@@ -115,6 +115,7 @@ end;
 
 
 // Too global.
+{$IFDEF LINUX}
 function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
 begin;
   result := 0;
@@ -127,6 +128,7 @@ begin;
   writeln('Serial: ' + inttostr(para2^.serial));
   writeln('Type: ' + inttostr(para2^._type));
 end;
+{$ENDIF}
 
 procedure TMWindow.GetDimensions(var W, H: Integer);
 {$IFDEF LINUX}
