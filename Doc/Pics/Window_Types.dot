@@ -1,0 +1,12 @@
+digraph Window_Types {
+	"Window" [shape=box]
+
+	"Window" -> "XWindow"
+	"Window" -> "Raw Data Pointer"
+	"Window" -> "Windows-Alike Window"
+
+	"Windows-Alike Window" -> "Bitmap"
+	"Windows-Alike Window" -> "Windows Window"
+	"Windows-Alike Window" -> "Device Context"
+	
+}

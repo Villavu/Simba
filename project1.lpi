@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <UseXPManifest Value="True"/>
+      <ActiveEditorIndexAtStart Value="1"/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+      <Language Value=""/>
+      <CharSet Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="9">
+      <Unit0>
+        <Filename Value="project1.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="project1"/>
+        <CursorPos X="45" Y="20"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="27"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="unit1.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Unit1"/>
+        <CursorPos X="64" Y="46"/>
+        <TopLine Value="18"/>
+        <EditorIndex Value="0"/>
+        <UsageCount Value="27"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="client.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Client"/>
+        <CursorPos X="18" Y="34"/>
+        <TopLine Value="10"/>
+        <UsageCount Value="27"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
+        <UnitName Value="CompTypes"/>
+        <CursorPos X="62" Y="426"/>
+        <TopLine Value="426"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="mufasatypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MufasaTypes"/>
+        <CursorPos X="52" Y="20"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="27"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="window.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Window"/>
+        <CursorPos X="4" Y="100"/>
+        <TopLine Value="85"/>
+        <UsageCount Value="27"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../../Documents/fpc/rtl/inc/systemh.inc"/>
+        <CursorPos X="3" Y="261"/>
+        <TopLine Value="246"/>
+        <UsageCount Value="9"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="input.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Input"/>
+        <CursorPos X="5" Y="20"/>
+        <TopLine Value="15"/>
+        <UsageCount Value="26"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="../cogat/Units/CogatUnits/compinput.pas"/>
+        <UnitName Value="CompInput"/>
+        <CursorPos X="39" Y="486"/>
+        <TopLine Value="469"/>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="12"/>
+        <Loaded Value="True"/>
+      </Unit8>
+    </Units>
+    <JumpHistory Count="14" HistoryIndex="13">
+      <Position1>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="14" Column="31" TopLine="1"/>
+      </Position1>
+      <Position2>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="17" Column="38" TopLine="3"/>
+      </Position2>
+      <Position3>
+        <Filename Value="../cogat/Units/CogatUnits/compinput.pas"/>
+        <Caret Line="7" Column="22" TopLine="1"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
+        <Caret Line="113" Column="45" TopLine="111"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
+        <Caret Line="161" Column="27" TopLine="146"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
+        <Caret Line="3" Column="87" TopLine="1"/>
+      </Position6>
+      <Position7>
+        <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
+        <Caret Line="97" Column="32" TopLine="82"/>
+      </Position7>
+      <Position8>
+        <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
+        <Caret Line="161" Column="31" TopLine="148"/>
+      </Position8>
+      <Position9>
+        <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
+        <Caret Line="426" Column="59" TopLine="411"/>
+      </Position9>
+      <Position10>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="14" Column="55" TopLine="1"/>
+      </Position10>
+      <Position11>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="17" Column="46" TopLine="1"/>
+      </Position11>
+      <Position12>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="32" Column="43" TopLine="16"/>
+      </Position12>
+      <Position13>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="44" Column="4" TopLine="18"/>
+      </Position13>
+      <Position14>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position14>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)/"/>
+      <OtherUnitFiles Value="$(ProjPath)/Units/MMLCore/"/>
+    </SearchPaths>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
