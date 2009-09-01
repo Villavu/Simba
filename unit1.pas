@@ -32,10 +32,17 @@ procedure TForm1.Button1Click(Sender: TObject);
 Var
    Client: TClient;
    w,h:integer;
+   bmp: TBitmap;
+
 begin
   Client := TClient.Create;
   Client.MWindow.GetDimensions(w, h);
   writeln(inttostr(w) + ' , ' + inttostr(h));
+
+  bmp := Client.MWindow.CopyClientToBitmap(0, 0, w, h);
+  //writeln(inttostr(bmp.Width));
+  bmp.SaveToFile('/tmp/test.bmp');
+  bmp.Free;
 
   Client.Destroy;
 end;
