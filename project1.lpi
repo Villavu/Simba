@@ -111,7 +111,7 @@
         <Filename Value="Units/MMLCore/client.pas"/>
         <UnitName Value="Client"/>
         <CursorPos X="19" Y="4"/>
-        <TopLine Value="12"/>
+        <TopLine Value="4"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="15"/>
         <Loaded Value="True"/>
@@ -137,7 +137,7 @@
       <Unit12>
         <Filename Value="Units/MMLCore/window.pas"/>
         <UnitName Value="Window"/>
-        <CursorPos X="18" Y="272"/>
+        <CursorPos X="43" Y="269"/>
         <TopLine Value="254"/>
         <EditorIndex Value="6"/>
         <UsageCount Value="15"/>
