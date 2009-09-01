@@ -66,7 +66,7 @@ begin
 end;
 
 initialization
-  {$I unit1.lrs}
+  {$I testunit.lrs}
 
 end.
 
