@@ -5,7 +5,8 @@ unit Window;
 interface
 
 uses
-  Classes, SysUtils, mufasatypes, graphics
+  Classes, SysUtils, mufasatypes, graphics,
+  LCLType
 
   {$IFDEF LINUX}, xlib, x, xutil, ctypes{$ENDIF};
 
@@ -16,9 +17,13 @@ type
             procedure GetDimensions(var W, H: Integer);
             function CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
 
+            function SetTarget(XWindow: QWord): integer; overload;
+            function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
+            function SetTarget(ArrPtr: PRGB32): integer; overload;
+
             constructor Create(Client: TObject);
             destructor Destroy; override;
-        protected
+        public
               // Reference to client.
               Client: TObject;
 
@@ -109,22 +114,6 @@ begin
   inherited;
 end;
 
-// Too global.
-{$IFDEF LINUX}
-function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
-begin;
-  result := 0;
-  Writeln('X Error: ');
-  writeln('Error code: ' + inttostr(para2^.error_code));
-  writeln('Display: ' + inttostr(LongWord(para2^.display)));
-  writeln('Minor code: ' + inttostr(para2^.minor_code));
-  writeln('Request code: ' + inttostr(para2^.request_code));
-  writeln('Resource ID: ' + inttostr(para2^.resourceid));
-  writeln('Serial: ' + inttostr(para2^.serial));
-  writeln('Type: ' + inttostr(para2^._type));
-end;
-{$ENDIF}
-
 function TMWindow.ReturnData(xs, ys, width, height: Integer): PRGB32;
 {$IFDEF LINUX}
 var
@@ -155,7 +144,7 @@ begin
       {$ELSE}
         WriteLn('Windows doesn''t support XImage');
       {$ENDIF}
-    End;
+    end;
   end;
 end;
 
@@ -257,14 +246,40 @@ begin
       {$ELSE}
       WriteLn('You dummy! How are you going to use w_XWindow on non Linux systems?');
       {$ENDIF}
-    End;
+    end;
     w_ArrayPtr:
     begin
     end;
   end;
 end;
 
+function TMWindow.SetTarget(XWindow: QWord): integer; overload;
+{$IFDEF LINUX}
+var
+   Old_Handler: TXErrorHandler;
+{$ENDIF}
+begin
+{$IFDEF LINUX}
+  Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+  Self.CurWindow := XWindow;
+  Self.TargetMode:= w_XWindow;
+  XSetErrorHandler(Old_Handler);
+{$ENDIF}
+end;
 
+function TMWindow.SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
+begin
+  if NewType in [ w_XWindow, w_ArrayPtr ] then
+  begin
+    // throw exception
+  end;
+end;
+
+function TMWindow.SetTarget(ArrPtr: PRGB32): integer; overload;
+begin
+
+  Self.TargetMode:= w_ArrayPtr;
+end;
 
 end.
 

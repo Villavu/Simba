@@ -5,7 +5,8 @@ unit windowutil;
 interface
 
 uses
-  Classes, SysUtils
+  Classes, SysUtils,
+  ctypes // for cint, etc
   {$IFDEF LINUX},
   x, xlib, // For X* stuff.
   GraphType // For TRawImage
@@ -13,11 +14,27 @@ uses
 
          {$IFDEF LINUX}
          Procedure XImageToRawImage(XImg: PXImage; Var RawImage: TRawImage);
+         function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
          {$ENDIF}
 
 implementation
 
 {$IFDEF LINUX}
+
+// Too global.
+function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
+begin;
+  result := 0;
+  Writeln('X Error: ');
+  writeln('Error code: ' + inttostr(para2^.error_code));
+  writeln('Display: ' + inttostr(LongWord(para2^.display)));
+  writeln('Minor code: ' + inttostr(para2^.minor_code));
+  writeln('Request code: ' + inttostr(para2^.request_code));
+  writeln('Resource ID: ' + inttostr(para2^.resourceid));
+  writeln('Serial: ' + inttostr(para2^.serial));
+  writeln('Type: ' + inttostr(para2^._type));
+end;
+
 Procedure XImageToRawImage(XImg: PXImage; Var RawImage: TRawImage);
 Begin
   RawImage.Init; { Calls raw.Description.Init as well }
