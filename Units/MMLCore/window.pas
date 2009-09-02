@@ -33,6 +33,11 @@ type
               // Target Window Mode.
               TargetMode: TTargetWindowMode;
 
+              {$IFDEF MSWINDOWS}
+              //Target handle; HWND
+              TargetHandle : Hwnd;
+              {$ENDIF}
+
               {$IFDEF LINUX}
               // X Display
               XDisplay: PDisplay;
@@ -167,14 +172,16 @@ begin
 end;
 
 function TMWindow.CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
-{$IFDEF LINUX}
 var
+   w,h : Integer;
+   ww, hh: Integer;
+   {$IFDEF LINUX}
    Old_Handler: TXErrorHandler;
-   w, h, ww, hh: Integer;
    Img: PXImage;
    Raw: TRawImage;
    Bmp: TBitmap;
-{$ENDIF}
+   {$ENDIF}
+
 begin
   Self.GetDimensions(w, h);
   writeln(inttostr(xs) + ', ' + inttostr(ys) + ' : ' + inttostr(xe) + ', ' +
@@ -256,19 +263,17 @@ begin
   end;
 end;
 
-function TMWindow.SetTarget(XWindow: x.TWindow): integer; overload;
 {$IFDEF LINUX}
+function TMWindow.SetTarget(XWindow: x.TWindow): integer; overload;
 var
    Old_Handler: TXErrorHandler;
-{$ENDIF}
 begin
-{$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   Self.CurWindow := XWindow;
   Self.TargetMode:= w_XWindow;
   XSetErrorHandler(Old_Handler);
-{$ENDIF}
 end;
+{$ENDIF}
 
 function TMWindow.SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
 begin

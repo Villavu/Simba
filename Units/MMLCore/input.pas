@@ -18,7 +18,7 @@ type
 
             procedure GetMousePos(var X, Y: Integer);
             procedure SetMousePos(X, Y: Integer);
-            procedure MouseButtonAction(X, Y: Integer; mClick: TClickType; mPress: TMousePress);
+            procedure MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
             procedure ClickMouse(X, Y: Integer; mClick: TClickType);
             function IsMouseButtonDown(mType: TClickType): Boolean;
 
@@ -30,7 +30,55 @@ type
 implementation
 
 uses
-    Client;
+    Client{$IFDEF MSWINDOWS},windows{$ENDIF};
+
+{$IFDEF MSWINDOWS}
+type
+  PMouseInput = ^TMouseInput;
+  tagMOUSEINPUT = packed record
+    dx: Longint;
+    dy: Longint;
+    mouseData: DWORD;
+    dwFlags: DWORD;
+    time: DWORD;
+    dwExtraInfo: DWORD;
+  end;
+  TMouseInput = tagMOUSEINPUT;
+
+  PKeybdInput = ^TKeybdInput;
+  tagKEYBDINPUT = packed record
+    wVk: WORD;
+    wScan: WORD;
+    dwFlags: DWORD;
+    time: DWORD;
+    dwExtraInfo: DWORD;
+  end;
+  TKeybdInput = tagKEYBDINPUT;
+
+  PHardwareInput = ^THardwareInput;
+  tagHARDWAREINPUT = packed record
+    uMsg: DWORD;
+    wParamL: WORD;
+    wParamH: WORD;
+  end;
+  THardwareInput = tagHARDWAREINPUT;
+  PInput = ^TInput;
+  tagINPUT = packed record
+    Itype: DWORD;
+    case Integer of
+      0: (mi: TMouseInput);
+      1: (ki: TKeybdInput);
+      2: (hi: THardwareInput);
+  end;
+  TInput = tagINPUT;
+const
+  INPUT_MOUSE = 0;
+  INPUT_KEYBOARD = 1;
+  INPUT_HARDWARE = 2;
+
+{Mouse}
+function SendInput(cInputs: UINT; var pInputs: TInput; cbSize: Integer): UINT; stdcall; external user32 name 'SendInput';
+{$ENDIF}
 
 constructor TMInput.Create(Client: TObject);
 begin
@@ -52,7 +100,17 @@ var
    xmask: Cardinal;
    Old_Handler: TXErrorHandler;
 {$ENDIF}
+{$IFDEF MSWINDOWS}
+var
+  MousePoint : TPoint;
+{$ENDIF}
 begin
+  {$IFDEF MSWINDOWS}
+  Windows.GetCursorPos(MousePoint);
+  Windows.ScreenToClient( TClient(Client).MWindow.TargetHandle, MousePoint);
+  x := MousePoint.x;
+  y := MousePoint.y;
+  {$ENDIF}
   {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   XQueryPointer(TClient(Client).MWindow.XDisplay,TClient(Client).MWindow.CurWindow,@root,@child,@b,@b,@x,@y,@xmask);
@@ -65,7 +123,15 @@ procedure TMInput.SetMousePos(X, Y: Integer);
 var
    Old_Handler: TXErrorHandler;
 {$ENDIF}
+{$IFDEF MSWINDOWS}
+var
+  rect : TRect;
+{$ENDIF}
 begin
+ {$IFDEF MSWINDOWS}
+  GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);
+  Windows.SetCursorPos(x + Rect.Left, y + Rect.Top);
+ {$ENDIF}
 {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   XWarpPointer(TClient(Client).MWindow.XDisplay, 0, TClient(Client).MWindow.CurWindow, 0, 0, 0, 0, X, Y);
@@ -74,17 +140,40 @@ begin
 {$ENDIF}
 end;
 
-procedure TMInput.MouseButtonAction(X, Y: Integer; mClick: TClickType; mPress: TMousePress);
+procedure TMInput.MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
 {$IFDEF LINUX}
 var
   event : TXEvent;
   Garbage : QWord;
   Old_Handler: TXErrorHandler;
 {$ENDIF}
-
-begin
-  Self.SetMousePos(X, Y);
-{$IFDEF LINUX}
+{$IFDEF MSWINDOWS}
+var
+  Input : TInput;
+  Rect : TRect;
+{$ENDIF}
+begin;
+  {$IFDEF MSWINDOWS}
+  GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);
+  Input.Itype:= INPUT_MOUSE;
+  Input.mi.dx:= x + Rect.left;
+  Input.mi.dy:= y + Rect.Top;
+  if mPress = mouse_Down then
+  begin;
+    case mClick of
+      Mouse_Left: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTDOWN;
+      Mouse_Middle: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEDOWN;
+      Mouse_Right: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTDOWN;
+    end;
+  end else
+   case mClick of
+      Mouse_Left: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP;
+      Mouse_Middle: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEUP;
+      Mouse_Right: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTUP;
+    end;
+  SendInput(1,Input, sizeof(Input));
+  {$ENDIF}
+ {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
   FillChar(event,sizeof(TXevent),0);
@@ -123,6 +212,7 @@ end;
 procedure TMInput.ClickMouse(X, Y: Integer; mClick: TClickType);
 
 begin
+  Self.SetMousePos(x,y);
   Self.MouseButtonAction(X, Y, mClick, mouse_Down);
   Self.MouseButtonAction(X, Y, mClick, mouse_Up);
 end;
@@ -136,6 +226,13 @@ var
    Old_Handler: TXErrorHandler;
 {$ENDIF}
 begin
+  {$IFDEF MSWINDOWS}
+  case mType of
+    Mouse_Left:  Result := (GetAsyncKeyState(VK_LBUTTON) <> 0);
+    Mouse_Middle:   Result := (GetAsyncKeyState(VK_MBUTTON) <> 0)
+    Mouse_Right:   Result := (GetAsyncKeyState(VK_RBUTTON) <> 0)
+   end;
+  {$ENDIF}
   {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   XQueryPointer(TClient(Client).MWindow.XDisplay,TClient(Client).MWindow.CurWindow,@root,@child,@rootx,@rooty,@x,@y,@xmask);
