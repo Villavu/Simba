@@ -17,7 +17,10 @@ type
             procedure GetDimensions(var W, H: Integer);
             function CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
 
-            function SetTarget(XWindow: QWord): integer; overload;
+            {$IFDEF LINUX}
+            function SetTarget(XWindow: x.TWindow): integer; overload;
+            {$ENDIF}
+
             function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
             function SetTarget(ArrPtr: PRGB32): integer; overload;
 
@@ -38,10 +41,10 @@ type
               XConnectionNumber: Integer;
 
               // X Window
-              CurWindow: QWord;
+              CurWindow: x.TWindow;
 
               // Desktop Window
-              DesktopWindow: QWord;
+              DesktopWindow: x.TWindow;
 
               // X Screen
               XScreen: PScreen;
@@ -253,7 +256,7 @@ begin
   end;
 end;
 
-function TMWindow.SetTarget(XWindow: QWord): integer; overload;
+function TMWindow.SetTarget(XWindow: x.TWindow): integer; overload;
 {$IFDEF LINUX}
 var
    Old_Handler: TXErrorHandler;
