@@ -276,6 +276,7 @@ begin
   begin
     // throw exception
   end;
+
 end;
 
 function TMWindow.SetTarget(ArrPtr: PRGB32): integer; overload;

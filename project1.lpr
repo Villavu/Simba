@@ -4,7 +4,7 @@ program project1;
 
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads,
+  cthreads, cmem,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, TestUnit, LResources, Client, MufasaTypes, Window, Input, windowutil;
