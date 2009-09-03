@@ -103,13 +103,14 @@ var
 {$IFDEF MSWINDOWS}
 var
   MousePoint : TPoint;
+  Rect : TRect;
 {$ENDIF}
 begin
   {$IFDEF MSWINDOWS}
   Windows.GetCursorPos(MousePoint);
-  Windows.ScreenToClient( TClient(Client).MWindow.TargetHandle, MousePoint);
-  x := MousePoint.x;
-  y := MousePoint.y;
+  GetWindowRect(TClient(Client).MWindow.TargetHandle,Rect);
+  x := MousePoint.x - Rect.Left;
+  y := MousePoint.y - Rect.Top;
   {$ENDIF}
   {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
@@ -131,6 +132,7 @@ begin
  {$IFDEF MSWINDOWS}
   GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);
   Windows.SetCursorPos(x + Rect.Left, y + Rect.Top);
+
  {$ENDIF}
 {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
@@ -229,8 +231,8 @@ begin
   {$IFDEF MSWINDOWS}
   case mType of
     Mouse_Left:  Result := (GetAsyncKeyState(VK_LBUTTON) <> 0);
-    Mouse_Middle:   Result := (GetAsyncKeyState(VK_MBUTTON) <> 0)
-    Mouse_Right:   Result := (GetAsyncKeyState(VK_RBUTTON) <> 0)
+    Mouse_Middle:   Result := (GetAsyncKeyState(VK_MBUTTON) <> 0);
+    mouse_Right:   Result := (GetAsyncKeyState(VK_RBUTTON) <> 0);
    end;
   {$ENDIF}
   {$IFDEF LINUX}

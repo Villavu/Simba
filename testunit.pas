@@ -51,14 +51,19 @@ Var
 begin
   while (not Terminated)  do
   begin
+
+  Writeln('Creating the client');
   Client := TClient.Create;
+  Writeln('Getting the dimensions');
   Client.MWindow.GetDimensions(w, h);
   writeln(inttostr(w) + ' , ' + inttostr(h));
-
-  //Client.MWindow.SetTarget(77736320);
-
+  Writeln('Setting target');
+  Client.MWindow.SetTarget(132840,w_window);
+  Client.MWindow.ActivateClient;
+  Client.MWindow.GetDimensions(w, h);
+  Writeln('Copying BMP');
   bmp := Client.MWindow.CopyClientToBitmap(0, 0, w, h);
-  bmp.SaveToFile('/tmp/test.bmp');
+  bmp.SaveToFile('c:\test.bmp');
   bmp.Free;
 
  //Sleep(1000);
@@ -78,6 +83,7 @@ begin
       { Do comparison here }
       inc(ptr);
     end;
+
   Client.MWindow.FreeReturnData;
 
   Client.MInput.IsMouseButtonDown(mouse_Left);

@@ -5,22 +5,28 @@ unit Window;
 interface
 
 uses
-  Classes, SysUtils, mufasatypes, graphics,
+  Classes, SysUtils, mufasatypes{$IFDEF MSWINDOWS},windows {$ENDIF}, graphics,
   LCLType
 
   {$IFDEF LINUX}, xlib, x, xutil, ctypes{$ENDIF};
 
 type
+
+    { TMWindow }
+
     TMWindow = class(TObject)
             function ReturnData(xs, ys, width, height: Integer): PRGB32;
             procedure FreeReturnData;
             procedure GetDimensions(var W, H: Integer);
             function CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
-
+            procedure ActivateClient;
             {$IFDEF LINUX}
             function SetTarget(XWindow: x.TWindow): integer; overload;
             {$ENDIF}
 
+            {$IFDEF MSWINDOWS}
+            function UpdateDrawBitmap:boolean;
+            {$ENDIF}
             function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
             function SetTarget(ArrPtr: PRGB32): integer; overload;
 
@@ -33,9 +39,15 @@ type
               // Target Window Mode.
               TargetMode: TTargetWindowMode;
 
+
               {$IFDEF MSWINDOWS}
               //Target handle; HWND
               TargetHandle : Hwnd;
+              DrawBmpDataPtr : PRGB32;
+
+              //Works on linux as well, test it out
+              TargetDC : HDC;
+              DrawBitmap : TBitmap;
               {$ENDIF}
 
               {$IFDEF LINUX}
@@ -90,6 +102,13 @@ constructor TMWindow.Create(Client: TObject);
 begin
   inherited Create;
   Self.Client := Client;
+  {$IFDEF MSWINDOWS}
+  Self.DrawBitmap := TBitmap.Create;
+  Self.TargetMode:= w_Window;
+  Self.TargetHandle:= windows.GetDesktopWindow;
+  Self.TargetDC:= GetWindowDC(Self.TargetHandle);
+  Self.UpdateDrawBitmap;
+  {$ENDIF}
   {$IFDEF LINUX}
   Self.TargetMode := w_XWindow;
 
@@ -106,8 +125,6 @@ begin
   Self.DesktopWindow:= RootWindow(Self.XDisplay, Self.XScreenNum);
   Self.CurWindow:= Self.DesktopWindow;
 
-  {$ELSE}
-  // Set Target mode for windows.
   {$ENDIF}
 
 end;
@@ -118,7 +135,11 @@ begin
   {$IFDEF LINUX}
   XCloseDisplay(Self.XDisplay);
   {$ENDIF}
-
+  {$IFDEF MSWINDOWS}
+  if TargetMode = w_Window then
+    ReleaseDC(TargetHandle,TargetDC);
+  DrawBitmap.Free;
+  {$ENDIF}
   inherited;
 end;
 
@@ -129,6 +150,13 @@ var
 {$ENDIF}
 begin
   case Self.TargetMode of
+    w_Window:
+    begin
+      {$IFDEF MSWINDOWS}
+      BitBlt(Self.DrawBitmap.Canvas.Handle,0,0, width, height, Self.TargetDC, xs,ys, SRCCOPY);
+      Result := Self.DrawBmpDataPtr;
+      {$ENDIF}
+    end;
     w_XWindow:
     begin
       {$IFDEF LINUX}
@@ -190,6 +218,17 @@ begin
   hh := ye-ys;
 
     case Self.TargetMode Of
+       w_Window:
+       begin
+         {$IFDEF MSWINDOWS}
+         if(xs < 0) or (ys < 0) or (xe > W) or (ye > H) then
+           Writeln('pervet');
+         Result := TBitmap.Create;
+         Result.SetSize(ww+1,hh+1);
+         BitBlt(result.canvas.handle,0,0,ww+1,hh+1,
+                self.TargetDC,xs,ys, SRCCOPY);
+         {$ENDIF}
+       end;
        w_XWindow:
        begin
          {$IFDEF LINUX}
@@ -225,6 +264,30 @@ begin
     end;
 end;
 
+procedure TMWindow.ActivateClient;
+begin
+  {$IFDEF MSWINDOWS}
+  SetForegroundWindow(Self.TargetHandle);
+  {$ENDIF}
+  {$IFDEF LINUX}
+  XSetInputFocus(Self.XDisplay,Self.CurWindow,RevertToParent,CurrentTime);
+  {$ENDIF}
+end;
+
+
+{$IFDEF MSWINDOWS}  //Probably need one for Linux as well
+function TMWindow.UpdateDrawBitmap :boolean;
+var
+  w,h : integer;
+  BmpInfo : Windows.TBitmap;
+begin
+  GetDimensions(w,h);
+  DrawBitmap.SetSize(w,h);
+  GetObject(DrawBitmap.Handle, SizeOf(BmpInfo), @BmpInfo);
+  DrawBmpDataPtr := BmpInfo.bmBits;
+end;
+{$ENDIF}
+
 procedure TMWindow.GetDimensions(var W, H: Integer);
 {$IFDEF LINUX}
 var
@@ -233,10 +296,19 @@ var
    childwindow : x.TWindow;
    Old_Handler: TXErrorHandler;
 {$ENDIF}
+{$IFDEF MSWINDOWS}
+var
+  Rect : TRect;
+{$ENDIF}
 begin
   case TargetMode of
     w_Window:
     begin
+      {$IFDEF MSWINDOWS}
+      GetWindowRect(Self.TargetHandle, Rect);
+      w:= Rect.Right - Rect.left + 1;
+      h:= Rect.Bottom - Rect.Top  + 1;
+      {$ENDIF}
     end;
     w_XWindow:
     begin
@@ -280,8 +352,19 @@ begin
   if NewType in [ w_XWindow, w_ArrayPtr ] then
   begin
     // throw exception
+    Exit;
   end;
-
+  case NewType of
+    w_Window :
+    begin;
+      ReleaseDC(Self.TargetHandle,Self.TargetDC);
+      Self.TargetHandle := Window;
+      Self.TargetDC := GetWindowDC(Window);
+    end;
+  end;
+  {$IFDEF MSWINDOWS}
+  UpdateDrawBitmap;
+  {$ENDIF}
 end;
 
 function TMWindow.SetTarget(ArrPtr: PRGB32): integer; overload;
