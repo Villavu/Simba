@@ -5,8 +5,13 @@ unit Window;
 interface
 
 uses
-  Classes, SysUtils, mufasatypes{$IFDEF MSWINDOWS},windows {$ENDIF}, graphics,
-  LCLType
+  Classes, SysUtils, mufasatypes
+  {$IFDEF MSWINDOWS}
+  ,windows  // For windows API
+  {$ENDIF}
+  , graphics,
+  LCLType,
+  LCLIntf // for ReleaseDC and such
 
   {$IFDEF LINUX}, xlib, x, xutil, ctypes{$ENDIF};
 
@@ -357,9 +362,12 @@ begin
   case NewType of
     w_Window :
     begin;
+
+      {$IFDEF MSWINDOWS}
       ReleaseDC(Self.TargetHandle,Self.TargetDC);
       Self.TargetHandle := Window;
       Self.TargetDC := GetWindowDC(Window);
+      {$ENDIF}
     end;
   end;
   {$IFDEF MSWINDOWS}
