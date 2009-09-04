@@ -5,7 +5,7 @@ unit Client;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes, Window, Input;
+  Classes, SysUtils, MufasaTypes, Window, Input, Files;
 
 type
     TClient = class(TObject)
@@ -15,6 +15,7 @@ type
         public
             MWindow: TMWindow;
             MInput: TMInput;
+            MFiles: TMFiles;
 
     end;
 
@@ -27,12 +28,15 @@ begin
 
   MWindow := TMWindow.Create(Self);
   MInput := TMInput.Create(Self);
+  MFiles := TMFiles.Create;
 end;
 
 destructor TClient.Destroy;
 begin
-  MWindow.Destroy;
+  MFiles.Destroy;
   MInput.Destroy;
+  MWindow.Destroy;
+
 
   inherited;
 end;
