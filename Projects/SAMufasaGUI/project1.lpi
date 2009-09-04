@@ -6,7 +6,7 @@
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="1"/>
+      <ActiveEditorIndexAtStart Value="0"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -30,34 +30,32 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="37">
+    <Units Count="42">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="1" Y="19"/>
+        <CursorPos X="71" Y="6"/>
         <TopLine Value="1"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="unit1.pas"/>
-        <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
         <CursorPos X="33" Y="57"/>
         <TopLine Value="32"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="55"/>
       </Unit1>
       <Unit2>
         <Filename Value="client.pas"/>
-        <IsPartOfProject Value="True"/>
         <UnitName Value="Client"/>
         <CursorPos X="18" Y="34"/>
         <TopLine Value="10"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="55"/>
       </Unit2>
       <Unit3>
         <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
@@ -68,19 +66,17 @@
       </Unit3>
       <Unit4>
         <Filename Value="mufasatypes.pas"/>
-        <IsPartOfProject Value="True"/>
         <UnitName Value="MufasaTypes"/>
         <CursorPos X="52" Y="20"/>
         <TopLine Value="1"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="55"/>
       </Unit4>
       <Unit5>
         <Filename Value="window.pas"/>
-        <IsPartOfProject Value="True"/>
         <UnitName Value="Window"/>
         <CursorPos X="4" Y="100"/>
         <TopLine Value="85"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="55"/>
       </Unit5>
       <Unit6>
         <Filename Value="../Documents/fpc/rtl/inc/systemh.inc"/>
@@ -90,11 +86,10 @@
       </Unit6>
       <Unit7>
         <Filename Value="input.pas"/>
-        <IsPartOfProject Value="True"/>
         <UnitName Value="Input"/>
         <CursorPos X="5" Y="20"/>
         <TopLine Value="15"/>
-        <UsageCount Value="53"/>
+        <UsageCount Value="54"/>
       </Unit7>
       <Unit8>
         <Filename Value="../cogat/Units/CogatUnits/compinput.pas"/>
@@ -133,11 +128,10 @@
       </Unit12>
       <Unit13>
         <Filename Value="Units/MMLCore/windowutil.pas"/>
-        <IsPartOfProject Value="True"/>
         <UnitName Value="windowutil"/>
         <CursorPos X="54" Y="20"/>
         <TopLine Value="20"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="47"/>
       </Unit13>
       <Unit14>
         <Filename Value="../Documents/lazarus/lcl/graphics.pp"/>
@@ -168,11 +162,12 @@
       </Unit17>
       <Unit18>
         <Filename Value="testunit.pas"/>
+        <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="52" Y="22"/>
+        <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="21"/>
@@ -300,8 +295,57 @@
         <TopLine Value="2388"/>
         <UsageCount Value="10"/>
       </Unit36>
+      <Unit37>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Client"/>
+        <CursorPos X="38" Y="8"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MufasaTypes"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="../../../cogat/Units/CogatUnits/compfiles.pas"/>
+        <UnitName Value="compFiles"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="6"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="../../Units/MMLCore/files.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="files"/>
+        <CursorPos X="61" Y="9"/>
+        <TopLine Value="2"/>
+        <EditorIndex Value="5"/>
+        <UsageCount Value="21"/>
+        <Loaded Value="True"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Window"/>
+        <CursorPos X="49" Y="159"/>
+        <TopLine Value="131"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit41>
     </Units>
-    <JumpHistory Count="3" HistoryIndex="2">
+    <JumpHistory Count="7" HistoryIndex="6">
       <Position1>
         <Filename Value="testunit.pas"/>
         <Caret Line="10" Column="7" TopLine="1"/>
@@ -314,6 +358,22 @@
         <Filename Value="testunit.pas"/>
         <Caret Line="103" Column="43" TopLine="95"/>
       </Position3>
+      <Position4>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="9" Column="24" TopLine="1"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <Caret Line="8" Column="38" TopLine="1"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../../Units/MMLCore/files.pas"/>
+        <Caret Line="14" Column="8" TopLine="1"/>
+      </Position6>
+      <Position7>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="9" Column="32" TopLine="1"/>
+      </Position7>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
