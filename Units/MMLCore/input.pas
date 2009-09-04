@@ -20,6 +20,11 @@ type
             procedure SetMousePos(X, Y: Integer);
             procedure MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
             procedure ClickMouse(X, Y: Integer; mClick: TClickType);
+
+            {
+              Possibly change to GetMouseButtonStates? Then people can get the
+              states bitwise. Like X and WinAPI.
+            }
             function IsMouseButtonDown(mType: TClickType): Boolean;
 
          public
@@ -129,17 +134,19 @@ var
   rect : TRect;
 {$ENDIF}
 begin
- {$IFDEF MSWINDOWS}
+
+{$IFDEF MSWINDOWS}
   GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);
   Windows.SetCursorPos(x + Rect.Left, y + Rect.Top);
+{$ENDIF}
 
- {$ENDIF}
 {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   XWarpPointer(TClient(Client).MWindow.XDisplay, 0, TClient(Client).MWindow.CurWindow, 0, 0, 0, 0, X, Y);
   XFlush(TClient(Client).MWindow.XDisplay);
   XSetErrorHandler(Old_Handler);
 {$ENDIF}
+
 end;
 
 procedure TMInput.MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
@@ -154,14 +161,14 @@ var
   Input : TInput;
   Rect : TRect;
 {$ENDIF}
-begin;
-  {$IFDEF MSWINDOWS}
+begin
+{$IFDEF MSWINDOWS}
   GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);
   Input.Itype:= INPUT_MOUSE;
   Input.mi.dx:= x + Rect.left;
   Input.mi.dy:= y + Rect.Top;
   if mPress = mouse_Down then
-  begin;
+  begin
     case mClick of
       Mouse_Left: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTDOWN;
       Mouse_Middle: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_MIDDLEDOWN;
@@ -174,8 +181,9 @@ begin;
       Mouse_Right: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTUP;
     end;
   SendInput(1,Input, sizeof(Input));
-  {$ENDIF}
- {$IFDEF LINUX}
+{$ENDIF}
+
+{$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
   FillChar(event,sizeof(TXevent),0);
@@ -209,8 +217,6 @@ begin;
 {$ENDIF}
 end;
 
-// ff omzetten naar MouseButtonDown(), en dan Click gewoon down en dan up.
-// holdmouse releasemouse
 procedure TMInput.ClickMouse(X, Y: Integer; mClick: TClickType);
 
 begin
@@ -228,14 +234,16 @@ var
    Old_Handler: TXErrorHandler;
 {$ENDIF}
 begin
-  {$IFDEF MSWINDOWS}
+
+{$IFDEF MSWINDOWS}
   case mType of
-    Mouse_Left:  Result := (GetAsyncKeyState(VK_LBUTTON) <> 0);
-    Mouse_Middle:   Result := (GetAsyncKeyState(VK_MBUTTON) <> 0);
-    mouse_Right:   Result := (GetAsyncKeyState(VK_RBUTTON) <> 0);
+    Mouse_Left:   Result := (GetAsyncKeyState(VK_LBUTTON) <> 0);
+    Mouse_Middle: Result := (GetAsyncKeyState(VK_MBUTTON) <> 0);
+    mouse_Right:  Result := (GetAsyncKeyState(VK_RBUTTON) <> 0);
    end;
-  {$ENDIF}
-  {$IFDEF LINUX}
+{$ENDIF}
+
+{$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   XQueryPointer(TClient(Client).MWindow.XDisplay,TClient(Client).MWindow.CurWindow,@root,@child,@rootx,@rooty,@x,@y,@xmask);
 
@@ -246,7 +254,8 @@ begin
   end;
 
   XSetErrorHandler(Old_Handler);
-  {$ENDIF}
+{$ENDIF}
+
 end;
 
 end.

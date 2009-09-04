@@ -44,9 +44,10 @@ type
 procedure TMyThread.Execute;
 Var
    Client: TClient;
-   w,h, x, y, xx, yy:integer;
+   w,h, x, y, xx, yy, i:integer;
    bmp: TBitmap;
    ptr: PRGB32;
+   arr: Array Of Integer;
 
 begin
   while (not Terminated)  do
@@ -58,12 +59,25 @@ begin
   Client.MWindow.GetDimensions(w, h);
   writeln(inttostr(w) + ' , ' + inttostr(h));
   Writeln('Setting target');
-  Client.MWindow.SetTarget(132840,w_window);
+  //Client.MWindow.SetTarget(132840,w_window);
+
+  SetLength(Arr, 9);
+  for i := 0 to high(arr) do
+    arr[i] := $FFFFFF;
+
+  Client.MWIndow.SetTarget(PRGB32(@Arr[0]), Point(3, 3));
+
   Client.MWindow.ActivateClient;
   Client.MWindow.GetDimensions(w, h);
   Writeln('Copying BMP');
   bmp := Client.MWindow.CopyClientToBitmap(0, 0, w, h);
+
+  {$IFDEF WINDOWS}
   bmp.SaveToFile('c:\test.bmp');
+  {$ENDIF}
+  {$IFDEF LINUX}
+  bmp.SaveToFile('/tmp/test.bmp');
+  {$ENDIF}
   bmp.Free;
 
  //Sleep(1000);

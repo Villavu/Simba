@@ -6,18 +6,22 @@ interface
 
 uses
   Classes, SysUtils,
-  ctypes // for cint, etc
-  {$IFDEF LINUX},
+  ctypes, // for cint, etc
+  {$IFDEF LINUX}
   x, xlib, // For X* stuff.
-  GraphType // For TRawImage
-  {$ENDIF};
+  GraphType, // For TRawImage
+  {$ENDIF}
+
+  mufasatypes;
 
          {$IFDEF LINUX}
          Procedure XImageToRawImage(XImg: PXImage; Var RawImage: TRawImage);
+         Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; Var RawImage: TRawImage);
          function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
          {$ENDIF}
 
 implementation
+
 
 {$IFDEF LINUX}
 
@@ -80,6 +84,46 @@ Begin
 
 End;
 {$ENDIF}
+
+Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; Var RawImage: TRawImage);
+Begin
+  RawImage.Init; { Calls raw.Description.Init as well }
+
+  RawImage.Description.PaletteColorCount:=0;
+  RawImage.Description.MaskBitsPerPixel:=0;
+  RawImage.Description.Width := Size.X;
+  RawImage.Description.Height:= Size.Y;
+
+  RawImage.Description.Format := ricfRGBA;
+
+  RawImage.Description.ByteOrder := riboLSBFirst;
+
+  RawImage.Description.BitOrder:= riboBitsInOrder; // should be fine
+
+  RawImage.Description.Depth:=24;
+
+  RawImage.Description.BitsPerPixel:=32;
+
+  RawImage.Description.LineOrder:=riloTopToBottom;
+
+  RawImage.Description.LineEnd := rileDWordBoundary;
+
+  RawImage.Description.RedPrec := 8;
+  RawImage.Description.GreenPrec:= 8;
+  RawImage.Description.BluePrec:= 8;
+  RawImage.Description.AlphaPrec:=0;
+
+
+  RawImage.Description.RedShift:=16;
+  RawImage.Description.GreenShift:=8;
+  RawImage.Description.BlueShift:=0;
+
+  RawImage.DataSize := RawImage.Description.Width * RawImage.Description.Height
+                       * (RawImage.Description.bitsperpixel shr 3);
+
+  RawImage.Data := PByte(Ptr);
+
+End;
 
 end.
 

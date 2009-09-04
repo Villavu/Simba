@@ -5,11 +5,11 @@ unit Window;
 interface
 
 uses
-  Classes, SysUtils, mufasatypes
+  Classes, SysUtils, mufasatypes,
   {$IFDEF MSWINDOWS}
   ,windows  // For windows API
   {$ENDIF}
-  , graphics,
+  graphics,
   LCLType,
   LCLIntf // for ReleaseDC and such
 
@@ -33,7 +33,7 @@ type
             function UpdateDrawBitmap:boolean;
             {$ENDIF}
             function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
-            function SetTarget(ArrPtr: PRGB32): integer; overload;
+            function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 
             constructor Create(Client: TObject);
             destructor Destroy; override;
@@ -91,6 +91,9 @@ type
 
               {$ENDIF}
 
+              ArrayPtr: PRGB32;
+              ArraySize: TPoint;
+
 
 
     end;
@@ -107,6 +110,10 @@ constructor TMWindow.Create(Client: TObject);
 begin
   inherited Create;
   Self.Client := Client;
+
+  Self.ArrayPtr := nil;
+  Self.ArraySize := Point(-1, -1);
+
   {$IFDEF MSWINDOWS}
   Self.DrawBitmap := TBitmap.Create;
   Self.TargetMode:= w_Window;
@@ -114,6 +121,7 @@ begin
   Self.TargetDC:= GetWindowDC(Self.TargetHandle);
   Self.UpdateDrawBitmap;
   {$ENDIF}
+
   {$IFDEF LINUX}
   Self.TargetMode := w_XWindow;
 
@@ -153,6 +161,8 @@ function TMWindow.ReturnData(xs, ys, width, height: Integer): PRGB32;
 var
    Old_Handler: TXErrorHandler;
 {$ENDIF}
+   TmpData: PRGB32;
+
 begin
   case Self.TargetMode of
     w_Window:
@@ -185,6 +195,12 @@ begin
       {$ELSE}
         WriteLn('Windows doesn''t support XImage');
       {$ENDIF}
+    end;
+    w_ArrayPtr:
+    begin
+      TmpData := Self.ArrayPtr;
+      Inc(TmpData, ys * Height + xs);
+      Result := TmpData;
     end;
   end;
 end;
@@ -221,13 +237,16 @@ begin
           inttostr(ye));
   ww := xe-xs;
   hh := ye-ys;
+  if(xs < 0) or (ys < 0) or (xe > W) or (ye > H) then
+  begin
+    writeln('Faulty coordinates');
+    exit;
+  end;
 
     case Self.TargetMode Of
        w_Window:
        begin
          {$IFDEF MSWINDOWS}
-         if(xs < 0) or (ys < 0) or (xe > W) or (ye > H) then
-           Writeln('pervet');
          Result := TBitmap.Create;
          Result.SetSize(ww+1,hh+1);
          BitBlt(result.canvas.handle,0,0,ww+1,hh+1,
@@ -239,15 +258,7 @@ begin
          {$IFDEF LINUX}
          Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
-         if(xs < 0) or (ys < 0) or (xe > W) or (ye > H) then
-         begin
-           writeln('Faulty coordinates');
-           XSetErrorHandler(Old_Handler);
-           exit;
-         end;
-
          Img := XGetImage(Self.XDisplay, Self.curWindow, xs, ys, ww, hh, AllPlanes, ZPixmap);
-         XImageToRawImage(Img, Raw);
 
          Bmp := TBitmap.Create;
          Bmp.LoadFromRawImage(Raw, False);
@@ -265,6 +276,15 @@ begin
          {$ELSE}
          writeln('Windows and tXWindow');
          {$ENDIF}
+       end;
+       w_ArrayPtr:
+       begin
+
+         ArrDataToRawImage(Self.ArrayPtr, Self.ArraySize, Raw);
+
+         Bmp := TBitmap.Create;
+         Bmp.LoadFromRawImage(Raw, False);
+         Result := Bmp;
        end;
     end;
 end;
@@ -336,6 +356,8 @@ begin
     end;
     w_ArrayPtr:
     begin
+      W := Self.ArraySize.X;
+      H := Self.ArraySize.Y;
     end;
   end;
 end;
@@ -375,10 +397,28 @@ begin
   {$ENDIF}
 end;
 
-function TMWindow.SetTarget(ArrPtr: PRGB32): integer; overload;
-begin
+{
+    This functionality is very BETA.
+    We have no way to send events to a window, so we should probably use the
+    desktop window?
 
+    eg: In mouse/keys: if Self.TargetMode not in [w_Window, w_XWindow], send it
+        to the desktop.
+}
+function TMWindow.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
+begin
+  Self.ArrayPtr := ArrPtr;
+  Self.ArraySize := Size;
   Self.TargetMode:= w_ArrayPtr;
+
+  {$IFDEF LINUX}
+  Self.CurWindow := Self.DesktopWindow;
+  {$ENDIF}
+
+  {$IFDEF WINDOWS}
+  Self.TargetHandle:= windows.GetDesktopWindow;
+  {$ENDIF}
+
 end;
 
 end.
