@@ -187,7 +187,9 @@ begin
         Writeln('ReturnData: XGetImage Error. Dumping data now:');
         Writeln('xs, ys, width, height: ' + inttostr(xs) + ', '  + inttostr(ys) +
                 ', ' + inttostr(width) + ', ' + inttostr(height));
-        Result := nil;
+        Result.Ptr := nil;
+        Result.IncPtrWith := 0;
+
         XSetErrorHandler(Old_Handler);
         Exit;
       end;
@@ -226,6 +228,11 @@ begin
   {$ENDIF}
 end;
 
+
+// Bugged. For params other than 0, 0, ClientWidth, ClientHeight
+// if other type than w_XImage
+
+// Also thread bugged
 function TMWindow.CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
 var
    w,h : Integer;
@@ -265,6 +272,7 @@ begin
          Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
          Img := XGetImage(Self.XDisplay, Self.curWindow, xs, ys, ww, hh, AllPlanes, ZPixmap);
+         XImageToRawImage(Img, Raw);
 
          Bmp := TBitmap.Create;
          Bmp.LoadFromRawImage(Raw, False);
@@ -306,7 +314,6 @@ begin
     XSetInputFocus(Self.XDisplay,Self.CurWindow,RevertToParent,CurrentTime);
   {$ENDIF}
 end;
-
 
 {$IFDEF MSWINDOWS}  //Probably need one for Linux as well
 function TMWindow.UpdateDrawBitmap :boolean;

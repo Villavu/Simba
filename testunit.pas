@@ -69,9 +69,11 @@ begin
   Client.MWIndow.SetTarget(PRGB32(@Arr[0]), Point(3, 3));    }
 
 //  Client.MWindow.ActivateClient;
+
   Client.MWindow.GetDimensions(w, h);
   Writeln('Copying BMP');
   bmp := Client.MWindow.CopyClientToBitmap(0, 0, w, h);
+  Writeln('Saving BMP');
 
   {$IFDEF WINDOWS}
   bmp.SaveToFile('c:\test1.bmp');
@@ -79,6 +81,8 @@ begin
   {$IFDEF LINUX}
   bmp.SaveToFile('/tmp/test1.bmp');
   {$ENDIF}
+
+  writeln('Copied Bitmap');
 //  bmp.Free;
 
  //Sleep(1000);
@@ -90,22 +94,31 @@ begin
   writeln(inttostr(x) + ' , ' + inttostr(y));
 
   Client.MInput.ClickMouse(60, 60, mouse_Right);
+
   LoopX:= w div 2;
   LoopY:= h div 2;
   bmp.SetSize(Loopx + 1, Loopy + 1);
   ReturnData := Client.MWindow.ReturnData(0, 0, Loopx + 1, Loopy + 1);
+
   SetLength(Arr,(Loopy + 1) * (Loopx + 1));
+
   for yy := 0 to Loopy do
   begin;
     for xx := 0 to Loopx do
     begin
       { Do comparison here }
       Arr[yy * (loopx + 1) + xx] :=RGBToColor(ReturnData.Ptr^.B,ReturnData.Ptr^.G,ReturnData.Ptr^.R);
-      Bmp.Canvas.Pixels[xx,yy] := clwhite xor RGBToColor(ReturnData.Ptr^.R,ReturnData.Ptr^.G,ReturnData.Ptr^.B);
+
+      // not thread stable on linux.
+      //Bmp.Canvas.Pixels[xx,yy] := RGBToColor(ReturnData.Ptr^.R,ReturnData.Ptr^.G,ReturnData.Ptr^.B);
+
       inc(ReturnData.Ptr);
     end;
     Inc(ReturnData.Ptr,ReturnData.IncPtrWith);
   end;
+
+
+
   {$IFDEF WINDOWS}
   bmp.SaveToFile('c:\test2.bmp');
   {$ENDIF}
@@ -113,6 +126,7 @@ begin
   bmp.SaveToFile('/tmp/test2.bmp');
   {$ENDIF}
   Bmp.free;
+
 //  Client.MWIndow.SetTarget(PRGB32(@Arr[0]), Point(Loopx + 1, Loopy + 1));
   Client.MWindow.FreeReturnData;
 
