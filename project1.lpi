@@ -133,8 +133,8 @@
       <Unit12>
         <Filename Value="Units/MMLCore/window.pas"/>
         <UnitName Value="Window"/>
-        <CursorPos X="10" Y="416"/>
-        <TopLine Value="396"/>
+        <CursorPos X="52" Y="394"/>
+        <TopLine Value="394"/>
         <EditorIndex Value="2"/>
         <UsageCount Value="22"/>
         <Loaded Value="True"/>
@@ -144,7 +144,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="windowutil"/>
         <CursorPos X="53" Y="122"/>
-        <TopLine Value="100"/>
+        <TopLine Value="98"/>
         <EditorIndex Value="3"/>
         <UsageCount Value="43"/>
         <Loaded Value="True"/>
