@@ -26,7 +26,7 @@ constructor TClient.Create;
 begin
   inherited Create;
 
-  MWindow := TMWindow.Create();
+  MWindow := TMWindow.Create(Self);
   MInput := TMInput.Create(Self);
   MFiles := TMFiles.Create;
 end;

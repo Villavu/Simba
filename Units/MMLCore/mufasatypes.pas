@@ -13,6 +13,7 @@ type
     B, G, R, A: Byte;
   end;
   PRGB32 = ^TRGB32;
+
   TRetData = record
     Ptr : PRGB32;
     IncPtrWith : integer;
