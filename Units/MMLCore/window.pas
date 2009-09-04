@@ -126,6 +126,7 @@ begin
   {$ENDIF}
 
   {$IFDEF LINUX}
+  Self.XImageFreed:=True;
   Self.TargetMode := w_XWindow;
 
   Self.XDisplay := XOpenDisplay(nil);
@@ -197,6 +198,7 @@ begin
       WriteLn(IntToStr(Self.XWindowImage^.width) + ', ' + IntToStr(Self.XWindowImage^.height));
       Result.Ptr := PRGB32(Self.XWindowImage^.data);
       Result.IncPtrWith := 0;
+      Self.XImageFreed:=False;
 
       XSetErrorHandler(Old_Handler);
       {$ELSE}
@@ -222,9 +224,13 @@ begin
     exit;
   end;
   {$IFDEF LINUX}
-  if(QWord(Self.XWindowImage) <> 0) then      // 0, nil?
+  if not Self.XImageFreed then
   begin
-    XDestroyImage(Self.XWindowImage);
+    Self.XImageFreed:=True;
+    if(QWord(Self.XWindowImage) <> 0) then      // 0, nil?
+    begin
+      XDestroyImage(Self.XWindowImage);
+    end;
   end;
   {$ENDIF}
 end;
@@ -426,6 +432,9 @@ end;
 }
 function TMWindow.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 begin
+  If Self.TargetMode = w_XWindow then
+    Self.FreeReturnData;
+
   Self.ArrayPtr := ArrPtr;
   Self.ArraySize := Size;
   Self.TargetMode:= w_ArrayPtr;

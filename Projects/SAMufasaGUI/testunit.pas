@@ -42,18 +42,25 @@ type
   end;
 
 procedure TMyThread.Execute;
-Const
-    TestPath = 'c:/test';
 
+Const
     fsFromBeginning = 0; // offset must be pos or 0
     fsFromCurrent = 1; // offset pos or neg
     fsFromEnd = 2; // offset only neg or 0
 
     // put somewhese else
+    {$IFDEF MSWINDOWS}
+    TestPath = 'c:/test';
     DirectorySeperator = '\';
     DS = '\';
     ExeExt = '.exe';
-
+    {$ENDIF}
+    {$IFDEF LINUX}
+    TestPath = '/tmp/test';
+    DirectorySeperator = '/';
+    DS = '/';
+    ExeExt = '';
+    {$ENDIF}
 Var
    Client: TClient;
    w,h, x, y, xx, yy, i:integer;
