@@ -43,16 +43,16 @@ type
 
 procedure TMyThread.Execute;
 Const
-    TestPath = './test';
+    TestPath = 'c:/test';
 
     fsFromBeginning = 0; // offset must be pos or 0
     fsFromCurrent = 1; // offset pos or neg
     fsFromEnd = 2; // offset only neg or 0
 
     // put somewhese else
-    DirectorySeperator = '/';
-    DS = '/';
-    ExeExt = '';
+    DirectorySeperator = '\';
+    DS = '\';
+    ExeExt = '.exe';
 
 Var
    Client: TClient;
