@@ -121,7 +121,7 @@ begin
     for xx := 0 to Loopx do
     begin
       { Do comparison here }
-      Arr[yy * (loopx + 1) + xx] :=RGBToColor(ReturnData.Ptr^.B,ReturnData.Ptr^.G,ReturnData.Ptr^.R);
+      Arr[yy * (loopx) + xx] :=RGBToColor(ReturnData.Ptr^.B,ReturnData.Ptr^.G,ReturnData.Ptr^.R);
 
       // .Canvas not thread stable on linux. (use fpImage and fpCanvas)
       //Bmp.Canvas.Pixels[xx,yy] := RGBToColor(ReturnData.Ptr^.R,ReturnData.Ptr^.G,ReturnData.Ptr^.B);
@@ -130,7 +130,14 @@ begin
     end;
     Inc(ReturnData.Ptr,ReturnData.IncPtrWith);
   end;
+  bmp.Free;
 
+  Client.MWindow.SetTarget(@Arr[0], Point(loopx, loopy));
+  writeln(inttostr(loopx) + ' , ' + inttostr(loopy));
+  Client.MWindow.GetDimensions(W, H);
+  writeln(inttostr(w) + ' , ' + inttostr(h));
+
+  Bmp := Client.MWindow.CopyClientToBitmap(0, 0, loopx, loopy);
 
 
   {$IFDEF WINDOWS}
