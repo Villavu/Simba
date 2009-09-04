@@ -35,12 +35,9 @@ type
             function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
             function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 
-            constructor Create(Client: TObject);
+            constructor Create;
             destructor Destroy; override;
         public
-              // Reference to client.
-              Client: TObject;
-
               // Target Window Mode.
               TargetMode: TTargetWindowMode;
 
@@ -107,10 +104,9 @@ uses
     GraphType // For TRawImage
     ;
 
-constructor TMWindow.Create(Client: TObject);
+constructor TMWindow.Create;
 begin
   inherited Create;
-  Self.Client := Client;
 
   Self.ArrayPtr := nil;
   Self.ArraySize := Classes.Point(-1, -1);
@@ -349,7 +345,7 @@ begin
     begin
       {$IFDEF MSWINDOWS}
       GetWindowRect(Self.TargetHandle, Rect);
-      w:= Rect.Right - Rect.left;
+      w:= Rect.Right - Rect.Left;
       h:= Rect.Bottom - Rect.Top;
       {$ENDIF}
     end;

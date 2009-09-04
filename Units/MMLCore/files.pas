@@ -94,6 +94,7 @@ Begin
      SetLength(FreeSpots, High(FreeSpots));
    End Else
    Begin
+     // Increase by * 2.
      //WriteLn('No Free Spot. Increasing the size');
      SetLength(MFiles, Length(MFiles) + 1);
      //Writeln('Length of Files: ' + IntToStr(Length(Files)));
