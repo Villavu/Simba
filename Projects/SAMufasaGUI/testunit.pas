@@ -83,9 +83,7 @@ begin
   {$ENDIF}
 
   writeln('Copied Bitmap');
-//  bmp.Free;
 
- //Sleep(1000);
   Client.MInput.GetMousePos(x, y);
   writeln(inttostr(x) + ' , ' + inttostr(y));
 
@@ -109,7 +107,7 @@ begin
       { Do comparison here }
       Arr[yy * (loopx + 1) + xx] :=RGBToColor(ReturnData.Ptr^.B,ReturnData.Ptr^.G,ReturnData.Ptr^.R);
 
-      // not thread stable on linux.
+      // .Canvas not thread stable on linux. (use fpImage and fpCanvas)
       //Bmp.Canvas.Pixels[xx,yy] := RGBToColor(ReturnData.Ptr^.R,ReturnData.Ptr^.G,ReturnData.Ptr^.B);
 
       inc(ReturnData.Ptr);
@@ -125,13 +123,14 @@ begin
   {$IFDEF LINUX}
   bmp.SaveToFile('/tmp/test2.bmp');
   {$ENDIF}
+
   Bmp.free;
 
 //  Client.MWIndow.SetTarget(PRGB32(@Arr[0]), Point(Loopx + 1, Loopy + 1));
   Client.MWindow.FreeReturnData;
 
   Client.MInput.IsMouseButtonDown(mouse_Left);
-  Sleep(1000);
+ // Sleep(1000);
   if Client.MInput.IsMouseButtonDown(mouse_Left) then
     writeln('Left mouse is down!');
   if Client.MInput.IsMouseButtonDown(mouse_Right) then
@@ -141,6 +140,7 @@ begin
   Client.Destroy;
   writeln('Test completed successfully');
   break;
+
   end;
 end;
 
