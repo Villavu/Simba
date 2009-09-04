@@ -298,10 +298,12 @@ end;
 procedure TMWindow.ActivateClient;
 begin
   {$IFDEF MSWINDOWS}
-  SetForegroundWindow(Self.TargetHandle);
+  if TargetMode = w_Window then
+    SetForegroundWindow(Self.TargetHandle);
   {$ENDIF}
   {$IFDEF LINUX}
-  XSetInputFocus(Self.XDisplay,Self.CurWindow,RevertToParent,CurrentTime);
+  if TargetMode = w_XWindow then
+    XSetInputFocus(Self.XDisplay,Self.CurWindow,RevertToParent,CurrentTime);
   {$ENDIF}
 end;
 
