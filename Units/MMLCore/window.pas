@@ -349,8 +349,8 @@ begin
     begin
       {$IFDEF MSWINDOWS}
       GetWindowRect(Self.TargetHandle, Rect);
-      w:= Rect.Right - Rect.left + 1;
-      h:= Rect.Bottom - Rect.Top  + 1;
+      w:= Rect.Right - Rect.left;
+      h:= Rect.Bottom - Rect.Top;
       {$ENDIF}
     end;
     w_XWindow:
