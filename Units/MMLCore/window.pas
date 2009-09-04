@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, mufasatypes,
   {$IFDEF MSWINDOWS}
-  ,windows  // For windows API
+  windows,  // For windows API
   {$ENDIF}
   graphics,
   LCLType,
@@ -20,7 +20,7 @@ type
     { TMWindow }
 
     TMWindow = class(TObject)
-            function ReturnData(xs, ys, width, height: Integer): PRGB32;
+            function ReturnData(xs, ys, width, height: Integer): TRetData;
             procedure FreeReturnData;
             procedure GetDimensions(var W, H: Integer);
             function CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
@@ -53,6 +53,7 @@ type
               //Works on linux as well, test it out
               TargetDC : HDC;
               DrawBitmap : TBitmap;
+              DrawBmpW,DrawBmpH : integer;
               {$ENDIF}
 
               {$IFDEF LINUX}
@@ -112,10 +113,11 @@ begin
   Self.Client := Client;
 
   Self.ArrayPtr := nil;
-  Self.ArraySize := Point(-1, -1);
+  Self.ArraySize := Classes.Point(-1, -1);
 
   {$IFDEF MSWINDOWS}
   Self.DrawBitmap := TBitmap.Create;
+  Self.DrawBitmap.PixelFormat:= pf32bit;
   Self.TargetMode:= w_Window;
   Self.TargetHandle:= windows.GetDesktopWindow;
   Self.TargetDC:= GetWindowDC(Self.TargetHandle);
@@ -156,9 +158,9 @@ begin
   inherited;
 end;
 
-function TMWindow.ReturnData(xs, ys, width, height: Integer): PRGB32;
-{$IFDEF LINUX}
+function TMWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
 var
+{$IFDEF LINUX}
    Old_Handler: TXErrorHandler;
 {$ENDIF}
    TmpData: PRGB32;
@@ -169,7 +171,8 @@ begin
     begin
       {$IFDEF MSWINDOWS}
       BitBlt(Self.DrawBitmap.Canvas.Handle,0,0, width, height, Self.TargetDC, xs,ys, SRCCOPY);
-      Result := Self.DrawBmpDataPtr;
+      Result.Ptr:= Self.DrawBmpDataPtr;
+      Result.IncPtrWith:= DrawBmpW - Width;
       {$ENDIF}
     end;
     w_XWindow:
@@ -189,7 +192,8 @@ begin
         Exit;
       end;
       WriteLn(IntToStr(Self.XWindowImage^.width) + ', ' + IntToStr(Self.XWindowImage^.height));
-      Result := PRGB32(Self.XWindowImage^.data);
+      Result.Ptr := PRGB32(Self.XWindowImage^.data);
+      Result.IncPtrWith := 0;
 
       XSetErrorHandler(Old_Handler);
       {$ELSE}
@@ -200,7 +204,9 @@ begin
     begin
       TmpData := Self.ArrayPtr;
       Inc(TmpData, ys * Height + xs);
-      Result := TmpData;
+      Result.Ptr := TmpData;
+      Result.IncPtrWith:= Self.ArraySize.x - width;
+
     end;
   end;
 end;
@@ -224,11 +230,11 @@ function TMWindow.CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
 var
    w,h : Integer;
    ww, hh: Integer;
+   Raw: TRawImage;
+   Bmp: TBitmap;
    {$IFDEF LINUX}
    Old_Handler: TXErrorHandler;
    Img: PXImage;
-   Raw: TRawImage;
-   Bmp: TBitmap;
    {$ENDIF}
 
 begin
@@ -308,6 +314,9 @@ var
 begin
   GetDimensions(w,h);
   DrawBitmap.SetSize(w,h);
+//  DrawBitmap.PixelFormat:=
+  DrawBmpW := w;
+  DrawBmpH := h;
   GetObject(DrawBitmap.Handle, SizeOf(BmpInfo), @BmpInfo);
   DrawBmpDataPtr := BmpInfo.bmBits;
 end;

@@ -7,18 +7,18 @@ interface
 uses
   Classes, SysUtils,
   ctypes, // for cint, etc
+  GraphType, // For TRawImage
   {$IFDEF LINUX}
   x, xlib, // For X* stuff.
-  GraphType, // For TRawImage
   {$ENDIF}
 
   mufasatypes;
 
          {$IFDEF LINUX}
          Procedure XImageToRawImage(XImg: PXImage; Var RawImage: TRawImage);
-         Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; Var RawImage: TRawImage);
          function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
          {$ENDIF}
+         Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; Var RawImage: TRawImage);
 
 implementation
 

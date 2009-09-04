@@ -1,12 +1,13 @@
 object Form1: TForm1
-  Left = 339
+  Left = 462
   Height = 527
-  Top = 262
+  Top = 227
   Width = 779
   ActiveControl = Button1
   Caption = 'Form1'
   ClientHeight = 527
   ClientWidth = 779
+  Position = poScreenCenter
   LCLVersion = '0.9.29'
   object Button1: TButton
     Left = 69

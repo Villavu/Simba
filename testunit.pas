@@ -46,8 +46,9 @@ Var
    Client: TClient;
    w,h, x, y, xx, yy, i:integer;
    bmp: TBitmap;
-   ptr: PRGB32;
+   ReturnData : TRetData;
    arr: Array Of Integer;
+   LoopY,LoopX : integer;
 
 begin
   while (not Terminated)  do
@@ -59,26 +60,26 @@ begin
   Client.MWindow.GetDimensions(w, h);
   writeln(inttostr(w) + ' , ' + inttostr(h));
   Writeln('Setting target');
-  //Client.MWindow.SetTarget(132840,w_window);
+//  Client.MWindow.SetTarget(67232,w_window);
 
-  SetLength(Arr, 9);
+{  SetLength(Arr, 9);
   for i := 0 to high(arr) do
     arr[i] := $FFFFFF;
 
-  Client.MWIndow.SetTarget(PRGB32(@Arr[0]), Point(3, 3));
+  Client.MWIndow.SetTarget(PRGB32(@Arr[0]), Point(3, 3));    }
 
-  Client.MWindow.ActivateClient;
+//  Client.MWindow.ActivateClient;
   Client.MWindow.GetDimensions(w, h);
   Writeln('Copying BMP');
   bmp := Client.MWindow.CopyClientToBitmap(0, 0, w, h);
 
   {$IFDEF WINDOWS}
-  bmp.SaveToFile('c:\test.bmp');
+  bmp.SaveToFile('c:\test1.bmp');
   {$ENDIF}
   {$IFDEF LINUX}
-  bmp.SaveToFile('/tmp/test.bmp');
+  bmp.SaveToFile('/tmp/test1.bmp');
   {$ENDIF}
-  bmp.Free;
+//  bmp.Free;
 
  //Sleep(1000);
   Client.MInput.GetMousePos(x, y);
@@ -89,15 +90,30 @@ begin
   writeln(inttostr(x) + ' , ' + inttostr(y));
 
   Client.MInput.ClickMouse(60, 60, mouse_Right);
-
-  ptr := Client.MWindow.ReturnData(0, 0, w, h);
-  for yy := 0 to h - 1 do
-    for xx := 0 to w - 1 do
+  LoopX:= w div 2;
+  LoopY:= h div 2;
+  bmp.SetSize(Loopx + 1, Loopy + 1);
+  ReturnData := Client.MWindow.ReturnData(0, 0, Loopx + 1, Loopy + 1);
+  SetLength(Arr,(Loopy + 1) * (Loopx + 1));
+  for yy := 0 to Loopy do
+  begin;
+    for xx := 0 to Loopx do
     begin
       { Do comparison here }
-      inc(ptr);
+      Arr[yy * (loopx + 1) + xx] :=RGBToColor(ReturnData.Ptr^.B,ReturnData.Ptr^.G,ReturnData.Ptr^.R);
+      Bmp.Canvas.Pixels[xx,yy] := clwhite xor RGBToColor(ReturnData.Ptr^.R,ReturnData.Ptr^.G,ReturnData.Ptr^.B);
+      inc(ReturnData.Ptr);
     end;
-
+    Inc(ReturnData.Ptr,ReturnData.IncPtrWith);
+  end;
+  {$IFDEF WINDOWS}
+  bmp.SaveToFile('c:\test2.bmp');
+  {$ENDIF}
+  {$IFDEF LINUX}
+  bmp.SaveToFile('/tmp/test2.bmp');
+  {$ENDIF}
+  Bmp.free;
+//  Client.MWIndow.SetTarget(PRGB32(@Arr[0]), Point(Loopx + 1, Loopy + 1));
   Client.MWindow.FreeReturnData;
 
   Client.MInput.IsMouseButtonDown(mouse_Left);
