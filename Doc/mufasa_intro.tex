@@ -114,10 +114,13 @@ At this point it is unsure if the Input class will also take care of Sockets and
 \section{More On The Core Classes}
 
 The previously mentioned MML classes are considered to be the absolute core of the library. (Although one could argue that even the Colour class isn't part of the core classes.)
+
 With these classes most functions that Mufasa will contain can be created. if you can make FindColor, you can make FindColorsSpiralTolerance, they don't really differ a lot. The same goes for DTM's, OCR and Bitmaps. Mouse and keyboard functions will be done with the Input class.
 
 The MML contains more classes, and they will mainly utilize the previous mentioned classes.
 It is essential to understand the Classes architecture to fully understand Mufasa.
 Before work on other classes will be done, the core classes must be finished and stable.
+
+A good rule of thumb is the following: any units that make extensive use of Compiler Directives, are considered a core unit.
 
 \end{document}
