@@ -22,7 +22,7 @@ type
   TTargetWindowMode = (w_BMP, w_Window, w_HDC, w_ArrayPtr, w_XWindow);
   TClickType = (mouse_Left, mouse_Right, mouse_Middle);
   TMousePress = (mouse_Down, mouse_Up);
-
+  TPointArray = array of TPoint;
 
 
 implementation
