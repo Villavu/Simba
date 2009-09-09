@@ -195,7 +195,7 @@ begin
         XSetErrorHandler(Old_Handler);
         Exit;
       end;
-      WriteLn(IntToStr(Self.XWindowImage^.width) + ', ' + IntToStr(Self.XWindowImage^.height));
+      //WriteLn(IntToStr(Self.XWindowImage^.width) + ', ' + IntToStr(Self.XWindowImage^.height));
       Result.Ptr := PRGB32(Self.XWindowImage^.data);
       Result.IncPtrWith := 0;
       Self.XImageFreed:=False;

@@ -201,7 +201,7 @@ begin
 
   event.xbutton.send_event := 1;
   event.xbutton.same_screen:= 1;
-  event.xbutton.subwindow:= 0;
+  event.xbutton.subwindow:= 0;  // this can't be right.
   event.xbutton.root := TClient(Client).MWindow.DesktopWindow;
   event.xbutton.window := TClient(Client).MWindow.CurWindow;
   event.xbutton.x_root:= x;

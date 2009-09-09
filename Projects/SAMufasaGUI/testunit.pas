@@ -25,6 +25,8 @@ var
   Form1: TForm1; 
 
 implementation
+uses
+   lclintf;
 
 type
     TMyThread = class(TThread)
@@ -63,7 +65,7 @@ Const
     {$ENDIF}
 Var
    Client: TClient;
-   w,h, x, y, xx, yy, i:integer;
+   w,h, x, y, xx, yy, i,t1,t2:integer;
    bmp: TBitmap;
    ReturnData : TRetData;
    arr: Array Of Integer;
@@ -79,8 +81,19 @@ begin
 
   Writeln('Creating the client');
   Client := TClient.Create;
+  //Client.MWindow.SetTarget(77594696);
   Writeln('Getting the dimensions');
   Client.MWindow.GetDimensions(w, h);
+  t1 := lclintf.gettickcount;
+  for i := 0 to 100 do
+    Client.MFinder.FindColor(x, y, 123456, 0, 0, w, h);
+  t2 := lclintf.gettickcount;
+  writeln(inttostr(round((t2 - t1) / 101)));
+
+  //break;
+
+
+
   writeln(inttostr(w) + ' , ' + inttostr(h));
   Writeln('Setting target');
 //  Client.MWindow.SetTarget(67232,w_window);
@@ -159,7 +172,7 @@ begin
 //  Client.MWIndow.SetTarget(PRGB32(@Arr[0]), Point(Loopx + 1, Loopy + 1));
   Client.MWindow.FreeReturnData;
 
-  Client.MInput.IsMouseButtonDown(mouse_Left);
+  Client.MInput.IsMouseButtonDown(mouse_Right);
  // Sleep(1000);
   if Client.MInput.IsMouseButtonDown(mouse_Left) then
     writeln('Left mouse is down!');
