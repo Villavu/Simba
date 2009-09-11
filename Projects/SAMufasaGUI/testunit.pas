@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Client, MufasaTypes;
+  StdCtrls, Client, MufasaTypes, mmlthread;
 
 type
 
@@ -253,11 +253,14 @@ end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 Var
-   MyThread: TMyThread;
+   //MyThread: TMyThread;
+   MMLThread: TMMLThread;
 
 begin
-  MyThread := TMyThread.Create(True);
-  MyThread.Resume;
+{  MyThread := TMyThread.Create(True);
+  MyThread.Resume;     }
+  MMLThread := TMMLThread.Create(True);
+  MMLThread.Resume;
 end;
 
 initialization

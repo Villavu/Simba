@@ -199,8 +199,8 @@ begin
        mouse_Right: Event.xbutton.button:= Button3;
   end;
 
-  event.xbutton.send_event := True;
-  event.xbutton.same_screen:= True;
+  event.xbutton.send_event := TBool(1);
+  event.xbutton.same_screen:= TBool(1);
   event.xbutton.subwindow:= 0;  // this can't be right.
   event.xbutton.root := TClient(Client).MWindow.DesktopWindow;
   event.xbutton.window := TClient(Client).MWindow.CurWindow;
