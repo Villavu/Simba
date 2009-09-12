@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="7"/>
+      <ActiveEditorIndexAtStart Value="2"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -41,7 +41,7 @@
         <CursorPos X="13" Y="17"/>
         <TopLine Value="1"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="73"/>
+        <UsageCount Value="74"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -173,7 +173,7 @@
         <CursorPos X="19" Y="271"/>
         <TopLine Value="255"/>
         <EditorIndex Value="6"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit18>
       <Unit19>
@@ -305,7 +305,7 @@
         <CursorPos X="25" Y="4"/>
         <TopLine Value="4"/>
         <EditorIndex Value="4"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit37>
       <Unit38>
@@ -315,7 +315,7 @@
         <CursorPos X="4" Y="26"/>
         <TopLine Value="1"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit38>
       <Unit39>
@@ -331,16 +331,16 @@
         <UnitName Value="files"/>
         <CursorPos X="62" Y="61"/>
         <TopLine Value="46"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
       </Unit40>
       <Unit41>
         <Filename Value="../../Units/MMLCore/window.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Window"/>
         <CursorPos X="8" Y="262"/>
-        <TopLine Value="255"/>
+        <TopLine Value="225"/>
         <EditorIndex Value="5"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit41>
       <Unit42>
@@ -375,10 +375,10 @@
         <Filename Value="../../Units/MMLCore/finder.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="finder"/>
-        <CursorPos X="24" Y="130"/>
-        <TopLine Value="111"/>
+        <CursorPos X="53" Y="99"/>
+        <TopLine Value="81"/>
         <EditorIndex Value="2"/>
-        <UsageCount Value="31"/>
+        <UsageCount Value="32"/>
         <Loaded Value="True"/>
       </Unit46>
       <Unit47>
@@ -394,7 +394,7 @@
         <UnitName Value="MMLThread"/>
         <CursorPos X="132" Y="5"/>
         <TopLine Value="1"/>
-        <UsageCount Value="29"/>
+        <UsageCount Value="30"/>
       </Unit48>
       <Unit49>
         <Filename Value="../../../Documents/fpc/rtl/objpas/classes/classesh.inc"/>
@@ -406,10 +406,10 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="22" Y="136"/>
+        <CursorPos X="64" Y="129"/>
         <TopLine Value="121"/>
         <EditorIndex Value="7"/>
-        <UsageCount Value="27"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit50>
       <Unit51>
