@@ -139,6 +139,8 @@ procedure TMMLPSThread.OnCompile(Sender: TPSScript);
 begin
   //Here we add all the initalizing, of BMPArray etc
 
+  // ^ This will all be done with Client.Create;
+
   // Here we add all the functions to the engine.
   {$I PSInc/pscompile.inc}
 end;
@@ -146,6 +148,7 @@ end;
 procedure TMMLPSThread.AfterExecute(Sender: TPSScript);
 begin
   //Here we add all the Script-freeing-leftovers (like BMParray etc)
+  // ^ This will all be done with Client.Destroy;
 end;
 
 function TMMLPSThread.RequireFile(Sender: TObject;
