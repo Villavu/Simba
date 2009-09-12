@@ -40,10 +40,15 @@ type
 
 implementation
 uses
-  MufasaTypes,{$ifdef mswindows}windows,{$endif}
-  uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,uPSC_extctrls, //Compile-libs
-  uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,uPSR_extctrls, //Runtime-libs
-  lclintf;
+  MufasaTypes,
+  {$ifdef mswindows}windows,{$endif}
+  uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
+  uPSC_extctrls, //Compile-libs
+
+  uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
+  uPSR_extctrls, //Runtime-libs
+
+  lclintf; // for GetTickCount and others.
 
 
 threadvar
@@ -89,37 +94,32 @@ end;
 
 constructor TMMLPSThread.Create(CreateSuspended : boolean);
 begin
-  if Client <> nil then
+  {if Client <> nil then
     Writeln('ThreadClient seems to be set, so not recreating it.') //reset client to defaults?
     //ThreadClient.ResetToDefaults
-  else
-    Client := TClient.Create;
-  if PSScript <> nil then
-    PSScript.Free;
+  else  }
+
+  // ^ Every time a script is compiled, a new thread is created. There will no
+  // existing client left. I commented the above code out.
+  Client := TClient.Create;
+
+ { if PSScript <> nil then
+    PSScript.Free;      }
+  // ^ Same, makes no sense. :-)
+
   // Create Stuff here
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
 
-
   PSScript.OnCompile:= @OnCompile;
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
   PSScript.OnAfterExecute:= @AfterExecute;
-  {$IFDEF CPU386 }
-  PSScript.Defines.Add ('CPU386');
-  {$ENDIF }
-  PSScript.Defines.Add ('MUFASA');
-  PSScript.Defines.Add ('COGAT');
-  PSScript.Defines.Add ('RAYMONDPOWNS');
-  {$IFDEF MSWINDOWS }
-  PSScript.Defines.Add ('MSWINDOWS');
-  PSScript.Defines.Add ('WIN32');
-  PSScript.Defines.Add ('WINDOWS');
-  {$ENDIF }
-  {$IFDEF LINUX }
-  PSScript.Defines.Add ('LINUX');
-  {$ENDIF }
+
+  // Set some defines
+  {$I PSInc/psdefines.inc}
+
   FreeOnTerminate := True;
   inherited Create(CreateSuspended);
 end;
@@ -131,12 +131,16 @@ begin
   inherited Destroy;
 end;
 
+// include PS wrappers
+
+{$I PSInc/Wrappers/colour.inc}
+
 procedure TMMLPSThread.OnCompile(Sender: TPSScript);
 begin
   //Here we add all the initalizing, of BMPArray etc
-  Sender.AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
-  Sender.AddFunction(@Writeln,'procedure writeln(s : string);');
-  //Also the functions get added into the engine, right here.
+
+  // Here we add all the functions to the engine.
+  {$I PSInc/pscompile.inc}
 end;
 
 procedure TMMLPSThread.AfterExecute(Sender: TPSScript);

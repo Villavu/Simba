@@ -41,7 +41,7 @@
         <CursorPos X="13" Y="17"/>
         <TopLine Value="1"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="70"/>
+        <UsageCount Value="73"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -173,7 +173,7 @@
         <CursorPos X="19" Y="271"/>
         <TopLine Value="255"/>
         <EditorIndex Value="6"/>
-        <UsageCount Value="36"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit18>
       <Unit19>
@@ -305,7 +305,7 @@
         <CursorPos X="25" Y="4"/>
         <TopLine Value="4"/>
         <EditorIndex Value="4"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="38"/>
         <Loaded Value="True"/>
       </Unit37>
       <Unit38>
@@ -315,7 +315,7 @@
         <CursorPos X="4" Y="26"/>
         <TopLine Value="1"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="38"/>
         <Loaded Value="True"/>
       </Unit38>
       <Unit39>
@@ -331,7 +331,7 @@
         <UnitName Value="files"/>
         <CursorPos X="62" Y="61"/>
         <TopLine Value="46"/>
-        <UsageCount Value="36"/>
+        <UsageCount Value="39"/>
       </Unit40>
       <Unit41>
         <Filename Value="../../Units/MMLCore/window.pas"/>
@@ -340,7 +340,7 @@
         <CursorPos X="8" Y="262"/>
         <TopLine Value="255"/>
         <EditorIndex Value="5"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="38"/>
         <Loaded Value="True"/>
       </Unit41>
       <Unit42>
@@ -378,7 +378,7 @@
         <CursorPos X="24" Y="130"/>
         <TopLine Value="111"/>
         <EditorIndex Value="2"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="31"/>
         <Loaded Value="True"/>
       </Unit46>
       <Unit47>
@@ -394,7 +394,7 @@
         <UnitName Value="MMLThread"/>
         <CursorPos X="132" Y="5"/>
         <TopLine Value="1"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="29"/>
       </Unit48>
       <Unit49>
         <Filename Value="../../../Documents/fpc/rtl/objpas/classes/classesh.inc"/>
@@ -406,10 +406,10 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="11" Y="46"/>
-        <TopLine Value="31"/>
+        <CursorPos X="22" Y="136"/>
+        <TopLine Value="121"/>
         <EditorIndex Value="7"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="27"/>
         <Loaded Value="True"/>
       </Unit50>
       <Unit51>
@@ -418,7 +418,7 @@
         <CursorPos X="21" Y="193"/>
         <TopLine Value="183"/>
         <EditorIndex Value="9"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="15"/>
         <Loaded Value="True"/>
       </Unit51>
       <Unit52>
@@ -447,7 +447,7 @@
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
         <EditorIndex Value="8"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit55>
       <Unit56>
@@ -455,7 +455,7 @@
         <CursorPos X="20" Y="1"/>
         <TopLine Value="1"/>
         <EditorIndex Value="1"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit56>
       <Unit57>
@@ -522,7 +522,7 @@
         <UsageCount Value="10"/>
       </Unit65>
     </Units>
-    <JumpHistory Count="18" HistoryIndex="17">
+    <JumpHistory Count="26" HistoryIndex="25">
       <Position1>
         <Filename Value="testunit.pas"/>
         <Caret Line="274" Column="26" TopLine="258"/>
@@ -595,6 +595,38 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="198" Column="19" TopLine="183"/>
       </Position18>
+      <Position19>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="145" Column="68" TopLine="121"/>
+      </Position19>
+      <Position20>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="121" Column="13" TopLine="106"/>
+      </Position20>
+      <Position21>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="140" Column="13" TopLine="124"/>
+      </Position21>
+      <Position22>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="55" Column="13" TopLine="41"/>
+      </Position22>
+      <Position23>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="60" Column="16" TopLine="41"/>
+      </Position23>
+      <Position24>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="61" Column="15" TopLine="41"/>
+      </Position24>
+      <Position25>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="71" Column="64" TopLine="56"/>
+      </Position25>
+      <Position26>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="136" Column="25" TopLine="123"/>
+      </Position26>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
