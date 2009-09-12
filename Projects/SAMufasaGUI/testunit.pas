@@ -272,7 +272,7 @@ begin
 //  MMLPSThread.Client.MWindow.SetTarget();
   MMLPSThread.SetPSScript(SynEdit1.Lines.Text);
   MMLPSThread.SetDebug(SynMemo1);
-  MMLPSThread.Client.MWindow.SetTarget(65052451);
+  //MMLPSThread.Client.MWindow.SetTarget(65052451);
   MMLPSThread.Resume;
 
 end;
