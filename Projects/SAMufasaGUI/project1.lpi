@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="10"/>
+      <ActiveEditorIndexAtStart Value="7"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -170,8 +170,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="54" Y="280"/>
-        <TopLine Value="261"/>
+        <CursorPos X="5" Y="275"/>
+        <TopLine Value="265"/>
         <EditorIndex Value="7"/>
         <UsageCount Value="42"/>
         <Loaded Value="True"/>
@@ -527,7 +527,7 @@
       </Unit65>
       <Unit66>
         <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
-        <CursorPos X="23" Y="2"/>
+        <CursorPos X="64" Y="4"/>
         <TopLine Value="1"/>
         <EditorIndex Value="10"/>
         <UsageCount Value="11"/>
