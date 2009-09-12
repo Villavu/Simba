@@ -35,10 +35,10 @@ end;
 
 destructor TClient.Destroy;
 begin
-  MFinder.Destroy;
-  MFiles.Destroy;
-  MInput.Destroy;
-  MWindow.Destroy;
+  MFinder.Free;
+  MFiles.Free;
+  MInput.Free;
+  MWindow.Free;
 
 
   inherited;

@@ -19,6 +19,7 @@ type
     SynFreePascalSyn1: TSynFreePascalSyn;
     SynMemo1: TSynMemo;
     procedure Button1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure SynMemo1Change(Sender: TObject);
   private
     { private declarations }
@@ -268,9 +269,15 @@ begin
 {  MMLThread := TMMLThread.Create(True);
   MMLThread.Resume;}
   MMLPSThread := TMMLPSThread.Create(True);
+//  MMLPSThread.Client.MWindow.SetTarget();
   MMLPSThread.SetPSScript(SynEdit1.Lines.Text);
   MMLPSThread.SetDebug(SynMemo1);
   MMLPSThread.Resume;
+
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
 
 end;
 

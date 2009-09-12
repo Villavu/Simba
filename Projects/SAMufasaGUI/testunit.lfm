@@ -7,6 +7,7 @@ object Form1: TForm1
   Caption = 'Form1'
   ClientHeight = 527
   ClientWidth = 779
+  OnCreate = FormCreate
   Position = poScreenCenter
   LCLVersion = '0.9.29'
   object Button1: TButton
@@ -31,6 +32,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 1
+    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
@@ -727,6 +729,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 2
+    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
