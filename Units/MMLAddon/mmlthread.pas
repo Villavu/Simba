@@ -15,7 +15,7 @@ type
         procedure Execute; override;
     public
         constructor Create(CreateSuspended: Boolean);
-        destructor Destroy;
+        destructor Destroy; override;
     end;
 
 implementation

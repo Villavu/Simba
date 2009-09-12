@@ -32,8 +32,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 1
-    BookMarkOptions.OnChange = nil
-    Gutter.Width = 57
+    Gutter.Width = 61
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -613,7 +612,7 @@ object Form1: TForm1
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 17
+        Width = 21
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -729,8 +728,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 2
-    BookMarkOptions.OnChange = nil
-    Gutter.Width = 57
+    Gutter.Width = 61
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -1307,7 +1305,7 @@ object Form1: TForm1
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 17
+        Width = 21
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone

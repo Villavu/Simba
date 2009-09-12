@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, SynEdit, SynHighlighterPas, SynMemo, Client, MufasaTypes,
-  mmlpsthread;
+  mmlpsthread, mmlthread;
 
 type
 
@@ -272,6 +272,7 @@ begin
 //  MMLPSThread.Client.MWindow.SetTarget();
   MMLPSThread.SetPSScript(SynEdit1.Lines.Text);
   MMLPSThread.SetDebug(SynMemo1);
+  MMLPSThread.Client.MWindow.SetTarget(65052451);
   MMLPSThread.Resume;
 
 end;
