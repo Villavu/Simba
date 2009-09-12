@@ -17,7 +17,6 @@ type
 //      PSClient : TPSScript;
 //        Client: TClient;
 //      DebugTo : TStrings;
-      Client : TClient;
       PSScript : TPSScript;
       DebugTo : TSynMemo;
       procedure OnCompile(Sender: TPSScript);
@@ -27,15 +26,16 @@ type
       procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
       procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
       procedure OutputMessages;
+      procedure OnThreadTerminate(Sender: TObject);
       procedure Execute; override;
     public
+      Client : TClient;
       procedure SetPSScript(Script : string);
       procedure SetDebug( Strings : TSynMemo );
-      function SetClientInfo : boolean;
 //      function CompilePSScript : boolean;
 //      function
       constructor Create(CreateSuspended: Boolean);
-      destructor Destroy;
+      destructor Destroy; override;
     end;
 
 implementation
@@ -121,19 +121,26 @@ begin
   {$I PSInc/psdefines.inc}
 
   FreeOnTerminate := True;
+  Self.OnTerminate := @Self.OnThreadTerminate;
   inherited Create(CreateSuspended);
+end;
+
+procedure TMMLPSThread.OnThreadTerminate(Sender: TObject);
+begin
+//  Writeln('Terminating the thread');
 end;
 
 destructor TMMLPSThread.Destroy;
 begin
   Client.Free;
   PSScript.Free;
-  inherited Destroy;
+  inherited;
 end;
 
 // include PS wrappers
 
 {$I PSInc/Wrappers/colour.inc}
+
 
 procedure TMMLPSThread.OnCompile(Sender: TPSScript);
 begin
@@ -237,10 +244,6 @@ begin
   DebugTo := Strings;
 end;
 
-function TMMLPSThread.SetClientInfo: boolean;
-begin
-  //Set the client handle, etc
-end;
 
 { Include stuff here? }
 
