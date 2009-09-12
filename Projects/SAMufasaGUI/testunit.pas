@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Client, MufasaTypes, mmlthread;
+  StdCtrls, SynEdit, SynHighlighterPas, SynMemo, Client, MufasaTypes,
+  mmlpsthread;
 
 type
 
@@ -14,7 +15,11 @@ type
 
   TForm1 = class(TForm)
     Button1: TButton;
+    SynEdit1: TSynEdit;
+    SynFreePascalSyn1: TSynFreePascalSyn;
+    SynMemo1: TSynMemo;
     procedure Button1Click(Sender: TObject);
+    procedure SynMemo1Change(Sender: TObject);
   private
     { private declarations }
   public
@@ -254,13 +259,24 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 Var
    //MyThread: TMyThread;
-   MMLThread: TMMLThread;
+//   MMLThread: TMMLThread;
+  MMLPSThread : TMMLPSThread;
 
 begin
 {  MyThread := TMyThread.Create(True);
   MyThread.Resume;     }
-  MMLThread := TMMLThread.Create(True);
-  MMLThread.Resume;
+{  MMLThread := TMMLThread.Create(True);
+  MMLThread.Resume;}
+  MMLPSThread := TMMLPSThread.Create(True);
+  MMLPSThread.SetPSScript(SynEdit1.Lines.Text);
+  MMLPSThread.SetDebug(SynMemo1);
+  MMLPSThread.Resume;
+
+end;
+
+procedure TForm1.SynMemo1Change(Sender: TObject);
+begin
+
 end;
 
 initialization
