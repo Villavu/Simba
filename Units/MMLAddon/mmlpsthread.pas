@@ -41,8 +41,9 @@ type
 implementation
 uses
   MufasaTypes,{$ifdef mswindows}windows,{$endif}
-  uPSC_std, uPSC_Controls,uPSC_Classes,uPSC_Graphics,uPSC_stdctrls,uPSC_Forms,uPSC_extctrls, //Compile-libs
-  uPSR_std, uPSR_Controls,uPSR_Classes,uPSR_Graphics,uPSR_stdctrls,uPSR_Forms,uPSR_extctrls; //Runtime-libs
+  uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,uPSC_extctrls, //Compile-libs
+  uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,uPSR_extctrls, //Runtime-libs
+  lclintf;
 
 
 threadvar
@@ -195,7 +196,7 @@ var
   time, i, ii: Integer;
 begin;
   CurrThread := Self;
-  time := GetTickCount;
+  time := lclintf.GetTickCount;
   try
     if PSScript.Compile then
     begin
