@@ -55,10 +55,11 @@ threadvar
   CurrThread : TMMLPSThread;
 
 {Some General PS Functions here}
-procedure Writeln(str : string);
-begin;
-  if CurrThread.DebugTo <> nil then
-    CurrThread.DebugTo.Lines.Add(Str);
+procedure psWriteln(str : string);
+begin
+  writeln(str);
+  {if CurrThread.DebugTo <> nil then
+    CurrThread.DebugTo.Lines.Add(Str);  }
   //Just overwriting itz.. soz.
 end;
 
