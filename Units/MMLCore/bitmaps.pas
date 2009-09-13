@@ -210,7 +210,7 @@ begin
     end;
     FreeSpots[FreeSpotsHigh] := Number;
   end;
-  BmpArray[Number].Free;
+  FreeAndNil(BmpArray[Number]);
 end;
 
 function TMufasaBitmap.SaveToFile(const FileName: string): boolean;
@@ -220,7 +220,7 @@ var
 begin
   ArrDataToRawImage(FData,Point(w,h),RawImage);
 //  Bmp := Graphics.TBitmap.Create;
-  Bmp := TLazIntfImage.Create(RawImage,true);
+  Bmp := TLazIntfImage.Create(RawImage,false);
   Bmp.SaveToFile(FileName);
   Bmp.Free;
 end;
@@ -259,8 +259,14 @@ begin
 end;
 
 destructor TMBitmaps.Destroy;
+var
+  I : integer;
 begin
-
+  for i := 0 to BmpsCurr do
+    if BmpArray[i] <> nil then
+      FreeAndNil(BmpArray[i]);
+  SetLength(BmpArray,0);
+  SetLength(FreeSpots,0);
   inherited Destroy;
 end;
 
@@ -314,7 +320,7 @@ end;
 destructor TMufasaBitmap.Destroy;
 begin
   if Assigned(FData) then
-    Freemem(FData,w*h*SizeOf(TRGB32));
+    Freemem(FData);
   inherited Destroy;
 end;
 
