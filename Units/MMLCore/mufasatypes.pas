@@ -6,7 +6,7 @@ interface
 
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,plugins;
 const
   DS = DirectorySeparator;
 var
@@ -28,6 +28,8 @@ type
   TPointArray = array of TPoint;
   TVariantArray = Array of Variant;
   TIntegerArray = Array of Integer;
+var
+  PluginsGlob : TMPlugins;
 
 implementation
 

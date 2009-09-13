@@ -29,7 +29,6 @@ type
       procedure OnThreadTerminate(Sender: TObject);
       procedure Execute; override;
     public
-      Plugins : TMPlugins;
       Client : TClient;
       procedure SetPSScript(Script : string);
       procedure SetDebug( Strings : TSynMemo );
@@ -100,9 +99,6 @@ constructor TMMLPSThread.Create(CreateSuspended : boolean);
 begin
   SetLength(PluginsToLoad,0);
   Client := TClient.Create;
-  Plugins := TMPlugins.Create;
-  Plugins.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
-
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
@@ -131,7 +127,6 @@ begin
   SetLength(PluginsToLoad,0);
   Client.Free;
   PSScript.Free;
-  Plugins.Free;
   inherited;
 end;
 
@@ -153,7 +148,7 @@ begin
   if DirectiveName= 'LOADDLL' then
     if DirectiveParam <> '' then
     begin;
-      TempNum := Plugins.LoadPlugin(DirectiveParam);
+      TempNum := PluginsGlob.LoadPlugin(DirectiveParam);
       if TempNum < 0 then
         Writeln(Format('Your DLL %s has not been found',[DirectiveParam]))
       else
@@ -173,9 +168,9 @@ var
   i,ii : integer;
 begin
   for i := high(PluginsToLoad) downto 0 do
-    for ii := 0 to Plugins.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
-      PSScript.AddFunction(Plugins.MPlugins[PluginsToLoad[i]].Methods[i].FuncPtr,
-                           Plugins.MPlugins[PluginsToLoad[i]].Methods[i].FuncStr);
+    for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
+      PSScript.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[i].FuncPtr,
+                           PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[i].FuncStr, cdStdCall);
   // Here we add all the functions to the engine.
   {$I PSInc/pscompile.inc}
 end;
