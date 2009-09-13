@@ -32,6 +32,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 1
+    BookMarkOptions.OnChange = nil
     Gutter.Width = 61
     Gutter.MouseActions = <    
       item
@@ -728,6 +729,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 2
+    BookMarkOptions.OnChange = nil
     Gutter.Width = 61
     Gutter.MouseActions = <    
       item

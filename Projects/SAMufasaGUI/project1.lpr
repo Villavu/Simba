@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, LResources, Window, files, MufasaTypes, Client, TestUnit, finder,
-  MMLThread, mmlpsthread, bitmaps;
+  MMLThread, mmlpsthread, bitmaps, colour_conv;
 
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
