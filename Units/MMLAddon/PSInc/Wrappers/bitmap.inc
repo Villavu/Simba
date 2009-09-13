@@ -42,3 +42,48 @@ function CreateMirroredBitmap(Bmp : integer) : integer;
 begin;
   Result := CurrThread.Client.MBitmaps.CreateMirroredBitmap(Bmp);
 end;
+
+function FastGetPixel(bmp,x,y : integer) : LongWord;
+begin;
+  Result := CurrThread.Client.MBitmaps.Bmp[Bmp].FastGetPixel(x,y);
+end;
+
+function FastGetPixels(bmp : integer; TPA : TPointArray) : TIntegerArray;
+begin;
+  result := CurrThread.Client.MBitmaps.Bmp[Bmp].FastGetPixels(TPA);
+end;
+
+procedure FastSetPixel(Bmp,x,y : integer; Color : TColor);
+begin
+  CurrThread.Client.MBitmaps.Bmp[bmp].FastSetPixel(x,y,color);
+end;
+
+procedure FastSetPixels(Bmp : integer; TPA : TPointArray; Colors : TIntegerArray);
+begin;
+  CurrThread.Client.MBitmaps.Bmp[Bmp].FastSetPixels(TPA,Colors);
+end;
+
+procedure FastDrawClear(bmp : integer; Color : TColor);
+begin;
+  CurrThread.Client.MBitmaps.Bmp[bmp].FastDrawClear(Color);
+end;
+
+procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer);
+begin;
+  CurrThread.Client.MBitmaps.Bmp[SourceBitmap].FastDrawTransparent(x,y,CurrThread.Client.MBitmaps.Bmp[TargetBitmap]);
+end;
+
+procedure SetTransparentColor(Bmp : integer; Color : TColor);
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bmp].SetTransparentColor(Color);
+end;
+
+function GetTransparentColor(Bmp : integer) : TColor;
+begin;
+  Result := CurrThread.Client.MBitmaps.Bmp[bmp].GetTransparentColor;
+end;
+
+procedure FastReplaceColor(bmp: Integer; OldColor, NewColor: TColor);
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bmp].FastReplaceColor(OldColor,NewColor);
+end;

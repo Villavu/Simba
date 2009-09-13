@@ -24,6 +24,7 @@ type
   TMousePress = (mouse_Down, mouse_Up);
   TPointArray = array of TPoint;
   TVariantArray = Array of Variant;
+  TIntegerArray = Array of Integer;
 
 implementation
 
