@@ -1,0 +1,42 @@
+program new;
+var
+   x,y,w,h,i,j,t,t2:integer;
+begin
+  getclientdimensions(w,h);
+  writeln(inttostr(w) + ', ' + inttostr(h));     
+
+
+  for i := 0 to 2 do
+  begin
+    setcolortolerancespeed(i);
+    t := getsystemtime;
+	for j := 0 to 100 do
+    findcolortolerance(x, y, 255, 0, 0, w, h, 40);
+    t2 := getsystemtime;
+    writeln('Time for 101 tries: ' + inttostr(t2 - t) + ' ms.');
+    writeln('That is ' + FloatToStr((t2 - t) / 101) + ' ms each.');
+
+    if findcolortolerance(x, y, 255, 0, 0, w, h, 40) then
+    begin
+      writeln('CTS: ' + inttostr(I) + '; Found the colour at (' + inttostr(x) + ', ' +
+      inttostr(y) + ')');
+      movemouse(x, y);
+      wait(1000);
+    end else
+      writeln('not found');
+  end;
+end.
+
+Compiled succesfully in 7 ms.
+826, 597
+Time for 101 tries: 1143 ms.
+That is 11.316831683168 ms each.
+not found
+Time for 101 tries: 2565 ms.
+That is 25.396039603960 ms each.
+not found
+Time for 101 tries: 3799 ms.
+That is 37.613861386139 ms each.
+not found
+Succesfully executed
+

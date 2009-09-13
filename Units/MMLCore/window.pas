@@ -242,7 +242,7 @@ end;
 // Also thread bugged
 function TMWindow.CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
 var
-   w,h : Integer;
+   w,h: Integer;
    ww, hh: Integer;
    Raw: TRawImage;
    Bmp: TBitmap;
@@ -250,6 +250,7 @@ var
    Old_Handler: TXErrorHandler;
    Img: PXImage;
    {$ENDIF}
+
 
 begin
   Self.GetDimensions(w, h);
@@ -262,6 +263,7 @@ begin
     writeln('Faulty coordinates');
     exit;
   end;
+
 
     case Self.TargetMode Of
        w_Window:

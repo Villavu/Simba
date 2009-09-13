@@ -78,6 +78,7 @@ begin;
   end;
 end;
 
+
 {
   Note to Raymond: For PascalScript, Create it on the .Create,
   Execute it on the .Execute, and don't forget to Destroy it on .Destroy.
@@ -99,6 +100,7 @@ end;
 constructor TMMLPSThread.Create(CreateSuspended : boolean);
 begin
   Client := TClient.Create;
+
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
@@ -130,8 +132,10 @@ begin
 end;
 
 // include PS wrappers
+{$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 {$I PSInc/Wrappers/colour.inc}
+{$I PSInc/Wrappers/mouse.inc}
 
 
 
