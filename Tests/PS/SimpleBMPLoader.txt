@@ -134,9 +134,9 @@ begin
    GetBitmapSize(bmpz,w,h);
    Writeln(inttostr(w) + '-' + inttostr(h));
    SetBitmapSize(Bmpz,w div 2, h div 2);
-   SaveBitmap(Bmpz,'c:\Test.bmp');
-   FreeBitmap(Bmpz);
-   Bmpz := LoadBitmap('c:\Test.bmp');
+   SaveBitmap(Bmpz,'/tmp/test.bmp');
+   //FreeBitmap(Bmpz);
+   Bmpz := LoadBitmap('/tmp/test.bmp');
    SetBitmapSize(bmpz,w,h);
-   SaveBitmap(Bmpz,'c:\Test2.bmp');
+   SaveBitmap(Bmpz,'/tmp/test2.bmp');
 end.
