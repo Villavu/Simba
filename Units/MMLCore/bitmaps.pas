@@ -22,8 +22,8 @@ type
     procedure LoadFromFile(const FileName : string);
     constructor Create;
     destructor Destroy;override;
-
   end;
+
   TMufasaBmpArray = Array of TMufasaBitmap;
   { TMBitmaps }
   TMBitmaps = class(TObject)
@@ -60,7 +60,7 @@ begin
 end;
 
 function TMBitmaps.CreateBMP(w,h : integer): Integer;
-begin;
+begin
   if BmpsCurr < BmpsHigh then
   begin;
     inc(BmpsCurr);
@@ -85,7 +85,7 @@ var
   w,h : integer;
   y,x : integer;
   Source,Dest : PRGB32;
-begin;
+begin
   Source := Bmp[Bitmap].FData;
   w := BmpArray[Bitmap].Width;
   h := BmpArray[Bitmap].Height;
@@ -116,7 +116,7 @@ var
   DestPoint, Point : PByte;
   LazIntf  : TLazIntfImage;
 
-begin;
+begin
   Result := CreateBMP(width,height);
   if (Data <> '') and (Length(Data) <> 6) then
   begin;
@@ -197,7 +197,7 @@ begin;
 end;
 
 procedure TMBitmaps.FreeBMP(Number: integer);
-begin;
+begin
   if Number = BmpsCurr then
     Dec(BmpsCurr)
   else
@@ -267,7 +267,7 @@ end;
 
 { TMufasaBitmap }
 function Min(a,b:integer) : integer;
-begin;
+begin
   if a < b then
     result := a
   else
