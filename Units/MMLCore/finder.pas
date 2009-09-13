@@ -210,23 +210,17 @@ begin
       Inc(Ptr, PtrInc);
     end;
   end;
-  TClient(Client).MWindow.FreeReturnData;
   Result := False;
+  TClient(Client).MWindow.FreeReturnData;
   Exit;
 
   Hit:
-       Result := True;
-       x := xx;
-       y := yy;
 
-       TClient(Client).MWindow.FreeReturnData;
-       Exit;
+    Result := True;
+    x := xx;
+    y := yy;
 
-   Miss:
-      Inc(Ptr);
-
-  Result := True;
-  TClient(Client).MWindow.FreeReturnData;
+    TClient(Client).MWindow.FreeReturnData;
 end;
 
 end.
