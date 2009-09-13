@@ -75,7 +75,7 @@ procedure x64call(
   out _RAX: IPointer;
   _RDI, _RSI, _RDX, _RCX, _R8, _R9: IPointer;
   var _XMM0: Double;
-  _XMM1, _XMM2, _XMM3, _XMM4, _XMM5, _XMM6, _XMM7: Double;
+  var _XMM1, _XMM2, _XMM3, _XMM4, _XMM5, _XMM6, _XMM7: Double;
   aStack: Pointer; aItems: Integer); assembler; nostackframe;
 
 

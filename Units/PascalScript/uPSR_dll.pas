@@ -19,7 +19,7 @@ uses
   {$IFDEF Darwin}
   LCLIntf, Unix, baseunix, dynlibs, termio, sockets;
   {$ELSE}
-  LibC{$IFNDEF FPC}, Windows{$ENDIF};
+  dl;{$IFNDEF FPC}, Windows{$ENDIF}
   {$ENDIF}
   {$ELSE}
   Windows;
