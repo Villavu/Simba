@@ -7,7 +7,10 @@ interface
 
 uses
   Classes, SysUtils;
-
+const
+  DS = DirectorySeparator;
+var
+  MainDir : string;
 type
   TRGB32 = packed record
     B, G, R, A: Byte;
@@ -18,7 +21,7 @@ type
     Ptr : PRGB32;
     IncPtrWith : integer;
   end;
-
+  TBmpMirrorStyle = (MirrorWidth,MirrorHeight,MirrorLine); //LineMirror is in line x=y;
   TTargetWindowMode = (w_BMP, w_Window, w_HDC, w_ArrayPtr, w_XWindow);
   TClickType = (mouse_Left, mouse_Right, mouse_Middle);
   TMousePress = (mouse_Down, mouse_Up);

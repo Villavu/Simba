@@ -40,7 +40,12 @@ end;
 
 function CreateMirroredBitmap(Bmp : integer) : integer;
 begin;
-  Result := CurrThread.Client.MBitmaps.CreateMirroredBitmap(Bmp);
+  Result := CurrThread.Client.MBitmaps.CreateMirroredBitmap(Bmp, MirrorWidth);
+end;
+
+function CreateMirroredBitmapEx(Bmp : integer; MirrorStyle : TBmpMirrorStyle) : integer;
+begin;
+  Result := CurrThread.Client.MBitmaps.CreateMirroredBitmap(Bmp,MirrorStyle);
 end;
 
 function FastGetPixel(bmp,x,y : integer) : LongWord;

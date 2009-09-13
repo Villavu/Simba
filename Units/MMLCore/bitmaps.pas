@@ -49,7 +49,7 @@ type
     function GetBMP(Index : integer) : TMufasaBitmap;
     property Bmp[Index : integer]: TMufasaBitmap read GetBMP;
     function CreateBMP(w, h: integer): Integer;
-    function CreateMirroredBitmap(bitmap: Integer): Integer;
+    function CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer;
     function CreateBMPFromFile(const Path : string) : integer;
     function CreateBMPFromString(width,height : integer; Data : string) : integer;
     procedure FreeBMP( Number : integer);
@@ -106,7 +106,8 @@ begin
   BmpArray[Result].Index:= Result;
 end;
 
-function TMBitmaps.CreateMirroredBitmap(bitmap: Integer): Integer;
+function TMBitmaps.CreateMirroredBitmap(bitmap: Integer;
+  MirrorStyle: TBmpMirrorStyle): Integer;
 var
   w,h : integer;
   y,x : integer;
@@ -115,11 +116,22 @@ begin
   Source := Bmp[Bitmap].FData;
   w := BmpArray[Bitmap].Width;
   h := BmpArray[Bitmap].Height;
-  Result := CreateBMP(w,h);
+  if MirrorStyle = MirrorLine then
+    Result := CreateBMP(h,w)
+  else
+    Result := CreateBMP(w,h);
   Dest := BmpArray[Result].FData;
-  for y := (h-1) downto 0 do
-    for x := (w-1) downto 0 do
-      Dest[y*w+x] := Source[y*w+w-1-x];
+  case MirrorStyle of
+    MirrorWidth :  for y := (h-1) downto 0 do
+                     for x := (w-1) downto 0 do
+                       Dest[y*w+x] := Source[y*w+w-1-x];
+    MirrorHeight : for y := (h-1) downto 0 do
+                    Move(Source[y*w],Dest[(h-1 - y) * w],w*SizeOf(TRGB32));
+    MirrorLine :  for y := (h-1) downto 0 do
+                     for x := (w-1) downto 0 do
+                       Dest[x*h+y] := Source[y*w+x];
+
+  end;
 //Can be optmized, this is just proof of concept
 end;
 
