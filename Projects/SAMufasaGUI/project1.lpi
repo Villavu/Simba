@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="2"/>
+      <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -377,7 +377,7 @@
         <Filename Value="../../Units/MMLCore/finder.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="finder"/>
-        <CursorPos X="3" Y="290"/>
+        <CursorPos X="3" Y="289"/>
         <TopLine Value="269"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="57"/>
@@ -409,7 +409,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="65" Y="139"/>
-        <TopLine Value="225"/>
+        <TopLine Value="139"/>
         <EditorIndex Value="8"/>
         <UsageCount Value="53"/>
         <Loaded Value="True"/>
@@ -752,8 +752,8 @@
       <Unit100>
         <Filename Value="../../Units/PascalScript/uPSRuntime.pas"/>
         <UnitName Value="uPSRuntime"/>
-        <CursorPos X="11" Y="1815"/>
-        <TopLine Value="1820"/>
+        <CursorPos X="54" Y="1887"/>
+        <TopLine Value="1875"/>
         <EditorIndex Value="2"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
