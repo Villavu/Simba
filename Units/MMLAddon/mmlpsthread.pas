@@ -5,20 +5,20 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,SynMemo;
+  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,SynMemo,Plugins,uPSPreProcessor;
 
 type
 
     { TMMLPSThread }
 
     TMMLPSThread = class(TThread)
+      procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
+        Parser: TPSPascalPreProcessorParser; const Active: Boolean;
+        const DirectiveName, DirectiveParam: string; var Continue: Boolean);
     protected
-//      PSScript : TPSScript;
-//      PSClient : TPSScript;
-//        Client: TClient;
-//      DebugTo : TStrings;
       PSScript : TPSScript;
       DebugTo : TSynMemo;
+      PluginsToload : Array of integer;
       procedure OnCompile(Sender: TPSScript);
       procedure AfterExecute(Sender : TPSScript);
       function RequireFile(Sender: TObject; const OriginFileName: String;
@@ -29,11 +29,10 @@ type
       procedure OnThreadTerminate(Sender: TObject);
       procedure Execute; override;
     public
+      Plugins : TMPlugins;
       Client : TClient;
       procedure SetPSScript(Script : string);
       procedure SetDebug( Strings : TSynMemo );
-//      function CompilePSScript : boolean;
-//      function
       constructor Create(CreateSuspended: Boolean);
       destructor Destroy; override;
     end;
@@ -99,12 +98,15 @@ end;
 
 constructor TMMLPSThread.Create(CreateSuspended : boolean);
 begin
+  SetLength(PluginsToLoad,0);
   Client := TClient.Create;
+  Plugins := TMPlugins.Create;
+  Plugins.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
 
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
-
+  PSScript.OnProcessUnknowDirective:=@PSScriptProcessUnknowDirective;
   PSScript.OnCompile:= @OnCompile;
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
@@ -126,8 +128,10 @@ end;
 
 destructor TMMLPSThread.Destroy;
 begin
+  SetLength(PluginsToLoad,0);
   Client.Free;
   PSScript.Free;
+  Plugins.Free;
   inherited;
 end;
 
@@ -139,13 +143,39 @@ end;
 
 
 
+procedure TMMLPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
+  Parser: TPSPascalPreProcessorParser; const Active: Boolean;
+  const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+var
+  TempNum : integer;
+  I,II : integer;
+begin
+  if DirectiveName= 'LOADDLL' then
+    if DirectiveParam <> '' then
+    begin;
+      TempNum := Plugins.LoadPlugin(DirectiveParam);
+      if TempNum < 0 then
+        Writeln(Format('Your DLL %s has not been found',[DirectiveParam]))
+      else
+      begin;
+        for i := High(PluginsToLoad) downto 0 do
+          if PluginsToLoad[i] = TempNum then
+            Exit;
+        SetLength(PluginsToLoad,Length(PluginsToLoad)+1);
+        PluginsToLoad[High(PluginsToLoad)] := TempNum;
+      end;
+    end;
+  Continue:= True;
+end;
 
 procedure TMMLPSThread.OnCompile(Sender: TPSScript);
+var
+  i,ii : integer;
 begin
-  //Here we add all the initalizing, of BMPArray etc
-
-  // ^ This will all be done with Client.Create;
-
+  for i := high(PluginsToLoad) downto 0 do
+    for ii := 0 to Plugins.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
+      PSScript.AddFunction(Plugins.MPlugins[PluginsToLoad[i]].Methods[i].FuncPtr,
+                           Plugins.MPlugins[PluginsToLoad[i]].Methods[i].FuncStr);
   // Here we add all the functions to the engine.
   {$I PSInc/pscompile.inc}
 end;
