@@ -25,7 +25,7 @@ type
         procedure DefaultOperations(var x1,y1,x2,y2 : integer);
       public
           procedure SetToleranceSpeed(nCTS: Integer);
-
+          function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
           // Possibly turn x, y into a TPoint var.
           function FindColor(var x, y: Integer; Color, x1, y1, x2, y2: Integer): Boolean;
           function FindColorTolerance(var x, y: Integer; Color, x1, y1, x2, y2, tol: Integer): Boolean;
@@ -65,9 +65,31 @@ end;
 
 procedure TMFinder.SetToleranceSpeed(nCTS: Integer);
 begin
-  if (CTS < 0) or (CTS > 2) then
-    cts := 1;
+  if (nCTS < 0) or (nCTS > 2) then
+    raise Exception.CreateFmt('The given CTS ([%d]) is invalid.',[nCTS]);
   Self.CTS := nCTS;
+end;
+
+function TMFinder.SimilarColors(Color1, Color2,Tolerance: Integer) : boolean;
+var
+  R1,G1,B1,R2,G2,B2 : Byte;
+  H1,S1,L1,H2,S2,L2 : extended;
+begin
+  Result := False;
+  ColorToRGB(Color1,R1,G1,B1);
+  ColorToRGB(Color2,R2,G2,B2);
+  if Color1 = Color2 then
+    Result := true
+  else
+  case CTS of
+  0: Result := ((Abs(R1-R2) <= Tolerance) and (Abs(G1-G2) <= Tolerance) and (Abs(B1-B2) <= Tolerance));
+  1: Result := (Sqrt(sqr(R1-R2) + sqr(G1-G2) + sqr(B1-B2)) <= Tolerance);
+  2: begin
+       RGBToHSL(R1,g1,b1,H1,S1,L1);
+       RGBToHSL(R2,g2,b2,H2,S2,L2);
+       Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
+     end;
+  end;
 end;
 
 procedure TMFinder.UpdateCachedValues(NewWidth, NewHeight: integer);
@@ -184,7 +206,8 @@ begin
       begin
          if ((abs(clR-Ptr^.R) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clG-Ptr^.B) <= Tol)) then
             goto Hit;
-         end;
+        inc(Ptr);
+      end;
       Inc(Ptr, PtrInc);
     end;
 
@@ -195,6 +218,7 @@ begin
       begin
          if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
             goto Hit;
+        inc(ptr);
       end;
       Inc(Ptr, PtrInc);
     end;
@@ -206,6 +230,7 @@ begin
          RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
          if ((abs(H1 - H2) <= (hueMod * tol)) and (abs(S1 - S2) <= (satMod * tol)) and (abs(L1 - L2) <= Tol)) then
             goto Hit;
+        inc(Ptr);
       end;
       Inc(Ptr, PtrInc);
     end;
@@ -215,11 +240,9 @@ begin
   Exit;
 
   Hit:
-
     Result := True;
     x := xx;
     y := yy;
-
     TClient(Client).MWindow.FreeReturnData;
 end;
 
