@@ -281,14 +281,14 @@ begin
       end;
       Inc(Ptr);
     end;
-    Inc(Ptr, PtrInc)
+    Inc(Ptr, PtrInc);
   end;
 
   SetLength(TPA, I);
 
-  //Move(ClientTPA[0], TPA[0], i * SizeOf(TPoint));
-  for xx := 0 to I do
-    TPA[I] := ClientTPA[I];
+  Move(ClientTPA[0], TPA[0], i * SizeOf(TPoint));
+ { for xx := 0 to I - 1 do
+    TPA[xx] := ClientTPA[xx];}
   Result := I > 0;
 
   TClient(Client).MWindow.FreeReturnData;
