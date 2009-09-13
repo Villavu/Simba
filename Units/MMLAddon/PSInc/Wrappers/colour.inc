@@ -12,3 +12,8 @@ procedure SetColorToleranceSpeed(cts: Integer);
 begin
   CurrThread.Client.MFinder.SetToleranceSpeed(cts);
 end;
+
+function SimilarColors(Col1,Col2,Tol : integer) : boolean;
+begin;
+  Result := CurrThread.Client.MFinder.SimilarColors(Col1,Col2,Tol);
+end;
