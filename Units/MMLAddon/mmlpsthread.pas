@@ -57,9 +57,12 @@ threadvar
 {Some General PS Functions here}
 procedure psWriteln(str : string);
 begin
+  {$IFNDEF MSWINDOWS}
   writeln(str);
-  {if CurrThread.DebugTo <> nil then
-    CurrThread.DebugTo.Lines.Add(Str);  }
+  {$ELSE}
+  if CurrThread.DebugTo <> nil then
+    CurrThread.DebugTo.Lines.Add(Str);
+  {$ENDIF}
   //Just overwriting itz.. soz.
 end;
 
@@ -95,20 +98,7 @@ end;
 
 constructor TMMLPSThread.Create(CreateSuspended : boolean);
 begin
-  {if Client <> nil then
-    Writeln('ThreadClient seems to be set, so not recreating it.') //reset client to defaults?
-    //ThreadClient.ResetToDefaults
-  else  }
-
-  // ^ Every time a script is compiled, a new thread is created. There will no
-  // existing client left. I commented the above code out.
   Client := TClient.Create;
-
- { if PSScript <> nil then
-    PSScript.Free;      }
-  // ^ Same, makes no sense. :-)
-
-  // Create Stuff here
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
@@ -139,8 +129,11 @@ begin
 end;
 
 // include PS wrappers
+{$I PSInc/Wrappers/bitmap.inc}
 
 {$I PSInc/Wrappers/colour.inc}
+
+
 
 
 procedure TMMLPSThread.OnCompile(Sender: TPSScript);
@@ -196,7 +189,7 @@ begin
   b := False;
   for l := 0 to PSScript.CompilerMessageCount - 1 do
   begin
-    Writeln(PSScript.CompilerErrorToStr(l));
+    psWriteln(PSScript.CompilerErrorToStr(l));
     if (not b) and (PSScript.CompilerMessages[l] is TIFPSPascalCompilerError) then
     begin
       b := True;
@@ -216,22 +209,22 @@ begin;
     if PSScript.Compile then
     begin
       OutputMessages;
-      Writeln('Compiled succesfully in ' + IntToStr(GetTickCount - time) + ' ms.');
+      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - time) + ' ms.');
 //      if not (ScriptState = SCompiling) then
         if not PSScript.Execute then
         begin
 //          FormMain.CurrSynEdit.SelStart := Script.PSScript.ExecErrorPosition;
-          Writeln(PSScript.ExecErrorToString +' at '+Inttostr(PSScript.ExecErrorProcNo)+'.'
+          psWriteln(PSScript.ExecErrorToString +' at '+Inttostr(PSScript.ExecErrorProcNo)+'.'
                   +Inttostr(PSScript.ExecErrorByteCodePosition));
-        end else Writeln('Succesfully executed');
+        end else psWriteln('Succesfully executed');
     end else
     begin
       OutputMessages;
-      Writeln('Compiling failed');
+      psWriteln('Compiling failed');
     end;
   except
      on E : Exception do
-       Writeln('Error: ' + E.Message);
+       psWriteln('Error: ' + E.Message);
   end;
 end;
 

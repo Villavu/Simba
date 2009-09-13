@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="7"/>
+      <ActiveEditorIndexAtStart Value="5"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -33,15 +33,15 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="69">
+    <Units Count="92">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="13" Y="17"/>
+        <CursorPos X="34" Y="11"/>
         <TopLine Value="1"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="76"/>
+        <UsageCount Value="90"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -51,117 +51,117 @@
         <UnitName Value="TestUnit"/>
         <CursorPos X="33" Y="57"/>
         <TopLine Value="32"/>
-        <UsageCount Value="55"/>
+        <UsageCount Value="53"/>
       </Unit1>
       <Unit2>
         <Filename Value="client.pas"/>
         <UnitName Value="Client"/>
         <CursorPos X="18" Y="34"/>
         <TopLine Value="10"/>
-        <UsageCount Value="55"/>
+        <UsageCount Value="53"/>
       </Unit2>
       <Unit3>
         <Filename Value="../cogat/Units/CogatUnits/comptypes.pas"/>
         <UnitName Value="CompTypes"/>
         <CursorPos X="13" Y="531"/>
         <TopLine Value="523"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="20"/>
       </Unit3>
       <Unit4>
         <Filename Value="mufasatypes.pas"/>
         <UnitName Value="MufasaTypes"/>
         <CursorPos X="52" Y="20"/>
         <TopLine Value="1"/>
-        <UsageCount Value="55"/>
+        <UsageCount Value="53"/>
       </Unit4>
       <Unit5>
         <Filename Value="window.pas"/>
         <UnitName Value="Window"/>
         <CursorPos X="4" Y="100"/>
         <TopLine Value="85"/>
-        <UsageCount Value="55"/>
+        <UsageCount Value="53"/>
       </Unit5>
       <Unit6>
         <Filename Value="../Documents/fpc/rtl/inc/systemh.inc"/>
         <CursorPos X="3" Y="261"/>
         <TopLine Value="246"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit6>
       <Unit7>
         <Filename Value="input.pas"/>
         <UnitName Value="Input"/>
         <CursorPos X="5" Y="20"/>
         <TopLine Value="15"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="52"/>
       </Unit7>
       <Unit8>
         <Filename Value="../cogat/Units/CogatUnits/compinput.pas"/>
         <UnitName Value="CompInput"/>
         <CursorPos X="43" Y="250"/>
         <TopLine Value="236"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="18"/>
       </Unit8>
       <Unit9>
         <Filename Value="Units/MMLCore/client.pas"/>
         <UnitName Value="Client"/>
         <CursorPos X="46" Y="8"/>
         <TopLine Value="1"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="22"/>
       </Unit9>
       <Unit10>
         <Filename Value="Units/MMLCore/input.pas"/>
         <UnitName Value="Input"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="22"/>
       </Unit10>
       <Unit11>
         <Filename Value="Units/MMLCore/mufasatypes.pas"/>
         <UnitName Value="MufasaTypes"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="22"/>
       </Unit11>
       <Unit12>
         <Filename Value="Units/MMLCore/window.pas"/>
         <UnitName Value="Window"/>
         <CursorPos X="69" Y="254"/>
         <TopLine Value="251"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="22"/>
       </Unit12>
       <Unit13>
         <Filename Value="Units/MMLCore/windowutil.pas"/>
         <UnitName Value="windowutil"/>
         <CursorPos X="54" Y="20"/>
         <TopLine Value="20"/>
-        <UsageCount Value="47"/>
+        <UsageCount Value="45"/>
       </Unit13>
       <Unit14>
         <Filename Value="../Documents/lazarus/lcl/graphics.pp"/>
         <UnitName Value="Graphics"/>
         <CursorPos X="15" Y="1287"/>
         <TopLine Value="1272"/>
-        <UsageCount Value="17"/>
+        <UsageCount Value="15"/>
       </Unit14>
       <Unit15>
         <Filename Value="../cogat/Units/CogatUnits/compbitmaps.pas"/>
         <UnitName Value="CompBitmaps"/>
         <CursorPos X="1" Y="109"/>
         <TopLine Value="92"/>
-        <UsageCount Value="17"/>
+        <UsageCount Value="15"/>
       </Unit15>
       <Unit16>
         <Filename Value="../Documents/lazarus/lcl/include/rasterimage.inc"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="691"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit16>
       <Unit17>
         <Filename Value="../Documents/fpc/packages/x11/src/xlib.pp"/>
         <UnitName Value="xlib"/>
         <CursorPos X="47" Y="1272"/>
         <TopLine Value="1257"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="10"/>
       </Unit17>
       <Unit18>
         <Filename Value="testunit.pas"/>
@@ -170,10 +170,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="5" Y="275"/>
-        <TopLine Value="265"/>
-        <EditorIndex Value="7"/>
-        <UsageCount Value="42"/>
+        <CursorPos X="24" Y="264"/>
+        <TopLine Value="250"/>
+        <EditorIndex Value="6"/>
+        <UsageCount Value="56"/>
         <Loaded Value="True"/>
       </Unit18>
       <Unit19>
@@ -181,40 +181,40 @@
         <UnitName Value="CompColors"/>
         <CursorPos X="44" Y="914"/>
         <TopLine Value="897"/>
-        <UsageCount Value="15"/>
+        <UsageCount Value="13"/>
       </Unit19>
       <Unit20>
         <Filename Value="../Documents/fpc/packages/x11/src/x.pp"/>
         <UnitName Value="x"/>
         <CursorPos X="4" Y="179"/>
         <TopLine Value="164"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit20>
       <Unit21>
         <Filename Value="../Documents/fpc/rtl/unix/aliasctp.inc"/>
         <CursorPos X="63" Y="45"/>
         <TopLine Value="30"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit21>
       <Unit22>
         <Filename Value="../cogat/Units/CogatUnits/compdragger.pas"/>
         <UnitName Value="CompDragger"/>
         <CursorPos X="33" Y="14"/>
         <TopLine Value="6"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit22>
       <Unit23>
         <Filename Value="../Documents/lazarus/lcl/lcltype.pp"/>
         <UnitName Value="LCLType"/>
         <CursorPos X="9" Y="99"/>
         <TopLine Value="83"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit23>
       <Unit24>
         <Filename Value="testunit.lfm"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
         <SyntaxHighlighter Value="LFM"/>
       </Unit24>
       <Unit25>
@@ -222,100 +222,100 @@
         <UnitName Value="Unix"/>
         <CursorPos X="63" Y="63"/>
         <TopLine Value="56"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit25>
       <Unit26>
         <Filename Value="../Compilertje/Units/CogatUnits/compinput.pas"/>
         <UnitName Value="CompInput"/>
         <CursorPos X="6" Y="462"/>
         <TopLine Value="449"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="10"/>
       </Unit26>
       <Unit27>
         <Filename Value="../FPC/FPCCheckout/rtl/win/wininc/func.inc"/>
         <CursorPos X="10" Y="663"/>
         <TopLine Value="635"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="9"/>
       </Unit27>
       <Unit28>
         <Filename Value="../Compilertje/Units/CogatUnits/comptypes.pas"/>
         <UnitName Value="CompTypes"/>
         <CursorPos X="13" Y="418"/>
         <TopLine Value="402"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="9"/>
       </Unit28>
       <Unit29>
         <Filename Value="../Compilertje/Units/CogatUnits/compcolors.pas"/>
         <UnitName Value="CompColors"/>
         <CursorPos X="12" Y="603"/>
         <TopLine Value="573"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="9"/>
       </Unit29>
       <Unit30>
         <Filename Value="../lazarus/lcl/graphics.pp"/>
         <UnitName Value="Graphics"/>
         <CursorPos X="15" Y="1283"/>
         <TopLine Value="1270"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="9"/>
       </Unit30>
       <Unit31>
         <Filename Value="../lazarus/lcl/include/rasterimage.inc"/>
         <CursorPos X="20" Y="351"/>
         <TopLine Value="339"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="9"/>
       </Unit31>
       <Unit32>
         <Filename Value="../lazarus/lcl/intfgraphics.pas"/>
         <UnitName Value="IntfGraphics"/>
         <CursorPos X="3" Y="3251"/>
         <TopLine Value="3245"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit32>
       <Unit33>
         <Filename Value="../../Documents/fpc/packages/fcl-image/src/fpcanvas.pp"/>
         <UnitName Value="FPCanvas"/>
         <CursorPos X="23" Y="257"/>
         <TopLine Value="142"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit33>
       <Unit34>
         <Filename Value="../../Documents/fpc/packages/fcl-image/src/fpimage.pp"/>
         <UnitName Value="FPimage"/>
         <CursorPos X="3" Y="58"/>
         <TopLine Value="43"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit34>
       <Unit35>
         <Filename Value="../../Documents/fpc/packages/fcl-image/src/fpimage.inc"/>
         <CursorPos X="24" Y="25"/>
         <TopLine Value="1"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit35>
       <Unit36>
         <Filename Value="../../Documents/lazarus/lcl/graphics.pp"/>
         <UnitName Value="Graphics"/>
         <CursorPos X="88" Y="2395"/>
         <TopLine Value="2388"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit36>
       <Unit37>
         <Filename Value="../../Units/MMLCore/client.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Client"/>
-        <CursorPos X="46" Y="4"/>
+        <CursorPos X="73" Y="23"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="4"/>
-        <UsageCount Value="41"/>
+        <EditorIndex Value="5"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit37>
       <Unit38>
         <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="MufasaTypes"/>
-        <CursorPos X="4" Y="26"/>
+        <CursorPos X="27" Y="19"/>
         <TopLine Value="1"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit38>
       <Unit39>
@@ -323,26 +323,26 @@
         <UnitName Value="compFiles"/>
         <CursorPos X="18" Y="8"/>
         <TopLine Value="1"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="23"/>
       </Unit39>
       <Unit40>
         <Filename Value="../../Units/MMLCore/files.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="files"/>
-        <CursorPos X="3" Y="48"/>
-        <TopLine Value="19"/>
-        <EditorIndex Value="5"/>
-        <UsageCount Value="42"/>
+        <CursorPos X="25" Y="64"/>
+        <TopLine Value="30"/>
+        <EditorIndex Value="10"/>
+        <UsageCount Value="56"/>
         <Loaded Value="True"/>
       </Unit40>
       <Unit41>
         <Filename Value="../../Units/MMLCore/window.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Window"/>
-        <CursorPos X="53" Y="163"/>
-        <TopLine Value="151"/>
-        <EditorIndex Value="6"/>
-        <UsageCount Value="41"/>
+        <CursorPos X="40" Y="263"/>
+        <TopLine Value="263"/>
+        <EditorIndex Value="11"/>
+        <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit41>
       <Unit42>
@@ -350,30 +350,30 @@
         <UnitName Value="Forms"/>
         <CursorPos X="15" Y="1236"/>
         <TopLine Value="981"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit42>
       <Unit43>
         <Filename Value="../../../cogat/Units/CogatUnits/comptypes.pas"/>
         <UnitName Value="CompTypes"/>
         <CursorPos X="80" Y="9"/>
         <TopLine Value="1"/>
-        <UsageCount Value="15"/>
+        <UsageCount Value="13"/>
       </Unit43>
       <Unit44>
         <Filename Value="../../Units/MMLCore/windowutil.pas"/>
         <UnitName Value="windowutil"/>
-        <CursorPos X="39" Y="19"/>
-        <TopLine Value="9"/>
-        <UsageCount Value="15"/>
+        <CursorPos X="96" Y="86"/>
+        <TopLine Value="75"/>
+        <EditorIndex Value="12"/>
+        <UsageCount Value="18"/>
+        <Loaded Value="True"/>
       </Unit44>
       <Unit45>
         <Filename Value="../../Units/MMLCore/input.pas"/>
         <UnitName Value="Input"/>
         <CursorPos X="3" Y="90"/>
         <TopLine Value="59"/>
-        <EditorIndex Value="8"/>
-        <UsageCount Value="14"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="16"/>
       </Unit45>
       <Unit46>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
@@ -382,15 +382,17 @@
         <CursorPos X="27" Y="65"/>
         <TopLine Value="41"/>
         <EditorIndex Value="2"/>
-        <UsageCount Value="34"/>
+        <UsageCount Value="48"/>
         <Loaded Value="True"/>
       </Unit46>
       <Unit47>
         <Filename Value="../../../lazarus/lcl/graphics.pp"/>
         <UnitName Value="Graphics"/>
-        <CursorPos X="17" Y="2298"/>
-        <TopLine Value="2282"/>
-        <UsageCount Value="10"/>
+        <CursorPos X="17" Y="1353"/>
+        <TopLine Value="1341"/>
+        <EditorIndex Value="21"/>
+        <UsageCount Value="15"/>
+        <Loaded Value="True"/>
       </Unit47>
       <Unit48>
         <Filename Value="../../Units/MMLAddon/mmlthread.pas"/>
@@ -398,22 +400,22 @@
         <UnitName Value="MMLThread"/>
         <CursorPos X="132" Y="5"/>
         <TopLine Value="1"/>
-        <UsageCount Value="32"/>
+        <UsageCount Value="46"/>
       </Unit48>
       <Unit49>
         <Filename Value="../../../Documents/fpc/rtl/objpas/classes/classesh.inc"/>
         <CursorPos X="27" Y="1430"/>
         <TopLine Value="1422"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit49>
       <Unit50>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="18" Y="153"/>
-        <TopLine Value="141"/>
-        <EditorIndex Value="9"/>
-        <UsageCount Value="30"/>
+        <CursorPos X="31" Y="132"/>
+        <TopLine Value="107"/>
+        <EditorIndex Value="7"/>
+        <UsageCount Value="44"/>
         <Loaded Value="True"/>
       </Unit50>
       <Unit51>
@@ -421,45 +423,43 @@
         <UnitName Value="uPSComponent"/>
         <CursorPos X="21" Y="193"/>
         <TopLine Value="183"/>
-        <EditorIndex Value="12"/>
-        <UsageCount Value="16"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="18"/>
       </Unit51>
       <Unit52>
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/classes/classesh.inc"/>
-        <CursorPos X="29" Y="1437"/>
-        <TopLine Value="1409"/>
-        <UsageCount Value="14"/>
+        <CursorPos X="30" Y="260"/>
+        <TopLine Value="244"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="15"/>
+        <Loaded Value="True"/>
       </Unit52>
       <Unit53>
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/types.pp"/>
         <UnitName Value="types"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="10"/>
       </Unit53>
       <Unit54>
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/typinfo.pp"/>
         <UnitName Value="typinfo"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="10"/>
       </Unit54>
       <Unit55>
         <Filename Value="../../Units/PascalScript/uPSC_forms.pas"/>
         <UnitName Value="uPSC_forms"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="11"/>
-        <UsageCount Value="15"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="17"/>
       </Unit55>
       <Unit56>
         <Filename Value="project1.lrs"/>
         <CursorPos X="70" Y="41"/>
-        <TopLine Value="10"/>
+        <TopLine Value="7"/>
         <EditorIndex Value="1"/>
-        <UsageCount Value="15"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit56>
       <Unit57>
@@ -467,205 +467,377 @@
         <UnitName Value="LResources"/>
         <CursorPos X="3" Y="1396"/>
         <TopLine Value="1396"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="10"/>
       </Unit57>
       <Unit58>
         <Filename Value="../../../lazarus/components/synedit/synmemo.pas"/>
         <UnitName Value="SynMemo"/>
         <CursorPos X="16" Y="150"/>
         <TopLine Value="31"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit58>
       <Unit59>
         <Filename Value="../../../lazarus/components/synedit/syneditmiscclasses.pp"/>
         <UnitName Value="SynEditMiscClasses"/>
         <CursorPos X="29" Y="100"/>
         <TopLine Value="92"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit59>
       <Unit60>
         <Filename Value="../../../lazarus/components/synedit/synedit.pp"/>
         <UnitName Value="SynEdit"/>
         <CursorPos X="22" Y="1531"/>
         <TopLine Value="1523"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit60>
       <Unit61>
         <Filename Value="../../../lazarus/components/synedit/syngutterchanges.pas"/>
         <UnitName Value="SynGutterChanges"/>
         <CursorPos X="34" Y="126"/>
         <TopLine Value="118"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit61>
       <Unit62>
         <Filename Value="../../../lazarus/components/synedit/syneditlines.pas"/>
         <UnitName Value="SynEditLines"/>
         <CursorPos X="21" Y="48"/>
         <TopLine Value="40"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit62>
       <Unit63>
         <Filename Value="../../../lazarus/components/synedit/synedittextbase.pas"/>
         <UnitName Value="SynEditTextBase"/>
         <CursorPos X="3" Y="75"/>
         <TopLine Value="124"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit63>
       <Unit64>
         <Filename Value="../../Units/PascalScript/uPSC_std.pas"/>
         <UnitName Value="uPSC_std"/>
         <CursorPos X="35" Y="8"/>
         <TopLine Value="1"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit64>
       <Unit65>
         <Filename Value="../../Units/PascalScript/uPSC_controls.pas"/>
         <UnitName Value="uPSC_controls"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="11"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit65>
       <Unit66>
         <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
-        <CursorPos X="64" Y="4"/>
+        <CursorPos X="31" Y="10"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="10"/>
-        <UsageCount Value="11"/>
+        <EditorIndex Value="8"/>
+        <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit66>
       <Unit67>
         <Filename Value="../../../FPC/FPCCheckout/rtl/win/tthread.inc"/>
         <CursorPos X="15" Y="17"/>
         <TopLine Value="12"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="9"/>
       </Unit67>
       <Unit68>
         <Filename Value="../../../FPC/FPCCheckout/rtl/inc/objpash.inc"/>
         <CursorPos X="21" Y="184"/>
-        <TopLine Value="156"/>
-        <UsageCount Value="11"/>
+        <TopLine Value="167"/>
+        <UsageCount Value="14"/>
       </Unit68>
+      <Unit69>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="bitmaps"/>
+        <CursorPos X="33" Y="84"/>
+        <TopLine Value="74"/>
+        <EditorIndex Value="14"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpcanvas.pp"/>
+        <UnitName Value="FPCanvas"/>
+        <CursorPos X="96" Y="409"/>
+        <TopLine Value="188"/>
+        <UsageCount Value="10"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/colour.inc"/>
+        <CursorPos X="35" Y="9"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="11"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/bitmap.inc"/>
+        <IsPartOfProject Value="True"/>
+        <CursorPos X="13" Y="43"/>
+        <TopLine Value="9"/>
+        <EditorIndex Value="9"/>
+        <UsageCount Value="33"/>
+        <Loaded Value="True"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpcanvas.inc"/>
+        <CursorPos X="16" Y="20"/>
+        <TopLine Value="18"/>
+        <UsageCount Value="9"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/examples/drawing.pp"/>
+        <UnitName Value="Drawing"/>
+        <CursorPos X="20" Y="19"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="9"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpimgcanv.pp"/>
+        <UnitName Value="FPImgCanv"/>
+        <CursorPos X="32" Y="23"/>
+        <TopLine Value="13"/>
+        <UsageCount Value="9"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fppixlcanv.pp"/>
+        <UnitName Value="FPPixlCanv"/>
+        <CursorPos X="3" Y="31"/>
+        <TopLine Value="32"/>
+        <UsageCount Value="9"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpimage.pp"/>
+        <UnitName Value="FPimage"/>
+        <CursorPos X="17" Y="129"/>
+        <TopLine Value="112"/>
+        <EditorIndex Value="15"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpimage.inc"/>
+        <CursorPos X="3" Y="44"/>
+        <TopLine Value="40"/>
+        <EditorIndex Value="16"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="../../../lazarus/lcl/lclintf.pas"/>
+        <UnitName Value="LCLIntf"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="11"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="../../../lazarus/lcl/intfgraphics.pas"/>
+        <UnitName Value="IntfGraphics"/>
+        <CursorPos X="84" Y="1334"/>
+        <TopLine Value="1334"/>
+        <EditorIndex Value="19"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="../../../lazarus/lcl/graphtype.pp"/>
+        <UnitName Value="GraphType"/>
+        <CursorPos X="19" Y="634"/>
+        <TopLine Value="630"/>
+        <EditorIndex Value="13"/>
+        <UsageCount Value="15"/>
+        <Loaded Value="True"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpcolors.inc"/>
+        <CursorPos X="24" Y="21"/>
+        <TopLine Value="12"/>
+        <UsageCount Value="9"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fppalette.inc"/>
+        <CursorPos X="3" Y="19"/>
+        <TopLine Value="4"/>
+        <UsageCount Value="9"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fphandler.inc"/>
+        <CursorPos X="18" Y="268"/>
+        <TopLine Value="241"/>
+        <UsageCount Value="11"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpwritebmp.pp"/>
+        <UnitName Value="FPWriteBMP"/>
+        <CursorPos X="28" Y="722"/>
+        <TopLine Value="698"/>
+        <UsageCount Value="11"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="../../../lazarus/lcl/include/rasterimage.inc"/>
+        <CursorPos X="3" Y="571"/>
+        <TopLine Value="567"/>
+        <UsageCount Value="11"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="../../../lazarus/lcl/include/custombitmap.inc"/>
+        <CursorPos X="3" Y="98"/>
+        <TopLine Value="96"/>
+        <EditorIndex Value="22"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="../../../Compilertje/Units/CogatUnits/compmaths.pas"/>
+        <UnitName Value="CompMaths"/>
+        <CursorPos X="26" Y="43"/>
+        <TopLine Value="14"/>
+        <UsageCount Value="10"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/math.pp"/>
+        <UnitName Value="math"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="20"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="../../../FPC/FPCCheckout/rtl/inc/systemh.inc"/>
+        <CursorPos X="11" Y="513"/>
+        <TopLine Value="496"/>
+        <EditorIndex Value="17"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="../../../FPC/FPCCheckout/rtl/i386/fastmove.inc"/>
+        <CursorPos X="44" Y="836"/>
+        <TopLine Value="817"/>
+        <EditorIndex Value="18"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit91>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="125" Column="16" TopLine="95"/>
+        <Caret Line="132" Column="31" TopLine="106"/>
       </Position1>
       <Position2>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="15" Column="46" TopLine="15"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="107" Column="21" TopLine="100"/>
       </Position2>
       <Position3>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="131" Column="49" TopLine="95"/>
+        <Filename Value="../../../lazarus/lcl/intfgraphics.pas"/>
+        <Caret Line="274" Column="64" TopLine="251"/>
       </Position3>
       <Position4>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="125" Column="39" TopLine="110"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="30" Column="43" TopLine="28"/>
       </Position4>
       <Position5>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="129" Column="41" TopLine="123"/>
+        <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
+        <Caret Line="20" Column="12" TopLine="1"/>
       </Position5>
       <Position6>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="125" Column="22" TopLine="117"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="37" Column="54" TopLine="19"/>
       </Position6>
       <Position7>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="31" Column="17" TopLine="23"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="85" Column="5" TopLine="51"/>
       </Position7>
       <Position8>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="126" Column="13" TopLine="85"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="80" Column="26" TopLine="63"/>
       </Position8>
       <Position9>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="124" Column="7" TopLine="94"/>
+        <Caret Line="145" Column="17" TopLine="123"/>
       </Position9>
       <Position10>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="136" Column="6" TopLine="94"/>
+        <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
+        <Caret Line="8" Column="30" TopLine="1"/>
       </Position10>
       <Position11>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="20" Column="19" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="36" Column="60" TopLine="22"/>
       </Position11>
       <Position12>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="132" Column="1" TopLine="128"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="94" Column="67" TopLine="76"/>
       </Position12>
       <Position13>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="39" Column="36" TopLine="24"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="230" Column="5" TopLine="196"/>
       </Position13>
       <Position14>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="134" Column="43" TopLine="126"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="234" Column="22" TopLine="212"/>
       </Position14>
       <Position15>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="37" Column="57" TopLine="27"/>
+        <Filename Value="../../../lazarus/lcl/intfgraphics.pas"/>
+        <Caret Line="3242" Column="48" TopLine="3238"/>
       </Position15>
       <Position16>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="80" Column="29" TopLine="72"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="234" Column="9" TopLine="209"/>
       </Position16>
       <Position17>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="119" Column="42" TopLine="111"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="229" Column="19" TopLine="212"/>
       </Position17>
       <Position18>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="157" Column="36" TopLine="149"/>
+        <Filename Value="../../../lazarus/lcl/intfgraphics.pas"/>
+        <Caret Line="274" Column="64" TopLine="245"/>
       </Position18>
       <Position19>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="13" Column="132" TopLine="9"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="109" Column="39" TopLine="106"/>
       </Position19>
       <Position20>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="80" Column="73" TopLine="72"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="247" Column="36" TopLine="230"/>
       </Position20>
       <Position21>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="44" Column="31" TopLine="9"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="223" Column="68" TopLine="201"/>
       </Position21>
       <Position22>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="203" Column="39" TopLine="187"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="225" Column="21" TopLine="202"/>
       </Position22>
       <Position23>
-        <Filename Value="../../Units/MMLCore/client.pas"/>
-        <Caret Line="30" Column="19" TopLine="1"/>
+        <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpimage.inc"/>
+        <Caret Line="194" Column="23" TopLine="168"/>
       </Position23>
       <Position24>
-        <Filename Value="../../Units/MMLCore/client.pas"/>
-        <Caret Line="31" Column="18" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="219" Column="23" TopLine="196"/>
       </Position24>
       <Position25>
-        <Filename Value="../../Units/MMLCore/client.pas"/>
-        <Caret Line="32" Column="16" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="211" Column="60" TopLine="196"/>
       </Position25>
       <Position26>
-        <Filename Value="../../Units/MMLCore/client.pas"/>
-        <Caret Line="33" Column="16" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="230" Column="3" TopLine="206"/>
       </Position26>
       <Position27>
-        <Filename Value="../../Units/MMLCore/client.pas"/>
-        <Caret Line="30" Column="20" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="233" Column="3" TopLine="206"/>
       </Position27>
       <Position28>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="43" Column="32" TopLine="41"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="224" Column="60" TopLine="209"/>
       </Position28>
       <Position29>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="22" Column="54" TopLine="11"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="86" Column="5" TopLine="31"/>
       </Position29>
       <Position30>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="153" Column="18" TopLine="141"/>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <Caret Line="1" Column="38" TopLine="1"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
@@ -676,7 +848,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
-      <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/"/>
+      <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/;$(ProjPath)../../Units/Misc/"/>
     </SearchPaths>
     <CodeGeneration>
       <Optimizations>
