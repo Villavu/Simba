@@ -1,5 +1,11 @@
 unit plugins;
 
+{
+   Problems with SMART; you cannot free the plugin when smart is open..
+   Therefore, loading & free-ing plugins per script run is not an option.
+   Assigning a TMPlugin per Tab might be a do-able solution, but will still cope with the SMART Problems..
+   So the question is: Plugins Per Tab,Per Run or Global?
+}
 {$mode objfpc}{$H+}
 
 interface
@@ -56,6 +62,7 @@ begin
   begin;
     if (Plugins[i].dllHandle > 0) then
     try
+      Writeln(inttostr(I));
       FreeLibrary(Plugins[i].dllHandle);
     except
     end;

@@ -20,6 +20,7 @@ type
     SynMemo1: TSynMemo;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure SynMemo1Change(Sender: TObject);
   private
     { private declarations }
@@ -32,7 +33,7 @@ var
 
 implementation
 uses
-   lclintf;
+   lclintf,plugins;
 
 type
     TMyThread = class(TThread)
@@ -272,14 +273,21 @@ begin
 //  MMLPSThread.Client.MWindow.SetTarget();
   MMLPSThread.SetPSScript(SynEdit1.Lines.Text);
   MMLPSThread.SetDebug(SynMemo1);
-  //MMLPSThread.Client.MWindow.SetTarget(65052451);
+  MMLPSThread.Client.MWindow.SetTarget(67786,w_Window);
   MMLPSThread.Resume;
 
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  MainDir:= ExtractFileDir(Application.ExeName);
+  PluginsGlob := TMPlugins.Create;
+  PluginsGlob.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
+end;
 
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  PluginsGlob.Free;
 end;
 
 procedure TForm1.SynMemo1Change(Sender: TObject);
