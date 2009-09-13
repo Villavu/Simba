@@ -47,7 +47,7 @@ uses
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls, //Runtime-libs
-
+  Graphics, //For Graphics types
   lclintf; // for GetTickCount and others.
 
 
@@ -111,6 +111,7 @@ begin
   // Set some defines
   {$I PSInc/psdefines.inc}
 
+
   FreeOnTerminate := True;
   Self.OnTerminate := @Self.OnThreadTerminate;
   inherited Create(CreateSuspended);
@@ -130,7 +131,6 @@ end;
 
 // include PS wrappers
 {$I PSInc/Wrappers/bitmap.inc}
-
 {$I PSInc/Wrappers/colour.inc}
 
 
