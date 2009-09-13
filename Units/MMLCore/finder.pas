@@ -29,6 +29,8 @@ type
           // Possibly turn x, y into a TPoint var.
           function FindColor(var x, y: Integer; Color, x1, y1, x2, y2: Integer): Boolean;
           function FindColorTolerance(var x, y: Integer; Color, x1, y1, x2, y2, tol: Integer): Boolean;
+
+          function FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean;
       protected
         Client: TObject;
         CachedWidth, CachedHeight : integer;
@@ -244,6 +246,52 @@ begin
     x := xx;
     y := yy;
     TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean;
+var
+   PtrData: TRetData;
+   Ptr: PRGB32;
+   PtrInc: Integer;
+   dX, dY, clR, clG, clB, xx, yy, i: Integer;
+
+begin
+  DefaultOperations(x1,y1,x2,y2);
+
+  dX := x2 - x1;
+  dY := y2 - y1;
+
+  I := 0;
+
+  ColorToRGB(Color, clR, clG, clB);
+
+  PtrData := TClient(Client).MWindow.ReturnData(x1, y1, dX + 1, dY + 1);
+
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+
+  for yy := y1 to y2 do
+  begin;
+    for xx := x1 to x2 do
+    begin;
+      if (Ptr^.R = clR) and (Ptr^.G = clG) and (Ptr^.B = clB) then
+      begin
+        Self.ClientTPA[I] := Point(xx, yy);
+        Inc(I);
+      end;
+      Inc(Ptr);
+    end;
+    Inc(Ptr, PtrInc)
+  end;
+
+  SetLength(TPA, I);
+
+  //Move(ClientTPA[0], TPA[0], i * SizeOf(TPoint));
+  for xx := 0 to I do
+    TPA[I] := ClientTPA[I];
+  Result := I > 0;
+
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 end.
