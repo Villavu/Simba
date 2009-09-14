@@ -1,0 +1,9 @@
+program new;
+
+{.LoadDLL libsmart}
+
+
+begin
+  SmartSetup('http://world19.runescape.com/', 'plugin.js?param=o0,a1,m0', 765, 503);
+  Wait(5000);
+end.
