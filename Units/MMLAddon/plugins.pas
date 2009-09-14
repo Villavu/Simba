@@ -124,7 +124,9 @@ var
   PlugExt: String = {$IFDEF LINUX}'.so';{$ELSE}'.dll';{$ENDIF}
 begin
   ii := -1;
-  Result := -1;
+  result := -1;
+  if PluginDirs.Count = 0 then
+    Exit;
   ValidateDirs;
   PluginName := ExtractFileNameWithoutExt(PluginName);
   for i := 0 to PluginDirs.Count - 1 do
@@ -134,6 +136,8 @@ begin
         Raise Exception.CreateFmt('Plugin(%s) has been found multiple times',[PluginName]);
       ii := i;
     end;
+  if ii = -1 then
+    raise Exception.CreateFMT('Plugins(%s) has not been found',[PluginName]);
   for i := 0 to PluginLen - 1 do
     if Plugins[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
       Exit(i);
