@@ -242,17 +242,8 @@ end;
 
 procedure TMWindow.FreeReturnData;
 begin
-  if Self.TargetMode <> w_XWindow then
-  begin
-    raise Exception.createFMT('FreeReturnData - Image data must only ' +
-                               ' be freed with XGetImage', []);
-    exit;
-  end;
-  if FreezeState then
-  begin
-    raise Exception.createFMT('FreeReturnData called when Freeze = True', []);
-    exit;
-  end;
+  if (Self.TargetMode <> w_XWindow) or FreezeState then
+    Exit;
   {$IFDEF LINUX}
   if not Self.XImageFreed then
   begin
