@@ -110,16 +110,25 @@ begin
   if y1 > y2 then
     Swap(y1,y2);}
   if x1 < 0 then
-    x1 := 0;
+    // x1 := 0;
+    raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
+                              'correct x1: %d.', [x1]);
   if y1 < 0 then
-    y1 := 0;
+//    y1 := 0;
+    raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
+                              'correct y1: %d.', [y1]);
+
   TClient(Self.Client).MWindow.GetDimensions(w,h);
   if (w <> CachedWidth) or (h <> CachedHeight) then
     UpdateCachedValues(w,h);
   if x2 >= w then
-    x2 := w-1;
+//    x2 := w-1;
+    raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
+                              'correct x2: %d.', [x2]);
   if y2 >= h then
-    y2 := h-1;
+//    y2 := h-1;
+    raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
+                              'correct y2: %d.', [y2]);
 end;
 
 function TMFinder.FindColor(var x, y: Integer; Color, x1, y1, x2, y2: Integer): Boolean;
@@ -287,8 +296,7 @@ begin
   SetLength(TPA, I);
 
   Move(ClientTPA[0], TPA[0], i * SizeOf(TPoint));
- { for xx := 0 to I - 1 do
-    TPA[xx] := ClientTPA[xx];}
+
   Result := I > 0;
 
   TClient(Client).MWindow.FreeReturnData;
