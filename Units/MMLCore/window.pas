@@ -35,8 +35,22 @@ type
             function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
             function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 
+            {
+              Freeze Client Feature.
+              This will force the MWindow unit to Store the current Client's
+              data in whatever internal structure it will use, and returndata /
+              copyclienttobitmap will not renew this data until Unfreeze() is
+              called.
+            }
+
+            function Freeze: boolean;
+            function Unfreeze: boolean;
+
             constructor Create(Client: TObject);
             destructor Destroy; override;
+
+        private
+              FreezeState: Boolean;
         public
               // Client
               Client: TObject;
@@ -95,6 +109,8 @@ type
               ArrayPtr: PRGB32;
               ArraySize: TPoint;
 
+              property Frozen: boolean read FreezeState;
+
 
 
     end;
@@ -112,6 +128,9 @@ begin
   inherited Create;
 
   Self.Client := Client;
+
+
+  Self.FreezeState :=False;
 
   Self.ArrayPtr := nil;
   Self.ArraySize := Classes.Point(-1, -1);
@@ -202,12 +221,17 @@ begin
 
       XSetErrorHandler(Old_Handler);
       {$ELSE}
-        WriteLn('Windows doesn''t support XImage');
+      raise Exception.createFMT('ReturnData: You cannot use ' +
+                                'the XImage mode on Windows.', []);
       {$ENDIF}
     end;
     w_ArrayPtr:
     begin
+      // Copy the pointer as we will perform operations on it.
       TmpData := Self.ArrayPtr;
+
+      // Increase the pointer to the specified start of the data.
+
       Inc(TmpData, ys * Height + xs);
       Result.Ptr := TmpData;
       Result.IncPtrWith:= Self.ArraySize.x - width;
@@ -220,7 +244,13 @@ procedure TMWindow.FreeReturnData;
 begin
   if Self.TargetMode <> w_XWindow then
   begin
-    // throw exception.
+    raise Exception.createFMT('FreeReturnData - Image data must only ' +
+                               ' be freed with XGetImage', []);
+    exit;
+  end;
+  if FreezeState then
+  begin
+    raise Exception.createFMT('FreeReturnData called when Freeze = True', []);
     exit;
   end;
   {$IFDEF LINUX}
@@ -235,11 +265,41 @@ begin
   {$ENDIF}
 end;
 
+// This will draw the ENTIRE client to a bitmap.
+// And ReturnData / CopyClientToBitmap will always use this bitmap.
+// They must NEVER update, unless Unfreeze is called.
+
+// I am not entirely sure how to do this, yet.
+// Best option for now seems to copy the entire data to a PRGB32,
+// and use it like the ArrPtr mode.
+
+// I currently added "Frozen", "FreezeState", "Freeze" and "Unfreeze".
+// We will have to either "abuse" the current system, and set the client to
+// PtrArray mode, or edit in some extra variables.
+// (We will still need extra variables to remember the old mode,
+// to which we will switch back with Unfreeze.)
+
+// Several ways to do it, what's the best way?
+
+// Also, should a box be passed to Freeze, or should we just copy the entire
+// client?
+
+function TMWindow.Freeze: Boolean;
+begin
+  Self.FreezeState:=True;
+  raise Exception.createFMT('Freeze: Not yet implemented.', []);
+end;
+
+function TMWindow.Unfreeze: Boolean;
+begin
+  Self.FreezeState:=False;
+  raise Exception.createFMT('Unfreeze: Not yet implemented.', []);
+end;
 
 // Bugged. For params other than 0, 0, ClientWidth, ClientHeight
 // if other type than w_XImage
 
-// Also thread bugged
+// Also possibly thread bugged
 function TMWindow.CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
 var
    w,h: Integer;
@@ -297,11 +357,25 @@ begin
          XDestroyImage(Img);
          XSetErrorHandler(Old_Handler);
          {$ELSE}
-         writeln('Windows and tXWindow');
+         raise Exception.createFMT('CopyClientToBitmap: You cannot use ' +
+                                    'the XImage mode on Windows.', []);
          {$ENDIF}
        end;
        w_ArrayPtr:
        begin
+         // Will only work if the coords are 0, 0, w, h.
+         // Otherwise, we will need to perform mem copy/move operations.
+         // Copy it to a XImage-alike structure,
+         // then pass it to ArrDataToRawImage.
+
+         // Basically, Copy the data slices from the array into a XImage,
+         // where the data IS aligned.
+
+         raise Exception.createFMT('Array Data to Bitmap not yet fully ' +
+                                   'implemented', []);
+         Result := nil;
+         exit;
+
 
          ArrDataToRawImage(Self.ArrayPtr, Self.ArraySize, Raw);
 
@@ -378,7 +452,8 @@ begin
       end;
       XSetErrorHandler(Old_Handler);
       {$ELSE}
-      WriteLn('You dummy! How are you going to use w_XWindow on non Linux systems?');
+       raise Exception.createFMT('GetDimensions: You cannot use ' +
+                                 'the XImage mode on Windows.', []);
       {$ENDIF}
     end;
     w_ArrayPtr:
@@ -405,7 +480,7 @@ function TMWindow.SetTarget(Window: THandle; NewType: TTargetWindowMode): intege
 begin
   if NewType in [ w_XWindow, w_ArrayPtr ] then
   begin
-    // throw exception
+    raise Exception.createFMT('SetTarget: Invalid new type.', []);
     Exit;
   end;
   case NewType of
