@@ -4,7 +4,7 @@ unit bitmaps;
 
 interface
 uses
-  Classes, SysUtils, FPImgCanv,FPImage,IntfGraphics,graphtype,MufasaTypes ,graphics;
+  Classes, SysUtils, FPImgCanv,FPImage,IntfGraphics,graphtype,MufasaTypes,window,graphics;
 
 type
 
@@ -33,6 +33,7 @@ type
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
+    procedure CopyClientToBitmap(MWindow : TMWindow; xs, ys, xe, ye: Integer);
     constructor Create;
     destructor Destroy;override;
   end;
@@ -402,6 +403,22 @@ begin
   for i := w*h-1 downto 0 do
     if LongWord(FData[i]) = LongWord(OldCol) then
       FData[i] := NewCol;
+end;
+
+procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TMWindow; xs, ys, xe, ye: Integer);
+var
+  wi,hi,y : integer;
+  PtrRet : TRetData;
+  Rows : integer;
+begin
+  Self.ValidatePoint(xs,ys);
+  Self.ValidatePoint(xe,ye);
+  wi := xe-xs + 1;
+  hi := ye-ys + 1;
+  PtrRet := MWindow.ReturnData(xs,ys,wi,hi);
+  for y := 0 to (hi-1) do
+    Move(PtrRet.Ptr[y * (wi + PtrRet.IncPtrWith)], FData[y * self.w],wi * SizeOf(TRGB32));
+  MWindow.FreeReturnData;
 end;
 
 constructor TMBitmaps.Create(Owner: TObject);

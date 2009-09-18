@@ -303,6 +303,7 @@ begin
   PtrReturn := Self.ReturnData(0,0,w,h);
   GetMem(Self.FrozenData, w * h * sizeof(TRGB32));
   Move(PtrReturn.Ptr[0], FrozenData[0], w*h*sizeof(TRGB32));
+  Self.FreeReturnData;
   Self.FreezeState:=True;
 end;
 
