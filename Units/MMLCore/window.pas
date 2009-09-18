@@ -20,6 +20,7 @@ type
     { TMWindow }
 
     TMWindow = class(TObject)
+      function GetColor(x,y : integer) : TColor;
             function ReturnData(xs, ys, width, height: Integer): TRetData;
             procedure FreeReturnData;
             procedure GetDimensions(var W, H: Integer);
@@ -181,6 +182,20 @@ begin
   DrawBitmap.Free;
   {$ENDIF}
   inherited;
+end;
+
+function TMWindow.GetColor(x, y: integer): TColor;
+begin
+  if Self.TargetMode = w_Window then
+    Result := GetPixel(Self.TargetDC,x,y)
+  else
+  begin
+    with ReturnData(x,y,1,1) do
+      Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
+    FreeReturnData;
+  end;
+
+
 end;
 
 function TMWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
