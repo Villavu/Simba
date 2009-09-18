@@ -27,3 +27,8 @@ function SimilarColors(Col1,Col2,Tol : integer) : boolean;
 begin;
   Result := CurrThread.Client.MFinder.SimilarColors(Col1,Col2,Tol);
 end;
+
+function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
+begin;
+  result := CurrThread.Client.MFinder.CountColorTolerance(color,xs,ys,xe,ye,tolerance);
+end;
