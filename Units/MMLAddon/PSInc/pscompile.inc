@@ -7,6 +7,7 @@ Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 Sender.AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 Sender.AddFunction(@psWriteln,'procedure writeln(s : string);');
 
+Sender.AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
 Sender.AddFunction(@FindColor, 'function findcolor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
 Sender.AddFunction(@FindColorTolerance, 'function findcolortolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
 Sender.AddFunction(@FindColors, 'function findcolors(var TPA: TPointArray; color, x1, y1, x2, y2: integer): boolean;');

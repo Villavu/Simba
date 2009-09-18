@@ -1,3 +1,8 @@
+function GetColor(x,y : integer) : TColor;
+begin;
+  Result := CurrThread.Client.MWindow.GetColor(x,y);
+end;
+
 function findcolor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean;
 begin
   Result := CurrThread.Client.MFinder.FindColor(x, y, color, x1, y1, x2, y2);
