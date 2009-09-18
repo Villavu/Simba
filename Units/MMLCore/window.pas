@@ -51,6 +51,8 @@ type
 
         private
               FreezeState: Boolean;
+              FrozenData : PRGB32;
+              FrozenSize : TPoint;
         public
               // Client
               Client: TObject;
@@ -129,7 +131,8 @@ begin
 
   Self.Client := Client;
 
-
+  Self.FrozenData:= nil;
+  Self.FrozenSize := Classes.Point(-1,-1);
   Self.FreezeState :=False;
 
   Self.ArrayPtr := nil;
@@ -167,7 +170,8 @@ end;
 
 destructor TMWindow.Destroy;
 begin
-
+  if FrozenData <> nil then
+    FreeMem(FrozenData);
   {$IFDEF LINUX}
   XCloseDisplay(Self.XDisplay);
   {$ENDIF}
@@ -185,8 +189,19 @@ var
    Old_Handler: TXErrorHandler;
 {$ENDIF}
    TmpData: PRGB32;
-
+   w,h : integer;
 begin
+  Self.GetDimensions(w,h);
+  if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
+    raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
+
+  if Self.Frozen then
+  begin;
+    TmpData := Self.FrozenData;
+    Inc(TmpData, ys * width + xs);
+    Result.Ptr:= tmpData;
+    Result.IncPtrWith:= Self.FrozenSize.x - width;
+  end else
   case Self.TargetMode of
     w_Window:
     begin
@@ -232,7 +247,7 @@ begin
 
       // Increase the pointer to the specified start of the data.
 
-      Inc(TmpData, ys * Height + xs);
+      Inc(TmpData, ys * width + xs);
       Result.Ptr := TmpData;
       Result.IncPtrWith:= Self.ArraySize.x - width;
 
@@ -276,15 +291,29 @@ end;
 // client?
 
 function TMWindow.Freeze: Boolean;
+var
+  w,h,x,y : integer;
+  PtrReturn : TRetData;
 begin
+  if Self.FreezeState then
+    raise Exception.CreateFMT('TMWindow.Freeze: The window is already frozen.',[]);
+  Result := true;
+  Self.GetDimensions(w,h);
+  Self.FrozenSize := Classes.Point(w,h);
+  PtrReturn := Self.ReturnData(0,0,w,h);
+  GetMem(Self.FrozenData, w * h * sizeof(TRGB32));
+  Move(PtrReturn.Ptr[0], FrozenData[0], w*h*sizeof(TRGB32));
   Self.FreezeState:=True;
-  raise Exception.createFMT('Freeze: Not yet implemented.', []);
 end;
 
 function TMWindow.Unfreeze: Boolean;
 begin
+  if Self.FreezeState = false then
+    raise Exception.CreateFMT('TMWindow.Unfreeze: The window is not frozen.',[]);
+  FreeMem(Self.FrozenData);
+  Self.FrozenData := nil;
+  Result := True;
   Self.FreezeState:=False;
-  raise Exception.createFMT('Unfreeze: Not yet implemented.', []);
 end;
 
 // Bugged. For params other than 0, 0, ClientWidth, ClientHeight
@@ -297,6 +326,8 @@ var
    ww, hh: Integer;
    Raw: TRawImage;
    Bmp: TBitmap;
+   y : integer;
+   TempData : PRGB32;
    {$IFDEF LINUX}
    Old_Handler: TXErrorHandler;
    Img: PXImage;
@@ -310,71 +341,71 @@ begin
   ww := xe-xs;
   hh := ye-ys;
   if(xs < 0) or (ys < 0) or (xe > W) or (ye > H) then
-  begin
-    writeln('Faulty coordinates');
-    exit;
+    Raise Exception.CreateFMT('CopyClientToBitmap TMWindow: Faulty coordinates (%d,%d)(%d,%d); Width/Height is (%d,%d)',[xs,ys,xe,ye,w,h]);
+  if Self.Frozen then
+  begin;
+    TempData:= GetMem((ww + 1) * (hh + 1) * sizeof(TRGB32));
+    for y := ys to ye do
+      Move(Self.FrozenData[y*Self.FrozenSize.x],TempData[(y-ys) * (ww+1)],(ww+1) * SizeOf(TRGB32));
+    ArrDataToRawImage(TempData,Classes.Point(ww + 1,hh + 1),Raw);
+    Bmp := TBitmap.Create;
+    Bmp.LoadFromRawImage(Raw,true);
+    Result := bmp;
+  end else
+  case Self.TargetMode Of
+     w_Window:
+     begin
+       {$IFDEF MSWINDOWS}
+       Result := TBitmap.Create;
+       Result.SetSize(ww+1,hh+1);
+       BitBlt(result.canvas.handle,0,0,ww+1,hh+1,
+              self.TargetDC,xs,ys, SRCCOPY);
+       {$ENDIF}
+     end;
+     w_XWindow:
+     begin
+       {$IFDEF LINUX}
+       Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+
+       Img := XGetImage(Self.XDisplay, Self.curWindow, xs, ys, ww, hh, AllPlanes, ZPixmap);
+       XImageToRawImage(Img, Raw);
+
+       Bmp := TBitmap.Create;
+       Bmp.LoadFromRawImage(Raw, False);
+       Result := Bmp;
+
+       {
+         If you want to use some internal Bitmap system, BitBlt to it here.
+         Don't forget to free Bmp!
+       }
+       //lclintf.BitBlt(Bmps[bitmap].Canvas.Handle, 0, 0, ww + 1, hh + 1, Bmp.Canvas.Handle, xs, ys, SRCCOPY);
+       //Bmp.Free;
+
+       XDestroyImage(Img);
+       XSetErrorHandler(Old_Handler);
+       {$ELSE}
+       raise Exception.createFMT('CopyClientToBitmap: You cannot use ' +
+                                  'the XImage mode on Windows.', []);
+       {$ENDIF}
+     end;
+     w_ArrayPtr:
+     begin
+       // Will only work if the coords are 0, 0, w, h.
+       // Otherwise, we will need to perform mem copy/move operations.
+       // Copy it to a XImage-alike structure,
+       // then pass it to ArrDataToRawImage.
+
+       // Basically, Copy the data slices from the array into a XImage,
+       // where the data IS aligned.
+        TempData:= GetMem((ww + 1) * (hh + 1) * sizeof(trgb32));
+        for y := ys to ye do
+          Move(Self.ArrayPtr[y*Self.ArraySize.x],TempData[(y-ys) * (ww+1)],(ww+1) * SizeOf(TRGB32));
+        ArrDataToRawImage(TempData,Classes.Point(ww+1,hh+1),Raw);
+        Bmp := TBitmap.Create;
+        Bmp.LoadFromRawImage(Raw,true);
+        Result := bmp;
+     end;
   end;
-
-
-    case Self.TargetMode Of
-       w_Window:
-       begin
-         {$IFDEF MSWINDOWS}
-         Result := TBitmap.Create;
-         Result.SetSize(ww+1,hh+1);
-         BitBlt(result.canvas.handle,0,0,ww+1,hh+1,
-                self.TargetDC,xs,ys, SRCCOPY);
-         {$ENDIF}
-       end;
-       w_XWindow:
-       begin
-         {$IFDEF LINUX}
-         Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
-
-         Img := XGetImage(Self.XDisplay, Self.curWindow, xs, ys, ww, hh, AllPlanes, ZPixmap);
-         XImageToRawImage(Img, Raw);
-
-         Bmp := TBitmap.Create;
-         Bmp.LoadFromRawImage(Raw, False);
-         Result := Bmp;
-
-         {
-           If you want to use some internal Bitmap system, BitBlt to it here.
-           Don't forget to free Bmp!
-         }
-         //lclintf.BitBlt(Bmps[bitmap].Canvas.Handle, 0, 0, ww + 1, hh + 1, Bmp.Canvas.Handle, xs, ys, SRCCOPY);
-         //Bmp.Free;
-
-         XDestroyImage(Img);
-         XSetErrorHandler(Old_Handler);
-         {$ELSE}
-         raise Exception.createFMT('CopyClientToBitmap: You cannot use ' +
-                                    'the XImage mode on Windows.', []);
-         {$ENDIF}
-       end;
-       w_ArrayPtr:
-       begin
-         // Will only work if the coords are 0, 0, w, h.
-         // Otherwise, we will need to perform mem copy/move operations.
-         // Copy it to a XImage-alike structure,
-         // then pass it to ArrDataToRawImage.
-
-         // Basically, Copy the data slices from the array into a XImage,
-         // where the data IS aligned.
-
-         raise Exception.createFMT('Array Data to Bitmap not yet fully ' +
-                                   'implemented', []);
-         Result := nil;
-         exit;
-
-
-         ArrDataToRawImage(Self.ArrayPtr, Self.ArraySize, Raw);
-
-         Bmp := TBitmap.Create;
-         Bmp.LoadFromRawImage(Raw, False);
-         Result := Bmp;
-       end;
-    end;
 end;
 
 procedure TMWindow.ActivateClient;
@@ -418,6 +449,11 @@ var
   Rect : TRect;
 {$ENDIF}
 begin
+  if Frozen then
+  begin;
+    w := FrozenSize.x;
+    h := FrozenSize.y;
+  end else
   case TargetMode of
     w_Window:
     begin
@@ -460,6 +496,8 @@ function TMWindow.SetTarget(XWindow: x.TWindow): integer; overload;
 var
    Old_Handler: TXErrorHandler;
 begin
+  if Self.Frozen then
+    raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   Self.CurWindow := XWindow;
   Self.TargetMode:= w_XWindow;
@@ -469,11 +507,10 @@ end;
 
 function TMWindow.SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
 begin
+  if Self.Frozen then
+    raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
   if NewType in [ w_XWindow, w_ArrayPtr ] then
-  begin
     raise Exception.createFMT('SetTarget: Invalid new type.', []);
-    Exit;
-  end;
   case NewType of
     w_Window :
     begin;
@@ -500,6 +537,8 @@ end;
 }
 function TMWindow.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 begin
+  if Self.Frozen then
+    raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
   If Self.TargetMode = w_XWindow then
     Self.FreeReturnData;
 
