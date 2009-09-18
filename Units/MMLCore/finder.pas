@@ -24,6 +24,7 @@ type
         Procedure UpdateCachedValues(NewWidth,NewHeight : integer);
         procedure DefaultOperations(var x1,y1,x2,y2 : integer);
       public
+          function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
           procedure SetToleranceSpeed(nCTS: Integer);
           function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
           // Possibly turn x, y into a TPoint var.
@@ -94,6 +95,23 @@ begin
   end;
 end;
 
+
+function ColorSame(var CTS,Tolerance : Integer; var R1,B1,G1,R2,G2,B2 : byte; var H1,S1,L1,huemod,satmod : extended) : boolean; inline;
+var
+  H2,S2,L2 : extended;
+begin
+  Result := False;
+  case CTS of
+  0: Result := ((Abs(R1-R2) <= Tolerance) and (Abs(G1-G2) <= Tolerance) and (Abs(B1-B2) <= Tolerance));
+  1: Result := (Sqrt(sqr(R1-R2) + sqr(G1-G2) + sqr(B1-B2)) <= Tolerance);
+  2: begin
+       RGBToHSL(R1,g1,b1,H1,S1,L1);
+       RGBToHSL(R2,g2,b2,H2,S2,L2);
+       Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
+     end;
+  end;
+end;
+
 procedure TMFinder.UpdateCachedValues(NewWidth, NewHeight: integer);
 begin
   CachedWidth := NewWidth;
@@ -129,6 +147,44 @@ begin
 //    y2 := h-1;
     raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
                               'correct y2: %d.', [y2]);
+end;
+
+function TMFinder.CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
+var
+   PtrData: TRetData;
+   Ptr: PRGB32;
+   PtrInc: Integer;
+   clR, clG, clB : byte;
+   dX, dY, xx, yy: Integer;
+   h,s,l,hmod,smod : extended;
+   Ccts : integer;
+begin
+  DefaultOperations(xs, ys, xe, ye);
+  dX := xe - xs;
+  dY := ye - ys;
+  ColorToRGB(Color, clR, clG, clB);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+  CCts := Self.CTS;
+  result := 0;
+  if cts = 2 then
+  begin;
+    RGBToHSL(clR,clG,clB,h,s,l);
+    hmod := Self.hueMod;
+    smod := Self.satMod;
+  end;
+  for yy := ys to ye do
+  begin;
+    for xx := xs to xe do
+    begin;
+      if ColorSame(CCts,Tolerance,clR,clG,clB,Ptr^.r,Ptr^.g,Ptr^.b,H,S,L,hmod,smod) then
+        inc(result);
+      Inc(Ptr);
+    end;
+    Inc(Ptr, PtrInc)
+  end;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColor(var x, y: Integer; Color, x1, y1, x2, y2: Integer): Boolean;
