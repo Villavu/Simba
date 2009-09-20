@@ -32,3 +32,8 @@ function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer
 begin;
   result := CurrThread.Client.MFinder.CountColorTolerance(color,xs,ys,xe,ye,tolerance);
 end;
+
+function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;
+begin;
+  result := CurrThread.Client.MFinder.FindColorsTolerance(points,color,xs,ys,xe,ye,tolerance);
+end;
