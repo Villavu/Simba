@@ -8,6 +8,12 @@ Sender.AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; va
 Sender.AddFunction(@psWriteln,'procedure writeln(s : string);');
 
 
+{maths}
+sender.AddFunction(@power,'function pow(base,exponent : extended) : extended');
+Sender.AddFunction(@max,'function Max(a, b: Integer): Integer;');
+Sender.AddFunction(@min,'function Min(a, b: Integer): Integer;');
+Sender.AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
+
 Sender.AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
 Sender.AddFunction(@FindColor, 'function findcolor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
 Sender.AddFunction(@FindColorTolerance, 'function findcolortolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');

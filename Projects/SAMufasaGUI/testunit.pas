@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, SynEdit, SynHighlighterPas, SynMemo, Client, MufasaTypes,
+  StdCtrls, Menus, SynEdit, SynHighlighterPas, SynMemo, Client, MufasaTypes,
   mmlpsthread, mmlthread;
 
 type
@@ -15,13 +15,16 @@ type
 
   TForm1 = class(TForm)
     Button1: TButton;
+    MainMenu1: TMainMenu;
+    Memo1: TMemo;
+    MenuItemScript: TMenuItem;
+    MenuItemRun: TMenuItem;
     SynEdit1: TSynEdit;
     SynFreePascalSyn1: TSynFreePascalSyn;
-    SynMemo1: TSynMemo;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure SynMemo1Change(Sender: TObject);
+    procedure MenuItemRunClick(Sender: TObject);
   private
     { private declarations }
   public
@@ -257,25 +260,20 @@ end;
 
 
 { TForm1 }
-
-procedure TForm1.Button1Click(Sender: TObject);
+procedure Run;
 Var
-   //MyThread: TMyThread;
-//   MMLThread: TMMLThread;
   MMLPSThread : TMMLPSThread;
 
 begin
-{  MyThread := TMyThread.Create(True);
-  MyThread.Resume;     }
-{  MMLThread := TMMLThread.Create(True);
-  MMLThread.Resume;}
   MMLPSThread := TMMLPSThread.Create(True);
-//  MMLPSThread.Client.MWindow.SetTarget();
-  MMLPSThread.SetPSScript(SynEdit1.Lines.Text);
-  MMLPSThread.SetDebug(SynMemo1);
-  MMLPSThread.Client.MWindow.SetTarget(67786,w_Window);
+  MMLPSThread.SetPSScript(Form1.SynEdit1.Lines.Text);
+  MMLPSThread.SetDebug(Form1.Memo1);
   MMLPSThread.Resume;
+end;
 
+procedure TForm1.Button1Click(Sender: TObject);
+begin;
+  Run;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -283,6 +281,7 @@ begin
   MainDir:= ExtractFileDir(Application.ExeName);
   PluginsGlob := TMPlugins.Create;
   PluginsGlob.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
+//  SynMemo1.sc
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -290,10 +289,11 @@ begin
   PluginsGlob.Free;
 end;
 
-procedure TForm1.SynMemo1Change(Sender: TObject);
+procedure TForm1.MenuItemRunClick(Sender: TObject);
 begin
-
+  Run;
 end;
+
 
 initialization
   {$I testunit.lrs}
