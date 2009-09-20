@@ -30,7 +30,7 @@ type
           // Possibly turn x, y into a TPoint var.
           function FindColor(var x, y: Integer; Color, x1, y1, x2, y2: Integer): Boolean;
           function FindColorTolerance(var x, y: Integer; Color, x1, y1, x2, y2, tol: Integer): Boolean;
-
+          function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
           function FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean;
       protected
         Client: TObject;
@@ -313,6 +313,85 @@ begin
     TClient(Client).MWindow.FreeReturnData;
 end;
 
+function TMFinder.FindColorsTolerance(var Points: TPointArray; Color, xs, ys,
+  xe, ye, Tol: Integer): Boolean;
+var
+   PtrData: TRetData;
+   Ptr: PRGB32;
+   PtrInc,C: Integer;
+   dX, dY, clR, clG, clB, xx, yy: Integer;
+   H1, S1, L1, H2, S2, L2: Extended;
+begin
+  DefaultOperations(xs,ys,xe,ye);
+
+  dX := xe - xs;
+  dY := ye - ys;
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+  ColorToHSL(Color, H1, S1, L1);
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+
+  // Do we want to "cache" these vars?
+  // We will, for now. Easier to type.
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+  c := 0;
+  case CTS of
+    0:
+    for yy := ys to ye do
+    begin
+      for xx := xs to xe do
+      begin
+         if ((abs(clR-Ptr^.R) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clG-Ptr^.B) <= Tol)) then
+         begin;
+           ClientTPA[c].x := xx;
+           ClientTPA[c].y := yy;
+           inc(c);
+         end;
+        inc(Ptr);
+      end;
+      Inc(Ptr, PtrInc);
+    end;
+
+    1:
+    for yy := ys to ye do
+    begin
+      for xx := xs to xe do
+      begin
+         if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
+         begin;
+           ClientTPA[c].x := xx;
+           ClientTPA[c].y := yy;
+           inc(c);
+         end;
+        inc(ptr);
+      end;
+      Inc(Ptr, PtrInc);
+    end;
+    2:
+    begin
+    for yy := ys to ye do
+      for xx := xs to xe do
+      begin
+         RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
+         if ((abs(H1 - H2) <= (hueMod * tol)) and (abs(S1 - S2) <= (satMod * tol)) and (abs(L1 - L2) <= Tol)) then
+         begin;
+           ClientTPA[c].x := xx;
+           ClientTPA[c].y := yy;
+           inc(c);
+         end;
+        inc(Ptr);
+      end;
+      Inc(Ptr, PtrInc);
+    end;
+  end;
+  SetLength(Points, C);
+  Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
+  Result := C > 0;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
 function TMFinder.FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean;
 var
    PtrData: TRetData;
@@ -341,7 +420,8 @@ begin
     begin;
       if (Ptr^.R = clR) and (Ptr^.G = clG) and (Ptr^.B = clB) then
       begin
-        Self.ClientTPA[I] := Point(xx, yy);
+        Self.ClientTPA[I].x := xx;
+        Self.ClientTPA[i].y := yy;
         Inc(I);
       end;
       Inc(Ptr);

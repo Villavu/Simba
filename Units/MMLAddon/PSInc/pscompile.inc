@@ -20,6 +20,7 @@ Sender.AddFunction(@FindColorTolerance, 'function findcolortolerance(var x, y: i
 Sender.AddFunction(@FindColors, 'function findcolors(var TPA: TPointArray; color, x1, y1, x2, y2: integer): boolean;');
 Sender.AddFunction(@SimilarColors,'function SimilarColors(Col1,Col2,Tolerance : integer) : boolean');
 Sender.AddFunction(@CountColorTolerance,'function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;');
+Sender.AddFunction(@FindColorsTolerance,'function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 
 Sender.AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 Sender.AddFunction(@GetMousePos, 'procedure GetMousePos(var x, y: integer);');
