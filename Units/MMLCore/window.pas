@@ -134,7 +134,7 @@ begin
 
   Self.FrozenData:= nil;
   Self.FrozenSize := Classes.Point(-1,-1);
-  Self.FreezeState :=False;
+  Self.FreezeState := False;
 
   Self.ArrayPtr := nil;
   Self.ArraySize := Classes.Point(-1, -1);
@@ -171,8 +171,9 @@ end;
 
 destructor TMWindow.Destroy;
 begin
-  if FrozenData <> nil then
-    FreeMem(FrozenData);
+  if FreezeState then
+    if FrozenData <> nil then
+      FreeMem(FrozenData);
   {$IFDEF LINUX}
   XCloseDisplay(Self.XDisplay);
   {$ENDIF}
@@ -186,16 +187,16 @@ end;
 
 function TMWindow.GetColor(x, y: integer): TColor;
 begin
+  {$IFDEF WINDOWS}
   if Self.TargetMode = w_Window then
     Result := GetPixel(Self.TargetDC,x,y)
   else
+  {$ENDIF}
   begin
     with ReturnData(x,y,1,1) do
       Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
     FreeReturnData;
   end;
-
-
 end;
 
 function TMWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
