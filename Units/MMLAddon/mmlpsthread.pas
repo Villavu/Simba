@@ -5,7 +5,7 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,SynMemo,Plugins,uPSPreProcessor;
+  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, Plugins,uPSPreProcessor;
 
 type
 
@@ -17,7 +17,7 @@ type
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
     protected
       PSScript : TPSScript;
-      DebugTo : TSynMemo;
+      DebugTo : TMemo;
       PluginsToload : Array of integer;
       procedure OnCompile(Sender: TPSScript);
       procedure AfterExecute(Sender : TPSScript);
@@ -31,7 +31,7 @@ type
     public
       Client : TClient;
       procedure SetPSScript(Script : string);
-      procedure SetDebug( Strings : TSynMemo );
+      procedure SetDebug( Strings : TMemo );
       constructor Create(CreateSuspended: Boolean);
       destructor Destroy; override;
     end;
@@ -46,6 +46,7 @@ uses
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
+  math, //Maths!
   lclintf; // for GetTickCount and others.
 
 
@@ -59,7 +60,8 @@ begin
   writeln(str);
   {$ELSE}
   if CurrThread.DebugTo <> nil then
-    CurrThread.DebugTo.Lines.Add(Str);
+    CurrThread.DebugTo.lines.add(str);
+
   {$ENDIF}
   //Just overwriting itz.. soz.
 end;
@@ -134,6 +136,7 @@ end;
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 {$I PSInc/Wrappers/colour.inc}
+{$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
 
 
@@ -262,7 +265,7 @@ begin
    PSScript.Script.Text:= Script;
 end;
 
-procedure TMMLPSThread.SetDebug(Strings: TSynMemo);
+procedure TMMLPSThread.SetDebug(Strings: TMemo);
 begin
   DebugTo := Strings;
 end;
