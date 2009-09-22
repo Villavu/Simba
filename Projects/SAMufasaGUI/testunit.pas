@@ -11,7 +11,8 @@ uses
   MufasaTypes,
   mmlpsthread,
   mmlthread,
-  window // for the comp picker and selector
+  window, // for the comp picker and selector
+  colourpicker
   ;
 
 type
@@ -45,10 +46,12 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure MenuItemRunClick(Sender: TObject);
+    procedure PickColorEvent(Sender: TObject);
   private
     { private declarations }
   public
     Window: TMWindow;
+    Picker: TMColorPicker;
       { public declarations }
   end; 
 
@@ -87,6 +90,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Window := TMWindow.Create;
+  Picker := TMColorPicker.Create(Window);
+
   MainDir:= ExtractFileDir(Application.ExeName);
   PluginsGlob := TMPlugins.Create;
   PluginsGlob.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
@@ -95,6 +100,7 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  Picker.Free;
   Window.Free;
   PluginsGlob.Free;
 end;
@@ -102,6 +108,14 @@ end;
 procedure TForm1.MenuItemRunClick(Sender: TObject);
 begin
   Run;
+end;
+
+procedure TForm1.PickColorEvent(Sender: TObject);
+var
+   c, x, y: Integer;
+begin
+  Picker.Pick(c, x, y);
+  writeln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
 
 
