@@ -47,7 +47,7 @@ type
             function Freeze: boolean;
             function Unfreeze: boolean;
 
-            constructor Create(Client: TObject);
+            constructor Create;
             destructor Destroy; override;
 
         private
@@ -55,9 +55,6 @@ type
               FrozenData : PRGB32;
               FrozenSize : TPoint;
         public
-              // Client
-              Client: TObject;
-
               // Target Window Mode.
               TargetMode: TTargetWindowMode;
 
@@ -126,11 +123,9 @@ uses
     GraphType // For TRawImage
     ;
 
-constructor TMWindow.Create(Client: TObject);
+constructor TMWindow.Create;
 begin
   inherited Create;
-
-  Self.Client := Client;
 
   Self.FrozenData:= nil;
   Self.FrozenSize := Classes.Point(-1,-1);

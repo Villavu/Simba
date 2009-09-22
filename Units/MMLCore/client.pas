@@ -29,7 +29,7 @@ constructor TClient.Create;
 begin
   inherited Create;
 
-  MWindow := TMWindow.Create(Self);
+  MWindow := TMWindow.Create;
   MInput := TMInput.Create(Self);
   MFiles := TMFiles.Create;
   MFinder := TMFinder.Create(Self);
