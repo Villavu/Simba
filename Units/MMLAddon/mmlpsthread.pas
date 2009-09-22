@@ -61,9 +61,7 @@ begin
   {$ELSE}
   if CurrThread.DebugTo <> nil then
     CurrThread.DebugTo.lines.add(str);
-
   {$ENDIF}
-  //Just overwriting itz.. soz.
 end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
