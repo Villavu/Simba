@@ -49,11 +49,12 @@ type
     { private declarations }
   public
     Window: TMWindow;
-    { public declarations }
+      { public declarations }
   end; 
 
 var
-  Form1: TForm1; 
+  Form1: TForm1;
+
 
 implementation
 uses
@@ -70,6 +71,11 @@ begin
   MMLPSThread := TMMLPSThread.Create(True);
   MMLPSThread.SetPSScript(Form1.SynEdit1.Lines.Text);
   MMLPSThread.SetDebug(Form1.Memo1);
+
+  // This doesn't actually set the Client's MWindow to the passed window, it
+  // only copies the current set window handle.
+  MMLPSThread.Client.MWindow.SetWindow(Form1.Window);
+
   MMLPSThread.Resume;
 end;
 

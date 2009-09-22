@@ -36,6 +36,8 @@ type
             function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
             function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 
+            procedure SetWindow(Window: TMWindow);
+
             {
               Freeze Client Feature.
               This will force the MWindow unit to Store the current Client's
@@ -178,6 +180,30 @@ begin
   DrawBitmap.Free;
   {$ENDIF}
   inherited;
+end;
+
+procedure TMWindow.SetWindow(Window: TMWindow);
+begin
+  case Window.TargetMode of
+    w_BMP, w_Window, w_HDC:
+        {$IFDEF WINDOWS}
+        Self.SetTarget(Window.TargetDC, Window.TargetMode);
+        {$ELSE}
+         writeln('TMWindow.SetWindow - HDC not supported');
+        {$ENDIF}
+
+    // I don't think array can ever be set at this point.
+    // Let's just add it anyway. ;)
+    w_ArrayPtr:
+        Self.SetTarget(Window.ArrayPtr, Window.ArraySize);
+
+    w_XWindow:
+        {$IFDEF LINUX}
+        Self.SetTarget(Window.CurWindow);
+        {$ELSE}
+        writeln('TMWindow.SetWindow - XImage not supported');
+        {$ENDIF}
+  end;
 end;
 
 function TMWindow.GetColor(x, y: integer): TColor;
