@@ -37,6 +37,7 @@ type
             function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 
             procedure SetWindow(Window: TMWindow);
+            procedure SetDesktop;
 
             {
               Freeze Client Feature.
@@ -204,6 +205,15 @@ begin
         writeln('TMWindow.SetWindow - XImage not supported');
         {$ENDIF}
   end;
+end;
+
+procedure TMWindow.SetDesktop;
+begin
+  {$IFDEF LINUX}
+  Self.SetTarget(Self.DesktopWindow);
+  {$ELSE}
+  Self.SetTarget(windows.GetDesktopWindow, w_Window);
+  {$ENDIF}
 end;
 
 function TMWindow.GetColor(x, y: integer): TColor;
