@@ -5,7 +5,7 @@ unit Client;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes, Window, Input, Files, Finder,Bitmaps;
+  Classes, SysUtils, MufasaTypes, Window, Input, Files, Finder, Bitmaps, dtm;
 
 type
     TClient = class(TObject)
@@ -18,6 +18,7 @@ type
             MFiles: TMFiles;
             MFinder: TMFinder;
             MBitmaps : TMBitmaps;
+            MDTM: TMDTM;
 
     end;
 
@@ -33,15 +34,18 @@ begin
   MFiles := TMFiles.Create;
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(self);
+  MDTM := MDTM.Create(self);
 end;
 
 destructor TClient.Destroy;
 begin
+  MDTM.Free;
   MBitmaps.Free;
   MFinder.Free;
   MFiles.Free;
   MInput.Free;
   MWindow.Free;
+
 
 
   inherited;
