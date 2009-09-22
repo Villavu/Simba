@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="7"/>
+      <ActiveEditorIndexAtStart Value="5"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -33,7 +33,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="116">
+    <Units Count="117">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -170,9 +170,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="47" Y="79"/>
-        <TopLine Value="65"/>
-        <EditorIndex Value="7"/>
+        <CursorPos X="81" Y="66"/>
+        <TopLine Value="57"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="88"/>
         <Loaded Value="True"/>
       </Unit18>
@@ -337,9 +337,9 @@
         <Filename Value="../../Units/MMLCore/window.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Window"/>
-        <CursorPos X="36" Y="59"/>
-        <TopLine Value="45"/>
-        <EditorIndex Value="9"/>
+        <CursorPos X="44" Y="28"/>
+        <TopLine Value="6"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="87"/>
         <Loaded Value="True"/>
       </Unit41>
@@ -408,7 +408,7 @@
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="32" Y="268"/>
         <TopLine Value="249"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="76"/>
         <Loaded Value="True"/>
       </Unit50>
@@ -539,7 +539,7 @@
         <UnitName Value="bitmaps"/>
         <CursorPos X="63" Y="428"/>
         <TopLine Value="419"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="9"/>
         <UsageCount Value="66"/>
         <Loaded Value="True"/>
       </Unit69>
@@ -754,7 +754,7 @@
         <UnitName Value="plugins"/>
         <CursorPos X="86" Y="128"/>
         <TopLine Value="128"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="10"/>
         <UsageCount Value="42"/>
         <Loaded Value="True"/>
       </Unit101>
@@ -840,20 +840,25 @@
         <UnitName Value="compDTM"/>
         <CursorPos X="1" Y="44"/>
         <TopLine Value="41"/>
-        <EditorIndex Value="5"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit114>
       <Unit115>
         <Filename Value="../../Units/MMLCore/dtm.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="dtm"/>
-        <CursorPos X="1" Y="32"/>
-        <TopLine Value="2"/>
-        <EditorIndex Value="6"/>
+        <CursorPos X="52" Y="15"/>
+        <TopLine Value="1"/>
         <UsageCount Value="23"/>
-        <Loaded Value="True"/>
       </Unit115>
+      <Unit116>
+        <Filename Value="../../../cogat/Units/CogatUnits/comppicker.pas"/>
+        <UnitName Value="CompPicker"/>
+        <CursorPos X="26" Y="111"/>
+        <TopLine Value="91"/>
+        <EditorIndex Value="6"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit116>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
@@ -974,7 +979,7 @@
       </Position29>
       <Position30>
         <Filename Value="../../Units/MMLCore/window.pas"/>
-        <Caret Line="50" Column="31" TopLine="31"/>
+        <Caret Line="50" Column="31" TopLine="35"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
