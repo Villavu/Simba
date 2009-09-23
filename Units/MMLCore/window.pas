@@ -384,8 +384,6 @@ var
 
 begin
   Self.GetDimensions(w, h);
-  writeln(inttostr(xs) + ', ' + inttostr(ys) + ' : ' + inttostr(xe) + ', ' +
-          inttostr(ye));
   ww := xe-xs;
   hh := ye-ys;
   if(xs < 0) or (ys < 0) or (xe > W) or (ye > H) then
@@ -422,13 +420,6 @@ begin
        Bmp.LoadFromRawImage(Raw, False);
        Result := Bmp;
 
-       {
-         If you want to use some internal Bitmap system, BitBlt to it here.
-         Don't forget to free Bmp!
-       }
-       //lclintf.BitBlt(Bmps[bitmap].Canvas.Handle, 0, 0, ww + 1, hh + 1, Bmp.Canvas.Handle, xs, ys, SRCCOPY);
-       //Bmp.Free;
-
        XDestroyImage(Img);
        XSetErrorHandler(Old_Handler);
        {$ELSE}
@@ -438,13 +429,6 @@ begin
      end;
      w_ArrayPtr:
      begin
-       // Will only work if the coords are 0, 0, w, h.
-       // Otherwise, we will need to perform mem copy/move operations.
-       // Copy it to a XImage-alike structure,
-       // then pass it to ArrDataToRawImage.
-
-       // Basically, Copy the data slices from the array into a XImage,
-       // where the data IS aligned.
         TempData:= GetMem((ww + 1) * (hh + 1) * sizeof(trgb32));
         for y := ys to ye do
           Move(Self.ArrayPtr[y*Self.ArraySize.x],TempData[(y-ys) * (ww+1)],(ww+1) * SizeOf(TRGB32));
