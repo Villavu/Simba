@@ -129,7 +129,7 @@ Begin
   RawImage.Data := PByte(Ptr);
 
 End;
-
+{$IFDEF LINUX}
 function MouseWindow: x.TWindow;
 var
    Old_Handler: TXErrorHandler;
@@ -139,6 +139,7 @@ begin
 
   XSetErrorHandler(Old_Handler);
 end;
+{$ENDIF}
 
 end.
 
