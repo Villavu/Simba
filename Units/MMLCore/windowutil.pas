@@ -17,7 +17,6 @@ uses
          {$IFDEF LINUX}
          Procedure XImageToRawImage(XImg: PXImage; Var RawImage: TRawImage);
          function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
-         function MouseWindow: x.TWindow;
          {$ENDIF}
          Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; Var RawImage: TRawImage);
 
@@ -129,17 +128,6 @@ Begin
   RawImage.Data := PByte(Ptr);
 
 End;
-{$IFDEF LINUX}
-function MouseWindow: x.TWindow;
-var
-   Old_Handler: TXErrorHandler;
-begin
-  Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
-
-
-  XSetErrorHandler(Old_Handler);
-end;
-{$ENDIF}
 
 end.
 

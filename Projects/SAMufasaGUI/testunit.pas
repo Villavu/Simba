@@ -12,7 +12,8 @@ uses
   mmlpsthread,
   mmlthread,
   window, // for the comp picker and selector
-  colourpicker
+  colourpicker,
+  windowselector
   ;
 
 type
@@ -47,11 +48,14 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure MenuItemRunClick(Sender: TObject);
     procedure PickColorEvent(Sender: TObject);
+    procedure Selector_DOWN(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     { private declarations }
   public
     Window: TMWindow;
     Picker: TMColorPicker;
+    Selector: TMWindowSelector;
       { public declarations }
   end; 
 
@@ -91,6 +95,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   Window := TMWindow.Create;
   Picker := TMColorPicker.Create(Window);
+  Selector := TMWindowSelector.Create(Window);
 
   MainDir:= ExtractFileDir(Application.ExeName);
   PluginsGlob := TMPlugins.Create;
@@ -100,6 +105,7 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  Selector.Free;
   Picker.Free;
   Window.Free;
   PluginsGlob.Free;
@@ -116,6 +122,13 @@ var
 begin
   Picker.Pick(c, x, y);
   writeln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
+end;
+
+procedure TForm1.Selector_DOWN(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  Window.SetTarget(Selector.Drag);
+  writeln('New window: ' + IntToStr(Window.CurWindow));
 end;
 
 
