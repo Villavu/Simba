@@ -11,12 +11,12 @@ begin
     setcolortolerancespeed(i);
     t := getsystemtime;
 	for j := 0 to 100 do
-    findcolortolerance(x, y, 255, 0, 0, w, h, 40);
+    findcolortolerance(x, y, 255, 0, 0, w -1 , h -1, 40);
     t2 := getsystemtime;
     writeln('Time for 101 tries: ' + inttostr(t2 - t) + ' ms.');
     writeln('That is ' + FloatToStr((t2 - t) / 101) + ' ms each.');
 
-    if findcolortolerance(x, y, 255, 0, 0, w, h, 40) then
+    if findcolortolerance(x, y, 255, 0, 0, w-1, h-1, 40) then
     begin
       writeln('CTS: ' + inttostr(I) + '; Found the colour at (' + inttostr(x) + ', ' +
       inttostr(y) + ')');
