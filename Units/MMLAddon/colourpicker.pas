@@ -8,6 +8,12 @@ uses
   Classes, SysUtils, LCLIntf,LCLType,InterfaceBase,Forms,Controls,ExtCtrls,
   Graphics,
   Window
+
+  {$IFNDEF PICKER_CLIENT}
+    {$IFDEF LINUX}
+    ,x
+    {$ENDIF}
+  {$ENDIF}
   ;
 
 type
@@ -62,8 +68,22 @@ procedure TMColorPicker.Pick(Var C, X, Y: Integer);
 var
    w, h: integer;
    bmp: TBitmap;
+
+   {$IFNDEF PICKER_CLIENT}
+     {$IFDEF LINUX}
+     OldWindow: TWindow;
+     {$ENDIF}
+   {$ENDIF}
+
 begin
   Form := TForm.Create(Application.MainForm);
+   {$IFNDEF PICKER_CLIENT}
+     {$IFDEF LINUX}
+     OldWindow := Window.CurWindow;
+     Window.SetTarget(Window.DesktopWindow);
+     {$ENDIF}
+   {$ENDIF}
+
   Window.GetDimensions(w, h);
 
   Form.Width := w;
@@ -118,6 +138,12 @@ begin
   c := Color;
   x := Colorx;
   y := Colory;
+
+  {$IFNDEF PICKER_CLIENT}
+    {$IFDEF LINUX}
+    Window.SetTarget(OldWindow);
+    {$ENDIF}
+  {$ENDIF}
 
   Note.Free;
   Bitmap.Free;
