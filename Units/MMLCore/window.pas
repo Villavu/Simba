@@ -190,7 +190,7 @@ begin
         {$IFDEF WINDOWS}
         Self.SetTarget(Window.TargetHandle, Window.TargetMode);
         {$ELSE}
-         writeln('TMWindow.SetWindow - HDC not supported');
+         writeln('TMWindow.SetWindow - Handle not supported');
         {$ENDIF}
 
     // I don't think array can ever be set at this point.

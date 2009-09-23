@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 1128
+  Left = 1103
   Height = 541
-  Top = 149
+  Top = 82
   Width = 763
   ActiveControl = SynEdit1
   Caption = 'Mufasa v2'
@@ -794,8 +794,8 @@ object Form1: TForm1
       Left = 168
       Top = 2
       Caption = 'TB_SelectClient'
-      Enabled = False
       ImageIndex = 7
+      OnMouseDown = Selector_DOWN
     end
     object ToolButton8: TToolButton
       Left = 191
