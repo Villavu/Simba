@@ -188,7 +188,7 @@ begin
   case Window.TargetMode of
     w_BMP, w_Window, w_HDC:
         {$IFDEF WINDOWS}
-        Self.SetTarget(Window.TargetDC, Window.TargetMode);
+        Self.SetTarget(Window.TargetHandle, Window.TargetMode);
         {$ELSE}
          writeln('TMWindow.SetWindow - HDC not supported');
         {$ENDIF}
