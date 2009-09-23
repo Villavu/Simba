@@ -65,7 +65,7 @@ var
 
 implementation
 uses
-   lclintf,plugins;
+   lclintf,plugins,windows;
 
 
 
@@ -77,11 +77,12 @@ Var
 begin
   MMLPSThread := TMMLPSThread.Create(True);
   MMLPSThread.SetPSScript(Form1.SynEdit1.Lines.Text);
+//  MMLPSThread.Client.MWindow.SetTarget(461670,w_Window);
   MMLPSThread.SetDebug(Form1.Memo1);
 
   // This doesn't actually set the Client's MWindow to the passed window, it
   // only copies the current set window handle.
-  MMLPSThread.Client.MWindow.SetWindow(Form1.Window);
+  MMLPSThread.Client.MWindow.SetTarget(GetDesktopWindow,w_window);
 
   MMLPSThread.Resume;
 end;
@@ -127,8 +128,8 @@ end;
 procedure TForm1.Selector_DOWN(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  Window.SetTarget(Selector.Drag);
-  writeln('New window: ' + IntToStr(Window.CurWindow));
+  Window.SetTarget(Selector.Drag {$ifdef MSWINDOWS},w_window{$endif});
+  writeln('New window: ' + IntToStr(Window.TargetHandle));
 end;
 
 

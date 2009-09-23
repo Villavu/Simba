@@ -8,6 +8,9 @@ uses
   Classes, SysUtils,
   ctypes,
   window, windowutil,
+  controls,
+  graphics,
+  forms,
   {$IFNDEF MSWINDOWS}x, xlib
   {$ELSE}
   windows
@@ -95,9 +98,55 @@ end;
 {$ELSE}
 
 function TMWindowSelector.Drag: Hwnd;
-
-begin
-  // Moet jij maar ff doen, ray.
+var
+  TargetRect: TRect;
+  DC: HDC;
+  OldPen, Pen: hPen;
+  OldBrush : hBrush;
+  BrushHandle : THandle;
+  Cursor : TCursor;
+  TempHandle : Hwnd;
+  Handle : Hwnd;
+begin;
+  Pen := CreatePen(PS_SOLID, GetSystemMetrics(SM_CXBORDER)*5, clred);
+  BrushHandle := GetStockObject(Null_Brush);
+  Cursor:= Screen.Cursor;
+  Screen.Cursor:= crCross;
+  TempHandle := GetDesktopWindow;
+  while GetAsyncKeyState(VK_LBUTTON) <> 0 do
+  begin;
+    Handle:= WindowFromPoint(Mouse.CursorPos);
+    if Handle <> TempHandle then
+    begin;
+      if TempHandle <> 0 then
+      begin;
+        Invalidaterect(temphandle, nil, true);
+        UpdateWindow(temphandle);
+        {$IFDEF MSWINDOWS}
+        RedrawWindow(TempHandle, nil, 0, RDW_Frame or RDW_Invalidate or RDW_Updatenow or RDW_Allchildren);
+        {$ENDIF}
+      end;
+      if Handle <> 0 then
+      begin;
+        GetWindowRect(Handle, TargetRect);
+        DC := Windows.GetWindowDC(Handle);
+        OldPen := SelectObject(DC, Pen);
+        OldBrush := SelectObject(DC, BrushHandle);
+        Rectangle(DC, 0, 0, TargetRect.Right - TargetRect.Left, TargetRect.Bottom - TargetRect.Top);
+        SelectObject(DC, OldBrush);
+        SelectObject(DC, OldPen);
+        ReleaseDC(Handle, DC);
+      end;
+      TempHandle  := Handle;
+    end;
+    Sleep(64);
+  end;
+  Result := TempHandle;
+  Screen.Cursor:= cursor;
+  Invalidaterect(temphandle, nil, true);
+  UpdateWindow(temphandle);
+  RedrawWindow(TempHandle, nil, 0, RDW_Frame or RDW_Invalidate or RDW_Updatenow or RDW_Allchildren);
+  DeleteObject(Pen);
 end;
 {$ENDIF}
 
