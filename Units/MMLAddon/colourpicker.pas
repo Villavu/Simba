@@ -23,7 +23,7 @@ type
         constructor Create(aWindow: TMWindow);
         destructor Destroy; override;
 
-        procedure Pick(Var C, X, Y: Integer);
+        procedure Pick(Out C, X, Y: Integer);
 
         procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer );
        procedure TimorTimer(Sender: TObject);
@@ -64,7 +64,7 @@ begin
 
 end;
 
-procedure TMColorPicker.Pick(Var C, X, Y: Integer);
+procedure TMColorPicker.Pick(Out C, X, Y: Integer);
 var
    w, h: integer;
    bmp: TBitmap;

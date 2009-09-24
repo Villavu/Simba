@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 400
+  Left = 796
   Height = 541
-  Top = 129
+  Top = 165
   Width = 763
   ActiveControl = SynEdit1
   Caption = 'Mufasa v2'
-  ClientHeight = 521
+  ClientHeight = 516
   ClientWidth = 763
   Menu = MainMenu1
   OnCreate = FormCreate
@@ -25,7 +25,6 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 0
-    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
