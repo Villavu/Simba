@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Menus, ComCtrls, SynEdit, SynHighlighterPas, SynMemo,
+  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas, SynMemo,
   //Client,
   MufasaTypes,
   mmlpsthread,
@@ -34,7 +34,7 @@ type
     TB_Stop: TToolButton;
     ToolButton1: TToolButton;
     TB_ReloadPlugins: TToolButton;
-    TB_WAT: TToolButton;
+    TB_Tray: TToolButton;
     TB_NewTab: TToolButton;
     TB_CloseTab: TToolButton;
     ToolButton4: TToolButton;
@@ -43,6 +43,7 @@ type
     TB_SelectClient: TToolButton;
     ToolButton8: TToolButton;
     TB_Convert: TToolButton;
+    MTrayIcon: TTrayIcon;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -50,6 +51,8 @@ type
     procedure PickColorEvent(Sender: TObject);
     procedure Selector_DOWN(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure NoTray(Sender: TObject);
+    procedure ToTray(Sender: TObject);
   private
     { private declarations }
   public
@@ -129,6 +132,19 @@ procedure TForm1.Selector_DOWN(Sender: TObject; Button: TMouseButton;
 begin
   Window.SetTarget(Selector.Drag {$ifdef MSWINDOWS},w_window{$endif});
   writeln('New window: ' + IntToStr(Window.{$ifdef MSWindows}TargetHandle{$else}CurWindow{$ENDIF}));
+end;
+
+procedure TForm1.NoTray(Sender: TObject);
+begin
+  if Not Form1.IsVisible then
+    Form1.Show
+  else
+    Form1.Hide;
+end;
+
+procedure TForm1.ToTray(Sender: TObject);
+begin
+  Form1.Hide;
 end;
 
 
