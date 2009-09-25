@@ -3,13 +3,9 @@
 .PHONY: default clean
 
 #Set these ----------
-platform := x86_64-linux
-widgetset := gtk2
-lazaruspath := /home/merlijn/Programs/lazarus
-
-#-dUseCThreads on linux, none on windows. :) 
-platformdefines := -dUseCThreads
-#End set there -------
+platform := i386-win32
+widgetset := win32
+lazaruspath := "C:\path\to\lazarus"
 
 CC := fpc
 build := $(CC)
@@ -27,7 +23,8 @@ lazarusunits := -Fu$(lazaruspath)/components/synedit/units/$(platform)/ -Fu$(laz
 default: $(binary)
 
 clean:
-	rm -f *.o *.ppu $(binary) 
+	#Zoek zelf ff uit
+	del $(binary) 
 
 $(binary):
 	$(CC) $(flags) $(units) $(lazarusunits) -o$(binary) $(defines) project1.lpr 
