@@ -87,6 +87,10 @@ begin
   MMLPSThread.Client.MWindow.SetWindow(Form1.Window);
 
   MMLPSThread.Resume;
+
+ // sleep(500);
+ // MMLPSThread.PSScript.Stop;
+
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);

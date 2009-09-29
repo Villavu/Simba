@@ -271,7 +271,7 @@ begin
     begin
       for xx := x1 to x2 do
       begin
-         if ((abs(clR-Ptr^.R) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clG-Ptr^.B) <= Tol)) then
+         if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
             goto Hit;
         inc(Ptr);
       end;
@@ -279,15 +279,20 @@ begin
     end;
 
     1:
-    for yy := y1 to y2 do
     begin
-      for xx := x1 to x2 do
+      Tol := Sqr(Tol);
+
+      for yy := y1 to y2 do
       begin
-         if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
-            goto Hit;
-        inc(ptr);
+        for xx := x1 to x2 do
+        begin
+           if (sqr(clB - Ptr^.B) + sqr(clG - Ptr^.G) + sqr(clR-Ptr^.R)) <= Tol then
+              goto Hit;
+          inc(ptr);
+        end;
+        Inc(Ptr, PtrInc);
       end;
-      Inc(Ptr, PtrInc);
+
     end;
     2:
     begin
