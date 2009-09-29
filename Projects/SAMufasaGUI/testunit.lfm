@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 1147
+  Left = 354
   Height = 541
-  Top = 148
+  Top = 208
   Width = 763
   ActiveControl = SynEdit1
   Caption = 'Mufasa v2'
@@ -25,7 +25,8 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 0
-    Gutter.Width = 57
+    BookMarkOptions.OnChange = nil
+    Gutter.Width = 61
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -605,7 +606,7 @@ object Form1: TForm1
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 17
+        Width = 21
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
