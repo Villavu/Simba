@@ -14,6 +14,9 @@ Sender.AddFunction(@max,'function Max(a, b: Integer): Integer;');
 Sender.AddFunction(@min,'function Min(a, b: Integer): Integer;');
 Sender.AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
 
+Sender.AddFunction(@Freeze, 'function freeze:boolean;');
+Sender.AddFunction(@Unfreeze, 'function unfreeze: boolean;');
+
 Sender.AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
 Sender.AddFunction(@FindColor, 'function findcolor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
 Sender.AddFunction(@FindColorTolerance, 'function findcolortolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');

@@ -16,7 +16,6 @@ type
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
     protected
-      PSScript : TPSScript;
       DebugTo : TMemo;
       PluginsToload : Array of integer;
       procedure OnCompile(Sender: TPSScript);
@@ -29,6 +28,7 @@ type
       procedure OnThreadTerminate(Sender: TObject);
       procedure Execute; override;
     public
+      PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
       Client : TClient;
       procedure SetPSScript(Script : string);
       procedure SetDebug( Strings : TMemo );
