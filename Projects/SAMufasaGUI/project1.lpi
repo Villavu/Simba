@@ -381,8 +381,8 @@
         <Filename Value="../../Units/MMLCore/finder.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="finder"/>
-        <CursorPos X="1" Y="354"/>
-        <TopLine Value="390"/>
+        <CursorPos X="39" Y="38"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="9"/>
         <UsageCount Value="101"/>
         <Loaded Value="True"/>
