@@ -295,6 +295,8 @@ begin
 
     end;
     2:
+    // Can be optimized a lot... RGBToHSL isn't really inline,
+    // and hueMod * tol is also calculated every time.
     begin
     for yy := y1 to y2 do
       for xx := x1 to x2 do
@@ -348,7 +350,7 @@ begin
     begin
       for xx := xs to xe do
       begin
-         if ((abs(clR-Ptr^.R) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clG-Ptr^.B) <= Tol)) then
+         if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
          begin;
            ClientTPA[c].x := xx;
            ClientTPA[c].y := yy;
