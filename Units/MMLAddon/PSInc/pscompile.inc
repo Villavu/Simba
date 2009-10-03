@@ -10,7 +10,7 @@ Sender.AddFunction(@psWriteln,'procedure writeln(s : string);');
 
 { DTM }
 
-Sender.AddFunction(@ps_StringFromDTM, 'function StringFromDTM(DTMString: String): Integer;');
+Sender.AddFunction(@ps_StringFromDTM, 'function DTMFromString(DTMString: String): Integer;');
 Sender.AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
 Sender.AddFunction(@FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
 

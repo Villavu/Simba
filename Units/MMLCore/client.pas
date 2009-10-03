@@ -34,7 +34,7 @@ begin
   MFiles := TMFiles.Create;
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(self);
-  MDTM := MDTM.Create(self);
+  MDTM := TMDTM.Create(self);
 end;
 
 destructor TClient.Destroy;

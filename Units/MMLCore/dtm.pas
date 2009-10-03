@@ -9,8 +9,6 @@ uses
 
 type
     TMDTM = class(TObject)
-           constructor Create(Owner: TObject);
-           destructor Destroy; override;
 
            function AddDTM(d: TDTM): Integer;
            function AddpDTM(d: pDTM): Integer;
@@ -32,6 +30,8 @@ type
            function pFindDTM(DTM: pDTM; var x, y: Integer; x1, y1, x2, y2:
            Integer): Boolean;
 
+           constructor Create(Owner: TObject);
+           destructor Destroy; override;
     private
 
            Client: TObject;
@@ -75,7 +75,7 @@ uses
     Client, dtmutil, paszlib;
 
 type
-   TBufferByteArray = Array[0..524288] of Byte;
+   TBufferByteArray = Array[0..524287] of Byte;
    PBufferByteArray = ^TBufferByteArray;
 
 constructor TMDTM.Create(Owner: TObject);
@@ -107,7 +107,7 @@ function TMDTM.StringToDTM(S: String): pDTM;
 var
   b: PBufferByteArray;
   Source : String;
-  DestLen : LongWord;
+  DestLen : longword;
   i,ii,c : integer;
 begin
   SetLength(Result.p,0);
