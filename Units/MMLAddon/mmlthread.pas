@@ -58,7 +58,8 @@ var
    i,w,h: Integer;
 
 begin
-
+  w := 0;
+  h := 0;
   i := 0;
   while (not Terminated) and (i < 10) do
   begin

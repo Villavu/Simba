@@ -83,7 +83,8 @@ begin
      Window.SetTarget(Window.DesktopWindow);
      {$ENDIF}
    {$ENDIF}
-
+  w := 0;
+  h := 0;
   Window.GetDimensions(w, h);
 
   Form.Width := w;
