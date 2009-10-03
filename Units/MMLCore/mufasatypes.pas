@@ -28,6 +28,28 @@ type
   TPointArray = array of TPoint;
   TVariantArray = Array of Variant;
   TIntegerArray = Array of Integer;
+
+  T2DExtendedArray = Array of Array of Extended;
+
+  { DTM Types }
+  pDTM = record
+    p: TPointArray;
+    c, t, asz, ash: TIntegerArray;
+  end;
+
+  { Other DTM Types }
+
+  TDTMPointDef = record
+    x, y, Color, Tolerance, AreaSize, AreaShape: integer;
+  end;
+
+  TDTMPointDefArray = Array Of TDTMPointDef;
+
+  TDTM = record
+    MainPoint: TDTMPointDef;
+    SubPoints: TDTMPointDefArray;
+  end;
+
 var
   PluginsGlob : TMPlugins;
 
