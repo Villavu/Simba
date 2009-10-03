@@ -1,0 +1,18 @@
+program new;
+var
+  dtm,x,y, w, h:integer;
+begin
+  getclientdimensions(w,h);
+  writeln(inttostr(w) + ',' + inttostr(h));
+  dtm := DTMFromString('78DA63F4606460F0634001E181810C46401A2' +
+          '8C3F01F0818AD31D54064612490B601B28209A87105B2A209A8F1' +
+          '23424D38901540841A2FFC6A00C8100982');
+
+  if finddtm(dtm, x,y, 0, 0, w-1,h-1) then
+  begin
+    writeln('found');
+    movemouse(x,y);
+  end else
+    writeln('not found');
+  freedtm(dtm);
+end.
