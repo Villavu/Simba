@@ -33,7 +33,8 @@ type
            constructor Create(Owner: TObject);
            destructor Destroy; override;
     private
-
+           function AreaShape(Color, Tolerance, Size, Shape: Integer; P: TPoint) : Boolean; inline;
+    private
            Client: TObject;
 
            // For decompressing.
@@ -72,7 +73,10 @@ const
 
 implementation
 uses
-    Client, dtmutil, paszlib;
+    Client, dtmutil, paszlib, finder,
+    graphics, // for TColor
+    math // for max
+    ;
 
 type
    TBufferByteArray = Array[0..524287] of Byte;
@@ -87,16 +91,133 @@ begin
   SetLength(FreeSpots, 0);
   SetLength(BufferString, 524288);
 end;
-
+{$DEFINE DTM_DEBUG}
 destructor TMDTM.Destroy;
 
+{$IFDEF DTM_DEBUG}
+var
+   i, j: integer;
+   b:boolean;
+{$ENDIF}
 begin
+  {$IFDEF DTM_DEBUG}
+  writeln(inttostr(high(dtmlist)));
+  writeln(inttostr(high(freespots)));
+  for i := 0 to high(DTMList) do
+  begin
+    b := false;
+    for j := 0 to high(freespots) do
+      if i = freespots[j] then
+      begin
+        b := true;
+        break;
+      end;
+      if not b then
+        writeln('DTM Number ' + inttostr(i) + ' was not freed');
+  end;
+  {$ENDIF}
   SetLength(DTMList, 0);
   SetLength(FreeSpots, 0);
   SetLength(BufferString, 0);
 
   inherited Destroy;
 end;
+
+type
+    PMSimColor = function (Color1,Color2,Tolerance : Integer) : boolean of object;
+    PMGetCol = function (x, y: integer): TColor of object;
+
+Function TMDTM.AreaShape(Color, Tolerance, Size, Shape: Integer; P: TPoint) : Boolean; inline;
+
+Var
+   X, Y, S: Integer;
+   SimCol: PMSimColor;
+   GetCol: PMGetCol;
+
+Begin
+  writeln('areashape');
+  SimCol := @TClient(Client).MFinder.SimilarColors;
+  GetCol := @TClient(Client).MWindow.GetColor;
+  Case Shape Of
+    dtm_Rectangle:
+    Begin
+      {
+        Example:
+        3x3
+        X X X
+        X X X
+        X X X
+      }
+      For X := P.X - Size To P.X + Size Do
+        For Y := P.Y - Size To P.Y + Size Do
+          If SimCol(GetCol(X, Y), Color, Tolerance) Then
+          Begin
+            Result := True;
+	          Exit;
+          End;
+    End;
+
+    dtm_Cross:
+      {
+        Example:
+        3x3
+          X
+        X X X
+          X
+      }
+    Begin
+      For X := P.X - Size To P.X + Size Do
+        If SimCol(GetCol(X, P.Y), Color, Tolerance) Then
+        Begin
+          Result := True;
+          Exit;
+        End;
+      For Y := P.Y - Size To P.Y + Size Do
+        If SimCol(GetCol(P.X, Y), Color, Tolerance) Then
+        Begin
+          Result := True;
+          Exit;
+        End;
+    End;
+
+    dtm_DiagonalCross:
+      {
+        Example:
+        3x3
+        X   X
+          X
+        X   X
+
+      }
+      Begin
+      For S := -Size To Size Do
+      Begin
+        If SimCol(GetCol(P.X + S, P.Y + S), Color, Tolerance) Then
+        Begin
+          Result := True;
+          Exit;
+        End;
+        If SimCol(GetCol(P.X + S, P.Y - S), Color, Tolerance) Then
+        Begin
+          Result := True;
+          Exit;
+        End;
+      End;
+    End;
+
+    {4:
+    Begin
+      D := Ceil(Sqrt(Pow(Size, 2) + Pow(Size, 2)));
+      //Will finish later
+
+    End;   }
+
+    Else
+      WriteLn('Incorrect Shape');
+  End;
+  Result := False;
+End;
+
 
 function HexToInt(HexNum: string): LongInt;inline;
 begin
@@ -260,22 +381,28 @@ var
    Found: Boolean;
    TempTP: TPoint;
    RetData: TRetData;
+   MaxSubPointDist: TPoint;
 
 begin
+  MaxSubPointDist := Point(0,0);
+
   for I := 1 to High(DTM.p) do
   begin
     DTM.p[I].x := DTM.p[I].x - DTM.p[0].x;
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
+    MaxSubPointDist.X := Max(DTM.p[I].x, MaxSubPointDist.X);
+    MaxSubPointDist.Y := Max(DTM.p[I].y, MaxSubPointDist.Y);
   end;
 
-  // X2 := X2 - MaxSubPointDist.X
-  // Y2 := Y2 - MaxSubPointDist.Y
-  // X1 := X1 + MaxSubPointDist.X
-  // Y1 := Y1 + MaxSubPointDist.Y
-  // If X2 > X1 then Exit
-  // If Y2 > Y1 then Exit
+   X2 := X2 - MaxSubPointDist.X;
+   Y2 := Y2 - MaxSubPointDist.Y;
+   X1 := X1 + MaxSubPointDist.X;
+   Y1 := Y1 + MaxSubPointDist.Y;
+   {If X2 > X1 then
+     //Exit;
+   If Y2 > Y1 then  }
+     //Exit;
   // Will make sure there are no out of bounds exceptions, and will make it faster
-
   TClient(Client).MWindow.Freeze();
 
   TClient(Client).MFinder.FindColorsTolerance(mP, DTM.c[Low(DTM.c)],
@@ -297,8 +424,7 @@ begin
       TempTP.X := DTM.p[J].X + mP[I].X;
       TempTP.Y := DTM.p[J].Y + mP[I].Y;
       //Now would be the time to Rotate TempTP
-      //If Not AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) then
-      if False then
+      if not AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) then
       begin
         Found := False;
         Break;

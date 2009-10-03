@@ -3,7 +3,7 @@ begin
  Result := CurrThread.Client.MDTM.FindDTM(DTM, x, y, x1, y1, x2, y2);
 end;
 
-function ps_StringFromDTM(DTMString: String): Integer;
+function ps_DTMFromString(DTMString: String): Integer;
 var
    dtm: pDTM;
 begin

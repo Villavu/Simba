@@ -5,7 +5,7 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, Plugins,uPSPreProcessor;
+  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, uPSPreProcessor;
 
 type
 
@@ -65,8 +65,7 @@ begin
 end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
-var
-  i : integer;
+
 begin;
   Writeln('We have a length of: '  + inttostr(length(v)));
   Try
@@ -145,7 +144,7 @@ procedure TMMLPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean);
 var
   TempNum : integer;
-  I,II : integer;
+  I: integer;
 begin
   if DirectiveName= 'LOADDLL' then
     if DirectiveParam <> '' then
@@ -187,6 +186,7 @@ function TMMLPSThread.RequireFile(Sender: TObject;
   const OriginFileName: String; var FileName, OutPut: string): Boolean;
 begin
 
+  Result := False;
 end;
 
 procedure TMMLPSThread.OnCompImport(Sender: TObject; x: TPSPascalCompiler);
@@ -232,7 +232,7 @@ end;
 
 procedure TMMLPSThread.Execute;
 var
-  time, i, ii: Integer;
+  time: Integer;
 begin;
   CurrThread := Self;
   time := lclintf.GetTickCount;
