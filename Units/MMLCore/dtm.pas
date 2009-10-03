@@ -135,7 +135,6 @@ Var
    GetCol: PMGetCol;
 
 Begin
-  writeln('areashape');
   SimCol := @TClient(Client).MFinder.SimilarColors;
   GetCol := @TClient(Client).MWindow.GetColor;
   Case Shape Of
@@ -380,7 +379,6 @@ var
    I, J, H, dH: Integer;
    Found: Boolean;
    TempTP: TPoint;
-   RetData: TRetData;
    MaxSubPointDist: TPoint;
 
 begin
@@ -403,13 +401,15 @@ begin
    If Y2 > Y1 then  }
      //Exit;
   // Will make sure there are no out of bounds exceptions, and will make it faster
-  TClient(Client).MWindow.Freeze();
 
-  TClient(Client).MFinder.FindColorsTolerance(mP, DTM.c[Low(DTM.c)],
-          x1, y1, x2, y2, DTM.t[Low(DTM.t)]);
+  with TClient(Client) do
+  begin
+    MWindow.Freeze();
 
-  TClient(Client).MWindow.GetDimensions(H, dH);
-  RetData := TClient(Client).MWindow.ReturnData(0, 0, H, dH);
+    MFinder.FindColorsTolerance(mP, DTM.c[Low(DTM.c)], x1, y1, x2, y2,
+                                DTM.t[Low(DTM.t)]);
+    MWindow.GetDimensions(H, dH);
+  end;
 
   H := High(mP);
   dH := High(DTM.p);
