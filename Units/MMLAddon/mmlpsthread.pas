@@ -136,6 +136,7 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
+{$I PSInc/Wrappers/dtm.inc}
 
 
 

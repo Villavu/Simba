@@ -10,6 +10,7 @@ uses
   windowutil // for mufasa window utils
   {$IFDEF LINUX}
   ,x, xlib // for X* stuff
+  // do non silent keys with XTest.
   {$ENDIF};
 type
     TMInput = class(TObject)

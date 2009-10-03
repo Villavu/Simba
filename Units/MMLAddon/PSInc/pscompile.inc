@@ -3,9 +3,16 @@ Sender.Comp.AddTypeS('TIntegerArray', 'Array of integer');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
 Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 
+//Sender.Comp.AddTypeS('pDTM','pDTM = record p: TPointArray; c, t, asz, ash: TIntegerArray; end');
 
 Sender.AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 Sender.AddFunction(@psWriteln,'procedure writeln(s : string);');
+
+{ DTM }
+
+Sender.AddFunction(@ps_StringFromDTM, 'function StringFromDTM(DTMString: String): Integer;');
+Sender.AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
+Sender.AddFunction(@FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
 
 
 {maths}
