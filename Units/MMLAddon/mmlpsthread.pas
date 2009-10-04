@@ -38,7 +38,7 @@ type
 
 implementation
 uses
-  MufasaTypes,
+  MufasaTypes, dtmutil,
   {$ifdef mswindows}windows,{$endif}
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
   uPSC_extctrls, //Compile-libs

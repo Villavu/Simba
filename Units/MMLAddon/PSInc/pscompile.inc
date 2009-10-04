@@ -3,17 +3,27 @@ Sender.Comp.AddTypeS('TIntegerArray', 'Array of integer');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
 Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 
-//Sender.Comp.AddTypeS('pDTM','pDTM = record p: TPointArray; c, t, asz, ash: TIntegerArray; end');
+
+Sender.Comp.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
+Sender.Comp.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
+Sender.Comp.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
+Sender.Comp.AddTypeS('pDTM','record p: TPointArray; c, t, asz, ash: TIntegerArray; end');
+
 
 Sender.AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 Sender.AddFunction(@psWriteln,'procedure writeln(s : string);');
 
 { DTM }
 
+Sender.AddFunction(@PrintpDTM, 'Procedure PrintpDTM(tDTM : pDTM);');
+Sender.AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer; var dtm: pDTM): Boolean;');
+Sender.AddFunction(@pDTMToTDTM, 'Function pDTMToTDTM(Const DTM: pDTM): TDTM;');
+Sender.AddFunction(@tDTMTopDTM, 'Function tDTMTopDTM(Const DTM: TDTM): pDTM;');
 Sender.AddFunction(@ps_DTMFromString, 'function DTMFromString(DTMString: String): Integer;');
 Sender.AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
-Sender.AddFunction(@FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
-
+Sender.AddFunction(@ps_FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
+Sender.AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
+Sender.AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 
 {maths}
 sender.AddFunction(@power,'function pow(base,exponent : extended) : extended');

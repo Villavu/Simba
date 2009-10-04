@@ -1,6 +1,7 @@
 program new;
 var
   dtm,x,y, w, h:integer;
+  ppdtm:pdtm;
 begin
   getclientdimensions(w,h);
   writeln(inttostr(w) + ',' + inttostr(h));
@@ -14,5 +15,10 @@ begin
     movemouse(x,y);
   end else
     writeln('not found');
+  if getdtm(dtm, ppdtm) then
+    writeln('yay');
+  printpdtm(tdtmtopdtm(pdtmtotdtm(ppdtm)));
+  dtm := addpdtm(ppdtm);
   freedtm(dtm);
+  // old dtm is not freed, since it is overridden by addpdtm.
 end.

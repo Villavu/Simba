@@ -91,6 +91,7 @@ begin
   SetLength(FreeSpots, 0);
   SetLength(BufferString, 524288);
 end;
+
 {$DEFINE DTM_DEBUG}
 destructor TMDTM.Destroy;
 
@@ -101,8 +102,6 @@ var
 {$ENDIF}
 begin
   {$IFDEF DTM_DEBUG}
-  writeln(inttostr(high(dtmlist)));
-  writeln(inttostr(high(freespots)));
   for i := 0 to high(DTMList) do
   begin
     b := false;
@@ -204,12 +203,11 @@ Begin
       End;
     End;
 
-    {4:
+    4:
     Begin
-      D := Ceil(Sqrt(Pow(Size, 2) + Pow(Size, 2)));
-      //Will finish later
-
-    End;   }
+       raise Exception.CreateFmt('The given DTM Shape ([%d]) is not yet' +
+                                 ' implemented.', [Shape]);
+    End;
 
     Else
       WriteLn('Incorrect Shape');

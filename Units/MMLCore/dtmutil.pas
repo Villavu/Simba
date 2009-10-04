@@ -10,11 +10,19 @@ uses
 
 Function pDTMToTDTM(Const DTM: pDTM): TDTM;
 Function tDTMTopDTM(Const DTM: TDTM): pDTM;
-
+Procedure PrintpDTM(tDTM : pDTM);
 
 implementation
 
-
+Procedure PrintpDTM(tDTM : pDTM);
+var
+  i : integer;
+begin;
+  i := 0;
+  WriteLn('MainPoint ' + inttostr(tDTM.p[i].x) + ', ' + inttostr(tDTM.p[i].y) + ' col: ' + inttostr(tDTM.c[i]) + ', tol: ' + inttostr(tDTM.t[i]) + '; ashape ' + inttostr(tdtm.ash[i]) + ' asize ' + inttostr(tdtm.asz[i]));
+  for I := 1 to High(tDTM.p) do
+    WriteLn('SubPoint['+IntToStr(I) + '] ' + inttostr(tDTM.p[i].x) + ', ' + inttostr(tDTM.p[i].y) + ' col: ' + inttostr(tDTM.c[i]) + ', tol: ' + inttostr(tDTM.t[i]) + '; ashape ' + inttostr(tdtm.ash[i]) + ' asize ' + inttostr(tdtm.asz[i]));
+end;
 Function pDTMToTDTM(Const DTM: pDTM): TDTM;
 
 Var
