@@ -8,7 +8,30 @@ begin
  Result := CurrThread.Client.MDTM.FindDTMs(DTM, p, x1, y1, x2, y2);
 end;
 
+function ps_FindDTMRotated(DTM: Integer; var x, y: Integer; x1, y1, x2, y2:
+                           Integer; sAngle, eAngle, aStep: Extended;
+                           var aFound: Extended): Boolean;
+begin
+ Result := CurrThread.Client.MDTM.FindDTMRotated(DTM, x, y, x1, y1, x2, y2,
+                                                 sAngle, eAngle, aStep, aFound);
+end;
 
+function ps_FindDTMsRotated(DTM: Integer; var x, y: Integer; x1, y1, x2, y2:
+                           Integer; sAngle, eAngle, aStep: Extended;
+                           var aFound: Extended): Boolean;
+begin
+ Result := CurrThread.Client.MDTM.FindDTMRotated(DTM, x, y, x1, y1, x2, y2,
+                                  sAngle, eAngle, aStep, aFound);
+end;
+
+function ps_FindDTMsRotated(DTM: Integer; var Points: TPointArray; x1,
+                                  y1, x2, y2: Integer; sAngle, eAngle,
+                                  aStep: Extended; var aFound: T2DExtendedArray)
+                                  : Boolean;
+begin
+  Result := CurrThread.Client.MDTM.FindDTMsRotated(DTM, Points, x1, y1, x2, y2,
+                                    sAngle, eAngle, aStep, aFound);
+end;
 
 function ps_DTMFromString(DTMString: String): Integer;
 var
