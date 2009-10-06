@@ -225,21 +225,6 @@ Begin
   Result := False;
 End;
 
-function RotatePoints(P: TPointArray; A, cx, cy: Extended): TPointArray; inline;
-
-var
-   I, L: Integer;
-
-begin
-  L := High(P);
-  SetLength(Result, L + 1);
-  for I := 0 to L do
-  begin
-    Result[I].X := Round(cx + cos(A) * (p[i].x - cx) - sin(A) * (p[i].y - cy));
-    Result[I].Y := Round(cy + sin(A) * (p[i].x - cx) + cos(A) * (p[i].y - cy));
-  end;
-end;
-
 {/\
   Rotates the given point (p) by A (in radians) around the point defined by cx, cy.
 /\}
@@ -382,6 +367,47 @@ begin
   FreeSpots[High(FreeSpots)] := DTM;
 end;
 
+procedure DTMBounds(dtm: pDTM; var x1, y1, x2, y2: Integer);
+var
+   i: Integer;
+   B: TBox;
+
+begin
+  for i := 0 to high(dtm.p) do
+  begin
+    B.X1 := Min(B.X1, dtm.p[i].X - dtm.asz[i]);
+    B.Y1 := Min(B.Y1, dtm.p[i].Y - dtm.asz[i]);
+    B.X2 := Max(B.X2, dtm.p[i].X + dtm.asz[i]);
+    B.Y2 := Max(B.Y2, dtm.p[i].Y + dtm.asz[i]);
+  end;
+  writeln(inttostr(B.x1) + ', ' + inttostr(b.y1) + ', ' + inttostr(b.x2) +
+          ', ' + inttostr(b.y2));
+  x1 += -B.X1;
+  y1 += -B.Y1;
+  X2 -= B.X2;
+  Y2 -= B.Y2;
+end;
+
+procedure DTMRotatedBounds(dtm: pDTM; var x1, y1, x2, y2: Integer);
+var
+   i: Integer;
+   B: TBox;
+
+begin
+  for i := 0 to high(dtm.p) do
+  begin
+    B.X1 := Min(B.X1, dtm.p[i].X - dtm.asz[i]);
+    B.Y1 := Min(B.Y1, dtm.p[i].Y - dtm.asz[i]);
+    B.X2 := Max(B.X2, dtm.p[i].X + dtm.asz[i]);
+    B.Y2 := Max(B.Y2, dtm.p[i].Y + dtm.asz[i]);
+  end;
+  writeln(inttostr(B.x1) + ', ' + inttostr(b.y1) + ', ' + inttostr(b.x2) +
+          ', ' + inttostr(b.y2));
+  x1 += -B.X1 * 2;
+  y1 += -B.Y1 * 2;
+  X2 -= B.X2 * 2;
+  Y2 -= B.Y2 * 2;
+end;
 {
   Tries to find the given DTM (index). If found will put the point the dtm has
   been found at in x, y and result to true.
@@ -412,24 +438,23 @@ var
    I, J, H, dH: Integer;
    Found: Boolean;
    TempTP: TPoint;
-   MaxSubPointDist: TPoint;
+
 
 begin
-  MaxSubPointDist := Point(0,0);
 
   for I := 1 to High(DTM.p) do
   begin
     DTM.p[I].x := DTM.p[I].x - DTM.p[0].x;
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
-    MaxSubPointDist.X := Max(DTM.p[I].x, MaxSubPointDist.X);
-    MaxSubPointDist.Y := Max(DTM.p[I].y, MaxSubPointDist.Y);
+
   end;
 
-   X2 := X2 - MaxSubPointDist.X;
-   Y2 := Y2 - MaxSubPointDist.Y;
-   X1 := X1 + MaxSubPointDist.X;
-   Y1 := Y1 + MaxSubPointDist.Y;
-   {If X2 > X1 then
+  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));
+  DTMBounds(DTM, x1, y1, x2, y2);
+  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));
+  {If X2 > X1 then
      //Exit;
    If Y2 > Y1 then  }
      //Exit;
@@ -509,11 +534,9 @@ Var
    I, J, H, dH: Integer;
    Found: Boolean;
    TempTP: TPoint;
-   MaxSubPointDist: TPoint;
 
 Begin
   Result := False;
-  MaxSubPointDist := Point(0,0);
   SetLength(Points, 0);
   For I := 1 To High(DTM.p) Do
   Begin
@@ -521,10 +544,11 @@ Begin
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
   End;
 
-   X2 := X2 - MaxSubPointDist.X;
-   Y2 := Y2 - MaxSubPointDist.Y;
-   X1 := X1 + MaxSubPointDist.X;
-   Y1 := Y1 + MaxSubPointDist.Y;
+  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));
+  DTMBounds(DTM, x1, y1, x2, y2);
+  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));
    {If X2 > X1 then
      //Exit;
    If Y2 > Y1 then  }
@@ -608,17 +632,17 @@ Var
    MaxSubPointDist: TPoint;
 
 Begin
-  MaxSubPointDist := Point(0,0);
   For I := 1 To High(DTM.p) Do
   Begin
     DTM.p[I].x := DTM.p[I].x - DTM.p[0].x;
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
   End;
 
-   X2 := X2 - MaxSubPointDist.X;
-   Y2 := Y2 - MaxSubPointDist.Y;
-   X1 := X1 + MaxSubPointDist.X;
-   Y1 := Y1 + MaxSubPointDist.Y;
+  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));
+  DTMRotatedBounds(DTM, x1, y1, x2, y2);
+  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));
    {If X2 > X1 then
      //Exit;
    If Y2 > Y1 then  }
@@ -668,9 +692,13 @@ Begin
 
       For R := 0 To High(Angle) Do
       Begin
+        writeln('dtm: ' + inttostr(dtm.p[j].x) + ', ' + inttostr(dtm.p[j].y));
+        writeln('mP: ' + inttostr(mP[i].x) + ', ' + inttostr(mP[i].y));
         TempTP.X := DTM.p[J].X + mP[I].X;
         TempTP.Y := DTM.p[J].Y + mP[I].Y;
+        writeln('TempTP: ' + inttostr(TempTP.x) + ', ' + inttostr(TempTP.y));
         TempTP := RotatePoint(TempTP, Angle[R], mP[I].X, mP[I].Y);
+        writeln('TempTP: ' + inttostr(TempTP.x) + ', ' + inttostr(TempTP.y));
         If Not AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) Then
         Begin
           For W := R To High(Angle) - 1 Do
@@ -741,20 +769,15 @@ Var
    tAngle: Extended;
    Found: Boolean;
    TempTP: TPoint;
-   MaxSubPointDist: TPoint;
 
 Begin
-  MaxSubPointDist := Point(0,0);
   For I := 1 To High(DTM.p) Do
   Begin
     DTM.p[I].x := DTM.p[I].x - DTM.p[0].x;
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
   End;
 
-   X2 := X2 - MaxSubPointDist.X;
-   Y2 := Y2 - MaxSubPointDist.Y;
-   X1 := X1 + MaxSubPointDist.X;
-   Y1 := Y1 + MaxSubPointDist.Y;
+  DTMBounds(DTM, x1, y1, x2, y2);
    {If X2 > X1 then
      //Exit;
    If Y2 > Y1 then  }

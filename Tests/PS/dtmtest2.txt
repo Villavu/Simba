@@ -10,18 +10,18 @@ const
 var
    ppdtm: pdtm;
    w,h,x,y,dtm,i: integer;
-	
+
    a: extended;
 
    p,pp: TPointArray;
    c,t,asz,ash: TIntegerArray;
 
 begin
-  p := [Point(0,0), Point(1,1)];
-  c := [clWhite, clWhite];
-  t := [0, 0];
-  asz := [4, 4];
-  ash := [dtm_Rectangle, dtm_Rectangle];
+  p := [Point(0,0), Point(1,1), Point(-4, -4)];
+  c := [clWhite, clWhite, clWhite];
+  t := [0, 0, 0];
+  asz := [0, 4, 4];
+  ash := [dtm_Rectangle, dtm_Rectangle, dtm_Rectangle];
   setlength(ppdtm.p,2);
   setlength(ppdtm.c,2);
   setlength(ppdtm.t,2);
@@ -29,7 +29,7 @@ begin
   setlength(ppdtm.ash,2);
 
   ppdtm.p := p;
-  ppdtm.c := c;   
+  ppdtm.c := c;
   ppdtm.t := t;
   ppdtm.asz := asz;
   ppdtm.ash := ash;
@@ -37,6 +37,8 @@ begin
   dtm := AddpDTM(ppdtm);
 
   getclientdimensions(w,h);
+  writeln(inttostr(w) + ', ' + inttostr(h));
+
   if FindDTM(dtm, x, y, 0, 0, w-1, h-1) then
   begin
     writeln('Found DTM at ' + inttostr(x) + ', ' + inttostr(y));
@@ -45,7 +47,7 @@ begin
 
   if FindDTMs(dtm, p, 0, 0, w-1, h-1) then
   begin
-    writeln('Found ' + inttostr(length(p)) + ' DTM(s). First one at ' + 
+    writeln('Found ' + inttostr(length(p)) + ' DTM(s). First one at ' +
              inttostr(p[0].x) + ', ' + inttostr(p[0].y));
     movemouse(p[0].x,p[0].y);
   end;
@@ -54,5 +56,5 @@ begin
   begin
     writeln('Found DTM at ' + inttostr(x) + ', ' + inttostr(y) + ' Angle: ' + FloatToStr(a));
     movemouse(x,y);
-  end;    
+  end;  
 end.
