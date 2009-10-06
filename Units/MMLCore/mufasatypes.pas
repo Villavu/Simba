@@ -37,6 +37,10 @@ type
     Possibly add .name too?
     Then one could give DTM names, which would be easy for debugging.
   }
+  TBox = record
+    x1, y1, x2, y2: Integer;
+  end;
+
   pDTM = record
     p: TPointArray;
     c, t, asz, ash: TIntegerArray;
