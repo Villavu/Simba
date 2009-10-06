@@ -20,7 +20,7 @@ begin
   p := [Point(0,0), Point(1,1)];
   c := [clWhite, clWhite];
   t := [0, 0];
-  asz := [0, 0];
+  asz := [4, 4];
   ash := [dtm_Rectangle, dtm_Rectangle];
   setlength(ppdtm.p,2);
   setlength(ppdtm.c,2);
