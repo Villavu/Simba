@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, LResources, Window, files, MufasaTypes, Client, TestUnit, finder,
   MMLThread, mmlpsthread, bitmaps, colour_conv, plugins, DTM, colourpicker,
-  windowselector, dtmutil;
+  windowselector, dtmutil, mmath;
 
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 

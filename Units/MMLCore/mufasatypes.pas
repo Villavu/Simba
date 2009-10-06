@@ -29,9 +29,14 @@ type
   TVariantArray = Array of Variant;
   TIntegerArray = Array of Integer;
 
+  TExtendedArray = Array of Extended;
   T2DExtendedArray = Array of Array of Extended;
 
   { DTM Types }
+  {
+    Possibly add .name too?
+    Then one could give DTM names, which would be easy for debugging.
+  }
   pDTM = record
     p: TPointArray;
     c, t, asz, ash: TIntegerArray;

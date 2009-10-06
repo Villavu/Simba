@@ -9,27 +9,28 @@ const
 
 var
    ppdtm: pdtm;
-   w,h,x,y,dtm: integer;
+   w,h,x,y,dtm,i: integer;
+	
+   p,pp: TPointArray;
+   c,t,asz,ash: TIntegerArray;
+
 begin
+  p := [Point(0,0), Point(1,1)];
+  c := [clWhite, clWhite];
+  t := [0, 0];
+  asz := [0, 0];
+  ash := [dtm_Rectangle, dtm_Rectangle];
   setlength(ppdtm.p,2);
   setlength(ppdtm.c,2);
   setlength(ppdtm.t,2);
   setlength(ppdtm.asz,2);
   setlength(ppdtm.ash,2);
 
-  ppdtm.p[0].x := 0;
-  ppdtm.p[0].y := 0;
-  ppdtm.c[0] := 16777215;
-  ppdtm.t[0] := 0;
-  ppdtm.asz[0] := 0;
-  ppdtm.asz[0] := dtm_Rectangle;
-
-  ppdtm.p[1].x := 1;
-  ppdtm.p[1].y := 1;
-  ppdtm.c[1] := 16777215;
-  ppdtm.t[1] := 0;
-  ppdtm.asz[1] := 0;
-  ppdtm.asz[1] := dtm_Rectangle;
+  ppdtm.p := p;
+  ppdtm.c := c;   
+  ppdtm.t := t;
+  ppdtm.asz := asz;
+  ppdtm.ash := ash;
 
   dtm := AddpDTM(ppdtm);
 
@@ -40,4 +41,10 @@ begin
     movemouse(x,y);
   end;
 
+  if FindDTMs(dtm, p, 0, 0, w-1, h-1) then
+  begin
+    writeln('Found ' + inttostr(length(p)) + ' DTM(s). First one at ' + 
+             inttostr(p[0].x) + ', ' + inttostr(p[0].y));
+    movemouse(p[0].x,p[0].y);
+  end;
 end.
