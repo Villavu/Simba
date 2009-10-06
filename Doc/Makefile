@@ -6,7 +6,7 @@ self := mufasa_intro
 default: createreport
 
 clean:
-	rm -f *.{pdf,log, aux}
+	find -iname "$(self)*" | grep -v svn | grep -v tex | xargs rm -vf
 	$(MAKE) -C Pics/ clean
 
 createreport:
