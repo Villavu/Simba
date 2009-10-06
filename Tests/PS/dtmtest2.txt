@@ -11,6 +11,8 @@ var
    ppdtm: pdtm;
    w,h,x,y,dtm,i: integer;
 	
+   a: extended;
+
    p,pp: TPointArray;
    c,t,asz,ash: TIntegerArray;
 
@@ -47,4 +49,10 @@ begin
              inttostr(p[0].x) + ', ' + inttostr(p[0].y));
     movemouse(p[0].x,p[0].y);
   end;
+
+  if FindDTMRotated(dtm, x, y, 0, 0, w-1, h-1, -3.14, 3.14, 0.05, a) then
+  begin
+    writeln('Found DTM at ' + inttostr(x) + ', ' + inttostr(y) + ' Angle: ' + FloatToStr(a));
+    movemouse(x,y);
+  end;    
 end.

@@ -425,8 +425,8 @@ begin
     MaxSubPointDist.Y := Max(DTM.p[I].y, MaxSubPointDist.Y);
   end;
 
-   X2 := X2 - MaxSubPointDist.X - 1;
-   Y2 := Y2 - MaxSubPointDist.Y - 1;
+   X2 := X2 - MaxSubPointDist.X;
+   Y2 := Y2 - MaxSubPointDist.Y;
    X1 := X1 + MaxSubPointDist.X;
    Y1 := Y1 + MaxSubPointDist.Y;
    {If X2 > X1 then
@@ -521,8 +521,8 @@ Begin
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
   End;
 
-   X2 := X2 - MaxSubPointDist.X - 1;
-   Y2 := Y2 - MaxSubPointDist.Y - 1;
+   X2 := X2 - MaxSubPointDist.X;
+   Y2 := Y2 - MaxSubPointDist.Y;
    X1 := X1 + MaxSubPointDist.X;
    Y1 := Y1 + MaxSubPointDist.Y;
    {If X2 > X1 then
@@ -615,8 +615,8 @@ Begin
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
   End;
 
-   X2 := X2 - MaxSubPointDist.X - 1;
-   Y2 := Y2 - MaxSubPointDist.Y - 1;
+   X2 := X2 - MaxSubPointDist.X;
+   Y2 := Y2 - MaxSubPointDist.Y;
    X1 := X1 + MaxSubPointDist.X;
    Y1 := Y1 + MaxSubPointDist.Y;
    {If X2 > X1 then
@@ -751,8 +751,8 @@ Begin
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
   End;
 
-   X2 := X2 - MaxSubPointDist.X - 1;
-   Y2 := Y2 - MaxSubPointDist.Y - 1;
+   X2 := X2 - MaxSubPointDist.X;
+   Y2 := Y2 - MaxSubPointDist.Y;
    X1 := X1 + MaxSubPointDist.X;
    Y1 := Y1 + MaxSubPointDist.Y;
    {If X2 > X1 then

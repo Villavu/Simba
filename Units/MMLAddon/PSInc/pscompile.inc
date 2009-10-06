@@ -8,7 +8,7 @@ Sender.Comp.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, A
 Sender.Comp.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
 Sender.Comp.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
 Sender.Comp.AddTypeS('pDTM','record p: TPointArray; c, t, asz, ash: TIntegerArray; end');
-
+Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended');
 
 Sender.AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 Sender.AddFunction(@psWriteln,'procedure writeln(s : string);');
@@ -23,6 +23,8 @@ Sender.AddFunction(@ps_DTMFromString, 'function DTMFromString(DTMString: String)
 Sender.AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
 Sender.AddFunction(@ps_FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
 Sender.AddFunction(@ps_FindDTMs, 'function FindDTMs(DTM: Integer; var p: TPointArray; x1, y1, x2, y2: Integer): Boolean;');
+Sender.AddFunction(@ps_FindDTMRotated, 'function FindDTMRotated(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean;');
+Sender.AddFunction(@ps_FindDTMsRotated, 'function FindDTMsRotated(DTM: Integer; var Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
 Sender.AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
 Sender.AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 
