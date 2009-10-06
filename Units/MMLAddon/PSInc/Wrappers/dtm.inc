@@ -3,6 +3,13 @@ begin
  Result := CurrThread.Client.MDTM.FindDTM(DTM, x, y, x1, y1, x2, y2);
 end;
 
+function ps_FindDTMs(DTM: Integer; var p: TPointArray; x1, y1, x2, y2: Integer): Boolean;
+begin
+ Result := CurrThread.Client.MDTM.FindDTMs(DTM, p, x1, y1, x2, y2);
+end;
+
+
+
 function ps_DTMFromString(DTMString: String): Integer;
 var
    dtm: pDTM;

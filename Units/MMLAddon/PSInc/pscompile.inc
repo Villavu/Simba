@@ -22,6 +22,7 @@ Sender.AddFunction(@tDTMTopDTM, 'Function tDTMTopDTM(Const DTM: TDTM): pDTM;');
 Sender.AddFunction(@ps_DTMFromString, 'function DTMFromString(DTMString: String): Integer;');
 Sender.AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
 Sender.AddFunction(@ps_FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
+Sender.AddFunction(@ps_FindDTMs, 'function FindDTMs(DTM: Integer; var p: TPointArray; x1, y1, x2, y2: Integer): Boolean;');
 Sender.AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
 Sender.AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 
@@ -30,6 +31,7 @@ sender.AddFunction(@power,'function pow(base,exponent : extended) : extended');
 Sender.AddFunction(@max,'function Max(a, b: Integer): Integer;');
 Sender.AddFunction(@min,'function Min(a, b: Integer): Integer;');
 Sender.AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
+Sender.AddFunction(@point,'function Point(x,y:integer) : TPoint;');
 
 Sender.AddFunction(@Freeze, 'function freeze:boolean;');
 Sender.AddFunction(@Unfreeze, 'function unfreeze: boolean;');
