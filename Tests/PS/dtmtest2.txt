@@ -1,0 +1,43 @@
+program new;
+
+const
+    dtm_Rectangle = 0;
+    dtm_Cross = 1;
+    dtm_DiagonalCross = 2;
+    dtm_Circle = 3;
+    dtm_Triangle = 4;
+
+var
+   ppdtm: pdtm;
+   w,h,x,y,dtm: integer;
+begin
+  setlength(ppdtm.p,2);
+  setlength(ppdtm.c,2);
+  setlength(ppdtm.t,2);
+  setlength(ppdtm.asz,2);
+  setlength(ppdtm.ash,2);
+
+  ppdtm.p[0].x := 0;
+  ppdtm.p[0].y := 0;
+  ppdtm.c[0] := 16777215;
+  ppdtm.t[0] := 0;
+  ppdtm.asz[0] := 0;
+  ppdtm.asz[0] := dtm_Rectangle;
+
+  ppdtm.p[1].x := 1;
+  ppdtm.p[1].y := 1;
+  ppdtm.c[1] := 16777215;
+  ppdtm.t[1] := 0;
+  ppdtm.asz[1] := 0;
+  ppdtm.asz[1] := dtm_Rectangle;
+
+  dtm := AddpDTM(ppdtm);
+
+  getclientdimensions(w,h);
+  if FindDTM(dtm, x, y, 0, 0, w-1, h-1) then
+  begin
+    writeln('Found DTM at ' + inttostr(x) + ', ' + inttostr(y));
+    movemouse(x,y);
+  end;
+
+end.
