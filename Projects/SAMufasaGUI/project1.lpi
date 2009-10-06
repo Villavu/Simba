@@ -313,7 +313,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="MufasaTypes"/>
         <CursorPos X="51" Y="37"/>
-        <TopLine Value="39"/>
+        <TopLine Value="37"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="134"/>
         <Loaded Value="True"/>
@@ -842,7 +842,7 @@
         <Filename Value="../../Units/MMLCore/dtm.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="dtm"/>
-        <CursorPos X="31" Y="235"/>
+        <CursorPos X="34" Y="226"/>
         <TopLine Value="226"/>
         <EditorIndex Value="3"/>
         <UsageCount Value="70"/>
