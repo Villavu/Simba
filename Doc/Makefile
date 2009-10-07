@@ -11,4 +11,4 @@ clean:
 
 createreport:
 	$(MAKE) -C Pics/
-	texi2pdf $(self).tex --silent
+	texi2pdf $(self).tex #--silent

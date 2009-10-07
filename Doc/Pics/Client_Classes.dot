@@ -3,10 +3,9 @@ digraph Client {
 	Client [shape=box]
 	
 	Client -> Window
-	Client -> ColorFinder
+	Client -> Finder
 	Client -> Bitmaps
 	Client -> Files
-	Client -> Strings
 	Client -> OCR
 	Client -> DTM
 

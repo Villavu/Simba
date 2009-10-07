@@ -1,61 +1,111 @@
-\documentclass[a4paper, 10pt]{article}
+\documentclass[a4paper, 10pt]{report} % perhaps book?
 \usepackage{graphicx}
+\usepackage{url}
 \begin{document}
-\title{Mufasa Client Class}
+\title{Mufasa Handbook}
 \author{Merlijn Wajer}
 \maketitle
 
-\section{Introduction}
+\chapter{Introduction}
 
-This is the official Mufasa Documentation.
-The main purpose of this document is to provide a clear view on Mufasa's architecture.
+\emph{This is the official Mufasa Documentation.
+The main purpose of this document is to provide a clear view on Mufasa's 
+interal structure. This guide is aimed at developers and other persons
+interested in project Mufasa.}
 
 \section{What is Mufasa?}
 
-Mufasa is a project that aims to create two things, a GUI to create scripts, and the Mufasa Macro Library.
-The Mufasa Macro Library (MML) will provide one with a way to control the mouse and keyboard, open files, open web pages, and capturing and analyzing images.
-The GUI will use MML for most of it's features. Each script thread will also use a Client class.
-
-\subsection{Simple feature overview}
+Mufasa is a project that aims to create the Mufasa Macro Library (MML).
+As a side project, the project also tries to create a simple but effective
+user interface to the Mufasa Macro Library. This is achieved with the
+Pascal interpreter PascalScript\footnote{\url{http://www.remobjects.com/ps.aspx}}
+combined with a wrapper for the MML.
 
 Mufasa is:
 \begin{itemize}
-	\item Object Oriented. This means the code is generally more
-		  readable, and easier to maintain.
+	\item Object Oriented. Since OOP also increases the abstraction of
+		  certain tasks/parts, the code is much easier to maintain and
+		  comprehend.
 	\item Free Software, as in, Free.\footnote{License here}
-	\item MOAR
+	\item Cross platform. Currently the supported platforms are Linux 
+		  (32 and 64 bit) and Windows (32 and 64 bit).
+		  Mac support is planned; but currently halted due to lack of a
+		  Mac computer.\footnote{Virtual Machines are an option;
+		  but currently Darwin is not supported on Virtualbox.}
+	\item A community project; the SRL community\footnote{
+			\url{http://www.villavu.com}}
+		  is widely known for it's maturity and open-mindedness.
+	\item Mufasa is actively maintained. It also has a bugtracker,
+		  a wiki, and a forum.
 \end{itemize}
 
-\section{Important Classes in MML}
+\pagebreak
 
-\subsection{The Client Class}
+\subsection{Mufasa Macro Library}
 
-The Client Class is the main Class, and is created to be able
- to run seperately from the User Interface, thus being thread safe.
+The MML's main features are:
+\begin{itemize}
+	\item Mouse control.
+	\item Keyboard control.
+	\item Screen capturing and analyzing.
+	\item Providing several methods to analyzing the screen; among these
+		  are DTM's and Bitmaps.
+	\item API's to open files and web pages.
+\end{itemize}
+
+\subsection{Mufasa GUI}
+
+As mentioned in the introduction, the Mufasa GUI uses Pascal Script as 
+interpreter. \\ 
+
+A non-OOP MML wrapper has been created only for the purpose
+of exporting MML functionality to Pascal Script. 
+This allows the user to use MML functions in their so called `Scripts'. \\
+A more detailed specification will be given once we have explored the MML.
+
+\chapter{The Mufasa Macro Library and it's Core Classes}
+
+The Mufasa Library consists out of one class that combines all the other
+classes, the \textbf{Client} class.
+
+\section{The Client Class}
+
+The \textbf{Client} class is the main Class, and is designed 
+to run seperately from the User Interface.
 The Client class is mainly designed to be a container for other classes.
+If one wants to use the MML as a whole, he will only need the use 
+the Client class.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\includegraphics[scale=0.4]{Pics/Client_Classes}
 	\caption{Classes that the Client contains.}
 \end{figure}
 
 \pagebreak
 
-\subsection{The Window Class}
+\section{The Window Class}
 
-\begin{figure}[h]
+The \textbf{Window} class manages the core functionality for retreiving Window data,
+such as the actual pixel data and the position and dimension of a window. \\
+
+The Window class' main purpose is to form a cross platform class to retrieve
+window information; no other class than the Window class should have to do
+any platform-specific function calls to retreive window data; this is all
+abstracted by the Window class.\footnote{This implements the so-called 
+encapsulation of functionality.} \\
+
+The Window class:
+
+\begin{figure}[ht]
 	\includegraphics[scale=0.4]{Pics/Window}
-	\caption{The structure of the Window class}
+	\caption{Simplified structure of the Window class}
 \end{figure}
 
-The window class manages the core functionality for retreiving Window data, such as the actual pixels, position, or dimensions.
-
-\begin{figure}[h]
-	\includegraphics[scale=0.4]{Pics/Window_Types}
-	\caption{Different types of Windows. Note that XWindow is only for non-Windows systems.}
-\end{figure}
-
-Figure 3 shows the three different Window Types supported by Mufasa.
+Figure 2.2 is ofcourse a highly simplified representation of the Window class;
+the real class implements several other features. Among those are copying
+(parts) of a window to a bitmap, methods to set a window as target, and
+a feature that allows the user to ``Lock'' the Windows' current data in
+Mufasa-maintained memory. \\
 
 Quick overview of functions:
 
@@ -69,47 +119,80 @@ Quick overview of functions:
 	\item GetPixel
 \end{itemize}
 
-Together, these functions form the core of the window management, except for input.
+Together, these functions form the core of the window management.
+However; to fake user input, a programmer also needs the ability to 
+manipulate user input. Which brings us to the next MML Core class.
 
-\subsection{The Input Class}
+\section{The Input Class}
 
-The Input Class is the class that takes care of all the input.
+The \textbf{Input} Class is the class that takes care of all the input. \\
+As one can see in Figure 4, MML aims to support both Silent and non Silent 
+Input. Since the Input heavily differs per operating system, 
+the Input class should have a general way of sending keys,
+possibly at the expense of losing some functionality.
 
-\begin{figure}[h]
+\subsection{Silent Input}
+
+So what is Silent Input?
+We\footnote{The Designers and Developers of Mufasa} define Silent Input as
+methods to manipulate the user's mouse and keyboard, without visually using
+them. So what does this mean? \\
+
+This basically means that you will still be able to use your mouse while
+MML is performing mouse operations on your targetted window/client.
+
+However, silent input is very hard to implement, and often hardly supported
+by host operating systems. Often silent mouse or keyboard input is simply 
+ignored. So in general is it advised to stick to non silent input.
+
+
+\begin{figure}[ht]
 	\includegraphics[scale=0.4]{Pics/Input_Diag}
 	\caption{Input Functionality.}
 \end{figure}
+\section{The Colour Convertions Include}
 
-As one can see in Figure 4, MML aims to support both Silent and non Silent Input.
-Since the Input heavily differs per operating system, the Input class should have a general way of sending keys, possibly at the expense of losing some functionality.
+The \textbf{Colour Conversions} unit contains pascal code to quickly convert
+one colour type to another. It also adds support for comparing colours.
+The reason this is not a class, is because constantly dereferencing a class
+to call a single\footnote{Small} function won't do the speed of a program any 
+good. There also wasn't really a need for a class,
+since none of these functions need to be initialized in any way.
 
-\subsection{The Color Convertions Include}
+\section{The Colour Class}
 
-This .inc file contains pascal code to quickly convert one colour type to another.
-It also adds support for comparing colours. The reason this is not a class, is because constantly dereferencing a class to call a single function doesn't do the speed of a program any good. There also wasn't really a need for a class, since none of these functions need to be initialized in any way.
+The colour class is a Class that does all the colour identfying and locating
+work. (A function like FindColor does this)
+The colour class uses the Colour Convertions unit for several of it's
+functions.
 
-\subsection{The Colour Class}
-
-The colour class is a Class that does all the colour identfying and locating work. (FindColor, for example)
-The colour class uses the Convertions include for several of it's functions.
-
-A FindColor-derivative function in Mufasa exists generally out of the following steps:
+A FindColor-derivative function in Mufasa exists generally out of the following
+steps:
 \begin{itemize}
 	\item Retrieve Client Data.
-	\item Loop over the data, possibly with a special algorithm.
-	\item Check the current pixel data against another colour, possibly with tolerance.
+	\item Loop over the data, possibly with a special (spiral) algorithm.
+	\item Check the current pixel data against another colour, possibly 
+		  with tolerance.
 	\item Free the Client Data.
 	\item Return found point(s).
 \end{itemize}
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \includegraphics[scale=0.4]{Pics/FindColor}
     \caption{A basic find colour.}
 \end{figure}
 
-\subsection{Notes on the previously mentioned classes}
+\chapter{DISREGARD ANYTHING PAST THIS}
 
-At this point it is unsure if the Input class will also take care of Sockets and Files. Most likely these will get their own class.
+\section{DTMs and the DTM Class}
+
+
+\section{Bitmaps and the Bitmaps Class}
+
+
+
+\section{Notes on the previously mentioned classes}
+
 
 \section{More On The Core Classes}
 

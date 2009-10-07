@@ -1,7 +1,7 @@
 
 .PHONY: default clean
 
-files := Client_Classes FindColor Input_Diag Window Window_Types
+files := Client_Classes FindColor Input_Diag Window
 build = dot $(1).dot -Tpng > $(1).png
 
 default: dotit
@@ -22,7 +22,4 @@ Input_Diag:
 
 Window:
 	$(call build,Window)
-
-Window_Types:
-	$(call build,Window_Types)
 
