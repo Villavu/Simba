@@ -441,14 +441,20 @@ begin
 end;
 
 procedure TMWindow.ActivateClient;
+{$IFDEF LINUX}
+var
+   Old_Handler: TXErrorHandler;
+{$ENDIF}
 begin
   {$IFDEF MSWINDOWS}
   if TargetMode = w_Window then
     SetForegroundWindow(Self.TargetHandle);
   {$ENDIF}
   {$IFDEF LINUX}
+  Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   if TargetMode = w_XWindow then
     XSetInputFocus(Self.XDisplay,Self.CurWindow,RevertToParent,CurrentTime);
+  XSetErrorHandler(Old_Handler);
   {$ENDIF}
 end;
 

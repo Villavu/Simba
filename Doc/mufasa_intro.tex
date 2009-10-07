@@ -143,13 +143,14 @@ MML is performing mouse operations on your targetted window/client.
 
 However, silent input is very hard to implement, and often hardly supported
 by host operating systems. Often silent mouse or keyboard input is simply 
-ignored. So in general is it advised to stick to non silent input.
+ignored. So in general it is advised to stick to non silent input.
 
 
 \begin{figure}[ht]
 	\includegraphics[scale=0.4]{Pics/Input_Diag}
 	\caption{Input Functionality.}
 \end{figure}
+
 \section{The Colour Convertions Include}
 
 The \textbf{Colour Conversions} unit contains pascal code to quickly convert
@@ -182,10 +183,137 @@ steps:
     \caption{A basic find colour.}
 \end{figure}
 
-\chapter{DISREGARD ANYTHING PAST THIS}
-
 \section{DTMs and the DTM Class}
 
+DTM is shorthand for Deformable Template Model. \\
+
+\emph{``DTM'' is the term used in SCAR. If it is actually a Deformable Template
+Model is definately debateable; but for now we will stick to ``DTM''.} \\
+
+A DTM is in my view just a relatively simple way of defining a relationship
+between several points. Each of these points have a relative offset to each
+other, and may different in colour, tolerance, area size and shape.
+A DTM generally consists out of one \textbf{Main Point}, and several
+\textbf{Sub Points}
+The structure of a DTM looks like this:
+
+\begin{figure}[ht]
+    \includegraphics[scale=0.4]{Pics/DTM}
+    \caption{Structure of a DTM.}
+\end{figure}
+
+Where each point in a DTM has a colour, tolerance, area size and area shape
+entity. The main point's ``point'' is typically $ (0, 0) $, and all the
+sub point points are arelative to the main point.
+
+\subsection{DTM Structure in MML}
+
+\begin{verbatim}
+  pDTM = record
+    p: TPointArray;
+    c, t, asz, ash: TIntegerArray;
+  end; 
+\end{verbatim}
+
+\subsection{Example of a simple DTM}
+If one was to create his own DTM, he\footnote{Or she, but we will denote he
+and she as ``he'' in this article.} would first have to think of a usefull DTM
+structure.
+
+Say:
+$$ MainPoint = (123, 456)  $$
+$$ SubPoint_1 = (122, 460) $$
+$$ SubPoint_2 = (120, 450) $$
+
+Then we could create the following pDTM structure:
+
+\begin{verbatim}
+	// Give dtm.p a length of three.
+	// Mainpoint
+	dtm.p[0] = Point(123, 456);
+
+	// Subpoints
+	dtm.p[1] = Point(122, 460)
+	dtm.p[2] = Point(120, 450)
+\end{verbatim}
+
+Note that we do not include other variables, such as colour, tolerance, area
+size and area shape; they are of no importance in this example.
+
+However, this code is not very clear about the DTM's points.
+Better would be to write:
+
+\begin{verbatim}
+    // Give dtm.p a length of three.
+    // Mainpoint
+    dtm.p[0] = Point(0, 0);
+
+    // Subpoints
+    dtm.p[1] = Point(-1, 4)  // 122 - 123 = -1, 460 - 456 = 4
+    dtm.p[2] = Point(-3, -6) // 120 - 123 = -3, 450 - 456 = -6
+\end{verbatim}
+
+As you can see it is perfectly valid to use negative points.
+
+\subsection{Colour and Tolerance}
+
+The colour value of a point in a DTM is just a RGB integer value.
+Black = 0, Red = 255, White = 16777215, et cetera.
+
+The value tolerance decides if a colour is similar enough to the given
+colour; if this is the case, we say that the colours \textbf{matched}.
+
+With no Area Size and Area Shape specified\footnote{Read: with Area
+Size = 0 and Area Shape = Rectangle} we say that a DTM matches if for each
+point in the DTM, the colour at the relative point matches the colour in dtm
+with the given tolerance.
+
+$$ \forall p \in P, \forall t \in Tol, \forall c \in Col : T(C(p), c) \leq t $$
+
+With C() defining the colour at the given point, and T() defining the tolerance
+between the two given colours.
+
+\subsection{Area Size and Shape}
+
+Area Size and Shape add that nifty extra functionality to DTM's.
+\textbf{Area Size} defines the area that should all match the colour with the given
+tolerance. \\
+
+The \textbf{Area Shape} defines the Shape of the Area Size.
+Currently, the following shapes are supported:
+\begin{itemize}
+	\item Rectangle
+	\item Cross
+	\item DiagonalCross
+	\item Circle
+	\item Triangle\footnote{Not fully implemented yet.}
+\end{itemize}
+
+\subsection{Loading a DTM from a string}
+
+It is also possible to load a DTM from a ``zipped'' string.
+The details of the algorithm will not be explained here.\footnote{Take
+a look at the code in dtm.pas}
+
+\subsection{pDTM and TDTM}
+
+One may know DTM's as a different type:
+
+\begin{verbatim}
+  TDTMPointDef = record
+    x, y, Color, Tolerance, AreaSize, AreaShape: integer;
+  end;
+
+  TDTMPointDefArray = Array Of TDTMPointDef;
+
+  TDTM = record
+    MainPoint: TDTMPointDef;
+    SubPoints: TDTMPointDefArray;
+  end;    
+\end{verbatim}
+
+MML provides the two functions \textbf{pDTMtoTDTM} and \textbf{TDTMtopDTM} to
+directly convert between the two types.
 
 \section{Bitmaps and the Bitmaps Class}
 

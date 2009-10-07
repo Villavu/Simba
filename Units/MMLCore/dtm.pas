@@ -380,8 +380,8 @@ begin
     B.X2 := Max(B.X2, dtm.p[i].X + dtm.asz[i]);
     B.Y2 := Max(B.Y2, dtm.p[i].Y + dtm.asz[i]);
   end;
-  writeln(inttostr(B.x1) + ', ' + inttostr(b.y1) + ', ' + inttostr(b.x2) +
-          ', ' + inttostr(b.y2));
+  {writeln(inttostr(B.x1) + ', ' + inttostr(b.y1) + ', ' + inttostr(b.x2) +
+          ', ' + inttostr(b.y2)); }
   x1 += -B.X1;
   y1 += -B.Y1;
   X2 -= B.X2;
@@ -401,8 +401,7 @@ begin
     B.X2 := Max(B.X2, dtm.p[i].X + dtm.asz[i]);
     B.Y2 := Max(B.Y2, dtm.p[i].Y + dtm.asz[i]);
   end;
-  writeln(inttostr(B.x1) + ', ' + inttostr(b.y1) + ', ' + inttostr(b.x2) +
-          ', ' + inttostr(b.y2));
+
   x1 += -B.X1 * 2;
   y1 += -B.Y1 * 2;
   X2 -= B.X2 * 2;
@@ -449,11 +448,11 @@ begin
 
   end;
 
-  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));
+  {writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));     }
   DTMBounds(DTM, x1, y1, x2, y2);
-  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));
+  {writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));  }
   {If X2 > X1 then
      //Exit;
    If Y2 > Y1 then  }
@@ -544,11 +543,11 @@ Begin
     DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
   End;
 
-  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));
+  {writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));         }
   DTMBounds(DTM, x1, y1, x2, y2);
-  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));
+ { writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
+          ', ' + inttostr(y2));     }
    {If X2 > X1 then
      //Exit;
    If Y2 > Y1 then  }
