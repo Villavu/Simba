@@ -92,3 +92,13 @@ procedure FastReplaceColor(bmp: Integer; OldColor, NewColor: TColor);
 begin
   CurrThread.Client.MBitmaps.Bmp[Bmp].FastReplaceColor(OldColor,NewColor);
 end;
+
+procedure ps_CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer);
+var
+   mBMP: TMufasaBitmap;
+begin
+  mBMP := CurrThread.Client.MBitmaps.GetBMP(bmp);
+  if mBMP = nil then
+    exit;
+  mBMP.CopyClientToBitmap(CurrThread.Client.MWindow, xs, ys, xe, ye);
+end;
