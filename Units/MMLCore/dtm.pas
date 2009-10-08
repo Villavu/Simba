@@ -402,10 +402,10 @@ begin
     B.Y2 := Max(B.Y2, dtm.p[i].Y + dtm.asz[i]);
   end;
 
-  x1 += -B.X1 * 2;
-  y1 += -B.Y1 * 2;
-  X2 -= B.X2 * 2;
-  Y2 -= B.Y2 * 2;
+  x1 += -Sqr(B.X1);
+  y1 += -Sqr(B.Y1);
+  X2 -= Sqr(B.X2);
+  Y2 -= Sqr(B.Y2);
 end;
 {
   Tries to find the given DTM (index). If found will put the point the dtm has

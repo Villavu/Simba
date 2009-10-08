@@ -47,6 +47,7 @@ uses
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
+  bitmaps,
   lclintf; // for GetTickCount and others.
 
 
@@ -132,6 +133,7 @@ end;
 // include PS wrappers
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
+
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
