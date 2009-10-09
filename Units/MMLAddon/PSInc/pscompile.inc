@@ -33,7 +33,7 @@ sender.AddFunction(@power,'function pow(base,exponent : extended) : extended');
 Sender.AddFunction(@max,'function Max(a, b: Integer): Integer;');
 Sender.AddFunction(@min,'function Min(a, b: Integer): Integer;');
 Sender.AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
-Sender.AddFunction(@point,'function Point(x,y:integer) : TPoint;');
+Sender.AddFunction(@classes.point,'function Point(x,y:integer) : TPoint;');
 
 Sender.AddFunction(@Freeze, 'function freeze:boolean;');
 Sender.AddFunction(@Unfreeze, 'function unfreeze: boolean;');
@@ -73,6 +73,10 @@ Sender.AddFunction(@SetTransparentColor,'procedure SetTransparentColor(bmp : int
 Sender.AddFunction(@GetTransparentColor,'function GetTransparentColor(bmp: integer) : TColor;');
 Sender.AddFunction(@FastReplaceColor,'procedure FastReplaceColor(Bmp : integer; OldColor,NewColor : TColor);');
 Sender.AddFunction(@ps_CopyClientToBitmap, 'procedure CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer);');
+Sender.AddFunction(@SetBitmapName, 'procedure SetBitmapName(Bmp : integer; name : string);');
+Sender.AddFunction(@FindBitmap,'function FindBitmap(bitmap: integer; var x, y: Integer): Boolean;');
+Sender.AddFunction(@FindBitmapIn,'function FindBitmapIn(bitmap: integer; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;');
+sender.AddFunction(@FindBitmapToleranceIn,'function FindBitmapToleranceIn(bitmap: integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;');
 
 
 

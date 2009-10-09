@@ -5,7 +5,7 @@ unit finder;
 interface
 
 uses
-  Classes, SysUtils,    MufasaTypes; // Types
+  Classes, SysUtils,bitmaps,  MufasaTypes; // Types
 
 { TMFinder Class }
 
@@ -22,23 +22,26 @@ type
           destructor Destroy; override;
       private
         Procedure UpdateCachedValues(NewWidth,NewHeight : integer);
-        procedure DefaultOperations(var x1,y1,x2,y2 : integer);
+        procedure DefaultOperations(var xs,ys,xe,ye : integer);
       public
-          function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
-          procedure SetToleranceSpeed(nCTS: Integer);
-          function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
-          // Possibly turn x, y into a TPoint var.
-          function FindColor(var x, y: Integer; Color, x1, y1, x2, y2: Integer): Boolean;
-          function FindColorTolerance(var x, y: Integer; Color, x1, y1, x2, y2, tol: Integer): Boolean;
-          function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
-          function FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean;
+        function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
+        procedure SetToleranceSpeed(nCTS: Integer);
+        function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
+        // Possibly turn x, y into a TPoint var.
+        function FindColor(var x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
+        function FindColorTolerance(var x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
+        function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
+        function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+        //Bitmap functions
+        function FindBitmap(bitmap: TMufasaBitmap; var x, y: Integer): Boolean;
+        function FindBitmapIn(bitmap: TMufasaBitmap; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
+        function FindBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
       protected
         Client: TObject;
         CachedWidth, CachedHeight : integer;
         ClientTPA : TPointArray;
         hueMod, satMod: Extended;
         CTS: Integer;
-
     end;
 
 implementation
@@ -46,7 +49,29 @@ uses
     Client, // For the Client Casts.
     colour_conv // For RGBToColor, etc.
     ;
+type
+  TPRGB32Array = array of PRGB32;
 
+function CalculateRowPtrs(ReturnData : TRetData; RowCount : integer) : TPRGB32Array;overload;
+var
+  I : integer;
+begin;
+  setlength(result,RowCount);
+  for i := 0 to RowCount - 1do
+  begin;
+    result[i] := ReturnData.Ptr;
+    inc(ReturnData.Ptr,ReturnData.IncPtrWith);
+  end;
+end;
+
+function CalculateRowPtrs(Bitmap : TMufasaBitmap) : TPRGB32Array;overload;
+var
+  I : integer;
+begin;
+  setlength(result,Bitmap.Height);
+  for i := 0 to Bitmap.Height - 1 do
+    result[i] := Bitmap.FData + Bitmap.Width;
+end;
 
 constructor TMFinder.Create(aClient: TObject);
 
@@ -96,7 +121,7 @@ begin
 end;
 
 
-function ColorSame(var CTS,Tolerance : Integer; var R1,B1,G1,R2,G2,B2 : byte; var H1,S1,L1,huemod,satmod : extended) : boolean; inline;
+function ColorSame(var CTS,Tolerance : Integer; var R1,G1,B1,R2,G2,B2 : byte; var H1,S1,L1,huemod,satmod : extended) : boolean; inline;
 var
   H2,S2,L2 : extended;
 begin
@@ -119,34 +144,34 @@ begin
   SetLength(ClientTPA,NewWidth * NewHeight);
 end;
 
-procedure TMFinder.DefaultOperations(var x1, y1, x2, y2: integer);
+procedure TMFinder.DefaultOperations(var xs, ys, xe, ye: integer);
 var
   w,h : integer;
 begin
-{  if x1 > x2 then
-    Swap(x1,x2);
-  if y1 > y2 then
-    Swap(y1,y2);}
-  if x1 < 0 then
-    // x1 := 0;
-    raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
-                              'correct x1: %d.', [x1]);
-  if y1 < 0 then
-//    y1 := 0;
-    raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
-                              'correct y1: %d.', [y1]);
+{  if xs > xe then
+    Swap(xs,xe);
+  if ys > ye then
+    Swap(ys,ye);}
+  if xs < 0 then
+    // xs := 0;
+    raise Exception.createFMT('Any Find Function, you did not pass a ' +
+                              'correct xs: %d.', [xs]);
+  if ys < 0 then
+//    ys := 0;
+    raise Exception.createFMT('Any Find Function, you did not pass a ' +
+                              'correct ys: %d.', [ys]);
 
   TClient(Self.Client).MWindow.GetDimensions(w,h);
   if (w <> CachedWidth) or (h <> CachedHeight) then
     UpdateCachedValues(w,h);
-  if x2 >= w then
-//    x2 := w-1;
-    raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
-                              'correct x2: %d.', [x2]);
-  if y2 >= h then
-//    y2 := h-1;
-    raise Exception.createFMT('Any FindColor Function, you did not pass a ' +
-                              'correct y2: %d.', [y2]);
+  if xe >= w then
+//    xe := w-1;
+    raise Exception.createFMT('Any Find Function, you did not pass a ' +
+                              'correct xe: %d.', [xe]);
+  if ye >= h then
+//    ye := h-1;
+    raise Exception.createFMT('Any Find Function, you did not pass a ' +
+                              'correct ye: %d.', [ye]);
 end;
 
 function TMFinder.CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
@@ -159,6 +184,7 @@ var
    h,s,l,hmod,smod : extended;
    Ccts : integer;
 begin
+  Result := 0;
   DefaultOperations(xs, ys, xe, ye);
   dX := xe - xs;
   dY := ye - ys;
@@ -187,7 +213,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindColor(var x, y: Integer; Color, x1, y1, x2, y2: Integer): Boolean;
+function TMFinder.FindColor(var x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr: PRGB32;
@@ -195,27 +221,27 @@ var
    dX, dY, clR, clG, clB, xx, yy: Integer;
 
 begin
-
-  // checks for valid x1,y1,x2,y2? (may involve GetDimensions)
-  DefaultOperations(x1,y1,x2,y2);
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
 
   // calculate delta x and y
-  dX := x2 - x1;
-  dY := y2 - y1;
+  dX := xe - xs;
+  dY := ye - ys;
 
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
 
-  PtrData := TClient(Client).MWindow.ReturnData(x1, y1, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
 
-  for yy := y1 to y2 do
+  for yy := ys to ye do
   begin;
-    for xx := x1 to x2 do
+    for xx := xs to xe do
     begin;
       // Colour comparison here. Possibly with tolerance? ;)
       if (Ptr^.R = clR) and (Ptr^.G = clG) and (Ptr^.B = clB) then
@@ -235,7 +261,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindColorTolerance(var x, y: Integer; Color, x1, y1, x2, y2, tol: Integer): Boolean;
+function TMFinder.FindColorTolerance(var x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr: PRGB32;
@@ -247,18 +273,18 @@ var
    label Miss;
 
 begin
-
-  // checks for valid x1,y1,x2,y2? (may involve GetDimensions)
-  DefaultOperations(x1,y1,x2,y2);
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
 
   // calculate delta x and y
-  dX := x2 - x1;
-  dY := y2 - y1;
+  dX := xe - xs;
+  dY := ye - ys;
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
   ColorToHSL(Color, H1, S1, L1);
 
-  PtrData := TClient(Client).MWindow.ReturnData(x1, y1, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -267,9 +293,9 @@ begin
 
   case CTS of
     0:
-    for yy := y1 to y2 do
+    for yy := ys to ye do
     begin
-      for xx := x1 to x2 do
+      for xx := xs to xe do
       begin
          if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
             goto Hit;
@@ -282,9 +308,9 @@ begin
     begin
       Tol := Sqr(Tol);
 
-      for yy := y1 to y2 do
+      for yy := ys to ye do
       begin
-        for xx := x1 to x2 do
+        for xx := xs to xe do
         begin
            if (sqr(clB - Ptr^.B) + sqr(clG - Ptr^.G) + sqr(clR-Ptr^.R)) <= Tol then
               goto Hit;
@@ -298,8 +324,8 @@ begin
     // Can be optimized a lot... RGBToHSL isn't really inline,
     // and hueMod * tol is also calculated every time.
     begin
-    for yy := y1 to y2 do
-      for xx := x1 to x2 do
+    for yy := ys to ye do
+      for xx := xs to xe do
       begin
          RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
          if ((abs(H1 - H2) <= (hueMod * tol)) and (abs(S1 - S2) <= (satMod * tol)) and (abs(L1 - L2) <= Tol)) then
@@ -329,6 +355,7 @@ var
    dX, dY, clR, clG, clB, xx, yy: Integer;
    H1, S1, L1, H2, S2, L2: Extended;
 begin
+  Result := false;
   DefaultOperations(xs,ys,xe,ye);
 
   dX := xe - xs;
@@ -399,7 +426,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean;
+function TMFinder.FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr: PRGB32;
@@ -407,23 +434,24 @@ var
    dX, dY, clR, clG, clB, xx, yy, i: Integer;
 
 begin
-  DefaultOperations(x1,y1,x2,y2);
+  Result := false;
+  DefaultOperations(xs,ys,xe,ye);
 
-  dX := x2 - x1;
-  dY := y2 - y1;
+  dX := xe - xs;
+  dY := ye - ys;
 
   I := 0;
 
   ColorToRGB(Color, clR, clG, clB);
 
-  PtrData := TClient(Client).MWindow.ReturnData(x1, y1, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
 
-  for yy := y1 to y2 do
+  for yy := ys to ye do
   begin;
-    for xx := x1 to x2 do
+    for xx := xs to xe do
     begin;
       if (Ptr^.R = clR) and (Ptr^.G = clG) and (Ptr^.B = clB) then
       begin
@@ -442,6 +470,132 @@ begin
 
   Result := I > 0;
 
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindBitmap(bitmap: TMufasaBitmap; var x, y: Integer): Boolean;
+var
+  w,h : integer;
+begin
+  TClient(Client).MWindow.GetDimensions(w,h);
+  result := Self.FindBitmapIn(bitmap,x,y,0,0,w-1,h-1);
+end;
+
+function TMFinder.FindBitmapIn(bitmap: TMufasaBitmap; var x, y: Integer; xs,
+  ys, xe, ye: Integer): Boolean;
+var
+   MainRowdata : TPRGB32Array;
+   BmpRowData : TPRGB32Array;
+   PtrData : TRetData;
+   BmpW,BmpH : integer;
+   xBmp,yBmp : integer;
+   tmpY : integer;
+   dX, dY,  xx, yy: Integer;
+label NotFoundBmp;
+  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Caculate the row ptrs
+  MainRowdata:= CalculateRowPtrs(PtrData,dy);
+  BmpRowData:= CalculateRowPtrs(bitmap);
+  //Get the 'fixed' bmp size
+  BmpW := bitmap.Width - 1;
+  BmpH := bitmap.Height - 1;
+  //Heck our bitmap cannot be outside the search area
+  dX := dX - bmpW;
+  dY := dY - bmpH;
+  for yy := 0 to dY do
+    for xx := 0 to dX do
+    begin;
+      for yBmp:= 0 to BmpH do
+      begin;
+        tmpY := yBmp + yy;
+        for xBmp := 0 to BmpW do
+          if (BmpRowData[yBmp][xBmp].R <> MainRowdata[tmpY][xBmp +  xx].R) or
+             (BmpRowData[yBmp][xBmp].G <> MainRowdata[tmpY][xBmp +  xx].G) or
+             (BmpRowData[yBmp][xBmp].B <> MainRowdata[tmpY][xBmp +  xx].B) then
+             goto NotFoundBmp;
+
+      end;
+      //We did find the Bmp, otherwise we would be at the part below
+      TClient(Client).MWindow.FreeReturnData;
+      x := xx + xs;
+      y := yy + ys;
+      result := true;
+      exit;
+      NotFoundBmp:
+    end;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs,
+  ys, xe, ye: Integer; tolerance: Integer): Boolean;
+var
+   MainRowdata : TPRGB32Array;
+   BmpRowData : TPRGB32Array;
+   PtrData : TRetData;
+   BmpW,BmpH : integer;
+   xBmp,yBmp : integer;
+   tmpY : integer;
+   dX, dY,  xx, yy: Integer;
+   CCTS : integer;
+   H,S,L,HMod,SMod : extended;
+label NotFoundBmp;
+  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Caculate the row ptrs
+  MainRowdata:= CalculateRowPtrs(PtrData,dy);
+  BmpRowData:= CalculateRowPtrs(bitmap);
+  //Get the 'fixed' bmp size
+  BmpW := bitmap.Width - 1;
+  BmpH := bitmap.Height - 1;
+  //Heck our bitmap cannot be outside the search area
+  dX := dX - bmpW;
+  dY := dY - bmpH;
+  CCTS := Self.CTS;
+  if CCTS > 1 then
+    CCTS := 1;
+  for yy := 0 to dY do
+    for xx := 0 to dX do
+    begin;
+      for yBmp:= 0 to BmpH do
+      begin;
+        tmpY := yBmp + yy;
+        for xBmp := 0 to BmpW do
+          if not ColorSame(CCTS,tolerance,
+                           BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                           MainRowdata[tmpY][xBmp +  xx].R,MainRowdata[tmpY][xBmp +  xx].G,MainRowdata[tmpY][xBmp +  xx].B,
+                           H,S,L,HMod,SMod) then
+             goto NotFoundBmp;
+
+      end;
+      //We did find the Bmp, otherwise we would be at the part below
+      TClient(Client).MWindow.FreeReturnData;
+      x := xx + xs;
+      y := yy + ys;
+      result := true;
+      exit;
+      NotFoundBmp:
+    end;
   TClient(Client).MWindow.FreeReturnData;
 end;
 

@@ -38,6 +38,11 @@ begin;
   end;
 end;
 
+procedure SetBitmapName(Bmp : integer; name : string);
+begin;
+  CurrThread.Client.MBitmaps.Bmp[Bmp].BmpName:= name;
+end;
+
 function CreateMirroredBitmap(Bmp : integer) : integer;
 begin;
   Result := CurrThread.Client.MBitmaps.CreateMirroredBitmap(Bmp, MirrorWidth);
@@ -102,3 +107,26 @@ begin
     exit;
   mBMP.CopyClientToBitmap(CurrThread.Client.MWindow, xs, ys, xe, ye);
 end;
+
+function FindBitmap(Bitmap: integer; var x, y: Integer): Boolean;
+begin;
+  with CurrThread.Client do
+    result := MFinder.FindBitmap( MBitmaps.Bmp[bitmap],x,y);
+end;
+
+function FindBitmapIn(bitmap: integer; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
+begin;
+  with CurrThread.Client do
+    result := MFinder.FindBitmapIn( MBitmaps.Bmp[bitmap],x,y,xs,ys,xe,ye);
+end;
+
+function FindBitmapToleranceIn(bitmap: integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
+begin;
+  with CurrThread.Client do
+    result := MFinder.FindBitmapToleranceIn( MBitmaps.Bmp[bitmap],x,y,xs,ys,xe,ye,tolerance);
+end;
+
+
+
+
+

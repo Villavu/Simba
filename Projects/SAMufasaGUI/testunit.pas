@@ -21,9 +21,9 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    Memo1: TMemo;
     Mufasa_Image_List: TImageList;
     MainMenu1: TMainMenu;
-    Memo1: TMemo;
     MenuItemScript: TMenuItem;
     MenuItemRun: TMenuItem;
     SynEdit1: TSynEdit;

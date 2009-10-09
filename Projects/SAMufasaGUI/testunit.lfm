@@ -5,7 +5,7 @@ object Form1: TForm1
   Width = 723
   ActiveControl = SynEdit1
   Caption = 'Mufasa v2'
-  ClientHeight = 528
+  ClientHeight = 533
   ClientWidth = 723
   Menu = MainMenu1
   OnCreate = FormCreate
@@ -18,13 +18,14 @@ object Form1: TForm1
     Top = 32
     Width = 704
     Align = alCustom
-    Font.Height = -10
+    Font.Height = -13
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
     Font.Quality = fqNonAntialiased
     ParentColor = False
     ParentFont = False
     TabOrder = 0
+    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
@@ -710,19 +711,6 @@ object Form1: TForm1
       end
     end
   end
-  object Memo1: TMemo
-    Left = 8
-    Height = 120
-    Top = 368
-    Width = 704
-    Font.Height = -8
-    Lines.Strings = (
-      'Memo1'
-    )
-    ParentFont = False
-    ScrollBars = ssAutoBoth
-    TabOrder = 1
-  end
   object ToolBar1: TToolBar
     Left = 0
     Height = 24
@@ -829,6 +817,14 @@ object Form1: TForm1
       ImageIndex = 10
       OnClick = ToTray
     end
+  end
+  object Memo1: TMemo
+    Left = 13
+    Height = 134
+    Top = 370
+    Width = 694
+    ScrollBars = ssAutoBoth
+    TabOrder = 1
   end
   object SynFreePascalSyn1: TSynFreePascalSyn
     Enabled = False
