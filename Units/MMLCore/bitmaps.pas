@@ -18,6 +18,7 @@ type
   public
     FData : PRGB32;
     Index : integer;
+    BmpName : string; //Optional?
     procedure SetSize(AWidth,AHeight : integer);
     property Width : Integer read w;
     property Height : Integer read h;
@@ -52,7 +53,8 @@ type
     function CreateBMP(w, h: integer): Integer;
     function CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer;
     function CreateBMPFromFile(const Path : string) : integer;
-    function CreateBMPFromString(width,height : integer; Data : string) : integer;
+    function CreateBMPFromString(width,height : integer; Data : string) : integer;overload;
+    function CreateBMPFromString(BmpName : string; width,height : integer; Data : string) : integer;overload;
     procedure FreeBMP( Number : integer);
     constructor Create(Owner : TObject);
     destructor Destroy;override;
@@ -235,6 +237,14 @@ begin
   end;
 end;
 
+function TMBitmaps.CreateBMPFromString(BmpName: string; width, height: integer;
+  Data: string): integer;
+begin
+  Result := Self.CreateBMPFromString(width,height,data);
+  Bmp[Result].BmpName:= BmpName;
+
+end;
+
 procedure TMBitmaps.FreeBMP(Number: integer);
 var
   ToDestroy : TMufasaBitmap;
@@ -252,6 +262,11 @@ begin
     end;
     FreeSpots[FreeSpotsHigh] := Number;
   end;
+  //Just for testing purposes
+  if ToDestroy.BmpName = '' then
+    Writeln(Format('BMP[%d] has been freed.',[number]))
+  else
+    Writeln(Format('BMP[%s] has been freed.',[ToDestroy.BmpName]));
   FreeAndNil(ToDestroy);
 end;
 
@@ -439,7 +454,13 @@ var
 begin
   for i := 0 to BmpsCurr do
     if BmpArray[i] <> nil then
+    begin;
+      if BmpArray[i].BmpName = '' then
+        Writeln(Format('BMP[%d] has not been freed in the script, freeing it now.',[i]))
+      else
+        Writeln(Format('BMP[%s] has not been freed in the script, freeing it now.',[BmpArray[i].BmpName]));
       FreeAndNil(BmpArray[i]);
+    end;
   SetLength(BmpArray,0);
   SetLength(FreeSpots,0);
   inherited Destroy;
@@ -485,6 +506,7 @@ end;
 constructor TMufasaBitmap.Create;
 begin
   inherited Create;
+  BmpName:= '';
   FData:= nil;
   TransparentSet:= False;
   w := 0;
