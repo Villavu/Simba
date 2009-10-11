@@ -23,19 +23,26 @@ type
       private
         Procedure UpdateCachedValues(NewWidth,NewHeight : integer);
         procedure DefaultOperations(var xs,ys,xe,ye : integer);
+        //Loads the Spiral into ClientTPA (Will not cause problems)
+        procedure LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
       public
         function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
         procedure SetToleranceSpeed(nCTS: Integer);
         function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
         // Possibly turn x, y into a TPoint var.
         function FindColor(var x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
+        function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
         function FindColorTolerance(var x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
         function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
+        function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
         function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
         //Bitmap functions
         function FindBitmap(bitmap: TMufasaBitmap; var x, y: Integer): Boolean;
         function FindBitmapIn(bitmap: TMufasaBitmap; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
         function FindBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
+        function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
+        function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
+        function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
       protected
         Client: TObject;
         CachedWidth, CachedHeight : integer;
@@ -51,6 +58,60 @@ uses
     ;
 type
   TPRGB32Array = array of PRGB32;
+
+procedure TMFinder.LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
+var
+  i,y,x,c,Ring : integer;
+  CurrBox : TBox;
+begin;
+  i := 0;
+  Ring := 1;
+  c := 0;
+  CurrBox.x1 := Startx-1;
+  CurrBox.y1 := Starty-1;
+  CurrBox.x2 := Startx+1;
+  CurrBox.y2 := Starty+1;
+  if (startx >= x1) and (startx <= x2) and (starty >= y1) and (starty <= y2) then
+  begin;
+    ClientTPA[c] := Point(Startx, StartY);
+    inc(c);
+  end;
+  Repeat
+    if (CurrBox.x2 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y1 >= y1) and (Currbox.y1 <= y2)  then
+      for i := CurrBox.x1 + 1 to CurrBox.x2 do
+        if (I >= x1) and ( I <= x2) then
+        begin;
+          ClientTPA[c] := Point(i,CurrBox.y1);
+          inc(c);
+        end;
+    if (CurrBox.x2 >= x1) and (CurrBox.x2 <= x2) and (Currbox.y2 >= y1) and (Currbox.y1 <= y2)  then
+      for i := CurrBox.y1 + 1 to CurrBox.y2 do
+        if (I >= y1) and ( I <= y2) then
+        begin;
+          ClientTPA[c] := Point(Currbox.x2, I);
+          inc(c);
+        end;
+    if (CurrBox.x2 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y2 >= y1) and (Currbox.y2 <= y2)  then
+      for i := CurrBox.x2 - 1 downto CurrBox.x1 do
+        if (I >= x1) and ( I <= x2) then
+        begin;
+          ClientTPA[c] := Point(i,CurrBox.y2);
+          inc(c);
+        end;
+    if (CurrBox.x1 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y2 >= y1) and (Currbox.y1 <= y2)  then
+      for i := CurrBox.y2 - 1 downto CurrBox.y1 do
+        if (I >= y1) and ( I <= y2) then
+        begin;
+          ClientTPA[c] := Point(Currbox.x1, I);
+          inc(c);
+        end;
+    inc(ring);
+    CurrBox.x1 := Startx-ring;
+    CurrBox.y1 := Starty-Ring;
+    CurrBox.x2 := Startx+Ring;
+    CurrBox.y2 := Starty+Ring;
+  until (Currbox.x1 < x1) and (Currbox.x2 > x2) and (currbox.y1 < y1) and (currbox.y2 > y2);
+end;
 
 function CalculateRowPtrs(ReturnData : TRetData; RowCount : integer) : TPRGB32Array;overload;
 var
@@ -261,6 +322,47 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
+function TMFinder.FindColorSpiral(var x, y: Integer; color, xs, ys, xe,
+  ye: Integer): Boolean;
+var
+   PtrData: TRetData;
+   RowData : TPRGB32Array;
+   dX, dY, clR, clG, clB, i,HiSpiral: Integer;
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Load rowdata
+  RowData:= CalculateRowPtrs(ptrdata,dy+1);
+  //Load the spiral path
+  LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
+
+
+  HiSpiral := (dy+1) * (dx + 1) -1;
+  for i := 0 to HiSpiral do
+    if (RowData[ClientTPA[i].y][ClientTPA[i].x].R = clR) and (RowData[ClientTPA[i].y][ClientTPA[i].x].G = clG)
+        and (RowData[ClientTPA[i].y][ClientTPA[i].x].B = clB) then
+      begin
+        Result := True;
+        x := ClientTPA[i].x + xs;
+        y := ClientTPA[i].y + ys;
+        TClient(Client).MWindow.FreeReturnData;
+        Exit;
+      end;
+
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
 function TMFinder.FindColorTolerance(var x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
 var
    PtrData: TRetData;
@@ -426,6 +528,78 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
+function TMFinder.FindColorsSpiralTolerance(x, y: Integer;
+  var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer
+  ): boolean;
+var
+   PtrData: TRetData;
+   c : integer;
+   RowData : TPRGB32Array;
+   dX, dY, clR, clG, clB, i,SpiralHi: Integer;
+   H1, S1, L1, H2, S2, L2: Extended;
+begin
+  Result := false;
+  DefaultOperations(xs,ys,xe,ye);
+
+  dX := xe - xs;
+  dY := ye - ys;
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+  ColorToHSL(Color, H1, S1, L1);
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+
+  c := 0;
+
+  //Load rowdata
+  RowData:= CalculateRowPtrs(ptrdata,dy+1);
+  //Load the spiral path
+  LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
+  SpiralHi := (dx + 1) * (dy + 1) - 1;
+  case CTS of
+    0:
+    for i := 0 to SpiralHi do
+      if ((abs(clB-RowData[ClientTPA[i].y][ClientTPA[i].x].B) <= Tolerance) and
+         (abs(clG-RowData[ClientTPA[i].y][ClientTPA[i].x].G) <= Tolerance) and
+         (Abs(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R) <= Tolerance)) then
+      begin;
+        ClientTPA[c].x := ClientTPA[i].x + xs;
+        ClientTPA[c].y := ClientTPA[i].y + ys;
+        inc(c);
+      end;
+
+
+    1:
+    for i := 0 to SpiralHi do
+      if (Sqrt(sqr(clR - RowData[ClientTPA[i].y][ClientTPA[i].x].R) +
+               sqr(clG - RowData[ClientTPA[i].y][ClientTPA[i].x].G) +
+               sqr(clB - RowData[ClientTPA[i].y][ClientTPA[i].x].B)) <= Tolerance) then
+      begin;
+        ClientTPA[c].x := ClientTPA[i].x + xs;
+        ClientTPA[c].y := ClientTPA[i].y + ys;
+        inc(c);
+      end;
+
+    2:
+    for i := 0 to SpiralHi do
+    begin;
+      RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
+               RowData[ClientTPA[i].y][ClientTPA[i].x].G,
+               RowData[ClientTPA[i].y][ClientTPA[i].x].B,H2,S2,L2);
+      if ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S1 - S2) <= (satMod * Tolerance)) and (abs(L1 - L2) <= Tolerance)) then
+      begin;
+        ClientTPA[c].x := ClientTPA[i].x + xs;
+        ClientTPA[c].y := ClientTPA[i].y + ys;
+        inc(c);
+      end;
+    end;
+  end;
+  SetLength(Points, C);
+  Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
+  Result := C > 0;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
 function TMFinder.FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
 var
    PtrData: TRetData;
@@ -505,7 +679,7 @@ begin
 
   PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
-  MainRowdata:= CalculateRowPtrs(PtrData,dy);
+  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
   //Get the 'fixed' bmp size
   BmpW := bitmap.Width - 1;
@@ -563,7 +737,7 @@ begin
 
   PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
-  MainRowdata:= CalculateRowPtrs(PtrData,dy);
+  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
   //Get the 'fixed' bmp size
   BmpW := bitmap.Width - 1;
@@ -571,6 +745,7 @@ begin
   //Heck our bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
+  //We wont want HSL comparison with BMPs, right? Not for now atleast.
   CCTS := Self.CTS;
   if CCTS > 1 then
     CCTS := 1;
@@ -596,6 +771,201 @@ begin
       exit;
       NotFoundBmp:
     end;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer;
+  xs, ys, xe, ye: Integer): Boolean;
+var
+   MainRowdata : TPRGB32Array;
+   BmpRowData : TPRGB32Array;
+   PtrData : TRetData;
+   BmpW,BmpH : integer;
+   xBmp,yBmp : integer;
+   tmpY : integer;
+   dX, dY,  i,HiSpiral: Integer;
+label NotFoundBmp;
+  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Caculate the row ptrs
+  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
+  BmpRowData:= CalculateRowPtrs(bitmap);
+  //Get the 'fixed' bmp size
+  BmpW := bitmap.Width - 1;
+  BmpH := bitmap.Height - 1;
+  //Heck, our bitmap cannot be outside the search area
+  dX := dX - bmpW;
+  dY := dY - bmpH;
+  //Load the spiral into memory
+  LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
+  HiSpiral := (dx+1) * (dy+1) - 1;
+  for i := 0 to HiSpiral do
+  begin;
+    for yBmp:= 0 to BmpH do
+      begin;
+        tmpY := yBmp + ClientTPA[i].y;
+        for xBmp := 0 to BmpW do
+          if (BmpRowData[yBmp][xBmp].R <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R) or
+             (BmpRowData[yBmp][xBmp].G <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G) or
+             (BmpRowData[yBmp][xBmp].B <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B) then
+             goto NotFoundBmp;
+
+    end;
+    //We did find the Bmp, otherwise we would be at the part below
+    TClient(Client).MWindow.FreeReturnData;
+    x := ClientTPA[i].x + xs;
+    y := ClientTPA[i].y + ys;
+    result := true;
+    exit;
+    NotFoundBmp:
+  end;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x,
+  y: Integer; xs, ys, xe, ye, tolerance: integer): Boolean;
+var
+   MainRowdata : TPRGB32Array;
+   BmpRowData : TPRGB32Array;
+   PtrData : TRetData;
+   BmpW,BmpH : integer;
+   xBmp,yBmp : integer;
+   tmpY : integer;
+   dX, dY,  i,HiSpiral: Integer;
+   CCTS : integer;
+   H,S,L,HMod,SMod : extended;
+label NotFoundBmp;
+  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Caculate the row ptrs
+  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
+  BmpRowData:= CalculateRowPtrs(bitmap);
+  //Get the 'fixed' bmp size
+  BmpW := bitmap.Width - 1;
+  BmpH := bitmap.Height - 1;
+  //Heck, our bitmap cannot be outside the search area
+  dX := dX - bmpW;
+  dY := dY - bmpH;
+  //Load the spiral into memory
+  LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
+  HiSpiral := (dx+1) * (dy+1) - 1;
+  //NO HSL.
+  CCTS := Self.CTS;
+  if CCTS > 1 then
+    CCTS := 1;
+  for i := 0 to HiSpiral do
+  begin;
+    for yBmp:= 0 to BmpH do
+      begin;
+        tmpY := yBmp + ClientTPA[i].y;
+        for xBmp := 0 to BmpW do
+          if not ColorSame(CCTS,tolerance,
+                           BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                           MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R,MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G,
+                           MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B,
+                           H,S,L,HMod,SMod) then
+            goto NotFoundBmp;
+
+    end;
+    //We did find the Bmp, otherwise we would be at the part below
+    x := ClientTPA[i].x + xs;
+    y := ClientTPA[i].y + ys;
+    result := true;
+    exit;
+    NotFoundBmp:
+  end;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x,
+  y: Integer; var Points: TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+var
+   MainRowdata : TPRGB32Array;
+   BmpRowData : TPRGB32Array;
+   PtrData : TRetData;
+   BmpW,BmpH : integer;
+   xBmp,yBmp : integer;
+   tmpY : integer;
+   dX, dY,  i,HiSpiral: Integer;
+   FoundC : integer;
+   CCTS : integer;
+   H,S,L,HMod,SMod : extended;
+label NotFoundBmp;
+  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Caculate the row ptrs
+  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
+  BmpRowData:= CalculateRowPtrs(bitmap);
+  //Get the 'fixed' bmp size
+  BmpW := bitmap.Width - 1;
+  BmpH := bitmap.Height - 1;
+  //Heck, our bitmap cannot be outside the search area
+  dX := dX - bmpW;
+  dY := dY - bmpH;
+  //Load the spiral into memory
+  LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
+  HiSpiral := (dx+1) * (dy+1) - 1;
+  //NO HSL.
+  CCTS := Self.CTS;
+  if CCTS > 1 then
+    CCTS := 1;
+  FoundC := 0;
+  for i := 0 to HiSpiral do
+  begin;
+    for yBmp:= 0 to BmpH do
+      begin;
+        tmpY := yBmp + ClientTPA[i].y;
+        for xBmp := 0 to BmpW do
+          if not ColorSame(CCTS,tolerance,
+                           BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                           MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R,MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G,
+                           MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B,
+                           H,S,L,HMod,SMod) then
+            goto NotFoundBmp;
+
+    end;
+    //We did find the Bmp, otherwise we would be at the part below
+    ClientTPA[FoundC].x := ClientTPA[i].x + xs;
+    ClientTPA[FoundC].y := ClientTPA[i].y + ys;
+    inc(FoundC);
+    NotFoundBmp:
+  end;
+  if FoundC > 0 then
+  begin;
+    result := true;
+    SetLength(Points,FoundC);
+    Move(ClientTPA[0], Points[0], FoundC * SizeOf(TPoint));
+  end;
   TClient(Client).MWindow.FreeReturnData;
 end;
 

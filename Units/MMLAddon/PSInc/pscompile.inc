@@ -45,6 +45,8 @@ Sender.AddFunction(@FindColors, 'function findcolors(var TPA: TPointArray; color
 Sender.AddFunction(@SimilarColors,'function SimilarColors(Col1,Col2,Tolerance : integer) : boolean');
 Sender.AddFunction(@CountColorTolerance,'function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;');
 Sender.AddFunction(@FindColorsTolerance,'function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
+Sender.AddFunction(@FindColorSpiral,'function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;');
+Sender.AddFunction(@FindColorsSpiralTolerance,'function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;');
 
 Sender.AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 Sender.AddFunction(@GetMousePos, 'procedure GetMousePos(var x, y: integer);');
@@ -77,10 +79,6 @@ Sender.AddFunction(@SetBitmapName, 'procedure SetBitmapName(Bmp : integer; name 
 Sender.AddFunction(@FindBitmap,'function FindBitmap(bitmap: integer; var x, y: Integer): Boolean;');
 Sender.AddFunction(@FindBitmapIn,'function FindBitmapIn(bitmap: integer; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;');
 sender.AddFunction(@FindBitmapToleranceIn,'function FindBitmapToleranceIn(bitmap: integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;');
-
-
-
-
-
-
-
+Sender.AddFunction(@FindBitmapSpiral,'function FindBitmapSpiral(bitmap: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;');
+Sender.AddFunction(@FindBitmapsSpiralTolerance,'function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;');
+Sender.AddFunction(@FindBitmapSpiralTolerance,'function FindBitmapSpiralTolerance(bitmap: integer; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;');
