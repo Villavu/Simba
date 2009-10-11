@@ -37,3 +37,13 @@ function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tol
 begin;
   result := CurrThread.Client.MFinder.FindColorsTolerance(points,color,xs,ys,xe,ye,tolerance);
 end;
+
+function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
+begin;
+  result := CurrThread.Client.MFinder.FindColorSpiral(x,y,color,xs,ys,xe,ye);
+end;
+
+function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
+begin;
+  result := CurrThread.Client.MFinder.FindColorsSpiralTolerance(x,y,Points,color,xs,ys,xe,ye,tolerance);
+end;
