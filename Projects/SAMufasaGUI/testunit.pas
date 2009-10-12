@@ -33,7 +33,6 @@ uses
   //Client,
   MufasaTypes,
   mmlpsthread,
-  mmlthread,
   window, // for the comp picker and selector
   colourpicker,
   windowselector
