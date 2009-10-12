@@ -18,64 +18,43 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    Client class for the Mufasa Macro Library
+    OCR class for the Mufasa Macro Library
 }
 
-
-unit Client;
+unit ocr;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes,
-  Window, Input, Files, Finder, Bitmaps, dtm, ocr;
+  Classes, SysUtils;
 
 type
-    TClient = class(TObject)
-        constructor Create;
-        destructor Destroy; override;
-
-        public
-            MWindow: TMWindow;
-            MInput: TMInput;
-            MFiles: TMFiles;
-            MFinder: TMFinder;
-            MBitmaps : TMBitmaps;
-            MDTM: TMDTM;
-            MOCR: TMOCR;
+    TMOCR = class(TObject)
+           constructor Create(Owner: TObject);
+           destructor Destroy; override;
+    private
+           Client: TObject;
 
     end;
 
 implementation
 
-// Possibly pass arguments to a default window.
-constructor TClient.Create;
+constructor TMOCR.Create(Owner: TObject);
 begin
   inherited Create;
+  Self.Client := Owner;
 
-  MWindow := TMWindow.Create;
-  MInput := TMInput.Create(Self);
-  MFiles := TMFiles.Create;
-  MFinder := TMFinder.Create(Self);
-  MBitmaps := TMBitmaps.Create(self);
-  MDTM := TMDTM.Create(self);
-  MOCR := TMOCR.Create(self);
 end;
 
-destructor TClient.Destroy;
+destructor TMOCR.Destroy;
+
 begin
-  MOCR.Free;
-  MDTM.Free;
-  MBitmaps.Free;
-  MFinder.Free;
-  MFiles.Free;
-  MInput.Free;
-  MWindow.Free;
 
-  inherited;
+inherited Destroy;
 end;
+
 
 end.
 

@@ -1,5 +1,7 @@
+{ This is an automatically generated lazarus resource file }
+
 LazarusResources.Add('TForm1','FORMDATA',[
-  'TPF0'#6'TForm1'#5'Form1'#4'Left'#3#174#0#6'Height'#3')'#2#3'Top'#3'Y'#1#5'Wi'
+  'TPF0'#6'TForm1'#5'Form1'#4'Left'#3'O'#1#6'Height'#3')'#2#3'Top'#3#222#0#5'Wi'
   +'dth'#3#211#2#13'ActiveControl'#7#8'SynEdit1'#7'Caption'#6#9'Mufasa v2'#12'C'
   +'lientHeight'#3#16#2#11'ClientWidth'#3#211#2#4'Menu'#7#9'MainMenu1'#8'OnCrea'
   +'te'#7#10'FormCreate'#9'OnDestroy'#7#11'FormDestroy'#8'Position'#7#14'poScre'
