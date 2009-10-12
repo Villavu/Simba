@@ -122,7 +122,7 @@ the real class implements several other features. Among those are copying
 a feature that allows the user to ``Lock'' the Windows' current data in
 Mufasa-maintained memory. \\
 
-Quick overview of functions:
+\subsection{Quick overview of functions}
 
 \begin{itemize}
 	\item ReturnData
@@ -137,6 +137,18 @@ Quick overview of functions:
 Together, these functions form the core of the window management.
 However; to fake user input, a programmer also needs the ability to 
 manipulate user input. Which brings us to the next MML Core class.
+
+\subsection{Freeze}
+
+The Window class also contains a feature called `Freeze'.
+Freeze allows one to save the current Client's Window data.
+All further methods that use the Client's Window data now use the saved
+data, until `UnFreeze' is called. \\
+
+This feature was easy to implement since we only had to modify the
+`ReturnData' method. If used wisely, this can speed up your program
+a lot, depending on the client size. It makes FindColorsTolerance about
+6 times faster on my system.
 
 \section{The Input Class}
 
