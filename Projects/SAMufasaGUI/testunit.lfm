@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 174
+  Left = 335
   Height = 553
-  Top = 345
+  Top = 222
   Width = 723
   ActiveControl = SynEdit1
   Caption = 'Mufasa v2'
