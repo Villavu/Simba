@@ -256,7 +256,7 @@ end;
 
 procedure TMMLPSThread.Execute;
 var
-  time: Integer;
+  time: DWord;
 begin;
   CurrThread := Self;
   time := lclintf.GetTickCount;
