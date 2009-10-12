@@ -1,3 +1,18 @@
+{
+	This file is part of the Mufasa Macro Library (MML)
+
+	Copyright (c) 2009 by Raymond van Venentie and Merlijn Wajer
+
+	See the file COPYING, included in this distribution,
+	for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+
+}
+
+
 unit Client;
 
 {$mode objfpc}{$H+}
