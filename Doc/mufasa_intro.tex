@@ -3,7 +3,7 @@
 \usepackage{url}
 \begin{document}
 \title{Mufasa Handbook}
-\author{Merlijn Wajer}
+\author{Merlijn Wajer \and Raymond van Venetie}
 \maketitle
 \tableofcontents
 
@@ -19,8 +19,8 @@ interested in project Mufasa.}
 Mufasa is a project that aims to create the Mufasa Macro Library (MML).
 As a side project, the project also tries to create a simple but effective
 user interface to the Mufasa Macro Library. This is achieved with the
-Pascal interpreter PascalScript\footnote{\url{http://www.remobjects.com/ps.aspx}}
-combined with a wrapper for the MML.
+Pascal interpreter PascalScript\footnote{
+\url{http://www.remobjects.com/ps.aspx}} combined with a wrapper for the MML.
 
 Mufasa is:
 \begin{itemize}
@@ -303,8 +303,8 @@ between the two given colours.
 \subsection{Area Size and Shape}
 
 Area Size and Shape add that nifty extra functionality to DTM's.
-\textbf{Area Size} defines the area that should all match the colour with the given
-tolerance. \\
+\textbf{Area Size} defines the area that should all match the colour
+with the given tolerance. \\
 
 The \textbf{Area Shape} defines the Shape of the Area Size.
 Currently, the following shapes are supported:
@@ -344,7 +344,11 @@ directly convert between the two types.
 
 \subsection{Main Point and AreaSize / Shape}
 
-\subsection{DTM algorithm}
+The main point's area size and shape are not used in the current
+implementation. It wouldn't be that hard to add them, however.
+
+%\subsection{DTM algorithm}
+
 
 \section{Bitmaps and the Bitmaps Class}
 
@@ -355,14 +359,21 @@ directly convert between the two types.
 
 \section{More On The Core Classes}
 
-The previously mentioned MML classes are considered to be the absolute core of the library. (Although one could argue that even the Colour class isn't part of the core classes.)
+The previously mentioned MML classes are considered to be the absolute core 
+`of the library. (Although one could argue that even the Colour class isn't
+part of the core classes.)
 
-With these classes most functions that Mufasa will contain can be created. if you can make FindColor, you can make FindColorsSpiralTolerance, they don't really differ a lot. The same goes for DTM's, OCR and Bitmaps. Mouse and keyboard functions will be done with the Input class.
+With these classes most functions that Mufasa will contain can be created.
+If you can make FindColor, you can make FindColorsSpiralTolerance, 
+they don't really differ a lot. The same goes for DTM's, OCR and Bitmaps.
+Mouse and keyboard functions will be done with the Input class.
 
-The MML contains more classes, and they will mainly utilize the previous mentioned classes.
-It is essential to understand the Classes architecture to fully understand Mufasa.
-Before work on other classes will be done, the core classes must be finished and stable.
+The MML contains more classes, and they will mainly utilize the previous
+mentioned classes. It is essential to understand the Classes architecture
+to fully understand Mufasa. Before work on other classes will be done,
+the core classes must be finished and stable.
 
-A good rule of thumb is the following: any units that make extensive use of Compiler Directives, are considered a core unit.
+A good rule of thumb is the following: any units that make extensive use of
+Compiler Directives, are considered a core unit.
 
 \end{document}
