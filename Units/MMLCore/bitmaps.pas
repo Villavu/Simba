@@ -43,6 +43,7 @@ type
     Index : integer;
     BmpName : string; //Optional?
     procedure SetSize(AWidth,AHeight : integer);
+    procedure StretchResize(AWidth,AHeight : integer);
     property Width : Integer read w;
     property Height : Integer read h;
     procedure ValidatePoint(x,y : integer);
@@ -58,6 +59,7 @@ type
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
     procedure CopyClientToBitmap(MWindow : TMWindow; xs, ys, xe, ye: Integer);
+    function RotatedBitmap(angle: Extended): TMufasaBitmap;
     constructor Create;
     destructor Destroy;override;
   end;
@@ -458,6 +460,19 @@ begin
     Move(PtrRet.Ptr[y * (wi + PtrRet.IncPtrWith)], FData[y * self.w],wi * SizeOf(TRGB32));
   MWindow.FreeReturnData;
 end;
+//Scar rotates unit circle-wise.. Oh, scar doesnt update the bounds, so kinda crops ur image.
+function TMufasaBitmap.RotatedBitmap(angle: Extended): TMufasaBitmap;
+var
+  NewW,NewH : integer;
+  MiddlePoint : TPoint;
+  CosAngle,SinAngle : extended;
+  NewCorners : array[1..4] of TPoint; //(xs,ye);(xe,ye);(xe,ys);(xe,ys)
+begin
+  MiddlePoint := Point(w/2,h/2);
+  CosAngle := Cos(Angle);
+  SinAngle := Sin(Angle);
+//  NewCorners[1] := Point(-
+end;
 
 constructor TMBitmaps.Create(Owner: TObject);
 begin
@@ -511,6 +526,35 @@ begin
       minh := Min(AHeight,h);
       for i := 0 to minh - 1 do
         Move(FData[i*w],Newdata[i*AWidth],minw * SizeOf(TRGB32));
+    end;
+    if Assigned(FData) then
+      FreeMem(FData);
+    FData := NewData;
+    w := AWidth;
+    h := AHeight;
+  end;
+end;
+
+procedure TMufasaBitmap.StretchResize(AWidth, AHeight: integer);
+var
+  NewData : PRGB32;
+  i: integer;
+  x,y : integer;
+begin
+  if (AWidth <> w) or (AHeight <> h) then
+  begin;
+    if AWidth*AHeight <> 0 then
+    begin;
+      NewData := GetMem(AWidth * AHeight * SizeOf(TRGB32));
+      FillDWord(NewData[0],AWidth*AHeight,0);
+    end
+    else
+      NewData := nil;
+    if Assigned(FData) and Assigned(NewData) and (w*H <> 0) then
+    begin;
+      for y := 0 to AHeight - 1 do
+        for x := 0 to AWidth -1 do
+          NewData[y*AWidth + x] := FData[((y * h)div aheight) * W+ (x * W) div awidth];
     end;
     if Assigned(FData) then
       FreeMem(FData);

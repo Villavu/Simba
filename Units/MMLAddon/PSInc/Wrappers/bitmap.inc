@@ -49,7 +49,17 @@ end;
 procedure SetBitmapSize(Bmp,NewW,NewH : integer);
 begin;
   if (NewW>=0) and (NewH >=0) then
-    CurrThread.Client.MBitmaps.Bmp[Bmp].SetSize(NewW,NewH);
+    CurrThread.Client.MBitmaps.Bmp[Bmp].SetSize(NewW,NewH)
+  else
+    raise exception.createfmt('Wrong Width or Height in SetBitmapSize: (%d,%d)',[NewW,NewH]);
+end;
+
+procedure StretchBitmapResize(Bmp,NewW,NewH : integer);
+begin;
+  if (NewW>=0) and (NewH >=0) then
+    CurrThread.Client.MBitmaps.Bmp[Bmp].StretchResize(NewW,NewH)
+  else
+    raise exception.createfmt('Wrong Width or Height in ScretchResize: (%d,%d)',[NewW,NewH]);
 end;
 
 procedure GetBitmapSize(Bmp : integer; var BmpW,BmpH : integer);
