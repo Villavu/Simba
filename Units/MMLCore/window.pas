@@ -426,8 +426,8 @@ begin
      begin
        {$IFDEF MSWINDOWS}
        Result := TBitmap.Create;
-       Result.SetSize(ww+1,hh+1);
-       BitBlt(result.canvas.handle,0,0,ww+1,hh+1,
+       Result.SetSize(ww,hh);
+       BitBlt(result.canvas.handle,0,0,ww,hh,
               self.TargetDC,xs,ys, SRCCOPY);
        {$ENDIF}
      end;
