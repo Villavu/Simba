@@ -1,23 +1,25 @@
 object Form1: TForm1
-  Left = 335
+  Left = 207
   Height = 553
-  Top = 222
+  Top = 196
   Width = 723
   ActiveControl = SynEdit1
   Caption = 'Mufasa v2'
-  ClientHeight = 528
+  ClientHeight = 533
   ClientWidth = 723
   Menu = MainMenu1
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poScreenCenter
   LCLVersion = '0.9.29'
   object SynEdit1: TSynEdit
     Left = 8
-    Height = 328
+    Height = 333
     Top = 32
     Width = 704
     Align = alCustom
+    Anchors = [akTop, akLeft, akRight, akBottom]
     Font.Height = -13
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
@@ -25,7 +27,8 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 0
-    Gutter.Width = 61
+    BookMarkOptions.OnChange = nil
+    Gutter.Width = 57
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -602,12 +605,14 @@ object Form1: TForm1
     MaxLeftChar = 80
     ScrollBars = ssAutoBoth
     BracketHighlightStyle = sbhsBoth
+    OnChange = OnSyneditChange
+    OnProcessCommand = SynEditProcessCommand
     object TSynGutterPartList
       object TSynGutterMarks
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 21
+        Width = 17
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -771,8 +776,8 @@ object Form1: TForm1
       Left = 122
       Top = 2
       Caption = 'TB_ClearDebug'
-      Enabled = False
       ImageIndex = 5
+      OnClick = ClearDebug
     end
     object TB_PickColour: TToolButton
       Left = 145
@@ -819,20 +824,66 @@ object Form1: TForm1
   end
   object Memo1: TMemo
     Left = 13
-    Height = 134
+    Height = 139
     Top = 370
     Width = 694
+    Anchors = [akLeft, akRight, akBottom]
     ScrollBars = ssAutoBoth
     TabOrder = 1
   end
-  object SynFreePascalSyn1: TSynFreePascalSyn
-    Enabled = False
-    CompilerMode = pcmObjFPC
-    NestedComments = True
-    left = 560
+  object StatusBar: TStatusBar
+    Left = 0
+    Height = 23
+    Top = 510
+    Width = 723
+    Panels = <    
+      item
+        Text = 'Untitled'
+        Width = 100
+      end    
+      item
+        Width = 50
+      end>
+    SimplePanel = False
   end
   object MainMenu1: TMainMenu
     left = 608
+    object MenuFile: TMenuItem
+      Caption = 'File'
+      OnClick = MenuFileClick
+      object MenuItemNew: TMenuItem
+        Caption = 'New'
+        ShortCut = 16462
+        OnClick = MenuItemNewClick
+      end
+      object MenuItemOpen: TMenuItem
+        Caption = 'Open'
+        ShortCut = 16463
+        OnClick = MenuItemOpenClick
+      end
+      object MenuItemSave: TMenuItem
+        Caption = 'Save'
+        ShortCut = 16467
+        OnClick = MenuItemSaveClick
+      end
+      object MenuItemSaveAs: TMenuItem
+        Caption = 'Save as..'
+        OnClick = MenuItemSaveAsClick
+      end
+    end
+    object MenuEdit: TMenuItem
+      Caption = 'Edit'
+      object MenuItemUndo: TMenuItem
+        Caption = 'Undo'
+        ShortCut = 16474
+        OnClick = Undo
+      end
+      object MenuItemRedo: TMenuItem
+        Caption = 'Redo'
+        ShortCut = 24666
+        OnClick = Redo
+      end
+    end
     object MenuItemScript: TMenuItem
       Caption = 'Script'
       object MenuItemRun: TMenuItem
@@ -1302,5 +1353,19 @@ object Form1: TForm1
     Visible = True
     OnClick = NoTray
     left = 464
+  end
+  object SynFreePascalSyn1: TSynFreePascalSyn
+    Enabled = False
+    CommentAttri.Foreground = clBlue
+    CommentAttri.Style = [fsBold]
+    IdentifierAttri.Foreground = clDefault
+    NumberAttri.Foreground = clNavy
+    StringAttri.Foreground = clBlue
+    SymbolAttri.Foreground = clRed
+    DirectiveAttri.Foreground = clRed
+    DirectiveAttri.Style = [fsBold]
+    CompilerMode = pcmObjFPC
+    NestedComments = True
+    left = 424
   end
 end
