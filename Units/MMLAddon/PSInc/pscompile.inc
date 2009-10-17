@@ -106,4 +106,10 @@ Sender.AddFunction(@FindBitmapSpiral,'function FindBitmapSpiral(bitmap: Integer;
 Sender.AddFunction(@FindBitmapsSpiralTolerance,'function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;');
 Sender.AddFunction(@FindBitmapSpiralTolerance,'function FindBitmapSpiralTolerance(bitmap: integer; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;');
 Sender.AddFunction(@RotateBitmap,'function RotateBitmap(bitmap: Integer; angle: Extended): Integer;');
+Sender.AddFunction(@Desaturate,'function DesaturateBitmap(Bitmap : integer) : integer;');
+sender.AddFunction(@InvertBitmap,'procedure InvertBitmap(Bitmap : integer);');
+Sender.AddFunction(@CopyBitmap,'function CopyBitmap(Bitmap:  integer) : integer)');
+Sender.AddFunction(@GreyScaleBitmap,'function GreyScaleBitmap(bitmap : integer) : integer');
+Sender.AddFunction(@BrightnessBitmap,'function BrightnessBitmap(Bitmap,br : integer) : integer;');
+Sender.AddFunction(@ContrastBitmap,'function ContrastBitmap(bitmap : integer; co : extended) : integer;');
 

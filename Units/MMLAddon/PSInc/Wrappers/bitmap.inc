@@ -186,3 +186,44 @@ begin;
     Bmp[Bitmap].RotateBitmap(angle,Bmp[result]);
   end;
 end;
+
+function Desaturate(Bitmap : integer) : integer;
+begin;
+  with CurrThread.Client.MBitmaps do
+  begin;
+    result := CreateBMP(0,0);
+    Bmp[Bitmap].Desaturate(Bmp[result]);
+  end;
+end;
+procedure InvertBitmap(Bitmap : integer);
+begin;
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].Invert;
+end;
+function CopyBitmap(Bitmap : integer) : integer;
+begin;
+  result := Currthread.Client.MBitmaps.CopyBMP(bitmap);
+end;
+function GreyScaleBitmap(Bitmap : integer) : integer;
+begin;
+  with CurrThread.Client.MBitmaps do
+  begin;
+    result := CreateBMP(0,0);
+    Bmp[Bitmap].GreyScale(Bmp[result]);
+  end;
+end;
+function BrightnessBitmap(Bitmap,br : integer) : integer;
+begin;
+  with CurrThread.Client.MBitmaps do
+  begin;
+    result := CreateBMP(0,0);
+    Bmp[Bitmap].Brightness(Bmp[result],br);
+  end;
+end;
+function ContrastBitmap(bitmap : integer; co : extended) : integer;
+begin;
+  with CurrThread.Client.MBitmaps do
+  begin;
+    result := CreateBMP(0,0);
+    Bmp[Bitmap].Contrast(Bmp[result],co);
+  end;
+end;
