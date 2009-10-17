@@ -66,6 +66,7 @@ type
         function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
         function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
         function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+        function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
       protected
         Client: TObject;
         CachedWidth, CachedHeight : integer;
@@ -990,6 +991,110 @@ begin
     Move(ClientTPA[0], Points[0], FoundC * SizeOf(TPoint));
   end;
   TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; var x,
+  y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;
+  AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
+var
+   MainRowdata : TPRGB32Array;
+   BmpRowData : TPRGB32Array;
+   PtrData : TRetData;
+   BmpW,BmpH : integer;
+   xBmp,yBmp : integer;
+   tmpY,tmpX : integer;
+   dX, dY,  xx, yy: Integer;
+   SearchdX,SearchdY : integer;
+   CCTS : integer;
+   GoodCount : integer;//Save the amount of pixels who have found a correspondening pixel
+   BestCount : integer;//The best amount of pixels till now..
+   BestPT : TPoint; //The point where it found the most pixels.
+   RangeX,RangeY : Integer;
+   H,S,L,HMod,SMod : extended;
+label FoundBMPPoint;
+  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+  SearchDx := dX;
+  SearchDy := dY;
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Caculate the row ptrs
+  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
+  BmpRowData:= CalculateRowPtrs(bitmap);
+  //Get the 'fixed' bmp size
+  BmpW := bitmap.Width - 1;
+  BmpH := bitmap.Height - 1;
+  //Heck our bitmap cannot be outside the search area
+  dX := dX - bmpW;
+  dY := dY - bmpH;
+  //We wont want HSL comparison with BMPs, right? Not for now atleast.
+  CCTS := Self.CTS;
+  if CCTS > 1 then
+    CCTS := 1;
+  //Reset the accuracy :-)
+  Accuracy := 0;
+  BestCount := -1;
+  BestPT := Point(-1,-1);
+
+  for yy := 0 to dY do
+    for xx := 0 to dX do
+    begin;
+      GoodCount := 0;
+      for yBmp:= 0 to BmpH do
+      begin;
+        //Calculate points of the BMP left against Goodcount (if it cannot possibly get more points skip this x,y?
+        if bestCount > (goodcount + (Bmph - yBmp) * (bmpW)) then
+          Break;
+        for xBmp := 0 to BmpW do
+        begin;
+
+          for RangeY := (yy-Range) to (yy + Range) do
+          begin;
+            tmpY := yBmp + RangeY;
+            if (tmpY < 0) or (tmpY > SearchdY ) then
+              continue;
+            for RangeX := (xx-Range) to (xx + Range) do
+            begin;
+              tmpX := xBmp + RangeX;
+              if (tmpX < 0) or (tmpX > SearchdX) then
+                Continue;
+              if ColorSame(CCTS,tolerance,
+                                BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                                MainRowdata[tmpY][tmpX].R,MainRowdata[tmpY][tmpX].G,MainRowdata[tmpY][tmpX].B,
+                                H,S,L,HMod,SMod) then
+                goto FoundBMPPoint;
+            end;
+          end;
+          //We did not find a good point so were continueing!
+          Continue;
+          FoundBMPPoint:
+          //We found a pooint woot!
+          inc(GoodCount);
+        end;
+      end;
+      if GoodCount > BestCount then //This x,y has the best Acc so far!
+      begin;
+        BestCount := GoodCount;
+        BestPT := Point(xx+xs,yy+ys);
+      end;
+    end;
+  TClient(Client).MWindow.FreeReturnData;
+  if BestCount = 0 then
+    Exit;
+  accuracy := BestCount / ((BmpW + 1) * (BmpH+1));
+  if (accuracy = 1) or AllowPartialAccuracy then
+  begin
+    x := BestPT.x;
+    y := BestPT.y;
+    Exit(true);
+  end;
 end;
 
 end.
