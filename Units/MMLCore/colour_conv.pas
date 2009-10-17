@@ -40,7 +40,8 @@ Procedure ColorToRGB(Color : integer;var r,g,b : integer); overload; inline;
 Procedure RGBToXYZ(R,G,B : integer;var x,y,z : Extended); inline;
 Procedure XYZToRGB(X,Y,Z : Extended;var R,G,B: integer); inline;
 Procedure RGBToHSL(RR,GG,BB : integer;var H,S,L : Extended); inline;
-Procedure HSLtoRGB(H,S,L : extended;var R,G,B : Integer); inline;
+Procedure HSLtoRGB(H,S,L : extended;var R,G,B : Byte); inline;overload;
+Procedure HSLtoRGB(H,S,L : extended;var R,G,B : Integer); inline;overload;
 Procedure ColorToHSL(Col: Integer; var h, s, l: Extended); inline;
 
 implementation
@@ -200,6 +201,49 @@ end;
    Translates the given H (Hue), S (Saturation) and L (Luminance) components to
    Red (R), Green (G) and Blue (B) components.
 /\}
+
+procedure HSLtoRGB(H, S, L: extended; var R, G, B: Byte); inline; overload;
+var
+  Temp,Temp2 : Extended;
+//begin
+
+Function Hue2RGB(TempHue : Extended) : integer;
+begin;
+  if TempHue < 0 then
+    TempHue := TempHue + 1
+  else if TempHue > 1 then
+    TempHue := TempHue - 1;
+  if ( ( 6 * TempHue ) < 1 ) then
+    Result :=Round(255 * (( Temp + ( Temp2 - Temp ) * 6 * TempHue )))
+  else if ( ( 2 * TempHue ) < 1 ) then
+    Result :=Round(255 * Temp2)
+  else if ( ( 3 * TempHue ) < 2 ) then
+    Result :=Round(255 * (Temp + ( Temp2 - Temp ) * ( ( TwoDivThree ) - TempHue ) * 6))
+  else
+    Result :=Round(255 * Temp);
+end;
+
+begin;
+  H := H / 100;
+  S := S / 100;
+  L := L / 100;
+  if s = 0 then
+  begin;
+    R := Byte(Round(L * 255));
+    G := R;
+    B := R;
+  end else
+  begin;
+    if (L < 0.5) then
+      Temp2 := L * ( 1 + S )
+    else
+      Temp2 := (L + S) - ( S * L);
+    Temp := 2 * L - Temp2;
+    R := Hue2RGB( H + ( OneDivThree ) );
+    G := Hue2RGB( H );
+    B := Hue2RGB( H - ( OneDivThree ) );
+  end;
+end;
 
 Procedure HSLtoRGB(H,S,L : extended;var R,G,B : Integer); inline;
 var
