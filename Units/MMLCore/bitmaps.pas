@@ -59,7 +59,7 @@ type
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
     procedure CopyClientToBitmap(MWindow : TMWindow; xs, ys, xe, ye: Integer);
-    function RotatedBitmap(angle: Extended): TMufasaBitmap;
+    procedure RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );
     constructor Create;
     destructor Destroy;override;
   end;
@@ -89,7 +89,7 @@ type
 implementation
 
 uses
-  Windowutil,paszlib,DCPbase64;
+  Windowutil,paszlib,DCPbase64,mmath,math;
 
 function Min(a,b:integer) : integer;
 begin
@@ -460,18 +460,67 @@ begin
     Move(PtrRet.Ptr[y * (wi + PtrRet.IncPtrWith)], FData[y * self.w],wi * SizeOf(TRGB32));
   MWindow.FreeReturnData;
 end;
+
+
+function RotatePointEdited(p: TPoint; angle, mx, my: Extended): TPoint;
+
+begin
+  Result.X := Ceil(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
+  Result.Y := Ceil(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
+end;
+
 //Scar rotates unit circle-wise.. Oh, scar doesnt update the bounds, so kinda crops ur image.
-function TMufasaBitmap.RotatedBitmap(angle: Extended): TMufasaBitmap;
+procedure TMufasaBitmap.RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );
 var
   NewW,NewH : integer;
-  MiddlePoint : TPoint;
   CosAngle,SinAngle : extended;
-  NewCorners : array[1..4] of TPoint; //(xs,ye);(xe,ye);(xe,ys);(xe,ys)
+  MinX,MinY,MaxX,MaxY : integer;
+  i : integer;
+  x,y : integer;
+  OldX,OldY : integer;
+  MiddlePoint : TPoint;
+  NewCorners : array[1..4] of TPoint; //(xs,ye);(xe,ye);(xe,ys);(xs,ys)
 begin
-  MiddlePoint := Point(w/2,h/2);
+  MiddlePoint := Point((w-1) div 2,(h-1) div 2);
   CosAngle := Cos(Angle);
   SinAngle := Sin(Angle);
-//  NewCorners[1] := Point(-
+  MinX := MaxInt;
+  MinY := MaxInt;
+  MaxX := 0;
+  MaxY := 0;
+  NewCorners[1]:= RotatePointEdited(Point(0,h-1),angle,middlepoint.x,middlepoint.y);
+  NewCorners[2]:= RotatePointEdited(Point(w-1,h-1),angle,middlepoint.x,middlepoint.y);
+  NewCorners[3]:= RotatePointEdited(Point(w-1,0),angle,middlepoint.x,middlepoint.y);
+  NewCorners[4]:= RotatePointEdited(Point(0,0),angle,middlepoint.x,middlepoint.y);
+  for i := 1 to 4 do
+  begin;
+    if NewCorners[i].x > MaxX then
+      MaxX := NewCorners[i].x;
+    if NewCorners[i].Y > MaxY then
+      MaxY := NewCorners[i].y;
+    if NewCorners[i].x < MinX then
+      MinX := NewCorners[i].x;
+    if NewCorners[i].y < MinY then
+      MinY := NewCorners[i].y;
+  end;
+  Writeln(Format('Min: (%d,%d) Max : (%d,%d)',[MinX,MinY,MaxX,MaxY]));
+  NewW := MaxX - MinX+1;
+  NewH := MaxY - MinY+1;
+  Writeln(format('New bounds: %d,%d',[NewW,NewH]));
+  TargetBitmap.SetSize(NewW,NewH);
+  for y := NewH - 1 downto 0 do
+    for x := NewW - 1 downto 0 do
+    begin;
+      Oldx := Round(MiddlePoint.x + CosAngle * (x + MinX-MiddlePoint.x) - SinAngle * (y + MinY - MiddlePoint.y));
+      Oldy := Round(MiddlePoint.y + SinAngle * (x + MinX-MiddlePoint.x) + CosAngle * (y + MinY-MiddlePoint.y));
+      if not ((Oldx <0) or (Oldx >= w) or (Oldy < 0) or (Oldy >= h)) then
+        TargetBitmap.FData[ y * NewW + x] := Self.FData[OldY * W + OldX];
+    end;
+
+    //NewX = Round(MiddlePoint.x + CosAngle * (x-MiddlePoint.x) - SinAngle * (y-MiddlePoint.y)) - MinX;
+    //NewY = Round(MiddlePoint.y + SinAngle * (x-MiddlePoint.x) + CosAngle * (y-MiddlePoint.y)) - MinY;
+//    Writeln(Format('(%d,%d) becomes (%d,%d)',[x,y,Round(MiddlePoint.x + CosAngle * (x-MiddlePoint.x) - SinAngle * (y-MiddlePoint.y)) - MinX,
+//                                                 Round(MiddlePoint.y + SinAngle * (x-MiddlePoint.x) + CosAngle * (y-MiddlePoint.y))]));
 end;
 
 constructor TMBitmaps.Create(Owner: TObject);
