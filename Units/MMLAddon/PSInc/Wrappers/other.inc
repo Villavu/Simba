@@ -31,6 +31,26 @@ begin
   Sleep(t);
 end;
 
+procedure SaveScreenshot(FileName: string);
+var
+  w,h : integer;
+begin;
+  with CurrThread.Client.MWindow do
+  begin;
+    GetDimensions(w,h);
+    with CopyClientToBitmap(0,0,w-1,h-1) do
+    begin;
+      SaveToFile(FileName);
+      Free;
+    end;
+  end;
+end;
+
+function Distance(x1, y1, x2, y2: Integer): Integer;
+begin;
+  Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
+end;
+
 function Freeze: boolean;
 begin
   result := CurrThread.Client.MWindow.Freeze();
