@@ -79,13 +79,20 @@ threadvar
 
 {Some General PS Functions here}
 procedure psWriteln(str : string);
+var
+  CriticalSec : TRTLCriticalSection;
 begin
-  {$IFNDEF MSWINDOWS}
-  writeln(str);
-  {$ELSE}
-  if CurrThread.DebugTo <> nil then
-    CurrThread.DebugTo.lines.add(str);
-  {$ENDIF}
+  System.InitCriticalSection(CriticalSec);
+  System.EnterCriticalSection(CriticalSec);
+  try
+    if CurrThread.DebugTo <> nil then
+    begin;
+      CurrThread.DebugTo.lines.add(str);
+      CurrThread.DebugTo.Refresh;
+    end;
+  finally
+    System.LeaveCriticalSection(CriticalSec);
+  end;
 end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
@@ -160,7 +167,6 @@ end;
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/dtm.inc}
-
 
 
 procedure TMMLPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
