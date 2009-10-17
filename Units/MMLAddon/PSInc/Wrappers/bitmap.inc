@@ -163,7 +163,7 @@ end;
 function FindBitmapSpiral(bitmap: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
 begin;
   with CurrThread.Client do
-    result := MFinder.FindBitmapSpiral(Mbitmaps.bmp[bitmap],x,y,xs,ye,xe,ye);
+    result := MFinder.FindBitmapSpiral(Mbitmaps.bmp[bitmap],x,y,xs,ys,xe,ye);
 end;
 
 function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
@@ -178,3 +178,11 @@ begin;
     result := MFinder.FindBitmapSpiralTolerance(MBitmaps.Bmp[bitmap],x,y,xs,ys,xe,ye,tolerance);
 end;
 
+function RotateBitmap(bitmap: Integer; angle: Extended): Integer;
+begin;
+  with CurrThread.Client.MBitmaps do
+  begin;
+    Result := CreateBMP(0,0);
+    Bmp[Bitmap].RotateBitmap(angle,Bmp[result]);
+  end;
+end;
