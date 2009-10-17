@@ -79,6 +79,7 @@ threadvar
 
 {Some General PS Functions here}
 procedure psWriteln(str : string);
+{$IFDEF WINDOWS}
 var
   CriticalSec : TRTLCriticalSection;
 begin
@@ -94,6 +95,12 @@ begin
     System.LeaveCriticalSection(CriticalSec);
   end;
 end;
+{$ELSE}
+begin
+writeln(str);
+end;
+{$ENDIF}
+
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
 
