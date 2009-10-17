@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="19"/>
+      <ActiveEditorIndexAtStart Value="12"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -38,9 +38,9 @@
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="132" Y="31"/>
-        <TopLine Value="18"/>
-        <EditorIndex Value="24"/>
+        <CursorPos X="38" Y="22"/>
+        <TopLine Value="16"/>
+        <EditorIndex Value="17"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -172,7 +172,7 @@
         <UnitName Value="TestUnit"/>
         <CursorPos X="21" Y="263"/>
         <TopLine Value="249"/>
-        <EditorIndex Value="18"/>
+        <EditorIndex Value="15"/>
         <UsageCount Value="194"/>
         <Loaded Value="True"/>
       </Unit18>
@@ -262,9 +262,9 @@
         <Filename Value="../../Units/MMLCore/window.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Window"/>
-        <CursorPos X="1" Y="1"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="11"/>
+        <CursorPos X="69" Y="425"/>
+        <TopLine Value="409"/>
+        <EditorIndex Value="9"/>
         <UsageCount Value="193"/>
         <Loaded Value="True"/>
       </Unit30>
@@ -320,9 +320,9 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="122" Y="144"/>
-        <TopLine Value="88"/>
-        <EditorIndex Value="12"/>
+        <CursorPos X="22" Y="172"/>
+        <TopLine Value="156"/>
+        <EditorIndex Value="10"/>
         <UsageCount Value="182"/>
         <Loaded Value="True"/>
       </Unit37>
@@ -389,9 +389,9 @@
       </Unit46>
       <Unit47>
         <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
-        <CursorPos X="104" Y="114"/>
-        <TopLine Value="60"/>
-        <EditorIndex Value="15"/>
+        <CursorPos X="27" Y="63"/>
+        <TopLine Value="48"/>
+        <EditorIndex Value="11"/>
         <UsageCount Value="59"/>
         <Loaded Value="True"/>
       </Unit47>
@@ -405,9 +405,7 @@
         <Filename Value="../../../FPC/FPCCheckout/rtl/inc/objpash.inc"/>
         <CursorPos X="23" Y="175"/>
         <TopLine Value="160"/>
-        <EditorIndex Value="7"/>
         <UsageCount Value="24"/>
-        <Loaded Value="True"/>
       </Unit49>
       <Unit50>
         <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
@@ -430,16 +428,16 @@
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/colour.inc"/>
         <CursorPos X="34" Y="56"/>
         <TopLine Value="39"/>
-        <EditorIndex Value="16"/>
+        <EditorIndex Value="13"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit52>
       <Unit53>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/bitmap.inc"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="1" Y="229"/>
-        <TopLine Value="174"/>
-        <EditorIndex Value="17"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="14"/>
         <UsageCount Value="171"/>
         <Loaded Value="True"/>
       </Unit53>
@@ -572,7 +570,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="colour_conv"/>
         <CursorPos X="41" Y="76"/>
-        <TopLine Value="144"/>
+        <TopLine Value="76"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="154"/>
         <Loaded Value="True"/>
@@ -592,9 +590,11 @@
       </Unit75>
       <Unit76>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/other.inc"/>
-        <CursorPos X="1" Y="1"/>
-        <TopLine Value="1"/>
-        <UsageCount Value="5"/>
+        <CursorPos X="31" Y="41"/>
+        <TopLine Value="19"/>
+        <EditorIndex Value="12"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit76>
       <Unit77>
         <Filename Value="../../Units/PascalScript/uPSCompiler.pas"/>
@@ -726,7 +726,7 @@
         <UnitName Value="dtm"/>
         <CursorPos X="34" Y="141"/>
         <TopLine Value="112"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="129"/>
         <Loaded Value="True"/>
       </Unit96>
@@ -768,7 +768,7 @@
         <UnitName Value="windowselector"/>
         <CursorPos X="32" Y="12"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="23"/>
+        <EditorIndex Value="16"/>
         <UsageCount Value="115"/>
         <Loaded Value="True"/>
       </Unit101>
@@ -783,9 +783,7 @@
         <UnitName Value="Forms"/>
         <CursorPos X="3" Y="1529"/>
         <TopLine Value="1499"/>
-        <EditorIndex Value="21"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit103>
       <Unit104>
         <Filename Value="../../../usr/lib64/fpc/2.2.4/source/rtl/unix/cthreads.pp"/>
@@ -847,8 +845,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmath"/>
         <CursorPos X="133" Y="45"/>
-        <TopLine Value="42"/>
-        <EditorIndex Value="10"/>
+        <TopLine Value="40"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="82"/>
         <Loaded Value="True"/>
       </Unit112>
@@ -909,169 +907,101 @@
         <Filename Value="../../../FPC/FPCCheckout/rtl/inc/heap.inc"/>
         <CursorPos X="34" Y="463"/>
         <TopLine Value="455"/>
-        <EditorIndex Value="8"/>
         <UsageCount Value="21"/>
-        <Loaded Value="True"/>
       </Unit120>
       <Unit121>
         <Filename Value="../../../FPC/FPCCheckout/rtl/win/wininc/struct.inc"/>
         <CursorPos X="6" Y="217"/>
         <TopLine Value="196"/>
-        <EditorIndex Value="14"/>
         <UsageCount Value="20"/>
-        <Loaded Value="True"/>
       </Unit121>
       <Unit122>
         <Filename Value="../../../lazarus/lcl/include/customform.inc"/>
         <CursorPos X="45" Y="1541"/>
         <TopLine Value="1522"/>
-        <EditorIndex Value="13"/>
         <UsageCount Value="16"/>
-        <Loaded Value="True"/>
       </Unit122>
       <Unit123>
         <Filename Value="../../../lazarus/lcl/include/winapih.inc"/>
         <CursorPos X="10" Y="177"/>
         <TopLine Value="162"/>
-        <EditorIndex Value="20"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit123>
       <Unit124>
         <Filename Value="../../../lazarus/lcl/include/application.inc"/>
         <CursorPos X="28" Y="206"/>
         <TopLine Value="200"/>
-        <EditorIndex Value="22"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit124>
       <Unit125>
         <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
         <UnitName Value="SynEditKeyCmds"/>
         <CursorPos X="113" Y="1151"/>
         <TopLine Value="1119"/>
-        <EditorIndex Value="19"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit125>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="15" HistoryIndex="14">
       <Position1>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="301" Column="26" TopLine="286"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="119" Column="1" TopLine="113"/>
       </Position1>
       <Position2>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="319" Column="68" TopLine="305"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="152" Column="13" TopLine="137"/>
       </Position2>
       <Position3>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="321" Column="70" TopLine="305"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="14" Column="46" TopLine="1"/>
       </Position3>
       <Position4>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="761" Column="40" TopLine="771"/>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Caret Line="49" Column="36" TopLine="41"/>
       </Position4>
       <Position5>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="62" Column="86" TopLine="67"/>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Caret Line="264" Column="21" TopLine="89"/>
       </Position5>
       <Position6>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="177" Column="16" TopLine="163"/>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Caret Line="371" Column="21" TopLine="356"/>
       </Position6>
       <Position7>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="228" Column="38" TopLine="214"/>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Caret Line="409" Column="21" TopLine="394"/>
       </Position7>
       <Position8>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="229" Column="66" TopLine="214"/>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Caret Line="490" Column="16" TopLine="475"/>
       </Position8>
       <Position9>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="230" Column="38" TopLine="214"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="172" Column="22" TopLine="156"/>
       </Position9>
       <Position10>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="231" Column="38" TopLine="214"/>
+        <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
+        <Caret Line="8" Column="45" TopLine="1"/>
       </Position10>
       <Position11>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="232" Column="38" TopLine="214"/>
+        <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
+        <Caret Line="63" Column="27" TopLine="48"/>
       </Position11>
       <Position12>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="233" Column="38" TopLine="214"/>
+        <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/other.inc"/>
+        <Caret Line="41" Column="23" TopLine="19"/>
       </Position12>
       <Position13>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="234" Column="38" TopLine="214"/>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Caret Line="50" Column="40" TopLine="35"/>
       </Position13>
       <Position14>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="235" Column="38" TopLine="214"/>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Caret Line="69" Column="33" TopLine="54"/>
       </Position14>
       <Position15>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="539" Column="46" TopLine="525"/>
+        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Caret Line="345" Column="39" TopLine="330"/>
       </Position15>
-      <Position16>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="540" Column="42" TopLine="525"/>
-      </Position16>
-      <Position17>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="541" Column="42" TopLine="525"/>
-      </Position17>
-      <Position18>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="542" Column="46" TopLine="525"/>
-      </Position18>
-      <Position19>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="543" Column="41" TopLine="525"/>
-      </Position19>
-      <Position20>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="544" Column="41" TopLine="525"/>
-      </Position20>
-      <Position21>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="545" Column="42" TopLine="525"/>
-      </Position21>
-      <Position22>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="578" Column="52" TopLine="564"/>
-      </Position22>
-      <Position23>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="1074" Column="33" TopLine="1060"/>
-      </Position23>
-      <Position24>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="1075" Column="26" TopLine="1060"/>
-      </Position24>
-      <Position25>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="1076" Column="18" TopLine="1060"/>
-      </Position25>
-      <Position26>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="1077" Column="18" TopLine="1060"/>
-      </Position26>
-      <Position27>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="1078" Column="18" TopLine="1060"/>
-      </Position27>
-      <Position28>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="1087" Column="18" TopLine="1060"/>
-      </Position28>
-      <Position29>
-        <Filename Value="../../../lazarus/components/synedit/syneditkeycmds.pp"/>
-        <Caret Line="1091" Column="18" TopLine="1077"/>
-      </Position29>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
