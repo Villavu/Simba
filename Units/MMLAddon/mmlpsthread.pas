@@ -28,11 +28,20 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, uPSPreProcessor;
+  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes;
 
 type
 
     { TMMLPSThread }
+    TSyncInfo = record
+      V : MufasaTypes.TVariantArray;
+      MethodName : string;
+      Res : Variant;
+      SyncMethod : procedure of object;
+      OldThread : TThread;
+      PSScript : TPSScript;
+    end;
+    PSyncInfo = ^TSyncInfo;
 
     TMMLPSThread = class(TThread)
       procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
@@ -53,15 +62,17 @@ type
     public
       PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
       Client : TClient;
+      SyncInfo : PSyncInfo; //We need this for callthreadsafe
       procedure SetPSScript(Script : string);
       procedure SetDebug( Strings : TMemo );
-      constructor Create(CreateSuspended: Boolean);
+      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo);
       destructor Destroy; override;
     end;
-
+threadvar
+  CurrThread : TMMLPSThread;
 implementation
 uses
-  MufasaTypes, dtmutil,
+  dtmutil,
   {$ifdef mswindows}windows,{$endif}
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
   uPSC_extctrls, //Compile-libs
@@ -71,11 +82,9 @@ uses
   Graphics, //For Graphics types
   math, //Maths!
   bitmaps,
+  forms,//Forms
   lclintf; // for GetTickCount and others.
 
-
-threadvar
-  CurrThread : TMMLPSThread;
 
 {Some General PS Functions here}
 procedure psWriteln(str : string);
@@ -97,12 +106,18 @@ end;
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
 
 begin;
-  Writeln('We have a length of: '  + inttostr(length(v)));
+  CurrThread.SyncInfo^.MethodName:= ProcName;
+  CurrThread.SyncInfo^.V:= V;
+  CurrThread.SyncInfo^.PSScript := CurrThread.PSScript;
+  CurrThread.SyncInfo^.OldThread := CurrThread;
+  CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
+  Result := CurrThread.SyncInfo^.Res;
+{  Writeln('We have a length of: '  + inttostr(length(v)));
   Try
     Result := CurrThread.PSScript.Exec.RunProcPVar(v,CurrThread.PSScript.Exec.GetProc(Procname));
   Except
     Writeln('We has some errors :-(');
-  end;
+  end;}
 end;
 
 
@@ -124,8 +139,9 @@ end;
 }
 
 
-constructor TMMLPSThread.Create(CreateSuspended : boolean);
+constructor TMMLPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo);
 begin
+  SyncInfo:= TheSyncInfo;
   SetLength(PluginsToLoad,0);
   Client := TClient.Create;
   PSScript := TPSScript.Create(nil);
@@ -162,6 +178,7 @@ end;
 // include PS wrappers
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
+{$I PSInc/Wrappers/window.inc}
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}

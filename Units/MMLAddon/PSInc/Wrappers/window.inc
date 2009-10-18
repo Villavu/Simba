@@ -18,39 +18,31 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    Other.inc for the Mufasa Macro Library
+    window.inc for the Mufasa Macro Library
 }
 
-procedure Wait(t: Integer);
+procedure SetDesktopAsClient;
+begin;
+  CurrThread.Client.MWindow.SetDesktop;
+end;
+
+procedure SetTargetBitmap(bitmap: Integer);
+begin;
+  With CurrThread.Client do
+    MWindow.SetTarget(MBitmaps.Bmp[Bitmap]);
+end;
+
+procedure GetClientDimensions(var w, h: integer);
 begin
-  Sleep(t);
+  CurrThread.Client.MWindow.GetDimensions(w, h);
 end;
 
-procedure SaveScreenshot(FileName: string);
-var
-  w,h : integer;
-begin;
-  with CurrThread.Client.MWindow do
-  begin;
-    GetDimensions(w,h);
-    with CopyClientToBitmap(0,0,w-1,h-1) do
-    begin;
-      SaveToFile(FileName);
-      Free;
-    end;
-  end;
+function Freeze: boolean;
+begin
+  result := CurrThread.Client.MWindow.Freeze();
 end;
 
-function CreateForm : TForm;
-begin;
-  result := TForm.Create(nil);
-end;
-function CreateButton(Owner : TComponent) : TButton;
-begin;
-  Result := TButton.Create(Owner);
-end;
-
-function Distance(x1, y1, x2, y2: Integer): Integer;
-begin;
-  Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
+function Unfreeze: boolean;
+begin
+  result := CurrThread.Client.MWindow.Unfreeze;
 end;

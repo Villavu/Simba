@@ -27,18 +27,18 @@ unit bitmaps;
 
 interface
 uses
-  Classes, SysUtils, FPImgCanv,FPImage,IntfGraphics,graphtype,MufasaTypes,window,graphics;
+  Classes, SysUtils, FPImgCanv,FPImage,IntfGraphics,graphtype,MufasaTypes,graphics;
 
 type
 
   { TMufasaBitmap }
-
   TMufasaBitmap = class(TObject)
   private
     w,h : integer;
     TransparentColor : TRGB32;
     TransparentSet : boolean;
   public
+    OnDestroy : procedure(Bitmap : TMufasaBitmap) of object;
     FData : PRGB32;
     Index : integer;
     BmpName : string; //Optional?
@@ -58,7 +58,7 @@ type
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
-    procedure CopyClientToBitmap(MWindow : TMWindow; xs, ys, xe, ye: Integer);
+    procedure CopyClientToBitmap(MWindow : TObject; xs, ys, xe, ye: Integer);
     procedure RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );
     procedure Desaturate;overload;
     procedure Desaturate(TargetBitmap : TMufasaBitmap); overload;
@@ -69,6 +69,8 @@ type
     procedure Contrast(co: Extended);overload;
     procedure Contrast(TargetBitmap : TMufasaBitmap; co : Extended);overload;
     procedure Invert;
+    procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
+    procedure Posterize(Po : integer);overload;
     constructor Create;
     destructor Destroy;override;
   end;
@@ -100,7 +102,7 @@ implementation
 
 uses
   Windowutil,paszlib,DCPbase64,mmath,math,
-  colour_conv;
+  colour_conv,window;
 
 function Min(a,b:integer) : integer;
 begin
@@ -467,7 +469,7 @@ begin
       FData[i] := NewCol;
 end;
 
-procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TMWindow; xs, ys, xe, ye: Integer);
+procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject; xs, ys, xe, ye: Integer);
 var
   wi,hi,y : integer;
   PtrRet : TRetData;
@@ -477,10 +479,10 @@ begin
   Self.ValidatePoint(xe,ye);
   wi := xe-xs + 1;
   hi := ye-ys + 1;
-  PtrRet := MWindow.ReturnData(xs,ys,wi,hi);
+  PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi,hi);
   for y := 0 to (hi-1) do
     Move(PtrRet.Ptr[y * (wi + PtrRet.IncPtrWith)], FData[y * self.w],wi * SizeOf(TRGB32));
-  MWindow.FreeReturnData;
+  TMWindow(MWindow).FreeReturnData;
 end;
 
 
@@ -715,6 +717,45 @@ begin
   end;
 end;
 
+procedure TMufasaBitmap.Posterize(TargetBitmap: TMufasaBitmap; Po: integer);
+var
+  I : integer;
+  PtrOld,PtrNew : PRGB32;
+begin
+  if not InRange(Po,1,255) then
+    Raise exception.CreateFmt('Posterize Po(%d) out of range[1,255]',[Po]);
+  TargetBitmap.SetSize(w,h);
+  PtrOld := Self.FData;
+  PtrNew := TargetBitmap.FData;
+  for i := (h*w-1) downto 0 do
+  begin;
+    PtrNew^.r := Round(PtrOld^.r / po) * Po;
+    PtrNew^.g := Round(PtrOld^.g / po) * Po;
+    PtrNew^.b := Round(PtrOld^.b / po) * Po;
+    inc(ptrOld);
+    inc(PtrNew);
+  end;
+end;
+
+procedure TMufasaBitmap.Posterize(Po: integer);
+var
+  I : integer;
+  Ptr: PRGB32;
+begin
+  if not InRange(Po,1,255) then
+    Raise exception.CreateFmt('Posterize Po(%d) out of range[1,255]',[Po]);
+  Ptr := Self.FData;
+  for i := (h*w-1) downto 0 do
+  begin;
+    ptr^.r := Round(ptr^.r / po) * Po;
+    ptr^.g := Round(ptr^.g / po) * Po;
+    ptr^.b := Round(ptr^.b / po) * Po;
+    inc(ptr);
+  end;
+end;
+
+
+
 constructor TMBitmaps.Create(Owner: TObject);
 begin
   inherited Create;
@@ -823,6 +864,8 @@ end;
 
 destructor TMufasaBitmap.Destroy;
 begin
+  if Assigned(OnDestroy) then
+    OnDestroy(Self);
   if Assigned(FData) then
     Freemem(FData);
   inherited Destroy;

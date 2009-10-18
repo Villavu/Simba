@@ -34,6 +34,7 @@ uses
   {$ENDIF}
   graphics,
   LCLType,
+  bitmaps,
   LCLIntf // for ReleaseDC and such
 
   {$IFDEF LINUX}, xlib, x, xutil, ctypes{$ENDIF};
@@ -58,10 +59,12 @@ type
             {$ENDIF}
             function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
             function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
+            function SetTarget(Bitmap : TMufasaBitmap) : integer;overload;
 
             procedure SetWindow(Window: TMWindow);
             procedure SetDesktop;
 
+            procedure OnTargetBitmapDestroy( Bitmap : TMufasaBitmap);
             {
               Freeze Client Feature.
               This will force the MWindow unit to Store the current Client's
@@ -77,9 +80,10 @@ type
             destructor Destroy; override;
 
         private
-              FreezeState: Boolean;
-              FrozenData : PRGB32;
-              FrozenSize : TPoint;
+          FreezeState: Boolean;
+          FrozenData : PRGB32;
+          FrozenSize : TPoint;
+          TargetBitmap : TMufasaBitmap;
         public
               // Target Window Mode.
               TargetMode: TTargetWindowMode;
@@ -209,7 +213,9 @@ end;
 procedure TMWindow.SetWindow(Window: TMWindow);
 begin
   case Window.TargetMode of
-    w_BMP, w_Window, w_HDC:
+    w_BMP :
+      Self.SetTarget(Window.TargetBitmap);
+    w_Window, w_HDC:
         {$IFDEF WINDOWS}
         Self.SetTarget(Window.TargetHandle, Window.TargetMode);
         {$ELSE}
@@ -237,6 +243,11 @@ begin
   {$ELSE}
   Self.SetTarget(windows.GetDesktopWindow, w_Window);
   {$ENDIF}
+end;
+
+procedure TMWindow.OnTargetBitmapDestroy(Bitmap: TMufasaBitmap);
+begin
+  raise Exception.CreateFmt('Our targetbitmap has been destroyed, what now?',[]);
 end;
 
 function TMWindow.GetColor(x, y: integer): TColor;
@@ -273,6 +284,17 @@ begin
     Result.IncPtrWith:= Self.FrozenSize.x - width;
   end else
   case Self.TargetMode of
+    w_BMP :
+      begin;
+      // Copy the pointer as we will perform operations on it.
+      TmpData := TargetBitmap.FData;
+
+      // Increase the pointer to the specified start of the data.
+
+      Inc(TmpData, ys * width + xs);
+      Result.Ptr := TmpData;
+      Result.IncPtrWith:= TargetBitmap.Width - width;
+      end;
     w_Window:
     begin
       {$IFDEF MSWINDOWS}
@@ -461,6 +483,16 @@ begin
         Bmp.LoadFromRawImage(Raw,true);
         Result := bmp;
      end;
+     w_BMP:
+     begin
+        TempData:= GetMem((ww + 1) * (hh + 1) * sizeof(trgb32));
+        for y := ys to ye do
+          Move(TargetBitmap.FData[y*w],TempData[(y-ys) * (ww+1)],(ww+1) * SizeOf(TRGB32));
+        ArrDataToRawImage(TempData,Classes.Point(ww+1,hh+1),Raw);
+        Bmp := TBitmap.Create;
+        Bmp.LoadFromRawImage(Raw,true);
+        Result := bmp;
+     end;
   end;
 end;
 
@@ -475,10 +507,12 @@ begin
     SetForegroundWindow(Self.TargetHandle);
   {$ENDIF}
   {$IFDEF LINUX}
-  Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   if TargetMode = w_XWindow then
+  begin;
+    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     XSetInputFocus(Self.XDisplay,Self.CurWindow,RevertToParent,CurrentTime);
-  XSetErrorHandler(Old_Handler);
+    XSetErrorHandler(Old_Handler);
+  end;
   {$ENDIF}
 end;
 
@@ -517,6 +551,11 @@ begin
     h := FrozenSize.y;
   end else
   case TargetMode of
+    w_BMP :
+      begin
+        w := TargetBitmap.Width;
+        h := TargetBitmap.Height;
+      end;
     w_Window:
     begin
       {$IFDEF MSWINDOWS}
@@ -616,6 +655,15 @@ begin
   Self.TargetHandle:= windows.GetDesktopWindow;
   {$ENDIF}
 
+end;
+
+function TMWindow.SetTarget(Bitmap: TMufasaBitmap): integer;
+begin
+  if Self.Frozen then
+    raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
+  TargetBitmap := Bitmap;
+  self.TargetMode:= w_BMP;
+  Bitmap.OnDestroy:= @OnTargetBitmapDestroy;
 end;
 
 end.

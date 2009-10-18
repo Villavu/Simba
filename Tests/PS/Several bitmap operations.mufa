@@ -155,4 +155,5 @@ begin
    Invertbitmap(bmpz);//Invert back
    SaveBitmap(DesaturateBitmap(Bmpz),savedir + 'desaturate.bmp');
    SaveBitmap(RotateBitmap(Bmpz,0.30*pi),savedir + 'rotated.bmp');
+   SaveBitmap(PosterizeBitmap(Bmpz,75),savedir + 'posterized.bmp');
 end.

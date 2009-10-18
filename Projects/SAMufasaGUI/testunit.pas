@@ -23,6 +23,7 @@
 
 unit TestUnit;
 
+{$Undefine ProcessMessages} //Define this for processmessages in ThreadSafeCall
 {$mode objfpc}{$H+}
 
 interface
@@ -87,6 +88,7 @@ type
     procedure MenuItemRunClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
     procedure MenuItemSaveClick(Sender: TObject);
+    procedure OnLinePSScript(Sender: TObject);
     procedure OnSyneditChange(Sender: TObject);
     procedure PickColorEvent(Sender: TObject);
     procedure Redo(Sender: TObject);
@@ -107,6 +109,7 @@ type
     Window: TMWindow;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
+    procedure SafeCallThread;
     function OpenScript : boolean;
     function SaveCurrentScript : boolean;
     function SaveCurrentScriptAs : boolean;
@@ -117,7 +120,7 @@ const
   WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
 var
   Form1: TForm1;
-
+  CurrentSyncInfo : TSyncInfo;//We need this for SafeCallThread
 
 implementation
 uses
@@ -131,7 +134,8 @@ Var
   MMLPSThread : TMMLPSThread;
 
 begin
-  MMLPSThread := TMMLPSThread.Create(True);
+  CurrentSyncInfo.SyncMethod:= @Form1.SafeCallThread;
+  MMLPSThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
   MMLPSThread.SetPSScript(Form1.SynEdit1.Lines.Text);
   MMLPSThread.SetDebug(Form1.Memo1);
 
@@ -216,6 +220,14 @@ begin
   SaveCurrentScript;
 end;
 
+procedure TForm1.OnLinePSScript(Sender: TObject);
+begin
+  //Writeln('We just completed a line!!');
+  {$IFDEF ProcessMessages}
+  Application.ProcessMessages; //Don't think that this is neccesary though
+  {$ENDIF}
+end;
+
 procedure TForm1.OnSyneditChange(Sender: TObject);
 begin
   if not ScriptChanged then
@@ -288,6 +300,19 @@ begin
       Self.Caption:= format(WindowTitle,[ScriptName]);
       ScriptChanged := false;
     end;
+end;
+
+procedure TForm1.SafeCallThread;
+begin
+  Writeln('Executing : ' + CurrentSyncInfo.MethodName);
+  mmlpsthread.CurrThread := TMMLPSTHREAD(CurrentSyncInfo.OldThread);
+  with CurrentSyncInfo.PSScript do
+  begin;
+    OnLine:=@OnLinePSScript;
+    CurrentSyncInfo.Res:= Exec.RunProcPVar(CurrentSyncInfo.V,Exec.GetProc(CurrentSyncInfo.MethodName));
+    Online := nil;
+  end;
+  mmlpsthread.CurrThread := nil;
 end;
 
 function TForm1.OpenScript: boolean;
