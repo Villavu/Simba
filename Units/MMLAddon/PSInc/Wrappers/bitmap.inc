@@ -132,13 +132,8 @@ begin
 end;
 
 procedure ps_CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer);
-var
-   mBMP: TMufasaBitmap;
 begin
-  mBMP := CurrThread.Client.MBitmaps.GetBMP(bmp);
-  if mBMP = nil then
-    exit;
-  mBMP.CopyClientToBitmap(CurrThread.Client.MWindow, xs, ys, xe, ye);
+  CurrThread.Client.MBitmaps.GetBMP(bmp).CopyClientToBitmap(CurrThread.Client.MWindow, xs, ys, xe, ye);
 end;
 
 function FindBitmap(Bitmap: integer; var x, y: Integer): Boolean;
@@ -225,5 +220,14 @@ begin;
   begin;
     result := CreateBMP(0,0);
     Bmp[Bitmap].Contrast(Bmp[result],co);
+  end;
+end;
+
+function PosterizeBitmap(Bitmap : integer; po : integer) : integer;
+begin;
+  with CurrThread.Client.MBitmaps do
+  begin
+    result := CreateBMP(0,0);
+    Bmp[bitmap].Posterize(Bmp[result],po);
   end;
 end;

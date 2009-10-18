@@ -58,10 +58,23 @@ Sender.AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
 Sender.AddFunction(@classes.point,'function Point(x,y:integer) : TPoint;');
 Sender.AddFunction(@Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
 
+{window}
 Sender.AddFunction(@Freeze, 'function freeze:boolean;');
 Sender.AddFunction(@Unfreeze, 'function unfreeze: boolean;');
-Sender.AddFunction(@SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
+Sender.AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(var w, h:integer);');
+Sender.AddFunction(@SetTargetBitmap,'procedure SetTargetBitmap(Bitmap : integer);');
+Sender.AddFunction(@SetDesktopAsClient,'procedure SetDesktopAsClient');
 
+
+{other}
+Sender.AddFunction(@SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
+Sender.AddFunction(@Wait, 'procedure wait(t: integer);');
+Sender.AddFunction(@GetTickCount, 'function GetSystemTime: Integer;');
+Sender.AddFunction(@CreateForm,'function CreateForm : TForm;');
+Sender.AddFunction(@CreateButton,'function CreateButton(Owner : TComponent) : TButton');
+
+
+{Color + Color Finders}
 Sender.AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
 Sender.AddFunction(@FindColor, 'function findcolor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
 Sender.AddFunction(@FindColorTolerance, 'function findcolortolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
@@ -71,15 +84,14 @@ Sender.AddFunction(@CountColorTolerance,'function CountColorTolerance(Color, xs,
 Sender.AddFunction(@FindColorsTolerance,'function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 Sender.AddFunction(@FindColorSpiral,'function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;');
 Sender.AddFunction(@FindColorsSpiralTolerance,'function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;');
+Sender.AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(cts: integer);');
 
+{Mouse etc.}
 Sender.AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 Sender.AddFunction(@GetMousePos, 'procedure GetMousePos(var x, y: integer);');
 
-Sender.AddFunction(@Wait, 'procedure wait(t: integer);');
-Sender.AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(var w, h:integer);');
-Sender.AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(cts: integer);');
-Sender.AddFunction(@GetTickCount, 'function GetSystemTime: Integer;');
 
+{Bitmaps}
 Sender.AddFunction(@CreateBitmap,'function CreateBitmap(w,h :integer) : integer;');
 Sender.AddFunction(@FreeBitmap,'procedure FreeBitmap(Bmp : integer);');
 Sender.AddFunction(@SaveBitmap,'procedure SaveBitmap(Bmp : integer; path : string);');
@@ -114,4 +126,4 @@ Sender.AddFunction(@CopyBitmap,'function CopyBitmap(Bitmap:  integer) : integer)
 Sender.AddFunction(@GreyScaleBitmap,'function GreyScaleBitmap(bitmap : integer) : integer');
 Sender.AddFunction(@BrightnessBitmap,'function BrightnessBitmap(Bitmap,br : integer) : integer;');
 Sender.AddFunction(@ContrastBitmap,'function ContrastBitmap(bitmap : integer; co : extended) : integer;');
-
+Sender.AddFunction(@PosterizeBitmap,'function PosterizeBitmap(Bitmap : integer; po : integer) : integer;');
