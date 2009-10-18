@@ -80,19 +80,11 @@ threadvar
 {Some General PS Functions here}
 procedure psWriteln(str : string);
 {$IFDEF WINDOWS}
-var
-  CriticalSec : TRTLCriticalSection;
 begin
-  System.InitCriticalSection(CriticalSec);
-  System.EnterCriticalSection(CriticalSec);
-  try
-    if CurrThread.DebugTo <> nil then
-    begin;
-      CurrThread.DebugTo.lines.add(str);
-      CurrThread.DebugTo.Refresh;
-    end;
-  finally
-    System.LeaveCriticalSection(CriticalSec);
+  if CurrThread.DebugTo <> nil then
+  begin;
+    CurrThread.DebugTo.lines.add(str);
+    CurrThread.DebugTo.Refresh;
   end;
 end;
 {$ELSE}

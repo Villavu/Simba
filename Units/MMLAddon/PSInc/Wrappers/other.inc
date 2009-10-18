@@ -38,7 +38,7 @@ begin;
   with CurrThread.Client.MWindow do
   begin;
     GetDimensions(w,h);
-    with CopyClientToBitmap(0,0,w,h) do
+    with CopyClientToBitmap(0,0,w-1,h-1) do
     begin;
       SaveToFile(FileName);
       Free;
