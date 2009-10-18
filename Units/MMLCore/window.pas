@@ -407,9 +407,10 @@ var
 
 begin
   Self.GetDimensions(w, h);
+  //THIS IS NOT THE FUCKING WIDTH/HEIGHT YA!
   ww := xe-xs;
   hh := ye-ys;
-  if(xs < 0) or (ys < 0) or (xe > W) or (ye > H) then
+  if(xs < 0) or (ys < 0) or (xe >= W) or (ye >= H) then
     Raise Exception.CreateFMT('CopyClientToBitmap TMWindow: Faulty coordinates (%d,%d)(%d,%d); Width/Height is (%d,%d)',[xs,ys,xe,ye,w,h]);
   if Self.Frozen then
   begin;
@@ -426,8 +427,8 @@ begin
      begin
        {$IFDEF MSWINDOWS}
        Result := TBitmap.Create;
-       Result.SetSize(ww,hh);
-       BitBlt(result.canvas.handle,0,0,ww,hh,
+       Result.SetSize(ww+1,hh+1);
+       BitBlt(result.canvas.handle,0,0,ww+1,hh+1,
               self.TargetDC,xs,ys, SRCCOPY);
        {$ENDIF}
      end;
@@ -436,7 +437,7 @@ begin
        {$IFDEF LINUX}
        Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
-       Img := XGetImage(Self.XDisplay, Self.curWindow, xs, ys, ww, hh, AllPlanes, ZPixmap);
+       Img := XGetImage(Self.XDisplay, Self.curWindow, xs, ys, ww+1, hh+1, AllPlanes, ZPixmap);
        XImageToRawImage(Img, Raw);
 
        Bmp := TBitmap.Create;
