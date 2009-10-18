@@ -138,9 +138,9 @@ begin
   Note.Canvas.Rectangle(89, 3, 115, 29);
   Note.Canvas.Pen.Style:= psClear;
 
-  bmp := Window.CopyClientToBitmap(0, 0, w, h);
-  BitBlt(Image.Canvas.Handle, 0,0,w,h, bmp.Canvas.Handle,0,0,SRCCOPY);
-  BitBlt(Bitmap.Canvas.Handle, 0,0,w,h, bmp.Canvas.Handle,0,0,SRCCOPY);
+  bmp := Window.CopyClientToBitmap(0, 0, w - 1, h - 1);
+  BitBlt(Image.Canvas.Handle, 0,0,w ,h , bmp.Canvas.Handle,0,0,SRCCOPY);
+  BitBlt(Bitmap.Canvas.Handle, 0,0,w ,h , bmp.Canvas.Handle,0,0,SRCCOPY);
   bmp.Free;
 
   ImageHandle:= Image.Canvas.Handle;
