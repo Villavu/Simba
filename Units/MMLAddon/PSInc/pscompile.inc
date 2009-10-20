@@ -21,9 +21,12 @@
     PSCompile.inc for the Mufasa Macro Library
 }
 
+Sender.Comp.AddConstantN('AppPath','string').SetString(CurrThread.AppPath);
+Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath);
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of integer');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
 Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
+Sender.Comp.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
 
 
 Sender.Comp.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
@@ -127,3 +130,6 @@ Sender.AddFunction(@GreyScaleBitmap,'function GreyScaleBitmap(bitmap : integer) 
 Sender.AddFunction(@BrightnessBitmap,'function BrightnessBitmap(Bitmap,br : integer) : integer;');
 Sender.AddFunction(@ContrastBitmap,'function ContrastBitmap(bitmap : integer; co : extended) : integer;');
 Sender.AddFunction(@PosterizeBitmap,'function PosterizeBitmap(Bitmap : integer; po : integer) : integer;');
+Sender.AddFunction(@CreateBitmapMask,'function CreateBitmapMask(Bitmap : integer) : TMask;');
+Sender.AddFunction(@FindMaskTolerance,'function FindMaskTolerance(mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
+Sender.AddFunction(@FindBitmapMaskTolerance,'function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');

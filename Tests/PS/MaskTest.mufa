@@ -1,0 +1,22 @@
+program new;
+//http://nl.wikipedia.org/wiki/Lily_Allen
+
+var
+  Bmp : integer;
+  Mask : TMask;
+  x,y : integer;
+  i, ii : integer;
+  w,h : integer;
+begin
+  Bmp :=  BitmapFromString(107, 19, 'beNrtVkEOgCAM8/+fxoOJUYG' +
+       'uWwZKbE9KtmYrHbBtgiAIgpCOckFiopdtZr/j2HhynBjYjmntJxaW' +
+       '6BwJWC8eH6QU15gz0Zx9vFgX0Iwhs0CASRUW8CFmioB1JFisA5qRI' +
+       'KvJQNKa5mEcyAhoauI6N8ymAlkxWpdtwgL2bhPXCJc7+E7JLNJsgG' +
+       'qQgL1jhHwX4VJdBsNZMbN5D//m/ob5XzwDp40wfg/jW9g024hbuPd' +
+       'ritabVqaAj7zYVyxg9fol4M8FFG7YAfIG00k=');
+  Mask := CreateBitmapMask(Bmp);
+  GetClientDimensions(w,h);
+//  if FindBitmapMaskTolerance(Bmp,x,y,0, 0,w-1, h-1,1,5) then
+  if FindMaskTolerance(Mask,x,y,0, 0,w-1, h-1,1,5) then
+    MoveMouse(x,y);
+end.

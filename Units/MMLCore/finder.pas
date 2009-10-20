@@ -27,6 +27,7 @@ unit finder;
 
 interface
 
+{$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 uses
   Classes, SysUtils,bitmaps,  MufasaTypes; // Types
 
@@ -59,6 +60,9 @@ type
         function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
         function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
         function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+        //Mask
+        function FindBitmapMaskTolerance(mask: TMask; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+        procedure CheckMask(Mask : TMask);
         //Bitmap functions
         function FindBitmap(bitmap: TMufasaBitmap; var x, y: Integer): Boolean;
         function FindBitmapIn(bitmap: TMufasaBitmap; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
@@ -142,11 +146,8 @@ var
   I : integer;
 begin;
   setlength(result,RowCount);
-  for i := 0 to RowCount - 1do
-  begin;
-    result[i] := ReturnData.Ptr;
-    inc(ReturnData.Ptr,ReturnData.IncPtrWith);
-  end;
+  for i := 0 to RowCount - 1 do
+    result[i] := ReturnData.Ptr + ReturnData.RowLen * i;
 end;
 
 function CalculateRowPtrs(Bitmap : TMufasaBitmap) : TPRGB32Array;overload;
@@ -155,7 +156,7 @@ var
 begin;
   setlength(result,Bitmap.Height);
   for i := 0 to Bitmap.Height - 1 do
-    result[i] := Bitmap.FData + Bitmap.Width;
+    result[i] := Bitmap.FData + Bitmap.Width * i;
 end;
 
 constructor TMFinder.Create(aClient: TObject);
@@ -669,6 +670,92 @@ begin
   Result := I > 0;
 
   TClient(Client).MWindow.FreeReturnData;
+end;
+
+//Only works with CTS 1 for now.. Since Colorsame doesn't return a boolean :-(
+//We do not check whether every white pixel is in tol range with every other white pixel..
+
+function TMFinder.FindBitmapMaskTolerance(mask: TMask; var x, y: Integer; xs,
+  ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+var
+   MainRowdata : TPRGB32Array;
+   PtrData : TRetData;
+   MaskW,MaskH : integer;
+   CheckerWhite,CheckerBlack,CurrWhite,CurrBlack: TRGB32;
+   i,ii : integer;
+   dX, dY,  xx, yy: Integer;
+label NotFoundMask;
+  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+  //Check the mask.
+  CheckMask(Mask);
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Caculate the row ptrs
+  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
+
+  //Get the 'fixed' mask size
+  MaskW := Mask.W;
+  MaskH := Mask.H;
+  //Heck our mask cannot be outside the search area
+  dX := dX - MaskW;
+  dY := dY - MaskH;
+  for yy := 0 to dY do
+    for xx := 0 to dX do
+    begin;
+      CheckerWhite := MainRowdata[yy + mask.White[0].y][xx + mask.white[0].x];
+      CheckerBlack := MainRowdata[yy + mask.Black[0].y][xx + mask.Black[0].x];
+      //Just check two 'random' points against eachother, might be a time saver in some circumstances.
+      if (Sqrt(sqr(CheckerWhite.r-CheckerBlack.r) + sqr(CheckerWhite.G-CheckerBlack.G) + sqr(CheckerWhite.b-CheckerBlack.B))
+          <= ContourTolerance) then //The Tol between the white and black is lower than the minimum difference, so continue with looking!
+        continue;
+      for i := 0 to mask.WhiteHi do
+      begin;
+        CurrWhite := MainRowdata[yy + mask.White[i].y][xx + mask.white[i].x];
+        if (Sqrt(sqr(CheckerWhite.r-CurrWhite.r) + sqr(CheckerWhite.G-CurrWhite.G) + sqr(CheckerWhite.b-CurrWhite.B))
+            > Tolerance) then //The white checkpoint n' this point aren't in the same tol range -> goto nomatch;
+          goto NotFoundMask;
+        {$ifdef CheckAllBackground}
+        for ii := 0 to mask.BlackHi do
+        begin
+          CurrBlack := MainRowdata[yy + mask.Black[ii].y][xx + mask.Black[ii].x];
+          if (Sqrt(sqr(CurrWhite.r-CurrBlack.r) + sqr(CurrWhite.G-CurrBlack.G) + sqr(CurrWhite.b-CurrBlack.B))
+                    <= ContourTolerance) then //The Tol between the white and black is lower than the minimum difference -> goto nomatch;
+              goto NotFoundMask;
+        end;
+        {$endif}
+      end;
+      {$ifndef CheckAllBackground}
+      for ii := 0 to mask.BlackHi do
+      begin
+        CurrBlack := MainRowdata[yy + mask.Black[ii].y][xx + mask.Black[ii].x];
+        if (Sqrt(sqr(CheckerWhite.r-CurrBlack.r) + sqr(CheckerWhite.G-CurrBlack.G) + sqr(CheckerWhite.b-CurrBlack.B))
+                  <= ContourTolerance) then //The Tol between the white and black is lower than the minimum difference -> goto nomatch;
+            goto NotFoundMask;
+      end;
+      {$endif}
+      //We have found the mask appearntly, otherwise we would have jumped! Gna Gna.
+      x := xx + xs;
+      y := yy + ys;
+      TClient(Client).MWindow.FreeReturnData;
+      Exit(true);
+      //Bah not found the mask, lets do nothing and continue!
+      NotFoundMask:
+    end;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
+procedure TMFinder.CheckMask(Mask: TMask);
+begin
+  if (Mask.W < 1) or (Mask.H < 1) or (Mask.WhiteHi < 0) or (Mask.BlackHi < 0) then
+    raise exception.CreateFMT('Mask is invalid. Width/Height: (%d,%d). WhiteHi/BlackHi: (%d,%d)',[Mask.W,Mask.H,Mask.WhiteHi,Mask.BlackHi]);
 end;
 
 function TMFinder.FindBitmap(bitmap: TMufasaBitmap; var x, y: Integer): Boolean;
