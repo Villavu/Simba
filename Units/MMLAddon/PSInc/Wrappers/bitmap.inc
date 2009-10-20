@@ -231,3 +231,19 @@ begin;
     Bmp[bitmap].Posterize(Bmp[result],po);
   end;
 end;
+function CreateBitmapMask(Bitmap : integer) : TMask;
+begin;
+  result := CurrThread.Client.MBitmaps.Bmp[Bitmap].CreateTMask;
+end;
+
+function FindMaskTolerance(mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+begin;
+  result := CurrThread.Client.MFinder.FindBitmapMaskTolerance(Mask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
+end;
+function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+begin;
+  Writeln('Better be using FindMaskTolerance in combination with CreateBitmapMask, more efficient.');
+  with CurrThread.Client do
+    result := MFinder.FindBitmapMaskTolerance(MBitmaps.bmp[mask].CreateTMask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
+end;
+

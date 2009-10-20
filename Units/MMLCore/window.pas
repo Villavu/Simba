@@ -282,6 +282,7 @@ begin
     Inc(TmpData, ys * width + xs);
     Result.Ptr:= tmpData;
     Result.IncPtrWith:= Self.FrozenSize.x - width;
+    Result.RowLen:= Self.FrozenSize.x;
   end else
   case Self.TargetMode of
     w_BMP :
@@ -294,6 +295,7 @@ begin
       Inc(TmpData, ys * width + xs);
       Result.Ptr := TmpData;
       Result.IncPtrWith:= TargetBitmap.Width - width;
+      Result.RowLen:= TargetBitmap.Width;
       end;
     w_Window:
     begin
@@ -301,6 +303,7 @@ begin
       BitBlt(Self.DrawBitmap.Canvas.Handle,0,0, width, height, Self.TargetDC, xs,ys, SRCCOPY);
       Result.Ptr:= Self.DrawBmpDataPtr;
       Result.IncPtrWith:= DrawBmpW - Width;
+      Result.RowLen:= DrawBmpW;
       {$ENDIF}
     end;
     w_XWindow:
@@ -324,6 +327,7 @@ begin
       //WriteLn(IntToStr(Self.XWindowImage^.width) + ', ' + IntToStr(Self.XWindowImage^.height));
       Result.Ptr := PRGB32(Self.XWindowImage^.data);
       Result.IncPtrWith := 0;
+      Result.RowLen := width;
       Self.XImageFreed:=False;
 
       XSetErrorHandler(Old_Handler);
@@ -342,6 +346,7 @@ begin
       Inc(TmpData, ys * width + xs);
       Result.Ptr := TmpData;
       Result.IncPtrWith:= Self.ArraySize.x - width;
+      Result.RowLen:= Self.ArraySize.x;
 
     end;
   end;

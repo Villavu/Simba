@@ -32,8 +32,7 @@ uses
   Classes, SysUtils,plugins;
 const
   DS = DirectorySeparator;
-var
-  MainDir : string;
+
 type
   TRGB32 = packed record
     B, G, R, A: Byte;
@@ -43,6 +42,7 @@ type
   TRetData = record
     Ptr : PRGB32;
     IncPtrWith : integer;
+    RowLen : integer;
   end;
   TBmpMirrorStyle = (MirrorWidth,MirrorHeight,MirrorLine); //LineMirror is in line x=y;
   TTargetWindowMode = (w_BMP, w_Window, w_HDC, w_ArrayPtr, w_XWindow);
@@ -54,6 +54,12 @@ type
 
   TExtendedArray = Array of Extended;
   T2DExtendedArray = Array of Array of Extended;
+  { Mask Types }
+  TMask = record
+    White, Black : TPointArray;
+    WhiteHi,BlackHi : integer;
+    W,H : integer;
+  end;
 
   { DTM Types }
   {

@@ -71,6 +71,7 @@ type
     procedure Invert;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
+    function CreateTMask : TMask;
     constructor Create;
     destructor Destroy;override;
   end;
@@ -475,10 +476,8 @@ var
   PtrRet : TRetData;
   Rows : integer;
 begin
-  Self.ValidatePoint(xs,ys);
-  Self.ValidatePoint(xe,ye);
-  wi := xe-xs + 1;
-  hi := ye-ys + 1;
+  wi := Min(xe-xs + 1,Self.w);
+  hi := Min(ye-ys + 1,Self.h);
   PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi,hi);
   for y := 0 to (hi-1) do
     Move(PtrRet.Ptr[y * (wi + PtrRet.IncPtrWith)], FData[y * self.w],wi * SizeOf(TRGB32));
@@ -752,6 +751,38 @@ begin
     ptr^.b := Round(ptr^.b / po) * Po;
     inc(ptr);
   end;
+end;
+
+function TMufasaBitmap.CreateTMask: TMask;
+var
+  x,y : integer;
+  dX,dY : integer;
+begin
+  Result.BlackHi:= -1;
+  Result.WhiteHi:= -1;
+  Result.W := Self.Width;
+  Result.H := Self.Height;
+  SetLength(result.Black,w*h);
+  SetLength(result.White,w*h);
+  dX := w-1;
+  dY := h-1;
+  //Search it like | | | | | instead of horizontal -> for X loop first.
+  for x := 0 to dX do
+    for y := 0 to dY do
+    //Check for non-white/black pixels? Not for now atleast.
+      if FData[y*w+x].r = 255 then
+      begin;
+        inc(Result.WhiteHi);
+        Result.White[Result.WhiteHi].x := x;
+        Result.White[Result.WhiteHi].y := y;
+      end else
+      begin;
+        inc(Result.BlackHi);
+        Result.Black[Result.BlackHi].x := x;
+        Result.Black[Result.BlackHi].y := y;
+      end;
+  SetLength(result.Black,Result.BlackHi+1);
+  SetLength(result.White,Result.WhiteHi+1);
 end;
 
 

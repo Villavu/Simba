@@ -47,6 +47,8 @@ type
       procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+    private
+      ScriptPath, AppPath : string;
     protected
       DebugTo : TMemo;
       PluginsToload : Array of integer;
@@ -65,6 +67,7 @@ type
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       procedure SetPSScript(Script : string);
       procedure SetDebug( Strings : TMemo );
+      procedure SetPaths(ScriptP,AppP : string);
       constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo);
       destructor Destroy; override;
     end;
@@ -313,6 +316,12 @@ end;
 procedure TMMLPSThread.SetDebug(Strings: TMemo);
 begin
   DebugTo := Strings;
+end;
+
+procedure TMMLPSThread.SetPaths(ScriptP, AppP: string);
+begin
+  AppPath:= AppP;
+  ScriptPath:= ScriptP;
 end;
 
 

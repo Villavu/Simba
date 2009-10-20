@@ -23,7 +23,7 @@
 
 unit TestUnit;
 
-{$Undefine ProcessMessages} //Define this for processmessages in ThreadSafeCall
+{$Undef ProcessMessages} //Define this for processmessages in ThreadSafeCall
 {$mode objfpc}{$H+}
 
 interface
@@ -100,7 +100,7 @@ type
     procedure ToTray(Sender: TObject);
     procedure Undo(Sender: TObject);
   private
-    ScriptPath : string;//The path to the saved/opened file currently in the SynEdit
+    ScriptFile : string;//The path to the saved/opened file currently in the SynEdit
     StartText : string;//The text synedit holds upon start/open/save
     ScriptName : string;//The name of the currently opened/saved file.
     ScriptDefault : string;//The default script e.g. program new; begin end.
@@ -115,11 +115,13 @@ type
     function SaveCurrentScriptAs : boolean;
     function CanExitOrOpen : boolean;
     function ClearScript : boolean;
+    procedure run;
   end;
 const
   WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
 var
   Form1: TForm1;
+  MainDir : string;
   CurrentSyncInfo : TSyncInfo;//We need this for SafeCallThread
 
 implementation
@@ -128,20 +130,23 @@ uses
 
 
 
-{ TForm1 }
-procedure Run;
+procedure TForm1.Run;
 Var
   MMLPSThread : TMMLPSThread;
 
 begin
-  CurrentSyncInfo.SyncMethod:= @Form1.SafeCallThread;
+  CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
   MMLPSThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
-  MMLPSThread.SetPSScript(Form1.SynEdit1.Lines.Text);
-  MMLPSThread.SetDebug(Form1.Memo1);
+  MMLPSThread.SetPSScript(Self.SynEdit1.Lines.Text);
+  MMLPSThread.SetDebug(Self.Memo1);
+  if ScriptFile <> '' then
+    MMLPSThread.SetPaths( ExtractFileDir(ScriptFile) + DS,MainDir +DS)
+  else
+    MMLPSThread.SetPaths('',MainDir + DS);
 
   // This doesn't actually set the Client's MWindow to the passed window, it
   // only copies the current set window handle.
-  MMLPSThread.Client.MWindow.SetWindow(Form1.Window);
+  MMLPSThread.Client.MWindow.SetWindow(Self.Window);
 
   MMLPSThread.Resume;
 
@@ -330,9 +335,9 @@ begin;
         StartText := SynEdit1.Lines.text;
         ScriptName:= ExtractFileNameOnly(FileName);
         WriteLn('Script name will be: ' + ScriptName);
-        ScriptPath:= FileName;
+        ScriptFile:= FileName;
         StatusBar.Panels[0].Text:= ScriptName;
-        StatusBar.Panels[1].text:= ScriptPath;
+        StatusBar.Panels[1].text:= FileName;
         Self.Caption:= Format(WindowTitle,[ScriptName]);
         ScriptChanged := false;
         Result := True;
@@ -344,11 +349,11 @@ end;
 
 function TForm1.SaveCurrentScript: boolean;
 begin
-  Result := (ScriptPath <> '');
+  Result := (ScriptFile <> '');
   if Result then
   begin;
     ScriptChanged := false;
-    SynEdit1.Lines.SaveToFile(ScriptPath);
+    SynEdit1.Lines.SaveToFile(ScriptFile);
     StartText:= SynEdit1.Lines.Text;
   end
   else
@@ -365,13 +370,13 @@ begin
     begin;
       if ExtractFileExt(FileName) = '' then
       begin;
-        ScriptPath := FileName + '.mufa';
+        ScriptFile := FileName + '.mufa';
       end else
-        ScriptPath := FileName;
-      SynEdit1.Lines.SaveToFile(ScriptPath);
-      ScriptName:= ExtractFileNameOnly(ScriptPath);
+        ScriptFile := FileName;
+      SynEdit1.Lines.SaveToFile(ScriptFile);
+      ScriptName:= ExtractFileNameOnly(ScriptFile);
       StatusBar.Panels[0].Text:= ScriptName;
-      StatusBar.Panels[1].text := ScriptPath;
+      StatusBar.Panels[1].text := ScriptFile;
       Self.Caption:= Format(WindowTitle,[ScriptName]);
       WriteLn('Script name will be: ' + ScriptName);
       Result := True;
@@ -381,7 +386,7 @@ begin
   end;
   if result then
   begin;
-    Writeln('Succesfully saved: ' + ScriptPath);
+    Writeln('Succesfully saved: ' + ScriptFile);
     StartText:= SynEdit1.Lines.Text;
     SynEdit1.MarkTextAsSaved;
     ScriptChanged := false;
@@ -405,7 +410,7 @@ function TForm1.ClearScript: boolean;
 begin
   if CanExitOrOpen then
   begin;
-    ScriptPath:= '';
+    ScriptFile:= '';
     ScriptName:= 'Untitled';
     StartText:= ScriptDefault;
     SynEdit1.Lines.Text:= ScriptDefault;
