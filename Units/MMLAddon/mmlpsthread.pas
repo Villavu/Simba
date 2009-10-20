@@ -44,6 +44,9 @@ type
     PSyncInfo = ^TSyncInfo;
 
     TMMLPSThread = class(TThread)
+      procedure OnProcessDirective(Sender: TPSPreProcessor;
+        Parser: TPSPascalPreProcessorParser; const Active: Boolean;
+        const DirectiveName, DirectiveParam: string; var Continue: Boolean);
       procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
@@ -150,6 +153,7 @@ begin
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
+  PSScript.OnProcessDirective:=@OnProcessDirective;
   PSScript.OnProcessUnknowDirective:=@PSScriptProcessUnknowDirective;
   PSScript.OnCompile:= @OnCompile;
   PSScript.OnCompImport:= @OnCompImport;
@@ -187,6 +191,11 @@ end;
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/dtm.inc}
 
+procedure TMMLPSThread.OnProcessDirective(Sender: TPSPreProcessor;
+  Parser: TPSPascalPreProcessorParser; const Active: Boolean;
+  const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+begin
+end;
 
 procedure TMMLPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
@@ -233,9 +242,33 @@ end;
 
 function TMMLPSThread.RequireFile(Sender: TObject;
   const OriginFileName: String; var FileName, OutPut: string): Boolean;
+var
+  path: string;
+  f: TFileStream;
 begin
-
-  Result := False;
+  if FileExists(FileName) then
+    Path := FileName
+  else
+    Path :=  AppPath+ 'Includes' + DS + Filename;
+  if not FileExists(Path) then
+  begin;
+    Writeln(Path + ' doesn''t exist');
+    Result := false;
+    Exit;
+  end;
+  try
+    F := TFileStream.Create(Path, fmOpenRead or fmShareDenyWrite);
+  except
+    Result := false;
+    exit;
+  end;
+  try
+    SetLength(Output, f.Size);
+    f.Read(Output[1], Length(Output));
+  finally
+    f.Free;
+  end;
+  Result := True;
 end;
 
 procedure TMMLPSThread.OnCompImport(Sender: TObject; x: TPSPascalCompiler);
