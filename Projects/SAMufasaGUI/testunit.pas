@@ -140,9 +140,9 @@ begin
   MMLPSThread.SetPSScript(Self.SynEdit1.Lines.Text);
   MMLPSThread.SetDebug(Self.Memo1);
   if ScriptFile <> '' then
-    MMLPSThread.SetPaths( ExtractFileDir(ScriptFile) + DS,MainDir +DS)
+    MMLPSThread.SetPaths( ExtractFileDir(ScriptFile) + DS,IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)))
   else
-    MMLPSThread.SetPaths('',MainDir + DS);
+    MMLPSThread.SetPaths('', IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)));
 
   // This doesn't actually set the Client's MWindow to the passed window, it
   // only copies the current set window handle.
