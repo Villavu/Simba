@@ -30,7 +30,7 @@ interface
 uses
   Classes, SysUtils, LCLIntf,LCLType,InterfaceBase,Forms,Controls,ExtCtrls,
   Graphics,
-  Window
+  Window,MufasaTypes
 
   {$IFNDEF PICKER_CLIENT}
     {$IFDEF LINUX}
@@ -95,6 +95,8 @@ var
    {$IFNDEF PICKER_CLIENT}
      {$IFDEF LINUX}
      OldWindow: TWindow;
+     {$ELSE}
+     OldWindow: HWND;
      {$ENDIF}
    {$ENDIF}
 
@@ -103,8 +105,10 @@ begin
    {$IFNDEF PICKER_CLIENT}
      {$IFDEF LINUX}
      OldWindow := Window.CurWindow;
-     Window.SetTarget(Window.DesktopWindow);
+     {$ELSE}
+     OldWindow := Window.TargetHandle;
      {$ENDIF}
+     Window.SetDesktop;
    {$ENDIF}
   w := 0;
   h := 0;
@@ -166,6 +170,8 @@ begin
   {$IFNDEF PICKER_CLIENT}
     {$IFDEF LINUX}
     Window.SetTarget(OldWindow);
+    {$ELSE}
+    Window.SetTarget(OldWindow, w_Window);
     {$ENDIF}
   {$ENDIF}
 
