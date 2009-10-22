@@ -297,10 +297,10 @@ procedure TMFinder.DefaultOperations(var xs, ys, xe, ye: integer);
 var
   w,h : integer;
 begin
-{  if xs > xe then
-    Swap(xs,xe);
+  if xs > xe then
+    raise Exception.CreateFMT('Finder function: Xs > xe (%d,%d)',[xs,xe]);
   if ys > ye then
-    Swap(ys,ye);}
+    raise Exception.CreateFMT('Finder function: Ys > ye (%d,%d)',[ys,ye]);
   if xs < 0 then
     // xs := 0;
     raise Exception.createFMT('Any Find Function, you did not pass a ' +
