@@ -1,0 +1,6 @@
+program new;
+{.include test.mufa}
+begin
+  Writeln(TestStr);
+  Writeln(inttostr(MultiPly(500,-20)));
+end.
