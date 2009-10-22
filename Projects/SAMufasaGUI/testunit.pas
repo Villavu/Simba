@@ -97,6 +97,7 @@ type
     procedure NoTray(Sender: TObject);
     procedure SynEditProcessCommand(Sender: TObject;
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+    procedure ToolBar1Click(Sender: TObject);
     procedure ToTray(Sender: TObject);
     procedure Undo(Sender: TObject);
   private
@@ -291,6 +292,11 @@ begin
   end;
 end;
 
+procedure TForm1.ToolBar1Click(Sender: TObject);
+begin
+
+end;
+
 procedure TForm1.ToTray(Sender: TObject);
 begin
   Form1.Hide;
@@ -355,6 +361,8 @@ begin
     ScriptChanged := false;
     SynEdit1.Lines.SaveToFile(ScriptFile);
     StartText:= SynEdit1.Lines.Text;
+    SynEdit1.MarkTextAsSaved;
+    Self.Caption:= Format(WindowTitle,[ScriptName]);
   end
   else
     result := SaveCurrentScriptAs;

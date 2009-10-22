@@ -247,3 +247,9 @@ begin;
     result := MFinder.FindBitmapMaskTolerance(MBitmaps.bmp[mask].CreateTMask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
 end;
 
+function FindDeformedBitmapToleranceIn(bitmap: integer; var x,
+  y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;
+  AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
+begin;
+  result := CurrThread.Client.MFinder.FindDeformedBitmapToleranceIn(CurrThread.Client.MBitmaps.bmp[Bitmap],x,y,xs,ys,xe,ye,tolerance,range,AllowPartialAccuracy,accuracy);
+end;

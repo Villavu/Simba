@@ -55,6 +55,7 @@ type
     function FastGetPixels(TPA : TPointArray) : TIntegerArray;
     Procedure SetTransparentColor(Col : TColor);
     Function GetTransparentColor : TColor;
+    property TransparentColorSet : boolean read TransparentSet;
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
