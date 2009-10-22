@@ -51,7 +51,9 @@ type
   TPointArray = array of TPoint;
   TVariantArray = Array of Variant;
   TIntegerArray = Array of Integer;
-
+  T2DIntArray = array of TIntegerArray;
+  TBoolArray = array of boolean;
+  T2DBoolArray = Array of TBoolArray;
   TExtendedArray = Array of Extended;
   T2DExtendedArray = Array of Array of Extended;
   { Mask Types }

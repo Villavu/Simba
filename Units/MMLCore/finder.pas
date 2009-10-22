@@ -82,7 +82,8 @@ type
 implementation
 uses
     Client, // For the Client Casts.
-    colour_conv // For RGBToColor, etc.
+    colour_conv, // For RGBToColor, etc.
+    math //min/max
     ;
 type
   TPRGB32Array = array of PRGB32;
@@ -157,6 +158,68 @@ begin;
   setlength(result,Bitmap.Height);
   for i := 0 to Bitmap.Height - 1 do
     result[i] := Bitmap.FData + Bitmap.Width * i;
+end;
+//SkipCoords[y][x] = False/True; True means its "transparent" and therefore not needed to be checked.
+procedure CalculateBitmapSkipCoords(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray);
+var
+  x,y : integer;
+  R,G,B : byte;
+  Ptr : PRGB32;
+begin;
+  r := 0;
+  g := 0;
+  b := 0;
+  if Bitmap.TransparentColorSet then
+    ColorToRGB(Bitmap.GetTransparentColor,r,g,b);
+  Ptr := Bitmap.FData;
+  SetLength(SkipCoords,Bitmap.Height,Bitmap.Width);
+  for y := 0 to Bitmap.Height - 1 do
+    for x := 0 to Bitmap.Width - 1 do
+    begin;
+      if (Ptr^.r = r) and (Ptr^.g = g) and (Ptr^.b = b) then
+        SkipCoords[y][x] := True
+      else
+        SkipCoords[y][x] := false;
+      inc(ptr);
+    end;
+end;
+//Points left holds the amount of points that are "left" to be checked (Including the point itself.. So for example Pointsleft[0][0] would hold the total amount of pixels that are to be checked.
+procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray;out TotalPoints : integer; out PointsLeft : T2DIntArray);
+var
+  x,y : integer;
+  R,G,B : byte;
+  Ptr : PRGB32;
+  TotalC : integer;
+begin;
+  r := 0;
+  g := 0;
+  b := 0;
+  TotalC := 0;
+  if Bitmap.TransparentColorSet then
+    ColorToRGB(Bitmap.GetTransparentColor,r,g,b);
+  Ptr := Bitmap.FData;
+  SetLength(SkipCoords,Bitmap.Height,Bitmap.Width);
+  SetLength(PointsLeft,Bitmap.Height,Bitmap.Width);
+  for y := 0 to Bitmap.Height - 1 do
+    for x := 0 to Bitmap.Width - 1 do
+    begin;
+      if (Ptr^.r = r) and (Ptr^.g = g) and (Ptr^.b = b) then
+        SkipCoords[y][x] := True
+      else
+      begin;
+        SkipCoords[y][x] := false;
+        inc(TotalC);
+      end;
+      inc(ptr);
+    end;
+  TotalPoints:= TotalC;
+  for y := 0 to Bitmap.Height - 1 do
+    for x := 0 to Bitmap.Width - 1 do
+    begin;
+      PointsLeft[y][x] := TotalC;
+      if not SkipCoords[y][x] then
+        Dec(TotalC);
+    end;
 end;
 
 constructor TMFinder.Create(aClient: TObject);
@@ -776,6 +839,7 @@ var
    xBmp,yBmp : integer;
    tmpY : integer;
    dX, dY,  xx, yy: Integer;
+   SkipCoords : T2DBoolArray;
 label NotFoundBmp;
   //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
 
@@ -798,6 +862,8 @@ begin
   //Heck our bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
+  //Get the "skip coords".
+  CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for yy := 0 to dY do
     for xx := 0 to dX do
     begin;
@@ -805,10 +871,11 @@ begin
       begin;
         tmpY := yBmp + yy;
         for xBmp := 0 to BmpW do
-          if (BmpRowData[yBmp][xBmp].R <> MainRowdata[tmpY][xBmp +  xx].R) or
-             (BmpRowData[yBmp][xBmp].G <> MainRowdata[tmpY][xBmp +  xx].G) or
-             (BmpRowData[yBmp][xBmp].B <> MainRowdata[tmpY][xBmp +  xx].B) then
-             goto NotFoundBmp;
+          if not SkipCoords[yBmp][xBmp] then
+            if (BmpRowData[yBmp][xBmp].R <> MainRowdata[tmpY][xBmp +  xx].R) or
+               (BmpRowData[yBmp][xBmp].G <> MainRowdata[tmpY][xBmp +  xx].G) or
+               (BmpRowData[yBmp][xBmp].B <> MainRowdata[tmpY][xBmp +  xx].B) then
+               goto NotFoundBmp;
 
       end;
       //We did find the Bmp, otherwise we would be at the part below
@@ -834,6 +901,7 @@ var
    dX, dY,  xx, yy: Integer;
    CCTS : integer;
    H,S,L,HMod,SMod : extended;
+   SkipCoords : T2DBoolArray;
 label NotFoundBmp;
   //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
 
@@ -860,6 +928,8 @@ begin
   CCTS := Self.CTS;
   if CCTS > 1 then
     CCTS := 1;
+  //Get the "skip coords".
+  CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for yy := 0 to dY do
     for xx := 0 to dX do
     begin;
@@ -867,11 +937,12 @@ begin
       begin;
         tmpY := yBmp + yy;
         for xBmp := 0 to BmpW do
-          if not ColorSame(CCTS,tolerance,
-                           BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
-                           MainRowdata[tmpY][xBmp +  xx].R,MainRowdata[tmpY][xBmp +  xx].G,MainRowdata[tmpY][xBmp +  xx].B,
-                           H,S,L,HMod,SMod) then
-             goto NotFoundBmp;
+          if not SkipCoords[yBmp][xBmp] then
+            if not ColorSame(CCTS,tolerance,
+                             BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                             MainRowdata[tmpY][xBmp +  xx].R,MainRowdata[tmpY][xBmp +  xx].G,MainRowdata[tmpY][xBmp +  xx].B,
+                             H,S,L,HMod,SMod) then
+               goto NotFoundBmp;
 
       end;
       //We did find the Bmp, otherwise we would be at the part below
@@ -895,6 +966,7 @@ var
    xBmp,yBmp : integer;
    tmpY : integer;
    dX, dY,  i,HiSpiral: Integer;
+   SkipCoords : T2DBoolArray;
 label NotFoundBmp;
   //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
 
@@ -920,16 +992,19 @@ begin
   //Load the spiral into memory
   LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
   HiSpiral := (dx+1) * (dy+1) - 1;
+  //Get the "skip coords".
+  CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for i := 0 to HiSpiral do
   begin;
     for yBmp:= 0 to BmpH do
       begin;
         tmpY := yBmp + ClientTPA[i].y;
         for xBmp := 0 to BmpW do
-          if (BmpRowData[yBmp][xBmp].R <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R) or
-             (BmpRowData[yBmp][xBmp].G <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G) or
-             (BmpRowData[yBmp][xBmp].B <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B) then
-             goto NotFoundBmp;
+          if not SkipCoords[yBmp][xBmp] then
+            if (BmpRowData[yBmp][xBmp].R <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R) or
+               (BmpRowData[yBmp][xBmp].G <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G) or
+               (BmpRowData[yBmp][xBmp].B <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B) then
+               goto NotFoundBmp;
 
     end;
     //We did find the Bmp, otherwise we would be at the part below
@@ -955,6 +1030,7 @@ var
    dX, dY,  i,HiSpiral: Integer;
    CCTS : integer;
    H,S,L,HMod,SMod : extended;
+   SkipCoords : T2DBoolArray;
 label NotFoundBmp;
   //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
 
@@ -984,18 +1060,21 @@ begin
   CCTS := Self.CTS;
   if CCTS > 1 then
     CCTS := 1;
+  //Get the "skip coords".
+  CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for i := 0 to HiSpiral do
   begin;
     for yBmp:= 0 to BmpH do
       begin;
         tmpY := yBmp + ClientTPA[i].y;
         for xBmp := 0 to BmpW do
-          if not ColorSame(CCTS,tolerance,
-                           BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
-                           MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R,MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G,
-                           MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B,
-                           H,S,L,HMod,SMod) then
-            goto NotFoundBmp;
+          if not SkipCoords[yBmp][xBmp] then
+            if not ColorSame(CCTS,tolerance,
+                             BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                             MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R,MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G,
+                             MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B,
+                             H,S,L,HMod,SMod) then
+              goto NotFoundBmp;
 
     end;
     //We did find the Bmp, otherwise we would be at the part below
@@ -1021,6 +1100,7 @@ var
    FoundC : integer;
    CCTS : integer;
    H,S,L,HMod,SMod : extended;
+   SkipCoords : T2DBoolArray;
 label NotFoundBmp;
   //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
 
@@ -1051,18 +1131,21 @@ begin
   if CCTS > 1 then
     CCTS := 1;
   FoundC := 0;
+  //Get the "skip coords".
+  CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for i := 0 to HiSpiral do
   begin;
     for yBmp:= 0 to BmpH do
       begin;
         tmpY := yBmp + ClientTPA[i].y;
         for xBmp := 0 to BmpW do
-          if not ColorSame(CCTS,tolerance,
-                           BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
-                           MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R,MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G,
-                           MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B,
-                           H,S,L,HMod,SMod) then
-            goto NotFoundBmp;
+          if not SkipCoords[yBmp][xBmp] then
+            if not ColorSame(CCTS,tolerance,
+                             BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                             MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R,MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G,
+                             MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B,
+                             H,S,L,HMod,SMod) then
+              goto NotFoundBmp;
 
     end;
     //We did find the Bmp, otherwise we would be at the part below
@@ -1089,16 +1172,17 @@ var
    PtrData : TRetData;
    BmpW,BmpH : integer;
    xBmp,yBmp : integer;
-   tmpY,tmpX : integer;
    dX, dY,  xx, yy: Integer;
    SearchdX,SearchdY : integer;
-   CCTS : integer;
    GoodCount : integer;//Save the amount of pixels who have found a correspondening pixel
    BestCount : integer;//The best amount of pixels till now..
    BestPT : TPoint; //The point where it found the most pixels.
    RangeX,RangeY : Integer;
-   H,S,L,HMod,SMod : extended;
-label FoundBMPPoint;
+   yStart,yEnd,xStart,xEnd : integer;
+   TotalC : integer;
+   SkipCoords : T2DBoolArray;
+   PointsLeft : T2DIntArray;
+label FoundBMPPoint, Madness;
   //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
 
 begin
@@ -1121,14 +1205,12 @@ begin
   //Heck our bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
-  //We wont want HSL comparison with BMPs, right? Not for now atleast.
-  CCTS := Self.CTS;
-  if CCTS > 1 then
-    CCTS := 1;
   //Reset the accuracy :-)
   Accuracy := 0;
   BestCount := -1;
   BestPT := Point(-1,-1);
+  //Get the "skip coords". and PointsLeft (so we can calc whether we should stop searching or not ;-).
+  CalculateBitmapSkipCoordsEx(Bitmap,SkipCoords,TotalC,PointsLeft);
 
   for yy := 0 to dY do
     for xx := 0 to dX do
@@ -1136,26 +1218,25 @@ begin
       GoodCount := 0;
       for yBmp:= 0 to BmpH do
       begin;
-        //Calculate points of the BMP left against Goodcount (if it cannot possibly get more points skip this x,y?
-        if bestCount > (goodcount + (Bmph - yBmp) * (bmpW)) then
-          Break;
         for xBmp := 0 to BmpW do
         begin;
-
-          for RangeY := (yy-Range) to (yy + Range) do
+          //We do not have to check this point, win win win <--- triple win <-- JACKPOT!
+          if SkipCoords[yBmp][xBmp] then
+            Continue;
+          //Calculate points of the BMP left against Goodcount (if it cannot possibly get more points skip this x,y?
+          if bestCount > (GoodCount + PointsLeft[yBmp][xBmp]) then
+            goto Madness;
+          //The point on the bitmap + the the coordinate we are on at the "screen" minus the range.
+          yStart := max(yBmp + yy-Range,0);
+          yEnd := Min(yBmp + yy+range,SearchdY);
+          for RangeY := yStart to yEnd do
           begin;
-            tmpY := yBmp + RangeY;
-            if (tmpY < 0) or (tmpY > SearchdY ) then
-              continue;
-            for RangeX := (xx-Range) to (xx + Range) do
+            xStart := max(xx-Range + xBmp,0);
+            xEnd := Min(xx+range + xBmp,SearchdX);
+            for RangeX := xStart to xEnd do
             begin;
-              tmpX := xBmp + RangeX;
-              if (tmpX < 0) or (tmpX > SearchdX) then
-                Continue;
-              if ColorSame(CCTS,tolerance,
-                                BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
-                                MainRowdata[tmpY][tmpX].R,MainRowdata[tmpY][tmpX].G,MainRowdata[tmpY][tmpX].B,
-                                H,S,L,HMod,SMod) then
+              if Sqrt(sqr(BmpRowData[yBmp][xBmp].R - MainRowdata[RangeY][RangeX].R) + sqr(BmpRowData[yBmp][xBmp].G - MainRowdata[RangeY][RangeX].G)
+                          +sqr(BmpRowData[yBmp][xBmp].B - MainRowdata[RangeY][RangeX].B)) <= tolerance then
                 goto FoundBMPPoint;
             end;
           end;
@@ -1166,16 +1247,26 @@ begin
           inc(GoodCount);
         end;
       end;
+      //If we jumped to Madness it means we did not have enuf points left to beat tha fu-king score.
+      Madness:
       if GoodCount > BestCount then //This x,y has the best Acc so far!
       begin;
         BestCount := GoodCount;
         BestPT := Point(xx+xs,yy+ys);
+        if GoodCount = TotalC then
+        begin;
+          TClient(Client).MWindow.FreeReturnData;
+          x := BestPT.x;
+          y := BestPT.y;
+          accuracy:= 1;
+          Exit(true);
+        end;
       end;
     end;
   TClient(Client).MWindow.FreeReturnData;
   if BestCount = 0 then
     Exit;
-  accuracy := BestCount / ((BmpW + 1) * (BmpH+1));
+  accuracy := BestCount / TotalC;
   if (accuracy = 1) or AllowPartialAccuracy then
   begin
     x := BestPT.x;

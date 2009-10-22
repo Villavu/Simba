@@ -5,7 +5,7 @@ object Form1: TForm1
   Width = 723
   ActiveControl = SynEdit1
   Caption = 'Mufasa v2'
-  ClientHeight = 528
+  ClientHeight = 533
   ClientWidth = 723
   Menu = MainMenu1
   OnClose = FormClose
@@ -15,7 +15,7 @@ object Form1: TForm1
   LCLVersion = '0.9.29'
   object SynEdit1: TSynEdit
     Left = 8
-    Height = 328
+    Height = 333
     Top = 32
     Width = 704
     Align = alCustom
@@ -27,8 +27,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 0
-    BookMarkOptions.OnChange = nil
-    Gutter.Width = 61
+    Gutter.Width = 57
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -602,8 +601,6 @@ object Form1: TForm1
       'begin'
       'end.'
     )
-    MaxLeftChar = 80
-    ScrollBars = ssAutoBoth
     BracketHighlightStyle = sbhsBoth
     OnChange = OnSyneditChange
     OnProcessCommand = SynEditProcessCommand
@@ -612,7 +609,7 @@ object Form1: TForm1
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 21
+        Width = 17
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -723,6 +720,7 @@ object Form1: TForm1
     Caption = 'ToolBar1'
     Images = Mufasa_Image_List
     TabOrder = 2
+    OnClick = ToolBar1Click
     object TB_Run: TToolButton
       Left = 1
       Top = 2
@@ -825,7 +823,7 @@ object Form1: TForm1
   object Memo1: TMemo
     Left = 13
     Height = 139
-    Top = 365
+    Top = 370
     Width = 694
     Anchors = [akLeft, akRight, akBottom]
     ScrollBars = ssAutoBoth
@@ -833,8 +831,8 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 21
-    Top = 507
+    Height = 23
+    Top = 510
     Width = 723
     Panels = <    
       item

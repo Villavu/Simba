@@ -133,3 +133,4 @@ Sender.AddFunction(@PosterizeBitmap,'function PosterizeBitmap(Bitmap : integer; 
 Sender.AddFunction(@CreateBitmapMask,'function CreateBitmapMask(Bitmap : integer) : TMask;');
 Sender.AddFunction(@FindMaskTolerance,'function FindMaskTolerance(mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 Sender.AddFunction(@FindBitmapMaskTolerance,'function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
+Sender.AddFunction(@FindDeformedBitmapToleranceIn,'function FindDeformedBitmapToleranceIn(bitmap: integer; var x,y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;');
