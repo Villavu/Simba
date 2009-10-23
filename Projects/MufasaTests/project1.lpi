@@ -35,7 +35,7 @@
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="18" Y="53"/>
+        <CursorPos X="42" Y="27"/>
         <TopLine Value="20"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="20"/>
@@ -109,7 +109,7 @@
     <Version Value="8"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
-      <OtherUnitFiles Value="/home/merlijn/Programs/mufasa/Units/MMLCore/;/home/merlijn/Programs/mufasa/Units/Misc/;/home/merlijn/Programs/mufasa/Units/MMLAddon/;$(LazarusDir)/lcl/units/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)/;$(LazarusDir)/lcl/units/$(TargetCPU)-$(TargetOS)/"/>
+      <OtherUnitFiles Value="$(ProjPath)/../../Units/MMLCore/;$(ProjPath)/../../Units/Misc/;$(ProjPath)/../../Units/MMLAddon/;$(LazarusDir)/lcl/units/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)/;$(LazarusDir)/lcl/units/$(TargetCPU)-$(TargetOS)/"/>
     </SearchPaths>
     <Other>
       <CustomOptions Value="-dM_MEMORY_DEBUG"/>
