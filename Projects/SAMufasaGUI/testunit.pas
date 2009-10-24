@@ -41,13 +41,21 @@ uses
   , SynEditKeyCmds;
 
 type
-
+  TScriptState = (ss_None,ss_Running,ss_Paused,ss_Stopping);
+  {
+    ss_None: Means the script either hasn't been run yet, or it has ended (Succesfully or terminated)
+    ss_Running: Means the script is running as we speak :-)
+    ss_Paused: Means the script is currently in pause modus.
+    ss_Stopping: Means we've asked PS-Script politely to stop the script (next time we press the stop button we won't be that nice).
+  }
   { TForm1 }
 
   TForm1 = class(TForm)
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    MenuItemShow: TMenuItem;
+    MenuItemExit: TMenuItem;
     MenuItemCut: TMenuItem;
     MenuItemPaste: TMenuItem;
     MenuItemNew: TMenuItem;
@@ -60,6 +68,7 @@ type
     MainMenu1: TMainMenu;
     MenuItemScript: TMenuItem;
     MenuItemRun: TMenuItem;
+    TrayPopup: TPopupMenu;
     StatusBar: TStatusBar;
     SynEdit1: TSynEdit;
     SynFreePascalSyn1: TSynFreePascalSyn;
@@ -86,6 +95,7 @@ type
     procedure ButtonDragClick(Sender: TObject);
     procedure ButtonNewClick(Sender: TObject);
     procedure ButtonOpenClick(Sender: TObject);
+    procedure ButtonPauseClick(Sender: TObject);
     procedure ButtonRunClick(Sender: TObject);
     procedure ButtonSaveClick(Sender: TObject);
     procedure ButtonClearClick(Sender: TObject);
@@ -95,12 +105,14 @@ type
     procedure MenuEditClick(Sender: TObject);
     procedure MenuFileClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
+    procedure MenuItemExitClick(Sender: TObject);
     procedure MenuItemNewClick(Sender: TObject);
     procedure MenuItemOpenClick(Sender: TObject);
     procedure MenuItemPasteClick(Sender: TObject);
     procedure MenuItemRunClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
     procedure MenuItemSaveClick(Sender: TObject);
+    procedure MenuItemShowClick(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure OnSyneditChange(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
@@ -108,9 +120,10 @@ type
     procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure NoTray(Sender: TObject);
+    procedure ScriptThreadTerminate(Sender: TObject);
     procedure SynEditProcessCommand(Sender: TObject;
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
-    procedure ToolBar1Click(Sender: TObject);
+    procedure ButtonStopClick(Sender: TObject);
     procedure ButtonTrayClick(Sender: TObject);
     procedure MenuItemUndoClick(Sender: TObject);
   private
@@ -119,17 +132,23 @@ type
     ScriptName : string;//The name of the currently opened/saved file.
     ScriptDefault : string;//The default script e.g. program new; begin end.
     ScriptChanged : boolean;//We need this for that little * (edited star).
+    ScriptThread : TMMLPSThread;//Just one thread for now..
+    FScriptState : TScriptState;//Defines the "state" of the current script. (Acces through property for form updates).
+    procedure SetScriptState(const State: TScriptState);
   public
     Window: TMWindow;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
+    property ScriptState : TScriptState read FScriptState write SetScriptState;
     procedure SafeCallThread;
     function OpenScript : boolean;
     function SaveCurrentScript : boolean;
     function SaveCurrentScriptAs : boolean;
     function CanExitOrOpen : boolean;
     function ClearScript : boolean;
-    procedure run;
+    procedure RunScript;
+    procedure PauseScript;
+    procedure StopScript;
     procedure undo;
     procedure redo;
     procedure Cut;
@@ -137,6 +156,11 @@ type
   end;
 const
   WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
+  Panel_State = 0;
+  Panel_ScriptName = 1;
+  Panel_ScriptPath = 2;
+  Image_Stop = 7;
+  Image_Terminate = 19;
 var
   Form1: TForm1;
   MainDir : string;
@@ -148,29 +172,73 @@ uses
 
 
 
-procedure TForm1.Run;
-Var
-  MMLPSThread : TMMLPSThread;
-
+procedure TForm1.RunScript;
 begin
+  if ScriptState = ss_Paused then
+  begin;
+    ScriptThread.Resume;
+    ScriptState := ss_Running;
+    Exit;
+  end else
+  if ScriptState <> ss_None then
+  begin;
+    Writeln('The script hasn''t stopped yet, so we cannot start a new one.');
+    exit;
+  end;
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-  MMLPSThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
-  MMLPSThread.SetPSScript(Self.SynEdit1.Lines.Text);
-  MMLPSThread.SetDebug(Self.Memo1);
+  ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
+  ScriptThread.SetPSScript(Self.SynEdit1.Lines.Text);
+  ScriptThread.SetDebug(Self.Memo1);
   if ScriptFile <> '' then
-    MMLPSThread.SetPaths( ExtractFileDir(ScriptFile) + DS,IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)))
+    ScriptThread.SetPaths( ExtractFileDir(ScriptFile) + DS,IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)))
   else
-    MMLPSThread.SetPaths('', IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)));
+    ScriptThread.SetPaths('', IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)));
 
   // This doesn't actually set the Client's MWindow to the passed window, it
   // only copies the current set window handle.
-  MMLPSThread.Client.MWindow.SetWindow(Self.Window);
+  ScriptThread.Client.MWindow.SetWindow(Self.Window);
 
-  MMLPSThread.Resume;
+  ScriptThread.OnTerminate:=@ScriptThreadTerminate;
+  ScriptState:= ss_Running;
+  //Lets run it!
+  ScriptThread.Resume;
+end;
 
- // sleep(500);
- // MMLPSThread.PSScript.Stop;
+procedure TForm1.PauseScript;
+begin
+  if ScriptState = ss_Running then
+  begin;
+    ScriptThread.Suspended:= True;
+    ScriptState:= ss_Paused;
+  end else if ScriptState = ss_Paused then
+  begin;
+    ScriptThread.Resume;
+    ScriptState := ss_Running;
+  end;
+end;
 
+procedure TForm1.StopScript;
+begin
+  case ScriptState of
+    ss_Stopping:
+      begin    //Terminate the thread the tough way.
+        writeln('Terminating the Scriptthread');
+        KillThread(ScriptThread.Handle);
+        ScriptThread.Free;
+        ScriptState := ss_None;
+      end;
+    ss_Running:
+      begin
+        ScriptThread.PSScript.Stop;
+        ScriptState := ss_Stopping;
+      end;
+    ss_Paused:
+      begin
+        ScriptThread.Resume;
+        ScriptThread.PSScript.Stop;
+        ScriptState:= ss_Stopping;
+      end;
+  end;
 end;
 
 procedure TForm1.Undo;
@@ -207,7 +275,7 @@ end;
 
 procedure TForm1.ButtonRunClick(Sender: TObject);
 begin;
-  Run;
+  Self.RunScript;
 end;
 
 procedure TForm1.ButtonSaveClick(Sender: TObject);
@@ -228,6 +296,11 @@ end;
 procedure TForm1.ButtonOpenClick(Sender: TObject);
 begin
   Self.OpenScript;
+end;
+
+procedure TForm1.ButtonPauseClick(Sender: TObject);
+begin
+  Self.PauseScript;
 end;
 
 procedure TForm1.ButtonClearClick(Sender: TObject);
@@ -251,6 +324,7 @@ begin
   Caption := Format(WindowTitle,['Untitled']);
   ScriptName:= 'Untitled';
   ScriptChanged := false;
+  ScriptState:= ss_None;
   MainDir:= ExtractFileDir(Application.ExeName);
   PluginsGlob := TMPlugins.Create;
   PluginsGlob.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
@@ -280,6 +354,11 @@ begin
   Self.cut;
 end;
 
+procedure TForm1.MenuItemExitClick(Sender: TObject);
+begin
+  Self.Close;
+end;
+
 procedure TForm1.MenuItemNewClick(Sender: TObject);
 begin
   ClearScript;
@@ -297,7 +376,7 @@ end;
 
 procedure TForm1.MenuItemRunClick(Sender: TObject);
 begin
-  Run;
+  RunScript;
 end;
 
 procedure TForm1.MenuItemSaveAsClick(Sender: TObject);
@@ -308,6 +387,11 @@ end;
 procedure TForm1.MenuItemSaveClick(Sender: TObject);
 begin
   SaveCurrentScript;
+end;
+
+procedure TForm1.MenuItemShowClick(Sender: TObject);
+begin
+  Self.Show;
 end;
 
 procedure TForm1.OnLinePSScript(Sender: TObject);
@@ -356,6 +440,11 @@ begin
     Form1.Hide;
 end;
 
+procedure TForm1.ScriptThreadTerminate(Sender: TObject);
+begin
+  ScriptState:= ss_None;
+end;
+
 procedure TForm1.SynEditProcessCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 begin
@@ -371,10 +460,11 @@ begin
   end;
 end;
 
-procedure TForm1.ToolBar1Click(Sender: TObject);
+procedure TForm1.ButtonStopClick(Sender: TObject);
 begin
-
+  Self.StopScript;
 end;
+
 
 procedure TForm1.ButtonTrayClick(Sender: TObject);
 begin
@@ -384,6 +474,18 @@ end;
 procedure TForm1.MenuItemUndoClick(Sender: TObject);
 begin
   Self.Undo;
+end;
+
+procedure TForm1.SetScriptState(const State: TScriptState);
+begin
+  FScriptState:= State;
+  with Self.StatusBar.panels[Panel_State] do
+    case FScriptState of
+      ss_Running : begin Text := 'Running'; TB_Run.Enabled:= False; TB_Pause.Enabled:= True; TB_Stop.Enabled:= True; end;
+      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; TB_Pause.Enabled:= True; TB_Stop.Enabled:= True; end;
+      ss_Stopping: begin Text := 'Stopping';TB_Run.Enabled:= False; TB_Pause.Enabled:= False; TB_Stop.Enabled:= True; TB_Stop.ImageIndex := Image_Terminate end;
+      ss_None    : begin Text := 'Done'; TB_Run.Enabled:= True; TB_Pause.Enabled:= False; TB_Stop.Enabled:= False; TB_Stop.ImageIndex := Image_Stop end;
+    end;
 end;
 
 
@@ -416,8 +518,8 @@ begin;
         ScriptName:= ExtractFileNameOnly(FileName);
         WriteLn('Script name will be: ' + ScriptName);
         ScriptFile:= FileName;
-        StatusBar.Panels[0].Text:= ScriptName;
-        StatusBar.Panels[1].text:= FileName;
+        StatusBar.Panels[Panel_ScriptName].Text:= ScriptName;
+        StatusBar.Panels[Panel_ScriptPath].text:= FileName;
         Self.Caption:= Format(WindowTitle,[ScriptName]);
         ScriptChanged := false;
         Result := True;
@@ -457,8 +559,8 @@ begin
         ScriptFile := FileName;
       SynEdit1.Lines.SaveToFile(ScriptFile);
       ScriptName:= ExtractFileNameOnly(ScriptFile);
-      StatusBar.Panels[0].Text:= ScriptName;
-      StatusBar.Panels[1].text := ScriptFile;
+      StatusBar.Panels[Panel_ScriptName].Text:= ScriptName;
+      StatusBar.Panels[Panel_ScriptPath].text := ScriptFile;
       Self.Caption:= Format(WindowTitle,[ScriptName]);
       WriteLn('Script name will be: ' + ScriptName);
       Result := True;
@@ -496,8 +598,8 @@ begin
     ScriptName:= 'Untitled';
     StartText:= ScriptDefault;
     SynEdit1.Lines.Text:= ScriptDefault;
-    StatusBar.Panels[0].Text:= 'Untitled';
-    StatusBar.Panels[1].Text:= '';
+    StatusBar.Panels[Panel_ScriptName].Text:= 'Untitled';
+    StatusBar.Panels[Panel_ScriptPath].Text:= '';
     Self.Caption := Format(WindowTitle,['Untitled']);
     ScriptChanged:= false;
   end;
