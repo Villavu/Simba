@@ -48,6 +48,8 @@ type
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    MenuItemCut: TMenuItem;
+    MenuItemPaste: TMenuItem;
     MenuItemNew: TMenuItem;
     MenuItemSaveAs: TMenuItem;
     MenuItemOpen: TMenuItem;
@@ -70,6 +72,10 @@ type
     TB_Tray: TToolButton;
     TB_NewTab: TToolButton;
     TB_CloseTab: TToolButton;
+    TB_New: TToolButton;
+    ToolButton2: TToolButton;
+    TB_Open: TToolButton;
+    ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     TB_ClearDebug: TToolButton;
     TB_PickColour: TToolButton;
@@ -77,29 +83,36 @@ type
     ToolButton8: TToolButton;
     TB_Convert: TToolButton;
     MTrayIcon: TTrayIcon;
-    procedure Button1Click(Sender: TObject);
-    procedure ClearDebug(Sender: TObject);
+    procedure ButtonDragClick(Sender: TObject);
+    procedure ButtonNewClick(Sender: TObject);
+    procedure ButtonOpenClick(Sender: TObject);
+    procedure ButtonRunClick(Sender: TObject);
+    procedure ButtonSaveClick(Sender: TObject);
+    procedure ButtonClearClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure MenuEditClick(Sender: TObject);
     procedure MenuFileClick(Sender: TObject);
+    procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemNewClick(Sender: TObject);
     procedure MenuItemOpenClick(Sender: TObject);
+    procedure MenuItemPasteClick(Sender: TObject);
     procedure MenuItemRunClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
     procedure MenuItemSaveClick(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure OnSyneditChange(Sender: TObject);
-    procedure PickColorEvent(Sender: TObject);
-    procedure Redo(Sender: TObject);
-    procedure Selector_DOWN(Sender: TObject; Button: TMouseButton;
+    procedure ButtonPickClick(Sender: TObject);
+    procedure MenuItemRedoClick(Sender: TObject);
+    procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure NoTray(Sender: TObject);
     procedure SynEditProcessCommand(Sender: TObject;
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure ToolBar1Click(Sender: TObject);
-    procedure ToTray(Sender: TObject);
-    procedure Undo(Sender: TObject);
+    procedure ButtonTrayClick(Sender: TObject);
+    procedure MenuItemUndoClick(Sender: TObject);
   private
     ScriptFile : string;//The path to the saved/opened file currently in the SynEdit
     StartText : string;//The text synedit holds upon start/open/save
@@ -117,6 +130,10 @@ type
     function CanExitOrOpen : boolean;
     function ClearScript : boolean;
     procedure run;
+    procedure undo;
+    procedure redo;
+    procedure Cut;
+    procedure Paste;
   end;
 const
   WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
@@ -156,12 +173,64 @@ begin
 
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.Undo;
+begin
+  SynEdit1.Undo;
+  if ScriptChanged then
+    if SynEdit1.Lines.Text = StartText then
+    begin;
+      Self.Caption:= format(WindowTitle,[ScriptName]);
+      ScriptChanged := false;
+    end;
+end;
+
+procedure TForm1.Redo;
+begin
+  SynEdit1.Redo;
+  if ScriptChanged then
+    if SynEdit1.Lines.Text = StartText then
+    begin;
+      Self.Caption:= format(WindowTitle,[ScriptName]);
+      ScriptChanged := false;
+    end;
+end;
+
+procedure TForm1.Cut;
+begin
+  SynEdit1.CutToClipboard;
+end;
+
+procedure TForm1.Paste;
+begin
+  SynEdit1.PasteFromClipboard;
+end;
+
+procedure TForm1.ButtonRunClick(Sender: TObject);
 begin;
   Run;
 end;
 
-procedure TForm1.ClearDebug(Sender: TObject);
+procedure TForm1.ButtonSaveClick(Sender: TObject);
+begin
+  Self.SaveCurrentScript;
+end;
+
+procedure TForm1.ButtonNewClick(Sender: TObject);
+begin
+  Self.ClearScript;
+end;
+
+procedure TForm1.ButtonDragClick(Sender: TObject);
+begin
+
+end;
+
+procedure TForm1.ButtonOpenClick(Sender: TObject);
+begin
+  Self.OpenScript;
+end;
+
+procedure TForm1.ButtonClearClick(Sender: TObject);
 begin
   Memo1.Clear;
 end;
@@ -196,9 +265,19 @@ begin
   PluginsGlob.Free;
 end;
 
+procedure TForm1.MenuEditClick(Sender: TObject);
+begin
+
+end;
+
 procedure TForm1.MenuFileClick(Sender: TObject);
 begin
 
+end;
+
+procedure TForm1.MenuItemCutClick(Sender: TObject);
+begin
+  Self.cut;
 end;
 
 procedure TForm1.MenuItemNewClick(Sender: TObject);
@@ -209,6 +288,11 @@ end;
 procedure TForm1.MenuItemOpenClick(Sender: TObject);
 begin
   OpenScript;
+end;
+
+procedure TForm1.MenuItemPasteClick(Sender: TObject);
+begin
+  Self.Paste;
 end;
 
 procedure TForm1.MenuItemRunClick(Sender: TObject);
@@ -243,7 +327,7 @@ begin
   end;
 end;
 
-procedure TForm1.PickColorEvent(Sender: TObject);
+procedure TForm1.ButtonPickClick(Sender: TObject);
 var
    c, x, y: Integer;
 begin
@@ -251,18 +335,13 @@ begin
   writeln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
 
-procedure TForm1.Redo(Sender: TObject);
+
+procedure TForm1.MenuItemRedoClick(Sender: TObject);
 begin
-  SynEdit1.Redo;
-  if ScriptChanged then
-    if SynEdit1.Lines.Text = StartText then
-    begin;
-      Self.Caption:= format(WindowTitle,[ScriptName]);
-      ScriptChanged := false;
-    end;
+  Self.redo;
 end;
 
-procedure TForm1.Selector_DOWN(Sender: TObject; Button: TMouseButton;
+procedure TForm1.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   Window.SetTarget(Selector.Drag {$ifdef MSWINDOWS},w_window{$endif});
@@ -283,12 +362,12 @@ begin
   if Command = ecUndo then
   begin;
     Command:= ecNone;
-    Undo(Sender);
+    Self.Undo;
   end else
   if Command = ecRedo then
   begin;
     Command := ecNone;
-    Redo(Sender);
+    Self.Redo;
   end;
 end;
 
@@ -297,21 +376,16 @@ begin
 
 end;
 
-procedure TForm1.ToTray(Sender: TObject);
+procedure TForm1.ButtonTrayClick(Sender: TObject);
 begin
   Form1.Hide;
 end;
 
-procedure TForm1.Undo(Sender: TObject);
+procedure TForm1.MenuItemUndoClick(Sender: TObject);
 begin
-  SynEdit1.Undo;
-  if ScriptChanged then
-    if SynEdit1.Lines.Text = StartText then
-    begin;
-      Self.Caption:= format(WindowTitle,[ScriptName]);
-      ScriptChanged := false;
-    end;
+  Self.Undo;
 end;
+
 
 procedure TForm1.SafeCallThread;
 begin

@@ -1,0 +1,4 @@
+pause,stop: From Lazarus (http://lazarus.freepascal.org)
+addtab,closetab,cut,new,open,paste,redo,run,save,undo: Mark James http://www.famfamfam.com/lab/icons/silk/
+eraser: Yusuke Kamiyamane http://www.pinvoke.com/
+pickcolor: From the Crystal Clear Project (http://www.everaldo.com/crystal/) licensed under LGPL
