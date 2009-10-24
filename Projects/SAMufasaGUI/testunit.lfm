@@ -27,6 +27,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 0
+    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
@@ -865,7 +866,7 @@ object Form1: TForm1
     Width = 723
     Panels = <    
       item
-        Width = 75
+        Width = 60
       end    
       item
         Text = 'Untitled'
@@ -1231,6 +1232,17 @@ object Form1: TForm1
         ImageIndex = 6
         ShortCut = 120
         OnClick = MenuItemRunClick
+      end
+      object MenuItemPause: TMenuItem
+        Caption = 'Pause'
+        ImageIndex = 5
+        OnClick = MenuItemPauseClick
+      end
+      object MenuItemStop: TMenuItem
+        Caption = 'Stop'
+        ImageIndex = 7
+        ShortCut = 16497
+        OnClick = MenuItemStopClick
       end
     end
   end

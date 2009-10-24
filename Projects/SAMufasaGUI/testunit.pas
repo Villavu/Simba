@@ -54,6 +54,8 @@ type
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    MenuItemPause: TMenuItem;
+    MenuItemStop: TMenuItem;
     MenuItemShow: TMenuItem;
     MenuItemExit: TMenuItem;
     MenuItemCut: TMenuItem;
@@ -109,10 +111,12 @@ type
     procedure MenuItemNewClick(Sender: TObject);
     procedure MenuItemOpenClick(Sender: TObject);
     procedure MenuItemPasteClick(Sender: TObject);
+    procedure MenuItemPauseClick(Sender: TObject);
     procedure MenuItemRunClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
     procedure MenuItemSaveClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
+    procedure MenuItemStopClick(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure OnSyneditChange(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
@@ -374,6 +378,11 @@ begin
   Self.Paste;
 end;
 
+procedure TForm1.MenuItemPauseClick(Sender: TObject);
+begin
+  Self.PauseScript;
+end;
+
 procedure TForm1.MenuItemRunClick(Sender: TObject);
 begin
   RunScript;
@@ -392,6 +401,11 @@ end;
 procedure TForm1.MenuItemShowClick(Sender: TObject);
 begin
   Self.Show;
+end;
+
+procedure TForm1.MenuItemStopClick(Sender: TObject);
+begin
+  self.StopScript;
 end;
 
 procedure TForm1.OnLinePSScript(Sender: TObject);
