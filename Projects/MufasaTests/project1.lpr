@@ -8,7 +8,9 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, CustApp,
   Forms,Interfaces,
+  LCLIntf,
   Client
+
 
   { you can add units after this };
 
@@ -31,7 +33,10 @@ procedure MufasaTests.DoRun;
 
 var
   ErrorMsg: String;
+  Time: DWord;
   C: TClient;
+  I, W, H, X, Y: Integer;
+
 begin
   // quick check parameters
   ErrorMsg:=CheckOptions('h','help');
@@ -50,7 +55,21 @@ begin
 
   { add your program here }
   C := TClient.Create;
-  writeln('wat');
+
+  C.MWindow.GetDimensions(W, H);
+  Time := GetTickCount;
+  for i := 0 to 100 do
+    C.MFinder.FindColor(X, Y, 0, 0, 0, W - 1, H - 1);
+  writeln('Time: ' + IntToStr(GetTickCount - Time));
+
+  if C.MFinder.FindColor(X, Y, 0, 0, 0, W - 1, H - 1) then
+  begin
+    C.MInput.SetMousePos(X, Y);
+    writeln('found!');
+  end else
+  begin
+    writeln('not found!');
+  end;
 
 
 

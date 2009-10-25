@@ -35,8 +35,8 @@
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="42" Y="27"/>
-        <TopLine Value="20"/>
+        <CursorPos X="53" Y="63"/>
+        <TopLine Value="35"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
@@ -74,7 +74,7 @@
         <Loaded Value="True"/>
       </Unit4>
     </Units>
-    <JumpHistory Count="7" HistoryIndex="6">
+    <JumpHistory Count="8" HistoryIndex="7">
       <Position1>
         <Filename Value="project1.lpr"/>
         <Caret Line="77" Column="17" TopLine="42"/>
@@ -103,6 +103,10 @@
         <Filename Value="project1.lpr"/>
         <Caret Line="11" Column="3" TopLine="1"/>
       </Position7>
+      <Position8>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="59" Column="18" TopLine="40"/>
+      </Position8>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
