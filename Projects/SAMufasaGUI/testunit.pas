@@ -70,6 +70,9 @@ type
     MainMenu1: TMainMenu;
     MenuItemScript: TMenuItem;
     MenuItemRun: TMenuItem;
+    PanelSynedit: TPanel;
+    PanelMemo: TPanel;
+    SplitterMemoSynedit: TSplitter;
     TrayPopup: TPopupMenu;
     StatusBar: TStatusBar;
     SynEdit1: TSynEdit;
@@ -86,7 +89,7 @@ type
     TB_New: TToolButton;
     ToolButton2: TToolButton;
     TB_Open: TToolButton;
-    ToolButton3: TToolButton;
+    TB_Save: TToolButton;
     ToolButton4: TToolButton;
     TB_ClearDebug: TToolButton;
     TB_PickColour: TToolButton;
@@ -174,7 +177,12 @@ implementation
 uses
    lclintf,plugins;
 
-
+{$ifdef mswindows}
+procedure Writeln( S : String);
+begin;
+  Form1.Memo1.Lines.Add(s);
+end;
+{$ENDIF}
 
 procedure TForm1.RunScript;
 begin
@@ -212,8 +220,12 @@ procedure TForm1.PauseScript;
 begin
   if ScriptState = ss_Running then
   begin;
+    {$ifdef MSWindows}
     ScriptThread.Suspended:= True;
     ScriptState:= ss_Paused;
+    {$else}
+    Writeln('Linux users are screwd');
+    {$endif}
   end else if ScriptState = ss_Paused then
   begin;
     ScriptThread.Resume;
