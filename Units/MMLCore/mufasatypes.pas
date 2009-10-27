@@ -49,9 +49,11 @@ type
   TClickType = (mouse_Left, mouse_Right, mouse_Middle);
   TMousePress = (mouse_Down, mouse_Up);
   TPointArray = array of TPoint;
+  T2DPointArray = array of TPointArray;
   TVariantArray = Array of Variant;
   TIntegerArray = Array of Integer;
   T2DIntArray = array of TIntegerArray;
+  T2DIntegerArray = T2DIntArray;
   TBoolArray = array of boolean;
   T2DBoolArray = Array of TBoolArray;
   TExtendedArray = Array of Extended;
