@@ -458,6 +458,7 @@ var
    PtrInc: Integer;
    dX, dY, clR, clG, clB, xx, yy: Integer;
    H1, S1, L1, H2, S2, L2: Extended;
+   HueXTol, SatXTol: Extended;
 
    label Hit;
    label Miss;
@@ -512,17 +513,18 @@ begin
     end;
     2:
     // Can be optimized a lot... RGBToHSL isn't really inline,
-    // and hueMod * tol is also calculated every time.
     begin
-    for yy := ys to ye do
-      for xx := xs to xe do
-      begin
-         RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
-         if ((abs(H1 - H2) <= (hueMod * tol)) and (abs(S1 - S2) <= (satMod * tol)) and (abs(L1 - L2) <= Tol)) then
+      HueXTol := hueMod * Tol;
+      SatXTol := satMod * Tol;
+      for yy := ys to ye do
+        for xx := xs to xe do
+        begin
+          RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
+          if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
             goto Hit;
-        inc(Ptr);
-      end;
-      Inc(Ptr, PtrInc);
+         inc(Ptr);
+        end;
+        Inc(Ptr, PtrInc);
     end;
   end;
   Result := False;
@@ -543,7 +545,7 @@ var
    Ptr: PRGB32;
    PtrInc,C: Integer;
    dX, dY, clR, clG, clB, xx, yy: Integer;
-   H1, S1, L1, H2, S2, L2: Extended;
+   H1, S1, L1, H2, S2, L2, hueXTol, satXTol: Extended;
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
@@ -593,20 +595,23 @@ begin
       end;
       Inc(Ptr, PtrInc);
     end;
+
     2:
     begin
-    for yy := ys to ye do
-      for xx := xs to xe do
-      begin
-         RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
-         if ((abs(H1 - H2) <= (hueMod * tol)) and (abs(S1 - S2) <= (satMod * tol)) and (abs(L1 - L2) <= Tol)) then
-         begin;
-           ClientTPA[c].x := xx;
-           ClientTPA[c].y := yy;
-           inc(c);
-         end;
-        inc(Ptr);
-      end;
+      HueXTol := hueMod * Tol;
+      SatXTol := satMod * Tol;
+      for yy := ys to ye do
+        for xx := xs to xe do
+        begin
+          RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
+          if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
+          begin;
+            ClientTPA[c].x := xx;
+            ClientTPA[c].y := yy;
+            Inc(c);
+          end;
+          Inc(Ptr);
+        end;
       Inc(Ptr, PtrInc);
     end;
   end;
@@ -624,7 +629,7 @@ var
    c : integer;
    RowData : TPRGB32Array;
    dX, dY, clR, clG, clB, i,SpiralHi: Integer;
-   H1, S1, L1, H2, S2, L2: Extended;
+   H1, S1, L1, H2, S2, L2, HueXTol, SatXTol: Extended;
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
@@ -669,16 +674,21 @@ begin
       end;
 
     2:
-    for i := 0 to SpiralHi do
     begin;
-      RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
-               RowData[ClientTPA[i].y][ClientTPA[i].x].G,
-               RowData[ClientTPA[i].y][ClientTPA[i].x].B,H2,S2,L2);
-      if ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S1 - S2) <= (satMod * Tolerance)) and (abs(L1 - L2) <= Tolerance)) then
+      HueXTol := hueMod * Tolerance;
+      SatXTol := satMod * Tolerance;
+      for i := 0 to SpiralHi do
       begin;
-        ClientTPA[c].x := ClientTPA[i].x + xs;
-        ClientTPA[c].y := ClientTPA[i].y + ys;
-        inc(c);
+        RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
+                 RowData[ClientTPA[i].y][ClientTPA[i].x].G,
+                 RowData[ClientTPA[i].y][ClientTPA[i].x].B,
+                 H2,S2,L2);
+        if ((abs(H1 - H2) <= (HueXTol)) and (abs(S1 - S2) <= (satXTol)) and (abs(L1 - L2) <= Tolerance)) then
+        begin;
+          ClientTPA[c].x := ClientTPA[i].x + xs;
+          ClientTPA[c].y := ClientTPA[i].y + ys;
+          inc(c);
+        end;
       end;
     end;
   end;

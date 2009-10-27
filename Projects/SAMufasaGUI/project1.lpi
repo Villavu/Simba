@@ -236,7 +236,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="MufasaTypes"/>
         <CursorPos X="26" Y="37"/>
-        <TopLine Value="55"/>
+        <TopLine Value="37"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -402,7 +402,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="bitmaps"/>
         <CursorPos X="22" Y="61"/>
-        <TopLine Value="32"/>
+        <TopLine Value="33"/>
         <EditorIndex Value="4"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -667,7 +667,7 @@
       <Unit90>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/math.inc"/>
         <CursorPos X="14" Y="17"/>
-        <TopLine Value="3"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="6"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
@@ -829,7 +829,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmath"/>
         <CursorPos X="32" Y="42"/>
-        <TopLine Value="47"/>
+        <TopLine Value="42"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="125"/>
         <Loaded Value="True"/>
