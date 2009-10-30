@@ -38,7 +38,7 @@ uses
   colourpicker,
   windowselector,
   lcltype
-  , SynEditKeyCmds;
+  , SynEditKeyCmds,SynEditHighlighter, SynEditMarkupSpecialLine, SynEditMiscClasses;
 
 type
   TScriptState = (ss_None,ss_Running,ss_Paused,ss_Stopping);
@@ -104,6 +104,7 @@ type
     procedure ButtonRunClick(Sender: TObject);
     procedure ButtonSaveClick(Sender: TObject);
     procedure ButtonClearClick(Sender: TObject);
+    procedure ErrorThread(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -128,12 +129,15 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure NoTray(Sender: TObject);
     procedure ScriptThreadTerminate(Sender: TObject);
+    procedure SynEdit1SpecialLineColors(Sender: TObject; Line: integer;
+      var Special: boolean; var FG, BG: TColor);
     procedure SynEditProcessCommand(Sender: TObject;
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure ButtonStopClick(Sender: TObject);
     procedure ButtonTrayClick(Sender: TObject);
     procedure MenuItemUndoClick(Sender: TObject);
   private
+    ScriptErrorLine : integer; //Highlight the error line!
     ScriptFile : string;//The path to the saved/opened file currently in the SynEdit
     StartText : string;//The text synedit holds upon start/open/save
     ScriptName : string;//The name of the currently opened/saved file.
@@ -201,6 +205,7 @@ begin
   ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
   ScriptThread.SetPSScript(Self.SynEdit1.Lines.Text);
   ScriptThread.SetDebug(Self.Memo1);
+  ScriptThread.OnError:=@ErrorThread;
   if ScriptFile <> '' then
     ScriptThread.SetPaths( ExtractFileDir(ScriptFile) + DS,IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)))
   else
@@ -324,6 +329,14 @@ begin
   Memo1.Clear;
 end;
 
+procedure TForm1.ErrorThread(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType);
+begin
+  ScriptErrorLine:= ErrorAtLine;
+  SynEdit1.SelStart:= ErrorPosition;
+  Writeln(Format('Error: %s at line %d',[errorstr,erroratline]));
+  SynEdit1.Invalidate;
+end;
+
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if not CanExitOrOpen then
@@ -341,6 +354,7 @@ begin
   ScriptName:= 'Untitled';
   ScriptChanged := false;
   ScriptState:= ss_None;
+  ScriptErrorLine:= -1;
   MainDir:= ExtractFileDir(Application.ExeName);
   PluginsGlob := TMPlugins.Create;
   PluginsGlob.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
@@ -430,6 +444,7 @@ end;
 
 procedure TForm1.OnSyneditChange(Sender: TObject);
 begin
+  ScriptErrorLine:= -1;
   if not ScriptChanged then
   begin;
     ScriptChanged:= True;
@@ -470,6 +485,18 @@ procedure TForm1.ScriptThreadTerminate(Sender: TObject);
 begin
   ScriptState:= ss_None;
 end;
+
+procedure TForm1.SynEdit1SpecialLineColors(Sender: TObject; Line: integer;
+  var Special: boolean; var FG, BG: TColor);
+begin
+  if line = ScriptErrorLine then
+  begin;
+    Special := true;
+    BG := $50a0ff;
+    FG := 0;
+  end;
+end;
+
 
 procedure TForm1.SynEditProcessCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
@@ -607,6 +634,7 @@ function TForm1.CanExitOrOpen: boolean;
 var
   I : integer;
 begin;
+  Self.Enabled := False;//We HAVE to answer the popup
   Result := True;
   if StartText <> Synedit1.Lines.text then
     Case MessageBox(0,pchar('Do you want to save the script?'), Pchar('Script has been modified.'),
@@ -614,6 +642,8 @@ begin;
           IDCANCEL : Result := False;
           IDYES : Result := SaveCurrentScript;
       end;
+  Self.Enabled := True;
+  Self.SetFocus;
 end;
 
 function TForm1.ClearScript: boolean;
