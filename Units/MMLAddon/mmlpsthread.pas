@@ -28,10 +28,9 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes;
+  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes, web;
 
 type
-
     { TMMLPSThread }
     TSyncInfo = record
       V : MufasaTypes.TVariantArray;
@@ -42,7 +41,8 @@ type
       PSScript : TPSScript;
     end;
     PSyncInfo = ^TSyncInfo;
-
+    TErrorType = (errRuntime,errCompile);
+    TOnError = procedure (ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType) of object;
     TMMLPSThread = class(TThread)
       procedure OnProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
@@ -55,6 +55,7 @@ type
     protected
       DebugTo : TMemo;
       PluginsToload : Array of integer;
+      FOnError  : TOnError;
       procedure OnCompile(Sender: TPSScript);
       procedure AfterExecute(Sender : TPSScript);
       function RequireFile(Sender: TObject; const OriginFileName: String;
@@ -68,6 +69,7 @@ type
       PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
       Client : TClient;
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
+      property OnError : TOnError read FOnError write FOnError;
       procedure SetPSScript(Script : string);
       procedure SetDebug( Strings : TMemo );
       procedure SetPaths(ScriptP,AppP : string);
@@ -159,7 +161,7 @@ begin
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
   PSScript.OnAfterExecute:= @AfterExecute;
-
+  OnError:= nil;
   // Set some defines
   {$I PSInc/psdefines.inc}
 
@@ -306,8 +308,9 @@ begin
     if (not b) and (PSScript.CompilerMessages[l] is TIFPSPascalCompilerError) then
     begin
       b := True;
-//      FormMain.CurrSynEdit.SelStart := PSScript.CompilerMessages[l].Pos;
-
+      if OnError <> nil then
+        with PSScript.CompilerMessages[l] do
+          OnError(Row, Pos, MessageToString,errCompile);
     end;
   end;
 end;
@@ -326,9 +329,8 @@ begin;
 //      if not (ScriptState = SCompiling) then
         if not PSScript.Execute then
         begin
-//          FormMain.CurrSynEdit.SelStart := Script.PSScript.ExecErrorPosition;
-          psWriteln(PSScript.ExecErrorToString +' at '+Inttostr(PSScript.ExecErrorProcNo)+'.'
-                  +Inttostr(PSScript.ExecErrorByteCodePosition));
+          if OnError <> nil then
+            OnError(PSScript.ExecErrorRow,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,errRuntime);
         end else psWriteln('Succesfully executed');
     end else
     begin
@@ -337,7 +339,7 @@ begin;
     end;
   except
      on E : Exception do
-       psWriteln('Error: ' + E.Message);
+       psWriteln('ERROR IN PSSCRIPT: ' + e.message);
   end;
 end;
 

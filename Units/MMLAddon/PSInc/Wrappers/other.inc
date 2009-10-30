@@ -54,3 +54,8 @@ function Distance(x1, y1, x2, y2: Integer): Integer;
 begin;
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
 end;
+
+procedure HakunaMatata;
+begin;
+  OpenWebPage('http://www.youtube.com/v/ejEVczA8PLU&hl=en&fs=1&autoplay=1');
+end;

@@ -75,7 +75,10 @@ Sender.AddFunction(@Wait, 'procedure wait(t: integer);');
 Sender.AddFunction(@GetTickCount, 'function GetSystemTime: Integer;');
 Sender.AddFunction(@CreateForm,'function CreateForm : TForm;');
 Sender.AddFunction(@CreateButton,'function CreateButton(Owner : TComponent) : TButton');
+Sender.AddFunction(@HakunaMatata,'procedure HakunaMatata;');
 
+{web}
+Sender.AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 
 {Color + Color Finders}
 Sender.AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
