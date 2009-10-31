@@ -62,6 +62,9 @@ type
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    TrayPlay: TMenuItem;
+    TrayStop: TMenuItem;
+    TrayPause: TMenuItem;
     MenuItemPause: TMenuItem;
     MenuItemStop: TMenuItem;
     MenuItemShow: TMenuItem;
@@ -137,6 +140,9 @@ type
     procedure ButtonStopClick(Sender: TObject);
     procedure ButtonTrayClick(Sender: TObject);
     procedure MenuItemUndoClick(Sender: TObject);
+    procedure TrayPauseClick(Sender: TObject);
+    procedure TrayPlayClick(Sender: TObject);
+    procedure TrayStopClick(Sender: TObject);
   private
     function GetScriptState: TScriptState;
     procedure SetScriptState(const State: TScriptState);
@@ -205,6 +211,7 @@ begin
       Writeln('The script hasn''t stopped yet, so we cannot start a new one.');
       exit;
     end;
+    ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
     ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
     ScriptThread.SetPSScript(CurrScript.SynEdit.Lines.Text);
@@ -340,6 +347,8 @@ begin
   StatusBar.Panels[Panel_ScriptName].Text:= Script.ScriptName;
   StatusBar.Panels[Panel_ScriptPath].text:= Script.ScriptFile;
   SetScriptState(Tab.ScriptFrame.FScriptState);//To set the buttons right
+  if Self.Showing then
+    CurrScript.SynEdit.SetFocus;
 end;
 
 procedure TForm1.ButtonRunClick(Sender: TObject);
@@ -477,6 +486,7 @@ end;
 procedure TForm1.MenuItemShowClick(Sender: TObject);
 begin
   Self.Show;
+  Self.WindowState := wsNormal;
 end;
 
 procedure TForm1.MenuItemStopClick(Sender: TObject);
@@ -544,6 +554,21 @@ begin
   CurrScript.Undo;
 end;
 
+procedure TForm1.TrayPauseClick(Sender: TObject);
+begin
+  Self.PauseScript;
+end;
+
+procedure TForm1.TrayPlayClick(Sender: TObject);
+begin
+  Self.RunScript;
+end;
+
+procedure TForm1.TrayStopClick(Sender: TObject);
+begin
+  Self.StopScript;
+end;
+
 function TForm1.GetScriptState: TScriptState;
 begin
   result := CurrScript.FScriptState;
@@ -554,10 +579,26 @@ begin
   CurrScript.FScriptState:= State;
   with Self.StatusBar.panels[Panel_State] do
     case state of
-      ss_Running : begin Text := 'Running'; TB_Run.Enabled:= False; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif} TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True; end;
-      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif} TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True; end;
-      ss_Stopping: begin Text := 'Stopping';TB_Run.Enabled:= False; TB_Pause.Enabled:= False; TB_Stop.Enabled:= True; TB_Stop.ImageIndex := Image_Terminate end;
-      ss_None    : begin Text := 'Done'; TB_Run.Enabled:= True; TB_Pause.Enabled:= False; TB_Stop.Enabled:= False; TB_Stop.ImageIndex := Image_Stop end;
+      ss_Running : begin Text := 'Running'; TB_Run.Enabled:= False; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
+                         TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
+                         TrayPlay.Checked := True; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := True;{$endif}
+                         TrayStop.Enabled:= True; TrayStop.Checked:= False;
+                   end;
+      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
+                         TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
+                         TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := True; TrayPause.Enabled := True;{$endif}
+                         TrayStop.Enabled:= True; TrayStop.Checked:= False;
+                   end;
+      ss_Stopping: begin Text := 'Stopping';TB_Run.Enabled:= False; TB_Pause.Enabled:= False; TB_Stop.Enabled:= True;
+                         TB_Stop.ImageIndex := Image_Terminate;
+                         TrayPlay.Checked := False; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
+                         TrayStop.Enabled:= True; TrayStop.Checked:= True;
+                   end;
+      ss_None    : begin Text := 'Done'; TB_Run.Enabled:= True; TB_Pause.Enabled:= False; TB_Stop.Enabled:= False;
+                         TB_Stop.ImageIndex := Image_Stop;
+                         TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
+                         TrayStop.Enabled:= false; TrayStop.Checked:= False;
+                   end;
     end;
 end;
 

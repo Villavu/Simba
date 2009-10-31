@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 251
+  Left = 356
   Height = 553
-  Top = 340
+  Top = 220
   Width = 723
   Caption = 'Mufasa v2'
   ClientHeight = 533
@@ -1352,7 +1352,21 @@ object Form1: TForm1
     left = 464
   end
   object TrayPopup: TPopupMenu
+    Images = Mufasa_Image_List
     left = 600
+    object TrayStop: TMenuItem
+      Caption = 'Stop'
+      OnClick = TrayStopClick
+    end
+    object TrayPause: TMenuItem
+      Caption = 'Pause'
+      Enabled = False
+      OnClick = TrayPauseClick
+    end
+    object TrayPlay: TMenuItem
+      Caption = 'Play'
+      OnClick = TrayPlayClick
+    end
     object MenuItemShow: TMenuItem
       Caption = 'Show'
       OnClick = MenuItemShowClick
