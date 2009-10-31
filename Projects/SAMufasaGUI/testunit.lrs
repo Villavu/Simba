@@ -1,5 +1,7 @@
+{ This is an automatically generated lazarus resource file }
+
 LazarusResources.Add('TForm1','FORMDATA',[
-  'TPF0'#6'TForm1'#5'Form1'#4'Left'#3#251#0#6'Height'#3')'#2#3'Top'#3'T'#1#5'Wi'
+  'TPF0'#6'TForm1'#5'Form1'#4'Left'#3'd'#1#6'Height'#3')'#2#3'Top'#3#220#0#5'Wi'
   +'dth'#3#211#2#7'Caption'#6#9'Mufasa v2'#12'ClientHeight'#3#21#2#11'ClientWid'
   +'th'#3#211#2#4'Menu'#7#9'MainMenu1'#7'OnClose'#7#9'FormClose'#8'OnCreate'#7
   +#10'FormCreate'#9'OnDestroy'#7#11'FormDestroy'#8'Position'#7#14'poScreenCent'
@@ -1440,7 +1442,11 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +#0#0#0#0#0#0#0#240#0#0#0#224#0#0#0#224#0#0#0#224#0#0#0#224#0#0#0#224#0#0#0
   +#224#0#0#0#240#0#0#0#240#1#0#0#240#3#0#0#240#7#0#0#248#15#0#0#254#31#0#0#255
   +#255#0#0#7'Visible'#9#7'OnClick'#7#6'NoTray'#4'left'#3#208#1#0#0#10'TPopupMe'
-  +'nu'#9'TrayPopup'#4'left'#3'X'#2#0#9'TMenuItem'#12'MenuItemShow'#7'Caption'#6
-  +#4'Show'#7'OnClick'#7#17'MenuItemShowClick'#0#0#9'TMenuItem'#12'MenuItemExit'
-  +#7'Caption'#6#4'Exit'#7'OnClick'#7#17'MenuItemExitClick'#0#0#0#0
+  +'nu'#9'TrayPopup'#6'Images'#7#17'Mufasa_Image_List'#4'left'#3'X'#2#0#9'TMenu'
+  +'Item'#8'TrayStop'#7'Caption'#6#4'Stop'#7'OnClick'#7#13'TrayStopClick'#0#0#9
+  +'TMenuItem'#9'TrayPause'#7'Caption'#6#5'Pause'#7'Enabled'#8#7'OnClick'#7#14
+  +'TrayPauseClick'#0#0#9'TMenuItem'#8'TrayPlay'#7'Caption'#6#4'Play'#7'OnClick'
+  +#7#13'TrayPlayClick'#0#0#9'TMenuItem'#12'MenuItemShow'#7'Caption'#6#4'Show'#7
+  +'OnClick'#7#17'MenuItemShowClick'#0#0#9'TMenuItem'#12'MenuItemExit'#7'Captio'
+  +'n'#6#4'Exit'#7'OnClick'#7#17'MenuItemExitClick'#0#0#0#0
 ]);
