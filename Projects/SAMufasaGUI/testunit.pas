@@ -554,8 +554,8 @@ begin
   CurrScript.FScriptState:= State;
   with Self.StatusBar.panels[Panel_State] do
     case state of
-      ss_Running : begin Text := 'Running'; TB_Run.Enabled:= False; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif} TB_Stop.Enabled:= True; end;
-      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif} TB_Stop.Enabled:= True; end;
+      ss_Running : begin Text := 'Running'; TB_Run.Enabled:= False; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif} TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True; end;
+      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif} TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True; end;
       ss_Stopping: begin Text := 'Stopping';TB_Run.Enabled:= False; TB_Pause.Enabled:= False; TB_Stop.Enabled:= True; TB_Stop.ImageIndex := Image_Terminate end;
       ss_None    : begin Text := 'Done'; TB_Run.Enabled:= True; TB_Pause.Enabled:= False; TB_Stop.Enabled:= False; TB_Stop.ImageIndex := Image_Stop end;
     end;
