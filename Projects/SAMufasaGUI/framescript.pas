@@ -1,0 +1,169 @@
+unit framescript;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType, SynEditMarkupSpecialLine, Graphics;
+
+type
+  TScriptState = (ss_None,ss_Running,ss_Paused,ss_Stopping);
+  {
+    ss_None: Means the script either hasn't been run yet, or it has ended (Succesfully or terminated)
+    ss_Running: Means the script is running as we speak :-)
+    ss_Paused: Means the script is currently in pause modus.
+    ss_Stopping: Means we've asked PS-Script politely to stop the script (next time we press the stop button we won't be that nice).
+  }
+  { TScriptFrame }
+
+  TScriptFrame = class(TFrame)
+    SynEdit: TSynEdit;
+    SynFreePascalSyn1: TSynFreePascalSyn;
+    procedure SynEditChange(Sender: TObject);
+    procedure SynEditProcessCommand(Sender: TObject;
+      var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+    procedure SynEditSpecialLineColors(Sender: TObject; Line: integer;
+      var Special: boolean; var FG, BG: TColor);
+
+  private
+    OwnerPage  : TPageControl;
+    OwnerSheet : TTabSheet;//The owner TTabsheet -> For title setting
+  public
+    ScriptErrorLine : integer; //Highlight the error line!
+    ScriptFile : string;//The path to the saved/opened file currently in the SynEdit
+    StartText : string;//The text synedit holds upon start/open/save
+    ScriptName : string;//The name of the currently opened/saved file.
+    ScriptDefault : string;//The default script e.g. program new; begin end.
+    ScriptChanged : boolean;//We need this for that little * (edited star).
+    ScriptThread : TMMLPSThread;//Just one thread for now..
+    FScriptState : TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
+    procedure undo;
+    procedure redo;
+    procedure ErrorThread(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType);
+    procedure MakeActiveScriptFrame;
+    procedure ScriptThreadTerminate(Sender: TObject);
+    constructor Create(TheOwner: TComponent); override;
+    destructor Destroy; override;
+    { public declarations }
+  end;
+
+implementation
+uses
+  TestUnit;
+
+{ TScriptFrame }
+
+procedure TScriptFrame.SynEditChange(Sender: TObject);
+begin
+  ScriptErrorLine:= -1;
+  if not ScriptChanged then
+  begin;
+    ScriptChanged:= True;
+    Form1.Caption:= Format(WindowTitle,[ScriptName + '*']);
+    OwnerSheet.Caption:=ScriptName + '*';
+  end;
+end;
+
+procedure TScriptFrame.SynEditProcessCommand(Sender: TObject;
+  var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+begin
+  if Command = ecUndo then
+  begin;
+    Command:= ecNone;
+    Self.Undo;
+  end else
+  if Command = ecRedo then
+  begin;
+    Command := ecNone;
+    Self.Redo;
+  end;
+end;
+
+procedure TScriptFrame.SynEditSpecialLineColors(Sender: TObject;
+  Line: integer; var Special: boolean; var FG, BG: TColor);
+begin
+  if line = ScriptErrorLine then
+  begin;
+    Special := true;
+    BG := $50a0ff;
+    FG := 0;
+  end;
+end;
+
+procedure TScriptFrame.undo;
+begin
+  SynEdit.Undo;
+  if ScriptChanged then
+    if SynEdit.Lines.Text = StartText then
+    begin;
+      Form1.Caption:= format(WindowTitle,[ScriptName]);
+      OwnerSheet.Caption:= ScriptName;
+      ScriptChanged := false;
+    end;
+end;
+
+procedure TScriptFrame.redo;
+begin
+  SynEdit.Redo;
+  if ScriptChanged then
+    if SynEdit.Lines.Text = StartText then
+    begin;
+      Form1.Caption:= format(WindowTitle,[ScriptName]);
+      OwnerSheet.Caption := ScriptName;
+      ScriptChanged := false;
+    end;
+end;
+
+procedure TScriptFrame.ErrorThread(ErrorAtLine, ErrorPosition: integer;
+  ErrorStr: string; ErrorType: TErrorType);
+begin
+  MakeActiveScriptFrame;
+  ScriptErrorLine:= ErrorAtLine;
+  SynEdit.SelStart:= ErrorPosition;
+  Writeln(Format('Error: %s at line %d',[errorstr,erroratline]));
+  SynEdit.Invalidate;
+end;
+
+procedure TScriptFrame.MakeActiveScriptFrame;
+var
+  i : integer;
+begin
+  for i := 0 to OwnerPage.PageCount - 1 do
+    if OwnerPage.Pages[i] = OwnerSheet then
+    begin;
+      OwnerPage.TabIndex := i;
+      exit;
+    end;
+end;
+
+procedure TScriptFrame.ScriptThreadTerminate(Sender: TObject);
+begin
+  FScriptState:= ss_None;
+  Form1.RefreshTab;
+end;
+
+constructor TScriptFrame.Create(TheOwner: TComponent);
+begin
+  inherited Create(TheOwner);
+  OwnerSheet := TTabSheet(TheOwner);
+  OwnerPage := TPageControl(OwnerSheet.Owner);
+  StartText:= SynEdit.Lines.text;
+  ScriptDefault:= StartText;
+  ScriptName:= 'Untitled';
+  ScriptChanged := false;
+  FScriptState:= ss_None;
+  ScriptErrorLine:= -1;
+  OwnerSheet.Caption:= ScriptName;
+end;
+
+destructor TScriptFrame.Destroy;
+begin
+  inherited Destroy;
+end;
+
+initialization
+  {$I framescript.lrs}
+
+end.
+
