@@ -32,7 +32,7 @@ uses
   mufasatypes, // for common mufasa types
   windowutil // for mufasa window utils
   {$IFDEF LINUX}
-  ,x, xlib // for X* stuff
+  ,ctypes,x, xlib{,xtest,keysym} // for X* stuff
   // do non silent keys with XTest.
   {$ENDIF};
 type
@@ -44,6 +44,9 @@ type
             procedure SetMousePos(X, Y: Integer);
             procedure MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
             procedure ClickMouse(X, Y: Integer; mClick: TClickType);
+
+            procedure KeyUp(key: Integer);
+            procedure KeyDown(key: Integer);
 
             {
               Possibly change to GetMouseButtonStates? Then people can get the
@@ -119,6 +122,18 @@ destructor TMInput.Destroy;
 begin
 
   inherited;
+end;
+
+procedure TMInput.KeyUp(key: Integer);
+
+begin
+
+end;
+
+procedure TMInput.KeyDown(key: Integer);
+
+begin
+
 end;
 
 procedure TMInput.GetMousePos(var X, Y: Integer);
@@ -223,7 +238,7 @@ begin
        mouse_Right: Event.xbutton.button:= Button3;
   end;
 
-  event.xbutton.send_event := TBool(1);
+  event.xbutton.send_event := TBool(1); // true if this came from a "send event"
   event.xbutton.same_screen:= TBool(1);
   event.xbutton.subwindow:= 0;  // this can't be right.
   event.xbutton.root := TClient(Client).MWindow.DesktopWindow;
