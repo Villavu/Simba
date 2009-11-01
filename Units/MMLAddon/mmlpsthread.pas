@@ -109,9 +109,7 @@ writeln(str);
 end;
 {$ENDIF}
 
-
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
-
 begin;
   CurrThread.SyncInfo^.MethodName:= ProcName;
   CurrThread.SyncInfo^.V:= V;
