@@ -46,3 +46,8 @@ function Unfreeze: boolean;
 begin
   result := CurrThread.Client.MWindow.Unfreeze;
 end;
+
+procedure SetTargetArray(P: Integer; Size: TPoint);
+begin
+  CurrThread.Client.MWindow.SetTarget(PRGB32(P), Size);
+end;

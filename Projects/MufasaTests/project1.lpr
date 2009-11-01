@@ -9,7 +9,8 @@ uses
   Classes, SysUtils, CustApp,
   Forms,Interfaces,
   LCLIntf,
-  Client
+  Client,
+  bitmaps
 
 
   { you can add units after this };
@@ -35,7 +36,8 @@ var
   ErrorMsg: String;
   Time: DWord;
   C: TClient;
-  I, W, H, X, Y: Integer;
+  I{, W, H, X, Y}: Integer;
+  bmp: TMufasaBitmap;
 
 begin
   // quick check parameters
@@ -55,8 +57,10 @@ begin
 
   { add your program here }
   C := TClient.Create;
+  {$WARNING Change This Path!}
+  C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/Fonts/');
 
-  C.MWindow.GetDimensions(W, H);
+ {C.MWindow.GetDimensions(W, H);
   Time := GetTickCount;
   for i := 0 to 100 do
     C.MFinder.FindColor(X, Y, 0, 0, 0, W - 1, H - 1);
@@ -69,11 +73,27 @@ begin
   end else
   begin
     writeln('not found!');
-  end;
+  end;    }
 
 
+  bmp := TMufasaBitmap.Create;
+
+  {$WARNING Change This Path!}
+  bmp.LoadFromFile('/home/merlijn/Programs/mufasa/UpText/text5.bmp');
+
+  writeln(inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
+
+  C.MWindow.SetTarget(bmp);
+
+  Time := GetTickCount;
+  for i := 0 to 100 do
+    C.MOCR.GetUpTextAt(0,0);
+  writeln('Time: ' + FloatToStr(((GetTickCount - Time) / (i + 1))));
+  writeln(C.MOCR.GetUpTextAt(0,0));
 
   C.Free;
+  bmp.OnDestroy:=nil;
+  bmp.Free;
 
 
   // stop program loop

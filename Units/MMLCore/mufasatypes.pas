@@ -48,6 +48,8 @@ type
   TTargetWindowMode = (w_BMP, w_Window, w_HDC, w_ArrayPtr, w_XWindow);
   TClickType = (mouse_Left, mouse_Right, mouse_Middle);
   TMousePress = (mouse_Down, mouse_Up);
+
+  TStringArray = array of String;
   TPointArray = array of TPoint;
   T2DPointArray = array of TPointArray;
   TVariantArray = Array of Variant;

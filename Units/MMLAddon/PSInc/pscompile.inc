@@ -67,6 +67,7 @@ Sender.AddFunction(@Unfreeze, 'function unfreeze: boolean;');
 Sender.AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(var w, h:integer);');
 Sender.AddFunction(@SetTargetBitmap,'procedure SetTargetBitmap(Bitmap : integer);');
 Sender.AddFunction(@SetDesktopAsClient,'procedure SetDesktopAsClient');
+Sender.AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; Size: TPoint);');
 
 
 {other}
