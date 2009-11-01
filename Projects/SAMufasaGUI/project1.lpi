@@ -168,7 +168,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="68" Y="770"/>
+        <CursorPos X="33" Y="771"/>
         <TopLine Value="760"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="202"/>
@@ -1397,7 +1397,7 @@
         <CursorPos X="56" Y="576"/>
         <TopLine Value="560"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit194>
     </Units>
