@@ -48,6 +48,7 @@ type
             function ReturnData(xs, ys, width, height: Integer): TRetData;
             procedure FreeReturnData;
             procedure GetDimensions(var W, H: Integer);
+            function GetDimensionBox(out Box : TBox) : boolean;
             function CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
             procedure ActivateClient;
             {$IFDEF LINUX}
@@ -593,6 +594,57 @@ begin
     begin
       W := Self.ArraySize.X;
       H := Self.ArraySize.Y;
+    end;
+  end;
+end;
+
+function TMWindow.GetDimensionBox(out Box : TBox) : boolean;
+function IntToTBox(x1,y1,x2,y2 : integer) : TBox;inline;
+begin;
+  result.x1 := x1;
+  result.y1 := y1;
+  result.x2 := x2;
+  result.y2 := y2;
+end;
+
+{$IFDEF LINUX}
+var
+   Attrib: TXWindowAttributes;
+   newx,newy : integer;
+   childwindow : x.TWindow;
+   Old_Handler: TXErrorHandler;
+{$ENDIF}
+{$IFDEF MSWINDOWS}
+var
+  Rect : TRect;
+{$ENDIF}
+begin
+  result := false;
+  case TargetMode of
+    w_Window:
+    begin
+      {$IFDEF MSWINDOWS}
+      result := true;
+      GetWindowRect(Self.TargetHandle, Rect);
+      box := IntToTBox(Rect.Left,Rect.top,Rect.Right - 1,Rect.Bottom - 1);
+      {$ENDIF}
+    end;
+    w_XWindow:
+    begin
+      {$IFDEF LINUX}
+      result := true;
+      Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+      if XGetWindowAttributes(Self.XDisplay, Self.CurWindow, @Attrib) <> 0 Then
+      begin
+        XTranslateCoordinates(Self.XDisplay, Self.CurWindow, Self.DesktopWindow, 0,0, @newx, @newy, @childwindow);
+        box := IntToTBox(Attrib.x,Attrib.y,Attrib.x + Attrib.Width -1,Attrib.y +Attrib.Height-1 );
+      end else
+        box := IntToTBox(-1,-1,-1,-1);
+      XSetErrorHandler(Old_Handler);
+      {$ELSE}
+       raise Exception.createFMT('GetDimensions: You cannot use ' +
+                                 'the XImage mode on Windows.', []);
+      {$ENDIF}
     end;
   end;
 end;
