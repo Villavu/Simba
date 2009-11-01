@@ -57,7 +57,6 @@ type
       PluginsToload : Array of integer;
       FOnError  : TOnError;
       procedure OnCompile(Sender: TPSScript);
-      procedure AfterExecute(Sender : TPSScript);
       function RequireFile(Sender: TObject; const OriginFileName: String;
                           var FileName, OutPut: string): Boolean;
       procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
@@ -160,7 +159,6 @@ begin
   PSScript.OnCompile:= @OnCompile;
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
-  PSScript.OnAfterExecute:= @AfterExecute;
   OnError:= nil;
   // Set some defines
   {$I PSInc/psdefines.inc}
@@ -188,7 +186,6 @@ end;
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 {$I PSInc/Wrappers/window.inc}
-
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
@@ -235,12 +232,6 @@ begin
                            PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[i].FuncStr, cdStdCall);
   // Here we add all the functions to the engine.
   {$I PSInc/pscompile.inc}
-end;
-
-procedure TMMLPSThread.AfterExecute(Sender: TPSScript);
-begin
-  //Here we add all the Script-freeing-leftovers (like BMParray etc)
-  // ^ This will all be done with Client.Destroy;
 end;
 
 function TMMLPSThread.RequireFile(Sender: TObject;
