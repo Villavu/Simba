@@ -59,6 +59,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionClearDebug: TAction;
     ActionSaveAll: TAction;
     ActionStopScript: TAction;
     ActionSaveScript: TAction;
@@ -131,6 +132,7 @@ type
     ToolButton8: TToolButton;
     TB_Convert: TToolButton;
     MTrayIcon: TTrayIcon;
+    procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
@@ -143,30 +145,15 @@ type
     procedure ActionStopExecute(Sender: TObject);
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
-    procedure ButtonNewClick(Sender: TObject);
-    procedure ButtonOpenClick(Sender: TObject);
-    procedure ButtonPauseClick(Sender: TObject);
-    procedure ButtonRunClick(Sender: TObject);
-    procedure ButtonSaveClick(Sender: TObject);
-    procedure ButtonClearClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
-    procedure MenuEditClick(Sender: TObject);
-    procedure MenuFileClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemExitClick(Sender: TObject);
-    procedure MenuItemNewClick(Sender: TObject);
-    procedure MenuItemOpenClick(Sender: TObject);
     procedure MenuItemPasteClick(Sender: TObject);
-    procedure MenuItemPauseClick(Sender: TObject);
-    procedure MenuItemRunClick(Sender: TObject);
-    procedure MenuItemSaveAsClick(Sender: TObject);
-    procedure MenuItemSaveClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
-    procedure MenuItemStopClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
@@ -176,7 +163,6 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure NoTray(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
-    procedure ButtonStopClick(Sender: TObject);
     procedure ButtonTrayClick(Sender: TObject);
     procedure MenuItemUndoClick(Sender: TObject);
     procedure PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -186,9 +172,6 @@ type
       State: TDragState; var Accept: Boolean);
     procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-    procedure TrayPauseClick(Sender: TObject);
-    procedure TrayPlayClick(Sender: TObject);
-    procedure TrayStopClick(Sender: TObject);
   private
     PopupTab : integer;
     function GetScriptState: TScriptState;
@@ -432,20 +415,6 @@ begin
       CurrScript.SynEdit.SetFocus;
 end;
 
-procedure TForm1.ButtonRunClick(Sender: TObject);
-begin;
-  Self.RunScript;
-end;
-
-procedure TForm1.ButtonSaveClick(Sender: TObject);
-begin
-  Self.SaveCurrentScript;
-end;
-
-procedure TForm1.ButtonNewClick(Sender: TObject);
-begin
-  Self.ClearScript;
-end;
 
 procedure TForm1.ActionTabLastExecute(Sender: TObject);
 var
@@ -462,6 +431,11 @@ end;
 procedure TForm1.ActionCloseTabExecute(Sender: TObject);
 begin
   Self.DeleteTab(PageControl1.TabIndex,false);
+end;
+
+procedure TForm1.ActionClearDebugExecute(Sender: TObject);
+begin
+  Memo1.Clear;
 end;
 
 procedure TForm1.ActionNewExecute(Sender: TObject);
@@ -530,21 +504,6 @@ begin
   PageControl1.TabIndex:= CurrIndex;
 end;
 
-procedure TForm1.ButtonOpenClick(Sender: TObject);
-begin
-  Self.OpenScript;
-end;
-
-procedure TForm1.ButtonPauseClick(Sender: TObject);
-begin
-  Self.PauseScript;
-end;
-
-procedure TForm1.ButtonClearClick(Sender: TObject);
-begin
-  Memo1.Clear;
-end;
-
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i : integer;
@@ -589,16 +548,6 @@ begin
   ShortCut := KeyToShortCut(Message.CharCode, ShiftState);}
 end;
 
-procedure TForm1.MenuEditClick(Sender: TObject);
-begin
-
-end;
-
-procedure TForm1.MenuFileClick(Sender: TObject);
-begin
-
-end;
-
 procedure TForm1.MenuItemCloseTabsClick(Sender: TObject);
 begin
   Self.CloseTabs;
@@ -614,50 +563,20 @@ begin
   Self.Close;
 end;
 
-procedure TForm1.MenuItemNewClick(Sender: TObject);
-begin
-  ClearScript;
-end;
 
-procedure TForm1.MenuItemOpenClick(Sender: TObject);
-begin
-  OpenScript;
-end;
 
 procedure TForm1.MenuItemPasteClick(Sender: TObject);
 begin
   Self.Paste;
 end;
 
-procedure TForm1.MenuItemPauseClick(Sender: TObject);
-begin
-  Self.PauseScript;
-end;
 
-procedure TForm1.MenuItemRunClick(Sender: TObject);
-begin
-  RunScript;
-end;
 
-procedure TForm1.MenuItemSaveAsClick(Sender: TObject);
-begin
-  SaveCurrentScriptAs;
-end;
-
-procedure TForm1.MenuItemSaveClick(Sender: TObject);
-begin
-  SaveCurrentScript;
-end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
 begin
   Self.Show;
   Self.WindowState := wsNormal;
-end;
-
-procedure TForm1.MenuItemStopClick(Sender: TObject);
-begin
-  self.StopScript;
 end;
 
 procedure TForm1.MenuItemTabCloseClick(Sender: TObject);
@@ -714,12 +633,6 @@ begin
   RefreshTab();
 end;
 
-procedure TForm1.ButtonStopClick(Sender: TObject);
-begin
-  Self.StopScript;
-end;
-
-
 procedure TForm1.ButtonTrayClick(Sender: TObject);
 begin
   Form1.Hide;
@@ -770,22 +683,6 @@ begin
   {$ifdef mswindows}
   PageControl1.BeginDrag(false);
   {$endif}
-end;
-
-
-procedure TForm1.TrayPauseClick(Sender: TObject);
-begin
-  Self.PauseScript;
-end;
-
-procedure TForm1.TrayPlayClick(Sender: TObject);
-begin
-  Self.RunScript;
-end;
-
-procedure TForm1.TrayStopClick(Sender: TObject);
-begin
-  Self.StopScript;
 end;
 
 function TForm1.GetScriptState: TScriptState;
