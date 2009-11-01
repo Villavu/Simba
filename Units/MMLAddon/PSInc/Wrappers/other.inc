@@ -21,10 +21,24 @@
     Other.inc for the Mufasa Macro Library
 }
 
-procedure Wait(t: Integer);
+procedure psWait(t: Integer);
+{$ifdef MSWINDOWS}
 begin
   Sleep(t);
 end;
+{$else}
+var
+  EndTime : integer;
+begin
+  if t > 50 then
+  begin;
+    EndTime := GetTickCount + t;
+    while (CurrThread.PSScript.Exec.Status = isRunning) and (GetTickCount < EndTime) do
+      Sleep(16);
+  end else
+    sleep(t);
+end;
+{$endif}
 
 procedure SaveScreenshot(FileName: string);
 var

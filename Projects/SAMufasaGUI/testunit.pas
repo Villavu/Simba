@@ -310,7 +310,7 @@ begin
       ss_Stopping:
         begin    //Terminate the thread the tough way.
           writeln('Terminating the Scriptthread');
-          KillThread(ScriptThread.Handle);
+          Writeln('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
           ScriptThread.Free;
           ScriptState := ss_None;
         end;
@@ -734,6 +734,11 @@ procedure TForm1.PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;
   var Handled: Boolean);
 begin
   PopupTab := PageControl1.TabIndexAtClientPos(MousePos);
+  if PopupTab = -1 then
+  begin
+    Writeln('We couldn''t find which tab you clicked on, closing the popup');
+    Handled := true;
+  end;
 end;
 
 procedure TForm1.PageControl1DragDrop(Sender, Source: TObject; X, Y: Integer);
@@ -745,10 +750,10 @@ begin
     exit;
   NewPos := PageControl1.TabIndexAtClientPos(Point(x,y));
   OldPos := PageControl1.TabIndex;
-  if NewPos <> OldPos then
+  if (NewPos <> OldPos) and (NewPos <> -1) then
   begin;
     Tabs.Move(OldPos,NewPos);
-    PageControl1.Pages[PageControl1.TabIndex].TabIndex:= PageControl1.TabIndexAtClientPos(Point(x,y));
+    PageControl1.Pages[OldPos].TabIndex:= NewPos;
   end;
 end;
 
@@ -762,7 +767,7 @@ end;
 procedure TForm1.PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  PageControl1.BeginDrag(False);
+  PageControl1.BeginDrag(false);
 end;
 
 

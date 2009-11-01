@@ -72,7 +72,7 @@ Sender.AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; Size: 
 
 {other}
 Sender.AddFunction(@SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
-Sender.AddFunction(@Wait, 'procedure wait(t: integer);');
+Sender.AddFunction(@psWait, 'procedure wait(t: integer);');
 Sender.AddFunction(@GetTickCount, 'function GetSystemTime: Integer;');
 Sender.AddFunction(@CreateForm,'function CreateForm : TForm;');
 Sender.AddFunction(@CreateButton,'function CreateButton(Owner : TComponent) : TButton');
