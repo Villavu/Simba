@@ -5,7 +5,7 @@ object Form1: TForm1
   Width = 723
   ActiveControl = PageControl1
   Caption = 'Action1'
-  ClientHeight = 528
+  ClientHeight = 533
   ClientWidth = 723
   Menu = MainMenu1
   OnClose = FormClose
@@ -154,8 +154,8 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 21
-    Top = 507
+    Height = 23
+    Top = 510
     Width = 723
     Panels = <    
       item
@@ -172,17 +172,17 @@ object Form1: TForm1
   end
   object PanelMemo: TPanel
     Left = 0
-    Height = 147
+    Height = 150
     Top = 360
     Width = 723
     Align = alBottom
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 147
+    ClientHeight = 150
     ClientWidth = 723
     TabOrder = 2
     object Memo1: TMemo
       Left = 1
-      Height = 145
+      Height = 148
       Top = 1
       Width = 721
       Align = alClient

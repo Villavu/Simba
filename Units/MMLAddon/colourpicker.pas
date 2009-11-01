@@ -66,6 +66,7 @@ type
         FPickEvent : TPickEvent;
 
         oldx, oldy, Color, colorx, colory: Integer;
+        targetleft,targettop : integer;
 
         TheChangedEvent,TheChangingEvent : TNotifyEvent;
         NoteHandle, BitmapHandle, ImageHandle : HDC;
@@ -91,6 +92,7 @@ procedure TMColorPicker.Pick(Out C, X, Y: Integer);
 var
    w, h: integer;
    bmp: TBitmap;
+   box : TBox;
 
    {$IFNDEF PICKER_CLIENT}
      {$IFDEF LINUX}
@@ -102,6 +104,15 @@ var
 
 begin
   Form := TForm.Create(Application.MainForm);
+  if Window.GetDimensionBox( box) then
+  begin;
+    targetleft := box.x1;
+    targettop := box.y1;
+  end else
+  begin;
+    targetleft := 0;
+    targettop := 0;
+  end;
    {$IFNDEF PICKER_CLIENT}
      {$IFDEF LINUX}
      OldWindow := Window.CurWindow;
@@ -125,8 +136,8 @@ begin
   Image.Parent := Form;
   Image.left := 0;
   image.Width := 0;
-  Image.width := Form.Width - 1;
-  Image.Height := Form.Height - 1;
+  Image.width := Form.Width;
+  Image.Height := Form.Height;
   Image.Cursor:= crCross;
   Image.OnMouseDown:= @ColorPickDown;
   Image.OnMouseMove:=@ImageMouseMove;
@@ -159,7 +170,6 @@ begin
   Timor.OnTimer:= @TimorTimer;
   Timor.Interval:= 50;
   Timor.Enabled:= False;
-
   Form.ShowModal;
 
   // add x to history here.
@@ -184,9 +194,40 @@ end;
 
 procedure TMColorPicker.ImageMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
+{$ifdef mswindows}
+var
+  TempPoint : TPoint;
+begin
+
+  TempPoint := Point(x,y);
+
+  { If a form cannot be fully set to 0,0 }
+  TempPoint.X := TempPoint.X - Form.Left;
+  TempPoint.Y := TempPoint.Y - Form.Top;
+
+  BitBlt(ImageHandle, oldx + 5, oldy + 5,147,33,BitmapHandle,oldx + 5,oldy + 5,SRCCOPY);
+  Color := WidgetSet.DCGetPixel(ImageHandle, TempPoint.X, TempPoint.Y);
+  Rectangle(NoteHandle,1,1,85,32);
+//  Text:='Pos: ' + inttostr(TempPoint.x - Client.Rect.Left) + ','  + inttostr(TempPoint.y - Client.Rect.Bottom);
+  Text:='Pos: ' + inttostr(TempPoint.x - targetleft) + ','  + inttostr(TempPoint.y - targettop);
+  ExtTextOut(NoteHandle, 5, 3,0,nil,pchar(text),length(text),nil);
+  Text := 'Color: ' +  inttostr(Color);
+  ExtTextOut(NoteHandle, 5, 15,0,nil,pchar(text),length(text),nil);
+  BitBlt( ImageHandle, TempPoint.x + 5, TempPoint.y + 5,147,33,NoteHandle,0,0,SRCCOPY);
+  Brush.Color := Color;
+  Image.Canvas.Rectangle(TempPoint.x + 123, TempPoint.y + 8, tempPoint.x + 149, temppoint.y + 34);
+//  Rectangle(ImageHandle,TempPoint.x + 123, TempPoint.y + 8, tempPoint.x + 149, temppoint.y + 34);
+  TheChangingEvent(Sender);
+  StretchBlt(ImageHandle,TempPoint.x + 95, TempPoint.y + 9, 24,24, BitmapHandle, TempPoint.x - 1, TempPoint.y-1,3,3, SRCCOPY);
+  TheChangedEvent(Sender);
+  Oldx := TempPoint.x;
+  Oldy := TempPoint.y;
+end;
+{$else}
 begin
   Timor.Enabled:= True;
 end;
+{$endif}
 
 procedure TMColorPicker.TimorTimer(Sender: TObject);
 var
@@ -203,7 +244,7 @@ begin
   Color := WidgetSet.DCGetPixel(ImageHandle, TempPoint.X, TempPoint.Y);
   Rectangle(NoteHandle,1,1,85,32);
 //  Text:='Pos: ' + inttostr(TempPoint.x - Client.Rect.Left) + ','  + inttostr(TempPoint.y - Client.Rect.Bottom);
-  Text:='Pos: ' + inttostr(TempPoint.x) + ','  + inttostr(TempPoint.y);
+  Text:='Pos: ' + inttostr(TempPoint.x - targetleft) + ','  + inttostr(TempPoint.y - targettop);
   ExtTextOut(NoteHandle, 5, 3,0,nil,pchar(text),length(text),nil);
   Text := 'Color: ' +  inttostr(Color);
   ExtTextOut(NoteHandle, 5, 15,0,nil,pchar(text),length(text),nil);
@@ -223,11 +264,11 @@ procedure TMColorPicker.ColorPickDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
 begin;
   Color:=  WidgetSet.DCGetPixel(Image.Canvas.Handle,x,y);
-  Self.Colorx := x;
-  Self.Colory := y;
+  Self.Colorx := x - targetleft;
+  Self.Colory := y - targettop;
   Timor.enabled := false;
   if OnPick <> nil then
-    Onpick(Sender,Color,x,y);
+    Onpick(Sender,Color,Colorx,Colory);
   Form.Close;
 end;
 
