@@ -767,7 +767,7 @@ end;
 procedure TForm1.PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  PageControl1.BeginDrag(false);
+  PageControl1.BeginDrag({$ifdef linux}true{$else} false {$endif});
 end;
 
 
