@@ -76,6 +76,8 @@ type
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    MenuItemDivider3: TMenuItem;
+    MenuItemCopy: TMenuItem;
     MenuItemSaveAll: TMenuItem;
     MenuItemTabCloseOthers: TMenuItem;
     MenuItemTabAdd: TMenuItem;
@@ -150,6 +152,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
     procedure MenuItemCloseTabsClick(Sender: TObject);
+    procedure MenuItemCopyClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemExitClick(Sender: TObject);
     procedure MenuItemPasteClick(Sender: TObject);
@@ -194,6 +197,7 @@ type
     procedure PauseScript;
     procedure StopScript;
     procedure Cut;
+    procedure Copy;
     procedure Paste;
     procedure AddTab;
     function DeleteTab( TabIndex : integer; CloseLast : boolean) : boolean;
@@ -317,6 +321,11 @@ begin
   CurrScript.SynEdit.CutToClipboard;
 end;
 
+procedure TForm1.Copy;
+begin
+  CurrScript.SynEdit.CopyToClipboard;
+end;
+
 procedure TForm1.Paste;
 begin
   CurrScript.SynEdit.PasteFromClipboard;
@@ -379,7 +388,8 @@ var
 begin
   for i := tabs.count - 1 downto 0 do
     if i <> exclude then
-      DeleteTab(i,false);
+      if not DeleteTab(i,false) then
+        exit;
 end;
 
 procedure TForm1.CloseTabs;
@@ -430,7 +440,10 @@ end;
 
 procedure TForm1.ActionCloseTabExecute(Sender: TObject);
 begin
-  Self.DeleteTab(PageControl1.TabIndex,false);
+  if(PageControl1.PageCount > 1)then
+    Self.DeleteTab(PageControl1.TabIndex,false)
+  else
+    Self.ClearScript;
 end;
 
 procedure TForm1.ActionClearDebugExecute(Sender: TObject);
@@ -553,9 +566,14 @@ begin
   Self.CloseTabs;
 end;
 
+procedure TForm1.MenuItemCopyClick(Sender: TObject);
+begin
+  Self.Copy;
+end;
+
 procedure TForm1.MenuItemCutClick(Sender: TObject);
 begin
-  Self.cut;
+  Self.Cut;
 end;
 
 procedure TForm1.MenuItemExitClick(Sender: TObject);

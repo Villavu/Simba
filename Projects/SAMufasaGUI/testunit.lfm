@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 278
+  Left = 478
   Height = 553
-  Top = 235
+  Top = 249
   Width = 723
   ActiveControl = PageControl1
   Caption = 'Action1'
-  ClientHeight = 533
+  ClientHeight = 528
   ClientWidth = 723
   Menu = MainMenu1
   OnClose = FormClose
@@ -27,12 +27,14 @@ object Form1: TForm1
     TabOrder = 0
     object TB_Run: TToolButton
       Left = 96
+      Hint = 'Run'
       Top = 2
       Action = ActionRunScript
       ImageIndex = 6
     end
     object TB_Pause: TToolButton
       Left = 119
+      Hint = 'Pause'
       Top = 2
       Action = ActionPauseScript
       Enabled = False
@@ -40,6 +42,7 @@ object Form1: TForm1
     end
     object TB_Stop: TToolButton
       Left = 142
+      Hint = 'Stop'
       Top = 2
       Action = ActionStopScript
       Enabled = False
@@ -54,11 +57,13 @@ object Form1: TForm1
     end
     object TB_NewTab: TToolButton
       Left = 168
+      Hint = 'Add tab'
       Top = 2
       Action = ActionNewTab
     end
     object TB_CloseTab: TToolButton
       Left = 191
+      Hint = 'Close tab'
       Top = 2
       Action = ActionCloseTab
     end
@@ -71,6 +76,7 @@ object Form1: TForm1
     end
     object TB_ClearDebug: TToolButton
       Left = 217
+      Hint = 'Clear debug box'
       Top = 2
       Action = ActionClearDebug
     end
@@ -106,6 +112,7 @@ object Form1: TForm1
     end
     object TB_ReloadPlugins: TToolButton
       Left = 312
+      Hint = 'Reload plugins'
       Top = 2
       Caption = 'TB_ReloadPlugins'
       Enabled = False
@@ -121,6 +128,7 @@ object Form1: TForm1
     end
     object TB_New: TToolButton
       Left = 1
+      Hint = 'New'
       Top = 2
       Action = ActionNewScript
       ParentShowHint = False
@@ -135,6 +143,7 @@ object Form1: TForm1
     end
     object TB_Open: TToolButton
       Left = 24
+      Hint = 'Open'
       Top = 2
       Action = ActionOpenScript
       ParentShowHint = False
@@ -142,11 +151,13 @@ object Form1: TForm1
     end
     object TB_Save: TToolButton
       Left = 47
+      Hint = 'Save'
       Top = 2
       Action = ActionSaveScript
     end
     object TB_SaveAll: TToolButton
       Left = 70
+      Hint = 'Save all'
       Top = 2
       Action = ActionSaveAll
       Enabled = False
@@ -154,8 +165,8 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 23
-    Top = 510
+    Height = 21
+    Top = 507
     Width = 723
     Panels = <    
       item
@@ -172,17 +183,17 @@ object Form1: TForm1
   end
   object PanelMemo: TPanel
     Left = 0
-    Height = 150
+    Height = 147
     Top = 360
     Width = 723
     Align = alBottom
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 150
+    ClientHeight = 147
     ClientWidth = 723
     TabOrder = 2
     object Memo1: TMemo
       Left = 1
-      Height = 148
+      Height = 145
       Top = 1
       Width = 721
       Align = alClient
@@ -601,6 +612,9 @@ object Form1: TForm1
         ShortCut = 24666
         OnClick = MenuItemRedoClick
       end
+      object MenuItemDivider3: TMenuItem
+        Caption = '-'
+      end
       object MenuItemCut: TMenuItem
         Caption = 'Cut'
         Bitmap.Data = {
@@ -642,6 +656,11 @@ object Form1: TForm1
         ImageIndex = 3
         ShortCut = 16472
         OnClick = MenuItemCutClick
+      end
+      object MenuItemCopy: TMenuItem
+        Caption = 'Copy'
+        ShortCut = 16451
+        OnClick = MenuItemCopyClick
       end
       object MenuItemPaste: TMenuItem
         Caption = 'Paste'
