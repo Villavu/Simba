@@ -469,6 +469,12 @@ var
 begin
     RGBtoXYZ(c,X,Y,Z);
     sum:= X + Y + Z;
+    if(sum = 0) then
+    begin
+      result.l := 0.0;
+      result.a := 0.0;
+      result.b := 0.0;
+    end;
     Xn:= X / sum;
     Yn:= Y / sum;
     Zn:= Z / sum;
@@ -484,7 +490,7 @@ end;
 
 function ExtractText(colors: PRGB32;{colors: tRGBArray;} w,h: integer): TNormArray;
 const
-  GradientMax = 5.0;
+  GradientMax = 2.0;
   white:  tRGB = ( b: $FF; g: $FF; r: $FF; a: $00 );
   cyan:   tRGB = ( b: $FF; g: $FF; r: $00; a: $00 );
   yellow: tRGB = ( b: $00; g: $EF; r: $FF; a: $00 );
@@ -643,7 +649,7 @@ var
 begin
   TClient(Client).MWindow.GetDimensions(w, h);
 
-  ww := 300;
+  ww := 200;
   hh := 20;
 
   if ww + atX > w then
@@ -653,12 +659,14 @@ begin
 
   bmp := TMufasaBitmap.Create;
 //  bmp.SetSize(ww - atX, hh - atY); CopyCLientToBitmap will automatically resize -> Resize bool is true.
-  bmp.CopyClientToBitmap(TClient(Client).MWindow,True, atX, atY, atX + ww, atY + hh);
+  bmp.CopyClientToBitmap(TClient(Client).MWindow,True, atX, atY, atX + ww - 1, atY + hh - 1);
+  writeln(inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
+  bmp.SaveToFile('/tmp/output.bmp');
 
   n := ExtractText(bmp.FData, bmp.Width, bmp.Height);
   Result := ocrDetect(n, bmp.Width, bmp.Height, OCRData[0]);
 
-  bmp.SaveToFile('/tmp/output.bmp');
+
   bmp.Free;
 end;
 
