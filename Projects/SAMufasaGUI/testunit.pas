@@ -29,7 +29,7 @@ unit TestUnit;
 interface
 
 uses
-  cthreads, Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  {$ifdef linux}cthreads,{$endif}Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas, SynMemo,
   //Client,
   MufasaTypes,
