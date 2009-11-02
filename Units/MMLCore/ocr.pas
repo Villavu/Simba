@@ -646,10 +646,10 @@ begin
   ww := 300;
   hh := 20;
 
-  if ww > w then
-    ww := w;
-  if hh > h then
-    hh := h;
+  if ww + atX > w then
+    ww := w - atX;
+  if hh + atY > h then
+    hh := h - atY;
 
   bmp := TMufasaBitmap.Create;
 //  bmp.SetSize(ww - atX, hh - atY); CopyCLientToBitmap will automatically resize -> Resize bool is true.
@@ -658,6 +658,7 @@ begin
   n := ExtractText(bmp.FData, bmp.Width, bmp.Height);
   Result := ocrDetect(n, bmp.Width, bmp.Height, OCRData[0]);
 
+  bmp.SaveToFile('/tmp/output.bmp');
   bmp.Free;
 end;
 
