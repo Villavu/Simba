@@ -652,10 +652,8 @@ begin
     hh := h;
 
   bmp := TMufasaBitmap.Create;
-  bmp.SetSize(ww - atX, hh - atY);
-  bmp.OnDestroy:=nil;
-
-  bmp.CopyClientToBitmap(TClient(Client).MWindow, atX, atY, ww, hh);
+//  bmp.SetSize(ww - atX, hh - atY); CopyCLientToBitmap will automatically resize -> Resize bool is true.
+  bmp.CopyClientToBitmap(TClient(Client).MWindow,True, atX, atY, atX + ww, atY + hh);
 
   n := ExtractText(bmp.FData, bmp.Width, bmp.Height);
   Result := ocrDetect(n, bmp.Width, bmp.Height, OCRData[0]);

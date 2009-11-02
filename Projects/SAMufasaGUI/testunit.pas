@@ -443,7 +443,7 @@ begin
   if(PageControl1.PageCount > 1)then
     Self.DeleteTab(PageControl1.TabIndex,false)
   else
-    Self.ClearScript;
+    Self.ClearScript;  //DeleteTab would take care of this already, but yeah, it's neater this way.
 end;
 
 procedure TForm1.ActionClearDebugExecute(Sender: TObject);
