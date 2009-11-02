@@ -133,7 +133,7 @@ end;
 
 procedure ps_CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer);
 begin
-  CurrThread.Client.MBitmaps.GetBMP(bmp).CopyClientToBitmap(CurrThread.Client.MWindow, xs, ys, xe, ye);
+  CurrThread.Client.MBitmaps.GetBMP(bmp).CopyClientToBitmap(CurrThread.Client.MWindow, True, xs, ys, xe, ye);
 end;
 
 function FindBitmap(Bitmap: integer; var x, y: Integer): Boolean;

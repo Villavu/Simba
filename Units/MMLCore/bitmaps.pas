@@ -59,7 +59,7 @@ type
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
-    procedure CopyClientToBitmap(MWindow : TObject; xs, ys, xe, ye: Integer);
+    procedure CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);
     procedure RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );
     procedure Desaturate;overload;
     procedure Desaturate(TargetBitmap : TMufasaBitmap); overload;
@@ -471,12 +471,15 @@ begin
       FData[i] := NewCol;
 end;
 
-procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject; xs, ys, xe, ye: Integer);
+procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);
 var
-  wi,hi,y : integer;
+  y : integer;
+  wi,hi : integer;
   PtrRet : TRetData;
   Rows : integer;
 begin
+  if Resize then
+    Self.SetSize(xe-xs+1,ye-ys+1);
   wi := Min(xe-xs + 1,Self.w);
   hi := Min(ye-ys + 1,Self.h);
   PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi,hi);
