@@ -280,10 +280,10 @@ begin
   if Self.Frozen then
   begin;
     TmpData := Self.FrozenData;
-    Inc(TmpData, ys * width + xs);
-    Result.Ptr:= tmpData;
-    Result.IncPtrWith:= Self.FrozenSize.x - width;
     Result.RowLen:= Self.FrozenSize.x;
+    Result.IncPtrWith:= Result.RowLen - width;
+    Inc(TmpData, ys * Result.RowLen + xs);
+    Result.Ptr:= tmpData;
   end else
   case Self.TargetMode of
     w_BMP :
@@ -292,11 +292,10 @@ begin
       TmpData := TargetBitmap.FData;
 
       // Increase the pointer to the specified start of the data.
-
-      Inc(TmpData, ys * width + xs);
-      Result.Ptr := TmpData;
-      Result.IncPtrWith:= TargetBitmap.Width - width;
       Result.RowLen:= TargetBitmap.Width;
+      Result.IncPtrWith:= Result.RowLen - width;
+      Inc(TmpData, ys * Result.RowLen + xs);
+      Result.Ptr := TmpData;
       end;
     w_Window:
     begin
@@ -343,12 +342,10 @@ begin
       TmpData := Self.ArrayPtr;
 
       // Increase the pointer to the specified start of the data.
-
-      Inc(TmpData, ys * width + xs);
-      Result.Ptr := TmpData;
-      Result.IncPtrWith:= Self.ArraySize.x - width;
       Result.RowLen:= Self.ArraySize.x;
-
+      Result.IncPtrWith:= Result.RowLen - width;
+      Inc(TmpData, ys * Result.RowLen + xs);
+      Result.Ptr := TmpData;
     end;
   end;
 end;
@@ -435,7 +432,6 @@ var
 
 begin
   Self.GetDimensions(w, h);
-  //THIS IS NOT THE FUCKING WIDTH/HEIGHT YA!
   ww := xe-xs;
   hh := ye-ys;
   if(xs < 0) or (ys < 0) or (xe >= W) or (ye >= H) then
