@@ -149,6 +149,8 @@ begin
   SyncInfo:= TheSyncInfo;
   SetLength(PluginsToLoad,0);
   Client := TClient.Create;
+  Client.MOCR.InitTOCR(AppPath + DS + 'Fonts');
+
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
@@ -188,6 +190,7 @@ end;
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/dtm.inc}
+{$I PSInc/Wrappers/ocr.inc}
 
 procedure TMMLPSThread.OnProcessDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;

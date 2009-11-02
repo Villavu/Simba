@@ -97,6 +97,10 @@ Sender.AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(ct
 Sender.AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 Sender.AddFunction(@GetMousePos, 'procedure GetMousePos(var x, y: integer);');
 
+{ OCR}
+
+Sender.AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
+
 
 {Bitmaps}
 Sender.AddFunction(@CreateBitmap,'function CreateBitmap(w,h :integer) : integer;');

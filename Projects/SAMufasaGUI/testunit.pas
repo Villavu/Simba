@@ -29,7 +29,7 @@ unit TestUnit;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  cthreads, Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas, SynMemo,
   //Client,
   MufasaTypes,
@@ -298,6 +298,7 @@ begin
         begin    //Terminate the thread the tough way.
           writeln('Terminating the Scriptthread');
           Writeln('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
+          WaitForThreadTerminate(ScriptThread.Handle, 0);
           ScriptThread.Free;
           ScriptState := ss_None;
         end;
