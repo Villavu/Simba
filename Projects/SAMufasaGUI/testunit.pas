@@ -35,10 +35,9 @@ uses
   MufasaTypes,
   mmlpsthread,
   window, // for the comp picker and selector
-  colourpicker, framescript,
-  windowselector,
-  lcltype, ActnList, StdActns
-  , SynEditKeyCmds,SynEditHighlighter, SynEditMarkupSpecialLine, SynEditMiscClasses, LMessages;
+  colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
+  SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
+  SynEditMiscClasses, LMessages, Buttons;
 
 type
 
@@ -73,9 +72,12 @@ type
     ActionTabLast: TAction;
     ActionTabNext: TAction;
     ActionList: TActionList;
+    LabeledEditSearch: TLabeledEdit;
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    MenuItemFind: TMenuItem;
+    MenuItemDivider4: TMenuItem;
     MenuItemDivider3: TMenuItem;
     MenuItemCopy: TMenuItem;
     MenuItemSaveAll: TMenuItem;
@@ -87,6 +89,9 @@ type
     MenuItemNewTab: TMenuItem;
     MenuItemDivider2: TMenuItem;
     MenuItemDivider: TMenuItem;
+    PageControl1: TPageControl;
+    SearchPanel: TPanel;
+    ScriptPanel: TPanel;
     TabPopup: TPopupMenu;
     TB_SaveAll: TToolButton;
     TrayDivider: TMenuItem;
@@ -109,7 +114,6 @@ type
     MainMenu1: TMainMenu;
     MenuItemScript: TMenuItem;
     MenuItemRun: TMenuItem;
-    PageControl1: TPageControl;
     PanelMemo: TPanel;
     SplitterMemoSynedit: TSplitter;
     TrayPopup: TPopupMenu;
@@ -147,6 +151,7 @@ type
     procedure ActionStopExecute(Sender: TObject);
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
+    procedure EditSearchChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -155,6 +160,7 @@ type
     procedure MenuItemCopyClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemExitClick(Sender: TObject);
+    procedure MenuItemFindClick(Sender: TObject);
     procedure MenuItemPasteClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
@@ -522,6 +528,15 @@ begin
   PageControl1.TabIndex:= CurrIndex;
 end;
 
+procedure TForm1.EditSearchChange(Sender: TObject);
+begin
+  Writeln(LabeledEditSearch.Text);
+  CurrScript.SynEdit.SelStart:= -1;
+  CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.Text,'',[],point(0,0));
+  with CurrScript.SynEdit do
+    SetHighlightSearch(LabeledEditSearch.text,[]);
+end;
+
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i : integer;
@@ -573,12 +588,18 @@ end;
 
 procedure TForm1.MenuItemCopyClick(Sender: TObject);
 begin
-  Self.Copy;
+  if CurrScript.SynEdit.Focused then
+    Self.Copy
+  else if Memo1.Focused then
+    Memo1.CopyToClipboard;
 end;
 
 procedure TForm1.MenuItemCutClick(Sender: TObject);
 begin
-  Self.Cut;
+  if CurrScript.SynEdit.Focused then
+    Self.Cut
+  else if Memo1.Focused then
+    Memo1.CutToClipboard;
 end;
 
 procedure TForm1.MenuItemExitClick(Sender: TObject);
@@ -586,11 +607,27 @@ begin
   Self.Close;
 end;
 
+procedure TForm1.MenuItemFindClick(Sender: TObject);
+begin
+  SearchPanel.Visible:= not SearchPanel.Visible;
+  with  CurrScript.SynEdit do
+  begin;
+    UseIncrementalColor:= true;
+    if SearchPanel.Visible then
+      MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable
+    else
+      MarkupByClass[TSynEditMarkupHighlightAllCaret].TempEnable;
+  end;
+end;
+
 
 
 procedure TForm1.MenuItemPasteClick(Sender: TObject);
 begin
-  Self.Paste;
+  if CurrScript.SynEdit.Focused then
+    Self.Paste
+  else if Memo1.Focused then
+    Memo1.PasteFromClipboard;
 end;
 
 
