@@ -318,6 +318,7 @@ begin
         Writeln('ReturnData: XGetImage Error. Dumping data now:');
         Writeln('xs, ys, width, height: ' + inttostr(xs) + ', '  + inttostr(ys) +
                 ', ' + inttostr(width) + ', ' + inttostr(height));
+        raise Exception.CreateFMT('TMWindow.ReturnData: ReturnData: XGetImage Error', []);
         Result.Ptr := nil;
         Result.IncPtrWith := 0;
 
