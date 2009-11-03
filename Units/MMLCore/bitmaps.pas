@@ -480,9 +480,16 @@ var
 begin
   if Resize then
     Self.SetSize(xe-xs+1,ye-ys+1);
+ { writeln('self: ' + inttostr(self.w) + ', ' + inttostr(self.h));
+  writeln('end - start + 1: ' + inttostr(xe-xs + 1) + ', ' + inttostr(ye-ys + 1));}
   wi := Min(xe-xs + 1,Self.w);
   hi := Min(ye-ys + 1,Self.h);
+ { if wi <> xe - xs + 1 then
+    writeln('WAT x');
+  if hi <> ye - ys + 1 then
+    writeln('WAT y');  }
   PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi,hi);
+
   for y := 0 to (hi-1) do
     Move(PtrRet.Ptr[y * (wi + PtrRet.IncPtrWith)], FData[y * self.w],wi * SizeOf(TRGB32));
   TMWindow(MWindow).FreeReturnData;

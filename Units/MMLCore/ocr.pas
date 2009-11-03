@@ -359,6 +359,7 @@ begin
     upper:= -9001; //large negative
     left:= -9001; //large negative
     x:= 0;
+    writeln('ocrDetect: w,h: ' +inttostr(w) + ', ' + inttostr(h));
     while x < w do
     begin
         empty:= true;
@@ -495,6 +496,7 @@ const
   cyan:   tRGB = ( b: $FF; g: $FF; r: $00; a: $00 );
   yellow: tRGB = ( b: $00; g: $EF; r: $FF; a: $00 );
   red:    tRGB = ( b: $00; g: $00; r: $FF; a: $00 );
+  green:  tRGB = ( b: $00; g: $FF; r: $00; a: $00 );
 var
   up, left: boolean;
   len,numblobs,thisblob,lastblob,i,j,used: integer;
@@ -598,6 +600,8 @@ begin
         newcolors[i]:= 1
       else if colorDistSqr(red,c) <= 10000 then
         newcolors[i]:= 1
+      else if colorDistSqr(green,c) <= 10000 then
+        newcolors[i]:= 1
       else
         newcolors[i]:= 0;
     end;
@@ -634,7 +638,7 @@ end;
 function TMOCR.InitTOCR(path: string): boolean;
 begin
   { This must be dynamic }
-                       {  '/home/merlijn/Programs/mufasa/UpText/upchars/'    }
+
   SetLength(OCRData, 1);
   OCRData[0] := InitOCR(path + '/UpChars/');
 end;
@@ -649,21 +653,27 @@ var
 begin
   TClient(Client).MWindow.GetDimensions(w, h);
 
-  ww := 200;
-  hh := 20;
+  ww := 450;
+  hh := 25;
 
   if ww + atX > w then
     ww := w - atX;
   if hh + atY > h then
     hh := h - atY;
-
+  {writeln('ww and hh: ' + inttostr(ww) + ', ' + inttostr(hh));}
   bmp := TMufasaBitmap.Create;
-//  bmp.SetSize(ww - atX, hh - atY); CopyCLientToBitmap will automatically resize -> Resize bool is true.
-  bmp.CopyClientToBitmap(TClient(Client).MWindow,True, atX, atY, atX + ww - 1, atY + hh - 1);
-  writeln(inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
+
+  bmp.SetSize(ww, hh);
+  bmp.CopyClientToBitmap(TClient(Client).MWindow, False, atX, atY, atX + ww - 1,
+                                             atY + hh - 1);
+
+  {writeln('bmp.w / bmp.h: ' + inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
+  writeln('wwhh: ' + inttostr(ww * hh));
+  writeln('widhei: ' + inttostr(bmp.width * bmp.height));}
   bmp.SaveToFile('/tmp/output.bmp');
 
   n := ExtractText(bmp.FData, bmp.Width, bmp.Height);
+  {writeln('n: ' + inttostr(length(n))); }
   Result := ocrDetect(n, bmp.Width, bmp.Height, OCRData[0]);
 
 
