@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="0"/>
+      <ActiveEditorIndexAtStart Value="5"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -168,7 +168,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="32" Y="265"/>
+        <CursorPos X="58" Y="265"/>
         <TopLine Value="250"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="202"/>
@@ -315,7 +315,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="29" Y="349"/>
-        <TopLine Value="333"/>
+        <TopLine Value="332"/>
         <EditorIndex Value="3"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -867,7 +867,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ocr"/>
         <CursorPos X="11" Y="657"/>
-        <TopLine Value="645"/>
+        <TopLine Value="655"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="136"/>
         <Loaded Value="True"/>
@@ -1435,7 +1435,7 @@
         <UsageCount Value="10"/>
       </Unit197>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
         <Filename Value="testunit.pas"/>
         <Caret Line="345" Column="28" TopLine="325"/>
@@ -1538,24 +1538,20 @@
       </Position25>
       <Position26>
         <Filename Value="testunit.pas"/>
-        <Caret Line="1" Column="1" TopLine="631"/>
+        <Caret Line="264" Column="7" TopLine="242"/>
       </Position26>
       <Position27>
         <Filename Value="testunit.pas"/>
-        <Caret Line="264" Column="7" TopLine="242"/>
+        <Caret Line="265" Column="18" TopLine="250"/>
       </Position27>
       <Position28>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="265" Column="18" TopLine="250"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="158" Column="50" TopLine="142"/>
       </Position28>
       <Position29>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="158" Column="50" TopLine="142"/>
-      </Position29>
-      <Position30>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="246" Column="21" TopLine="231"/>
-      </Position30>
+      </Position29>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

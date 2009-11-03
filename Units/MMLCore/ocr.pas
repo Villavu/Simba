@@ -640,7 +640,7 @@ begin
   { This must be dynamic }
 
   SetLength(OCRData, 1);
-  OCRData[0] := InitOCR(path + '/UpChars/');
+  OCRData[0] := InitOCR(path + DS + 'UpChars' + DS);
 end;
 
 function TMOCR.GetUpTextAt(atX, atY: integer): string;
@@ -654,7 +654,7 @@ begin
   TClient(Client).MWindow.GetDimensions(w, h);
 
   ww := 450;
-  hh := 25;
+  hh := 20;
 
   if ww + atX > w then
     ww := w - atX;
@@ -670,7 +670,8 @@ begin
   {writeln('bmp.w / bmp.h: ' + inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
   writeln('wwhh: ' + inttostr(ww * hh));
   writeln('widhei: ' + inttostr(bmp.width * bmp.height));}
-  bmp.SaveToFile('/tmp/output.bmp');
+
+  bmp.SaveToFile('.' + DS + 'output.bmp');
 
   n := ExtractText(bmp.FData, bmp.Width, bmp.Height);
   {writeln('n: ' + inttostr(length(n))); }
