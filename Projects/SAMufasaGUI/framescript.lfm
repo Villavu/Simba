@@ -6,8 +6,8 @@ object ScriptFrame: TScriptFrame
   ClientHeight = 300
   ClientWidth = 400
   TabOrder = 0
-  DesignLeft = 775
-  DesignTop = 204
+  DesignLeft = 826
+  DesignTop = 355
   object SynEdit: TSynEdit
     Left = 0
     Height = 300

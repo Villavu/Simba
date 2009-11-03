@@ -80,22 +80,22 @@ begin
   bmp := TMufasaBitmap.Create;
 
   {$WARNING Change This Path!}
- //bmp.LoadFromFile('/home/merlijn/Programs/mufasa/UpText/text5.bmp');
+  bmp.LoadFromFile('/home/merlijn/Programs/mufasa/UpText/text1.bmp');
   //bmp.LoadFromFile('/home/merlijn/Programs/mufasa/output.bmp');
 
   writeln(inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
-  C.MWindow.SetTarget(x.TWindow(94371927));
-  //C.MWindow.SetTarget(bmp);
+  {C.MWindow.SetTarget(x.TWindow(94371927));   }
+  C.MWindow.SetTarget(bmp);
 
- { Time := GetTickCount;
+  Time := GetTickCount;
   for i := 0 to 100 do
     C.MOCR.GetUpTextAt(0,0);
-  writeln('Time: ' + FloatToStr(((GetTickCount - Time) / (i + 1)))); }
-  writeln(C.MOCR.GetUpTextAt(7,7));
+  writeln('Time: ' + FloatToStr(((GetTickCount - Time) / (i + 1))));
+  writeln(C.MOCR.GetUpTextAt(0,0));
 
   C.Free;
-  //bmp.OnDestroy:=nil;
-  //bmp.Free;
+  bmp.OnDestroy:=nil;
+  bmp.Free;
 
 
   // stop program loop

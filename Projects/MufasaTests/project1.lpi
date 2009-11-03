@@ -35,8 +35,8 @@
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="71" Y="93"/>
-        <TopLine Value="81"/>
+        <CursorPos X="63" Y="83"/>
+        <TopLine Value="71"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="38"/>
         <Loaded Value="True"/>
@@ -106,8 +106,8 @@
       <Unit9>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <UnitName Value="ocr"/>
-        <CursorPos X="38" Y="659"/>
-        <TopLine Value="645"/>
+        <CursorPos X="11" Y="361"/>
+        <TopLine Value="355"/>
         <EditorIndex Value="2"/>
         <UsageCount Value="14"/>
         <Loaded Value="True"/>

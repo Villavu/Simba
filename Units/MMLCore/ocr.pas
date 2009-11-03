@@ -359,7 +359,6 @@ begin
     upper:= -9001; //large negative
     left:= -9001; //large negative
     x:= 0;
-    writeln('ocrDetect: w,h: ' +inttostr(w) + ', ' + inttostr(h));
     while x < w do
     begin
         empty:= true;
@@ -648,9 +647,11 @@ function TMOCR.GetUpTextAt(atX, atY: integer): string;
 var
    bmp: TMufasaBitmap;
    n: TNormArray;
-   w,h,ww,hh: integer;
+   p: prgb32;
+   w,h,ww,hh,len,i: integer;
 
 begin
+  result := '';
   TClient(Client).MWindow.GetDimensions(w, h);
 
   ww := 450;
@@ -665,15 +666,42 @@ begin
 
   bmp.SetSize(ww, hh);
   bmp.CopyClientToBitmap(TClient(Client).MWindow, False, atX, atY, atX + ww - 1,
-                                             atY + hh - 1);
+    atY + hh - 1);
+
+  //bmp.SaveToFile('.' + DS + 'output.bmp');
+
+  bmp.Posterize(127);
+  //bmp.SaveToFile('.' + DS + 'posterize.bmp');
+  bmp.Contrast(127);
+  //bmp.SaveToFile('.' + DS + 'posterizecontrast.bmp');
+  {bmp.Brightness(-20);
+  bmp.SaveToFile('.' + DS + 'posterizecontrastbrightness.bmp');  }
 
   {writeln('bmp.w / bmp.h: ' + inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
   writeln('wwhh: ' + inttostr(ww * hh));
   writeln('widhei: ' + inttostr(bmp.width * bmp.height));}
 
-  bmp.SaveToFile('.' + DS + 'output.bmp');
+  bmp.SaveToFile('.' + DS + 'final.bmp');
+  p := bmp.FData;
 
-  n := ExtractText(bmp.FData, bmp.Width, bmp.Height);
+  len := ww * hh;
+  setlength(n, ww * hh);
+  for i := 0 to len - 1 do
+    begin
+      if((p^.R = 255) and (p^.B = 255) and (p^.G = 255))  //white
+      or((p^.R = 255) and (p^.B < 2) and (p^.G < 2))      //red
+      or((p^.R = 0) and (p^.B = 255) and (p^.G = 255))    //cyan
+      or((p^.R = 255) and (p^.B = 0) and (p^.G = 255))    //yellow
+      or((p^.R = 0) and (p^.B = 0) and (p^.G = 255)) then //green
+        n[i] := 1
+      else
+        n[i] := 0;
+      Inc(P);
+    end;
+
+
+
+ { n := ExtractText(bmp.FData, bmp.Width, bmp.Height); }
   {writeln('n: ' + inttostr(length(n))); }
   Result := ocrDetect(n, bmp.Width, bmp.Height, OCRData[0]);
 
