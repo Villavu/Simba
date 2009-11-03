@@ -53,8 +53,9 @@ begin
   for i := 0 to a - 1 do
   begin
     Processes[i] := TProcess.Create(Self);
-    Processes[i].CommandLine := 'echo "wat"';
-    Processes[i].ApplicationName := 'ForkingTest: ' + inttostr(i);
+    {$WARNING SET THIS PATH}
+    Processes[i].CommandLine := 'C:/mufasa/Projects/MufasaTests/project1.exe';
+    //Processes[i].ApplicationName := 'ForkingTest: ' + inttostr(i);
     Processes[i].Execute;
     Writeln('Process ' + inttostr(i) + ', has ID ' + inttostr(Processes[i].ProcessID));
   end;
@@ -83,6 +84,7 @@ begin
   your program here }
 
   // stop program loop
+  writeln('done');
   Terminate;
 end;
 
