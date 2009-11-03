@@ -10,7 +10,7 @@ uses
   Forms,Interfaces,
   LCLIntf,
   Client,
-  bitmaps
+  bitmaps,x
 
 
   { you can add units after this };
@@ -59,6 +59,7 @@ begin
   C := TClient.Create;
   {$WARNING Change This Path!}
   C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/Fonts/');
+  //C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/ben/');
 
  {C.MWindow.GetDimensions(W, H);
   Time := GetTickCount;
@@ -80,21 +81,21 @@ begin
 
   {$WARNING Change This Path!}
  //bmp.LoadFromFile('/home/merlijn/Programs/mufasa/UpText/text5.bmp');
-  bmp.LoadFromFile('/home/merlijn/Programs/mufasa/hoi.bmp');
+  //bmp.LoadFromFile('/home/merlijn/Programs/mufasa/output.bmp');
 
   writeln(inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
+  C.MWindow.SetTarget(x.TWindow(94371927));
+  //C.MWindow.SetTarget(bmp);
 
-  C.MWindow.SetTarget(bmp);
-
-  Time := GetTickCount;
+ { Time := GetTickCount;
   for i := 0 to 100 do
-    C.MOCR.GetUpTextAt(10,10);
-  writeln('Time: ' + FloatToStr(((GetTickCount - Time) / (i + 1))));
-  writeln(C.MOCR.GetUpTextAt(10,10));
+    C.MOCR.GetUpTextAt(0,0);
+  writeln('Time: ' + FloatToStr(((GetTickCount - Time) / (i + 1)))); }
+  writeln(C.MOCR.GetUpTextAt(7,7));
 
   C.Free;
-  bmp.OnDestroy:=nil;
-  bmp.Free;
+  //bmp.OnDestroy:=nil;
+  //bmp.Free;
 
 
   // stop program loop

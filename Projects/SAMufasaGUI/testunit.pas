@@ -262,6 +262,10 @@ begin
     // only copies the current set window handle.
     ScriptThread.Client.MWindow.SetWindow(Self.Window);
 
+    // we MUST set the OCR Path
+    writeln(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + DS + 'Fonts' + DS);
+    ScriptThread.Client.MOCR.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;
     //Lets run it!

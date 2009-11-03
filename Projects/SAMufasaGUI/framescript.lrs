@@ -6,7 +6,7 @@ LazarusResources.Add('TScriptFrame','FORMDATA',[
   +'t'#11'Font.Height'#2#243#9'Font.Name'#6#11'Courier New'#10'Font.Pitch'#7#7
   +'fpFixed'#12'Font.Quality'#7#16'fqNonAntialiased'#11'ParentColor'#8#10'Paren'
   +'tFont'#8#8'TabOrder'#2#0#24'BookMarkOptions.OnChange'#13#12'Gutter.Width'#2
-  +'9'#19'Gutter.MouseActions'#14#1#5'Shift'#11#0#9'ShiftMask'#11#0#6'Button'#7
+  +'='#19'Gutter.MouseActions'#14#1#5'Shift'#11#0#9'ShiftMask'#11#0#6'Button'#7
   +#6'mbLeft'#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#2#13
   +#9'MoveCaret'#8#6'Option'#2#0#8'Priority'#2#0#0#1#5'Shift'#11#0#9'ShiftMask'
   +#11#0#6'Button'#7#7'mbRight'#10'ClickCount'#7#8'ccSingle'#8'ClickDir'#7#4'cd'
@@ -116,7 +116,7 @@ LazarusResources.Add('TScriptFrame','FORMDATA',[
   +#8'OnChange'#7#13'SynEditChange'#16'OnProcessCommand'#7#21'SynEditProcessCom'
   +'mand'#19'OnSpecialLineColors'#7#24'SynEditSpecialLineColors'#0#18'TSynGutte'
   +'rPartList'#0#0#15'TSynGutterMarks'#0#5'Width'#2#23#0#0#20'TSynGutterLineNum'
-  +'ber'#0#5'Width'#2#17#12'MouseActions'#14#0#21'MarkupInfo.Background'#7#9'cl'
+  +'ber'#0#5'Width'#2#21#12'MouseActions'#14#0#21'MarkupInfo.Background'#7#9'cl'
   +'BtnFace'#21'MarkupInfo.Foreground'#7#6'clNone'#10'DigitCount'#2#2#30'ShowOn'
   +'lyLineNumbersMultiplesOf'#2#1#9'ZeroStart'#8#12'LeadingZeros'#8#0#0#17'TSyn'
   +'GutterChanges'#0#5'Width'#2#4#13'ModifiedColor'#4#252#233#0#0#10'SavedColor'

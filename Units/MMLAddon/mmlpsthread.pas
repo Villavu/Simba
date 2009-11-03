@@ -149,7 +149,6 @@ begin
   SyncInfo:= TheSyncInfo;
   SetLength(PluginsToLoad,0);
   Client := TClient.Create;
-  Client.MOCR.InitTOCR(AppPath + DS + 'Fonts');
 
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;

@@ -22,7 +22,7 @@ object ScriptFrame: TScriptFrame
     ParentFont = False
     TabOrder = 0
     BookMarkOptions.OnChange = nil
-    Gutter.Width = 57
+    Gutter.Width = 61
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -597,7 +597,7 @@ object ScriptFrame: TScriptFrame
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 17
+        Width = 21
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
