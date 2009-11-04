@@ -624,6 +624,8 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  //Show close buttons @ tabs
+  PageControl1.Options:=PageControl1.Options+[nboShowCloseButtons];
   Tabs := TList.Create;
   AddTab;//Give it alteast 1 tab ;-).
   Window := TMWindow.Create;
