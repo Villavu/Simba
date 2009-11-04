@@ -33,7 +33,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="207">
+    <Units Count="210">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -168,8 +168,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="68" Y="628"/>
-        <TopLine Value="616"/>
+        <CursorPos X="1" Y="156"/>
+        <TopLine Value="143"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -227,7 +227,7 @@
         <UnitName Value="Client"/>
         <CursorPos X="26" Y="44"/>
         <TopLine Value="26"/>
-        <EditorIndex Value="21"/>
+        <EditorIndex Value="24"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit26>
@@ -260,7 +260,7 @@
         <UnitName Value="Window"/>
         <CursorPos X="39" Y="312"/>
         <TopLine Value="306"/>
-        <EditorIndex Value="16"/>
+        <EditorIndex Value="19"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit30>
@@ -276,7 +276,7 @@
         <UnitName Value="windowutil"/>
         <CursorPos X="29" Y="29"/>
         <TopLine Value="24"/>
-        <EditorIndex Value="17"/>
+        <EditorIndex Value="20"/>
         <UsageCount Value="37"/>
         <Loaded Value="True"/>
       </Unit32>
@@ -285,7 +285,7 @@
         <UnitName Value="Input"/>
         <CursorPos X="19" Y="229"/>
         <TopLine Value="225"/>
-        <EditorIndex Value="24"/>
+        <EditorIndex Value="27"/>
         <UsageCount Value="61"/>
         <Loaded Value="True"/>
       </Unit33>
@@ -295,7 +295,7 @@
         <UnitName Value="finder"/>
         <CursorPos X="50" Y="19"/>
         <TopLine Value="19"/>
-        <EditorIndex Value="22"/>
+        <EditorIndex Value="25"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit34>
@@ -320,7 +320,7 @@
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="29" Y="349"/>
         <TopLine Value="327"/>
-        <EditorIndex Value="18"/>
+        <EditorIndex Value="21"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit37>
@@ -383,7 +383,7 @@
         <UnitName Value="SynEdit"/>
         <CursorPos X="47" Y="581"/>
         <TopLine Value="568"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="9"/>
         <UsageCount Value="15"/>
         <Loaded Value="True"/>
       </Unit46>
@@ -391,7 +391,7 @@
         <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
         <CursorPos X="67" Y="97"/>
         <TopLine Value="87"/>
-        <EditorIndex Value="25"/>
+        <EditorIndex Value="28"/>
         <UsageCount Value="83"/>
         <Loaded Value="True"/>
       </Unit47>
@@ -413,7 +413,7 @@
         <UnitName Value="bitmaps"/>
         <CursorPos X="44" Y="692"/>
         <TopLine Value="670"/>
-        <EditorIndex Value="23"/>
+        <EditorIndex Value="26"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit50>
@@ -586,7 +586,7 @@
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/other.inc"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="26"/>
+        <EditorIndex Value="29"/>
         <UsageCount Value="27"/>
         <Loaded Value="True"/>
       </Unit76>
@@ -735,7 +735,7 @@
         <UnitName Value="colourpicker"/>
         <CursorPos X="18" Y="100"/>
         <TopLine Value="96"/>
-        <EditorIndex Value="15"/>
+        <EditorIndex Value="18"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit98>
@@ -838,7 +838,7 @@
         <UnitName Value="mmath"/>
         <CursorPos X="32" Y="42"/>
         <TopLine Value="16"/>
-        <UsageCount Value="180"/>
+        <UsageCount Value="181"/>
       </Unit112>
       <Unit113>
         <Filename Value="../../../Documents/fpc/rtl/objpas/types.pp"/>
@@ -874,8 +874,8 @@
         <UnitName Value="ocr"/>
         <CursorPos X="19" Y="91"/>
         <TopLine Value="75"/>
-        <EditorIndex Value="20"/>
-        <UsageCount Value="150"/>
+        <EditorIndex Value="23"/>
+        <UsageCount Value="151"/>
         <Loaded Value="True"/>
       </Unit117>
       <Unit118>
@@ -891,7 +891,7 @@
         <UnitName Value="project"/>
         <CursorPos X="46" Y="15"/>
         <TopLine Value="1"/>
-        <UsageCount Value="147"/>
+        <UsageCount Value="148"/>
       </Unit119>
       <Unit120>
         <Filename Value="../../../FPC/FPCCheckout/rtl/inc/heap.inc"/>
@@ -1007,7 +1007,7 @@
         <UnitName Value="web"/>
         <CursorPos X="90" Y="16"/>
         <TopLine Value="1"/>
-        <UsageCount Value="75"/>
+        <UsageCount Value="76"/>
       </Unit137>
       <Unit138>
         <Filename Value="../../../lazarus/lcl/lazhelphtml.pas"/>
@@ -1054,8 +1054,8 @@
       <Unit144>
         <Filename Value="../../../lazarus/ide/editoroptions.pp"/>
         <UnitName Value="EditorOptions"/>
-        <CursorPos X="22" Y="922"/>
-        <TopLine Value="919"/>
+        <CursorPos X="6" Y="2568"/>
+        <TopLine Value="2555"/>
         <EditorIndex Value="3"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
@@ -1083,7 +1083,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="SourceEditor"/>
-        <CursorPos X="7" Y="6605"/>
+        <CursorPos X="62" Y="6605"/>
         <TopLine Value="6591"/>
         <EditorIndex Value="8"/>
         <UsageCount Value="12"/>
@@ -1212,8 +1212,8 @@
         <UnitName Value="framescript"/>
         <CursorPos X="43" Y="47"/>
         <TopLine Value="34"/>
-        <EditorIndex Value="27"/>
-        <UsageCount Value="68"/>
+        <EditorIndex Value="30"/>
+        <UsageCount Value="69"/>
         <Loaded Value="True"/>
       </Unit162>
       <Unit163>
@@ -1231,17 +1231,19 @@
       <Unit165>
         <Filename Value="../../../lazarus/lcl/extctrls.pp"/>
         <UnitName Value="ExtCtrls"/>
-        <CursorPos X="41" Y="133"/>
-        <TopLine Value="121"/>
-        <EditorIndex Value="9"/>
+        <CursorPos X="15" Y="196"/>
+        <TopLine Value="183"/>
+        <EditorIndex Value="13"/>
         <UsageCount Value="15"/>
         <Loaded Value="True"/>
       </Unit165>
       <Unit166>
         <Filename Value="../../../lazarus/lcl/include/customnotebook.inc"/>
-        <CursorPos X="56" Y="307"/>
-        <TopLine Value="296"/>
+        <CursorPos X="3" Y="772"/>
+        <TopLine Value="761"/>
+        <EditorIndex Value="10"/>
         <UsageCount Value="15"/>
+        <Loaded Value="True"/>
       </Unit166>
       <Unit167>
         <Filename Value="../../../lazarus/components/synedit/syneditpointclasses.pas"/>
@@ -1444,7 +1446,7 @@
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/ocr.inc"/>
         <CursorPos X="33" Y="4"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="19"/>
+        <EditorIndex Value="22"/>
         <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit196>
@@ -1482,7 +1484,7 @@
         <UnitName Value="SynEditMarkupHighAll"/>
         <CursorPos X="3" Y="402"/>
         <TopLine Value="402"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="17"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit201>
@@ -1498,7 +1500,7 @@
         <UnitName Value="SynEditMiscClasses"/>
         <CursorPos X="89" Y="85"/>
         <TopLine Value="84"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="14"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit203>
@@ -1507,7 +1509,7 @@
         <UnitName Value="SynEditSearch"/>
         <CursorPos X="12" Y="127"/>
         <TopLine Value="127"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="16"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit204>
@@ -1516,7 +1518,7 @@
         <UnitName Value="SynEditTypes"/>
         <CursorPos X="3" Y="69"/>
         <TopLine Value="56"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="15"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit205>
@@ -1532,127 +1534,154 @@
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit206>
+      <Unit207>
+        <Filename Value="../../../lazarus/ide/searchresultview.pp"/>
+        <ComponentName Value="SearchResultsView"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="SearchResultView"/>
+        <CursorPos X="117" Y="226"/>
+        <TopLine Value="219"/>
+        <UsageCount Value="10"/>
+      </Unit207>
+      <Unit208>
+        <Filename Value="../../../lazarus/lcl/interfaces/qt/qtwsextctrls.pp"/>
+        <UnitName Value="QtWSExtCtrls"/>
+        <CursorPos X="31" Y="302"/>
+        <TopLine Value="289"/>
+        <EditorIndex Value="11"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit208>
+      <Unit209>
+        <Filename Value="../../../lazarus/lcl/interfaces/gtk/gtkproc.inc"/>
+        <CursorPos X="9" Y="4450"/>
+        <TopLine Value="4437"/>
+        <EditorIndex Value="12"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit209>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="testunit.pas"/>
-        <Caret Line="791" Column="9" TopLine="789"/>
+        <Caret Line="361" Column="1" TopLine="353"/>
       </Position1>
       <Position2>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="496" Column="51" TopLine="488"/>
+        <Filename Value="../../../lazarus/ide/lazarusidestrconsts.pas"/>
+        <Caret Line="1407" Column="3" TopLine="1396"/>
       </Position2>
       <Position3>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="662" Column="6" TopLine="660"/>
+        <Filename Value="../../../lazarus/ide/frames/editor_general_misc_options.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position3>
       <Position4>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="504" Column="77" TopLine="488"/>
+        <Filename Value="../../../lazarus/ide/frames/editor_general_misc_options.pas"/>
+        <Caret Line="93" Column="29" TopLine="80"/>
       </Position4>
       <Position5>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="531" Column="3" TopLine="529"/>
+        <Filename Value="../../../lazarus/ide/frames/editor_general_misc_options.pas"/>
+        <Caret Line="126" Column="11" TopLine="113"/>
       </Position5>
       <Position6>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="686" Column="18" TopLine="674"/>
+        <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
+        <Caret Line="6856" Column="3" TopLine="6856"/>
       </Position6>
       <Position7>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="682" Column="28" TopLine="674"/>
+        <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
+        <Caret Line="4226" Column="25" TopLine="4213"/>
       </Position7>
       <Position8>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="549" Column="12" TopLine="547"/>
+        <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
+        <Caret Line="6605" Column="34" TopLine="6591"/>
       </Position8>
       <Position9>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="360" Column="13" TopLine="353"/>
+        <Filename Value="../../../lazarus/lcl/extctrls.pp"/>
+        <Caret Line="312" Column="17" TopLine="299"/>
       </Position9>
       <Position10>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="50" Column="21" TopLine="37"/>
+        <Filename Value="../../../lazarus/lcl/extctrls.pp"/>
+        <Caret Line="225" Column="50" TopLine="212"/>
       </Position10>
       <Position11>
-        <Filename Value="../../../lazarus/lcl/comctrls.pp"/>
-        <Caret Line="222" Column="3" TopLine="209"/>
+        <Filename Value="../../../lazarus/lcl/extctrls.pp"/>
+        <Caret Line="149" Column="25" TopLine="136"/>
       </Position11>
       <Position12>
-        <Filename Value="../../../lazarus/lcl/comctrls.pp"/>
-        <Caret Line="1437" Column="19" TopLine="1424"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="359" Column="83" TopLine="353"/>
       </Position12>
       <Position13>
         <Filename Value="testunit.pas"/>
-        <Caret Line="360" Column="1" TopLine="353"/>
+        <Caret Line="627" Column="11" TopLine="614"/>
       </Position13>
       <Position14>
         <Filename Value="testunit.pas"/>
-        <Caret Line="361" Column="1" TopLine="353"/>
+        <Caret Line="93" Column="5" TopLine="80"/>
       </Position14>
       <Position15>
-        <Filename Value="../../../lazarus/ide/lazarusidestrconsts.pas"/>
-        <Caret Line="1407" Column="3" TopLine="1396"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="1048" Column="1" TopLine="1023"/>
       </Position15>
       <Position16>
-        <Filename Value="../../../lazarus/ide/frames/editor_general_misc_options.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
+        <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
+        <Caret Line="6605" Column="34" TopLine="6591"/>
       </Position16>
       <Position17>
-        <Filename Value="../../../lazarus/ide/frames/editor_general_misc_options.pas"/>
-        <Caret Line="93" Column="29" TopLine="80"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="627" Column="30" TopLine="614"/>
       </Position17>
       <Position18>
-        <Filename Value="../../../lazarus/ide/frames/editor_general_misc_options.pas"/>
-        <Caret Line="126" Column="11" TopLine="113"/>
+        <Filename Value="../../../lazarus/ide/editoroptions.pp"/>
+        <Caret Line="922" Column="22" TopLine="919"/>
       </Position18>
       <Position19>
         <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
-        <Caret Line="6856" Column="3" TopLine="6856"/>
+        <Caret Line="6605" Column="7" TopLine="6591"/>
       </Position19>
       <Position20>
-        <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
-        <Caret Line="4226" Column="25" TopLine="4213"/>
+        <Filename Value="../../../lazarus/lcl/include/customnotebook.inc"/>
+        <Caret Line="307" Column="56" TopLine="296"/>
       </Position20>
       <Position21>
-        <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
-        <Caret Line="6605" Column="34" TopLine="6591"/>
+        <Filename Value="../../../lazarus/lcl/interfaces/qt/qtwsextctrls.pp"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position21>
       <Position22>
-        <Filename Value="../../../lazarus/lcl/extctrls.pp"/>
-        <Caret Line="312" Column="17" TopLine="299"/>
+        <Filename Value="../../../lazarus/lcl/interfaces/qt/qtwsextctrls.pp"/>
+        <Caret Line="419" Column="50" TopLine="406"/>
       </Position22>
       <Position23>
-        <Filename Value="../../../lazarus/lcl/extctrls.pp"/>
-        <Caret Line="225" Column="50" TopLine="212"/>
+        <Filename Value="../../../lazarus/lcl/interfaces/gtk/gtkproc.inc"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position23>
       <Position24>
         <Filename Value="../../../lazarus/lcl/extctrls.pp"/>
-        <Caret Line="149" Column="25" TopLine="136"/>
+        <Caret Line="133" Column="41" TopLine="121"/>
       </Position24>
       <Position25>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="359" Column="83" TopLine="353"/>
+        <Filename Value="../../../lazarus/lcl/include/customnotebook.inc"/>
+        <Caret Line="440" Column="6" TopLine="427"/>
       </Position25>
       <Position26>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="627" Column="11" TopLine="614"/>
+        <Filename Value="../../../lazarus/lcl/include/customnotebook.inc"/>
+        <Caret Line="441" Column="15" TopLine="427"/>
       </Position26>
       <Position27>
         <Filename Value="testunit.pas"/>
-        <Caret Line="93" Column="5" TopLine="80"/>
+        <Caret Line="628" Column="68" TopLine="616"/>
       </Position27>
       <Position28>
         <Filename Value="testunit.pas"/>
-        <Caret Line="1048" Column="1" TopLine="1023"/>
+        <Caret Line="629" Column="68" TopLine="616"/>
       </Position28>
       <Position29>
-        <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
-        <Caret Line="6605" Column="34" TopLine="6591"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="635" Column="58" TopLine="616"/>
       </Position29>
       <Position30>
         <Filename Value="testunit.pas"/>
-        <Caret Line="627" Column="30" TopLine="614"/>
+        <Caret Line="630" Column="35" TopLine="617"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
