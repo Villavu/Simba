@@ -102,7 +102,9 @@ procedure psWriteln(str : string);
 //{$IFDEF WINDOWS}
 begin
   if Assigned(CurrThread.DebugTo) then
-    CurrThread.DebugTo(str);
+    CurrThread.DebugTo(str)
+  else
+    writeln(str);
  {if CurrThread.DebugTo <> nil then
  begin;
     CurrThread.DebugTo.lines.add(str);
