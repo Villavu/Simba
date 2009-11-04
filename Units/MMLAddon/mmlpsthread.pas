@@ -40,6 +40,9 @@ type
       OldThread : TThread;
       PSScript : TPSScript;
     end;
+
+    TWritelnProc = procedure(s: string);
+
     PSyncInfo = ^TSyncInfo;
     TErrorType = (errRuntime,errCompile);
     TOnError = procedure (ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType) of object;
@@ -53,7 +56,8 @@ type
     private
       ScriptPath, AppPath : string;
     protected
-      DebugTo : TMemo;
+      //DebugTo : TMemo;
+      DebugTo: TWritelnProc;
       PluginsToload : Array of integer;
       FOnError  : TOnError;
       procedure OnCompile(Sender: TPSScript);
@@ -70,7 +74,7 @@ type
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       property OnError : TOnError read FOnError write FOnError;
       procedure SetPSScript(Script : string);
-      procedure SetDebug( Strings : TMemo );
+      procedure SetDebug( writelnProc : TWritelnProc );
       procedure SetPaths(ScriptP,AppP : string);
       constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo);
       destructor Destroy; override;
@@ -95,19 +99,21 @@ uses
 
 {Some General PS Functions here}
 procedure psWriteln(str : string);
-{$IFDEF WINDOWS}
+//{$IFDEF WINDOWS}
 begin
-  if CurrThread.DebugTo <> nil then
-  begin;
+  if Assigned(CurrThread.DebugTo) then
+    CurrThread.DebugTo(str);
+ {if CurrThread.DebugTo <> nil then
+ begin;
     CurrThread.DebugTo.lines.add(str);
     CurrThread.DebugTo.Refresh;
-  end;
+ end; }
 end;
-{$ELSE}
-begin
-writeln(str);
-end;
-{$ENDIF}
+//{$ELSE}
+//begin
+//writeln(str);
+//end;
+//{$ENDIF}
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
 begin;
@@ -340,9 +346,9 @@ begin
    PSScript.Script.Text:= Script;
 end;
 
-procedure TMMLPSThread.SetDebug(Strings: TMemo);
+procedure TMMLPSThread.SetDebug(writelnProc: TWritelnProc);
 begin
-  DebugTo := Strings;
+  DebugTo := writelnProc;
 end;
 
 procedure TMMLPSThread.SetPaths(ScriptP, AppP: string);

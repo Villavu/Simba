@@ -95,6 +95,7 @@ type
     ScriptPanel: TPanel;
     TabPopup: TPopupMenu;
     TB_SaveAll: TToolButton;
+    DebugTimer: TTimer;
     TrayDivider: TMenuItem;
     TrayPlay: TMenuItem;
     TrayStop: TMenuItem;
@@ -187,12 +188,15 @@ type
       State: TDragState; var Accept: Boolean);
     procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure ProcessDebugStream(Sender: TObject);
   private
     PopupTab : integer;
     SearchStart : TPoint;
     function GetScriptState: TScriptState;
     procedure SetScriptState(const State: TScriptState);
   public
+    DebugStream: String;
+
     CurrScript : TScriptFrame; //The current scriptframe
     CurrTab    : TMufasaTab; //The current TMufasaTab
     Tabs : TList;
@@ -220,9 +224,9 @@ type
     procedure DoSearch(Next : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
   end;
-  {$ifdef mswindows}
-  procedure Writeln( S : String);
-  {$endif}
+
+  procedure formWriteln( S : String);
+
 const
   WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
   Panel_State = 0;
@@ -237,14 +241,50 @@ var
 
 implementation
 uses
-   lclintf,plugins;
+   lclintf,plugins,
+   syncobjs; // for the critical sections
 
-{$ifdef mswindows}
-procedure Writeln( S : String);
-begin;
-  Form1.Memo1.Lines.Add(s);
+//{$ifdef mswindows}
+
+var
+   DebugCriticalSection: syncobjs.TCriticalSection;
+
+procedure TForm1.ProcessDebugStream(Sender: TObject);
+
+begin
+  if length(DebugStream) = 0 then
+    Exit;
+
+  // cut off 1 newline char
+
+  DebugCriticalSection.Enter;
+
+  try
+    setlength(DebugStream, length(DebugStream) - 1);
+    Memo1.Lines.Add(DebugStream);
+    SetLength(DebugStream, 0);
+  finally
+    DebugCriticalSection.Leave;
+  end;
 end;
-{$ENDIF}
+
+procedure formWriteln( S : String);
+
+begin
+  s := s + #10;
+  DebugCriticalSection.Enter;
+  try
+    Form1.DebugStream:= Form1.DebugStream + s;
+  finally
+    DebugCriticalSection.Leave;
+  end;
+
+
+  writeln('formWriteln: ' + s);
+  //Form1.Memo1.Lines.Add(s);
+end;
+
+//{$ENDIF}
 
 procedure TForm1.RunScript;
 begin
@@ -265,7 +305,8 @@ begin
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
     ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
     ScriptThread.SetPSScript(CurrScript.SynEdit.Lines.Text);
-    ScriptThread.SetDebug(Self.Memo1);
+//    ScriptThread.SetDebug(Self.Memo1);
+    ScriptThread.SetDebug(@formWriteln);
     ScriptThread.OnError:=@ErrorThread;
     if ScriptFile <> '' then
       ScriptThread.SetPaths( ExtractFileDir(ScriptFile) + DS,IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)))
@@ -635,6 +676,10 @@ begin
   MainDir:= ExtractFileDir(Application.ExeName);
   PluginsGlob := TMPlugins.Create;
   PluginsGlob.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
+
+  { For writeln }
+  SetLength(DebugStream, 0);
+  DebugCriticalSection := syncobjs.TCriticalSection.Create;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -648,6 +693,9 @@ begin
   Picker.Free;
   Window.Free;
   PluginsGlob.Free;
+
+  SetLength(DebugStream, 0);
+  DebugCriticalSection.Free;
 end;
 
 procedure TForm1.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
