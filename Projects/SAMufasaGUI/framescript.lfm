@@ -21,7 +21,6 @@ object ScriptFrame: TScriptFrame
     ParentColor = False
     ParentFont = False
     TabOrder = 0
-    BookMarkOptions.OnChange = nil
     Gutter.Width = 59
     Gutter.MouseActions = <    
       item
