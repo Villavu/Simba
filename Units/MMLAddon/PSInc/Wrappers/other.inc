@@ -60,7 +60,7 @@ begin;
   result := TForm.Create(nil);
 end;
 function CreateButton(Owner : TComponent) : TButton;
-begin;
+begin
   Result := TButton.Create(Owner);
 end;
 
