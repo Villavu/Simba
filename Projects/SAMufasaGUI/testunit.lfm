@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 448
+  Left = 274
   Height = 557
-  Top = 192
+  Top = 233
   Width = 731
   Caption = 'Action1'
   ClientHeight = 537
@@ -227,6 +227,7 @@ object Form1: TForm1
       Top = 0
       Width = 731
       Align = alClient
+      Images = Mufasa_Image_List
       PopupMenu = TabPopup
       TabOrder = 0
       OnChange = PageControl1Change
@@ -245,7 +246,6 @@ object Form1: TForm1
       ClientHeight = 27
       ClientWidth = 731
       TabOrder = 1
-      Visible = False
       object LabeledEditSearch: TLabeledEdit
         Left = 104
         Height = 21

@@ -348,6 +348,7 @@ var
 begin;
   Tab := TMufasaTab.Create(Self.PageControl1);
   Tabs.Add(Tab);
+  Tab.TabSheet.ImageIndex:= 8;
 //  Tab.TabSheet.OnContextPopup:= @TabPopup;
   PageControl1.TabIndex:= Tabs.Count - 1;
   RefreshTab;
@@ -551,6 +552,8 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  //Don't show search panel now
+  SearchPanel.Height:= 0;
   Tabs := TList.Create;
   AddTab;//Give it alteast 1 tab ;-).
   Window := TMWindow.Create;
@@ -609,7 +612,10 @@ end;
 
 procedure TForm1.MenuItemFindClick(Sender: TObject);
 begin
-  SearchPanel.Visible:= not SearchPanel.Visible;
+  if SearchPanel.Height > 0 then
+    SearchPanel.Height:= 0
+  else
+    SearchPanel.Height:= 27;
   with  CurrScript.SynEdit do
   begin;
     UseIncrementalColor:= true;

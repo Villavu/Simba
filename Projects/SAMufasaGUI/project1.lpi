@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="13"/>
+      <ActiveEditorIndexAtStart Value="0"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -168,8 +168,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="18" Y="615"/>
-        <TopLine Value="610"/>
+        <CursorPos X="32" Y="555"/>
+        <TopLine Value="553"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -319,7 +319,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="29" Y="349"/>
-        <TopLine Value="318"/>
+        <TopLine Value="327"/>
         <EditorIndex Value="4"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -410,7 +410,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="bitmaps"/>
         <CursorPos X="44" Y="692"/>
-        <TopLine Value="666"/>
+        <TopLine Value="670"/>
         <EditorIndex Value="9"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -1481,7 +1481,7 @@
         <UsageCount Value="10"/>
       </Unit203>
     </Units>
-    <JumpHistory Count="4" HistoryIndex="3">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
         <Filename Value="testunit.pas"/>
         <Caret Line="541" Column="43" TopLine="531"/>
@@ -1498,6 +1498,26 @@
         <Filename Value="framescript.pas"/>
         <Caret Line="182" Column="1" TopLine="166"/>
       </Position4>
+      <Position5>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="615" Column="18" TopLine="610"/>
+      </Position5>
+      <Position6>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="472" Column="11" TopLine="470"/>
+      </Position6>
+      <Position7>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="348" Column="27" TopLine="345"/>
+      </Position7>
+      <Position8>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="351" Column="30" TopLine="340"/>
+      </Position8>
+      <Position9>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="615" Column="39" TopLine="611"/>
+      </Position9>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
