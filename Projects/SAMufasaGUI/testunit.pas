@@ -58,6 +58,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionFindStart: TAction;
     ActionClearDebug: TAction;
     ActionSaveAll: TAction;
     ActionStopScript: TAction;
@@ -140,6 +141,7 @@ type
     MTrayIcon: TTrayIcon;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
+    procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
@@ -156,11 +158,15 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
+    procedure LabeledEditSearchEnter(Sender: TObject);
+    procedure LabeledEditSearchExit(Sender: TObject);
+    procedure LabeledEditSearchKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemCopyClick(Sender: TObject);
     procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemExitClick(Sender: TObject);
-    procedure MenuItemFindClick(Sender: TObject);
     procedure MenuItemPasteClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
@@ -183,6 +189,7 @@ type
       Shift: TShiftState; X, Y: Integer);
   private
     PopupTab : integer;
+    SearchStart : TPoint;
     function GetScriptState: TScriptState;
     procedure SetScriptState(const State: TScriptState);
   public
@@ -210,6 +217,7 @@ type
     procedure ClearTab( TabIndex : integer);
     procedure CloseTabs( Exclude : integer);overload;//-1 for none
     procedure CloseTabs;overload;
+    procedure DoSearch(Next : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
   end;
   {$ifdef mswindows}
@@ -409,6 +417,54 @@ begin
   CloseTabs(-1);
 end;
 
+procedure TForm1.DoSearch(Next: boolean);
+var
+  Res : integer;
+  CurrPos : TPoint;
+begin
+  if LabeledEditSearch.Text = '' then
+  begin
+    res := -1;
+    CurrScript.Synedit.SetHighlightSearch('',[]);
+//    CurrScript.SynEdit.SelectionMode:=
+//    CurrScript.SynEdit.CaretXY :=     CurrScript.SynEdit.CaretXY;
+    CurrScript.SynEdit.LogicalCaretXY := SearchStart;
+  end
+  else
+  begin
+    Writeln('Searching: ' + LabeledEditSearch.Text);
+    if next then
+      CurrPos := CurrScript.SynEdit.LogicalCaretXY
+    else
+      CurrPos := SearchStart;
+    Res := CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.Text,'',[],CurrPos);
+    if res = 0 then
+    begin
+      res := CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.text,'',[],Point(0,0));
+      if res > 0 then
+      begin;
+        Writeln('End of document reached');
+        SearchStart.x := 0;
+        SearchStart.Y := CurrScript.SynEdit.LogicalCaretXY.y;
+      end;
+    end;
+  end;
+  if res = 0 then
+  begin;
+    LabeledEditSearch.Color := 6711039;
+    LabeledEditSearch.Font.Color:= clWhite;
+    CurrScript.Synedit.SetHighlightSearch('',[]);
+    CurrScript.SynEdit.LogicalCaretXY := SearchStart;
+  end
+  else
+  begin
+    LabeledEditSearch.Color:= clWindow;
+    LabeledEditSearch.Font.Color:= clWindowText;
+    with CurrScript.SynEdit do
+      SetHighlightSearch(LabeledEditSearch.text,[]);
+  end;
+end;
+
 procedure TForm1.RefreshTab;
 var
   Tab : TMufasaTab;
@@ -435,6 +491,16 @@ begin
   if Self.Showing then
     if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
       CurrScript.SynEdit.SetFocus;
+  with CurrScript.SynEdit do
+  begin
+    SetHighlightSearch('',[]);
+    UseIncrementalColor:= false;
+    MarkupByClass[TSynEditMarkupHighlightAllCaret].TempEnable;
+    Invalidate;
+  end;
+  LabeledEditSearch.SelLength:= 0;
+  LabeledEditSearch.Color:= clWindow;
+  LabeledEditSearch.Font.Color:= clWindowText;
 end;
 
 
@@ -456,6 +522,16 @@ begin
     Self.DeleteTab(PageControl1.TabIndex,false)
   else
     Self.ClearScript;  //DeleteTab would take care of this already, but yeah, it's neater this way.
+end;
+
+procedure TForm1.ActionFindstartExecute(Sender: TObject);
+begin
+  if sender = LabeledEditSearch then
+    SearchPanel.Visible:= false
+  else
+    SearchPanel.Visible:= true;
+  if SearchPanel.Visible then
+    LabeledEditSearch.SetFocus;
 end;
 
 procedure TForm1.ActionClearDebugExecute(Sender: TObject);
@@ -531,11 +607,7 @@ end;
 
 procedure TForm1.EditSearchChange(Sender: TObject);
 begin
-  Writeln(LabeledEditSearch.Text);
-  CurrScript.SynEdit.SelStart:= -1;
-  CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.Text,'',[],point(0,0));
-  with CurrScript.SynEdit do
-    SetHighlightSearch(LabeledEditSearch.text,[]);
+  DoSearch(false);
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -552,8 +624,6 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  //Don't show search panel now
-  SearchPanel.Height:= 0;
   Tabs := TList.Create;
   AddTab;//Give it alteast 1 tab ;-).
   Window := TMWindow.Create;
@@ -584,6 +654,44 @@ begin
   ShortCut := KeyToShortCut(Message.CharCode, ShiftState);}
 end;
 
+procedure TForm1.LabeledEditSearchEnter(Sender: TObject);
+begin
+  SearchStart := CurrScript.SynEdit.LogicalCaretXY;
+  with CurrScript.SynEdit do
+  begin
+    UseIncrementalColor:= true;
+    MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable
+  end;
+end;
+
+procedure TForm1.LabeledEditSearchExit(Sender: TObject);
+begin
+  RefreshTab;
+end;
+
+procedure TForm1.LabeledEditSearchKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (ssCtrl in Shift) and (key = vk_f) then
+  begin;
+    LabeledEditSearch.SelectAll;
+  end else
+  if key = VK_ESCAPE then
+  begin
+    ActionFindstartExecute(Sender);
+    CurrScript.SynEdit.SetFocus;
+  end;
+end;
+
+procedure TForm1.LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
+begin
+  if key = #13 then
+  begin;
+    DoSearch(true);
+//    LabeledEditSearch.SelStart:= Length(LabeledEditSearch.Text);
+  end;
+end;
+
 procedure TForm1.MenuItemCloseTabsClick(Sender: TObject);
 begin
   Self.CloseTabs;
@@ -609,23 +717,6 @@ procedure TForm1.MenuItemExitClick(Sender: TObject);
 begin
   Self.Close;
 end;
-
-procedure TForm1.MenuItemFindClick(Sender: TObject);
-begin
-  if SearchPanel.Height > 0 then
-    SearchPanel.Height:= 0
-  else
-    SearchPanel.Height:= 27;
-  with  CurrScript.SynEdit do
-  begin;
-    UseIncrementalColor:= true;
-    if SearchPanel.Visible then
-      MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable
-    else
-      MarkupByClass[TSynEditMarkupHighlightAllCaret].TempEnable;
-  end;
-end;
-
 
 
 procedure TForm1.MenuItemPasteClick(Sender: TObject);
