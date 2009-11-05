@@ -271,10 +271,15 @@ end;
 procedure formWriteln( S : String);
 
 begin
-  s := s + #10;
   DebugCriticalSection.Enter;
   try
+    {$ifdef MSWindows}
+    //Ha, we cán acces the debugmemo
+    Form1.Memo1.Lines.Add(s);
+    {$else}
+    s := s + MEOL;
     Form1.DebugStream:= Form1.DebugStream + s;
+    {$endif}
   finally
     DebugCriticalSection.Leave;
   end;
@@ -438,6 +443,7 @@ begin
     TB_SaveAll.Enabled:= false;
     MenuItemSaveAll.Enabled:= false;
   end;
+  RefreshTab;
 end;
 
 procedure TForm1.ClearTab(TabIndex: integer);
@@ -514,6 +520,11 @@ var
   Script : TScriptFrame;
   NewTab : integer;
 begin
+  if tabs.Count < 1 then
+  begin;
+    Writeln('Cannot refresh tab, since there are no tabs.');
+    exit;
+  end;
   NewTab := PageControl1.TabIndex;
   Tab := TMufasaTab(Tabs[Newtab]);
   Script := Tab.ScriptFrame;
@@ -682,6 +693,9 @@ begin
   { For writeln }
   SetLength(DebugStream, 0);
   DebugCriticalSection := syncobjs.TCriticalSection.Create;
+  {$ifdef mswindows}
+  DebugTimer.Enabled:= false;
+  {$endif}
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -733,6 +747,7 @@ begin
   begin
     ActionFindstartExecute(Sender);
     CurrScript.SynEdit.SetFocus;
+    key := 0;
   end;
 end;
 
@@ -741,6 +756,7 @@ begin
   if key = #13 then
   begin;
     DoSearch(true);
+    key := #0;
 //    LabeledEditSearch.SelStart:= Length(LabeledEditSearch.Text);
   end;
 end;
@@ -1072,6 +1088,7 @@ begin
   ScriptFrame := TScriptFrame.Create(Tabsheet);
   ScriptFrame.Parent := Tabsheet;
   ScriptFrame.Align:= alClient;
+
 end;
 
 constructor TMufasaTab.Create(Page: TPageControl);
