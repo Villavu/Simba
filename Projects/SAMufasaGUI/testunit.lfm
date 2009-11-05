@@ -1,9 +1,9 @@
 object Form1: TForm1
-  Left = 168
+  Left = 274
   Height = 557
-  Top = 177
+  Top = 233
   Width = 731
-  ActiveControl = PageControl1
+  ActiveControl = ScriptPanel
   Caption = 'Action1'
   ClientHeight = 532
   ClientWidth = 731
@@ -1906,5 +1906,9 @@ object Form1: TForm1
       OnExecute = ActionFindstartExecute
       ShortCut = 16454
     end
+  end
+  object DebugTimer: TTimer
+    OnTimer = ProcessDebugStream
+    left = 640
   end
 end
