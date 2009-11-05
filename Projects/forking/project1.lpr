@@ -54,9 +54,11 @@ begin
   begin
     Processes[i] := TProcess.Create(Self);
     {$WARNING SET THIS PATH}
-    Processes[i].CommandLine := 'C:/mufasa/Projects/MufasaTests/project1.exe';
+    //Processes[i].CommandLine := 'C:/mufasa/Projects/MufasaTests/project1.exe';
+    Processes[i].CommandLine := '/home/merlijn/Programs/mufasa/Projects/MufasaTests/project1';
     //Processes[i].ApplicationName := 'ForkingTest: ' + inttostr(i);
     Processes[i].Execute;
+    sleep(100);
     Writeln('Process ' + inttostr(i) + ', has ID ' + inttostr(Processes[i].ProcessID));
   end;
 
