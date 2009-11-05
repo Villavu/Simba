@@ -181,6 +181,7 @@ type
     procedure PageControl1Change(Sender: TObject);
     procedure ButtonTrayClick(Sender: TObject);
     procedure MenuItemUndoClick(Sender: TObject);
+    procedure PageControl1Changing(Sender: TObject; var AllowChange: Boolean);
     procedure PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;
       var Handled: Boolean);
     procedure PageControl1DragDrop(Sender, Source: TObject; X, Y: Integer);
@@ -192,6 +193,7 @@ type
   private
     PopupTab : integer;
     SearchStart : TPoint;
+    LastTab  : integer;
     function GetScriptState: TScriptState;
     procedure SetScriptState(const State: TScriptState);
   public
@@ -269,8 +271,8 @@ begin
 end;
 
 procedure formWriteln( S : String);
-
 begin
+  writeln('formWriteln: ' + s);
   DebugCriticalSection.Enter;
   try
     {$ifdef MSWindows}
@@ -283,9 +285,6 @@ begin
   finally
     DebugCriticalSection.Leave;
   end;
-
-
-  writeln('formWriteln: ' + s);
   //Form1.Memo1.Lines.Add(s);
 end;
 
@@ -421,6 +420,8 @@ var
   OldIndex : integer;//So that we can switch back, if needed.
 begin
   OldIndex := PageControl1.TabIndex;
+  if TabIndex = OldIndex then   //We are closing the 'current'  tab, lets go back in history
+    OldIndex := LastTab;
   PageControl1.TabIndex:= TabIndex;
   //ScriptFrame now is now correct ;-D
   result := CanExitOrOpen;
@@ -867,6 +868,12 @@ end;
 procedure TForm1.MenuItemUndoClick(Sender: TObject);
 begin
   CurrScript.Undo;
+end;
+
+procedure TForm1.PageControl1Changing(Sender: TObject; var AllowChange: Boolean
+  );
+begin
+  LastTab:= PageControl1.TabIndex;
 end;
 
 procedure TForm1.PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;

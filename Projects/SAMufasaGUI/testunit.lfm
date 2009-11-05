@@ -1,12 +1,13 @@
 object Form1: TForm1
-  Left = 223
+  Left = 362
   Height = 557
-  Top = 272
+  Top = 240
   Width = 731
   ActiveControl = ScriptPanel
-  Caption = 'Action1'
-  ClientHeight = 537
+  Caption = 'THA FUKING MUFASA'
+  ClientHeight = 532
   ClientWidth = 731
+  KeyPreview = True
   Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate
@@ -165,8 +166,8 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 23
-    Top = 514
+    Height = 21
+    Top = 511
     Width = 731
     Panels = <    
       item
@@ -183,17 +184,17 @@ object Form1: TForm1
   end
   object PanelMemo: TPanel
     Left = 0
-    Height = 154
+    Height = 151
     Top = 360
     Width = 731
     Align = alBottom
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 154
+    ClientHeight = 151
     ClientWidth = 731
     TabOrder = 2
     object Memo1: TMemo
       Left = 1
-      Height = 152
+      Height = 149
       Top = 1
       Width = 729
       Align = alClient
@@ -232,6 +233,7 @@ object Form1: TForm1
       PopupMenu = TabPopup
       TabOrder = 0
       OnChange = PageControl1Change
+      OnChanging = PageControl1Changing
       OnContextPopup = PageControl1ContextPopup
       OnDragDrop = PageControl1DragDrop
       OnDragOver = PageControl1DragOver
@@ -250,7 +252,7 @@ object Form1: TForm1
       Visible = False
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 21
+        Height = 27
         Top = 6
         Width = 174
         AutoSelect = False
@@ -259,10 +261,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 73
-        EditLabel.Height = 14
-        EditLabel.Top = 9
-        EditLabel.Width = 28
+        EditLabel.Left = 67
+        EditLabel.Height = 18
+        EditLabel.Top = 10
+        EditLabel.Width = 34
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
