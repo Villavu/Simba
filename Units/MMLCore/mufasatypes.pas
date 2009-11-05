@@ -32,6 +32,7 @@ uses
   Classes, SysUtils,plugins;
 const
   DS = DirectorySeparator;
+  MEOL = {$ifdef MSWINDOWS}#13+{$endif}#10;
 
 type
   TRGB32 = packed record

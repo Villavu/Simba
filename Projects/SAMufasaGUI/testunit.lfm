@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 274
+  Left = 223
   Height = 557
-  Top = 233
+  Top = 272
   Width = 731
   ActiveControl = ScriptPanel
   Caption = 'Action1'
-  ClientHeight = 532
+  ClientHeight = 537
   ClientWidth = 731
   Menu = MainMenu1
   OnClose = FormClose
@@ -165,8 +165,8 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 21
-    Top = 511
+    Height = 23
+    Top = 514
     Width = 731
     Panels = <    
       item
@@ -183,17 +183,17 @@ object Form1: TForm1
   end
   object PanelMemo: TPanel
     Left = 0
-    Height = 151
+    Height = 154
     Top = 360
     Width = 731
     Align = alBottom
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 151
+    ClientHeight = 154
     ClientWidth = 731
     TabOrder = 2
     object Memo1: TMemo
       Left = 1
-      Height = 149
+      Height = 152
       Top = 1
       Width = 729
       Align = alClient
@@ -250,7 +250,7 @@ object Form1: TForm1
       Visible = False
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 27
+        Height = 21
         Top = 6
         Width = 174
         AutoSelect = False
@@ -259,10 +259,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 67
-        EditLabel.Height = 18
-        EditLabel.Top = 10
-        EditLabel.Width = 34
+        EditLabel.Left = 73
+        EditLabel.Height = 14
+        EditLabel.Top = 9
+        EditLabel.Width = 28
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
