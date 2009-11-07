@@ -36,6 +36,7 @@ type
 
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
+    procedure SetCHShowMenu(Sender: TObject);
   private
     { private declarations }
   public
@@ -91,10 +92,14 @@ end;
 procedure TColourHistoryForm.ChangeViewData(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 begin
-  ColourValue.Caption := 'Colour: ' + IntToStr(TColourPickerObject(ColourList.Selected.Data).Colour);
-  CoordValue.Caption := 'Coords: ' + IntToStr(TColourPickerObject(ColourList.Selected.Data).Pos.X) +
-                        ', ' + IntToStr(TColourPickerObject(ColourList.Selected.Data).Pos.Y);
-  SelectionName.Text := TColourPickerObject(ColourList.Selected.Data).Name;
+  if not Assigned(Item) then
+    exit;
+  if not Item.Selected then
+    exit;
+  ColourValue.Caption := 'Colour: ' + IntToStr(TColourPickerObject(Item.Data).Colour);
+  CoordValue.Caption := 'Coords: ' + IntToStr(TColourPickerObject(Item.Data).Pos.X) +
+                        ', ' + IntToStr(TColourPickerObject(Item.Data).Pos.Y);
+  SelectionName.Text := TColourPickerObject(Item.Data).Name;
 end;
 
 procedure TColourHistoryForm.ChangeName(Sender: TObject);
@@ -119,6 +124,11 @@ end;
 destructor TColourHistoryForm.Destroy;
 begin
   inherited Destroy;
+end;
+
+procedure TColourHistoryForm.SetCHShowMenu(Sender: TObject);
+begin
+  Form1.View_CH_Menu.Checked := True;
 end;
 
 initialization
