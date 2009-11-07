@@ -152,6 +152,7 @@ procedure TScriptFrame.MakeActiveScriptFrame;
 var
   i : integer;
 begin
+  if Form1.Visible then
   for i := 0 to OwnerPage.PageCount - 1 do
     if OwnerPage.Pages[i] = OwnerSheet then
     begin;
