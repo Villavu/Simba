@@ -32,7 +32,7 @@ uses
   mufasatypes, // for common mufasa types
   windowutil // for mufasa window utils
   {$IFDEF LINUX}
-  ,ctypes,x, xlib{,xtest,keysym} // for X* stuff
+  ,ctypes,x, xlib,xtest{,keysym} // for X* stuff
   // do non silent keys with XTest.
   {$ENDIF};
 type
@@ -43,10 +43,14 @@ type
             procedure GetMousePos(var X, Y: Integer);
             procedure SetMousePos(X, Y: Integer);
             procedure MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
+            procedure MouseButtonActionSilent(x,y : integer; mClick: TClickType; mPress: TMousePress);
             procedure ClickMouse(X, Y: Integer; mClick: TClickType);
 
             procedure KeyUp(key: Integer);
             procedure KeyDown(key: Integer);
+
+            // Not used yet.
+            procedure SetSilent(_Silent: Boolean);
 
             {
               Possibly change to GetMouseButtonStates? Then people can get the
@@ -56,6 +60,9 @@ type
 
          public
             Client: TObject;
+         private
+             // Not used yet.
+            Silent: Boolean;
 
     end;
 
@@ -191,8 +198,8 @@ end;
 procedure TMInput.MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
 {$IFDEF LINUX}
 var
-  event : TXEvent;
-  Garbage : QWord;
+  ButtonP: cuint;
+  _isPress: cbool;
   Old_Handler: TXErrorHandler;
 {$ENDIF}
 {$IFDEF MSWINDOWS}
@@ -220,6 +227,44 @@ begin
       Mouse_Right: Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_RIGHTUP;
     end;
   SendInput(1,Input, sizeof(Input));
+{$ENDIF}
+
+{$IFDEF LINUX}
+  Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+
+  if mPress = mouse_Down then
+    _isPress := cbool(1)
+  else
+    _isPress := cbool(0);
+
+  case mClick of
+    mouse_Left: ButtonP  := Button1;
+    mouse_Middle:ButtonP := Button2;
+    mouse_Right: ButtonP := Button3;
+  end;
+
+  XTestFakeButtonEvent(TClient(Client).MWindow.XDisplay, ButtonP,
+                       _isPress, CurrentTime);
+
+  XSetErrorHandler(Old_Handler);
+{$ENDIF}
+end;
+
+procedure TMInput.MouseButtonActionSilent(x,y : integer; mClick: TClickType; mPress: TMousePress);
+{$IFDEF LINUX}
+var
+  event : TXEvent;
+  Garbage : QWord;
+  Old_Handler: TXErrorHandler;
+{$ENDIF}
+{$IFDEF MSWINDOWS}
+var
+  Input : TInput;
+  Rect : TRect;
+{$ENDIF}
+begin
+{$IFDEF MSWINDOWS}
+  writeln('Not implemented');
 {$ENDIF}
 
 {$IFDEF LINUX}
@@ -262,6 +307,12 @@ begin
   Self.SetMousePos(x,y);
   Self.MouseButtonAction(X, Y, mClick, mouse_Down);
   Self.MouseButtonAction(X, Y, mClick, mouse_Up);
+end;
+
+procedure TMInput.SetSilent(_Silent: Boolean);
+begin
+  raise exception.CreateFmt('Input - SetSilent / Silent is not implemented',[]);
+  Self.Silent := _Silent;
 end;
 
 function TMInput.IsMouseButtonDown(mType: TClickType): Boolean;

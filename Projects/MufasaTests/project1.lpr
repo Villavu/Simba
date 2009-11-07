@@ -10,7 +10,7 @@ uses
   Forms,Interfaces,
   LCLIntf,
   Client,
-  bitmaps,x
+  bitmaps,x ,mufasatypes
 
 
   { you can add units after this };
@@ -80,7 +80,7 @@ begin
   bmp := TMufasaBitmap.Create;
 
   {$WARNING Change This Path!}
-  bmp.LoadFromFile('/home/merlijn/Programs/mufasa/UpText/text1.bmp');
+{  bmp.LoadFromFile('/home/merlijn/Programs/mufasa/UpText/text1.bmp');
   //bmp.LoadFromFile('/home/merlijn/Programs/mufasa/output.bmp');
 
   writeln(inttostr(bmp.Width) + ', ' + inttostr(bmp.height));
@@ -91,7 +91,9 @@ begin
   for i := 0 to 100 do
     C.MOCR.GetUpTextAt(0,0);
   writeln('Time: ' + FloatToStr(((GetTickCount - Time) / (i + 1))));
-  writeln(C.MOCR.GetUpTextAt(0,0));
+  writeln(C.MOCR.GetUpTextAt(0,0));    }
+
+  C.MInput.ClickMouse(5,5, mouse_Left);
 
   C.Free;
   bmp.OnDestroy:=nil;
