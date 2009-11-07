@@ -79,13 +79,17 @@ implementation
 
 constructor TMColorPicker.Create(aWindow: TMWindow);
 begin
+  inherited Create;
   Self.Window := aWindow;
+  Self.ColourHistory := TList.Create;
 
 end;
 
 destructor TMColorPicker.Destroy;
 begin
 
+  Self.ColourHistory.Destroy;
+  inherited Destroy;
 end;
 
 procedure TMColorPicker.Pick(Out C, X, Y: Integer);

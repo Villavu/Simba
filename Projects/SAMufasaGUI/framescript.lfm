@@ -1,16 +1,16 @@
 object ScriptFrame: TScriptFrame
   Left = 0
-  Height = 300
+  Height = 324
   Top = 0
   Width = 400
-  ClientHeight = 300
+  ClientHeight = 324
   ClientWidth = 400
   TabOrder = 0
-  DesignLeft = 1272
-  DesignTop = 153
+  DesignLeft = 556
+  DesignTop = 242
   object SynEdit: TSynEdit
     Left = 0
-    Height = 300
+    Height = 324
     Top = 0
     Width = 400
     Align = alClient
@@ -22,7 +22,8 @@ object ScriptFrame: TScriptFrame
     ParentFont = False
     PopupMenu = Form1.ScriptPopup
     TabOrder = 0
-    Gutter.Width = 57
+    BookMarkOptions.OnChange = nil
+    Gutter.Width = 61
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -597,7 +598,7 @@ object ScriptFrame: TScriptFrame
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 17
+        Width = 21
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
