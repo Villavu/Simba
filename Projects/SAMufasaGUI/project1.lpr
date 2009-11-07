@@ -32,7 +32,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, LResources, Window, files, MufasaTypes, Client, TestUnit, finder,
   mmlpsthread, bitmaps, colour_conv, plugins, DTM, colourpicker,
-  windowselector, dtmutil, mmath, ocr, web;
+  windowselector, dtmutil, mmath, ocr, web, colourhistory;
 
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
@@ -42,6 +42,7 @@ begin
   Application.Initialize;
 
   Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TColourHistoryForm, ColourHistoryForm);
   Application.Run;
 end.
 

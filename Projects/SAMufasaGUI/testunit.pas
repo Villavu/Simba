@@ -86,6 +86,8 @@ type
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    View_CH_Menu: TMenuItem;
+    ViewMenu: TMenuItem;
     MenuItemFindNext: TMenuItem;
     PopupItemDelete: TMenuItem;
     MenuItemDelete: TMenuItem;
@@ -188,6 +190,7 @@ type
     procedure ActionUndoExecute(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
+    procedure ColourHistoryMenuClick(Sender: TObject);
     procedure EditSearchChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -277,7 +280,8 @@ var
 implementation
 uses
    lclintf,plugins,
-   syncobjs; // for the critical sections
+   syncobjs,
+   colourhistory; // for the critical sections
 
 //{$ifdef mswindows}
 
@@ -812,6 +816,15 @@ begin
     CurrScript.SynEdit.SetFocus;
 end;
 
+procedure TForm1.ColourHistoryMenuClick(Sender: TObject);
+begin
+  View_CH_Menu.Checked := not View_CH_Menu.Checked;
+  if View_CH_Menu.Checked then
+    ColourHistoryForm.Show
+  else
+    ColourHistoryForm.Hide;
+end;
+
 procedure TForm1.EditSearchChange(Sender: TObject);
 begin
   DoSearch(false,true);
@@ -961,8 +974,13 @@ end;
 procedure TForm1.ButtonPickClick(Sender: TObject);
 var
    c, x, y: Integer;
+   cobj: TColourPickerObject;
 begin
   Picker.Pick(c, x, y);
+  cobj := TColourPickerObject.Create(c, Point(x,y), 'Untitled');
+
+  ColourHistoryForm.AddColObj(cobj);
+  ColourHistoryForm.Show;
   writeln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
 
