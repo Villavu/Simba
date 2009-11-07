@@ -3,10 +3,11 @@ object ColourHistoryForm: TColourHistoryForm
   Height = 250
   Top = 299
   Width = 489
-  ActiveControl = SelectionName
+  ActiveControl = ColourValue
   Caption = 'Colour Picker History'
   ClientHeight = 250
   ClientWidth = 489
+  OnHide = UnSetCHShowMenu
   OnShow = SetCHShowMenu
   LCLVersion = '0.9.29'
   object ColourList: TListView
