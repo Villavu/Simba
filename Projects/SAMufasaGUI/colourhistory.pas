@@ -22,10 +22,10 @@ type
   { TColourHistoryForm }
 
   TColourHistoryForm = class(TForm)
+    ColourValue: TEdit;
+    CoordValue: TLabel;
     PickNewColourButton: TButton;
     DeleteButton: TButton;
-    ColourValue: TLabel;
-    CoordValue: TLabel;
     ColourList: TListView;
     SelectionName: TEdit;
     procedure ChangeName(Sender: TObject);
@@ -96,7 +96,7 @@ begin
     exit;
   if not Item.Selected then
     exit;
-  ColourValue.Caption := 'Colour: ' + IntToStr(TColourPickerObject(Item.Data).Colour);
+  ColourValue.Caption := IntToStr(TColourPickerObject(Item.Data).Colour);
   CoordValue.Caption := 'Coords: ' + IntToStr(TColourPickerObject(Item.Data).Pos.X) +
                         ', ' + IntToStr(TColourPickerObject(Item.Data).Pos.Y);
   SelectionName.Text := TColourPickerObject(Item.Data).Name;

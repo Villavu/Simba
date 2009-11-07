@@ -1,7 +1,7 @@
 object ColourHistoryForm: TColourHistoryForm
-  Left = 498
+  Left = 494
   Height = 250
-  Top = 474
+  Top = 299
   Width = 489
   ActiveControl = SelectionName
   Caption = 'Colour Picker History'
@@ -27,27 +27,11 @@ object ColourHistoryForm: TColourHistoryForm
     OnClick = DeleteSelected
     TabOrder = 1
   end
-  object ColourValue: TLabel
-    Left = 360
-    Height = 18
-    Top = 40
-    Width = 9
-    Caption = '0'
-    ParentColor = False
-  end
-  object CoordValue: TLabel
-    Left = 360
-    Height = 18
-    Top = 73
-    Width = 25
-    Caption = '0, 0'
-    ParentColor = False
-  end
   object SelectionName: TEdit
     Left = 360
     Height = 27
     Top = 104
-    Width = 104
+    Width = 112
     OnChange = ChangeName
     TabOrder = 2
     Text = 'Name'
@@ -59,5 +43,22 @@ object ColourHistoryForm: TColourHistoryForm
     Width = 128
     Caption = 'Pick New Colour'
     TabOrder = 3
+  end
+  object ColourValue: TEdit
+    Left = 360
+    Height = 27
+    Top = 16
+    Width = 112
+    ReadOnly = True
+    TabOrder = 4
+    Text = 'ColourValue'
+  end
+  object CoordValue: TLabel
+    Left = 360
+    Height = 18
+    Top = 64
+    Width = 74
+    Caption = 'CoordValue'
+    ParentColor = False
   end
 end
