@@ -58,7 +58,7 @@ object ColourHistoryForm: TColourHistoryForm
     Left = 360
     Height = 18
     Top = 64
-    Width = 74
+    Width = 75
     Caption = 'CoordValue'
     ParentColor = False
   end

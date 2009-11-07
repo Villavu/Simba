@@ -101,6 +101,8 @@ type
     PopupItemDivider1: TMenuItem;
     PopupItemRedo: TMenuItem;
     PopupItemUndo: TMenuItem;
+    PopupItemDivider3: TMenuItem;
+    PopupItemFind: TMenuItem;
     MenuItemFind: TMenuItem;
     MenuItemDivider4: TMenuItem;
     MenuItemDivider3: TMenuItem;
@@ -250,16 +252,13 @@ type
     procedure RunScript;
     procedure PauseScript;
     procedure StopScript;
-    procedure Cut;
-    procedure Copy;
-    procedure Paste;
     procedure AddTab;
     function DeleteTab( TabIndex : integer; CloseLast : boolean) : boolean;
     procedure ClearTab( TabIndex : integer);
     procedure CloseTabs( Exclude : integer);overload;//-1 for none
     procedure CloseTabs;overload;
     procedure SetEditActions;
-    procedure DoSearch(Next : boolean; HighlightAll : boolean);
+    procedure DoSearch(Str: String; Next : boolean; HighlightAll : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
   end;
 
@@ -432,21 +431,6 @@ begin
   end;
 end;
 
-procedure TForm1.Cut;
-begin
-  CurrScript.SynEdit.CutToClipboard;
-end;
-
-procedure TForm1.Copy;
-begin
-  CurrScript.SynEdit.CopyToClipboard;
-end;
-
-procedure TForm1.Paste;
-begin
-  CurrScript.SynEdit.PasteFromClipboard;
-end;
-
 procedure TForm1.AddTab;
 var
   Tab : TMufasaTab;
@@ -530,8 +514,20 @@ end;
 
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+  begin
     with CurrScript.SynEdit do
-      EditActions(CanUndo,CanRedo,SelText <> '',SelText <> '',CanPaste,SelText <> '')
+    begin
+      EditActions(CanUndo,CanRedo,SelText <> '',SelText <> '',CanPaste,SelText <> '');
+      if(SelText <> '')then
+      begin
+        PopupItemFind.Enabled:= True;
+        if(Length(SelText) > 20)then
+          PopupItemFind.Caption:= Format('Find next: "%s"', [Copy(SelText, 1, 17) + '...'])
+        else
+          PopupItemFind.Caption:= Format('Find next: "%s"', [SelText]);
+      end;
+    end
+  end
   else if Memo1.Focused then
     with Memo1 do
       EditActions(CanUndo,False,SelText <>'',SelText <> '',True,SelText <> '')
@@ -539,7 +535,7 @@ begin
     EditActions(false,false,false,false,false,false);
 end;
 
-procedure TForm1.DoSearch(Next: boolean; HighlightAll : boolean);
+procedure TForm1.DoSearch(Str: String; Next: boolean; HighlightAll : boolean);
 var
   Res : integer;
   CurrPos : TPoint;
@@ -548,7 +544,7 @@ begin
   SearchOptions:= [];
   if CheckBoxMatchCase.Checked then
     SearchOptions := [ssoMatchCase];
-  if LabeledEditSearch.Text = '' then
+  if Str = '' then
   begin
     res := -1;
     CurrScript.Synedit.SetHighlightSearch('',[]);
@@ -558,15 +554,15 @@ begin
   end
   else
   begin
-    Writeln('Searching: ' + LabeledEditSearch.Text);
+    Writeln('Searching: ' + Str);
     if next then
       CurrPos := CurrScript.SynEdit.LogicalCaretXY
     else
       CurrPos := SearchStart;
-    Res := CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.Text,'',SearchOptions,CurrPos);
+    Res := CurrScript.SynEdit.SearchReplaceEx(Str,'',SearchOptions,CurrPos);
     if res = 0 then
     begin
-      res := CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.text,'',SearchOptions,Point(0,0));
+      res := CurrScript.SynEdit.SearchReplaceEx(Str,'',SearchOptions,Point(0,0));
       if res > 0 then
       begin;
         Writeln('End of document reached');
@@ -588,7 +584,7 @@ begin
     LabeledEditSearch.Font.Color:= clWindowText;
     with CurrScript.SynEdit do
       if HighlightAll then
-        SetHighlightSearch(LabeledEditSearch.text,[])
+        SetHighlightSearch(Str,[])
       else
         SetHighlightSearch('',[]);
   end;
@@ -663,7 +659,7 @@ end;
 procedure TForm1.ActionCopyExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
-    Self.Copy
+    CurrScript.SynEdit.CopyToClipboard
   else if Memo1.Focused then
     Memo1.CopyToClipboard;
 end;
@@ -671,7 +667,7 @@ end;
 procedure TForm1.ActionCutExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
-    Self.Cut
+    CurrScript.SynEdit.CutToClipboard
   else if Memo1.Focused then
     Memo1.CutToClipboard;
 end;
@@ -686,7 +682,10 @@ end;
 
 procedure TForm1.ActionFindNextExecute(Sender: TObject);
 begin
-  DoSearch(true,false);
+  if(ScriptPopup.HandleAllocated)then
+    DoSearch(CurrScript.SynEdit.SelText, true, false)
+  else
+    DoSearch(LabeledEditSearch.Text, true, false);
 end;
 
 procedure TForm1.ActionFindstartExecute(Sender: TObject);
@@ -719,7 +718,7 @@ end;
 procedure TForm1.ActionPasteExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
-    Self.Paste
+    CurrScript.SynEdit.PasteFromClipboard
   else if Memo1.Focused then
     Memo1.PasteFromClipboard;
 end;
@@ -805,7 +804,7 @@ end;
 procedure TForm1.CheckBoxMatchCaseClick(Sender: TObject);
 begin
   RefreshTab;
-  DoSearch(false,true);
+  DoSearch(LabeledEditSearch.Text, false, true);
   CurrScript.SynEdit.UseIncrementalColor:= true;
 end;
 
@@ -827,7 +826,7 @@ end;
 
 procedure TForm1.EditSearchChange(Sender: TObject);
 begin
-  DoSearch(false,true);
+  DoSearch(LabeledEditSearch.Text, false, true);
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -922,7 +921,7 @@ procedure TForm1.LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
 begin
   if key = #13 then
   begin;
-    DoSearch(true,true);
+    DoSearch(LabeledEditSearch.Text, true, true);
     key := #0;
 //    LabeledEditSearch.SelStart:= Length(LabeledEditSearch.Text);
   end;

@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 274
+  Left = 474
   Height = 557
-  Top = 233
+  Top = 246
   Width = 731
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -261,10 +261,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 67
+        EditLabel.Left = 65
         EditLabel.Height = 18
         EditLabel.Top = 10
-        EditLabel.Width = 34
+        EditLabel.Width = 36
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -365,7 +365,7 @@ object Form1: TForm1
         Left = 320
         Height = 22
         Top = 6
-        Width = 97
+        Width = 98
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -2121,7 +2121,7 @@ object Form1: TForm1
       Caption = 'Cut'
       ImageIndex = 3
       OnExecute = ActionCutExecute
-      ShortCut = 16451
+      ShortCut = 16472
     end
     object ActionCopy: TAction
       Caption = 'Copy'
@@ -2421,6 +2421,13 @@ object Form1: TForm1
     object PopupItemSelectAll: TMenuItem
       Action = ActionSelectAll
       OnClick = ActionSelectAllExecute
+    end
+    object PopupItemDivider3: TMenuItem
+      Caption = '-'
+    end
+    object PopupItemFind: TMenuItem
+      Action = ActionFindNext
+      OnClick = ActionFindNextExecute
     end
   end
 end
