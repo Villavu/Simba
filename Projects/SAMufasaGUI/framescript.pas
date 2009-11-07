@@ -27,7 +27,8 @@ unit framescript;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType, SynEditMarkupSpecialLine, Graphics;
+  Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,
+   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType, SynEditMarkupSpecialLine, Graphics;
 
 type
   TScriptState = (ss_None,ss_Running,ss_Paused,ss_Stopping);
@@ -144,7 +145,7 @@ begin
   ScriptErrorLine:= ErrorAtLine;
   SynEdit.Invalidate;
   SynEdit.SelStart:= ErrorPosition;
-  Writeln(Format('Error: %s at line %d',[errorstr,erroratline]));
+  formWriteln(Format('Error: %s at line %d',[errorstr,erroratline]));
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;
