@@ -3,3 +3,6 @@ cut,new,open,paste,redo,run,save,undo: Mark James http://www.famfamfam.com/lab/i
 closetab,closetabs,addtab,eraser,terminate: Yusuke Kamiyamane http://www.pinvoke.com/
 pickcolor: From the Crystal Clear Project (http://www.everaldo.com/crystal/) licensed under LGPL
 crosshair: http://led24.de/iconset/ or http://led24.de/ would be appreciated. Follow us on twitter http://twitter.com/gasyoun or email leds24@gmail.com 512 icons 20/05/2009
+
+Delete: http://www.oxygen-icons.org/ licensed under GPL
+close:http://titancreations.org/

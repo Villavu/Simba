@@ -33,7 +33,7 @@ uses
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas, SynMemo,
   //Client,
   MufasaTypes,
-  mmlpsthread,
+  mmlpsthread,synedittypes,
   window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
@@ -58,6 +58,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionFindNext: TAction;
     ActionRedo: TAction;
     ActionUndo: TAction;
     ActionSelectAll: TAction;
@@ -80,10 +81,12 @@ type
     ActionTabLast: TAction;
     ActionTabNext: TAction;
     ActionList: TActionList;
+    CheckBoxMatchCase: TCheckBox;
     LabeledEditSearch: TLabeledEdit;
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    MenuItemFindNext: TMenuItem;
     PopupItemDelete: TMenuItem;
     MenuItemDelete: TMenuItem;
     MenuItemDivider5: TMenuItem;
@@ -113,6 +116,7 @@ type
     ScriptPopup: TPopupMenu;
     SearchPanel: TPanel;
     ScriptPanel: TPanel;
+    SpeedButtonSearch: TSpeedButton;
     TabPopup: TPopupMenu;
     TB_SaveAll: TToolButton;
     DebugTimer: TTimer;
@@ -165,6 +169,7 @@ type
     procedure ActionCopyExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
+    procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
@@ -181,6 +186,8 @@ type
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
     procedure ActionUndoExecute(Sender: TObject);
+    procedure CheckBoxMatchCaseClick(Sender: TObject);
+    procedure CloseFindPanel;
     procedure EditSearchChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -214,6 +221,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure ProcessDebugStream(Sender: TObject);
     procedure ScriptPopupPopup(Sender: TObject);
+    procedure SpeedButtonSearchClick(Sender: TObject);
   private
     PopupTab : integer;
     SearchStart : TPoint;
@@ -247,7 +255,8 @@ type
     procedure ClearTab( TabIndex : integer);
     procedure CloseTabs( Exclude : integer);overload;//-1 for none
     procedure CloseTabs;overload;
-    procedure DoSearch(Next : boolean);
+    procedure SetEditActions;
+    procedure DoSearch(Next : boolean; HighlightAll : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
   end;
 
@@ -296,15 +305,14 @@ end;
 
 procedure TForm1.ScriptPopupPopup(Sender: TObject);
 begin
-  with CurrScript.SynEdit do
-  begin
-    PopupItemUndo.Enabled:= CanUndo;
-    PopupItemRedo.Enabled:= CanRedo;
-    PopupItemCut.Enabled:= SelText <> '';
-    PopupItemCopy.Enabled:= SelText <> '';
-    PopupItemPaste.Enabled:= CanPaste;
-    PopupItemDelete.Enabled:= SelText <> '';
-  end;
+  SetEditActions;
+end;
+
+
+
+procedure TForm1.SpeedButtonSearchClick(Sender: TObject);
+begin
+  CloseFindPanel;
 end;
 
 procedure formWriteln( S : String);
@@ -505,11 +513,37 @@ begin
   CloseTabs(-1);
 end;
 
-procedure TForm1.DoSearch(Next: boolean);
+procedure TForm1.SetEditActions;
+procedure EditActions(Undo,Redo,Cut,Copy,Paste,Delete : boolean);
+begin;
+  ActionUndo.Enabled:= Undo;
+  ActionRedo.Enabled:= Redo;
+  ActionCut.Enabled:= Cut;
+  ActionCopy.Enabled:= Copy;
+  ActionPaste.Enabled:= Paste;
+  ActionDelete.Enabled:= Delete;
+end;
+
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+    with CurrScript.SynEdit do
+      EditActions(CanUndo,CanRedo,SelText <> '',SelText <> '',CanPaste,SelText <> '')
+  else if Memo1.Focused then
+    with Memo1 do
+      EditActions(CanUndo,False,SelText <>'',SelText <> '',True,SelText <> '')
+  else
+    EditActions(false,false,false,false,false,false);
+end;
+
+procedure TForm1.DoSearch(Next: boolean; HighlightAll : boolean);
 var
   Res : integer;
   CurrPos : TPoint;
+  SearchOptions : TSynSearchOptions;
 begin
+  SearchOptions:= [];
+  if CheckBoxMatchCase.Checked then
+    SearchOptions := [ssoMatchCase];
   if LabeledEditSearch.Text = '' then
   begin
     res := -1;
@@ -525,10 +559,10 @@ begin
       CurrPos := CurrScript.SynEdit.LogicalCaretXY
     else
       CurrPos := SearchStart;
-    Res := CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.Text,'',[],CurrPos);
+    Res := CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.Text,'',SearchOptions,CurrPos);
     if res = 0 then
     begin
-      res := CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.text,'',[],Point(0,0));
+      res := CurrScript.SynEdit.SearchReplaceEx(LabeledEditSearch.text,'',SearchOptions,Point(0,0));
       if res > 0 then
       begin;
         Writeln('End of document reached');
@@ -549,7 +583,10 @@ begin
     LabeledEditSearch.Color:= clWindow;
     LabeledEditSearch.Font.Color:= clWindowText;
     with CurrScript.SynEdit do
-      SetHighlightSearch(LabeledEditSearch.text,[]);
+      if HighlightAll then
+        SetHighlightSearch(LabeledEditSearch.text,[])
+      else
+        SetHighlightSearch('',[]);
   end;
 end;
 
@@ -594,6 +631,8 @@ begin
   LabeledEditSearch.SelLength:= 0;
   LabeledEditSearch.Color:= clWindow;
   LabeledEditSearch.Font.Color:= clWindowText;
+  //Set tha edit buttons right
+  SetEditActions;
 end;
 
 
@@ -641,13 +680,15 @@ begin
     Memo1.ClearSelection;
 end;
 
+procedure TForm1.ActionFindNextExecute(Sender: TObject);
+begin
+  DoSearch(true,false);
+end;
+
 procedure TForm1.ActionFindstartExecute(Sender: TObject);
 begin
-  if sender = LabeledEditSearch then
-    SearchPanel.Visible:= false
-  else
-    SearchPanel.Visible:= true;
-  if SearchPanel.Visible then
+  SearchPanel.Visible:= true;
+  if LabeledEditSearch.CanFocus then
     LabeledEditSearch.SetFocus;
 end;
 
@@ -726,7 +767,10 @@ begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.SelectAll
   else if Memo1.Focused then
-    Memo1.SelectAll;
+    Memo1.SelectAll
+  else if LabeledEditSearch.Focused then
+    LabeledEditSearch.SelectAll;
+
 end;
 
 procedure TForm1.ActionStopExecute(Sender: TObject);
@@ -754,9 +798,23 @@ begin
     Memo1.Undo;
 end;
 
+procedure TForm1.CheckBoxMatchCaseClick(Sender: TObject);
+begin
+  RefreshTab;
+  DoSearch(false,true);
+  CurrScript.SynEdit.UseIncrementalColor:= true;
+end;
+
+procedure TForm1.CloseFindPanel;
+begin
+  SearchPanel.Visible:= false;
+  if CurrScript.SynEdit.CanFocus then
+    CurrScript.SynEdit.SetFocus;
+end;
+
 procedure TForm1.EditSearchChange(Sender: TObject);
 begin
-  DoSearch(false);
+  DoSearch(false,true);
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -791,6 +849,7 @@ begin
   {$ifdef mswindows}
   DebugTimer.Enabled:= false;
   {$endif}
+//  Ed
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -828,7 +887,8 @@ end;
 
 procedure TForm1.LabeledEditSearchExit(Sender: TObject);
 begin
-  RefreshTab;
+  if not CheckBoxMatchCase.MouseEntered then
+    RefreshTab;
 end;
 
 procedure TForm1.LabeledEditSearchKeyDown(Sender: TObject; var Key: Word;
@@ -840,8 +900,7 @@ begin
   end else
   if key = VK_ESCAPE then
   begin
-    ActionFindstartExecute(Sender);
-    CurrScript.SynEdit.SetFocus;
+    CloseFindPanel;
     key := 0;
   end;
 end;
@@ -850,7 +909,7 @@ procedure TForm1.LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
 begin
   if key = #13 then
   begin;
-    DoSearch(true);
+    DoSearch(true,true);
     key := #0;
 //    LabeledEditSearch.SelStart:= Length(LabeledEditSearch.Text);
   end;
@@ -858,25 +917,7 @@ end;
 
 procedure TForm1.MenuEditClick(Sender: TObject);
 begin
-  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
-  with CurrScript.SynEdit do
-  begin
-    MenuItemUndo.Enabled:= CanUndo;
-    MenuItemRedo.Enabled:= CanRedo;
-    MenuItemCut.Enabled:= SelText <> '';
-    MenuItemCopy.Enabled:= SelText <> '';
-    MenuItemPaste.Enabled:= CanPaste;
-    MenuItemDelete.Enabled:= SelText <> '';
-  end else if Memo1.Focused then
-  with Memo1 do
-  begin
-    MenuItemUndo.Enabled:= CanUndo;
-    MenuItemRedo.Enabled:= False;
-    MenuItemCut.Enabled:= SelText <> '';
-    MenuItemCopy.Enabled:= SelText <> '';
-    MenuItemPaste.Enabled:= CurrScript.SynEdit.CanPaste;
-    MenuItemDelete.Enabled:= SelText <> '';
-  end;
+  SetEditActions;
 end;
 
 procedure TForm1.MenuItemCloseTabsClick(Sender: TObject);
@@ -1155,7 +1196,8 @@ begin;
           IDYES : Result := SaveCurrentScript;
       end;
   Self.Enabled := True;
-  Self.SetFocus;
+  if Self.CanFocus then
+    Self.SetFocus;
 end;
 
 function TForm1.ClearScript: boolean;
