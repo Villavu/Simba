@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 274
+  Left = 474
   Height = 557
-  Top = 233
+  Top = 246
   Width = 731
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -261,10 +261,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 67
+        EditLabel.Left = 65
         EditLabel.Height = 18
         EditLabel.Top = 10
-        EditLabel.Width = 34
+        EditLabel.Width = 36
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -408,6 +408,7 @@ object Form1: TForm1
       end
       object MenuItemSaveAs: TMenuItem
         Action = ActionSaveScriptAs
+        Caption = 'Save as...'
         OnClick = ActionSaveAsExecute
       end
       object MenuItemSaveAll: TMenuItem
@@ -580,8 +581,9 @@ object Form1: TForm1
     object MenuEdit: TMenuItem
       Caption = 'Edit'
       SubMenuImages = Mufasa_Image_List
+      OnClick = MenuEditClick
       object MenuItemUndo: TMenuItem
-        Caption = 'Undo'
+        Action = ActionUndo
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000000000000000
@@ -618,12 +620,10 @@ object Form1: TForm1
           00000000000000000000000000000000000000A0C4FF00000000000000000000
           0000000000000000000000000000000000000000000000000000
         }
-        ImageIndex = 18
-        ShortCut = 16474
-        OnClick = MenuItemUndoClick
+        OnClick = ActionUndoExecute
       end
       object MenuItemRedo: TMenuItem
-        Caption = 'Redo'
+        Action = ActionRedo
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000FFFFFF000000
@@ -660,15 +660,13 @@ object Form1: TForm1
           00000000000000000000000000000000000000000000000000000000000000A0
           C4FF000000000000000000000000000000000000000000000000
         }
-        ImageIndex = 12
-        ShortCut = 24666
-        OnClick = MenuItemRedoClick
+        OnClick = ActionRedoExecute
       end
       object MenuItemDivider3: TMenuItem
         Caption = '-'
       end
       object MenuItemCut: TMenuItem
-        Caption = 'Cut'
+        Action = ActionCut
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
@@ -705,12 +703,10 @@ object Form1: TForm1
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF009A6B2731AA7E43A19260
           1805FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        ImageIndex = 3
-        ShortCut = 16472
-        OnClick = MenuItemCutClick
+        OnClick = ActionCutExecute
       end
       object MenuItemCopy: TMenuItem
-        Caption = 'Copy'
+        Action = ActionCopy
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
@@ -747,53 +743,24 @@ object Form1: TForm1
           55CECC8857DECB8856DBCC8856DBCB8757DBCA8350D0C479426EB2673C08FFFF
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
-        ImageIndex = 22
-        ShortCut = 16451
-        OnClick = MenuItemCopyClick
+        OnClick = ActionCopyExecute
       end
       object MenuItemPaste: TMenuItem
-        Caption = 'Paste'
-        Bitmap.Data = {
-          36040000424D3604000000000000360000002800000010000000100000000100
-          2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
-          FF00FFFFFF00FFFFFF00FFFFFF005E5E5E025B5B5B775858588A5555558A5252
-          528A4F4F4F8A4C4C4C8A4A4A4A8A4848488A4646468A444444662063984A2063
-          98CF206398FF206398FF206398FF246395FF587388FFF7F7F7FFF0F0F0FFF0F0
-          F0FFF0F0F0FFF0F0F0FFF0F0F0FFF0F0F0FFF3F3F3FA46464684206398C262A5
-          D7FF65A8DAFF64A6D9FF62A4D8FF629FD1FF758EA4FFEFEFEFFFE7E7E7FFE7E7
-          E7FFE7E7E7FFE7E7E7FFE6E6E6FFE6E6E6FFECECECFA49494984206398FF68AB
-          DCFF488ECFFF468BCEFF4387CDFF4484C6FF6885A1FFF0F0F0FFB4B4B4FFB4B4
-          B4FFB4B4B4FFB4B4B4FFB4B4B4FFB3B3B3FFEDEDEDFA4C4C4C84206398FF69AE
-          DCFF4A93D1FF488FD0FF468BCEFF4788C7FF6C88A3FFF0F0F0FFE8E8E8FFE8E8
-          E8FFE7E7E7FFE7E7E7FFE7E7E7FFE7E7E7FFEDEDEDFA4F4F4F84206398FF6BB1
-          DEFF4D97D3FF4B93D2FF488FD0FF4A8CC9FF6F8BA5FFF1F1F1FFB6B6B6FFB5B5
-          B5FFB5B5B5FFB4B4B4FFB4B4B4FFB4B4B4FFEDEDEDFA53535384206398FF6DB3
-          DFFF509CD5FF4E98D3FF4B94D1FF4C91CBFF708EA7FFF1F1F1FFE9E9E9FFE9E9
-          E9FFE8E8E8FFE8E8E8FFE8E8E8FFE7E7E7FFEDEDEDFA56565684206398FF70B5
-          E0FF529FD7FF509CD6FF4E98D4FF4F95CDFF7391AAFFF1F1F1FFB7B7B7FFB6B6
-          B6FFB6B6B6FFB6B6B6FFB5B5B5FFB5B5B5FFEEEEEEFA5A5A5A84206398FF73B7
-          E1FF57A3D7FF53A0D7FF509DD5FF5299CFFF7594ACFFF8F8F8FFF2F2F2FFF2F2
-          F2FFF2F2F2FFF2F2F2FFF2F2F2FFF1F1F1FFF4F4F4FA5E5E5E84206398FF76B9
-          E2FF5CA7D9FF58A4D8FF53A0D7FF539ED5FF618BA9FF6488A1FF6487A1FF6386
-          A0FF69879FFF4A6881FF6A6A6A8A6868688A6565658A62626263206398FF7ABB
-          E3FF61AADBFF5AA5D9FF53A0D7FF529FD7FF529FD7FF529FD7FF529FD7FF529F
-          D7FF62A3D8FF206398FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00206398FF7CBD
-          E4FF65AEDDFF62ABDCFF5EA8DAFF5CA7D9FF5CA7D9FF5CA7D9FF5CA7D9FF529F
-          D7FF62A3D8FF206398FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00206398FF7FBF
-          E4FF69B2DEFF4A9BDAFF4497DCFF4396DCFF4296DCFF4295DCFF4195DBFF519E
-          D6FF6CB2DEFF206398FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00206398E071B3
-          DBFE7EBFE4FF4E9DDFFFB5EEFDFF75D4F0FF75D4F0FFB5EEFDFF4B9BDEFF6EB4
-          E0FF6DB3DFF9206398F3FFFFFF00FFFFFF00FFFFFF00FFFFFF00206398322063
-          98B2206398FF3775A4FFB6EFFEFF80DBF3FF80DBF3FFB6EFFEFF2E6EA1FF2063
-          98FF206398A520639853FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-          FF002063982A206398FF206398FF206398FF206398FF206398FF206398F0FFFF
-          FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
-        }
-        ImageIndex = 11
-        ShortCut = 16470
-        OnClick = MenuItemPasteClick
+        Action = ActionPaste
+        OnClick = ActionPasteExecute
+      end
+      object MenuItemDelete: TMenuItem
+        Action = ActionDelete
+        OnClick = ActionDeleteExecute
       end
       object MenuItemDivider4: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemSelectAll: TMenuItem
+        Action = ActionSelectAll
+        OnClick = ActionSelectAllExecute
+      end
+      object MenuItemDivider5: TMenuItem
         Caption = '-'
       end
       object MenuItemFind: TMenuItem
@@ -1908,9 +1875,87 @@ object Form1: TForm1
       OnExecute = ActionFindstartExecute
       ShortCut = 16454
     end
+    object ActionCut: TAction
+      Caption = 'Cut'
+      ImageIndex = 3
+      OnExecute = ActionCutExecute
+      ShortCut = 16451
+    end
+    object ActionCopy: TAction
+      Caption = 'Copy'
+      ImageIndex = 22
+      OnExecute = ActionCopyExecute
+      ShortCut = 16451
+    end
+    object ActionPaste: TAction
+      Caption = 'Paste'
+      ImageIndex = 10
+      OnExecute = ActionPasteExecute
+      ShortCut = 16470
+    end
+    object ActionDelete: TAction
+      Caption = 'Delete'
+      OnExecute = ActionDeleteExecute
+      ShortCut = 46
+    end
+    object ActionSelectAll: TAction
+      Caption = 'Select All'
+      OnExecute = ActionSelectAllExecute
+      ShortCut = 16449
+    end
+    object ActionUndo: TAction
+      Caption = 'Undo'
+      ImageIndex = 18
+      OnExecute = ActionUndoExecute
+      ShortCut = 16474
+    end
+    object ActionRedo: TAction
+      Caption = 'Redo'
+      ImageIndex = 12
+      OnExecute = ActionRedoExecute
+      ShortCut = 16473
+    end
   end
   object DebugTimer: TTimer
     OnTimer = ProcessDebugStream
     left = 640
+  end
+  object ScriptPopup: TPopupMenu
+    OnPopup = ScriptPopupPopup
+    left = 680
+    object PopupItemUndo: TMenuItem
+      Action = ActionUndo
+      OnClick = ActionUndoExecute
+    end
+    object PopupItemRedo: TMenuItem
+      Action = ActionRedo
+      OnClick = ActionRedoExecute
+    end
+    object PopupItemDivider1: TMenuItem
+      Caption = '-'
+    end
+    object PopupItemCut: TMenuItem
+      Action = ActionCut
+      OnClick = ActionCutExecute
+    end
+    object PopupItemCopy: TMenuItem
+      Action = ActionCopy
+      OnClick = ActionCopyExecute
+    end
+    object PopupItemPaste: TMenuItem
+      Action = ActionPaste
+      OnClick = ActionPasteExecute
+    end
+    object PopupItemDelete: TMenuItem
+      Action = ActionDelete
+      OnClick = ActionDeleteExecute
+    end
+    object PopupItemDivider2: TMenuItem
+      Caption = '-'
+    end
+    object PopupItemSelectAll: TMenuItem
+      Action = ActionSelectAll
+      OnClick = ActionSelectAllExecute
+    end
   end
 end

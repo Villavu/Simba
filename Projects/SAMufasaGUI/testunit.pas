@@ -58,6 +58,13 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionRedo: TAction;
+    ActionUndo: TAction;
+    ActionSelectAll: TAction;
+    ActionDelete: TAction;
+    ActionPaste: TAction;
+    ActionCopy: TAction;
+    ActionCut: TAction;
     ActionFindStart: TAction;
     ActionClearDebug: TAction;
     ActionSaveAll: TAction;
@@ -77,6 +84,18 @@ type
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    PopupItemDelete: TMenuItem;
+    MenuItemDelete: TMenuItem;
+    MenuItemDivider5: TMenuItem;
+    MenuItemSelectAll: TMenuItem;
+    PopupItemSelectAll: TMenuItem;
+    PopupItemDivider2: TMenuItem;
+    PopupItemPaste: TMenuItem;
+    PopupItemCopy: TMenuItem;
+    PopupItemCut: TMenuItem;
+    PopupItemDivider1: TMenuItem;
+    PopupItemRedo: TMenuItem;
+    PopupItemUndo: TMenuItem;
     MenuItemFind: TMenuItem;
     MenuItemDivider4: TMenuItem;
     MenuItemDivider3: TMenuItem;
@@ -91,6 +110,7 @@ type
     MenuItemDivider2: TMenuItem;
     MenuItemDivider: TMenuItem;
     PageControl1: TPageControl;
+    ScriptPopup: TPopupMenu;
     SearchPanel: TPanel;
     ScriptPanel: TPanel;
     TabPopup: TPopupMenu;
@@ -142,18 +162,25 @@ type
     MTrayIcon: TTrayIcon;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
+    procedure ActionCopyExecute(Sender: TObject);
+    procedure ActionCutExecute(Sender: TObject);
+    procedure ActionDeleteExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
+    procedure ActionPasteExecute(Sender: TObject);
     procedure ActionPauseExecute(Sender: TObject);
+    procedure ActionRedoExecute(Sender: TObject);
     procedure ActionRunExecute(Sender: TObject);
     procedure ActionSaveAllExecute(Sender: TObject);
     procedure ActionSaveAsExecute(Sender: TObject);
     procedure ActionSaveExecute(Sender: TObject);
+    procedure ActionSelectAllExecute(Sender: TObject);
     procedure ActionStopExecute(Sender: TObject);
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
+    procedure ActionUndoExecute(Sender: TObject);
     procedure EditSearchChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -164,23 +191,19 @@ type
     procedure LabeledEditSearchKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
+    procedure MenuEditClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
-    procedure MenuItemCopyClick(Sender: TObject);
-    procedure MenuItemCutClick(Sender: TObject);
     procedure MenuItemExitClick(Sender: TObject);
-    procedure MenuItemPasteClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
-    procedure MenuItemRedoClick(Sender: TObject);
     procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure NoTray(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
     procedure ButtonTrayClick(Sender: TObject);
-    procedure MenuItemUndoClick(Sender: TObject);
     procedure PageControl1Changing(Sender: TObject; var AllowChange: Boolean);
     procedure PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;
       var Handled: Boolean);
@@ -190,6 +213,7 @@ type
     procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure ProcessDebugStream(Sender: TObject);
+    procedure ScriptPopupPopup(Sender: TObject);
   private
     PopupTab : integer;
     SearchStart : TPoint;
@@ -267,6 +291,19 @@ begin
     SetLength(DebugStream, 0);
   finally
     DebugCriticalSection.Leave;
+  end;
+end;
+
+procedure TForm1.ScriptPopupPopup(Sender: TObject);
+begin
+  with CurrScript.SynEdit do
+  begin
+    PopupItemUndo.Enabled:= CanUndo;
+    PopupItemRedo.Enabled:= CanRedo;
+    PopupItemCut.Enabled:= SelText <> '';
+    PopupItemCopy.Enabled:= SelText <> '';
+    PopupItemPaste.Enabled:= CanPaste;
+    PopupItemDelete.Enabled:= SelText <> '';
   end;
 end;
 
@@ -580,6 +617,30 @@ begin
     Self.ClearScript;  //DeleteTab would take care of this already, but yeah, it's neater this way.
 end;
 
+procedure TForm1.ActionCopyExecute(Sender: TObject);
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+    Self.Copy
+  else if Memo1.Focused then
+    Memo1.CopyToClipboard;
+end;
+
+procedure TForm1.ActionCutExecute(Sender: TObject);
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+    Self.Cut
+  else if Memo1.Focused then
+    Memo1.CutToClipboard;
+end;
+
+procedure TForm1.ActionDeleteExecute(Sender: TObject);
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+    CurrScript.SynEdit.ClearSelection
+  else if Memo1.Focused then
+    Memo1.ClearSelection;
+end;
+
 procedure TForm1.ActionFindstartExecute(Sender: TObject);
 begin
   if sender = LabeledEditSearch then
@@ -610,9 +671,25 @@ begin
   Self.OpenScript;
 end;
 
+procedure TForm1.ActionPasteExecute(Sender: TObject);
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+    Self.Paste
+  else if Memo1.Focused then
+    Memo1.PasteFromClipboard;
+end;
+
 procedure TForm1.ActionPauseExecute(Sender: TObject);
 begin
   Self.PauseScript;
+end;
+
+procedure TForm1.ActionRedoExecute(Sender: TObject);
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+    CurrScript.Redo
+  else if Memo1.Focused then
+    Memo1.Undo; //?
 end;
 
 procedure TForm1.ActionRunExecute(Sender: TObject);
@@ -644,6 +721,14 @@ begin
   Self.SaveCurrentScript;
 end;
 
+procedure TForm1.ActionSelectAllExecute(Sender: TObject);
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+    CurrScript.SynEdit.SelectAll
+  else if Memo1.Focused then
+    Memo1.SelectAll;
+end;
+
 procedure TForm1.ActionStopExecute(Sender: TObject);
 begin
   Self.StopScript;
@@ -659,6 +744,14 @@ begin
   else
     Inc(CurrIndex);
   PageControl1.TabIndex:= CurrIndex;
+end;
+
+procedure TForm1.ActionUndoExecute(Sender: TObject);
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+    CurrScript.Undo
+  else if Memo1.Focused then
+    Memo1.Undo;
 end;
 
 procedure TForm1.EditSearchChange(Sender: TObject);
@@ -763,41 +856,38 @@ begin
   end;
 end;
 
+procedure TForm1.MenuEditClick(Sender: TObject);
+begin
+  if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
+  with CurrScript.SynEdit do
+  begin
+    MenuItemUndo.Enabled:= CanUndo;
+    MenuItemRedo.Enabled:= CanRedo;
+    MenuItemCut.Enabled:= SelText <> '';
+    MenuItemCopy.Enabled:= SelText <> '';
+    MenuItemPaste.Enabled:= CanPaste;
+    MenuItemDelete.Enabled:= SelText <> '';
+  end else if Memo1.Focused then
+  with Memo1 do
+  begin
+    MenuItemUndo.Enabled:= CanUndo;
+    MenuItemRedo.Enabled:= False;
+    MenuItemCut.Enabled:= SelText <> '';
+    MenuItemCopy.Enabled:= SelText <> '';
+    MenuItemPaste.Enabled:= CurrScript.SynEdit.CanPaste;
+    MenuItemDelete.Enabled:= SelText <> '';
+  end;
+end;
+
 procedure TForm1.MenuItemCloseTabsClick(Sender: TObject);
 begin
   Self.CloseTabs;
-end;
-
-procedure TForm1.MenuItemCopyClick(Sender: TObject);
-begin
-  if CurrScript.SynEdit.Focused then
-    Self.Copy
-  else if Memo1.Focused then
-    Memo1.CopyToClipboard;
-end;
-
-procedure TForm1.MenuItemCutClick(Sender: TObject);
-begin
-  if CurrScript.SynEdit.Focused then
-    Self.Cut
-  else if Memo1.Focused then
-    Memo1.CutToClipboard;
 end;
 
 procedure TForm1.MenuItemExitClick(Sender: TObject);
 begin
   Self.Close;
 end;
-
-
-procedure TForm1.MenuItemPasteClick(Sender: TObject);
-begin
-  if CurrScript.SynEdit.Focused then
-    Self.Paste
-  else if Memo1.Focused then
-    Memo1.PasteFromClipboard;
-end;
-
 
 
 
@@ -836,11 +926,6 @@ begin
 end;
 
 
-procedure TForm1.MenuItemRedoClick(Sender: TObject);
-begin
-  CurrScript.redo;
-end;
-
 procedure TForm1.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
@@ -864,11 +949,6 @@ end;
 procedure TForm1.ButtonTrayClick(Sender: TObject);
 begin
   Form1.Hide;
-end;
-
-procedure TForm1.MenuItemUndoClick(Sender: TObject);
-begin
-  CurrScript.Undo;
 end;
 
 procedure TForm1.PageControl1Changing(Sender: TObject; var AllowChange: Boolean
