@@ -7,6 +7,7 @@ object ColourHistoryForm: TColourHistoryForm
   Caption = 'Colour Picker History'
   ClientHeight = 250
   ClientWidth = 489
+  OnShow = SetCHShowMenu
   LCLVersion = '0.9.29'
   object ColourList: TListView
     Left = 16

@@ -818,7 +818,7 @@ end;
 
 procedure TForm1.ColourHistoryMenuClick(Sender: TObject);
 begin
-  View_CH_Menu.Checked := not View_CH_Menu.Checked;
+  View_CH_Menu.Checked := not ColourHistoryForm.Visible;
   if View_CH_Menu.Checked then
     ColourHistoryForm.Show
   else
@@ -981,7 +981,7 @@ begin
 
   ColourHistoryForm.AddColObj(cobj);
   ColourHistoryForm.Show;
-  writeln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
+  formWriteln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
 
 
