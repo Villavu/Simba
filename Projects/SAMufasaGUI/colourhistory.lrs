@@ -1,0 +1,18 @@
+LazarusResources.Add('TColourHistoryForm','FORMDATA',[
+  'TPF0'#18'TColourHistoryForm'#17'ColourHistoryForm'#4'Left'#3#242#1#6'Height'
+  +#3#250#0#3'Top'#3#218#1#5'Width'#3#233#1#13'ActiveControl'#7#13'SelectionNam'
+  +'e'#7'Caption'#6#21'Colour Picker History'#12'ClientHeight'#3#250#0#11'Clien'
+  +'tWidth'#3#233#1#10'LCLVersion'#6#6'0.9.29'#0#9'TListView'#10'ColourList'#4
+  +'Left'#2#16#6'Height'#3#208#0#3'Top'#2#16#5'Width'#3'@'#1#7'Columns'#14#0#8
+  +'TabOrder'#2#0#12'OnSelectItem'#7#14'ChangeViewData'#0#0#7'TButton'#12'Delet'
+  +'eButton'#4'Left'#3'`'#1#6'Height'#2#25#3'Top'#3#199#0#5'Width'#3#128#0#7'Ca'
+  +'ption'#6#6'Delete'#7'OnClick'#7#14'DeleteSelected'#8'TabOrder'#2#1#0#0#6'TL'
+  +'abel'#11'ColourValue'#4'Left'#3'h'#1#6'Height'#2#18#3'Top'#2'('#5'Width'#2#9
+  +#7'Caption'#6#1'0'#11'ParentColor'#8#0#0#6'TLabel'#10'CoordValue'#4'Left'#3
+  +'h'#1#6'Height'#2#18#3'Top'#2'I'#5'Width'#2#25#7'Caption'#6#4'0, 0'#11'Paren'
+  +'tColor'#8#0#0#5'TEdit'#13'SelectionName'#4'Left'#3'h'#1#6'Height'#2#27#3'To'
+  +'p'#2'h'#5'Width'#2'h'#8'OnChange'#7#10'ChangeName'#8'TabOrder'#2#2#4'Text'#6
+  +#4'Name'#0#0#7'TButton'#19'PickNewColourButton'#4'Left'#3'`'#1#6'Height'#2#25
+  +#3'Top'#3#160#0#5'Width'#3#128#0#7'Caption'#6#15'Pick New Colour'#8'TabOrder'
+  +#2#3#0#0#0
+]);
