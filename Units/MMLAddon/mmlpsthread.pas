@@ -217,7 +217,7 @@ begin
     begin;
       TempNum := PluginsGlob.LoadPlugin(DirectiveParam);
       if TempNum < 0 then
-        Writeln(Format('Your DLL %s has not been found',[DirectiveParam]))
+        psWriteln(Format('Your DLL %s has not been found',[DirectiveParam]))
       else
       begin;
         for i := High(PluginsToLoad) downto 0 do
@@ -254,7 +254,7 @@ begin
     Path :=  AppPath+ 'Includes' + DS + Filename;
   if not FileExists(Path) then
   begin;
-    Writeln(Path + ' doesn''t exist');
+    psWriteln(Path + ' doesn''t exist');
     Result := false;
     Exit;
   end;

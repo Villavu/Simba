@@ -308,11 +308,12 @@ begin
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
     ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
-    ScriptThread.SetPSScript(CurrScript.SynEdit.Lines.Text);
-//    ScriptThread.SetDebug(Self.Memo1);
     {$IFNDEF TERMINALWRITELN}
     ScriptThread.SetDebug(@formWriteln);
     {$ENDIF}
+    ScriptThread.SetPSScript(CurrScript.SynEdit.Lines.Text);
+//    ScriptThread.SetDebug(Self.Memo1);
+
     ScriptThread.OnError:=@ErrorThread;
     if ScriptFile <> '' then
       ScriptThread.SetPaths( ExtractFileDir(ScriptFile) + DS,IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)))
