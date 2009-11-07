@@ -42,6 +42,7 @@ procedure XTestSetGContextOfGC(gc: TGC; gid:TGContext); cdecl; external;
 procedure XTestSetVisualIDOfVisual(visual:PVisual; visualid: TVisualID); cdecl; external;
 function XTestDiscard(dpy:pDisplay):TStatus; cdecl; external;
 
+{ Below is old testing code }
 procedure mouse_move(x,y: integer);
 procedure mouse_click(left:boolean);
 procedure keytest;
