@@ -156,7 +156,8 @@ begin
     if OwnerPage.Pages[i] = OwnerSheet then
     begin;
       OwnerPage.TabIndex := i;
-      OwnerSheet.SetFocus;
+      if OwnerSheet.CanFocus then
+        OwnerSheet.SetFocus;
       exit;
     end;
 end;
