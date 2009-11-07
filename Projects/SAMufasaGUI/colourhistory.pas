@@ -37,6 +37,7 @@ type
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
     procedure SetCHShowMenu(Sender: TObject);
+    procedure UnSetCHShowMenu(Sender: TObject);
   private
     { private declarations }
   public
@@ -129,6 +130,11 @@ end;
 procedure TColourHistoryForm.SetCHShowMenu(Sender: TObject);
 begin
   Form1.View_CH_Menu.Checked := True;
+end;
+
+procedure TColourHistoryForm.UnSetCHShowMenu(Sender: TObject);
+begin
+  Form1.View_CH_Menu.Checked := False;
 end;
 
 initialization
