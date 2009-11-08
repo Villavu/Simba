@@ -28,10 +28,14 @@ unit MMLKeyInput;
 interface
 
 uses
-  Classes, SysUtils, XKeyInput;
+  Classes, SysUtils, {$IFDEF MSWINDOWS}WinKeyInput{$ELSE}XKeyInput{$ENDIF};
 
 type
+  {$IFDEF MSWINDOWS}
+  TMMLKeyInput = class(TWinKeyInput)
+  {$ELSE}
   TMMLKeyInput = class(TXKeyInput)
+  {$ENDIF}
     public
        { Override these two methods,
          as the original class calls ProcessMessages;
