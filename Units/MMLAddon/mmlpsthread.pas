@@ -157,6 +157,7 @@ begin
   SyncInfo:= TheSyncInfo;
   SetLength(PluginsToLoad,0);
   Client := TClient.Create;
+  Client.MInput.SendText('hoi');
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;

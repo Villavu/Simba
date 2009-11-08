@@ -32,11 +32,11 @@ uses
   mufasatypes, // for common mufasa types
   windowutil, // for mufasa window utils
   {$IFDEF LINUX}
-  ctypes,x, xlib,xtest, // for X* stuff
+  ctypes,x, xlib,xtest, XKeyInput,  lclintf;// for X* stuff
    // do non silent keys/mouse with XTest / TKeyInput.
   {Later on we should use xdotool, as it allows silent input}
   {$ENDIF}
-  MouseAndKeyInput, KeyInputIntf, lclintf;
+
 type
     TMInput = class(TObject)
             constructor Create(Client: TObject);
@@ -67,7 +67,9 @@ type
          private
              // Not used yet.
             Silent: Boolean;
-            //KeyInput: TKeyInput;
+            {$IFDEF LINUX}
+            KeyInput: TXKeyInput;
+            {$ENDIF}
 
     end;
 
@@ -128,27 +130,39 @@ constructor TMInput.Create(Client: TObject);
 begin
   inherited Create;
   Self.Client := Client;
-  //Self.KeyInput := KeyInput;
+  {$IFDEF LINUX}
+  Self.KeyInput := TXKeyInput.Create;
+  {$ENDIF}
 
 end;
 
 destructor TMInput.Destroy;
 begin
 
-  //Self.KeyInput := nil;
+  {$IFDEF LINUX}
+  Self.KeyInput.Free;
+  {$ENDIF}
   inherited;
 end;
 
 procedure TMInput.KeyUp(key: Word);
 
 begin
-  {Self.}KeyInput.Up(Key);
+  {$IFDEF MSWINDOWS}
+  Raise Exception.CreateFMT('KeyUp not yet implemented',[]);
+  {$ELSE}
+  Self.KeyInput.Up(Key);
+  {$ENDIF}
 end;
 
 procedure TMInput.KeyDown(key: Word);
 
 begin
-  {Self.}KeyInput.Down(Key);
+  {$IFDEF MSWINDOWS}
+  Raise Exception.CreateFMT('KeyDown not yet implemented',[]);
+  {$ELSE}
+  Self.KeyInput.Down(Key);
+  {$ENDIF}
 end;
 
 procedure TMInput.PressKey(key: Word);
