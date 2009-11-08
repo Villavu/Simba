@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="6"/>
+      <ActiveEditorIndexAtStart Value="0"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -162,8 +162,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="43" Y="963"/>
-        <TopLine Value="946"/>
+        <CursorPos X="156" Y="888"/>
+        <TopLine Value="865"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -410,7 +410,7 @@
       <Unit51>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/colour.inc"/>
         <CursorPos X="1" Y="1"/>
-        <TopLine Value="33"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="7"/>
         <UsageCount Value="38"/>
         <Loaded Value="True"/>
@@ -1669,7 +1669,7 @@
         <UsageCount Value="10"/>
       </Unit232>
     </Units>
-    <JumpHistory Count="8" HistoryIndex="7">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
         <Filename Value="testunit.pas"/>
         <Caret Line="837" Column="30" TopLine="831"/>
@@ -1702,6 +1702,10 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="242" Column="18" TopLine="227"/>
       </Position8>
+      <Position9>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="963" Column="43" TopLine="946"/>
+      </Position9>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
