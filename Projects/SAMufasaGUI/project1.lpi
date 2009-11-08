@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="1"/>
+      <ActiveEditorIndexAtStart Value="4"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -33,7 +33,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="231">
+    <Units Count="233">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -219,8 +219,8 @@
         <Filename Value="../../Units/MMLCore/client.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Client"/>
-        <CursorPos X="39" Y="14"/>
-        <TopLine Value="1"/>
+        <CursorPos X="23" Y="42"/>
+        <TopLine Value="21"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -273,9 +273,11 @@
       <Unit32>
         <Filename Value="../../Units/MMLCore/input.pas"/>
         <UnitName Value="Input"/>
-        <CursorPos X="39" Y="143"/>
-        <TopLine Value="134"/>
+        <CursorPos X="47" Y="78"/>
+        <TopLine Value="67"/>
+        <EditorIndex Value="2"/>
         <UsageCount Value="79"/>
+        <Loaded Value="True"/>
       </Unit32>
       <Unit33>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
@@ -305,7 +307,7 @@
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="44" Y="167"/>
         <TopLine Value="142"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit36>
@@ -1176,7 +1178,7 @@
         <UnitName Value="framescript"/>
         <CursorPos X="13" Y="98"/>
         <TopLine Value="87"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="106"/>
         <Loaded Value="True"/>
       </Unit161>
@@ -1490,9 +1492,11 @@
         <ComponentName Value="ColourHistoryForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="colourhistory"/>
-        <CursorPos X="2" Y="137"/>
-        <TopLine Value="116"/>
+        <CursorPos X="75" Y="121"/>
+        <TopLine Value="115"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="43"/>
+        <Loaded Value="True"/>
       </Unit208>
       <Unit209>
         <Filename Value="../../../Documents/lazarus/lcl/comctrls.pp"/>
@@ -1605,9 +1609,11 @@
       <Unit225>
         <Filename Value="../../Units/MMLCore/mmlkeyinput.pas"/>
         <UnitName Value="MMLKeyInput"/>
-        <CursorPos X="34" Y="25"/>
-        <TopLine Value="20"/>
+        <CursorPos X="83" Y="46"/>
+        <TopLine Value="31"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="20"/>
+        <Loaded Value="True"/>
       </Unit225>
       <Unit226>
         <Filename Value="../../../Documents/lazarus/components/mouseandkeyinput/xkeyinput.pas"/>
@@ -1644,8 +1650,22 @@
         <TopLine Value="24"/>
         <UsageCount Value="10"/>
       </Unit230>
+      <Unit231>
+        <Filename Value="../../../../Documents/lazarus/lcl/lclintf.pas"/>
+        <UnitName Value="LCLIntf"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="281"/>
+        <UsageCount Value="10"/>
+      </Unit231>
+      <Unit232>
+        <Filename Value="../../../../Documents/lazarus/lcl/lcltype.pp"/>
+        <UnitName Value="LCLType"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="481"/>
+        <UsageCount Value="10"/>
+      </Unit232>
     </Units>
-    <JumpHistory Count="3" HistoryIndex="2">
+    <JumpHistory Count="6" HistoryIndex="5">
       <Position1>
         <Filename Value="testunit.pas"/>
         <Caret Line="837" Column="30" TopLine="831"/>
@@ -1658,6 +1678,18 @@
         <Filename Value="testunit.pas"/>
         <Caret Line="949" Column="10" TopLine="946"/>
       </Position3>
+      <Position4>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <Caret Line="42" Column="23" TopLine="21"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../../Units/MMLCore/input.pas"/>
+        <Caret Line="39" Column="21" TopLine="27"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../../Units/MMLCore/input.pas"/>
+        <Caret Line="78" Column="47" TopLine="67"/>
+      </Position6>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
