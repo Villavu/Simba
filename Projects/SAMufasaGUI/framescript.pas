@@ -27,8 +27,8 @@ unit framescript;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,
-   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType, SynEditMarkupSpecialLine, Graphics;
+  Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,   SynEditMarkupHighAll,
+   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType, SynEditMarkupSpecialLine, Graphics, Controls;
 
 type
   TScriptState = (ss_None,ss_Running,ss_Paused,ss_Stopping);
@@ -44,12 +44,12 @@ type
     SynEdit: TSynEdit;
     SynFreePascalSyn1: TSynFreePascalSyn;
     procedure SynEditChange(Sender: TObject);
+    procedure SynEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
+      );
     procedure SynEditProcessCommand(Sender: TObject;
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure SynEditSpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
-    procedure SynEditStatusChange(Sender: TObject; Changes: TSynStatusChanges);
-
   private
     OwnerPage  : TPageControl;
     OwnerSheet : TTabSheet;//The owner TTabsheet -> For title setting
@@ -89,6 +89,16 @@ begin
   end;
 end;
 
+procedure TScriptFrame.SynEditKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if key = VK_F3 then
+  begin;
+    Form1.ActionFindNextExecute(Sender);
+    key := 0;
+  end;
+end;
+
 procedure TScriptFrame.SynEditProcessCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 begin
@@ -115,53 +125,6 @@ begin
   end;
 end;
 
-var
-  Str: String;
-
-procedure HighlightSelected(S: String);
-var
-  T: Cardinal;
-begin
-  writeln(Str);
-  T:= GetTickCount;
-  while (GetTickCount - T < 1500) and (S = Str) do
-  begin
-    Sleep(10);
-    Application.ProcessMessages;
-  end;
-  if S <> Str then exit;
-  with Form1.CurrScript.SynEdit do
-  begin
-    HighlightAllColor.Background:= 15132390;
-    HighlightAllColor.FrameColor:= 12632256;
-    SetHighlightSearch(S, [ssoEntireScope]);
-  end;
-end;
-
-procedure TScriptFrame.SynEditStatusChange(Sender: TObject;
-  Changes: TSynStatusChanges);
-var
-  S: String;
-  P, x, y: Integer;
-begin
-  with Form1.CurrScript.SynEdit do
-  begin
-    if(Pos(' ', SelText) = 0)then
-    begin
-      if(Length(SelText) > 0)then S:= SelText else S:= GetWordAtRowCol(CaretXY);
-      if(Str = S)then exit;
-      Str:= S;
-      P:= Pos(S, Text);
-      if(PosEx(S, Text, P + 1) > 0)then
-      begin
-        HighlightSelected(S);
-        exit;
-      end;
-    end;
-    S:= '';
-    SetHighlightSearch('', []);
-  end;
-end;
 
 procedure TScriptFrame.undo;
 begin
@@ -219,6 +182,8 @@ begin
 end;
 
 constructor TScriptFrame.Create(TheOwner: TComponent);
+var
+  MarkCaret : TSynEditMarkupHighlightAllCaret;
 begin
   inherited Create(TheOwner);
   OwnerSheet := TTabSheet(TheOwner);
@@ -233,6 +198,20 @@ begin
   SynEdit.IncrementColor.Background := $30D070;
   SynEdit.HighlightAllColor.Background:= clYellow;
   SynEdit.HighlightAllColor.Foreground:= clDefault;
+  MarkCaret := TSynEditMarkupHighlightAllCaret(SynEdit.MarkupByClass[TSynEditMarkupHighlightAllCaret]);
+  if assigned(MarkCaret) then
+  begin
+    with MarkCaret.MarkupInfo do
+    begin;
+      Background :=$E6E6E6;
+      FrameColor := clGray;
+    end;
+    MarkCaret.Enabled := True;
+    MarkCaret.FullWord:= True;
+    MarkCaret.FullWordMaxLen:= 3;
+    MarkCaret.WaitTime := 1500;
+    MarkCaret.IgnoreKeywords := true;
+  end;
 end;
 
 destructor TScriptFrame.Destroy;

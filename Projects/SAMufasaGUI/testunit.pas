@@ -825,12 +825,18 @@ begin
     Memo1.Undo;
 end;
 
+
+
 procedure TForm1.CheckBoxMatchCaseClick(Sender: TObject);
 begin
   RefreshTab;
+  CurrScript.SynEdit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
   DoSearch(LabeledEditSearch.Text, false, true);
   CurrScript.SynEdit.UseIncrementalColor:= true;
+  LabeledEditSearch.SetFocus;
 end;
+
+
 
 procedure TForm1.CloseFindPanel;
 begin
@@ -1188,6 +1194,7 @@ begin
     else
       result := SaveCurrentScriptAs;
   end;
+  RefreshTab;
 end;
 
 function TForm1.SaveCurrentScriptAs: boolean;
