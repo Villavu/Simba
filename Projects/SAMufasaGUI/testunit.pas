@@ -861,13 +861,41 @@ end;
 
 procedure TForm1.dlgReplaceReplace(Sender: TObject);
 var
-  Options: TSynSearchOptions;
+  SOptions: TSynSearchOptions;
+  P: TPoint;
+  Y: Boolean;
+  Btns: TMsgDlgButtons;
+
+ procedure Replace;
+ begin
+   CurrScript.SynEdit.SearchReplaceEx(dlgReplace.FindText, dlgReplace.ReplaceText, SOptions + [ssoReplace], P);
+ end;
+
 begin
-  if(frEntireScope in dlgReplace.Options)then Options:= [ssoEntireScope];
-  if(frMatchCase in dlgReplace.Options)then Options:= Options + [ssoMatchCase];
-  if(frWholeWord in dlgReplace.Options)then Options:= Options + [ssoWholeWord];
-  if(frReplaceAll in dlgReplace.Options)then Options:= Options + [ssoReplaceAll];
-  CurrScript.SynEdit.SearchReplace(dlgReplace.FindText, dlgReplace.ReplaceText, Options);
+  Y:= False;
+  SOptions:= [];
+  if(frMatchCase in dlgReplace.Options)then SOptions:= [ssoMatchCase];
+  if(frWholeWord in dlgReplace.Options)then SOptions+= [ssoWholeWord];
+  with CurrScript.SynEdit do
+  begin
+    Btns:= [mbYes, mbNo];
+    if(frReplaceAll in dlgReplace.Options)then Btns+= [mbYesToAll];
+    if(frEntireScope in dlgReplace.Options)then P:= Point(0, 0) else P:= CaretXY;
+    while SearchReplaceEx(dlgReplace.FindText, '', SOptions, P) > 0 do
+    begin
+      if(Y)then
+        Replace
+      else case MessageDlg('Replace', Format('Do you want to replace "%s" with "%s"?', [dlgReplace.FindText, dlgReplace.ReplaceText]), mtConfirmation, Btns, 0) of
+        mrYes: Replace;
+        mrYesToAll: begin
+                      Replace;
+                      Y:= True;
+                    end;
+      end;
+      if(not(frReplaceAll in dlgReplace.Options))then exit;
+      P:= CaretXY;
+    end;
+  end;
 end;
 
 procedure TForm1.EditSearchChange(Sender: TObject);
