@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="2"/>
+      <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -33,7 +33,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="227">
+    <Units Count="231">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -219,9 +219,9 @@
         <Filename Value="../../Units/MMLCore/client.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Client"/>
-        <CursorPos X="1" Y="1"/>
+        <CursorPos X="39" Y="14"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="1"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit25>
@@ -273,11 +273,9 @@
       <Unit32>
         <Filename Value="../../Units/MMLCore/input.pas"/>
         <UnitName Value="Input"/>
-        <CursorPos X="30" Y="136"/>
-        <TopLine Value="119"/>
-        <EditorIndex Value="1"/>
+        <CursorPos X="39" Y="143"/>
+        <TopLine Value="134"/>
         <UsageCount Value="79"/>
-        <Loaded Value="True"/>
       </Unit32>
       <Unit33>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
@@ -306,8 +304,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="44" Y="167"/>
-        <TopLine Value="42"/>
-        <EditorIndex Value="5"/>
+        <TopLine Value="142"/>
+        <EditorIndex Value="2"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit36>
@@ -1178,7 +1176,7 @@
         <UnitName Value="framescript"/>
         <CursorPos X="13" Y="98"/>
         <TopLine Value="87"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="106"/>
         <Loaded Value="True"/>
       </Unit161>
@@ -1591,163 +1589,75 @@
         <UsageCount Value="10"/>
       </Unit222>
       <Unit223>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/mouseandkeyinput.pas"/>
+        <Filename Value="../../../Documents/lazarus/components/mouseandkeyinput/mouseandkeyinput.pas"/>
         <UnitName Value="MouseAndKeyInput"/>
         <CursorPos X="18" Y="41"/>
         <TopLine Value="26"/>
-        <EditorIndex Value="6"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit223>
       <Unit224>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/keyinputintf.pas"/>
+        <Filename Value="../../../Documents/lazarus/components/mouseandkeyinput/keyinputintf.pas"/>
         <UnitName Value="KeyInputIntf"/>
         <CursorPos X="5" Y="34"/>
         <TopLine Value="24"/>
-        <EditorIndex Value="7"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit224>
       <Unit225>
         <Filename Value="../../Units/MMLCore/mmlkeyinput.pas"/>
         <UnitName Value="MMLKeyInput"/>
-        <CursorPos X="49" Y="23"/>
-        <TopLine Value="11"/>
-        <EditorIndex Value="2"/>
+        <CursorPos X="34" Y="25"/>
+        <TopLine Value="20"/>
         <UsageCount Value="20"/>
-        <Loaded Value="True"/>
       </Unit225>
       <Unit226>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/xkeyinput.pas"/>
+        <Filename Value="../../../Documents/lazarus/components/mouseandkeyinput/xkeyinput.pas"/>
         <UnitName Value="XKeyInput"/>
         <CursorPos X="5" Y="36"/>
         <TopLine Value="29"/>
-        <EditorIndex Value="3"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit226>
+      <Unit227>
+        <Filename Value="../../../laz/lazarus/components/mouseandkeyinput/keyinputintf.pas"/>
+        <UnitName Value="KeyInputIntf"/>
+        <CursorPos X="24" Y="12"/>
+        <TopLine Value="10"/>
+        <UsageCount Value="10"/>
+      </Unit227>
+      <Unit228>
+        <Filename Value="../../../laz/lazarus/components/mouseandkeyinput/mouseandkeyinput.pas"/>
+        <UnitName Value="MouseAndKeyInput"/>
+        <CursorPos X="12" Y="26"/>
+        <TopLine Value="16"/>
+        <UsageCount Value="10"/>
+      </Unit228>
+      <Unit229>
+        <Filename Value="../../../laz/lazarus/components/mouseandkeyinput/winmouseinput.pas"/>
+        <UnitName Value="WinMouseInput"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="10"/>
+      </Unit229>
+      <Unit230>
+        <Filename Value="../../../laz/lazarus/components/mouseandkeyinput/winkeyinput.pas"/>
+        <UnitName Value="WinKeyInput"/>
+        <CursorPos X="15" Y="32"/>
+        <TopLine Value="24"/>
+        <UsageCount Value="10"/>
+      </Unit230>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
         <Filename Value="testunit.pas"/>
-        <Caret Line="834" Column="80" TopLine="831"/>
+        <Caret Line="837" Column="30" TopLine="831"/>
       </Position1>
       <Position2>
         <Filename Value="testunit.pas"/>
-        <Caret Line="198" Column="1" TopLine="187"/>
+        <Caret Line="203" Column="49" TopLine="188"/>
       </Position2>
       <Position3>
         <Filename Value="testunit.pas"/>
-        <Caret Line="839" Column="1" TopLine="839"/>
-      </Position3>
-      <Position4>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="837" Column="30" TopLine="831"/>
-      </Position4>
-      <Position5>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="203" Column="49" TopLine="188"/>
-      </Position5>
-      <Position6>
-        <Filename Value="testunit.pas"/>
         <Caret Line="949" Column="10" TopLine="946"/>
-      </Position6>
-      <Position7>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="57" Column="18" TopLine="46"/>
-      </Position7>
-      <Position8>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="176" Column="15" TopLine="161"/>
-      </Position8>
-      <Position9>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="51" Column="28" TopLine="38"/>
-      </Position9>
-      <Position10>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="145" Column="15" TopLine="127"/>
-      </Position10>
-      <Position11>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/mouseandkeyinput.pas"/>
-        <Caret Line="41" Column="17" TopLine="32"/>
-      </Position11>
-      <Position12>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/mouseandkeyinput.pas"/>
-        <Caret Line="53" Column="8" TopLine="32"/>
-      </Position12>
-      <Position13>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/mouseandkeyinput.pas"/>
-        <Caret Line="41" Column="18" TopLine="26"/>
-      </Position13>
-      <Position14>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="39" Column="41" TopLine="24"/>
-      </Position14>
-      <Position15>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="35" Column="45" TopLine="24"/>
-      </Position15>
-      <Position16>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="69" Column="29" TopLine="55"/>
-      </Position16>
-      <Position17>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="131" Column="20" TopLine="119"/>
-      </Position17>
-      <Position18>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="77" Column="10" TopLine="61"/>
-      </Position18>
-      <Position19>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="71" Column="29" TopLine="51"/>
-      </Position19>
-      <Position20>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/xkeyinput.pas"/>
-        <Caret Line="36" Column="17" TopLine="28"/>
-      </Position20>
-      <Position21>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="71" Column="35" TopLine="51"/>
-      </Position21>
-      <Position22>
-        <Filename Value="../../Units/MMLCore/mmlkeyinput.pas"/>
-        <Caret Line="27" Column="13" TopLine="1"/>
-      </Position22>
-      <Position23>
-        <Filename Value="../../Units/MMLCore/mmlkeyinput.pas"/>
-        <Caret Line="11" Column="3" TopLine="1"/>
-      </Position23>
-      <Position24>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/xkeyinput.pas"/>
-        <Caret Line="33" Column="27" TopLine="19"/>
-      </Position24>
-      <Position25>
-        <Filename Value="../../../../Documents/lazarus/components/mouseandkeyinput/keyinputintf.pas"/>
-        <Caret Line="34" Column="19" TopLine="24"/>
-      </Position25>
-      <Position26>
-        <Filename Value="../../Units/MMLCore/mmlkeyinput.pas"/>
-        <Caret Line="21" Column="11" TopLine="11"/>
-      </Position26>
-      <Position27>
-        <Filename Value="../../Units/MMLCore/mmlkeyinput.pas"/>
-        <Caret Line="23" Column="17" TopLine="7"/>
-      </Position27>
-      <Position28>
-        <Filename Value="../../Units/MMLCore/mmlkeyinput.pas"/>
-        <Caret Line="13" Column="30" TopLine="1"/>
-      </Position28>
-      <Position29>
-        <Filename Value="../../Units/MMLCore/mmlkeyinput.pas"/>
-        <Caret Line="28" Column="13" TopLine="1"/>
-      </Position29>
-      <Position30>
-        <Filename Value="../../Units/MMLCore/input.pas"/>
-        <Caret Line="35" Column="36" TopLine="21"/>
-      </Position30>
+      </Position3>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

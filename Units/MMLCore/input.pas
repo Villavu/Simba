@@ -32,10 +32,11 @@ uses
   mufasatypes, // for common mufasa types
   windowutil, // for mufasa window utils
   {$IFDEF LINUX}
-  ctypes,x, xlib,xtest, MMLKeyInput,  lclintf;// for X* stuff
+  ctypes,x, xlib,xtest,// for X* stuff
    // do non silent keys/mouse with XTest / TKeyInput.
   {Later on we should use xdotool, as it allows silent input}
   {$ENDIF}
+  MMLKeyInput,  lclintf;
 
 type
     TMInput = class(TObject)
@@ -67,9 +68,7 @@ type
          private
              // Not used yet.
             Silent: Boolean;
-            {$IFDEF LINUX}
             KeyInput: TMMLKeyInput;
-            {$ENDIF}
 
     end;
 
@@ -130,39 +129,27 @@ constructor TMInput.Create(Client: TObject);
 begin
   inherited Create;
   Self.Client := Client;
-  {$IFDEF LINUX}
   Self.KeyInput := TMMLKeyInput.Create;
-  {$ENDIF}
 
 end;
 
 destructor TMInput.Destroy;
 begin
 
-  {$IFDEF LINUX}
   Self.KeyInput.Free;
-  {$ENDIF}
   inherited;
 end;
 
 procedure TMInput.KeyUp(key: Word);
 
 begin
-  {$IFDEF MSWINDOWS}
-  Raise Exception.CreateFMT('KeyUp not yet implemented',[]);
-  {$ELSE}
   Self.KeyInput.Up(Key);
-  {$ENDIF}
 end;
 
 procedure TMInput.KeyDown(key: Word);
 
 begin
-  {$IFDEF MSWINDOWS}
-  Raise Exception.CreateFMT('KeyDown not yet implemented',[]);
-  {$ELSE}
   Self.KeyInput.Down(Key);
-  {$ENDIF}
 end;
 
 procedure TMInput.PressKey(key: Word);
