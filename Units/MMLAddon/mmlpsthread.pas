@@ -157,7 +157,6 @@ begin
   SyncInfo:= TheSyncInfo;
   SetLength(PluginsToLoad,0);
   Client := TClient.Create;
-
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
@@ -196,6 +195,7 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
+{$I PSInc/Wrappers/keyboard.inc}
 {$I PSInc/Wrappers/dtm.inc}
 {$I PSInc/Wrappers/ocr.inc}
 

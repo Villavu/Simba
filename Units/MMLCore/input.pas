@@ -30,11 +30,13 @@ interface
 uses
   Classes, SysUtils,
   mufasatypes, // for common mufasa types
-  windowutil // for mufasa window utils
+  windowutil, // for mufasa window utils
   {$IFDEF LINUX}
-  ,ctypes,x, xlib,xtest{,keysym} // for X* stuff
-  // do non silent keys with XTest.
-  {$ENDIF};
+  ctypes,x, xlib,xtest, // for X* stuff
+   // do non silent keys/mouse with XTest / TKeyInput.
+  {Later on we should use xdotool, as it allows silent input}
+  {$ENDIF}
+  MouseAndKeyInput, KeyInputIntf, lclintf;
 type
     TMInput = class(TObject)
             constructor Create(Client: TObject);
@@ -46,8 +48,10 @@ type
             procedure MouseButtonActionSilent(x,y : integer; mClick: TClickType; mPress: TMousePress);
             procedure ClickMouse(X, Y: Integer; mClick: TClickType);
 
-            procedure KeyUp(key: Integer);
-            procedure KeyDown(key: Integer);
+            procedure KeyUp(key: Word);
+            procedure KeyDown(key: Word);
+            procedure PressKey(key: Word);
+            procedure SendText(text: string);
 
             // Not used yet.
             procedure SetSilent(_Silent: Boolean);
@@ -63,13 +67,14 @@ type
          private
              // Not used yet.
             Silent: Boolean;
+            //KeyInput: TKeyInput;
 
     end;
 
 implementation
 
 uses
-    Client{$IFDEF MSWINDOWS},windows{$ENDIF};
+    Client,{$IFDEF MSWINDOWS}windows {$ELSE}lcltype{$ENDIF};
 
 {$IFDEF MSWINDOWS}
 type
@@ -123,24 +128,52 @@ constructor TMInput.Create(Client: TObject);
 begin
   inherited Create;
   Self.Client := Client;
+  //Self.KeyInput := KeyInput;
+
 end;
 
 destructor TMInput.Destroy;
 begin
 
+  //Self.KeyInput := nil;
   inherited;
 end;
 
-procedure TMInput.KeyUp(key: Integer);
+procedure TMInput.KeyUp(key: Word);
 
 begin
-
+  {Self.}KeyInput.Up(Key);
 end;
 
-procedure TMInput.KeyDown(key: Integer);
+procedure TMInput.KeyDown(key: Word);
 
 begin
+  {Self.}KeyInput.Down(Key);
+end;
 
+procedure TMInput.PressKey(key: Word);
+begin
+  Self.KeyDown(key);
+  Self.KeyUp(key);
+end;
+
+{ No using VkKeyScan }
+function GetSimpleKeyCode(c: char): word;
+
+begin
+  //result := ord(UpCase(c));
+  c := lowerCase(c);
+  if ((c >= 'a') and (c <= 'z')) then
+    Exit(VK_A + (Byte(c) - 97));
+   Raise Exception.CreateFMT('GetSimpleKeyCode - char is not in A..z',[]);
+end;
+
+procedure TMInput.SendText(text: string);
+var
+   i: integer;
+begin
+  for i := 1 to length(text) do
+    Self.PressKey(GetSimpleKeyCode(text[i]));
 end;
 
 procedure TMInput.GetMousePos(var X, Y: Integer);
