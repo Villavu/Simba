@@ -93,6 +93,8 @@ Sender.AddFunction(@FindColorSpiral,'function FindColorSpiral(var x, y: Integer;
 Sender.AddFunction(@FindColorsSpiralTolerance,'function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;');
 Sender.AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(cts: integer);');
 
+Sender.AddFunction(@ColorToHSL, 'procedure ColorToHSL(c: integer; var r,g,b: extended);');
+
 {Mouse etc.}
 Sender.AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 Sender.AddFunction(@GetMousePos, 'procedure GetMousePos(var x, y: integer);');

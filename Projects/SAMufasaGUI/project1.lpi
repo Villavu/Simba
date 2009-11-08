@@ -7,7 +7,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="4"/>
+      <ActiveEditorIndexAtStart Value="6"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -305,8 +305,8 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="44" Y="167"/>
-        <TopLine Value="142"/>
+        <CursorPos X="15" Y="96"/>
+        <TopLine Value="71"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -374,9 +374,11 @@
       </Unit45>
       <Unit46>
         <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
-        <CursorPos X="67" Y="97"/>
-        <TopLine Value="87"/>
+        <CursorPos X="88" Y="96"/>
+        <TopLine Value="71"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="94"/>
+        <Loaded Value="True"/>
       </Unit46>
       <Unit47>
         <Filename Value="../../../FPC/FPCCheckout/rtl/win/tthread.inc"/>
@@ -407,9 +409,11 @@
       </Unit50>
       <Unit51>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/colour.inc"/>
-        <CursorPos X="30" Y="28"/>
-        <TopLine Value="16"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="33"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="38"/>
+        <Loaded Value="True"/>
       </Unit51>
       <Unit52>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/bitmap.inc"/>
@@ -1178,7 +1182,7 @@
         <UnitName Value="framescript"/>
         <CursorPos X="13" Y="98"/>
         <TopLine Value="87"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="106"/>
         <Loaded Value="True"/>
       </Unit161>
@@ -1492,8 +1496,8 @@
         <ComponentName Value="ColourHistoryForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="colourhistory"/>
-        <CursorPos X="75" Y="121"/>
-        <TopLine Value="115"/>
+        <CursorPos X="39" Y="117"/>
+        <TopLine Value="113"/>
         <EditorIndex Value="4"/>
         <UsageCount Value="43"/>
         <Loaded Value="True"/>
@@ -1665,7 +1669,7 @@
         <UsageCount Value="10"/>
       </Unit232>
     </Units>
-    <JumpHistory Count="6" HistoryIndex="5">
+    <JumpHistory Count="8" HistoryIndex="7">
       <Position1>
         <Filename Value="testunit.pas"/>
         <Caret Line="837" Column="30" TopLine="831"/>
@@ -1690,6 +1694,14 @@
         <Filename Value="../../Units/MMLCore/input.pas"/>
         <Caret Line="78" Column="47" TopLine="67"/>
       </Position6>
+      <Position7>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="195" Column="24" TopLine="177"/>
+      </Position7>
+      <Position8>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="242" Column="18" TopLine="227"/>
+      </Position8>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
