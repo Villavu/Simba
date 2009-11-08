@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 474
+  Left = 275
   Height = 557
-  Top = 246
+  Top = 155
   Width = 731
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -373,7 +373,7 @@ object Form1: TForm1
     end
   end
   object MainMenu1: TMainMenu
-    left = 560
+    left = 528
     object MenuFile: TMenuItem
       Caption = 'File'
       SubMenuImages = Mufasa_Image_List
@@ -932,11 +932,16 @@ object Form1: TForm1
       end
       object MenuItemFind: TMenuItem
         Action = ActionFindStart
+        Caption = 'Find...'
         OnClick = ActionFindstartExecute
       end
       object MenuItemFindNext: TMenuItem
         Action = ActionFindNext
         OnClick = ActionFindNextExecute
+      end
+      object MenuItemReplace: TMenuItem
+        Action = ActionReplace
+        OnClick = ActionReplaceExecute
       end
     end
     object MenuItemScript: TMenuItem
@@ -1075,7 +1080,7 @@ object Form1: TForm1
     end
   end
   object Mufasa_Image_List: TImageList
-    left = 512
+    left = 488
     Bitmap = {
       4C69190000001000000010000000424242004242420042424200424242004242
       420042424200424242004242420042424200424242004242420042424200A155
@@ -1918,11 +1923,11 @@ object Form1: TForm1
     }
     Visible = True
     OnClick = NoTray
-    left = 464
+    left = 448
   end
   object TrayPopup: TPopupMenu
     Images = Mufasa_Image_List
-    left = 600
+    left = 568
     object TrayStop: TMenuItem
       Action = ActionStopScript
       Enabled = False
@@ -1951,7 +1956,7 @@ object Form1: TForm1
   end
   object TabPopup: TPopupMenu
     Images = Mufasa_Image_List
-    left = 424
+    left = 408
     object MenuItemTabAdd: TMenuItem
       Action = ActionNewTab
       Bitmap.Data = {
@@ -2040,7 +2045,7 @@ object Form1: TForm1
   end
   object ActionList: TActionList
     Images = Mufasa_Image_List
-    left = 384
+    left = 368
     object ActionTabNext: TAction
       Caption = 'Next tab'
       OnExecute = ActionTabNextExecute
@@ -2163,15 +2168,20 @@ object Form1: TForm1
       OnExecute = ActionFindNextExecute
       ShortCut = 114
     end
+    object ActionReplace: TAction
+      Caption = 'Replace...'
+      OnExecute = ActionReplaceExecute
+      ShortCut = 16466
+    end
   end
   object DebugTimer: TTimer
     OnTimer = ProcessDebugStream
-    left = 640
+    left = 608
   end
   object ScriptPopup: TPopupMenu
     Images = Mufasa_Image_List
     OnPopup = ScriptPopupPopup
-    left = 680
+    left = 648
     object PopupItemUndo: TMenuItem
       Action = ActionUndo
       Bitmap.Data = {
@@ -2429,5 +2439,16 @@ object Form1: TForm1
       Action = ActionFindNext
       OnClick = ActionFindNextExecute
     end
+    object PopupItemReplace: TMenuItem
+      Action = ActionReplace
+      Caption = 'Replace'
+      OnClick = ActionReplaceExecute
+    end
+  end
+  object dlgReplace: TReplaceDialog
+    Options = [frDown, frFindNext, frHideUpDown]
+    OnFind = dlgReplaceFind
+    OnReplace = dlgReplaceReplace
+    left = 688
   end
 end
