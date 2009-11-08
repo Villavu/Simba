@@ -48,6 +48,7 @@ type
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure SynEditSpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
+    procedure SynEditStatusChange(Sender: TObject; Changes: TSynStatusChanges);
 
   private
     OwnerPage  : TPageControl;
@@ -73,7 +74,7 @@ type
 
 implementation
 uses
-  TestUnit;
+  TestUnit, SynEditTypes;
 
 { TScriptFrame }
 
@@ -111,6 +112,22 @@ begin
     Special := true;
     BG := $50a0ff;
     FG := 0;
+  end;
+end;
+
+procedure TScriptFrame.SynEditStatusChange(Sender: TObject;
+  Changes: TSynStatusChanges);
+begin
+  with Form1.CurrScript.SynEdit do
+  begin
+    if(Length(SelText) > 0)then
+      if(Pos(' ', SelText) = 0) and (GetWordAtRowCol(CaretXY) = SelText)then
+      begin
+        HighlightAllColor.Background:= clLime;
+        SetHighlightSearch(SelText, [ssoWholeWord, ssoEntireScope]);
+        exit;
+      end;
+    SetHighlightSearch('', []);
   end;
 end;
 

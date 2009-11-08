@@ -1,7 +1,7 @@
 object ColourHistoryForm: TColourHistoryForm
-  Left = 494
+  Left = 1180
   Height = 250
-  Top = 299
+  Top = 746
   Width = 489
   ActiveControl = ColourValue
   Caption = 'Colour Picker History'

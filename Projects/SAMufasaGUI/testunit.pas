@@ -58,6 +58,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionReplace: TAction;
     ActionFindNext: TAction;
     ActionRedo: TAction;
     ActionUndo: TAction;
@@ -86,6 +87,9 @@ type
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    PopupItemReplace: TMenuItem;
+    MenuItemReplace: TMenuItem;
+    dlgReplace: TReplaceDialog;
     View_CH_Menu: TMenuItem;
     ViewMenu: TMenuItem;
     MenuItemFindNext: TMenuItem;
@@ -181,6 +185,7 @@ type
     procedure ActionPasteExecute(Sender: TObject);
     procedure ActionPauseExecute(Sender: TObject);
     procedure ActionRedoExecute(Sender: TObject);
+    procedure ActionReplaceExecute(Sender: TObject);
     procedure ActionRunExecute(Sender: TObject);
     procedure ActionSaveAllExecute(Sender: TObject);
     procedure ActionSaveAsExecute(Sender: TObject);
@@ -193,6 +198,8 @@ type
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
     procedure ColourHistoryMenuClick(Sender: TObject);
+    procedure dlgReplaceFind(Sender: TObject);
+    procedure dlgReplaceReplace(Sender: TObject);
     procedure EditSearchChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -512,19 +519,26 @@ begin;
   ActionDelete.Enabled:= Delete;
 end;
 
+var
+  S: String;
+  B: Boolean;
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
   begin
     with CurrScript.SynEdit do
     begin
       EditActions(CanUndo,CanRedo,SelText <> '',SelText <> '',CanPaste,SelText <> '');
-      if(SelText <> '')then
+      B:= SelText <> '';
+      PopupItemFind.Enabled:= B;
+      PopupItemReplace.Enabled:= B;
+      if(B)then
       begin
-        PopupItemFind.Enabled:= True;
         if(Length(SelText) > 20)then
-          PopupItemFind.Caption:= Format('Find next: "%s"', [Copy(SelText, 1, 17) + '...'])
+          S:= Format('"%s"', [Copy(SelText, 1, 17) + '...'])
         else
-          PopupItemFind.Caption:= Format('Find next: "%s"', [SelText]);
+          S:= Format('"%s"', [SelText]);
+        PopupItemFind.Caption:= 'Find next: ' + S;
+        PopupItemReplace.Caption:= 'Replace: ' + S;
       end;
     end
   end
@@ -583,10 +597,13 @@ begin
     LabeledEditSearch.Color:= clWindow;
     LabeledEditSearch.Font.Color:= clWindowText;
     with CurrScript.SynEdit do
+    begin
+      HighlightAllColor.Background:= clYellow;
       if HighlightAll then
         SetHighlightSearch(Str,[])
       else
         SetHighlightSearch('',[]);
+    end;
   end;
 end;
 
@@ -736,6 +753,13 @@ begin
     Memo1.Undo; //?
 end;
 
+procedure TForm1.ActionReplaceExecute(Sender: TObject);
+begin
+  if(ScriptPopup.HandleAllocated)then
+    dlgReplace.FindText:= CurrScript.SynEdit.SelText;
+  dlgReplace.Execute;
+end;
+
 procedure TForm1.ActionRunExecute(Sender: TObject);
 begin
   Self.RunScript;
@@ -822,6 +846,22 @@ begin
     ColourHistoryForm.Show
   else
     ColourHistoryForm.Hide;
+end;
+
+procedure TForm1.dlgReplaceFind(Sender: TObject);
+begin
+  DoSearch(dlgReplace.FindText, True, False);
+end;
+
+procedure TForm1.dlgReplaceReplace(Sender: TObject);
+var
+  Options: TSynSearchOptions;
+begin
+  if(frEntireScope in dlgReplace.Options)then Options:= [ssoEntireScope];
+  if(frMatchCase in dlgReplace.Options)then Options:= Options + [ssoMatchCase];
+  if(frWholeWord in dlgReplace.Options)then Options:= Options + [ssoWholeWord];
+  if(frReplaceAll in dlgReplace.Options)then Options:= Options + [ssoReplaceAll];
+  CurrScript.SynEdit.SearchReplace(dlgReplace.FindText, dlgReplace.ReplaceText, Options);
 end;
 
 procedure TForm1.EditSearchChange(Sender: TObject);
