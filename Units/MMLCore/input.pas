@@ -32,7 +32,7 @@ uses
   mufasatypes, // for common mufasa types
   windowutil, // for mufasa window utils
   {$IFDEF LINUX}
-  ctypes,x, xlib,xtest, XKeyInput,  lclintf;// for X* stuff
+  ctypes,x, xlib,xtest, MMLKeyInput,  lclintf;// for X* stuff
    // do non silent keys/mouse with XTest / TKeyInput.
   {Later on we should use xdotool, as it allows silent input}
   {$ENDIF}
@@ -68,7 +68,7 @@ type
              // Not used yet.
             Silent: Boolean;
             {$IFDEF LINUX}
-            KeyInput: TXKeyInput;
+            KeyInput: TMMLKeyInput;
             {$ENDIF}
 
     end;
@@ -131,7 +131,7 @@ begin
   inherited Create;
   Self.Client := Client;
   {$IFDEF LINUX}
-  Self.KeyInput := TXKeyInput.Create;
+  Self.KeyInput := TMMLKeyInput.Create;
   {$ENDIF}
 
 end;
