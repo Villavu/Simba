@@ -74,7 +74,7 @@ type
 
 implementation
 uses
-  TestUnit, SynEditTypes;
+  TestUnit, SynEditTypes, LCLIntF, StrUtils;
 
 { TScriptFrame }
 
@@ -115,18 +115,50 @@ begin
   end;
 end;
 
+var
+  Str: String;
+
+procedure HighlightSelected(S: String);
+var
+  T: Cardinal;
+begin
+  writeln(Str);
+  T:= GetTickCount;
+  while (GetTickCount - T < 1500) and (S = Str) do
+  begin
+    Sleep(10);
+    Application.ProcessMessages;
+  end;
+  if S <> Str then exit;
+  with Form1.CurrScript.SynEdit do
+  begin
+    HighlightAllColor.Background:= 15132390;
+    HighlightAllColor.FrameColor:= 12632256;
+    SetHighlightSearch(S, [ssoEntireScope]);
+  end;
+end;
+
 procedure TScriptFrame.SynEditStatusChange(Sender: TObject;
   Changes: TSynStatusChanges);
+var
+  S: String;
+  P, x, y: Integer;
 begin
   with Form1.CurrScript.SynEdit do
   begin
-    if(Length(SelText) > 0)then
-      if(Pos(' ', SelText) = 0) and (GetWordAtRowCol(CaretXY) = SelText)then
+    if(Pos(' ', SelText) = 0)then
+    begin
+      if(Length(SelText) > 0)then S:= SelText else S:= GetWordAtRowCol(CaretXY);
+      if(Str = S)then exit;
+      Str:= S;
+      P:= Pos(S, Text);
+      if(PosEx(S, Text, P + 1) > 0)then
       begin
-        HighlightAllColor.Background:= clLime;
-        SetHighlightSearch(SelText, [ssoWholeWord, ssoEntireScope]);
+        HighlightSelected(S);
         exit;
       end;
+    end;
+    S:= '';
     SetHighlightSearch('', []);
   end;
 end;
