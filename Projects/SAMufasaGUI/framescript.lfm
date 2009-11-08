@@ -22,6 +22,7 @@ object ScriptFrame: TScriptFrame
     ParentFont = False
     PopupMenu = Form1.ScriptPopup
     TabOrder = 0
+    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
