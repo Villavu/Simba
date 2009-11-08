@@ -97,6 +97,12 @@ Sender.AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(ct
 Sender.AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 Sender.AddFunction(@GetMousePos, 'procedure GetMousePos(var x, y: integer);');
 
+{Keyboard}
+Sender.AddFunction(@KeyDown, 'procedure KeyDown(key: Word);');
+Sender.AddFunction(@KeyUp, 'procedure KeyUp(key: Word);');
+Sender.AddFunction(@PressKey, 'procedure PressKey(key: Word);');
+Sender.AddFunction(@SendKeys, 'procedure SendKeys(s: string);');
+
 { OCR}
 
 Sender.AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');

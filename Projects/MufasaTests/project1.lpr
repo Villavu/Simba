@@ -93,7 +93,9 @@ begin
   writeln('Time: ' + FloatToStr(((GetTickCount - Time) / (i + 1))));
   writeln(C.MOCR.GetUpTextAt(0,0));    }
 
-  C.MInput.ClickMouse(5,5, mouse_Left);
+  //C.MInput.ClickMouse(5,5, mouse_Left);
+  sleep(2000);
+  C.MInput.SendText('a');
 
   C.Free;
   bmp.OnDestroy:=nil;
