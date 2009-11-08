@@ -1,18 +1,18 @@
 object ScriptFrame: TScriptFrame
   Left = 0
-  Height = 324
+  Height = 328
   Top = 0
-  Width = 400
-  ClientHeight = 324
-  ClientWidth = 400
+  Width = 397
+  ClientHeight = 328
+  ClientWidth = 397
   TabOrder = 0
-  DesignLeft = 1272
-  DesignTop = 155
+  DesignLeft = 579
+  DesignTop = 195
   object SynEdit: TSynEdit
     Left = 0
-    Height = 324
+    Height = 328
     Top = 0
-    Width = 400
+    Width = 397
     Align = alClient
     Font.Height = -13
     Font.Name = 'Courier New'
@@ -22,6 +22,7 @@ object ScriptFrame: TScriptFrame
     ParentFont = False
     PopupMenu = Form1.ScriptPopup
     TabOrder = 0
+    OnKeyDown = SynEditKeyDown
     BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
@@ -593,7 +594,6 @@ object ScriptFrame: TScriptFrame
     OnChange = SynEditChange
     OnProcessCommand = SynEditProcessCommand
     OnSpecialLineColors = SynEditSpecialLineColors
-    OnStatusChange = SynEditStatusChange
     object TSynGutterPartList
       object TSynGutterMarks
         Width = 23
