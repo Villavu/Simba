@@ -1050,9 +1050,9 @@ var
    cobj: TColourPickerObject;
 begin
   Picker.Pick(c, x, y);
-  cobj := TColourPickerObject.Create(c, Point(x,y), 'Untitled');
+  cobj := TColourPickerObject.Create(c, Point(x,y), '');
 
-  ColourHistoryForm.AddColObj(cobj);
+  ColourHistoryForm.AddColObj(cobj, true);
   ColourHistoryForm.Show;
   formWriteln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
