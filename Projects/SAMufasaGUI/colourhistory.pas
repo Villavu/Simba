@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ComCtrls, StdCtrls;
+  ComCtrls, StdCtrls, ExtCtrls;
 
 type
   TColourPickerObject = class(TObject)
@@ -24,6 +24,7 @@ type
   TColourHistoryForm = class(TForm)
     ColourValue: TEdit;
     CoordValue: TLabel;
+    ColourImage: TImage;
     PickNewColourButton: TButton;
     DeleteButton: TButton;
     ColourList: TListView;
@@ -32,14 +33,17 @@ type
     procedure ChangeViewData(Sender: TObject; Item: TListItem; Selected: Boolean
       );
     procedure DeleteSelected(Sender: TObject);
-    procedure AddColObj(c: TColourPickerObject);
+    procedure AddColObj(c: TColourPickerObject; autoName: Boolean);
 
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
     procedure SetCHShowMenu(Sender: TObject);
     procedure UnSetCHShowMenu(Sender: TObject);
   private
+    Colour_Count: Integer;
     { private declarations }
+  protected
+    procedure AddColObj(c: TColourPickerObject);
   public
     IndexSelected: Integer;
     { public declarations }
@@ -70,6 +74,16 @@ end;
 
 { TColourHistoryForm }
 
+procedure TColourHistoryForm.AddColObj(c: TColourPickerObject; autoName: Boolean);
+begin
+  if autoName then
+  begin
+    Inc(Colour_Count);
+    c.Name := 'Untitled (' + IntToStr(Colour_Count) + ')';
+  end;
+  Self.AddColObj(c);
+end;
+
 procedure TColourHistoryForm.AddColObj(c: TColourPickerObject);
 
 var
@@ -82,6 +96,7 @@ begin
 end;
 
 procedure TColourHistoryForm.DeleteSelected(Sender: TObject);
+
 begin
   if (Assigned(ColourList.Selected)) then
   begin
@@ -97,10 +112,28 @@ begin
     exit;
   if not Item.Selected then
     exit;
+
+  { This only occurs when we have manually added an item with the Form Editor }
+  if not Assigned(Item.Data) then
+    exit;
+
+  { Change Form Text / Values }
   ColourValue.Caption := IntToStr(TColourPickerObject(Item.Data).Colour);
   CoordValue.Caption := 'Coords: ' + IntToStr(TColourPickerObject(Item.Data).Pos.X) +
                         ', ' + IntToStr(TColourPickerObject(Item.Data).Pos.Y);
   SelectionName.Text := TColourPickerObject(Item.Data).Name;
+
+  { Draw the Image }
+  ColourImage.Canvas.Brush.Color := TColourPickerObject(Item.Data).Colour;
+  ColourImage.Canvas.Rectangle(0,0,ColourImage.Width, ColourImage.Height);
+
+  if Self.Visible then
+  begin
+    try
+      SelectionName.SetFocus;
+    finally
+    end;
+  end;
 end;
 
 procedure TColourHistoryForm.ChangeName(Sender: TObject);
@@ -118,12 +151,15 @@ constructor TColourHistoryForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
+  Colour_Count := 0;
   PickNewColourButton.OnClick:= @Form1.ButtonPickClick;
-
 end;
 
 destructor TColourHistoryForm.Destroy;
 begin
+  PickNewColourButton.OnClick := nil;
+  Colour_Count := 0;
+
   inherited Destroy;
 end;
 
