@@ -16,6 +16,7 @@ object ColourHistoryForm: TColourHistoryForm
     Top = 16
     Width = 328
     Columns = <>
+    SmallImages = Form1.Mufasa_Image_List
     TabOrder = 0
     OnSelectItem = ChangeViewData
   end
@@ -30,7 +31,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object SelectionName: TEdit
     Left = 360
-    Height = 27
+    Height = 21
     Top = 16
     Width = 112
     OnChange = ChangeName
@@ -47,7 +48,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object ColourValue: TEdit
     Left = 360
-    Height = 27
+    Height = 21
     Top = 56
     Width = 112
     ReadOnly = True
@@ -56,9 +57,9 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object CoordValue: TLabel
     Left = 360
-    Height = 18
+    Height = 14
     Top = 96
-    Width = 74
+    Width = 56
     Caption = 'CoordValue'
     ParentColor = False
   end
