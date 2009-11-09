@@ -22,6 +22,7 @@ type
   { TColourHistoryForm }
 
   TColourHistoryForm = class(TForm)
+    OkButton: TButton;
     ColourValue: TEdit;
     CoordValue: TLabel;
     ColourImage: TImage;
@@ -37,6 +38,8 @@ type
 
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
+    procedure OkButtonClick(Sender: TObject);
+    procedure SelectionNameKeyPress(Sender: TObject; var Key: char);
     procedure SetCHShowMenu(Sender: TObject);
     procedure UnSetCHShowMenu(Sender: TObject);
   private
@@ -92,7 +95,6 @@ begin
   it := ColourList.Items.Add;
   it.Data := c;
   it.Caption:= c.Name;
-  it.ImageIndex:= 7;//just an example
   ColourList.Selected := it;
 end;
 
@@ -162,6 +164,21 @@ begin
   Colour_Count := 0;
 
   inherited Destroy;
+end;
+
+procedure TColourHistoryForm.OkButtonClick(Sender: TObject);
+begin
+  Self.close;
+end;
+
+procedure TColourHistoryForm.SelectionNameKeyPress(Sender: TObject;
+  var Key: char);
+begin
+  if key = #13 then
+  begin
+    key := #0;
+    Self.close;
+  end;
 end;
 
 procedure TColourHistoryForm.SetCHShowMenu(Sender: TObject);
