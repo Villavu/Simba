@@ -92,6 +92,7 @@ begin
   it := ColourList.Items.Add;
   it.Data := c;
   it.Caption:= c.Name;
+  it.ImageIndex:= 7;//just an example
   ColourList.Selected := it;
 end;
 
