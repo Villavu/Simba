@@ -1,4 +1,4 @@
-{
+﻿{
 	This file is part of the Mufasa Macro Library (MML)
 	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
 
@@ -76,7 +76,7 @@ type
 implementation
 
 uses
-    Client,{$IFDEF MSWINDOWS}windows {$ELSE}lcltype{$ENDIF};
+    Client,{$IFDEF MSWINDOWS}windows {$ENDIF},lcltype;
 
 {$IFDEF MSWINDOWS}
 type
@@ -161,29 +161,38 @@ end;
 
 { No using VkKeyScan }
 function GetSimpleKeyCode(c: char): word;
-
 begin
-  //result := ord(UpCase(c));
-  c := lowerCase(c);
-  if ((c >= 'a') and (c <= 'z')) then
-    Exit(VK_A + (Byte(c) - 97));
-   Raise Exception.CreateFMT('GetSimpleKeyCode - char is not in A..z',[]);
+  case C of
+    '0'..'9' :Result := VK_0 + Ord(C) - Ord('0');
+    'a'..'z' :Result := VK_A + Ord(C) - Ord('a');
+    'A'..'Z' :Result := VK_A + Ord(C) - Ord('A');
+    ' ' : result := VK_SPACE;
+  else
+    Raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
+  end
 end;
 
 procedure TMInput.SendText(text: string);
 var
    i: integer;
+   HoldShift : boolean;
+
 begin
+  HoldShift := false;
   for i := 1 to length(text) do
   begin
     if((text[i] >= 'A') and (text[i] <= 'Z')) then
+    begin;
       Self.KeyDown(VK_SHIFT);
-
-    Self.PressKey(ord(upcase(text[i])));
-    //Self.PressKey(GetSimpleKeyCode(text[i]));
-
-    if((text[i] >= 'A') and (text[i] <= 'Z')) then
-      Self.KeyUp(VK_SHIFT);
+      HoldShift:= True;
+      Text[i] := lowerCase(Text[i]);
+    end else
+      if HoldShift then
+      begin
+        HoldShift:= false;
+        Self.KeyUp(VK_SHIFT);
+      end;
+    Self.PressKey( GetSimpleKeyCode(Text[i]));
   end;
 end;
 
@@ -290,6 +299,7 @@ begin
 {$IFDEF MSWINDOWS}
   GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);
   Input.Itype:= INPUT_MOUSE;
+  FillChar(Input,Sizeof(Input),0);
   Input.mi.dx:= x + Rect.left;
   Input.mi.dy:= y + Rect.Top;
   if mPress = mouse_Down then
