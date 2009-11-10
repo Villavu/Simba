@@ -232,6 +232,8 @@ begin
   Continue:= True;
 end;
 
+
+
 procedure TMMLPSThread.OnCompile(Sender: TPSScript);
 var
   i,ii : integer;
@@ -240,6 +242,9 @@ begin
     for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
       PSScript.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[i].FuncPtr,
                            PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[i].FuncStr, cdStdCall);
+  for i := 0 to high(VirtualKeys) do
+    PSScript.Comp.AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
+
   // Here we add all the functions to the engine.
   {$I PSInc/pscompile.inc}
 end;
