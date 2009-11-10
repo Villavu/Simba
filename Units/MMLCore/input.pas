@@ -32,11 +32,11 @@ uses
   mufasatypes, // for common mufasa types
   windowutil, // for mufasa window utils
   {$IFDEF LINUX}
-  ctypes,x, xlib,xtest,// for X* stuff
+  ctypes,x, xlib,xtest,keysym,// for X* stuff
    // do non silent keys/mouse with XTest / TKeyInput.
   {Later on we should use xdotool, as it allows silent input}
   {$ENDIF}
-  MMLKeyInput,  lclintf;
+  MMLKeyInput,  lclintf,math;
 
 type
     TMInput = class(TObject)
@@ -53,6 +53,7 @@ type
             procedure KeyDown(key: Word);
             procedure PressKey(key: Word);
             procedure SendText(text: string);
+            function isKeyDown(key: Word): Boolean;
 
             // Not used yet.
             procedure SetSilent(_Silent: Boolean);
@@ -184,6 +185,41 @@ begin
     if((text[i] >= 'A') and (text[i] <= 'Z')) then
       Self.KeyUp(VK_SHIFT);
   end;
+end;
+
+function TMInput.isKeyDown(key: Word): Boolean;
+{$IFDEF LINUX}
+{var
+   key_states: chararr32;
+   i, j: integer;
+   _key: TKeySym;
+   _code: TKeyCode;
+   wat: integer; }
+{$ENDIF}
+begin
+  {$IFDEF MSWINDOWS}
+
+  {$ELSE}
+  raise Exception.CreateFmt('IsKeyDown isn''t implemented yet on Linux', []);
+  {XQueryKeymap(TClient(Client).MWindow.XDisplay, key_states);
+  _key :=  VirtualKeyToXKeySym(key);
+  _code := XKeysymToKeycode(TClient(Client).MWindow.XDisplay, _key);
+
+  for i := 0 to 31 do
+    for j := 7 to 0 do
+    begin
+      wat := Byte(key_states[i]) and (1 shl (j));
+      if wat > 0 then
+      begin
+        writeln(inttostr((i * 8) + j) + ': ' + inttostr(Byte(key_states[i]) and (1 shl j)));
+        writeln(inttostr((i * 8) + j) + ': ' + inttostr(Byte(key_states[i]) and (1 shl (8-j))));
+      end;
+    end;
+  writeln(Format('key: %d, _key: %d, _code: %d', [key, _key, _code]));
+  writeln('Wat: ' + inttostr((Byte(key_states[floor(_code / 8)]) and 1 shl (_code mod 8))));
+  result := (Byte(key_states[floor(_code / 8)]) and 1 shl (_code mod 8)) > 0; }
+  {XQueryKeymap -> Print all values !  }
+  {$ENDIF}
 end;
 
 procedure TMInput.GetMousePos(var X, Y: Integer);
