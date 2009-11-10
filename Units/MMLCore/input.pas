@@ -174,7 +174,16 @@ var
    i: integer;
 begin
   for i := 1 to length(text) do
-    Self.PressKey(GetSimpleKeyCode(text[i]));
+  begin
+    if((text[i] >= 'A') and (text[i] <= 'Z')) then
+      Self.KeyDown(VK_SHIFT);
+
+    Self.PressKey(ord(upcase(text[i])));
+    //Self.PressKey(GetSimpleKeyCode(text[i]));
+
+    if((text[i] >= 'A') and (text[i] <= 'Z')) then
+      Self.KeyUp(VK_SHIFT);
+  end;
 end;
 
 procedure TMInput.GetMousePos(var X, Y: Integer);

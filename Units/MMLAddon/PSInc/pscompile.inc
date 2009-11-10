@@ -32,8 +32,11 @@ Sender.Comp.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackH
 Sender.Comp.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
 Sender.Comp.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
 Sender.Comp.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
-Sender.Comp.AddTypeS('pDTM','record p: TPointArray; c, t, asz, ash: TIntegerArray; end');
-Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended');
+Sender.Comp.AddTypeS('pDTM','record p: TPointArray; c, t, asz, ash: TIntegerArray; end;');
+Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended;');
+Sender.Comp.AddTypeS('TClickType',  '(mouse_Left, mouse_Right, mouse_Middle);');
+Sender.Comp.AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
+
 
 Sender.AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 Sender.AddFunction(@psWriteln,'procedure writeln(s : string);');
@@ -98,6 +101,10 @@ Sender.AddFunction(@ColorToHSL, 'procedure ColorToHSL(c: integer; var r,g,b: ext
 {Mouse etc.}
 Sender.AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 Sender.AddFunction(@GetMousePos, 'procedure GetMousePos(var x, y: integer);');
+Sender.AddFunction(@HoldMouse, 'procedure HoldMouse(x, y: integer; clickType: TClickType);');
+Sender.AddFunction(@ReleaseMouse, 'procedure ReleaseMouse(x, y: integer; clickType: TClickType);');
+Sender.AddFunction(@ClickMouse, 'procedure ClickMouse(x, y: integer; clickType: TClickType);');
+
 
 {Keyboard}
 Sender.AddFunction(@KeyDown, 'procedure KeyDown(key: Word);');
