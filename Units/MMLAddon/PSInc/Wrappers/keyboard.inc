@@ -40,3 +40,8 @@ procedure PressKey(key: Word);
 begin
   CurrThread.Client.MInput.PressKey(key);
 end;
+
+function isKeyDown(key: Word): boolean;
+begin
+  Result := CurrThread.Client.MInput.isKeyDown(key);
+end;

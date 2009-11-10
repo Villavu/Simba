@@ -111,6 +111,7 @@ Sender.AddFunction(@KeyDown, 'procedure KeyDown(key: Word);');
 Sender.AddFunction(@KeyUp, 'procedure KeyUp(key: Word);');
 Sender.AddFunction(@PressKey, 'procedure PressKey(key: Word);');
 Sender.AddFunction(@SendKeys, 'procedure SendKeys(s: string);');
+Sender.AddFunction(@isKeyDown, 'function isKeyDown(key: Word): Boolean;');
 
 { OCR}
 
