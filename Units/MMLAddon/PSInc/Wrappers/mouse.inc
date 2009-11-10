@@ -29,4 +29,21 @@ end;
 procedure GetMousePos(var x, y: integer);
 begin
    CurrThread.Client.MInput.GetMousePos(X, Y);
-end; 
+end;
+
+procedure HoldMouse(x, y: integer; clickType: TClickType);
+begin
+   CurrThread.Client.MInput.SetMousePos(x, y);
+   CurrThread.Client.MInput.MouseButtonAction(x, y, clickType, mouse_Down);
+end;
+
+procedure ReleaseMouse(x, y: integer; clickType: TClickType);
+begin
+   CurrThread.Client.MInput.SetMousePos(x, y);
+   CurrThread.Client.MInput.MouseButtonAction(x, y, clickType, mouse_Up);
+end;
+
+procedure ClickMouse(x, y: integer; clickType: TClickType);
+begin
+   CurrThread.Client.MInput.ClickMouse(x, y, clickType);
+end;
