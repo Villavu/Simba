@@ -76,7 +76,7 @@ type
 implementation
 
 uses
-    Client,{$IFDEF MSWINDOWS}windows {$ENDIF},lcltype;
+    Client,{$IFDEF MSWINDOWS}windows, {$ENDIF}lcltype;
 
 {$IFDEF MSWINDOWS}
 type
