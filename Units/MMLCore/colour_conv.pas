@@ -35,14 +35,14 @@ uses
 
 Function RGBtoColor(r,g,b : byte) : TColor; overload; inline;
 Function RGBtoColor(r,g,b : integer) : TColor; overload; inline;
-Procedure ColorToRGB(Color : integer;var r,g,b : byte); overload; inline;
-Procedure ColorToRGB(Color : integer;var r,g,b : integer); overload; inline;
-Procedure RGBToXYZ(R,G,B : integer;var x,y,z : Extended); inline;
-Procedure XYZToRGB(X,Y,Z : Extended;var R,G,B: integer); inline;
-Procedure RGBToHSL(RR,GG,BB : integer;var H,S,L : Extended); inline;
-Procedure HSLtoRGB(H,S,L : extended;var R,G,B : Byte); inline;overload;
-Procedure HSLtoRGB(H,S,L : extended;var R,G,B : Integer); inline;overload;
-Procedure ColorToHSL(Col: Integer; var h, s, l: Extended); inline;
+Procedure ColorToRGB(Color : integer;out r,g,b : byte); overload; inline;
+Procedure ColorToRGB(Color : integer;out r,g,b : integer); overload; inline;
+Procedure RGBToXYZ(R,G,B : integer;out x,y,z : Extended); inline;
+Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: integer); inline;
+Procedure RGBToHSL(RR,GG,BB : integer;out H,S,L : Extended); inline;
+Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Byte); inline;overload;
+Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Integer); inline;overload;
+Procedure ColorToHSL(Col: Integer; out h, s, l: Extended); inline;
 
 implementation
 
@@ -71,7 +71,7 @@ end;
    components. R, G and B are bytes.
 /\}
 
-Procedure ColorToRGB(Color : integer;var r,g,b : byte); overload; inline;
+Procedure ColorToRGB(Color : integer;out r,g,b : byte); overload; inline;
 begin
   R := Color and $ff;
   G := Color shr 8 and $ff;
@@ -83,7 +83,7 @@ end;
    components. R, G and B are integers.
 /\}
 
-Procedure ColorToRGB(Color : integer;var r,g,b : integer); overload; inline;
+Procedure ColorToRGB(Color : integer;out r,g,b : integer); overload; inline;
 begin
   R := Color and $ff;
   G := Color shr 8 and $ff;
@@ -95,7 +95,7 @@ end;
    X, Y and Z components.
 /\}
 
-Procedure RGBToXYZ(R,G,B : integer;var x,y,z : Extended); inline;
+Procedure RGBToXYZ(R,G,B : integer;out x,y,z : Extended); inline;
 var
   Red,Green,Blue : Extended;
 begin;
@@ -124,7 +124,7 @@ end;
    Red (R), Green (G) and Blue (B) components.
 /\}
 
-Procedure XYZToRGB(X,Y,Z : Extended;var R,G,B: integer); inline;
+Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: integer); inline;
 var
   TempR,TempG,TempB,Tempx,tempy,tempz : Extended;
 begin;
@@ -156,7 +156,7 @@ end;
    H (Hue), S (Saturation) and L (Luminance) components.
 /\}
 
-Procedure RGBToHSL(RR,GG,BB : integer;var H,S,L : Extended); inline;
+Procedure RGBToHSL(RR,GG,BB : integer;out H,S,L : Extended); inline;
 var
   R,  G,  B,   D,  Cmax, Cmin: Extended;
 begin
@@ -202,7 +202,7 @@ end;
    Red (R), Green (G) and Blue (B) components.
 /\}
 
-procedure HSLtoRGB(H, S, L: extended; var R, G, B: Byte); inline; overload;
+procedure HSLtoRGB(H, S, L: extended; out R, G, B: Byte); inline; overload;
 var
   Temp,Temp2 : Extended;
 //begin
@@ -245,7 +245,7 @@ begin;
   end;
 end;
 
-Procedure HSLtoRGB(H,S,L : extended;var R,G,B : Integer); inline;
+Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Integer); inline;
 var
   Temp,Temp2 : Extended;
 //begin
@@ -292,7 +292,7 @@ end;
   Split the Given Color col in H, S, L components.
 /\}
 
-Procedure ColorToHSL(Col: Integer; var h, s, l: Extended); inline;
+Procedure ColorToHSL(Col: Integer; out h, s, l: Extended); inline;
 Var
   R, G, B: Integer;
 Begin

@@ -47,7 +47,7 @@ type
       function GetColor(x,y : integer) : TColor;
             function ReturnData(xs, ys, width, height: Integer): TRetData;
             procedure FreeReturnData;
-            procedure GetDimensions(var W, H: Integer);
+            procedure GetDimensions(out W, H: Integer);
             function GetDimensionBox(out Box : TBox) : boolean;
             function CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
             procedure ActivateClient;
@@ -535,7 +535,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TMWindow.GetDimensions(var W, H: Integer);
+procedure TMWindow.GetDimensions(out W, H: Integer);
 {$IFDEF LINUX}
 var
    Attrib: TXWindowAttributes;
