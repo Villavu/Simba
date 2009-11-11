@@ -54,23 +54,23 @@ type
         procedure SetToleranceSpeed(nCTS: Integer);
         function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
         // Possibly turn x, y into a TPoint var.
-        function FindColor(var x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
+        function FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
         function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
-        function FindColorTolerance(var x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
-        function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
+        function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
+        function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
         function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
         function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
         //Mask
-        function FindBitmapMaskTolerance(mask: TMask; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+        function FindBitmapMaskTolerance(mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
         procedure CheckMask(Mask : TMask);
         //Bitmap functions
-        function FindBitmap(bitmap: TMufasaBitmap; var x, y: Integer): Boolean;
-        function FindBitmapIn(bitmap: TMufasaBitmap; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
-        function FindBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
+        function FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
+        function FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
+        function FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
         function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
         function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
-        function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
-        function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
+        function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+        function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
       protected
         Client: TObject;
         CachedWidth, CachedHeight : integer;
@@ -90,7 +90,7 @@ type
 
 procedure TMFinder.LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
 var
-  i,y,x,c,Ring : integer;
+  i,c,Ring : integer;
   CurrBox : TBox;
 begin;
   i := 0;
@@ -362,7 +362,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindColor(var x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
+function TMFinder.FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr: PRGB32;
@@ -451,7 +451,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindColorTolerance(var x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
+function TMFinder.FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr: PRGB32;
@@ -461,7 +461,6 @@ var
    HueXTol, SatXTol: Extended;
 
    label Hit;
-   label Miss;
 
 begin
   Result := false;
@@ -538,7 +537,7 @@ begin
     TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindColorsTolerance(var Points: TPointArray; Color, xs, ys,
+function TMFinder.FindColorsTolerance(out Points: TPointArray; Color, xs, ys,
   xe, ye, Tol: Integer): Boolean;
 var
    PtrData: TRetData;
@@ -748,7 +747,7 @@ end;
 //Only works with CTS 1 for now.. Since Colorsame doesn't return a boolean :-(
 //We do not check whether every white pixel is in tol range with every other white pixel..
 
-function TMFinder.FindBitmapMaskTolerance(mask: TMask; var x, y: Integer; xs,
+function TMFinder.FindBitmapMaskTolerance(mask: TMask; out x, y: Integer; xs,
   ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
 var
    MainRowdata : TPRGB32Array;
@@ -831,7 +830,7 @@ begin
     raise exception.CreateFMT('Mask is invalid. Width/Height: (%d,%d). WhiteHi/BlackHi: (%d,%d)',[Mask.W,Mask.H,Mask.WhiteHi,Mask.BlackHi]);
 end;
 
-function TMFinder.FindBitmap(bitmap: TMufasaBitmap; var x, y: Integer): Boolean;
+function TMFinder.FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
 var
   w,h : integer;
 begin
@@ -839,7 +838,7 @@ begin
   result := Self.FindBitmapIn(bitmap,x,y,0,0,w-1,h-1);
 end;
 
-function TMFinder.FindBitmapIn(bitmap: TMufasaBitmap; var x, y: Integer; xs,
+function TMFinder.FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer; xs,
   ys, xe, ye: Integer): Boolean;
 var
    MainRowdata : TPRGB32Array;
@@ -899,7 +898,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; var x, y: Integer; xs,
+function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs,
   ys, xe, ye: Integer; tolerance: Integer): Boolean;
 var
    MainRowdata : TPRGB32Array;
@@ -934,8 +933,10 @@ begin
   //Heck our bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
-  //We wont want HSL comparison with BMPs, right? Not for now atleast.
+  //Compiler hints
+  HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
   CCTS := Self.CTS;
+  //We wont want HSL comparison with BMPs, right? Not for now atleast.
   if CCTS > 1 then
     CCTS := 1;
   //Get the "skip coords".
@@ -1066,6 +1067,8 @@ begin
   //Load the spiral into memory
   LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
   HiSpiral := (dx+1) * (dy+1) - 1;
+  //Compiler hints
+  HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
   //NO HSL.
   CCTS := Self.CTS;
   if CCTS > 1 then
@@ -1098,7 +1101,7 @@ begin
 end;
 
 function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x,
-  y: Integer; var Points: TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+  y: Integer; out Points: TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
 var
    MainRowdata : TPRGB32Array;
    BmpRowData : TPRGB32Array;
@@ -1136,6 +1139,8 @@ begin
   //Load the spiral into memory
   LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
   HiSpiral := (dx+1) * (dy+1) - 1;
+  //Compiler hints
+  HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
   //NO HSL.
   CCTS := Self.CTS;
   if CCTS > 1 then
@@ -1173,7 +1178,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; var x,
+function TMFinder.FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x,
   y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;
   AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
 var

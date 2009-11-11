@@ -92,7 +92,6 @@ uses
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
-  bitmaps,
   colour_conv,
   forms,//Forms
   lclintf; // for GetTickCount and others.

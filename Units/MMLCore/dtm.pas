@@ -35,7 +35,7 @@ type
 
            function AddDTM(d: TDTM): Integer;
            function AddpDTM(d: pDTM): Integer;
-           function GetDTM(index: Integer; var dtm: pDTM): Boolean;
+           function GetDTM(index: Integer; out dtm: pDTM): Boolean;
            procedure FreeDTM(DTM: Integer);
            Function StringToDTM(S: String): pDTM;
 
@@ -106,7 +106,7 @@ const
 
 implementation
 uses
-    Client, dtmutil, paszlib, finder,
+    Client, dtmutil, paszlib,
     graphics, // for TColor
     math // for max
     ;
@@ -354,7 +354,7 @@ end;
    Returns true is succesfull, false if the dtm does not exist.
 /\}
 
-function TMDTM.GetDTM(index: Integer; var dtm: pDTM): Boolean;
+function TMDTM.GetDTM(index: Integer; out dtm: pDTM): Boolean;
 begin
   Result := True;
   try
@@ -396,6 +396,7 @@ var
    B: TBox;
 
 begin
+  FillChar(b,sizeOf(TBox),0);
   for i := 0 to high(dtm.p) do
   begin
     B.X1 := Min(B.X1, dtm.p[i].X - dtm.asz[i]);
@@ -417,6 +418,7 @@ var
    B: TBox;
 
 begin
+  FillChar(b,sizeOf(TBox),0);
   for i := 0 to high(dtm.p) do
   begin
     B.X1 := Min(B.X1, dtm.p[i].X - dtm.asz[i]);
@@ -651,7 +653,7 @@ Var
    tAngle: Extended;
    Found: Boolean;
    TempTP: TPoint;
-   MaxSubPointDist: TPoint;
+//   MaxSubPointDist: TPoint;
 
 Begin
   For I := 1 To High(DTM.p) Do

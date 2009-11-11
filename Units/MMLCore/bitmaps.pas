@@ -27,7 +27,7 @@ unit bitmaps;
 
 interface
 uses
-  Classes, SysUtils, FPImgCanv,FPImage,IntfGraphics,graphtype,MufasaTypes,graphics;
+  Classes, SysUtils, FPImage,IntfGraphics,graphtype,MufasaTypes,graphics;
 
 type
 
@@ -103,7 +103,7 @@ type
 implementation
 
 uses
-  Windowutil,paszlib,DCPbase64,mmath,math,
+  Windowutil,paszlib,DCPbase64,math,
   colour_conv,window;
 
 function Min(a,b:integer) : integer;
@@ -202,11 +202,11 @@ end;
 
 function TMBitmaps.CreateBMPFromString(width, height: integer; Data: string): integer;
 var
-  I,II,x,y: LongWord;
+  I,II: LongWord;
   DestLen : LongWord;
   Dest,Source : string;
   DestPoint, Point : PByte;
-  LazIntf  : TLazIntfImage;
+
 
 begin
   Result := CreateBMP(width,height);
@@ -265,7 +265,7 @@ begin
           i := i + 4;
         end;
       end;
-    end else if LongWord(Length(Data)) = (Width * Height * 3 * 2) then
+    end else if LongWord(Length(Data)) = LongWord((Width * Height * 3 * 2)) then
     begin;
       ii := 1;
       i := 0;
@@ -327,10 +327,15 @@ var
   Bmp : TLazIntfImage;
 begin
   ArrDataToRawImage(FData,Point(w,h),RawImage);
+  result := true;
 //  Bmp := Graphics.TBitmap.Create;
-  Bmp := TLazIntfImage.Create(RawImage,false);
-  Bmp.SaveToFile(FileName);
-  Bmp.Free;
+  try
+    Bmp := TLazIntfImage.Create(RawImage,false);
+    Bmp.SaveToFile(FileName);
+    Bmp.Free;
+  except
+    result := false;
+  end;
 end;
 
 procedure TMufasaBitmap.LoadFromFile(const FileName: string);
@@ -476,7 +481,6 @@ var
   y : integer;
   wi,hi : integer;
   PtrRet : TRetData;
-  Rows : integer;
 begin
   if Resize then
     Self.SetSize(xe-xs+1,ye-ys+1);
@@ -715,10 +719,8 @@ end;
 
 procedure TMufasaBitmap.Invert;
 var
-  Ptr : PRGB32;
   i : integer;
 begin
-  ptr := Self.FData;
   for i := (h*w-1) downto 0 do
   begin;
     Self.FData[i].r := not Self.FData[i].r;
@@ -862,7 +864,6 @@ end;
 procedure TMufasaBitmap.StretchResize(AWidth, AHeight: integer);
 var
   NewData : PRGB32;
-  i: integer;
   x,y : integer;
 begin
   if (AWidth <> w) or (AHeight <> h) then
