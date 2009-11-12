@@ -21,6 +21,10 @@
     Mouse.inc for the Mufasa Macro Library
 }
 
+const
+  ps_mouse_right = 0;
+  ps_mouse_left = 1;
+  ps_mouse_middle = 2;
 procedure MoveMouse(x, y: integer);
 begin
   CurrThread.Client.MInput.SetMousePos(X, Y);
@@ -30,20 +34,30 @@ procedure GetMousePos(out x, y: integer);
 begin
    CurrThread.Client.MInput.GetMousePos(X, Y);
 end;
-
-procedure HoldMouse(x, y: integer; clickType: TClickType);
-begin
-   CurrThread.Client.MInput.SetMousePos(x, y);
-   CurrThread.Client.MInput.MouseButtonAction(x, y, clickType, mouse_Down);
+function ConvIntClickType(Int : Integer) : TClickType;inline;
+begin;
+  case int of
+    ps_mouse_right : result := mouse_Right;
+    ps_mouse_left : result := mouse_left;
+    ps_mouse_middle: result := mouse_middle;
+  else
+    raise exception.CreateFMT('Unknown Clicktype (%d) passed.',[int]);
+  end;
 end;
 
-procedure ReleaseMouse(x, y: integer; clickType: TClickType);
+procedure HoldMouse(x, y: integer; clickType: integer);
 begin
    CurrThread.Client.MInput.SetMousePos(x, y);
-   CurrThread.Client.MInput.MouseButtonAction(x, y, clickType, mouse_Up);
+   CurrThread.Client.MInput.MouseButtonAction(x, y, ConvIntClickType(clickType), mouse_Down);
 end;
 
-procedure ClickMouse(x, y: integer; clickType: TClickType);
+procedure ReleaseMouse(x, y: integer; clickType: integer);
 begin
-   CurrThread.Client.MInput.ClickMouse(x, y, clickType);
+   CurrThread.Client.MInput.SetMousePos(x, y);
+   CurrThread.Client.MInput.MouseButtonAction(x, y, ConvIntClickType(clickType), mouse_Up);
+end;
+
+procedure ClickMouse(x, y: integer; clickType: integer);
+begin
+   CurrThread.Client.MInput.ClickMouse(x, y, ConvIntClickType(clickType));
 end;

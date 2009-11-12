@@ -1,0 +1,10 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TAboutForm','FORMDATA',[
+  'TPF0'#10'TAboutForm'#9'AboutForm'#4'Left'#3'n'#2#6'Height'#3','#1#3'Top'#3#15
+  +#1#5'Width'#3#144#1#7'Caption'#6#9'AboutForm'#12'ClientHeight'#3','#1#11'Cli'
+  +'entWidth'#3#144#1#10'LCLVersion'#6#6'0.9.29'#0#5'TMemo'#5'Memo1'#4'Left'#2#0
+  +#6'Height'#3','#1#3'Top'#2#0#5'Width'#3#144#1#5'Align'#7#8'alClient'#13'Line'
+  +'s.Strings'#1#6'$Mufasa is, and always will be, sick.'#0#8'TabOrder'#2#0#0#0
+  +#0
+]);
