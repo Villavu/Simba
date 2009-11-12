@@ -21,35 +21,35 @@
     DTM.inc for the Mufasa Macro Library
 }
 
-function ps_FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+function ps_FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
 begin
  Result := CurrThread.Client.MDTM.FindDTM(DTM, x, y, x1, y1, x2, y2);
 end;
 
-function ps_FindDTMs(DTM: Integer; var p: TPointArray; x1, y1, x2, y2: Integer): Boolean;
+function ps_FindDTMs(DTM: Integer; out p: TPointArray; x1, y1, x2, y2: Integer): Boolean;
 begin
  Result := CurrThread.Client.MDTM.FindDTMs(DTM, p, x1, y1, x2, y2);
 end;
 
-function ps_FindDTMRotated(DTM: Integer; var x, y: Integer; x1, y1, x2, y2:
+function ps_FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2:
                            Integer; sAngle, eAngle, aStep: Extended;
-                           var aFound: Extended): Boolean;
+                           out aFound: Extended): Boolean;
 begin
  Result := CurrThread.Client.MDTM.FindDTMRotated(DTM, x, y, x1, y1, x2, y2,
                                                  sAngle, eAngle, aStep, aFound);
 end;
 
-function ps_FindDTMsRotated(DTM: Integer; var x, y: Integer; x1, y1, x2, y2:
+function ps_FindDTMsRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2:
                            Integer; sAngle, eAngle, aStep: Extended;
-                           var aFound: Extended): Boolean;
+                           out aFound: Extended): Boolean;
 begin
  Result := CurrThread.Client.MDTM.FindDTMRotated(DTM, x, y, x1, y1, x2, y2,
                                   sAngle, eAngle, aStep, aFound);
 end;
 
-function ps_FindDTMsRotated(DTM: Integer; var Points: TPointArray; x1,
+function ps_FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1,
                                   y1, x2, y2: Integer; sAngle, eAngle,
-                                  aStep: Extended; var aFound: T2DExtendedArray)
+                                  aStep: Extended; out aFound: T2DExtendedArray)
                                   : Boolean;
 begin
   Result := CurrThread.Client.MDTM.FindDTMsRotated(DTM, Points, x1, y1, x2, y2,
@@ -72,7 +72,7 @@ begin
   CurrThread.Client.MDTM.FreeDTM(DTM);
 end;
 
-function ps_GetDTM(index: Integer; var dtm: pDTM): Boolean;
+function ps_GetDTM(index: Integer; out dtm: pDTM): Boolean;
 begin
  Result := CurrThread.Client.MDTM.GetDTM(index, dtm);
 end;

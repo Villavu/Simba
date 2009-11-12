@@ -62,7 +62,7 @@ begin;
     raise exception.createfmt('Wrong Width or Height in ScretchResize: (%d,%d)',[NewW,NewH]);
 end;
 
-procedure GetBitmapSize(Bmp : integer; var BmpW,BmpH : integer);
+procedure GetBitmapSize(Bmp : integer; out BmpW,BmpH : integer);
 begin;
   With CurrThread.Client.MBitmaps.Bmp[bmp] do
   begin;
@@ -136,19 +136,19 @@ begin
   CurrThread.Client.MBitmaps.GetBMP(bmp).CopyClientToBitmap(CurrThread.Client.MWindow, True, xs, ys, xe, ye);
 end;
 
-function FindBitmap(Bitmap: integer; var x, y: Integer): Boolean;
+function FindBitmap(Bitmap: integer; out x, y: Integer): Boolean;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmap( MBitmaps.Bmp[bitmap],x,y);
 end;
 
-function FindBitmapIn(bitmap: integer; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
+function FindBitmapIn(bitmap: integer; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmapIn( MBitmaps.Bmp[bitmap],x,y,xs,ys,xe,ye);
 end;
 
-function FindBitmapToleranceIn(bitmap: integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
+function FindBitmapToleranceIn(bitmap: integer; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmapToleranceIn( MBitmaps.Bmp[bitmap],x,y,xs,ys,xe,ye,tolerance);
@@ -161,7 +161,7 @@ begin;
     result := MFinder.FindBitmapSpiral(Mbitmaps.bmp[bitmap],x,y,xs,ys,xe,ye);
 end;
 
-function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmapsSpiralTolerance(MBitmaps.Bmp[bitmap],x,y,points,xs,ys,xe,ye,tolerance);
@@ -236,20 +236,20 @@ begin;
   result := CurrThread.Client.MBitmaps.Bmp[Bitmap].CreateTMask;
 end;
 
-function FindMaskTolerance(mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+function FindMaskTolerance(mask: TMask; out x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
 begin;
   result := CurrThread.Client.MFinder.FindBitmapMaskTolerance(Mask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
 end;
-function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+function FindBitmapMaskTolerance(mask: Integer; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
 begin;
   Writeln('Better be using FindMaskTolerance in combination with CreateBitmapMask, more efficient.');
   with CurrThread.Client do
     result := MFinder.FindBitmapMaskTolerance(MBitmaps.bmp[mask].CreateTMask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
 end;
 
-function FindDeformedBitmapToleranceIn(bitmap: integer; var x,
+function FindDeformedBitmapToleranceIn(bitmap: integer; out x,
   y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;
-  AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
+  AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
 begin;
   result := CurrThread.Client.MFinder.FindDeformedBitmapToleranceIn(CurrThread.Client.MBitmaps.bmp[Bitmap],x,y,xs,ys,xe,ye,tolerance,range,AllowPartialAccuracy,accuracy);
 end;

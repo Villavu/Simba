@@ -43,7 +43,7 @@ type
             constructor Create(Client: TObject);
             destructor Destroy; override;
 
-            procedure GetMousePos(var X, Y: Integer);
+            procedure GetMousePos(out X, Y: Integer);
             procedure SetMousePos(X, Y: Integer);
             procedure MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
             procedure MouseButtonActionSilent(x,y : integer; mClick: TClickType; mPress: TMousePress);
@@ -231,7 +231,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TMInput.GetMousePos(var X, Y: Integer);
+procedure TMInput.GetMousePos(out X, Y: Integer);
 {$IFDEF LINUX}
 var
    b:integer;

@@ -26,7 +26,7 @@ begin
   CurrThread.Client.MInput.SetMousePos(X, Y);
 end;
 
-procedure GetMousePos(var x, y: integer);
+procedure GetMousePos(out x, y: integer);
 begin
    CurrThread.Client.MInput.GetMousePos(X, Y);
 end;

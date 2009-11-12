@@ -49,7 +49,7 @@ type
           procedure CloseFile(FileNum: Integer);
           function EndOfFile(FileNum: Integer): Boolean;
           function FileSizeMuf(FileNum: Integer): LongInt;
-          function ReadFileString(FileNum: Integer; var s: string; x: Integer): Boolean;
+          function ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
           function WriteFileString(FileNum: Integer; s: string): Boolean;
           Function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
           function FilePointerPos(FileNum: Integer): Integer;
@@ -427,7 +427,7 @@ end;
   Reads x numbers of characters from a file, and stores it into s.
 /\}
 
-function TMFiles.ReadFileString(FileNum: Integer; var s: string; x: Integer): Boolean;
+function TMFiles.ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
 
 begin
   If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
