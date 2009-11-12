@@ -37,7 +37,7 @@ uses
   window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
-  SynEditMiscClasses, LMessages, Buttons;
+  SynEditMiscClasses, LMessages, Buttons,about;
 
 type
 
@@ -58,6 +58,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionExit: TAction;
     ActionReplace: TAction;
     ActionFindNext: TAction;
     ActionRedo: TAction;
@@ -87,11 +88,15 @@ type
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
+    MenuHelp: TMenuItem;
+    MenuItemAbout: TMenuItem;
+    MenuItemMainExit: TMenuItem;
+    MenuItemDivider6: TMenuItem;
     PopupItemReplace: TMenuItem;
     MenuItemReplace: TMenuItem;
     dlgReplace: TReplaceDialog;
-    View_CH_Menu: TMenuItem;
-    ViewMenu: TMenuItem;
+    MenuItemColourHistory: TMenuItem;
+    MenuView: TMenuItem;
     MenuItemFindNext: TMenuItem;
     PopupItemDelete: TMenuItem;
     MenuItemDelete: TMenuItem;
@@ -177,6 +182,7 @@ type
     procedure ActionCopyExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
+    procedure ActionExitExecute(Sender: TObject);
     procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
@@ -197,7 +203,7 @@ type
     procedure ActionUndoExecute(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
-    procedure ColourHistoryMenuClick(Sender: TObject);
+    procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure dlgReplaceFind(Sender: TObject);
     procedure dlgReplaceReplace(Sender: TObject);
     procedure EditSearchChange(Sender: TObject);
@@ -211,8 +217,8 @@ type
       Shift: TShiftState);
     procedure LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
     procedure MenuEditClick(Sender: TObject);
+    procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
-    procedure MenuItemExitClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
@@ -533,12 +539,12 @@ begin
       PopupItemReplace.Enabled:= B;
       if(B)then
       begin
-        if(Length(SelText) > 20)then
-          S:= Format('"%s"', [Copy(SelText, 1, 17) + '...'])
+        if(Length(SelText) > 13)then
+          S:= Format('"%s"', [Copy(SelText, 1, 10) + '...'])
         else
           S:= Format('"%s"', [SelText]);
         PopupItemFind.Caption:= 'Find next: ' + S;
-        PopupItemReplace.Caption:= 'Replace: ' + S;
+        PopupItemReplace.Caption:= 'Replace:   ' + S;
       end;
     end
   end
@@ -678,7 +684,10 @@ begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.CopyToClipboard
   else if Memo1.Focused then
+  begin;
+    Writeln('WOT');
     Memo1.CopyToClipboard;
+  end;
 end;
 
 procedure TForm1.ActionCutExecute(Sender: TObject);
@@ -695,6 +704,11 @@ begin
     CurrScript.SynEdit.ClearSelection
   else if Memo1.Focused then
     Memo1.ClearSelection;
+end;
+
+procedure TForm1.ActionExitExecute(Sender: TObject);
+begin
+  Self.Close;
 end;
 
 procedure TForm1.ActionFindNextExecute(Sender: TObject);
@@ -845,10 +859,10 @@ begin
     CurrScript.SynEdit.SetFocus;
 end;
 
-procedure TForm1.ColourHistoryMenuClick(Sender: TObject);
+procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
 begin
-  View_CH_Menu.Checked := not ColourHistoryForm.Visible;
-  if View_CH_Menu.Checked then
+  MenuItemColourHistory.Checked := not ColourHistoryForm.Visible;
+  if MenuItemColourHistory.Checked then
     ColourHistoryForm.Show
   else
     ColourHistoryForm.Hide;
@@ -956,10 +970,13 @@ end;
 
 procedure TForm1.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
 begin
+  SetEditActions;
   Handled := ActionList.IsShortCut(Msg);
 {  ShiftState := MsgKeyDataToShiftState(Message.KeyData);
   ShortCut := KeyToShortCut(Message.CharCode, ShiftState);}
 end;
+
+
 
 procedure TForm1.LabeledEditSearchEnter(Sender: TObject);
 begin
@@ -1006,17 +1023,15 @@ begin
   SetEditActions;
 end;
 
+procedure TForm1.MenuItemAboutClick(Sender: TObject);
+begin
+  AboutForm.ShowModal;
+end;
+
 procedure TForm1.MenuItemCloseTabsClick(Sender: TObject);
 begin
   Self.CloseTabs;
 end;
-
-procedure TForm1.MenuItemExitClick(Sender: TObject);
-begin
-  Self.Close;
-end;
-
-
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
 begin

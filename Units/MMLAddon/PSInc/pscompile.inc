@@ -34,7 +34,6 @@ Sender.Comp.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
 Sender.Comp.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
 Sender.Comp.AddTypeS('pDTM','record p: TPointArray; c, t, asz, ash: TIntegerArray; end;');
 Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended;');
-Sender.Comp.AddTypeS('TClickType',  '(mouse_Left, mouse_Right, mouse_Middle);');
 Sender.Comp.AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
 
 
@@ -99,11 +98,14 @@ Sender.AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(ct
 Sender.AddFunction(@ColorToHSL, 'procedure ColorToHSL(c: integer; out r,g,b: extended);');
 
 {Mouse etc.}
+Sender.Comp.AddConstantN('mouse_Right','integer').SetInt(ps_mouse_right); //0
+Sender.Comp.AddConstantN('mouse_Left','integer').SetInt(ps_mouse_left);//1
+Sender.Comp.AddConstantN('mouse_Middle','integer').SetInt(ps_mouse_middle);//2
 Sender.AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 Sender.AddFunction(@GetMousePos, 'procedure GetMousePos(out x, y: integer);');
-Sender.AddFunction(@HoldMouse, 'procedure HoldMouse(x, y: integer; clickType: TClickType);');
-Sender.AddFunction(@ReleaseMouse, 'procedure ReleaseMouse(x, y: integer; clickType: TClickType);');
-Sender.AddFunction(@ClickMouse, 'procedure ClickMouse(x, y: integer; clickType: TClickType);');
+Sender.AddFunction(@HoldMouse, 'procedure HoldMouse(x, y: integer; clickType: integer);');
+Sender.AddFunction(@ReleaseMouse, 'procedure ReleaseMouse(x, y: integer; clickType: integer);');
+Sender.AddFunction(@ClickMouse, 'procedure ClickMouse(x, y: integer; clickType: integer);');
 
 
 {Keyboard}

@@ -183,12 +183,12 @@ end;
 
 procedure TColourHistoryForm.SetCHShowMenu(Sender: TObject);
 begin
-  Form1.View_CH_Menu.Checked := True;
+  Form1.MenuItemColourHistory.Checked := True;
 end;
 
 procedure TColourHistoryForm.UnSetCHShowMenu(Sender: TObject);
 begin
-  Form1.View_CH_Menu.Checked := False;
+  Form1.MenuItemColourHistory.Checked := False;
 end;
 
 initialization
