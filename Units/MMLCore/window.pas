@@ -94,7 +94,8 @@ type
               //Target handle; HWND
               TargetHandle : Hwnd;
               DrawBmpDataPtr : PRGB32;
-
+              DesktopHWND : Hwnd;
+              DesktopDC : HDC;
               //Works on linux as well, test it out
               TargetDC : HDC;
               DrawBitmap : TBitmap;
@@ -169,8 +170,11 @@ begin
   Self.DrawBitmap := TBitmap.Create;
   Self.DrawBitmap.PixelFormat:= pf32bit;
   Self.TargetMode:= w_Window;
-  Self.TargetHandle:= windows.GetDesktopWindow;
-  Self.TargetDC:= GetWindowDC(Self.TargetHandle);
+  Self.TargetHandle:= 0;
+  Self.TargetDC := 0;
+  Self.DesktopHWND:= GetDesktopWindow;
+  Self.DesktopDC:= GetDC(0);
+  Self.SetDesktop;
   Self.UpdateDrawBitmap;
   {$ENDIF}
 
@@ -242,7 +246,7 @@ begin
   {$IFDEF LINUX}
   Self.SetTarget(Self.DesktopWindow);
   {$ELSE}
-  Self.SetTarget(windows.GetDesktopWindow, w_Window);
+  Self.SetTarget(Self.DesktopHWND, w_Window);
   {$ENDIF}
 end;
 
@@ -671,9 +675,14 @@ begin
     begin;
 
       {$IFDEF MSWINDOWS}
-      ReleaseDC(Self.TargetHandle,Self.TargetDC);
+      //We had the desktop as target -> Not freeing that DC!
+      if not Self.TargetDC= Self.DesktopDC then
+        ReleaseDC(Self.TargetHandle,Self.TargetDC);
       Self.TargetHandle := Window;
-      Self.TargetDC := GetWindowDC(Window);
+      if Window = Self.DesktopHWND then
+        Self.TargetDC := DesktopDC
+      else
+        Self.TargetDC := GetWindowDC(Window);
       {$ENDIF}
     end;
   end;

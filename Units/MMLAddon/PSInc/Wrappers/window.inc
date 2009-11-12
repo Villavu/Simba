@@ -32,7 +32,7 @@ begin;
     MWindow.SetTarget(MBitmaps.Bmp[Bitmap]);
 end;
 
-procedure GetClientDimensions(var w, h: integer);
+procedure GetClientDimensions(out w, h: integer);
 begin
   CurrThread.Client.MWindow.GetDimensions(w, h);
 end;

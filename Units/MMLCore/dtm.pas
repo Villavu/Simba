@@ -39,27 +39,27 @@ type
            procedure FreeDTM(DTM: Integer);
            Function StringToDTM(S: String): pDTM;
 
-           function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2,
+           function FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2,
                            y2: Integer): Boolean;
-          function FindDTMs(DTM: Integer; var Points: TPointArray; x1, y1, x2,
+          function FindDTMs(DTM: Integer; out Points: TPointArray; x1, y1, x2,
                             y2: Integer): Boolean;
-          function FindDTMRotated(DTM: Integer; var x, y: Integer; x1, y1, x2,
+          function FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2,
                                   y2: Integer; sAngle, eAngle, aStep: Extended;
-                                  var aFound: Extended): Boolean;
-          function FindDTMsRotated(DTM: Integer; var Points: TPointArray; x1,
+                                  out aFound: Extended): Boolean;
+          function FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1,
                                   y1, x2, y2: Integer; sAngle, eAngle,
-                                  aStep: Extended; var aFound: T2DExtendedArray)
+                                  aStep: Extended; out aFound: T2DExtendedArray)
                                   : Boolean;
-           function pFindDTM(DTM: pDTM; var x, y: Integer; x1, y1, x2, y2:
+           function pFindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2:
            Integer): Boolean;
-           function pFindDTMs(DTM: pDTM; var Points: TPointArray; x1, y1, x2,
+           function pFindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2,
                             y2: Integer): Boolean;
-          function pFindDTMRotated(DTM: pDTM; var x, y: Integer; x1, y1, x2,
+          function pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2,
                                   y2: Integer; sAngle, eAngle, aStep: Extended;
-                                  var aFound: Extended): Boolean;
-          function pFindDTMsRotated(DTM: pDTM; var Points: TPointArray; x1,
+                                  out aFound: Extended): Boolean;
+          function pFindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1,
                                   y1, x2, y2: Integer; sAngle, eAngle,
-                                  aStep: Extended; var aFound: T2DExtendedArray)
+                                  aStep: Extended; out aFound: T2DExtendedArray)
                                   : Boolean;
 
            constructor Create(Owner: TObject);
@@ -436,7 +436,7 @@ end;
   Tries to find the given DTM (index). If found will put the point the dtm has
   been found at in x, y and result to true.
 }
-function TMDTM.FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+function TMDTM.FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
 var
    temp: pDTM;
 begin
@@ -455,7 +455,7 @@ end;
   been found at in x, y and result to true.
 }
 
-function TMDTM.pFindDTM(DTM: pDTM; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+function TMDTM.pFindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
 
 var
    mP: TPointArray;
@@ -531,7 +531,7 @@ end;
   DTM's. All the occurances are stored in the Points (TPointArray)
 /\}
 
-function TMDTM.FindDTMs(DTM: Integer; Var Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
+function TMDTM.FindDTMs(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
 Var
    temp: pDTM;
 Begin
@@ -551,7 +551,7 @@ End;
   DTM's. All the occurances are stored in the Points (TPointArray)
 /\}
 
-Function TMDTM.pFindDTMs(DTM: pDTM; Var Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
+Function TMDTM.pFindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
 
 Var
    mP: TPointArray;
@@ -622,7 +622,7 @@ End;
   Returns all Angles in an Extended array.
 /\}
 
-Function TMDTM.FindDTMRotated(DTM: Integer; Var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; Var aFound: Extended): Boolean;
+Function TMDTM.FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
 Var
    temp: pDTM;
 Begin
@@ -644,7 +644,7 @@ End;
   Returns all Angles in an Extended array.
 /\}
 
-Function TMDTM.pFindDTMRotated(DTM: pDTM; Var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; Var aFound: Extended): Boolean;
+Function TMDTM.pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
 
 Var
    mP: TPointArray;
@@ -762,7 +762,7 @@ End;
   Returns all Angles in a Two Dimensional Extended array.
 /\}
 
-Function TMDTM.FindDTMsRotated(DTM: Integer; Var Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; Var aFound: T2DExtendedArray): Boolean;
+Function TMDTM.FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
 Var
    temp: pDTM;
 Begin
@@ -784,7 +784,7 @@ End;
   Returns all Angles in a Two Dimensional Extended array.
 /\}
 
-Function TMDTM.pFindDTMsRotated(DTM: pDTM; Var Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; Var aFound: T2DExtendedArray): Boolean;
+Function TMDTM.pFindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
 
 Var
    mP: TPointArray;

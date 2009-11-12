@@ -30,7 +30,7 @@ interface
 uses
   Classes, SysUtils, MufasaTypes, bitmaps, math,
   {Begin To-Remove units. Replace ReadBmp with TMufasaBitmap stuff later.}
-  FPImgCanv, graphtype, intfgraphics,graphics;
+  graphtype, intfgraphics,graphics;
 
   {End To-Remove unit}
 
@@ -123,7 +123,7 @@ end;
 
 
 {initalizes the remaining fields from a TocrGlyphMask and finds the global bounds}
-procedure findBounds(glyphs: TocrGlyphMaskArray; var width,height: integer);
+procedure findBounds(glyphs: TocrGlyphMaskArray; out width,height: integer);
 var
     i,x,y,c,w,h: integer;
     l,r,t,b: integer;
@@ -305,7 +305,7 @@ begin
 end;
 
 {converts a TPA into a 1-0 image of the smallest possible size}
-function PointsToNorm(points: TpointArray; var w,h: integer): TNormArray;
+function PointsToNorm(points: TpointArray; out w,h: integer): TNormArray;
 var
     l,r,t,b: integer;
     i,len,size: integer;
@@ -440,7 +440,7 @@ begin
     result.b:= (color1.b * weight1 + color2.b * weight2) div (weight1 + weight2);
 end;
 
-procedure RGBtoXYZ(color: tRGB; var X, Y, Z: real); inline;
+procedure RGBtoXYZ(color: tRGB; out X, Y, Z: real); inline;
 var
     nr,ng,nb: real;
 begin
@@ -639,7 +639,12 @@ begin
   { This must be dynamic }
 
   SetLength(OCRData, 1);
-  OCRData[0] := InitOCR(path + DS + 'UpChars' + DS);
+  result := true;
+  OCRPath := path + DS;
+  if DirectoryExists(path + DS + 'UpChars' + DS) then
+    OCRData[0] := InitOCR(path + DS + 'UpChars' + DS)
+  else
+    result := false;
 end;
 
 function TMOCR.GetUpTextAt(atX, atY: integer): string;

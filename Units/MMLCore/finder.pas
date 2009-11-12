@@ -58,8 +58,8 @@ type
         function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
         function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
         function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
-        function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
-        function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+        function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
+        function FindColors(out TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
         //Mask
         function FindBitmapMaskTolerance(mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
         procedure CheckMask(Mask : TMask);
@@ -621,7 +621,7 @@ begin
 end;
 
 function TMFinder.FindColorsSpiralTolerance(x, y: Integer;
-  var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer
+  out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer
   ): boolean;
 var
    PtrData: TRetData;
@@ -697,7 +697,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+function TMFinder.FindColors(out TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr: PRGB32;
