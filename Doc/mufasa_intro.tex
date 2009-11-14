@@ -353,7 +353,44 @@ implementation. It wouldn't be that hard to add them, however.
 
 \section{Bitmaps and the Bitmaps Class}
 
+\subsection{Introduction to Mufasa Bitmaps}
+To understand how the bitmaps in MML work, we will first make a 
+distinguishment between two different objects; the Bitmap Manager and the 
+Bitmap itself. The bitmap manager contains and manages a pool of bitmaps.
 
+
+\subsection{The Bitmap}
+
+Mufasa has it's own implementation of a Bitmap.
+A bitmap is basically just a piece of bytes, ordered in a certain fashion.
+We have extended this concept to a full blown Bitmap class: ``TMufasaBitmap''.
+The data per pixel consists out of 32 bits\footnote{4 bytes}, and is 
+``stored'' in the variable ``FData'', of the type ``TRGB32''.
+FData is a pointer to the data in memory.
+The advantage of a 32 bit structure to a 24 bits structure, consists mainly
+of the fact that 32 bits are more easily accessed that 24 bits. 32 bits are
+aligned in such a fashion that they are easily accessed, and translated to
+other formats\footnote{Or just ``Colours''}.
+
+\subsection{Example of usage}
+As you can directly access the rawdata, bitmap functions will be fast and 
+easy to use. Since the data is stored as an array you need to do convert your
+coordinate into a array-index using the following transformation:
+$$ \{\forall (x, y) \in Points,\ \forall\ i \in Index: i = (x * w) + x \} $$
+
+With ``w'' as the Bitmap width.
+
+For example we want to change pixel (5,20) to clWhite and our bitmaps
+width = 50:
+\begin{verbatim}
+Bitmap.FData[20 * 50 + 5].r := 255;
+Bitmap.FData[20 * 50 + 5].g := 255;
+Bitmap.FData[20 * 50 + 5].b := 255;
+\end{verbatim}
+
+\subsection{Naming a bitmap}
+You can also name a bitmap by setting the BmpName property.
+This may come in handy when working with multiple bitmaps.
 
 \section{Notes on the previously mentioned classes}
 

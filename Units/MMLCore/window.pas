@@ -41,7 +41,18 @@ uses
 
 type
 
-    { TMWindow }
+    {
+       TMWindow Class handles all interaction with the Operating System Display
+       Getting Window ID's, Window Bitmap Data, Window Size.
+
+       It also abstracts data allocation from the user. Downside is there can't
+       be more than one Data in memory.
+
+       EG: One uses ReturnData, but must Free the data with FreeReturnData;
+           If one calls ReturnData, one must first free the ReturnData, before
+           calling ReturnData again.
+
+    }
 
     TMWindow = class(TObject)
       function GetColor(x,y : integer) : TColor;
@@ -124,15 +135,13 @@ type
               // The X Image pointer.
               XWindowImage: PXImage;
 
-                 {$IFDEF M_MEMORY_DEBUG}
-                  // XImageFreed should be True if there is currently no
-                  // XImage loaded. If one is loaded, XImageFreed is true.
+              // XImageFreed should be True if there is currently no
+              // XImage loaded. If one is loaded, XImageFreed is true.
 
-                  // If ReturnData is called while XImageFreed is false,
-                  // we throw an exception.
-                  // Same for FreeReturnData with XImageFreed true.
-                  XImageFreed: Boolean;
-                  {$ENDIF}
+              // If ReturnData is called while XImageFreed is false,
+              // we throw an exception.
+              // Same for FreeReturnData with XImageFreed true.
+              XImageFreed: Boolean;
 
               {$ELSE}
 
@@ -313,6 +322,10 @@ begin
     w_XWindow:
     begin
       {$IFDEF LINUX}
+      if not Self.XImageFreed then
+        Raise Exception.CreateFmt('ReturnData was called again without freeing'+
+                                  ' the previously used data. Do not forget to'+
+                                  ' call FreeReturnData', []);
       { Should be this. }
       Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
