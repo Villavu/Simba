@@ -892,7 +892,7 @@ end;
 procedure TMufasaBitmap.ValidatePoint(x, y: integer);
 begin
   if (x <0) or (x >= w) or (y < 0) or (y >= h) then
-    raise Exception.CreateFmt('You are accesing an invalid point, (%d,%d) at bitmap[%d]',[x,y,index]);
+    raise Exception.CreateFmt('You are accessing an invalid point, (%d,%d) at bitmap[%d]',[x,y,index]);
 end;
 
 constructor TMufasaBitmap.Create;
