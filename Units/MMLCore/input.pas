@@ -267,7 +267,11 @@ var
 var
   rect : TRect;
 {$ENDIF}
+  w,h: integer;
 begin
+  TClient(Client).MWindow.GetDimensions(w, h);
+  if (x < 0) or (y < 0) or (x > w) or (y > h) then
+    raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid', [x, y]);
 
 {$IFDEF MSWINDOWS}
   GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);

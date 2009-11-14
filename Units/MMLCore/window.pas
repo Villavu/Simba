@@ -590,6 +590,7 @@ begin
       Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
       if XGetWindowAttributes(Self.XDisplay, Self.CurWindow, @Attrib) <> 0 Then
       begin
+        { I don't think we need this XTranslateCoordinates... :D }
         XTranslateCoordinates(Self.XDisplay, Self.CurWindow, Self.DesktopWindow, 0,0, @newx, @newy, @childwindow);
         W := Attrib.Width;
         H := Attrib.Height;
@@ -650,6 +651,7 @@ begin
       Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
       if XGetWindowAttributes(Self.XDisplay, Self.CurWindow, @Attrib) <> 0 Then
       begin
+        { I don't think we need this XTranslateCoordinates... :D }
         XTranslateCoordinates(Self.XDisplay, Self.CurWindow, Self.DesktopWindow, 0,0, @newx, @newy, @childwindow);
         box := IntToTBox(Attrib.x,Attrib.y,Attrib.x + Attrib.Width -1,Attrib.y +Attrib.Height-1 );
       end else
