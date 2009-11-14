@@ -278,7 +278,9 @@ type
   procedure formWriteln( S : String);
 
 const
-  WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
+  // Rip Mufasa -> Simba ftw
+  //WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
+  WindowTitle = 'Simba - %s';//Title, where %s = the place of the filename.
   Panel_State = 0;
   Panel_ScriptName = 1;
   Panel_ScriptPath = 2;

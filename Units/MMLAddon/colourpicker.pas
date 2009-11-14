@@ -54,8 +54,8 @@ type
   public
         // Will give us CopyClientToBitmap
         Window: TMWindow;
-        ColourHistory: TList; // for colour history
 
+        { Form components }
         Form : TForm;
         Image: TImage;
         Timor : TTimer;
@@ -65,10 +65,13 @@ type
         Text : string;
         FPickEvent : TPickEvent;
 
+        { Some temp vars }
         oldx, oldy, Color, colorx, colory: Integer;
         targetleft,targettop : integer;
 
         TheChangedEvent,TheChangingEvent : TNotifyEvent;
+
+        { Handles }
         NoteHandle, BitmapHandle, ImageHandle : HDC;
   public
     property OnPick: TPickEvent read FPickEvent write FPickEvent;
@@ -81,14 +84,11 @@ constructor TMColorPicker.Create(aWindow: TMWindow);
 begin
   inherited Create;
   Self.Window := aWindow;
-  Self.ColourHistory := TList.Create;
-
 end;
 
 destructor TMColorPicker.Destroy;
 begin
 
-  Self.ColourHistory.Destroy;
   inherited Destroy;
 end;
 
@@ -107,6 +107,7 @@ var
    {$ENDIF}
 
 begin
+  { We create a Form, with the client image on it. }
   Form := TForm.Create(Application.MainForm);
   if Window.GetDimensionBox( box) then
   begin;

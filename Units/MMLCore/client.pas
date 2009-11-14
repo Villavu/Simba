@@ -32,6 +32,11 @@ uses
   Classes, SysUtils, MufasaTypes,
   Window, Input, Files, Finder, Bitmaps, dtm, ocr;
 
+{
+TClient is a full-blown instance of the MML.
+It binds all the components together.
+}
+
 type
     TClient = class(TObject)
         constructor Create;

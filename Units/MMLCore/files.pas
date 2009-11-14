@@ -69,6 +69,7 @@ implementation
 uses
   {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles;
 
+{ GetFiles in independant of the TMFiles class }
 
 function GetFiles(Path, Ext: string): TstringArray;
 var
@@ -98,21 +99,18 @@ procedure TMFiles.FreeFileList;
 var
   I : integer;
 begin;
-  //WriteLn('Freeing all open Files.');
   For I := 0 To High(MFiles) Do
     If MFiles[i].FS <> nil Then
     Begin
-      WriteLn('You forgot to free a file...');
+      WriteLn('You forgot to free a file... (Path = ' + MFiles[i].Path + ')');
       Try
         MFiles[I].FS.Free;
       Except
         WriteLn('FreeFileList - Exception when freeing');
       End;
-      //FileClose(Files[i].Handle);
     End;
   SetLength(MFiles, 0);
   SetLength(FreeSpots, 0);
-  //WriteLn('Done Freeing all Files');
 end;
 
 destructor TMFiles.Destroy;
@@ -147,9 +145,6 @@ Begin
    End;
 End;
 
-{/\
-  Copies content of the file into the result (if no errors occur).
-/\}
 Function TMFiles.SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
 Begin
   If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
@@ -198,8 +193,9 @@ Begin
   End;
   //Result := FileSeek(Files[FileNum].Handle, cChars, Origin);
 End;
+
 {/\
-  Opens a file for reading.
+  Creates a file for reading/writing.
   Returns the handle (index) to the File Array.
   Returns -1 if unsuccesfull.
 /\}
