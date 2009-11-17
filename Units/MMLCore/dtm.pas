@@ -87,9 +87,6 @@ const
  I am not sure wether I should simply copy and paste the old DTM implementation,
  or rewrite it from scratch.
 
- I recall there was something partially wrong with SCAR-alike DTM conversions
- to Mufasa DTM's...
-
  The old DTM system problaby doesn't perform that well, but seems to be quite
  stable and complete.
 
@@ -412,6 +409,7 @@ begin
   Y2 -= B.Y2;
 end;
 
+// TODO
 procedure DTMRotatedBounds(dtm: pDTM; var x1, y1, x2, y2: Integer);
 var
    i: Integer;
