@@ -71,6 +71,17 @@ Sender.AddFunction(@SetTargetBitmap,'procedure SetTargetBitmap(Bitmap : integer)
 Sender.AddFunction(@SetDesktopAsClient,'procedure SetDesktopAsClient');
 Sender.AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; Size: TPoint);');
 
+{files}
+Sender.AddFunction(@ps_CreateFile, 'function CreateFile(Path: string): Integer;');
+Sender.AddFunction(@ps_OpenFile, 'function OpenFile(Path: string; Shared: Boolean): Integer;');
+Sender.AddFunction(@ps_RewriteFile, 'function RewriteFile(Path: string; Shared: Boolean): Integer;');
+Sender.AddFunction(@ps_CloseFile, 'procedure CloseFile(FileNum: Integer);');
+Sender.AddFunction(@ps_EndOfFile, 'function EndOfFile(FileNum: Integer): Boolean;');
+Sender.AddFunction(@ps_FileSize, 'function FileSize(FileNum: Integer): LongInt;');
+Sender.AddFunction(@ps_ReadFileString, 'function ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;');
+Sender.AddFunction(@ps_WriteFileString, 'function WriteFileString(FileNum: Integer; s: string): Boolean;');
+Sender.AddFunction(@ps_SetFileCharPointer, 'Function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;');
+Sender.AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Integer;');
 
 {other}
 Sender.AddFunction(@SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
