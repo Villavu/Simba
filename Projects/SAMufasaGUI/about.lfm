@@ -3,6 +3,7 @@ object AboutForm: TAboutForm
   Height = 300
   Top = 271
   Width = 400
+  ActiveControl = Memo1
   Caption = 'AboutForm'
   ClientHeight = 300
   ClientWidth = 400
