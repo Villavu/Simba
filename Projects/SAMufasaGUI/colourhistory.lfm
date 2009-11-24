@@ -2,13 +2,13 @@ object ColourHistoryForm: TColourHistoryForm
   Left = 403
   Height = 250
   Top = 344
-  Width = 489
+  Width = 490
   ActiveControl = SelectionName
   Caption = 'Colour Picker History'
   ClientHeight = 250
-  ClientWidth = 489
+  ClientWidth = 490
   Constraints.MinHeight = 200
-  Constraints.MinWidth = 200
+  Constraints.MinWidth = 490
   OnHide = UnSetCHShowMenu
   OnShow = SetCHShowMenu
   LCLVersion = '0.9.29'
@@ -16,7 +16,7 @@ object ColourHistoryForm: TColourHistoryForm
     Left = 16
     Height = 176
     Top = 16
-    Width = 328
+    Width = 329
     Anchors = [akTop, akLeft, akRight, akBottom]
     Columns = <>
     TabOrder = 0
@@ -33,7 +33,7 @@ object ColourHistoryForm: TColourHistoryForm
     TabOrder = 1
   end
   object SelectionName: TEdit
-    Left = 360
+    Left = 361
     Height = 21
     Top = 16
     Width = 112
@@ -44,7 +44,7 @@ object ColourHistoryForm: TColourHistoryForm
     Text = 'Name'
   end
   object PickNewColourButton: TButton
-    Left = 216
+    Left = 217
     Height = 25
     Top = 208
     Width = 128
@@ -53,7 +53,7 @@ object ColourHistoryForm: TColourHistoryForm
     TabOrder = 3
   end
   object ColourValue: TEdit
-    Left = 360
+    Left = 361
     Height = 21
     Top = 56
     Width = 112
@@ -63,7 +63,7 @@ object ColourHistoryForm: TColourHistoryForm
     Text = 'ColourValue'
   end
   object CoordValue: TLabel
-    Left = 360
+    Left = 361
     Height = 14
     Top = 96
     Width = 112
@@ -76,11 +76,11 @@ object ColourHistoryForm: TColourHistoryForm
     Left = 152
     Height = 24
     Top = 209
-    Width = 56
+    Width = 57
     Anchors = [akLeft, akRight, akBottom]
   end
   object OkButton: TButton
-    Left = 392
+    Left = 393
     Height = 24
     Top = 209
     Width = 80
