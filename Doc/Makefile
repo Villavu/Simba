@@ -1,5 +1,5 @@
 
-.PHONY: default clean intro psbook
+.PHONY: default clean intro psbook html all
 
 intro_ := mufasa_intro
 psbook_ := mufasa_ps_handbook
@@ -16,3 +16,8 @@ createreport:
 	$(MAKE) -C Pics/
 	texi2pdf $(intro_).tex #--silent
 	texi2pdf $(psbook_).tex #--silent
+
+html:
+	$(MAKE) -C Pics/
+	latex2html $(intro_).tex
+	latex2html $(psbook_).tex
