@@ -1,14 +1,18 @@
 
-.PHONY: default clean
+.PHONY: default clean intro psbook
 
-self := mufasa_intro
+intro_ := mufasa_intro
+psbook_ := mufasa_ps_handbook
+
 
 default: createreport
 
 clean:
-	find -iname "$(self)*" | grep -v svn | grep -v tex | xargs rm -vf
+	find -iname "$(intro_)*" | grep -v svn | grep -v tex | xargs rm -vf
+	find -iname "$(psbook_)*" | grep -v svn | grep -v tex | xargs rm -vf
 	$(MAKE) -C Pics/ clean
 
 createreport:
 	$(MAKE) -C Pics/
-	texi2pdf $(self).tex #--silent
+	texi2pdf $(intro_).tex #--silent
+	texi2pdf $(psbook_).tex #--silent
