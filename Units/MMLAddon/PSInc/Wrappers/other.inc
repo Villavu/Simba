@@ -69,6 +69,11 @@ begin;
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
 end;
 
+procedure TerminateScript;
+begin;
+  CurrThread.PSScript.Stop;
+end;
+
 procedure HakunaMatata;
 begin;
   OpenWebPage('http://www.youtube.com/v/ejEVczA8PLU&hl=en&fs=1&autoplay=1');

@@ -24,6 +24,7 @@
 Sender.Comp.AddConstantN('AppPath','string').SetString(CurrThread.AppPath);
 Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath);
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of integer');
+Sender.Comp.AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
 Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 Sender.Comp.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
@@ -56,6 +57,7 @@ Sender.AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
 Sender.AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 
 {maths}
+sender.AddFunction(@ceil,'function ceil(e : extended) : integer');
 sender.AddFunction(@power,'function pow(base,exponent : extended) : extended');
 Sender.AddFunction(@max,'function Max(a, b: Integer): Integer;');
 Sender.AddFunction(@min,'function Min(a, b: Integer): Integer;');
@@ -90,6 +92,7 @@ Sender.AddFunction(@GetTickCount, 'function GetSystemTime: Integer;');
 Sender.AddFunction(@CreateForm,'function CreateForm : TForm;');
 Sender.AddFunction(@CreateButton,'function CreateButton(Owner : TComponent) : TButton');
 Sender.AddFunction(@HakunaMatata,'procedure HakunaMatata;');
+Sender.AddFunction(@TerminateScript,'procedure TerminateScript;');
 
 {web}
 Sender.AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
