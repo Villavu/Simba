@@ -1,0 +1,18 @@
+program new;
+var
+  Bmp,x,y : integer;
+begin
+  Bmp := createbItmap(100,100);
+  CopyClientToBitmap(Bmp,0,0,99,99);
+  for x := 0 to 49 do
+  begin;
+    for y := 0 to 49 do
+    begin;
+      fastsetpixel(bmp,x,y,random(clwhite));
+      fastsetpixel(bmp,y,x,random(clwhite));
+    end;
+    x := x + 5;
+  end;
+  DisplayDebugImgWindow(100,100);
+  DrawBitmapDebugImg(bmp);
+end.

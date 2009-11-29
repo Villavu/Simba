@@ -28,7 +28,7 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes, web;
+  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes, web,bitmaps;
 
 type
     { TMMLPSThread }
@@ -42,6 +42,12 @@ type
     end;
 
     TWritelnProc = procedure(s: string);
+    TDbgImgInfo = record
+      DispSize : ^TPoint;
+      ShowForm : procedure of object;
+      ToDrawBitmap : ^TMufasaBitmap;
+      DrawBitmap : procedure of object;
+    end;
 
     PSyncInfo = ^TSyncInfo;
     TErrorType = (errRuntime,errCompile);
@@ -58,6 +64,7 @@ type
     protected
       //DebugTo : TMemo;
       DebugTo: TWritelnProc;
+      DebugImg : TDbgImgInfo;
       PluginsToload : Array of integer;
       FOnError  : TOnError;
       procedure OnCompile(Sender: TPSScript);
@@ -75,6 +82,7 @@ type
       property OnError : TOnError read FOnError write FOnError;
       procedure SetPSScript(Script : string);
       procedure SetDebug( writelnProc : TWritelnProc );
+      procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
       procedure SetPaths(ScriptP,AppP : string);
       constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo);
       destructor Destroy; override;
@@ -358,6 +366,11 @@ end;
 procedure TMMLPSThread.SetDebug(writelnProc: TWritelnProc);
 begin
   DebugTo := writelnProc;
+end;
+
+procedure TMMLPSThread.SetDbgImg(DebugImageInfo: TDbgImgInfo);
+begin
+  DebugImg := DebugImageInfo;
 end;
 
 procedure TMMLPSThread.SetPaths(ScriptP, AppP: string);

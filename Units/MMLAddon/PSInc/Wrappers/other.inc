@@ -69,6 +69,18 @@ begin;
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
 end;
 
+procedure DisplayDebugImgWindow(w,h : integer);
+begin;
+  CurrThread.DebugImg.DispSize^ := Classes.Point(w,h);
+  CurrThread.Synchronize( CurrThread.DebugImg.ShowForm);
+end;
+
+procedure DrawBitmapDebugImg(bmp : integer);
+begin;
+  CurrThread.DebugImg.ToDrawBitmap^ := CurrThread.Client.MBitmaps.Bmp[bmp];
+  CurrThread.Synchronize(CurrThread.DebugImg.DrawBitmap);
+end;
+
 procedure TerminateScript;
 begin;
   CurrThread.PSScript.Stop;
