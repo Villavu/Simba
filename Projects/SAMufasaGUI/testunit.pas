@@ -89,6 +89,7 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemDebugImage: TMenuItem;
     MenuItemAbout: TMenuItem;
     MenuItemMainExit: TMenuItem;
     MenuItemDivider6: TMenuItem;
@@ -219,6 +220,7 @@ type
     procedure MenuEditClick(Sender: TObject);
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
+    procedure MenuItemDebugImageClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
@@ -294,8 +296,10 @@ var
 implementation
 uses
    lclintf,plugins,
-   syncobjs,
-   colourhistory; // for the critical sections
+   syncobjs, // for the critical sections
+   debugimage,
+   bitmaps,
+   colourhistory;
 
 //{$ifdef mswindows}
 
@@ -354,6 +358,8 @@ end;
 //{$ENDIF}
 
 procedure TForm1.RunScript;
+var
+  DbgImgInfo : TDbgImgInfo;
 begin
   with CurrScript do
   begin
@@ -375,7 +381,11 @@ begin
     ScriptThread.SetDebug(@formWriteln);
     {$ENDIF}
     ScriptThread.SetPSScript(CurrScript.SynEdit.Lines.Text);
-//    ScriptThread.SetDebug(Self.Memo1);
+    DbgImgInfo.DispSize := @DebugImgForm.DispSize;
+    DbgImgInfo.ShowForm := @DebugImgForm.ShowDebugImgForm;
+    DbgImgInfo.ToDrawBitmap:= @DebugImgForm.ToDrawBmp;
+    DbgImgInfo.DrawBitmap:= @DebugImgForm.DrawBitmap;
+    ScriptThread.SetDbgImg(DbgImgInfo);
 
     ScriptThread.OnError:=@ErrorThread;
     if ScriptFile <> '' then
@@ -933,6 +943,7 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  Randomize;
   //Show close buttons @ tabs
   PageControl1.Options:=PageControl1.Options+[nboShowCloseButtons];
   PageControl1.OnCloseTabClicked:=ActionCloseTab.OnExecute;
@@ -1033,6 +1044,11 @@ end;
 procedure TForm1.MenuItemCloseTabsClick(Sender: TObject);
 begin
   Self.CloseTabs;
+end;
+
+procedure TForm1.MenuItemDebugImageClick(Sender: TObject);
+begin
+  DebugImgForm.Show;
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);

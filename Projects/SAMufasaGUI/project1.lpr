@@ -30,7 +30,7 @@ uses
   cthreads, cmem,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, testunit,colourhistory, About;
+  Forms, testunit,colourhistory, About, internets, debugimage;
 
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
@@ -41,6 +41,7 @@ begin
   Application.CreateForm(TForm1, Form1);
   Application.CreateForm(TColourHistoryForm, ColourHistoryForm);
   Application.CreateForm(TAboutForm, AboutForm);
+  Application.CreateForm(TDebugImgForm, DebugImgForm);
   Application.Run;
 end.
 

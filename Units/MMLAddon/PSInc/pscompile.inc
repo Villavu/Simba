@@ -93,7 +93,9 @@ Sender.AddFunction(@CreateForm,'function CreateForm : TForm;');
 Sender.AddFunction(@CreateButton,'function CreateButton(Owner : TComponent) : TButton');
 Sender.AddFunction(@HakunaMatata,'procedure HakunaMatata;');
 Sender.AddFunction(@TerminateScript,'procedure TerminateScript;');
-
+Sender.AddFunction(@DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w,h : integer);');
+Sender.AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp : integer);');
+Sender.AddFunction(@Random,'function Random(Int : integer): integer;');
 {web}
 Sender.AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 
