@@ -40,6 +40,7 @@ Procedure ColorToRGB(Color : integer;out r,g,b : integer); overload; inline;
 Procedure RGBToXYZ(R,G,B : integer;out x,y,z : Extended); inline;
 Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: integer); inline;
 Procedure RGBToHSL(RR,GG,BB : integer;out H,S,L : Extended); inline;
+Procedure RGBToHSLNonFixed(RR,GG,BB : integer;out H,S,L : Extended); inline;
 Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Byte); inline;overload;
 Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Integer); inline;overload;
 Procedure ColorToHSL(Col: Integer; out h, s, l: Extended); inline;
@@ -195,6 +196,50 @@ begin
   H := H * 100;
   S := S * 100;
   L := L * 100;
+end;
+
+{/\
+   Translates the given Red (R), Green (G) and Blue (B) components to
+   H (Hue), S (Saturation) and L (Luminance) components.
+   This function does not multiply it by 100.
+/\}
+
+Procedure RGBToHSLNonFixed(RR,GG,BB : integer;out H,S,L : Extended); inline;
+var
+  R,  G,  B,   D,  Cmax, Cmin: Extended;
+begin
+  R := RR / 255;
+  G := GG / 255;
+  B := BB / 255;
+  CMin := R;
+  if G < Cmin then Cmin := G;
+  if B  < Cmin then Cmin := B;
+  CMax := R;
+  if G > Cmax then Cmax := G;
+  if B  > Cmax then Cmax := B;
+  L := 0.5 * (Cmax + Cmin);
+  if Cmax = Cmin then
+  begin
+    H := 0;
+    S := 0;
+  end else
+  begin;
+    D := Cmax - Cmin;
+    if L < 0.5 then
+      S := D / (Cmax + Cmin)
+    else
+      S := D / (2 - Cmax - Cmin);
+    if R = Cmax then
+      H := (G - B) / D
+    else
+      if G = Cmax then
+        H  := 2 + (B - R) / D
+      else
+        H := 4 +  (R - G) / D;
+    H := H / 6;
+    if H < 0 then
+      H := H + 1;
+  end;
 end;
 
 {/\

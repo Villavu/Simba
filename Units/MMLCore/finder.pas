@@ -45,11 +45,17 @@ type
           constructor Create(aClient: TObject);
           destructor Destroy; override;
       private
+
+
         Procedure UpdateCachedValues(NewWidth,NewHeight : integer);
         procedure DefaultOperations(var xs,ys,xe,ye : integer);
         //Loads the Spiral into ClientTPA (Will not cause problems)
         procedure LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
       public
+        function FindColorsToleranceOptimised(out Points: TPointArray; Color,
+          xs, ys, xe, ye, Tol: Integer): Boolean;
+        function FindColorToleranceOptimised(out x, y: Integer; Color, xs, ys,
+          xe, ye, tol: Integer): Boolean;
         function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
         procedure SetToleranceSpeed(nCTS: Integer);
         function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
@@ -73,6 +79,7 @@ type
         function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
       protected
         Client: TObject;
+        Percentage : array[0..255] of Extended; //We store all the possible RGB / 255 divisions.
         CachedWidth, CachedHeight : integer;
         ClientTPA : TPointArray;
         hueMod, satMod: Extended;
@@ -223,6 +230,8 @@ begin;
 end;
 
 constructor TMFinder.Create(aClient: TObject);
+var
+  I : integer;
 
 begin
   inherited Create;
@@ -231,6 +240,8 @@ begin
   Self.CTS := 1;
   Self.hueMod := 0.2;
   Self.satMod := 0.2;
+  for i := 0 to 255 do
+    Percentage[i] := i / 255;
 
 end;
 
@@ -279,7 +290,6 @@ begin
   0: Result := ((Abs(R1-R2) <= Tolerance) and (Abs(G1-G2) <= Tolerance) and (Abs(B1-B2) <= Tolerance));
   1: Result := (Sqrt(sqr(R1-R2) + sqr(G1-G2) + sqr(B1-B2)) <= Tolerance);
   2: begin
-       RGBToHSL(R1,g1,b1,H1,S1,L1);
        RGBToHSL(R2,g2,b2,H2,S2,L2);
        Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
      end;
@@ -451,15 +461,17 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-function TMFinder.FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
+function TMFinder.FindColorToleranceOptimised(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr: PRGB32;
    PtrInc: Integer;
    dX, dY, clR, clG, clB, xx, yy: Integer;
    H1, S1, L1, H2, S2, L2: Extended;
-   HueXTol, SatXTol: Extended;
-
+   R,G,B : extended; //percentage R,G,B.. (Needed for HSL).
+   D : Extended; //CMax - Cmin
+   HueTol,SatTol, LumTol : extended;
+   CMax, CMin : extended;
    label Hit;
 
 begin
@@ -472,7 +484,140 @@ begin
   dY := ye - ys;
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
-  ColorToHSL(Color, H1, S1, L1);
+  if Cts = 2 then
+    RGBToHSLNonFixed(clR,clG,clB,H1,S1,L1);
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+
+  // Do we want to "cache" these vars?
+  // We will, for now. Easier to type.
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+
+  case CTS of
+    0:
+    for yy := ys to ye do
+    begin
+      for xx := xs to xe do
+      begin
+         if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
+            goto Hit;
+        inc(Ptr);
+      end;
+      Inc(Ptr, PtrInc);
+    end;
+
+    1:
+    begin
+      Tol := Sqr(Tol);
+
+      for yy := ys to ye do
+      begin
+        for xx := xs to xe do
+        begin
+           if (sqr(clB - Ptr^.B) + sqr(clG - Ptr^.G) + sqr(clR-Ptr^.R)) <= Tol then
+              goto Hit;
+          inc(ptr);
+        end;
+        Inc(Ptr, PtrInc);
+      end;
+
+    end;
+    2:
+    begin
+      //Since we don't make (real) percentages of the HSL-values we need to change the tolerance..
+      HueTol := hueMod * Tol / 100;
+      SatTol := satMod * Tol / 100;
+      LumTol := Tol / 100;
+      for yy := ys to ye do
+      begin
+        for xx := xs to xe do
+        begin
+          R := Percentage[Ptr^.r];
+          G := Percentage[Ptr^.g];
+          B := Percentage[Ptr^.b];
+          //We increase the Ptr already, since we do Continue in loops..
+          inc(Ptr);
+          CMin := R;
+          CMax := R;
+          if G  < Cmin then CMin := G;
+          if B  < Cmin then CMin := B;
+          if G  > Cmax then CMax := G;
+          if B  > Cmax then CMax := B;
+          L2 := 0.5 * (Cmax + Cmin);
+          //The L-value is already calculated, lets see if the current point meats the requirements!
+          if Abs(L2-L1) > LumTol then //if not (Abs(L2 - L1) <= LumTol) then
+            Continue;
+          if Cmax = Cmin then
+          begin
+            //S and H are both zero, lets check if we need found a point!
+            if (H1 <= HueTol) and (S1 <= SatTol) then
+              goto Hit
+            else
+              Continue;
+          end;
+          D := Cmax - Cmin;
+          if L2 < 0.5 then
+            S2 := D / (Cmax + Cmin)
+          else
+            S2 := D / (2 - Cmax - Cmin);
+          //We've Calculated the S. Lets see if we need to continue.
+          if Abs(S2 - S1) > SatTol then //if not (abs(S1 - S2) <= SatXTol) then
+            Continue;
+          if R = Cmax then
+            H2 := (G - B) / D
+          else
+            if G = Cmax then
+              H2  := 2 + (B - R) / D
+            else
+              H2 := 4 +  (R - G) / D;
+          H2 := H2 / 6;
+          if H2 < 0 then
+            H2 := H2 + 1;
+          //Finally lets test H2
+          if Abs(H2 - H1) <= HueTol then
+            goto hit;
+        end;
+        Inc(Ptr, PtrInc);
+      end;
+    end;
+  end;
+  Result := False;
+  TClient(Client).MWindow.FreeReturnData;
+  Exit;
+
+  Hit:
+    Result := True;
+    x := xx;
+    y := yy;
+    TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
+var
+   PtrData: TRetData;
+   Ptr: PRGB32;
+   PtrInc: Integer;
+   dX, dY, clR, clG, clB, xx, yy: Integer;
+   H1, S1, L1, H2, S2, L2: Extended;
+   R,G,B : extended; //percentage R,G,B.. (Needed for HSL).
+   D : Extended; //CMax - Cmin
+   HueXTol, SatXTol: Extended;
+   CMax, CMin : extended;
+   label Hit;
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+  if Cts = 2 then
+    RGBToHSL(clR,clG,clB,H1,S1,L1);
 
   PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
@@ -516,6 +661,7 @@ begin
       HueXTol := hueMod * Tol;
       SatXTol := satMod * Tol;
       for yy := ys to ye do
+      begin
         for xx := xs to xe do
         begin
           RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
@@ -524,6 +670,7 @@ begin
          inc(Ptr);
         end;
         Inc(Ptr, PtrInc);
+      end;
     end;
   end;
   Result := False;
@@ -544,7 +691,9 @@ var
    Ptr: PRGB32;
    PtrInc,C: Integer;
    dX, dY, clR, clG, clB, xx, yy: Integer;
-   H1, S1, L1, H2, S2, L2, hueXTol, satXTol: Extended;
+   H1, S1, L1, H2, S2, L2, hueXTol, satXTol,LumTol,R,G,B,D,Cmin,Cmax: Extended;
+label
+  hit;
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
@@ -553,7 +702,8 @@ begin
   dY := ye - ys;
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
-  ColorToHSL(Color, H1, S1, L1);
+  if CTS = 2 then
+    ColorToHSL(color,H1,S1,L1);
 
   PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
@@ -600,6 +750,7 @@ begin
       HueXTol := hueMod * Tol;
       SatXTol := satMod * Tol;
       for yy := ys to ye do
+      begin
         for xx := xs to xe do
         begin
           RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
@@ -609,9 +760,138 @@ begin
             ClientTPA[c].y := yy;
             Inc(c);
           end;
-          Inc(Ptr);
+          Inc(Ptr)
         end;
+        Inc(Ptr, PtrInc);
+      end;
+    end;
+  end;
+  SetLength(Points, C);
+  Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
+  Result := C > 0;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+function TMFinder.FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys,
+  xe, ye, Tol: Integer): Boolean;
+var
+   PtrData: TRetData;
+   Ptr: PRGB32;
+   PtrInc,C: Integer;
+   dX, dY, clR, clG, clB, xx, yy: Integer;
+   H1, S1, L1, H2, S2, L2, hueTol, satTol,LumTol,R,G,B,D,Cmin,Cmax: Extended;
+label
+  hit;
+begin
+  Result := false;
+  DefaultOperations(xs,ys,xe,ye);
+
+  dX := xe - xs;
+  dY := ye - ys;
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+  if CTS = 2 then
+    RGBToHSLNonFixed(clR,clG,clB,H1,S1,L1);
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+
+  // Do we want to "cache" these vars?
+  // We will, for now. Easier to type.
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+  c := 0;
+  case CTS of
+    0:
+    for yy := ys to ye do
+    begin
+      for xx := xs to xe do
+      begin
+         if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
+         begin;
+           ClientTPA[c].x := xx;
+           ClientTPA[c].y := yy;
+           inc(c);
+         end;
+        inc(Ptr);
+      end;
       Inc(Ptr, PtrInc);
+    end;
+
+    1:
+    for yy := ys to ye do
+    begin
+      for xx := xs to xe do
+      begin
+         if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
+         begin;
+           ClientTPA[c].x := xx;
+           ClientTPA[c].y := yy;
+           inc(c);
+         end;
+        inc(ptr);
+      end;
+      Inc(Ptr, PtrInc);
+    end;
+
+    2:
+    begin
+      HueTol := hueMod * Tol / 100;
+      SatTol := satMod * Tol / 100;
+      LumTol := Tol / 100;
+      for yy := ys to ye do
+      begin
+        for xx := xs to xe do
+        begin
+          R := Percentage[Ptr^.r];
+          G := Percentage[Ptr^.g];
+          B := Percentage[Ptr^.b];
+          //We increase the Ptr already, since we use Continue;
+          inc(Ptr);
+          CMin := R;
+          CMax := R;
+          if G  < Cmin then CMin := G;
+          if B  < Cmin then CMin := B;
+          if G  > Cmax then CMax := G;
+          if B  > Cmax then CMax := B;
+          L2 := 0.5 * (Cmax + Cmin);
+          //The L-value is already calculated, lets see if the current point meats the requirements!
+          if Abs(L2-L1) > LumTol then //if not (Abs(L2 - L1) <= LumTol) then
+            Continue;
+          if Cmax = Cmin then
+          begin
+            //S and H are both zero, lets check if we need found a point!
+            if (H1 <= HueTol) and (S1 <= SatTol) then
+              goto Hit
+            else
+              Continue;
+          end;
+          D := Cmax - Cmin;
+          if L2 < 0.5 then
+            S2 := D / (Cmax + Cmin)
+          else
+            S2 := D / (2 - Cmax - Cmin);
+          //We've Calculated the S. Lets see if we need to continue.
+          if Abs(S2 - S1) > SatTol then //if not (abs(S1 - S2) <= SatXTol) then
+            Continue;
+          if R = Cmax then
+            H2 := (G - B) / D
+          else
+            if G = Cmax then
+              H2  := 2 + (B - R) / D
+            else
+              H2 := 4 +  (R - G) / D;
+          H2 := H2 / 6;
+          if H2 < 0 then
+            H2 := H2 + 1;
+          //Finally lets test H2
+          if Abs(H2 - H1) > HueTol then
+            continue;
+          hit:
+            ClientTPA[c].x := xx;
+            ClientTPA[c].y := yy;
+            Inc(c);
+        end;
+        Inc(Ptr, PtrInc);
+      end;
     end;
   end;
   SetLength(Points, C);

@@ -31,6 +31,10 @@ begin
   Result := CurrThread.Client.MFinder.FindColor(x, y, color, x1, y1, x2, y2);
 end;
 
+function findcolortoleranceOptimised(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;
+begin
+  Result := CurrThread.Client.MFinder.FindColorToleranceOptimised(x, y, color, x1, y1, x2, y2, tol);
+end;
 function findcolortolerance(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;
 begin
   Result := CurrThread.Client.MFinder.FindColorTolerance(x, y, color, x1, y1, x2, y2, tol);
@@ -56,6 +60,10 @@ begin;
   result := CurrThread.Client.MFinder.CountColorTolerance(color,xs,ys,xe,ye,tolerance);
 end;
 
+function FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;
+begin;
+  result := CurrThread.Client.MFinder.FindColorsToleranceOptimised(points,color,xs,ys,xe,ye,tolerance);
+end;
 function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;
 begin;
   result := CurrThread.Client.MFinder.FindColorsTolerance(points,color,xs,ys,xe,ye,tolerance);

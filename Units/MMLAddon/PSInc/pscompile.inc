@@ -100,10 +100,12 @@ Sender.AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 {Color + Color Finders}
 Sender.AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
 Sender.AddFunction(@FindColor, 'function findcolor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
+Sender.AddFunction(@findcolortoleranceOptimised, 'function findcolortoleranceOptimised(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
 Sender.AddFunction(@FindColorTolerance, 'function findcolortolerance(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
 Sender.AddFunction(@FindColors, 'function findcolors(out TPA: TPointArray; color, x1, y1, x2, y2: integer): boolean;');
 Sender.AddFunction(@SimilarColors,'function SimilarColors(Col1,Col2,Tolerance : integer) : boolean');
 Sender.AddFunction(@CountColorTolerance,'function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;');
+Sender.AddFunction(@FindColorsToleranceOptimised,'function FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 Sender.AddFunction(@FindColorsTolerance,'function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 Sender.AddFunction(@FindColorSpiral,'function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;');
 Sender.AddFunction(@FindColorsSpiralTolerance,'function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;');
