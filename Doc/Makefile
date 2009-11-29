@@ -21,5 +21,5 @@ intro:
 
 html:
 	$(MAKE) -C Pics/
-	latex2html $(intro_).tex -local_icons
-	latex2html $(psbook_).tex -local_icons
+	latex2html $(intro_).tex -local_icons -nofootnode
+	latex2html $(psbook_).tex -local_icons -nofootnode
