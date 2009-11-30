@@ -182,7 +182,7 @@ begin
   for i := 1 to length(text) do
   begin
     if((text[i] >= 'A') and (text[i] <= 'Z')) then
-    begin;
+    begin
       Self.KeyDown(VK_SHIFT);
       HoldShift:= True;
       Text[i] := lowerCase(Text[i]);
@@ -194,6 +194,8 @@ begin
       end;
     Self.PressKey( GetSimpleKeyCode(Text[i]));
   end;
+  if HoldShift then
+    Self.KeyUp(VK_SHIFT);
 end;
 
 function TMInput.isKeyDown(key: Word): Boolean;

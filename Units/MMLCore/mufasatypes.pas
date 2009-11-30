@@ -34,7 +34,16 @@ const
   DS = DirectorySeparator;
   MEOL = {$ifdef MSWINDOWS}#13+{$endif}#10;
 
+{ Overloaded Operators}
+
+{ TPoint add }
+operator + (PT1,PT2 : TPoint) : TPoint;
+
+{ TPoint sub }
+operator - (PT1,PT2 : TPoint) : TPoint;
+
 type
+
   TRGB32 = packed record
     B, G, R, A: Byte;
   end;
@@ -283,6 +292,15 @@ var
                 );
 
 implementation
-
+operator+(PT1, PT2: TPoint): TPoint;
+begin
+  Result.x := PT1.x + PT2.x;
+  Result.y := Pt1.y + PT2.y;
+end;
+operator-(PT1, PT2: TPoint): TPoint;
+begin
+  Result.x := PT1.x - PT2.x;
+  Result.y := Pt1.y - PT2.y;
+end;
 end.
 

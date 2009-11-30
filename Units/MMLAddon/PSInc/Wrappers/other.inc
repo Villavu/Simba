@@ -28,7 +28,7 @@ begin
 end;
 {$else}
 var
-  EndTime : integer;
+  EndTime : DWord;
 begin
   if t > 50 then
   begin;
@@ -36,7 +36,9 @@ begin
     while (CurrThread.PSScript.Exec.Status = isRunning) and (GetTickCount < EndTime) do
       Sleep(16);
   end else
+  begin
     sleep(t);
+  end;
 end;
 {$endif}
 

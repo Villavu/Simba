@@ -51,3 +51,8 @@ procedure SetTargetArray(P: Integer; Size: TPoint);
 begin
   CurrThread.Client.MWindow.SetTarget(PRGB32(P), Size);
 end;
+
+procedure activateclient;
+begin
+  CurrThread.Client.MWindow.ActivateClient;
+end;
