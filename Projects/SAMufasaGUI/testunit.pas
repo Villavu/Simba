@@ -1048,7 +1048,11 @@ end;
 
 procedure TForm1.MenuItemDebugImageClick(Sender: TObject);
 begin
-  DebugImgForm.Show;
+  MenuItemDebugImage.Checked := not DebugImgForm.Visible;
+  if MenuItemDebugImage.Checked then
+    DebugImgForm.Show
+  else
+    DebugImgForm.Hide;
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
