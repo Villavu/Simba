@@ -89,7 +89,7 @@ Sender.AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer
 {other}
 Sender.AddFunction(@SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
 Sender.AddFunction(@psWait, 'procedure wait(t: integer);');
-Sender.AddFunction(@GetTickCount, 'function GetSystemTime: Integer;');
+Sender.AddFunction(@GetTickCount, 'function GetSystemTime: DWord;');
 Sender.AddFunction(@CreateForm,'function CreateForm : TForm;');
 Sender.AddFunction(@CreateButton,'function CreateButton(Owner : TComponent) : TButton');
 Sender.AddFunction(@HakunaMatata,'procedure HakunaMatata;');
