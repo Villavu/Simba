@@ -72,6 +72,7 @@ Sender.AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(out w, h
 Sender.AddFunction(@SetTargetBitmap,'procedure SetTargetBitmap(Bitmap : integer);');
 Sender.AddFunction(@SetDesktopAsClient,'procedure SetDesktopAsClient');
 Sender.AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; Size: TPoint);');
+Sender.AddFunction(@ActivateClient, 'procedure activateclient;');
 
 {files}
 Sender.AddFunction(@ps_CreateFile, 'function CreateFile(Path: string): Integer;');

@@ -531,6 +531,7 @@ begin
   begin;
     Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     XSetInputFocus(Self.XDisplay,Self.CurWindow,RevertToParent,CurrentTime);
+    XFlush(Self.XDisplay);
     XSetErrorHandler(Old_Handler);
   end;
   {$ENDIF}
