@@ -261,7 +261,9 @@ end;
 
 procedure TMWindow.OnTargetBitmapDestroy(Bitmap: TMufasaBitmap);
 begin
-  raise Exception.CreateFmt('Our targetbitmap has been destroyed, what now?',[]);
+  Self.SetDesktop;
+  writeln('Our current bitmap is being freed! Defaulting to Desktop.');
+ // raise Exception.CreateFmt('Our targetbitmap has been destroyed, what now?',[]);
 end;
 
 function TMWindow.GetColor(x, y: integer): TColor;
