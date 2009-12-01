@@ -33,13 +33,17 @@ uses
 type
     TMDTM = class(TObject)
 
+        private
+
+
+    public
            function AddDTM(d: TDTM): Integer;
            function AddpDTM(d: pDTM): Integer;
            function GetDTM(index: Integer; out dtm: pDTM): Boolean;
            procedure FreeDTM(DTM: Integer);
            Function StringToDTM(S: String): pDTM;
 
-           function FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2,
+         {  function FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2,
                            y2: Integer): Boolean;
           function FindDTMs(DTM: Integer; out Points: TPointArray; x1, y1, x2,
                             y2: Integer): Boolean;
@@ -50,22 +54,18 @@ type
                                   y1, x2, y2: Integer; sAngle, eAngle,
                                   aStep: Extended; out aFound: T2DExtendedArray)
                                   : Boolean;
-           function pFindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2:
-           Integer): Boolean;
-           function pFindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2,
-                            y2: Integer): Boolean;
+          function pFindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2:
+                           Integer): Boolean;
           function pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2,
-                                  y2: Integer; sAngle, eAngle, aStep: Extended;
-                                  out aFound: Extended): Boolean;
+                                   y2: Integer; sAngle, eAngle, aStep: Extended;
+                                   out aFound: Extended): Boolean;
           function pFindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1,
-                                  y1, x2, y2: Integer; sAngle, eAngle,
-                                  aStep: Extended; out aFound: T2DExtendedArray)
-                                  : Boolean;
-
+                                    y1, x2, y2: Integer; sAngle, eAngle,
+                                    aStep: Extended; out aFound: T2DExtendedArray)
+                                    : Boolean;
+                                                    }
            constructor Create(Owner: TObject);
            destructor Destroy; override;
-    private
-           function AreaShape(Color, Tolerance, Size, Shape: Integer; P: TPoint) : Boolean; inline;
     private
            Client: TObject;
 
@@ -75,13 +75,6 @@ type
            DTMList: Array Of pDTM;
            FreeSpots: Array Of Integer;
     end;
-
-const
-    dtm_Rectangle = 0;
-    dtm_Cross = 1;
-    dtm_DiagonalCross = 2;
-    dtm_Circle = 3;
-    dtm_Triangle = 4;
 
 {
  I am not sure wether I should simply copy and paste the old DTM implementation,
@@ -111,6 +104,7 @@ uses
 type
    TBufferByteArray = Array[0..524287] of Byte;
    PBufferByteArray = ^TBufferByteArray;
+
 
 constructor TMDTM.Create(Owner: TObject);
 begin
@@ -152,102 +146,13 @@ begin
   inherited Destroy;
 end;
 
-type
-    PMSimColor = function (Color1,Color2,Tolerance : Integer) : boolean of object;
-    PMGetCol = function (x, y: integer): TColor of object;
-
-Function TMDTM.AreaShape(Color, Tolerance, Size, Shape: Integer; P: TPoint) : Boolean; inline;
-
-Var
-   X, Y, S: Integer;
-   SimCol: PMSimColor;
-   GetCol: PMGetCol;
+Function AreaShape(Color, Tolerance, Size, Shape: Integer; P: TPoint) : Boolean; inline;
 
 Begin
-  SimCol := @TClient(Client).MFinder.SimilarColors;
-  GetCol := @TClient(Client).MWindow.GetColor;
-  Case Shape Of
-    dtm_Rectangle:
-    Begin
-      {
-        Example:
-        3x3
-        X X X
-        X X X
-        X X X
-      }
-      For X := P.X - Size To P.X + Size Do
-        For Y := P.Y - Size To P.Y + Size Do
-          If SimCol(GetCol(X, Y), Color, Tolerance) Then
-          Begin
-            Result := True;
-	          Exit;
-          End;
-    End;
 
-    dtm_Cross:
-      {
-        Example:
-        3x3
-          X
-        X X X
-          X
-      }
-    Begin
-      For X := P.X - Size To P.X + Size Do
-        If SimCol(GetCol(X, P.Y), Color, Tolerance) Then
-        Begin
-          Result := True;
-          Exit;
-        End;
-      For Y := P.Y - Size To P.Y + Size Do
-        If SimCol(GetCol(P.X, Y), Color, Tolerance) Then
-        Begin
-          Result := True;
-          Exit;
-        End;
-    End;
-
-    dtm_DiagonalCross:
-      {
-        Example:
-        3x3
-        X   X
-          X
-        X   X
-
-      }
-      Begin
-      For S := -Size To Size Do
-      Begin
-        If SimCol(GetCol(P.X + S, P.Y + S), Color, Tolerance) Then
-        Begin
-          Result := True;
-          Exit;
-        End;
-        If SimCol(GetCol(P.X + S, P.Y - S), Color, Tolerance) Then
-        Begin
-          Result := True;
-          Exit;
-        End;
-      End;
-    End;
-
-    4:
-    Begin
-       raise Exception.CreateFmt('The given DTM Shape ([%d]) is not yet' +
-                                 ' implemented.', [Shape]);
-    End;
-
-    Else
-      WriteLn('Incorrect Shape');
-  End;
-  Result := False;
 End;
 
-{/\
-  Rotates the given point (p) by A (in radians) around the point defined by cx, cy.
-/\}
+//  Rotates the given point (p) by A (in radians) around the point defined by cx, cy.
 
 function RotatePoint(p: TPoint; angle, mx, my: Extended): TPoint; inline;
 
@@ -306,6 +211,7 @@ begin
       Result.t[i] := PInteger(@b^[c+24])^;
     end;
   end;
+  result.l := length(result.p);
 end;
 
 function TMDTM.AddDTM(d: TDTM): Integer;
@@ -380,61 +286,21 @@ begin
     SetLength(DTMList[DTM].t, 0);
     SetLength(DTMList[DTM].asz, 0);
     SetLength(DTMList[DTM].ash, 0);
+    DTMList[DTM].l := 0;
   except
+    raise Exception.CreateFmt('Invalid DTM passed to FreeDTM', []);
     //WriteLn('Invalid DTM');
   end;
   SetLength(FreeSpots, Length(FreeSpots) + 1);
   FreeSpots[High(FreeSpots)] := DTM;
 end;
 
-procedure DTMBounds(dtm: pDTM; var x1, y1, x2, y2: Integer);
-var
-   i: Integer;
-   B: TBox;
 
-begin
-  FillChar(b,sizeOf(TBox),0);
-  for i := 0 to high(dtm.p) do
-  begin
-    B.X1 := Min(B.X1, dtm.p[i].X - dtm.asz[i]);
-    B.Y1 := Min(B.Y1, dtm.p[i].Y - dtm.asz[i]);
-    B.X2 := Max(B.X2, dtm.p[i].X + dtm.asz[i]);
-    B.Y2 := Max(B.Y2, dtm.p[i].Y + dtm.asz[i]);
-  end;
-  {writeln(inttostr(B.x1) + ', ' + inttostr(b.y1) + ', ' + inttostr(b.x2) +
-          ', ' + inttostr(b.y2)); }
-  x1 += -B.X1;
-  y1 += -B.Y1;
-  X2 -= B.X2;
-  Y2 -= B.Y2;
-end;
-
-// TODO
-procedure DTMRotatedBounds(dtm: pDTM; var x1, y1, x2, y2: Integer);
-var
-   i: Integer;
-   B: TBox;
-
-begin
-  FillChar(b,sizeOf(TBox),0);
-  for i := 0 to high(dtm.p) do
-  begin
-    B.X1 := Min(B.X1, dtm.p[i].X - dtm.asz[i]);
-    B.Y1 := Min(B.Y1, dtm.p[i].Y - dtm.asz[i]);
-    B.X2 := Max(B.X2, dtm.p[i].X + dtm.asz[i]);
-    B.Y2 := Max(B.Y2, dtm.p[i].Y + dtm.asz[i]);
-  end;
-
-  x1 += -Sqr(B.X1);
-  y1 += -Sqr(B.Y1);
-  X2 -= Sqr(B.X2);
-  Y2 -= Sqr(B.Y2);
-end;
 {
   Tries to find the given DTM (index). If found will put the point the dtm has
   been found at in x, y and result to true.
 }
-function TMDTM.FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+{function TMDTM.FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
 var
    temp: pDTM;
 begin
@@ -446,90 +312,26 @@ begin
     y := 0;
     Result := False;
   end;
-end;
+end;  }
 
 {
   Tries to find the given pDTM. If found will put the point the dtm has
   been found at in x, y and result to true.
 }
 
-function TMDTM.pFindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
-
-var
-   mP: TPointArray;
-   I, J, H, dH: Integer;
-   Found: Boolean;
-   TempTP: TPoint;
+{function TMDTM.pFindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
 
 
 begin
 
-  for I := 1 to High(DTM.p) do
-  begin
-    DTM.p[I].x := DTM.p[I].x - DTM.p[0].x;
-    DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
-
-  end;
-
-  {writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));     }
-  DTMBounds(DTM, x1, y1, x2, y2);
-  {writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));  }
-  {If X2 > X1 then
-     //Exit;
-   If Y2 > Y1 then  }
-     //Exit;
-  // Will make sure there are no out of bounds exceptions, and will make it faster
-
-  with TClient(Client) do
-  begin
-    MWindow.Freeze();
-
-    MFinder.FindColorsTolerance(mP, DTM.c[Low(DTM.c)], x1, y1, x2, y2,
-                                DTM.t[Low(DTM.t)]);
-    MWindow.GetDimensions(H, dH);
-  end;
-
-  H := High(mP);
-  dH := High(DTM.p);
-  for I := 0 to H do
-  begin
-    // Use MainPoint's AreaSize and Shape.
-    // for Loop on mP, depending on the AreaShape. then on all the code beneath
-    // this point, use the var that is retrieved from the for loop.
-    Found := True;
-    for J := 1 to dH do
-    begin
-      TempTP.X := DTM.p[J].X + mP[I].X;
-      TempTP.Y := DTM.p[J].Y + mP[I].Y;
-      //Now would be the time to Rotate TempTP
-      if not AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) then
-      begin
-        Found := False;
-        Break;
-      end;
-    end;
-
-    if Found then
-    begin
-      Result := True;
-      x := mP[I].X;
-      y := mP[I].Y;
-      TClient(Client).MWindow.UnFreeze();
-      Exit;
-    end;
-  end;
-  TClient(Client).MWindow.UnFreeze();
-  Result := False;
-end;
+end;   }
 
 {/\
   Tries to find the given DTM (index). Will return true if it has found one or more
   DTM's. All the occurances are stored in the Points (TPointArray)
 /\}
 
-function TMDTM.FindDTMs(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
+{function TMDTM.FindDTMs(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
 Var
    temp: pDTM;
 Begin
@@ -540,78 +342,36 @@ Begin
     SetLength(Points, 0);
     Result := False;
   End;
-End;
-
-
+End;     }
 
 {/\
   Tries to find the given pDTM. Will return true if it has found one or more
   DTM's. All the occurances are stored in the Points (TPointArray)
 /\}
 
-Function TMDTM.pFindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
 
-Var
-   mP: TPointArray;
-   I, J, H, dH: Integer;
-   Found: Boolean;
-   TempTP: TPoint;
 
-Begin
-  Result := False;
-  SetLength(Points, 0);
-  For I := 1 To High(DTM.p) Do
-  Begin
-    DTM.p[I].x := DTM.p[I].x - DTM.p[0].x;
-    DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
-  End;
+{wat}
+// Then, first find all occurances of all colours on the given client.
+// Each point has a colour, and we call them C_0...C_n.
+// MP denotes the points of the main point colour on the client.
+// P_i denotes the points on the client for C_i
+// O_i denotes the point offset, and possible area shape and size.
+// B_i denotes a boolean representation of P_i for C_i, for C_1...C_n.
+// B_0 and O_0 are the merry exception here, as we don't need them for C_0,
+// which we will show later.
 
-  {writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));         }
-  DTMBounds(DTM, x1, y1, x2, y2);
- { writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));     }
-   {If X2 > X1 then
-     //Exit;
-   If Y2 > Y1 then  }
-     //Exit;
-  // Will make sure there are no out of bounds exceptions, and will make it faster
+// I hope it is clear how this will be respresented in computer data
+// structures.
 
-  with TClient(Client) do
-  begin
-    MWindow.Freeze();
+// Now, we iterate for i in range(1, n),
+  // We use MP_i, and iterate for j in range(0, dtm_points),
+    // Calculate the B_j indices (with MP_i and O_j) for each j, and
+    // see if B_j is not true, go on with MP_i + 1.
+    // Possible using areasize/shape.
 
-    MFinder.FindColorsTolerance(mP, DTM.c[Low(DTM.c)], x1, y1, x2, y2,
-                                DTM.t[Low(DTM.t)]);
-    MWindow.GetDimensions(H, dH);
-  end;
-  H := High(mP);
-  dH := High(DTM.p);
-  For I := 0 To H Do
-  Begin
-    Found := True;
-    For J := 1 To dH Do
-    Begin
-      TempTP.X := DTM.p[J].X + mP[I].X;
-      TempTP.Y := DTM.p[J].Y + mP[I].Y;
-      If Not AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) Then
-      Begin
-        Found := False;
-        Break;
-      End;
-    End;
-
-    If Found Then
-    Begin
-      Result := True;
-      SetLength(Points, Length(Points) + 1);
-      Points[High(Points)] := mP[I];
-    End;
-  End;
-
-  TClient(Client).MWindow.UnFreeze();
-  Result := Length(Points) > 0;
-End;
+    // else, if B_j is true, continue with this inner loop.
+  // If B_{0...dtm_points} were all true, the point is valid.
 
 {/\
   Tries to find the given DTM (index). If found will put the point the dtm has
@@ -620,7 +380,7 @@ End;
   Returns all Angles in an Extended array.
 /\}
 
-Function TMDTM.FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
+{Function TMDTM.FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
 Var
    temp: pDTM;
 Begin
@@ -633,7 +393,7 @@ Begin
     aFound := 0.0;
     Result := False;
   End;
-End;
+End;  }
 
 {/\
   Tries to find the given pDTM. If found will put the point the dtm has
@@ -642,115 +402,11 @@ End;
   Returns all Angles in an Extended array.
 /\}
 
-Function TMDTM.pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
-
-Var
-   mP: TPointArray;
-   I, J, H, dH, R, W: Integer;
-   Angle: Array Of Extended;
-   tAngle: Extended;
-   Found: Boolean;
-   TempTP: TPoint;
-//   MaxSubPointDist: TPoint;
+{Function TMDTM.pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
 
 Begin
-  For I := 1 To High(DTM.p) Do
-  Begin
-    DTM.p[I].x := DTM.p[I].x - DTM.p[0].x;
-    DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
-  End;
 
-  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));
-  DTMRotatedBounds(DTM, x1, y1, x2, y2);
-  writeln(inttostr(x1) + ', ' + inttostr(y1) + ', ' + inttostr(x2) +
-          ', ' + inttostr(y2));
-   {If X2 > X1 then
-     //Exit;
-   If Y2 > Y1 then  }
-     //Exit;
-  // Will make sure there are no out of bounds exceptions, and will make it faster
-
-  with TClient(Client) do
-  begin
-    MWindow.Freeze();
-
-    MFinder.FindColorsTolerance(mP, DTM.c[Low(DTM.c)], x1, y1, x2, y2,
-                                DTM.t[Low(DTM.t)]);
-    MWindow.GetDimensions(H, dH);
-  end;
-
-  H := High(mP);
-  dH := High(DTM.p);
-  For I := 0 To H Do
-  Begin
-    // Use MainPoint's AreaSize and Shape.
-    // For Loop on mP, depending on the AreaShape. Then on all the code beneath
-    // this point, use the var that is retrieved from the for loop.
-    Found := True;
-    SetLength(Angle, 0);
-    Found := True;
-    For J := 1 To dH Do
-    Begin
-      If Length(Angle) = 0 Then
-      Begin
-        tAngle := sAngle;
-        While tAngle <= eAngle Do
-        Begin
-          TempTP.X := DTM.p[J].X + mP[I].X;
-          TempTP.Y := DTM.p[J].Y + mP[I].Y;
-          TempTP := RotatePoint(TempTP, tAngle, mP[I].X, mP[I].Y);
-          If AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) Then
-          Begin
-            SetLength(Angle, Length(Angle) + 1);
-            Angle[High(Angle)] := tAngle;
-            Found := True;
-          End;
-          tAngle := tAngle + aStep;
-        End;
-      End;
-
-      Found := Length(Angle) > 0;
-
-      For R := 0 To High(Angle) Do
-      Begin
-        writeln('dtm: ' + inttostr(dtm.p[j].x) + ', ' + inttostr(dtm.p[j].y));
-        writeln('mP: ' + inttostr(mP[i].x) + ', ' + inttostr(mP[i].y));
-        TempTP.X := DTM.p[J].X + mP[I].X;
-        TempTP.Y := DTM.p[J].Y + mP[I].Y;
-        writeln('TempTP: ' + inttostr(TempTP.x) + ', ' + inttostr(TempTP.y));
-        TempTP := RotatePoint(TempTP, Angle[R], mP[I].X, mP[I].Y);
-        writeln('TempTP: ' + inttostr(TempTP.x) + ', ' + inttostr(TempTP.y));
-        If Not AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) Then
-        Begin
-          For W := R To High(Angle) - 1 Do
-            Angle[W] := Angle[W + 1];
-          SetLength(Angle, Length(Angle) - 1);
-          If Length(Angle) = 0 Then
-          Begin
-            Found := False;
-            Break;
-          End;
-        End;
-      End;
-      If Not Found Then
-        Break;
-    End;
-
-    If Found Then
-    Begin
-      Result := True;
-      x := mP[I].X;
-      y := mP[I].Y;
-      aFound := Angle[0];
-      TClient(Client).MWindow.UnFreeze();
-      Exit;
-    End;
-  End;
-
-  TClient(Client).MWindow.UnFreeze();
-  Result := False;
-End;
+End;   }
 
 {/\
   Tries to find the given DTM (index). Will return true if it has found one or more
@@ -760,7 +416,7 @@ End;
   Returns all Angles in a Two Dimensional Extended array.
 /\}
 
-Function TMDTM.FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
+{Function TMDTM.FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
 Var
    temp: pDTM;
 Begin
@@ -772,7 +428,7 @@ Begin
     SetLength(aFound, 0);
     Result := False;
   End;
-End;
+End;    }
 
 {/\
   Tries to find the given pDTM. Will return true if it has found one or more
@@ -782,109 +438,12 @@ End;
   Returns all Angles in a Two Dimensional Extended array.
 /\}
 
-Function TMDTM.pFindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
-
-Var
-   mP: TPointArray;
-   I, J, H, dH, R, W, PCount: Integer;
-   Angle: TExtendedArray;
-   tAngle: Extended;
-   Found: Boolean;
-   TempTP: TPoint;
+{Function TMDTM.pFindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
 
 Begin
-  For I := 1 To High(DTM.p) Do
-  Begin
-    DTM.p[I].x := DTM.p[I].x - DTM.p[0].x;
-    DTM.p[I].y := DTM.p[I].y - DTM.p[0].y;
-  End;
-
-  DTMBounds(DTM, x1, y1, x2, y2);
-   {If X2 > X1 then
-     //Exit;
-   If Y2 > Y1 then  }
-     //Exit;
-  // Will make sure there are no out of bounds exceptions, and will make it faster
-
-  with TClient(Client) do
-  begin
-    MWindow.Freeze();
-
-    MFinder.FindColorsTolerance(mP, DTM.c[Low(DTM.c)], x1, y1, x2, y2,
-                                DTM.t[Low(DTM.t)]);
-    MWindow.GetDimensions(H, dH);
-  end;
-
-  H := High(mP);
-  dH := High(DTM.p);
-  PCount := 0;
-  For I := 0 To H Do
-  Begin
-    //WriteLn('I: ' + IntToStr(I));
-    // Use MainPoint's AreaSize and Shape.
-    // For Loop on mP, depending on the AreaShape. Then on all the code beneath
-    // this point, use the var that is retrieved from the for loop.
-    //Found := True;
-    SetLength(Angle, 0);
-    Found := True;
-    For J := 1 To dH Do
-    Begin
-      If Length(Angle) = 0 Then
-      Begin
-        tAngle := sAngle;
-        While tAngle <= eAngle Do
-        Begin
-          TempTP.X := DTM.p[J].X + mP[I].X;
-          TempTP.Y := DTM.p[J].Y + mP[I].Y;
-          TempTP := RotatePoint(TempTP, tAngle, mP[I].X, mP[I].Y);
-          If AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) Then
-          Begin
-            SetLength(Angle, Length(Angle) + 1);
-            Angle[High(Angle)] := tAngle;
-            Found := True;
-          End;
-          tAngle := tAngle + aStep;
-        End;
-      End;
-
-      Found := Length(Angle) > 0;
-      {If Found Then
-        WriteLn('Angle length after first search: ' + IntToStr(Length(Angle))); }
-      For R := 0 To High(Angle) Do
-      Begin
-        TempTP.X := DTM.p[J].X + mP[I].X;
-        TempTP.Y := DTM.p[J].Y + mP[I].Y;
-        TempTP := RotatePoint(TempTP, Angle[R], mP[I].X, mP[I].Y);
-        If Not AreaShape(DTM.c[J], DTM.t[J], DTM.asz[J], DTM.ash[J], TempTP) Then
-        Begin
-          For W := R To High(Angle) - 1 Do
-            Angle[W] := Angle[W + 1];
-          SetLength(Angle, Length(Angle) - 1);
-          If Length(Angle) = 0 Then
-          Begin
-            Found := False;
-            Break;
-          End;
-        End;
-      End;
-      If Not Found Then
-        Break;
-    End;
-
-    If Found Then
-    Begin
-      SetLength(Points, PCount + 1);
-      Points[PCount] := mP[I];
-      PCount := PCount + 1;
-      SetLength(aFound, Length(aFound) + 1);
-      aFound[High(aFound)] := Angle;
-      Continue;
-    End;
-  End;
-
-  TClient(Client).MWindow.UnFreeze();
-  Result := Length(Points) > 0;
-End;
+  // Don't forget to pre calculate the rotated points at the start.
+  // Saves a lot of rotatepoint() calls.
+End;  }
 
 end.
 

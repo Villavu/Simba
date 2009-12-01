@@ -77,7 +77,14 @@ type
         function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
         function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
         function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
-      protected
+
+        function FindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+        function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
+        function FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
+        function FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
+
+
+    protected
         Client: TObject;
         Percentage : array[0..255] of Extended; //We store all the possible RGB / 255 divisions.
         CachedWidth, CachedHeight : integer;
@@ -90,7 +97,8 @@ implementation
 uses
     Client, // For the Client Casts.
     colour_conv, // For RGBToColor, etc.
-    math //min/max
+    math, //min/max
+    dtmutil
     ;
 type
   TPRGB32Array = array of PRGB32;
@@ -1570,5 +1578,248 @@ begin
   end;
 end;
 
+function TMFinder.FindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+
+var
+   P: TPointArray;
+begin
+  Self.FindDTMs(DTM, P, x1, y1, x2, y2);
+  if(Length(p) > 0) then
+  begin
+    x := p[0].x;
+    y := p[0].y;
+    Exit(True);
+  end;
+  Exit(False);
+end;
+
+// TODO: Add a max count, so we can use it more efficiently for FindDTM?
+function TMFinder.FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
+var
+   // Colours of DTMs
+   C: Array of Integer;
+
+   // Bitwise
+   b: Array of Array of Integer;
+
+   // bounds
+   W, H: integer;
+   MA: TBox;
+
+   // for loops, etc
+   xx, yy: integer;
+   i, xxx,yyy: Integer;
+
+   // for comparions.
+   clR, clG, clB: Integer;
+
+   //clientdata
+   cd: TPRGB32Array;
+
+   PtrData: TRetData;
+   Ptr: PRGB32;
+   PtrInc: Integer;
+
+   // point count
+   pc: Integer = 0;
+
+   label EndOfLoop;
+   label AnotherLoopEnd;
+
+
+
+begin
+  if not DTMConsistent(dtm) then
+  begin
+    raise Exception.CreateFmt('FindDTMs: DTM is not consistent.', []);
+    Exit;
+  end;
+
+  // Get the area we should search in for the Main Point.
+  writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
+  MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
+  writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
+
+  DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
+
+  // Init data structure B.
+  W := x2 - x1;
+  H := y2 - y1;
+  setlength(b, W + 1);
+  for i := 0 to W do
+  begin
+    setlength(b[i], H + 1);
+    // does setlength init already? if it doesn't, do we want to init here?
+    // or do we want to init in the loop, as we loop over every b anyway?
+    //FillChar(b[i][0], SizeOf(Integer) * H, 0);
+  end;
+
+  // C = DTM.C
+  C := DTM.c;
+
+  // Now, we must find the occurances of all colours.
+  // This part should be turned into a more general function (for DTM Finding).
+  // Something like FindColorsMultiBooleanArray (?)
+
+  // Retreive Client Data.
+  PtrData := TClient(Client).MWindow.ReturnData(x1, y1, W + 1, H + 1);
+
+  // Do we want to "cache" these vars?
+  // We will, for now. Easier to type.
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+
+  cd := CalculateRowPtrs(PtrData, h + 1);
+  writeln(format('w,h: %d, %d', [w,h]));
+  for yy := 0 to h do
+    for xx := 0 to w do
+    begin
+      //writeln(format('x,y: %d, %d', [xx,yy]));
+
+      // main point
+      if not TClient(Client).MFinder.SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
+        goto AnotherLoopEnd;
+      b[xx][yy] := B[xx][yy] or 1;
+      for i := 1 to dtm.l - 1 do
+      begin // use square areashape - it covers all.
+        for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
+          for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
+            // may want to remove this line, but I think it is a good optimisation.
+            if B[xxx][yyy] and (1 shl i) = 0 then
+              if TClient(Client).MFinder.SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
+                b[xxx][yyy] := B[xxx][yyy] or (1 shl i)
+              else
+                goto AnotherLoopEnd;
+      end;
+
+      AnotherLoopEnd:
+        //writeln(format('b[%d][%d]: %d' ,[xx,yy,b[xx][yy]]));
+    end;
+
+   {for yy := 0 to h do
+    for xx := 0 to w do
+      writeln(format('b[%d][%d]: %d' ,[xx,yy,b[xx][yy]])); }
+
+  // Now iterate over the data. (Main Point Bounds)
+  for yy := MA.y1-y1 to MA.y2-y1 do
+    for xx := MA.x1-x1 to MA.x2-x1 do
+    begin
+      //writeln(format('Testing for MP at %d, %d', [xx,yy]));
+      //writeln(format('Testing for MP RealPoints at %d, %d', [xx+x1,yy+y1]));
+      if (b[xx][yy] and 1) = 0 then
+        continue;
+      //writeln(format('Got a MP at %d, %d', [xx,yy]));
+      //writeln(format('Got a MP Real Points at %d, %d', [xx+x1,yy+y1]));
+      for i := 1 to dtm.l - 1 do
+      begin
+        //writeln(format('i: %d',[i]));
+        case dtm.ash[i] of
+
+          { Example:
+            3x3 (AreaSize = 1)
+            X X X
+            X X X
+            X X X  }
+          //areasize and areashape. areasize = 0 is completly valid
+          dtm_Rectangle:
+          begin
+            //writeln(Format('X - From, To: %d, %d', [xx - dtm.asz[i]+ dtm.p[i].x, xx + dtm.asz[i]+ dtm.p[i].x]));
+            for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
+              for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
+                if b[xxx][yyy] and (1 shl i) = 0 then
+                  goto EndOfLoop;
+          end;
+
+          { Example:
+            3x3 (AreaSize = 1)
+              X
+            X X X
+              X    }
+          dtm_Cross:
+          begin
+            for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
+            begin
+              //writeln(format('Cross - One. %d, %d', [xxx,dtm.p[i].y + yy]));
+              if b[xxx][dtm.p[i].y + yy] and (1 shl i) = 0 then
+                goto EndOfLoop;
+
+            end;
+            for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
+            begin
+              //writeln(format('Cross - One. %d, %d', [dtm.p[i].x + xx,yyy]));
+              if b[dtm.p[i].x + xx][yyy] and (1 shl i) = 0 then
+                goto EndOfLoop;
+            end;
+          end;
+
+         { Example:
+          3x3 (AreaSize = 1)
+          X   X
+            X
+          X   X  }
+         dtm_DiagonalCross:
+          begin
+            for xxx := -dtm.asz[i] to dtm.asz[i] do
+            begin
+              if b[xx + dtm.p[i].x + xxx][yy + dtm.p[i].y + xxx] and (1 shl i) = 0 then
+                 goto EndOfLoop;
+              if b[xx + dtm.p[i].x + xxx][yy + dtm.p[i].y + xxx] and (1 shl i) = 0 then
+                goto EndOfLoop;
+            end;
+          end
+
+          else
+          begin
+            raise exception.createFMT('FindDTMs: Invalid Areashape!', []);
+            Exit;
+          end;
+        end;
+        // point [xx,yy] found if we make it to here
+        //writeln(Format('Wat (Real Points): %d, %d', [xx+x1, yy+y1])); //Good old wat!
+      end;
+      ClientTPA[pc] := Point(xx+x1, yy+y1);
+      Inc(pc);
+      //writeln(Format('Found a Point: %d, %d', [xx+x1, yy+y1]));
+      EndOfLoop:
+    end;
+  TClient(Client).MWindow.FreeReturnData;
+  SetLength(Points, pc);
+  Move(ClientTPA[0], Points[0], pc * SizeOf(TPoint));
+end;
+
+function TMFinder.FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
+
+begin
+  raise Exception.CreateFmt('Not done yet!', []);
+end;
+
+function TMFinder.FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
+
+begin
+  // Don't forget to pre calculate the rotated points at the start.
+  // Saves a lot of rotatepoint() calls.
+  raise Exception.CreateFmt('Not done yet!', []);
+end;
+
 end.
+
+
+{ crap code }
+
+  // this is the probably the slowest part of the algorithm.
+{  for yy := y1 to y2 do
+    begin
+      for xx := x1 to x2 do
+      begin
+         {for i := 0 to dtm.l - 1 do
+         begin
+            // optimise this later...
+            if TClient(Client).MFinder.SimilarColors(dtm.c[i], RGBToColor(Ptr^.R,Ptr^.G,Ptr^.B) , dtm.t[i]) then
+               B[xx][yy] := B[xx][yy] or (1 shl i);
+         end;     }
+         inc(Ptr);
+      end;
+      inc(Ptr, PtrInc);
+    end;
+             }
 

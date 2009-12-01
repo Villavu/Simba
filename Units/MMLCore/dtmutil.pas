@@ -35,7 +35,43 @@ Function pDTMToTDTM(Const DTM: pDTM): TDTM;
 Function tDTMTopDTM(Const DTM: TDTM): pDTM;
 Procedure PrintpDTM(tDTM : pDTM);
 
+procedure initdtm(var d: pdtm; len: integer);
+function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
+function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
+function DTMConsistent(var dtm: pdtm): boolean;
+procedure NormalizeDTM(var dtm: pdtm);
+
+const
+    dtm_Rectangle = 0;
+    dtm_Cross = 1;
+    dtm_DiagonalCross = 2;
+    dtm_Circle = 3;
+    dtm_Triangle = 4;
+
 implementation
+uses math;
+
+// macro
+procedure initdtm(var d: pdtm; len: integer);
+var
+   i: integer;
+begin
+  d.l := len;
+  setlength(d.p, len);
+  setlength(d.c, len);
+  setlength(d.t, len);
+  setlength(d.ash, len);
+  setlength(d.asz, len);
+  FillChar(d.p[0], SizeOf(TPoint) * len, 0);
+  FillChar(d.c[0], SizeOf(Integer) * len, 0);
+  FillChar(d.t[0], SizeOf(Integer) * len, 0);
+  FillChar(d.ash[0], SizeOf(Integer) * len, 0);
+
+  // Better set it to 1, than fill with 0.
+  FillChar(d.asz[0], SizeOf(Integer) * len, 0);
+  {for i := 0 to len - 1 do
+    d.asz[i] := 1;         }
+end;
 
 Procedure PrintpDTM(tDTM : pDTM);
 var
@@ -65,7 +101,7 @@ Begin
   Result.MainPoint := Temp;
   SetLength(Result.SubPoints, Length(DTM.p) - 1);
 
-  For I := 1 To High(DTM.p) Do
+  For I := 1 To DTM.l-1 Do
   Begin
     Temp.X := 0; Temp.Y := 0; Temp.AreaSize := 0; Temp.AreaShape := 0; Temp.Color := 0; Temp.Tolerance := 0;
     Temp.X := DTM.p[i].x;
@@ -111,7 +147,87 @@ Begin
     Result.asz[I] := DTM.SubPoints[I - 1].AreaSize;
     Result.ash[I] := DTM.SubPoints[I - 1].AreaShape;
   End;
+  Result.l := length(Result.p);
 End;
+
+{ TODO: Check if bounds are correct? }
+function DTMConsistent(var dtm: pdtm): boolean;
+var
+   i: integer;
+begin
+  if dtm.l = 0 then
+    Exit(False);
+  if dtm.l <> length(dtm.p) then
+    Exit(False);
+  if dtm.l <> length(dtm.c) then
+    Exit(False);
+  if dtm.l <> length(dtm.t) then
+    Exit(False);
+  if dtm.l <> length(dtm.asz) then
+    Exit(False);
+  if dtm.l <> length(dtm.ash) then
+    Exit(False);
+  for i := 0 to dtm.l-1 do
+    if dtm.asz[i] < 0 then
+      Exit(False);
+  for i := 0 to dtm.l-1 do
+    if dtm.c[i] < 0 then
+      Exit(False);
+  for i := 0 to dtm.l-1 do
+    if dtm.t[i] < 0 then
+      Exit(False);
+  for i := 0 to dtm.l-1 do
+    if dtm.ash[i] < 0 then
+      Exit(False);
+end;
+
+procedure NormalizeDTM(var dtm: pdtm);
+var
+   i:integer;
+begin
+  for i := 0 to dtm.l do
+    dtm.p[i] := dtm.p[i] - dtm.p[0];
+end;
+
+Function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
+
+var
+   i: Integer;
+   b: TBox;
+
+begin
+ // writeln(format('%d, %d', [0,0]));
+  for i := 1 to high(dtm.c) do
+  begin
+    dtm.p[i] := dtm.p[i] - dtm.p[0];
+ //   writeln(format('%d, %d', [dtm.p[i].x, dtm.p[i].y]));
+  end;
+  dtm.p[0] := dtm.p[0] - dtm.p[0];
+
+
+  FillChar(b, SizeOf(TBox), 0);
+  for i := 0 to high(dtm.c) do
+  begin
+    b.x1 := min(b.x1, dtm.p[i].x - dtm.asz[i]);
+    b.y1 := min(b.y1, dtm.p[i].y - dtm.asz[i]);
+    b.x2 := max(b.x2, dtm.p[i].x + dtm.asz[i]);
+    b.y2 := max(b.y2, dtm.p[i].y + dtm.asz[i]);
+  end;
+
+  //FillChar(Result, SizeOf(TBox), 0);
+  writeln(Format('DTM Bounding Box: %d, %d : %d, %d', [b.x1, b.y1,b.x2,b.y2]));
+  Result.x1 := x1 - b.x1;
+  Result.y1 := y1 - b.y1;
+  Result.x2 := x2 - b.x2;
+  Result.y2 := y2 - b.y2;
+end;
+
+Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
+
+begin
+
+end;
+
 
 end.
 
