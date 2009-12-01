@@ -86,7 +86,9 @@ type
     x1, y1, x2, y2: Integer;
   end;
 
+  { TODO: add cts per colour/tolerance? }
   pDTM = record
+    l: Integer;
     p: TPointArray;
     c, t, asz, ash: TIntegerArray;
   end;
