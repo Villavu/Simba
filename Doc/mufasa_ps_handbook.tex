@@ -55,7 +55,7 @@ GetMousePos returns the current position of the mouse in $x$ and $y$.
 \subsection{HoldMouse}
 \textbf{procedure} {\color{blue}{HoldMouse}}({\color{typeRed}
 {x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}{clickType :}}
-{\color{typeGreen}{clickType}})
+{\color{typeGreen}{TClickType}})
 
 HoldMouse holds the given mouse button (clickType) down at the specified $x$, $y$ 
 coordinate. If the mouse if not at the given $x$, $y$ yet, the mouse position
@@ -64,7 +64,7 @@ will be set to $x$, $y$.
 \subsection{ReleaseMouse}
 \textbf{procedure} {\color{blue}{ReleaseMouse}}({\color{typeRed}
 {x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}{clickType :}}
-{\color{typeGreen}{clickType}});
+{\color{typeGreen}{TClickType}});
 
 ReleaseMouse releases the given mouse button (clickType) at the specified $x$, $y$ 
 coordinate. If the mouse if not at the given $x$, $y$ yet, the mouse position
@@ -73,7 +73,7 @@ will be set to $x$, $y$.
 \subsection{ClickMouse}
 \textbf{procedure} {\color{blue}{ClickMouse}}({\color{typeRed}
 {x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}{clickType :}}
-{\color{typeGreen}{clickType}});
+{\color{typeGreen}{TClickType}});
 
 ClickMouse performs a click with the given mouse button (clickType) at the
 specified x, y coordinate.
