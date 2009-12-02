@@ -35,7 +35,7 @@ Function pDTMToTDTM(Const DTM: pDTM): TDTM;
 Function tDTMTopDTM(Const DTM: TDTM): pDTM;
 Procedure PrintpDTM(tDTM : pDTM);
 
-procedure initdtm(var d: pdtm; len: integer);
+procedure initdtm(out d: pdtm; len: integer);
 function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
 function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
 function DTMConsistent(var dtm: pdtm): boolean;
@@ -52,7 +52,7 @@ implementation
 uses math;
 
 // macro
-procedure initdtm(var d: pdtm; len: integer);
+procedure initdtm(out d: pdtm; len: integer);
 var
    i: integer;
 begin
