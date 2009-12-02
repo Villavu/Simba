@@ -78,20 +78,21 @@ begin
   dtm.p[0] := Point(2, 2);
   dtm.p[1] := Point(-3, -3);
   dtm.p[2] := Point(0, 0);
-  dtm.c[0] := 0;
+  dtm.c[0] :=  255;
+  dtm.t[0] :=  255;
   dtm.asz[1] := 1;
   dtm.ash[1] := dtm_Rectangle;
 
   setlength(p, 1);
 
   time := GetTickCount;
-  C.MFinder.FindDTMs(dtm, p, 0, 0,799, 599, 10);
+  C.MFinder.FindDTMs(dtm, p, 0, 0,799, 599, 0);
   //C.MFinder.FindDTM(dtm, p[0].x, p[0].y, 0, 0,799, 599);
   writeln(inttostr(gettickcount - time));
   writeln(inttostr(length(p)));
 
-  for i := 0 to high(p) do
-    writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));
+  {for i := 0 to high(p) do
+    writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));          }
 
 
   //bmp.OnDestroy:=nil;

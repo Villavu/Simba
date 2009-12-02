@@ -1593,7 +1593,6 @@ begin
   Exit(False);
 end;
 
-// TODO: Add a max count, so we can use it more efficiently for FindDTM?
 function TMFinder.FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
 var
    // Colours of DTMs
@@ -1610,15 +1609,13 @@ var
    xx, yy: integer;
    i, xxx,yyy: Integer;
 
-   // for comparions.
-   clR, clG, clB: Integer;
+   // for comparisons.
+   rgbs: array of TRGB32;
 
    //clientdata
    cd: TPRGB32Array;
 
    PtrData: TRetData;
-   Ptr: PRGB32;
-   PtrInc: Integer;
 
    // point count
    pc: Integer = 0;
@@ -1636,9 +1633,9 @@ begin
   end;
 
   // Get the area we should search in for the Main Point.
-  writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
+  //writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
-  writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
+  //writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
 
   DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
 
@@ -1666,18 +1663,21 @@ begin
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
-  Ptr := PtrData.Ptr;
-  PtrInc := PtrData.IncPtrWith;
 
   cd := CalculateRowPtrs(PtrData, h + 1);
-  writeln(format('w,h: %d, %d', [w,h]));
+  //writeln(format('w,h: %d, %d', [w,h]));
+
+  // pre calc rgb values for dtms
+  SetLength(rgbs, dtm.l);
+  for i := 0 to dtm.l - 1 do
+    ColorToRGB(dtm.c[i], rgbs[i].r, rgbs[i].g, rgbs[i].b);
 
   for yy := MA.y1 to MA.y2 do
     for xx := MA.x1 to MA.x2 do
     begin
       // main point
-      //if dtm.c[0] <> RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B) then
-      if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
+       if Sqrt(sqr(rgbs[0].r - cd[yy][xx].R) + sqr(rgbs[0].g - cd[yy][xx].G) + sqr(rgbs[0].b - cd[yy][xx].B)) > dtm.t[0] then
+ //     if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
         goto AnotherLoopEnd;
       b[xx][yy] := B[xx][yy] or 1;
       for i := 1 to dtm.l - 1 do
@@ -1688,8 +1688,8 @@ begin
             // may want to remove this line, but I think it is a good optimisation.
             if B[xxx][yyy] and (1 shl i) = 0 then
             begin
-              //if dtm.c[i] = RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B) then
-              if SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
+              if Sqrt(sqr(rgbs[i].r - cd[yyy][xxx].R) + sqr(rgbs[i].g - cd[yyy][xxx].G) + sqr(rgbs[i].b - cd[yyy][xxx].B)) <= dtm.t[i] then
+ //             if SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
                 b[xxx][yyy] := B[xxx][yyy] or (1 shl i)
               else
                 goto AnotherLoopEnd;
