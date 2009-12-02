@@ -61,13 +61,16 @@ begin
   C := TClient.Create;
 
   bmp := TMufasaBitmap.Create;
-  bmp.SetSize(10,10);
-  FillChar(bmp.FData[0],sizeof(trgb32)*100, 0);
-  bmp.FastSetPixel(8,8,255);
+  bmp.SetSize(800,600);
+  FillChar(bmp.FData[0],sizeof(trgb32)*800*600, 0);
+  Randomize;
+  for i := 0 to 200 do
+    bmp.fastsetpixel(random(800), random(600), 255);
+  {bmp.FastSetPixel(8,8,255);
   bmp.FastSetPixel(9,9,255);
   bmp.FastSetPixel(7,7,255);
   bmp.FastSetPixel(9,8,255);
-  bmp.FastSetPixel(8,9,255);
+  bmp.FastSetPixel(8,9,255);   }
   C.MWindow.SetTarget(bmp);
 
 
@@ -75,17 +78,20 @@ begin
   dtm.p[0] := Point(2, 2);
   dtm.p[1] := Point(-3, -3);
   dtm.p[2] := Point(0, 0);
-  dtm.c[0] := 255;
-  dtm.asz[1] := 0;
+  dtm.c[0] := 0;
+  dtm.asz[1] := 1;
   dtm.ash[1] := dtm_Rectangle;
 
-  setlength(p, 0);
+  setlength(p, 1);
 
-  C.MFinder.FindDTMs(dtm, p, 0, 0, 9, 9);
+  time := GetTickCount;
+  C.MFinder.FindDTMs(dtm, p, 0, 0,799, 599, 10);
+  //C.MFinder.FindDTM(dtm, p[0].x, p[0].y, 0, 0,799, 599);
+  writeln(inttostr(gettickcount - time));
+  writeln(inttostr(length(p)));
+
   for i := 0 to high(p) do
     writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));
-
-
 
 
   //bmp.OnDestroy:=nil;
