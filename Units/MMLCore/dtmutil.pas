@@ -216,7 +216,7 @@ begin
   end;
 
   //FillChar(Result, SizeOf(TBox), 0);
-  writeln(Format('DTM Bounding Box: %d, %d : %d, %d', [b.x1, b.y1,b.x2,b.y2]));
+  //writeln(Format('DTM Bounding Box: %d, %d : %d, %d', [b.x1, b.y1,b.x2,b.y2]));
   Result.x1 := x1 - b.x1;
   Result.y1 := y1 - b.y1;
   Result.x2 := x2 - b.x2;
