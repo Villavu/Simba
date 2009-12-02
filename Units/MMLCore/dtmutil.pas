@@ -179,6 +179,7 @@ begin
   for i := 0 to dtm.l-1 do
     if dtm.ash[i] < 0 then
       Exit(False);
+  Exit(True);
 end;
 
 procedure NormalizeDTM(var dtm: pdtm);
