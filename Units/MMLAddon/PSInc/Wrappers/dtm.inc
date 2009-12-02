@@ -40,7 +40,7 @@ var
    temp: pDTM;
 begin
   if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
-    Result := CurrThread.Client.MFinder.FindDTMs(temp, p, x1, y1, x2, y2)
+    Result := CurrThread.Client.MFinder.FindDTMs(temp, p, x1, y1, x2, y2, 0)
   else
   begin
     setlength(p,0);
