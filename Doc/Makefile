@@ -3,23 +3,28 @@
 
 intro_ := mufasa_intro
 psbook_ := mufasa_ps_handbook
+book_ := mufasa_handbook
 
-
-default: intro
+default: tex
 
 clean:
 	rm -rvf $(intro_)
 	rm -rvf $(psbook_)
+	rm -rvf $(book_)
 	find -iname "$(intro_)*" | grep -v svn | grep -v tex | xargs rm -vf
 	find -iname "$(psbook_)*" | grep -v svn | grep -v tex | xargs rm -vf
+	find -iname "$(book_)*" | grep -v svn | grep -v tex | xargs rm -vf
 	$(MAKE) -C Pics/ clean
 
-intro:
+tex:
 	$(MAKE) -C Pics/
 	texi2pdf $(intro_).tex #--silent
 	texi2pdf $(psbook_).tex #--silent
+	texi2pdf $(book_).tex #--silent
+
 
 html:
 	$(MAKE) -C Pics/
 	latex2html $(intro_).tex -local_icons -nofootnode
 	latex2html $(psbook_).tex -local_icons -nofootnode
+	latex2html $(book_).tex -local_icons -nofootnode
