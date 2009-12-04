@@ -59,6 +59,22 @@ Error: Exception: You are accessing an invalid point, (-1,-1) at bitmap[0] at li
 
 Further expanding the example:
 \begin{verbatim}
+program new;
+var
+  bmp:integer;
+  x, y:integer;
+begin
+  bmp:=bitmapfromstring(200, 200, '');
+  x := -1;
+  y := -1;
+  try
+  	fastsetpixel(bmp, x, y, clwhite);
+  except
+  	writeln('We failed to do a setpixel with x = ' + inttostr(x) + 
+			', y = ' + inttostr(y));
+  end;
+end.
+
 \end{verbatim}
 
 Results in:
