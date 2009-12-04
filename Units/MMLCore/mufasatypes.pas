@@ -91,6 +91,7 @@ type
     l: Integer;
     p: TPointArray;
     c, t, asz, ash: TIntegerArray;
+    n: String;    // DOEN
   end;
 
   { Other DTM Types }

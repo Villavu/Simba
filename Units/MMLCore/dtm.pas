@@ -41,7 +41,9 @@ type
            function AddpDTM(d: pDTM): Integer;
            function GetDTM(index: Integer; out dtm: pDTM): Boolean;
            procedure FreeDTM(DTM: Integer);
-           Function StringToDTM(S: String): pDTM;
+           function StringToDTM(S: String): pDTM;
+           function SetDTMName(DTM: Integer; S: String): boolean;
+
 
          {  function FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2,
                            y2: Integer): Boolean;
@@ -270,6 +272,18 @@ begin
       Result := False;
     end;
   end
+end;
+
+function TMDTM.SetDTMName(DTM: Integer; s: string): boolean;
+var
+  dtm_: pDTM;
+begin
+  if(GetDTM(dtm, dtm_)) then
+  begin
+    dtm_.n := s;
+    Exit(True);
+  end;
+  Exit(False);
 end;
 
 {/\

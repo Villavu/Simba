@@ -83,9 +83,10 @@ begin
   result := true;
   OCRPath := path + DS;
   if DirectoryExists(path + DS + 'UpChars' + DS) then
-    OCRData[0] := InitOCR(path + DS + 'UpChars' + DS)
+    OCRData[0] := ocrutil.InitOCR(path + DS + 'UpChars' + DS)
   else
     result := false;
+
 end;
 
 function TMOCR.GetUpTextAt(atX, atY: integer): string;
