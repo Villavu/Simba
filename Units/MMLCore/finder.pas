@@ -1654,15 +1654,8 @@ begin
   // C = DTM.C
   C := DTM.c;
 
-  // Now, we must find the occurances of all colours.
-  // This part should be turned into a more general function (for DTM Finding).
-  // Something like FindColorsMultiBooleanArray (?)
-
   // Retreive Client Data.
   PtrData := TClient(Client).MWindow.ReturnData(x1, y1, W + 1, H + 1);
-
-  // Do we want to "cache" these vars?
-  // We will, for now. Easier to type.
 
   cd := CalculateRowPtrs(PtrData, h + 1);
   //writeln(format('w,h: %d, %d', [w,h]));
@@ -1728,24 +1721,3 @@ begin
 end;
 
 end.
-
-
-{ crap code }
-
-  // this is the probably the slowest part of the algorithm.
-{  for yy := y1 to y2 do
-    begin
-      for xx := x1 to x2 do
-      begin
-         {for i := 0 to dtm.l - 1 do
-         begin
-            // optimise this later...
-            if TClient(Client).MFinder.SimilarColors(dtm.c[i], RGBToColor(Ptr^.R,Ptr^.G,Ptr^.B) , dtm.t[i]) then
-               B[xx][yy] := B[xx][yy] or (1 shl i);
-         end;     }
-         inc(Ptr);
-      end;
-      inc(Ptr, PtrInc);
-    end;
-             }
-

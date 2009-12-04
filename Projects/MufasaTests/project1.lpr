@@ -10,7 +10,7 @@ uses
   Forms,Interfaces,
   LCLIntf,
   Client,
-  bitmaps,x ,mufasatypes,dtm,dtmutil
+  bitmaps,x ,mufasatypes,dtm,dtmutil, ocrutil
 
 
   { you can add units after this };
@@ -29,6 +29,28 @@ type
   end;
 
 { MufasaTests }
+
+const
+    CW = 800;
+    CH = 600;
+
+function randomdtm(a: integer): pdtm;
+var
+   i: integer;
+begin
+  initdtm(result, a);
+  for i := 1 to result.l - 1 do
+  begin
+    result.p[i] := point(random(30) - 15, random(30) - 15);
+    result.c[i] := 0;
+    result.t[i] := random(255);
+    result.asz [i] := random(5);
+    result.ash[i] := 0;
+    writeln(format('dtm: (%d, %d) c: %d, t: %d, asz: %d', [result.p[i].x,
+            result.p[i].y,  result.c[i], result.t[i], result.asz[i]]));
+  end;
+  result.c[0] := 255;
+end;
 
 procedure MufasaTests.DoRun;
 
@@ -61,38 +83,47 @@ begin
   C := TClient.Create;
 
   bmp := TMufasaBitmap.Create;
-  bmp.SetSize(800,600);
-  FillChar(bmp.FData[0],sizeof(trgb32)*800*600, 0);
+  bmp.SetSize(CW,CH);
+  Writeln(Format('Client W/H: %d, %d', [CW, CH]));
+  FillChar(bmp.FData[0],sizeof(trgb32)*CW*CH, 0);
   Randomize;
-  for i := 0 to 200 do
-    bmp.fastsetpixel(random(800), random(600), 255);
-  {bmp.FastSetPixel(8,8,255);
+ for i := 0 to 500 do
+    bmp.fastsetpixel(random(CW), random(CH), 255);
+ { bmp.FastSetPixel(8,8,255);
   bmp.FastSetPixel(9,9,255);
   bmp.FastSetPixel(7,7,255);
   bmp.FastSetPixel(9,8,255);
-  bmp.FastSetPixel(8,9,255);   }
+  bmp.FastSetPixel(8,9,255);            }
   C.MWindow.SetTarget(bmp);
 
 
-  initdtm(dtm, 3);
+ { initdtm(dtm, 5);
   dtm.p[0] := Point(2, 2);
   dtm.p[1] := Point(-3, -3);
   dtm.p[2] := Point(0, 0);
+  dtm.p[3] := Point(1, 1);
+  dtm.p[4] := Point(3, 3);
   dtm.c[0] :=  255;
-  dtm.t[0] :=  255;
+  dtm.t[0] :=  0;
   dtm.asz[1] := 1;
-  dtm.ash[1] := dtm_Rectangle;
+  dtm.ash[1] := dtm_Rectangle;  }
 
-  setlength(p, 1);
+  dtm := randomdtm(20);
+
+ // setlength(p, 1);
+  time := GetTickCount;
+  C.MFinder.FindDTMs(dtm, p, 0, 0,CW-1, CH-1, 0);
+  writeln(inttostr(gettickcount - time) + 'ms');
+  setlength(p,0);
 
   time := GetTickCount;
-  C.MFinder.FindDTMs(dtm, p, 0, 0,799, 599, 0);
-  //C.MFinder.FindDTM(dtm, p[0].x, p[0].y, 0, 0,799, 599);
-  writeln(inttostr(gettickcount - time));
-  writeln(inttostr(length(p)));
+  C.MFinder.FindDTMs(dtm, p, 0, 0,CW-1, CH-1, 0);
+  //C.MFinder.FindDTM(dtm, p[0].x, p[0].y, 0, 0,CW-1, CH-1);
+  writeln(inttostr(gettickcount - time) + 'ms');
+  writeln(inttostr(length(p))+ ' points found');
 
   {for i := 0 to high(p) do
-    writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));          }
+    writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));     }
 
 
   //bmp.OnDestroy:=nil;

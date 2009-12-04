@@ -19,6 +19,75 @@ the Mufasa macro library exports to it's Interpreter, PS\footnote{Pascal
 Script}. For a real in depth explanation, the Mufasa Handbook would be a better
 place to look.
 
+\chapter{Exceptions}
+
+\section{Motivation}
+Mufasa takes debugging to a new level by using exceptions for error handling,
+this allows you to even catch possible errors in your script, thus allowing
+the script to continue it's exection. We strongly believe Exceptions are the
+way to go. They were implemented for a reason.
+
+\section{When do we throw Exceptions}
+
+There are a lot of occasions where Mufasa may throw exceptions.
+
+Consider the following program:
+
+\begin{verbatim}
+program new;
+var
+  bmp:integer;
+  x, y:integer;
+begin
+  bmp:=bitmapfromstring(200, 200, '');
+  x := -1;
+  y := -1;
+  fastsetpixel(bmp, x, y, clwhite);
+end.
+\end{verbatim}
+
+This code is, always invalid. If you try this in SCAR, it will execute and do
+nothing. \\
+
+Very useful, right? \\
+
+Now, when we execute the same code with MML, we get this:
+
+\begin{verbatim}
+Error: Exception: You are accessing an invalid point, (-1,-1) at bitmap[0] at line 8
+\end{verbatim}
+
+Further expanding the example:
+\begin{verbatim}
+\end{verbatim}
+
+Results in:
+
+\begin{verbatim}
+Compiled succesfully in 8 ms.
+We failed to do a setpixel with x = .-1, y = -1
+Succesfully executed
+\end{verbatim}
+
+\subsection{Going beyond script debugging}
+Exceptions are even in the very core of Mufasa. This greatly improves
+debugging in general, as we will also be able to easily spot errors in Mufasa.
+When they occured, what the values of the variables were, et cetera.
+
+Let's look at a function known as ReturnData(), which returns the client data.
+It for example checks if the points that are passed are consistent.
+If they are not, an Exception is thrown. If Mufasa does not catch that 
+particular Exception\footnote{Which it doesn't, as a feature.}, then it will
+be thrown in your script. This will indicate that somehow ReturnData got
+invalid coordinates. Usually this Exception is not throw, as other functions
+also check their input for sanity, and then it is possible to throw a more
+detailed exception.
+
+\subsection{How to Handle Exceptions}
+
+An exception is handled with a $try$ ... $except$ ... $finally$ statement.
+See the example in the previous section for more details.
+
 \chapter{Input}
 
 \section{Mouse}

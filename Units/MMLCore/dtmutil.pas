@@ -57,6 +57,7 @@ var
    i: integer;
 begin
   d.l := len;
+  d.n := '';
   setlength(d.p, len);
   setlength(d.c, len);
   setlength(d.t, len);
@@ -78,10 +79,13 @@ var
   i : integer;
 begin;
   i := 0;
+  if tdtm.n <> '' then
+    writeln('Name: ' + tdtm.n);
   WriteLn('MainPoint ' + inttostr(tDTM.p[i].x) + ', ' + inttostr(tDTM.p[i].y) + ' col: ' + inttostr(tDTM.c[i]) + ', tol: ' + inttostr(tDTM.t[i]) + '; ashape ' + inttostr(tdtm.ash[i]) + ' asize ' + inttostr(tdtm.asz[i]));
   for I := 1 to High(tDTM.p) do
     WriteLn('SubPoint['+IntToStr(I) + '] ' + inttostr(tDTM.p[i].x) + ', ' + inttostr(tDTM.p[i].y) + ' col: ' + inttostr(tDTM.c[i]) + ', tol: ' + inttostr(tDTM.t[i]) + '; ashape ' + inttostr(tdtm.ash[i]) + ' asize ' + inttostr(tdtm.asz[i]));
 end;
+
 Function pDTMToTDTM(Const DTM: pDTM): TDTM;
 
 Var

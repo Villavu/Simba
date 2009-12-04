@@ -21,15 +21,14 @@ Developer notes include:
 	\item Bugs
 \end{itemize}
 
-
 \chapter{Core}
 
 \section{TClient}
 
 The TClient class bundles all the other Core classes.
 It's main use is to make using the Mufasa Macro Library trivial, by bundling
-the for Mufasa classes into one class, and provides the methods to make them 
-cooperate.
+the core Mufasa classes into one class, and providing the methods to make those
+classes cooperate.
 
 \section{TMWindow}
 
@@ -47,6 +46,20 @@ Retreiving information from the target Application/Window.
 \section{TMBitmaps}
 
 \section{TMDTM}
+
+The TMDTM class is a DTM manager. It provides methods to add, store, load
+and free DTM's. It has a few few other features. One of it's other features
+is keeping track of what DTMs are unfreed. It can, for example, help you find
+a bug in your code, by printing out information of the DTM that you forgot to
+free. You can also give names to DTMs, which eases debugging further.
+
+If you try to access an invalid DTM, the MML will throw an exception.
+
+
+\subsection{AddDTM}
+\subsection{GetDTM}
+\subsection{DTMFromString}
+\subsection{FreeDTM}
 
 \section{TMOCR}
 
