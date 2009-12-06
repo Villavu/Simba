@@ -73,10 +73,11 @@ type
 
     end;
 
+    function GetKeyCode(key : char) : byte;
 implementation
 
 uses
-    Client,{$IFDEF MSWINDOWS}windows, {$ENDIF}lcltype;
+    Client,{$IFDEF MSWINDOWS}windows, {$ENDIF}interfacebase,lcltype;
 
 {$IFDEF MSWINDOWS}
 type
@@ -170,6 +171,15 @@ begin
   else
     Raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
   end
+end;
+
+function GetKeyCode(Key: Char): Byte;
+begin
+  {$ifdef MSWINDOWS}
+  result := VkKeyScan(Key)and $FF;
+  {$else}
+  result := GetSimpleKeyCode(Key);
+  {$endif}
 end;
 
 procedure TMInput.SendText(text: string);

@@ -26,6 +26,8 @@ Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath)
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of integer');
 Sender.Comp.AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
+Sender.Comp.AddTypeS('T2DPointArray','Array of Array of TPoint');
+Sender.Comp.AddTypeS('TPointArrayArray','Array of Array of TPoint');
 Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 Sender.Comp.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
 
@@ -35,6 +37,7 @@ Sender.Comp.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
 Sender.Comp.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
 Sender.Comp.AddTypeS('pDTM','record p: TPointArray; c, t, asz, ash: TIntegerArray; end;');
 Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended;');
+Sender.Comp.AddTypeS('TStringArray','Array of string;');
 Sender.Comp.AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
 
 
@@ -57,13 +60,18 @@ Sender.AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
 Sender.AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 
 {maths}
+
 sender.AddFunction(@ceil,'function ceil(e : extended) : integer');
 sender.AddFunction(@power,'function pow(base,exponent : extended) : extended');
 Sender.AddFunction(@max,'function Max(a, b: Integer): Integer;');
 Sender.AddFunction(@min,'function Min(a, b: Integer): Integer;');
+Sender.AddFunction(@minE,'function MinE(a, b: extended): Extended;');
+Sender.AddFunction(@IntToBox,'function IntToBox(x1,y1,x2,y2 : integer) : TBox;');
 Sender.AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
 Sender.AddFunction(@classes.point,'function Point(x,y:integer) : TPoint;');
 Sender.AddFunction(@Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
+Sender.AddFunction(@hypot,'function Hypot(X, Y: Extended): Extended;');
+Sender.AddFunction(@RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
 
 {window}
 Sender.AddFunction(@Freeze, 'function freeze:boolean;');
@@ -89,14 +97,23 @@ Sender.AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer
 {other}
 Sender.AddFunction(@SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
 Sender.AddFunction(@psWait, 'procedure wait(t: integer);');
+Sender.AddFunction(@psWait, 'procedure Sleep(t: integer);');
 Sender.AddFunction(@GetTickCount, 'function GetSystemTime: LongWord;');
+Sender.AddFunction(@GetTickCount, 'function GetTickCount: LongWord;');
+Sender.AddFunction(@GetTimeRunning,'function GetTimeRunning: LongWord;');
 Sender.AddFunction(@CreateForm,'function CreateForm : TForm;');
 Sender.AddFunction(@CreateButton,'function CreateButton(Owner : TComponent) : TButton');
+Sender.AddFunction(@ConvertTime,'procedure ConvertTime(Time : integer; var h,m,s : integer);');
 Sender.AddFunction(@HakunaMatata,'procedure HakunaMatata;');
 Sender.AddFunction(@TerminateScript,'procedure TerminateScript;');
 Sender.AddFunction(@DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w,h : integer);');
 Sender.AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp : integer);');
 Sender.AddFunction(@Random,'function Random(Int : integer): integer;');
+
+
+
+{string}
+Sender.AddFunction(@Capitalize,'function Capitalize(str : string) : string;');
 {web}
 Sender.AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 
@@ -107,6 +124,7 @@ Sender.AddFunction(@findcolortoleranceOptimised, 'function findcolortoleranceOpt
 Sender.AddFunction(@FindColorTolerance, 'function findcolortolerance(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
 Sender.AddFunction(@FindColors, 'function findcolors(out TPA: TPointArray; color, x1, y1, x2, y2: integer): boolean;');
 Sender.AddFunction(@SimilarColors,'function SimilarColors(Col1,Col2,Tolerance : integer) : boolean');
+Sender.AddFunction(@CountColor,'function CountColor(Color, xs, ys, xe, ye: Integer): Integer;');
 Sender.AddFunction(@CountColorTolerance,'function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;');
 Sender.AddFunction(@FindColorsToleranceOptimised,'function FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 Sender.AddFunction(@FindColorsTolerance,'function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
@@ -133,6 +151,7 @@ Sender.AddFunction(@KeyUp, 'procedure KeyUp(key: Word);');
 Sender.AddFunction(@PressKey, 'procedure PressKey(key: Word);');
 Sender.AddFunction(@SendKeys, 'procedure SendKeys(s: string);');
 Sender.AddFunction(@isKeyDown, 'function isKeyDown(key: Word): Boolean;');
+Sender.AddFunction(@GetKeyCode, 'function GetKeyCode(Key : char) : byte');
 
 { OCR}
 
@@ -160,6 +179,7 @@ Sender.AddFunction(@SetTransparentColor,'procedure SetTransparentColor(bmp : int
 Sender.AddFunction(@GetTransparentColor,'function GetTransparentColor(bmp: integer) : TColor;');
 Sender.AddFunction(@FastReplaceColor,'procedure FastReplaceColor(Bmp : integer; OldColor,NewColor : TColor);');
 Sender.AddFunction(@ps_CopyClientToBitmap, 'procedure CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer);');
+Sender.AddFunction(@BitmapFromClient,'function BitmapFromClient(const xs, ys, xe, ye: Integer): Integer;');
 Sender.AddFunction(@SetBitmapName, 'procedure SetBitmapName(Bmp : integer; name : string);');
 Sender.AddFunction(@FindBitmap,'function FindBitmap(bitmap: integer; out x, y: Integer): Boolean;');
 Sender.AddFunction(@FindBitmapIn,'function FindBitmapIn(bitmap: integer; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;');

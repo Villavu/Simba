@@ -55,6 +55,10 @@ begin;
   Result := CurrThread.Client.MFinder.SimilarColors(Col1,Col2,Tol);
 end;
 
+function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
+begin;
+  result := CurrThread.Client.MFinder.CountColor(color,xs,ys,xe,ye);
+end;
 function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
 begin;
   result := CurrThread.Client.MFinder.CountColorTolerance(color,xs,ys,xe,ye,tolerance);

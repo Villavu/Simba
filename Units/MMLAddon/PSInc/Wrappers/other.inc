@@ -66,6 +66,36 @@ begin
   Result := TButton.Create(Owner);
 end;
 
+function MinE(a, b: Extended): Extended;
+begin;
+  result := min(a,b);
+end;
+
+function IntToBox(x1,y1,x2,y2 : integer) : TBox;
+begin;
+  result.x1 := x1;
+  result.y1 := y1;
+  result.x2 := x2;
+  result.y2 := y2;
+end;
+
+function Capitalize(str : string) : string;
+var
+  i , l : integer;
+  cap : boolean;
+begin;
+  result := str;
+  l := length(str);
+  cap := true;
+  for i := 1 to l do
+    if cap and (str[i] in ['a'..'z'] + ['A'..'Z']) then
+    begin;
+      result[i] := UpperCase(str[i])[1];
+      cap := false;
+    end else if not (str[i] in ['a'..'z'] + ['A'..'Z']) then
+      cap := true;
+end;
+
 function Distance(x1, y1, x2, y2: Integer): Integer;
 begin;
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
@@ -86,6 +116,22 @@ end;
 procedure TerminateScript;
 begin;
   CurrThread.PSScript.Stop;
+end;
+function GetTimeRunning: LongWord;
+begin;
+  result := GetTickCount - CurrThread.StartTime;
+end;
+
+procedure ConvertTime(Time : integer; var h,m,s : integer);
+var
+  x : integer;
+begin;
+  x := time;
+  h := x div(1000 * 60 * 60);
+  x := x mod (1000 * 60 * 60);
+  m := x div (1000 * 60);
+  x := x mod (1000 * 60);
+  s := x div (1000);
 end;
 
 procedure HakunaMatata;
