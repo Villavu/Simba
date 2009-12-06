@@ -51,6 +51,11 @@ type
     PSyncInfo = ^TSyncInfo;
     TErrorType = (errRuntime,errCompile);
     TOnError = procedure (ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType) of object;
+    TExpMethod = record
+      FuncDecl : string;
+      FuncPtr : Pointer;
+    end;
+
     TMMLPSThread = class(TThread)
       procedure OnProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
@@ -75,11 +80,13 @@ type
       procedure OnThreadTerminate(Sender: TObject);
       procedure Execute; override;
     public
+      ExportedMethods : array of TExpMethod;
       PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
       Client : TClient;
       StartTime : LongWord;
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       property OnError : TOnError read FOnError write FOnError;
+      procedure LoadMethods;
       procedure SetPSScript(Script : string);
       procedure SetDebug( writelnProc : TWritelnProc );
       procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
@@ -178,10 +185,12 @@ begin
   OnError:= nil;
   // Set some defines
   {$I PSInc/psdefines.inc}
-
+  // Load the methods we're going to export
+  Self.LoadMethods;
 
   FreeOnTerminate := True;
   Self.OnTerminate := @Self.OnThreadTerminate;
+
   inherited Create(CreateSuspended);
 end;
 
@@ -255,9 +264,11 @@ begin
                            PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[i].FuncStr, cdStdCall);
   for i := 0 to high(VirtualKeys) do
     PSScript.Comp.AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
-
-  // Here we add all the functions to the engine.
+  // Here we add all the Consts/Types to the engine.
   {$I PSInc/pscompile.inc}
+  //Export all the methods
+  for i := 0 to high(ExportedMethods) do
+    PSScript.AddFunction(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl);
 end;
 
 function TMMLPSThread.RequireFile(Sender: TObject;
@@ -337,6 +348,7 @@ procedure TMMLPSThread.Execute;
 begin
   CurrThread := Self;
   Starttime := lclintf.GetTickCount;
+
   try
     if PSScript.Compile then
     begin
@@ -357,6 +369,27 @@ begin
      on E : Exception do
        psWriteln('ERROR IN PSSCRIPT: ' + e.message);
   end;
+end;
+
+procedure TMMLPSThread.LoadMethods;
+var
+  c : integer;
+procedure AddFunction( Ptr : Pointer; DeclStr : String);
+begin;
+//  SetLength(ExportedMethods,c+1);
+  if c >= 200 then
+    raise exception.create('PSThread.LoadMethods: Exported more than 200 functions');
+  ExportedMethods[c].FuncDecl:= DeclStr;
+  ExportedMethods[c].FuncPtr:= Ptr;
+  inc(c);
+end;
+
+begin
+  c := 0;
+  SetLength(ExportedMethods,200);
+  {$i PSinc/psexportedmethods.inc}
+
+  SetLength(ExportedMethods,c);
 end;
 
 procedure TMMLPSThread.SetPSScript(Script: string);
