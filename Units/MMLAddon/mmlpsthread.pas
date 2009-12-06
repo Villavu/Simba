@@ -48,7 +48,6 @@ type
       ToDrawBitmap : ^TMufasaBitmap;
       DrawBitmap : procedure of object;
     end;
-
     PSyncInfo = ^TSyncInfo;
     TErrorType = (errRuntime,errCompile);
     TOnError = procedure (ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType) of object;
@@ -78,6 +77,7 @@ type
     public
       PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
       Client : TClient;
+      StartTime : LongWord;
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       property OnError : TOnError read FOnError write FOnError;
       procedure SetPSScript(Script : string);
@@ -100,7 +100,9 @@ uses
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
+  strutils,
   colour_conv,
+  input,
   forms,//Forms
   lclintf; // for GetTickCount and others.
 
@@ -332,16 +334,14 @@ begin
 end;
 
 procedure TMMLPSThread.Execute;
-var
-  time: DWord;
-begin;
+begin
   CurrThread := Self;
-  time := lclintf.GetTickCount;
+  Starttime := lclintf.GetTickCount;
   try
     if PSScript.Compile then
     begin
       OutputMessages;
-      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - time) + ' ms.');
+      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
 //      if not (ScriptState = SCompiling) then
         if not PSScript.Execute then
         begin

@@ -8,7 +8,7 @@ object ScriptFrame: TScriptFrame
   TabOrder = 0
   DesignLeft = 579
   DesignTop = 195
-  object SynEdit: TSynEdit
+  inline SynEdit: TSynEdit
     Left = 0
     Height = 328
     Top = 0
@@ -23,7 +23,6 @@ object ScriptFrame: TScriptFrame
     PopupMenu = Form1.ScriptPopup
     TabOrder = 0
     OnKeyDown = SynEditKeyDown
-    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
@@ -594,7 +593,7 @@ object ScriptFrame: TScriptFrame
     OnChange = SynEditChange
     OnProcessCommand = SynEditProcessCommand
     OnSpecialLineColors = SynEditSpecialLineColors
-    object TSynGutterPartList
+    inline TSynGutterPartList
       object TSynGutterMarks
         Width = 23
       end
@@ -713,7 +712,7 @@ object ScriptFrame: TScriptFrame
     DirectiveAttri.Foreground = clRed
     DirectiveAttri.Style = [fsBold]
     CompilerMode = pcmObjFPC
-    NestedComments = True
+    NestedComments = False
     left = 320
     top = 16
   end

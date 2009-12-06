@@ -57,6 +57,7 @@ type
         function FindColorToleranceOptimised(out x, y: Integer; Color, xs, ys,
           xe, ye, tol: Integer): Boolean;
         function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
+        function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
         procedure SetToleranceSpeed(nCTS: Integer);
         function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
         // Possibly turn x, y into a TPoint var.
@@ -377,6 +378,47 @@ begin
     end;
     Inc(Ptr, PtrInc)
   end;
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.CountColor(Color, xs, ys, xe, ye: Integer): Integer;
+var
+   PtrData: TRetData;
+   Ptr: PRGB32;
+   PtrInc: Integer;
+   dX, dY, clR, clG, clB, xx, yy: Integer;
+
+begin
+  Result := 0;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+
+  // Do we want to "cache" these vars?
+  // We will, for now. Easier to type.
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+
+  for yy := ys to ye do
+  begin;
+    for xx := xs to xe do
+    begin;
+      // Colour comparison here. Possibly with tolerance? ;)
+      if (Ptr^.R = clR) and (Ptr^.G = clG) and (Ptr^.B = clB) then
+        inc(result);
+      Inc(Ptr);
+    end;
+    Inc(Ptr, PtrInc)
+  end;
+
   TClient(Client).MWindow.FreeReturnData;
 end;
 
