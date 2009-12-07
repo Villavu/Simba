@@ -283,6 +283,7 @@ begin
     dtm_.n := s;
     Exit(True);
   end;
+  raise Exception.CreateFMT('SetDTMName: The given DTM %d does not exist.', [DTM]);
   Exit(False);
 end;
 

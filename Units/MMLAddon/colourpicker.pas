@@ -130,6 +130,7 @@ begin
   h := 0;
   Window.GetDimensions(w, h);
 
+  Form.Caption := 'SimbaColourPicker';
   Form.Width := w;
   Form.Height := h;
   Form.Top := 0;
