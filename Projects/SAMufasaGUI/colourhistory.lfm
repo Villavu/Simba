@@ -1,7 +1,7 @@
 object ColourHistoryForm: TColourHistoryForm
-  Left = 403
+  Left = 420
   Height = 250
-  Top = 344
+  Top = 318
   Width = 490
   ActiveControl = SelectionName
   Caption = 'Colour Picker History'
@@ -19,6 +19,7 @@ object ColourHistoryForm: TColourHistoryForm
     Width = 329
     Anchors = [akTop, akLeft, akRight, akBottom]
     Columns = <>
+    ItemIndex = -1
     TabOrder = 0
     OnSelectItem = ChangeViewData
   end
@@ -34,7 +35,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object SelectionName: TEdit
     Left = 361
-    Height = 21
+    Height = 27
     Top = 16
     Width = 112
     Anchors = [akTop, akRight]
@@ -54,7 +55,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object ColourValue: TEdit
     Left = 361
-    Height = 21
+    Height = 27
     Top = 56
     Width = 112
     Anchors = [akTop, akRight]
@@ -64,7 +65,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object CoordValue: TLabel
     Left = 361
-    Height = 14
+    Height = 18
     Top = 96
     Width = 112
     Anchors = [akTop, akRight]
