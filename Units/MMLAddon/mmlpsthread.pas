@@ -387,7 +387,7 @@ end;
 begin
   c := 0;
   SetLength(ExportedMethods,200);
-  {$i PSinc/psexportedmethods.inc}
+  {$i PSInc/psexportedmethods.inc}
 
   SetLength(ExportedMethods,c);
 end;
