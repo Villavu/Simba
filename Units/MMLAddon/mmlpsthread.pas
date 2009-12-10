@@ -110,6 +110,7 @@ uses
   strutils,
   colour_conv,
   input,
+  tpa, //Tpa stuff
   forms,//Forms
   lclintf; // for GetTickCount and others.
 
