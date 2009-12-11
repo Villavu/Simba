@@ -1,7 +1,7 @@
 object DebugImgForm: TDebugImgForm
-  Left = 502
+  Left = 491
   Height = 300
-  Top = 289
+  Top = 266
   Width = 400
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsToolWindow
@@ -9,6 +9,7 @@ object DebugImgForm: TDebugImgForm
   ClientHeight = 300
   ClientWidth = 400
   OnCreate = FormCreate
+  OnHide = FormHide
   OnResize = FormResize
   LCLVersion = '0.9.29'
   object DrawImage: TImage
