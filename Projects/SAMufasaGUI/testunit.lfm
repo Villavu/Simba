@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 274
+  Left = 331
   Height = 557
-  Top = 233
+  Top = 119
   Width = 731
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
-  ClientHeight = 532
+  ClientHeight = 528
   ClientWidth = 731
   KeyPreview = True
   Menu = MainMenu1
@@ -167,7 +167,7 @@ object Form1: TForm1
   object StatusBar: TStatusBar
     Left = 0
     Height = 21
-    Top = 511
+    Top = 507
     Width = 731
     Panels = <    
       item
@@ -185,7 +185,7 @@ object Form1: TForm1
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 357
+    Top = 353
     Width = 731
     Align = alBottom
     ClientHeight = 154
@@ -205,25 +205,25 @@ object Form1: TForm1
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 352
+    Top = 348
     Width = 731
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 328
+    Height = 324
     Top = 24
     Width = 731
     Align = alClient
     BevelOuter = bvNone
     Caption = 'ScriptPanel'
-    ClientHeight = 328
+    ClientHeight = 324
     ClientWidth = 731
     TabOrder = 4
     object PageControl1: TPageControl
       Left = 0
-      Height = 293
+      Height = 289
       Top = 0
       Width = 731
       Align = alClient
@@ -236,11 +236,12 @@ object Form1: TForm1
       OnDragDrop = PageControl1DragDrop
       OnDragOver = PageControl1DragOver
       OnMouseDown = PageControl1MouseDown
+      OnPageChanged = PageControl1Change
     end
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 293
+      Top = 289
       Width = 731
       Align = alBottom
       BevelOuter = bvSpace
@@ -248,35 +249,10 @@ object Form1: TForm1
       ClientWidth = 731
       TabOrder = 1
       Visible = False
-      object LabeledEditSearch: TLabeledEdit
-        Left = 104
-        Height = 27
-        Top = 6
-        Width = 174
-        AutoSelect = False
-        EditLabel.AnchorSideLeft.Control = LabeledEditSearch
-        EditLabel.AnchorSideTop.Control = LabeledEditSearch
-        EditLabel.AnchorSideTop.Side = asrCenter
-        EditLabel.AnchorSideRight.Control = LabeledEditSearch
-        EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 67
-        EditLabel.Height = 18
-        EditLabel.Top = 10
-        EditLabel.Width = 34
-        EditLabel.Caption = 'Find: '
-        EditLabel.ParentColor = False
-        LabelPosition = lpLeft
-        TabOrder = 0
-        OnChange = EditSearchChange
-        OnEnter = LabeledEditSearchEnter
-        OnExit = LabeledEditSearchExit
-        OnKeyDown = LabeledEditSearchKeyDown
-        OnKeyPress = LabeledEditSearchKeyPress
-      end
       object SpeedButtonSearch: TSpeedButton
-        Left = 16
+        Left = 32
         Height = 19
-        Top = 5
+        Top = 7
         Width = 16
         Color = clBtnFace
         Flat = True
@@ -359,11 +335,35 @@ object Form1: TForm1
         NumGlyphs = 0
         OnClick = SpeedButtonSearchClick
       end
+      object LabeledEditSearch: TLabeledEdit
+        Left = 104
+        Height = 25
+        Top = 6
+        Width = 174
+        EditLabel.AnchorSideLeft.Control = LabeledEditSearch
+        EditLabel.AnchorSideTop.Control = LabeledEditSearch
+        EditLabel.AnchorSideTop.Side = asrCenter
+        EditLabel.AnchorSideRight.Control = LabeledEditSearch
+        EditLabel.AnchorSideBottom.Control = LabeledEditSearch
+        EditLabel.Left = 65
+        EditLabel.Height = 18
+        EditLabel.Top = 9
+        EditLabel.Width = 36
+        EditLabel.Caption = 'Find: '
+        EditLabel.ParentColor = False
+        LabelPosition = lpLeft
+        TabOrder = 0
+        OnChange = EditSearchChange
+        OnEnter = LabeledEditSearchEnter
+        OnExit = LabeledEditSearchExit
+        OnKeyDown = LabeledEditSearchKeyDown
+        OnKeyPress = LabeledEditSearchKeyPress
+      end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 22
-        Top = 6
-        Width = 97
+        Height = 20
+        Top = 7
+        Width = 96
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -972,6 +972,7 @@ object Form1: TForm1
       end
       object MenuItemFind: TMenuItem
         Action = ActionFindStart
+        ImageIndex = 26
         OnClick = ActionFindstartExecute
       end
       object MenuItemFindNext: TMenuItem
@@ -1132,7 +1133,7 @@ object Form1: TForm1
   object Mufasa_Image_List: TImageList
     left = 488
     Bitmap = {
-      4C691A0000001000000010000000424242004242420042424200424242004242
+      4C691B0000001000000010000000424242004242420042424200424242004242
       420042424200424242004242420042424200424242004242420042424200A155
       42FFA15542FFA15542FF4242420E424242004242420042424200424242004242
       4200424242004242420042424200424242004242420042424200A15542FFFFDA
@@ -1964,7 +1965,39 @@ object Form1: TForm1
       4FFF4C4C4CFF4A4A4AFF474747FF454545FF25679DFF3274A8FF3D7CAFFF4784
       B5FF4E8ABAFF3E7EADFF0C578FEAFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF001D639B1619609839145D9562105A
-      92880D5890A4135C92FC0C578FED
+      92880D5890A4135C92FC0C578FED00000000000000008C8C8C308C8C8CAF8C8C
+      8CFF8C8C8CFF8C8C8CFF8C8C8CEF8C8C8C9F8C8C8C1000000000000000000000
+      0000000000000000000000000000000000008C8C8C608C8C8CFF9A9A9AFFD4D3
+      D2FFE2E1DFFFE2E0DCFFCDC9C3FF939392FF8C8C8CEF8C8C8C30000000000000
+      00000000000000000000000000008C8C8C308C8C8CFFB7B7B7FFFFFEFDFFFFFE
+      FCFFFFFDF9FFFFFDF9FFFFFEFCFFF8F2E8FFA29F9CFF8C8C8CDF8C8C8C100000
+      00000000000000000000000000008C8C8CAF9A9A9AFFFFFEFDFFFFFCF8FFFFFB
+      F4FFFFF9EFFFFFF7EAFFFFF6E8FFFFFAF2FFF1E8DBFF939291FF8C8C8C700000
+      00000000000000000000000000008C8C8CFFD4D3D2FFFFFCF9FFFFFBF4FFFFF9
+      EFFFFFF7EBFFFFF5E6FFFFF3E2FFFFF2DDFFFFF2DDFFB7B1A7FF8C8C8CBF0000
+      00000000000000000000000000008C8C8CFFE2E0DDFFFFFBF4FFFFF9F0FFFFF7
+      EBFFFFF5E6FFFFF3E2FFFFF2DDFFFFF0D9FFFFEED4FFC6BCAEFF8C8C8CEF0000
+      00000000000000000000000000008C8C8CFFE2DFDAFFFFF9F0FFFFF7EBFFFFF5
+      E7FFFFF4E2FFFFF2DDFFFFF0D9FFFFEED4FFFFECD0FFC6BBACFF8C8C8CCF0000
+      00000000000000000000000000008C8C8CEFBEBCB7FFFFF7ECFFFFF5E7FFFFF4
+      E2FFFFF2DEFFFFF0D9FFFFEED5FFFFECD0FFFFEBCBFFA29E97FF8C8C8CAF0000
+      00000000000000000000000000008C8C8C80939392FFF1E8DCFFFFF4E3FFFFF2
+      DEFFFFF0D9FFFFEED5FFFFECD0FFFFEBCCFFDBCCB5FF8C8C8CFF8C8C8C500000
+      00000000000000000000000000008C8C8C108C8C8CCFA29F9CFFE9DFCFFFFFF0
+      DAFFFFEED5FFFFECD0FFFFEBCCFFDBCCB5FF939290FF7C7C7CFF818181CF8C8C
+      8C10000000000000000000000000000000008C8C8C108C8C8CBF8C8C8CFFA29F
+      9AFFBEB6ABFFB7B0A5FF9A9894FF8C8C8CFF606060FF3C3C3CFF616161FF8181
+      81CF8C8C8C1000000000000000000000000000000000000000008C8C8C508C8C
+      8C9F8C8C8CBF8C8C8CBF8C8C8C8F54545450020202EF161616FF3B3B3BFF6161
+      61FF818181CF8C8C8C1000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000001010130020202EF151515FF3B3B
+      3BFF616161FF818181CF8C8C8C10000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000001010130020202EF1515
+      15FF3B3B3BFF606060FF808080CF000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000010101300202
+      02EF151515FF3A3A3AFF606060FF000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000101
+      0120020202CF141414FF393939CF
     }
   end
   object MTrayIcon: TTrayIcon
@@ -2399,14 +2432,12 @@ object Form1: TForm1
     end
     object ActionUndo: TAction
       Caption = '&Undo'
-      DisableIfNoHandler = False
       ImageIndex = 18
       OnExecute = ActionUndoExecute
       ShortCut = 16474
     end
     object ActionRedo: TAction
       Caption = '&Redo'
-      DisableIfNoHandler = False
       ImageIndex = 12
       OnExecute = ActionRedoExecute
       ShortCut = 16473
