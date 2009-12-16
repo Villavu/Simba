@@ -87,6 +87,8 @@ type
   end;
 
   { TODO: add cts per colour/tolerance? }
+
+  // TODO DTM-Not points. Not very hard really.
   pDTM = record
     l: Integer;
     p: TPointArray;
