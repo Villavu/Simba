@@ -131,7 +131,7 @@ begin
                         ', ' + IntToStr(TColourPickerObject(Item.Data).Pos.Y);
   SelectionName.Text := TColourPickerObject(Item.Data).Name;
 
-  CH_RGB_Label.Caption:=Format('RGB:%d,%d%d', [r,g,b]);
+  CH_RGB_Label.Caption:=Format('RGB:%d,%d,%d', [r,g,b]);
 
   { Draw the Image }
   ColourImage.Canvas.Brush.Color := TColourPickerObject(Item.Data).Colour;
