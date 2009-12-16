@@ -90,4 +90,14 @@ object ColourHistoryForm: TColourHistoryForm
     OnClick = OkButtonClick
     TabOrder = 5
   end
+  object CH_RGB_Label: TLabel
+    Left = 361
+    Height = 18
+    Top = 128
+    Width = 112
+    Anchors = [akTop, akRight]
+    Caption = 'RGBValues'
+    Constraints.MinWidth = 112
+    ParentColor = False
+  end
 end
