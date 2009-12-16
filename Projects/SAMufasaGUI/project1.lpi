@@ -1513,8 +1513,8 @@
         <ComponentName Value="ColourHistoryForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="colourhistory"/>
-        <CursorPos X="75" Y="103"/>
-        <TopLine Value="79"/>
+        <CursorPos X="45" Y="141"/>
+        <TopLine Value="115"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="93"/>
         <Loaded Value="True"/>
