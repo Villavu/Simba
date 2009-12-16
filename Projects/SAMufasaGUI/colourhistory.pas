@@ -22,6 +22,7 @@ type
   { TColourHistoryForm }
 
   TColourHistoryForm = class(TForm)
+    CH_RGB_Label: TLabel;
     OkButton: TButton;
     ColourValue: TEdit;
     CoordValue: TLabel;
@@ -59,7 +60,7 @@ var
 
 implementation
 uses
-  TestUnit;
+  colour_conv, TestUnit;
 
 constructor TColourPickerObject.Create(C: Integer; P: TPoint; N: String);
 begin
@@ -110,6 +111,8 @@ end;
 
 procedure TColourHistoryForm.ChangeViewData(Sender: TObject; Item: TListItem;
   Selected: Boolean);
+var
+   r,g,b:integer;
 begin
   if not Assigned(Item) then
     exit;
@@ -120,11 +123,15 @@ begin
   if not Assigned(Item.Data) then
     exit;
 
+  colour_conv.ColorToRGB(TColourPickerObject(Item.Data).Colour, r, g, b);
+
   { Change Form Text / Values }
   ColourValue.Caption := IntToStr(TColourPickerObject(Item.Data).Colour);
   CoordValue.Caption := 'Coords: ' + IntToStr(TColourPickerObject(Item.Data).Pos.X) +
                         ', ' + IntToStr(TColourPickerObject(Item.Data).Pos.Y);
   SelectionName.Text := TColourPickerObject(Item.Data).Name;
+
+  CH_RGB_Label.Caption:=Format('RGB:%d,%d%d', [r,g,b]);
 
   { Draw the Image }
   ColourImage.Canvas.Brush.Color := TColourPickerObject(Item.Data).Colour;
