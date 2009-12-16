@@ -741,9 +741,9 @@ begin
   PtrNew := TargetBitmap.FData;
   for i := (h*w-1) downto 0 do
   begin;
-    PtrNew^.r := Round(PtrOld^.r / po) * Po;
-    PtrNew^.g := Round(PtrOld^.g / po) * Po;
-    PtrNew^.b := Round(PtrOld^.b / po) * Po;
+    PtrNew^.r := min(Round(PtrOld^.r / po) * Po, 255);
+    PtrNew^.g := min(Round(PtrOld^.g / po) * Po, 255);
+    PtrNew^.b := min(Round(PtrOld^.b / po) * Po, 255);
     inc(ptrOld);
     inc(PtrNew);
   end;
@@ -753,15 +753,25 @@ procedure TMufasaBitmap.Posterize(Po: integer);
 var
   I : integer;
   Ptr: PRGB32;
+  {a:integer; }
 begin
   if not InRange(Po,1,255) then
     Raise exception.CreateFmt('Posterize Po(%d) out of range[1,255]',[Po]);
   Ptr := Self.FData;
   for i := (h*w-1) downto 0 do
   begin;
-    ptr^.r := Round(ptr^.r / po) * Po;
-    ptr^.g := Round(ptr^.g / po) * Po;
-    ptr^.b := Round(ptr^.b / po) * Po;
+   { a := round(ptr^.r / po);
+    a := a * po;
+    ptr^.r := min(a,255);
+    a := round(ptr^.g / po);
+    a := a * po;
+    ptr^.g := min(a,255);
+    a := round(ptr^.b / po);
+    a := a * po;
+    ptr^.b := min(a,255);      }
+    ptr^.r := min(Round(ptr^.r / po) * Po, 255);
+    ptr^.g := min(Round(ptr^.g / po) * Po, 255);
+    ptr^.b := min(Round(ptr^.b / po) * Po, 255);
     inc(ptr);
   end;
 end;
