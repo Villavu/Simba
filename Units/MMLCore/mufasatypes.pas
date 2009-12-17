@@ -89,6 +89,11 @@ type
   { TODO: add cts per colour/tolerance? }
 
   // TODO DTM-Not points. Not very hard really.
+
+  { not points -
+    add seperate tpa or boolean array for every point that is to be matched ?
+   }
+
   pDTM = record
     l: Integer;
     p: TPointArray;
