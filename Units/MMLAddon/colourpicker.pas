@@ -250,9 +250,9 @@ begin
   Color := WidgetSet.DCGetPixel(ImageHandle, TempPoint.X, TempPoint.Y);
   Rectangle(NoteHandle,1,1,85,32);
 //  Text:='Pos: ' + inttostr(TempPoint.x - Client.Rect.Left) + ','  + inttostr(TempPoint.y - Client.Rect.Bottom);
-  Text:='Pos: ' + inttostr(TempPoint.x - targetleft) + ','  + inttostr(TempPoint.y - targettop);
+  Text:={'Pos: ' + }inttostr(TempPoint.x - targetleft) + ','  + inttostr(TempPoint.y - targettop);
   ExtTextOut(NoteHandle, 5, 3,0,nil,pchar(text),length(text),nil);
-  Text := 'Color: ' +  inttostr(Color);
+  Text := {'Color: ' +  }inttostr(Color);
   ExtTextOut(NoteHandle, 5, 15,0,nil,pchar(text),length(text),nil);
   BitBlt( ImageHandle, TempPoint.x + 5, TempPoint.y + 5,147,33,NoteHandle,0,0,SRCCOPY);
   Brush.Color := Color;
