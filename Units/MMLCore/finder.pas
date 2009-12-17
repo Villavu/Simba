@@ -67,6 +67,8 @@ type
         function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
         function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
         function FindColors(out TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+        function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
+        function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
         //Mask
         function FindBitmapMaskTolerance(mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
         procedure CheckMask(Mask : TMask);
@@ -511,6 +513,81 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
+function TMFinder.FindColoredArea(var x, y: Integer; Color, xs, ys, xe, ye, MinArea: Integer): Boolean;
+var
+   PtrData: TRetData;
+   Ptr, Before: PRGB32;
+   PtrInc: Integer;
+   dX, dY, clR, clG, clB, xx, yy, fx, fy, Count : Integer;
+   NotFound : Boolean;
+
+begin
+  Result := false;
+  Count := 0;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+
+  // Do we want to "cache" these vars?
+  // We will, for now. Easier to type.
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+
+  for yy := ys to ye do
+  begin;
+    for xx := xs to xe do
+    begin;
+      NotFound := False;
+      // Colour comparison here. Possibly with tolerance? ;)
+      if (Ptr^.R = clR) and (Ptr^.G = clG) and (Ptr^.B = clB) then
+      begin
+        Before := Ptr;
+        for fy := yy to ye do
+        begin
+          for fx := xx to xe do
+          begin
+            Inc(Ptr);
+            if not ((Ptr^.R = clR) and (Ptr^.G = clG) and (Ptr^.B = clB)) then
+            begin
+              NotFound := True;
+              Break;
+            end;
+            Inc(Count);
+            if Count >= MinArea then
+            Begin
+              Result := True;
+              x := xx;
+              y := yy;
+              TClient(Client).MWindow.FreeReturnData;
+              Exit;
+            end;
+          end;
+
+          if NotFound then
+          begin
+            Ptr := Before;
+            Break;
+          end;
+          Inc(Ptr, PtrInc);
+        end;
+      end;
+      Inc(Ptr);
+    end;
+    Inc(Ptr, PtrInc);
+  end;
+
+  TClient(Client).MWindow.FreeReturnData;
+end;
+
+
 function TMFinder.FindColorToleranceOptimised(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
 var
    PtrData: TRetData;
@@ -723,6 +800,84 @@ begin
       end;
     end;
   end;
+  Result := False;
+  TClient(Client).MWindow.FreeReturnData;
+  Exit;
+
+  Hit:
+    Result := True;
+    x := xx;
+    y := yy;
+    TClient(Client).MWindow.FreeReturnData;
+end;
+
+function TMFinder.FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean;
+var
+   PtrData: TRetData;
+   Ptr, Before: PRGB32;
+   PtrInc: Integer;
+   dX, dY, xx, yy, fx, fy, Count: Integer;
+   clR, clG, clB : Byte;
+   H1, S1, L1: Extended;
+   NotFound : Boolean;
+   label Hit;
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+  if Cts = 2 then
+    RGBToHSL(clR,clG,clB,H1,S1,L1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
+
+  // Do we want to "cache" these vars?
+  // We will, for now. Easier to type.
+  Ptr := PtrData.Ptr;
+  PtrInc := PtrData.IncPtrWith;
+
+  for yy := ys to ye do
+  begin;
+    for xx := xs to xe do
+    begin;
+      NotFound := False;
+      // Colour comparison here.
+      if ColorSame(CTS, Tol, Ptr^.R, Ptr^.G, Ptr^.B, clR, clG, clB, H1, S1, L1, huemod, satmod) then
+      begin
+        Before := Ptr;
+        for fy := yy to ye do
+        begin
+          for fx := xx to xe do
+          begin
+            Inc(Ptr);
+            if not ColorSame(CTS, Tol, Ptr^.R, Ptr^.G, Ptr^.B, clR, clG, clB, H1, S1, L1, huemod, satmod) then
+            begin
+              NotFound := True;
+              Break;
+            end;
+            Inc(Count);
+            if Count >= MinArea then
+              goto Hit;
+          end;
+
+          if NotFound then
+          begin
+            Ptr := Before;
+            Break;
+          end;
+          Inc(Ptr, PtrInc);
+        end;
+      end;
+      Inc(Ptr);
+    end;
+    Inc(Ptr, PtrInc);
+  end;
+
   Result := False;
   TClient(Client).MWindow.FreeReturnData;
   Exit;
