@@ -121,13 +121,10 @@ end;
 {$DEFINE DTM_DEBUG}
 destructor TMDTM.Destroy;
 
-{$IFDEF DTM_DEBUG}
 var
    i, j: integer;
    b:boolean;
-{$ENDIF}
 begin
-  {$IFDEF DTM_DEBUG}
   for i := 0 to high(DTMList) do
   begin
     b := false;
@@ -140,7 +137,6 @@ begin
       if not b then
         writeln('DTM Number ' + inttostr(i) + ' was not freed');
   end;
-  {$ENDIF}
   SetLength(DTMList, 0);
   SetLength(FreeSpots, 0);
   SetLength(BufferString, 0);

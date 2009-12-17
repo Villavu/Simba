@@ -432,10 +432,7 @@ begin
   Self.FreezeState:=False;
 end;
 
-// Bugged. For params other than 0, 0, ClientWidth, ClientHeight
-// if other type than w_XImage
-
-// Also possibly thread bugged
+//Remove?
 function TMWindow.CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
 var
    w,h: Integer;
@@ -518,6 +515,8 @@ begin
   end;
 end;
 
+// Set's input focus on Linux, does not mean the window will look `active', but
+// it surely is. Try typing something after ActivateClient.
 procedure TMWindow.ActivateClient;
 {$IFDEF LINUX}
 var
@@ -539,7 +538,7 @@ begin
   {$ENDIF}
 end;
 
-{$IFDEF MSWINDOWS}  //Probably need one for Linux as well
+{$IFDEF MSWINDOWS}
 function TMWindow.UpdateDrawBitmap :boolean;
 var
   w,h : integer;
@@ -555,6 +554,7 @@ begin
 end;
 {$ENDIF}
 
+// Returns dimensions of the Window
 procedure TMWindow.GetDimensions(out W, H: Integer);
 {$IFDEF LINUX}
 var
@@ -616,6 +616,7 @@ begin
   end;
 end;
 
+// Make this use GetDimensions, ray...?
 function TMWindow.GetDimensionBox(out Box : TBox) : boolean;
 function IntToTBox(x1,y1,x2,y2 : integer) : TBox;inline;
 begin;
@@ -668,6 +669,7 @@ begin
   end;
 end;
 
+// Set target to X-Window
 {$IFDEF LINUX}
 function TMWindow.SetTarget(XWindow: x.TWindow): integer; overload;
 var
@@ -682,6 +684,7 @@ begin
 end;
 {$ENDIF}
 
+// Set target to Windows Window
 function TMWindow.SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
 begin
   if Self.Frozen then
@@ -735,9 +738,9 @@ begin
   {$IFDEF WINDOWS}
   Self.TargetHandle:= windows.GetDesktopWindow;
   {$ENDIF}
-
 end;
 
+// Set target to Bitmap
 function TMWindow.SetTarget(Bitmap: TMufasaBitmap): integer;
 begin
   if Self.Frozen then

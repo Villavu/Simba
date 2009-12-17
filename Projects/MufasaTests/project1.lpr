@@ -10,7 +10,7 @@ uses
   Forms,Interfaces,
   LCLIntf,
   Client,
-  bitmaps,x ,mufasatypes,dtm,dtmutil, ocrutil
+  bitmaps,x ,mufasatypes,dtm,dtmutil, ocrutil ,graphics ,colour_conv,math
 
 
   { you can add units after this };
@@ -54,14 +54,21 @@ end;
 
 procedure MufasaTests.DoRun;
 
+const
+    ocr_Limit_High = 192;
+    ocr_Limit_Low = 65;
+
 var
   ErrorMsg: String;
   Time: DWord;
   C: TClient;
-  I: Integer;
+  I, w, h,x,y: Integer;
   dtm: pdtm;
   p:tpointarray;
-  bmp: TMufasaBitmap;
+  bmp, bmprs: TMufasaBitmap;
+  cyan, itemc:integer;
+  r,g,b:integer;
+  t:Dword;
 
 begin
   // quick check parameters
@@ -80,53 +87,93 @@ begin
   end;
 
   { add your program here }
+  cyan := rgbtocolor(0,255,255);
+
+
+  bmprs := TMufasaBitmap.Create;
+  bmprs.LoadFromFile('/home/merlijn/Programs/mufasa/pics/uptext6.bmp');
   C := TClient.Create;
+  C.MWindow.SetTarget(bmprs);
+  C.MWindow.GetDimensions(w, h);
 
   bmp := TMufasaBitmap.Create;
-  bmp.SetSize(CW,CH);
-  Writeln(Format('Client W/H: %d, %d', [CW, CH]));
-  FillChar(bmp.FData[0],sizeof(trgb32)*CW*CH, 0);
-  Randomize;
- for i := 0 to 500 do
-    bmp.fastsetpixel(random(CW), random(CH), 255);
- { bmp.FastSetPixel(8,8,255);
-  bmp.FastSetPixel(9,9,255);
-  bmp.FastSetPixel(7,7,255);
-  bmp.FastSetPixel(9,8,255);
-  bmp.FastSetPixel(8,9,255);            }
-  C.MWindow.SetTarget(bmp);
+  bmp.CopyClientToBitmap(C.MWindow, True, 0, 0, 450, 50);
+
+  t:=gettickcount;
+
+  for y := 0 to bmp.Height - 1 do
+    for x := 0 to bmp.Width - 1 do
+    begin
+      colortorgb(bmp.fastgetpixel(x,y),r,g,b);
+      // the abs(g-b) < 15 seems to help heaps when taking out crap points
+      if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High) and (abs(g-b) < 15) then
+      begin
+        bmp.fastsetpixel(x,y,clwhite);
+        continue;
+      end;
+      if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b > ocr_Limit_High) then
+      begin
+        bmp.fastsetpixel(x,y,cyan);
+        continue;
+      end;
+      if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
+      begin
+        bmp.fastsetpixel(x,y,rgbtocolor(0,255,0));
+        continue;
+      end;
+      if(r > ocr_Limit_High) and (g > 100) and (g < ocr_Limit_High) and (b > 30) and (b < 90) then
+      begin
+        bmp.fastsetpixel(x,y,rgbtocolor(255,127,0));
+        continue;
+      end;
+      if(r > ocr_Limit_High) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
+      begin
+        bmp.fastsetpixel(x,y,rgbtocolor(255,255,0));
+        continue;
+      end;
+      // better use g < 40 than ocr_Limit_Low imo
+      if (r > ocr_Limit_High) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
+      begin
+        bmp.fastsetpixel(x,y,rgbtocolor(255,0,0));
+        continue;
+      end;
+
+      bmp.fastsetpixel(x,y,0);
+    end;
+    writeln(inttostr(gettickcount-t));
+  {
+  bmp.Posterize(130); // ~ 3
+ // bmp.Contrast(3);
+
+  for y := 0 to bmp.Height - 1 do
+    for x := 0 to bmp.Width - 1 do
+    begin
+      if bmp.FastGetPixel(x, y) = clWhite then
+        continue;
+      //cyan
+      if bmp.FastGetPixel(x, y) = rgbtocolor(0,255,255) then
+        continue;
+      //green
+      if bmp.FastGetPixel(x, y) = rgbtocolor(0,255,0) then
+        continue;
+
+      //item // TODO -> 5.bmp = not OK
+      if bmp.FastGetPixel(x, y) = rgbtocolor(255,130,0) then
+        continue;
+
+      //yellow, interact
+      if bmp.FastGetPixel(x, y) = rgbtocolor(255,255,0) then
+        continue;
+
+      bmp.fastsetpixel(x,y,0);
+    end;
+                }
 
 
- { initdtm(dtm, 5);
-  dtm.p[0] := Point(2, 2);
-  dtm.p[1] := Point(-3, -3);
-  dtm.p[2] := Point(0, 0);
-  dtm.p[3] := Point(1, 1);
-  dtm.p[4] := Point(3, 3);
-  dtm.c[0] :=  255;
-  dtm.t[0] :=  0;
-  dtm.asz[1] := 1;
-  dtm.ash[1] := dtm_Rectangle;  }
-
-  dtm := randomdtm(20);
-
- // setlength(p, 1);
-  time := GetTickCount;
-  C.MFinder.FindDTMs(dtm, p, 0, 0,CW-1, CH-1, 0);
-  writeln(inttostr(gettickcount - time) + 'ms');
-  setlength(p,0);
-
-  time := GetTickCount;
-  C.MFinder.FindDTMs(dtm, p, 0, 0,CW-1, CH-1, 0);
-  //C.MFinder.FindDTM(dtm, p[0].x, p[0].y, 0, 0,CW-1, CH-1);
-  writeln(inttostr(gettickcount - time) + 'ms');
-  writeln(inttostr(length(p))+ ' points found');
-
-  {for i := 0 to high(p) do
-    writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));     }
 
 
-  //bmp.OnDestroy:=nil;
+  bmp.SaveToFile('/tmp/output.bmp');
+    //bmp.OnDestroy:=nil;
   bmp.Free;
   C.Free;
 
