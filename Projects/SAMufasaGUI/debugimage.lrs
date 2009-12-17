@@ -1,4 +1,4 @@
-{ Este es un archivo de recurso de Lazarus generado automáticamente }
+{ This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TDebugImgForm','FORMDATA',[
   'TPF0'#13'TDebugImgForm'#12'DebugImgForm'#4'Left'#3#235#1#6'Height'#3','#1#3

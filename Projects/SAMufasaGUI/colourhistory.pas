@@ -83,7 +83,8 @@ begin
   if autoName then
   begin
     Inc(Colour_Count);
-    c.Name := 'Untitled (' + IntToStr(Colour_Count) + ')';
+    // TODO: Proper name
+    c.Name := IntToStr(c.Colour) + ' (' + IntToStr(Colour_Count) + ')';
   end;
   Self.AddColObj(c);
 end;
