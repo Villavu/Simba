@@ -10,7 +10,7 @@ uses
   Forms,Interfaces,
   LCLIntf,
   Client,
-  bitmaps,x ,mufasatypes,dtm,dtmutil, ocrutil ,graphics ,colour_conv,math
+  bitmaps,{x ,}mufasatypes,dtm,dtmutil, ocrutil ,graphics ,colour_conv,math
 
 
   { you can add units after this };
