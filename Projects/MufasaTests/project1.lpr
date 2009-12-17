@@ -91,7 +91,7 @@ begin
 
 
   bmprs := TMufasaBitmap.Create;
-  bmprs.LoadFromFile('/home/merlijn/Programs/mufasa/pics/uptext6.bmp');
+  bmprs.LoadFromFile('/home/merlijn/Programs/mufasa/pics/uptext7.png');
   C := TClient.Create;
   C.MWindow.SetTarget(bmprs);
   C.MWindow.GetDimensions(w, h);
@@ -106,7 +106,7 @@ begin
     begin
       colortorgb(bmp.fastgetpixel(x,y),r,g,b);
       // the abs(g-b) < 15 seems to help heaps when taking out crap points
-      if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High) and (abs(g-b) < 15) then
+      if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High){ and (abs(g-b) < 15)} then
       begin
         bmp.fastsetpixel(x,y,clwhite);
         continue;
