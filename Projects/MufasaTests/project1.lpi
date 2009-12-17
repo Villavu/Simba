@@ -11,7 +11,7 @@
       <TargetFileExt Value=""/>
       <Icon Value="0"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="6"/>
+      <ActiveEditorIndexAtStart Value="0"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -30,15 +30,15 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="23">
+    <Units Count="26">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="61" Y="82"/>
-        <TopLine Value="63"/>
+        <CursorPos X="34" Y="143"/>
+        <TopLine Value="118"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="72"/>
+        <UsageCount Value="96"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -46,15 +46,15 @@
         <UnitName Value="CustApp"/>
         <CursorPos X="15" Y="51"/>
         <TopLine Value="32"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="4"/>
       </Unit1>
       <Unit2>
         <Filename Value="../../Units/MMLCore/client.pas"/>
         <UnitName Value="Client"/>
-        <CursorPos X="21" Y="51"/>
-        <TopLine Value="35"/>
-        <EditorIndex Value="8"/>
-        <UsageCount Value="30"/>
+        <CursorPos X="28" Y="50"/>
+        <TopLine Value="30"/>
+        <EditorIndex Value="9"/>
+        <UsageCount Value="42"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -62,281 +62,302 @@
         <UnitName Value="windowutil"/>
         <CursorPos X="110" Y="30"/>
         <TopLine Value="3"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="4"/>
       </Unit3>
       <Unit4>
         <Filename Value="../../Units/MMLCore/window.pas"/>
         <UnitName Value="Window"/>
         <CursorPos X="55" Y="251"/>
         <TopLine Value="236"/>
-        <EditorIndex Value="11"/>
-        <UsageCount Value="29"/>
+        <EditorIndex Value="12"/>
+        <UsageCount Value="41"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
         <UnitName Value="colour_conv"/>
         <CursorPos X="18" Y="346"/>
-        <TopLine Value="309"/>
-        <EditorIndex Value="3"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="307"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
         <UnitName Value="finder"/>
-        <CursorPos X="41" Y="1637"/>
-        <TopLine Value="1631"/>
-        <EditorIndex Value="2"/>
-        <UsageCount Value="33"/>
+        <CursorPos X="1" Y="1728"/>
+        <TopLine Value="1701"/>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="45"/>
         <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="../../Units/MMLCore/input.pas"/>
         <UnitName Value="Input"/>
-        <CursorPos X="56" Y="49"/>
-        <TopLine Value="24"/>
-        <EditorIndex Value="7"/>
-        <UsageCount Value="29"/>
+        <CursorPos X="72" Y="47"/>
+        <TopLine Value="36"/>
+        <EditorIndex Value="8"/>
+        <UsageCount Value="41"/>
         <Loaded Value="True"/>
       </Unit7>
       <Unit8>
         <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
         <UnitName Value="MufasaTypes"/>
-        <CursorPos X="1" Y="88"/>
+        <CursorPos X="98" Y="92"/>
         <TopLine Value="76"/>
-        <EditorIndex Value="12"/>
-        <UsageCount Value="31"/>
+        <EditorIndex Value="13"/>
+        <UsageCount Value="43"/>
         <Loaded Value="True"/>
       </Unit8>
       <Unit9>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <UnitName Value="ocr"/>
-        <CursorPos X="53" Y="31"/>
-        <TopLine Value="24"/>
-        <EditorIndex Value="9"/>
-        <UsageCount Value="30"/>
+        <CursorPos X="69" Y="116"/>
+        <TopLine Value="84"/>
+        <EditorIndex Value="10"/>
+        <UsageCount Value="42"/>
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
         <Filename Value="../../../../Documents/fpc/rtl/objpas/sysutils/diskh.inc"/>
         <CursorPos X="10" Y="18"/>
         <TopLine Value="1"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="5"/>
       </Unit10>
       <Unit11>
         <Filename Value="../../Units/MMLCore/files.pas"/>
         <UnitName Value="files"/>
         <CursorPos X="5" Y="42"/>
         <TopLine Value="27"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="5"/>
       </Unit11>
       <Unit12>
         <Filename Value="../../../../Documents/lazarus/lcl/graphics.pp"/>
         <UnitName Value="Graphics"/>
-        <CursorPos X="3" Y="1426"/>
-        <TopLine Value="1411"/>
-        <UsageCount Value="8"/>
+        <CursorPos X="3" Y="243"/>
+        <TopLine Value="223"/>
+        <UsageCount Value="7"/>
       </Unit12>
       <Unit13>
         <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
         <UnitName Value="bitmaps"/>
-        <CursorPos X="32" Y="835"/>
-        <TopLine Value="850"/>
+        <CursorPos X="34" Y="768"/>
+        <TopLine Value="749"/>
         <EditorIndex Value="1"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit13>
       <Unit14>
         <Filename Value="../../../../Documents/fpc/rtl/inc/objpash.inc"/>
         <CursorPos X="22" Y="177"/>
         <TopLine Value="162"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="5"/>
       </Unit14>
       <Unit15>
         <Filename Value="../../../../Documents/lazarus/lcl/intfgraphics.pas"/>
         <UnitName Value="IntfGraphics"/>
         <CursorPos X="30" Y="2975"/>
         <TopLine Value="2959"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="5"/>
       </Unit15>
       <Unit16>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="3" Y="154"/>
         <TopLine Value="235"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="5"/>
       </Unit16>
       <Unit17>
         <Filename Value="../../../../Documents/fpc/rtl/i386/mmx.pp"/>
         <UnitName Value="mmx"/>
         <CursorPos X="80" Y="15"/>
         <TopLine Value="71"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="5"/>
       </Unit17>
       <Unit18>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/ocr.inc"/>
         <CursorPos X="20" Y="5"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="10"/>
-        <UsageCount Value="26"/>
+        <EditorIndex Value="11"/>
+        <UsageCount Value="38"/>
         <Loaded Value="True"/>
       </Unit18>
       <Unit19>
         <Filename Value="../../Units/MMLCore/dtm.pas"/>
         <UnitName Value="dtm"/>
         <CursorPos X="92" Y="287"/>
-        <TopLine Value="267"/>
-        <EditorIndex Value="5"/>
-        <UsageCount Value="26"/>
+        <TopLine Value="99"/>
+        <EditorIndex Value="6"/>
+        <UsageCount Value="38"/>
         <Loaded Value="True"/>
       </Unit19>
       <Unit20>
         <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
         <UnitName Value="dtmutil"/>
         <CursorPos X="43" Y="218"/>
-        <TopLine Value="88"/>
-        <EditorIndex Value="4"/>
-        <UsageCount Value="22"/>
+        <TopLine Value="49"/>
+        <EditorIndex Value="5"/>
+        <UsageCount Value="34"/>
         <Loaded Value="True"/>
       </Unit20>
       <Unit21>
         <Filename Value="../../../../Documents/fpc/packages/fcl-base/src/custapp.pp"/>
         <UnitName Value="CustApp"/>
-        <CursorPos X="59" Y="48"/>
-        <TopLine Value="18"/>
-        <UsageCount Value="9"/>
+        <CursorPos X="43" Y="287"/>
+        <TopLine Value="274"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
       </Unit21>
       <Unit22>
         <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
         <UnitName Value="ocrutil"/>
-        <CursorPos X="68" Y="420"/>
-        <TopLine Value="395"/>
-        <EditorIndex Value="6"/>
-        <UsageCount Value="10"/>
+        <CursorPos X="22" Y="470"/>
+        <TopLine Value="445"/>
+        <EditorIndex Value="7"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit22>
+      <Unit23>
+        <Filename Value="../../Units/Linux/xtest.pas"/>
+        <UnitName Value="XTest"/>
+        <CursorPos X="56" Y="22"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="7"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="../../../../Documents/fpc/rtl/inc/mathh.inc"/>
+        <CursorPos X="58" Y="78"/>
+        <TopLine Value="57"/>
+        <UsageCount Value="7"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="../../../../Documents/fpc/rtl/inc/innr.inc"/>
+        <CursorPos X="4" Y="98"/>
+        <TopLine Value="78"/>
+        <UsageCount Value="7"/>
+      </Unit25>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1893" Column="47" TopLine="1868"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="65" Column="16" TopLine="37"/>
       </Position1>
       <Position2>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1892" Column="27" TopLine="1877"/>
+        <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
+        <Caret Line="566" Column="30" TopLine="545"/>
       </Position2>
       <Position3>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1884" Column="45" TopLine="1877"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="93" Column="88" TopLine="86"/>
       </Position3>
       <Position4>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1680" Column="83" TopLine="1669"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="762" Column="18" TopLine="748"/>
       </Position4>
       <Position5>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1892" Column="35" TopLine="1877"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="762" Column="38" TopLine="732"/>
       </Position5>
       <Position6>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1884" Column="19" TopLine="1869"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="765" Column="7" TopLine="732"/>
       </Position6>
       <Position7>
         <Filename Value="project1.lpr"/>
-        <Caret Line="66" Column="18" TopLine="55"/>
+        <Caret Line="95" Column="4" TopLine="72"/>
       </Position7>
       <Position8>
         <Filename Value="project1.lpr"/>
-        <Caret Line="88" Column="43" TopLine="61"/>
+        <Caret Line="114" Column="54" TopLine="85"/>
       </Position8>
       <Position9>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="82" Column="26" TopLine="62"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="108" Column="37" TopLine="82"/>
       </Position9>
       <Position10>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="84" Column="26" TopLine="62"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="106" Column="18" TopLine="82"/>
       </Position10>
       <Position11>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1586" Column="16" TopLine="1571"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="54" Column="26" TopLine="34"/>
       </Position11>
       <Position12>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1794" Column="10" TopLine="1781"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="55" Column="26" TopLine="34"/>
       </Position12>
       <Position13>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="82" Column="88" TopLine="63"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="397" Column="17" TopLine="374"/>
       </Position13>
       <Position14>
-        <Filename Value="project1.lpr"/>
-        <Caret Line="81" Column="16" TopLine="60"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="368" Column="30" TopLine="1"/>
       </Position14>
       <Position15>
-        <Filename Value="project1.lpr"/>
-        <Caret Line="85" Column="17" TopLine="73"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="766" Column="22" TopLine="743"/>
       </Position15>
       <Position16>
         <Filename Value="project1.lpr"/>
-        <Caret Line="69" Column="57" TopLine="54"/>
+        <Caret Line="110" Column="7" TopLine="70"/>
       </Position16>
       <Position17>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1674" Column="10" TopLine="1656"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="86" Column="11" TopLine="73"/>
       </Position17>
       <Position18>
-        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
-        <Caret Line="39" Column="21" TopLine="24"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="93" Column="25" TopLine="85"/>
       </Position18>
       <Position19>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1693" Column="131" TopLine="1676"/>
+        <Filename Value="../../../../Documents/fpc/packages/fcl-base/src/custapp.pp"/>
+        <Caret Line="57" Column="28" TopLine="37"/>
       </Position19>
       <Position20>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1613" Column="26" TopLine="1608"/>
+        <Filename Value="../../../../Documents/fpc/packages/fcl-base/src/custapp.pp"/>
+        <Caret Line="284" Column="16" TopLine="262"/>
       </Position20>
       <Position21>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1696" Column="1" TopLine="1669"/>
+        <Filename Value="../../../../Documents/fpc/packages/fcl-base/src/custapp.pp"/>
+        <Caret Line="57" Column="28" TopLine="37"/>
       </Position21>
       <Position22>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1675" Column="25" TopLine="1660"/>
+        <Filename Value="../../../../Documents/fpc/packages/fcl-base/src/custapp.pp"/>
+        <Caret Line="282" Column="43" TopLine="262"/>
       </Position22>
       <Position23>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1696" Column="127" TopLine="1681"/>
+        <Filename Value="../../../../Documents/fpc/packages/fcl-base/src/custapp.pp"/>
+        <Caret Line="284" Column="25" TopLine="262"/>
       </Position23>
       <Position24>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1682" Column="1" TopLine="1671"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="93" Column="45" TopLine="85"/>
       </Position24>
       <Position25>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1618" Column="22" TopLine="1607"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="100" Column="21" TopLine="90"/>
       </Position25>
       <Position26>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1637" Column="18" TopLine="1621"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="85" Column="33" TopLine="54"/>
       </Position26>
       <Position27>
-        <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="31" Column="54" TopLine="13"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="118" Column="50" TopLine="89"/>
       </Position27>
       <Position28>
-        <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
-        <Caret Line="8" Column="38" TopLine="1"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="119" Column="28" TopLine="98"/>
       </Position28>
       <Position29>
-        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
-        <Caret Line="47" Column="31" TopLine="27"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="107" Column="62" TopLine="72"/>
       </Position29>
       <Position30>
-        <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="31" Column="53" TopLine="24"/>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="143" Column="40" TopLine="120"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
