@@ -54,9 +54,19 @@ end;
 
 procedure MufasaTests.DoRun;
 
+
 const
-    ocr_Limit_High = 192;
+    ocr_Limit_High = 191;
     ocr_Limit_Low = 65;
+
+    ocr_White = 16777215;
+    ocr_Green = 65280;
+    ocr_Red = 255;
+    ocr_Yellow = 65535;
+    ocr_Blue = 16776960;
+    ocr_ItemC = 16744447;
+
+    ocr_Purple = 8388736;
 
 var
   ErrorMsg: String;
@@ -66,7 +76,6 @@ var
   dtm: pdtm;
   p:tpointarray;
   bmp, bmprs: TMufasaBitmap;
-  cyan, itemc:integer;
   r,g,b:integer;
   t:Dword;
 
@@ -86,15 +95,21 @@ begin
     Exit;
   end;
 
+
+  { clOlive = false point }
+  { clSilver = false shadow }
+  { clLime = false shadow}
+
   { add your program here }
-  cyan := rgbtocolor(0,255,255);
 
 
   bmprs := TMufasaBitmap.Create;
-  bmprs.LoadFromFile('/home/merlijn/Programs/mufasa/pics/uptext7.png');
+  bmprs.LoadFromFile('/home/merlijn/Programs/mufasa/pics/16.bmp');
   C := TClient.Create;
   C.MWindow.SetTarget(bmprs);
   C.MWindow.GetDimensions(w, h);
+
+  writeln(inttostr(clpurple));
 
   bmp := TMufasaBitmap.Create;
   bmp.CopyClientToBitmap(C.MWindow, True, 0, 0, 450, 50);
@@ -108,66 +123,111 @@ begin
       // the abs(g-b) < 15 seems to help heaps when taking out crap points
       if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High){ and (abs(g-b) < 15)} then
       begin
-        bmp.fastsetpixel(x,y,clwhite);
+        bmp.fastsetpixel(x,y,ocr_White);
         continue;
       end;
       if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b > ocr_Limit_High) then
       begin
-        bmp.fastsetpixel(x,y,cyan);
+        bmp.fastsetpixel(x,y,ocr_Blue);
         continue;
       end;
       if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
       begin
-        bmp.fastsetpixel(x,y,rgbtocolor(0,255,0));
+        bmp.fastsetpixel(x,y,ocr_Green);
         continue;
       end;
-      if(r > ocr_Limit_High) and (g > 100) and (g < ocr_Limit_High) and (b > 30) and (b < 90) then
+
+      // false results with fire
+      if(r > ocr_Limit_High) and (g > 100) and (g < ocr_Limit_High) and (b > 40) and (b < 90) then
       begin
-        bmp.fastsetpixel(x,y,rgbtocolor(255,127,0));
+        bmp.fastsetpixel(x,y,ocr_ItemC);
         continue;
       end;
       if(r > ocr_Limit_High) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
       begin
-        bmp.fastsetpixel(x,y,rgbtocolor(255,255,0));
+        bmp.fastsetpixel(x,y,ocr_Yellow);
         continue;
       end;
       // better use g < 40 than ocr_Limit_Low imo
       if (r > ocr_Limit_High) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
       begin
-        bmp.fastsetpixel(x,y,rgbtocolor(255,0,0));
+        bmp.fastsetpixel(x,y,ocr_Red);
+        continue;
+      end;
+
+      if (r < ocr_Limit_Low) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
+      begin
+        bmp.FastSetPixel(x,y, ocr_Purple);
         continue;
       end;
 
       bmp.fastsetpixel(x,y,0);
     end;
+
+    // increase height by 1, so our algo works better. (shadow)
+    bmp.SetSize(Bmp.Width, Bmp.Height+1);
+    for x := 0 to bmp.width -1 do
+      bmp.fastsetpixel(x,bmp.height-1,0);
+
+   for y := 0 to bmp.Height - 2 do
+     for x := 0 to bmp.Width - 2 do
+     begin
+       if bmp.fastgetpixel(x,y) = clPurple then
+         continue;
+       if bmp.fastgetpixel(x,y) = clBlack then
+         continue;
+       if (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x+1,y+1)) and (bmp.fastgetpixel(x+1,y+1) <> clpurple) then
+         bmp.fastsetpixel(x,y,{clAqua}0);
+     end;
+
+     { Optional - remove false shadow }
+   for y := bmp.Height - 1 downto 1 do
+     for x := bmp.Width - 1 downto 1 do
+     begin
+       if bmp.fastgetpixel(x,y) <> clPurple then
+         continue;
+       if bmp.fastgetpixel(x,y) = bmp.fastgetpixel(x-1,y-1) then
+       begin
+         bmp.fastsetpixel(x,y,clSilver);
+         continue;
+       end;
+       if bmp.fastgetpixel(x-1,y-1) = 0 then
+         bmp.fastsetpixel(x,y,clLime);
+     end;
+
+   { remove bad points }
+   for y := bmp.Height - 2 downto 1 do
+     for x := bmp.Width - 2 downto 1 do
+     begin
+       if bmp.fastgetpixel(x,y) = clPurple then
+         continue;
+       if bmp.fastgetpixel(x,y) = clBlack then
+         continue;
+       if (bmp.fastgetpixel(x,y) = bmp.fastgetpixel(x+1,y+1) ) then
+         continue;
+
+       if bmp.fastgetpixel(x+1,y+1) <> clPurple then
+       begin
+         bmp.fastsetpixel(x,y,clOlive);
+         continue;
+       end;
+     end;
+
+   { Dangerous removes all pixels that had no pixels on x-1 or x+1}
+ {  for y := 0 to bmp.Height - 2 do
+     for x := 1 to bmp.Width - 2 do
+     begin
+       if bmp.fastgetpixel(x,y) = clBlack then continue;
+       if bmp.fastgetpixel(x,y) = clPurple then continue;
+       if bmp.fastgetpixel(x,y) = clOlive then continue;
+       if bmp.fastgetpixel(x,y) = clSilver then continue;
+       if bmp.fastgetpixel(x,y) = clLime then continue;
+       if (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x+1,y) )  and
+          (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x-1,y) ) then
+          bmp.fastsetpixel(x,y,clFuchsia);
+     end;                                }
+
     writeln(inttostr(gettickcount-t));
-  {
-  bmp.Posterize(130); // ~ 3
- // bmp.Contrast(3);
-
-  for y := 0 to bmp.Height - 1 do
-    for x := 0 to bmp.Width - 1 do
-    begin
-      if bmp.FastGetPixel(x, y) = clWhite then
-        continue;
-      //cyan
-      if bmp.FastGetPixel(x, y) = rgbtocolor(0,255,255) then
-        continue;
-      //green
-      if bmp.FastGetPixel(x, y) = rgbtocolor(0,255,0) then
-        continue;
-
-      //item // TODO -> 5.bmp = not OK
-      if bmp.FastGetPixel(x, y) = rgbtocolor(255,130,0) then
-        continue;
-
-      //yellow, interact
-      if bmp.FastGetPixel(x, y) = rgbtocolor(255,255,0) then
-        continue;
-
-      bmp.fastsetpixel(x,y,0);
-    end;
-                }
 
 
 

@@ -60,6 +60,7 @@ type
     function ImageToNorm(src: tRGBArray; w,h: integer): TNormArray;
     function ocrDetect(txt: TNormArray; w,h: integer; var ocrdata: TocrData): string;
     function ExtractText(colors: PRGB32;{colors: tRGBArray;} w,h: integer): TNormArray;
+    function MakeTPAString(str: string): TpointArray;
 
 implementation
 uses
@@ -579,6 +580,33 @@ begin
   for i:= 0 to len-1 do
     norm[i]:= newcolors[blobbed[i]];
   result:= norm;
+end;
+
+function MakeTPAString(str: string): TpointArray;
+var
+    i,j,c,off: integer;
+    bmp: array of Tbmp;
+begin
+    raise Exception.Create('MakeTPAString sucks ass, don''t use it.');
+    c:= 0;
+    off:= 0;
+    SetLength(bmp,length(str));
+    for i:= 0 to length(str)-1 do
+    begin
+        bmp[i]:= ReadBmp('/home/merlijn/Programs/mufasa/Fonts/UpChars/' + inttostr(ord(str[i+1])) + '.bmp');
+        SetLength(result,c+bmp[i].width*bmp[i].height);
+        for j:= 0 to bmp[i].width*bmp[i].height - 1 do
+        begin
+            if bmp[i].data[j].g = 255 then
+            begin
+                result[c].x:= j mod bmp[i].width + off;
+                result[c].y:= j div bmp[i].width;
+                inc(c);
+            end;
+        end;
+        off:= off + bmp[i].width;
+        SetLength(result,c);
+    end;
 end;
 
 end.
