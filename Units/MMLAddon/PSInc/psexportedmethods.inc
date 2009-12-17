@@ -111,7 +111,8 @@ AddFunction(@FindColorsTolerance,'function FindColorsTolerance(out Points: TPoin
 AddFunction(@FindColorSpiral,'function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;');
 AddFunction(@FindColorsSpiralTolerance,'function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;');
 AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(cts: integer);');
-
+AddFunction(@FindColoredArea, 'function FindColoredArea(var x, y : Integer; color, xs, ys, xe, ye, MinArea : Integer): Boolean');
+AddFunction(@FindColoredAreaTolerance, 'function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe, ye, MinArea, Tolerance : Integer): Boolean');
 AddFunction(@ColorToHSL, 'procedure ColorToHSL(c: integer; out r,g,b: extended);');
 
 {Mouse etc.}
