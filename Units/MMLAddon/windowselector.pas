@@ -34,7 +34,7 @@ uses
   controls,
   graphics,
   forms,
-  {$IFNDEF MSWINDOWS}x, xlib
+  {$IFNDEF MSWINDOWS}x, xlib,xatom
   {$ELSE}
   windows
   {$ENDIF}
@@ -87,17 +87,27 @@ var
   x, y : cint;
   Old_Handler : TXErrorHandler;
 
+  window_opacity: TAtom;
+  opacity_75: culong;
+  opacity_100: culong;
+
 begin
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
   Result := 0;
 
+  window_opacity:=XInternAtom(Window.XDisplay,PChar('_NET_WM_WINDOW_OPACITY'), False);
+  opacity_75 := cuint($ffffffff * 0.75);
+  opacity_100 := cuint($ffffffff);
+
   repeat
+    // get pointer pos + current window we are at.
     XQueryPointer(Window.XDisplay, Window.DesktopWindow, @root,
                 @Tempwindow, @x_root, @y_root,
                 @x, @y, @xmask);
     subwindow:= Tempwindow;
 
+    // find the most `child' window.
     while subwindow <> 0 do
     begin
         Tempwindow := subwindow;
@@ -105,15 +115,32 @@ begin
                  @subwindow, @x_root, @y_root,
                  @x, @y, @xmask);
     end;
+
+
+
     if Result <> Tempwindow then
     begin
-      WriteLn('Changing Window to: ' + IntToStr(Tempwindow));
+      writeln('Making ' + inttostr(tempwindow) + ' transparent');
+      XChangeProperty(Window.XDisplay, tempwindow, window_opacity, XA_CARDINAL, 32, PropModeReplace, @opacity_75, 1);
+
+      writeln('Resetting ' + inttostr(Result));
+      if result <> 0 then
+        XChangeProperty(Window.XDisplay, Result, window_opacity, XA_CARDINAL, 32, PropModeReplace, @opacity_100, 1);
+      WriteLn('Changing Window from: ' +  Inttostr(result) +' to: ' + IntToStr(Tempwindow));
+     // XChangeProperty(Window.XDisplay, tempwindow, window_opacity, XA_CARDINAL, 32, PropModeReplace, @opacity_50, 1);
+
       Result := Tempwindow;
     end;
-
+    XFlush(Window.XDisplay);
     Sleep(16);
 
+    //if we are selecting for a long time, we must still process other messages
+    Application.ProcessMessages;
+
   until (xmask and Button1Mask) = 0;
+
+  XChangeProperty(Window.XDisplay, Result, window_opacity, XA_CARDINAL, 32, PropModeReplace, @opacity_100, 1);
+  XFlush(Window.XDisplay);
 
   XSetErrorHandler(Old_handler);
 end;
