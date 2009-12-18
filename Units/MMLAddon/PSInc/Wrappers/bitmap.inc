@@ -106,6 +106,20 @@ begin;
   CurrThread.Client.MBitmaps.Bmp[Bmp].FastSetPixels(TPA,Colors);
 end;
 
+procedure DrawTPABitmap(bitmap : integer; TPA : TPointArray; Color : integer);
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].DrawTPA(TPA,Color);
+end;
+procedure DrawATPABitmap(bitmap : integer; ATPA : T2DPointArray);
+begin
+  CurrThread.Client.MBitmaps.Bmp[bitmap].DrawATPA(ATPA);
+end;
+
+procedure DrawATPABitmapEx(bitmap : integer; ATPA : T2DPointArray; Colors : TIntegerArray);
+begin
+  CurrThread.Client.MBitmaps.Bmp[bitmap].DrawATPA(ATPA,Colors);
+end;
+
 procedure FastDrawClear(bmp : integer; Color : TColor);
 begin;
   CurrThread.Client.MBitmaps.Bmp[bmp].FastDrawClear(Color);
