@@ -301,6 +301,7 @@ var
                 (str :'UNDEFINED'; key :  $FF)
                 );
 
+
 implementation
 operator+(PT1, PT2: TPoint): TPoint;
 begin
@@ -312,5 +313,6 @@ begin
   Result.x := PT1.x - PT2.x;
   Result.y := Pt1.y - PT2.y;
 end;
+
 end.
 

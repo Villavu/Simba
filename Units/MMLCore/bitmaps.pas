@@ -51,6 +51,9 @@ type
     procedure LoadFromFile(const FileName : string);
     procedure FastSetPixel(x,y : integer; Color : TColor);
     procedure FastSetPixels(TPA : TPointArray; Colors : TIntegerArray);
+    procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);overload;
+    procedure DrawATPA(ATPA : T2DPointArray);overload;
+    procedure DrawTPA(TPA : TPointArray; Color : TColor);
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(TPA : TPointArray) : TIntegerArray;
     Procedure SetTransparentColor(Col : TColor);
@@ -104,7 +107,7 @@ implementation
 
 uses
   Windowutil,paszlib,DCPbase64,math,
-  colour_conv,window;
+  colour_conv,window,mufasatypesutil;
 
 function Min(a,b:integer) : integer;
 begin
@@ -390,6 +393,47 @@ begin
     FData[TPA[i].y * w + TPA[i].x] := RGBToBGR(Colors[i]);
   end;
 end;
+
+procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Colors: TIntegerArray);
+var
+  lenTPA,lenATPA : integer;
+  i,ii : integer;
+  Color : TRGB32;
+begin
+  lenATPA := High(ATPA);
+  if LenATPA <> High(colors) then
+    Raise Exception.CreateFMT('TPA/Colors Length differ -> %d : %d',[LenATPA + 1,High(Colors) + 1]);
+  for i := 0 to lenATPA do
+  begin;
+    lenTPA := High(ATPA[i]);
+    Color := RGBToBGR(Colors[i]);
+    for ii := 0 to lenTPA do
+    begin;
+      ValidatePoint(ATPA[i][ii].x,ATPA[i][ii].y);
+      FData[ATPA[i][ii].y * w + ATPA[i][ii].x] := Color;
+    end;
+  end;
+end;
+
+
+procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray);
+var
+  Colors : TIntegerArray;
+  i,len : integer;
+begin
+  len := high(ATPA);
+  SetLength(colors,len+1);
+  for i := 0 to len do
+    Colors[i] := Random(clwhite);
+  DrawATPA(ATPA,Colors);
+end;
+
+procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: TColor);
+begin
+  DrawATPA(ConvArr([TPA]),ConvArr([Color]));
+end;
+
+
 
 function TMufasaBitmap.FastGetPixel(x, y: integer): TColor;
 begin
