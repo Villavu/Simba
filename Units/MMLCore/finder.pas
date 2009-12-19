@@ -98,8 +98,8 @@ type
 
 implementation
 uses
+    colour_conv,// For RGBToColor, etc.
     Client, // For the Client Casts.
-    colour_conv, // For RGBToColor, etc.
     math, //min/max
     dtmutil
     ;
