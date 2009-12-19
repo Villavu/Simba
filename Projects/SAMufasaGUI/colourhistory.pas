@@ -103,6 +103,8 @@ begin
   bmp.Canvas.Rectangle(0,0,16,16);
 
   it.ImageIndex:= CHImages.Add(bmp,nil);
+  it.SelectedIndex:=it.ImageIndex;
+
   bmp.Free;
 end;
 
@@ -118,6 +120,7 @@ begin
       TColourPickerObject(ColourTree.Selected.Data).Free;
     i:=ColourTree.Selected.ImageIndex;
     ColourTree.Selected.ImageIndex:=0;
+    ColourTree.Selected.SelectedIndex:=-0;
     CHImages.Delete(i);
 
     ColourTree.Selected.Delete;
