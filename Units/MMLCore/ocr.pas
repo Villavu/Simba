@@ -53,7 +53,7 @@ uses
   colour_conv, client,  files;
 
 const
-    ocr_Limit_High = 191;
+    ocr_Limit_High = 190;
     ocr_Limit_Low = 65;
 
     ocr_White = 16777215;
@@ -79,7 +79,9 @@ var
 
 begin
   bmp := TMufasaBitmap.Create;
-  bmp.CopyClientToBitmap(TClient(Client).MWindow, True, sx, sy, sx + w - 1, sy + h - 1);
+  bmp.SetSize(w, h + 2);
+  bmp.CopyClientToBitmap(TClient(Client).MWindow, False, 0,1, sx, sy, sx + w - 1, sy + h - 1);
+  //bmp.CopyClientToBitmap(TClient(Client).MWindow, True, sx, sy, sx + w - 1, sy + h - 1);
 
   bmp.SaveToFile('/tmp/ocrinit.bmp');
   for y := 0 to bmp.Height - 1 do
@@ -87,7 +89,10 @@ begin
     begin
       colortorgb(bmp.fastgetpixel(x,y),r,g,b);
       // the abs(g-b) < 15 seems to help heaps when taking out crap points
-      if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High){ and (abs(g-b) < 15)} then
+      if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High)
+         // 50 or 55. 55 seems to be better.
+         and (abs(r-g) + abs(r-b) + abs(g-b) < 55) then
+         // TODO: make 55 a var, and make it so that it can be set
       begin
         bmp.fastsetpixel(x,y,ocr_White);
         continue;
@@ -104,7 +109,7 @@ begin
       end;
 
       // false results with fire
-      if(r > ocr_Limit_High) and (g > 100) and (g < ocr_Limit_High) and (b > 40) and (b < 90) then
+      if(r > ocr_Limit_High) and (g > 100) and (g < ocr_Limit_High) and (b > 40) and (b < 127) then
       begin
         bmp.fastsetpixel(x,y,ocr_ItemC);
         continue;
@@ -131,7 +136,11 @@ begin
     end;
 
     // increase height by 1, so our algo works better.
-    bmp.SetSize(Bmp.Width, Bmp.Height+1);
+    {bmp.SetSize(Bmp.Width, Bmp.Height+1);    }
+
+    // first and last horiz line = 0
+    for x := 0 to bmp.width -1 do
+      bmp.fastsetpixel(x,0,0);
     for x := 0 to bmp.width -1 do
       bmp.fastsetpixel(x,bmp.height-1,0);
 
@@ -164,8 +173,8 @@ begin
      end;
 
    { remove bad points }
-   for y := bmp.Height - 2 downto 1 do
-     for x := bmp.Width - 2 downto 1 do
+   for y := bmp.Height - 2 downto 0 do
+     for x := bmp.Width - 2 downto 0 do
      begin
        if bmp.fastgetpixel(x,y) = clPurple then
          continue;
@@ -181,7 +190,19 @@ begin
        end;
      end;
 
+    { may remove some pixels from chars. }
+  {  for y := bmp.Height - 2 downto 1 do
+       for x := bmp.Width - 2 downto 1 do
+       begin
+         if (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x+1,y)) and
+            (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x-1,y)) and
+            (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x,y+1)) and
+            (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x,y-1)) then
+            bmp.fastsetpixel(x,y, clOlive);
+       end;   }
    { remove debug ;) }
+
+   bmp.SaveToFile('/tmp/ocrdebug.bmp');
 
    for y := 0 to bmp.Height - 1 do
      for x := 0 to bmp.Width - 1 do
@@ -259,14 +280,17 @@ function TMOCR.InitTOCR(path: string): boolean;
 begin
   { This must be dynamic }
 
-  SetLength(OCRData, 1);
+  SetLength(OCRData, 2);
   result := true;
   OCRPath := path + DS;
   if DirectoryExists(path + DS + 'UpChars' + DS) then
     OCRData[0] := ocrutil.InitOCR(path + DS + 'UpChars' + DS)
   else
     result := false;
-
+  if DirectoryExists(path + DS + 'StatChars' + DS) then
+    OCRData[1] := ocrutil.InitOCR(path + DS + 'StatChars' + DS)
+  else
+    result := false;
 end;
 
 function TMOCR.GetUpTextAt(atX, atY: integer): string;
@@ -281,9 +305,9 @@ begin
 
   n := getTextPointsIn(atX, atY, ww, hh);
   Result := ocrDetect(n, ww, hh, OCRData[0]);
-  writeln(result);
+  //writeln(result);
 end;
-{
+    {
 function TMOCR.GetUpTextAt(atX, atY: integer): string;
 
 var
@@ -294,7 +318,8 @@ var
    n:Tnormarray;
 
 begin
-  t:=MakeTPAString('01:44 < mixster> Wizzup: Lies! How can my laptop handle that as well as playing music if even ownage machines suffer from it?');
+ // t:=MakeTPAString('01:44 < mixster> Wizzup: Lies! How can my laptop handle that as well as playing music if even ownage machines suffer from it?');
+  t:=MakeTPAString('Wizzup Lies How can my laptop handle that as well as playing music if even ownage machines suffer from it');
   writeln(inttostr(length(t)));
   b := TMufasaBitmap.Create;
   b.SetSize(1000,1000);
@@ -322,11 +347,11 @@ begin
       Inc(P);
     end;
 
-  Result := ocrDetect(n, b.Width, b.Height, OCRData[0]);
+  Result := ocrDetect(n, b.Width, b.Height, OCRData[1]);
   writeln(result);
 
 
-end;           }
+end;               }
            {
 function TMOCR.GetUpTextAt(atX, atY: integer): string;
 

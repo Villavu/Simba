@@ -593,7 +593,7 @@ begin
     SetLength(bmp,length(str));
     for i:= 0 to length(str)-1 do
     begin
-        bmp[i]:= ReadBmp('/home/merlijn/Programs/mufasa/Fonts/UpChars/' + inttostr(ord(str[i+1])) + '.bmp');
+        bmp[i]:= ReadBmp('/home/merlijn/Programs/mufasa/Fonts/StatChars/' + inttostr(ord(str[i+1])) + '.bmp');
         SetLength(result,c+bmp[i].width*bmp[i].height);
         for j:= 0 to bmp[i].width*bmp[i].height - 1 do
         begin
