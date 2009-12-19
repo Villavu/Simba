@@ -34,11 +34,15 @@ type
     procedure ChangeName(Sender: TObject);
     procedure ChangeViewData(Sender: TObject; Item: TListItem; Selected: Boolean
       );
+    procedure ColourListAdvancedCustomDrawSubItem(Sender: TCustomListView;
+      Item: TListItem; SubItem: Integer; State: TCustomDrawState;
+      Stage: TCustomDrawStage; var DefaultDraw: Boolean);
     procedure DeleteSelected(Sender: TObject);
     procedure AddColObj(c: TColourPickerObject; autoName: Boolean);
 
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
+    procedure FormCreate(Sender: TObject);
     procedure OkButtonClick(Sender: TObject);
     procedure SelectionNameKeyPress(Sender: TObject; var Key: char);
     procedure SetCHShowMenu(Sender: TObject);
@@ -147,6 +151,16 @@ begin
   end;
 end;
 
+procedure TColourHistoryForm.ColourListAdvancedCustomDrawSubItem(
+  Sender: TCustomListView; Item: TListItem; SubItem: Integer;
+  State: TCustomDrawState; Stage: TCustomDrawStage; var DefaultDraw: Boolean);
+begin
+  if SubItem = 0 then
+    ColourList.Canvas.Brush.Color := clWhite
+  else
+    ColourList.Canvas.Brush.Color := TColourPickerObject(Item.Data).Colour;
+end;
+
 procedure TColourHistoryForm.ChangeName(Sender: TObject);
 begin
   if not Assigned(ColourList.Selected) then
@@ -172,6 +186,12 @@ begin
   Colour_Count := 0;
 
   inherited Destroy;
+end;
+
+procedure TColourHistoryForm.FormCreate(Sender: TObject);
+begin
+  ColourList.Column[0].Width:= 100;
+  ColourList.Column[1].Width:= 500;
 end;
 
 procedure TColourHistoryForm.OkButtonClick(Sender: TObject);

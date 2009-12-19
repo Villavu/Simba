@@ -9,6 +9,7 @@ object ColourHistoryForm: TColourHistoryForm
   ClientWidth = 490
   Constraints.MinHeight = 200
   Constraints.MinWidth = 490
+  OnCreate = FormCreate
   OnHide = UnSetCHShowMenu
   OnShow = SetCHShowMenu
   LCLVersion = '0.9.29'
@@ -18,9 +19,21 @@ object ColourHistoryForm: TColourHistoryForm
     Top = 16
     Width = 329
     Anchors = [akTop, akLeft, akRight, akBottom]
-    Columns = <>
+    Columns = <    
+      item
+        Caption = 'Colour'
+        MaxWidth = 50
+        MinWidth = 50
+        Width = 10
+      end    
+      item
+        Caption = 'Woot'
+        Width = 10
+      end>
     ItemIndex = -1
     TabOrder = 0
+    ViewStyle = vsReport
+    OnAdvancedCustomDrawSubItem = ColourListAdvancedCustomDrawSubItem
     OnSelectItem = ChangeViewData
   end
   object DeleteButton: TButton
@@ -35,7 +48,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object SelectionName: TEdit
     Left = 361
-    Height = 27
+    Height = 21
     Top = 16
     Width = 112
     Anchors = [akTop, akRight]
@@ -55,7 +68,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object ColourValue: TEdit
     Left = 361
-    Height = 27
+    Height = 21
     Top = 56
     Width = 112
     Anchors = [akTop, akRight]
@@ -65,7 +78,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object CoordValue: TLabel
     Left = 361
-    Height = 18
+    Height = 14
     Top = 96
     Width = 112
     Anchors = [akTop, akRight]
@@ -92,7 +105,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object CH_RGB_Label: TLabel
     Left = 361
-    Height = 18
+    Height = 14
     Top = 128
     Width = 112
     Anchors = [akTop, akRight]
