@@ -555,10 +555,10 @@ begin
     Self.SetSize(xe-xs+1 + x,ye-ys+1 + y);
   wi := Min(xe-xs + 1 + x,Self.w);
   hi := Min(ye-ys + 1 + y,Self.h);
-  PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi,hi);
+  PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi - x,hi - y);
 
-  for yy := 0 to (hi-1) do
-    Move(PtrRet.Ptr[yy * (wi + PtrRet.IncPtrWith)], FData[(yy + y) * self.w + x],wi * SizeOf(TRGB32));
+  for yy := 0 to (hi-1 - y) do
+    Move(PtrRet.Ptr[yy * (wi - x + PtrRet.IncPtrWith)], FData[(yy + y) * self.w + x],wi * SizeOf(TRGB32));
   TMWindow(MWindow).FreeReturnData;
 end;
 
