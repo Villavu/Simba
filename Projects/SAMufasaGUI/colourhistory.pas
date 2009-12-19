@@ -23,32 +23,27 @@ type
 
   TColourHistoryForm = class(TForm)
     CH_RGB_Label: TLabel;
+    CHImages: TImageList;
     OkButton: TButton;
     ColourValue: TEdit;
     CoordValue: TLabel;
     ColourImage: TImage;
     PickNewColourButton: TButton;
     DeleteButton: TButton;
-    ColourList: TListView;
     SelectionName: TEdit;
+    ColourTree: TTreeView;
     procedure ChangeName(Sender: TObject);
-    procedure ChangeViewData(Sender: TObject; Item: TListItem; Selected: Boolean
-      );
-    procedure ColourListAdvancedCustomDrawSubItem(Sender: TCustomListView;
-      Item: TListItem; SubItem: Integer; State: TCustomDrawState;
-      Stage: TCustomDrawStage; var DefaultDraw: Boolean);
+    procedure ColourTreeChange(Sender: TObject; Node: TTreeNode);
     procedure DeleteSelected(Sender: TObject);
     procedure AddColObj(c: TColourPickerObject; autoName: Boolean);
 
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
-    procedure FormCreate(Sender: TObject);
     procedure OkButtonClick(Sender: TObject);
     procedure SelectionNameKeyPress(Sender: TObject; var Key: char);
     procedure SetCHShowMenu(Sender: TObject);
     procedure UnSetCHShowMenu(Sender: TObject);
   private
-    Colour_Count: Integer;
     { private declarations }
   protected
     procedure AddColObj(c: TColourPickerObject);
@@ -86,9 +81,8 @@ procedure TColourHistoryForm.AddColObj(c: TColourPickerObject; autoName: Boolean
 begin
   if autoName then
   begin
-    Inc(Colour_Count);
     // TODO: Proper name
-    c.Name := IntToStr(c.Colour) + ' (' + IntToStr(Colour_Count) + ')';
+    c.Name := IntToStr(c.Colour);
   end;
   Self.AddColObj(c);
 end;
@@ -96,50 +90,65 @@ end;
 procedure TColourHistoryForm.AddColObj(c: TColourPickerObject);
 
 var
-   it: TListItem;
+   it: TTreeNode;
+   bmp: TBitmap;
 begin
-  it := ColourList.Items.Add;
+  it := ColourTree.Items.Add(nil, c.Name);
   it.Data := c;
-  it.Caption:= c.Name;
-  ColourList.Selected := it;
+  ColourTree.Selected := it;
+
+  bmp:=TBitmap.Create;
+  bmp.SetSize(16,16);
+  bmp.Canvas.Brush.Color:=c.Colour;
+  bmp.Canvas.Rectangle(0,0,16,16);
+
+  it.ImageIndex:= CHImages.Add(bmp,nil);
+  bmp.Free;
 end;
 
 procedure TColourHistoryForm.DeleteSelected(Sender: TObject);
 
+var
+   i:integer;
+
 begin
-  if (Assigned(ColourList.Selected)) then
+  if (Assigned(ColourTree.Selected)) then
   begin
-    TColourPickerObject(ColourList.Selected.Data).Free;
-    ColourList.Selected.Delete;
+    if Assigned(ColourTree.Selected.Data) then
+      TColourPickerObject(ColourTree.Selected.Data).Free;
+    i:=ColourTree.Selected.ImageIndex;
+    ColourTree.Selected.ImageIndex:=0;
+    CHImages.Delete(i);
+
+    ColourTree.Selected.Delete;
   end;
 end;
 
-procedure TColourHistoryForm.ChangeViewData(Sender: TObject; Item: TListItem;
-  Selected: Boolean);
+procedure TColourHistoryForm.ColourTreeChange(Sender: TObject; Node: TTreeNode);
 var
    r,g,b:integer;
 begin
-  if not Assigned(Item) then
+  if not Assigned(Node) then
     exit;
-  if not Item.Selected then
+  if not Node.Selected then
     exit;
 
   { This only occurs when we have manually added an item with the Form Editor }
-  if not Assigned(Item.Data) then
+  if not Assigned(Node.Data) then
     exit;
 
-  colour_conv.ColorToRGB(TColourPickerObject(Item.Data).Colour, r, g, b);
+  colour_conv.ColorToRGB(TColourPickerObject(Node.Data).Colour, r, g, b);
 
   { Change Form Text / Values }
-  ColourValue.Caption := IntToStr(TColourPickerObject(Item.Data).Colour);
-  CoordValue.Caption := 'Coords: ' + IntToStr(TColourPickerObject(Item.Data).Pos.X) +
-                        ', ' + IntToStr(TColourPickerObject(Item.Data).Pos.Y);
-  SelectionName.Text := TColourPickerObject(Item.Data).Name;
+  ColourValue.Caption := IntToStr(TColourPickerObject(Node.Data).Colour);
+  CoordValue.Caption := 'Coords: ' + IntToStr(TColourPickerObject(Node.Data).Pos.X) +
+                        ', ' + IntToStr(TColourPickerObject(Node.Data).Pos.Y);
+  SelectionName.Text := TColourPickerObject(Node.Data).Name;
 
   CH_RGB_Label.Caption:=Format('RGB:%d,%d,%d', [r,g,b]);
 
   { Draw the Image }
-  ColourImage.Canvas.Brush.Color := TColourPickerObject(Item.Data).Colour;
+  ColourImage.Canvas.Brush.Color := TColourPickerObject(Node.Data).Colour;
   ColourImage.Canvas.Rectangle(0,0,ColourImage.Width, ColourImage.Height);
 
   if Self.Visible then
@@ -151,52 +160,34 @@ begin
   end;
 end;
 
-procedure TColourHistoryForm.ColourListAdvancedCustomDrawSubItem(
-  Sender: TCustomListView; Item: TListItem; SubItem: Integer;
-  State: TCustomDrawState; Stage: TCustomDrawStage; var DefaultDraw: Boolean);
-begin
-  if SubItem = 0 then
-    ColourList.Canvas.Brush.Color := clWhite
-  else
-    ColourList.Canvas.Brush.Color := TColourPickerObject(Item.Data).Colour;
-end;
-
 procedure TColourHistoryForm.ChangeName(Sender: TObject);
 begin
-  if not Assigned(ColourList.Selected) then
+  if not Assigned(ColourTree.Selected) then
   begin
     WriteLn('We double clicked but have nothing Selected?');
     exit;
   end;
-  ColourList.Selected.Caption := SelectionName.Text;
-  TColourPickerObject(ColourList.Selected.Data).Name := SelectionName.Text;
+  ColourTree.Selected.Text := SelectionName.Text;
+  TColourPickerObject(ColourTree.Selected.Data).Name := SelectionName.Text;
 end;
 
 constructor TColourHistoryForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  Colour_Count := 0;
   PickNewColourButton.OnClick:= @Form1.ButtonPickClick;
 end;
 
 destructor TColourHistoryForm.Destroy;
 begin
   PickNewColourButton.OnClick := nil;
-  Colour_Count := 0;
 
   inherited Destroy;
 end;
 
-procedure TColourHistoryForm.FormCreate(Sender: TObject);
-begin
-  ColourList.Column[0].Width:= 100;
-  ColourList.Column[1].Width:= 500;
-end;
-
 procedure TColourHistoryForm.OkButtonClick(Sender: TObject);
 begin
-  Self.close;
+  Self.Close;
 end;
 
 procedure TColourHistoryForm.SelectionNameKeyPress(Sender: TObject;
