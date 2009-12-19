@@ -398,8 +398,8 @@ begin
     ScriptThread.Client.MWindow.SetWindow(Self.Window);
 
     // we MUST set the OCR Path
-    writeln(IncludeTrailingPathDelimiter(
-    ExpandFileName('TestUnit: OCR Path... ' + MainDir +DS + '..' + DS + '..' + ds)) + DS + 'Fonts' + DS);
+    writeln(IncludeTrailingPathDelimiter('TestUnit: OCR Path... ' +
+    ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + DS + 'Fonts' + DS);
     ScriptThread.Client.MOCR.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
 
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
