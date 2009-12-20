@@ -34,6 +34,9 @@ type
     ColourTree: TTreeView;
     procedure ChangeName(Sender: TObject);
     procedure ColourTreeChange(Sender: TObject; Node: TTreeNode);
+    procedure ColourTreeDragOver(Sender, Source: TObject; X, Y: Integer;
+      State: TDragState; var Accept: Boolean);
+    procedure ColourTreeEndDrag(Sender, Target: TObject; X, Y: Integer);
     procedure DeleteSelected(Sender: TObject);
     procedure AddColObj(c: TColourPickerObject; autoName: Boolean);
 
@@ -161,6 +164,37 @@ begin
     finally
     end;
   end;
+end;
+
+procedure TColourHistoryForm.ColourTreeDragOver(Sender, Source: TObject; X,
+  Y: Integer; State: TDragState; var Accept: Boolean);
+
+begin
+  Accept:=True;
+end;
+
+procedure TColourHistoryForm.ColourTreeEndDrag(Sender, Target: TObject; X,
+  Y: Integer);
+
+Var
+   Node: TTreeNode;
+
+begin
+  Node := ColourTree.GetNodeAt(X, Y);
+  if not assigned(ColourTree.Selected) then
+  begin
+    writeln('No valid node is currently selected');
+    exit;
+  end;
+  if not assigned(Node) then
+  begin
+    ColourTree.Selected.MoveTo(nil, naAdd);
+    exit;
+  end;
+
+  ColourTree.Selected.MoveTo(Node, naAddChild);
+  writeln('Dragging from: ' + ColourTree.Selected.Text);
+  writeln('Dragging to: ' + Node.Text);
 end;
 
 procedure TColourHistoryForm.ChangeName(Sender: TObject);

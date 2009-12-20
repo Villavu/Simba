@@ -96,10 +96,13 @@ object ColourHistoryForm: TColourHistoryForm
     Width = 337
     Anchors = [akTop, akLeft, akRight, akBottom]
     DefaultItemHeight = 19
+    DragMode = dmAutomatic
     Images = CHImages
     ScrollBars = ssAutoBoth
     TabOrder = 5
     OnChange = ColourTreeChange
+    OnDragOver = ColourTreeDragOver
+    OnEndDrag = ColourTreeEndDrag
   end
   object CHImages: TImageList
     left = 360
