@@ -174,6 +174,7 @@ begin
     CHImages.Delete(i);
 
     ColourTree.Selected.Delete;
+    TreeChanged:=True;
   end;
 end;
 
@@ -312,9 +313,11 @@ begin
   if not assigned(Node) then
   begin
     ColourTree.Selected.MoveTo(nil, naAdd);
+    TreeChanged:=True;
     exit;
   end;
   ColourTree.Selected.MoveTo(Node, naAddChild);
+  TreeChanged:=True;
   writeln('Dragging from: ' + ColourTree.Selected.Text);
   writeln('Dragging to: ' + Node.Text);
 end;
@@ -423,7 +426,7 @@ var
 begin
   if TreeChanged then
   begin
-    case MessageBox(0,pchar('Do you want to save the colors?'), Pchar('Colours have been modified.'),
+    case MessageBox(0,pchar('Do you want to save the colours?'), Pchar('Colours have been modified.'),
                     MB_YESNOCANCEL or MB_ICONQUESTION) of
         IDCANCEL :
               Exit;
@@ -440,7 +443,6 @@ begin
   if CHOpenDialog.Execute then
     if FileExists(CHOpenDialog.FileName) then
     begin
-      writeln('Loading from file: ' + CHOpenDialog.FileName);
       ReadXMLFile(XMLDoc, CHOpenDialog.FileName);
 
       // Clear Tree and Images
@@ -449,7 +451,7 @@ begin
         CHImages.Clear;
         XML2Tree(XMLDoc);
       ColourTree.EndUpdate;
-
+      TreeChanged:=False;
       XMLDoc.Free;
     end;
 end;
