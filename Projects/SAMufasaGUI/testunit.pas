@@ -89,6 +89,7 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemHide: TMenuItem;
     MenuItemDebugImage: TMenuItem;
     MenuItemAbout: TMenuItem;
     MenuItemMainExit: TMenuItem;
@@ -221,6 +222,7 @@ type
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemDebugImageClick(Sender: TObject);
+    procedure MenuItemHideClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
@@ -1054,6 +1056,14 @@ begin
     DebugImgForm.Show
   else
     DebugImgForm.Hide;
+end;
+
+procedure TForm1.MenuItemHideClick(Sender: TObject);
+begin
+  if Self.Visible = false then
+    MenuItemShowClick(sender)
+  else
+    Self.hide;
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
