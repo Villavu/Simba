@@ -5,17 +5,19 @@ object ColourHistoryForm: TColourHistoryForm
   Width = 490
   ActiveControl = SelectionName
   Caption = 'Colour Picker History'
-  ClientHeight = 250
+  ClientHeight = 225
   ClientWidth = 490
   Constraints.MinHeight = 200
   Constraints.MinWidth = 490
+  Menu = CHMainMenu
+  OnCreate = FormCreate
   OnHide = UnSetCHShowMenu
   OnShow = SetCHShowMenu
   LCLVersion = '0.9.29'
   object DeleteButton: TButton
     Left = 16
     Height = 25
-    Top = 208
+    Top = 183
     Width = 128
     Anchors = [akLeft, akBottom]
     Caption = 'Delete'
@@ -36,7 +38,7 @@ object ColourHistoryForm: TColourHistoryForm
   object PickNewColourButton: TButton
     Left = 217
     Height = 25
-    Top = 208
+    Top = 183
     Width = 128
     Anchors = [akRight, akBottom]
     Caption = 'Pick New Colour'
@@ -65,14 +67,14 @@ object ColourHistoryForm: TColourHistoryForm
   object ColourImage: TImage
     Left = 152
     Height = 24
-    Top = 209
+    Top = 184
     Width = 57
     Anchors = [akLeft, akRight, akBottom]
   end
   object OkButton: TButton
     Left = 393
     Height = 24
-    Top = 209
+    Top = 184
     Width = 80
     Anchors = [akRight, akBottom]
     Caption = 'Ok'
@@ -91,7 +93,7 @@ object ColourHistoryForm: TColourHistoryForm
   end
   object ColourTree: TTreeView
     Left = 8
-    Height = 169
+    Height = 144
     Top = 16
     Width = 337
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -101,11 +103,46 @@ object ColourHistoryForm: TColourHistoryForm
     ScrollBars = ssAutoBoth
     TabOrder = 5
     OnChange = ColourTreeChange
+    OnDragDrop = ColourTreeDragDrop
     OnDragOver = ColourTreeDragOver
-    OnEndDrag = ColourTreeEndDrag
   end
   object CHImages: TImageList
+    left = 424
+    top = 160
+  end
+  object CHMainMenu: TMainMenu
     left = 360
-    top = 200
+    top = 160
+    object CHFile: TMenuItem
+      Caption = 'File'
+      object CHClear: TMenuItem
+        Caption = 'Clear'
+      end
+      object CHLoad: TMenuItem
+        Caption = 'Load'
+        OnClick = CHLoadClick
+      end
+      object CHSave: TMenuItem
+        Caption = 'Save'
+        OnClick = CHSaveClick
+      end
+    end
+    object CHHelp: TMenuItem
+      Caption = 'Help'
+      object CHAbout: TMenuItem
+        Caption = 'About'
+        OnClick = CHAboutClick
+      end
+    end
+  end
+  object CHSaveDialog: TSaveDialog
+    DefaultExt = '.xml'
+    left = 392
+    top = 160
+  end
+  object CHOpenDialog: TOpenDialog
+    DefaultExt = '.xml'
+    left = 456
+    top = 160
   end
 end
