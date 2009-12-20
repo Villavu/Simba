@@ -37,11 +37,13 @@ type
     w,h : integer;
     TransparentColor : TRGB32;
     TransparentSet : boolean;
+    FIndex : integer;
   public
     OnDestroy : procedure(Bitmap : TMufasaBitmap) of object;
+    FakeData : array of TRGB32;
     FData : PRGB32;
-    Index : integer;
     BmpName : string; //Optional?
+    property Index : integer read FIndex write FIndex;
     procedure SetSize(AWidth,AHeight : integer);
     procedure StretchResize(AWidth,AHeight : integer);
     property Width : Integer read w;
