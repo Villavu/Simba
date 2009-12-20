@@ -307,6 +307,7 @@ procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
 begin;
   with cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap') do
   begin;
+
     RegisterMethod('function SaveToFile(const FileName : string) :boolean;');
     RegisterMethod('procedure LoadFromFile(const FileName : string);');
   end;
@@ -316,8 +317,9 @@ procedure RIRegister_Mufasa(cl: TPSRuntimeClassImporter);
 begin;
   with cl.Add(TMufasaBitmap) do
   begin
+    RegisterConstructor(@TMufasaBitmap.Create,'CREATE');
     RegisterMethod(@TMufasaBitmap.SaveToFile, 'SAVETOFILE');
-    RegisterConstructor(@TMufasaBitmap.LoadFromFile, 'LOADFROMFILE');
+    RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LOADFROMFILE');
   end;
 end;
 
