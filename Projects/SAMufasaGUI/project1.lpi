@@ -1451,8 +1451,8 @@
         <ComponentName Value="ColourHistoryForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="colourhistory"/>
-        <CursorPos X="79" Y="346"/>
-        <TopLine Value="332"/>
+        <CursorPos X="52" Y="242"/>
+        <TopLine Value="218"/>
         <EditorIndex Value="6"/>
         <UsageCount Value="134"/>
         <Loaded Value="True"/>
@@ -1883,123 +1883,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="182" Column="76" TopLine="143"/>
+        <Caret Line="216" Column="39" TopLine="186"/>
       </Position1>
       <Position2>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="216" Column="39" TopLine="186"/>
+        <Caret Line="212" Column="23" TopLine="189"/>
       </Position2>
       <Position3>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="212" Column="23" TopLine="189"/>
+        <Caret Line="217" Column="32" TopLine="193"/>
       </Position3>
       <Position4>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="217" Column="32" TopLine="193"/>
+        <Caret Line="199" Column="21" TopLine="193"/>
       </Position4>
       <Position5>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="199" Column="21" TopLine="193"/>
+        <Caret Line="192" Column="28" TopLine="157"/>
       </Position5>
       <Position6>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="152" Column="6" TopLine="157"/>
+        <Caret Line="155" Column="4" TopLine="139"/>
       </Position6>
       <Position7>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="192" Column="28" TopLine="157"/>
+        <Caret Line="150" Column="25" TopLine="148"/>
       </Position7>
       <Position8>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="155" Column="4" TopLine="139"/>
+        <Caret Line="196" Column="34" TopLine="176"/>
       </Position8>
       <Position9>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="150" Column="25" TopLine="148"/>
+        <Caret Line="334" Column="23" TopLine="297"/>
       </Position9>
       <Position10>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="196" Column="34" TopLine="176"/>
+        <Caret Line="362" Column="15" TopLine="325"/>
       </Position10>
       <Position11>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="334" Column="23" TopLine="297"/>
+        <Caret Line="381" Column="5" TopLine="356"/>
       </Position11>
       <Position12>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="362" Column="15" TopLine="325"/>
+        <Caret Line="376" Column="64" TopLine="356"/>
       </Position12>
       <Position13>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="381" Column="5" TopLine="356"/>
+        <Caret Line="410" Column="48" TopLine="387"/>
       </Position13>
       <Position14>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="376" Column="64" TopLine="356"/>
+        <Caret Line="87" Column="26" TopLine="58"/>
       </Position14>
       <Position15>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="410" Column="48" TopLine="387"/>
+        <Caret Line="366" Column="8" TopLine="350"/>
       </Position15>
       <Position16>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="87" Column="26" TopLine="58"/>
+        <Caret Line="365" Column="79" TopLine="344"/>
       </Position16>
       <Position17>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="366" Column="8" TopLine="350"/>
+        <Caret Line="371" Column="21" TopLine="355"/>
       </Position17>
       <Position18>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="365" Column="79" TopLine="344"/>
+        <Caret Line="376" Column="64" TopLine="356"/>
       </Position18>
       <Position19>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="371" Column="21" TopLine="355"/>
+        <Caret Line="393" Column="36" TopLine="356"/>
       </Position19>
       <Position20>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="376" Column="64" TopLine="356"/>
+        <Caret Line="389" Column="29" TopLine="361"/>
       </Position20>
       <Position21>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="393" Column="36" TopLine="356"/>
+        <Caret Line="399" Column="39" TopLine="371"/>
       </Position21>
       <Position22>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="389" Column="29" TopLine="361"/>
+        <Caret Line="395" Column="31" TopLine="375"/>
       </Position22>
       <Position23>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="399" Column="39" TopLine="371"/>
+        <Caret Line="342" Column="79" TopLine="330"/>
       </Position23>
       <Position24>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="395" Column="31" TopLine="375"/>
+        <Caret Line="391" Column="29" TopLine="361"/>
       </Position24>
       <Position25>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="342" Column="79" TopLine="330"/>
+        <Caret Line="91" Column="15" TopLine="56"/>
       </Position25>
       <Position26>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="391" Column="29" TopLine="361"/>
+        <Caret Line="31" Column="65" TopLine="23"/>
       </Position26>
       <Position27>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="91" Column="15" TopLine="56"/>
+        <Caret Line="393" Column="72" TopLine="383"/>
       </Position27>
       <Position28>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="31" Column="65" TopLine="23"/>
+        <Caret Line="364" Column="17" TopLine="332"/>
       </Position28>
       <Position29>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="393" Column="72" TopLine="383"/>
+        <Caret Line="227" Column="1" TopLine="200"/>
       </Position29>
       <Position30>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="364" Column="17" TopLine="332"/>
+        <Caret Line="79" Column="26" TopLine="52"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

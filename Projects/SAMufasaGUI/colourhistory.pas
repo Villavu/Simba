@@ -65,6 +65,7 @@ type
     ColourTree: TTreeView;
     procedure CHAboutClick(Sender: TObject);
     procedure ChangeName(Sender: TObject);
+    procedure CHClearClick(Sender: TObject);
     procedure CHLoadClick(Sender: TObject);
     procedure ColourTreeChange(Sender: TObject; Node: TTreeNode);
     procedure ColourTreeDragDrop(Sender, Source: TObject; X, Y: Integer);
@@ -224,7 +225,6 @@ begin
   begin
     WriteXMLData(n, XMLNode, XMLDoc, XMLChild, C);
 
-    writeln('Walking: ' + n.text);
     WalkTree(n, XMLChild, XMLDoc, C);
     n := n.GetNextSibling;
   end;
@@ -337,6 +337,15 @@ begin
   TColourPickerObject(ColourTree.Selected.Data).Name := SelectionName.Text;
 end;
 
+procedure TColourHistoryForm.CHClearClick(Sender: TObject);
+begin
+  TreeChanged:=False;
+  ColourTree.BeginUpdate;
+    ColourTree.Items.Clear;
+    CHImages.Clear;
+  ColourTree.EndUpdate;
+end;
+
 //heavily modded from http://wiki.lazarus.freepascal.org/XML_Tutorial
 procedure TColourHistoryForm.XML2Tree(XMLDoc: TXMLDocument);
 var
@@ -421,10 +430,8 @@ begin
         IDYES :
             begin
               if CHSaveDialog.Execute then
-              begin
-                writeln('Saving to file: ' +CHSaveDialog.FileName);
-                ColourTree.SaveToFile(CHSaveDialog.FileName);
-              end else
+                ColourTree.SaveToFile(CHSaveDialog.FileName)
+              else
                 Exit;
             end;
     end;
@@ -435,26 +442,16 @@ begin
     begin
       writeln('Loading from file: ' + CHOpenDialog.FileName);
       ReadXMLFile(XMLDoc, CHOpenDialog.FileName);
+
+      // Clear Tree and Images
+      ColourTree.BeginUpdate;
+        ColourTree.Items.Clear;
+        CHImages.Clear;
+        XML2Tree(XMLDoc);
+      ColourTree.EndUpdate;
+
+      XMLDoc.Free;
     end;
-
-
-  // Clear Tree and Images
-  ColourTree.BeginUpdate;
-
-    ColourTree.Items.Clear;
-    CHImages.Clear;
-
-    XML2Tree(XMLDoc);
-  ColourTree.EndUpdate;
-
-
-
-
-
-
-
-  XMLDoc.Free;
-
 end;
 
 procedure TColourHistoryForm.CHAboutClick(Sender: TObject);
@@ -480,14 +477,10 @@ procedure TColourHistoryForm.CHSaveClick(Sender: TObject);
 
 begin
    if CHSaveDialog.Execute then
-    if FileExists(CHSaveDialog.FileName) then
-    begin
-      writeln('Saving to file: ' +CHSaveDialog.FileName);
-      SaveToXML(CHSaveDialog.FileName);
-      //ColourTree.SaveToFile(CHSaveDialog.FileName);
-      TreeChanged:=False;
-    end else
-    writeln('no saving to file');
+  begin
+    SaveToXML(CHSaveDialog.FileName);
+    TreeChanged:=False;
+  end;
 end;
 
 procedure TColourHistoryForm.FormCreate(Sender: TObject);

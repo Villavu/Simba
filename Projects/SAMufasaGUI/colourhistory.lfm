@@ -117,6 +117,7 @@ object ColourHistoryForm: TColourHistoryForm
       Caption = 'File'
       object CHClear: TMenuItem
         Caption = 'Clear'
+        OnClick = CHClearClick
       end
       object CHLoad: TMenuItem
         Caption = 'Load'
