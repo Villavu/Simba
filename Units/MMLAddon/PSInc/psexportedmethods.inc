@@ -137,6 +137,7 @@ AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
 
 
 {Bitmaps}
+AddFunction(@GetMufasaBitmap,'function GetMufasaBitmap(bmp : integer) : TMufasaBitmap;');
 AddFunction(@CreateBitmap,'function CreateBitmap(w,h :integer) : integer;');
 AddFunction(@FreeBitmap,'procedure FreeBitmap(Bmp : integer);');
 AddFunction(@SaveBitmap,'procedure SaveBitmap(Bmp : integer; path : string);');

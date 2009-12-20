@@ -304,22 +304,43 @@ begin
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
+var
+  Ptr : PtrUInt;
 begin;
   with cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap') do
   begin;
-
+    RegisterMethod('constructor create');
+    RegisterMethod('procedure Free');
     RegisterMethod('function SaveToFile(const FileName : string) :boolean;');
     RegisterMethod('procedure LoadFromFile(const FileName : string);');
+    RegisterProperty('Index','Integer',iptR);
   end;
+end;
+
+function CreateMufasaBitmap : TMufasaBitmap;
+begin;
+  result := CurrThread.Client.MBitmaps.Bmp[  CurrThread.Client.MBitmaps.CreateBMP(0,0)];
+end;
+
+procedure FreeMufasaBitmap(Self : TMufasaBitmap);
+begin;
+  CurrThread.Client.MBitmaps.FreeBMP(Self.Index);
+end;
+
+procedure MufasaBitmapIndex(self : TMufasaBitmap; var Index : integer);
+begin;
+  Index := self.Index;
 end;
 
 procedure RIRegister_Mufasa(cl: TPSRuntimeClassImporter);
 begin;
   with cl.Add(TMufasaBitmap) do
   begin
-    RegisterConstructor(@TMufasaBitmap.Create,'CREATE');
+    RegisterConstructor(@CreateMufasaBitmap,'CREATE');
+    RegisterMethod(@FreeMufasaBitmap,'FREE');
     RegisterMethod(@TMufasaBitmap.SaveToFile, 'SAVETOFILE');
     RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LOADFROMFILE');
+    RegisterPropertyHelper(@MufasaBitmapIndex,nil,'INDEX');
   end;
 end;
 
