@@ -10,7 +10,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="12"/>
+      <ActiveEditorIndexAtStart Value="21"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -139,8 +139,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="72" Y="1327"/>
-        <TopLine Value="799"/>
+        <CursorPos X="12" Y="36"/>
+        <TopLine Value="13"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -288,8 +288,8 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="63" Y="188"/>
-        <TopLine Value="298"/>
+        <CursorPos X="89" Y="13"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="21"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -1359,7 +1359,7 @@
       </Unit184>
       <Unit185>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/ocr.inc"/>
-        <CursorPos X="18" Y="5"/>
+        <CursorPos X="55" Y="5"/>
         <TopLine Value="1"/>
         <EditorIndex Value="10"/>
         <UsageCount Value="27"/>
@@ -1813,7 +1813,7 @@
       <Unit250>
         <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
         <UnitName Value="ocrutil"/>
-        <CursorPos X="15" Y="176"/>
+        <CursorPos X="57" Y="165"/>
         <TopLine Value="145"/>
         <EditorIndex Value="12"/>
         <UsageCount Value="27"/>
@@ -1890,7 +1890,7 @@
         <UsageCount Value="10"/>
       </Unit260>
     </Units>
-    <JumpHistory Count="26" HistoryIndex="25">
+    <JumpHistory Count="28" HistoryIndex="27">
       <Position1>
         <Filename Value="colourhistory.pas"/>
         <Caret Line="393" Column="36" TopLine="356"/>
@@ -1995,6 +1995,14 @@
         <Filename Value="../../../../Documents/lazarus/lcl/comctrls.pp"/>
         <Caret Line="2978" Column="9" TopLine="2957"/>
       </Position26>
+      <Position27>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="1327" Column="72" TopLine="799"/>
+      </Position27>
+      <Position28>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="36" Column="12" TopLine="13"/>
+      </Position28>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
