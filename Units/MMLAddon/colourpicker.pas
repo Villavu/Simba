@@ -105,6 +105,8 @@ var
    {$ENDIF}
 
 begin
+  Application.MainForm.Enabled := False;
+
   { We create a Form, with the client image on it. }
   ScreenForm := TForm.Create(Application.MainForm);
   InfoForm := TForm.Create(ScreenForm);
@@ -180,6 +182,8 @@ begin
   ScreenForm.Show;
   InfoForm.Show;
 
+  SetCursorPos(Mouse.CursorPos.X, Mouse.CursorPos.Y);
+
   closed := False;
 
   while not Closed do //CBA to do this a better way...
@@ -205,6 +209,8 @@ begin
   ImageInfo.Free;
   InfoForm.Free;
   ScreenForm.Free;
+
+  Application.MainForm.Enabled := True;
 end;
 
 procedure TMColorPicker.ImageMainMouseMove(Sender: TObject; Shift: TShiftState; X,
