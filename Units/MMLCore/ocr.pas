@@ -100,7 +100,9 @@ begin
     debugbmp.SetSize(w, (h + 2) * 4);
   {$ENDIF}
 
+  {$IFDEF OCRSAVEBITMAP}
   bmp.SaveToFile('/tmp/ocrinit.bmp');
+  {$ENDIF}
   {$IFDEF OCRDEBUG}
     for dy := 0 to bmp.height - 1 do
       for dx := 0 to bmp.width - 1 do
@@ -176,7 +178,9 @@ begin
    { for y := 0 to bmp.Height -1 do
       bmp.fastsetpixel(0, y, 0);      }
 
+   {$IFDEF OCRSAVEBITMAP}
     bmp.SaveToFile('/tmp/ocrcol.bmp');
+   {$ENDIF}
     {$IFDEF OCRDEBUG}
       for dy := 0 to bmp.height - 1 do
         for dx := 0 to bmp.width - 1 do
@@ -242,7 +246,9 @@ begin
        for dx := 0 to bmp.width - 1 do
          debugbmp.fastsetpixel(dx,dy+h+h,bmp.fastgetpixel(dx,dy));
    {$ENDIF}
+   {$IFDEF OCRSAVEBITMAP}
    bmp.SaveToFile('/tmp/ocrdebug.bmp');
+   {$ENDIF}
 
    for y := 0 to bmp.Height - 1 do
      for x := 0 to bmp.Width - 1 do
@@ -284,7 +290,9 @@ begin
        end;
 
      result := n;
+     {$IFDEF OCRSAVEBITMAP}
      bmp.SaveToFile('/tmp/ocrfinal.bmp');
+     {$ENDIF}
      {$IFDEF OCRDEBUG}
        for dy := 0 to bmp.height - 1 do
          for dx := 0 to bmp.width - 1 do
