@@ -402,7 +402,7 @@ begin
     // we MUST set the OCR Path
     writeln(IncludeTrailingPathDelimiter('TestUnit: OCR Path... ' +
     ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + DS + 'Fonts' + DS);
-    ScriptThread.Client.MOCR.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+    ScriptThread.Client.MOCR.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS, false);
 
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;
