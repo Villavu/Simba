@@ -158,23 +158,51 @@ begin
   SetNodeBitmap(it);
 end;
 
+procedure WalkDeleteTree(Node: TTreeNode; Img: TImageList);
+var
+   N: TTreeNode;
+
+begin
+  N := Node.GetFirstChild;
+
+  while assigned(n) do
+  begin
+    If Assigned(N.Data) then
+      TColourPickerObject(N.Data).Free;
+    WriteLn('Deleting ImageIndex: ' + IntToStr(n.ImageIndex) + '; Text: ' + N.Text);
+    Img.Delete(n.ImageIndex);
+    WalkDeleteTree(n, img);
+    n := n.GetNextSibling;
+  end;
+end;
+
 procedure TColourHistoryForm.DeleteSelected(Sender: TObject);
 
 var
    i:integer;
+   e: TTreeNodesEnumerator;
 
 begin
   if (Assigned(ColourTree.Selected)) then
   begin
     if Assigned(ColourTree.Selected.Data) then
       TColourPickerObject(ColourTree.Selected.Data).Free;
-    i:=ColourTree.Selected.ImageIndex;
-    ColourTree.Selected.ImageIndex:=0;
-    ColourTree.Selected.SelectedIndex:=-0;
-    CHImages.Delete(i);
+
+    WalkDeleteTree(ColourTree.Selected, CHImages);
+
+    WriteLn('Deleting ImageIndex: ' + IntToStr(ColourTree.Selected.ImageIndex) + '; Text: ' + ColourTree.Selected.Text);
+    CHImages.Delete(ColourTree.Selected.ImageIndex);
 
     ColourTree.Selected.Delete;
-    TreeChanged:=True;
+    TreeChanged := True;
+
+    { Now, we have to recreate all images and their indices... Since the TImageList
+      fiddles with it's indices if one is deleted... Wtf? }
+    CHImages.Clear;
+
+    e := ColourTree.Items.GetEnumerator;
+    while e.MoveNext do
+      SetNodeBitmap(e.Current);
   end;
 end;
 

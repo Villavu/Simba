@@ -54,6 +54,7 @@ uses
 
 const
     ocr_Limit_High = 190;
+    ocr_Limit_Med = 130;
     ocr_Limit_Low = 65;
 
     ocr_White = 16777215;
@@ -125,7 +126,18 @@ begin
         bmp.fastsetpixel(x,y,ocr_Red);
         continue;
       end;
-
+      if (r > ocr_Limit_High) and (g > ocr_Limit_Low) and (b < ocr_Limit_Low) then
+      begin
+        bmp.fastsetpixel(x,y,ocr_Red);
+        continue;
+      end;
+      if (r > ocr_Limit_Med) and (r < (ocr_Limit_High + 10)) and (g > ocr_Limit_Low - 10) and
+          (b < 20) then
+          begin
+            bmp.fastsetpixel(x,y,ocr_Green);
+            continue;
+          end;
+      //shadow
       if (r < ocr_Limit_Low) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
       begin
         bmp.FastSetPixel(x,y, ocr_Purple);
