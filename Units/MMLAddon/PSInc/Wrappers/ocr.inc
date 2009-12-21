@@ -1,5 +1,5 @@
 function rs_GetUpText: String;
 begin
-  Result := CurrThread.Client.MOCR.GetUpTextAt(7,7);
+  Result := CurrThread.Client.MOCR.GetUpTextAt(7, 7, false);
   {writeln('inside: ' + result);}
 end;
