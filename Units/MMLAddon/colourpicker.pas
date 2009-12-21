@@ -48,31 +48,27 @@ type
 
         procedure Pick(Out C, X, Y: Integer);
 
-        procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer );
-       procedure TimorTimer(Sender: TObject);
+        procedure ImageMainMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+        procedure ImageInfoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
        Procedure ColorPickDown(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer);
   public
         // Will give us CopyClientToBitmap
         Window: TMWindow;
 
         { Form components }
-        Form : TForm;
-        Image: TImage;
-        Timor : TTimer;
-        Bitmap : Graphics.TBitmap;
-        Note : Graphics.TBitmap;
-        Brush : TBrush;
+        ScreenForm, InfoForm : TForm;
+        ImageMain, ImageInfo: TImage;
         Text : string;
         FPickEvent : TPickEvent;
 
         { Some temp vars }
         oldx, oldy, Color, colorx, colory: Integer;
-        targetleft,targettop : integer;
+//        targetleft,targettop : integer;
 
         TheChangedEvent,TheChangingEvent : TNotifyEvent;
 
         { Handles }
-        NoteHandle, BitmapHandle, ImageHandle : HDC;
+        InfoHandle, ImageHandle : HDC;
   public
     property OnPick: TPickEvent read FPickEvent write FPickEvent;
   end;
@@ -92,10 +88,12 @@ begin
   inherited Destroy;
 end;
 
+var
+  closed: Boolean;
+
 procedure TMColorPicker.Pick(Out C, X, Y: Integer);
 var
    w, h: integer;
-   bmp: TBitmap;
    box : TBox;
 
    {$IFNDEF PICKER_CLIENT}
@@ -108,8 +106,10 @@ var
 
 begin
   { We create a Form, with the client image on it. }
-  Form := TForm.Create(Application.MainForm);
-  if Window.GetDimensionBox( box) then
+  ScreenForm := TForm.Create(Application.MainForm);
+  InfoForm := TForm.Create(ScreenForm);
+
+{  if Window.GetDimensionBox(box) then
   begin;
     targetleft := box.x1;
     targettop := box.y1;
@@ -117,7 +117,7 @@ begin
   begin;
     targetleft := 0;
     targettop := 0;
-  end;
+  end; }
    {$IFNDEF PICKER_CLIENT}
      {$IFDEF LINUX}
      OldWindow := Window.CurWindow;
@@ -130,53 +130,63 @@ begin
   h := 0;
   Window.GetDimensions(w, h);
 
-  Form.Caption := 'SimbaColourPicker';
-  Form.Width := w;
-  Form.Height := h;
-  Form.Top := 0;
-  Form.left := 0;
-  Form.WindowState := wsmaximized;
-  Form.BorderStyle:= bsNone;
+  ScreenForm.Caption := 'SimbaColourPicker';
+  ScreenForm.Width := w;
+  ScreenForm.Height := h;
+  ScreenForm.Top := 0;
+  ScreenForm.left := 0;
+  ScreenForm.WindowState := wsmaximized;
+  ScreenForm.BorderStyle:= bsNone;
+  ScreenForm.FormStyle := fsStayOnTop;
 
-  Image := TImage.Create(Form);
-  Image.Parent := Form;
-  Image.left := 0;
-  image.Width := 0;
-  Image.width := Form.Width;
-  Image.Height := Form.Height;
-  Image.Cursor:= crCross;
-  Image.OnMouseDown:= @ColorPickDown;
-  Image.OnMouseMove:=@ImageMouseMove;
-  Image.Canvas.Brush.Color := 14811135;
-  Bitmap := Graphics.TBitmap.create;
-  Bitmap.width := Form.Width;
-  Bitmap.Height := Form.Height;
-  Note := Graphics.TBitmap.create;
-  Note.Canvas.Brush.Color := 14811135;
-  Note.Width := 148;
-  Note.Height := 33;
-  Note.Canvas.Rectangle(0, 0, 147, 33);
-  Note.Canvas.Rectangle(89, 3, 115, 29);
-  Note.Canvas.Pen.Style:= psClear;
+  InfoForm.Width := 173;
+  InfoForm.Height := 33;
+  InfoForm.BorderStyle := bsNone;
+  InfoForm.FormStyle := fsStayOnTop;
+  InfoForm.Left := Mouse.CursorPos.X + 5;
+  InfoForm.Top := Mouse.CursorPos.Y - 16;
 
-  bmp := Window.CopyClientToBitmap(0, 0, w - 1, h - 1);
-  BitBlt(Image.Canvas.Handle, 0,0,w ,h , bmp.Canvas.Handle,0,0,SRCCOPY);
-  BitBlt(Bitmap.Canvas.Handle, 0,0,w ,h , bmp.Canvas.Handle,0,0,SRCCOPY);
-  bmp.Free;
+  ImageInfo := TImage.Create(InfoForm);
+  ImageInfo.Parent := InfoForm;
+  ImageInfo.Left := 0;
+  ImageInfo.Top := 0;
+  ImageInfo.Width := 173;
+  ImageInfo.Height := 33;
+  ImageInfo.Cursor := crCross;
+  ImageInfo.OnMouseMove := @ImageInfoMouseMove;
+  ImageInfo.Canvas.Brush.Color := 14811135;
+  ImageInfo.Canvas.Rectangle(0, 0, 173, 33);
+  ImageInfo.Canvas.Rectangle(114, 3, 140, 29);
+  ImageInfo.Canvas.Rectangle(142, 3, 168, 29);
+  ImageInfo.Canvas.Pen.Style := psClear;
 
-  ImageHandle:= Image.Canvas.Handle;
-  BitmapHandle:= Bitmap.Canvas.Handle;
-  NoteHandle:= Note.Canvas.Handle;
-  TheChangedEvent := Image.Canvas.OnChange;
-  TheChangingEvent := Image.Canvas.OnChanging;
+  ImageMain := TImage.Create(ScreenForm);
+  ImageMain.Parent := ScreenForm;
+  ImageMain.left := 0;
+  ImageMain.top := 0;
+  ImageMain.width := ScreenForm.Width;
+  ImageMain.Height := ScreenForm.Height;
+  ImageMain.Cursor:= crCross;
+  ImageMain.OnMouseDown:= @ColorPickDown;
+  ImageMain.OnMouseMove:=@ImageMainMouseMove;
 
-  Brush := Image.Canvas.Brush;
-  Timor := TTimer.Create(Form);
+  ImageMain.Picture.Bitmap := Window.CopyClientToBitmap(0, 0, w - 1, h - 1);
 
-  Timor.OnTimer:= @TimorTimer;
-  Timor.Interval:= 50;
-  Timor.Enabled:= False;
-  Form.ShowModal;
+  ImageHandle:= ImageMain.Canvas.Handle;
+  InfoHandle:= ImageInfo.Canvas.Handle;
+  TheChangedEvent := ImageMain.Canvas.OnChange;
+  TheChangingEvent := ImageMain.Canvas.OnChanging;
+
+  ScreenForm.Show;
+  InfoForm.Show;
+
+  closed := False;
+
+  while not Closed do //CBA to do this a better way...
+  begin
+    sleep(1);
+    Application.ProcessMessages;
+  end;
 
   // add x to history here.
   c := Color;
@@ -191,91 +201,66 @@ begin
     {$ENDIF}
   {$ENDIF}
 
-  Note.Free;
-  Bitmap.Free;
-  Timor.Free;
-  Image.Free;
-  Form.Free;
+  ImageMain.Free;
+  ImageInfo.Free;
+  InfoForm.Free;
+  ScreenForm.Free;
 end;
 
-procedure TMColorPicker.ImageMouseMove(Sender: TObject; Shift: TShiftState; X,
+procedure TMColorPicker.ImageMainMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
-{$ifdef mswindows}
 var
   TempPoint : TPoint;
+  Data : TRetData;
+  R : TRect;
+  px, py : Integer;
 begin
+  InfoForm.Left := Mouse.CursorPos.X + 5;
+  InfoForm.Top := Mouse.CursorPos.Y - 16;
 
-  TempPoint := Point(x,y);
+  TempPoint := Point(x, y);
 
   { If a form cannot be fully set to 0,0 }
-  TempPoint.X := TempPoint.X - Form.Left;
-  TempPoint.Y := TempPoint.Y - Form.Top;
-
-  BitBlt(ImageHandle, oldx + 5, oldy + 5,147,33,BitmapHandle,oldx + 5,oldy + 5,SRCCOPY);
-  Color := WidgetSet.DCGetPixel(ImageHandle, TempPoint.X, TempPoint.Y);
-  Rectangle(NoteHandle,1,1,85,32);
-//  Text:='Pos: ' + inttostr(TempPoint.x - Client.Rect.Left) + ','  + inttostr(TempPoint.y - Client.Rect.Bottom);
-  Text:='Pos: ' + inttostr(TempPoint.x - targetleft) + ','  + inttostr(TempPoint.y - targettop);
-  ExtTextOut(NoteHandle, 5, 3,0,nil,pchar(text),length(text),nil);
+  TempPoint.X := TempPoint.X - ScreenForm.Left;
+  TempPoint.Y := TempPoint.Y - ScreenForm.Top;
+  Color := WidgetSet.DCGetPixel(ImageHandle, X, Y);
+  ImageInfo.Canvas.Brush.Color := Color;
+  ImageInfo.Canvas.Rectangle(143, 4, 168, 29);
+  SetBkColor(InfoHandle, 14811135);
+  Text := 'Pos: ' + inttostr(x) + ','  + inttostr(y);
+  R := Rect(5, 6, 114, 18);
+  ExtTextOut(InfoHandle, 5, 3, ETO_OPAQUE, @R, pchar(text), length(text), nil);
   Text := 'Color: ' +  inttostr(Color);
-  ExtTextOut(NoteHandle, 5, 15,0,nil,pchar(text),length(text),nil);
-  BitBlt( ImageHandle, TempPoint.x + 5, TempPoint.y + 5,147,33,NoteHandle,0,0,SRCCOPY);
-  Brush.Color := Color;
-  Image.Canvas.Rectangle(TempPoint.x + 123, TempPoint.y + 8, tempPoint.x + 149, temppoint.y + 34);
-//  Rectangle(ImageHandle,TempPoint.x + 123, TempPoint.y + 8, tempPoint.x + 149, temppoint.y + 34);
-  TheChangingEvent(Sender);
-  StretchBlt(ImageHandle,TempPoint.x + 95, TempPoint.y + 9, 24,24, BitmapHandle, TempPoint.x - 1, TempPoint.y-1,3,3, SRCCOPY);
-  TheChangedEvent(Sender);
+  R := Rect(5, 18, 114, 28);
+  ExtTextOut(InfoHandle, 5, 15, ETO_OPAQUE, @R, pchar(text), length(text), nil);
+  for px := -1 to 1 do
+    for py := -1 to 1 do
+    begin
+      ImageInfo.Canvas.Brush.Color := WidgetSet.DCGetPixel(ImageHandle, x + px, y + py);
+      ImageInfo.Canvas.Rectangle((px + 1) * 8 + 115, (py + 1) * 8 + 4, (px + 1) * 8 + 124, (py + 1) * 8 + 13);
+    end;
   Oldx := TempPoint.x;
   Oldy := TempPoint.y;
 end;
-{$else}
+
+procedure TMColorPicker.ImageInfoMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
 begin
-  Timor.Enabled:= True;
-end;
-{$endif}
-
-procedure TMColorPicker.TimorTimer(Sender: TObject);
-var
-  TempPoint : TPoint;
-begin
-//  GetCursorPos(TempPoint);
-  TempPoint := Mouse.CursorPos;
-
-  { If a form cannot be fully set to 0,0 }
-  TempPoint.X := TempPoint.X - Form.Left;
-  TempPoint.Y := TempPoint.Y - Form.Top;
-
-  BitBlt(ImageHandle, oldx + 5, oldy + 5,147,33,BitmapHandle,oldx + 5,oldy + 5,SRCCOPY);
-  Color := WidgetSet.DCGetPixel(ImageHandle, TempPoint.X, TempPoint.Y);
-  Rectangle(NoteHandle,1,1,85,32);
-//  Text:='Pos: ' + inttostr(TempPoint.x - Client.Rect.Left) + ','  + inttostr(TempPoint.y - Client.Rect.Bottom);
-  Text:={'Pos: ' + }inttostr(TempPoint.x - targetleft) + ','  + inttostr(TempPoint.y - targettop);
-  ExtTextOut(NoteHandle, 5, 3,0,nil,pchar(text),length(text),nil);
-  Text := {'Color: ' +  }inttostr(Color);
-  ExtTextOut(NoteHandle, 5, 15,0,nil,pchar(text),length(text),nil);
-  BitBlt( ImageHandle, TempPoint.x + 5, TempPoint.y + 5,147,33,NoteHandle,0,0,SRCCOPY);
-  Brush.Color := Color;
-  Image.Canvas.Rectangle(TempPoint.x + 123, TempPoint.y + 8, tempPoint.x + 149, temppoint.y + 34);
-//  Rectangle(ImageHandle,TempPoint.x + 123, TempPoint.y + 8, tempPoint.x + 149, temppoint.y + 34);
-  TheChangingEvent(Sender);
-  StretchBlt(ImageHandle,TempPoint.x + 95, TempPoint.y + 9, 24,24, BitmapHandle, TempPoint.x - 1, TempPoint.y-1,3,3, SRCCOPY);
-  TheChangedEvent(Sender);
-  Oldx := TempPoint.x;
-  Oldy := TempPoint.y;
-  Timor.Enabled:= False;
+  InfoForm.Top := Mouse.CursorPos.Y - 16;
+  InfoForm.Left := Mouse.CursorPos.X + 5;
 end;
 
 procedure TMColorPicker.ColorPickDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
 begin;
-  Color:=  WidgetSet.DCGetPixel(Image.Canvas.Handle,x,y);
-  Self.Colorx := x - targetleft;
-  Self.Colory := y - targettop;
-  Timor.enabled := false;
+  Color:=  WidgetSet.DCGetPixel(ImageMain.Canvas.Handle,x,y);
+  Self.Colorx := x;
+  Self.Colory := y;
   if OnPick <> nil then
     Onpick(Sender,Color,Colorx,Colory);
-  Form.Close;
+  InfoForm.Close;
+  ScreenForm.Close;
+  closed := True;
 end;
 
 end.
