@@ -14,6 +14,7 @@ type
 
   TForm1 = class(TForm)
     BitmapButton: TButton;
+    FShadow: TCheckBox;
     PathButton: TButton;
     OCRButton: TButton;
     Image1: TImage;
@@ -45,9 +46,10 @@ Var
    C: TClient;
    bmp: TMufasaBitmap;
    x,y: integer;
+   s: string;
+   Shadow: boolean;
 
 begin
-  writeln(BitmapPath);
   if not FileExists(BitmapPath) then
   begin
     MessageBox(0,pchar('You did not set a valid bitmap'), Pchar('Bitmap Error'),
@@ -65,16 +67,24 @@ begin
     Exit;
   end;
 
+  Form1.Image1.Canvas.Brush.Color := 0;
+  Form1.Image1.Canvas.Rectangle(0, 0, Form1.Image1.Canvas.Width,  Form1.Image1.Canvas.Height);
+
   C := TClient.Create;
   bmp := TMufasaBitmap.Create;
   bmp.LoadFromFile(BitmapPath);
   C.MWindow.SetTarget(bmp);
-  C.MOCR.InitTOCR(UpTextPath + DS + '..' + DS);
-  writeln(C.MOCR.GetUpTextAt(7,7));
+
+  Shadow :=FShadow.Checked;
+
+  C.MOCR.InitTOCR(UpTextPath + DS + '..' + DS, Shadow);
+  s := C.MOCR.GetUpTextAt(7,7, Shadow);
 
   for y := 0 to C.MOCR.debugbmp.Height - 1 do
     for x := 0 to C.MOCR.debugbmp.Width -1 do
       Form1.Image1.Canvas.Pixels[x,y] := C.MOCR.debugbmp.FastGetPixel(x,y);
+  Form1.Image1.Canvas.Font.Color:=clRed;
+  Form1.Image1.Canvas.TextOut(0, C.MOCR.debugbmp.Height, s);
 
   C.Free;
 end;

@@ -37,9 +37,9 @@ uses
       TMOCR = class(TObject)
              constructor Create(Owner: TObject);
              destructor Destroy; override;
-             function InitTOCR(path: string): boolean;
-             function getTextPointsIn(sx, sy, w, h: Integer): TNormArray;
-             function GetUpTextAt(atX, atY: integer): string;
+             function InitTOCR(path: string; shadow: Boolean): boolean;
+             function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean): TNormArray;
+             function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
       private
              Client: TObject;
              OCRData: TocrDataArray;
@@ -75,7 +75,7 @@ const
    Non optimised. ;-)
 }
 
-function TMOCR.getTextPointsIn(sx, sy, w, h: Integer): TNormArray;
+function TMOCR.getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean): TNormArray;
 var
    bmp: TMufasaBitmap;
    x,y: integer;
@@ -250,28 +250,42 @@ begin
    bmp.SaveToFile('/tmp/ocrdebug.bmp');
    {$ENDIF}
 
-   for y := 0 to bmp.Height - 1 do
-     for x := 0 to bmp.Width - 1 do
-     begin
-    {   if bmp.fastgetpixel(x,y) <> clPurple then
+   if shadow then
+   begin
+     for y := 0 to bmp.Height - 1 do
+       for x := 0 to bmp.Width - 1 do
        begin
-         bmp.FastSetPixel(x,y,0);
-         continue;
-       end;    }
-       if bmp.fastgetpixel(x,y) = clPurple then
-       begin
-         bmp.FastSetPixel(x,y,0);
-         continue;
+         if bmp.fastgetpixel(x,y) <> clPurple then
+         begin
+           bmp.FastSetPixel(x,y,0);
+           continue;
+         end;
        end;
-       if bmp.fastgetpixel(x,y) = clOlive then
+   end else
+   begin
+     for y := 0 to bmp.Height - 1 do
+       for x := 0 to bmp.Width - 1 do
        begin
-         bmp.FastSetPixel(x,y,0);
-         continue;
-       end;
-       if bmp.fastgetpixel(x,y) = clSilver then
-       begin
-         bmp.FastSetPixel(x,y,0);
-         continue;
+      {   if bmp.fastgetpixel(x,y) <> clPurple then
+         begin
+           bmp.FastSetPixel(x,y,0);
+           continue;
+         end;    }
+         if bmp.fastgetpixel(x,y) = clPurple then
+         begin
+           bmp.FastSetPixel(x,y,0);
+           continue;
+         end;
+         if bmp.fastgetpixel(x,y) = clOlive then
+         begin
+           bmp.FastSetPixel(x,y,0);
+           continue;
+         end;
+         if bmp.fastgetpixel(x,y) = clSilver then
+         begin
+           bmp.FastSetPixel(x,y,0);
+           continue;
+         end;
        end;
      end;
 
@@ -337,7 +351,7 @@ begin
   inherited Destroy;
 end;
 
-function TMOCR.InitTOCR(path: string): boolean;
+function TMOCR.InitTOCR(path: string; shadow: boolean): boolean;
 begin
   { This must be dynamic }
 
@@ -345,17 +359,17 @@ begin
   result := true;
   OCRPath := path + DS;
   if DirectoryExists(path + DS + 'UpChars' + DS) then
-    OCRData[0] := ocrutil.InitOCR(path + DS + 'UpChars' + DS)
+    OCRData[0] := ocrutil.InitOCR(path + DS + 'UpChars' + DS, shadow)
   else
     result := false;
 
   if DirectoryExists(path + DS + 'StatChars' + DS) then
-    OCRData[1] := ocrutil.InitOCR(path + DS + 'StatChars' + DS)
+    OCRData[1] := ocrutil.InitOCR(path + DS + 'StatChars' + DS, shadow)
   else
     result := false;
 end;
 
-function TMOCR.GetUpTextAt(atX, atY: integer): string;
+function TMOCR.GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
 var
    n:Tnormarray;
@@ -365,7 +379,7 @@ begin
   ww := 400;
   hh := 20;
 
-  n := getTextPointsIn(atX, atY, ww, hh);
+  n := getTextPointsIn(atX, atY, ww, hh, shadow);
   Result := ocrDetect(n, ww, hh, OCRData[0]);
   //writeln(result);
 end;

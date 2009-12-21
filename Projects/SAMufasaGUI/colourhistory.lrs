@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TColourHistoryForm','FORMDATA',[
-  'TPF0'#18'TColourHistoryForm'#17'ColourHistoryForm'#4'Left'#3'u'#1#6'Height'#3
-  +#250#0#3'Top'#3'4'#1#5'Width'#3#234#1#13'ActiveControl'#7#13'SelectionName'#7
+  'TPF0'#18'TColourHistoryForm'#17'ColourHistoryForm'#4'Left'#3'v'#1#6'Height'#3
+  +#250#0#3'Top'#3'O'#1#5'Width'#3#234#1#13'ActiveControl'#7#13'SelectionName'#7
   +'Caption'#6#21'Colour Picker History'#12'ClientHeight'#3#227#0#11'ClientWidt'
   +'h'#3#234#1#21'Constraints.MinHeight'#3#200#0#20'Constraints.MinWidth'#3#234
   +#1#4'Menu'#7#10'CHMainMenu'#8'OnCreate'#7#10'FormCreate'#6'OnHide'#7#15'UnSe'

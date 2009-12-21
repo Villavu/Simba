@@ -1,8 +1,9 @@
 object Form1: TForm1
-  Left = 492
+  Left = 493
   Height = 305
-  Top = 266
+  Top = 293
   Width = 609
+  ActiveControl = BitmapButton
   Caption = 'Form1'
   ClientHeight = 305
   ClientWidth = 609
@@ -39,6 +40,14 @@ object Form1: TForm1
     Caption = 'Set Path'
     OnClick = PathButtonClick
     TabOrder = 2
+  end
+  object FShadow: TCheckBox
+    Left = 507
+    Height = 20
+    Top = 112
+    Width = 79
+    Caption = 'Shadow?'
+    TabOrder = 3
   end
   object OCRFileOpen: TOpenDialog
     Filter = '.bmp'
