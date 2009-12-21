@@ -10,7 +10,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Mufasa Stand Alone"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="6"/>
+      <ActiveEditorIndexAtStart Value="12"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -43,7 +43,7 @@
         <UnitName Value="project1"/>
         <CursorPos X="100" Y="21"/>
         <TopLine Value="6"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="16"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -139,8 +139,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="38" Y="1312"/>
-        <TopLine Value="1291"/>
+        <CursorPos X="72" Y="1327"/>
+        <TopLine Value="799"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -232,7 +232,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Window"/>
         <CursorPos X="49" Y="283"/>
-        <TopLine Value="273"/>
+        <TopLine Value="405"/>
         <EditorIndex Value="4"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -249,8 +249,8 @@
         <UnitName Value="windowutil"/>
         <CursorPos X="23" Y="8"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="18"/>
-        <UsageCount Value="79"/>
+        <EditorIndex Value="20"/>
+        <UsageCount Value="80"/>
         <Loaded Value="True"/>
       </Unit27>
       <Unit28>
@@ -266,7 +266,7 @@
         <UnitName Value="finder"/>
         <CursorPos X="58" Y="23"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="11"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit29>
@@ -290,7 +290,7 @@
         <UnitName Value="mmlpsthread"/>
         <CursorPos X="63" Y="188"/>
         <TopLine Value="298"/>
-        <EditorIndex Value="19"/>
+        <EditorIndex Value="21"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
       </Unit32>
@@ -352,7 +352,7 @@
         <Filename Value="../../Units/MMLAddon/PSInc/pscompile.inc"/>
         <CursorPos X="117" Y="32"/>
         <TopLine Value="4"/>
-        <EditorIndex Value="16"/>
+        <EditorIndex Value="18"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit41>
@@ -654,7 +654,7 @@
         <UnitName Value="dtm"/>
         <CursorPos X="62" Y="135"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="15"/>
+        <EditorIndex Value="17"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit86>
@@ -671,7 +671,7 @@
         <UnitName Value="colourpicker"/>
         <CursorPos X="65" Y="243"/>
         <TopLine Value="134"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="14"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit88>
@@ -698,7 +698,7 @@
         <UnitName Value="windowselector"/>
         <CursorPos X="54" Y="139"/>
         <TopLine Value="116"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="13"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit91>
@@ -734,7 +734,7 @@
         <UnitName Value="dtmutil"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="151"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="15"/>
         <UsageCount Value="206"/>
         <Loaded Value="True"/>
       </Unit96>
@@ -749,8 +749,8 @@
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/dtm.inc"/>
         <CursorPos X="33" Y="34"/>
         <TopLine Value="30"/>
-        <EditorIndex Value="17"/>
-        <UsageCount Value="38"/>
+        <EditorIndex Value="19"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit98>
       <Unit99>
@@ -814,9 +814,9 @@
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ocr"/>
-        <CursorPos X="59" Y="119"/>
-        <TopLine Value="114"/>
-        <EditorIndex Value="8"/>
+        <CursorPos X="51" Y="251"/>
+        <TopLine Value="14"/>
+        <EditorIndex Value="9"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit107>
@@ -1139,7 +1139,7 @@
         <UnitName Value="framescript"/>
         <CursorPos X="106" Y="190"/>
         <TopLine Value="180"/>
-        <UsageCount Value="199"/>
+        <UsageCount Value="200"/>
       </Unit151>
       <Unit152>
         <Filename Value="framesynedit.lrs"/>
@@ -1359,9 +1359,11 @@
       </Unit184>
       <Unit185>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/ocr.inc"/>
-        <CursorPos X="40" Y="3"/>
+        <CursorPos X="18" Y="5"/>
         <TopLine Value="1"/>
+        <EditorIndex Value="10"/>
         <UsageCount Value="27"/>
+        <Loaded Value="True"/>
       </Unit185>
       <Unit186>
         <Filename Value="../../../Documents/lazarus/lcl/interfaces/gtk/gtkwidgetset.inc"/>
@@ -1451,10 +1453,10 @@
         <ComponentName Value="ColourHistoryForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="colourhistory"/>
-        <CursorPos X="22" Y="203"/>
-        <TopLine Value="183"/>
-        <EditorIndex Value="6"/>
-        <UsageCount Value="136"/>
+        <CursorPos X="81" Y="189"/>
+        <TopLine Value="174"/>
+        <EditorIndex Value="7"/>
+        <UsageCount Value="137"/>
         <Loaded Value="True"/>
       </Unit198>
       <Unit199>
@@ -1705,7 +1707,7 @@
         <UnitName Value="about"/>
         <CursorPos X="44" Y="21"/>
         <TopLine Value="4"/>
-        <UsageCount Value="99"/>
+        <UsageCount Value="100"/>
       </Unit235>
       <Unit236>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/file.inc"/>
@@ -1719,7 +1721,7 @@
         <UnitName Value="internets"/>
         <CursorPos X="87" Y="3"/>
         <TopLine Value="1"/>
-        <UsageCount Value="93"/>
+        <UsageCount Value="94"/>
       </Unit237>
       <Unit238>
         <Filename Value="debugimageform.pas"/>
@@ -1728,7 +1730,7 @@
         <UnitName Value="debugimageform"/>
         <CursorPos X="20" Y="1"/>
         <TopLine Value="1"/>
-        <UsageCount Value="80"/>
+        <UsageCount Value="81"/>
       </Unit238>
       <Unit239>
         <Filename Value="debugimage.pas"/>
@@ -1736,10 +1738,10 @@
         <ComponentName Value="DebugImgForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="debugimage"/>
-        <CursorPos X="1" Y="1"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="7"/>
-        <UsageCount Value="79"/>
+        <CursorPos X="59" Y="23"/>
+        <TopLine Value="37"/>
+        <EditorIndex Value="8"/>
+        <UsageCount Value="80"/>
         <Loaded Value="True"/>
       </Unit239>
       <Unit240>
@@ -1811,10 +1813,10 @@
       <Unit250>
         <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
         <UnitName Value="ocrutil"/>
-        <CursorPos X="64" Y="22"/>
-        <TopLine Value="25"/>
-        <EditorIndex Value="10"/>
-        <UsageCount Value="26"/>
+        <CursorPos X="15" Y="176"/>
+        <TopLine Value="145"/>
+        <EditorIndex Value="12"/>
+        <UsageCount Value="27"/>
         <Loaded Value="True"/>
       </Unit250>
       <Unit251>
@@ -1843,7 +1845,7 @@
         <CursorPos X="37" Y="3116"/>
         <TopLine Value="3105"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit254>
       <Unit255>
@@ -1862,14 +1864,16 @@
       <Unit257>
         <Filename Value="../../../../Documents/lazarus/lcl/comctrls.pp"/>
         <UnitName Value="ComCtrls"/>
-        <CursorPos X="29" Y="2587"/>
-        <TopLine Value="2567"/>
-        <UsageCount Value="10"/>
+        <CursorPos X="9" Y="2978"/>
+        <TopLine Value="2957"/>
+        <EditorIndex Value="6"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit257>
       <Unit258>
         <Filename Value="../../../../Documents/lazarus/lcl/include/treeview.inc"/>
-        <CursorPos X="42" Y="2692"/>
-        <TopLine Value="2684"/>
+        <CursorPos X="44" Y="276"/>
+        <TopLine Value="1"/>
         <UsageCount Value="10"/>
       </Unit258>
       <Unit259>
@@ -1886,127 +1890,111 @@
         <UsageCount Value="10"/>
       </Unit260>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="26" HistoryIndex="25">
       <Position1>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="410" Column="48" TopLine="387"/>
+        <Caret Line="393" Column="36" TopLine="356"/>
       </Position1>
       <Position2>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="87" Column="26" TopLine="58"/>
+        <Caret Line="389" Column="29" TopLine="361"/>
       </Position2>
       <Position3>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="366" Column="8" TopLine="350"/>
+        <Caret Line="399" Column="39" TopLine="371"/>
       </Position3>
       <Position4>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="365" Column="79" TopLine="344"/>
+        <Caret Line="395" Column="31" TopLine="375"/>
       </Position4>
       <Position5>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="371" Column="21" TopLine="355"/>
+        <Caret Line="342" Column="79" TopLine="330"/>
       </Position5>
       <Position6>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="376" Column="64" TopLine="356"/>
+        <Caret Line="391" Column="29" TopLine="361"/>
       </Position6>
       <Position7>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="393" Column="36" TopLine="356"/>
+        <Caret Line="91" Column="15" TopLine="56"/>
       </Position7>
       <Position8>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="389" Column="29" TopLine="361"/>
+        <Caret Line="31" Column="65" TopLine="23"/>
       </Position8>
       <Position9>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="399" Column="39" TopLine="371"/>
+        <Caret Line="393" Column="72" TopLine="383"/>
       </Position9>
       <Position10>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="395" Column="31" TopLine="375"/>
+        <Caret Line="364" Column="17" TopLine="332"/>
       </Position10>
       <Position11>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="342" Column="79" TopLine="330"/>
+        <Caret Line="227" Column="1" TopLine="200"/>
       </Position11>
       <Position12>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="391" Column="29" TopLine="361"/>
+        <Caret Line="79" Column="26" TopLine="52"/>
       </Position12>
       <Position13>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="91" Column="15" TopLine="56"/>
+        <Caret Line="177" Column="1" TopLine="134"/>
       </Position13>
       <Position14>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="31" Column="65" TopLine="23"/>
+        <Caret Line="317" Column="54" TopLine="295"/>
       </Position14>
       <Position15>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="393" Column="72" TopLine="383"/>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <Caret Line="33" Column="48" TopLine="13"/>
       </Position15>
       <Position16>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="364" Column="17" TopLine="332"/>
+        <Filename Value="../../Units/MMLCore/ocr.pas"/>
+        <Caret Line="137" Column="43" TopLine="109"/>
       </Position16>
       <Position17>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="227" Column="1" TopLine="200"/>
+        <Filename Value="../../Units/MMLCore/ocr.pas"/>
+        <Caret Line="134" Column="60" TopLine="114"/>
       </Position17>
       <Position18>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="79" Column="26" TopLine="52"/>
+        <Filename Value="../../Units/MMLCore/ocr.pas"/>
+        <Caret Line="135" Column="18" TopLine="114"/>
       </Position18>
       <Position19>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="177" Column="1" TopLine="134"/>
+        <Caret Line="74" Column="29" TopLine="49"/>
       </Position19>
       <Position20>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="317" Column="54" TopLine="295"/>
+        <Caret Line="170" Column="14" TopLine="153"/>
       </Position20>
       <Position21>
-        <Filename Value="../../Units/MMLCore/client.pas"/>
-        <Caret Line="33" Column="48" TopLine="13"/>
+        <Filename Value="colourhistory.pas"/>
+        <Caret Line="191" Column="1" TopLine="169"/>
       </Position21>
       <Position22>
-        <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="137" Column="43" TopLine="109"/>
+        <Filename Value="colourhistory.pas"/>
+        <Caret Line="172" Column="83" TopLine="157"/>
       </Position22>
       <Position23>
-        <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="134" Column="60" TopLine="114"/>
+        <Filename Value="colourhistory.pas"/>
+        <Caret Line="201" Column="15" TopLine="172"/>
       </Position23>
       <Position24>
-        <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="135" Column="18" TopLine="114"/>
+        <Filename Value="colourhistory.pas"/>
+        <Caret Line="205" Column="32" TopLine="169"/>
       </Position24>
       <Position25>
         <Filename Value="colourhistory.pas"/>
-        <Caret Line="74" Column="29" TopLine="49"/>
+        <Caret Line="163" Column="13" TopLine="135"/>
       </Position25>
       <Position26>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="170" Column="14" TopLine="153"/>
+        <Filename Value="../../../../Documents/lazarus/lcl/comctrls.pp"/>
+        <Caret Line="2978" Column="9" TopLine="2957"/>
       </Position26>
-      <Position27>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="191" Column="1" TopLine="169"/>
-      </Position27>
-      <Position28>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="172" Column="83" TopLine="157"/>
-      </Position28>
-      <Position29>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="201" Column="15" TopLine="172"/>
-      </Position29>
-      <Position30>
-        <Filename Value="colourhistory.pas"/>
-        <Caret Line="205" Column="32" TopLine="169"/>
-      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
