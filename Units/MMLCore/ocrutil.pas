@@ -53,8 +53,8 @@ type
     end;
 
     procedure findBounds(glyphs: TocrGlyphMaskArray; out width,height: integer);
-    function LoadGlyphMasks(path: string): TocrGlyphMaskArray;
-    function InitOCR(path: string): TocrData;
+    function LoadGlyphMasks(path: string; shadow: boolean): TocrGlyphMaskArray;
+    function InitOCR(path: string; shadow: boolean): TocrData;
     function GuessGlyph(glyph: TNormArray; ocrdata: TocrData): char;
     function PointsToNorm(points: TpointArray; out w,h: integer): TNormArray;
     function ImageToNorm(src: tRGBArray; w,h: integer): TNormArray;
@@ -153,17 +153,22 @@ begin
 end;
 
 {This Loads the actual data from the .bmp, but does not init all fields}
-function LoadGlyphMasks(path: string): TocrGlyphMaskArray;
+function LoadGlyphMasks(path: string; shadow: boolean): TocrGlyphMaskArray;
 var
     strs: array of string;
     bmp: array of Tbmp; {-> TMufasaBitmap, and why use an array? }
     len,size,i,j: integer;
     color: tRGB;
+    shadow_i: byte;
 begin
     strs:= GetFiles(path,'bmp');
     len:= length(strs);
     SetLength(result,len);
     SetLength(bmp,len);
+    if shadow then
+      shadow_i := 0
+    else
+      shadow_i := 255;
     for i:= 0 to len-1 do
     begin
         bmp[i]:= ReadBmp(path + strs[i]);
@@ -172,8 +177,9 @@ begin
         for j:= 0 to size-1 do
         begin
             color:= bmp[i].data[j];
-            if (color.r = 255) and (color.g = 255) and (color.b = 255) then
-            //if (color.r = 255) and (color.g = 0) and (color.b = 0) then
+           { if (color.r = 255) and (color.g = 255 and not shadow_i) and
+            (color.b = 255 and not shadow_i) then}
+            if (color.r = 255) and (color.g = shadow_i) and (color.b = shadow_i) then
                 result[i].mask[j]:= 1
             else
                 result[i].mask[j]:= 0;
@@ -186,7 +192,7 @@ begin
 end;
 
 {Fully initalizes a TocrData structure, this is LoadFont or whatever, call it first}
-function InitOCR(path: string): TocrData;
+function InitOCR(path: string; shadow: boolean): TocrData;
 var
     masks: TocrGlyphMaskArray;
     t,b,l,r,w,h,mw: integer;
@@ -195,7 +201,7 @@ var
     pos: integer;
     ascii: char;
 begin
-    masks:= LoadGlyphMasks(path);
+    masks:= LoadGlyphMasks(path, shadow);
     w:= 0;
     h:= 0;
     findBounds(masks,w,h);
