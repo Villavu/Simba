@@ -44,6 +44,10 @@ uses
              Client: TObject;
              OCRData: TocrDataArray;
              OCRPath: string;
+      {$IFDEF OCRDEBUG}
+      public
+             debugbmp: TMufasaBitmap;
+      {$ENDIF}
 
       end;
 
@@ -77,14 +81,31 @@ var
    x,y: integer;
    r,g,b: integer;
    n: TNormArray;
+   {$IFDEF OCRDEBUG}
+   dx,dy: integer;
+   {$ENDIF}
+
 
 begin
   bmp := TMufasaBitmap.Create;
-  bmp.SetSize(w, h + 2);
-  bmp.CopyClientToBitmap(TClient(Client).MWindow, False, 0,1, sx, sy, sx + w - 1, sy + h - 1);
-  //bmp.CopyClientToBitmap(TClient(Client).MWindow, True, sx, sy, sx + w - 1, sy + h - 1);
+
+  { Increase to create a black horizonal line at the top and at the bottom }
+  { This so the crappy algo can do it's work correctly. }
+  bmp.SetSize(w{ + 1}, h + 2);
+
+  bmp.CopyClientToBitmap(TClient(Client).MWindow, False, {1}0,1, sx, sy, sx + w - 1, sy + h - 1);
+
+  {$IFDEF OCRDEBUG}
+    debugbmp := TMufasaBitmap.Create;
+    debugbmp.SetSize(w, (h + 2) * 4);
+  {$ENDIF}
 
   bmp.SaveToFile('/tmp/ocrinit.bmp');
+  {$IFDEF OCRDEBUG}
+    for dy := 0 to bmp.height - 1 do
+      for dx := 0 to bmp.width - 1 do
+        debugbmp.fastsetpixel(dx,dy,bmp.fastgetpixel(dx,dy));
+  {$ENDIF}
   for y := 0 to bmp.Height - 1 do
     for x := 0 to bmp.Width - 1 do
     begin
@@ -147,17 +168,20 @@ begin
       bmp.fastsetpixel(x,y,0);
     end;
 
-    // increase height by 1, so our algo works better.
-    {bmp.SetSize(Bmp.Width, Bmp.Height+1);    }
-
     // first and last horiz line = 0
     for x := 0 to bmp.width -1 do
       bmp.fastsetpixel(x,0,0);
     for x := 0 to bmp.width -1 do
       bmp.fastsetpixel(x,bmp.height-1,0);
+   { for y := 0 to bmp.Height -1 do
+      bmp.fastsetpixel(0, y, 0);      }
 
     bmp.SaveToFile('/tmp/ocrcol.bmp');
-
+    {$IFDEF OCRDEBUG}
+      for dy := 0 to bmp.height - 1 do
+        for dx := 0 to bmp.width - 1 do
+          debugbmp.fastsetpixel(dx,dy+h,bmp.fastgetpixel(dx,dy));
+    {$ENDIF}
     for y := 0 to bmp.Height - 2 do
       for x := 0 to bmp.Width - 2 do
       begin
@@ -213,12 +237,21 @@ begin
             bmp.fastsetpixel(x,y, clOlive);
        end;   }
    { remove debug ;) }
-
+   {$IFDEF OCRDEBUG}
+     for dy := 0 to bmp.height - 1 do
+       for dx := 0 to bmp.width - 1 do
+         debugbmp.fastsetpixel(dx,dy+h+h,bmp.fastgetpixel(dx,dy));
+   {$ENDIF}
    bmp.SaveToFile('/tmp/ocrdebug.bmp');
 
    for y := 0 to bmp.Height - 1 do
      for x := 0 to bmp.Width - 1 do
      begin
+    {   if bmp.fastgetpixel(x,y) <> clPurple then
+       begin
+         bmp.FastSetPixel(x,y,0);
+         continue;
+       end;    }
        if bmp.fastgetpixel(x,y) = clPurple then
        begin
          bmp.FastSetPixel(x,y,0);
@@ -236,6 +269,9 @@ begin
        end;
      end;
 
+     for y := 0 to bmp.Height -1 do
+       bmp.fastsetpixel(0, y, 0);
+
      setlength(n, bmp.Height * bmp.Width);
 
      for y := 0 to bmp.Height - 1 do
@@ -249,6 +285,11 @@ begin
 
      result := n;
      bmp.SaveToFile('/tmp/ocrfinal.bmp');
+     {$IFDEF OCRDEBUG}
+       for dy := 0 to bmp.height - 1 do
+         for dx := 0 to bmp.width - 1 do
+           debugbmp.fastsetpixel(dx,dy+h+h+h,bmp.fastgetpixel(dx,dy));
+     {$ENDIF}
      bmp.Free;
        { Dangerous removes all pixels that had no pixels on x-1 or x+1}
      {  for y := 0 to bmp.Height - 2 do
@@ -299,6 +340,7 @@ begin
     OCRData[0] := ocrutil.InitOCR(path + DS + 'UpChars' + DS)
   else
     result := false;
+
   if DirectoryExists(path + DS + 'StatChars' + DS) then
     OCRData[1] := ocrutil.InitOCR(path + DS + 'StatChars' + DS)
   else

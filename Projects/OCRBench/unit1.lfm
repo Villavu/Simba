@@ -1,0 +1,52 @@
+object Form1: TForm1
+  Left = 492
+  Height = 305
+  Top = 266
+  Width = 609
+  Caption = 'Form1'
+  ClientHeight = 305
+  ClientWidth = 609
+  LCLVersion = '0.9.29'
+  object OCRButton: TButton
+    Left = 512
+    Height = 25
+    Top = 255
+    Width = 88
+    Caption = 'OCR Filter!'
+    OnClick = OCRButtonClick
+    TabOrder = 0
+  end
+  object Image1: TImage
+    Left = 16
+    Height = 264
+    Top = 16
+    Width = 480
+  end
+  object BitmapButton: TButton
+    Left = 512
+    Height = 25
+    Top = 32
+    Width = 88
+    Caption = 'Set Bitmap'
+    OnClick = BitmapButtonClick
+    TabOrder = 1
+  end
+  object PathButton: TButton
+    Left = 512
+    Height = 25
+    Top = 72
+    Width = 88
+    Caption = 'Set Path'
+    OnClick = PathButtonClick
+    TabOrder = 2
+  end
+  object OCRFileOpen: TOpenDialog
+    Filter = '.bmp'
+    left = 528
+    top = 192
+  end
+  object UpCharsDialog: TSelectDirectoryDialog
+    left = 528
+    top = 160
+  end
+end
