@@ -173,6 +173,7 @@ begin
         begin
             color:= bmp[i].data[j];
             if (color.r = 255) and (color.g = 255) and (color.b = 255) then
+            //if (color.r = 255) and (color.g = 0) and (color.b = 0) then
                 result[i].mask[j]:= 1
             else
                 result[i].mask[j]:= 0;
