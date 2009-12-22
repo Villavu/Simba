@@ -48,25 +48,7 @@ object Form1: TForm1
     Top = 112
     Width = 79
     Caption = 'Shadow?'
-    OnChange = FShadowChange
     TabOrder = 3
-  end
-  object SplitEdit: TEdit
-    Left = 512
-    Height = 27
-    Top = 168
-    Width = 88
-    TabOrder = 4
-    Text = '1'
-  end
-  object SplitLabel: TLabel
-    Left = 512
-    Height = 18
-    Top = 144
-    Width = 88
-    AutoSize = False
-    Caption = 'Split Spacing:'
-    ParentColor = False
   end
   object OCRFileOpen: TOpenDialog
     Filter = '.bmp'

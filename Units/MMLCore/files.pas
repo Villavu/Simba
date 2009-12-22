@@ -64,6 +64,7 @@ type
 
     // We don't need one per object. :-)
     function GetFiles(Path, Ext: string): TStringArray;
+    function GetDirectories(Path: string): TstringArray;
 
 implementation
 uses
@@ -80,6 +81,25 @@ begin
   if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
   begin
     repeat
+      inc(c);
+      SetLength(Result,c);
+       Result[c-1] := SearchRec.Name;
+    until FindNext(SearchRec) <> 0;
+    SysUtils.FindClose(SearchRec);
+  end;
+end;
+
+function GetDirectories(Path: string): TstringArray;
+var
+    SearchRec : TSearchRec;
+    c : integer;
+begin
+  c := 0;
+  if FindFirst(Path + '*', faDirectory, SearchRec) = 0 then
+  begin
+    repeat
+      if SearchRec.Name[1] = '.' then
+        continue;
       inc(c);
       SetLength(Result,c);
        Result[c-1] := SearchRec.Name;
