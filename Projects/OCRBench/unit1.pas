@@ -99,7 +99,7 @@ begin
       Spacing := 1;
     end;
   end;
-  writeln('Spacing: ' + Inttostr(spacing));
+
   // DS + .. + DS because InitOCR wants the directory of the Fonts, not UpChars
   // only.
   C.MOCR.InitTOCR(UpTextPath + DS + '..' + DS, Shadow);
@@ -127,8 +127,8 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  {BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext2.bmp';
-  UpTextPath := '/home/merlijn/Programs/mufasa/Fonts/UpChars';}
+  BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext2.bmp';
+  UpTextPath := '/home/merlijn/Programs/mufasa/Fonts/UpChars';
 end;
 
 procedure TForm1.FShadowChange(Sender: TObject);

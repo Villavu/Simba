@@ -71,6 +71,34 @@ const
 
     ocr_Purple = 8388736;
 
+{
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+When splitting the shadows, having the `original' points of the chars would be very helpful when splitting!
+
+Short description:
+Merge shadow and char; (Same colour; simple)
+Split with spacing of 1.
+Remove character points; leaves only shadow. Voila, perfect splitting.
+Splitting could go wrong for shadows of characters with two much spacing; like 'h'.
+
+In some cases, this may `bind' characters to each other.
+In this case, we need to remove the shadow and split again. After this split
+we can put the shadows back in, and see to what group they belong.
+
+We can also just split the chars, and then use their shadow.
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+**************************************************************************************************
+}
+
+
+
 
 {
    Non optimised. ;-)
