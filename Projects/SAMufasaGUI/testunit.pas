@@ -241,6 +241,8 @@ type
       State: TDragState; var Accept: Boolean);
     procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
     procedure ProcessDebugStream(Sender: TObject);
     procedure ScriptPopupPopup(Sender: TObject);
     procedure SpeedButtonSearchClick(Sender: TObject);
@@ -1166,17 +1168,35 @@ end;
 
 procedure TForm1.PageControl1DragOver(Sender, Source: TObject; X, Y: Integer;
   State: TDragState; var Accept: Boolean);
+var
+  Pos: Integer;
 begin
-  if Sender = PageControl1 then;
-    Accept := True;
+  Pos := PageControl1.TabIndexAtClientPos(Point(x,y));
+  if (Pos <> PageControl1.TabIndex) and (Pos <> -1) then
+    PageControl1.DragCursor := crDrag
+  else
+    PageControl1.DragCursor := crNo;
+  Accept := PageControl1.DragCursor = crDrag;
 end;
 
 procedure TForm1.PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  {$ifdef mswindows}
-  PageControl1.BeginDrag(false);
-  {$endif}
+  if(Button = mbLeft)then
+  begin
+    {$ifdef linux}
+    PageControl1.TabIndex := PageControl1.TabIndexAtClientPos(Point(x,y));
+    {$endif}
+    PageControl1.BeginDrag(false, 10);
+  end;
+end;
+
+procedure TForm1.PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if(Button = mbMiddle) and (not(PageControl1.Dragging))then
+    if(PageControl1.TabIndexAtClientPos(Point(x,y)) <> -1)then
+      DeleteTab(PageControl1.TabIndexAtClientPos(Point(x,y)), False);
 end;
 
 function TForm1.GetScriptState: TScriptState;

@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 274
+  Left = 474
   Height = 557
-  Top = 233
+  Top = 246
   Width = 731
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
-  ClientHeight = 534
+  ClientHeight = 532
   ClientWidth = 731
   KeyPreview = True
   Menu = MainMenu1
@@ -166,8 +166,8 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 17
-    Top = 517
+    Height = 21
+    Top = 536
     Width = 731
     Panels = <    
       item
@@ -185,7 +185,7 @@ object Form1: TForm1
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 363
+    Top = 382
     Width = 731
     Align = alBottom
     ClientHeight = 154
@@ -205,25 +205,25 @@ object Form1: TForm1
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 358
+    Top = 377
     Width = 731
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 334
+    Height = 353
     Top = 24
     Width = 731
     Align = alClient
     BevelOuter = bvNone
     Caption = 'ScriptPanel'
-    ClientHeight = 334
+    ClientHeight = 353
     ClientWidth = 731
     TabOrder = 4
     object PageControl1: TPageControl
       Left = 0
-      Height = 299
+      Height = 318
       Top = 0
       Width = 731
       Align = alClient
@@ -236,12 +236,13 @@ object Form1: TForm1
       OnDragDrop = PageControl1DragDrop
       OnDragOver = PageControl1DragOver
       OnMouseDown = PageControl1MouseDown
+      OnMouseUp = PageControl1MouseUp
       OnPageChanged = PageControl1Change
     end
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 299
+      Top = 318
       Width = 731
       Align = alBottom
       BevelOuter = bvSpace
@@ -345,10 +346,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 67
+        EditLabel.Left = 65
         EditLabel.Height = 18
         EditLabel.Top = 10
-        EditLabel.Width = 34
+        EditLabel.Width = 36
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -361,9 +362,9 @@ object Form1: TForm1
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 20
+        Height = 22
         Top = 7
-        Width = 95
+        Width = 98
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
