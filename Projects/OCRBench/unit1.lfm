@@ -44,9 +44,9 @@ object Form1: TForm1
   end
   object FShadow: TCheckBox
     Left = 507
-    Height = 20
+    Height = 22
     Top = 112
-    Width = 79
+    Width = 81
     Caption = 'Shadow?'
     TabOrder = 3
   end
