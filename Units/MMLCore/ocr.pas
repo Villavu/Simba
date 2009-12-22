@@ -38,7 +38,8 @@ uses
              constructor Create(Owner: TObject);
              destructor Destroy; override;
              function InitTOCR(path: string; shadow: Boolean): boolean;
-             function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean): TNormArray;
+             function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean; spacing: Integer): TNormArray;
+             function GetUpTextAtEx(atX, atY: integer; shadow: boolean; Spacing: Integer): string;
              function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
       private
              Client: TObject;
@@ -54,7 +55,7 @@ uses
 implementation
 
 uses
-  colour_conv, client,  files;
+  colour_conv, client,  files, tpa, mufasatypesutil;
 
 const
     ocr_Limit_High = 190;
@@ -75,7 +76,7 @@ const
    Non optimised. ;-)
 }
 
-function TMOCR.getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean): TNormArray;
+function TMOCR.getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean; spacing: integer): TNormArray;
 var
    bmp: TMufasaBitmap;
    x,y: integer;
@@ -84,7 +85,12 @@ var
    {$IFDEF OCRDEBUG}
    dx,dy: integer;
    {$ENDIF}
-
+   {$IFDEF OCRTPA}
+   t: tpointarray;
+   at, atf,att: T2DPointArray;
+   pc: integer;
+   max_len: integer;
+   {$ENDIF}
 
 begin
   bmp := TMufasaBitmap.Create;
@@ -97,7 +103,7 @@ begin
 
   {$IFDEF OCRDEBUG}
     debugbmp := TMufasaBitmap.Create;
-    debugbmp.SetSize(w, (h + 2) * 4);
+    debugbmp.SetSize(w, (h + 2) * 5);
   {$ENDIF}
 
   {$IFDEF OCRSAVEBITMAP}
@@ -266,11 +272,6 @@ begin
      for y := 0 to bmp.Height - 1 do
        for x := 0 to bmp.Width - 1 do
        begin
-      {   if bmp.fastgetpixel(x,y) <> clPurple then
-         begin
-           bmp.FastSetPixel(x,y,0);
-           continue;
-         end;    }
          if bmp.fastgetpixel(x,y) = clPurple then
          begin
            bmp.FastSetPixel(x,y,0);
@@ -292,16 +293,32 @@ begin
      for y := 0 to bmp.Height -1 do
        bmp.fastsetpixel(0, y, 0);
 
+     {$IFDEF OCRTPA}
+     pc := 0;
+     setlength(t,  bmp.Height * bmp.Width);
+     {$ENDIF}
+
      setlength(n, bmp.Height * bmp.Width);
 
      for y := 0 to bmp.Height - 1 do
        for x := 0 to bmp.Width - 1 do
        begin
          if bmp.fastgetpixel(x,y) > 0 then
-           n[x + y * bmp.width] := 1
+         begin
+           n[x + y * bmp.width] := 1;
+           {$IFDEF OCRTPA}
+           t[pc] := point(x,y);
+           inc(pc);
+           {$ENDIF}
+         end
          else
-           n[x + y * bmp.width] := 0;
+           n[x
+           + y * bmp.width] := 0;
        end;
+
+     {$IFDEF OCRTPA}
+     setlength(t,pc);
+     {$ENDIF}
 
      result := n;
      {$IFDEF OCRSAVEBITMAP}
@@ -312,6 +329,64 @@ begin
          for dx := 0 to bmp.width - 1 do
            debugbmp.fastsetpixel(dx,dy+h+h+h,bmp.fastgetpixel(dx,dy));
      {$ENDIF}
+
+     {$IFDEF OCRTPA}
+     at:=splittpaex(t,spacing,bmp.height);
+
+   {
+     // this was to split extra large points into smaller ones, but it usually won't help
+     if shadow then
+       max_len := 30
+     else
+       max_len := 50;
+
+     for x := 0 to high(at) do
+     begin
+       if length(at[x]) > max_len then
+       begin
+         setlength(t,0);
+        // t := at[x];
+         att := splittpaex(at[x], 1, bmp.height);
+         for y := 0 to high(att) do
+         begin
+           setlength(atf,length(atf)+1);
+           atf[high(atf)] := convtpaarr(att[y]);
+         end;
+       end else
+       begin
+         setlength(atf,length(atf)+1);
+         atf[high(atf)] := convtpaarr(at[x]);
+       end;
+     end;
+
+     for x := 0 to high(atf) do
+     begin
+       pc := random(clWhite);
+       for y := 0 to high(atf[x]) do
+         bmp.FastSetPixel(atf[x][y].x, atf[x][y].y, pc);
+     end; }
+
+     for x := 0 to high(at) do
+     begin
+       if length(at[x]) > 70 then
+       begin
+         for y := 0 to high(at[x]) do
+           bmp.FastSetPixel(at[x][y].x, at[x][y].y, clOlive);
+       end else
+       begin
+         pc := random(clWhite);
+         for y := 0 to high(at[x]) do
+           bmp.FastSetPixel(at[x][y].x, at[x][y].y, pc);
+       end;
+     end;
+       {$IFDEF OCRDEBUG}
+       for dy := 0 to bmp.height - 1 do
+         for dx := 0 to bmp.width - 1 do
+           debugbmp.fastsetpixel(dx,dy+h+h+h+h,bmp.fastgetpixel(dx,dy));
+       {$ENDIF}
+     {$ENDIF}
+
+
      bmp.Free;
        { Dangerous removes all pixels that had no pixels on x-1 or x+1}
      {  for y := 0 to bmp.Height - 2 do
@@ -369,19 +444,25 @@ begin
     result := false;
 end;
 
-function TMOCR.GetUpTextAt(atX, atY: integer; shadow: boolean): string;
-
+function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean; spacing: Integer): string;
 var
    n:Tnormarray;
    ww, hh: integer;
-
 begin
   ww := 400;
   hh := 20;
 
-  n := getTextPointsIn(atX, atY, ww, hh, shadow);
+  n := getTextPointsIn(atX, atY, ww, hh, shadow, spacing);
   Result := ocrDetect(n, ww, hh, OCRData[0]);
-  //writeln(result);
+end;
+
+function TMOCR.GetUpTextAt(atX, atY: integer; shadow: boolean): string;
+
+begin
+  if shadow then
+    result := GetUpTextAtEx(atX, atY, shadow, 2)
+  else
+    result := GetUpTextAtEx(atX, atY, shadow, 1);
 end;
     {
 function TMOCR.GetUpTextAt(atX, atY: integer): string;
