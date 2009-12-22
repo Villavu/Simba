@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, ExtCtrls, Client, MufasaTypes, Bitmaps;
+  StdCtrls, ExtCtrls, Client, MufasaTypes, Bitmaps, ocr;
 
 type
 
@@ -108,7 +108,7 @@ begin
   Form1.Image1.Canvas.TextOut(0, 0, s);
   {$ENDIF}
   {$IFDEF OCRDEBUG}
-  Form1.Image1.Picture.SaveToFile('/tmp/ocrbench.bmp');
+  Form1.Image1.Picture.SaveToFile(OCRDebugPath + 'ocrbench.bmp');
   {$ENDIF}
 
   bmp.Free;
