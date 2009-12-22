@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 474
+  Left = 446
   Height = 557
-  Top = 246
+  Top = 224
   Width = 731
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -167,7 +167,7 @@ object Form1: TForm1
   object StatusBar: TStatusBar
     Left = 0
     Height = 21
-    Top = 536
+    Top = 511
     Width = 731
     Panels = <    
       item
@@ -185,7 +185,7 @@ object Form1: TForm1
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 382
+    Top = 357
     Width = 731
     Align = alBottom
     ClientHeight = 154
@@ -205,28 +205,29 @@ object Form1: TForm1
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 377
+    Top = 352
     Width = 731
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 353
+    Height = 328
     Top = 24
     Width = 731
     Align = alClient
     BevelOuter = bvNone
     Caption = 'ScriptPanel'
-    ClientHeight = 353
+    ClientHeight = 328
     ClientWidth = 731
     TabOrder = 4
     object PageControl1: TPageControl
-      Left = 0
-      Height = 318
+      Left = 144
+      Height = 293
       Top = 0
-      Width = 731
-      Align = alClient
+      Width = 587
+      Align = alRight
+      Anchors = [akTop, akLeft, akRight, akBottom]
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
       TabOrder = 0
@@ -242,7 +243,7 @@ object Form1: TForm1
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 318
+      Top = 293
       Width = 731
       Align = alBottom
       BevelOuter = bvSpace
@@ -369,6 +370,25 @@ object Form1: TForm1
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
       end
+    end
+    object TreeView1: TTreeView
+      Left = 0
+      Height = 293
+      Top = 0
+      Width = 141
+      Align = alLeft
+      DefaultItemHeight = 19
+      ReadOnly = True
+      ScrollBars = ssAutoBoth
+      TabOrder = 2
+      OnMouseDown = TreeView1MouseDown
+      Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
+      Items.Data = {
+        F9FFFFFF020001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF020000000000
+        00000005000000436F6C6F72FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000
+        00000000000900000046696E64436F6C6F72FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFF00000000000000000008000000476574436F6C6F72
+      }
     end
   end
   object MainMenu1: TMainMenu

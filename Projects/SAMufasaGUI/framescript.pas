@@ -44,6 +44,9 @@ type
     SynEdit: TSynEdit;
     SynFreePascalSyn1: TSynFreePascalSyn;
     procedure SynEditChange(Sender: TObject);
+    procedure SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
+      State: TDragState; var Accept: Boolean);
     procedure SynEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
       );
     procedure SynEditProcessCommand(Sender: TObject;
@@ -86,6 +89,22 @@ begin
     ScriptChanged:= True;
     Form1.Caption:= Format(WindowTitle,[ScriptName + '*']);
     OwnerSheet.Caption:=ScriptName + '*';
+  end;
+end;
+
+procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
+begin
+  SynEdit.InsertTextAtCaret('will implement later');
+end;
+
+procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
+  State: TDragState; var Accept: Boolean);
+begin
+  Accept := Source = Form1.TreeView1;
+  if(Accept)then
+  begin
+    SynEdit.CaretXY := SynEdit.PixelsToLogicalPos(point(x, y));
+    Form1.ActiveControl := SynEdit;
   end;
 end;
 
