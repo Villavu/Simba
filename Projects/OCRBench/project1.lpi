@@ -44,8 +44,8 @@
         <ComponentName Value="Form1"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
-        <CursorPos X="77" Y="89"/>
-        <TopLine Value="62"/>
+        <CursorPos X="3" Y="94"/>
+        <TopLine Value="73"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="49"/>
         <Loaded Value="True"/>

@@ -84,9 +84,13 @@ begin
   // only.
   C.MOCR.InitTOCR(FontPath, Shadow);
 
+  {$IFDEF OCRDEBUG}
   t:=gettickcount;
+  {$ENDIF}
   s := C.MOCR.GetUpTextAtEx(7, 7, Shadow);
+  {$IFDEF OCRDEBUG}
   writeln(inttostr(gettickcount-t));
+  {$ENDIF}
 
   // write to debugbmp
   {$IFDEF OCRDEBUG}
@@ -103,7 +107,9 @@ begin
   Form1.Image1.Canvas.Font.Color:=clRed;
   Form1.Image1.Canvas.TextOut(0, 0, s);
   {$ENDIF}
+  {$IFDEF OCRDEBUG}
   Form1.Image1.Picture.SaveToFile('/tmp/ocrbench.bmp');
+  {$ENDIF}
 
   bmp.Free;
   C.Free;
@@ -118,8 +124,8 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext4.bmp';
-  FontPath := '/home/merlijn/Programs/mufasa/Fonts/';
+  {BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext4.bmp';
+  FontPath := '/home/merlijn/Programs/mufasa/Fonts/'; }
 end;
 
 procedure TForm1.PathButtonClick(Sender: TObject);
