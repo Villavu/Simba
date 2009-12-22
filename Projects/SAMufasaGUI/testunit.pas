@@ -179,6 +179,7 @@ type
     ToolButton8: TToolButton;
     TB_Convert: TToolButton;
     MTrayIcon: TTrayIcon;
+    TreeView1: TTreeView;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
@@ -246,6 +247,8 @@ type
     procedure ProcessDebugStream(Sender: TObject);
     procedure ScriptPopupPopup(Sender: TObject);
     procedure SpeedButtonSearchClick(Sender: TObject);
+    procedure TreeView1MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     PopupTab : integer;
     SearchStart : TPoint;
@@ -339,6 +342,13 @@ end;
 procedure TForm1.SpeedButtonSearchClick(Sender: TObject);
 begin
   CloseFindPanel;
+end;
+
+procedure TForm1.TreeView1MouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if(Button = mbLeft)then
+    TreeView1.BeginDrag(False, 10); //BeginDrag(False, 10);
 end;
 
 procedure formWriteln( S : String);
@@ -1172,11 +1182,7 @@ var
   Pos: Integer;
 begin
   Pos := PageControl1.TabIndexAtClientPos(Point(x,y));
-  if (Pos <> PageControl1.TabIndex) and (Pos <> -1) then
-    PageControl1.DragCursor := crDrag
-  else
-    PageControl1.DragCursor := crNo;
-  Accept := PageControl1.DragCursor = crDrag;
+  Accept := (Pos <> PageControl1.TabIndex) and (Pos <> -1);
 end;
 
 procedure TForm1.PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -1378,7 +1384,6 @@ begin
   ScriptFrame := TScriptFrame.Create(Tabsheet);
   ScriptFrame.Parent := Tabsheet;
   ScriptFrame.Align:= alClient;
-
 end;
 
 constructor TMufasaTab.Create(Page: TPageControl);
@@ -1389,7 +1394,7 @@ begin
   Tabsheet.PageControl := Page;
   ScriptFrame := TScriptFrame.Create(Tabsheet);
   ScriptFrame.Parent := Tabsheet;
-  ScriptFrame.Align:= alClient;
+  ScriptFrame.Align := alClient;
 end;
 
 destructor TMufasaTab.Destroy;

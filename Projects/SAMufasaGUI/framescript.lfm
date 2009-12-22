@@ -22,6 +22,8 @@ object ScriptFrame: TScriptFrame
     ParentFont = False
     PopupMenu = Form1.ScriptPopup
     TabOrder = 0
+    OnDragDrop = SynEditDragDrop
+    OnDragOver = SynEditDragOver
     OnKeyDown = SynEditKeyDown
     Gutter.Width = 57
     Gutter.MouseActions = <    
@@ -712,7 +714,7 @@ object ScriptFrame: TScriptFrame
     DirectiveAttri.Foreground = clRed
     DirectiveAttri.Style = [fsBold]
     CompilerMode = pcmObjFPC
-    NestedComments = False
+    NestedComments = True
     left = 320
     top = 16
   end
