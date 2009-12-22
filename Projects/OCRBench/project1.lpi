@@ -44,8 +44,8 @@
         <ComponentName Value="Form1"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
-        <CursorPos X="33" Y="112"/>
-        <TopLine Value="85"/>
+        <CursorPos X="4" Y="127"/>
+        <TopLine Value="43"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="50"/>
         <Loaded Value="True"/>
@@ -82,8 +82,8 @@
       <Unit5>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <UnitName Value="ocr"/>
-        <CursorPos X="78" Y="451"/>
-        <TopLine Value="423"/>
+        <CursorPos X="66" Y="365"/>
+        <TopLine Value="341"/>
         <EditorIndex Value="4"/>
         <UsageCount Value="26"/>
         <Loaded Value="True"/>
@@ -161,7 +161,7 @@
         <Loaded Value="True"/>
       </Unit14>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <Caret Line="588" Column="7" TopLine="575"/>
@@ -278,6 +278,10 @@
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <Caret Line="634" Column="41" TopLine="293"/>
       </Position29>
+      <Position30>
+        <Filename Value="../../Units/MMLCore/ocr.pas"/>
+        <Caret Line="191" Column="50" TopLine="183"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
