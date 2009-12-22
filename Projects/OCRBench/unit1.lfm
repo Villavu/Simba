@@ -1,12 +1,13 @@
 object Form1: TForm1
-  Left = 493
-  Height = 305
-  Top = 293
+  Left = 462
+  Height = 306
+  Top = 264
   Width = 609
   ActiveControl = BitmapButton
   Caption = 'Form1'
-  ClientHeight = 305
+  ClientHeight = 306
   ClientWidth = 609
+  OnCreate = FormCreate
   LCLVersion = '0.9.29'
   object OCRButton: TButton
     Left = 512
@@ -47,15 +48,33 @@ object Form1: TForm1
     Top = 112
     Width = 79
     Caption = 'Shadow?'
+    OnChange = FShadowChange
     TabOrder = 3
+  end
+  object SplitEdit: TEdit
+    Left = 512
+    Height = 27
+    Top = 168
+    Width = 88
+    TabOrder = 4
+    Text = '1'
+  end
+  object SplitLabel: TLabel
+    Left = 512
+    Height = 18
+    Top = 144
+    Width = 88
+    AutoSize = False
+    Caption = 'Split Spacing:'
+    ParentColor = False
   end
   object OCRFileOpen: TOpenDialog
     Filter = '.bmp'
-    left = 528
-    top = 192
+    left = 416
+    top = 277
   end
   object UpCharsDialog: TSelectDirectoryDialog
-    left = 528
-    top = 160
+    left = 448
+    top = 277
   end
 end
