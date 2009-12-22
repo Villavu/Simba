@@ -64,7 +64,13 @@ uses
       {$ENDIF}
 
       end;
-
+      {$IFDEF OCRDEBUG}
+        {$IFDEF LINUX}
+          const OCRDebugPath = '/tmp/';
+        {$ELSE}
+          const OCRDebugPath = '';
+        {$ENDIF}
+      {$ENDIF}
 implementation
 
 uses
@@ -365,7 +371,7 @@ begin
   // Filter 1
   FilterUpTextByColour(bmp,w,h);
   {$IFDEF OCRSAVEBITMAP}
-  bmp.SaveToFile('/tmp/ocrcol.bmp');
+  bmp.SaveToFile(OCRDebugPath + 'ocrcol.bmp');
   {$ENDIF}
 
   {$IFDEF OCRDEBUG}
@@ -375,7 +381,7 @@ begin
   FilterUpTextByCharacteristics(bmp,w,h);
 
   {$IFDEF OCRSAVEBITMAP}
-  bmp.SaveToFile('/tmp/ocrdebug.bmp');
+  bmp.SaveToFile(OCRDebugPath + 'ocrdebug.bmp');
   {$ENDIF}
   {$IFDEF OCRDEBUG}
     DebugToBmp(bmp,2,h);
