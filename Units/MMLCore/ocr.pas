@@ -357,7 +357,7 @@ begin
   bmp.CopyClientToBitmap(TClient(Client).MWindow, False, 1{0},1, sx, sy, sx + w - 1, sy + h - 1);
 
   {$IFDEF OCRSAVEBITMAP}
-  bmp.SaveToFile('/tmp/ocrinit.bmp');
+  bmp.SaveToFile(OCRDebugPath + 'ocrinit.bmp');
   {$ENDIF}
 
   {$IFDEF OCRDEBUG}
