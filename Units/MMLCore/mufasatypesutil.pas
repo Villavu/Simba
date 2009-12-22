@@ -11,6 +11,8 @@ function ConvArr(Arr: array of TPoint): TPointArray; overload;
 function ConvArr(Arr: array of TPointArray): T2DPointArray; overload;
 function ConvArr(Arr: array of Integer): TIntegerArray; overload;
 
+function ConvTPAArr(Arr: array of TPoint): TPointArray; overload;
+
 
 implementation
 
@@ -22,6 +24,16 @@ begin;
   SetLength(Result, Len);
   Move(Arr[Low(Arr)], Result[0], Len*SizeOf(TPoint));
 end;
+
+function ConvTPAArr(Arr: array of TPoint): TPointArray; overload;
+var
+  Len : Integer;
+begin;
+  Len := Length(Arr);
+  SetLength(Result, Len);
+  Move(Arr[Low(Arr)], Result[0], Len*SizeOf(TPoint));
+end;
+
 
 function ConvArr(Arr: array of TPointArray): T2DPointArray; overload;
 var

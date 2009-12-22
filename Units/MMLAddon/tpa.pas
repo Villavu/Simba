@@ -545,16 +545,16 @@ var
    i, l: Integer;
    DistArr: TIntegerArray;
 begin
-  writeln('hoi0');
+  //writeln('hoi0');
   l := High(a);
   if (l < 0) then Exit;
-  writeln('hoi1');
+  //writeln('hoi1');
   SetLength(DistArr, l + 1);
   for i := 0 to l do
     DistArr[i] := Round(Sqr(From.x - a[i][0].x) + Sqr(From.y - a[i][0].y));
-  writeln('hoi2');
+  //writeln('hoi2');
   QuickATPASort(DistArr, a, 0, l, True);
-  writeln('hoi3');
+  //writeln('hoi3');
 end;
 
 {/\
@@ -866,7 +866,7 @@ begin
       t2 := 0;
       while (t2 <= (l - ec)) do
       begin
-        if (Round(fSqrt(Sqr(Result[c][t1].x - tpa[t2].x) + Sqr(Result[c][t1].y - tpa[t2].y))) <= Dist) then
+        if (Round(Sqrt(Sqr(Result[c][t1].x - tpa[t2].x) + Sqr(Result[c][t1].y - tpa[t2].y))) <= Dist) then
         begin
           SetLength(Result[c], tc +1);
           Result[c][tc] := tpa[t2];

@@ -1,5 +1,5 @@
 function rs_GetUpText: String;
 begin
-  Result := CurrThread.Client.MOCR.GetUpTextAt(7, 7, false);
-  {writeln('inside: ' + result);}
+  // why the hell does it still not use shadows?
+  Result := CurrThread.Client.MOCR.GetUpTextAtEx(7, 7, true);
 end;
