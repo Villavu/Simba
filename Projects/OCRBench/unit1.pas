@@ -82,7 +82,7 @@ begin
 
   // DS + .. + DS because InitOCR wants the directory of the Fonts, not UpChars
   // only.
-  C.MOCR.InitTOCR(FontPath, Shadow);
+  C.MOCR.InitTOCR(FontPath + DS, Shadow);
 
   {$IFDEF OCRDEBUG}
   t:=gettickcount;
@@ -125,7 +125,7 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   {BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext4.bmp';
-  FontPath := '/home/merlijn/Programs/mufasa/Fonts/'; }
+  FontPath := '/home/merlijn/Programs/mufasa/Fonts/';}
 end;
 
 procedure TForm1.PathButtonClick(Sender: TObject);
