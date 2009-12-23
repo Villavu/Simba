@@ -45,16 +45,13 @@ end;
 procedure SaveScreenshot(FileName: string);
 var
   w,h : integer;
+  bmp: TMufasaBitmap;
 begin;
-  with CurrThread.Client.MWindow do
-  begin;
-    GetDimensions(w,h);
-    with CopyClientToBitmap(0,0,w-1,h-1) do
-    begin;
-      SaveToFile(FileName);
-      Free;
-    end;
-  end;
+  CurrThread.Client.MWindow.GetDimensions(w,h);
+  bmp := TMufasaBitmap.Create;
+  bmp.CopyClientToBitmap(CurrThread.Client.MWindow,True,0,0,w-1,h-1);
+  bmp.SaveToFile(FileName);
+  bmp.Free;
 end;
 
 function CreateForm : TForm;
