@@ -487,6 +487,8 @@ begin
   _shadows := shadows;
 
   bmp.Free;
+  charsbmp.Free;
+  shadowsbmp.Free;
 end;
 
 constructor TMOCR.Create(Owner: TObject);
