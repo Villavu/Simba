@@ -84,8 +84,10 @@ begin
   if UseClient then
     C.MWindow.SetWindow(CliW)
   else
+  begin
     bmp.LoadFromFile(BitmapPath);
-  C.MWindow.SetTarget(bmp);
+    C.MWindow.SetTarget(bmp);
+  end;
 
   Shadow :=FShadow.Checked;
 
@@ -96,7 +98,7 @@ begin
 
   t:=gettickcount;
 
-  s := C.MOCR.GetUpTextAtEx(5, 5, Shadow);
+  s := C.MOCR.GetUpTextAtEx(7, 7, Shadow);
 
   writeln(inttostr(gettickcount-t));
 
