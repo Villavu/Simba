@@ -50,6 +50,15 @@ object Form1: TForm1
     Caption = 'Shadow?'
     TabOrder = 3
   end
+  object ClientButton: TToggleBox
+    Left = 512
+    Height = 23
+    Top = 144
+    Width = 88
+    Caption = 'Set Client'
+    OnMouseDown = SelectClient
+    TabOrder = 4
+  end
   object OCRFileOpen: TOpenDialog
     Filter = '.bmp'
     left = 416

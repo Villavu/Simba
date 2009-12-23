@@ -60,7 +60,6 @@ type
             procedure FreeReturnData;
             procedure GetDimensions(out W, H: Integer);
             function GetDimensionBox(out Box : TBox) : boolean;
-            function CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
             procedure ActivateClient;
             {$IFDEF LINUX}
             function SetTarget(XWindow: x.TWindow): integer; overload;
@@ -431,89 +430,6 @@ begin
   Self.FrozenData := nil;
   Result := True;
   Self.FreezeState:=False;
-end;
-
-//Remove?
-function TMWindow.CopyClientToBitmap(xs, ys, xe, ye: integer): TBitmap;
-var
-   w,h: Integer;
-   ww, hh: Integer;
-   Raw: TRawImage;
-   Bmp: TBitmap;
-   y : integer;
-   TempData : PRGB32;
-   {$IFDEF LINUX}
-   Old_Handler: TXErrorHandler;
-   Img: PXImage;
-   {$ENDIF}
-
-
-begin
-  Self.GetDimensions(w, h);
-  ww := xe-xs;
-  hh := ye-ys;
-  if(xs < 0) or (ys < 0) or (xe >= W) or (ye >= H) then
-    Raise Exception.CreateFMT('CopyClientToBitmap TMWindow: Faulty coordinates (%d,%d)(%d,%d); Width/Height is (%d,%d)',[xs,ys,xe,ye,w,h]);
-  if Self.Frozen then
-  begin;
-    TempData:= GetMem((ww + 1) * (hh + 1) * sizeof(TRGB32));
-    for y := ys to ye do
-      Move(Self.FrozenData[y*Self.FrozenSize.x],TempData[(y-ys) * (ww+1)],(ww+1) * SizeOf(TRGB32));
-    ArrDataToRawImage(TempData,Classes.Point(ww + 1,hh + 1),Raw);
-    Bmp := TBitmap.Create;
-    Bmp.LoadFromRawImage(Raw,true);
-    Result := bmp;
-  end else
-  case Self.TargetMode Of
-     w_Window:
-     begin
-       {$IFDEF MSWINDOWS}
-       Result := TBitmap.Create;
-       Result.SetSize(ww+1,hh+1);
-       BitBlt(result.canvas.handle,0,0,ww+1,hh+1,
-              self.TargetDC,xs,ys, SRCCOPY);
-       {$ENDIF}
-     end;
-     w_XWindow:
-     begin
-       {$IFDEF LINUX}
-       Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
-
-       Img := XGetImage(Self.XDisplay, Self.curWindow, xs, ys, ww+1, hh+1, AllPlanes, ZPixmap);
-       XImageToRawImage(Img, Raw);
-
-       Bmp := TBitmap.Create;
-       Bmp.LoadFromRawImage(Raw, False);
-       Result := Bmp;
-
-       XDestroyImage(Img);
-       XSetErrorHandler(Old_Handler);
-       {$ELSE}
-       raise Exception.createFMT('CopyClientToBitmap: You cannot use ' +
-                                  'the XImage mode on Windows.', []);
-       {$ENDIF}
-     end;
-     w_ArrayPtr:
-     begin
-        TempData:= GetMem((ww + 1) * (hh + 1) * sizeof(trgb32));
-        for y := ys to ye do
-          Move(Self.ArrayPtr[y*Self.ArraySize.x],TempData[(y-ys) * (ww+1)],(ww+1) * SizeOf(TRGB32));
-        ArrDataToRawImage(TempData,Classes.Point(ww+1,hh+1),Raw);
-        Bmp := TBitmap.Create;
-        Bmp.LoadFromRawImage(Raw,true);
-        Result := bmp;
-     end;
-     w_BMP:
-     begin
-        TempData:= GetMem((ww + 1) * (hh + 1) * sizeof(trgb32));
-        for y := ys to ye do
-          Move(TargetBitmap.FData[y*w],TempData[(y-ys) * (ww+1)],(ww+1) * SizeOf(TRGB32));
-        ArrDataToRawImage(TempData,Classes.Point(ww+1,hh+1),Raw);
-        Bmp := TBitmap.Create;
-        Bmp.LoadFromRawImage(Raw,true);
-        Result := bmp;
-     end;
-  end;
 end;
 
 // Set's input focus on Linux, does not mean the window will look `active', but

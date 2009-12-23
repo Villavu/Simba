@@ -79,6 +79,7 @@ type
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
     function Copy: TMufasaBitmap;
+    function ToTBitmap: TBitmap;
     function CreateTMask : TMask;
     constructor Create;
     destructor Destroy;override;
@@ -383,6 +384,18 @@ begin
   Result := TMufasaBitmap.Create;
   Result.SetSize(self.Width, self.Height);
   Move(self.FData[0], Result.FData[0],self.w * self.h * SizeOf(TRGB32));
+end;
+
+function TMufasaBitmap.ToTBitmap: TBitmap;
+
+var
+  tr:TRawImage;
+
+begin
+  Result := TBitmap.Create;
+  Result.SetSize(self.Width, self.Height);
+  ArrDataToRawImage(Self.Fdata, point(self.width,self.height), tr);
+  Result.LoadFromRawImage(tr, false);
 end;
 
 procedure TMufasaBitmap.FastSetPixel(x, y: integer; Color: TColor);
