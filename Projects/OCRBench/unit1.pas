@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, ExtCtrls, Client, MufasaTypes, Bitmaps, ocr;
+  StdCtrls, ExtCtrls, Client, MufasaTypes, Bitmaps, ocr, windowselector,window;
 
 type
 
@@ -19,14 +19,20 @@ type
     OCRButton: TButton;
     Image1: TImage;
     OCRFileOpen: TOpenDialog;
+    ClientButton: TToggleBox;
     UpCharsDialog: TSelectDirectoryDialog;
     procedure BitmapButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure OCRButtonClick(Sender: TObject);
     procedure PathButtonClick(Sender: TObject);
+    procedure SelectClient(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     BitmapPath: String;
     FontPath: String;
+
+    CliW: TMWindow;
+    UseClient: Boolean;
     { private declarations }
   public
     { public declarations }
@@ -52,7 +58,7 @@ Var
    t: dword;
 
 begin
-  if not FileExists(BitmapPath) then
+  if not FileExists(BitmapPath) and not UseClient then
   begin
     MessageBox(0,pchar('You did not set a valid bitmap'), Pchar('Bitmap Error'),
                     MB_OK);
@@ -75,7 +81,10 @@ begin
   // create and init client
   C := TClient.Create;
   bmp := TMufasaBitmap.Create;
-  bmp.LoadFromFile(BitmapPath);
+  if UseClient then
+    C.MWindow.SetWindow(CliW)
+  else
+    bmp.LoadFromFile(BitmapPath);
   C.MWindow.SetTarget(bmp);
 
   Shadow :=FShadow.Checked;
@@ -84,13 +93,13 @@ begin
   // only.
   C.MOCR.InitTOCR(FontPath + DS, Shadow);
 
-  {$IFDEF OCRDEBUG}
+
   t:=gettickcount;
-  {$ENDIF}
-  s := C.MOCR.GetUpTextAtEx(7, 7, Shadow);
-  {$IFDEF OCRDEBUG}
+
+  s := C.MOCR.GetUpTextAtEx(5, 5, Shadow);
+
   writeln(inttostr(gettickcount-t));
-  {$ENDIF}
+
 
   // write to debugbmp
   {$IFDEF OCRDEBUG}
@@ -119,19 +128,36 @@ end;
 procedure TForm1.BitmapButtonClick(Sender: TObject);
 begin
   if OCRFileOpen.Execute then
+  begin
     BitmapPath := OCRFileOpen.FileName;
+    UseClient:=False;
+  end;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  {BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext4.bmp';
-  FontPath := '/home/merlijn/Programs/mufasa/Fonts/';}
+  UseClient := False;
+  {BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext4.bmp'; }
+  FontPath := '/home/merlijn/Programs/mufasa/Fonts/';
 end;
 
 procedure TForm1.PathButtonClick(Sender: TObject);
 begin
   if UpCharsDialog.Execute then
     FontPath := UpCharsDialog.FileName;
+end;
+
+procedure TForm1.SelectClient(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+
+Var
+   WS: TMWindowSelector;
+begin
+  UseClient := True;
+  if not assigned(CliW) then
+    CliW := TMWindow.Create;
+  WS := TMWindowSelector.Create(CliW);
+  CliW.SetTarget(WS.Drag);
 end;
 
 initialization

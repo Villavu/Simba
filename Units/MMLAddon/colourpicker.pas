@@ -30,7 +30,7 @@ interface
 uses
   Classes, SysUtils, LCLIntf,LCLType,InterfaceBase,Forms,Controls,ExtCtrls,
   Graphics,
-  Window,MufasaTypes, colourhistory
+  Window,MufasaTypes, colourhistory,bitmaps
 
   {$IFNDEF PICKER_CLIENT}
     {$IFDEF LINUX}
@@ -105,6 +105,7 @@ var
      OldWindow: HWND;
      {$ENDIF}
    {$ENDIF}
+   bmp: TMufasaBitmap;
 
 begin
   { Disable both of the color pick buttons }
@@ -183,7 +184,10 @@ begin
   ImageMain.OnMouseMove:=@ImageMainMouseMove;
 
   { Copy the client to ImageMain }
-  ImageMain.Picture.Bitmap := Window.CopyClientToBitmap(0, 0, w - 1, h - 1);
+  bmp:=TMufasaBitmap.Create;
+  bmp.CopyClientToBitmap(Window, true, 0, 0, w-1, h-1);
+  ImageMain.Picture.Bitmap := bmp.ToTBitmap;
+  bmp.Free;
 
   { Set up handles and events }
   ImageHandle:= ImageMain.Canvas.Handle;
