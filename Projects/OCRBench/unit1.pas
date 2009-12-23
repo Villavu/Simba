@@ -159,7 +159,7 @@ begin
   if not assigned(CliW) then
     CliW := TMWindow.Create;
   WS := TMWindowSelector.Create(CliW);
-  CliW.SetTarget(WS.Drag);
+  CliW.SetTarget(WS.Drag{$IFDEF WINDOWS},w_Window{$ENDIF});
 end;
 
 initialization
