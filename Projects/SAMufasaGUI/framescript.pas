@@ -100,11 +100,12 @@ end;
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
   State: TDragState; var Accept: Boolean);
 begin
-  Accept := Source = Form1.TreeView1;
+  Accept := Source = Form1.FunctionList;
   if(Accept)then
   begin
     SynEdit.CaretXY := SynEdit.PixelsToLogicalPos(point(x, y));
-    Form1.ActiveControl := SynEdit;
+    if(not(Form1.Active))then Form1.BringToFront;
+    if(Form1.ActiveControl <> SynEdit)then Form1.ActiveControl := SynEdit;
   end;
 end;
 
