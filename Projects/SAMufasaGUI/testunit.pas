@@ -37,7 +37,7 @@ uses
   window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
-  SynEditMiscClasses, LMessages, Buttons,about;
+  SynEditMiscClasses, LMessages, Buttons, PairSplitter,about;
 
 type
 
@@ -179,7 +179,7 @@ type
     ToolButton8: TToolButton;
     TB_Convert: TToolButton;
     MTrayIcon: TTrayIcon;
-    TreeView1: TTreeView;
+    FunctionList: TTreeView;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
@@ -245,9 +245,13 @@ type
     procedure PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure ProcessDebugStream(Sender: TObject);
+    procedure ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject; X,
+      Y: Integer);
+    procedure ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; X,
+      Y: Integer; State: TDragState; var Accept: Boolean);
     procedure ScriptPopupPopup(Sender: TObject);
     procedure SpeedButtonSearchClick(Sender: TObject);
-    procedure TreeView1MouseDown(Sender: TObject; Button: TMouseButton;
+    procedure FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
   private
     PopupTab : integer;
@@ -306,7 +310,8 @@ uses
    syncobjs, // for the critical sections
    debugimage,
    bitmaps,
-   colourhistory;
+   colourhistory,
+   math;
 
 //{$ifdef mswindows}
 
@@ -332,23 +337,63 @@ begin
   end;
 end;
 
+procedure TForm1.ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject;
+  X, Y: Integer);
+begin
+  if(X <= (ScriptPanel.Width div 2))then
+  begin
+    FunctionList.Align := alLeft;
+    PageControl1.Align := alRight;
+  end else begin
+    FunctionList.Align := alRight;
+    PageControl1.Align := alLeft;
+  end;
+  PageControl1.Width := ScriptPanel.Width - (Source.DockRect.Right - Source.DockRect.Left);
+  FunctionList.Width := ScriptPanel.Width - PageControl1.Width;
+  PageControl1.Align := alClient;
+end;
+
+procedure TForm1.ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; //is there a better way to do all of this?
+  X, Y: Integer; State: TDragState; var Accept: Boolean);
+var
+   P: TPoint;
+begin
+  Accept := FunctionList.DragKind = dkDock;
+  if(Accept)then
+  begin
+    P := ScriptPanel.ClientToScreen(Point(0, 0));
+    if(X <= (ScriptPanel.Width div 2))then
+      Source.DockRect := Rect(P.x, P.y, min(P.x + FunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y + ScriptPanel.Height)
+    else
+      Source.DockRect := Rect(max(P.x + ScriptPanel.Width - FunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y, P.x + ScriptPanel.Width, P.y + ScriptPanel.Height);
+  end;
+end;
+
 procedure TForm1.ScriptPopupPopup(Sender: TObject);
 begin
   SetEditActions;
 end;
-
-
 
 procedure TForm1.SpeedButtonSearchClick(Sender: TObject);
 begin
   CloseFindPanel;
 end;
 
-procedure TForm1.TreeView1MouseDown(Sender: TObject; Button: TMouseButton;
+procedure TForm1.FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
+var
+   N: TTreeNode;
 begin
-  if(Button = mbLeft)then
-    TreeView1.BeginDrag(False, 10); //BeginDrag(False, 10);
+  N := FunctionList.GetNodeAt(x, y);
+  if(N = nil)then
+  begin
+    FunctionList.DragKind := dkDock;
+    FunctionList.BeginDrag(false, 40);
+    exit;
+  end;
+  FunctionList.DragKind := dkDrag;
+  if(Button = mbLeft) and (N.Level > 0)then
+    FunctionList.BeginDrag(False, 10);
 end;
 
 procedure formWriteln( S : String);

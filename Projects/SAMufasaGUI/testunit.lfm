@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 446
+  Left = 474
   Height = 557
-  Top = 224
+  Top = 246
   Width = 731
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -217,17 +217,18 @@ object Form1: TForm1
     Width = 731
     Align = alClient
     BevelOuter = bvNone
-    Caption = 'ScriptPanel'
     ClientHeight = 328
     ClientWidth = 731
+    DockSite = True
     TabOrder = 4
+    OnDockDrop = ScriptPanelDockDrop
+    OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
-      Left = 144
+      Left = 139
       Height = 293
       Top = 0
-      Width = 587
-      Align = alRight
-      Anchors = [akTop, akLeft, akRight, akBottom]
+      Width = 592
+      Align = alClient
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
       TabOrder = 0
@@ -371,21 +372,21 @@ object Form1: TForm1
         TabOrder = 1
       end
     end
-    object TreeView1: TTreeView
+    object FunctionList: TTreeView
       Left = 0
       Height = 293
       Top = 0
-      Width = 141
+      Width = 139
       Align = alLeft
       DefaultItemHeight = 19
       ReadOnly = True
       ScrollBars = ssAutoBoth
       TabOrder = 2
-      OnMouseDown = TreeView1MouseDown
+      OnMouseDown = FunctionListMouseDown
       Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
       Items.Data = {
         F9FFFFFF020001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF020000000000
-        00000005000000436F6C6F72FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000
+        00000105000000436F6C6F72FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000
         00000000000900000046696E64436F6C6F72FFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFF00000000000000000008000000476574436F6C6F72
       }
