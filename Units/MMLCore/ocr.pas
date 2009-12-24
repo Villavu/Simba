@@ -28,7 +28,7 @@ unit ocr;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes, bitmaps, math, ocrutil,
+  Classes, SysUtils, MufasaTypes, bitmaps, math, ocrutil, fontloader,
   {Begin To-Remove units. Replace ReadBmp with TMufasaBitmap stuff later.}
   graphtype, intfgraphics,graphics;
   {End To-Remove unit}
@@ -37,9 +37,9 @@ uses
       TMOCR = class(TObject)
              constructor Create(Owner: TObject);
              destructor Destroy; override;
-             function InitTOCR(path: string; shadow: Boolean): boolean;
-             function GetFontIndex(FontName: string): integer;
-             function GetFont(FontName: string): TocrData;
+             function InitTOCR(path: string): boolean;
+             function  GetFonts:TMFonts;
+             procedure SetFonts(NewFonts: TMFonts);
 
              function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
                       var _chars, _shadows: T2DPointArray): Boolean;
@@ -50,14 +50,13 @@ uses
              procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
              procedure FilterShadowBitmap(bmp: TMufasaBitmap);
              procedure FilterCharsBitmap(bmp: TMufasaBitmap);
+
              {$IFDEF OCRDEBUG}
              procedure DebugToBmp(bmp: TMufasaBitmap; hmod,h: integer);
              {$ENDIF}
       private
              Client: TObject;
-             OCRData: TocrDataArray;
-             OCRNames: Array Of String;
-             OCRPath: string;
+             Fonts: TMFonts;
       {$IFDEF OCRDEBUG}
       public
              debugbmp: TMufasaBitmap;
@@ -118,6 +117,56 @@ We can also just split the chars, and then use their shadow.
 
 
 
+constructor TMOCR.Create(Owner: TObject);
+
+var
+   files: TStringArray;
+
+begin
+  inherited Create;
+  Self.Client := Owner;
+  Self.Fonts := TMFonts.Create;
+end;
+
+destructor TMOCR.Destroy;
+
+begin
+
+  Self.Fonts.Free;
+  inherited Destroy;
+end;
+
+function TMOCR.InitTOCR(path: string): boolean;
+var
+   dirs: array of string;
+   i: longint;
+   dir: string;
+begin
+  // We're going to load all fonts now
+  Fonts.SetPath(path);
+  dirs := GetDirectories(path);
+
+  for i := 0 to high(dirs) do
+  begin
+    Fonts.LoadFont(dirs[i], false);
+    {$IFDEF FONTDEBUG}
+    writeln('Loading ' + dirs[i]);
+    {$ENDIF}
+  end;
+  If DirectoryExists(path + 'UpChars') then
+    Fonts.LoadFont('UpChars', true); // shadow
+end;
+
+
+function TMOCR.GetFonts:TMFonts;
+begin
+  Exit(Self.Fonts);
+end;
+
+procedure TMOCR.SetFonts(NewFonts: TMFonts);
+begin
+  Self.Fonts := NewFonts.Copy();
+end;
 
 {
    Non optimised. ;-)
@@ -491,83 +540,6 @@ begin
   shadowsbmp.Free;
 end;
 
-constructor TMOCR.Create(Owner: TObject);
-
-var
-   files: TStringArray;
-
-begin
-  inherited Create;
-  Self.Client := Owner;
-
-  SetLength(OCRData, 0);
-  SetLength(OCRNames, 0);
-end;
-
-destructor TMOCR.Destroy;
-
-begin
-
-  SetLength(OCRData, 0);
-  SetLength(OCRNames, 0);
-  inherited Destroy;
-end;
-
-function TMOCR.InitTOCR(path: string; shadow: boolean): boolean;
-var
-   dirs: array of string;
-   i: longint;
-   dir: string;
-begin
-  { This must be dynamic }
-  writeln(path);
-
-  dirs := GetDirectories(path);
-
-
-  SetLength(OCRData, length(dirs) * 2);
-  SetLength(OCRNames, length(dirs) * 2);
-
-  for i := 0 to high(dirs) do
-  begin
-    OCRData[i] := ocrutil.InitOCR(path + dirs[i] + DS, false);
-    OCRNames[i] := dirs[i];
-    OCRData[i+length(dirs)] := ocrutil.InitOCR(path + dirs[i] + DS, true);
-    OCRNames[i+length(dirs)] := dirs[i] + '_s';
-    {writeln('Loaded Font ' + OCRNames[i]);
-    writeln('Loaded Font ' + OCRNames[i+1]);}
-  end;
-  Result := (length(OCRData) > 0);
-  OCRPath := path;
-end;
-
-function TMOCR.GetFontIndex(FontName: string): integer;
-var
-   i: integer;
-begin
-  if length(OCRNames) <> length(OCRData) then
-    raise Exception.Create('Internal OCR error. Len(OCRData) <> Len(OCRNames)');
-  for i := 0 to high(OCRNames) do
-    if FontName = OCRNames[i] then
-    begin
-      Exit(i);
-    end;
-  raise Exception.Create('Font ' + FontName + ' is not loaded.');
-end;
-
-function TMOCR.GetFont(FontName: string): TocrData;
-var
-   i: integer;
-begin
-  if length(OCRNames) <> length(OCRData) then
-    raise Exception.Create('Internal OCR error. Len(OCRData) <> Len(OCRNames)');
-  for i := 0 to high(OCRNames) do
-    if FontName = OCRNames[i] then
-    begin
-      Exit(OCRData[i]);
-    end;
-  raise Exception.Create('Font ' + FontName + ' is not loaded.');
-end;
 
 function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
 var
@@ -582,13 +554,12 @@ var
 begin
   ww := 400;
   hh := 20;
+
   getTextPointsIn(atX, atY, ww, hh, shadow, chars, shadows);
 
-  // only shadow!
-  //shadow:=true;
   if shadow then
   begin
-    font := GetFont('UpChars_s');
+    font := Fonts.GetFont('UpChars_s');
     thachars := shadows;
     {$IFDEF OCRDEBUG}
     writeln('using shadows');
@@ -596,7 +567,7 @@ begin
   end
   else
   begin
-    font := GetFont('UpChars');
+    font := Fonts.GetFont('UpChars');
     thachars := chars;
     {$IFDEF OCRDEBUG}
     writeln('not using shadows');
@@ -619,6 +590,7 @@ begin
       lbset:=true;
     end else
     begin
+      // spacing
       if b.x1 - lb.x2 > 5 then
         result:=result+' ';
       lb:=b;
