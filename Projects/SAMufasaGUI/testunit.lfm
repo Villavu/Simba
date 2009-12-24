@@ -1,9 +1,9 @@
 object Form1: TForm1
-  Left = 541
+  Left = 474
   Height = 557
-  Top = 276
+  Top = 246
   Width = 732
-  ActiveControl = PageControl1
+  ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
   ClientHeight = 532
   ClientWidth = 732
@@ -224,10 +224,10 @@ object Form1: TForm1
     OnDockDrop = ScriptPanelDockDrop
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
-      Left = 123
+      Left = 118
       Height = 293
       Top = 0
-      Width = 609
+      Width = 614
       Align = alClient
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
@@ -372,34 +372,26 @@ object Form1: TForm1
         TabOrder = 1
       end
     end
-    object FunctionList: TTreeView
-      Left = 0
-      Height = 293
-      Top = 0
-      Width = 118
-      Align = alLeft
-      DefaultItemHeight = 19
-      ReadOnly = True
-      ScrollBars = ssAutoBoth
-      TabOrder = 2
-      Visible = False
-      OnMouseDown = FunctionListMouseDown
-      OnMouseUp = FunctionListMouseUp
-      Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
-      Items.Data = {
-        F9FFFFFF020001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF020000000000
-        00000105000000436F6C6F72FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000
-        00000000000900000046696E64436F6C6F72FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFF00000000000000000008000000476574436F6C6F72
-      }
-    end
     object Splitter1: TSplitter
-      Left = 118
+      Left = 113
       Height = 293
       Top = 0
       Width = 5
       OnCanResize = Splitter1CanResize
       Visible = False
+    end
+    inline frmFunctionList: TFunctionListFrame
+      Height = 293
+      ClientHeight = 293
+      TabOrder = 3
+      Visible = False
+      inherited FunctionList: TTreeView
+        Height = 266
+      end
+      inherited editSearchList: TEdit
+        Top = 266
+        OnExit = nil
+      end
     end
   end
   object MainMenu1: TMainMenu

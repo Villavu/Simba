@@ -37,7 +37,7 @@ uses
   window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
-  SynEditMiscClasses, LMessages, Buttons, PairSplitter,about;
+  SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist;
 
 type
 
@@ -84,6 +84,7 @@ type
     ActionTabNext: TAction;
     ActionList: TActionList;
     CheckBoxMatchCase: TCheckBox;
+    frmFunctionList: TFunctionListFrame;
     LabeledEditSearch: TLabeledEdit;
     Memo1: TMemo;
     MenuFile: TMenuItem;
@@ -181,7 +182,6 @@ type
     ToolButton8: TToolButton;
     TB_Convert: TToolButton;
     MTrayIcon: TTrayIcon;
-    FunctionList: TTreeView;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
@@ -208,8 +208,6 @@ type
     procedure ActionUndoExecute(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
-    procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
     procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure dlgReplaceFind(Sender: TObject);
     procedure dlgReplaceReplace(Sender: TObject);
@@ -256,11 +254,8 @@ type
       Y: Integer; State: TDragState; var Accept: Boolean);
     procedure ScriptPopupPopup(Sender: TObject);
     procedure SpeedButtonSearchClick(Sender: TObject);
-    procedure FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
     procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
-    procedure DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
   private
     PopupTab : integer;
     SearchStart : TPoint;
@@ -350,20 +345,20 @@ procedure TForm1.ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject;
 begin
   if(X <= (ScriptPanel.Width div 2))then
   begin
-    FunctionList.Align := alLeft;
+    frmFunctionList.Align := alLeft;
     PageControl1.Align := alRight;
     Splitter1.ResizeAnchor := akLeft;
     Splitter1.Align := alLeft;
-    Splitter1.Left := FunctionList.Left + FunctionList.Width;
+    Splitter1.Left := frmFunctionList.Left + frmFunctionList.Width;
   end else begin
-    FunctionList.Align := alRight;
+    frmFunctionList.Align := alRight;
     PageControl1.Align := alLeft;
     Splitter1.ResizeAnchor := akRight;
     Splitter1.Align := alRight;
-    Splitter1.Left := FunctionList.Left;
+    Splitter1.Left := frmFunctionList.Left;
   end;
   PageControl1.Width := ScriptPanel.Width - (Source.DockRect.Right - Source.DockRect.Left);
-  FunctionList.Width := ScriptPanel.Width - PageControl1.Width;
+  frmFunctionList.Width := ScriptPanel.Width - PageControl1.Width;
   PageControl1.Align := alClient;
   Splitter1.Show;
 end;
@@ -373,14 +368,14 @@ procedure TForm1.ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; /
 var
    P: TPoint;
 begin
-  Accept := FunctionList.DragKind = dkDock;
+  Accept := frmFunctionList.DragKind = dkDock;
   if(Accept)then
   begin
     P := ScriptPanel.ClientToScreen(Point(0, 0));
     if(X <= (ScriptPanel.Width div 2))then
-      Source.DockRect := Rect(P.x, P.y, min(P.x + FunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y + ScriptPanel.Height)
+      Source.DockRect := Rect(P.x, P.y, min(P.x + frmFunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y + ScriptPanel.Height)
     else
-      Source.DockRect := Rect(max(P.x + ScriptPanel.Width - FunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y, P.x + ScriptPanel.Width, P.y + ScriptPanel.Height);
+      Source.DockRect := Rect(max(P.x + ScriptPanel.Width - frmFunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y, P.x + ScriptPanel.Width, P.y + ScriptPanel.Height);
   end;
 end;
 
@@ -392,23 +387,6 @@ end;
 procedure TForm1.SpeedButtonSearchClick(Sender: TObject);
 begin
   CloseFindPanel;
-end;
-
-procedure TForm1.FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-var
-   N: TTreeNode;
-begin
-  N := FunctionList.GetNodeAt(x, y);
-  if(N = nil)then
-  begin
-    FunctionList.DragKind := dkDock;
-    FunctionList.BeginDrag(false, 40);
-    exit;
-  end;
-  FunctionList.DragKind := dkDrag;
-  if(Button = mbLeft) and (N.Level > 0)then
-    FunctionList.BeginDrag(False, 10);
 end;
 
 procedure TForm1.Splitter1CanResize(Sender: TObject; var NewSize: Integer;
@@ -953,27 +931,6 @@ begin
     CurrScript.SynEdit.SetFocus;
 end;
 
-procedure TForm1.DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  CloseAction := caHide;
-  MenuItemFunctionList.Checked := False;
-end;
-
-procedure TForm1.FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-var
-  F: ^TCustomDockForm;
-begin
-  if(FunctionList.Parent is TCustomDockForm)then
-  begin
-    F := @FunctionList.Parent; //can't typecast parent as a TCustomDockForm
-    F^.Caption := 'Function List';
-    F^.BorderStyle := bsSizeable;
-    F^.OnClose := @DockFormOnClose;
-    Splitter1.Hide;
-  end;
-end;
-
 procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
 begin
   MenuItemColourHistory.Checked := not ColourHistoryForm.Visible;
@@ -1189,16 +1146,16 @@ begin
     Checked := not Checked;
     if(Checked)then
     begin
-      if(FunctionList.Parent is TPanel)then
+      if(frmFunctionList.Parent is TPanel)then
       begin
         Splitter1.Show;
-        FunctionList.Show;
-      end else FunctionList.Parent.Show;
+        frmFunctionList.Show;
+      end else frmFunctionList.Parent.Show;
     end else begin
-      if(FunctionList.Parent is TPanel)then
-        FunctionList.Hide
+      if(frmFunctionList.Parent is TPanel)then
+        frmFunctionList.Hide
       else
-        FunctionList.Parent.Hide;
+        frmFunctionList.Parent.Hide;
       Splitter1.Hide;
     end;
   end;
