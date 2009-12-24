@@ -28,11 +28,13 @@ begin
   setlength(ppdtm.asz,2);
   setlength(ppdtm.ash,2);
 
+  ppdtm.l := 3;//We have 3 points..
   ppdtm.p := p;
   ppdtm.c := c;
   ppdtm.t := t;
   ppdtm.asz := asz;
   ppdtm.ash := ash;
+  ppdtm.n := 'TestDTM';//Our name!
 
   dtm := AddpDTM(ppdtm);
 

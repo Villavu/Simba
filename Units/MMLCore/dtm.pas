@@ -135,7 +135,12 @@ begin
         break;
       end;
       if not b then
-        writeln('DTM Number ' + inttostr(i) + ' was not freed');
+      begin;
+        if DTMList[i].n <> '' then
+          Writeln(Format('DTM [%s] was not freed',[DTMList[i].n]))
+        else
+          writeln(Format('DTM [%d] was not freed',[i]));
+      end;
   end;
   SetLength(DTMList, 0);
   SetLength(FreeSpots, 0);
