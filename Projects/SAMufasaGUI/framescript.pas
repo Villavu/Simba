@@ -100,7 +100,7 @@ end;
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
   State: TDragState; var Accept: Boolean);
 begin
-  Accept := Source = Form1.FunctionList;
+  Accept := Source = Form1.frmFunctionList;
   if(Accept)then
   begin
     SynEdit.CaretXY := SynEdit.PixelsToLogicalPos(point(x, y));

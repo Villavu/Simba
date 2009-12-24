@@ -30,7 +30,8 @@ uses
   cthreads, cmem,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, LResources, testunit,colourhistory, About, internets, debugimage;
+  Forms, LResources, testunit, colourhistory, About, internets, debugimage,
+  framefunctionlist;
 
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 

@@ -3,7 +3,7 @@
 LazarusResources.Add('TScriptFrame','FORMDATA',[
   'TPF0'#12'TScriptFrame'#11'ScriptFrame'#4'Left'#2#0#6'Height'#3'H'#1#3'Top'#2
   +#0#5'Width'#3#141#1#12'ClientHeight'#3'H'#1#11'ClientWidth'#3#141#1#8'TabOrd'
-  +'er'#2#0#10'DesignLeft'#3'C'#2#9'DesignTop'#3#195#0#0#244#8'TSynEdit'#7'SynE'
+  +'er'#2#0#10'DesignLeft'#3#20#3#9'DesignTop'#3#164#1#0#244#8'TSynEdit'#7'SynE'
   +'dit'#4'Left'#2#0#6'Height'#3'H'#1#3'Top'#2#0#5'Width'#3#141#1#5'Align'#7#8
   +'alClient'#11'Font.Height'#2#243#9'Font.Name'#6#11'Courier New'#10'Font.Pitc'
   +'h'#7#7'fpFixed'#12'Font.Quality'#7#16'fqNonAntialiased'#11'ParentColor'#8#10
