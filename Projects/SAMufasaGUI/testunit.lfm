@@ -1,12 +1,12 @@
 object Form1: TForm1
-  Left = 474
+  Left = 541
   Height = 557
-  Top = 246
-  Width = 731
-  ActiveControl = ScriptPanel
+  Top = 276
+  Width = 732
+  ActiveControl = PageControl1
   Caption = 'THA FUKING MUFASA'
   ClientHeight = 532
-  ClientWidth = 731
+  ClientWidth = 732
   KeyPreview = True
   Menu = MainMenu1
   OnClose = FormClose
@@ -20,7 +20,7 @@ object Form1: TForm1
     Left = 0
     Height = 24
     Top = 0
-    Width = 731
+    Width = 732
     Caption = 'ToolBar1'
     Images = Mufasa_Image_List
     ParentShowHint = False
@@ -168,7 +168,7 @@ object Form1: TForm1
     Left = 0
     Height = 21
     Top = 511
-    Width = 731
+    Width = 732
     Panels = <    
       item
         Width = 60
@@ -186,16 +186,16 @@ object Form1: TForm1
     Left = 0
     Height = 154
     Top = 357
-    Width = 731
+    Width = 732
     Align = alBottom
     ClientHeight = 154
-    ClientWidth = 731
+    ClientWidth = 732
     TabOrder = 2
     object Memo1: TMemo
       Left = 1
       Height = 152
       Top = 1
-      Width = 729
+      Width = 730
       Align = alClient
       ScrollBars = ssAutoBoth
       TabOrder = 0
@@ -206,7 +206,7 @@ object Form1: TForm1
     Left = 0
     Height = 5
     Top = 352
-    Width = 731
+    Width = 732
     Align = alBottom
     ResizeAnchor = akBottom
   end
@@ -214,20 +214,20 @@ object Form1: TForm1
     Left = 0
     Height = 328
     Top = 24
-    Width = 731
+    Width = 732
     Align = alClient
     BevelOuter = bvNone
     ClientHeight = 328
-    ClientWidth = 731
+    ClientWidth = 732
     DockSite = True
     TabOrder = 4
     OnDockDrop = ScriptPanelDockDrop
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
-      Left = 139
+      Left = 123
       Height = 293
       Top = 0
-      Width = 592
+      Width = 609
       Align = alClient
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
@@ -245,11 +245,11 @@ object Form1: TForm1
       Left = 0
       Height = 35
       Top = 293
-      Width = 731
+      Width = 732
       Align = alBottom
       BevelOuter = bvSpace
       ClientHeight = 35
-      ClientWidth = 731
+      ClientWidth = 732
       TabOrder = 1
       Visible = False
       object SpeedButtonSearch: TSpeedButton
@@ -376,13 +376,15 @@ object Form1: TForm1
       Left = 0
       Height = 293
       Top = 0
-      Width = 139
+      Width = 118
       Align = alLeft
       DefaultItemHeight = 19
       ReadOnly = True
       ScrollBars = ssAutoBoth
       TabOrder = 2
+      Visible = False
       OnMouseDown = FunctionListMouseDown
+      OnMouseUp = FunctionListMouseUp
       Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
       Items.Data = {
         F9FFFFFF020001000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF020000000000
@@ -390,6 +392,14 @@ object Form1: TForm1
         00000000000900000046696E64436F6C6F72FFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFF00000000000000000008000000476574436F6C6F72
       }
+    end
+    object Splitter1: TSplitter
+      Left = 118
+      Height = 293
+      Top = 0
+      Width = 5
+      OnCanResize = Splitter1CanResize
+      Visible = False
     end
   end
   object MainMenu1: TMainMenu
@@ -1178,6 +1188,10 @@ object Form1: TForm1
       object MenuItemDebugImage: TMenuItem
         Caption = 'View &Debug Image'
         OnClick = MenuItemDebugImageClick
+      end
+      object MenuItemFunctionList: TMenuItem
+        Caption = 'View &Function List'
+        OnClick = MenuItemFunctionListClick
       end
     end
     object MenuHelp: TMenuItem

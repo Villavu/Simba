@@ -89,6 +89,7 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemFunctionList: TMenuItem;
     MenuItemHide: TMenuItem;
     MenuItemDebugImage: TMenuItem;
     MenuItemAbout: TMenuItem;
@@ -132,6 +133,7 @@ type
     SearchPanel: TPanel;
     ScriptPanel: TPanel;
     SpeedButtonSearch: TSpeedButton;
+    Splitter1: TSplitter;
     TabPopup: TPopupMenu;
     TB_SaveAll: TToolButton;
     DebugTimer: TTimer;
@@ -206,6 +208,8 @@ type
     procedure ActionUndoExecute(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
+    procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
     procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure dlgReplaceFind(Sender: TObject);
     procedure dlgReplaceReplace(Sender: TObject);
@@ -227,6 +231,7 @@ type
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
+    procedure MenuItemFunctionListClick(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
     procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
@@ -253,6 +258,9 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer;
+      var Accept: Boolean);
+    procedure DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
   private
     PopupTab : integer;
     SearchStart : TPoint;
@@ -344,13 +352,20 @@ begin
   begin
     FunctionList.Align := alLeft;
     PageControl1.Align := alRight;
+    Splitter1.ResizeAnchor := akLeft;
+    Splitter1.Align := alLeft;
+    Splitter1.Left := FunctionList.Left + FunctionList.Width;
   end else begin
     FunctionList.Align := alRight;
     PageControl1.Align := alLeft;
+    Splitter1.ResizeAnchor := akRight;
+    Splitter1.Align := alRight;
+    Splitter1.Left := FunctionList.Left;
   end;
   PageControl1.Width := ScriptPanel.Width - (Source.DockRect.Right - Source.DockRect.Left);
   FunctionList.Width := ScriptPanel.Width - PageControl1.Width;
   PageControl1.Align := alClient;
+  Splitter1.Show;
 end;
 
 procedure TForm1.ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; //is there a better way to do all of this?
@@ -394,6 +409,13 @@ begin
   FunctionList.DragKind := dkDrag;
   if(Button = mbLeft) and (N.Level > 0)then
     FunctionList.BeginDrag(False, 10);
+end;
+
+procedure TForm1.Splitter1CanResize(Sender: TObject; var NewSize: Integer;
+  var Accept: Boolean);
+begin
+  if(NewSize > ScriptPanel.Width div 2)then
+    NewSize := ScriptPanel.Width div 2
 end;
 
 procedure formWriteln( S : String);
@@ -931,6 +953,27 @@ begin
     CurrScript.SynEdit.SetFocus;
 end;
 
+procedure TForm1.DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  CloseAction := caHide;
+  MenuItemFunctionList.Checked := False;
+end;
+
+procedure TForm1.FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  F: ^TCustomDockForm;
+begin
+  if(FunctionList.Parent is TCustomDockForm)then
+  begin
+    F := @FunctionList.Parent; //can't typecast parent as a TCustomDockForm
+    F^.Caption := 'Function List';
+    F^.BorderStyle := bsSizeable;
+    F^.OnClose := @DockFormOnClose;
+    Splitter1.Hide;
+  end;
+end;
+
 procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
 begin
   MenuItemColourHistory.Checked := not ColourHistoryForm.Visible;
@@ -1137,6 +1180,28 @@ end;
 procedure TForm1.MenuItemTabCloseOthersClick(Sender: TObject);
 begin
   CloseTabs(PopupTab);
+end;
+
+procedure TForm1.MenuItemFunctionListClick(Sender: TObject);
+begin
+  with MenuItemFunctionList do
+  begin
+    Checked := not Checked;
+    if(Checked)then
+    begin
+      if(FunctionList.Parent is TPanel)then
+      begin
+        Splitter1.Show;
+        FunctionList.Show;
+      end else FunctionList.Parent.Show;
+    end else begin
+      if(FunctionList.Parent is TPanel)then
+        FunctionList.Hide
+      else
+        FunctionList.Parent.Hide;
+      Splitter1.Hide;
+    end;
+  end;
 end;
 
 procedure TForm1.OnLinePSScript(Sender: TObject);
