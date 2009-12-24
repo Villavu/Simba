@@ -93,7 +93,8 @@ begin
 
   // DS + .. + DS because InitOCR wants the directory of the Fonts, not UpChars
   // only.
-  C.MOCR.InitTOCR(FontPath + DS, Shadow);
+  C.MOCR.InitTOCR(FontPath + DS);
+  C.MOCR.SetFonts(C.MOCR.GetFonts);
 
 
   t:=gettickcount;

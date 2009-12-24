@@ -37,7 +37,8 @@ uses
   window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
-  SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist;
+  SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
+  ocr;
 
 type
 
@@ -269,6 +270,7 @@ type
     CurrTab    : TMufasaTab; //The current TMufasaTab
     Tabs : TList;
     Window: TMWindow;
+    OCR_Fonts: TMOCR;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
@@ -456,10 +458,17 @@ begin
     // only copies the current set window handle.
     ScriptThread.Client.MWindow.SetWindow(Self.Window);
 
-    // we MUST set the OCR Path
-    writeln(IncludeTrailingPathDelimiter('TestUnit: OCR Path... ' +
-    ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + DS + 'Fonts' + DS);
-    ScriptThread.Client.MOCR.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS, false);
+    // Copy our current fonts
+    if not assigned(Self.OCR_Fonts) then
+    begin
+      Self.OCR_Fonts :=TMOCR.Create(ScriptThread.Client);
+      OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+    end;
+    ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+
+//    writeln(IncludeTrailingPathDelimiter('TestUnit: OCR Path... ' +
+    {ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + DS + 'Fonts' + DS);
+    ScriptThread.Client.MOCR.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS, false);}
 
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;
