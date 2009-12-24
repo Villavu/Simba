@@ -24,6 +24,7 @@ type
   private
     { private declarations }
   public
+    DraggingNode : TTreeNode;
     { public declarations }
   end; 
 
@@ -81,6 +82,7 @@ begin
   Self.DragKind := dkDrag;
   if(Button = mbLeft) and (N.Level > 0)then
     Self.BeginDrag(False, 10);
+  DraggingNode := N;
 end;
 
 procedure TFunctionListFrame.FunctionListMouseUp(Sender: TObject;

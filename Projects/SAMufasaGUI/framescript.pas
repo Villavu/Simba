@@ -77,7 +77,7 @@ type
 
 implementation
 uses
-  TestUnit, SynEditTypes, LCLIntF, StrUtils;
+  TestUnit, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
 
 { TScriptFrame }
 
@@ -94,7 +94,8 @@ end;
 
 procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
-  SynEdit.InsertTextAtCaret('will implement later');
+  if TFunctionListFrame(Source).DraggingNode.Data <> nil then
+    SynEdit.InsertTextAtCaret(PChar(TFunctionListFrame(Source).DraggingNode.Data));
 end;
 
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
