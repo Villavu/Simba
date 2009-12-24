@@ -1156,6 +1156,7 @@ var
   i : integer;
   Index : integer;
   TempNode : TTreeNode;
+  Temp2Node : TTreeNode;
   Tree : TTreeView;
 begin
   Methods := TMMLPSThread.GetExportedMethods;
@@ -1177,7 +1178,8 @@ begin
         Sections.Add(LastSection);
       end;
     end;
-    Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false)).data :=  strnew(PChar(GetMethodName(Methods[i].FuncDecl,true)));
+    Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
+    Temp2Node.Data:= strnew(PChar(GetMethodName(Methods[i].FuncDecl,true)));
   end;
 end;
 
