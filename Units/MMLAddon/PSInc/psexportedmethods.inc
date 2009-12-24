@@ -25,7 +25,7 @@ AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TV
 AddFunction(@psWriteln,'procedure writeln(s : string);');
 
 { DTM }
-
+SetCurrSection('DTM');
 AddFunction(@PrintpDTM, 'Procedure PrintpDTM(tDTM : pDTM);');
 AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer; out dtm: pDTM): Boolean;');
 AddFunction(@pDTMToTDTM, 'Function pDTMToTDTM(Const DTM: pDTM): TDTM;');
@@ -40,7 +40,7 @@ AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
 AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 
 {maths}
-
+SetCurrSection('Math');
 AddFunction(@ceil,'function ceil(e : extended) : integer');
 AddFunction(@power,'function pow(base,exponent : extended) : extended');
 AddFunction(@max,'function Max(a, b: Integer): Integer;');
@@ -54,6 +54,7 @@ AddFunction(@hypot,'function Hypot(X, Y: Extended): Extended;');
 AddFunction(@RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
 
 {window}
+SetCurrSection('Window');
 AddFunction(@Freeze, 'function freeze:boolean;');
 AddFunction(@Unfreeze, 'function unfreeze: boolean;');
 AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(out w, h:integer);');
@@ -63,6 +64,7 @@ AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; Size: TPoint)
 AddFunction(@ActivateClient, 'procedure activateclient;');
 
 {files}
+SetCurrSection('Files');
 AddFunction(@ps_CreateFile, 'function CreateFile(Path: string): Integer;');
 AddFunction(@ps_OpenFile, 'function OpenFile(Path: string; Shared: Boolean): Integer;');
 AddFunction(@ps_RewriteFile, 'function RewriteFile(Path: string; Shared: Boolean): Integer;');
@@ -75,6 +77,7 @@ AddFunction(@ps_SetFileCharPointer, 'Function SetFileCharPointer(FileNum, cChars
 AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Integer;');
 
 {other}
+SetCurrSection('Other');
 AddFunction(@SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
 AddFunction(@psWait, 'procedure wait(t: integer);');
 AddFunction(@psWait, 'procedure Sleep(t: integer);');
@@ -98,6 +101,7 @@ AddFunction(@Capitalize,'function Capitalize(str : string) : string;');
 AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 
 {Color + Color Finders}
+SetCurrSection('Color');
 AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
 AddFunction(@FindColor, 'function findcolor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
 AddFunction(@findcolortoleranceOptimised, 'function findcolortoleranceOptimised(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
@@ -116,6 +120,7 @@ AddFunction(@FindColoredAreaTolerance, 'function FindColoredAreaTolerance(var x,
 AddFunction(@ColorToHSL, 'procedure ColorToHSL(c: integer; out r,g,b: extended);');
 
 {Mouse etc.}
+SetCurrSection('Mouse');
 AddFunction(@MoveMouse, 'procedure MoveMouse(x, y: integer);');
 AddFunction(@GetMousePos, 'procedure GetMousePos(out x, y: integer);');
 AddFunction(@HoldMouse, 'procedure HoldMouse(x, y: integer; clickType: integer);');
@@ -124,6 +129,7 @@ AddFunction(@ClickMouse, 'procedure ClickMouse(x, y: integer; clickType: integer
 
 
 {Keyboard}
+SetCurrSection('Keyboard');
 AddFunction(@KeyDown, 'procedure KeyDown(key: Word);');
 AddFunction(@KeyUp, 'procedure KeyUp(key: Word);');
 AddFunction(@PressKey, 'procedure PressKey(key: Word);');
@@ -132,11 +138,12 @@ AddFunction(@isKeyDown, 'function isKeyDown(key: Word): Boolean;');
 AddFunction(@GetKeyCode, 'function GetKeyCode(Key : char) : byte');
 
 { OCR}
-
+SetCurrSection('OCR');
 AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
 
 
 {Bitmaps}
+SetCurrSection('Bitmaps');
 AddFunction(@GetMufasaBitmap,'function GetMufasaBitmap(bmp : integer) : TMufasaBitmap;');
 AddFunction(@CreateBitmap,'function CreateBitmap(w,h :integer) : integer;');
 AddFunction(@FreeBitmap,'procedure FreeBitmap(Bmp : integer);');
@@ -183,4 +190,5 @@ AddFunction(@DrawATPABitmap,'procedure DrawATPABitmap(bitmap : integer; ATPA : T
 AddFunction(@DrawATPABitmapEx,'procedure DrawATPABitmapEx(bitmap : integer; ATPA : T2DPointArray; Colors : TIntegerArray);');
 
 {tpa}
+SetCurrSection('TPA');
 AddFunction(@SplitTPAEx,'function SplitTPAEx(arr: TPointArray; w, h: Integer): T2DPointArray;');

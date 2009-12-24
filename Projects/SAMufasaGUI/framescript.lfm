@@ -25,6 +25,7 @@ object ScriptFrame: TScriptFrame
     OnDragDrop = SynEditDragDrop
     OnDragOver = SynEditDragOver
     OnKeyDown = SynEditKeyDown
+    BookMarkOptions.OnChange = nil
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
