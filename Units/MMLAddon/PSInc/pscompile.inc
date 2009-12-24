@@ -35,7 +35,8 @@ Sender.Comp.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackH
 Sender.Comp.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
 Sender.Comp.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
 Sender.Comp.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
-Sender.Comp.AddTypeS('pDTM','record p: TPointArray; c, t, asz, ash: TIntegerArray; end;');
+Sender.Comp.AddTypeS('pDTM','record l: Integer;p: TPointArray;c, t, asz, ash: TIntegerArray;n: String; end;');
+
 Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended;');
 Sender.Comp.AddTypeS('TStringArray','Array of string;');
 Sender.Comp.AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
