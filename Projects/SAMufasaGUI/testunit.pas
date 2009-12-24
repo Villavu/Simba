@@ -91,6 +91,8 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuExtra: TMenuItem;
+    MenuitemFillFunctionList: TMenuItem;
     MenuItemFunctionList: TMenuItem;
     MenuItemHide: TMenuItem;
     MenuItemDebugImage: TMenuItem;
@@ -226,6 +228,7 @@ type
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemDebugImageClick(Sender: TObject);
+    procedure MenuitemFillFunctionListClick(Sender: TObject);
     procedure MenuItemHideClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
@@ -1122,6 +1125,60 @@ begin
     DebugImgForm.Show
   else
     DebugImgForm.Hide;
+end;
+
+procedure TForm1.MenuitemFillFunctionListClick(Sender: TObject);
+function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
+var
+  I : integer;
+  ii : integer;
+begin;
+  I := pos(' ',Decl) + 1;
+  for ii := i to Length(decl) do
+  begin;
+    if (Decl[ii] = '(') or (Decl[ii] = ';') then
+    begin;
+      if PlusNextChar then
+        result := result + decl[ii];
+      exit;
+    end;
+    result := result + decl[ii];
+  end;
+  //We made it out of the loop.. This is a method without ';' we might wanne add that!
+  if PlusNextChar then
+    result := result + ';';
+end;
+
+var
+  Methods : TExpMethodArr;
+  LastSection : string;
+  Sections : TStringList;
+  i : integer;
+  Index : integer;
+  TempNode : TTreeNode;
+  Tree : TTreeView;
+begin
+  Methods := TMMLPSThread.GetExportedMethods;
+  Tree := frmFunctionList.FunctionList;
+  Tree.Items.Clear;
+  Sections := TStringList.Create;
+  LastSection := '';
+  for i := 0 to high(Methods) do
+  begin;
+    if Methods[i].Section <> LastSection then
+    begin;
+      LastSection := Methods[i].Section;
+      Index :=  Sections.IndexOf(LastSection);
+      if Index <> -1 then
+        TempNode := Tree.Items.Item[index]
+      else
+      begin
+        TempNode := Tree.Items.Add(nil,LastSection);
+        Sections.Add(LastSection);
+      end;
+    end;
+    Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false)).data :=  strnew(PChar(GetMethodName(Methods[i].FuncDecl,true)));
+  end;
 end;
 
 procedure TForm1.MenuItemHideClick(Sender: TObject);

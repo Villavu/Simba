@@ -52,9 +52,11 @@ type
     TErrorType = (errRuntime,errCompile);
     TOnError = procedure (ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType) of object;
     TExpMethod = record
+      Section : string;
       FuncDecl : string;
       FuncPtr : Pointer;
     end;
+    TExpMethodArr = array of TExpMethod;
 
     TMMLPSThread = class(TThread)
       procedure OnProcessDirective(Sender: TPSPreProcessor;
@@ -80,13 +82,14 @@ type
       procedure OnThreadTerminate(Sender: TObject);
       procedure Execute; override;
     public
-      ExportedMethods : array of TExpMethod;
+      ExportedMethods : TExpMethodArr;
       PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
       Client : TClient;
       StartTime : LongWord;
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       property OnError : TOnError read FOnError write FOnError;
       procedure LoadMethods;
+      class function GetExportedMethods : TExpMethodArr;
       procedure SetPSScript(Script : string);
       procedure SetDebug( writelnProc : TWritelnProc );
       procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
@@ -417,6 +420,12 @@ end;
 procedure TMMLPSThread.LoadMethods;
 var
   c : integer;
+  CurrSection : string;
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
 procedure AddFunction( Ptr : Pointer; DeclStr : String);
 begin;
 //  SetLength(ExportedMethods,c+1);
@@ -424,15 +433,47 @@ begin;
     raise exception.create('PSThread.LoadMethods: Exported more than 200 functions');
   ExportedMethods[c].FuncDecl:= DeclStr;
   ExportedMethods[c].FuncPtr:= Ptr;
+  ExportedMethods[c].Section:= CurrSection;
   inc(c);
 end;
 
 begin
   c := 0;
+  CurrSection := 'Other';
   SetLength(ExportedMethods,200);
   {$i PSInc/psexportedmethods.inc}
 
   SetLength(ExportedMethods,c);
+end;
+
+class function TMMLPSThread.GetExportedMethods: TExpMethodArr;
+var
+  c : integer;
+  CurrSection : string;
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
+procedure AddFunction( Ptr : Pointer; DeclStr : String);
+begin;
+//  SetLength(ExportedMethods,c+1);
+  if c >= 200 then
+    raise exception.create('PSThread.LoadMethods: Exported more than 200 functions');
+  Result[c].FuncDecl:= DeclStr;
+  Result[c].FuncPtr:= Ptr;
+  Result[c].Section:= CurrSection;
+  inc(c);
+end;
+
+begin
+  c := 0;
+  CurrSection := 'Other';
+  SetLength(Result,200);
+  {$i PSInc/psexportedmethods.inc}
+
+  SetLength(Result,c);
+
 end;
 
 procedure TMMLPSThread.SetPSScript(Script: string);
