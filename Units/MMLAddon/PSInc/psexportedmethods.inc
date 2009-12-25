@@ -91,6 +91,7 @@ AddFunction(@HakunaMatata,'procedure HakunaMatata;');
 AddFunction(@TerminateScript,'procedure TerminateScript;');
 AddFunction(@DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w,h : integer);');
 AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp : integer);');
+AddFunction(@GetDebugBitmap,'function GetDebugBitmap : integer;');
 AddFunction(@Random,'function Random(Int : integer): integer;');
 
 

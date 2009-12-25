@@ -110,6 +110,13 @@ begin;
   CurrThread.Synchronize(CurrThread.DebugImg.DrawBitmap);
 end;
 
+function GetDebugBitmap : integer;
+begin;
+  result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
+  CurrThread.DebugImg.GetDebugBitmap^ := CurrThread.Client.MBitmaps.Bmp[result];
+  CurrThread.Synchronize(CurrThread.DebugImg.GetBitmap);
+end;
+
 procedure TerminateScript;
 begin;
   CurrThread.PSScript.Stop;

@@ -123,6 +123,11 @@ procedure TFunctionListFrame.FunctionListMouseDown(Sender: TObject;
 var
    N: TTreeNode;
 begin
+  if InCodeCompletion then
+  begin;
+    Writeln('Not yet implemented');
+    exit;
+  end;
   N := Self.FunctionList.GetNodeAt(x, y);
   if(N = nil)then
   begin
