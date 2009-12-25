@@ -11,11 +11,11 @@ object FunctionListFrame: TFunctionListFrame
   DesignTop = 219
   object FunctionList: TTreeView
     Left = 0
-    Height = 306
+    Height = 300
     Top = 0
     Width = 115
     Align = alClient
-    DefaultItemHeight = 15
+    DefaultItemHeight = 19
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0
@@ -25,12 +25,11 @@ object FunctionListFrame: TFunctionListFrame
   end
   object editSearchList: TEdit
     Left = 0
-    Height = 21
-    Top = 306
+    Height = 27
+    Top = 300
     Width = 115
     Align = alBottom
     OnChange = editSearchListChange
-    OnKeyPress = editSearchListKeyPress
     TabOrder = 1
   end
 end
