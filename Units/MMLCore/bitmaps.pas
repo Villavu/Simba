@@ -436,9 +436,9 @@ begin
   Self.SetSize(RawImage.Description.Width, RawImage.Description.Height);
 
   {writeln(format('Image size: %d, %d', [w,h]));  }
-  rs := RawImage.Description.RedShift;
-  gs := RawImage.Description.GreenShift;
-  bs := RawImage.Description.BlueShift;
+  rs := RawImage.Description.RedShift shr 3;
+  gs := RawImage.Description.GreenShift shr 3;
+  bs := RawImage.Description.BlueShift shr 3;
  { writeln(format('Shifts(R,G,B): %d, %d, %d', [rs,gs,bs]));
   writeln(format('Bits per line %d, expected: %d',
   [RawImage.Description.BitsPerLine, RawImage.Description.BitsPerPixel * self.w]));
@@ -458,15 +458,14 @@ begin
       for x := 0 to self.w -1 do
       begin
         // b is the first byte in the record.
-        data^.b := _24_old_p[round(bs shr 3)];
-        data^.g := _24_old_p[round(gs shr 3)];
-        data^.r := _24_old_p[round(rs shr 3)];
+        data^.b := _24_old_p[bs];
+        data^.g := _24_old_p[gs];
+        data^.r := _24_old_p[rs];
         data^.a := 0;
 
         inc(_24_old_p, 3);
         inc(data);
       end;
-      inc(_24_old_p, 1); // align to dword!
 
       case RawImage.Description.LineEnd of
         rileTight, rileByteBoundary: ; // do nothing
@@ -480,7 +479,7 @@ begin
           while (_24_old_p - RawImage.Data) mod 4 <> 0 do
             inc(_24_old_p);
         rileDQWordBoundary:
-          while (_24_old_p - RawImage.Data) mod 4 <> 0 do
+          while (_24_old_p - RawImage.Data) mod 8 <> 0 do
             inc(_24_old_p);
         end;
     end;
