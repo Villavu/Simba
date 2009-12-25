@@ -15,7 +15,6 @@ type
     editSearchList: TEdit;
     FunctionList: TTreeView;
     procedure editSearchListChange(Sender: TObject);
-    procedure editSearchListKeyPress(Sender: TObject; var Key: char);
     procedure FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
@@ -38,21 +37,13 @@ type
 implementation
 
 uses
-  TestUnit, Graphics,simpleanalyzer;
+  TestUnit, Graphics, simpleanalyzer;
 
 { TFunctionListFrame }
 
 procedure TFunctionListFrame.editSearchListChange(Sender: TObject);
 begin
   Find(false);
-end;
-
-
-
-procedure TFunctionListFrame.editSearchListKeyPress(Sender: TObject;
-  var Key: char);
-begin
-  Writeln('test');
 end;
 
 procedure TFunctionListFrame.DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -71,72 +62,47 @@ begin
   if(editSearchList.Text = '')then
   begin
     editSearchList.Color := clWhite;
-    editSearchList.Repaint;
-    node := FunctionList.Items.GetFirstNode;
-    while node <> nil do
-    begin;
-      node.Expanded:= false;
-      node := Node.GetNext;
-    end;
+    FunctionList.FullCollapse;
     if InCodeCompletion then
     begin;
-      Form1.CurrScript.SynEdit.Lines[ CompletionCaret.y - 1] := CompletionStart;
+      Form1.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
       Form1.CurrScript.SynEdit.LogicalCaretXY:= point(CompletionCaret.x,CompletionCaret.y);
       Form1.CurrScript.SynEdit.SelEnd:= Form1.CurrScript.SynEdit.SelStart;
     end;
     exit;
   end;
-  FoundFunction := false;
+  FoundFunction := False;
   if FunctionList.Selected <> nil then
   begin
-    if next then
-      Start := FunctionList.Selected.AbsoluteIndex + 1
-    else
-      Start := FunctionList.Selected.AbsoluteIndex;
+    Start := FunctionList.Selected.AbsoluteIndex;
+    if(next)then
+      inc(Start);
   end else
     Start := 0;
-  for i := start to FunctionList.Items.Count - 1 do
-  begin
-    Node := FunctionList.Items.Item[i];
-    if Node.Level = 1 then
-      if(pos(lowercase(editSearchList.Text), lowercase(FunctionList.Items[I].Text)) > 0)then
-      begin;
-        FoundFunction := true;
-        index := i;
+  for i := start to start + FunctionList.Items.Count - 1 do
+    if(FunctionList.Items[i mod FunctionList.Items.Count].Level = 1)then
+      if(pos(lowercase(editSearchList.Text), lowercase(FunctionList.Items[i mod FunctionList.Items.Count].Text)) > 0)then
+      begin
+        FoundFunction := True;
+        index := i mod FunctionList.Items.Count;
         break;
       end;
-  end;
-  if not FoundFunction then
-  begin;
-    for i := 0 to start - 1 do
-    begin
-      Node := FunctionList.Items.Item[i];
-      if Node.Level = 1 then
-        if(pos(lowercase(editSearchList.Text), lowercase(FunctionList.Items[I].Text)) > 0)then
-        begin;
-          FoundFunction := true;
-          index := i;
-          break;
-        end;
-    end;
-  end;
   Result := FoundFunction;
 
   if Result then
   begin;
     Writeln(FunctionList.Items[Index].Text);
-    for i := 0 to FunctionList.Items.Count - 1 do
-      FunctionList.Items[i].Expanded:= false;
+    FunctionList.FullCollapse;
     FunctionList.Items[Index].Selected := true;
     FunctionList.Items[index].ExpandParents;
     editSearchList.Color := clWhite;
 
     if InCodeCompletion then
     begin;
-      str :=format(CompletionLine,[ FunctionList.items[index].text]);
+      str := format(CompletionLine, [FunctionList.items[index].text]);
       with Form1.CurrScript.SynEdit do
       begin;
-        Lines[ CompletionCaret.y - 1] := str;
+        Lines[CompletionCaret.y - 1] := str;
         LogicalCaretXY:= StartWordCompletion;
         i := SelStart;
         posi := pos(lowercase(editSearchList.text), lowercase(FunctionList.items[index].text));
@@ -148,9 +114,8 @@ begin
   begin
     editSearchList.Color := 6711039;
     if InCodeCompletion then
-      Form1.CurrScript.SynEdit.Lines[ CompletionCaret.y - 1] := CompletionStart;
+      Form1.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
   end;
-  editSearchList.Repaint;
 end;
 
 procedure TFunctionListFrame.FunctionListMouseDown(Sender: TObject;
