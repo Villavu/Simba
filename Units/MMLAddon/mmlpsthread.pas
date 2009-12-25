@@ -47,6 +47,8 @@ type
       ShowForm : procedure of object;
       ToDrawBitmap : ^TMufasaBitmap;
       DrawBitmap : procedure of object;
+      GetDebugBitmap : ^TMufasaBitmap;
+      GetBitmap : procedure of object;
     end;
     PSyncInfo = ^TSyncInfo;
     TErrorType = (errRuntime,errCompile);
