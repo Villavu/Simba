@@ -180,7 +180,7 @@ end;
 //SkipCoords[y][x] = False/True; True means its "transparent" and therefore not needed to be checked.
 procedure CalculateBitmapSkipCoords(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray);
 var
-  x,y,ww, hh : integer;
+  x,y : integer;
   R,G,B : byte;
   Ptr : PRGB32;
 begin;
@@ -191,10 +191,8 @@ begin;
     ColorToRGB(Bitmap.GetTransparentColor,r,g,b);
   Ptr := Bitmap.FData;
   SetLength(SkipCoords,Bitmap.Height,Bitmap.Width);
-  ww := Bitmap.Width - 1;
-  hh := Bitmap.Height - 1;
-  for y := 0 to hh do
-    for x := 0 to ww do
+  for y := 0 to Bitmap.Height - 1 do
+    for x := 0 to Bitmap.Width - 1 do
     begin;
       if (Ptr^.r = r) and (Ptr^.g = g) and (Ptr^.b = b) then
         SkipCoords[y][x] := True
@@ -206,7 +204,7 @@ end;
 //Points left holds the amount of points that are "left" to be checked (Including the point itself.. So for example Pointsleft[0][0] would hold the total amount of pixels that are to be checked.
 procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray;out TotalPoints : integer; out PointsLeft : T2DIntArray);
 var
-  x,y,ww,hh : integer;
+  x,y : integer;
   R,G,B : byte;
   Ptr : PRGB32;
   TotalC : integer;
@@ -220,10 +218,8 @@ begin;
   Ptr := Bitmap.FData;
   SetLength(SkipCoords,Bitmap.Height,Bitmap.Width);
   SetLength(PointsLeft,Bitmap.Height,Bitmap.Width);
-  ww := Bitmap.Width - 1;
-  hh := Bitmap.Height - 1;
-  for y := 0 to hh do
-    for x := 0 to ww do
+  for y := 0 to Bitmap.Height - 1 do
+    for x := 0 to Bitmap.Width - 1 do
     begin;
       if (Ptr^.r = r) and (Ptr^.g = g) and (Ptr^.b = b) then
         SkipCoords[y][x] := True
@@ -235,8 +231,8 @@ begin;
       inc(ptr);
     end;
   TotalPoints:= TotalC;
-  for y := 0 to hh do
-    for x := 0 to ww do
+  for y := 0 to Bitmap.Height - 1 do
+    for x := 0 to Bitmap.Width - 1 do
     begin;
       PointsLeft[y][x] := TotalC;
       if not SkipCoords[y][x] then
@@ -279,14 +275,11 @@ var
   H1,S1,L1,H2,S2,L2 : extended;
 begin
   Result := False;
-  if Color1 = Color2 then
-  begin
-    Result := true;
-    exit;
-  end;
-
   ColorToRGB(Color1,R1,G1,B1);
   ColorToRGB(Color2,R2,G2,B2);
+  if Color1 = Color2 then
+    Result := true
+  else
   case CTS of
   0: Result := ((Abs(R1-R2) <= Tolerance) and (Abs(G1-G2) <= Tolerance) and (Abs(B1-B2) <= Tolerance));
   1: Result := (Sqrt(sqr(R1-R2) + sqr(G1-G2) + sqr(B1-B2)) <= Tolerance);
@@ -420,6 +413,7 @@ begin
   begin;
     for xx := xs to xe do
     begin;
+      // Colour comparison here. Possibly with tolerance? ;)
       if (Ptr^.R = clR) and (Ptr^.G = clG) and (Ptr^.B = clB) then
         inc(result);
       Inc(Ptr);
