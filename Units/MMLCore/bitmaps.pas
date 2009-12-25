@@ -80,6 +80,8 @@ type
     procedure Posterize(Po : integer);overload;
     function Copy: TMufasaBitmap;
     function ToTBitmap: TBitmap;
+    procedure LoadFromTBitmap(bmp: TBitmap);
+    procedure LoadFromRawImage(RawImage: TRawImage);
     function CreateTMask : TMask;
     constructor Create;
     destructor Destroy;override;
@@ -398,6 +400,102 @@ begin
   Result.LoadFromRawImage(tr, false);
 end;
 
+procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
+
+var
+  x,y,v: integer;
+  _24_old_p: PByte;
+  rs,gs,bs:byte;
+  data: PRGB32;
+
+
+begin
+  // clear data
+  Self.SetSize(0,0);
+
+  if (RawImage.Description.BitsPerPixel <> 24) and (RawImage.Description.BitsPerPixel <> 32) then
+    raise Exception.CreateFMT('TMufasaBitmap.LoadFromRawImage - BitsPerPixel is %d', [RawImage.Description.BitsPerPixel]);
+
+  {writeln('Bits per pixel: ' + Inttostr(RawImage.Description.BitsPerPixel));   }
+  if RawImage.Description.LineOrder <> riloTopToBottom then
+    raise Exception.Create('TMufasaBitmap.LoadFromRawImage - LineOrder is not riloTopToBottom');
+
+ { writeln(format('LineOrder: theirs: %d, ours: %d', [RawImage.Description.LineOrder, riloTopToBottom]));  }
+
+
+ // Todo, add support for other alignments.
+ { if RawImage.Description.LineEnd <> rileDWordBoundary then
+    raise Exception.Create('TMufasaBitmap.LoadFromRawImage - LineEnd is not rileDWordBoundary');         }
+
+  //writeln(format('LineEnd: t', [RawImage.Description.LineEnd]));
+
+  if RawImage.Description.Format<>ricfRGBA then
+    raise Exception.Create('TMufasaBitmap.LoadFromRawImage - Format is not ricfRGBA');
+
+  // Set w,h and alloc mem.
+  Self.SetSize(RawImage.Description.Width, RawImage.Description.Height);
+
+  {writeln(format('Image size: %d, %d', [w,h]));  }
+  rs := RawImage.Description.RedShift;
+  gs := RawImage.Description.GreenShift;
+  bs := RawImage.Description.BlueShift;
+ { writeln(format('Shifts(R,G,B): %d, %d, %d', [rs,gs,bs]));
+  writeln(format('Bits per line %d, expected: %d',
+  [RawImage.Description.BitsPerLine, RawImage.Description.BitsPerPixel * self.w]));
+  }
+
+
+  if RawImage.Description.BitsPerPixel = 32 then
+    Move(RawImage.Data[0], Self.FData[0],  self.w * self.h * SizeOf(TRGB32))
+  else
+  begin
+    //FillChar(Self.FData[0], self.w * self.h * SizeOf(TRGB32), 0);
+    data := self.FData;
+
+    _24_old_p := RawImage.Data;
+    for y := 0 to self.h -1 do
+    begin
+      for x := 0 to self.w -1 do
+      begin
+        // b is the first byte in the record.
+        data^.b := _24_old_p[round(bs shr 3)];
+        data^.g := _24_old_p[round(gs shr 3)];
+        data^.r := _24_old_p[round(rs shr 3)];
+        data^.a := 0;
+
+        inc(_24_old_p, 3);
+        inc(data);
+      end;
+      inc(_24_old_p, 1); // align to dword!
+
+      case RawImage.Description.LineEnd of
+        rileTight, rileByteBoundary: ; // do nothing
+        rileWordBoundary:
+          while (_24_old_p - RawImage.Data) mod 2 <> 0 do
+            inc(_24_old_p);
+        rileDWordBoundary:
+          while (_24_old_p - RawImage.Data) mod 4 <> 0 do
+            inc(_24_old_p);
+        rileQWordBoundary:
+          while (_24_old_p - RawImage.Data) mod 4 <> 0 do
+            inc(_24_old_p);
+        rileDQWordBoundary:
+          while (_24_old_p - RawImage.Data) mod 4 <> 0 do
+            inc(_24_old_p);
+        end;
+    end;
+  end;
+  writeln('done');
+end;
+
+procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);
+
+begin
+  bmp.BeginUpdate();
+  LoadFromRawImage(bmp.RawImage);
+  bmp.EndUpdate();
+end;
+
 procedure TMufasaBitmap.FastSetPixel(x, y: integer; Color: TColor);
 begin
   ValidatePoint(x,y);
@@ -552,14 +650,10 @@ var
 begin
   if Resize then
     Self.SetSize(xe-xs+1,ye-ys+1);
- { writeln('self: ' + inttostr(self.w) + ', ' + inttostr(self.h));
-  writeln('end - start + 1: ' + inttostr(xe-xs + 1) + ', ' + inttostr(ye-ys + 1));}
+
   wi := Min(xe-xs + 1,Self.w);
   hi := Min(ye-ys + 1,Self.h);
- { if wi <> xe - xs + 1 then
-    writeln('WAT x');
-  if hi <> ye - ys + 1 then
-    writeln('WAT y');  }
+
   PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi,hi);
 
   for y := 0 to (hi-1) do
@@ -576,6 +670,7 @@ var
 begin
   if Resize then
     Self.SetSize(xe-xs+1 + x,ye-ys+1 + y);
+
   wi := Min(xe-xs + 1 + x,Self.w);
   hi := Min(ye-ys + 1 + y,Self.h);
   PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi - x,hi - y);
@@ -995,10 +1090,11 @@ constructor TMufasaBitmap.Create;
 begin
   inherited Create;
   BmpName:= '';
-  FData:= nil;
   TransparentSet:= False;
+  setSize(0,0);
+  {FData:= nil;
   w := 0;
-  h := 0;
+  h := 0; }
 end;
 
 destructor TMufasaBitmap.Destroy;
