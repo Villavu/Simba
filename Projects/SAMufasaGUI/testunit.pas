@@ -575,7 +575,9 @@ begin
     if OldIndex > TabIndex then
       PageControl1.TabIndex := OldIndex - 1
     else if OldIndex < TabIndex then
-      PageControl1.TabIndex := OldIndex;
+      PageControl1.TabIndex := OldIndex
+    else
+      PageControl1.TabIndex:= TabIndex;
   end;
   if tabs.count <= 1 then
   begin;
