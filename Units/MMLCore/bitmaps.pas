@@ -173,6 +173,7 @@ function TMBitmaps.CreateMirroredBitmap(bitmap: Integer;
 var
   w,h : integer;
   y,x : integer;
+  f1, f2: Integer;
   Source,Dest : PRGB32;
 begin
   Source := Bmp[Bitmap].FData;
@@ -184,15 +185,28 @@ begin
     Result := CreateBMP(w,h);
   Dest := BmpArray[Result].FData;
   case MirrorStyle of
-    MirrorWidth :  for y := (h-1) downto 0 do
-                     for x := (w-1) downto 0 do
-                       Dest[y*w+x] := Source[y*w+w-1-x];
-    MirrorHeight : for y := (h-1) downto 0 do
-                    Move(Source[y*w],Dest[(h-1 - y) * w],w*SizeOf(TRGB32));
-    MirrorLine :  for y := (h-1) downto 0 do
-                     for x := (w-1) downto 0 do
-                       Dest[x*h+y] := Source[y*w+x];
-
+    MirrorWidth :
+      begin
+        f1 := w*h;
+        f2 := f1 + w - 1;
+        for y := (h-1) downto 0 do
+          for x := (w-1) downto 0 do
+            Dest[f1+x] := Source[f2-x];
+      end;
+    MirrorHeight :
+      begin
+        f1 := h - 1;
+        for y := f1 downto 0 do               // Does SizeOf(TRGB32) Change?
+          Move(Source[y*w], Dest[(f1 - y) * w], w*SizeOf(TRGB32));
+      end;
+    MirrorLine :
+      begin
+        f1 := h-1;
+        f2 := w-1;
+        for y := f1 downto 0 do
+          for x := f2 downto 0 do
+            Dest[x*h+y] := Source[y*w+x];
+      end;
   end;
 //Can be optmized, this is just proof of concept
 end;
@@ -502,7 +516,7 @@ begin
   begin;
     for i := (w-1) downto 0 do
       FData[i] := Rec;
-    for i := (h-1) downto 1 do
+    for i := (h-1) downto 1 do         // does SizeOf(TRGB32) Change?
       Move(FData[0],FData[i*w],w*SizeOf(TRGB32));
   end;
 end;
@@ -535,11 +549,12 @@ end;
 procedure TMufasaBitmap.FastReplaceColor(OldColor, NewColor: TColor);
 var
   OldCol,NewCol : TRGB32;
-  i : integer;
+  i, wh : integer;
 begin
   OldCol := RGBToBGR(OldColor);
   NewCol := RGBToBGR(NewColor);
-  for i := w*h-1 downto 0 do
+  wh := w*h-1;
+  for i := wh downto 0 do
     if LongWord(FData[i]) = LongWord(OldCol) then
       FData[i] := NewCol;
 end;
@@ -547,7 +562,7 @@ end;
 procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);
 var
   y : integer;
-  wi,hi : integer;
+  wi, hi, hh : integer;
   PtrRet : TRetData;
 begin
   if Resize then
@@ -562,7 +577,8 @@ begin
     writeln('WAT y');  }
   PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi,hi);
 
-  for y := 0 to (hi-1) do
+  hh := hi-1;
+  for y := 0 to hh do
     Move(PtrRet.Ptr[y * (wi + PtrRet.IncPtrWith)], FData[y * self.w],wi * SizeOf(TRGB32));
   TMWindow(MWindow).FreeReturnData;
 end;
@@ -571,7 +587,7 @@ procedure TMufasaBitmap.CopyClientToBitmap(MWindow: TObject; Resize: boolean;
   x, y: integer; xs, ys, xe, ye: Integer);
 var
   yy : integer;
-  wi,hi : integer;
+  wi,hi,hh : integer;
   PtrRet : TRetData;
 begin
   if Resize then
@@ -580,7 +596,8 @@ begin
   hi := Min(ye-ys + 1 + y,Self.h);
   PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi - x,hi - y);
 
-  for yy := 0 to (hi-1 - y) do
+  hh := hi-1-y;
+  for yy := 0 to hh do
     Move(PtrRet.Ptr[yy * (wi - x + PtrRet.IncPtrWith)], FData[(yy + y) * self.w + x],wi * SizeOf(TRGB32));
   TMWindow(MWindow).FreeReturnData;
 end;
@@ -600,7 +617,7 @@ var
   CosAngle,SinAngle : extended;
   MinX,MinY,MaxX,MaxY : integer;
   i : integer;
-  x,y : integer;
+  x,y,hm1, wm1, yy, xx : integer;
   OldX,OldY : integer;
   MiddlePoint : TPoint;
   NewCorners : array[1..4] of TPoint; //(xs,ye);(xe,ye);(xe,ys);(xs,ys)
@@ -612,9 +629,11 @@ begin
   MinY := MaxInt;
   MaxX := 0;
   MaxY := 0;
-  NewCorners[1]:= RotatePointEdited(Point(0,h-1),angle,middlepoint.x,middlepoint.y);
-  NewCorners[2]:= RotatePointEdited(Point(w-1,h-1),angle,middlepoint.x,middlepoint.y);
-  NewCorners[3]:= RotatePointEdited(Point(w-1,0),angle,middlepoint.x,middlepoint.y);
+  hm1 := h-1;
+  wm1 := w-1;
+  NewCorners[1]:= RotatePointEdited(Point(0,hm1),angle,middlepoint.x,middlepoint.y);
+  NewCorners[2]:= RotatePointEdited(Point(wm1,hm1),angle,middlepoint.x,middlepoint.y);
+  NewCorners[3]:= RotatePointEdited(Point(wm1,0),angle,middlepoint.x,middlepoint.y);
   NewCorners[4]:= RotatePointEdited(Point(0,0),angle,middlepoint.x,middlepoint.y);
   for i := 1 to 4 do
   begin;
@@ -632,11 +651,15 @@ begin
   NewH := MaxY - MinY+1;
   Writeln(format('New bounds: %d,%d',[NewW,NewH]));
   TargetBitmap.SetSize(NewW,NewH);
-  for y := NewH - 1 downto 0 do
-    for x := NewW - 1 downto 0 do
+  hm1 := NewH-1;
+  wm1 := NewW-1;
+  xx := MinX-MiddlePoint.x;
+  yy := MinY-MiddlePoint.y;
+  for y := hm1 downto 0 do
+    for x := wm1 downto 0 do
     begin;
-      Oldx := Round(MiddlePoint.x + CosAngle * (x + MinX-MiddlePoint.x) - SinAngle * (y + MinY - MiddlePoint.y));
-      Oldy := Round(MiddlePoint.y + SinAngle * (x + MinX-MiddlePoint.x) + CosAngle * (y + MinY-MiddlePoint.y));
+      Oldx := Round(MiddlePoint.x + CosAngle * (x + xx) - SinAngle * (y + yy));
+      Oldy := Round(MiddlePoint.y + SinAngle * (x + xx) + CosAngle * (y + yy));
       if not ((Oldx <0) or (Oldx >= w) or (Oldy < 0) or (Oldy >= h)) then
         TargetBitmap.FData[ y * NewW + x] := Self.FData[OldY * W + OldX];
     end;
@@ -644,12 +667,13 @@ end;
 
 procedure TMufasaBitmap.Desaturate;
 var
-  I : integer;
+  I, HH : integer;
   He,Se,Le : extended;
   Ptr : PRGB32;
 begin
   Ptr := FData;
-  for i := (h*w-1) downto 0 do
+  HH := h*w-1;
+  for i := HH downto 0 do
   begin;
     RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,He,Se,Le);
     HSLtoRGB(He,0.0,Le,Ptr^.R,Ptr^.G,Ptr^.B);
@@ -659,14 +683,15 @@ end;
 
 procedure TMufasaBitmap.Desaturate(TargetBitmap: TMufasaBitmap);
 var
-  I : integer;
+  I,HH : integer;
   He,Se,Le : extended;
   PtrOld,PtrNew : PRGB32;
 begin
   TargetBitmap.SetSize(w,h);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  HH := w*h-1;
+  for i := HH downto 0 do
   begin;
     RGBToHSL(PtrOld^.R,PtrOld^.G,PtrOld^.B,He,Se,Le);
     HSLtoRGB(He,0.0,Le,PtrNew^.R,PtrNew^.G,PtrNew^.B);
@@ -677,14 +702,15 @@ end;
 
 procedure TMufasaBitmap.GreyScale(TargetBitmap: TMufasaBitmap);
 var
-  I : integer;
+  I, HH : integer;
   Lum : byte;
   PtrOld,PtrNew : PRGB32;
 begin
   TargetBitmap.SetSize(w,h);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  HH := h*w-1;
+  for i := HH downto 0 do
   begin;
     Lum := Round(PtrOld^.r * 0.3 + PtrOld^.g * 0.59 + PtrOld^.b * 0.11);
     PtrNew^.r := Lum;
@@ -697,12 +723,13 @@ end;
 
 procedure TMufasaBitmap.GreyScale;
 var
-  I : integer;
+  I, HH : integer;
   Lum : Byte;
   Ptr: PRGB32;
 begin
   Ptr := Self.FData;
-  for i := (h*w-1) downto 0 do
+  HH := h*w-1;
+  for i := HH downto 0 do
   begin;
     Lum := Round(Ptr^.r * 0.3 + Ptr^.g * 0.59 + Ptr^.b * 0.11);
     Ptr^.r := Lum;
@@ -725,11 +752,12 @@ begin;
 end;
 procedure TMufasaBitmap.Brightness(br: integer);
 var
-  I : integer;
+  I, hh : integer;
   Ptr: PRGB32;
 begin
   Ptr := Self.FData;
-  for i := (h*w-1) downto 0 do
+  hh := h*w-1;
+  for i := hh downto 0 do
   begin;
     Ptr^.r := BrigthnessAdjust(Ptr^.r,br);
     Ptr^.g := BrigthnessAdjust(Ptr^.g,br);
@@ -740,13 +768,14 @@ end;
 
 procedure TMufasaBitmap.Brightness(TargetBitmap: TMufasaBitmap; br: integer);
 var
-  I : integer;
+  I, hh: integer;
   PtrOld,PtrNew : PRGB32;
 begin
   TargetBitmap.SetSize(w,h);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  hh := h*w-1;
+  for i := hh downto 0 do
   begin;
     PtrNew^.r := BrigthnessAdjust(PtrOld^.r,br);
     PtrNew^.g := BrigthnessAdjust(PtrOld^.g,br);
@@ -772,11 +801,12 @@ end;
 
 procedure TMufasaBitmap.Contrast(co: Extended);
 var
-  I : integer;
+  I, hh: integer;
   Ptr: PRGB32;
 begin
   Ptr := Self.FData;
-  for i := (h*w-1) downto 0 do
+  hh := h*w-1;
+  for i := hh downto 0 do
   begin;
     Ptr^.r := ContrastAdjust(Ptr^.r,co);
     Ptr^.g := ContrastAdjust(Ptr^.g,co);
@@ -787,13 +817,14 @@ end;
 
 procedure TMufasaBitmap.Contrast(TargetBitmap: TMufasaBitmap; co: Extended);
 var
-  I : integer;
+  I,hh: integer;
   PtrOld,PtrNew : PRGB32;
 begin
   TargetBitmap.SetSize(w,h);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  hh := h*w-1;
+  for i := hh downto 0 do
   begin;
     PtrNew^.r := ContrastAdjust(PtrOld^.r,co);
     PtrNew^.g := ContrastAdjust(PtrOld^.g,co);
@@ -805,9 +836,10 @@ end;
 
 procedure TMufasaBitmap.Invert;
 var
-  i : integer;
+  i, hh : integer;
 begin
-  for i := (h*w-1) downto 0 do
+  hh := h*w-1;
+  for i := hh downto 0 do
   begin;
     Self.FData[i].r := not Self.FData[i].r;
     Self.FData[i].g := not Self.FData[i].g;
@@ -817,7 +849,7 @@ end;
 
 procedure TMufasaBitmap.Posterize(TargetBitmap: TMufasaBitmap; Po: integer);
 var
-  I : integer;
+  I,hh : integer;
   PtrOld,PtrNew : PRGB32;
 begin
   if not InRange(Po,1,255) then
@@ -825,7 +857,8 @@ begin
   TargetBitmap.SetSize(w,h);
   PtrOld := Self.FData;
   PtrNew := TargetBitmap.FData;
-  for i := (h*w-1) downto 0 do
+  hh := w*h-1;
+  for i := hh downto 0 do
   begin;
     PtrNew^.r := min(Round(PtrOld^.r / po) * Po, 255);
     PtrNew^.g := min(Round(PtrOld^.g / po) * Po, 255);
@@ -837,21 +870,22 @@ end;
 
 procedure TMufasaBitmap.Posterize(Po: integer);
 var
-  I : integer;
+  I,hh: integer;
   Ptr: PRGB32;
   {a:integer; }
 begin
   if not InRange(Po,1,255) then
     Raise exception.CreateFmt('Posterize Po(%d) out of range[1,255]',[Po]);
   Ptr := Self.FData;
-  for i := (h*w-1) downto 0 do
+  hh := w*h-1;
+  for i := hh downto 0 do
   begin;
    { a := round(ptr^.r / po);
     a := a * po;
     ptr^.r := min(a,255);
     a := round(ptr^.g / po);
     a := a * po;
-    ptr^.g := min(a,255);
+    ptr^.g := min(a,255);     // bit redundant math, aye?
     a := round(ptr^.b / po);
     a := a * po;
     ptr^.b := min(a,255);      }
