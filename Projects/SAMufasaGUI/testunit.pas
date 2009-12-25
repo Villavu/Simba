@@ -456,6 +456,8 @@ begin
     DbgImgInfo.ShowForm := @DebugImgForm.ShowDebugImgForm;
     DbgImgInfo.ToDrawBitmap:= @DebugImgForm.ToDrawBmp;
     DbgImgInfo.DrawBitmap:= @DebugImgForm.DrawBitmap;
+    DbgImgInfo.GetDebugBitmap:= @DebugImgForm.GetDbgBmp;
+    DbgImgInfo.GetBitmap:= @DebugImgForm.GetDebugImage;
     ScriptThread.SetDbgImg(DbgImgInfo);
 
     ScriptThread.OnError:=@ErrorThread;

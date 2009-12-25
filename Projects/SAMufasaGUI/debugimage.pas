@@ -44,9 +44,10 @@ type
   public
     DispSize : TPoint;
     ToDrawBmp: TMufasaBitmap;//The bitmap we should draw!
+    GetDbgBmp : TMufasaBitmap;
     procedure BlackDebugImage;
     procedure DrawBitmap;
-    procedure GetDebugImage(out bmp : TMufasaBitmap);
+    procedure GetDebugImage;
     procedure ShowDebugImgForm; //Uses the global var for w/h
     { public declarations }
   end;
@@ -99,12 +100,9 @@ begin
   Bitmap.Free;
 end;
 
-procedure TDebugImgForm.GetDebugImage(out bmp: TMufasaBitmap);
+procedure TDebugImgForm.GetDebugImage;
 begin;
-  DrawImage.Picture.SaveToFile(MainDir + DS + 'stupidwayofdoingthis.bmp');
-  bmp := TMufasaBitmap.Create;
-  bmp.LoadFromFile(MainDir + DS + 'stupidwayofdoingthis.bmp');
-  DeleteFile(MainDir + DS + 'stupidwayofdoingthis.bmp');
+  GetDbgBmp.LoadFromRawImage(DrawImage.Picture.Bitmap.RawImage);
 end;
 
 procedure TDebugImgForm.ShowDebugImgForm;
