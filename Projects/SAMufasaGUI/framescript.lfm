@@ -6,7 +6,7 @@ object ScriptFrame: TScriptFrame
   ClientHeight = 328
   ClientWidth = 397
   TabOrder = 0
-  DesignLeft = 788
+  DesignLeft = 159
   DesignTop = 420
   inline SynEdit: TSynEdit
     Left = 0
@@ -595,6 +595,7 @@ object ScriptFrame: TScriptFrame
     BracketHighlightStyle = sbhsBoth
     OnChange = SynEditChange
     OnProcessCommand = SynEditProcessCommand
+    OnProcessUserCommand = SynEditProcessUserCommand
     OnSpecialLineColors = SynEditSpecialLineColors
     inline TSynGutterPartList
       object TSynGutterMarks

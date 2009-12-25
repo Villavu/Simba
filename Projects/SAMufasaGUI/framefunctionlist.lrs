@@ -11,6 +11,6 @@ LazarusResources.Add('TFunctionListFrame','FORMDATA',[
   +'oAutoItemHeight'#16'tvoHideSelection'#21'tvoKeepCollapsedNodes'#11'tvoReadO'
   +'nly'#14'tvoShowButtons'#12'tvoShowLines'#11'tvoShowRoot'#11'tvoToolTips'#0#0
   +#0#5'TEdit'#14'editSearchList'#4'Left'#2#0#6'Height'#2#21#3'Top'#3'2'#1#5'Wi'
-  +'dth'#2's'#5'Align'#7#8'alBottom'#8'OnChange'#7#20'editSearchListChange'#6'O'
-  +'nExit'#7#18'editSearchListExit'#8'TabOrder'#2#1#0#0#0
+  +'dth'#2's'#5'Align'#7#8'alBottom'#8'OnChange'#7#20'editSearchListChange'#10
+  +'OnKeyPress'#7#22'editSearchListKeyPress'#8'TabOrder'#2#1#0#0#0
 ]);

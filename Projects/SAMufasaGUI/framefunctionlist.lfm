@@ -30,7 +30,7 @@ object FunctionListFrame: TFunctionListFrame
     Width = 115
     Align = alBottom
     OnChange = editSearchListChange
-    OnExit = editSearchListExit
+    OnKeyPress = editSearchListKeyPress
     TabOrder = 1
   end
 end
