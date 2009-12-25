@@ -29,7 +29,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,   SynEditMarkupHighAll,
    mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType, SynEditMarkupSpecialLine, Graphics, Controls;
-
+const
+   ecCodeCompletion = ecUserFirst;
 type
   TScriptState = (ss_None,ss_Running,ss_Paused,ss_Stopping);
   {
@@ -50,6 +51,8 @@ type
     procedure SynEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
       );
     procedure SynEditProcessCommand(Sender: TObject;
+      var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+    procedure SynEditProcessUserCommand(Sender: TObject;
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure SynEditSpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
@@ -95,7 +98,7 @@ end;
 procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
   if TFunctionListFrame(Source).DraggingNode.Data <> nil then
-    SynEdit.InsertTextAtCaret(PChar(TFunctionListFrame(Source).DraggingNode.Data));
+    SynEdit.InsertTextAtCaret( GetMethodName(PChar(TFunctionListFrame(Source).DraggingNode.Data),true));
 end;
 
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
@@ -132,6 +135,54 @@ begin
   begin;
     Command := ecNone;
     Self.Redo;
+  end;
+end;
+
+procedure TScriptFrame.SynEditProcessUserCommand(Sender: TObject;
+  var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+var
+  LineText,SearchText : string;
+  Caret : TPoint;
+  i,endI : integer;
+begin
+  if Command = ecCodeCompletion then
+  begin
+    form1.FunctionListShown(True);
+    with form1.frmFunctionList do
+      if editSearchList.CanFocus then
+      begin;
+        editSearchList.SetFocus;
+        LineText := SynEdit.LineText;
+        Caret:=SynEdit.LogicalCaretXY;
+        i := Caret.X - 1;
+        endi := caret.x;
+        if (i > length(LineText)) or ((i = 0) and (length(lineText) = 0)) then
+        begin
+          SearchText:= '';
+          CompletionLine := PadRight(linetext,caret.x);
+        end
+        else begin
+          while (i > 0) and (LineText[i] in ['a'..'z','A'..'Z','0'..'9','_']) do
+            dec(i);
+          while LineText[endi] in ['a'..'z','A'..'Z','0'..'9','_'] do
+            inc(endi);
+          SearchText := Trim(copy(LineText, i + 1, Caret.X - i - 1));
+          CompletionLine := LineText;
+        end;
+        CompletionStart:= LineText;
+        Delete(CompletionLine,i+1,endi - i - 1);
+        Insert('%s',CompletionLine,i+1);
+        CompletionCaret := Point(endi,Caret.y);
+        StartWordCompletion:= Point(i+1,caret.y);
+        Writeln(CompletionLine);
+        Writeln(CompletionStart);
+        InCodeCompletion := true;
+        editSearchList.Text:= SearchText;
+        editSearchList.SelStart:= Length(searchText);
+        SynEdit.SelectedColor.Style:= [fsUnderline];
+        SynEdit.SelectedColor.Foreground:= clBlack;
+        SynEdit.SelectedColor.Background:= clWhite;
+      end;
   end;
 end;
 
@@ -201,7 +252,15 @@ begin
   FScriptState:= ss_None;
   Form1.RefreshTab;
 end;
-
+procedure AddKey(const SynEdit : TSynEdit; const ACmd: TSynEditorCommand; const AKey: word;const AShift: TShiftState);
+begin
+  with SynEdit.KeyStrokes.Add do
+  begin
+    Key := AKey;
+    Shift := AShift;
+    Command := ACmd;
+  end;
+end;
 constructor TScriptFrame.Create(TheOwner: TComponent);
 var
   MarkCaret : TSynEditMarkupHighlightAllCaret;
@@ -233,6 +292,7 @@ begin
     MarkCaret.WaitTime := 1500;
     MarkCaret.IgnoreKeywords := true;
   end;
+  AddKey(SynEdit,ecCodeCompletion,VK_SPACE,[ssCtrl]);
 end;
 
 destructor TScriptFrame.Destroy;
