@@ -211,6 +211,10 @@ type
     procedure ActionUndoExecute(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
+    procedure editSearchListExit(Sender: TObject);
+    procedure editSearchListKeyPress(Sender: TObject; var Key: char);
+    procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
+    procedure FunctionListExit(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure dlgReplaceFind(Sender: TObject);
     procedure dlgReplaceReplace(Sender: TObject);
@@ -276,6 +280,7 @@ type
     OCR_Fonts: TMOCR;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
+    procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
     function OpenScript : boolean;
@@ -297,6 +302,7 @@ type
   end;
 
   procedure formWriteln( S : String);
+  function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
 
 const
   // Rip Mufasa -> Simba ftw
@@ -319,6 +325,7 @@ uses
    debugimage,
    bitmaps,
    colourhistory,
+   simpleanalyzer,
    math;
 
 //{$ifdef mswindows}
@@ -805,9 +812,16 @@ end;
 
 procedure TForm1.ActionFindstartExecute(Sender: TObject);
 begin
-  SearchPanel.Visible:= true;
-  if LabeledEditSearch.CanFocus then
-    LabeledEditSearch.SetFocus;
+  if frmFunctionList.Focused or frmFunctionList.FunctionList.Focused or frmFunctionList.editSearchList.Focused then
+  begin
+    if frmFunctionList.editSearchList.CanFocus then
+      frmFunctionList.editSearchList.SetFocus;
+  end else
+  begin
+    SearchPanel.Visible:= true;
+    if LabeledEditSearch.CanFocus then
+      LabeledEditSearch.SetFocus;
+  end;
 end;
 
 procedure TForm1.ActionClearDebugExecute(Sender: TObject);
@@ -942,6 +956,60 @@ begin
   if CurrScript.SynEdit.CanFocus then
     CurrScript.SynEdit.SetFocus;
 end;
+
+procedure TForm1.editSearchListExit(Sender: TObject);
+begin
+  frmFunctionList.editSearchList.Color := clWhite;
+  if frmFunctionList.InCodeCompletion then
+  begin;
+    frmFunctionList.InCodeCompletion:= false;
+    CurrScript.SynEdit.SelectedColor.Style:= [];
+    CurrScript.SynEdit.SelectedColor.Foreground:= clHighlightText;
+    CurrScript.SynEdit.SelectedColor.Background:= clHighlight;
+  end;
+end;
+
+procedure TForm1.editSearchListKeyPress(Sender: TObject; var Key: char);
+var
+  linetext : string;
+begin
+  if key = #13 then//enter
+  begin;
+    key := #0;
+    frmFunctionList.Find(True);
+  end;
+  if key = #32 then//space lets do this!
+  begin;
+    key := #0;
+    linetext := CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1];
+    frmFunctionList.editSearchList.OnExit(sender);
+    while  (frmFunctionList.CompletionCaret.x <= length(linetext)) and (linetext[frmFunctionList.CompletionCaret.x] in ['a'..'z','A'..'Z','0'..'9','_']) do
+      inc(frmFunctionList.CompletionCaret.x);
+    CurrScript.SynEdit.LogicalCaretXY:= frmFunctionList.CompletionCaret;
+    CurrScript.SynEdit.SetFocus;
+  end;
+  if key = #27 then//esc
+  begin
+    key := #0;
+    CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1] := frmFunctionList.CompletionStart;
+    frmFunctionList.editSearchList.OnExit(sender);
+    CurrScript.SynEdit.LogicalCaretXY:= point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
+    CurrScript.SynEdit.SelEnd:= CurrScript.SynEdit.SelStart;
+    CurrScript.SynEdit.SetFocus;
+  end;
+end;
+
+procedure TForm1.FunctionListChange(Sender: TObject; Node: TTreeNode);
+begin
+  if Node.Level > 0 then
+    StatusBar.Panels[2].Text := PChar(Node.Data);
+end;
+
+procedure TForm1.FunctionListExit(Sender: TObject);
+begin
+  StatusBar.Panels[2].Text:= '';
+end;
+
 
 procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
 begin
@@ -1127,7 +1195,6 @@ begin
     DebugImgForm.Hide;
 end;
 
-procedure TForm1.MenuitemFillFunctionListClick(Sender: TObject);
 function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
 var
   I : integer;
@@ -1142,6 +1209,12 @@ begin;
         result := result + decl[ii];
       exit;
     end;
+    if (Decl[ii] = ' ') or (Decl[ii] = ':') then
+    begin;
+      if PlusNextChar then
+        result := result + ' ';
+      exit;
+    end;
     result := result + decl[ii];
   end;
   //We made it out of the loop.. This is a method without ';' we might wanne add that!
@@ -1149,6 +1222,7 @@ begin;
     result := result + ';';
 end;
 
+procedure TForm1.MenuitemFillFunctionListClick(Sender: TObject);
 var
   Methods : TExpMethodArr;
   LastSection : string;
@@ -1179,8 +1253,9 @@ begin
       end;
     end;
     Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
-    Temp2Node.Data:= strnew(PChar(GetMethodName(Methods[i].FuncDecl,true)));
+    Temp2Node.Data:= strnew(PChar(Methods[i].FuncDecl));
   end;
+  frmFunctionList.ScriptNode := Tree.Items.Add(nil,'Script');
 end;
 
 procedure TForm1.MenuItemHideClick(Sender: TObject);
@@ -1209,24 +1284,7 @@ end;
 
 procedure TForm1.MenuItemFunctionListClick(Sender: TObject);
 begin
-  with MenuItemFunctionList do
-  begin
-    Checked := not Checked;
-    if(Checked)then
-    begin
-      if(frmFunctionList.Parent is TPanel)then
-      begin
-        Splitter1.Show;
-        frmFunctionList.Show;
-      end else frmFunctionList.Parent.Show;
-    end else begin
-      if(frmFunctionList.Parent is TPanel)then
-        frmFunctionList.Hide
-      else
-        frmFunctionList.Parent.Hide;
-      Splitter1.Hide;
-    end;
-  end;
+  FunctionListShown(not MenuItemFunctionList.Checked);
 end;
 
 procedure TForm1.OnLinePSScript(Sender: TObject);
@@ -1371,6 +1429,51 @@ begin
                          TrayStop.Enabled:= false; TrayStop.Checked:= False;
                    end;
     end;
+end;
+
+procedure TForm1.FunctionListShown(ShowIt: boolean);
+var
+  Node : TTreeNode;
+  tmpNode : TTreeNode;
+  Tree : TTreeView;
+  Analyzer : TScriptAnalyzer;
+  I,ii : integer;
+begin
+  with MenuItemFunctionList, frmFunctionList do
+  begin
+    Checked := ShowIt;
+    if(Checked)then
+    begin
+      if FunctionList.Items.Count = 0 then
+        MenuitemFillFunctionListClick(nil);
+
+      if(frmFunctionList.Parent is TPanel)then
+      begin
+        Splitter1.Show;
+        frmFunctionList.Show;
+      end else frmFunctionList.Parent.Show;
+      if editSearchList.CanFocus then
+        editSearchList.SetFocus;
+      //Lets load up this Script tree!
+      Tree := frmFunctionList.FunctionList;
+      Node := frmFunctionList.ScriptNode;
+      Node.DeleteChildren;
+      Analyzer := TScriptAnalyzer.create;
+      Analyzer.ScriptToAnalyze:= CurrScript.SynEdit.Lines.Text;
+      Analyzer.analyze;
+      for i := 0 to Analyzer.MethodLen - 1 do
+      begin
+        tmpNode := Tree.Items.AddChild(Node,Analyzer.Methods[i].Name);
+        tmpNode.Data:= PChar(Analyzer.Methods[i].CreateMethodStr);
+      end;
+    end else begin
+      if(frmFunctionList.Parent is TPanel)then
+        frmFunctionList.Hide
+      else
+        frmFunctionList.Parent.Hide;
+      Splitter1.Hide;
+    end;
+  end;
 end;
 
 

@@ -1,12 +1,12 @@
 object Form1: TForm1
-  Left = 274
+  Left = 273
   Height = 557
   Top = 233
-  Width = 732
+  Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
   ClientHeight = 537
-  ClientWidth = 732
+  ClientWidth = 734
   KeyPreview = True
   Menu = MainMenu1
   OnClose = FormClose
@@ -20,7 +20,7 @@ object Form1: TForm1
     Left = 0
     Height = 24
     Top = 0
-    Width = 732
+    Width = 734
     Caption = 'ToolBar1'
     Images = Mufasa_Image_List
     ParentShowHint = False
@@ -168,7 +168,7 @@ object Form1: TForm1
     Left = 0
     Height = 23
     Top = 514
-    Width = 732
+    Width = 734
     Panels = <    
       item
         Width = 60
@@ -186,16 +186,16 @@ object Form1: TForm1
     Left = 0
     Height = 154
     Top = 360
-    Width = 732
+    Width = 734
     Align = alBottom
     ClientHeight = 154
-    ClientWidth = 732
+    ClientWidth = 734
     TabOrder = 2
     object Memo1: TMemo
       Left = 1
       Height = 152
       Top = 1
-      Width = 730
+      Width = 732
       Align = alClient
       ScrollBars = ssAutoBoth
       TabOrder = 0
@@ -206,7 +206,7 @@ object Form1: TForm1
     Left = 0
     Height = 5
     Top = 355
-    Width = 732
+    Width = 734
     Align = alBottom
     ResizeAnchor = akBottom
   end
@@ -214,20 +214,20 @@ object Form1: TForm1
     Left = 0
     Height = 331
     Top = 24
-    Width = 732
+    Width = 734
     Align = alClient
     BevelOuter = bvNone
     ClientHeight = 331
-    ClientWidth = 732
+    ClientWidth = 734
     DockSite = True
     TabOrder = 4
     OnDockDrop = ScriptPanelDockDrop
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
-      Left = 118
+      Left = 150
       Height = 296
       Top = 0
-      Width = 614
+      Width = 584
       Align = alClient
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
@@ -245,11 +245,11 @@ object Form1: TForm1
       Left = 0
       Height = 35
       Top = 296
-      Width = 732
+      Width = 734
       Align = alBottom
       BevelOuter = bvSpace
       ClientHeight = 35
-      ClientWidth = 732
+      ClientWidth = 734
       TabOrder = 1
       Visible = False
       object SpeedButtonSearch: TSpeedButton
@@ -373,7 +373,7 @@ object Form1: TForm1
       end
     end
     object Splitter1: TSplitter
-      Left = 113
+      Left = 145
       Height = 296
       Top = 0
       Width = 5
@@ -382,19 +382,22 @@ object Form1: TForm1
     end
     inline frmFunctionList: TFunctionListFrame
       Height = 296
-      Width = 113
+      Width = 145
       ClientHeight = 296
-      ClientWidth = 113
+      ClientWidth = 145
       TabOrder = 3
       Visible = False
       inherited FunctionList: TTreeView
         Height = 275
-        Width = 113
+        Width = 145
+        OnChange = FunctionListChange
+        OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
         Top = 275
-        Width = 113
-        OnExit = nil
+        Width = 145
+        OnExit = editSearchListExit
+        OnKeyPress = editSearchListKeyPress
       end
     end
   end

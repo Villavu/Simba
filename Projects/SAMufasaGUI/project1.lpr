@@ -31,7 +31,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, LResources, testunit, colourhistory, About, internets, debugimage,
-  framefunctionlist;
+  framefunctionlist, simpleanalyzer;
 
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
