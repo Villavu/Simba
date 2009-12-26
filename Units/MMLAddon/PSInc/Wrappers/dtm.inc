@@ -70,7 +70,7 @@ var
 begin
   if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
     Result := CurrThread.Client.MFinder.FindDTMsRotated(temp, Points, x1, y1, x2, y2,
-                                  sAngle, eAngle, aStep, aFound)
+                                  sAngle, eAngle, aStep, aFound, 0)
   else
     Result := False;
 end;

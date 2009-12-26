@@ -403,7 +403,7 @@ end;
 procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
 
 var
-  x,y,v: integer;
+  x,y: integer;
   _24_old_p: PByte;
   rs,gs,bs:byte;
   data: PRGB32;
@@ -484,7 +484,6 @@ begin
         end;
     end;
   end;
-  writeln('done');
 end;
 
 procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);
