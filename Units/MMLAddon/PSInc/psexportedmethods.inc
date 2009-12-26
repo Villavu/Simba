@@ -51,7 +51,7 @@ AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
 AddFunction(@classes.point,'function Point(x,y:integer) : TPoint;');
 AddFunction(@Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
 AddFunction(@hypot,'function Hypot(X, Y: Extended): Extended;');
-AddFunction(@RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
+AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
 
 {window}
 SetCurrSection('Window');
