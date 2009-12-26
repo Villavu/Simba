@@ -37,7 +37,8 @@ Procedure PrintpDTM(tDTM : pDTM);
 
 procedure initdtm(out d: pdtm; len: integer);
 function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
-function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
+function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
+                            sAngle, eAngle, aStep: Extended): TBox;
 function DTMConsistent(var dtm: pdtm): boolean;
 procedure NormalizeDTM(var dtm: pdtm);
 
@@ -227,7 +228,8 @@ begin
   Result.y2 := y2 - b.y2;
 end;
 
-Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
+Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
+                            sAngle, eAngle, aStep: Extended): TBox;
 
 begin
 
