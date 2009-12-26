@@ -979,25 +979,30 @@ begin
   begin;
     key := #0;
     frmFunctionList.Find(True);
-  end;
-  if key = #32 then//space lets do this!
+  end else
+  if frmFunctionList.InCodeCompletion then
   begin;
-    key := #0;
-    linetext := CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1];
-    frmFunctionList.editSearchList.OnExit(sender);
-    while  (frmFunctionList.CompletionCaret.x <= length(linetext)) and (linetext[frmFunctionList.CompletionCaret.x] in ['a'..'z','A'..'Z','0'..'9','_']) do
-      inc(frmFunctionList.CompletionCaret.x);
-    CurrScript.SynEdit.LogicalCaretXY:= frmFunctionList.CompletionCaret;
-    CurrScript.SynEdit.SetFocus;
-  end;
-  if key = #27 then//esc
-  begin
-    key := #0;
-    CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1] := frmFunctionList.CompletionStart;
-    frmFunctionList.editSearchList.OnExit(sender);
-    CurrScript.SynEdit.LogicalCaretXY:= point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
-    CurrScript.SynEdit.SelEnd:= CurrScript.SynEdit.SelStart;
-    CurrScript.SynEdit.SetFocus;
+    if key = #27 then//esc -> C'est error!
+    begin
+      key := #0;
+      CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1] := frmFunctionList.CompletionStart;
+      frmFunctionList.editSearchList.OnExit(sender);
+      CurrScript.SynEdit.LogicalCaretXY:= point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
+      CurrScript.SynEdit.SelEnd:= CurrScript.SynEdit.SelStart;
+      CurrScript.SynEdit.SetFocus;
+    end else
+    if key in [' ',',','.','(',')'] then //on on these chars we will insert the function!
+    begin;
+      linetext := CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1];
+      frmFunctionList.editSearchList.OnExit(sender);
+      while  (frmFunctionList.CompletionCaret.x <= length(linetext)) and (linetext[frmFunctionList.CompletionCaret.x] in ['a'..'z','A'..'Z','0'..'9','_']) do
+        inc(frmFunctionList.CompletionCaret.x);
+      CurrScript.SynEdit.LogicalCaretXY:= frmFunctionList.CompletionCaret;
+      CurrScript.SynEdit.SelStart:= CurrScript.SynEdit.SelEnd;
+      CurrScript.SynEdit.ExecuteCommand(ecChar,key,nil);
+      CurrScript.SynEdit.SetFocus;
+      key := #0;
+    end;
   end;
 end;
 
