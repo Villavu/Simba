@@ -76,47 +76,37 @@ uses
   colour_conv, client,  files, tpa, mufasatypesutil;
 
 const
+    { Very rough limits for R, G, B }
     ocr_Limit_High = 190;
     ocr_Limit_Med = 130;
     ocr_Limit_Low = 65;
 
+
+    { `base' Colours of the Uptext }
+
+    { White }
     ocr_White = 16777215;
+
+    { Level < Your Level }
     ocr_Green = 65280;
+
+    { Level > Your Level }
     ocr_Red = 255;
+
+    { Interact or Level = Your Level }
     ocr_Yellow = 65535;
+
+    { Object }
     ocr_Blue = 16776960;
+
+    { Item }
     ocr_ItemC = 16744447;
 
+    { Shadow }
     ocr_Purple = 8388736;
 
-{
-**************************************************************************************************
-**************************************************************************************************
-**************************************************************************************************
-**************************************************************************************************
-**************************************************************************************************
-When splitting the shadows, having the `original' points of the chars would be very helpful when splitting!
 
-Short description:
-Merge shadow and char; (Same colour; simple)
-Split with spacing of 1.
-Remove character points; leaves only shadow. Voila, perfect splitting.
-Splitting could go wrong for shadows of characters with two much spacing; like 'h'.
-
-In some cases, this may `bind' characters to each other.
-In this case, we need to remove the shadow and split again. After this split
-we can put the shadows back in, and see to what group they belong.
-
-We can also just split the chars, and then use their shadow.
-**************************************************************************************************
-**************************************************************************************************
-**************************************************************************************************
-**************************************************************************************************
-**************************************************************************************************
-}
-
-
-
+{ Constructor }
 constructor TMOCR.Create(Owner: TObject);
 
 var
@@ -128,6 +118,7 @@ begin
   Self.Fonts := TMFonts.Create;
 end;
 
+{ Destructor }
 destructor TMOCR.Destroy;
 
 begin
@@ -136,6 +127,10 @@ begin
   inherited Destroy;
 end;
 
+{
+  InitTOCR loads all fonts in path
+  We don't do this in the constructor because we may not yet have the path.
+}
 function TMOCR.InitTOCR(path: string): boolean;
 var
    dirs: array of string;
@@ -157,19 +152,30 @@ begin
     Fonts.LoadFont('UpChars', true); // shadow
 end;
 
-
+{ Get the current pointer to our list of Fonts }
 function TMOCR.GetFonts:TMFonts;
 begin
   Exit(Self.Fonts);
 end;
 
+{ Set new Fonts. We set it to a Copy of NewFonts }
 procedure TMOCR.SetFonts(NewFonts: TMFonts);
 begin
   Self.Fonts := NewFonts.Copy();
 end;
 
 {
-   Non optimised. ;-)
+  Filter UpText by a very rough colour comparison / range check.
+  We first convert the colour to RGB, and if it falls into the following
+  defined ranges, it may be part of the uptext. Also get the possible
+  shadows.
+
+  We have large ranges because we rather have extra (fake) pixels than less
+  uptext pixels... This because we can filter most of the noise out easily.
+
+  Non optimised. We can make it use direct data instead of fastgetpixel and
+  fastsetpixel, but speed isn't really an issue. The entire algorithm is still
+  fast enough.
 }
 
 procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap; w,h: integer);
@@ -254,6 +260,35 @@ begin
       bmp.fastsetpixel(bmp.Width-1, y, 0);
 end;
 
+
+{
+  This filter assumes the previous colour filter has been applied first.
+  I like to call this the `characteristics' filter because we really only filter
+  on characteristics.
+
+  For the uptext, a few things apply...
+  First of all:
+
+  *** Remove False Shadow ***
+      if shadow[x,y] then not shadow[x-1,y-1]
+  If there is a shadow at x,y then there should not be a shadow at x-1, y-1; if
+  there is one, then shadow[x, y] is not a shadow.
+
+    (One could also say, if shadow[x,y] and shadow[x+1,y+1] then shadow[x+1,y+1]
+     is no shadow; because it essentially means the same. However, a smart mind
+     will soon see that this algorithm will be a *lot* more efficient if we
+     start at the right bottom, instead of the left top. Which means we should
+     work with x-1 and y-1, rather than x+1,y+1
+     Yeah.... My comments are vague.
+    )
+
+  *** UpText chars identity 1 and 2 ***
+      if UpTextChar[x,y] then (UpTextChar[x+1,y+1] or shadow[x+1,y+1])
+    If this is not true, then UpTextChar[x,y] cannot be part of uptext - it
+    has no shadow, and it doesn't have a `friend' (at x+1,y+1) either.
+    We don't need to do this from the right bottom to left top.
+
+}
 procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
 var
    x,y: Integer;
@@ -289,7 +324,7 @@ begin
        bmp.fastsetpixel(x,y,clSilver);
    end;
 
-  // Now we do another filter like
+  // Now we do another filter, with uptext chars identity 1 and 2.
  for y := bmp.Height - 2 downto 0 do
    for x := bmp.Width - 2 downto 0 do
    begin
@@ -297,18 +332,24 @@ begin
        continue;
      if bmp.fastgetpixel(x,y) = clBlack then
        continue;
+
+     // identity 1
      if (bmp.fastgetpixel(x,y) = bmp.fastgetpixel(x+1,y+1) ) then
        continue;
 
+     // identity 2
      if bmp.fastgetpixel(x+1,y+1) <> clPurple then
      begin
        bmp.fastsetpixel(x,y,clOlive);
        continue;
      end;
+
+     // If we make it to here, it means the pixel is part of the uptext.
    end;
 end;
 
 {$IFDEF OCRDEBUG}
+{ Write to our debugbmp }
 procedure TMOCR.DebugToBmp(bmp: TMufasaBitmap; hmod, h: integer);
 var
    x,y: integer;
@@ -319,6 +360,12 @@ begin
 end;
 {$ENDIF}
 
+{
+  Return the shadows of the points in charpoint on bitmap shadowsbmp.
+
+  Pseudo:
+    if shadow[charpoint[i].x+1, charpoint[i].y+1] then addtoResult;
+}
 function getshadows(shadowsbmp:TMufasaBitmap; charpoint: tpointarray): tpointarray;
 var
    i,c:integer;
@@ -336,6 +383,7 @@ begin
   setlength(result,c);
 end;
 
+{ Remove anything but the shadows on the bitmap (Shadow = clPurple, remember?) }
 procedure TMOCR.FilterShadowBitmap(bmp: TMufasaBitmap);
 var
    x,y:integer;
@@ -351,6 +399,13 @@ begin
     end;
 end;
 
+{
+  Remove all but uptext colours clWhite,clGreen, etc.
+  See constants above.
+
+  This assumes that the bitmap only consists of colour 0, and the other
+  constants founds above the functionss
+}
 procedure TMOCR.FilterCharsBitmap(bmp: TMufasaBitmap);
 var
    x,y: integer;
@@ -378,6 +433,19 @@ begin
   end;
 end;
 
+
+{
+  This uses the two filters, and performs a split on the bitmap.
+  A split per character, that is. So we can more easily identify it.
+
+  TODO:
+  *
+    Remove more noise after we have split, it should be possible to identify
+    noise; weird positions or boxes compared to the rest, etc.
+  *
+    Split each colours seperately, and combine only later, after removing noise.
+
+}
 function TMOCR.getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
                                var _chars, _shadows: T2DPointArray): Boolean;
 var
@@ -427,6 +495,7 @@ begin
     DebugToBmp(bmp,1,h);
   {$ENDIF}
 
+  // Filter 2
   FilterUpTextByCharacteristics(bmp,w,h);
 
   {$IFDEF OCRSAVEBITMAP}
@@ -469,6 +538,7 @@ begin
     end;
   setlength(chars,charscount);
 
+  // split chars
   chars_2d := SplitTPAEx(chars,1,charsbmp.height);
   SortATPAFrom(chars_2d, point(0,0));
   for x := 0 to high(chars_2d) do
@@ -509,6 +579,7 @@ begin
     end;
   end;
 
+  // sort, split messes with the order of chars
   SortATPAFromFirstPoint(chars_2d, point(0,0));
   for y := 0 to high(chars_2d) do
   begin
@@ -517,7 +588,6 @@ begin
     setlength(finalchars,length(finalchars)+1);
     finalchars[high(finalchars)] := chars_2d[y];
   end;
-
 
   SortATPAFromFirstPoint(shadows, point(0,0));
   for x := 0 to high(shadows) do
@@ -540,6 +610,14 @@ begin
   shadowsbmp.Free;
 end;
 
+{
+  GetUpTextAtEx combines/uses the functions above.
+
+  It will identify each character, and also keep track of the previous
+  chars' final `x' bounds. If the difference between the .x2 of the previous
+  character and the .x1 of the current character is bigger than 5, then there
+  was a space between them. (Add ' ' to result)
+}
 
 function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
 var
@@ -552,10 +630,13 @@ var
    lbset: boolean;
 
 begin
+  result:='';
   ww := 400;
   hh := 20;
 
   getTextPointsIn(atX, atY, ww, hh, shadow, chars, shadows);
+
+  // Get font data for analysis.
 
   if shadow then
   begin
@@ -575,7 +656,6 @@ begin
   end;
 
   lbset:=false;
-  //writeln(format('FFont Width/Height: (%d, %d)', [font.width,font.height]));
   setlength(n, (font.width+1) * (font.height+1));
   for j := 0 to high(thachars) do
   begin
@@ -603,13 +683,7 @@ begin
       n[(thachars[j][i].x) + ((thachars[j][i].y) * font.width)] := 1;
     end;
     result := result + GuessGlyph(n, font);
-    //writeln('--'+GuessGlyph(n, font));
   end;
-
-
-  //Result := ocrDetect(n, ww-1, hh-1, font);
-  //Result:='To do';
-  //Result:='';
 end;
 
 function TMOCR.GetUpTextAt(atX, atY: integer; shadow: boolean): string;
