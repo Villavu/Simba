@@ -25,3 +25,8 @@ function psSqr( e : extended) : extended;
 begin;
   result := sqr(e);
 end;
+
+function ps_RandomRange(const aFrom, aTo: Integer): Integer;
+begin
+  Result:=Random(Abs(aFrom-aTo))+Min(aTo,AFrom);
+end;
