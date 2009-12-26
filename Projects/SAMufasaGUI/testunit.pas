@@ -214,6 +214,7 @@ type
     procedure editSearchListExit(Sender: TObject);
     procedure editSearchListKeyPress(Sender: TObject; var Key: char);
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
+    procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure dlgReplaceFind(Sender: TObject);
@@ -1008,8 +1009,17 @@ end;
 
 procedure TForm1.FunctionListChange(Sender: TObject; Node: TTreeNode);
 begin
+  if node = nil then
+    exit;
   if Node.Level > 0 then
     StatusBar.Panels[2].Text := PChar(Node.Data);
+  if Node.level = 0 then
+    StatusBar.Panels[2].Text := 'Section: ' + Node.Text;
+end;
+
+procedure TForm1.FunctionListEnter(Sender: TObject);
+begin
+  frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
 
 procedure TForm1.FunctionListExit(Sender: TObject);
@@ -1245,6 +1255,7 @@ begin
   Tree.Items.Clear;
   Sections := TStringList.Create;
   LastSection := '';
+  frmFunctionList.ScriptNode := Tree.Items.Add(nil,'Script');
   for i := 0 to high(Methods) do
   begin;
     if Methods[i].Section <> LastSection then
@@ -1262,7 +1273,7 @@ begin
     Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
     Temp2Node.Data:= strnew(PChar(Methods[i].FuncDecl));
   end;
-  frmFunctionList.ScriptNode := Tree.Items.Add(nil,'Script');
+  frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
 
 procedure TForm1.MenuItemHideClick(Sender: TObject);
@@ -1462,17 +1473,7 @@ begin
       if editSearchList.CanFocus then
         editSearchList.SetFocus;
       //Lets load up this Script tree!
-      Tree := frmFunctionList.FunctionList;
-      Node := frmFunctionList.ScriptNode;
-      Node.DeleteChildren;
-      Analyzer := TScriptAnalyzer.create;
-      Analyzer.ScriptToAnalyze:= CurrScript.SynEdit.Lines.Text;
-      Analyzer.analyze;
-      for i := 0 to Analyzer.MethodLen - 1 do
-      begin
-        tmpNode := Tree.Items.AddChild(Node,Analyzer.Methods[i].Name);
-        tmpNode.Data:= PChar(Analyzer.Methods[i].CreateMethodStr);
-      end;
+      frmFunctionList.LoadScriptTree(CurrScript.SynEdit.text);
     end else begin
       if(frmFunctionList.Parent is TPanel)then
         frmFunctionList.Hide
