@@ -99,6 +99,8 @@ var
   Analyzer : TScriptAnalyzer;
   tmpNode : TTreeNode;
 begin
+  if ScriptNode = nil then
+    exit;
   if FilterTree.Visible then
     Writeln('Might get some acces violations now..');
   ScriptNode.DeleteChildren;
