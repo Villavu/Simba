@@ -1106,6 +1106,7 @@ begin
   PageControl1.OnCloseTabClicked:=ActionCloseTab.OnExecute;
   Tabs := TList.Create;
   AddTab;//Give it alteast 1 tab ;-).
+  FunctionListShown(True); //Show this function list bitch!
   Window := TMWindow.Create;
   Picker := TMColorPicker.Create(Window);
   Selector := TMWindowSelector.Create(Window);
@@ -1119,6 +1120,7 @@ begin
   {$ifdef mswindows}
   DebugTimer.Enabled:= false;
   {$endif}
+
 //  Ed
 end;
 
@@ -1470,8 +1472,9 @@ begin
         Splitter1.Show;
         frmFunctionList.Show;
       end else frmFunctionList.Parent.Show;
-      if editSearchList.CanFocus then
-        editSearchList.SetFocus;
+      if Self.Visible then
+        if editSearchList.CanFocus then
+          editSearchList.SetFocus;
       //Lets load up this Script tree!
       frmFunctionList.LoadScriptTree(CurrScript.SynEdit.text);
     end else begin
