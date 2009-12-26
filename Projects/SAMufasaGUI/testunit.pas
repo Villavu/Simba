@@ -300,6 +300,7 @@ type
     procedure SetEditActions;
     procedure DoSearch(Str: String; Next : boolean; HighlightAll : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
+    procedure RefreshTabSender(sender : integer);
   end;
 
   procedure formWriteln( S : String);
@@ -738,6 +739,8 @@ begin
   if Self.Showing then
     if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
       CurrScript.SynEdit.SetFocus;
+  editSearchListExit(self);//To set the highlighting back to normal;
+  frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
   with CurrScript.SynEdit do
   begin
     SetHighlightSearch('',[]);
@@ -750,6 +753,11 @@ begin
   LabeledEditSearch.Font.Color:= clWindowText;
   //Set tha edit buttons right
   SetEditActions;
+end;
+
+procedure TForm1.RefreshTabSender(sender: integer);
+begin
+  RefreshTab;
 end;
 
 
@@ -969,6 +977,7 @@ begin
     CurrScript.SynEdit.SelectedColor.Style:= [];
     CurrScript.SynEdit.SelectedColor.Foreground:= clHighlightText;
     CurrScript.SynEdit.SelectedColor.Background:= clHighlight;
+    CurrScript.Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempEnable;
   end;
 end;
 
@@ -1120,7 +1129,7 @@ begin
   {$ifdef mswindows}
   DebugTimer.Enabled:= false;
   {$endif}
-
+  Application.QueueAsyncCall(@RefreshTabSender,0);
 //  Ed
 end;
 

@@ -182,6 +182,7 @@ begin
         SynEdit.SelectedColor.Style:= [fsUnderline];
         SynEdit.SelectedColor.Foreground:= clBlack;
         SynEdit.SelectedColor.Background:= clWhite;
+        Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
       end;
   end;
 end;
