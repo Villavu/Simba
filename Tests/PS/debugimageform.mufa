@@ -1,6 +1,7 @@
 program new;
 var
   Bmp,x,y : integer;
+  DebugBmp : integer;
 begin
   Bmp := createbItmap(100,100);
   CopyClientToBitmap(Bmp,0,0,99,99);
@@ -15,4 +16,6 @@ begin
   end;
   DisplayDebugImgWindow(100,100);
   DrawBitmapDebugImg(bmp);
+  DebugBMP := GetDebugBitmap;
+  SaveBitmap(DebugBmp,ScriptPath + 'debugimage.bmp');
 end.
