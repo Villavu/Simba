@@ -21,6 +21,8 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
   private
+    procedure CreateFilterTree;
+    procedure FilterTreeVis(Vis : boolean);
     { private declarations }
   public
     DraggingNode : TTreeNode;
@@ -30,6 +32,7 @@ type
     StartWordCompletion : TPoint;
     CompletionLine : string;
     CompletionStart : string;
+    FilterTree : TTreeView;
     function Find(Next : boolean) : boolean;
     { public declarations }
   end; 
@@ -52,13 +55,41 @@ begin
   Form1.MenuItemFunctionList.Checked := False;
 end;
 
+procedure TFunctionListFrame.CreateFilterTree;
+begin
+  if Assigned(FilterTree) then
+    exit;
+  FilterTree := TTreeView.Create(Self);
+  FilterTree.Parent := Self;
+  FilterTree.Visible := false;
+  FilterTree.SetBounds(FunctionList.Left,FunctionList.Top,FunctionList.Width,FunctionList.Height);
+  FilterTree.Align := alClient;
+  FilterTree.ReadOnly:= True;
+  FilterTree.ScrollBars:= ssAutoBoth;
+  FilterTree.OnMouseDown:= @FunctionListMouseDown;
+  FilterTree.OnMouseUp:= @FunctionListMouseUp;
+
+end;
+
+procedure TFunctionListFrame.FilterTreeVis(Vis: boolean);
+begin
+  CreateFilterTree;
+  FunctionList.Visible:= not Vis;
+  FilterTree.Visible := Vis;
+end;
+
 function TFunctionListFrame.Find(Next : boolean) : boolean;
 var
-  Start,i,index,posi: Integer;
+  Start,Len,i,index,posi: Integer;
   FoundFunction : boolean;
+  LastSection : string;
   str : string;
+  RootNode : TTreeNode;
+  NormalNode : TTreeNode;
   Node : TTreeNode;
+  InsertStr : string;
 begin
+  CreateFilterTree;
   if(editSearchList.Text = '')then
   begin
     editSearchList.Color := clWhite;
@@ -69,53 +100,109 @@ begin
       Form1.CurrScript.SynEdit.LogicalCaretXY:= point(CompletionCaret.x,CompletionCaret.y);
       Form1.CurrScript.SynEdit.SelEnd:= Form1.CurrScript.SynEdit.SelStart;
     end;
+    FilterTreeVis(False);
     exit;
   end;
-  FoundFunction := False;
-  if FunctionList.Selected <> nil then
-  begin
-    Start := FunctionList.Selected.AbsoluteIndex;
-    if(next)then
-      inc(Start);
-  end else
-    Start := 0;
-  for i := start to start + FunctionList.Items.Count - 1 do
-    if(FunctionList.Items[i mod FunctionList.Items.Count].Level = 1)then
-      if(pos(lowercase(editSearchList.Text), lowercase(FunctionList.Items[i mod FunctionList.Items.Count].Text)) > 0)then
+
+  //We only have to search the next item in our filter tree.. Fu-king easy!
+  if next then
+  begin;
+    if FilterTree.Visible = false then
+    begin;
+      Writeln('ERROR: You cannot search next, since the Tree isnt generated yet');
+      Find(false);
+      exit;
+    end;
+    if FilterTree.Selected <> nil then
+      Start := FilterTree.Selected.AbsoluteIndex + 1
+    else
+      Start := 0;
+    Len := FilterTree.Items.Count;
+    for i := start to start + len - 1 do
+      if FilterTree.Items[i mod len].Level = 1 then
       begin
-        FoundFunction := True;
-        index := i mod FunctionList.Items.Count;
+        FilterTree.Items[i mod len].Selected:= true;
+        InsertStr := FilterTree.Items[i mod len].Text;
+        Result := true;
         break;
       end;
-  Result := FoundFunction;
-
-  if Result then
-  begin;
-    Writeln(FunctionList.Items[Index].Text);
-    FunctionList.FullCollapse;
-    FunctionList.Items[Index].Selected := true;
-    FunctionList.Items[index].ExpandParents;
-    editSearchList.Color := clWhite;
-
-    if InCodeCompletion then
+  end else
+  begin
+    FilterTree.Items.Clear;
+    FoundFunction := False;
+    if FunctionList.Selected <> nil then
+      Start := FunctionList.Selected.AbsoluteIndex
+    else
+      Start := 0;
+    Len := FunctionList.Items.Count;
+    LastSection := '';
+    for i := start to start + FunctionList.Items.Count - 1 do
     begin;
-      str := format(CompletionLine, [FunctionList.items[index].text]);
+      Node := FunctionList.Items[i mod FunctionList.Items.Count];
+      if(Node.Level = 1)then
+        if(pos(lowercase(editSearchList.Text), lowercase(Node.Text)) > 0)then
+        begin
+          if not FoundFunction then
+          begin
+            FoundFunction := True;
+            index := i mod FunctionList.Items.Count;
+            InsertStr:= node.Text;
+          end;
+          if LastSection <> Node.Parent.Text then //We enter a new section, add it to the filter tree!
+            RootNode := FilterTree.Items.AddChild(nil,Node.Parent.Text);
+          FilterTree.Items.AddChild(RootNode,Node.Text).Data := Node.Data;
+          LastSection:= RootNode.Text;
+  //        break;
+        end;
+      end;
+      Result := FoundFunction;
+
+      if Result then
+      begin;
+        FilterTreeVis(True);
+        FilterTree.FullExpand;
+        FilterTree.Items[1].Selected:= True;
+        Writeln(FunctionList.Items[Index].Text);
+        FunctionList.FullCollapse;
+        FunctionList.Items[Index].Selected := true;
+        FunctionList.Items[index].ExpandParents;
+        editSearchList.Color := clWhite;
+
+
+      end else
+      begin
+        FilterTreeVis(false);
+        editSearchList.Color := 6711039;
+        if InCodeCompletion then
+          Form1.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
+      end;
+  end;
+
+  if result and InCodeCompletion then
+    begin;
+      str := format(CompletionLine, [InsertStr]);
       with Form1.CurrScript.SynEdit do
       begin;
         Lines[CompletionCaret.y - 1] := str;
         LogicalCaretXY:= StartWordCompletion;
         i := SelStart;
-        posi := pos(lowercase(editSearchList.text), lowercase(FunctionList.items[index].text));
-        SelStart := i + length(editSearchList.Text) + posi - 1;
-        SelEnd := i + Length(str);
+        posi := pos(lowercase(editSearchList.text), lowercase(InsertStr)) + length(editSearchList.text) - 1; //underline the rest of the word
+        if Posi = Length(InsertStr) then //Special occasions
+        begin;
+          if Length(editSearchList.Text) <> Posi then          //We found the last part of the text -> for exmaple when you Search for bitmap, you can find LoadBitmap -> We underline 'Load'
+          begin;
+            SelStart := i;
+            SelEnd := i + pos(lowercase(editSearchList.text), lowercase(InsertStr)) -1;
+            Exit;
+          end;
+          //We searched for the whole text -> for example LoadBitmap, and we found LoadBitmap -> Underline the whole text
+          Posi := 0;
+        end;
+        //Underline the rest of the word
+        SelStart := i + posi;
+        SelEnd := SelStart + Length(InsertStr) - posi;
       end;
     end;
-  end else
-  begin
-    editSearchList.Color := 6711039;
-    if InCodeCompletion then
-      Form1.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
-  end;
 end;
 
 procedure TFunctionListFrame.FunctionListMouseDown(Sender: TObject;
@@ -128,7 +215,9 @@ begin
     Writeln('Not yet implemented');
     exit;
   end;
-  N := Self.FunctionList.GetNodeAt(x, y);
+  if not (Sender is TTreeView) then
+    exit;
+  N := TTreeView(Sender).GetNodeAt(x, y);
   if(N = nil)then
   begin
     Self.DragKind := dkDock;
