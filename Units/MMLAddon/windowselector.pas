@@ -189,6 +189,7 @@ begin;
       end;
       TempHandle  := Handle;
     end;
+    Application.ProcessMessages;
     Sleep(64);
   end;
   Result := TempHandle;
