@@ -18,7 +18,7 @@ uses
          Procedure XImageToRawImage(XImg: PXImage; Var RawImage: TRawImage);
          function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
          {$ENDIF}
-         Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; Var RawImage: TRawImage);
+         Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
 
 implementation
 
@@ -89,7 +89,7 @@ End;
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
 // feature)
-Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; Var RawImage: TRawImage);
+Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
 Begin
   RawImage.Init; { Calls raw.Description.Init as well }
 

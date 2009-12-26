@@ -84,7 +84,7 @@ type
         function FindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
         function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
         function FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
-        function FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
+        function FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
 
 
     protected
@@ -1796,6 +1796,8 @@ var
    C: Array of Integer;
 
    // Bitwise
+   // TODO: Change to record. One that indicates if there is a match at bit i
+   // and one that indicates it has already been matched at bit i...
    b: Array of Array of Integer;
 
    // bounds
@@ -1845,7 +1847,9 @@ begin
     setlength(b[i], H + 1);
     // does setlength init already? if it doesn't, do we want to init here?
     // or do we want to init in the loop, as we loop over every b anyway?
-    //FillChar(b[i][0], SizeOf(Integer) * H, 0);
+
+    // init
+    FillChar(b[i][0], SizeOf(Integer) * H, 0);
   end;
 
   // C = DTM.C
@@ -1909,7 +1913,7 @@ begin
   raise Exception.CreateFmt('Not done yet!', []);
 end;
 
-function TMFinder.FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
+function TMFinder.FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
 
 begin
   // Don't forget to pre calculate the rotated points at the start.

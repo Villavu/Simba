@@ -37,7 +37,7 @@ uses
   bitmaps,
   LCLIntf // for ReleaseDC and such
 
-  {$IFDEF LINUX}, xlib, x, xutil, ctypes{$ENDIF};
+  {$IFDEF LINUX}, xlib, x, xutil{$ENDIF};
 
 type
 
@@ -158,7 +158,6 @@ type
 implementation
 
 uses
-    Client, // For the Client Class
     windowutil, // For utilities such as XImageToRawImage
     GraphType // For TRawImage
     ;
@@ -407,7 +406,7 @@ end;
 
 function TMWindow.Freeze: Boolean;
 var
-  w,h,x,y : integer;
+  w,h : integer;
   PtrReturn : TRetData;
 begin
   if Self.FreezeState then
