@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 243
+  Left = 273
   Height = 557
-  Top = 302
+  Top = 233
   Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -391,6 +391,8 @@ object Form1: TForm1
         Height = 275
         Width = 145
         OnChange = FunctionListChange
+        OnDeletion = nil
+        OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit

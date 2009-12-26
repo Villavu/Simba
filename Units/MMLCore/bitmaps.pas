@@ -805,7 +805,7 @@ begin
   end;
 end;
 
-function BrigthnessAdjust(Col:  byte; br : integer): byte;inline;
+function BrightnessAdjust(Col:  byte; br : integer): byte;inline;
 var
   temp : integer;
 begin;
@@ -824,9 +824,9 @@ begin
   Ptr := Self.FData;
   for i := (h*w-1) downto 0 do
   begin;
-    Ptr^.r := BrigthnessAdjust(Ptr^.r,br);
-    Ptr^.g := BrigthnessAdjust(Ptr^.g,br);
-    Ptr^.b := BrigthnessAdjust(Ptr^.b,br);
+    Ptr^.r := BrightnessAdjust(Ptr^.r,br);
+    Ptr^.g := BrightnessAdjust(Ptr^.g,br);
+    Ptr^.b := BrightnessAdjust(Ptr^.b,br);
     inc(ptr);
   end;
 end;
@@ -841,9 +841,9 @@ begin
   PtrNew := TargetBitmap.FData;
   for i := (h*w-1) downto 0 do
   begin;
-    PtrNew^.r := BrigthnessAdjust(PtrOld^.r,br);
-    PtrNew^.g := BrigthnessAdjust(PtrOld^.g,br);
-    PtrNew^.b := BrigthnessAdjust(PtrOld^.b,br);
+    PtrNew^.r := BrightnessAdjust(PtrOld^.r,br);
+    PtrNew^.g := BrightnessAdjust(PtrOld^.g,br);
+    PtrNew^.b := BrightnessAdjust(PtrOld^.b,br);
     inc(ptrOld);
     inc(PtrNew);
   end;

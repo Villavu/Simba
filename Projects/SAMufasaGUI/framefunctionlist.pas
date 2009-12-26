@@ -15,14 +15,16 @@ type
     editSearchList: TEdit;
     FunctionList: TTreeView;
     procedure editSearchListChange(Sender: TObject);
+    procedure FunctionListDeletion(Sender: TObject; Node: TTreeNode);
     procedure FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
   private
-    procedure CreateFilterTree;
+    FFilterTree : TTreeView;
     procedure FilterTreeVis(Vis : boolean);
+    function GetFilterTree: TTreeView;
     { private declarations }
   public
     DraggingNode : TTreeNode;
@@ -32,7 +34,8 @@ type
     StartWordCompletion : TPoint;
     CompletionLine : string;
     CompletionStart : string;
-    FilterTree : TTreeView;
+    property FilterTree : TTreeView read GetFilterTree;
+    procedure LoadScriptTree( Script : String);
     function Find(Next : boolean) : boolean;
     { public declarations }
   end; 
@@ -49,33 +52,65 @@ begin
   Find(false);
 end;
 
+procedure TFunctionListFrame.FunctionListDeletion(Sender: TObject;
+  Node: TTreeNode);
+begin
+  if node.data <> nil then
+    StrDispose(PChar(Node.Data));
+end;
+
 procedure TFunctionListFrame.DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   CloseAction := caHide;
   Form1.MenuItemFunctionList.Checked := False;
 end;
 
-procedure TFunctionListFrame.CreateFilterTree;
-begin
-  if Assigned(FilterTree) then
-    exit;
-  FilterTree := TTreeView.Create(Self);
-  FilterTree.Parent := Self;
-  FilterTree.Visible := false;
-  FilterTree.SetBounds(FunctionList.Left,FunctionList.Top,FunctionList.Width,FunctionList.Height);
-  FilterTree.Align := alClient;
-  FilterTree.ReadOnly:= True;
-  FilterTree.ScrollBars:= ssAutoBoth;
-  FilterTree.OnMouseDown:= @FunctionListMouseDown;
-  FilterTree.OnMouseUp:= @FunctionListMouseUp;
-
-end;
 
 procedure TFunctionListFrame.FilterTreeVis(Vis: boolean);
 begin
-  CreateFilterTree;
   FunctionList.Visible:= not Vis;
   FilterTree.Visible := Vis;
+end;
+
+function TFunctionListFrame.GetFilterTree: TTreeView;
+begin
+  Result := FFilterTree;
+  if Assigned(Result) then
+    exit;
+  FFilterTree := TTreeView.Create(Self);
+  FFilterTree.Parent := Self;
+  FFilterTree.Visible := false;
+  FFilterTree.SetBounds(FunctionList.Left,FunctionList.Top,FunctionList.Width,FunctionList.Height);
+  FFilterTree.Align := alClient;
+  FFilterTree.ReadOnly:= True;
+  FFilterTree.ScrollBars:= ssAutoBoth;
+  FFilterTree.OnMouseDown:= FunctionList.OnMouseDown;
+  FFilterTree.OnMouseUp:= FunctionList.OnMouseUp;
+  FFilterTree.OnChange:= FunctionList.OnChange;
+  FFilterTree.OnExit := FunctionList.OnExit;
+  Result := FFilterTree;
+  //We do not want to delete the data from the FilterTree
+//  FilterTree.OnDeletion:= FunctionList.OnDeletion;
+end;
+
+procedure TFunctionListFrame.LoadScriptTree(Script: String);
+var
+  I : integer;
+  Analyzer : TScriptAnalyzer;
+  tmpNode : TTreeNode;
+begin
+  if FilterTree.Visible then
+    Writeln('Might get some acces violations now..');
+  ScriptNode.DeleteChildren;
+  Analyzer := TScriptAnalyzer.create;
+  Analyzer.ScriptToAnalyze:= Script;
+  Analyzer.analyze;
+  for i := 0 to Analyzer.MethodLen - 1 do
+  begin
+    tmpNode := FunctionList.Items.AddChild(ScriptNode,Analyzer.Methods[i].Name);
+    tmpNode.Data:= strnew(PChar(Analyzer.Methods[i].CreateMethodStr));
+  end;
+  ScriptNode.Expand(true);
 end;
 
 function TFunctionListFrame.Find(Next : boolean) : boolean;
@@ -89,7 +124,6 @@ var
   Node : TTreeNode;
   InsertStr : string;
 begin
-  CreateFilterTree;
   if(editSearchList.Text = '')then
   begin
     editSearchList.Color := clWhite;
@@ -101,6 +135,7 @@ begin
       Form1.CurrScript.SynEdit.SelEnd:= Form1.CurrScript.SynEdit.SelStart;
     end;
     FilterTreeVis(False);
+    ScriptNode.Expand(true);
     exit;
   end;
 

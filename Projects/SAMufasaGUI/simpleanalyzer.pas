@@ -326,40 +326,47 @@ begin
                     end;
       tkProcedure,
       tkFunction : begin;
-                      if not InMethod then
-                        InVarSection := False;
-                      if (not InTypes) and (not InVarSection) then
+                      if (InVarSection or (InMethod and InParams)) and ExpectingType then
                       begin;
-                        WaitingForResult := LastTK = tkFunction;
-                        if Lex.TokenID <> tkIdentifier then
+                        //Do nothing since the this procedure/function is a var ;-)
+                      end else
+                      begin;
+                        if not InMethod then
+                          InVarSection := False;
+                        if (not InTypes) and (not InVarSection) then
                         begin;
-                          ShowMessage('No method name -> exiting');
-                          exit;
-                        end;
-                        TempName := Lex.Token;
-                        Lex.NextNoJunk;
-                        if Lex.TokenID = tkRoundOpen then
-                          InParams := True
-                        else if Lex.TokenID = tkPoint then
-                        begin;
-//                          FormAnalyzer.SynEdit2.Lines.add('In class definition *cough*');
-                          Lex.NextNoJunk;
+                          WaitingForResult := LastTK = tkFunction;
+                          if Lex.TokenID <> tkIdentifier then
+                          begin;
+                            Writeln('Analyzer: No method name -> exiting');
+                            exit;
+                          end;
                           TempName := Lex.Token;
-                        end else if ((Lex.TokenID = tkSemicolon) xor WaitingForResult) or ((Lex.TokenID = tkColon) xor WaitingForResult)  then
-                        begin;
-                          InParams := False;
-                        end else
-                        begin;
-                          ShowMessage('Your missing some stuff in the procedure declaration');
-                          Exit;
-                        end;
-                        if InMethod then
-                          Method := Method.AddMethod(WaitingForResult,TempName)
-                        else
-                          Method := Self.AddMethod(WaitingForResult,TempName);
-                        InMethod := true;
-                        Method.BeginPos := LastPos - 5;
+                          Lex.NextNoJunk;
+                          if Lex.TokenID = tkRoundOpen then
+                            InParams := True
+                          else if Lex.TokenID = tkPoint then
+                          begin;
+                            Writeln('Analyzer: In class definition?');
+    //                          FormAnalyzer.SynEdit2.Lines.add('In class definition *cough*');
+                            Lex.NextNoJunk;
+                            TempName := Lex.Token;
+                          end else if ((Lex.TokenID = tkSemicolon) xor WaitingForResult) or ((Lex.TokenID = tkColon) xor WaitingForResult)  then
+                          begin;
+                            InParams := False;
+                          end else
+                          begin;
+                            Writeln('Analyzer: You''re missing some stuff in the procedure declaration');
+                            Exit;
+                          end;
+                          if InMethod then
+                            Method := Method.AddMethod(WaitingForResult,TempName)
+                          else
+                            Method := Self.AddMethod(WaitingForResult,TempName);
+                          InMethod := true;
+                          Method.BeginPos := LastPos - 5;
 
+                        end;
                       end;
                     end;
 

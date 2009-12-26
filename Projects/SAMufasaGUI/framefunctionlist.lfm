@@ -11,22 +11,23 @@ object FunctionListFrame: TFunctionListFrame
   DesignTop = 219
   object FunctionList: TTreeView
     Left = 0
-    Height = 300
+    Height = 306
     Top = 0
     Width = 115
     Align = alClient
-    DefaultItemHeight = 19
+    DefaultItemHeight = 15
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0
+    OnDeletion = FunctionListDeletion
     OnMouseDown = FunctionListMouseDown
     OnMouseUp = FunctionListMouseUp
     Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
   end
   object editSearchList: TEdit
     Left = 0
-    Height = 27
-    Top = 300
+    Height = 21
+    Top = 306
     Width = 115
     Align = alBottom
     OnChange = editSearchListChange
