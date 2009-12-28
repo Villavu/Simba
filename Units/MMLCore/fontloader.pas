@@ -135,7 +135,11 @@ begin
 end;
 
 destructor TMFonts.Destroy;
+var
+  i:integer;
 begin
+  for i := 0 to Fonts.Count - 1 do
+    TMFont(Fonts.Items[i]).Free;
   Fonts.Free;
 
   inherited;
@@ -177,6 +181,7 @@ var
   i: integer;
 begin
   i := GetFontIndex(Name);
+  TMFont(Fonts.Items[i]).Free;
   Fonts.Delete(i);
 end;
 
