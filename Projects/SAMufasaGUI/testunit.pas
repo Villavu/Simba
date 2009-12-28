@@ -300,7 +300,7 @@ type
     procedure SetEditActions;
     procedure DoSearch(Str: String; Next : boolean; HighlightAll : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
-    procedure RefreshTabSender(sender : integer);
+    procedure RefreshTabSender(sender : PtrInt);
   end;
 
   procedure formWriteln( S : String);
@@ -755,7 +755,7 @@ begin
   SetEditActions;
 end;
 
-procedure TForm1.RefreshTabSender(sender: integer);
+procedure TForm1.RefreshTabSender(sender: PtrInt);
 begin
   RefreshTab;
 end;
