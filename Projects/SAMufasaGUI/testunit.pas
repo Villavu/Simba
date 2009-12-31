@@ -38,7 +38,7 @@ uses
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
   SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
-  ocr;
+  ocr, updateform;
 
 type
 
@@ -92,6 +92,7 @@ type
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
     MenuExtra: TMenuItem;
+    UpdateMenuButton: TMenuItem;
     MenuitemFillFunctionList: TMenuItem;
     MenuItemFunctionList: TMenuItem;
     MenuItemHide: TMenuItem;
@@ -265,6 +266,7 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
+    procedure UpdateMenuButtonClick(Sender: TObject);
   private
     PopupTab : integer;
     SearchStart : TPoint;
@@ -408,6 +410,11 @@ procedure TForm1.Splitter1CanResize(Sender: TObject; var NewSize: Integer;
 begin
   if(NewSize > ScriptPanel.Width div 2)then
     NewSize := ScriptPanel.Width div 2
+end;
+
+procedure TForm1.UpdateMenuButtonClick(Sender: TObject);
+begin
+  SimbaUpdateForm.Show; { I don't see why Modal }
 end;
 
 procedure formWriteln( S : String);
