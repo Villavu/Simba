@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 395
+  Left = 273
   Height = 557
-  Top = 267
+  Top = 233
   Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -1201,6 +1201,10 @@ object Form1: TForm1
       object MenuitemFillFunctionList: TMenuItem
         Caption = 'Fill Function List'
         OnClick = MenuitemFillFunctionListClick
+      end
+      object UpdateMenuButton: TMenuItem
+        Caption = 'Update'
+        OnClick = UpdateMenuButtonClick
       end
     end
     object MenuHelp: TMenuItem

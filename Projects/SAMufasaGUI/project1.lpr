@@ -31,7 +31,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, LResources, testunit, colourhistory, About, internets, debugimage,
-  framefunctionlist, simpleanalyzer, updater;
+  framefunctionlist, simpleanalyzer, updater, updateform;
 
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
@@ -44,6 +44,7 @@ begin
   Application.CreateForm(TColourHistoryForm, ColourHistoryForm);
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TDebugImgForm, DebugImgForm);
+  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   Application.Run;
 end.
 
