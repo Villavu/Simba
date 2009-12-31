@@ -1,0 +1,20 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TSimbaUpdateForm','FORMDATA',[
+  'TPF0'#16'TSimbaUpdateForm'#15'SimbaUpdateForm'#4'Left'#3#131#1#6'Height'#3
+  +#135#1#3'Top'#3#242#0#5'Width'#3#211#1#7'Caption'#6#15'SimbaUpdateForm'#12'C'
+  +'lientHeight'#3#135#1#11'ClientWidth'#3#211#1#10'LCLVersion'#6#6'0.9.29'#0#12
+  +'TProgressBar'#16'DownloadProgress'#4'Left'#2#24#6'Height'#2#28#3'Top'#2'H'#5
+  +'Width'#3#157#1#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#6'Smooth'#9#8
+  +'TabOrder'#2#0#0#0#7'TButton'#12'UpdateButton'#4'Left'#2#24#6'Height'#2#25#3
+  +'Top'#2' '#5'Width'#3#157#1#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#7
+  +'Caption'#6#7'Update!'#7'OnClick'#7#17'UpdateButtonClick'#8'TabOrder'#2#1#0#0
+  +#7'TButton'#8'OkButton'#4'Left'#3'j'#1#6'Height'#2#25#3'Top'#3'X'#1#5'Width'
+  +#2'K'#7'Anchors'#11#7'akRight'#8'akBottom'#0#7'Caption'#6#2'Ok'#7'OnClick'#7
+  +#13'OkButtonClick'#8'TabOrder'#2#2#0#0#7'TButton'#12'CancelButton'#4'Left'#2
+  +#24#6'Height'#2#25#3'Top'#3'X'#1#5'Width'#2'K'#7'Anchors'#11#6'akLeft'#8'akB'
+  +'ottom'#0#7'Caption'#6#6'Cancel'#7'OnClick'#7#17'CancelButtonClick'#8'TabOrd'
+  +'er'#2#3#0#0#5'TMemo'#9'UpdateLog'#4'Left'#2#24#6'Height'#3#199#0#3'Top'#3
+  +#128#0#5'Width'#3#157#1#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBott'
+  +'om'#0#8'TabOrder'#2#4#0#0#0
+]);

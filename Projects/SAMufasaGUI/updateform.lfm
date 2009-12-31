@@ -1,0 +1,57 @@
+object SimbaUpdateForm: TSimbaUpdateForm
+  Left = 387
+  Height = 391
+  Top = 242
+  Width = 467
+  Caption = 'SimbaUpdateForm'
+  ClientHeight = 391
+  ClientWidth = 467
+  LCLVersion = '0.9.29'
+  object DownloadProgress: TProgressBar
+    Left = 24
+    Height = 28
+    Top = 72
+    Width = 413
+    Anchors = [akTop, akLeft, akRight]
+    Smooth = True
+    TabOrder = 0
+  end
+  object UpdateButton: TButton
+    Left = 24
+    Height = 25
+    Top = 32
+    Width = 413
+    Anchors = [akTop, akLeft, akRight]
+    Caption = 'Update!'
+    OnClick = UpdateButtonClick
+    TabOrder = 1
+  end
+  object OkButton: TButton
+    Left = 362
+    Height = 25
+    Top = 344
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Ok'
+    OnClick = OkButtonClick
+    TabOrder = 2
+  end
+  object CancelButton: TButton
+    Left = 24
+    Height = 25
+    Top = 344
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Caption = 'Cancel'
+    OnClick = CancelButtonClick
+    TabOrder = 3
+  end
+  object UpdateLog: TMemo
+    Left = 24
+    Height = 199
+    Top = 128
+    Width = 413
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    TabOrder = 4
+  end
+end
