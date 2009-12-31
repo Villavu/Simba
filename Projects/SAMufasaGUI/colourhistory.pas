@@ -74,8 +74,7 @@ type
     procedure DeleteSelected(Sender: TObject);
     procedure AddColObj(c: TColourPickerObject; autoName: Boolean);
 
-    constructor Create(TheOwner: TComponent); override;
-    destructor Destroy; override;
+
     procedure CHSaveClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure OkButtonClick(Sender: TObject);
@@ -90,6 +89,9 @@ type
     procedure SetNodeBitmap(N: TTreeNode);
     procedure SaveToXML(s: String);
     procedure XML2Tree(XMLDoc: TXMLDocument);
+  public
+    constructor Create(TheOwner: TComponent); override;
+    destructor Destroy; override;
   public
     IndexSelected: Integer;
     { public declarations }
@@ -179,7 +181,6 @@ end;
 procedure TColourHistoryForm.DeleteSelected(Sender: TObject);
 
 var
-   i:integer;
    e: TTreeNodesEnumerator;
 
 begin
