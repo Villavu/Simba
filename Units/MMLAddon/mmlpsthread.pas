@@ -112,6 +112,7 @@ uses
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
+  internets, // internets
   strutils,
   input,
   tpa, //Tpa stuff
@@ -225,6 +226,7 @@ end;
 {$I PSInc/Wrappers/keyboard.inc}
 {$I PSInc/Wrappers/dtm.inc}
 {$I PSInc/Wrappers/ocr.inc}
+{$I PSInc/Wrappers/internets.inc}
 
 procedure TMMLPSThread.OnProcessDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;

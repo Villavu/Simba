@@ -98,8 +98,11 @@ AddFunction(@Random,'function Random(Int : integer): integer;');
 
 {string}
 AddFunction(@Capitalize,'function Capitalize(str : string) : string;');
+
 {web}
 AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
+AddFunction(@ps_GetPage,'function GetPage(url : string): string;');
+
 
 {Color + Color Finders}
 SetCurrSection('Color');

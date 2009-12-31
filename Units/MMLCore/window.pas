@@ -330,7 +330,7 @@ begin
       Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
       Self.XWindowImage := XGetImage(Self.XDisplay, Self.curWindow, xs, ys, width, height, AllPlanes, ZPixmap);
-      if QWord(Self.XWindowImage) = 0 then
+      if Self.XWindowImage = nil then
       begin
         Writeln('ReturnData: XGetImage Error. Dumping data now:');
         Writeln('xs, ys, width, height: ' + inttostr(xs) + ', '  + inttostr(ys) +
@@ -377,7 +377,7 @@ begin
   if not Self.XImageFreed then
   begin
     Self.XImageFreed:=True;
-    if(QWord(Self.XWindowImage) <> 0) then      // 0, nil?
+    if(Self.XWindowImage <> nil) then
     begin
       XDestroyImage(Self.XWindowImage);
     end;
