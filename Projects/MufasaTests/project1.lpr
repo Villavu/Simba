@@ -53,6 +53,17 @@ begin
   result.c[0] := 255;
 end;
 
+var
+   aTime: dword;
+
+function myChange: boolean;
+begin
+  if gettickcount-atime > 1000 then
+    result := true
+  else
+    result := false;
+end;
+
 procedure MufasaTests.DoRun;
 
 
@@ -98,12 +109,20 @@ begin
     Exit;
   end;
 
+  atime:=gettickcount;
+
   up := TMMLFileDownloader.Create;
   up.FileURL:='http://www.villavu.com/pics/desktop.png';
   up.ReplacementFile:='test.png';
-  up.DownloadAndSave;
-  up.Replace;
-  up.Free;
+  up.OnBeat:=@myChange;
+  try
+    up.DownloadAndSave;
+    up.Replace;
+  finally
+    writeln(inttostr(gettickcount-atime));
+    up.Free;
+  end;
+
 
 
 
