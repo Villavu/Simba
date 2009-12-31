@@ -10,7 +10,8 @@ uses
   Forms,Interfaces,
   LCLIntf,
   Client,
-  bitmaps,{x ,}mufasatypes,dtm,dtmutil, ocrutil ,graphics ,colour_conv,math
+  bitmaps,{x ,}mufasatypes,dtm,dtmutil, ocrutil ,graphics ,colour_conv,math,
+  updater
 
 
   { you can add units after this };
@@ -55,7 +56,7 @@ end;
 procedure MufasaTests.DoRun;
 
 
-const
+{const
     ocr_Limit_High = 191;
     ocr_Limit_Low = 65;
 
@@ -66,18 +67,20 @@ const
     ocr_Blue = 16776960;
     ocr_ItemC = 16744447;
 
-    ocr_Purple = 8388736;
+    ocr_Purple = 8388736;   }
 
 var
   ErrorMsg: String;
-  Time: DWord;
+{  Time: DWord;
   C: TClient;
   I, w, h,x,y: Integer;
   dtm: pdtm;
   p:tpointarray;
   bmp, bmprs: TMufasaBitmap;
+  tbmp: TBitmap;
   r,g,b:integer;
-  t:Dword;
+  t:Dword;    }
+  up: TMMLFileDownloader;
 
 begin
   // quick check parameters
@@ -95,6 +98,14 @@ begin
     Exit;
   end;
 
+  up := TMMLFileDownloader.Create;
+  up.FileURL:='http://www.villavu.com/pics/desktop.png';
+  up.ReplacementFile:='test.png';
+  up.DownloadAndSave;
+  up.Replace;
+  up.Free;
+
+
 
   { clOlive = false point }
   { clSilver = false shadow }
@@ -102,140 +113,36 @@ begin
 
   { add your program here }
 
+{  tbmp:=TBitmap.Create;
+  tbmp.LoadFromFile('/home/merlijn/Programs/mufasa/pics/16.bmp');
 
   bmprs := TMufasaBitmap.Create;
-  bmprs.LoadFromFile('/home/merlijn/Programs/mufasa/pics/16.bmp');
-  C := TClient.Create;
-  C.MWindow.SetTarget(bmprs);
-  C.MWindow.GetDimensions(w, h);
+  bmprs.SetSize(10,10);
 
-  writeln(inttostr(clpurple));
-
-  bmp := TMufasaBitmap.Create;
-  bmp.CopyClientToBitmap(C.MWindow, True, 0, 0, 450, 50);
-
-  t:=gettickcount;
-
-  for y := 0 to bmp.Height - 1 do
-    for x := 0 to bmp.Width - 1 do
+  bmprs.LoadFromRawImage(tbmp.RawImage);
+  tbmp.Free;
+  tbmp := bmprs.ToTBitmap;
+                                  }
+ { for y := 0 to tbmp.Height -1 do
+    for x := 0 to tbmp.width -1 do
     begin
-      colortorgb(bmp.fastgetpixel(x,y),r,g,b);
-      // the abs(g-b) < 15 seems to help heaps when taking out crap points
-      if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High){ and (abs(g-b) < 15)} then
-      begin
-        bmp.fastsetpixel(x,y,ocr_White);
-        continue;
-      end;
-      if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b > ocr_Limit_High) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Blue);
-        continue;
-      end;
-      if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Green);
-        continue;
-      end;
-
-      // false results with fire
-      if(r > ocr_Limit_High) and (g > 100) and (g < ocr_Limit_High) and (b > 40) and (b < 90) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_ItemC);
-        continue;
-      end;
-      if(r > ocr_Limit_High) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Yellow);
-        continue;
-      end;
-      // better use g < 40 than ocr_Limit_Low imo
-      if (r > ocr_Limit_High) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Red);
-        continue;
-      end;
-
-      if (r < ocr_Limit_Low) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
-      begin
-        bmp.FastSetPixel(x,y, ocr_Purple);
-        continue;
-      end;
-
-      bmp.fastsetpixel(x,y,0);
-    end;
-
-    // increase height by 1, so our algo works better. (shadow)
-    bmp.SetSize(Bmp.Width, Bmp.Height+1);
-    for x := 0 to bmp.width -1 do
-      bmp.fastsetpixel(x,bmp.height-1,0);
-
-   for y := 0 to bmp.Height - 2 do
-     for x := 0 to bmp.Width - 2 do
-     begin
-       if bmp.fastgetpixel(x,y) = clPurple then
-         continue;
-       if bmp.fastgetpixel(x,y) = clBlack then
-         continue;
-       if (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x+1,y+1)) and (bmp.fastgetpixel(x+1,y+1) <> clpurple) then
-         bmp.fastsetpixel(x,y,{clAqua}0);
-     end;
-
-     { Optional - remove false shadow }
-   for y := bmp.Height - 1 downto 1 do
-     for x := bmp.Width - 1 downto 1 do
-     begin
-       if bmp.fastgetpixel(x,y) <> clPurple then
-         continue;
-       if bmp.fastgetpixel(x,y) = bmp.fastgetpixel(x-1,y-1) then
-       begin
-         bmp.fastsetpixel(x,y,clSilver);
-         continue;
-       end;
-       if bmp.fastgetpixel(x-1,y-1) = 0 then
-         bmp.fastsetpixel(x,y,clLime);
-     end;
-
-   { remove bad points }
-   for y := bmp.Height - 2 downto 1 do
-     for x := bmp.Width - 2 downto 1 do
-     begin
-       if bmp.fastgetpixel(x,y) = clPurple then
-         continue;
-       if bmp.fastgetpixel(x,y) = clBlack then
-         continue;
-       if (bmp.fastgetpixel(x,y) = bmp.fastgetpixel(x+1,y+1) ) then
-         continue;
-
-       if bmp.fastgetpixel(x+1,y+1) <> clPurple then
-       begin
-         bmp.fastsetpixel(x,y,clOlive);
-         continue;
-       end;
-     end;
-
-   { Dangerous removes all pixels that had no pixels on x-1 or x+1}
- {  for y := 0 to bmp.Height - 2 do
-     for x := 1 to bmp.Width - 2 do
-     begin
-       if bmp.fastgetpixel(x,y) = clBlack then continue;
-       if bmp.fastgetpixel(x,y) = clPurple then continue;
-       if bmp.fastgetpixel(x,y) = clOlive then continue;
-       if bmp.fastgetpixel(x,y) = clSilver then continue;
-       if bmp.fastgetpixel(x,y) = clLime then continue;
-       if (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x+1,y) )  and
-          (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x-1,y) ) then
-          bmp.fastsetpixel(x,y,clFuchsia);
-     end;                                }
-
-    writeln(inttostr(gettickcount-t));
+      writeln(format('(%d, %d) = %d , %d', [x,y,tbmp.Canvas.pixels[x,y],bmprs.FastGetPixel(x,y)]));
+      colortorgb(tbmp.Canvas.pixels[x,y],r,g,b);
+      writeln(format('%d,%d,%d', [r,g,b]));
+      colortorgb(bmprs.FastGetPixel(x,y),r,g,b);
+      writeln(format('%d,%d,%d', [r,g,b]));
+    end;     }
+  //bmprs.LoadFromFile('/home/merlijn/Programs/mufasa/pics/16.bmp');
+  {C := TClient.Create;
+  C.MWindow.SetTarget(bmprs);    }
 
 
-
-
-  bmp.SaveToFile('/tmp/output.bmp');
+ { bmp.SaveToFile('/tmp/output.bmp');
+  tbmp.SaveToFile('/tmp/output2.bmp');
     //bmp.OnDestroy:=nil;
   bmp.Free;
-  C.Free;
+  tbmp.Free;  }
+ // C.Free;
 
   // stop program loop
   Terminate;

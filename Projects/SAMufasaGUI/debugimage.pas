@@ -84,6 +84,7 @@ begin
   DrawImage.Canvas.Brush.Color:= clBlack;
   DrawImage.Canvas.Pen.Color:= clBlack;
   DrawImage.Canvas.Rectangle(0,0,DrawImage.Width,DrawImage.Height);
+  DrawImage.Repaint;
 end;
 
 procedure TDebugImgForm.DrawBitmap;
@@ -97,6 +98,7 @@ begin
   Bitmap := Graphics.TBitmap.Create;
   Bitmap.LoadFromRawImage(Rawimage,false);
   DrawImage.Canvas.Draw(0,0,Bitmap);
+  DrawImage.Repaint;
   Bitmap.Free;
 end;
 
