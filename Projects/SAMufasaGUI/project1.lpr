@@ -30,14 +30,11 @@ uses
   cthreads, cmem,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, LResources, testunit, colourhistory, About, internets, debugimage,
+  Forms, testunit, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform;
 
-{$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
-
 begin
-  {$I project1.lrs}
-  Application.Title:='Mufasa Stand Alone';
+  Application.Title:='Simba';
   Application.Initialize;
 
   Application.CreateForm(TForm1, Form1);

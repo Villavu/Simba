@@ -3,6 +3,7 @@ object SimbaUpdateForm: TSimbaUpdateForm
   Height = 391
   Top = 242
   Width = 467
+  ActiveControl = UpdateButton
   Caption = 'SimbaUpdateForm'
   ClientHeight = 391
   ClientWidth = 467
