@@ -38,7 +38,7 @@
         <CursorPos X="7" Y="124"/>
         <TopLine Value="99"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="120"/>
+        <UsageCount Value="121"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -271,8 +271,8 @@
       <Unit30>
         <Filename Value="../../Units/MMLAddon/updater.pas"/>
         <UnitName Value="updater"/>
-        <CursorPos X="13" Y="157"/>
-        <TopLine Value="139"/>
+        <CursorPos X="18" Y="199"/>
+        <TopLine Value="174"/>
         <EditorIndex Value="4"/>
         <UsageCount Value="15"/>
         <Loaded Value="True"/>

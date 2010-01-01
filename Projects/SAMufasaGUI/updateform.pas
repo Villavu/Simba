@@ -82,13 +82,17 @@ procedure TSimbaUpdateForm.PerformUpdate;
 begin
   Updater := TMMLFileDownloader.Create;
 
+  FCancelling := False;
+  FCancelled := False;
+
   // Make this a setting later
-  Updater.FileURL := 'http://old.villavu.com/merlijn/Simba';
+  Updater.FileURL := 'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};
 
   // Dynamic
 
-  Updater.ReplacementFile := 'Simba';
-  Updater.OnBeat:=@Self.OnUpdateBeat;
+
+  Updater.ReplacementFile := ApplicationName{$IFDEF WINDOWS} +'.exe'{$ENDIF};
+  Updater.OnBeat := @Self.OnUpdateBeat;
 
   Self.UpdateLog.Lines.Add('Starting download of ' + Updater.FileURL + ' ...');
   try
@@ -103,6 +107,7 @@ begin
     FCancelling := False;
     FCancelled := True;
     Self.UpdateLog.Lines.Add('Download stopped ...');
+    // more detailed info
     writeln('EXCEPTION IN UPDATEFORM: We either hit Cancel, or something went wrong with files');
   end;
   Self.UpdateLog.Lines.Add('Done ...');
