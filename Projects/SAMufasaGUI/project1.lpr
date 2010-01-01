@@ -30,10 +30,13 @@ uses
   cthreads, cmem,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
+  LResources ,
   Forms, testunit, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform;
+{$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
 begin
+  {$I project1.lrs}
   Application.Title:='Simba';
   Application.Initialize;
 
