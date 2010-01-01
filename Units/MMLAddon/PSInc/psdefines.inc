@@ -26,6 +26,7 @@ PSScript.Defines.Add('CPU386');
 {$ENDIF }
 PSScript.Defines.Add('MUFASA');
 PSScript.Defines.Add('COGAT');
+PSScript.Defines.Add('SIMBA');
 PSScript.Defines.Add('RAYMONDPOWNS');
 {$IFDEF MSWINDOWS }
 PSScript.Defines.Add('MSWINDOWS');

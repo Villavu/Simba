@@ -5,7 +5,10 @@ unit updater;
 interface
 
 uses
-  Classes, SysUtils, httpsend,blcksock;
+  Classes, SysUtils, httpsend,blcksock
+  {$IFDEF LINUX}
+  ,unixutils    // for chmod
+  {$ENDIF};
 
 type
   {  TMMLUpdateThread = class(TThread)
@@ -14,7 +17,7 @@ type
           destructor Destroy; override;
     end;       }
     TMemory = pointer;
-    TFunctionBoolean = function: boolean;
+    TMMLFunctionBoolean = function: boolean of object;
 
 
     TMMLFileDownloader = class(TObject)
@@ -25,8 +28,8 @@ type
            HTTPSend: THTTPSend;
            FFileSize: Integer;
            FDownloaded: Boolean;
-           FOnChange: TFunctionBoolean;
-           FOnBeat: TFunctionBoolean;
+           FOnChange: TMMLFunctionBoolean;
+           FOnBeat: TMMLFunctionBoolean;
 
          public
             constructor Create;
@@ -53,10 +56,10 @@ type
             { If either of these events return "True", an exception is thrown
               and the download is cancelled. This way we can easily `cancel'
               a download. }
-            property OnChange: TFunctionBoolean read FOnChange write FOnChange;
+            property OnChange: TMMLFunctionBoolean read FOnChange write FOnChange;
 
             { Called every 50ms }
-            property OnBeat: TFunctionBoolean read FOnBeat write FOnBeat;
+            property OnBeat: TMMLFunctionBoolean read FOnBeat write FOnBeat;
 
             function GetPercentage: Integer;
          private
@@ -105,7 +108,7 @@ procedure TMMLFileDownloader.OnHeartBeat(Sender: TObject);
 begin
   if Assigned(FOnBeat) then
     if FOnBeat() then
-      raise Exception.Create('OnChange event called for a quit');
+      raise Exception.Create('OnBeat event called for a quit');
 end;
 
 procedure TMMLFileDownloader.OnMonitor(Sender: TObject; Writing: Boolean;
@@ -122,7 +125,6 @@ begin
   if Assigned(FOnChange) then
     if FOnChange() then
       raise Exception.Create('OnChange event called for a quit');
- // writeln('Percent done: ' + IntToStr(GetPercentage));
 end;
 
 function TMMLFileDownloader.GetPercentage: Integer;
@@ -165,25 +167,48 @@ begin
     FDownloaded := True;
   except
     writeln('DownloadAndSave: Exception Occured');
-    HTTPSend.Free;
-    Response.Free;
+    Result := False;
   end;
+  HTTPSend.Free;
+  Response.Free;
+  if not result then
+    Raise Exception.Create('Throwing it so we can catch it later');
 end;
 
 function TMMLFileDownloader.Replace: Boolean;
 begin
+  { Change to messages + Exit(False) instead of exceptions? }
   if not Downloaded then
-    raise Exception.Create('Nothing downloaded');
+  begin
+    writeln('Nothing downloaded');
+    exit(False);
+   // raise Exception.Create('Nothing downloaded');
+  end;
   if FReplacementFile = '' then
-    raise Exception.Create('ReplacementFile not set');
+  begin
+    writeln('ReplacementFile not se');
+    exit(False);
+    //raise Exception.Create('ReplacementFile not set');
+  end;
   if not FileExists(FReplacementFile) then
+  begin
+    writeln('ReplacementFile not found');
+    exit(False);
     raise Exception.Create('ReplacementFile not found');
+  end;
   if not FileExists(FReplacementFile+ '_') then
+  begin
+    writeln('ReplacementFile + _ not found');
+    exit(False);
     raise Exception.Create('ReplacementFile + _ not found');
-
+  end;
   RenameFile(FReplacementFile, FReplacementFile+'_old_');
   RenameFile(FReplacementFile+'_', FReplacementFile);
   DeleteFile(FReplacementFile+'_old_');
+  {$IFDEF LINUX}
+  Chmod(FReplacementFile, PermissionBits[0] or PermissionBits[1] or PermissionBits[2]);
+  {$ENDIF}
+
 end;
 
 constructor TMMLFileDownloader.Create;
@@ -194,15 +219,13 @@ begin
   FDownloaded := False;
   FReplacementFile:='';
   FFileURL := '';
-
-
+  FOnChange := nil;
+  FOnBeat := nil;
 end;
 
 
 destructor TMMLFileDownloader.Destroy;
 begin
-
-
 
   inherited;
 end;
