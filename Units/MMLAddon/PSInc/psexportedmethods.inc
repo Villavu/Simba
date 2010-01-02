@@ -60,7 +60,7 @@ AddFunction(@Unfreeze, 'function unfreeze: boolean;');
 AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(out w, h:integer);');
 AddFunction(@SetTargetBitmap,'procedure SetTargetBitmap(Bitmap : integer);');
 AddFunction(@SetDesktopAsClient,'procedure SetDesktopAsClient');
-AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; Size: TPoint);');
+AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; w, h: integer);');
 AddFunction(@ActivateClient, 'procedure activateclient;');
 
 {files}

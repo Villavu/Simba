@@ -47,9 +47,9 @@ begin
   result := CurrThread.Client.MWindow.Unfreeze;
 end;
 
-procedure SetTargetArray(P: Integer; Size: TPoint);
+procedure SetTargetArray(P: Integer; w, h: integer);
 begin
-  CurrThread.Client.MWindow.SetTarget(PRGB32(P), Size);
+  CurrThread.Client.MWindow.SetTarget(PRGB32(P), point(w,h));
 end;
 
 procedure activateclient;
