@@ -2,8 +2,15 @@ program new;
 
 {.LoadDLL libsmart}
 
-
+var
+  w,h:integer;
 begin
   SmartSetup('http://world19.runescape.com/', 'plugin.js?param=o0,a1,m0', 765, 503);
-  Wait(5000);
+  SetTargetArray(SmartImageArray, 765,503);
+  getclientdimensions(w,h);
+  writeln(inttostr(w) + ' , ' + inttostr(h));
+  if findcolortolerance(w,h,clwhite,0,0,764,502,300) then
+    smartmovemouse(w,h);
+  savescreenshot('/tmp/smart.bmp');
+  //Wait(5000);
 end.

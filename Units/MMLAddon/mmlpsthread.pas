@@ -265,14 +265,17 @@ procedure TMMLPSThread.OnCompile(Sender: TPSScript);
 var
   i,ii : integer;
 begin
+  {$I PSInc/pscompile.inc}
+
   for i := high(PluginsToLoad) downto 0 do
     for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
-      PSScript.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[i].FuncPtr,
-                           PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[i].FuncStr, cdStdCall);
+      PSScript.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncPtr,
+                           PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncStr, cdStdCall);
+
   for i := 0 to high(VirtualKeys) do
     PSScript.Comp.AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
   // Here we add all the Consts/Types to the engine.
-  {$I PSInc/pscompile.inc}
+
   //Export all the methods
   for i := 0 to high(ExportedMethods) do
     PSScript.AddFunction(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl);

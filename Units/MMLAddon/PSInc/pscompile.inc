@@ -40,6 +40,7 @@ Sender.Comp.AddTypeS('pDTM','record l: Integer;p: TPointArray;c, t, asz, ash: TI
 Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended;');
 Sender.Comp.AddTypeS('TStringArray','Array of string;');
 Sender.Comp.AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
+Sender.Comp.AddTypeS('Pointer', 'Integer');
 
 
 Sender.Comp.AddConstantN('mouse_Right','integer').SetInt(ps_mouse_right); //0
