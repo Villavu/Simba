@@ -49,7 +49,7 @@ end;
 
 procedure SetTargetArray(P: Integer; w, h: integer);
 begin
-  CurrThread.Client.MWindow.SetTarget(PRGB32(P), point(w,h));
+  CurrThread.Client.MWindow.SetTarget(PRGB32(P), classes.point(w,h));
 end;
 
 procedure activateclient;
