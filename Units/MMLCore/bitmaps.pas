@@ -395,7 +395,6 @@ var
 
 begin
   Result := TBitmap.Create;
-  Result.SetSize(self.Width, self.Height);
   ArrDataToRawImage(Self.Fdata, point(self.width,self.height), tr);
   Result.LoadFromRawImage(tr, false);
 end;
