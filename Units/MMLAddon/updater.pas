@@ -194,13 +194,13 @@ begin
   begin
     writeln('ReplacementFile not found');
     exit(False);
-    raise Exception.Create('ReplacementFile not found');
+    //raise Exception.Create('ReplacementFile not found');
   end;
   if not FileExists(FReplacementFile+ '_') then
   begin
     writeln('ReplacementFile + _ not found');
     exit(False);
-    raise Exception.Create('ReplacementFile + _ not found');
+    //raise Exception.Create('ReplacementFile + _ not found');
   end;
   RenameFile(FReplacementFile, FReplacementFile+'_old_');
   RenameFile(FReplacementFile+'_', FReplacementFile);

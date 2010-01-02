@@ -110,7 +110,8 @@ begin
     // more detailed info
     writeln('EXCEPTION IN UPDATEFORM: We either hit Cancel, or something went wrong with files');
   end;
-  Self.UpdateLog.Lines.Add('Done ...');
+  Self.UpdateLog.Lines.Add('Done ... ');
+  Self.UpdateLog.Lines.Add('Please restart all currently running Simba binaries.');
 end;
 
 initialization
