@@ -186,6 +186,7 @@ begin
   { Copy the client to ImageMain }
   bmp:=TMufasaBitmap.Create;
   bmp.CopyClientToBitmap(Window, true, 0, 0, w-1, h-1);
+  ImageMain.Picture.Bitmap.Free;
   ImageMain.Picture.Bitmap := bmp.ToTBitmap;
   bmp.Free;
 
