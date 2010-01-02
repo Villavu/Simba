@@ -100,6 +100,7 @@ AddFunction(@Random,'function Random(Int : integer): integer;');
 AddFunction(@Capitalize,'function Capitalize(str : string) : string;');
 
 {web}
+SetCurrSection('Web');
 AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 AddFunction(@ps_GetPage,'function GetPage(url : string): string;');
 
