@@ -5,7 +5,7 @@ object Form1: TForm1
   Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
-  ClientHeight = 532
+  ClientHeight = 537
   ClientWidth = 734
   KeyPreview = True
   Menu = MainMenu1
@@ -165,7 +165,7 @@ object Form1: TForm1
     end
     object UpdateButton: TToolButton
       Left = 344
-      Hint = 'There is an Update is available'
+      Hint = 'A new update is available'
       Top = 2
       Caption = 'UpdateButton'
       ImageIndex = 1
@@ -175,8 +175,8 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 21
-    Top = 511
+    Height = 23
+    Top = 514
     Width = 734
     Panels = <    
       item
@@ -194,7 +194,7 @@ object Form1: TForm1
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 357
+    Top = 360
     Width = 734
     Align = alBottom
     ClientHeight = 154
@@ -214,19 +214,19 @@ object Form1: TForm1
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 352
+    Top = 355
     Width = 734
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 328
+    Height = 331
     Top = 24
     Width = 734
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 328
+    ClientHeight = 331
     ClientWidth = 734
     DockSite = True
     TabOrder = 4
@@ -234,7 +234,7 @@ object Form1: TForm1
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
       Left = 150
-      Height = 293
+      Height = 296
       Top = 0
       Width = 584
       Align = alClient
@@ -253,7 +253,7 @@ object Form1: TForm1
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 293
+      Top = 296
       Width = 734
       Align = alBottom
       BevelOuter = bvSpace
@@ -349,7 +349,7 @@ object Form1: TForm1
       end
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 27
+        Height = 21
         Top = 6
         Width = 174
         EditLabel.AnchorSideLeft.Control = LabeledEditSearch
@@ -357,10 +357,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 67
-        EditLabel.Height = 18
-        EditLabel.Top = 10
-        EditLabel.Width = 34
+        EditLabel.Left = 73
+        EditLabel.Height = 14
+        EditLabel.Top = 9
+        EditLabel.Width = 28
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -373,9 +373,9 @@ object Form1: TForm1
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 22
+        Height = 17
         Top = 7
-        Width = 97
+        Width = 72
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -383,31 +383,29 @@ object Form1: TForm1
     end
     object Splitter1: TSplitter
       Left = 145
-      Height = 293
+      Height = 296
       Top = 0
       Width = 5
       OnCanResize = Splitter1CanResize
       Visible = False
     end
     inline frmFunctionList: TFunctionListFrame
-      Height = 293
+      Height = 296
       Width = 145
-      ClientHeight = 293
+      ClientHeight = 296
       ClientWidth = 145
       TabOrder = 3
       Visible = False
       inherited FunctionList: TTreeView
-        Height = 266
+        Height = 275
         Width = 145
-        DefaultItemHeight = 19
         OnChange = FunctionListChange
         OnDeletion = nil
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Height = 27
-        Top = 266
+        Top = 275
         Width = 145
         OnExit = editSearchListExit
         OnKeyPress = editSearchListKeyPress

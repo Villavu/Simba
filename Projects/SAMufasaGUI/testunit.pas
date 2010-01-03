@@ -41,7 +41,7 @@ uses
   ocr, updateform;
 
 const
-  SimbaVersion = 364;
+  SimbaVersion = 365;
 
 type
 
@@ -428,8 +428,10 @@ end;
 procedure TForm1.UpdateTimerCheck(Sender: TObject);
 begin
   if SimbaUpdateForm.CanUpdate then
+  begin;
     UpdateButton.Visible:=True;
-
+    formWriteln('A new update of Simba is available!');
+  end;
   { Only check once, at startup }
   UpdateTimer.Enabled:=False;
 end;
@@ -1156,6 +1158,13 @@ begin
   DebugTimer.Enabled:= false;
   {$endif}
   Application.QueueAsyncCall(@RefreshTabSender,0);
+  {$ifdef mswindows}
+  if FileExists(Application.ExeName+'_old_') then
+  begin
+    Writeln('We still have an out-dated exe file in the dir, lets remove!');
+    Writeln(format('Sucesfully deleted the file? %s',[BoolToStr(DeleteFile(Application.ExeName + '_old_'),true)]));
+  end;
+  {$endif}
 //  Ed
 end;
 
