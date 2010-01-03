@@ -40,6 +40,9 @@ uses
   SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
   ocr, updateform;
 
+const
+  SimbaVersion = 363;
+
 type
 
   { TMufasaTab }
@@ -92,6 +95,9 @@ type
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
     MenuExtra: TMenuItem;
+    UpdateTimer: TTimer;
+    ToolButton3: TToolButton;
+    UpdateButton: TToolButton;
     UpdateMenuButton: TMenuItem;
     MenuitemFillFunctionList: TMenuItem;
     MenuItemFunctionList: TMenuItem;
@@ -184,7 +190,6 @@ type
     TB_PickColour: TToolButton;
     TB_SelectClient: TToolButton;
     ToolButton8: TToolButton;
-    TB_Convert: TToolButton;
     MTrayIcon: TTrayIcon;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
@@ -266,7 +271,9 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
+    procedure UpdateButtonClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
+    procedure UpdateTimerCheck(Sender: TObject);
   private
     PopupTab : integer;
     SearchStart : TPoint;
@@ -410,6 +417,21 @@ procedure TForm1.Splitter1CanResize(Sender: TObject; var NewSize: Integer;
 begin
   if(NewSize > ScriptPanel.Width div 2)then
     NewSize := ScriptPanel.Width div 2
+end;
+
+procedure TForm1.UpdateButtonClick(Sender: TObject);
+begin
+  SimbaUpdateForm.Show;
+  UpdateButton.Visible:=False;
+end;
+
+procedure TForm1.UpdateTimerCheck(Sender: TObject);
+begin
+  if SimbaUpdateForm.CanUpdate then
+    UpdateButton.Visible:=True;
+
+  { Only check once, at startup }
+  UpdateTimer.Enabled:=False;
 end;
 
 procedure TForm1.UpdateMenuButtonClick(Sender: TObject);
