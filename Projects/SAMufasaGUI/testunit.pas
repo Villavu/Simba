@@ -41,7 +41,7 @@ uses
   ocr, updateform;
 
 const
-  SimbaVersion = 363;
+  SimbaVersion = 364;
 
 type
 
@@ -501,6 +501,7 @@ begin
     // only copies the current set window handle.
     ScriptThread.Client.MWindow.SetWindow(Self.Window);
 
+
     // Copy our current fonts
     if not assigned(Self.OCR_Fonts) then
     begin
@@ -508,10 +509,6 @@ begin
       OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
     end;
     ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
-
-//    writeln(IncludeTrailingPathDelimiter('TestUnit: OCR Path... ' +
-    {ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + DS + 'Fonts' + DS);
-    ScriptThread.Client.MOCR.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS, false);}
 
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;

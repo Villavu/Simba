@@ -61,7 +61,7 @@ begin
   inherited Create;
 
   MWindow := TMWindow.Create;
-  MInput := TMInput.Create(Self);
+  MInput := TMInput.Create(MWindow);
   MFiles := TMFiles.Create;
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(self);
