@@ -71,6 +71,7 @@ type
             function SetTarget(Window: THandle; NewType: TTargetWindowMode): integer; overload;
             function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
             function SetTarget(Bitmap : TMufasaBitmap) : integer;overload;
+            function TargetValid: Boolean;
 
             procedure SetWindow(Window: TMWindow);
             procedure SetDesktop;
@@ -211,6 +212,8 @@ begin
   if FreezeState then
     if FrozenData <> nil then
       FreeMem(FrozenData);
+
+  FreeReturnData;  // checks if it is freed or not. if it is not freed, it frees.
   {$IFDEF LINUX}
   XCloseDisplay(Self.XDisplay);
   {$ENDIF}
@@ -254,6 +257,30 @@ begin
   Self.SetTarget(Self.DesktopWindow);
   {$ELSE}
   Self.SetTarget(Self.DesktopHWND, w_Window);
+  {$ENDIF}
+end;
+
+
+function TMWindow.TargetValid: Boolean;
+{$IFDEF LINUX}
+var
+  old_handler: TXErrorHandler;
+  Attrib: TXWindowAttributes;
+{$ENDIF}
+begin
+  {$IFDEF LINUX}
+  old_handler := XSetErrorHandler(@MufasaXErrorHandler);
+
+  { There must be a better way to do this, at least with less overhead. }
+  if XGetWindowAttributes(Self.XDisplay, Self.CurWindow, @Attrib) = 0 then
+    result := false
+  else
+    result := true;
+
+  XSetErrorHandler(old_handler);
+  {$ELSE}
+  writeln('stub: TMWindow.TargetValid on Windows. Returning true.');
+  Exit(True);
   {$ENDIF}
 end;
 
@@ -447,6 +474,8 @@ begin
   if TargetMode = w_XWindow then
   begin;
     Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+
+    { TODO: Check if Window is valid? }
     XSetInputFocus(Self.XDisplay,Self.CurWindow,RevertToParent,CurrentTime);
     XFlush(Self.XDisplay);
     XSetErrorHandler(Old_Handler);
@@ -532,7 +561,6 @@ begin
   end;
 end;
 
-// Make this use GetDimensions, ray...?
 function TMWindow.GetDimensionBox(out Box : TBox) : boolean;
 function IntToTBox(x1,y1,x2,y2 : integer) : TBox;inline;
 begin;

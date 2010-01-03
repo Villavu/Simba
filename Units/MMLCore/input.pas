@@ -36,11 +36,11 @@ uses
    // do non silent keys/mouse with XTest / TKeyInput.
   {Later on we should use xdotool, as it allows silent input}
   {$ENDIF}
-  MMLKeyInput,  lclintf,math;
+  MMLKeyInput,  lclintf,math,window;
 
 type
     TMInput = class(TObject)
-            constructor Create(Client: TObject);
+            constructor Create(Window: TMWindow);
             destructor Destroy; override;
 
             procedure GetMousePos(out X, Y: Integer);
@@ -65,7 +65,7 @@ type
             function IsMouseButtonDown(mType: TClickType): Boolean;
 
          public
-            Client: TObject;
+            Window: TMWindow;
          private
              // Not used yet.
             Silent: Boolean;
@@ -77,7 +77,7 @@ type
 implementation
 
 uses
-    Client,{$IFDEF MSWINDOWS}windows, {$ENDIF}interfacebase,lcltype;
+    {$IFDEF MSWINDOWS}windows, {$ENDIF}interfacebase,lcltype;
 
 {$IFDEF MSWINDOWS}
 type
@@ -127,10 +127,10 @@ const
 function SendInput(cInputs: UINT; var pInputs: TInput; cbSize: Integer): UINT; stdcall; external user32 name 'SendInput';
 {$ENDIF}
 
-constructor TMInput.Create(Client: TObject);
+constructor TMInput.Create(Window: TMWindow);
 begin
   inherited Create;
-  Self.Client := Client;
+  Self.Window := Window;
   Self.KeyInput := TMMLKeyInput.Create;
 
 end;
@@ -219,6 +219,7 @@ function TMInput.isKeyDown(key: Word): Boolean;
 {$ENDIF}
 begin
   {$IFDEF MSWINDOWS}
+  raise Exception.CreateFmt('IsKeyDown isn''t implemented yet on Windows', []);
 
   {$ELSE}
   raise Exception.CreateFmt('IsKeyDown isn''t implemented yet on Linux', []);
@@ -259,13 +260,13 @@ var
 begin
   {$IFDEF MSWINDOWS}
   Windows.GetCursorPos(MousePoint);
-  GetWindowRect(TClient(Client).MWindow.TargetHandle,Rect);
+  GetWindowRect(Window.TargetHandle,Rect);
   x := MousePoint.x - Rect.Left;
   y := MousePoint.y - Rect.Top;
   {$ENDIF}
   {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
-  XQueryPointer(TClient(Client).MWindow.XDisplay,TClient(Client).MWindow.CurWindow,@root,@child,@b,@b,@x,@y,@xmask);
+  XQueryPointer(Window.XDisplay,Window.CurWindow,@root,@child,@b,@b,@x,@y,@xmask);
   XSetErrorHandler(Old_Handler);
   {$ENDIF}
 end;
@@ -281,19 +282,20 @@ var
 {$ENDIF}
   w,h: integer;
 begin
-  TClient(Client).MWindow.GetDimensions(w, h);
+  // This may be a bit too much overhead.
+  Window.GetDimensions(w, h);
   if (x < 0) or (y < 0) or (x > w) or (y > h) then
     raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid', [x, y]);
 
 {$IFDEF MSWINDOWS}
-  GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);
+  GetWindowRect(Window.TargetHandle, Rect);
   Windows.SetCursorPos(x + Rect.Left, y + Rect.Top);
 {$ENDIF}
 
 {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
-  XWarpPointer(TClient(Client).MWindow.XDisplay, 0, TClient(Client).MWindow.CurWindow, 0, 0, 0, 0, X, Y);
-  XFlush(TClient(Client).MWindow.XDisplay);
+  XWarpPointer(Window.XDisplay, 0, Window.CurWindow, 0, 0, 0, 0, X, Y);
+  XFlush(Window.XDisplay);
   XSetErrorHandler(Old_Handler);
 {$ENDIF}
 
@@ -313,7 +315,7 @@ var
 {$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
-  GetWindowRect(TClient(Client).MWindow.TargetHandle, Rect);
+  GetWindowRect(Window.TargetHandle, Rect);
   Input.Itype:= INPUT_MOUSE;
   FillChar(Input,Sizeof(Input),0);
   Input.mi.dx:= x + Rect.left;
@@ -348,7 +350,7 @@ begin
     mouse_Right: ButtonP := Button3;
   end;
 
-  XTestFakeButtonEvent(TClient(Client).MWindow.XDisplay, ButtonP,
+  XTestFakeButtonEvent(Window.XDisplay, ButtonP,
                        _isPress, CurrentTime);
 
   XSetErrorHandler(Old_Handler);
@@ -391,16 +393,16 @@ begin
   event.xbutton.send_event := TBool(1); // true if this came from a "send event"
   event.xbutton.same_screen:= TBool(1);
   event.xbutton.subwindow:= 0;  // this can't be right.
-  event.xbutton.root := TClient(Client).MWindow.DesktopWindow;
-  event.xbutton.window := TClient(Client).MWindow.CurWindow;
+  event.xbutton.root := Window.DesktopWindow;
+  event.xbutton.window := Window.CurWindow;
   event.xbutton.x_root:= x;
   event.xbutton.y_root:= y;
   event.xbutton.x := x;
   event.xbutton.y := y;
   event.xbutton.state:= 0;
-  if(XSendEvent(TClient(Client).MWindow.XDisplay, PointerWindow, True, $fff, @event) = 0) then
+  if(XSendEvent(Window.XDisplay, PointerWindow, True, $fff, @event) = 0) then
     Writeln('Errorrrr :-(');
-  XFlush(TClient(Client).MWindow.XDisplay);
+  XFlush(Window.XDisplay);
 
   XSetErrorHandler(Old_Handler);
 {$ENDIF}
@@ -440,7 +442,7 @@ begin
 
 {$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
-  XQueryPointer(TClient(Client).MWindow.XDisplay,TClient(Client).MWindow.CurWindow,@root,@child,@rootx,@rooty,@x,@y,@xmask);
+  XQueryPointer(Window.XDisplay,Window.CurWindow,@root,@child,@rootx,@rooty,@x,@y,@xmask);
 
   case mType of
        mouse_Left:   Result := (xmask and Button1Mask) <> 0;
