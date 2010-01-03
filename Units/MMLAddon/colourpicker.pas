@@ -30,7 +30,7 @@ interface
 uses
   Classes, SysUtils, LCLIntf,LCLType,InterfaceBase,Forms,Controls,ExtCtrls,
   Graphics,
-  Window,MufasaTypes, colourhistory,bitmaps
+  Window,MufasaTypes, colourhistory,bitmaps,input
 
   {$IFNDEF PICKER_CLIENT}
     {$IFDEF LINUX}
@@ -55,6 +55,9 @@ type
         // Will give us CopyClientToBitmap
         Window: TMWindow;
 
+        // Created and freed in Pick.
+        Input: TMInput;
+
         { Form components }
         ScreenForm, InfoForm : TForm;
         ImageMain, ImageInfo: TImage;
@@ -77,8 +80,10 @@ type
 implementation
 
 constructor TMColorPicker.Create(aWindow: TMWindow);
+
 begin
   inherited Create;
+
   Self.Window := aWindow;
 end;
 
@@ -107,8 +112,21 @@ var
    {$ENDIF}
    bmp: TMufasaBitmap;
 
+   InputWindow: TMWindow;
+
 begin
   { Disable both of the color pick buttons }
+
+
+  InputWindow := TMWindow.Create;
+  InputWindow.SetWindow(Self.Window);
+
+  { If the Window is not valid, set it to the desktop }
+  if not InputWindow.TargetValid then
+    InputWindow.SetDesktop;
+
+  Input := TMInput.Create(InputWindow);
+
   Application.MainForm.Enabled := False;
   ColourHistoryForm.Enabled := False;
 
@@ -232,6 +250,9 @@ begin
   InfoForm.Free;
   ScreenForm.Free;
 
+  Input.Free;
+  InputWindow.Free;
+
   { Re-enable the color pick buttons }
   Application.MainForm.Enabled := True;
   ColourHistoryForm.Enabled := True;
@@ -244,8 +265,10 @@ var
   Data : TRetData;
   R : TRect;
   px, py : Integer;
+  MouseX, MouseY: Integer;
 begin
   { Move the info form }
+  Input.GetMousePos(MouseX, MouseY);
   InfoForm.Left := Mouse.CursorPos.X + 5;
   InfoForm.Top := Mouse.CursorPos.Y - 15;
 
@@ -264,7 +287,7 @@ begin
 
   { Draw the cursor and color info }
   SetBkColor(InfoHandle, 14811135);
-  Text := Format('Pos: %d, %d', [x, y]);
+  Text := Format('Pos: %d, %d', [MouseX, MouseY]);
   R := Rect(5, 6, 114, 18);
   ExtTextOut(InfoHandle, 5, 3, ETO_OPAQUE, @R, pchar(text), length(text), nil);
   Text := Format('Color: %d', [Color]);
