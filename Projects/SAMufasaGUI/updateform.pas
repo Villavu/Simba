@@ -12,6 +12,15 @@ type
 
   { TSimbaUpdateForm }
 
+  { TSimbaVersionThread }
+
+  TSimbaVersionThread = class(TThread)
+  public
+    ResultStr : string;
+    InputURL : string;
+    Done : boolean;
+    procedure Execute; override;
+  end;
   TSimbaUpdateForm = class(TForm)
     UpdateLog: TMemo;
     UpdateButton: TButton;
@@ -30,7 +39,7 @@ type
     Updater: TMMLFileDownloader;
     FCancelling: Boolean;
     FSimbaVersion: Integer;
-
+    SimbaVersionThread : TSimbaVersionThread;
   private
     function OnUpdateBeat: Boolean;
     function GetLatestSimbaVersion: Integer;
@@ -40,6 +49,7 @@ type
   protected
     FCancelled: Boolean;
   end; 
+
 
 var
   SimbaUpdateForm: TSimbaUpdateForm;
@@ -59,7 +69,25 @@ end;
 
 function TSimbaUpdateForm.GetLatestSimbaVersion: Integer;
 begin
-  FSimbaVersion := StrToIntDef(Trim(GetPage('http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF} + '.version')), -1);
+  if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
+  begin
+    SimbaVersionThread := TSimbaVersionThread.Create(true);
+    SimbaVersionThread.InputURL:= 'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF} + '.version';
+    SimbaVersionThread.Resume;
+    while SimbaVersionThread.Done = false do//Wait till thread is done
+    begin
+      Application.ProcessMessages;
+      Sleep(50);
+    end;
+    FSimbaVersion := StrToIntDef(Trim(SimbaVersionThread.ResultStr), -1);//Read output
+    FreeAndNil(SimbaVersionThread);//Free the thread
+  end else
+    //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
+    while SimbaVersionThread = nil do
+    begin;
+      Application.ProcessMessages;
+      Sleep(50);
+    end;
   Exit(FSimbaVersion);
 end;
 
@@ -142,6 +170,14 @@ begin
   end;
   Self.UpdateLog.Lines.Add('Done ... ');
   Self.UpdateLog.Lines.Add('Please restart all currently running Simba binaries.');
+end;
+
+{ TSimbaVersionThread }
+
+procedure TSimbaVersionThread.Execute;
+begin
+  ResultStr:= GetPage(InputURL);
+  done := true;
 end;
 
 initialization
