@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 273
+  Left = 472
   Height = 557
-  Top = 233
+  Top = 201
   Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -104,15 +104,8 @@ object Form1: TForm1
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
-    object TB_Convert: TToolButton
-      Left = 289
-      Top = 2
-      Caption = 'TB_Convert'
-      Enabled = False
-      ImageIndex = 1
-    end
     object TB_ReloadPlugins: TToolButton
-      Left = 312
+      Left = 289
       Hint = 'Reload plugins'
       Top = 2
       Caption = 'TB_ReloadPlugins'
@@ -120,7 +113,7 @@ object Form1: TForm1
       ImageIndex = 13
     end
     object TB_Tray: TToolButton
-      Left = 335
+      Left = 312
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -162,6 +155,22 @@ object Form1: TForm1
       Top = 2
       Action = ActionSaveAll
       Enabled = False
+    end
+    object ToolButton3: TToolButton
+      Left = 335
+      Top = 2
+      Width = 3
+      Caption = 'ToolButton3'
+      Style = tbsDivider
+    end
+    object UpdateButton: TToolButton
+      Left = 344
+      Hint = 'There is an Update is available'
+      Top = 2
+      Caption = 'UpdateButton'
+      ImageIndex = 1
+      Visible = False
+      OnClick = UpdateButtonClick
     end
   end
   object StatusBar: TStatusBar
@@ -406,7 +415,8 @@ object Form1: TForm1
     end
   end
   object MainMenu1: TMainMenu
-    left = 528
+    left = 488
+    top = 144
     object MenuFile: TMenuItem
       Caption = '&File'
       SubMenuImages = Mufasa_Image_List
@@ -1216,7 +1226,8 @@ object Form1: TForm1
     end
   end
   object Mufasa_Image_List: TImageList
-    left = 488
+    left = 448
+    top = 144
     Bitmap = {
       4C691B0000001000000010000000424242004242420042424200424242004242
       420042424200424242004242420042424200424242004242420042424200A155
@@ -2251,11 +2262,13 @@ object Form1: TForm1
     }
     Visible = True
     OnClick = NoTray
-    left = 448
+    left = 528
+    top = 104
   end
   object TrayPopup: TPopupMenu
     Images = Mufasa_Image_List
-    left = 568
+    left = 528
+    top = 144
     object TrayStop: TMenuItem
       Action = ActionStopScript
       Enabled = False
@@ -2324,7 +2337,8 @@ object Form1: TForm1
   end
   object TabPopup: TPopupMenu
     Images = Mufasa_Image_List
-    left = 408
+    left = 488
+    top = 104
     object MenuItemTabAdd: TMenuItem
       Action = ActionNewTab
       Bitmap.Data = {
@@ -2413,7 +2427,8 @@ object Form1: TForm1
   end
   object ActionList: TActionList
     Images = Mufasa_Image_List
-    left = 368
+    left = 448
+    top = 104
     object ActionTabNext: TAction
       Caption = 'Next tab'
       OnExecute = ActionTabNextExecute
@@ -2550,12 +2565,14 @@ object Form1: TForm1
   end
   object DebugTimer: TTimer
     OnTimer = ProcessDebugStream
-    left = 608
+    left = 568
+    top = 104
   end
   object ScriptPopup: TPopupMenu
     Images = Mufasa_Image_List
     OnPopup = ScriptPopupPopup
-    left = 648
+    left = 568
+    top = 144
     object PopupItemUndo: TMenuItem
       Action = ActionUndo
       Bitmap.Data = {
@@ -2823,6 +2840,13 @@ object Form1: TForm1
     Options = [frDown, frFindNext, frHideUpDown]
     OnFind = dlgReplaceFind
     OnReplace = dlgReplaceReplace
-    left = 688
+    left = 608
+    top = 104
+  end
+  object UpdateTimer: TTimer
+    Interval = 10000
+    OnTimer = UpdateTimerCheck
+    left = 608
+    top = 144
   end
 end
