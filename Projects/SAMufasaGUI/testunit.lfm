@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 443
+  Left = 273
   Height = 557
-  Top = 303
+  Top = 233
   Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -381,12 +381,12 @@ object Form1: TForm1
         TabOrder = 1
       end
     end
-    object Splitter1: TSplitter
+    object SplitterFunctionList: TSplitter
       Left = 150
       Height = 296
       Top = 0
       Width = 5
-      OnCanResize = Splitter1CanResize
+      OnCanResize = SplitterFunctionListCanResize
       Visible = False
     end
     inline frmFunctionList: TFunctionListFrame
@@ -394,9 +394,10 @@ object Form1: TForm1
       Width = 150
       ClientHeight = 296
       ClientWidth = 150
+      OnEndDock = nil
       TabOrder = 3
       inherited FunctionList: TTreeView
-        Height = 275
+        Height = 257
         Width = 150
         OnChange = FunctionListChange
         OnDeletion = nil
@@ -407,7 +408,11 @@ object Form1: TForm1
         Top = 275
         Width = 150
         OnExit = editSearchListExit
+        OnKeyDown = editSearchListKeyDown
         OnKeyPress = editSearchListKeyPress
+      end
+      inherited FunctionListLabel: TLabel
+        Width = 146
       end
     end
   end

@@ -41,9 +41,6 @@ uses
   SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
   ocr, updateform;
 
-const
-  SimbaVersion = 365;
-
 type
 
   { TMufasaTab }
@@ -147,7 +144,7 @@ type
     SearchPanel: TPanel;
     ScriptPanel: TPanel;
     SpeedButtonSearch: TSpeedButton;
-    Splitter1: TSplitter;
+    SplitterFunctionList: TSplitter;
     TabPopup: TPopupMenu;
     TB_SaveAll: TToolButton;
     DebugTimer: TTimer;
@@ -221,6 +218,8 @@ type
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
     procedure editSearchListExit(Sender: TObject);
+    procedure editSearchListKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     procedure editSearchListKeyPress(Sender: TObject; var Key: char);
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
@@ -273,7 +272,7 @@ type
       Y: Integer; State: TDragState; var Accept: Boolean);
     procedure ScriptPopupPopup(Sender: TObject);
     procedure SpeedButtonSearchClick(Sender: TObject);
-    procedure Splitter1CanResize(Sender: TObject; var NewSize: Integer;
+    procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
     procedure UpdateButtonClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
@@ -323,6 +322,7 @@ const
   // Rip Mufasa -> Simba ftw
   //WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
   WindowTitle = 'Simba - %s';//Title, where %s = the place of the filename.
+  SimbaVersion = 365;
   Panel_State = 0;
   Panel_ScriptName = 1;
   Panel_ScriptPath = 2;
@@ -374,20 +374,20 @@ begin
   begin
     frmFunctionList.Align := alLeft;
     PageControl1.Align := alRight;
-    Splitter1.ResizeAnchor := akLeft;
-    Splitter1.Align := alLeft;
-    Splitter1.Left := frmFunctionList.Left + frmFunctionList.Width;
+    SplitterFunctionList.ResizeAnchor := akLeft;
+    SplitterFunctionList.Align := alLeft;
+    SplitterFunctionList.Left := frmFunctionList.Left + frmFunctionList.Width;
   end else begin
     frmFunctionList.Align := alRight;
     PageControl1.Align := alLeft;
-    Splitter1.ResizeAnchor := akRight;
-    Splitter1.Align := alRight;
-    Splitter1.Left := frmFunctionList.Left;
+    SplitterFunctionList.ResizeAnchor := akRight;
+    SplitterFunctionList.Align := alRight;
+    SplitterFunctionList.Left := frmFunctionList.Left;
   end;
   PageControl1.Width := ScriptPanel.Width - (Source.DockRect.Right - Source.DockRect.Left);
   frmFunctionList.Width := ScriptPanel.Width - PageControl1.Width;
   PageControl1.Align := alClient;
-  Splitter1.Show;
+  SplitterFunctionList.Show;
 end;
 
 procedure TForm1.ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; //is there a better way to do all of this?
@@ -416,7 +416,7 @@ begin
   CloseFindPanel;
 end;
 
-procedure TForm1.Splitter1CanResize(Sender: TObject; var NewSize: Integer;
+procedure TForm1.SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
   var Accept: Boolean);
 begin
   if(NewSize > ScriptPanel.Width div 2)then
@@ -437,7 +437,8 @@ begin
     formWriteln('A new update of Simba is available!');
   end;
   { Only check once, at startup }
-  UpdateTimer.Enabled:=False;
+  UpdateTimer.Interval:= 30 {mins} * 60 {secs} * 1000 {ms};//Every half hour
+//  UpdateTimer.Enabled:=False;
 end;
 
 procedure TForm1.UpdateMenuButtonClick(Sender: TObject);
@@ -818,10 +819,9 @@ begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.CopyToClipboard
   else if Memo1.Focused then
-  begin;
-    Writeln('WOT');
-    Memo1.CopyToClipboard;
-  end;
+    Memo1.CopyToClipboard
+  else
+    Writeln(Sender.ToString);
 end;
 
 procedure TForm1.ActionCutExecute(Sender: TObject);
@@ -1005,11 +1005,33 @@ begin
   frmFunctionList.editSearchList.Color := clWhite;
   if frmFunctionList.InCodeCompletion then
   begin;
+    if frmFunctionList.FilterTree.Focused then
+    begin;
+      Writeln('This is currently not supported');
+      CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1] := frmFunctionList.CompletionStart;
+      CurrScript.SynEdit.LogicalCaretXY:= point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
+      CurrScript.SynEdit.SelEnd:= CurrScript.SynEdit.SelStart;
+    end;
     frmFunctionList.InCodeCompletion:= false;
     CurrScript.SynEdit.SelectedColor.Style:= [];
     CurrScript.SynEdit.SelectedColor.Foreground:= clHighlightText;
     CurrScript.SynEdit.SelectedColor.Background:= clHighlight;
     CurrScript.Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempEnable;
+  end;
+end;
+
+procedure TForm1.editSearchListKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if key = vk_up then
+  begin
+    frmFunctionList.Find(True,true);
+    key := 0;
+  end else
+  if key = vk_down then
+  begin
+    frmFunctionList.Find(true);
+    key := 0;
   end;
 end;
 
@@ -1021,6 +1043,11 @@ begin
   begin;
     key := #0;
     frmFunctionList.Find(True);
+//See OnKeyUp
+{  end else if key = Chr(VK_UP) then //Up, go one up!
+  begin;
+    Writeln('hai');
+    frmFunctionList.Find(false,true);}
   end else
   if frmFunctionList.InCodeCompletion then
   begin;
@@ -1067,7 +1094,6 @@ procedure TForm1.FunctionListExit(Sender: TObject);
 begin
   StatusBar.Panels[2].Text:= '';
 end;
-
 
 procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
 begin
@@ -1169,6 +1195,7 @@ begin
     Writeln(format('Sucesfully deleted the file? %s',[BoolToStr(DeleteFile(Application.ExeName + '_old_'),true)]));
   end;
   {$endif}
+  frmFunctionList.OnEndDock:= @frmFunctionList.FrameEndDock;
 //  Ed
 end;
 
@@ -1541,10 +1568,10 @@ begin
     begin
       if FunctionList.Items.Count = 0 then
         MenuitemFillFunctionListClick(nil);
-
+      FrameEndDock(frmFunctionList,frmFunctionList.Parent,0,0);//Set the label correctly
       if(frmFunctionList.Parent is TPanel)then
       begin
-        Splitter1.Show;
+        SplitterFunctionList.Show;
         frmFunctionList.Show;
       end else frmFunctionList.Parent.Show;
       if Self.Visible then
@@ -1557,7 +1584,7 @@ begin
         frmFunctionList.Hide
       else
         frmFunctionList.Parent.Hide;
-      Splitter1.Hide;
+      SplitterFunctionList.Hide;
     end;
   end;
 end;

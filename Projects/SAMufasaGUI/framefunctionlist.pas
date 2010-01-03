@@ -5,7 +5,8 @@ unit framefunctionlist;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, ComCtrls, StdCtrls, Controls;
+  Classes, SysUtils, FileUtil, LResources, Forms, ComCtrls, StdCtrls, Controls,
+  ExtCtrls, Buttons;
 
 type
 
@@ -14,13 +15,18 @@ type
   TFunctionListFrame = class(TFrame)
     editSearchList: TEdit;
     FunctionList: TTreeView;
+    FunctionListLabel: TLabel;
+    CloseButton: TSpeedButton;
     procedure editSearchListChange(Sender: TObject);
+    procedure FrameEndDock(Sender, Target: TObject; X, Y: Integer);
+    procedure FunctionListDblClick(Sender: TObject);
     procedure FunctionListDeletion(Sender: TObject; Node: TTreeNode);
+    procedure FunctionListLabelMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
     procedure FunctionListMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-    procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
     procedure DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure CloseButtonClick(Sender: TObject);
   private
     FFilterTree : TTreeView;
     procedure FilterTreeVis(Vis : boolean);
@@ -36,7 +42,7 @@ type
     CompletionStart : string;
     property FilterTree : TTreeView read GetFilterTree;
     procedure LoadScriptTree( Script : String);
-    function Find(Next : boolean) : boolean;
+    function Find(Next : boolean; backwards : boolean = false) : boolean;
     { public declarations }
   end; 
 
@@ -52,11 +58,50 @@ begin
   Find(false);
 end;
 
+procedure TFunctionListFrame.FrameEndDock(Sender, Target: TObject; X, Y: Integer
+  );
+begin
+  if Target is TPanel then
+    FunctionListLabel.Visible := True
+  else if Target is TCustomDockForm then
+  begin
+    TCustomDockForm(Target).Caption := 'Function List';
+    TCustomDockForm(Target).OnClose := @DockFormOnClose;
+    Form1.SplitterFunctionList.Visible:= false;
+    FunctionListLabel.Visible := false;
+//    TCustomDockForm(frmFunctionList.Parent).BorderStyle:= bsNone;
+  end;
+end;
+
+procedure TFunctionListFrame.FunctionListDblClick(Sender: TObject);
+var
+   Node : TTreeNode;
+begin
+  if FilterTree.Visible then
+    Node := FilterTree.Selected
+  else
+    node := FunctionList.Selected;
+  if node<> nil then
+    if node.Level > 0 then
+      if node.Data <> nil then
+      begin;
+        Form1.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PChar(node.Data),true));
+        Form1.RefreshTab;
+      end;
+end;
+
 procedure TFunctionListFrame.FunctionListDeletion(Sender: TObject;
   Node: TTreeNode);
 begin
   if node.data <> nil then
     StrDispose(PChar(Node.Data));
+end;
+
+procedure TFunctionListFrame.FunctionListLabelMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  Self.DragKind := dkDock;
+  Self.BeginDrag(false, 40);
 end;
 
 procedure TFunctionListFrame.DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -65,6 +110,11 @@ begin
   Form1.MenuItemFunctionList.Checked := False;
 end;
 
+procedure TFunctionListFrame.CloseButtonClick(Sender: TObject);
+begin
+  self.Hide;
+  Form1.MenuItemFunctionList.Checked := False;
+end;
 
 procedure TFunctionListFrame.FilterTreeVis(Vis: boolean);
 begin
@@ -88,6 +138,7 @@ begin
   FFilterTree.OnMouseUp:= FunctionList.OnMouseUp;
   FFilterTree.OnChange:= FunctionList.OnChange;
   FFilterTree.OnExit := FunctionList.OnExit;
+  FFilterTree.OnDblClick:= FunctionList.OnDblClick;
   Result := FFilterTree;
   //We do not want to delete the data from the FilterTree
 //  FilterTree.OnDeletion:= FunctionList.OnDeletion;
@@ -115,9 +166,9 @@ begin
   ScriptNode.Expand(true);
 end;
 
-function TFunctionListFrame.Find(Next : boolean) : boolean;
+function TFunctionListFrame.Find(Next : boolean; backwards : boolean = false) : boolean;
 var
-  Start,Len,i,index,posi: Integer;
+  Start,Len,i,index,posi,c: Integer;
   FoundFunction : boolean;
   LastSection : string;
   str : string;
@@ -151,11 +202,24 @@ begin
       exit;
     end;
     if FilterTree.Selected <> nil then
-      Start := FilterTree.Selected.AbsoluteIndex + 1
+    begin;
+      if backwards then
+        start := FilterTree.Selected.AbsoluteIndex  - 1
+      else
+        Start := FilterTree.Selected.AbsoluteIndex + 1;
+    end
     else
-      Start := 0;
+    begin
+      if backwards then
+        Start := FilterTree.Items.Count - 1
+      else
+        Start := 0;
+    end;
     Len := FilterTree.Items.Count;
-    for i := start to start + len - 1 do
+    i := start + len; //This is for the backwards compatibily, we do mod anways.. it just makes sure -1 isn't negative.
+    c := 0;
+    while c < (len - 1) do
+    begin;
       if FilterTree.Items[i mod len].Level = 1 then
       begin
         FilterTree.Items[i mod len].Selected:= true;
@@ -163,6 +227,12 @@ begin
         Result := true;
         break;
       end;
+      if backwards then
+        dec(i)
+      else
+        inc(i);
+      inc(c);
+    end;
   end else
   begin
     FilterTree.Items.Clear;
@@ -267,20 +337,6 @@ begin
   DraggingNode := N;
 end;
 
-procedure TFunctionListFrame.FunctionListMouseUp(Sender: TObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var
-  F: ^TCustomDockForm;
-begin
-  if(Self.Parent is TCustomDockForm)then
-  begin
-    F := @Self.Parent; //can't typecast parent as a TCustomDockForm
-    F^.Caption := 'Function List';
-    F^.BorderStyle := bsSizeable;
-    F^.OnClose := @DockFormOnClose;
-    Form1.Splitter1.Hide;
-  end;
-end;
 
 initialization
   {$I framefunctionlist.lrs}

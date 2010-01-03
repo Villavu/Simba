@@ -3,20 +3,18 @@ object AboutForm: TAboutForm
   Height = 300
   Top = 271
   Width = 400
-  ActiveControl = Memo1
+  ActiveControl = AboutMemo
   Caption = 'AboutForm'
   ClientHeight = 300
   ClientWidth = 400
+  OnCreate = FormCreate
   LCLVersion = '0.9.29'
-  object Memo1: TMemo
+  object AboutMemo: TMemo
     Left = 0
     Height = 300
     Top = 0
     Width = 400
     Align = alClient
-    Lines.Strings = (
-      'Mufasa is, and always will be, sick.'
-    )
     TabOrder = 0
   end
 end
