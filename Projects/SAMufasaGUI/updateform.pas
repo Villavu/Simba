@@ -19,16 +19,21 @@ type
     CancelButton: TButton;
     DownloadProgress: TProgressBar;
     procedure CancelButtonClick(Sender: TObject);
+    procedure CleanUpdateForm(Sender: TObject);
     procedure OkButtonClick(Sender: TObject);
     procedure UpdateButtonClick(Sender: TObject);
+    function CanUpdate: Boolean;
+
   private
     { private declarations }
 
     Updater: TMMLFileDownloader;
     FCancelling: Boolean;
+    FSimbaVersion: Integer;
 
   private
     function OnUpdateBeat: Boolean;
+    function GetLatestSimbaVersion: Integer;
   public
     { public declarations }
     procedure PerformUpdate;
@@ -40,6 +45,23 @@ var
   SimbaUpdateForm: TSimbaUpdateForm;
 
 implementation
+
+uses
+  internets,  TestUnit;
+
+function TSimbaUpdateForm.CanUpdate: Boolean;
+begin
+  GetLatestSimbaVersion;
+
+  Writeln('Latest Simba Version: ' + IntToStr(FSimbaVersion));
+  Exit(testunit.SimbaVersion < FSimbaVersion);
+end;
+
+function TSimbaUpdateForm.GetLatestSimbaVersion: Integer;
+begin
+  FSimbaVersion := StrToIntDef(Trim(GetPage('http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF} + '.version')), -1);
+  Exit(FSimbaVersion);
+end;
 
 procedure TSimbaUpdateForm.UpdateButtonClick(Sender: TObject);
 begin
@@ -56,6 +78,13 @@ begin
   begin
     FCancelling := True;
   end;
+end;
+
+procedure TSimbaUpdateForm.CleanUpdateForm(Sender: TObject);
+begin
+  Self.DownloadProgress.Position:=0;
+  Self.UpdateLog.Clear;
+  Self.UpdateLog.Lines.Add('---------- Update Session ----------');
 end;
 
 procedure TSimbaUpdateForm.OkButtonClick(Sender: TObject);
@@ -88,11 +117,12 @@ begin
   // Make this a setting later
   Updater.FileURL := 'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};
 
-  // Dynamic
+  //ApplicationName{$IFDEF WINDOWS} +'.exe'{$ENDIF};
 
-
-  Updater.ReplacementFile := ApplicationName{$IFDEF WINDOWS} +'.exe'{$ENDIF};
+  // Should work on Windows as well
+  Updater.ReplacementFile := ExtractFileName(Application.ExeName);
   Updater.OnBeat := @Self.OnUpdateBeat;
+  Updater.BasePath := ExtractFilePath(Application.ExeName);
 
   Self.UpdateLog.Lines.Add('Starting download of ' + Updater.FileURL + ' ...');
   try

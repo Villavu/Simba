@@ -23,6 +23,7 @@ type
     TMMLFileDownloader = class(TObject)
          private
            FFileURL: String;
+           FBasePath: String;
            FReplacementFile: String;
            FTotal: Integer;
            HTTPSend: THTTPSend;
@@ -30,6 +31,8 @@ type
            FDownloaded: Boolean;
            FOnChange: TMMLFunctionBoolean;
            FOnBeat: TMMLFunctionBoolean;
+         private
+           procedure SetBasePath(s: string);
 
          public
             constructor Create;
@@ -52,6 +55,8 @@ type
 
             { Return true if we have downloaded the file completely }
             property Downloaded: Boolean read FDownloaded;
+
+            property BasePath: String read FBasePath write SetBasePath;
 
             { If either of these events return "True", an exception is thrown
               and the download is cancelled. This way we can easily `cancel'
@@ -78,7 +83,15 @@ type
 
 
 implementation
+uses
+  strings;
 
+procedure TMMLFileDownloader.SetBasePath(s: string);
+begin
+  if s[length(s) - 1] <> DirectorySeparator then
+    s := s + DirectorySeparator;
+  FBasePath:=s;
+end;
 
 procedure TMMLFileDownloader.TryToGetFileSize;
 var
@@ -155,7 +168,7 @@ begin
   if FileURL = '' then
     raise Exception.Create('FileURL not set');
 
-  Response := TFileStream.Create(FReplacementFile + '_', fmCreate);
+  Response := TFileStream.Create(FBasePath + FReplacementFile + '_', fmCreate);
   try
     Result := HTTPSend.HTTPMethod('GET', FileURL);
 
@@ -190,23 +203,23 @@ begin
     exit(False);
     //raise Exception.Create('ReplacementFile not set');
   end;
-  if not FileExists(FReplacementFile) then
+  if not FileExists(FBasePath + FReplacementFile) then
   begin
     writeln('ReplacementFile not found');
     exit(False);
     //raise Exception.Create('ReplacementFile not found');
   end;
-  if not FileExists(FReplacementFile+ '_') then
+  if not FileExists(FBasePath + FReplacementFile+ '_') then
   begin
     writeln('ReplacementFile + _ not found');
     exit(False);
     //raise Exception.Create('ReplacementFile + _ not found');
   end;
-  RenameFile(FReplacementFile, FReplacementFile+'_old_');
-  RenameFile(FReplacementFile+'_', FReplacementFile);
-  DeleteFile(FReplacementFile+'_old_');
+  RenameFile(FBasePath + FReplacementFile, FBasePath + FReplacementFile+'_old_');
+  RenameFile(FBasePath + FReplacementFile +'_', FBasePath + FReplacementFile);
+  DeleteFile(FBasePath + FReplacementFile+'_old_');
   {$IFDEF LINUX}
-  Chmod(FReplacementFile, PermissionBits[0] or PermissionBits[1] or PermissionBits[2]);
+  Chmod(FBasePath + FReplacementFile, PermissionBits[0] or PermissionBits[1] or PermissionBits[2]);
   {$ENDIF}
 
 end;
@@ -219,6 +232,7 @@ begin
   FDownloaded := False;
   FReplacementFile:='';
   FFileURL := '';
+  FBasePath:= '';
   FOnChange := nil;
   FOnBeat := nil;
 end;

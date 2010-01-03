@@ -1,12 +1,13 @@
 object SimbaUpdateForm: TSimbaUpdateForm
-  Left = 387
+  Left = 507
   Height = 391
-  Top = 242
+  Top = 321
   Width = 467
   ActiveControl = UpdateButton
   Caption = 'SimbaUpdateForm'
   ClientHeight = 391
   ClientWidth = 467
+  OnShow = CleanUpdateForm
   LCLVersion = '0.9.29'
   object DownloadProgress: TProgressBar
     Left = 24
@@ -19,8 +20,8 @@ object SimbaUpdateForm: TSimbaUpdateForm
   end
   object UpdateButton: TButton
     Left = 24
-    Height = 25
-    Top = 32
+    Height = 40
+    Top = 16
     Width = 413
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Update!'
@@ -49,8 +50,8 @@ object SimbaUpdateForm: TSimbaUpdateForm
   end
   object UpdateLog: TMemo
     Left = 24
-    Height = 199
-    Top = 128
+    Height = 183
+    Top = 144
     Width = 413
     Anchors = [akTop, akLeft, akRight, akBottom]
     TabOrder = 4
