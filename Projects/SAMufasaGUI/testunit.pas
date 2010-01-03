@@ -36,6 +36,7 @@ uses
   mmlpsthread,synedittypes,
   window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
+  SynExportHTML,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
   SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
   ocr, updateform;
@@ -95,6 +96,8 @@ type
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
     MenuExtra: TMenuItem;
+    MenuItemExportHTML: TMenuItem;
+    MenuItemDivider9: TMenuItem;
     UpdateTimer: TTimer;
     ToolButton3: TToolButton;
     UpdateButton: TToolButton;
@@ -239,6 +242,7 @@ type
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemCloseTabsClick(Sender: TObject);
     procedure MenuItemDebugImageClick(Sender: TObject);
+    procedure MenuItemExportHTMLClick(Sender: TObject);
     procedure MenuitemFillFunctionListClick(Sender: TObject);
     procedure MenuItemHideClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
@@ -1256,6 +1260,33 @@ begin
     DebugImgForm.Show
   else
     DebugImgForm.Hide;
+end;
+
+procedure TForm1.MenuItemExportHTMLClick(Sender: TObject);
+var
+  SynExporterHTML : TSynExporterHTML;
+begin;
+  SynExporterHTML := TSynExporterHTML.Create(nil);
+  SynExporterHTML.Highlighter := CurrScript.SynFreePascalSyn1;
+  SynExporterHTML.ExportAsText:= True;
+  with TSaveDialog.Create(nil) do
+    try
+      Filter:= 'HTML Files (*.html;*.htm)|*.html;*.htm|All files(*.*)|*.*';
+      Options:= [ofOverwritePrompt,ofEnableSizing];
+      DefaultExt:= 'html';
+      if Execute then
+      begin
+        if CurrScript.ScriptName <> '' then
+          SynExporterHTML.Title:= 'Simba - ' + CurrScript.ScriptName
+        else
+          SynExporterHTML.Title:= 'Cogat - Untitled';
+        SynExporterHTML.ExportAll(CurrScript.SynEdit.Lines);
+        SynExporterHTML.SaveToFile(FileName);
+      end;
+    finally
+      free;
+      SynExporterHTML.Free;
+    end;
 end;
 
 function GetMethodName( Decl : string; PlusNextChar : boolean) : string;

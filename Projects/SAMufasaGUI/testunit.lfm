@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 273
+  Left = 443
   Height = 557
-  Top = 233
+  Top = 303
   Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -233,10 +233,10 @@ object Form1: TForm1
     OnDockDrop = ScriptPanelDockDrop
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
-      Left = 150
+      Left = 155
       Height = 296
       Top = 0
-      Width = 584
+      Width = 579
       Align = alClient
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
@@ -382,7 +382,7 @@ object Form1: TForm1
       end
     end
     object Splitter1: TSplitter
-      Left = 145
+      Left = 150
       Height = 296
       Top = 0
       Width = 5
@@ -391,14 +391,13 @@ object Form1: TForm1
     end
     inline frmFunctionList: TFunctionListFrame
       Height = 296
-      Width = 145
+      Width = 150
       ClientHeight = 296
-      ClientWidth = 145
+      ClientWidth = 150
       TabOrder = 3
-      Visible = False
       inherited FunctionList: TTreeView
         Height = 275
-        Width = 145
+        Width = 150
         OnChange = FunctionListChange
         OnDeletion = nil
         OnEnter = FunctionListEnter
@@ -406,7 +405,7 @@ object Form1: TForm1
       end
       inherited editSearchList: TEdit
         Top = 275
-        Width = 145
+        Width = 150
         OnExit = editSearchListExit
         OnKeyPress = editSearchListKeyPress
       end
@@ -1207,12 +1206,19 @@ object Form1: TForm1
     object MenuExtra: TMenuItem
       Caption = 'Extra'
       object MenuitemFillFunctionList: TMenuItem
-        Caption = 'Fill Function List'
+        Caption = '&Fill Function List'
         OnClick = MenuitemFillFunctionListClick
       end
       object UpdateMenuButton: TMenuItem
-        Caption = 'Update'
+        Caption = '&Update'
         OnClick = UpdateMenuButtonClick
+      end
+      object MenuItemDivider9: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemExportHTML: TMenuItem
+        Caption = '&Export script as HTML'
+        OnClick = MenuItemExportHTMLClick
       end
     end
     object MenuHelp: TMenuItem
