@@ -36,7 +36,8 @@ type
   { TAboutForm }
 
   TAboutForm = class(TForm)
-    Memo1: TMemo;
+    AboutMemo: TMemo;
+    procedure FormCreate(Sender: TObject);
   private
     { private declarations }
   public
@@ -47,6 +48,18 @@ var
   AboutForm: TAboutForm;
 
 implementation
+uses
+  TestUnit;
+{ TAboutForm }
+
+procedure TAboutForm.FormCreate(Sender: TObject);
+begin
+  AboutMemo.Lines.Add('---Simba---');
+  AboutMemo.Lines.Add('');
+  AboutMemo.Lines.Add('');
+  AboutMemo.Lines.Add('Simba is released under the GPL license.');
+  AboutMemo.Lines.Add(format('You are currently using version: %d',[Testunit.SimbaVersion]));
+end;
 
 initialization
   {$I about.lrs}
