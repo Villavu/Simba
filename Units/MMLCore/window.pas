@@ -96,6 +96,8 @@ type
           FrozenData : PRGB32;
           FrozenSize : TPoint;
           TargetBitmap : TMufasaBitmap;
+          {:Called before setting the NewTarget, deletes stuff related to OldTarget and sets the new targetmode}
+          procedure OnSetTarget(NewTarget,OldTarget : TTargetWindowMode);
         public
               // Target Window Mode.
               TargetMode: TTargetWindowMode;
@@ -174,6 +176,8 @@ begin
   Self.ArrayPtr := nil;
   Self.ArraySize := Classes.Point(-1, -1);
 
+  Self.TargetBitmap := nil;
+
   {$IFDEF MSWINDOWS}
   Self.DrawBitmap := TBitmap.Create;
   Self.DrawBitmap.PixelFormat:= pf32bit;
@@ -225,6 +229,24 @@ begin
   inherited;
 end;
 
+
+procedure TMWindow.OnSetTarget(NewTarget,OldTarget : TTargetWindowMode);
+begin
+  case OldTarget of
+    w_Window: begin
+                if not Self.TargetDC= Self.DesktopDC then
+                  ReleaseDC(Self.TargetHandle,Self.TargetDC);
+              end;
+    w_XWindow: Self.FreeReturnData;
+  end;
+  //Set them to zero, just in case ;-).
+  if NewTarget <> w_BMP then
+    Self.TargetBitmap := nil;
+  if NewTarget <> w_ArrayPtr then
+    self.ArrayPtr := nil;
+  Self.TargetMode:= NewTarget;
+end;
+
 procedure TMWindow.SetWindow(Window: TMWindow);
 begin
   case Window.TargetMode of
@@ -256,7 +278,9 @@ begin
   {$IFDEF LINUX}
   Self.SetTarget(Self.DesktopWindow);
   {$ELSE}
-  Self.SetTarget(Self.DesktopHWND, w_Window);
+  OnSetTarget(w_window, Self.TargetMode);
+  Self.TargetDC:= DesktopDC;
+  Self.TargetHandle:= DesktopHWND;
   {$ENDIF}
 end;
 
@@ -268,20 +292,23 @@ var
   Attrib: TXWindowAttributes;
 {$ENDIF}
 begin
-  {$IFDEF LINUX}
-  old_handler := XSetErrorHandler(@MufasaXErrorHandler);
-
-  { There must be a better way to do this, at least with less overhead. }
-  if XGetWindowAttributes(Self.XDisplay, Self.CurWindow, @Attrib) = 0 then
-    result := false
-  else
-    result := true;
-
-  XSetErrorHandler(old_handler);
-  {$ELSE}
-  writeln('stub: TMWindow.TargetValid on Windows. Returning true.');
-  Exit(True);
-  {$ENDIF}
+  case Self.TargetMode of
+    w_BMP : result := TargetBitmap <> nil;
+    w_Window : result := IsWindow(self.TargetHandle);
+    w_ArrayPtr : result := ArrayPtr <> nil;
+    w_HDC : result := Self.TargetDC <> 0;
+    w_XWindow : begin
+                  {$IFDEF LINUX}
+                  old_handler := XSetErrorHandler(@MufasaXErrorHandler);
+                  { There must be a better way to do this, at least with less overhead. }
+                  if XGetWindowAttributes(Self.XDisplay, Self.CurWindow, @Attrib) = 0 then
+                    result := false
+                  else
+                    result := true;
+                  XSetErrorHandler(old_handler);
+                  {$ENDIF}
+                end;
+  end;
 end;
 
 procedure TMWindow.OnTargetBitmapDestroy(Bitmap: TMufasaBitmap);
@@ -454,8 +481,8 @@ begin
     raise Exception.CreateFMT('TMWindow.Unfreeze: The window is not frozen.',[]);
   FreeMem(Self.FrozenData);
   Self.FrozenData := nil;
-  Result := True;
   Self.FreezeState:=False;
+  Result := True;
 end;
 
 // Set's input focus on Linux, does not mean the window will look `active', but
@@ -621,10 +648,8 @@ var
 begin
   if Self.Frozen then
     raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
-  Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+  OnSetTarget(w_XWindow,Self.TargetMode)
   Self.CurWindow := XWindow;
-  Self.TargetMode:= w_XWindow;
-  XSetErrorHandler(Old_Handler);
 end;
 {$ENDIF}
 
@@ -635,19 +660,22 @@ begin
     raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
   if NewType in [ w_XWindow, w_ArrayPtr ] then
     raise Exception.createFMT('SetTarget: Invalid new type.', []);
+  OnSetTarget(NewType,self.TargetMode);
   case NewType of
+    w_HDC :
+    begin
+      {$ifdef MSWindows}
+      Self.TargetDC:= Window;
+      {$else}
+      Raise Exception.Create('HDC not supported on linux (yet)');
+      {$endif}
+    end;
     w_Window :
     begin;
-
       {$IFDEF MSWINDOWS}
-      //We had the desktop as target -> Not freeing that DC!
-      if not Self.TargetDC= Self.DesktopDC then
-        ReleaseDC(Self.TargetHandle,Self.TargetDC);
+      //The old DC is free'd in OnSetTarget.
       Self.TargetHandle := Window;
-      if Window = Self.DesktopHWND then
-        Self.TargetDC := DesktopDC
-      else
-        Self.TargetDC := GetWindowDC(Window);
+      Self.TargetDC := GetWindowDC(Window);
       {$ENDIF}
     end;
   end;
@@ -668,29 +696,20 @@ function TMWindow.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 begin
   if Self.Frozen then
     raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
-  If Self.TargetMode = w_XWindow then
-    Self.FreeReturnData;
-
+  OnSetTarget(w_ArrayPtr,self.TargetMode);
+  Self.SetDesktop;//Set the underlaying window to desktop for key-sending etc..
   Self.ArrayPtr := ArrPtr;
   Self.ArraySize := Size;
-  Self.TargetMode:= w_ArrayPtr;
-
-  {$IFDEF LINUX}
-  Self.CurWindow := Self.DesktopWindow;
-  {$ENDIF}
-
-  {$IFDEF WINDOWS}
-  Self.TargetHandle:= windows.GetDesktopWindow;
-  {$ENDIF}
 end;
 
-// Set target to Bitmap
+// Set target to Bitmap, set desktop for keyinput/output
 function TMWindow.SetTarget(Bitmap: TMufasaBitmap): integer;
 begin
   if Self.Frozen then
     raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
-  TargetBitmap := Bitmap;
-  self.TargetMode:= w_BMP;
+  OnSetTarget(w_BMP,self.TargetMode);
+  Self.SetDesktop;
+  Self.TargetBitmap := Bitmap;
   Bitmap.OnDestroy:= @OnTargetBitmapDestroy;
 end;
 
