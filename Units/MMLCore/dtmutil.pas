@@ -64,6 +64,8 @@ begin
   setlength(d.t, len);
   setlength(d.ash, len);
   setlength(d.asz, len);
+  setlength(d.gp, len);
+
   FillChar(d.p[0], SizeOf(TPoint) * len, 0);
   FillChar(d.c[0], SizeOf(Integer) * len, 0);
   FillChar(d.t[0], SizeOf(Integer) * len, 0);
@@ -71,8 +73,10 @@ begin
 
   // Better set it to 1, than fill with 0.
   FillChar(d.asz[0], SizeOf(Integer) * len, 0);
-  {for i := 0 to len - 1 do
-    d.asz[i] := 1;         }
+
+  //FillChar(d.gp[0], SizeOf(Boolean) * len, 0);
+  for i := 0 to len - 1 do
+    d.gp[i] := true;
 end;
 
 Procedure PrintpDTM(tDTM : pDTM);
@@ -82,9 +86,9 @@ begin;
   i := 0;
   if tdtm.n <> '' then
     writeln('Name: ' + tdtm.n);
-  WriteLn('MainPoint ' + inttostr(tDTM.p[i].x) + ', ' + inttostr(tDTM.p[i].y) + ' col: ' + inttostr(tDTM.c[i]) + ', tol: ' + inttostr(tDTM.t[i]) + '; ashape ' + inttostr(tdtm.ash[i]) + ' asize ' + inttostr(tdtm.asz[i]));
+  WriteLn('MainPoint ' + inttostr(tDTM.p[i].x) + ', ' + inttostr(tDTM.p[i].y) + ' col: ' + inttostr(tDTM.c[i]) + ', tol: ' + inttostr(tDTM.t[i]) + '; ashape ' + inttostr(tdtm.ash[i]) + ' asize ' + inttostr(tdtm.asz[i])+ ', Good: ' + BoolToStr(tdtm.gp[i]));
   for I := 1 to High(tDTM.p) do
-    WriteLn('SubPoint['+IntToStr(I) + '] ' + inttostr(tDTM.p[i].x) + ', ' + inttostr(tDTM.p[i].y) + ' col: ' + inttostr(tDTM.c[i]) + ', tol: ' + inttostr(tDTM.t[i]) + '; ashape ' + inttostr(tdtm.ash[i]) + ' asize ' + inttostr(tdtm.asz[i]));
+    WriteLn('SubPoint['+IntToStr(I) + '] ' + inttostr(tDTM.p[i].x) + ', ' + inttostr(tDTM.p[i].y) + ' col: ' + inttostr(tDTM.c[i]) + ', tol: ' + inttostr(tDTM.t[i]) + '; ashape ' + inttostr(tdtm.ash[i]) + ' asize ' + inttostr(tdtm.asz[i]) + ', Good: ' + BoolToStr(tdtm.gp[i]));
 end;
 
 Function pDTMToTDTM(Const DTM: pDTM): TDTM;
@@ -102,6 +106,7 @@ Begin
     Temp.AreaShape := DTM.ash[i];
     Temp.Color := DTM.c[i];
     Temp.Tolerance := DTM.t[i];
+    Temp.Good:= DTM.gp[i];
   End;
   Result.MainPoint := Temp;
   SetLength(Result.SubPoints, Length(DTM.p) - 1);
@@ -115,6 +120,7 @@ Begin
     Temp.AreaShape := DTM.ash[i];
     Temp.Color := DTM.c[i];
     Temp.Tolerance := DTM.t[i];
+    Temp.Good:= DTM.gp[i];
     Result.SubPoints[I - 1] := Temp;
   End;
 End;
@@ -135,6 +141,7 @@ Begin
   SetLength(Result.t, Length(DTM.SubPoints) + 1);
   SetLength(Result.asz, Length(DTM.SubPoints) + 1);
   SetLength(Result.ash, Length(DTM.SubPoints) + 1);
+  SetLength(Result.gp, Length(DTM.SubPoints) + 1);
 
   Result.p[0].x := DTM.MainPoint.x;
   Result.p[0].y := DTM.MainPoint.y;
@@ -142,6 +149,7 @@ Begin
   Result.t[0]   := DTM.MainPoint.Tolerance;
   Result.asz[0] := DTM.MainPoint.AreaSize;
   Result.ash[0] := DTM.MainPoint.AreaShape;
+  Result.gp[0] := DTM.MainPoint.Good;
 
   For I := 1 To Length(DTM.SubPoints) Do  // High + 1 = Length
   Begin
@@ -151,6 +159,7 @@ Begin
     Result.t[I]   := DTM.SubPoints[I - 1].Tolerance;
     Result.asz[I] := DTM.SubPoints[I - 1].AreaSize;
     Result.ash[I] := DTM.SubPoints[I - 1].AreaShape;
+    Result.gp[I] := DTM.SubPoints[I - 1].Good;
   End;
   Result.l := length(Result.p);
 End;
@@ -171,6 +180,8 @@ begin
   if dtm.l <> length(dtm.asz) then
     Exit(False);
   if dtm.l <> length(dtm.ash) then
+    Exit(False);
+  if dtm.l <> length(dtm.gp) then
     Exit(False);
   for i := 0 to dtm.l-1 do
     if dtm.asz[i] < 0 then
