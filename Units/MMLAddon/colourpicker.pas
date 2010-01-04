@@ -275,8 +275,8 @@ procedure TMColorPicker.ImageInfoMouseMove(Sender: TObject; Shift: TShiftState; 
   Y: Integer);
 begin
   { Move the info form }
-//  InfoForm.Top := Mouse.CursorPos.Y - 15;
-//  InfoForm.Left := Mouse.CursorPos.X + 5;
+  InfoForm.Top := Mouse.CursorPos.Y - 15;
+  InfoForm.Left := Mouse.CursorPos.X + 5;
 end;
 
 procedure TMColorPicker.ColorPickUp(Sender: TObject; Button: TMouseButton;
