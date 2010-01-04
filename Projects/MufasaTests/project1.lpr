@@ -10,8 +10,7 @@ uses
   Forms,Interfaces,
   LCLIntf,
   Client,
-  bitmaps,{x ,}mufasatypes,dtm,dtmutil, ocrutil ,graphics ,colour_conv,math,
-  updater
+  bitmaps,x ,mufasatypes,dtm,dtmutil, ocrutil
 
 
   { you can add units after this };
@@ -47,51 +46,24 @@ begin
     result.t[i] := random(255);
     result.asz [i] := random(5);
     result.ash[i] := 0;
-    writeln(format('dtm: (%d, %d) c: %d, t: %d, asz: %d', [result.p[i].x,
-            result.p[i].y,  result.c[i], result.t[i], result.asz[i]]));
+    {writeln(format('dtm: (%d, %d) c: %d, t: %d, asz: %d', [result.p[i].x,
+            result.p[i].y,  result.c[i], result.t[i], result.asz[i]])); }
+    result.gp[i] := false;// random(10) = 1;
   end;
   result.c[0] := 255;
-end;
-
-var
-   aTime: dword;
-
-function myChange: boolean;
-begin
-  if gettickcount-atime > 1000 then
-    result := true
-  else
-    result := false;
+  PrintpDTM(result);
 end;
 
 procedure MufasaTests.DoRun;
 
-
-{const
-    ocr_Limit_High = 191;
-    ocr_Limit_Low = 65;
-
-    ocr_White = 16777215;
-    ocr_Green = 65280;
-    ocr_Red = 255;
-    ocr_Yellow = 65535;
-    ocr_Blue = 16776960;
-    ocr_ItemC = 16744447;
-
-    ocr_Purple = 8388736;   }
-
 var
   ErrorMsg: String;
-{  Time: DWord;
+  Time: DWord;
   C: TClient;
-  I, w, h,x,y: Integer;
+  I: Integer;
   dtm: pdtm;
   p:tpointarray;
-  bmp, bmprs: TMufasaBitmap;
-  tbmp: TBitmap;
-  r,g,b:integer;
-  t:Dword;    }
-  up: TMMLFileDownloader;
+  bmp: TMufasaBitmap;
 
 begin
   // quick check parameters
@@ -109,59 +81,57 @@ begin
     Exit;
   end;
 
-  atime:=gettickcount;
-
-  up := TMMLFileDownloader.Create;
-  up.FileURL:='http://www.villavu.com/pics/desktop.png';
-  up.ReplacementFile:='test.png';
-  up.OnBeat:=@myChange;
-  try
-    up.DownloadAndSave;
-    up.Replace;
-  finally
-    writeln(inttostr(gettickcount-atime));
-    up.Free;
-  end;
-
-
-
-
-  { clOlive = false point }
-  { clSilver = false shadow }
-  { clLime = false shadow}
-
   { add your program here }
+  C := TClient.Create;
 
-{  tbmp:=TBitmap.Create;
-  tbmp.LoadFromFile('/home/merlijn/Programs/mufasa/pics/16.bmp');
-
-  bmprs := TMufasaBitmap.Create;
-  bmprs.SetSize(10,10);
-
-  bmprs.LoadFromRawImage(tbmp.RawImage);
-  tbmp.Free;
-  tbmp := bmprs.ToTBitmap;
-                                  }
- { for y := 0 to tbmp.Height -1 do
-    for x := 0 to tbmp.width -1 do
-    begin
-      writeln(format('(%d, %d) = %d , %d', [x,y,tbmp.Canvas.pixels[x,y],bmprs.FastGetPixel(x,y)]));
-      colortorgb(tbmp.Canvas.pixels[x,y],r,g,b);
-      writeln(format('%d,%d,%d', [r,g,b]));
-      colortorgb(bmprs.FastGetPixel(x,y),r,g,b);
-      writeln(format('%d,%d,%d', [r,g,b]));
-    end;     }
-  //bmprs.LoadFromFile('/home/merlijn/Programs/mufasa/pics/16.bmp');
-  {C := TClient.Create;
-  C.MWindow.SetTarget(bmprs);    }
+  bmp := TMufasaBitmap.Create;
+  bmp.SetSize(CW,CH);
+  Writeln(Format('Client W/H: %d, %d', [CW, CH]));
+  FillChar(bmp.FData[0],sizeof(trgb32)*CW*CH, 0);
+  Randomize;
+ for i := 0 to 500 do
+    bmp.fastsetpixel(random(CW), random(CH), 255);
+ { bmp.FastSetPixel(8,8,255);
+  bmp.FastSetPixel(9,9,255);
+  bmp.FastSetPixel(7,7,255);
+  bmp.FastSetPixel(9,8,255);
+  bmp.FastSetPixel(8,9,255);            }
+  C.MWindow.SetTarget(bmp);
 
 
- { bmp.SaveToFile('/tmp/output.bmp');
-  tbmp.SaveToFile('/tmp/output2.bmp');
-    //bmp.OnDestroy:=nil;
+ { initdtm(dtm, 5);
+  dtm.p[0] := Point(2, 2);
+  dtm.p[1] := Point(-3, -3);
+  dtm.p[2] := Point(0, 0);
+  dtm.p[3] := Point(1, 1);
+  dtm.p[4] := Point(3, 3);
+  dtm.c[0] :=  255;
+  dtm.t[0] :=  0;
+  dtm.asz[1] := 1;
+  dtm.ash[1] := dtm_Rectangle;  }
+
+  dtm := randomdtm(10);
+
+ // setlength(p, 1);
+ C.MFinder.SetToleranceSpeed(1);
+
+  time := GetTickCount;
+  for i := 0 to 100 do
+  begin
+    setlength(p,0);
+    C.MFinder.FindDTMs(dtm, p, 0, 0,CW-1, CH-1, 0);
+  end;
+  writeln(inttostr(gettickcount - time) + 'ms');
+  writeln(inttostr(length(p))+ ' points found');
+  setlength(p,0);
+
+  {for i := 0 to high(p) do
+    writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));     }
+
+
+  //bmp.OnDestroy:=nil;
   bmp.Free;
-  tbmp.Free;  }
- // C.Free;
+  C.Free;
 
   // stop program loop
   Terminate;

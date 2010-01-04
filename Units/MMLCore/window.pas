@@ -572,6 +572,7 @@ begin
         H := Attrib.Height;
       end else
       begin
+        { TODO: Raise Exception because the Window does not exist? }
         W := -1;
         H := -1;
       end;
