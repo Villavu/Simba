@@ -10,7 +10,7 @@ uses
   Forms,Interfaces,
   LCLIntf,
   Client,
-  bitmaps,x ,mufasatypes,dtm,dtmutil, ocrutil
+  bitmaps,{$IFDEF LINUX}x,{$ENDIF}mufasatypes,dtm,dtmutil, ocrutil
 
 
   { you can add units after this };
@@ -48,7 +48,7 @@ begin
     result.ash[i] := 0;
     {writeln(format('dtm: (%d, %d) c: %d, t: %d, asz: %d', [result.p[i].x,
             result.p[i].y,  result.c[i], result.t[i], result.asz[i]])); }
-    result.gp[i] := false;// random(10) = 1;
+    result.bp[i] := false;// random(10) = 1;
   end;
   result.c[0] := 255;
   PrintpDTM(result);
@@ -124,6 +124,8 @@ begin
   writeln(inttostr(gettickcount - time) + 'ms');
   writeln(inttostr(length(p))+ ' points found');
   setlength(p,0);
+
+  PrintpDTM(tdtmtopDTM(pDTMToTDTM(dtm)));
 
   {for i := 0 to high(p) do
     writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));     }
