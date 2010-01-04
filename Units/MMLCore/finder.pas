@@ -1819,6 +1819,8 @@ var
    // point count
    pc: Integer = 0;
 
+   goodPoints: Array of Boolean;
+
    label theEnd;
    label AnotherLoopEnd;
 
@@ -1837,6 +1839,10 @@ begin
   //writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
 
   DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
+
+  setlength(goodPoints, dtm.l);
+  for i := 0 to dtm.l - 1 do
+    goodPoints[i] := not dtm.bp[i];
 
   // Init data structure B.
   W := x2 - x1;
@@ -1899,7 +1905,7 @@ begin
                 goto AnotherLoopEnd;
             end;
 
-            if (b[xxx][yyy+1] and (1 shl i) = 0) and dtm.gp[i] then
+            if (b[xxx][yyy+1] and (1 shl i) = 0) and goodPoints[i] then
               goto AnotherLoopEnd;
           end;
       end;

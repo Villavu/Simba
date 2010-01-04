@@ -24,6 +24,7 @@
 Sender.Comp.AddConstantN('AppPath','string').SetString(CurrThread.AppPath);
 Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath);
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of integer');
+Sender.Comp.AddTypeS('TBoolArray', 'Array of Boolean');
 Sender.Comp.AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
 Sender.Comp.AddTypeS('T2DPointArray','Array of Array of TPoint');
@@ -32,10 +33,10 @@ Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 Sender.Comp.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
 
 
-Sender.Comp.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; Good: Boolean; end;');
+Sender.Comp.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
 Sender.Comp.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
 Sender.Comp.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
-Sender.Comp.AddTypeS('pDTM','record l: Integer;p: TPointArray;c, t, asz, ash: TIntegerArray; gp: array of boolean; n: String; end;');
+Sender.Comp.AddTypeS('pDTM','record l: Integer;p: TPointArray;c, t, asz, ash: TIntegerArray; bp: Array Of Boolean; n: String; end;');
 
 Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended;');
 Sender.Comp.AddTypeS('TStringArray','Array of string;');
