@@ -39,6 +39,7 @@ uses
   {$ENDIF}
   ;
 
+
 type
   TPickEvent = procedure (Sender: TObject; Color, X, Y: Integer);
 
@@ -103,29 +104,21 @@ var
    SS : TShiftState;
    p : TPoint;
 
-   {$IFNDEF PICKER_CLIENT}
-     {$IFDEF LINUX}
-     OldWindow: TWindow;
-     {$ELSE}
-     OldWindow: HWND;
-     {$ENDIF}
-   {$ENDIF}
    bmp: TMufasaBitmap;
+   Desktop : TMWindow;
 
-   InputWindow: TMWindow;
 
 begin
   { Disable both of the color pick buttons }
+  w := 0;
+  h := 0;
+  if not Self.Window.TargetValid then
+    self.Window.SetDesktop;
 
-
-  InputWindow := TMWindow.Create;
-  InputWindow.SetWindow(Self.Window);
-
-  { If the Window is not valid, set it to the desktop }
-  if not InputWindow.TargetValid then
-    InputWindow.SetDesktop;
-
-  Input := TMInput.Create(InputWindow);
+  Desktop := TMWindow.Create;
+  Desktop.SetDesktop;
+  Input := TMInput.Create(Self.Window);
+  Desktop.GetDimensions(w, h);
 
   Application.MainForm.Enabled := False;
   ColourHistoryForm.Enabled := False;
@@ -134,27 +127,8 @@ begin
   ScreenForm := TForm.Create(Application.MainForm);
   InfoForm := TForm.Create(ScreenForm);
 
-{  if Window.GetDimensionBox(box) then
-  begin;
-    targetleft := box.x1;
-    targettop := box.y1;
-  end else
-  begin;
-    targetleft := 0;
-    targettop := 0;
-  end; }
-   {$IFNDEF PICKER_CLIENT}
-     {$IFDEF LINUX}
-     OldWindow := Window.CurWindow;
-     {$ELSE}
-     OldWindow := Window.TargetHandle;
-     {$ENDIF}
-     Window.SetDesktop;
-   {$ENDIF}
-  w := 0;
-  h := 0;
-  { Get the dimensions of the screen }
-  Window.GetDimensions(w, h);
+
+
 
   { Initialize the form that will hold the client image }
   ScreenForm.Caption := 'SimbaColourPicker';
@@ -203,7 +177,7 @@ begin
 
   { Copy the client to ImageMain }
   bmp:=TMufasaBitmap.Create;
-  bmp.CopyClientToBitmap(Window, true, 0, 0, w-1, h-1);
+  bmp.CopyClientToBitmap(Desktop, true, 0, 0, w-1, h-1);
   ImageMain.Picture.Bitmap.Free;
   ImageMain.Picture.Bitmap := bmp.ToTBitmap;
   bmp.Free;
@@ -213,7 +187,6 @@ begin
   InfoHandle:= ImageInfo.Canvas.Handle;
   TheChangedEvent := ImageMain.Canvas.OnChange;
   TheChangingEvent := ImageMain.Canvas.OnChanging;
-
   { Show the forms }
   ScreenForm.Show;
   InfoForm.Show;
@@ -236,14 +209,6 @@ begin
   x := Colorx;
   y := Colory;
 
-  {$IFNDEF PICKER_CLIENT}
-    {$IFDEF LINUX}
-    Window.SetTarget(OldWindow);
-    {$ELSE}
-    Window.SetTarget(OldWindow, w_Window);
-    {$ENDIF}
-  {$ENDIF}
-
   { Free forms and images }
   ImageMain.Free;
   ImageInfo.Free;
@@ -251,7 +216,7 @@ begin
   ScreenForm.Free;
 
   Input.Free;
-  InputWindow.Free;
+  Desktop.free;
 
   { Re-enable the color pick buttons }
   Application.MainForm.Enabled := True;
@@ -310,8 +275,8 @@ procedure TMColorPicker.ImageInfoMouseMove(Sender: TObject; Shift: TShiftState; 
   Y: Integer);
 begin
   { Move the info form }
-  InfoForm.Top := Mouse.CursorPos.Y - 15;
-  InfoForm.Left := Mouse.CursorPos.X + 5;
+//  InfoForm.Top := Mouse.CursorPos.Y - 15;
+//  InfoForm.Left := Mouse.CursorPos.X + 5;
 end;
 
 procedure TMColorPicker.ColorPickUp(Sender: TObject; Button: TMouseButton;
