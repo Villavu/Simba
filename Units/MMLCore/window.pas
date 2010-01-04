@@ -234,8 +234,12 @@ procedure TMWindow.OnSetTarget(NewTarget,OldTarget : TTargetWindowMode);
 begin
   case OldTarget of
     w_Window: begin
+                {$IFDEF WINDOWS}
                 if not Self.TargetDC= Self.DesktopDC then
                   ReleaseDC(Self.TargetHandle,Self.TargetDC);
+                {$ELSE}
+                raise Exception.Create('Handle/DC not supported on Linux');
+                {$ENDIF}
               end;
     w_XWindow: Self.FreeReturnData;
   end;
@@ -295,11 +299,27 @@ var
 begin
   case Self.TargetMode of
     w_BMP : result := TargetBitmap <> nil;
-    w_Window : result := IsWindow(self.TargetHandle);
+    w_Window :
+      begin
+        {$IFDEF WINDOWS}
+          result := IsWindow(self.TargetHandle);
+        {$ELSE}
+          Raise Exception.Create('TargetValid: Linux and w_Window');
+          result := False;
+        {$ENDIF}
+      end;
     w_ArrayPtr : result := ArrayPtr <> nil;
-    w_HDC : result := Self.TargetDC <> 0;
+    w_HDC :
+    begin
+      {$IFDEF WINDOWS}
+       result := Self.TargetDC <> 0;
+      {$ELSE}
+        Raise Exception.Create('TargetValid: Linux and w_HDC');
+        result := False;
+      {$ENDIF}
+    end;
     w_XWindow : begin
-                  {$IFDEF LINUX}
+               {$IFDEF LINUX}
                   old_handler := XSetErrorHandler(@MufasaXErrorHandler);
                   { There must be a better way to do this, at least with less overhead. }
                   if XGetWindowAttributes(Self.XDisplay, Self.CurWindow, @Attrib) = 0 then
@@ -650,7 +670,7 @@ var
 begin
   if Self.Frozen then
     raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
-  OnSetTarget(w_XWindow,Self.TargetMode)
+  OnSetTarget(w_XWindow,Self.TargetMode);
   Self.CurWindow := XWindow;
 end;
 {$ENDIF}
