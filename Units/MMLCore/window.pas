@@ -281,6 +281,7 @@ begin
   OnSetTarget(w_window, Self.TargetMode);
   Self.TargetDC:= DesktopDC;
   Self.TargetHandle:= DesktopHWND;
+  UpdateDrawBitmap;
   {$ENDIF}
 end;
 
