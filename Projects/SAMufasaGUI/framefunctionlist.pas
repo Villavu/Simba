@@ -218,7 +218,7 @@ begin
     Len := FilterTree.Items.Count;
     i := start + len; //This is for the backwards compatibily, we do mod anways.. it just makes sure -1 isn't negative.
     c := 0;
-    while c < (len - 1) do
+    while c < (len ) do
     begin;
       if FilterTree.Items[i mod len].Level = 1 then
       begin
