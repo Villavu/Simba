@@ -98,6 +98,7 @@ type
     l: Integer;
     p: TPointArray;
     c, t, asz, ash: TIntegerArray;
+    gp: TBoolArray;
     n: String;    // DOEN
   end;
 
@@ -105,6 +106,7 @@ type
 
   TDTMPointDef = record
     x, y, Color, Tolerance, AreaSize, AreaShape: integer;
+    Good: Boolean;
   end;
 
   TDTMPointDefArray = Array Of TDTMPointDef;

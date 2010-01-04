@@ -78,24 +78,6 @@ type
            FreeSpots: Array Of Integer;
     end;
 
-{
- I am not sure wether I should simply copy and paste the old DTM implementation,
- or rewrite it from scratch.
-
- The old DTM system problaby doesn't perform that well, but seems to be quite
- stable and complete.
-
- If I would rewrite it from scratch, it would probably be faster, and
- hopefully more efficient.That won't be too hard, especially since I have
- direct data access now. (TClient FTW!)
-
- Rewrite from scratch it will be, I guess.
- And AreaShape will be turned into a {$I }, inline simply doesn't cut it.
-
- ~Wizz
-}
-
-
 implementation
 uses
     Client, dtmutil, paszlib,

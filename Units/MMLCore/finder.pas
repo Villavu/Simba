@@ -1841,15 +1841,15 @@ begin
   // Init data structure B.
   W := x2 - x1;
   H := y2 - y1;
-  setlength(b, W + 1);
+  setlength(b, (W + 1) * 2);
   for i := 0 to W do
   begin
-    setlength(b[i], H + 1);
+    setlength(b[i], (H + 1) * 2);
     // does setlength init already? if it doesn't, do we want to init here?
     // or do we want to init in the loop, as we loop over every b anyway?
 
     // init
-    FillChar(b[i][0], SizeOf(Integer) * H, 0);
+    FillChar(b[i][0], SizeOf(Integer) * H * 2, 0);
   end;
 
   // C = DTM.C
@@ -1869,25 +1869,38 @@ begin
   for yy := MA.y1 to MA.y2 do
     for xx := MA.x1 to MA.x2 do
     begin
-      // main point
-       if Sqrt(sqr(rgbs[0].r - cd[yy][xx].R) + sqr(rgbs[0].g - cd[yy][xx].G) + sqr(rgbs[0].b - cd[yy][xx].B)) > dtm.t[0] then
- //     if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
-        goto AnotherLoopEnd;
+      // Checking main point now; store that we have checked it.
+      // (Main point is point 1)
       b[xx][yy] := B[xx][yy] or 1;
+
+ //     if Sqrt(sqr(rgbs[0].r - cd[yy][xx].R) + sqr(rgbs[0].g - cd[yy][xx].G) + sqr(rgbs[0].b - cd[yy][xx].B)) > dtm.t[0] then
+      if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
+        goto AnotherLoopEnd;
+
+      // Mainpoint match. (If it did not match, we would be at AnotherLoopEnd)
+      b[xx][yy+1] := B[xx][yy+1] or 1;
+
+
       for i := 1 to dtm.l - 1 do
       begin //change to use other areashapes too.
         for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
           for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
           begin
-            // may want to remove this line, but I think it is a good optimisation.
-            if B[xxx][yyy] and (1 shl i) = 0 then
+            // If we have matched this point
+            if b[xxx][yyy+1] and (1 shl i) = 0 then
             begin
-              if Sqrt(sqr(rgbs[i].r - cd[yyy][xxx].R) + sqr(rgbs[i].g - cd[yyy][xxx].G) + sqr(rgbs[i].b - cd[yyy][xxx].B)) <= dtm.t[i] then
- //             if SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
-                b[xxx][yyy] := B[xxx][yyy] or (1 shl i)
+              // Checking point i now. (Store that we matched it)
+              b[xxx][yyy]:=b[xxx][yyy] or (1 shl i);
+
+   //           if Sqrt(sqr(rgbs[i].r - cd[yyy][xxx].R) + sqr(rgbs[i].g - cd[yyy][xxx].G) + sqr(rgbs[i].b - cd[yyy][xxx].B)) <= dtm.t[i] then
+              if SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
+                b[xxx][yyy+1] := B[xxx][yyy+1] or (1 shl i)
               else
                 goto AnotherLoopEnd;
             end;
+
+            if (b[xxx][yyy+1] and (1 shl i) = 0) and dtm.gp[i] then
+              goto AnotherLoopEnd;
           end;
       end;
       //writeln(Format('Found point: (%d, %d)', [xx,yy]));
