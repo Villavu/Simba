@@ -184,6 +184,7 @@ begin
     SetLength(Result.t,DestLen);
     SetLength(Result.asz,DestLen);
     SetLength(Result.ash,DestLen);
+    SetLength(Result.bp,DestLen);
     b := @Self.Bufferstring[1];
     for i := 0 to DestLen - 1 do
     begin;
@@ -194,6 +195,7 @@ begin
       Result.ash[i] := PInteger(@b^[c+16])^;
       Result.c[i] := PInteger(@b^[c+20])^;
       Result.t[i] := PInteger(@b^[c+24])^;
+      Result.bp[i] := False;
     end;
   end;
   result.l := length(result.p);

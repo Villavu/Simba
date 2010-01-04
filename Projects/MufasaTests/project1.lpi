@@ -11,7 +11,7 @@
       <TargetFileExt Value=""/>
       <Icon Value="0"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="2"/>
+      <ActiveEditorIndexAtStart Value="0"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -35,14 +35,14 @@
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="29" Y="51"/>
-        <TopLine Value="33"/>
+        <CursorPos X="1" Y="210"/>
+        <TopLine Value="184"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="74"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="../../../../../usr/lib64/fpc/2.2.4/source/packages/fcl-base/src/custapp.pp"/>
+        <Filename Value="../../../usr/lib64/fpc/2.2.4/source/packages/fcl-base/src/custapp.pp"/>
         <UnitName Value="CustApp"/>
         <CursorPos X="15" Y="51"/>
         <TopLine Value="32"/>
@@ -85,7 +85,7 @@
       <Unit6>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
         <UnitName Value="finder"/>
-        <CursorPos X="69" Y="1901"/>
+        <CursorPos X="31" Y="1907"/>
         <TopLine Value="1890"/>
         <EditorIndex Value="2"/>
         <UsageCount Value="34"/>
@@ -119,7 +119,7 @@
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="../../../../Documents/fpc/rtl/objpas/sysutils/diskh.inc"/>
+        <Filename Value="../../../Documents/fpc/rtl/objpas/sysutils/diskh.inc"/>
         <CursorPos X="10" Y="18"/>
         <TopLine Value="1"/>
         <UsageCount Value="8"/>
@@ -132,7 +132,7 @@
         <UsageCount Value="8"/>
       </Unit11>
       <Unit12>
-        <Filename Value="../../../../Documents/lazarus/lcl/graphics.pp"/>
+        <Filename Value="../../../Documents/lazarus/lcl/graphics.pp"/>
         <UnitName Value="Graphics"/>
         <CursorPos X="3" Y="1426"/>
         <TopLine Value="1411"/>
@@ -148,13 +148,13 @@
         <Loaded Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="../../../../Documents/fpc/rtl/inc/objpash.inc"/>
+        <Filename Value="../../../Documents/fpc/rtl/inc/objpash.inc"/>
         <CursorPos X="22" Y="177"/>
         <TopLine Value="162"/>
         <UsageCount Value="8"/>
       </Unit14>
       <Unit15>
-        <Filename Value="../../../../Documents/lazarus/lcl/intfgraphics.pas"/>
+        <Filename Value="../../../Documents/lazarus/lcl/intfgraphics.pas"/>
         <UnitName Value="IntfGraphics"/>
         <CursorPos X="30" Y="2975"/>
         <TopLine Value="2959"/>
@@ -168,7 +168,7 @@
         <UsageCount Value="8"/>
       </Unit16>
       <Unit17>
-        <Filename Value="../../../../Documents/fpc/rtl/i386/mmx.pp"/>
+        <Filename Value="../../../Documents/fpc/rtl/i386/mmx.pp"/>
         <UnitName Value="mmx"/>
         <CursorPos X="80" Y="15"/>
         <TopLine Value="71"/>
@@ -201,7 +201,7 @@
         <Loaded Value="True"/>
       </Unit20>
       <Unit21>
-        <Filename Value="../../../../Documents/fpc/packages/fcl-base/src/custapp.pp"/>
+        <Filename Value="../../../Documents/fpc/packages/fcl-base/src/custapp.pp"/>
         <UnitName Value="CustApp"/>
         <CursorPos X="59" Y="48"/>
         <TopLine Value="18"/>
@@ -244,124 +244,124 @@
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1618" Column="22" TopLine="1607"/>
-      </Position1>
-      <Position2>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1637" Column="18" TopLine="1621"/>
-      </Position2>
-      <Position3>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <Caret Line="31" Column="54" TopLine="13"/>
-      </Position3>
-      <Position4>
+      </Position1>
+      <Position2>
         <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
         <Caret Line="8" Column="38" TopLine="1"/>
-      </Position4>
-      <Position5>
+      </Position2>
+      <Position3>
         <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
         <Caret Line="47" Column="31" TopLine="27"/>
-      </Position5>
-      <Position6>
+      </Position3>
+      <Position4>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <Caret Line="31" Column="53" TopLine="24"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../../Units/MMLCore/finder.pas"/>
+        <Caret Line="85" Column="74" TopLine="75"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../../Units/MMLCore/finder.pas"/>
+        <Caret Line="2027" Column="29" TopLine="2002"/>
       </Position6>
       <Position7>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="85" Column="74" TopLine="75"/>
+        <Caret Line="2028" Column="37" TopLine="2009"/>
       </Position7>
       <Position8>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="2027" Column="29" TopLine="2002"/>
+        <Caret Line="2021" Column="75" TopLine="2004"/>
       </Position8>
       <Position9>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="2028" Column="37" TopLine="2009"/>
+        <Caret Line="1832" Column="28" TopLine="1827"/>
       </Position9>
       <Position10>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="2021" Column="75" TopLine="2004"/>
+        <Caret Line="1822" Column="1" TopLine="1808"/>
       </Position10>
       <Position11>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1832" Column="28" TopLine="1827"/>
+        <Caret Line="1877" Column="23" TopLine="1867"/>
       </Position11>
       <Position12>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1822" Column="1" TopLine="1808"/>
+        <Caret Line="62" Column="31" TopLine="44"/>
       </Position12>
       <Position13>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1877" Column="23" TopLine="1867"/>
+        <Caret Line="1893" Column="88" TopLine="1867"/>
       </Position13>
       <Position14>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="62" Column="31" TopLine="44"/>
+        <Caret Line="2033" Column="30" TopLine="2002"/>
       </Position14>
       <Position15>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1893" Column="88" TopLine="1867"/>
+        <Caret Line="1934" Column="32" TopLine="1916"/>
       </Position15>
       <Position16>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="2033" Column="30" TopLine="2002"/>
+        <Caret Line="2007" Column="29" TopLine="1989"/>
       </Position16>
       <Position17>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="1934" Column="32" TopLine="1916"/>
+        <Caret Line="87" Column="28" TopLine="78"/>
       </Position17>
       <Position18>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="2007" Column="29" TopLine="1989"/>
+        <Caret Line="2010" Column="81" TopLine="1989"/>
       </Position18>
       <Position19>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="87" Column="28" TopLine="78"/>
-      </Position19>
-      <Position20>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="2010" Column="81" TopLine="1989"/>
-      </Position20>
-      <Position21>
         <Filename Value="project1.lpr"/>
         <Caret Line="111" Column="22" TopLine="101"/>
+      </Position19>
+      <Position20>
+        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
+        <Caret Line="31" Column="24" TopLine="12"/>
+      </Position20>
+      <Position21>
+        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
+        <Caret Line="158" Column="46" TopLine="133"/>
       </Position21>
       <Position22>
         <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="31" Column="24" TopLine="12"/>
+        <Caret Line="148" Column="33" TopLine="119"/>
       </Position22>
       <Position23>
         <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="158" Column="46" TopLine="133"/>
+        <Caret Line="31" Column="30" TopLine="1"/>
       </Position23>
       <Position24>
-        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="148" Column="33" TopLine="119"/>
-      </Position24>
-      <Position25>
-        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="31" Column="30" TopLine="1"/>
-      </Position25>
-      <Position26>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
         <Caret Line="1898" Column="99" TopLine="1878"/>
-      </Position26>
-      <Position27>
+      </Position24>
+      <Position25>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
         <Caret Line="1902" Column="65" TopLine="1884"/>
-      </Position27>
-      <Position28>
+      </Position25>
+      <Position26>
         <Filename Value="project1.lpr"/>
         <Caret Line="51" Column="35" TopLine="34"/>
-      </Position28>
-      <Position29>
+      </Position26>
+      <Position27>
         <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
         <Caret Line="77" Column="5" TopLine="49"/>
-      </Position29>
-      <Position30>
+      </Position27>
+      <Position28>
         <Filename Value="../../Units/MMLCore/dtm.pas"/>
         <Caret Line="31" Column="29" TopLine="1"/>
+      </Position28>
+      <Position29>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="128" Column="41" TopLine="109"/>
+      </Position29>
+      <Position30>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="62" Column="83" TopLine="38"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

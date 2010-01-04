@@ -15,6 +15,7 @@ var
 
    p,pp: TPointArray;
    c,t,asz,ash: TIntegerArray;
+   bp:array of boolean;
 
 begin
   p := [Point(0,0), Point(1,1), Point(-4, -4)];
@@ -23,10 +24,7 @@ begin
   asz := [0, 4, 4];
   ash := [dtm_Rectangle, dtm_Rectangle, dtm_Rectangle];
   setlength(ppdtm.p,2);
-  setlength(ppdtm.c,2);
-  setlength(ppdtm.t,2);
-  setlength(ppdtm.asz,2);
-  setlength(ppdtm.ash,2);
+  bp:=[false,false,false];
 
   ppdtm.l := 3;//We have 3 points..
   ppdtm.p := p;
@@ -34,6 +32,7 @@ begin
   ppdtm.t := t;
   ppdtm.asz := asz;
   ppdtm.ash := ash;
+  ppdtm.bp := bp;
   ppdtm.n := 'TestDTM';//Our name!
 
   dtm := AddpDTM(ppdtm);
