@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ComCtrls, StdCtrls, xml2, XMLRead, XMLWrite, DOM;
+  ComCtrls, StdCtrls, XMLRead, XMLWrite, DOM;
 
 type
 
@@ -44,7 +44,13 @@ var
    DDataNode, DataNode: TDOMNode;
 
 begin
-  XMLChild := XMLDoc.CreateElement(n.Text);
+  if n.Text = 'Value' then
+  begin
+    XMLChild := XMLDoc.CreateTextNode(TSettingData(N.Data).Val);
+  end else
+  begin
+    XMLChild := XMLDoc.CreateElement(n.Text);
+  end;
   Inc(C);
   XMLNode.AppendChild(XMLChild);
 end;
@@ -156,19 +162,16 @@ var
 
 begin
   sett := TMMLSettings.Create(TreeView1.Items);
+  sett.CreateKey('Settings/FullScreen/wat', true);
+  sett.SetKeyValue('Settings/FullScreen/wat', 'TRUE');
+  writeln(sett.GetKeyValue('Settings/FullScreen/wat'));
 
-  if sett.KeyExists('') then
-    writeln('Tree exists');
-  if sett.KeyExists('Settings/a/b/c') then
-    writeln('Settings exists');
+  writeln(sett.GetSetDefaultKeyValue('Settings/FullScreen/wat2', 'OWAT'));
 
-  {writeln(sett.GetKeyValue('Settings/hoi0/Item1/Item2/Item3/wattt'));     }
-  sett.CreateKey('Settings/a/b/c', true);
+  writeln(sett.GetSetDefaultKeyValue('Settings/Component1/hoiii', 'NO U'));
 
-  if sett.iskey('Settings/a/b/c') then
-    writeln('is key');
-
-  s := sett.ListKeys('Settings');
+  writeln(sett.GetSetDefaultKeyValue('Settings/Component2/hoi', 'OK'));
+  s := sett.ListKeys('Settings/FullScreen');
   for i := 0 to high(s) do
     writeln(s[i]);
 

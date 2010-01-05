@@ -39,9 +39,10 @@ type
       function KeyExists(KeyName: String): Boolean;
       function IsKey(KeyName: String): Boolean;
       function IsDirectory(KeyName: String): Boolean;
-      procedure SetKey(KeyName: String; KeyValue: String);
+      procedure SetKeyValue(KeyName: String; KeyValue: String);
       function CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
       function GetKeyValue(KeyName: String): String;
+      function GetSetDefaultKeyValue(KeyName, defVal: String): String;
 
   end;
 
@@ -197,10 +198,7 @@ begin
   while N <> nil do
   begin
     if N.Text <> 'Value' then
-    begin
-      writeln(N.text);
       inc(i);
-    end;
     N := N.GetNextSibling;
   end;
 
@@ -221,15 +219,38 @@ function TMMLSettings.GetKeyValue(KeyName: String): String;
 var
     N: TTreeNode;
 begin
-  if IsKey(KeyName) then
+  if not KeyExists(KeyName) then
     Exit('');
   N := WalkToNode(KeyName);
   if N <> nil then
-    if N.GetFirstChild <> nil then
-      if assigned(n.GetFirstChild.Data) then
-        Exit(TSettingData(n.GetFirstChild.Data).Val);
-
+    N := N.GetFirstChild;
+  while N <> nil do
+  begin
+    if N.Text = 'Value' then
+      if assigned(n.Data) then
+        Exit(TSettingData(n.Data).Val);
+    N := N.GetNextSibling;
+  end;
   Exit('');
+end;
+
+function TMMLSettings.GetSetDefaultKeyValue(KeyName, defVal: String): String;
+var
+    Res: String;
+begin
+  if not IsKey(KeyName) then
+  begin
+    CreateKey(KeyName, True);
+    SetKeyValue(KeyName, defVal);
+    exit(defVal);
+  end;
+  Res := GetKeyValue(KeyName);
+  if Res = '' then
+  begin
+    SetKeyValue(KeyName, defVal);
+    exit(defVal);
+  end;
+  Exit(Res);
 end;
 
 function TMMLSettings.CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
@@ -242,7 +263,6 @@ var
 begin
   if KeyExists(KeyName) then
   begin
-    writeln('Key: ' + KeyName + ' exists');
     Exit(False);
   end;
   NewPath := '';
@@ -305,10 +325,37 @@ begin
   newN.MoveTo(nParent, naAddChild);
 end;
 
-procedure TMMLSettings.SetKey(KeyName: String; KeyValue: String);
+procedure TMMLSettings.SetKeyValue(KeyName: String; KeyValue: String);
+var
+    N, NN: TTreeNode;
 begin
-  if IsKey(KeyName) then
+  if not KeyExists(KeyName) then
     Exit;
+  if not IsKey(KeyName) then
+    Exit;
+
+  N := WalkToNode(KeyName);
+
+  if not N.HasChildren then
+  begin
+    NN := TTreeNode.Create(Nodes);
+    NN.Text := 'Value';
+    NN.MoveTo(N, naAddChild);
+  end;
+
+  if n <> nil then
+    N := N.GetFirstChild;
+   while N <> nil do
+   begin
+     if N.Text = 'Value' then
+     begin
+       if Assigned(N.Data) then
+         TSettingData(N.Data).Free;
+       N.Data := TSettingData.Create;
+       TSettingData(N.Data).Val := KeyValue;
+     end;
+     N := N.GetNextSibling;
+   end;
 end;
 
 end.
