@@ -32,7 +32,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   LResources ,
   Forms, testunit, colourhistory, About, internets, debugimage,
-  framefunctionlist, simpleanalyzer, updater, updateform;
+  framefunctionlist, simpleanalyzer, updater, updateform, simbasettings;
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
 begin
@@ -45,6 +45,7 @@ begin
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TDebugImgForm, DebugImgForm);
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
+  Application.CreateForm(TSettingsForm, SettingsForm);
   Application.Run;
 end.
 
