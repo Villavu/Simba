@@ -5,7 +5,7 @@ unit settings;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls;
+  Classes, SysUtils, ComCtrls, xmlread, xmlwrite, DOM;
 
 
 
@@ -34,6 +34,13 @@ type
       function WalkToNode(KeyName: String): TTreeNode;
       function GetNodePath(Node: TTreeNode): String;
 
+      procedure InternalLoadFromXML(XMLDoc: TXMLDocument);
+      procedure WriteXMLData(n: TTreeNode;
+                       XMLNode: TDOMNode; XMLDoc: TXMLDocument;
+                       var XMLChild: TDOMNode; var C: Integer);
+      procedure WalkTree(Node: TTreeNode; XMLNode: TDOMNode; XMLDoc: TXMLDocument;
+                   var C: Integer);
+
     public
       function ListKeys(KeyName: String): TStringArray;
       function KeyExists(KeyName: String): Boolean;
@@ -43,6 +50,10 @@ type
       function CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
       function GetKeyValue(KeyName: String): String;
       function GetSetDefaultKeyValue(KeyName, defVal: String): String;
+
+    public
+      procedure LoadFromXML(fileName: String);
+      procedure SaveToXML(fileName: String);
 
   end;
 
@@ -73,6 +84,54 @@ begin
   Nodes := nil;
 
   inherited;
+end;
+
+procedure TMMLSettings.InternalLoadFromXML(XMLDoc: TXMLDocument);
+var
+  iNode: TDOMNode;
+
+  procedure ProcessNode(Node: TDOMNode; TreeNode: TTreeNode);
+  var
+    cNode: TDOMNode;
+    s: string;
+    d: TSettingData;
+
+  begin
+    if Node = nil then Exit; // Stops if reached a leaf
+
+    // Adds a node to the tree
+    if (Node.NodeType = 3) then
+      s := 'Data'
+    else
+      s := Node.NodeName;
+
+    TreeNode := Nodes.AddChild(TreeNode, s);
+    if (Node.NodeType = 3) then
+    begin
+      d := TSettingData.Create;
+      D.Val := Node.NodeValue;
+      TreeNode.Data := D;
+
+      TreeNode.Text := 'Value';
+    end;
+    // Goes to the child node
+    cNode := Node.FirstChild;
+
+    // Processes all child nodes
+    while cNode <> nil do
+    begin
+      ProcessNode(cNode, TreeNode);
+      cNode := cNode.NextSibling;
+    end;
+  end;
+
+begin
+  iNode := XMLDoc.DocumentElement;
+  while iNode <> nil do
+  begin
+    ProcessNode(iNode, nil); // Recursive
+    iNode := iNode.NextSibling;
+  end;
 end;
 
 function TMMLSettings.KeyNameToKeys(KeyName: String): TStringArray;
@@ -126,13 +185,12 @@ begin
       inc(i);
       if i = length(s) then
         break;
-      n := N.GetFirstChild;
+      N := N.GetFirstChild;
     end else
-      n := n.GetNextSibling;
+      N := N.GetNextSibling;
   end;
 
   Result := N;
-
 end;
 
 function TMMLSettings.GetNodePath(Node: TTreeNode): String;
@@ -279,6 +337,7 @@ begin
   if path[0] <> nParent.Text then
   begin
     writeln('First key doesn''t match. First key should always match');
+    exit(false);
   end;
   for i := 0 to length(Path) - 2 do
   begin
@@ -356,6 +415,74 @@ begin
      end;
      N := N.GetNextSibling;
    end;
+end;
+
+procedure TMMLSettings.LoadFromXML(fileName: String);
+var
+    Doc: TXMLDocument;
+begin
+  ReadXMLFile(Doc, fileName);
+  InternalLoadFromXML(Doc);
+  Doc.Free;
+end;
+
+procedure TMMLSettings.WriteXMLData(n: TTreeNode;
+                       XMLNode: TDOMNode; XMLDoc: TXMLDocument;
+                       var XMLChild: TDOMNode; var C: Integer);
+
+var
+   DDataNode, DataNode: TDOMNode;
+
+begin
+  if n.Text = 'Value' then
+  begin
+    XMLChild := XMLDoc.CreateTextNode(TSettingData(N.Data).Val);
+  end else
+  begin
+    XMLChild := XMLDoc.CreateElement(n.Text);
+  end;
+  Inc(C);
+  XMLNode.AppendChild(XMLChild);
+end;
+
+procedure TMMLSettings.WalkTree(Node: TTreeNode; XMLNode: TDOMNode; XMLDoc: TXMLDocument;
+                   var C: Integer);
+var
+   N: TTreeNode;
+   XMLChild: TDOMNode;
+
+begin
+  N := Node.GetFirstChild;
+
+  while assigned(n) do
+  begin
+    WriteXMLData(n, XMLNode, XMLDoc, XMLChild, C);
+
+    WalkTree(n, XMLChild, XMLDoc, C);
+    n := n.GetNextSibling;
+  end;
+end;
+
+procedure TMMLSettings.SaveToXML(fileName: String);
+var
+   XMLDoc: TXMLDocument;
+   RootNode: TDOMNode;
+   C: Integer;
+begin
+  XMLDoc := TXMLDocument.Create;
+
+  RootNode := XMLDoc.CreateElement('Settings');
+  XMLDoc.AppendChild(RootNode);
+
+  RootNode := XMLDoc.DocumentElement;
+
+  C := 0;
+  if Nodes.GetFirstNode <> nil then
+    WalkTree(Nodes.GetFirstNode, RootNode, XMLDoc, C);
+
+  WriteXMLFile(XMLDoc, fileName);
+
+  XMLDoc.Free;
 end;
 
 end.
