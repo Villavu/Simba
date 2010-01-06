@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ComCtrls, StdCtrls, XMLRead, XMLWrite, DOM;
+  ComCtrls, StdCtrls;
 
 type
 
@@ -22,8 +22,6 @@ type
   private
     { private declarations }
 
-    procedure LoadFromXML(tree: TTreeView; XMLDoc: TXMLDocument);
-    procedure SaveToXML(s: String);
   public
     { public declarations }
   end; 
@@ -34,123 +32,6 @@ var
 implementation
 uses
   settings;
-
-
-procedure WriteXMLData(n: TTreeNode;
-                       XMLNode: TDOMNode; XMLDoc: TXMLDocument;
-                       var XMLChild: TDOMNode; var C: Integer);
-
-var
-   DDataNode, DataNode: TDOMNode;
-
-begin
-  if n.Text = 'Value' then
-  begin
-    XMLChild := XMLDoc.CreateTextNode(TSettingData(N.Data).Val);
-  end else
-  begin
-    XMLChild := XMLDoc.CreateElement(n.Text);
-  end;
-  Inc(C);
-  XMLNode.AppendChild(XMLChild);
-end;
-
-procedure WalkTree(Node: TTreeNode; XMLNode: TDOMNode; XMLDoc: TXMLDocument;
-                   var C: Integer);
-var
-   N: TTreeNode;
-   XMLChild: TDOMNode;
-
-begin
-  N := Node.GetFirstChild;
-
-  while assigned(n) do
-  begin
-    WriteXMLData(n, XMLNode, XMLDoc, XMLChild, C);
-
-    WalkTree(n, XMLChild, XMLDoc, C);
-    n := n.GetNextSibling;
-  end;
-end;
-
-procedure TForm1.SaveToXML(s: String);
-var
-   XMLDoc: TXMLDocument;
-   RootNode: TDOMNode;
-   C: Integer;
-
-begin
-  XMLDoc := TXMLDocument.Create;
-
-  RootNode := XMLDoc.CreateElement('Settings');
-  XMLDoc.AppendChild(RootNode);
-
-  RootNode := XMLDoc.DocumentElement;
-
-  C := 0;
-  if TreeView1.Items.GetFirstNode <> nil then
-    WalkTree(TreeView1.Items.GetFirstNode, RootNode, XMLDoc, C);
-
- { writeln(TreeView1.Items.TopLvlCount);
-  for i := 0 to TreeView1.Items.TopLvlCount -1 do
-  begin
-    WriteXMLData(TreeView1.Items.TopLvlItems[i], RootNode, XMLDoc, XMLChild, C);
-    WalkTree(TreeView1.Items.TopLvlItems[i], XMLChild, XMLDoc, C);
-  end;   }
-
-  WriteXMLFile(XMLDoc, s);
-
-  XMLDoc.Free;
-end;
-
-procedure TForm1.LoadFromXML(tree: TTreeView; XMLDoc: TXMLDocument);
-var
-  iNode: TDOMNode;
-
-  procedure ProcessNode(Node: TDOMNode; TreeNode: TTreeNode);
-  var
-    cNode: TDOMNode;
-    s: string;
-    d: TSettingData;
-
-  begin
-    if Node = nil then Exit; // Stops if reached a leaf
-
-    // Adds a node to the tree
-    if (Node.NodeType = 3) then
-      s := 'Data'
-    else
-      s := Node.NodeName;
-
-    TreeNode := tree.Items.AddChild(TreeNode, s);
-    if (Node.NodeType = 3) then
-    begin
-      d := TSettingData.Create;
-      D.Val := Node.NodeValue;
-      TreeNode.Data := D;
-
-      TreeNode.Text := 'Value';
-    end;
-    // Goes to the child node
-    cNode := Node.FirstChild;
-
-    // Processes all child nodes
-    while cNode <> nil do
-    begin
-      ProcessNode(cNode, TreeNode);
-      cNode := cNode.NextSibling;
-    end;
-  end;
-
-begin
-  iNode := XMLDoc.DocumentElement;
-  while iNode <> nil do
-  begin
-    ProcessNode(iNode, nil); // Recursive
-    iNode := iNode.NextSibling;
-  end;
-end;
-
 
 { TForm1 }
 
@@ -184,23 +65,26 @@ begin
       ss:=ss +'/' + s[0];
   end;   }
 
+  sett.SaveToXML('settings.xml');
   sett.Free;
-  SaveToXML('settings.xml');
+  //SaveToXML('settings.xml');
 end;
 
 procedure TForm1.LoadButtonClick(Sender: TObject);
 var
-  doc: TXMLDocument;
+  s: TMMLSettings;
 begin
   if not FileExists('settings.xml') then
   begin
     TreeView1.Items.Clear;
-    SaveToXML('settings.xml');
+    s := TMMLSettings.Create(TreeView1.Items);
+    s.SaveToXML('settings.xml');
+    s.Free;
   end;
-  ReadXMLFile(doc, 'settings.xml');
 
   TreeView1.Items.Clear;
-  LoadFromXML(TreeView1, doc);
+  s := TMMLSettings.Create(TreeView1.Items);
+  s.LoadFromXML('settings.xml');
 end;
 
 initialization
