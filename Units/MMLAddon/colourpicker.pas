@@ -100,7 +100,6 @@ var
 procedure TMColorPicker.Pick(Out C, X, Y: Integer);
 var
    w, h: integer;
-   box : TBox;
    SS : TShiftState;
    p : TPoint;
 
@@ -227,7 +226,6 @@ procedure TMColorPicker.ImageMainMouseMove(Sender: TObject; Shift: TShiftState; 
   Y: Integer);
 var
   TempPoint : TPoint;
-  Data : TRetData;
   R : TRect;
   px, py : Integer;
   MouseX, MouseY: Integer;

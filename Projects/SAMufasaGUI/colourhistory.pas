@@ -138,7 +138,8 @@ var
 begin
   bmp:=TBitmap.Create;
   bmp.SetSize(16,16);
-  bmp.Canvas.Brush.Color:=TColourPickerObject(n.Data).Colour;
+  if(Assigned(n.Data)) then
+    bmp.Canvas.Brush.Color:=TColourPickerObject(n.Data).Colour;
   bmp.Canvas.Rectangle(0,0,16,16);
 
   n.ImageIndex:=CHImages.Add(bmp, nil);
@@ -172,7 +173,13 @@ begin
     If Assigned(N.Data) then
       TColourPickerObject(N.Data).Free;
     WriteLn('Deleting ImageIndex: ' + IntToStr(n.ImageIndex) + '; Text: ' + N.Text);
-    Img.Delete(n.ImageIndex);
+
+    // yeah....
+    try
+      if n.ImageIndex <> -1 Then
+        Img.Delete(n.ImageIndex);
+    except end;
+
     WalkDeleteTree(n, img);
     n := n.GetNextSibling;
   end;
@@ -192,7 +199,8 @@ begin
     WalkDeleteTree(ColourTree.Selected, CHImages);
 
     WriteLn('Deleting ImageIndex: ' + IntToStr(ColourTree.Selected.ImageIndex) + '; Text: ' + ColourTree.Selected.Text);
-    CHImages.Delete(ColourTree.Selected.ImageIndex);
+    if ColourTree.Selected.ImageIndex <> -1 then
+      CHImages.Delete(ColourTree.Selected.ImageIndex);
 
     ColourTree.Selected.Delete;
     TreeChanged := True;

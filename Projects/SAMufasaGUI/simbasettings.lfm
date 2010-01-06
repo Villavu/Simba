@@ -1,0 +1,21 @@
+object SettingsForm: TSettingsForm
+  Left = 747
+  Height = 438
+  Top = 283
+  Width = 333
+  Caption = 'Simba Settings'
+  ClientHeight = 438
+  ClientWidth = 333
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '0.9.29'
+  object SettingsTreeView: TTreeView
+    Left = 16
+    Height = 401
+    Top = 16
+    Width = 297
+    DefaultItemHeight = 19
+    ScrollBars = ssAutoBoth
+    TabOrder = 0
+  end
+end
