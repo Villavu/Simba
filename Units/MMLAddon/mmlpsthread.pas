@@ -313,8 +313,7 @@ begin
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
-var
-  Ptr : PtrUInt;
+
 begin;
   with cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap') do
   begin;

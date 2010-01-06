@@ -1,6 +1,6 @@
 unit settings;
 
-{$mode objfpc}
+{$mode objfpc}{$M+}
 
 interface
 
