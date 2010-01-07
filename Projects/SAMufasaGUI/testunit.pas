@@ -422,7 +422,7 @@ procedure TForm1.SplitterFunctionListCanResize(Sender: TObject; var NewSize: Int
   var Accept: Boolean);
 begin
   if(NewSize > ScriptPanel.Width div 2)then
-    NewSize := ScriptPanel.Width div 2
+    NewSize := ScriptPanel.Width div 2;
 end;
 
 procedure TForm1.UpdateButtonClick(Sender: TObject);
@@ -432,15 +432,33 @@ begin
 end;
 
 procedure TForm1.UpdateTimerCheck(Sender: TObject);
+var
+   chk: String;
+   time:integer;
 begin
+
+  chk := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+              'Settings/Updater/CheckForUpdates',
+              'True', SimbaSettingsFile
+          );
+
+  if chk <> 'True' then
+    Exit;
+
   if SimbaUpdateForm.CanUpdate then
   begin;
     UpdateButton.Visible:=True;
     formWriteln('A new update of Simba is available!');
   end;
-  { Only check once, at startup }
-  UpdateTimer.Interval:= 30 {mins} * 60 {secs} * 1000 {ms};//Every half hour
-//  UpdateTimer.Enabled:=False;
+
+  time := StrToIntDef(SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+                    'Settings/Updater/CheckEveryXMinutes',
+                    '30', SimbaSettingsFile
+         ), 30);
+
+
+
+  UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
 
 procedure TForm1.UpdateMenuButtonClick(Sender: TObject);
@@ -517,16 +535,14 @@ begin
     // Copy our current fonts
     if not assigned(Self.OCR_Fonts) then
     begin
-      Self.OCR_Fonts :=TMOCR.Create(ScriptThread.Client);
+      Self.OCR_Fonts := TMOCR.Create(ScriptThread.Client);
 
-      if not SettingsForm.Settings.KeyExists('Settings/Fonts/Path') then
-        saveAfterSetting := True;
-
-      fontPath := SettingsForm.Settings.GetSetDefaultKeyValue('Settings/Fonts/Path',
-      IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
-
-      if saveAfterSetting then
-        SettingsForm.Settings.SaveToXML('settings.xml');
+      fontPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+                        'Settings/Fonts/Path',
+                            IncludeTrailingPathDelimiter(ExpandFileName(MainDir
+                            +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS,
+                           SimbaSettingsFile
+                  );
 
       if DirectoryExists(fontPath) then
       begin

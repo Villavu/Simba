@@ -24,6 +24,7 @@ type
     procedure SettingsFormButtonOKClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure SettingsTreeViewDblClick(Sender: TObject);
     { private declarations }
   public
     procedure SaveCurrent;
@@ -73,6 +74,26 @@ end;
 procedure TSettingsForm.FormDestroy(Sender: TObject);
 begin
   Settings.Free;
+end;
+
+procedure TSettingsForm.SettingsTreeViewDblClick(Sender: TObject);
+var
+  p, pp: TPoint;
+  N: TTreeNode;
+  Path, NewVal: String;
+
+begin
+  p := Mouse.CursorPos;
+  pp := TSettingsForm(Sender).ScreenToClient(p);
+  N := SettingsTreeView.GetNodeAt(pp.x, pp.y);
+  if N <> nil then
+    if (N.Text = 'Value') and (N.Parent <> nil) then
+    begin
+      Path := Settings.GetNodePath(N.Parent);
+      NewVal := InputBox('Change Setting', 'Change value for ' + N.Parent.Text,
+                            Settings.GetKeyValue(Path));
+      Settings.SetKeyValue(Path, NewVal);
+    end;
 end;
 
 procedure TSettingsForm.SaveCurrent;

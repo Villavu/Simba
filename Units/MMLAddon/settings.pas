@@ -49,7 +49,15 @@ type
       procedure SetKeyValue(KeyName: String; KeyValue: String);
       function CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
       function GetKeyValue(KeyName: String): String;
+
+      // Horrible name
       function GetSetDefaultKeyValue(KeyName, defVal: String): String;
+
+      // /facepalm
+      function GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName: String): String;
+
+      // AAAAAAAAAAAHG??
+      function GetSetLoadSaveDefaultKeyValueIfNotExists(KeyName, defVal, fileName: String): String;
 
     public
       procedure LoadFromXML(fileName: String);
@@ -309,6 +317,21 @@ begin
     exit(defVal);
   end;
   Exit(Res);
+end;
+
+function TMMLSettings.GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName: String): String;
+begin
+  LoadFromXML(fileName);
+  Result := GetSetDefaultKeyValue(KeyName, defVal);
+  SaveToXML(fileName);
+end;
+
+function TMMLSettings.GetSetLoadSaveDefaultKeyValueIfNotExists(KeyName, defVal, fileName: String): String;
+begin
+  if KeyExists(KeyName) then
+    exit(GetSetDefaultKeyValue(KeyName, defVal))
+  else
+    Exit(GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName));
 end;
 
 function TMMLSettings.CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
