@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, httpsend,blcksock
   {$IFDEF LINUX}
-  ,unixutils    // for chmod
+  ,BaseUnix
   {$ENDIF};
 
 type
@@ -219,7 +219,8 @@ begin
   RenameFile(FBasePath + FReplacementFile +'_', FBasePath + FReplacementFile);
   DeleteFile(FBasePath + FReplacementFile+'_old_');
   {$IFDEF LINUX}
-  Chmod(FBasePath + FReplacementFile, PermissionBits[0] or PermissionBits[1] or PermissionBits[2]);
+  fpchmod(FBasePath + FReplacementFile, S_IRUSR or S_IWUSR or S_IXUSR or S_IRGRP
+                or S_IXGRP or S_IROTH or S_IXOTH);
   {$ENDIF}
 
 end;
