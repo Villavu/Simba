@@ -39,7 +39,7 @@ uses
   SynExportHTML,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
   SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
-  ocr, updateform;
+  ocr, updateform, simbasettings;
 
 type
 
@@ -469,6 +469,9 @@ end;
 procedure TForm1.RunScript;
 var
   DbgImgInfo : TDbgImgInfo;
+  fontPath: String;
+  saveAfterSetting: Boolean = false;
+
 begin
   with CurrScript do
   begin
@@ -513,7 +516,25 @@ begin
     if not assigned(Self.OCR_Fonts) then
     begin
       Self.OCR_Fonts :=TMOCR.Create(ScriptThread.Client);
-      OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+
+      if not SettingsForm.Settings.KeyExists('Settings/Fonts/Path') then
+        saveAfterSetting := True;
+
+      fontPath := SettingsForm.Settings.GetSetDefaultKeyValue('Settings/Fonts/Path',
+      IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+
+      if saveAfterSetting then
+        SettingsForm.Settings.SaveToXML('settings.xml');
+
+      if DirectoryExists(fontPath) then
+      begin
+        OCR_Fonts.InitTOCR(fontPath);
+      end
+      else
+      begin
+        writeln('Warning: The Font directory in the Settings is not valid. Changing to default.');
+        OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+      end;
     end;
     ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
 
