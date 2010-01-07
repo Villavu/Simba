@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ComCtrls, settings;
+  ComCtrls, StdCtrls, settings;
 
 const
    SimbaSettingsFile = 'settings.xml';
@@ -16,8 +16,12 @@ type
   { TSettingsForm }
 
   TSettingsForm = class(TForm)
+    SettingsFormButtonCancel: TButton;
+    SettingsFormButtonOK: TButton;
     SettingsTreeView: TTreeView;
     Settings: TMMLSettings;
+    procedure SettingsFormButtonCancelClick(Sender: TObject);
+    procedure SettingsFormButtonOKClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     { private declarations }
@@ -46,6 +50,24 @@ begin
 
   SettingsTreeView.Items.Clear;
   Settings.LoadFromXML('settings.xml');
+end;
+
+procedure TSettingsForm.SettingsFormButtonOKClick(Sender: TObject);
+begin
+  SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
+  SettingsForm.ModalResult:=mrOK;
+end;
+
+procedure TSettingsForm.SettingsFormButtonCancelClick(Sender: TObject);
+begin
+  if not FileExists(SimbaSettingsFile) then
+  begin
+    SettingsForm.SettingsTreeView.Items.Clear;
+    SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
+    SettingsForm.SettingsTreeView.Items.Clear;
+    SettingsForm.Settings.LoadFromXML(SimbaSettingsFile);
+  end;
+  SettingsForm.ModalResult:=mrOK;
 end;
 
 procedure TSettingsForm.FormDestroy(Sender: TObject);

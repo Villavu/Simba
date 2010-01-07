@@ -93,6 +93,7 @@ type
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
     MenuExtra: TMenuItem;
+    MenuViewSettings: TMenuItem;
     MenuItemExportHTML: TMenuItem;
     MenuItemDivider9: TMenuItem;
     UpdateTimer: TTimer;
@@ -248,6 +249,7 @@ type
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
     procedure MenuItemFunctionListClick(Sender: TObject);
+    procedure MenuViewSettingsClick(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
     procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
@@ -1428,6 +1430,11 @@ end;
 procedure TForm1.MenuItemFunctionListClick(Sender: TObject);
 begin
   FunctionListShown(not MenuItemFunctionList.Checked);
+end;
+
+procedure TForm1.MenuViewSettingsClick(Sender: TObject);
+begin
+  SettingsForm.ShowModal;
 end;
 
 procedure TForm1.OnLinePSScript(Sender: TObject);
