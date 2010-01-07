@@ -36,7 +36,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="297">
+    <Units Count="298">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -137,8 +137,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="55" Y="41"/>
-        <TopLine Value="23"/>
+        <CursorPos X="78" Y="1459"/>
+        <TopLine Value="1435"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -1705,7 +1705,7 @@
         <UnitName Value="internets"/>
         <CursorPos X="5" Y="14"/>
         <TopLine Value="1"/>
-        <UsageCount Value="196"/>
+        <UsageCount Value="197"/>
       </Unit237>
       <Unit238>
         <Filename Value="debugimageform.pas"/>
@@ -1714,7 +1714,7 @@
         <UnitName Value="debugimageform"/>
         <CursorPos X="20" Y="1"/>
         <TopLine Value="1"/>
-        <UsageCount Value="183"/>
+        <UsageCount Value="184"/>
       </Unit238>
       <Unit239>
         <Filename Value="debugimage.pas"/>
@@ -1724,7 +1724,7 @@
         <UnitName Value="debugimage"/>
         <CursorPos X="66" Y="17"/>
         <TopLine Value="1"/>
-        <UsageCount Value="182"/>
+        <UsageCount Value="183"/>
       </Unit239>
       <Unit240>
         <Filename Value="debugimage.lrs"/>
@@ -1846,7 +1846,7 @@
         <UnitName Value="framefunctionlist"/>
         <CursorPos X="117" Y="5"/>
         <TopLine Value="1"/>
-        <UsageCount Value="103"/>
+        <UsageCount Value="104"/>
       </Unit257>
       <Unit258>
         <Filename Value="../../../usr/local/share/lazarus/lcl/comctrls.pp"/>
@@ -1901,7 +1901,7 @@
         <UnitName Value="simpleanalyzer"/>
         <CursorPos X="52" Y="104"/>
         <TopLine Value="193"/>
-        <UsageCount Value="90"/>
+        <UsageCount Value="91"/>
       </Unit265>
       <Unit266>
         <Filename Value="../../Units/Misc/mPasLex.pas"/>
@@ -1974,9 +1974,9 @@
         <Filename Value="../../Units/MMLAddon/updater.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="updater"/>
-        <CursorPos X="10" Y="201"/>
-        <TopLine Value="190"/>
-        <UsageCount Value="63"/>
+        <CursorPos X="112" Y="106"/>
+        <TopLine Value="68"/>
+        <UsageCount Value="64"/>
       </Unit276>
       <Unit277>
         <Filename Value="updateform.pas"/>
@@ -1984,9 +1984,11 @@
         <ComponentName Value="SimbaUpdateForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="updateform"/>
-        <CursorPos X="77" Y="74"/>
-        <TopLine Value="47"/>
-        <UsageCount Value="58"/>
+        <CursorPos X="98" Y="127"/>
+        <TopLine Value="122"/>
+        <EditorIndex Value="12"/>
+        <UsageCount Value="59"/>
+        <Loaded Value="True"/>
       </Unit277>
       <Unit278>
         <Filename Value="../../../Documents/lazarus/lcl/fileutil.pas"/>
@@ -2105,10 +2107,10 @@
         <ComponentName Value="SettingsForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="simbasettings"/>
-        <CursorPos X="40" Y="67"/>
-        <TopLine Value="31"/>
+        <CursorPos X="44" Y="26"/>
+        <TopLine Value="8"/>
         <EditorIndex Value="9"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit295>
       <Unit296>
@@ -2120,6 +2122,13 @@
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit296>
+      <Unit297>
+        <Filename Value="../../../fpc/packages/unixutil/src/unixutils.pp"/>
+        <UnitName Value="UnixUtils"/>
+        <CursorPos X="97" Y="17"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="10"/>
+      </Unit297>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
@@ -2127,120 +2136,120 @@
         <Caret Line="451" Column="25" TopLine="434"/>
       </Position1>
       <Position2>
-        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="34" Column="20" TopLine="21"/>
-      </Position2>
-      <Position3>
-        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="127" Column="22" TopLine="108"/>
-      </Position3>
-      <Position4>
-        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="36" Column="22" TopLine="22"/>
-      </Position4>
-      <Position5>
-        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="87" Column="7" TopLine="74"/>
-      </Position5>
-      <Position6>
-        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="87" Column="7" TopLine="74"/>
-      </Position6>
-      <Position7>
-        <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
-        <Caret Line="123" Column="7" TopLine="100"/>
-      </Position7>
-      <Position8>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="425" Column="68" TopLine="411"/>
-      </Position8>
-      <Position9>
-        <Filename Value="../../Units/MMLAddon/colourpicker.pas"/>
-        <Caret Line="115" Column="76" TopLine="101"/>
-      </Position9>
-      <Position10>
-        <Filename Value="../../Units/MMLAddon/colourpicker.pas"/>
-        <Caret Line="102" Column="18" TopLine="84"/>
-      </Position10>
-      <Position11>
-        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
-        <Caret Line="451" Column="25" TopLine="434"/>
-      </Position11>
-      <Position12>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="82" Column="47" TopLine="63"/>
-      </Position12>
-      <Position13>
+      </Position2>
+      <Position3>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="316" Column="1" TopLine="299"/>
-      </Position13>
-      <Position14>
+      </Position3>
+      <Position4>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="79" Column="51" TopLine="61"/>
-      </Position14>
-      <Position15>
+      </Position4>
+      <Position5>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="68" Column="52" TopLine="50"/>
-      </Position15>
-      <Position16>
+      </Position5>
+      <Position6>
         <Filename Value="../../Units/MMLCore/window.pas"/>
         <Caret Line="297" Column="49" TopLine="287"/>
-      </Position16>
-      <Position17>
+      </Position6>
+      <Position7>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="219" Column="24" TopLine="215"/>
-      </Position17>
-      <Position18>
+      </Position7>
+      <Position8>
         <Filename Value="../../Units/MMLCore/window.pas"/>
         <Caret Line="52" Column="39" TopLine="33"/>
-      </Position18>
-      <Position19>
+      </Position8>
+      <Position9>
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <Caret Line="310" Column="52" TopLine="291"/>
-      </Position19>
-      <Position20>
+      </Position9>
+      <Position10>
         <Filename Value="colourhistory.pas"/>
         <Caret Line="142" Column="3" TopLine="123"/>
-      </Position20>
-      <Position21>
+      </Position10>
+      <Position11>
         <Filename Value="colourhistory.pas"/>
         <Caret Line="141" Column="22" TopLine="123"/>
-      </Position21>
-      <Position22>
+      </Position11>
+      <Position12>
         <Filename Value="simbasettings.pas"/>
         <Caret Line="20" Column="33" TopLine="1"/>
-      </Position22>
-      <Position23>
+      </Position12>
+      <Position13>
         <Filename Value="simbasettings.pas"/>
         <Caret Line="43" Column="8" TopLine="7"/>
-      </Position23>
-      <Position24>
+      </Position13>
+      <Position14>
         <Filename Value="simbasettings.pas"/>
         <Caret Line="42" Column="36" TopLine="13"/>
+      </Position14>
+      <Position15>
+        <Filename Value="simbasettings.pas"/>
+        <Caret Line="3" Column="16" TopLine="1"/>
+      </Position15>
+      <Position16>
+        <Filename Value="simbasettings.pas"/>
+        <Caret Line="4" Column="27" TopLine="1"/>
+      </Position16>
+      <Position17>
+        <Filename Value="simbasettings.pas"/>
+        <Caret Line="27" Column="119" TopLine="1"/>
+      </Position17>
+      <Position18>
+        <Filename Value="simbasettings.pas"/>
+        <Caret Line="3" Column="19" TopLine="1"/>
+      </Position18>
+      <Position19>
+        <Filename Value="simbasettings.pas"/>
+        <Caret Line="9" Column="18" TopLine="1"/>
+      </Position19>
+      <Position20>
+        <Filename Value="simbasettings.pas"/>
+        <Caret Line="41" Column="3" TopLine="9"/>
+      </Position20>
+      <Position21>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="42" Column="14" TopLine="23"/>
+      </Position21>
+      <Position22>
+        <Filename Value="updateform.pas"/>
+        <Caret Line="21" Column="38" TopLine="1"/>
+      </Position22>
+      <Position23>
+        <Filename Value="updateform.pas"/>
+        <Caret Line="60" Column="38" TopLine="41"/>
+      </Position23>
+      <Position24>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="42" Column="14" TopLine="23"/>
       </Position24>
       <Position25>
         <Filename Value="simbasettings.pas"/>
-        <Caret Line="3" Column="16" TopLine="1"/>
+        <Caret Line="58" Column="72" TopLine="31"/>
       </Position25>
       <Position26>
         <Filename Value="simbasettings.pas"/>
-        <Caret Line="4" Column="27" TopLine="1"/>
+        <Caret Line="65" Column="72" TopLine="31"/>
       </Position26>
       <Position27>
         <Filename Value="simbasettings.pas"/>
-        <Caret Line="27" Column="119" TopLine="1"/>
+        <Caret Line="55" Column="52" TopLine="46"/>
       </Position27>
       <Position28>
         <Filename Value="simbasettings.pas"/>
-        <Caret Line="3" Column="19" TopLine="1"/>
+        <Caret Line="57" Column="52" TopLine="46"/>
       </Position28>
       <Position29>
         <Filename Value="simbasettings.pas"/>
-        <Caret Line="9" Column="18" TopLine="1"/>
+        <Caret Line="69" Column="17" TopLine="46"/>
       </Position29>
       <Position30>
         <Filename Value="simbasettings.pas"/>
-        <Caret Line="41" Column="3" TopLine="9"/>
+        <Caret Line="77" Column="5" TopLine="62"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
@@ -2251,7 +2260,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/;$(ProjPath)../../Units/MMLAddon/PSInc/"/>
-      <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/MMLAddon/PSInc/;$(ProjPath)../../Units/Linux/;$(ProjPath)../../Units/Synapse/;$(LazarusDir)/components/mouseandkeyinput/"/>
+      <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore/;../../../fpc/packages/unixutil/src/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/MMLAddon/PSInc/;$(ProjPath)../../Units/Linux/;$(ProjPath)../../Units/Synapse/;$(LazarusDir)/components/mouseandkeyinput/;../../../fpc/packages/libc/src/"/>
     </SearchPaths>
     <CodeGeneration>
       <Optimizations>

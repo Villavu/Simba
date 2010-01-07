@@ -1,21 +1,43 @@
 object SettingsForm: TSettingsForm
-  Left = 747
-  Height = 438
-  Top = 283
-  Width = 333
+  Left = 600
+  Height = 559
+  Top = 138
+  Width = 342
+  ActiveControl = SettingsTreeView
   Caption = 'Simba Settings'
-  ClientHeight = 438
-  ClientWidth = 333
+  ClientHeight = 559
+  ClientWidth = 342
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '0.9.29'
   object SettingsTreeView: TTreeView
     Left = 16
-    Height = 401
+    Height = 474
     Top = 16
-    Width = 297
+    Width = 306
+    Anchors = [akTop, akLeft, akRight, akBottom]
     DefaultItemHeight = 19
+    ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0
+    Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
+  end
+  object SettingsFormButtonOK: TButton
+    Left = 247
+    Height = 25
+    Top = 512
+    Width = 75
+    Caption = 'OK'
+    OnClick = SettingsFormButtonOKClick
+    TabOrder = 1
+  end
+  object SettingsFormButtonCancel: TButton
+    Left = 16
+    Height = 25
+    Top = 512
+    Width = 75
+    Caption = 'Cancel'
+    OnClick = SettingsFormButtonCancelClick
+    TabOrder = 2
   end
 end

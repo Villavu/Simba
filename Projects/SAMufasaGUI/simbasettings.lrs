@@ -1,10 +1,19 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TSettingsForm','FORMDATA',[
-  'TPF0'#13'TSettingsForm'#12'SettingsForm'#4'Left'#3#235#2#6'Height'#3#182#1#3
-  +'Top'#3#27#1#5'Width'#3'M'#1#7'Caption'#6#14'Simba Settings'#12'ClientHeight'
-  +#3#182#1#11'ClientWidth'#3'M'#1#8'OnCreate'#7#10'FormCreate'#9'OnDestroy'#7
-  +#11'FormDestroy'#10'LCLVersion'#6#6'0.9.29'#0#9'TTreeView'#16'SettingsTreeVi'
-  +'ew'#4'Left'#2#16#6'Height'#3#145#1#3'Top'#2#16#5'Width'#3')'#1#17'DefaultIt'
-  +'emHeight'#2#19#10'ScrollBars'#7#10'ssAutoBoth'#8'TabOrder'#2#0#0#0#0
+  'TPF0'#13'TSettingsForm'#12'SettingsForm'#4'Left'#3'X'#2#6'Height'#3'/'#2#3'T'
+  +'op'#3#138#0#5'Width'#3'V'#1#13'ActiveControl'#7#16'SettingsTreeView'#7'Capt'
+  +'ion'#6#14'Simba Settings'#12'ClientHeight'#3'/'#2#11'ClientWidth'#3'V'#1#8
+  +'OnCreate'#7#10'FormCreate'#9'OnDestroy'#7#11'FormDestroy'#10'LCLVersion'#6#6
+  +'0.9.29'#0#9'TTreeView'#16'SettingsTreeView'#4'Left'#2#16#6'Height'#3#218#1#3
+  +'Top'#2#16#5'Width'#3'2'#1#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akB'
+  +'ottom'#0#17'DefaultItemHeight'#2#19#8'ReadOnly'#9#10'ScrollBars'#7#10'ssAut'
+  +'oBoth'#8'TabOrder'#2#0#7'Options'#11#17'tvoAutoItemHeight'#16'tvoHideSelect'
+  +'ion'#21'tvoKeepCollapsedNodes'#11'tvoReadOnly'#14'tvoShowButtons'#12'tvoSho'
+  +'wLines'#11'tvoShowRoot'#11'tvoToolTips'#0#0#0#7'TButton'#20'SettingsFormBut'
+  +'tonOK'#4'Left'#3#247#0#6'Height'#2#25#3'Top'#3#0#2#5'Width'#2'K'#7'Caption'
+  +#6#2'OK'#7'OnClick'#7#25'SettingsFormButtonOKClick'#8'TabOrder'#2#1#0#0#7'TB'
+  +'utton'#24'SettingsFormButtonCancel'#4'Left'#2#16#6'Height'#2#25#3'Top'#3#0#2
+  +#5'Width'#2'K'#7'Caption'#6#6'Cancel'#7'OnClick'#7#29'SettingsFormButtonCanc'
+  +'elClick'#8'TabOrder'#2#2#0#0#0
 ]);
