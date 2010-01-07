@@ -18,4 +18,4 @@ LazarusResources.Add('TSimbaUpdateForm','FORMDATA',[
   +#2#3#0#0#5'TMemo'#9'UpdateLog'#4'Left'#2#24#6'Height'#3#183#0#3'Top'#3#144#0
   +#5'Width'#3#157#1#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0#8
   +'TabOrder'#2#4#0#0#0
-]);
+]);

@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 593
+  Left = 273
   Height = 557
-  Top = 261
+  Top = 233
   Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING MUFASA'
@@ -357,10 +357,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 65
+        EditLabel.Left = 67
         EditLabel.Height = 18
         EditLabel.Top = 10
-        EditLabel.Width = 36
+        EditLabel.Width = 34
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
