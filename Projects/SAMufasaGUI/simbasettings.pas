@@ -8,6 +8,9 @@ uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ComCtrls, settings;
 
+const
+   SimbaSettingsFile = 'settings.xml';
+
 type
 
   { TSettingsForm }
