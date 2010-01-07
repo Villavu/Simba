@@ -321,6 +321,7 @@ end;
 
 function TMMLSettings.GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName: String): String;
 begin
+  Nodes.Clear;
   LoadFromXML(fileName);
   Result := GetSetDefaultKeyValue(KeyName, defVal);
   SaveToXML(fileName);
