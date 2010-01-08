@@ -1,3 +1,26 @@
+{
+	This file is part of the Mufasa Macro Library (MML)
+	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+
+    MML is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    MML is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with MML.  If not, see <http://www.gnu.org/licenses/>.
+
+	See the file COPYING, included in this distribution,
+	for details about the copyright.
+
+    Settings class for Mufasa Macro Library
+}
+
 unit settings;
 
 {$mode objfpc}{$M+}
@@ -21,6 +44,20 @@ type
       destructor Destroy; override;
 
   end;
+
+  {
+    TMMLSettings; class to manage settings with XML.
+        Features:
+            - Loading and Saving to XML.
+            - Showing the settings as a tree.
+            - Changing, Creating settings. (No Deleting yet.)
+            - Bad naming conventions.
+        Bugs:
+            - Don't use '/' as a *name* for a node. It WILL fuck up.
+                It is no problem in values, but in NAMES for nodes, it will
+                simply not work.
+            - Poor naming.
+  }
 
   TMMLSettings = class(TObject)
 
@@ -201,6 +238,11 @@ begin
   Result := N;
 end;
 
+{
+    Return the "path" of the given Node.
+    The node should be in Nodes. (TreeView.Items)
+}
+
 function TMMLSettings.GetNodePath(Node: TTreeNode): String;
 var
   N: TTreeNode;
@@ -224,6 +266,10 @@ begin
     result := result + s[i] + '/';
 end;
 
+{
+    Equivalent to 'ls' or 'dir'. It lists the keys in a certain key (directory)
+}
+
 function TMMLSettings.ListKeys(KeyName: String): TStringArray;
 var
   N: TTreeNode;
@@ -243,11 +289,21 @@ begin
   end;
 end;
 
+{
+    Return wether the given key exists or not
+}
+
 function TMMLSettings.KeyExists(KeyName: String): Boolean;
 
 begin
   Result := WalkToNode(KeyName) <> nil;
 end;
+
+{
+    Return wether the given key is a key. (again, bad naming)
+    What I mean is, a 'key' only has a 'Value', which a 'directory key' has other
+    keys (or none) as childs.
+}
 
 function TMMLSettings.IsKey(KeyName: String): Boolean;
 var
@@ -271,6 +327,10 @@ begin
   Exit(i = 0);
 end;
 
+{
+    Perhaps this should just do Exit(not IsKey(KeyName))
+}
+
 function TMMLSettings.IsDirectory(KeyName: String): Boolean;
 var
   N: TTreeNode;
@@ -280,6 +340,10 @@ begin
     Exit(N.HasChildren);
   Exit(False);
 end;
+
+{
+    Get the value of a Key. (String)
+}
 
 function TMMLSettings.GetKeyValue(KeyName: String): String;
 var
@@ -300,6 +364,12 @@ begin
   Exit('');
 end;
 
+{
+    If the key exists - return the value.
+    If it does not exist, create the key - with a possible path, set it to
+    defVal and return defVal.
+}
+
 function TMMLSettings.GetSetDefaultKeyValue(KeyName, defVal: String): String;
 var
     Res: String;
@@ -319,6 +389,10 @@ begin
   Exit(Res);
 end;
 
+{
+    Clear the entire tree. Load from fileName. call GetSetDefaultKeyValue.
+}
+
 function TMMLSettings.GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName: String): String;
 begin
   Nodes.Clear;
@@ -327,6 +401,9 @@ begin
   SaveToXML(fileName);
 end;
 
+{
+    If Key exists, call getSetDefaultKeyValue, else call GetSetLoadSaveDefaultKeyValue
+}
 function TMMLSettings.GetSetLoadSaveDefaultKeyValueIfNotExists(KeyName, defVal, fileName: String): String;
 begin
   if KeyExists(KeyName) then
@@ -334,6 +411,12 @@ begin
   else
     Exit(GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName));
 end;
+
+{
+    Create the given key. If CreatePath = true, then create every key that is
+    required to create the key. (Say KeyName = 'a/b/c/d/e' and only key a exists,
+    and CreatePath = True, then b,c,d and e are all created.
+}
 
 function TMMLSettings.CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
 var
@@ -374,10 +457,7 @@ begin
     N := WalkToNode(NewPath);
 
     if (N = nil) and (not CreatePath) then
-    begin
-      writeln('(N = nil) and (not CreatePath)');
       exit(false);
-    end;
 
     if (N = nil) and CreatePath then
     begin
@@ -407,6 +487,10 @@ begin
   newN.Text := Path[High(Path)];
   newN.MoveTo(nParent, naAddChild);
 end;
+
+{
+    Set the value of a key.
+}
 
 procedure TMMLSettings.SetKeyValue(KeyName: String; KeyValue: String);
 var
@@ -441,6 +525,8 @@ begin
    end;
 end;
 
+
+{ load from xml }
 procedure TMMLSettings.LoadFromXML(fileName: String);
 var
     Doc: TXMLDocument;
@@ -486,6 +572,8 @@ begin
     n := n.GetNextSibling;
   end;
 end;
+
+{ save to xml }
 
 procedure TMMLSettings.SaveToXML(fileName: String);
 var

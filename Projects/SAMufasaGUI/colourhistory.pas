@@ -18,7 +18,7 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    Coliur History window for Mufasa Macro Library
+    Colour History window for Mufasa Macro Library
 }
 unit colourhistory;
 

@@ -68,26 +68,18 @@ begin
 end;
 
 function TSimbaUpdateForm.GetLatestSimbaVersion: Integer;
-var
-  saveAfterSetting: Boolean = false;
+
 begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
     SimbaVersionThread := TSimbaVersionThread.Create(true);
 
-    if not SettingsForm.Settings.KeyExists('Settings/Updater/RemoteVersionLink') then
-      saveAfterSetting := true;
-
-    SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetDefaultKeyValue(
+    SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValue(
                 'Settings/Updater/RemoteVersionLink',
                 'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +
-                '.exe'{$ENDIF} + '.version');
+                '.exe'{$ENDIF} + '.version',
+                SimbaSettingsFile);
 
-    if saveAfterSetting then
-      SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
-
-
-   // SimbaVersionThread.InputURL:= 'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF} + '.version';
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
@@ -151,26 +143,18 @@ begin
 end;
 
 procedure TSimbaUpdateForm.PerformUpdate;
-var
-  saveAfterSetting: Boolean = false;
+
 begin
   Updater := TMMLFileDownloader.Create;
 
   FCancelling := False;
   FCancelled := False;
 
-  // Make this a setting later
-
-  if not SettingsForm.Settings.KeyExists('Settings/Updater/RemoteLink') then
-    saveAfterSetting := true;
-
-  Updater.FileURL := SettingsForm.Settings.GetSetDefaultKeyValue(
+  Updater.FileURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValue(
         'Settings/Updater/RemoteLink',
-        'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF}
+        'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
+        SimbaSettingsFile
   );
-
-  if saveAfterSetting then
-    SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
 
   //ApplicationName{$IFDEF WINDOWS} +'.exe'{$ENDIF};
 
