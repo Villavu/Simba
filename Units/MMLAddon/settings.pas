@@ -89,10 +89,10 @@ type
 
       // Horrible name
       function GetSetDefaultKeyValue(KeyName, defVal: String): String;
-
+     private
       // /facepalm
       function GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName: String): String;
-
+     public
       // AAAAAAAAAAAHG??
       function GetSetLoadSaveDefaultKeyValueIfNotExists(KeyName, defVal, fileName: String): String;
 
@@ -407,7 +407,7 @@ end;
 function TMMLSettings.GetSetLoadSaveDefaultKeyValueIfNotExists(KeyName, defVal, fileName: String): String;
 begin
   if KeyExists(KeyName) then
-    exit(GetSetDefaultKeyValue(KeyName, defVal))
+    Exit(GetSetDefaultKeyValue(KeyName, defVal))
   else
     Exit(GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName));
 end;

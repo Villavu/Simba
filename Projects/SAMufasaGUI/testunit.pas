@@ -41,6 +41,9 @@ uses
   SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
   ocr, updateform, simbasettings;
 
+const
+    SimbaVersion = 386;
+
 type
 
   { TMufasaTab }
@@ -324,7 +327,6 @@ const
   // Rip Mufasa -> Simba ftw
   //WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
   WindowTitle = 'Simba - %s';//Title, where %s = the place of the filename.
-  SimbaVersion = 365;
   Panel_State = 0;
   Panel_ScriptName = 1;
   Panel_ScriptPath = 2;
