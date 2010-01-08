@@ -74,7 +74,7 @@ begin
   begin
     SimbaVersionThread := TSimbaVersionThread.Create(true);
 
-    SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValue(
+    SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
                 'Settings/Updater/RemoteVersionLink',
                 'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +
                 '.exe'{$ENDIF} + '.version',
@@ -150,7 +150,7 @@ begin
   FCancelling := False;
   FCancelled := False;
 
-  Updater.FileURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValue(
+  Updater.FileURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
         'Settings/Updater/RemoteLink',
         'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
         SimbaSettingsFile
