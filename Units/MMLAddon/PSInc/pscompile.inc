@@ -23,6 +23,9 @@
 
 Sender.Comp.AddConstantN('AppPath','string').SetString(CurrThread.AppPath);
 Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath);
+Sender.Comp.AddConstantN('IncludePath','string').SetString(CurrThread.IncludePath);
+Sender.Comp.AddConstantN('PluginPath','string').SetString(CurrThread.PluginPath);
+Sender.Comp.AddConstantN('FontPath','string').SetString(CurrThread.FontPath);
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of integer');
 Sender.Comp.AddTypeS('TExtendedArray','Array of extended');
 Sender.Comp.AddTypeS('TBoolArray', 'Array of Boolean');

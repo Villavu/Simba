@@ -68,7 +68,7 @@ type
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
     private
-      ScriptPath, AppPath : string;
+      ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
     protected
       //DebugTo : TMemo;
       DebugTo: TWritelnProc;
@@ -95,7 +95,7 @@ type
       procedure SetPSScript(Script : string);
       procedure SetDebug( writelnProc : TWritelnProc );
       procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
-      procedure SetPaths(ScriptP,AppP : string);
+      procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
       constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo);
       destructor Destroy; override;
     end;
@@ -290,7 +290,7 @@ begin
   if FileExists(FileName) then
     Path := FileName
   else
-    Path :=  AppPath+ 'Includes' + DS + Filename;
+    Path :=  IncludePath + Filename;
   if not FileExists(Path) then
   begin;
     psWriteln(Path + ' doesn''t exist');
@@ -424,32 +424,8 @@ begin
 end;
 
 procedure TMMLPSThread.LoadMethods;
-var
-  c : integer;
-  CurrSection : string;
-procedure SetCurrSection(str : string);
-begin;
-  CurrSection := Str;
-end;
-
-procedure AddFunction( Ptr : Pointer; DeclStr : String);
-begin;
-//  SetLength(ExportedMethods,c+1);
-  if c >= 200 then
-    raise exception.create('PSThread.LoadMethods: Exported more than 200 functions');
-  ExportedMethods[c].FuncDecl:= DeclStr;
-  ExportedMethods[c].FuncPtr:= Ptr;
-  ExportedMethods[c].Section:= CurrSection;
-  inc(c);
-end;
-
 begin
-  c := 0;
-  CurrSection := 'Other';
-  SetLength(ExportedMethods,200);
-  {$i PSInc/psexportedmethods.inc}
-
-  SetLength(ExportedMethods,c);
+  ExportedMethods:= GetExportedMethods;
 end;
 
 class function TMMLPSThread.GetExportedMethods: TExpMethodArr;
@@ -497,10 +473,14 @@ begin
   DebugImg := DebugImageInfo;
 end;
 
-procedure TMMLPSThread.SetPaths(ScriptP, AppP: string);
+procedure TMMLPSThread.SetPaths(ScriptP, AppP,IncludeP,PluginP,FontP: string);
 begin
   AppPath:= AppP;
   ScriptPath:= ScriptP;
+  IncludePath:= IncludeP;
+  PluginPath:= PluginP;
+  FontPath:= FontP;
+
 end;
 
 
