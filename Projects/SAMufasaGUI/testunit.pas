@@ -539,21 +539,27 @@ begin
     begin
       Self.OCR_Fonts := TMOCR.Create(ScriptThread.Client);
 
-      fontPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-                        'Settings/Fonts/Path',
-                            IncludeTrailingPathDelimiter(ExpandFileName(MainDir
-                            +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS,
-                           SimbaSettingsFile
-                  );
+      if lowercase(
+          SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+           'Settings/Fonts/LoadOnStartUp', 'True', SimbaSettingsFile)
+          ) = 'true' then
+      begin
+        fontPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+                          'Settings/Fonts/Path',
+                              IncludeTrailingPathDelimiter(ExpandFileName(MainDir
+                              +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS,
+                             SimbaSettingsFile
+                    );
 
-      if DirectoryExists(fontPath) then
-      begin
-        OCR_Fonts.InitTOCR(fontPath);
-      end
-      else
-      begin
-        writeln('Warning: The Font directory in the Settings is not valid. Changing to default.');
-        OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+        if DirectoryExists(fontPath) then
+        begin
+          OCR_Fonts.InitTOCR(fontPath);
+        end
+        else
+        begin
+          writeln('Warning: The Font directory in the Settings is not valid. Changing to default.');
+          OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+        end;
       end;
     end;
     ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
