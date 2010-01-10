@@ -316,7 +316,7 @@ begin
 
   i := 0;
 
-  N := N.GetNextSibling;
+  N := N.GetFirstChild;
   while N <> nil do
   begin
     if N.Text <> 'Value' then
@@ -497,10 +497,15 @@ var
     N, NN: TTreeNode;
 begin
   if not KeyExists(KeyName) then
+  begin
+    writeln('SetKeyValue - Key does not exist');
     Exit;
+  end;
   if not IsKey(KeyName) then
+  begin
+    writeln('SetKeyValue - IsKey returned false');
     Exit;
-
+  end;
   N := WalkToNode(KeyName);
 
   if not N.HasChildren then
@@ -520,6 +525,7 @@ begin
          TSettingData(N.Data).Free;
        N.Data := TSettingData.Create;
        TSettingData(N.Data).Val := KeyValue;
+       writeln('Setting ' + KeyName + 'to ' + KeyValue);
      end;
      N := N.GetNextSibling;
    end;
@@ -531,6 +537,7 @@ procedure TMMLSettings.LoadFromXML(fileName: String);
 var
     Doc: TXMLDocument;
 begin
+  Nodes.Clear;
   ReadXMLFile(Doc, fileName);
   InternalLoadFromXML(Doc);
   Doc.Free;
