@@ -43,14 +43,14 @@ procedure TSettingsForm.FormCreate(Sender: TObject);
 
 begin
   Settings := TMMLSettings.Create(SettingsTreeView.Items);
-  if not FileExists('settings.xml') then
+  if not FileExists(SimbaSettingsFile) then
   begin
     SettingsTreeView.Items.Clear;
-    Settings.SaveToXML('settings.xml');
+    Settings.SaveToXML(SimbaSettingsFile);
   end;
 
   SettingsTreeView.Items.Clear;
-  Settings.LoadFromXML('settings.xml');
+  Settings.LoadFromXML(SimbaSettingsFile);
 end;
 
 procedure TSettingsForm.SettingsFormButtonOKClick(Sender: TObject);
@@ -98,19 +98,19 @@ end;
 
 procedure TSettingsForm.SaveCurrent;
 begin
-  Settings.SaveToXML('settings.xml');
+  Settings.SaveToXML(SimbaSettingsFile);
 end;
 
 procedure TSettingsForm.Reload;
 begin
-  if not FileExists('settings.xml') then
+  if not FileExists(SimbaSettingsFile) then
   begin
     SettingsTreeView.Items.Clear;
-    Settings.SaveToXML('settings.xml');
+    Settings.SaveToXML(SimbaSettingsFile);
   end;
 
   SettingsTreeView.Items.Clear;
-  Settings.LoadFromXML('settings.xml');
+  Settings.LoadFromXML(SimbaSettingsFile);
 end;
 
 initialization
