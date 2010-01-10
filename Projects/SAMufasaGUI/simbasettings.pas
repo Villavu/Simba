@@ -92,6 +92,7 @@ begin
       Path := Settings.GetNodePath(N.Parent);
       NewVal := InputBox('Change Setting', 'Change value for ' + N.Parent.Text,
                             Settings.GetKeyValue(Path));
+      writeln('NewVal: ' + NewVal);
       Settings.SetKeyValue(Path, NewVal);
     end;
 end;

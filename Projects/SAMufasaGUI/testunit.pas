@@ -492,7 +492,7 @@ procedure TForm1.RunScript;
 var
   DbgImgInfo : TDbgImgInfo;
   fontPath: String;
-  saveAfterSetting: Boolean = false;
+  loadFontsOnScriptStart: String;
 
 begin
   with CurrScript do
@@ -534,36 +534,34 @@ begin
     ScriptThread.Client.MWindow.SetWindow(Self.Window);
 
 
+    loadFontsOnScriptStart := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+           'Settings/Fonts/LoadOnStartUp', 'True', SimbaSettingsFile);
     // Copy our current fonts
-    if not assigned(Self.OCR_Fonts) then
+    if not assigned(Self.OCR_Fonts) and (lowercase(loadFontsOnScriptStart) = 'true') then
     begin
       Self.OCR_Fonts := TMOCR.Create(ScriptThread.Client);
 
-      if lowercase(
-          SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-           'Settings/Fonts/LoadOnStartUp', 'True', SimbaSettingsFile)
-          ) = 'true' then
-      begin
-        fontPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+      fontPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
                           'Settings/Fonts/Path',
                               IncludeTrailingPathDelimiter(ExpandFileName(MainDir
                               +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS,
                              SimbaSettingsFile
                     );
 
-        if DirectoryExists(fontPath) then
-        begin
-          OCR_Fonts.InitTOCR(fontPath);
-        end
-        else
-        begin
-          writeln('Warning: The Font directory in the Settings is not valid. Changing to default.');
-          OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
-        end;
+      if DirectoryExists(fontPath) then
+      begin
+        OCR_Fonts.InitTOCR(fontPath);
+      end
+      else
+      begin
+        writeln('Warning: The Font directory in the Settings is not valid. Changing to default.');
+        OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
       end;
-    end;
-    ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
 
+      ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+    end else
+      if assigned(Self.OCR_Fonts) and (lowercase(loadFontsOnScriptStart) = 'true') then
+        ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;
     //Lets run it!
@@ -1479,8 +1477,13 @@ begin
   Picker.Pick(c, x, y);
   cobj := TColourPickerObject.Create(c, Point(x,y), '');
 
-  ColourHistoryForm.AddColObj(cobj, true);
-  ColourHistoryForm.Show;
+  if lowercase(SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+        'Settings/ColourPicker/ShowHistoryOnPick', 'True', SimbaSettingsFile
+  )) = 'true' then
+  begin
+    ColourHistoryForm.AddColObj(cobj, true);
+    ColourHistoryForm.Show;
+  end;
   formWriteln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
 

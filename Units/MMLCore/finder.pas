@@ -1796,8 +1796,6 @@ var
    C: Array of Integer;
 
    // Bitwise
-   // TODO: Change to record. One that indicates if there is a match at bit i
-   // and one that indicates it has already been tested at bit i...
    b: Array of Array of Integer;
 
    // bounds
