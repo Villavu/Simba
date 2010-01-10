@@ -24,6 +24,7 @@
 Sender.Comp.AddConstantN('AppPath','string').SetString(CurrThread.AppPath);
 Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath);
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of integer');
+Sender.Comp.AddTypeS('TExtendedArray','Array of extended');
 Sender.Comp.AddTypeS('TBoolArray', 'Array of Boolean');
 Sender.Comp.AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
