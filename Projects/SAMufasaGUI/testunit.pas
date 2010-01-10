@@ -42,7 +42,7 @@ uses
   ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 391;
+    SimbaVersion = 392;
 
 type
 
