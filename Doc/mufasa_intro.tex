@@ -53,7 +53,7 @@ Mufasa is:
 		  and it is possible to make this, with the right effort. \\
 	\item Open minded. We appreciate your help, ideas and critisism!
 	\item Well documented. Well... At least we are aiming towards being
-		  well documented, but there is probably work left.
+		  well documented, but there is still some work left.
 \end{itemize}
 
 \pagebreak
@@ -239,9 +239,12 @@ sub point points are arelative to the main point.
 
 \begin{verbatim}
   pDTM = record
+    l: Integer;
     p: TPointArray;
     c, t, asz, ash: TIntegerArray;
-  end; 
+    bp: Array Of Boolean;
+    n: String;
+  end;                                           
 \end{verbatim}
 
 \subsection{Example of a simple DTM}
@@ -307,16 +310,18 @@ between the two given colours.
 Area Size and Shape add that nifty extra functionality to DTM's.
 \textbf{Area Size} defines the area that should all match the colour
 with the given tolerance. \\
+\textbf{Area Shape} is currently not implemented, mainly because
+we haven't found a good use for area shapes.
 
-The \textbf{Area Shape} defines the Shape of the Area Size.
-Currently, the following shapes are supported:
-\begin{itemize}
-	\item Rectangle
-	\item Cross
-	\item DiagonalCross
-	\item Circle
-	\item Triangle\footnote{Not fully implemented yet.}
-\end{itemize}
+%The \textbf{Area Shape} defines the Shape of the Area Size.
+%Currently, the following shapes are supported:
+%\begin{itemize}
+%	\item Rectangle
+%	\item Cross
+%	\item DiagonalCross
+%	\item Circle
+%	\item Triangle\footnote{Not fully implemented yet.}
+%\end{itemize}
 
 \subsection{Loading a DTM from a string}
 
@@ -338,7 +343,7 @@ One may know DTM's as a different type:
   TDTM = record
     MainPoint: TDTMPointDef;
     SubPoints: TDTMPointDefArray;
-  end;    
+  end;            
 \end{verbatim}
 
 The MML provides the two functions \textbf{pDTMtoTDTM} and \textbf{TDTMtopDTM} to
@@ -392,6 +397,11 @@ Bitmap.FData[20 * 50 + 5].b := 255;
 \subsection{Naming a bitmap}
 You can also name a bitmap by setting the BmpName property.
 This may come in handy when working with multiple bitmaps.
+
+\section{Finder class}
+The finder class contains all the methods that are used to ``identify''
+pixels\footnote{Also contains methods for bitmaps on bitmaps, dtms, etc} 
+and more on other bitmaps; or just on a window.
 
 \section{Notes on the previously mentioned classes}
 
