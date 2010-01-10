@@ -79,9 +79,13 @@ function FindTPAEdges(p: TPointArray): TPointArray;
 function PointInTPA(p: TPoint; arP: TPointArray): Boolean;
 function ClearTPAFromTPA(arP, ClearPoints: TPointArray): TPointArray;
 procedure ClearDoubleTPA(var TPA: TPointArray);
-Function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; Box: TBox): TPointArray;
+Function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; const Box: TBox): TPointArray;
 Procedure TPACountSort(Var TPA: TPointArray;const max: TPoint;Const SortOnX : Boolean);
 Procedure TPACountSortBase(Var TPA: TPointArray;const maxx, base: TPoint; const SortOnX : Boolean);
+procedure InvertTIA(var tI: TIntegerArray);
+function SumIntegerArray(Ints : TIntegerArray): Integer;
+function AverageTIA(tI: TIntegerArray): Integer;
+function AverageExtended(tE: TExtendedArray): Extended;
 
 implementation
 
@@ -222,21 +226,15 @@ procedure RAaSTPAEx(var a: TPointArray; const w, h: Integer);
 var
    i, c, NoTP, l: Integer;
    t: TPoint;
-   b: boolean;
-
 begin
-  b:=false;
   NoTP := 0;
   l := High(a);
   for i := 0 to l do
   begin
     for c := 0 to NoTP - 1 do
       if (Abs(a[i].x - a[c].x) <= w) and (Abs(a[i].y - a[c].y) <= h) then
-      begin
-        b := true;
         Break;
-      end;
-    if not b then
+    if (c >= NoTP) then
     begin
       t := a[i];
       a[i] := a[NoTP];
@@ -255,20 +253,14 @@ procedure RAaSTPA(var a: TPointArray; const Dist: Integer);
 var
    i, c, NoTP, l: Integer;
    t: TPoint;
-   b: boolean;
-
 begin
-  b := false;
   NoTP := 0;
   l := High(a);
   for i := 0 to l do
   begin
     for c := 0 to NoTP - 1 do
       if (Round(fSqrt(Sqr(a[i].x - a[c].x) + Sqr(a[i].y - a[c].y))) <= Dist) then
-      begin
-        b:=true;
         Break;
-      end;
     if (c >= NoTP) then
     begin
       t := a[i];
@@ -545,16 +537,12 @@ var
    i, l: Integer;
    DistArr: TIntegerArray;
 begin
-  //writeln('hoi0');
   l := High(a);
   if (l < 0) then Exit;
-  //writeln('hoi1');
   SetLength(DistArr, l + 1);
   for i := 0 to l do
     DistArr[i] := Round(Sqr(From.x - a[i][0].x) + Sqr(From.y - a[i][0].y));
-  //writeln('hoi2');
   QuickATPASort(DistArr, a, 0, l, True);
-  //writeln('hoi3');
 end;
 
 {/\
@@ -579,8 +567,8 @@ end;
 
 procedure InvertATPA(var a: T2DPointArray);
 var
-   i, l: Integer;
-   b: T2DPointArray;
+  i, l: Integer;
+  b: T2DPointArray;
 begin
   l := High(a);
   if (l < 0) then Exit;
@@ -866,7 +854,7 @@ begin
       t2 := 0;
       while (t2 <= (l - ec)) do
       begin
-        if (Round(Sqrt(Sqr(Result[c][t1].x - tpa[t2].x) + Sqr(Result[c][t1].y - tpa[t2].y))) <= Dist) then
+        if (Round(fSqrt(Sqr(Result[c][t1].x - tpa[t2].x) + Sqr(Result[c][t1].y - tpa[t2].y))) <= Dist) then
         begin
           SetLength(Result[c], tc +1);
           Result[c][tc] := tpa[t2];
@@ -1341,11 +1329,16 @@ end;
   Merges the TPointArrays of the T2DPointArray ATPA in to one TPA.
 /\}
 
-Function MergeATPA(ATPA : T2DPointArray)  : TPointArray;
+Function MergeATPA(ATPA: T2DPointArray): TPointArray;
 var
-  I,II, Len, TempL,CurrentL : integer;
+  I, II, Len, TempL, CurrentL: integer;
 begin;
   Len := High(ATPA);
+  if Len < 0 then
+  begin
+    SetLength(Result, 0);
+    Exit;
+  end;
   CurrentL := 0;
   For I:= 0 to Len do
   begin;
@@ -1399,14 +1392,14 @@ Begin
     Result[I].X := Trunc(cx + cos(A) * (p[i].x - cx) - sin(A) * (p[i].y - cy));
     Result[I].Y := Trunc(cy + sin(A) * (p[i].x - cx) + cos(A) * (p[i].y - cy));
   End;
-  // I recon its faster than Point().
+  // I recon it's faster than Point().
 End;
 
 {/\
   Rotate the given Point with A radians.
 /\}
 
-Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint; inline;
+Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
 
 Begin
   Result.X := Trunc(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
@@ -1467,10 +1460,16 @@ var
   i, l: Integer;
 begin
   l := High(arP);
+  if l < 0 then
+  begin
+    Result := False;
+    Exit;
+  end;
+  Result := True;
   for i := 0 to l do
     if (arP[i].x = p.x) and (arP[i].y = p.y) then
-      Break;
-  Result := i <> Length(arP);
+      Exit;
+  Result := False;
 end;
 
 {/\
@@ -1526,31 +1525,40 @@ end;
   \\ If you pass this all the colors of the background, it will returns the points of the object.
 /\}
 
-Function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; Box: TBox): TPointArray;
-
-Var
-   X, Y, I: Integer;
-   B: Array Of Array Of Boolean;
-
-Begin
-  SetLength(Result, ((Box.X2 - Box.X1 + 1) * (Box.Y2 - Box.Y1 + 1)) - Length(TotalTPA));
-
-  SetLength(B, Box.X2 - Box.X1 + 1, Box.Y2 - Box.Y1 + 1);
-
-  For I := 0 To High(TotalTPA) Do
-    B[TotalTPA[I].X - Box.X1][TotalTPA[I].Y - Box.Y1] := True;
-
-  I := 0;
-  For X := 0 To Box.X2 - Box.X1 Do
-    For Y := 0 To Box.Y2 - Box.Y1 Do
-      If Not B[X][Y] Then
-      Begin
-          Result[I].X := X + Box.X1;
-          Result[I].Y := Y + Box.Y1;
-        I := I + 1;
-      End;
-  SetLength(B, 0);
-End;
+Function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; const Box: TBox): TPointArray;
+var
+  x, y, w, h, i, l: integer;
+  B: Array of Array of Boolean;
+begin;
+  w := Box.x2 - Box.x1;
+  h := Box.y2 - Box.y1;
+  if (w = 0) and (h = 0) then
+    Exit;
+  SetLength(b, w + 1, h + 1);
+  l := High(TotalTPA);
+  x := 0;
+  for i := 0 to l do
+    if ((TotalTPA[i].x >= Box.x1) and (TotalTPA[i].x <= Box.x2) and
+        (TotalTPA[i].y >= Box.y1) and (TotalTPA[i].y <= Box.y2)) then
+    begin;
+      Inc(x);
+      B[TotalTPA[i].x-Box.x1][TotalTPA[i].y-Box.y1] := True;
+    end;
+  if x = 0 then
+    Exit;
+  SetLength(result,(w + 1) * (h + 1) - x);
+  i := 0;
+  for x := 0 to w do
+    for y := 0 to h do
+      if not B[x][y] then
+      try
+        Result[i].x := x + Box.x1;
+        Result[i].y := y + Box.y1;
+        Inc(i);
+      except end;
+  SetLength(b, 0);
+  SetLength(Result, i);
+end;
 
 {/\
   Sorts a TPointArray by either X or Y. You have to define the max Point as well.
@@ -1595,6 +1603,7 @@ Begin
       End;
   end;
 End;
+
 
 {/\
   Sorts a TPointArray by either X or Y. Allows one to pass a Base.
@@ -1643,6 +1652,60 @@ Begin
       End;
   end;
 End;
+
+{/\
+  Returns the sum of all integers in the array
+/\}
+function SumIntegerArray(Ints : TIntegerArray): Integer;
+var
+  I, H: Integer;
+begin
+  Result := 0;
+  H := High(Ints);
+  for I := 0 to H do
+    Result := Result + Ints[I];
+end;
+
+{/\
+  Inverts the IntegerArray, last becomes first etc..
+/\}
+procedure InvertTIA(var tI: TIntegerArray);
+var
+  Temp: TIntegerArray;
+  i, h: Integer;
+begin
+  h := High(tI);
+  Temp := tI;
+  for i := 0 to h do
+    tI[i] := Temp[h - i];
+end;
+
+{/\
+  Results the Average of an IntegerArray
+/\}
+
+function AverageTIA(tI: TIntegerArray): Integer;
+begin
+  try Result := (SumIntegerArray(tI) div Length(tI)); except Result := 0; end;
+end;
+
+{/\
+  Results the Average of an ExtendedArray
+/\}
+function AverageExtended(tE: TExtendedArray): Extended;
+var
+  i, h: Integer;
+begin
+  Result := 1;
+  try
+    h := High(tE);
+    for i := 0 to h do
+      Result := (Result * tE[i]);
+    Result := Power(Result, 1/(h + 1));
+  except
+    Result := 0.0;
+  end;
+end;
 
 end.
 
