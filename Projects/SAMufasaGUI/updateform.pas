@@ -62,7 +62,7 @@ uses
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
   GetLatestSimbaVersion;
-
+  Writeln(format('Current Simba version: %d',[TestUnit.SimbaVersion]));
   Writeln('Latest Simba Version: ' + IntToStr(FSimbaVersion));
   Exit(testunit.SimbaVersion < FSimbaVersion);
 end;
