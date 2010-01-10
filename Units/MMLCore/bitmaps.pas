@@ -56,6 +56,7 @@ type
     procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);overload;
     procedure DrawATPA(ATPA : T2DPointArray);overload;
     procedure DrawTPA(TPA : TPointArray; Color : TColor);
+    function CreateTPA(SearchCol : TColor) : TPointArray;
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(TPA : TPointArray) : TIntegerArray;
     Procedure SetTransparentColor(Col : TColor);
@@ -114,7 +115,7 @@ implementation
 
 uses
   Windowutil,paszlib,DCPbase64,math,
-  colour_conv,window,mufasatypesutil;
+  colour_conv,window,mufasatypesutil,tpa;
 
 function Min(a,b:integer) : integer;
 begin
@@ -551,6 +552,28 @@ procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: TColor);
 begin
   DrawATPA(ConvArr([TPA]),ConvArr([Color]));
 end;
+
+function TMufasaBitmap.CreateTPA(SearchCol: TColor): TPointArray;
+var
+  x,y,L,I : Integer;
+  StartPtr : PRGB32;
+  Search : TRGB32;
+begin
+  SetLength(Result,self.Width * Self.Height);
+  L := 0;
+  Search := RGBToBGR(SearchCol);
+  StartPtr := Self.FData;
+  For y := 0 to Self.h - 1 do
+    For x := 0 to self.w - 1 do
+      if LongWord(StartPtr^) = LongWord(SearchCol) then
+      begin;
+        L := L + 1;
+        Result[L].x := x;
+        Result[L].y := y;
+      end;
+  SetLength(Result,L + 1);
+end;
+
 
 
 
