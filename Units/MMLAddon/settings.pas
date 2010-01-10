@@ -125,7 +125,12 @@ begin
 end;
 
 destructor TMMLSettings.Destroy;
+var
+  i : integer;
 begin
+  for i := 0 to Nodes.Count - 1 do
+    if Nodes[i].data <> nil then
+      TSettingData(Nodes[i].Data).Free;
   Nodes := nil;
 
   inherited;
