@@ -42,7 +42,7 @@ uses
   ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 392;
+    SimbaVersion = 394;
 
 type
 
@@ -284,6 +284,7 @@ type
     procedure UpdateTimerCheck(Sender: TObject);
   private
     PopupTab : integer;
+    FirstRun : boolean;//Only show the warnings the first run (path not existing one's)
     SearchStart : TPoint;
     LastTab  : integer;
     function GetScriptState: TScriptState;
@@ -441,8 +442,7 @@ begin
 
   chk := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
               'Settings/Updater/CheckForUpdates',
-              'True', SimbaSettingsFile
-          );
+              'True', SimbaSettingsFile);
 
   if chk <> 'True' then
     Exit;
@@ -454,12 +454,8 @@ begin
   end;
 
   time := StrToIntDef(SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-                    'Settings/Updater/CheckEveryXMinutes',
-                    '30', SimbaSettingsFile
-         ), 30);
-
-
-
+                      'Settings/Updater/CheckEveryXMinutes','30', SimbaSettingsFile)
+                      ,30);
   UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
 
@@ -492,6 +488,10 @@ procedure TForm1.RunScript;
 var
   DbgImgInfo : TDbgImgInfo;
   fontPath: String;
+  includePath : string;
+  AppPath : string;
+  pluginspath: string;
+  ScriptPath : string;
   loadFontsOnScriptStart: String;
 
 begin
@@ -522,12 +522,41 @@ begin
     DbgImgInfo.GetDebugBitmap:= @DebugImgForm.GetDbgBmp;
     DbgImgInfo.GetBitmap:= @DebugImgForm.GetDebugImage;
     ScriptThread.SetDbgImg(DbgImgInfo);
-
     ScriptThread.OnError:=@ErrorThread;
+
     if ScriptFile <> '' then
-      ScriptThread.SetPaths( ExtractFileDir(ScriptFile) + DS,IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)))
-    else
-      ScriptThread.SetPaths('', IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)));
+      ScriptPath := ExtractFileDir(ScriptFile);
+    AppPath:= MainDir + DS;
+    includePath:= SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+                                       'Settings/Includes/Path',
+                                        IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
+                                        DS + '..' + DS + '..' + ds)) + 'Includes' + DS,
+                                        SimbaSettingsFile);
+    fontPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+                                      'Settings/Fonts/Path',
+                                      IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
+                                      DS + '..' + DS + '..' + ds)) + 'Fonts' + DS,
+                                      SimbaSettingsFile);
+    PluginsPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+                                      'Settings/Plugins/Path',
+                                      ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS),
+                                      SimbaSettingsFile);
+    if not DirectoryExists(PluginsPath) and not assigned(PluginsGlob) then
+    begin
+      if FirstRun then
+        Writeln('Warning: The plugins directory specified in Settings isn''t valid. Not loading Plugins now.');
+    end else if not Assigned(PluginsGlob) then
+    begin
+      PluginsGlob := TMPlugins.Create;
+      PluginsGlob.PluginDirs.Add(PluginsPath);
+    end;
+    if not DirectoryExists(IncludePath) then
+      if FirstRun then
+        Writeln('Warning: The include directory specified in the Settings isn''t valid.');
+    if not DirectoryExists(fontPath) then
+      if FirstRun then
+        Writeln('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
+    ScriptThread.SetPaths(ScriptPath,AppPath,Includepath,PluginsPath,fontPath);
 
     // This doesn't actually set the Client's MWindow to the passed window, it
     // only copies the current set window handle.
@@ -537,26 +566,18 @@ begin
     loadFontsOnScriptStart := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
            'Settings/Fonts/LoadOnStartUp', 'True', SimbaSettingsFile);
     // Copy our current fonts
-    if not assigned(Self.OCR_Fonts) and (lowercase(loadFontsOnScriptStart) = 'true') then
+    if not assigned(Self.OCR_Fonts) and (lowercase(loadFontsOnScriptStart) = 'true') and DirectoryExists(fontPath) then
     begin
       Self.OCR_Fonts := TMOCR.Create(ScriptThread.Client);
-
-      fontPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-                          'Settings/Fonts/Path',
-                              IncludeTrailingPathDelimiter(ExpandFileName(MainDir
-                              +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS,
-                             SimbaSettingsFile
-                    );
-
       if DirectoryExists(fontPath) then
       begin
         OCR_Fonts.InitTOCR(fontPath);
-      end
+      end;{
       else
       begin
         writeln('Warning: The Font directory in the Settings is not valid. Changing to default.');
         OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
-      end;
+      end; }
 
       ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
     end else
@@ -564,6 +585,7 @@ begin
         ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;
+    FirstRun := false;
     //Lets run it!
     ScriptThread.Resume;
   end;
@@ -1223,9 +1245,6 @@ begin
   Picker := TMColorPicker.Create(Window);
   Selector := TMWindowSelector.Create(Window);
   MainDir:= ExtractFileDir(Application.ExeName);
-  PluginsGlob := TMPlugins.Create;
-  PluginsGlob.PluginDirs.Add(ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
-
   { For writeln }
   SetLength(DebugStream, 0);
   DebugCriticalSection := syncobjs.TCriticalSection.Create;
@@ -1241,7 +1260,7 @@ begin
   end;
   {$endif}
   frmFunctionList.OnEndDock:= @frmFunctionList.FrameEndDock;
-//  Ed
+  FirstRun := true;//Our next run is the first run.
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
