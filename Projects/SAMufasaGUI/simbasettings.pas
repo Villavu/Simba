@@ -87,13 +87,14 @@ begin
   pp := TSettingsForm(Sender).ScreenToClient(p);
   N := SettingsTreeView.GetNodeAt(pp.x, pp.y);
   if N <> nil then
-    if (N.Text = 'Value') and (N.Parent <> nil) then
+    if assigned(N.Data) then
     begin
       Path := Settings.GetNodePath(N.Parent);
-      NewVal := InputBox('Change Setting', 'Change value for ' + N.Parent.Text,
+      NewVal := InputBox('Change Setting', 'Change value for ' + TSettingData(N.Data).Val,
                             Settings.GetKeyValue(Path));
       writeln('NewVal: ' + NewVal);
       Settings.SetKeyValue(Path, NewVal);
+      N.Text := NewVal;
     end;
 end;
 
