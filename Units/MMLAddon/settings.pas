@@ -599,8 +599,12 @@ begin
   C := 0;
   if Nodes.GetFirstNode <> nil then
     WalkTree(Nodes.GetFirstNode, RootNode, XMLDoc, C);
+  try
+    WriteXMLFile(XMLDoc, fileName);
+  except
+    Writeln('Failed to write ' + fileName);
+  end;
 
-  WriteXMLFile(XMLDoc, fileName);
 
   XMLDoc.Free;
 end;
