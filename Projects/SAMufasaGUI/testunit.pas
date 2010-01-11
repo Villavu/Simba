@@ -430,7 +430,7 @@ end;
 
 procedure TForm1.UpdateButtonClick(Sender: TObject);
 begin
-  SimbaUpdateForm.Show;
+  SimbaUpdateForm.ShowModal;
   UpdateButton.Visible:=False;
 end;
 
@@ -461,7 +461,7 @@ end;
 
 procedure TForm1.UpdateMenuButtonClick(Sender: TObject);
 begin
-  SimbaUpdateForm.Show; { I don't see why Modal }
+  SimbaUpdateForm.ShowModal;
 end;
 
 procedure formWriteln( S : String);
