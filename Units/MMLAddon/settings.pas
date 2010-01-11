@@ -150,10 +150,7 @@ var
     if Node = nil then Exit; // Stops if reached a leaf
 
     // Adds a node to the tree
-    if (Node.NodeType = 3) then
-      s := 'Data'
-    else
-      s := Node.NodeName;
+    s := Node.NodeName;
 
     TreeNode := Nodes.AddChild(TreeNode, s);
     if (Node.NodeType = 3) then
@@ -162,7 +159,7 @@ var
       D.Val := Node.NodeValue;
       TreeNode.Data := D;
 
-      TreeNode.Text := 'Value';
+      TreeNode.Text := Node.NodeValue;
     end;
     // Goes to the child node
     cNode := Node.FirstChild;
@@ -269,6 +266,8 @@ begin
   result := '';
   for i := high(s) downto 0 do
     result := result + s[i] + '/';
+  if length(result) > 1 then
+    setlength(result,length(result)-1);
 end;
 
 {
@@ -313,23 +312,20 @@ end;
 function TMMLSettings.IsKey(KeyName: String): Boolean;
 var
   N: TTreeNode;
-  i: Integer;
+
 begin
   N := WalkToNode(KeyName);
   if N = nil then
     Exit(False);
 
-  i := 0;
-
-  N := N.GetFirstChild;
-  while N <> nil do
+  n := N.GetFirstChild;
+  while n <> nil do
   begin
-    if N.Text <> 'Value' then
-      inc(i);
-    N := N.GetNextSibling;
+    if n.HasChildren then
+      exit(false);
+    n := N.GetNextSibling;
   end;
-
-  Exit(i = 0);
+  exit(true);
 end;
 
 {
@@ -361,9 +357,10 @@ begin
     N := N.GetFirstChild;
   while N <> nil do
   begin
-    if N.Text = 'Value' then
-      if assigned(n.Data) then
-        Exit(TSettingData(n.Data).Val);
+    if assigned(n.Data) then
+    begin
+      Exit(TSettingData(n.Data).Val);
+    end;
     N := N.GetNextSibling;
   end;
   Exit('');
@@ -516,7 +513,7 @@ begin
   if not N.HasChildren then
   begin
     NN := TTreeNode.Create(Nodes);
-    NN.Text := 'Value';
+    NN.Text := KeyValue;
     NN.MoveTo(N, naAddChild);
   end;
 
@@ -524,14 +521,11 @@ begin
     N := N.GetFirstChild;
    while N <> nil do
    begin
-     if N.Text = 'Value' then
-     begin
-       if Assigned(N.Data) then
-         TSettingData(N.Data).Free;
-       N.Data := TSettingData.Create;
-       TSettingData(N.Data).Val := KeyValue;
-       writeln('Setting ' + KeyName + 'to ' + KeyValue);
-     end;
+     if Assigned(N.Data) then
+       TSettingData(N.Data).Free;
+     N.Data := TSettingData.Create;
+     TSettingData(N.Data).Val := KeyValue;
+     writeln('Setting ' + KeyName + ' to ' + KeyValue);
      N := N.GetNextSibling;
    end;
 end;
@@ -556,7 +550,9 @@ var
    DDataNode, DataNode: TDOMNode;
 
 begin
-  if n.Text = 'Value' then
+  if assigned(n.data) and (n.HasChildren) then
+    writeln('Has data and children! Please close simba and remove settings.xml. if problem persists, please report your settings.xml');
+  if assigned(n.Data) then
   begin
     XMLChild := XMLDoc.CreateTextNode(TSettingData(N.Data).Val);
   end else
