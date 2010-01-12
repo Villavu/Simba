@@ -230,7 +230,10 @@ begin
   ScriptErrorLine:= ErrorAtLine;
   SynEdit.Invalidate;
   SynEdit.SelStart:= ErrorPosition;
-  formWriteln(Format('Error: %s at line %d',[errorstr,erroratline]));
+  if pos('error',lowercase(errorstr)) > 0 then
+    formWriteln(Format('%s at line %d',[errorstr,erroratline]))
+  else
+    formWriteln(Format('Error: %s at line %d',[errorstr,erroratline]));
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;
