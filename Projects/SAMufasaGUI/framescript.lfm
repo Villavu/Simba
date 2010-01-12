@@ -596,6 +596,7 @@ object ScriptFrame: TScriptFrame
     OnProcessCommand = SynEditProcessCommand
     OnProcessUserCommand = SynEditProcessUserCommand
     OnSpecialLineColors = SynEditSpecialLineColors
+    OnStatusChange = SynEditStatusChange
     inline TSynGutterPartList
       object TSynGutterMarks
         Width = 23

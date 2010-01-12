@@ -42,7 +42,7 @@ uses
   ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 399;
+    SimbaVersion = 404;
 
 type
 
@@ -99,9 +99,13 @@ type
     MenuViewSettings: TMenuItem;
     MenuItemExportHTML: TMenuItem;
     MenuItemDivider9: TMenuItem;
+    TT_Cut: TToolButton;
+    TT_Copy: TToolButton;
+    TT_Paste: TToolButton;
+    ToolButton9: TToolButton;
     UpdateTimer: TTimer;
     ToolButton3: TToolButton;
-    UpdateButton: TToolButton;
+    TT_Update: TToolButton;
     UpdateMenuButton: TMenuItem;
     MenuitemFillFunctionList: TMenuItem;
     MenuItemFunctionList: TMenuItem;
@@ -280,7 +284,8 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
-    procedure UpdateButtonClick(Sender: TObject);
+    procedure TrayPopupPopup(Sender: TObject);
+    procedure TT_UpdateClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
     procedure UpdateTimerCheck(Sender: TObject);
   private
@@ -290,6 +295,7 @@ type
     LastTab  : integer;
     function GetScriptState: TScriptState;
     procedure SetScriptState(const State: TScriptState);
+    function LoadSettingDef(Key : string; Def : string) : string;
   public
     DebugStream: String;
     SearchString : string;
@@ -312,10 +318,9 @@ type
     procedure PauseScript;
     procedure StopScript;
     procedure AddTab;
-    function DeleteTab( TabIndex : integer; CloseLast : boolean) : boolean;
+    function DeleteTab( TabIndex : integer; CloseLast : boolean; Silent : boolean = false) : boolean;
     procedure ClearTab( TabIndex : integer);
-    procedure CloseTabs( Exclude : integer);overload;//-1 for none
-    procedure CloseTabs;overload;
+    procedure CloseTabs(Exclude: integer = -1; Silent : boolean = false); //-1 for no exclusion
     procedure SetEditActions;
     procedure DoSearch(Next : boolean; HighlightAll : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
@@ -429,10 +434,21 @@ begin
     NewSize := ScriptPanel.Width div 2;
 end;
 
-procedure TForm1.UpdateButtonClick(Sender: TObject);
+procedure TForm1.TrayPopupPopup(Sender: TObject);
+begin
+  MenuItemHide.enabled:= Form1.Visible;
+  {$ifdef MSWindows}
+  MenuItemShow.Enabled:= not Form1.Visible;
+  if Form1.Visible then
+    if Form1.CanFocus then
+      form1.SetFocus;
+  {$endif}
+end;
+
+procedure TForm1.TT_UpdateClick(Sender: TObject);
 begin
   SimbaUpdateForm.ShowModal;
-  UpdateButton.Visible:=False;
+  TT_Update.Visible:=False;
 end;
 
 procedure TForm1.UpdateTimerCheck(Sender: TObject);
@@ -441,22 +457,18 @@ var
    time:integer;
 begin
 
-  chk := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-              'Settings/Updater/CheckForUpdates',
-              'True', SimbaSettingsFile);
+  chk := LoadSettingDef('Settings/Updater/CheckForUpdates','True');
 
   if chk <> 'True' then
     Exit;
 
   if SimbaUpdateForm.CanUpdate then
   begin;
-    UpdateButton.Visible:=True;
+    TT_Update.Visible:=True;
     formWriteln('A new update of Simba is available!');
   end;
 
-  time := StrToIntDef(SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-                      'Settings/Updater/CheckEveryXMinutes','30', SimbaSettingsFile)
-                      ,30);
+  time := StrToIntDef(LoadSettingDef('Settings/Updater/CheckEveryXMinutes','30'),30);
   UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
 
@@ -528,20 +540,15 @@ begin
     if ScriptFile <> '' then
       ScriptPath := ExtractFileDir(ScriptFile);
     AppPath:= MainDir + DS;
-    includePath:= SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-                                       'Settings/Includes/Path',
-                                        IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
-                                        DS + '..' + DS + '..' + ds)) + 'Includes' + DS,
-                                        SimbaSettingsFile);
-    fontPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-                                      'Settings/Fonts/Path',
-                                      IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
-                                      DS + '..' + DS + '..' + ds)) + 'Fonts' + DS,
-                                      SimbaSettingsFile);
-    PluginsPath := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-                                      'Settings/Plugins/Path',
-                                      ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS),
-                                      SimbaSettingsFile);
+    includePath:= LoadSettingDef('Settings/Includes/Path',
+                                 IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
+                                 DS + '..' + DS + '..' + ds)) + 'Includes' + DS);
+    fontPath := LoadSettingDef('Settings/Fonts/Path',
+                               IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
+                               DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+
+    PluginsPath := LoadSettingDef('Settings/Plugins/Path',
+                                  ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     if not DirectoryExists(PluginsPath) and not assigned(PluginsGlob) then
     begin
       if FirstRun then
@@ -564,8 +571,7 @@ begin
     ScriptThread.Client.MWindow.SetWindow(Self.Window);
 
 
-    loadFontsOnScriptStart := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-           'Settings/Fonts/LoadOnStartUp', 'True', SimbaSettingsFile);
+    loadFontsOnScriptStart := LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True');
     // Copy our current fonts
     if not assigned(Self.OCR_Fonts) and (lowercase(loadFontsOnScriptStart) = 'true') and DirectoryExists(fontPath) then
     begin
@@ -657,15 +663,23 @@ begin;
   end;
 end;
 
-function TForm1.DeleteTab(TabIndex: integer; CloseLast : boolean) : boolean;
+function TForm1.DeleteTab(TabIndex: integer; CloseLast : boolean; Silent : boolean = false) : boolean;
 var
   Tab : TMufasaTab;
   OldIndex : integer;//So that we can switch back, if needed.
 begin
-  OldIndex := PageControl1.TabIndex;
-  if TabIndex = OldIndex then   //We are closing the 'current'  tab, lets go back in history
-    OldIndex := LastTab;
-  PageControl1.TabIndex:= TabIndex;
+  if not Silent then
+  begin;
+    OldIndex := PageControl1.TabIndex;
+    if TabIndex = OldIndex then
+    begin;
+      if lowercase(LoadSettingDef('Settings/Tabs/OpenNextOnClose','False')) = 'false' then
+        OldIndex := LastTab //We are closing the 'current'  tab, lets go back in history
+      else
+        OldIndex := Min(Tabs.Count - 1,OldIndex + 1);
+    end;
+    PageControl1.TabIndex:= TabIndex;
+  end;
   //ScriptFrame now is now correct ;-D
   result := CanExitOrOpen;
   if not result then
@@ -677,17 +691,21 @@ begin
   begin;
     Tab.Free;
     Tabs.Delete(TabIndex);
-    if OldIndex > TabIndex then
-      PageControl1.TabIndex := OldIndex - 1
-    else if OldIndex < TabIndex then
-      PageControl1.TabIndex := OldIndex;
+    if not Silent then
+    begin;
+      if OldIndex > TabIndex then
+        PageControl1.TabIndex := OldIndex - 1
+      else if OldIndex < TabIndex then
+        PageControl1.TabIndex := OldIndex;
+    end;
   end;
   if tabs.count <= 1 then
   begin;
     TB_SaveAll.Enabled:= false;
     MenuItemSaveAll.Enabled:= false;
   end;
-  RefreshTab;
+  if not silent then
+    RefreshTab;
 end;
 
 procedure TForm1.ClearTab(TabIndex: integer);
@@ -695,19 +713,14 @@ begin
   TMufasaTab(Tabs[TabIndex]).Clear;
 end;
 
-procedure TForm1.CloseTabs(Exclude: integer);
+procedure TForm1.CloseTabs(Exclude: integer = -1; Silent : boolean = false);
 var
   I : integer;
 begin
   for i := tabs.count - 1 downto 0 do
     if i <> exclude then
-      if not DeleteTab(i,false) then
+      if not DeleteTab(i,false,silent) then
         exit;
-end;
-
-procedure TForm1.CloseTabs;
-begin
-  CloseTabs(-1);
 end;
 
 procedure TForm1.SetEditActions;
@@ -719,6 +732,9 @@ begin;
   ActionCopy.Enabled:= Copy;
   ActionPaste.Enabled:= Paste;
   ActionDelete.Enabled:= Delete;
+  TT_Cut.Enabled:= Cut;
+  TT_Paste.Enabled:=Paste;
+  TT_Copy.enabled := Copy;
 end;
 
 var
@@ -730,15 +746,17 @@ begin
     with CurrScript.SynEdit do
     begin
       EditActions(CanUndo,CanRedo,SelText <> '',SelText <> '',CanPaste,SelText <> '');
-      B:= SelText <> '';
+//      B:= SelText <> '';
+      B := SelAvail;
       PopupItemFind.Enabled:= B;
       PopupItemReplace.Enabled:= B;
       if(B)then
       begin
-        if(Length(SelText) > 13)then
-          S:= Format('"%s"', [Copy(SelText, 1, 10) + '...'])
+        s := SelText;
+        if(Length(S) > 13)then
+          S:= Format('"%s"', [Copy(S, 1, 10) + '...'])
         else
-          S:= Format('"%s"', [SelText]);
+          S:= Format('"%s"', [S]);
         PopupItemFind.Caption:= 'Find next: ' + S;
         PopupItemReplace.Caption:= 'Replace:   ' + S;
       end;
@@ -1420,28 +1438,32 @@ var
   Temp2Node : TTreeNode;
   Tree : TTreeView;
 begin
-  Methods := TMMLPSThread.GetExportedMethods;
-  Tree := frmFunctionList.FunctionList;
-  Tree.Items.Clear;
-  Sections := TStringList.Create;
-  LastSection := '';
-  frmFunctionList.ScriptNode := Tree.Items.Add(nil,'Script');
-  for i := 0 to high(Methods) do
+  if frmFunctionList.FunctionList.Items.Count = 0 then
   begin;
-    if Methods[i].Section <> LastSection then
+    Methods := TMMLPSThread.GetExportedMethods;
+    Tree := frmFunctionList.FunctionList;
+    Tree.Items.Clear;
+    Sections := TStringList.Create;
+    LastSection := '';
+    frmFunctionList.ScriptNode := Tree.Items.Add(nil,'Script');
+    for i := 0 to high(Methods) do
     begin;
-      LastSection := Methods[i].Section;
-      Index :=  Sections.IndexOf(LastSection);
-      if Index <> -1 then
-        TempNode := Tree.Items.Item[index]
-      else
-      begin
-        TempNode := Tree.Items.Add(nil,LastSection);
-        Sections.Add(LastSection);
+      if Methods[i].Section <> LastSection then
+      begin;
+        LastSection := Methods[i].Section;
+        Index :=  Sections.IndexOf(LastSection);
+        if Index <> -1 then
+          TempNode := Tree.Items.Item[index]
+        else
+        begin
+          TempNode := Tree.Items.Add(nil,LastSection);
+          Sections.Add(LastSection);
+        end;
       end;
+      Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
+      Temp2Node.Data:= strnew(PChar(Methods[i].FuncDecl));
     end;
-    Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
-    Temp2Node.Data:= strnew(PChar(Methods[i].FuncDecl));
+    Sections.free;
   end;
   frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
@@ -1498,9 +1520,7 @@ begin
   Picker.Pick(c, x, y);
   cobj := TColourPickerObject.Create(c, Point(x,y), '');
 
-  if lowercase(SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-        'Settings/ColourPicker/ShowHistoryOnPick', 'True', SimbaSettingsFile
-  )) = 'true' then
+  if lowercase(LoadSettingDef('Settings/ColourPicker/ShowHistoryOnPick', 'True')) = 'true' then
   begin
     ColourHistoryForm.AddColObj(cobj, true);
     ColourHistoryForm.Show;
@@ -1633,6 +1653,11 @@ begin
                          TrayStop.Enabled:= false; TrayStop.Checked:= False;
                    end;
     end;
+end;
+
+function TForm1.LoadSettingDef(Key: string; Def: string): string;
+begin
+  result := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(Key,def,SimbaSettingsFile);
 end;
 
 procedure TForm1.FunctionListShown(ShowIt: boolean);
