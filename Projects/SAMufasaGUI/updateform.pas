@@ -89,12 +89,14 @@ begin
     FSimbaVersion := StrToIntDef(Trim(SimbaVersionThread.ResultStr), -1);//Read output
     FreeAndNil(SimbaVersionThread);//Free the thread
   end else
+  begin
     //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
     while SimbaVersionThread = nil do
     begin;
       Application.ProcessMessages;
       Sleep(50);
     end;
+  end;
   Exit(FSimbaVersion);
 end;
 
@@ -165,6 +167,7 @@ begin
 
   Self.UpdateLog.Lines.Add('Starting download of ' + Updater.FileURL + ' ...');
   try
+    Self.OkButton.Enabled := False; // grey out button
     Updater.DownloadAndSave;
     Self.UpdateLog.Lines.Add('Downloaded to ' + Updater.ReplacementFile + '_ ...');
     Updater.Replace;
@@ -181,6 +184,7 @@ begin
   end;
   Self.UpdateLog.Lines.Add('Done ... ');
   Self.UpdateLog.Lines.Add('Please restart all currently running Simba binaries.');
+  Self.OkButton.Enabled := True; // un-grey out button
 end;
 
 { TSimbaVersionThread }
