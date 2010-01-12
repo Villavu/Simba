@@ -84,8 +84,6 @@ AddFunction(@psWait, 'procedure Sleep(t: integer);');
 AddFunction(@GetTickCount, 'function GetSystemTime: LongWord;');
 AddFunction(@GetTickCount, 'function GetTickCount: LongWord;');
 AddFunction(@GetTimeRunning,'function GetTimeRunning: LongWord;');
-AddFunction(@CreateForm,'function CreateForm : TForm;');
-AddFunction(@CreateButton,'function CreateButton(Owner : TComponent) : TButton');
 AddFunction(@ConvertTime,'procedure ConvertTime(Time : integer; var h,m,s : integer);');
 AddFunction(@HakunaMatata,'procedure HakunaMatata;');
 AddFunction(@TerminateScript,'procedure TerminateScript;');
