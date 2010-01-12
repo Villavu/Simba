@@ -385,14 +385,17 @@ begin
   b := False;
   for l := 0 to PSScript.CompilerMessageCount - 1 do
   begin
-    psWriteln(PSScript.CompilerErrorToStr(l));
     if (not b) and (PSScript.CompilerMessages[l] is TIFPSPascalCompilerError) then
     begin
       b := True;
       if OnError <> nil then
         with PSScript.CompilerMessages[l] do
-          OnError(Row, Pos, MessageToString,errCompile);
-    end;
+          OnError(Row, Pos, MessageToString,errCompile)
+      else
+        psWriteln(PSScript.CompilerErrorToStr(l));
+    end else
+      psWriteln(PSScript.CompilerErrorToStr(l));
+
   end;
 end;
 
