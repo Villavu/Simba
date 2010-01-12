@@ -392,9 +392,9 @@ begin
         with PSScript.CompilerMessages[l] do
           OnError(Row, Pos, MessageToString,errCompile)
       else
-        psWriteln(PSScript.CompilerErrorToStr(l));
+        psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row));
     end else
-      psWriteln(PSScript.CompilerErrorToStr(l));
+      psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row));
 
   end;
 end;
