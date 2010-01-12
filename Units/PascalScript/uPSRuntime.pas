@@ -5042,6 +5042,15 @@ begin
                   b := not b;
                 end else result := False;
               end;
+            btRecord:
+              begin
+                if var1Type = var2Type then
+                begin
+                  Set_Equal(var1, var2, TPSTypeRec_Record(var1Type).RealSize, b);
+                  b := not b;
+                end else result := False;
+              end
+
           else begin
               CMD_Err(erTypeMismatch);
               exit;
@@ -5142,6 +5151,13 @@ begin
                   Set_Equal(var1, var2, TPSTypeRec_Set(var1Type).aByteSize, b);
                 end else result := False;
               end;
+            btRecord:
+              begin
+                if var1Type = var2Type then
+                begin
+                  Set_Equal(var1, var2, TPSTypeRec_Record(var1Type).RealSize, b);
+                end else result := False;
+              end
           else begin
               CMD_Err(erTypeMismatch);
               exit;
@@ -8854,7 +8870,7 @@ begin
     38: Stack.SetAnsiString(-1, tbtString(AnsiLowercase(string(Stack.GetAnsiString(-2))))); // AnsiLowerCase
 {$IFNDEF PS_NOINT64}
     39: Stack.SetInt64(-1, StrToInt64(string(Stack.GetAnsiString(-2))));  // StrToInt64
-    40: Stack.SetAnsiString(-1, SysUtils.IntToStr(Stack.GetInt64(-2)));// Int64ToStr
+    40: Stack.SetAnsiString(-1, tbtstring(SysUtils.IntToStr(Stack.GetInt64(-2))));// Int64ToStr
 {$ENDIF}
     41:  // sizeof
       begin
@@ -12098,9 +12114,6 @@ begin
 end;
 
 function TPSStack.PushType(aType: TPSTypeRec): PPSVariant;
-var
-  o: Cardinal;
-  p: Pointer;
 begin
   Result := Push(aType.RealSize + Sizeof(Pointer));
   Result.FType := aType;

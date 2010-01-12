@@ -758,7 +758,8 @@ type
     ecInvalidnumberOfParameters
     {$IFDEF PS_USESSUPPORT}
     , ecNotAllowed,
-    ecUnitNotFoundOrContainsErrors
+    ecUnitNotFoundOrContainsErrors,
+    ecCrossReference
     {$ENDIF}
     );
 
@@ -873,7 +874,7 @@ type
 
 
 
-  TPSBinOperatorType = (otAdd, otSub, otMul, otDiv, otMod, otShl, otShr, otAnd, otOr, otXor, otAs,
+  TPSBinOperatorType = (otAdd, otSub, otMul, otDiv, otMod, otShl, otShr, otAnd, otOr, otXor, otAs, otIntDiv,
                           otGreaterEqual, otLessEqual, otGreater, otLess, otEqual,
                           otNotEqual, otIs, otIn);
 
@@ -945,7 +946,9 @@ type
     {$IFDEF PS_USESSUPPORT}
     FUnitInits : TPSList; //nvds
     FUnitFinits: TPSList; //nvds
-    FUses      : TIFStringList;
+    FUses      : TPSStringList;
+    fUnits     : TPSUnitList;
+    fUnit      : TPSUnit;
     fModule    : tbtString;
     {$ENDIF}
     fInCompile : Integer;
@@ -1017,6 +1020,9 @@ type
     function IsCompatibleType(p1, p2: TPSType; Cast: Boolean): Boolean;
 
     function IsDuplicate(const s: tbtString; const check: TPSDuplicCheck): Boolean;
+    {$IFDEF PS_USESSUPPORT}
+    function IsInLocalUnitList(s: tbtString): Boolean;
+	{$ENDIF}
 
     function NewProc(const OriginalName, Name: tbtString): TPSInternalProcedure;
 
@@ -1472,7 +1478,7 @@ type
     property ClassInheritsFrom: TPSCompileTimeClass read FInheritsFrom write FInheritsFrom;
 
     function RegisterMethod(const Decl: tbtString): Boolean;
-	
+
     procedure RegisterProperty(const PropertyName, PropertyType: tbtString; PropAC: TPSPropType);
 
     procedure RegisterPublishedProperties;
@@ -1599,6 +1605,8 @@ type
 
     function RegisterMethod(const Declaration: tbtString; const cc: TPSCallingConvention): Boolean;
 
+    function RegisterMethodEx(const Declaration: tbtString; const cc: TPSCallingConvention; const CustomParser: TPSPascalParser): Boolean;
+
     procedure RegisterDummyMethod;
 
     function IsCompatibleWith(aType: TPSType): Boolean;
@@ -1703,6 +1711,7 @@ type
 function PS_mi2s(i: Cardinal): tbtString;
 
 function ParseMethod(Owner: TPSPascalCompiler; const FClassName: tbtString; Decl: tbtString; var OrgName: tbtString; DestDecl: TPSParametersDecl; var Func: TPMFuncType): Boolean;
+function ParseMethodEx(Owner: TPSPascalCompiler; const FClassName: tbtString; Decl: tbtString; var OrgName: tbtString; DestDecl: TPSParametersDecl; var Func: TPMFuncType; CustomParser: TPSPascalParser): Boolean;
 
 function DeclToBits(const Decl: TPSParametersDecl): tbtString;
 
@@ -1775,6 +1784,7 @@ const
   {$IFDEF PS_USESSUPPORT}
   RPS_NotAllowed = '%s is not allowed at this position';
   RPS_UnitNotFound = 'Unit ''%s'' not found or contains errors';
+  RPS_CrossReference = 'Cross-Reference error of ''%s''';
   {$ENDIF}
 
 
@@ -1969,8 +1979,12 @@ begin
   end;
 end;
 
-
 function ParseMethod(Owner: TPSPascalCompiler; const FClassName: tbtString; Decl: tbtString; var OrgName: tbtString; DestDecl: TPSParametersDecl; var Func: TPMFuncType): Boolean;
+begin
+  Result := ParseMethodEx(Owner, FClassName, Decl, OrgName, DestDecl, Func, nil);
+end;
+
+function ParseMethodEx(Owner: TPSPascalCompiler; const FClassName: tbtString; Decl: tbtString; var OrgName: tbtString; DestDecl: TPSParametersDecl; var Func: TPMFuncType; CustomParser: TPSPascalParser): Boolean;
 var
   Parser: TPSPascalParser;
   FuncType: Byte;
@@ -1980,8 +1994,11 @@ var
   ERow, EPos, ECol: Integer;
 
 begin
-  Parser := TPSPascalParser.Create;
-  Parser.SetText(Decl);
+  if CustomParser = nil then begin
+    Parser := TPSPascalParser.Create;
+    Parser.SetText(Decl);
+  end else
+    Parser := CustomParser;
   if Parser.CurrTokenId = CSTII_Function then
     FuncType:= 0
   else if Parser.CurrTokenId = CSTII_Procedure then
@@ -1990,14 +2007,18 @@ begin
     FuncType := 2
   else
   begin
-    Parser.Free;
+    if Parser <> CustomParser then
+      Parser.Free;
     Result := False;
     exit;
   end;
   Parser.Next;
   if Parser.CurrTokenId <> CSTI_Identifier then
   begin
-    Parser.Free;
+    if Parser <> CustomParser then
+      Parser.Free
+    else
+      Owner.MakeError('', ecIdentifierExpected, '');
     Result := False;
     exit;
   end; {if}
@@ -2031,7 +2052,10 @@ begin
           modifier := pmIn;
         if Parser.CurrTokenId <> CSTI_Identifier then
         begin
-          Parser.Free;
+          if Parser <> CustomParser then
+            Parser.Free
+          else
+            Owner.MakeError('', ecIdentifierExpected, '');
           Result := False;
           exit;
         end;
@@ -2046,7 +2070,10 @@ begin
           Parser.Next;
           if Parser.CurrTokenId <> CSTI_Identifier then
           begin
-            Parser.Free;
+            if Parser <> CustomParser then
+              Parser.Free
+            else
+              Owner.MakeError('', ecIdentifierExpected, '');
             Result := False;
             exit;
           end;
@@ -2055,7 +2082,10 @@ begin
         end;
         if Parser.CurrTokenId <> CSTI_Colon then
         begin
-          Parser.Free;
+          if Parser <> CustomParser then
+            Parser.Free
+          else
+            Owner.MakeError('', ecColonExpected, '');
           Result := False;
           exit;
         end;
@@ -2065,7 +2095,10 @@ begin
           Parser.nExt;
           if Parser.CurrTokenId <> CSTII_Of then
           begin
-            Parser.Free;
+            if Parser <> CustomParser then
+              Parser.Free
+            else
+              Owner.MakeError('', ecOfExpected, '');
             Result := False;
             exit;
           end;
@@ -2078,7 +2111,10 @@ begin
             VCType := Owner.GetTypeCopyLink(Owner.FindType(Parser.GetToken));
             if VCType = nil then
             begin
-              Parser.Free;
+              if Parser <> CustomParser then
+                Parser.Free
+              else
+                Owner.MakeError('', ecUnknownType, Parser.GetToken);
               Result := False;
               exit;
             end;
@@ -2106,7 +2142,8 @@ begin
               btRecord: VCType := FindAndAddType(Owner, '!OPENARRAYOFRECORD_'+FastUpperCase(Parser.OriginalToken), 'array of ' +FastUpperCase(Parser.OriginalToken));
             else
               begin
-                Parser.Free;
+                if Parser <> CustomParser then
+                  Parser.Free;
                 Result := False;
                 exit;
               end;
@@ -2118,7 +2155,10 @@ begin
           VCType := Owner.FindType(Parser.GetToken);
           if VCType = nil then
           begin
-            Parser.Free;
+            if Parser <> CustomParser then
+              Parser.Free
+            else
+              Owner.MakeError('', ecUnknownType, Parser.GetToken);
             Result := False;
             exit;
           end;
@@ -2144,7 +2184,10 @@ begin
           break;
         if Parser.CurrTokenId <> CSTI_Semicolon then
         begin
-          Parser.Free;
+          if Parser <> CustomParser then
+            Parser.Free
+          else
+            Owner.MakeError('', ecSemiColonExpected, '');
           Result := False;
           exit;
         end;
@@ -2157,7 +2200,10 @@ begin
   begin
     if Parser.CurrTokenId <> CSTI_Colon then
     begin
-      Parser.Free;
+      if Parser <> CustomParser then
+        Parser.Free
+      else
+        Owner.MakeError('', ecColonExpected, '');
       Result := False;
       exit;
     end;
@@ -2166,10 +2212,14 @@ begin
     VCType := Owner.FindType(Parser.GetToken);
     if VCType = nil then
     begin
-      Parser.Free;
+      if Parser <> CustomParser then
+        Parser.Free
+      else
+        Owner.MakeError('', ecUnknownType, Parser.GetToken);
       Result := False;
       exit;
     end;
+    Parser.Next;
   end
   else if FuncType = 2 then {constructor}
   begin
@@ -2177,7 +2227,8 @@ begin
   end else
     VCType := nil;
   DestDecl.Result := VCType;
-  Parser.Free;
+  if Parser <> CustomParser then
+    Parser.Free;
   if FuncType = 2 then
     Func := mftConstructor
   else
@@ -2218,7 +2269,8 @@ begin
     else
     begin
       if (TPSExternalProcedure(x).RegProc.NameHash = h) and
-        (TPSExternalProcedure(x).RegProc.Name = Name) then
+        (TPSExternalProcedure(x).RegProc.Name = Name)     {$IFDEF PS_USESSUPPORT} and
+        (IsInLocalUnitList(TPSInternalProcedure(x).DeclareUnit)){$ENDIF} then
       begin
         Result := l;
         exit;
@@ -3171,7 +3223,34 @@ begin
             else Result := False;
           end;
         end;
+{$IFDEF PS_DELPHIDIV}
       otDiv:
+        begin { / }
+          if IsIntType(var1.FType.BaseType) then
+            ConvertToFloat(self, FUseUsedTypes, var1, Self.FindType('EXTENDED'));
+          case Var1.FType.BaseType of
+            btSingle: var1^.tsingle := var1^.tsingle / GetReal( Var2, Result);
+            btDouble: var1^.tdouble := var1^.tdouble / GetReal( Var2, Result);
+            btExtended: var1^.textended := var1^.textended / GetReal( Var2, Result);
+            btCurrency: var1^.tcurrency := var1^.tcurrency / GetReal( Var2, Result);
+            else Result := False;
+          end;
+        end;
+      otIntDiv:
+        begin { / }
+          case Var1.FType.BaseType of
+            btU8: var1^.tu8 := var1^.tu8 div GetUint(Var2, Result);
+            btS8: var1^.ts8 := var1^.ts8 div Getint(Var2, Result);
+            btU16: var1^.tu16 := var1^.tu16 div GetUint(Var2, Result);
+            btS16: var1^.ts16 := var1^.ts16 div Getint(Var2, Result);
+            btU32: var1^.tu32 := var1^.tu32 div GetUint(Var2, Result);
+            btS32: var1^.ts32 := var1^.ts32 div Getint(Var2, Result);
+            {$IFNDEF PS_NOINT64}btS64: var1^.ts64 := var1^.ts64 div GetInt64(Var2, Result); {$ENDIF}
+            else Result := False;
+          end;
+        end;
+{$ELSE}
+      otDiv, otIntDiv:
         begin { / }
           case Var1.FType.BaseType of
             btU8: var1^.tu8 := var1^.tu8 div GetUint(Var2, Result);
@@ -3188,6 +3267,7 @@ begin
             else Result := False;
           end;
         end;
+{$ENDIF}
       otMod:
         begin { MOD }
           case Var1.FType.BaseType of
@@ -3719,7 +3799,11 @@ var
   rvv: PIFPSRecordFieldTypeDef;
   p, p2: TPSType;
   tempf: PIfRVariant;
-
+{$IFNDEF PS_NOINTERFACES}
+  InheritedFrom: tbtString;
+  Guid: TGUID;
+  Intf: TPSInterface;
+{$ENDIF}
 begin
   if (FParser.CurrTokenID = CSTII_Function) or (FParser.CurrTokenID = CSTII_Procedure) then
   begin
@@ -4059,6 +4143,94 @@ begin
     FTypes.Add(p);
     Result := p;
     Exit;
+{$IFNDEF PS_NOINTERFACES}
+  end else if FParser.CurrTokenId = CSTII_Interface then
+  begin
+    FParser.Next;
+    if FParser.CurrTokenId <> CSTI_OpenRound then
+    begin
+      MakeError('', ecOpenRoundExpected, '');
+      Result := nil;
+      Exit;
+    end;
+    FParser.Next;
+    if FParser.CurrTokenID <> CSTI_Identifier then
+    begin
+      MakeError('', ecIdentifierExpected, '');
+      Result := nil;
+      exit;
+    end;
+    InheritedFrom := FParser.GetToken;
+    TypeNo := FindType(InheritedFrom);
+    if TypeNo = nil then
+    begin
+      MakeError('', ecUnknownType, FParser.GetToken);
+      Result := nil;
+      exit;
+    end;
+    if TypeNo.BaseType <> btInterface then
+    begin
+      MakeError('', ecTypeMismatch, '');
+      Result := nil;
+      Exit;
+    end;
+    FParser.Next;
+    if FParser.CurrTokenId <> CSTI_CloseRound then
+    begin
+      MakeError('', ecCloseRoundExpected, '');
+      Result := nil;
+      Exit;
+    end;
+{$IFNDEF PS_NOINTERFACEGUIDBRACKETS}
+    FParser.Next;
+    if FParser.CurrTokenId <> CSTI_OpenBlock then
+    begin
+      MakeError('', ecOpenBlockExpected, '');
+      Result := nil;
+      Exit;
+    end;
+{$ENDIF}
+    FParser.Next;
+    if FParser.CurrTokenId <> CSTI_String then
+    begin
+      MakeError('', ecStringExpected, '');
+      Result := nil;
+      Exit;
+    end;
+    s := FParser.GetToken;
+    try
+      Guid := StringToGuid(String(Copy(s, 2, Length(s)-2)));
+    except
+      on e: Exception do
+      begin
+        MakeError('', ecCustomError, tbtstring(e.Message));
+        Result := nil;
+        Exit;
+      end;
+    end;
+{$IFNDEF PS_NOINTERFACEGUIDBRACKETS}
+    FParser.Next;
+    if FParser.CurrTokenId <> CSTI_CloseBlock then
+    begin
+      MakeError('', ecCloseBlockExpected, '');
+      Result := nil;
+      Exit;
+    end;
+{$ENDIF}
+    Intf := AddInterface(FindInterface(InheritedFrom), Guid, Name);
+    FParser.Next;
+    repeat
+      if not Intf.RegisterMethodEx('', cdStdCall, FParser) then begin
+        MakeError('', ecCustomError, 'Invalid method');
+        Result := nil;
+        Exit;
+      end;
+      FParser.Next;
+    until FParser.CurrTokenId = CSTII_End;
+    FParser.Next; // skip CSTII_End
+    Result := Intf.FType;
+    Exit;
+{$ENDIF}
   end else if FParser.CurrTokenId = CSTI_Identifier then
   begin
     s := FParser.GetToken;
@@ -5655,6 +5827,16 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
         BVal.Val2 := tmpp;
       end;
     end else begin
+      if (BVal.aType <> nil) and (BVal.aType <> GetTypeNo(BlockInfo, Output)) then begin
+        tmpp := AllocStackReg(BVal.aType);
+        PreWriteOutrec(tmpp, nil);
+        DoBinCalc(BVal, tmpp);
+        afterwriteoutrec(tmpp);
+        result := WriteCalculation(tmpp, output);
+        tmpp.Free;
+        exit;
+      end;
+
       if not PreWriteOutRec(Output, nil) then
       begin
         Result := False;
@@ -5700,7 +5882,10 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
         exit;
       end;
       BlockWriteByte(BlockInfo, Cm_CA);
-      BlockWriteByte(BlockInfo, Ord(BVal.Operator));
+      if BVAL.Operator = otIntDiv then
+        BlockWriteByte(BlockInfo, Ord(otDiv))
+      else
+        BlockWriteByte(BlockInfo, Ord(BVal.Operator));
       if not (WriteOutRec(Output, False) and WriteOutRec(BVal.FVal2, True)) then
       begin
         Result := False;
@@ -6232,15 +6417,6 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
     end;
   end;
 
-
-  function GetIdentifier(const FType: Byte): TPSValue;
-    {
-      FType:
-        0 = Anything
-        1 = Only variables
-        2 = Not constants
-    }
-
     procedure CheckProcCall(var x: TPSValue);
     var
       aType: TPSType;
@@ -6524,17 +6700,17 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
             begin
               ImplicitPeriod := False;
               FParser.Next;
- 
+
               tmp := AllocStackReg(u);
               WriteCalculation(x,tmp);
               TPSVar(BlockInfo.Proc.FProcVars[TPSValueAllocatedStackVar(tmp).LocalVarNo]).Use;
- 
+
               rr := TPSSubNumber.Create;
               TPSValueVar(tmp).RecAdd(rr);
               TPSSubNumber(rr).SubNo := t;
               rr.aType := TPSRecordType(u).RecVal(t).FType;
               u := rr.aType;
- 
+
               tmpn := TPSValueReplace.Create;
               with TPSValueReplace(tmpn) do
               begin
@@ -6544,7 +6720,7 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
                 NewValue := AllocStackReg(u);
                 PreWriteAllocated := true;
               end;
- 
+
               if not WriteCalculation(tmp,TPSValueReplace(tmpn).NewValue) then
               begin
                 {MakeError('',ecInternalError,'');}
@@ -7193,6 +7369,15 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
       end;
     end;
 
+  function GetIdentifier(const FType: Byte): TPSValue;
+    {
+      FType:
+        0 = Anything
+        1 = Only variables
+        2 = Not constants
+    }
+
+
   var
     vt: TPSVariableType;
     vno: Cardinal;
@@ -7351,7 +7536,8 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
     for l := 0 to FVars.Count - 1 do
     begin
       if (TPSVar(FVars[l]).NameHash = h) and
-        (TPSVar(FVars[l]).Name = s) then
+        (TPSVar(FVars[l]).Name = s)    {$IFDEF PS_USESSUPPORT} and
+        (IsInLocalUnitList(TPSVar(FVars[l]).FDeclareUnit)){$ENDIF} then
       begin
         TPSVar(FVars[l]).Use;
         Result := TPSValueGlobalVar.Create;
@@ -7438,7 +7624,8 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
     for l := 0 to FConstants.Count -1 do
     begin
       t := TPSConstant(FConstants[l]);
-      if (t.NameHash = h) and (t.Name = s) then
+      if (t.NameHash = h) and (t.Name = s)     {$IFDEF PS_USESSUPPORT}  and
+        (IsInLocalUnitList(t.FDeclareUnit)) {$ENDIF} then
       begin
         if FType <> 0 then
         begin
@@ -7986,7 +8173,8 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
             else
               Result := nil;
           end;
-        otSub, otMul, otDiv: { -  * / }
+
+        otSub, otMul, otIntDiv, otDiv: { -  * / }
           begin
             if ((t1.BaseType = btVariant) or (t1.BaseType = btNotificationVariant)) and (
               ((t2.BaseType = btVariant) or (t2.BaseType = btNotificationVariant)) or
@@ -8003,15 +8191,23 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
               ((t1.BaseType = btVariant) or (t1.BaseType = btNotificationVariant)) or
               (isIntRealType(t1.BaseType))) then
               Result := t2
-            else if IsIntType(t1.BaseType) and IsIntType(t2.BaseType) then
-              Result := t1
-            else if IsIntRealType(t1.BaseType) and
+            else if IsIntType(t1.BaseType) and IsIntType(t2.BaseType) then begin
+              Result := t1;
+{$IFDEF PS_DELPHIDIV}
+              if Cmd = otDiv then
+                result := FindBaseType(btExtended);
+{$ENDIF}
+            end else if IsIntRealType(t1.BaseType) and
               IsIntRealType(t2.BaseType) then
             begin
               if IsRealType(t1.BaseType) then
                 Result := t1
               else
                 Result := t2;
+{$IFDEF PS_DELPHIDIV}
+              if Cmd = otIntDiv then //intdiv only works
+                result := nil;
+{$ENDIF}
             end
             else
               Result := nil;
@@ -8208,6 +8404,8 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
               Result := FDefaultBoolType
             else if (t1.BaseType = btClass) and (t2.BaseType = btClass) then
               Result := FDefaultBoolType
+            else if (t1 = t2) then
+              Result := FDefaultBoolType
             else if ((t1.BaseType = btVariant) or (t1.BaseType = btNotificationVariant)) or ((t2.BaseType = btVariant) or (t2.BaseType = btNotificationVariant)) then
               Result := FDefaultBoolType
             else Result := nil;
@@ -8247,6 +8445,7 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
     function ReadTerm: TPSValue;
     var
       F1, F2: TPSValue;
+      fType: TPSType;
       F: TPSBinValueOp;
       Token: TPSPasToken;
       Op: TPSBinOperatorType;
@@ -8270,7 +8469,8 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
         end;
         case Token of
           CSTI_Multiply: Op := otMul;
-          CSTII_div, CSTI_Divide: Op := otDiv;
+          CSTI_Divide: Op := otDiv;
+          CSTII_div: Op := otIntDiv;
           CSTII_mod: Op := otMod;
           CSTII_and: Op := otAnd;
           CSTII_shl: Op := otShl;
@@ -8279,19 +8479,30 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
         else
           Op := otAdd;
         end;
-        F := TPSBinValueOp.Create;
-        f.Val1 := F1;
-        f.Val2 := F2;
-        f.Operator := Op;
-        f.aType := GetResultType(F1, F2, Op);
-        if f.aType = nil then
-        begin
-          MakeError('', ecTypeMismatch, '');
-          f.Free;
-          Result := nil;
-          exit;
+        if (Op = otAs) and (f2 is TPSValueData) and (TPSValueData(f2).Data.FType.BaseType = btType) then begin
+          fType := TPSValueData(f2).Data.ttype;
+          f2.Free;
+          f2 := TPSUnValueOp.Create;
+          TPSUnValueOp(F2).Val1 := f1;
+          TPSUnValueOp(F2).SetParserPos(FParser);
+          TPSUnValueOp(f2).FType := fType;
+          TPSUnValueOp(f2).Operator := otCast;
+          f1 := f2;
+        end else begin
+          F := TPSBinValueOp.Create;
+          f.Val1 := F1;
+          f.Val2 := F2;
+          f.Operator := Op;
+          f.aType := GetResultType(F1, F2, Op);
+          if f.aType = nil then
+          begin
+            MakeError('', ecTypeMismatch, '');
+            f.Free;
+            Result := nil;
+            exit;
+          end;
+          f1 := f;
         end;
-        f1 := f;
       end;
       Result := F1;
     end;  // ReadTerm
@@ -8727,7 +8938,8 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
     end;
 
   var
-    Val: TPSValue;
+    Temp, Val: TPSValue;
+    vt: TPSVariableType;
 
 begin
     Val := ReadExpression;
@@ -8736,6 +8948,17 @@ begin
       Result := nil;
       exit;
     end;
+    vt := ivtGlobal;
+    repeat
+      Temp := Val;
+      if Val <> nil then CheckFurther(Val, False);
+      if Val <> nil then CheckClass(Val, vt, InvalidVal, False);
+      if Val <> nil then  CheckExtClass(Val, vt, InvalidVal, False);
+{$IFNDEF PS_NOIDISPATCH}if Val <> nil then CheckIntf(Val, vt, InvalidVal, False);{$ENDIF}
+      if Val <> nil then CheckProcCall(Val);
+      if Val<> nil then CheckClassArrayProperty(Val, vt, InvalidVal);
+    until (Val = nil) or (Temp = Val);
+
     if not TryEvalConst(Val) then
     begin
       Val.Free;
@@ -9113,6 +9336,18 @@ begin
 
   begin
     Res := ProcCall.ResultType;
+    if ProcCall.ResultType = FAnyString then
+    begin
+      for l := ProcCall.Parameters.Count - 1 downto 0 do
+      begin
+        Tmp := ProcCall.Parameters[l];
+        if (Tmp.ParamMode <> pmOut) and (Tmp.ExpectedType = FAnyString) then
+        begin
+          Res := GetTypeNo(BlockInfo, tmp.Val);
+          Break;
+        end;
+      end;
+    end;
     Result := False;
     if (res = nil) and (ResultRegister <> nil) then
     begin
@@ -9196,7 +9431,7 @@ begin
       end
       else
       begin
-        if Tmp.ExpectedType = nil then
+        if (Tmp.ExpectedType = nil) or (Tmp.ExpectedType = FAnyString) then
           Tmp.ExpectedType := GetTypeNo(BlockInfo, tmp.Val);
         if Tmp.ExpectedType.BaseType = btPChar then
         begin
@@ -9391,7 +9626,7 @@ begin
       exit;
     end;
     case lType.BaseType of
-      btVariant, btU8, btS8, btU16, btS16, btU32, btS32: ;
+      btVariant, btU8, btS8, btU16, btS16, btU32, {$IFNDEF PS_NOINT64} btS64, {$ENDIF} btS32: ;
     else
       begin
         MakeError('', ecTypeMismatch, '');
@@ -9953,7 +10188,7 @@ begin
   begin
     Result := False;
     Debug_WriteLine(BlockInfo);
-    vin := GetIdentifier(2);
+    vin := Calc(CSTI_Assignment);//GetIdentifier(2);
     if vin <> nil then
     begin
       if vin is TPSValueVar then
@@ -10638,6 +10873,7 @@ begin
           if (BlockInfo.SubType = tifOneliner) or (BlockInfo.SubType = TOneLiner) then
             break;
         end;
+      CSTI_OpenRound,
       CSTI_Identifier:
         begin
           case _ProcessLabel of
@@ -10878,6 +11114,7 @@ var
   OldFileName: tbtString;
   OldParser  : TPSPascalParser;
   OldIsUnit  : Boolean;
+  OldUnit    : TPSUnit;
   {$ENDIF}
 
   procedure Cleanup;
@@ -10955,8 +11192,8 @@ var
     FUnitFinits.Free;                            //
     FUnitFinits := nil;                          //
 
-    FUses.Free;
-    FUses:=nil;
+    FreeAndNil(fUnits);
+    FreeAndNil(FUses);
     fInCompile:=0;
     {$ENDIF}
   end;
@@ -11516,7 +11753,16 @@ var
           {$ENDIF}
         end;
       end;
-      {$IFDEF PS_USESSUPPORT}
+    {$IFDEF PS_USESSUPPORT}
+      if fUnits.GetUnit(S).HasUses(fModule) then
+      begin
+        MakeError('', ecCrossReference, s);
+        Result := False;
+        exit;
+      end;
+
+      fUnit.AddUses(S);
+
       if Parse then
       begin
       {$ENDIF}
@@ -11612,6 +11858,7 @@ begin
     FUnitFinits:= TPSList.Create; //nvds
 
     FUses:=TIFStringList.Create;
+    FUnits:=TPSUnitList.Create;
     {$ENDIF}
   {$IFNDEF PS_NOINTERFACES}  FInterfaces := TPSList.Create;{$ENDIF}
 
@@ -11650,15 +11897,19 @@ begin
   {$IFDEF PS_USESSUPPORT}
     fModule:=OldFileName;
     OldParser:=nil;
+    OldUnit:=nil;
     OldIsUnit:=false; // defaults
   end
   else
   begin
     OldParser:=FParser;
     OldIsUnit:=FIsUnit;
+    OldUnit:=fUnit;
     FParser:=TPSPascalParser.Create;
     FParser.SetText(s);
   end;
+
+  fUnit:=fUnits.GetUnit(fModule);
 
   inc(fInCompile);
   {$ENDIF}
@@ -11956,6 +12207,7 @@ begin
     fParser.Free;
     fParser:=OldParser;
     fIsUnit:=OldIsUnit;
+    fUnit:=OldUnit;
     result:=true;
   end;
   {$ENDIF}
@@ -12428,7 +12680,8 @@ function TPSPascalCompiler.ReadConstant(FParser: TPSPascalParser; StopOn: TPSPas
       end;
       case Token of
         CSTI_Multiply: Op := otMul;
-        CSTII_div, CSTI_Divide: Op := otDiv;
+        CSTI_Divide: Op := otDiv;
+        CSTII_Div: Op := otIntDiv;
         CSTII_mod: Op := otMod;
         CSTII_and: Op := otAnd;
         CSTII_shl: Op := otShl;
@@ -12903,12 +13156,16 @@ end;
 function TPSPascalCompiler.AddVariable(const Name: tbtString; FType: TPSType): TPSVar;
 var
   P: TPSVar;
+  s:tbtString;
 begin
   if FProcs = nil then raise EPSCompilerException.Create(RPS_OnUseEventOnly);
   if FType = nil then raise EPSCompilerException.CreateFmt(RPS_InvalidTypeForVar, [Name]);
+  s := Fastuppercase(Name);
+  if IsDuplicate(s,[dcVars]) then raise EPSCompilerException.CreateFmt(RPS_DuplicateIdent, [Name]);
+
   p := TPSVar.Create;
   p.OrgName := Name;
-  p.Name := Fastuppercase(Name);
+  p.Name := s;
   p.FType := AT2UT(FType);
   p.exportname := p.Name;
   FVars.Add(p);
@@ -13340,6 +13597,19 @@ begin
   result := nil;
 end;
 
+{$IFDEF PS_USESSUPPORT}
+function TPSPascalCompiler.IsInLocalUnitList(s: tbtstring): Boolean;
+begin
+  s:=FastUpperCase(s);
+  if (s=FastUpperCase(fModule)) or (s='SYSTEM') then
+  begin
+    result:=true;
+    exit;
+  end;
+  result:=fUnit.HasUses(S);
+end;
+{$ENDIF}
+
 { TPSType }
 
 constructor TPSType.Create;
@@ -13765,6 +14035,7 @@ begin
     {$IFDEF PS_USESSUPPORT}
     ecNotAllowed : Result:=tbtstring(Format(RPS_NotAllowed,[Param]));
     ecUnitNotFoundOrContainsErrors: Result:=tbtstring(Format(RPS_UnitNotFound,[Param]));
+    ecCrossReference: Result:=Format(RPS_CrossReference,[Param]);
     {$ENDIF}
   else
     Result := tbtstring(RPS_UnknownError);
@@ -15214,13 +15485,19 @@ end;
 
 function TPSInterface.RegisterMethod(const Declaration: tbtString;
   const cc: TPSCallingConvention): Boolean;
+begin
+  Result := RegisterMethodEx(Declaration, cc, nil);
+end;
+
+function TPSInterface.RegisterMethodEx(const Declaration: tbtString;
+  const cc: TPSCallingConvention; const CustomParser: TPSPascalParser): Boolean;
 var
   M: TPSInterfaceMethod;
   DOrgName: tbtString;
   Func: TPMFuncType;
 begin
   M := TPSInterfaceMethod.Create(Self);
-  if not ParseMethod(FOwner, '', Declaration, DOrgname, m.Decl, Func) then
+  if not ParseMethodEx(FOwner, '', Declaration, DOrgname, m.Decl, Func, CustomParser) then
   begin
     FItems.Add(m); // in any case, add a dummy item
     Result := False;
