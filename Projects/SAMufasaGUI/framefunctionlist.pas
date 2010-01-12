@@ -62,14 +62,16 @@ procedure TFunctionListFrame.FrameEndDock(Sender, Target: TObject; X, Y: Integer
   );
 begin
   if Target is TPanel then
-    FunctionListLabel.Visible := True
+  begin
+     Form1.SplitterFunctionList.Visible := true;
+     CloseButton.Visible:= true;
+  end
   else if Target is TCustomDockForm then
   begin
-    TCustomDockForm(Target).Caption := 'Function List';
+    TCustomDockForm(Target).Caption := 'Functionlist';
     TCustomDockForm(Target).OnClose := @DockFormOnClose;
     Form1.SplitterFunctionList.Visible:= false;
-    FunctionListLabel.Visible := false;
-//    TCustomDockForm(frmFunctionList.Parent).BorderStyle:= bsNone;
+    CloseButton.Visible:= false;
   end;
 end;
 
@@ -164,6 +166,7 @@ begin
     tmpNode.Data:= strnew(PChar(Analyzer.Methods[i].CreateMethodStr));
   end;
   ScriptNode.Expand(true);
+  Analyzer.free;
 end;
 
 function TFunctionListFrame.Find(Next : boolean; backwards : boolean = false) : boolean;
