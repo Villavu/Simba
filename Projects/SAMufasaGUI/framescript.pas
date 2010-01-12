@@ -56,6 +56,7 @@ type
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure SynEditSpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
+    procedure SynEditStatusChange(Sender: TObject; Changes: TSynStatusChanges);
   private
     OwnerPage  : TPageControl;
     OwnerSheet : TTabSheet;//The owner TTabsheet -> For title setting
@@ -195,6 +196,17 @@ begin
     Special := true;
     BG := $50a0ff;
     FG := 0;
+  end;
+end;
+
+procedure TScriptFrame.SynEditStatusChange(Sender: TObject;
+  Changes: TSynStatusChanges);
+begin
+  if scSelection in changes then
+  begin;
+    Form1.TT_Cut.Enabled := SynEdit.SelAvail;
+    form1.TT_Copy.Enabled:= Form1.TT_Cut.Enabled;
+    form1.TT_Paste.Enabled:= SynEdit.CanPaste;
   end;
 end;
 
