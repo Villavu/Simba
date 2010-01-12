@@ -54,15 +54,6 @@ begin;
   bmp.Free;
 end;
 
-function CreateForm : TForm;
-begin;
-  result := TForm.Create(nil);
-end;
-function CreateButton(Owner : TComponent) : TButton;
-begin
-  Result := TButton.Create(Owner);
-end;
-
 function MinE(a, b: Extended): Extended;
 begin;
   result := min(a,b);

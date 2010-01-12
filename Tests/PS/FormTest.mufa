@@ -13,10 +13,10 @@ var
 begin;
   TempVar := False;
   Result := false;
-  MyForm := CreateForm;
+  MyForm := TForm.Create(nil);
   MyForm.Width := 250;
   MyForm.Height := 250;
-  AButton := CreateButton(MyForm);
+  AButton := TButton.Create(MyForm);
   AButton.Parent := MyForm;
   Abutton.SetBounds(100,100,100,50);
   AButton.OnClick := @OnClick;
