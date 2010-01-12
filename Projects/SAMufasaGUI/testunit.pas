@@ -270,6 +270,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure PopupItemFindClick(Sender: TObject);
     procedure ProcessDebugStream(Sender: TObject);
     procedure ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject; X,
       Y: Integer);
@@ -291,7 +292,7 @@ type
     procedure SetScriptState(const State: TScriptState);
   public
     DebugStream: String;
-
+    SearchString : string;
     CurrScript : TScriptFrame; //The current scriptframe
     CurrTab    : TMufasaTab; //The current TMufasaTab
     Tabs : TList;
@@ -316,7 +317,7 @@ type
     procedure CloseTabs( Exclude : integer);overload;//-1 for none
     procedure CloseTabs;overload;
     procedure SetEditActions;
-    procedure DoSearch(Str: String; Next : boolean; HighlightAll : boolean);
+    procedure DoSearch(Next : boolean; HighlightAll : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
     procedure RefreshTabSender(sender : PtrInt);
   end;
@@ -750,7 +751,7 @@ begin
     EditActions(false,false,false,false,false,false);
 end;
 
-procedure TForm1.DoSearch(Str: String; Next: boolean; HighlightAll : boolean);
+procedure TForm1.DoSearch(Next: boolean; HighlightAll : boolean);
 var
   Res : integer;
   CurrPos : TPoint;
@@ -759,7 +760,7 @@ begin
   SearchOptions:= [];
   if CheckBoxMatchCase.Checked then
     SearchOptions := [ssoMatchCase];
-  if Str = '' then
+  if SearchString = '' then
   begin
     res := -1;
     CurrScript.Synedit.SetHighlightSearch('',[]);
@@ -769,15 +770,15 @@ begin
   end
   else
   begin
-    Writeln('Searching: ' + Str);
+    Writeln('Searching: ' + SearchString);
     if next then
       CurrPos := CurrScript.SynEdit.LogicalCaretXY
     else
       CurrPos := SearchStart;
-    Res := CurrScript.SynEdit.SearchReplaceEx(Str,'',SearchOptions,CurrPos);
+    Res := CurrScript.SynEdit.SearchReplaceEx(SearchString,'',SearchOptions,CurrPos);
     if res = 0 then
     begin
-      res := CurrScript.SynEdit.SearchReplaceEx(Str,'',SearchOptions,Point(0,0));
+      res := CurrScript.SynEdit.SearchReplaceEx(SearchString,'',SearchOptions,Point(0,0));
       if res > 0 then
       begin;
         Writeln('End of document reached');
@@ -801,7 +802,7 @@ begin
     begin
       HighlightAllColor.Background:= clYellow;
       if HighlightAll then
-        SetHighlightSearch(Str,[])
+        SetHighlightSearch(SearchString,[])
       else
         SetHighlightSearch('',[]);
     end;
@@ -914,10 +915,7 @@ end;
 
 procedure TForm1.ActionFindNextExecute(Sender: TObject);
 begin
-  if(ScriptPopup.HandleAllocated)then
-    DoSearch(CurrScript.SynEdit.SelText, true, false)
-  else
-    DoSearch(LabeledEditSearch.Text, true, false);
+  DoSearch(true, false);
 end;
 
 procedure TForm1.ActionFindstartExecute(Sender: TObject);
@@ -1053,7 +1051,8 @@ procedure TForm1.CheckBoxMatchCaseClick(Sender: TObject);
 begin
   RefreshTab;
   CurrScript.SynEdit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
-  DoSearch(LabeledEditSearch.Text, false, true);
+  SearchString := LabeledEditSearch.Text;
+  DoSearch(false, true);
   CurrScript.SynEdit.UseIncrementalColor:= true;
   LabeledEditSearch.SetFocus;
 end;
@@ -1173,7 +1172,8 @@ end;
 
 procedure TForm1.dlgReplaceFind(Sender: TObject);
 begin
-  DoSearch(dlgReplace.FindText, True, False);
+  SearchString := dlgReplace.FindText;
+  DoSearch(True, False);
 end;
 
 procedure TForm1.dlgReplaceReplace(Sender: TObject);
@@ -1217,7 +1217,8 @@ end;
 
 procedure TForm1.EditSearchChange(Sender: TObject);
 begin
-  DoSearch(LabeledEditSearch.Text, false, true);
+  SearchString :=LabeledEditSearch.Text;
+  DoSearch(false, true);
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -1323,7 +1324,8 @@ procedure TForm1.LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
 begin
   if key = #13 then
   begin;
-    DoSearch(LabeledEditSearch.Text, true, true);
+    SearchString:= LabeledEditSearch.Text;
+    DoSearch(true, true);
     key := #0;
 //    LabeledEditSearch.SelStart:= Length(LabeledEditSearch.Text);
   end;
@@ -1592,6 +1594,12 @@ begin
   if(Button = mbMiddle) and (not(PageControl1.Dragging))then
     if(PageControl1.TabIndexAtClientPos(Point(x,y)) <> -1)then
       DeleteTab(PageControl1.TabIndexAtClientPos(Point(x,y)), False);
+end;
+
+procedure TForm1.PopupItemFindClick(Sender: TObject);
+begin
+  SearchString := CurrScript.SynEdit.SelText;
+  ActionFindNextExecute(ScriptPopup);
 end;
 
 function TForm1.GetScriptState: TScriptState;
