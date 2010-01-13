@@ -7,11 +7,11 @@ interface
 uses
   Classes, SysUtils;
 
-const
-  POSTVARS_VARIABLE = 0;
-  POSTVARS_VALUE    = 1;
-
 type
+  TPostVariable = record
+    variable, value: String;
+  end;
+
   {
        Store the internet connection information
   }
@@ -20,17 +20,19 @@ type
     //url of the connection
     ConnURL: String;
     //contains post paramaters and vars
-    PostVars: array [0..1] of TStringArray;
+    PostVars: TList;
     PostFreeSpots: array of Integer;
     PostVarsLen, PostVarsHigh, FreeSpotsHigh, FreeSpotsLen : integer;
+  private
+    function createPostVariable(variable, value: String): TPostVariable;
   public
     constructor Create(URL: String);
     destructor Destroy; override;
     //POST variable functions for PHP transmission
-    procedure PostVariableAdd(theVar, theValue: String);
-    procedure PostVariableDel(theVar: String);
-    procedure PostVariableReplace(searchVar, replaceVar, value: String);
-    function PostHTTP: Boolean;
+    procedure AddPostVariable(theVar, theValue: String);
+    procedure DelPostVariable(theVar: String);
+    procedure ReplacePostVariable(searchVar, replaceVar, value: String);
+    function PostHTTP(out dataStream: TStream): Boolean;
   end;
 
 
@@ -39,6 +41,7 @@ type
   TInternetArray = class(TObject)
   protected
     FreeSpots: array of Integer;
+    ConnList : TList;
     ConnArray: array of TInternetConnection;
     ConnHigh, FreeSpotsHigh, FreeSpotsLen : integer;
 
@@ -47,10 +50,10 @@ type
     function ConnectionClose(ConnInd: Integer): Boolean;
     destructor Destroy; override;
     //POST variable functions for PHP transmission
-    procedure PostVariableAdd(connInd: Integer; theVar, theValue: String);
-    procedure PostVariableDel(connInd: Integer; theVar: String);
-    procedure PostVariableReplace(connInd: Integer; searchVar, replaceVar, value: String);
-    function PostHTTP(connInd: Integer): Boolean;
+    procedure AddPostVariable(connInd: Integer; theVar, theValue: String);
+    procedure DelPostVariable(connInd: Integer; theVar: String);
+    procedure ReplacePostVariable(connInd: Integer; searchVar, replaceVar, value: String);
+    function PostHTTP(connInd: Integer; out dataStream: TStream): Boolean;
   end;
 
 function GetPage(URL: String): String;
@@ -78,6 +81,7 @@ procedure TInternetConnection.Create(URL: String);
 begin
   inherited;
   Self.ConnURL := URL;
+  Self.PostVars.Create;
 end;
 
 procedure TInternetConnection.Destroy; overload;
@@ -85,26 +89,24 @@ begin
   inherited;
   // ADD CLOSING OF CONNECTION
 
-  // is this all necessary? Memory leaks etc trying to avoid them :p
-  setLength(PostVars[POSTVARS_VARIABLE], PostVars[POSTVARS_VALUE], 0);
-  setLength(PostFreeSpots, 0);
-  FreeSpotsHigh := -1;
-  FreeSpotsLen := 0;
-  PostVarsHigh := -1;
-  PostVarsLen := 0;
+  // Clear it up
+  PostVars.Clear;
 end;
 
-procedure TInternetConnect.PostVariableAdd(theVar, theValue: String);
+procedure TInternetConnect.AddPostVariable(theVar, theValue: String);
 var
   currentIndex: Integer;
 begin
   theVar := replace(' ', '%20', theVar);        // more needs to be done, I only knew the ' ' replace.
   theValue := replace(' ', '%20', theValue);
-  with Self do
+  Self.PostVars.Add(createPostVariable(theVar, theValue));
+ { with Self do
   begin
+
+
     if (FreeSpotsHigh = -1) then
     begin
-      setLength(PostVars[POSTVARS_VARIABLE], PostVars[POSTVARS_VALUE], PostVarsHigh + 2);
+      setLength(PostVars, PostVarsHigh + 2);
       inc(PostVarsHigh);
       currentIndex := PostVarsHigh;
     end else
@@ -112,85 +114,79 @@ begin
       currentIndex := PostFreeSpots[FreeSpotsHigh];
       dec(FreeSpotsHigh);
     end;
-    PostVars[POSTVARS_VARIABLE][currentIndex] := theVar;
-    PostVars[POSTVARS_VALUE][currentIndex] := theValue;
-  end;
+    PostVars[currentIndex].variable := theVar;
+    PostVars[currentIndex].value := theValue;
+
+  end;  }
 end;
 
-procedure TInternetConnection.PostVariableDel(theVar: String);
+procedure TInternetConnection.DelPostVariable(theVar: String);
 var
   i: Integer;
+  tempPostVar: TPostVariable;
 begin
-  for i := PostVarHigh downto 0 do
+  for i := (Self.PostVars.Count - 1) downto 0 do
   begin
-    if (theVar = Self.PostVars[POSTVARS_VARIABLE][i]) then
+    if (theVar = Self.PostVars.Items[i].variable) then
     begin
-      with Self do
-      begin
-        PostVars[POSTVARS_VARIABLE][i] := '';
-        PostVars[POSTVARS_VALUE][i] := '';
-        if (FreeSpotsHigh = FreeSpotsLen) then
-        begin
-          FreeSpotsLen := FreeSpotsLen + 1;
-          setLength(PostFreeSpots, FreeSpotsLen);
-        end;
-        PostFreeSpots[FreeSpotsHigh] := i;
-      end;
+      tempPostVar := PostVars.Items[i];
+      Self.PostVars.Remove(tempPostVar);
+      break;
     end;
   end;
 end;
 
-procedure TInternetConnection.PostVariableReplace(searchVar, replaceVar, value: String);
+procedure TInternetConnection.ReplacePostVariable(searchVar, replaceVar, theValue: String);
 var
-  i: Integer;;
+  i: Integer;
+  tempPostVar: TPostVariable;
 begin
   with Self do
   begin
-    for i := PostVarHigh downto 0 do
+    for i := (PostVars.Count - 1) downto 0 do
     begin
-      if (searchVar = PostVars[POSTVARS_VARIABLE][i]) then
+      tempPostVar := PostVars.Items[i];
+      if (searchVar = tempPostVar.variable) then
       begin
-        PostVars[POSTVARS_VARIABLE][i] := replaceVar;
-        PostVars[POSTVARS_VALUE][i] := value;
+        tempPostVar.variable := replaceVar;
+        tempPostVar.value := theValue;
+        break;
       end;
     end;
   end;
 end;
 
-function TInternetConnection.PostHTTP: Boolean;
+function TInternetConnection.PostHTTP(out dataStream: TStream): Boolean;
 var
   // holds the vars when they are placed together
   URLData: String;
-  theStream: TStream;
+  tempPostVar: TPostVariable;
 begin
   try
     with Self do
     begin
       //ADD Connection stuffs
 
-      for i := PostVarsHigh downto 0 do
+      for i := (PostVars.Count - 1) downto 0 do
       begin
-        if (PostVars[POSTVARS_VARIABLE] <> '') then
+        tempPostVar := PostVars.Items[i];
+        if (tempPostVar.variable <> '') then
         begin
-          URLData := URLData + format('%d=%d+', [PostVars[POSTVARS_VARIABLE][i],
-                                                 PostVars[POSTVARS_VALUE][i]]);
+          URLData := URLData + format('%d=%d+', [tempPostVar.variable,
+                                                 tempPostVar.value]);
         end;
       end;
       Delete(URLData, Length(URLData) - 1, 1);
 
       {I DONT KNOW (TStream), this should work since we don't reuse it after.}
-      HttpPostURL(ConnURL, URLData, theStream);
+      dataStream := nil;
+      HttpPostURL(ConnURL, URLData, dataStream);
 
       // Lets remove all Post Variable data so fresh start next time.
-      setLength(PostVars[POSTVARS_VARIABLE], PostVars[POSTVARS_VALUE], 0);
-      setLength(PostFreeSpots, 0);
-      FreeSpotsHigh := -1;
-      FreeSpotsLen := 0;
-      PostVarsHigh := -1;
-      PostVarsLen := 0;
+      PostVars.Clear;
     end;
   except
-    raise Exception.createFMT('TInternetConnection.PostHTTP: Something went wrong, could not complete. (%d)', URLData);
+    raise Exception.createFMT('TInternetConnection.PostHTTP: Something went wrong, could not complete. URL: %d', URLData);
     exit(false);
   end;
   result := true;
@@ -205,19 +201,11 @@ function TInternetArray.ConnectionOpen(URL: String): Integer;
 var
   currentIndex: Integer;
 begin
-  with Self do
-  begin
-    if (FreeSpotsHigh = -1) then
-    begin
-      setLength(ConnArray, ConnHigh + 2);
-      inc(ConnHigh);
-      currentIndex := ConnHigh;
-    end else
-    begin
-      currentIndex := FreeSpots[FreeSpotsHigh];
-      dec(FreeSpotsHigh);
-    end;
-    ConnArray[currentIndex].Create(URL);
+  try
+    Result := Self.ConnList.Add(TInternetConnection.Create(URL));
+  except
+    raise Exception.createFMT('TInternetArray.ConnectionClose: Could not close connection %d URL: %d',
+                               [theInd, ConnURL]);
   end;
 end;
 
@@ -225,8 +213,14 @@ end;
   Close the connection, add the index to the FreeSpots.
 }
 function TInternetArray.ConnectionClose(theInd: Integer): Boolean;
+var
+  tempConn: TInternetConnection;
 begin
   try
+    tempConn := Self.ConnList.Items[theInd];
+    Self.ConnList.Remove(tempConn);
+    tempConn.Destroy;
+    {
     with Self do
     begin
       ConnArray[theInd].Destroy;
@@ -236,10 +230,10 @@ begin
         setLength(FreeSpots, FreeSpotsLen);
       end;
       FreeSpots[FreeSpotsHigh] := theInd;
-    end;
+    end;  }
   except
     raise Exception.createFMT('TInternetArray.ConnectionClose: Could not close connection %d URL: %d',
-                               [theInd, ConnArray[theInd].ConnURL]);
+                               [theInd, ConnList.Items[theInd].ConnURL]);
     exit(false);
   end;
   result := True;
@@ -252,7 +246,7 @@ end;
 procedure TInternetArray.PostVariableAdd(connInd: Integer; theVar, theValue: String);
 begin
   try
-    result := ConnArray[connInd].PostVariableAdd(theVar, theValue);
+    ConnList.Items[commInd].PostVariableAdd(theVar, theValue);
   except
     raise Exception.createFMT('TInternetArray.PostVariableAdd: %d is not in the ConnArray',
                                [connInd]);
@@ -266,7 +260,7 @@ end;
 procedure TInternetArray.PostVariableDel(connInd: Integer; theVar: String);
 begin
   try
-    result := ConnArray[connInd].PostVariableAdd(theVar);
+    ConnList.Items[commInd].PostVariableAdd(theVar);
   except
     raise Exception.createFMT('TInternetArray.PostVariableDel: %d is not in the ConnArray',
                                [connInd]);
@@ -280,9 +274,19 @@ end;
 procedure TInternetArray.PostVariableReplace(connInd: Integer; searchVar, replaceVar, value: String);
 begin
   try
-    result := ConnArray[connInd].PostVariableAdd(searchVar, replaceVar, value);
+    ConnList.Items[commInd].PostVariableAdd(searchVar, replaceVar, value);
   except
     raise Exception.createFMT('TInternetArray.PostVariableReplace: %d is not in the ConnArray',
+                               [connInd]);
+  end;
+end;
+
+function TInternetArray.PostHTTP(connInd: Integer; out dataStream: TStream): Boolean;
+begin
+  try
+    result := ConnList.Items[commInd].PostHTTP(dataStream);
+  except
+    raise Exception.createFMT('TInternetArray.PostHTTP: %d is not in the ConnArray',
                                [connInd]);
   end;
 end;
