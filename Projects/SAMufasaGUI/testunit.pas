@@ -912,8 +912,8 @@ begin
     CurrScript.SynEdit.CopyToClipboard
   else if Memo1.Focused then
     Memo1.CopyToClipboard
-  else
-    Writeln(Sender.ToString);
+ { else
+    Writeln(Sender.ToString);     }
 end;
 
 procedure TForm1.ActionCutExecute(Sender: TObject);
@@ -1813,23 +1813,25 @@ begin;
     if ScriptState <> ss_Stopping then
     begin
       result := False;
-      Case MessageBox(0,pchar('Do you want to stop the script?'), Pchar('Script is still running.'),
-                               MB_YESNOCANCEL or MB_ICONQUESTION) of
-          IDYES : StopScript;
-      end;
+      case MessageDlg('Script is still running', 'Do you want to stop the script?',
+                        mtConfirmation, mbYesNoCancel, 0) of
+                          mrYes: StopScript;
+                        end;
     end else
-      Case MessageBox(0,pchar('Do you want to terminate the script?'), Pchar('Script is stopping.'),
-                               MB_YESNOCANCEL or MB_ICONQUESTION) of
-          IDNO,IDCancel: Result := false;
-          IDYES : StopScript;
-      end;
+      case MessageDlg('Script is stopping.', 'Do you want to terminate the script?',
+                      mtConfirmation, mbYesNoCancel, 0) of
+                        mrNo, mrCancel: Result := false;
+                        mrYes: StopScript;
+                      end;
   end;
   if Result and (CurrScript.StartText <> CurrScript.SynEdit.Lines.text) then
-    Case MessageBox(0,pchar('Do you want to save the script?'), Pchar('Script has been modified.'),
-                MB_YESNOCANCEL or MB_ICONQUESTION) of
-          IDCANCEL : Result := False;
-          IDYES : Result := SaveCurrentScript;
-      end;
+  begin
+    case MessageDlg('Script has been modified.', 'Do you want to save the script?',
+                mtConfirmation, mbYesNoCancel, 0) of
+          mrCancel : Result := False;
+          mrYes : Result := SaveCurrentScript;
+    end;
+  end;
   Self.Enabled := True;
   if Self.CanFocus then
     Self.SetFocus;
