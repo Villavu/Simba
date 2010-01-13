@@ -39,7 +39,7 @@ uses
   SynExportHTML,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
   SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
-  ocr, updateform, simbasettings;
+  ocr, updateform, simbasettings, reportbug;
 
 const
     SimbaVersion = 404;
@@ -91,11 +91,14 @@ type
     CheckBoxMatchCase: TCheckBox;
     frmFunctionList: TFunctionListFrame;
     LabeledEditSearch: TLabeledEdit;
+    MainMenu: TMainMenu;
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
     MenuExtra: TMenuItem;
+    MenuItemAbout: TMenuItem;
+    MenuItemReportBug: TMenuItem;
     MenuViewSettings: TMenuItem;
     MenuItemExportHTML: TMenuItem;
     MenuItemDivider9: TMenuItem;
@@ -111,7 +114,6 @@ type
     MenuItemFunctionList: TMenuItem;
     MenuItemHide: TMenuItem;
     MenuItemDebugImage: TMenuItem;
-    MenuItemAbout: TMenuItem;
     MenuItemMainExit: TMenuItem;
     MenuItemDivider6: TMenuItem;
     PopupItemReplace: TMenuItem;
@@ -252,6 +254,7 @@ type
     procedure MenuItemExportHTMLClick(Sender: TObject);
     procedure MenuitemFillFunctionListClick(Sender: TObject);
     procedure MenuItemHideClick(Sender: TObject);
+    procedure MenuItemReportBugClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
@@ -1474,6 +1477,11 @@ begin
     MenuItemShowClick(sender)
   else
     Self.hide;
+end;
+
+procedure TForm1.MenuItemReportBugClick(Sender: TObject);
+begin
+  FormReportBug.Show;
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
