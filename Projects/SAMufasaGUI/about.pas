@@ -66,6 +66,8 @@ begin
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Simba is released under the GPL license.');
   AboutMemo.Lines.Add(format('You are currently using version: %d',[Testunit.SimbaVersion]));
+  AboutMemo.Lines.Add('');
+  AboutMemo.Lines.Add('Please report bugs at: http://mufasa.villavu.com/mantis/');
 end;
 
 procedure TAboutForm.OkButtonClick(Sender: TObject);

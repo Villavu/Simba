@@ -13,6 +13,7 @@ implementation
 uses
   httpsend;
 
+{ OTHER }
 function GetPage(URL: String): String;
 var
   s: TStringList;
