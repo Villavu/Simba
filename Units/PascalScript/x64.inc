@@ -113,6 +113,12 @@ asm
   push rdi  // address
   push rsi  // _rax
   push r9   // xmm0
+{$IFDEF PS_STACKALIGN}
+  bt r8, 0
+  jc @skipjump
+  sub rsp, 8
+@skipjump:
+{$ENDIF}
   mov rax, rdx
   jmp @compareitems
 @work:
@@ -144,6 +150,8 @@ asm
 
   mov rax, [rbp-8]
   call RAX
+
+//  add rsp, 8
 
   // add RSP, 32 // undo the damage done earlier
 
@@ -350,11 +358,22 @@ _XMM0: Double;
               Result := True;
               exit;
             end else begin
+            {$IFDEF FPC}
+              StoreReg(IPointer(FVar.Dta));
+            {$ELSE}
               StoreReg(IPointer(FVar.Dta^));
+            {$ENDIF}
             end;
           end;
+        btRecord:
+          begin
+            if fvar^.aType.RealSize <= sizeof(IPointer) then
+              StoreReg(IPointer(fvar.dta^))
+            else
+              StoreReg(IPointer(fVar.Dta));
+          end;
         btVariant
-        , btStaticArray, btRecord:
+        , btStaticArray:
           begin
             StoreReg(IPointer(fVar.Dta));
           end;
@@ -449,22 +468,39 @@ begin
     if assigned(_Self) then begin
       StoreReg(IPointer(_Self));
     end;
+{$IFDEF PS_RESBEFOREPARAMETERS}
+   if assigned(res) then begin
+    case res^.aType.BaseType of
+      {$IFDEF x64_string_result_as_varparameter}
+      btstring, btWideString, btUnicodeString,
+      {$ENDIF}
+      btInterface, btArray, btVariant, btStaticArray:
+        GetPtr(res);
+      btSet:
+        begin
+          if res.aType.RealSize > PointerSize then GetPtr(res);
+        end;
+    end;
+   end;
+{$ENDIF}
     for I := 0 to Params.Count - 1 do
     begin
       if not GetPtr(rp(Params[I])) then Exit;
     end;
-
     if assigned(res) then begin
+{$IFNDEF PS_RESBEFOREPARAMETERS}
       case res^.aType.BaseType of
         {$IFDEF x64_string_result_as_varparameter}
         btstring, btWideString, btUnicodeString,
         {$ENDIF}
-        btInterface, btArray, btrecord, btVariant, btStaticArray: GetPtr(res);
+        btInterface, btArray, btVariant, btStaticArray:
+          GetPtr(res);
         btSet:
           begin
-            if TPSTypeRec_Set(res.aType).aByteSize > PointerSize then GetPtr(res);
+            if res.aType.RealSize > PointerSize then GetPtr(res);
           end;
       end;
+{$ENDIF}
       if Stack = nil then pp := nil else pp := @Stack[Length(Stack) -8];
 {$IFDEF WINDOWS}
       x64call(Address, _RAX, _RCX, _RDX, _R8, _R9, _XMM0, _XMM1, _XMM2, _XMM3, pp, Length(Stack) div 8);
@@ -472,9 +508,9 @@ begin
       x64call(Address, _RAX, Registers, pp, Length(Stack) div 8, _XMM0);
 {$ENDIF}
       case res^.aType.BaseType of
-        btSet:
+        btRecord, btSet:
           begin
-            case TPSTypeRec_Set(res.aType).aByteSize  of
+            case res.aType.RealSize of
               1: byte(res.Dta^) := _RAX;
               2: word(res.Dta^) := _RAX;
               3,
@@ -497,7 +533,7 @@ begin
         {$IFDEF x64_string_result_as_varparameter}
         btWidestring,btUnicodestring, btstring ,
         {$ENDIF}
-        btStaticArray, btArray, btrecord:;
+        btStaticArray, btArray:;
         {$IFNDEF x64_string_result_as_varparameter}
         btUnicodeString, btWideString, btstring:  Int64(res.dta^) := _RAX;
         {$ENDIF}
