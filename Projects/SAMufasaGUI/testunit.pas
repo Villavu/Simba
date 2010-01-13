@@ -23,6 +23,7 @@
 
 unit TestUnit;
 
+{$undef EditButtons}
 {$Undef ProcessMessages} //Define this for processmessages in ThreadSafeCall
 {$mode objfpc}{$H+}
 
@@ -42,7 +43,7 @@ uses
   ocr, updateform, simbasettings, reportbug;
 
 const
-    SimbaVersion = 405;
+    SimbaVersion = 408;
 
 type
 
@@ -735,9 +736,11 @@ begin;
   ActionCopy.Enabled:= Copy;
   ActionPaste.Enabled:= Paste;
   ActionDelete.Enabled:= Delete;
+  {$ifdef UpdateEditButtons}
   TT_Cut.Enabled:= Cut;
   TT_Paste.Enabled:=Paste;
   TT_Copy.enabled := Copy;
+  {$endif}
 end;
 
 var

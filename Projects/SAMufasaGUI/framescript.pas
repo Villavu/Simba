@@ -202,12 +202,14 @@ end;
 procedure TScriptFrame.SynEditStatusChange(Sender: TObject;
   Changes: TSynStatusChanges);
 begin
+  {$IFDEF UpdateEditButtons}
   if scSelection in changes then
   begin;
     Form1.TT_Cut.Enabled := SynEdit.SelAvail;
     form1.TT_Copy.Enabled:= Form1.TT_Cut.Enabled;
     form1.TT_Paste.Enabled:= SynEdit.CanPaste;
   end;
+  {$ENDIF}
 end;
 
 
