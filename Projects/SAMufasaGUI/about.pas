@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls;
+  StdCtrls, ExtCtrls;
 
 type
 
@@ -37,7 +37,12 @@ type
 
   TAboutForm = class(TForm)
     AboutMemo: TMemo;
+    ButtonClose: TButton;
+    ImageSimba: TImage;
+    LabelTitle: TLabel;
+    LabelRevision: TLabel;
     procedure FormCreate(Sender: TObject);
+    procedure OkButtonClick(Sender: TObject);
   private
     { private declarations }
   public
@@ -54,11 +59,19 @@ uses
 
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin
+  Self.Caption := format('About Simba r%d', [TestUnit.SimbaVersion]);
+  Self.LabelRevision.Caption := format('Revision %d', [TestUnit.SimbaVersion]);
   AboutMemo.Lines.Add('---Simba---');
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Simba is released under the GPL license.');
   AboutMemo.Lines.Add(format('You are currently using version: %d',[Testunit.SimbaVersion]));
+end;
+
+procedure TAboutForm.OkButtonClick(Sender: TObject);
+begin
+  Self.ModalResult:=mrOK;
+  Self.Hide;
 end;
 
 initialization

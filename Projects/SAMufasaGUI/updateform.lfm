@@ -4,7 +4,8 @@ object SimbaUpdateForm: TSimbaUpdateForm
   Top = 321
   Width = 467
   ActiveControl = UpdateButton
-  Caption = 'SimbaUpdateForm'
+  BorderIcons = [biSystemMenu, biMinimize]
+  Caption = 'Update Simba'
   ClientHeight = 391
   ClientWidth = 467
   OnShow = CleanUpdateForm
@@ -50,8 +51,8 @@ object SimbaUpdateForm: TSimbaUpdateForm
   end
   object UpdateLog: TMemo
     Left = 24
-    Height = 183
-    Top = 144
+    Height = 207
+    Top = 120
     Width = 413
     Anchors = [akTop, akLeft, akRight, akBottom]
     TabOrder = 4

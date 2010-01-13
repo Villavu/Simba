@@ -720,4 +720,4 @@ object ScriptFrame: TScriptFrame
     left = 320
     top = 16
   end
-end
+end
