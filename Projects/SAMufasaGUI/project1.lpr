@@ -30,9 +30,9 @@ uses
   cthreads, cmem,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  LResources ,
-  Forms, testunit, colourhistory, About, internets, debugimage,
-  framefunctionlist, simpleanalyzer, updater, updateform, simbasettings;
+  LResources, Forms, testunit, colourhistory, About, internets, debugimage,
+  framefunctionlist, simpleanalyzer, updater, updateform, simbasettings,
+  reportbug;
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
 begin
@@ -46,6 +46,7 @@ begin
   Application.CreateForm(TDebugImgForm, DebugImgForm);
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   Application.CreateForm(TSettingsForm, SettingsForm);
+  Application.CreateForm(TFormReportBug, FormReportBug);
   Application.Run;
 end.
 
