@@ -1,0 +1,43 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TFormReportBug','FORMDATA',[
+  'TPF0'#14'TFormReportBug'#13'FormReportBug'#4'Left'#3'3'#2#6'Height'#3#144#1#3
+  +'Top'#3#164#0#5'Width'#3'X'#2#13'ActiveControl'#7#11'MemoSummary'#7'Caption'
+  +#6#12'Report a Bug'#12'ClientHeight'#3#144#1#11'ClientWidth'#3'X'#2#10'LCLVe'
+  +'rsion'#6#6'0.9.29'#0#7'TButton'#12'ButtonReport'#4'Left'#2#16#6'Height'#2#25
+  +#3'Top'#3'p'#1#5'Width'#2'K'#7'Caption'#6#6'Report'#7'OnClick'#7#17'ButtonRe'
+  +'portClick'#8'TabOrder'#2#0#0#0#5'TMemo'#15'MemoDescription'#4'Left'#2#9#6'H'
+  +'eight'#3#168#0#3'Top'#3#192#0#5'Width'#3','#1#8'TabOrder'#2#1#0#0#6'TLabel'
+  +#10'LabelTitle'#4'Left'#2#10#6'Height'#2#20#3'Top'#2#12#5'Width'#2'i'#7'Capt'
+  +'ion'#6#12'Report a Bug'#11'Font.Height'#2#239#9'Font.Name'#6#4'Sans'#11'Par'
+  +'entColor'#8#10'ParentFont'#8#0#0#9'TGroupBox'#18'GroupBoxReportData'#4'Left'
+  +#3'H'#1#6'Height'#3'>'#1#3'Top'#2'*'#5'Width'#3#8#1#7'Caption'#6#11'Report D'
+  +'ata'#12'ClientHeight'#3'+'#1#11'ClientWidth'#3#4#1#8'TabOrder'#2#2#0#9'TCom'
+  +'boBox'#16'ComboBoxCategory'#4'Left'#2#9#6'Height'#2#29#3'Top'#2#21#5'Width'
+  +#3#237#0#10'ItemHeight'#2#0#9'ItemIndex'#2#0#13'Items.Strings'#1#6#15'Select'
+  +' Category'#6#7'Bitmaps'#6#17'Client-Image Core'#6#15'Code Completion'#6#14
+  +'Colour History'#6#13'Colour Picker'#6#18'Colour Recognition'#6#3'DTM'#6#11
+  +'File System'#6#13'Function List'#6#7'General'#6#3'GUI'#6#6'Input '#6#18'Int'
+  +'ernet Functions'#6#5'Other'#6#6'Python'#6#16'Scripting Engine'#0#8'TabOrder'
+  +#2#0#4'Text'#6#15'Select Category'#0#0#9'TComboBox'#23'ComboBoxReproducibili'
+  +'ty'#4'Left'#2#9#6'Height'#2#29#3'Top'#2']'#5'Width'#3#237#0#10'ItemHeight'#2
+  +#0#9'ItemIndex'#2#0#13'Items.Strings'#1#6#15'Reproducibility'#6#6'Always'#6#9
+  +'Sometimes'#6#6'Random'#6#14'Have not tried'#6#19'Unable to Reproduce'#6#3'N'
+  +'/A'#0#8'TabOrder'#2#1#4'Text'#6#15'Reproducibility'#0#0#9'TComboBox'#16'Com'
+  +'boBoxSeverity'#4'Left'#2#9#6'Height'#2#29#3'Top'#3#173#0#5'Width'#3#237#0#8
+  +'BidiMode'#7#24'bdRightToLeftReadingOnly'#10'ItemHeight'#2#0#9'ItemIndex'#2#0
+  +#13'Items.Strings'#1#6#8'Severity'#6#7'Feature'#6#7'Trivial'#6#4'Text'#6#5'T'
+  +'weak'#6#5'Minor'#6#5'Major'#6#5'Crash'#6#5'Block'#0#14'ParentBidiMode'#8#8
+  +'TabOrder'#2#2#4'Text'#6#8'Severity'#0#0#9'TComboBox'#16'ComboBoxPriority'#4
+  +'Left'#2#9#6'Height'#2#29#3'Top'#3#253#0#5'Width'#3#237#0#10'ItemHeight'#2#0
+  +#9'ItemIndex'#2#0#13'Items.Strings'#1#6#8'Priority'#6#4'None'#6#3'Low'#6#6'N'
+  +'ormal'#6#4'High'#6#6'Urgent'#6#9'Immediate'#0#8'TabOrder'#2#3#4'Text'#6#8'P'
+  +'riority'#0#0#0#5'TMemo'#11'MemoSummary'#4'Left'#2#9#6'Height'#2'Y'#3'Top'#2
+  +'@'#5'Width'#3','#1#8'TabOrder'#2#3#0#0#6'TLabel'#12'LabelSummary'#4'Left'#2
+  +#10#6'Height'#2#18#3'Top'#2'*'#5'Width'#2'f'#7'Caption'#6#14'Breif Summary:'
+  +#11'ParentColor'#8#0#0#6'TLabel'#16'LabelDescription'#4'Left'#2#10#6'Height'
+  +#2#18#3'Top'#3#168#0#5'Width'#2'O'#7'Caption'#6#12'Description:'#11'ParentCo'
+  +'lor'#8#0#0#7'TButton'#12'ButtonCancel'#4'Left'#3#164#1#6'Height'#2#25#3'Top'
+  +#3'p'#1#5'Width'#3#171#0#7'Caption'#6#6'Cancel'#7'OnClick'#7#17'ButtonCancel'
+  +'Click'#8'TabOrder'#2#4#0#0#0
+]);
