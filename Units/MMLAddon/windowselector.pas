@@ -107,7 +107,6 @@ begin
                 @x, @y, @xmask);
     subwindow:= Tempwindow;
 
-    // find the most `child' window.
     while subwindow <> 0 do
     begin
         Tempwindow := subwindow;
