@@ -282,8 +282,7 @@ procedure TMColorPicker.ColorPickUp(Sender: TObject; Button: TMouseButton;
 begin;
   { Set the coordinates and color that the user cliked on }
   Color:=  WidgetSet.DCGetPixel(ImageMain.Canvas.Handle,x,y);
-  Self.Colorx := x;
-  Self.Colory := y;
+  Input.GetMousePos(ColorX, ColorY);
 
   if OnPick <> nil then
     Onpick(Sender,Color,Colorx,Colory);

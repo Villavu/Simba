@@ -43,7 +43,7 @@ uses
   ocr, updateform, simbasettings, reportbug;
 
 const
-    SimbaVersion = 408;
+    SimbaVersion = 413;
 
 type
 
@@ -322,6 +322,7 @@ type
     procedure PauseScript;
     procedure StopScript;
     procedure AddTab;
+    procedure StopCodeCompletion;
     function DeleteTab( TabIndex : integer; CloseLast : boolean; Silent : boolean = false) : boolean;
     procedure ClearTab( TabIndex : integer);
     procedure CloseTabs(Exclude: integer = -1; Silent : boolean = false); //-1 for no exclusion
@@ -855,8 +856,8 @@ begin
     Self.Caption := Format(WindowTitle,[Script.ScriptName + '*'])
   end else
   begin;
-    Self.Caption := Format(WindowTitle,[Script.ScriptName]);
     Tab.TabSheet.Caption:= Script.ScriptName;
+    Self.Caption := Format(WindowTitle,[Script.ScriptName]);
   end;
   StatusBar.Panels[Panel_ScriptName].Text:= Script.ScriptName;
   StatusBar.Panels[Panel_ScriptPath].text:= Script.ScriptFile;
@@ -864,7 +865,7 @@ begin
   if Self.Showing then
     if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
       CurrScript.SynEdit.SetFocus;
-  editSearchListExit(self);//To set the highlighting back to normal;
+  StopCodeCompletion;//To set the highlighting back to normal;
   frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
   with CurrScript.SynEdit do
   begin
@@ -1089,25 +1090,31 @@ begin
   if CurrScript.SynEdit.CanFocus then
     CurrScript.SynEdit.SetFocus;
 end;
+procedure TForm1.StopCodeCompletion;
+begin
+  if frmFunctionList.InCodeCompletion then
+    with CurrScript,frmFunctionList do
+    begin;
+      editSearchList.Color:= clWhite;
+      if FilterTree.Focused then
+      begin;
+        Writeln('This is currently not supported');
+        SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
+        SynEdit.LogicalCaretXY:= point(CompletionCaret.x,CompletionCaret.y);
+        SynEdit.SelEnd:= SynEdit.SelStart;
+      end;
+      InCodeCompletion:= false;
+      SynEdit.SelectedColor.Style:= [];
+      SynEdit.SelectedColor.Foreground:= clHighlightText;
+      SynEdit.SelectedColor.Background:= clHighlight;
+      Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempEnable;
+    end;
+end;
 
 procedure TForm1.editSearchListExit(Sender: TObject);
 begin
   frmFunctionList.editSearchList.Color := clWhite;
-  if frmFunctionList.InCodeCompletion then
-  begin;
-    if frmFunctionList.FilterTree.Focused then
-    begin;
-      Writeln('This is currently not supported');
-      CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1] := frmFunctionList.CompletionStart;
-      CurrScript.SynEdit.LogicalCaretXY:= point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
-      CurrScript.SynEdit.SelEnd:= CurrScript.SynEdit.SelStart;
-    end;
-    frmFunctionList.InCodeCompletion:= false;
-    CurrScript.SynEdit.SelectedColor.Style:= [];
-    CurrScript.SynEdit.SelectedColor.Foreground:= clHighlightText;
-    CurrScript.SynEdit.SelectedColor.Background:= clHighlight;
-    CurrScript.Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempEnable;
-  end;
+  StopCodeCompletion;
 end;
 
 procedure TForm1.editSearchListKeyDown(Sender: TObject; var Key: Word;
@@ -1133,27 +1140,22 @@ begin
   begin;
     key := #0;
     frmFunctionList.Find(True);
-//See OnKeyUp
-{  end else if key = Chr(VK_UP) then //Up, go one up!
-  begin;
-    Writeln('hai');
-    frmFunctionList.Find(false,true);}
   end else
   if frmFunctionList.InCodeCompletion then
   begin;
     if key = #27 then//esc -> C'est error!
     begin
       key := #0;
+      StopCodeCompletion;
       CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1] := frmFunctionList.CompletionStart;
-      frmFunctionList.editSearchList.OnExit(sender);
       CurrScript.SynEdit.LogicalCaretXY:= point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
       CurrScript.SynEdit.SelEnd:= CurrScript.SynEdit.SelStart;
       CurrScript.SynEdit.SetFocus;
     end else
     if key in [' ',',','.','(',')'] then //on on these chars we will insert the function!
     begin;
+      StopCodeCompletion;
       linetext := CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1];
-      frmFunctionList.editSearchList.OnExit(sender);
       while  (frmFunctionList.CompletionCaret.x <= length(linetext)) and (linetext[frmFunctionList.CompletionCaret.x] in ['a'..'z','A'..'Z','0'..'9','_']) do
         inc(frmFunctionList.CompletionCaret.x);
       CurrScript.SynEdit.LogicalCaretXY:= frmFunctionList.CompletionCaret;
@@ -1182,7 +1184,7 @@ end;
 
 procedure TForm1.FunctionListExit(Sender: TObject);
 begin
-  StatusBar.Panels[2].Text:= '';
+//  StatusBar.Panels[2].Text:= '';
 end;
 
 procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
@@ -1308,8 +1310,6 @@ procedure TForm1.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
 begin
   SetEditActions;
   Handled := ActionList.IsShortCut(Msg);
-{  ShiftState := MsgKeyDataToShiftState(Message.KeyData);
-  ShortCut := KeyToShortCut(Message.CharCode, ShiftState);}
 end;
 
 
@@ -1785,6 +1785,7 @@ begin
           ScriptFile := FileName;
         SynEdit.Lines.SaveToFile(ScriptFile);
         ScriptName:= ExtractFileNameOnly(ScriptFile);
+        Writeln('Saving to: ' + FileName);
         WriteLn('Script name will be: ' + ScriptName);
         RefreshTab();
         Result := True;
