@@ -38,6 +38,7 @@ type
 
     Updater: TMMLFileDownloader;
     FCancelling: Boolean;
+    FDone: Boolean;
     FSimbaVersion: Integer;
     SimbaVersionThread : TSimbaVersionThread;
   private
@@ -107,7 +108,7 @@ end;
 
 procedure TSimbaUpdateForm.CancelButtonClick(Sender: TObject);
 begin
-  if FCancelled then
+  if FCancelled or FDone then
   begin
     Self.ModalResult:=mrCancel;
     Self.Hide;
@@ -149,6 +150,7 @@ procedure TSimbaUpdateForm.PerformUpdate;
 begin
   Updater := TMMLFileDownloader.Create;
 
+  FDone := False;
   FCancelling := False;
   FCancelled := False;
 
@@ -182,6 +184,7 @@ begin
     // more detailed info
     writeln('EXCEPTION IN UPDATEFORM: We either hit Cancel, or something went wrong with files');
   end;
+  FDone := True;
   Self.UpdateLog.Lines.Add('Done ... ');
   Self.UpdateLog.Lines.Add('Please restart all currently running Simba binaries.');
   Self.OkButton.Enabled := True; // un-grey out button
