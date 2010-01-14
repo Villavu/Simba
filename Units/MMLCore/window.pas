@@ -460,25 +460,26 @@ begin
   {$ENDIF}
 end;
 
-// This will draw the ENTIRE client to a bitmap.
-// And ReturnData / CopyClientToBitmap will always use this bitmap.
-// They must NEVER update, unless Unfreeze is called.
+{
+ This will draw the ENTIRE client to a bitmap.
+ And ReturnData / CopyClientToBitmap will always use this bitmap.
+ They must NEVER update, unless Unfreeze is called.
 
-// I am not entirely sure how to do this, yet.
-// Best option for now seems to copy the entire data to a PRGB32,
-// and use it like the ArrPtr mode.
+ I am not entirely sure how to do this, yet.
+ Best option for now seems to copy the entire data to a PRGB32,
+ and use it like the ArrPtr mode.
 
-// I currently added "Frozen", "FreezeState", "Freeze" and "Unfreeze".
-// We will have to either "abuse" the current system, and set the client to
-// PtrArray mode, or edit in some extra variables.
-// (We will still need extra variables to remember the old mode,
-// to which we will switch back with Unfreeze.)
+ I currently added "Frozen", "FreezeState", "Freeze" and "Unfreeze".
+ We will have to either "abuse" the current system, and set the client to
+ PtrArray mode, or edit in some extra variables.
+ (We will still need extra variables to remember the old mode,
+ to which we will switch back with Unfreeze.)
 
-// Several ways to do it, what's the best way?
+ Several ways to do it, what's the best way?
 
-// Also, should a box be passed to Freeze, or should we just copy the entire
-// client?
-
+ Also, should a box be passed to Freeze, or should we just copy the entire
+ client?
+}
 function TMWindow.Freeze: Boolean;
 var
   w,h : integer;
