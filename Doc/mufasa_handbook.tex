@@ -1,6 +1,7 @@
 \documentclass[a4paper]{report}
 \usepackage{amsmath}
 \usepackage{color}
+\usepackage{graphicx}
 
 \begin{document}
 \title{Mufasa Handbook}
@@ -28,18 +29,124 @@ Developer notes include:
 The TClient class bundles all the other Core classes.
 It's main use is to make using the Mufasa Macro Library trivial, by bundling
 the core Mufasa classes into one class, and providing the methods to make those
-classes cooperate.
+classes cooperate. The main function of this class is to provide a
+ready-to-use class that contains all the core functionality of the MML.
+
+\section{MufasaTypes}
+
+MufasaTypes contains all the commonly used types, enums and other constants.
+Most of the core classes will use this unit.
 
 \section{TMWindow}
+
+The TMWindow class provides a user with a cross platform API with commonly used
+functions like retrieving pixel data of a specified window.
+
+\begin{center}
+	\begin{figure}[ht]
+		\includegraphics[scale=0.4]{Pics/TMWindow.png}
+		\caption{Quick overview of TMWindow}
+	\end{figure}
+\end{center}
 
 \subsection{Main features}
 
 Retreiving information from the target Application/Window.
+\begin{itemize}
+	\item Pixel data of a window.
+	\item Width and Height of a window.
+\end{itemize}
 
-% All useful functions documented here.
+Aside from this core functionality, it also allows programmers to easily switch
+between several different targets. It is even allowed to set a memory pointer to
+pixel data as target ``window''. It also implements a feature called ``Data
+Freeze''.
+
+\subsection{Other important units}
+
+The WindowUtil unit is required for it's X error handler procedure. It also
+contains a few other procedures used for XImage to RawImage conversions, but
+those aren't used in the TMWindow class.
+
 \subsection{ReturnData}
 
+Return data returns a TRetData structure which contains a pointer to the 
+raw image data, and a small description on how to handle the given data.
+If it fails, it will return nil on Linux. On Windows, the results may vary.
+
+\subsubsection{TRetData}
+\begin{verbatim}
+  TRetData = record
+    Ptr : PRGB32;
+    IncPtrWith : integer;
+    RowLen : integer;
+  end;
+\end{verbatim}
+
+The Ptr contains the data pointer, IncPtrWith contains the value you have to
+increase your own data pointer with on a line end, and RowLen contains the
+amount of pixels per row. 
+
+\subsection{GetDimensions}
+
+GetDimensions returns the width and height of the currently targetted window.
+GetDimensionBox returns the start of the window (left top) and the end of the
+window (right bottom).
+
+\subsection{Set Target}
+
+Several SetTarget calls are implemented. Most can be found in the descriptive
+picture of TMWindow in the start of this section.
+A special call ``SetDesktop'' sets the current window to the
+default\footnote{Desktop} window.
+
+\subsection{Freeze}
+
+Freeze is a state that we have implemented in TMWindow. If Freeze is called, the
+current client's pixel data is fully copied to an internal bitmap, and
+\textbf{all} the next TMWindow calls that are called using the internal data
+instead. Once \textbf{Unfreeze} is called, the internal data is freed, and
+TMWindow will revert back to it's ``real'' client.
+
+\subsection{Notes on Linux}
+
+On Linux X11 is mainly used for any graphical interface. Any errors generated
+by X11 result in a program kill, and X11 will then write the errors. This can be
+avoided by setting a custom error handler. This is what we did. Unfortunately we
+cannot use the results of the error handler, since we have not been able to
+determine a way to make a thread safe error handler. \\
+Currently it is mainly in to not make the program brutally crash. You should
+however, not encounter any X11 errors.
+
 \section{TMInput}
+
+
+The \textbf{TMInput} Class is the class that takes care of all the input. \\
+MML aims to support both Silent and non Silent Input, although most of the
+silent input methods are highly experimental, and need a lot of work.
+Since the Input heavily differs per operating system, 
+the Input class has a general way of sending keys, possibly at the expense
+of losing some Operating System specific functionality.
+
+\subsection{Silent Input}
+
+So what is Silent Input?
+We\footnote{The Designers and Developers of Mufasa} define Silent Input as
+methods to manipulate the user's mouse and keyboard, without visually using
+them. So what does this mean? \\
+
+This basically means that you will still be able to use your mouse while
+MML is performing mouse operations on your targetted window/client.
+
+However, silent input is very hard to implement, and often hardly supported
+by host operating systems. Often silent mouse or keyboard input is simply 
+ignored. So in general it is advised to stick to non silent input.
+
+
+\begin{figure}[ht]
+	\includegraphics[scale=0.4]{Pics/Input_Diag}
+	\caption{Input Functionality.}
+\end{figure}
 
 \section{TMFiles}
 
