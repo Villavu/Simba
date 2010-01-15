@@ -120,18 +120,29 @@ however, not encounter any X11 errors.
 
 \section{TMInput}
 
-
 The \textbf{TMInput} Class is the class that takes care of all the input. \\
 MML aims to support both Silent and non Silent Input, although most of the
 silent input methods are highly experimental, and need a lot of work.
 Since the Input heavily differs per operating system, 
 the Input class has a general way of sending keys, possibly at the expense
-of losing some Operating System specific functionality.
+of losing some Operating System specific functionality. \\
+
+TMInput isn't just used to send keys and mouse presses, but also used to get the
+mouse position, or states of keys on the keyboard.
+
+\begin{figure}[ht]
+	\includegraphics[scale=0.4]{Pics/Input_Diag}
+	\caption{Input Functionality.}
+\end{figure}
+
+\subsection{Sending Key Input}
+
+% TODO Explain API for keys and mouse.
 
 \subsection{Silent Input}
 
 So what is Silent Input?
-We\footnote{The Designers and Developers of Mufasa} define Silent Input as
+We\footnote{Developers of Mufasa} define Silent Input as
 methods to manipulate the user's mouse and keyboard, without visually using
 them. So what does this mean? \\
 
@@ -142,14 +153,72 @@ However, silent input is very hard to implement, and often hardly supported
 by host operating systems. Often silent mouse or keyboard input is simply 
 ignored. So in general it is advised to stick to non silent input.
 
-\begin{figure}[ht]
-	\includegraphics[scale=0.4]{Pics/Input_Diag}
-	\caption{Input Functionality.}
-\end{figure}
+\subsubsection{Silent Input On Linux}
+It is safe to assume that on Linux, one uses the X.org X11 server for all the
+graphical stuff. X11 should allow events to be send to any window, but the
+window itself is free to ignore input that may not come from a ``valid'' window.
+This makes it harder to implement. However, recently we found a tool called
+``xdotool'', which seems to be able to sent silent keys, and possibly mouse
+events. Perhaps if we take a better look at it we can work a way out to do
+silent input on Linux.
 
-\section{TMFiles}
+\subsubsection{Silent Input On Windows}
+% TODO
 
-\section{TMBitmaps}
+\section{TMufasaBitmap}
+
+For the MML, we wrote our own Bitmap class.
+A bitmap is basically just a piece of bytes, ordered in a certain fashion.
+We have extended this concept to a full blown Bitmap class: ``TMufasaBitmap''.
+The data per pixel consists out of 32 bits\footnote{4 bytes}, and is 
+``stored'' in the variable ``FData'', of the type ``TRGB32''.
+FData is a pointer to the data in memory.
+The advantage of a 32 bit structure to a 24 bits structure, consists mainly
+of the fact that 32 bits are more easily accessed that 24 bits. 32 bits are
+aligned in such a way that they are easily accessed, and translated to
+other formats\footnote{Or just ``Colours''}.
+
+\subsection{Converting to and from TMufasaBitmap}
+
+Because there are many other commonly used bitmap classes out there, it is
+important that is it easy to ``import'' and ``export'' bitmaps. This may seem
+trivial - but there are a lot of things you have to take in account when
+importing or exporting. Alignment of bits, the byte order, the line ending
+style, the amount of bytes per pixel, etc.
+
+To turn a bitmap into a TMufasaBitmap, we provide two functions.
+
+\begin{verbatim}
+    procedure LoadFromTBitmap(bmp: TBitmap);
+    procedure LoadFromRawImage(RawImage: TRawImage);
+\end{verbatim}
+
+Tbitmap is a commonly used class in Lazarus, and also allows importing and
+exporting to many other types. This allows us to load virtually any type that
+TBitmap supports. A RawImage is a complex structure of a bitmap ``definition''.
+It is commonly used in Lazarus, thus we implemented support for it.
+
+Exporting TMufasaBitmap is done by using the \textbf{ToTBitmap} function. As
+mentioned, this allows one to save it to virtually any format.
+
+\subsection{Loading from and Saving to files}
+
+The functions LoadFromFile and SafeToFile allow the programmer to load and safe
+TMufasaBitmaps to files. Not all types of bitmap represenations are supported.
+
+%TODO add list of supported bitmaps.
+
+\subsection{Bitmap manipulation}
+
+We also provide some functions that can be used to manipulate bitmaps.
+Grayscaling, changing brightness and contrast, posterize and working with
+transparent colours are also supported.
+
+\subsection{Copying the Client Window to a TMufasaBitmap}
+
+Coopying the Client Window set in TMWindow is very simply with the TMufasaBitmap
+class, just use the \textbf{CopyClientToBitmap} functions.
+
 
 \section{TMDTM}
 
@@ -157,7 +226,7 @@ The TMDTM class is a DTM manager. It provides methods to add, store, load
 and free DTM's. It has a few few other features. One of it's other features
 is keeping track of what DTMs are unfreed. It can, for example, help you find
 a bug in your code, by printing out information of the DTM that you forgot to
-free. You can also give names to DTMs, which eases debugging further.
+free. You can also give names to DTMs, which eases debugging even further.
 
 If you try to access an invalid DTM, the MML will throw an exception.
 
@@ -167,9 +236,17 @@ If you try to access an invalid DTM, the MML will throw an exception.
 \subsection{DTMFromString}
 \subsection{FreeDTM}
 
-\section{TMOCR}
+\section{TMFinder}
 
-\chapter{Add on}
+\section{TMOCR}
+\subsection{Font Loader}
+\section{TMFiles}
+
+\chapter{Addon}
+
+\section{Settings Management}
+
+\section{Updater}
 
 \section{Colour Picker}
 
