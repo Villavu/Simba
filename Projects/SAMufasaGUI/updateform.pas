@@ -29,6 +29,7 @@ type
     DownloadProgress: TProgressBar;
     procedure CancelButtonClick(Sender: TObject);
     procedure CleanUpdateForm(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure OkButtonClick(Sender: TObject);
     procedure UpdateButtonClick(Sender: TObject);
     function CanUpdate: Boolean;
@@ -123,6 +124,11 @@ begin
   Self.DownloadProgress.Position:=0;
   Self.UpdateLog.Clear;
   Self.UpdateLog.Lines.Add('---------- Update Session ----------');
+end;
+
+procedure TSimbaUpdateForm.FormCreate(Sender: TObject);
+begin
+  FDone := True;
 end;
 
 procedure TSimbaUpdateForm.OkButtonClick(Sender: TObject);

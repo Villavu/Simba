@@ -8,6 +8,7 @@ object SimbaUpdateForm: TSimbaUpdateForm
   Caption = 'Update Simba'
   ClientHeight = 391
   ClientWidth = 467
+  OnCreate = FormCreate
   OnShow = CleanUpdateForm
   LCLVersion = '0.9.29'
   object DownloadProgress: TProgressBar
