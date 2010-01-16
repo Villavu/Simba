@@ -40,7 +40,7 @@ uses
   SynExportHTML,
   SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
   SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
-  ocr, updateform, simbasettings, reportbug;
+  ocr, updateform, simbasettings;
 
 const
     SimbaVersion = 413;
@@ -1484,7 +1484,7 @@ end;
 
 procedure TForm1.MenuItemReportBugClick(Sender: TObject);
 begin
-  FormReportBug.Show;
+  OpenURL('http://old.villavu.com/mantis/bug_report_page.php');
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
