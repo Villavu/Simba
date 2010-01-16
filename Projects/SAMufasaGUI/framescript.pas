@@ -293,6 +293,8 @@ begin
   FScriptState:= ss_None;
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
+  SynEdit.Options:= SynEdit.Options- [eoGroupUndo];
+  SynEdit.Options:= SynEdit.Options+ [eoGroupUndo];
   SynEdit.IncrementColor.Background := $30D070;
   SynEdit.HighlightAllColor.Background:= clYellow;
   SynEdit.HighlightAllColor.Foreground:= clDefault;
