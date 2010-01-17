@@ -783,7 +783,7 @@ begin
 
     end;
     2:
-    // Can be optimized a lot... RGBToHSL isn't really inline,
+    { Can be optimized a lot... RGBToHSL isn't really inline, }
     begin
       HueXTol := hueMod * Tol;
       SatXTol := satMod * Tol;
@@ -1074,7 +1074,7 @@ begin
             S2 := D / (Cmax + Cmin)
           else
             S2 := D / (2 - Cmax - Cmin);
-          //We've Calculated the S. Lets see if we need to continue.
+           { We've Calculated the S. Lets see if we need to continue. }
           if Abs(S2 - S1) > SatTol then //if not (abs(S1 - S2) <= SatXTol) then
             Continue;
           if R = Cmax then
@@ -1229,7 +1229,7 @@ begin
   TClient(Client).MWindow.FreeReturnData;
 end;
 
-//Only works with CTS 1 for now.. Since Colorsame doesn't return a boolean :-(
+ { Only works with CTS 1 for now.. Since Colorsame doesn't return a boolean :-( }
 //We do not check whether every white pixel is in tol range with every other white pixel..
 
 function TMFinder.FindBitmapMaskTolerance(mask: TMask; out x, y: Integer; xs,
@@ -1242,7 +1242,7 @@ var
    i,ii : integer;
    dX, dY,  xx, yy: Integer;
 label NotFoundMask;
-  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
 begin
   Result := false;
@@ -1335,7 +1335,7 @@ var
    dX, dY,  xx, yy: Integer;
    SkipCoords : T2DBoolArray;
 label NotFoundBmp;
-  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
 begin
   Result := false;
@@ -1397,7 +1397,7 @@ var
    H,S,L,HMod,SMod : extended;
    SkipCoords : T2DBoolArray;
 label NotFoundBmp;
-  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+  { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. } 
 
 begin
   Result := false;
@@ -1464,7 +1464,7 @@ var
    dX, dY,  i,HiSpiral: Integer;
    SkipCoords : T2DBoolArray;
 label NotFoundBmp;
-  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops } 
 
 begin
   Result := false;
@@ -1528,7 +1528,7 @@ var
    H,S,L,HMod,SMod : extended;
    SkipCoords : T2DBoolArray;
 label NotFoundBmp;
-  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+  { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. } 
 
 begin
   Result := false;
@@ -1600,7 +1600,7 @@ var
    H,S,L,HMod,SMod : extended;
    SkipCoords : T2DBoolArray;
 label NotFoundBmp;
-  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
 begin
   Result := false;
@@ -1683,7 +1683,7 @@ var
    SkipCoords : T2DBoolArray;
    PointsLeft : T2DIntArray;
 label FoundBMPPoint, Madness;
-  //Don't know if the compiler has any speed-troubles with goto jumping in nested for loops.
+  { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
 begin
   Result := false;
@@ -1849,8 +1849,8 @@ begin
   for i := 0 to W do
   begin
     setlength(b[i], (H + 1) * 2);
-    // does setlength init already? if it doesn't, do we want to init here?
-    // or do we want to init in the loop, as we loop over every b anyway?
+    { does setlength init already? if it doesn't, do we want to init here?
+    or do we want to init in the loop, as we loop over every b anyway? }
 
     // init
     FillChar(b[i][0], SizeOf(Integer) * H * 2, 0);
@@ -1931,10 +1931,55 @@ begin
 end;
 
 function TMFinder.FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
+var
+   // Colours of DTMs
+   C: Array of Integer;
+
+   // Bitwise
+   b: Array of Array of Integer;
+
+   // bounds
+   W, H: integer;
+   MA: TBox;
+
+   // for loops, etc
+   xx, yy: integer;
+   i, xxx,yyy: Integer;
+
+   // for comparisons.
+   rgbs: array of TRGB32;
+
+   //clientdata
+   cd: TPRGB32Array;
+
+   PtrData: TRetData;
+
+   // point count
+   pc: Integer = 0;
+
+   goodPoints: Array of Boolean;
+
+   label theEnd;
+   label AnotherLoopEnd;
+
+
 
 begin
-  // Don't forget to pre calculate the rotated points at the start.
-  // Saves a lot of rotatepoint() calls.
+  if not DTMConsistent(dtm) then
+  begin
+    raise Exception.CreateFmt('FindDTMs: DTM is not consistent.', []);
+    Exit;
+  end;
+
+  // Get the area we should search in for the Main Point.
+  //writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
+  MA := ValidMainPointBoxRotated(DTM, x1, y1, x2, y2);
+  //writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
+
+  DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
+
+  { Don't forget to pre calculate the rotated points at the start.
+   Saves a lot of rotatepoint() calls. }
   raise Exception.CreateFmt('Not done yet!', []);
 end;
 

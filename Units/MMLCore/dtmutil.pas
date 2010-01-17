@@ -242,8 +242,30 @@ end;
 Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
                             sAngle, eAngle, aStep: Extended): TBox;
 
-begin
+var
+   i, d: Integer;
 
+begin
+  for i := 1 to high(dtm.c) do
+  begin
+    dtm.p[i] := dtm.p[i] - dtm.p[0];
+  end;
+  dtm.p[0] := dtm.p[0] - dtm.p[0];
+
+
+  { FIXME }
+  for i := 0 to high(dtm.c) do
+  begin
+	  d := max(dtm.p[i].x - dtm.asz[i], d);
+	  d := max(dtm.p[i].x + dtm.asz[i], d);
+	  d := max(dtm.p[i].y - dtm.asz[i], d);
+	  d := max(dtm.p[i].y + dtm.asz[i], d);
+  end;
+
+  Result.x1 := d;
+  Result.y1 := d;
+  Result.x2 := d;
+  Result.y2 := d;
 end;
 
 
