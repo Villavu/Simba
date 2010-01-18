@@ -50,6 +50,21 @@ begin
   CurrThread.Client.MFinder.SetToleranceSpeed(cts);
 end;
 
+function GetToleranceSpeed: Integer;
+begin
+  CurrThread.Client.MFinder.GetToleranceSpeed;
+end;
+
+procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);
+begin
+  CurrThread.Client.MFinder.SetToleranceSpeed2Modifiers(nHue, nSat);
+end;
+
+procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);
+begin
+  CurrThread.Client.MFinder.GetToleranceSpeed2Modifiers(hMod, sMod);
+end;
+
 function SimilarColors(Col1,Col2,Tol : integer) : boolean;
 begin;
   Result := CurrThread.Client.MFinder.SimilarColors(Col1,Col2,Tol);
