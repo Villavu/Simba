@@ -66,6 +66,8 @@ type
             { Called every 50ms }
             property OnBeat: TMMLFunctionBoolean read FOnBeat write FOnBeat;
 
+            property DownloadedSize : Integer read FTotal;
+            property FileSize : integer read FFileSize;
             function GetPercentage: Integer;
          private
             procedure TryToGetFileSize;

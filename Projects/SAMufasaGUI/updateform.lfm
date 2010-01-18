@@ -14,7 +14,7 @@ object SimbaUpdateForm: TSimbaUpdateForm
   object DownloadProgress: TProgressBar
     Left = 24
     Height = 28
-    Top = 72
+    Top = 64
     Width = 413
     Anchors = [akTop, akLeft, akRight]
     Smooth = True
@@ -23,7 +23,7 @@ object SimbaUpdateForm: TSimbaUpdateForm
   object UpdateButton: TButton
     Left = 24
     Height = 40
-    Top = 16
+    Top = 8
     Width = 413
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Update!'
@@ -33,7 +33,7 @@ object SimbaUpdateForm: TSimbaUpdateForm
   object OkButton: TButton
     Left = 362
     Height = 25
-    Top = 344
+    Top = 352
     Width = 75
     Anchors = [akRight, akBottom]
     Caption = 'Ok'
@@ -43,7 +43,7 @@ object SimbaUpdateForm: TSimbaUpdateForm
   object CancelButton: TButton
     Left = 24
     Height = 25
-    Top = 344
+    Top = 352
     Width = 75
     Anchors = [akLeft, akBottom]
     Caption = 'Cancel'
@@ -53,9 +53,18 @@ object SimbaUpdateForm: TSimbaUpdateForm
   object UpdateLog: TMemo
     Left = 24
     Height = 207
-    Top = 120
+    Top = 128
     Width = 413
     Anchors = [akTop, akLeft, akRight, akBottom]
     TabOrder = 4
+  end
+  object DownloadSpeed: TLabel
+    Left = 24
+    Height = 14
+    Top = 104
+    Width = 78
+    Caption = 'DownloadSpeed'
+    ParentColor = False
+    Visible = False
   end
 end
