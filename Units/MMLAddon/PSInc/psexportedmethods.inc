@@ -118,16 +118,16 @@ AddFunction(@ps_GetPage,'function GetPage(url : string): string;');
 
 { Color Conversions and Speed }
 SetCurrSection('Color Convert');
-AddFunction(@ColorToRGB, 'procedure ColorToRGB(Color: integer; out r, g, b: Integer);');
-AddFunction(@RGBToColor, 'function RGBtoColor(r, g, b: integer): TColor;');
-AddFunction(@ColorToHSL, 'procedure ColorToHSL(Color: Integer; out h, s, l: Extended);');
-AddFunction(@HSLToColor, 'function HSLToColor(H, S, L: Extended): TColor;');
-AddFunction(@ColorToXYZ, 'procedure ColorToXYZ(Color: Integer; out x, y, z: Extended);');
-AddFunction(@XYZToColor, 'function XYZToColor(X, Y, Z: Extended): TColor;');
-AddFunction(@RGBToHSL, 'procedure RGBToHSL(R, G, B: Integer; out h, s, l: Extended);');
-AddFunction(@HSLToRGB, 'procedure HSLtoRGB(H, S, L: extended; out R, G ,B: Integer);');
-AddFunction(@RGBToXYZ, 'procedure RGBToXYZ(R, G, B: Integer;out x, y ,z: Extended);');
-AddFunction(@XYZToRGB, 'procedure XYZToRGB(X, Y, Z: Extended; out R, G, B: integer);');
+AddFunction(@Colour_Conv.ColorToRGB, 'procedure ColorToRGB(Color: integer; out r, g, b: Byte);');
+AddFunction(@Colour_conv.RGBToColor, 'function RGBtoColor(r, g, b: Byte): TColor;');
+AddFunction(@Colour_conv.ColorToHSL, 'procedure ColorToHSL(Color: Integer; out h, s, l: Extended);');
+AddFunction(@Colour_conv.HSLToColor, 'function HSLToColor(H, S, L: Extended): TColor;');
+AddFunction(@Colour_conv.ColorToXYZ, 'procedure ColorToXYZ(Color: Integer; out x, y, z: Extended);');
+AddFunction(@Colour_conv.XYZToColor, 'function XYZToColor(X, Y, Z: Extended): TColor;');
+AddFunction(@Colour_conv.RGBToHSL, 'procedure RGBToHSL(R, G, B: Byte; out h, s, l: Extended);');
+AddFunction(@Colour_conv.HSLToRGB, 'procedure HSLtoRGB(H, S, L: extended; out R, G ,B: Byte);');
+AddFunction(@Colour_conv.RGBToXYZ, 'procedure RGBToXYZ(R, G, B: Byte;out x, y ,z: Extended);');
+AddFunction(@Colour_conv.XYZToRGB, 'procedure XYZToRGB(X, Y, Z: Extended; out R, G, B: Byte);');
 
 { Color Finding }
 SetCurrSection('Color');
