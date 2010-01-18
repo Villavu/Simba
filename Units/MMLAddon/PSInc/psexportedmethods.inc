@@ -55,8 +55,8 @@ AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;'
 
 {window}
 SetCurrSection('Window');
-AddFunction(@Freeze, 'function freeze:boolean;');
-AddFunction(@Unfreeze, 'function unfreeze: boolean;');
+AddFunction(@Freeze, 'function Freeze:boolean;');
+AddFunction(@Unfreeze, 'function Unfreeze: boolean;');
 AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(out w, h:integer);');
 AddFunction(@SetTargetBitmap,'procedure SetTargetBitmap(Bitmap : integer);');
 AddFunction(@SetDesktopAsClient,'procedure SetDesktopAsClient');
@@ -84,13 +84,13 @@ AddFunction(@psWait, 'procedure Sleep(t: integer);');
 AddFunction(@GetTickCount, 'function GetSystemTime: LongWord;');
 AddFunction(@GetTickCount, 'function GetTickCount: LongWord;');
 AddFunction(@GetTimeRunning,'function GetTimeRunning: LongWord;');
-AddFunction(@ConvertTime,'procedure ConvertTime(Time : integer; var h,m,s : integer);');
+AddFunction(@ConvertTime,'procedure ConvertTime(Time: integer; var h, m, s: integer);');
 AddFunction(@HakunaMatata,'procedure HakunaMatata;');
 AddFunction(@TerminateScript,'procedure TerminateScript;');
-AddFunction(@DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w,h : integer);');
-AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp : integer);');
-AddFunction(@GetDebugBitmap,'function GetDebugBitmap : integer;');
-AddFunction(@Random,'function Random(Int : integer): integer;');
+AddFunction(@DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w, h: integer);');
+AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp: integer);');
+AddFunction(@GetDebugBitmap,'function GetDebugBitmap: integer;');
+AddFunction(@Random,'function Random(Int: integer): integer;');
 AddFunction(@NewThreadCall,'function NewThreadCall(procname : string) : cardinal');
 
 
@@ -105,24 +105,39 @@ AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 AddFunction(@ps_GetPage,'function GetPage(url : string): string;');
 
 
-{Color + Color Finders}
+{ Color Conversions and Speed }
+SetCurrSection('Color Convert');
+AddFunction(@ColorToRGB, 'procedure ColorToRGB(Color: integer; out r, g, b: Integer);');
+AddFunction(@RGBToColor, 'function RGBtoColor(r, g, b: integer): TColor;');
+AddFunction(@ColorToHSL, 'procedure ColorToHSL(Color: Integer; out h, s, l: Extended);');
+AddFunction(@HSLToColor, 'function HSLToColor(H, S, L: Extended): TColor;');
+AddFunction(@ColorToXYZ, 'procedure ColorToXYZ(Color: Integer; out x, y, z: Extended);');
+AddFunction(@XYZToColor, 'function XYZToColor(X, Y, Z: Extended): TColor;');
+AddFunction(@RGBToHSL, 'procedure RGBToHSL(R, G, B: Integer; out h, s, l: Extended);');
+AddFunction(@HSLToRGB, 'procedure HSLtoRGB(H, S, L: extended; out R, G ,B: Integer);');
+AddFunction(@RGBToXYZ, 'procedure RGBToXYZ(R, G, B: Integer;out x, y ,z: Extended);');
+AddFunction(@XYZToRGB, 'procedure XYZToRGB(X, Y, Z: Extended; out R, G, B: integer);');
+
+{ Color Finding }
 SetCurrSection('Color');
+AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(cts: integer);');
+AddFunction(@GetToleranceSpeed, 'function GetToleranceSpeed: Integer;');
+AddFunction(@SetToleranceSpeed2Modifiers, 'procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);');
+AddFunction(@GetToleranceSpeed2Modifiers, 'procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);');
 AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
-AddFunction(@FindColor, 'function findcolor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
-AddFunction(@findcolortoleranceOptimised, 'function findcolortoleranceOptimised(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
-AddFunction(@FindColorTolerance, 'function findcolortolerance(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
-AddFunction(@FindColors, 'function findcolors(out TPA: TPointArray; color, x1, y1, x2, y2: integer): boolean;');
-AddFunction(@SimilarColors,'function SimilarColors(Col1,Col2,Tolerance : integer) : boolean');
+AddFunction(@FindColor, 'function FindColor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
+AddFunction(@findcolortoleranceOptimised, 'function FindColorToleranceOptimised(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
+AddFunction(@FindColorTolerance, 'function FindColorTolerance(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
+AddFunction(@FindColors, 'function FindColors(out TPA: TPointArray; color, x1, y1, x2, y2: integer): boolean;');
+AddFunction(@SimilarColors,'function SimilarColors(Col1, Col2, Tolerance: integer): boolean');
 AddFunction(@CountColor,'function CountColor(Color, xs, ys, xe, ye: Integer): Integer;');
 AddFunction(@CountColorTolerance,'function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;');
 AddFunction(@FindColorsToleranceOptimised,'function FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 AddFunction(@FindColorsTolerance,'function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 AddFunction(@FindColorSpiral,'function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;');
 AddFunction(@FindColorsSpiralTolerance,'function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;');
-AddFunction(@SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(cts: integer);');
-AddFunction(@FindColoredArea, 'function FindColoredArea(var x, y : Integer; color, xs, ys, xe, ye, MinArea : Integer): Boolean');
+AddFunction(@FindColoredArea, 'function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye, MinArea: Integer): Boolean');
 AddFunction(@FindColoredAreaTolerance, 'function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe, ye, MinArea, Tolerance : Integer): Boolean');
-AddFunction(@ColorToHSL, 'procedure ColorToHSL(c: integer; out r,g,b: extended);');
 
 {Mouse etc.}
 SetCurrSection('Mouse');
@@ -139,7 +154,7 @@ AddFunction(@KeyDown, 'procedure KeyDown(key: Word);');
 AddFunction(@KeyUp, 'procedure KeyUp(key: Word);');
 AddFunction(@PressKey, 'procedure PressKey(key: Word);');
 AddFunction(@SendKeys, 'procedure SendKeys(s: string);');
-AddFunction(@isKeyDown, 'function isKeyDown(key: Word): Boolean;');
+AddFunction(@isKeyDown, 'function IsKeyDown(key: Word): Boolean;');
 AddFunction(@GetKeyCode, 'function GetKeyCode(Key : char) : byte');
 
 { OCR}
@@ -190,9 +205,9 @@ AddFunction(@CreateBitmapMask,'function CreateBitmapMask(Bitmap : integer) : TMa
 AddFunction(@FindMaskTolerance,'function FindMaskTolerance(mask: TMask; out x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 AddFunction(@FindBitmapMaskTolerance,'function FindBitmapMaskTolerance(mask: Integer; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 AddFunction(@FindDeformedBitmapToleranceIn,'function FindDeformedBitmapToleranceIn(bitmap: integer; out x,y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;');
-AddFunction(@DrawTPABitmap,'procedure DrawTPABitmap(bitmap : integer; TPA : TPointArray; Color : integer);');
-AddFunction(@DrawATPABitmap,'procedure DrawATPABitmap(bitmap : integer; ATPA : T2DPointArray);');
-AddFunction(@DrawATPABitmapEx,'procedure DrawATPABitmapEx(bitmap : integer; ATPA : T2DPointArray; Colors : TIntegerArray);');
+AddFunction(@DrawTPABitmap,'procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);');
+AddFunction(@DrawATPABitmap,'procedure DrawATPABitmap(bitmap: integer; ATPA: T2DPointArray);');
+AddFunction(@DrawATPABitmapEx,'procedure DrawATPABitmapEx(bitmap: integer; ATPA: T2DPointArray; Colors: TIntegerArray);');
 
 {tpa}
 SetCurrSection('TPA');

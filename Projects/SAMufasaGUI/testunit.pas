@@ -37,10 +37,9 @@ uses
   mmlpsthread,synedittypes,
   window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
-  SynExportHTML,
-  SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,SynEditMarkupHighAll,
-  SynEditMiscClasses, LMessages, Buttons, PairSplitter,about, framefunctionlist,
-  ocr, updateform, simbasettings;
+  SynExportHTML, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,
+  SynEditMarkupHighAll, SynEditMiscClasses, LMessages, Buttons, PairSplitter,
+  ColorBox, about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
     SimbaVersion = 423;
@@ -202,6 +201,7 @@ type
     TB_SelectClient: TToolButton;
     ToolButton8: TToolButton;
     MTrayIcon: TTrayIcon;
+    ColorListBox1: TColorListBox;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
@@ -1092,6 +1092,7 @@ begin
   if CurrScript.SynEdit.CanFocus then
     CurrScript.SynEdit.SetFocus;
 end;
+
 procedure TForm1.StopCodeCompletion;
 begin
   if frmFunctionList.InCodeCompletion then

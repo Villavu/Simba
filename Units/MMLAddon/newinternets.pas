@@ -8,6 +8,9 @@ uses
   Classes, SysUtils;
 
 type
+  {
+    Record to hold the information of a $_POST variable and value.
+  }
   TPostVariable = record
     variable, value: String;
   end;
@@ -21,35 +24,30 @@ type
     ConnURL: String;
     //contains post paramaters and vars
     PostVars: TList;
-    PostFreeSpots: array of Integer;
-    PostVarsLen, PostVarsHigh, FreeSpotsHigh, FreeSpotsLen : integer;
   private
     function createPostVariable(variable, value: String): TPostVariable;
   public
     constructor Create(URL: String);
     destructor Destroy; override;
-    //POST variable functions for PHP transmission
+
+    //$_POST variable functions for PHP transmission
     procedure AddPostVariable(theVar, theValue: String);
     procedure DelPostVariable(theVar: String);
     procedure ReplacePostVariable(searchVar, replaceVar, value: String);
     function PostHTTP(out dataStream: TStream): Boolean;
   end;
 
-
-
-
-  TInternetArray = class(TObject)
+  TMufasaInternet = class(TObject)
   protected
-    FreeSpots: array of Integer;
+    // TList storing all of the connection infos
     ConnList : TList;
-    ConnArray: array of TInternetConnection;
-    ConnHigh, FreeSpotsHigh, FreeSpotsLen : integer;
 
   public
     function ConnectionOpen(URL: String): Integer;
     function ConnectionClose(ConnInd: Integer): Boolean;
     destructor Destroy; override;
-    //POST variable functions for PHP transmission
+
+    //$_POST variable functions for PHP
     procedure AddPostVariable(connInd: Integer; theVar, theValue: String);
     procedure DelPostVariable(connInd: Integer; theVar: String);
     procedure ReplacePostVariable(connInd: Integer; searchVar, replaceVar, value: String);
@@ -60,7 +58,7 @@ function GetPage(URL: String): String;
 
 implementation
 uses
-  httpsend;
+  httpsend, synacode;
 
 
 function replace(sStr, rStr, iStr: String): String;
@@ -80,7 +78,7 @@ end;
 procedure TInternetConnection.Create(URL: String);
 begin
   inherited;
-  Self.ConnURL := URL;
+  Self.ConnURL := EncodeURL(URL);
   Self.PostVars.Create;
 end;
 
@@ -97,8 +95,8 @@ procedure TInternetConnect.AddPostVariable(theVar, theValue: String);
 var
   currentIndex: Integer;
 begin
-  theVar := replace(' ', '%20', theVar);        // more needs to be done, I only knew the ' ' replace.
-  theValue := replace(' ', '%20', theValue);
+  theVar := EncodeURLElement(theVar);
+  theValue := EncodeURLElement(theValue);
   Self.PostVars.Add(createPostVariable(theVar, theValue));
  { with Self do
   begin
@@ -179,7 +177,7 @@ begin
       Delete(URLData, Length(URLData) - 1, 1);
 
       {I DONT KNOW (TStream), this should work since we don't reuse it after.}
-      dataStream := nil;
+      dataStream := TStream.Create;
       HttpPostURL(ConnURL, URLData, dataStream);
 
       // Lets remove all Post Variable data so fresh start next time.
@@ -192,12 +190,12 @@ begin
   result := true;
 end;
 
-{ TInternetArray }
+{ TMufasaInternet }
 
 {
   Allocate space in the ConnArray, then open the connection.
 }
-function TInternetArray.ConnectionOpen(URL: String): Integer;
+function TMufasaInternet.ConnectionOpen(URL: String): Integer;
 var
   currentIndex: Integer;
 begin
@@ -212,7 +210,7 @@ end;
 {
   Close the connection, add the index to the FreeSpots.
 }
-function TInternetArray.ConnectionClose(theInd: Integer): Boolean;
+function TMufasaInternet.ConnectionClose(theInd: Integer): Boolean;
 var
   tempConn: TInternetConnection;
 begin
@@ -243,7 +241,7 @@ end;
   Wrapper for the TInternetConnection.PostVariableAdd procedure which accepts
   a connection index.
 }
-procedure TInternetArray.PostVariableAdd(connInd: Integer; theVar, theValue: String);
+procedure TMufasaInternet.PostVariableAdd(connInd: Integer; theVar, theValue: String);
 begin
   try
     ConnList.Items[commInd].PostVariableAdd(theVar, theValue);
@@ -257,7 +255,7 @@ end;
   Wrapper for the TInternetConnection.PostVariableDel procedure which accepts
   a connection index.
 }
-procedure TInternetArray.PostVariableDel(connInd: Integer; theVar: String);
+procedure TMufasaInternet.PostVariableDel(connInd: Integer; theVar: String);
 begin
   try
     ConnList.Items[commInd].PostVariableAdd(theVar);
@@ -271,7 +269,7 @@ end;
   Wrapper for the TInternetConnection.PostVariableReplace procedure which accepts
   a connection index.
 }
-procedure TInternetArray.PostVariableReplace(connInd: Integer; searchVar, replaceVar, value: String);
+procedure TMufasaInternet.PostVariableReplace(connInd: Integer; searchVar, replaceVar, value: String);
 begin
   try
     ConnList.Items[commInd].PostVariableAdd(searchVar, replaceVar, value);
@@ -281,7 +279,7 @@ begin
   end;
 end;
 
-function TInternetArray.PostHTTP(connInd: Integer; out dataStream: TStream): Boolean;
+function TMufasaInternet.PostHTTP(connInd: Integer; out dataStream: TStream): Boolean;
 begin
   try
     result := ConnList.Items[commInd].PostHTTP(dataStream);

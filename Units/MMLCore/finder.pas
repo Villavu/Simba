@@ -58,7 +58,6 @@ type
           xe, ye, tol: Integer): Boolean;
         function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
         function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
-        procedure SetToleranceSpeed(nCTS: Integer);
         function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
         // Possibly turn x, y into a TPoint var.
         function FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
@@ -86,7 +85,11 @@ type
         function FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
         function FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
 
-
+        // tol speeds
+        procedure SetToleranceSpeed(nCTS: Integer);
+        function GetToleranceSpeed: Integer;
+        procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);
+        procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);
     protected
         Client: TObject;
         Percentage : array[0..255] of Extended; //We store all the possible RGB / 255 divisions.
@@ -267,6 +270,23 @@ begin
   if (nCTS < 0) or (nCTS > 2) then
     raise Exception.CreateFmt('The given CTS ([%d]) is invalid.',[nCTS]);
   Self.CTS := nCTS;
+end;
+
+function TMFinder.GetToleranceSpeed: Integer;
+begin
+  Result := Self.CTS;
+end;
+
+procedure TMFinder.SetToleranceSpeed2Modifiers(nHue, nSat: Extended);
+begin
+  Self.hueMod := nHue;
+  Self.satMod := nSat;
+end;
+
+procedure TMFinder.GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);
+begin
+  hMod := Self.hueMod;
+  sMod := Self.satMod;
 end;
 
 function TMFinder.SimilarColors(Color1, Color2,Tolerance: Integer) : boolean;
