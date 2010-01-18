@@ -282,17 +282,22 @@ var
 {$ENDIF}
   w,h: integer;
 begin
+
+
+{$IFDEF MSWINDOWS}
+  GetWindowRect(Window.TargetHandle, Rect);
+  x := x + rect.left;
+  y := y + rect.top;
+  if (x<0) or (y<0) then
+    writeln('Negative coords, what now?');
+  Windows.SetCursorPos(x, y);
+{$ENDIF}
+
+{$IFDEF LINUX}
   // This may be a bit too much overhead.
   Window.GetDimensions(w, h);
   if (x < 0) or (y < 0) or (x > w) or (y > h) then
     raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid', [x, y]);
-
-{$IFDEF MSWINDOWS}
-  GetWindowRect(Window.TargetHandle, Rect);
-  Windows.SetCursorPos(x + Rect.Left, y + Rect.Top);
-{$ENDIF}
-
-{$IFDEF LINUX}
   Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
   XWarpPointer(Window.XDisplay, 0, Window.CurWindow, 0, 0, 0, 0, X, Y);
   XFlush(Window.XDisplay);

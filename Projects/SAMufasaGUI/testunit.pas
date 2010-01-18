@@ -42,7 +42,7 @@ uses
   ColorBox, about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 427;
+    SimbaVersion = 429;
 
 type
 
@@ -531,6 +531,7 @@ begin
     ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
     {$IFNDEF TERMINALWRITELN}
     ScriptThread.SetDebug(@formWriteln);
+    ScriptThread.DebugMemo := Self.Memo1;
     {$ENDIF}
     ScriptThread.SetPSScript(CurrScript.SynEdit.Lines.Text);
     DbgImgInfo.DispSize := @DebugImgForm.DispSize;

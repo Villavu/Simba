@@ -22,7 +22,7 @@
 }
 
 AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
-AddFunction(nil,'procedure writeln(x);'); //We use special function for this
+AddFunction(nil,'procedure Writeln(x);'); //We use special function for this
 
 { DTM }
 SetCurrSection('DTM');
@@ -41,6 +41,7 @@ AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 
 {maths}
 SetCurrSection('Math');
+AddFunction(nil,'function Round(e:extended) : integer');
 AddFunction(@ceil,'function ceil(e : extended) : integer');
 AddFunction(@power,'function pow(base,exponent : extended) : extended');
 AddFunction(@max,'function Max(a, b: Integer): Integer;');
@@ -92,6 +93,7 @@ AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp: integer);');
 AddFunction(@GetDebugBitmap,'function GetDebugBitmap: integer;');
 AddFunction(@Random,'function Random(Int: integer): integer;');
 AddFunction(@NewThreadCall,'function NewThreadCall(procname : string) : cardinal');
+AddFunction(@ClearDebug,'procedure ClearDebug;');
 
 
 
