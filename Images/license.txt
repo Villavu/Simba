@@ -1,5 +1,5 @@
 pause,stop: From Lazarus (http://lazarus.freepascal.org)
-exit,cut,new,open,paste,redo,run,save,undo,help,bug: Mark James http://www.famfamfam.com/lab/icons/silk/
+exit,cut,page_new,new,open,paste,redo,run,save,undo,help,bug,arrow_refresh,html: Mark James http://www.famfamfam.com/lab/icons/silk/
 closetab,closetabs,addtab,eraser,terminate: Yusuke Kamiyamane http://www.pinvoke.com/
 pickcolor: From the Crystal Clear Project (http://www.everaldo.com/crystal/) licensed under LGPL
 crosshair: http://led24.de/iconset/ or http://led24.de/ would be appreciated. Follow us on twitter http://twitter.com/gasyoun or email leds24@gmail.com 512 icons 20/05/2009
