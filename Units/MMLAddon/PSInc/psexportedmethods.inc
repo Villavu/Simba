@@ -22,7 +22,7 @@
 }
 
 AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
-AddFunction(@psWriteln,'procedure writeln(s : string);');
+AddFunction(nil,'procedure writeln(s : string);'); //We use special function for this
 
 { DTM }
 SetCurrSection('DTM');
@@ -91,11 +91,13 @@ AddFunction(@DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w,h : intege
 AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp : integer);');
 AddFunction(@GetDebugBitmap,'function GetDebugBitmap : integer;');
 AddFunction(@Random,'function Random(Int : integer): integer;');
+AddFunction(@NewThreadCall,'function NewThreadCall(procname : string) : cardinal');
 
 
 
 {string}
 AddFunction(@Capitalize,'function Capitalize(str : string) : string;');
+AddFunction(@psFormat,'function Format(const fmt : string;const args : array of const) : string;');
 
 {web}
 SetCurrSection('Web');

@@ -43,7 +43,7 @@ uses
   ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 413;
+    SimbaVersion = 423;
 
 type
 
@@ -314,6 +314,7 @@ type
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
     function OpenScript : boolean;
+    function LoadScriptFile(filename : string) : boolean;
     function SaveCurrentScript : boolean;
     function SaveCurrentScriptAs : boolean;
     function CanExitOrOpen : boolean;
@@ -540,7 +541,8 @@ begin
     DbgImgInfo.GetDebugBitmap:= @DebugImgForm.GetDbgBmp;
     DbgImgInfo.GetBitmap:= @DebugImgForm.GetDebugImage;
     ScriptThread.SetDbgImg(DbgImgInfo);
-    ScriptThread.OnError:=@ErrorThread;
+    ScriptThread.ErrorData:= @ErrorData;
+    ScriptThread.OnError:= @HandleErrorData;
 
     if ScriptFile <> '' then
       ScriptPath := ExtractFileDir(ScriptFile);
@@ -1730,22 +1732,28 @@ begin;
   try
     Filter:= 'Mufasa Files|*.cogat;*.mufa;*.txt|Any files|*.*';
     if Execute then
-      if FileExists(FileName) then
-      begin;
-        with CurrScript do
-        begin
-          SynEdit.Lines.LoadFromFile(FileName);
-          StartText := SynEdit.Lines.text;
-          ScriptName:= ExtractFileNameOnly(FileName);
-          WriteLn('Script name will be: ' + ScriptName);
-          ScriptFile:= FileName;
-          ScriptChanged := false;
-          RefreshTab();
-          Result := True;
-        end;
-      end;
+      result := LoadScriptFile(filename);
   finally
     Free;
+  end;
+end;
+
+function TForm1.LoadScriptFile(FileName : string): boolean;
+begin
+  if FileExists(FileName) then
+  begin;
+    with CurrScript do
+    begin
+      filename := SetDirSeparators(filename);
+      SynEdit.Lines.LoadFromFile(FileName);
+      StartText := SynEdit.Lines.text;
+      ScriptName:= ExtractFileNameOnly(filename);
+      WriteLn('Script name will be: ' + ScriptName);
+      ScriptFile:= FileName;
+      ScriptChanged := false;
+      RefreshTab();
+      Result := True;
+    end;
   end;
 end;
 
