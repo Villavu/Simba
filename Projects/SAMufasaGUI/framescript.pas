@@ -39,6 +39,7 @@ type
     ss_Paused: Means the script is currently in pause modus.
     ss_Stopping: Means we've asked PS-Script politely to stop the script (next time we press the stop button we won't be that nice).
   }
+
   { TScriptFrame }
 
   TScriptFrame = class(TFrame)
@@ -61,6 +62,7 @@ type
     OwnerPage  : TPageControl;
     OwnerSheet : TTabSheet;//The owner TTabsheet -> For title setting
   public
+    ErrorData : TErrorData;  //For threadsafestuff
     ScriptErrorLine : integer; //Highlight the error line!
     ScriptFile : string;//The path to the saved/opened file currently in the SynEdit
     StartText : string;//The text synedit holds upon start/open/save
@@ -71,7 +73,7 @@ type
     FScriptState : TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
     procedure undo;
     procedure redo;
-    procedure ErrorThread(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType);
+    procedure HandleErrorData;
     procedure MakeActiveScriptFrame;
     procedure ScriptThreadTerminate(Sender: TObject);
     constructor Create(TheOwner: TComponent); override;
@@ -237,17 +239,43 @@ begin
     end;
 end;
 
-procedure TScriptFrame.ErrorThread(ErrorAtLine, ErrorPosition: integer;
-  ErrorStr: string; ErrorType: TErrorType);
+procedure TScriptFrame.HandleErrorData;
+var
+  i : integer;
 begin
+  if ErrorData.Module <> '' then
+  begin;
+    if not FileExists(ErrorData.Module) then
+      ErrorData.Module := ErrorData.IncludePath + ErrorData.Module;
+    if not FileExists(ErrorData.Module) then
+      Writeln('ERROR comes from a non-existing file....')
+    else
+    begin
+      ErrorData.Module:= SetDirSeparators(ErrorData.Module);// Set it right ;-)
+      for i := 0 to Form1.Tabs.Count - 1 do
+        if lowercase(TMufasaTab(Form1.Tabs[i]).ScriptFrame.ScriptFile) = lowercase(ErrorData.Module) then
+        begin;
+          ErrorData.Module:= '';
+          TMufasaTab(Form1.Tabs[i]).ScriptFrame.ErrorData := Self.ErrorData;
+          TMufasaTab(Form1.Tabs[i]).ScriptFrame.HandleErrorData;
+          Exit;
+        end;
+      Form1.AddTab;
+      Form1.LoadScriptFile(ErrorData.Module);
+      ErrorData.Module:= '';
+      Form1.CurrScript.ErrorData := Self.ErrorData;
+      Form1.CurrScript.HandleErrorData;
+      exit;
+    end;
+  end;
   MakeActiveScriptFrame;
-  ScriptErrorLine:= ErrorAtLine;
+  ScriptErrorLine:= ErrorData.Line;
   SynEdit.Invalidate;
-  SynEdit.SelStart:= ErrorPosition;
-  if pos('error',lowercase(errorstr)) > 0 then
-    formWriteln(Format('%s at line %d',[errorstr,erroratline]))
+  SynEdit.SelStart:= ErrorData.Position;
+  if pos('error',lowercase(ErrorData.Error)) > 0 then
+    formWriteln(Format('%s at line %d',[ErrorData.Error,ErrorData.Line]))
   else
-    formWriteln(Format('Error: %s at line %d',[errorstr,erroratline]));
+    formWriteln(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Line]));
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;

@@ -23,6 +23,7 @@
 
 unit mmlpsthread;
 
+{$Define PS_USESSUPPORT}
 {$mode objfpc}{$H+}
 
 interface
@@ -52,7 +53,15 @@ type
     end;
     PSyncInfo = ^TSyncInfo;
     TErrorType = (errRuntime,errCompile);
-    TOnError = procedure (ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType) of object;
+    TOnError = procedure of object;
+    TErrorData = record
+      Line,Position : integer;
+      Error : string;
+      ErrType : TErrorType;
+      Module : string;
+      IncludePath : string;
+    end;
+    PErrorData = ^TErrorData;
     TExpMethod = record
       Section : string;
       FuncDecl : string;
@@ -64,11 +73,15 @@ type
       procedure OnProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+      function PSScriptFindUnknownFile(Sender: TObject;
+        const OrginFileName: string; var FileName, Output: string
+        ): Boolean;
       procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
     private
       ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
+      procedure HandleError(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
     protected
       //DebugTo : TMemo;
       DebugTo: TWritelnProc;
@@ -89,6 +102,7 @@ type
       Client : TClient;
       StartTime : LongWord;
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
+      ErrorData : PErrorData; //We need this for thread-safety etc
       property OnError : TOnError read FOnError write FOnError;
       procedure LoadMethods;
       class function GetExportedMethods : TExpMethodArr;
@@ -107,7 +121,7 @@ uses
   {$ifdef mswindows}windows,{$endif}
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
   uPSC_extctrls, //Compile-libs
-
+  uPSUtils,
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
@@ -122,23 +136,31 @@ uses
 
 {Some General PS Functions here}
 procedure psWriteln(str : string);
-//{$IFDEF WINDOWS}
 begin
   if Assigned(CurrThread.DebugTo) then
     CurrThread.DebugTo(str)
   else
     writeln(str);
- {if CurrThread.DebugTo <> nil then
- begin;
-    CurrThread.DebugTo.lines.add(str);
-    CurrThread.DebugTo.Refresh;
- end; }
 end;
-//{$ELSE}
-//begin
-//writeln(str);
-//end;
-//{$ENDIF}
+
+function writeln_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  arr: TPSVariantIFC;
+begin
+  Result:=true;
+  arr:=NewTPSVariantIFC(Stack[Stack.Count-1],false);
+  case arr.aType.BaseType of
+    btString,btChar : psWriteln(stack.GetString(-1));
+    btU8, btS8, btU16, btS16, btU32, btS32: psWriteln(inttostr(stack.GetInt(-1)));
+    {$IFNDEF PS_NOINT64}btS64 : psWriteln(IntToStr(stack.GetInt64(-1))); {$ENDIF}
+    else Result:=false;
+  end;
+end;
+
+function NewThreadCall(Procname : string) : Cardinal;
+begin;
+  result :=   CurrThread.PSScript.Exec.GetVar(Procname);
+end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
 begin;
@@ -188,6 +210,7 @@ begin
   PSScript.OnCompile:= @OnCompile;
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
+  PSScript.OnFindUnknownFile:=@PSScriptFindUnknownFile;
   OnError:= nil;
   // Set some defines
   {$I PSInc/psdefines.inc}
@@ -234,6 +257,12 @@ procedure TMMLPSThread.OnProcessDirective(Sender: TPSPreProcessor;
 begin
 end;
 
+function TMMLPSThread.PSScriptFindUnknownFile(Sender: TObject;
+  const OrginFileName: string; var FileName, Output: string): Boolean;
+begin
+  Writeln(OrginFileName + '-' +  Output + '-' + FileName);
+end;
+
 procedure TMMLPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean);
@@ -259,6 +288,20 @@ begin
   Continue:= True;
 end;
 
+procedure TMMLPSThread.HandleError(ErrorAtLine, ErrorPosition: integer;
+  ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
+begin
+  if FOnError = nil then
+    exit;
+  ErrorData^.Line:= ErrorAtLine;
+  ErrorData^.Position:= ErrorPosition;
+  ErrorData^.Error:= ErrorStr;
+  ErrorData^.ErrType:= ErrorType;
+  ErrorData^.Module:= ErrorModule;
+  ErrorData^.IncludePath:= IncludePath;
+  CurrThread.Synchronize(FOnError);
+end;
+
 
 
 procedure TMMLPSThread.OnCompile(Sender: TPSScript);
@@ -278,7 +321,8 @@ begin
 
   //Export all the methods
   for i := 0 to high(ExportedMethods) do
-    PSScript.AddFunction(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl);
+    if ExportedMethods[i].FuncPtr <> nil then
+      PSScript.AddFunction(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl);
 end;
 
 function TMMLPSThread.RequireFile(Sender: TObject;
@@ -362,6 +406,12 @@ begin
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Mufasa(x);
+  with x.AddFunction('procedure writeln;').decl do
+    with AddParam do
+    begin
+      OrgName:= 'x';
+      Mode:= pmIn;
+    end;
 end;
 
 procedure TMMLPSThread.OnExecImport(Sender: TObject; se: TPSExec;
@@ -375,6 +425,7 @@ begin
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
   RIRegister_Mufasa(x);
+  se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
 end;
 
 procedure TMMLPSThread.OutputMessages;
@@ -390,7 +441,7 @@ begin
       b := True;
       if OnError <> nil then
         with PSScript.CompilerMessages[l] do
-          OnError(Row, Pos, MessageToString,errCompile)
+          HandleError(Row, Pos, MessageToString,errCompile, ModuleName)
       else
         psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row));
     end else
@@ -411,10 +462,10 @@ begin
       psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
 //      if not (ScriptState = SCompiling) then
         if not PSScript.Execute then
-        begin
-          if OnError <> nil then
-            OnError(PSScript.ExecErrorRow,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,errRuntime);
-        end else psWriteln('Succesfully executed');
+          HandleError(PSScript.ExecErrorRow,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,
+                      errRuntime, PSScript.ExecErrorFileName)
+        else
+          psWriteln('Succesfully executed');
     end else
     begin
       OutputMessages;

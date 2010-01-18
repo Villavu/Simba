@@ -111,12 +111,14 @@ begin
   { Disable both of the color pick buttons }
   w := 0;
   h := 0;
+  { If the target window isn't valid (closed etc), make the destkop the new window}
   if not Self.Window.TargetValid then
     self.Window.SetDesktop;
+  Input := TMInput.Create(Self.Window);//For the correct x,y values
 
+  {Desktop is needed for the whole picture}
   Desktop := TMWindow.Create;
   Desktop.SetDesktop;
-  Input := TMInput.Create(Self.Window);
   Desktop.GetDimensions(w, h);
 
   Application.MainForm.Enabled := False;
@@ -125,9 +127,6 @@ begin
   { Create a form that will hold the client image and a form that will show cursor and color data }
   ScreenForm := TForm.Create(Application.MainForm);
   InfoForm := TForm.Create(ScreenForm);
-
-
-
 
   { Initialize the form that will hold the client image }
   ScreenForm.Caption := 'SimbaColourPicker';
