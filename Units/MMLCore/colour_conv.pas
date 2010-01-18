@@ -44,6 +44,10 @@ Procedure RGBToHSLNonFixed(RR,GG,BB : integer;out H,S,L : Extended); inline;
 Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Byte); inline;overload;
 Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Integer); inline;overload;
 Procedure ColorToHSL(Col: Integer; out h, s, l: Extended); inline;
+procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended); inline;
+function XYZToColor(X, Y, Z: Extended): TColor; inline;
+function HSLToColor(H, S, L: Extended): TColor; inline;
+
 
 implementation
 
@@ -345,5 +349,28 @@ Begin
   RGBToHSL(R, G, B, H, S, L);
 End;
 
-end.
+procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended); inline;
+var
+  R, G, B: Integer;
+begin
+  ColorToRGB(Color, R, G, B);
+  RGBToXYZ(R, G, B, X, Y, Z);
+end;
 
+function HSLToColor(H, S, L: Extended): TColor; inline;
+var
+  r, g, b: Integer;
+begin
+  HSLToRGB(H, S, L, r, g, b);
+  Result := RGBToColor(r, g, b);
+end;
+
+function XYZToColor(X, Y, Z: Extended): TColor; inline;
+var
+  r, g, b: Integer;
+begin
+  XYZToRGB(X, Y, Z, r, g, b);
+  Result := RGBToColor(r, g, b);
+end;
+
+end.
