@@ -100,8 +100,9 @@ end;
 
 procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
-  if TFunctionListFrame(Source).DraggingNode.Data <> nil then
-    SynEdit.InsertTextAtCaret( GetMethodName(PChar(TFunctionListFrame(Source).DraggingNode.Data),true));
+  if Source is TFunctionListFrame then
+    if TFunctionListFrame(Source).DraggingNode.Data <> nil then
+      SynEdit.InsertTextAtCaret( GetMethodName(PChar(TFunctionListFrame(Source).DraggingNode.Data),true));
 end;
 
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;

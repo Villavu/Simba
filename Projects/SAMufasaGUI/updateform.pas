@@ -22,6 +22,7 @@ type
     procedure Execute; override;
   end;
   TSimbaUpdateForm = class(TForm)
+    DownloadSpeed: TLabel;
     UpdateLog: TMemo;
     UpdateButton: TButton;
     OkButton: TButton;
@@ -38,8 +39,12 @@ type
     { private declarations }
 
     Updater: TMMLFileDownloader;
+    FStartTime : longword;
     FCancelling: Boolean;
     FDone: Boolean;
+    FUpdating : boolean;
+    FOldSpeed : integer;
+    FLastUpdateSpeed : longword;
     FSimbaVersion: Integer;
     SimbaVersionThread : TSimbaVersionThread;
   private
@@ -52,6 +57,9 @@ type
     FCancelled: Boolean;
   end; 
 
+const
+  DownloadSpeedTextRunning = 'Downloading at %d kB/s';
+  DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
 
 var
   SimbaUpdateForm: TSimbaUpdateForm;
@@ -59,7 +67,7 @@ var
 implementation
 
 uses
-  internets,  TestUnit, simbasettings;
+  internets,  TestUnit, simbasettings,lclintf;
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
@@ -104,7 +112,10 @@ end;
 
 procedure TSimbaUpdateForm.UpdateButtonClick(Sender: TObject);
 begin
-  Self.PerformUpdate;
+  if FUpdating then
+    UpdateLog.Lines.Add('Already performing an update!')
+  else
+    Self.PerformUpdate;
 end;
 
 procedure TSimbaUpdateForm.CancelButtonClick(Sender: TObject);
@@ -124,11 +135,14 @@ begin
   Self.DownloadProgress.Position:=0;
   Self.UpdateLog.Clear;
   Self.UpdateLog.Lines.Add('---------- Update Session ----------');
+  Self.DownloadSpeed.Visible:= false;
 end;
 
 procedure TSimbaUpdateForm.FormCreate(Sender: TObject);
 begin
   FDone := True;
+  FUpdating:= false;
+
 end;
 
 procedure TSimbaUpdateForm.OkButtonClick(Sender: TObject);
@@ -141,19 +155,29 @@ end;
 function TSimbaUpdateForm.OnUpdateBeat: Boolean;
 var
   Percentage: Integer;
+  NewSpeed : integer;
 begin
   Application.ProcessMessages;
 
   Percentage := Updater.GetPercentage();
   if Percentage <> -1 then
     DownloadProgress.Position:=Percentage;
-
+  // Formula for speed (kB/s) -> (Bytes div 1000) / (MSecSinceStart div 1000) = Bytes/ MSecSinceStart
+  NewSpeed :=(Updater.DownloadedSize)  div ((GetTickCount-FStartTime));
+  if abs(NewSpeed - FOldSpeed) > 1 then
+    if (GetTickCount - FLastUpdateSpeed) > 1000 then    //Only update the speed text every second
+    begin;
+      FOldSpeed:= NewSpeed;
+      DownloadSpeed.Caption:= Format(DownloadSpeedTextRunning,[NewSpeed]);
+      FLastUpdateSpeed:= GetTickCount;
+    end;
   Result := FCancelling;
 end;
 
 procedure TSimbaUpdateForm.PerformUpdate;
 
 begin
+  FUpdating:= True;
   Updater := TMMLFileDownloader.Create;
 
   FDone := False;
@@ -176,24 +200,30 @@ begin
   Self.UpdateLog.Lines.Add('Starting download of ' + Updater.FileURL + ' ...');
   try
     Self.OkButton.Enabled := False; // grey out button
+    DownloadSpeed.Visible:= true;
+    DownloadSpeed.Caption:= Format(DownloadSpeedTextRunning,[0]);
+    FStartTime:= GetTickCount - 1;//Be sure that we don't get div 0
     Updater.DownloadAndSave;
+    DownloadSpeed.Caption := Format(DownloadSpeedTextEnded,[Updater.FileSize div (GetTickCount-FStartTime)]);
     Self.UpdateLog.Lines.Add('Downloaded to ' + Updater.ReplacementFile + '_ ...');
     Updater.Replace;
     Self.UpdateLog.Lines.Add('Renaming ' + Updater.ReplacementFile + ' to ' + Updater.ReplacementFile + '_old_');
     Self.UpdateLog.Lines.Add('Renaming ' + Updater.ReplacementFile + '_ to ' + Updater.ReplacementFile);
     Self.UpdateLog.Lines.Add('Deleting ' + Updater.ReplacementFile + '_old_');
     Updater.Free;
+    Self.UpdateLog.Lines.Add('Done ... ');
+    Self.UpdateLog.Lines.Add('Please restart all currently running Simba binaries.');
   except
     FCancelling := False;
     FCancelled := True;
-    Self.UpdateLog.Lines.Add('Download stopped ...');
+    DownloadSpeed.Visible:= false;
+    Self.UpdateLog.Lines.Add('Download stopped at '+inttostr(DownloadProgress.Position)+'%... Simba did not succesfully update.');
     // more detailed info
     writeln('EXCEPTION IN UPDATEFORM: We either hit Cancel, or something went wrong with files');
   end;
   FDone := True;
-  Self.UpdateLog.Lines.Add('Done ... ');
-  Self.UpdateLog.Lines.Add('Please restart all currently running Simba binaries.');
   Self.OkButton.Enabled := True; // un-grey out button
+  FUpdating:= false;
 end;
 
 { TSimbaVersionThread }
