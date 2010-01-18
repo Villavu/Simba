@@ -22,7 +22,7 @@
 }
 
 AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
-AddFunction(nil,'procedure writeln(s : string);'); //We use special function for this
+AddFunction(nil,'procedure writeln(x);'); //We use special function for this
 
 { DTM }
 SetCurrSection('DTM');
@@ -96,8 +96,19 @@ AddFunction(@NewThreadCall,'function NewThreadCall(procname : string) : cardinal
 
 
 {string}
+SetCurrSection('String');
 AddFunction(@Capitalize,'function Capitalize(str : string) : string;');
 AddFunction(@psFormat,'function Format(const fmt : string;const args : array of const) : string;');
+AddFunction(nil,'function ToStr(x) : string;');
+AddFunction(@IntToStr, 'function IntToStr(value: Integer): String;');
+AddFunction(@FloatToStr, 'function FloatToStr(value: Extended): String;');
+AddFunction(@psBoolToStr, 'function BoolToStr(value: Boolean): String;');
+AddFunction(@StrToInt, 'function StrToInt(value: String): Integer;');
+AddFunction(@StrToIntDef, 'function StrToIntDef(value: String; default: Integer): Integer;');
+AddFunction(@StrToFloat, 'function StrToFloat(value: String): Extended;');
+AddFunction(@StrToFloatDef, 'function StrToFloatDef(value: String; default: Extended): Extended;');
+AddFunction(@StrToBool, 'function StrToBool(value: String): Boolean;');
+AddFunction(@StrToBoolDef, 'function StrToBoolDef(value: String; default: Boolean): Boolean;');
 
 {web}
 SetCurrSection('Web');

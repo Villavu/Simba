@@ -67,28 +67,6 @@ begin;
   result.y2 := y2;
 end;
 
-function Capitalize(str : string) : string;
-var
-  i , l : integer;
-  cap : boolean;
-begin;
-  result := str;
-  l := length(str);
-  cap := true;
-  for i := 1 to l do
-    if cap and (str[i] in ['a'..'z'] + ['A'..'Z']) then
-    begin;
-      result[i] := UpperCase(str[i])[1];
-      cap := false;
-    end else if not (str[i] in ['a'..'z'] + ['A'..'Z']) then
-      cap := true;
-end;
-
-function psFormat(const fmt : string;const args : array of const) : string;
-begin;
-  Result := Format(fmt,Args);
-end;
-
 function Distance(x1, y1, x2, y2: Integer): Integer;
 begin;
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
