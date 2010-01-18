@@ -42,6 +42,12 @@ begin
 end;
 {$endif}
 
+procedure ClearDebug;
+begin
+  if Assigned(CurrThread.DebugMemo) then
+    CurrThread.Synchronize(@CurrThread.DebugMemo.Clear);
+end;
+
 procedure SaveScreenshot(FileName: string);
 var
   w,h : integer;
