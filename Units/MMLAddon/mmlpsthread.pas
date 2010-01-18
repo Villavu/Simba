@@ -101,6 +101,7 @@ type
       PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
       Client : TClient;
       StartTime : LongWord;
+      DebugMemo : TMemo;
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       ErrorData : PErrorData; //We need this for thread-safety etc
       property OnError : TOnError read FOnError write FOnError;

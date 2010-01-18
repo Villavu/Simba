@@ -719,8 +719,8 @@ function TMWindow.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
 begin
   if Self.Frozen then
     raise Exception.CreateFMT('You cannot set a target when Frozen',[]);
-  OnSetTarget(w_ArrayPtr,self.TargetMode);
   Self.SetDesktop;//Set the underlaying window to desktop for key-sending etc..
+  OnSetTarget(w_ArrayPtr,self.TargetMode);
   Self.ArrayPtr := ArrPtr;
   Self.ArraySize := Size;
 end;
