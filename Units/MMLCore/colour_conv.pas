@@ -37,12 +37,11 @@ Function RGBtoColor(r,g,b : byte) : TColor; overload; inline;
 Function RGBtoColor(r,g,b : integer) : TColor; overload; inline;
 Procedure ColorToRGB(Color : integer;out r,g,b : byte); overload; inline;
 Procedure ColorToRGB(Color : integer;out r,g,b : integer); overload; inline;
-Procedure RGBToXYZ(R,G,B : integer;out x,y,z : Extended); inline;
-Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: integer); inline;
-Procedure RGBToHSL(RR,GG,BB : integer;out H,S,L : Extended); inline;
-Procedure RGBToHSLNonFixed(RR,GG,BB : integer;out H,S,L : Extended); inline;
-Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Byte); inline;overload;
-Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Integer); inline;overload;
+Procedure RGBToXYZ(R,G,B : byte;out x,y,z : Extended); inline;
+Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: byte); inline;
+Procedure RGBToHSL(RR,GG,BB : byte;out H,S,L : Extended); inline;
+Procedure RGBToHSLNonFixed(RR,GG,BB : byte;out H,S,L : Extended); inline;
+Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Byte); inline;
 Procedure ColorToHSL(Col: Integer; out h, s, l: Extended); inline;
 procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended); inline;
 function XYZToColor(X, Y, Z: Extended): TColor; inline;
@@ -100,7 +99,7 @@ end;
    X, Y and Z components.
 /\}
 
-Procedure RGBToXYZ(R,G,B : integer;out x,y,z : Extended); inline;
+Procedure RGBToXYZ(R,G,B : byte;out x,y,z : Extended); inline;
 var
   Red,Green,Blue : Extended;
 begin;
@@ -129,7 +128,7 @@ end;
    Red (R), Green (G) and Blue (B) components.
 /\}
 
-Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: integer); inline;
+Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: byte); inline;
 var
   TempR,TempG,TempB,Tempx,tempy,tempz : Extended;
 begin;
@@ -161,7 +160,7 @@ end;
    H (Hue), S (Saturation) and L (Luminance) components.
 /\}
 
-Procedure RGBToHSL(RR,GG,BB : integer;out H,S,L : Extended); inline;
+Procedure RGBToHSL(RR,GG,BB : byte;out H,S,L : Extended); inline;
 var
   R,  G,  B,   D,  Cmax, Cmin: Extended;
 begin
@@ -208,7 +207,7 @@ end;
    This function does not multiply it by 100.
 /\}
 
-Procedure RGBToHSLNonFixed(RR,GG,BB : integer;out H,S,L : Extended); inline;
+Procedure RGBToHSLNonFixed(RR,GG,BB : byte;out H,S,L : Extended); inline;
 var
   R,  G,  B,   D,  Cmax, Cmin: Extended;
 begin
@@ -251,7 +250,7 @@ end;
    Red (R), Green (G) and Blue (B) components.
 /\}
 
-procedure HSLtoRGB(H, S, L: extended; out R, G, B: Byte); inline; overload;
+procedure HSLtoRGB(H, S, L: extended; out R, G, B: Byte); inline;
 var
   Temp,Temp2 : Extended;
 //begin
@@ -294,56 +293,13 @@ begin;
   end;
 end;
 
-Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Integer); inline;
-var
-  Temp,Temp2 : Extended;
-//begin
-
-Function Hue2RGB(TempHue : Extended) : integer;
-begin;
-  if TempHue < 0 then
-    TempHue := TempHue + 1
-  else if TempHue > 1 then
-    TempHue := TempHue - 1;
-  if ( ( 6 * TempHue ) < 1 ) then
-    Result :=Round(255 * (( Temp + ( Temp2 - Temp ) * 6 * TempHue )))
-  else if ( ( 2 * TempHue ) < 1 ) then
-    Result :=Round(255 * Temp2)
-  else if ( ( 3 * TempHue ) < 2 ) then
-    Result :=Round(255 * (Temp + ( Temp2 - Temp ) * ( ( TwoDivThree ) - TempHue ) * 6))
-  else
-    Result :=Round(255 * Temp);
-end;
-
-begin;
-  H := H / 100;
-  S := S / 100;
-  L := L / 100;
-  if s = 0 then
-  begin;
-    R := Round(L * 255);
-    G := R;
-    B := R;
-  end else
-  begin;
-    if (L < 0.5) then
-      Temp2 := L * ( 1 + S )
-    else
-      Temp2 := (L + S) - ( S * L);
-    Temp := 2 * L - Temp2;
-    R := Hue2RGB( H + ( OneDivThree ) );
-    G := Hue2RGB( H );
-    B := Hue2RGB( H - ( OneDivThree ) );
-  end;
-end;
-
 {/\
   Split the Given Color col in H, S, L components.
 /\}
 
 Procedure ColorToHSL(Col: Integer; out h, s, l: Extended); inline;
 Var
-  R, G, B: Integer;
+  R, G, B: byte;
 Begin
   ColorToRGB(Col, R, G, B);
   RGBToHSL(R, G, B, H, S, L);
@@ -351,7 +307,7 @@ End;
 
 procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended); inline;
 var
-  R, G, B: Integer;
+  R, G, B: byte;
 begin
   ColorToRGB(Color, R, G, B);
   RGBToXYZ(R, G, B, X, Y, Z);
@@ -359,7 +315,7 @@ end;
 
 function HSLToColor(H, S, L: Extended): TColor; inline;
 var
-  r, g, b: Integer;
+  r, g, b: byte;
 begin
   HSLToRGB(H, S, L, r, g, b);
   Result := RGBToColor(r, g, b);
@@ -367,7 +323,7 @@ end;
 
 function XYZToColor(X, Y, Z: Extended): TColor; inline;
 var
-  r, g, b: Integer;
+  r, g, b: byte;
 begin
   XYZToRGB(X, Y, Z, r, g, b);
   Result := RGBToColor(r, g, b);

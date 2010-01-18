@@ -42,7 +42,7 @@ uses
   ColorBox, about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 423;
+    SimbaVersion = 427;
 
 type
 
@@ -201,7 +201,6 @@ type
     TB_SelectClient: TToolButton;
     ToolButton8: TToolButton;
     MTrayIcon: TTrayIcon;
-    ColorListBox1: TColorListBox;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
