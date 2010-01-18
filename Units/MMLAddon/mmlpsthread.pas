@@ -143,18 +143,31 @@ begin
     writeln(str);
 end;
 
+function MakeString(data : TPSVariantIFC) : string;
+begin;
+  if data.aType.basetype in [btString,btChar] then
+    result := PSGetAnsiString(Data.Dta,data.aType)
+  else if data.aType.ExportName = 'BOOLEAN' then
+    result := BoolToStr(PSGetInt(Data.Dta,data.aType) <> 0,true)
+  else
+    result := PSVariantToString(data,'');
+end;
+
 function writeln_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
 var
   arr: TPSVariantIFC;
 begin
   Result:=true;
-  arr:=NewTPSVariantIFC(Stack[Stack.Count-1],false);
-  case arr.aType.BaseType of
-    btString,btChar : psWriteln(stack.GetString(-1));
-    btU8, btS8, btU16, btS16, btU32, btS32: psWriteln(inttostr(stack.GetInt(-1)));
-    {$IFNDEF PS_NOINT64}btS64 : psWriteln(IntToStr(stack.GetInt64(-1))); {$ENDIF}
-    else Result:=false;
-  end;
+  psWriteln(makeString(NewTPSVariantIFC(Stack[Stack.Count-1],false)));
+end;
+
+function ToStr_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  data: TPSVariantIFC;
+begin
+  result := true;
+  Stack.SetAnsiString(-1, MakeString(NewTPSVariantIFC(Stack[Stack.Count-2],false)));
+
 end;
 
 function NewThreadCall(Procname : string) : Cardinal;
@@ -240,6 +253,7 @@ end;
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 {$I PSInc/Wrappers/window.inc}
+{$I PSInc/Wrappers/Strings.inc}
 
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/math.inc}
@@ -412,6 +426,12 @@ begin
       OrgName:= 'x';
       Mode:= pmIn;
     end;
+  with x.AddFunction('function ToStr:string').decl do
+    with addparam do
+    begin
+      OrgName:= 'x';
+      Mode:= pmIn;
+    end;
 end;
 
 procedure TMMLPSThread.OnExecImport(Sender: TObject; se: TPSExec;
@@ -426,6 +446,7 @@ begin
   RIRegister_ExtCtrls(x);
   RIRegister_Mufasa(x);
   se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
+  se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
 end;
 
 procedure TMMLPSThread.OutputMessages;
