@@ -6,7 +6,9 @@ interface
     Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager;
   
   type
-    
+
+    TNativeWindow = x.TWindow;
+
     TWindow = class(TWindow_Abstract)
       public
         constructor Create(display: PDisplay; screennum: integer; window: x.TWindow); 
@@ -35,12 +37,12 @@ interface
     TIOManager = class(TIOManager_Abstract)
       public
         constructor Create(plugin_dir: string);
-        destructor Destroy; override;
-        function SetTarget(target: x.TWindow): integer; overload;
-        procedure SetDesktop;
+        function SetTarget(target: TNativeWindow): integer; overload;
+        procedure SetDesktop; override;
       private
         procedure NativeInit; override;
         procedure NativeFree; override;
+      public
         display: PDisplay;
         screennum: integer;
         desktop: x.TWindow;
@@ -48,6 +50,8 @@ interface
     
     
 implementation
+
+  uses windowutil, GraphType;
 
 //***implementation*** TWindow
 
@@ -77,7 +81,7 @@ implementation
     if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
     begin
       { I don't think we need this XTranslateCoordinates... :D }
-      XTranslateCoordinates(display, seld.window, RootWindow(display, screennum), 0,0, @newx, @newy, @childwindow);
+      XTranslateCoordinates(display, window, RootWindow(display, screennum), 0,0, @newx, @newy, @childwindow);
       W := Attrib.Width;
       H := Attrib.Height;
     end else
@@ -92,8 +96,9 @@ implementation
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;  
   var
     Old_Handler: TXErrorHandler;
+    w,h: integer;
   begin
-    GetDimensions(w,h);
+    GetTargetDimensions(w,h);
     if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
       raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
     if dirty then
@@ -142,7 +147,12 @@ implementation
   function TWindow.IsKeyHeld(key: integer): boolean; begin end;
   
 //***implementation*** IOManager
-  
+
+  constructor TIOManager.Create(plugin_dir: string);
+  begin
+    inherited Create(plugin_dir);
+  end;
+
   procedure TIOManager.NativeInit;
   begin
     display := XOpenDisplay(nil);
@@ -150,7 +160,6 @@ implementation
     begin
       // throw Exception
     end;
-    screen := XDefaultScreenOfDisplay(display);
     screennum:= DefaultScreen(display);
     desktop:= RootWindow(display,screennum)
   end;
@@ -170,4 +179,4 @@ implementation
     SetBothTargets(TWindow.Create(display, screennum, target))
   end;
   
-  
+end.
