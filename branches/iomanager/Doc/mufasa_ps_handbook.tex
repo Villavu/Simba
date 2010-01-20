@@ -1,0 +1,555 @@
+\documentclass[a4paper]{report}
+\usepackage{amsmath}
+\usepackage{color}
+
+\begin{document}
+\title{Mufasa PascalScript Handbook}
+\author{Merlijn Wajer \and Raymond van Veneti\"{e}}
+
+\definecolor{typeGreen}{rgb}{0.0, 0.6, 0.0}
+\definecolor{typeRed}{rgb}{0.6, 0.0, 0.0}
+
+\maketitle
+\tableofcontents
+
+\chapter{Foreword}
+
+This document provides a simple but helpful explanation on every function that
+the Mufasa macro library exports to it's Interpreter, PS\footnote{Pascal
+Script}. For a real in depth explanation, the Mufasa Handbook would be a better
+place to look.
+
+\chapter{Exceptions}
+
+\section{Motivation}
+Mufasa takes debugging to a new level by using exceptions for error handling,
+this allows you to even catch possible errors in your script, thus allowing
+the script to continue it's exection. We strongly believe Exceptions are the
+way to go. They were implemented for a reason.
+
+\section{When do we throw Exceptions}
+
+There are a lot of occasions where Mufasa may throw exceptions.
+
+Consider the following program:
+
+\begin{verbatim}
+program new;
+var
+  bmp:integer;
+  x, y:integer;
+begin
+  bmp:=bitmapfromstring(200, 200, '');
+  x := -1;
+  y := -1;
+  fastsetpixel(bmp, x, y, clwhite);
+end.
+\end{verbatim}
+
+Now, when we execute this with MML, we get this:
+
+\begin{verbatim}
+Error: Exception: You are accessing an invalid point, (-1,-1) at bitmap[0] at line 8
+\end{verbatim}
+
+Further expanding the example:
+\begin{verbatim}
+program new;
+var
+  bmp:integer;
+  x, y:integer;
+begin
+  bmp:=bitmapfromstring(200, 200, '');
+  x := -1;
+  y := -1;
+  try
+  	fastsetpixel(bmp, x, y, clwhite);
+  except
+  	writeln('We failed to do a setpixel with x = ' + inttostr(x) + 
+			', y = ' + inttostr(y));
+  end;
+end.
+
+\end{verbatim}
+
+Results in:
+
+\begin{verbatim}
+Compiled succesfully in 8 ms.
+We failed to do a setpixel with x = .-1, y = -1
+Succesfully executed
+\end{verbatim}
+
+\subsection{Going beyond script debugging}
+Exceptions are even in the very core of Mufasa. This greatly improves
+debugging in general, as we will also be able to easily spot errors in Mufasa.
+When they occured, what the values of the variables were, et cetera.
+
+Let's look at a function known as ReturnData(), which returns the client data.
+It for example checks if the points that are passed are consistent.
+If they are not, an Exception is thrown. If Mufasa does not catch that 
+particular Exception\footnote{Which it doesn't, as a feature.}, then it will
+be thrown in your script. This will indicate that somehow ReturnData got
+invalid coordinates. Usually this Exception is not throw, as other functions
+also check their input for sanity, and then it is possible to throw a more
+detailed exception.
+
+\subsection{How to Handle Exceptions}
+
+An exception is handled with a $try$ ... $except$ ... $finally$ statement.
+See the example in the previous section for more details.
+
+\chapter{Input}
+
+\section{Mouse}
+
+\subsection{Types}
+
+A few variables are exported for working with Mufasa Mouse Functions.
+
+TClickType, which defines the click type.
+\begin{itemize}
+	\item $mouse\_Right = 0$ 
+	\item $mouse\_Left = 1$
+	\item $mouse\_Middle = 2$
+\end{itemize}
+
+TMousePress, which defines if the mouse button is to be down or up.
+\begin{itemize}
+	\item $mouse\_Up$
+	\item $mouse\_Down$
+\end{itemize}
+
+%  TClickType = (mouse_Left, mouse_Right, mouse_Middle);
+%  TMousePress = (mouse_Down, mouse_Up);                
+
+\subsection{MoveMouse}
+\textbf{procedure} {\color{blue}{MoveMouse}}({\color{typeRed}
+{in x, y: }}{\color{typeGreen}{Integer}});
+
+MoveMouse moves the mouse pointer to the specified x and y coordinates.
+
+\subsection{GetMousePos}
+\textbf{procedure} {\color{blue}{GetMousePos}}({\color{typeRed}
+{out x, y: }}{\color{typeGreen}{Integer}});
+
+GetMousePos returns the current position of the mouse in $x$ and $y$.
+
+\subsection{HoldMouse}
+\textbf{procedure} {\color{blue}{HoldMouse}}({\color{typeRed}
+{x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}{clickType :}}
+{\color{typeGreen}{TClickType}})
+
+HoldMouse holds the given mouse button (clickType) down at the specified $x$, $y$ 
+coordinate. If the mouse if not at the given $x$, $y$ yet, the mouse position
+will be set to $x$, $y$.
+
+\subsection{ReleaseMouse}
+\textbf{procedure} {\color{blue}{ReleaseMouse}}({\color{typeRed}
+{x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}{clickType :}}
+{\color{typeGreen}{TClickType}});
+
+ReleaseMouse releases the given mouse button (clickType) at the specified $x$, $y$ 
+coordinate. If the mouse if not at the given $x$, $y$ yet, the mouse position
+will be set to $x$, $y$.
+
+\subsection{ClickMouse}
+\textbf{procedure} {\color{blue}{ClickMouse}}({\color{typeRed}
+{x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}{clickType :}}
+{\color{typeGreen}{TClickType}});
+
+ClickMouse performs a click with the given mouse button (clickType) at the
+specified x, y coordinate.
+
+\section{Keyboard}
+
+The Keyboard functions in Mufasa are listed here.
+Most of them are quite basic and can use some improvement.
+
+\subsection{Types}
+
+Most of the low level Keyboard functions use Virtual Keys.
+
+\subsection{Virtual Keys}
+
+Virtual Keys originate from MS Windows, and we've added support for them.
+Virtual Keys also work on non-Windows operating systems.
+
+\begin{itemize}
+\item   UNKNOWN: 0
+\item   LBUTTON: 1
+\item   RBUTTON: 2
+\item   CANCEL: 3
+\item   MBUTTON: 4
+\item   XBUTTON1: 5
+\item   XBUTTON2: 6
+\item   BACK: 8
+\item   TAB: 9
+\item   CLEAR: 12
+\item   RETURN: 13
+\item   SHIFT: 16
+\item   CONTROL: 17
+\item   MENU: 18
+\item   PAUSE: 19
+\item   CAPITAL: 20
+\item   KANA: 21
+\item   HANGUL: 21
+\item   JUNJA: 23
+\item   FINAL: 24
+\item   HANJA: 25
+\item   KANJI: 25
+\item   ESCAPE: 27
+\item   CONVERT: 28
+\item   NONCONVERT: 29
+\item   ACCEPT: 30
+\item   MODECHANGE: 31
+\item   SPACE: 32
+\item   PRIOR: 33
+\item   NEXT: 34
+\item   END: 35
+\item   HOME: 36
+\item   LEFT: 37
+\item   UP: 38
+\item   RIGHT: 39
+\item   DOWN: 40
+\item   SELECT: 41
+\item   PRINT: 42
+\item   EXECUTE: 43
+\item   SNAPSHOT: 44
+\item   INSERT: 45
+\item   DELETE: 46
+\item   HELP: 47
+\item   0: \$30
+\item   1: \$31
+\item   2: \$32
+\item   3: \$33
+\item   4: \$34
+\item   5: \$35
+\item   6: \$36
+\item   7: \$37
+\item   8: \$38
+\item   9: \$39
+\item   A: \$41
+\item   B: \$42
+\item   C: \$43
+\item   D: \$44
+\item   E: \$45
+\item   F: \$46
+\item   G: \$47
+\item   H: \$48
+\item   I: \$49
+\item   J: \$4A
+\item   K: \$4B
+\item   L: \$4C
+\item   M: \$4D
+\item   N: \$4E
+\item   O: \$4F
+\item   P: \$50
+\item   Q: \$51
+\item   R: \$52
+\item   S: \$53
+\item   T: \$54
+\item   U: \$55
+\item   V: \$56
+\item   W: \$57
+\item   X: \$58
+\item   Y: \$59
+\item   Z: \$5A
+\item   LWIN: \$5B
+\item   RWIN: \$5C
+\item   APPS: \$5D
+\item   SLEEP: \$5F
+\item   NUMPAD0: 96
+\item   NUMPAD1: 97
+\item   NUMPAD2: 98
+\item   NUMPAD3: 99
+\item   NUMPAD4: 100
+\item   NUMPAD5: 101
+\item   NUMPAD6: 102
+\item   NUMPAD7: 103
+\item   NUMPAD8: 104
+\item   NUMPAD9: 105
+\item   MULTIPLY: 106
+\item   ADD: 107
+\item   SEPARATOR: 108
+\item   SUBTRACT: 109
+\item   DECIMAL: 110
+\item   DIVIDE: 111
+\item   F1: 112
+\item   F2: 113
+\item   F3: 114
+\item   F4: 115
+\item   F5: 116
+\item   F6: 117
+\item   F7: 118
+\item   F8: 119
+\item   F9: 120
+\item   F10: 121
+\item   F11: 122
+\item   F12: 123
+\item   F13: 124
+\item   F14: 125
+\item   F15: 126
+\item   F16: 127
+\item   F17: 128
+\item   F18: 129
+\item   F19: 130
+\item   F20: 131
+\item   F21: 132
+\item   F22: 133
+\item   F23: 134
+\item   F24: 135
+\item   NUMLOCK: \$90
+\item   SCROLL: \$91
+\item   LSHIFT: \$A0
+\item   RSHIFT: \$A1
+\item   LCONTROL: \$A2
+\item   RCONTROL: \$A3
+\item   LMENU: \$A4
+\item   RMENU: \$A5
+\item   BROWSER\_BACK: \$A6
+\item   BROWSER\_FORWARD: \$A7
+\item   BROWSER\_REFRESH: \$A8
+\item   BROWSER\_STOP: \$A9
+\item   BROWSER\_SEARCH: \$AA
+\item   BROWSER\_FAVORITES: \$AB
+\item   BROWSER\_HOME: \$AC
+\item   VOLUME\_MUTE: \$AD
+\item   VOLUME\_DOWN: \$AE
+\item   VOLUME\_UP: \$AF
+\item   MEDIA\_NEXT\_TRACK: \$B0
+\item   MEDIA\_PREV\_TRACK: \$B1
+\item   MEDIA\_STOP: \$B2
+\item   MEDIA\_PLAY\_PAUSE: \$B3
+\item   LAUNCH\_MAIL: \$B4
+\item   LAUNCH\_MEDIA\_SELECT: \$B5
+\item   LAUNCH\_APP1: \$B6
+\item   LAUNCH\_APP2: \$B7
+\item   OEM\_1: \$BA
+\item   OEM\_PLUS: \$BB
+\item   OEM\_COMMA: \$BC
+\item   OEM\_MINUS: \$BD
+\item   OEM\_PERIOD: \$BE
+\item   OEM\_2: \$BF
+\item   OEM\_3: \$C0
+\item   OEM\_4: \$DB
+\item   OEM\_5: \$DC
+\item   OEM\_6: \$DD
+\item   OEM\_7: \$DE
+\item   OEM\_8: \$DF
+\item   OEM\_102: \$E2
+\item   PROCESSKEY: \$E7
+\item   ATTN: \$F6
+\item   CRSEL: \$F7
+\item   EXSEL: \$F8
+\item   EREOF: \$F9
+\item   PLAY: \$FA
+\item   ZOOM: \$FB
+\item   NONAME: \$FC
+\item   PA1: \$FD
+\item   OEM\_CLEAR: \$FE
+\item   HIGHESTVALUE: \$FE
+\item   UNDEFINED: \$FF
+\end{itemize}
+
+\subsection{KeyDown}
+
+\textbf{procedure} {\color{blue}{KeyDown}}({\color{typeRed}
+{key: }}{\color{typeGreen}{Word}});
+
+KeyDown sends a request to the Operating System to ``fake'' an event that
+causes the Key to be ``down''.
+$key$ can be any Virtual Key\footnote{See the section on Virtual Keys}.
+
+\subsubsection{Common pitfalls}
+
+Don't forget that certain keys may require that shift, or another key,
+is down as well.
+
+\subsection{KeyUp}
+\textbf{procedure} {\color{blue}{KeyUp}}({\color{typeRed}
+{key: }}{\color{typeGreen}{Word}});
+
+KeyUp sends a request to the Operating System to ``fake'' an event that
+causes the Key to be ``up''.
+$key$ can be any Virtual Key.
+
+\subsection{PressKey}
+
+\textbf{procedure} {\color{blue}{PressKey}}({\color{typeRed}
+{key: }}{\color{typeGreen}{Word}});
+
+PressKey combines KeyDown and KeyUp, to fake a key press.
+
+\subsection{SendKeys}
+
+\textbf{procedure} {\color{blue}{SendKEys}}({\color{typeRed}
+{s: }}{\color{typeGreen}{String}});
+
+SendKeys takes a string $s$, and attempts to send it's complete contents to
+the client. It currently only accepts characters ranging from ``A..z''.
+
+\subsection{IsKeyDown}
+\textbf{function} {\color{blue}{PressKey}}({\color{typeRed}
+{key: }}{\color{typeGreen}{Word}}): {\color{typeGreen}{Boolean}};
+
+IsKeyDown returns true if the given VK key is ``down''.
+
+\subsection{Notes}
+
+There is no IsKeyUp, because this can easily be generated by inverting the
+result of IsKeyDown:
+\begin{verbatim}
+    not IsKeyDown (x)
+\end{verbatim}
+
+
+\chapter{Finding Routines}
+
+\section{Colours}
+
+\subsection{FindColor}
+
+\textbf{function} {\color{blue}{FindColor}}({\color{typeRed}
+{var x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}
+{col, x1, y1, x2, y2: }}{\color{typeGreen}{Integer}}): {\color{typeGreen}{Boolean}};
+
+FindColor returns true if the exact color given (col) is found in the box defined by x1, y1, x2, y2.
+The point is returned in x and y. It searches from the top left to the bottom right and will stop
+after matching a point.
+
+\subsection{FindColorTolerance}
+
+\textbf{function} {\color{blue}{FindColorTolerance}}({\color{typeRed}
+{var x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}
+{col, x1, y1, x2, y2, tol: }}{\color{typeGreen}{Integer}}): {\color{typeGreen}{Boolean}};
+
+FindColorTolerance returns true if a colour within the given tolerance range (tol) of the given color (col)
+is found in the box defined by x1, y1, x2, y2. Only the first point is returned in x and y.
+Whether or not a color is within the tolerance range is determined by the CTS mode.
+It searches from the top left to the bottom right and will stop after matching a point.
+
+\subsection{FindColorsTolerance}
+
+\textbf{function} {\color{blue}{FindColorsTolerance}}({\color{typeRed}
+{var pts: }}{\color{typeGreen}{TPointArray}}; {\color{typeRed}
+{col, x1, y1, x2, y2, tol: }}{\color{typeGreen}{Integer}}): {\color{typeGreen}{Boolean}};
+
+FindColorsTolerance returns true if at least one point was found. A point is found if it is within the
+given tolerance range (tol) of the given color (col) and inside the box defined by x1, y1, x2, y2.
+Whether or not a color is within the tolerance range is determined by the CTS mode.
+It searches from the top left to the bottom right and will find all matching points in the area.
+
+\section{Bitmaps}
+
+% Dit doe je zelf maar
+
+\section{DTMs}
+
+Deformable Template Models are a special approach to finding
+objects. One can specify several points, colours and tolerances
+for these points.
+
+\subsection{Types}
+
+Mufasa's DTM type:
+
+\begin{verbatim}
+  pDTM = record
+    p: TPointArray;
+    c, t, asz, ash: TIntegerArray;
+  end; 
+\end{verbatim}
+
+Deprecated DTM type:
+
+\begin{verbatim}
+  TDTMPointDef = record
+    x, y, Color, Tolerance, AreaSize, AreaShape: integer;
+  end;
+
+  TDTMPointDefArray = Array Of TDTMPointDef;
+
+  TDTM = record
+    MainPoint: TDTMPointDef;
+    SubPoints: TDTMPointDefArray;
+  end;    
+\end{verbatim}
+
+\subsection{FindDTM}
+
+\textbf{function} {\color{blue}{FindDTM}}({\color{typeRed}{DTM: }}
+{\color{typeGreen}{Integer}}; {\color{typeRed}{Var x, y: }}
+{\color{typeGreen}{Integer}}) {\color{typeGreen}{: Boolean}}; \\ 
+
+FindDTM is the most basic DTM finding function. It takes a box to search in,
+and if the DTM is found, it will set $x$ and $y$ to the coordinate the DTM
+was found at and it will also return true. Else, it returns false.
+Once a DTM is found, it will stop searching. In other words; it always returns
+the first found DTM.
+
+\subsection{FindDTMs}
+
+\textbf{function} {\color{blue}{FindDTMs}}({\color{typeRed}{DTM: }}
+{\color{typeGreen}{Integer}}; {\color{typeRed}{Var Points: }}
+{\color{typeGreen}{TPointArray}}){\color{typeGreen}{: Boolean}}; \\
+
+FindDTMs is like FindDTM, but it returns an array of $x$ and $y$, as the
+$TPointArray$ type.
+
+\subsection{FindDTMRotated}
+
+\subsection{FindDTMsRotated}
+
+\subsection{DTMFromString}
+
+\subsection{DTMToString}
+
+\subsection{AddDTM}
+
+\subsection{FreeDTM}
+
+\subsection{GetDTM}
+
+\subsection{tDTMtopDTM}
+
+\subsection{pDTMtopDTM}
+
+
+\chapter{OCR}
+
+\section{Finding text}
+
+\section{Indentifying text}
+
+\subsection{GetTextAtEx}
+DAT IS DIT
+
+\chapter{Client}
+\section{Client and Window}
+
+\chapter{Files and Web}
+
+\section{Files}
+
+\section{Web}
+
+\subsection{OpenWebPage}
+
+\chapter{Point Sorting and Math}
+\section{Sorting functions}
+
+\section{Math}
+
+\chapter{Easter Eggs}
+\section{Easter egg 1}
+Nothing here! Do you really think we document Easter eggs?
+????
+
+Hakuna matata!
+
+Wizzyplugin stuff
+
+
+
+\end{document}

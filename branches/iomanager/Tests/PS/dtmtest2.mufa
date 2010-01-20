@@ -1,0 +1,61 @@
+program new;
+
+const
+    dtm_Rectangle = 0;
+    dtm_Cross = 1;
+    dtm_DiagonalCross = 2;
+    dtm_Circle = 3;
+    dtm_Triangle = 4;
+
+var
+   ppdtm: pdtm;
+   w,h,x,y,dtm,i: integer;
+
+   a: extended;
+
+   p,pp: TPointArray;
+   c,t,asz,ash: TIntegerArray;
+   bp:array of boolean;
+
+begin
+  p := [Point(0,0), Point(1,1), Point(-4, -4)];
+  c := [clWhite, clWhite, clWhite];
+  t := [0, 0, 0];
+  asz := [0, 4, 4];
+  ash := [dtm_Rectangle, dtm_Rectangle, dtm_Rectangle];
+  setlength(ppdtm.p,2);
+  bp:=[false,false,false];
+
+  ppdtm.l := 3;//We have 3 points..
+  ppdtm.p := p;
+  ppdtm.c := c;
+  ppdtm.t := t;
+  ppdtm.asz := asz;
+  ppdtm.ash := ash;
+  ppdtm.bp := bp;
+  ppdtm.n := 'TestDTM';//Our name!
+
+  dtm := AddpDTM(ppdtm);
+
+  getclientdimensions(w,h);
+  writeln(inttostr(w) + ', ' + inttostr(h));
+
+  if FindDTM(dtm, x, y, 0, 0, w-1, h-1) then
+  begin
+    writeln('Found DTM at ' + inttostr(x) + ', ' + inttostr(y));
+    movemouse(x,y);
+  end;
+
+  if FindDTMs(dtm, p, 0, 0, w-1, h-1) then
+  begin
+    writeln('Found ' + inttostr(length(p)) + ' DTM(s). First one at ' +
+             inttostr(p[0].x) + ', ' + inttostr(p[0].y));
+    movemouse(p[0].x,p[0].y);
+  end;
+
+  if FindDTMRotated(dtm, x, y, 0, 0, w-1, h-1, -3.14, 3.14, 0.05, a) then
+  begin
+    writeln('Found DTM at ' + inttostr(x) + ', ' + inttostr(y) + ' Angle: ' + FloatToStr(a));
+    movemouse(x,y);
+  end;  
+end.
