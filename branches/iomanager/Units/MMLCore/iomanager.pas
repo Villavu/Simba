@@ -3,7 +3,7 @@ unit IOManager;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes;
+    Classes, SysUtils, mufasatypes, graphics, LCLType, bitmaps, LCLIntf;
 
   type    
   
@@ -40,7 +40,7 @@ interface
     TRawTarget = class(TTarget)
       public
         constructor Create(rgb: prgb32; w,h: integer);
-        destructor Destory; override;
+        destructor Destroy; override;
         
         procedure GetTargetDimensions(var w, h: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
@@ -65,7 +65,7 @@ interface
         procedure SendString(str: PChar); override; abstract;
         procedure HoldKey(key: integer); override; abstract;
         procedure ReleaseKey(key: integer); override; abstract;
-        function IsKeyHeld(key: integer): boolean; override; abstract;\
+        function IsKeyHeld(key: integer): boolean; override; abstract;
     end;
         
     { Contains the pointers to a non-internal target implementation using the EIOS specification.
@@ -104,10 +104,9 @@ interface
     TEIOS_Target = class(TTarget)
       public
         constructor Create(client: TEIOS_Client; initval: pointer);
-        destructor Destory; override;
+        destructor Destroy; override;
         
         procedure GetTargetDimensions(var w, h: integer); override;
-        function GetColor(x,y : integer) : TColor; override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
         procedure GetMousePosition(var x,y: integer); override;
@@ -152,8 +151,8 @@ interface
         function GetClient(name: string): TEIOS_Client;
         
       private
-        function FindClient(name:string): integer;
         plugs: array of TEIOS_LoadedPlugin;
+        function FindClient(name:string): integer;
     end;
 
     { This class specifies the object that will go in the ThreadVar to give the script access
@@ -170,7 +169,7 @@ interface
         
         procedure SetDesktop; virtual; abstract;
         function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
-        function SetTarget(Bitmap : TMufasaBitmap) : integer; overload;
+        function SetTarget(bmp : TMufasaBitmap) : integer; overload;
         function SetTarget(name: string; initargs: pointer): integer; overload;
         function TargetValid: Boolean;
 
@@ -179,9 +178,10 @@ interface
         procedure FreeReturnData;
 
         procedure GetDimensions(var W, H: Integer);
+        procedure ActivateClient;
 
-        property Frozen: boolean read IsFrozen;
-        procedure SetFrozen(frozen: boolean);
+        function IsFrozen: boolean;
+        procedure SetFrozen(makefrozen: boolean);
         
         procedure GetMousePos(var X, Y: Integer);
         procedure SetMousePos(X, Y: Integer);
@@ -198,7 +198,7 @@ interface
       protected
         controller: TEIOS_Controller;
         keymouse: TTarget;
-        image: TTarget
+        image: TTarget;
         frozen: TTarget;
         freezebuffer: prgb32;
         bothsame: boolean;
@@ -233,8 +233,8 @@ implementation
   begin
     if bothsame then keymouse.Destroy() else
     begin
-      keymouse.Destroy();
-      image.Destroy();
+      keymouse.Free();
+      image.Free();
     end;
     if frozen <> nil then frozen.Destroy();
     if controller <> nil then controller.Destroy();
@@ -244,13 +244,13 @@ implementation
   begin
     if frozen <> nil then 
       raise Exception.Create('You cannot set a target when Frozen');
-    if not(bothsame) then image.Destroy();
+    if not(bothsame) then image.Free();
     image:= target;
     bothsame:= false;
   end;
   procedure TIOManager_Abstract.SetKeyMouseTarget(target: TTarget);
   begin
-    if not(bothsame) then keymouse.Destroy();
+    if not(bothsame) then keymouse.Free();
     keymouse:= target;
     bothsame:= false;
   end;
@@ -260,8 +260,8 @@ implementation
       raise Exception.Create('You cannot set a target when Frozen');
     if bothsame then image.Destroy() else
     begin
-      image.Destroy();
-      keymouse.Destroy();
+      image.Free();
+      keymouse.Free();
     end; 
     image:= target;
     keymouse:= target;
@@ -285,17 +285,22 @@ implementation
     end else if frozen = nil then
     begin
       frozen:= image;
-      frozen.GetDimensions(w,h);
+      frozen.GetTargetDimensions(w,h);
       buffer:= frozen.ReturnData(0,0,w,h);
       GetMem(freezebuffer, w * h * sizeof(TRGB32));
-      Move(PtrReturn.Ptr[0], freezebuffer[0], w*h*sizeof(TRGB32));
+      Move(buffer.Ptr[0], freezebuffer[0], w*h*sizeof(TRGB32));
       frozen.FreeReturnData;
       image:= TRawTarget.Create(freezebuffer,w,h);
     end;
   end;
-  
+
+  function TIOManager_Abstract.IsFrozen: boolean;
+  begin
+    result:= frozen <> nil;
+  end;
+
   function TIOManager_Abstract.GetColor(x,y : integer) : TColor; begin result:= image.GetColor(x,y); end;
-  function TIOManager_Abstract.ReturnData(xs,yx,width,height: integer): TRetData; begin result:= image.ReturnData(xs,yx,width,height); end;
+  function TIOManager_Abstract.ReturnData(xs,ys,width,height: integer): TRetData; begin result:= image.ReturnData(xs,ys,width,height); end;
   procedure TIOManager_Abstract.FreeReturnData; begin image.freeReturnData(); end;
   
   function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; begin SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y)); end;
@@ -303,9 +308,9 @@ implementation
   function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer; 
   var
     client: TEIOS_Client;
-  begin 
+  begin
+    if not controller.ClientExists(name) then raise Exception.Create('EIOS Client by specified name does not exist');
     client:= controller.GetClient(name);
-    if client = nil then raise Exception.Create('EIOS Client by specified name does not exist');
     SetBothTargets(TEIOS_Target.Create(client, initargs));
   end;
   
@@ -313,6 +318,21 @@ implementation
   begin
     result:= (keymouse <> nil) and (image <> nil);
   end;
+
+  procedure TIOManager_Abstract.GetDimensions(var W, H: Integer); begin image.GetTargetDimensions(w,h) end;
+  procedure TIOManager_Abstract.ActivateClient; begin {lolwat} end;
+
+  procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer); begin keymouse.GetMousePosition(x,y) end;
+  procedure TIOManager_Abstract.SetMousePos(X, Y: Integer); begin keymouse.MoveMouse(x,y); end;
+  procedure TIOManager_Abstract.MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress); begin {lolwat} end;
+  procedure TIOManager_Abstract.MouseButtonActionSilent(x,y : integer; mClick: TClickType; mPress: TMousePress); begin {lolwat} end;
+  procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; mClick: TClickType); begin {lolwat} end;
+
+  procedure TIOManager_Abstract.KeyUp(key: Word); begin keymouse.ReleaseKey(key) end;
+  procedure TIOManager_Abstract.KeyDown(key: Word); begin keymouse.HoldKey(key) end;
+  procedure TIOManager_Abstract.PressKey(key: Word); begin {lolwat} end;
+  procedure TIOManager_Abstract.SendText(text: string); begin keymouse.SendString(PChar(@text[1])); end;
+  function TIOManager_Abstract.isKeyDown(key: Word): Boolean; begin result:= keymouse.IsKeyHeld(key); end;
   
 //***implementation*** TTarget
   
@@ -381,7 +401,7 @@ implementation
     self.h:= h;
   end;
   
-  destructor TRawTarget.Destory;
+  destructor TRawTarget.Destroy;
   begin
     {do nothing}
     inherited Destroy;
@@ -410,7 +430,7 @@ implementation
     //Load plugins from plugins folder
   end;
 
-  destructor TEIOS_Controller.Destroy
+  destructor TEIOS_Controller.Destroy;
   var
     i: integer;
   begin
@@ -447,8 +467,6 @@ implementation
     i:= FindClient(name);
     if i >= 0 then
       result:= plugs[i].client
-    else
-      result:= nil;
   end;
 
 end.
