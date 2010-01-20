@@ -1,0 +1,23 @@
+digraph Window {
+	"TMWindow Class" -> "Return Data"
+
+	"Return Data" -> "TRetData"
+	"TRetData" -> "Pointer"
+	"TRetData" -> "PtrInc"
+	"TRetData" -> "RowLen"
+
+
+	"TMWindow Class" -> "Set Target"
+
+
+	"Set Target" -> "Bitmap"
+	"Set Target" -> "Linux X Window"
+	"Set Target" -> "Windows Window"
+	"Set Target" -> "Raw Data"
+
+	"TMWindow Class" -> "GetDimensions"
+
+	"TMWindow Class" -> "Freeze"
+	"TMWindow Class" -> "UnFreeze"	
+
+}

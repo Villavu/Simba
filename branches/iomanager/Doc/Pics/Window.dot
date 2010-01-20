@@ -1,0 +1,15 @@
+digraph Window {
+
+	"Target Window" [shape=box]
+
+	"Target Window" -> "Window Dimensions"
+	"Target Window" -> "Window Pixel Data"
+//	"Target Window" -> "Input Event"
+
+	"Window Dimensions" -> "Width"
+	"Window Dimensions" -> "Height"
+
+//	"Input Event" -> "Mouse Event"
+//	"Input Event" -> "Key Event"
+
+}

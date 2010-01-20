@@ -1,0 +1,7 @@
+Known issues:
+
+Linux:
+	- Mouse Clicking only works in the client, and the mouse click must be in the client, otherwise the event is ignored.
+
+Windows:
+	
