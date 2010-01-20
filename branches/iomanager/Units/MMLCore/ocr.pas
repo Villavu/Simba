@@ -471,7 +471,7 @@ begin
   bmp.SetSize(w + 2, h + 2);
 
   // Copy the client to out working bitmap.
-  bmp.CopyClientToBitmap(TClient(Client).MWindow, False, 1{0},1, sx, sy, sx + w - 1, sy + h - 1);
+  bmp.CopyClientToBitmap(TClient(Client).IOManager, False, 1{0},1, sx, sy, sx + w - 1, sy + h - 1);
 
   {$IFDEF OCRSAVEBITMAP}
   bmp.SaveToFile(OCRDebugPath + 'ocrinit.bmp');

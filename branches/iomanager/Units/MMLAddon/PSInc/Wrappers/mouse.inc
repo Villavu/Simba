@@ -27,12 +27,12 @@ const
   ps_mouse_middle = 2;
 procedure MoveMouse(x, y: integer);
 begin
-  CurrThread.Client.MInput.SetMousePos(X, Y);
+  CurrThread.Client.IOManager.SetMousePos(X, Y);
 end;
 
 procedure GetMousePos(out x, y: integer);
 begin
-   CurrThread.Client.MInput.GetMousePos(X, Y);
+   CurrThread.Client.IOManager.GetMousePos(X, Y);
 end;
 function ConvIntClickType(Int : Integer) : TClickType;inline;
 begin;
@@ -47,17 +47,17 @@ end;
 
 procedure HoldMouse(x, y: integer; clickType: integer);
 begin
-   CurrThread.Client.MInput.SetMousePos(x, y);
-   CurrThread.Client.MInput.MouseButtonAction(x, y, ConvIntClickType(clickType), mouse_Down);
+   CurrThread.Client.IOManager.SetMousePos(x, y);
+   CurrThread.Client.IOManager.MouseButtonAction(x, y, ConvIntClickType(clickType), mouse_Down);
 end;
 
 procedure ReleaseMouse(x, y: integer; clickType: integer);
 begin
-   CurrThread.Client.MInput.SetMousePos(x, y);
-   CurrThread.Client.MInput.MouseButtonAction(x, y, ConvIntClickType(clickType), mouse_Up);
+   CurrThread.Client.IOManager.SetMousePos(x, y);
+   CurrThread.Client.IOManager.MouseButtonAction(x, y, ConvIntClickType(clickType), mouse_Up);
 end;
 
 procedure ClickMouse(x, y: integer; clickType: integer);
 begin
-   CurrThread.Client.MInput.ClickMouse(x, y, ConvIntClickType(clickType));
+   CurrThread.Client.IOManager.ClickMouse(x, y, ConvIntClickType(clickType));
 end;

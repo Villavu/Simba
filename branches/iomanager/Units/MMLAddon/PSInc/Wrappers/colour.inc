@@ -23,7 +23,7 @@
 
 function GetColor(x,y : integer) : TColor;
 begin;
-  Result := CurrThread.Client.MWindow.GetColor(x,y);
+  Result := CurrThread.Client.IOManager.GetColor(x,y);
 end;
 
 function findcolor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean;
