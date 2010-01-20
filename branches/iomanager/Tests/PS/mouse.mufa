@@ -1,0 +1,32 @@
+program Mouse;
+
+{
+This program illustrates the Mufasa Mouse Functions
+}
+
+var
+   w, h, x, y: integer;
+begin
+  getclientdimensions(w,h);
+  writeln(inttostr(w) + ', ' + inttostr(h));
+  MoveMouse(0, 0);
+  getmousepos(x, y);
+  writeln(inttostr(x) + ', ' + inttostr(y));
+  wait(1000);
+  MoveMouse(w, 0);
+  getmousepos(x, y);
+  writeln(inttostr(x) + ', ' + inttostr(y));
+  wait(1000);
+  MoveMouse(0, h);
+  getmousepos(x, y);
+  writeln(inttostr(x) + ', ' + inttostr(y));
+  wait(1000);
+  MoveMouse(w, h);
+  getmousepos(x, y);
+  writeln(inttostr(x) + ', ' + inttostr(y));
+  wait(1000);
+  ClickMouse(0, 0, mouse_Right);
+
+  for x := 0 to 400 do
+    MoveMouse(x, x);
+end.
