@@ -23,25 +23,25 @@
 
 procedure KeyDown(key: Word);
 begin
-  CurrThread.Client.MInput.KeyDown(key);
+  CurrThread.Client.IOManager.KeyDown(key);
 end;
 
 procedure KeyUp(key: Word);
 begin
-  CurrThread.Client.MInput.KeyUp(key);
+  CurrThread.Client.IOManager.KeyUp(key);
 end;
 
 procedure SendKeys(s: string);
 begin
-  CurrThread.Client.MInput.SendText(s);
+  CurrThread.Client.IOManager.SendText(s);
 end;
 
 procedure PressKey(key: Word);
 begin
-  CurrThread.Client.MInput.PressKey(key);
+  CurrThread.Client.IOManager.PressKey(key);
 end;
 
 function isKeyDown(key: Word): boolean;
 begin
-  Result := CurrThread.Client.MInput.isKeyDown(key);
+  Result := CurrThread.Client.IOManager.isKeyDown(key);
 end;
