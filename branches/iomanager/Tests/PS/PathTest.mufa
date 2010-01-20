@@ -1,0 +1,5 @@
+program new;
+begin
+  Writeln(AppPath);
+  Writeln(ScriptPath);
+end.

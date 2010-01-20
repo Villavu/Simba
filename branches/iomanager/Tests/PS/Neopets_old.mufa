@@ -1,0 +1,148 @@
+program BankProblems;
+
+//  http://www.neopets.com/games/play.phtml?game_id=371
+
+Const
+   KeyDownUpSpeed = 1;  // The Higher the "KeyDownUpSpeed", the slower the script is.
+
+Type
+  Door = record
+    X: Integer;
+    Y: Integer;
+    DoorChar: Byte;
+    IsOpen: Boolean;
+    IsMonster: Boolean;
+    WhatMonster: String;
+  End;
+
+Var
+   Doors: Array [0..5] Of Door;
+
+Procedure DeclareStuff;
+
+Var
+   I: Integer;
+Begin
+  For I := 0 To 5 Do
+  Begin
+    Doors[I].X := 45 + I * 96;
+    Doors[I].Y := 210;
+  End;
+
+  Doors[0].DoorChar := 83;
+  Doors[1].DoorChar := 68;
+  Doors[2].DoorChar := 70;
+  Doors[3].DoorChar := 74;
+  Doors[4].DoorChar := 75;
+  Doors[5].DoorChar := 76;
+End;
+
+Function IsBadGuy(DN: Integer): Boolean;
+
+Var
+   TempColor: Array [0..11] Of Integer;
+   I, x, y: Integer;
+   H, S, L: Extended;
+Begin
+  TempColor[0] := GetColor(Doors[DN].X, Doors[DN].Y);
+  TempColor[1] := GetColor(Doors[DN].X, Doors[DN].Y-1);
+  TempColor[2] := GetColor(Doors[DN].X-1, Doors[DN].Y);
+  TempColor[3] := GetColor(Doors[DN].X, Doors[DN].Y+1);
+  TempColor[4] := GetColor(Doors[DN].X+1, Doors[DN].Y);
+  TempColor[5] := GetColor(Doors[DN].X, Doors[DN].Y-2);
+  TempColor[5] := GetColor(Doors[DN].X-2, Doors[DN].Y);
+  TempColor[6] := GetColor(Doors[DN].X+1, Doors[DN].Y+2);
+  TempColor[7] := GetColor(Doors[DN].X+2, Doors[DN].Y);
+  TempColor[8] := GetColor(Doors[DN].X, Doors[DN].Y-3);
+  TempColor[9] := GetColor(Doors[DN].X-3, Doors[DN].Y);
+  TempColor[10] := GetColor(Doors[DN].X+1, Doors[DN].Y+3);
+  TempColor[11] := GetColor(Doors[DN].X+3, Doors[DN].Y);
+
+  For I := 0 To 11 Do
+  Begin
+    If SimilarColors(TempColor[I], 3055, 30) Then           // Red Devil
+    Begin
+      Result := True;
+      Doors[DN].WhatMonster := 'Devil';
+      Exit;
+    End;
+  End;
+
+  For I := 0 To 11 Do
+  Begin
+    If SimilarColors(TempColor[I], 12841714, 40) Then           // Squirrle
+    Begin
+      ColorToHSL(TempColor[I], H, S, L);
+      If (L > 60) And (L < 95) Then
+         If (H > 5 ) And (H < 30) Then
+          If FindColorTolerance(x, y, 4092580, Doors[DN].X, Doors[DN].Y-1,
+                                Doors[DN].X + 20, Doors[DN].Y + 1, 40)
+          Then
+          Begin
+            Result := True;
+            Doors[DN].WhatMonster := 'Squirrle';
+            Exit;
+          End;
+    End;
+  End;
+
+  For I := 0 To 11 Do
+  Begin
+    If SimilarColors(TempColor[I], 28756, 30) Then           // Green Monster
+    Begin
+      Result := True;
+      Doors[DN].WhatMonster := 'Green Monster';
+      Exit;
+    End;
+  End;
+
+  For I := 0 To 11 Do
+  Begin
+    If SimilarColors(TempColor[I], 794793, 30) Then           // Mysterious Man
+    Begin
+      Result := True;
+      Doors[DN].WhatMonster := 'Mysterious Man';
+      Exit;
+    End;
+  End;
+
+End;
+
+Procedure HandleMonsters;
+
+Var
+   I, iX, iY, Time: Integer;
+
+Begin
+  For I := 0 To 5 Do
+  Begin
+    If IsBadGuy(I) Then
+    Begin
+      KeyDown(Doors[I].DoorChar);
+      Wait(10 * KeyDownUpSpeed);
+      KeyUp(Doors[I].DoorChar);
+    End;
+  End;
+End;
+
+Procedure AddToGold;
+
+Begin
+  If GetColor(388, 25) = 0 Then
+  Begin
+    Wait(100);
+    KeyDown(32);
+    Wait(10 * KeyDownUpSpeed);
+    KeyUp(32);
+  End;
+End;
+
+begin
+  //ClearDebug;
+  DeclareStuff;
+  Repeat
+    AddToGold;
+    HandleMonsters;
+    Wait(10);
+  Until False;
+end.
