@@ -115,7 +115,7 @@ implementation
 
 uses
   Windowutil,paszlib,DCPbase64,math,
-  colour_conv,window,mufasatypesutil,tpa;
+  colour_conv,IOManager,mufasatypesutil,tpa;
 
 function Min(a,b:integer) : integer;
 begin
@@ -674,11 +674,11 @@ begin
   wi := Min(xe-xs + 1,Self.w);
   hi := Min(ye-ys + 1,Self.h);
 
-  PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi,hi);
+  PtrRet := TIOManager_Abstract(MWindow).ReturnData(xs,ys,wi,hi);
 
   for y := 0 to (hi-1) do
     Move(PtrRet.Ptr[y * (wi + PtrRet.IncPtrWith)], FData[y * self.w],wi * SizeOf(TRGB32));
-  TMWindow(MWindow).FreeReturnData;
+  TIOManager_Abstract(MWindow).FreeReturnData;
 end;
 
 procedure TMufasaBitmap.CopyClientToBitmap(MWindow: TObject; Resize: boolean;
@@ -693,11 +693,11 @@ begin
 
   wi := Min(xe-xs + 1 + x,Self.w);
   hi := Min(ye-ys + 1 + y,Self.h);
-  PtrRet := TMWindow(MWindow).ReturnData(xs,ys,wi - x,hi - y);
+  PtrRet := TIOManager_Abstract(MWindow).ReturnData(xs,ys,wi - x,hi - y);
 
   for yy := 0 to (hi-1 - y) do
     Move(PtrRet.Ptr[yy * (wi - x + PtrRet.IncPtrWith)], FData[(yy + y) * self.w + x],wi * SizeOf(TRGB32));
-  TMWindow(MWindow).FreeReturnData;
+  TIOManager_Abstract(MWindow).FreeReturnData;
 end;
 
 

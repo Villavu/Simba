@@ -151,13 +151,13 @@ end;
 
 procedure ps_CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer);
 begin
-  CurrThread.Client.MBitmaps.GetBMP(bmp).CopyClientToBitmap(CurrThread.Client.MWindow, True, xs, ys, xe, ye);
+  CurrThread.Client.MBitmaps.GetBMP(bmp).CopyClientToBitmap(CurrThread.Client.IOManager, True, xs, ys, xe, ye);
 end;
 
 function BitmapFromClient(const xs, ys, xe, ye: Integer): Integer;
 begin;
   result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
-  CurrThread.Client.MBitmaps.Bmp[result].CopyClientToBitmap(CurrThread.Client.MWindow,True,xs,ys,xe,ye);
+  CurrThread.Client.MBitmaps.Bmp[result].CopyClientToBitmap(CurrThread.Client.IOManager,True,xs,ys,xe,ye);
 end;
 
 function FindBitmap(Bitmap: integer; out x, y: Integer): Boolean;
