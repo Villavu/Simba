@@ -35,11 +35,12 @@ uses
   //Client,
   MufasaTypes,
   mmlpsthread,synedittypes,
-  window, // for the comp picker and selector
+  {$IFDEF MSWINDOWS} os_windows, {$ENDIF} //For ColorPicker etc.
+  {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,
   SynEditMarkupHighAll, SynEditMiscClasses, LMessages, Buttons, PairSplitter,
-  ColorBox, about, framefunctionlist, ocr, updateform, simbasettings;
+  ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
     SimbaVersion = 429;
@@ -305,7 +306,7 @@ type
     CurrScript : TScriptFrame; //The current scriptframe
     CurrTab    : TMufasaTab; //The current TMufasaTab
     Tabs : TList;
-    Window: TMWindow;
+    Manager: TIOManager;
     OCR_Fonts: TMOCR;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
@@ -573,9 +574,7 @@ begin
         Writeln('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
     ScriptThread.SetPaths(ScriptPath,AppPath,Includepath,PluginsPath,fontPath);
 
-    // This doesn't actually set the Client's MWindow to the passed window, it
-    // only copies the current set window handle.
-    ScriptThread.Client.MWindow.SetWindow(Self.Window);
+    ScriptThread.Client.IOManager.SetTarget(Selector.LastPick);
 
 
     loadFontsOnScriptStart := LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True');
@@ -1271,9 +1270,9 @@ begin
   Tabs := TList.Create;
   AddTab;//Give it alteast 1 tab ;-).
   FunctionListShown(True); //Show this function list bitch!
-  Window := TMWindow.Create;
-  Picker := TMColorPicker.Create(Window);
-  Selector := TMWindowSelector.Create(Window);
+  Manager := TIOManager.Create(''); //No need to load plugins for the Global manager
+  Picker := TMColorPicker.Create(Manager);
+  Selector := TMWindowSelector.Create(Manager);
   MainDir:= ExtractFileDir(Application.ExeName);
   { For writeln }
   SetLength(DebugStream, 0);
@@ -1302,7 +1301,7 @@ begin
   Tabs.free;
   Selector.Free;
   Picker.Free;
-  Window.Free;
+  Manager.Free;
   PluginsGlob.Free;
 
   SetLength(DebugStream, 0);
@@ -1487,7 +1486,7 @@ end;
 
 procedure TForm1.MenuItemReportBugClick(Sender: TObject);
 begin
-  OpenURL('http://old.villavu.com/mantis/bug_report_page.php');
+  //OpenURL('http://old.villavu.com/mantis/bug_report_page.php');
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
@@ -1546,8 +1545,8 @@ end;
 procedure TForm1.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  Window.SetTarget(Selector.Drag {$ifdef MSWINDOWS},w_window{$endif});
-  writeln('New window: ' + IntToStr(Window.{$ifdef MSWindows}TargetHandle{$else}CurWindow{$ENDIF}));
+  Manager.SetTarget(Selector.Drag {$ifdef MSWINDOWS},w_window{$endif});
+  writeln('New window: ' + IntToStr(Selector.LastPick));
 end;
 
 procedure TForm1.NoTray(Sender: TObject);
