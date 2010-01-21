@@ -10,7 +10,7 @@
       <TargetFileExt Value=""/>
       <Title Value="Simba"/>
       <UseXPManifest Value="True"/>
-      <ActiveEditorIndexAtStart Value="0"/>
+      <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -139,7 +139,7 @@
         <UnitName Value="TestUnit"/>
         <ComponentState Value="1"/>
         <CursorPos X="12" Y="312"/>
-        <TopLine Value="290"/>
+        <TopLine Value="235"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -267,7 +267,7 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="25" Y="34"/>
+        <CursorPos X="57" Y="40"/>
         <TopLine Value="23"/>
         <EditorIndex Value="4"/>
         <UsageCount Value="202"/>
@@ -367,7 +367,7 @@
         <CursorPos X="47" Y="47"/>
         <TopLine Value="47"/>
         <EditorIndex Value="8"/>
-        <UsageCount Value="30"/>
+        <UsageCount Value="31"/>
         <Loaded Value="True"/>
       </Unit44>
       <Unit45>
@@ -503,7 +503,7 @@
         <CursorPos X="53" Y="13"/>
         <TopLine Value="75"/>
         <EditorIndex Value="6"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="42"/>
         <Loaded Value="True"/>
       </Unit64>
       <Unit65>
@@ -542,7 +542,7 @@
         <Filename Value="../../Units/MMLAddon/plugins.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="plugins"/>
-        <CursorPos X="12" Y="54"/>
+        <CursorPos X="15" Y="60"/>
         <TopLine Value="34"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="200"/>
@@ -1596,7 +1596,7 @@
         <ComponentState Value="1"/>
         <CursorPos X="26" Y="295"/>
         <TopLine Value="7"/>
-        <UsageCount Value="141"/>
+        <UsageCount Value="142"/>
       </Unit223>
       <Unit224>
         <Filename Value="../../../usr/local/share/lazarus/lcl/comctrls.pp"/>
@@ -1651,7 +1651,7 @@
         <UnitName Value="simpleanalyzer"/>
         <CursorPos X="52" Y="104"/>
         <TopLine Value="193"/>
-        <UsageCount Value="128"/>
+        <UsageCount Value="129"/>
       </Unit231>
       <Unit232>
         <Filename Value="../../Units/Misc/mPasLex.pas"/>
@@ -1712,7 +1712,7 @@
         <CursorPos X="30" Y="109"/>
         <TopLine Value="98"/>
         <EditorIndex Value="7"/>
-        <UsageCount Value="19"/>
+        <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit240>
       <Unit241>
@@ -1728,7 +1728,7 @@
         <UnitName Value="updater"/>
         <CursorPos X="38" Y="211"/>
         <TopLine Value="65"/>
-        <UsageCount Value="101"/>
+        <UsageCount Value="102"/>
       </Unit242>
       <Unit243>
         <Filename Value="updateform.pas"/>
@@ -1739,7 +1739,7 @@
         <CursorPos X="111" Y="102"/>
         <TopLine Value="81"/>
         <EditorIndex Value="5"/>
-        <UsageCount Value="96"/>
+        <UsageCount Value="97"/>
         <Loaded Value="True"/>
       </Unit243>
       <Unit244>
@@ -1861,7 +1861,7 @@
         <UnitName Value="simbasettings"/>
         <CursorPos X="26" Y="9"/>
         <TopLine Value="11"/>
-        <UsageCount Value="59"/>
+        <UsageCount Value="60"/>
       </Unit261>
       <Unit262>
         <Filename Value="../../Units/MMLAddon/settings.pas"/>
@@ -1907,7 +1907,7 @@
         <ComponentState Value="1"/>
         <CursorPos X="53" Y="23"/>
         <TopLine Value="21"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="43"/>
       </Unit267>
       <Unit268>
         <Filename Value="../../Units/Synapse/synsock.pas"/>
@@ -1964,7 +1964,7 @@
         <UnitName Value="newinternets"/>
         <CursorPos X="80" Y="2"/>
         <TopLine Value="1"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
       </Unit275>
       <Unit276>
         <Filename Value="reportbug.lrs"/>
@@ -2014,7 +2014,7 @@
         <CursorPos X="20" Y="3"/>
         <TopLine Value="1"/>
         <EditorIndex Value="2"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit282>
       <Unit283>

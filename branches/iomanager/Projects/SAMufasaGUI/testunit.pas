@@ -33,14 +33,13 @@ uses
   {$ifdef linux}cthreads,{$endif}Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas, SynMemo,
   //Client,
-  MufasaTypes,
+  MufasaTypes, plugins,
   mmlpsthread,synedittypes,
-  {$IFDEF MSWINDOWS} os_windows, {$ENDIF} //For ColorPicker etc.
-  {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
+  window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,
   SynEditMarkupHighAll, SynEditMiscClasses, LMessages, Buttons, PairSplitter,
-  ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
+  ColorBox, about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
     SimbaVersion = 429;
@@ -306,10 +305,11 @@ type
     CurrScript : TScriptFrame; //The current scriptframe
     CurrTab    : TMufasaTab; //The current TMufasaTab
     Tabs : TList;
-    Manager: TIOManager;
+    Window: TMWindow;
     OCR_Fonts: TMOCR;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
+    PluginsGlob: TMPlugins;
     procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
@@ -352,7 +352,7 @@ var
 
 implementation
 uses
-   lclintf,plugins,
+   lclintf,
    syncobjs, // for the critical sections
    debugimage,
    bitmaps,
@@ -527,13 +527,9 @@ begin
       Writeln('The script hasn''t stopped yet, so we cannot start a new one.');
       exit;
     end;
-    AppPath:= MainDir + DS;
-    includePath:= LoadSettingDef('Settings/Includes/Path', IncludeTrailingPathDelimiter(ExpandFileName(MainDir+  DS + '..' + DS + '..' + ds)) + 'Includes' + DS);
-    fontPath := LoadSettingDef('Settings/Fonts/Path', IncludeTrailingPathDelimiter(ExpandFileName(MainDir+  DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
-    PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-    ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
+    ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
     {$IFNDEF TERMINALWRITELN}
     ScriptThread.SetDebug(@formWriteln);
     ScriptThread.DebugMemo := Self.Memo1;
@@ -551,6 +547,16 @@ begin
 
     if ScriptFile <> '' then
       ScriptPath := ExtractFileDir(ScriptFile);
+    AppPath:= MainDir + DS;
+    includePath:= LoadSettingDef('Settings/Includes/Path',
+                                 IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
+                                 DS + '..' + DS + '..' + ds)) + 'Includes' + DS);
+    fontPath := LoadSettingDef('Settings/Fonts/Path',
+                               IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
+                               DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+
+    PluginsPath := LoadSettingDef('Settings/Plugins/Path',
+                                  ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     if not DirectoryExists(PluginsPath) and not assigned(PluginsGlob) then
     begin
       if FirstRun then
@@ -568,7 +574,9 @@ begin
         Writeln('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
     ScriptThread.SetPaths(ScriptPath,AppPath,Includepath,PluginsPath,fontPath);
 
-    if selector.haspicked then ScriptThread.Client.IOManager.SetTarget(Selector.LastPick);
+    // This doesn't actually set the Client's MWindow to the passed window, it
+    // only copies the current set window handle.
+    ScriptThread.Client.MWindow.SetWindow(Self.Window);
 
 
     loadFontsOnScriptStart := LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True');
@@ -1264,9 +1272,9 @@ begin
   Tabs := TList.Create;
   AddTab;//Give it alteast 1 tab ;-).
   FunctionListShown(True); //Show this function list bitch!
-  Manager := TIOManager.Create(''); //No need to load plugins for the Global manager
-  Picker := TMColorPicker.Create(Manager);
-  Selector := TMWindowSelector.Create(Manager);
+  Window := TMWindow.Create;
+  Picker := TMColorPicker.Create(Window);
+  Selector := TMWindowSelector.Create(Window);
   MainDir:= ExtractFileDir(Application.ExeName);
   { For writeln }
   SetLength(DebugStream, 0);
@@ -1295,7 +1303,7 @@ begin
   Tabs.free;
   Selector.Free;
   Picker.Free;
-  Manager.Free;
+  Window.Free;
   PluginsGlob.Free;
 
   SetLength(DebugStream, 0);
@@ -1480,7 +1488,7 @@ end;
 
 procedure TForm1.MenuItemReportBugClick(Sender: TObject);
 begin
-  //OpenURL('http://old.villavu.com/mantis/bug_report_page.php');
+  OpenURL('http://old.villavu.com/mantis/bug_report_page.php');
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
@@ -1539,8 +1547,8 @@ end;
 procedure TForm1.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  Manager.SetTarget(Selector.Drag);
-  writeln('New window: ' + IntToStr(Selector.LastPick));
+  Window.SetTarget(Selector.Drag {$ifdef MSWINDOWS},w_window{$endif});
+  writeln('New window: ' + IntToStr(Window.{$ifdef MSWindows}TargetHandle{$else}CurWindow{$ENDIF}));
 end;
 
 procedure TForm1.NoTray(Sender: TObject);

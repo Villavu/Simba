@@ -351,7 +351,7 @@ begin
     raise Exception.createFMT('Any Find Function, you did not pass a ' +
                               'correct ys: %d.', [ys]);
 
-  TClient(Self.Client).IOManager.GetDimensions(w,h);
+  TClient(Self.Client).MWindow.GetDimensions(w,h);
   if (w <> CachedWidth) or (h <> CachedHeight) then
     UpdateCachedValues(w,h);
   if xe >= w then
@@ -379,7 +379,7 @@ begin
   dX := xe - xs;
   dY := ye - ys;
   ColorToRGB(Color, clR, clG, clB);
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
   CCts := Self.CTS;
@@ -400,7 +400,7 @@ begin
     end;
     Inc(Ptr, PtrInc)
   end;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.CountColor(Color, xs, ys, xe, ye: Integer): Integer;
@@ -422,7 +422,7 @@ begin
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -441,7 +441,7 @@ begin
     Inc(Ptr, PtrInc)
   end;
 
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
@@ -463,7 +463,7 @@ begin
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -481,7 +481,7 @@ begin
         x := xx;
         y := yy;
 
-        TClient(Client).IOManager.FreeReturnData;
+        TClient(Client).MWindow.FreeReturnData;
         Exit;
       end;
       Inc(Ptr);
@@ -489,7 +489,7 @@ begin
     Inc(Ptr, PtrInc)
   end;
 
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColorSpiral(var x, y: Integer; color, xs, ys, xe,
@@ -511,7 +511,7 @@ begin
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Load rowdata
   RowData:= CalculateRowPtrs(ptrdata,dy+1);
   //Load the spiral path
@@ -526,11 +526,11 @@ begin
         Result := True;
         x := ClientTPA[i].x + xs;
         y := ClientTPA[i].y + ys;
-        TClient(Client).IOManager.FreeReturnData;
+        TClient(Client).MWindow.FreeReturnData;
         Exit;
       end;
 
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColoredArea(var x, y: Integer; Color, xs, ys, xe, ye, MinArea: Integer): Boolean;
@@ -554,7 +554,7 @@ begin
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -586,7 +586,7 @@ begin
               Result := True;
               x := xx;
               y := yy;
-              TClient(Client).IOManager.FreeReturnData;
+              TClient(Client).MWindow.FreeReturnData;
               Exit;
             end;
           end;
@@ -604,7 +604,7 @@ begin
     Inc(Ptr, PtrInc);
   end;
 
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 
@@ -634,7 +634,7 @@ begin
   if Cts = 2 then
     RGBToHSLNonFixed(clR,clG,clB,H1,S1,L1);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -730,14 +730,14 @@ begin
     end;
   end;
   Result := False;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
   Exit;
 
   Hit:
     Result := True;
     x := xx;
     y := yy;
-    TClient(Client).IOManager.FreeReturnData;
+    TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
@@ -766,7 +766,7 @@ begin
   if Cts = 2 then
     RGBToHSL(clR,clG,clB,H1,S1,L1);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -821,14 +821,14 @@ begin
     end;
   end;
   Result := False;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
   Exit;
 
   Hit:
     Result := True;
     x := xx;
     y := yy;
-    TClient(Client).IOManager.FreeReturnData;
+    TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean;
@@ -854,7 +854,7 @@ begin
   ColorToRGB(Color, clR, clG, clB);
   if Cts = 2 then
     RGBToHSL(clR,clG,clB,H1,S1,L1);
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -899,14 +899,14 @@ begin
   end;
 
   Result := False;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
   Exit;
 
   Hit:
     Result := True;
     x := xx;
     y := yy;
-    TClient(Client).IOManager.FreeReturnData;
+    TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColorsTolerance(out Points: TPointArray; Color, xs, ys,
@@ -930,7 +930,7 @@ begin
   if CTS = 2 then
     ColorToHSL(color,H1,S1,L1);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -994,7 +994,7 @@ begin
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 function TMFinder.FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys,
   xe, ye, Tol: Integer): Boolean;
@@ -1017,7 +1017,7 @@ begin
   if CTS = 2 then
     RGBToHSLNonFixed(clR,clG,clB,H1,S1,L1);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   // Do we want to "cache" these vars?
   // We will, for now. Easier to type.
@@ -1122,7 +1122,7 @@ begin
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColorsSpiralTolerance(x, y: Integer;
@@ -1144,7 +1144,7 @@ begin
   ColorToRGB(Color, clR, clG, clB);
   ColorToHSL(Color, H1, S1, L1);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   c := 0;
 
@@ -1199,7 +1199,7 @@ begin
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindColors(out TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
@@ -1220,7 +1220,7 @@ begin
 
   ColorToRGB(Color, clR, clG, clB);
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
 
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
@@ -1246,7 +1246,7 @@ begin
 
   Result := I > 0;
 
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
  { Only works with CTS 1 for now.. Since Colorsame doesn't return a boolean :-( }
@@ -1274,7 +1274,7 @@ begin
   dX := xe - xs;
   dY := ye - ys;
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
 
@@ -1321,12 +1321,12 @@ begin
       //We have found the mask appearntly, otherwise we would have jumped! Gna Gna.
       x := xx + xs;
       y := yy + ys;
-      TClient(Client).IOManager.FreeReturnData;
+      TClient(Client).MWindow.FreeReturnData;
       Exit(true);
       //Bah not found the mask, lets do nothing and continue!
       NotFoundMask:
     end;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 procedure TMFinder.CheckMask(Mask: TMask);
@@ -1339,7 +1339,7 @@ function TMFinder.FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
 var
   w,h : integer;
 begin
-  TClient(Client).IOManager.GetDimensions(w,h);
+  TClient(Client).MWindow.GetDimensions(w,h);
   result := Self.FindBitmapIn(bitmap,x,y,0,0,w-1,h-1);
 end;
 
@@ -1366,7 +1366,7 @@ begin
   dX := xe - xs;
   dY := ye - ys;
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1393,14 +1393,14 @@ begin
 
       end;
       //We did find the Bmp, otherwise we would be at the part below
-      TClient(Client).IOManager.FreeReturnData;
+      TClient(Client).MWindow.FreeReturnData;
       x := xx + xs;
       y := yy + ys;
       result := true;
       exit;
       NotFoundBmp:
     end;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs,
@@ -1428,7 +1428,7 @@ begin
   dX := xe - xs;
   dY := ye - ys;
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1462,14 +1462,14 @@ begin
 
       end;
       //We did find the Bmp, otherwise we would be at the part below
-      TClient(Client).IOManager.FreeReturnData;
+      TClient(Client).MWindow.FreeReturnData;
       x := xx + xs;
       y := yy + ys;
       result := true;
       exit;
       NotFoundBmp:
     end;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer;
@@ -1495,7 +1495,7 @@ begin
   dX := xe - xs;
   dY := ye - ys;
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1524,14 +1524,14 @@ begin
 
     end;
     //We did find the Bmp, otherwise we would be at the part below
-    TClient(Client).IOManager.FreeReturnData;
+    TClient(Client).MWindow.FreeReturnData;
     x := ClientTPA[i].x + xs;
     y := ClientTPA[i].y + ys;
     result := true;
     exit;
     NotFoundBmp:
   end;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x,
@@ -1559,7 +1559,7 @@ begin
   dX := xe - xs;
   dY := ye - ys;
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1602,7 +1602,7 @@ begin
     exit;
     NotFoundBmp:
   end;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x,
@@ -1631,7 +1631,7 @@ begin
   dX := xe - xs;
   dY := ye - ys;
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1680,7 +1680,7 @@ begin
     SetLength(Points,FoundC);
     Move(ClientTPA[0], Points[0], FoundC * SizeOf(TPoint));
   end;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 end;
 
 function TMFinder.FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x,
@@ -1715,7 +1715,7 @@ begin
   dY := ye - ys;
   SearchDx := dX;
   SearchDy := dY;
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
   BmpRowData:= CalculateRowPtrs(bitmap);
@@ -1775,7 +1775,7 @@ begin
         BestPT := Point(xx+xs,yy+ys);
         if GoodCount = TotalC then
         begin;
-          TClient(Client).IOManager.FreeReturnData;
+          TClient(Client).MWindow.FreeReturnData;
           x := BestPT.x;
           y := BestPT.y;
           accuracy:= 1;
@@ -1783,7 +1783,7 @@ begin
         end;
       end;
     end;
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
   if BestCount = 0 then
     Exit;
   accuracy := BestCount / TotalC;
@@ -1880,7 +1880,7 @@ begin
   C := DTM.c;
 
   // Retreive Client Data.
-  PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
+  PtrData := TClient(Client).MWindow.ReturnData(x1, y1, W + 1, H + 1);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
   //writeln(format('w,h: %d, %d', [w,h]));
@@ -1937,7 +1937,7 @@ begin
     end;
 
   TheEnd:
-  TClient(Client).IOManager.FreeReturnData;
+  TClient(Client).MWindow.FreeReturnData;
 
   SetLength(Points, pc);
   if pc > 0 then

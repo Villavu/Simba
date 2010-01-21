@@ -30,9 +30,7 @@ interface
 uses
   Classes, SysUtils, LCLIntf,LCLType,InterfaceBase,Forms,Controls,ExtCtrls,
   Graphics,
-  {$IFDEF MSWINDOWS} os_windows, {$ENDIF}
-  {$IFDEF LINUX} os_linux, {$ENDIF}
-  MufasaTypes, colourhistory,bitmaps
+  Window,MufasaTypes, colourhistory,bitmaps,input
 
   {$IFNDEF PICKER_CLIENT}
     {$IFDEF LINUX}
@@ -46,7 +44,7 @@ type
   TPickEvent = procedure (Sender: TObject; Color, X, Y: Integer);
 
   TMColorPicker = class(TObject)
-        constructor Create(manager: TIOManager);
+        constructor Create(aWindow: TMWindow);
         destructor Destroy; override;
 
         procedure Pick(Out C, X, Y: Integer);
@@ -55,7 +53,11 @@ type
         procedure ImageInfoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
        Procedure ColorPickUp(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer);
   public
-        manager: TIOManager;
+        // Will give us CopyClientToBitmap
+        Window: TMWindow;
+
+        // Created and freed in Pick.
+        Input: TMInput;
 
         { Form components }
         ScreenForm, InfoForm : TForm;
@@ -78,12 +80,12 @@ type
 
 implementation
 
-constructor TMColorPicker.Create(manager: TIOManager);
+constructor TMColorPicker.Create(aWindow: TMWindow);
 
 begin
   inherited Create;
 
-  self.manager := manager;
+  Self.Window := aWindow;
 end;
 
 destructor TMColorPicker.Destroy;
@@ -102,7 +104,7 @@ var
    p : TPoint;
 
    bmp: TMufasaBitmap;
-   Desktop : TIOManager;
+   Desktop : TMWindow;
 
 
 begin
@@ -110,11 +112,12 @@ begin
   w := 0;
   h := 0;
   { If the target window isn't valid (closed etc), make the destkop the new window}
-  if not Self.Manager.TargetValid then
-    self.Manager.SetDesktop;
+  if not Self.Window.TargetValid then
+    self.Window.SetDesktop;
+  Input := TMInput.Create(Self.Window);//For the correct x,y values
 
   {Desktop is needed for the whole picture}
-  Desktop := TIOManager.Create('');
+  Desktop := TMWindow.Create;
   Desktop.SetDesktop;
   Desktop.GetDimensions(w, h);
 
@@ -210,6 +213,7 @@ begin
   InfoForm.Free;
   ScreenForm.Free;
 
+  Input.Free;
   Desktop.free;
 
   { Re-enable the color pick buttons }
@@ -226,7 +230,7 @@ var
   MouseX, MouseY: Integer;
 begin
   { Move the info form }
-  manager.GetMousePos(MouseX, MouseY);
+  Input.GetMousePos(MouseX, MouseY);
   InfoForm.Left := Mouse.CursorPos.X + 5;
   InfoForm.Top := Mouse.CursorPos.Y - 15;
 
@@ -277,7 +281,7 @@ procedure TMColorPicker.ColorPickUp(Sender: TObject; Button: TMouseButton;
 begin;
   { Set the coordinates and color that the user cliked on }
   Color:=  WidgetSet.DCGetPixel(ImageMain.Canvas.Handle,x,y);
-  Manager.GetMousePos(ColorX, ColorY);
+  Input.GetMousePos(ColorX, ColorY);
 
   if OnPick <> nil then
     Onpick(Sender,Color,Colorx,Colory);
