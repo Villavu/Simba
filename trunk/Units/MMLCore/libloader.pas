@@ -1,26 +1,3 @@
-{
-	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
-
-    MML is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    MML is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with MML.  If not, see <http://www.gnu.org/licenses/>.
-
-	See the file COPYING, included in this distribution,
-	for details about the copyright.
-
-     Super unit for loading libraries for the Mufasa Macro Library
-}
-
 unit libloader;
 
 {$mode objfpc}
@@ -29,7 +6,6 @@ interface
 
   uses
     Classes, SysUtils, dynlibs;
-
   type
     TGenericLib = record
       filename: string;
@@ -57,7 +33,6 @@ implementation
 
   uses
     MufasaTypes,FileUtil;
-
   procedure TGenericLoader.FreePlugins;
   var
     I : integer;
@@ -142,7 +117,7 @@ implementation
     SetLength(Loaded,PluginLen + 1);
     Writeln(Format('Loading plugin %s at %s',[PluginName,PluginDirs.Strings[ii]]));
     Loaded[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
-    Loaded[PluginLen].handle:= LoadLibrary(PChar(@Loaded[PluginLen].filename));
+    Loaded[PluginLen].handle:= LoadLibrary(PChar(@Loaded[PluginLen].filename[1]));
     if Loaded[PluginLen].handle = 0 then
       Raise Exception.CreateFMT('Error loading plugin %s',[Loaded[PluginLen].filename]);
     if InitPlugin(Loaded[PluginLen].handle) then

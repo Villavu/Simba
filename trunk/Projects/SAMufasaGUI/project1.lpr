@@ -29,14 +29,13 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads, cmem,
   {$ENDIF}{$ENDIF}
-  Interfaces, // this includes the LCL widgetset
-  LResources, Forms, testunit, colourhistory, About, internets, debugimage,
-  framefunctionlist, simpleanalyzer, updater, updateform, simbasettings, 
+  Interfaces, Forms, testunit, colourhistory, About, internets, debugimage,
+  framefunctionlist, simpleanalyzer, updater, updateform, simbasettings,
 libloader;
-{$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
+
+{$R project1.res}
 
 begin
-  {$I project1.lrs}
   Application.Title:='Simba';
   Application.Initialize;
 
