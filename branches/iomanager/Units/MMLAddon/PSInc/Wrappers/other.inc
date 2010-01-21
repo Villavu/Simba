@@ -53,9 +53,9 @@ var
   w,h : integer;
   bmp: TMufasaBitmap;
 begin;
-  CurrThread.Client.IOManager.GetDimensions(w,h);
+  CurrThread.Client.MWindow.GetDimensions(w,h);
   bmp := TMufasaBitmap.Create;
-  bmp.CopyClientToBitmap(CurrThread.Client.IOManager,True,0,0,w-1,h-1);
+  bmp.CopyClientToBitmap(CurrThread.Client.MWindow,True,0,0,w-1,h-1);
   bmp.SaveToFile(FileName);
   bmp.Free;
 end;

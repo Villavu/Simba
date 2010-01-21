@@ -31,5 +31,3 @@ clean:
 
 $(binary):
 	$(CC) $(flags) $(units) $(lazarusunits) -o$(binary) $(defines) project1.lpr 
-	
-	-Fu/usr/local/share/lazarus/ideintf/units/x86_64-linux/
