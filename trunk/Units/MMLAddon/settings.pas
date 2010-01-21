@@ -537,6 +537,12 @@ var
     Doc: TXMLDocument;
 begin
   Nodes.Clear;
+  if not fileExists(fileName) then
+  begin
+    writeln('KANKER');
+    // create file.
+    SaveToXML(fileName);
+  end;
   ReadXMLFile(Doc, fileName);
   InternalLoadFromXML(Doc);
   Doc.Free;
