@@ -1,3 +1,26 @@
+{
+	This file is part of the Mufasa Macro Library (MML)
+	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+
+    MML is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    MML is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with MML.  If not, see <http://www.gnu.org/licenses/>.
+
+	See the file COPYING, included in this distribution,
+	for details about the copyright.
+
+      Linux OS specific implemetation for Mufasa Macro Library
+}
+
 unit os_linux;
 
 interface
@@ -55,11 +78,26 @@ interface
         screennum: integer;
         desktop: x.TWindow;
     end;
-    
+
+  function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
     
 implementation
 
-  uses windowutil, GraphType, interfacebase, lcltype;
+  uses GraphType, interfacebase, lcltype;
+
+  // Too global.
+  function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
+  begin;
+    result := 0;
+    Writeln('X Error: ');
+    writeln('Error code: ' + inttostr(para2^.error_code));
+    writeln('Display: ' + inttostr(LongWord(para2^.display)));
+    writeln('Minor code: ' + inttostr(para2^.minor_code));
+    writeln('Request code: ' + inttostr(para2^.request_code));
+    writeln('Resource ID: ' + inttostr(para2^.resourceid));
+    writeln('Serial: ' + inttostr(para2^.serial));
+    writeln('Type: ' + inttostr(para2^._type));
+  end;
 
 //***implementation*** TKeyInput
 

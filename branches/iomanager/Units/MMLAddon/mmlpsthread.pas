@@ -129,7 +129,6 @@ uses
   math, //Maths!
   internets, // internets
   strutils,
-  input,
   tpa, //Tpa stuff
   forms,//Forms
   lclintf; // for GetTickCount and others.

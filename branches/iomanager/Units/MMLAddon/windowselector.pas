@@ -32,7 +32,6 @@ uses
   ctypes,
   {$IFDEF MSWINDOWS} os_windows, {$ENDIF}
   {$IFDEF LINUX} os_linux, {$ENDIF}
-  windowutil,
   controls,
   graphics,
   forms,
