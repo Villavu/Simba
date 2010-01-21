@@ -79,7 +79,7 @@ interface
     
 implementation
 
-  uses windowutil, GraphType, interfacebase;
+  uses GraphType, interfacebase;
 
   type
     PMouseInput = ^TMouseInput;
@@ -144,7 +144,7 @@ implementation
   constructor TWindow.Create(target: Hwnd); begin 
     inherited Create;
     self.handle:= target;
-    self.dc:= GetDC(target);
+    self.dc:= GetWindowDC(target);
     self.buffer:= TBitmap.Create;
     self.buffer.PixelFormat:= pf32bit;
     keyinput:= TKeyInput.Create;
