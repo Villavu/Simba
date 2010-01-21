@@ -33,7 +33,7 @@ uses
   framefunctionlist, simpleanalyzer, updater, updateform, simbasettings,
 libloader;
 
-{$R project1.res}
+//{$R project1.res}
 
 begin
   Application.Title:='Simba';
