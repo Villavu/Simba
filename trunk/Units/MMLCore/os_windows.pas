@@ -68,6 +68,7 @@ interface
     
     TIOManager = class(TIOManager_Abstract)
       public
+        constructor Create;
         constructor Create(plugin_dir: string);
         function SetTarget(target: Hwnd): integer; overload;
         procedure SetDesktop; override;
@@ -305,6 +306,11 @@ implementation
   
   
 //***implementation*** IOManager
+
+  constructor TIOManager.Create;
+  begin
+    inherited Create;
+  end;
 
   constructor TIOManager.Create(plugin_dir: string);
   begin

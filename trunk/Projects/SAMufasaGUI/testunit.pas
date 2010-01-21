@@ -558,7 +558,7 @@ begin
     end else if not Assigned(PluginsGlob) then
     begin
       PluginsGlob := TMPlugins.Create;
-      PluginsGlob.PluginDirs.Add(PluginsPath);
+      PluginsGlob.AddAndLoadPath(PluginsPath);
     end;
     if not DirectoryExists(IncludePath) then
       if FirstRun then
@@ -1264,7 +1264,7 @@ begin
   Tabs := TList.Create;
   AddTab;//Give it alteast 1 tab ;-).
   FunctionListShown(True); //Show this function list bitch!
-  Manager := TIOManager.Create(''); //No need to load plugins for the Global manager
+  Manager := TIOManager.Create; //No need to load plugins for the Global manager
   Picker := TMColorPicker.Create(Manager);
   Selector := TMWindowSelector.Create(Manager);
   MainDir:= ExtractFileDir(Application.ExeName);
