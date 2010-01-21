@@ -3,11 +3,17 @@ unit os_linux;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager;
+    Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest, keysym;
   
   type
 
     TNativeWindow = x.TWindow;
+
+    TKeyInput = class(TXKeyInput)
+      public
+        procedure Down(Key: Word);
+        procedure Up(Key: Word);
+    end;
 
     TWindow = class(TWindow_Abstract)
       public
@@ -17,12 +23,13 @@ interface
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         procedure FreeReturnData; override;
 
+        procedure ActivateClient; override;
         procedure GetMousePosition(var x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
-        procedure HoldMouse(x,y: integer; left: boolean); override;
-        procedure ReleaseMouse(x,y: integer; left: boolean); override;
+        procedure HoldMouse(x,y: integer; button: TClickType); override;
+        procedure ReleaseMouse(x,y: integer; button: TClickType); override;
 
-        procedure SendString(str: PChar); override;
+        procedure SendString(str: string); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
@@ -32,6 +39,7 @@ interface
         window: x.TWindow;
         buffer: PXImage;
         dirty: Boolean;  //true if image loaded
+        keyinput: TKeyInput;
     end;
     
     TIOManager = class(TIOManager_Abstract)
@@ -51,7 +59,19 @@ interface
     
 implementation
 
-  uses windowutil, GraphType;
+  uses windowutil, GraphType, interfacebase, lcltype;
+
+//***implementation*** TKeyInput
+
+  procedure TKeyInput.Down(Key: Word);
+  begin
+    DoDown(Key);
+  end;
+
+  procedure TKeyInput.Up(Key: Word);
+  begin
+    DoUp(Key);
+  end;
 
 //***implementation*** TWindow
 
@@ -61,12 +81,14 @@ implementation
     self.display:= display;
     self.screennum:= screennum;
     self.window:= window;
-    self.dirty:= false; 
+    self.dirty:= false;
+    self.keyinput:= TKeyInput.Create
   end; 
   
   destructor TWindow.Destroy; 
   begin
-    FreeReturnData; 
+    FreeReturnData;
+    keyinput.Free;
     inherited Destroy; 
   end;
   
@@ -90,6 +112,17 @@ implementation
       W := -1;
       H := -1;
     end;
+    XSetErrorHandler(Old_Handler);
+  end;
+
+  procedure TWindow.ActivateClient;
+  var
+     Old_Handler: TXErrorHandler;
+  begin
+    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    { TODO: Check if Window is valid? }
+    XSetInputFocus(display,window,RevertToParent,CurrentTime);
+    XFlush(display);
     XSetErrorHandler(Old_Handler);
   end;
   
@@ -136,15 +169,115 @@ implementation
     end;
   end;
 
-  procedure TWindow.GetMousePosition(var x,y: integer); begin end;
-  procedure TWindow.MoveMouse(x,y: integer); begin end;
-  procedure TWindow.HoldMouse(x,y: integer; left: boolean); begin end;
-  procedure TWindow.ReleaseMouse(x,y: integer; left: boolean); begin end;
+  procedure TWindow.GetMousePosition(var x,y: integer);
+  var
+   b:integer;
+   root, child: twindow;
+   xmask: Cardinal;
+   Old_Handler: TXErrorHandler;
+  begin
+    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    XQueryPointer(display,window,@root,@child,@b,@b,@x,@y,@xmask);
+    XSetErrorHandler(Old_Handler);
+  end;
+  procedure TWindow.MoveMouse(x,y: integer);
+  var
+   Old_Handler: TXErrorHandler;
+    w,h: integer;
+  begin
+    GetTargetDimensions(w, h);
+    if (x < 0) or (y < 0) or (x > w) or (y > h) then
+      raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid (0,0,%d,%d)', [x, y, w, h]);
+    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    XWarpPointer(display, 0, window, 0, 0, 0, 0, X, Y);
+    XFlush(display);
+    XSetErrorHandler(Old_Handler);
+  end;
+  procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
+  var
+    ButtonP: cuint;
+    _isPress: cbool;
+    Old_Handler: TXErrorHandler;
+  begin
+    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    _isPress := cbool(1);
+    case button of
+      mouse_Left:   ButtonP:= Button1;
+      mouse_Middle: ButtonP:= Button2;
+      mouse_Right:  ButtonP:= Button3;
+    end;
+    XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
+    XSetErrorHandler(Old_Handler);
+  end;
+  procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
+  var
+    ButtonP: cuint;
+    _isPress: cbool;
+    Old_Handler: TXErrorHandler;
+  begin
+    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    _isPress := cbool(0);
+    case button of
+      mouse_Left:   ButtonP:= Button1;
+      mouse_Middle: ButtonP:= Button2;
+      mouse_Right:  ButtonP:= Button3;
+    end;
+    XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
+    XSetErrorHandler(Old_Handler);
+  end;
 
-  procedure TWindow.SendString(str: PChar); begin end;
-  procedure TWindow.HoldKey(key: integer); begin end;
-  procedure TWindow.ReleaseKey(key: integer); begin end;
-  function TWindow.IsKeyHeld(key: integer): boolean; begin end;
+  function GetSimpleKeyCode(c: char): word;
+  begin
+    case C of
+      '0'..'9' :Result := VK_0 + Ord(C) - Ord('0');
+      'a'..'z' :Result := VK_A + Ord(C) - Ord('a');
+      'A'..'Z' :Result := VK_A + Ord(C) - Ord('A');
+      ' ' : result := VK_SPACE;
+    else
+      Raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
+    end
+  end;
+
+  procedure TWindow.SendString(str: string);
+  var
+    i: integer;
+    key: byte;
+    HoldShift : boolean;
+  begin
+    HoldShift := false;
+    for i := 1 to length(str) do
+    begin
+      if((str[i] >= 'A') and (str[i] <= 'Z')) then
+      begin
+        HoldKey(VK_SHIFT);
+        HoldShift:= True;
+        str[i] := lowerCase(str[i]);
+      end else
+        if HoldShift then
+        begin
+          HoldShift:= false;
+          ReleaseKey(VK_SHIFT);
+        end;
+      key:= GetSimpleKeyCode(str[i]);
+      HoldKey(key);
+      //BenLand100: You should probably wait here...
+      ReleaseKey(key);
+    end;
+    if HoldShift then
+      ReleaseKey(VK_SHIFT);
+  end;
+  procedure TWindow.HoldKey(key: integer);
+  begin
+    keyinput.Down(key);
+  end;
+  procedure TWindow.ReleaseKey(key: integer);
+  begin
+    keyinput.Up(key);
+  end;
+  function TWindow.IsKeyHeld(key: integer): boolean;
+  begin
+    raise Exception.CreateFmt('IsKeyDown isn''t implemented yet on Linux', []);
+  end;
   
 //***implementation*** IOManager
 

@@ -18,18 +18,19 @@ interface
         procedure GetTargetDimensions(var w, h: integer); virtual;
         function GetColor(x,y : integer) : TColor; virtual;
         function ReturnData(xs, ys, width, height: Integer): TRetData; virtual;
-        procedure FreeReturnData; virtual; 
+        procedure FreeReturnData; virtual;
+        procedure ActivateClient; virtual;
 
         { ONLY override the following methods if the target provides mouse functions, defaults to 
         | raise exceptions }
         procedure GetMousePosition(var x,y: integer); virtual;
         procedure MoveMouse(x,y: integer); virtual;
-        procedure HoldMouse(x,y: integer; left: boolean); virtual;
-        procedure ReleaseMouse(x,y: integer; left: boolean); virtual;
+        procedure HoldMouse(x,y: integer; button: TClickType); virtual;
+        procedure ReleaseMouse(x,y: integer; button: TClickType); virtual;
 
         { ONLY override the following methods if the target provides key functions, defaults to 
         | raise exceptions }
-        procedure SendString(str: PChar); virtual;
+        procedure SendString(str: string); virtual;
         procedure HoldKey(key: integer); virtual;
         procedure ReleaseKey(key: integer); virtual;
         function IsKeyHeld(key: integer): boolean; virtual; 
@@ -57,12 +58,13 @@ interface
         procedure GetTargetDimensions(var w, h: integer); override; abstract;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override; abstract;
 
+        procedure ActivateClient; override; abstract;
         procedure GetMousePosition(var x,y: integer); override; abstract;
         procedure MoveMouse(x,y: integer); override; abstract;
-        procedure HoldMouse(x,y: integer; left: boolean); override; abstract;
-        procedure ReleaseMouse(x,y: integer; left: boolean); override; abstract;
+        procedure HoldMouse(x,y: integer; button: TClickType); override; abstract;
+        procedure ReleaseMouse(x,y: integer; button: TClickType); override; abstract;
 
-        procedure SendString(str: PChar); override; abstract;
+        procedure SendString(str: string); override; abstract;
         procedure HoldKey(key: integer); override; abstract;
         procedure ReleaseKey(key: integer); override; abstract;
         function IsKeyHeld(key: integer): boolean; override; abstract;
@@ -111,10 +113,10 @@ interface
 
         procedure GetMousePosition(var x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
-        procedure HoldMouse(x,y: integer; left: boolean); override;
-        procedure ReleaseMouse(x,y: integer; left: boolean); override;
+        procedure HoldMouse(x,y: integer; button: TClickType); override;
+        procedure ReleaseMouse(x,y: integer; button: TClickType); override;
 
-        procedure SendString(str: PChar); override;
+        procedure SendString(str: string); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
@@ -185,9 +187,9 @@ interface
         
         procedure GetMousePos(var X, Y: Integer);
         procedure SetMousePos(X, Y: Integer);
-        procedure MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress);
-        procedure MouseButtonActionSilent(x,y : integer; mClick: TClickType; mPress: TMousePress);
-        procedure ClickMouse(X, Y: Integer; mClick: TClickType);
+        procedure HoldMouse(x,y : integer; button: TClickType);
+        procedure ReleaseMouse(x,y : integer; button: TClickType);
+        procedure ClickMouse(X, Y: Integer; button: TClickType);
 
         procedure KeyUp(key: Word);
         procedure KeyDown(key: Word);
@@ -324,13 +326,18 @@ implementation
 
   procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer); begin keymouse.GetMousePosition(x,y) end;
   procedure TIOManager_Abstract.SetMousePos(X, Y: Integer); begin keymouse.MoveMouse(x,y); end;
-  procedure TIOManager_Abstract.MouseButtonAction(x,y : integer; mClick: TClickType; mPress: TMousePress); begin {lolwat} end;
-  procedure TIOManager_Abstract.MouseButtonActionSilent(x,y : integer; mClick: TClickType; mPress: TMousePress); begin {lolwat} end;
-  procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; mClick: TClickType); begin {lolwat} end;
+  procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
+  procedure TIOManager_Abstract.ReleaseMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
+  procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; button: TClickType);
+  begin
+    HoldMouse(x,y,button);
+    //BenLand100 note: probably should wait here
+    ReleaseMouse(x,y,button);
+  end;
 
   procedure TIOManager_Abstract.KeyUp(key: Word); begin keymouse.ReleaseKey(key) end;
   procedure TIOManager_Abstract.KeyDown(key: Word); begin keymouse.HoldKey(key) end;
-  procedure TIOManager_Abstract.PressKey(key: Word); begin {lolwat} end;
+  procedure TIOManager_Abstract.PressKey(key: Word); begin keyup(key); keydown(key); end;
   procedure TIOManager_Abstract.SendText(text: string); begin keymouse.SendString(PChar(@text[1])); end;
   function TIOManager_Abstract.isKeyDown(key: Word): Boolean; begin result:= keymouse.IsKeyHeld(key); end;
   
@@ -345,13 +352,14 @@ implementation
   end;
   function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;  begin raise Exception.Create('ReturnData not avaliable for this target'); end;
   procedure TTarget.FreeReturnData; begin {do nothing by default} end;
+  procedure TTarget.ActivateClient; begin raise Exception.Create('ActivateClient not avaliable for this target'); end;
 
   procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Create('GetMousePosition not avaliable for this target'); end;
   procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not avaliable for this target'); end;
-  procedure TTarget.HoldMouse(x,y: integer; left: boolean); begin raise Exception.Create('HoldMouse not avaliable for this target'); end;
-  procedure TTarget.ReleaseMouse(x,y: integer; left: boolean); begin raise Exception.Create('ReleaseMouse not avaliable for this target'); end;
+  procedure TTarget.HoldMouse(x,y: integer; button: TClickType); begin raise Exception.Create('HoldMouse not avaliable for this target'); end;
+  procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType); begin raise Exception.Create('ReleaseMouse not avaliable for this target'); end;
 
-  procedure TTarget.SendString(str: PChar); begin raise Exception.Create('SendString not avaliable for this target'); end;
+  procedure TTarget.SendString(str: string); begin raise Exception.Create('SendString not avaliable for this target'); end;
   procedure TTarget.HoldKey(key: integer); begin raise Exception.Create('HoldKey not avaliable for this target'); end;
   procedure TTarget.ReleaseKey(key: integer); begin raise Exception.Create('ReleaseKey not avaliable for this target'); end;
   function TTarget.IsKeyHeld(key: integer): boolean; begin raise Exception.Create('IsKeyHeld not avaliable for this target'); end;
@@ -383,10 +391,24 @@ implementation
 
   procedure TEIOS_Target.GetMousePosition(var x,y: integer); begin client.GetMousePosition(target,x,y); end;
   procedure TEIOS_Target.MoveMouse(x,y: integer); begin client.MoveMouse(target,x,y); end;
-  procedure TEIOS_Target.HoldMouse(x,y: integer; left: boolean); begin client.HoldMouse(target,x,y,left); end;
-  procedure TEIOS_Target.ReleaseMouse(x,y: integer; left: boolean); begin client.ReleaseMouse(target,x,y,left); end;
+  procedure TEIOS_Target.HoldMouse(x,y: integer; button: TClickType);
+  begin
+    case button of
+      mouse_Left:   client.HoldMouse(target,x,y,true);
+      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
+      mouse_Right:  client.HoldMouse(target,x,y,false);
+    end;
+  end;
+  procedure TEIOS_Target.ReleaseMouse(x,y: integer; button: TClickType);
+  begin
+    case button of
+      mouse_Left:   client.ReleaseMouse(target,x,y,true);
+      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
+      mouse_Right:  client.ReleaseMouse(target,x,y,false);
+    end;
+  end;
 
-  procedure TEIOS_Target.SendString(str: PChar); begin client.SendString(target,str); end;
+  procedure TEIOS_Target.SendString(str: string); begin client.SendString(target,PChar(@str[1])); end;
   procedure TEIOS_Target.HoldKey(key: integer); begin client.HoldKey(target,key); end;
   procedure TEIOS_Target.ReleaseKey(key: integer); begin client.ReleaseKey(target,key); end;
   function TEIOS_Target.IsKeyHeld(key: integer): boolean; begin result:= client.IsKeyHeld(target,key); end;
