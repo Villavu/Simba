@@ -33,7 +33,7 @@ uses
   {$ifdef linux}cthreads,{$endif}Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas, SynMemo,
   //Client,
-  MufasaTypes,
+  MufasaTypes, plugins,
   mmlpsthread,synedittypes,
   window, // for the comp picker and selector
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
@@ -309,6 +309,7 @@ type
     OCR_Fonts: TMOCR;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
+    PluginsGlob: TMPlugins;
     procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
@@ -351,7 +352,7 @@ var
 
 implementation
 uses
-   lclintf,plugins,
+   lclintf,
    syncobjs, // for the critical sections
    debugimage,
    bitmaps,

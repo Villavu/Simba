@@ -29,7 +29,9 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes, web,bitmaps;
+  Classes, SysUtils, client, uPSComponent, uPSCompiler,
+  uPSRuntime, stdCtrls, uPSPreProcessor, MufasaTypes,
+  web, bitmaps, plugins;
 
 type
     { TMMLPSThread }
@@ -86,6 +88,7 @@ type
       //DebugTo : TMemo;
       DebugTo: TWritelnProc;
       DebugImg : TDbgImgInfo;
+      PluginsGlob: TMPlugins;
       PluginsToload : Array of integer;
       FOnError  : TOnError;
       procedure OnCompile(Sender: TPSScript);
