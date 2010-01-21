@@ -30,21 +30,22 @@ interface
 
 uses
   Classes, SysUtils, MufasaTypes,
-  Window, Input, Files, Finder, Bitmaps, dtm, ocr;
+  IOManager, Files, Finder, Bitmaps, dtm, ocr,
+  {$IFDEF MSWINDOWS} os_windows {$ENDIF}
+  {$IFDEF LINUX} os_linux {$ENDIF};
 
 {
 TClient is a full-blown instance of the MML.
 It binds all the components together.
 }
 
-type
+  type
     TClient = class(TObject)
-        constructor Create;
+        constructor Create(plugin_dir: string);
         destructor Destroy; override;
 
         public
-            MWindow: TMWindow;
-            MInput: TMInput;
+            IOManager: TIOManager;
             MFiles: TMFiles;
             MFinder: TMFinder;
             MBitmaps : TMBitmaps;
@@ -56,12 +57,11 @@ type
 implementation
 
 // Possibly pass arguments to a default window.
-constructor TClient.Create;
+constructor TClient.Create(plugin_dir: string);
 begin
   inherited Create;
 
-  MWindow := TMWindow.Create;
-  MInput := TMInput.Create(MWindow);
+  IOManager:= TIOManager.Create(plugin_dir);
   MFiles := TMFiles.Create;
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(self);
@@ -76,8 +76,7 @@ begin
   MBitmaps.Free;
   MFinder.Free;
   MFiles.Free;
-  MInput.Free;
-  MWindow.Free;
+  IOManager.Free;
 
   inherited;
 end;
