@@ -17,15 +17,16 @@ interface
       private
         PluginLen : integer;
         Loaded: TGenericLibArray;
+        PluginDirs : TStringList;
         procedure FreePlugins;
+        procedure LoadPluginsDir(DirIndex : integer);
       protected
         function InitPlugin(plugin: TLibHandle): boolean; virtual; abstract;
       public
-        PluginDirs : TStringList;
         constructor Create;
         destructor Destroy; override;
         procedure ValidateDirs;
-        procedure LoadPluginsDir(DirIndex : integer);
+        procedure AddAndLoadPath(path: string);
         function LoadPlugin(PluginName : string) : integer;
     end;
 
@@ -33,6 +34,19 @@ implementation
 
   uses
     MufasaTypes,FileUtil;
+
+  procedure TGenericLoader.AddAndLoadPath(path: string);
+  var
+    idx: integer;
+  begin
+    if PluginDirs.Find(path,idx) then
+       LoadPluginsDir(idx)
+    else begin
+      PluginDirs.Add(path);
+      LoadPluginsDir(PluginDirs.Count-1);
+    end;
+  end;
+
   procedure TGenericLoader.FreePlugins;
   var
     I : integer;
@@ -58,7 +72,7 @@ implementation
     for i := 0 to PluginDirs.Count - 1 do
     begin;
       if DirectoryExists(PluginDirs.Strings[i]) = false then
-        raise Exception.createFMT('Directory(%s) does not exist',[PluginDirs[i]]);
+          raise Exception.createFMT('Directory(%s) does not exist',[PluginDirs[i]]);
       TempStr := PluginDirs.Strings[i];
       if (TempStr[Length(TempStr)] <> DS) then
       begin;
@@ -133,6 +147,7 @@ implementation
     inherited Create;
     PluginLen := 0;
     PluginDirs := TStringList.Create;
+    PluginDirs.CaseSensitive:= {$IFDEF LINUX}true{$ELSE}false{$ENDIF};
   end;
 
   destructor TGenericLoader.Destroy;

@@ -29,7 +29,7 @@ interface
     Classes, SysUtils, mufasatypes, graphics, LCLType, bitmaps, LCLIntf, libloader, dynlibs;
 
   type    
-  
+
     { This is the base class for the target functionality. If it provides a target, it extends this.  
     | Some methods in heregratuitous provide default functionality as a convinence. Only override as nessessary }
     TTarget = class(TObject)
@@ -165,7 +165,7 @@ interface
     | Sexy, right? ;}
     TEIOS_Controller = class(TGenericLoader)
       public
-        constructor Create(plugin_dir: string);
+        constructor Create();
         destructor Destroy; override;
 
         function ClientExists(name: string): boolean;
@@ -187,6 +187,7 @@ interface
     | since they sometimes are treated as seperate entities. }
     TIOManager_Abstract = class(TObject)
       public
+        constructor Create;
         constructor Create(plugin_dir: string);
         destructor Destroy; override;
         
@@ -219,7 +220,6 @@ interface
         function isKeyDown(key: Word): Boolean;
         
       protected
-        controller: TEIOS_Controller;
         keymouse: TTarget;
         image: TTarget;
         frozen: TTarget;
@@ -239,12 +239,24 @@ implementation
     {$IFDEF MSWINDOWS} os_windows {$ENDIF}
     {$IFDEF LINUX} os_linux {$ENDIF};
 
+  var eios_controller: TEIOS_Controller;
+
 //***implementation*** TIOManager
 
   constructor TIOManager_Abstract.Create(plugin_dir: string);
   begin
     inherited Create;
-    controller:= TEIOS_Controller.Create(plugin_dir);
+    eios_controller.AddAndLoadPath(plugin_dir);
+    keymouse:= nil;
+    image:= nil;
+    frozen:= nil;
+    NativeInit;
+    SetDesktop;
+  end;
+
+  constructor TIOManager_Abstract.Create;
+  begin
+    inherited Create;
     keymouse:= nil;
     image:= nil;
     frozen:= nil;
@@ -260,7 +272,6 @@ implementation
       image.Free();
     end;
     if frozen <> nil then frozen.Destroy();
-    if controller <> nil then controller.Destroy();
   end;
   
   procedure TIOManager_Abstract.SetImageTarget(target: TTarget);
@@ -332,8 +343,8 @@ implementation
   var
     client: TEIOS_Client;
   begin
-    if not controller.ClientExists(name) then raise Exception.Create('EIOS Client by specified name does not exist');
-    client:= controller.GetClient(name);
+    if not eios_controller.ClientExists(name) then raise Exception.Create('EIOS Client by specified name does not exist');
+    client:= eios_controller.GetClient(name);
     SetBothTargets(TEIOS_Target.Create(client, initargs));
   end;
   
@@ -526,11 +537,9 @@ implementation
 
 //***implementation*** TEIOS_Controller
   
-  constructor TEIOS_Controller.Create(plugin_dir: string);
+  constructor TEIOS_Controller.Create();
   begin
     inherited Create;
-    PluginDirs.Add(plugin_dir);
-    LoadPluginsDir(0);
   end;
 
   destructor TEIOS_Controller.Destroy;
@@ -607,4 +616,8 @@ implementation
       result:= plugs[i].client
   end;
 
+  initialization
+    eios_controller:= TEIOS_Controller.Create;
+  finalization
+    eios_controller.Free;
 end.
