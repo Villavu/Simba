@@ -160,10 +160,7 @@ type
 
 implementation
 
-uses
-    windowutil, // For utilities such as XImageToRawImage
-    GraphType // For TRawImage
-    ;
+uses windowutil, GraphType;
 
 constructor TMWindow.Create;
 begin
