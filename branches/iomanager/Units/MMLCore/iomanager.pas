@@ -26,7 +26,7 @@ unit IOManager;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, graphics, LCLType, bitmaps, LCLIntf;
+    Classes, SysUtils, mufasatypes, graphics, LCLType, bitmaps, LCLIntf, plugins, dynlibs;
 
   type    
   
@@ -115,9 +115,6 @@ interface
       HoldKey: procedure(target: pointer; key: integer); stdcall;
       ReleaseKey: procedure(target: pointer; key: integer); stdcall;
       IsKeyHeld: function(target: pointer; key: integer): boolean; stdcall;
-
-      Initialize: procedure; stdcall;
-      Finalize: procedure; stdcall;
     end;
     
     { Implements a EIOS target. This is, for all intensive purposes, a TRawTarget with added
@@ -155,7 +152,6 @@ interface
     | a TEIOS_Client with the method pointers set. }
     type TEIOS_LoadedPlugin = record
       name: string;
-      plugin: pointer;
       client: TEIOS_Client;
     end;
 
@@ -167,14 +163,16 @@ interface
     | would be the single call....
     | SetTarget('SMART',SmartSetupRecord);
     | Sexy, right? ;}
-    TEIOS_Controller = class(TObject)
+    TEIOS_Controller = class(TGenericLoader)
       public
         constructor Create(plugin_dir: string);
         destructor Destroy; override;
 
         function ClientExists(name: string): boolean;
         function GetClient(name: string): TEIOS_Client;
-        
+
+      protected
+        function InitPlugin(plugin: TLibHandle): boolean; override;
       private
         plugs: array of TEIOS_LoadedPlugin;
         function FindClient(name:string): integer;
@@ -237,7 +235,7 @@ interface
 
 implementation
 
-  uses 
+  uses FileUtil,
     {$IFDEF MSWINDOWS} os_windows {$ENDIF}
     {$IFDEF LINUX} os_linux {$ENDIF};
 
@@ -246,7 +244,7 @@ implementation
   constructor TIOManager_Abstract.Create(plugin_dir: string);
   begin
     inherited Create;
-    controller:= nil;
+    controller:= TEIOS_Controller.Create(plugin_dir);
     keymouse:= nil;
     image:= nil;
     frozen:= nil;
@@ -392,9 +390,13 @@ implementation
   constructor TEIOS_Target.Create(client: TEIOS_Client; initval: pointer); begin
     inherited Create;
     self.client:= client;
-    self.target:= client.RequestTarget(initval);
-    self.buffer:= client.GetImageBuffer(target);
-    client.GetTargetDimensions(target,self.width,self.height);
+    if Pointer(client.RequestTarget) <> nil then
+      self.target:= client.RequestTarget(initval);
+    if Pointer(client.GetImageBuffer) <> nil then
+       self.buffer:= client.GetImageBuffer(target)
+    else
+       self.buffer:= nil;
+    GetTargetDimensions(self.width,self.height);
   end; 
   
   destructor TEIOS_Target.Destroy; begin 
@@ -402,39 +404,95 @@ implementation
     inherited Destroy;
   end;
   
-  procedure TEIOS_Target.GetTargetDimensions(var w, h: integer); begin client.GetTargetDimensions(target,w,h); end;
+  procedure TEIOS_Target.GetTargetDimensions(var w, h: integer);
+  begin
+    if Pointer(client.GetTargetDimensions) <> nil then
+      client.GetTargetDimensions(target,w,h)
+    else
+      inherited GetTargetDimensions(w,h);
+  end;
   function TEIOS_Target.ReturnData(xs, ys, width, height: Integer): TRetData;  
   begin
-    client.UpdateImageBufferBounds(target,xs,ys,xs+width,ys+height);
+    if Pointer(client.UpdateImageBufferBounds) <> nil then
+      client.UpdateImageBufferBounds(target,xs,ys,xs+width,ys+height)
+    else if Pointer(client.UpdateImageBuffer) <> nil then
+      client.UpdateImageBuffer(target)
+    else begin
+      {no update command exported}
+    end;
     result.Ptr := buffer;
     result.RowLen:= self.width;
     result.IncPtrWith:= result.RowLen - width;
     Inc(result.Ptr, ys * result.RowLen + xs);
   end;
 
-  procedure TEIOS_Target.GetMousePosition(var x,y: integer); begin client.GetMousePosition(target,x,y); end;
-  procedure TEIOS_Target.MoveMouse(x,y: integer); begin client.MoveMouse(target,x,y); end;
+  procedure TEIOS_Target.GetMousePosition(var x,y: integer);
+  begin
+    if Pointer(client.GetMousePosition) <> nil then
+      client.GetMousePosition(target,x,y)
+    else
+      inherited GetMousePosition(x,y);
+  end;
+  procedure TEIOS_Target.MoveMouse(x,y: integer);
+  begin
+    if Pointer(client.MoveMouse) <> nil then
+      client.MoveMouse(target,x,y)
+    else
+      inherited MoveMouse(x,y);
+  end;
   procedure TEIOS_Target.HoldMouse(x,y: integer; button: TClickType);
   begin
-    case button of
-      mouse_Left:   client.HoldMouse(target,x,y,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right:  client.HoldMouse(target,x,y,false);
-    end;
+    if Pointer(client.HoldMouse) <> nil then
+    begin
+      case button of
+        mouse_Left:   client.HoldMouse(target,x,y,true);
+        mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
+        mouse_Right:  client.HoldMouse(target,x,y,false);
+      end;
+    end else
+      inherited HoldMouse(x,y,button);
   end;
   procedure TEIOS_Target.ReleaseMouse(x,y: integer; button: TClickType);
   begin
-    case button of
-      mouse_Left:   client.ReleaseMouse(target,x,y,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right:  client.ReleaseMouse(target,x,y,false);
-    end;
+    if Pointer(client.ReleaseMouse) <> nil then
+    begin
+      case button of
+        mouse_Left:   client.ReleaseMouse(target,x,y,true);
+        mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
+        mouse_Right:  client.ReleaseMouse(target,x,y,false);
+      end;
+    end else
+      inherited ReleaseMouse(x,y,button);
   end;
 
-  procedure TEIOS_Target.SendString(str: string); begin client.SendString(target,PChar(@str[1])); end;
-  procedure TEIOS_Target.HoldKey(key: integer); begin client.HoldKey(target,key); end;
-  procedure TEIOS_Target.ReleaseKey(key: integer); begin client.ReleaseKey(target,key); end;
-  function TEIOS_Target.IsKeyHeld(key: integer): boolean; begin result:= client.IsKeyHeld(target,key); end;
+  procedure TEIOS_Target.SendString(str: string);
+  begin
+    if Pointer(client.SendString) <> nil then
+      client.SendString(target,PChar(@str[1]))
+    else
+      inherited SendString(str);
+  end;
+  procedure TEIOS_Target.HoldKey(key: integer);
+  begin
+    if Pointer(client.HoldKey) <> nil then
+      client.HoldKey(target,key)
+    else
+      inherited HoldKey(key);
+  end;
+  procedure TEIOS_Target.ReleaseKey(key: integer);
+  begin
+    if Pointer(client.ReleaseKey) <> nil then
+      client.ReleaseKey(target,key)
+    else
+      inherited ReleaseKey(key);
+  end;
+  function TEIOS_Target.IsKeyHeld(key: integer): boolean;
+  begin
+    if Pointer(client.IsKeyHeld) <> nil then
+      result:= client.IsKeyHeld(target,key)
+    else
+      result:= inherited IsKeyHeld(key);
+  end;
   
 //***implementation*** TRawTarget
   
@@ -471,22 +529,57 @@ implementation
   constructor TEIOS_Controller.Create(plugin_dir: string);
   begin
     inherited Create;
-    SetLength(Plugs, 0);
-    //Load plugins from plugins folder
+    PluginDirs.Add(plugin_dir);
+    LoadPluginsDir(0);
   end;
 
   destructor TEIOS_Controller.Destroy;
   var
     i: integer;
   begin
-    for i:= 0 to length(plugs) - 1 do
-      if plugs[i].plugin <> nil then
-      begin
-        //Unload plugin that was loaded
-      end;
+    SetLength(plugs,0);
     inherited Destroy;
   end;
-  
+
+  function TEIOS_Controller.InitPlugin(plugin: TLibHandle): boolean;
+  var
+    GetName: procedure(name: pchar); stdcall;
+    buffer: pchar;
+    idx: integer;
+  begin
+    Pointer(GetName) := GetProcAddress(plugin, PChar('EIOS_GetName'));
+    if Pointer(GetName) = nil then begin result:= false; exit; end;
+    idx:= Length(plugs);
+    SetLength(plugs,idx+1);
+    buffer:= stralloc(255);
+    GetName(buffer);
+    plugs[idx].name:= buffer;
+    strdispose(buffer);
+    {link in all eios methods that *might* exist}
+    with plugs[idx].client do
+    begin
+      Pointer(RequestTarget):= GetProcAddress(plugin, PChar('EIOS_RequestTarget'));
+      Pointer(ReleaseTarget):= GetProcAddress(plugin, PChar('EIOS_ReleaseTarget'));
+
+      Pointer(GetTargetDimensions):= GetProcAddress(plugin, PChar('EIOS_GetTargetDimensions'));
+      Pointer(GetImageBuffer):= GetProcAddress(plugin, PChar('EIOS_GetImageBuffer'));
+      Pointer(UpdateImageBuffer):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBuffer'));
+      Pointer(UpdateImageBufferBounds):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBufferBounds'));
+
+      Pointer(GetMousePosition):= GetProcAddress(plugin, PChar('EIOS_GetMousePosition'));
+      Pointer(MoveMouse):= GetProcAddress(plugin, PChar('EIOS_MoveMouse'));
+      Pointer(HoldMouse):= GetProcAddress(plugin, PChar('EIOS_HoldMouse'));
+      Pointer(ReleaseMouse):= GetProcAddress(plugin, PChar('EIOS_ReleaseMouse'));
+
+      Pointer(SendString):= GetProcAddress(plugin, PChar('EIOS_SendString'));
+      Pointer(HoldKey):= GetProcAddress(plugin, PChar('EIOS_HoldKey'));
+      Pointer(ReleaseKey):= GetProcAddress(plugin, PChar('EIOS_ReleaseKey'));
+      Pointer(IsKeyHeld):= GetProcAddress(plugin, PChar('EIOS_IsKeyHeld'));
+    end;
+    {done linking in methods}
+    result:= true;
+  end;
+
   function TEIOS_Controller.FindClient(name: string): integer;
   var
     i: integer;

@@ -34,7 +34,7 @@ unit plugins;
 interface
 
 uses
-  Classes, SysUtils,dynlibs;
+  Classes, SysUtils, dynlibs;
 
 type
   TMPluginMethod = record
@@ -44,31 +44,45 @@ type
 
   TMPlugin = record
     Methods : Array of TMPluginMethod;
-    dllHandle : TLibHandle;
-    filename : string;
     MethodLen : integer;
   end;
   TMPluginArray = array of TMPlugin;
 
-  { TMPlugins }
+  TGenericLib = record
+    filename: string;
+    handle: TLibHandle;
+  end;
+  TGenericLibArray = array of TGenericLib;
 
-  TMPlugins = class (TObject)
-  private
-    Plugins : TMPluginArray;
-    PluginLen : integer;
-    procedure FreePlugins;
-  public
-    PluginDirs : TStringList;
-    procedure ValidateDirs;
-    procedure LoadPluginsDir( DirIndex : integer);
-    function LoadPlugin(PluginName : string) : integer;
-    property Count : integer read PluginLen;
-    property MPlugins : TMPluginArray read Plugins;
-    constructor Create;
-    destructor Destroy;override;
+  TGenericLoader = class(TObject)
+    private
+      PluginLen : integer;
+      Loaded: TGenericLibArray;
+      procedure FreePlugins;
+    protected
+      function InitPlugin(plugin: TLibHandle): boolean; virtual; abstract;
+    public
+      PluginDirs : TStringList;
+      constructor Create;
+      destructor Destroy; override;
+      procedure ValidateDirs;
+      procedure LoadPluginsDir(DirIndex : integer);
+      function LoadPlugin(PluginName : string) : integer;
   end;
 
 
+  { TMPlugins }
+
+  TMPlugins = class (TGenericLoader)
+    private
+      Plugins : TMPluginArray;
+      NumPlugins : integer;
+    protected
+      function InitPlugin(plugin: TLibHandle): boolean; override;
+    public
+      property MPlugins : TMPluginArray read Plugins;
+      property Count : integer read NumPlugins;
+  end;
 
 implementation
 
@@ -77,24 +91,24 @@ uses
 
 { TMPlugins }
 
-procedure TMPlugins.FreePlugins;
+procedure TGenericLoader.FreePlugins;
 var
   I : integer;
 begin
   for i := 0 to PluginLen - 1 do
   begin;
-    if (Plugins[i].dllHandle > 0) then
+    if (Loaded[i].handle > 0) then
     try
       Writeln(inttostr(I));
-      FreeLibrary(Plugins[i].dllHandle);
+      FreeLibrary(Loaded[i].handle);
     except
     end;
   end;
-  SetLength(Plugins,0);
+  SetLength(Loaded,0);
   PluginLen:= 0;
 end;
 
-procedure TMPlugins.ValidateDirs;
+procedure TGenericLoader.ValidateDirs;
 var
   i : integer;
   TempStr : string;
@@ -115,7 +129,7 @@ begin
   end;
 end;
 
-procedure TMPlugins.LoadPluginsDir(DirIndex: integer);
+procedure TGenericLoader.LoadPluginsDir(DirIndex: integer);
 var
   PlugExt: String = {$IFDEF LINUX}'*.so';{$ELSE}'*.dll';{$ENDIF}
   FileSearcher : TSearchRec;
@@ -133,16 +147,10 @@ begin
   FindClose(FileSearcher);
 end;
 
-function TMPlugins.LoadPlugin(PluginName: string): Integer;
+
+function TGenericLoader.LoadPlugin(PluginName: string): Integer;
 var
   i, ii : integer;
-  pntrArrc     :  function : integer; stdcall;
-  GetFuncInfo  :  function (x: Integer; var ProcAddr: Pointer; var ProcDef: PChar) : Integer; stdcall;
-  GetTypeCount :  function : Integer; stdcall;
-  GetTypeInfo  :  function (x: Integer; var sType, sTypeDef: string): Integer; stdcall;
-  PD : PChar;
-  pntr : Pointer;
-  arrc : integer;
   Status : LongInt;
   PlugExt: String = {$IFDEF LINUX}'.so';{$ELSE}'.dll';{$ENDIF}
 begin
@@ -162,50 +170,65 @@ begin
   if ii = -1 then
     raise Exception.CreateFMT('Plugins(%s) has not been found',[PluginName]);
   for i := 0 to PluginLen - 1 do
-    if Plugins[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
+    if Loaded[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
       Exit(i);
-  pd := StrAlloc(255);
-  SetLength(Plugins,PluginLen + 1);
+  SetLength(Loaded,PluginLen + 1);
   Writeln(Format('Loading plugin %s at %s',[PluginName,PluginDirs.Strings[ii]]));
-  Plugins[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
-  Plugins[PluginLen].dllHandle:= LoadLibrary(PChar(Plugins[PluginLen].filename));
-  if Plugins[PluginLen].dllHandle = 0 then
-    Raise Exception.CreateFMT('Error loading plugin %s',[Plugins[PluginLen].filename]);
-  Pointer(pntrArrc) := GetProcAddress(Plugins[PluginLen].dllHandle, PChar('GetFunctionCount'));
-  if @pntrArrc = nil then
-    Raise Exception.CreateFMT('Error loading plugin %s',[Plugins[PluginLen].filename]);
-  arrc := pntrArrc();
-  SetLength(Plugins[PluginLen].Methods, ArrC);
-  Pointer(GetFuncInfo) := GetProcAddress(Plugins[PluginLen].dllHandle, PChar('GetFunctionInfo'));
-  if @GetFuncInfo = nil then
-    Raise Exception.CreateFMT('Error loading plugin %s',[Plugins[PluginLen].filename]);
-  Plugins[PluginLen].MethodLen := Arrc;
-  for ii := 0 to ArrC-1 do
-  begin;
-    if (GetFuncInfo(ii, pntr, pd) < 0) then
-      Continue;
-    Plugins[Pluginlen].Methods[ii].FuncPtr := pntr;
-    Plugins[Pluginlen].Methods[ii].FuncStr := pd;
-  end;
+  Loaded[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
+  Loaded[PluginLen].handle:= LoadLibrary(PChar(Loaded[PluginLen].filename));
+  if Loaded[PluginLen].handle = 0 then
+    Raise Exception.CreateFMT('Error loading plugin %s',[Loaded[PluginLen].filename]);
+  if InitPlugin(Loaded[PluginLen].handle) then
+    inc(PluginLen)
+  else
+    FreeLibrary(Loaded[PluginLen].handle);
   Result := PluginLen;
-  inc(PluginLen);
-  StrDispose(pd);
-
 end;
 
 
-constructor TMPlugins.Create;
+constructor TGenericLoader.Create;
 begin
   inherited Create;
   PluginLen := 0;
   PluginDirs := TStringList.Create;
 end;
 
-destructor TMPlugins.Destroy;
+destructor TGenericLoader.Destroy;
 begin
   FreePlugins;
   PluginDirs.Free;
   inherited Destroy;
+end;
+
+function TMPlugins.InitPlugin(plugin: TLibHandle): boolean;
+var
+  pntrArrc     :  function : integer; stdcall;
+  GetFuncInfo  :  function (x: Integer; var ProcAddr: Pointer; var ProcDef: PChar) : Integer; stdcall;
+  GetTypeCount :  function : Integer; stdcall;
+  GetTypeInfo  :  function (x: Integer; var sType, sTypeDef: string): Integer; stdcall;
+  PD : PChar;
+  pntr : Pointer;
+  arrc, ii : integer;
+begin
+  Pointer(pntrArrc) := GetProcAddress(plugin, PChar('GetFunctionCount'));
+  if @pntrArrc = nil then begin result:= false; exit; end;
+  Pointer(GetFuncInfo) := GetProcAddress(plugin, PChar('GetFunctionInfo'));
+  if @GetFuncInfo = nil then begin result:= false; exit; end;
+  arrc := pntrArrc();
+  SetLength(Plugins,NumPlugins+1);
+  Plugins[NumPlugins].MethodLen := Arrc;
+  SetLength(Plugins[NumPlugins].Methods, ArrC);
+  pd := StrAlloc(255);
+  for ii := 0 to ArrC-1 do
+  begin;
+    if (GetFuncInfo(ii, pntr, pd) < 0) then
+      Continue;
+    Plugins[NumPlugins].Methods[ii].FuncPtr := pntr;
+    Plugins[NumPlugins].Methods[ii].FuncStr := pd;
+  end;
+  StrDispose(pd);
+  inc(NumPlugins);
+  result:= true;
 end;
 
 end.
