@@ -1,22 +1,22 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TForm1','FORMDATA',[
-  'TPF0'#6'TForm1'#5'Form1'#4'Left'#3'<'#1#6'Height'#3'-'#2#3'Top'#2'i'#5'Width'
-  +#3#222#2#13'ActiveControl'#7#11'ScriptPanel'#7'Caption'#6#16'THA FUKING SIMB'
-  +'A'#12'ClientHeight'#3#20#2#11'ClientWidth'#3#222#2#10'KeyPreview'#9#4'Menu'
-  +#7#8'MainMenu'#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreate'#9'OnDe'
-  +'stroy'#7#11'FormDestroy'#10'OnShortCut'#7#13'FormShortCuts'#8'Position'#7#14
-  +'poScreenCenter'#10'LCLVersion'#6#6'0.9.29'#7'Visible'#9#0#8'TToolBar'#8'Too'
-  +'lBar1'#4'Left'#2#0#6'Height'#2#24#3'Top'#2#0#5'Width'#3#222#2#7'Caption'#6#8
-  +'ToolBar1'#6'Images'#7#17'Mufasa_Image_List'#14'ParentShowHint'#8#8'ShowHint'
-  +#9#8'TabOrder'#2#0#0#11'TToolButton'#6'TB_Run'#4'Left'#3#168#0#4'Hint'#6#3'R'
-  +'un'#3'Top'#2#2#6'Action'#7#15'ActionRunScript'#10'ImageIndex'#2#6#0#0#11'TT'
-  +'oolButton'#8'TB_Pause'#4'Left'#3#191#0#4'Hint'#6#5'Pause'#3'Top'#2#2#6'Acti'
-  +'on'#7#17'ActionPauseScript'#7'Enabled'#8#10'ImageIndex'#2#5#0#0#11'TToolBut'
-  +'ton'#7'TB_Stop'#4'Left'#3#214#0#4'Hint'#6#4'Stop'#3'Top'#2#2#6'Action'#7#16
-  +'ActionStopScript'#7'Enabled'#8#10'ImageIndex'#2#7#0#0#11'TToolButton'#11'To'
-  +'olButton1'#4'Left'#3#237#0#3'Top'#2#2#5'Width'#2#3#7'Caption'#6#11'ToolButt'
-  +'on1'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButton'#9'TB_NewTab'#4'Left'#3
+  'TPF0'#6'TForm1'#5'Form1'#4'Left'#3'Q'#2#6'Height'#3'-'#2#3'Top'#3'A'#1#5'Wid'
+  +'th'#3#222#2#13'ActiveControl'#7#11'ScriptPanel'#7'Caption'#6#16'THA FUKING '
+  +'SIMBA'#12'ClientHeight'#3#20#2#11'ClientWidth'#3#222#2#10'KeyPreview'#9#4'M'
+  +'enu'#7#8'MainMenu'#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreate'#9
+  +'OnDestroy'#7#11'FormDestroy'#10'OnShortCut'#7#13'FormShortCuts'#8'Position'
+  +#7#14'poScreenCenter'#10'LCLVersion'#6#6'0.9.29'#7'Visible'#9#0#8'TToolBar'#8
+  +'ToolBar1'#4'Left'#2#0#6'Height'#2#24#3'Top'#2#0#5'Width'#3#222#2#7'Caption'
+  +#6#8'ToolBar1'#6'Images'#7#17'Mufasa_Image_List'#14'ParentShowHint'#8#8'Show'
+  +'Hint'#9#8'TabOrder'#2#0#0#11'TToolButton'#6'TB_Run'#4'Left'#3#168#0#4'Hint'
+  +#6#3'Run'#3'Top'#2#2#6'Action'#7#15'ActionRunScript'#10'ImageIndex'#2#6#0#0
+  +#11'TToolButton'#8'TB_Pause'#4'Left'#3#191#0#4'Hint'#6#5'Pause'#3'Top'#2#2#6
+  +'Action'#7#17'ActionPauseScript'#7'Enabled'#8#10'ImageIndex'#2#5#0#0#11'TToo'
+  +'lButton'#7'TB_Stop'#4'Left'#3#214#0#4'Hint'#6#4'Stop'#3'Top'#2#2#6'Action'#7
+  +#16'ActionStopScript'#7'Enabled'#8#10'ImageIndex'#2#7#0#0#11'TToolButton'#11
+  +'ToolButton1'#4'Left'#3#237#0#3'Top'#2#2#5'Width'#2#3#7'Caption'#6#11'ToolBu'
+  +'tton1'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButton'#9'TB_NewTab'#4'Left'#3
   +#240#0#4'Hint'#6#7'Add tab'#3'Top'#2#2#6'Action'#7#12'ActionNewTab'#0#0#11'T'
   +'ToolButton'#11'TB_CloseTab'#4'Left'#3#7#1#4'Hint'#6#9'Close tab'#3'Top'#2#2
   +#6'Action'#7#14'ActionCloseTab'#0#0#11'TToolButton'#11'ToolButton4'#4'Left'#3
@@ -53,27 +53,27 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +'T_Paste'#4'Left'#3#142#0#3'Top'#2#2#6'Action'#7#11'ActionPaste'#0#0#11'TToo'
   +'lButton'#11'ToolButton9'#4'Left'#3#165#0#3'Top'#2#2#5'Width'#2#3#7'Caption'
   +#6#11'ToolButton9'#5'Style'#7#10'tbsDivider'#0#0#0#10'TStatusBar'#9'StatusBa'
-  +'r'#4'Left'#2#0#6'Height'#2#21#3'Top'#3#24#2#5'Width'#3#222#2#6'Panels'#14#1
+  +'r'#4'Left'#2#0#6'Height'#2#21#3'Top'#3#255#1#5'Width'#3#222#2#6'Panels'#14#1
   +#5'Width'#2'<'#0#1#4'Text'#6#8'Untitled'#5'Width'#3#150#0#0#1#5'Width'#2'2'#0
   +#0#11'SimplePanel'#8#0#0#6'TPanel'#9'PanelMemo'#4'Left'#2#0#6'Height'#3#154#0
-  +#3'Top'#3'~'#1#5'Width'#3#222#2#5'Align'#7#8'alBottom'#12'ClientHeight'#3#154
+  +#3'Top'#3'e'#1#5'Width'#3#222#2#5'Align'#7#8'alBottom'#12'ClientHeight'#3#154
   +#0#11'ClientWidth'#3#222#2#8'TabOrder'#2#2#0#5'TMemo'#5'Memo1'#4'Left'#2#1#6
   +'Height'#3#152#0#3'Top'#2#1#5'Width'#3#220#2#5'Align'#7#8'alClient'#10'Scrol'
   +'lBars'#7#10'ssAutoBoth'#8'TabOrder'#2#0#0#0#0#9'TSplitter'#19'SplitterMemoS'
-  +'ynedit'#6'Cursor'#7#8'crVSplit'#4'Left'#2#0#6'Height'#2#5#3'Top'#3'y'#1#5'W'
+  +'ynedit'#6'Cursor'#7#8'crVSplit'#4'Left'#2#0#6'Height'#2#5#3'Top'#3'`'#1#5'W'
   +'idth'#3#222#2#5'Align'#7#8'alBottom'#12'ResizeAnchor'#7#8'akBottom'#0#0#6'T'
-  +'Panel'#11'ScriptPanel'#4'Left'#2#0#6'Height'#3'a'#1#3'Top'#2#24#5'Width'#3
+  +'Panel'#11'ScriptPanel'#4'Left'#2#0#6'Height'#3'H'#1#3'Top'#2#24#5'Width'#3
   +#222#2#5'Align'#7#8'alClient'#10'BevelOuter'#7#6'bvNone'#12'ClientHeight'#3
-  +'a'#1#11'ClientWidth'#3#222#2#8'DockSite'#9#8'TabOrder'#2#4#10'OnDockDrop'#7
+  +'H'#1#11'ClientWidth'#3#222#2#8'DockSite'#9#8'TabOrder'#2#4#10'OnDockDrop'#7
   ,#19'ScriptPanelDockDrop'#10'OnDockOver'#7#19'ScriptPanelDockOver'#0#12'TPage'
-  +'Control'#12'PageControl1'#4'Left'#3#155#0#6'Height'#3'>'#1#3'Top'#2#0#5'Wid'
+  +'Control'#12'PageControl1'#4'Left'#3#155#0#6'Height'#3'%'#1#3'Top'#2#0#5'Wid'
   +'th'#3'C'#2#5'Align'#7#8'alClient'#6'Images'#7#17'Mufasa_Image_List'#9'Popup'
   +'Menu'#7#8'TabPopup'#8'TabOrder'#2#0#8'OnChange'#7#18'PageControl1Change'#10
   +'OnChanging'#7#20'PageControl1Changing'#14'OnContextPopup'#7#24'PageControl1'
   +'ContextPopup'#10'OnDragDrop'#7#20'PageControl1DragDrop'#10'OnDragOver'#7#20
   +'PageControl1DragOver'#11'OnMouseDown'#7#21'PageControl1MouseDown'#9'OnMouse'
   +'Up'#7#19'PageControl1MouseUp'#13'OnPageChanged'#7#18'PageControl1Change'#0#0
-  +#6'TPanel'#11'SearchPanel'#4'Left'#2#0#6'Height'#2'#'#3'Top'#3'>'#1#5'Width'
+  +#6'TPanel'#11'SearchPanel'#4'Left'#2#0#6'Height'#2'#'#3'Top'#3'%'#1#5'Width'
   +#3#222#2#5'Align'#7#8'alBottom'#10'BevelOuter'#7#7'bvSpace'#12'ClientHeight'
   +#2'#'#11'ClientWidth'#3#222#2#8'TabOrder'#2#1#7'Visible'#8#0#12'TSpeedButton'
   +#17'SpeedButtonSearch'#4'Left'#2' '#6'Height'#2#19#3'Top'#2#7#5'Width'#2#16#5
@@ -155,14 +155,14 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +#25'LabeledEditSearchKeyPress'#0#0#9'TCheckBox'#17'CheckBoxMatchCase'#4'Left'
   +#3'@'#1#6'Height'#2#22#3'Top'#2#7#5'Width'#2'b'#7'Caption'#6#10'Match case'#7
   +'OnClick'#7#22'CheckBoxMatchCaseClick'#8'TabOrder'#2#1#0#0#0#9'TSplitter'#20
-  +'SplitterFunctionList'#4'Left'#3#150#0#6'Height'#3'>'#1#3'Top'#2#0#5'Width'#2
+  +'SplitterFunctionList'#4'Left'#3#150#0#6'Height'#3'%'#1#3'Top'#2#0#5'Width'#2
   +#5#11'OnCanResize'#7#29'SplitterFunctionListCanResize'#7'Visible'#8#0#0#244
-  +#18'TFunctionListFrame'#15'frmFunctionList'#6'Height'#3'>'#1#5'Width'#3#150#0
-  +#12'ClientHeight'#3'>'#1#11'ClientWidth'#3#150#0#9'OnEndDock'#13#8'TabOrder'
-  +#2#3#0#241#9'TTreeView'#12'FunctionList'#6'Height'#3#13#1#3'Top'#2#22#5'Widt'
-  +'h'#3#150#0#17'DefaultItemHeight'#2#19#8'OnChange'#7#18'FunctionListChange'
+  +#18'TFunctionListFrame'#15'frmFunctionList'#6'Height'#3'%'#1#5'Width'#3#150#0
+  +#12'ClientHeight'#3'%'#1#11'ClientWidth'#3#150#0#9'OnEndDock'#13#8'TabOrder'
+  +#2#3#0#241#9'TTreeView'#12'FunctionList'#6'Height'#3#244#0#3'Top'#2#22#5'Wid'
+  +'th'#3#150#0#17'DefaultItemHeight'#2#19#8'OnChange'#7#18'FunctionListChange'
   +#10'OnDeletion'#13#7'OnEnter'#7#17'FunctionListEnter'#6'OnExit'#7#16'Functio'
-  +'nListExit'#0#0#241#5'TEdit'#14'editSearchList'#6'Height'#2#27#3'Top'#3'#'#1
+  +'nListExit'#0#0#241#5'TEdit'#14'editSearchList'#6'Height'#2#27#3'Top'#3#10#1
   +#5'Width'#3#150#0#6'OnExit'#7#18'editSearchListExit'#9'OnKeyDown'#7#21'editS'
   +'earchListKeyDown'#10'OnKeyPress'#7#22'editSearchListKeyPress'#0#0#241#6'TLa'
   +'bel'#17'FunctionListLabel'#6'Height'#2#18#5'Width'#3#146#0#0#0#0#0#9'TMainM'
