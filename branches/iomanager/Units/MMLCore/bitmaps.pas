@@ -110,12 +110,48 @@ type
     destructor Destroy;override;
   end;
 
+  Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
 
 implementation
 
 uses
-  Windowutil,paszlib,DCPbase64,math,
+  paszlib,DCPbase64,math,
   colour_conv,IOManager,mufasatypesutil,tpa;
+
+// Needs more fixing. We need to either copy the memory ourself, or somehow
+// find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
+// feature)
+Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
+Begin
+  RawImage.Init; { Calls raw.Description.Init as well }
+
+  RawImage.Description.PaletteColorCount:=0;
+  RawImage.Description.MaskBitsPerPixel:=0;
+  RawImage.Description.Width := Size.X;
+  RawImage.Description.Height:= Size.Y;
+
+  RawImage.Description.Format := ricfRGBA;
+  RawImage.Description.ByteOrder := riboLSBFirst;
+  RawImage.Description.BitOrder:= riboBitsInOrder; // should be fine
+  RawImage.Description.Depth:=24;
+  RawImage.Description.BitsPerPixel:=32;
+  RawImage.Description.LineOrder:=riloTopToBottom;
+  RawImage.Description.LineEnd := rileDWordBoundary;
+
+  RawImage.Description.RedPrec := 8;
+  RawImage.Description.GreenPrec:= 8;
+  RawImage.Description.BluePrec:= 8;
+  RawImage.Description.AlphaPrec:=0;
+
+
+  RawImage.Description.RedShift:=16;
+  RawImage.Description.GreenShift:=8;
+  RawImage.Description.BlueShift:=0;
+
+  RawImage.DataSize := RawImage.Description.Width * RawImage.Description.Height
+                       * (RawImage.Description.bitsperpixel shr 3);
+  RawImage.Data := PByte(Ptr);
+End;
 
 function Min(a,b:integer) : integer;
 begin
