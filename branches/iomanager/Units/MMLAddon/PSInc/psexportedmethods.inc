@@ -168,7 +168,6 @@ AddFunction(@KeyUp, 'procedure KeyUp(key: Word);');
 AddFunction(@PressKey, 'procedure PressKey(key: Word);');
 AddFunction(@SendKeys, 'procedure SendKeys(s: string);');
 AddFunction(@isKeyDown, 'function IsKeyDown(key: Word): Boolean;');
-AddFunction(@GetKeyCode, 'function GetKeyCode(Key : char) : byte');
 
 { OCR}
 SetCurrSection('OCR');
