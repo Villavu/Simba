@@ -29,9 +29,12 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent, uPSCompiler,
-  uPSRuntime, stdCtrls, uPSPreProcessor, MufasaTypes,
-  web, bitmaps, plugins;
+  Classes, SysUtils, client, uPSComponent,uPSCompiler,
+  uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes, web,
+  bitmaps, plugins;
+
+var
+  PluginsGlob: TMPlugins;
 
 type
     { TMMLPSThread }
@@ -88,7 +91,6 @@ type
       //DebugTo : TMemo;
       DebugTo: TWritelnProc;
       DebugImg : TDbgImgInfo;
-      PluginsGlob: TMPlugins;
       PluginsToload : Array of integer;
       FOnError  : TOnError;
       procedure OnCompile(Sender: TPSScript);
@@ -114,7 +116,7 @@ type
       procedure SetDebug( writelnProc : TWritelnProc );
       procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
       procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
-      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo);
+      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
       destructor Destroy; override;
     end;
 threadvar
@@ -132,7 +134,6 @@ uses
   math, //Maths!
   internets, // internets
   strutils,
-  input,
   tpa, //Tpa stuff
   forms,//Forms
   lclintf; // for GetTickCount and others.
@@ -214,11 +215,11 @@ end;
 }
 
 
-constructor TMMLPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo);
+constructor TMMLPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 begin
   SyncInfo:= TheSyncInfo;
   SetLength(PluginsToLoad,0);
-  Client := TClient.Create;
+  Client := TClient.Create(plugin_dir);
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;

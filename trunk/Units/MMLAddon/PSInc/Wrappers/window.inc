@@ -23,36 +23,38 @@
 
 procedure SetDesktopAsClient;
 begin;
-  CurrThread.Client.MWindow.SetDesktop;
+  CurrThread.Client.IOManager.SetDesktop;
 end;
 
 procedure SetTargetBitmap(bitmap: Integer);
 begin;
   With CurrThread.Client do
-    MWindow.SetTarget(MBitmaps.Bmp[Bitmap]);
+    IOManager.SetTarget(MBitmaps.Bmp[Bitmap]);
 end;
 
 procedure GetClientDimensions(out w, h: integer);
 begin
-  CurrThread.Client.MWindow.GetDimensions(w, h);
+  CurrThread.Client.IOManager.GetDimensions(w, h);
 end;
 
 function Freeze: boolean;
 begin
-  result := CurrThread.Client.MWindow.Freeze();
+  CurrThread.Client.IOManager.SetFrozen(true);
+  result := true;
 end;
 
 function Unfreeze: boolean;
 begin
-  result := CurrThread.Client.MWindow.Unfreeze;
+  CurrThread.Client.IOManager.SetFrozen(false);
+  result := true;
 end;
 
 procedure SetTargetArray(P: Integer; w, h: integer);
 begin
-  CurrThread.Client.MWindow.SetTarget(PRGB32(P), classes.point(w,h));
+  CurrThread.Client.IOManager.SetTarget(PRGB32(P), classes.point(w,h));
 end;
 
 procedure activateclient;
 begin
-  CurrThread.Client.MWindow.ActivateClient;
+  CurrThread.Client.IOManager.ActivateClient;
 end;

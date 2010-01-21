@@ -29,7 +29,7 @@ interface
 
 
 uses
-  Classes, SysUtils, LibLoader;
+  Classes, SysUtils;
 const
   DS = DirectorySeparator;
   MEOL = {$ifdef MSWINDOWS}#13+{$endif}#10;

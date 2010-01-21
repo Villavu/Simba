@@ -34,7 +34,7 @@ unit plugins;
 interface
 
 uses
-  Classes, SysUtils, dynlibs, LibLoader;
+  Classes, SysUtils, dynlibs, libloader;
 
 type
   TMPluginMethod = record
@@ -47,6 +47,7 @@ type
     MethodLen : integer;
   end;
   TMPluginArray = array of TMPlugin;
+
 
 
   { TMPlugins }
