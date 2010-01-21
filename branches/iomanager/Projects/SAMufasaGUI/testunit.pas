@@ -574,7 +574,7 @@ begin
         Writeln('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
     ScriptThread.SetPaths(ScriptPath,AppPath,Includepath,PluginsPath,fontPath);
 
-    ScriptThread.Client.IOManager.SetTarget(Selector.LastPick);
+    if selector.haspicked then ScriptThread.Client.IOManager.SetTarget(Selector.LastPick);
 
 
     loadFontsOnScriptStart := LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True');
@@ -1545,7 +1545,7 @@ end;
 procedure TForm1.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
-  Manager.SetTarget(Selector.Drag {$ifdef MSWINDOWS},w_window{$endif});
+  Manager.SetTarget(Selector.Drag);
   writeln('New window: ' + IntToStr(Selector.LastPick));
 end;
 

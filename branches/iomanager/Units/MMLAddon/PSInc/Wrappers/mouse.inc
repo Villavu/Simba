@@ -47,14 +47,12 @@ end;
 
 procedure HoldMouse(x, y: integer; clickType: integer);
 begin
-   CurrThread.Client.IOManager.SetMousePos(x, y);
-   CurrThread.Client.IOManager.MouseButtonAction(x, y, ConvIntClickType(clickType), mouse_Down);
+   CurrThread.Client.IOManager.HoldMouse(x, y, ConvIntClickType(clickType));
 end;
 
 procedure ReleaseMouse(x, y: integer; clickType: integer);
 begin
-   CurrThread.Client.IOManager.SetMousePos(x, y);
-   CurrThread.Client.IOManager.MouseButtonAction(x, y, ConvIntClickType(clickType), mouse_Up);
+   CurrThread.Client.IOManager.ReleaseMouse(x, y, ConvIntClickType(clickType));
 end;
 
 procedure ClickMouse(x, y: integer; clickType: integer);

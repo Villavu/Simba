@@ -53,6 +53,7 @@ type
 
     public
           LastPick: TNativeWindow;
+          haspicked: boolean;
           manager: TIOManager;
 
     end;
@@ -64,7 +65,7 @@ implementation
 constructor TMWindowSelector.Create(manager: TIOManager);
 begin
   inherited create;
-
+  haspicked:= false;
   self.manager := manager;
 
 end;
@@ -130,6 +131,7 @@ begin
 
       Result := Tempwindow;
       LastPick:= TempWindow;
+      haspicked:= true;
     end;
     XFlush(manager.display);
     Sleep(16);
@@ -194,6 +196,7 @@ begin;
   end;
   Result := TempHandle;
   LastPick:= TempHandle;
+  haspicked:= true;
   Screen.Cursor:= cursor;
   Invalidaterect(temphandle, nil, true);
   UpdateWindow(temphandle);
