@@ -111,7 +111,7 @@ type
       procedure SetDebug( writelnProc : TWritelnProc );
       procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
       procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
-      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo);
+      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
       destructor Destroy; override;
     end;
 threadvar
@@ -210,11 +210,11 @@ end;
 }
 
 
-constructor TMMLPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo);
+constructor TMMLPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 begin
   SyncInfo:= TheSyncInfo;
   SetLength(PluginsToLoad,0);
-  Client := TClient.Create;
+  Client := TClient.Create(plugin_dir);
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;

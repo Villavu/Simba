@@ -41,7 +41,7 @@ It binds all the components together.
 
 type
     TClient = class(TObject)
-        constructor Create;
+        constructor Create(plugin_dir: string);
         destructor Destroy; override;
 
         public
@@ -57,11 +57,11 @@ type
 implementation
 
 // Possibly pass arguments to a default window.
-constructor TClient.Create;
+constructor TClient.Create(plugin_dir: string);
 begin
   inherited Create;
 
-  IOManager:= TIOManager.Create('./Plugins');
+  IOManager:= TIOManager.Create(plugin_dir);
   MFiles := TMFiles.Create;
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(self);

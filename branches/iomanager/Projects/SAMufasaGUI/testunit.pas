@@ -527,9 +527,13 @@ begin
       Writeln('The script hasn''t stopped yet, so we cannot start a new one.');
       exit;
     end;
+    AppPath:= MainDir + DS;
+    includePath:= LoadSettingDef('Settings/Includes/Path', IncludeTrailingPathDelimiter(ExpandFileName(MainDir+  DS + '..' + DS + '..' + ds)) + 'Includes' + DS);
+    fontPath := LoadSettingDef('Settings/Fonts/Path', IncludeTrailingPathDelimiter(ExpandFileName(MainDir+  DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
+    PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-    ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo);
+    ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
     {$IFNDEF TERMINALWRITELN}
     ScriptThread.SetDebug(@formWriteln);
     ScriptThread.DebugMemo := Self.Memo1;
@@ -547,16 +551,6 @@ begin
 
     if ScriptFile <> '' then
       ScriptPath := ExtractFileDir(ScriptFile);
-    AppPath:= MainDir + DS;
-    includePath:= LoadSettingDef('Settings/Includes/Path',
-                                 IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
-                                 DS + '..' + DS + '..' + ds)) + 'Includes' + DS);
-    fontPath := LoadSettingDef('Settings/Fonts/Path',
-                               IncludeTrailingPathDelimiter(ExpandFileName(MainDir+
-                               DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
-
-    PluginsPath := LoadSettingDef('Settings/Plugins/Path',
-                                  ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     if not DirectoryExists(PluginsPath) and not assigned(PluginsGlob) then
     begin
       if FirstRun then
