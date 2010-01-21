@@ -29,7 +29,7 @@ interface
 
 
 uses
-  Classes, SysUtils,plugins;
+  Classes, SysUtils, LibLoader;
 const
   DS = DirectorySeparator;
   MEOL = {$ifdef MSWINDOWS}#13+{$endif}#10;
@@ -115,8 +115,6 @@ type
     SubPoints: TDTMPointDefArray;
   end;
 
-var
-  PluginsGlob : TMPlugins;
 type
   VirtualKeyInfo = record
       Str : string;

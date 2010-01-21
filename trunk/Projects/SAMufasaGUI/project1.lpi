@@ -36,7 +36,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="282">
+    <Units Count="284">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -137,8 +137,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestUnit"/>
-        <CursorPos X="11" Y="42"/>
-        <TopLine Value="27"/>
+        <ComponentState Value="1"/>
+        <CursorPos X="12" Y="312"/>
+        <TopLine Value="290"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -195,9 +196,11 @@
         <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="MufasaTypes"/>
-        <CursorPos X="58" Y="108"/>
-        <TopLine Value="92"/>
+        <CursorPos X="39" Y="120"/>
+        <TopLine Value="98"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="201"/>
+        <Loaded Value="True"/>
       </Unit21>
       <Unit22>
         <Filename Value="../../Units/MMLCore/files.pas"/>
@@ -242,7 +245,7 @@
         <UnitName Value="finder"/>
         <CursorPos X="9" Y="90"/>
         <TopLine Value="86"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="10"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit27>
@@ -264,9 +267,11 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="5" Y="70"/>
-        <TopLine Value="470"/>
+        <CursorPos X="25" Y="34"/>
+        <TopLine Value="23"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
       </Unit30>
       <Unit31>
         <Filename Value="../../Units/PascalScript/uPSComponent.pas"/>
@@ -346,7 +351,7 @@
         <UnitName Value="bitmaps"/>
         <CursorPos X="50" Y="119"/>
         <TopLine Value="113"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="9"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit42>
@@ -361,7 +366,7 @@
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/colour.inc"/>
         <CursorPos X="47" Y="47"/>
         <TopLine Value="47"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="30"/>
         <Loaded Value="True"/>
       </Unit44>
@@ -483,7 +488,7 @@
         <UnitName Value="colour_conv"/>
         <CursorPos X="1" Y="332"/>
         <TopLine Value="302"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="11"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit62>
@@ -497,7 +502,7 @@
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/other.inc"/>
         <CursorPos X="53" Y="13"/>
         <TopLine Value="75"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="41"/>
         <Loaded Value="True"/>
       </Unit64>
@@ -537,9 +542,11 @@
         <Filename Value="../../Units/MMLAddon/plugins.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="plugins"/>
-        <CursorPos X="40" Y="49"/>
-        <TopLine Value="55"/>
+        <CursorPos X="12" Y="54"/>
+        <TopLine Value="34"/>
+        <EditorIndex Value="1"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit70>
       <Unit71>
         <Filename Value="../../Units/MMLAddon/PSInc/psdefines.inc"/>
@@ -1704,7 +1711,7 @@
         <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
         <CursorPos X="30" Y="109"/>
         <TopLine Value="98"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="19"/>
         <Loaded Value="True"/>
       </Unit240>
@@ -1731,7 +1738,7 @@
         <UnitName Value="updateform"/>
         <CursorPos X="111" Y="102"/>
         <TopLine Value="81"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="96"/>
         <Loaded Value="True"/>
       </Unit243>
@@ -2000,124 +2007,144 @@
         <TopLine Value="511"/>
         <UsageCount Value="15"/>
       </Unit281>
+      <Unit282>
+        <Filename Value="../../Units/MMLCore/libloader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="libloader"/>
+        <CursorPos X="20" Y="3"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit282>
+      <Unit283>
+        <Filename Value="../../../../../custom-installs/freepascal/rtl/objpas/classes/classesh.inc"/>
+        <CursorPos X="15" Y="1506"/>
+        <TopLine Value="1478"/>
+        <UsageCount Value="10"/>
+      </Unit283>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="testunit.pas"/>
-        <Caret Line="205" Column="33" TopLine="28"/>
+        <Caret Line="1452" Column="33" TopLine="1439"/>
       </Position1>
       <Position2>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="196" Column="74" TopLine="45"/>
+        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
+        <Caret Line="115" Column="17" TopLine="80"/>
       </Position2>
       <Position3>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="195" Column="74" TopLine="170"/>
+        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
+        <Caret Line="48" Column="1" TopLine="4"/>
       </Position3>
       <Position4>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="231" Column="15" TopLine="218"/>
+        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
+        <Caret Line="351" Column="52" TopLine="346"/>
       </Position4>
       <Position5>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="336" Column="24" TopLine="318"/>
+        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
+        <Caret Line="374" Column="5" TopLine="345"/>
       </Position5>
       <Position6>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="474" Column="16" TopLine="459"/>
+        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
+        <Caret Line="364" Column="35" TopLine="345"/>
       </Position6>
       <Position7>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="486" Column="22" TopLine="459"/>
+        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
+        <Caret Line="119" Column="77" TopLine="80"/>
       </Position7>
       <Position8>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="61" Column="25" TopLine="61"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="1449" Column="100" TopLine="1439"/>
       </Position8>
       <Position9>
-        <Filename Value="../../Units/MMLCore/finder.pas"/>
-        <Caret Line="289" Column="82" TopLine="270"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="1489" Column="3" TopLine="1487"/>
       </Position9>
       <Position10>
-        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
-        <Caret Line="114" Column="1" TopLine="103"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="474" Column="10" TopLine="459"/>
       </Position10>
       <Position11>
-        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
-        <Caret Line="110" Column="27" TopLine="96"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="434" Column="20" TopLine="391"/>
       </Position11>
       <Position12>
         <Filename Value="testunit.pas"/>
-        <Caret Line="487" Column="95" TopLine="275"/>
+        <Caret Line="533" Column="40" TopLine="508"/>
       </Position12>
       <Position13>
         <Filename Value="testunit.pas"/>
-        <Caret Line="1439" Column="38" TopLine="1407"/>
+        <Caret Line="58" Column="21" TopLine="38"/>
       </Position13>
       <Position14>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="1452" Column="33" TopLine="1439"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="128" Column="27" TopLine="111"/>
       </Position14>
       <Position15>
-        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
-        <Caret Line="115" Column="17" TopLine="80"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="468" Column="17" TopLine="418"/>
       </Position15>
       <Position16>
-        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
-        <Caret Line="48" Column="1" TopLine="4"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="1017" Column="63" TopLine="1010"/>
       </Position16>
       <Position17>
-        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
-        <Caret Line="351" Column="52" TopLine="346"/>
+        <Filename Value="../../Units/MMLCore/libloader.pas"/>
+        <Caret Line="21" Column="6" TopLine="1"/>
       </Position17>
       <Position18>
-        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
-        <Caret Line="374" Column="5" TopLine="345"/>
+        <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
+        <Caret Line="32" Column="31" TopLine="1"/>
       </Position18>
       <Position19>
-        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
-        <Caret Line="364" Column="35" TopLine="345"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="291" Column="29" TopLine="274"/>
       </Position19>
       <Position20>
-        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
-        <Caret Line="119" Column="77" TopLine="80"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="329" Column="31" TopLine="312"/>
       </Position20>
       <Position21>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="1449" Column="100" TopLine="1439"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="330" Column="41" TopLine="313"/>
       </Position21>
       <Position22>
         <Filename Value="testunit.pas"/>
-        <Caret Line="1489" Column="3" TopLine="1487"/>
+        <Caret Line="308" Column="33" TopLine="292"/>
       </Position22>
       <Position23>
         <Filename Value="testunit.pas"/>
-        <Caret Line="474" Column="10" TopLine="459"/>
+        <Caret Line="604" Column="21" TopLine="581"/>
       </Position23>
       <Position24>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="434" Column="20" TopLine="391"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="10" Column="18" TopLine="67"/>
       </Position24>
       <Position25>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="533" Column="40" TopLine="508"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="122" Column="11" TopLine="109"/>
       </Position25>
       <Position26>
-        <Filename Value="testunit.pas"/>
-        <Caret Line="58" Column="21" TopLine="38"/>
+        <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
+        <Caret Line="89" Column="30" TopLine="77"/>
       </Position26>
       <Position27>
-        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
-        <Caret Line="128" Column="27" TopLine="111"/>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="604" Column="21" TopLine="537"/>
       </Position27>
       <Position28>
         <Filename Value="testunit.pas"/>
-        <Caret Line="468" Column="17" TopLine="418"/>
+        <Caret Line="36" Column="24" TopLine="300"/>
       </Position28>
       <Position29>
         <Filename Value="testunit.pas"/>
-        <Caret Line="1017" Column="63" TopLine="1010"/>
+        <Caret Line="312" Column="27" TopLine="289"/>
       </Position29>
+      <Position30>
+        <Filename Value="testunit.pas"/>
+        <Caret Line="355" Column="12" TopLine="338"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -2128,7 +2155,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/;$(ProjPath)../../Units/MMLAddon/PSInc/"/>
       <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/MMLAddon/PSInc/;$(ProjPath)../../Units/Linux/;$(ProjPath)../../Units/Synapse/;$(LazarusDir)/components/mouseandkeyinput/"/>
-      <UnitOutputDirectory Value="../../build/$(TargetOS)/"/>
+      <UnitOutputDirectory Value="../../build/$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
       <Optimizations>
