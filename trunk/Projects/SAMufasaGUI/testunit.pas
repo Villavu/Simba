@@ -551,15 +551,9 @@ begin
 
     if ScriptFile <> '' then
       ScriptPath := ExtractFileDir(ScriptFile);
-    if not DirectoryExists(PluginsPath) and not assigned(PluginsGlob) then
-    begin
-      if FirstRun then
-        Writeln('Warning: The plugins directory specified in Settings isn''t valid. Not loading Plugins now.');
-    end else if not Assigned(PluginsGlob) then
-    begin
-      PluginsGlob := TMPlugins.Create;
-      PluginsGlob.AddAndLoadPath(PluginsPath);
-    end;
+
+    if DirectoryExists(PluginsPath) then
+       PluginsGlob.AddAndLoadPath(PluginsPath);
     if not DirectoryExists(IncludePath) then
       if FirstRun then
         Writeln('Warning: The include directory specified in the Settings isn''t valid.');

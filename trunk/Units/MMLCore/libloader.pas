@@ -42,6 +42,7 @@ implementation
     if PluginDirs.Find(path,idx) then
        LoadPluginsDir(idx)
     else begin
+         writeln('Loading Path: ' + path);
       PluginDirs.Add(path);
       LoadPluginsDir(PluginDirs.Count-1);
     end;
