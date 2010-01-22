@@ -564,12 +564,11 @@ begin
 end;
 
 
-{ Include stuff here? }
-
-//{$I inc/colors.inc}
-//{$I inc/bitmaps.inc}
-
-
+initialization
+  PluginsGlob := TMPlugins.Create;
+finalization
+  //PluginsGlob.Free;
+  //Its a nice idea, but it will segfault... the program is closing anyway.
 end.
 
 

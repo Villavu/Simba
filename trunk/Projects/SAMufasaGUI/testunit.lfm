@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 1040
+  Left = 1343
   Height = 557
-  Top = 323
+  Top = 181
   Width = 734
   ActiveControl = ScriptPanel
   Caption = 'THA FUKING SIMBA'
