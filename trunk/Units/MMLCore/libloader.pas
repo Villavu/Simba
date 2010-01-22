@@ -132,7 +132,7 @@ implementation
     SetLength(Loaded,PluginLen + 1);
     Writeln(Format('Loading plugin %s at %s',[PluginName,PluginDirs.Strings[ii]]));
     Loaded[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
-    Loaded[PluginLen].handle:= LoadLibrary(PChar(@Loaded[PluginLen].filename[1]));
+    Loaded[PluginLen].handle:= LoadLibrary(Loaded[PluginLen].filename);
     if Loaded[PluginLen].handle = 0 then
       Raise Exception.CreateFMT('Error loading plugin %s',[Loaded[PluginLen].filename]);
     if InitPlugin(Loaded[PluginLen].handle) then

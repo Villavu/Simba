@@ -21,6 +21,7 @@
            Input/Output manager for Mufasa Macro Library
 }
 
+{$mode objfpc}{$H+}
 unit IOManager;
 
 interface
@@ -370,7 +371,7 @@ implementation
   procedure TIOManager_Abstract.KeyUp(key: Word); begin keymouse.ReleaseKey(key) end;
   procedure TIOManager_Abstract.KeyDown(key: Word); begin keymouse.HoldKey(key) end;
   procedure TIOManager_Abstract.PressKey(key: Word); begin keyup(key); keydown(key); end;
-  procedure TIOManager_Abstract.SendText(text: string); begin keymouse.SendString(PChar(@text[1])); end;
+  procedure TIOManager_Abstract.SendText(text: string); begin keymouse.SendString(text); end;
   function TIOManager_Abstract.isKeyDown(key: Word): Boolean; begin result:= keymouse.IsKeyHeld(key); end;
   
 //***implementation*** TTarget
@@ -479,7 +480,7 @@ implementation
   procedure TEIOS_Target.SendString(str: string);
   begin
     if Pointer(client.SendString) <> nil then
-      client.SendString(target,PChar(@str[1]))
+      client.SendString(target,PChar(str))
     else
       inherited SendString(str);
   end;
