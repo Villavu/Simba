@@ -26,10 +26,14 @@ begin;
   CurrThread.Client.IOManager.SetDesktop;
 end;
 
+procedure SetTargetArray(P: Integer; w, h: integer);
+begin
+  CurrThread.Client.IOManager.SetTarget(PRGB32(P), classes.point(w,h));
+end;
+
 procedure SetTargetBitmap(bitmap: Integer);
 begin;
-  With CurrThread.Client do
-    IOManager.SetTarget(MBitmaps.Bmp[Bitmap]);
+  CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps.Bmp[Bitmap]);
 end;
 
 procedure GetClientDimensions(out w, h: integer);
@@ -40,21 +44,21 @@ end;
 function Freeze: boolean;
 begin
   CurrThread.Client.IOManager.SetFrozen(true);
-  result := true;
+  result := true; //dunno what the result is supposed to mean
 end;
 
 function Unfreeze: boolean;
 begin
   CurrThread.Client.IOManager.SetFrozen(false);
-  result := true;
+  result := true; //dunno what the result is supposed to mean
 end;
 
-procedure SetTargetArray(P: Integer; w, h: integer);
-begin
-  CurrThread.Client.IOManager.SetTarget(PRGB32(P), classes.point(w,h));
-end;
-
-procedure activateclient;
+procedure ActivateClient;
 begin
   CurrThread.Client.IOManager.ActivateClient;
+end;
+
+function IsTargetValid: boolean;
+begin
+  result:= CurrThread.Client.IOManager.TargetValid;
 end;

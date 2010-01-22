@@ -56,13 +56,14 @@ AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;'
 
 {window}
 SetCurrSection('Window');
-AddFunction(@Freeze, 'function Freeze:boolean;');
+AddFunction(@Freeze, 'function Freeze: boolean;');
 AddFunction(@Unfreeze, 'function Unfreeze: boolean;');
 AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(var w, h:integer);');
 AddFunction(@SetTargetBitmap,'procedure SetTargetBitmap(Bitmap : integer);');
 AddFunction(@SetDesktopAsClient,'procedure SetDesktopAsClient');
 AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; w, h: integer);');
-AddFunction(@ActivateClient, 'procedure activateclient;');
+AddFunction(@ActivateClient, 'procedure ActivateClient;');
+AddFunction(@IsTargetValid, 'function IsTargetValid: boolean;');
 
 {files}
 SetCurrSection('Files');
