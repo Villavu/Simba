@@ -512,26 +512,28 @@ class function TMMLPSThread.GetExportedMethods: TExpMethodArr;
 var
   c : integer;
   CurrSection : string;
-procedure SetCurrSection(str : string);
-begin;
-  CurrSection := Str;
-end;
 
-procedure AddFunction( Ptr : Pointer; DeclStr : String);
-begin;
-//  SetLength(ExportedMethods,c+1);
-  if c >= 300 then
-    raise exception.create('PSThread.LoadMethods: Exported more than 300 functions');
-  Result[c].FuncDecl:= DeclStr;
-  Result[c].FuncPtr:= Ptr;
-  Result[c].Section:= CurrSection;
-  inc(c);
-end;
+  procedure SetCurrSection(str : string);
+  begin;
+    CurrSection := Str;
+  end;
+
+  procedure AddFunction( Ptr : Pointer; DeclStr : String);
+  begin;
+  //  SetLength(ExportedMethods,c+1);
+    if c >= 300 then
+      raise exception.create('PSThread.LoadMethods: Exported more than 300 functions');
+    Result[c].FuncDecl:= DeclStr;
+    Result[c].FuncPtr:= Ptr;
+    Result[c].Section:= CurrSection;
+    inc(c);
+  end;
 
 begin
   c := 0;
   CurrSection := 'Other';
   SetLength(Result,300);
+
   {$i PSInc/psexportedmethods.inc}
 
   SetLength(Result,c);
