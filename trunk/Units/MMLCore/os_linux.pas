@@ -20,7 +20,7 @@
 
       Linux OS specific implemetation for Mufasa Macro Library
 }
-
+{$mode objfpc}{$H+} 
 unit os_linux;
 
 interface
