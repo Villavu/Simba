@@ -46,6 +46,7 @@ interface
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         procedure FreeReturnData; override;
 
+        function TargetValid: boolean; override;
         procedure ActivateClient; override;
         procedure GetMousePosition(var x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
@@ -152,6 +153,18 @@ implementation
       H := -1;
     end;
     XSetErrorHandler(Old_Handler);
+  end;
+
+  function TWindow.TargetValid: boolean;
+  var
+    old_handler: TXErrorHandler;
+    Attrib: TXWindowAttributes;
+  begin
+    old_handler := XSetErrorHandler(@MufasaXErrorHandler);
+    //This was in the repos, but it doesn't seem to work...
+    //Maybe I missed something?
+    result:= XGetWindowAttributes(display, window, @Attrib) <> 0;
+    XSetErrorHandler(old_handler);
   end;
 
   procedure TWindow.ActivateClient;
