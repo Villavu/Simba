@@ -44,6 +44,7 @@ interface
         function ReturnData(xs, ys, width, height: Integer): TRetData; virtual;
         procedure FreeReturnData; virtual;
         procedure ActivateClient; virtual;
+        function TargetValid: boolean; virtual;
 
         { ONLY override the following methods if the target provides mouse functions, defaults to 
         | raise exceptions }
@@ -82,6 +83,7 @@ interface
         procedure GetTargetDimensions(var w, h: integer); override; abstract;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override; abstract;
 
+        function TargetValid: boolean; override; abstract;
         procedure ActivateClient; override; abstract;
         procedure GetMousePosition(var x,y: integer); override; abstract;
         procedure MoveMouse(x,y: integer); override; abstract;
@@ -313,10 +315,11 @@ implementation
     //BenLand100 edit: I say we leave this exception out. POLS
     //if not(isfrozen) and (frozen = nil) then
     //  raise Exception.Create('The window is not frozen.');
-    if makefrozen then
+    if not(makefrozen) then
     begin
-      image.Destroy();
+      image.Free();
       image:= frozen;
+      frozen:= nil;
     end else if frozen = nil then
     begin
       frozen:= image;
@@ -351,7 +354,11 @@ implementation
   
   function TIOManager_Abstract.TargetValid: Boolean;
   begin
-    result:= (keymouse <> nil) and (image <> nil);
+    result:= false;
+    if (keymouse <> nil) and (image <> nil) then
+    begin
+
+    end;
   end;
 
   procedure TIOManager_Abstract.GetDimensions(var W, H: Integer); begin image.GetTargetDimensions(w,h) end;
@@ -386,6 +393,7 @@ implementation
   function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;  begin raise Exception.Create('ReturnData not avaliable for this target'); end;
   procedure TTarget.FreeReturnData; begin {do nothing by default} end;
   procedure TTarget.ActivateClient; begin raise Exception.Create('ActivateClient not avaliable for this target'); end;
+  function TTarget.TargetValid: boolean; begin result:= true; end;
 
   procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Create('GetMousePosition not avaliable for this target'); end;
   procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not avaliable for this target'); end;

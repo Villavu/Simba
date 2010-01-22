@@ -47,6 +47,7 @@ interface
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         function GetColor(x,y : integer) : TColor; override;
 
+        function TargetValid: boolean; override;
         procedure ActivateClient; override;
         procedure GetMousePosition(var x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
@@ -157,6 +158,11 @@ implementation
     buffer.Free;
     keyinput.Free;
     inherited Destroy; 
+  end;
+
+  function TWindow.TargetValid: boolean;
+  begin
+    result:= IsWindow(handle);
   end;
 
   procedure TWindow.ActivateClient;

@@ -258,6 +258,7 @@ end;
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 {$I PSInc/Wrappers/window.inc}
+
 {$I PSInc/Wrappers/strings.inc}
 
 {$I PSInc/Wrappers/colour.inc}
