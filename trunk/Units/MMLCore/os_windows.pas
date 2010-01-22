@@ -21,6 +21,7 @@
      Windows OS specific implementation for Mufasa Macro Library
 }
 
+{$mode objfpc}{$H+}
 unit os_windows;
 
 interface
