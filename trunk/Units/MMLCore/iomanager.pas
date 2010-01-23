@@ -65,7 +65,7 @@ interface
     | Currently this uses the pointer as-is, but it might be needed to make a local copy... }
     TRawTarget = class(TTarget)
       public
-        constructor Create(rgb: prgb32; w,h: integer);
+        constructor Create(rgb: prgb32; w,h: integer; CopyData : boolean);
         destructor Destroy; override;
         
         procedure GetTargetDimensions(var w, h: integer); override;
@@ -73,6 +73,7 @@ interface
 
       private
         rgb: prgb32;
+        freedata : boolean;
         w,h: integer;
     end;
       
@@ -246,387 +247,394 @@ implementation
 
 //***implementation*** TIOManager
 
-  constructor TIOManager_Abstract.Create(plugin_dir: string);
+constructor TIOManager_Abstract.Create(plugin_dir: string);
+begin
+  inherited Create;
+  eios_controller.AddAndLoadPath(plugin_dir);
+  keymouse:= nil;
+  image:= nil;
+  frozen:= nil;
+  NativeInit;
+  SetDesktop;
+{
+  self.create;
+  eios_controller.AddAndLoadPath(plugin_dir);
+}
+end;
+
+constructor TIOManager_Abstract.Create;
+begin
+  inherited Create;
+  keymouse:= nil;
+  image:= nil;
+  frozen:= nil;
+  NativeInit;
+  SetDesktop;
+end;
+
+destructor TIOManager_Abstract.Destroy;
+begin
+  if bothsame then keymouse.Destroy() else
   begin
-    inherited Create;
-    eios_controller.AddAndLoadPath(plugin_dir);
-    keymouse:= nil;
-    image:= nil;
+    keymouse.Free();
+    image.Free();
+  end;
+  if IsFrozen then frozen.Destroy();
+end;
+
+procedure TIOManager_Abstract.SetImageTarget(target: TTarget);
+begin
+  if IsFrozen then
+    raise Exception.Create('You cannot set a target when Frozen');
+  if not(bothsame) then image.Free();
+  image:= target;
+  bothsame:= false;
+end;
+procedure TIOManager_Abstract.SetKeyMouseTarget(target: TTarget);
+begin
+  if not(bothsame) then keymouse.Free();
+  keymouse:= target;
+  bothsame:= false;
+end;
+procedure TIOManager_Abstract.SetBothTargets(target: TTarget);
+begin
+  if IsFrozen then
+    raise Exception.Create('You cannot set a target when Frozen');
+  if bothsame then image.Destroy() else
+  begin
+    image.Free();
+    keymouse.Free();
+  end;
+  image:= target;
+  keymouse:= target;
+  bothsame:= true;
+end;
+
+procedure TIOManager_Abstract.SetFrozen(makefrozen: boolean);
+var
+  w,h: integer;
+  buffer: TRetData;
+begin
+  if (makefrozen) and (IsFrozen) then
+    raise Exception.Create('The window is already frozen.');
+  //BenLand100 edit: I say we leave this exception out. POLS
+  //if not(isfrozen) and (frozen = nil) then
+  //  raise Exception.Create('The window is not frozen.');
+  if makefrozen then //No need for the Frozen = nil check, already done above with the exception.
+  begin
+    frozen:= image;
+    frozen.GetTargetDimensions(w,h);
+    buffer:= frozen.ReturnData(0,0,w,h);
+    image:= TRawTarget.Create(buffer.Ptr,w,h,true);
+    frozen.FreeReturnData;
+  end else
+  begin
+    image.Free();
+    image:= frozen;
     frozen:= nil;
-    NativeInit;
-    SetDesktop;
   end;
+end;
 
-  constructor TIOManager_Abstract.Create;
-  begin
-    inherited Create;
-    keymouse:= nil;
-    image:= nil;
-    frozen:= nil;
-    NativeInit;
-    SetDesktop;
-  end;
-  
-  destructor TIOManager_Abstract.Destroy;
-  begin
-    if bothsame then keymouse.Destroy() else
-    begin
-      keymouse.Free();
-      image.Free();
-    end;
-    if frozen <> nil then frozen.Destroy();
-  end;
-  
-  procedure TIOManager_Abstract.SetImageTarget(target: TTarget);
-  begin
-    if frozen <> nil then 
-      raise Exception.Create('You cannot set a target when Frozen');
-    if not(bothsame) then image.Free();
-    image:= target;
-    bothsame:= false;
-  end;
-  procedure TIOManager_Abstract.SetKeyMouseTarget(target: TTarget);
-  begin
-    if not(bothsame) then keymouse.Free();
-    keymouse:= target;
-    bothsame:= false;
-  end;
-  procedure TIOManager_Abstract.SetBothTargets(target: TTarget);
-  begin
-    if frozen <> nil then 
-      raise Exception.Create('You cannot set a target when Frozen');
-    if bothsame then image.Destroy() else
-    begin
-      image.Free();
-      keymouse.Free();
-    end; 
-    image:= target;
-    keymouse:= target;
-    bothsame:= true;
-  end;
-  
-  procedure TIOManager_Abstract.SetFrozen(makefrozen: boolean);
-  var
-    w,h: integer;
-    buffer: TRetData;
-  begin
-    if (makefrozen) and (frozen <> nil) then
-      raise Exception.Create('The window is already frozen.');
-    //BenLand100 edit: I say we leave this exception out. POLS
-    //if not(isfrozen) and (frozen = nil) then
-    //  raise Exception.Create('The window is not frozen.');
-    if not(makefrozen) then
-    begin
-      image.Free();
-      image:= frozen;
-      frozen:= nil;
-    end else if frozen = nil then
-    begin
-      frozen:= image;
-      frozen.GetTargetDimensions(w,h);
-      buffer:= frozen.ReturnData(0,0,w,h);
-      GetMem(freezebuffer, w * h * sizeof(TRGB32));
-      Move(buffer.Ptr[0], freezebuffer[0], w*h*sizeof(TRGB32));
-      frozen.FreeReturnData;
-      image:= TRawTarget.Create(freezebuffer,w,h);
-    end;
-  end;
+function TIOManager_Abstract.IsFrozen: boolean;
+begin
+  result:= frozen <> nil;
+end;
 
-  function TIOManager_Abstract.IsFrozen: boolean;
-  begin
-    result:= frozen <> nil;
-  end;
+function TIOManager_Abstract.GetColor(x,y : integer) : TColor; begin result:= image.GetColor(x,y); end;
+function TIOManager_Abstract.ReturnData(xs,ys,width,height: integer): TRetData; begin result:= image.ReturnData(xs,ys,width,height); end;
+procedure TIOManager_Abstract.FreeReturnData; begin image.freeReturnData(); end;
 
-  function TIOManager_Abstract.GetColor(x,y : integer) : TColor; begin result:= image.GetColor(x,y); end;
-  function TIOManager_Abstract.ReturnData(xs,ys,width,height: integer): TRetData; begin result:= image.ReturnData(xs,ys,width,height); end;
-  procedure TIOManager_Abstract.FreeReturnData; begin image.freeReturnData(); end;
-  
-  function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; begin SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y)); end;
-  function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap) : integer; begin SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height)); end;
-  function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer; 
-  var
-    client: TEIOS_Client;
-  begin
-    if not eios_controller.ClientExists(name) then raise Exception.Create('EIOS Client by specified name does not exist');
-    client:= eios_controller.GetClient(name);
-    SetBothTargets(TEIOS_Target.Create(client, initargs));
-  end;
-  
-  function TIOManager_Abstract.TargetValid: Boolean;
-  begin
-    result:= false;
-    if (keymouse <> nil) and (image <> nil) then
-    begin
+function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; begin SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y,false)); end;
+function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap) : integer; begin SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height,false)); end;
+function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer;
+var
+  client: TEIOS_Client;
+begin
+  if not eios_controller.ClientExists(name) then raise Exception.Create('EIOS Client by specified name does not exist');
+  client:= eios_controller.GetClient(name);
+  SetBothTargets(TEIOS_Target.Create(client, initargs));
+end;
 
-    end;
-  end;
+function TIOManager_Abstract.TargetValid: Boolean;
+begin
+  result:= false;
+  if (keymouse <> nil) and (image <> nil) then
+    result := (keymouse.TargetValid and image.TargetValid);
+end;
 
-  procedure TIOManager_Abstract.GetDimensions(var W, H: Integer); begin image.GetTargetDimensions(w,h) end;
-  procedure TIOManager_Abstract.ActivateClient; begin {lolwat} end;
+procedure TIOManager_Abstract.GetDimensions(var W, H: Integer); begin image.GetTargetDimensions(w,h) end;
+procedure TIOManager_Abstract.ActivateClient; begin {lolwat} end;
 
-  procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer); begin keymouse.GetMousePosition(x,y) end;
-  procedure TIOManager_Abstract.SetMousePos(X, Y: Integer); begin keymouse.MoveMouse(x,y); end;
-  procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
-  procedure TIOManager_Abstract.ReleaseMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
-  procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; button: TClickType);
-  begin
-    HoldMouse(x,y,button);
-    //BenLand100 note: probably should wait here
-    ReleaseMouse(x,y,button);
-  end;
+procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer); begin keymouse.GetMousePosition(x,y) end;
+procedure TIOManager_Abstract.SetMousePos(X, Y: Integer); begin keymouse.MoveMouse(x,y); end;
+procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
+procedure TIOManager_Abstract.ReleaseMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
+procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; button: TClickType);
+begin
+  HoldMouse(x,y,button);
+  //BenLand100 note: probably should wait here
+  ReleaseMouse(x,y,button);
+end;
 
-  procedure TIOManager_Abstract.KeyUp(key: Word); begin keymouse.ReleaseKey(key) end;
-  procedure TIOManager_Abstract.KeyDown(key: Word); begin keymouse.HoldKey(key) end;
-  procedure TIOManager_Abstract.PressKey(key: Word); begin keyup(key); keydown(key); end;
-  procedure TIOManager_Abstract.SendText(text: string); begin keymouse.SendString(text); end;
-  function TIOManager_Abstract.isKeyDown(key: Word): Boolean; begin result:= keymouse.IsKeyHeld(key); end;
-  
+procedure TIOManager_Abstract.KeyUp(key: Word); begin keymouse.ReleaseKey(key) end;
+procedure TIOManager_Abstract.KeyDown(key: Word); begin keymouse.HoldKey(key) end;
+procedure TIOManager_Abstract.PressKey(key: Word); begin keyup(key); keydown(key); end;
+procedure TIOManager_Abstract.SendText(text: string); begin keymouse.SendString(text); end;
+function TIOManager_Abstract.isKeyDown(key: Word): Boolean; begin result:= keymouse.IsKeyHeld(key); end;
+
 //***implementation*** TTarget
-  
-  procedure TTarget.GetTargetDimensions(var w, h: integer); begin raise Exception.Create('GetTargetDimensions not avaliable for this target'); end;
-  function TTarget.GetColor(x,y : integer) : TColor; 
-  begin
-    with ReturnData(x,y,1,1) do
-      Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
-    FreeReturnData;
-  end;
-  function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;  begin raise Exception.Create('ReturnData not avaliable for this target'); end;
-  procedure TTarget.FreeReturnData; begin {do nothing by default} end;
-  procedure TTarget.ActivateClient; begin raise Exception.Create('ActivateClient not avaliable for this target'); end;
-  function TTarget.TargetValid: boolean; begin result:= true; end;
 
-  procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Create('GetMousePosition not avaliable for this target'); end;
-  procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not avaliable for this target'); end;
-  procedure TTarget.HoldMouse(x,y: integer; button: TClickType); begin raise Exception.Create('HoldMouse not avaliable for this target'); end;
-  procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType); begin raise Exception.Create('ReleaseMouse not avaliable for this target'); end;
+procedure TTarget.GetTargetDimensions(var w, h: integer); begin raise Exception.Create('GetTargetDimensions not avaliable for this target'); end;
+function TTarget.GetColor(x,y : integer) : TColor;
+begin
+  with ReturnData(x,y,1,1) do
+    Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
+  FreeReturnData;
+end;
+function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;  begin raise Exception.Create('ReturnData not avaliable for this target'); end;
+procedure TTarget.FreeReturnData; begin {do nothing by default} end;
+procedure TTarget.ActivateClient; begin raise Exception.Create('ActivateClient not avaliable for this target'); end;
+function TTarget.TargetValid: boolean; begin result:= true; end;
 
-  procedure TTarget.SendString(str: string); begin raise Exception.Create('SendString not avaliable for this target'); end;
-  procedure TTarget.HoldKey(key: integer); begin raise Exception.Create('HoldKey not avaliable for this target'); end;
-  procedure TTarget.ReleaseKey(key: integer); begin raise Exception.Create('ReleaseKey not avaliable for this target'); end;
-  function TTarget.IsKeyHeld(key: integer): boolean; begin raise Exception.Create('IsKeyHeld not avaliable for this target'); end;
-  
+procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Create('GetMousePosition not avaliable for this target'); end;
+procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not avaliable for this target'); end;
+procedure TTarget.HoldMouse(x,y: integer; button: TClickType); begin raise Exception.Create('HoldMouse not avaliable for this target'); end;
+procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType); begin raise Exception.Create('ReleaseMouse not avaliable for this target'); end;
+
+procedure TTarget.SendString(str: string); begin raise Exception.Create('SendString not avaliable for this target'); end;
+procedure TTarget.HoldKey(key: integer); begin raise Exception.Create('HoldKey not avaliable for this target'); end;
+procedure TTarget.ReleaseKey(key: integer); begin raise Exception.Create('ReleaseKey not avaliable for this target'); end;
+function TTarget.IsKeyHeld(key: integer): boolean; begin raise Exception.Create('IsKeyHeld not avaliable for this target'); end;
+
 //***implementation*** TEIOS_Target
-  
-  constructor TEIOS_Target.Create(client: TEIOS_Client; initval: pointer); begin
-    inherited Create;
-    self.client:= client;
-    if Pointer(client.RequestTarget) <> nil then
-      self.target:= client.RequestTarget(initval);
-    if Pointer(client.GetImageBuffer) <> nil then
-       self.buffer:= client.GetImageBuffer(target)
-    else
-       self.buffer:= nil;
-    GetTargetDimensions(self.width,self.height);
-  end; 
-  
-  destructor TEIOS_Target.Destroy; begin 
-    client.ReleaseTarget(self.target);
-    inherited Destroy;
+
+constructor TEIOS_Target.Create(client: TEIOS_Client; initval: pointer); begin
+  inherited Create;
+  self.client:= client;
+  if Pointer(client.RequestTarget) <> nil then
+    self.target:= client.RequestTarget(initval);
+  if Pointer(client.GetImageBuffer) <> nil then
+     self.buffer:= client.GetImageBuffer(target)
+  else
+     self.buffer:= nil;
+  GetTargetDimensions(self.width,self.height);
+end;
+
+destructor TEIOS_Target.Destroy; begin
+  client.ReleaseTarget(self.target);
+  inherited Destroy;
+end;
+
+procedure TEIOS_Target.GetTargetDimensions(var w, h: integer);
+begin
+  if Pointer(client.GetTargetDimensions) <> nil then
+    client.GetTargetDimensions(target,w,h)
+  else
+    inherited GetTargetDimensions(w,h);
+end;
+function TEIOS_Target.ReturnData(xs, ys, width, height: Integer): TRetData;
+begin
+  if Pointer(client.UpdateImageBufferBounds) <> nil then
+    client.UpdateImageBufferBounds(target,xs,ys,xs+width,ys+height)
+  else if Pointer(client.UpdateImageBuffer) <> nil then
+    client.UpdateImageBuffer(target)
+  else begin
+    {no update command exported}
   end;
-  
-  procedure TEIOS_Target.GetTargetDimensions(var w, h: integer);
+  result.Ptr := buffer;
+  result.RowLen:= self.width;
+  result.IncPtrWith:= result.RowLen - width;
+  Inc(result.Ptr, ys * result.RowLen + xs);
+end;
+
+procedure TEIOS_Target.GetMousePosition(var x,y: integer);
+begin
+  if Pointer(client.GetMousePosition) <> nil then
+    client.GetMousePosition(target,x,y)
+  else
+    inherited GetMousePosition(x,y);
+end;
+procedure TEIOS_Target.MoveMouse(x,y: integer);
+begin
+  if Pointer(client.MoveMouse) <> nil then
+    client.MoveMouse(target,x,y)
+  else
+    inherited MoveMouse(x,y);
+end;
+procedure TEIOS_Target.HoldMouse(x,y: integer; button: TClickType);
+begin
+  if Pointer(client.HoldMouse) <> nil then
   begin
-    if Pointer(client.GetTargetDimensions) <> nil then
-      client.GetTargetDimensions(target,w,h)
-    else
-      inherited GetTargetDimensions(w,h);
-  end;
-  function TEIOS_Target.ReturnData(xs, ys, width, height: Integer): TRetData;  
-  begin
-    if Pointer(client.UpdateImageBufferBounds) <> nil then
-      client.UpdateImageBufferBounds(target,xs,ys,xs+width,ys+height)
-    else if Pointer(client.UpdateImageBuffer) <> nil then
-      client.UpdateImageBuffer(target)
-    else begin
-      {no update command exported}
+    case button of
+      mouse_Left:   client.HoldMouse(target,x,y,true);
+      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
+      mouse_Right:  client.HoldMouse(target,x,y,false);
     end;
-    result.Ptr := buffer;
-    result.RowLen:= self.width;
-    result.IncPtrWith:= result.RowLen - width;
-    Inc(result.Ptr, ys * result.RowLen + xs);
-  end;
+  end else
+    inherited HoldMouse(x,y,button);
+end;
+procedure TEIOS_Target.ReleaseMouse(x,y: integer; button: TClickType);
+begin
+  if Pointer(client.ReleaseMouse) <> nil then
+  begin
+    case button of
+      mouse_Left:   client.ReleaseMouse(target,x,y,true);
+      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
+      mouse_Right:  client.ReleaseMouse(target,x,y,false);
+    end;
+  end else
+    inherited ReleaseMouse(x,y,button);
+end;
 
-  procedure TEIOS_Target.GetMousePosition(var x,y: integer);
-  begin
-    if Pointer(client.GetMousePosition) <> nil then
-      client.GetMousePosition(target,x,y)
-    else
-      inherited GetMousePosition(x,y);
-  end;
-  procedure TEIOS_Target.MoveMouse(x,y: integer);
-  begin
-    if Pointer(client.MoveMouse) <> nil then
-      client.MoveMouse(target,x,y)
-    else
-      inherited MoveMouse(x,y);
-  end;
-  procedure TEIOS_Target.HoldMouse(x,y: integer; button: TClickType);
-  begin
-    if Pointer(client.HoldMouse) <> nil then
-    begin
-      case button of
-        mouse_Left:   client.HoldMouse(target,x,y,true);
-        mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-        mouse_Right:  client.HoldMouse(target,x,y,false);
-      end;
-    end else
-      inherited HoldMouse(x,y,button);
-  end;
-  procedure TEIOS_Target.ReleaseMouse(x,y: integer; button: TClickType);
-  begin
-    if Pointer(client.ReleaseMouse) <> nil then
-    begin
-      case button of
-        mouse_Left:   client.ReleaseMouse(target,x,y,true);
-        mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-        mouse_Right:  client.ReleaseMouse(target,x,y,false);
-      end;
-    end else
-      inherited ReleaseMouse(x,y,button);
-  end;
+procedure TEIOS_Target.SendString(str: string);
+begin
+  if Pointer(client.SendString) <> nil then
+    client.SendString(target,PChar(str))
+  else
+    inherited SendString(str);
+end;
+procedure TEIOS_Target.HoldKey(key: integer);
+begin
+  if Pointer(client.HoldKey) <> nil then
+    client.HoldKey(target,key)
+  else
+    inherited HoldKey(key);
+end;
+procedure TEIOS_Target.ReleaseKey(key: integer);
+begin
+  if Pointer(client.ReleaseKey) <> nil then
+    client.ReleaseKey(target,key)
+  else
+    inherited ReleaseKey(key);
+end;
+function TEIOS_Target.IsKeyHeld(key: integer): boolean;
+begin
+  if Pointer(client.IsKeyHeld) <> nil then
+    result:= client.IsKeyHeld(target,key)
+  else
+    result:= inherited IsKeyHeld(key);
+end;
 
-  procedure TEIOS_Target.SendString(str: string);
-  begin
-    if Pointer(client.SendString) <> nil then
-      client.SendString(target,PChar(str))
-    else
-      inherited SendString(str);
-  end;
-  procedure TEIOS_Target.HoldKey(key: integer);
-  begin
-    if Pointer(client.HoldKey) <> nil then
-      client.HoldKey(target,key)
-    else
-      inherited HoldKey(key);
-  end;
-  procedure TEIOS_Target.ReleaseKey(key: integer);
-  begin
-    if Pointer(client.ReleaseKey) <> nil then
-      client.ReleaseKey(target,key)
-    else
-      inherited ReleaseKey(key);
-  end;
-  function TEIOS_Target.IsKeyHeld(key: integer): boolean;
-  begin
-    if Pointer(client.IsKeyHeld) <> nil then
-      result:= client.IsKeyHeld(target,key)
-    else
-      result:= inherited IsKeyHeld(key);
-  end;
-  
 //***implementation*** TRawTarget
-  
-  constructor TRawTarget.Create(rgb: prgb32; w,h: integer);
+
+constructor TRawTarget.Create(rgb: prgb32; w,h: integer; CopyData : boolean);
+begin
+  inherited Create;
+  self.w:= w;
+  self.h:= h;
+  self.freedata:= copydata;
+  if CopyData then
   begin
-    inherited Create;
+    GetMem(self.rgb,w*h*sizeof(TRGB32));
+    Move(rgb[0],self.rgb[0],w*h*sizeof(TRGB32));
+  end else
     self.rgb:= rgb;
-    self.w:= w;
-    self.h:= h;
-  end;
-  
-  destructor TRawTarget.Destroy;
-  begin
-    {do nothing}
-    inherited Destroy;
-  end;
-  
-  procedure TRawTarget.GetTargetDimensions(var w, h: integer);
-  begin
-    w:= self.w;
-    h:= self.h;
-  end;
-  
-  function TRawTarget.ReturnData(xs, ys, width, height: Integer): TRetData;  
-  begin
-    result.Ptr := rgb;
-    result.RowLen:= self.w;
-    result.IncPtrWith:= result.RowLen - width;
-    Inc(result.Ptr, ys * result.RowLen + xs);
-  end;
+end;
+
+destructor TRawTarget.Destroy;
+begin
+  if freedata then
+    Freemem(self.rgb,w*h*sizeof(TRGB32));
+  inherited Destroy;
+end;
+
+procedure TRawTarget.GetTargetDimensions(var w, h: integer);
+begin
+  w:= self.w;
+  h:= self.h;
+end;
+
+function TRawTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
+begin
+  result.Ptr := rgb;
+  result.RowLen:= self.w;
+  result.IncPtrWith:= result.RowLen - width;
+  Inc(result.Ptr, ys * result.RowLen + xs);
+end;
 
 //***implementation*** TEIOS_Controller
-  
-  constructor TEIOS_Controller.Create();
-  begin
-    inherited Create;
-  end;
 
-  destructor TEIOS_Controller.Destroy;
-  var
-    i: integer;
-  begin
-    SetLength(plugs,0);
-    inherited Destroy;
-  end;
+constructor TEIOS_Controller.Create();
+begin
+  inherited Create;
+end;
 
-  function TEIOS_Controller.InitPlugin(plugin: TLibHandle): boolean;
-  var
-    GetName: procedure(name: pchar); stdcall;
-    buffer: pchar;
-    idx: integer;
+destructor TEIOS_Controller.Destroy;
+var
+  i: integer;
+begin
+  SetLength(plugs,0);
+  inherited Destroy;
+end;
+
+function TEIOS_Controller.InitPlugin(plugin: TLibHandle): boolean;
+var
+  GetName: procedure(name: pchar); stdcall;
+  buffer: pchar;
+  idx: integer;
+begin
+  Pointer(GetName) := GetProcAddress(plugin, PChar('EIOS_GetName'));
+  if Pointer(GetName) = nil then begin result:= false; exit; end;
+  idx:= Length(plugs);
+  SetLength(plugs,idx+1);
+  buffer:= stralloc(255);
+  GetName(buffer);
+  plugs[idx].name:= buffer;
+  strdispose(buffer);
+  {link in all eios methods that *might* exist}
+  with plugs[idx].client do
   begin
-    Pointer(GetName) := GetProcAddress(plugin, PChar('EIOS_GetName'));
-    if Pointer(GetName) = nil then begin result:= false; exit; end;
-    idx:= Length(plugs);
-    SetLength(plugs,idx+1);
-    buffer:= stralloc(255);
-    GetName(buffer);
-    plugs[idx].name:= buffer;
-    strdispose(buffer);
-    {link in all eios methods that *might* exist}
-    with plugs[idx].client do
+    Pointer(RequestTarget):= GetProcAddress(plugin, PChar('EIOS_RequestTarget'));
+    Pointer(ReleaseTarget):= GetProcAddress(plugin, PChar('EIOS_ReleaseTarget'));
+
+    Pointer(GetTargetDimensions):= GetProcAddress(plugin, PChar('EIOS_GetTargetDimensions'));
+    Pointer(GetImageBuffer):= GetProcAddress(plugin, PChar('EIOS_GetImageBuffer'));
+    Pointer(UpdateImageBuffer):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBuffer'));
+    Pointer(UpdateImageBufferBounds):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBufferBounds'));
+
+    Pointer(GetMousePosition):= GetProcAddress(plugin, PChar('EIOS_GetMousePosition'));
+    Pointer(MoveMouse):= GetProcAddress(plugin, PChar('EIOS_MoveMouse'));
+    Pointer(HoldMouse):= GetProcAddress(plugin, PChar('EIOS_HoldMouse'));
+    Pointer(ReleaseMouse):= GetProcAddress(plugin, PChar('EIOS_ReleaseMouse'));
+
+    Pointer(SendString):= GetProcAddress(plugin, PChar('EIOS_SendString'));
+    Pointer(HoldKey):= GetProcAddress(plugin, PChar('EIOS_HoldKey'));
+    Pointer(ReleaseKey):= GetProcAddress(plugin, PChar('EIOS_ReleaseKey'));
+    Pointer(IsKeyHeld):= GetProcAddress(plugin, PChar('EIOS_IsKeyHeld'));
+  end;
+  {done linking in methods}
+  result:= true;
+end;
+
+function TEIOS_Controller.FindClient(name: string): integer;
+var
+  i: integer;
+begin
+  for i:= 0 to length(plugs) - 1 do
+    if plugs[i].name = name then
     begin
-      Pointer(RequestTarget):= GetProcAddress(plugin, PChar('EIOS_RequestTarget'));
-      Pointer(ReleaseTarget):= GetProcAddress(plugin, PChar('EIOS_ReleaseTarget'));
-
-      Pointer(GetTargetDimensions):= GetProcAddress(plugin, PChar('EIOS_GetTargetDimensions'));
-      Pointer(GetImageBuffer):= GetProcAddress(plugin, PChar('EIOS_GetImageBuffer'));
-      Pointer(UpdateImageBuffer):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBuffer'));
-      Pointer(UpdateImageBufferBounds):= GetProcAddress(plugin, PChar('EIOS_UpdateImageBufferBounds'));
-
-      Pointer(GetMousePosition):= GetProcAddress(plugin, PChar('EIOS_GetMousePosition'));
-      Pointer(MoveMouse):= GetProcAddress(plugin, PChar('EIOS_MoveMouse'));
-      Pointer(HoldMouse):= GetProcAddress(plugin, PChar('EIOS_HoldMouse'));
-      Pointer(ReleaseMouse):= GetProcAddress(plugin, PChar('EIOS_ReleaseMouse'));
-
-      Pointer(SendString):= GetProcAddress(plugin, PChar('EIOS_SendString'));
-      Pointer(HoldKey):= GetProcAddress(plugin, PChar('EIOS_HoldKey'));
-      Pointer(ReleaseKey):= GetProcAddress(plugin, PChar('EIOS_ReleaseKey'));
-      Pointer(IsKeyHeld):= GetProcAddress(plugin, PChar('EIOS_IsKeyHeld'));
+      result:= i;
+      exit;
     end;
-    {done linking in methods}
-    result:= true;
-  end;
+  result:= -1;
+end;
 
-  function TEIOS_Controller.FindClient(name: string): integer;
-  var
-    i: integer;
-  begin
-    for i:= 0 to length(plugs) - 1 do
-      if plugs[i].name = name then
-      begin
-        result:= i;
-        exit;
-      end;
-    result:= -1;
-  end;
-  
-  function TEIOS_Controller.ClientExists(name: string): boolean;
-  begin
-    result:= FindClient(name) >= 0;
-  end;
-  
-  function TEIOS_Controller.GetClient(name: string): TEIOS_Client;
-  var
-    i: integer;
-  begin
-    i:= FindClient(name);
-    if i >= 0 then
-      result:= plugs[i].client
-  end;
+function TEIOS_Controller.ClientExists(name: string): boolean;
+begin
+  result:= FindClient(name) >= 0;
+end;
 
-  initialization
-    eios_controller:= TEIOS_Controller.Create;
-  finalization
-    eios_controller.Free;
+function TEIOS_Controller.GetClient(name: string): TEIOS_Client;
+var
+  i: integer;
+begin
+  i:= FindClient(name);
+  if i >= 0 then
+    result:= plugs[i].client
+end;
+
+initialization
+  eios_controller:= TEIOS_Controller.Create;
+finalization
+  eios_controller.Free;
 end.
