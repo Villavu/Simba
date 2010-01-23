@@ -363,7 +363,11 @@ begin
 end;
 
 procedure TIOManager_Abstract.GetDimensions(var W, H: Integer); begin image.GetTargetDimensions(w,h) end;
-procedure TIOManager_Abstract.ActivateClient; begin {lolwat} end;
+procedure TIOManager_Abstract.ActivateClient; 
+begin 
+  keymouse.ActivateClient(); 
+  {not sure if image needs activation or not, if its a native window keymouse == image so it should be good.}
+end;
 
 procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer); begin keymouse.GetMousePosition(x,y) end;
 procedure TIOManager_Abstract.SetMousePos(X, Y: Integer); begin keymouse.MoveMouse(x,y); end;
