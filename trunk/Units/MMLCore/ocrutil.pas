@@ -19,6 +19,7 @@ type
     TocrGlyphMetric = record
         xoff,yoff: integer;
         width,height: integer;
+        index: integer; //stores the internal TocrData index for this char
     end;
     TocrData = record
         ascii: array[0..255] of TocrGlyphMetric;
@@ -240,6 +241,7 @@ begin
         if pos = 0 then result.neg_adj[i]:= 1 else result.neg_adj[i]:= 1 / pos;
         if pos = 0 then result.pos_adj[i]:= 0 else result.pos_adj[i]:= 1 / pos;
         result.map[i]:= ascii;
+        result.ascii[ord(ascii)].index:= i;
         result.ascii[ord(ascii)].xoff:= masks[i].l;
         result.ascii[ord(ascii)].yoff:= masks[i].t;
         result.ascii[ord(ascii)].width:= masks[i].width;
