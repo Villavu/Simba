@@ -65,7 +65,7 @@ interface
     | Currently this uses the pointer as-is, but it might be needed to make a local copy... }
     TRawTarget = class(TTarget)
       public
-        constructor Create(rgb: prgb32; w,h: integer; CopyData : boolean);
+        constructor Create(rgb: prgb32; w,h: integer; CopyData : boolean = false);
         destructor Destroy; override;
         
         procedure GetTargetDimensions(var w, h: integer); override;
@@ -344,8 +344,8 @@ function TIOManager_Abstract.GetColor(x,y : integer) : TColor; begin result:= im
 function TIOManager_Abstract.ReturnData(xs,ys,width,height: integer): TRetData; begin result:= image.ReturnData(xs,ys,width,height); end;
 procedure TIOManager_Abstract.FreeReturnData; begin image.freeReturnData(); end;
 
-function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; begin SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y,false)); end;
-function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap) : integer; begin SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height,false)); end;
+function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; begin SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y)); end;
+function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap) : integer; begin SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height)); end;
 function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer;
 var
   client: TEIOS_Client;
@@ -521,7 +521,7 @@ end;
 
 //***implementation*** TRawTarget
 
-constructor TRawTarget.Create(rgb: prgb32; w,h: integer; CopyData : boolean);
+constructor TRawTarget.Create(rgb: prgb32; w,h: integer; CopyData : boolean = false);
 begin
   inherited Create;
   self.w:= w;
