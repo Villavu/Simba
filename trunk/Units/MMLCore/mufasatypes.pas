@@ -43,7 +43,10 @@ operator + (PT1,PT2 : TPoint) : TPoint;
 operator - (PT1,PT2 : TPoint) : TPoint;
 
 type
-
+  TRGB24 = packed record
+    B, G, R : byte;
+  end;
+  PRGB24 = ^TRGB24;
   TRGB32 = packed record
     B, G, R, A: Byte;
   end;
@@ -120,8 +123,13 @@ type
       Str : string;
       Key : byte;
   end;
+type
+   TBufferByteArray = Array[0..524287] of Byte;
+   PBufferByteArray = ^TBufferByteArray;
 
 var
+  BufferString : PChar;
+  BufferLen : LongWord;
   VirtualKeys : array[0..173] of VirtualKeyInfo = (
                 (str :'UNKNOWN'; key :  0),
                 (str :'LBUTTON'; key :  1),
@@ -312,6 +320,12 @@ begin
   Result.x := PT1.x - PT2.x;
   Result.y := Pt1.y - PT2.y;
 end;
+
+initialization
+  BufferString := StrAlloc(524288);
+  BufferLen := 524288;
+finalization
+  StrDispose(bufferstring);
 
 end.
 
