@@ -99,7 +99,7 @@ type
     function GetNewIndex : integer;
   public
     function GetBMP(Index : integer) : TMufasaBitmap;
-    property Bmp[Index : integer]: TMufasaBitmap read GetBMP;
+    property Bmp[Index : integer]: TMufasaBitmap read GetBMP; default;
     function CreateBMP(w, h: integer): Integer;
     function AddBMP(_bmp: TMufasaBitmap): Integer;
     function CopyBMP( Bitmap : integer) : Integer;
@@ -1038,9 +1038,8 @@ begin
   SetLength(result.White,w*h);
   dX := w-1;
   dY := h-1;
-  //Search it like | | | | | instead of horizontal -> for X loop first.
-  for x := 0 to dX do
-    for y := 0 to dY do
+  for y := 0 to dY do
+    for x := 0 to dX do
     //Check for non-white/black pixels? Not for now atleast.
       if FData[y*w+x].r = 255 then
       begin;

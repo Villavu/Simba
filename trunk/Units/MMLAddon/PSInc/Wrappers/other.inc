@@ -86,14 +86,14 @@ end;
 
 procedure DrawBitmapDebugImg(bmp : integer);
 begin;
-  CurrThread.DebugImg.ToDrawBitmap^ := CurrThread.Client.MBitmaps.Bmp[bmp];
+  CurrThread.DebugImg.ToDrawBitmap^ := CurrThread.Client.MBitmaps[bmp];
   CurrThread.Synchronize(CurrThread.DebugImg.DrawBitmap);
 end;
 
 function GetDebugBitmap : integer;
 begin;
   result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
-  CurrThread.DebugImg.GetDebugBitmap^ := CurrThread.Client.MBitmaps.Bmp[result];
+  CurrThread.DebugImg.GetDebugBitmap^ := CurrThread.Client.MBitmaps[result];
   CurrThread.Synchronize(CurrThread.DebugImg.GetBitmap);
 end;
 
