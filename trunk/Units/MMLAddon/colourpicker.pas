@@ -114,7 +114,7 @@ begin
     self.Manager.SetDesktop;
 
   {Desktop is needed for the whole picture}
-  Desktop := TIOManager.Create('');
+  Desktop := TIOManager.Create;
   Desktop.SetDesktop;
   Desktop.GetDimensions(w, h);
 
