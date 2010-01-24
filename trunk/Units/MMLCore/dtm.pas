@@ -70,10 +70,6 @@ type
            destructor Destroy; override;
     private
            Client: TObject;
-
-           // For decompressing.
-           BufferString: String;
-
            DTMList: Array Of pDTM;
            FreeSpots: Array Of Integer;
     end;
@@ -85,9 +81,7 @@ uses
     math // for max
     ;
 
-type
-   TBufferByteArray = Array[0..524287] of Byte;
-   PBufferByteArray = ^TBufferByteArray;
+
 
 
 constructor TMDTM.Create(Owner: TObject);
@@ -97,7 +91,6 @@ begin
 
   SetLength(DTMList, 0);
   SetLength(FreeSpots, 0);
-  SetLength(BufferString, 524288);
 end;
 
 {$DEFINE DTM_DEBUG}
@@ -126,7 +119,6 @@ begin
   end;
   SetLength(DTMList, 0);
   SetLength(FreeSpots, 0);
-  SetLength(BufferString, 0);
 
   inherited Destroy;
 end;
@@ -170,8 +162,8 @@ begin
   SetLength(Source,ii);
   for i := 1 to ii do
     Source[i] := Chr(HexToInt(S[i * 2 - 1] + S[i * 2]));
-  DestLen := Length(Self.BufferString);
-  if uncompress(PChar(Self.Bufferstring),Destlen,pchar(Source), ii) = Z_OK then
+  DestLen := BufferLen;
+  if uncompress(Bufferstring,Destlen,pchar(Source), ii) = Z_OK then
   begin;
     if (Destlen mod 36) > 0 then
     begin;
@@ -185,7 +177,7 @@ begin
     SetLength(Result.asz,DestLen);
     SetLength(Result.ash,DestLen);
     SetLength(Result.bp,DestLen);
-    b := @Self.Bufferstring[1];
+    b := PBufferByteArray(BufferString);
     for i := 0 to DestLen - 1 do
     begin;
       c := i * 36;

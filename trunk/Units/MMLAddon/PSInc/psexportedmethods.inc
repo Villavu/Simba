@@ -179,6 +179,7 @@ AddFunction(@MaskFromText, 'function MaskFromText(text, font: String): TMask;');
 
 {Bitmaps}
 SetCurrSection('Bitmaps');
+AddFunction(@CreateBitmapString,'function CreateBitmapString(bmp : integer) : string;');
 AddFunction(@GetMufasaBitmap,'function GetMufasaBitmap(bmp : integer) : TMufasaBitmap;');
 AddFunction(@CreateBitmap,'function CreateBitmap(w,h :integer) : integer;');
 AddFunction(@FreeBitmap,'procedure FreeBitmap(Bmp : integer);');

@@ -20,6 +20,11 @@
 
     Bitmap.inc for the Mufasa Macro Library
 }
+function CreateBitmapString(bmp : integer) : string;
+begin;
+  result := CurrThread.Client.MBitmaps[bmp].ToString;
+end;
+
 function GetMufasaBitmap(bmp : integer): TMufasaBitmap;
 begin;
   result := CurrThread.Client.MBitmaps[bmp];
