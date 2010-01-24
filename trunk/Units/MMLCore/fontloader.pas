@@ -92,7 +92,7 @@ var
 begin
   Result := TMFont.Create;
   Result.Name := Self.Name;
-  Move(Self.Data.ascii[0], Self.Data.ascii[0], length(Self.Data.ascii) * SizeOf(Integer));
+  Move(Self.Data.ascii[0], Result.Data.ascii[0], length(Self.Data.ascii) * SizeOf(TocrGlyphMetric));
   l := Length(Self.Data.Pos);
   SetLength(Result.Data.pos, l);
   for i := 0 to l - 1 do
@@ -204,7 +204,6 @@ begin
   if Shadow then
     F.Name := F.Name + '_s';
   f.Data := ocrdata;
-
   Fonts.Add(f);
   {$IFDEF FONTDEBUG}
   writeln('Loaded Font ' + f.Name);
