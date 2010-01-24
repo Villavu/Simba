@@ -81,6 +81,7 @@ type
     procedure Posterize(Po : integer);overload;
     function Copy: TMufasaBitmap;
     function ToTBitmap: TBitmap;
+    function ToString : string;
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
     function CreateTMask : TMask;
@@ -265,6 +266,8 @@ var
   DestLen : LongWord;
   Dest,Source : string;
   DestPoint, Point : PByte;
+  MufRaw : PRGB24;
+  MufDest : PRGB32;
 
 
 begin
@@ -272,35 +275,49 @@ begin
   if (Data <> '') and (Length(Data) <> 6) then
   begin;
     Point := Pointer(BmpArray[Result].FData);
-    if Data[1] = 'b' then
+    if (Data[1] = 'b') or (Data[1] = 'm') then
     begin;
       Source := Base64DecodeStr(Copy(Data,2,Length(Data) - 1));
       Destlen := Width * Height * 3;
       Setlength(Dest,DestLen);
       if uncompress(PChar(Dest),Destlen,pchar(Source), Length(Source)) = Z_OK then
       begin;
-        DestPoint := @Dest[1];
-        i := 0;
-        ii := 2;
-        Dec(DestLen);
-        if DestLen > 2 then
-        begin;
-          while (ii < DestLen) do
-          Begin;
-            Point[i]:= DestPoint[ii+2];
-            Point[i+1]:= DestPoint[ii+1];
-            Point[i+2]:= DestPoint[ii];
-            ii := ii + 3;
-            i := i + 4;
+        if data[1] = 'm' then //Our encrypted bitmap! Winnor.
+        begin
+          MufRaw:= @Dest[1];
+          MufDest:= PRGB32(Point);
+          for i := width * height - 1 downto 0 do
+          begin
+            MufDest[i].R:= MufRaw[i].R;
+            MufDest[i].G := MufRaw[i].G;
+            MufDest[i].B := MufRaw[i].B;
           end;
-          Point[i] := DestPoint[1];
-          Point[i+1] := DestPoint[0];
-          Point[i+2] := DestPoint[ii];
-        end else if (Width = 1) and (Height =1 ) then
-        begin;
-          Point[0] := DestPoint[1];
-          Point[1] := DestPoint[0];
-          Point[2] := DestPoint[2];
+        end else
+        if Data[1] = 'b'then
+        begin
+          DestPoint := @Dest[1];
+          i := 0;
+          ii := 2;
+          Dec(DestLen);
+          if DestLen > 2 then
+          begin;
+            while (ii < DestLen) do
+            Begin;
+              Point[i]:= DestPoint[ii+2];
+              Point[i+1]:= DestPoint[ii+1];
+              Point[i+2]:= DestPoint[ii];
+              ii := ii + 3;
+              i := i + 4;
+            end;
+            Point[i] := DestPoint[1];
+            Point[i+1] := DestPoint[0];
+            Point[i+2] := DestPoint[ii];
+          end else if (Width = 1) and (Height =1 ) then
+          begin;
+            Point[0] := DestPoint[1];
+            Point[1] := DestPoint[0];
+            Point[2] := DestPoint[2];
+          end;
         end;
       end;
     end else if Data[1] = 'z' then
@@ -446,6 +463,31 @@ begin
   Result := TBitmap.Create;
   ArrDataToRawImage(Self.Fdata, point(self.width,self.height), tr);
   Result.LoadFromRawImage(tr, false);
+end;
+
+function TMufasaBitmap.ToString: string;
+var
+  i : integer;
+  DestLen : longword;
+  DataStr : string;
+  CorrectData : PRGB24;
+begin
+  SetLength(DataStr,w*h*3);
+  CorrectData:= PRGB24(@DataStr[1]);
+  for i := w*h - 1 downto 0 do
+  begin
+    CorrectData[i].R := FData[i].R;
+    CorrectData[i].G := FData[i].G;
+    CorrectData[i].B := FData[i].B;
+  end;
+  DestLen := BufferLen;
+  if compress(Pchar(BufferString),destlen,PChar(DataStr),w*h*3) = Z_OK then
+  begin;
+    SetLength(DataStr,DestLen);
+    move(bufferstring[0],dataStr[1],DestLen);
+    result := 'm' + Base64EncodeStr(datastr);
+    SetLength(datastr,0);
+  end;
 end;
 
 procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
