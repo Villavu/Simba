@@ -82,21 +82,26 @@ begin
   end;
 
   { add your program here }
-  C := TClient.Create;
+  C := TClient.Create('.');
+  C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/Fonts/');
 
-  bmp := TMufasaBitmap.Create;
+  bmp := C.MOCR.TextToFontBitmap('Danke schon', 'SmallChars');
+
+  bmp.SaveToFile('/tmp/wat.bmp');
+
+{  bmp := TMufasaBitmap.Create;
   bmp.SetSize(CW,CH);
   Writeln(Format('Client W/H: %d, %d', [CW, CH]));
   FillChar(bmp.FData[0],sizeof(trgb32)*CW*CH, 0);
   Randomize;
  for i := 0 to 500 do
-    bmp.fastsetpixel(random(CW), random(CH), 255);
+    bmp.fastsetpixel(random(CW), random(CH), 255);    }
  { bmp.FastSetPixel(8,8,255);
   bmp.FastSetPixel(9,9,255);
   bmp.FastSetPixel(7,7,255);
   bmp.FastSetPixel(9,8,255);
   bmp.FastSetPixel(8,9,255);            }
-  C.MWindow.SetTarget(bmp);
+//  C.MWindow.SetTarget(bmp);
 
 
  { initdtm(dtm, 5);
@@ -110,7 +115,7 @@ begin
   dtm.asz[1] := 1;
   dtm.ash[1] := dtm_Rectangle;  }
 
-  dtm := randomdtm(10);
+ { dtm := randomdtm(10);
 
  // setlength(p, 1);
  C.MFinder.SetToleranceSpeed(1);
@@ -125,14 +130,14 @@ begin
   writeln(inttostr(length(p))+ ' points found');
   setlength(p,0);
 
-  PrintpDTM(tdtmtopDTM(pDTMToTDTM(dtm)));
+  PrintpDTM(tdtmtopDTM(pDTMToTDTM(dtm)));     }
 
   {for i := 0 to high(p) do
     writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));     }
 
 
   //bmp.OnDestroy:=nil;
-  bmp.Free;
+  //bmp.Free;
   C.Free;
 
   // stop program loop

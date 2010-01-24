@@ -233,7 +233,8 @@ begin
                 begin
                     result.pos[i][c]:= 1;
                     inc(pos);
-                end;
+                end else
+                    result.pos[i][c] := 0;
             end;
         end;
         for c:= 0 to size-1 do
