@@ -51,6 +51,11 @@ uses
              procedure FilterShadowBitmap(bmp: TMufasaBitmap);
              procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
+             function GetTextAt(atX, atY, font, minspacing, maxspacing, color, len: integer): string;
+             function TextToFontTPA(Text, font: String; var w, h: integer): TPointArray;
+             function TextToFontBitmap(Text, font: String): TMufasaBitmap;
+
+
              {$IFDEF OCRDEBUG}
              procedure DebugToBmp(bmp: TMufasaBitmap; hmod,h: integer);
              {$ENDIF}
@@ -693,6 +698,72 @@ begin
     result := GetUpTextAtEx(atX, atY, true)
   else
     result := GetUpTextAtEx(atX, atY, false);
+end;
+
+function TMOCR.GetTextAt(atX, atY, font, minspacing, maxspacing, color, len: integer): string;
+
+begin
+
+end;
+
+function TMOCR.TextToFontTPA(Text, font: String; var w, h: integer): TPointArray;
+
+var
+   fontD: TOcrData;
+   c, i, x, y, off: Integer;
+   d: TocrGlyphMetric;
+   an: integer;
+
+begin
+  fontD := Fonts.GetFont(font);
+  c := 0;
+  off := 0;
+  setlength(result, 0);
+
+  for i := 1 to length(text)  do
+  begin
+    writeln(text[i]);
+    an := Ord(text[i]);
+    if not InRange(an, 0, 255) then
+    begin
+      writeln('WARNING: Invalid character passed to TextToFontTPA');
+      continue;
+    end;
+    d := fontD.ascii[an];
+    {writeln(format('xoff, yoff: %d, %d', [d.xoff, d.yoff]));
+    writeln(format('bmp w,h: %d, %d', [d.width, d.height]));
+    writeln(format('font w,h: %d, %d', [fontD.width, fontD.height])); }
+    setlength(result, c+d.width*d.height);
+    for y := 0 to fontD.height - 1 do
+      for x := 0 to fontD.width - 1 do
+      begin
+        if fontD.pos[fontD.ascii[an].index][x + y * fontD.width] = 1 then
+       // if fontD.pos[an][x + y * fontD.width] = 1 then
+        begin
+          result[c] := Point(x + off +d.xoff, y+d.yoff);
+          inc(c);
+        end;
+      end;
+    setlength(result, c);
+    off := off + d.width;
+  end;
+  w := off;
+  h := d.height;
+ { writeln('C: ' + inttostr(c));      }
+end;
+
+function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitmap;
+var
+   TPA: TPointArray;
+   w,h: integer;
+   bmp: TMufasaBitmap;
+begin
+  TPA := TextToFontTPA(text, font, w, h);
+  bmp := TMufasaBitmap.Create;
+  writeln(format('b: %d, %d', [w, h]));
+  bmp.SetSize(w, h);
+  bmp.DrawTPA(TPA, clWhite);
+  result := bmp;
 end;
 
 end.
