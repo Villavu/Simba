@@ -26,6 +26,11 @@ begin;
   Result := CurrThread.Client.IOManager.GetColor(x,y);
 end;
 
+function GetColors(Coords : TPointArray) : TIntegerArray;
+begin
+  result := CurrThread.Client.MFinder.GetColors(coords);
+end;
+
 function findcolor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean;
 begin
   Result := CurrThread.Client.MFinder.FindColor(x, y, color, x1, y1, x2, y2);

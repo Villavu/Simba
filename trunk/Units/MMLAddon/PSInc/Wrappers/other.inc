@@ -73,6 +73,11 @@ begin;
   result.y2 := y2;
 end;
 
+function IntInBox(x, y: Integer; Box: TBox): Boolean;
+begin;
+  result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
+end;
+
 function Distance(x1, y1, x2, y2: Integer): Integer;
 begin;
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));

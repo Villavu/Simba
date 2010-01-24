@@ -442,11 +442,6 @@ begin;
   Result.B := Color shr 16 and $ff;
 end;
 
-function BGRToRGB(BGR : TRGB32) : TColor;inline;
-begin;
-  Result := BGR.R or BGR.g shl 8 or BGR.b shl 16;
-end;
-
 function TMufasaBitmap.Copy: TMufasaBitmap;
 begin
   Result := TMufasaBitmap.Create;

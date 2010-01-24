@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, SysUtils,
-  Graphics,
+  Graphics, mufasatypes,
   Math;
 
 
@@ -46,6 +46,8 @@ Procedure ColorToHSL(Col: Integer; out h, s, l: Extended); inline;
 procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended); inline;
 function XYZToColor(X, Y, Z: Extended): TColor; inline;
 function HSLToColor(H, S, L: Extended): TColor; inline;
+function BGRToRGB(BGR : TRGB32) : TColor;inline;
+
 
 
 implementation
@@ -54,6 +56,10 @@ Const
   OneDivThree = 1/3.0;
   TwoDivThree = 2 / 3.0;
   OneDivTwoPointFour = 1 / 2.4;
+function BGRToRGB(BGR : TRGB32) : TColor;inline;
+begin;
+  Result := BGR.R or BGR.g shl 8 or BGR.b shl 16;
+end;
 
 Function RGBtoColor(r,g,b : byte): TColor; overload; inline;
 begin;
