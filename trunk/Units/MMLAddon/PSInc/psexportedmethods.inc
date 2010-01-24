@@ -48,11 +48,15 @@ AddFunction(@max,'function Max(a, b: Integer): Integer;');
 AddFunction(@min,'function Min(a, b: Integer): Integer;');
 AddFunction(@minE,'function MinE(a, b: extended): Extended;');
 AddFunction(@IntToBox,'function IntToBox(x1,y1,x2,y2 : integer) : TBox;');
+AddFunction(@IntInBox,'function IntInBox(x, y: Integer; Box: TBox): Boolean;');
 AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
 AddFunction(@classes.point,'function Point(x,y:integer) : TPoint;');
 AddFunction(@Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
 AddFunction(@hypot,'function Hypot(X, Y: Extended): Extended;');
 AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
+AddFunction(@BinCoe,'function BinCoe(a, b: LongInt): Extended;');
+AddFunction(@FixD,'function FixD(Degrees : extended) : Extended;');
+AddFunction(@InRange,'function InRange(value,min,max : integer) : boolean;');
 
 {window}
 SetCurrSection('Window');
@@ -139,6 +143,7 @@ AddFunction(@GetToleranceSpeed, 'function GetToleranceSpeed: Integer;');
 AddFunction(@SetToleranceSpeed2Modifiers, 'procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);');
 AddFunction(@GetToleranceSpeed2Modifiers, 'procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);');
 AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
+AddFunction(@GetColors,'function GetColors(Coords : TPointArray) : TIntegerArray;');
 AddFunction(@FindColor, 'function FindColor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
 AddFunction(@findcolortoleranceOptimised, 'function FindColorToleranceOptimised(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
 AddFunction(@FindColorTolerance, 'function FindColorTolerance(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
