@@ -169,6 +169,7 @@ begin
   Sender.AddFunction(@TestArrayPassing,'procedure TestArrayPassing(const Arr : TStringArray);');
   Sender.AddFunction(@TestArrayEdit,'Procedure TestArrayEdit(var Arr : TStringArray);');
   Sender.AddFunction(@TestArrayFull,'function TestArrayFull(var Arr1: TStringArray; Arr2 : TStringArray): TStringArray;');
+  Sender.AddFunction(@MakeArr,'function MakeArr : TStringArray;');
   Sender.AddFunction(@makePoint, 'function makePoint(x, y: integer): w_Tpoint;');
 end;
 
