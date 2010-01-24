@@ -128,6 +128,7 @@ uses
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
   uPSC_extctrls, //Compile-libs
   uPSUtils,
+  fontloader,
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
@@ -327,8 +328,12 @@ end;
 procedure TMMLPSThread.OnCompile(Sender: TPSScript);
 var
   i,ii : integer;
+  Fonts : TMFonts;
 begin
   {$I PSInc/pscompile.inc}
+  Fonts := Client.MOCR.GetFonts;
+  for i := fonts.count - 1 downto 0 do
+    PSScript.Comp.AddConstantN(Fonts[i].Name,'string').SetString(Fonts[i].Name);
 
   for i := high(PluginsToLoad) downto 0 do
     for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
@@ -391,7 +396,8 @@ end;
 
 function CreateMufasaBitmap : TMufasaBitmap;
 begin;
-  result := CurrThread.Client.MBitmaps.Bmp[  CurrThread.Client.MBitmaps.CreateBMP(0,0)];
+  result := TMufasaBitmap.Create;
+  CurrThread.Client.MBitmaps.AddBMP(result);
 end;
 
 procedure FreeMufasaBitmap(Self : TMufasaBitmap);

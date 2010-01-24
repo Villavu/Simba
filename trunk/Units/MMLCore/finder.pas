@@ -69,7 +69,7 @@ type
         function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
         function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
         //Mask
-        function FindBitmapMaskTolerance(mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+        function FindMaskTolerance(mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
         procedure CheckMask(Mask : TMask);
         //Bitmap functions
         function FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
@@ -1252,7 +1252,7 @@ end;
  { Only works with CTS 1 for now.. Since Colorsame doesn't return a boolean :-( }
 //We do not check whether every white pixel is in tol range with every other white pixel..
 
-function TMFinder.FindBitmapMaskTolerance(mask: TMask; out x, y: Integer; xs,
+function TMFinder.FindMaskTolerance(mask: TMask; out x, y: Integer; xs,
   ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
 var
    MainRowdata : TPRGB32Array;

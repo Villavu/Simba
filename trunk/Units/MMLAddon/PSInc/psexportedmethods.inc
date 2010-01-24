@@ -173,9 +173,9 @@ AddFunction(@isKeyDown, 'function IsKeyDown(key: Word): Boolean;');
 { OCR}
 SetCurrSection('OCR');
 AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
-AddFunction(@BitmapFromTextFont, 'function BitmapFromTextFont(text, font: String): integer;');
-AddFunction(@TPAFromTextFont, 'function TPAFromTextFont(text, font: String): TPointArray;');
-
+AddFunction(@BitmapFromText, 'function BitmapFromText(text, font: String): integer;');
+AddFunction(@TPAFromText, 'function TPAFromText(text, font: String): TPointArray;');
+AddFunction(@MaskFromText, 'function MaskFromText(text, font: String): TMask;');
 
 {Bitmaps}
 SetCurrSection('Bitmaps');
@@ -216,7 +216,7 @@ AddFunction(@GreyScaleBitmap,'function GreyScaleBitmap(bitmap : integer) : integ
 AddFunction(@BrightnessBitmap,'function BrightnessBitmap(Bitmap,br : integer) : integer;');
 AddFunction(@ContrastBitmap,'function ContrastBitmap(bitmap : integer; co : extended) : integer;');
 AddFunction(@PosterizeBitmap,'function PosterizeBitmap(Bitmap : integer; po : integer) : integer;');
-AddFunction(@CreateBitmapMask,'function CreateBitmapMask(Bitmap : integer) : TMask;');
+AddFunction(@CreateMaskFromBitmap,'function CreateMaskFromBitmap(Bitmap : integer) : TMask;');
 AddFunction(@FindMaskTolerance,'function FindMaskTolerance(mask: TMask; out x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 AddFunction(@FindBitmapMaskTolerance,'function FindBitmapMaskTolerance(mask: Integer; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 AddFunction(@FindDeformedBitmapToleranceIn,'function FindDeformedBitmapToleranceIn(bitmap: integer; out x,y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;');
