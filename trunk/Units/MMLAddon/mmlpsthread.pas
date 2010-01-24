@@ -167,13 +167,36 @@ begin
   psWriteln(makeString(NewTPSVariantIFC(Stack[Stack.Count-1],false)));
 end;
 
+function swap_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  Param1,Param2: TPSVariantIFC;
+  tempCopy : pointer;
+begin
+  Result:=true;
+  Param1 := NewTPSVariantIFC(Stack[Stack.count-1],true);
+  Param2 := NewTPSVariantIFC(Stack[Stack.count-2],true);
+  if Param1.aType.BaseType <> Param2.aType.BaseType then
+    exit(false)
+  else
+  begin
+    Param1.aType.CalcSize;
+    param2.aType.CalcSize;
+    if Param1.aType.RealSize <> Param2.aType.RealSize then
+      exit(false);
+    GetMem(tempcopy,Param1.aType.RealSize);
+    Move(Param1.Dta^,tempCopy^,param1.atype.realsize);
+    Move(Param2.Dta^,Param1.Dta^,param1.atype.realsize);
+    Move(tempCopy^,Param2.Dta^,param1.atype.realsize);
+    Freemem(tempcopy);
+  end;
+end;
+
 function ToStr_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
 var
   data: TPSVariantIFC;
 begin
   result := true;
   Stack.SetAnsiString(-1, MakeString(NewTPSVariantIFC(Stack[Stack.Count-2],false)));
-
 end;
 
 function NewThreadCall(Procname : string) : Cardinal;
@@ -444,6 +467,19 @@ begin
       OrgName:= 'x';
       Mode:= pmIn;
     end;
+  with x.AddFunction('procedure swap;').decl do
+  begin
+    with addparam do
+    begin
+      OrgName:= 'x';
+      Mode:= pmInOut;
+    end;
+    with addparam do
+    begin
+      OrgName:= 'y';
+      Mode:= pmInOut;
+    end;
+  end;
 end;
 
 procedure TMMLPSThread.OnExecImport(Sender: TObject; se: TPSExec;
@@ -459,6 +495,7 @@ begin
   RIRegister_Mufasa(x);
   se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
   se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
+  se.RegisterFunctionName('SWAP',@swap_,nil,nil);
 end;
 
 procedure TMMLPSThread.OutputMessages;

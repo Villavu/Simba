@@ -30,3 +30,35 @@ function ps_RandomRange(const aFrom, aTo: Integer): Integer;
 begin
   Result:=Random(Abs(aFrom-aTo))+Min(aTo,AFrom);
 end;
+
+function Factorial(number: longword): Int64;
+var
+  Loop : longword;
+begin
+  result := 1;
+  for loop := number downto 2 do
+    result := result * loop;
+end;
+
+function BinCoe(a, b: LongInt): Extended;
+begin
+  result := Factorial(a) / (factorial(b) * factorial(a-b));
+end;
+
+function FixD(Degrees : extended) : Extended;
+begin;
+  Result := Degrees;
+  while Result < 0 do
+    Result := Result + 360;
+  while Result > 360 do
+    Result := Result - 360;
+end;
+
+procedure psSwap(var A,B);
+var
+  TempPtr : Pointer;
+begin;
+  TempPtr := pointer(A);
+  pointer(a) := pointer(b);
+  pointer(b) := TempPtr;
+end;

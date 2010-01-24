@@ -84,7 +84,8 @@ type
         function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
         function FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
         function FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
-
+        //Donno
+        function GetColors(Coords: TPointArray): TIntegerArray;
         // tol speeds
         procedure SetToleranceSpeed(nCTS: Integer);
         function GetToleranceSpeed: Integer;
@@ -104,6 +105,7 @@ uses
     colour_conv,// For RGBToColor, etc.
     Client, // For the Client Casts.
     math, //min/max
+    tpa, //TPABounds
     dtmutil
     ;
 type
@@ -2003,4 +2005,23 @@ begin
   raise Exception.CreateFmt('Not done yet!', []);
 end;
 
+function TMFinder.GetColors(Coords: TPointArray): TIntegerArray;
+var
+  Box : TBox;
+  Len, I,w,h : integer;
+  PtrRet : TRetData;
+  Ptr : PRGB32;
+begin
+  len := high(Coords);
+  setlength(result,len+1);
+  box := GetTPABounds(coords);
+  w := 0;
+  h := 0;
+  DefaultOperations(w,h,box.x2,box.y2);
+  TClient(Self.Client).IOManager.GetDimensions(w,h);
+  PtrRet := TClient(Client).IOManager.ReturnData(0,0,Box.x2 + 1,box.y2+ 1);//Otherwise lotsashit.
+  ptr := PtrRet.Ptr;
+  for i := 0 to len do
+    Result[i] := BGRToRGB(Ptr[Coords[i].y*w + Coords[i].x]);
+end;
 end.
