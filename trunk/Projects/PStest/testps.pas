@@ -13,6 +13,7 @@ type
     x, y:integer;
   end;
 
+  function MakeArr : TStringArray;
 procedure TestParameters(Int1,Int2,Int3,Int4,Int5,Int6 : integer);
 function TestResult(Int1,Int2,Int3,Int4,Int5,Int6 : integer): Integer;
 function TestString(Str1,Str2,Str3 : string) : string;
@@ -112,6 +113,13 @@ begin
   Arr1 := ConvStrArr(['Hoi','Hoe','Gaat','Het?']);
   Arr2 := ConvStrArr(['Ik','ben','een','geest!']);
   Result := ConvStrArr(['Waza?','Gaat','Alles','Goed']);
+end;
+
+function MakeArr : TStringArray;
+begin;
+  setlength(result,2);
+  result[0] := 'Test0';
+  Result[1] := 'Wow!';
 end;
 
 function makePoint(x, y: integer): w_Tpoint;
