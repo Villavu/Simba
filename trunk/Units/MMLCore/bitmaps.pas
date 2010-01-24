@@ -100,6 +100,7 @@ type
     function GetBMP(Index : integer) : TMufasaBitmap;
     property Bmp[Index : integer]: TMufasaBitmap read GetBMP;
     function CreateBMP(w, h: integer): Integer;
+    function AddBMP(_bmp: TMufasaBitmap): Integer;
     function CopyBMP( Bitmap : integer) : Integer;
     function CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer;
     function CreateBMPFromFile(const Path : string) : integer;
@@ -194,6 +195,26 @@ begin
   BmpArray[Result] := TMufasaBitmap.Create;
   BmpArray[Result].SetSize(w,h);
   BmpArray[Result].Index:= Result;
+end;
+
+function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;
+begin
+  if BmpsCurr < BmpsHigh then
+  begin;
+    inc(BmpsCurr);
+    Result := BmpsCurr;
+  end else if (FreeSpotsHigh > -1) then
+  begin;
+    Result := FreeSpots[FreeSpotsHigh];
+    dec(FreeSpotsHigh);
+  end else
+  begin;
+    SetLength(BmpArray, BmpsHigh + 6);
+    BmpsHigh := BmpsHigh + 5;
+    inc(BmpsCurr);
+    Result := BmpsCurr;
+  end;
+  BmpArray[Result] := _bmp;
 end;
 
 function TMBitmaps.CopyBMP(Bitmap: integer): Integer;

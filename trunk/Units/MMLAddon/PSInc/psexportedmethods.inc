@@ -173,6 +173,8 @@ AddFunction(@isKeyDown, 'function IsKeyDown(key: Word): Boolean;');
 { OCR}
 SetCurrSection('OCR');
 AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
+AddFunction(@BitmapFromTextFont, 'function BitmapFromTextFont(text, font: String): integer;');
+AddFunction(@TPAFromTextFont, 'function TPAFromTextFont(text, font: String): TPointArray;');
 
 
 {Bitmaps}
