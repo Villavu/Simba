@@ -48,23 +48,29 @@ type
 
 
 type
+
+    { TMFonts }
+
     TMFonts = class(TObject)
-            constructor Create;
-            destructor Destroy; override;
+    private
+        function GetFontIndex(Name: String): Integer;
+        function GetFontByIndex(Index : integer): TMfont;
+    private
+        Fonts: TList;
+        Path: String;
+    public
+      constructor Create;
+      destructor Destroy; override;
 
-            function GetFont(Name: String): TOcrData;
-            function FreeFont(Name: String): boolean;
-            function LoadFont(Name: String; Shadow: Boolean): boolean;
-            procedure SetPath(aPath: String);
-            function GetPath: String;
-
-            function Copy: TMFonts;
-        private
-            function GetFontIndex(Name: String): Integer;
-        private
-            Fonts: TList;
-            Path: String;
-        end;
+      function GetFont(Name: String): TOcrData;
+      function FreeFont(Name: String): boolean;
+      function LoadFont(Name: String; Shadow: Boolean): boolean;
+      procedure SetPath(aPath: String);
+      function GetPath: String;
+      function Copy: TMFonts;
+      function Count : integer;
+      property Font[Index : integer]: TMfont read GetFontByIndex; default;
+    end;
 
 implementation
 
@@ -124,6 +130,11 @@ begin
   Result.Data.Height := Self.Data.Height;
   Result.Data.inputs := Self.Data.inputs;
   Result.Data.outputs := Self.Data.outputs;
+end;
+
+function TMFonts.GetFontByIndex(Index : integer): TMfont;
+begin
+  result := TMfont(Fonts.Items[index]);
 end;
 
 constructor TMFonts.Create;
@@ -219,6 +230,11 @@ begin
   Result.Path := Self.GetPath();
   for i := 0 to Self.Fonts.Count -1 do
     Result.Fonts.Add(TMFont(Self.Fonts.Items[i]).Copy());
+end;
+
+function TMFonts.Count: integer;
+begin
+  result := Fonts.Count;
 end;
 
 end.

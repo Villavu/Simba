@@ -33,7 +33,7 @@ end;
 
 procedure SetTargetBitmap(bitmap: Integer);
 begin;
-  CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps.Bmp[Bitmap]);
+  CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[Bitmap]);
 end;
 
 procedure GetClientDimensions(out w, h: integer);
