@@ -96,6 +96,7 @@ type
     FreeSpots : Array of integer;
     BmpArray : TMufasaBmpArray;
     BmpsCurr,BmpsHigh,FreeSpotsHigh,FreeSpotsLen : integer;
+    function GetNewIndex : integer;
   public
     function GetBMP(Index : integer) : TMufasaBitmap;
     property Bmp[Index : integer]: TMufasaBitmap read GetBMP;
@@ -164,6 +165,24 @@ end;
 
 { TMBitmaps }
 
+function TMBitmaps.GetNewIndex: integer;
+begin
+  if BmpsCurr < BmpsHigh then
+  begin;
+    inc(BmpsCurr);
+    Result := BmpsCurr;
+  end else if (FreeSpotsHigh > -1) then
+  begin;
+    Result := FreeSpots[FreeSpotsHigh];
+    dec(FreeSpotsHigh);
+  end else
+  begin;
+    SetLength(BmpArray, BmpsHigh + 6);
+    BmpsHigh := BmpsHigh + 5;
+    inc(BmpsCurr);
+    Result := BmpsCurr;
+  end;
+end;
 
 function TMBitmaps.GetBMP(Index: integer): TMufasaBitmap;
 begin
@@ -177,21 +196,7 @@ end;
 
 function TMBitmaps.CreateBMP(w,h : integer): Integer;
 begin
-  if BmpsCurr < BmpsHigh then
-  begin;
-    inc(BmpsCurr);
-    Result := BmpsCurr;
-  end else if (FreeSpotsHigh > -1) then
-  begin;
-    Result := FreeSpots[FreeSpotsHigh];
-    dec(FreeSpotsHigh);
-  end else
-  begin;
-    SetLength(BmpArray, BmpsHigh + 6);
-    BmpsHigh := BmpsHigh + 5;
-    inc(BmpsCurr);
-    Result := BmpsCurr;
-  end;
+  result := GetNewIndex;
   BmpArray[Result] := TMufasaBitmap.Create;
   BmpArray[Result].SetSize(w,h);
   BmpArray[Result].Index:= Result;
@@ -199,21 +204,7 @@ end;
 
 function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;
 begin
-  if BmpsCurr < BmpsHigh then
-  begin;
-    inc(BmpsCurr);
-    Result := BmpsCurr;
-  end else if (FreeSpotsHigh > -1) then
-  begin;
-    Result := FreeSpots[FreeSpotsHigh];
-    dec(FreeSpotsHigh);
-  end else
-  begin;
-    SetLength(BmpArray, BmpsHigh + 6);
-    BmpsHigh := BmpsHigh + 5;
-    inc(BmpsCurr);
-    Result := BmpsCurr;
-  end;
+  Result := GetNewIndex;
   BmpArray[Result] := _bmp;
 end;
 
