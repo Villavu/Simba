@@ -69,7 +69,7 @@ type
     ScriptName : string;//The name of the currently opened/saved file.
     ScriptDefault : string;//The default script e.g. program new; begin end.
     ScriptChanged : boolean;//We need this for that little * (edited star).
-    ScriptThread : TMMLPSThread;//Just one thread for now..
+    ScriptThread : TMThread;//Just one thread for now..
     FScriptState : TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
     procedure undo;
     procedure redo;
@@ -353,4 +353,4 @@ initialization
   {$I framescript.lrs}
 
 end.
-
+
