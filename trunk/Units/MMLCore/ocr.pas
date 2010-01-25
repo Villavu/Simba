@@ -54,7 +54,7 @@ uses
              procedure FilterShadowBitmap(bmp: TMufasaBitmap);
              procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
-             function GetTextAt(atX, atY, font, minspacing, maxspacing, color, len: integer): string;
+             function GetTextAt(atX, atY, minspacing, maxspacing, color, tol, len: integer; font: string): string;
              function TextToFontTPA(Text, font: String; var w, h: integer): TPointArray;
              function TextToFontBitmap(Text, font: String): TMufasaBitmap;
              function TextToMask(Text, font: String): TMask;
@@ -704,9 +704,17 @@ begin
     result := GetUpTextAtEx(atX, atY, false);
 end;
 
-function TMOCR.GetTextAt(atX, atY, font, minspacing, maxspacing, color, len: integer): string;
+function TMOCR.GetTextAt(atX, atY, minspacing, maxspacing, color, tol, len: integer; font: string): string;
+
+var
+   fD: TocrData;
+   TPA: TPointArray;
 
 begin
+  fD := Fonts.GetFont(font);
+  SetLength(TPA, 0);
+  TClient(Client).MFinder.FindColorsTolerance(TPA, color, atX, atY, {fuck}0, {fuck}0, tol);
+
 
 end;
 

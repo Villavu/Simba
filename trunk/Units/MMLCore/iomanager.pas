@@ -222,7 +222,9 @@ interface
         procedure PressKey(key: Word);
         procedure SendText(text: string);
         function isKeyDown(key: Word): Boolean;
-        
+
+        function GetImageTarget: TTarget;
+
       protected
         keymouse: TTarget;
         image: TTarget;
@@ -231,6 +233,7 @@ interface
         bothsame: boolean;
         
         procedure SetImageTarget(target: TTarget);
+
         procedure SetKeyMouseTarget(target: TTarget);
         procedure SetBothTargets(target: TTarget);
         procedure NativeInit; virtual; abstract;
@@ -290,6 +293,12 @@ begin
   image:= target;
   bothsame:= false;
 end;
+
+function TIOManager_Abstract.GetImageTarget: TTarget;
+begin
+  result := image;
+end;
+
 procedure TIOManager_Abstract.SetKeyMouseTarget(target: TTarget);
 begin
   if not(bothsame) then keymouse.Free();
@@ -340,17 +349,34 @@ begin
   result:= frozen <> nil;
 end;
 
-function TIOManager_Abstract.GetColor(x,y : integer) : TColor; begin result:= image.GetColor(x,y); end;
-function TIOManager_Abstract.ReturnData(xs,ys,width,height: integer): TRetData; begin result:= image.ReturnData(xs,ys,width,height); end;
-procedure TIOManager_Abstract.FreeReturnData; begin image.freeReturnData(); end;
+function TIOManager_Abstract.GetColor(x,y : integer) : TColor;
+begin
+  result:= image.GetColor(x,y);
+end;
+function TIOManager_Abstract.ReturnData(xs,ys,width,height: integer): TRetData;
+begin
+  result:= image.ReturnData(xs,ys,width,height);
+end;
+procedure TIOManager_Abstract.FreeReturnData;
+begin
+  image.freeReturnData();
+end;
 
-function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; begin SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y)); end;
-function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap) : integer; begin SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height)); end;
+function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer;
+begin
+  SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y));
+end;
+function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap) : integer;
+begin
+  SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height));
+end;
+
 function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer;
 var
   client: TEIOS_Client;
 begin
-  if not eios_controller.ClientExists(name) then raise Exception.Create('EIOS Client by specified name does not exist');
+  if not eios_controller.ClientExists(name) then
+    raise Exception.Create('EIOS Client by specified name does not exist');
   client:= eios_controller.GetClient(name);
   SetBothTargets(TEIOS_Target.Create(client, initargs));
 end;
@@ -369,10 +395,23 @@ begin
   {not sure if image needs activation or not, if its a native window keymouse == image so it should be good.}
 end;
 
-procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer); begin keymouse.GetMousePosition(x,y) end;
-procedure TIOManager_Abstract.SetMousePos(X, Y: Integer); begin keymouse.MoveMouse(x,y); end;
-procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType); begin keymouse.HoldMouse(x,y,button); end;
-procedure TIOManager_Abstract.ReleaseMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
+procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer);
+begin
+  keymouse.GetMousePosition(x,y)
+end;
+procedure TIOManager_Abstract.SetMousePos(X, Y: Integer);
+begin
+  keymouse.MoveMouse(x,y);
+end;
+procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType);
+begin
+  keymouse.HoldMouse(x,y,button);
+end;
+procedure TIOManager_Abstract.ReleaseMouse(x,y : integer; button: TClickType);
+begin
+  keymouse.ReleaseMouse(x,y,button);
+end;
+
 procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; button: TClickType);
 begin
   HoldMouse(x,y,button);
@@ -380,11 +419,28 @@ begin
   ReleaseMouse(x,y,button);
 end;
 
-procedure TIOManager_Abstract.KeyUp(key: Word); begin keymouse.ReleaseKey(key) end;
-procedure TIOManager_Abstract.KeyDown(key: Word); begin keymouse.HoldKey(key) end;
-procedure TIOManager_Abstract.PressKey(key: Word); begin keyup(key); keydown(key); end;
-procedure TIOManager_Abstract.SendText(text: string); begin keymouse.SendString(text); end;
-function TIOManager_Abstract.isKeyDown(key: Word): Boolean; begin result:= keymouse.IsKeyHeld(key); end;
+procedure TIOManager_Abstract.KeyUp(key: Word);
+begin
+  keymouse.ReleaseKey(key)
+end;
+procedure TIOManager_Abstract.KeyDown(key: Word);
+begin
+  keymouse.HoldKey(key)
+end;
+procedure TIOManager_Abstract.PressKey(key: Word);
+begin
+  keyup(key);
+  keydown(key);
+end;
+procedure TIOManager_Abstract.SendText(text: string);
+begin
+  keymouse.SendString(text);
+end;
+
+function TIOManager_Abstract.isKeyDown(key: Word): Boolean;
+begin
+  result:= keymouse.IsKeyHeld(key);
+end;
 
 //***implementation*** TTarget
 
