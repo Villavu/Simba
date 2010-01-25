@@ -371,7 +371,7 @@ end;
 
 procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer); begin keymouse.GetMousePosition(x,y) end;
 procedure TIOManager_Abstract.SetMousePos(X, Y: Integer); begin keymouse.MoveMouse(x,y); end;
-procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
+procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType); begin keymouse.HoldMouse(x,y,button); end;
 procedure TIOManager_Abstract.ReleaseMouse(x,y : integer; button: TClickType); begin keymouse.ReleaseMouse(x,y,button); end;
 procedure TIOManager_Abstract.ClickMouse(X, Y: Integer; button: TClickType);
 begin
