@@ -44,7 +44,6 @@ type
       Res : Variant;
       SyncMethod : procedure of object;
       OldThread : TThread;
-      PSScript : TPSScript;
     end;
 
     TWritelnProc = procedure(s: string);
@@ -247,7 +246,7 @@ begin
   ErrorData^.ErrType:= ErrorType;
   ErrorData^.Module:= ErrorModule;
   ErrorData^.IncludePath:= IncludePath;
-  CurrThread.Synchronize(OnError); //what does this do???
+  CurrThread.Synchronize(OnError);
 end;
 
 procedure TMThread.OnThreadTerminate(Sender: TObject);
@@ -332,6 +331,15 @@ begin
   FontPath:= FontP;
 end;
 
+function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
+begin
+  CurrThread.SyncInfo^.MethodName:= ProcName;
+  CurrThread.SyncInfo^.V:= V;
+  CurrThread.SyncInfo^.OldThread := CurrThread;
+  CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
+  Result := CurrThread.SyncInfo^.Res;
+end;
+
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 {$I PSInc/Wrappers/window.inc}
@@ -396,28 +404,6 @@ end;
   It may also be wise to turn the "Importing of wrappers" into an include as
   well, it will really make the unit more straightforward to use and read.
 }
-
-{function NewThreadCall(Procname : string) : Cardinal;
-begin;
-  result :=   CurrThread.PSScript.Exec.GetVar(Procname);
-end;}
-
-{function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
-begin;
-  CurrThread.SyncInfo^.MethodName:= ProcName;
-  CurrThread.SyncInfo^.V:= V;
-  CurrThread.SyncInfo^.PSScript := CurrThread.PSScript;
-  CurrThread.SyncInfo^.OldThread := CurrThread;
-  CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
-  Result := CurrThread.SyncInfo^.Res;
-//  Writeln('We have a length of: '  + inttostr(length(v)));
-//  Try
-//    Result := CurrThread.PSScript.Exec.RunProcPVar(v,CurrThread.PSScript.Exec.GetProc(Procname));
-//  Except
-//    Writeln('We has some errors :-(');
-//  end;
-end;}
-
 
 constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 begin

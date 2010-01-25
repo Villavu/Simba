@@ -1699,20 +1699,32 @@ end;
 
 
 procedure TForm1.SafeCallThread;
+var
+  thread: TMThread;
 begin
   Writeln('Executing : ' + CurrentSyncInfo.MethodName);
-  mmlpsthread.CurrThread := TMThread(CurrentSyncInfo.OldThread);
-  with CurrentSyncInfo.PSScript do
-  begin;
-    OnLine:=@OnLinePSScript;
-    CurrentSyncInfo.Res:= Exec.RunProcPVar(CurrentSyncInfo.V,Exec.GetProc(CurrentSyncInfo.MethodName));
-    Online := nil;
+  thread:= TMThread(CurrentSyncInfo.OldThread);
+  mmlpsthread.CurrThread:= thread;
+  try
+    if thread is TPSThread then
+    begin
+      with TPSThread(thread).PSScript do
+      begin
+        OnLine:=@OnLinePSScript;
+        CurrentSyncInfo.Res:= Exec.RunProcPVar(CurrentSyncInfo.V,Exec.GetProc(CurrentSyncInfo.MethodName));
+        Online := nil;
+      end;
+    end else
+    begin
+      raise Exception.Create('ThreadSafeCall not implemented on this client');
+    end;
+  finally
+    mmlpsthread.CurrThread:= nil;
   end;
-  mmlpsthread.CurrThread := nil;
 end;
 
 function TForm1.OpenScript: boolean;
-begin;
+begin
   Result := False;
   if CanExitOrOpen = false then
     Exit;
