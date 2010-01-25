@@ -33,7 +33,7 @@ begin
   if t > 50 then
   begin;
     EndTime := GetTickCount + t;
-    while (CurrThread.PSScript.Exec.Status = isRunning) and (GetTickCount < EndTime) do
+    while {(CurrThread.PSScript.Exec.Status = isRunning) and }(GetTickCount < EndTime) do
       Sleep(16);
   end else
   begin
@@ -104,7 +104,7 @@ end;
 
 procedure TerminateScript;
 begin;
-  CurrThread.PSScript.Stop;
+  CurrThread.Terminate;
 end;
 function GetTimeRunning: LongWord;
 begin;
