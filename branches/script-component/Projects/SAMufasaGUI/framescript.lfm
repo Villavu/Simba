@@ -25,7 +25,7 @@ object ScriptFrame: TScriptFrame
     OnDragDrop = SynEditDragDrop
     OnDragOver = SynEditDragOver
     OnKeyDown = SynEditKeyDown
-    Gutter.Width = 57
+    Gutter.Width = 53
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -602,7 +602,7 @@ object ScriptFrame: TScriptFrame
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 17
+        Width = 13
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone

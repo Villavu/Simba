@@ -74,54 +74,74 @@ type
     end;
     TExpMethodArr = array of TExpMethod;
 
-    TMMLPSThread = class(TThread)
+    TMThread = class(TThread)
+    protected
+      ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
+      DebugTo: TWritelnProc;
+      DebugImg : TDbgImgInfo;
+      PluginsToload : array of integer;
+      ExportedMethods : TExpMethodArr;
+
+      procedure HandleError(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
+      function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
+      function LoadFile(var filename, contents: string): boolean;
+      procedure LoadMethods; virtual; abstract;
+
+    public
+      Client : TClient;
+      StartTime : LongWord;
+      DebugMemo : TMemo;
+
+      SyncInfo : PSyncInfo; //We need this for callthreadsafe
+      ErrorData : PErrorData; //We need this for thread-safety etc
+      OnError  : TOnError; //Error handeler
+
+      procedure SetScript(Script : string);
+      procedure SetDebug( writelnProc : TWritelnProc );
+      procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
+      procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
+      procedure OnThreadTerminate(Sender: TObject);
+      procedure SetScript(script: string); virtual; abstract;
+      procedure Execute; override; abstract;
+      procedure Terminate; virtual; abstract;
+
+      constructor Create(CreateSuspended: boolean; plugin_dir: string);
+      destructor Destroy; override;
+
+      class function GetExportedMethods : TExpMethodArr;
+    end;
+
+    TPSThread = class(TMThread)
       procedure OnProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
       function PSScriptFindUnknownFile(Sender: TObject;
-        const OrginFileName: string; var FileName, Output: string
-        ): Boolean;
+        const OrginFileName: string; var FileName, Output: string): Boolean;
       procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser; const Active: Boolean;
         const DirectiveName, DirectiveParam: string; var Continue: Boolean);
-    private
-      ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
-      procedure HandleError(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
     protected
       //DebugTo : TMemo;
-      DebugTo: TWritelnProc;
-      DebugImg : TDbgImgInfo;
-      PluginsToload : Array of integer;
-      FOnError  : TOnError;
       procedure OnCompile(Sender: TPSScript);
       function RequireFile(Sender: TObject; const OriginFileName: String;
                           var FileName, OutPut: string): Boolean;
       procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
       procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
       procedure OutputMessages;
-      procedure OnThreadTerminate(Sender: TObject);
-      procedure Execute; override;
     public
-      ExportedMethods : TExpMethodArr;
       PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
-      Client : TClient;
-      StartTime : LongWord;
-      DebugMemo : TMemo;
-      SyncInfo : PSyncInfo; //We need this for callthreadsafe
-      ErrorData : PErrorData; //We need this for thread-safety etc
-      property OnError : TOnError read FOnError write FOnError;
-      procedure LoadMethods;
-      class function GetExportedMethods : TExpMethodArr;
-      procedure SetPSScript(Script : string);
-      procedure SetDebug( writelnProc : TWritelnProc );
-      procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
-      procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
       constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
       destructor Destroy; override;
+      procedure SetScript(script: string); override;
+      procedure Execute; override;
+      procedure Terminate; override;
     end;
+
 threadvar
-  CurrThread : TMMLPSThread;
+  CurrThread : TMThread;
+
 implementation
+
 uses
   colour_conv,dtmutil,
   {$ifdef mswindows}windows,{$endif}
@@ -199,27 +219,166 @@ begin
   Stack.SetAnsiString(-1, MakeString(NewTPSVariantIFC(Stack[Stack.Count-2],false)));
 end;
 
-function NewThreadCall(Procname : string) : Cardinal;
-begin;
-  result :=   CurrThread.PSScript.Exec.GetVar(Procname);
+{***implementation TMThread***}
+constructor TMThread.Create(CreateSuspended: boolean; plugin_dir: string);
+begin
+  Client := TClient.Create(plugin_dir);
+  ExportedMethods:= GetExportedMethods;
+  SetLength(PluginsToLoad,0);
+  FreeOnTerminate := True;
+  OnTerminate := @OnThreadTerminate;
+  inherited Create(CreateSuspended);
 end;
 
-function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
-begin;
-  CurrThread.SyncInfo^.MethodName:= ProcName;
-  CurrThread.SyncInfo^.V:= V;
-  CurrThread.SyncInfo^.PSScript := CurrThread.PSScript;
-  CurrThread.SyncInfo^.OldThread := CurrThread;
-  CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
-  Result := CurrThread.SyncInfo^.Res;
-{  Writeln('We have a length of: '  + inttostr(length(v)));
-  Try
-    Result := CurrThread.PSScript.Exec.RunProcPVar(v,CurrThread.PSScript.Exec.GetProc(Procname));
-  Except
-    Writeln('We has some errors :-(');
-  end;}
+destructor TMThread.Destroy;
+begin
+  SetLength(PluginsToLoad,0);
+  Client.Free;
+  inherited Destroy;
 end;
 
+procedure TMThread.HandleError(ErrorAtLine, ErrorPosition: integer; ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
+begin
+  if OnError = nil then
+    exit;
+  ErrorData^.Line:= ErrorAtLine;
+  ErrorData^.Position:= ErrorPosition;
+  ErrorData^.Error:= ErrorStr;
+  ErrorData^.ErrType:= ErrorType;
+  ErrorData^.Module:= ErrorModule;
+  ErrorData^.IncludePath:= IncludePath;
+  CurrThread.Synchronize(OnError); //what does this do???
+end;
+
+procedure TMThread.OnThreadTerminate(Sender: TObject);
+begin
+
+end;
+
+function TMThread.ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
+var
+  plugin_idx, i: integer;
+begin
+  if DirectiveName= 'LOADDLL' then
+  begin
+    if DirectiveArgs <> '' then
+    begin;
+      plugin_idx:= PluginsGlob.LoadPlugin(DirectiveArgs);
+      if plugin_idx < 0 then
+        psWriteln(Format('Your DLL %s has not been found',[DirectiveArgs]))
+      else
+      begin;
+        for i := High(PluginsToLoad) downto 0 do
+          if PluginsToLoad[i] = plugin_idx then
+            Exit;
+        SetLength(PluginsToLoad,Length(PluginsToLoad)+1);
+        PluginsToLoad[High(PluginsToLoad)]:= plugin_idx;
+      end;
+    end;
+  end;
+  result:= True;
+end;
+
+function TMThread.LoadFile(var filename, contents: string): boolean;
+var
+  path: string;
+  f: TFileStream;
+begin
+  if FileExists(filename) then
+    path:= filename
+  else
+    path:= IncludePath + filename;
+  if not FileExists(path) then
+  begin
+    psWriteln(Path + ' doesn''t exist');
+    Result := false;
+    Exit;
+  end;
+  try
+    f:= TFileStream.Create(Path, fmOpenRead or fmShareDenyWrite);
+  except
+    Result := false;
+    exit;
+  end;
+  try
+    try
+      SetLength(contents, f.Size);
+      f.Read(contents[1], Length(contents));
+      result:= true;
+    finally
+      f.free;
+    end;
+  except
+    result:= false;
+  end;
+end;
+
+procedure TMThread.SetDebug(writelnProc: TWritelnProc);
+begin
+  DebugTo := writelnProc;
+end;
+
+procedure TMThread.SetDbgImg(DebugImageInfo: TDbgImgInfo);
+begin
+  DebugImg := DebugImageInfo;
+end;
+
+procedure TMThread.SetPaths(ScriptP, AppP,IncludeP,PluginP,FontP: string);
+begin
+  AppPath:= AppP;
+  ScriptPath:= ScriptP;
+  IncludePath:= IncludeP;
+  PluginPath:= PluginP;
+  FontPath:= FontP;
+end;
+
+{$I PSInc/Wrappers/other.inc}
+{$I PSInc/Wrappers/bitmap.inc}
+{$I PSInc/Wrappers/window.inc}
+
+{$I PSInc/Wrappers/strings.inc}
+
+{$I PSInc/Wrappers/colour.inc}
+{$I PSInc/Wrappers/math.inc}
+{$I PSInc/Wrappers/mouse.inc}
+{$I PSInc/Wrappers/file.inc}
+
+{$I PSInc/Wrappers/keyboard.inc}
+{$I PSInc/Wrappers/dtm.inc}
+{$I PSInc/Wrappers/ocr.inc}
+{$I PSInc/Wrappers/internets.inc}
+
+class function TMThread.GetExportedMethods: TExpMethodArr;
+var
+  c : integer;
+  CurrSection : string;
+
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
+procedure AddFunction( Ptr : Pointer; DeclStr : String);
+begin;
+  if c >= 300 then
+    raise exception.create('PSThread.LoadMethods: Exported more than 300 functions');
+  Result[c].FuncDecl:= DeclStr;
+  Result[c].FuncPtr:= Ptr;
+  Result[c].Section:= CurrSection;
+  inc(c);
+end;
+
+begin
+  c := 0;
+  CurrSection := 'Other';
+  SetLength(Result,300);
+
+  {$i PSInc/psexportedmethods.inc}
+
+  SetLength(Result,c);
+end;
+
+{***implementation TPSThread***}
 
 {
   Note to Raymond: For PascalScript, Create it on the .Create,
@@ -238,12 +397,31 @@ end;
   well, it will really make the unit more straightforward to use and read.
 }
 
+{function NewThreadCall(Procname : string) : Cardinal;
+begin;
+  result :=   CurrThread.PSScript.Exec.GetVar(Procname);
+end;}
 
-constructor TMMLPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+{function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
+begin;
+  CurrThread.SyncInfo^.MethodName:= ProcName;
+  CurrThread.SyncInfo^.V:= V;
+  CurrThread.SyncInfo^.PSScript := CurrThread.PSScript;
+  CurrThread.SyncInfo^.OldThread := CurrThread;
+  CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
+  Result := CurrThread.SyncInfo^.Res;
+//  Writeln('We have a length of: '  + inttostr(length(v)));
+//  Try
+//    Result := CurrThread.PSScript.Exec.RunProcPVar(v,CurrThread.PSScript.Exec.GetProc(Procname));
+//  Except
+//    Writeln('We has some errors :-(');
+//  end;
+end;}
+
+
+constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 begin
   SyncInfo:= TheSyncInfo;
-  SetLength(PluginsToLoad,0);
-  Client := TClient.Create(plugin_dir);
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
@@ -256,99 +434,36 @@ begin
   OnError:= nil;
   // Set some defines
   {$I PSInc/psdefines.inc}
-  // Load the methods we're going to export
-  Self.LoadMethods;
-
-  FreeOnTerminate := True;
-  Self.OnTerminate := @Self.OnThreadTerminate;
-
-  inherited Create(CreateSuspended);
+  inherited Create(CreateSuspended, plugin_dir);
 end;
 
-procedure TMMLPSThread.OnThreadTerminate(Sender: TObject);
-begin
-//  Writeln('Terminating the thread');
-end;
 
-destructor TMMLPSThread.Destroy;
+destructor TPSThread.Destroy;
 begin
-  SetLength(PluginsToLoad,0);
-  Client.Free;
   PSScript.Free;
   inherited;
 end;
 
-// include PS wrappers
-{$I PSInc/Wrappers/other.inc}
-{$I PSInc/Wrappers/bitmap.inc}
-{$I PSInc/Wrappers/window.inc}
-
-{$I PSInc/Wrappers/strings.inc}
-
-{$I PSInc/Wrappers/colour.inc}
-{$I PSInc/Wrappers/math.inc}
-{$I PSInc/Wrappers/mouse.inc}
-{$I PSInc/Wrappers/file.inc}
-
-{$I PSInc/Wrappers/keyboard.inc}
-{$I PSInc/Wrappers/dtm.inc}
-{$I PSInc/Wrappers/ocr.inc}
-{$I PSInc/Wrappers/internets.inc}
-
-procedure TMMLPSThread.OnProcessDirective(Sender: TPSPreProcessor;
+procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean);
 begin
 end;
 
-function TMMLPSThread.PSScriptFindUnknownFile(Sender: TObject;
+function TPSThread.PSScriptFindUnknownFile(Sender: TObject;
   const OrginFileName: string; var FileName, Output: string): Boolean;
 begin
   Writeln(OrginFileName + '-' +  Output + '-' + FileName);
 end;
 
-procedure TMMLPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
+procedure TPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean);
-var
-  TempNum : integer;
-  I: integer;
 begin
-  if DirectiveName= 'LOADDLL' then
-    if DirectiveParam <> '' then
-    begin;
-      TempNum := PluginsGlob.LoadPlugin(DirectiveParam);
-      if TempNum < 0 then
-        psWriteln(Format('Your DLL %s has not been found',[DirectiveParam]))
-      else
-      begin;
-        for i := High(PluginsToLoad) downto 0 do
-          if PluginsToLoad[i] = TempNum then
-            Exit;
-        SetLength(PluginsToLoad,Length(PluginsToLoad)+1);
-        PluginsToLoad[High(PluginsToLoad)] := TempNum;
-      end;
-    end;
-  Continue:= True;
+  Continue:= ProcessDirective(DirectiveName, DirectiveParam);
 end;
 
-procedure TMMLPSThread.HandleError(ErrorAtLine, ErrorPosition: integer;
-  ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
-begin
-  if FOnError = nil then
-    exit;
-  ErrorData^.Line:= ErrorAtLine;
-  ErrorData^.Position:= ErrorPosition;
-  ErrorData^.Error:= ErrorStr;
-  ErrorData^.ErrType:= ErrorType;
-  ErrorData^.Module:= ErrorModule;
-  ErrorData^.IncludePath:= IncludePath;
-  CurrThread.Synchronize(FOnError);
-end;
-
-
-
-procedure TMMLPSThread.OnCompile(Sender: TPSScript);
+procedure TPSThread.OnCompile(Sender: TPSScript);
 var
   i,ii : integer;
   Fonts : TMFonts;
@@ -373,40 +488,14 @@ begin
       PSScript.AddFunction(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl);
 end;
 
-function TMMLPSThread.RequireFile(Sender: TObject;
+function TPSThread.RequireFile(Sender: TObject;
   const OriginFileName: String; var FileName, OutPut: string): Boolean;
-var
-  path: string;
-  f: TFileStream;
 begin
-  if FileExists(FileName) then
-    Path := FileName
-  else
-    Path :=  IncludePath + Filename;
-  if not FileExists(Path) then
-  begin;
-    psWriteln(Path + ' doesn''t exist');
-    Result := false;
-    Exit;
-  end;
-  try
-    F := TFileStream.Create(Path, fmOpenRead or fmShareDenyWrite);
-  except
-    Result := false;
-    exit;
-  end;
-  try
-    SetLength(Output, f.Size);
-    f.Read(Output[1], Length(Output));
-  finally
-    f.Free;
-  end;
-  Result := True;
+  result:= LoadFile(FileName,OutPut);
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
-
-begin;
+begin
   with cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap') do
   begin;
     RegisterMethod('constructor create');
@@ -445,7 +534,7 @@ begin;
   end;
 end;
 
-procedure TMMLPSThread.OnCompImport(Sender: TObject; x: TPSPascalCompiler);
+procedure TPSThread.OnCompImport(Sender: TObject; x: TPSPascalCompiler);
 begin
   SIRegister_Std(x);
   SIRegister_Controls(x);
@@ -482,7 +571,7 @@ begin
   end;
 end;
 
-procedure TMMLPSThread.OnExecImport(Sender: TObject; se: TPSExec;
+procedure TPSThread.OnExecImport(Sender: TObject; se: TPSExec;
   x: TPSRuntimeClassImporter);
 begin
   RIRegister_Std(x);
@@ -498,7 +587,7 @@ begin
   se.RegisterFunctionName('SWAP',@swap_,nil,nil);
 end;
 
-procedure TMMLPSThread.OutputMessages;
+procedure TPSThread.OutputMessages;
 var
   l: Longint;
   b: Boolean;
@@ -520,7 +609,7 @@ begin
   end;
 end;
 
-procedure TMMLPSThread.Execute;
+procedure TPSThread.Execute;
 begin
   CurrThread := Self;
   Starttime := lclintf.GetTickCount;
@@ -547,66 +636,14 @@ begin
   end;
 end;
 
-procedure TMMLPSThread.LoadMethods;
+procedure TPSThread.Terminate;
 begin
-  ExportedMethods:= GetExportedMethods;
+  PSScript.Stop;
 end;
 
-class function TMMLPSThread.GetExportedMethods: TExpMethodArr;
-var
-  c : integer;
-  CurrSection : string;
-
-  procedure SetCurrSection(str : string);
-  begin;
-    CurrSection := Str;
-  end;
-
-  procedure AddFunction( Ptr : Pointer; DeclStr : String);
-  begin;
-  //  SetLength(ExportedMethods,c+1);
-    if c >= 300 then
-      raise exception.create('PSThread.LoadMethods: Exported more than 300 functions');
-    Result[c].FuncDecl:= DeclStr;
-    Result[c].FuncPtr:= Ptr;
-    Result[c].Section:= CurrSection;
-    inc(c);
-  end;
-
-begin
-  c := 0;
-  CurrSection := 'Other';
-  SetLength(Result,300);
-
-  {$i PSInc/psexportedmethods.inc}
-
-  SetLength(Result,c);
-
-end;
-
-procedure TMMLPSThread.SetPSScript(Script: string);
+procedure TPSThread.SetScript(script: string);
 begin
    PSScript.Script.Text:= Script;
-end;
-
-procedure TMMLPSThread.SetDebug(writelnProc: TWritelnProc);
-begin
-  DebugTo := writelnProc;
-end;
-
-procedure TMMLPSThread.SetDbgImg(DebugImageInfo: TDbgImgInfo);
-begin
-  DebugImg := DebugImageInfo;
-end;
-
-procedure TMMLPSThread.SetPaths(ScriptP, AppP,IncludeP,PluginP,FontP: string);
-begin
-  AppPath:= AppP;
-  ScriptPath:= ScriptP;
-  IncludePath:= IncludeP;
-  PluginPath:= PluginP;
-  FontPath:= FontP;
-
 end;
 
 
@@ -616,5 +653,4 @@ finalization
   //PluginsGlob.Free;
   //Its a nice idea, but it will segfault... the program is closing anyway.
 end.
-
 

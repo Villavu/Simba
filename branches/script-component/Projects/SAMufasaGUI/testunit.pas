@@ -533,12 +533,12 @@ begin
     PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-    ScriptThread := TMMLPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
+    ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
     {$IFNDEF TERMINALWRITELN}
     ScriptThread.SetDebug(@formWriteln);
     ScriptThread.DebugMemo := Self.Memo1;
     {$ENDIF}
-    ScriptThread.SetPSScript(CurrScript.SynEdit.Lines.Text);
+    ScriptThread.SetScript(CurrScript.SynEdit.Lines.Text);
     DbgImgInfo.DispSize := @DebugImgForm.DispSize;
     DbgImgInfo.ShowForm := @DebugImgForm.ShowDebugImgForm;
     DbgImgInfo.ToDrawBitmap:= @DebugImgForm.ToDrawBmp;
@@ -627,13 +627,13 @@ begin
         end;
       ss_Running:
         begin
-          ScriptThread.PSScript.Stop;
+          ScriptThread.Terminate;
           ScriptState := ss_Stopping;
         end;
       ss_Paused:
         begin
           ScriptThread.Resume;
-          ScriptThread.PSScript.Stop;
+          ScriptThread.Terminate;
           ScriptState:= ss_Stopping;
         end;
     end;
@@ -1436,7 +1436,7 @@ var
 begin
   if frmFunctionList.FunctionList.Items.Count = 0 then
   begin;
-    Methods := TMMLPSThread.GetExportedMethods;
+    Methods := TMThread.GetExportedMethods;
     Tree := frmFunctionList.FunctionList;
     Tree.Items.Clear;
     Sections := TStringList.Create;
@@ -1701,7 +1701,7 @@ end;
 procedure TForm1.SafeCallThread;
 begin
   Writeln('Executing : ' + CurrentSyncInfo.MethodName);
-  mmlpsthread.CurrThread := TMMLPSTHREAD(CurrentSyncInfo.OldThread);
+  mmlpsthread.CurrThread := TMThread(CurrentSyncInfo.OldThread);
   with CurrentSyncInfo.PSScript do
   begin;
     OnLine:=@OnLinePSScript;

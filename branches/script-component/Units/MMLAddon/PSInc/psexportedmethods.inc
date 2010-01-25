@@ -21,7 +21,7 @@
     psexportedmethods.inc for the Mufasa Macro Library
 }
 
-AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
+//AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 AddFunction(nil,'procedure Writeln(x);'); //We use special function for this
 
 { DTM }
@@ -97,7 +97,7 @@ AddFunction(@DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w, h: intege
 AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp: integer);');
 AddFunction(@GetDebugBitmap,'function GetDebugBitmap: integer;');
 AddFunction(@Random,'function Random(Int: integer): integer;');
-AddFunction(@NewThreadCall,'function NewThreadCall(procname : string) : cardinal');
+//AddFunction(@NewThreadCall,'function NewThreadCall(procname : string) : cardinal');
 AddFunction(@ClearDebug,'procedure ClearDebug;');
 
 
