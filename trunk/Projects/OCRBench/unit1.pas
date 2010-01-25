@@ -6,7 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, ExtCtrls, Client, MufasaTypes, Bitmaps, ocr, windowselector,window;
+  StdCtrls, ExtCtrls, Client, MufasaTypes, Bitmaps, ocr, windowselector,
+  {$IFDEF MSWINDOWS} os_windows, {$ENDIF}
+  {$IFDEF LINUX} os_linux {$ENDIF};
 
 type
 
@@ -31,7 +33,7 @@ type
     BitmapPath: String;
     FontPath: String;
 
-    CliW: TMWindow;
+    CliW: TIOManager;
     UseClient: Boolean;
     { private declarations }
   public
@@ -79,14 +81,14 @@ begin
   Form1.Image1.Canvas.Rectangle(0, 0, Form1.Image1.Canvas.Width,  Form1.Image1.Canvas.Height);
 
   // create and init client
-  C := TClient.Create;
+  C := TClient.Create('');
   bmp := TMufasaBitmap.Create;
   if UseClient then
-    C.MWindow.SetWindow(CliW)
+   C.IOManager.SetTarget(TWindow(CliW.GetImageTarget).GetNativeWindow())
   else
   begin
     bmp.LoadFromFile(BitmapPath);
-    C.MWindow.SetTarget(bmp);
+    C.IOManager.SetTarget(bmp);
   end;
 
   Shadow :=FShadow.Checked;
@@ -158,7 +160,7 @@ Var
 begin
   UseClient := True;
   if not assigned(CliW) then
-    CliW := TMWindow.Create;
+    CliW := TIOManager.Create;
   WS := TMWindowSelector.Create(CliW);
   CliW.SetTarget(WS.Drag{$IFDEF WINDOWS},w_Window{$ENDIF});
 end;

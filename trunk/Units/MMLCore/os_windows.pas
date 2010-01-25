@@ -58,6 +58,8 @@ interface
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
+
+        function GetNativeWindow: Hwnd;
       private
         handle: Hwnd;
         dc: HDC;
@@ -158,6 +160,11 @@ implementation
     buffer.Free;
     keyinput.Free;
     inherited Destroy; 
+  end;
+
+  function TWindow.GetNativeWindow: Hwnd;
+  begin
+    result := handle;
   end;
 
   function TWindow.TargetValid: boolean;
