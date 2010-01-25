@@ -1,0 +1,12 @@
+digraph Client {
+
+	Client [shape=box]
+	
+	Client -> Window
+	Client -> Finder
+	Client -> Bitmaps
+	Client -> Files
+	Client -> OCR
+	Client -> DTM
+
+}
