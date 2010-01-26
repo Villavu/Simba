@@ -11,7 +11,7 @@
       <Title Value="Simba"/>
       <UseXPManifest Value="True"/>
       <Icon Value="0"/>
-      <ActiveEditorIndexAtStart Value="5"/>
+      <ActiveEditorIndexAtStart Value="14"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -265,8 +265,8 @@
         <Filename Value="../../Units/MMLAddon/mmlpsthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="mmlpsthread"/>
-        <CursorPos X="61" Y="256"/>
-        <TopLine Value="331"/>
+        <CursorPos X="94" Y="474"/>
+        <TopLine Value="452"/>
         <EditorIndex Value="11"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -349,7 +349,7 @@
         <UnitName Value="bitmaps"/>
         <CursorPos X="12" Y="93"/>
         <TopLine Value="83"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="15"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit42>
@@ -369,9 +369,11 @@
       <Unit45>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/bitmap.inc"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="1" Y="1"/>
-        <TopLine Value="1"/>
+        <CursorPos X="76" Y="281"/>
+        <TopLine Value="8"/>
+        <EditorIndex Value="12"/>
         <UsageCount Value="201"/>
+        <Loaded Value="True"/>
       </Unit45>
       <Unit46>
         <Filename Value="../../../FPC/FPCCheckout/packages/fcl-image/src/fpcanvas.inc"/>
@@ -495,7 +497,7 @@
       <Unit64>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/other.inc"/>
         <CursorPos X="1" Y="1"/>
-        <TopLine Value="95"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="7"/>
         <UsageCount Value="44"/>
         <Loaded Value="True"/>
@@ -585,7 +587,9 @@
         <UnitName Value="dtm"/>
         <CursorPos X="84" Y="51"/>
         <TopLine Value="33"/>
+        <EditorIndex Value="13"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit77>
       <Unit78>
         <Filename Value="../../../cogat/Units/CogatUnits/comppicker.pas"/>
@@ -664,9 +668,11 @@
       </Unit87>
       <Unit88>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/dtm.inc"/>
-        <CursorPos X="1" Y="1"/>
-        <TopLine Value="1"/>
+        <CursorPos X="60" Y="53"/>
+        <TopLine Value="82"/>
+        <EditorIndex Value="14"/>
         <UsageCount Value="52"/>
+        <Loaded Value="True"/>
       </Unit88>
       <Unit89>
         <Filename Value="../../../cogat/compscript.pas"/>
@@ -766,8 +772,8 @@
       </Unit102>
       <Unit103>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/window.inc"/>
-        <CursorPos X="51" Y="34"/>
-        <TopLine Value="19"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="17"/>
         <Loaded Value="True"/>
@@ -1592,7 +1598,7 @@
         <UnitName Value="framefunctionlist"/>
         <CursorPos X="26" Y="295"/>
         <TopLine Value="7"/>
-        <UsageCount Value="185"/>
+        <UsageCount Value="186"/>
       </Unit223>
       <Unit224>
         <Filename Value="../../../usr/local/share/lazarus/lcl/comctrls.pp"/>
@@ -1649,7 +1655,7 @@
         <UnitName Value="simpleanalyzer"/>
         <CursorPos X="52" Y="104"/>
         <TopLine Value="193"/>
-        <UsageCount Value="172"/>
+        <UsageCount Value="173"/>
       </Unit231>
       <Unit232>
         <Filename Value="../../Units/Misc/mPasLex.pas"/>
@@ -1726,7 +1732,7 @@
         <UnitName Value="updater"/>
         <CursorPos X="38" Y="211"/>
         <TopLine Value="65"/>
-        <UsageCount Value="145"/>
+        <UsageCount Value="146"/>
       </Unit242>
       <Unit243>
         <Filename Value="updateform.pas"/>
@@ -1737,7 +1743,7 @@
         <ComponentState Value="1"/>
         <CursorPos X="111" Y="102"/>
         <TopLine Value="207"/>
-        <UsageCount Value="140"/>
+        <UsageCount Value="141"/>
       </Unit243>
       <Unit244>
         <Filename Value="../../../Documents/lazarus/lcl/fileutil.pas"/>
@@ -1858,7 +1864,7 @@
         <UnitName Value="simbasettings"/>
         <CursorPos X="26" Y="9"/>
         <TopLine Value="11"/>
-        <UsageCount Value="103"/>
+        <UsageCount Value="104"/>
       </Unit261>
       <Unit262>
         <Filename Value="../../Units/MMLAddon/settings.pas"/>
@@ -1896,7 +1902,7 @@
         <UnitName Value="reportbug"/>
         <CursorPos X="53" Y="23"/>
         <TopLine Value="21"/>
-        <UsageCount Value="86"/>
+        <UsageCount Value="87"/>
       </Unit266>
       <Unit267>
         <Filename Value="../../Units/Synapse/synsock.pas"/>
@@ -1953,7 +1959,7 @@
         <UnitName Value="newinternets"/>
         <CursorPos X="37" Y="171"/>
         <TopLine Value="153"/>
-        <UsageCount Value="82"/>
+        <UsageCount Value="83"/>
       </Unit274>
       <Unit275>
         <Filename Value="reportbug.lrs"/>
@@ -2026,7 +2032,7 @@
         <UnitName Value="os_windows"/>
         <CursorPos X="54" Y="348"/>
         <TopLine Value="319"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="16"/>
         <UsageCount Value="26"/>
         <Loaded Value="True"/>
       </Unit284>
@@ -2050,7 +2056,7 @@
         <UnitName Value="libloader"/>
         <CursorPos X="1" Y="149"/>
         <TopLine Value="128"/>
-        <UsageCount Value="40"/>
+        <UsageCount Value="41"/>
       </Unit287>
       <Unit288>
         <Filename Value="../../Units/MMLAddon/tpa.pas"/>
@@ -2181,35 +2187,35 @@
       </Position22>
       <Position23>
         <Filename Value="../../Units/MMLCore/iomanager.pas"/>
-        <Caret Line="233" Column="29" TopLine="438"/>
+        <Caret Line="299" Column="27" TopLine="249"/>
       </Position23>
       <Position24>
         <Filename Value="../../Units/MMLCore/iomanager.pas"/>
-        <Caret Line="299" Column="27" TopLine="249"/>
+        <Caret Line="294" Column="30" TopLine="282"/>
       </Position24>
       <Position25>
         <Filename Value="../../Units/MMLCore/iomanager.pas"/>
-        <Caret Line="294" Column="30" TopLine="282"/>
+        <Caret Line="317" Column="30" TopLine="302"/>
       </Position25>
       <Position26>
         <Filename Value="../../Units/MMLCore/iomanager.pas"/>
-        <Caret Line="317" Column="30" TopLine="302"/>
+        <Caret Line="249" Column="58" TopLine="230"/>
       </Position26>
       <Position27>
         <Filename Value="../../Units/MMLCore/iomanager.pas"/>
-        <Caret Line="249" Column="58" TopLine="230"/>
+        <Caret Line="354" Column="12" TopLine="331"/>
       </Position27>
       <Position28>
-        <Filename Value="../../Units/MMLCore/iomanager.pas"/>
-        <Caret Line="354" Column="12" TopLine="331"/>
+        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
+        <Caret Line="14" Column="58" TopLine="1"/>
       </Position28>
       <Position29>
         <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
-        <Caret Line="14" Column="58" TopLine="1"/>
+        <Caret Line="24" Column="102" TopLine="12"/>
       </Position29>
       <Position30>
-        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
-        <Caret Line="24" Column="102" TopLine="12"/>
+        <Filename Value="../../Units/MMLCore/dtm.pas"/>
+        <Caret Line="51" Column="84" TopLine="33"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

@@ -21,17 +21,17 @@
     Math.inc for the Mufasa Macro Library
 }
 
-function psSqr( e : extended) : extended;
+function psSqr( e : extended) : extended; stdcall;
 begin;
   result := sqr(e);
 end;
 
-function ps_RandomRange(const aFrom, aTo: Integer): Integer;
+function ps_RandomRange(const aFrom, aTo: Integer): Integer; stdcall;
 begin
   Result:=Random(Abs(aFrom-aTo))+Min(aTo,AFrom);
 end;
 
-function Factorial(number: longword): Int64;
+function Factorial(number: longword): Int64; stdcall;
 var
   Loop : longword;
 begin
@@ -40,12 +40,12 @@ begin
     result := result * loop;
 end;
 
-function BinCoe(a, b: LongInt): Extended;
+function BinCoe(a, b: LongInt): Extended; stdcall;
 begin
   result := Factorial(a) / (factorial(b) * factorial(a-b));
 end;
 
-function FixD(Degrees : extended) : Extended;
+function FixD(Degrees : extended) : Extended; stdcall;
 begin;
   Result := Degrees;
   while Result < 0 do
@@ -54,7 +54,7 @@ begin;
     Result := Result - 360;
 end;
 
-procedure psSwap(var A,B);
+procedure psSwap(var A,B); stdcall;
 var
   TempPtr : Pointer;
 begin;

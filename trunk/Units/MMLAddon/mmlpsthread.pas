@@ -471,7 +471,7 @@ begin
   //Export all the methods
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
-      PSScript.AddFunction(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl);
+      PSScript.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl,cdStdCall);
 end;
 
 function TPSThread.RequireFile(Sender: TObject;
