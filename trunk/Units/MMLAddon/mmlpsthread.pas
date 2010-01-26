@@ -24,7 +24,7 @@
 unit mmlpsthread;
 
 {$Define PS_USESSUPPORT}
-//{$define PS_StdCall}
+{$define PS_StdCall}
 
 {$mode objfpc}{$H+}
 
@@ -33,10 +33,8 @@ interface
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes, web,
-  bitmaps, plugins;
+  bitmaps, plugins, libloader, dynlibs;
 
-var
-  PluginsGlob: TMPlugins;
 
 type
     { TMMLPSThread }
@@ -83,11 +81,6 @@ type
       PluginsToload : array of integer;
       ExportedMethods : TExpMethodArr;
 
-      procedure HandleError(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
-      function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
-      function LoadFile(var filename, contents: string): boolean;
-      procedure LoadMethods; virtual; abstract;
-
     public
       Client : TClient;
       StartTime : LongWord;
@@ -96,6 +89,11 @@ type
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       ErrorData : PErrorData; //We need this for thread-safety etc
       OnError  : TOnError; //Error handeler
+
+      procedure HandleError(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
+      function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
+      function LoadFile(var filename, contents: string): boolean;
+      procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetScript(Script : string);
       procedure SetDebug( writelnProc : TWritelnProc );
@@ -106,40 +104,76 @@ type
       procedure Execute; override; abstract;
       procedure Terminate; virtual; abstract;
 
-      constructor Create(CreateSuspended: boolean; plugin_dir: string);
+      constructor Create(CreateSuspended: boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
       destructor Destroy; override;
 
       class function GetExportedMethods : TExpMethodArr;
     end;
 
     TPSThread = class(TMThread)
-      procedure OnProcessDirective(Sender: TPSPreProcessor;
-        Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-        const DirectiveName, DirectiveParam: string; var Continue: Boolean);
-      function PSScriptFindUnknownFile(Sender: TObject;
-        const OrginFileName: string; var FileName, Output: string): Boolean;
-      procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
-        Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-        const DirectiveName, DirectiveParam: string; var Continue: Boolean);
-    protected
-      //DebugTo : TMemo;
-      procedure OnCompile(Sender: TPSScript);
-      function RequireFile(Sender: TObject; const OriginFileName: String;
-                          var FileName, OutPut: string): Boolean;
-      procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
-      procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
-      procedure OutputMessages;
-    public
-      PSScript : TPSScript;   // Moved to public, as we can't kill it otherwise.
-      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
-      destructor Destroy; override;
-      procedure SetScript(script: string); override;
-      procedure Execute; override;
-      procedure Terminate; override;
+      public
+        procedure OnProcessDirective(Sender: TPSPreProcessor;
+          Parser: TPSPascalPreProcessorParser; const Active: Boolean;
+          const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+        function PSScriptFindUnknownFile(Sender: TObject;
+          const OrginFileName: string; var FileName, Output: string): Boolean;
+        procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
+          Parser: TPSPascalPreProcessorParser; const Active: Boolean;
+          const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+      protected
+        procedure OnCompile(Sender: TPSScript);
+        function RequireFile(Sender: TObject; const OriginFileName: String;
+                            var FileName, OutPut: string): Boolean;
+        procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
+        procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
+        procedure OutputMessages;
+      public
+        PSScript : TPSScript;
+        constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+        destructor Destroy; override;
+        procedure SetScript(script: string); override;
+        procedure Execute; override;
+        procedure Terminate; override;
+    end;
+
+    TPrecompiler_Callback = function(name, args: PChar): boolean; stdcall;
+    TErrorHandeler_Callback = procedure(line, pos: integer; err: PChar); stdcall;
+
+    TInterpreter = record
+      Create: function(ppg: PChar; precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): pointer; cdecl;
+      AddMethod: procedure(interp: pointer; address: pointer; def: PChar);
+      Run: procedure(interp: pointer);
+      Stop: procedure(interp: pointer);
+      Destroy: procedure(interp: pointer);
+    end;
+
+    TInterpreterLoader = class(TGenericLoader)
+      protected
+        interps: array of TInterpreter;
+        function InitPlugin(plugin: TLibHandle): boolean; override;
+        function GetInterpreter(idx: integer): TInterpreter;
+      public
+        property Get[idx: integer]: TInterpreter read GetInterpreter; default;
+    end;
+
+    TInterpreterThread = class(TMThread)
+      protected
+        instance: pointer;
+        interpreter: TInterpreter;
+      public
+        constructor Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+        destructor Destroy; override;
+        procedure SetScript(script: string); override;
+        procedure Execute; override;
+        procedure Terminate; override;
+        procedure AddMethod(meth: TExpMethod); override;
     end;
 
 threadvar
   CurrThread : TMThread;
+var
+  PluginsGlob: TMPlugins;
+  interp_loader: TInterpreterLoader;
 
 implementation
 
@@ -227,9 +261,10 @@ begin
 end;
 
 {***implementation TMThread***}
-constructor TMThread.Create(CreateSuspended: boolean; plugin_dir: string);
+constructor TMThread.Create(CreateSuspended: boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 begin
   Client := TClient.Create(plugin_dir);
+  SyncInfo:= TheSyncInfo;
   ExportedMethods:= GetExportedMethods;
   SetLength(PluginsToLoad,0);
   FreeOnTerminate := True;
@@ -260,6 +295,10 @@ end;
 procedure TMThread.OnThreadTerminate(Sender: TObject);
 begin
 
+end;
+
+procedure TMThread.AddMethod(meth: TExpMethod);
+begin
 end;
 
 function TMThread.ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
@@ -339,7 +378,7 @@ begin
   FontPath:= FontP;
 end;
 
-function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;ps_decl;
+function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; stdcall;
 begin
   CurrThread.SyncInfo^.MethodName:= ProcName;
   CurrThread.SyncInfo^.V:= V;
@@ -415,7 +454,6 @@ end;
 
 constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 begin
-  SyncInfo:= TheSyncInfo;
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
@@ -428,7 +466,7 @@ begin
   OnError:= nil;
   // Set some defines
   {$I PSInc/psdefines.inc}
-  inherited Create(CreateSuspended, plugin_dir);
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 end;
 
 
@@ -641,9 +679,101 @@ begin
    PSScript.Script.Text:= Script;
 end;
 
+{***implementation TCPThread***}
+
+constructor TInterpreterThread.Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+var
+  plugin_idx: integer;
+begin
+  interp_loader.AddPath(plugin_dir);
+  plugin_idx:= interp_loader.LoadPlugin(libname);
+  if plugin_idx < 0 then
+    raise Exception.Create(Format('Could not locate the interpreter library: %s',[libname]));
+  interpreter:= interp_loader[plugin_idx];
+  instance:= nil;
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
+end;
+
+destructor TInterpreterThread.Destroy;
+begin
+  if instance <> nil then
+    interpreter.Destroy(instance);
+  inherited Destroy;
+end;
+
+function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
+begin
+  result:= CurrThread.ProcessDirective(name, args);
+end;
+
+procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar); stdcall;
+begin
+  CurrThread.HandleError(line,pos,err,errRuntime,'');
+end;
+
+procedure TInterpreterThread.SetScript(script: string);
+var
+  i: integer;
+begin
+  if instance <> nil then
+    interpreter.Destroy(instance);
+  instance:= interpreter.Create(PChar(@script[1]), @Interpreter_Precompiler, @Interpreter_ErrorHandler);
+  for i := 0 to high(ExportedMethods) do
+    if ExportedMethods[i].FuncPtr <> nil then
+      interpreter.AddMethod(instance,ExportedMethods[i].FuncPtr,PChar(@ExportedMethods[i].FuncDecl[1]));
+end;
+
+procedure TInterpreterThread.AddMethod(meth: TExpMethod);
+begin
+  if instance = nil then
+     raise Exception.Create('Script not set, cannot add method');
+  interpreter.AddMethod(instance,meth.FuncPtr,PChar(@meth.FuncDecl[1]));
+end;
+
+procedure TInterpreterThread.Execute;
+begin
+  if instance = nil then
+     raise Exception.Create('Script not set, cannot run');
+  interpreter.Run(instance);
+end;
+
+procedure TInterpreterThread.Terminate;
+begin
+  if @interpreter.Stop = nil then
+     raise Exception.Create('Stopping Interpreter not yet implemented');
+  interpreter.Stop(instance);
+end;
+
+{***implementation TInterpreterLoader***}
+
+function TInterpreterLoader.InitPlugin(plugin: TLibHandle): boolean;
+var
+  interp: TInterpreter;
+begin
+  Pointer(interp.Create) := GetProcAddress(plugin, PChar('interp_init'));
+  if @interp.Create = nil then begin result:= false; exit; end;
+  Pointer(interp.Destroy) := GetProcAddress(plugin, PChar('interp_free'));
+  if @interp.Destroy = nil then begin result:= false; exit; end;
+  Pointer(interp.Run) := GetProcAddress(plugin, PChar('interp_run'));
+  if @interp.Run = nil then begin result:= false; exit; end;
+  Pointer(interp.AddMethod) := GetProcAddress(plugin, PChar('interp_meth'));
+  if @interp.AddMethod = nil then begin result:= false; exit; end;
+  //Optional methods...
+  Pointer(interp.Stop) := GetProcAddress(plugin, PChar('interp_stop'));
+
+  SetLength(interps,length(interps)+1);
+  interps[high(interps)]:= interp;
+  result:= true;
+end;
+
+function TInterpreterLoader.GetInterpreter(idx: integer): TInterpreter;
+begin
+  result:= interps[idx];
+end;
 
 initialization
   PluginsGlob := TMPlugins.Create;
+  interp_loader := TInterpreterLoader.Create;
 finalization
   //PluginsGlob.Free;
   //Its a nice idea, but it will segfault... the program is closing anyway.
