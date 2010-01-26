@@ -17,9 +17,7 @@ begin
   Result := CurrThread.Client.MOCR.TextToMask(text,font);
 end;
 
-function TPAFromText(text, font: String): TPointArray; ps_decl;
-var
-  w,h : integer;
+function TPAFromText(text, font: String;out w,h : integer): TPointArray; ps_decl;
 begin
   Result := CurrThread.Client.MOCR.TextToFontTPA(text, font, w, h);
 end;

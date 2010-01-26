@@ -33,6 +33,9 @@ interface
 
     { This is the base class for the target functionality. If it provides a target, it extends this.  
     | Some methods in heregratuitous provide default functionality as a convinence. Only override as nessessary }
+
+    { TTarget }
+
     TTarget = class(TObject)
       public
         
@@ -58,7 +61,8 @@ interface
         procedure SendString(str: string); virtual;
         procedure HoldKey(key: integer); virtual;
         procedure ReleaseKey(key: integer); virtual;
-        function IsKeyHeld(key: integer): boolean; virtual; 
+        function IsKeyHeld(key: integer): boolean; virtual;
+        function GetKeyCode(C : char) : integer; virtual;
     end;
    
     { Implements a target that is a raw pixel array, e.g. stuff from a bitmap or a frozen state.
@@ -79,6 +83,9 @@ interface
       
    { Implements a target that is a Window in the operating system. This class is abstract, i.e.,
    | the actual os-specific Implementation of TWindow is in one of the os units. }
+
+    { TWindow_Abstract }
+
     TWindow_Abstract = class(TTarget)
       public
         procedure GetTargetDimensions(var w, h: integer); override; abstract;
@@ -95,6 +102,7 @@ interface
         procedure HoldKey(key: integer); override; abstract;
         procedure ReleaseKey(key: integer); override; abstract;
         function IsKeyHeld(key: integer): boolean; override; abstract;
+        function GetKeyCode(C : char) : integer; override; abstract;
     end;
         
     { Contains the pointers to a non-internal target implementation using the EIOS specification.
@@ -119,6 +127,7 @@ interface
       HoldKey: procedure(target: pointer; key: integer); stdcall;
       ReleaseKey: procedure(target: pointer; key: integer); stdcall;
       IsKeyHeld: function(target: pointer; key: integer): boolean; stdcall;
+      GetKeyCode : function(target : pointer; C : char) : integer; stdcall;
     end;
     
     { Implements a EIOS target. This is, for all intensive purposes, a TRawTarget with added
@@ -127,6 +136,9 @@ interface
     | UpdateImageBuffer call is just a call to an empty method, OR does not exist. In the case
     | of an EIOS client not needing a method defined, it will not be exported and will be set
     | to NIL here. I think. Will get back to that. }
+
+    { TEIOS_Target }
+
     TEIOS_Target = class(TTarget)
       public
         constructor Create(client: TEIOS_Client; initval: pointer);
@@ -144,6 +156,7 @@ interface
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
+        function GetKeyCode(C : char) : integer; override;
       
       private
         client: TEIOS_Client;
@@ -189,6 +202,9 @@ interface
     | Name -> Function compatibility from the TWindow and TMInput classes (e.g. key, image, 
     | and window functions). I decided to split targeting into input/output == image/keymouse, 
     | since they sometimes are treated as seperate entities. }
+
+    { TIOManager_Abstract }
+
     TIOManager_Abstract = class(TObject)
       public
         constructor Create;
@@ -222,6 +238,7 @@ interface
         procedure PressKey(key: Word);
         procedure SendText(text: string);
         function isKeyDown(key: Word): Boolean;
+        function GetKeyCode(c : char) : integer;
 
         function GetImageTarget: TTarget; overload;
         function GetKeyMouseTarget: TTarget; overload;
@@ -509,29 +526,35 @@ begin
   result:= keymouse.IsKeyHeld(key);
 end;
 
+function TIOManager_Abstract.GetKeyCode(c: char): integer;
+begin
+  result := keymouse.GetKeyCode(c);
+end;
+
 //***implementation*** TTarget
 
-procedure TTarget.GetTargetDimensions(var w, h: integer); begin raise Exception.Create('GetTargetDimensions not avaliable for this target'); end;
+procedure TTarget.GetTargetDimensions(var w, h: integer); begin raise Exception.Create('GetTargetDimensions not available for this target'); end;
 function TTarget.GetColor(x,y : integer) : TColor;
 begin
   with ReturnData(x,y,1,1) do
     Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
   FreeReturnData;
 end;
-function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;  begin raise Exception.Create('ReturnData not avaliable for this target'); end;
+function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;  begin raise Exception.Create('ReturnData not available for this target'); end;
 procedure TTarget.FreeReturnData; begin {do nothing by default} end;
-procedure TTarget.ActivateClient; begin raise Exception.Create('ActivateClient not avaliable for this target'); end;
+procedure TTarget.ActivateClient; begin raise Exception.Create('ActivateClient not available for this target'); end;
 function TTarget.TargetValid: boolean; begin result:= true; end;
 
-procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Create('GetMousePosition not avaliable for this target'); end;
-procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not avaliable for this target'); end;
-procedure TTarget.HoldMouse(x,y: integer; button: TClickType); begin raise Exception.Create('HoldMouse not avaliable for this target'); end;
-procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType); begin raise Exception.Create('ReleaseMouse not avaliable for this target'); end;
+procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Create('GetMousePosition not available for this target'); end;
+procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not available for this target'); end;
+procedure TTarget.HoldMouse(x,y: integer; button: TClickType); begin raise Exception.Create('HoldMouse not available for this target'); end;
+procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType); begin raise Exception.Create('ReleaseMouse not available for this target'); end;
 
-procedure TTarget.SendString(str: string); begin raise Exception.Create('SendString not avaliable for this target'); end;
-procedure TTarget.HoldKey(key: integer); begin raise Exception.Create('HoldKey not avaliable for this target'); end;
-procedure TTarget.ReleaseKey(key: integer); begin raise Exception.Create('ReleaseKey not avaliable for this target'); end;
-function TTarget.IsKeyHeld(key: integer): boolean; begin raise Exception.Create('IsKeyHeld not avaliable for this target'); end;
+procedure TTarget.SendString(str: string); begin raise Exception.Create('SendString not available for this target'); end;
+procedure TTarget.HoldKey(key: integer); begin raise Exception.Create('HoldKey not available for this target'); end;
+procedure TTarget.ReleaseKey(key: integer); begin raise Exception.Create('ReleaseKey not available for this target'); end;
+function TTarget.IsKeyHeld(key: integer): boolean; begin raise Exception.Create('IsKeyHeld not available for this target'); end;
+function TTarget.GetKeyCode(C: char): integer;begin Exception.CreateFMT('GetKeyCode - char (%s) to key is not available for this target.',[c]); end;
 
 //***implementation*** TEIOS_Target
 
@@ -640,6 +663,14 @@ begin
     result:= client.IsKeyHeld(target,key)
   else
     result:= inherited IsKeyHeld(key);
+end;
+
+function TEIOS_Target.GetKeyCode(C: char): integer;
+begin
+  if Pointer(client.GetKeyCode) <> nil then
+    result:= client.GetKeyCode(target,C)
+  else
+    result:= inherited GetKeyCode(C);
 end;
 
 //***implementation*** TRawTarget
