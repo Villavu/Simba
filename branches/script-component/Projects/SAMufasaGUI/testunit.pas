@@ -553,7 +553,7 @@ begin
       ScriptPath := ExtractFileDir(ScriptFile);
 
     if DirectoryExists(PluginsPath) then
-       PluginsGlob.AddAndLoadPath(PluginsPath);
+       PluginsGlob.AddPath(PluginsPath);
     if not DirectoryExists(IncludePath) then
       if FirstRun then
         Writeln('Warning: The include directory specified in the Settings isn''t valid.');

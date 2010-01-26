@@ -3188,4 +3188,4 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +'d'#9'OnReplace'#7#17'dlgReplaceReplace'#4'left'#3'`'#2#3'top'#2'h'#0#0#6'TT'
   +'imer'#11'UpdateTimer'#8'Interval'#3#16''''#7'OnTimer'#7#16'UpdateTimerCheck'
   +#4'left'#3'`'#2#3'top'#3#144#0#0#0#0
-]);
+]);
