@@ -26,14 +26,44 @@ begin;
   CurrThread.Client.IOManager.SetDesktop;
 end;
 
-procedure SetTargetArray(P: Integer; w, h: integer);
+function SetTargetArray(P: Integer; w, h: integer): integer;
 begin
-  CurrThread.Client.IOManager.SetTarget(PRGB32(P), classes.point(w,h));
+  result:= CurrThread.Client.IOManager.SetTarget(PRGB32(P), classes.point(w,h));
 end;
 
-procedure SetTargetBitmap(bitmap: Integer);
+function SetTargetBitmap(bitmap: Integer): integer;
 begin;
-  CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[Bitmap]);
+  result:= CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[Bitmap]);
+end;
+
+function SetEIOSTarget(name: string; args: Variant): integer;
+begin
+  result:= CurrThread.Client.IOManager.SetTarget(name, @args);
+end;
+
+procedure SetImageTarget(idx: integer);
+begin
+  CurrThread.Client.IOManager.SetImageTarget(idx);
+end;
+
+procedure SetKeyMouseTarget(idx: integer);
+begin
+  CurrThread.Client.IOManager.SetKeyMouseTarget(idx);
+end;
+
+function GetImageTarget: integer;
+begin
+  CurrThread.Client.IOManager.GetImageTarget(result);
+end;
+
+function GetKeyMouseTarget: integer;
+begin
+  CurrThread.Client.IOManager.GetKeyMouseTarget(result);
+end;
+
+procedure FreeTarget(idx: integer);
+begin
+  CurrThread.Client.IOManager.FreeTarget(idx);
 end;
 
 procedure GetClientDimensions(out w, h: integer);

@@ -58,7 +58,7 @@ interface
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
 
-        function GetNativeWindow: x.TWindow;
+        function GetNativeWindow: TNativeWindow;
       private
         display: PDisplay;
         screennum: integer;
@@ -134,7 +134,7 @@ implementation
     inherited Destroy; 
   end;
 
-  function TWindow.GetNativeWindow: x.TWindow;
+  function TWindow.GetNativeWindow: TNativeWindow;
   begin
     result := self.window;
   end;
