@@ -57,6 +57,8 @@ interface
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
+
+        function GetNativeWindow: x.TWindow;
       private
         display: PDisplay;
         screennum: integer;
@@ -131,7 +133,12 @@ implementation
     keyinput.Free;
     inherited Destroy; 
   end;
-  
+
+  function TWindow.GetNativeWindow: x.TWindow;
+  begin
+    result := self.window;
+  end;
+
   procedure TWindow.GetTargetDimensions(var w, h: integer); 
   var
     Old_Handler: TXErrorHandler;
