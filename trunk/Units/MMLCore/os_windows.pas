@@ -59,7 +59,7 @@ interface
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
 
-        function GetNativeWindow: Hwnd;
+        function GetNativeWindow: TNativeWindow;
       private
         handle: Hwnd;
         dc: HDC;
@@ -74,7 +74,7 @@ interface
       public
         constructor Create;
         constructor Create(plugin_dir: string);
-        function SetTarget(target: Hwnd): integer; overload;
+        function SetTarget(target: TNativeWindow): integer; overload;
         procedure SetDesktop; override;
       protected
         DesktopHWND : Hwnd;
@@ -162,7 +162,7 @@ implementation
     inherited Destroy; 
   end;
 
-  function TWindow.GetNativeWindow: Hwnd;
+  function TWindow.GetNativeWindow: TNativeWindow;
   begin
     result := handle;
   end;
@@ -345,7 +345,7 @@ implementation
     SetBothTargets(TWindow.Create(DesktopHWND));
   end;
   
-  function TIOManager.SetTarget(target: Hwnd): integer;
+  function TIOManager.SetTarget(target: TNativeWindow): integer;
   begin
     SetBothTargets(TWindow.Create(target));
   end;

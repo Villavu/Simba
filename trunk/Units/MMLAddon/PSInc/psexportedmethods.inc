@@ -63,9 +63,15 @@ SetCurrSection('Window');
 AddFunction(@Freeze, 'function Freeze: boolean;');
 AddFunction(@Unfreeze, 'function Unfreeze: boolean;');
 AddFunction(@GetClientDimensions, 'procedure GetClientDimensions(var w, h:integer);');
-AddFunction(@SetTargetBitmap,'procedure SetTargetBitmap(Bitmap : integer);');
+AddFunction(@SetTargetBitmap,'function SetTargetBitmap(Bitmap : integer): integer;');
+AddFunction(@SetTargetArray, 'function SetTargetArray(P: Integer; w, h: integer): integer;');
+AddFunction(@SetEIOSTarget, 'function SetEIOSTarget(name: string; initargs: Variant): integer;');
+AddFunction(@SetImageTarget,'procedure SetImageTarget(idx: integer);');
+AddFunction(@SetKeyMouseTarget,'procedure SetKeyMouseTarget(idx: integer);');
+AddFunction(@GetImageTarget,'function GetImageTarget: integer;');
+AddFunction(@GetKeyMouseTarget,'function GetKeyMouseTarget: integer;');
+AddFunction(@FreeTarget,'procedure FreeTarget(idx: integer);');
 AddFunction(@SetDesktopAsClient,'procedure SetDesktopAsClient');
-AddFunction(@SetTargetArray, 'procedure SetTargetArray(P: Integer; w, h: integer);');
 AddFunction(@ActivateClient, 'procedure ActivateClient;');
 AddFunction(@IsTargetValid, 'function IsTargetValid: boolean;');
 

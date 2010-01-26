@@ -223,21 +223,33 @@ interface
         procedure SendText(text: string);
         function isKeyDown(key: Word): Boolean;
 
-        function GetImageTarget: TTarget;
+        function GetImageTarget: TTarget; overload;
+        function GetKeyMouseTarget: TTarget; overload;
+
+        procedure GetImageTarget(var idx: integer); overload;
+        procedure GetKeyMouseTarget(var idx: integer); overload;
+        procedure SetImageTarget(idx: integer);
+        procedure SetKeyMouseTarget(idx: integer);
+        procedure FreeTarget(idx: integer);
 
       protected
+        function SetImageTarget(target: TTarget): integer;
+        function SetKeyMouseTarget(target: TTarget): integer;
+        function SetBothTargets(target: TTarget): integer;
+        procedure NativeInit; virtual; abstract;
+        procedure NativeFree; virtual; abstract;
+
+      private
         keymouse: TTarget;
         image: TTarget;
         frozen: TTarget;
         freezebuffer: prgb32;
         bothsame: boolean;
-        
-        procedure SetImageTarget(target: TTarget);
 
-        procedure SetKeyMouseTarget(target: TTarget);
-        procedure SetBothTargets(target: TTarget);
-        procedure NativeInit; virtual; abstract;
-        procedure NativeFree; virtual; abstract;
+        idxarr: array of TTarget;
+
+        function GetTargetIdx(target: TTarget): integer;
+        function GetIdxTarget(idx: integer): TTarget;
     end;
 
 implementation
@@ -253,16 +265,13 @@ implementation
 constructor TIOManager_Abstract.Create(plugin_dir: string);
 begin
   inherited Create;
+  SetLength(idxarr,0);
   eios_controller.AddPath(plugin_dir);
   keymouse:= nil;
   image:= nil;
   frozen:= nil;
   NativeInit;
   SetDesktop;
-{
-  self.create;
-  eios_controller.AddAndLoadPath(plugin_dir);
-}
 end;
 
 constructor TIOManager_Abstract.Create;
@@ -276,22 +285,61 @@ begin
 end;
 
 destructor TIOManager_Abstract.Destroy;
+var
+  i: integer;
 begin
-  if bothsame then keymouse.Destroy() else
-  begin
-    keymouse.Free();
-    image.Free();
-  end;
-  if IsFrozen then frozen.Destroy();
+  for i:= high(idxarr) downto 0 do
+    idxarr[i].Free;
 end;
 
-procedure TIOManager_Abstract.SetImageTarget(target: TTarget);
+procedure TIOManager_Abstract.FreeTarget(idx: integer);
+begin
+  if idx > high(idxarr) then
+    raise Exception.Create('Invalid target index');
+  if idxarr[idx] = nil then
+    raise Exception.Create('Double free of target');
+  idxarr[idx].Free;
+  idxarr[idx]:= nil;
+end;
+
+function TIOManager_Abstract.GetTargetIdx(target: TTarget): integer;
+var
+  i: integer;
+begin
+  result:= -1;
+  for i:= 0 to high(idxarr) do
+  begin
+    if idxarr[i] = target then
+    begin
+      result:= i;
+      exit;
+    end;
+    if (idxarr[i] = nil) and (result = -1) then
+      result:= i;
+  end;
+  if result = -1 then
+  begin
+    SetLength(idxarr,Length(idxarr) + 1);
+    result:= high(idxarr);
+  end;
+  idxarr[result]:= target;
+end;
+
+function TIOManager_Abstract.GetIdxTarget(idx: integer): TTarget;
+begin
+  if idx > high(idxarr) then
+    raise Exception.Create('Invalid target index');
+  if idxarr[idx] = nil then
+    raise Exception.Create('No target with specified index');
+  result:= idxarr[idx];
+end;
+
+function TIOManager_Abstract.SetImageTarget(target: TTarget): integer;
 begin
   if IsFrozen then
     raise Exception.Create('You cannot set a target when Frozen');
-  if not(bothsame) then image.Free();
+  result:= GetTargetIdx(target);
   image:= target;
-  bothsame:= false;
 end;
 
 function TIOManager_Abstract.GetImageTarget: TTarget;
@@ -299,24 +347,24 @@ begin
   result := image;
 end;
 
-procedure TIOManager_Abstract.SetKeyMouseTarget(target: TTarget);
+function TIOManager_Abstract.SetKeyMouseTarget(target: TTarget): integer;
 begin
-  if not(bothsame) then keymouse.Free();
+  result:= GetTargetIdx(target);
   keymouse:= target;
-  bothsame:= false;
 end;
-procedure TIOManager_Abstract.SetBothTargets(target: TTarget);
+
+function TIOManager_Abstract.GetKeyMouseTarget: TTarget;
+begin
+  result := keymouse;
+end;
+
+function TIOManager_Abstract.SetBothTargets(target: TTarget): integer;
 begin
   if IsFrozen then
     raise Exception.Create('You cannot set a target when Frozen');
-  if bothsame then image.Destroy() else
-  begin
-    image.Free();
-    keymouse.Free();
-  end;
+  result:= GetTargetIdx(target);
   image:= target;
   keymouse:= target;
-  bothsame:= true;
 end;
 
 procedure TIOManager_Abstract.SetFrozen(makefrozen: boolean);
@@ -326,9 +374,6 @@ var
 begin
   if (makefrozen) and (IsFrozen) then
     raise Exception.Create('The window is already frozen.');
-  //BenLand100 edit: I say we leave this exception out. POLS
-  //if not(isfrozen) and (frozen = nil) then
-  //  raise Exception.Create('The window is not frozen.');
   if makefrozen then //No need for the Frozen = nil check, already done above with the exception.
   begin
     frozen:= image;
@@ -364,11 +409,11 @@ end;
 
 function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer;
 begin
-  SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y));
+  result:= SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y));
 end;
 function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap) : integer;
 begin
-  SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height));
+  result:= SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height));
 end;
 
 function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer;
@@ -378,7 +423,29 @@ begin
   if not eios_controller.ClientExists(name) then
     raise Exception.Create('EIOS Client by specified name does not exist');
   client:= eios_controller.GetClient(name);
-  SetBothTargets(TEIOS_Target.Create(client, initargs));
+  result:= SetBothTargets(TEIOS_Target.Create(client, initargs));
+end;
+
+procedure TIOManager_Abstract.SetImageTarget(idx: integer);
+begin
+  image:= GetIdxTarget(idx);
+end;
+
+procedure TIOManager_Abstract.SetKeyMouseTarget(idx: integer);
+begin
+  keymouse:= GetIdxTarget(idx);
+end;
+
+procedure TIOManager_Abstract.GetImageTarget(var idx: integer);
+begin
+  if IsFrozen then
+    raise Exception.Create('Cannot get image target while frozen');
+  idx:= GetTargetIdx(image);
+end;
+
+procedure TIOManager_Abstract.GetKeyMouseTarget(var idx: integer);
+begin
+  idx:= GetTargetIdx(keymouse);
 end;
 
 function TIOManager_Abstract.TargetValid: Boolean;
