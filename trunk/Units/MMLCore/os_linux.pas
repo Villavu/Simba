@@ -38,6 +38,8 @@ interface
         procedure Up(Key: Word);
     end;
 
+    { TWindow }
+
     TWindow = class(TWindow_Abstract)
       public
         constructor Create(display: PDisplay; screennum: integer; window: x.TWindow); 
@@ -57,6 +59,7 @@ interface
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
+        function GetKeyCode(c : char) : integer;override;
 
         function GetNativeWindow: TNativeWindow;
       private
@@ -285,18 +288,6 @@ implementation
     XSetErrorHandler(Old_Handler);
   end;
 
-  function GetSimpleKeyCode(c: char): word;
-  begin
-    case C of
-      '0'..'9' :Result := VK_0 + Ord(C) - Ord('0');
-      'a'..'z' :Result := VK_A + Ord(C) - Ord('a');
-      'A'..'Z' :Result := VK_A + Ord(C) - Ord('A');
-      ' ' : result := VK_SPACE;
-    else
-      Raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
-    end
-  end;
-
   procedure TWindow.SendString(str: string);
   var
     i: integer;
@@ -317,7 +308,7 @@ implementation
           HoldShift:= false;
           ReleaseKey(VK_SHIFT);
         end;
-      key:= GetSimpleKeyCode(str[i]);
+      key:= GetKeyCode(str[i]);
       HoldKey(key);
       //BenLand100: You should probably wait here...
       ReleaseKey(key);
@@ -336,6 +327,18 @@ implementation
   function TWindow.IsKeyHeld(key: integer): boolean;
   begin
     raise Exception.CreateFmt('IsKeyDown isn''t implemented yet on Linux', []);
+  end;
+
+  function TWindow.GetKeyCode(c: char): integer;
+  begin
+    case C of
+      '0'..'9' :Result := VK_0 + Ord(C) - Ord('0');
+      'a'..'z' :Result := VK_A + Ord(C) - Ord('a');
+      'A'..'Z' :Result := VK_A + Ord(C) - Ord('A');
+      ' ' : result := VK_SPACE;
+    else
+      Raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
+    end
   end;
   
 //***implementation*** IOManager

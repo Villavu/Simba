@@ -1730,7 +1730,7 @@ begin
     Exit;
   with TOpenDialog.Create(nil) do
   try
-    Filter:= 'Mufasa Files|*.cogat;*.mufa;*.txt|Any files|*.*';
+    Filter:= 'Simba Files|*.simb;*.cogat;*.mufa;*.txt|Any files|*.*';
     if Execute then
       result := LoadScriptFile(filename);
   finally
@@ -1783,12 +1783,12 @@ begin
     Result := false;
     with TSaveDialog.Create(nil) do
     try
-      Filter:= 'Mufasa files|*.cogat;*.mufa;*.pas;*.txt|Any Files|*.*';
+      Filter:= 'Simba files|*.simb;*.cogat;*.mufa;*.pas;*.txt|Any Files|*.*';
       if Execute then
       begin;
         if ExtractFileExt(FileName) = '' then
         begin;
-          ScriptFile := FileName + '.mufa';
+          ScriptFile := FileName + '.simb';
         end else
           ScriptFile := FileName;
         SynEdit.Lines.SaveToFile(ScriptFile);

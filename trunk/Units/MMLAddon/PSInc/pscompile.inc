@@ -26,13 +26,14 @@ Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath)
 Sender.Comp.AddConstantN('IncludePath','string').SetString(CurrThread.IncludePath);
 Sender.Comp.AddConstantN('PluginPath','string').SetString(CurrThread.PluginPath);
 Sender.Comp.AddConstantN('FontPath','string').SetString(CurrThread.FontPath);
+Sender.Comp.AddTypeS('TDateTime','Double');
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of LongInt');
 Sender.Comp.AddTypeS('TExtendedArray','Array of extended');
 Sender.Comp.AddTypeS('TBoolArray', 'Array of Boolean');
 Sender.Comp.AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
-Sender.Comp.AddTypeS('T2DPointArray','Array of Array of TPoint');
-Sender.Comp.AddTypeS('TPointArrayArray','Array of Array of TPoint');
+Sender.Comp.AddTypeS('T2DPointArray','Array of TPointArray');
+Sender.Comp.AddTypeS('TPointArrayArray','Array of TPointArray');
 Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 Sender.Comp.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
 Sender.Comp.addtypeS('PPoint','record R,T : extended; end;');
@@ -43,6 +44,8 @@ Sender.Comp.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPoin
 Sender.Comp.AddTypeS('pDTM','record l: Integer;p: TPointArray;c, t, asz, ash: TIntegerArray; bp: Array Of Boolean; n: String; end;');
 
 Sender.Comp.AddTypeS('T2DExtendedArray', 'array of array of extended;');
+Sender.Comp.AddTypeS('T3DExtendedArray','array of array of array of extended;');
+Sender.Comp.AddTypeS('T2DIntegerArray','array of array of integer;');
 Sender.Comp.AddTypeS('TStringArray','Array of string;');
 Sender.Comp.AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
 Sender.Comp.AddTypeS('Pointer', 'Integer');

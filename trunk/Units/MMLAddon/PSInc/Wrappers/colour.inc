@@ -26,6 +26,11 @@ begin;
   Result := CurrThread.Client.IOManager.GetColor(x,y);
 end;
 
+procedure GetColorsWrap(Coords : TPointArray; var Colors:  TIntegerArray); ps_decl;
+begin
+  Colors := CurrThread.Client.MFinder.GetColors(coords);
+end;
+
 function GetColors(Coords : TPointArray) : TIntegerArray; ps_decl;
 begin
   result := CurrThread.Client.MFinder.GetColors(coords);

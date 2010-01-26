@@ -39,6 +39,8 @@ interface
         procedure Up(Key: Word);
     end;
 
+    { TWindow }
+
     TWindow = class(TWindow_Abstract)
       public
         constructor Create(target: Hwnd); 
@@ -58,6 +60,7 @@ interface
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
+        function GetKeyCode(c : char) : integer;override;
 
         function GetNativeWindow: TNativeWindow;
       private
@@ -297,7 +300,7 @@ implementation
           HoldShift:= false;
           ReleaseKey(VK_SHIFT);
         end;
-      key:= VkKeyScan(str[i]) and $FF;
+      key:= GetKeyCode(str[i]);
       HoldKey(key);
       //BenLand100 note: probably should wait here
       ReleaseKey(key);
@@ -316,6 +319,11 @@ implementation
   function TWindow.IsKeyHeld(key: integer): boolean;
   begin
     raise Exception.CreateFmt('IsKeyHeld isn''t implemented yet on Windows', []);
+  end;
+
+  function TWindow.GetKeyCode(c: char): integer;
+  begin
+    result := VkKeyScan(c) and $FF;
   end;
   
   

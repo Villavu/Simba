@@ -60,18 +60,7 @@ begin;
   bmp.Free;
 end;
 
-function IntToBox(x1,y1,x2,y2 : integer) : TBox; ps_decl;
-begin;
-  result.x1 := x1;
-  result.y1 := y1;
-  result.x2 := x2;
-  result.y2 := y2;
-end;
 
-function IntInBox(x, y: Integer; Box: TBox): Boolean; ps_decl;
-begin;
-  result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
-end;
 
 procedure DisplayDebugImgWindow(w,h : integer); ps_decl;
 begin;
@@ -112,7 +101,22 @@ begin;
   x := x mod (1000 * 60);
   s := x div (1000);
 end;
-
+procedure ps_DecodeDate ( const SourceDate  : TDateTime; out Year, Month, Day  : Word ); ps_decl;
+begin
+  decodedate(sourcedate,year,month,day);
+end;
+procedure ps_DecodeTime(DateTime : TDateTime; var Hour,Min,Sec,MSec : word); ps_decl;
+begin
+  decodetime(datetime,hour,min,sec,msec);
+end;
+function ps_Now : TDateTime; ps_decl;
+begin
+  result := now;
+end;
+function ps_Date : TDateTime; ps_decl;
+begin
+  result := date;
+end;
 procedure HakunaMatata; ps_decl;
 begin;
   OpenWebPage('http://www.youtube.com/v/ejEVczA8PLU&hl=en&fs=1&autoplay=1');

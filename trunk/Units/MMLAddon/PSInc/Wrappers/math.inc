@@ -21,6 +21,11 @@
     Math.inc for the Mufasa Macro Library
 }
 
+function ps_iAbs(a : integer) : integer;ps_decl;
+begin
+  result := abs(a);
+end;
+
 function ps_ceil(e : extended) : integer;ps_decl;
 begin
   result := ceil(e);
@@ -75,6 +80,11 @@ begin
   Result:=Random(Abs(aFrom-aTo))+Min(aTo,AFrom);
 end;
 
+function ps_ArcTan2(x,y : extended) : extended;
+begin
+  result := ArcTan2(x,y);
+end;
+
 function Factorial(number: longword): Int64; ps_decl;
 var
   Loop : longword;
@@ -97,3 +107,30 @@ begin;
   while Result > 360 do
     Result := Result - 360;
 end;
+
+function IntToBox(x1,y1,x2,y2 : integer) : TBox; ps_decl;
+begin;
+  result.x1 := x1;
+  result.y1 := y1;
+  result.x2 := x2;
+  result.y2 := y2;
+end;
+
+function IntInBox(x, y: Integer; Box: TBox): Boolean; ps_decl;
+begin;
+  result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
+end;
+
+function PointToBox(PT1,PT2 : TPoint) : TBox; ps_decl;
+begin;
+  result.x1 := PT1.x;
+  result.y1 := PT1.y;
+  result.x2 := PT2.x;
+  result.y2 := PT2.y;
+end;
+
+function PointInBox(PT : TPoint; Box: TBox): Boolean; ps_decl;
+begin;
+  result := (((PT.x >= Box.x1) and(PT.x <= Box.x2)) and ((PT.y>= box.y1) and (PT.y <= box.y2)));
+end;
+
