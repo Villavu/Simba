@@ -21,7 +21,7 @@
     Other.inc for the Mufasa Macro Library
 }
 
-procedure psWait(t: Integer); stdcall;
+procedure psWait(t: Integer); ps_decl;
 {$ifdef MSWINDOWS}
 begin
   Sleep(t);
@@ -42,13 +42,13 @@ begin
 end;
 {$endif}
 
-procedure ClearDebug; stdcall;
+procedure ClearDebug; ps_decl;
 begin
   if Assigned(CurrThread.DebugMemo) then
     CurrThread.Synchronize(@CurrThread.DebugMemo.Clear);
 end;
 
-procedure SaveScreenshot(FileName: string); stdcall;
+procedure SaveScreenshot(FileName: string); ps_decl;
 var
   w,h : integer;
   bmp: TMufasaBitmap;
@@ -60,12 +60,7 @@ begin;
   bmp.Free;
 end;
 
-function MinE(a, b: Extended): Extended; stdcall;
-begin;
-  result := min(a,b);
-end;
-
-function IntToBox(x1,y1,x2,y2 : integer) : TBox; stdcall;
+function IntToBox(x1,y1,x2,y2 : integer) : TBox; ps_decl;
 begin;
   result.x1 := x1;
   result.y1 := y1;
@@ -73,45 +68,40 @@ begin;
   result.y2 := y2;
 end;
 
-function IntInBox(x, y: Integer; Box: TBox): Boolean; stdcall;
+function IntInBox(x, y: Integer; Box: TBox): Boolean; ps_decl;
 begin;
   result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
 end;
 
-function Distance(x1, y1, x2, y2: Integer): Integer; stdcall;
-begin;
-  Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
-end;
-
-procedure DisplayDebugImgWindow(w,h : integer); stdcall;
+procedure DisplayDebugImgWindow(w,h : integer); ps_decl;
 begin;
   CurrThread.DebugImg.DispSize^ := Classes.Point(w,h);
   CurrThread.Synchronize( CurrThread.DebugImg.ShowForm);
 end;
 
-procedure DrawBitmapDebugImg(bmp : integer); stdcall;
+procedure DrawBitmapDebugImg(bmp : integer); ps_decl;
 begin;
   CurrThread.DebugImg.ToDrawBitmap^ := CurrThread.Client.MBitmaps[bmp];
   CurrThread.Synchronize(CurrThread.DebugImg.DrawBitmap);
 end;
 
-function GetDebugBitmap : integer; stdcall;
+function GetDebugBitmap : integer; ps_decl;
 begin;
   result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
   CurrThread.DebugImg.GetDebugBitmap^ := CurrThread.Client.MBitmaps[result];
   CurrThread.Synchronize(CurrThread.DebugImg.GetBitmap);
 end;
 
-procedure TerminateScript; stdcall;
+procedure TerminateScript; ps_decl;
 begin;
   CurrThread.Terminate;
 end;
-function GetTimeRunning: LongWord; stdcall;
+function GetTimeRunning: LongWord; ps_decl;
 begin;
   result := GetTickCount - CurrThread.StartTime;
 end;
 
-procedure ConvertTime(Time : integer; var h,m,s : integer); stdcall;
+procedure ConvertTime(Time : integer; var h,m,s : integer); ps_decl;
 var
   x : integer;
 begin;
@@ -123,7 +113,7 @@ begin;
   s := x div (1000);
 end;
 
-procedure HakunaMatata; stdcall;
+procedure HakunaMatata; ps_decl;
 begin;
   OpenWebPage('http://www.youtube.com/v/ejEVczA8PLU&hl=en&fs=1&autoplay=1');
 end;

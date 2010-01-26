@@ -1,9 +1,9 @@
-function rs_GetUpText: String; stdcall;
+function rs_GetUpText: String; ps_decl;
 begin
   Result := CurrThread.Client.MOCR.GetUpTextAtEx(7, 7, true);
 end;
 
-function BitmapFromText(text, font: String): integer; stdcall;
+function BitmapFromText(text, font: String): integer; ps_decl;
 var
   bmp: TMufasaBitmap;
 begin
@@ -12,12 +12,12 @@ begin
   Result := CurrThread.Client.MBitmaps.AddBMP(bmp);
 end;
 
-function MaskFromText(text, font: String): TMask; stdcall;
+function MaskFromText(text, font: String): TMask; ps_decl;
 begin
   Result := CurrThread.Client.MOCR.TextToMask(text,font);
 end;
 
-function TPAFromText(text, font: String): TPointArray; stdcall;
+function TPAFromText(text, font: String): TPointArray; ps_decl;
 var
   w,h : integer;
 begin

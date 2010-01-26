@@ -24,6 +24,8 @@
 unit mmlpsthread;
 
 {$Define PS_USESSUPPORT}
+//{$define PS_StdCall}
+
 {$mode objfpc}{$H+}
 
 interface
@@ -158,6 +160,12 @@ uses
   forms,//Forms
   lclintf; // for GetTickCount and others.
 
+{$MACRO ON}
+{$ifdef PS_StdCall}
+  {$define ps_decl := stdcall}
+{$else}
+  {$define ps_decl := REGISTER}
+{$endif}
 
 {Some General PS Functions here}
 procedure psWriteln(str : string);
@@ -331,7 +339,7 @@ begin
   FontPath:= FontP;
 end;
 
-function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;
+function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;ps_decl;
 begin
   CurrThread.SyncInfo^.MethodName:= ProcName;
   CurrThread.SyncInfo^.V:= V;
@@ -471,7 +479,8 @@ begin
   //Export all the methods
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
-      PSScript.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl,cdStdCall);
+      PSScript.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl,
+                             {$ifdef PS_StdCall}cdStdCall{$else}cdRegister {$endif});
 end;
 
 function TPSThread.RequireFile(Sender: TObject;
