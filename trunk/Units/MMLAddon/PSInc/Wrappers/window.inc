@@ -21,74 +21,74 @@
     window.inc for the Mufasa Macro Library
 }
 
-procedure SetDesktopAsClient;
+procedure SetDesktopAsClient; stdcall;
 begin;
   CurrThread.Client.IOManager.SetDesktop;
 end;
 
-function SetTargetArray(P: Integer; w, h: integer): integer;
+function SetTargetArray(P: Integer; w, h: integer): integer; stdcall;
 begin
   result:= CurrThread.Client.IOManager.SetTarget(PRGB32(P), classes.point(w,h));
 end;
 
-function SetTargetBitmap(bitmap: Integer): integer;
+function SetTargetBitmap(bitmap: Integer): integer; stdcall;
 begin;
   result:= CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[Bitmap]);
 end;
 
-function SetEIOSTarget(name: string; args: Variant): integer;
+function SetEIOSTarget(name: string; args: Variant): integer; stdcall;
 begin
   result:= CurrThread.Client.IOManager.SetTarget(name, @args);
 end;
 
-procedure SetImageTarget(idx: integer);
+procedure SetImageTarget(idx: integer); stdcall;
 begin
   CurrThread.Client.IOManager.SetImageTarget(idx);
 end;
 
-procedure SetKeyMouseTarget(idx: integer);
+procedure SetKeyMouseTarget(idx: integer); stdcall;
 begin
   CurrThread.Client.IOManager.SetKeyMouseTarget(idx);
 end;
 
-function GetImageTarget: integer;
+function GetImageTarget: integer; stdcall;
 begin
   CurrThread.Client.IOManager.GetImageTarget(result);
 end;
 
-function GetKeyMouseTarget: integer;
+function GetKeyMouseTarget: integer; stdcall;
 begin
   CurrThread.Client.IOManager.GetKeyMouseTarget(result);
 end;
 
-procedure FreeTarget(idx: integer);
+procedure FreeTarget(idx: integer); stdcall;
 begin
   CurrThread.Client.IOManager.FreeTarget(idx);
 end;
 
-procedure GetClientDimensions(out w, h: integer);
+procedure GetClientDimensions(out w, h: integer); stdcall;
 begin
   CurrThread.Client.IOManager.GetDimensions(w, h);
 end;
 
-function Freeze: boolean;
+function Freeze: boolean; stdcall;
 begin
   CurrThread.Client.IOManager.SetFrozen(true);
   result := true; //dunno what the result is supposed to mean
 end;
 
-function Unfreeze: boolean;
+function Unfreeze: boolean; stdcall;
 begin
   CurrThread.Client.IOManager.SetFrozen(false);
   result := true; //dunno what the result is supposed to mean
 end;
 
-procedure ActivateClient;
+procedure ActivateClient; stdcall;
 begin
   CurrThread.Client.IOManager.ActivateClient;
 end;
 
-function IsTargetValid: boolean;
+function IsTargetValid: boolean; stdcall;
 begin
   result:= CurrThread.Client.IOManager.TargetValid;
 end;
