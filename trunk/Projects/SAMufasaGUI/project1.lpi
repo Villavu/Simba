@@ -9,13 +9,14 @@
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
       <Title Value="Simba"/>
+      <Icon Value="0"/>
       <UseXPManifest Value="True"/>
       <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
-      <Language Value="0403"/>
-      <CharSet Value="04E2"/>
+      <Language Value="0421"/>
+      <CharSet Value="03A4"/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
@@ -589,7 +590,7 @@
         <UnitName Value="CompPicker"/>
         <CursorPos X="47" Y="240"/>
         <TopLine Value="213"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit78>
       <Unit79>
         <Filename Value="../../Units/MMLAddon/colourpicker.pas"/>
@@ -628,7 +629,7 @@
         <Filename Value="../../../usr/lib64/fpc/2.2.4/source/rtl/objpas/classes/classesh.inc"/>
         <CursorPos X="3" Y="319"/>
         <TopLine Value="319"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit83>
       <Unit84>
         <Filename Value="../../../lazarus/lcl/forms.pp"/>
@@ -642,7 +643,7 @@
         <UnitName Value="cthreads"/>
         <CursorPos X="28" Y="1077"/>
         <TopLine Value="1070"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit85>
       <Unit86>
         <Filename Value="../../Units/MMLCore/dtmutil.pas"/>
@@ -657,7 +658,7 @@
         <UnitName Value="CompMaths"/>
         <CursorPos X="15" Y="640"/>
         <TopLine Value="636"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit87>
       <Unit88>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/dtm.inc"/>
@@ -705,7 +706,7 @@
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ocr"/>
-        <CursorPos X="26" Y="742"/>
+        <CursorPos X="36" Y="757"/>
         <TopLine Value="720"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="200"/>
@@ -785,13 +786,13 @@
         <Filename Value="../../../FPC/FPCCheckout/rtl/inc/threadh.inc"/>
         <CursorPos X="11" Y="135"/>
         <TopLine Value="119"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit106>
       <Unit107>
         <Filename Value="../../../FPC/FPCCheckout/rtl/inc/thread.inc"/>
         <CursorPos X="21" Y="152"/>
         <TopLine Value="152"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit107>
       <Unit108>
         <Filename Value="../../../lazarus/lcl/comctrls.pp"/>
@@ -841,7 +842,7 @@
         <UnitName Value="CodeToolsStrConsts"/>
         <CursorPos X="28" Y="81"/>
         <TopLine Value="74"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit114>
       <Unit115>
         <Filename Value="../../../lazarus/ide/editoroptions.pp"/>
@@ -855,7 +856,7 @@
         <UnitName Value="SynEditHighlighter"/>
         <CursorPos X="28" Y="74"/>
         <TopLine Value="54"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit116>
       <Unit117>
         <Filename Value="../../../lazarus/ide/sourceeditor.pp"/>
@@ -933,21 +934,21 @@
         <Filename Value="../../../lazarus/lcl/include/menuitem.inc"/>
         <CursorPos X="3" Y="1400"/>
         <TopLine Value="1378"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit127>
       <Unit128>
         <Filename Value="../../../lazarus/lcl/widgetset/wsmenus.pp"/>
         <UnitName Value="WSMenus"/>
         <CursorPos X="1" Y="129"/>
         <TopLine Value="126"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit128>
       <Unit129>
         <Filename Value="../../../lazarus/lcl/lclclasses.pp"/>
         <UnitName Value="LCLClasses"/>
         <CursorPos X="5" Y="40"/>
         <TopLine Value="32"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit129>
       <Unit130>
         <Filename Value="../../../lazarus/ide/codeexplorer.pas"/>
@@ -957,7 +958,7 @@
         <UnitName Value="CodeExplorer"/>
         <CursorPos X="13" Y="1477"/>
         <TopLine Value="1466"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit130>
       <Unit131>
         <Filename Value="../../../lazarus/ide/keymapping.pp"/>
@@ -971,7 +972,7 @@
         <UnitName Value="BaseDebugManager"/>
         <CursorPos X="15" Y="87"/>
         <TopLine Value="76"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit132>
       <Unit133>
         <Filename Value="../../../lazarus/lcl/lmessages.pp"/>
@@ -1003,7 +1004,7 @@
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/classes/lists.inc"/>
         <CursorPos X="3" Y="626"/>
         <TopLine Value="624"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit137>
       <Unit138>
         <Filename Value="../../../lazarus/lcl/include/tabsheet.inc"/>
@@ -1034,14 +1035,14 @@
         <UnitName Value="WSExtCtrls"/>
         <CursorPos X="50" Y="292"/>
         <TopLine Value="292"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit142>
       <Unit143>
         <Filename Value="../../../lazarus/lcl/interfaces/cocoa/cocoawsextctrls.pas"/>
         <UnitName Value="CocoaWSExtCtrls"/>
         <CursorPos X="22" Y="72"/>
         <TopLine Value="59"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit143>
       <Unit144>
         <Filename Value="../../../lazarus/lcl/interfaces/gtk/gtkwsextctrls.pp"/>
@@ -2087,7 +2088,7 @@
         <Loaded Value="True"/>
       </Unit292>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/window.inc"/>
         <Caret Line="1" Column="1" TopLine="1"/>
@@ -2134,80 +2135,76 @@
       </Position11>
       <Position12>
         <Filename Value="../../Units/MMLCore/tpa.pas"/>
-        <Caret Line="14" Column="67" TopLine="23"/>
+        <Caret Line="76" Column="21" TopLine="58"/>
       </Position12>
       <Position13>
         <Filename Value="../../Units/MMLCore/tpa.pas"/>
-        <Caret Line="76" Column="21" TopLine="58"/>
+        <Caret Line="77" Column="21" TopLine="58"/>
       </Position13>
       <Position14>
-        <Filename Value="../../Units/MMLCore/tpa.pas"/>
-        <Caret Line="77" Column="21" TopLine="58"/>
-      </Position14>
-      <Position15>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <Caret Line="31" Column="54" TopLine="23"/>
+      </Position14>
+      <Position15>
+        <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
+        <Caret Line="85" Column="37" TopLine="69"/>
       </Position15>
       <Position16>
         <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
-        <Caret Line="85" Column="37" TopLine="69"/>
+        <Caret Line="25" Column="12" TopLine="12"/>
       </Position16>
       <Position17>
         <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
-        <Caret Line="25" Column="12" TopLine="12"/>
+        <Caret Line="26" Column="12" TopLine="12"/>
       </Position17>
       <Position18>
         <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
-        <Caret Line="26" Column="12" TopLine="12"/>
+        <Caret Line="20" Column="13" TopLine="12"/>
       </Position18>
       <Position19>
-        <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
-        <Caret Line="20" Column="13" TopLine="12"/>
-      </Position19>
-      <Position20>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <Caret Line="656" Column="23" TopLine="625"/>
-      </Position20>
-      <Position21>
+      </Position19>
+      <Position20>
         <Filename Value="../../Units/MMLCore/fontloader.pas"/>
         <Caret Line="63" Column="34" TopLine="37"/>
+      </Position20>
+      <Position21>
+        <Filename Value="../../Units/MMLCore/ocr.pas"/>
+        <Caret Line="710" Column="61" TopLine="692"/>
       </Position21>
       <Position22>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="710" Column="61" TopLine="692"/>
+        <Caret Line="55" Column="42" TopLine="37"/>
       </Position22>
       <Position23>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="55" Column="42" TopLine="37"/>
+        <Caret Line="714" Column="22" TopLine="692"/>
       </Position23>
       <Position24>
-        <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="714" Column="22" TopLine="692"/>
+        <Filename Value="../../Units/MMLCore/fontloader.pas"/>
+        <Caret Line="55" Column="29" TopLine="37"/>
       </Position24>
       <Position25>
         <Filename Value="../../Units/MMLCore/fontloader.pas"/>
-        <Caret Line="55" Column="29" TopLine="37"/>
+        <Caret Line="79" Column="10" TopLine="61"/>
       </Position25>
       <Position26>
-        <Filename Value="../../Units/MMLCore/fontloader.pas"/>
-        <Caret Line="79" Column="10" TopLine="61"/>
+        <Filename Value="../../Units/MMLCore/ocr.pas"/>
+        <Caret Line="729" Column="26" TopLine="702"/>
       </Position26>
       <Position27>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="729" Column="26" TopLine="702"/>
+        <Caret Line="712" Column="8" TopLine="703"/>
       </Position27>
       <Position28>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="712" Column="8" TopLine="703"/>
+        <Caret Line="721" Column="23" TopLine="703"/>
       </Position28>
       <Position29>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
-        <Caret Line="721" Column="23" TopLine="703"/>
-      </Position29>
-      <Position30>
-        <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <Caret Line="751" Column="10" TopLine="720"/>
-      </Position30>
+      </Position29>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -2226,6 +2223,12 @@
         <OptimizationLevel Value="2"/>
       </Optimizations>
     </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="True"/>
+        <GenerateDwarf Value="True"/>
+      </Debugging>
+    </Linking>
     <Other>
       <CustomOptions Value="-dUseCThreads
 -dM_MEMORY_DEBUG
