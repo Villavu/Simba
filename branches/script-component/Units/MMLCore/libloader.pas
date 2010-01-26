@@ -26,7 +26,7 @@ interface
         constructor Create;
         destructor Destroy; override;
         procedure ValidateDirs;
-        procedure AddAndLoadPath(path: string);
+        procedure AddPath(path: string);
         function LoadPlugin(PluginName : string) : integer;
     end;
 
@@ -35,16 +35,15 @@ implementation
   uses
     MufasaTypes,FileUtil;
 
-  procedure TGenericLoader.AddAndLoadPath(path: string);
+  procedure TGenericLoader.AddPath(path: string);
   var
     idx: integer;
   begin
     if PluginDirs.Find(path,idx) then
        LoadPluginsDir(idx)
     else begin
-         writeln('Loading Path: ' + path);
+      writeln('Adding Plugin Path: ' + path);
       PluginDirs.Add(path);
-      LoadPluginsDir(PluginDirs.Count-1);
     end;
   end;
 
@@ -139,7 +138,7 @@ implementation
       inc(PluginLen)
     else
       FreeLibrary(Loaded[PluginLen].handle);
-    Result := PluginLen;
+    Result:= PluginLen - 1;
   end;
 
 

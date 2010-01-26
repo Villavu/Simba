@@ -250,7 +250,7 @@ implementation
 constructor TIOManager_Abstract.Create(plugin_dir: string);
 begin
   inherited Create;
-  eios_controller.AddAndLoadPath(plugin_dir);
+  eios_controller.AddPath(plugin_dir);
   keymouse:= nil;
   image:= nil;
   frozen:= nil;
@@ -614,12 +614,7 @@ function TEIOS_Controller.FindClient(name: string): integer;
 var
   i: integer;
 begin
-  for i:= 0 to length(plugs) - 1 do
-    if plugs[i].name = name then
-    begin
-      result:= i;
-      exit;
-    end;
+  i:= LoadPlugin(name);
   result:= -1;
 end;
 
