@@ -1,7 +1,0 @@
-digraph DTM {
-	DTM -> Points
-	DTM -> Colours
-	DTM -> Tolerances
-	DTM -> "Area Sizes"
-	DTM -> "Area Shapes"
-}
