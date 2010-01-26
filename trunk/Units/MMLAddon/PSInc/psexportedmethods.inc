@@ -26,7 +26,7 @@ AddFunction(nil,'procedure Writeln(x);'); //We use special function for this
 
 { DTM }
 SetCurrSection('DTM');
-AddFunction(@PrintpDTM, 'Procedure PrintpDTM(tDTM : pDTM);');
+AddFunction(@ps_PrintpDTM, 'Procedure PrintpDTM(tDTM : pDTM);');
 AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer; out dtm: pDTM): Boolean;');
 AddFunction(@pDTMToTDTM, 'Function pDTMToTDTM(DTM: pDTM): TDTM;');
 AddFunction(@tDTMTopDTM, 'Function tDTMTopDTM(DTM: TDTM): pDTM;');
@@ -39,20 +39,21 @@ AddFunction(@ps_FindDTMsRotated, 'function FindDTMsRotated(DTM: Integer; out Poi
 AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
 AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 
+
 {maths}
 SetCurrSection('Math');
 AddFunction(nil,'function Round(e:extended) : integer');
-AddFunction(@ceil,'function ceil(e : extended) : integer');
-AddFunction(@power,'function pow(base,exponent : extended) : extended');
-AddFunction(@max,'function Max(a, b: Integer): Integer;');
-AddFunction(@min,'function Min(a, b: Integer): Integer;');
-AddFunction(@minE,'function MinE(a, b: extended): Extended;');
+AddFunction(@ps_ceil,'function ceil(e : extended) : integer');
+AddFunction(@ps_pow,'function pow(base,exponent : extended) : extended');
+AddFunction(@ps_max,'function Max(a, b: Integer): Integer;');
+AddFunction(@ps_min,'function Min(a, b: Integer): Integer;');
+AddFunction(@ps_minE,'function MinE(a, b: extended): Extended;');
 AddFunction(@IntToBox,'function IntToBox(x1,y1,x2,y2 : integer) : TBox;');
 AddFunction(@IntInBox,'function IntInBox(x, y: Integer; Box: TBox): Boolean;');
-AddFunction(@pssqr,'function Sqr(e : extended) : extended;');
-AddFunction(@classes.point,'function Point(x,y:integer) : TPoint;');
-AddFunction(@Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
-AddFunction(@hypot,'function Hypot(X, Y: Extended): Extended;');
+AddFunction(@ps_sqr,'function Sqr(e : extended) : extended;');
+AddFunction(@ps_point,'function Point(x,y:integer) : TPoint;');
+AddFunction(@ps_Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
+AddFunction(@ps_hypot,'function Hypot(X, Y: Extended): Extended;');
 AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
 AddFunction(@BinCoe,'function BinCoe(a, b: LongInt): Extended;');
 AddFunction(@FixD,'function FixD(Degrees : extended) : Extended;');
