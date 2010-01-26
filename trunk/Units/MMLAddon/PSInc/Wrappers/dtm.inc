@@ -21,7 +21,7 @@
     DTM.inc for the Mufasa Macro Library
 }
 
-function ps_FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+function ps_FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean; stdcall;
 var
    temp: pDTM;
 begin
@@ -35,7 +35,7 @@ begin
   end;
 end;
 
-function ps_FindDTMs(DTM: Integer; out p: TPointArray; x1, y1, x2, y2: Integer): Boolean;
+function ps_FindDTMs(DTM: Integer; out p: TPointArray; x1, y1, x2, y2: Integer): Boolean; stdcall;
 var
    temp: pDTM;
 begin
@@ -50,7 +50,7 @@ end;
 
 function ps_FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2:
                            Integer; sAngle, eAngle, aStep: Extended;
-                           out aFound: Extended): Boolean;
+                           out aFound: Extended): Boolean; stdcall;
 var
    temp: pDTM;
 begin
@@ -64,7 +64,7 @@ begin
   end;
 end;
 
-function ps_FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
+function ps_FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean; stdcall;
 var
    temp: pDTM;
 begin
@@ -75,7 +75,7 @@ begin
     Result := False;
 end;
 
-{function ps_FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1,
+{function ps_FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, stdcall;
                                   y1, x2, y2: Integer; sAngle, eAngle,
                                   aStep: Extended; out aFound: T2DExtendedArray)
                                   : Boolean;
@@ -84,7 +84,7 @@ begin
                                     sAngle, eAngle, aStep, aFound);
 end;       }
 
-function ps_DTMFromString(DTMString: String): Integer;
+function ps_DTMFromString(DTMString: String): Integer; stdcall;
 var
    dtm: pDTM;
 begin
@@ -95,22 +95,22 @@ begin
   end;
 end;
 
-procedure ps_FreeDTM(DTM: Integer);
+procedure ps_FreeDTM(DTM: Integer); stdcall;
 begin
   CurrThread.Client.MDTM.FreeDTM(DTM);
 end;
 
-function ps_GetDTM(index: Integer; out dtm: pDTM): Boolean;
+function ps_GetDTM(index: Integer; out dtm: pDTM): Boolean; stdcall;
 begin
  Result := CurrThread.Client.MDTM.GetDTM(index, dtm);
 end;
 
-function ps_AddDTM(d: TDTM): Integer;
+function ps_AddDTM(d: TDTM): Integer; stdcall;
 begin
   Result := CurrThread.Client.MDTM.AddDTM(d);
 end;
 
-function ps_AddpDTM(d: pDTM): Integer;
+function ps_AddpDTM(d: pDTM): Integer; stdcall;
 begin
  Result := CurrThread.Client.MDTM.AddpDTM(d);
 end;

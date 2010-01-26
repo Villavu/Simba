@@ -1,9 +1,9 @@
-function psFormat(const fmt : string;const args : array of const) : string;
+function psFormat(const fmt : string;const args : array of const) : string; stdcall;
 begin;
   Result := Format(fmt,Args);
 end;
 
-function Capitalize(str : string) : string;
+function Capitalize(str : string) : string; stdcall;
 var
   i , l : integer;
   cap : boolean;
@@ -20,7 +20,7 @@ begin;
       cap := true;
 end;
 
-function psBoolToStr(bool : boolean) : string;
+function psBoolToStr(bool : boolean) : string; stdcall;
 begin;
   result := BoolToStr(bool,true);
 end;
