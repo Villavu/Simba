@@ -48,8 +48,13 @@ AddFunction(@ps_pow,'function pow(base,exponent : extended) : extended');
 AddFunction(@ps_max,'function Max(a, b: Integer): Integer;');
 AddFunction(@ps_min,'function Min(a, b: Integer): Integer;');
 AddFunction(@ps_minE,'function MinE(a, b: extended): Extended;');
+AddFunction(@ps_maxE,'function MaxE(a, b: extended): Extended;');
+AddFunction(@ps_iAbs,'function iAbs(a : integer) : integer;');
+AddFunction(@ps_ArcTan2,'function ArcTan2(x,y : extended) : extended;');
 AddFunction(@IntToBox,'function IntToBox(x1,y1,x2,y2 : integer) : TBox;');
 AddFunction(@IntInBox,'function IntInBox(x, y: Integer; Box: TBox): Boolean;');
+AddFunction(@PointToBox,'function PointToBox(PT1,PT2 : TPoint; Box: TBox): Boolean;');
+AddFunction(@PointInBox,'function PointInBox(PT : TPoint; Box: TBox): Boolean;');
 AddFunction(@ps_sqr,'function Sqr(e : extended) : extended;');
 AddFunction(@ps_point,'function Point(x,y:integer) : TPoint;');
 AddFunction(@ps_Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
@@ -88,15 +93,21 @@ AddFunction(@ps_ReadFileString, 'function ReadFileString(FileNum: Integer; out s
 AddFunction(@ps_WriteFileString, 'function WriteFileString(FileNum: Integer; s: string): Boolean;');
 AddFunction(@ps_SetFileCharPointer, 'Function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;');
 AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Integer;');
+AddFunction(@ps_DirectoryExists,'function DirectoryExists( const DirectoryName : string ) : Boolean;');
+AddFunction(@ps_FileExists,'function FileExists ( const FileName : string ) : Boolean;');
 
 {other}
 SetCurrSection('Other');
 AddFunction(@SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
 AddFunction(@psWait, 'procedure wait(t: integer);');
 AddFunction(@psWait, 'procedure Sleep(t: integer);');
+AddFunction(@ps_now,'function Now: TDateTime;');
+AddFunction(@ps_date,'function Date : TDateTime;');
 AddFunction(@GetTickCount, 'function GetSystemTime: LongWord;');
 AddFunction(@GetTickCount, 'function GetTickCount: LongWord;');
 AddFunction(@GetTimeRunning,'function GetTimeRunning: LongWord;');
+AddFunction(@ps_DecodeTime,'procedure DecodeTime(DateTime : TDateTime; var Hour,Min,Sec,MSec : word);');
+AddFunction(@ps_DecodeDate,'procedure DecodeDate ( const SourceDate  : TDateTime; out Year, Month, Day  : Word );');
 AddFunction(@ConvertTime,'procedure ConvertTime(Time: integer; var h, m, s: integer);');
 AddFunction(@HakunaMatata,'procedure HakunaMatata;');
 AddFunction(@TerminateScript,'procedure TerminateScript;');
@@ -113,6 +124,7 @@ SetCurrSection('String');
 AddFunction(@Capitalize,'function Capitalize(str : string) : string;');
 AddFunction(@psFormat,'function Format(const fmt : string;const args : array of const) : string;');
 AddFunction(nil,'function ToStr(x) : string;');
+AddFunction(@ps_Between,'function Between(s1, s2, str: string): string;');
 AddFunction(@IntToStr, 'function IntToStr(value: Integer): String;');
 AddFunction(@FloatToStr, 'function FloatToStr(value: Extended): String;');
 AddFunction(@psBoolToStr, 'function BoolToStr(value: Boolean): String;');
@@ -150,6 +162,7 @@ AddFunction(@SetToleranceSpeed2Modifiers, 'procedure SetToleranceSpeed2Modifiers
 AddFunction(@GetToleranceSpeed2Modifiers, 'procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);');
 AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
 AddFunction(@GetColors,'function GetColors(Coords : TPointArray) : TIntegerArray;');
+AddFunction(@GetColorsWrap,'procedure GetColorsWrap(Coords : TPointArray; var Colors :TIntegerArray);');
 AddFunction(@FindColor, 'function FindColor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
 AddFunction(@findcolortoleranceOptimised, 'function FindColorToleranceOptimised(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
 AddFunction(@FindColorTolerance, 'function FindColorTolerance(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
@@ -180,12 +193,13 @@ AddFunction(@KeyUp, 'procedure KeyUp(key: Word);');
 AddFunction(@PressKey, 'procedure PressKey(key: Word);');
 AddFunction(@SendKeys, 'procedure SendKeys(s: string);');
 AddFunction(@isKeyDown, 'function IsKeyDown(key: Word): Boolean;');
+AddFunction(@GetKeyCode,'function GetKeyCode(c : char) : integer;');
 
 { OCR}
 SetCurrSection('OCR');
 AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
 AddFunction(@BitmapFromText, 'function BitmapFromText(text, font: String): integer;');
-AddFunction(@TPAFromText, 'function TPAFromText(text, font: String): TPointArray;');
+AddFunction(@TPAFromText, 'function TPAFromText(text, font: String;out w,h : integer): TPointArray;');
 AddFunction(@MaskFromText, 'function MaskFromText(text, font: String): TMask;');
 
 {Bitmaps}

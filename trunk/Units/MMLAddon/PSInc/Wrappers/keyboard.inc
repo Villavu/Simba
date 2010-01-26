@@ -45,3 +45,8 @@ function isKeyDown(key: Word): boolean; ps_decl;
 begin
   Result := CurrThread.Client.IOManager.isKeyDown(key);
 end;
+
+function GetKeyCode(c :char) : integer; ps_decl;
+begin
+  result := CurrThread.Client.IOManager.GetKeyCode(c);
+end;
