@@ -9,8 +9,8 @@
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
       <Title Value="Simba"/>
-      <UseXPManifest Value="True"/>
       <Icon Value="0"/>
+      <UseXPManifest Value="True"/>
       <ActiveEditorIndexAtStart Value="15"/>
     </General>
     <VersionInfo>
@@ -44,8 +44,8 @@
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <CursorPos X="40" Y="38"/>
-        <TopLine Value="13"/>
+        <CursorPos X="61" Y="25"/>
+        <TopLine Value="12"/>
         <EditorIndex Value="15"/>
         <UsageCount Value="205"/>
         <Loaded Value="True"/>
