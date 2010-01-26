@@ -1,9 +1,0 @@
-program new;
-var
-  R,G,B : byte;
-begin
-  ColorToRGB(clwhite,r,g,b);
-  Writeln([r,g,b]);
-  Writeln(RGBToColor(50,150,250));//16422450
-  writeln(XYZToColor(0.5,0.7,0.9));//1513219
-end.
