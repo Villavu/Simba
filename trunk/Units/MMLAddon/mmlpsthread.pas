@@ -151,9 +151,8 @@ type
       protected
         interps: array of TInterpreter;
         function InitPlugin(plugin: TLibHandle): boolean; override;
-        function GetInterpreter(idx: integer): TInterpreter;
       public
-        property Get[idx: integer]: TInterpreter read GetInterpreter; default;
+        function GetInterpreter(idx: integer): TInterpreter;
     end;
 
     TInterpreterThread = class(TMThread)
@@ -269,6 +268,7 @@ begin
   SetLength(PluginsToLoad,0);
   FreeOnTerminate := True;
   OnTerminate := @OnThreadTerminate;
+  OnError:= nil;
   inherited Create(CreateSuspended);
 end;
 
@@ -463,7 +463,6 @@ begin
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
   PSScript.OnFindUnknownFile:=@PSScriptFindUnknownFile;
-  OnError:= nil;
   // Set some defines
   {$I PSInc/psdefines.inc}
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
@@ -689,7 +688,7 @@ begin
   plugin_idx:= interp_loader.LoadPlugin(libname);
   if plugin_idx < 0 then
     raise Exception.Create(Format('Could not locate the interpreter library: %s',[libname]));
-  interpreter:= interp_loader[plugin_idx];
+  interpreter:= interp_loader.GetInterpreter(plugin_idx);
   instance:= nil;
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 end;
@@ -720,14 +719,14 @@ begin
   instance:= interpreter.Create(PChar(@script[1]), @Interpreter_Precompiler, @Interpreter_ErrorHandler);
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
-      interpreter.AddMethod(instance,ExportedMethods[i].FuncPtr,PChar(@ExportedMethods[i].FuncDecl[1]));
+      interpreter.AddMethod(instance,ExportedMethods[i].FuncPtr,PChar(ExportedMethods[i].FuncDecl));
 end;
 
 procedure TInterpreterThread.AddMethod(meth: TExpMethod);
 begin
   if instance = nil then
      raise Exception.Create('Script not set, cannot add method');
-  interpreter.AddMethod(instance,meth.FuncPtr,PChar(@meth.FuncDecl[1]));
+  interpreter.AddMethod(instance,meth.FuncPtr,PChar(meth.FuncDecl));
 end;
 
 procedure TInterpreterThread.Execute;
@@ -748,22 +747,23 @@ end;
 
 function TInterpreterLoader.InitPlugin(plugin: TLibHandle): boolean;
 var
-  interp: TInterpreter;
+  i: integer;
 begin
-  Pointer(interp.Create) := GetProcAddress(plugin, PChar('interp_init'));
-  if @interp.Create = nil then begin result:= false; exit; end;
-  Pointer(interp.Destroy) := GetProcAddress(plugin, PChar('interp_free'));
-  if @interp.Destroy = nil then begin result:= false; exit; end;
-  Pointer(interp.Run) := GetProcAddress(plugin, PChar('interp_run'));
-  if @interp.Run = nil then begin result:= false; exit; end;
-  Pointer(interp.AddMethod) := GetProcAddress(plugin, PChar('interp_meth'));
-  if @interp.AddMethod = nil then begin result:= false; exit; end;
-  //Optional methods...
-  Pointer(interp.Stop) := GetProcAddress(plugin, PChar('interp_stop'));
-
-  SetLength(interps,length(interps)+1);
-  interps[high(interps)]:= interp;
   result:= true;
+  i:= length(interps);
+  SetLength(interps,i+1);
+  Pointer(interps[i].Create) := GetProcAddress(plugin, PChar('interp_init'));
+  Pointer(interps[i].Destroy) := GetProcAddress(plugin, PChar('interp_free'));
+  Pointer(interps[i].Run) := GetProcAddress(plugin, PChar('interp_run'));
+  Pointer(interps[i].AddMethod) := GetProcAddress(plugin, PChar('interp_meth'));
+  //Optional methods...
+  Pointer(interps[i].Stop) := GetProcAddress(plugin, PChar('interp_stop'));
+  if (Pointer(interps[i].Create) = nil) or (Pointer(interps[i].Destroy) = nil) or
+     (Pointer(interps[i].Run) = nil) or (Pointer(interps[i].AddMethod) = nil) then
+  begin
+    SetLength(interps,i);
+    result:= false;
+  end;
 end;
 
 function TInterpreterLoader.GetInterpreter(idx: integer): TInterpreter;

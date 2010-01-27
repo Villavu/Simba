@@ -718,8 +718,6 @@ begin
 end;
 
 destructor TEIOS_Controller.Destroy;
-var
-  i: integer;
 begin
   SetLength(plugs,0);
   inherited Destroy;
