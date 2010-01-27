@@ -198,7 +198,7 @@ uses
 {$endif}
 
 {Some General PS Functions here}
-procedure psWriteln(str : string); ps_decl;
+procedure psWriteln(str : string); stdcall;
 begin
   if Assigned(CurrThread.DebugTo) then
     CurrThread.DebugTo(str)
