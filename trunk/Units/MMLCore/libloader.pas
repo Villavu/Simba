@@ -39,9 +39,9 @@ implementation
   var
     idx: integer;
   begin
-    if PluginDirs.Find(path,idx) then
-       LoadPluginsDir(idx)
-    else begin
+    //IDK who changed this to loading a dir, but DON'T
+    if not PluginDirs.Find(path,idx) then
+    begin
       writeln('Adding Plugin Path: ' + path);
       PluginDirs.Add(path);
     end;
