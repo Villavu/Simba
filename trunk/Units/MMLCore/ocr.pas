@@ -712,8 +712,9 @@ var
 
 begin
   fD := Fonts.GetFont(font);
+  writeln(format('W, H: %d, %d', [fD.max_width, fd.max_height]));
   SetLength(TPA, 0);
-  TClient(Client).MFinder.FindColorsTolerance(TPA, color, atX, atY, {fuck}0, {fuck}0, tol);
+  //TClient(Client).MFinder.FindColorsTolerance(TPA, color, atX, atY, {fuck}0, {fuck}0, tol);
 
 
 end;
