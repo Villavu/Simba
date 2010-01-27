@@ -28,7 +28,7 @@ type
         neg: array of array of integer;
         neg_adj: array of real;
         map: array of char;
-        width,height: integer;
+        width,height, max_width, max_height: integer;
         inputs,outputs: integer;
     end;
 
@@ -209,6 +209,8 @@ begin
     len:= Length(masks);
     result.width:= w;
     result.height:= h;
+    result.max_width:=0;
+    result.max_height:=0;
     size:= w * h;
     SetLength(result.pos,len,size);
     SetLength(result.pos_adj,len);
@@ -247,6 +249,8 @@ begin
         result.ascii[ord(ascii)].yoff:= masks[i].t;
         result.ascii[ord(ascii)].width:= masks[i].width;
         result.ascii[ord(ascii)].height:= masks[i].height;
+        result.max_width := max(result.max_width, masks[i].width);
+        result.max_height := max(result.max_height, masks[i].height);
     end;
     result.inputs:= size;
     result.outputs:= len;
