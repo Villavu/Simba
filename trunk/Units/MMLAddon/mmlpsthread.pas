@@ -24,7 +24,6 @@
 unit mmlpsthread;
 
 {$Define PS_USESSUPPORT}
-{$define PS_StdCall}
 
 {$mode objfpc}{$H+}
 
@@ -139,26 +138,9 @@ type
     TPrecompiler_Callback = function(name, args: PChar): boolean; stdcall;
     TErrorHandeler_Callback = procedure(line, pos: integer; err: PChar); stdcall;
 
-    TInterpreter = record
-      Create: function(ppg: PChar; precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): pointer; cdecl;
-      AddMethod: procedure(interp: pointer; address: pointer; def: PChar);
-      Run: procedure(interp: pointer);
-      Stop: procedure(interp: pointer);
-      Destroy: procedure(interp: pointer);
-    end;
-
-    TInterpreterLoader = class(TGenericLoader)
-      protected
-        interps: array of TInterpreter;
-        function InitPlugin(plugin: TLibHandle): boolean; override;
-      public
-        function GetInterpreter(idx: integer): TInterpreter;
-    end;
-
-    TInterpreterThread = class(TMThread)
+    TCPThread = class(TMThread)
       protected
         instance: pointer;
-        interpreter: TInterpreter;
       public
         constructor Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
@@ -168,13 +150,26 @@ type
         procedure AddMethod(meth: TExpMethod); override;
     end;
 
+    function interp_init(ppg: PChar; precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): Pointer; cdecl; external;
+    procedure interp_meth(interp: Pointer; addr: Pointer; def: PChar); cdecl; external;
+    function interp_run(interp: Pointer): boolean; cdecl; external;
+    procedure interp_free(interp: Pointer); cdecl; external;
+
 threadvar
   CurrThread : TMThread;
 var
   PluginsGlob: TMPlugins;
-  interp_loader: TInterpreterLoader;
 
 implementation
+
+{$ifdef LINUX}
+  {$linklib c}
+  {$linklib stdc++}
+  {$link ./libcpascal.so}
+{$else}
+  {$linklib stdc++}
+  {$linklib ./libcpascal.dll}
+{$endif}
 
 uses
   colour_conv,dtmutil,
@@ -193,6 +188,7 @@ uses
   forms,//Forms
   lclintf; // for GetTickCount and others.
 
+{$define PS_StdCall}
 {$MACRO ON}
 {$ifdef PS_StdCall}
   {$define ps_decl := stdcall}
@@ -201,7 +197,7 @@ uses
 {$endif}
 
 {Some General PS Functions here}
-procedure psWriteln(str : string);
+procedure psWriteln(str : string); ps_decl;
 begin
   if Assigned(CurrThread.DebugTo) then
     CurrThread.DebugTo(str)
@@ -680,27 +676,24 @@ end;
 
 {***implementation TCPThread***}
 
-constructor TInterpreterThread.Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+constructor TCPThread.Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 var
   plugin_idx: integer;
 begin
-  interp_loader.AddPath(plugin_dir);
-  plugin_idx:= interp_loader.LoadPlugin(libname);
-  if plugin_idx < 0 then
-    raise Exception.Create(Format('Could not locate the interpreter library: %s',[libname]));
-  interpreter:= interp_loader.GetInterpreter(plugin_idx);
   instance:= nil;
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 end;
 
-destructor TInterpreterThread.Destroy;
+destructor TCPThread.Destroy;
 begin
   if instance <> nil then
-    interpreter.Destroy(instance);
+    interp_free(instance);
   inherited Destroy;
 end;
 
 function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
+var
+  local_name, local_args: string;
 begin
   result:= CurrThread.ProcessDirective(name, args);
 end;
@@ -710,70 +703,47 @@ begin
   CurrThread.HandleError(line,pos,err,errRuntime,'');
 end;
 
-procedure TInterpreterThread.SetScript(script: string);
+procedure TCPThread.SetScript(script: string);
 var
   i: integer;
 begin
   if instance <> nil then
-    interpreter.Destroy(instance);
-  instance:= interpreter.Create(PChar(@script[1]), @Interpreter_Precompiler, @Interpreter_ErrorHandler);
+    interp_free(instance);
+  Starttime := lclintf.GetTickCount;
+  instance:= interp_init(PChar(@script[1]), @Interpreter_Precompiler, @Interpreter_ErrorHandler);
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
-      interpreter.AddMethod(instance,ExportedMethods[i].FuncPtr,PChar(ExportedMethods[i].FuncDecl));
+      interp_meth(instance,ExportedMethods[i].FuncPtr,PChar(ExportedMethods[i].FuncDecl));
 end;
 
-procedure TInterpreterThread.AddMethod(meth: TExpMethod);
+procedure TCPThread.AddMethod(meth: TExpMethod);
 begin
   if instance = nil then
      raise Exception.Create('Script not set, cannot add method');
-  interpreter.AddMethod(instance,meth.FuncPtr,PChar(meth.FuncDecl));
+  interp_meth(instance,meth.FuncPtr,PChar(meth.FuncDecl));
 end;
 
-procedure TInterpreterThread.Execute;
+procedure TCPThread.Execute;
 begin
   if instance = nil then
      raise Exception.Create('Script not set, cannot run');
-  interpreter.Run(instance);
+  CurrThread := Self;
+  Starttime := lclintf.GetTickCount;
+  psWriteln('Invoking CPascal Interpreter');
+  if interp_run(instance) then
+     psWriteln('Executed Successfully')
+  else
+     psWriteln('Execution Failed');
+
 end;
 
-procedure TInterpreterThread.Terminate;
+procedure TCPThread.Terminate;
 begin
-  if @interpreter.Stop = nil then
-     raise Exception.Create('Stopping Interpreter not yet implemented');
-  interpreter.Stop(instance);
-end;
-
-{***implementation TInterpreterLoader***}
-
-function TInterpreterLoader.InitPlugin(plugin: TLibHandle): boolean;
-var
-  i: integer;
-begin
-  result:= true;
-  i:= length(interps);
-  SetLength(interps,i+1);
-  Pointer(interps[i].Create) := GetProcAddress(plugin, PChar('interp_init'));
-  Pointer(interps[i].Destroy) := GetProcAddress(plugin, PChar('interp_free'));
-  Pointer(interps[i].Run) := GetProcAddress(plugin, PChar('interp_run'));
-  Pointer(interps[i].AddMethod) := GetProcAddress(plugin, PChar('interp_meth'));
-  //Optional methods...
-  Pointer(interps[i].Stop) := GetProcAddress(plugin, PChar('interp_stop'));
-  if (Pointer(interps[i].Create) = nil) or (Pointer(interps[i].Destroy) = nil) or
-     (Pointer(interps[i].Run) = nil) or (Pointer(interps[i].AddMethod) = nil) then
-  begin
-    SetLength(interps,i);
-    result:= false;
-  end;
-end;
-
-function TInterpreterLoader.GetInterpreter(idx: integer): TInterpreter;
-begin
-  result:= interps[idx];
+  raise Exception.Create('Stopping Interpreter not yet implemented');
 end;
 
 initialization
   PluginsGlob := TMPlugins.Create;
-  interp_loader := TInterpreterLoader.Create;
 finalization
   //PluginsGlob.Free;
   //Its a nice idea, but it will segfault... the program is closing anyway.

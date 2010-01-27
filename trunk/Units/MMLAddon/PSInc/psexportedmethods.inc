@@ -22,7 +22,7 @@
 }
 
 AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
-AddFunction(nil,'procedure Writeln(x);'); //We use special function for this
+AddFunction(@pswriteln,'procedure Writeln(x: string);'); //PS defines a special, keep this for CPascal
 
 { DTM }
 SetCurrSection('DTM');
