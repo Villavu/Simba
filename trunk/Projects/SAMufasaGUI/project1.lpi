@@ -233,7 +233,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/;$(ProjPath)../../Units/MMLAddon/PSInc/"/>
-      <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/MMLAddon/PSInc/;$(ProjPath)../../Units/Linux/;$(ProjPath)../../Units/Synapse/;$(LazarusDir)/components/mouseandkeyinput/"/>
+      <OtherUnitFiles Value="$(ProjPath)/;$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/MMLAddon/PSInc/;$(ProjPath)../../Units/Linux/;$(ProjPath)../../Units/Synapse/;$(LazarusDir)/components/mouseandkeyinput/"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
