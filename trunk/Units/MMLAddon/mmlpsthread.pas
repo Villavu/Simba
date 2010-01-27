@@ -136,11 +136,12 @@ type
     end;
 
     TPrecompiler_Callback = function(name, args: PChar): boolean; stdcall;
-    TErrorHandeler_Callback = procedure(line, pos: integer; err: PChar); stdcall;
+    TErrorHandeler_Callback = procedure(line, pos: integer; err: PChar; runtime: boolean); stdcall;
 
     TCPThread = class(TMThread)
       protected
         instance: pointer;
+        added_methods: array of TExpMethod;
       public
         constructor Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
@@ -150,8 +151,10 @@ type
         procedure AddMethod(meth: TExpMethod); override;
     end;
 
-    function interp_init(ppg: PChar; precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): Pointer; cdecl; external;
+    function interp_init(precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): Pointer; cdecl; external;
     procedure interp_meth(interp: Pointer; addr: Pointer; def: PChar); cdecl; external;
+    procedure interp_set(interp: Pointer; ppg: PChar); cdecl; external;
+    function interp_comp(interp: Pointer): boolean; cdecl; external;
     function interp_run(interp: Pointer): boolean; cdecl; external;
     procedure interp_free(interp: Pointer); cdecl; external;
 
@@ -163,11 +166,8 @@ var
 implementation
 
 {$ifdef LINUX}
-  {$linklib c}
-  {$linklib stdc++}
   {$link ./libcpascal.so}
 {$else}
-  {$linklib stdc++}
   {$linklib ./libcpascal.dll}
 {$endif}
 
@@ -302,7 +302,8 @@ function TMThread.ProcessDirective(DirectiveName, DirectiveArgs: string): boolea
 var
   plugin_idx, i: integer;
 begin
-  if DirectiveName= 'LOADDLL' then
+  writeln('Running Directive: ' + DirectiveName);
+  if CompareText(DirectiveName,'LOADDLL') = 0 then
   begin
     if DirectiveArgs <> '' then
     begin;
@@ -677,21 +678,6 @@ end;
 
 {***implementation TCPThread***}
 
-constructor TCPThread.Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
-var
-  plugin_idx: integer;
-begin
-  instance:= nil;
-  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
-end;
-
-destructor TCPThread.Destroy;
-begin
-  if instance <> nil then
-    interp_free(instance);
-  inherited Destroy;
-end;
-
 function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
 var
   local_name, local_args: string;
@@ -699,42 +685,62 @@ begin
   result:= CurrThread.ProcessDirective(name, args);
 end;
 
-procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar); stdcall;
+procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar; runtime: boolean); stdcall;
 begin
-  CurrThread.HandleError(line,pos,err,errRuntime,'');
+  if runtime then
+    CurrThread.HandleError(line,pos,err,errRuntime,'')
+  else
+    CurrThread.HandleError(line,pos,err,errCompile,'')
+end;
+
+constructor TCPThread.Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+var
+  plugin_idx: integer;
+begin
+  instance:= interp_init(@Interpreter_Precompiler, @Interpreter_ErrorHandler);
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
+end;
+
+destructor TCPThread.Destroy;
+begin
+  interp_free(instance);
+  inherited Destroy;
 end;
 
 procedure TCPThread.SetScript(script: string);
-var
-  i: integer;
 begin
-  if instance <> nil then
-    interp_free(instance);
-  Starttime := lclintf.GetTickCount;
-  instance:= interp_init(PChar(@script[1]), @Interpreter_Precompiler, @Interpreter_ErrorHandler);
-  for i := 0 to high(ExportedMethods) do
-    if ExportedMethods[i].FuncPtr <> nil then
-      interp_meth(instance,ExportedMethods[i].FuncPtr,PChar(ExportedMethods[i].FuncDecl));
+  interp_set(instance,PChar(script));
 end;
 
 procedure TCPThread.AddMethod(meth: TExpMethod);
 begin
-  if instance = nil then
-     raise Exception.Create('Script not set, cannot add method');
   interp_meth(instance,meth.FuncPtr,PChar(meth.FuncDecl));
 end;
 
 procedure TCPThread.Execute;
+var
+  i,ii: integer;
 begin
-  if instance = nil then
-     raise Exception.Create('Script not set, cannot run');
   CurrThread := Self;
-  Starttime := lclintf.GetTickCount;
+  Starttime := GetTickCount;
   psWriteln('Invoking CPascal Interpreter');
-  if interp_run(instance) then
-     psWriteln('Executed Successfully')
-  else
-     psWriteln('Execution Failed');
+  if interp_comp(instance) then
+  begin
+    for i := high(PluginsToLoad) downto 0 do
+      for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
+        with PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii] do
+          interp_meth(self.instance,FuncPtr,PChar(FuncStr));
+    for i := 0 to high(ExportedMethods) do
+      if ExportedMethods[i].FuncPtr <> nil then
+        with ExportedMethods[i] do
+          interp_meth(self.instance,FuncPtr,PChar(FuncDecl));
+    psWriteln('Compiled Successfully in ' +  IntToStr(GetTickCount - Starttime) + 'ms');
+    if interp_run(instance) then
+       psWriteln('Executed Successfully')
+    else
+       psWriteln('Execution Failed');
+  end else
+     psWriteln('Compile Failed');
 
 end;
 
