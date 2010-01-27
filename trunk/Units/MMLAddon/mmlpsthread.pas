@@ -186,7 +186,9 @@ uses
   strutils,
   tpa, //Tpa stuff
   forms,//Forms
-  lclintf; // for GetTickCount and others.
+  lclintf  // for GetTickCount and others.
+  {$IFDEF SIMBA} ,testunit {$ENDIF}
+  ;
 
 {$define PS_StdCall}
 {$MACRO ON}

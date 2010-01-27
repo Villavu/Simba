@@ -533,8 +533,8 @@ begin
     PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-    //ScriptThread := TCPThread.Create('libcpascal',True,@CurrentSyncInfo,PluginsPath);
-    ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
+    ScriptThread := TCPThread.Create('libcpascal',True,@CurrentSyncInfo,PluginsPath);
+    //ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
     {$IFNDEF TERMINALWRITELN}
     ScriptThread.SetDebug(@formWriteln);
     ScriptThread.DebugMemo := Self.Memo1;

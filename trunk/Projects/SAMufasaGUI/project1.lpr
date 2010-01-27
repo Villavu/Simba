@@ -25,6 +25,8 @@ program project1;
 
 {$mode objfpc}{$H+}
 
+{$DEFINE SIMBA}
+
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads, cmem,
