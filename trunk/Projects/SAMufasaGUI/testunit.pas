@@ -511,6 +511,7 @@ var
   AppPath : string;
   pluginspath: string;
   ScriptPath : string;
+  UseCPascal: String;
   loadFontsOnScriptStart: String;
 
 begin
@@ -533,8 +534,11 @@ begin
     PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-    ScriptThread := TCPThread.Create('libcpascal',True,@CurrentSyncInfo,PluginsPath);
-    //ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
+    UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'True');
+    if lowercase(UseCPascal) = 'true' then
+      ScriptThread := TCPThread.Create('libcpascal',True,@CurrentSyncInfo,PluginsPath)
+    else
+      ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
     {$IFNDEF TERMINALWRITELN}
     ScriptThread.SetDebug(@formWriteln);
     ScriptThread.DebugMemo := Self.Memo1;
