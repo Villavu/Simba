@@ -187,7 +187,6 @@ uses
   tpa, //Tpa stuff
   forms,//Forms
   lclintf  // for GetTickCount and others.
-  {$IFDEF SIMBA} ,testunit {$ENDIF}
   ;
 
 {$define PS_StdCall}
