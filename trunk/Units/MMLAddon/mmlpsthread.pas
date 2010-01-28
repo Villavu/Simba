@@ -143,7 +143,7 @@ type
         instance: pointer;
         added_methods: array of TExpMethod;
       public
-        constructor Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+        constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
         procedure SetScript(script: string); override;
         procedure Execute; override;
@@ -151,25 +151,20 @@ type
         procedure AddMethod(meth: TExpMethod); override;
     end;
 
-    function interp_init(precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): Pointer; cdecl; external;
-    procedure interp_meth(interp: Pointer; addr: Pointer; def: PChar); cdecl; external;
-    procedure interp_set(interp: Pointer; ppg: PChar); cdecl; external;
-    function interp_comp(interp: Pointer): boolean; cdecl; external;
-    function interp_run(interp: Pointer): boolean; cdecl; external;
-    procedure interp_free(interp: Pointer); cdecl; external;
-
 threadvar
   CurrThread : TMThread;
 var
   PluginsGlob: TMPlugins;
 
-implementation
+  libcpascal: integer;
+  interp_init: function(precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): Pointer; cdecl;
+  interp_meth: procedure(interp: Pointer; addr: Pointer; def: PChar); cdecl;
+  interp_set: procedure(interp: Pointer; ppg: PChar); cdecl;
+  interp_comp: function(interp: Pointer): boolean; cdecl;
+  interp_run: function(interp: Pointer): boolean; cdecl;
+  interp_free: procedure(interp: Pointer); cdecl;
 
-{$ifdef LINUX}
-  {$link ./libcpascal.so}
-{$else}
-  {$linklib ./libcpascal.dll}
-{$endif}
+implementation
 
 uses
   colour_conv,dtmutil,
@@ -678,6 +673,19 @@ end;
 
 {***implementation TCPThread***}
 
+procedure LoadCPascal(plugin_dir: string);
+begin
+  libcpascal:= LoadLibrary(PChar(plugin_dir + 'libcpascal' + {$ifdef LINUX} '.so' {$else} '.dll' {$endif}));
+  if libcpascal = 0 then
+    raise Exception.Create('CPascal library not found');
+  Pointer(interp_init):= GetProcAddress(libcpascal, PChar('interp_init'));
+  Pointer(interp_meth):= GetProcAddress(libcpascal, PChar('interp_meth'));
+  Pointer(interp_set):= GetProcAddress(libcpascal, PChar('interp_set'));
+  Pointer(interp_comp):= GetProcAddress(libcpascal, PChar('interp_comp'));
+  Pointer(interp_run):= GetProcAddress(libcpascal, PChar('interp_run'));
+  Pointer(interp_free):= GetProcAddress(libcpascal, PChar('interp_free'));
+end;
+
 function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
 var
   local_name, local_args: string;
@@ -693,10 +701,12 @@ begin
     CurrThread.HandleError(line,pos,err,errCompile,'')
 end;
 
-constructor TCPThread.Create(libname: string; CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+constructor TCPThread.Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 var
   plugin_idx: integer;
 begin
+  if libcpascal = 0 then
+    LoadCPascal(plugin_dir);
   instance:= interp_init(@Interpreter_Precompiler, @Interpreter_ErrorHandler);
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 end;
@@ -751,6 +761,7 @@ end;
 
 initialization
   PluginsGlob := TMPlugins.Create;
+  libcpascal:= 0;
 finalization
   //PluginsGlob.Free;
   //Its a nice idea, but it will segfault... the program is closing anyway.
