@@ -44,6 +44,7 @@ AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 SetCurrSection('Math');
 AddFunction(nil,'function Round(e:extended) : integer');
 AddFunction(@ps_ceil,'function ceil(e : extended) : integer');
+AddFunction(@ps_floor,'function floor(e : extended) : integer');
 AddFunction(@ps_pow,'function pow(base,exponent : extended) : extended');
 AddFunction(@ps_max,'function Max(a, b: Integer): Integer;');
 AddFunction(@ps_min,'function Min(a, b: Integer): Integer;');
@@ -53,13 +54,15 @@ AddFunction(@ps_iAbs,'function iAbs(a : integer) : integer;');
 AddFunction(@ps_ArcTan2,'function ArcTan2(x,y : extended) : extended;');
 AddFunction(@IntToBox,'function IntToBox(x1,y1,x2,y2 : integer) : TBox;');
 AddFunction(@IntInBox,'function IntInBox(x, y: Integer; Box: TBox): Boolean;');
-AddFunction(@PointToBox,'function PointToBox(PT1,PT2 : TPoint; Box: TBox): Boolean;');
+AddFunction(@PointToBox,'function PointToBox(PT1,PT2 : TPoint): TBox;');
 AddFunction(@PointInBox,'function PointInBox(PT : TPoint; Box: TBox): Boolean;');
 AddFunction(@ps_sqr,'function Sqr(e : extended) : extended;');
 AddFunction(@ps_point,'function Point(x,y:integer) : TPoint;');
 AddFunction(@ps_Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
 AddFunction(@ps_hypot,'function Hypot(X, Y: Extended): Extended;');
 AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
+AddFunction(@ps_incex,'procedure IncEx(var x : integer; increase : integer);');
+AddFunction(@ps_DecEx,'procedure DecEx(var x : integer; Decrease : integer);');
 AddFunction(@BinCoe,'function BinCoe(a, b: LongInt): Extended;');
 AddFunction(@FixD,'function FixD(Degrees : extended) : Extended;');
 AddFunction(@InRange,'function InRange(value,min,max : integer) : boolean;');
@@ -95,6 +98,9 @@ AddFunction(@ps_SetFileCharPointer, 'Function SetFileCharPointer(FileNum, cChars
 AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Integer;');
 AddFunction(@ps_DirectoryExists,'function DirectoryExists( const DirectoryName : string ) : Boolean;');
 AddFunction(@ps_FileExists,'function FileExists ( const FileName : string ) : Boolean;');
+AddFunction(@ps_WriteINI,'procedure WriteINI(Section, KeyName, NewString, FileName: string);');
+AddFunction(@ps_ReadINI,'function ReadINI(Section, KeyName, FileName: string): string;');
+AddFunction(@ps_DeleteINI,'procedure DeleteINI(Section, KeyName, FileName: string);');
 
 {other}
 SetCurrSection('Other');
@@ -134,7 +140,9 @@ AddFunction(@ps_StrToFloat, 'function StrToFloat(value: String): Extended;');
 AddFunction(@ps_StrToFloatDef, 'function StrToFloatDef(value: String; default: Extended): Extended;');
 AddFunction(@ps_StrToBool, 'function StrToBool(value: String): Boolean;');
 AddFunction(@ps_StrToBoolDef, 'function StrToBoolDef(value: String; default: Boolean): Boolean;');
-
+AddFunction(@ExtractFromStr,'function ExtractFromStr( Str : string; Extract : StrExtr) : string;');
+AddFunction(@ps_Replace,'function Replace(Text, FindStr, ReplaceStr: string; Flags: TReplaceFlags): string;');
+AddFunction(@ps_Replace,'function ReplaceWrap(Text, FindStr, ReplaceStr: string; Flags: TReplaceFlags): string;');
 {web}
 SetCurrSection('Web');
 AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
@@ -173,6 +181,7 @@ AddFunction(@CountColorTolerance,'function CountColorTolerance(Color, xs, ys, xe
 AddFunction(@FindColorsToleranceOptimised,'function FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 AddFunction(@FindColorsTolerance,'function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;');
 AddFunction(@FindColorSpiral,'function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;');
+AddFunction(@FindColorSpiralTolerance,'function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye,Tol: Integer): Boolean;');
 AddFunction(@FindColorsSpiralTolerance,'function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;');
 AddFunction(@FindColoredArea, 'function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye, MinArea: Integer): Boolean');
 AddFunction(@FindColoredAreaTolerance, 'function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe, ye, MinArea, Tolerance : Integer): Boolean');
@@ -198,6 +207,7 @@ AddFunction(@GetKeyCode,'function GetKeyCode(c : char) : integer;');
 { OCR}
 SetCurrSection('OCR');
 AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
+AddFunction(@rs_GetUpTextAt, 'function rs_GetUpTextAt(x, y : integer): string;');
 AddFunction(@BitmapFromText, 'function BitmapFromText(text, font: String): integer;');
 AddFunction(@TPAFromText, 'function TPAFromText(text, font: String;out w,h : integer): TPointArray;');
 AddFunction(@MaskFromText, 'function MaskFromText(text, font: String): TMask;');

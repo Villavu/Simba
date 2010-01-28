@@ -20,42 +20,42 @@
 
     Bitmap.inc for the Mufasa Macro Library
 }
-function CreateBitmapString(bmp : integer) : string; ps_decl;
+function CreateBitmapString(bmp : integer) : string; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps[bmp].ToString;
 end;
 
-function GetMufasaBitmap(bmp : integer): TMufasaBitmap; ps_decl;
+function GetMufasaBitmap(bmp : integer): TMufasaBitmap; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps[bmp];
 end;
 
-function CreateBitmap(w,h : integer):integer; ps_decl;
+function CreateBitmap(w,h : integer):integer; extdecl;
 begin
   result := CurrThread.Client.MBitmaps.CreateBMP(w,h);
 end;
 
-procedure FreeBitmap(Number : integer); ps_decl;
+procedure FreeBitmap(Number : integer); extdecl;
 begin
   CurrThread.Client.MBitmaps.FreeBMP(Number);
 end;
 
-procedure SaveBitmap(Bmp : integer; path : string); ps_decl;
+procedure SaveBitmap(Bmp : integer; path : string); extdecl;
 begin;
   CurrThread.Client.MBitmaps[Bmp].SaveToFile(Path);
 end;
 
-function BitmapFromString(Width,height : integer; Data : string) : integer; ps_decl;
+function BitmapFromString(Width,height : integer; Data : string) : integer; extdecl;
 begin;
   Result := CurrThread.Client.MBitmaps.CreateBMPFromString(Width,Height,Data);
 end;
 
-function LoadBitmap(Path : String) : integer; ps_decl;
+function LoadBitmap(Path : String) : integer; extdecl;
 begin;
   Result := CurrThread.Client.MBitmaps.CreateBMPFromFile(Path);
 end;
 
-procedure SetBitmapSize(Bmp,NewW,NewH : integer); ps_decl;
+procedure SetBitmapSize(Bmp,NewW,NewH : integer); extdecl;
 begin;
   if (NewW>=0) and (NewH >=0) then
     CurrThread.Client.MBitmaps[Bmp].SetSize(NewW,NewH)
@@ -63,7 +63,7 @@ begin;
     raise exception.createfmt('Wrong Width or Height in SetBitmapSize: (%d,%d)',[NewW,NewH]);
 end;
 
-procedure StretchBitmapResize(Bmp,NewW,NewH : integer); ps_decl;
+procedure StretchBitmapResize(Bmp,NewW,NewH : integer); extdecl;
 begin;
   if (NewW>=0) and (NewH >=0) then
     CurrThread.Client.MBitmaps[Bmp].StretchResize(NewW,NewH)
@@ -71,7 +71,7 @@ begin;
     raise exception.createfmt('Wrong Width or Height in ScretchResize: (%d,%d)',[NewW,NewH]);
 end;
 
-procedure GetBitmapSize(Bmp : integer; out BmpW,BmpH : integer); ps_decl;
+procedure GetBitmapSize(Bmp : integer; out BmpW,BmpH : integer); extdecl;
 begin;
   With CurrThread.Client.MBitmaps[bmp] do
   begin;
@@ -80,129 +80,129 @@ begin;
   end;
 end;
 
-procedure SetBitmapName(Bmp : integer; name : string); ps_decl;
+procedure SetBitmapName(Bmp : integer; name : string); extdecl;
 begin;
   CurrThread.Client.MBitmaps[Bmp].BmpName:= name;
 end;
 
-function CreateMirroredBitmap(Bmp : integer) : integer; ps_decl;
+function CreateMirroredBitmap(Bmp : integer) : integer; extdecl;
 begin;
   Result := CurrThread.Client.MBitmaps.CreateMirroredBitmap(Bmp, MirrorWidth);
 end;
 
-function CreateMirroredBitmapEx(Bmp : integer; MirrorStyle : TBmpMirrorStyle) : integer; ps_decl;
+function CreateMirroredBitmapEx(Bmp : integer; MirrorStyle : TBmpMirrorStyle) : integer; extdecl;
 begin;
   Result := CurrThread.Client.MBitmaps.CreateMirroredBitmap(Bmp,MirrorStyle);
 end;
 
-function FastGetPixel(bmp,x,y : integer) : LongWord; ps_decl;
+function FastGetPixel(bmp,x,y : integer) : LongWord; extdecl;
 begin;
   Result := CurrThread.Client.MBitmaps[Bmp].FastGetPixel(x,y);
 end;
 
-function FastGetPixels(bmp : integer; TPA : TPointArray) : TIntegerArray; ps_decl;
+function FastGetPixels(bmp : integer; TPA : TPointArray) : TIntegerArray; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps[Bmp].FastGetPixels(TPA);
 end;
 
-procedure FastSetPixel(Bmp,x,y : integer; Color : TColor); ps_decl;
+procedure FastSetPixel(Bmp,x,y : integer; Color : TColor); extdecl;
 begin
   CurrThread.Client.MBitmaps[bmp].FastSetPixel(x,y,color);
 end;
 
-procedure FastSetPixels(Bmp : integer; TPA : TPointArray; Colors : TIntegerArray); ps_decl;
+procedure FastSetPixels(Bmp : integer; TPA : TPointArray; Colors : TIntegerArray); extdecl;
 begin;
   CurrThread.Client.MBitmaps[Bmp].FastSetPixels(TPA,Colors);
 end;
 
-procedure DrawTPABitmap(bitmap : integer; TPA : TPointArray; Color : integer); ps_decl;
+procedure DrawTPABitmap(bitmap : integer; TPA : TPointArray; Color : integer); extdecl;
 begin
   CurrThread.Client.MBitmaps[Bitmap].DrawTPA(TPA,Color);
 end;
-procedure DrawATPABitmap(bitmap : integer; ATPA : T2DPointArray); ps_decl;
+procedure DrawATPABitmap(bitmap : integer; ATPA : T2DPointArray); extdecl;
 begin
   CurrThread.Client.MBitmaps[bitmap].DrawATPA(ATPA);
 end;
 
-procedure DrawATPABitmapEx(bitmap : integer; ATPA : T2DPointArray; Colors : TIntegerArray); ps_decl;
+procedure DrawATPABitmapEx(bitmap : integer; ATPA : T2DPointArray; Colors : TIntegerArray); extdecl;
 begin
   CurrThread.Client.MBitmaps[bitmap].DrawATPA(ATPA,Colors);
 end;
 
-procedure FastDrawClear(bmp : integer; Color : TColor); ps_decl;
+procedure FastDrawClear(bmp : integer; Color : TColor); extdecl;
 begin;
   CurrThread.Client.MBitmaps[bmp].FastDrawClear(Color);
 end;
 
-procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer); ps_decl;
+procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer); extdecl;
 begin;
   CurrThread.Client.MBitmaps[SourceBitmap].FastDrawTransparent(x,y,CurrThread.Client.MBitmaps[TargetBitmap]);
 end;
 
-procedure SetTransparentColor(Bmp : integer; Color : TColor); ps_decl;
+procedure SetTransparentColor(Bmp : integer; Color : TColor); extdecl;
 begin
   CurrThread.Client.MBitmaps[Bmp].SetTransparentColor(Color);
 end;
 
-function GetTransparentColor(Bmp : integer) : TColor; ps_decl;
+function GetTransparentColor(Bmp : integer) : TColor; extdecl;
 begin;
   Result := CurrThread.Client.MBitmaps[bmp].GetTransparentColor;
 end;
 
-procedure FastReplaceColor(bmp: Integer; OldColor, NewColor: TColor); ps_decl;
+procedure FastReplaceColor(bmp: Integer; OldColor, NewColor: TColor); extdecl;
 begin
   CurrThread.Client.MBitmaps[Bmp].FastReplaceColor(OldColor,NewColor);
 end;
 
-procedure ps_CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer); ps_decl;
+procedure ps_CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer); extdecl;
 begin
   CurrThread.Client.MBitmaps.GetBMP(bmp).CopyClientToBitmap(CurrThread.Client.IOManager, True, xs, ys, xe, ye);
 end;
 
-function BitmapFromClient(const xs, ys, xe, ye: Integer): Integer; ps_decl;
+function BitmapFromClient(const xs, ys, xe, ye: Integer): Integer; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
   CurrThread.Client.MBitmaps[result].CopyClientToBitmap(CurrThread.Client.IOManager,True,xs,ys,xe,ye);
 end;
 
-function FindBitmap(Bitmap: integer; out x, y: Integer): Boolean; ps_decl;
+function FindBitmap(Bitmap: integer; out x, y: Integer): Boolean; extdecl;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmap( MBitmaps[bitmap],x,y);
 end;
 
-function FindBitmapIn(bitmap: integer; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean; ps_decl;
+function FindBitmapIn(bitmap: integer; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean; extdecl;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmapIn( MBitmaps[bitmap],x,y,xs,ys,xe,ye);
 end;
 
-function FindBitmapToleranceIn(bitmap: integer; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean; ps_decl;
+function FindBitmapToleranceIn(bitmap: integer; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean; extdecl;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmapToleranceIn( MBitmaps[bitmap],x,y,xs,ys,xe,ye,tolerance);
 end;
 
 
-function FindBitmapSpiral(bitmap: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean; ps_decl;
+function FindBitmapSpiral(bitmap: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean; extdecl;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmapSpiral(Mbitmaps[bitmap],x,y,xs,ys,xe,ye);
 end;
 
-function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean; ps_decl;
+function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean; extdecl;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmapsSpiralTolerance(MBitmaps[bitmap],x,y,points,xs,ys,xe,ye,tolerance);
 end;
 
-function FindBitmapSpiralTolerance(bitmap: integer; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean; ps_decl;
+function FindBitmapSpiralTolerance(bitmap: integer; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean; extdecl;
 begin;
   with CurrThread.Client do
     result := MFinder.FindBitmapSpiralTolerance(MBitmaps[bitmap],x,y,xs,ys,xe,ye,tolerance);
 end;
 
-function RotateBitmap(bitmap: Integer; angle: Extended): Integer; ps_decl;
+function RotateBitmap(bitmap: Integer; angle: Extended): Integer; extdecl;
 begin;
   with CurrThread.Client.MBitmaps do
   begin;
@@ -211,7 +211,7 @@ begin;
   end;
 end;
 
-function Desaturate(Bitmap : integer) : integer; ps_decl;
+function Desaturate(Bitmap : integer) : integer; extdecl;
 begin;
   with CurrThread.Client.MBitmaps do
   begin;
@@ -219,15 +219,15 @@ begin;
     Bmp[Bitmap].Desaturate(Bmp[result]);
   end;
 end;
-procedure InvertBitmap(Bitmap : integer); ps_decl;
+procedure InvertBitmap(Bitmap : integer); extdecl;
 begin;
   CurrThread.Client.MBitmaps[Bitmap].Invert;
 end;
-function CopyBitmap(Bitmap : integer) : integer; ps_decl;
+function CopyBitmap(Bitmap : integer) : integer; extdecl;
 begin;
   result := Currthread.Client.MBitmaps.CopyBMP(bitmap);
 end;
-function GreyScaleBitmap(Bitmap : integer) : integer; ps_decl;
+function GreyScaleBitmap(Bitmap : integer) : integer; extdecl;
 begin;
   with CurrThread.Client.MBitmaps do
   begin;
@@ -235,7 +235,7 @@ begin;
     Bmp[Bitmap].GreyScale(Bmp[result]);
   end;
 end;
-function BrightnessBitmap(Bitmap,br : integer) : integer; ps_decl;
+function BrightnessBitmap(Bitmap,br : integer) : integer; extdecl;
 begin;
   with CurrThread.Client.MBitmaps do
   begin;
@@ -243,7 +243,7 @@ begin;
     Bmp[Bitmap].Brightness(Bmp[result],br);
   end;
 end;
-function ContrastBitmap(bitmap : integer; co : extended) : integer; ps_decl;
+function ContrastBitmap(bitmap : integer; co : extended) : integer; extdecl;
 begin;
   with CurrThread.Client.MBitmaps do
   begin;
@@ -252,7 +252,7 @@ begin;
   end;
 end;
 
-function PosterizeBitmap(Bitmap : integer; po : integer) : integer; ps_decl;
+function PosterizeBitmap(Bitmap : integer; po : integer) : integer; extdecl;
 begin;
   with CurrThread.Client.MBitmaps do
   begin
@@ -260,16 +260,16 @@ begin;
     Bmp[bitmap].Posterize(Bmp[result],po);
   end;
 end;
-function CreateMaskFromBitmap(Bitmap : integer) : TMask; ps_decl;
+function CreateMaskFromBitmap(Bitmap : integer) : TMask; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps[Bitmap].CreateTMask;
 end;
 
-function FindMaskTolerance(mask: TMask; out x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; ps_decl;
+function FindMaskTolerance(mask: TMask; out x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; extdecl;
 begin;
   result := CurrThread.Client.MFinder.FindMaskTolerance(Mask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
 end;
-function FindBitmapMaskTolerance(mask: Integer; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; ps_decl;
+function FindBitmapMaskTolerance(mask: Integer; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; extdecl;
 begin;
   psWriteln('Better be using FindMaskTolerance in combination with CreateMaskFromBitmap, more efficient.');
   with CurrThread.Client do
@@ -278,7 +278,7 @@ end;
 
 function FindDeformedBitmapToleranceIn(bitmap: integer; out x,
   y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;
-  AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean; ps_decl;
+  AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean; extdecl;
 begin;
   result := CurrThread.Client.MFinder.FindDeformedBitmapToleranceIn(CurrThread.Client.MBitmaps[Bitmap],x,y,xs,ys,xe,ye,tolerance,range,AllowPartialAccuracy,accuracy);
 end;
