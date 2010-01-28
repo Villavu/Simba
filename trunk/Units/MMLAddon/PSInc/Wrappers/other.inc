@@ -117,6 +117,10 @@ function ps_Date : TDateTime; ps_decl;
 begin
   result := date;
 end;
+function ps_GetTickCount : Longword; ps_decl;
+begin
+  result := GetTickCount;
+end;
 procedure HakunaMatata; ps_decl;
 begin;
   OpenWebPage('http://www.youtube.com/v/ejEVczA8PLU&hl=en&fs=1&autoplay=1');
