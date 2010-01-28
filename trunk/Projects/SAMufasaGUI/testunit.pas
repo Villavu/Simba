@@ -535,10 +535,15 @@ begin
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
     UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'True');
-    if lowercase(UseCPascal) = 'true' then
-      ScriptThread := TCPThread.Create(True,@CurrentSyncInfo,PluginsPath)
-    else
-      ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
+    try
+      if lowercase(UseCPascal) = 'true' then
+        ScriptThread := TCPThread.Create(True,@CurrentSyncInfo,PluginsPath)
+      else
+        ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
+    except
+      writeln('Failed to initialise the library!');
+      Exit;
+    end;
     {$IFNDEF TERMINALWRITELN}
     ScriptThread.SetDebug(@formWriteln);
     ScriptThread.DebugMemo := Self.Memo1;
