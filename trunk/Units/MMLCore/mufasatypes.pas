@@ -97,7 +97,7 @@ type
     add seperate tpa or boolean array for every point that is to be matched ?
    }
 
-  pDTM = record
+  pDTM = packed record
     l: Integer;
     p: TPointArray;
     c, t, asz, ash: TIntegerArray;

@@ -21,32 +21,32 @@
     Keyboard.inc for the Mufasa Macro Library
 }
 
-procedure KeyDown(key: Word); ps_decl;
+procedure KeyDown(key: Word); extdecl;
 begin
   CurrThread.Client.IOManager.KeyDown(key);
 end;
 
-procedure KeyUp(key: Word); ps_decl;
+procedure KeyUp(key: Word); extdecl;
 begin
   CurrThread.Client.IOManager.KeyUp(key);
 end;
 
-procedure SendKeys(s: string); ps_decl;
+procedure SendKeys(s: string); extdecl;
 begin
   CurrThread.Client.IOManager.SendText(s);
 end;
 
-procedure PressKey(key: Word); ps_decl;
+procedure PressKey(key: Word); extdecl;
 begin
   CurrThread.Client.IOManager.PressKey(key);
 end;
 
-function isKeyDown(key: Word): boolean; ps_decl;
+function isKeyDown(key: Word): boolean; extdecl;
 begin
   Result := CurrThread.Client.IOManager.isKeyDown(key);
 end;
 
-function GetKeyCode(c :char) : integer; ps_decl;
+function GetKeyCode(c :char) : integer; extdecl;
 begin
   result := CurrThread.Client.IOManager.GetKeyCode(c);
 end;

@@ -25,12 +25,12 @@ const
   ps_mouse_right = 0;
   ps_mouse_left = 1;
   ps_mouse_middle = 2;
-procedure MoveMouse(x, y: integer); ps_decl;
+procedure MoveMouse(x, y: integer); extdecl;
 begin
   CurrThread.Client.IOManager.SetMousePos(X, Y);
 end;
 
-procedure GetMousePos(out x, y: integer); ps_decl;
+procedure GetMousePos(out x, y: integer); extdecl;
 begin
    CurrThread.Client.IOManager.GetMousePos(X, Y);
 end;
@@ -45,17 +45,17 @@ begin;
   end;
 end;
 
-procedure HoldMouse(x, y: integer; clickType: integer); ps_decl;
+procedure HoldMouse(x, y: integer; clickType: integer); extdecl;
 begin
    CurrThread.Client.IOManager.HoldMouse(x, y, ConvIntClickType(clickType));
 end;
 
-procedure ReleaseMouse(x, y: integer; clickType: integer); ps_decl;
+procedure ReleaseMouse(x, y: integer; clickType: integer); extdecl;
 begin
    CurrThread.Client.IOManager.ReleaseMouse(x, y, ConvIntClickType(clickType));
 end;
 
-procedure ClickMouse(x, y: integer; clickType: integer); ps_decl;
+procedure ClickMouse(x, y: integer; clickType: integer); extdecl;
 begin
    CurrThread.Client.IOManager.ClickMouse(x, y, ConvIntClickType(clickType));
 end;
