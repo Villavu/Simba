@@ -173,6 +173,7 @@ uses
   uPSC_extctrls, //Compile-libs
   uPSUtils,
   fontloader,
+  IniFiles,//Silly INI files
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
@@ -183,17 +184,20 @@ uses
   forms,//Forms
   lclintf  // for GetTickCount and others.
   ;
-
+{$ifdef Linux}
 {$define PS_StdCall}
+{$else}
+//{$define PS_StdCall}
+{$endif}
 {$MACRO ON}
 {$ifdef PS_StdCall}
-  {$define ps_decl := stdcall}
+  {$define extdecl := stdcall}
 {$else}
-  {$define ps_decl := REGISTER}
+  {$define extdecl := REGISTER}
 {$endif}
 
 {Some General PS Functions here}
-procedure psWriteln(str : string); stdcall;
+procedure psWriteln(str : string); extdecl;
 begin
   if Assigned(CurrThread.DebugTo) then
     CurrThread.DebugTo(str)
@@ -297,7 +301,6 @@ function TMThread.ProcessDirective(DirectiveName, DirectiveArgs: string): boolea
 var
   plugin_idx, i: integer;
 begin
-  writeln('Running Directive: ' + DirectiveName);
   if CompareText(DirectiveName,'LOADDLL') = 0 then
   begin
     if DirectiveArgs <> '' then

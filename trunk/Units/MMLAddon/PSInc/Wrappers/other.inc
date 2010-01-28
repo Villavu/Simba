@@ -21,7 +21,7 @@
     Other.inc for the Mufasa Macro Library
 }
 
-procedure psWait(t: Integer); ps_decl;
+procedure psWait(t: Integer); extdecl;
 {$ifdef MSWINDOWS}
 begin
   Sleep(t);
@@ -42,13 +42,13 @@ begin
 end;
 {$endif}
 
-procedure ClearDebug; ps_decl;
+procedure ClearDebug; extdecl;
 begin
   if Assigned(CurrThread.DebugMemo) then
     CurrThread.Synchronize(@CurrThread.DebugMemo.Clear);
 end;
 
-procedure SaveScreenshot(FileName: string); ps_decl;
+procedure SaveScreenshot(FileName: string); extdecl;
 var
   w,h : integer;
   bmp: TMufasaBitmap;
@@ -62,35 +62,35 @@ end;
 
 
 
-procedure DisplayDebugImgWindow(w,h : integer); ps_decl;
+procedure DisplayDebugImgWindow(w,h : integer); extdecl;
 begin;
   CurrThread.DebugImg.DispSize^ := Classes.Point(w,h);
   CurrThread.Synchronize( CurrThread.DebugImg.ShowForm);
 end;
 
-procedure DrawBitmapDebugImg(bmp : integer); ps_decl;
+procedure DrawBitmapDebugImg(bmp : integer); extdecl;
 begin;
   CurrThread.DebugImg.ToDrawBitmap^ := CurrThread.Client.MBitmaps[bmp];
   CurrThread.Synchronize(CurrThread.DebugImg.DrawBitmap);
 end;
 
-function GetDebugBitmap : integer; ps_decl;
+function GetDebugBitmap : integer; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
   CurrThread.DebugImg.GetDebugBitmap^ := CurrThread.Client.MBitmaps[result];
   CurrThread.Synchronize(CurrThread.DebugImg.GetBitmap);
 end;
 
-procedure TerminateScript; ps_decl;
+procedure TerminateScript; extdecl;
 begin;
   CurrThread.Terminate;
 end;
-function GetTimeRunning: LongWord; ps_decl;
+function GetTimeRunning: LongWord; extdecl;
 begin;
   result := GetTickCount - CurrThread.StartTime;
 end;
 
-procedure ConvertTime(Time : integer; var h,m,s : integer); ps_decl;
+procedure ConvertTime(Time : integer; var h,m,s : integer); extdecl;
 var
   x : integer;
 begin;
@@ -101,27 +101,27 @@ begin;
   x := x mod (1000 * 60);
   s := x div (1000);
 end;
-procedure ps_DecodeDate ( const SourceDate  : TDateTime; out Year, Month, Day  : Word ); ps_decl;
+procedure ps_DecodeDate ( const SourceDate  : TDateTime; out Year, Month, Day  : Word ); extdecl;
 begin
   decodedate(sourcedate,year,month,day);
 end;
-procedure ps_DecodeTime(DateTime : TDateTime; var Hour,Min,Sec,MSec : word); ps_decl;
+procedure ps_DecodeTime(DateTime : TDateTime; var Hour,Min,Sec,MSec : word); extdecl;
 begin
   decodetime(datetime,hour,min,sec,msec);
 end;
-function ps_Now : TDateTime; ps_decl;
+function ps_Now : TDateTime; extdecl;
 begin
   result := now;
 end;
-function ps_Date : TDateTime; ps_decl;
+function ps_Date : TDateTime; extdecl;
 begin
   result := date;
 end;
-function ps_GetTickCount : Longword; ps_decl;
+function ps_GetTickCount : Longword; extdecl;
 begin
   result := GetTickCount;
 end;
-procedure HakunaMatata; ps_decl;
+procedure HakunaMatata; extdecl;
 begin;
   OpenWebPage('http://www.youtube.com/v/ejEVczA8PLU&hl=en&fs=1&autoplay=1');
 end;

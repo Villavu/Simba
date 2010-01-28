@@ -1,4 +1,4 @@
-function ps_GetPage(S: String): String; ps_decl;
+function ps_GetPage(S: String): String; extdecl;
 begin
   result := GetPage(S);
 end;

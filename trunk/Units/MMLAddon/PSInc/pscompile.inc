@@ -26,11 +26,15 @@ Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath)
 Sender.Comp.AddConstantN('IncludePath','string').SetString(CurrThread.IncludePath);
 Sender.Comp.AddConstantN('PluginPath','string').SetString(CurrThread.PluginPath);
 Sender.Comp.AddConstantN('FontPath','string').SetString(CurrThread.FontPath);
+Sender.Comp.AddTypeS('TReplaceFlag', '(rfReplaceAll, rfIgnoreCase)');
+Sender.Comp.AddTypeS('TReplaceFlags','set of TReplaceFlag');
+Sender.Comp.AddTypeS('StrExtr','(Numbers, Letters, Others);');
 Sender.Comp.AddTypeS('TDateTime','Double');
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of LongInt');
 Sender.Comp.AddTypeS('TExtendedArray','Array of extended');
 Sender.Comp.AddTypeS('TBoolArray', 'Array of Boolean');
 Sender.Comp.AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
+Sender.Comp.AddTypeS('TBoxArray','Array of TBox');
 Sender.Comp.AddTypeS('TPointArray','Array of TPoint');
 Sender.Comp.AddTypeS('T2DPointArray','Array of TPointArray');
 Sender.Comp.AddTypeS('TPointArrayArray','Array of TPointArray');

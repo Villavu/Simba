@@ -21,71 +21,81 @@
     Math.inc for the Mufasa Macro Library
 }
 
-function ps_iAbs(a : integer) : integer;ps_decl;
+function ps_iAbs(a : integer) : integer;extdecl;
 begin
   result := abs(a);
 end;
 
-function ps_ceil(e : extended) : integer;ps_decl;
+function ps_ceil(e : extended) : integer;extdecl;
 begin
   result := ceil(e);
 end;
 
-function ps_pow(base,exponent : extended) : extended; ps_decl;
+function ps_pow(base,exponent : extended) : extended; extdecl;
 begin
   result := power(base,exponent);
 end;
 
-function ps_Max(a,b : integer) : integer; ps_decl;
+function ps_Max(a,b : integer) : integer; extdecl;
 begin
   result := max(a,b);
 end;
 
-function ps_Min(a, b: Integer): Integer; ps_decl;
+function ps_Min(a, b: Integer): Integer; extdecl;
 begin
   result := min(a,b);
 end;
 
-function ps_MinE(a, b : extended) : extended; ps_decl;
+function ps_MinE(a, b : extended) : extended; extdecl;
 begin
   result := min(a,b);
 end;
 
-function ps_MaxE(a,b : extended) : extended; ps_decl;
+function ps_MaxE(a,b : extended) : extended; extdecl;
 begin
   result := max(a,b);
 end;
 
-function ps_Sqr(e : extended) : extended;ps_decl;
+function ps_Sqr(e : extended) : extended;extdecl;
 begin
   result := sqr(e);
 end;
 
-function ps_Point(x,y : integer) : TPoint;ps_decl;
+function ps_Point(x,y : integer) : TPoint;extdecl;
 begin
   result := classes.point(x,y);
 end;
-function ps_Distance(x1,y1,x2,y2 : integer) : integer;ps_decl;
+function ps_Distance(x1,y1,x2,y2 : integer) : integer;extdecl;
 begin
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
 end;
 
-function ps_Hypot(X, Y: Extended): Extended;ps_decl;
+function ps_Hypot(X, Y: Extended): Extended;extdecl;
 begin
   result := hypot(x,y);
 end;
 
-function ps_RandomRange(const aFrom, aTo: Integer): Integer; ps_decl;
+function ps_RandomRange(const aFrom, aTo: Integer): Integer; extdecl;
 begin
   Result:=Random(Abs(aFrom-aTo))+Min(aTo,AFrom);
 end;
 
-function ps_ArcTan2(x,y : extended) : extended;
+function ps_ArcTan2(x,y : extended) : extended;  extdecl;
 begin
   result := ArcTan2(x,y);
 end;
 
-function Factorial(number: longword): Int64; ps_decl;
+procedure ps_IncEx(var x : integer; increase : integer); extdecl;
+begin
+  x := x + increase;
+end;
+
+procedure ps_DecEx(var x : integer; Decrease : integer); extdecl;
+begin
+  x := x - Decrease;
+end;
+
+function Factorial(number: longword): Int64; extdecl;
 var
   Loop : longword;
 begin
@@ -94,12 +104,12 @@ begin
     result := result * loop;
 end;
 
-function BinCoe(a, b: LongInt): Extended; ps_decl;
+function BinCoe(a, b: LongInt): Extended; extdecl;
 begin
   result := Factorial(a) / (factorial(b) * factorial(a-b));
 end;
 
-function FixD(Degrees : extended) : Extended; ps_decl;
+function FixD(Degrees : extended) : Extended; extdecl;
 begin;
   Result := Degrees;
   while Result < 0 do
@@ -108,7 +118,7 @@ begin;
     Result := Result - 360;
 end;
 
-function IntToBox(x1,y1,x2,y2 : integer) : TBox; ps_decl;
+function IntToBox(x1,y1,x2,y2 : integer) : TBox; extdecl;
 begin;
   result.x1 := x1;
   result.y1 := y1;
@@ -116,12 +126,12 @@ begin;
   result.y2 := y2;
 end;
 
-function IntInBox(x, y: Integer; Box: TBox): Boolean; ps_decl;
+function IntInBox(x, y: Integer; Box: TBox): Boolean; extdecl;
 begin;
   result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
 end;
 
-function PointToBox(PT1,PT2 : TPoint) : TBox; ps_decl;
+function PointToBox(PT1,PT2 : TPoint) : TBox; extdecl;
 begin;
   result.x1 := PT1.x;
   result.y1 := PT1.y;
@@ -129,8 +139,12 @@ begin;
   result.y2 := PT2.y;
 end;
 
-function PointInBox(PT : TPoint; Box: TBox): Boolean; ps_decl;
+function PointInBox(PT : TPoint; Box: TBox): Boolean; extdecl;
 begin;
   result := (((PT.x >= Box.x1) and(PT.x <= Box.x2)) and ((PT.y>= box.y1) and (PT.y <= box.y2)));
 end;
 
+function ps_floor(e : extended) : integer; extdecl;
+begin;
+  result := floor(e);
+end;

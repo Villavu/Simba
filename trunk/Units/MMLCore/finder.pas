@@ -62,6 +62,7 @@ type
         // Possibly turn x, y into a TPoint var.
         function FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
         function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
+        function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye,Tol: Integer): Boolean;
         function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
         function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
         function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
@@ -533,6 +534,81 @@ begin
       end;
 
   TClient(Client).IOManager.FreeReturnData;
+end;
+
+function TMFinder.FindColorSpiralTolerance(var x, y: Integer; color, xs, ys,
+  xe, ye, Tol: Integer): Boolean;
+var
+   PtrData: TRetData;
+   RowData : TPRGB32Array;
+   dX, dY, clR, clG, clB,i,Hispiral: Integer;
+   H1, S1, L1, H2, S2, L2: Extended;
+   R,G,B : extended; //percentage R,G,B.. (Needed for HSL).
+   D : Extended; //CMax - Cmin
+   HueXTol, SatXTol: Extended;
+   CMax, CMin : extended;
+   label Hit;
+
+begin
+  Result := false;
+  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
+  DefaultOperations(xs,ys,xe,ye);
+
+  // calculate delta x and y
+  dX := xe - xs;
+  dY := ye - ys;
+  //next, convert the color to r,g,b
+  ColorToRGB(Color, clR, clG, clB);
+  if Cts = 2 then
+    RGBToHSL(clR,clG,clB,H1,S1,L1);
+
+  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
+  //Load rowdata
+  RowData:= CalculateRowPtrs(ptrdata,dy+1);
+  //Load the spiral path
+  LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
+  HiSpiral := (dy+1) * (dx + 1) -1;
+  case CTS of
+    0:
+      for i := 0 to HiSpiral do
+        if ((abs(clB-RowData[ClientTPA[i].y][ClientTPA[i].x].B) <= Tol) and
+            (abs(clG-RowData[ClientTPA[i].y][ClientTPA[i].x].G) <= Tol) and
+            (Abs(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R) <= Tol)) then
+              goto Hit;
+
+    1:
+    begin
+      Tol := Sqr(Tol);
+      for i := 0 to HiSpiral do
+           if (sqr(clB - RowData[ClientTPA[i].y][ClientTPA[i].x].B) +
+               sqr(clG - RowData[ClientTPA[i].y][ClientTPA[i].x].G) +
+               sqr(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R)) <= Tol then
+                 goto Hit;
+    end;
+    2:
+    { Can be optimized a lot... RGBToHSL isn't really inline, }
+    begin
+      HueXTol := hueMod * Tol;
+      SatXTol := satMod * Tol;
+      for i := 0 to HiSpiral do
+      begin
+        RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
+                 RowData[ClientTPA[i].y][ClientTPA[i].x].G,
+                 RowData[ClientTPA[i].y][ClientTPA[i].x].B,H2,S2,L2);
+        if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
+          goto Hit;
+      end;
+    end;
+  end;
+  Result := False;
+  TClient(Client).IOManager.FreeReturnData;
+  Exit;
+
+  Hit:
+    Result := True;
+    x := ClientTPA[i].x + xs;
+    y := ClientTPA[i].y + ys;
+    TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.FindColoredArea(var x, y: Integer; Color, xs, ys, xe, ye, MinArea: Integer): Boolean;

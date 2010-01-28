@@ -981,7 +981,12 @@ begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.PasteFromClipboard
   else if Memo1.Focused then
-    Memo1.PasteFromClipboard;
+    Memo1.PasteFromClipboard
+  else if LabeledEditSearch.Focused then
+    LabeledEditSearch.PasteFromClipboard
+  else if frmFunctionList.editSearchList.Focused then
+    frmFunctionList.editSearchList.PasteFromClipboard;
+
 end;
 
 procedure TForm1.ActionPauseExecute(Sender: TObject);
@@ -1438,6 +1443,7 @@ var
   Methods : TExpMethodArr;
   LastSection : string;
   Sections : TStringList;
+  Nodes : array of TTreeNode;
   i : integer;
   Index : integer;
   TempNode : TTreeNode;
@@ -1459,11 +1465,13 @@ begin
         LastSection := Methods[i].Section;
         Index :=  Sections.IndexOf(LastSection);
         if Index <> -1 then
-          TempNode := Tree.Items.Item[index]
+          TempNode := Nodes[index]
         else
         begin
           TempNode := Tree.Items.Add(nil,LastSection);
           Sections.Add(LastSection);
+          setlength(nodes,length(nodes)+1);
+          nodes[high(nodes)] := tempNode;
         end;
       end;
       Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));

@@ -21,50 +21,50 @@
     File.inc for the Mufasa Macro Library
 }
 
-function ps_CreateFile(Path: string): Integer; ps_decl;
+function ps_CreateFile(Path: string): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.CreateFile(Path);
 end;
 
-function ps_OpenFile(Path: string; Shared: Boolean): Integer; ps_decl;
+function ps_OpenFile(Path: string; Shared: Boolean): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.OpenFile(Path, Shared);
 end;
 
-function ps_RewriteFile(Path: string; Shared: Boolean): Integer; ps_decl;
+function ps_RewriteFile(Path: string; Shared: Boolean): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.RewriteFile(Path, Shared);
 end;
 
-procedure ps_CloseFile(FileNum: Integer); ps_decl;
+procedure ps_CloseFile(FileNum: Integer); extdecl;
 begin
   CurrThread.Client.MFiles.CloseFile(FileNum);
 end;
 
-function ps_EndOfFile(FileNum: Integer): Boolean; ps_decl;
+function ps_EndOfFile(FileNum: Integer): Boolean; extdecl;
 begin
   Result := CurrThread.Client.MFiles.EndOfFile(FileNum);
 end;
 
-function ps_FileSize(FileNum: Integer): LongInt; ps_decl;
+function ps_FileSize(FileNum: Integer): LongInt; extdecl;
 begin
   Result := CurrThread.Client.MFiles.FileSizeMuf(FileNum);
 end;
 
-function ps_ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean; ps_decl;
+function ps_ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean; extdecl;
 begin
   Result := CurrThread.Client.MFiles.ReadFileString(FileNum, s, x);
 end;
 
-function ps_WriteFileString(FileNum: Integer; s: string): Boolean; ps_decl;
+function ps_WriteFileString(FileNum: Integer; s: string): Boolean; extdecl;
 begin
   Result := CurrThread.Client.MFiles.WriteFileString(FileNum, s);
 end;
-function ps_SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer; ps_decl;
+function ps_SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.SetFileCharPointer(Filenum, cChars, Origin);
 end;
-function ps_FilePointerPos(FileNum: Integer): Integer; ps_decl;
+function ps_FilePointerPos(FileNum: Integer): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.FilePointerPos(FileNum);
 end;
@@ -72,7 +72,37 @@ function ps_FileExists ( const FileName : string ) : Boolean;
 begin
   result := FileExists(FileName);
 end;
-function ps_DirectoryExists ( const DirectoryName : string ) : Boolean; ps_decl;
+function ps_DirectoryExists ( const DirectoryName : string ) : Boolean; extdecl;
 begin
   result := DirectoryExists(DirectoryName);
+end;
+
+procedure ps_WriteINI(Section, KeyName, NewString, FileName: string);extdecl;
+var
+  tempini : TIniFile;
+begin;
+  tempini := TIniFile.Create(FileName,True);
+  tempini.WriteString(Section,keyname,newstring);
+  tempini.free;
+end;
+
+function ps_ReadINI(Section, KeyName, FileName: string): string;extdecl;
+var
+  tempini : TIniFile;
+begin;
+  tempini := TIniFile.Create(FileName,True);
+  Result := tempini.ReadString(section,keyname,'');
+  tempini.free;
+end;
+
+procedure ps_DeleteINI(Section, KeyName, FileName: string); extdecl;
+var
+  tempini : TIniFile;
+begin;
+  tempini := TIniFile.Create(FileName,True);
+  if KeyName = '' then
+    tempini.EraseSection(Section)
+  else
+    Tempini.DeleteKey(section,keyname);
+  tempini.free;
 end;
