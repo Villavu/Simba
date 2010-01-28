@@ -536,7 +536,7 @@ begin
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
     UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'True');
     if lowercase(UseCPascal) = 'true' then
-      ScriptThread := TCPThread.Create('libcpascal',True,@CurrentSyncInfo,PluginsPath)
+      ScriptThread := TCPThread.Create(True,@CurrentSyncInfo,PluginsPath)
     else
       ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
     {$IFNDEF TERMINALWRITELN}
