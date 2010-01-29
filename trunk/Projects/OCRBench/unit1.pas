@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, ExtCtrls, Client, MufasaTypes, Bitmaps, ocr, windowselector,
-  {$IFDEF MSWINDOWS} os_windows, {$ENDIF}
+  {$IFDEF MSWINDOWS} os_windows {$ENDIF}
   {$IFDEF LINUX} os_linux {$ENDIF};
 
 type
@@ -162,7 +162,7 @@ begin
   if not assigned(CliW) then
     CliW := TIOManager.Create;
   WS := TMWindowSelector.Create(CliW);
-  CliW.SetTarget(WS.Drag{$IFDEF WINDOWS},w_Window{$ENDIF});
+  CliW.SetTarget(WS.Drag);
 end;
 
 initialization
