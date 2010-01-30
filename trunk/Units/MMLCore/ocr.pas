@@ -54,7 +54,8 @@ uses
              procedure FilterShadowBitmap(bmp: TMufasaBitmap);
              procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
-             function GetTextAt(atX, atY, minspacing, maxspacing, color, tol, len: integer; font: string): string;
+             function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
+                               color, tol, len: integer; font: string): string;
              function TextToFontTPA(Text, font: String; var w, h: integer): TPointArray;
              function TextToFontBitmap(Text, font: String): TMufasaBitmap;
              function TextToMask(Text, font: String): TMask;
@@ -549,6 +550,8 @@ begin
 
   // split chars
   chars_2d := SplitTPAEx(chars,1,charsbmp.height);
+
+  { FIXME: This only sorts the points in every TPA }
   SortATPAFrom(chars_2d, point(0,0));
   for x := 0 to high(chars_2d) do
   begin
@@ -684,9 +687,15 @@ begin
         result:=result+' ';
       lb:=b;
     end;
+
+
     for i := 0 to high(t) do
       t[i] := t[i] - point(b.x1,b.y1);
 
+    {
+      FIXME: If the TPA is too large, we can still go beyond n's bounds.
+      We should check the bounds in GetTextPointsIn
+    }
     for i := 0 to high(thachars[j]) do
     begin
       n[(thachars[j][i].x) + ((thachars[j][i].y) * font.width)] := 1;
@@ -704,19 +713,119 @@ begin
     result := GetUpTextAtEx(atX, atY, false);
 end;
 
-function TMOCR.GetTextAt(atX, atY, minspacing, maxspacing, color, tol, len: integer; font: string): string;
+function TMOCR.GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
+                               color, tol, len: integer; font: string): string;
 
 var
+   b, lb: TBox;
+   i, j, w, h: Integer;
+   lbset: boolean;
+   n: TNormArray;
    fD: TocrData;
    TPA: TPointArray;
+   STPA: T2DPointArray;
+   bmp:tmufasabitmap;
+
 
 begin
   fD := Fonts.GetFont(font);
-  writeln(format('W, H: %d, %d', [fD.max_width, fd.max_height]));
+{  writeln(format('W, H: %d, %d', [fD.max_width, fd.max_height]));    }
+
+  TClient(Client).IOManager.GetDimensions(w, h);
+ { writeln('Dimensions: (' + inttostr(w) + ', ' + inttostr(h) + ')');    }
+
+  { Get the text points }
   SetLength(TPA, 0);
-  //TClient(Client).MFinder.FindColorsTolerance(TPA, color, atX, atY, {fuck}0, {fuck}0, tol);
+  TClient(Client).MFinder.FindColorsTolerance(TPA, color, atX, atY,
+                                     min(fD.max_width * len, w - atX - 1),
+                                     fD.max_height - 1, tol);
+{  b := GetTPABounds(TPA);
+  bmp := TMufasaBitmap.Create;
+  bmp.SetSize(b.x2+1,b.y2+1);
+  bmp.DrawTPA(TPA, clRed);
+  bmp.SaveToFile('/tmp/found.bmp');     }
 
+  { Split the text points into something usable. }
+  { +1 because splittpa will not split well if we use 0 space ;) }
+  STPA := SplitTPAEx(TPA, minvspacing+1, hspacing+1);
 
+{  bmp.DrawATPA(STPA);
+  bmp.SaveToFile('/tmp/found2.bmp');
+  bmp.Free;        }
+
+ { for i := 0 to high(STPA) do
+  begin
+    b := GetTPABounds(STPA[i]);
+    bmp := TMufasaBitmap.Create;
+    bmp.SetSize(b.x2+1,b.y2+1);
+    bmp.DrawTPA(STPA[i], clRed);
+    bmp.SaveToFile('/tmp/t_' + inttostr(i) + '.bmp');
+    bmp.Free;
+  end;                               }
+
+  SortATPAFrom(STPA, Point(0, 0));
+  SortATPAFromFirstPoint(STPA, Point(0, 0));
+
+ { for i := 0 to high(STPA) do
+  begin
+    b := GetTPABounds(STPA[i]);
+    bmp := TMufasaBitmap.Create;
+    bmp.SetSize(b.x2+1,b.y2+1);
+    bmp.DrawTPA(STPA[i], clRed);
+    bmp.SaveToFile('/tmp/s_' + inttostr(i) + '.bmp');
+    bmp.Free;
+  end;       }
+
+  { We no longer need the points in TPA }
+  SetLength(TPA, 0);
+
+  fillchar(b, sizeof(tbox), 0);
+  fillchar(lb, sizeof(tbox), 0);
+
+  lbset := false;
+  SetLength(Result, 0);
+  SetLength(n, (fd.width + 1) * (fd.height + 1));
+  for i := 0 to min(high(STPA),len) do
+  begin
+    for j := 0 to high(n) do
+      n[j] := 0;
+    TPA := STPA[i];
+    b := GetTPABounds(TPA);
+    if not lbset then
+    begin
+      lb:=b;
+      lbset:=true;
+    end else
+    begin
+     { if b.x1 - lb.x2 < minvspacing then
+      begin
+        writeln('GetTextAt: not enough spacing between chars...');
+        lb := b;
+        continue;
+      end;   }
+      if b.x1 - lb.x2 > maxvspacing then
+        result:=result+' ';
+
+      lb:=b;
+    end;
+
+    for j := 0 to high(tpa) do
+      tpa[j] := tpa[j] - point(b.x1,b.y1);
+
+    {
+      FIXME: We never check it j actually fits in n's bounds...
+      This *WILL* error when wrong spaces etc are passed.
+      Added a temp resolution.
+    }
+    for j := 0 to high(tpa) do
+    begin
+      if (tpa[j].x) + ((tpa[j].y) * fD.width) <= high(n) then
+        n[(tpa[j].x) + ((tpa[j].y) * fD.width)] := 1
+      else
+        raise Exception.Create('The automatically split characters are too wide. Try decreasing minspacing');
+    end;
+    result := result + GuessGlyph(n, fD);
+  end;
 end;
 
 function TMOCR.TextToFontTPA(Text, font: String; var w, h: integer): TPointArray;
