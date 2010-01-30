@@ -315,10 +315,10 @@ begin
   //writeln('d1:'+inttostr(length(maze)));
   //writeln('d2:'+inttostr(length(maze[0])));
   writeln('preparing to solve maze');
-  //thin(input,start.x,start.y,finish.x,finish.y,length(input),length(input[0]));
+  thin(input,start.x,start.y,finish.x,finish.y,length(input),length(input[0]));
   writeln('thinned the maze');
   //writeln('start: (' + inttostr(start.x) + ',' + inttostr(start.y) + ') finish: (' + inttostr(finish.x) + ',' + inttostr(finish.y) + ')');
-  //all_paths:= flood(input,start.x,start.y,finish.x,finish.y,length(input),length(input[0]));
+  all_paths:= flood(input,start.x,start.y,finish.x,finish.y,length(input),length(input[0]));
   writeln('found all possible paths');
   jills_routes:= Length(all_paths) - 1;
   max_pos:= 0;
