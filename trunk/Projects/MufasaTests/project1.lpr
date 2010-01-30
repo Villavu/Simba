@@ -61,6 +61,7 @@ var
   Time: DWord;
   C: TClient;
   I: Integer;
+  T: DWord;
   dtm: pdtm;
   p:tpointarray;
   bmp: TMufasaBitmap;
@@ -83,11 +84,25 @@ begin
 
   { add your program here }
   C := TClient.Create('.');
-  C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/Fonts/');
+  bmp := TMufasaBitmap.Create;
+  //bmp.LoadFromFile('/home/merlijn/Programs/mufasa/pics/smallchars.bmp');
+  bmp.LoadFromFile('/home/merlijn/Programs/mufasa/pics/UpChars.bmp');
+  C.IOManager.SetTarget(bmp);
+  C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/trunk/Fonts/');
+  // small chars
+  t := GetTickCount;
+  for i := 0 to 100 do
+    C.MOCR.GetTextAt(0,0,0,3,2,65278,2,100,'UpChars');
+    //C.MOCR.GetTextAt(0,0,1,3,2,0,0,100,'SmallChars');
+  writeln(floattostr((gettickcount - t) / 100.0) + ' ms');
+  writeln(C.MOCR.GetTextAt(0,0,0,3,2,65278,2,100,'UpChars'));
+  //writeln(C.MOCR.GetTextAt(0,0,1,3,2,0,0,100,'SmallChars'));
 
-  bmp := C.MOCR.TextToFontBitmap('Danke schon', 'SmallChars');
 
-  bmp.SaveToFile('/tmp/wat.bmp');
+{ bmp := C.MOCR.TextToFontBitmap('Welcome to RuneScape.', 'SmallChars');
+
+
+  bmp.SaveToFile('/tmp/wat.bmp');    }
 
 {  bmp := TMufasaBitmap.Create;
   bmp.SetSize(CW,CH);
@@ -138,6 +153,7 @@ begin
 
   //bmp.OnDestroy:=nil;
   //bmp.Free;
+  bmp.Free;
   C.Free;
 
   // stop program loop
