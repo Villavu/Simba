@@ -75,10 +75,22 @@ interface
         procedure GetTargetDimensions(var w, h: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
-      private
+      protected
         rgb: prgb32;
         freedata : boolean;
         w,h: integer;
+    end;
+
+    TBitmapTarget = class(TTarget)
+      public
+        constructor Create(bitmap: TMufasaBitmap);
+        destructor Destroy; override;
+
+        procedure GetTargetDimensions(var w, h: integer); override;
+        function ReturnData(xs, ys, width, height: Integer): TRetData; override;
+
+      protected
+        bitmap: TMufasaBitmap;
     end;
       
    { Implements a target that is a Window in the operating system. This class is abstract, i.e.,
@@ -216,6 +228,7 @@ interface
         function SetTarget(bmp : TMufasaBitmap) : integer; overload;
         function SetTarget(name: string; initargs: pointer): integer; overload;
         function TargetValid: Boolean;
+        procedure BitmapDestroyed(Bitmap : TMufasaBitmap);
 
         function GetColor(x,y : integer) : TColor;
         function ReturnData(xs, ys, width, height: Integer): TRetData;
@@ -428,9 +441,19 @@ function TIOManager_Abstract.SetTarget(ArrPtr: PRGB32; Size: TPoint): integer;
 begin
   result:= SetImageTarget(TRawTarget.Create(ArrPtr,Size.X,Size.Y));
 end;
+
+//Only checks the current image target, not targets that might be in the indexes...
+procedure TIOManager_Abstract.BitmapDestroyed(Bitmap : TMufasaBitmap);
+begin
+  if image is TBitmapTarget then
+    if TBitmapTarget(image).bitmap = Bitmap then
+      raise Exception.Create('Target bitmap was destroyed!');
+end;
+
 function TIOManager_Abstract.SetTarget(bmp : TMufasaBitmap) : integer;
 begin
-  result:= SetImageTarget(TRawTarget.Create(bmp.FData,bmp.width,bmp.height));
+  result:= SetImageTarget(TBitmapTarget.Create(bmp));
+  bmp.OnDestroy:= @BitmapDestroyed;
 end;
 
 function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer;
@@ -706,6 +729,33 @@ function TRawTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
   result.Ptr := rgb;
   result.RowLen:= self.w;
+  result.IncPtrWith:= result.RowLen - width;
+  Inc(result.Ptr, ys * result.RowLen + xs);
+end;
+
+//***implementation*** TBitmapTarget
+
+constructor TBitmapTarget.Create(bitmap: TMufasaBitmap);
+begin
+  inherited Create;
+  self.bitmap:= bitmap;
+end;
+
+destructor TBitmapTarget.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure TBitmapTarget.GetTargetDimensions(var w, h: integer);
+begin
+  h:= bitmap.Height;
+  w:= bitmap.Width;
+end;
+
+function TBitmapTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
+begin
+  result.Ptr := bitmap.FData;
+  result.RowLen:= bitmap.Width;
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
 end;
