@@ -520,10 +520,19 @@ $TPointArray$ type.
 
 \section{Finding text}
 
-\section{Indentifying text}
+\section{Identifying text}
 
-\subsection{GetTextAtEx}
-DAT IS DIT
+\subsection{GetTextAt}
+
+GetTextAt returns the text at the given X, Y.
+minvspacing and maxvspacing define the minimum and maximum vertical spacing
+between characters in the font, hspacing is the minimal space to split
+characters on. If it is, for example, 0, and ``i'' will be split into two
+characters.
+
+\begin{verbatim}
+function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; font: string): string;  
+\end{verbatim}
 
 \chapter{Client}
 \section{Client and Window}
