@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 469;
+    SimbaVersion = 501;
 
 type
 
@@ -64,6 +64,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionCompileScript: TAction;
     ActionExit: TAction;
     ActionReplace: TAction;
     ActionFindNext: TAction;
@@ -98,6 +99,8 @@ type
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
     MenuExtra: TMenuItem;
+    MenuItemCompile: TMenuItem;
+    MenuItemHandbook: TMenuItem;
     MenuItemAbout: TMenuItem;
     MenuItemReportBug: TMenuItem;
     MenuViewSettings: TMenuItem;
@@ -204,6 +207,7 @@ type
     MTrayIcon: TTrayIcon;
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
+    procedure ActionCompileScriptExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
@@ -235,6 +239,7 @@ type
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
+    procedure MenuItemHandbookClick(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure dlgReplaceFind(Sender: TObject);
     procedure dlgReplaceReplace(Sender: TObject);
@@ -534,7 +539,7 @@ begin
     PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-    UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'True');
+    UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');
     try
       if lowercase(UseCPascal) = 'true' then
         ScriptThread := TCPThread.Create(True,@CurrentSyncInfo,PluginsPath)
@@ -906,6 +911,35 @@ begin
     Self.ClearScript;  //DeleteTab would take care of this already, but yeah, it's neater this way.
 end;
 
+procedure TForm1.ActionCompileScriptExecute(Sender: TObject);
+var
+  UseCPascal : string;
+  PluginsPath : string;
+  TempThread : TMThread;
+begin
+  UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');
+  PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
+  try
+    if lowercase(UseCPascal) = 'true' then
+      TempThread := TCPThread.Create(True,nil,PluginsPath)
+    else
+      TempThread := TPSThread.Create(True,nil,PluginsPath);
+  except
+    writeln('Failed to initialise the library!');
+    Exit;
+  end;
+  {$IFNDEF TERMINALWRITELN}
+  TempThread.SetDebug(@formWriteln);
+  TempThread.DebugMemo := Self.Memo1;
+  {$ENDIF}
+  TempThread.SetScript(CurrScript.SynEdit.Text);
+  TempThread.ErrorData:= @CurrScript.ErrorData;
+  TempThread.OnError:= @CurrScript.HandleErrorData;
+  TempThread.CompileOnly:= true;
+  TempThread.Resume;
+
+end;
+
 procedure TForm1.ActionCopyExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
@@ -1190,6 +1224,11 @@ end;
 procedure TForm1.FunctionListExit(Sender: TObject);
 begin
 //  StatusBar.Panels[2].Text:= '';
+end;
+
+procedure TForm1.MenuItemHandbookClick(Sender: TObject);
+begin
+  OpenURL('http://vila.villavu.com/mufasa/mufasa_ps_handbook/');
 end;
 
 procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);

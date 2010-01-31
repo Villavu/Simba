@@ -318,7 +318,7 @@ implementation
   end;
   function TWindow.IsKeyHeld(key: integer): boolean;
   begin
-    raise Exception.CreateFmt('IsKeyHeld isn''t implemented yet on Windows', []);
+    Result := (GetAsyncKeyState(key)  <> 0);
   end;
 
   function TWindow.GetKeyCode(c: char): integer;
