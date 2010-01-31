@@ -211,6 +211,7 @@ AddFunction(@rs_GetUpTextAt, 'function rs_GetUpTextAt(x, y : integer): string;')
 AddFunction(@BitmapFromText, 'function BitmapFromText(text, font: String): integer;');
 AddFunction(@TPAFromText, 'function TPAFromText(text, font: String;out w,h : integer): TPointArray;');
 AddFunction(@MaskFromText, 'function MaskFromText(text, font: String): TMask;');
+AddFunction(@GetTextAt,'function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer; font: string): string;');
 
 {Bitmaps}
 SetCurrSection('Bitmaps');

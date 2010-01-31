@@ -89,6 +89,7 @@ type
       ErrorData : PErrorData; //We need this for thread-safety etc
       OnError  : TOnError; //Error handeler
 
+      CompileOnly : boolean;
       procedure HandleError(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
       function LoadFile(var filename, contents: string): boolean;
@@ -263,6 +264,7 @@ begin
   ExportedMethods:= GetExportedMethods;
   SetLength(PluginsToLoad,0);
   FreeOnTerminate := True;
+  CompileOnly := false;
   OnTerminate := @OnThreadTerminate;
   OnError:= nil;
   inherited Create(CreateSuspended);
@@ -397,6 +399,7 @@ end;
 {$I PSInc/Wrappers/keyboard.inc}
 {$I PSInc/Wrappers/dtm.inc}
 {$I PSInc/Wrappers/ocr.inc}
+
 {$I PSInc/Wrappers/internets.inc}
 
 class function TMThread.GetExportedMethods: TExpMethodArr;
@@ -647,6 +650,8 @@ begin
     begin
       OutputMessages;
       psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      if CompileOnly then
+        exit;
 //      if not (ScriptState = SCompiling) then
         if not PSScript.Execute then
           HandleError(PSScript.ExecErrorRow,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,
@@ -748,6 +753,8 @@ begin
         with ExportedMethods[i] do
           interp_meth(self.instance,FuncPtr,PChar(FuncDecl));
     psWriteln('Compiled Successfully in ' +  IntToStr(GetTickCount - Starttime) + 'ms');
+    if CompileOnly then
+      exit;
     if interp_run(instance) then
        psWriteln('Executed Successfully')
     else
