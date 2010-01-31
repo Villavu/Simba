@@ -26,3 +26,9 @@ function TPAFromText(text, font: String;out w,h : integer): TPointArray; extdecl
 begin
   Result := CurrThread.Client.MOCR.TextToFontTPA(text, font, w, h);
 end;
+
+function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
+                   color, tol, len: integer; font: string): string; extdecl;
+begin
+  result := CurrThread.Client.MOCR.GetTextAt(atx,aty,minvspacing,maxvspacing,hspacing,color,tol,len,font);
+end;

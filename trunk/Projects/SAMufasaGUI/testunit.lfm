@@ -1136,6 +1136,11 @@ object Form1: TForm1
         ImageIndex = 6
         OnClick = ActionRunExecute
       end
+      object MenuItemCompile: TMenuItem
+        Action = ActionCompileScript
+        Caption = 'Compile'
+        OnClick = ActionCompileScriptExecute
+      end
       object MenuItemPause: TMenuItem
         Action = ActionPauseScript
         Bitmap.Data = {
@@ -1406,6 +1411,10 @@ object Form1: TForm1
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
         OnClick = MenuItemAboutClick
+      end
+      object MenuItemHandbook: TMenuItem
+        Caption = '&Handbook'
+        OnClick = MenuItemHandbookClick
       end
       object MenuItemReportBug: TMenuItem
         Caption = '&Report a Bug'
@@ -2783,6 +2792,11 @@ object Form1: TForm1
       Caption = '&Exit'
       ImageIndex = 25
       OnExecute = ActionExitExecute
+    end
+    object ActionCompileScript: TAction
+      Caption = 'ActionCompileScript'
+      OnExecute = ActionCompileScriptExecute
+      ShortCut = 16504
     end
   end
   object DebugTimer: TTimer
