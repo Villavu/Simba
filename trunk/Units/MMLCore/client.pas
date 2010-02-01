@@ -71,6 +71,8 @@ end;
 
 destructor TClient.Destroy;
 begin
+  IOManager.SetState(True);
+
   MOCR.Free;
   MDTM.Free;
   MBitmaps.Free;
