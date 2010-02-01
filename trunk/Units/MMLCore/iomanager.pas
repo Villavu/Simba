@@ -261,6 +261,7 @@ interface
         procedure SetImageTarget(idx: integer);
         procedure SetKeyMouseTarget(idx: integer);
         procedure FreeTarget(idx: integer);
+        procedure SetState(val: Boolean);
 
       protected
         function SetImageTarget(target: TTarget): integer;
@@ -275,11 +276,13 @@ interface
         frozen: TTarget;
         freezebuffer: prgb32;
         bothsame: boolean;
+        FStopping: Boolean;
 
         idxarr: array of TTarget;
 
         function GetTargetIdx(target: TTarget): integer;
         function GetIdxTarget(idx: integer): TTarget;
+      property Stopping: Boolean Read FStopping write SetState;
     end;
 
 implementation
@@ -446,7 +449,7 @@ end;
 procedure TIOManager_Abstract.BitmapDestroyed(Bitmap : TMufasaBitmap);
 begin
   if image is TBitmapTarget then
-    if TBitmapTarget(image).bitmap = Bitmap then
+    if (TBitmapTarget(image).bitmap = Bitmap) and (not FStopping) then
       raise Exception.Create('Target bitmap was destroyed!');
 end;
 
@@ -552,6 +555,12 @@ end;
 function TIOManager_Abstract.GetKeyCode(c: char): integer;
 begin
   result := keymouse.GetKeyCode(c);
+end;
+
+// TRUE when STOPPING.
+procedure TIOManager_Abstract.SetState(val: Boolean);
+begin
+  FStopping := val;
 end;
 
 //***implementation*** TTarget
