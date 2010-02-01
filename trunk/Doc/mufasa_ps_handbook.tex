@@ -9,6 +9,15 @@
 \definecolor{typeGreen}{rgb}{0.0, 0.6, 0.0}
 \definecolor{typeRed}{rgb}{0.6, 0.0, 0.0}
 
+% Few defines to make methods easier.
+% Most func/proc  definitions still don't use this...
+\def\pproc{\textbf{procedure}}
+\def\pfunc{\textbf{function}}
+\newcommand{\pvtype}[1]{{\color{typeGreen}{#1}}}
+\newcommand{\pvname}[1]{{\color{typeRed}{#1}}}
+\newcommand{\mname}[1]{{\color{blue}{#1}}}
+
+
 \maketitle
 \tableofcontents
 
@@ -138,7 +147,7 @@ GetMousePos returns the current position of the mouse in \textbf{x} and
 \textbf{y}.
 
 \subsection{HoldMouse}
-\textbf{procedure} {\color{blue}{HoldMouse}}({\color{typeRed}
+\pproc \mname{HoldMouse}({\color{typeRed}
 {x, y: }}{\color{typeGreen}{Integer}}; {\color{typeRed}{clickType :}}
 {\color{typeGreen}{TClickType}})
 
@@ -616,6 +625,7 @@ from them and write to them.
 
 \chapter{Point Sorting and Math}
 \section{Sorting functions}
+Wizzyplugin stuff
 
 \section{Math}
 
@@ -626,7 +636,6 @@ Nothing here! Do you really think we document Easter eggs?
 
 Hakuna matata!
 
-Wizzyplugin stuff
 
 
 
