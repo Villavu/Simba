@@ -303,6 +303,7 @@ begin
   keymouse:= nil;
   image:= nil;
   frozen:= nil;
+  FStopping:=False;
   NativeInit;
   SetDesktop;
 end;
