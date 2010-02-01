@@ -457,10 +457,13 @@ for these points.
 Mufasa's DTM type:
 
 \begin{verbatim}
-  pDTM = record
-    p: TPointArray;
-    c, t, asz, ash: TIntegerArray;
-  end; 
+  pDTM = packed record
+    l: Integer; // length
+    p: TPointArray; // points
+    c, t, asz, ash: TIntegerArray; // colours, tolerance, areasize/shape
+    bp: Array Of Boolean; // Bad Point ( = Not Point )
+    n: String; // Name
+  end;              
 \end{verbatim}
 
 Deprecated DTM type:
@@ -532,16 +535,80 @@ between characters in the font, hspacing is the minimal space to split
 characters on. If it is, for example, 0, and ``i'' will be split into two
 characters.
 
+%TODO: colours
 \begin{verbatim}
 function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; font: string): string;  
 \end{verbatim}
 
-\chapter{Client}
-\section{Client and Window}
+\chapter{Clients}
 
+\section{Window}
+Simba can target running applicationsa/applets on your computer. 
+You simply use the crosshair to select the client, and it will then read and
+send all its data from and to that application. Simba has also split up its
+``Key and Mouse'' input and its ``Data Target``, which means you can send
+mouse events to one window, while reading data from another.
+
+\section{Bitmaps and other Raw Data}
+
+Simba can also target data that is loaded in memory. Arrays, bitmaps and data
+pointers. Obviously if you load any of these with Simba any mouse and key
+events will not be send to that target, as it has no means of communicating
+with your devices. Most likely mouse and key events will still be send to the
+previous target.
+
+% Complete TODO.
+\section{Functions provided}
+
+\subsection{GetClientDimensions}
+
+\subsection{ActivateClient}
+
+\subsection{IsTargetValid}
+
+\subsection{SetTargetBitmap}
+
+\subsection{SetImageTarget}
+
+\subsection{SetTargetArray}
+
+\subsection{SetEIOSTarget}
+
+\subsection{SetKeyMouseTarget}
+
+\subsection{GetImageTarget}
+
+\subsection{GetKeyMouseTarget}
+
+\subsection{FreeTarget}
+
+\section{Freeze and UnFreeze}
+
+% Files
 \chapter{Files and Web}
 
 \section{Files}
+
+Files are used to load and save data to the hard drive.
+Simba provides several functions to access files - that is, read
+from them and write to them.
+
+
+\subsection{CreateFile}
+\subsection{OpenFile}
+\subsection{RewriteFile}
+\subsection{CloseFile}
+\subsection{EndOfFile}
+\subsection{FileSize}
+\subsection{ReadFileString}
+\subsection{WriteFileString}
+\subsection{SetFileCharPointer}
+\subsection{FilePointerPos}
+\subsection{DirectoryExists}
+\subsection{FileExists}
+\subsection{WriteINI}
+\subsection{ReadINI}
+\subsection{DeleteINI}
 
 \section{Web}
 
