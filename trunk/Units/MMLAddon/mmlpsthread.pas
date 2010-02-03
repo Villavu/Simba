@@ -174,6 +174,7 @@ uses
   uPSC_extctrls, //Compile-libs
   uPSUtils,
   fontloader,
+  IOmanager,//TEIOS_Exported
   IniFiles,//Silly INI files
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls, //Runtime-libs

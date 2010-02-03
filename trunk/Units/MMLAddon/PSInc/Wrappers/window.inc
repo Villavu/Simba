@@ -61,6 +61,16 @@ begin
   CurrThread.Client.IOManager.GetKeyMouseTarget(result);
 end;
 
+function ExportImageTarget : TEIOS_Exported;
+begin;
+  result := CurrThread.Client.IOManager.ExportImageTarget;
+end;
+
+function ExportKeyMouseTarget : TEIOS_Exported;
+begin;
+  result := CurrThread.Client.IOManager.ExportKeyMouseTarget;
+end;
+
 procedure FreeTarget(idx: integer); extdecl;
 begin
   CurrThread.Client.IOManager.FreeTarget(idx);
