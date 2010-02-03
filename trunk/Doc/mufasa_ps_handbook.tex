@@ -492,27 +492,47 @@ Deprecated DTM type:
 \subsection{FindDTM}
 
 \textbf{function} {\color{blue}{FindDTM}}({\color{typeRed}{DTM: }}
-{\color{typeGreen}{Integer}}; {\color{typeRed}{Var x, y: }}
-{\color{typeGreen}{Integer}}) {\color{typeGreen}{: Boolean}}; \\ 
+{\color{typeGreen}{Integer}}; {\color{typeRed}{out x, y: }}
+{\color{typeGreen}{Integer}}; {\color{typeRed}{x1, y1, x2, y2: }}{\color{typeGreen}
+{Integer}) {\color{typeGreen}{: Boolean}}; \\ 
 
 FindDTM is the most basic DTM finding function. It takes a box to search in,
-and if the DTM is found, it will set \textbf{x} and \textbf{y} to the coordinate the DTM
-was found at and it will also return true. Else, it returns false.
-Once a DTM is found, it will stop searching. In other words; it always returns
+defined by x1, y1, x2, y2; and if the DTM is found, it will set \textbf{x} and 
+\textbf{y} to the coordinate the DTM was found at and it will also return true. 
+Else, it returns false. Once a DTM is found, it will stop searching. In other words; it always returns
 the first found DTM.
 
 \subsection{FindDTMs}
 
 \textbf{function} {\color{blue}{FindDTMs}}({\color{typeRed}{DTM: }}
-{\color{typeGreen}{Integer}}; {\color{typeRed}{Var Points: }}
-{\color{typeGreen}{TPointArray}}){\color{typeGreen}{: Boolean}}; \\
+{\color{typeGreen}{Integer}}; {\color{typeRed}{out Points: }}
+{\color{typeGreen}{TPointArray}}; {\color{typeRed}{x1, y1, x2, y2: }}{\color{typeGreen}
+{Integer}}){\color{typeGreen}{: Boolean}}; \\
 
 FindDTMs is like FindDTM, but it returns an array of \textbf{x} and \textbf{y}, as the
 \textbf{TPointArray} type.
 
 \subsection{FindDTMRotated}
+\textbf{function} {\color{blue}{FindDTMRotated}}({\color{typeRed}{DTM: }}
+{\color{typeGreen}{Integer}}; {\color{typeRed}{out x, y: }}
+{\color{typeGreen}{Integer}}; {\color{typeRed}{x1, y1, x2, y2: }}{\color{typeGreen}
+{Integer}}; {\color{typeRed}{sAngle, eAngle, aStep: }}{\color{typeGreen}{Extended}}; 
+{\color{typeRed}{out aFound: }}{\color{typeGreen}{Extended}}){\color{typeGreen}{: Boolean}}; \\
+
+FindDTMRotated is behaves like FindDTM. Only, it will turn the DTM between 
+sAngle and eAngle by aStep each time. It will also return the angle which the DTM was found
+at.
 
 \subsection{FindDTMsRotated}
+\textbf{function} {\color{blue}{FindDTMsRotated}}({\color{typeRed}{DTM: }}
+{\color{typeGreen}{Integer}}; {\color{typeRed}{out Points: }}
+{\color{typeGreen}{TPointArray}}; {\color{typeRed}{x1, y1, x2, y2: }}{\color{typeGreen}
+{Integer}}; {\color{typeRed}{sAngle, eAngle, aStep: }}{\color{typeGreen}{Extended}}; 
+{\color{typeRed}{out aFound: }}{\color{typeGreen}{T2DExtendedArray}}){\color{typeGreen}{: Boolean}}; \\
+
+FindDTMRotated is behaves like FindDTMs. Only, it will turn the DTM between 
+sAngle and eAngle by aStep each time. It will also return the angles which each DTM Main Point 
+was found at.
 
 \subsection{DTMFromString}
 
