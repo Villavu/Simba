@@ -13,8 +13,9 @@
 % Most func/proc  definitions still don't use this...
 \def\pproc{\textbf{procedure}}
 \def\pfunc{\textbf{function}}
-\newcommand{\pvtype}[1]{{\color{typeGreen}{#1}}}
-\newcommand{\pvname}[1]{{\color{typeRed}{#1}}}
+\newcommand{\pvtype}[1]{{\color{typeGreen}{#1}};}
+\newcommand{\pvtypel}[1]{{\color{typeGreen}{#1}};}
+\newcommand{\pvname}[1]{{\color{typeRed}{#1}}:}
 \newcommand{\mname}[1]{{\color{blue}{#1}}}
 
 
@@ -147,8 +148,8 @@ GetMousePos returns the current position of the mouse in \textbf{x} and
 \textbf{y}.
 
 \subsection{HoldMouse}
-\pproc \mname{HoldMouse}(\pvname{x, y:} \pvtype{Integer} \pvname{clickType :}
-\pvtype{TClickType})
+\pproc \mname{HoldMouse}(\pvname{x, y} \pvtype{Integer} \pvname{clickType}
+\pvtypel{TClickType})
 
 HoldMouse holds the given mouse button (clickType) down at the specified \textbf{x}, \textbf{y} 
 coordinate. If the mouse if not at the given \textbf{x}, \textbf{y} yet, the mouse position
@@ -491,10 +492,10 @@ Deprecated DTM type:
 
 \subsection{FindDTM}
 
-\textbf{function} {\color{blue}{FindDTM}}({\color{typeRed}{DTM: }}
-{\color{typeGreen}{Integer}}; {\color{typeRed}{out x, y: }}
-{\color{typeGreen}{Integer}}; {\color{typeRed}{x1, y1, x2, y2: }}{\color{typeGreen}
-{Integer}) {\color{typeGreen}{: Boolean}}; \\ 
+
+\pfunc \mname{FindDTM}(\pvname{DTM: }\pvtype{Integer} \textbf{var}
+\pvname{x, y} \pvtype{Integer} \pvname{x1, y1, x2, y2} \pvtypel{Integer}):
+\pvtype{Boolean}
 
 FindDTM is the most basic DTM finding function. It takes a box to search in,
 defined by x1, y1, x2, y2; and if the DTM is found, it will set \textbf{x} and 
@@ -504,29 +505,28 @@ the first found DTM.
 
 \subsection{FindDTMs}
 
-\pfunc \mname{FindDTMs}(\pvname{DTM: }\pvtype{Integer}; \pvname{Points}
-\pvtype{TPointArray}; \pvname{x1, y1, x2, y2: } \pvtype{Integer}
+\pfunc \mname{FindDTMs}(\pvname{DTM}\pvtype{Integer} \pvname{Points}
+\pvtype{TPointArray} \pvname{x1, y1, x2, y2} \pvtypel{Integer}):
+\pvtype{Boolean}
 
 FindDTMs is like FindDTM, but it returns an array of \textbf{x} and \textbf{y}, as the
 \textbf{TPointArray} type.
 
 \subsection{FindDTMRotated}
-\textbf{function} {\color{blue}{FindDTMRotated}}({\color{typeRed}{DTM: }}
-{\color{typeGreen}{Integer}}; {\color{typeRed}{out x, y: }}
-{\color{typeGreen}{Integer}}; {\color{typeRed}{x1, y1, x2, y2: }}{\color{typeGreen}
-{Integer}}; {\color{typeRed}{sAngle, eAngle, aStep: }}{\color{typeGreen}{Extended}}; 
-{\color{typeRed}{out aFound: }}{\color{typeGreen}{Extended}}){\color{typeGreen}{: Boolean}}; \\
+\pfunc \mname{FindDTMRotated}(\pvname{DTM}\pvtype{Integer} \textbf{var}
+\pvname{x, y} \pvtype{Integer} \pvname{x1, y1, x2, y2} \pvtype{Integer}
+\pvname{sAngle, eAngle, aStep} \pvtype{Extended} \textbf{var}
+\pvname{aFound} \pvtypel{Extended}): \pvtype{Boolean}
 
 FindDTMRotated is behaves like FindDTM. Only, it will turn the DTM between 
 sAngle and eAngle by aStep each time. It will also return the angle which the DTM was found
 at.
 
 \subsection{FindDTMsRotated}
-\textbf{function} {\color{blue}{FindDTMsRotated}}({\color{typeRed}{DTM: }}
-{\color{typeGreen}{Integer}}; {\color{typeRed}{out Points: }}
-{\color{typeGreen}{TPointArray}}; {\color{typeRed}{x1, y1, x2, y2: }}{\color{typeGreen}
-{Integer}}; {\color{typeRed}{sAngle, eAngle, aStep: }}{\color{typeGreen}{Extended}}; 
-{\color{typeRed}{out aFound: }}{\color{typeGreen}{T2DExtendedArray}}){\color{typeGreen}{: Boolean}}; \\
+\pfunc \mname{FindDTMRotated}(\pvname{DTM}\pvtype{Integer} \textbf{var}
+\pvname{Points} \pvtype{TPointArray} \pvname{x1, y1, x2, y2} \pvtype{Integer}
+\pvname{sAngle, eAngle, aStep} \pvtype{Extended} \textbf{var}
+\pvname{aFound} \pvtypel{T2DExtendedArray}): \pvtype{Boolean}
 
 FindDTMRotated is behaves like FindDTMs. Only, it will turn the DTM between 
 sAngle and eAngle by aStep each time. It will also return the angles which each DTM Main Point 
