@@ -41,6 +41,7 @@ Sender.Comp.AddTypeS('TPointArrayArray','Array of TPointArray');
 Sender.Comp.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 Sender.Comp.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
 Sender.Comp.addtypeS('PPoint','record R,T : extended; end;');
+Sender.Comp.AddTypeS('TEIOS_Exported','record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14:integer; end;');
 
 Sender.Comp.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
 Sender.Comp.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
