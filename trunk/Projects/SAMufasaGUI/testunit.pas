@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 501;
+    SimbaVersion = 521;
 
 type
 
@@ -293,6 +293,7 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
+    procedure TB_ReloadPluginsClick(Sender: TObject);
     procedure TrayPopupPopup(Sender: TObject);
     procedure TT_UpdateClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
@@ -443,6 +444,11 @@ procedure TForm1.SplitterFunctionListCanResize(Sender: TObject; var NewSize: Int
 begin
   if(NewSize > ScriptPanel.Width div 2)then
     NewSize := ScriptPanel.Width div 2;
+end;
+
+procedure TForm1.TB_ReloadPluginsClick(Sender: TObject);
+begin
+//  PluginsGlob.FreePlugins;
 end;
 
 procedure TForm1.TrayPopupPopup(Sender: TObject);

@@ -36,10 +36,14 @@ interface
 uses
   Classes, SysUtils, dynlibs, libloader;
 
+const
+  cv_StdCall = 0; //StdCall
+  cv_Register = 1; //Register
 type
   TMPluginMethod = record
     FuncPtr : pointer;
     FuncStr : string;
+    FuncConv: integer;
   end;
 
   TMPlugin = record
@@ -74,6 +78,7 @@ function TMPlugins.InitPlugin(plugin: TLibHandle): boolean;
 var
   pntrArrc     :  function : integer; stdcall;
   GetFuncInfo  :  function (x: Integer; var ProcAddr: Pointer; var ProcDef: PChar) : Integer; stdcall;
+  GetFuncConv  :  function (x: integer) : integer; stdcall;
   GetTypeCount :  function : Integer; stdcall;
   GetTypeInfo  :  function (x: Integer; var sType, sTypeDef: string): Integer; stdcall;
   PD : PChar;
@@ -81,9 +86,11 @@ var
   arrc, ii : integer;
 begin
   Pointer(pntrArrc) := GetProcAddress(plugin, PChar('GetFunctionCount'));
-  if @pntrArrc = nil then begin result:= false; exit; end;
+  if pntrArrc = nil then begin result:= false; exit; end;
   Pointer(GetFuncInfo) := GetProcAddress(plugin, PChar('GetFunctionInfo'));
-  if @GetFuncInfo = nil then begin result:= false; exit; end;
+  if GetFuncInfo = nil then begin result:= false; exit; end;
+  Pointer(GetFuncConv) := GetProcAddress(plugin,pchar('GetFunctionCallingConv'));
+
   arrc := pntrArrc();
   SetLength(Plugins,NumPlugins+1);
   Plugins[NumPlugins].MethodLen := Arrc;
@@ -95,8 +102,13 @@ begin
       Continue;
     Plugins[NumPlugins].Methods[ii].FuncPtr := pntr;
     Plugins[NumPlugins].Methods[ii].FuncStr := pd;
+    if GetFuncConv <> nil then
+      Plugins[NumPlugins].Methods[ii].FuncConv := GetFuncConv(ii)
+    else
+      Plugins[NumPlugins].Methods[ii].FuncConv := cv_stdcall;
   end;
   StrDispose(pd);
+
   inc(NumPlugins);
   result:= true;
 end;

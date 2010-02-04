@@ -494,6 +494,16 @@ begin
   Continue:= ProcessDirective(DirectiveName, DirectiveParam);
 end;
 
+function Muf_Conv_to_PS_Conv( conv : integer) : TDelphiCallingConvention;
+begin
+  case conv of
+    cv_StdCall : result := cdStdCall;
+    cv_Register: result := cdRegister;
+  else
+    raise exception.createfmt('Unknown Calling Convention[%d]',[conv]);
+  end;
+end;
+
 procedure TPSThread.OnCompile(Sender: TPSScript);
 var
   i,ii : integer;
@@ -507,7 +517,8 @@ begin
   for i := high(PluginsToLoad) downto 0 do
     for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
       PSScript.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncPtr,
-                           PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncStr, cdStdCall);
+                           PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncStr,
+                           Muf_Conv_to_PS_Conv(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncConv));
 
   for i := 0 to high(VirtualKeys) do
     PSScript.Comp.AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
