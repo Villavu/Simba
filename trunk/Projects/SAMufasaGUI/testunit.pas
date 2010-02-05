@@ -106,6 +106,7 @@ type
     MenuViewSettings: TMenuItem;
     MenuItemExportHTML: TMenuItem;
     MenuItemDivider9: TMenuItem;
+    MouseTimer: TTimer;
     TT_Cut: TToolButton;
     TT_Copy: TToolButton;
     TT_Paste: TToolButton;
@@ -230,6 +231,7 @@ type
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
     procedure ActionUndoExecute(Sender: TObject);
+    procedure ChangeMouseStatus(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
     procedure editSearchListExit(Sender: TObject);
@@ -347,8 +349,11 @@ const
   //WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
   WindowTitle = 'Simba - %s';//Title, where %s = the place of the filename.
   Panel_State = 0;
-  Panel_ScriptName = 1;
-  Panel_ScriptPath = 2;
+  Panel_Coords = 1;
+  Panel_ScriptName = 2;
+  Panel_ScriptPath = 3;
+
+
   Image_Stop = 7;
   Image_Terminate = 19;
 var
@@ -1114,7 +1119,13 @@ begin
     Memo1.Undo;
 end;
 
-
+procedure TForm1.ChangeMouseStatus(Sender: TObject);
+var
+  x, y: Integer;
+begin
+  Self.Manager.GetMousePos(x, y);
+  StatusBar.Panels[Panel_Coords].Text := Format('(%d, %d)', [x, y]);
+end;
 
 procedure TForm1.CheckBoxMatchCaseClick(Sender: TObject);
 begin
@@ -1217,9 +1228,9 @@ begin
   if node = nil then
     exit;
   if Node.Level > 0 then
-    StatusBar.Panels[2].Text := PChar(Node.Data);
+    StatusBar.Panels[Panel_ScriptPath].Text := PChar(Node.Data);
   if Node.level = 0 then
-    StatusBar.Panels[2].Text := 'Section: ' + Node.Text;
+    StatusBar.Panels[Panel_ScriptPath].Text := 'Section: ' + Node.Text;
 end;
 
 procedure TForm1.FunctionListEnter(Sender: TObject);

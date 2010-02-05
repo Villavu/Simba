@@ -209,8 +209,12 @@ object Form1: TForm1
         Width = 60
       end    
       item
+        Text = 'MouseBla'
+        Width = 100
+      end    
+      item
         Text = 'Untitled'
-        Width = 150
+        Width = 100
       end    
       item
         Width = 50
@@ -3012,5 +3016,11 @@ object Form1: TForm1
     OnTimer = UpdateTimerCheck
     left = 608
     top = 144
+  end
+  object MouseTimer: TTimer
+    Interval = 100
+    OnTimer = ChangeMouseStatus
+    left = 448
+    top = 200
   end
 end
