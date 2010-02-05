@@ -160,6 +160,7 @@ var
   libcpascal: integer;
   interp_init: function(precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): Pointer; cdecl;
   interp_meth: procedure(interp: Pointer; addr: Pointer; def: PChar); cdecl;
+  interp_type: procedure(interp: Pointer; def: PChar); cdecl;
   interp_set: procedure(interp: Pointer; ppg: PChar); cdecl;
   interp_comp: function(interp: Pointer): boolean; cdecl;
   interp_run: function(interp: Pointer): boolean; cdecl;
@@ -704,6 +705,7 @@ begin
     raise Exception.Create('CPascal library not found');
   Pointer(interp_init):= GetProcAddress(libcpascal, PChar('interp_init'));
   Pointer(interp_meth):= GetProcAddress(libcpascal, PChar('interp_meth'));
+  Pointer(interp_type):= GetProcAddress(libcpascal, PChar('interp_type'));
   Pointer(interp_set):= GetProcAddress(libcpascal, PChar('interp_set'));
   Pointer(interp_comp):= GetProcAddress(libcpascal, PChar('interp_comp'));
   Pointer(interp_run):= GetProcAddress(libcpascal, PChar('interp_run'));
@@ -758,16 +760,22 @@ begin
   CurrThread := Self;
   Starttime := GetTickCount;
   psWriteln('Invoking CPascal Interpreter');
+  interp_type(self.instance,'type extended = real;');
+  interp_type(self.instance,'type tdtm = integer;');
+  interp_type(self.instance,'type pdtm = ^tdtm;');
+  interp_type(self.instance,'type TEIOS_Exported = record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14:integer; end;');
+  //interp_type(self.instance,'type pointer = integer;');
+
+  for i := high(PluginsToLoad) downto 0 do
+    for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
+      with PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii] do
+        interp_meth(self.instance,FuncPtr,PChar(FuncStr));
+  for i := 0 to high(ExportedMethods) do
+    if ExportedMethods[i].FuncPtr <> nil then
+      with ExportedMethods[i] do
+        interp_meth(self.instance,FuncPtr,PChar(FuncDecl));
   if interp_comp(instance) then
   begin
-    for i := high(PluginsToLoad) downto 0 do
-      for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
-        with PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii] do
-          interp_meth(self.instance,FuncPtr,PChar(FuncStr));
-    for i := 0 to high(ExportedMethods) do
-      if ExportedMethods[i].FuncPtr <> nil then
-        with ExportedMethods[i] do
-          interp_meth(self.instance,FuncPtr,PChar(FuncDecl));
     psWriteln('Compiled Successfully in ' +  IntToStr(GetTickCount - Starttime) + 'ms');
     if CompileOnly then
       exit;
