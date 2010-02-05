@@ -125,3 +125,8 @@ procedure HakunaMatata; extdecl;
 begin;
   OpenWebPage('http://www.youtube.com/v/ejEVczA8PLU&hl=en&fs=1&autoplay=1');
 end;
+
+function ps_Random(Int: integer): integer; extdecl;
+begin
+  result := Random(int);
+end;

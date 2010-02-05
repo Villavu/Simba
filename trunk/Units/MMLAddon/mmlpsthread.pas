@@ -389,18 +389,14 @@ end;
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 {$I PSInc/Wrappers/window.inc}
-
 {$I PSInc/Wrappers/strings.inc}
-
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
-
 {$I PSInc/Wrappers/keyboard.inc}
 {$I PSInc/Wrappers/dtm.inc}
 {$I PSInc/Wrappers/ocr.inc}
-
 {$I PSInc/Wrappers/internets.inc}
 
 class function TMThread.GetExportedMethods: TExpMethodArr;
@@ -453,6 +449,8 @@ end;
 }
 
 constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+var
+  I : integer;
 begin
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
@@ -466,6 +464,12 @@ begin
   // Set some defines
   {$I PSInc/psdefines.inc}
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
+  for i := 0 to high(ExportedMethods) do
+    if pos('Writeln',exportedmethods[i].FuncDecl) > 0 then
+    begin
+      ExportedMethods[i].FuncPtr := nil;
+      break;
+    end;
 end;
 
 
