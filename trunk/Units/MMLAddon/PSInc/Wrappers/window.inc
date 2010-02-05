@@ -61,12 +61,12 @@ begin
   CurrThread.Client.IOManager.GetKeyMouseTarget(result);
 end;
 
-function ExportImageTarget : TEIOS_Exported;
+function ExportImageTarget : TTarget_Exported;
 begin;
   result := CurrThread.Client.IOManager.ExportImageTarget;
 end;
 
-function ExportKeyMouseTarget : TEIOS_Exported;
+function ExportKeyMouseTarget : TTarget_Exported;
 begin;
   result := CurrThread.Client.IOManager.ExportKeyMouseTarget;
 end;

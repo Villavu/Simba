@@ -209,7 +209,7 @@ interface
 
     {Basically like TEIOS_Client, only this is exported to some plugin, whilst TEIOS_Client is Imported
      Not all functions have to be 'set', it depends on the kind of target (Image/KeyMouse) }
-    TEIOS_Exported = packed record
+    TTarget_Exported = packed record
       Target : Pointer;
 
       GetTargetDimensions: procedure(target: pointer; var w, h: integer); stdcall;
@@ -277,8 +277,8 @@ interface
 
         function GetImageTarget: TTarget; overload;
         function GetKeyMouseTarget: TTarget; overload;
-        function ExportImageTarget  : TEIOS_Exported; overload;
-        function ExportKeyMouseTarget  : TEIOS_Exported; overload;
+        function ExportImageTarget  : TTarget_Exported; overload;
+        function ExportKeyMouseTarget  : TTarget_Exported; overload;
 
         procedure GetImageTarget(var idx: integer); overload;
         procedure GetKeyMouseTarget(var idx: integer); overload;
@@ -309,22 +309,22 @@ interface
       property Stopping: Boolean Read FStopping write SetState;
     end;
 
-    {These wrappers are for an exported TEIOS_Exported. This is done so a plugin can acces the current target and use its methodes}
-    procedure TEIOS_Exported_GetTargetDimensions(target: pointer; var w, h: integer); stdcall;
-    function TEIOS_Exported_GetColor (target: pointer;x,y : integer) : integer; stdcall;
-    function TEIOS_Exported_ReturnData (target: pointer;xs, ys, width, height: Integer): TRetData; stdcall;
-    procedure TEIOS_Exported_FreeReturnData(target: pointer); stdcall;
+    {These wrappers are for an exported TTarget_Exported. This is done so a plugin can acces the current target and use its methodes}
+    procedure TTarget_Exported_GetTargetDimensions(target: pointer; var w, h: integer); stdcall;
+    function TTarget_Exported_GetColor (target: pointer;x,y : integer) : integer; stdcall;
+    function TTarget_Exported_ReturnData (target: pointer;xs, ys, width, height: Integer): TRetData; stdcall;
+    procedure TTarget_Exported_FreeReturnData(target: pointer); stdcall;
 
-    procedure TEIOS_Exported_GetMousePosition(target: pointer; var x,y: integer); stdcall;
-    procedure TEIOS_Exported_MoveMouse(target: pointer; x,y: integer); stdcall;
-    procedure TEIOS_Exported_HoldMouse(target: pointer; x,y: integer; left: boolean); stdcall;
-    procedure TEIOS_Exported_ReleaseMouse(target: pointer; x,y: integer; left: boolean); stdcall;
+    procedure TTarget_Exported_GetMousePosition(target: pointer; var x,y: integer); stdcall;
+    procedure TTarget_Exported_MoveMouse(target: pointer; x,y: integer); stdcall;
+    procedure TTarget_Exported_HoldMouse(target: pointer; x,y: integer; left: boolean); stdcall;
+    procedure TTarget_Exported_ReleaseMouse(target: pointer; x,y: integer; left: boolean); stdcall;
 
-    procedure TEIOS_Exported_SendString(target: pointer; str: PChar); stdcall;
-    procedure TEIOS_Exported_HoldKey(target: pointer; key: integer); stdcall;
-    procedure TEIOS_Exported_ReleaseKey(target: pointer; key: integer); stdcall;
-    function  TEIOS_Exported_IsKeyHeld(target: pointer; key: integer): boolean; stdcall;
-    function  TEIOS_Exported_GetKeyCode(target : pointer; C : char) : integer; stdcall;
+    procedure TTarget_Exported_SendString(target: pointer; str: PChar); stdcall;
+    procedure TTarget_Exported_HoldKey(target: pointer; key: integer); stdcall;
+    procedure TTarget_Exported_ReleaseKey(target: pointer; key: integer); stdcall;
+    function  TTarget_Exported_IsKeyHeld(target: pointer; key: integer): boolean; stdcall;
+    function  TTarget_Exported_GetKeyCode(target : pointer; C : char) : integer; stdcall;
 
 implementation
 
@@ -434,34 +434,34 @@ begin
   result := keymouse;
 end;
 
-function TIOManager_Abstract.ExportImageTarget: TEIOS_Exported;
+function TIOManager_Abstract.ExportImageTarget: TTarget_Exported;
 begin
-  FillChar(result,sizeof(TEIOS_Exported),0);
+  FillChar(result,sizeof(TTarget_Exported),0);
   with result do
   begin
     Target:= image;
-    GetTargetDimensions:= @TEIOS_Exported_GetTargetDimensions;
-    GetColor:= @TEIOS_Exported_GetColor;
-    ReturnData := @TEIOS_Exported_ReturnData;
-    FreeReturnData:= @TEIOS_Exported_FreeReturnData;
+    GetTargetDimensions:= @TTarget_Exported_GetTargetDimensions;
+    GetColor:= @TTarget_Exported_GetColor;
+    ReturnData := @TTarget_Exported_ReturnData;
+    FreeReturnData:= @TTarget_Exported_FreeReturnData;
   end;
 end;
 
-function TIOManager_Abstract.ExportKeyMouseTarget: TEIOS_Exported;
+function TIOManager_Abstract.ExportKeyMouseTarget: TTarget_Exported;
 begin
   with result do
   begin
     Target:= KeyMouse;
-    GetMousePosition := @TEIOS_Exported_GetMousePosition;
-    MoveMouse := @TEIOS_Exported_MoveMouse;
-    HoldMouse := @TEIOS_Exported_HoldMouse;
-    ReleaseMouse := @TEIOS_Exported_ReleaseMouse;
+    GetMousePosition := @TTarget_Exported_GetMousePosition;
+    MoveMouse := @TTarget_Exported_MoveMouse;
+    HoldMouse := @TTarget_Exported_HoldMouse;
+    ReleaseMouse := @TTarget_Exported_ReleaseMouse;
 
-    SendString := @TEIOS_Exported_SendString;
-    HoldKey := @TEIOS_Exported_HoldKey;
-    ReleaseKey := @TEIOS_Exported_ReleaseKey;
-    IsKeyHeld := @TEIOS_Exported_IsKeyHeld;
-    GetKeyCode := @TEIOS_Exported_GetKeyCode;
+    SendString := @TTarget_Exported_SendString;
+    HoldKey := @TTarget_Exported_HoldKey;
+    ReleaseKey := @TTarget_Exported_ReleaseKey;
+    IsKeyHeld := @TTarget_Exported_IsKeyHeld;
+    GetKeyCode := @TTarget_Exported_GetKeyCode;
   end;
 end;
 
@@ -919,41 +919,41 @@ end;
 
 //***implementation*** TEIS_Exported wrappers
 
-procedure TEIOS_Exported_GetTargetDimensions(target: pointer; var w,
+procedure TTarget_Exported_GetTargetDimensions(target: pointer; var w,
   h: integer); stdcall;
 begin
   TTarget(Target).GetTargetDimensions(w,h);
 end;
 
-function TEIOS_Exported_GetColor(target: pointer;x, y: integer): integer; stdcall;
+function TTarget_Exported_GetColor(target: pointer;x, y: integer): integer; stdcall;
 begin
   result := TTarget(Target).GetColor(x,y);
 end;
 
-function TEIOS_Exported_ReturnData(target: pointer;xs, ys, width, height: Integer): TRetData;
+function TTarget_Exported_ReturnData(target: pointer;xs, ys, width, height: Integer): TRetData;
   stdcall;
 begin
   result := TTarget(Target).ReturnData(xs,ys,width,height);
 end;
 
-procedure TEIOS_Exported_FreeReturnData(target: pointer); stdcall;
+procedure TTarget_Exported_FreeReturnData(target: pointer); stdcall;
 begin
   TTarget(target).FreeReturnData;
 end;
 
 
-procedure TEIOS_Exported_GetMousePosition(target: pointer; var x, y: integer
+procedure TTarget_Exported_GetMousePosition(target: pointer; var x, y: integer
   ); stdcall;
 begin
   TTarget(Target).GetMousePosition(x,y);
 end;
 
-procedure TEIOS_Exported_MoveMouse(target: pointer; x, y: integer); stdcall;
+procedure TTarget_Exported_MoveMouse(target: pointer; x, y: integer); stdcall;
 begin
   TTarget(Target).MoveMouse(x,y);
 end;
 
-procedure TEIOS_Exported_HoldMouse(target: pointer; x, y: integer;
+procedure TTarget_Exported_HoldMouse(target: pointer; x, y: integer;
   left: boolean); stdcall;
 begin
   if left then
@@ -962,7 +962,7 @@ begin
     TTarget(Target).HoldMouse(x,y,mouse_right);
 end;
 
-procedure TEIOS_Exported_ReleaseMouse(target: pointer; x, y: integer;
+procedure TTarget_Exported_ReleaseMouse(target: pointer; x, y: integer;
   left: boolean); stdcall;
 begin
   if left then
@@ -971,28 +971,28 @@ begin
     TTarget(Target).ReleaseMouse(x,y,mouse_right);
 end;
 
-procedure TEIOS_Exported_SendString(target: pointer; str: PChar); stdcall;
+procedure TTarget_Exported_SendString(target: pointer; str: PChar); stdcall;
 begin
   TTarget(Target).SendString(str);
 end;
 
-procedure TEIOS_Exported_HoldKey(target: pointer; key: integer); stdcall;
+procedure TTarget_Exported_HoldKey(target: pointer; key: integer); stdcall;
 begin
   TTarget(Target).HoldKey(key);
 end;
 
-procedure TEIOS_Exported_ReleaseKey(target: pointer; key: integer); stdcall;
+procedure TTarget_Exported_ReleaseKey(target: pointer; key: integer); stdcall;
 begin
   TTarget(Target).ReleaseKey(key);
 end;
 
-function TEIOS_Exported_IsKeyHeld(target: pointer; key: integer): boolean;
+function TTarget_Exported_IsKeyHeld(target: pointer; key: integer): boolean;
   stdcall;
 begin
   result := TTarget(Target).IsKeyHeld(key);
 end;
 
-function TEIOS_Exported_GetKeyCode(target: pointer; C: char): integer;
+function TTarget_Exported_GetKeyCode(target: pointer; C: char): integer;
   stdcall;
 begin
   result := TTarget(target).GetKeyCode(c);
