@@ -122,7 +122,7 @@ AddFunction(@TerminateScript,'procedure TerminateScript;');
 AddFunction(@DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w, h: integer);');
 AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp: integer);');
 AddFunction(@GetDebugBitmap,'function GetDebugBitmap: integer;');
-AddFunction(@Random,'function Random(Int: integer): integer;');
+AddFunction(@ps_Random,'function Random(Int: integer): integer;');
 AddFunction(@ClearDebug,'procedure ClearDebug;');
 
 
@@ -307,7 +307,7 @@ AddFunction(@LinearSort,'procedure LinearSort(var tpa: TPointArray; cx, cy, sd: 
 AddFunction(@MergeATPA,'Function MergeATPA(ATPA : T2DPointArray)  : TPointArray;');
 AddFunction(@TPAFromBox,'function TPAFromBox(const Box : TBox) : TPointArray;');
 AddFunction(@RotatePoints,'Function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;');
-AddFunction(@RotatePoint,'Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint; inline;');
+AddFunction(@RotatePoint,'Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;');
 AddFunction(@FindTPAEdges,'function FindTPAEdges(p: TPointArray): TPointArray;');
 AddFunction(@PointInTPA,'function PointInTPA(p: TPoint; arP: TPointArray): Boolean;');
 AddFunction(@ClearTPAFromTPA,'function ClearTPAFromTPA(arP, ClearPoints: TPointArray): TPointArray;');
