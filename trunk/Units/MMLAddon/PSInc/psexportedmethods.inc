@@ -212,6 +212,7 @@ AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
 AddFunction(@rs_GetUpTextAt, 'function rs_GetUpTextAt(x, y : integer): string;');
 AddFunction(@BitmapFromText, 'function BitmapFromText(text, font: String): integer;');
 AddFunction(@TPAFromText, 'function TPAFromText(text, font: String;out w,h : integer): TPointArray;');
+AddFunction(@TPAFromTextWrap,'procedure TPAFromTextWrap(text, font: String;out w,h : integer;out TPA : TPointArray)');
 AddFunction(@MaskFromText, 'function MaskFromText(text, font: String): TMask;');
 AddFunction(@GetTextAt,'function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer; font: string): string;');
 
@@ -265,6 +266,7 @@ AddFunction(@DrawATPABitmapEx,'procedure DrawATPABitmapEx(bitmap: integer; ATPA:
 
 {tpa}
 SetCurrSection('TPA');
+AddFunction(@ps_Quicksort,'procedure Quicksort(var Arr : TIntegerArray);');
 AddFunction(@tSwap,'procedure tSwap(var a, b: TPoint);');
 AddFunction(@tpaSwap,'procedure tpaSwap(var a, b: TPointArray);');
 AddFunction(@SwapE,'procedure SwapE(var a, b: Extended);');

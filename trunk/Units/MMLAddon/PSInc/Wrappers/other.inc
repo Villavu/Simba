@@ -90,6 +90,11 @@ begin;
   result := GetTickCount - CurrThread.StartTime;
 end;
 
+procedure ps_Quicksort(var Arr : TIntegerArray); extdecl;
+begin
+  QuickSort(Arr,low(arr),high(arr));
+end;
+
 procedure ConvertTime(Time : integer; var h,m,s : integer); extdecl;
 var
   x : integer;
