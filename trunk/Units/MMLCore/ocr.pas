@@ -729,52 +729,56 @@ var
 
 begin
   fD := Fonts.GetFont(font);
-{  writeln(format('W, H: %d, %d', [fD.max_width, fd.max_height]));    }
+  {writeln(format('W, H: %d, %d', [fD.max_width, fd.max_height]));}
 
   TClient(Client).IOManager.GetDimensions(w, h);
  { writeln('Dimensions: (' + inttostr(w) + ', ' + inttostr(h) + ')');    }
 
   { Get the text points }
   SetLength(TPA, 0);
+  if (atY + fD.max_height -1) >= h then
+    raise exception.createFMT('You are trying to get text that is out of is origin y-coordinate: %d',[aty]);
+
   TClient(Client).MFinder.FindColorsTolerance(TPA, color, atX, atY,
-                                     min(fD.max_width * len, w - atX - 1),
-                                     fD.max_height - 1, tol);
+                                     min(atX + fD.max_width * len, w - 1),
+                                     atY + fD.max_height - 1, tol);
 {  b := GetTPABounds(TPA);
   bmp := TMufasaBitmap.Create;
   bmp.SetSize(b.x2+1,b.y2+1);
   bmp.DrawTPA(TPA, clRed);
-  bmp.SaveToFile('/tmp/found.bmp');     }
+  bmp.SaveToFile('c:\found.bmp');}
 
   { Split the text points into something usable. }
   { +1 because splittpa will not split well if we use 0 space ;) }
   STPA := SplitTPAEx(TPA, minvspacing+1, hspacing+1);
 
 {  bmp.DrawATPA(STPA);
-  bmp.SaveToFile('/tmp/found2.bmp');
-  bmp.Free;        }
+  bmp.SaveToFile('c:\found2.bmp');
+  bmp.Free;
 
- { for i := 0 to high(STPA) do
+  for i := 0 to high(STPA) do
   begin
     b := GetTPABounds(STPA[i]);
     bmp := TMufasaBitmap.Create;
     bmp.SetSize(b.x2+1,b.y2+1);
     bmp.DrawTPA(STPA[i], clRed);
-    bmp.SaveToFile('/tmp/t_' + inttostr(i) + '.bmp');
+    bmp.SaveToFile('c:\t_' + inttostr(i) + '.bmp');
     bmp.Free;
-  end;                               }
+  end;    }
 
-  SortATPAFrom(STPA, Point(0, 0));
-  SortATPAFromFirstPoint(STPA, Point(0, 0));
+  SortATPAFrom(STPA, Point(0, atY));
+  SortATPAFromFirstPoint(STPA, Point(0, atY));
 
- { for i := 0 to high(STPA) do
+{  for i := 0 to high(STPA) do
   begin
     b := GetTPABounds(STPA[i]);
     bmp := TMufasaBitmap.Create;
-    bmp.SetSize(b.x2+1,b.y2+1);
-    bmp.DrawTPA(STPA[i], clRed);
-    bmp.SaveToFile('/tmp/s_' + inttostr(i) + '.bmp');
+    bmp.SetSize(b.x2-b.x1 + 2,b.y2-b.y1 + 2);
+    for j := 0 to high(STPA[i]) do
+      bmp.FastSetPixel(stpa[i][j].x-b.x1,stpa[i][j].y-b.y1,clred);
+    bmp.SaveToFile('c:\s_' + inttostr(i) + '.bmp');
     bmp.Free;
-  end;       }
+  end;  }
 
   { We no longer need the points in TPA }
   SetLength(TPA, 0);
