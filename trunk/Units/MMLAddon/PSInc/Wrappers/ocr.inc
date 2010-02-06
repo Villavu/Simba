@@ -22,6 +22,11 @@ begin
   Result := CurrThread.Client.MOCR.TextToMask(text,font);
 end;
 
+procedure TPAFromTextWrap(text, font: String;out w,h : integer;out TPA : TPointArray); extdecl;
+begin
+  TPA := CurrThread.Client.MOCR.TextToFontTPA(text, font, w, h);
+end;
+
 function TPAFromText(text, font: String;out w,h : integer): TPointArray; extdecl;
 begin
   Result := CurrThread.Client.MOCR.TextToFontTPA(text, font, w, h);
