@@ -130,6 +130,8 @@ begin
   Result.Data.Height := Self.Data.Height;
   Result.Data.inputs := Self.Data.inputs;
   Result.Data.outputs := Self.Data.outputs;
+  Result.Data.max_height:= Self.Data.max_height;
+  Result.Data.max_width:= Self.Data.max_width;
 end;
 
 function TMFonts.GetFontByIndex(Index : integer): TMfont;

@@ -1118,6 +1118,7 @@ function FindTextTPAinTPA(Height : integer; SearchTPA, TotalTPA: TPointArray; va
 var
   Len, I,II,LenSearch,LenTPA,xOff,yOff,x,y: integer;
   tx,ty,MatchCount : integer;
+  Found : boolean;
   Screen : Array of Array of Boolean;
   ScreenBox,SearchBox : TBox;
   InversedTPA : TPointArray;
@@ -1176,15 +1177,23 @@ begin;
       if ty > 0 then
         if ((SearchBox.x2 + tx) <= ScreenBox.x2) and ((SearchBox.y2 + ty) <= ScreenBox.y2) then
           begin;
+            Found := false;
             For II := 0 to LenSearch do
               if Screen[tx + SearchTPA[II].x ][ty + SearchTPA[II].y] = False then
+              begin
+                Found := true;
                 Break;
-            if (II > LenSearch) then
+              end;
+            if (not Found) then
             begin;
+              Found := false;
               For II := 0 to LenTPA do
                 if Screen[tx + InversedTPA[II].x ][ty + InversedTPA[II].y] = True then
+                begin
+                  Found := true;
                   Break;
-              if (II > LenTPA) then
+                end;
+              if (not Found) then
               begin;
                 MatchCount := MatchCount + 1;
                 SetLength(Matches,MatchCount);
