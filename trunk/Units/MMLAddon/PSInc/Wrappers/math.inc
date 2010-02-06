@@ -33,7 +33,10 @@ end;
 
 function ps_pow(base,exponent : extended) : extended; extdecl;
 begin
-  result := power(base,exponent);
+  if (exponent=0) then
+    result := 1
+  else
+    result := power(base,exponent);
 end;
 
 function ps_Max(a,b : integer) : integer; extdecl;

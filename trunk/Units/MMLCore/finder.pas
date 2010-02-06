@@ -1930,9 +1930,9 @@ begin
   end;
 
   // Get the area we should search in for the Main Point.
-  //writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
+//  writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
-  //writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
+//  writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
 
   DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
 
@@ -1943,15 +1943,15 @@ begin
   // Init data structure B.
   W := x2 - x1;
   H := y2 - y1;
-  setlength(b, (W + 1) * 2);
+  setlength(b, (W + 1));
   for i := 0 to W do
   begin
-    setlength(b[i], (H + 1) * 2);
+    setlength(b[i], (H + 1));
     { does setlength init already? if it doesn't, do we want to init here?
     or do we want to init in the loop, as we loop over every b anyway? }
 
     // init
-    FillChar(b[i][0], SizeOf(Integer) * H * 2, 0);
+    FillChar(b[i][0], SizeOf(Integer) * (H+1), 0);
   end;
 
   // C = DTM.C
@@ -1967,14 +1967,12 @@ begin
   SetLength(rgbs, dtm.l);
   for i := 0 to dtm.l - 1 do
     ColorToRGB(dtm.c[i], rgbs[i].r, rgbs[i].g, rgbs[i].b);
-
-  for yy := MA.y1 to MA.y2 do
-    for xx := MA.x1 to MA.x2 do
+  for yy := MA.y1 -y1 to MA.y2 - y1 do
+    for xx := MA.x1 -x1 to MA.x2 - x1 do
     begin
       // Checking main point now; store that we have checked it.
       // (Main point is point 1)
       b[xx][yy] := B[xx][yy] or 1;
-
  //     if Sqrt(sqr(rgbs[0].r - cd[yy][xx].R) + sqr(rgbs[0].g - cd[yy][xx].G) + sqr(rgbs[0].b - cd[yy][xx].B)) > dtm.t[0] then
       if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
         goto AnotherLoopEnd;
@@ -2006,7 +2004,7 @@ begin
           end;
       end;
       //writeln(Format('Found point: (%d, %d)', [xx,yy]));
-      ClientTPA[pc] := Point(xx, yy);
+      ClientTPA[pc] := Point(xx + x1, yy + y1);
       Inc(pc);
       if(pc = maxToFind) then
         goto theEnd;
