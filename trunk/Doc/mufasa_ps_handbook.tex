@@ -4,7 +4,8 @@
 
 \begin{document}
 \title{Mufasa PascalScript Handbook}
-\author{Merlijn Wajer \and Raymond van Veneti\"{e}}
+\author{Merlijn Wajer \and Raymond van Veneti\"{e}
+        \and Benjamin J. Land}
 
 \definecolor{typeGreen}{rgb}{0.0, 0.6, 0.0}
 \definecolor{typeRed}{rgb}{0.6, 0.0, 0.0}
@@ -527,6 +528,10 @@ was found at.
 \subsection{AddDTM}
 
 \subsection{FreeDTM}
+\pproc ps\_FreeDTM(\pvname{DTM}\pvtype{Integer})
+
+FreeDTM frees a DTM with the given index \textbf{DTM}. If it does not exist, an
+exception is raised.
 
 \subsection{GetDTM}
 
@@ -541,6 +546,13 @@ was found at.
 
 \section{Identifying text}
 
+\subsection{BitmapFromText}
+\subsection{MaskFromText}
+\subsection{TPAFromText}
+
+\subsection{rs\_GetUpText}
+\subsection{rs\_GetUpTextAt}
+
 \subsection{GetTextAt}
 
 GetTextAt returns the text at the given X, Y.
@@ -548,6 +560,7 @@ minvspacing and maxvspacing define the minimum and maximum vertical spacing
 between characters in the font, hspacing is the minimal space to split
 characters on. If it is, for example, 0, and ``i'' will be split into two
 characters.
+
 
 %TODO: colours
 \begin{verbatim}
