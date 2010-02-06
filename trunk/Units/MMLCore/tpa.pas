@@ -202,7 +202,7 @@ const
   flnC=545947;
   fsqrtA:single=0.5;
 
-{$ASMMODE INTEL}
+{{$ASMMODE INTEL}
 function fsqrt(x: Single): Single;
 begin
   asm
@@ -213,7 +213,8 @@ begin
     add dword ptr x,($3F800000-flnC)
     fld x
   end;
-end;
+end;   }
+
 
 procedure tSwap(var a, b: TPoint);
 var
@@ -280,10 +281,11 @@ var
 begin
   NoTP := 0;
   l := High(a);
+  Writeln('wat');
   for i := 0 to l do
   begin
     for c := 0 to NoTP - 1 do
-      if (Round(fSqrt(Sqr(a[i].x - a[c].x) + Sqr(a[i].y - a[c].y))) <= Dist) then
+      if (Round(sqrt(Sqr(a[i].x - a[c].x) + Sqr(a[i].y - a[c].y))) <= Dist) then
         Break;
     if (c >= NoTP) then
     begin
@@ -325,7 +327,7 @@ begin
   Result := False;
   l := High(a);
   for i := 0 to l do
-    if (Round(fSqrt(Sqr(P.x - a[i].x) + Sqr(P.y - a[i].y))) <= Dist) then
+    if (Round(sqrt(Sqr(P.x - a[i].x) + Sqr(P.y - a[i].y))) <= Dist) then
     begin
       Result := True;
       Exit;
@@ -371,7 +373,7 @@ begin
   for i := 0 to l do
   begin
     for t := 0 to c -1 do
-      if (Round(fSqrt(Sqr(Result[t].x - a[i].x) + Sqr(Result[t].y - a[i].y))) <= Dist) then
+      if (Round(sqrt(Sqr(Result[t].x - a[i].x) + Sqr(Result[t].y - a[i].y))) <= Dist) then
         Break;
     if (t >= c) then
     begin
@@ -426,7 +428,7 @@ begin
   for a := 0 to l do
   begin
     for b := 0 to c -1 do
-      if (Round(fSqrt(Sqr(TPA[a].X - Result[b][0].X) + Sqr(TPA[a].Y - Result[b][0].Y))) <= Dist) then
+      if (Round(sqrt(Sqr(TPA[a].X - Result[b][0].X) + Sqr(TPA[a].Y - Result[b][0].Y))) <= Dist) then
         Break;
     if (b < c) then
     begin
@@ -654,11 +656,14 @@ var
    i, l: Integer;
    SizeArr: TIntegerArray;
 begin
+  Writeln('yo man!');
   l := High(a);
+  Writeln(inttostr(l));
   if (l < 0) then Exit;
   SetLength(SizeArr, l + 1);
   for i := 0 to l do
     SizeArr[i] := Length(a[i]);
+  Writeln('Yo');
   QuickATPASort(SizeArr, a, 0, l, not BigFirst);
 end;
 
@@ -878,7 +883,7 @@ begin
       t2 := 0;
       while (t2 <= (l - ec)) do
       begin
-        if (Round(fSqrt(Sqr(Result[c][t1].x - tpa[t2].x) + Sqr(Result[c][t1].y - tpa[t2].y))) <= Dist) then
+        if (Round(sqrt(Sqr(Result[c][t1].x - tpa[t2].x) + Sqr(Result[c][t1].y - tpa[t2].y))) <= Dist) then
         begin
           SetLength(Result[c], tc +1);
           Result[c][tc] := tpa[t2];
@@ -930,7 +935,7 @@ begin
     SwapE(StartD, EndD);
   for I := 0 to T do
   begin
-    D := fSqrt(Sqr(Points[I].X - Mx) + Sqr(Points[I].Y - My));
+    D := sqrt(Sqr(Points[I].X - Mx) + Sqr(Points[I].Y - My));
     if( D <= MinR) or (D >= MaxR) then
       Continue;
     D := (ArcTan2(Points[I].Y - My, Points[I].X - Mx) * i180Pi) + 90;
@@ -959,7 +964,7 @@ begin;
   if RemoveHigher then
   begin;
     for I := 0 to LL do
-      if not (Round(fSqrt(sqr(ThePoints[i].x - x)+sqr(ThePoints[i].y - y))) > Dist) then
+      if not (Round(sqrt(sqr(ThePoints[i].x - x)+sqr(ThePoints[i].y - y))) > Dist) then
       begin;
         Result[L] := ThePoints[i];
         L := L + 1;
@@ -967,7 +972,7 @@ begin;
   end else
   begin;
     for I := 0 to LL do
-      if not (Round(fSqrt(sqr(ThePoints[i].x - x)+sqr(ThePoints[i].y - y))) < Dist) then
+      if not (Round(sqrt(sqr(ThePoints[i].x - x)+sqr(ThePoints[i].y - y))) < Dist) then
       begin;
         Result[L] := ThePoints[i];
         L := L + 1;
