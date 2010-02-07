@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 533;
+    SimbaVersion = 534;
 
 type
 
@@ -1240,11 +1240,6 @@ begin
   begin
     MethodInfo := PMethodInfo(node.Data)^;
     StatusBar.Panels[Panel_ScriptPath].Text := MethodInfo.MethodStr;
-    if MethodInfo.BeginPos > 0 then
-    begin
-      CurrScript.SynEdit.SelStart := MethodInfo.BeginPos;
-      CurrScript.SynEdit.SetFocus;
-    end;
   end;
   if Node.level = 0 then
     StatusBar.Panels[Panel_ScriptPath].Text := 'Section: ' + Node.Text;

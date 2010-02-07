@@ -23,6 +23,7 @@ object FunctionListFrame: TFunctionListFrame
     OnDblClick = FunctionListDblClick
     OnDeletion = FunctionListDeletion
     OnMouseDown = FunctionListMouseDown
+    OnMouseUp = FunctionListMouseUp
     Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
   end
   object editSearchList: TEdit

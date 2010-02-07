@@ -27,6 +27,8 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure CloseButtonClick(Sender: TObject);
+    procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     FFilterTree : TTreeView;
     procedure FilterTreeVis(Vis : boolean);
@@ -125,6 +127,31 @@ procedure TFunctionListFrame.CloseButtonClick(Sender: TObject);
 begin
   self.Hide;
   Form1.MenuItemFunctionList.Checked := False;
+end;
+
+procedure TFunctionListFrame.FunctionListMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+   N: TTreeNode;
+   MethodInfo : TMethodInfo;
+begin
+  if InCodeCompletion then
+  begin;
+    Writeln('Not yet implemented');
+    exit;
+  end;
+  if not (Sender is TTreeView) then
+    exit;
+  N := TTreeView(Sender).GetNodeAt(x, y);
+  if(N = nil)then
+    exit;
+  if button = mbRight then
+    if N.Data <> nil then
+    begin
+      MethodInfo := PMethodInfo(N.data)^;
+      if (MethodInfo.BeginPos > 0) then
+        Form1.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
+    end;
 end;
 
 procedure TFunctionListFrame.FilterTreeVis(Vis: boolean);
@@ -334,6 +361,8 @@ procedure TFunctionListFrame.FunctionListMouseDown(Sender: TObject;
 var
    N: TTreeNode;
 begin
+  if button = mbRight then
+    exit;
   if InCodeCompletion then
   begin;
     Writeln('Not yet implemented');
