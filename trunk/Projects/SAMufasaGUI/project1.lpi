@@ -39,7 +39,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="33">
+    <Units Count="34">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -224,12 +224,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="libloader"/>
       </Unit32>
+      <Unit33>
+        <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/tpa.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit33>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
     <Target>
-      <Filename Value="Simba"/>
+      <Filename Value="../../Simba"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/;$(ProjPath)../../Units/MMLAddon/PSInc/"/>
@@ -245,7 +249,6 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="True"/>
-        <GenerateDwarf Value="True"/>
       </Debugging>
     </Linking>
     <Other>

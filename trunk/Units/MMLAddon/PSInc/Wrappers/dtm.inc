@@ -84,6 +84,11 @@ begin
                                     sAngle, eAngle, aStep, aFound);
 end;       }
 
+procedure ps_SetDTMName(DTM : integer; name : string);
+begin
+  CurrThread.Client.MDTM.SetDTMName(DTM,name);
+end;
+
 function ps_DTMFromString(DTMString: String): Integer; extdecl;
 var
    dtm: pDTM;

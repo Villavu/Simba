@@ -112,9 +112,10 @@ begin
       if not b then
       begin;
         if DTMList[i].n <> '' then
-          Writeln(Format('DTM [%s] was not freed',[DTMList[i].n]))
+          Writeln(Format('DTM[%s] has not been freed in the script, freeing it now.',[DTMList[i].n]))
         else
-          writeln(Format('DTM [%d] was not freed',[i]));
+          writeln(Format('DTM[%d] has not been freed in the script, freeing it now.',[i]));
+        FreeDTM(i);
       end;
   end;
   SetLength(DTMList, 0);
@@ -252,15 +253,13 @@ begin
 end;
 
 function TMDTM.SetDTMName(DTM: Integer; s: string): boolean;
-var
-  dtm_: pDTM;
 begin
-  if(GetDTM(dtm, dtm_)) then
-  begin
-    dtm_.n := s;
-    Exit(True);
+  try
+    DTMList[DTM].n:= s;
+    Exit(true);
+  except
+    raise Exception.CreateFMT('SetDTMName: The given DTM %d does not exist.', [DTM]);
   end;
-  raise Exception.CreateFMT('SetDTMName: The given DTM %d does not exist.', [DTM]);
   Exit(False);
 end;
 
