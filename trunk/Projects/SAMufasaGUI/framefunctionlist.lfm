@@ -135,4 +135,4 @@ object FunctionListFrame: TFunctionListFrame
     NumGlyphs = 0
     OnClick = CloseButtonClick
   end
-end
+end

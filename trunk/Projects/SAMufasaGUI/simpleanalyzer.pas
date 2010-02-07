@@ -170,6 +170,7 @@ var
 
   LastTkString : string;
   I : integer;
+  TempInt : integer;
   InMethod : Boolean;
   ExpectingType : boolean; //Params and result
   WaitingForResult : boolean;
@@ -342,6 +343,7 @@ begin
                             exit;
                           end;
                           TempName := Lex.Token;
+                          TempInt := Lex.TokenPos;
                           Lex.NextNoJunk;
                           if Lex.TokenID = tkRoundOpen then
                             InParams := True
@@ -364,7 +366,7 @@ begin
                           else
                             Method := Self.AddMethod(WaitingForResult,TempName);
                           InMethod := true;
-                          Method.BeginPos := LastPos - 5;
+                          Method.Beginpos := TempInt;
 
                         end;
                       end;

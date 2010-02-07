@@ -46,6 +46,12 @@ type
     { public declarations }
   end; 
 
+  TMethodInfo = record
+    MethodStr : PChar;
+    BeginPos : integer;
+  end;
+  PMethodInfo = ^TMethodInfo;
+
 implementation
 
 uses
@@ -87,7 +93,7 @@ begin
     if node.Level > 0 then
       if node.Data <> nil then
       begin;
-        Form1.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PChar(node.Data),true));
+        Form1.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.MethodStr,true));
         Form1.RefreshTab;
       end;
 end;
@@ -96,7 +102,10 @@ procedure TFunctionListFrame.FunctionListDeletion(Sender: TObject;
   Node: TTreeNode);
 begin
   if node.data <> nil then
-    StrDispose(PChar(Node.Data));
+  begin
+    StrDispose(PMethodInfo(node.data)^.MethodStr);
+    Freemem(node.data,sizeof(TMethodInfo));
+  end;
 end;
 
 procedure TFunctionListFrame.FunctionListLabelMouseDown(Sender: TObject;
@@ -163,7 +172,12 @@ begin
   for i := 0 to Analyzer.MethodLen - 1 do
   begin
     tmpNode := FunctionList.Items.AddChild(ScriptNode,Analyzer.Methods[i].Name);
-    tmpNode.Data:= strnew(PChar(Analyzer.Methods[i].CreateMethodStr));
+    tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+    with PMethodInfo(tmpNode.Data)^ do
+    begin
+      MethodStr:= strnew(PChar(Analyzer.Methods[i].CreateMethodStr));
+      BeginPos:= Analyzer.Methods[i].BeginPos;
+    end;
   end;
   ScriptNode.Expand(true);
   Analyzer.free;

@@ -55,20 +55,20 @@ end;
 
 procedure TSettingsForm.SettingsFormButtonOKClick(Sender: TObject);
 begin
-  SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
-  SettingsForm.ModalResult:=mrOK;
+  Self.Settings.SaveToXML(SimbaSettingsFile);
+  Self.ModalResult:=mrOK;
 end;
 
 procedure TSettingsForm.SettingsFormButtonCancelClick(Sender: TObject);
 begin
   if not FileExists(SimbaSettingsFile) then
   begin
-    SettingsForm.SettingsTreeView.Items.Clear;
-    SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
-    SettingsForm.SettingsTreeView.Items.Clear;
-    SettingsForm.Settings.LoadFromXML(SimbaSettingsFile);
+    Self.SettingsTreeView.Items.Clear;
+    Self.Settings.SaveToXML(SimbaSettingsFile);
+    Self.SettingsTreeView.Items.Clear;
+    Self.Settings.LoadFromXML(SimbaSettingsFile);
   end;
-  SettingsForm.ModalResult:=mrOK;
+  Self.ModalResult:=mrOK;
 end;
 
 procedure TSettingsForm.FormDestroy(Sender: TObject);
