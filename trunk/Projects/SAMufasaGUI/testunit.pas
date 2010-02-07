@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 532;
+    SimbaVersion = 533;
 
 type
 
@@ -341,6 +341,7 @@ type
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
     procedure RefreshTabSender(sender : PtrInt);
     procedure CreateDefaultEnvironment;
+    procedure InitalizeTMThread(var Thread : TMThread);
   end;
 
   procedure formWriteln( S : String);
@@ -521,16 +522,6 @@ end;
 //{$ENDIF}
 
 procedure TForm1.RunScript;
-var
-  DbgImgInfo : TDbgImgInfo;
-  fontPath: String;
-  includePath : string;
-  AppPath : string;
-  pluginspath: string;
-  ScriptPath : string;
-  UseCPascal: String;
-  loadFontsOnScriptStart: String;
-
 begin
   with CurrScript do
   begin
@@ -545,72 +536,8 @@ begin
       Writeln('The script hasn''t stopped yet, so we cannot start a new one.');
       exit;
     end;
-    AppPath:= MainDir + DS;
-    includePath:= IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
-    fontPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS)));
-    PluginsPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS)));
-    ScriptErrorLine:= -1;
-    CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-    UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');
-    try
-      if lowercase(UseCPascal) = 'true' then
-        ScriptThread := TCPThread.Create(True,@CurrentSyncInfo,PluginsPath)
-      else
-        ScriptThread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
-    except
-      writeln('Failed to initialise the library!');
-      Exit;
-    end;
-    {$IFNDEF TERMINALWRITELN}
-    ScriptThread.SetDebug(@formWriteln);
-    ScriptThread.DebugMemo := Self.Memo1;
-    {$ENDIF}
-    ScriptThread.SetScript(CurrScript.SynEdit.Lines.Text);
-    DbgImgInfo.DispSize := @DebugImgForm.DispSize;
-    DbgImgInfo.ShowForm := @DebugImgForm.ShowDebugImgForm;
-    DbgImgInfo.ToDrawBitmap:= @DebugImgForm.ToDrawBmp;
-    DbgImgInfo.DrawBitmap:= @DebugImgForm.DrawBitmap;
-    DbgImgInfo.GetDebugBitmap:= @DebugImgForm.GetDbgBmp;
-    DbgImgInfo.GetBitmap:= @DebugImgForm.GetDebugImage;
-    ScriptThread.SetDbgImg(DbgImgInfo);
-    ScriptThread.ErrorData:= @ErrorData;
-    ScriptThread.OnError:= @HandleErrorData;
-
-    if ScriptFile <> '' then
-      ScriptPath := ExtractFileDir(ScriptFile);
-
-    if DirectoryExists(PluginsPath) then
-       PluginsGlob.AddPath(PluginsPath);
-    if not DirectoryExists(IncludePath) then
-      if FirstRun then
-        Writeln('Warning: The include directory specified in the Settings isn''t valid.');
-    if not DirectoryExists(fontPath) then
-      if FirstRun then
-        Writeln('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
-    ScriptThread.SetPaths(ScriptPath,AppPath,Includepath,PluginsPath,fontPath);
-
-    if selector.haspicked then ScriptThread.Client.IOManager.SetTarget(Selector.LastPick);
-
-
-    loadFontsOnScriptStart := LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True');
-    // Copy our current fonts
-    if not assigned(Self.OCR_Fonts) and (lowercase(loadFontsOnScriptStart) = 'true') and DirectoryExists(fontPath) then
-    begin
-      Self.OCR_Fonts := TMOCR.Create(ScriptThread.Client);
-      if DirectoryExists(fontPath) then
-      begin
-        OCR_Fonts.InitTOCR(fontPath);
-      end;{
-      else
-      begin
-        writeln('Warning: The Font directory in the Settings is not valid. Changing to default.');
-        OCR_Fonts.InitTOCR(IncludeTrailingPathDelimiter(ExpandFileName(MainDir +DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
-      end; }
-
-      ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
-    end else
-      if assigned(Self.OCR_Fonts) and (lowercase(loadFontsOnScriptStart) = 'true') then
-        ScriptThread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+    InitalizeTMThread(scriptthread);
+    ScriptThread.CompileOnly:= false;
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;
     FirstRun := false;
@@ -930,6 +857,77 @@ begin
   SettingsForm.SaveCurrent;
 end;
 
+procedure TForm1.InitalizeTMThread(var Thread: TMThread);
+var
+  DbgImgInfo : TDbgImgInfo;
+  fontPath: String;
+  includePath : string;
+  AppPath : string;
+  pluginspath: string;
+  ScriptPath : string;
+  UseCPascal: String;
+  loadFontsOnScriptStart: boolean;
+begin
+  AppPath:= MainDir + DS;
+  includePath:= IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
+  fontPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS)));
+  PluginsPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS)));
+  CurrScript.ScriptErrorLine:= -1;
+  CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
+  UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');
+  try
+    if lowercase(UseCPascal) = 'true' then
+      Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginsPath)
+    else
+      Thread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
+  except
+    writeln('Failed to initialise the library!');
+    Exit;
+  end;
+  {$IFNDEF TERMINALWRITELN}
+  Thread.SetDebug(@formWriteln);
+  Thread.DebugMemo := Self.Memo1;
+  {$ENDIF}
+  Thread.SetScript(CurrScript.SynEdit.Lines.Text);
+  DbgImgInfo.DispSize := @DebugImgForm.DispSize;
+  DbgImgInfo.ShowForm := @DebugImgForm.ShowDebugImgForm;
+  DbgImgInfo.ToDrawBitmap:= @DebugImgForm.ToDrawBmp;
+  DbgImgInfo.DrawBitmap:= @DebugImgForm.DrawBitmap;
+  DbgImgInfo.GetDebugBitmap:= @DebugImgForm.GetDbgBmp;
+  DbgImgInfo.GetBitmap:= @DebugImgForm.GetDebugImage;
+  Thread.SetDbgImg(DbgImgInfo);
+  Thread.ErrorData:= @CurrScript.ErrorData;
+  Thread.OnError:= @CurrScript.HandleErrorData;
+
+  if CurrScript.ScriptFile <> '' then
+    ScriptPath := ExtractFileDir(CurrScript.ScriptFile);
+
+  if DirectoryExists(PluginsPath) then
+     PluginsGlob.AddPath(PluginsPath);
+  if not DirectoryExists(IncludePath) then
+    if FirstRun then
+      Writeln('Warning: The include directory specified in the Settings isn''t valid.');
+  if not DirectoryExists(fontPath) then
+    if FirstRun then
+      Writeln('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
+  Thread.SetPaths(ScriptPath,AppPath,Includepath,PluginsPath,fontPath);
+
+  if selector.haspicked then Thread.Client.IOManager.SetTarget(Selector.LastPick);
+
+
+  loadFontsOnScriptStart := (lowercase(LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True')) = 'true');
+  // Copy our current fonts
+  if not assigned(Self.OCR_Fonts) and loadFontsOnScriptStart and DirectoryExists(fontPath) then
+  begin
+    Self.OCR_Fonts := TMOCR.Create(Thread.Client);
+    OCR_Fonts.InitTOCR(fontPath);
+    Thread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+  end else
+    if assigned(Self.OCR_Fonts) and loadFontsOnScriptStart then
+      Thread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+
+end;
+
 
 procedure TForm1.ActionTabLastExecute(Sender: TObject);
 var
@@ -953,31 +951,11 @@ end;
 
 procedure TForm1.ActionCompileScriptExecute(Sender: TObject);
 var
-  UseCPascal : string;
-  PluginsPath : string;
   TempThread : TMThread;
 begin
-  UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');
-  PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + 'Plugins'+ DS));
-  try
-    if lowercase(UseCPascal) = 'true' then
-      TempThread := TCPThread.Create(True,nil,PluginsPath)
-    else
-      TempThread := TPSThread.Create(True,nil,PluginsPath);
-  except
-    writeln('Failed to initialise the library!');
-    Exit;
-  end;
-  {$IFNDEF TERMINALWRITELN}
-  TempThread.SetDebug(@formWriteln);
-  TempThread.DebugMemo := Self.Memo1;
-  {$ENDIF}
-  TempThread.SetScript(CurrScript.SynEdit.Text);
-  TempThread.ErrorData:= @CurrScript.ErrorData;
-  TempThread.OnError:= @CurrScript.HandleErrorData;
+  InitalizeTMThread(TempThread);
   TempThread.CompileOnly:= true;
   TempThread.Resume;
-
 end;
 
 procedure TForm1.ActionCopyExecute(Sender: TObject);
