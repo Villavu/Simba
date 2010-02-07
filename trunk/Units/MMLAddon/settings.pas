@@ -539,7 +539,7 @@ begin
   Nodes.Clear;
   if not fileExists(fileName) then
   begin
-    writeln('KANKER');
+    writeln('SettingsFile hasn''t been created yet.');
     // create file.
     SaveToXML(fileName);
   end;

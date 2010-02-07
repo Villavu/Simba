@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 530;
+    SimbaVersion = 532;
 
 type
 
@@ -308,6 +308,7 @@ type
     function GetScriptState: TScriptState;
     procedure SetScriptState(const State: TScriptState);
     function LoadSettingDef(Key : string; Def : string) : string;
+    function CreateSetting(Key : string; Value : string) : string;
   public
     DebugStream: String;
     SearchString : string;
@@ -339,6 +340,7 @@ type
     procedure DoSearch(Next : boolean; HighlightAll : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
     procedure RefreshTabSender(sender : PtrInt);
+    procedure CreateDefaultEnvironment;
   end;
 
   procedure formWriteln( S : String);
@@ -478,7 +480,6 @@ var
    chk: String;
    time:integer;
 begin
-
   chk := LoadSettingDef('Settings/Updater/CheckForUpdates','True');
 
   if chk <> 'True' then
@@ -901,6 +902,34 @@ begin
   RefreshTab;
 end;
 
+procedure TForm1.CreateDefaultEnvironment;
+var
+  IncludePath,FontPath,PluginsPath : string;
+begin
+  CreateSetting('Settings/Updater/CheckForUpdates','True');
+  CreateSetting('Settings/Updater/CheckEveryXMinutes','30');
+  CreateSetting('Settings/Interpreter/UseCPascal', 'False');
+  CreateSetting('Settings/Fonts/LoadOnStartUp', 'True');
+  CreateSetting('Settings/Tabs/OpenNextOnClose','False');
+  CreateSetting('Settings/ColourPicker/ShowHistoryOnPick', 'True');
+  CreateSetting('Settings/Updater/RemoteLink',
+                'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS}+'.exe'{$ENDIF});
+  CreateSetting('Settings/Updater/RemoteVersionLink',
+                'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS}+'.exe'{$ENDIF} + '.version');
+  {Creates the paths and returns the path}
+  includePath:= CreateSetting('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS));
+  fontPath := CreateSetting('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS));
+  PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
+  if not DirectoryExists(IncludePath) then
+    CreateDir(IncludePath);
+  if not DirectoryExists(FontPath) then
+    CreateDir(FontPath);
+  if not DirectoryExists(PluginsPath) then
+    CreateDir(PluginsPath);
+  SettingsForm.SettingsTreeView.FullExpand;
+  SettingsForm.SaveCurrent;
+end;
+
 
 procedure TForm1.ActionTabLastExecute(Sender: TObject);
 var
@@ -929,7 +958,7 @@ var
   TempThread : TMThread;
 begin
   UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');
-  PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
+  PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + 'Plugins'+ DS));
   try
     if lowercase(UseCPascal) = 'true' then
       TempThread := TCPThread.Create(True,nil,PluginsPath)
@@ -1224,11 +1253,21 @@ begin
 end;
 
 procedure TForm1.FunctionListChange(Sender: TObject; Node: TTreeNode);
+var
+  MethodInfo : TMethodInfo;
 begin
   if node = nil then
     exit;
   if Node.Level > 0 then
-    StatusBar.Panels[Panel_ScriptPath].Text := PChar(Node.Data);
+  begin
+    MethodInfo := PMethodInfo(node.Data)^;
+    StatusBar.Panels[Panel_ScriptPath].Text := MethodInfo.MethodStr;
+    if MethodInfo.BeginPos > 0 then
+    begin
+      CurrScript.SynEdit.SelStart := MethodInfo.BeginPos;
+      CurrScript.SynEdit.SetFocus;
+    end;
+  end;
   if Node.level = 0 then
     StatusBar.Panels[Panel_ScriptPath].Text := 'Section: ' + Node.Text;
 end;
@@ -1323,6 +1362,14 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Randomize;
+  MainDir:= ExtractFileDir(Application.ExeName);
+  if FileExists(MainDir + DS + SimbaSettingsFile) then
+    Application.CreateForm(TSettingsForm,SettingsForm)
+  else  begin
+    Application.CreateForm(TSettingsForm,SettingsForm);
+    Self.CreateDefaultEnvironment;
+  end;
+  UpdateTimer.OnTimer:= @UpdateTimerCheck;
   //Show close buttons @ tabs
   PageControl1.Options:=PageControl1.Options+[nboShowCloseButtons];
   PageControl1.OnCloseTabClicked:=ActionCloseTab.OnExecute;
@@ -1332,7 +1379,6 @@ begin
   Manager := TIOManager.Create; //No need to load plugins for the Global manager
   Picker := TMColorPicker.Create(Manager);
   Selector := TMWindowSelector.Create(Manager);
-  MainDir:= ExtractFileDir(Application.ExeName);
   { For writeln }
   SetLength(DebugStream, 0);
   DebugCriticalSection := syncobjs.TCriticalSection.Create;
@@ -1531,7 +1577,12 @@ begin
         end;
       end;
       Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
-      Temp2Node.Data:= strnew(PChar(Methods[i].FuncDecl));
+      Temp2Node.Data := GetMem(SizeOf(TMethodInfo));
+      with PMethodInfo(Temp2Node.Data)^ do
+      begin
+        MethodStr:= strnew(PChar(Methods[i].FuncDecl));
+        BeginPos:= -1;
+      end;
     end;
     Sections.free;
   end;
@@ -1733,6 +1784,11 @@ end;
 function TForm1.LoadSettingDef(Key: string; Def: string): string;
 begin
   result := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(Key,def,SimbaSettingsFile);
+end;
+
+function TForm1.CreateSetting(Key: string; Value: string): string;
+begin
+  result := SettingsForm.Settings.GetSetDefaultKeyValue(Key,value);
 end;
 
 procedure TForm1.FunctionListShown(ShowIt: boolean);
