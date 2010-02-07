@@ -102,7 +102,7 @@ procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
   if Source is TFunctionListFrame then
     if TFunctionListFrame(Source).DraggingNode.Data <> nil then
-      SynEdit.InsertTextAtCaret( GetMethodName(PChar(TFunctionListFrame(Source).DraggingNode.Data),true));
+      SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(TFunctionListFrame(Source).DraggingNode.Data)^.MethodStr,true));
 end;
 
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
@@ -323,7 +323,7 @@ begin
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
   SynEdit.Options:= SynEdit.Options- [eoGroupUndo];
-  SynEdit.Options:= SynEdit.Options+ [eoGroupUndo];
+  SynEdit.Options:= SynEdit.Options+ [eoGroupUndo,eoPersistentCaret];
   SynEdit.IncrementColor.Background := $30D070;
   SynEdit.HighlightAllColor.Background:= clYellow;
   SynEdit.HighlightAllColor.Foreground:= clDefault;
@@ -353,4 +353,4 @@ initialization
   {$I framescript.lrs}
 
 end.
-
+

@@ -430,7 +430,6 @@ object Form1: TForm1
         Height = 257
         Width = 150
         OnChange = FunctionListChange
-        OnDeletion = nil
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
