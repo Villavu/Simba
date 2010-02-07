@@ -3094,8 +3094,7 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +'Replace'#7'OnClick'#7#20'ActionReplaceExecute'#0#0#0#14'TReplaceDialog'#10
   +'dlgReplace'#7'Options'#11#6'frDown'#10'frFindNext'#12'frHideUpDown'#0#6'OnF'
   +'ind'#7#14'dlgReplaceFind'#9'OnReplace'#7#17'dlgReplaceReplace'#4'left'#3'`'
-  +#2#3'top'#2'h'#0#0#6'TTimer'#11'UpdateTimer'#8'Interval'#3#16''''#7'OnTimer'
-  +#7#16'UpdateTimerCheck'#4'left'#3'`'#2#3'top'#3#144#0#0#0#6'TTimer'#10'Mouse'
-  +'Timer'#8'Interval'#2'd'#7'OnTimer'#7#17'ChangeMouseStatus'#4'left'#3#192#1#3
-  +'top'#3#200#0#0#0#0
+  +#2#3'top'#2'h'#0#0#6'TTimer'#11'UpdateTimer'#8'Interval'#3#16''''#4'left'#3
+  +'`'#2#3'top'#3#144#0#0#0#6'TTimer'#10'MouseTimer'#8'Interval'#2'd'#7'OnTimer'
+  +#7#17'ChangeMouseStatus'#4'left'#3#192#1#3'top'#3#200#0#0#0#0
 ]);

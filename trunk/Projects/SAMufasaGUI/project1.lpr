@@ -46,7 +46,7 @@ begin
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TDebugImgForm, DebugImgForm);
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
-  Application.CreateForm(TSettingsForm, SettingsForm);
+//  Application.CreateForm(TSettingsForm, SettingsForm); Done in FormCreate of MainForm
   Application.Run;
 end.
 

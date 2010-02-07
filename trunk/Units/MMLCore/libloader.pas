@@ -13,6 +13,8 @@ interface
     end;
     TGenericLibArray = array of TGenericLib;
 
+    { TGenericLoader }
+
     TGenericLoader = class(TObject)
       private
         PluginLen : integer;
@@ -20,6 +22,7 @@ interface
         PluginDirs : TStringList;
         procedure FreePlugins;
         procedure LoadPluginsDir(DirIndex : integer);
+        function VerifyPath(Path : string) : string;
       protected
         function InitPlugin(plugin: TLibHandle): boolean; virtual; abstract;
       public
@@ -38,12 +41,14 @@ implementation
   procedure TGenericLoader.AddPath(path: string);
   var
     idx: integer;
+    verified : string;
   begin
+    verified := VerifyPath(path);
     //IDK who changed this to loading a dir, but DON'T
-    if not PluginDirs.Find(path,idx) then
+    if not PluginDirs.Find(verified,idx) then
     begin
-      writeln('Adding Plugin Path: ' + path);
-      PluginDirs.Add(path);
+      writeln('Adding Plugin Path: ' + verified);
+      PluginDirs.Add(verified);
     end;
   end;
 
@@ -71,17 +76,9 @@ implementation
   begin
     for i := 0 to PluginDirs.Count - 1 do
     begin;
-      if DirectoryExists(PluginDirs.Strings[i]) = false then
-          raise Exception.createFMT('Directory(%s) does not exist',[PluginDirs[i]]);
-      TempStr := PluginDirs.Strings[i];
-      if (TempStr[Length(TempStr)] <> DS) then
-      begin;
-        if (TempStr[Length(TempStr)] = '\') or (TempStr[Length(TempStr)] = '/') then
-          TempStr[Length(TempStr)] := DS
-        else
-          TempStr := TempStr + DS;
-        PluginDirs.Strings[i] := TempStr;
-      end;
+      if DirectoryExists(PluginDirs[i]) = false then
+        raise Exception.createFMT('Directory(%s) does not exist',[PluginDirs[i]]);
+      PluginDirs[i] := VerifyPath(PluginDirs[i]);
     end;
   end;
 
@@ -101,6 +98,18 @@ implementation
       LoadPlugin(FileSearcher.Name);
     until FindNext(FileSearcher) <> 0;
     FindClose(FileSearcher);
+  end;
+
+  function TGenericLoader.VerifyPath(Path: string): string;
+  begin
+    Result := Path;
+    if (Result[Length(Result)] <> DS) then
+    begin;
+      if (Result[Length(Result)] = '\') or (Result[Length(Result)] = '/') then
+        Result[Length(Result)] := DS
+      else
+        Result := Result + DS;
+    end;
   end;
 
 
@@ -148,6 +157,7 @@ implementation
     PluginLen := 0;
     PluginDirs := TStringList.Create;
     PluginDirs.CaseSensitive:= {$IFDEF LINUX}true{$ELSE}false{$ENDIF};
+    PluginDirs.Duplicates:= dupIgnore;
   end;
 
   destructor TGenericLoader.Destroy;
