@@ -100,7 +100,7 @@ var
    w, h: integer;
    SS : TShiftState;
    p : TPoint;
-
+   bmp2 : Graphics.TBitmap;
    bmp: TMufasaBitmap;
    Desktop : TIOManager;
 
@@ -173,8 +173,9 @@ begin
   { Copy the client to ImageMain }
   bmp:=TMufasaBitmap.Create;
   bmp.CopyClientToBitmap(Desktop, true, 0, 0, w-1, h-1);
-  ImageMain.Picture.Bitmap.Free;
-  ImageMain.Picture.Bitmap := bmp.ToTBitmap;
+  Bmp2 := Bmp.ToTBitmap;
+  ImageMain.Picture.Assign(bmp2);
+  bmp2.free;
   bmp.Free;
 
   { Set up handles and events }

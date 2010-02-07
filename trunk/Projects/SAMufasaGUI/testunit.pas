@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 521;
+    SimbaVersion = 530;
 
 type
 
@@ -545,9 +545,9 @@ begin
       exit;
     end;
     AppPath:= MainDir + DS;
-    includePath:= LoadSettingDef('Settings/Includes/Path', IncludeTrailingPathDelimiter(ExpandFileName(MainDir+  DS + '..' + DS + '..' + ds)) + 'Includes' + DS);
-    fontPath := LoadSettingDef('Settings/Fonts/Path', IncludeTrailingPathDelimiter(ExpandFileName(MainDir+  DS + '..' + DS + '..' + ds)) + 'Fonts' + DS);
-    PluginsPath := LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir + DS + '..' + DS + '..'+ DS + 'Plugins'+ DS));
+    includePath:= IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
+    fontPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS)));
+    PluginsPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS)));
     ScriptErrorLine:= -1;
     CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
     UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');

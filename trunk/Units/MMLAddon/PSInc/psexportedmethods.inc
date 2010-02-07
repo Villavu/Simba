@@ -30,6 +30,7 @@ AddFunction(@ps_PrintpDTM, 'Procedure PrintpDTM(tDTM : pDTM);');
 AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer; out dtm: pDTM): Boolean;');
 AddFunction(@pDTMToTDTM, 'Function pDTMToTDTM(DTM: pDTM): TDTM;');
 AddFunction(@tDTMTopDTM, 'Function tDTMTopDTM(DTM: TDTM): pDTM;');
+AddFunction(@ps_SetDTMName, 'procedure SetDTMName(DTM : integer; name : string);');
 AddFunction(@ps_DTMFromString, 'function DTMFromString(DTMString: String): Integer;');
 AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
 AddFunction(@ps_FindDTM, 'function FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
