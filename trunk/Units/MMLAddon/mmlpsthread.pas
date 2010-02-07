@@ -77,8 +77,8 @@ type
       ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
       DebugImg : TDbgImgInfo;
-      PluginsToload : array of integer;
       ExportedMethods : TExpMethodArr;
+      procedure LoadPlugin(plugidx: integer); virtual; abstract;
 
     public
       Client : TClient;
@@ -121,6 +121,8 @@ type
           Parser: TPSPascalPreProcessorParser; const Active: Boolean;
           const DirectiveName, DirectiveParam: string; var Continue: Boolean);
       protected
+        PluginsToload : array of integer;
+        procedure LoadPlugin(plugidx: integer); override;
         procedure OnCompile(Sender: TPSScript);
         function RequireFile(Sender: TObject; const OriginFileName: String;
                             var FileName, OutPut: string): Boolean;
@@ -143,6 +145,7 @@ type
       protected
         instance: pointer;
         added_methods: array of TExpMethod;
+        procedure LoadPlugin(plugidx: integer); override;
       public
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
@@ -264,7 +267,6 @@ begin
   Client := TClient.Create(plugin_dir);
   SyncInfo:= TheSyncInfo;
   ExportedMethods:= GetExportedMethods;
-  SetLength(PluginsToLoad,0);
   FreeOnTerminate := True;
   CompileOnly := false;
   OnTerminate := @OnThreadTerminate;
@@ -274,7 +276,6 @@ end;
 
 destructor TMThread.Destroy;
 begin
-  SetLength(PluginsToLoad,0);
   Client.Free;
   inherited Destroy;
 end;
@@ -313,13 +314,7 @@ begin
       if plugin_idx < 0 then
         psWriteln(Format('Your DLL %s has not been found',[DirectiveArgs]))
       else
-      begin;
-        for i := High(PluginsToLoad) downto 0 do
-          if PluginsToLoad[i] = plugin_idx then
-            Exit;
-        SetLength(PluginsToLoad,Length(PluginsToLoad)+1);
-        PluginsToLoad[High(PluginsToLoad)]:= plugin_idx;
-      end;
+        LoadPlugin(plugin_idx);
     end;
   end;
   result:= True;
@@ -508,6 +503,18 @@ begin
   else
     raise exception.createfmt('Unknown Calling Convention[%d]',[conv]);
   end;
+end;
+
+
+procedure TPSThread.LoadPlugin(plugidx: integer);
+var
+ i: integer;
+begin
+  for i := High(PluginsToLoad) downto 0 do
+    if PluginsToLoad[i] = plugidx then
+      Exit;
+  SetLength(PluginsToLoad,Length(PluginsToLoad)+1);
+  PluginsToLoad[High(PluginsToLoad)]:= plugidx;
 end;
 
 procedure TPSThread.OnCompile(Sender: TPSScript);
@@ -754,6 +761,20 @@ begin
   interp_meth(instance,meth.FuncPtr,PChar(meth.FuncDecl));
 end;
 
+procedure TCPThread.LoadPlugin(plugidx: integer);
+var
+  i: integer;
+begin
+  with PluginsGlob.MPlugins[plugidx] do
+    for i := 0 to MethodLen - 1 do
+      with Methods[i] do
+      begin
+        pswriteln(FuncStr);
+        interp_meth(self.instance,FuncPtr,PChar(FuncStr));
+      end;
+  pswriteln('done')
+end;
+
 procedure TCPThread.Execute;
 var
   i,ii: integer;
@@ -761,16 +782,32 @@ begin
   CurrThread := Self;
   Starttime := GetTickCount;
   psWriteln('Invoking CPascal Interpreter');
+  interp_type(self.instance,'type longword = integer;');
+  interp_type(self.instance,'type word = integer;');
+  interp_type(self.instance,'type longint = integer;');
+  interp_type(self.instance,'type pointer = integer;');
+  interp_type(self.instance,'type byte = integer;');
   interp_type(self.instance,'type extended = real;');
-  interp_type(self.instance,'type tdtm = integer;');
-  interp_type(self.instance,'type pdtm = ^tdtm;');
-  interp_type(self.instance,'type TEIOS_Exported = record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14:integer; end;');
-  //interp_type(self.instance,'type pointer = integer;');
+  interp_type(self.instance,'type tcolor = integer;');
 
-  for i := high(PluginsToLoad) downto 0 do
-    for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
-      with PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii] do
-        interp_meth(self.instance,FuncPtr,PChar(FuncStr));
+  interp_type(self.instance,'type TExtendedArray = array of extended;');
+  interp_type(self.instance,'type T2DExtendedArray = array of array of extended;');
+  interp_type(self.instance,'type TIntegerArray = array of integer;');
+
+  interp_type(self.instance,'type TBox = record X1,Y1,X2,Y2: integer; end;');
+  interp_type(self.instance,'type TPoint = record x,y: integer; end;');
+  interp_type(self.instance,'type TPointArray = array of TPoint;');   ;
+  interp_type(self.instance,'type T2DPointArray = array of array of TPoint;');   ;
+  interp_type(self.instance,'type TPointArrayArray = T2DPointArray;');
+
+  interp_type(self.instance,'type TTarget_Exported = record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14:integer; end;');
+  interp_type(self.instance,'type TMask = record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
+  interp_type(self.instance,'type TDTMPointDef = record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
+  interp_type(self.instance,'type TDTMPointDefArray = Array Of TDTMPointDef;');
+  interp_type(self.instance,'type TDTM = record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
+  interp_type(self.instance,'type pDTM = record l: Integer;p: TPointArray;c, t, asz, ash: TIntegerArray; bp: Array Of Boolean; n: String; end;');
+
+
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
       with ExportedMethods[i] do
