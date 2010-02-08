@@ -64,6 +64,7 @@ procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
 function SplitTPAEx(arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(arr: TPointArray; Dist: Integer): T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
+procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
 function RemoveDistTPointArray(x, y, dist: Integer; ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;
 function GetATPABounds(ATPA: T2DPointArray): TBox;
 function GetTPABounds(TPA: TPointArray): TBox;
@@ -87,6 +88,8 @@ procedure InvertTIA(var tI: TIntegerArray);
 function SumIntegerArray(Ints : TIntegerArray): Integer;
 function AverageTIA(tI: TIntegerArray): Integer;
 function AverageExtended(tE: TExtendedArray): Extended;
+function SameTPA(aTPA, bTPA: TPointArray): Boolean;
+function TPAInATPA(TPA: TPointArray; InATPA: T2DPointArray; var Index: LongInt): Boolean;
 
 implementation
 
@@ -251,15 +254,21 @@ procedure RAaSTPAEx(var a: TPointArray; const w, h: Integer);
 var
    i, c, NoTP, l: Integer;
    t: TPoint;
+   Found : boolean;
 begin
   NoTP := 0;
   l := High(a);
   for i := 0 to l do
   begin
+    Found := false;
     for c := 0 to NoTP - 1 do
       if (Abs(a[i].x - a[c].x) <= w) and (Abs(a[i].y - a[c].y) <= h) then
+      begin
+        Found := true;
         Break;
-    if (c >= NoTP) then
+      end;
+    if not Found then
+//    if (c >= NoTP) then
     begin
       t := a[i];
       a[i] := a[NoTP];
@@ -278,16 +287,21 @@ procedure RAaSTPA(var a: TPointArray; const Dist: Integer);
 var
    i, c, NoTP, l: Integer;
    t: TPoint;
+   Found : boolean;
 begin
   NoTP := 0;
   l := High(a);
-  Writeln('wat');
   for i := 0 to l do
   begin
+    Found := false;
     for c := 0 to NoTP - 1 do
       if (Round(sqrt(Sqr(a[i].x - a[c].x) + Sqr(a[i].y - a[c].y))) <= Dist) then
+      begin
+        Found := True;
         Break;
-    if (c >= NoTP) then
+      end;
+    if not Found then
+//    if (c >= NoTP) then
     begin
       t := a[i];
       a[i] := a[NoTP];
@@ -341,16 +355,22 @@ end;
 function ReArrangeandShortenArrayEx(a: TPointArray; w, h: Integer): TPointArray;
 var
   i, t, c, l: Integer;
+  Found: Boolean;
 begin
   l := High(a);
   c := 0;
   SetLength(Result, l + 1);
   for i := 0 to l do
   begin
+    Found := False;
     for t := 0 to c -1 do
       if (Abs(Result[t].x - a[i].x) <= w) and (Abs(Result[t].y - a[i].y) <= h) then
+      begin;
+        Found := True;
         Break;
-    if (t >= c) then
+      end;
+    if not Found then
+//    if (t >= c) then
     begin
       Result[c] := a[i];
       Inc(c);
@@ -366,16 +386,22 @@ end;
 function ReArrangeandShortenArray(a: TPointArray; Dist: Integer): TPointArray;
 var
   i, t, c, l: Integer;
+  Found: Boolean;
 begin
   l := High(a);
   c := 0;
   SetLength(Result, l + 1);
   for i := 0 to l do
   begin
+    Found := False;
     for t := 0 to c -1 do
       if (Round(sqrt(Sqr(Result[t].x - a[i].x) + Sqr(Result[t].y - a[i].y))) <= Dist) then
+      begin
+        Found := True;
         Break;
-    if (t >= c) then
+      end;
+    if not found then
+//    if (t >= c) then
     begin
       Result[c] := a[i];
       Inc(c);
@@ -391,16 +417,22 @@ end;
 function TPAtoATPAEx(TPA: TPointArray; w, h: Integer): T2DPointArray;
 var
    a, b, c, l: LongInt;
+   Found: Boolean;
 begin
   SetLength(Result, 0);
   l := High(TPA);
   c := 0;
   for a := 0 to l do
   begin
+    Found := false;
     for b := 0 to c -1 do
       if (Abs(TPA[a].X - Result[b][0].X) <= w) and (Abs(TPA[a].Y - Result[b][0].Y) <= h) then
+      begin
+        Found := True;
         Break;
-    if (b < c) then
+      end;
+    if Found then
+//    if (b < c) then
     begin
       SetLength(Result[b], Length(Result[b]) + 1);
       Result[b][High(Result[b])] := TPA[a];
@@ -421,16 +453,22 @@ end;
 function TPAtoATPA(TPA: TPointArray; Dist: Integer): T2DPointArray;
 var
    a, b, c, l: LongInt;
+   Found: Boolean;
 begin
   SetLength(Result, 0);
   l := High(tpa);
   c := 0;
   for a := 0 to l do
   begin
+    Found := false;
     for b := 0 to c -1 do
       if (Round(sqrt(Sqr(TPA[a].X - Result[b][0].X) + Sqr(TPA[a].Y - Result[b][0].Y))) <= Dist) then
+      begin
+        Found := True;
         Break;
-    if (b < c) then
+      end;
+    if Found then
+//    if (b < c) then
     begin
       SetLength(Result[b], Length(Result[b]) + 1);
       Result[b][High(Result[b])] := TPA[a];
@@ -656,14 +694,12 @@ var
    i, l: Integer;
    SizeArr: TIntegerArray;
 begin
-  Writeln('yo man!');
   l := High(a);
   Writeln(inttostr(l));
   if (l < 0) then Exit;
   SetLength(SizeArr, l + 1);
   for i := 0 to l do
     SizeArr[i] := Length(a[i]);
-  Writeln('Yo');
   QuickATPASort(SizeArr, a, 0, l, not BigFirst);
 end;
 
@@ -761,16 +797,22 @@ procedure ClearSameIntegers(var a: TIntegerArray);
 var
   i, t, c, l: Integer;
   b: TIntegerArray;
+  Found: Boolean;
 begin
   b := Copy(a);
   l := High(b);
   c := 0;
   for i := 0 to l do
   begin
+    Found := False;
     for t := 0 to c -1 do
       if (b[i] = a[t]) then
+      begin
+        Found := True;
         Break;
-    if (t >= c) then
+      end;
+    if not Found then
+//    if (t >= c) then
     begin
       a[c] := b[i];
       Inc(c);
@@ -787,16 +829,22 @@ procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
 var
   i, t, c, l: Integer;
   b: TIntegerArray;
+  Found: Boolean;
 begin
   b := Copy(a);
   l := High(b);
   c := 0;
   for i := 0 to l do
   begin
+    Found := false;
     for t := 0 to c -1 do
       if (b[i] = a[t]) then
+      begin
+        Found := true;
         Break;
-    if (t >= c) then
+      end;
+    if not Found then
+//    if (t >= c) then
     begin
       SetLength(a, c +1);
       a[c] := b[i];
@@ -951,6 +999,42 @@ begin
 end;
 
 {/\
+  Removes the points in the TPointArray Points that are not on the line defined by angle, radius and center.
+/\}
+procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
+var
+  I, Hi, Ind, y: Integer;
+  P: TPointArray;
+  Box: TBox;
+  B: Array of Array of Boolean;
+  SinAngle,CosAngle : Extended;
+begin
+  Ind := 0;
+  Box:= GetTPABounds(Points);
+  SinAngle := sin(Radial);
+  CosAngle := cos(Radial);
+  SetLength(B, max(Box.x2, Round(SinAngle * Radius + MX)) + 1);
+  y:= max(Box.x2, -Round(CosAngle * Radius) + MY);
+  for I:= 0 to High(B) do
+    SetLength(B[I], y + 1);
+  Hi:= High(Points);
+  for I:= 0 to Hi do
+    B[Points[I].x][Points[I].y]:= True;
+  SetLength(P, Hi + 1);
+  for I:= 0 to Radius do
+  begin
+    if(B[Round(SinAngle * I) + MX][-Round(CosAngle * I) + MY])then
+    begin
+      P[Ind].X := Round(SinAngle * I) + MX;
+      P[Ind].Y := -Round(CosAngle * I) + MY;
+      inc(Ind);
+    end;
+  end;
+  SetLength(P, Ind);
+  Points:= P;
+end;
+
+{/\
   Removes the points that are inside or outside the distance Dist from the point (x, y) from the TPointArray ThePoints.
 /\}
 
@@ -1054,6 +1138,7 @@ var
   tx,ty,MatchCount : integer;
   Screen : Array of Array of Boolean;
   ScreenBox,SearchBox : TBox;
+  Found: Boolean;
 begin;
   Result := False;
   Len := High(TotalTPA);
@@ -1099,10 +1184,15 @@ begin;
       if ty > 0 then
         if ((SearchBox.x2 + tx) <= ScreenBox.x2) and ((SearchBox.y2 + ty) <= ScreenBox.y2) then
           begin;
+            Found := false;
             For II := 0 to LenSearch do
               if Screen[tx + SearchTPA[II].x ][ty + SearchTPA[II].y] = False then
+              begin
+                Found := True;
                 Break;
-            if II > LenSearch then
+              end;
+            if not found then
+//            if II > LenSearch then
             begin;
               MatchCount := MatchCount + 1;
               SetLength(Matches,MatchCount);
@@ -1421,14 +1511,17 @@ Function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;
 
 Var
    I, L: Integer;
+   CosA,SinA : extended;
 
 Begin
   L := High(P);
   SetLength(Result, L + 1);
+  CosA := Cos(a);
+  SinA := Sin(a);
   For I := 0 To L Do
   Begin
-    Result[I].X := Trunc(cx + cos(A) * (p[i].x - cx) - sin(A) * (p[i].y - cy));
-    Result[I].Y := Trunc(cy + sin(A) * (p[i].x - cx) + cos(A) * (p[i].y - cy));
+    Result[I].X := Trunc(cx + CosA * (p[i].x - cx) - SinA * (p[i].y - cy));
+    Result[I].Y := Trunc(cy + SinA * (p[i].x - cx) + CosA * (p[i].y - cy));
   End;
   // I recon it's faster than Point().
 End;
@@ -1499,10 +1592,7 @@ var
 begin
   l := High(arP);
   if l < 0 then
-  begin
-    Result := False;
-    Exit;
-  end;
+    Exit(false);
   Result := True;
   for i := 0 to l do
     if (arP[i].x = p.x) and (arP[i].y = p.y) then
@@ -1517,16 +1607,21 @@ end;
 function ClearTPAFromTPA(arP, ClearPoints: TPointArray): TPointArray;
 var
   i, j, l, l2: Integer;
+  Found: Boolean;
 begin
   l := High(arP);
   l2 := High(ClearPoints);
   for i := 0 to l do
   begin
+    Found := false;
     for j := 0 to l2 do
       if (arP[i].x = ClearPoints[j].x) and (arP[i].y = ClearPoints[j].y) then
+      begin
+        Found := True;
         Break;
-
-    if (j = l2 + 1) then
+      end;
+    if not found then
+//    if (j = l2 + 1) then
     begin
       SetLength(Result, Length(Result) + 1);
       Result[High(Result)] := arP[i];
@@ -1744,6 +1839,43 @@ begin
     Result := 0.0;
   end;
 end;
+
+{/\
+  Returns true if the two inputed TPA's are exactly the same (so the order matters)
+/\}
+function SameTPA(aTPA, bTPA: TPointArray): Boolean;
+var
+  I: LongInt;
+  h : integer;
+begin
+  Result := False;
+  if (Length(aTPA) <> Length(bTPA)) then
+    Exit;
+  h := high(ATPA);
+  for I := Low(aTPA) to h do
+    if ((aTPA[I].X <> bTPA[I].X) or (aTPA[I].Y <> bTPA[I].Y)) then
+      Exit;
+  Result := True;
+end;
+{/\
+  Returns true if the TPA is found as one of ATPA's sub-TPA's.. And again, order matters
+/\}
+function TPAInATPA(TPA: TPointArray; InATPA: T2DPointArray; var Index: LongInt): Boolean;
+var
+  I: LongInt;
+  h : integer;
+begin
+  Result := True;
+  h := high(inATPA);
+    for I := Low(InATPA) to h do
+      if (SameTPA(TPA, InATPA[I])) then
+      begin
+        Index := I;
+        Exit;
+      end;
+  Result := False;
+end;
+
 
 end.
 
