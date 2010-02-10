@@ -81,14 +81,6 @@ const medium_maze ='61' + #10 +
 '0110111111111111111010000000001111111111101111111111111111110' + #10 +
 '0000000000000000000000000000000000000000000000000000000000000' + #10 ;
 
-type Tpoint = record
-  x,y: integer;
-end;
-
-type TpointArray = array of TPoint;
-
-type TpointArrayArray = array of TpointArray;
-
 type TboolGrid = array of array of boolean;
 
 function readLine(raw: string; var off: integer): string;
