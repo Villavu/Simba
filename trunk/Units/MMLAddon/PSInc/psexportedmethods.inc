@@ -338,3 +338,6 @@ AddFunction(@TPAFromBoxWrap,'procedure TPAFromBoxWrap(const Box : TBox; var Res 
 AddFunction(@RotatePointsWrap,'procedure RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; var Res :  TPointArray);');
 AddFunction(@FindTPAEdgesWrap,'procedure FindTPAEdgesWrap(p: TPointArray; var Res :  TPointArray);');
 AddFunction(@ClearTPAFromTPAWrap,'procedure ClearTPAFromTPAWrap(arP, ClearPoints: TPointArray;  var Res :  TPointArray);');
+AddFunction(@FilterPointsLine,'procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);');
+AddFunction(@SameTPA,'function SameTPA(aTPA, bTPA: TPointArray): Boolean;');
+AddFunction(@TPAInATPA,'function TPAInATPA(TPA: TPointArray; InATPA: T2DPointArray; var Index: LongInt): Boolean;');
