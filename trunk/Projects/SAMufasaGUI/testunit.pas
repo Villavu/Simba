@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 534;
+    SimbaVersion = 537;
 
 type
 
@@ -1572,7 +1572,7 @@ end;
 
 procedure TForm1.MenuItemReportBugClick(Sender: TObject);
 begin
-  //OpenURL('http://old.villavu.com/mantis/bug_report_page.php');
+  OpenURL('http://mufasa.villavu.com/mantis/bug_report_page.php');
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
