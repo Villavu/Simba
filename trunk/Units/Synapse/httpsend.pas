@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 003.012.002 |
+| Project : Ararat Synapse                                       | 003.012.004 |
 |==============================================================================|
 | Content: HTTP client                                                         |
 |==============================================================================|
-| Copyright (c)1999-2008, Lukas Gebauer                                        |
+| Copyright (c)1999-2010, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c) 1999-2008.               |
+| Portions created by Lukas Gebauer are Copyright (c) 1999-2010.               |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -51,6 +51,17 @@ Used RFC: RFC-1867, RFC-1947, RFC-2388, RFC-2616
   {$MODE DELPHI}
 {$ENDIF}
 {$H+}
+//old Delphi does not have MSWINDOWS define.
+{$IFDEF WIN32}
+  {$IFNDEF MSWINDOWS}
+    {$DEFINE MSWINDOWS}
+  {$ENDIF}
+{$ENDIF}
+
+{$IFDEF UNICODE}
+  {$WARN IMPLICIT_STRING_CAST OFF}
+  {$WARN IMPLICIT_STRING_CAST_LOSS OFF}
+{$ENDIF}
 
 unit httpsend;
 
@@ -264,6 +275,7 @@ begin
   FCookies := TStringList.Create;
   FDocument := TMemoryStream.Create;
   FSock := TTCPBlockSocket.Create;
+  FSock.Owner := self;
   FSock.ConvertLineEnd := True;
   FSock.SizeRecvBuffer := c64k;
   FSock.SizeSendBuffer := c64k;
@@ -321,7 +333,7 @@ begin
   if FProtocol = '0.9' then
     Result := FHeaders[0] + CRLF
   else
-{$IFNDEF WIN32}
+{$IFNDEF MSWINDOWS}
     Result := AdjustLineBreaks(FHeaders.Text, tlbsCRLF);
 {$ELSE}
     Result := FHeaders.Text;

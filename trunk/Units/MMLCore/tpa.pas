@@ -672,6 +672,7 @@ function MiddleTPA(tpa: TPointArray): TPoint;
 var
    i, l: Integer;
 begin
+  FillChar(result,sizeof(TPoint),0);
   l := High(tpa);
   if (l < 0) then Exit;
   Result.x := 0;
@@ -1073,6 +1074,7 @@ function GetATPABounds(ATPA: T2DPointArray): TBox;
 var
   I,II,L2,L : Integer;
 begin;
+  FillChar(result,sizeof(TBox),0);
   L := High(ATPA);
   if (l < 0) then Exit;
   For I := 0 to L do
@@ -1108,6 +1110,7 @@ function GetTPABounds(TPA: TPointArray): TBox;
 var
   I,L : Integer;
 begin;
+  FillChar(result,sizeof(TBox),0);
   L := High(TPA);
   if (l < 0) then Exit;
   Result.x1 := TPA[0].x;

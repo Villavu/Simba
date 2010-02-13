@@ -55,6 +55,11 @@ Used RFC: RFC-2045
 {$Q-}
 {$R-}
 
+{$IFDEF UNICODE}
+  {$WARN IMPLICIT_STRING_CAST OFF}
+  {$WARN IMPLICIT_STRING_CAST_LOSS OFF}
+{$ENDIF}
+
 unit mimepart;
 
 interface

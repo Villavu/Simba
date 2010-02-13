@@ -32,7 +32,7 @@ interface
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes, web,
-  bitmaps, plugins, libloader, dynlibs;
+  bitmaps, plugins, libloader, dynlibs,internets;
 
 
 type
@@ -82,6 +82,7 @@ type
 
     public
       Client : TClient;
+      MInternet : TMInternet;
       StartTime : LongWord;
       DebugMemo : TMemo;
 
@@ -184,7 +185,6 @@ uses
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
-  internets, // internets
   strutils,
   tpa, //Tpa stuff
   forms,//Forms
@@ -265,6 +265,7 @@ end;
 constructor TMThread.Create(CreateSuspended: boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 begin
   Client := TClient.Create(plugin_dir);
+  MInternet := TMInternet.Create(Client);
   SyncInfo:= TheSyncInfo;
   ExportedMethods:= GetExportedMethods;
   FreeOnTerminate := True;
@@ -276,6 +277,7 @@ end;
 
 destructor TMThread.Destroy;
 begin
+  MInternet.Free;
   Client.Free;
   inherited Destroy;
 end;
