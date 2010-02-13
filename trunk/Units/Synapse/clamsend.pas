@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 001.001.000 |
+| Project : Ararat Synapse                                       | 001.001.001 |
 |==============================================================================|
 | Content: ClamAV-daemon client                                                |
 |==============================================================================|
-| Copyright (c)2005-2009, Lukas Gebauer                                        |
+| Copyright (c)2005-2010, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2005-2009.                |
+| Portions created by Lukas Gebauer are Copyright (c)2005-2010.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -53,6 +53,11 @@ daemon from ClamAV. See more about ClamAV on @LINK(http://www.clamav.net)
 {$ENDIF}
 {$Q-}
 {$H+}
+
+{$IFDEF UNICODE}
+  {$WARN IMPLICIT_STRING_CAST OFF}
+  {$WARN IMPLICIT_STRING_CAST_LOSS OFF}
+{$ENDIF}
 
 unit clamsend;
 
@@ -121,7 +126,9 @@ constructor TClamSend.Create;
 begin
   inherited Create;
   FSock := TTCPBlockSocket.Create;
+  FSock.Owner := self;
   FDSock := TTCPBlockSocket.Create;
+  FDSock.Owner := self;
   FTimeout := 60000;
   FTargetPort := cClamProtocol;
   FSession := false;
@@ -247,7 +254,6 @@ end;
 function TClamSend.ScanStream2(const Value: TStream): AnsiString;
 var
   i: integer;
-  s: AnsiString;
 begin
   Result := '';
   if not FSession then

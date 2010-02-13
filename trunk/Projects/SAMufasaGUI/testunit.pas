@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 537;
+    SimbaVersion = 538;
 
 type
 
@@ -342,6 +342,7 @@ type
     procedure RefreshTabSender(sender : PtrInt);
     procedure CreateDefaultEnvironment;
     procedure InitalizeTMThread(var Thread : TMThread);
+    procedure HandleParameters;
   end;
 
   procedure formWriteln( S : String);
@@ -838,6 +839,7 @@ begin
   CreateSetting('Settings/Interpreter/UseCPascal', 'False');
   CreateSetting('Settings/Fonts/LoadOnStartUp', 'True');
   CreateSetting('Settings/Tabs/OpenNextOnClose','False');
+  CreateSetting('Settings/Tabs/OpenScriptInNewTab','True');
   CreateSetting('Settings/ColourPicker/ShowHistoryOnPick', 'True');
   CreateSetting('Settings/Updater/RemoteLink',
                 'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS}+'.exe'{$ENDIF});
@@ -928,6 +930,34 @@ begin
 
 end;
 
+procedure TForm1.HandleParameters;
+var
+  DoRun : Boolean;
+  ErrorMsg : string;
+begin
+  DoRun := false;
+  if Paramcount = 1 then
+  begin
+    if FileExists(ParamStr(1)) then
+      LoadScriptFile(paramstr(1));
+  end else
+  begin;
+    ErrorMsg:=Application.CheckOptions('ro:','run open:');
+    if ErrorMsg <> '' then
+      writeln(ErrorMSG)
+    else
+    begin
+      if Application.HasOption('o','open') then
+      begin;
+        LoadScriptFile(Application.GetOptionValue('o','open'));
+        DoRun:= Application.HasOption('r','run');
+      end;
+    end;
+  end;
+  if DoRun then
+    Self.RunScript;
+end;
+
 
 procedure TForm1.ActionTabLastExecute(Sender: TObject);
 var
@@ -1015,7 +1045,8 @@ end;
 
 procedure TForm1.ActionNewExecute(Sender: TObject);
 begin
-  Self.ClearScript;
+  //Self.ClearScript;
+  Self.AddTab;
 end;
 
 procedure TForm1.ActionNewTabExecute(Sender: TObject);
@@ -1336,7 +1367,8 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   Randomize;
   MainDir:= ExtractFileDir(Application.ExeName);
-  if FileExists(MainDir + DS + SimbaSettingsFile) then
+  SimbaSettingsFile := MainDir + DS + 'settings.xml';
+  if FileExists(SimbaSettingsFile) then
     Application.CreateForm(TSettingsForm,SettingsForm)
   else  begin
     Application.CreateForm(TSettingsForm,SettingsForm);
@@ -1368,6 +1400,7 @@ begin
   {$endif}
   frmFunctionList.OnEndDock:= @frmFunctionList.FrameEndDock;
   FirstRun := true;//Our next run is the first run.
+  HandleParameters;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -1827,24 +1860,34 @@ begin
 end;
 
 function TForm1.OpenScript: boolean;
+var
+  OpenInNewTab : boolean;
 begin
   Result := False;
-  if CanExitOrOpen = false then
-    Exit;
+  OpenInNewTab:= (LowerCase(LoadSettingDef('Settings/Tabs/OpenScriptInNewTab','True')) = 'true');
+  if not OpenInNewTab then
+    if CanExitOrOpen = false then
+      Exit;
   with TOpenDialog.Create(nil) do
   try
     Filter:= 'Simba Files|*.simb;*.cogat;*.mufa;*.txt|Any files|*.*';
     if Execute then
-      result := LoadScriptFile(filename);
+      if FileExists(filename) then
+        result := LoadScriptFile(filename);
   finally
     Free;
   end;
 end;
 
 function TForm1.LoadScriptFile(FileName : string): boolean;
+var
+  OpenInNewTab : boolean;
 begin
+  OpenInNewTab:= (LowerCase(LoadSettingDef('Settings/Tabs/OpenScriptInNewTab','True')) = 'true');
   if FileExists(FileName) then
   begin;
+    if OpenInNewTab and (CurrScript.SynEdit.Text <> CurrScript.ScriptDefault) then //Add la tab!
+      self.addtab;
     with CurrScript do
     begin
       filename := SetDirSeparators(filename);

@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 002.002.000 |
+| Project : Ararat Synapse                                       | 002.002.003 |
 |==============================================================================|
 | Content: Socket Independent Platform Layer - Win32 definition include        |
 |==============================================================================|
-| Copyright (c)1999-2008, Lukas Gebauer                                        |
+| Copyright (c)1999-2010, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2003.                     |
+| Portions created by Lukas Gebauer are Copyright (c)2003-2010.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -43,8 +43,6 @@
 |==============================================================================}
 
 {:@exclude}
-
-{$IFDEF WIN32}
 
 //{$DEFINE WINSOCK1}
 {Note about define WINSOCK1:
@@ -260,7 +258,11 @@ type
   u_long = Longint;
   pu_long = ^u_long;
   pu_short = ^u_short;
+{$IFDEF FPC}
+  TSocket = ptruint;
+{$ELSE}
   TSocket = u_int;
+{$ENDIF}
   TAddrFamily = integer;
 
   TMemory = pointer;
@@ -286,7 +288,7 @@ const
   FD_SETSIZE     =   64;
 type
   PFDSet = ^TFDSet;
-  TFDSet = packed record
+  TFDSet = record
     fd_count: u_int;
     fd_array: array[0..FD_SETSIZE-1] of TSocket;
   end;
@@ -298,7 +300,7 @@ const
 
 type
   PTimeVal = ^TTimeVal;
-  TTimeVal = packed record
+  TTimeVal = record
     tv_sec: Longint;
     tv_usec: Longint;
   end;
@@ -311,6 +313,7 @@ const
   IPPROTO_UDP    =   17;	{ User Datagram Protocol		}
   IPPROTO_IPV6   =   41;
   IPPROTO_ICMPV6 =   58;
+  IPPROTO_RM     =  113;
 
   IPPROTO_RAW    =   255;
   IPPROTO_MAX    =   256;
@@ -318,14 +321,14 @@ const
 type
 
   PInAddr = ^TInAddr;
-  TInAddr = packed record
+  TInAddr = record
     case integer of
       0: (S_bytes: packed array [0..3] of byte);
       1: (S_addr: u_long);
   end;
 
   PSockAddrIn = ^TSockAddrIn;
-  TSockAddrIn = packed record
+  TSockAddrIn = record
     case Integer of
       0: (sin_family: u_short;
           sin_port: u_short;
@@ -341,7 +344,7 @@ type
   end;
 
   PInAddr6 = ^TInAddr6;
-  TInAddr6 = packed record
+  TInAddr6 = record
     case integer of
       0: (S6_addr: packed array [0..15] of byte);
       1: (u6_addr8: packed array [0..15] of byte);
@@ -350,7 +353,7 @@ type
   end;
 
   PSockAddrIn6 = ^TSockAddrIn6;
-  TSockAddrIn6 = packed record
+  TSockAddrIn6 = record
 		sin6_family:   u_short;     // AF_INET6
 		sin6_port:     u_short;     // Transport level port number
 		sin6_flowinfo: u_long;	    // IPv6 flow information
@@ -366,7 +369,7 @@ type
   end;
 
   PHostEnt = ^THostEnt;
-  THostEnt = packed record
+  THostEnt = record
     h_name: PAnsiChar;
     h_aliases: ^PAnsiChar;
     h_addrtype: Smallint;
@@ -377,7 +380,7 @@ type
   end;
 
   PNetEnt = ^TNetEnt;
-  TNetEnt = packed record
+  TNetEnt = record
     n_name: PAnsiChar;
     n_aliases: ^PAnsiChar;
     n_addrtype: Smallint;
@@ -385,15 +388,20 @@ type
   end;
 
   PServEnt = ^TServEnt;
-  TServEnt = packed record
+  TServEnt = record
     s_name: PAnsiChar;
     s_aliases: ^PAnsiChar;
+{$ifdef WIN64}
+    s_proto: PAnsiChar;
+    s_port: Smallint;
+{$else} 
     s_port: Smallint;
     s_proto: PAnsiChar;
+{$endif}
   end;
 
   PProtoEnt = ^TProtoEnt;
-  TProtoEnt = packed record
+  TProtoEnt = record
     p_name: PAnsiChar;
     p_aliases: ^PAnsichar;
     p_proto: Smallint;
@@ -526,7 +534,7 @@ type
 
   { Structure used by kernel to pass protocol information in raw sockets. }
   PSockProto = ^TSockProto;
-  TSockProto = packed record
+  TSockProto = record
     sp_family: u_short;
     sp_protocol: u_short;
   end;
@@ -553,7 +561,7 @@ const
 type
 { Structure used for manipulating linger option. }
   PLinger = ^TLinger;
-  TLinger = packed record
+  TLinger = record
     l_onoff: u_short;
     l_linger: u_short;
   end;
@@ -715,14 +723,22 @@ const
   WSASYS_STATUS_LEN      =   128;
 type
   PWSAData = ^TWSAData;
-  TWSAData = packed record
+  TWSAData = record
     wVersion: Word;
     wHighVersion: Word;
+{$ifdef win64}
+    iMaxSockets : Word;
+    iMaxUdpDg : Word;
+    lpVendorInfo : PAnsiChar;
+    szDescription : array[0..WSADESCRIPTION_LEN] of AnsiChar;
+    szSystemStatus : array[0..WSASYS_STATUS_LEN] of AnsiChar;
+{$else}     
     szDescription: array[0..WSADESCRIPTION_LEN] of AnsiChar;
     szSystemStatus: array[0..WSASYS_STATUS_LEN] of AnsiChar;
     iMaxSockets: Word;
     iMaxUdpDg: Word;
     lpVendorInfo: PAnsiChar;
+{$endif}
   end;
 
   function IN6_IS_ADDR_UNSPECIFIED(const a: PInAddr6): boolean;
@@ -1167,10 +1183,10 @@ begin
       Sin.sin_family := AF_INET;
       ProtoEnt := synsock.GetProtoByNumber(SockProtocol);
       ServEnt := nil;
-      if ProtoEnt <> nil then
+      if (ProtoEnt <> nil) and (StrToIntDef(string(Port),-1) =-1) then
         ServEnt := synsock.GetServByName(PAnsiChar(Port), ProtoEnt^.p_name);
       if ServEnt = nil then
-        Sin.sin_port := synsock.htons(StrToIntDef(Port, 0))
+        Sin.sin_port := synsock.htons(StrToIntDef(string(Port), 0))
       else
         Sin.sin_port := ServEnt^.s_port;
       if IP = cBroadcast then
@@ -1282,7 +1298,7 @@ var
   IP: u_long;
   PAdrPtr: PaPInAddr;
   i: Integer;
-  s: AnsiString;
+  s: String;
   InAddr: TInAddr;
 begin
   IPList.Clear;
@@ -1312,7 +1328,7 @@ begin
       end;
     end
     else
-      IPList.Add(Name);
+      IPList.Add(string(Name));
   end
   else
   begin
@@ -1342,7 +1358,7 @@ begin
             if r = 0 then
             begin
               host := PAnsiChar(host);
-              IPList.Add(host);
+              IPList.Add(string(host));
             end;
           end;
           AddrNext := AddrNext^.ai_next;
@@ -1375,7 +1391,7 @@ begin
       if ProtoEnt <> nil then
         ServEnt := synsock.GetServByName(PAnsiChar(Port), ProtoEnt^.p_name);
       if ServEnt = nil then
-        Result := StrToIntDef(Port, 0)
+        Result := StrToIntDef(string(Port), 0)
       else
         Result := synsock.htons(ServEnt^.s_port);
     finally
@@ -1581,5 +1597,3 @@ finalization
 begin
   SynSockCS.Free;
 end;
-
-{$ENDIF}

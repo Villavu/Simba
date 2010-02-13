@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 001.001.000 |
+| Project : Ararat Synapse                                       | 001.001.001 |
 |==============================================================================|
 | Content: ICONV support for Win32, Linux and .NET                             |
 |==============================================================================|
-| Copyright (c)2004-2008, Lukas Gebauer                                        |
+| Copyright (c)2004-2010, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2004-2008.                |
+| Portions created by Lukas Gebauer are Copyright (c)2004-2010.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -46,6 +46,12 @@
   {$MODE DELPHI}
 {$ENDIF}
 {$H+}
+//old Delphi does not have MSWINDOWS define.
+{$IFDEF WIN32}
+  {$IFNDEF MSWINDOWS}
+    {$DEFINE MSWINDOWS}
+  {$ENDIF}
+{$ENDIF}
 
 {:@abstract(LibIconv support)
 
@@ -63,7 +69,7 @@ uses
   System.Text,
 {$ENDIF}
   synafpc,
-{$IFNDEF WIN32}
+{$IFNDEF MSWINDOWS}
   {$IFNDEF FPC}
   Libc,
   {$ENDIF}
@@ -74,7 +80,7 @@ uses
 
 
 const
-  {$IFNDEF WIN32}
+  {$IFNDEF MSWINDOWS}
   DLLIconvName = 'libiconv.so';
   {$ELSE}
   DLLIconvName = 'iconv.dll';

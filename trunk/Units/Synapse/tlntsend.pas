@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 001.003.000 |
+| Project : Ararat Synapse                                       | 001.003.001 |
 |==============================================================================|
 | Content: TELNET and SSH2 client                                              |
 |==============================================================================|
-| Copyright (c)1999-2008, Lukas Gebauer                                        |
+| Copyright (c)1999-2010, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2002-2008.                |
+| Portions created by Lukas Gebauer are Copyright (c)2002-2010.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -51,6 +51,11 @@ Used RFC: RFC-854
   {$MODE DELPHI}
 {$ENDIF}
 {$H+}
+
+{$IFDEF UNICODE}
+  {$WARN IMPLICIT_STRING_CAST OFF}
+  {$WARN IMPLICIT_STRING_CAST_LOSS OFF}
+{$ENDIF}
 
 unit tlntsend;
 
@@ -148,6 +153,7 @@ constructor TTelnetSend.Create;
 begin
   inherited Create;
   FSock := TTCPBlockSocket.Create;
+  FSock.Owner := self;
   FSock.OnReadFilter := FilterHook;
   FTimeout := 60000;
   FTargetPort := cTelnetProtocol;

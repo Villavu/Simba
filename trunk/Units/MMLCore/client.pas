@@ -51,7 +51,6 @@ It binds all the components together.
             MBitmaps : TMBitmaps;
             MDTM: TMDTM;
             MOCR: TMOCR;
-
     end;
 
 implementation
