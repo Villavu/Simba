@@ -150,6 +150,16 @@ AddFunction(@ps_Replace,'function ReplaceWrap(Text, FindStr, ReplaceStr: string;
 SetCurrSection('Web');
 AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 AddFunction(@ps_GetPage,'function GetPage(url : string): string;');
+AddFunction(@ps_InitializeHTTPClient,'function InitializeHTTPClient(HandleCookies, HandleRedirects: Boolean): Integer;');
+AddFunction(@ps_FreeHTTPClient,'procedure FreeHTTPClient(Client: Integer);');
+AddFunction(@ps_GetHTTPPage,'function GetHTTPPage(Client: Integer; URL: string): string;');
+AddFunction(@ps_SetHTTPUserAgent,'procedure SetHTTPUserAgent(Client: Integer; Agent: string);');
+AddFunction(@ps_PostHTTPPage,'function PostHTTPPage(Client: Integer; Url: string; PostData: string): string;');
+AddFunction(@ps_PostHTTPPageEx,'function PostHTTPPageEx(Client: Integer; Url: string): string;');
+AddFunction(@ps_ClearPostData,'procedure ClearPostData(Client: Integer);');
+AddFunction(@ps_AddPostVariable,'procedure AddPostVariable(Client: Integer; VarName, VarValue: string);');
+AddFunction(@ps_GetRawHeaders,'function GetRawHeaders(Client: Integer): string;');
+
 
 
 { Color Conversions and Speed }

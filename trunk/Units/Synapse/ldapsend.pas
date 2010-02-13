@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 001.006.001 |
+| Project : Ararat Synapse                                       | 001.007.000 |
 |==============================================================================|
 | Content: LDAP client                                                         |
 |==============================================================================|
-| Copyright (c)1999-2009, Lukas Gebauer                                        |
+| Copyright (c)1999-2010, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2003-2009.                |
+| Portions created by Lukas Gebauer are Copyright (c)2003-2010.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -51,6 +51,11 @@ Used RFC: RFC-2251, RFC-2254, RFC-2829, RFC-2830
   {$MODE DELPHI}
 {$ENDIF}
 {$H+}
+
+{$IFDEF UNICODE}
+  {$WARN IMPLICIT_STRING_CAST OFF}
+  {$WARN IMPLICIT_STRING_CAST_LOSS OFF}
+{$ENDIF}
 
 unit ldapsend;
 
@@ -124,6 +129,8 @@ type
     procedure Del(Index: integer);
     {:Find and return attribute with requested name. Returns nil if not found.}
     function Find(AttributeName: AnsiString): TLDAPAttribute;
+    {:Find and return attribute value with requested name. Returns empty string if not found.}
+    function Get(AttributeName: AnsiString): string;
     {:List of TLDAPAttribute objects.}
     property Items[Index: Integer]: TLDAPAttribute read GetAttribute; default;
   end;
@@ -391,6 +398,17 @@ begin
   Result := FAttributeList.Count;
 end;
 
+function TLDAPAttributeList.Get(AttributeName: AnsiString): string;
+var
+  x: TLDAPAttribute;
+begin
+  Result := '';
+  x := self.Find(AttributeName);
+  if x <> nil then
+    if x.Count > 0 then
+      Result := x[0];
+end;
+
 function TLDAPAttributeList.GetAttribute(Index: integer): TLDAPAttribute;
 begin
   Result := nil;
@@ -499,6 +517,7 @@ begin
   FReferals := TStringList.Create;
   FFullResult := '';
   FSock := TTCPBlockSocket.Create;
+  FSock.Owner := self;
   FTimeout := 60000;
   FTargetPort := cLDAPProtocol;
   FAutoTLS := False;

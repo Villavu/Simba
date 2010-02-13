@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 005.001.000 |
+| Project : Ararat Synapse                                       | 005.002.000 |
 |==============================================================================|
 | Content: Socket Independent Platform Layer                                   |
 |==============================================================================|
-| Copyright (c)1999-2003, Lukas Gebauer                                        |
+| Copyright (c)1999-2010, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2001-2003.                |
+| Portions created by Lukas Gebauer are Copyright (c)2001-20010.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -48,20 +48,30 @@ unit synsock;
 
 {$MINENUMSIZE 4}
 
-{$IFDEF CIL}
-  {$I ssdotnet.pas}
-{$ENDIF}
-
+//old Delphi does not have MSWINDOWS define.
 {$IFDEF WIN32}
-  {$I sswin32.pas}
-{$ELSE}
-  {$IFDEF FPC}
-    {$I ssfpc.pas}
-  {$ELSE}
-    {$I sslinux.pas}
+  {$IFNDEF MSWINDOWS}
+    {$DEFINE MSWINDOWS}
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF CIL}
+  {$I ssdotnet.pas}
+{$ELSE}
+  {$IFDEF MSWINDOWS}
+    {$I sswin32.pas}
+  {$ELSE}
+    {$IFDEF WINCE}
+      {$I sswin32.pas}  //not complete yet!
+    {$ELSE}
+      {$IFDEF FPC}
+        {$I ssfpc.pas}
+      {$ELSE}
+        {$I sslinux.pas}
+      {$ENDIF}
+    {$ENDIF}
+  {$ENDIF}
+{$ENDIF}
 
 end.
 
