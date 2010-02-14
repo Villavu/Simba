@@ -100,6 +100,7 @@ AddFunction(@ps_WriteFileString, 'function WriteFileString(FileNum: Integer; s: 
 AddFunction(@ps_SetFileCharPointer, 'Function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;');
 AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Integer;');
 AddFunction(@ps_DirectoryExists,'function DirectoryExists( const DirectoryName : string ) : Boolean;');
+AddFunction(@ps_CreateDirectory,'function CreateDirectory( const DirectoryName : string) : boolean;');
 AddFunction(@ps_FileExists,'function FileExists ( const FileName : string ) : Boolean;');
 AddFunction(@ps_WriteINI,'procedure WriteINI(Section, KeyName, NewString, FileName: string);');
 AddFunction(@ps_ReadINI,'function ReadINI(Section, KeyName, FileName: string): string;');
