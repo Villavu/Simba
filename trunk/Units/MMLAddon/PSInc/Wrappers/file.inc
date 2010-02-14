@@ -76,6 +76,10 @@ function ps_DirectoryExists ( const DirectoryName : string ) : Boolean; extdecl;
 begin
   result := DirectoryExists(DirectoryName);
 end;
+function ps_CreateDirectory( const DirectoryName : string) : boolean; extdecl;
+begin
+  result := CreateDir(directoryName);
+end;
 
 procedure ps_WriteINI(Section, KeyName, NewString, FileName: string);extdecl;
 var
