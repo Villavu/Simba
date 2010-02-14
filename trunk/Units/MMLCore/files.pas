@@ -122,7 +122,7 @@ begin;
   For I := 0 To High(MFiles) Do
     If MFiles[i].FS <> nil Then
     Begin
-      WriteLn('You forgot to free a file... (Path = ' + MFiles[i].Path + ')');
+      Writeln(Format('File[%s] has not been freed in the script, freeing it now.',[MFiles[i].Path]));
       Try
         MFiles[I].FS.Free;
       Except
