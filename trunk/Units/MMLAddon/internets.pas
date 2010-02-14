@@ -81,6 +81,7 @@ begin
   if HTTPClients[index] = nil then
     raise exception.CreateFmt('FreeHTTPClient: Trying to free an index(%d) that is already freed',[index]);
   THTTPClient(HTTPClients[index]).Free;
+  HTTPClients[index] := nil;
 end;
 
 constructor TMInternet.Create(Owner: TObject);
@@ -97,10 +98,16 @@ var
 begin
   for i := Connections.Count -1 downto 0 do
     if Connections[i] <> nil then
+    begin
       TObject(Connections[i]).Free;
+      Writeln(Format('Connection[%d] has not been freed in the script, freeing it now.',[i]));
+    end;
   for i := HTTPClients.Count -1 downto 0 do
     if HTTPClients[i] <> nil then
+    begin
       THTTPClient(HTTPClients[i]).Free;
+      Writeln(Format('HTTPClient[%d] has not been freed in the script, freeing it now.',[i]));
+    end;
   Connections.Free;
   HTTPClients.Free;
   inherited Destroy;
