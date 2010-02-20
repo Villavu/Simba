@@ -5,7 +5,7 @@ end;
 
 function ps_InitializeHTTPClient(HandleCookies, HandleRedirects: Boolean): Integer; extdecl;
 begin
-  result := CurrThread.MInternet.CreateHTTPClient(HandleCookies); extdecl;
+  result := CurrThread.MInternet.CreateHTTPClient(HandleCookies);
 end;
 
 procedure ps_FreeHTTPClient(Client: Integer); extdecl;
