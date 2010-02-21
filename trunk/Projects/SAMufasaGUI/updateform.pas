@@ -99,8 +99,7 @@ begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
     SimbaVersionThread := TSimbaVersionThread.Create(true);
-    SettingsForm.Settings.CreateKey('Settings/Updater/RemoteVersionLink',true);
-    SettingsForm.Settings.SetKeyValue('Settings/Updater/RemoteVersionLink',SimbaURL + 'Version');
+
     SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
                 'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version',SimbaSettingsFile);
     SimbaVersionThread.Resume;
@@ -196,9 +195,6 @@ begin
   FDone := False;
   FCancelling := False;
   FCancelled := False;
-
-  SettingsForm.Settings.CreateKey('Settings/Updater/RemoteLink',true);
-  SettingsForm.Settings.SetKeyValue('Settings/Updater/RemoteLink',SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
 
   Updater.FileURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
         'Settings/Updater/RemoteLink',
