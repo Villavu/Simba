@@ -65,9 +65,25 @@ var
   SimbaUpdateForm: TSimbaUpdateForm;
 
 implementation
-
 uses
   internets,  TestUnit, simbasettings,lclintf;
+
+const
+  SimbaURL =     {$IFDEF WINDOWS}
+                  {$IFDEF CPUI386}
+                  'http://simba.villavu.com/bin/Windows/x86/Stable/'
+                  {$ELSE}
+                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
+                  {$ENDIF}
+                {$ELSE}
+                  {$IFDEF CPUI386}
+                  'http://simba.villavu.com/bin/Linux/x86/Stable/'
+                  {$ELSE}
+                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
+                  {$ENDIF}
+                {$ENDIF};
+
+
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
@@ -83,24 +99,10 @@ begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
     SimbaVersionThread := TSimbaVersionThread.Create(true);
-
+    SettingsForm.Settings.CreateKey('Settings/Updater/RemoteVersionLink',true);
+    SettingsForm.Settings.SetKeyValue('Settings/Updater/RemoteVersionLink',SimbaURL + 'Version');
     SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
-                'Settings/Updater/RemoteVersionLink',
-                {$IFDEF WINDOWS}
-                  {$IFDEF CPUI386}
-                  'http://simba.villavu.com/bin/Windows/x86/Stable/Version'
-                  {$ELSE}
-                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/Version'
-                  {$ENDIF}
-                {$ELSE}
-                  {$IFDEF CPUI386}
-                  'http://simba.villavu.com/bin/Linux/x86/Stable/Version'
-                  {$ELSE}
-                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/Version'
-                  {$ENDIF}
-                {$ENDIF}
-                , SimbaSettingsFile);
-
+                'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version',SimbaSettingsFile);
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
@@ -195,9 +197,12 @@ begin
   FCancelling := False;
   FCancelled := False;
 
+  SettingsForm.Settings.CreateKey('Settings/Updater/RemoteLink',true);
+  SettingsForm.Settings.SetKeyValue('Settings/Updater/RemoteLink',SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
+
   Updater.FileURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
         'Settings/Updater/RemoteLink',
-        'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
+        SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
         SimbaSettingsFile
   );
 
