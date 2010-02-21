@@ -107,6 +107,7 @@ type
     MenuItemExportHTML: TMenuItem;
     MenuItemDivider9: TMenuItem;
     MouseTimer: TTimer;
+    NewsTimer: TTimer;
     TT_Cut: TToolButton;
     TT_Copy: TToolButton;
     TT_Paste: TToolButton;
@@ -268,6 +269,7 @@ type
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
     procedure MenuItemFunctionListClick(Sender: TObject);
     procedure MenuViewSettingsClick(Sender: TObject);
+    procedure NewsTimerTimer(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
     procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
@@ -1632,6 +1634,30 @@ end;
 procedure TForm1.MenuViewSettingsClick(Sender: TObject);
 begin
   SettingsForm.ShowModal;
+end;
+
+function GetSimbaNews: String;
+var
+  t: TSimbaVersionThread;
+begin
+  t := TSimbaVersionThread.Create(true);
+  t.InputURL:='http://simba.villavu.com/bin/news';
+  t.Resume;
+  while not t.done do
+  begin
+    Application.ProcessMessages;
+    Sleep(50);
+  end;
+  Exit(t.ResultStr);
+end;
+
+procedure TForm1.NewsTimerTimer(Sender: TObject);
+var
+  s: String;
+begin
+  NewsTimer.Enabled:=False;
+  s := GetSimbaNews;
+  Memo1.Append(s);
 end;
 
 procedure TForm1.OnLinePSScript(Sender: TObject);
