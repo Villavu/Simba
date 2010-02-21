@@ -43,7 +43,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 538;
+    SimbaVersion = 544;
 
 type
 
@@ -1681,10 +1681,14 @@ end;
 procedure TForm1.NewsTimerTimer(Sender: TObject);
 var
   s: String;
+  News : TStringList; {Need it for correct EOL stuff}
 begin
   NewsTimer.Enabled:=False;
   s := GetSimbaNews;
-  Memo1.Append(s);
+  News := TStringList.Create;
+  News.Text:= s;
+  Memo1.Lines.AddStrings(News);
+  News.free;
 end;
 
 procedure TForm1.OnLinePSScript(Sender: TObject);

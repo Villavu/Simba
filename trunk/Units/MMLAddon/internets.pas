@@ -50,12 +50,19 @@ uses
 { OTHER }
 function GetPage(URL: String): String;
 var
-  s: TStringList;
-begin
-  s:=TStringList.Create;
-  HttpGetText(URL, s);
-  result := s.Text;
-  s.Free;
+  HTTP : THTTPSend;
+begin;
+  HTTP := THTTPSend.Create;
+  Result := '';
+  try
+    if HTTP.HTTPMethod('GET', URL) then
+    begin
+      SetLength(result,HTTP.Document.Size);
+      HTTP.Document.Read(result[1],length(result));
+    end;
+  finally
+    HTTP.Free;
+  end;
 end;
 
 { TMInternet }
@@ -125,12 +132,17 @@ begin
   if not fHandleCookies then
     HTTPSend.Cookies.Clear;
   HTTPSend.MimeType :=  'text/html';
-  if HTTPSend.HTTPMethod('GET',url) then
-  begin;
-    SetLength(result,HTTPSend.Document.Size);
-    HTTPSend.Document.Read(result[1],length(result));
-  end else
-    result := '';
+  try
+    if HTTPSend.HTTPMethod('GET',url) then
+    begin;
+      SetLength(result,HTTPSend.Document.Size);
+      HTTPSend.Document.Read(result[1],length(result));
+    end else
+      result := '';
+  except
+    on e : exception do
+      Writeln('THTTPClient error: ' + e.message);
+  end;
 end;
 
 function THTTPClient.PostHTTPPage(Url: string; PostData: string): string;
@@ -138,12 +150,17 @@ begin
   HTTPSend.MimeType := 'application/x-www-form-urlencoded';
   HTTPSend.Document.Clear;
   HTTPSend.Document.Write(Postdata[1],length(postdata));
-  if HTTPSend.HTTPMethod('POST',url) then
-  begin;
-    SetLength(result,HTTPSend.Document.Size);
-    HTTPSend.Document.Read(result[1],Length(result));
-  end else
-    result := '';
+  try
+    if HTTPSend.HTTPMethod('POST',url) then
+    begin;
+      SetLength(result,HTTPSend.Document.Size);
+      HTTPSend.Document.Read(result[1],Length(result));
+    end else
+      result := '';
+  except
+    on e : exception do
+      Writeln('THTTPClient error: ' + e.message);
+  end;
 end;
 
 function THTTPClient.PostHTTPPage(Url: string): string;
