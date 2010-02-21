@@ -55,7 +55,7 @@ type
     procedure PerformUpdate;
   protected
     FCancelled: Boolean;
-  end; 
+  end;
 
 const
   DownloadSpeedTextRunning = 'Downloading at %d kB/s';
@@ -86,9 +86,20 @@ begin
 
     SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
                 'Settings/Updater/RemoteVersionLink',
-                'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS} +
-                '.exe'{$ENDIF} + '.version',
-                SimbaSettingsFile);
+                {$IFDEF WINDOWS}
+                  {$IFDEF CPUI386}
+                  'http://simba.villavu.com/bin/Windows/x86/Stable/Version'
+                  {$ELSE}
+                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/Version'
+                  {$ENDIF}
+                {$ELSE}
+                  {$IFDEF CPUI386}
+                  'http://simba.villavu.com/bin/Linux/x86/Stable/Version'
+                  {$ELSE}
+                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/Version'
+                  {$ENDIF}
+                {$ENDIF}
+                , SimbaSettingsFile);
 
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
