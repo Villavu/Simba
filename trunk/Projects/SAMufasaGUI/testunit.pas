@@ -843,10 +843,37 @@ begin
   CreateSetting('Settings/Tabs/OpenNextOnClose','False');
   CreateSetting('Settings/Tabs/OpenScriptInNewTab','True');
   CreateSetting('Settings/ColourPicker/ShowHistoryOnPick', 'True');
-  CreateSetting('Settings/Updater/RemoteLink',
-                'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS}+'.exe'{$ENDIF});
+
+  CreateSetting('Settings/Updater/RemoteVersion',
+                {$IFDEF WINDOWS}
+                  {$IFDEF CPUI386}
+                  'http://simba.villavu.com/bin/Windows/x86/Stable/Simba.exe'
+                  {$ELSE}
+                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/Simba.exe'
+                  {$ENDIF}
+                {$ELSE}
+                  {$IFDEF CPUI386}
+                  'http://simba.villavu.com/bin/Linux/x86/Stable/Simba'
+                  {$ELSE}
+                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/Simba'
+                  {$ENDIF}
+                {$ENDIF}
+                );
   CreateSetting('Settings/Updater/RemoteVersionLink',
-                'http://old.villavu.com/merlijn/Simba'{$IFDEF WINDOWS}+'.exe'{$ENDIF} + '.version');
+                {$IFDEF WINDOWS}
+                  {$IFDEF CPUI386}
+                  'http://simba.villavu.com/bin/Windows/x86/Stable/Version'
+                  {$ELSE}
+                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/Version'
+                  {$ENDIF}
+                {$ELSE}
+                  {$IFDEF CPUI386}
+                  'http://simba.villavu.com/bin/Linux/x86/Stable/Version'
+                  {$ELSE}
+                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/Version'
+                  {$ENDIF}
+                {$ENDIF}
+                );
   {Creates the paths and returns the path}
   includePath:= CreateSetting('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS));
   fontPath := CreateSetting('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS));
