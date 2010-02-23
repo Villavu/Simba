@@ -1195,6 +1195,7 @@ begin
   begin
     formWriteln('Our window no longer exists -> Resetting to desktop');
     self.Manager.SetDesktop;
+    self.Manager.ResetError;
   end;
   StatusBar.Panels[Panel_Coords].Text := Format('(%d, %d)', [x, y]);
 end;
