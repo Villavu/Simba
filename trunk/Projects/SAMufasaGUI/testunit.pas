@@ -1191,6 +1191,11 @@ var
   x, y: Integer;
 begin
   Self.Manager.GetMousePos(x, y);
+  if self.Manager.ReceivedError() then
+  begin
+    formWriteln('Our window no longer exists -> Resetting to desktop');
+    self.Manager.SetDesktop;
+  end;
   StatusBar.Panels[Panel_Coords].Text := Format('(%d, %d)', [x, y]);
 end;
 
