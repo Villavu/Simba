@@ -85,14 +85,14 @@ var
   x_root, y_root : cint;
   xmask : cuint;
   x, y : cint;
-  Old_Handler : TXErrorHandler;
+  //Old_Handler : TXErrorHandler;
 
   window_opacity: TAtom;
   opacity_75: culong;
   opacity_100: culong;
 
 begin
-  Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+  //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
 
   Result := 0;
 
@@ -143,7 +143,7 @@ begin
   XChangeProperty(manager.display, Result, window_opacity, XA_CARDINAL, 32, PropModeReplace, @opacity_100, 1);
   XFlush(manager.display);
 
-  XSetErrorHandler(Old_handler);
+  //XSetErrorHandler(Old_handler);
 end;
 
 {$ELSE}

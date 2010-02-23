@@ -49,6 +49,10 @@ interface
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         function GetColor(x,y : integer) : TColor; override;
 
+        function  GetError: String; override;
+        function  ReceivedError: Boolean; override;
+        procedure ResetError; override;
+
         function TargetValid: boolean; override;
         procedure ActivateClient; override;
         procedure GetMousePosition(var x,y: integer); override;
@@ -163,6 +167,21 @@ implementation
     buffer.Free;
     keyinput.Free;
     inherited Destroy; 
+  end;
+
+  function  TWindow.GetError: String;
+  begin
+    exit('');
+  end;
+
+  function  TWindow.ReceivedError: Boolean;
+  begin
+    exit(false);
+  end;
+
+  procedure TWindow.ResetError;
+  begin
+
   end;
 
   function TWindow.GetNativeWindow: TNativeWindow;

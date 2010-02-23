@@ -49,6 +49,11 @@ interface
         procedure ActivateClient; virtual;
         function TargetValid: boolean; virtual;
 
+        { Sucky implementation }
+        function  GetError: String; virtual; abstract;
+        function  ReceivedError: Boolean; virtual; abstract;
+        procedure ResetError; virtual; abstract;
+
         { ONLY override the following methods if the target provides mouse functions, defaults to 
         | raise exceptions }
         procedure GetMousePosition(var x,y: integer); virtual;
@@ -104,6 +109,7 @@ interface
         function ReturnData(xs, ys, width, height: Integer): TRetData; override; abstract;
 
         function TargetValid: boolean; override; abstract;
+
         procedure ActivateClient; override; abstract;
         procedure GetMousePosition(var x,y: integer); override; abstract;
         procedure MoveMouse(x,y: integer); override; abstract;
@@ -244,6 +250,11 @@ interface
         constructor Create;
         constructor Create(plugin_dir: string);
         destructor Destroy; override;
+
+        { Sucky implementation }
+        function  GetError: String;
+        function  ReceivedError: Boolean;
+        procedure ResetError;
         
         procedure SetDesktop; virtual; abstract;
         function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
@@ -629,6 +640,27 @@ end;
 function TIOManager_Abstract.GetKeyCode(c: char): integer;
 begin
   result := keymouse.GetKeyCode(c);
+end;
+
+function TIOManager_Abstract.GetError: String;
+begin
+  if keymouse.ReceivedError then
+    exit(keymouse.GetError);
+  if image.ReceivedError then
+    exit(image.GetError);
+  raise Exception.Create('TIOManager_Abstract.GetError: NO ERROR!');
+  exit('');
+end;
+
+function TIOManager_Abstract.ReceivedError: Boolean;
+begin
+  exit(keymouse.ReceivedError or image.ReceivedError);
+end;
+
+procedure TIOManager_Abstract.ResetError;
+begin
+  keymouse.ResetError;
+  image.ResetError;
 end;
 
 // TRUE when STOPPING.
