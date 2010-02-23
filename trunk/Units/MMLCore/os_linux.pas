@@ -26,7 +26,8 @@ unit os_linux;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest, keysym;
+    Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest, keysym,
+    syncobjs;
   
   type
 
@@ -47,6 +48,10 @@ interface
         procedure GetTargetDimensions(var w, h: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         procedure FreeReturnData; override;
+
+        function  GetError: String; override;
+        function  ReceivedError: Boolean; override;
+        procedure ResetError; override;
 
         function TargetValid: boolean; override;
         procedure ActivateClient; override;
@@ -69,6 +74,8 @@ interface
         buffer: PXImage;
         dirty: Boolean;  //true if image loaded
         keyinput: TKeyInput;
+
+        oldXHandler: TXErrorHandler;
     end;
     
     TIOManager = class(TIOManager_Abstract)
@@ -92,19 +99,14 @@ implementation
 
   uses GraphType, interfacebase, lcltype;
 
-  // Too global.
-  function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
-  begin;
-    result := 0;
-    Writeln('X Error: ');
-    writeln('Error code: ' + inttostr(para2^.error_code));
-    writeln('Display: ' + inttostr(LongWord(para2^.display)));
-    writeln('Minor code: ' + inttostr(para2^.minor_code));
-    writeln('Request code: ' + inttostr(para2^.request_code));
-    writeln('Resource ID: ' + inttostr(para2^.resourceid));
-    writeln('Serial: ' + inttostr(para2^.serial));
-    writeln('Type: ' + inttostr(para2^._type));
-  end;
+  { PROBLEM: .Create is called on the main thread. ErrorCS etc aren't
+    created on other threads. We will create them on the fly... }
+  threadvar
+    xerror: string;
+  threadvar
+    ErrorCS: syncobjs.TCriticalSection;
+
+
 
 //***implementation*** TKeyInput
 
@@ -120,6 +122,60 @@ implementation
 
 //***implementation*** TWindow
 
+  // Too global.
+
+  function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
+
+  begin
+    { if someone understands the pascal syntax on how to define an array with
+    constant values, please change this to use an array }
+    case para2^.error_code of
+      1:  xerror := 'BadRequest';
+      2:  xerror := 'BadValue';
+      3:  xerror := 'BadWindow';
+      4:  xerror := 'BadPixmap';
+      5:  xerror := 'BadAtom';
+      6:  xerror := 'BadCursor';
+      7:  xerror := 'BadFont';
+      8:  xerror := 'BadMatch';
+      9:  xerror := 'BadDrawable';
+      10: xerror := 'BadAccess';
+      11: xerror := 'BadAlloc';
+      12: xerror := 'BadColor';
+      13: xerror := 'BadGC';
+      14: xerror := 'BadIDChoice';
+      15: xerror := 'BadName';
+      16: xerror := 'BadLength';
+      17: xerror := 'BadImplementation';
+      else
+        xerror := 'UNKNOWN';
+    end;
+    result := 0;
+    Writeln('X Error: ');
+    writeln('Error code: ' + inttostr(para2^.error_code));
+    writeln('Display: ' + inttostr(LongWord(para2^.display)));
+    writeln('Minor code: ' + inttostr(para2^.minor_code));
+    writeln('Request code: ' + inttostr(para2^.request_code));
+    writeln('Resource ID: ' + inttostr(para2^.resourceid));
+    writeln('Serial: ' + inttostr(para2^.serial));
+    writeln('Type: ' + inttostr(para2^._type));
+  end;
+
+  function TWindow.GetError: String;
+  begin
+    exit(xerror);
+  end;
+
+  function  TWindow.ReceivedError: Boolean;
+  begin
+    result := xerror <> '';
+  end;
+
+  procedure TWindow.ResetError;
+  begin
+    xerror := '';
+  end;
+
   constructor TWindow.Create(display: PDisplay; screennum: integer; window: x.TWindow); 
   begin 
     inherited Create;
@@ -127,14 +183,47 @@ implementation
     self.screennum:= screennum;
     self.window:= window;
     self.dirty:= false;
-    self.keyinput:= TKeyInput.Create
+    self.keyinput:= TKeyInput.Create;
+
+    xerror := '';
+    writeln('creating twindow');
+
+    { XXX FIXME TODO O GOD WTF }
+    if not assigned(ErrorCS) then
+      ErrorCS := syncobjs.TCriticalSection.Create;
+    ErrorCS.Enter;
+    try
+      oldXHandler:=XSetErrorHandler(@MufasaXErrorHandler);
+    finally
+      ErrorCS.Leave;
+    end;
   end; 
   
-  destructor TWindow.Destroy; 
+  destructor TWindow.Destroy;
+    var
+      erh: TXErrorHandler;
   begin
     FreeReturnData;
     keyinput.Free;
-    inherited Destroy; 
+
+    { XXX FIXME TODO O GOD WTF }
+    if not assigned(ErrorCS) then
+      ErrorCS := syncobjs.TCriticalSection.Create;
+    ErrorCS.Enter;
+
+    if self.ReceivedError then
+      writeln('recieved error: ' + GetError)
+    else
+      writeln('got no error');
+
+    erh := XSetErrorHandler(oldXHandler);
+    try
+      if erh <> @MufasaXErrorHandler then
+        XSetErrorHandler(erh);
+    finally
+      ErrorCS.Leave;
+    end;
+    inherited Destroy;
   end;
 
   function TWindow.GetNativeWindow: TNativeWindow;
@@ -144,12 +233,12 @@ implementation
 
   procedure TWindow.GetTargetDimensions(var w, h: integer); 
   var
-    Old_Handler: TXErrorHandler;
+   // Old_Handler: TXErrorHandler;
     Attrib: TXWindowAttributes;
     newx, newy: integer;
     childwindow: x.TWindow;
   begin
-    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
     begin
       { I don't think we need this XTranslateCoordinates... :D }
@@ -162,35 +251,38 @@ implementation
       W := -1;
       H := -1;
     end;
-    XSetErrorHandler(Old_Handler);
+    //XSetErrorHandler(Old_Handler);
   end;
 
   function TWindow.TargetValid: boolean;
   var
-    old_handler: TXErrorHandler;
+    //old_handler: TXErrorHandler;
     Attrib: TXWindowAttributes;
   begin
-    old_handler := XSetErrorHandler(@MufasaXErrorHandler);
+    //old_handler := XSetErrorHandler(@MufasaXErrorHandler);
     //This was in the repos, but it doesn't seem to work...
     //Maybe I missed something?
-    result:= XGetWindowAttributes(display, window, @Attrib) <> 0;
-    XSetErrorHandler(old_handler);
+
+    {result:= XGetWindowAttributes(display, window, @Attrib) <> 0; }
+    XGetWindowAttributes(display, window, @Attrib);
+    result := not ReceivedError;
+    //XSetErrorHandler(old_handler);
   end;
 
   procedure TWindow.ActivateClient;
-  var
-     Old_Handler: TXErrorHandler;
+  //var
+     //Old_Handler: TXErrorHandler;
   begin
-    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     { TODO: Check if Window is valid? }
     XSetInputFocus(display,window,RevertToParent,CurrentTime);
     XFlush(display);
-    XSetErrorHandler(Old_Handler);
+    //XSetErrorHandler(Old_Handler);
   end;
   
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;  
   var
-    Old_Handler: TXErrorHandler;
+    //Old_Handler: TXErrorHandler;
     w,h: integer;
   begin
     GetTargetDimensions(w,h);
@@ -200,7 +292,7 @@ implementation
       raise Exception.CreateFmt('ReturnData was called again without freeing'+
                                 ' the previously used data. Do not forget to'+
                                 ' call FreeReturnData', []);
-    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     buffer := XGetImage(display, window, xs, ys, width, height, AllPlanes, ZPixmap);
     if buffer = nil then
     begin
@@ -209,7 +301,7 @@ implementation
               ', ' + inttostr(width) + ', ' + inttostr(height));
       Result.Ptr := nil;
       Result.IncPtrWith := 0;
-      XSetErrorHandler(Old_Handler);
+      //XSetErrorHandler(Old_Handler);
       raise Exception.CreateFMT('TMWindow.ReturnData: ReturnData: XGetImage Error', []);
       exit;
     end;
@@ -217,7 +309,7 @@ implementation
     Result.IncPtrWith := 0;
     Result.RowLen := width;
     dirty:= true;
-    XSetErrorHandler(Old_Handler);
+    //XSetErrorHandler(Old_Handler);
   end;
   
   procedure TWindow.FreeReturnData; 
@@ -236,32 +328,32 @@ implementation
    b:integer;
    root, child: twindow;
    xmask: Cardinal;
-   Old_Handler: TXErrorHandler;
+   //Old_Handler: TXErrorHandler;
   begin
-    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     XQueryPointer(display,window,@root,@child,@b,@b,@x,@y,@xmask);
-    XSetErrorHandler(Old_Handler);
+    //XSetErrorHandler(Old_Handler);
   end;
   procedure TWindow.MoveMouse(x,y: integer);
   var
-   Old_Handler: TXErrorHandler;
+   //Old_Handler: TXErrorHandler;
     w,h: integer;
   begin
     GetTargetDimensions(w, h);
     if (x < 0) or (y < 0) or (x > w) or (y > h) then
       raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid (0,0,%d,%d)', [x, y, w, h]);
-    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     XWarpPointer(display, 0, window, 0, 0, 0, 0, X, Y);
     XFlush(display);
-    XSetErrorHandler(Old_Handler);
+    //XSetErrorHandler(Old_Handler);
   end;
   procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
   var
     ButtonP: cuint;
     _isPress: cbool;
-    Old_Handler: TXErrorHandler;
+    //Old_Handler: TXErrorHandler;
   begin
-    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+   // Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     _isPress := cbool(1);
     case button of
       mouse_Left:   ButtonP:= Button1;
@@ -269,15 +361,15 @@ implementation
       mouse_Right:  ButtonP:= Button3;
     end;
     XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
-    XSetErrorHandler(Old_Handler);
+  //  XSetErrorHandler(Old_Handler);
   end;
   procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
   var
     ButtonP: cuint;
     _isPress: cbool;
-    Old_Handler: TXErrorHandler;
+  //  Old_Handler: TXErrorHandler;
   begin
-    Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+   // Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     _isPress := cbool(0);
     case button of
       mouse_Left:   ButtonP:= Button1;
@@ -285,7 +377,7 @@ implementation
       mouse_Right:  ButtonP:= Button3;
     end;
     XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
-    XSetErrorHandler(Old_Handler);
+    //XSetErrorHandler(Old_Handler);
   end;
 
   procedure TWindow.SendString(str: string);
