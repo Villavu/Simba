@@ -173,9 +173,7 @@ begin;
       begin;
         Invalidaterect(temphandle, nil, true);
         UpdateWindow(temphandle);
-        {$IFDEF MSWINDOWS}
         RedrawWindow(TempHandle, nil, 0, RDW_Frame or RDW_Invalidate or RDW_Updatenow or RDW_Allchildren);
-        {$ENDIF}
       end;
       if Handle <> 0 then
       begin;
