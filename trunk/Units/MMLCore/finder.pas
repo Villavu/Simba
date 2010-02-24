@@ -2069,7 +2069,7 @@ begin
 
   // Get the area we should search in for the Main Point.
   //writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
-  MA := ValidMainPointBoxRotated(DTM, x1, y1, x2, y2);
+  MA := ValidMainPointBoxRotated(DTM, x1, y1, x2, y2, sAngle, eAngle, aStep);
   //writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
 
   DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
