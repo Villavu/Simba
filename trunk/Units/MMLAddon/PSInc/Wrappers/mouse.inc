@@ -59,3 +59,8 @@ procedure ClickMouse(x, y: integer; clickType: integer); extdecl;
 begin
    CurrThread.Client.IOManager.ClickMouse(x, y, ConvIntClickType(clickType));
 end;
+
+function  IsMouseButtonDown( button : integer) : boolean; extdecl;
+begin
+  result := CurrThread.Client.IOManager.IsMouseButtonDown(ConvIntClickType(button));
+end;

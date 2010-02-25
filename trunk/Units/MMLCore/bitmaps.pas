@@ -56,6 +56,7 @@ type
     procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);overload;
     procedure DrawATPA(ATPA : T2DPointArray);overload;
     procedure DrawTPA(TPA : TPointArray; Color : TColor);
+    procedure DrawToCanvas(x,y : integer; Canvas : TCanvas);
     function CreateTPA(SearchCol : TColor) : TPointArray;
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(TPA : TPointArray) : TIntegerArray;
@@ -636,6 +637,15 @@ end;
 procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: TColor);
 begin
   DrawATPA(ConvArr([TPA]),ConvArr([Color]));
+end;
+
+procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas: TCanvas);
+var
+  Bitmap : Graphics.TBitmap;
+begin
+  Bitmap := Self.ToTBitmap;
+  Canvas.Draw(x,y,Bitmap);
+  Bitmap.free;
 end;
 
 function TMufasaBitmap.CreateTPA(SearchCol: TColor): TPointArray;

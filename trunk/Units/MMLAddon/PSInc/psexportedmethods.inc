@@ -207,7 +207,7 @@ AddFunction(@GetMousePos, 'procedure GetMousePos(var x, y: integer);');
 AddFunction(@HoldMouse, 'procedure HoldMouse(x, y: integer; clickType: integer);');
 AddFunction(@ReleaseMouse, 'procedure ReleaseMouse(x, y: integer; clickType: integer);');
 AddFunction(@ClickMouse, 'procedure ClickMouse(x, y: integer; clickType: integer);');
-
+AddFunction(@IsMouseButtonDown,'function IsMouseButtonDown( button : integer) : boolean;');
 
 {Keyboard}
 SetCurrSection('Keyboard');
@@ -275,6 +275,7 @@ AddFunction(@FindDeformedBitmapToleranceIn,'function FindDeformedBitmapTolerance
 AddFunction(@DrawTPABitmap,'procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);');
 AddFunction(@DrawATPABitmap,'procedure DrawATPABitmap(bitmap: integer; ATPA: T2DPointArray);');
 AddFunction(@DrawATPABitmapEx,'procedure DrawATPABitmapEx(bitmap: integer; ATPA: T2DPointArray; Colors: TIntegerArray);');
+AddFunction(@DrawBitmap,'procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);');
 
 {tpa}
 SetCurrSection('TPA');
