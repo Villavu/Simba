@@ -1977,7 +1977,7 @@ begin
           for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
           begin
             // If we have not checked this point, check it now.
-            if ch[xxx][yyy+1] and (1 shl i) = 0 then
+            if ch[xxx][yyy] and (1 shl i) = 0 then
             begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
@@ -2054,20 +2054,15 @@ var
 
 
 begin
-  raise Exception.CreateFmt('Not done yet!', []);
   if not DTMConsistent(_dtm) then
   begin
     raise Exception.CreateFmt('FindDTMsRotated: DTM is not consistent.', []);
     Exit;
   end;
 
-  // Get the area we should search in for the Main Point.
-  //writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
-  MA := ValidMainPointBox(_DTM, x1, y1, x2, y2);
+  NormalizeDTM(_dtm);
 
-  //writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
-
-  DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
+  DefaultOperations(x1, y1, x2, y2);
   DTM := copydtm(_DTM);
 
   setlength(goodPoints, dtm.l);
@@ -2101,6 +2096,8 @@ begin
   while s < eAngle do
   begin
     RotateDTM(dtm, s);
+    MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
+
     for yy := MA.y1 -y1 to MA.y2 - y1 do
       for xx := MA.x1 -x1 to MA.x2 - x1 do
       begin
@@ -2117,8 +2114,9 @@ begin
           for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
             for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
             begin
+              writeln(format('xxx,yyy: %d, %d', [xxx,yyy]));
               // If we have not checked this point, check it now.
-              if ch[xxx][yyy+1] and (1 shl i) = 0 then
+              if ch[xxx][yyy] and (1 shl i) = 0 then
               begin
                 // Checking point i now. (Store that we matched it)
                 ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
@@ -2135,6 +2133,7 @@ begin
             end;
         end;
         //writeln(Format('Found point: (%d, %d)', [xx,yy]));
+
         Inc(pc);
         setlength(Points,pc);
         Points[pc-1] := Point(xx + x1, yy + y1);
@@ -2149,8 +2148,9 @@ begin
     s := s + aStep;
     ac := 0;
   end;
+
   TheEnd:
-  TClient(Client).IOManager.FreeReturnData;
+    TClient(Client).IOManager.FreeReturnData;
 
   { Don't forget to pre calculate the rotated points at the start.
    Saves a lot of rotatepoint() calls. }
