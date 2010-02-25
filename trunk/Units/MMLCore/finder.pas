@@ -2012,8 +2012,17 @@ end;
 
 function TMFinder.FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
 
+var
+   P: TPointArray;
+   F: T2DExtendedArray;
 begin
-  raise Exception.CreateFmt('Not done yet!', []);
+  FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F, 1);
+  if Length(P) = 0 then
+    exit(false);
+  aFound := F[0][0];
+  x := P[0].x;
+  y := P[0].y;
+  Exit(True);
 end;
 
 function TMFinder.FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
