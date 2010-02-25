@@ -65,6 +65,7 @@ var
   dtm: pdtm;
   p:tpointarray;
   bmp: TMufasaBitmap;
+  aa: T2DExtendedArray;
 
 begin
   // quick check parameters
@@ -84,74 +85,64 @@ begin
 
   { add your program here }
   C := TClient.Create('.');
+
   bmp := TMufasaBitmap.Create;
-  //bmp.LoadFromFile('/home/merlijn/Programs/mufasa/pics/smallchars.bmp');
-  bmp.LoadFromFile('/home/merlijn/Programs/mufasa/pics/UpChars.bmp');
-  C.IOManager.SetTarget(bmp);
-  C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/trunk/Fonts/');
-  // small chars
-  t := GetTickCount;
-  for i := 0 to 100 do
-    C.MOCR.GetTextAt(0,0,0,3,2,65278,2,100,'UpChars');
-    //C.MOCR.GetTextAt(0,0,1,3,2,0,0,100,'SmallChars');
-  writeln(floattostr((gettickcount - t) / 100.0) + ' ms');
-  writeln(C.MOCR.GetTextAt(0,0,0,3,2,65278,2,100,'UpChars'));
-  //writeln(C.MOCR.GetTextAt(0,0,1,3,2,0,0,100,'SmallChars'));
-
-
-{ bmp := C.MOCR.TextToFontBitmap('Welcome to RuneScape.', 'SmallChars');
-
-
-  bmp.SaveToFile('/tmp/wat.bmp');    }
-
-{  bmp := TMufasaBitmap.Create;
   bmp.SetSize(CW,CH);
   Writeln(Format('Client W/H: %d, %d', [CW, CH]));
   FillChar(bmp.FData[0],sizeof(trgb32)*CW*CH, 0);
   Randomize;
- for i := 0 to 500 do
-    bmp.fastsetpixel(random(CW), random(CH), 255);    }
- { bmp.FastSetPixel(8,8,255);
-  bmp.FastSetPixel(9,9,255);
-  bmp.FastSetPixel(7,7,255);
-  bmp.FastSetPixel(9,8,255);
-  bmp.FastSetPixel(8,9,255);            }
-//  C.MWindow.SetTarget(bmp);
+  {for i := 0 to 2000 do
+    bmp.fastsetpixel(random(CW), random(CH), 255); }
+
+  bmp.FastSetPixel(50,50,255);
+  bmp.FastSetPixel(45,45,255);
+ // bmp.FastSetPixel(7,7,255);
+ // bmp.FastSetPixel(9,8,255);
+ // bmp.FastSetPixel(8,9,255);
+  bmp.savetofile('/tmp/wat.bmp');
+
+  C.IOManager.SetTarget(bmp);
 
 
- { initdtm(dtm, 5);
+  initdtm(dtm, 2);
   dtm.p[0] := Point(2, 2);
   dtm.p[1] := Point(-3, -3);
-  dtm.p[2] := Point(0, 0);
+ { dtm.p[2] := Point(0, 0);
   dtm.p[3] := Point(1, 1);
-  dtm.p[4] := Point(3, 3);
+  dtm.p[4] := Point(3, 3);   }
   dtm.c[0] :=  255;
   dtm.t[0] :=  0;
-  dtm.asz[1] := 1;
-  dtm.ash[1] := dtm_Rectangle;  }
 
- { dtm := randomdtm(10);
+  dtm.c[1] := 255;
+  dtm.t[1] := 0;
+  dtm.asz[1] := 0;
+  dtm.ash[1] := dtm_Rectangle;
+
+  //dtm := randomdtm(1);
 
  // setlength(p, 1);
- C.MFinder.SetToleranceSpeed(1);
+  C.MFinder.SetToleranceSpeed(1);
 
   time := GetTickCount;
-  for i := 0 to 100 do
+  for i := 0 to 0 do
   begin
     setlength(p,0);
-    C.MFinder.FindDTMs(dtm, p, 0, 0,CW-1, CH-1, 0);
+    C.MFinder.FindDTMsRotated(dtm, p, 0, 0,CW-1, CH-1, 0.0, Pi / 4.0, Pi / 10.0, aa, 0);
+    //C.MFinder.FindDTMs(dtm, p, 0, 0,CW-1, CH-1, 0);
   end;
   writeln(inttostr(gettickcount - time) + 'ms');
   writeln(inttostr(length(p))+ ' points found');
+  for i := 0 to high(p) do
+    writeln(format('P[%d]: (%d, %d)', [i,p[i].x,p[i].y]));
   setlength(p,0);
 
-  PrintpDTM(tdtmtopDTM(pDTMToTDTM(dtm)));     }
+  PrintpDTM(tdtmtopDTM(pDTMToTDTM(dtm)));
 
-  {for i := 0 to high(p) do
-    writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));     }
+  for i := 0 to high(p) do
+    writeln(format('%d: (%d, %d)', [i, p[i].x, p[i].y]));
 
 
-  //bmp.OnDestroy:=nil;
+  bmp.OnDestroy:=nil;
   //bmp.Free;
   bmp.Free;
   C.Free;
@@ -182,6 +173,8 @@ var
 
 {$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
+{$R project1.res}
+
 begin
   Application:=MufasaTests.Create(nil);
   Application.Title:='My Application';
@@ -189,6 +182,25 @@ begin
   Application.Free;
 end.
 
+{ bmp := TMufasaBitmap.Create;
+ //bmp.LoadFromFile('/home/merlijn/Programs/mufasa/pics/smallchars.bmp');
+ bmp.LoadFromFile('/home/merlijn/Programs/mufasa/pics/UpChars.bmp');
+ C.IOManager.SetTarget(bmp);
+ C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/trunk/Fonts/');
+ // small chars
+ t := GetTickCount;
+ for i := 0 to 100 do
+   C.MOCR.GetTextAt(0,0,0,3,2,65278,2,100,'UpChars');
+   //C.MOCR.GetTextAt(0,0,1,3,2,0,0,100,'SmallChars');
+ writeln(floattostr((gettickcount - t) / 100.0) + ' ms');
+ writeln(C.MOCR.GetTextAt(0,0,0,3,2,65278,2,100,'UpChars'));   }
+ //writeln(C.MOCR.GetTextAt(0,0,1,3,2,0,0,100,'SmallChars'));
+
+
+{ bmp := C.MOCR.TextToFontBitmap('Welcome to RuneScape.', 'SmallChars');
+
+
+ bmp.SaveToFile('/tmp/wat.bmp');    }
 
 {  {$WARNING Change This Path!}
   C.MOCR.InitTOCR('/home/merlijn/Programs/mufasa/Fonts/');
