@@ -84,7 +84,7 @@ type
         function FindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
         function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
         function FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
-        function FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
+        function FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
         //Donno
         function GetColors(Coords: TPointArray): TIntegerArray;
         // tol speeds
@@ -1895,6 +1895,7 @@ var
 
    // Bitwise
    b: Array of Array of Integer;
+   ch: array of array of integer;
 
    // bounds
    W, H: integer;
@@ -1903,9 +1904,6 @@ var
    // for loops, etc
    xx, yy: integer;
    i, xxx,yyy: Integer;
-
-   // for comparisons.
-   rgbs: array of TRGB32;
 
    //clientdata
    cd: TPRGB32Array;
@@ -1930,27 +1928,27 @@ begin
   end;
 
   // Get the area we should search in for the Main Point.
-//  writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
-//  writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
 
+  // Is the area valid?
   DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
 
+  // Turn the bp into a more usable array.
   setlength(goodPoints, dtm.l);
   for i := 0 to dtm.l - 1 do
     goodPoints[i] := not dtm.bp[i];
 
-  // Init data structure B.
+  // Init data structure b and ch.
   W := x2 - x1;
   H := y2 - y1;
+
   setlength(b, (W + 1));
+  setlength(ch, (W + 1));
   for i := 0 to W do
   begin
+    setlength(ch[i], (H + 1));
+    FillChar(ch[i][0], SizeOf(Integer) * (H+1), 0);
     setlength(b[i], (H + 1));
-    { does setlength init already? if it doesn't, do we want to init here?
-    or do we want to init in the loop, as we loop over every b anyway? }
-
-    // init
     FillChar(b[i][0], SizeOf(Integer) * (H+1), 0);
   end;
 
@@ -1961,45 +1959,37 @@ begin
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
-  //writeln(format('w,h: %d, %d', [w,h]));
 
-  // pre calc rgb values for dtms
-  SetLength(rgbs, dtm.l);
-  for i := 0 to dtm.l - 1 do
-    ColorToRGB(dtm.c[i], rgbs[i].r, rgbs[i].g, rgbs[i].b);
   for yy := MA.y1 -y1 to MA.y2 - y1 do
     for xx := MA.x1 -x1 to MA.x2 - x1 do
     begin
       // Checking main point now; store that we have checked it.
-      // (Main point is point 1)
-      b[xx][yy] := B[xx][yy] or 1;
- //     if Sqrt(sqr(rgbs[0].r - cd[yy][xx].R) + sqr(rgbs[0].g - cd[yy][xx].G) + sqr(rgbs[0].b - cd[yy][xx].B)) > dtm.t[0] then
+      ch[xx][yy] := ch[xx][yy] or 1;
       if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
         goto AnotherLoopEnd;
 
-      // Mainpoint match. (If it did not match, we would be at AnotherLoopEnd)
-      b[xx][yy+1] := B[xx][yy+1] or 1;
-
+      // Mainpoint matched. (If it did not match, we would be at AnotherLoopEnd)
+      b[xx][yy] := b[xx][yy] or 1;
 
       for i := 1 to dtm.l - 1 do
       begin //change to use other areashapes too.
         for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
           for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
           begin
-            // If we have matched this point
-            if b[xxx][yyy+1] and (1 shl i) = 0 then
+            // If we have not checked this point, check it now.
+            if ch[xxx][yyy+1] and (1 shl i) = 0 then
             begin
               // Checking point i now. (Store that we matched it)
-              b[xxx][yyy]:=b[xxx][yyy] or (1 shl i);
+              ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-   //           if Sqrt(sqr(rgbs[i].r - cd[yyy][xxx].R) + sqr(rgbs[i].g - cd[yyy][xxx].G) + sqr(rgbs[i].b - cd[yyy][xxx].B)) <= dtm.t[i] then
               if SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
-                b[xxx][yyy+1] := B[xxx][yyy+1] or (1 shl i)
+                b[xxx][yyy] := b[xxx][yyy] or (1 shl i)
               else
                 goto AnotherLoopEnd;
             end;
 
-            if (b[xxx][yyy+1] and (1 shl i) = 0) and goodPoints[i] then
+            // if it didn't match and was supposed to be good points, stop.
+            if (b[xxx][yyy] and (1 shl i) = 0) and goodPoints[i] then
               goto AnotherLoopEnd;
           end;
       end;
@@ -2026,13 +2016,15 @@ begin
   raise Exception.CreateFmt('Not done yet!', []);
 end;
 
-function TMFinder.FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
+function TMFinder.FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
 var
+   DTM: pDTM;
    // Colours of DTMs
    C: Array of Integer;
 
    // Bitwise
    b: Array of Array of Integer;
+   ch: Array of Array of Integer;
 
    // bounds
    W, H: integer;
@@ -2052,31 +2044,117 @@ var
 
    // point count
    pc: Integer = 0;
+   ac: Integer = 0;
 
    goodPoints: Array of Boolean;
+   s: extended;
 
    label theEnd;
    label AnotherLoopEnd;
 
 
-
 begin
-  if not DTMConsistent(dtm) then
+  raise Exception.CreateFmt('Not done yet!', []);
+  if not DTMConsistent(_dtm) then
   begin
-    raise Exception.CreateFmt('FindDTMs: DTM is not consistent.', []);
+    raise Exception.CreateFmt('FindDTMsRotated: DTM is not consistent.', []);
     Exit;
   end;
 
   // Get the area we should search in for the Main Point.
   //writeln(Format('%d, %d, %d, %d', [x1,y1,x2,y2]));
-  MA := ValidMainPointBoxRotated(DTM, x1, y1, x2, y2, sAngle, eAngle, aStep);
+  MA := ValidMainPointBox(_DTM, x1, y1, x2, y2);
+
   //writeln(Format('%d, %d, %d, %d', [MA.x1,MA.y1,MA.x2,MA.y2]));
 
   DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
+  DTM := copydtm(_DTM);
+
+  setlength(goodPoints, dtm.l);
+  for i := 0 to dtm.l - 1 do
+    goodPoints[i] := not dtm.bp[i];
+
+  // Init data structure B.
+  W := x2 - x1;
+  H := y2 - y1;
+  setlength(b, (W + 1));
+  setlength(ch, (W + 1));
+  for i := 0 to W do
+  begin
+    setlength(b[i], (H + 1));
+    FillChar(b[i][0], SizeOf(Integer) * (H+1), 0);
+    setlength(ch[i], (H + 1));
+    FillChar(ch[i][0], SizeOf(Integer) * (H+1), 0);
+  end;
+
+  // C = DTM.C
+  C := DTM.c;
+
+  // Retreive Client Data.
+  PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
+
+  cd := CalculateRowPtrs(PtrData, h + 1);
+  SetLength(aFound, 0);
+  SetLength(Points, 0);
+
+  s := sAngle;
+  while s < eAngle do
+  begin
+    RotateDTM(dtm, s);
+    for yy := MA.y1 -y1 to MA.y2 - y1 do
+      for xx := MA.x1 -x1 to MA.x2 - x1 do
+      begin
+        // Checking main point now; store that we have checked it.
+        ch[xx][yy] := ch[xx][yy] or 1;
+        if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
+          goto AnotherLoopEnd;
+
+        // Mainpoint matched. (If it did not match, we would be at AnotherLoopEnd)
+        b[xx][yy] := b[xx][yy] or 1;
+
+        for i := 1 to dtm.l - 1 do
+        begin //change to use other areashapes too.
+          for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
+            for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
+            begin
+              // If we have not checked this point, check it now.
+              if ch[xxx][yyy+1] and (1 shl i) = 0 then
+              begin
+                // Checking point i now. (Store that we matched it)
+                ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
+
+                if SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
+                  b[xxx][yyy] := b[xxx][yyy] or (1 shl i)
+                else
+                  goto AnotherLoopEnd;
+              end;
+
+              // if it didn't match and was supposed to be good points, stop.
+              if (b[xxx][yyy] and (1 shl i) = 0) and goodPoints[i] then
+                goto AnotherLoopEnd;
+            end;
+        end;
+        //writeln(Format('Found point: (%d, %d)', [xx,yy]));
+        Inc(pc);
+        setlength(Points,pc);
+        Points[pc-1] := Point(xx + x1, yy + y1);
+        Setlength(aFound, pc);
+        setlength(aFound[pc-1],1);
+        aFound[pc-1][0] := s;
+        if(pc = maxToFind) then
+          goto theEnd;
+        AnotherLoopEnd:
+          //writeln(format('b[%d][%d]: %d' ,[xx,yy,b[xx][yy]]));
+      end;
+    s := s + aStep;
+    ac := 0;
+  end;
+  TheEnd:
+  TClient(Client).IOManager.FreeReturnData;
 
   { Don't forget to pre calculate the rotated points at the start.
    Saves a lot of rotatepoint() calls. }
-  raise Exception.CreateFmt('Not done yet!', []);
+//  raise Exception.CreateFmt('Not done yet!', []);
 end;
 
 function TMFinder.GetColors(Coords: TPointArray): TIntegerArray;

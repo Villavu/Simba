@@ -28,7 +28,7 @@ unit dtmutil;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes;
+  Classes, SysUtils, MufasaTypes, tpa;
 
 
 Function pDTMToTDTM(Const DTM: pDTM): TDTM;
@@ -41,6 +41,8 @@ Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
                                   sAngle, eAngle, aStep: Extended): TBox;
 function DTMConsistent(var dtm: pdtm): boolean;
 procedure NormalizeDTM(var dtm: pdtm);
+procedure RotateDTM(var dtm: pdtm; angle: extended);
+function copydtm(const dtm: pdtm): pdtm;
 
 const
     dtm_Rectangle = 0;
@@ -55,7 +57,7 @@ uses math;
 // macro
 procedure initdtm(out d: pdtm; len: integer);
 var
-   i: integer;
+   i: integer = 0;
 begin
   d.l := len;
   d.n := '';
@@ -267,6 +269,27 @@ begin
   Result.y2 := y2 - ceil(d);
 end;
 
+procedure RotateDTM(var dtm: pdtm; angle: extended);
+
+begin
+  if length(dtm.p) = 0 then
+    raise Exception.Create('RotateDTM, no points in DTM.');
+  RotatePoints(dtm.p, angle, dtm.p[0].x, dtm.p[0].y);
+end;
+
+function copydtm(const dtm: pdtm): pdtm;
+var
+   i: integer;
+begin
+  initdtm(result,dtm.l);
+  Move(dtm.p[0], result.p[0], length(dtm.p) * sizeof(Tpoint));
+  Move(dtm.c[0], result.c[0], length(dtm.c) * sizeof(Integer));
+  Move(dtm.t[0], result.t[0], length(dtm.t) * sizeof(Integer));
+  Move(dtm.asz[0], result.asz[0], length(dtm.asz) * sizeof(Integer));
+  Move(dtm.ash[0], result.ash[0], length(dtm.ash) * sizeof(Integer));
+  Move(dtm.bp[0], result.bp[0], length(dtm.bp) * sizeof(Boolean));
+  result.n := 'Copy of ' + dtm.n;
+end;
 
 end.
 
