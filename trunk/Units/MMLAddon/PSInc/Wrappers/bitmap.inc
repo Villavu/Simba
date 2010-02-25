@@ -134,6 +134,11 @@ begin;
   CurrThread.Client.MBitmaps[bmp].FastDrawClear(Color);
 end;
 
+procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].DrawToCanvas(x,y,dest);
+end;
+
 procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer); extdecl;
 begin;
   CurrThread.Client.MBitmaps[SourceBitmap].FastDrawTransparent(x,y,CurrThread.Client.MBitmaps[TargetBitmap]);

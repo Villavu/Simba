@@ -60,6 +60,7 @@ interface
         procedure MoveMouse(x,y: integer); virtual;
         procedure HoldMouse(x,y: integer; button: TClickType); virtual;
         procedure ReleaseMouse(x,y: integer; button: TClickType); virtual;
+        function  IsMouseButtonHeld( button : TClickType) : boolean ; virtual;
 
         { ONLY override the following methods if the target provides key functions, defaults to 
         | raise exceptions }
@@ -115,6 +116,7 @@ interface
         procedure MoveMouse(x,y: integer); override; abstract;
         procedure HoldMouse(x,y: integer; button: TClickType); override; abstract;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override; abstract;
+        function  IsMouseButtonHeld( button : TClickType) : boolean;override; abstract;
 
         procedure SendString(str: string); override; abstract;
         procedure HoldKey(key: integer); override; abstract;
@@ -140,6 +142,7 @@ interface
       MoveMouse: procedure(target: pointer; x,y: integer); stdcall;
       HoldMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
       ReleaseMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
+      IsMouseButtonHeld : function  (target : pointer; left : Boolean) : boolean; stdcall;
 
       SendString: procedure(target: pointer; str: PChar); stdcall;
       HoldKey: procedure(target: pointer; key: integer); stdcall;
@@ -169,6 +172,7 @@ interface
         procedure MoveMouse(x,y: integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
+        function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
         procedure SendString(str: string); override;
         procedure HoldKey(key: integer); override;
@@ -227,6 +231,7 @@ interface
       MoveMouse: procedure(target: pointer; x,y: integer); stdcall;
       HoldMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
       ReleaseMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
+      IsMouseButtonHeld : function  (target : pointer; left : boolean) : boolean;stdcall;
 
       SendString: procedure(target: pointer; str: PChar); stdcall;
       HoldKey: procedure(target: pointer; key: integer); stdcall;
@@ -278,6 +283,7 @@ interface
         procedure HoldMouse(x,y : integer; button: TClickType);
         procedure ReleaseMouse(x,y : integer; button: TClickType);
         procedure ClickMouse(X, Y: Integer; button: TClickType);
+        function  IsMouseButtonDown( button : TClickType) : boolean;
 
         procedure KeyUp(key: Word);
         procedure KeyDown(key: Word);
@@ -330,6 +336,7 @@ interface
     procedure TTarget_Exported_MoveMouse(target: pointer; x,y: integer); stdcall;
     procedure TTarget_Exported_HoldMouse(target: pointer; x,y: integer; left: boolean); stdcall;
     procedure TTarget_Exported_ReleaseMouse(target: pointer; x,y: integer; left: boolean); stdcall;
+    function TTarget_Exported_IsMouseButtonHeld(target: pointer; left : boolean) : boolean;stdcall;
 
     procedure TTarget_Exported_SendString(target: pointer; str: PChar); stdcall;
     procedure TTarget_Exported_HoldKey(target: pointer; key: integer); stdcall;
@@ -614,6 +621,11 @@ begin
   ReleaseMouse(x,y,button);
 end;
 
+function TIOManager_Abstract.IsMouseButtonDown(button: TClickType): boolean;
+begin
+  result := keymouse.IsMouseButtonHeld(button);
+end;
+
 procedure TIOManager_Abstract.KeyUp(key: Word);
 begin
   keymouse.ReleaseKey(key)
@@ -687,6 +699,7 @@ procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Crea
 procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not available for this target'); end;
 procedure TTarget.HoldMouse(x,y: integer; button: TClickType); begin raise Exception.Create('HoldMouse not available for this target'); end;
 procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType); begin raise Exception.Create('ReleaseMouse not available for this target'); end;
+function TTarget.IsMouseButtonHeld(button: TClickType): boolean; begin  raise Exception.Create('IsMouseButtonHeld not available for this target'); end;
 
 procedure TTarget.SendString(str: string); begin raise Exception.Create('SendString not available for this target'); end;
 procedure TTarget.HoldKey(key: integer); begin raise Exception.Create('HoldKey not available for this target'); end;
@@ -772,6 +785,19 @@ begin
     end;
   end else
     inherited ReleaseMouse(x,y,button);
+end;
+
+function TEIOS_Target.IsMouseButtonHeld(button: TClickType): boolean;
+begin
+  if Pointer(client.IsMouseButtonHeld) <> nil then
+  begin
+    case button of
+      mouse_Left:  result := client.IsMouseButtonHeld(target,true);
+      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
+      mouse_Right: result := client.IsMouseButtonHeld(target,false);
+    end;
+  end else
+    result := inherited IsMouseButtonHeld(button);
 end;
 
 procedure TEIOS_Target.SendString(str: string);
@@ -1001,6 +1027,15 @@ begin
     TTarget(Target).ReleaseMouse(x,y,mouse_left)
   else
     TTarget(Target).ReleaseMouse(x,y,mouse_right);
+end;
+
+function TTarget_Exported_IsMouseButtonHeld(target: pointer; left: boolean
+  ): boolean; stdcall;
+begin
+  if left then
+    result := TTarget(Target).IsMouseButtonHeld(mouse_left)
+  else
+    result := TTarget(Target).IsMouseButtonHeld(mouse_right);
 end;
 
 procedure TTarget_Exported_SendString(target: pointer; str: PChar); stdcall;
