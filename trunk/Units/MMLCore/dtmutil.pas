@@ -243,7 +243,8 @@ Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
                                   sAngle, eAngle, aStep: Extended): TBox;
 
 var
-   i, d: Integer;
+   i: Integer;
+   d:extended;
 
 begin
   for i := 1 to high(dtm.c) do
@@ -252,19 +253,18 @@ begin
   end;
   dtm.p[0] := dtm.p[0] - dtm.p[0];
 
-
   for i := 0 to high(dtm.c) do
   begin
-    d := max(dtm.p[i].x - dtm.asz[i], d);
-    d := max(dtm.p[i].x + dtm.asz[i], d);
-    d := max(dtm.p[i].y - dtm.asz[i], d);
-    d := max(dtm.p[i].y + dtm.asz[i], d);
+    d := max(d, sqrt(sqr(dtm.p[i].x - dtm.asz[i]) + sqr(dtm.p[i].x - dtm.asz[i])));
+    d := max(d, sqrt(sqr(dtm.p[i].y - dtm.asz[i]) + sqr(dtm.p[i].y - dtm.asz[i])));
+    d := max(d, sqrt(sqr(dtm.p[i].x + dtm.asz[i]) + sqr(dtm.p[i].x + dtm.asz[i])));
+    d := max(d, sqrt(sqr(dtm.p[i].y + dtm.asz[i]) + sqr(dtm.p[i].y + dtm.asz[i])));
   end;
 
-  Result.x1 := d;
-  Result.y1 := d;
-  Result.x2 := d;
-  Result.y2 := d;
+  Result.x1 := x1 + ceil(d);
+  Result.y1 := y1 + ceil(d);
+  Result.x2 := x2 - ceil(d);
+  Result.y2 := y2 - ceil(d);
 end;
 
 
