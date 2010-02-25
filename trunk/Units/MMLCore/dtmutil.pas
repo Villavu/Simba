@@ -28,7 +28,7 @@ unit dtmutil;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes, tpa;
+  Classes, SysUtils, MufasaTypes;
 
 
 Function pDTMToTDTM(Const DTM: pDTM): TDTM;
@@ -53,6 +53,24 @@ const
 
 implementation
 uses math;
+
+Function RotatePoints_(Var P: TPointArray; A, cx, cy: Extended): TPointArray ;
+
+Var
+   I, L: Integer;
+   CosA,SinA : extended;
+
+Begin
+  L := High(P);
+  CosA := Cos(a);
+  SinA := Sin(a);
+  For I := 0 To L Do
+  Begin
+    P[I].X := Trunc(cx + CosA * (p[i].x - cx) - SinA * (p[i].y - cy));
+    P[I].Y := Trunc(cy + SinA * (p[i].x - cx) + CosA * (p[i].y - cy));
+  End;
+  // I recon it's faster than Point().
+End;
 
 // macro
 procedure initdtm(out d: pdtm; len: integer);
@@ -204,8 +222,9 @@ procedure NormalizeDTM(var dtm: pdtm);
 var
    i:integer;
 begin
-  for i := 0 to dtm.l do
+  for i := 1 to dtm.l do
     dtm.p[i] := dtm.p[i] - dtm.p[0];
+  dtm.p[0] := dtm.p[0] - dtm.p[0];
 end;
 
 Function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
@@ -271,10 +290,13 @@ end;
 
 procedure RotateDTM(var dtm: pdtm; angle: extended);
 
+var
+   i: integer;
 begin
   if length(dtm.p) = 0 then
     raise Exception.Create('RotateDTM, no points in DTM.');
-  RotatePoints(dtm.p, angle, dtm.p[0].x, dtm.p[0].y);
+
+  RotatePoints_(dtm.p, angle, dtm.p[0].x, dtm.p[0].y);
 end;
 
 function copydtm(const dtm: pdtm): pdtm;
