@@ -59,6 +59,7 @@ interface
         procedure MoveMouse(x,y: integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
+        function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
         procedure SendString(str: string); override;
         procedure HoldKey(key: integer); override;
@@ -379,6 +380,11 @@ implementation
     XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
     //XSetErrorHandler(Old_Handler);
   end;
+
+function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
+begin
+  raise exception.create('IsMouseButtonHeld is not yet implemented on Linux');
+end;
 
   procedure TWindow.SendString(str: string);
   var

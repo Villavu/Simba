@@ -59,6 +59,7 @@ interface
         procedure MoveMouse(x,y: integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
+        function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
         procedure SendString(str: string); override;
         procedure HoldKey(key: integer); override;
@@ -298,6 +299,15 @@ implementation
     end;
     SendInput(1,Input, sizeof(Input));
   end;
+
+function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
+begin
+  case button of
+     mouse_Left : Result := (GetAsyncKeyState(VK_LBUTTON) <> 0);
+     mouse_Middle : Result := (GetAsyncKeyState(VK_MBUTTON) <> 0);
+     mouse_Right : Result := (GetAsyncKeyState(VK_RBUTTON) <> 0);
+  end;
+end;
 
   procedure TWindow.SendString(str: string);
   var
