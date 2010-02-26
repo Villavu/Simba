@@ -215,6 +215,9 @@ end;
 
 function MakeString(data : TPSVariantIFC) : string;
 begin;
+  if data.Dta = nil then
+    result := 'Nil'
+  else
   if data.aType.basetype in [btString,btChar] then
     result := PSGetAnsiString(Data.Dta,data.aType)
   else if data.aType.ExportName = 'BOOLEAN' then

@@ -733,12 +733,18 @@ end;
 //-------------------------------------------------------------------
 
 function FloatToStr(E: Extended): TbtString;
+{$ifdef FPC}
+begin
+  result := sysutils.floattostr(e);
+end;
+{$else}
 var
   s: tbtstring;
 begin
   Str(e:0:12, s);
   result := s;
 end;
+{$endif}
 
 function StrToInt(const S: TbtString): LongInt;
 var
