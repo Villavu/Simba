@@ -131,8 +131,8 @@ AddFunction(@ClearDebug,'procedure ClearDebug;');
 
 {string}
 SetCurrSection('String');
-AddFunction(@Capitalize,'function Capitalize(str : string) : string;');
-AddFunction(@psFormat,'function Format(const fmt : string;const args : array of const) : string;');
+AddFunction(@ps_Capitalize,'function Capitalize(str : string) : string;');
+AddFunction(@ps_Format,'function Format(const fmt : string;const args : array of const) : string;');
 AddFunction(nil,'function ToStr(x) : string;');
 AddFunction(@ps_Between,'function Between(s1, s2, str: string): string;');
 AddFunction(@ps_IntToStr, 'function IntToStr(value: Integer): String;');
@@ -144,9 +144,13 @@ AddFunction(@ps_StrToFloat, 'function StrToFloat(value: String): Extended;');
 AddFunction(@ps_StrToFloatDef, 'function StrToFloatDef(value: String; default: Extended): Extended;');
 AddFunction(@ps_StrToBool, 'function StrToBool(value: String): Boolean;');
 AddFunction(@ps_StrToBoolDef, 'function StrToBoolDef(value: String; default: Boolean): Boolean;');
-AddFunction(@ExtractFromStr,'function ExtractFromStr( Str : string; Extract : StrExtr) : string;');
+AddFunction(@ps_ExtractFromStr,'function ExtractFromStr( Str : string; Extract : StrExtr) : string;');
 AddFunction(@ps_Replace,'function Replace(Text, FindStr, ReplaceStr: string; Flags: TReplaceFlags): string;');
 AddFunction(@ps_Replace,'function ReplaceWrap(Text, FindStr, ReplaceStr: string; Flags: TReplaceFlags): string;');
+AddFunction(@ps_Implode,'function Implode(Glue: string; Pieces: TStringArray): string;');
+AddFunction(@ps_Explode,'function Explode(del, str: string): TStringArray;');
+AddFunction(@ps_explodewrap,'procedure ExplodeWrap(del, str: string; var res : TStringArray);');
+
 {web}
 SetCurrSection('Web');
 AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
