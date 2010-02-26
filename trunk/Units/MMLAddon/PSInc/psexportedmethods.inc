@@ -126,6 +126,8 @@ AddFunction(@DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp: integer);');
 AddFunction(@GetDebugBitmap,'function GetDebugBitmap: integer;');
 AddFunction(@ps_Random,'function Random(Int: integer): integer;');
 AddFunction(@ClearDebug,'procedure ClearDebug;');
+AddFunction(@PlaySound,'procedure PlaySound( Sound : string);');
+AddFunction(@StopSound,'Procedure StopSound;');
 
 
 
