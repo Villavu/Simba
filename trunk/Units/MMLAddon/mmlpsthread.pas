@@ -181,6 +181,7 @@ uses
   fontloader,
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
+  stringutil, //String st00f
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
