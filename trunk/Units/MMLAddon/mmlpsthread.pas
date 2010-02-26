@@ -58,7 +58,7 @@ type
     TErrorType = (errRuntime,errCompile);
     TOnError = procedure of object;
     TErrorData = record
-      Line,Position : integer;
+      Row,Col,Position : integer;
       Error : string;
       ErrType : TErrorType;
       Module : string;
@@ -78,6 +78,7 @@ type
       DebugTo: TWritelnProc;
       DebugImg : TDbgImgInfo;
       ExportedMethods : TExpMethodArr;
+      Includes : TStringList;
       procedure LoadPlugin(plugidx: integer); virtual; abstract;
 
     public
@@ -91,9 +92,9 @@ type
       OnError  : TOnError; //Error handeler
 
       CompileOnly : boolean;
-      procedure HandleError(ErrorAtLine,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
+      procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
-      function LoadFile(var filename, contents: string): boolean;
+      function LoadFile(ParentFile : string; var filename, contents: string): boolean;
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetScript(Script : string);
@@ -174,7 +175,7 @@ implementation
 
 uses
   colour_conv,dtmutil,
-  {$ifdef mswindows}windows,{$endif}
+  {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
   uPSC_extctrls, //Compile-libs
   uPSUtils,
@@ -273,6 +274,8 @@ begin
   CompileOnly := false;
   OnTerminate := @OnThreadTerminate;
   OnError:= nil;
+  Includes := TStringList.Create;
+  Includes.CaseSensitive:= {$ifdef linux}true{$else}false{$endif};
   inherited Create(CreateSuspended);
 end;
 
@@ -280,14 +283,16 @@ destructor TMThread.Destroy;
 begin
   MInternet.Free;
   Client.Free;
+  Includes.free;
   inherited Destroy;
 end;
 
-procedure TMThread.HandleError(ErrorAtLine, ErrorPosition: integer; ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
+procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
 begin
   if OnError = nil then
     exit;
-  ErrorData^.Line:= ErrorAtLine;
+  ErrorData^.Row:= ErrorRow;
+  ErrorData^.Col := ErrorCol;
   ErrorData^.Position:= ErrorPosition;
   ErrorData^.Error:= ErrorStr;
   ErrorData^.ErrType:= ErrorType;
@@ -305,10 +310,57 @@ procedure TMThread.AddMethod(meth: TExpMethod);
 begin
 end;
 
+function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
+var
+  i : integer;
+begin;
+  if fileexists(filename) then
+    result := filename
+  else
+  begin
+    for i := 0 to high(Dirs) do
+      if DirectoryExists(dirs[i]) then
+        if fileexists(dirs[i] + filename) then
+        begin
+          result := dirs[i] + filename;
+          exit;
+        end;
+  end;
+end;
+
+function TMThread.LoadFile(ParentFile : string; var filename, contents: string): boolean;
+var
+  path: string;
+  f: TFileStream;
+begin
+  path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(parentfile))]);
+  if path = '' then
+  begin
+    psWriteln(Path + ' doesn''t exist');
+    Result := false;
+    Exit;
+  end;
+  filename := path;//Yeah!
+  Includes.Add(path);
+
+  try
+    f:= TFileStream.Create(Path, fmOpenRead or fmShareDenyWrite);
+    SetLength(contents, f.Size);
+    f.Read(contents[1], Length(contents));
+    result:= true;
+    f.free;
+  except
+    Result := false;
+    psWriteln('ERROR in TMThread.LoadFile');
+  end;
+end;
+
 function TMThread.ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
 var
   plugin_idx, i: integer;
+  path : string;
 begin
+  result := false;
   if CompareText(DirectiveName,'LOADDLL') = 0 then
   begin
     if DirectiveArgs <> '' then
@@ -316,45 +368,28 @@ begin
       plugin_idx:= PluginsGlob.LoadPlugin(DirectiveArgs);
       if plugin_idx < 0 then
         psWriteln(Format('Your DLL %s has not been found',[DirectiveArgs]))
-      else
+      else begin
         LoadPlugin(plugin_idx);
-    end;
-  end;
-  result:= True;
-end;
-
-function TMThread.LoadFile(var filename, contents: string): boolean;
-var
-  path: string;
-  f: TFileStream;
-begin
-  if FileExists(filename) then
-    path:= filename
-  else
-    path:= IncludePath + filename;
-  if not FileExists(path) then
+        result:= True;
+      end;
+    end else
+      psWriteln('Your LoadDLL directive has no params, thus cannot find the plugin');
+  end else
+  if CompareText(DirectiveName,'INCLUDE_ONCE') = 0 then
   begin
-    psWriteln(Path + ' doesn''t exist');
-    Result := false;
-    Exit;
-  end;
-  try
-    f:= TFileStream.Create(Path, fmOpenRead or fmShareDenyWrite);
-  except
-    Result := false;
-    exit;
-  end;
-  try
-    try
-      SetLength(contents, f.Size);
-      f.Read(contents[1], Length(contents));
-      result:= true;
-    finally
-      f.free;
+    result := true; //Lets to the actual file checking later on in the preprocessor ;-)
+    if DirectiveArgs <> '' then
+    begin
+      path := FindFile(DirectiveArgs,[ScriptPath,IncludePath]);
+      if path <> '' then
+        if Includes.Find(path,i) then
+        begin
+          psWriteln('Include_Once file already included');
+          result := false;
+        end;
     end;
-  except
-    result:= false;
-  end;
+  end else
+    result := true;
 end;
 
 procedure TMThread.SetDebug(writelnProc: TWritelnProc);
@@ -376,8 +411,9 @@ begin
   FontPath:= FontP;
 end;
 
-function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; stdcall;
+function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
 begin
+  Writeln('yo');
   CurrThread.SyncInfo^.MethodName:= ProcName;
   CurrThread.SyncInfo^.V:= V;
   CurrThread.SyncInfo^.OldThread := CurrThread;
@@ -550,7 +586,7 @@ end;
 function TPSThread.RequireFile(Sender: TObject;
   const OriginFileName: String; var FileName, OutPut: string): Boolean;
 begin
-  result:= LoadFile(FileName,OutPut);
+  result:= LoadFile(OriginFileName,FileName,OutPut);
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
@@ -659,7 +695,7 @@ begin
       b := True;
       if OnError <> nil then
         with PSScript.CompilerMessages[l] do
-          HandleError(Row, Pos, MessageToString,errCompile, ModuleName)
+          HandleError(Row, Col, Pos, MessageToString,errCompile, ModuleName)
       else
         psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row));
     end else
@@ -682,7 +718,7 @@ begin
         exit;
 //      if not (ScriptState = SCompiling) then
         if not PSScript.Execute then
-          HandleError(PSScript.ExecErrorRow,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,
+          HandleError(PSScript.ExecErrorRow,PSScript.ExecErrorCol,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,
                       errRuntime, PSScript.ExecErrorFileName)
         else
           psWriteln('Succesfully executed');
@@ -733,9 +769,9 @@ end;
 procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar; runtime: boolean); stdcall;
 begin
   if runtime then
-    CurrThread.HandleError(line,pos,err,errRuntime,'')
+    CurrThread.HandleError(line,-1,pos,err,errRuntime,'')
   else
-    CurrThread.HandleError(line,pos,err,errCompile,'')
+    CurrThread.HandleError(line,-1,pos,err,errCompile,'')
 end;
 
 constructor TCPThread.Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);

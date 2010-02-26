@@ -247,9 +247,7 @@ begin
   if ErrorData.Module <> '' then
   begin;
     if not FileExists(ErrorData.Module) then
-      ErrorData.Module := ErrorData.IncludePath + ErrorData.Module;
-    if not FileExists(ErrorData.Module) then
-      Writeln('ERROR comes from a non-existing file....')
+      Writeln(Format('ERROR comes from a non-existing file (%s)',[ErrorData.Module]))
     else
     begin
       ErrorData.Module:= SetDirSeparators(ErrorData.Module);// Set it right ;-)
@@ -270,13 +268,16 @@ begin
     end;
   end;
   MakeActiveScriptFrame;
-  ScriptErrorLine:= ErrorData.Line;
+  ScriptErrorLine:= ErrorData.Row;
   SynEdit.Invalidate;
-  SynEdit.SelStart:= ErrorData.Position;
-  if pos('error',lowercase(ErrorData.Error)) > 0 then
-    formWriteln(Format('%s at line %d',[ErrorData.Error,ErrorData.Line]))
+  if ErrorData.Col = -1 then
+    SynEdit.SelStart:= ErrorData.Position
   else
-    formWriteln(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Line]));
+    SynEdit.LogicalCaretXY := Point(ErrorData.Col,ErrorData.Row);
+  if pos('error',lowercase(ErrorData.Error)) > 0 then
+    formWriteln(Format('%s at line %d',[ErrorData.Error,ErrorData.Row]))
+  else
+    formWriteln(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Row]));
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;
@@ -342,6 +343,7 @@ begin
     MarkCaret.IgnoreKeywords := true;
   end;
   AddKey(SynEdit,ecCodeCompletion,VK_SPACE,[ssCtrl]);
+//  TSynPasSyn(SynEdit.Highlighter).NestedComments:= false; Does not work :(
 end;
 
 destructor TScriptFrame.Destroy;

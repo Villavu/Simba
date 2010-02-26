@@ -931,7 +931,7 @@ begin
   Thread.OnError:= @CurrScript.HandleErrorData;
 
   if CurrScript.ScriptFile <> '' then
-    ScriptPath := ExtractFileDir(CurrScript.ScriptFile);
+    ScriptPath := IncludeTrailingPathDelimiter(ExtractFileDir(CurrScript.ScriptFile));
 
   if DirectoryExists(PluginsPath) then
      PluginsGlob.AddPath(PluginsPath);

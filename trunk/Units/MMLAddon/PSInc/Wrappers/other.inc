@@ -42,6 +42,24 @@ begin
 end;
 {$endif}
 
+procedure PlaySound( Sound : string); extdecl;
+begin
+  {$ifdef MSWINDOWS}
+  sndPlaySound(PChar(sound),SND_ASYNC or SND_NODEFAULT);
+  {$else}
+  Writeln(Format('Playing sound %s (not supported yet on Linux)',[sound]);
+  {$endif}
+end;
+
+Procedure StopSound; extdecl;
+begin;
+  {$ifdef MSWINDOWS}
+  sndPlaySoundW(nil,0);
+  {$else}
+  Writeln('Stopping sound is not supported yet on Linux');
+  {$endif}
+end;
+
 procedure ClearDebug; extdecl;
 begin
   if Assigned(CurrThread.DebugMemo) then
