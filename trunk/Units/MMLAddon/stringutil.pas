@@ -44,7 +44,7 @@ begin;
   lenstr := length(str);
   //  for i := 1 to lenstr do
   i := 1;
-  while i < lenstr do
+  while i <= lenstr do
   begin;
     if not ((i + lendel - 1) > lenstr) then
     begin
@@ -62,19 +62,17 @@ begin;
         result[lenres-1] := Copy(str,lastpos,i-lastpos);
         lastpos := i+lendel;
         i := i + lendel-1;//Dirty
+        if i = lenstr then //This was the trailing delimiter
+          exit;
       end;
-    end else //We cannot possibly find a delimiter anymore, thus copy the rest of the string
+    end else //We cannot possibly find a delimiter anymore, thus copy the rest of the string and exit
       Break;
     inc(i);
   end;
   //Copy the rest of the string (if it's not a delimiter)
-  if (lenstr - lastpos + 1) = 0 then
-    exit;
   inc(lenres);
   setlength(result,lenres);
   result[lenres-1] := Copy(str,lastpos,lenstr - lastpos + 1);
-  if result[lenres-1] = del then
-    result[lenres-1] := '';
 end;
 
 function Capitalize(str : string) : string;
