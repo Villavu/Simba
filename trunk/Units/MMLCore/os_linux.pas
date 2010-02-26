@@ -123,13 +123,9 @@ implementation
 
 //***implementation*** TWindow
 
-  // Too global.
-
   function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
 
   begin
-    { if someone understands the pascal syntax on how to define an array with
-    constant values, please change this to use an array }
     case para2^.error_code of
       1:  xerror := 'BadRequest';
       2:  xerror := 'BadValue';
@@ -187,7 +183,6 @@ implementation
     self.keyinput:= TKeyInput.Create;
 
     xerror := '';
-    writeln('creating twindow');
 
     { XXX FIXME TODO O GOD WTF }
     if not assigned(ErrorCS) then
@@ -212,11 +207,6 @@ implementation
       ErrorCS := syncobjs.TCriticalSection.Create;
     ErrorCS.Enter;
 
-    if self.ReceivedError then
-      writeln('recieved error: ' + GetError)
-    else
-      writeln('got no error');
-
     erh := XSetErrorHandler(oldXHandler);
     try
       if erh <> @MufasaXErrorHandler then
@@ -234,56 +224,40 @@ implementation
 
   procedure TWindow.GetTargetDimensions(var w, h: integer); 
   var
-   // Old_Handler: TXErrorHandler;
     Attrib: TXWindowAttributes;
     newx, newy: integer;
     childwindow: x.TWindow;
   begin
-    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
     begin
-      { I don't think we need this XTranslateCoordinates... :D }
-      XTranslateCoordinates(display, window, RootWindow(display, screennum), 0,0, @newx, @newy, @childwindow);
       W := Attrib.Width;
       H := Attrib.Height;
     end else
     begin
-      { TODO: Raise Exception because the Window does not exist? }
       W := -1;
       H := -1;
     end;
-    //XSetErrorHandler(Old_Handler);
   end;
 
   function TWindow.TargetValid: boolean;
   var
-    //old_handler: TXErrorHandler;
     Attrib: TXWindowAttributes;
   begin
-    //old_handler := XSetErrorHandler(@MufasaXErrorHandler);
-    //This was in the repos, but it doesn't seem to work...
-    //Maybe I missed something?
-
-    {result:= XGetWindowAttributes(display, window, @Attrib) <> 0; }
     XGetWindowAttributes(display, window, @Attrib);
     result := not ReceivedError;
-    //XSetErrorHandler(old_handler);
   end;
 
   procedure TWindow.ActivateClient;
-  //var
-     //Old_Handler: TXErrorHandler;
+
   begin
-    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
-    { TODO: Check if Window is valid? }
     XSetInputFocus(display,window,RevertToParent,CurrentTime);
     XFlush(display);
-    //XSetErrorHandler(Old_Handler);
+    if ReceivedError then
+      raise Exception.Create('Error: ActivateClient: ' + GetError);
   end;
   
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;  
   var
-    //Old_Handler: TXErrorHandler;
     w,h: integer;
   begin
     GetTargetDimensions(w,h);
@@ -293,7 +267,7 @@ implementation
       raise Exception.CreateFmt('ReturnData was called again without freeing'+
                                 ' the previously used data. Do not forget to'+
                                 ' call FreeReturnData', []);
-    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
+
     buffer := XGetImage(display, window, xs, ys, width, height, AllPlanes, ZPixmap);
     if buffer = nil then
     begin
@@ -302,7 +276,6 @@ implementation
               ', ' + inttostr(width) + ', ' + inttostr(height));
       Result.Ptr := nil;
       Result.IncPtrWith := 0;
-      //XSetErrorHandler(Old_Handler);
       raise Exception.CreateFMT('TMWindow.ReturnData: ReturnData: XGetImage Error', []);
       exit;
     end;
@@ -326,51 +299,45 @@ implementation
 
   procedure TWindow.GetMousePosition(var x,y: integer);
   var
-   b:integer;
-   root, child: twindow;
-   xmask: Cardinal;
-   //Old_Handler: TXErrorHandler;
+    b:integer;
+    root, child: twindow;
+    xmask: Cardinal;
+
   begin
-    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     XQueryPointer(display,window,@root,@child,@b,@b,@x,@y,@xmask);
-    //XSetErrorHandler(Old_Handler);
   end;
+
   procedure TWindow.MoveMouse(x,y: integer);
   var
-   //Old_Handler: TXErrorHandler;
     w,h: integer;
   begin
     GetTargetDimensions(w, h);
     if (x < 0) or (y < 0) or (x > w) or (y > h) then
       raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid (0,0,%d,%d)', [x, y, w, h]);
-    //Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     XWarpPointer(display, 0, window, 0, 0, 0, 0, X, Y);
     XFlush(display);
-    //XSetErrorHandler(Old_Handler);
   end;
+
   procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
   var
     ButtonP: cuint;
     _isPress: cbool;
-    //Old_Handler: TXErrorHandler;
+
   begin
-   // Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     _isPress := cbool(1);
     case button of
       mouse_Left:   ButtonP:= Button1;
       mouse_Middle: ButtonP:= Button2;
       mouse_Right:  ButtonP:= Button3;
     end;
-    XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
-  //  XSetErrorHandler(Old_Handler);
+    XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);;
   end;
+
   procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
   var
     ButtonP: cuint;
     _isPress: cbool;
-  //  Old_Handler: TXErrorHandler;
   begin
-   // Old_Handler := XSetErrorHandler(@MufasaXErrorHandler);
     _isPress := cbool(0);
     case button of
       mouse_Left:   ButtonP:= Button1;
@@ -378,13 +345,24 @@ implementation
       mouse_Right:  ButtonP:= Button3;
     end;
     XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
-    //XSetErrorHandler(Old_Handler);
   end;
 
-function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
-begin
-  raise exception.create('IsMouseButtonHeld is not yet implemented on Linux');
-end;
+  function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
+    var
+     b:integer;
+     root, child: twindow;
+     xmask: Cardinal;
+     ButtonP: cuint;
+
+  begin
+    XQueryPointer(display,window,@root,@child,@b,@b,@b,@b,@xmask);
+    case button of
+      mouse_Left:   ButtonP:= Button1Mask;
+      mouse_Middle: ButtonP:= Button2Mask;
+      mouse_Right:  ButtonP:= Button3Mask;
+    end;
+    result := xmask and ButtonP > 0;
+  end;
 
   procedure TWindow.SendString(str: string);
   var
@@ -414,14 +392,17 @@ end;
     if HoldShift then
       ReleaseKey(VK_SHIFT);
   end;
+
   procedure TWindow.HoldKey(key: integer);
   begin
     keyinput.Down(key);
   end;
+
   procedure TWindow.ReleaseKey(key: integer);
   begin
     keyinput.Up(key);
   end;
+
   function TWindow.IsKeyHeld(key: integer): boolean;
   begin
     raise Exception.CreateFmt('IsKeyDown isn''t implemented yet on Linux', []);
@@ -439,7 +420,7 @@ end;
     end
   end;
   
-//***implementation*** IOManager
+  { ***implementation*** IOManager }
 
   constructor TIOManager.Create;
   begin
@@ -455,10 +436,12 @@ end;
   begin
     display := XOpenDisplay(nil);
     if display = nil then
-    begin
-      // throw Exception
-    end;
+      raise Exception.Create('Could not open a connection to the X Display');
+
+    { DefaultScreen }
     screennum:= DefaultScreen(display);
+
+    { Get the Desktop Window }
     desktop:= RootWindow(display,screennum)
   end;
   
