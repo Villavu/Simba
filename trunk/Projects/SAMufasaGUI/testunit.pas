@@ -1401,6 +1401,7 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Randomize;
+  DecimalSeparator := '.';
   MainDir:= ExtractFileDir(Application.ExeName);
   SimbaSettingsFile := MainDir + DS + 'settings.xml';
   if FileExists(SimbaSettingsFile) then

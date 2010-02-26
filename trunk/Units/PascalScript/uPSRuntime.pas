@@ -1,5 +1,4 @@
 unit uPSRuntime;
-
 {$I PascalScript.inc}
 {
 
@@ -1600,9 +1599,9 @@ begin
     btS16: str(tbts16(p.dta^), Result);
     btU32: str(tbtu32(p.dta^), Result);
     btS32: str(tbts32(p.dta^), Result);
-    btSingle: str(tbtsingle(p.dta^), Result);
-    btDouble: str(tbtdouble(p.dta^), Result);
-    btExtended: str(tbtextended(p.dta^), Result);
+    btSingle: result := floattostr(tbtsingle(p.dta^));
+    btDouble: result := floattostr(tbtdouble(p.dta^));
+    btExtended: result := floattostr(tbtextended(p.dta^));
     btString: Result := makestring(tbtString(p.dta^));
     btPChar:
       begin
@@ -3725,6 +3724,7 @@ begin
   end;
 end;
 
+
 procedure PSSetAnsiString(Src: Pointer; aType: TPSTypeRec; var Ok: Boolean; const Val: tbtString);
 begin
   if (Src = nil) or (aType = nil) then begin Ok := false; exit; end;
@@ -3736,9 +3736,12 @@ begin
   end;
   case aType.BaseType of
     btString: tbtstring(src^) := val;
+    btChar: if AnsiString(val) <> '' then tbtchar(src^) := AnsiString(val)[1];
 {$IFNDEF PS_NOWIDESTRING}
     btUnicodeString: tbtunicodestring(src^) := tbtUnicodeString(AnsiString(val));
-    btWideString: tbtwidestring(src^) := tbtwidestring(AnsiString(val));{$ENDIF}
+    btWideString: tbtwidestring(src^) := tbtwidestring(AnsiString(val));
+    btWideChar: if AnsiString(val) <> '' then tbtwidechar(src^) := tbtwidechar(AnsiString(val)[1]);
+    {$ENDIF}
     btVariant:
       begin
         try
@@ -3761,6 +3764,8 @@ begin
     if (src = nil) or (aType = nil) then begin Ok := false; exit; end;
   end;
   case aType.BaseType of
+    btChar: if val <> '' then tbtchar(src^) := tbtChar(val[1]);
+    btWideChar: if val <> '' then tbtwidechar(src^) := val[1];
     btString: tbtstring(src^) := tbtString(val);
     btWideString: tbtwidestring(src^) := val;
     btUnicodeString: tbtunicodestring(src^) := val;
@@ -3775,6 +3780,7 @@ begin
     else ok := false;
   end;
 end;
+
 procedure PSSetUnicodeString(Src: Pointer; aType: TPSTypeRec; var Ok: Boolean; const Val: tbtunicodestring);
 begin
   if (Src = nil) or (aType = nil) then begin Ok := false; exit; end;
@@ -4564,19 +4570,19 @@ begin
       if Tmp is EDivByZero then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, '', Tmp);
+        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
         Exit;
       end;
       if Tmp is EZeroDivide then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, '', Tmp);
+        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
         Exit;
       end;
       if Tmp is EMathError then
       begin
         Result := False;
-        CMD_Err3(erMathError, '', Tmp);
+        CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
         Exit;
       end;
     end;
@@ -5255,19 +5261,19 @@ begin
       if Tmp is EDivByZero then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, '', Tmp);
+        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
         Exit;
       end;
       if Tmp is EZeroDivide then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, '', Tmp);
+        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
         Exit;
       end;
       if Tmp is EMathError then
       begin
         Result := False;
-        CMD_Err3(erMathError, '', Tmp);
+        CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
         Exit;
       end;
     end;
@@ -6273,19 +6279,19 @@ begin
       if Tmp is EDivByZero then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, '', Tmp);
+        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
         Exit;
       end;
       if Tmp is EZeroDivide then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, '', Tmp);
+        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
         Exit;
       end;
       if Tmp is EMathError then
       begin
         Result := False;
-        CMD_Err3(erMathError, '', Tmp);
+        CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
         Exit;
       end;
     end;
@@ -6548,13 +6554,13 @@ begin
               Pointer(Dest.P^) := nil;
               SetLength(tbtstring(Dest.P^), Param);
               if Param <> 0 then begin
-                if not ReadData(tbtstring(Dest.P^)[1], Param) then
-                begin
-                  CMD_Err(erOutOfRange);
-                  FTempVars.Pop;
-                  Result := False;
-                  exit;
-                end;
+              if not ReadData(tbtstring(Dest.P^)[1], Param) then
+              begin
+                CMD_Err(erOutOfRange);
+                FTempVars.Pop;
+                Result := False;
+                exit;
+              end;
                 pansichar(dest.p^)[Param] := #0;
               end;
             end;
@@ -7171,19 +7177,19 @@ begin
           if Tmp is EDivByZero then
           begin
             Result := False;
-            CMD_Err3(erDivideByZero, '', Tmp);
+            CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
             Exit;
           end;
           if Tmp is EZeroDivide then
           begin
             Result := False;
-            CMD_Err3(erDivideByZero, '', Tmp);
+            CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
             Exit;
           end;
           if Tmp is EMathError then
           begin
             Result := False;
-            CMD_Err3(erMathError, '', Tmp);
+            CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
             Exit;
           end;
         end;
@@ -7820,17 +7826,17 @@ begin
                     end else
                     if Tmp is EDivByZero then
                     begin
-                      CMD_Err3(erDivideByZero, '', Tmp);
+                      CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
                       Break;
                     end;
                     if Tmp is EZeroDivide then
                     begin
-                      CMD_Err3(erDivideByZero, '', Tmp);
+                      CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
                       Break;
                     end;
                     if Tmp is EMathError then
                     begin
-                      CMD_Err3(erMathError, '', Tmp);
+                      CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
                       Break;
                     end;
                   end;
@@ -8506,17 +8512,17 @@ begin
                       end else
                       if Tmp is EDivByZero then
                       begin
-                        CMD_Err3(erDivideByZero, '', Tmp);
+                        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
                         break;
                       end;
                       if Tmp is EZeroDivide then
                       begin
-                        CMD_Err3(erDivideByZero, '', Tmp);
+                        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
                         break;
                       end;
                       if Tmp is EMathError then
                       begin
-                        CMD_Err3(erMathError, '', Tmp);
+                        CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
                         break;
                       end;
                     end;
@@ -9170,6 +9176,16 @@ begin
   end;
 end;
 
+function _VarArrayGet(var S : Variant; I : Integer) : Variant;
+begin
+  result := VarArrayGet(S, [I]);
+end;
+
+procedure _VarArraySet(const c : Variant; I : Integer; var s : Variant);
+begin
+  VarArrayPut(s, c, [i]);
+end;
+
 
 procedure TPSExec.RegisterStandardProcs;
 begin
@@ -9247,6 +9263,8 @@ begin
   RegisterFunctionName('WSTRGET', DefProc, Pointer(42), nil);
   RegisterFunctionName('WSTRSET', DefProc, Pointer(43), nil);
   {$ENDIF}
+  RegisterDelphiFunction(@_VarArrayGet, 'VARARRAYGET', cdRegister);
+  RegisterDelphiFunction(@_VarArraySet, 'VARARRAYSET', cdRegister);
 
   RegisterInterfaceLibraryRuntime(Self);
 end;
@@ -11092,18 +11110,40 @@ begin
 end;
 
 function TPSExec.LastExParam: tbtString;
+var
+  pp: TPSExceptionHandler;
 begin
-  result := ExParam;
+  if FExceptionStack.Count = 0 then begin
+    result := ExParam;
+    exit;
+  end;
+  pp := fExceptionStack[fExceptionStack.Count-1];
+  result := pp.ExceptionParam;
 end;
 
 function TPSExec.LastExPos: Integer;
+var
+  pp: TPSExceptionHandler;
 begin
-  result := ExPos;
+  if FExceptionStack.Count = 0 then begin
+    result := ExPos;
+    exit;
+  end;
+  pp := fExceptionStack[fExceptionStack.Count-1];
+  result := pp.ExceptOffset;
+
 end;
 
 function TPSExec.LastExProc: Integer;
+var
+  pp: TPSExceptionHandler;
 begin
-  result := exProc;
+  if FExceptionStack.Count = 0 then begin
+    result := ExProc;
+    exit;
+  end;
+  pp := fExceptionStack[fExceptionStack.Count-1];
+  result := FProcs.IndexOf(pp.CurrProc);
 end;
 
 { TPSRuntimeClass }
@@ -12342,6 +12382,9 @@ var
   aName: PWideChar;
   WSFreeList: TPSList;
 begin
+  if Self = nil then begin
+    raise EPSException.Create('Variant is null, cannot invoke', nil, 0, 0);
+  end;
   FillChar(ExceptInfo, SizeOf(ExceptInfo), 0);
   if Name='' then begin
    DispatchId:=0;
