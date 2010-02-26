@@ -395,7 +395,8 @@ begin
     Writeln(Format('BMP[%d] has been freed.',[number]))
   else
     Writeln(Format('BMP[%s] has been freed.',[ToDestroy.BmpName]));
-  FreeAndNil(ToDestroy);
+  ToDestroy.Free;
+  BmpArray[number] := nil;
 end;
 
 function TMufasaBitmap.SaveToFile(const FileName: string): boolean;

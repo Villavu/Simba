@@ -611,11 +611,10 @@ begin
         //-- 20050707_jgv - ask the application
         AppContinue := True;
         If @OnProcessDirective <> Nil then OnProcessDirective (Self, Parser, FDefineState.DoWrite, name, s, AppContinue);
-
         If AppContinue then
         //-- end jgv
 
-          if (Name = 'I') or (Name = 'INCLUDE') or (Name = '.INCLUDE') then
+          if (Name = 'I') or (Name = 'INCLUDE') or (Name = 'INCLUDE_ONCE') then
           begin
             if FDefineState.DoWrite then
             begin
