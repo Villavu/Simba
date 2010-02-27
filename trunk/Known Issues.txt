@@ -1,7 +1,9 @@
 Known issues:
+    * Could do with a better Keyboard System.
 
 Linux:
-	- Mouse Clicking only works in the client, and the mouse click must be in the client, otherwise the event is ignored.
+    * Interpreter doesn't work too well.
+    * IsKeyDown doesn't work yet.
 
 Windows:
-	
+
