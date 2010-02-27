@@ -44,7 +44,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 560;
+    SimbaVersion = 561;
 
 type
 
