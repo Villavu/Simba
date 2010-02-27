@@ -174,6 +174,8 @@ var
 
 begin
   iNode := XMLDoc.DocumentElement;
+  if iNode.NodeName = 'Simba' then
+    iNode := iNode.ChildNodes[0];
   while iNode <> nil do
   begin
     ProcessNode(iNode, nil); // Recursive
@@ -224,7 +226,6 @@ begin
 
   N := Nodes.GetFirstNode;
   i := 0;
-
   while N <> nil do
   begin
     if N.Text = s[i] then
@@ -236,7 +237,6 @@ begin
     end else
       N := N.GetNextSibling;
   end;
-
   Result := N;
 end;
 
@@ -434,20 +434,21 @@ begin
   end;
   NewPath := '';
   N := nil;
-  nParent := Nodes.GetFirstNode;
-
   Path := KeyNameToKeys(KeyName);
+
   if length(path) < 2 then
   begin
     writeln('Path too short!');
     exit(false);
   end;
-
-  if path[0] <> nParent.Text then
+  nParent := WalkToNode(path[0]);
+  if nParent = nil then
+    nParent := Nodes.Add(nil,path[0]);
+ { if path[0] <> nParent.Text then
   begin
     writeln('First key doesn''t match. First key should always match');
     exit(false);
-  end;
+  end;}
   for i := 0 to length(Path) - 2 do
   begin
     if Path[i] = '' then
@@ -592,26 +593,34 @@ end;
 procedure TMMLSettings.SaveToXML(fileName: String);
 var
    XMLDoc: TXMLDocument;
-   RootNode: TDOMNode;
+   Simba,Settings,LastConfig: TDOMNode;
+   SettingsTreeNode,LastConfigTreeNode : TTreeNode;
    C: Integer;
 begin
   XMLDoc := TXMLDocument.Create;
 
-  RootNode := XMLDoc.CreateElement('Settings');
-  XMLDoc.AppendChild(RootNode);
-
-  RootNode := XMLDoc.DocumentElement;
-
   C := 0;
-  if Nodes.GetFirstNode <> nil then
-    WalkTree(Nodes.GetFirstNode, RootNode, XMLDoc, C);
+  SettingsTreeNode := WalkToNode('Settings');
+  LastConfigTreeNode := WalkToNode('LastConfig');
+
+  Simba := XMLDoc.CreateElement('Simba');
+  Simba := XMLDoc.AppendChild(Simba);
+
+  Settings := XMLDoc.CreateElement('Settings');
+  LastConfig := XMLDoc.CreateElement('LastConfig');
+  Simba.AppendChild(Settings);
+  Simba.AppendChild(LastConfig);
+
+  if SettingsTreeNode <> nil then
+    WalkTree(SettingsTreeNode, Settings, XMLDoc, C);
+
+  if LastConfigTreeNode <> nil then
+    WalkTree(LastConfigTreeNode, LastConfig, XMLDoc, C);
   try
     WriteXMLFile(XMLDoc, fileName);
   except
     Writeln('Failed to write ' + fileName);
   end;
-
-
   XMLDoc.Free;
 end;
 

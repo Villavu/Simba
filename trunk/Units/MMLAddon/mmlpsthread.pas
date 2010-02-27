@@ -416,7 +416,6 @@ end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
 begin
-  Writeln('yo');
   CurrThread.SyncInfo^.MethodName:= ProcName;
   CurrThread.SyncInfo^.V:= V;
   CurrThread.SyncInfo^.OldThread := CurrThread;

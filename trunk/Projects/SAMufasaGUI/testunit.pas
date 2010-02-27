@@ -40,10 +40,11 @@ uses
   colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,
   SynEditMarkupHighAll, SynEditMiscClasses, LMessages, Buttons, PairSplitter,
+  stringutil,mufasatypesutil,
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 555;
+    SimbaVersion = 560;
 
 type
 
@@ -99,6 +100,7 @@ type
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
     MenuExtra: TMenuItem;
+    MenuItemOpenRecent: TMenuItem;
     MenuItemCompile: TMenuItem;
     MenuItemHandbook: TMenuItem;
     MenuItemAbout: TMenuItem;
@@ -289,6 +291,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure PopupItemFindClick(Sender: TObject);
     procedure ProcessDebugStream(Sender: TObject);
+    procedure RecentFileItemsClick(Sender: TObject);
     procedure ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject; X,
       Y: Integer);
     procedure ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; X,
@@ -304,6 +307,8 @@ type
     procedure UpdateTimerCheck(Sender: TObject);
   private
     PopupTab : integer;
+    RecentFileItems : array of TMenuItem;
+    RecentFiles : TStringList;
     FirstRun : boolean;//Only show the warnings the first run (path not existing one's)
     SearchStart : TPoint;
     LastTab  : integer;
@@ -343,6 +348,9 @@ type
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
     procedure RefreshTabSender(sender : PtrInt);
     procedure CreateDefaultEnvironment;
+    procedure LoadFormSettings;
+    procedure SaveFormSettings;
+    procedure AddRecentFile(filename : string);
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
   end;
@@ -399,6 +407,18 @@ begin
   finally
     DebugCriticalSection.Leave;
   end;
+end;
+
+procedure TForm1.RecentFileItemsClick(Sender: TObject);
+var
+  i : integer;
+begin
+  for i := 0 to high(RecentFileItems) do
+    if RecentFileItems[i] = sender then
+    begin;
+      LoadScriptFile(RecentFiles[RecentFiles.Count - 1 -i]);//Inverse order
+      exit;
+    end;
 end;
 
 procedure TForm1.ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject;
@@ -878,14 +898,85 @@ begin
   includePath:= CreateSetting('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS));
   fontPath := CreateSetting('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS));
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
+  CreateSetting('LastConfig/MainForm/Position','');
   if not DirectoryExists(IncludePath) then
     CreateDir(IncludePath);
   if not DirectoryExists(FontPath) then
     CreateDir(FontPath);
   if not DirectoryExists(PluginsPath) then
     CreateDir(PluginsPath);
-  SettingsForm.SettingsTreeView.FullExpand;
+  SettingsForm.SettingsTreeView.Items.GetFirstNode.Expand(false);
   SettingsForm.SaveCurrent;
+end;
+
+procedure TForm1.LoadFormSettings;
+var
+  str : string;
+  Data : TStringArray;
+  i : integer;
+begin
+  str := LoadSettingDef('LastConfig/MainForm/Position','');
+  if str <> '' then
+  begin;
+    Data := Explode(':',str);
+    if length(Data) <> 4 then
+      Exit;
+    Self.Left:= StrToIntDef(Data[0],Self.Left);
+    Self.Top:= StrToIntDef(Data[1],self.top);
+    Self.Width:= StrToIntDef(Data[2],self.width);
+    Self.Height:= StrToIntDef(Data[3],self.height);
+  end;
+  str := LoadSettingDef('LastConfig/MainForm/RecentFiles','');
+  if str <> '' then
+  begin
+    Data := Explode(';',str);
+    for i := high(data) downto 0 do//First = entry should be added as last
+      AddRecentFile(data[i]);
+  end;
+end;
+
+procedure TForm1.SaveFormSettings;
+var
+  Data : TStringArray;
+  i : integer;
+begin
+  with SettingsForm.Settings do
+  begin
+    Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
+    SetKeyValue('LastConfig/MainForm/Position', Implode(':',Data ));
+    if RecentFiles.Count > 0 then
+    begin
+      SetLength(data,RecentFiles.Count);
+      for i := 0 to high(data) do //First entry should be the last-opened
+        data[high(data) - i] := RecentFiles[i];
+      SetKeyValue('LastConfig/MainForm/RecentFiles',implode(';',data));
+    end;
+    SaveToXML(SimbaSettingsFile);
+  end;
+end;
+
+procedure TForm1.AddRecentFile(filename: string);
+var
+  MaxRecentFiles : integer;
+  Len,i : integer;
+begin
+  MaxRecentFiles:= StrToIntDef(LoadSettingDef('Settings/General/MaxRecentFiles','10'),10);
+  i := RecentFiles.IndexOf(filename);
+  if i <> -1 then
+    RecentFiles.Delete(i);
+  if RecentFiles.Count = MaxRecentFiles then
+    RecentFiles.Delete(0);
+  RecentFiles.Add(filename);
+  Len := RecentFiles.Count;
+  if len <> length(RecentFileItems) then //Not reached maximum yet, add those files!
+  begin
+    SetLength(RecentFileItems,len);
+    RecentFileItems[len-1] := TMenuItem.Create(MenuItemOpenRecent);
+    RecentFileItems[len-1].OnClick:=@RecentFileItemsClick;
+    MenuItemOpenRecent.Add(RecentFileItems[len-1]);
+  end;
+  for i := 0 to len - 1 do
+    RecentFileItems[len - 1-i].Caption:= ExtractFileName(RecentFiles[i]);
 end;
 
 procedure TForm1.InitalizeTMThread(var Thread: TMThread);
@@ -1390,6 +1481,7 @@ procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i : integer;
 begin
+  Self.SaveFormSettings;
   for i := Tabs.Count - 1 downto 0 do
     if not DeleteTab(i,true) then
     begin;
@@ -1403,9 +1495,13 @@ begin
   Randomize;
   DecimalSeparator := '.';
   MainDir:= ExtractFileDir(Application.ExeName);
+  RecentFiles := TStringList.Create;
   SimbaSettingsFile := MainDir + DS + 'settings.xml';
   if FileExists(SimbaSettingsFile) then
-    Application.CreateForm(TSettingsForm,SettingsForm)
+  begin
+    Application.CreateForm(TSettingsForm,SettingsForm);
+    Self.LoadFormSettings;
+  end
   else  begin
     Application.CreateForm(TSettingsForm,SettingsForm);
     Self.CreateDefaultEnvironment;
@@ -1445,6 +1541,8 @@ var
 begin
   for i := Tabs.Count - 1 downto 0 do
     TMufasaTab(Tabs[i]).Free;
+  for i := 0 to high(RecentFileItems) do
+    RecentFileItems[i].Free;
   Tabs.free;
   Selector.Free;
   Picker.Free;
@@ -1452,6 +1550,7 @@ begin
   PluginsGlob.Free;
 
   SetLength(DebugStream, 0);
+  RecentFiles.Free;
   DebugCriticalSection.Free;
 end;
 
@@ -1961,6 +2060,7 @@ begin
       WriteLn('Script name will be: ' + ScriptName);
       ScriptFile:= FileName;
       ScriptChanged := false;
+      AddRecentFile(filename);
       RefreshTab();
       Result := True;
     end;
