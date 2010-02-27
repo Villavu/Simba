@@ -38,7 +38,8 @@ implementation
 { TSettingsForm }
 
 procedure TSettingsForm.FormCreate(Sender: TObject);
-
+var
+  FirstNode : TTreeNode;
 begin
   Settings := TMMLSettings.Create(SettingsTreeView.Items);
   if not FileExists(SimbaSettingsFile) then
@@ -46,9 +47,12 @@ begin
     SettingsTreeView.Items.Clear;
     Settings.SaveToXML(SimbaSettingsFile);
   end;
-
   SettingsTreeView.Items.Clear;
   Settings.LoadFromXML(SimbaSettingsFile);
+  FirstNode := SettingsTreeView.Items.GetFirstNode;
+  if FirstNode <> nil then
+    if FirstNode.Text = 'Settings' then
+      FirstNode.Expand(false);
 end;
 
 procedure TSettingsForm.SettingsFormButtonOKClick(Sender: TObject);
