@@ -47,12 +47,12 @@ begin
   {$ifdef MSWINDOWS}
   sndPlaySound(PChar(sound),SND_ASYNC or SND_NODEFAULT);
   {$else}
-  Writeln(Format('Playing sound %s (not supported yet on Linux)',[sound]);
+  Writeln(Format('Playing sound %s (not supported yet on Linux)',[sound]));
   {$endif}
 end;
 
 Procedure StopSound; extdecl;
-begin;
+begin
   {$ifdef MSWINDOWS}
   sndPlaySoundW(nil,0);
   {$else}
