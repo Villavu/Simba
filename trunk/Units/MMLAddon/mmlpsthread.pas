@@ -723,11 +723,11 @@ begin
           HandleError(PSScript.ExecErrorRow,PSScript.ExecErrorCol,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,
                       errRuntime, PSScript.ExecErrorFileName)
         else
-          psWriteln('Succesfully executed');
+          psWriteln('Successfully executed.');
     end else
     begin
       OutputMessages;
-      psWriteln('Compiling failed');
+      psWriteln('Compiling failed.');
     end;
   except
      on E : Exception do
