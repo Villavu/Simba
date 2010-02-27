@@ -43,6 +43,7 @@ interface
 
     TWindow = class(TWindow_Abstract)
       public
+        constructor Create;
         constructor Create(target: Hwnd); 
         destructor Destroy; override;
         procedure GetTargetDimensions(var w, h: integer); override;
@@ -76,8 +77,17 @@ interface
         width,height: integer;
         keyinput: TKeyInput;
         procedure ValidateBuffer(w,h:integer);
+      protected
+        function WindowRect : TRect;virtual;
     end;
-    
+
+    { TDesktopWindow }
+
+    TDesktopWindow = class(TWindow)
+    private
+      constructor Create(DesktopHandle : HWND);
+      function WindowRect : TRect;override;
+    end;
     TIOManager = class(TIOManager_Abstract)
       public
         constructor Create;
@@ -154,16 +164,23 @@ implementation
 
 //***implementation*** TWindow
 
-  constructor TWindow.Create(target: Hwnd); begin 
+  constructor TWindow.Create;
+  begin
     inherited Create;
-    self.handle:= target;
-    self.dc:= GetWindowDC(target);
     self.buffer:= TBitmap.Create;
     self.buffer.PixelFormat:= pf32bit;
     keyinput:= TKeyInput.Create;
-  end; 
+  end;
+
+  constructor TWindow.Create(target: Hwnd);
+  begin
+    self.create; //Call the other create
+    self.handle:= target;
+    self.dc:= GetWindowDC(target);
+  end;
   
-  destructor TWindow.Destroy; begin
+  destructor TWindow.Destroy;
+  begin
     ReleaseDC(handle,dc);
     buffer.Free;
     keyinput.Free;
@@ -204,7 +221,7 @@ implementation
   var
     Rect : TRect; 
   begin 
-    GetWindowRect(handle, Rect);
+    Rect := WindowRect;
     w:= Rect.Right - Rect.Left;
     h:= Rect.Bottom - Rect.Top;
   end;
@@ -226,6 +243,11 @@ implementation
       GetObject(buffer.Handle, SizeOf(BmpInfo), @BmpInfo);
       self.buffer_raw := BmpInfo.bmBits;
     end;
+  end;
+
+  function TWindow.WindowRect: TRect;
+  begin
+    GetWindowRect(self.handle,result);
   end;
   
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
@@ -249,7 +271,7 @@ implementation
     Rect : TRect;
   begin
     Windows.GetCursorPos(MousePoint);
-    GetWindowRect(handle,Rect);
+    Rect := WindowRect;
     x := MousePoint.x - Rect.Left;
     y := MousePoint.y - Rect.Top;
   end;
@@ -258,7 +280,7 @@ implementation
     rect : TRect;
     w,h: integer;
   begin
-    GetWindowRect(handle, Rect);
+    Rect := WindowRect;
     x := x + rect.left;
     y := y + rect.top;
     if (x<0) or (y<0) then
@@ -270,7 +292,7 @@ implementation
     Input : TInput;
     Rect : TRect;
   begin
-    GetWindowRect(handle, Rect);
+    Rect := WindowRect;
     Input.Itype:= INPUT_MOUSE;
     FillChar(Input,Sizeof(Input),0);
     Input.mi.dx:= x + Rect.left;
@@ -287,7 +309,7 @@ implementation
     Input : TInput;
     Rect : TRect;
   begin
-    GetWindowRect(handle, Rect);
+    Rect := WindowRect;
     Input.Itype:= INPUT_MOUSE;
     FillChar(Input,Sizeof(Input),0);
     Input.mi.dx:= x + Rect.left;
@@ -379,12 +401,31 @@ end;
   
   procedure TIOManager.SetDesktop;
   begin
-    SetBothTargets(TWindow.Create(DesktopHWND));
+    SetBothTargets(TDesktopWindow.Create(DesktopHWND));
   end;
   
   function TIOManager.SetTarget(target: TNativeWindow): integer;
   begin
     SetBothTargets(TWindow.Create(target));
   end;
+
+{ TDesktopWindow }
+
+constructor TDesktopWindow.Create(DesktopHandle: HWND);
+begin
+  inherited Create;
+  self.dc := GetDC(DesktopHandle);
+  self.handle:= DesktopHandle;
+  Writeln('Created a desktop window');
+end;
+
+
+function TDesktopWindow.WindowRect: TRect;
+begin
+  result.Left:= GetSystemMetrics(SM_XVIRTUALSCREEN);
+  result.Top:= GetSystemMetrics(SM_YVIRTUALSCREEN);
+  result.Right := GetSystemMetrics(SM_CXVIRTUALSCREEN);
+  result.Bottom:= GetSystemMetrics(SM_CYVIRTUALSCREEN);
+end;
 
 end.
