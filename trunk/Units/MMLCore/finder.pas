@@ -24,6 +24,7 @@
 unit finder;
 
 {$mode objfpc}{$H+}
+{$INLINE ON}
 
 interface
 
@@ -2014,6 +2015,8 @@ begin
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
               if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
+
+           //   if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
                 b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
 
