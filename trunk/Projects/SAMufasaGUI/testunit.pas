@@ -44,7 +44,7 @@ uses
   ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 570;
+    SimbaVersion = 571;
 
 type
 
@@ -65,6 +65,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionNormalSize: TAction;
     ActionCompileScript: TAction;
     ActionExit: TAction;
     ActionReplace: TAction;
@@ -220,6 +221,7 @@ type
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
+    procedure ActionNormalSizeExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
     procedure ActionPasteExecute(Sender: TObject);
     procedure ActionPauseExecute(Sender: TObject);
@@ -863,6 +865,8 @@ begin
   CreateSetting('Settings/Tabs/OpenNextOnClose','False');
   CreateSetting('Settings/Tabs/OpenScriptInNewTab','True');
   CreateSetting('Settings/ColourPicker/ShowHistoryOnPick', 'True');
+  CreateSetting('Settings/General/MaxRecentFiles','10');
+  CreateSetting('Settings/MainForm/NormalSize','739:555');
 
   CreateSetting('Settings/Updater/RemoteVersion',
                 {$IFDEF WINDOWS}
@@ -899,6 +903,7 @@ begin
   fontPath := CreateSetting('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS));
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
   CreateSetting('LastConfig/MainForm/Position','');
+  CreateSetting('LastConfig/MainForm/State','Normal');
   if not DirectoryExists(IncludePath) then
     CreateDir(IncludePath);
   if not DirectoryExists(FontPath) then
@@ -926,6 +931,13 @@ begin
     Self.Width:= StrToIntDef(Data[2],self.width);
     Self.Height:= StrToIntDef(Data[3],self.height);
   end;
+  str := lowercase(LoadSettingDef('LastConfig/MainForm/State','Normal'));
+  if str = 'maximized' then
+    self.windowstate := wsMaximized
+  else
+//  if str = 'normal' then
+    Self.WindowState := wsNormal;
+
   str := LoadSettingDef('LastConfig/MainForm/RecentFiles','');
   if str <> '' then
   begin
@@ -942,8 +954,14 @@ var
 begin
   with SettingsForm.Settings do
   begin
-    Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
-    SetKeyValue('LastConfig/MainForm/Position', Implode(':',Data ));
+    if Self.WindowState = wsMaximized then
+      SetKeyValue('LastConfig/MainForm/State','maximized')
+    else
+    begin; //Only save the form position if its non maximized.
+      SetKeyValue('LastConfig/MainForm/State','normal');
+      Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
+      SetKeyValue('LastConfig/MainForm/Position', Implode(':',Data ));
+    end;
     if RecentFiles.Count > 0 then
     begin
       SetLength(data,RecentFiles.Count);
@@ -1172,6 +1190,24 @@ end;
 procedure TForm1.ActionNewTabExecute(Sender: TObject);
 begin
   Self.AddTab;
+end;
+
+procedure TForm1.ActionNormalSizeExecute(Sender: TObject);
+var
+  SizeStr : string;
+  Data : TStringArray;
+begin
+  SizeStr := LoadSettingDef('Settings/MainForm/NormalSize','739:555');
+  Data := Explode(':',SizeStr);
+  if length(Data) = 2 then
+  begin
+    Self.Width:= StrToIntDef(Data[0],739);
+    Self.Height:= StrToIntDef(Data[1],555);
+  end else
+  begin;
+    self.width := 739;
+    self.height := 555;
+  end;
 end;
 
 procedure TForm1.ActionOpenExecute(Sender: TObject);
