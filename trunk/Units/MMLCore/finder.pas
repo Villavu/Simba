@@ -2140,11 +2140,11 @@ begin
     ColorToRGB(_dtm.c[i],clR[i],clG[i],clB[i]);
   //Compiler hints
 
-  SetLength(hh,dtm.l);
-  SetLength(ss,dtm.l);
-  SetLength(ll,dtm.l);
-  for i := 0 to DTM.l - 1 do
-    ColorToHSL(dtm.c[i],hh[i],ss[i],ll[i]);
+  SetLength(hh,_dtm.l);
+  SetLength(ss,_dtm.l);
+  SetLength(ll,_dtm.l);
+  for i := 0 to _DTM.l - 1 do
+    ColorToHSL(_dtm.c[i],hh[i],ss[i],ll[i]);
 
   GetToleranceSpeed2Modifiers(hMod, sMod);
   ccts := CTS;
