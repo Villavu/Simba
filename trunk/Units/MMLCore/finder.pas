@@ -543,10 +543,7 @@ var
    RowData : TPRGB32Array;
    dX, dY, clR, clG, clB,i,Hispiral: Integer;
    H1, S1, L1, H2, S2, L2: Extended;
-   R,G,B : extended; //percentage R,G,B.. (Needed for HSL).
-   D : Extended; //CMax - Cmin
    HueXTol, SatXTol: Extended;
-   CMax, CMin : extended;
    label Hit;
 
 begin
@@ -825,10 +822,7 @@ var
    PtrInc: Integer;
    dX, dY, clR, clG, clB, xx, yy: Integer;
    H1, S1, L1, H2, S2, L2: Extended;
-   R,G,B : extended; //percentage R,G,B.. (Needed for HSL).
-   D : Extended; //CMax - Cmin
    HueXTol, SatXTol: Extended;
-   CMax, CMin : extended;
    label Hit;
 
 begin
@@ -938,7 +932,7 @@ begin
   // We will, for now. Easier to type.
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
-
+  Count := 0;
   for yy := ys to ye do
   begin;
     for xx := xs to xe do
@@ -994,9 +988,7 @@ var
    Ptr: PRGB32;
    PtrInc,C: Integer;
    dX, dY, clR, clG, clB, xx, yy: Integer;
-   H1, S1, L1, H2, S2, L2, hueXTol, satXTol,LumTol,R,G,B,D,Cmin,Cmax: Extended;
-label
-  hit;
+   H1, S1, L1, H2, S2, L2, hueXTol, satXTol: Extended;
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
@@ -1521,7 +1513,10 @@ begin
   CCTS := Self.CTS;
   //We wont want HSL comparison with BMPs, right? Not for now atleast.
   if CCTS > 1 then
+  begin
+    Writeln('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
     CCTS := 1;
+  end;
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for yy := 0 to dY do
@@ -1655,7 +1650,10 @@ begin
   //NO HSL.
   CCTS := Self.CTS;
   if CCTS > 1 then
+  begin
+    Writeln('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
     CCTS := 1;
+  end;
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for i := 0 to HiSpiral do
@@ -1727,7 +1725,10 @@ begin
   //NO HSL.
   CCTS := Self.CTS;
   if CCTS > 1 then
+  begin
+    Writeln('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
     CCTS := 1;
+  end;
   FoundC := 0;
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
@@ -1891,7 +1892,11 @@ end;
 function TMFinder.FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
 var
    // Colours of DTMs
-   C: Array of Integer;
+   clR,clG,clB : array of byte;
+
+   //Similar colors stuff
+   hh,ss,ll,hmod,smod : extended;
+   Ccts : integer;
 
    // Bitwise
    b: Array of Array of Integer;
@@ -1905,6 +1910,8 @@ var
    xx, yy: integer;
    i, xxx,yyy: Integer;
 
+   StartX,StartY,EndX,EndY : integer;
+
    //clientdata
    cd: TPRGB32Array;
 
@@ -1912,6 +1919,7 @@ var
 
    // point count
    pc: Integer = 0;
+   Found : boolean;
 
    goodPoints: Array of Boolean;
 
@@ -1921,6 +1929,8 @@ var
 
 
 begin
+  // Is the area valid?
+  DefaultOperations(x1, y1, x2, y2);
   if not DTMConsistent(dtm) then
   begin
     raise Exception.CreateFmt('FindDTMs: DTM is not consistent.', []);
@@ -1929,9 +1939,6 @@ begin
 
   // Get the area we should search in for the Main Point.
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
-
-  // Is the area valid?
-  DefaultOperations(MA.x1, MA.y1, MA.x2, MA.y2);
 
   // Turn the bp into a more usable array.
   setlength(goodPoints, dtm.l);
@@ -1953,28 +1960,47 @@ begin
   end;
 
   // C = DTM.C
-  C := DTM.c;
+  SetLength(clR,dtm.l);
+  SetLength(clG,dtm.l);
+  SetLength(clB,dtm.l);
+  for i := 0 to DTM.l - 1 do
+    ColorToRGB(dtm.c[i],clR[i],clG[i],clB[i]);
+  //Compiler hints
+  HMod := 0;SMod := 0;hh := 0.0;ss := 0.0; ll := 0.0;
+  //NO HSL.
+  CCTS := Self.CTS;
+  if CCTS > 1 then
+  begin
+    Writeln('CTS > 1, putting it temporary back to 1. For this (DTM)search');
+    CCTS := 1;
+  end;
 
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
+  //CD starts at 0,0.. We must adjust the MA, since this is still based on the xs,ys,xe,ye box.
+  MA.x1 := MA.x1 - x1;
+  MA.y1 := MA.y1 - y1;
+  MA.x2 := MA.x2 - x1;
+  MA.y2 := MA.y2 - y1;
+  //MA is now fixed to the new (0,0) box...
 
-  for yy := MA.y1 -y1 to MA.y2 - y1 do
-    for xx := MA.x1 -x1 to MA.x2 - x1 do
+  for yy := MA.y1  to MA.y2  do //Coord of the mainpoint in the search area
+    for xx := MA.x1  to MA.x2 do
     begin
-      // Checking main point now; store that we have checked it.
-      ch[xx][yy] := ch[xx][yy] or 1;
-      if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
-        goto AnotherLoopEnd;
-
-      // Mainpoint matched. (If it did not match, we would be at AnotherLoopEnd)
-      b[xx][yy] := b[xx][yy] or 1;
-
-      for i := 1 to dtm.l - 1 do
+      //Mainpoint can have area size as well, so we must check that just like any subpoint.
+      for i := 0 to dtm.l - 1 do
       begin //change to use other areashapes too.
-        for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
-          for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
+        Found := false;
+        //With area it can go out of bounds, therefore this max/min check
+        StartX := max(0,xx - dtm.asz[i] + dtm.p[i].x);
+        StartY := max(0,yy - dtm.asz[i] + dtm.p[i].y);
+        EndX := Min(Ma.x2,xx + dtm.asz[i] + dtm.p[i].x);
+        EndY := Min(ma.y2,yy + dtm.asz[i] + dtm.p[i].y);
+        for xxx := StartX to EndX do //The search area for the subpoint
+        begin
+          for yyy := StartY to EndY do
           begin
             // If we have not checked this point, check it now.
             if ch[xxx][yyy] and (1 shl i) = 0 then
@@ -1982,32 +2008,41 @@ begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-              if SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
-                b[xxx][yyy] := b[xxx][yyy] or (1 shl i)
-              else
-                goto AnotherLoopEnd;
+              if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh,ss,ll,hmod,smod) then
+                b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
 
-            // if it didn't match and was supposed to be good points, stop.
-            if (b[xxx][yyy] and (1 shl i) = 0) and goodPoints[i] then
-              goto AnotherLoopEnd;
+            //Check if the point matches the subpoint
+            if (b[xxx][yyy] and (1 shl i) <> 0) then
+            begin
+              //Check if it was supposed to be a goodpoint..
+              if GoodPoints[i] then
+              begin
+                Found := true;
+                break;
+              end else //It was not supposed to match!!
+                goto AnotherLoopEnd;
+            end;
           end;
+          if Found then Break; //Optimalisation, we must break out of this second for loop, since we already found the subpoint
+        end;
+        if (not found) and (GoodPoints[i]) then      //This sub-point wasn't found, while it should.. Exit this mainpoint search
+          goto AnotherLoopEnd;
       end;
-      //writeln(Format('Found point: (%d, %d)', [xx,yy]));
+      //We survived the sub-point search, add this mainpoint to the results.
       ClientTPA[pc] := Point(xx + x1, yy + y1);
       Inc(pc);
       if(pc = maxToFind) then
         goto theEnd;
       AnotherLoopEnd:
-        //writeln(format('b[%d][%d]: %d' ,[xx,yy,b[xx][yy]]));
     end;
-
   TheEnd:
   TClient(Client).IOManager.FreeReturnData;
 
   SetLength(Points, pc);
   if pc > 0 then
     Move(ClientTPA[0], Points[0], pc * SizeOf(TPoint));
+  Result := (pc > 0);
 end;
 
 function TMFinder.FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
@@ -2029,7 +2064,11 @@ function TMFinder.FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x
 var
    DTM: pDTM;
    // Colours of DTMs
-   C: Array of Integer;
+   clR,clG,clB : array of byte;
+
+   //Similar colors stuff
+   hh,ss,ll,hmod,smod : extended;
+   Ccts : integer;
 
    // Bitwise
    b: Array of Array of Integer;
@@ -2042,10 +2081,9 @@ var
    // for loops, etc
    xx, yy: integer;
    i, xxx,yyy: Integer;
+   StartX,StartY,EndX,EndY : integer;
 
-   // for comparisons.
-   rgbs: array of TRGB32;
-
+   Found : boolean;
    //clientdata
    cd: TPRGB32Array;
 
@@ -2063,6 +2101,8 @@ var
 
 
 begin
+  // Is the area valid?
+  DefaultOperations(x1, y1, x2, y2);
   if not DTMConsistent(_dtm) then
   begin
     raise Exception.CreateFmt('FindDTMsRotated: DTM is not consistent.', []);
@@ -2071,12 +2111,9 @@ begin
 
   NormalizeDTM(_dtm);
 
-  DefaultOperations(x1, y1, x2, y2);
-  DTM := copydtm(_DTM);
-
-  setlength(goodPoints, dtm.l);
-  for i := 0 to dtm.l - 1 do
-    goodPoints[i] := not dtm.bp[i];
+  setlength(goodPoints, _dtm.l);
+  for i := 0 to _dtm.l - 1 do
+    goodPoints[i] := not _dtm.bp[i];
 
   // Init data structure B.
   W := x2 - x1;
@@ -2091,8 +2128,21 @@ begin
     FillChar(ch[i][0], SizeOf(Integer) * (H+1), 0);
   end;
 
-  // C = DTM.C
-  C := DTM.c;
+  // Convert colors to there components
+  SetLength(clR,_dtm.l);
+  SetLength(clG,_dtm.l);
+  SetLength(clB,_dtm.l);
+  for i := 0 to _dtm.l - 1 do
+    ColorToRGB(_dtm.c[i],clR[i],clG[i],clB[i]);
+  //Compiler hints
+  HMod := 0;SMod := 0;hh := 0.0;ss := 0.0; ll := 0.0;
+  //NO HSL.
+  CCTS := Self.CTS;
+  if CCTS > 1 then
+  begin
+    Writeln('CTS > 1, putting it temporary back to 1. For this (DTM)search');
+    CCTS := 1;
+  end;
 
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
@@ -2104,45 +2154,59 @@ begin
   s := sAngle;
   while s < eAngle do
   begin
-    RotateDTM(dtm, s);
+    dtm := RotateDTM(_dtm, s);
+    //Rotate the DTM, the rest is just like FindDTMs
     MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
-
-    for yy := MA.y1 -y1 to MA.y2 - y1 do
-      for xx := MA.x1 -x1 to MA.x2 - x1 do
+    //CD starts at 0,0.. We must adjust the MA, since this is still based on the xs,ys,xe,ye box.
+    MA.x1 := MA.x1 - x1;
+    MA.y1 := MA.y1 - y1;
+    MA.x2 := MA.x2 - x1;
+    MA.y2 := MA.y2 - y1;
+    //MA is now fixed to the new (0,0) box...
+    for yy := MA.y1  to MA.y2  do //Coord of the mainpoint in the search area
+      for xx := MA.x1  to MA.x2 do
       begin
-        // Checking main point now; store that we have checked it.
-        ch[xx][yy] := ch[xx][yy] or 1;
-        if not SimilarColors(dtm.c[0], RGBToColor(cd[yy][xx].R, cd[yy][xx].G, cd[yy][xx].B), dtm.t[0]) then
-          goto AnotherLoopEnd;
-
-        // Mainpoint matched. (If it did not match, we would be at AnotherLoopEnd)
-        b[xx][yy] := b[xx][yy] or 1;
-
-        for i := 1 to dtm.l - 1 do
+        //Mainpoint can have area size as well, so we must check that just like any subpoint.
+        for i := 0 to dtm.l - 1 do
         begin //change to use other areashapes too.
-          for xxx := xx - dtm.asz[i] + dtm.p[i].x to xx + dtm.asz[i] + dtm.p[i].x do
-            for yyy := yy - dtm.asz[i] + dtm.p[i].y to yy + dtm.asz[i]+ dtm.p[i].y do
+          Found := false;
+          //With area it can go out of bounds, therefore this max/min check
+          StartX := max(0,xx - dtm.asz[i] + dtm.p[i].x);
+          StartY := max(0,yy - dtm.asz[i] + dtm.p[i].y);
+          EndX := Min(Ma.x2,xx + dtm.asz[i] + dtm.p[i].x);
+          EndY := Min(ma.y2,yy + dtm.asz[i] + dtm.p[i].y);
+          for xxx := StartX to EndX do //The search area for the subpoint
+          begin
+            for yyy := StartY to EndY do
             begin
-              writeln(format('xxx,yyy: %d, %d', [xxx,yyy]));
               // If we have not checked this point, check it now.
               if ch[xxx][yyy] and (1 shl i) = 0 then
               begin
                 // Checking point i now. (Store that we matched it)
                 ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-                if SimilarColors(dtm.c[i], RGBToColor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
-                  b[xxx][yyy] := b[xxx][yyy] or (1 shl i)
-                else
-                  goto AnotherLoopEnd;
+                if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh,ss,ll,hmod,smod) then
+                  b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
               end;
 
-              // if it didn't match and was supposed to be good points, stop.
-              if (b[xxx][yyy] and (1 shl i) = 0) and goodPoints[i] then
-                goto AnotherLoopEnd;
+              //Check if the point matches the subpoint
+              if (b[xxx][yyy] and (1 shl i) <> 0) then
+              begin
+                //Check if it was supposed to be a goodpoint..
+                if GoodPoints[i] then
+                begin
+                  Found := true;
+                  break;
+                end else //It was not supposed to match!!
+                  goto AnotherLoopEnd;
+              end;
             end;
+            if Found then Break; //Optimalisation, we must break out of this second for loop, since we already found the subpoint
+          end;
+          if (not found) and (GoodPoints[i]) then      //This sub-point wasn't found, while it should.. Exit this mainpoint search
+            goto AnotherLoopEnd;
         end;
-        //writeln(Format('Found point: (%d, %d)', [xx,yy]));
-
+        //We survived the sub-point search, add this mainpoint to the results.
         Inc(pc);
         setlength(Points,pc);
         Points[pc-1] := Point(xx + x1, yy + y1);
@@ -2152,15 +2216,13 @@ begin
         if(pc = maxToFind) then
           goto theEnd;
         AnotherLoopEnd:
-          //writeln(format('b[%d][%d]: %d' ,[xx,yy,b[xx][yy]]));
       end;
     s := s + aStep;
     ac := 0;
   end;
-
   TheEnd:
     TClient(Client).IOManager.FreeReturnData;
-
+  Result := (pc > 0);
   { Don't forget to pre calculate the rotated points at the start.
    Saves a lot of rotatepoint() calls. }
 //  raise Exception.CreateFmt('Not done yet!', []);
