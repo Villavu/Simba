@@ -84,8 +84,8 @@ type
 
         function FindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
         function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
-        function FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
-        function FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
+        function FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
+        function FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer; Alternating : boolean): Boolean;
         //Donno
         function GetColors(Coords: TPointArray): TIntegerArray;
         // tol speeds
@@ -2048,13 +2048,13 @@ begin
   Result := (pc > 0);
 end;
 
-function TMFinder.FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
+function TMFinder.FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
 
 var
    P: TPointArray;
    F: T2DExtendedArray;
 begin
-  FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F, 1);
+  FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F, 1,Alternating);
   if Length(P) = 0 then
     exit(false);
   aFound := F[0][0];
@@ -2063,7 +2063,7 @@ begin
   Exit(True);
 end;
 
-function TMFinder.FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer): Boolean;
+function TMFinder.FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer; Alternating : boolean): Boolean;
 var
    DTM: pDTM;
    // Colours of DTMs
@@ -2092,6 +2092,12 @@ var
    cd: TPRGB32Array;
 
    PtrData: TRetData;
+
+   //If we search alternating, we start in the middle and then +,-,+,- the angle step outwars
+   MiddleAngle : extended;
+   //Count the amount of anglesteps, mod 2 determines whether it's a + or a - search, and div 2 determines the amount of steps
+   //you have to take.
+   AngleSteps : integer;
 
    // point count
    pc: Integer = 0;
@@ -2155,8 +2161,13 @@ begin
   cd := CalculateRowPtrs(PtrData, h + 1);
   SetLength(aFound, 0);
   SetLength(Points, 0);
-
-  s := sAngle;
+  if Alternating then
+  begin
+    MiddleAngle := (sAngle + eAngle) / 2.0;
+    s := MiddleAngle;  //Start in the middle!
+    AngleSteps := 0;
+  end else
+    s := sAngle;
   while s < eAngle do
   begin
     dtm := RotateDTM(_dtm, s);
@@ -2222,8 +2233,16 @@ begin
           goto theEnd;
         AnotherLoopEnd:
       end;
-    s := s + aStep;
     ac := 0;
+    if Alternating then
+    begin
+      if AngleSteps mod 2 = 0 then   //This means it's an even number, thus we must add a positive step
+        s := MiddleAngle + (aStep * (anglesteps div 2 + 1))  //Angle steps starts at 0, so we must add 1.
+      else
+        s := MiddleAngle - (aStep * (anglesteps div 2 + 1)); //We must search in the negative direction
+      inc(AngleSteps);
+    end else
+      s := s + aStep;
   end;
   TheEnd:
     TClient(Client).IOManager.FreeReturnData;
