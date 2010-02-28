@@ -35,8 +35,10 @@ AddFunction(@ps_DTMFromString, 'function DTMFromString(DTMString: String): Integ
 AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
 AddFunction(@ps_FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
 AddFunction(@ps_FindDTMs, 'function FindDTMs(DTM: Integer; var p: TPointArray; x1, y1, x2, y2: Integer): Boolean;');
-AddFunction(@ps_FindDTMRotated, 'function FindDTMRotated(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
-AddFunction(@ps_FindDTMsRotated, 'function FindDTMsRotated(DTM: Integer; var Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
+AddFunction(@ps_FindDTMRotatedSE, 'function FindDTMRotatedSE(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
+AddFunction(@ps_FindDTMRotatedAlternating, 'function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
+AddFunction(@ps_FindDTMsRotatedSE, 'function FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
+AddFunction(@ps_FindDTMsRotatedAlternating, 'function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
 AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
 AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
 

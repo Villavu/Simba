@@ -48,14 +48,14 @@ begin
   end;
 end;
 
-function ps_FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2:
+function ps_FindDTMRotatedAlternating(DTM: Integer; out x, y: Integer; x1, y1, x2, y2:
                            Integer; sAngle, eAngle, aStep: Extended;
                            out aFound: Extended): Boolean; extdecl;
 var
    temp: pDTM;
 begin
   if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
-    Result := CurrThread.Client.MFinder.FindDTMRotated(temp, x, y, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound)
+    Result := CurrThread.Client.MFinder.FindDTMRotated(temp, x, y, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound,true)
   else
   begin
     x := 0;
@@ -64,13 +64,40 @@ begin
   end;
 end;
 
-function ps_FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean; extdecl;
+function ps_FindDTMRotatedSE(DTM: Integer; out x, y: Integer; x1, y1, x2, y2:
+                           Integer; sAngle, eAngle, aStep: Extended;
+                           out aFound: Extended): Boolean; extdecl;
+var
+   temp: pDTM;
+begin
+  if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
+    Result := CurrThread.Client.MFinder.FindDTMRotated(temp, x, y, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound,false)
+  else
+  begin
+    x := 0;
+    y := 0;
+    Result := False;
+  end;
+end;
+
+function ps_FindDTMsRotatedAlternating(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean; extdecl;
 var
    temp: pDTM;
 begin
   if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
     Result := CurrThread.Client.MFinder.FindDTMsRotated(temp, Points, x1, y1, x2, y2,
-                                  sAngle, eAngle, aStep, aFound, 0)
+                                  sAngle, eAngle, aStep, aFound, 0,true)
+  else
+    Result := False;
+end;
+
+function ps_FindDTMsRotatedSE(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean; extdecl;
+var
+   temp: pDTM;
+begin
+  if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
+    Result := CurrThread.Client.MFinder.FindDTMsRotated(temp, Points, x1, y1, x2, y2,
+                                  sAngle, eAngle, aStep, aFound, 0,false)
   else
     Result := False;
 end;
