@@ -1977,9 +1977,6 @@ begin
   GetToleranceSpeed2Modifiers(hMod, sMod);
 
   ccts := CTS;
-  //Compiler hints
-  HMod := 0;SMod := 0;
-  //NO HSL.
 
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
@@ -2013,10 +2010,8 @@ begin
             begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
-
+         //   if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
               if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
-
-           //   if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
                 b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
 
