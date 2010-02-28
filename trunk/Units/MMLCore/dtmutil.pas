@@ -41,7 +41,7 @@ Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
                                   sAngle, eAngle, aStep: Extended): TBox;
 function DTMConsistent(var dtm: pdtm): boolean;
 procedure NormalizeDTM(var dtm: pdtm);
-procedure RotateDTM(var dtm: pdtm; angle: extended);
+function RotateDTM(const dtm: pdtm; angle: extended) : pdtm;
 function copydtm(const dtm: pdtm): pdtm;
 
 const
@@ -222,9 +222,11 @@ procedure NormalizeDTM(var dtm: pdtm);
 var
    i:integer;
 begin
-  for i := 1 to dtm.l do
+  if dtm.p[0] = Point(0,0) then  //Already normalized
+    exit;
+  for i := 1 to dtm.l - 1 do
     dtm.p[i] := dtm.p[i] - dtm.p[0];
-  dtm.p[0] := dtm.p[0] - dtm.p[0];
+  dtm.p[0] := dtm.p[0] - dtm.p[0]; //Point(0,0);
 end;
 
 Function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
@@ -234,25 +236,19 @@ var
    b: TBox;
 
 begin
- // writeln(format('%d, %d', [0,0]));
-  for i := 1 to high(dtm.c) do
-  begin
-    dtm.p[i] := dtm.p[i] - dtm.p[0];
- //   writeln(format('%d, %d', [dtm.p[i].x, dtm.p[i].y]));
-  end;
-  dtm.p[0] := dtm.p[0] - dtm.p[0];
+  NormalizeDTM(dtm);
 
-
-  FillChar(b, SizeOf(TBox), 0);
-  for i := 0 to high(dtm.c) do
+  FillChar(b, SizeOf(TBox), 0); //Sets all the members to 0
+  b.x1 := MaxInt;
+  b.y1 := MaxInt;
+  for i := 0 to dtm.l - 1 do
   begin
-    b.x1 := min(b.x1, dtm.p[i].x - dtm.asz[i]);
-    b.y1 := min(b.y1, dtm.p[i].y - dtm.asz[i]);
-    b.x2 := max(b.x2, dtm.p[i].x + dtm.asz[i]);
-    b.y2 := max(b.y2, dtm.p[i].y + dtm.asz[i]);
+    b.x1 := min(b.x1, dtm.p[i].x);// - dtm.asz[i]);
+    b.y1 := min(b.y1, dtm.p[i].y);// - dtm.asz[i]);
+    b.x2 := max(b.x2, dtm.p[i].x);// + dtm.asz[i]);
+    b.y2 := max(b.y2, dtm.p[i].y);// + dtm.asz[i]);
   end;
 
-  //FillChar(Result, SizeOf(TBox), 0);
   //writeln(Format('DTM Bounding Box: %d, %d : %d, %d', [b.x1, b.y1,b.x2,b.y2]));
   Result.x1 := x1 - b.x1;
   Result.y1 := y1 - b.y1;
@@ -268,19 +264,16 @@ var
    d:extended;
 
 begin
-  for i := 1 to high(dtm.c) do
-  begin
-    dtm.p[i] := dtm.p[i] - dtm.p[0];
-  end;
-  dtm.p[0] := dtm.p[0] - dtm.p[0];
+  NormalizeDTM(dtm);
 
+{ Delete the ASZ
   for i := 0 to high(dtm.c) do
   begin
     d := max(d, sqrt(sqr(dtm.p[i].x - dtm.asz[i]) + sqr(dtm.p[i].x - dtm.asz[i])));
     d := max(d, sqrt(sqr(dtm.p[i].y - dtm.asz[i]) + sqr(dtm.p[i].y - dtm.asz[i])));
     d := max(d, sqrt(sqr(dtm.p[i].x + dtm.asz[i]) + sqr(dtm.p[i].x + dtm.asz[i])));
     d := max(d, sqrt(sqr(dtm.p[i].y + dtm.asz[i]) + sqr(dtm.p[i].y + dtm.asz[i])));
-  end;
+  end;   }
 
   Result.x1 := x1 + ceil(d);
   Result.y1 := y1 + ceil(d);
@@ -288,15 +281,15 @@ begin
   Result.y2 := y2 - ceil(d);
 end;
 
-procedure RotateDTM(var dtm: pdtm; angle: extended);
+function RotateDTM(const dtm: pdtm; angle: extended) : pDTM;
 
 var
    i: integer;
 begin
   if length(dtm.p) = 0 then
     raise Exception.Create('RotateDTM, no points in DTM.');
-
-  RotatePoints_(dtm.p, angle, dtm.p[0].x, dtm.p[0].y);
+  result := copydtm(dtm);
+  RotatePoints_(result.p, angle, result.p[0].x, result.p[0].y);
 end;
 
 function copydtm(const dtm: pdtm): pdtm;
