@@ -1895,7 +1895,8 @@ var
    clR,clG,clB : array of byte;
 
    //Similar colors stuff
-   hh,ss,ll,hmod,smod : extended;
+   hh,ss,ll: array of extended;
+   hmod,smod: extended;
    Ccts : integer;
 
    // Bitwise
@@ -1965,15 +1966,19 @@ begin
   SetLength(clB,dtm.l);
   for i := 0 to DTM.l - 1 do
     ColorToRGB(dtm.c[i],clR[i],clG[i],clB[i]);
+
+  SetLength(hh,dtm.l);
+  SetLength(ss,dtm.l);
+  SetLength(ll,dtm.l);
+  for i := 0 to DTM.l - 1 do
+    ColorToHSL(dtm.c[i],hh[i],ss[i],ll[i]);
+
+  GetToleranceSpeed2Modifiers(hMod, sMod);
+
+  ccts := CTS;
   //Compiler hints
-  HMod := 0;SMod := 0;hh := 0.0;ss := 0.0; ll := 0.0;
+  HMod := 0;SMod := 0;
   //NO HSL.
-  CCTS := Self.CTS;
-  if CCTS > 1 then
-  begin
-    Writeln('CTS > 1, putting it temporary back to 1. For this (DTM)search');
-    CCTS := 1;
-  end;
 
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
@@ -2008,7 +2013,7 @@ begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-              if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh,ss,ll,hmod,smod) then
+              if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
                 b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
 
@@ -2067,7 +2072,8 @@ var
    clR,clG,clB : array of byte;
 
    //Similar colors stuff
-   hh,ss,ll,hmod,smod : extended;
+   hh,ss,ll: array of extended;
+   hmod,smod: extended;
    Ccts : integer;
 
    // Bitwise
@@ -2135,14 +2141,15 @@ begin
   for i := 0 to _dtm.l - 1 do
     ColorToRGB(_dtm.c[i],clR[i],clG[i],clB[i]);
   //Compiler hints
-  HMod := 0;SMod := 0;hh := 0.0;ss := 0.0; ll := 0.0;
-  //NO HSL.
-  CCTS := Self.CTS;
-  if CCTS > 1 then
-  begin
-    Writeln('CTS > 1, putting it temporary back to 1. For this (DTM)search');
-    CCTS := 1;
-  end;
+
+  SetLength(hh,dtm.l);
+  SetLength(ss,dtm.l);
+  SetLength(ll,dtm.l);
+  for i := 0 to DTM.l - 1 do
+    ColorToHSL(dtm.c[i],hh[i],ss[i],ll[i]);
+
+  GetToleranceSpeed2Modifiers(hMod, sMod);
+  ccts := CTS;
 
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
@@ -2185,7 +2192,7 @@ begin
                 // Checking point i now. (Store that we matched it)
                 ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-                if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh,ss,ll,hmod,smod) then
+                if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
                   b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
               end;
 
