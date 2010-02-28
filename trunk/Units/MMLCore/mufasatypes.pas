@@ -42,6 +42,9 @@ operator + (PT1,PT2 : TPoint) : TPoint;
 { TPoint sub }
 operator - (PT1,PT2 : TPoint) : TPoint;
 
+{ TPoint comp}
+operator = (PT1,PT2 : TPoint) : boolean;
+
 type
   TRGB24 = packed record
     B, G, R : byte;
@@ -319,6 +322,11 @@ operator-(PT1, PT2: TPoint): TPoint;
 begin
   Result.x := PT1.x - PT2.x;
   Result.y := Pt1.y - PT2.y;
+end;
+
+operator=(PT1, PT2: TPoint): boolean;
+begin
+  result := ((PT1.x = PT2.x) and (pt1.y = pt2.y));
 end;
 
 initialization
