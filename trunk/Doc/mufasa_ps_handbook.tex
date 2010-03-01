@@ -501,25 +501,44 @@ the first found DTM.
 FindDTMs is like FindDTM, but it returns an array of \textbf{x} and \textbf{y}, as the
 \textbf{TPointArray} type.
 
-\subsection{FindDTMRotated}
+\subsection{FindDTMRotatedSE}
 \pfunc \mname{FindDTMRotated}(\pvname{DTM}\pvtype{Integer} \textbf{out }
 \pvname{x, y} \pvtype{Integer} \pvname{x1, y1, x2, y2} \pvtype{Integer}
 \pvname{sAngle, eAngle, aStep} \pvtype{Extended} \textbf{out}
 \pvname{aFound} \pvtypel{Extended}): \pvtype{Boolean}
 
-FindDTMRotated is behaves like FindDTM. Only, it will turn the DTM between 
-sAngle and eAngle by aStep each time. It will also return the angle which the DTM was found
-at.
+FindDTMRotatedSE is behaves like FindDTM. Only, it will rotate the DTM between 
+sAngle and eAngle by aStep each time. It will also return the angle which the
+DTM was found at. Start rotating at StartAngle.
 
-\subsection{FindDTMsRotated}
+\subsection{FindDTMRotatedAlternating}
+\pfunc \mname{FindDTMRotated}(\pvname{DTM}\pvtype{Integer} \textbf{out }
+\pvname{x, y} \pvtype{Integer} \pvname{x1, y1, x2, y2} \pvtype{Integer}
+\pvname{sAngle, eAngle, aStep} \pvtype{Extended} \textbf{out}
+\pvname{aFound} \pvtypel{Extended}): \pvtype{Boolean}
+
+FindDTMRotated is behaves like FindDTM. Only, it will rotate the DTM between 
+sAngle and eAngle by aStep each time. It will also return the angle which the
+DTM was found at. Starts at 0 degrees and alternatives between - and + aStep to search for the DTM.
+
+\subsection{FindDTMsRotatedSE}
 \pfunc \mname{FindDTMRotated}(\pvname{DTM}\pvtype{Integer} \textbf{var}
 \pvname{Points} \pvtype{TPointArray} \pvname{x1, y1, x2, y2} \pvtype{Integer}
 \pvname{sAngle, eAngle, aStep} \pvtype{Extended} \textbf{out}
 \pvname{aFound} \pvtypel{T2DExtendedArray}): \pvtype{Boolean}
 
-FindDTMRotated is behaves like FindDTMs. Only, it will turn the DTM between 
-sAngle and eAngle by aStep each time. It will also return the angles which each DTM Main Point 
-was found at.
+FindDTMsRotatedSE behaves like FindRotatedDTMSE, but finds all DTM occurances.
+Since one point can be found on several angles, aFound is a 2d array.
+
+\subsection{FindDTMsRotatedAlternating}
+\pfunc \mname{FindDTMRotated}(\pvname{DTM}\pvtype{Integer} \textbf{var}
+\pvname{Points} \pvtype{TPointArray} \pvname{x1, y1, x2, y2} \pvtype{Integer}
+\pvname{sAngle, eAngle, aStep} \pvtype{Extended} \textbf{out}
+\pvname{aFound} \pvtypel{T2DExtendedArray}): \pvtype{Boolean}
+
+FindDTMsRotatedAlternating behaves like FindRotatedDTMAlternating,
+but finds all DTM occurances.
+Since one point can be found on several angles, aFound is a 2d array.
 
 \subsection{DTMFromString}
 
