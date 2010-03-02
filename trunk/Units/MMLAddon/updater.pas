@@ -85,8 +85,7 @@ type
 
 
 implementation
-uses
-  strings;
+
 
 procedure TMMLFileDownloader.SetBasePath(s: string);
 begin
@@ -128,9 +127,6 @@ end;
 
 procedure TMMLFileDownloader.OnMonitor(Sender: TObject; Writing: Boolean;
   const Buffer: TMemory; Len: Integer);
-
-var
-  i,p:integer;
 begin
   if writing then exit;
   Inc(FTotal, len);
@@ -154,8 +150,6 @@ function TMMLFileDownloader.DownloadAndSave: Boolean;
 
 var
   response: TStream;
-  i:integer;
-  f: TFileStream;
 
 begin
   Result := False;

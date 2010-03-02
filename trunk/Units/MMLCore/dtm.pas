@@ -76,7 +76,7 @@ type
 
 implementation
 uses
-    Client, dtmutil, paszlib,
+    dtmutil, paszlib,
     graphics, // for TColor
     math // for max
     ;
@@ -124,11 +124,11 @@ begin
   inherited Destroy;
 end;
 
-Function AreaShape(Color, Tolerance, Size, Shape: Integer; P: TPoint) : Boolean; inline;
+{Function AreaShape(Color, Tolerance, Size, Shape: Integer; P: TPoint) : Boolean; inline;
 
 Begin
 
-End;
+End;}
 
 //  Rotates the given point (p) by A (in radians) around the point defined by cx, cy.
 

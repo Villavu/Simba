@@ -80,7 +80,7 @@ type
         function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
         function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
         function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
-        function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
+        function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
 
         function FindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
         function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
@@ -1765,7 +1765,7 @@ end;
 
 function TMFinder.FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x,
   y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;
-  AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
+  AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
 var
    MainRowdata : TPRGB32Array;
    BmpRowData : TPRGB32Array;

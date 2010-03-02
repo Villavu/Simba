@@ -31,17 +31,17 @@ interface
 
 uses
   {$ifdef linux}cthreads,{$endif}Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas, SynMemo,
+  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas,
   //Client,
   MufasaTypes,
   mmlpsthread,synedittypes,
   {$IFDEF MSWINDOWS} os_windows, {$ENDIF} //For ColorPicker etc.
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
-  colourpicker, framescript, windowselector, lcltype, ActnList, StdActns,
-  SynExportHTML, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupSpecialLine,
-  SynEditMarkupHighAll, SynEditMiscClasses, LMessages, Buttons, PairSplitter,
+  colourpicker, framescript, windowselector, lcltype, ActnList,
+  SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
+  SynEditMarkupHighAll, LMessages, Buttons,
   stringutil,mufasatypesutil,
-  ColorBox              , about, framefunctionlist, ocr, updateform, simbasettings;
+  about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
     SimbaVersion = 571;
@@ -379,12 +379,10 @@ var
 
 implementation
 uses
-   lclintf,plugins,
+   lclintf,
    syncobjs, // for the critical sections
    debugimage,
-   bitmaps,
    colourhistory,
-   simpleanalyzer,
    math;
 
 //{$ifdef mswindows}
@@ -1729,6 +1727,7 @@ var
   Temp2Node : TTreeNode;
   Tree : TTreeView;
 begin
+  SetLength(nodes,0);
   if frmFunctionList.FunctionList.Items.Count = 0 then
   begin;
     Methods := TMThread.GetExportedMethods;
@@ -1997,12 +1996,6 @@ begin
 end;
 
 procedure TForm1.FunctionListShown(ShowIt: boolean);
-var
-  Node : TTreeNode;
-  tmpNode : TTreeNode;
-  Tree : TTreeView;
-  Analyzer : TScriptAnalyzer;
-  I,ii : integer;
 begin
   with MenuItemFunctionList, frmFunctionList do
   begin
@@ -2158,8 +2151,6 @@ begin
 end;
 
 function TForm1.CanExitOrOpen: boolean;
-var
-  I : integer;
 begin;
   Self.Enabled := False;//We HAVE to answer the popup
   Result := True;
@@ -2194,8 +2185,10 @@ end;
 
 function TForm1.ClearScript: boolean;
 begin
+  result := false;
   if CanExitOrOpen then
   begin;
+    result := true;
     CurrTab.Clear;
     RefreshTab();
   end;

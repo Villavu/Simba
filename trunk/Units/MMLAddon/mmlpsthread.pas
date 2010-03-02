@@ -227,8 +227,6 @@ begin;
 end;
 
 function writeln_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
-var
-  arr: TPSVariantIFC;
 begin
   Result:=true;
   psWriteln(makeString(NewTPSVariantIFC(Stack[Stack.Count-1],false)));
@@ -259,8 +257,6 @@ begin
 end;
 
 function ToStr_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
-var
-  data: TPSVariantIFC;
 begin
   result := true;
   Stack.SetAnsiString(-1, MakeString(NewTPSVariantIFC(Stack[Stack.Count-2],false)));
@@ -527,6 +523,7 @@ function TPSThread.PSScriptFindUnknownFile(Sender: TObject;
   const OrginFileName: string; var FileName, Output: string): Boolean;
 begin
   Writeln(OrginFileName + '-' +  Output + '-' + FileName);
+  Result := false;
 end;
 
 procedure TPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
@@ -762,8 +759,7 @@ begin
 end;
 
 function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
-var
-  local_name, local_args: string;
+
 begin
   result:= CurrThread.ProcessDirective(name, args);
 end;
@@ -818,7 +814,7 @@ end;
 
 procedure TCPThread.Execute;
 var
-  i,ii: integer;
+  i: integer;
 begin
   CurrThread := Self;
   Starttime := GetTickCount;

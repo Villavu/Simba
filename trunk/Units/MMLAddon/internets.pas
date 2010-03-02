@@ -44,8 +44,6 @@ type
   end;
 
 implementation
-uses
-  synacode;
 
 { OTHER }
 function GetPage(URL: String): String;
