@@ -3,14 +3,14 @@ begin
   result := GetPage(S);
 end;
 
-function ps_InitializeHTTPClient(HandleCookies, HandleRedirects: Boolean): Integer; extdecl;
+function ps_InitializeHTTPClient(HandleCookies: Boolean): Integer; extdecl;
 begin
   result := CurrThread.MInternet.CreateHTTPClient(HandleCookies);
 end;
 
 procedure ps_FreeHTTPClient(Client: Integer); extdecl;
 begin;
-  CurrThread.MInternet.GetHTTPClient(Client).Free;
+  CurrThread.MInternet.FreeHTTPClient(client);
 end;
 
 function ps_GetHTTPPage(Client: Integer; URL: string): string; extdecl;

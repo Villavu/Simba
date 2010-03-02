@@ -72,7 +72,6 @@ implementation
   procedure TGenericLoader.ValidateDirs;
   var
     i : integer;
-    TempStr : string;
   begin
     for i := 0 to PluginDirs.Count - 1 do
     begin;
@@ -116,7 +115,6 @@ implementation
   function TGenericLoader.LoadPlugin(PluginName: string): Integer;
   var
     i, ii : integer;
-    Status : LongInt;
     PlugExt: String = {$IFDEF LINUX}'.so';{$ELSE}'.dll';{$ENDIF}
   begin
     ii := -1;

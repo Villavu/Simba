@@ -75,7 +75,7 @@ type
 implementation
 
 uses
-  files, MufasaTypes;
+  MufasaTypes;
 
 
 constructor TMFont.Create;
@@ -194,8 +194,12 @@ var
   i: integer;
 begin
   i := GetFontIndex(Name);
-  TMFont(Fonts.Items[i]).Free;
-  Fonts.Delete(i);
+  result := (i <> -1);
+  if result then
+  begin
+    TMFont(Fonts.Items[i]).Free;
+    Fonts.Delete(i);
+  end;
 end;
 
 function TMFonts.LoadFont(Name: String; Shadow: Boolean): boolean;

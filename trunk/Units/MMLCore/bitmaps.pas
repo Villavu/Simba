@@ -120,7 +120,7 @@ implementation
 
 uses
   paszlib,DCPbase64,math,
-  colour_conv,IOManager,mufasatypesutil,tpa;
+  colour_conv,IOManager,mufasatypesutil;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
@@ -651,7 +651,7 @@ end;
 
 function TMufasaBitmap.CreateTPA(SearchCol: TColor): TPointArray;
 var
-  x,y,L,I : Integer;
+  x,y,L : Integer;
   StartPtr : PRGB32;
   Search : TRGB32;
 begin
@@ -661,7 +661,7 @@ begin
   StartPtr := Self.FData;
   For y := 0 to Self.h - 1 do
     For x := 0 to self.w - 1 do
-      if LongWord(StartPtr^) = LongWord(SearchCol) then
+      if LongWord(StartPtr^) = LongWord(Search) then
       begin;
         L := L + 1;
         Result[L].x := x;

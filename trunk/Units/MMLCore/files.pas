@@ -379,8 +379,6 @@ end;
 /\}
 
 function TMFiles.FileSizeMuf(FileNum: Integer): LongInt;
-Var
-   tempPos: Integer;
 begin
 
   If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
@@ -472,8 +470,6 @@ end;
 /\}
 
 function TMFiles.WriteFileString(FileNum: Integer; s: string): Boolean;
-var
-  BytesRead : DWord;
 begin
   If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
   Begin
