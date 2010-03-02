@@ -159,7 +159,7 @@ AddFunction(@ps_explodewrap,'procedure ExplodeWrap(del, str: string; var res : T
 SetCurrSection('Web');
 AddFunction(@OpenWebPage,'procedure OpenWebPage(url : string);');
 AddFunction(@ps_GetPage,'function GetPage(url : string): string;');
-AddFunction(@ps_InitializeHTTPClient,'function InitializeHTTPClient(HandleCookies, HandleRedirects: Boolean): Integer;');
+AddFunction(@ps_InitializeHTTPClient,'function InitializeHTTPClient(HandleCookies: Boolean): Integer;');
 AddFunction(@ps_FreeHTTPClient,'procedure FreeHTTPClient(Client: Integer);');
 AddFunction(@ps_GetHTTPPage,'function GetHTTPPage(Client: Integer; URL: string): string;');
 AddFunction(@ps_SetHTTPUserAgent,'procedure SetHTTPUserAgent(Client: Integer; Agent: string);');

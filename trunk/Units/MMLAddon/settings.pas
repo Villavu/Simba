@@ -28,14 +28,11 @@ unit settings;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, xmlread, xmlwrite, DOM;
+  Classes, SysUtils, ComCtrls, xmlread, xmlwrite, DOM,mufasatypes;
 
 
 
 type
-  // remove later
-  TStringArray = Array Of String;
-
   TSettingData = class(TObject)
     public
       Val: String;
@@ -104,7 +101,7 @@ type
 
 implementation
 uses
-  strutils;
+  stringutil;
 
 constructor TSettingData.Create;
 begin
@@ -184,30 +181,8 @@ begin
 end;
 
 function TMMLSettings.KeyNameToKeys(KeyName: String): TStringArray;
-  // yay for SRL!
-  function srl_Explode(str, del: string): TStringArray;
-  var
-    i, l, dL: Integer;
-  begin
-    i := 0;
-    l := -1;
-    SetLength(Result, 0);
-    if (str = '') then
-      Exit;
-    dL := Length(del) - 1;
-    repeat
-      Inc(l);
-      SetLength(Result, l + 1);
-      i := Pos(del, str);
-      if i <= 0 then
-        Break;
-      Result[l] := Copy(str, 1, i - 1);
-      Delete(str, 1, i + dL);
-    until false;
-    Result[l] := Copy(str, 1, Length(str));
-  end;
 begin
-  Result := srl_Explode(KeyName, '/');
+  Result := Explode('/',KeyName);
 end;
 
 function TMMLSettings.WalkToNode(KeyName: String): TTreeNode;
@@ -277,8 +252,6 @@ end;
 function TMMLSettings.ListKeys(KeyName: String): TStringArray;
 var
   N: TTreeNode;
-  i: Integer;
-  S: TStringArray;
 begin
   SetLength(Result, 0);
   N := WalkToNode(KeyName);
@@ -552,10 +525,6 @@ end;
 procedure TMMLSettings.WriteXMLData(n: TTreeNode;
                        XMLNode: TDOMNode; XMLDoc: TXMLDocument;
                        var XMLChild: TDOMNode; var C: Integer);
-
-var
-   DDataNode, DataNode: TDOMNode;
-
 begin
   if assigned(n.data) and (n.HasChildren) then
     writeln('Has data and children! Please close simba and remove settings.xml. if problem persists, please report your settings.xml');

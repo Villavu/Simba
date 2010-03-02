@@ -56,7 +56,7 @@ uses
 
              function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
                                color, tol, len: integer; font: string): string;
-             function TextToFontTPA(Text, font: String; var w, h: integer): TPointArray;
+             function TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
              function TextToFontBitmap(Text, font: String): TMufasaBitmap;
              function TextToMask(Text, font: String): TMask;
 
@@ -118,10 +118,6 @@ const
 
 { Constructor }
 constructor TMOCR.Create(Owner: TObject);
-
-var
-   files: TStringArray;
-
 begin
   inherited Create;
   Self.Client := Owner;
@@ -145,15 +141,15 @@ function TMOCR.InitTOCR(path: string): boolean;
 var
    dirs: array of string;
    i: longint;
-   dir: string;
 begin
   // We're going to load all fonts now
   Fonts.SetPath(path);
   dirs := GetDirectories(path);
-
+  Result := false;
   for i := 0 to high(dirs) do
   begin
-    Fonts.LoadFont(dirs[i], false);
+    if Fonts.LoadFont(dirs[i], false) then
+      result := true;
     {$IFDEF FONTDEBUG}
     writeln('Loading ' + dirs[i]);
     {$ENDIF}
@@ -461,8 +457,6 @@ function TMOCR.getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
 var
    bmp, shadowsbmp, charsbmp: TMufasaBitmap;
    x,y: integer;
-   r,g,b: integer;
-   n: TNormArray;
    {$IFDEF OCRDEBUG}
    dx,dy: integer;
    {$ENDIF}
@@ -620,6 +614,7 @@ begin
   bmp.Free;
   charsbmp.Free;
   shadowsbmp.Free;
+  Result := true;
 end;
 
 {
@@ -724,8 +719,6 @@ var
    fD: TocrData;
    TPA: TPointArray;
    STPA: T2DPointArray;
-   bmp:tmufasabitmap;
-
 
 begin
   fD := Fonts.GetFont(font);
@@ -832,7 +825,7 @@ begin
   end;
 end;
 
-function TMOCR.TextToFontTPA(Text, font: String; var w, h: integer): TPointArray;
+function TMOCR.TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
 
 var
    fontD: TOcrData;
@@ -899,7 +892,6 @@ var
    i,x,y : integer;
    dx,dy : integer;
    c : integer;
-   bmp: TMufasaBitmap;
    Pixels : array of array of boolean; //White = true
 begin
   TPA := TextToFontTPA(text, font, w, h);

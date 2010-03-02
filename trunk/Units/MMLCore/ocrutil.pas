@@ -65,7 +65,7 @@ type
 
 implementation
 uses
-  bitmaps, math,
+  math,
   {Begin To-Remove units. Replace ReadBmp with TMufasaBitmap stuff later.}
   graphtype, intfgraphics,graphics;
   {End To-Remove unit}

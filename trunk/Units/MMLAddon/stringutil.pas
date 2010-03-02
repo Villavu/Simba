@@ -84,7 +84,7 @@ begin;
   result := str;
   l := length(str);
   cap := true;
-  Range :=  ['a'..'z'] + ['A'..'Z'];
+  Range :=  ['a'..'z','A'..'Z'];
   for i := 1 to l do
     if cap and (str[i] in Range) then
     begin;
@@ -101,9 +101,10 @@ var
 begin;
   case Extract of
     Numbers : Range := ['0'..'9'];
-    Letters : Range := ['A'..'Z'] + ['a'..'z'];
-    Others  : Range := [#0..#255] - ['0'..'9'] - ['A'..'Z'] - ['a'..'z'];
+    Letters : Range := ['A'..'Z','a'..'z'];
+    Others  : Range := [#0..#255] - ['0'..'9','A'..'Z','a'..'z'];
   end;
+  Result := '';
   for i := length(str) downto 1 do
     if str[i] in Range then
       result := str[i] + result;

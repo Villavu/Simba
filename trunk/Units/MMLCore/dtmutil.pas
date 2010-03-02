@@ -54,7 +54,7 @@ const
 implementation
 uses math;
 
-Function RotatePoints_(Var P: TPointArray; A, cx, cy: Extended): TPointArray ;
+procedure RotatePoints_(Var P: TPointArray; A, cx, cy: Extended);
 
 Var
    I, L: Integer;
@@ -282,9 +282,6 @@ begin
 end;
 
 function RotateDTM(const dtm: pdtm; angle: extended) : pDTM;
-
-var
-   i: integer;
 begin
   if length(dtm.p) = 0 then
     raise Exception.Create('RotateDTM, no points in DTM.');
@@ -293,8 +290,6 @@ begin
 end;
 
 function copydtm(const dtm: pdtm): pdtm;
-var
-   i: integer;
 begin
   initdtm(result,dtm.l);
   Move(dtm.p[0], result.p[0], length(dtm.p) * sizeof(Tpoint));
