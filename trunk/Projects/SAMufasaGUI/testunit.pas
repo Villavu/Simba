@@ -243,6 +243,7 @@ type
     procedure editSearchListKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure editSearchListKeyPress(Sender: TObject; var Key: char);
+    procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
@@ -1419,6 +1420,38 @@ begin
       key := #0;
     end;
   end;
+end;
+
+procedure TForm1.FormDropFiles(Sender: TObject; const FileNames: array of String
+  );
+var
+  response, i : integer;
+  OldFileSetting : string;
+begin
+  if (length(FileNames) = 1) then
+  begin
+    LoadScriptFile(FileNames[0]); //One file saves us some work
+    exit;
+  end;
+  if (length(FileNames) > 5) then //> 5 seems nice to me, cant imagine you want to open that many scripts on a regular base
+  response := MessageDlg('Are you sure you want to open '+inttostr(length(filenames))+
+  ' scripts?', mtConfirmation, mbYesNo, 0);
+  case response of
+    IDNO: exit;
+  end;
+  //Its plain stupid opening all of those files in just one tab -.-
+  OldFileSetting := SettingsForm.Settings.GetKeyValue('Settings/Tabs/OpenScriptInNewTab');
+  SettingsForm.Settings.SetKeyValue('Settings/Tabs/OpenScriptInNewTab', 'True');
+  {$IfDef WINDOWS}
+  //Fix for the really old Windows kernel bug which probably will never be fixed
+  for i := 1 to high(filenames) do
+   LoadScriptFile(FileNames[i]);
+  LoadScriptFile(FileNames[0]);
+  {$Else} //in this case its tolerable as Windows is the only OS with this bug
+  for i := 0 to high(filenames) do
+   LoadScriptFile(FileNames[i]);
+  {$EndIf};
+  SettingsForm.Settings.SetKeyValue('Settings/Tabs/OpenScriptInNewTab', OldFileSetting);
 end;
 
 procedure TForm1.FunctionListChange(Sender: TObject; Node: TTreeNode);

@@ -1,9 +1,10 @@
 object Form1: TForm1
-  Left = 273
+  Left = 433
   Height = 555
-  Top = 233
+  Top = 224
   Width = 739
   ActiveControl = ScriptPanel
+  AllowDropFiles = True
   Caption = 'THA FUKING SIMBA'
   ClientHeight = 535
   ClientWidth = 739
@@ -12,6 +13,7 @@ object Form1: TForm1
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnDropFiles = FormDropFiles
   OnShortCut = FormShortCuts
   LCLVersion = '0.9.29'
   Visible = True
