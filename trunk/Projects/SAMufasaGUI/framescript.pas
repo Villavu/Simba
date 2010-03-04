@@ -259,8 +259,7 @@ begin
           TMufasaTab(Form1.Tabs[i]).ScriptFrame.HandleErrorData;
           Exit;
         end;
-      Form1.AddTab;
-      Form1.LoadScriptFile(ErrorData.Module);
+      Form1.LoadScriptFile(ErrorData.Module,true);
       ErrorData.Module:= '';
       Form1.CurrScript.ErrorData := Self.ErrorData;
       Form1.CurrScript.HandleErrorData;
