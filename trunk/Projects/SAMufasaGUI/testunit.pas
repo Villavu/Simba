@@ -44,7 +44,7 @@ uses
   about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 571;
+    SimbaVersion = 576;
 
 type
 
@@ -333,7 +333,7 @@ type
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
     function OpenScript : boolean;
-    function LoadScriptFile(filename : string) : boolean;
+    function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false) : boolean;
     function SaveCurrentScript : boolean;
     function SaveCurrentScriptAs : boolean;
     function CanExitOrOpen : boolean;
@@ -1425,8 +1425,7 @@ end;
 procedure TForm1.FormDropFiles(Sender: TObject; const FileNames: array of String
   );
 var
-  response, i : integer;
-  OldFileSetting : string;
+  i : integer;
 begin
   if (length(FileNames) = 1) then
   begin
@@ -1434,24 +1433,19 @@ begin
     exit;
   end;
   if (length(FileNames) > 5) then //> 5 seems nice to me, cant imagine you want to open that many scripts on a regular base
-  response := MessageDlg('Are you sure you want to open '+inttostr(length(filenames))+
-  ' scripts?', mtConfirmation, mbYesNo, 0);
-  case response of
-    IDNO: exit;
-  end;
-  //Its plain stupid opening all of those files in just one tab -.-
-  OldFileSetting := SettingsForm.Settings.GetKeyValue('Settings/Tabs/OpenScriptInNewTab');
-  SettingsForm.Settings.SetKeyValue('Settings/Tabs/OpenScriptInNewTab', 'True');
+    case MessageDlg('Are you sure you want to open '+inttostr(length(filenames))+
+                    ' scripts?', mtConfirmation, mbYesNo, 0)  of
+      IDNO: exit;
+    end;
   {$IfDef WINDOWS}
   //Fix for the really old Windows kernel bug which probably will never be fixed
   for i := 1 to high(filenames) do
-   LoadScriptFile(FileNames[i]);
-  LoadScriptFile(FileNames[0]);
+   LoadScriptFile(FileNames[i],true);
+  LoadScriptFile(FileNames[0],true);
   {$Else} //in this case its tolerable as Windows is the only OS with this bug
   for i := 0 to high(filenames) do
-   LoadScriptFile(FileNames[i]);
+   LoadScriptFile(FileNames[i],true);
   {$EndIf};
-  SettingsForm.Settings.SetKeyValue('Settings/Tabs/OpenScriptInNewTab', OldFileSetting);
 end;
 
 procedure TForm1.FunctionListChange(Sender: TObject; Node: TTreeNode);
@@ -2104,11 +2098,15 @@ begin
   end;
 end;
 
-function TForm1.LoadScriptFile(FileName : string): boolean;
+function TForm1.LoadScriptFile(filename: string; AlwaysOpenInNewTab: boolean
+  ): boolean;
 var
   OpenInNewTab : boolean;
 begin
-  OpenInNewTab:= (LowerCase(LoadSettingDef('Settings/Tabs/OpenScriptInNewTab','True')) = 'true');
+  if AlwaysOpenInNewTab then
+    OpenInNewTab := true
+  else
+    OpenInNewTab:= (LowerCase(LoadSettingDef('Settings/Tabs/OpenScriptInNewTab','True')) = 'true');
   if FileExists(FileName) then
   begin;
     if OpenInNewTab and (CurrScript.SynEdit.Text <> CurrScript.ScriptDefault) then //Add la tab!
