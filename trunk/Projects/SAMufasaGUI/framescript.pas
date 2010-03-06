@@ -130,15 +130,15 @@ end;
 procedure TScriptFrame.SynEditProcessCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 begin
-  if Command = ecUndo then
-  begin;
-    Command:= ecNone;
-    Self.Undo;
-  end else
-  if Command = ecRedo then
-  begin;
-    Command := ecNone;
-    Self.Redo;
+  case Command of
+    ecUndo :  begin
+                Command:= ecNone;
+                Self.Undo;
+              end;
+    ecRedo :  begin
+                Command := ecNone;
+                self.Redo;
+              end;
   end;
 end;
 

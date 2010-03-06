@@ -25,7 +25,7 @@ object ScriptFrame: TScriptFrame
     OnDragDrop = SynEditDragDrop
     OnDragOver = SynEditDragOver
     OnKeyDown = SynEditKeyDown
-    Gutter.Width = 53
+    Gutter.Width = 57
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -225,7 +225,7 @@ object ScriptFrame: TScriptFrame
       end    
       item
         Command = ecBlockIndent
-        ShortCut = 24649
+        ShortCut = 16457
       end    
       item
         Command = ecLineBreak
@@ -233,7 +233,7 @@ object ScriptFrame: TScriptFrame
       end    
       item
         Command = ecBlockUnindent
-        ShortCut = 24661
+        ShortCut = 16469
       end    
       item
         Command = ecPaste
@@ -591,6 +591,7 @@ object ScriptFrame: TScriptFrame
       'begin'
       'end.'
     )
+    Options = [eoAutoIndent, eoGroupUndo, eoScrollPastEol, eoSmartTabs, eoTabIndent, eoTabsToSpaces, eoTrimTrailingSpaces, eoBracketHighlight]
     BracketHighlightStyle = sbhsBoth
     OnChange = SynEditChange
     OnProcessCommand = SynEditProcessCommand
@@ -602,7 +603,7 @@ object ScriptFrame: TScriptFrame
         Width = 23
       end
       object TSynGutterLineNumber
-        Width = 13
+        Width = 17
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -720,4 +721,4 @@ object ScriptFrame: TScriptFrame
     left = 320
     top = 16
   end
-end
+end
