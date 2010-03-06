@@ -35,7 +35,7 @@ uses
   //Client,
   MufasaTypes,
   mmlpsthread,synedittypes,
-  {$IFDEF MSWINDOWS} os_windows, {$ENDIF} //For ColorPicker etc.
+  {$IFDEF MSWINDOWS} os_windows, windows,{$ENDIF} //For ColorPicker etc.
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
   colourpicker, framescript, windowselector, lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
@@ -44,7 +44,7 @@ uses
   about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 576;
+    SimbaVersion = 578;
 
 type
 
@@ -100,13 +100,14 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
-    MenuExtra: TMenuItem;
+    MenuItemSettingsButton: TMenuItem;
+    MenuItemDivider10: TMenuItem;
+    MenuTools: TMenuItem;
     MenuItemOpenRecent: TMenuItem;
     MenuItemCompile: TMenuItem;
     MenuItemHandbook: TMenuItem;
     MenuItemAbout: TMenuItem;
     MenuItemReportBug: TMenuItem;
-    MenuViewSettings: TMenuItem;
     MenuItemExportHTML: TMenuItem;
     MenuItemDivider9: TMenuItem;
     MouseTimer: TTimer;
@@ -269,11 +270,11 @@ type
     procedure MenuitemFillFunctionListClick(Sender: TObject);
     procedure MenuItemHideClick(Sender: TObject);
     procedure MenuItemReportBugClick(Sender: TObject);
+    procedure MenuItemSettingsButtonClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
     procedure MenuItemFunctionListClick(Sender: TObject);
-    procedure MenuViewSettingsClick(Sender: TObject);
     procedure NewsTimerTimer(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
@@ -453,11 +454,11 @@ begin
   Accept := frmFunctionList.DragKind = dkDock;
   if(Accept)then
   begin
-    P := ScriptPanel.ClientToScreen(Point(0, 0));
+    P := ScriptPanel.ClientToScreen(Classes.Point(0, 0));
     if(X <= (ScriptPanel.Width div 2))then
-      Source.DockRect := Rect(P.x, P.y, min(P.x + frmFunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y + ScriptPanel.Height)
+      Source.DockRect := Classes.Rect(P.x, P.y, min(P.x + frmFunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y + ScriptPanel.Height)
     else
-      Source.DockRect := Rect(max(P.x + ScriptPanel.Width - frmFunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y, P.x + ScriptPanel.Width, P.y + ScriptPanel.Height);
+      Source.DockRect := Classes.Rect(max(P.x + ScriptPanel.Width - frmFunctionList.Width, P.x + (ScriptPanel.Width div 2)), P.y, P.x + ScriptPanel.Width, P.y + ScriptPanel.Height);
   end;
 end;
 
@@ -770,7 +771,7 @@ begin
     Res := CurrScript.SynEdit.SearchReplaceEx(SearchString,'',SearchOptions,CurrPos);
     if res = 0 then
     begin
-      res := CurrScript.SynEdit.SearchReplaceEx(SearchString,'',SearchOptions,Point(0,0));
+      res := CurrScript.SynEdit.SearchReplaceEx(SearchString,'',SearchOptions,Classes.Point(0,0));
       if res > 0 then
       begin;
         Writeln('End of document reached');
@@ -866,6 +867,7 @@ begin
   CreateSetting('Settings/ColourPicker/ShowHistoryOnPick', 'True');
   CreateSetting('Settings/General/MaxRecentFiles','10');
   CreateSetting('Settings/MainForm/NormalSize','739:555');
+  CreateSetting('Settings/FunctionList/ShowOnStart','True');
 
   CreateSetting('Settings/Updater/RemoteVersion',
                 {$IFDEF WINDOWS}
@@ -915,7 +917,7 @@ end;
 
 procedure TForm1.LoadFormSettings;
 var
-  str : string;
+  str,str2 : string;
   Data : TStringArray;
   i : integer;
 begin
@@ -944,6 +946,12 @@ begin
     for i := high(data) downto 0 do//First = entry should be added as last
       AddRecentFile(data[i]);
   end;
+  str := LowerCase(LoadSettingDef('Settings/FunctionList/ShowOnStart','True'));
+  str2 := lowercase(LoadSettingDef('LastConfig/MainForm/FunctionListShown',''));
+  if (str = 'true') or (str2 = 'true') then
+    FunctionListShown(True)
+  else
+    FunctionListShown(false);
 end;
 
 procedure TForm1.SaveFormSettings;
@@ -968,6 +976,10 @@ begin
         data[high(data) - i] := RecentFiles[i];
       SetKeyValue('LastConfig/MainForm/RecentFiles',implode(';',data));
     end;
+    if MenuItemFunctionList.Checked then
+      SetKeyValue('LastConfig/MainForm/FunctionListShown','True')
+    else
+      SetKeyValue('LastConfig/MainForm/FunctionListShown','False');
     SaveToXML(SimbaSettingsFile);
   end;
 end;
@@ -1355,7 +1367,7 @@ begin
       begin;
         Writeln('This is currently not supported');
         SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
-        SynEdit.LogicalCaretXY:= point(CompletionCaret.x,CompletionCaret.y);
+        SynEdit.LogicalCaretXY:= Classes.point(CompletionCaret.x,CompletionCaret.y);
         SynEdit.SelEnd:= SynEdit.SelStart;
       end;
       InCodeCompletion:= false;
@@ -1403,7 +1415,7 @@ begin
       key := #0;
       StopCodeCompletion;
       CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1] := frmFunctionList.CompletionStart;
-      CurrScript.SynEdit.LogicalCaretXY:= point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
+      CurrScript.SynEdit.LogicalCaretXY:= Classes.point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
       CurrScript.SynEdit.SelEnd:= CurrScript.SynEdit.SelStart;
       CurrScript.SynEdit.SetFocus;
     end else
@@ -1514,7 +1526,7 @@ begin
   begin
     Btns:= [mbYes, mbNo];
     if(frReplaceAll in dlgReplace.Options)then Btns+= [mbYesToAll];
-    if(frEntireScope in dlgReplace.Options)then P:= Point(0, 0) else P:= CaretXY;
+    if(frEntireScope in dlgReplace.Options)then P:= Classes.Point(0, 0) else P:= CaretXY;
     while SearchReplaceEx(dlgReplace.FindText, '', SOptions, P) > 0 do
     begin
       if(Y)then
@@ -1573,7 +1585,6 @@ begin
   PageControl1.OnCloseTabClicked:=ActionCloseTab.OnExecute;
   Tabs := TList.Create;
   AddTab;//Give it alteast 1 tab ;-).
-  FunctionListShown(True); //Show this function list bitch!
   Manager := TIOManager.Create; //No need to load plugins for the Global manager
   Picker := TMColorPicker.Create(Manager);
   Selector := TMWindowSelector.Create(Manager);
@@ -1588,7 +1599,7 @@ begin
   if FileExists(Application.ExeName+'_old_') then
   begin
     Writeln('We still have an out-dated exe file in the dir, lets remove!');
-    Writeln(format('Sucesfully deleted the file? %s',[BoolToStr(DeleteFile(Application.ExeName + '_old_'),true)]));
+    Writeln(format('Sucesfully deleted the file? %s',[BoolToStr(DeleteFile(PChar(Application.ExeName + '_old_')),true)]));
   end;
   {$endif}
   frmFunctionList.OnEndDock:= @frmFunctionList.FrameEndDock;
@@ -1789,7 +1800,8 @@ begin
     end;
     Sections.free;
   end;
-  frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
+  if CurrScript <> nil then
+    frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
 
 procedure TForm1.MenuItemHideClick(Sender: TObject);
@@ -1803,6 +1815,11 @@ end;
 procedure TForm1.MenuItemReportBugClick(Sender: TObject);
 begin
   OpenURL('http://mufasa.villavu.com/mantis/bug_report_page.php');
+end;
+
+procedure TForm1.MenuItemSettingsButtonClick(Sender: TObject);
+begin
+  SettingsForm.ShowModal;
 end;
 
 procedure TForm1.MenuItemShowClick(Sender: TObject);
@@ -1824,11 +1841,6 @@ end;
 procedure TForm1.MenuItemFunctionListClick(Sender: TObject);
 begin
   FunctionListShown(not MenuItemFunctionList.Checked);
-end;
-
-procedure TForm1.MenuViewSettingsClick(Sender: TObject);
-begin
-  SettingsForm.ShowModal;
 end;
 
 function GetSimbaNews: String;
@@ -1875,7 +1887,7 @@ var
    cobj: TColourPickerObject;
 begin
   Picker.Pick(c, x, y);
-  cobj := TColourPickerObject.Create(c, Point(x,y), '');
+  cobj := TColourPickerObject.Create(c, Classes.Point(x,y), '');
 
   if lowercase(LoadSettingDef('Settings/ColourPicker/ShowHistoryOnPick', 'True')) = 'true' then
   begin
@@ -1935,7 +1947,7 @@ var
 begin
   if sender <> PageControl1 then
     exit;
-  NewPos := PageControl1.TabIndexAtClientPos(Point(x,y));
+  NewPos := PageControl1.TabIndexAtClientPos(Classes.Point(x,y));
   OldPos := PageControl1.TabIndex;
   if (NewPos <> OldPos) and (NewPos <> -1) then
   begin;
@@ -1949,7 +1961,7 @@ procedure TForm1.PageControl1DragOver(Sender, Source: TObject; X, Y: Integer;
 var
   Pos: Integer;
 begin
-  Pos := PageControl1.TabIndexAtClientPos(Point(x,y));
+  Pos := PageControl1.TabIndexAtClientPos(Classes.Point(x,y));
   Accept := (Pos <> PageControl1.TabIndex) and (Pos <> -1);
 end;
 
@@ -1969,8 +1981,8 @@ procedure TForm1.PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   if(Button = mbMiddle) and (not(PageControl1.Dragging))then
-    if(PageControl1.TabIndexAtClientPos(Point(x,y)) <> -1)then
-      DeleteTab(PageControl1.TabIndexAtClientPos(Point(x,y)), False);
+    if(PageControl1.TabIndexAtClientPos(Classes.Point(x,y)) <> -1)then
+      DeleteTab(PageControl1.TabIndexAtClientPos(Classes.Point(x,y)), False);
 end;
 
 procedure TForm1.PopupItemFindClick(Sender: TObject);
@@ -2041,7 +2053,8 @@ begin
         if editSearchList.CanFocus then
           editSearchList.SetFocus;
       //Lets load up this Script tree!
-      frmFunctionList.LoadScriptTree(CurrScript.SynEdit.text);
+      if CurrScript <> nil then
+        frmFunctionList.LoadScriptTree(CurrScript.SynEdit.text);
     end else begin
       if(frmFunctionList.Parent is TPanel)then
         frmFunctionList.Hide
