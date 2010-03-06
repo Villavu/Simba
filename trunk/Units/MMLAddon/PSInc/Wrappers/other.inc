@@ -62,8 +62,8 @@ end;
 
 procedure ClearDebug; extdecl;
 begin
-  if Assigned(CurrThread.DebugMemo) then
-    CurrThread.Synchronize(@CurrThread.DebugMemo.Clear);
+  if Assigned(CurrThread.DebugClear) then
+    CurrThread.DebugClear();
 end;
 
 procedure SaveScreenshot(FileName: string); extdecl;

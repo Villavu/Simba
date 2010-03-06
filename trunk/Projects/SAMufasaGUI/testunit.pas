@@ -44,7 +44,7 @@ uses
   about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 578;
+    SimbaVersion = 579;
 
 type
 
@@ -359,6 +359,7 @@ type
     procedure HandleParameters;
   end;
 
+  procedure ClearDebug;
   procedure formWriteln( S : String);
   function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
 
@@ -526,22 +527,29 @@ begin
   SimbaUpdateForm.ShowModal;
 end;
 
+procedure ClearDebug;
+begin
+  {$IFNDEF MSWINDOWS}
+  Form1.ProcessDebugStream(nil);
+  {$ENDIF}
+  TThread.Synchronize(nil,@Form1.Memo1.Clear);
+end;
+
 procedure formWriteln( S : String);
 begin
   writeln('formWriteln: ' + s);
+  {$ifdef MSWindows}
+  //Ha, we cán acces the debugmemo
+  Form1.Memo1.Lines.Add(s);
+  {$else}
   DebugCriticalSection.Enter;
   try
-    {$ifdef MSWindows}
-    //Ha, we cán acces the debugmemo
-    Form1.Memo1.Lines.Add(s);
-    {$else}
     s := s + MEOL;
     Form1.DebugStream:= Form1.DebugStream + s;
-    {$endif}
   finally
     DebugCriticalSection.Leave;
   end;
-  //Form1.Memo1.Lines.Add(s);
+  {$endif}
 end;
 
 //{$ENDIF}
@@ -1037,7 +1045,7 @@ begin
   end;
   {$IFNDEF TERMINALWRITELN}
   Thread.SetDebug(@formWriteln);
-  Thread.DebugMemo := Self.Memo1;
+  Thread.SetDebugClear(@ClearDebug);
   {$ENDIF}
   Thread.SetScript(CurrScript.SynEdit.Lines.Text);
   DbgImgInfo.DispSize := @DebugImgForm.DispSize;
@@ -2272,4 +2280,3 @@ initialization
 
 
 end.
-

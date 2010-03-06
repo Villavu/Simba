@@ -46,6 +46,7 @@ type
     end;
 
     TWritelnProc = procedure(s: string);
+    TClearDebugProc = procedure;
     TDbgImgInfo = record
       DispSize : ^TPoint;
       ShowForm : procedure of object;
@@ -72,10 +73,13 @@ type
     end;
     TExpMethodArr = array of TExpMethod;
 
+    { TMThread }
+
     TMThread = class(TThread)
     protected
       ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
+      DebugClear : TClearDebugProc;
       DebugImg : TDbgImgInfo;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
@@ -85,7 +89,6 @@ type
       Client : TClient;
       MInternet : TMInternet;
       StartTime : LongWord;
-      DebugMemo : TMemo;
 
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       ErrorData : PErrorData; //We need this for thread-safety etc
@@ -97,8 +100,8 @@ type
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
       procedure AddMethod(meth: TExpMethod); virtual;
 
-      procedure SetScript(Script : string);
       procedure SetDebug( writelnProc : TWritelnProc );
+      procedure SetDebugClear( clearProc : TClearDebugProc );
       procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
       procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
       procedure OnThreadTerminate(Sender: TObject);
@@ -394,6 +397,11 @@ end;
 procedure TMThread.SetDebug(writelnProc: TWritelnProc);
 begin
   DebugTo := writelnProc;
+end;
+
+procedure TMThread.SetDebugClear(clearProc: TClearDebugProc);
+begin
+  DebugClear:= clearProc;
 end;
 
 procedure TMThread.SetDbgImg(DebugImageInfo: TDbgImgInfo);
@@ -875,4 +883,3 @@ finalization
   //PluginsGlob.Free;
   //Its a nice idea, but it will segfault... the program is closing anyway.
 end.
-
