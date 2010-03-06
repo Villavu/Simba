@@ -225,6 +225,11 @@ begin
     Self.UpdateLog.Lines.Add('Download stopped at '+inttostr(DownloadProgress.Position)+'%... Simba did not succesfully update.');
     // more detailed info
     writeln('EXCEPTION IN UPDATEFORM: We either hit Cancel, or something went wrong with files');
+    if FileExists(Updater.BasePath + Updater.ReplacementFile + '_') then
+    begin
+      Writeln(Format('Deleting the ghost file (%s)',[Updater.BasePath + Updater.ReplacementFile + '_']));
+      DeleteFile(Updater.BasePath + Updater.ReplacementFile + '_');
+    end;
   end;
   FDone := True;
   Self.UpdateButton.Caption := 'Update!';
