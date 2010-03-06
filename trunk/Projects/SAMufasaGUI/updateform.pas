@@ -25,13 +25,11 @@ type
     DownloadSpeed: TLabel;
     UpdateLog: TMemo;
     UpdateButton: TButton;
-    OkButton: TButton;
-    CancelButton: TButton;
+    CloseButton: TButton;
     DownloadProgress: TProgressBar;
-    procedure CancelButtonClick(Sender: TObject);
+    procedure CloseButtonClick(Sender: TObject);
     procedure CleanUpdateForm(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure OkButtonClick(Sender: TObject);
     procedure UpdateButtonClick(Sender: TObject);
     function CanUpdate: Boolean;
 
@@ -94,7 +92,6 @@ begin
 end;
 
 function TSimbaUpdateForm.GetLatestSimbaVersion: Integer;
-
 begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
@@ -125,42 +122,38 @@ end;
 procedure TSimbaUpdateForm.UpdateButtonClick(Sender: TObject);
 begin
   if FUpdating then
-    UpdateLog.Lines.Add('Already performing an update!')
+    FCancelling := True
   else
     Self.PerformUpdate;
 end;
 
-procedure TSimbaUpdateForm.CancelButtonClick(Sender: TObject);
+procedure TSimbaUpdateForm.CloseButtonClick(Sender: TObject);
 begin
   if FCancelled or FDone then
-  begin
-    Self.ModalResult:=mrCancel;
-    Self.Hide;
-  end else
-  begin
-    FCancelling := True;
-  end;
+    Self.ModalResult := mrCancel
+  else
+    Self.UpdateLog.Lines.Add('Update in progress!');
 end;
 
 procedure TSimbaUpdateForm.CleanUpdateForm(Sender: TObject);
 begin
-  Self.DownloadProgress.Position:=0;
+  Self.DownloadProgress.Position := 0;
   Self.UpdateLog.Clear;
   Self.UpdateLog.Lines.Add('---------- Update Session ----------');
-  Self.DownloadSpeed.Visible:= false;
+  Self.DownloadSpeed.Visible := false;
+  if not CanUpdate then
+  begin
+    ShowMessage('No Updates Available!');
+    Self.UpdateLog.Lines.Add('No Updates Available!');
+    Self.UpdateButton.Enabled := False;
+  end else
+    Self.UpdateButton.Enabled := true;
 end;
 
 procedure TSimbaUpdateForm.FormCreate(Sender: TObject);
 begin
   FDone := True;
-  FUpdating:= false;
-
-end;
-
-procedure TSimbaUpdateForm.OkButtonClick(Sender: TObject);
-begin
-  Self.ModalResult:=mrOK;
-  Self.Hide;
+  FUpdating := false;
 end;
 
 { Return true if we have to cancel }
@@ -187,7 +180,6 @@ begin
 end;
 
 procedure TSimbaUpdateForm.PerformUpdate;
-
 begin
   FUpdating:= True;
   Updater := TMMLFileDownloader.Create;
@@ -211,7 +203,8 @@ begin
 
   Self.UpdateLog.Lines.Add('Starting download of ' + Updater.FileURL + ' ...');
   try
-    Self.OkButton.Enabled := False; // grey out button
+    Self.UpdateButton.Caption := 'Cancel'; // Update to Cancel
+    Self.CloseButton.Enabled := false;
     DownloadSpeed.Visible:= true;
     DownloadSpeed.Caption:= Format(DownloadSpeedTextRunning,[0]);
     FStartTime:= GetTickCount - 1;//Be sure that we don't get div 0
@@ -228,13 +221,14 @@ begin
   except
     FCancelling := False;
     FCancelled := True;
-    DownloadSpeed.Visible:= false;
+    DownloadSpeed.Visible := false;
     Self.UpdateLog.Lines.Add('Download stopped at '+inttostr(DownloadProgress.Position)+'%... Simba did not succesfully update.');
     // more detailed info
     writeln('EXCEPTION IN UPDATEFORM: We either hit Cancel, or something went wrong with files');
   end;
   FDone := True;
-  Self.OkButton.Enabled := True; // un-grey out button
+  Self.UpdateButton.Caption := 'Update!';
+  Self.CloseButton.Enabled := true;
   FUpdating:= false;
 end;
 
