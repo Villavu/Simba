@@ -132,7 +132,7 @@ begin
   ScreenForm.Height := h;
   ScreenForm.Top := 0;
   ScreenForm.left := 0;
-  ScreenForm.WindowState := wsmaximized;
+  //ScreenForm.WindowState := wsmaximized;
   ScreenForm.BorderStyle:= bsNone;
   ScreenForm.FormStyle := fsStayOnTop;
 
