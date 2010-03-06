@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 433
+  Left = 331
   Height = 555
-  Top = 224
+  Top = 150
   Width = 739
   ActiveControl = ScriptPanel
   AllowDropFiles = True
@@ -1245,13 +1245,9 @@ object Form1: TForm1
         Caption = 'View &Function List'
         OnClick = MenuItemFunctionListClick
       end
-      object MenuViewSettings: TMenuItem
-        Caption = 'View Settings'
-        OnClick = MenuViewSettingsClick
-      end
     end
-    object MenuExtra: TMenuItem
-      Caption = 'E&xtra'
+    object MenuTools: TMenuItem
+      Caption = '&Tools'
       object MenuitemFillFunctionList: TMenuItem
         Caption = '&Fill Function List'
         Bitmap.Data = {
@@ -1334,6 +1330,13 @@ object Form1: TForm1
         OnClick = UpdateMenuButtonClick
       end
       object MenuItemDivider9: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemSettingsButton: TMenuItem
+        Caption = 'Settings'
+        OnClick = MenuItemSettingsButtonClick
+      end
+      object MenuItemDivider10: TMenuItem
         Caption = '-'
       end
       object MenuItemExportHTML: TMenuItem

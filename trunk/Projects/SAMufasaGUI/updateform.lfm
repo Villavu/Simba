@@ -1,68 +1,59 @@
 object SimbaUpdateForm: TSimbaUpdateForm
-  Left = 507
-  Height = 391
-  Top = 321
-  Width = 467
+  Left = 262
+  Height = 331
+  Top = 219
+  Width = 473
   ActiveControl = UpdateButton
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Update Simba'
-  ClientHeight = 391
-  ClientWidth = 467
+  ClientHeight = 331
+  ClientWidth = 473
   OnCreate = FormCreate
   OnShow = CleanUpdateForm
   LCLVersion = '0.9.29'
   object DownloadProgress: TProgressBar
-    Left = 24
-    Height = 28
-    Top = 64
-    Width = 413
-    Anchors = [akTop, akLeft, akRight]
+    Left = 8
+    Height = 29
+    Top = 268
+    Width = 454
+    Anchors = [akLeft, akRight, akBottom]
     Smooth = True
     TabOrder = 0
   end
   object UpdateButton: TButton
-    Left = 24
-    Height = 40
-    Top = 8
-    Width = 413
-    Anchors = [akTop, akLeft, akRight]
+    Left = 387
+    Height = 25
+    Top = 300
+    Width = 75
+    Anchors = [akRight, akBottom]
     Caption = 'Update!'
     OnClick = UpdateButtonClick
     TabOrder = 1
   end
-  object OkButton: TButton
-    Left = 362
+  object CloseButton: TButton
+    Left = 8
     Height = 25
-    Top = 352
-    Width = 75
-    Anchors = [akRight, akBottom]
-    Caption = 'Ok'
-    OnClick = OkButtonClick
-    TabOrder = 2
-  end
-  object CancelButton: TButton
-    Left = 24
-    Height = 25
-    Top = 352
+    Top = 300
     Width = 75
     Anchors = [akLeft, akBottom]
-    Caption = 'Cancel'
-    OnClick = CancelButtonClick
-    TabOrder = 3
+    Caption = 'Close'
+    OnClick = CloseButtonClick
+    TabOrder = 2
   end
   object UpdateLog: TMemo
-    Left = 24
-    Height = 207
-    Top = 128
-    Width = 413
+    Left = 8
+    Height = 253
+    Top = 8
+    Width = 454
     Anchors = [akTop, akLeft, akRight, akBottom]
-    TabOrder = 4
+    TabOrder = 3
   end
   object DownloadSpeed: TLabel
-    Left = 24
+    Left = 96
     Height = 14
-    Top = 104
+    Top = 306
     Width = 78
+    Anchors = [akLeft, akBottom]
     Caption = 'DownloadSpeed'
     ParentColor = False
     Visible = False
