@@ -33,7 +33,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, Forms, testunit, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform, simbasettings,
-libloader;
+libloader, mufasabase;
 
 {$R project1.res}
 

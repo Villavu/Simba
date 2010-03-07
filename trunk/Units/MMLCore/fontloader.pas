@@ -56,10 +56,11 @@ type
         function GetFontIndex(Name: String): Integer;
         function GetFontByIndex(Index : integer): TMfont;
     private
-        Fonts: TList;
-        Path: String;
+      Fonts: TList;
+      Path: String;
+      Client : TObject;
     public
-      constructor Create;
+      constructor Create(Owner : TObject);
       destructor Destroy; override;
 
       function GetFont(Name: String): TOcrData;
@@ -75,7 +76,7 @@ type
 implementation
 
 uses
-  MufasaTypes;
+  MufasaTypes,Client;
 
 
 constructor TMFont.Create;
@@ -139,12 +140,12 @@ begin
   result := TMfont(Fonts.Items[index]);
 end;
 
-constructor TMFonts.Create;
+constructor TMFonts.Create(Owner : TObject);
 
 begin
-  inherited;
-
+  inherited Create;
   Fonts := TList.Create;
+  Client := Owner;
 end;
 
 destructor TMFonts.Destroy;
@@ -223,7 +224,7 @@ begin
   f.Data := ocrdata;
   Fonts.Add(f);
   {$IFDEF FONTDEBUG}
-  writeln('Loaded Font ' + f.Name);
+  TClient(Client).Writeln('Loaded Font ' + f.Name);
   {$ENDIF}
 end;
 
@@ -232,7 +233,7 @@ function TMFonts.Copy: TMFonts;
 var
   i:integer;
 begin
-  Result := TMFonts.Create;
+  Result := TMFonts.Create(Client);
   Result.Path := Self.GetPath();
   for i := 0 to Self.Fonts.Count -1 do
     Result.Fonts.Add(TMFont(Self.Fonts.Items[i]).Copy());

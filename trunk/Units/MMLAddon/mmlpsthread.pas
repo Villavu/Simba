@@ -31,7 +31,7 @@ interface
 
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
-  uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes, web,
+  uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
   bitmaps, plugins, libloader, dynlibs,internets;
 
 
@@ -45,7 +45,6 @@ type
       OldThread : TThread;
     end;
 
-    TWritelnProc = procedure(s: string);
     TClearDebugProc = procedure;
     TDbgImgInfo = record
       DispSize : ^TPoint;
@@ -213,7 +212,7 @@ begin
   if Assigned(CurrThread.DebugTo) then
     CurrThread.DebugTo(str)
   else
-    writeln(str);
+    mDebugLn(str);
 end;
 
 function MakeString(data : TPSVariantIFC) : string;
@@ -397,6 +396,7 @@ end;
 procedure TMThread.SetDebug(writelnProc: TWritelnProc);
 begin
   DebugTo := writelnProc;
+  Client.WritelnProc:= writelnProc;
 end;
 
 procedure TMThread.SetDebugClear(clearProc: TClearDebugProc);
@@ -530,7 +530,7 @@ end;
 function TPSThread.PSScriptFindUnknownFile(Sender: TObject;
   const OrginFileName: string; var FileName, Output: string): Boolean;
 begin
-  Writeln(OrginFileName + '-' +  Output + '-' + FileName);
+  mDebugLn(OrginFileName + '-' +  Output + '-' + FileName);
   Result := false;
 end;
 
@@ -736,7 +736,7 @@ begin
     end;
   except
      on E : Exception do
-       psWriteln('ERROR IN PSSCRIPT: ' + e.message);
+       psWriteln('Exception in Script: ' + e.message);
   end;
 end;
 

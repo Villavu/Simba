@@ -12,7 +12,6 @@ function BitmapFromText(text, font: String): integer; extdecl;
 var
   bmp: TMufasaBitmap;
 begin
-  writeln('BitmapFromText: ' + text + ' ' + font);
   bmp := CurrThread.Client.MOCR.TextToFontBitmap(text, font);
   Result := CurrThread.Client.MBitmaps.AddBMP(bmp);
 end;

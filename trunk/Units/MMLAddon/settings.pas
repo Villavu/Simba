@@ -28,7 +28,7 @@ unit settings;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, xmlread, xmlwrite, DOM,mufasatypes;
+  Classes, SysUtils, ComCtrls, xmlread, xmlwrite, DOM,mufasatypes,MufasaBase;
 
 
 
@@ -411,7 +411,7 @@ begin
 
   if length(path) < 2 then
   begin
-    writeln('Path too short!');
+    mDebugLn('CreateKey - Path too short!');
     exit(false);
   end;
   nParent := WalkToNode(path[0]);
@@ -426,7 +426,7 @@ begin
   begin
     if Path[i] = '' then
     begin
-      writeln('Invalid Key Path / Name');
+      mDebugLn('CreateKey - Invalid Key Path / Name');
       exit(false);
     end;
     NewPath := NewPath + Path[i] + '/';
@@ -441,7 +441,7 @@ begin
       newN.Text := Path[i];
       if (nParent = nil) then
       begin
-        writeln('This shouldn''t happen...');
+        mDebugLn('CreateKey - This shouldn''t happen...');
         newN.MoveTo(Nodes.GetFirstNode, naAddChild);
         nParent := newN;
       end
@@ -474,12 +474,12 @@ var
 begin
   if not KeyExists(KeyName) then
   begin
-    writeln('SetKeyValue - Key does not exist');
+    mDebugLn('SetKeyValue - Key does not exist');
     Exit;
   end;
   if not IsKey(KeyName) then
   begin
-    writeln('SetKeyValue - IsKey returned false');
+    mDebugLn('SetKeyValue - IsKey returned false');
     Exit;
   end;
   N := WalkToNode(KeyName);
@@ -499,7 +499,7 @@ begin
        TSettingData(N.Data).Free;
      N.Data := TSettingData.Create;
      TSettingData(N.Data).Val := KeyValue;
-     writeln('Setting ' + KeyName + ' to ' + KeyValue);
+     mDebugLn('Setting ' + KeyName + ' to ' + KeyValue);
      N := N.GetNextSibling;
    end;
 end;
@@ -513,7 +513,7 @@ begin
   Nodes.Clear;
   if not fileExists(fileName) then
   begin
-    writeln('SettingsFile hasn''t been created yet.');
+    mDebugLn('SettingsFile hasn''t been created yet.');
     // create file.
     SaveToXML(fileName);
   end;
@@ -527,7 +527,7 @@ procedure TMMLSettings.WriteXMLData(n: TTreeNode;
                        var XMLChild: TDOMNode; var C: Integer);
 begin
   if assigned(n.data) and (n.HasChildren) then
-    writeln('Has data and children! Please close simba and remove settings.xml. if problem persists, please report your settings.xml');
+    mDebugLn('WriteXMLData - Has data and children! Please close simba and remove settings.xml. if problem persists, please report your settings.xml');
   if assigned(n.Data) then
   begin
     XMLChild := XMLDoc.CreateTextNode(TSettingData(N.Data).Val);
@@ -588,7 +588,7 @@ begin
   try
     WriteXMLFile(XMLDoc, fileName);
   except
-    Writeln('Failed to write ' + fileName);
+    mDebugLn('Failed to write ' + fileName);
   end;
   XMLDoc.Free;
 end;

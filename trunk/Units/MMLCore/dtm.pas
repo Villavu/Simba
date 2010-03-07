@@ -77,6 +77,7 @@ type
 implementation
 uses
     dtmutil, paszlib,
+    client,
     graphics, // for TColor
     math // for max
     ;
@@ -112,9 +113,9 @@ begin
       if not b then
       begin;
         if DTMList[i].n <> '' then
-          Writeln(Format('DTM[%s] has not been freed in the script, freeing it now.',[DTMList[i].n]))
+          TClient(Client).Writeln(Format('DTM[%s] has not been freed in the script, freeing it now.',[DTMList[i].n]))
         else
-          writeln(Format('DTM[%d] has not been freed in the script, freeing it now.',[i]));
+          TClient(Client).Writeln(Format('DTM[%d] has not been freed in the script, freeing it now.',[i]));
         FreeDTM(i);
       end;
   end;
@@ -167,10 +168,7 @@ begin
   if uncompress(Bufferstring,Destlen,pchar(Source), ii) = Z_OK then
   begin;
     if (Destlen mod 36) > 0 then
-    begin;
-      Writeln('Invalid DTM');
-      Exit;
-    end;
+      raise Exception.CreateFmt('Invalid DTM passed to StringToDTM: %s',[s]);
     DestLen := DestLen div 36;
     SetLength(Result.p,DestLen);
     SetLength(Result.c,DestLen);

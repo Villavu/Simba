@@ -5,7 +5,7 @@ unit updater;
 interface
 
 uses
-  Classes, SysUtils, httpsend,blcksock
+  Classes, SysUtils, httpsend,MufasaBase,blcksock
   {$IFDEF LINUX}
   ,BaseUnix
   {$ENDIF};
@@ -175,7 +175,7 @@ begin
     end;
     FDownloaded := True;
   except
-    writeln('DownloadAndSave: Exception Occured');
+    mDebugLn('DownloadAndSave: Exception Occured');
     Result := False;
   end;
   HTTPSend.Free;
@@ -189,25 +189,25 @@ begin
   { Change to messages + Exit(False) instead of exceptions? }
   if not Downloaded then
   begin
-    writeln('Nothing downloaded');
+    mDebugLn('Nothing downloaded');
     exit(False);
    // raise Exception.Create('Nothing downloaded');
   end;
   if FReplacementFile = '' then
   begin
-    writeln('ReplacementFile not se');
+    mDebugLn('ReplacementFile not se');
     exit(False);
     //raise Exception.Create('ReplacementFile not set');
   end;
   if not FileExists(FBasePath + FReplacementFile) then
   begin
-    writeln('ReplacementFile not found');
+    mDebugLn('ReplacementFile not found');
     exit(False);
     //raise Exception.Create('ReplacementFile not found');
   end;
   if not FileExists(FBasePath + FReplacementFile+ '_') then
   begin
-    writeln('ReplacementFile + _ not found');
+    mDebugLn('ReplacementFile + _ not found');
     exit(False);
     //raise Exception.Create('ReplacementFile + _ not found');
   end;

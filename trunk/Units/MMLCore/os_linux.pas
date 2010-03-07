@@ -148,14 +148,14 @@ implementation
         xerror := 'UNKNOWN';
     end;
     result := 0;
-    Writeln('X Error: ');
-    writeln('Error code: ' + inttostr(para2^.error_code));
-    writeln('Display: ' + inttostr(LongWord(para2^.display)));
-    writeln('Minor code: ' + inttostr(para2^.minor_code));
-    writeln('Request code: ' + inttostr(para2^.request_code));
-    writeln('Resource ID: ' + inttostr(para2^.resourceid));
-    writeln('Serial: ' + inttostr(para2^.serial));
-    writeln('Type: ' + inttostr(para2^._type));
+    mDebugLn('X Error: ');
+    mDebugLn('Error code: ' + inttostr(para2^.error_code));
+    mDebugLn('Display: ' + inttostr(LongWord(para2^.display)));
+    mDebugLn('Minor code: ' + inttostr(para2^.minor_code));
+    mDebugLn('Request code: ' + inttostr(para2^.request_code));
+    mDebugLn('Resource ID: ' + inttostr(para2^.resourceid));
+    mDebugLn('Serial: ' + inttostr(para2^.serial));
+    mDebugLn('Type: ' + inttostr(para2^._type));
   end;
 
   function TWindow.GetError: String;
@@ -271,8 +271,8 @@ implementation
     buffer := XGetImage(display, window, xs, ys, width, height, AllPlanes, ZPixmap);
     if buffer = nil then
     begin
-      Writeln('ReturnData: XGetImage Error. Dumping data now:');
-      Writeln('xs, ys, width, height: ' + inttostr(xs) + ', '  + inttostr(ys) +
+      mDebugLn('ReturnData: XGetImage Error. Dumping data now:');
+      mDebugLn('xs, ys, width, height: ' + inttostr(xs) + ', '  + inttostr(ys) +
               ', ' + inttostr(width) + ', ' + inttostr(height));
       Result.Ptr := nil;
       Result.IncPtrWith := 0;

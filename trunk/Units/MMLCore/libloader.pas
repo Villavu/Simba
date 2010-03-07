@@ -36,7 +36,7 @@ interface
 implementation
 
   uses
-    MufasaTypes,FileUtil;
+    MufasaTypes,MufasaBase,FileUtil;
 
   procedure TGenericLoader.AddPath(path: string);
   var
@@ -47,7 +47,7 @@ implementation
     //IDK who changed this to loading a dir, but DON'T
     if not PluginDirs.Find(verified,idx) then
     begin
-      writeln('Adding Plugin Path: ' + verified);
+      mDebugLn('Adding Plugin Path: ' + verified);
       PluginDirs.Add(verified);
     end;
   end;
@@ -60,7 +60,7 @@ implementation
     begin;
       if (Loaded[i].handle > 0) then
       try
-        Writeln(inttostr(I));
+        mDebugLn('Freeing plugin[%d]',[i]);
         FreeLibrary(Loaded[i].handle);
       except
       end;
@@ -136,7 +136,7 @@ implementation
       if Loaded[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
         Exit(i);
     SetLength(Loaded,PluginLen + 1);
-    Writeln(Format('Loading plugin %s at %s',[PluginName,PluginDirs.Strings[ii]]));
+    mDebugLn(Format('Loading plugin %s at %s',[PluginName,PluginDirs.Strings[ii]]));
     Loaded[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
     Loaded[PluginLen].handle:= LoadLibrary(Loaded[PluginLen].filename);
     if Loaded[PluginLen].handle = 0 then
