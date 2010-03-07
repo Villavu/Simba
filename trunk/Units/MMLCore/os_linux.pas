@@ -27,7 +27,7 @@ interface
 
   uses
     Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest, keysym,
-    syncobjs;
+    syncobjs, mufasabase;
   
   type
 

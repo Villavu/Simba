@@ -35,6 +35,7 @@ uses
   controls,
   graphics,
   forms,
+  mufasabase,
   {$IFNDEF MSWINDOWS}x, xlib,xatom
   {$ELSE}
   windows
