@@ -29,7 +29,7 @@ unit Client;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes,
+  Classes, SysUtils, MufasaTypes,MufasaBase,
   IOManager, Files, Finder, Bitmaps, dtm, ocr,
   {$IFDEF MSWINDOWS} os_windows {$ENDIF}
   {$IFDEF LINUX} os_linux {$ENDIF};
@@ -41,27 +41,38 @@ It binds all the components together.
 
   type
     TClient = class(TObject)
-        constructor Create(plugin_dir: string);
-        destructor Destroy; override;
-
-        public
-            IOManager: TIOManager;
-            MFiles: TMFiles;
-            MFinder: TMFinder;
-            MBitmaps : TMBitmaps;
-            MDTM: TMDTM;
-            MOCR: TMOCR;
+    public
+      IOManager: TIOManager;
+      MFiles: TMFiles;
+      MFinder: TMFinder;
+      MBitmaps : TMBitmaps;
+      MDTM: TMDTM;
+      MOCR: TMOCR;
+      WritelnProc : TWritelnProc;
+      procedure WriteLn(s : string);
+      constructor Create(plugin_dir: string);
+      destructor Destroy; override;
     end;
 
 implementation
+
+
+
+procedure TClient.WriteLn(s: string);
+begin
+  if Assigned(WritelnProc) then
+    WritelnProc(s)
+  else
+    mDebugLn(s);
+end;
 
 // Possibly pass arguments to a default window.
 constructor TClient.Create(plugin_dir: string);
 begin
   inherited Create;
-
+  WritelnProc:= nil;
   IOManager:= TIOManager.Create(plugin_dir);
-  MFiles := TMFiles.Create;
+  MFiles := TMFiles.Create(self);
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(self);
   MDTM := TMDTM.Create(self);

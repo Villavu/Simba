@@ -52,7 +52,7 @@ const
     dtm_Triangle = 4;
 
 implementation
-uses math;
+uses math,MufasaBase;
 
 procedure RotatePoints_(Var P: TPointArray; A, cx, cy: Extended);
 
@@ -105,10 +105,10 @@ var
 begin;
   i := 0;
   if adtm.n <> '' then
-    writeln('Name: ' + aDTM.n);
-  WriteLn('MainPoint ' + inttostr(aDTM.p[i].x) + ', ' + inttostr(aDTM.p[i].y) + ' col: ' + inttostr(aDTM.c[i]) + ', tol: ' + inttostr(aDTM.t[i]) + '; ashape ' + inttostr(aDTM.ash[i]) + ' asize ' + inttostr(aDTM.asz[i])+ ', Bad Point: ' + BoolToStr(aDTM.bp[i]));
+    mDebugLn('Name: ' + aDTM.n);
+  mDebugLn('MainPoint ' + inttostr(aDTM.p[i].x) + ', ' + inttostr(aDTM.p[i].y) + ' col: ' + inttostr(aDTM.c[i]) + ', tol: ' + inttostr(aDTM.t[i]) + '; ashape ' + inttostr(aDTM.ash[i]) + ' asize ' + inttostr(aDTM.asz[i])+ ', Bad Point: ' + BoolToStr(aDTM.bp[i]));
   for I := 1 to High(aDTM.p) do
-    WriteLn('SubPoint['+IntToStr(I) + '] ' + inttostr(aDTM.p[i].x) + ', ' + inttostr(aDTM.p[i].y) + ' col: ' + inttostr(aDTM.c[i]) + ', tol: ' + inttostr(aDTM.t[i]) + '; ashape ' + inttostr(aDTM.ash[i]) + ' asize ' + inttostr(aDTM.asz[i]) + ', Bad Point: ' + BoolToStr(aDTM.bp[i]));
+    mDebugLn('SubPoint['+IntToStr(I) + '] ' + inttostr(aDTM.p[i].x) + ', ' + inttostr(aDTM.p[i].y) + ' col: ' + inttostr(aDTM.c[i]) + ', tol: ' + inttostr(aDTM.t[i]) + '; ashape ' + inttostr(aDTM.ash[i]) + ' asize ' + inttostr(aDTM.asz[i]) + ', Bad Point: ' + BoolToStr(aDTM.bp[i]));
 end;
 
 Function pDTMToTDTM(Const DTM: pDTM): TDTM;

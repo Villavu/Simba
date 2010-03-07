@@ -181,7 +181,7 @@ implementation
   
   destructor TWindow.Destroy;
   begin
-    ReleaseDC(handle,dc);
+    ReleaseDC(handle,dc);//Dogdy as one might have used .create and not set a handle..
     buffer.Free;
     keyinput.Free;
     inherited Destroy; 
@@ -283,8 +283,8 @@ implementation
     Rect := WindowRect;
     x := x + rect.left;
     y := y + rect.top;
-    if (x<0) or (y<0) then
-      writeln('Negative coords, what now?');
+{    if (x<0) or (y<0) then
+      writeln('Negative coords, what now?');}
     Windows.SetCursorPos(x, y);
   end;
   procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
@@ -416,7 +416,6 @@ begin
   inherited Create;
   self.dc := GetDC(DesktopHandle);
   self.handle:= DesktopHandle;
-  Writeln('Created a desktop window');
 end;
 
 

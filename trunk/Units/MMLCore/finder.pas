@@ -30,7 +30,7 @@ interface
 
 {$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 uses
-  Classes, SysUtils,bitmaps,  MufasaTypes; // Types
+  Classes, SysUtils,bitmaps,MufasaBase,  MufasaTypes; // Types
 
 { TMFinder Class }
 
@@ -1515,7 +1515,7 @@ begin
   //We wont want HSL comparison with BMPs, right? Not for now atleast.
   if CCTS > 1 then
   begin
-    Writeln('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
+    mDebugLn('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
     CCTS := 1;
   end;
   //Get the "skip coords".
@@ -1652,7 +1652,7 @@ begin
   CCTS := Self.CTS;
   if CCTS > 1 then
   begin
-    Writeln('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
+    mDebugLn('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
     CCTS := 1;
   end;
   //Get the "skip coords".
@@ -1727,7 +1727,7 @@ begin
   CCTS := Self.CTS;
   if CCTS > 1 then
   begin
-    Writeln('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
+    mDebugLn('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
     CCTS := 1;
   end;
   FoundC := 0;

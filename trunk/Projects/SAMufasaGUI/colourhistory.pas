@@ -27,7 +27,7 @@ unit colourhistory;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,MufasaBase,
   ComCtrls, StdCtrls, ExtCtrls, Menus,  DOM, XMLWrite, XMLRead;
 
 type
@@ -172,7 +172,7 @@ begin
   begin
     If Assigned(N.Data) then
       TColourPickerObject(N.Data).Free;
-    WriteLn('Deleting ImageIndex: ' + IntToStr(n.ImageIndex) + '; Text: ' + N.Text);
+    mDebugLn('Deleting ImageIndex: ' + IntToStr(n.ImageIndex) + '; Text: ' + N.Text);
 
     // yeah....
     try
@@ -198,7 +198,7 @@ begin
 
     WalkDeleteTree(ColourTree.Selected, CHImages);
 
-    WriteLn('Deleting ImageIndex: ' + IntToStr(ColourTree.Selected.ImageIndex) + '; Text: ' + ColourTree.Selected.Text);
+    mDebugLn('Deleting ImageIndex: ' + IntToStr(ColourTree.Selected.ImageIndex) + '; Text: ' + ColourTree.Selected.Text);
     if ColourTree.Selected.ImageIndex <> -1 then
       CHImages.Delete(ColourTree.Selected.ImageIndex);
 
@@ -284,7 +284,7 @@ begin
 
   C := 0;
 
-  writeln(Colourtree.Items.TopLvlCount);
+  mDebugLn(inttostr(Colourtree.Items.TopLvlCount));
   for i := 0 to Colourtree.Items.TopLvlCount -1 do
   begin
     WriteXMLData(ColourTree.Items.TopLvlItems[i], RootNode, XMLDoc, XMLChild, C);
@@ -343,7 +343,7 @@ begin
   Node := ColourTree.GetNodeAt(X, Y);
   if not assigned(ColourTree.Selected) then
   begin
-    writeln('No valid node is currently selected');
+    mDebugLn('No valid node is currently selected');
     exit;
   end;
 
@@ -355,8 +355,8 @@ begin
   end;
   ColourTree.Selected.MoveTo(Node, naAddChild);
   TreeChanged:=True;
-  writeln('Dragging from: ' + ColourTree.Selected.Text);
-  writeln('Dragging to: ' + Node.Text);
+  mDebugLn('Dragging from: ' + ColourTree.Selected.Text);
+  mDebugLn('Dragging to: ' + Node.Text);
 end;
 
 procedure TColourHistoryForm.ColourTreeDragOver(Sender, Source: TObject; X,
@@ -370,7 +370,7 @@ procedure TColourHistoryForm.ChangeName(Sender: TObject);
 begin
   if not Assigned(ColourTree.Selected) then
   begin
-    WriteLn('We double clicked but have nothing Selected?');
+    mDebugLn('We double clicked but have nothing Selected?');
     exit;
   end;
   ColourTree.Selected.Text := SelectionName.Text;
@@ -406,7 +406,7 @@ var
       exit;
 
     TreeNode := ColourTree.Items.AddChild(TreeNode, 'ERROR');
-    writeln(Node.NodeName);
+    mDebugLn(Node.NodeName);
     cNode := Node.FindNode('Data');
     if Assigned(cNode) then
     begin

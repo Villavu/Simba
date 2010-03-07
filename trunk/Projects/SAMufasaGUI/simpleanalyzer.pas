@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, SynEdit, SynHighlighterPas, Clipbrd;
+  StdCtrls, SynEdit, SynHighlighterPas,MufasaBase, Clipbrd;
 
 type
 
@@ -339,7 +339,7 @@ begin
                           WaitingForResult := LastTK = tkFunction;
                           if Lex.TokenID <> tkIdentifier then
                           begin;
-                            Writeln('Analyzer: No method name -> exiting');
+                            mDebugLn('Analyzer: No method name -> exiting');
                             exit;
                           end;
                           TempName := Lex.Token;
@@ -349,7 +349,7 @@ begin
                             InParams := True
                           else if Lex.TokenID = tkPoint then
                           begin;
-                            Writeln('Analyzer: In class definition?');
+                            mDebugLn('Analyzer: In class definition?');
     //                          FormAnalyzer.SynEdit2.Lines.add('In class definition *cough*');
                             Lex.NextNoJunk;
                             TempName := Lex.Token;
@@ -358,7 +358,7 @@ begin
                             InParams := False;
                           end else
                           begin;
-                            Writeln('Analyzer: You''re missing some stuff in the procedure declaration');
+                            mDebugLn('Analyzer: You''re missing some stuff in the procedure declaration');
                             Exit;
                           end;
                           if InMethod then

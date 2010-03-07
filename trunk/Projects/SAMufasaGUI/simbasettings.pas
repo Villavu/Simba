@@ -5,7 +5,7 @@ unit simbasettings;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls,MufasaBase, Graphics, Dialogs,
   ComCtrls, StdCtrls, settings;
 
 type
@@ -94,7 +94,7 @@ begin
       Path := Settings.GetNodePath(N.Parent);
       NewVal := InputBox('Change Setting', 'Change value for ' + TSettingData(N.Data).Val,
                             Settings.GetKeyValue(Path));
-      writeln('NewVal: ' + NewVal);
+      mDebugLn('NewVal: ' + NewVal);
       Settings.SetKeyValue(Path, NewVal);
       N.Text := NewVal;
     end;

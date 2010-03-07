@@ -27,7 +27,7 @@ unit bitmaps;
 
 interface
 uses
-  Classes, SysUtils, FPImage,IntfGraphics,graphtype,MufasaTypes,graphics;
+  Classes, SysUtils, FPImage,IntfGraphics,graphtype,MufasaTypes,MufasaBase,graphics;
 
 type
 
@@ -119,7 +119,7 @@ type
 implementation
 
 uses
-  paszlib,DCPbase64,math,
+  paszlib,DCPbase64,math, client,
   colour_conv,IOManager,mufasatypesutil;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
@@ -392,9 +392,9 @@ begin
   end;
   //Just for testing purposes
   if ToDestroy.BmpName = '' then
-    Writeln(Format('BMP[%d] has been freed.',[number]))
+    TClient(Self.Client).Writeln(Format('BMP[%d] has been freed.',[number]))
   else
-    Writeln(Format('BMP[%s] has been freed.',[ToDestroy.BmpName]));
+    TClient(Self.Client).Writeln(Format('BMP[%s] has been freed.',[ToDestroy.BmpName]));
   ToDestroy.Free;
   BmpArray[number] := nil;
 end;
@@ -838,10 +838,10 @@ begin
     if NewCorners[i].y < MinY then
       MinY := NewCorners[i].y;
   end;
-  Writeln(Format('Min: (%d,%d) Max : (%d,%d)',[MinX,MinY,MaxX,MaxY]));
+  mDebugLn(Format('Min: (%d,%d) Max : (%d,%d)',[MinX,MinY,MaxX,MaxY]));
   NewW := MaxX - MinX+1;
   NewH := MaxY - MinY+1;
-  Writeln(format('New bounds: %d,%d',[NewW,NewH]));
+  mDebugLn(format('New bounds: %d,%d',[NewW,NewH]));
   TargetBitmap.SetSize(NewW,NewH);
   for y := NewH - 1 downto 0 do
     for x := NewW - 1 downto 0 do
@@ -1126,9 +1126,9 @@ begin
     if BmpArray[i] <> nil then
     begin;
       if BmpArray[i].BmpName = '' then
-        Writeln(Format('BMP[%d] has not been freed in the script, freeing it now.',[i]))
+        TClient(Client).Writeln(Format('BMP[%d] has not been freed in the script, freeing it now.',[i]))
       else
-        Writeln(Format('BMP[%s] has not been freed in the script, freeing it now.',[BmpArray[i].BmpName]));
+        TClient(Client).Writeln(Format('BMP[%s] has not been freed in the script, freeing it now.',[BmpArray[i].BmpName]));
       FreeAndNil(BmpArray[i]);
     end;
   SetLength(BmpArray,0);

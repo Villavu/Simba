@@ -40,11 +40,11 @@ uses
   colourpicker, framescript, windowselector, lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,
-  stringutil,mufasatypesutil,
+  stringutil,mufasatypesutil,mufasabase,
   about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 579;
+    SimbaVersion = 581;
 
 type
 
@@ -65,6 +65,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ActionConsole: TAction;
     ActionNormalSize: TAction;
     ActionCompileScript: TAction;
     ActionExit: TAction;
@@ -112,6 +113,7 @@ type
     MenuItemDivider9: TMenuItem;
     MouseTimer: TTimer;
     NewsTimer: TTimer;
+    TT_Console: TToolButton;
     TT_Cut: TToolButton;
     TT_Copy: TToolButton;
     TT_Paste: TToolButton;
@@ -214,6 +216,7 @@ type
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCompileScriptExecute(Sender: TObject);
+    procedure ActionConsoleExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
@@ -330,6 +333,10 @@ type
     OCR_Fonts: TMOCR;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
+    {$ifdef mswindows}
+    ConsoleVisible : boolean;
+    procedure ShowConsole( ShowIt : boolean);
+    {$endif}
     procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
@@ -357,10 +364,12 @@ type
     procedure AddRecentFile(filename : string);
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
+    procedure OnSaveScript(const Filename : string);
   end;
 
   procedure ClearDebug;
   procedure formWriteln( S : String);
+  procedure formWritelnEx( S : String);
   function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
 
 const
@@ -388,7 +397,13 @@ uses
    colourhistory,
    math;
 
-//{$ifdef mswindows}
+{$ifdef mswindows}
+function ConsoleHandler( eventType : DWord) : WINBOOL;stdcall;
+begin
+  TThread.Synchronize(nil,@Form1.Close);
+  Result := true;
+end;
+{$endif}
 
 var
    DebugCriticalSection: syncobjs.TCriticalSection;
@@ -506,18 +521,24 @@ procedure TForm1.UpdateTimerCheck(Sender: TObject);
 var
    chk: String;
    time:integer;
+  LatestVersion : integer;
 begin
   chk := LoadSettingDef('Settings/Updater/CheckForUpdates','True');
 
   if chk <> 'True' then
     Exit;
 
-  if SimbaUpdateForm.CanUpdate then
+  LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
+  if LatestVersion > SimbaVersion then
   begin;
     TT_Update.Visible:=True;
-    formWriteln('A new update of Simba is available!');
+    formWritelnEx('A new update of Simba is available!');
+    formWritelnEx(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+  end else
+  begin
+    mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
+    mDebugLn('Latest Simba Version: ' + IntToStr(LatestVersion));
   end;
-
   time := StrToIntDef(LoadSettingDef('Settings/Updater/CheckEveryXMinutes','30'),30);
   UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
@@ -537,7 +558,7 @@ end;
 
 procedure formWriteln( S : String);
 begin
-  writeln('formWriteln: ' + s);
+  mDebugLn('formWriteln: ' + s);
   {$ifdef MSWindows}
   //Ha, we cán acces the debugmemo
   Form1.Memo1.Lines.Add(s);
@@ -566,7 +587,7 @@ begin
     end else
     if ScriptState <> ss_None then
     begin;
-      Writeln('The script hasn''t stopped yet, so we cannot start a new one.');
+      FormWritelnEx('The script hasn''t stopped yet, so we cannot start a new one.');
       exit;
     end;
     InitalizeTMThread(scriptthread);
@@ -589,7 +610,7 @@ begin
       ScriptThread.Suspended:= True;
       ScriptState:= ss_Paused;
       {$else}
-      Writeln('Linux users are screwed, no pause button for u!');
+      mDebugLn('Linux users are screwed, no pause button for u!');
       {$endif}
     end else if ScriptState = ss_Paused then
     begin;
@@ -606,8 +627,8 @@ begin
     case ScriptState of
       ss_Stopping:
         begin    //Terminate the thread the tough way.
-          writeln('Terminating the Scriptthread');
-          Writeln('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
+          mDebugLn('Terminating the Scriptthread');
+          mDebugLn('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
           WaitForThreadTerminate(ScriptThread.Handle, 0);
           ScriptThread.Free;
           ScriptState := ss_None;
@@ -771,7 +792,7 @@ begin
   end
   else
   begin
-    Writeln('Searching: ' + SearchString);
+    mDebugLn('Searching: ' + SearchString);
     if next then
       CurrPos := CurrScript.SynEdit.LogicalCaretXY
     else
@@ -782,7 +803,7 @@ begin
       res := CurrScript.SynEdit.SearchReplaceEx(SearchString,'',SearchOptions,Classes.Point(0,0));
       if res > 0 then
       begin;
-        Writeln('End of document reached');
+        mDebugLn('End of document reached');
         SearchStart.x := 0;
         SearchStart.Y := CurrScript.SynEdit.LogicalCaretXY.y;
       end;
@@ -818,7 +839,7 @@ var
 begin
   if tabs.Count < 1 then
   begin;
-    Writeln('Cannot refresh tab, since there are no tabs.');
+    mDebugLn('Cannot refresh tab, since there are no tabs.');
     exit;
   end;
   NewTab := PageControl1.TabIndex;
@@ -840,7 +861,8 @@ begin
   SetScriptState(Tab.ScriptFrame.FScriptState);//To set the buttons right
   if Self.Showing then
     if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
-      CurrScript.SynEdit.SetFocus;
+      if CurrScript.SynEdit.CanFocus then
+        CurrScript.SynEdit.SetFocus;
   StopCodeCompletion;//To set the highlighting back to normal;
   frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
   with CurrScript.SynEdit do
@@ -913,6 +935,10 @@ begin
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
   CreateSetting('LastConfig/MainForm/Position','');
   CreateSetting('LastConfig/MainForm/State','Normal');
+  {$ifdef MSWindows}
+  CreateSetting('LastConfig/Console/Visible','True');
+  ShowConsole(True);
+  {$endif}
   if not DirectoryExists(IncludePath) then
     CreateDir(IncludePath);
   if not DirectoryExists(FontPath) then
@@ -960,6 +986,13 @@ begin
     FunctionListShown(True)
   else
     FunctionListShown(false);
+  {$ifdef MSWindows}
+  str := LowerCase(LoadSettingDef('LastConfig/Console/Visible','True'));
+  if str = 'true' then
+    ShowConsole(True)
+  else
+    ShowConsole(false);
+  {$endif}
 end;
 
 procedure TForm1.SaveFormSettings;
@@ -988,6 +1021,12 @@ begin
       SetKeyValue('LastConfig/MainForm/FunctionListShown','True')
     else
       SetKeyValue('LastConfig/MainForm/FunctionListShown','False');
+    {$ifdef MSWindows}
+    if ConsoleVisible then
+      SetKeyValue('LastConfig/Console/Visible','True')
+    else
+      SetKeyValue('LastConfig/Console/Visible','false');
+    {$endif}
     SaveToXML(SimbaSettingsFile);
   end;
 end;
@@ -1040,7 +1079,7 @@ begin
     else
       Thread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
   except
-    writeln('Failed to initialise the library!');
+    mDebugLn('Failed to initialise the library!');
     Exit;
   end;
   {$IFNDEF TERMINALWRITELN}
@@ -1065,10 +1104,10 @@ begin
      PluginsGlob.AddPath(PluginsPath);
   if not DirectoryExists(IncludePath) then
     if FirstRun then
-      Writeln('Warning: The include directory specified in the Settings isn''t valid.');
+      FormWritelnEx('Warning: The include directory specified in the Settings isn''t valid.');
   if not DirectoryExists(fontPath) then
     if FirstRun then
-      Writeln('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
+      FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
   Thread.SetPaths(ScriptPath,AppPath,Includepath,PluginsPath,fontPath);
 
   if selector.haspicked then Thread.Client.IOManager.SetTarget(Selector.LastPick);
@@ -1101,7 +1140,7 @@ begin
   begin;
     ErrorMsg:=Application.CheckOptions('ro:','run open:');
     if ErrorMsg <> '' then
-      writeln(ErrorMSG)
+      mDebugLn(ErrorMSG)
     else
     begin
       if Application.HasOption('o','open') then
@@ -1113,6 +1152,25 @@ begin
   end;
   if DoRun then
     Self.RunScript;
+end;
+
+procedure TForm1.OnSaveScript(const Filename: string);
+begin
+  with CurrScript do
+  begin
+    ScriptFile:= Filename;
+    ScriptName:= ExtractFileNameOnly(Filename);
+    mDebugLn('Script name will be: ' + ScriptName);
+    FormWritelnEx('Succesfully saved: ' + Filename);
+    StartText:= SynEdit.Lines.Text;
+    ScriptChanged := false;
+    SynEdit.MarkTextAsSaved;
+    Self.Caption:= Format(WindowTitle,[ScriptName]);
+    CurrTab.TabSheet.Caption:= ScriptName;
+    Self.AddRecentFile(FileName);
+    StatusBar.Panels[Panel_ScriptName].Text:= ScriptName;
+    StatusBar.Panels[Panel_ScriptPath].text:= ScriptFile;
+  end;
 end;
 
 
@@ -1143,6 +1201,13 @@ begin
   InitalizeTMThread(TempThread);
   TempThread.CompileOnly:= true;
   TempThread.Resume;
+end;
+
+procedure TForm1.ActionConsoleExecute(Sender: TObject);
+begin
+  {$ifdef mswindows}
+  ShowConsole(not ConsoleVisible);
+  {$endif}
 end;
 
 procedure TForm1.ActionCopyExecute(Sender: TObject);
@@ -1339,7 +1404,7 @@ begin
   Self.Manager.GetMousePos(x, y);
   if self.Manager.ReceivedError() then
   begin
-    formWriteln('Our window no longer exists -> Resetting to desktop');
+    FormWritelnEx('Our window no longer exists -> Resetting to desktop');
     self.Manager.SetDesktop;
     self.Manager.ResetError;
   end;
@@ -1373,7 +1438,7 @@ begin
       editSearchList.Color:= clWhite;
       if FilterTree.Focused then
       begin;
-        Writeln('This is currently not supported');
+        mDebugLn('This is currently not supported');
         SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
         SynEdit.LogicalCaretXY:= Classes.point(CompletionCaret.x,CompletionCaret.y);
         SynEdit.SelEnd:= SynEdit.SelStart;
@@ -1578,6 +1643,12 @@ begin
   MainDir:= ExtractFileDir(Application.ExeName);
   RecentFiles := TStringList.Create;
   SimbaSettingsFile := MainDir + DS + 'settings.xml';
+  {$ifdef MSWindows}
+  ConsoleVisible := False;
+  {$else}
+  TT_Console.Visible:= false;
+  InitmDebug;
+  {$endif}
   if FileExists(SimbaSettingsFile) then
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
@@ -1606,13 +1677,15 @@ begin
   {$ifdef mswindows}
   if FileExists(Application.ExeName+'_old_') then
   begin
-    Writeln('We still have an out-dated exe file in the dir, lets remove!');
-    Writeln(format('Sucesfully deleted the file? %s',[BoolToStr(DeleteFile(PChar(Application.ExeName + '_old_')),true)]));
+    mDebugLn('We still have an out-dated exe file in the dir, lets remove!');
+    mDebugLn(format('Sucesfully deleted the file? %s',[BoolToStr(DeleteFile(PChar(Application.ExeName + '_old_')),true)]));
   end;
+  SetConsoleCtrlHandler(@ConsoleHandler,true);
   {$endif}
   frmFunctionList.OnEndDock:= @frmFunctionList.FrameEndDock;
   FirstRun := true;//Our next run is the first run.
   HandleParameters;
+  TT_Update.Visible:= false;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -1732,6 +1805,11 @@ begin;
       free;
       SynExporterHTML.Free;
     end;
+end;
+
+procedure formWritelnEx(S: String);
+begin
+  Form1.Memo1.Lines.Add(s);
 end;
 
 function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
@@ -1876,6 +1954,7 @@ begin
   News := TStringList.Create;
   News.Text:= s;
   Memo1.Lines.AddStrings(News);
+  Memo1.Lines.add('');
   News.free;
 end;
 
@@ -1902,7 +1981,7 @@ begin
     ColourHistoryForm.AddColObj(cobj, true);
     ColourHistoryForm.Show;
   end;
-  formWriteln('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
+  FormWritelnEx('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
 
 
@@ -1910,7 +1989,7 @@ procedure TForm1.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   Manager.SetTarget(Selector.Drag);
-  writeln('New window: ' + IntToStr(Selector.LastPick));
+  FormWritelnEx('New window: ' + IntToStr(Selector.LastPick));
 end;
 
 procedure TForm1.NoTray(Sender: TObject);
@@ -1943,7 +2022,7 @@ begin
   PopupTab := PageControl1.TabIndexAtClientPos(MousePos);
   if PopupTab = -1 then
   begin
-    Writeln('We couldn''t find which tab you clicked on, closing the popup');
+    mDebugLn('We couldn''t find which tab you clicked on, closing the popup');
     Handled := true;
   end;
 end;
@@ -2042,6 +2121,24 @@ begin
   result := SettingsForm.Settings.GetSetDefaultKeyValue(Key,value);
 end;
 
+{$ifdef mswindows}
+procedure TForm1.ShowConsole(ShowIt: boolean);
+begin
+  if ShowIt = ConsoleVisible then
+    Exit;
+  if showit then //Console is hidden, get it back!
+  begin
+    AllocConsole;
+    InitmDebug;//Make sure mDebugLn works correctly!
+  end else
+  begin
+    FreeConsole;
+    FreemDebug;
+  end;
+  ConsoleVisible:= ShowIt;
+end;
+{$endif}
+
 procedure TForm1.FunctionListShown(ShowIt: boolean);
 begin
   with MenuItemFunctionList, frmFunctionList do
@@ -2078,7 +2175,7 @@ procedure TForm1.SafeCallThread;
 var
   thread: TMThread;
 begin
-  Writeln('Executing : ' + CurrentSyncInfo.MethodName);
+  mDebugLn('Executing : ' + CurrentSyncInfo.MethodName);
   thread:= TMThread(CurrentSyncInfo.OldThread);
   mmlpsthread.CurrThread:= thread;
   try
@@ -2138,7 +2235,7 @@ begin
       SynEdit.Lines.LoadFromFile(FileName);
       StartText := SynEdit.Lines.text;
       ScriptName:= ExtractFileNameOnly(filename);
-      WriteLn('Script name will be: ' + ScriptName);
+      mDebugLn('Script name will be: ' + ScriptName);
       ScriptFile:= FileName;
       ScriptChanged := false;
       AddRecentFile(filename);
@@ -2155,50 +2252,34 @@ begin
     Result := (ScriptFile <> '');
     if Result then
     begin;
-      ScriptChanged := false;
       SynEdit.Lines.SaveToFile(ScriptFile);
-      StartText:= SynEdit.Lines.Text;
-      SynEdit.MarkTextAsSaved;
-      Self.Caption:= Format(WindowTitle,[ScriptName]);
+      OnSaveScript(scriptfile);
     end
     else
       result := SaveCurrentScriptAs;
   end;
-  RefreshTab;
 end;
 
 function TForm1.SaveCurrentScriptAs: boolean;
+var
+  ScriptFile : string;
 begin
-  with CurrScript do
-  begin;
-    Result := false;
-    with TSaveDialog.Create(nil) do
-    try
-      Filter:= 'Simba files|*.simb;*.cogat;*.mufa;*.pas;*.txt|Any Files|*.*';
-      if Execute then
-      begin;
-        if ExtractFileExt(FileName) = '' then
-        begin;
-          ScriptFile := FileName + '.simb';
-        end else
-          ScriptFile := FileName;
-        SynEdit.Lines.SaveToFile(ScriptFile);
-        ScriptName:= ExtractFileNameOnly(ScriptFile);
-        Writeln('Saving to: ' + FileName);
-        WriteLn('Script name will be: ' + ScriptName);
-        RefreshTab();
-        Result := True;
-      end;
-    finally
-      Free;
-    end;
-    if result then
+  Result := false;
+  with TSaveDialog.Create(nil) do
+  try
+    Filter:= 'Simba files|*.simb;*.cogat;*.mufa;*.pas;*.txt|Any Files|*.*';
+    if Execute then
     begin;
-      Writeln('Succesfully saved: ' + ScriptFile);
-      StartText:= SynEdit.Lines.Text;
-      SynEdit.MarkTextAsSaved;
-      ScriptChanged := false;
+      if ExtractFileExt(FileName) = '' then
+      begin;
+        ScriptFile := FileName + '.simb';
+      end else
+        ScriptFile := FileName;
+      CurrScript.SynEdit.Lines.SaveToFile(ScriptFile);
+      OnSaveScript(scriptfile);
     end;
+  finally
+    free;
   end;
 end;
 

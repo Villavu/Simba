@@ -121,6 +121,7 @@ type
     SubPoints: TDTMPointDefArray;
   end;
 
+  TWritelnProc = procedure(s: string);
 type
   VirtualKeyInfo = record
       Str : string;

@@ -28,7 +28,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,   SynEditMarkupHighAll,
-   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType, SynEditMarkupSpecialLine, Graphics, Controls;
+   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls;
 const
    ecCodeCompletion = ecUserFirst;
 type
@@ -178,8 +178,8 @@ begin
         Insert('%s',CompletionLine,i+1);
         CompletionCaret := Point(endi,Caret.y);
         StartWordCompletion:= Point(i+1,caret.y);
-        Writeln(CompletionLine);
-        Writeln(CompletionStart);
+        mDebugLn(CompletionLine);
+        mDebugLn(CompletionStart);
         InCodeCompletion := true;
         editSearchList.Text:= SearchText;
         editSearchList.SelStart:= Length(searchText);
@@ -247,7 +247,7 @@ begin
   if ErrorData.Module <> '' then
   begin;
     if not FileExists(ErrorData.Module) then
-      Writeln(Format('ERROR comes from a non-existing file (%s)',[ErrorData.Module]))
+      formWriteln(Format('ERROR comes from a non-existing file (%s)',[ErrorData.Module]))
     else
     begin
       ErrorData.Module:= SetDirSeparators(ErrorData.Module);// Set it right ;-)
