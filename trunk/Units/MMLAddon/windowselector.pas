@@ -192,14 +192,14 @@ begin;
       DragForm.SetBounds(TargetRect.Left,TargetRect.top,W,H);//Draw the transparent form
 
       SetWindowRgn(EdgeForm.Handle,0,false);//Delete the old region
-      EdgeForm.SetBounds(TargetRect.Left,TargetRect.top,W,H);//Move the form etc..
       Region := CreateRectRgn(0,0,w-1,h-1); //Create a full region, of the whole form
       CombineRgn(Region,Region,CreateRectRgn(EdgeSize,EdgeSize,w-1-(edgesize),h-1-(edgesize)),RGN_XOR); //Combine a the 2 regions (of the full form and one without the edges)
       SetWindowRgn(edgeform.Handle,Region,true);//Set the only-edge-region!
+      EdgeForm.SetBounds(TargetRect.Left,TargetRect.top,W,H);//Move the form etc..
       TempHandle  := Handle;
     end;
     Application.ProcessMessages;
-    Sleep(64);
+    Sleep(30);
   end;
   Result := TempHandle;
   LastPick:= TempHandle;

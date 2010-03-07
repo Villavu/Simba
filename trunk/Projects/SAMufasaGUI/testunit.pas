@@ -44,7 +44,7 @@ uses
   about, framefunctionlist, ocr, updateform, simbasettings;
 
 const
-    SimbaVersion = 581;
+    SimbaVersion = 585;
 
 type
 
