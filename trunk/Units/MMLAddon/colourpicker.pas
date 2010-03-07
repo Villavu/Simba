@@ -118,8 +118,8 @@ begin
   Desktop.SetDesktop;
   Desktop.GetDimensions(w, h);
 
-  Application.MainForm.Enabled := False;
-  ColourHistoryForm.Enabled := False;
+{  Application.MainForm.Enabled := False;
+  ColourHistoryForm.Enabled := False;}
 
   { Create a form that will hold the client image and a form that will show cursor and color data }
   ScreenForm := TForm.Create(Application.MainForm);
@@ -132,15 +132,15 @@ begin
   ScreenForm.Height := h;
   ScreenForm.Top := 0;
   ScreenForm.left := 0;
-  //ScreenForm.WindowState := wsmaximized;
+  //ScreenForm.WindowState := wsmaximized; {Dual screen problems}
   ScreenForm.BorderStyle:= bsNone;
-  ScreenForm.FormStyle := fsStayOnTop;
+//  ScreenForm.FormStyle := fsStayOnTop;  {Runescape generates new handle ;-)}
 
   { Initialize the form that will hold the cursor and color info }
   InfoForm.Width := 173;
   InfoForm.Height := 33;
   InfoForm.BorderStyle := bsNone;
-  InfoForm.FormStyle := fsStayOnTop;
+//  InfoForm.FormStyle := fsStayOnTop;
   InfoForm.Left := Mouse.CursorPos.X + 5;
   InfoForm.Top := Mouse.CursorPos.Y - 15;
 
@@ -200,6 +200,10 @@ begin
     Application.ProcessMessages;
   end;
 
+  { Close the forms }
+  InfoForm.Hide;
+  ScreenForm.Hide;
+
   // add x to history here.
   c := Color;
   x := Colorx;
@@ -214,8 +218,8 @@ begin
   Desktop.free;
 
   { Re-enable the color pick buttons }
-  Application.MainForm.Enabled := True;
-  ColourHistoryForm.Enabled := True;
+//  Application.MainForm.Enabled := True;
+//  ColourHistoryForm.Enabled := True;
 end;
 
 procedure TMColorPicker.ImageMainMouseMove(Sender: TObject; Shift: TShiftState; X,
@@ -282,10 +286,6 @@ begin;
 
   if OnPick <> nil then
     Onpick(Sender,Color,Colorx,Colory);
-
-  { Close the forms }
-  InfoForm.Close;
-  ScreenForm.Close;
 
   { Tell Pick() that we are done }
   closed := True;

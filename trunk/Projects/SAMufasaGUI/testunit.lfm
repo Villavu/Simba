@@ -200,6 +200,7 @@ object Form1: TForm1
     end
     object TT_Console: TToolButton
       Left = 407
+      Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
     end

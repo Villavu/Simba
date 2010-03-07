@@ -35,7 +35,7 @@ uses
   controls,
   graphics,
   forms,
-  mufasabase,
+  extctrls,
   {$IFNDEF MSWINDOWS}x, xlib,xatom
   {$ELSE}
   windows
@@ -152,41 +152,50 @@ end;
 function TMWindowSelector.Drag: TNativeWindow;
 var
   TargetRect: TRect;
-  DC: HDC;
-  OldPen, Pen: hPen;
-  OldBrush : hBrush;
-  BrushHandle : THandle;
+  Region : HRGN;
   Cursor : TCursor;
   TempHandle : Hwnd;
   Handle : Hwnd;
+  DragForm : TForm;
+  EdgeForm : TForm;
+  Style : DWord;
+  W,H,i: integer;
+const
+  EdgeSize =4;
+  WindowCol = clred;
 begin;
-  Pen := CreatePen(PS_SOLID, GetSystemMetrics(SM_CXBORDER)*5, clred);
-  BrushHandle := GetStockObject(Null_Brush);
   Cursor:= Screen.Cursor;
   Screen.Cursor:= crCross;
   TempHandle := GetDesktopWindow;
+  EdgeForm := TForm.Create(nil);
+  EdgeForm.Color:= WindowCol;
+  EdgeForm.BorderStyle:= bsNone;
+  EdgeForm.Show;
+
+  DragForm := TForm.Create(nil);
+  DragForm.Color:= WindowCol;
+  DragForm.BorderStyle:= bsNone;
+  DragForm.Show;
+
+  Style := GetWindowLong(DragForm.Handle, GWL_EXSTYLE);
+  SetWindowLong(DragForm.Handle, GWL_EXSTYLE, Style or WS_EX_LAYERED or WS_EX_TRANSPARENT);
+  SetLayeredWindowAttributes(DragForm.Handle, 0, 100, LWA_ALPHA);
+
   while GetAsyncKeyState(VK_LBUTTON) <> 0 do
   begin;
     Handle:= WindowFromPoint(Mouse.CursorPos);
     if Handle <> TempHandle then
     begin;
-      if TempHandle <> 0 then
-      begin;
-        Invalidaterect(temphandle, nil, true);
-        UpdateWindow(temphandle);
-        RedrawWindow(TempHandle, nil, 0, RDW_Frame or RDW_Invalidate or RDW_Updatenow or RDW_Allchildren);
-      end;
-      if Handle <> 0 then
-      begin;
-        GetWindowRect(Handle, TargetRect);
-        DC := Windows.GetWindowDC(Handle);
-        OldPen := SelectObject(DC, Pen);
-        OldBrush := SelectObject(DC, BrushHandle);
-        Rectangle(DC, 0, 0, TargetRect.Right - TargetRect.Left, TargetRect.Bottom - TargetRect.Top);
-        SelectObject(DC, OldBrush);
-        SelectObject(DC, OldPen);
-        ReleaseDC(Handle, DC);
-      end;
+      GetWindowRect(Handle, TargetRect);
+      W :=TargetRect.Right - TargetRect.Left+1;
+      H :=TargetRect.Bottom - TargetRect.Top+1;
+      DragForm.SetBounds(TargetRect.Left,TargetRect.top,W,H);//Draw the transparent form
+
+      SetWindowRgn(EdgeForm.Handle,0,false);//Delete the old region
+      EdgeForm.SetBounds(TargetRect.Left,TargetRect.top,W,H);//Move the form etc..
+      Region := CreateRectRgn(0,0,w-1,h-1); //Create a full region, of the whole form
+      CombineRgn(Region,Region,CreateRectRgn(EdgeSize,EdgeSize,w-1-(edgesize),h-1-(edgesize)),RGN_XOR); //Combine a the 2 regions (of the full form and one without the edges)
+      SetWindowRgn(edgeform.Handle,Region,true);//Set the only-edge-region!
       TempHandle  := Handle;
     end;
     Application.ProcessMessages;
@@ -196,10 +205,10 @@ begin;
   LastPick:= TempHandle;
   haspicked:= true;
   Screen.Cursor:= cursor;
-  Invalidaterect(temphandle, nil, true);
-  UpdateWindow(temphandle);
-  RedrawWindow(TempHandle, nil, 0, RDW_Frame or RDW_Invalidate or RDW_Updatenow or RDW_Allchildren);
-  DeleteObject(Pen);
+  DragForm.Hide;
+  DragForm.Free;
+  EdgeForm.Hide;
+  EdgeForm.Free;
 end;
 {$ENDIF}
 
