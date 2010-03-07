@@ -16,7 +16,7 @@ object SettingsForm: TSettingsForm
     Top = 16
     Width = 324
     Anchors = [akTop, akLeft, akRight, akBottom]
-    DefaultItemHeight = 19
+    DefaultItemHeight = 15
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0

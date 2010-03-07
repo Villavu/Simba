@@ -696,7 +696,6 @@ var
    SizeArr: TIntegerArray;
 begin
   l := High(a);
-  Writeln(inttostr(l));
   if (l < 0) then Exit;
   SetLength(SizeArr, l + 1);
   for i := 0 to l do

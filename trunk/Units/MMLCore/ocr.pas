@@ -28,7 +28,7 @@ unit ocr;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes, bitmaps, math, ocrutil, fontloader,
+  Classes, SysUtils, MufasaTypes,MufasaBase, bitmaps, math, ocrutil, fontloader,
   {Begin To-Remove units. Replace ReadBmp with TMufasaBitmap stuff later.}
   graphtype, intfgraphics,graphics;
   {End To-Remove unit}
@@ -121,7 +121,7 @@ constructor TMOCR.Create(Owner: TObject);
 begin
   inherited Create;
   Self.Client := Owner;
-  Self.Fonts := TMFonts.Create;
+  Self.Fonts := TMFonts.Create(Owner);
 end;
 
 { Destructor }
@@ -150,9 +150,6 @@ begin
   begin
     if Fonts.LoadFont(dirs[i], false) then
       result := true;
-    {$IFDEF FONTDEBUG}
-    writeln('Loading ' + dirs[i]);
-    {$ENDIF}
   end;
   If DirectoryExists(path + 'UpChars') then
     Fonts.LoadFont('UpChars', true); // shadow
@@ -564,9 +561,9 @@ begin
     begin // more than one char
       {$IFDEF OCRDEBUG}
       if length(chars_2d[y]) > 70 then
-        writeln('more than one char at y: ' + inttostr(y));
+        mDebugLn('more than one char at y: ' + inttostr(y));
       if (bb.x2 - bb.x1 > 10) then
-        writeln('too wide at y: ' + inttostr(y));
+        mDebugLn('too wide at y: ' + inttostr(y));
       {$ENDIF}
       helpershadow:=getshadows(shadowsbmp,chars_2d[y]);
       chars_2d_b := splittpaex(helpershadow,2,shadowsbmp.height);
@@ -649,17 +646,11 @@ begin
   begin
     font := Fonts.GetFont('UpChars_s');
     thachars := shadows;
-    {$IFDEF OCRDEBUG}
-    writeln('using shadows');
-    {$ENDIF}
   end
   else
   begin
     font := Fonts.GetFont('UpChars');
     thachars := chars;
-    {$IFDEF OCRDEBUG}
-    writeln('not using shadows');
-    {$ENDIF}
   end;
 
   lbset:=false;
@@ -841,11 +832,10 @@ begin
 
   for i := 1 to length(text)  do
   begin
-    writeln(text[i]);
     an := Ord(text[i]);
     if not InRange(an, 0, 255) then
     begin
-      writeln('WARNING: Invalid character passed to TextToFontTPA');
+      mDebugLn('WARNING: Invalid character passed to TextToFontTPA');
       continue;
     end;
     d := fontD.ascii[an];
@@ -879,7 +869,6 @@ var
 begin
   TPA := TextToFontTPA(text, font, w, h);
   bmp := TMufasaBitmap.Create;
-  writeln(format('b: %d, %d', [w, h]));
   bmp.SetSize(w, h);
   bmp.DrawTPA(TPA, clWhite);
   result := bmp;

@@ -18,6 +18,7 @@ type
     HTTPSend : THTTPSend;
     fHandleCookies : boolean;
     PostVariables : TStringList;
+    Client : TObject;
   public
     procedure SetHTTPUserAgent(agent : string);
     function GetHTTPPage(url : string ) : string;
@@ -26,7 +27,7 @@ type
     function GetRawHeaders: string;
     procedure ClearPostData;
     procedure AddPostVariable(VarName, VarValue: string);
-    constructor Create(HandleCookies : boolean = true);
+    constructor Create(Owner : TObject; HandleCookies : boolean = true);
     destructor Destroy;override;
   end;
   { TMInternet }
@@ -45,6 +46,8 @@ type
 
 implementation
 
+uses
+  Client;
 { OTHER }
 function GetPage(URL: String): String;
 var
@@ -67,7 +70,7 @@ end;
 
 function TMInternet.CreateHTTPClient(HandleCookies: boolean = true): integer;
 begin;
-  Result := HTTPClients.Add(THTTPClient.Create(HandleCookies));
+  Result := HTTPClients.Add(THTTPClient.Create(Client,HandleCookies));
 end;
 
 function TMInternet.GetHTTPClient(Index: integer): THTTPClient;
@@ -105,13 +108,13 @@ begin
     if Connections[i] <> nil then
     begin
       TObject(Connections[i]).Free;
-      Writeln(Format('Connection[%d] has not been freed in the script, freeing it now.',[i]));
+      TClient(Client).Writeln(Format('Connection[%d] has not been freed in the script, freeing it now.',[i]));
     end;
   for i := HTTPClients.Count -1 downto 0 do
     if HTTPClients[i] <> nil then
     begin
       THTTPClient(HTTPClients[i]).Free;
-      Writeln(Format('HTTPClient[%d] has not been freed in the script, freeing it now.',[i]));
+      TClient(Client).Writeln(Format('HTTPClient[%d] has not been freed in the script, freeing it now.',[i]));
     end;
   Connections.Free;
   HTTPClients.Free;
@@ -139,7 +142,7 @@ begin
       result := '';
   except
     on e : exception do
-      Writeln('THTTPClient error: ' + e.message);
+      TClient(Client).Writeln('THTTPClient error: ' + e.message);
   end;
 end;
 
@@ -157,7 +160,7 @@ begin
       result := '';
   except
     on e : exception do
-      Writeln('THTTPClient error: ' + e.message);
+      TClient(Client).Writeln('THTTPClient error: ' + e.message);
   end;
 end;
 
@@ -189,9 +192,10 @@ begin
   PostVariables.Add(Varname + '=' + VarValue);
 end;
 
-constructor THTTPClient.Create(HandleCookies : boolean = true);
+constructor THTTPClient.Create(Owner : TObject; HandleCookies : boolean = true);
 begin
   inherited Create;
+  Client := Owner;
   HTTPSend := THTTPSend.Create;
   fHandleCookies:= HandleCookies;
   PostVariables := TStringList.Create;

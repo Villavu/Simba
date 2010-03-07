@@ -5,7 +5,7 @@ unit framefunctionlist;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, ComCtrls, StdCtrls, Controls,
+  Classes, SysUtils, FileUtil, LResources, MufasaBase,Forms, ComCtrls, StdCtrls, Controls,
   ExtCtrls, Buttons;
 
 type
@@ -137,7 +137,7 @@ var
 begin
   if InCodeCompletion then
   begin;
-    Writeln('Not yet implemented');
+    mDebugLn('Not yet implemented');
     exit;
   end;
   if not (Sender is TTreeView) then
@@ -191,7 +191,7 @@ begin
   if ScriptNode = nil then
     exit;
   if FilterTree.Visible then
-    Writeln('Might get some acces violations now..');
+    mDebugLn('Might get some acces violations now..');
   ScriptNode.DeleteChildren;
   Analyzer := TScriptAnalyzer.create;
   Analyzer.ScriptToAnalyze:= Script;
@@ -241,7 +241,7 @@ begin
   begin;
     if FilterTree.Visible = false then
     begin;
-      Writeln('ERROR: You cannot search next, since the Tree isnt generated yet');
+      mDebugLn('ERROR: You cannot search next, since the Tree isnt generated yet');
       Find(false);
       exit;
     end;
@@ -313,7 +313,7 @@ begin
         FilterTreeVis(True);
         FilterTree.FullExpand;
         FilterTree.Items[1].Selected:= True;
-        Writeln(FunctionList.Items[Index].Text);
+        mDebugLn(FunctionList.Items[Index].Text);
         FunctionList.FullCollapse;
         FunctionList.Items[Index].Selected := true;
         FunctionList.Items[index].ExpandParents;
@@ -365,7 +365,7 @@ begin
     exit;
   if InCodeCompletion then
   begin;
-    Writeln('Not yet implemented');
+    mDebugLn('Not yet implemented');
     exit;
   end;
   if not (Sender is TTreeView) then

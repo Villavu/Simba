@@ -5,7 +5,7 @@ unit updateform;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, LResources, Forms,MufasaBase, Controls, Graphics, Dialogs,
   ComCtrls, StdCtrls, updater;
 
 type
@@ -31,8 +31,6 @@ type
     procedure CleanUpdateForm(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure UpdateButtonClick(Sender: TObject);
-    function CanUpdate: Boolean;
-
   private
     { private declarations }
 
@@ -47,9 +45,9 @@ type
     SimbaVersionThread : TSimbaVersionThread;
   private
     function OnUpdateBeat: Boolean;
-    function GetLatestSimbaVersion: Integer;
   public
-    { public declarations }
+    function CanUpdate: Boolean;
+    function GetLatestSimbaVersion: Integer;
     procedure PerformUpdate;
   protected
     FCancelled: Boolean;
@@ -86,8 +84,8 @@ const
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
   GetLatestSimbaVersion;
-  Writeln(format('Current Simba version: %d',[TestUnit.SimbaVersion]));
-  Writeln('Latest Simba Version: ' + IntToStr(FSimbaVersion));
+  mDebugLn(format('Current Simba version: %d',[TestUnit.SimbaVersion]));
+  mDebugLn('Latest Simba Version: ' + IntToStr(FSimbaVersion));
   Exit(testunit.SimbaVersion < FSimbaVersion);
 end;
 

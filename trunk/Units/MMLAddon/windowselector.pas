@@ -119,13 +119,13 @@ begin
 
     if Result <> Tempwindow then
     begin
-      writeln('Making ' + inttostr(tempwindow) + ' transparent');
+      mDebugLn('Making ' + inttostr(tempwindow) + ' transparent');
       XChangeProperty(manager.display, tempwindow, window_opacity, XA_CARDINAL, 32, PropModeReplace, @opacity_75, 1);
 
-      writeln('Resetting ' + inttostr(Result));
+      mDebugLn('Resetting ' + inttostr(Result));
       if result <> 0 then
         XChangeProperty(manager.display, Result, window_opacity, XA_CARDINAL, 32, PropModeReplace, @opacity_100, 1);
-      WriteLn('Changing Window from: ' +  Inttostr(result) +' to: ' + IntToStr(Tempwindow));
+      mDebugLn('Changing Window from: ' +  Inttostr(result) +' to: ' + IntToStr(Tempwindow));
      // XChangeProperty(Window.XDisplay, tempwindow, window_opacity, XA_CARDINAL, 32, PropModeReplace, @opacity_50, 1);
 
       Result := Tempwindow;
