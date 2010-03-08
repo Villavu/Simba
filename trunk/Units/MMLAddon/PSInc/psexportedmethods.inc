@@ -317,6 +317,7 @@ AddFunction(@FilterPointsPie,'procedure FilterPointsPie(var Points: TPointArray;
 AddFunction(@GetATPABounds,'function GetATPABounds(ATPA: T2DPointArray): TBox;');
 AddFunction(@GetTPABounds,'function GetTPABounds(TPA: TPointArray): TBox;');
 AddFunction(@FindTPAinTPA,'function FindTPAinTPA(SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;');
+AddFunction(@GetSamePointsATPA,'function GetSamePointsATPA( ATPA : T2DPointArray; var Matches : TPointArray) : boolean;');
 AddFunction(@FindTextTPAinTPA,'function FindTextTPAinTPA(Height : integer; SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;');
 AddFunction(@SortCircleWise,'procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Integer; SortUp, ClockWise: Boolean);');
 AddFunction(@LinearSort,'procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean);');

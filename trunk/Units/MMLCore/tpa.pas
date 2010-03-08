@@ -70,6 +70,7 @@ function GetATPABounds(ATPA: T2DPointArray): TBox;
 function GetTPABounds(TPA: TPointArray): TBox;
 function FindTPAinTPA(SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;
 function FindTextTPAinTPA(Height : integer; SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;
+function GetSamePointsATPA( ATPA : T2DPointArray; var Matches : TPointArray) : boolean;
 function FindGapsTPA(TPA: TPointArray; MinPixels: Integer): T2DPointArray;
 procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Integer; SortUp, ClockWise: Boolean);
 procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean);
@@ -1304,6 +1305,76 @@ begin;
     Result := True;
 end;
 
+{/\
+  Finds the points that exist in all TPA's in the ATPA.
+/\}
+
+function GetSamePointsATPA( ATPA : T2DPointArray; var Matches : TPointArray) : boolean;
+var
+  I,ii,Len,MatchesC : integer;
+  MinBox,TempBox : TBox;
+  Grid : Array of Array of LongWord;
+  CompareValue : Longword;
+  W,H,x,y: integer;
+begin;
+  len := high(ATPA);
+  result := false;
+  if len >= 31 then
+  begin;
+    Writeln('You cannot have more than 32 TPA''s in your ATPA for this function');
+    exit;
+  end;
+  if len <= 0 then
+  begin;
+    Writeln('You''d need more than 1 TPA for this function');
+    exit;
+  end;
+  MinBox.x1 := 0;
+  MinBox.y1 := 0;
+  MinBox.x2 := MaxInt;
+  MinBox.y2 := MaxInt;
+  for i := 0 to len do
+    if Length(ATPA[i]) = 0 then
+      Exit
+    else
+    begin
+      TempBox := GetTPABounds(ATPA[i]);
+      MinBox.x1 := Max(MinBox.x1,TempBox.x1);
+      MinBox.y1 := Max(MinBox.y1,TempBox.y1);
+      MinBox.x2 := Min(MinBox.x2,TempBox.x2);
+      MinBox.y2 := Min(MinBox.y2,TempBox.y2);
+    end;
+  w := MinBox.x2-minbox.x1;
+  h := minbox.y2 - minbox.y1;
+  Writeln(format('(%d,%d,%d,%d)',[minbox.x1,minbox.y1,minbox.x2,minbox.y2]));
+  SetLength(Grid,w + 1);
+  for i := (W) downto 0 do
+  begin;
+    setlength(grid[i],H + 1);
+    FillChar(grid[i][0],SizeOf(LongWord) * (H + 1),0);
+  end;
+  for i := 0 to len do
+    for ii := high(ATPA[i]) downto 0 do
+      if (ATPA[i][ii].x >= MinBox.x1) and (ATPA[i][ii].x <= MinBox.x2) and
+         (ATPA[i][ii].y >= MinBox.y1) and (ATPA[i][ii].y <= MinBox.y2) then
+        Grid[ATPA[i][ii].x-MinBox.x1][ATPA[i][ii].y-MinBox.y1] :=
+             Grid[ATPA[i][ii].x-MinBox.x1][ATPA[i][ii].y-MinBox.y1] or (1 shl i);//Set that this TPA has this point..
+  CompareValue := 0;
+  for i := 0 to len do
+    CompareValue := CompareValue or (1 shl i);
+  SetLength(matches, (W+1) * (H+ 1));
+  MatchesC := 0;
+  for y := 0 to H do
+    for x := 0 to W do
+      if Grid[x][y] = CompareValue then
+      begin;
+        Matches[MatchesC].x := x + minbox.x1;
+        Matches[MatchesC].y := y + minbox.y1;
+        inc(MatchesC);
+      end;
+  result := (MatchesC <> 0);
+  setlength(matches,MatchesC);
+end;
 {/\
   Finds the possible gaps in the TPointArray TPA and results the gaps as a T2DPointArray.
   \\ Considers as a gap if the gap length is >= MinPixels.
