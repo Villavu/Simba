@@ -29,9 +29,8 @@ interface
 
 uses
   Classes, SysUtils,
-  ctypes,
   {$IFDEF MSWINDOWS} os_windows, {$ENDIF}
-  {$IFDEF LINUX} os_linux, {$ENDIF}
+  {$IFDEF LINUX} os_linux,  ctypes, {$ENDIF}
   controls,
   graphics,
   forms,
@@ -159,7 +158,7 @@ var
   DragForm : TForm;
   EdgeForm : TForm;
   Style : DWord;
-  W,H,i: integer;
+  W,H: integer;
 const
   EdgeSize =4;
   WindowCol = clred;
@@ -184,7 +183,7 @@ begin;
   while GetAsyncKeyState(VK_LBUTTON) <> 0 do
   begin;
     Handle:= WindowFromPoint(Mouse.CursorPos);
-    if Handle <> TempHandle then
+    if (Handle <> TempHandle) and (Handle <> EdgeForm.Handle) then
     begin;
       GetWindowRect(Handle, TargetRect);
       W :=TargetRect.Right - TargetRect.Left+1;
