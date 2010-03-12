@@ -35,10 +35,11 @@ uses
   graphics,
   forms,
   extctrls,
-  {$IFNDEF MSWINDOWS}x, xlib,xatom
+  {$IFNDEF MSWINDOWS}x, xlib,xatom,
   {$ELSE}
-  windows
+  windows,
   {$ENDIF}
+  mufasabase
 
   ;
 
