@@ -1,0 +1,519 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <PathDelim Value="\"/>
+    <Version Value="7"/>
+    <General>
+      <Flags>
+        <UseDefaultCompilerOptions Value="True"/>
+      </Flags>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=".exe"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <ActiveEditorIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <Language Value=""/>
+      <CharSet Value=""/>
+      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="2">
+      <Item1>
+        <PackageName Value="SynEdit"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
+    </RequiredPackages>
+    <Units Count="44">
+      <Unit0>
+        <Filename Value="Valistus.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Valistus"/>
+        <CursorPos X="21" Y="17"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="126"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Main"/>
+        <CursorPos X="37" Y="426"/>
+        <TopLine Value="404"/>
+        <EditorIndex Value="0"/>
+        <UsageCount Value="126"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\v_Constants.pas"/>
+        <UnitName Value="v_Constants"/>
+        <UsageCount Value="10"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\v_SynPlugins.pas"/>
+        <UnitName Value="v_SynPlugins"/>
+        <UsageCount Value="10"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="..\v_ideCodeParser.pas"/>
+        <UnitName Value="v_ideCodeParser"/>
+        <UsageCount Value="10"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\v_ideCodeInsight.pas"/>
+        <UnitName Value="v_ideCodeInsight"/>
+        <UsageCount Value="10"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\v_MiscFunctions.pas"/>
+        <UnitName Value="v_MiscFunctions"/>
+        <UsageCount Value="10"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="v_Constants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_Constants"/>
+        <CursorPos X="5" Y="7"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="126"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="CastaliaPasLex.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CastaliaPasLex"/>
+        <CursorPos X="3" Y="374"/>
+        <TopLine Value="355"/>
+        <UsageCount Value="126"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="CastaliaPasLexTypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CastaliaPasLexTypes"/>
+        <CursorPos X="61" Y="140"/>
+        <TopLine Value="177"/>
+        <UsageCount Value="126"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="CastaliaSimplePasPar.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CastaliaSimplePasPar"/>
+        <CursorPos X="15" Y="517"/>
+        <TopLine Value="500"/>
+        <UsageCount Value="126"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="CastaliaSimplePasParTypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CastaliaSimplePasParTypes"/>
+        <CursorPos X="1" Y="19"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="126"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="v_SynPlugins.pas"/>
+        <UnitName Value="v_SynPlugins"/>
+        <CursorPos X="15" Y="27"/>
+        <TopLine Value="8"/>
+        <UsageCount Value="10"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="v_ideCodeParser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_ideCodeParser"/>
+        <CursorPos X="22" Y="273"/>
+        <TopLine Value="255"/>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="126"/>
+        <Loaded Value="True"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="v_ideCodeInsight.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_ideCodeInsight"/>
+        <CursorPos X="41" Y="285"/>
+        <TopLine Value="259"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="126"/>
+        <Loaded Value="True"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="v_MiscFunctions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_MiscFunctions"/>
+        <CursorPos X="27" Y="5"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="126"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="ValistusDefines.inc"/>
+        <IsPartOfProject Value="True"/>
+        <CursorPos X="2" Y="2"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="126"/>
+        <Loaded Value="True"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="C:\Lazarus\FPC\Source\rtl\inc\objpash.inc"/>
+        <CursorPos X="23" Y="192"/>
+        <TopLine Value="173"/>
+        <UsageCount Value="8"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="C:\Lazarus\FPC\Source\rtl\inc\systemh.inc"/>
+        <CursorPos X="11" Y="825"/>
+        <TopLine Value="806"/>
+        <UsageCount Value="6"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="C:\Lazarus\FPC\Source\rtl\objpas\classes\classesh.inc"/>
+        <CursorPos X="25" Y="598"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="7"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\stdctrls.pp"/>
+        <UnitName Value="StdCtrls"/>
+        <CursorPos X="20" Y="33"/>
+        <TopLine Value="16"/>
+        <UsageCount Value="8"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\lcltype.pp"/>
+        <UnitName Value="LCLType"/>
+        <CursorPos X="17" Y="607"/>
+        <TopLine Value="579"/>
+        <UsageCount Value="9"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="v_autocompleteform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="v_AutoCompleteForm"/>
+        <CursorPos X="46" Y="574"/>
+        <TopLine Value="543"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="122"/>
+        <Loaded Value="True"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\include\winapih.inc"/>
+        <CursorPos X="18" Y="235"/>
+        <TopLine Value="3"/>
+        <UsageCount Value="7"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\controls.pp"/>
+        <UnitName Value="Controls"/>
+        <CursorPos X="15" Y="1800"/>
+        <TopLine Value="1781"/>
+        <UsageCount Value="15"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\graphics.pp"/>
+        <UnitName Value="Graphics"/>
+        <CursorPos X="3" Y="92"/>
+        <TopLine Value="82"/>
+        <UsageCount Value="2"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\forms.pp"/>
+        <UnitName Value="Forms"/>
+        <CursorPos X="15" Y="582"/>
+        <TopLine Value="527"/>
+        <UsageCount Value="13"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\lclclasses.pp"/>
+        <UnitName Value="LCLClasses"/>
+        <CursorPos X="31" Y="38"/>
+        <TopLine Value="22"/>
+        <UsageCount Value="3"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\lmessages.pp"/>
+        <UnitName Value="LMessages"/>
+        <CursorPos X="3" Y="327"/>
+        <TopLine Value="83"/>
+        <UsageCount Value="7"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="C:\Lazarus\FPC\Source\packages\fcl-image\src\fpcanvas.pp"/>
+        <UnitName Value="FPCanvas"/>
+        <CursorPos X="32" Y="78"/>
+        <TopLine Value="59"/>
+        <UsageCount Value="1"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="C:\Lazarus\FPC\Source\rtl\objpas\objpas.pp"/>
+        <UnitName Value="objpas"/>
+        <CursorPos X="8" Y="36"/>
+        <TopLine Value="17"/>
+        <UsageCount Value="2"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\stringhashlist.pas"/>
+        <UnitName Value="StringHashList"/>
+        <CursorPos X="44" Y="57"/>
+        <TopLine Value="40"/>
+        <UsageCount Value="2"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="C:\Lazarus\FPC\Source\rtl\objpas\strutils.pp"/>
+        <UnitName Value="strutils"/>
+        <CursorPos X="10" Y="72"/>
+        <TopLine Value="53"/>
+        <UsageCount Value="2"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="C:\Lazarus\FPC\Source\rtl\objpas\sysutils\syspchh.inc"/>
+        <CursorPos X="18" Y="32"/>
+        <TopLine Value="11"/>
+        <UsageCount Value="2"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="C:\Lazarus\LazSVN\components\synedit\synedit.pp"/>
+        <UnitName Value="SynEdit"/>
+        <CursorPos X="45" Y="5647"/>
+        <TopLine Value="5621"/>
+        <UsageCount Value="14"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="C:\Lazarus\LazSVN\components\synedit\synedithighlighter.pp"/>
+        <UnitName Value="SynEditHighlighter"/>
+        <CursorPos X="33" Y="230"/>
+        <TopLine Value="303"/>
+        <UsageCount Value="7"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="C:\Lazarus\FPC\Source\rtl\win32\system.pp"/>
+        <UnitName Value="System"/>
+        <CursorPos X="2" Y="35"/>
+        <TopLine Value="16"/>
+        <UsageCount Value="7"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="C:\Lazarus\LazSVN\components\synedit\syneditkeycmds.pp"/>
+        <UnitName Value="SynEditKeyCmds"/>
+        <CursorPos X="11" Y="261"/>
+        <TopLine Value="135"/>
+        <UsageCount Value="9"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="C:\Lazarus\LazSVN\components\synedit\syneditmiscclasses.pp"/>
+        <UnitName Value="SynEditMiscClasses"/>
+        <CursorPos X="34" Y="996"/>
+        <TopLine Value="1007"/>
+        <UsageCount Value="10"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="C:\Lazarus\FPC\Source\rtl\objpas\sysutils\sysstrh.inc"/>
+        <CursorPos X="10" Y="223"/>
+        <TopLine Value="204"/>
+        <UsageCount Value="5"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="C:\Lazarus\LazSVN\components\synedit\syneditautocomplete.pp"/>
+        <UnitName Value="SynEditAutoComplete"/>
+        <CursorPos X="13" Y="182"/>
+        <TopLine Value="157"/>
+        <UsageCount Value="6"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\extendedstrings.pas"/>
+        <UnitName Value="ExtendedStrings"/>
+        <CursorPos X="34" Y="42"/>
+        <TopLine Value="31"/>
+        <UsageCount Value="8"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\widgetset\wsreferences.pp"/>
+        <UnitName Value="WSReferences"/>
+        <CursorPos X="14" Y="90"/>
+        <TopLine Value="71"/>
+        <UsageCount Value="8"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="C:\Lazarus\LazSVN\lcl\lresources.pp"/>
+        <UnitName Value="LResources"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="9"/>
+      </Unit43>
+    </Units>
+    <JumpHistory Count="29" HistoryIndex="28">
+      <Position1>
+        <Filename Value="main.pas"/>
+        <Caret Line="411" Column="36" TopLine="396"/>
+      </Position1>
+      <Position2>
+        <Filename Value="v_ideCodeParser.pas"/>
+        <Caret Line="43" Column="33" TopLine="24"/>
+      </Position2>
+      <Position3>
+        <Filename Value="main.pas"/>
+        <Caret Line="414" Column="34" TopLine="396"/>
+      </Position3>
+      <Position4>
+        <Filename Value="v_ideCodeParser.pas"/>
+        <Caret Line="104" Column="25" TopLine="85"/>
+      </Position4>
+      <Position5>
+        <Filename Value="v_ideCodeParser.pas"/>
+        <Caret Line="705" Column="21" TopLine="686"/>
+      </Position5>
+      <Position6>
+        <Filename Value="main.pas"/>
+        <Caret Line="414" Column="37" TopLine="396"/>
+      </Position6>
+      <Position7>
+        <Filename Value="v_ideCodeParser.pas"/>
+        <Caret Line="104" Column="21" TopLine="85"/>
+      </Position7>
+      <Position8>
+        <Filename Value="v_ideCodeParser.pas"/>
+        <Caret Line="705" Column="21" TopLine="686"/>
+      </Position8>
+      <Position9>
+        <Filename Value="main.pas"/>
+        <Caret Line="419" Column="135" TopLine="393"/>
+      </Position9>
+      <Position10>
+        <Filename Value="main.pas"/>
+        <Caret Line="380" Column="69" TopLine="361"/>
+      </Position10>
+      <Position11>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="528" Column="6" TopLine="492"/>
+      </Position11>
+      <Position12>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="520" Column="26" TopLine="492"/>
+      </Position12>
+      <Position13>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="529" Column="49" TopLine="513"/>
+      </Position13>
+      <Position14>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="530" Column="25" TopLine="514"/>
+      </Position14>
+      <Position15>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="82" Column="18" TopLine="63"/>
+      </Position15>
+      <Position16>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="88" Column="49" TopLine="63"/>
+      </Position16>
+      <Position17>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="532" Column="49" TopLine="516"/>
+      </Position17>
+      <Position18>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="548" Column="37" TopLine="516"/>
+      </Position18>
+      <Position19>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="530" Column="24" TopLine="516"/>
+      </Position19>
+      <Position20>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="79" Column="28" TopLine="63"/>
+      </Position20>
+      <Position21>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="79" Column="28" TopLine="63"/>
+      </Position21>
+      <Position22>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="534" Column="53" TopLine="516"/>
+      </Position22>
+      <Position23>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="556" Column="11" TopLine="529"/>
+      </Position23>
+      <Position24>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="532" Column="10" TopLine="513"/>
+      </Position24>
+      <Position25>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="537" Column="25" TopLine="518"/>
+      </Position25>
+      <Position26>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="544" Column="11" TopLine="525"/>
+      </Position26>
+      <Position27>
+        <Filename Value="main.pas"/>
+        <Caret Line="434" Column="12" TopLine="403"/>
+      </Position27>
+      <Position28>
+        <Filename Value="main.pas"/>
+        <Caret Line="437" Column="9" TopLine="403"/>
+      </Position28>
+      <Position29>
+        <Filename Value="v_autocompleteform.pas"/>
+        <Caret Line="574" Column="46" TopLine="543"/>
+      </Position29>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="Valistus"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)\"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <UseAnsiStrings Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
