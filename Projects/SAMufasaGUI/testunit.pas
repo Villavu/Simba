@@ -2251,8 +2251,14 @@ begin
   begin
     Result := (ScriptFile <> '');
     if Result then
-    begin;
-      SynEdit.Lines.SaveToFile(ScriptFile);
+    begin
+      try
+         SynEdit.Lines.SaveToFile(ScriptFile);
+      except
+        mDebugLn('Cannot save the file. Try specifying a different location.');
+        result := SaveCurrentScriptAs;
+        exit;
+      end;
       OnSaveScript(scriptfile);
     end
     else
