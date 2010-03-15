@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, virtualextension,
-  uPSComponent,uPSCompiler, uPSRuntime, uPSPreProcessor;
+  uPSComponent,uPSCompiler, uPSRuntime, uPSPreProcessor,forms;
 
 
 
@@ -18,6 +18,7 @@ type
     private
       PSInstance: TPSScript;
       FEnabled: Boolean;
+      Script: TStringList;
 
     private
       function InitScript: Boolean;
@@ -29,6 +30,7 @@ type
     protected
        procedure RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
        procedure RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
+       procedure RegisterMyMethods(Sender: TPSScript);
 
     end;
 
@@ -40,63 +42,53 @@ uses
   uPSR_extctrls //Runtime-libs;
   ;
 
-procedure TSimbaPSEventExtension.OutputMessages;
+procedure createf;
 var
-  l: Longint;
-  b: Boolean;
+  a: TForm;
 begin
-  b := False;
-  for l := 0 to PSInstance.CompilerMessageCount - 1 do
-  begin
-    if (not b) and (PSInstance.CompilerMessages[l] is TIFPSPascalCompilerError) then
-    begin
-      b := True;
-      {if OnError <> nil then
-        with PSInstance.CompilerMessages[l] do
-          HandleError(Row, Col, Pos, MessageToString,errCompile, ModuleName)
-      else   }
-        writeln(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
-    end else
-      Writeln(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
+  a:=TForm.Create(nil);
+  a.ShowModal;
+  a.Free;
+end;
 
-  end;
+
+function TSimbaPSEventExtension.HookExists(HookName: String): Boolean;
+begin
+
+end;
+
+function TSimbaPSEventExtension.ExecuteHook(HookName: String): Integer;
+begin
 end;
 
 constructor TSimbaPSEventExtension.Create(FileName: String);
 var
   fStr:TFileStream;
-  Script: String;
-  strs: TStrings;
 
 begin
-  // FIXME
-  //inherited;
+  inherited create;
+
   try
+    Script := TStringList.Create;
     fStr := TFileStream.Create(FileName, fmOpenRead);
-    SetLength(Script, fStr.Size);
-    fStr.Read(Script[1],fStr.Size);
+    Script.LoadFromStream(fStr);
+    fStr.Free;
   except
     raise Exception.CreateFmt('File %s could not be read', [FileName]);
   end;
 
-  try
-    fStr.Free;
-  finally
-  end;
-
-  Strs := TStringList.Create;
-  Strs.Add(Script);
-
   FEnabled := False;
 
+  { Create script, and see if the extension is valid. (If it compiles) }
 
   PSInstance := TPSScript.Create(nil);
 
-  PSInstance.Script := Strs;
+  PSInstance.Script := Self.Script;
   PSInstance.OnCompImport:=@RegisterPSCComponents;
   PSInstance.OnExecImport:=@RegisterPSRComponents;
+  PSInstance.OnCompile:=@RegisterMyMethods;
 
-  Writeln(Format('%s: Script: %s', [FileName, Script]));
+  Writeln(Format('%s: Script: %s', [FileName, Self.Script.Text]));
 
   try
     FEnabled := PSInstance.Compile;
@@ -114,10 +106,8 @@ begin
   if FEnabled then
     writeln('It exists')
   else
-    writeln('It does not exist');
-//  writeln(PSInstance.ExecuteFunction([], 'test'));
-
-
+    writeln('It does not exist - or something went wrong while executing it.');
+ // writeln(PSInstance.ExecuteFunction([], 'test'));
 end;
 
 function TSimbaPSEventExtension.InitScript: Boolean;
@@ -132,6 +122,12 @@ begin
     exit;
   end;
   exit(true);
+end;
+
+
+procedure TSimbaPSEventExtension.RegisterMyMethods(Sender: TPSScript);
+begin
+  Sender.AddFunction(@createf, 'procedure createf;');
 end;
 
 procedure TSimbaPSEventExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
@@ -167,14 +163,32 @@ begin
   inherited;
 end;
 
-function TSimbaPSEventExtension.HookExists(HookName: String): Boolean;
-begin
 
+procedure TSimbaPSEventExtension.OutputMessages;
+var
+  l: Longint;
+  b: Boolean;
+begin
+  b := False;
+  for l := 0 to PSInstance.CompilerMessageCount - 1 do
+  begin
+    if (not b) and (PSInstance.CompilerMessages[l] is TIFPSPascalCompilerError) then
+    begin
+      b := True;
+       with PSInstance.CompilerMessages[l] do
+         writeln(MessageToString);
+      {if OnError <> nil then
+        with PSInstance.CompilerMessages[l] do
+          HandleError(Row, Col, Pos, MessageToString,errCompile, ModuleName)
+      else   }
+        writeln(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
+    end else
+      Writeln(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
+
+  end;
 end;
 
-function TSimbaPSEventExtension.ExecuteHook(HookName: String): Integer;
-begin
-end;
+
 
 end.
 

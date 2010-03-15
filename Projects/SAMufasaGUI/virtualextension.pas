@@ -10,7 +10,6 @@ uses
 type
     TVirtualSimbaExtension = class(TObject)
     public
-
        { Must be implemented }
        function HookExists(HookName: String): Boolean; virtual; abstract;
 
