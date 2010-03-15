@@ -41,7 +41,8 @@ uses
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,
   stringutil,mufasatypesutil,mufasabase,
-  about, framefunctionlist, ocr, updateform, simbasettings;
+  about, framefunctionlist, ocr, updateform, simbasettings,
+  eventextension;
 
 const
     SimbaVersion = 585;
@@ -2006,8 +2007,18 @@ begin
 end;
 
 procedure TForm1.ButtonTrayClick(Sender: TObject);
+var
+   Ext: TSimbaPSEventExtension;
+{ FIXME: Turning it into a test button again... }
 begin
-  Form1.Hide;
+  {Form1.Hide;  }
+  try
+    Ext := TSimbaPSEventExtension.Create(MainDir + DS + 'Extensions' + DS + 'test.pas');
+    Ext.Free;
+  except
+    Writeln('Something went wrong with the Extensions.');
+  end;
+
 end;
 
 procedure TForm1.PageControl1Changing(Sender: TObject; var AllowChange: Boolean
