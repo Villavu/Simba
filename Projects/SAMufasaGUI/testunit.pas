@@ -2007,18 +2007,9 @@ begin
 end;
 
 procedure TForm1.ButtonTrayClick(Sender: TObject);
-var
-   Ext: TSimbaPSEventExtension;
-{ FIXME: Turning it into a test button again... }
-begin
-  {Form1.Hide;  }
-  try
-    Ext := TSimbaPSEventExtension.Create(MainDir + DS + 'Extensions' + DS + 'test.pas');
-    Ext.Free;
-  except
-    Writeln('Something went wrong with the Extensions.');
-  end;
 
+begin
+  Form1.Hide;
 end;
 
 procedure TForm1.PageControl1Changing(Sender: TObject; var AllowChange: Boolean
