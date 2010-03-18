@@ -15,10 +15,25 @@ type
     *)
 
     TExtensionManager = class(TObject)
-
+    public
+           constructor Create;
+           destructor Destroy; override;
     end;
 
+
+
 implementation
+
+
+constructor TExtensionManager.Create;
+begin
+
+end;
+
+destructor TExtensionManager.Destroy;
+begin
+
+end;
 
 end.
 
