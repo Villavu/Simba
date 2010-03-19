@@ -14,7 +14,7 @@ type
        function HookExists(HookName: String): Boolean; virtual; abstract;
 
        { No Custom Arguments just yet... }
-       function ExecuteHook(HookName: String): Integer; virtual; abstract;
+       function ExecuteHook(HookName: String; fArgs: Array of Variant; out OutVariant): Integer; virtual; abstract;
     private
        FName: String;
 
