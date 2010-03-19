@@ -21,6 +21,11 @@
     Other.inc for the Mufasa Macro Library
 }
 
+function psSetScriptProp(Name: String; Value: String): boolean;
+begin
+  Exit(CurrThread.Prop.SetProp(Name, Value));
+end;
+
 procedure psWait(t: Integer); extdecl;
 {$ifdef MSWINDOWS}
 begin
