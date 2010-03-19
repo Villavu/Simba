@@ -1,4 +1,4 @@
-unit eventextension;
+unit pseventextension;
 
 {$mode objfpc}
 
@@ -26,7 +26,7 @@ type
 
     public
        function HookExists(HookName: String): Boolean; override;
-       function ExecuteHook(HookName: String): Integer; override;
+       function ExecuteHook(HookName: String; fArgs: Array of Variant; out OutVariant): Integer;
     protected
        procedure RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
        procedure RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
@@ -40,7 +40,7 @@ uses
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
   uPSC_extctrls, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
-  uPSR_extctrls //Runtime-libs;
+  uPSR_extctrls //Runtime-libs
   ;
 
 procedure createf;
@@ -55,11 +55,20 @@ end;
 
 function TSimbaPSEventExtension.HookExists(HookName: String): Boolean;
 begin
-
+  { FIXME: Free the .data ? }
+  Exit(PSInstance.GetProcMethod('init').Data <> nil);
 end;
 
-function TSimbaPSEventExtension.ExecuteHook(HookName: String): Integer;
+function TSimbaPSEventExtension.ExecuteHook(HookName: String; fArgs: Array of Variant; out OutVariant): Integer;
+
 begin
+
+  result := 0;
+  try
+    PSInstance.ExecuteFunction([], HookName);
+  except
+    result := 1;
+  end;
 end;
 
 constructor TSimbaPSEventExtension.Create(FileName: String);
@@ -108,21 +117,20 @@ begin
     writeln('It exists')
   else
     writeln('It does not exist - or something went wrong while executing it.');
- // writeln(PSInstance.ExecuteFunction([], 'test'));
+  //writeln(PSInstance.ExecuteFunction([], 'test'));
 end;
 
 function TSimbaPSEventExtension.InitScript: Boolean;
 begin
-  if PSInstance.GetProcMethod('init').Data = nil then
+  if not HookExists('init') then
     exit(false);
 
+  result := true;
   try
     PSInstance.ExecuteFunction([], 'init');
   except
     result := false;
-    exit;
   end;
-  exit(true);
 end;
 
 
