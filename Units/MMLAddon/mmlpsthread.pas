@@ -32,7 +32,7 @@ interface
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
-  bitmaps, plugins, libloader, dynlibs,internets;
+  bitmaps, plugins, libloader, dynlibs,internets,scriptproperties;
 
 
 type
@@ -82,6 +82,7 @@ type
       DebugImg : TDbgImgInfo;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
+      Prop: TScriptProperties;
       procedure LoadPlugin(plugidx: integer); virtual; abstract;
 
     public
@@ -209,6 +210,8 @@ uses
 {Some General PS Functions here}
 procedure psWriteln(str : string); extdecl;
 begin
+  if CurrThread.Prop.WriteTimeStamp then
+    str := format('[%s]: %s', [TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount - CurrThread.StartTime))), str]);
   if Assigned(CurrThread.DebugTo) then
     CurrThread.DebugTo(str)
   else
@@ -277,6 +280,9 @@ begin
   OnError:= nil;
   Includes := TStringList.Create;
   Includes.CaseSensitive:= {$ifdef linux}true{$else}false{$endif};
+
+  Prop := TScriptProperties.Create;
+
   inherited Create(CreateSuspended);
 end;
 
