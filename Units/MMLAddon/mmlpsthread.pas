@@ -291,6 +291,7 @@ begin
   MInternet.Free;
   Client.Free;
   Includes.free;
+  Prop.Free;
   inherited Destroy;
 end;
 
