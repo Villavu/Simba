@@ -21,9 +21,14 @@
     Other.inc for the Mufasa Macro Library
 }
 
-function psSetScriptProp(Name: String; Value: String): boolean;
+function psSetScriptProp(prop : TSP_Property; Value: String): boolean; extdecl;
 begin
-  Exit(CurrThread.Prop.SetProp(Name, Value));
+  Exit(CurrThread.Prop.SetProp(prop, Value));
+end;
+
+function psGetScriptProp(prop : TSP_Property; var Value : string) : boolean; extdecl;
+begin;
+  exit(CurrThread.Prop.GetProp(prop,value));
 end;
 
 procedure psWait(t: Integer); extdecl;

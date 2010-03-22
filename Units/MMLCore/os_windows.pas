@@ -283,8 +283,6 @@ implementation
     Rect := WindowRect;
     x := x + rect.left;
     y := y + rect.top;
-{    if (x<0) or (y<0) then
-      writeln('Negative coords, what now?');}
     Windows.SetCursorPos(x, y);
   end;
   procedure TWindow.HoldMouse(x,y: integer; button: TClickType);

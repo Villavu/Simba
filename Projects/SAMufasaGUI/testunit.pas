@@ -41,11 +41,11 @@ uses
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,
   stringutil,mufasatypesutil,mufasabase,
-  about, framefunctionlist, ocr, updateform, simbasettings,
+  about, framefunctionlist, ocr, updateform, simbasettings, pseventextension,
   extensionmanager;
 
 const
-    SimbaVersion = 585;
+    SimbaVersion = 587;
 
 type
 
@@ -188,7 +188,6 @@ type
     MenuItemUndo: TMenuItem;
     MenuItemSave: TMenuItem;
     Mufasa_Image_List: TImageList;
-    MainMenu1: TMainMenu;
     MenuItemScript: TMenuItem;
     MenuItemRun: TMenuItem;
     PanelMemo: TPanel;
@@ -388,6 +387,9 @@ const
 var
   Form1: TForm1;
   MainDir : string;
+  {$ifdef MSWindows}
+  PrevWndProc : WNDPROC;
+  {$endif}
   CurrentSyncInfo : TSyncInfo;//We need this for SafeCallThread
 
 implementation
@@ -404,6 +406,19 @@ begin
   TThread.Synchronize(nil,@Form1.Close);
   Result := true;
 end;
+
+
+function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam;
+  lParam: LParam): LRESULT stdcall;
+begin
+  if uMsg = WM_HOTKEY then
+  begin
+    Form1.ActionStopScript.Execute;
+    Result := 0;
+  end else
+    Result := Windows.CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
+end;
+
 {$endif}
 
 var
@@ -1216,9 +1231,7 @@ begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.CopyToClipboard
   else if Memo1.Focused then
-    Memo1.CopyToClipboard
- { else
-    Writeln(Sender.ToString);     }
+    Memo1.CopyToClipboard;
 end;
 
 procedure TForm1.ActionCutExecute(Sender: TObject);
@@ -1645,11 +1658,15 @@ begin
   RecentFiles := TStringList.Create;
   SimbaSettingsFile := MainDir + DS + 'settings.xml';
   {$ifdef MSWindows}
-  ConsoleVisible := False;
+  ConsoleVisible := True;
+  PrevWndProc := Windows.WNDPROC(GetWindowLong(self.handle,GWL_WNDPROC));
+  SetWindowLong(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback));
+  if not RegisterHotkey(Self.Handle,0,MOD_CONTROL or MOD_ALT,VK_S) then
+    mDebugLn('Unable to register ctrl + alt + s as global hotkey');
   {$else}
   TT_Console.Visible:= false;
-  InitmDebug;
   {$endif}
+  InitmDebug;
   if FileExists(SimbaSettingsFile) then
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
@@ -1702,10 +1719,13 @@ begin
   Picker.Free;
   Manager.Free;
   PluginsGlob.Free;
-
   SetLength(DebugStream, 0);
   RecentFiles.Free;
   DebugCriticalSection.Free;
+  {$ifdef MSWindows}
+  if not UnRegisterHotkey(Self.Handle,0) then
+    mDebugLn('Unable to unregister ctrl + alt + s as global hotkey');
+  {$endif}
 end;
 
 procedure TForm1.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
@@ -1961,7 +1981,6 @@ end;
 
 procedure TForm1.OnLinePSScript(Sender: TObject);
 begin
-  //Writeln('We just completed a line!!');
   {$IFDEF ProcessMessages}
   Application.ProcessMessages; //Don't think that this is neccesary though
   {$ENDIF}
@@ -2007,18 +2026,8 @@ begin
 end;
 
 procedure TForm1.ButtonTrayClick(Sender: TObject);
-{var
-   Ext: TSimbaPSEventExtension;                   }
-{ FIXME: Turning it into a test button again... }
 begin
   Form1.Hide;
- { try
-    Ext := TSimbaPSEventExtension.Create(MainDir + DS + 'Extensions' + DS + 'test.pas');
-    Ext.Free;
-  except
-    Writeln('Something went wrong with the Extensions.');
-  end;                                                    }
-
 end;
 
 procedure TForm1.PageControl1Changing(Sender: TObject; var AllowChange: Boolean
@@ -2131,22 +2140,26 @@ function TForm1.CreateSetting(Key: string; Value: string): string;
 begin
   result := SettingsForm.Settings.GetSetDefaultKeyValue(Key,value);
 end;
-
 {$ifdef mswindows}
+function GetConsoleWindow: HWND; stdcall; external kernel32 name 'GetConsoleWindow';
+
 procedure TForm1.ShowConsole(ShowIt: boolean);
+var
+  ProcessId : DWOrd;
 begin
   if ShowIt = ConsoleVisible then
     Exit;
-  if showit then //Console is hidden, get it back!
+  //Check if the console is ours (if it's not, do not hide it!!
+  GetWindowThreadProcessId(GetConsoleWindow,ProcessId);
+  if ProcessId = GetCurrentProcessId then
   begin
-    AllocConsole;
-    InitmDebug;//Make sure mDebugLn works correctly!
+    if showit then
+      ShowWindow(GetConsoleWindow,SW_SHOWNA)
+    else
+      ShowWindow(GetConsoleWindow,sw_hide);
+    ConsoleVisible:= ShowIt;
   end else
-  begin
-    FreeConsole;
-    FreemDebug;
-  end;
-  ConsoleVisible:= ShowIt;
+    Writeln('You cannot hide the window, since its not created by Simba');
 end;
 {$endif}
 
