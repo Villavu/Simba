@@ -11,6 +11,9 @@ uses
 
 
 type
+
+    { TSimbaPSEventExtension }
+
     TSimbaPSEventExtension = class(TVirtualSimbaExtension)
     public
         constructor Create(FileName: String);
@@ -31,6 +34,7 @@ type
        procedure RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
        procedure RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
        procedure RegisterMyMethods(Sender: TPSScript);
+       procedure OnPSExecute(Sender: TPSScript);
 
     end;
 
@@ -38,9 +42,10 @@ type
 implementation
 uses
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
-  uPSC_extctrls, //Compile libs
+  uPSC_extctrls,uPSC_menus, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
-  uPSR_extctrls //Runtime-libs
+  uPSR_extctrls,uPSR_menus, //Runtime-libs
+  testunit//Writeln
   ;
 
 procedure createf;
@@ -97,27 +102,27 @@ begin
   PSInstance.OnCompImport:=@RegisterPSCComponents;
   PSInstance.OnExecImport:=@RegisterPSRComponents;
   PSInstance.OnCompile:=@RegisterMyMethods;
+  PSInstance.OnExecute:=@OnPSExecute;
 
-  Writeln(Format('%s: Script: %s', [FileName, Self.Script.Text]));
+  formWritelnEx(Format('%s: Script: %s', [FileName, Self.Script.Text]));
 
   try
     FEnabled := PSInstance.Compile;
   finally
     if FEnabled then
-      writeln('Extension Enabled')
+      formWritelnEx('Extension Enabled')
     else
     begin
-      writeln('Extension Disabled - Did not compile');
+      formWritelnEx('Extension Disabled - Did not compile');
       OutputMessages;
     end;
   end;
 
   FEnabled := InitScript();
   if FEnabled then
-    writeln('It exists')
+    formWritelnEx('It exists')
   else
-    writeln('It does not exist - or something went wrong while executing it.');
-  //writeln(PSInstance.ExecuteFunction([], 'test'));
+    formWritelnEx('It does not exist - or something went wrong while executing it.');
 end;
 
 function TSimbaPSEventExtension.InitScript: Boolean;
@@ -137,6 +142,15 @@ end;
 procedure TSimbaPSEventExtension.RegisterMyMethods(Sender: TPSScript);
 begin
   Sender.AddFunction(@createf, 'procedure createf;');
+  Sender.AddFunction(@formWritelnEx,'procedure Writeln(s : string)');
+  Sender.AddRegisteredVariable('Simba','TForm');
+  Sender.AddRegisteredVariable('Simba_MainMenu','TMainMenu');
+end;
+
+procedure TSimbaPSEventExtension.OnPSExecute(Sender: TPSScript);
+begin
+  Sender.SetVarToInstance('simba',Form1);
+  Sender.SetVarToInstance('Simba_MainMenu',Form1.MainMenu);
 end;
 
 procedure TSimbaPSEventExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
@@ -148,6 +162,7 @@ begin
   SIRegister_stdctrls(x);
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
+  SIRegister_Menus(x);
 end;
 
 procedure TSimbaPSEventExtension.RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
@@ -159,6 +174,7 @@ begin
   RIRegister_stdctrls(x);
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
+  RIRegister_Menus(x);
 end;
 
 destructor TSimbaPSEventExtension.Destroy;
@@ -167,7 +183,7 @@ begin
     FreeAndNil(PSInstance);
 
 
-  WriteLn('Closing extension');
+  formWritelnEx('Closing extension');
 
   inherited;
 end;
@@ -185,14 +201,14 @@ begin
     begin
       b := True;
        with PSInstance.CompilerMessages[l] do
-         writeln(MessageToString);
+         formWritelnEx(MessageToString);
       {if OnError <> nil then
         with PSInstance.CompilerMessages[l] do
           HandleError(Row, Col, Pos, MessageToString,errCompile, ModuleName)
       else   }
-        writeln(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
+        formWritelnEx(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
     end else
-      Writeln(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
+      formWritelnEx(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
 
   end;
 end;

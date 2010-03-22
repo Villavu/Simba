@@ -3,6 +3,7 @@ unit mufasabase;
 {$mode objfpc}
 
 interface
+{$undefine mDebug}
 
 uses
   files, Classes, SysUtils{$ifdef MSWindows},windows{$endif};
@@ -30,18 +31,11 @@ end;
 procedure InitmDebug;
 begin
   CanDebug := true;
-  {$ifdef MSWindows}
-  IsConsole:= True;
-  SysInitStdIO;
-  {$endif}
 end;
 
 procedure FreemDebug;
 begin
   CanDebug := false;
-  {$ifdef MSWindows}
-  IsConsole := false;
-  {$endif}
 end;
 
 end.
