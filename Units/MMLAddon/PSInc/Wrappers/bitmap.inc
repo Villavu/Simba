@@ -276,7 +276,9 @@ begin;
 end;
 function FindBitmapMaskTolerance(mask: Integer; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; extdecl;
 begin;
+  {$ifdef mDebug}
   mDebugLn('Better be using FindMaskTolerance in combination with CreateMaskFromBitmap, more efficient.');
+  {$endif}
   with CurrThread.Client do
     result := MFinder.FindMaskTolerance(MBitmaps[mask].CreateTMask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
 end;
