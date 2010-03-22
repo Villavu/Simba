@@ -626,7 +626,7 @@ end;
 function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
 var
    n:Tnormarray;
-   ww, hh,i,j: integer;
+   ww, hh,i,j,nl: integer;
    font: TocrData;
    chars, shadows, thachars: T2DPointArray;
    t:Tpointarray;
@@ -655,9 +655,10 @@ begin
 
   lbset:=false;
   setlength(n, (font.width+1) * (font.height+1));
+  nl := high(n);
   for j := 0 to high(thachars) do
   begin
-    for i := 0 to high(n) do
+    for i := 0 to nl do
       n[i] := 0;
 
     t:= thachars[j];
@@ -684,7 +685,8 @@ begin
     }
     for i := 0 to high(thachars[j]) do
     begin
-      n[(thachars[j][i].x) + ((thachars[j][i].y) * font.width)] := 1;
+      if (thachars[j][i].x) + ((thachars[j][i].y) * font.width) <= nl then
+        n[(thachars[j][i].x) + ((thachars[j][i].y) * font.width)] := 1;
     end;
     result := result + GuessGlyph(n, font);
   end;
