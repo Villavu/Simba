@@ -5,46 +5,132 @@ unit extensionmanager;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,virtualextension,psextension,mufasabase,mufasatypes;
 
 type
-
+    TExtension = TVirtualSimbaExtension;
     (**
-      TExtensionManager holds a list of VirtualExtensions, and
+      TExtensionManager holds a list of TExtension, and
       has functions to easily handle hooks.
     *)
 
+    { TExtensionManager }
+
     TExtensionManager = class(TObject)
-    public
-           constructor Create;
-           destructor Destroy; override;
     private
-           Extensions: TList;
+      FOnChange: TNotifyEvent;
+      procedure SetOnchange(const AValue: TNotifyEvent);
     public
-           function HandleHook(HookName: String; Args: Array of Variant): Variant;
+      constructor Create;
+      destructor Destroy; override;
+    public
+      Extensions: TList;
+      StartDisabled : boolean;
+      property OnChange : TNotifyEvent read FOnChange write SetOnchange;
+      function GetExtensionIndex(Filename : string) : integer;
+      function LoadPSExtension(Filename : string) : boolean;
+      function LoadPSExtensionsDir(Directory,ext : string) : boolean;
+      function HandleHook(HookName: String; Args: Array of Variant): Variant;
     end;
 
-
+var
+  ExtManager : TExtensionManager;
 
 implementation
 uses
-  pseventextension, virtualextension;
+  TestUnit;
 
+procedure TExtensionManager.SetOnchange(const AValue: TNotifyEvent);
+var
+  i : integer;
+begin
+  for i := 0 to Extensions.Count - 1 do
+    TExtension(Extensions[i]).OnChange := AValue;;
+  FOnChange:=AValue;
+end;
 
 constructor TExtensionManager.Create;
 begin
+  inherited Create;
   Extensions := TList.Create;
+  StartDisabled := True;
 end;
 
 destructor TExtensionManager.Destroy;
 var
   i: Integer;
 begin
-  {
   for i := 0 to Extensions.Count - 1 do
-    TVirtualSimbaExtension(Extensions.Items[i]).Free;
-  }
+    TExtension(Extensions.Items[i]).Free;
   Extensions.Free;
+  inherited Destroy;
+end;
+
+function TExtensionManager.GetExtensionIndex(Filename: string): integer;
+var
+  i : integer;
+begin
+  for i := 0 to Extensions.Count - 1 do
+    if CompareText(TExtension(Extensions[i]).Filename,filename) = 0 then
+      exit(i);
+  result := -1;
+end;
+
+function TExtensionManager.LoadPSExtension(Filename: string): boolean;
+var
+  Ext : TExtension;
+begin
+  if GetExtensionIndex(filename) <> -1 then
+    exit(true);
+  Result := False;
+  try
+    Ext := TSimbaPSExtension.Create(filename,startdisabled);
+    result := TSimbaPSExtension(ext).Working;
+    Extensions.Add(ext);
+    ext.OnChange:= FOnChange;
+    if assigned(FOnChange) then
+      FOnChange(Self);
+  except
+    on e : exception do
+      formWritelnex(format('Error in LoadPSExtension(%s): %s',[FileName, e.message]));
+  end;
+end;
+
+function GetFiles(Path, Ext: string): TstringArray;
+var
+    SearchRec : TSearchRec;
+    c : integer;
+begin
+    c := 0;
+    if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
+    begin
+        repeat
+            inc(c);
+            SetLength(Result,c);
+            Result[c-1] := SearchRec.Name;
+        until FindNext(SearchRec) <> 0;
+        SysUtils.FindClose(SearchRec);
+    end;
+end;
+
+function TExtensionManager.LoadPSExtensionsDir(Directory,ext: string): boolean;
+var
+  Files : TstringArray;
+  i : integer;
+  tempevent : TNotifyEvent;
+begin
+  result := false;
+  if not DirectoryExists(directory) then
+    exit;
+  tempevent := FOnChange;
+  FOnChange := nil;
+  Directory := IncludeTrailingPathDelimiter(directory);
+  Files := GetFiles(Directory,ext);
+  for i := 0 to high(Files) do
+    result := result or LoadPSExtension(Directory + files[i]);
+  FOnChange := Tempevent;
+  if Assigned(FOnChange) then
+    FOnChange(self);
 end;
 
 // How do we return more than one result?
@@ -53,11 +139,13 @@ var
   i: Integer;
 begin
   for i := 0 to Extensions.Count -1 do
-    if TVirtualSimbaExtension(Extensions.Items[i]).HookExists(HookName) then
-      if TVirtualSimbaExtension(Extensions.Items[i]).ExecuteHook(HookName, Args, Result) <> 0 then
-      begin
-        // Not succesfull.
-      end;
+    with TExtension(Extensions[i]) do
+      if Enabled then
+        if HookExists(HookName) then
+          if ExecuteHook(HookName, Args, Result) <> 0 then
+          begin
+            // Not succesfull.
+          end;
 end;
 
 end.

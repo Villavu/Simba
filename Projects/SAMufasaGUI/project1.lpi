@@ -39,7 +39,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="35">
+    <Units Count="33">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -164,10 +164,9 @@
         <UnitName Value="internets"/>
       </Unit22>
       <Unit23>
-        <Filename Value="debugimageform.pas"/>
+        <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
         <IsPartOfProject Value="True"/>
-        <HasResources Value="True"/>
-        <UnitName Value="debugimageform"/>
+        <UnitName Value="mufasabase"/>
       </Unit23>
       <Unit24>
         <Filename Value="debugimage.pas"/>
@@ -208,31 +207,22 @@
         <UnitName Value="simbasettings"/>
       </Unit29>
       <Unit30>
-        <Filename Value="reportbug.pas"/>
+        <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/tpa.inc"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="FormReportBug"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="reportbug"/>
       </Unit30>
       <Unit31>
-        <Filename Value="../../Units/MMLAddon/newinternets.pas"/>
+        <Filename Value="extensionmanagergui.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="newinternets"/>
+        <ComponentName Value="ExtensionsForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="extensionmanagergui"/>
       </Unit31>
       <Unit32>
         <Filename Value="../../Units/MMLCore/libloader.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="libloader"/>
       </Unit32>
-      <Unit33>
-        <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/tpa.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit33>
-      <Unit34>
-        <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="mufasabase"/>
-      </Unit34>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
