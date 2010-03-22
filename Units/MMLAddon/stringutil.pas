@@ -20,6 +20,7 @@ function Implode(Glue: string;Pieces: TStringArray): string;
 var
   I, Len : integer;
 begin
+  Result := '';
   Len := high(Pieces);
   if (Len < 0) then
     exit;

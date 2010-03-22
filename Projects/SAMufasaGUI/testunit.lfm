@@ -1239,16 +1239,20 @@ object Form1: TForm1
     object MenuView: TMenuItem
       Caption = '&View'
       object MenuItemColourHistory: TMenuItem
-        Caption = 'View &Colour History'
+        Caption = '&Colour History'
         OnClick = MenuItemColourHistoryClick
       end
       object MenuItemDebugImage: TMenuItem
-        Caption = 'View &Debug Image'
+        Caption = '&Debug Image'
         OnClick = MenuItemDebugImageClick
       end
       object MenuItemFunctionList: TMenuItem
-        Caption = 'View &Function List'
+        Caption = '&Function List'
         OnClick = MenuItemFunctionListClick
+      end
+      object MenuItemExtensions: TMenuItem
+        Caption = '&Extensions'
+        OnClick = MenuItemExtensionsClick
       end
     end
     object MenuTools: TMenuItem

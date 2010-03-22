@@ -1,0 +1,74 @@
+object ExtensionsForm: TExtensionsForm
+  Left = 200
+  Height = 256
+  Top = 139
+  Width = 389
+  Caption = 'ExtensionsForm'
+  ClientHeight = 256
+  ClientWidth = 389
+  OnCreate = FormCreate
+  LCLVersion = '0.9.29'
+  object ExtensionsBox: TGroupBox
+    Left = 0
+    Height = 256
+    Top = 0
+    Width = 389
+    Align = alClient
+    Caption = 'Extensions'
+    ClientHeight = 238
+    ClientWidth = 385
+    TabOrder = 0
+    object ExtensionsList: TListView
+      Left = 6
+      Height = 192
+      Top = 8
+      Width = 371
+      Align = alCustom
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      Columns = <      
+        item
+          Caption = 'Extensions'
+          MinWidth = 90
+          Width = 90
+        end      
+        item
+          Caption = 'Name'
+          MinWidth = 75
+          Width = 150
+        end      
+        item
+          AutoSize = True
+          Caption = 'Version'
+          MinWidth = 60
+          Width = 60
+        end>
+      HideSelection = False
+      ItemIndex = -1
+      ReadOnly = True
+      RowSelect = True
+      TabOrder = 0
+      ViewStyle = vsReport
+      OnAdvancedCustomDrawItem = ExtensionsListAdvancedCustomDrawItem
+      OnSelectItem = ExtensionsListSelectItem
+    end
+    object Button: TButton
+      Left = 302
+      Height = 25
+      Top = 208
+      Width = 75
+      Caption = 'Refresh'
+      OnClick = ButtonClick
+      TabOrder = 1
+    end
+    object ExtEnabled: TCheckBox
+      Left = 6
+      Height = 17
+      Top = 208
+      Width = 72
+      Caption = 'ExtEnabled'
+      OnChange = ExtEnabledChange
+      TabOrder = 2
+      Visible = False
+    end
+  end
+end
