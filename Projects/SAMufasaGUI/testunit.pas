@@ -41,7 +41,7 @@ uses
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,
   stringutil,mufasatypesutil,mufasabase,
-  about, framefunctionlist, ocr, updateform, simbasettings, pseventextension,
+  about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
   extensionmanager;
 
 const
@@ -102,6 +102,7 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemExtensions: TMenuItem;
     MenuItemSettingsButton: TMenuItem;
     MenuItemDivider10: TMenuItem;
     MenuTools: TMenuItem;
@@ -251,6 +252,7 @@ type
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
+    procedure MenuItemExtensionsClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure dlgReplaceFind(Sender: TObject);
@@ -397,6 +399,7 @@ uses
    lclintf,
    syncobjs, // for the critical sections
    debugimage,
+   extensionmanagergui,
    colourhistory,
    math;
 
@@ -902,7 +905,7 @@ end;
 
 procedure TForm1.CreateDefaultEnvironment;
 var
-  IncludePath,FontPath,PluginsPath : string;
+  IncludePath,FontPath,PluginsPath,extensionsPath : string;
 begin
   CreateSetting('Settings/Updater/CheckForUpdates','True');
   CreateSetting('Settings/Updater/CheckEveryXMinutes','30');
@@ -949,6 +952,7 @@ begin
   includePath:= CreateSetting('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS));
   fontPath := CreateSetting('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS));
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
+  extensionsPath := CreateSetting('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
   CreateSetting('LastConfig/MainForm/Position','');
   CreateSetting('LastConfig/MainForm/State','Normal');
   {$ifdef MSWindows}
@@ -961,15 +965,18 @@ begin
     CreateDir(FontPath);
   if not DirectoryExists(PluginsPath) then
     CreateDir(PluginsPath);
+  if not DirectoryExists(extensionsPath) then
+    CreateDir(extensionsPath);
   SettingsForm.SettingsTreeView.Items.GetFirstNode.Expand(false);
   SettingsForm.SaveCurrent;
+  LoadFormSettings;
 end;
 
 procedure TForm1.LoadFormSettings;
 var
   str,str2 : string;
   Data : TStringArray;
-  i : integer;
+  i,ii : integer;
 begin
   str := LoadSettingDef('LastConfig/MainForm/Position','');
   if str <> '' then
@@ -1009,6 +1016,18 @@ begin
   else
     ShowConsole(false);
   {$endif}
+  str := LoadSettingDef('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
+  str2 := LoadSettingDef('Settings/Extensions/FileExtension','sex');
+  ExtManager.LoadPSExtensionsDir(str,str2);
+  str := LoadSettingDef('LastConfig/Extensions/EnabledExts','');
+  if str <> '' then
+  begin
+    data := Explode(';',str);
+    for i := 0 to high(data) do
+      for ii := 0 to ExtManager.Extensions.Count - 1 do
+        if data[i] = TVirtualSimbaExtension(ExtManager.Extensions[ii]).Filename then
+          TVirtualSimbaExtension(ExtManager.Extensions[ii]).Enabled := true;
+  end;
 end;
 
 procedure TForm1.SaveFormSettings;
@@ -1032,7 +1051,8 @@ begin
       for i := 0 to high(data) do //First entry should be the last-opened
         data[high(data) - i] := RecentFiles[i];
       SetKeyValue('LastConfig/MainForm/RecentFiles',implode(';',data));
-    end;
+    end else
+      SetKeyValue('LastConfig/MainForm/RecentFiles','');
     if MenuItemFunctionList.Checked then
       SetKeyValue('LastConfig/MainForm/FunctionListShown','True')
     else
@@ -1043,6 +1063,18 @@ begin
     else
       SetKeyValue('LastConfig/Console/Visible','false');
     {$endif}
+    if ExtManager.Extensions.Count > 0 then
+    begin
+      SetLength(data,0);
+      for i := 0 to ExtManager.Extensions.Count-1 do
+        if TVirtualSimbaExtension(ExtManager.Extensions[i]).Enabled then
+        begin
+          setlength(data,length(data)+1);
+          data[high(data)] :=  TVirtualSimbaExtension(ExtManager.Extensions[i]).FileName;
+        end;
+      SetKeyValue('LastConfig/Extensions/EnabledExts',Implode(';',data));
+    end else
+      SetKeyValue('LastConfig/Extensions/EnabledExts','');
     SaveToXML(SimbaSettingsFile);
   end;
 end;
@@ -1572,6 +1604,11 @@ begin
 //  StatusBar.Panels[2].Text:= '';
 end;
 
+procedure TForm1.MenuItemExtensionsClick(Sender: TObject);
+begin
+  ExtensionsForm.Show;
+end;
+
 procedure TForm1.MenuItemHandbookClick(Sender: TObject);
 begin
   OpenURL('http://vila.villavu.com/mufasa/mufasa_ps_handbook/');
@@ -1667,6 +1704,8 @@ begin
   TT_Console.Visible:= false;
   {$endif}
   InitmDebug;
+  ExtManager := TExtensionManager.Create;
+  ExtManager.StartDisabled:= True;
   if FileExists(SimbaSettingsFile) then
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
@@ -1704,6 +1743,7 @@ begin
   FirstRun := true;//Our next run is the first run.
   HandleParameters;
   TT_Update.Visible:= false;
+
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -1722,6 +1762,7 @@ begin
   SetLength(DebugStream, 0);
   RecentFiles.Free;
   DebugCriticalSection.Free;
+  ExtManager.free;
   {$ifdef MSWindows}
   if not UnRegisterHotkey(Self.Handle,0) then
     mDebugLn('Unable to unregister ctrl + alt + s as global hotkey');

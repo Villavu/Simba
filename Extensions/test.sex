@@ -1,0 +1,35 @@
+program new;
+
+procedure init;
+begin;
+  Writeln('init your extension here');
+end;
+
+procedure free;
+begin
+  Writeln('Free your extension here');
+end;
+
+procedure Attach;
+begin;
+  Writeln('Your extension has been enabled, do stuff here');
+end;
+
+Procedure Detach;
+begin
+  Writeln('Your extension has ben disabled, do stuff here');
+end;
+
+//Called to retrieve the name of your extension
+function GetName : string;
+begin;
+  result := 'Test Extension';
+end;
+
+//Called to retrieve the version of your extension
+function GetVersion : string;
+begin;
+  result := '1.1b';
+end;
+begin
+end.

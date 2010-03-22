@@ -1,0 +1,53 @@
+program new;
+var
+  MenuItem,MenuItem2 : TMenuItem;
+  Started : Boolean;
+ 
+procedure OnClick(sender : TObject);
+begin;
+  Writeln('Hey you clicked the test menu item!');
+end;
+procedure init;
+begin;
+  MenuItem := TMenuItem.Create(Simba_MainMenu);  
+  MenuItem.Caption := 'Test';
+  Simba_MainMenu.Items.Add(menuItem);
+  MenuItem2 := TMenuItem.Create(MenuItem);
+  MenuItem2.Caption := 'Test!';
+  MenuItem2.OnClick := @OnClick;
+  MenuItem.Add(MenuItem2);
+  Started := True;
+end;
+
+procedure Free;
+begin
+  if Started then
+  begin;
+    //MenuItem.Free; {Doesn't work in PS somehow}
+	//MenuItem2.Free;
+  end;
+end;
+
+procedure Attach;
+begin;
+  //Menuitem.Visible := True;
+end;
+
+Procedure Detach;
+begin
+  //Menuitem.Visible := False;
+end;
+
+//Called to retrieve the name of your extension
+function GetName : string;
+begin;
+  result := 'Add submenu';
+end;
+
+//Called to retrieve the version of your extension
+function GetVersion : string;
+begin;
+  result := '1.0';
+end;
+begin
+end.

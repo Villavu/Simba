@@ -33,7 +33,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, Forms, testunit, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform, simbasettings,
-libloader, mufasabase;
+libloader, mufasabase, extensionmanagergui;
 
 {$R project1.res}
 
@@ -46,6 +46,7 @@ begin
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TDebugImgForm, DebugImgForm);
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
+  Application.CreateForm(TExtensionsForm, ExtensionsForm);
 //  Application.CreateForm(TSettingsForm, SettingsForm); Done in FormCreate of MainForm
   Application.Run;
 end.
