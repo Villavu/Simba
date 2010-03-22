@@ -390,11 +390,11 @@ begin
     end;
     FreeSpots[FreeSpotsHigh] := Number;
   end;
-  //Just for testing purposes
+ { //Just for testing purposes
   if ToDestroy.BmpName = '' then
     TClient(Self.Client).Writeln(Format('BMP[%d] has been freed.',[number]))
   else
-    TClient(Self.Client).Writeln(Format('BMP[%s] has been freed.',[ToDestroy.BmpName]));
+    TClient(Self.Client).Writeln(Format('BMP[%s] has been freed.',[ToDestroy.BmpName]));    }
   ToDestroy.Free;
   BmpArray[number] := nil;
 end;
