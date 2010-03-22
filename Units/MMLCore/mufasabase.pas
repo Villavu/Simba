@@ -13,8 +13,6 @@ procedure InitmDebug;
 procedure FreemDebug;
 implementation
 
-uses
-  TestUnit;
 var
   CanDebug : boolean = false;
 
