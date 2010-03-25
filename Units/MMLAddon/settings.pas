@@ -77,9 +77,14 @@ type
     public
       function GetNodePath(Node: TTreeNode): String;
       function ListKeys(KeyName: String): TStringArray;
+
       function KeyExists(KeyName: String): Boolean;
       function IsKey(KeyName: String): Boolean;
       function IsDirectory(KeyName: String): Boolean;
+
+      function DeleteKey(KeyName: String): Boolean;
+      function DeleteSubKeys(KeyName: String): Boolean;
+
       procedure SetKeyValue(KeyName: String; KeyValue: String);
       function CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
       function GetKeyValue(KeyName: String): String;
@@ -362,6 +367,56 @@ begin
     exit(defVal);
   end;
   Exit(Res);
+end;
+
+function TMMLSettings.DeleteKey(KeyName: String): Boolean;
+var
+    Node, C: TTreeNode;
+begin
+  if not isKey(KeyName) and not IsDirectory(KeyName) then
+    exit(false);
+  Node := WalkToNode(KeyName);
+
+  if Node = nil then  // This should not happen
+    exit;
+
+  C := Node.GetFirstChild;
+  if C = nil then
+  begin
+    TSettingData(Node.Data).Free;
+    Node.Delete;
+    exit;
+  end;
+
+  While C <> nil do
+  begin
+    TSettingData(C.Data).Free;
+    C := C.GetNextSibling;
+  end;
+  Node.DeleteChildren;
+
+  TSettingData(Node.Data).Free;
+  Node.Delete;
+end;
+
+function TMMLSettings.DeleteSubKeys(KeyName: String): Boolean;
+var
+    Node, C: TTreeNode;
+begin
+  if not isKey(KeyName) and not IsDirectory(KeyName) then
+    exit(false);
+  Node := WalkToNode(KeyName);
+  if Node = nil then  // This should not happen
+    exit;
+
+  C := Node.GetFirstChild;
+  While C <> nil do
+  begin
+    TSettingData(C.Data).Free;
+    C := C.GetNextSibling;
+  end;
+
+  Node.DeleteChildren;
 end;
 
 {

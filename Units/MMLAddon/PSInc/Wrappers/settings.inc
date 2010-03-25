@@ -61,3 +61,18 @@ begin
     setlength(KeyReturn, 0);
 end;
 
+function SettingsDeleteKey(KeyName: String): Boolean;
+begin
+  if CurrThread.Sett <> nil then
+    Result := CurrThread.Sett.DeleteKey(KeyName)
+  else
+    result := False;
+end;
+
+function SettingsDeleteSubKeys(KeyName: String): Boolean;
+begin
+    if CurrThread.Sett <> nil then
+    Result := CurrThread.Sett.DeleteSubKeys(KeyName)
+  else
+    result := False;
+end;
