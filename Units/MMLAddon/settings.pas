@@ -118,6 +118,7 @@ end;
 
 constructor TMMLSettings.Create(aNodes: TTreeNodes);
 begin
+  inherited Create;
   Self.Nodes := aNodes;
 end;
 

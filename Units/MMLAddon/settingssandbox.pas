@@ -53,6 +53,7 @@ implementation
 
 constructor TMMLSettingsSandbox.Create(sett: TMMLSettings);
 begin
+  inherited;
   Self.ST := sett;
 end;
 
@@ -81,7 +82,6 @@ end;
 
 function TMMLSettingsSandbox.GetKeyValue(KeyName: String): String;
 begin
-  writeln('getkeyvalue');
   exit(ST.GetKeyValue(Prefix + KeyName))
 end;
 
