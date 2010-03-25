@@ -32,7 +32,8 @@ interface
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
-  bitmaps, plugins, libloader, dynlibs,internets,scriptproperties;
+  bitmaps, plugins, libloader, dynlibs,internets,scriptproperties,
+  settingssandbox;
 
 
 type
@@ -89,6 +90,7 @@ type
       Client : TClient;
       MInternet : TMInternet;
       StartTime : LongWord;
+      Sett: TMMLSettingsSandbox;
 
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       ErrorData : PErrorData; //We need this for thread-safety etc
@@ -104,6 +106,8 @@ type
       procedure SetDebugClear( clearProc : TClearDebugProc );
       procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
       procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
+      procedure SetSettings(S: TMMLSettingsSandbox);
+
       procedure OnThreadTerminate(Sender: TObject);
       procedure SetScript(script: string); virtual; abstract;
       procedure Execute; override; abstract;
@@ -281,6 +285,7 @@ begin
   OnError:= nil;
   Includes := TStringList.Create;
   Includes.CaseSensitive:= {$ifdef linux}true{$else}false{$endif};
+  Sett := nil;
 
   Prop := TScriptProperties.Create;
 
@@ -293,6 +298,7 @@ begin
   Client.Free;
   Includes.free;
   Prop.Free;
+  Sett.Free;
   inherited Destroy;
 end;
 
@@ -417,6 +423,11 @@ begin
   DebugImg := DebugImageInfo;
 end;
 
+procedure TMThread.SetSettings(S: TMMLSettingsSandbox);
+begin
+  Self.Sett := S;
+end;
+
 procedure TMThread.SetPaths(ScriptP, AppP,IncludeP,PluginP,FontP: string);
 begin
   AppPath:= AppP;
@@ -436,6 +447,7 @@ begin
 end;
 
 {$I PSInc/Wrappers/other.inc}
+{$I PSInc/Wrappers/settings.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 {$I PSInc/Wrappers/window.inc}
 {$I PSInc/Wrappers/tpa.inc}
@@ -461,8 +473,8 @@ end;
 
 procedure AddFunction( Ptr : Pointer; DeclStr : String);
 begin;
-  if c >= 300 then
-    raise exception.create('PSThread.LoadMethods: Exported more than 300 functions');
+  if c >= 400 then
+    raise exception.create('PSThread.LoadMethods: Exported more than 400 functions');
   Result[c].FuncDecl:= DeclStr;
   Result[c].FuncPtr:= Ptr;
   Result[c].Section:= CurrSection;
@@ -472,7 +484,7 @@ end;
 begin
   c := 0;
   CurrSection := 'Other';
-  SetLength(Result,300);
+  SetLength(Result,400);
 
   {$i PSInc/psexportedmethods.inc}
 
