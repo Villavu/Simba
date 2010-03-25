@@ -42,7 +42,7 @@ uses
   SynEditMarkupHighAll, LMessages, Buttons,
   stringutil,mufasatypesutil,mufasabase,
   about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
-  extensionmanager;
+  extensionmanager, settingssandbox;
 
 const
     SimbaVersion = 587;
@@ -1112,6 +1112,7 @@ var
   pluginspath: string;
   ScriptPath : string;
   UseCPascal: String;
+  Se: TMMLSettingsSandbox;
   loadFontsOnScriptStart: boolean;
 begin
   AppPath:= MainDir + DS;
@@ -1172,6 +1173,9 @@ begin
     if assigned(Self.OCR_Fonts) and loadFontsOnScriptStart then
       Thread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
 
+  Se := TMMLSettingsSandbox.Create(SettingsForm.Settings);
+  Se.SetPrefix('Scripts/');
+  Thread.SetSettings(Se);
 end;
 
 procedure TForm1.HandleParameters;

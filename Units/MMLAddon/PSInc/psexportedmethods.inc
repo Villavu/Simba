@@ -365,3 +365,10 @@ AddFunction(@ClearTPAFromTPAWrap,'procedure ClearTPAFromTPAWrap(arP, ClearPoints
 AddFunction(@FilterPointsLine,'procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);');
 AddFunction(@SameTPA,'function SameTPA(aTPA, bTPA: TPointArray): Boolean;');
 AddFunction(@TPAInATPA,'function TPAInATPA(TPA: TPointArray; InATPA: T2DPointArray; var Index: LongInt): Boolean;');
+
+SetCurrSection('Settings');
+AddFunction(@SettingsIsKey, 'function SettingsIsKey(KeyName: String): Boolean;');
+AddFunction(@SettingsIsDirectory, 'function SettingsIsDirectory(KeyName: String): Boolean;');
+AddFunction(@SettingsGetKeyValue, 'function SettingsGetKeyValue(KeyName: String): String;');
+AddFunction(@SettingsGetSetDefaultKeyValue, 'function SettingsGetSetDefaultKeyValue(KeyName, defVal: String): String;');
+AddFunction(@SettingsListKeys, 'procedure SettingsListKeys(KeyName: String; var KeyReturn: TStringArray);');
