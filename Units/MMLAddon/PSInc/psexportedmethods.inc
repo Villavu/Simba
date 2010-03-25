@@ -372,3 +372,6 @@ AddFunction(@SettingsIsDirectory, 'function SettingsIsDirectory(KeyName: String)
 AddFunction(@SettingsGetKeyValue, 'function SettingsGetKeyValue(KeyName: String): String;');
 AddFunction(@SettingsGetSetDefaultKeyValue, 'function SettingsGetSetDefaultKeyValue(KeyName, defVal: String): String;');
 AddFunction(@SettingsListKeys, 'procedure SettingsListKeys(KeyName: String; var KeyReturn: TStringArray);');
+
+AddFunction(@SettingsDeleteKey, 'function SettingsDeleteKey(KeyName: String): Boolean;');
+AddFunction(@SettingsDeleteSubKeys, 'function SettingsDeleteSubKeys(KeyName: String): Boolean;');
