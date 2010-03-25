@@ -39,13 +39,10 @@ end;
 
 function SettingsGetKeyValue(KeyName: String): String;
 begin
-  writeln('ZO');
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.GetKeyValue(KeyName)
   else
-  begin
-    result:='kanker';
-  end;
+    result:='';
 end;
 
 function SettingsGetSetDefaultKeyValue(KeyName, defVal: String): String;
