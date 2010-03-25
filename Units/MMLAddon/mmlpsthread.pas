@@ -179,7 +179,7 @@ implementation
 uses
   colour_conv,dtmutil,
   {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
-  uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
+  uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
   uPSC_extctrls, //Compile-libs
   uPSUtils,
   fontloader,
@@ -187,6 +187,7 @@ uses
   IniFiles,//Silly INI files
   stringutil, //String st00f
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
+  uPSR_menus,
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
@@ -652,6 +653,7 @@ begin
   SIRegister_stdctrls(x);
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
+  SIRegister_Menus(x);
   SIRegister_Mufasa(x);
   with x.AddFunction('procedure writeln;').decl do
     with AddParam do
@@ -690,6 +692,7 @@ begin
   RIRegister_stdctrls(x);
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
+  RIRegister_Menus(x);
   RIRegister_Mufasa(x);
   se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
   se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
