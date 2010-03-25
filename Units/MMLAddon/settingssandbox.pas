@@ -40,6 +40,9 @@ type
             function GetKeyValue(KeyName: String): String;
             function GetSetDefaultKeyValue(KeyName, defVal: String): String;
             function ListKeys(KeyName: String): TStringArray;
+
+            function DeleteKey(KeyName: String): Boolean;
+            function DeleteSubKeys(KeyName: String): Boolean;
       public
             function GetPrefix: String;
             procedure SetPrefix(s: String);
@@ -81,7 +84,6 @@ end;
 
 function TMMLSettingsSandbox.GetKeyValue(KeyName: String): String;
 begin
-  writeln('getkeyvalue');
   exit(ST.GetKeyValue(Prefix + KeyName))
 end;
 
@@ -98,6 +100,16 @@ end;
 function TMMLSettingsSandbox.IsDirectory(KeyName: String): Boolean;
 begin
   exit(ST.IsDirectory(Prefix + KeyName))
+end;
+
+function TMMLSettingsSandbox.DeleteKey(KeyName: String): Boolean;
+begin
+  exit(ST.DeleteKey(Prefix + KeyName));
+end;
+
+function TMMLSettingsSandbox.DeleteSubKeys(KeyName: String): Boolean;
+begin
+  exit(ST.DeleteSubKeys(Prefix + KeyName));
 end;
 
 end.
