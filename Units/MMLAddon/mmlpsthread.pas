@@ -298,6 +298,7 @@ begin
   Client.Free;
   Includes.free;
   Prop.Free;
+  Sett.Free;
   inherited Destroy;
 end;
 
