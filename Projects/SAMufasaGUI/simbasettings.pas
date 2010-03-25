@@ -86,7 +86,8 @@ var
 
 begin
   p := Mouse.CursorPos;
-  pp := TSettingsForm(Sender).ScreenToClient(p);
+
+  pp := TTreeView(Sender).ScreenToClient(p);
   N := SettingsTreeView.GetNodeAt(pp.x, pp.y);
   if N <> nil then
     if assigned(N.Data) then
