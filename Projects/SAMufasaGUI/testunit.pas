@@ -918,7 +918,7 @@ begin
   CreateSetting('Settings/MainForm/NormalSize','739:555');
   CreateSetting('Settings/FunctionList/ShowOnStart','True');
 
-  CreateSetting('Settings/Updater/RemoteVersion',
+  CreateSetting('Settings/Updater/RemoteLink',
                 {$IFDEF WINDOWS}
                   {$IFDEF CPUI386}
                   'http://simba.villavu.com/bin/Windows/x86/Stable/Simba.exe'

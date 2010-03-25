@@ -562,29 +562,26 @@ end;
 procedure TMMLSettings.SaveToXML(fileName: String);
 var
    XMLDoc: TXMLDocument;
-   Simba,Settings,LastConfig: TDOMNode;
-   SettingsTreeNode,LastConfigTreeNode : TTreeNode;
+   Simba,DOMNode: TDOMNode;
+   TreeNode : TTreeNode;
    C: Integer;
 begin
   XMLDoc := TXMLDocument.Create;
 
   C := 0;
-  SettingsTreeNode := WalkToNode('Settings');
-  LastConfigTreeNode := WalkToNode('LastConfig');
 
   Simba := XMLDoc.CreateElement('Simba');
   Simba := XMLDoc.AppendChild(Simba);
 
-  Settings := XMLDoc.CreateElement('Settings');
-  LastConfig := XMLDoc.CreateElement('LastConfig');
-  Simba.AppendChild(Settings);
-  Simba.AppendChild(LastConfig);
+  TreeNode := Nodes.GetFirstNode;
+  while TreeNode <> nil do
+  begin;
+    DOMNode := XMLDoc.CreateElement(TreeNode.Text);
+    Simba.AppendChild(DOMNode);
+    WalkTree(TreeNode, DOMNode, XMLDoc, C);
+    TreeNode := TreeNode.GetNextSibling;
+  end;
 
-  if SettingsTreeNode <> nil then
-    WalkTree(SettingsTreeNode, Settings, XMLDoc, C);
-
-  if LastConfigTreeNode <> nil then
-    WalkTree(LastConfigTreeNode, LastConfig, XMLDoc, C);
   try
     WriteXMLFile(XMLDoc, fileName);
   except
