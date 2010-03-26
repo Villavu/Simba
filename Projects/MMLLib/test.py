@@ -17,3 +17,23 @@ dll.getmousepos.restype = POINT
 b = dll.getmousepos()
 
 print b.x, b.y
+
+PPOINT = POINTER(POINT)
+
+dll.returnpoints.restype = PPOINT
+c = dll.returnpoints()
+
+print c[0].x
+
+dll.printpoints.restype = c_int
+dll.printpoints.argtypes = [PPOINT, c_int]
+
+d = dll.printpoints(c, 2)
+
+dll.hoi.restype = None
+dll.hoi.argtypes = [POINTER(c_int)]
+
+e = c_int(5)
+dll.hoi(byref(e))
+
+print e

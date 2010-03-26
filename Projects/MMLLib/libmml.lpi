@@ -42,12 +42,12 @@
         <Filename Value="libmml.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="libmml"/>
-        <CursorPos X="15" Y="24"/>
-        <TopLine Value="1"/>
+        <CursorPos X="45" Y="32"/>
+        <TopLine Value="20"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
         <IsVisibleTab Value="True"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="26"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -60,11 +60,11 @@
       <Unit2>
         <Filename Value="../../Units/MMLCore/client.pas"/>
         <UnitName Value="Client"/>
-        <CursorPos X="40" Y="33"/>
-        <TopLine Value="23"/>
-        <EditorIndex Value="4"/>
+        <CursorPos X="7" Y="50"/>
+        <TopLine Value="33"/>
+        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -72,9 +72,9 @@
         <UnitName Value="IOManager"/>
         <CursorPos X="59" Y="30"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
@@ -104,10 +104,12 @@
       <Unit7>
         <Filename Value="../../Units/MMLCore/os_linux.pas"/>
         <UnitName Value="os_linux"/>
-        <CursorPos X="21" Y="85"/>
-        <TopLine Value="68"/>
-        <IsVisibleTab Value="True"/>
-        <UsageCount Value="10"/>
+        <CursorPos X="75" Y="32"/>
+        <TopLine Value="56"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <UsageCount Value="12"/>
+        <Loaded Value="True"/>
       </Unit7>
       <Unit8>
         <Filename Value="../../../fpc/packages/x11/src/xlib.pp"/>
@@ -154,9 +156,9 @@
         <UnitName Value="bitmaps"/>
         <CursorPos X="29" Y="122"/>
         <TopLine Value="100"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit13>
       <Unit14>
@@ -164,9 +166,9 @@
         <UnitName Value="Graphics"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="23"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit14>
       <Unit15>
@@ -182,9 +184,9 @@
         <UnitName Value="mufasabase"/>
         <CursorPos X="2" Y="6"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit16>
       <Unit17>
@@ -200,9 +202,9 @@
         <UnitName Value="MufasaTypes"/>
         <CursorPos X="19" Y="72"/>
         <TopLine Value="55"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <WindowIndex Value="0"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit18>
       <Unit19>
@@ -318,119 +320,127 @@
         <UsageCount Value="10"/>
       </Unit32>
     </Units>
-    <JumpHistory Count="28" HistoryIndex="27">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="10" Column="1" TopLine="5"/>
+        <Caret Line="10" Column="6" TopLine="6"/>
       </Position1>
       <Position2>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="38" Column="1" TopLine="5"/>
+        <Caret Line="6" Column="10" TopLine="1"/>
       </Position2>
       <Position3>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="26" Column="12" TopLine="5"/>
+        <Caret Line="7" Column="12" TopLine="1"/>
       </Position3>
       <Position4>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="10" Column="20" TopLine="5"/>
+        <Caret Line="12" Column="11" TopLine="1"/>
       </Position4>
       <Position5>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="28" Column="65" TopLine="5"/>
+        <Caret Line="7" Column="15" TopLine="1"/>
       </Position5>
       <Position6>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="10" Column="6" TopLine="6"/>
+        <Caret Line="24" Column="76" TopLine="1"/>
       </Position6>
       <Position7>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="6" Column="10" TopLine="1"/>
+        <Caret Line="7" Column="8" TopLine="1"/>
       </Position7>
       <Position8>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="7" Column="12" TopLine="1"/>
+        <Caret Line="12" Column="11" TopLine="1"/>
       </Position8>
       <Position9>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="12" Column="11" TopLine="1"/>
+        <Caret Line="6" Column="15" TopLine="1"/>
       </Position9>
       <Position10>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="7" Column="15" TopLine="1"/>
+        <Caret Line="31" Column="25" TopLine="1"/>
       </Position10>
       <Position11>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="24" Column="76" TopLine="1"/>
+        <Caret Line="30" Column="2" TopLine="4"/>
       </Position11>
       <Position12>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="7" Column="8" TopLine="1"/>
+        <Caret Line="6" Column="17" TopLine="1"/>
       </Position12>
       <Position13>
-        <Filename Value="libmml.lpr"/>
-        <Caret Line="12" Column="11" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="30" Column="80" TopLine="12"/>
       </Position13>
       <Position14>
-        <Filename Value="libmml.lpr"/>
-        <Caret Line="6" Column="15" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position14>
       <Position15>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="31" Column="25" TopLine="1"/>
+        <Caret Line="6" Column="23" TopLine="1"/>
       </Position15>
       <Position16>
-        <Filename Value="libmml.lpr"/>
-        <Caret Line="30" Column="2" TopLine="4"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="122" Column="11" TopLine="105"/>
       </Position16>
       <Position17>
-        <Filename Value="libmml.lpr"/>
-        <Caret Line="6" Column="17" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/iomanager.pas"/>
+        <Caret Line="30" Column="59" TopLine="1"/>
       </Position17>
       <Position18>
         <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
-        <Caret Line="30" Column="80" TopLine="12"/>
+        <Caret Line="123" Column="7" TopLine="100"/>
       </Position18>
       <Position19>
-        <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="122" Column="29" TopLine="100"/>
       </Position19>
       <Position20>
-        <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
-        <Caret Line="1" Column="1" TopLine="12"/>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <Caret Line="33" Column="40" TopLine="23"/>
       </Position20>
       <Position21>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="6" Column="23" TopLine="1"/>
+        <Caret Line="6" Column="18" TopLine="1"/>
       </Position21>
       <Position22>
-        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
-        <Caret Line="122" Column="11" TopLine="105"/>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="19" Column="19" TopLine="1"/>
       </Position22>
       <Position23>
-        <Filename Value="../../Units/MMLCore/iomanager.pas"/>
-        <Caret Line="30" Column="59" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/os_linux.pas"/>
+        <Caret Line="85" Column="21" TopLine="68"/>
       </Position23>
       <Position24>
-        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
-        <Caret Line="123" Column="7" TopLine="100"/>
+        <Filename Value="../../Units/MMLCore/os_linux.pas"/>
+        <Caret Line="26" Column="79" TopLine="1"/>
       </Position24>
       <Position25>
-        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
-        <Caret Line="122" Column="29" TopLine="100"/>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="27" Column="32" TopLine="1"/>
       </Position25>
       <Position26>
-        <Filename Value="../../Units/MMLCore/client.pas"/>
-        <Caret Line="33" Column="40" TopLine="23"/>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="44" Column="42" TopLine="13"/>
       </Position26>
       <Position27>
-        <Filename Value="libmml.lpr"/>
-        <Caret Line="6" Column="18" TopLine="1"/>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <Caret Line="79" Column="5" TopLine="52"/>
       </Position27>
       <Position28>
         <Filename Value="libmml.lpr"/>
-        <Caret Line="19" Column="19" TopLine="1"/>
+        <Caret Line="44" Column="65" TopLine="26"/>
       </Position28>
+      <Position29>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="6" Column="51" TopLine="1"/>
+      </Position29>
+      <Position30>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="44" Column="57" TopLine="26"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -439,7 +449,7 @@
       <Filename Value="libmml"/>
     </Target>
     <SearchPaths>
-      <OtherUnitFiles Value="$(ProjPath)/;$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/Linux/"/>
+      <OtherUnitFiles Value="$(ProjPath)/;$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/Linux/;$(LazarusDir)/components/mouseandkeyinput/"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       <LCLWidgetType Value="gtk2"/>
     </SearchPaths>
