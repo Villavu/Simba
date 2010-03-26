@@ -25,6 +25,9 @@ object ScriptFrame: TScriptFrame
     OnDragDrop = SynEditDragDrop
     OnDragOver = SynEditDragOver
     OnKeyDown = SynEditKeyDown
+    OnKeyPress = SynEditKeyPress
+    OnClickLink = SynEditClickLink
+    OnMouseLink = SynEditMouseLink
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item

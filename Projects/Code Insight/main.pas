@@ -426,15 +426,15 @@ begin
     begin
       if (d.Owner is TciProcedureDeclaration) and (not (d is TciProcedureDeclaration)) then
         d := d.Owner;
-      with TParamHint.Create(Self) do
-      begin
+      //with TParamHint.Create(Self) do
+      //begin
       if (TciProcedureDeclaration(d).SynParams <> '') then
-        //txtDebug.Lines.Add(TciProcedureDeclaration(d).SynParams)
-        Caption := TciProcedureDeclaration(d).SynParams
+        txtDebug.Lines.Add(TciProcedureDeclaration(d).SynParams)
+        //Caption := TciProcedureDeclaration(d).SynParams
       else
-        //txtDebug.Lines.Add('<no parameters expected>');
-        Caption := '<no parameters expected>';
-      end;
+        txtDebug.Lines.Add('<no parameters expected>');
+        //Caption := '<no parameters expected>';
+      //end;
     end;
   finally
     FreeAndNil(ms);
