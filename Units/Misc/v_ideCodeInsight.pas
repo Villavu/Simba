@@ -664,30 +664,23 @@ function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return:
 
   function DoGetVarType(s: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
 
-    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase): Boolean;
+    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean = True): Boolean;
     var
       i: Integer;
     begin
       Result := False;
       if Item.GetVarType(s, Decl, Return) then
-      begin
-        Result := True;
-        Exit;
-      end;
+        Exit(True);
 
       for i := High(Item.Includes) downto Low(Item.Includes) do
         if CheckIt(s, Item.Includes[i], Decl, Return) then
-        begin
-          Result := True;
-          Break;
-        end;
+          Exit(True);
 
+      if (not CheckCore) then
+        Exit;
       for i := High(CoreBuffer) downto Low(CoreBuffer) do
-        if CheckIt(s, CoreBuffer[i], Decl, Return) then
-        begin
-          Result := True;
-          Break;
-        end;
+        if CheckIt(s, CoreBuffer[i], Decl, Return, False) then
+          Exit(True);
     end;
 
   begin
@@ -696,30 +689,23 @@ function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return:
 
   function DoGetFuncType(FuncName, FuncClass: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
 
-    function CheckIt(FuncName, FuncClass: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase): Boolean;
+    function CheckIt(FuncName, FuncClass: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean = True): Boolean;
     var
       i: Integer;
     begin
       Result := False;
       if Item.GetFuncType(FuncName, FuncClass, Decl, Return) then
-      begin
-        Result := True;
-        Exit;
-      end;
+        Exit(True);
 
       for i := High(Item.Includes) downto Low(Item.Includes) do
         if CheckIt(FuncName, FuncClass, Item.Includes[i], Decl, Return) then
-        begin
-          Result := True;
-          Break;
-        end;
+          Exit(True);
 
+      if (not CheckCore) then
+        Exit;
       for i := High(CoreBuffer) downto Low(CoreBuffer) do
-        if CheckIt(FuncName, FuncClass, CoreBuffer[i], Decl, Return) then
-        begin
-          Result := True;
-          Break;
-        end;
+        if CheckIt(FuncName, FuncClass, CoreBuffer[i], Decl, Return, False) then
+          Exit(True);
     end;
 
   begin
@@ -728,30 +714,23 @@ function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return:
 
   function DoFindStruct(s: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
 
-    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
+    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer; const CheckCore: Boolean = True): Boolean;
     var
       i: Integer;
     begin
       Result := False;
       if Item.FindStruct(s, Decl, Return, ArrayCount) then
-      begin
-        Result := True;
-        Exit;
-      end;
+        Exit(True);
 
       for i := High(Item.Includes) downto Low(Item.Includes) do
         if CheckIt(s, Item.Includes[i], Decl, Return, ArrayCount) then
-        begin
-          Result := True;
-          Break;
-        end;
+          Exit(True);
 
+      if (not CheckCore) then
+        Exit;
       for i := High(CoreBuffer) downto Low(CoreBuffer) do
-        if CheckIt(s, CoreBuffer[i], Decl, Return, ArrayCount) then
-        begin
-          Result := True;
-          Break;
-        end;
+        if CheckIt(s, CoreBuffer[i], Decl, Return, ArrayCount, False) then
+          Exit(True);
     end;
 
   begin
