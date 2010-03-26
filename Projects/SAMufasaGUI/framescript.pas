@@ -28,7 +28,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,   SynEditMarkupHighAll,
-   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls;
+   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls,
+  v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, SynEditHighlighter;
 const
    ecCodeCompletion = ecUserFirst;
 type
@@ -46,11 +47,16 @@ type
     SynEdit: TSynEdit;
     SynFreePascalSyn1: TSynFreePascalSyn;
     procedure SynEditChange(Sender: TObject);
+    procedure SynEditClickLink(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
     procedure SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
       State: TDragState; var Accept: Boolean);
     procedure SynEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
       );
+    procedure SynEditKeyPress(Sender: TObject; var Key: char);
+    procedure SynEditMouseLink(Sender: TObject; X, Y: Integer;
+      var AllowMouseLink: Boolean);
     procedure SynEditProcessCommand(Sender: TObject;
       var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure SynEditProcessUserCommand(Sender: TObject;
@@ -81,9 +87,42 @@ type
     { public declarations }
   end;
 
+  function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1): string;
+
 implementation
 uses
   TestUnit, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
+
+function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1): string;
+var
+  s: string;
+  l: Integer;
+begin
+  Result := '';
+  if (Start = -1) then
+    Start := e.CaretX;
+  sp := Start - 1;
+  ep := Start - 1;
+  s := e.Lines[e.CaretY - 1];
+  l := Length(s);
+  //if (sp > l) then
+  //  Dec(sp);
+
+  if (sp < 1) or (sp > l) or (not (s[sp] in ['a'..'z', 'A'..'Z', '0'..'9', '_'])) then
+  begin
+    Inc(sp);
+    Inc(ep);
+    if (sp < 1) or (sp > l) or (not (s[sp] in ['a'..'z', 'A'..'Z', '0'..'9', '_'])) then
+      Exit('');
+  end;
+
+  while (sp > 1) and (sp <= l) and (s[sp - 1] in ['a'..'z', 'A'..'Z', '0'..'9', '_']) do
+    Dec(sp);
+  while (ep >= 1) and (ep < l) and (s[ep + 1] in ['a'..'z', 'A'..'Z', '0'..'9', '_']) do
+    Inc(ep);
+
+  Result := Copy(s, sp, ep - sp + 1);
+end;
 
 { TScriptFrame }
 
@@ -95,6 +134,44 @@ begin
     ScriptChanged:= True;
     Form1.Caption:= Format(WindowTitle,[ScriptName + '*']);
     OwnerSheet.Caption:=ScriptName + '*';
+  end;
+end;
+
+procedure TScriptFrame.SynEditClickLink(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  mp: TCodeInsight;
+  ms: TMemoryStream;
+  d: TDeclaration;
+  sp, ep: Integer;
+begin
+  mp := TCodeInsight.Create;
+  mp.OnMessage := @Form1.OnCCMessage;
+  mp.OnFindInclude := @Form1.OnCCFindInclude;
+
+  ms := TMemoryStream.Create;
+  SynEdit.Lines.SaveToStream(ms);
+
+  try
+    SynEdit.GetWordBoundsAtRowCol(SynEdit.CaretXY, sp, ep);
+    mp.Run(ms);
+    mp.Position := SynEdit.SelStart + (ep - SynEdit.CaretX) - 1;
+
+    d := mp.FindVarBase(mp.GetExpressionAtPos);
+    if (d <> nil) then
+    begin
+      if (TCodeInsight(d.Parser).FileName <> mp.FileName) then
+        mDebugLn('Declared in "' + TCodeInsight(d.Parser).FileName  + '" at ' + IntToStr(d.StartPos))
+      else
+      begin
+        SynEdit.SelStart := d.StartPos + 1;
+        SynEdit.SelEnd := d.StartPos + Length(TrimRight(d.RawText)) + 1;
+      end;
+    end;
+
+  finally
+    FreeAndNil(ms);
+    FreeAndNil(mp);
   end;
 end;
 
@@ -125,6 +202,22 @@ begin
     Form1.ActionFindNextExecute(Sender);
     key := 0;
   end;
+
+  Form1.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
+end;
+
+procedure TScriptFrame.SynEditKeyPress(Sender: TObject; var Key: char);
+begin
+   Form1.CodeCompletionForm.HandleKeyPress(Sender, Key);
+end;
+
+procedure TScriptFrame.SynEditMouseLink(Sender: TObject; X, Y: Integer;
+  var AllowMouseLink: Boolean);
+var
+  s: string;
+  Attri: TSynHighlighterAttributes;
+begin
+  AllowMouseLink := SynEdit.GetHighlighterAttriAtRowCol(Point(X, Y), s, Attri) and (Attri.Name = 'Identifier');
 end;
 
 procedure TScriptFrame.SynEditProcessCommand(Sender: TObject;
@@ -144,14 +237,22 @@ end;
 
 procedure TScriptFrame.SynEditProcessUserCommand(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
-var
+{var
   LineText,SearchText : string;
   Caret : TPoint;
-  i,endI : integer;
+  i,endI : integer;}
+var
+  mp: TCodeInsight;
+  ms: TMemoryStream;
+  ItemList, InsertList: TStringList;
+  sp, ep: Integer;
+  p: TPoint;
+  s, Filter: string;
+  Attri: TSynHighlighterAttributes;
 begin
-  if Command = ecCodeCompletion then
+  if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or (Attri.Name = 'Identifier')) then
   begin
-    form1.FunctionListShown(True);
+    {form1.FunctionListShown(True);
     with form1.frmFunctionList do
       if editSearchList.CanFocus then
       begin;
@@ -187,8 +288,63 @@ begin
         SynEdit.SelectedColor.Foreground:= clBlack;
         SynEdit.SelectedColor.Background:= clWhite;
         Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
+      end;}
+    mp := TCodeInsight.Create;
+    mp.OnMessage := @Form1.OnCCMessage;
+    mp.OnFindInclude := @Form1.OnCCFindInclude;
+
+    ms := TMemoryStream.Create;
+    ItemList := TStringList.Create;
+    InsertList := TStringList.Create;
+    InsertList.Sorted := True;
+
+    Synedit.Lines.SaveToStream(ms);
+
+    try
+      Filter := WordAtCaret(Synedit, sp, ep);
+      Form1.CodeCompletionStart := Point(sp, Synedit.CaretY);
+      mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
+
+      s := mp.GetExpressionAtPos;
+      if (s <> '') then
+      begin
+        sp := LastDelimiter('.', s);
+        if (sp > 0) then
+          Delete(s, sp, Length(s) - sp + 1)
+        else
+          s := '';
       end;
+
+      mp.FillSynCompletionProposal(ItemList, InsertList, s);
+      p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
+      p.y := p.y + SynEdit.LineHeight;
+      Form1.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
+    finally
+      FreeAndNil(ms);
+      FreeAndNil(mp);
+      ItemList.Free;
+      InsertList.Free;
+    end;
   end;
+
+  if Form1.CodeCompletionForm.Visible then
+    case Command of
+      ecDeleteChar, ecDeleteWord, ecDeleteEOL:
+        begin
+          if (SynEdit.CaretY = Form1.CodeCompletionStart.y) then
+          begin
+            //e.GetWordBoundsAtRowCol(acp_start, sp, ep);
+            s := WordAtCaret(SynEdit, sp, ep, Form1.CodeCompletionStart.x);
+            if (SynEdit.CaretX >= Form1.CodeCompletionStart.x) and (SynEdit.CaretX <= ep) then
+            begin
+              Form1.CodeCompletionForm.ListBox.Filter := s;
+              Exit;
+            end;
+          end;
+
+          Form1.CodeCompletionForm.Hide;
+        end;
+    end;
 end;
 
 procedure TScriptFrame.SynEditSpecialLineColors(Sender: TObject;
@@ -204,6 +360,9 @@ end;
 
 procedure TScriptFrame.SynEditStatusChange(Sender: TObject;
   Changes: TSynStatusChanges);
+var
+  sp, ep: Integer;
+  s: string;
 begin
   {$IFDEF UpdateEditButtons}
   if scSelection in changes then
@@ -213,8 +372,25 @@ begin
     form1.TT_Paste.Enabled:= SynEdit.CanPaste;
   end;
   {$ENDIF}
-end;
 
+  if Form1.CodeCompletionForm.Visible then
+    if (scAll in Changes) or (scTopLine in Changes) then
+      Form1.CodeCompletionForm.Visible := False
+    else if (scCaretX in Changes) or (scCaretY in Changes) or (scSelection in Changes) or (scModified in Changes) then
+    begin
+      if (SynEdit.CaretY = Form1.CodeCompletionStart.y) then
+      begin
+        s := WordAtCaret(SynEdit, sp, ep, Form1.CodeCompletionStart.x);
+        if (SynEdit.CaretX >= Form1.CodeCompletionStart.x) and (SynEdit.CaretX - 1 <= ep) then
+        begin
+          Form1.CodeCompletionForm.ListBox.Filter := s;
+          Exit;
+        end;
+      end;
+
+      Form1.CodeCompletionForm.Hide;
+    end;
+end;
 
 procedure TScriptFrame.undo;
 begin

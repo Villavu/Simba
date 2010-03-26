@@ -42,7 +42,7 @@ uses
   SynEditMarkupHighAll, LMessages, Buttons,
   stringutil,mufasatypesutil,mufasabase,
   about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
-  extensionmanager, settingssandbox;
+  extensionmanager, settingssandbox, v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
     SimbaVersion = 587;
@@ -314,6 +314,10 @@ type
     procedure TT_UpdateClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
     procedure UpdateTimerCheck(Sender: TObject);
+
+    procedure OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
+    procedure OnCompleteCode(Str: string);
+    function OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
   private
     PopupTab : integer;
     RecentFileItems : array of TMenuItem;
@@ -330,6 +334,8 @@ type
     SearchString : string;
     CurrScript : TScriptFrame; //The current scriptframe
     CurrTab    : TMufasaTab; //The current TMufasaTab
+    CodeCompletionForm: TAutoCompletePopup;
+    CodeCompletionStart: TPoint;
     Tabs : TList;
     Manager: TIOManager;
     OCR_Fonts: TMOCR;
@@ -427,8 +433,41 @@ end;
 var
    DebugCriticalSection: syncobjs.TCriticalSection;
 
-procedure TForm1.ProcessDebugStream(Sender: TObject);
+procedure TForm1.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
+begin
+  if (Typ = meNotSupported) then
+    Exit;
+  if (Sender is TmwSimplePasPar) then
+    if (TmwSimplePasPar(Sender).Lexer.TokenID = tok_DONE) then
+      Exit;
+  mDebugLn('ERROR: '+Format('%d:%d %s', [Y + 1, X, Msg])+' in '+TCodeInsight(Sender).FileName);
+end;
 
+procedure TForm1.OnCompleteCode(Str: string);
+var
+  sp, ep: Integer;
+  s: string;
+begin
+  if (Str <> '') then
+  begin
+    s := WordAtCaret(CurrScript.SynEdit, sp, ep);
+    if (s <> '') then
+    begin
+      CurrScript.SynEdit.SelStart := CurrScript.SynEdit.SelStart + (sp - CurrScript.SynEdit.CaretX);
+      CurrScript.SynEdit.SelEnd := CurrScript.SynEdit.SelStart + (ep - CurrScript.SynEdit.CaretX) + 1;
+      CurrScript.SynEdit.SelText := Str;
+    end
+    else
+      CurrScript.SynEdit.InsertTextAtCaret(Str);
+  end;
+end;
+
+function TForm1.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
+begin
+  Result := False;
+end;
+
+procedure TForm1.ProcessDebugStream(Sender: TObject);
 begin
   if length(DebugStream) = 0 then
     Exit;
@@ -1482,6 +1521,7 @@ end;
 
 procedure TForm1.StopCodeCompletion;
 begin
+  CodeCompletionForm.Hide;
   if frmFunctionList.InCodeCompletion then
     with CurrScript,frmFunctionList do
     begin;
@@ -1699,6 +1739,11 @@ begin
   MainDir:= ExtractFileDir(Application.ExeName);
   RecentFiles := TStringList.Create;
   SimbaSettingsFile := MainDir + DS + 'settings.xml';
+
+  //AutoCompletionStart := Point(-1, -1);
+  CodeCompletionForm := TAutoCompletePopup.Create(Self);
+  CodeCompletionForm.InsertProc := @OnCompleteCode;
+
   {$ifdef MSWindows}
   ConsoleVisible := True;
   PrevWndProc := Windows.WNDPROC(GetWindowLong(self.handle,GWL_WNDPROC));
@@ -1748,7 +1793,6 @@ begin
   FirstRun := true;//Our next run is the first run.
   HandleParameters;
   TT_Update.Visible:= false;
-
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);

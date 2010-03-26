@@ -269,8 +269,8 @@ begin
   else
     fDeclarationAtPos  := nil;
 
-  if (fDeclarationatPos is TciJunk) and (fDeclarationatPos.Owner <> nil) {and (fDeclarationatPos.EndPos = fPos)} then
-    fDeclarationAtPos := fDeclarationatPos.Owner;
+  (*if (fDeclarationatPos is TciJunk) and (fDeclarationatPos.Owner <> nil) {and (fDeclarationatPos.EndPos = fPos)} then
+    fDeclarationAtPos := fDeclarationatPos.Owner;*)
 
   if (fDeclarationAtPos <> nil) and (not (fDeclarationAtPos is TciJunk)) then
   begin

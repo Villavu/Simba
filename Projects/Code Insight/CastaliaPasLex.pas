@@ -424,8 +424,8 @@ begin
     end;
     J := AnsiString(UpCase(I))[1];
     case I of
-	  'a'..'z', 'A'..'Z', '_': mHashTable[I] := Ord(J) - 64;
-    '0'..'9': mHashTable[I] := Ord(J) - 47;
+      'a'..'z', 'A'..'Z', '_': mHashTable[I] := Ord(J) - 64;
+      '0'..'9': mHashTable[I] := Ord(J) - 47;
     else mHashTable[Char(I)] := 0;
     end;
   end;
@@ -2238,7 +2238,7 @@ end;
 
 function TmwBasePasLex.GetIsJunk: Boolean;
 begin
-  result := IsTokenIDJunk(FTokenID) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull)  and (TokenID <> tok_DONE));
+  result := IsTokenIDJunk(FTokenID) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull) and (TokenID <> tok_DONE));
 //  Result := fTokenID in [tokAnsiComment, tokBorComment, tokCRLF, tokCRLFCo, tokSlashesComment, tokSpace]; //XM 20001210
 end;
 

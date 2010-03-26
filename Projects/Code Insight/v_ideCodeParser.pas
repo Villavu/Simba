@@ -1024,7 +1024,7 @@ begin
   Lexer.Next;
   if Lexer.IsJunk and (not InDeclaration(TciJunk)) then
   begin
-    if (not InDeclaration(nil)) then
+    {if (not InDeclaration(nil)) then
       PushStack(TciJunk);
     while (Lexer.IsJunk) do
     begin
@@ -1044,6 +1044,18 @@ begin
           fStack.Top.Free;
         fStack.Pop;
       end;
+    end;}
+
+    while Lexer.IsJunk do
+    begin
+      if (Lexer.TokenID in [tokAnsiComment, tokBorComment, tokSlashesComment]) then
+      begin
+        if (not InDeclaration(TciJunk)) then
+          PushStack(TciJunk);
+      end
+      else if InDeclaration(TciJunk) then
+        PopStack;
+      Lexer.Next;
     end;
   end;
 end;
