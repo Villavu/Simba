@@ -174,7 +174,10 @@ implementation
 
   constructor TWindow.Create(target: Hwnd);
   begin
-    self.create; //Call the other create
+    inherited Create;
+    self.buffer:= TBitmap.Create;
+    self.buffer.PixelFormat:= pf32bit;
+    keyinput:= TKeyInput.Create;
     self.handle:= target;
     self.dc:= GetWindowDC(target);
   end;

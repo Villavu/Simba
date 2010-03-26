@@ -56,6 +56,7 @@ implementation
 
 constructor TMMLSettingsSandbox.Create(sett: TMMLSettings);
 begin
+  inherited;
   Self.ST := sett;
 end;
 
