@@ -275,6 +275,7 @@ end;
 {***implementation TMThread***}
 constructor TMThread.Create(CreateSuspended: boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 begin
+  inherited Create(CreateSuspended);
   Client := TClient.Create(plugin_dir);
   MInternet := TMInternet.Create(Client);
   SyncInfo:= TheSyncInfo;
@@ -288,8 +289,6 @@ begin
   Sett := nil;
 
   Prop := TScriptProperties.Create;
-
-  inherited Create(CreateSuspended);
 end;
 
 destructor TMThread.Destroy;
@@ -298,7 +297,8 @@ begin
   Client.Free;
   Includes.free;
   Prop.Free;
-  Sett.Free;
+  if Sett <> nil then
+    Sett.Free;
   inherited Destroy;
 end;
 
@@ -514,6 +514,7 @@ constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo;
 var
   I : integer;
 begin
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
   PSScript.OnNeedFile := @RequireFile;
@@ -525,7 +526,6 @@ begin
   PSScript.OnFindUnknownFile:=@PSScriptFindUnknownFile;
   // Set some defines
   {$I PSInc/psdefines.inc}
-  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
   for i := 0 to high(ExportedMethods) do
     if pos('Writeln',exportedmethods[i].FuncDecl) > 0 then
     begin
@@ -806,10 +806,10 @@ constructor TCPThread.Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; 
 var
   plugin_idx: integer;
 begin
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
   if libcpascal = 0 then
     LoadCPascal(plugin_dir);
   instance:= interp_init(@Interpreter_Precompiler, @Interpreter_ErrorHandler);
-  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 end;
 
 destructor TCPThread.Destroy;

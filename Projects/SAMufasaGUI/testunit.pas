@@ -1687,8 +1687,9 @@ begin
     if not DeleteTab(i,true) then
     begin;
       CloseAction := caNone;
-      exit
+      exit;
     end;
+  FreeAndNil(ExtManager);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -1758,6 +1759,8 @@ begin
     TMufasaTab(Tabs[i]).Free;
   for i := 0 to high(RecentFileItems) do
     RecentFileItems[i].Free;
+  if ExtManager <> nil then
+    ExtManager.free;
   Tabs.free;
   Selector.Free;
   Picker.Free;
@@ -1766,7 +1769,6 @@ begin
   SetLength(DebugStream, 0);
   RecentFiles.Free;
   DebugCriticalSection.Free;
-  ExtManager.free;
   {$ifdef MSWindows}
   if not UnRegisterHotkey(Self.Handle,0) then
     mDebugLn('Unable to unregister ctrl + alt + s as global hotkey');
