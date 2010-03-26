@@ -1,0 +1,479 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <Flags>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <UseDefaultCompilerOptions Value="True"/>
+      </Flags>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <Language Value=""/>
+      <CharSet Value=""/>
+      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="33">
+      <Unit0>
+        <Filename Value="libmml.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="libmml"/>
+        <CursorPos X="15" Y="24"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="../../../fpc/rtl/inc/systemh.inc"/>
+        <CursorPos X="36" Y="282"/>
+        <TopLine Value="259"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <UnitName Value="Client"/>
+        <CursorPos X="40" Y="33"/>
+        <TopLine Value="23"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../../Units/MMLCore/iomanager.pas"/>
+        <UnitName Value="IOManager"/>
+        <CursorPos X="59" Y="30"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../../../lazarus/lcl/fileutil.pas"/>
+        <UnitName Value="FileUtil"/>
+        <CursorPos X="69" Y="243"/>
+        <TopLine Value="220"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="../../../lazarus/lcl/lclproc.pas"/>
+        <UnitName Value="LCLProc"/>
+        <CursorPos X="76" Y="43"/>
+        <TopLine Value="18"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../../../lazarus/lcl/widgetset/wslclclasses.pp"/>
+        <UnitName Value="WSLCLClasses"/>
+        <CursorPos X="61" Y="18"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="../../Units/MMLCore/os_linux.pas"/>
+        <UnitName Value="os_linux"/>
+        <CursorPos X="21" Y="85"/>
+        <TopLine Value="68"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="../../../fpc/packages/x11/src/xlib.pp"/>
+        <UnitName Value="xlib"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="../../../lazarus/lcl/interfaces/nogui/interfaces.pp"/>
+        <UnitName Value="Interfaces"/>
+        <CursorPos X="19" Y="7"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="../../../fpc/packages/fcl-base/src/syncobjs.pp"/>
+        <UnitName Value="syncobjs"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="146"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="../../../fpc/rtl/unix/sysutils.pp"/>
+        <UnitName Value="sysutils"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="../../Units/MMLCore/finder.pas"/>
+        <UnitName Value="finder"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <UnitName Value="bitmaps"/>
+        <CursorPos X="29" Y="122"/>
+        <TopLine Value="100"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="../../../lazarus/lcl/graphics.pp"/>
+        <UnitName Value="Graphics"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="23"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="../../../lazarus/lcl/graphtype.pp"/>
+        <UnitName Value="GraphType"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
+        <UnitName Value="mufasabase"/>
+        <CursorPos X="2" Y="6"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="5"/>
+        <WindowIndex Value="0"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="../../Units/Linux/xtest.pas"/>
+        <UnitName Value="XTest"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
+        <UnitName Value="MufasaTypes"/>
+        <CursorPos X="19" Y="72"/>
+        <TopLine Value="55"/>
+        <EditorIndex Value="6"/>
+        <WindowIndex Value="0"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="../../../lazarus/components/mouseandkeyinput/xkeyinput.pas"/>
+        <UnitName Value="XKeyInput"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="../../../fpc/packages/x11/src/keysym.pp"/>
+        <UnitName Value="keysym"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="../../../lazarus/lcl/lcltype.pp"/>
+        <UnitName Value="LCLType"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="34"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="../../../lazarus/lcl/lclintf.pas"/>
+        <UnitName Value="LCLIntf"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="34"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="../../Units/MMLCore/libloader.pas"/>
+        <UnitName Value="libloader"/>
+        <CursorPos X="57" Y="48"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="../../Units/Linux/xinput.pas"/>
+        <UnitName Value="xinput"/>
+        <CursorPos X="71" Y="780"/>
+        <TopLine Value="763"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="../../../fpc/packages/x11/src/x.pp"/>
+        <UnitName Value="x"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="387"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="../../Units/MMLCore/tpa.pas"/>
+        <UnitName Value="tpa"/>
+        <CursorPos X="3" Y="206"/>
+        <TopLine Value="12"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="../../Units/MMLCore/ocr.pas"/>
+        <UnitName Value="ocr"/>
+        <CursorPos X="33" Y="33"/>
+        <TopLine Value="63"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="../../../lazarus/lcl/widgetset/wsreferences.pp"/>
+        <UnitName Value="WSReferences"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="../../Units/MMLCore/mufasatypesutil.pas"/>
+        <UnitName Value="mufasatypesutil"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="41"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="../../Units/MMLCore/colour_conv.pas"/>
+        <UnitName Value="colour_conv"/>
+        <CursorPos X="6" Y="33"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="../../../fpc/rtl/objpas/math.pp"/>
+        <UnitName Value="math"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="23"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="../../Units/MMLCore/dtm.pas"/>
+        <UnitName Value="dtm"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="10"/>
+      </Unit32>
+    </Units>
+    <JumpHistory Count="28" HistoryIndex="27">
+      <Position1>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="10" Column="1" TopLine="5"/>
+      </Position1>
+      <Position2>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="38" Column="1" TopLine="5"/>
+      </Position2>
+      <Position3>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="26" Column="12" TopLine="5"/>
+      </Position3>
+      <Position4>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="10" Column="20" TopLine="5"/>
+      </Position4>
+      <Position5>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="28" Column="65" TopLine="5"/>
+      </Position5>
+      <Position6>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="10" Column="6" TopLine="6"/>
+      </Position6>
+      <Position7>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="6" Column="10" TopLine="1"/>
+      </Position7>
+      <Position8>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="7" Column="12" TopLine="1"/>
+      </Position8>
+      <Position9>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="12" Column="11" TopLine="1"/>
+      </Position9>
+      <Position10>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="7" Column="15" TopLine="1"/>
+      </Position10>
+      <Position11>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="24" Column="76" TopLine="1"/>
+      </Position11>
+      <Position12>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="7" Column="8" TopLine="1"/>
+      </Position12>
+      <Position13>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="12" Column="11" TopLine="1"/>
+      </Position13>
+      <Position14>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="6" Column="15" TopLine="1"/>
+      </Position14>
+      <Position15>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="31" Column="25" TopLine="1"/>
+      </Position15>
+      <Position16>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="30" Column="2" TopLine="4"/>
+      </Position16>
+      <Position17>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="6" Column="17" TopLine="1"/>
+      </Position17>
+      <Position18>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="30" Column="80" TopLine="12"/>
+      </Position18>
+      <Position19>
+        <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position19>
+      <Position20>
+        <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
+        <Caret Line="1" Column="1" TopLine="12"/>
+      </Position20>
+      <Position21>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="6" Column="23" TopLine="1"/>
+      </Position21>
+      <Position22>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="122" Column="11" TopLine="105"/>
+      </Position22>
+      <Position23>
+        <Filename Value="../../Units/MMLCore/iomanager.pas"/>
+        <Caret Line="30" Column="59" TopLine="1"/>
+      </Position23>
+      <Position24>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="123" Column="7" TopLine="100"/>
+      </Position24>
+      <Position25>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <Caret Line="122" Column="29" TopLine="100"/>
+      </Position25>
+      <Position26>
+        <Filename Value="../../Units/MMLCore/client.pas"/>
+        <Caret Line="33" Column="40" TopLine="23"/>
+      </Position26>
+      <Position27>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="6" Column="18" TopLine="1"/>
+      </Position27>
+      <Position28>
+        <Filename Value="libmml.lpr"/>
+        <Caret Line="19" Column="19" TopLine="1"/>
+      </Position28>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <Target>
+      <Filename Value="libmml"/>
+    </Target>
+    <SearchPaths>
+      <OtherUnitFiles Value="$(ProjPath)/;$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/Linux/"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      <LCLWidgetType Value="gtk2"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <UseAnsiStrings Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <Optimizations>
+        <OptimizationLevel Value="2"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Options>
+        <ExecutableType Value="Library"/>
+      </Options>
+    </Linking>
+    <Other>
+      <CustomOptions Value="-fPIC"/>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
