@@ -3,7 +3,10 @@
 A component wrapper for IFPS3, including debugging support.
 
 }
-//{$I PascalScript.inc}
+
+{$IFDEF FPC}
+  {$H+}
+{$ENDIF}
 
 unit PSDump;
 
@@ -53,7 +56,7 @@ end;
 
 procedure CEException(Sender: TPSExec; ExError: TIFError; const ExParam: tbtstring; ExObject: TObject; ProcNo, Position: Cardinal);
 begin
-  if (@TPSScriptExtension(Sender.ID).FOnException <> nil) then
+  if (TPSScriptExtension(Sender.ID).FOnException <> nil) then
     TPSScriptExtension(Sender.ID).FOnException(Sender, ExError, ExParam, ExObject, ProcNo, Position);
 end;
 
@@ -61,7 +64,7 @@ end;
 
 function TPSScriptExtension.Compile: Boolean;
 begin
-  Result := inherited Compile;  
+  Result := inherited Compile;
   FNeedCompiling := not result;
 end;
 
@@ -126,7 +129,7 @@ procedure TPSScriptExtension.GetCodeProps;
     ci: TPSDelphiClassItem;
     i, ii: Integer;
     s: string;
-    Def: Cardinal;
+    Def: PtrUInt;
     ListFree: Boolean;
   begin
     Result := '';
@@ -164,7 +167,8 @@ procedure TPSScriptExtension.GetCodeProps;
           s := s + 'Index';
           if (ii > 0) then
             s := s + IntToStr(ii + 1);
-          s := s + ': ' + TypeToString(ci.Decl.Params[ii].aType);
+          if (ii = ci.Decl.ParamCount - 1) then
+            s := s + ': ' + TypeToString(ci.Decl.Params[ii].aType);
         end; 
         if (s <> '') then
           s := '['+s+']';
@@ -315,9 +319,9 @@ end;
 function TPSScriptExtension.DoBeforeCleanup(Sender: TObject; aComp: TPSPascalCompiler): Boolean;
 begin
   Result := True;
-  if (fItems <> nil) then 
+  if (fItems <> nil) then
     GetCodeProps;
-  if (@FOnBeforeCleanUp <> nil) then
+  if (FOnBeforeCleanUp <> nil) then
     Result := FOnBeforeCleanUp(Sender, aComp);
 end;
 
@@ -330,7 +334,7 @@ end;
 procedure TPSScriptExtension.DoScriptChange(sender: TObject);
 begin
   FNeedCompiling := True;
-  if (@FOnScriptChange <> nil) then
+  if (FOnScriptChange <> nil) then
     FOnScriptChange(sender);
 end;
 
