@@ -42,7 +42,8 @@ uses
   SynEditMarkupHighAll, LMessages, Buttons,
   stringutil,mufasatypesutil,mufasabase,
   about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
-  extensionmanager, settingssandbox, v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
+  extensionmanager, settingssandbox, v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes,
+  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, uPSComponent;
 
 const
     SimbaVersion = 587;
@@ -1733,6 +1734,48 @@ begin
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
+
+  procedure CCFillCore;
+  var
+    t: TMThread;
+    a: TPSScriptExtension;
+    b: TStringList;
+    ms: TMemoryStream;
+  begin
+    InitalizeTMThread(t);
+    if (not (t is TPSThread)) then
+      Exit;
+    a := TPSScriptExtension.Create(Self);
+    b := TStringList.Create;
+    ms := TMemoryStream.Create;
+
+    try
+
+      with TPSThread(t).PSScript do
+      begin
+        a.OnCompile := OnCompile;
+        a.OnCompImport := OnCompImport;
+        a.OnExecImport := OnExecImport;
+      end;
+
+      a.GetValueDefs(b);
+
+      SetLength(CoreBuffer, 1);
+      CoreBuffer[0] := TCodeInsight.Create;
+      with CoreBuffer[0] do
+      begin
+        OnMessage := @OnCCMessage;
+        b.SaveToStream(ms);
+        Run(ms);
+      end;
+    finally
+      ms.Free;
+      b.Free;
+      a.Free;
+      t.Free;
+    end;
+  end;
+
 begin
   Randomize;
   DecimalSeparator := '.';
@@ -1793,6 +1836,8 @@ begin
   FirstRun := true;//Our next run is the first run.
   HandleParameters;
   TT_Update.Visible:= false;
+
+  CCFillCore;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
