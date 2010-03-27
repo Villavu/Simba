@@ -119,7 +119,7 @@ begin;
   else
   begin
     for i := 0 to high(Dirs) do
-      if DirectoryExists(dirs[i]) then
+      if (Dirs[i] <> '') and DirectoryExists(dirs[i]) then
         if fileexists(dirs[i] + filename) then
         begin
           result := dirs[i] + filename;
