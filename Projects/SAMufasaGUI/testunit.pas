@@ -42,8 +42,8 @@ uses
   SynEditMarkupHighAll, LMessages, Buttons,
   stringutil,mufasatypesutil,mufasabase,
   about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
-  extensionmanager, settingssandbox, v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes,
-  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, uPSComponent;
+  extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
+  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
     SimbaVersion = 587;
@@ -471,7 +471,11 @@ function TForm1.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
 var
   Temp : string;
 begin
-  Temp := FindFile(filename,[MainDir+DS,IncludePath]);
+  Temp := ExtractFileDir(CurrTab.ScriptFrame.ScriptFile);
+  if (Temp <> '') then
+    Temp := Temp + DS;
+
+  Temp := FindFile(filename,[MainDir+DS,IncludePath, Temp]);
   if temp <> '' then
   begin;
     filename := temp;
