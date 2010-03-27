@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 from ctypes import *
+import platform
 
-dll = CDLL('./libmml.so')
+if platform.system() == 'Windows':
+    dll = CDLL('./libmml.dll')
+    print 'On Windows'
+else:
+    dll = CDLL('./libmml.so')
 dll.test.restype = c_char_p
 a = dll.test()
 print a
@@ -10,10 +15,11 @@ dll.init.restype = None
 dll.init()
 
 class POINT(Structure):
-		_fields_ = [('x', c_int),
-					('y', c_int)]
+        _fields_ = [('x', c_int),
+                    ('y', c_int)]
 
 dll.getmousepos.restype = POINT
+dll.getmousepos.argtypes = None
 b = dll.getmousepos()
 
 print b.x, b.y
@@ -30,8 +36,8 @@ dll.printpoints.argtypes = [PPOINT, c_int]
 
 d = dll.printpoints(c, 2)
 
-dll.hoi.restype = None
-dll.hoi.argtypes = [POINTER(c_int)]
+#dll.hoi.restype = None
+#dll.hoi.argtypes = [POINTER(c_int)]
 
 e = c_int(5)
 dll.hoi(byref(e))
