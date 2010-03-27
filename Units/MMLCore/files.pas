@@ -66,6 +66,7 @@ type
     // We don't need one per object. :-)
     function GetFiles(Path, Ext: string): TStringArray;
     function GetDirectories(Path: string): TstringArray;
+    function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
 
 implementation
 uses
@@ -106,6 +107,24 @@ begin
        Result[c-1] := SearchRec.Name;
     until FindNext(SearchRec) <> 0;
     SysUtils.FindClose(SearchRec);
+  end;
+end;
+
+function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
+var
+  i : integer;
+begin;
+  if fileexists(filename) then
+    result := filename
+  else
+  begin
+    for i := 0 to high(Dirs) do
+      if DirectoryExists(dirs[i]) then
+        if fileexists(dirs[i] + filename) then
+        begin
+          result := dirs[i] + filename;
+          exit;
+        end;
   end;
 end;
 

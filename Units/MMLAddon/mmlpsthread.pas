@@ -192,6 +192,7 @@ uses
   stringutil, //String st00f
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_menus,
+  files,
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
@@ -323,24 +324,6 @@ end;
 
 procedure TMThread.AddMethod(meth: TExpMethod);
 begin
-end;
-
-function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
-var
-  i : integer;
-begin;
-  if fileexists(filename) then
-    result := filename
-  else
-  begin
-    for i := 0 to high(Dirs) do
-      if DirectoryExists(dirs[i]) then
-        if fileexists(dirs[i] + filename) then
-        begin
-          result := dirs[i] + filename;
-          exit;
-        end;
-  end;
 end;
 
 function TMThread.LoadFile(ParentFile : string; var filename, contents: string): boolean;
