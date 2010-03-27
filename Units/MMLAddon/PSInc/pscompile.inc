@@ -21,11 +21,11 @@
     PSCompile.inc for the Mufasa Macro Library
 }
 
-Sender.Comp.AddConstantN('AppPath','string').SetString(CurrThread.AppPath);
-Sender.Comp.AddConstantN('ScriptPath','string').SetString(CurrThread.ScriptPath);
-Sender.Comp.AddConstantN('IncludePath','string').SetString(CurrThread.IncludePath);
-Sender.Comp.AddConstantN('PluginPath','string').SetString(CurrThread.PluginPath);
-Sender.Comp.AddConstantN('FontPath','string').SetString(CurrThread.FontPath);
+Sender.Comp.AddConstantN('AppPath','string').SetString(Self.AppPath);
+Sender.Comp.AddConstantN('ScriptPath','string').SetString(Self.ScriptPath);
+Sender.Comp.AddConstantN('IncludePath','string').SetString(Self.IncludePath);
+Sender.Comp.AddConstantN('PluginPath','string').SetString(Self.PluginPath);
+Sender.Comp.AddConstantN('FontPath','string').SetString(Self.FontPath);
 Sender.Comp.AddTypeS('TReplaceFlag', '(rfReplaceAll, rfIgnoreCase)');
 Sender.Comp.AddTypeS('TReplaceFlags','set of TReplaceFlag');
 Sender.Comp.AddTypeS('StrExtr','(Numbers, Letters, Others);');
