@@ -23,12 +23,12 @@ begin
   C:=TCLient.Create('');
 end;
 
-function getmousepos: tpoint;
+function getmousepos: tpoint;    cdecl;
 begin
   C.IOManager.GetMousePos(result.x,result.y);
 end;
 
-function returnpoints: PTPoint;
+function returnpoints: PTPoint;  cdecl;
 
 begin
   result := AllocMem(sizeof(TPoint) * 2);
@@ -38,19 +38,19 @@ begin
   result[1].y := 30;
 end;
 
-function printpoints(b: PTPoint; len: integer): boolean;
+function printpoints(b: PTPoint; len: integer): boolean;   cdecl;
 var i:integer;
 begin
   for i := 0 to len - 1 do
     writeln('X, Y: (' + inttostr(b[i].x) + ', ' + inttostr(b[i].y) + ')');
 end;
 
-procedure hoi(var i: integer);
+procedure hoi(var i: integer);  cdecl;
 begin
   i := i + 1;
 end;
 
-function givedtm:PPDTM;
+function givedtm:PPDTM;   cdecl;
 var
   dtm: PPDTM;
 begin
