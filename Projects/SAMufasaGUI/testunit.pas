@@ -326,7 +326,9 @@ type
     FirstRun : boolean;//Only show the warnings the first run (path not existing one's)
     SearchStart : TPoint;
     LastTab  : integer;
+    function GetIncludePath: String;
     function GetScriptState: TScriptState;
+    procedure SetIncludePath(const AValue: String);
     procedure SetScriptState(const State: TScriptState);
     function LoadSettingDef(Key : string; Def : string) : string;
     function CreateSetting(Key : string; Value : string) : string;
@@ -374,6 +376,7 @@ type
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
+    property IncludePath : String read GetIncludePath write SetIncludePath;
   end;
 
   procedure ClearDebug;
@@ -406,6 +409,7 @@ uses
    lclintf,
    syncobjs, // for the critical sections
    debugimage,
+   files,
    extensionmanagergui,
    colourhistory,
    math;
@@ -464,8 +468,16 @@ begin
 end;
 
 function TForm1.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
+var
+  Temp : string;
 begin
-  Result := False;
+  Temp := FindFile(filename,[MainDir+DS,IncludePath]);
+  if temp <> '' then
+  begin;
+    filename := temp;
+    result := true;
+  end else
+    result := false;
 end;
 
 procedure TForm1.ProcessDebugStream(Sender: TObject);
@@ -945,7 +957,7 @@ end;
 
 procedure TForm1.CreateDefaultEnvironment;
 var
-  IncludePath,FontPath,PluginsPath,extensionsPath : string;
+  FontPath,PluginsPath,extensionsPath : string;
 begin
   CreateSetting('Settings/Updater/CheckForUpdates','True');
   CreateSetting('Settings/Updater/CheckEveryXMinutes','30');
@@ -989,7 +1001,6 @@ begin
                 {$ENDIF}
                 );
   {Creates the paths and returns the path}
-  includePath:= CreateSetting('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS));
   fontPath := CreateSetting('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS));
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
   extensionsPath := CreateSetting('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
@@ -1147,7 +1158,6 @@ procedure TForm1.InitalizeTMThread(var Thread: TMThread);
 var
   DbgImgInfo : TDbgImgInfo;
   fontPath: String;
-  includePath : string;
   AppPath : string;
   pluginspath: string;
   ScriptPath : string;
@@ -1156,7 +1166,6 @@ var
   loadFontsOnScriptStart: boolean;
 begin
   AppPath:= MainDir + DS;
-  includePath:= IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
   fontPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS)));
   PluginsPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS)));
   CurrScript.ScriptErrorLine:= -1;
@@ -1757,7 +1766,6 @@ procedure TForm1.FormCreate(Sender: TObject);
         a.OnCompImport := OnCompImport;
         a.OnExecImport := OnExecImport;
       end;
-
       a.GetValueDefs(b);
 
       SetLength(CoreBuffer, 1);
@@ -2237,6 +2245,16 @@ end;
 function TForm1.GetScriptState: TScriptState;
 begin
   result := CurrScript.FScriptState;
+end;
+
+function TForm1.GetIncludePath: String;
+begin
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
+end;
+
+procedure TForm1.SetIncludePath(const AValue: String);
+begin
+  CreateSetting('Settings/Includes/Path',AValue);
 end;
 
 procedure TForm1.SetScriptState(const State: TScriptState);
