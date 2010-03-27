@@ -4,11 +4,11 @@ A component wrapper for IFPS3, including debugging support.
 
 }
 
+unit PSDump;
+
 {$IFDEF FPC}
   {$H+}
 {$ENDIF}
-
-unit PSDump;
 
 interface
 
