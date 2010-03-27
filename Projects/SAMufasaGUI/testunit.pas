@@ -1750,14 +1750,12 @@ procedure TForm1.FormCreate(Sender: TObject);
     ms := TMemoryStream.Create;
 
     try
-
       with TPSThread(t).PSScript do
       begin
         a.OnCompile := OnCompile;
         a.OnCompImport := OnCompImport;
         a.OnExecImport := OnExecImport;
       end;
-
       a.GetValueDefs(b);
 
       SetLength(CoreBuffer, 1);
