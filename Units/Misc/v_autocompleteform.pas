@@ -2,13 +2,11 @@ unit v_AutoCompleteForm;
 
 interface
 
-{$IFDEF FPC}
-{$mode objfpc}{$H+}
-{$ENDIF}
+{$I ValistusDefines.inc}
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, ExtCtrls,
+  StdCtrls, ExtCtrls,  SynEdit, SynEditKeyCmds,
 
   {$IFDEF FPC}
   LMessages,
@@ -33,6 +31,9 @@ type
     procedure setFilter(Filter: string);
 
     procedure DblClick; override;
+    {$IFDEF ccFORMCAPTION}
+    procedure DoSelectionChange(User: Boolean); override;
+    {$ENDIF}
     procedure DrawItem(Index: Integer; ARect: TRect; State: TOwnerDrawState); override;
     {$IFDEF FPC}
     procedure WMEraseBkgnd(var message: TLMEraseBkgnd); message LM_ERASEBKGND;
@@ -231,10 +232,10 @@ procedure TAutoCompleteListBox.WMEraseBkgnd(var message: TLMEraseBkgnd);
 procedure TAutoCompleteListBox.WMEraseBkgnd(var message: TWMEraseBkgnd);
 {$ENDIF}
 begin
-  if (Count < Round(Height / ItemHeight)) then
+  if (Count < Round(ClientHeight / ItemHeight)) then
   begin
     Canvas.Brush.Color := clYellow;
-    FillRect(message.DC, Rect(0, Count * ItemHeight, Width, Height), HBRUSH({$IFDEF FPC}Brush.Reference.Handle{$ELSE}Parent.Brush.Handle{$ENDIF}));
+    FillRect(message.DC, Rect(0, Count * ItemHeight, ClientWidth, ClientHeight), HBRUSH({$IFDEF FPC}Brush.Reference.Handle{$ELSE}Parent.Brush.Handle{$ENDIF}));
   end;
 
   message.Result := 1;
@@ -253,7 +254,7 @@ begin
     ItemIndex := TopIndex
   else
   begin
-    c := Round(Height / ItemHeight) - 1;
+    c := Round(ClientHeight / ItemHeight) - 1;
     if (ItemIndex > TopIndex + c) then
       ItemIndex := TopIndex + c;
   end;
@@ -276,7 +277,10 @@ begin
   begin
     Redirect.SetFocus;
     Application.ProcessMessages;
-    SendMessage(Redirect.Handle, CN_Char, message.wParam, message.lParam);
+    if (Redirect is TSynEdit) then
+      TSynEdit(Redirect).CommandProcessor(ecChar, TUTF8Char(Chr(TLMChar(message).CharCode)), nil)
+    else
+      SendMessage(Redirect.Handle, CN_Char, message.wParam, message.lParam);
   end;
 end;
 
@@ -287,6 +291,14 @@ begin
   if (Owner is TForm) then
     TForm(Owner).Hide;
 end;
+
+{$IFDEF ccFORMCAPTION}
+procedure TAutoCompleteListBox.DoSelectionChange(User: Boolean);
+begin
+  if (Owner is TForm) then
+    TForm(Owner).Caption := getInsert;
+end;
+{$ENDIF}
 
 procedure TAutoCompleteListBox.DrawItem(Index: Integer; ARect: TRect; State: TOwnerDrawState);
 var
@@ -416,8 +428,8 @@ end;
 
 procedure TAutoCompletePopup.DoShow;
 begin
-  //ClientHeight := Max(Min(Round(ClientHeight / l.ItemHeight), l.Count), 1) * l.ItemHeight;
-  //ClientHeight := Max(Round(ClientHeight / l.ItemHeight), 1) * l.ItemHeight;
+  //ClientHeight := Max(Min(Round(l.ClientHeight / l.ItemHeight), l.Count), 1) * l.ItemHeight;
+  //ClientHeight := Max(Round(l.ClientHeight / l.ItemHeight), 1) * l.ItemHeight;
 end;
 
 function TAutoCompletePopup.getRedirect: TWinControl;
@@ -460,15 +472,31 @@ begin
   ShowInTaskBar := stNever;
   {$ENDIF}
 
-  BorderStyle := bsSizeToolWin;
-  BorderIcons := [];
-  SetWindowLong(Handle, GWL_STYLE, GetWindowLong(Handle, GWL_STYLE) and (not WS_CAPTION) or WS_BORDER);
-  Height := Height - GetSystemMetrics(SM_CYCAPTION);
+  {$IFDEF ccFORMCAPTION}
+    {$IFDEF ccFORMRESIZE}
+      BorderStyle := bsSizeToolWin;
+      BorderIcons := [biSystemMenu];
+    {$ELSE}
+      BorderStyle := bsToolWindow;
+      BorderIcons := [biSystemMenu];
+    {$ENDIF}
+  {$ELSE}
+    {$IFDEF ccFORMRESIZE}
+      BorderStyle := bsSizeToolWin;
+      BorderIcons := [];
+      SetWindowLong(Handle, GWL_STYLE, GetWindowLong(Handle, GWL_STYLE) and (not WS_CAPTION) or WS_BORDER);
+      Height := Height - GetSystemMetrics(SM_CYCAPTION);
+    {$ELSE}
+      BorderStyle := bsNone;
+      BorderIcons := [];
+      l.BorderStyle := bsSingle;
+    {$ENDIF}
+  {$ENDIF}
 
   DoubleBuffered := True;
   ControlStyle := ControlStyle + [csOpaque];
 
-  ClientHeight := Round(ClientHeight / l.ItemHeight) * l.ItemHeight;
+  ClientHeight := (Round(ClientHeight / l.ItemHeight) * l.ItemHeight);
   Constraints.MinHeight := l.ItemHeight;
   Constraints.MinWidth := 100;
 end;
