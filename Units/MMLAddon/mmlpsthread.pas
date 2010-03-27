@@ -591,22 +591,22 @@ begin
   {$I PSInc/pscompile.inc}
   Fonts := Client.MOCR.GetFonts;
   for i := fonts.count - 1 downto 0 do
-    PSScript.Comp.AddConstantN(Fonts[i].Name,'string').SetString(Fonts[i].Name);
+    Sender.Comp.AddConstantN(Fonts[i].Name,'string').SetString(Fonts[i].Name);
 
   for i := high(PluginsToLoad) downto 0 do
     for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
-      PSScript.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncPtr,
+      Sender.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncPtr,
                            PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncStr,
                            Muf_Conv_to_PS_Conv(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncConv));
 
   for i := 0 to high(VirtualKeys) do
-    PSScript.Comp.AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
+    Sender.Comp.AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
   // Here we add all the Consts/Types to the engine.
 
   //Export all the methods
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
-      PSScript.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl,
+      Sender.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl,
                              {$ifdef PS_StdCall}cdStdCall{$else}cdRegister {$endif});
 end;
 
