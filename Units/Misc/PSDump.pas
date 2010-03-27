@@ -247,7 +247,7 @@ procedure TPSScriptExtension.GetCodeProps;
       btSingle: Result := FloatToStr(v.tsingle);          
       btDouble: Result := FloatToStr(v.tdouble);         
       btExtended: Result := FloatToStr(v.textended);        
-      btString: Result := tbtString(v.tstring);                                      
+      btString: Result := MakeString(tbtString(v.tstring));
     {$IFNDEF PS_NOINT64}
       btS64: Result := IntToStr(v.ts64);            
     {$ENDIF}
