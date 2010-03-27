@@ -175,7 +175,7 @@ procedure TPSScriptExtension.GetCodeProps;
         Result := Result + 'property ' + ci.OrgName + s;
         if (ci.Decl.Result <> nil) then
           Result := Result + ': '+ TypeToString(ci.Decl.Result);
-        if (Cardinal(ci) = Def) then
+        if (PtrUInt(ci) = Def) then
           Result := Result + '; default';
         Result := Result + '; ';
       end;
