@@ -36,8 +36,8 @@ dll.printpoints.argtypes = [PPOINT, c_int]
 
 d = dll.printpoints(c, 2)
 
-#dll.hoi.restype = None
-#dll.hoi.argtypes = [POINTER(c_int)]
+dll.hoi.restype = None
+dll.hoi.argtypes = [POINTER(c_int)]
 
 e = c_int(5)
 dll.hoi(byref(e))
