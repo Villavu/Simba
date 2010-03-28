@@ -475,11 +475,7 @@ function TForm1.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
 var
   Temp : string;
 begin
-  Temp := ExtractFileDir(CurrTab.ScriptFrame.ScriptFile);
-  if (Temp <> '') then
-    Temp := Temp + DS;
-
-  Temp := FindFile(filename,[MainDir+DS,IncludePath, Temp]);
+  Temp := FindFile(filename,[MainDir+DS,IncludePath]);
   if temp <> '' then
   begin;
     filename := temp;
