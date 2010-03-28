@@ -104,18 +104,19 @@ type
     function GetRealType: TDeclaration; overload;
   end;
 
-  { TciProcedureDeclaration }
+  TciProcedureName = class(TDeclaration);
 
+  { TciProcedureDeclaration }
   TciProcedureDeclaration = class(TDeclaration)
   private
     fProcType: string;
     fParams: string;
     fSynParams: string;
-    fName : string;
+    fName : TciProcedureName;
     fCleanDecl : string;
 
     function GetCleanDeclaration: string;
-    function GetName: string;
+    function GetName: TciProcedureName;
     function GetProcType: string;
     function GetParams: string;
     function GetSynParams: string;
@@ -125,7 +126,7 @@ type
     function GetParamDeclarations: TDeclarationArray;
 
     property CleanDeclaration : string read GetCleanDeclaration;
-    property Name : string read GetName;
+    property Name : TciProcedureName read GetName;
     property ProcType: string read GetProcType;
     property Params: string read GetParams;
     property SynParams: string read GetSynParams;
@@ -158,7 +159,7 @@ type
   TciLabelName = class(TDeclaration);                                       //Label
 
   //TciProcedureDeclaration = class(TDeclaration);                            //Procedure/Function
-  TciProcedureName = class(TDeclaration);                                   //Procedure/Function
+  //TciProcedureName = class(TDeclaration);                                   //Procedure/Function
   TciProcedureClassName = class(TDeclaration);                              //Class Procedure/Function
   TciReturnType = class(TciTypeKind);                                       //Function Result
   TciForward = class(TciTypeKind);                                          //Forwarding
@@ -788,19 +789,19 @@ begin
   Result := fProcType;
 end;
 
-function TciProcedureDeclaration.GetName: string;
+function TciProcedureDeclaration.GetName: TciProcedureName;
 var
   ProcedureName : TciProcedureName;
 begin
-  if (fName <> '') then
+  if (fName <> nil) then
     result := fName
   else
   begin
     ProcedureName := TciProcedureName(fItems.GetFirstItemOfClass(TciProcedureName));
     if ProcedureName <> nil then
-      result := ProcedureName.ShortText
+      result := ProcedureName
     else
-      Result := '';
+      Result := nil;
     fName := result;
   end;
 end;
@@ -814,9 +815,9 @@ begin
   else
   begin
     result := '';
-    if Name = '' then
+    if Name = nil then
       exit;
-    result := proctype + ' ' + Name;
+    result := proctype + ' ' + Name.ShortText;
     if Params <> '' then
       result := result + '(' + params + ')';
     Return := fItems.GetFirstItemOfClass(TciReturnType) as TciReturnType;
