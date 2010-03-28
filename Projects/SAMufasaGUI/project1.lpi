@@ -39,7 +39,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="33">
+    <Units Count="46">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -223,6 +223,70 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="libloader"/>
       </Unit32>
+      <Unit33>
+        <Filename Value="../../Units/Misc/v_autocompleteform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_AutoCompleteForm"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="../../Units/Misc/v_ideCodeParser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_ideCodeParser"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="../../Units/Misc/ValistusDefines.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="../../Units/Misc/PSDump.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PSDump"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="../../Units/Misc/v_ideCodeInsight.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_ideCodeInsight"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="../../Units/Misc/CastaliaPasLex.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CastaliaPasLex"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="../../Units/Misc/CastaliaPasLexTypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CastaliaPasLexTypes"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="../../Units/Misc/CastaliaSimplePasPar.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CastaliaSimplePasPar"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="../../Units/Misc/CastaliaSimplePasParTypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CastaliaSimplePasParTypes"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="../../Units/Misc/dcpbase64.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="dcpbase64"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="../../Units/Misc/mPasLex.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="mPasLex"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="../../Units/Misc/v_Constants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_Constants"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="../../Units/Misc/v_MiscFunctions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="v_MiscFunctions"/>
+      </Unit45>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
