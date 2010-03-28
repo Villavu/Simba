@@ -33,7 +33,10 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, Forms, testunit, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform, simbasettings,
-libloader, mufasabase, extensionmanagergui;
+  libloader, mufasabase, v_ideCodeInsight, PSDump, v_ideCodeParser,
+  v_AutoCompleteForm, CastaliaPasLex, CastaliaPasLexTypes, CastaliaSimplePasPar,
+  CastaliaSimplePasParTypes, dcpbase64, mPasLex, v_Constants, v_MiscFunctions,
+  extensionmanagergui;
 
 {$R project1.res}
 
