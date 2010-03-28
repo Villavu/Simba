@@ -1032,6 +1032,7 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
     if (d = nil) then
       Exit;
     n := d.ShortText;
+
     s := s + FormatMainName(n);
     if (Item.Params <> '') then
     begin
