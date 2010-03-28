@@ -224,8 +224,12 @@ var
   Param: string;
   i: Integer;
 begin
-  Param := Sender.DirectiveParam;
+  Param := Sender.DirectiveParamOriginal;
+  {$ifdef FPC}
+  param := SetDirSeparators(param);
+  {$ELSE}
   Param := StringReplace(Param, '/', '\', [rfReplaceAll]);
+  {$ENDIF}
   if (not Sender.IsJunk) and (Param <> '') then
   begin
     if FindInclude(Param) then

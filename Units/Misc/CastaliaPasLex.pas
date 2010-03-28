@@ -259,6 +259,7 @@ type
     procedure InitLine;
     function GetDirectiveKind: TptTokenKind;
     function GetDirectiveParam: string;
+    function GetDirectiveParamOriginal : string;
     function GetStringContent: string;
     function GetIsJunk: Boolean;
     function GetIsSpace: Boolean;
@@ -321,6 +322,7 @@ type
     property CommentState: Pointer read GetCommentState write SetCommentState;
     property CompilerDirective: string read GetCompilerDirective;
     property DirectiveParam: string read GetDirectiveParam;
+    property DirectiveParamOriginal : string read GetDirectiveParamOriginal;
 	property IsJunk: Boolean read GetIsJunk;
     property IsSpace: Boolean read GetIsSpace;
     property Line: AnsiString write SetLine;
@@ -2404,7 +2406,7 @@ begin
   dec(Run);
 end;
 
-function TmwBasePasLex.GetDirectiveParam: string;
+function TmwBasePasLex.GetDirectiveParamOriginal : string;
 var
   EndPos: Integer;
   ParamLen: Integer;
@@ -2436,7 +2438,11 @@ begin
   if fOrigin[TempRun] = ' ' then inc(TempRun);
   ParamLen := EndPos - TempRun;
   SetString(Result, (FOrigin + TempRun), ParamLen);
-  Result := UpperCase(Result);
+end;
+
+function TmwBasePasLex.GetDirectiveParam: string;
+begin
+  result := uppercase(GetDirectiveParamOriginal);
 end;
 
 procedure TmwBasePasLex.Init;

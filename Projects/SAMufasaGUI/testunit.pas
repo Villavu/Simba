@@ -1643,10 +1643,13 @@ var
 begin
   if node = nil then
     exit;
-  if Node.Level > 0 then
+  if (Node.Level > 0) and (Node.Data <> nil) then
   begin
     MethodInfo := PMethodInfo(node.Data)^;
     StatusBar.Panels[Panel_ScriptPath].Text := MethodInfo.MethodStr;
+    if frmFunctionList.DraggingNode = node then
+      if (MethodInfo.BeginPos > 0) then
+        CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
   end;
   if Node.level = 0 then
     StatusBar.Panels[Panel_ScriptPath].Text := 'Section: ' + Node.Text;
@@ -2034,6 +2037,7 @@ begin
     Sections := TStringList.Create;
     LastSection := '';
     frmFunctionList.ScriptNode := Tree.Items.Add(nil,'Script');
+    frmFunctionList.IncludesNode := Tree.Items.Add(nil,'Includes');
     for i := 0 to high(Methods) do
     begin;
       if Methods[i].Section <> LastSection then
