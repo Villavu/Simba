@@ -292,6 +292,7 @@ begin
         Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
       end;}
     mp := TCodeInsight.Create;
+    mp.FileName := ScriptFile;
     {$IFDEF ciDEBUG}
     mp.OnMessage := @Form1.OnCCMessage;
     {$ENDIF}
