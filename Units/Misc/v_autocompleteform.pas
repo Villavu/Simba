@@ -312,7 +312,7 @@ begin
     {$IFDEF FPC}UnlockSelectionChange;{$ENDIF}
   end;
 
-  if {$IFDEF FPC}(odPainted in State) or{$ENDIF} (not Visible) or (ARect.Left > ClientRect.Right) or (ARect.Top > ClientRect.Bottom) or (Index < 0) or (Index >= Items.Count) then
+  if (not Visible) or (ARect.Left > ClientRect.Right) or (ARect.Top > ClientRect.Bottom) or (Index < 0) or (Index >= Items.Count) then
     Exit;
 
   tl := ARect.Left;
