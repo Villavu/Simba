@@ -13,7 +13,7 @@ unit PSDump;
 interface
 
 uses
-  {$IFNDEF LINUX} Windows, {$ENDIF} SysUtils, Classes, uPSRuntime, uPSUtils, uPSComponent,
+  SysUtils, Classes, uPSRuntime, uPSUtils, uPSComponent,
   uPSCompiler, uPSC_dll, typInfo;
 
 type
@@ -82,11 +82,11 @@ type
   _TMyPascalCompiler = class(TPSPascalCompiler);
 procedure TPSScriptExtension.GetCodeProps;
 
-  function TypeToString(t: TPSType; Definition: Boolean = False): string; forward;
+  function TypeToString(t: TPSType; Definition: Boolean = False): tbtstring; forward;
 
-  function FunctionType(f: TObject): string;
+  function FunctionType(f: TObject): tbtstring;
   const
-    FuncStr: array[Boolean] of string = ('procedure', 'function');
+    FuncStr: array[Boolean] of tbtstring = ('procedure', 'function');
   begin
     if (f is TPSDelphiClassItemConstructor) then
       Result := 'constructor'
@@ -102,7 +102,7 @@ procedure TPSScriptExtension.GetCodeProps;
       Result := '';
   end;
 
-  function ParamsToString(d: TPSParametersDecl; CheckResult: Boolean = True): string;
+  function ParamsToString(d: TPSParametersDecl; CheckResult: Boolean = True): tbtstring;
   const
     ParamStr: array [pmIn..pmInOut] of tbtstring = ('','out ','var ');
   var
@@ -124,11 +124,11 @@ procedure TPSScriptExtension.GetCodeProps;
       Result := Result + ': ' + TypeToString(d.Result);
   end;
 
-  function ClassItemsToString(c: TPSCompileTimeClass; DoneList: TStrings = nil): string;
+  function ClassItemsToString(c: TPSCompileTimeClass; DoneList: TStrings = nil): tbtstring;
   var
     ci: TPSDelphiClassItem;
     i, ii: Integer;
-    s: string;
+    s: tbtstring;
     Def: PtrUInt;
     ListFree: Boolean;
   begin
@@ -186,7 +186,7 @@ procedure TPSScriptExtension.GetCodeProps;
       DoneList.Free;
   end;
 
-  function TypeToString(t: TPSType; Definition: Boolean = False): string;
+  function TypeToString(t: TPSType; Definition: Boolean = False): tbtstring;
   var
     r: PIFPSRecordFieldTypeDef;
     i: Integer;
@@ -235,7 +235,7 @@ procedure TPSScriptExtension.GetCodeProps;
       Result := t.OriginalName;
   end;
 
-  function IfRVariantToString(v: TIfRVariant): string;
+  function IfRVariantToString(v: TIfRVariant): tbtstring;
   begin
     case v.FType.BaseType of
       btU8: Result := IntToStr(v.tu8);         
