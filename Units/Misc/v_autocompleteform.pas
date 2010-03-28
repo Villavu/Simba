@@ -34,7 +34,7 @@ type
     {$IFDEF ccFORMCAPTION}
     procedure DoSelectionChange(User: Boolean); override;
     {$ENDIF}
-    procedure DrawItem(Index: Integer; ARect: TRect; State: TOwnerDrawState); override;
+    procedure DrawItem(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState);
     {$IFDEF FPC}
     procedure WMEraseBkgnd(var message: TLMEraseBkgnd); message LM_ERASEBKGND;
     procedure WMVScroll(var message: TLMVScroll); message LM_VSCROLL;
@@ -300,7 +300,7 @@ begin
 end;
 {$ENDIF}
 
-procedure TAutoCompleteListBox.DrawItem(Index: Integer; ARect: TRect; State: TOwnerDrawState);
+procedure TAutoCompleteListBox.DrawItem(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState);
 var
   p1, p2, p3, tl, col: Integer;
   s, c: string;
@@ -398,6 +398,7 @@ begin
   ControlStyle := ControlStyle + [csOpaque];
   BorderStyle := bsNone;
   Style := lbOwnerDrawFixed;
+  OnDrawItem := {$IFDEF FPC}@{$ENDIF}DrawItem;
 
   IntegralHeight := True;
   {$IFDEF FPC}
