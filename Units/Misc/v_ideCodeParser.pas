@@ -769,6 +769,12 @@ begin
       Delete(s, 1, 6);
       fProcType := GetFirstWord(s);
     end;
+
+    if (fProcType = '') then
+      if (Items.GetFirstItemOfClass(TciReturnType) <> nil) then
+        fProcType := 'function'
+      else
+        fProcType := 'procedure';
   end;
 
   Result := fProcType;
