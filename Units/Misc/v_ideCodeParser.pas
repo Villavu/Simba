@@ -104,12 +104,18 @@ type
     function GetRealType: TDeclaration; overload;
   end;
 
+  { TciProcedureDeclaration }
+
   TciProcedureDeclaration = class(TDeclaration)
   private
     fProcType: string;
     fParams: string;
     fSynParams: string;
+    fName : string;
+    fCleanDecl : string;
 
+    function GetCleanDeclaration: string;
+    function GetName: string;
     function GetProcType: string;
     function GetParams: string;
     function GetSynParams: string;
@@ -118,6 +124,8 @@ type
   public
     function GetParamDeclarations: TDeclarationArray;
 
+    property CleanDeclaration : string read GetCleanDeclaration;
+    property Name : string read GetName;
     property ProcType: string read GetProcType;
     property Params: string read GetParams;
     property SynParams: string read GetSynParams;
@@ -780,6 +788,46 @@ begin
   Result := fProcType;
 end;
 
+function TciProcedureDeclaration.GetName: string;
+var
+  ProcedureName : TciProcedureName;
+begin
+  if (fName <> '') then
+    result := fName
+  else
+  begin
+    ProcedureName := TciProcedureName(fItems.GetFirstItemOfClass(TciProcedureName));
+    if ProcedureName <> nil then
+      result := ProcedureName.ShortText
+    else
+      Result := '';
+    fName := result;
+  end;
+end;
+
+function TciProcedureDeclaration.GetCleanDeclaration: string;
+var
+  Return : TciReturnType;
+begin
+  if (fCleanDecl <> '') then
+    result := fCleanDecl
+  else
+  begin
+    result := '';
+    if Name = '' then
+      exit;
+    result := proctype + ' ' + Name;
+    if Params <> '' then
+      result := result + '(' + params + ')';
+    Return := fItems.GetFirstItemOfClass(TciReturnType) as TciReturnType;
+    if (Return <> nil) then
+      result := result + ': ' + Return.ShortText
+    else
+      result := result + ';';
+  end;
+end;
+
+
 function TciProcedureDeclaration.GetParams: string;
 var
   i: Integer;
@@ -1008,7 +1056,7 @@ begin
   if (not Sender.IsJunk) then
   begin
     PushStack(TciInclude, Sender.TokenPos);
-    fStack.Top.RawText := Sender.DirectiveParam;
+    fStack.Top.RawText := Sender.DirectiveParamOriginal;
     PopStack(Sender.TokenPos + Sender.TokenLen);
   end;
 

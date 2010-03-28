@@ -37,6 +37,7 @@ type
   public
     DraggingNode : TTreeNode;
     ScriptNode : TTreeNode;
+    IncludesNode : TTreeNode;
     InCodeCompletion : boolean;
     CompletionCaret : TPoint;
     StartWordCompletion : TPoint;
@@ -51,13 +52,14 @@ type
   TMethodInfo = record
     MethodStr : PChar;
     BeginPos : integer;
+//    FileName : PChar;
   end;
   PMethodInfo = ^TMethodInfo;
 
 implementation
 
 uses
-  TestUnit, Graphics, simpleanalyzer;
+  TestUnit, Graphics, stringutil, simpleanalyzer,v_ideCodeInsight,v_ideCodeParser;
 
 { TFunctionListFrame }
 
@@ -102,10 +104,16 @@ end;
 
 procedure TFunctionListFrame.FunctionListDeletion(Sender: TObject;
   Node: TTreeNode);
+var
+  MethodInfo : PMethodInfo;
 begin
   if node.data <> nil then
   begin
-    StrDispose(PMethodInfo(node.data)^.MethodStr);
+    MethodInfo := PMethodInfo(Node.data);
+    if MethodInfo^.MethodStr <> nil then
+      StrDispose(MethodInfo^.MethodStr);
+{    if MethodInfo^.FileName <> nil then
+      StrDispose(MethodInfo^.filename);}
     Freemem(node.data,sizeof(TMethodInfo));
   end;
 end;
@@ -145,13 +153,6 @@ begin
   N := TTreeView(Sender).GetNodeAt(x, y);
   if(N = nil)then
     exit;
-  if button = mbRight then
-    if N.Data <> nil then
-    begin
-      MethodInfo := PMethodInfo(N.data)^;
-      if (MethodInfo.BeginPos > 0) then
-        Form1.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
-    end;
 end;
 
 procedure TFunctionListFrame.FilterTreeVis(Vis: boolean);
@@ -183,31 +184,67 @@ begin
 end;
 
 procedure TFunctionListFrame.LoadScriptTree(Script: String);
+procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; FileName : string);
+var
+  i : integer;
+  tmpNode : TTreeNode;
+begin;
+  for i := 0 to Procs.Count - 1 do
+    if (Procs[i] is TciProcedureDeclaration) then
+      with Procs[i] as TciProcedureDeclaration do
+      begin
+        tmpNode := FunctionList.Items.AddChild(Node,name);
+        tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+        with PMethodInfo(tmpNode.Data)^ do
+        begin
+          MethodStr := strnew(Pchar(CleanDeclaration));
+          BeginPos:= StartPos;
+        end;
+      end;
+end;
+
+procedure AddIncludes(Include : TCodeInsight);
+var
+  parentNode : TTreeNode;
+  i : integer;
+begin;
+  parentNode := FunctionList.Items.AddChild(
+               IncludesNode,ExtractFileNameOnly(
+               Include.FileName));
+  AddProcsTree(parentNode,Include.Items,Include.FileName);
+  for i := 0 to high(Include.Includes) do
+    AddIncludes(Include.Includes[i])
+end;
 var
   I : integer;
-  Analyzer : TScriptAnalyzer;
-  tmpNode : TTreeNode;
+  Analyzing : TCodeInsight;
+  MS : TMemoryStream;
 begin
+  if script = '' then
+    exit;
   if ScriptNode = nil then
     exit;
   if FilterTree.Visible then
     mDebugLn('Might get some acces violations now..');
   ScriptNode.DeleteChildren;
-  Analyzer := TScriptAnalyzer.create;
-  Analyzer.ScriptToAnalyze:= Script;
-  Analyzer.analyze;
-  for i := 0 to Analyzer.MethodLen - 1 do
-  begin
-    tmpNode := FunctionList.Items.AddChild(ScriptNode,Analyzer.Methods[i].Name);
-    tmpNode.Data := GetMem(SizeOf(TMethodInfo));
-    with PMethodInfo(tmpNode.Data)^ do
-    begin
-      MethodStr:= strnew(PChar(Analyzer.Methods[i].CreateMethodStr));
-      BeginPos:= Analyzer.Methods[i].BeginPos;
-    end;
+  Analyzing := TCodeInsight.Create();
+  Analyzing.OnFindInclude:= @Form1.OnCCFindInclude;
+  Analyzing.FileName:= Form1.CurrScript.ScriptFile;
+  MS := TMemoryStream.Create;
+  MS.Write(Script[1],length(script));
+  Analyzing.Run(MS,nil,-1,true);
+  AddProcsTree(ScriptNode,Analyzing.Items,Analyzing.FileName); //Add the procedures of the script to the script tree
+
+  //Lame condition.. We must check if nothing new has been included since
+  //last generation of the tree.. However, this will do fine for now ;)
+  if IncludesNode.Count <> length(Analyzing.Includes) then
+  begin;
+    IncludesNode.DeleteChildren;
+    for i := 0 to high(Analyzing.Includes) do
+      AddIncludes(Analyzing.Includes[i]);
   end;
   ScriptNode.Expand(true);
-  Analyzer.free;
+  Analyzing.Free;
 end;
 
 function TFunctionListFrame.Find(Next : boolean; backwards : boolean = false) : boolean;
