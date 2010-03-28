@@ -1781,6 +1781,7 @@ procedure TForm1.FormCreate(Sender: TObject);
           {$ENDIF}
           b.SaveToStream(ms);
           Run(ms, nil, -1, True);
+          FileName := '!PSCORE!';
         end;
       finally
         b.Free;
