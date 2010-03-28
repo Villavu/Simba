@@ -352,7 +352,7 @@ type
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
     function OpenScript : boolean;
-    function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false) : boolean;
+    function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false; CheckOtherTabs : boolean = true) : boolean;
     function SaveCurrentScript : boolean;
     function SaveCurrentScriptAs : boolean;
     function CanExitOrOpen : boolean;
@@ -362,6 +362,7 @@ type
     procedure StopScript;
     procedure AddTab;
     procedure StopCodeCompletion;
+    function FindTab(filename : string) : integer;
     function DeleteTab( TabIndex : integer; CloseLast : boolean; Silent : boolean = false) : boolean;
     procedure ClearTab( TabIndex : integer);
     procedure CloseTabs(Exclude: integer = -1; Silent : boolean = false); //-1 for no exclusion
@@ -965,6 +966,7 @@ begin
   CreateSetting('Settings/Fonts/LoadOnStartUp', 'True');
   CreateSetting('Settings/Tabs/OpenNextOnClose','False');
   CreateSetting('Settings/Tabs/OpenScriptInNewTab','True');
+  CreateSetting('Settings/Tabs/CheckTabsBeforeOpen','True');
   CreateSetting('Settings/ColourPicker/ShowHistoryOnPick', 'True');
   CreateSetting('Settings/General/MaxRecentFiles','10');
   CreateSetting('Settings/MainForm/NormalSize','739:555');
@@ -1259,7 +1261,7 @@ procedure TForm1.OnSaveScript(const Filename: string);
 begin
   with CurrScript do
   begin
-    ScriptFile:= Filename;
+    ScriptFile:= SetDirSeparators(Filename);
     ScriptName:= ExtractFileNameOnly(Filename);
     mDebugLn('Script name will be: ' + ScriptName);
     FormWritelnEx('Succesfully saved: ' + Filename);
@@ -1551,6 +1553,21 @@ begin
     end;
 end;
 
+function TForm1.FindTab(filename: string): integer;
+var
+  i : integer;
+begin
+  FileName := SetDirSeparators(filename);
+  for i := 0 to Form1.Tabs.Count - 1 do
+    {$ifdef MSWindows} //Case insensitive
+    if lowercase(TMufasaTab(Tabs[i]).ScriptFrame.ScriptFile) = lowercase(filename) then
+    {$else}
+    if TMufasaTab(Tabs[i]).ScriptFrame.ScriptFile = filename then
+    {$endif}
+      exit(i);
+  result := -1;
+end;
+
 procedure TForm1.editSearchListExit(Sender: TObject);
 begin
   frmFunctionList.editSearchList.Color := clWhite;
@@ -1639,13 +1656,25 @@ var
 begin
   if node = nil then
     exit;
-  if Node.Level > 0 then
+  if Node.level = 0 then
+    StatusBar.Panels[Panel_ScriptPath].Text := 'Section: ' + Node.Text;
+  if (Node.Level > 0) and (Node.Data <> nil) then
   begin
     MethodInfo := PMethodInfo(node.Data)^;
     StatusBar.Panels[Panel_ScriptPath].Text := MethodInfo.MethodStr;
+    if frmFunctionList.DraggingNode = node then
+      if (MethodInfo.BeginPos > 0) then
+      begin;
+        if MethodInfo.Filename <> nil then
+          if MethodInfo.Filename <> '' then
+          begin;
+            Writeln(MethodInfo.filename);
+            LoadScriptFile(MethodInfo.Filename,true,true);
+          end;
+        CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
+        CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
+      end;
   end;
-  if Node.level = 0 then
-    StatusBar.Panels[Panel_ScriptPath].Text := 'Section: ' + Node.Text;
 end;
 
 procedure TForm1.FunctionListEnter(Sender: TObject);
@@ -2028,6 +2057,7 @@ begin
     Sections := TStringList.Create;
     LastSection := '';
     frmFunctionList.ScriptNode := Tree.Items.Add(nil,'Script');
+    frmFunctionList.IncludesNode := Tree.Items.Add(nil,'Includes');
     for i := 0 to high(Methods) do
     begin;
       if Methods[i].Section <> LastSection then
@@ -2397,17 +2427,32 @@ begin
   end;
 end;
 
-function TForm1.LoadScriptFile(filename: string; AlwaysOpenInNewTab: boolean
+function TForm1.LoadScriptFile(filename: string; AlwaysOpenInNewTab: boolean; CheckOtherTabs : boolean
   ): boolean;
 var
   OpenInNewTab : boolean;
+  CheckTabsFirst : boolean;
+  Tab : integer;
 begin
   if AlwaysOpenInNewTab then
     OpenInNewTab := true
   else
     OpenInNewTab:= (LowerCase(LoadSettingDef('Settings/Tabs/OpenScriptInNewTab','True')) = 'true');
+  if CheckOtherTabs then
+    CheckTabsFirst := True
+  else
+    CheckTabsFirst := (Lowercase(LoadSettingDef('Settings/Tabs/CheckTabsBeforeOpen','True')) = 'true');
   if FileExists(FileName) then
   begin;
+    if CheckTabsFirst then
+    begin;
+      Tab :=  FindTab(filename);
+      if tab <> -1 then
+      begin
+        TMufasaTab(Tabs[tab]).ScriptFrame.MakeActiveScriptFrame;
+        exit(true);
+      end;
+    end;
     if OpenInNewTab and (CurrScript.SynEdit.Text <> CurrScript.ScriptDefault) then //Add la tab!
       self.addtab;
     with CurrScript do
@@ -2417,7 +2462,7 @@ begin
       StartText := SynEdit.Lines.text;
       ScriptName:= ExtractFileNameOnly(filename);
       mDebugLn('Script name will be: ' + ScriptName);
-      ScriptFile:= FileName;
+      ScriptFile:= SetDirSeparators(FileName);
       ScriptChanged := false;
       AddRecentFile(filename);
       RefreshTab();

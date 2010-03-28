@@ -37,6 +37,7 @@ type
   public
     DraggingNode : TTreeNode;
     ScriptNode : TTreeNode;
+    IncludesNode : TTreeNode;
     InCodeCompletion : boolean;
     CompletionCaret : TPoint;
     StartWordCompletion : TPoint;
@@ -48,16 +49,16 @@ type
     { public declarations }
   end; 
 
-  TMethodInfo = record
-    MethodStr : PChar;
-    BeginPos : integer;
+  TMethodInfo = packed record
+    MethodStr,Filename : PChar;
+    BeginPos,endpos : integer;
   end;
   PMethodInfo = ^TMethodInfo;
 
 implementation
 
 uses
-  TestUnit, Graphics, simpleanalyzer;
+  TestUnit, Graphics, stringutil, simpleanalyzer,v_ideCodeInsight,v_ideCodeParser,lclintf;
 
 { TFunctionListFrame }
 
@@ -102,10 +103,16 @@ end;
 
 procedure TFunctionListFrame.FunctionListDeletion(Sender: TObject;
   Node: TTreeNode);
+var
+  MethodInfo : PMethodInfo;
 begin
   if node.data <> nil then
   begin
-    StrDispose(PMethodInfo(node.data)^.MethodStr);
+    MethodInfo := PMethodInfo(Node.data);
+    if MethodInfo^.MethodStr <> nil then
+      StrDispose(MethodInfo^.MethodStr);
+    if MethodInfo^.FileName <> nil then
+      StrDispose(MethodInfo^.filename);
     Freemem(node.data,sizeof(TMethodInfo));
   end;
 end;
@@ -145,13 +152,6 @@ begin
   N := TTreeView(Sender).GetNodeAt(x, y);
   if(N = nil)then
     exit;
-  if button = mbRight then
-    if N.Data <> nil then
-    begin
-      MethodInfo := PMethodInfo(N.data)^;
-      if (MethodInfo.BeginPos > 0) then
-        Form1.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
-    end;
 end;
 
 procedure TFunctionListFrame.FilterTreeVis(Vis: boolean);
@@ -183,41 +183,85 @@ begin
 end;
 
 procedure TFunctionListFrame.LoadScriptTree(Script: String);
+procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; Path : string);
+var
+  i : integer;
+  tmpNode : TTreeNode;
+begin;
+  for i := 0 to Procs.Count - 1 do
+    if (Procs[i] is TciProcedureDeclaration) then
+      with Procs[i] as TciProcedureDeclaration do
+      begin
+        tmpNode := FunctionList.Items.AddChild(Node,name.ShortText);
+        tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+        with PMethodInfo(tmpNode.Data)^ do
+        begin
+          MethodStr := strnew(Pchar(CleanDeclaration));
+          Filename:= strnew(pchar(path));
+          BeginPos:= name.StartPos ;
+          EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
+        end;
+      end;
+end;
+
+procedure AddIncludes(ParentNode : TTreeNode; Include : TCodeInsight);
+var
+  i : integer;
+begin;
+  parentNode := FunctionList.Items.AddChild(
+               IncludesNode,ExtractFileNameOnly(
+               Include.FileName));
+  AddProcsTree(parentNode,Include.Items,Include.FileName);
+  for i := 0 to high(Include.Includes) do
+    AddIncludes(ParentNode,Include.Includes[i])
+end;
 var
   I : integer;
-  Analyzer : TScriptAnalyzer;
-  tmpNode : TTreeNode;
+  Analyzing : TCodeInsight;
+  MS : TMemoryStream;
+  time : longword;
 begin
+  Time := GetTickCount;
+  if script = '' then
+    exit;
   if ScriptNode = nil then
     exit;
   if FilterTree.Visible then
-    mDebugLn('Might get some acces violations now..');
-  ScriptNode.DeleteChildren;
-  Analyzer := TScriptAnalyzer.create;
-  Analyzer.ScriptToAnalyze:= Script;
-  Analyzer.analyze;
-  for i := 0 to Analyzer.MethodLen - 1 do
   begin
-    tmpNode := FunctionList.Items.AddChild(ScriptNode,Analyzer.Methods[i].Name);
-    tmpNode.Data := GetMem(SizeOf(TMethodInfo));
-    with PMethodInfo(tmpNode.Data)^ do
-    begin
-      MethodStr:= strnew(PChar(Analyzer.Methods[i].CreateMethodStr));
-      BeginPos:= Analyzer.Methods[i].BeginPos;
-    end;
+    mDebugLn('Might get some acces violations now..');
+    exit;
+  end;
+  FunctionList.BeginUpdate;
+  ScriptNode.DeleteChildren;
+  Analyzing := TCodeInsight.Create();
+  Analyzing.OnFindInclude:= @Form1.OnCCFindInclude;
+  Analyzing.FileName:= Form1.CurrScript.ScriptFile;
+  MS := TMemoryStream.Create;
+  MS.Write(Script[1],length(script));
+  Analyzing.Run(MS,nil,-1,true);
+  AddProcsTree(ScriptNode,Analyzing.Items,Analyzing.FileName); //Add the procedures of the script to the script tree
+
+  //Lame condition.. We must check if nothing new has been included since
+  //last generation of the tree.. However, this will do fine for now ;)
+  if IncludesNode.Count <> length(Analyzing.Includes) then
+  begin;
+    IncludesNode.DeleteChildren;
+    for i := 0 to high(Analyzing.Includes) do
+      AddIncludes(IncludesNode, Analyzing.Includes[i]);
   end;
   ScriptNode.Expand(true);
-  Analyzer.free;
+  FunctionList.EndUpdate;
+  Analyzing.Free;
 end;
 
 function TFunctionListFrame.Find(Next : boolean; backwards : boolean = false) : boolean;
 var
-  Start,Len,i,index,posi,c: Integer;
+  Start,Len,i,ii,index,posi,c: Integer;
   FoundFunction : boolean;
-  LastSection : string;
+  LastSection : Array[1..2] of String;
   str : string;
   RootNode : TTreeNode;
-  NormalNode : TTreeNode;
+  NormalNode,tmpNode : TTreeNode;
   Node : TTreeNode;
   InsertStr : string;
 begin
@@ -264,7 +308,7 @@ begin
     c := 0;
     while c < (len ) do
     begin;
-      if FilterTree.Items[i mod len].Level = 1 then
+      if (FilterTree.Items[i mod len].HasChildren = false) then
       begin
         FilterTree.Items[i mod len].Selected:= true;
         InsertStr := FilterTree.Items[i mod len].Text;
@@ -279,18 +323,21 @@ begin
     end;
   end else
   begin
+    FilterTree.BeginUpdate;
     FilterTree.Items.Clear;
+
     FoundFunction := False;
     if FunctionList.Selected <> nil then
       Start := FunctionList.Selected.AbsoluteIndex
     else
       Start := 0;
     Len := FunctionList.Items.Count;
-    LastSection := '';
+    LastSection[1] := '';
+    LastSection[2] := '';
     for i := start to start + FunctionList.Items.Count - 1 do
     begin;
       Node := FunctionList.Items[i mod FunctionList.Items.Count];
-      if(Node.Level = 1)then
+      if(Node.Level >= 1) and (node.HasChildren = false) then
         if(pos(lowercase(editSearchList.Text), lowercase(Node.Text)) > 0)then
         begin
           if not FoundFunction then
@@ -299,10 +346,31 @@ begin
             index := i mod FunctionList.Items.Count;
             InsertStr:= node.Text;
           end;
-          if LastSection <> Node.Parent.Text then //We enter a new section, add it to the filter tree!
-            RootNode := FilterTree.Items.AddChild(nil,Node.Parent.Text);
+          if node.level = 2 then
+          begin;
+            if node.Parent.text <> lastsection[2] then
+            begin
+              if node.parent.parent.text <> lastsection[1] then
+              begin;
+                rootnode := FilterTree.Items.AddChild(nil,node.parent.parent.text);
+                lastsection[1] := rootnode.text;
+                rootnode := FilterTree.Items.AddChild(Rootnode,node.parent.text);
+                lastsection[2] := rootnode.text;
+              end else
+              begin
+                rootnode := FilterTree.Items.AddChild(rootnode.parent,node.parent.text);
+                lastsection[2] := rootnode.text;
+              end;
+            end;
+          end else
+          begin
+            if node.parent.text <> lastsection[1] then
+            begin
+              rootnode := FilterTree.Items.AddChild(nil,node.parent.text);
+              lastsection[1] := Rootnode.text;
+            end;
+          end;
           FilterTree.Items.AddChild(RootNode,Node.Text).Data := Node.Data;
-          LastSection:= RootNode.Text;
   //        break;
         end;
       end;
@@ -312,7 +380,10 @@ begin
       begin;
         FilterTreeVis(True);
         FilterTree.FullExpand;
-        FilterTree.Items[1].Selected:= True;
+        c := 0;
+        while FilterTree.Items[c].HasChildren do
+          inc(c);
+        FilterTree.Items[c].Selected:= True;
         mDebugLn(FunctionList.Items[Index].Text);
         FunctionList.FullCollapse;
         FunctionList.Items[Index].Selected := true;
@@ -327,6 +398,7 @@ begin
         if InCodeCompletion then
           Form1.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
       end;
+    FilterTree.EndUpdate;
   end;
 
   if result and InCodeCompletion then
