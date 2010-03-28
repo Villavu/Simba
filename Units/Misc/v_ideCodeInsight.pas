@@ -56,7 +56,7 @@ type
     constructor Create(FileName: string = ''); reintroduce;
     destructor Destroy; override;
     procedure Assign(From: TObject); override;
-    procedure Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1); reintroduce;
+    procedure Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1; ManageStream: Boolean = False); reintroduce;
 
     procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings);
     procedure FillProposal;
@@ -916,7 +916,7 @@ begin
   inherited;
 end;
 
-procedure TCodeInsight.Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1);
+procedure TCodeInsight.Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1; ManageStream: Boolean = False);
 begin
   if Assigned(BaseDefines) then
   begin
@@ -924,6 +924,17 @@ begin
     Lexer.Defines.Assign(BaseDefines);
   end;
   SetLength(fIncludes, 0);
+
+  if ManageStream then
+  begin
+    if (SourceStream <> nil) then
+    begin
+      if fOwnStream then
+        FreeAndNil(fMemoryStream);
+      fMemoryStream := TMemoryStream(SourceStream);
+    end;
+    fOwnStream := True;
+  end;
 
   if fOwnStream then
     inherited Run(fMemoryStream, MaxPos - 1)

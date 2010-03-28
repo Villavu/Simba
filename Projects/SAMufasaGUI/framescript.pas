@@ -146,7 +146,9 @@ var
   sp, ep: Integer;
 begin
   mp := TCodeInsight.Create;
+  {$IFDEF ciDEBUG}
   mp.OnMessage := @Form1.OnCCMessage;
+  {$ENDIF}
   mp.OnFindInclude := @Form1.OnCCFindInclude;
 
   ms := TMemoryStream.Create;
@@ -290,7 +292,9 @@ begin
         Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
       end;}
     mp := TCodeInsight.Create;
+    {$IFDEF ciDEBUG}
     mp.OnMessage := @Form1.OnCCMessage;
+    {$ENDIF}
     mp.OnFindInclude := @Form1.OnCCFindInclude;
 
     ms := TMemoryStream.Create;
