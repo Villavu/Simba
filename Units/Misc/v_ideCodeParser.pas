@@ -104,12 +104,19 @@ type
     function GetRealType: TDeclaration; overload;
   end;
 
+  TciProcedureName = class(TDeclaration);
+
+  { TciProcedureDeclaration }
   TciProcedureDeclaration = class(TDeclaration)
   private
     fProcType: string;
     fParams: string;
     fSynParams: string;
+    fName : TciProcedureName;
+    fCleanDecl : string;
 
+    function GetCleanDeclaration: string;
+    function GetName: TciProcedureName;
     function GetProcType: string;
     function GetParams: string;
     function GetSynParams: string;
@@ -118,6 +125,8 @@ type
   public
     function GetParamDeclarations: TDeclarationArray;
 
+    property CleanDeclaration : string read GetCleanDeclaration;
+    property Name : TciProcedureName read GetName;
     property ProcType: string read GetProcType;
     property Params: string read GetParams;
     property SynParams: string read GetSynParams;
@@ -150,7 +159,7 @@ type
   TciLabelName = class(TDeclaration);                                       //Label
 
   //TciProcedureDeclaration = class(TDeclaration);                            //Procedure/Function
-  TciProcedureName = class(TDeclaration);                                   //Procedure/Function
+  //TciProcedureName = class(TDeclaration);                                   //Procedure/Function
   TciProcedureClassName = class(TDeclaration);                              //Class Procedure/Function
   TciReturnType = class(TciTypeKind);                                       //Function Result
   TciForward = class(TciTypeKind);                                          //Forwarding
@@ -780,6 +789,46 @@ begin
   Result := fProcType;
 end;
 
+function TciProcedureDeclaration.GetName: TciProcedureName;
+var
+  ProcedureName : TciProcedureName;
+begin
+  if (fName <> nil) then
+    result := fName
+  else
+  begin
+    ProcedureName := TciProcedureName(fItems.GetFirstItemOfClass(TciProcedureName));
+    if ProcedureName <> nil then
+      result := ProcedureName
+    else
+      Result := nil;
+    fName := result;
+  end;
+end;
+
+function TciProcedureDeclaration.GetCleanDeclaration: string;
+var
+  Return : TciReturnType;
+begin
+  if (fCleanDecl <> '') then
+    result := fCleanDecl
+  else
+  begin
+    result := '';
+    if Name = nil then
+      exit;
+    result := proctype + ' ' + Name.ShortText;
+    if Params <> '' then
+      result := result + '(' + params + ')';
+    Return := fItems.GetFirstItemOfClass(TciReturnType) as TciReturnType;
+    if (Return <> nil) then
+      result := result + ': ' + Return.ShortText
+    else
+      result := result + ';';
+  end;
+end;
+
+
 function TciProcedureDeclaration.GetParams: string;
 var
   i: Integer;
@@ -1008,7 +1057,7 @@ begin
   if (not Sender.IsJunk) then
   begin
     PushStack(TciInclude, Sender.TokenPos);
-    fStack.Top.RawText := Sender.DirectiveParam;
+    fStack.Top.RawText := Sender.DirectiveParamOriginal;
     PopStack(Sender.TokenPos + Sender.TokenLen);
   end;
 

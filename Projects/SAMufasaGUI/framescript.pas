@@ -162,8 +162,18 @@ begin
     if (d <> nil) then
     begin
       if (TCodeInsight(d.Parser).FileName <> mp.FileName) then
-        mDebugLn('Declared in "' + TCodeInsight(d.Parser).FileName  + '" at ' + IntToStr(d.StartPos))
-      else
+      begin
+        if FileExists(TCodeInsight(d.Parser).FileName) then
+        begin;
+          if Form1.LoadScriptFile(TCodeInsight(d.Parser).FileName,true,true) then
+          begin;
+            Form1.CurrScript.SynEdit.SelStart:= d.StartPos + 1;
+            Form1.CurrScript.SynEdit.SelEnd := d.StartPos + Length(TrimRight(d.RawText)) + 1;
+          end;
+        end
+        else
+          mDebugLn('Declared in "' + TCodeInsight(d.Parser).FileName  + '" at ' + IntToStr(d.StartPos));
+      end else
       begin
         SynEdit.SelStart := d.StartPos + 1;
         SynEdit.SelEnd := d.StartPos + Length(TrimRight(d.RawText)) + 1;
@@ -429,15 +439,7 @@ begin
     else
     begin
       ErrorData.Module:= SetDirSeparators(ErrorData.Module);// Set it right ;-)
-      for i := 0 to Form1.Tabs.Count - 1 do
-        if lowercase(TMufasaTab(Form1.Tabs[i]).ScriptFrame.ScriptFile) = lowercase(ErrorData.Module) then
-        begin;
-          ErrorData.Module:= '';
-          TMufasaTab(Form1.Tabs[i]).ScriptFrame.ErrorData := Self.ErrorData;
-          TMufasaTab(Form1.Tabs[i]).ScriptFrame.HandleErrorData;
-          Exit;
-        end;
-      Form1.LoadScriptFile(ErrorData.Module,true);
+      Form1.LoadScriptFile(ErrorData.Module,true,true);//Checks if the file is already open!
       ErrorData.Module:= '';
       Form1.CurrScript.ErrorData := Self.ErrorData;
       Form1.CurrScript.HandleErrorData;
