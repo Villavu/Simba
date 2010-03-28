@@ -146,9 +146,8 @@ var
   sp, ep: Integer;
 begin
   mp := TCodeInsight.Create;
-  {$IFDEF ciDEBUG}
+  mp.FileName := ScriptFile;
   mp.OnMessage := @Form1.OnCCMessage;
-  {$ENDIF}
   mp.OnFindInclude := @Form1.OnCCFindInclude;
 
   ms := TMemoryStream.Create;
@@ -293,9 +292,7 @@ begin
       end;}
     mp := TCodeInsight.Create;
     mp.FileName := ScriptFile;
-    {$IFDEF ciDEBUG}
     mp.OnMessage := @Form1.OnCCMessage;
-    {$ENDIF}
     mp.OnFindInclude := @Form1.OnCCFindInclude;
 
     ms := TMemoryStream.Create;

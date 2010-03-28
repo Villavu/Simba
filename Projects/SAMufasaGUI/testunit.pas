@@ -316,9 +316,7 @@ type
     procedure UpdateMenuButtonClick(Sender: TObject);
     procedure UpdateTimerCheck(Sender: TObject);
 
-    {$IFDEF ciDEBUG}
     procedure OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
-    {$ENDIF}
     procedure OnCompleteCode(Str: string);
     function OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
   private
@@ -440,7 +438,6 @@ end;
 var
    DebugCriticalSection: syncobjs.TCriticalSection;
 
-{$IFDEF ciDEBUG}
 procedure TForm1.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
 begin
   if (Typ = meNotSupported) then
@@ -450,7 +447,6 @@ begin
       Exit;
   mDebugLn('ERROR: '+Format('%d:%d %s', [Y + 1, X, Msg])+' in '+TCodeInsight(Sender).FileName);
 end;
-{$ENDIF}
 
 procedure TForm1.OnCompleteCode(Str: string);
 var
@@ -1776,9 +1772,7 @@ procedure TForm1.FormCreate(Sender: TObject);
         CoreBuffer[0] := TCodeInsight.Create;
         with CoreBuffer[0] do
         begin
-          {$IFDEF ciDEBUG}
           OnMessage := @OnCCMessage;
-          {$ENDIF}
           b.SaveToStream(ms);
           Run(ms, nil, -1, True);
           FileName := '!PSCORE!';
