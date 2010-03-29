@@ -39,14 +39,14 @@ uses
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
   colourpicker, framescript, windowselector, lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
-  SynEditMarkupHighAll, LMessages, Buttons,
+  SynEditMarkupHighAll, LMessages, Buttons,mmisc,
   stringutil,mufasatypesutil,mufasabase,
   about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-    SimbaVersion = 587;
+    SimbaVersion = 590;
 
 type
 
@@ -2076,6 +2076,7 @@ begin
       end;
       Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
       Temp2Node.Data := GetMem(SizeOf(TMethodInfo));
+      FillChar(PMethodInfo(Temp2Node.Data)^,SizeOf(TMethodInfo),0);
       with PMethodInfo(Temp2Node.Data)^ do
       begin
         MethodStr:= strnew(PChar(Methods[i].FuncDecl));
@@ -2203,7 +2204,16 @@ begin
 end;
 
 procedure TForm1.ButtonTrayClick(Sender: TObject);
+{var
+  ms : TMemoryStream;
+  fs : TFileStream;}
 begin
+{
+  fs := TFileStream.Create('c:\remake\fonts.tar.bz2',fmOpenRead);
+  ms := DecompressBZip2(fs);
+  fs.free;
+  UnTar(ms,'c:\remake\fonttest\',true);
+  ms.free;}
   Form1.Hide;
 end;
 
