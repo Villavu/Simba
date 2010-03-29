@@ -89,6 +89,7 @@ begin;
       mDebugLn(format('Unknown filetype in archive. %s',[dirrec.name]));
   end;
   Tar.Free;
+  Result := true;
 
 end;
 
