@@ -69,9 +69,9 @@
         <UnitName Value="files"/>
       </Unit4>
       <Unit5>
-        <Filename Value="../../Units/MMLCore/window.pas"/>
+        <Filename Value="../../Units/MMLAddon/mmisc.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Window"/>
+        <UnitName Value="mmisc"/>
       </Unit5>
       <Unit6>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
