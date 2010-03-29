@@ -148,5 +148,12 @@ begin
           end;
 end;
 
+initialization
+  ExtManager := TExtensionManager.Create;
+  ExtManager.StartDisabled := True;
+finalization
+  if ExtManager <> nil then
+    FreeAndNil(ExtManager);
+
 end.
 

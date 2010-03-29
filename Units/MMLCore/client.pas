@@ -60,9 +60,13 @@ implementation
 
 procedure TClient.WriteLn(s: string);
 begin
-  if Assigned(WritelnProc) then
-    WritelnProc(s)
-  else
+  if self <> nil then
+  begin;
+    if Assigned(WritelnProc) then
+      WritelnProc(s)
+    else
+      mDebugLn(s);
+  end else
     mDebugLn(s);
 end;
 
