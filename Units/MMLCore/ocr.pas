@@ -164,7 +164,7 @@ end;
 { Set new Fonts. We set it to a Copy of NewFonts }
 procedure TMOCR.SetFonts(NewFonts: TMFonts);
 begin
-  Self.Fonts := NewFonts.Copy();
+  Self.Fonts := NewFonts.Copy(Self.Client);
 end;
 
 {

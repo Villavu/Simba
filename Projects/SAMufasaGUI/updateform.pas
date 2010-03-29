@@ -12,9 +12,9 @@ type
 
   { TSimbaUpdateForm }
 
-  { TSimbaVersionThread }
+  { TDownloadThread }
 
-  TSimbaVersionThread = class(TThread)
+  TDownloadThread = class(TThread)
   public
     ResultStr : string;
     InputURL : string;
@@ -42,11 +42,14 @@ type
     FOldSpeed : integer;
     FLastUpdateSpeed : longword;
     FSimbaVersion: Integer;
-    SimbaVersionThread : TSimbaVersionThread;
+    FFontVersion : integer;
+    SimbaVersionThread : TDownloadThread;
+    FontVersionThread : TDownloadThread;
   private
     function OnUpdateBeat: Boolean;
   public
     function CanUpdate: Boolean;
+    function GetLatestFontVersion : integer;
     function GetLatestSimbaVersion: Integer;
     procedure PerformUpdate;
   protected
@@ -56,15 +59,6 @@ type
 const
   DownloadSpeedTextRunning = 'Downloading at %d kB/s';
   DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
-
-var
-  SimbaUpdateForm: TSimbaUpdateForm;
-
-implementation
-uses
-  internets,  TestUnit, simbasettings,lclintf;
-
-const
   SimbaURL =     {$IFDEF WINDOWS}
                   {$IFDEF CPUI386}
                   'http://simba.villavu.com/bin/Windows/x86/Stable/'
@@ -78,8 +72,14 @@ const
                   'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
                   {$ENDIF}
                 {$ENDIF};
+  FontURL = 'http://simba.villavu.com/bin/Fonts/';
 
+var
+  SimbaUpdateForm: TSimbaUpdateForm;
 
+implementation
+uses
+  internets,  TestUnit, simbasettings,lclintf;
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
@@ -89,11 +89,39 @@ begin
   Exit(testunit.SimbaVersion < FSimbaVersion);
 end;
 
+function TSimbaUpdateForm.GetLatestFontVersion: integer;
+begin
+  if FontVersionThread = nil then//Create thread (only if no-other one is already running)
+  begin
+    FontVersionThread := TDownloadThread.Create(true);
+    FontVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+                                  'Settings/Fonts/VersionLink',FontURL  + 'Version',SimbaSettingsFile);
+    FontVersionThread.Resume;
+    while FontVersionThread.Done = false do//Wait till thread is done
+    begin
+      Application.ProcessMessages;
+      Sleep(25);
+    end;
+    FFontVersion := StrToIntDef(Trim(FontVersionThread.ResultStr), -1);//Read output
+    FreeAndNil(FontVersionThread);//Free the thread
+  end else
+  begin
+    //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
+    while FontVersionThread = nil do
+    begin;
+      Application.ProcessMessages;
+      Sleep(50);
+    end;
+  end;
+  Exit(FFontVersion);
+
+end;
+
 function TSimbaUpdateForm.GetLatestSimbaVersion: Integer;
 begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    SimbaVersionThread := TSimbaVersionThread.Create(true);
+    SimbaVersionThread := TDownloadThread.Create(true);
 
     SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
                 'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version',SimbaSettingsFile);
@@ -101,7 +129,7 @@ begin
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
       Application.ProcessMessages;
-      Sleep(50);
+      Sleep(25);
     end;
     FSimbaVersion := StrToIntDef(Trim(SimbaVersionThread.ResultStr), -1);//Read output
     FreeAndNil(SimbaVersionThread);//Free the thread
@@ -235,9 +263,9 @@ begin
   FUpdating:= false;
 end;
 
-{ TSimbaVersionThread }
+{ TDownloadThread }
 
-procedure TSimbaVersionThread.Execute;
+procedure TDownloadThread.Execute;
 begin
   ResultStr:= GetPage(InputURL);
   done := true;

@@ -36,9 +36,9 @@ type
 
   TDebugImgForm = class(TForm)
     DrawImage: TImage;
+    procedure DrawImageResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormHide(Sender: TObject);
-    procedure FormResize(Sender: TObject);
   private
     { private declarations }
   public
@@ -67,16 +67,16 @@ begin
   BlackDebugImage;
 end;
 
-procedure TDebugImgForm.FormHide(Sender: TObject);
-begin
-  Form1.MenuItemDebugImage.Checked := False;
-end;
-
-procedure TDebugImgForm.FormResize(Sender: TObject);
+procedure TDebugImgForm.DrawImageResize(Sender: TObject);
 begin
   DrawImage.Picture.Graphic.Width := DrawImage.Width;
   DrawImage.Picture.Graphic.Height := DrawImage.Height;
   BlackDebugImage;
+end;
+
+procedure TDebugImgForm.FormHide(Sender: TObject);
+begin
+  Form1.MenuItemDebugImage.Checked := False;
 end;
 
 procedure TDebugImgForm.BlackDebugImage;

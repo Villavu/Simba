@@ -70,11 +70,11 @@ uses
   graphtype, intfgraphics,graphics;
   {End To-Remove unit}
 
+
 function ReadBMP(path: string): Tbmp;
 var
   LazIntf : TLazIntfImage;
   RawImageDesc : TRawImageDescription;
-  data: array of tRGB;
 begin
   if FileExists(path) then
   begin;
@@ -84,9 +84,8 @@ begin
     LazIntf.LoadFromFile(path);
     Result.width := LazIntf.Width;
     Result.height := LazIntf.Height;
-    SetLength(data,LazIntf.Width*LazIntf.Height);
-    Move(LazIntf.PixelData[0],data[0],LazIntf.Width*LazIntf.Height*sizeOf(tRGB));
-    Result.data:= data;
+    SetLength(result.data,LazIntf.Width*LazIntf.Height);
+    Move(LazIntf.PixelData[0],result.data[0],LazIntf.Width*LazIntf.Height*sizeOf(tRGB));
     LazIntf.Free;
   end;
 end;
