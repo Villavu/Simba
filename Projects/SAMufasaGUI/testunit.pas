@@ -40,13 +40,13 @@ uses
   colourpicker, framescript, windowselector, lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,mmisc,
-  stringutil,mufasatypesutil,mufasabase,
+  stringutil,mufasatypesutil,mufasabase,  v_ideCodeParser,
   about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-    SimbaVersion = 590;
+    SimbaVersion = 600;
 
 type
 
@@ -2213,17 +2213,8 @@ begin
 end;
 
 procedure TForm1.ButtonTrayClick(Sender: TObject);
-{var
-  ms : TMemoryStream;
-  fs : TFileStream;}
 begin
-{
-  fs := TFileStream.Create('c:\remake\fonts.tar.bz2',fmOpenRead);
-  ms := DecompressBZip2(fs);
-  fs.free;
-  UnTar(ms,'c:\remake\fonttest\',true);
-  ms.free;}
-  Form1.Hide;
+  self.hide;
 end;
 
 procedure TForm1.PageControl1Changing(Sender: TObject; var AllowChange: Boolean

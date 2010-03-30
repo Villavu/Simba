@@ -32,6 +32,7 @@ uses
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, SynEditHighlighter;
 const
    ecCodeCompletion = ecUserFirst;
+   ecCodeHints = ecUserFirst + 1;
 type
   TScriptState = (ss_None,ss_Running,ss_Paused,ss_Stopping);
   {
@@ -256,89 +257,145 @@ var
   mp: TCodeInsight;
   ms: TMemoryStream;
   ItemList, InsertList: TStringList;
-  sp, ep: Integer;
+  sp, ep,bcc,cc,bck: Integer;
   p: TPoint;
   s, Filter: string;
   Attri: TSynHighlighterAttributes;
+  d: TDeclaration;
+  dd: TDeclaration;
 begin
-  if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or (Attri.Name = 'Identifier')) then
+  if ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or (Attri.Name = 'Identifier')) then
   begin
-    {form1.FunctionListShown(True);
-    with form1.frmFunctionList do
-      if editSearchList.CanFocus then
-      begin;
-        editSearchList.SetFocus;
-        LineText := SynEdit.LineText;
-        Caret:=SynEdit.LogicalCaretXY;
-        i := Caret.X - 1;
-        endi := caret.x;
-        if (i > length(LineText)) or ((i = 0) and (length(lineText) = 0)) then
+    if (Command = ecCodeCompletion) then
+    begin;
+      {form1.FunctionListShown(True);
+      with form1.frmFunctionList do
+        if editSearchList.CanFocus then
+        begin;
+          editSearchList.SetFocus;
+          LineText := SynEdit.LineText;
+          Caret:=SynEdit.LogicalCaretXY;
+          i := Caret.X - 1;
+          endi := caret.x;
+          if (i > length(LineText)) or ((i = 0) and (length(lineText) = 0)) then
+          begin
+            SearchText:= '';
+            CompletionLine := PadRight(linetext,caret.x);
+          end
+          else begin
+            while (i > 0) and (LineText[i] in ['a'..'z','A'..'Z','0'..'9','_']) do
+              dec(i);
+            while LineText[endi] in ['a'..'z','A'..'Z','0'..'9','_'] do
+              inc(endi);
+            SearchText := Trim(copy(LineText, i + 1, Caret.X - i - 1));
+            CompletionLine := LineText;
+          end;
+          CompletionStart:= LineText;
+          Delete(CompletionLine,i+1,endi - i - 1);
+          Insert('%s',CompletionLine,i+1);
+          CompletionCaret := Point(endi,Caret.y);
+          StartWordCompletion:= Point(i+1,caret.y);
+          mDebugLn(CompletionLine);
+          mDebugLn(CompletionStart);
+          InCodeCompletion := true;
+          editSearchList.Text:= SearchText;
+          editSearchList.SelStart:= Length(searchText);
+          SynEdit.SelectedColor.Style:= [fsUnderline];
+          SynEdit.SelectedColor.Foreground:= clBlack;
+          SynEdit.SelectedColor.Background:= clWhite;
+          Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
+        end;}
+      mp := TCodeInsight.Create;
+      mp.FileName := ScriptFile;
+      mp.OnMessage := @Form1.OnCCMessage;
+      mp.OnFindInclude := @Form1.OnCCFindInclude;
+
+      ms := TMemoryStream.Create;
+      ItemList := TStringList.Create;
+      InsertList := TStringList.Create;
+      InsertList.Sorted := True;
+
+      Synedit.Lines.SaveToStream(ms);
+
+      try
+        Filter := WordAtCaret(Synedit, sp, ep);
+        Form1.CodeCompletionStart := Point(sp, Synedit.CaretY);
+        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
+
+        s := mp.GetExpressionAtPos;
+        if (s <> '') then
         begin
-          SearchText:= '';
-          CompletionLine := PadRight(linetext,caret.x);
-        end
-        else begin
-          while (i > 0) and (LineText[i] in ['a'..'z','A'..'Z','0'..'9','_']) do
-            dec(i);
-          while LineText[endi] in ['a'..'z','A'..'Z','0'..'9','_'] do
-            inc(endi);
-          SearchText := Trim(copy(LineText, i + 1, Caret.X - i - 1));
-          CompletionLine := LineText;
+          sp := LastDelimiter('.', s);
+          if (sp > 0) then
+            Delete(s, sp, Length(s) - sp + 1)
+          else
+            s := '';
         end;
-        CompletionStart:= LineText;
-        Delete(CompletionLine,i+1,endi - i - 1);
-        Insert('%s',CompletionLine,i+1);
-        CompletionCaret := Point(endi,Caret.y);
-        StartWordCompletion:= Point(i+1,caret.y);
-        mDebugLn(CompletionLine);
-        mDebugLn(CompletionStart);
-        InCodeCompletion := true;
-        editSearchList.Text:= SearchText;
-        editSearchList.SelStart:= Length(searchText);
-        SynEdit.SelectedColor.Style:= [fsUnderline];
-        SynEdit.SelectedColor.Foreground:= clBlack;
-        SynEdit.SelectedColor.Background:= clWhite;
-        Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
-      end;}
-    mp := TCodeInsight.Create;
-    mp.FileName := ScriptFile;
-    mp.OnMessage := @Form1.OnCCMessage;
-    mp.OnFindInclude := @Form1.OnCCFindInclude;
 
-    ms := TMemoryStream.Create;
-    ItemList := TStringList.Create;
-    InsertList := TStringList.Create;
-    InsertList.Sorted := True;
-
-    Synedit.Lines.SaveToStream(ms);
-
-    try
-      Filter := WordAtCaret(Synedit, sp, ep);
-      Form1.CodeCompletionStart := Point(sp, Synedit.CaretY);
-      mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
-
-      s := mp.GetExpressionAtPos;
-      if (s <> '') then
-      begin
-        sp := LastDelimiter('.', s);
-        if (sp > 0) then
-          Delete(s, sp, Length(s) - sp + 1)
-        else
-          s := '';
+        mp.FillSynCompletionProposal(ItemList, InsertList, s);
+        p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
+        p.y := p.y + SynEdit.LineHeight;
+        Form1.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
+      finally
+        FreeAndNil(ms);
+        FreeAndNil(mp);
+        ItemList.Free;
+        InsertList.Free;
       end;
+    end else
+    if command = ecCodeHints then
+    begin
+      mp := TCodeInsight.Create;
+      mp.OnMessage := @form1.OnCCMessage;
+      mp.OnFindInclude := @form1.OnCCFindInclude;
 
-      mp.FillSynCompletionProposal(ItemList, InsertList, s);
-      p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
-      p.y := p.y + SynEdit.LineHeight;
-      Form1.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
-    finally
-      FreeAndNil(ms);
-      FreeAndNil(mp);
-      ItemList.Free;
-      InsertList.Free;
+      ms := TMemoryStream.Create;
+      synedit.Lines.SaveToStream(ms);
+
+      try
+        Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
+        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
+        //mp.Position := Synedit.SelStart + (ep - Synedit.CaretX) - 1;
+
+        bcc := 1;
+        bck := 0;
+        cc := 0;
+        s := mp.GetExpressionAtPos(bcc, bck, cc, True);
+        if (s <> '') then
+          Delete(s, Length(s), 1);
+
+        d := mp.FindVarBase(s);
+        dd := nil;
+        while (d <> nil) and (d <> dd) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) do
+        begin
+          dd := d;
+          d := d.Owner.Items.GetFirstItemOfClass(TciTypeKind);
+          if (d <> nil) then
+          begin
+            d := TciTypeKind(d).GetRealType;
+            if (d is TciReturnType) then
+              d := d.Owner;
+          end;
+          if (d <> nil) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) then
+            d := mp.FindVarBase(d.CleanText)
+          else
+            Break;
+        end;
+        if (d <> nil) and (d <> dd) and (d.Owner <> nil) and ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration)) then
+        begin
+          if (not (d is TciProcedureDeclaration)) and (d.Owner is TciProcedureDeclaration) then
+            d := d.Owner;
+          if (TciProcedureDeclaration(d).SynParams <> '') then
+            formWriteln(TciProcedureDeclaration(d).SynParams)
+          else
+            FormWriteln('<no parameters expected>');
+        end;
+      finally
+        FreeAndNil(ms);
+        FreeAndNil(mp);
+      end;
     end;
   end;
-
   if Form1.CodeCompletionForm.Visible then
     case Command of
       ecDeleteChar, ecDeleteWord, ecDeleteEOL:
@@ -522,6 +579,7 @@ begin
     MarkCaret.IgnoreKeywords := true;
   end;
   AddKey(SynEdit,ecCodeCompletion,VK_SPACE,[ssCtrl]);
+  AddKey(SynEdit,ecCodeHints,VK_SPACE,[ssCtrl,ssShift]);
 //  TSynPasSyn(SynEdit.Highlighter).NestedComments:= false; Does not work :(
 end;
 
