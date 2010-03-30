@@ -10,7 +10,6 @@ object DebugImgForm: TDebugImgForm
   ClientWidth = 400
   OnCreate = FormCreate
   OnHide = FormHide
-  OnResize = FormResize
   LCLVersion = '0.9.29'
   object DrawImage: TImage
     Left = 0
@@ -18,5 +17,6 @@ object DebugImgForm: TDebugImgForm
     Top = 0
     Width = 400
     Align = alClient
+    OnResize = DrawImageResize
   end
 end
