@@ -36,7 +36,7 @@ uses
   libloader, mufasabase, v_ideCodeInsight, PSDump, v_ideCodeParser,
   v_AutoCompleteForm, CastaliaPasLex, CastaliaPasLexTypes, CastaliaSimplePasPar,
   CastaliaSimplePasParTypes, dcpbase64, mPasLex, v_Constants, v_MiscFunctions,
-  extensionmanagergui;
+  extensionmanagergui, mmisc;
 
 {$R project1.res}
 
@@ -48,8 +48,8 @@ begin
   Application.CreateForm(TColourHistoryForm, ColourHistoryForm);
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TDebugImgForm, DebugImgForm);
-  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   Application.CreateForm(TExtensionsForm, ExtensionsForm);
+//  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
 //  Application.CreateForm(TSettingsForm, SettingsForm); Done in FormCreate of MainForm
   Application.Run;
 end.
