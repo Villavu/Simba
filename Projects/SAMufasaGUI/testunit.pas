@@ -39,14 +39,14 @@ uses
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
   colourpicker, framescript, windowselector, lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
-  SynEditMarkupHighAll, LMessages, Buttons,
+  SynEditMarkupHighAll, LMessages, Buttons,mmisc,
   stringutil,mufasatypesutil,mufasabase,
   about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-    SimbaVersion = 587;
+    SimbaVersion = 600;
 
 type
 
@@ -326,12 +326,17 @@ type
     FirstRun : boolean;//Only show the warnings the first run (path not existing one's)
     SearchStart : TPoint;
     LastTab  : integer;
+    UpdatingFonts : boolean;
+    function GetFontPath: String;
     function GetIncludePath: String;
     function GetScriptState: TScriptState;
+    procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
     procedure SetScriptState(const State: TScriptState);
     function LoadSettingDef(Key : string; Def : string) : string;
     function CreateSetting(Key : string; Value : string) : string;
+    procedure SetSetting(key : string; Value : string);
+    procedure FontUpdate;
   public
     DebugStream: String;
     SearchString : string;
@@ -378,8 +383,18 @@ type
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
     property IncludePath : String read GetIncludePath write SetIncludePath;
+    property FontPath : String read GetFontPath write SetFontPath;
   end;
 
+  { TProcThread }
+
+  TProcThread = class(TThread)
+  public
+    StartWait : Cardinal;
+    ClassProc : procedure of object;
+    NormalProc : procedure;
+    procedure Execute; override;
+  end;
   procedure ClearDebug;
   procedure formWriteln( S : String);
   procedure formWritelnEx( S : String);
@@ -595,9 +610,11 @@ var
    time:integer;
   LatestVersion : integer;
 begin
-  chk := LoadSettingDef('Settings/Updater/CheckForUpdates','True');
+  UpdateTimer.Interval:= MaxInt;
+  FontUpdate;
+  chk := LowerCase(LoadSettingDef('Settings/Updater/CheckForUpdates','True'));
 
-  if chk <> 'True' then
+  if chk <> 'true' then
     Exit;
 
   LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
@@ -958,12 +975,14 @@ end;
 
 procedure TForm1.CreateDefaultEnvironment;
 var
-  FontPath,PluginsPath,extensionsPath : string;
+  PluginsPath,extensionsPath : string;
+  FontUpdater : TProcThread;
 begin
   CreateSetting('Settings/Updater/CheckForUpdates','True');
   CreateSetting('Settings/Updater/CheckEveryXMinutes','30');
   CreateSetting('Settings/Interpreter/UseCPascal', 'False');
   CreateSetting('Settings/Fonts/LoadOnStartUp', 'True');
+  CreateSetting('Settings/Fonts/Version','-1');
   CreateSetting('Settings/Tabs/OpenNextOnClose','False');
   CreateSetting('Settings/Tabs/OpenScriptInNewTab','True');
   CreateSetting('Settings/Tabs/CheckTabsBeforeOpen','True');
@@ -972,38 +991,12 @@ begin
   CreateSetting('Settings/MainForm/NormalSize','739:555');
   CreateSetting('Settings/FunctionList/ShowOnStart','True');
 
-  CreateSetting('Settings/Updater/RemoteLink',
-                {$IFDEF WINDOWS}
-                  {$IFDEF CPUI386}
-                  'http://simba.villavu.com/bin/Windows/x86/Stable/Simba.exe'
-                  {$ELSE}
-                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/Simba.exe'
-                  {$ENDIF}
-                {$ELSE}
-                  {$IFDEF CPUI386}
-                  'http://simba.villavu.com/bin/Linux/x86/Stable/Simba'
-                  {$ELSE}
-                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/Simba'
-                  {$ENDIF}
-                {$ENDIF}
-                );
-  CreateSetting('Settings/Updater/RemoteVersionLink',
-                {$IFDEF WINDOWS}
-                  {$IFDEF CPUI386}
-                  'http://simba.villavu.com/bin/Windows/x86/Stable/Version'
-                  {$ELSE}
-                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/Version'
-                  {$ENDIF}
-                {$ELSE}
-                  {$IFDEF CPUI386}
-                  'http://simba.villavu.com/bin/Linux/x86/Stable/Version'
-                  {$ELSE}
-                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/Version'
-                  {$ENDIF}
-                {$ENDIF}
-                );
+  CreateSetting('Settings/Updater/RemoteLink',SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
+  CreateSetting('Settings/Updater/RemoteVersionLink',SimbaURL + 'Version');
+  CreateSetting('Settings/Fonts/VersionLink', FontURL + 'Version');
+  CreateSetting('Settings/Fonts/UpdateLink', FontURL + 'Fonts.tar.bz2');
+
   {Creates the paths and returns the path}
-  fontPath := CreateSetting('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS));
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
   extensionsPath := CreateSetting('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
   CreateSetting('LastConfig/MainForm/Position','');
@@ -1023,6 +1016,7 @@ begin
   SettingsForm.SettingsTreeView.Items.GetFirstNode.Expand(false);
   SettingsForm.SaveCurrent;
   LoadFormSettings;
+  UpdateTimer.Interval:=25;
 end;
 
 procedure TForm1.LoadFormSettings;
@@ -1159,7 +1153,6 @@ end;
 procedure TForm1.InitalizeTMThread(var Thread: TMThread);
 var
   DbgImgInfo : TDbgImgInfo;
-  fontPath: String;
   AppPath : string;
   pluginspath: string;
   ScriptPath : string;
@@ -1168,7 +1161,6 @@ var
   loadFontsOnScriptStart: boolean;
 begin
   AppPath:= MainDir + DS;
-  fontPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+  'Fonts' + DS)));
   PluginsPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS)));
   CurrScript.ScriptErrorLine:= -1;
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
@@ -1668,7 +1660,7 @@ begin
         if MethodInfo.Filename <> nil then
           if MethodInfo.Filename <> '' then
           begin;
-            Writeln(MethodInfo.filename);
+//            Writeln(MethodInfo.filename);
             LoadScriptFile(MethodInfo.Filename,true,true);
           end;
         CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
@@ -1771,51 +1763,63 @@ begin
   FreeAndNil(ExtManager);
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
 
-  procedure CCFillCore;
-  var
-    t: TMThread;
-    a: TPSScriptExtension;
-    b: TStringList;
-    ms: TMemoryStream;
+procedure CCFillCore;
+var
+  t: TMThread;
+  a: TPSScriptExtension;
+  b: TStringList;
+  ms: TMemoryStream;
+begin
+  if form1.UpdatingFonts then
   begin
-    InitalizeTMThread(t);
-    KillThread(t.ThreadID);
-    if (t is TPSThread) then
-    try
-      a := TPSScriptExtension.Create(Self);
-      b := TStringList.Create;
-      ms := TMemoryStream.Create;
-
-      try
-        with TPSThread(t).PSScript do
-        begin
-          a.OnCompile := OnCompile;
-          a.OnCompImport := OnCompImport;
-          a.OnExecImport := OnExecImport;
-        end;
-        a.GetValueDefs(b);
-
-        SetLength(CoreBuffer, 1);
-        CoreBuffer[0] := TCodeInsight.Create;
-        with CoreBuffer[0] do
-        begin
-          OnMessage := @OnCCMessage;
-          b.SaveToStream(ms);
-          Run(ms, nil, -1, True);
-          FileName := '!PSCORE!';
-        end;
-      finally
-        b.Free;
-        a.Free;
-      end;
-    finally
-      //KillThread(t.ThreadID);
-      t.Free;
+    mDebugLn('Updating the fonts, thus waiting a bit till we init the OCR.');
+    while form1.UpdatingFonts do
+    begin
+      if GetCurrentThreadId = MainThreadID then
+        Application.ProcessMessages;
+      sleep(25);
     end;
   end;
+  form1.InitalizeTMThread(t);
+  KillThread(t.ThreadID);
+  if (t is TPSThread) then
+  try
+    a := TPSScriptExtension.Create(form1);
+    b := TStringList.Create;
+    ms := TMemoryStream.Create;
 
+    try
+      with TPSThread(t).PSScript do
+      begin
+        a.OnCompile := OnCompile;
+        a.OnCompImport := OnCompImport;
+        a.OnExecImport := OnExecImport;
+      end;
+      a.GetValueDefs(b);
+
+      SetLength(CoreBuffer, 1);
+      CoreBuffer[0] := TCodeInsight.Create;
+      with CoreBuffer[0] do
+      begin
+        OnMessage := @form1.OnCCMessage;
+        b.SaveToStream(ms);
+        Run(ms, nil, -1, True);
+        FileName := '!PSCORE!';
+      end;
+    finally
+      b.Free;
+      a.Free;
+    end;
+  finally
+    //KillThread(t.ThreadID);
+    t.Free;
+  end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+var
+  FillThread : TProcThread;
 begin
   Randomize;
   DecimalSeparator := '.';
@@ -1837,18 +1841,22 @@ begin
   TT_Console.Visible:= false;
   {$endif}
   InitmDebug;
-  ExtManager := TExtensionManager.Create;
-  ExtManager.StartDisabled:= True;
+  FillThread := TProcThread.Create(true);
+  FillThread.FreeOnTerminate:= True;
+  FillThread.NormalProc:= @CCFillCore;
+  UpdateTimer.OnTimer:= @UpdateTimerCheck;
+  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   if FileExists(SimbaSettingsFile) then
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
     Self.LoadFormSettings;
-  end
-  else  begin
+  end else
+  begin
     Application.CreateForm(TSettingsForm,SettingsForm);
     Self.CreateDefaultEnvironment;
+    FillThread.StartWait:= 250;
   end;
-  UpdateTimer.OnTimer:= @UpdateTimerCheck;
+
   //Show close buttons @ tabs
   PageControl1.Options:=PageControl1.Options+[nboShowCloseButtons];
   PageControl1.OnCloseTabClicked:=ActionCloseTab.OnExecute;
@@ -1877,7 +1885,8 @@ begin
   HandleParameters;
   TT_Update.Visible:= false;
 
-  CCFillCore;
+  //Fill the codeinsight buffer
+  FillThread.Resume;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -2076,6 +2085,7 @@ begin
       end;
       Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
       Temp2Node.Data := GetMem(SizeOf(TMethodInfo));
+      FillChar(PMethodInfo(Temp2Node.Data)^,SizeOf(TMethodInfo),0);
       with PMethodInfo(Temp2Node.Data)^ do
       begin
         MethodStr:= strnew(PChar(Methods[i].FuncDecl));
@@ -2129,9 +2139,9 @@ end;
 
 function GetSimbaNews: String;
 var
-  t: TSimbaVersionThread;
+  t: TDownloadThread;
 begin
-  t := TSimbaVersionThread.Create(true);
+  t := TDownloadThread.Create(true);
   t.InputURL:='http://simba.villavu.com/bin/news';
   t.Resume;
   while not t.done do
@@ -2203,7 +2213,16 @@ begin
 end;
 
 procedure TForm1.ButtonTrayClick(Sender: TObject);
+{var
+  ms : TMemoryStream;
+  fs : TFileStream;}
 begin
+{
+  fs := TFileStream.Create('c:\remake\fonts.tar.bz2',fmOpenRead);
+  ms := DecompressBZip2(fs);
+  fs.free;
+  UnTar(ms,'c:\remake\fonttest\',true);
+  ms.free;}
   Form1.Hide;
 end;
 
@@ -2280,6 +2299,16 @@ begin
   result := CurrScript.FScriptState;
 end;
 
+procedure TForm1.SetFontPath(const AValue: String);
+begin
+  SetSetting('Settings/Fonts/Path',AValue);
+end;
+
+function TForm1.GetFontPath: String;
+begin
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+'Fonts' + DS)));
+end;
+
 function TForm1.GetIncludePath: String;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
@@ -2287,7 +2316,7 @@ end;
 
 procedure TForm1.SetIncludePath(const AValue: String);
 begin
-  CreateSetting('Settings/Includes/Path',AValue);
+  SetSetting('Settings/Includes/Path',AValue);
 end;
 
 procedure TForm1.SetScriptState(const State: TScriptState);
@@ -2327,6 +2356,62 @@ function TForm1.CreateSetting(Key: string; Value: string): string;
 begin
   result := SettingsForm.Settings.GetSetDefaultKeyValue(Key,value);
 end;
+
+procedure TForm1.SetSetting(key: string; Value: string);
+begin
+     //Creates the setting if needed
+  if CreateSetting(key,value) <> value then //The setting already occurs, and has a different value.. Lets change it
+  begin;
+    SettingsForm.Settings.SetKeyValue(key,value);
+    SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
+  end;
+end;
+
+procedure TForm1.FontUpdate;
+var
+  CurrVersion : integer;
+  LatestVersion : integer;
+  FontDownload : TDownloadThread;
+  Stream : TStringStream;
+  Decompressed : TMemoryStream;
+begin
+  if UpdatingFonts then
+    exit;
+  UpdatingFonts := True;
+  CurrVersion := StrToIntDef(LoadSettingDef('Settings/Fonts/Version','-1'),-1);
+  LatestVersion := SimbaUpdateForm.GetLatestFontVersion;
+  if LatestVersion > CurrVersion then
+  begin;
+    formWriteln(format('New fonts available. Current version: %d. Latest version: %d',[CurrVersion,LatestVersion]));
+    FontDownload := TDownloadThread.Create(True);
+    FontDownload.InputURL:= LoadSettingDef('Settings/Fonts/UpdateLink',FontURL + 'Fonts.tar.bz2');
+    FontDownload.resume;
+    while FontDownload.Done = false do
+    begin
+      Application.ProcessMessages;
+      Sleep(25);
+    end;
+    Stream := TStringStream.Create(FontDownload.ResultStr);
+    try
+      Decompressed := DecompressBZip2(stream);
+      if UnTar(decompressed, FontPath,true) then
+      begin;
+        FormWriteln('Succesfully installed the new fonts!');
+        SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion));
+        if Assigned(self.OCR_Fonts) then
+          self.OCR_Fonts.Free;
+        Self.OCR_Fonts := TMOCR.Create(nil);
+        OCR_Fonts.InitTOCR(fontPath);
+      end;
+      Decompressed.free;
+    finally
+      Stream.Free;
+      FontDownload.Free;
+    end;
+  end;
+  UpdatingFonts := False;
+end;
+
 {$ifdef mswindows}
 function GetConsoleWindow: HWND; stdcall; external kernel32 name 'GetConsoleWindow';
 
@@ -2586,6 +2671,18 @@ begin
   ScriptFrame.Free;
   TabSheet.Free;
   inherited Destroy;
+end;
+
+{ TProcThread }
+
+procedure TProcThread.Execute;
+begin
+  if startwait <> 0 then
+    sleep(StartWait);
+  if NormalProc <> nil then
+    NormalProc;
+  if ClassProc <> nil then
+    ClassProc;
 end;
 
 initialization

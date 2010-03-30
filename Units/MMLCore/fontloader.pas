@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, SysUtils,
-  ocrutil; // contains the actual `loading'
+  ocrutil,lclintf; // contains the actual `loading'
 
 {
   We will not give any access to actual indices.
@@ -68,7 +68,7 @@ type
       function LoadFont(Name: String; Shadow: Boolean): boolean;
       procedure SetPath(aPath: String);
       function GetPath: String;
-      function Copy: TMFonts;
+      function Copy(Owner : TObject): TMFonts;
       function Count : integer;
       property Font[Index : integer]: TMfont read GetFontByIndex; default;
     end;
@@ -206,8 +206,6 @@ end;
 function TMFonts.LoadFont(Name: String; Shadow: Boolean): boolean;
 var
   f: TMFont;
-  ocrdata: TOcrData;
-
 begin
   if not DirectoryExists(Path + Name) then
   begin
@@ -215,25 +213,23 @@ begin
     Exit(False);
   end;
 
-  ocrdata := InitOCR(Path + Name + DS, Shadow);
-
   f:=TMFont.Create;
   f.Name := Name;
   if Shadow then
     F.Name := F.Name + '_s';
-  f.Data := ocrdata;
+  f.Data := InitOCR(Path + Name + DS, Shadow);
   Fonts.Add(f);
   {$IFDEF FONTDEBUG}
   TClient(Client).Writeln('Loaded Font ' + f.Name);
   {$ENDIF}
 end;
 
-function TMFonts.Copy: TMFonts;
+function TMFonts.Copy(Owner : TObject): TMFonts;
 
 var
   i:integer;
 begin
-  Result := TMFonts.Create(Client);
+  Result := TMFonts.Create(Owner);
   Result.Path := Self.GetPath();
   for i := 0 to Self.Fonts.Count -1 do
     Result.Fonts.Add(TMFont(Self.Fonts.Items[i]).Copy());

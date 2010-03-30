@@ -194,6 +194,7 @@ begin;
       begin
         tmpNode := FunctionList.Items.AddChild(Node,name.ShortText);
         tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+        FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
         with PMethodInfo(tmpNode.Data)^ do
         begin
           MethodStr := strnew(Pchar(CleanDeclaration));
