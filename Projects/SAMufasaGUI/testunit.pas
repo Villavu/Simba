@@ -330,8 +330,10 @@ type
     function GetFontPath: String;
     function GetIncludePath: String;
     function GetScriptState: TScriptState;
+    function GetShowHintAuto: boolean;
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
+    procedure SetShowHintAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
     function LoadSettingDef(Key : string; Def : string) : string;
     function CreateSetting(Key : string; Value : string) : string;
@@ -383,6 +385,7 @@ type
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
+    property ShowHintAuto : boolean read GetShowHintAuto write SetShowHintAuto;
     property IncludePath : String read GetIncludePath write SetIncludePath;
     property FontPath : String read GetFontPath write SetFontPath;
   end;
@@ -991,6 +994,7 @@ begin
   CreateSetting('Settings/General/MaxRecentFiles','10');
   CreateSetting('Settings/MainForm/NormalSize','739:555');
   CreateSetting('Settings/FunctionList/ShowOnStart','True');
+  CreateSetting('Settings/CodeHints/ShowAutomatically','True');
 
   CreateSetting('Settings/Updater/RemoteLink',SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
   CreateSetting('Settings/Updater/RemoteVersionLink',SimbaURL + 'Version');
@@ -2294,6 +2298,11 @@ begin
   result := CurrScript.FScriptState;
 end;
 
+function TForm1.GetShowHintAuto: boolean;
+begin
+  Result := LowerCase(LoadSettingDef('Settings/CodeHints/ShowAutomatically','True')) = 'true';
+end;
+
 procedure TForm1.SetFontPath(const AValue: String);
 begin
   SetSetting('Settings/Fonts/Path',AValue);
@@ -2405,6 +2414,11 @@ begin
     end;
   end;
   UpdatingFonts := False;
+end;
+
+procedure TForm1.SetShowHintAuto(const AValue: boolean);
+begin
+  SetSetting('Settings/CodeHints/ShowAutomatically',Booltostr(AValue,true));
 end;
 
 {$ifdef mswindows}

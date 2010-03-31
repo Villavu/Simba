@@ -50,6 +50,8 @@ type
     procedure SynEditChange(Sender: TObject);
     procedure SynEditClickLink(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure SynEditCommandProcessed(Sender: TObject;
+      var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
     procedure SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
       State: TDragState; var Accept: Boolean);
@@ -206,6 +208,18 @@ begin
   finally
     FreeAndNil(ms);
     FreeAndNil(mp);
+  end;
+end;
+
+procedure TScriptFrame.SynEditCommandProcessed(Sender: TObject;
+  var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
+var
+  Command2 : TSynEditorCommand;
+begin
+  if (Command = ecChar) and (AChar = '(') and (Form1.ParamHint.Visible = false) and (Form1.ShowHintAuto) then
+  begin
+    Command2:= ecCodeHints;
+    SynEditProcessUserCommand(sender,command2,achar,nil);
   end;
 end;
 
@@ -377,8 +391,11 @@ begin
     synedit.Lines.SaveToStream(ms);
     try
       Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
-      mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1,true);
-
+      s := SynEdit.Lines[SynEdit.Carety-1];
+      if ep > length(s) then //We are outside the real text, go back to the last char
+        mp.Run(ms, nil, Synedit.SelStart - ep + length(s),true)
+      else
+        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1,true);
       bcc := 1;bck := 0;cc := 0;
       s := mp.GetExpressionAtPos(bcc, bck, cc,posi, true);
       bracketpos := posi + length(s);
