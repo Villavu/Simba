@@ -600,11 +600,14 @@ var
   typedecl : TDeclaration;
   s,TypeStr,Params : string;//
   i,ii :integer;
+  CursorXY : TPoint;
 begin
   result := -1;
   MustHide := True;
-  Parser := TmwPasLex.Create;
-  parser.Origin:= PChar(  StringListPartToText(Point(FBracketPoint.x,FBracketPoint.y-1),point(min(FSynEdit.LogicalCaretXY.x-1,length(FSynEdit.LineText)),FSynEdit.logicalcaretxy.y-1),FSynEdit.lines));
+  Parser := TmwPasLex.Create;                 //The position of the bracket
+  parser.Origin:= PChar(StringListPartToText(Point(FBracketPoint.x,FBracketPoint.y-1),
+                                             point(min(FSynEdit.CaretX,length(FSynEdit.Lines[FSynEdit.CaretY - 1])),FSynEdit.CaretY-1),
+                                             FSynEdit.lines));
   bracketcount := 0;
   ParameterIndex := -1;
   while parser.TokenID <> tkNull do
