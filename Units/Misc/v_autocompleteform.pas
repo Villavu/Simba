@@ -6,11 +6,12 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, ExtCtrls,  SynEdit, SynEditKeyCmds,
+  StdCtrls, ExtCtrls,  SynEdit, SynEditKeyCmds, v_ideCodeParser, v_ideCodeInsight,
 
   {$IFDEF FPC}
   LMessages,
-  lcltype
+  lcltype,
+  mPasLex
   {$ELSE}
   Windows,
   Messages
@@ -81,16 +82,34 @@ type
     property InsertProc: TInsertProc read getInsertProc write setInsertProc;
   end;
 
+  { TParamHint }
+
   TParamHint = class(THintWindow)
+  private
+    fPreparedString : string;
+    LastParameterIndex : integer;
+    FSynEdit : TSynedit;
+    FStartPoint : TPoint;
+    FBracketPoint : TPoint;
+    FMP : TCodeInsight;
+    FDecl : TciProcedureDeclaration;
+    FParameters : TDeclarationArray;
+    procedure ParamHintHide(Sender: TObject);
+    procedure ApplicationIdle(Sender: TObject; var Done: Boolean);
+    procedure DrawHints(var MaxWidth, MaxHeight: Integer; Draw: boolean);
+    function PrepareParamString(out Str : string; out MustHide : boolean) : integer;
   public
     constructor Create(TheOwner: TComponent); override;
+    procedure CalculateBounds;
+    procedure UpdateHint;
     procedure Paint; override;
+    procedure Show(StartPoint,BracketPoint : TPoint;Decl : TciProcedureDeclaration; Editor : TSynedit; mp : TCodeInsight); reintroduce;
   end;
 
 implementation
 
 uses
-  StrUtils {$IFDEF FPC}, lclintf{$ENDIF}, Themes;
+  StrUtils {$IFDEF FPC}, lclintf{$ENDIF},math, Themes;
 
 procedure TAutoCompleteListBox.setItemList(List: TStrings);
 begin
@@ -553,61 +572,391 @@ begin
     Editor.SetFocus;
 end;
 
+function StringListPartToText(BeginPos, EndPos : TPoint; Strings :TStrings) : string;
+var
+  i : integer;
+begin;
+  result := '';
+  if endpos.y < beginpos.y then
+    exit;
+  if endpos.y >= strings.Count then
+    exit;
+  if beginpos.x > length(strings[beginpos.y]) then
+    exit;
+  if endpos.x > length(strings[endpos.y]) then
+    exit;
+  result := copy(strings[beginpos.y],beginpos.x, length(strings[beginpos.y]) - beginpos.x + 1);
+  for i := beginpos.y + 1 to endpos.y-1 do
+    result := result + strings[i];
+  if endpos.y <> beginpos.y then
+    result := result +  copy(strings[endpos.y],0,endpos.x);
+end;
+
+function TParamHint.PrepareParamString(out Str: string; out MustHide : boolean): Integer;
+var
+  Parser : TmwPasLex;
+  bracketcount, parameterindex,ParamC : integer;
+  ParamNames : TDeclarationArray;
+  typedecl : TDeclaration;
+  s,TypeStr,Params : string;//
+  i,ii :integer;
+begin
+  result := -1;
+  MustHide := True;
+  Parser := TmwPasLex.Create;
+  parser.Origin:= PChar(  StringListPartToText(Point(FBracketPoint.x,FBracketPoint.y-1),point(min(FSynEdit.LogicalCaretXY.x-1,length(FSynEdit.LineText)),FSynEdit.logicalcaretxy.y-1),FSynEdit.lines));
+  bracketcount := 0;
+  ParameterIndex := -1;
+  while parser.TokenID <> tkNull do
+  begin
+    case parser.tokenID of
+      tkRoundOpen,tkSquareOpen:
+        begin
+          inc(BracketCount);
+          if BracketCount = 1 then
+            ParameterIndex := 0;
+        end;
+      tkRoundClose, tkSquareClose:
+        begin
+          dec(BracketCount);
+          if bracketcount =0 then
+            exit;
+        end;
+      tkComma:
+        begin
+          if bracketcount = 1 then
+            inc(parameterIndex);
+        end;
+      end;
+    parser.NextNoJunk;
+  end;
+  if parameterindex = -1 then
+    exit;
+  if parameterindex = LastParameterIndex then
+  begin
+    mustHide := false;
+    str := fPreparedString;
+    result := parameterindex;
+    exit;
+  end;
+  str := '';
+  ParamC := 0;
+  typedecl := FDecl.Name;
+  if typedecl = nil then
+    exit;
+  if typedecl.shorttext = '' then
+    exit;
+  for i := 0 to high(FParameters) do
+  begin
+    if (FParameters[i] is TciConstParameter) then
+      s := 'const '
+    else if (FParameters[i] is TciOutParameter) then
+      s := 'out '
+    else if (FParameters[i] is TciInParameter) then
+      s := 'in '
+    else if (FParameters[i] is TciVarParameter) then
+      s := 'var '
+    else
+      s := '';
+    ParamNames:= FParameters[i].Items.GetItemsOfClass(TciParameterName);
+    TypeDecl := FParameters[i].Items.GetFirstItemOfClass(TciParameterType);
+    if TypeDecl <> nil then
+      TypeStr := ': ' + typedecl.ShortText
+    else
+      TypeStr := '';
+    Params := '';
+    for ii := 0 to high(ParamNames) do
+    begin;
+      if parameterindex = ParamC then //Found the current parameter index in the parameterdecl!
+      begin;
+        if s <> '' then
+          s := '\' + s + '\'; //If it has a const/var/in/out thingy, bold this as well
+        if TypeStr <> '' then        //If has a type then bold the type
+          TypeStr := '\' + TypeStr + '\';
+        if Params <> '' then
+          Params := Params +', \' + ParamNames[ii].ShortText + '\'
+        else
+          Params := '\' + ParamNames[ii].ShortText + '\';
+      end else
+      begin;
+        if Params <> '' then
+          Params := Params +', ' +  ParamNames[ii].ShortText
+        else
+          Params := ParamNames[ii].ShortText;
+      end;
+      inc(ParamC);
+    end;
+    if str <> '' then
+      str := str + ';' + s + Params + typestr
+    else
+      str := s + params + typestr;
+  end;
+  TypeDecl := FDecl.Items.GetFirstItemOfClass(TciReturnType);
+  if TypeDecl <> nil then
+    TypeStr := ': ' + typedecl.ShortText
+  else
+    TypeStr := '';
+  str := FDecl.Name.ShortText + '(' +  str + ')' + TypeStr + ';';
+  str := StringReplace(str,'\\','',[rfReplaceAll]); //Delete all the \\, something like \const \\x\ is the same as \const x\
+  MustHide := False;
+  Result := parameterindex;
+  fPreparedString := str;
+  Parser.Free;
+end;
+
+
 constructor TParamHint.Create(TheOwner: TComponent);
 begin
   inherited;
-
   {$IFDEF FPC}
   AutoHide := False;
   {$ENDIF}
+  OnHide:=@ParamHintHide;
+  LastParameterIndex:= -1;
+  Application.AddOnIdleHandler(@ApplicationIdle);
+end;
+
+procedure TParamHint.CalculateBounds;
+var
+  DrawWidth: LongInt;
+  DrawHeight: LongInt;
+  ScreenTextXY: TPoint;
+  ClientXY: TPoint;
+  ScreenXY: TPoint;
+begin
+  ScreenTextXY := FSynEdit.LogicalToPhysicalPos(FStartPoint);
+  ClientXY := FSynEdit.RowColumnToPixels(ScreenTextXY);
+  DrawWidth := FSynEdit.ClientWidth;  //Maximum width it can have..
+  DrawHeight := ClientXY.y; //Maximum height it can have..
+  DrawHints(DrawWidth,DrawHeight,false); //Calculate the max size we need!
+  if DrawWidth<20 then DrawWidth:=20; //Some default values!
+  if DrawHeight<5 then DrawHeight:=5;
+
+  if ClientXY.X+DrawWidth>FSynedit.ClientWidth then //If we go out of bounds, lets put it to the left a bit.
+    ClientXY.X:=FSynedit.ClientWidth-DrawWidth;
+  if ClientXY.X<0 then //If we go to the left a lil bit to much, go to the right!
+    ClientXY.X:=0;
+  dec(ClientXY.Y,DrawHeight); //Move this a lil bit up!
+  if ClientXY.y < 0 then
+    ClientXY.y := 0;
+
+  ScreenXY:=FSynedit.ClientToScreen(ClientXY); //Position on the screen
+  dec(ScreenXY.Y,4); //Move it up a lilttle bit above your text, to make the shade come out better?
+
+  //Set the new position
+  BoundsRect:=Bounds(ScreenXY.X,ScreenXY.Y,DrawWidth,DrawHeight);
+end;
+
+procedure TParamHint.UpdateHint;
+var
+  MustHide : boolean;
+  CursorXY : TPoint;
+  Line : string;
+begin
+  if not self.Visible then
+    exit;
+  try
+    MustHide := True;
+    if not Assigned(FSynEdit) then
+      exit;
+    if FSynEdit.Focused = false then //No focus, hide this hint
+      exit;          //Exits to the finally statement ;)
+    CursorXY := FSynEdit.LogicalCaretXY;
+    if (CursorXY.x <= FBracketPoint.x) and (CursorXY.y <= FBracketPoint.y) then //Cursor moved in front of the bracket
+      exit;
+    Line:=FSynEdit.Lines[FBracketPoint.Y-1];
+    if (length(Line)<FBracketPoint.X) or (not (Line[FBracketPoint.X] in ['(','['])) then
+      exit;
+    if PrepareParamString(Line,MustHide) = LastParameterIndex then
+      exit
+    else if not MustHide then
+      Self.Invalidate;
+  finally
+    if MustHide then
+      Self.hide;
+  end;
+end;
+
+procedure TParamHint.ParamHintHide(Sender: TObject);
+begin
+  if FMP <> nil then
+    freeandnil(Fmp);
+end;
+
+procedure TParamHint.DrawHints(var MaxWidth, MaxHeight: Integer;
+  Draw: boolean);
+var
+  HorizontalSpace: Integer;
+  VerticalSpace: Integer;
+  BackgroundColor, TextGrayColor, TextColor, PenColor: TColor;
+  TextGrayStyle, TextStyle: TFontStyles;
+
+  procedure DrawHint(const Line: string; var AHintRect: TRect);
+  var
+    ATextRect: TRect; //The area we can use
+    TokenRect: TRect; //The area the text takes up
+    TokenSize: TPoint; //The W/H the text takes up
+    TokenPos: TPoint; //The position where the text is drawn
+    UsedWidth: Integer; // maximum right token position
+    LineHeight: Integer; // Current line height
+    Bolding : boolean; //If we are in a bolding part.
+    Pos : integer;
+    StartPos : integer;
+    //Text takes up it's own Width/Height + the space around the text.
+  begin
+    ATextRect:=Rect(AHintRect.Left+HorizontalSpace,
+                    AHintRect.Top+VerticalSpace,
+                    AHintRect.Right-HorizontalSpace,
+                    AHintRect.Bottom-VerticalSpace);//Possible area!
+    UsedWidth:=0;
+    LineHeight:=0;
+    TokenPos:=Point(ATextRect.Left,ATextRect.Top); //StartPoint like (0,0)
+    Bolding := False;
+    Pos := 0;
+    //Split the drawing up in words, that way we can split the function if it gets to long ;).
+    while (Pos < Length(Line)) do
+    begin
+      inc(Pos);
+      if (Line[Pos] = '\') then  //Bold from now
+      begin;
+        if Draw then
+        begin
+          if not Bolding then
+          begin
+            Canvas.Font.Color := TextColor;
+            Canvas.Font.Style := TextStyle;
+          end else
+          begin
+            Canvas.Font.Color := TextGrayColor;
+            Canvas.Font.Style := TextGrayStyle;
+          end;
+          Bolding := not Bolding;
+        end;
+        continue;
+      end;
+      StartPos := Pos;
+      if (Line[Pos] in ['a'..'z', 'A'..'Z', '0'..'9', '_']) then //We are in a word, lets draw that completely ;)
+      begin
+        while ((Pos < length(line)) and (Line[Pos + 1] in ['a'..'z', 'A'..'Z', '0'..'9', '_'])) do
+          inc(pos);
+      end else
+        while ((Pos < length(line)) and not(Line[Pos + 1] in ['a'..'z', 'A'..'Z', '0'..'9', '_','\'])) do
+          inc(pos);
+      TokenRect:=Bounds(0,0,12345,1234); //Random rect
+      DrawText(Canvas.Handle,@Line[StartPos],Pos-StartPos + 1,TokenRect,
+               DT_SINGLELINE+DT_CALCRECT+DT_NOCLIP); //Calculate the size it takes to draw this text
+      TokenSize:=Point(TokenRect.Right,TokenRect.Bottom); //The size it takes to draw this text
+      if (LineHeight>0) and (TokenPos.X+TokenSize.X>ATextRect.Right) then  //It doesn't fit.. Text = 2 long
+      begin
+        if Draw and (TokenPos.X<AHintRect.Right) then //Fill the rest of the area with blank info,
+                                                     //since we are going to draw this text on the next line
+          Canvas.FillRect(Rect(TokenPos.X,TokenPos.Y-VerticalSpace,
+                               AHintRect.Right,TokenPos.Y+LineHeight+VerticalSpace));
+        TokenPos:=Point(ATextRect.Left,TokenPos.y+LineHeight+VerticalSpace);//Lets start on the left side, one row below ;)
+        LineHeight:=0;
+      end;
+      OffsetRect(TokenRect,TokenPos.x,TokenPos.y); //Move the tokenrectangle to the tokenposition
+      if Draw then
+      begin
+        Canvas.FillRect(Rect(TokenRect.Left,TokenRect.Top-VerticalSpace,
+                             TokenRect.Right,TokenRect.Bottom+VerticalSpace));//Fill the entire rect (means including the spaces above and below
+        DrawText(Canvas.Handle,@Line[StartPos],Pos-StartPos + 1,
+                 TokenRect,DT_SINGLELINE+DT_NOCLIP);  //Draw the text!
+      end;
+      if LineHeight<TokenSize.y then
+        LineHeight:=TokenSize.y;   //the line has a bigger height than before.. The text H is bigger.
+      inc(TokenPos.X,TokenSize.x);  //Move the tokenposition text-width to the right
+      if UsedWidth<TokenPos.X then //Calculate the max-width we've used!
+        UsedWidth:=TokenPos.X;
+    end;
+    if Draw and (TokenPos.X<AHintRect.Right) and (LineHeight>0) then  //Fill the rest of the unused area
+      Canvas.FillRect(Rect(TokenPos.X,TokenPos.Y-VerticalSpace,
+                      AHintRect.Right,TokenPos.Y+LineHeight+VerticalSpace));
+    if (not Draw) and (UsedWidth>0) then
+      AHintRect.Right:=UsedWidth+HorizontalSpace; //Calculate the width we actually need
+    AHintRect.Bottom:=TokenPos.Y+LineHeight+VerticalSpace;
+  end;
+
+var
+  CurHintRect: TRect;
+  MustHide : boolean;
+  hintstr: string;
+begin
+  if Draw then
+  begin
+    BackgroundColor:=clInfoBk;
+    TextGrayColor:=clInfoText;
+    TextGrayStyle:=[];
+    TextColor:=clInfoText;
+    TextStyle:=[fsBold];
+    PenColor:=clBlack;
+  end;
+  HorizontalSpace:=2; //The spaces around the text
+  VerticalSpace:=2;
+
+  if Draw then begin
+    Canvas.Brush.Color:=BackgroundColor;
+    Canvas.Font.Color:=TextGrayColor;
+    Canvas.Font.Style:=TextGrayStyle;
+    Canvas.Pen.Color:=PenColor;
+  end else begin
+    Canvas.Font.Style:=[fsBold]; //Let us calculate the maximum width we need :)
+  end;
+  CurHintRect:=Rect(0,0,MaxWidth,MaxHeight);
+  PrepareParamString(HintStr,MustHide);
+  if MustHide then
+  begin;
+    Self.Hide;
+    exit;
+  end;
+  DrawHint(HintStr, CurHintRect);
+
+  if Draw then //Fill the rest if needed.. (Possible if we calculated we need 2 rows, but turns out we need only 1 this time).
+  begin
+    if CurHintRect.Bottom<MaxHeight then
+      Canvas.FillRect(Rect(0,CurHintRect.Bottom,MaxWidth,MaxHeight));
+    // draw frame around window
+    Canvas.Frame(Rect(0,0,MaxWidth-1,MaxHeight-1));
+  end;
+  if not Draw then //Adjust the maxwidth/maxheight needed to draw this thingy!
+  begin
+    if CurHintRect.right<MaxWidth then
+      MaxWidth:=CurHintRect.right;
+    if CurHintRect.Bottom<MaxHeight then
+      MaxHeight:=CurHintRect.Bottom;
+  end;
 end;
 
 procedure TParamHint.Paint;
-
-  function GetDrawTextFlags: Cardinal;
-  var
-    EffectiveAlignment: TAlignment;
-  begin
-    Result := DT_NOPREFIX or DT_VCENTER or DT_WORDBREAK;
-    EffectiveAlignment := Alignment;
-    if BiDiMode <> bdLeftToRight then
-    begin
-      Result := Result or DT_RTLREADING;
-      //change alignment if is RTL
-      if BiDiMode = bdRightToLeft then
-      begin
-        case Alignment of
-          taLeftJustify: EffectiveAlignment := taRightJustify;
-          taRightJustify: EffectiveAlignment := taLeftJustify;
-        end;
-      end;
-    end;
-    case EffectiveAlignment of
-      taLeftJustify: Result := Result or DT_LEFT;
-      taCenter: Result := Result or DT_CENTER;
-      taRightJustify: Result := Result or DT_RIGHT;
-    end;
+var
+  MaxWidth,MaxHeight : integer;
+begin
+  MaxWidth:= ClientWidth;
+  MaxHeight := ClientHeight;
+  DrawHints(MaxWidth,MaxHeight,True);
 end;
 
-var
-  ARect: TRect;
-  Details: TThemedElementDetails;
+procedure TParamHint.Show(StartPoint,BracketPoint: TPoint;Decl : TciProcedureDeclaration; Editor: TSynedit; mp : TCodeInsight);
 begin
-  ARect := ClientRect;
-  if Color = clInfoBk then // draw using themes
-  begin
-    Details := ThemeServices.GetElementDetails(tttStandardLink);
-    ThemeServices.DrawElement(Canvas.Handle, Details, ARect);
-  end
-  else
-  begin
-    Canvas.Brush.Color := Color;
-    Canvas.Pen.Width := 1;
-    Canvas.FillRect(ARect);
-    DrawEdge(Canvas.Handle, ARect, BDR_RAISEDOUTER, BF_RECT);
-  end;
-  InflateRect(ARect, - 4, - 4);
-  Canvas.TextOut(ARect.Left, ARect.Top, Caption);
+  if self.Visible then
+    self.hide;
+  FDecl := Decl;
+  Fmp := mp;
+  FParameters:= Decl.GetParamDeclarations;
+  if Length(FParameters) = 0 then //Method has no Parameters
+    exit;
+  FSynEdit := Editor;
+  FStartPoint:= StartPoint;
+  FBracketPoint:= BracketPoint;
+  CalculateBounds;  //Calculate the size we need!
+  self.Visible := true;
+end;
+
+
+procedure TParamHint.ApplicationIdle(Sender: TObject; var Done: Boolean);
+begin
+  if not Visible then exit;
+  UpdateHint;
 end;
 
 end.
