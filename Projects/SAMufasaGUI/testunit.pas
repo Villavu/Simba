@@ -344,6 +344,7 @@ type
     CurrTab    : TMufasaTab; //The current TMufasaTab
     CodeCompletionForm: TAutoCompletePopup;
     CodeCompletionStart: TPoint;
+    ParamHint : TParamHint;
     Tabs : TList;
     Manager: TIOManager;
     OCR_Fonts: TMOCR;
@@ -1831,6 +1832,8 @@ begin
   CodeCompletionForm := TAutoCompletePopup.Create(Self);
   CodeCompletionForm.InsertProc := @OnCompleteCode;
 
+  ParamHint := TParamHint.Create(self);
+
   {$ifdef MSWindows}
   ConsoleVisible := True;
   PrevWndProc := Windows.WNDPROC(GetWindowLong(self.handle,GWL_WNDPROC));
@@ -1907,6 +1910,7 @@ begin
   SetLength(DebugStream, 0);
   RecentFiles.Free;
   DebugCriticalSection.Free;
+  ParamHint.Free;
   {$ifdef MSWindows}
   if not UnRegisterHotkey(Self.Handle,0) then
     mDebugLn('Unable to unregister ctrl + alt + s as global hotkey');

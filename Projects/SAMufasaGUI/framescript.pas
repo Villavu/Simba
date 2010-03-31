@@ -29,7 +29,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,   SynEditMarkupHighAll,
    mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls,
-  v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, SynEditHighlighter;
+  v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, SynEditHighlighter,synedittextbase;
 const
    ecCodeCompletion = ecUserFirst;
    ecCodeHints = ecUserFirst + 1;
@@ -125,6 +125,28 @@ begin
   Result := Copy(s, sp, ep - sp + 1);
 end;
 
+function PosToCaretXY(e : TSynEdit; pos : integer) : TPoint;
+  function llen(const data: string): integer;
+  begin
+    result := length(Data) + length(LineEnding);
+  end;
+
+var
+  loop: integer;
+  count: integer;
+  Lines : TStrings;
+begin
+  loop := 0;
+  count := 0;
+  Lines := e.Lines;
+  while (loop < Lines.Count) and (count + llen(Lines[loop]) < pos) do begin
+    count := count + llen(Lines[loop]);
+    inc(loop);
+  end;
+  result.x := pos - count;
+  result.y := loop + 1;
+end;
+
 { TScriptFrame }
 
 procedure TScriptFrame.SynEditChange(Sender: TObject);
@@ -214,13 +236,15 @@ begin
     Form1.ActionFindNextExecute(Sender);
     key := 0;
   end;
+  if key = VK_ESCAPE then
+    Form1.ParamHint.Hide;
 
   Form1.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
 end;
 
 procedure TScriptFrame.SynEditKeyPress(Sender: TObject; var Key: char);
 begin
-   Form1.CodeCompletionForm.HandleKeyPress(Sender, Key);
+  Form1.CodeCompletionForm.HandleKeyPress(Sender, Key);
 end;
 
 procedure TScriptFrame.SynEditMouseLink(Sender: TObject; X, Y: Integer;
@@ -257,17 +281,15 @@ var
   mp: TCodeInsight;
   ms: TMemoryStream;
   ItemList, InsertList: TStringList;
-  sp, ep,bcc,cc,bck: Integer;
+  sp, ep,bcc,cc,bck,posi,bracketpos: Integer;
   p: TPoint;
   s, Filter: string;
   Attri: TSynHighlighterAttributes;
   d: TDeclaration;
   dd: TDeclaration;
 begin
-  if ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or (Attri.Name = 'Identifier')) then
+  if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or (Attri.Name = 'Identifier')) then
   begin
-    if (Command = ecCodeCompletion) then
-    begin;
       {form1.FunctionListShown(True);
       with form1.frmFunctionList do
         if editSearchList.CanFocus then
@@ -305,95 +327,100 @@ begin
           SynEdit.SelectedColor.Background:= clWhite;
           Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
         end;}
-      mp := TCodeInsight.Create;
-      mp.FileName := ScriptFile;
-      mp.OnMessage := @Form1.OnCCMessage;
-      mp.OnFindInclude := @Form1.OnCCFindInclude;
+    mp := TCodeInsight.Create;
+    mp.FileName := ScriptFile;
+    mp.OnMessage := @Form1.OnCCMessage;
+    mp.OnFindInclude := @Form1.OnCCFindInclude;
 
-      ms := TMemoryStream.Create;
-      ItemList := TStringList.Create;
-      InsertList := TStringList.Create;
-      InsertList.Sorted := True;
+    ms := TMemoryStream.Create;
+    ItemList := TStringList.Create;
+    InsertList := TStringList.Create;
+    InsertList.Sorted := True;
 
-      Synedit.Lines.SaveToStream(ms);
+    Synedit.Lines.SaveToStream(ms);
 
-      try
-        Filter := WordAtCaret(Synedit, sp, ep);
-        Form1.CodeCompletionStart := Point(sp, Synedit.CaretY);
-        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
+    try
+      Filter := WordAtCaret(Synedit, sp, ep);
+      Form1.CodeCompletionStart := Point(sp, Synedit.CaretY);
+      mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
 
-        s := mp.GetExpressionAtPos;
-        if (s <> '') then
-        begin
-          sp := LastDelimiter('.', s);
-          if (sp > 0) then
-            Delete(s, sp, Length(s) - sp + 1)
-          else
-            s := '';
-        end;
-
-        mp.FillSynCompletionProposal(ItemList, InsertList, s);
-        p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
-        p.y := p.y + SynEdit.LineHeight;
-        Form1.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
-      finally
-        FreeAndNil(ms);
-        FreeAndNil(mp);
-        ItemList.Free;
-        InsertList.Free;
+      s := mp.GetExpressionAtPos;
+      if (s <> '') then
+      begin
+        sp := LastDelimiter('.', s);
+        if (sp > 0) then
+          Delete(s, sp, Length(s) - sp + 1)
+        else
+          s := '';
       end;
-    end else
-    if command = ecCodeHints then
-    begin
-      mp := TCodeInsight.Create;
-      mp.OnMessage := @form1.OnCCMessage;
-      mp.OnFindInclude := @form1.OnCCFindInclude;
 
-      ms := TMemoryStream.Create;
-      synedit.Lines.SaveToStream(ms);
+      mp.FillSynCompletionProposal(ItemList, InsertList, s);
+      p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
+      p.y := p.y + SynEdit.LineHeight;
+      Form1.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
+    finally
+      FreeAndNil(ms);
+      FreeAndNil(mp);
+      ItemList.Free;
+      InsertList.Free;
+    end;
+  end;
+  if command = ecCodeHints then
+  begin
+    if Form1.ParamHint.Visible = true then
+      form1.ParamHint.hide;
+    mp := TCodeInsight.Create;
+    mp.OnMessage := @form1.OnCCMessage;
+    mp.OnFindInclude := @form1.OnCCFindInclude;
 
-      try
-        Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
-        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
-        //mp.Position := Synedit.SelStart + (ep - Synedit.CaretX) - 1;
+    ms := TMemoryStream.Create;
+    synedit.Lines.SaveToStream(ms);
+    try
+      Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
+      mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1,true);
 
-        bcc := 1;
-        bck := 0;
-        cc := 0;
-        s := mp.GetExpressionAtPos(bcc, bck, cc, True);
-        if (s <> '') then
-          Delete(s, Length(s), 1);
-
-        d := mp.FindVarBase(s);
-        dd := nil;
-        while (d <> nil) and (d <> dd) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) do
+      bcc := 1;bck := 0;cc := 0;
+      s := mp.GetExpressionAtPos(bcc, bck, cc,posi, true);
+      bracketpos := posi + length(s);
+      if pos('(',s) > 0 then
+      begin;
+        bracketpos := pos('(',s) + posi;
+        delete(s,pos('(',s),length(s) - pos('(',s) + 1);
+      end;
+      d := mp.FindVarBase(s);
+      dd := nil;
+      //Find the declaration -> For example if one uses var x : TNotifyEvent..
+      //You have to get the owner of x, to find the declaration of TNotifyEvent etc..
+      while (d <> nil) and (d <> dd) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) do
+      begin
+        dd := d;
+        d := d.Owner.Items.GetFirstItemOfClass(TciTypeKind);
+        if (d <> nil) then
         begin
-          dd := d;
-          d := d.Owner.Items.GetFirstItemOfClass(TciTypeKind);
-          if (d <> nil) then
-          begin
-            d := TciTypeKind(d).GetRealType;
-            if (d is TciReturnType) then
-              d := d.Owner;
-          end;
-          if (d <> nil) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) then
-            d := mp.FindVarBase(d.CleanText)
-          else
-            Break;
-        end;
-        if (d <> nil) and (d <> dd) and (d.Owner <> nil) and ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration)) then
-        begin
-          if (not (d is TciProcedureDeclaration)) and (d.Owner is TciProcedureDeclaration) then
+          d := TciTypeKind(d).GetRealType;
+          if (d is TciReturnType) then
             d := d.Owner;
-          if (TciProcedureDeclaration(d).SynParams <> '') then
-            formWriteln(TciProcedureDeclaration(d).SynParams)
-          else
-            FormWriteln('<no parameters expected>');
         end;
-      finally
-        FreeAndNil(ms);
-        FreeAndNil(mp);
+        if (d <> nil) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) then
+          d := mp.FindVarBase(d.CleanText)
+        else
+          Break;
       end;
+      //Yeah, we should have found the procedureDeclaration now!
+      if (d <> nil) and (d <> dd) and (d.Owner <> nil) and ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration)) then
+      begin
+        if (not (d is TciProcedureDeclaration)) and (d.Owner is TciProcedureDeclaration) then
+          d := d.Owner;
+        if (TciProcedureDeclaration(d).Params <> '') then
+          Form1.ParamHint.Show(PosToCaretXY(synedit,posi + 1), PosToCaretXY(synedit,bracketpos),
+                              TciProcedureDeclaration(d), synedit,mp)
+        else
+          FormWriteln('<no parameters expected>');
+      end;
+    except
+      on e : exception do
+        mDebugLn(e.message);
+      //Do not free the MP, we need to use this.
     end;
   end;
   if Form1.CodeCompletionForm.Visible then
@@ -410,7 +437,6 @@ begin
               Exit;
             end;
           end;
-
           Form1.CodeCompletionForm.Hide;
         end;
     end;
