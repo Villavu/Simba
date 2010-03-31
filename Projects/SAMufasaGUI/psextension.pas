@@ -27,6 +27,8 @@ type
       function FreeScript: boolean;
       function InitScript: Boolean;
       procedure OutputMessages;
+      procedure SIRegister_Settings(Cl: TPSPascalCompiler);
+      procedure RIRegister_Settings(Cl: TPSRuntimeClassImporter);
 
     public
        function HookExists(HookName: String): Boolean;override;
@@ -47,7 +49,7 @@ uses
   uPSC_extctrls,uPSC_menus, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls,uPSR_menus, //Runtime-libs
-  testunit//Writeln
+  testunit,updateform,settingssandbox//Writeln
   ;
 
 function TSimbaPSExtension.HookExists(HookName: String): Boolean;
@@ -110,10 +112,13 @@ begin
   result := ExecuteHook('Free',[],bla) = SExt_ok;
 end;
 
+{$I ../../Units/MMLAddon/PSInc/Wrappers/extensions.inc}
 
 procedure TSimbaPSExtension.RegisterMyMethods(Sender: TPSScript);
 begin
   Sender.AddFunction(@formWritelnEx,'procedure Writeln(s : string)');
+  Sender.AddFunction(@ext_GetPage,'function GetPage(url : string) : string');
+  Sender.AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
   Sender.AddRegisteredVariable('Simba','TForm');
   Sender.AddRegisteredVariable('Simba_MainMenu','TMainMenu');
 end;
@@ -122,6 +127,7 @@ procedure TSimbaPSExtension.OnPSExecute(Sender: TPSScript);
 begin
   Sender.SetVarToInstance('simba',Form1);
   Sender.SetVarToInstance('Simba_MainMenu',Form1.MainMenu);
+  Sender.SetPointerToData('Settings',@Self.Settings,Sender.FindNamedType('TMMLSettingsSandbox'));
 end;
 
 procedure TSimbaPSExtension.SetEnabled(bool: boolean);
@@ -148,6 +154,41 @@ begin
   inherited SetEnabled(bool);
 end;
 
+procedure TSimbaPSExtension.SIRegister_Settings(Cl: TPSPascalCompiler);
+begin
+  with cl.AddClassN(nil,'TMMLSettingsSandbox') do
+  begin;
+    RegisterMethod('function IsKey(KeyName: String): Boolean;');
+    RegisterMethod('function IsDirectory(KeyName: String): Boolean;');
+    RegisterMethod('function SetKeyValue(Keyname : string; Value : string) : boolean;');
+    RegisterMethod('function GetKeyValue(KeyName: String): String;');
+    RegisterMethod('function GetKeyValueDef(KeyName, defVal: String): String;');
+    RegisterMethod('function ListKeys(KeyName: String): TStringArray;');
+    RegisterMethod('function DeleteKey(KeyName: String): Boolean;');
+    RegisterMethod('function DeleteSubKeys(KeyName: String): Boolean;');
+    RegisterProperty('Prefix','String',iptR);
+  end;
+end;
+
+procedure SettingsPrefix(self : TMMLSettingsSandbox; var Prefix : String);
+begin; Prefix := self.Prefix; end;
+
+procedure TSimbaPSExtension.RIRegister_Settings(Cl: TPSRuntimeClassImporter);
+begin
+  with cl.Add(TMMLSettingsSandbox) do
+  begin
+    RegisterMethod(@TMMLSettingsSandbox.IsKey,'ISKEY');
+    RegisterMethod(@TMMLSettingsSandbox.IsDirectory,'ISDIRECTORY');
+    RegisterMethod(@TMMLSettingsSandbox.SetKeyValue,'SETKEYVALUE');
+    RegisterMethod(@TMMLSettingsSandbox.GetKeyValue,'GETKEYVALUE');
+    RegisterMethod(@TMMLSettingsSandbox.GetKeyValueDef,'GETKEYVALUEDEF');
+    RegisterMethod(@TMMLSettingsSandbox.ListKeys,'LISTKEYS');
+    RegisterMethod(@TMMLSettingsSandbox.DeleteKey,'DELETEKEY');
+    RegisterMethod(@TMMLSettingsSandbox.DeleteSubKeys,'DELETESUBKEYS');
+    RegisterPropertyHelper(@SettingsPrefix,nil,'Prefix');
+  end;
+end;
+
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 begin
   SIRegister_Std(x);
@@ -158,6 +199,7 @@ begin
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
+  SIRegister_Settings(x);
 end;
 
 procedure TSimbaPSExtension.RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
@@ -170,6 +212,7 @@ begin
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
+  RIRegister_Settings(x);
 end;
 
 destructor TSimbaPSExtension.Destroy;
@@ -222,7 +265,6 @@ begin
   for l := 0 to PSInstance.CompilerMessageCount - 1 do
     formWritelnEx(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
 end;
-
 
 
 end.
