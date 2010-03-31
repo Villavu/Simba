@@ -367,11 +367,10 @@ AddFunction(@SameTPA,'function SameTPA(aTPA, bTPA: TPointArray): Boolean;');
 AddFunction(@TPAInATPA,'function TPAInATPA(TPA: TPointArray; InATPA: T2DPointArray; var Index: LongInt): Boolean;');
 
 SetCurrSection('Settings');
-AddFunction(@SettingsIsKey, 'function SettingsIsKey(KeyName: String): Boolean;');
-AddFunction(@SettingsIsDirectory, 'function SettingsIsDirectory(KeyName: String): Boolean;');
-AddFunction(@SettingsGetKeyValue, 'function SettingsGetKeyValue(KeyName: String): String;');
-AddFunction(@SettingsGetSetDefaultKeyValue, 'function SettingsGetSetDefaultKeyValue(KeyName, defVal: String): String;');
-AddFunction(@SettingsListKeys, 'procedure SettingsListKeys(KeyName: String; var KeyReturn: TStringArray);');
-
-AddFunction(@SettingsDeleteKey, 'function SettingsDeleteKey(KeyName: String): Boolean;');
-AddFunction(@SettingsDeleteSubKeys, 'function SettingsDeleteSubKeys(KeyName: String): Boolean;');
+AddFunction(@KeyIsSetting, 'function KeyIsSetting(KeyName: String): Boolean;');
+AddFunction(@KeyIsDirectory, 'function KeyIsDirectory(KeyName: String): Boolean;');
+AddFunction(@GetSettingValue, 'function GetSettingValue(KeyName: String): String;');
+AddFunction(@GetSettingValueDef, 'function GetSettingValueDef(KeyName, defVal: String): String;');
+AddFunction(@ListSettings, 'function ListSettings(KeyName: String; var KeyReturn: TStringArray) : boolean;');
+AddFunction(@DeleteSetting, 'function DeleteSetting(KeyName: String): Boolean;');
+AddFunction(@DeleteSubSettings, 'function DeleteSubSettings(KeyName: String): Boolean;');

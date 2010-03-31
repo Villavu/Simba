@@ -337,7 +337,8 @@ type
     procedure SetScriptState(const State: TScriptState);
     function LoadSettingDef(Key : string; Def : string) : string;
     function CreateSetting(Key : string; Value : string) : string;
-    procedure SetSetting(key : string; Value : string);
+    procedure SetSetting(key : string; Value : string; save : boolean = false);
+    function SettingExtists(key : string) : boolean;
     procedure FontUpdate;
   public
     DebugStream: String;
@@ -1004,6 +1005,7 @@ begin
   {Creates the paths and returns the path}
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
   extensionsPath := CreateSetting('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
+  CreateSetting('Extensions/ExtensionCount','0');
   CreateSetting('LastConfig/MainForm/Position','');
   CreateSetting('LastConfig/MainForm/State','Normal');
   {$ifdef MSWindows}
@@ -1025,6 +1027,41 @@ begin
 end;
 
 procedure TForm1.LoadFormSettings;
+var
+  extCount : integer;
+  function LoadExtension(Number : integer) : boolean;
+  var
+    Path : string;
+    ExtPath : string;
+    ExtEnabled : boolean;
+  begin;
+    result := false;
+    if (number < 0) or (number >= extCount) then
+      exit;
+    path := 'Extensions/Extension' + inttostr(number);
+    if SettingExtists(Path) = false then
+      exit;
+    ExtPath := LoadSettingDef(Path + '/Path','');
+    if ExtPath = '' then
+      exit;
+    ExtEnabled := StrToBoolDef(LoadSettingDef(Path + '/Enabled','false'),false);
+    if ExtManager.LoadPSExtension(ExtPath,ExtEnabled) = false then
+      exit;
+    Result := true;
+  end;
+  procedure DeleteExtension(number : integer);
+  var
+    i : integer;
+    path : string;
+  begin;
+    path := 'Extensions/Extension';
+    SettingsForm.Settings.DeleteKey(path + inttostr(number));
+    for i := number + 1 to extCount - 1 do
+      SettingsForm.Settings.RenameKey(path + inttostr(i),'Extension' + inttostr(i-1));
+    SetSetting('Extensions/ExtensionCount',inttostr(extCount - 1),true);
+    dec(extCount);
+  end;
+
 var
   str,str2 : string;
   Data : TStringArray;
@@ -1068,65 +1105,58 @@ begin
   else
     ShowConsole(false);
   {$endif}
+  extCount := StrToIntDef(LoadSettingDef('Extensions/ExtensionCount/','0'),0);
+  for i := 0 to extCount - 1 do
+    while (i < extCount) and not LoadExtension(i) do
+      DeleteExtension(i);
+  SetSetting('Extensions/ExtensionCount',inttostr(extCount));
   str := LoadSettingDef('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
   str2 := LoadSettingDef('Settings/Extensions/FileExtension','sex');
   ExtManager.LoadPSExtensionsDir(str,str2);
-  str := LoadSettingDef('LastConfig/Extensions/EnabledExts','');
-  if str <> '' then
-  begin
-    data := Explode(';',str);
-    for i := 0 to high(data) do
-      for ii := 0 to ExtManager.Extensions.Count - 1 do
-        if data[i] = TVirtualSimbaExtension(ExtManager.Extensions[ii]).Filename then
-          TVirtualSimbaExtension(ExtManager.Extensions[ii]).Enabled := true;
-  end;
 end;
 
 procedure TForm1.SaveFormSettings;
 var
   Data : TStringArray;
+  path : string;
   i : integer;
 begin
   with SettingsForm.Settings do
   begin
     if Self.WindowState = wsMaximized then
-      SetKeyValue('LastConfig/MainForm/State','maximized')
+      SetSetting('LastConfig/MainForm/State','maximized')
     else
     begin; //Only save the form position if its non maximized.
-      SetKeyValue('LastConfig/MainForm/State','normal');
+      SetSetting('LastConfig/MainForm/State','normal');
       Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
-      SetKeyValue('LastConfig/MainForm/Position', Implode(':',Data ));
+      SetSetting('LastConfig/MainForm/Position', Implode(':',Data ));
     end;
     if RecentFiles.Count > 0 then
     begin
       SetLength(data,RecentFiles.Count);
       for i := 0 to high(data) do //First entry should be the last-opened
         data[high(data) - i] := RecentFiles[i];
-      SetKeyValue('LastConfig/MainForm/RecentFiles',implode(';',data));
+      SetSetting('LastConfig/MainForm/RecentFiles',implode(';',data));
     end else
-      SetKeyValue('LastConfig/MainForm/RecentFiles','');
+      SetSetting('LastConfig/MainForm/RecentFiles','');
     if MenuItemFunctionList.Checked then
-      SetKeyValue('LastConfig/MainForm/FunctionListShown','True')
+      SetSetting('LastConfig/MainForm/FunctionListShown','True')
     else
-      SetKeyValue('LastConfig/MainForm/FunctionListShown','False');
+      SetSetting('LastConfig/MainForm/FunctionListShown','False');
     {$ifdef MSWindows}
     if ConsoleVisible then
-      SetKeyValue('LastConfig/Console/Visible','True')
+      SetSetting('LastConfig/Console/Visible','True')
     else
-      SetKeyValue('LastConfig/Console/Visible','false');
+      SetSetting('LastConfig/Console/Visible','false');
     {$endif}
-    if ExtManager.Extensions.Count > 0 then
-    begin
-      SetLength(data,0);
-      for i := 0 to ExtManager.Extensions.Count-1 do
-        if TVirtualSimbaExtension(ExtManager.Extensions[i]).Enabled then
-        begin
-          setlength(data,length(data)+1);
-          data[high(data)] :=  TVirtualSimbaExtension(ExtManager.Extensions[i]).FileName;
-        end;
-      SetKeyValue('LastConfig/Extensions/EnabledExts',Implode(';',data));
-    end else
-      SetKeyValue('LastConfig/Extensions/EnabledExts','');
+    SetSetting('Extensions/ExtensionCount',inttostr(ExtManager.Extensions.Count));
+    for i := 0 to ExtManager.Extensions.Count-1 do
+    begin;
+
+      path :='Extensions/Extension' + inttostr(I);
+      SetSetting(Path + '/Path',TVirtualSimbaExtension(ExtManager.Extensions[i]).Filename);
+      SetSetting(Path + '/Enabled',BoolToStr(TVirtualSimbaExtension(ExtManager.Extensions[i]).Enabled,True));
+    end;
     SaveToXML(SimbaSettingsFile);
   end;
 end;
@@ -1222,7 +1252,7 @@ begin
       Thread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
 
   Se := TMMLSettingsSandbox.Create(SettingsForm.Settings);
-  Se.SetPrefix('Scripts/');
+  Se.Prefix := 'Scripts/';
   Thread.SetSettings(Se);
 end;
 
@@ -2305,7 +2335,7 @@ end;
 
 procedure TForm1.SetFontPath(const AValue: String);
 begin
-  SetSetting('Settings/Fonts/Path',AValue);
+  SetSetting('Settings/Fonts/Path',AValue,true);
 end;
 
 function TForm1.GetFontPath: String;
@@ -2320,7 +2350,7 @@ end;
 
 procedure TForm1.SetIncludePath(const AValue: String);
 begin
-  SetSetting('Settings/Includes/Path',AValue);
+  SetSetting('Settings/Includes/Path',AValue,true);
 end;
 
 procedure TForm1.SetScriptState(const State: TScriptState);
@@ -2353,22 +2383,25 @@ end;
 
 function TForm1.LoadSettingDef(Key: string; Def: string): string;
 begin
-  result := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(Key,def,SimbaSettingsFile);
+  result := SettingsForm.Settings.GetKeyValueDefLoad(Key,def,SimbaSettingsFile);
 end;
 
 function TForm1.CreateSetting(Key: string; Value: string): string;
 begin
-  result := SettingsForm.Settings.GetSetDefaultKeyValue(Key,value);
+  result := SettingsForm.Settings.GetKeyValueDef(Key,value);
 end;
 
-procedure TForm1.SetSetting(key: string; Value: string);
+procedure TForm1.SetSetting(key: string; Value: string; save : boolean);
 begin
-     //Creates the setting if needed
-  if CreateSetting(key,value) <> value then //The setting already occurs, and has a different value.. Lets change it
-  begin;
-    SettingsForm.Settings.SetKeyValue(key,value);
+  //Creates the setting if needed
+  SettingsForm.Settings.SetKeyValue(key,value);
+  if save then
     SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
-  end;
+end;
+
+function TForm1.SettingExtists(key: string): boolean;
+begin
+  result :=SettingsForm.Settings.KeyExists(key);
 end;
 
 procedure TForm1.FontUpdate;
@@ -2401,7 +2434,7 @@ begin
       if UnTar(decompressed, FontPath,true) then
       begin;
         FormWriteln('Succesfully installed the new fonts!');
-        SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion));
+        SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion),true);
         if Assigned(self.OCR_Fonts) then
           self.OCR_Fonts.Free;
         Self.OCR_Fonts := TMOCR.Create(nil);
