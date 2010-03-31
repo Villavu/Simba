@@ -21,7 +21,7 @@
     Settings.inc for the Mufasa Macro Library
 }
 
-function SettingsIsKey(KeyName: String): Boolean;
+function KeyIsSetting(KeyName: String): Boolean;
 begin
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.IsKey(KeyName)
@@ -29,7 +29,7 @@ begin
     result:=false;
 end;
 
-function SettingsIsDirectory(KeyName: String): Boolean;
+function KeyIsDirectory(KeyName: String): Boolean;
 begin
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.IsDirectory(KeyName)
@@ -37,7 +37,7 @@ begin
     result := false;
 end;
 
-function SettingsGetKeyValue(KeyName: String): String;
+function GetSettingValue(KeyName: String): String;
 begin
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.GetKeyValue(KeyName)
@@ -45,23 +45,23 @@ begin
     result:='';
 end;
 
-function SettingsGetSetDefaultKeyValue(KeyName, defVal: String): String;
+function GetSettingValueDef(KeyName, defVal: String): String;
 begin
   if CurrThread.Sett <> nil then
-    result:= CurrThread.Sett.GetSetDefaultKeyValue(KeyName, defVal)
+    result:= CurrThread.Sett.GetKeyValueDef(KeyName, defVal)
   else
     result:='';
 end;
 
-procedure SettingsListKeys(KeyName: String; var KeyReturn: TStringArray);
+function ListSettings(KeyName: String; var KeyReturn: TStringArray) : boolean;
 begin
   if CurrThread.Sett <> nil then
-    KeyReturn := CurrThread.Sett.ListKeys(KeyName)
+    Result := CurrThread.Sett.ListKeys(KeyName,keyReturn)
   else
-    setlength(KeyReturn, 0);
+    result := false;
 end;
 
-function SettingsDeleteKey(KeyName: String): Boolean;
+function DeleteSetting(KeyName: String): Boolean;
 begin
   if CurrThread.Sett <> nil then
     Result := CurrThread.Sett.DeleteKey(KeyName)
@@ -69,7 +69,7 @@ begin
     result := False;
 end;
 
-function SettingsDeleteSubKeys(KeyName: String): Boolean;
+function DeleteSubSettings(KeyName: String): Boolean;
 begin
     if CurrThread.Sett <> nil then
     Result := CurrThread.Sett.DeleteSubKeys(KeyName)
