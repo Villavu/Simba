@@ -24,21 +24,9 @@ class Mouse(object):
         self._initialiseDLLFuncs()
         pass
 
-    def _initialiseDLLFuncs(self):
-        self._mc.dll.getMousePos.restype = c_int
-        self._mc.dll.getMousePos.argtypes = [PPOINT]
-
-        self._mc.dll.setMousePos.restype = c_int
-        self._mc.dll.setMousePos.argtypes = [PPOINT]
-
-        self._mc.dll.getMouseButtonState.restype = c_int
-        self._mc.dll.getMouseButtonState.argtypes = [c_int]
-
-        self._mc.dll.setMouseButtonState.restype = c_int
-        self._mc.dll.setMouseButtonState.argtypes = [c_int, c_int, c_int, c_int]
-        pass
-
     def __getitem__(self, item):
+        '''Can currently return the state of mouse buttons as well as the
+            mouse position. Supports iterable arguments'''
         if item == self.Pos:
             return self._getMousePos() 
         if isiterable(item):
@@ -52,6 +40,8 @@ class Mouse(object):
         raise MouseException('item is not iterable, nor a (valid) string')
 
     def __setitem__(self, item, value):
+        '''Can currently set the state of mouse buttons as well as the
+            mouse position. Supports iterable arguments'''
         ak = self._getButtons().keys() + [self.Pos]
         isfalse = lambda x: True if not x in ak else False
 
@@ -66,7 +56,7 @@ class Mouse(object):
             for i, v in dict(zip(item, value)).iteritems():
                 if i == self.Pos:
                     self._setMousePos(v)
-                if i in (self.Left, self.Right, self.Middle):
+                if i in self._getButtons().keys():
                     self._setMouseButtonState(self._buttonToInt(i), \
                                               1 if v else 0)
             return
@@ -74,14 +64,17 @@ class Mouse(object):
 
         raise MouseException('FIXME')
 
-    # internal functions
-
+    # Tools
     def _getButtons(self):
+        '''Return mouse buttons with their corresponding button DLL number as dict'''
         return {self.Left : 0, self.Right : 1, self.Middle : 2}
 
     def _buttonToInt(self, button):
+        '''Return button number for button'''
         return self._getButtons()[button]
+    
 
+    # Internal DLL stuff
     def _getMousePos(self):
         ret = POINT()
         ok = self._mc.dll.getMousePos(byref(ret))
@@ -95,6 +88,9 @@ class Mouse(object):
         ret = POINT()
         ret.x, ret.y = p
         ok = self._mc.dll.setMousePos(byref(ret))
+        if ok != 0:
+            pass # Raise exception
+        self._lpp = (ret.x, ret.y)
         return ok
 
     def _getMouseButtonState(self, button):
@@ -104,6 +100,23 @@ class Mouse(object):
         return ok == 1
 
     def _setMouseButtonState(self, button, state):
-        return self._mc.dll.setMouseButtonState(c_int(button), c_int(state), *map(lambda x: c_int(x), self._getMousePos()))
+        ok = self._mc.dll.setMouseButtonState(c_int(button), c_int(state), *map(lambda x: c_int(x), self._getMousePos()))
+        if ok != 0:
+            pass # Raise exception
+        return ok
 
+    def _initialiseDLLFuncs(self):
+        '''Define all mouse related DLL-calls'''
+        self._mc.dll.getMousePos.restype = c_int
+        self._mc.dll.getMousePos.argtypes = [PPOINT]
+
+        self._mc.dll.setMousePos.restype = c_int
+        self._mc.dll.setMousePos.argtypes = [PPOINT]
+
+        self._mc.dll.getMouseButtonState.restype = c_int
+        self._mc.dll.getMouseButtonState.argtypes = [c_int]
+
+        self._mc.dll.setMouseButtonState.restype = c_int
+        self._mc.dll.setMouseButtonState.argtypes = [c_int, c_int, c_int, c_int]
+        pass
 
