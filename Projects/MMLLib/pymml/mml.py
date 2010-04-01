@@ -24,7 +24,19 @@ class MMLCore(object):
 DLL = MMLCore('../libmml.so')
 
 m = Mouse(DLL)
-print m._getMousePos()
+
+
+
+print m[Mouse.Pos]
+
+for v in zip((Mouse.Left, Mouse.Right), m[(Mouse.Left, Mouse.Right)]):
+    print v
+
+m[(Mouse.Pos, Mouse.Right)] = ((300,300), True)
+#print m._getMousePos()
+
+# Reset all buttons..
+m[(Mouse.Left, Mouse.Right, Mouse.Middle)] = [False for x in range(3)]
 
 del DLL
 
