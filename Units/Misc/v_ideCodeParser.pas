@@ -92,7 +92,8 @@ type
   private
     function GetShortText: string; override;
   public
-    function HasField(Name: string; out Decl: TDeclaration; Return: TVarBase = vbName): Boolean;
+    function HasField(Name: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean; overload;
+    function HasField(Name: string; out Decl: TDeclaration; Return: TVarBase = vbName): Boolean; overload;
     function GetDefault(Return: TVarBase = vbName): TDeclaration;
   end;
 
@@ -185,6 +186,8 @@ type
   TciClassMethodHeading = class(TciProcedureDeclaration);                   //Record + Class
   TciClassProperty = class(TDeclaration);                                   //Record + Class
   TciPropertyDefault = class(TDeclaration);                                 //Record + Class
+  TciIdentifier = class(TDeclaration);                                      //Record + Class
+  TciPropertyParameterList = class(TDeclaration);                           //Record + Class
 
   TciSetType = class(TDeclaration);                                         //Set
   TciOrdinalType = class(TDeclaration);                                     //Set
@@ -263,6 +266,8 @@ type
     procedure PropertyName; override;                                           //Record + Class
     procedure TypeId; override;                                                 //Record + Class
     procedure PropertyDefault; override;                                        //Record + Class
+    procedure Identifier; override;                                             //Record + Class
+    procedure PropertyParameterList; override;                                  //Record + Class
 
     procedure SetType; override;                                                //Set
     procedure OrdinalType; override;                                            //Set + Array Range
@@ -630,10 +635,11 @@ begin
   Result := fShortText;
 end;
 
-function TciStruct.HasField(Name: string; out Decl: TDeclaration; Return: TVarBase = vbName): Boolean;
+function TciStruct.HasField(Name: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
 var
   a, b: TDeclarationArray;
   i, ii: Integer;
+  t: TDeclaration;
 begin
   Result := False;
   Name := PrepareString(Name);
@@ -665,6 +671,12 @@ begin
       if (PrepareString(b[ii].CleanText) = Name) then
       begin
         Result := True;
+
+        t := a[i].Items.GetFirstItemOfClass(TciPropertyParameterList);
+        if (t <> nil) then
+          //ArrayCount := ArrayCount + t.Items.Count;   [a, b] Indices count as 1
+          Inc(ArrayCount);
+
         if (Return = vbType) then
           Decl := b[ii].Owner.Items.GetFirstItemOfClass(TciTypeKind)
         else
@@ -689,6 +701,13 @@ begin
         Exit;
       end;
   end;
+end;
+
+function TciStruct.HasField(Name: string; out Decl: TDeclaration; Return: TVarBase = vbName): Boolean;
+var
+  a: Integer;
+begin
+  Result := HasField(Name, Decl, Return, a);
 end;
 
 function TciStruct.GetDefault(Return: TVarBase = vbName): TDeclaration;
@@ -1662,7 +1681,7 @@ end;
 
 procedure TCodeParser.TypeId;
 begin
-  if (not InDeclaration(TciClassProperty)) then
+  if (not InDeclarations([TciClassProperty, TciPropertyParameterList])) then
   begin
     inherited;
     Exit;
@@ -1682,6 +1701,32 @@ begin
   end;
 
   PushStack(TciPropertyDefault);
+  inherited;
+  PopStack;
+end;
+
+procedure TCodeParser.Identifier;
+begin
+  if (not InDeclaration(TciPropertyParameterList)) then
+  begin
+    inherited;
+    Exit;
+  end;
+
+  PushStack(TciIdentifier);
+  inherited;
+  PopStack;
+end;
+
+procedure TCodeParser.PropertyParameterList;
+begin
+  if (not InDeclaration(TciClassProperty)) then
+  begin
+    inherited;
+    Exit;
+  end;
+
+  PushStack(TciPropertyParameterList);
   inherited;
   PopStack;
 end;
