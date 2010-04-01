@@ -14,7 +14,10 @@ type
 
 Const
   RESULT_OK = 0;
-  RESULT_ERROR = 1;
+  RESULT_ERROR = -1;
+
+  MOUSE_UP = 0;
+  MOUSE_DOWN = 1;
 
 var
   C: TClient;
@@ -36,7 +39,7 @@ end;
 
 { Mouse }
 
-function getmousepos(var t: tpoint): integer; cdecl;
+function getMousePos(var t: tpoint): integer; cdecl;
 
 begin
   try
@@ -50,17 +53,60 @@ begin
   end;
 end;
 
-{function ConvIntClickType(Int : Integer) : TClickType;inline;
-begin;
-  case int of
-    ps_mouse_right : result := mouse_Right;
-    ps_mouse_left : result := mouse_left;
-    ps_mouse_middle: result := mouse_middle;
-  else
-    raise exception.CreateFMT('Unknown Clicktype (%d) passed.',[int]);
+function setMousePos(var t: tpoint): integer; cdecl;
+begin
+  try
+    C.IOManager.SetMousePos(t.x,t.y);
+    result := RESULT_OK;
+  except on e : Exception do
+  begin
+    result := RESULT_ERROR;
+    last_error := PChar(e.Message);
   end;
-end;      }
+  end;
+end;
 
+function ConvIntClickType(Int : Integer) : TClickType;inline;
+begin
+  case int of
+    0 : result := mouse_Left;
+    1 : result := mouse_Right;
+    2: result := mouse_Middle;
+  end;
+end;
+
+function getMouseButtonState(But: Integer): Integer;
+begin
+  try
+    if C.IOManager.IsMouseButtonDown(ConvIntClickType(But)) then
+      result := MOUSE_DOWN;
+  except on e : Exception do
+  begin
+    result := RESULT_ERROR;
+    last_error := PChar(e.Message);
+  end;
+  end;
+end;
+
+function setMouseButtonState(But, State, X, Y: Integer): Integer;
+begin
+  try
+    if State = MOUSE_UP then
+    begin
+      C.IOManager.ReleaseMouse(X, Y, ConvIntClickType(But));
+      result := RESULT_OK;
+    end else if state = MOUSE_DOWN then
+    begin
+      C.IOManager.HoldMouse(X, Y, ConvIntClickType(But));
+      result := RESULT_OK;
+    end;
+  except on e : Exception do
+  begin
+    result := RESULT_ERROR;
+    last_error := PChar(e.Message);
+  end;
+  end;
+end;
 
 
 function returnpoints: PTPoint;  cdecl;
@@ -170,7 +216,10 @@ end;
 exports
   test,
   init,
-  getmousepos,
+  getMousePos,
+  setMousePos,
+  getMouseButtonState,
+  setMouseButtonState,
   returnpoints,
   printpoints,
   hoi,
