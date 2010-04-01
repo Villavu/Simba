@@ -864,17 +864,16 @@ begin
     a := GetParamDeclarations;
     for i := Low(a) to High(a) do
     begin
-      if (fItems[i] is TciConstParameter) then
+      if (a[i] is TciConstParameter) then
         s := 'const '
-      else if (fItems[i] is TciOutParameter) then
+      else if (a[i] is TciOutParameter) then
         s := 'out '
-      else if (fItems[i] is TciInParameter) then
+      else if (a[i] is TciInParameter) then
         s := 'in '
-      else if (fItems[i] is TciVarParameter) then
+      else if (a[i] is TciVarParameter) then
         s := 'var '
       else
         s := '';
-
       d := a[i].Items.GetFirstItemOfClass(TciParameterType);
       if (d <> nil) then
         t := ': ' + d.ShortText
