@@ -16,6 +16,8 @@ type
 
   TOnFindInclude = function(Sender: TObject; var FileName: string): Boolean of object;
 
+  { TCodeInsight }
+
   TCodeInsight = class(TCodeParser)
   protected
     fFileName: string;
@@ -49,6 +51,7 @@ type
     function GetFuncType(FuncName, FuncClass: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
     function FindStruct(s: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
   public
+    function GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; out sp : Integer; IgnoreBrackets: Boolean = False): string; overload;
     function GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; IgnoreBrackets: Boolean = False): string; overload;
     function GetExpressionAtPos: string; overload;
     function FindVarBase(s: string; GetStruct: Boolean = False; Return: TVarBase = vbName): TDeclaration;
@@ -545,7 +548,7 @@ begin
   end;
 end;
 
-function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; IgnoreBrackets: Boolean = False): string;
+function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount,CommaCount: Integer; out sp: Integer; IgnoreBrackets: Boolean): string;
 var
   i, StartPos, EndPos: Integer;
   s: string;
@@ -636,8 +639,15 @@ begin
     LastWasDot := False;
     Dec(StartPos);
   end;
-
+  sp := startpos + d.StartPos;
   Result := CompressWhiteSpace(Copy(s, StartPos + 1, EndPos - StartPos));
+end;
+
+function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; IgnoreBrackets: Boolean = False): string;
+var
+  sp : integer;
+begin
+  result := GetExpressionAtPos(bracecount,bracketcount,commacount,sp,ignorebrackets);
 end;
 
 function TCodeInsight.GetExpressionAtPos: string;

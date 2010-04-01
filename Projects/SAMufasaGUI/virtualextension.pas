@@ -5,7 +5,7 @@ unit virtualextension;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,settingssandbox;
 
 type
     { TVirtualSimbaExtension }
@@ -16,6 +16,7 @@ type
       FVersion : string;
       FFilename : string;
       FEnabled : boolean;
+      FSettings : TMMLSettingsSandbox;
       procedure SetEnabled(bool : boolean); virtual;
     public
       OnChange : TNotifyEvent;
@@ -27,6 +28,7 @@ type
 
        function GetName : string;
        function GetVersion : String;
+       property Settings : TMMLSettingsSandbox read FSettings write FSettings;
        property Filename : string read FFilename write FFilename;
        property Enabled : boolean read FEnabled write SetEnabled;
     end;

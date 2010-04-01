@@ -12,6 +12,7 @@ end;
 
 procedure Attach;
 begin;
+  Settings.SetKeyValue('TestSetting','1337');
   Writeln('Your extension has been enabled, do stuff here');
 end;
 
