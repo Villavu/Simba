@@ -30,26 +30,28 @@ uses
   Classes, SysUtils, settings, strutils, mufasatypes;
 
 type
+
+  { TMMLSettingsSandbox }
+
   TMMLSettingsSandbox = class(TObject)
-      public
-            constructor Create(sett: TMMLSettings);
-            destructor Destroy; override;
+  private
+    ST: TMMLSettings;
+    FPrefix: String;
+    function GetPrefix: String;
+    procedure SetPrefix(s: String);
+  public
+    constructor Create(sett: TMMLSettings);
+    destructor Destroy; override;
 
-            function IsKey(KeyName: String): Boolean;
-            function IsDirectory(KeyName: String): Boolean;
-            function GetKeyValue(KeyName: String): String;
-            function GetSetDefaultKeyValue(KeyName, defVal: String): String;
-            function ListKeys(KeyName: String): TStringArray;
-
-            function DeleteKey(KeyName: String): Boolean;
-            function DeleteSubKeys(KeyName: String): Boolean;
-      public
-            function GetPrefix: String;
-            procedure SetPrefix(s: String);
-      private
-            ST: TMMLSettings;
-            Prefix: String;
-
+    function IsKey(KeyName: String): Boolean;
+    function IsDirectory(KeyName: String): Boolean;
+    function SetKeyValue(Keyname : string; Value : string) : boolean;
+    function GetKeyValue(KeyName: String): String;
+    function GetKeyValueDef(KeyName, defVal: String): String;
+    function ListKeys(KeyName: String; out Keys : TStringArray): boolean;
+    function DeleteKey(KeyName: String): Boolean;
+    function DeleteSubKeys(KeyName: String): Boolean;
+    property prefix : string read GetPrefix write SetPrefix;
   end;
 
 implementation
@@ -70,17 +72,17 @@ end;
 
 function TMMLSettingsSandbox.GetPrefix: String;
 begin
-  result := Prefix;
+  result := FPrefix;
 end;
 
 procedure TMMLSettingsSandbox.SetPrefix(s: String);
 begin
-  Prefix := s;
+  FPrefix := s;
 end;
 
-function TMMLSettingsSandbox.ListKeys(KeyName: String): TStringArray;
+function TMMLSettingsSandbox.ListKeys(KeyName: String; out Keys :TStringArray): boolean;
 begin
-  exit(ST.ListKeys(Prefix + KeyName))
+  exit(ST.ListKeys(Prefix + KeyName,keys))
 end;
 
 function TMMLSettingsSandbox.GetKeyValue(KeyName: String): String;
@@ -88,9 +90,9 @@ begin
   exit(ST.GetKeyValue(Prefix + KeyName))
 end;
 
-function TMMLSettingsSandbox.GetSetDefaultKeyValue(KeyName, defVal: String): String;
+function TMMLSettingsSandbox.GetKeyValueDef(KeyName, defVal: String): String;
 begin
-  exit(ST.GetSetDefaultKeyValue(Prefix + KeyName, defVal))
+  exit(ST.GetKeyValueDef(Prefix + KeyName, defVal))
 end;
 
 function TMMLSettingsSandbox.IsKey(KeyName: String): Boolean;
@@ -101,6 +103,14 @@ end;
 function TMMLSettingsSandbox.IsDirectory(KeyName: String): Boolean;
 begin
   exit(ST.IsDirectory(Prefix + KeyName))
+end;
+
+function TMMLSettingsSandbox.SetKeyValue(Keyname: string; Value: string
+  ): boolean;
+begin
+  Writeln(KeyName);
+  Writeln(Value);
+  exit(ST.SetKeyValue(prefix + keyname,value,true));
 end;
 
 function TMMLSettingsSandbox.DeleteKey(KeyName: String): Boolean;

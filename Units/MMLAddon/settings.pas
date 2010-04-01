@@ -57,51 +57,40 @@ type
   }
 
   TMMLSettings = class(TObject)
+  private
+    Nodes: TTreeNodes;
+    function KeyNameToKeys(KeyName: String): TStringArray;
+    function WalkToNode(KeyName: String): TTreeNode;
 
-    public
-      constructor Create(aNodes: TTreeNodes);
-      destructor Destroy; override;
+    procedure InternalLoadFromXML(XMLDoc: TXMLDocument);
+    procedure WriteXMLData(n: TTreeNode;
+                     XMLNode: TDOMNode; XMLDoc: TXMLDocument;
+                     var XMLChild: TDOMNode; var C: Integer);
+    procedure WalkTree(Node: TTreeNode; XMLNode: TDOMNode; XMLDoc: TXMLDocument;
+                 var C: Integer);
+    function GetKeyValueDefLoadFirst(KeyName, defVal, fileName: String): String;
+  public
+    constructor Create(aNodes: TTreeNodes);
+    destructor Destroy; override;
+    function GetNodePath(Node: TTreeNode): String;
+    function ListKeys(KeyName: String; out Keys :TStringArray) : boolean;
 
-    private
-      Nodes: TTreeNodes;
-      function KeyNameToKeys(KeyName: String): TStringArray;
-      function WalkToNode(KeyName: String): TTreeNode;
+    function KeyExists(KeyName: String): Boolean;
+    function IsKey(KeyName: String): Boolean;
+    function IsDirectory(KeyName: String): Boolean;
 
-      procedure InternalLoadFromXML(XMLDoc: TXMLDocument);
-      procedure WriteXMLData(n: TTreeNode;
-                       XMLNode: TDOMNode; XMLDoc: TXMLDocument;
-                       var XMLChild: TDOMNode; var C: Integer);
-      procedure WalkTree(Node: TTreeNode; XMLNode: TDOMNode; XMLDoc: TXMLDocument;
-                   var C: Integer);
+    function DeleteKey(KeyName: String): Boolean;
+    function DeleteSubKeys(KeyName: String): Boolean;
 
-    public
-      function GetNodePath(Node: TTreeNode): String;
-      function ListKeys(KeyName: String): TStringArray;
+    function CreateKey(KeyName: String; CreatePath: Boolean = True): Boolean;
+    function SetKeyValue(KeyName: String; KeyValue: String; CreatePath : boolean = true) : boolean;
+    function GetKeyValue(KeyName: String): String;
+    function GetKeyValueDef(KeyName, defVal: String): String;
+    function RenameKey(oldKey,newKey : string) : boolean;
+    function GetKeyValueDefLoad(KeyName, defVal, fileName: String): String;
 
-      function KeyExists(KeyName: String): Boolean;
-      function IsKey(KeyName: String): Boolean;
-      function IsDirectory(KeyName: String): Boolean;
-
-      function DeleteKey(KeyName: String): Boolean;
-      function DeleteSubKeys(KeyName: String): Boolean;
-
-      procedure SetKeyValue(KeyName: String; KeyValue: String);
-      function CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
-      function GetKeyValue(KeyName: String): String;
-
-      // Horrible name
-      function GetSetDefaultKeyValue(KeyName, defVal: String): String;
-     private
-      // /facepalm
-      function GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName: String): String;
-     public
-      // AAAAAAAAAAAHG??
-      function GetSetLoadSaveDefaultKeyValueIfNotExists(KeyName, defVal, fileName: String): String;
-
-    public
-      procedure LoadFromXML(fileName: String);
-      procedure SaveToXML(fileName: String);
-
+    procedure LoadFromXML(fileName: String);
+    procedure SaveToXML(fileName: String);
   end;
 
 implementation
@@ -255,19 +244,19 @@ end;
     Equivalent to 'ls' or 'dir'. It lists the keys in a certain key (directory)
 }
 
-function TMMLSettings.ListKeys(KeyName: String): TStringArray;
+function TMMLSettings.ListKeys(KeyName: String; out Keys: TStringArray): boolean;
 var
   N: TTreeNode;
 begin
-  SetLength(Result, 0);
+  SetLength(Keys, 0);
   N := WalkToNode(KeyName);
   if N <> nil then
     N := N.GetFirstChild;
-
+  result := n <> nil;
   while N <> nil do
   begin
-    setlength(result,length(result)+1);
-    result[high(result)] := N.Text;
+    setlength(Keys,length(Keys)+1);
+    Keys[high(Keys)] := N.Text;
     N := N.GetNextSibling;
   end;
 end;
@@ -345,13 +334,41 @@ begin
   Exit('');
 end;
 
+function TMMLSettings.RenameKey(oldKey, newKey: string): boolean;
+var
+  Node : TTreeNode;
+  Path : TstringArray;
+  newstr : string;
+  i : integer;
+begin
+  result := false;
+  Path := KeyNameToKeys(OldKey);
+  if length(path) = 1 then
+    exit;
+  if pos('/',newKey) > 0 then
+    exit;
+  if not KeyExists(oldkey) then
+    exit;
+  for i := length(oldKey) downto 1 do
+    if oldkey[i] = '/' then
+    begin
+      newstr:= Copy(oldkey,1,i) + NewKey;
+      break;
+    end;
+  if KeyExists(NewKey) then
+    exit;
+  Node := WalkToNode(oldKey);
+  Node.Text:= NewKey;
+  result := true;
+end;
+
 {
     If the key exists - return the value.
     If it does not exist, create the key - with a possible path, set it to
     defVal and return defVal.
 }
 
-function TMMLSettings.GetSetDefaultKeyValue(KeyName, defVal: String): String;
+function TMMLSettings.GetKeyValueDef(KeyName, defVal: String): String;
 var
     Res: String;
 begin
@@ -421,26 +438,26 @@ begin
 end;
 
 {
-    Clear the entire tree. Load from fileName. call GetSetDefaultKeyValue.
+    Clear the entire tree. Load from fileName. call GetKeyValueDef.
 }
 
-function TMMLSettings.GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName: String): String;
+function TMMLSettings.GetKeyValueDefLoadFirst(KeyName, defVal, fileName: String): String;
 begin
   Nodes.Clear;
   LoadFromXML(fileName);
-  Result := GetSetDefaultKeyValue(KeyName, defVal);
+  Result := GetKeyValueDef(KeyName, defVal);
   SaveToXML(fileName);
 end;
 
 {
-    If Key exists, call getSetDefaultKeyValue, else call GetSetLoadSaveDefaultKeyValue
+    If Key exists, call GetKeyValueDef, else call GetSetLoadSaveDefaultKeyValue
 }
-function TMMLSettings.GetSetLoadSaveDefaultKeyValueIfNotExists(KeyName, defVal, fileName: String): String;
+function TMMLSettings.GetKeyValueDefLoad(KeyName, defVal, fileName: String): String;
 begin
   if KeyExists(KeyName) then
-    Exit(GetSetDefaultKeyValue(KeyName, defVal))
+    Exit(GetKeyValueDef(KeyName, defVal))
   else
-    Exit(GetSetLoadSaveDefaultKeyValue(KeyName, defVal, fileName));
+    Exit(GetKeyValueDefLoadFirst(KeyName, defVal, fileName));
 end;
 
 {
@@ -449,7 +466,7 @@ end;
     and CreatePath = True, then b,c,d and e are all created.
 }
 
-function TMMLSettings.CreateKey(KeyName: String; CreatePath: Boolean = False): Boolean;
+function TMMLSettings.CreateKey(KeyName: String; CreatePath: Boolean = True): Boolean;
 var
     N, newN, nParent: TTreeNode;
     Path: TStringArray;
@@ -524,15 +541,18 @@ end;
     Set the value of a key.
 }
 
-procedure TMMLSettings.SetKeyValue(KeyName: String; KeyValue: String);
+function TMMLSettings.SetKeyValue(KeyName: String; KeyValue: String; CreatePath: boolean) : boolean;
 var
     N, NN: TTreeNode;
 begin
-  if not KeyExists(KeyName) then
+  result := false;
+  if not KeyExists(KeyName) and not CreatePath then
   begin
     mDebugLn('SetKeyValue - Key does not exist');
     Exit;
-  end;
+  end else
+    if not KeyExists(keyname) then
+      CreateKey(keyname);
   if not IsKey(KeyName) then
   begin
     mDebugLn('SetKeyValue - IsKey returned false');
@@ -558,6 +578,7 @@ begin
      mDebugLn('Setting ' + KeyName + ' to ' + KeyValue);
      N := N.GetNextSibling;
    end;
+   result := true;
 end;
 
 

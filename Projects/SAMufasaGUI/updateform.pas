@@ -94,7 +94,7 @@ begin
   if FontVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
     FontVersionThread := TDownloadThread.Create(true);
-    FontVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+    FontVersionThread.InputURL := SettingsForm.Settings.GetKeyValueDefLoad(
                                   'Settings/Fonts/VersionLink',FontURL  + 'Version',SimbaSettingsFile);
     FontVersionThread.Resume;
     while FontVersionThread.Done = false do//Wait till thread is done
@@ -123,7 +123,7 @@ begin
   begin
     SimbaVersionThread := TDownloadThread.Create(true);
 
-    SimbaVersionThread.InputURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+    SimbaVersionThread.InputURL := SettingsForm.Settings.GetKeyValueDefLoad(
                 'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version',SimbaSettingsFile);
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
@@ -214,7 +214,7 @@ begin
   FCancelling := False;
   FCancelled := False;
 
-  Updater.FileURL := SettingsForm.Settings.GetSetLoadSaveDefaultKeyValueIfNotExists(
+  Updater.FileURL := SettingsForm.Settings.GetKeyValueDefLoad(
         'Settings/Updater/RemoteLink',
         SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
         SimbaSettingsFile
