@@ -695,7 +695,11 @@ begin
       begin
         Result := True;
         if (Return = vbType) then
-          Decl := b[ii].Owner
+          //Decl := b[ii].Owner
+          if (a[ii] is TciProcedureDeclaration) and (LowerCase(TciProcedureDeclaration(a[i]).ProcType) = 'constructor') then
+            Decl := Self
+          else
+            Decl := b[ii].Owner.Items.GetFirstItemOfClass(TciTypeKind)
         else
           Decl := b[ii];
         Exit;
