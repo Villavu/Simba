@@ -32,46 +32,19 @@ uses
 
 type
     TMDTM = class(TObject)
-
-        private
-
-
-    public
-           function AddDTM(d: TDTM): Integer;
-           function AddpDTM(d: pDTM): Integer;
-           function GetDTM(index: Integer; out dtm: pDTM): Boolean;
-           procedure FreeDTM(DTM: Integer);
-           function StringToDTM(S: String): pDTM;
-           function SetDTMName(DTM: Integer; S: String): boolean;
-
-
-         {  function FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2,
-                           y2: Integer): Boolean;
-          function FindDTMs(DTM: Integer; out Points: TPointArray; x1, y1, x2,
-                            y2: Integer): Boolean;
-          function FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2,
-                                  y2: Integer; sAngle, eAngle, aStep: Extended;
-                                  out aFound: Extended): Boolean;
-          function FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1,
-                                  y1, x2, y2: Integer; sAngle, eAngle,
-                                  aStep: Extended; out aFound: T2DExtendedArray)
-                                  : Boolean;
-          function pFindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2:
-                           Integer): Boolean;
-          function pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2,
-                                   y2: Integer; sAngle, eAngle, aStep: Extended;
-                                   out aFound: Extended): Boolean;
-          function pFindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1,
-                                    y1, x2, y2: Integer; sAngle, eAngle,
-                                    aStep: Extended; out aFound: T2DExtendedArray)
-                                    : Boolean;
-                                                    }
-           constructor Create(Owner: TObject);
-           destructor Destroy; override;
     private
-           Client: TObject;
-           DTMList: Array Of pDTM;
-           FreeSpots: Array Of Integer;
+      Client: TObject;
+      DTMList: Array Of pDTM;
+      FreeSpots: Array Of Integer;
+    public
+      function AddDTM(const d: TDTM): Integer;
+      function AddpDTM(const d: pDTM): Integer;
+      function GetDTM(index: Integer; out dtm: pDTM): Boolean;
+      procedure FreeDTM(DTM: Integer);
+      function StringToDTM(const S: String): pDTM;
+      function SetDTMName(DTM: Integer;const S: String): boolean;
+      constructor Create(Owner: TObject);
+      destructor Destroy; override;
     end;
 
 implementation
@@ -125,27 +98,20 @@ begin
   inherited Destroy;
 end;
 
-{Function AreaShape(Color, Tolerance, Size, Shape: Integer; P: TPoint) : Boolean; inline;
-
-Begin
-
-End;}
-
 //  Rotates the given point (p) by A (in radians) around the point defined by cx, cy.
 
-function RotatePoint(p: TPoint; angle, mx, my: Extended): TPoint; inline;
-
+function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint; inline;
 begin
   Result.X := Round(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
   Result.Y := Round(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
 end;
 
-function HexToInt(HexNum: string): LongInt;inline;
+function HexToInt(const HexNum: string): LongInt;inline;
 begin
    Result:=StrToInt('$' + HexNum);
 end;
 
-function TMDTM.StringToDTM(S: String): pDTM;
+function TMDTM.StringToDTM(const S: String): pDTM;
 var
   b: PBufferByteArray;
   Source : String;
@@ -192,7 +158,7 @@ begin
   result.l := length(result.p);
 end;
 
-function TMDTM.AddDTM(d: TDTM): Integer;
+function TMDTM.AddDTM(const d: TDTM): Integer;
 
 begin
   if Length(FreeSpots) > 0 then
@@ -213,7 +179,7 @@ end;
   Adds the given pDTM to the DTM Array, and returns it's index.
 /\}
 
-function TMDTM.AddpDTM(d: pDTM): Integer;
+function TMDTM.AddpDTM(const d: pDTM): Integer;
 
 begin
   if Length(FreeSpots) > 0 then
@@ -250,7 +216,7 @@ begin
   end
 end;
 
-function TMDTM.SetDTMName(DTM: Integer; s: string): boolean;
+function TMDTM.SetDTMName(DTM: Integer;const s: string): boolean;
 begin
   try
     DTMList[DTM].n:= s;
@@ -283,62 +249,6 @@ begin
   SetLength(FreeSpots, Length(FreeSpots) + 1);
   FreeSpots[High(FreeSpots)] := DTM;
 end;
-
-
-{
-  Tries to find the given DTM (index). If found will put the point the dtm has
-  been found at in x, y and result to true.
-}
-{function TMDTM.FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
-var
-   temp: pDTM;
-begin
-  if GetDTM(DTM, temp) then
-    Result := pFindDTM(temp, x, y, x1, y1, x2, y2)
-  else
-  begin
-    x := 0;
-    y := 0;
-    Result := False;
-  end;
-end;  }
-
-{
-  Tries to find the given pDTM. If found will put the point the dtm has
-  been found at in x, y and result to true.
-}
-
-{function TMDTM.pFindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
-
-
-begin
-
-end;   }
-
-{/\
-  Tries to find the given DTM (index). Will return true if it has found one or more
-  DTM's. All the occurances are stored in the Points (TPointArray)
-/\}
-
-{function TMDTM.FindDTMs(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer): Boolean;
-Var
-   temp: pDTM;
-Begin
-  If GetDTM(DTM, temp) Then
-    Result := pFindDTMs(temp, Points, x1, y1, x2, y2)
-  Else
-  Begin
-    SetLength(Points, 0);
-    Result := False;
-  End;
-End;     }
-
-{/\
-  Tries to find the given pDTM. Will return true if it has found one or more
-  DTM's. All the occurances are stored in the Points (TPointArray)
-/\}
-
-
 
 {wat}
 // Then, first find all occurances of all colours on the given client.
@@ -426,13 +336,6 @@ End;    }
   Does not stop rotating when one occurance of a DTM has been found.
   Returns all Angles in a Two Dimensional Extended array.
 /\}
-
-{Function TMDTM.pFindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
-
-Begin
-  // Don't forget to pre calculate the rotated points at the start.
-  // Saves a lot of rotatepoint() calls.
-End;  }
 
 end.
 

@@ -1,6 +1,6 @@
 unit libloader;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 

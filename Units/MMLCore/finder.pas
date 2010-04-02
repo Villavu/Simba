@@ -30,7 +30,7 @@ interface
 
 {$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 uses
-  Classes, SysUtils,bitmaps,MufasaBase,  MufasaTypes; // Types
+  colour_conv, Classes, SysUtils,bitmaps,MufasaBase,  MufasaTypes; // Types
 
 { TMFinder Class }
 
@@ -42,69 +42,66 @@ uses
 }
 
 type
-    TMFinder = class(TObject)
-          constructor Create(aClient: TObject);
-          destructor Destroy; override;
-      private
+  TMFinder = class(TObject)
+  private
+    Client: TObject;
+    Percentage : array[0..255] of Extended; //We store all the possible RGB / 255 divisions.
+    CachedWidth, CachedHeight : integer;
+    ClientTPA : TPointArray;
+    hueMod, satMod: Extended;
+    CTS: Integer;
 
+    Procedure UpdateCachedValues(NewWidth,NewHeight : integer);
+    procedure DefaultOperations(var xs,ys,xe,ye : integer);
+    //Loads the Spiral into ClientTPA (Will not cause problems)
+    procedure LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
+  public
+    WarnOnly : boolean;
+    function FindColorsToleranceOptimised(out Points: TPointArray; Color,xs, ys, xe, ye, Tol: Integer): Boolean;
+    function FindColorToleranceOptimised(out x, y: Integer; Color, xs, ys,xe, ye, tol: Integer): Boolean;
+    function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
+    function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
+    function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
+    // Possibly turn x, y into a TPoint var.
+    function FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
+    function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
+    function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye,Tol: Integer): Boolean;
+    function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
+    function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
+    function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
+    function FindColors(out TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+    function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
+    function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
+    //Mask
+    function FindMaskTolerance(const mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+    procedure CheckMask(const Mask : TMask);
+    //Bitmap functions
+    function FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
+    function FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
+    function FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
+    function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
+    function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
+    function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+    function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
 
-        Procedure UpdateCachedValues(NewWidth,NewHeight : integer);
-        procedure DefaultOperations(var xs,ys,xe,ye : integer);
-        //Loads the Spiral into ClientTPA (Will not cause problems)
-        procedure LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
-      public
-        function FindColorsToleranceOptimised(out Points: TPointArray; Color,
-          xs, ys, xe, ye, Tol: Integer): Boolean;
-        function FindColorToleranceOptimised(out x, y: Integer; Color, xs, ys,
-          xe, ye, tol: Integer): Boolean;
-        function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
-        function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
-        function SimilarColors(Color1,Color2,Tolerance : Integer) : boolean;
-        // Possibly turn x, y into a TPoint var.
-        function FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
-        function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
-        function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye,Tol: Integer): Boolean;
-        function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
-        function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
-        function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
-        function FindColors(out TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
-        function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
-        function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
-        //Mask
-        function FindMaskTolerance(mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
-        procedure CheckMask(Mask : TMask);
-        //Bitmap functions
-        function FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
-        function FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
-        function FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
-        function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
-        function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
-        function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
-        function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
-
-        function FindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
-        function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
-        function FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
-        function FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer; Alternating : boolean): Boolean;
-        //Donno
-        function GetColors(Coords: TPointArray): TIntegerArray;
-        // tol speeds
-        procedure SetToleranceSpeed(nCTS: Integer);
-        function GetToleranceSpeed: Integer;
-        procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);
-        procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);
-    protected
-        Client: TObject;
-        Percentage : array[0..255] of Extended; //We store all the possible RGB / 255 divisions.
-        CachedWidth, CachedHeight : integer;
-        ClientTPA : TPointArray;
-        hueMod, satMod: Extended;
-        CTS: Integer;
-    end;
+    function FindDTM(const DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+    function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
+    function FindDTMRotated(const DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
+    function FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer; Alternating : boolean): Boolean;
+    //Donno
+    function GetColors(const Coords: TPointArray): TIntegerArray;
+    // tol speeds
+    procedure SetToleranceSpeed(nCTS: Integer);
+    function GetToleranceSpeed: Integer;
+    procedure SetToleranceSpeed2Modifiers(const nHue, nSat: Extended);
+    procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);
+    constructor Create(aClient: TObject);
+    destructor Destroy; override;
+  end;
 
 implementation
 uses
-    colour_conv,// For RGBToColor, etc.
+//    colour_conv,// For RGBToColor, etc.
     Client, // For the Client Casts.
     math, //min/max
     tpa, //TPABounds
@@ -254,6 +251,7 @@ var
 begin
   inherited Create;
 
+  WarnOnly := False;
   Self.Client := aClient;
   Self.CTS := 1;
   Self.hueMod := 0.2;
@@ -281,7 +279,7 @@ begin
   Result := Self.CTS;
 end;
 
-procedure TMFinder.SetToleranceSpeed2Modifiers(nHue, nSat: Extended);
+procedure TMFinder.SetToleranceSpeed2Modifiers(const nHue, nSat: Extended);
 begin
   Self.hueMod := nHue;
   Self.satMod := nSat;
@@ -338,34 +336,64 @@ begin
   SetLength(ClientTPA,NewWidth * NewHeight);
 end;
 
+procedure Swap(var A,B : integer);
+var
+  c : integer;
+begin
+  c := a;
+  a := b;
+  b := c;
+end;
+
 procedure TMFinder.DefaultOperations(var xs, ys, xe, ye: integer);
 var
   w,h : integer;
 begin
-  if xs > xe then
-    raise Exception.CreateFMT('Finder function: Xs > xe (%d,%d)',[xs,xe]);
+  if (xs > xe) then
+    if WarnOnly then
+    begin
+      TClient(Client).WriteLn(Format('Warning! You passed wrong values to a finder function: xs > xe (%d,%d). Swapping the values for now.',[xs,xe]));
+      swap(xs,xe);
+    end else
+      raise Exception.CreateFMT('You passed wrong values to a finder function: xs > xe (%d,%d).',[xs,xe]);
   if ys > ye then
-    raise Exception.CreateFMT('Finder function: Ys > ye (%d,%d)',[ys,ye]);
+    if WarnOnly then
+    begin
+      TClient(Client).WriteLn(Format('Warning! You passed wrong values to a finder function: ys > ye (%d,%d). Swapping the values for now.',[ys,ye]));
+      swap(ys,ye);
+    end else
+      raise Exception.CreateFMT('You passed wrong values to a finder function: ys > ye (%d,%d).',[ys,ye]);
   if xs < 0 then
-    // xs := 0;
-    raise Exception.createFMT('Any Find Function, you did not pass a ' +
-                              'correct xs: %d.', [xs]);
+    if WarnOnly then
+    begin
+      TClient(Client).WriteLn(Format('Warning! You passed a wrong xs to a finder function: %d. That is below 0, thus out of bounds. Setting the value to 0 for now.',[xs]));
+      xs := 0;
+    end else
+      raise Exception.createFMT('You passed a wrong xs to a finder function: %d. That is below 0, thus out of bounds.',[xs]);
   if ys < 0 then
-//    ys := 0;
-    raise Exception.createFMT('Any Find Function, you did not pass a ' +
-                              'correct ys: %d.', [ys]);
-
+    if WarnOnly then
+    begin
+      TClient(Client).WriteLn(Format('Warning! You passed a wrong ys to a finder function: %d. That is below 0, thus out of bounds. Setting the value to 0 for now.',[ys]));
+      ys := 0;
+    end else
+      raise Exception.createFMT('You passed a wrong ys to a finder function: %d. That is below 0, thus out of bounds.',[ys]);
   TClient(Self.Client).IOManager.GetDimensions(w,h);
   if (w <> CachedWidth) or (h <> CachedHeight) then
     UpdateCachedValues(w,h);
   if xe >= w then
-//    xe := w-1;
-    raise Exception.createFMT('Any Find Function, you did not pass a ' +
-                              'correct xe: %d.', [xe]);
+    if WarnOnly then
+    begin
+      TClient(Client).WriteLn(Format('Warning! You passed a wrong xe to a finder function: %d. The client has a width of %d, thus the xe is out of bounds. Setting the value to %d (w-1) for now.',[xe,w,w-1]));
+      xe := w-1;
+    end else
+      raise Exception.createFMT('You passed a wrong xe to a finder function: %d. The client has a width of %d, thus the xe is out of bounds.',[xe,w]);
   if ye >= h then
-//    ye := h-1;
-    raise Exception.createFMT('Any Find Function, you did not pass a ' +
-                              'correct ye: %d.', [ye]);
+    if WarnOnly then
+    begin
+      TClient(Client).WriteLn(Format('Warning! You passed a wrong ye to a finder function: %d. The client has a height of %d, thus the ye is out of bounds. Setting the value to %d (h-1) for now.',[ye,h,h-1]));
+      ye := h-1;
+    end else
+      raise Exception.createFMT('You passed a wrong ye to a finder function: %d. The client has a height of %d, thus the ye is out of bounds.',[ye,h]);
 end;
 
 function TMFinder.CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
@@ -1181,6 +1209,7 @@ begin
           //Finally lets test H2
           if Abs(H2 - H1) > HueTol then
             continue;
+          //We survived the checks, this point is a match!
           hit:
             ClientTPA[c].x := xx;
             ClientTPA[c].y := yy;
@@ -1323,7 +1352,7 @@ end;
  { Only works with CTS 1 for now.. Since Colorsame doesn't return a boolean :-( }
 //We do not check whether every white pixel is in tol range with every other white pixel..
 
-function TMFinder.FindMaskTolerance(mask: TMask; out x, y: Integer; xs,
+function TMFinder.FindMaskTolerance(const mask: TMask; out x, y: Integer; xs,
   ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
 var
    MainRowdata : TPRGB32Array;
@@ -1400,7 +1429,7 @@ begin
   TClient(Client).IOManager.FreeReturnData;
 end;
 
-procedure TMFinder.CheckMask(Mask: TMask);
+procedure TMFinder.CheckMask(const Mask: TMask);
 begin
   if (Mask.W < 1) or (Mask.H < 1) or (Mask.WhiteHi < 0) or (Mask.BlackHi < 0) then
     raise exception.CreateFMT('Mask is invalid. Width/Height: (%d,%d). WhiteHi/BlackHi: (%d,%d)',[Mask.W,Mask.H,Mask.WhiteHi,Mask.BlackHi]);
@@ -1875,8 +1904,12 @@ begin
   end;
 end;
 
-function TMFinder.FindDTM(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+{
+  Tries to find the given DTM. If found will put the point the dtm has
+  been found at in x, y and result to true.
+}
 
+function TMFinder.FindDTM(const DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
 var
    P: TPointArray;
 begin
@@ -2048,7 +2081,7 @@ begin
   Result := (pc > 0);
 end;
 
-function TMFinder.FindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
+function TMFinder.FindDTMRotated(const DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
 
 var
    P: TPointArray;
@@ -2063,9 +2096,9 @@ begin
   Exit(True);
 end;
 
-function TMFinder.FindDTMsRotated(_DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer; Alternating : boolean): Boolean;
+function TMFinder.FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray; maxToFind: Integer; Alternating : boolean): Boolean;
 var
-   DTM: pDTM;
+   DTMRot: pDTM;
    // Colours of DTMs
    clR,clG,clB : array of byte;
 
@@ -2113,17 +2146,17 @@ var
 begin
   // Is the area valid?
   DefaultOperations(x1, y1, x2, y2);
-  if not DTMConsistent(_dtm) then
+  if not DTMConsistent(DTM) then
   begin
-    raise Exception.CreateFmt('FindDTMsRotated: DTM is not consistent.', []);
+    raise Exception.CreateFmt('FindDTMsRotated: DTMRot is not consistent.', []);
     Exit;
   end;
 
-  NormalizeDTM(_dtm);
+  NormalizeDTM(DTM);
 
-  setlength(goodPoints, _dtm.l);
-  for i := 0 to _dtm.l - 1 do
-    goodPoints[i] := not _dtm.bp[i];
+  setlength(goodPoints, DTM.l);
+  for i := 0 to DTM.l - 1 do
+    goodPoints[i] := not DTM.bp[i];
 
   // Init data structure B.
   W := x2 - x1;
@@ -2139,18 +2172,18 @@ begin
   end;
 
   // Convert colors to there components
-  SetLength(clR,_dtm.l);
-  SetLength(clG,_dtm.l);
-  SetLength(clB,_dtm.l);
-  for i := 0 to _dtm.l - 1 do
-    ColorToRGB(_dtm.c[i],clR[i],clG[i],clB[i]);
+  SetLength(clR,DTM.l);
+  SetLength(clG,DTM.l);
+  SetLength(clB,DTM.l);
+  for i := 0 to DTM.l - 1 do
+    ColorToRGB(DTM.c[i],clR[i],clG[i],clB[i]);
   //Compiler hints
 
-  SetLength(hh,_dtm.l);
-  SetLength(ss,_dtm.l);
-  SetLength(ll,_dtm.l);
-  for i := 0 to _DTM.l - 1 do
-    ColorToHSL(_dtm.c[i],hh[i],ss[i],ll[i]);
+  SetLength(hh,DTM.l);
+  SetLength(ss,DTM.l);
+  SetLength(ll,DTM.l);
+  for i := 0 to DTM.l - 1 do
+    ColorToHSL(DTM.c[i],hh[i],ss[i],ll[i]);
 
   GetToleranceSpeed2Modifiers(hMod, sMod);
   ccts := CTS;
@@ -2170,9 +2203,9 @@ begin
     s := sAngle;
   while s < eAngle do
   begin
-    dtm := RotateDTM(_dtm, s);
-    //Rotate the DTM, the rest is just like FindDTMs
-    MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
+    DTMRot := RotateDTM(DTM, s);
+    //Rotate the DTMRot, the rest is just like FindDTMs
+    MA := ValidMainPointBox(DTMRot, x1, y1, x2, y2);
     //CD starts at 0,0.. We must adjust the MA, since this is still based on the xs,ys,xe,ye box.
     MA.x1 := MA.x1 - x1;
     MA.y1 := MA.y1 - y1;
@@ -2183,14 +2216,14 @@ begin
       for xx := MA.x1  to MA.x2 do
       begin
         //Mainpoint can have area size as well, so we must check that just like any subpoint.
-        for i := 0 to dtm.l - 1 do
+        for i := 0 to DTMRot.l - 1 do
         begin //change to use other areashapes too.
           Found := false;
           //With area it can go out of bounds, therefore this max/min check
-          StartX := max(0,xx - dtm.asz[i] + dtm.p[i].x);
-          StartY := max(0,yy - dtm.asz[i] + dtm.p[i].y);
-          EndX := Min(Ma.x2,xx + dtm.asz[i] + dtm.p[i].x);
-          EndY := Min(ma.y2,yy + dtm.asz[i] + dtm.p[i].y);
+          StartX := max(0,xx - DTMRot.asz[i] + DTMRot.p[i].x);
+          StartY := max(0,yy - DTMRot.asz[i] + DTMRot.p[i].y);
+          EndX := Min(Ma.x2,xx + DTMRot.asz[i] + DTMRot.p[i].x);
+          EndY := Min(ma.y2,yy + DTMRot.asz[i] + DTMRot.p[i].y);
           for xxx := StartX to EndX do //The search area for the subpoint
           begin
             for yyy := StartY to EndY do
@@ -2201,7 +2234,7 @@ begin
                 // Checking point i now. (Store that we matched it)
                 ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-                if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
+                if ColorSame(ccts,DTMRot.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
                   b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
               end;
 
@@ -2252,7 +2285,7 @@ begin
 //  raise Exception.CreateFmt('Not done yet!', []);
 end;
 
-function TMFinder.GetColors(Coords: TPointArray): TIntegerArray;
+function TMFinder.GetColors(const Coords: TPointArray): TIntegerArray;
 var
   Box : TBox;
   Len, I,w,h : integer;

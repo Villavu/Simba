@@ -1,6 +1,6 @@
 unit stringutil;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 

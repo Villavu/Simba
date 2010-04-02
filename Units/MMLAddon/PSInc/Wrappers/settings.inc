@@ -21,6 +21,14 @@
     Settings.inc for the Mufasa Macro Library
 }
 
+function SetSettingValue(KeyName,value : string) : boolean;
+begin
+  if CurrThread.Sett <> nil then
+    result:= CurrThread.Sett.SetKeyValue(KeyName,Value)
+  else
+    result:=false;
+end;
+
 function KeyIsSetting(KeyName: String): Boolean;
 begin
   if CurrThread.Sett <> nil then
