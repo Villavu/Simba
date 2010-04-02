@@ -1,6 +1,6 @@
 unit virtualextension;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 

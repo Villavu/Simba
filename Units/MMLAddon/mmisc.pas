@@ -1,6 +1,6 @@
 unit mmisc;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 

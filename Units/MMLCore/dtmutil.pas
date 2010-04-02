@@ -33,13 +33,13 @@ uses
 
 Function pDTMToTDTM(Const DTM: pDTM): TDTM;
 Function tDTMTopDTM(Const DTM: TDTM): pDTM;
-Procedure PrintpDTM(aDTM : pDTM);
+Procedure PrintpDTM(const aDTM : pDTM);
 
 procedure initdtm(out d: pdtm; len: integer);
 function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
-Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
+Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;const
                                   sAngle, eAngle, aStep: Extended): TBox;
-function DTMConsistent(var dtm: pdtm): boolean;
+function DTMConsistent(const dtm: pdtm): boolean;
 procedure NormalizeDTM(var dtm: pdtm);
 function RotateDTM(const dtm: pdtm; angle: extended) : pdtm;
 function copydtm(const dtm: pdtm): pdtm;
@@ -99,7 +99,7 @@ begin
     d.bp[i] := False;
 end;
 
-Procedure PrintpDTM(aDTM : pDTM);
+Procedure PrintpDTM(const aDTM : pDTM);
 var
   i : integer;
 begin;
@@ -185,7 +185,7 @@ Begin
 End;
 
 { TODO: Check if bounds are correct? }
-function DTMConsistent(var dtm: pdtm): boolean;
+function DTMConsistent(const dtm: pdtm): boolean;
 var
    i: integer;
 begin
@@ -257,7 +257,7 @@ begin
 end;
 
 Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
-                                  sAngle, eAngle, aStep: Extended): TBox;
+                                  const sAngle, eAngle, aStep: Extended): TBox;
 
 var
    i: Integer;
