@@ -888,7 +888,7 @@ begin
   inherited Create;
 
   Proposal_InsertList := TStringList.Create;
-  //TStringList(Proposal_InsertList).Sorted := True;
+  TStringList(Proposal_InsertList).Sorted := True;
   Proposal_ItemList := TStringList.Create;
 
   fOnFindInclude := nil;
@@ -1015,6 +1015,11 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
           else if a[ii].HasOwnerClass(TciProcedureDeclaration, d, True) and (d.Owner <> nil) then
             Continue;}
 
+        {$IFDEF ciCHECKDUPLICATES}
+        if (InsertList.IndexOf(a[ii].ShortText) > -1) then
+          Continue;
+        {$ENDIF}
+
         s := FormatFirstColumn('enum') + FormatMainName(a[ii].ShortText);
         if a[ii].HasOwnerClass(TciTypeDeclaration, d, True) then
         begin
@@ -1046,6 +1051,11 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
     if (d = nil) then
       Exit;
     n := d.ShortText;
+
+    {$IFDEF ciCHECKDUPLICATES}
+    if (InsertList.IndexOf(n) > -1) then
+      Exit;
+    {$ENDIF}
 
     s := s + FormatMainName(n);
     if (Item.Params <> '') then
@@ -1178,10 +1188,11 @@ begin
   for i := Low(a) to High(a) do
   begin
     n := a[i].ShortText;
-    (*{$IFDEF ciCHECKDUPLICATES}
+
+    {$IFDEF ciCHECKDUPLICATES}
     if (InsertList.IndexOf(n) > -1) then
       Continue;
-    {$ENDIF}*)
+    {$ENDIF}
     s := FirstColumn + FormatMainName(n);
     if (Item is TciClassProperty) then
       s := s + FormatMainExtra(PropertyIndex(TciClassProperty(Item)));
