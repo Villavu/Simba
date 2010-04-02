@@ -48,7 +48,6 @@ class Mouse(object):
                 elif i in self._getButtons().keys():
                     res.append(self._getMouseButtonState(self._buttonToInt(i)))
                 else:
-                    print i
                     raise MouseException('Invalid mouse button')
             return res
 
@@ -56,7 +55,7 @@ class Mouse(object):
             if item == self.Pos:
                 return self._getMousePos() 
             if item in self._getButtons().keys():
-                return self_getMouseButtonState(self_buttonToInt(item))
+                return self._getMouseButtonState(self_buttonToInt(item))
 
         raise MouseException('item is not iterable nor a (valid) string')
 
