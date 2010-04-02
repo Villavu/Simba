@@ -1,6 +1,6 @@
 unit psextension;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
@@ -49,7 +49,7 @@ uses
   uPSC_extctrls,uPSC_menus, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls,uPSR_menus, //Runtime-libs
-  testunit,updateform,settingssandbox//Writeln
+  testunit,updateform,settingssandbox,bitmaps//Writeln
   ;
 
 function TSimbaPSExtension.HookExists(HookName: String): Boolean;
@@ -158,14 +158,14 @@ procedure TSimbaPSExtension.SIRegister_Settings(Cl: TPSPascalCompiler);
 begin
   with cl.AddClassN(nil,'TMMLSettingsSandbox') do
   begin;
-    RegisterMethod('function IsKey(KeyName: String): Boolean;');
-    RegisterMethod('function IsDirectory(KeyName: String): Boolean;');
-    RegisterMethod('function SetKeyValue(Keyname : string; Value : string) : boolean;');
-    RegisterMethod('function GetKeyValue(KeyName: String): String;');
-    RegisterMethod('function GetKeyValueDef(KeyName, defVal: String): String;');
-    RegisterMethod('function ListKeys(KeyName: String): TStringArray;');
-    RegisterMethod('function DeleteKey(KeyName: String): Boolean;');
-    RegisterMethod('function DeleteSubKeys(KeyName: String): Boolean;');
+    RegisterMethod('function IsKey(const KeyName: String): Boolean;');
+    RegisterMethod('function IsDirectory(const KeyName: String): Boolean;');
+    RegisterMethod('function SetKeyValue(const Keyname, Value : string) : boolean;');
+    RegisterMethod('function GetKeyValue(const KeyName: String): String;');
+    RegisterMethod('function GetKeyValueDef(const KeyName, defVal: String): String;');
+    RegisterMethod('function ListKeys(const KeyName: String; out Keys :TStringArray): boolean;');
+    RegisterMethod('function DeleteKey(const KeyName: String): Boolean;');
+    RegisterMethod('function DeleteSubKeys(const KeyName: String): Boolean;');
     RegisterProperty('Prefix','String',iptR);
   end;
 end;

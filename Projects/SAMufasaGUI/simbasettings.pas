@@ -1,6 +1,6 @@
 unit simbasettings;
 
-{$mode objfpc} {$M+}
+{$mode objfpc}{$H+}
 
 interface
 

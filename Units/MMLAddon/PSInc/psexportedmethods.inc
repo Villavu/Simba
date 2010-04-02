@@ -371,6 +371,7 @@ AddFunction(@KeyIsSetting, 'function KeyIsSetting(KeyName: String): Boolean;');
 AddFunction(@KeyIsDirectory, 'function KeyIsDirectory(KeyName: String): Boolean;');
 AddFunction(@GetSettingValue, 'function GetSettingValue(KeyName: String): String;');
 AddFunction(@GetSettingValueDef, 'function GetSettingValueDef(KeyName, defVal: String): String;');
+AddFunction(@SetSettingValue,'function SetSettingValue(KeyName,value : string) : boolean;');
 AddFunction(@ListSettings, 'function ListSettings(KeyName: String; var KeyReturn: TStringArray) : boolean;');
 AddFunction(@DeleteSetting, 'function DeleteSetting(KeyName: String): Boolean;');
 AddFunction(@DeleteSubSettings, 'function DeleteSubSettings(KeyName: String): Boolean;');

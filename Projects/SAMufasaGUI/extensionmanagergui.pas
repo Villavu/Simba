@@ -1,6 +1,6 @@
 unit extensionmanagergui;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
