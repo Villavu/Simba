@@ -23,45 +23,76 @@ class Mouse(object):
         self._mc = MC
         self._initialiseDLLFuncs()
         pass
+    
+    def setPos(self, pos):
+        return self.__setitem__(Mouse.Pos, pos)
+
+    def getPos(self):
+        return self._getMousePos()
+
+    def getButtonStates(self):
+        return zip(self._getButtons().keys(), \
+                    self.__getitem__(self._getButtons().keys()))
+
+    def setButtonState(self, button, downup):
+        return self.__setitem__(button, downup)
 
     def __getitem__(self, item):
         '''Can currently return the state of mouse buttons as well as the
             mouse position. Supports iterable arguments'''
-        if item == self.Pos:
-            return self._getMousePos() 
         if isiterable(item):
+            res = []
             for i in item:
-                if i not in self._getButtons().keys():
+                if i == self.Pos:
+                    res.append(self._getMousePos())
+                elif i in self._getButtons().keys():
+                    res.append(self._getMouseButtonState(self._buttonToInt(i)))
+                else:
+                    print i
                     raise MouseException('Invalid mouse button')
+            return res
 
-            bs = [self._buttonToInt(x) for x in item]
-            return [self._getMouseButtonState(x) for x in bs]
+        else:
+            if item == self.Pos:
+                return self._getMousePos() 
+            if item in self._getButtons().keys():
+                return self_getMouseButtonState(self_buttonToInt(item))
 
-        raise MouseException('item is not iterable, nor a (valid) string')
+        raise MouseException('item is not iterable nor a (valid) string')
 
     def __setitem__(self, item, value):
         '''Can currently set the state of mouse buttons as well as the
             mouse position. Supports iterable arguments'''
         ak = self._getButtons().keys() + [self.Pos]
-        isfalse = lambda x: True if not x in ak else False
-
-        for i in map(isfalse, item):
-            if i:
-                raise MouseException('One of the items is not valid. Items:', item)
 
         if isiterable(item) and isiterable(value):
+            isfalse = lambda x: True if not x in ak else False
+            for i in map(isfalse, item):
+                if i:
+                    raise MouseException('One of the items is not valid. Items:', item)
             if len(item) != len(value):
                 raise MouseException('Not enough values for items')
 
             for i, v in dict(zip(item, value)).iteritems():
                 if i == self.Pos:
                     self._setMousePos(v)
-                if i in self._getButtons().keys():
+                elif i in self._getButtons().keys():
                     self._setMouseButtonState(self._buttonToInt(i), \
                                               1 if v else 0)
             return
-        
+        else:
+            if item in ak:
+                if item == self.Pos:
+                    self_.setMousePos(value)
+                elif item in self._getButtons().keys():
+                    self._setMouseButtonState(self._buttonToInt(item), \
+                                              1 if value else 0)
+                return
+            else:
+                raise MouseException('Invalid item / value')
 
+                
+            
         raise MouseException('FIXME')
 
     # Tools
