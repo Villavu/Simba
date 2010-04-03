@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-    SimbaVersion = 602;
+    SimbaVersion = 605;
 
 type
 
@@ -382,7 +382,7 @@ type
     procedure CreateDefaultEnvironment;
     procedure LoadFormSettings;
     procedure SaveFormSettings;
-    procedure AddRecentFile(filename : string);
+    procedure AddRecentFile(const filename : string);
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
@@ -1161,7 +1161,7 @@ begin
   end;
 end;
 
-procedure TForm1.AddRecentFile(filename: string);
+procedure TForm1.AddRecentFile(const filename: string);
 var
   MaxRecentFiles : integer;
   Len,i : integer;
