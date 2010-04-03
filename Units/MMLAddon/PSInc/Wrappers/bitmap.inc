@@ -82,7 +82,7 @@ end;
 
 procedure SetBitmapName(Bmp : integer; name : string); extdecl;
 begin;
-  CurrThread.Client.MBitmaps[Bmp].BmpName:= name;
+  CurrThread.Client.MBitmaps[Bmp].Name:= name;
 end;
 
 function CreateMirroredBitmap(Bmp : integer) : integer; extdecl;
@@ -270,7 +270,7 @@ begin;
   result := CurrThread.Client.MBitmaps[Bitmap].CreateTMask;
 end;
 
-function FindMaskTolerance(mask: TMask; out x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; extdecl;
+function FindMaskTolerance(const mask: TMask; out x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; extdecl;
 begin;
   result := CurrThread.Client.MFinder.FindMaskTolerance(Mask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
 end;

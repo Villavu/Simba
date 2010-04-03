@@ -90,9 +90,9 @@ AddFunction(@IsTargetValid, 'function IsTargetValid: boolean;');
 
 {files}
 SetCurrSection('Files');
-AddFunction(@ps_CreateFile, 'function CreateFile(Path: string): Integer;');
-AddFunction(@ps_OpenFile, 'function OpenFile(Path: string; Shared: Boolean): Integer;');
-AddFunction(@ps_RewriteFile, 'function RewriteFile(Path: string; Shared: Boolean): Integer;');
+AddFunction(@ps_CreateFile, 'function CreateFile(const Path: string): Integer;');
+AddFunction(@ps_OpenFile, 'function OpenFile(const Path: string; Shared: Boolean): Integer;');
+AddFunction(@ps_RewriteFile, 'function RewriteFile(const Path: string; Shared: Boolean): Integer;');
 AddFunction(@ps_CloseFile, 'procedure CloseFile(FileNum: Integer);');
 AddFunction(@ps_EndOfFile, 'function EndOfFile(FileNum: Integer): Boolean;');
 AddFunction(@ps_FileSize, 'function FileSize(FileNum: Integer): LongInt;');
@@ -100,12 +100,12 @@ AddFunction(@ps_ReadFileString, 'function ReadFileString(FileNum: Integer; var s
 AddFunction(@ps_WriteFileString, 'function WriteFileString(FileNum: Integer; s: string): Boolean;');
 AddFunction(@ps_SetFileCharPointer, 'function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;');
 AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Integer;');
-AddFunction(@ps_DirectoryExists,'function DirectoryExists( const DirectoryName : string ) : Boolean;');
-AddFunction(@ps_CreateDirectory,'function CreateDirectory( const DirectoryName : string) : boolean;');
-AddFunction(@ps_FileExists,'function FileExists ( const FileName : string ) : Boolean;');
-AddFunction(@ps_WriteINI,'procedure WriteINI(Section, KeyName, NewString, FileName: string);');
-AddFunction(@ps_ReadINI,'function ReadINI(Section, KeyName, FileName: string): string;');
-AddFunction(@ps_DeleteINI,'procedure DeleteINI(Section, KeyName, FileName: string);');
+AddFunction(@ps_DirectoryExists,'function DirectoryExists(const DirectoryName : string ) : Boolean;');
+AddFunction(@ps_CreateDirectory,'function CreateDirectory(const DirectoryName : string) : boolean;');
+AddFunction(@ps_FileExists,'function FileExists (const FileName : string ) : Boolean;');
+AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, FileName: string);');
+AddFunction(@ps_ReadINI,'function ReadINI(const Section, KeyName, FileName: string): string;');
+AddFunction(@ps_DeleteINI,'procedure DeleteINI(const Section, KeyName, FileName: string);');
 
 {other}
 SetCurrSection('Other');
@@ -279,7 +279,7 @@ AddFunction(@BrightnessBitmap,'function BrightnessBitmap(Bitmap,br : integer) : 
 AddFunction(@ContrastBitmap,'function ContrastBitmap(bitmap : integer; co : extended) : integer;');
 AddFunction(@PosterizeBitmap,'function PosterizeBitmap(Bitmap : integer; po : integer) : integer;');
 AddFunction(@CreateMaskFromBitmap,'function CreateMaskFromBitmap(Bitmap : integer) : TMask;');
-AddFunction(@FindMaskTolerance,'function FindMaskTolerance(mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
+AddFunction(@FindMaskTolerance,'function FindMaskTolerance(const mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 AddFunction(@FindBitmapMaskTolerance,'function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 AddFunction(@FindDeformedBitmapToleranceIn,'function FindDeformedBitmapToleranceIn(bitmap: integer; var x,y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;');
 AddFunction(@DrawTPABitmap,'procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);');
