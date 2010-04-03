@@ -1,13 +1,13 @@
 object Form1: TForm1
-  Left = 345
-  Height = 555
-  Top = 260
-  Width = 739
+  Left = 423
+  Height = 557
+  Top = 159
+  Width = 666
   ActiveControl = ScriptPanel
   AllowDropFiles = True
   Caption = 'THA FUKING SIMBA'
-  ClientHeight = 535
-  ClientWidth = 739
+  ClientHeight = 537
+  ClientWidth = 666
   KeyPreview = True
   Menu = MainMenu
   OnClose = FormClose
@@ -21,7 +21,7 @@ object Form1: TForm1
     Left = 0
     Height = 24
     Top = 0
-    Width = 739
+    Width = 666
     Caption = 'ToolBar1'
     Images = Mufasa_Image_List
     ParentShowHint = False
@@ -207,9 +207,9 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 22
-    Top = 513
-    Width = 739
+    Height = 23
+    Top = 514
+    Width = 666
     Panels = <    
       item
         Width = 60
@@ -230,18 +230,21 @@ object Form1: TForm1
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 359
-    Width = 739
+    Top = 360
+    Width = 666
     Align = alBottom
     ClientHeight = 154
-    ClientWidth = 739
+    ClientWidth = 666
     TabOrder = 2
     object Memo1: TMemo
       Left = 1
       Height = 152
       Top = 1
-      Width = 737
+      Width = 664
       Align = alClient
+      Font.Height = -13
+      Font.Name = 'Courier New'
+      ParentFont = False
       ScrollBars = ssAutoBoth
       TabOrder = 0
     end
@@ -250,29 +253,29 @@ object Form1: TForm1
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 354
-    Width = 739
+    Top = 355
+    Width = 666
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 330
+    Height = 331
     Top = 24
-    Width = 739
+    Width = 666
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 330
-    ClientWidth = 739
+    ClientHeight = 331
+    ClientWidth = 666
     DockSite = True
     TabOrder = 4
     OnDockDrop = ScriptPanelDockDrop
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
       Left = 155
-      Height = 295
+      Height = 296
       Top = 0
-      Width = 584
+      Width = 511
       Align = alClient
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
@@ -289,12 +292,12 @@ object Form1: TForm1
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 295
-      Width = 739
+      Top = 296
+      Width = 666
       Align = alBottom
       BevelOuter = bvSpace
       ClientHeight = 35
-      ClientWidth = 739
+      ClientWidth = 666
       TabOrder = 1
       Visible = False
       object SpeedButtonSearch: TSpeedButton
@@ -385,7 +388,7 @@ object Form1: TForm1
       end
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 23
+        Height = 21
         Top = 6
         Width = 174
         EditLabel.AnchorSideLeft.Control = LabeledEditSearch
@@ -395,7 +398,7 @@ object Form1: TForm1
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
         EditLabel.Left = 71
         EditLabel.Height = 16
-        EditLabel.Top = 9
+        EditLabel.Top = 8
         EditLabel.Width = 30
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
@@ -409,9 +412,9 @@ object Form1: TForm1
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 19
+        Height = 17
         Top = 7
-        Width = 80
+        Width = 72
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -419,28 +422,28 @@ object Form1: TForm1
     end
     object SplitterFunctionList: TSplitter
       Left = 150
-      Height = 295
+      Height = 296
       Top = 0
       Width = 5
       OnCanResize = SplitterFunctionListCanResize
       Visible = False
     end
     inline frmFunctionList: TFunctionListFrame
-      Height = 295
+      Height = 296
       Width = 150
-      ClientHeight = 295
+      ClientHeight = 296
       ClientWidth = 150
       OnEndDock = nil
       TabOrder = 3
       inherited FunctionList: TTreeView
-        Height = 252
+        Height = 257
         Width = 150
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Top = 272
+        Top = 275
         Width = 150
         OnExit = editSearchListExit
         OnKeyDown = editSearchListKeyDown
