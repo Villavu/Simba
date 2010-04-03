@@ -149,6 +149,7 @@ begin
         if HookExists(HookName) then
           if ExecuteHook(HookName, Args, Result) <> 0 then
           begin
+            mDebugLn('Execute hook failed: Hookname: %s',[hookname]);
             // Not succesfull.
           end;
 end;
