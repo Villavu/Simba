@@ -985,9 +985,12 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
   begin
     Result := 'Enumeration';
     if (Item.Items.Count > 0) then
+    begin
       Result := Result + '(' + Item.Items[0].ShortText;
-    if (Item.Items.Count > 1) then
-      Result := Result + '..' + Item.Items[Item.Items.Count - 1].ShortText + ')';
+      if (Item.Items.Count > 1) then
+        Result := Result + '..' + Item.Items[Item.Items.Count - 1].ShortText;
+      Result := Result + ')';
+    end;
   end;
 
   procedure AddEnums(Item: {TCodeInsight}TDeclaration; ItemList, InsertList: TStrings); overload;
