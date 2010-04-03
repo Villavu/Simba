@@ -335,10 +335,10 @@ type
     procedure SetIncludePath(const AValue: String);
     procedure SetShowHintAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
-    function LoadSettingDef(Key : string; Def : string) : string;
-    function CreateSetting(Key : string; Value : string) : string;
-    procedure SetSetting(key : string; Value : string; save : boolean = false);
-    function SettingExtists(key : string) : boolean;
+    function LoadSettingDef(const Key, Def : string) : string;
+    function CreateSetting(const Key, Value : string) : string;
+    procedure SetSetting(const key,Value : string; save : boolean = false);
+    function SettingExtists(const key : string) : boolean;
     procedure FontUpdate;
   public
     DebugStream: String;
@@ -1289,15 +1289,15 @@ begin
   with CurrScript do
   begin
     ScriptFile:= SetDirSeparators(Filename);
-    ScriptName:= ExtractFileNameOnly(Filename);
+    ScriptName:= ExtractFileNameOnly(ScriptFile);
     mDebugLn('Script name will be: ' + ScriptName);
-    FormWritelnEx('Succesfully saved: ' + Filename);
+    FormWritelnEx('Succesfully saved: ' + ScriptFile);
     StartText:= SynEdit.Lines.Text;
     ScriptChanged := false;
     SynEdit.MarkTextAsSaved;
     Self.Caption:= Format(WindowTitle,[ScriptName]);
     CurrTab.TabSheet.Caption:= ScriptName;
-    Self.AddRecentFile(FileName);
+    Self.AddRecentFile(ScriptFile);
     StatusBar.Panels[Panel_ScriptName].Text:= ScriptName;
     StatusBar.Panels[Panel_ScriptPath].text:= ScriptFile;
   end;
@@ -2381,17 +2381,17 @@ begin
     end;
 end;
 
-function TForm1.LoadSettingDef(Key: string; Def: string): string;
+function TForm1.LoadSettingDef(const Key,Def: string): string;
 begin
   result := SettingsForm.Settings.GetKeyValueDefLoad(Key,def,SimbaSettingsFile);
 end;
 
-function TForm1.CreateSetting(Key: string; Value: string): string;
+function TForm1.CreateSetting(const Key,Value: string): string;
 begin
   result := SettingsForm.Settings.GetKeyValueDef(Key,value);
 end;
 
-procedure TForm1.SetSetting(key: string; Value: string; save : boolean);
+procedure TForm1.SetSetting(const key,Value: string; save : boolean);
 begin
   //Creates the setting if needed
   SettingsForm.Settings.SetKeyValue(key,value);
@@ -2399,7 +2399,7 @@ begin
     SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
 end;
 
-function TForm1.SettingExtists(key: string): boolean;
+function TForm1.SettingExtists(const key: string): boolean;
 begin
   result :=SettingsForm.Settings.KeyExists(key);
 end;

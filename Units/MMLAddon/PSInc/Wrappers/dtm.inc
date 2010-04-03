@@ -21,110 +21,57 @@
     DTM.inc for the Mufasa Macro Library
 }
 
-function ps_FindDTM(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean; extdecl;
-var
-   temp: pDTM;
+function ps_FindDTM(DTM: Integer; out x, y: Integer; xs, ys, xe, ye: Integer): Boolean; extdecl;
 begin
-  if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
-    Result := CurrThread.Client.MFinder.FindDTM(temp, x, y, x1, y1, x2, y2)
-  else
-  begin
-    x := 0;
-    y := 0;
-    Result := False;
-  end;
+  with CurrThread.Client do
+    result := MFinder.FindDTM(MDTM.GetDTM(DTM),x,y,xs,ys,xe,ye);
 end;
 
-function ps_FindDTMs(DTM: Integer; out p: TPointArray; x1, y1, x2, y2: Integer): Boolean; extdecl;
-var
-   temp: pDTM;
+function ps_FindDTMs(DTM: Integer; out p: TPointArray; xs, ys, xe, ye: Integer): Boolean; extdecl;
 begin
-  if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
-    Result := CurrThread.Client.MFinder.FindDTMs(temp, p, x1, y1, x2, y2, 0)
-  else
-  begin
-    setlength(p,0);
-    Result := False;
-  end;
+   with CurrThread.Client do
+     result := MFinder.FindDTMs(MDTM.GetDTM(DTM), p, xs, ys, xe, ye);
 end;
 
-function ps_FindDTMRotatedAlternating(DTM: Integer; out x, y: Integer; x1, y1, x2, y2:
+function ps_FindDTMRotatedAlternating(DTM: Integer; out x, y: Integer; xs, ys, xe, ye:
                            Integer; sAngle, eAngle, aStep: Extended;
                            out aFound: Extended): Boolean; extdecl;
-var
-   temp: pDTM;
 begin
-  if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
-    Result := CurrThread.Client.MFinder.FindDTMRotated(temp, x, y, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound,true)
-  else
-  begin
-    x := 0;
-    y := 0;
-    Result := False;
-  end;
+  with CurrThread.Client do
+    result := MFinder.FindDTMRotated(MDTM.GetDTM(DTM), x,y, xs, ys, xe, ye, sAngle, eAngle, aStep, aFound,true);
 end;
 
-function ps_FindDTMRotatedSE(DTM: Integer; out x, y: Integer; x1, y1, x2, y2:
+function ps_FindDTMRotatedSE(DTM: Integer; out x, y: Integer; xs, ys, xe, ye:
                            Integer; sAngle, eAngle, aStep: Extended;
                            out aFound: Extended): Boolean; extdecl;
-var
-   temp: pDTM;
 begin
-  if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
-    Result := CurrThread.Client.MFinder.FindDTMRotated(temp, x, y, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound,false)
-  else
-  begin
-    x := 0;
-    y := 0;
-    Result := False;
-  end;
+  with CurrThread.Client do
+    result := MFinder.FindDTMRotated(MDTM.GetDTM(DTM), x, y, xs, ys, xe, ye, sAngle, eAngle, aStep, aFound,false);
 end;
 
-function ps_FindDTMsRotatedAlternating(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean; extdecl;
-var
-   temp: pDTM;
+function ps_FindDTMsRotatedAlternating(DTM: Integer; out Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean; extdecl;
 begin
-  if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
-    Result := CurrThread.Client.MFinder.FindDTMsRotated(temp, Points, x1, y1, x2, y2,
-                                  sAngle, eAngle, aStep, aFound, 0,true)
-  else
-    Result := False;
+  with CurrThread.Client do
+    result := MFinder.FindDTMsRotated(MDTM.GetDTM(DTM), Points, xs, ys, xe, ye,
+                                  sAngle, eAngle, aStep, aFound, true);
 end;
 
-function ps_FindDTMsRotatedSE(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean; extdecl;
-var
-   temp: pDTM;
+function ps_FindDTMsRotatedSE(DTM: Integer; out Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean; extdecl;
 begin
-  if CurrThread.Client.MDTM.GetDTM(DTM, temp) then
-    Result := CurrThread.Client.MFinder.FindDTMsRotated(temp, Points, x1, y1, x2, y2,
-                                  sAngle, eAngle, aStep, aFound, 0,false)
-  else
-    Result := False;
+  with CurrThread.Client do
+    result := MFinder.FindDTMsRotated(MDTM.GetDTM(DTM), Points, xs, ys, xe, ye,
+                                  sAngle, eAngle, aStep, aFound, false);
 end;
 
-{function ps_FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, extdecl;
-                                  y1, x2, y2: Integer; sAngle, eAngle,
-                                  aStep: Extended; out aFound: T2DExtendedArray)
-                                  : Boolean;
-begin
-  Result := CurrThread.Client.MDTM.FindDTMsRotated(DTM, Points, x1, y1, x2, y2,
-                                    sAngle, eAngle, aStep, aFound);
-end;       }
-
-procedure ps_SetDTMName(DTM : integer; name : string);
+procedure ps_SetDTMName(DTM : integer;const name : string);
 begin
   CurrThread.Client.MDTM.SetDTMName(DTM,name);
 end;
 
-function ps_DTMFromString(DTMString: String): Integer; extdecl;
-var
-   dtm: pDTM;
+function ps_DTMFromString(const DTMString: String): Integer; extdecl;
 begin
   With CurrThread.Client.MDTM do
-  begin
-    dtm := StringToDTM(DTMString);
-    Result := AddpDTM(dtm);
-  end;
+    Result := AddpDTM(StringToDTM(DTMString));
 end;
 
 procedure ps_FreeDTM(DTM: Integer); extdecl;
@@ -132,23 +79,32 @@ begin
   CurrThread.Client.MDTM.FreeDTM(DTM);
 end;
 
-function ps_GetDTM(index: Integer; out dtm: pDTM): Boolean; extdecl;
+function ps_GetDTM(index: Integer) : pDTM; extdecl;
 begin
- Result := CurrThread.Client.MDTM.GetDTM(index, dtm);
+  CurrThread.Client.MDTM.GetDTM(index);
 end;
 
-function ps_AddDTM(d: TDTM): Integer; extdecl;
+function ps_AddDTM(const d: TDTM): Integer; extdecl;
 begin
   Result := CurrThread.Client.MDTM.AddDTM(d);
 end;
 
-function ps_AddpDTM(d: pDTM): Integer; extdecl;
+function ps_AddpDTM(const d: pDTM): Integer; extdecl;
 begin
- Result := CurrThread.Client.MDTM.AddpDTM(d);
+  Result := CurrThread.Client.MDTM.AddpDTM(d);
 end;
 
-Procedure ps_PrintpDTM(aDTM : pDTM);extdecl;
+procedure ps_PrintpDTM(const aDTM : pDTM);extdecl;
 begin
- PrintpDTM(aDTM);
+  PrintpDTM(aDTM);
 end;
 
+function ps_pDTMToTDTM(Const DTM: pDTM): TDTM;extdecl;
+begin
+  result := pDTMToTDTM(DTM);
+end;
+
+function ps_tDTMTopDTM(Const DTM: TDTM): pDTM;extdecl;
+begin
+  result := tDTMTopDTM(DTM);
+end;

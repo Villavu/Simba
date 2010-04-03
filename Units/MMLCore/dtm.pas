@@ -31,18 +31,22 @@ uses
   Classes, SysUtils, MufasaTypes;
 
 type
+
+    { TMDTM }
+
     TMDTM = class(TObject)
     private
       Client: TObject;
       DTMList: Array Of pDTM;
       FreeSpots: Array Of Integer;
+      procedure CheckIndex(index : integer);
     public
       function AddDTM(const d: TDTM): Integer;
       function AddpDTM(const d: pDTM): Integer;
-      function GetDTM(index: Integer; out dtm: pDTM): Boolean;
+      function GetDTM(index: Integer) :pDTM;
       procedure FreeDTM(DTM: Integer);
       function StringToDTM(const S: String): pDTM;
-      function SetDTMName(DTM: Integer;const S: String): boolean;
+      procedure SetDTMName(DTM: Integer;const S: String);
       constructor Create(Owner: TObject);
       destructor Destroy; override;
     end;
@@ -158,21 +162,15 @@ begin
   result.l := length(result.p);
 end;
 
-function TMDTM.AddDTM(const d: TDTM): Integer;
-
+procedure TMDTM.CheckIndex(index: integer);
 begin
-  if Length(FreeSpots) > 0 then
-  begin
-    DTMList[FreeSpots[High(FreeSpots)]] := TDTMTopDTM(d);
-    Result := FreeSpots[High(FreeSpots)];
-    SetLength(FreeSpots, High(FreeSpots));
-  end
-  else
-  begin
-    SetLength(DTMList, Length(DTMList) + 1);
-    DTMList[High(DTMList)] := TDTMTopDTM(d);
-    Result := High(DTMList);
-  end;
+  if (index < 0) or (index >= Length(DTMList)) then
+    raise Exception.CreateFmt('The given DTM Index[%d] doesn''t exist',[index]);
+end;
+
+function TMDTM.AddDTM(const d: TDTM): Integer;
+begin
+  Result := AddpDTM(tDTMTopDTM(d));
 end;
 
 {/\
@@ -180,7 +178,6 @@ end;
 /\}
 
 function TMDTM.AddpDTM(const d: pDTM): Integer;
-
 begin
   if Length(FreeSpots) > 0 then
   begin
@@ -188,12 +185,13 @@ begin
     Result := FreeSpots[High(FreeSpots)];
     SetLength(FreeSpots, High(FreeSpots));
   end
-  Else
+  else
   begin
     SetLength(DTMList, Length(DTMList) + 1);
     DTMList[High(DTMList)] := d;
     Result := High(DTMList);
   end;
+  NormalizeDTM(DTMList[result]);
 end;
 
 {/\
@@ -201,30 +199,16 @@ end;
    Returns true is succesfull, false if the dtm does not exist.
 /\}
 
-function TMDTM.GetDTM(index: Integer; out dtm: pDTM): Boolean;
+function TMDTM.GetDTM(index: Integer) :pDTM;
 begin
-  Result := True;
-  try
-    dtm := DTMList[index];
-  except
-    begin
-      raise Exception.CreateFmt('The given DTM Index ([%d]) is invalid.',
-      [index]);
-      //WriteLn('DTM Index ' + IntToStr(index) + ' does not exist');
-      Result := False;
-    end;
-  end
+  CheckIndex(index);
+  result := DTMList[index];
 end;
 
-function TMDTM.SetDTMName(DTM: Integer;const s: string): boolean;
+procedure TMDTM.SetDTMName(DTM: Integer;const s: string);
 begin
-  try
-    DTMList[DTM].n:= s;
-    Exit(true);
-  except
-    raise Exception.CreateFMT('SetDTMName: The given DTM %d does not exist.', [DTM]);
-  end;
-  Exit(False);
+  CheckIndex(DTM);
+  DTMList[DTM].n := s;
 end;
 
 {/\
@@ -233,19 +217,17 @@ end;
   Will keep track of not used index, so it is very memory efficient.
 /\}
 
-Procedure TMDTM.FreeDTM(DTM: Integer);
+procedure TMDTM.FreeDTM(DTM: Integer);
 begin
-  try
-    SetLength(DTMList[DTM].p, 0);
-    SetLength(DTMList[DTM].c, 0);
-    SetLength(DTMList[DTM].t, 0);
-    SetLength(DTMList[DTM].asz, 0);
-    SetLength(DTMList[DTM].ash, 0);
-    DTMList[DTM].l := 0;
-  except
-    raise Exception.CreateFmt('Invalid DTM passed to FreeDTM', []);
-    //WriteLn('Invalid DTM');
-  end;
+  CheckIndex(DTM);
+  SetLength(DTMList[DTM].p, 0);
+  SetLength(DTMList[DTM].c, 0);
+  SetLength(DTMList[DTM].t, 0);
+  SetLength(DTMList[DTM].asz, 0);
+  SetLength(DTMList[DTM].ash, 0);
+  SetLength(DTMList[DTM].bp,0);
+  DTMList[DTM].l := 0;
+  DTMList[DTM].n := '';
   SetLength(FreeSpots, Length(FreeSpots) + 1);
   FreeSpots[High(FreeSpots)] := DTM;
 end;
@@ -279,20 +261,20 @@ end;
   Returns all Angles in an Extended array.
 /\}
 
-{Function TMDTM.FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
+{function TMDTM.FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
 Var
    temp: pDTM;
 Begin
   If GetDTM(DTM, temp) Then
     Result := pFindDTMRotated(temp, x, y, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound)
-  Else
+  else
   Begin
     x := 0;
     y := 0;
     aFound := 0.0;
     Result := False;
-  End;
-End;  }
+  end;
+end;  }
 
 {/\
   Tries to find the given pDTM. If found will put the point the dtm has
@@ -301,11 +283,11 @@ End;  }
   Returns all Angles in an Extended array.
 /\}
 
-{Function TMDTM.pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
+{function TMDTM.pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
 
 Begin
 
-End;   }
+end;   }
 
 {/\
   Tries to find the given DTM (index). Will return true if it has found one or more
@@ -315,19 +297,19 @@ End;   }
   Returns all Angles in a Two Dimensional Extended array.
 /\}
 
-{Function TMDTM.FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
+{function TMDTM.FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
 Var
    temp: pDTM;
 Begin
   If GetDTM(DTM, temp) Then
     Result := pFindDTMsRotated(temp, Points, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound)
-  Else
+  else
   Begin
     SetLength(Points, 0);
     SetLength(aFound, 0);
     Result := False;
-  End;
-End;    }
+  end;
+end;    }
 
 {/\
   Tries to find the given pDTM. Will return true if it has found one or more
