@@ -31,13 +31,13 @@ uses
   Classes, SysUtils, MufasaTypes;
 
 
-Function pDTMToTDTM(Const DTM: pDTM): TDTM;
-Function tDTMTopDTM(Const DTM: TDTM): pDTM;
-Procedure PrintpDTM(const aDTM : pDTM);
+function pDTMToTDTM(Const DTM: pDTM): TDTM;
+function tDTMTopDTM(Const DTM: TDTM): pDTM;
+procedure PrintpDTM(const aDTM : pDTM);
 
 procedure initdtm(out d: pdtm; len: integer);
 function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
-Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;const
+function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;const
                                   sAngle, eAngle, aStep: Extended): TBox;
 function DTMConsistent(const dtm: pdtm): boolean;
 procedure NormalizeDTM(var dtm: pdtm);
@@ -55,7 +55,6 @@ implementation
 uses math,MufasaBase;
 
 procedure RotatePoints_(Var P: TPointArray; A, cx, cy: Extended);
-
 Var
    I, L: Integer;
    CosA,SinA : extended;
@@ -99,7 +98,7 @@ begin
     d.bp[i] := False;
 end;
 
-Procedure PrintpDTM(const aDTM : pDTM);
+procedure PrintpDTM(const aDTM : pDTM);
 var
   i : integer;
 begin;
@@ -111,7 +110,7 @@ begin;
     mDebugLn('SubPoint['+IntToStr(I) + '] ' + inttostr(aDTM.p[i].x) + ', ' + inttostr(aDTM.p[i].y) + ' col: ' + inttostr(aDTM.c[i]) + ', tol: ' + inttostr(aDTM.t[i]) + '; ashape ' + inttostr(aDTM.ash[i]) + ' asize ' + inttostr(aDTM.asz[i]) + ', Bad Point: ' + BoolToStr(aDTM.bp[i]));
 end;
 
-Function pDTMToTDTM(Const DTM: pDTM): TDTM;
+function pDTMToTDTM(Const DTM: pDTM): TDTM;
 
 Var
    Temp: TDTMPointDef;
@@ -147,19 +146,17 @@ End;
   Converts a TDTM to a pDTM.
 /\}
 
-Function tDTMTopDTM(Const DTM: TDTM): pDTM;
-
-Var
-   //Temp: TDTMPointDef;
+function tDTMTopDTM(Const DTM: TDTM): pDTM;
+var
    I: Integer;
-
-Begin
-  SetLength(Result.p, Length(DTM.SubPoints) + 1);
-  SetLength(Result.c, Length(DTM.SubPoints) + 1);
-  SetLength(Result.t, Length(DTM.SubPoints) + 1);
-  SetLength(Result.asz, Length(DTM.SubPoints) + 1);
-  SetLength(Result.ash, Length(DTM.SubPoints) + 1);
-  SetLength(Result.bp, Length(DTM.SubPoints) + 1);
+begin
+  Result.l := Length(DTM.SubPoints) + 1; //The mainpoint is in a different structure
+  SetLength(Result.p, Result.l);
+  SetLength(Result.c, Result.l);
+  SetLength(Result.t, Result.l);
+  SetLength(Result.asz, Result.l);
+  SetLength(Result.ash, Result.l);
+  SetLength(Result.bp, Result.l);
 
   Result.p[0].x := DTM.MainPoint.x;
   Result.p[0].y := DTM.MainPoint.y;
@@ -168,7 +165,7 @@ Begin
   Result.asz[0] := DTM.MainPoint.AreaSize;
   Result.ash[0] := DTM.MainPoint.AreaShape;
 
-  For I := 1 To Length(DTM.SubPoints) Do  // High + 1 = Length
+  For I := 1 To Result.l - 1 Do  // High + 1 = Length
   Begin
     Result.p[I].x := DTM.SubPoints[I - 1].x;
     Result.p[I].y := DTM.SubPoints[I - 1].y;
@@ -178,11 +175,10 @@ Begin
     Result.ash[I] := DTM.SubPoints[I - 1].AreaShape;
   End;
 
-  Result.l := length(Result.p);
   setlength(result.bp, result.l);
   for i := 0 to result.l -1 do
     result.bp[i] := false;
-End;
+end;
 
 { TODO: Check if bounds are correct? }
 function DTMConsistent(const dtm: pdtm): boolean;
@@ -229,7 +225,7 @@ begin
   dtm.p[0] := dtm.p[0] - dtm.p[0]; //Point(0,0);
 end;
 
-Function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
+function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
 
 var
    i: Integer;
@@ -256,7 +252,7 @@ begin
   Result.y2 := y2 - b.y2;
 end;
 
-Function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
+function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
                                   const sAngle, eAngle, aStep: Extended): TBox;
 
 var
