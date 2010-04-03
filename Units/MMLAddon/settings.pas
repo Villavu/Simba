@@ -334,6 +334,9 @@ begin
   Exit('');
 end;
 
+{
+  newKey is not the entire key path.
+}
 function TMMLSettings.RenameKey(oldKey, newKey: string): boolean;
 var
   Node : TTreeNode;
