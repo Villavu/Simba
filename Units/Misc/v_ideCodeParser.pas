@@ -120,7 +120,6 @@ type
     function GetName: TciProcedureName;
     function GetProcType: string;
     function GetParams: string;
-    function GetSynParams: string;
 
     function GetShortText: string; override;
   public
@@ -130,7 +129,6 @@ type
     property Name : TciProcedureName read GetName;
     property ProcType: string read GetProcType;
     property Params: string read GetParams;
-    property SynParams: string read GetSynParams;
   end;
 
   TciUsedUnit = class(TDeclaration);                                        //Included Units
@@ -869,51 +867,6 @@ begin
       else
         fParams := fParams + a[i].ShortText;
     Result := fParams;
-  end;
-end;
-
-function TciProcedureDeclaration.GetSynParams: string;
-var
-  i, ii: Integer;
-  a, b: TDeclarationArray;
-  d: TDeclaration;
-  s, t: string;
-begin
-  Result := '';
-  if (fSynParams <> '') then
-    Result := fSynParams
-  else if (fItems.Count > 0) then
-  begin
-    a := GetParamDeclarations;
-    for i := Low(a) to High(a) do
-    begin
-      if (a[i] is TciConstParameter) then
-        s := 'const '
-      else if (a[i] is TciOutParameter) then
-        s := 'out '
-      else if (a[i] is TciInParameter) then
-        s := 'in '
-      else if (a[i] is TciVarParameter) then
-        s := 'var '
-      else
-        s := '';
-      d := a[i].Items.GetFirstItemOfClass(TciParameterType);
-      if (d <> nil) then
-        t := ': ' + d.ShortText
-      else
-        t := '';
-      b := a[i].Items.GetItemsOfClass(TciParameterName);
-      for ii := Low(b) to High(b) do
-      begin
-        if (fSynParams <> '') then
-          fSynParams := fSynParams + ';","' + s + b[ii].ShortText + t
-        else
-          fSynParams := '"' + s + b[ii].ShortText + t;
-      end;
-    end;
-    if (fSynParams <> '') then
-      fSynParams := fSynParams + '"';
-    Result := fSynParams;
   end;
 end;
 
