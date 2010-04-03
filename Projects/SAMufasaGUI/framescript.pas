@@ -356,7 +356,13 @@ begin
     try
       Filter := WordAtCaret(Synedit, sp, ep);
       Form1.CodeCompletionStart := Point(sp, Synedit.CaretY);
-      mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
+
+      //mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
+      s := SynEdit.Lines[SynEdit.Carety-1];
+      if ep > length(s) then //We are outside the real text, go back to the last char
+        mp.Run(ms, nil, Synedit.SelStart - ep + length(s))
+      else
+        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
 
       s := mp.GetExpressionAtPos;
       if (s <> '') then
@@ -602,11 +608,13 @@ begin
   FScriptState:= ss_None;
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
-  SynEdit.Options:= SynEdit.Options- [eoGroupUndo];
-  SynEdit.Options:= SynEdit.Options+ [eoGroupUndo,eoPersistentCaret];
+  SynEdit.Options:= SynEdit.Options + [eoTabIndent] - [{eoGroupUndo,} eoSmartTabs];
+  //SynEdit.Options:= SynEdit.Options + [eoTabIndent];
   SynEdit.IncrementColor.Background := $30D070;
   SynEdit.HighlightAllColor.Background:= clYellow;
   SynEdit.HighlightAllColor.Foreground:= clDefault;
+  SynEdit.TabWidth := 2;
+  SynEdit.BlockIndent := 2;
   MarkCaret := TSynEditMarkupHighlightAllCaret(SynEdit.MarkupByClass[TSynEditMarkupHighlightAllCaret]);
   if assigned(MarkCaret) then
   begin
