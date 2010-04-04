@@ -99,6 +99,7 @@ type
     procedure DrawHints(var MaxWidth, MaxHeight: Integer; Draw: boolean);
     function PrepareParamString(out Str : string; out MustHide : boolean) : integer;
   public
+    destructor Destroy; override;
     constructor Create(TheOwner: TComponent); override;
     procedure CalculateBounds;
     procedure UpdateHint;
@@ -704,6 +705,12 @@ begin
   Result := parameterindex;
   fPreparedString := str;
   Parser.Free;
+end;
+
+destructor TParamHint.Destroy;
+begin
+  Application.RemoveOnIdleHandler(@ApplicationIdle);
+  inherited Destroy;
 end;
 
 
