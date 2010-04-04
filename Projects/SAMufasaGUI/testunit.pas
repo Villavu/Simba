@@ -1246,10 +1246,10 @@ begin
   begin
     Self.OCR_Fonts := TMOCR.Create(Thread.Client);
     OCR_Fonts.InitTOCR(fontPath);
-    Thread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+    Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts
   end else
     if assigned(Self.OCR_Fonts) and loadFontsOnScriptStart then
-      Thread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+      Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts;
 
   Se := TMMLSettingsSandbox.Create(SettingsForm.Settings);
   Se.Prefix := 'Scripts/';

@@ -5,7 +5,7 @@ unit ocrutil;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes;
+  Classes, SysUtils, MufasaTypes,bitmaps;
 
 type
     TNormArray = array of integer;
@@ -34,17 +34,10 @@ type
 
     TocrDataArray = array of TocrData;
 
-   { We already have PRGB32 -> To be removed later }
-   type
-    tRGB = packed record
-       B, G, R, A: Byte;
-   end;
-   tRGBArray = array of tRGB;
-
    {Begin To be removed}
    Tbmp = record
-       data: array of tRGB;
-       width,height: integer;
+     data: array of TRGB32;
+     width,height: integer;
    end;
    {End   To be removed}
 
@@ -54,11 +47,12 @@ type
     end;
 
     procedure findBounds(glyphs: TocrGlyphMaskArray; out width,height: integer);
-    function LoadGlyphMasks(path: string; shadow: boolean): TocrGlyphMaskArray;
-    function InitOCR(path: string; shadow: boolean): TocrData;
+    function LoadGlyphMask(const bmp : TMufasaBitmap; shadow: boolean; const ascii : char): TocrGlyphMask;
+    function LoadGlyphMasks(const path: string; shadow: boolean): TocrGlyphMaskArray;
+    function InitOCR(const Masks : TocrGlyphMaskArray): TocrData;
     function GuessGlyph(glyph: TNormArray; ocrdata: TocrData): char;
     function PointsToNorm(points: TpointArray; out w,h: integer): TNormArray;
-    function ImageToNorm(src: tRGBArray; w,h: integer): TNormArray;
+    function ImageToNorm(src: TRGB32Array; w,h: integer): TNormArray;
     function ocrDetect(txt: TNormArray; w,h: integer; var ocrdata: TocrData): string;
     function ExtractText(colors: PRGB32;{colors: tRGBArray;} w,h: integer): TNormArray;
     function MakeTPAString(str: string): TpointArray;
@@ -85,7 +79,7 @@ begin
     Result.width := LazIntf.Width;
     Result.height := LazIntf.Height;
     SetLength(result.data,LazIntf.Width*LazIntf.Height);
-    Move(LazIntf.PixelData[0],result.data[0],LazIntf.Width*LazIntf.Height*sizeOf(tRGB));
+    Move(LazIntf.PixelData[0],result.data[0],LazIntf.Width*LazIntf.Height*sizeOf(TRGB32));
     LazIntf.Free;
   end;
 end;
@@ -152,107 +146,113 @@ begin
     end;
 end;
 
-{This Loads the actual data from the .bmp, but does not init all fields}
-function LoadGlyphMasks(path: string; shadow: boolean): TocrGlyphMaskArray;
+function LoadGlyphMask(const bmp: TMufasaBitmap; shadow: boolean; const ascii : char): TocrGlyphMask;
 var
-    strs: array of string;
-    bmp: array of Tbmp; {-> TMufasaBitmap, and why use an array? }
-    len,size,i,j: integer;
-    color: tRGB;
-    shadow_i: byte;
+  size,j: integer;
+  color: TRGB32;
+  shadow_i: byte;
 begin
-    strs:= GetFiles(path,'bmp');
-    len:= length(strs);
-    SetLength(result,len);
-    SetLength(bmp,len);
-    if shadow then
-      shadow_i := 0
+  if shadow then
+    shadow_i := 0
+  else
+    shadow_i := 255;
+  size:= bmp.Width * bmp.Height;
+  SetLength(result.mask,size);
+  for j := 0 to size-1 do
+  begin
+    color := bmp.FData[j];
+   { if (color.r = 255) and (color.g = 255 and not shadow_i) and
+    (color.b = 255 and not shadow_i) then}
+    if (color.r = 255) and (color.g = shadow_i) and (color.b = shadow_i) then
+      result.mask[j]:= 1
     else
-      shadow_i := 255;
-    for i:= 0 to len-1 do
-    begin
-        bmp[i]:= ReadBmp(path + strs[i]);
-        size:= bmp[i].width*bmp[i].height;
-        SetLength(result[i].mask,size);
-        for j:= 0 to size-1 do
-        begin
-            color:= bmp[i].data[j];
-           { if (color.r = 255) and (color.g = 255 and not shadow_i) and
-            (color.b = 255 and not shadow_i) then}
-            if (color.r = 255) and (color.g = shadow_i) and (color.b = shadow_i) then
-                result[i].mask[j]:= 1
-            else
-                result[i].mask[j]:= 0;
-        end;
-        result[i].width:= bmp[i].width;
-        result[i].height:= bmp[i].height;
-        SetLength(strs[i],Length(strs[i])-4);
-        result[i].ascii:= chr(strtoint(strs[i]));
-    end;
+      result.mask[j]:= 0;
+  end;
+  result.width:= bmp.width;
+  result.height:= bmp.height;
+  result.ascii:= ascii;
+end;
+
+{This Loads the actual data from the .bmp, but does not init all fields}
+function LoadGlyphMasks(const path: string; shadow: boolean): TocrGlyphMaskArray;
+var
+  strs: array of string;
+  bmp : TMufasaBitmap;
+  len,i: integer;
+begin
+  strs:= GetFiles(path,'bmp');
+  len:= length(strs);
+  SetLength(result,len);
+  bmp := TMufasaBitmap.Create;
+  for i:= 0 to len-1 do
+  begin
+    bmp.LoadFromFile(path + strs[i]);
+    SetLength(strs[i],Length(strs[i])-4);
+    Result[i] := LoadGlyphMask(bmp,shadow,chr(strtoint(strs[i])));
+  end;
+  Bmp.free;
 end;
 
 {Fully initalizes a TocrData structure, this is LoadFont or whatever, call it first}
-function InitOCR(path: string; shadow: boolean): TocrData;
+function InitOCR(const masks : TocrGlyphMaskArray): TocrData;
 var
-    masks: TocrGlyphMaskArray;
-    t,b,l,r,w,h,mw: integer;
-    x,y: integer;
-    c,i,len,size: integer;
-    pos: integer;
-    ascii: char;
+  t,b,l,r,w,h,mw: integer;
+  x,y: integer;
+  c,i,len,size: integer;
+  pos: integer;
+  ascii: char;
 begin
-    masks:= LoadGlyphMasks(path, shadow);
-    w:= 0;
-    h:= 0;
-    findBounds(masks,w,h);
-    len:= Length(masks);
-    result.width:= w;
-    result.height:= h;
-    result.max_width:=0;
-    result.max_height:=0;
-    size:= w * h;
-    SetLength(result.pos,len,size);
-    SetLength(result.pos_adj,len);
-    SetLength(result.neg,len,size);
-    SetLength(result.neg_adj,len);
-    SetLength(result.map,len);
-    for i:= 0 to len - 1 do
+  w:= 0;
+  h:= 0;
+  findBounds(masks,w,h);
+  len:= Length(masks);
+  result.width:= w;
+  result.height:= h;
+  result.max_width:=0;
+  result.max_height:=0;
+  size:= w * h;
+  SetLength(result.pos,len,size);
+  SetLength(result.pos_adj,len);
+  SetLength(result.neg,len,size);
+  SetLength(result.neg_adj,len);
+  SetLength(result.map,len);
+  for i:= 0 to len - 1 do
+  begin
+    ascii:= masks[i].ascii;
+    pos:= 0;
+    l:= masks[i].l;
+    r:= masks[i].r;
+    b:= masks[i].b;
+    t:= masks[i].t;
+    mw:= masks[i].width;
+    for y:= t to b do
     begin
-        ascii:= masks[i].ascii;
-        pos:= 0;
-        l:= masks[i].l;
-        r:= masks[i].r;
-        b:= masks[i].b;
-        t:= masks[i].t;
-        mw:= masks[i].width;
-        for y:= t to b do
+      for x:= l to r do
+      begin
+        c:= (x-l) + (y-t)*w;
+        if masks[i].mask[x+y*mw] <> 0 then
         begin
-            for x:= l to r do
-            begin
-                c:= (x-l) + (y-t)*w;
-                if masks[i].mask[x+y*mw] <> 0 then
-                begin
-                    result.pos[i][c]:= 1;
-                    inc(pos);
-                end else
-                    result.pos[i][c] := 0;
-            end;
-        end;
-        for c:= 0 to size-1 do
-            result.neg[i][c]:= 1 - result.pos[i][c];
-        if pos = 0 then result.neg_adj[i]:= 1 else result.neg_adj[i]:= 1 / pos;
-        if pos = 0 then result.pos_adj[i]:= 0 else result.pos_adj[i]:= 1 / pos;
-        result.map[i]:= ascii;
-        result.ascii[ord(ascii)].index:= i;
-        result.ascii[ord(ascii)].xoff:= masks[i].l;
-        result.ascii[ord(ascii)].yoff:= masks[i].t;
-        result.ascii[ord(ascii)].width:= masks[i].width;
-        result.ascii[ord(ascii)].height:= masks[i].height;
-        result.max_width := max(result.max_width, masks[i].width);
-        result.max_height := max(result.max_height, masks[i].height);
+          result.pos[i][c]:= 1;
+          inc(pos);
+        end else
+          result.pos[i][c] := 0;
+      end;
     end;
-    result.inputs:= size;
-    result.outputs:= len;
+    for c:= 0 to size-1 do
+      result.neg[i][c]:= 1 - result.pos[i][c];
+    if pos = 0 then result.neg_adj[i]:= 1 else result.neg_adj[i]:= 1 / pos;
+    if pos = 0 then result.pos_adj[i]:= 0 else result.pos_adj[i]:= 1 / pos;
+    result.map[i]:= ascii;
+    result.ascii[ord(ascii)].index:= i;
+    result.ascii[ord(ascii)].xoff:= masks[i].l;
+    result.ascii[ord(ascii)].yoff:= masks[i].t;
+    result.ascii[ord(ascii)].width:= masks[i].width;
+    result.ascii[ord(ascii)].height:= masks[i].height;
+    result.max_width := max(result.max_width, masks[i].width);
+    result.max_height := max(result.max_height, masks[i].height);
+  end;
+  result.inputs:= size;
+  result.outputs:= len;
 end;
 
 {guesses a glyph stored in glyph (which is an 1-0 image of the size specified by width and height in ocrdata}
@@ -316,7 +316,7 @@ begin
     result:= norm;
 end;
 
-function ImageToNorm(src: tRGBArray; w,h: integer): TNormArray;
+function ImageToNorm(src: TRGB32Array; w,h: integer): TNormArray;
 var
     norm: TNormArray;
     i: integer;
@@ -417,14 +417,14 @@ begin
     end;
 end;
 
-function AvgColors(color1:tRGB; weight1: integer; color2: tRGB; weight2: integer): tRGB;
+function AvgColors(color1:TRGB32; weight1: integer; color2: TRGB32; weight2: integer): TRGB32;
 begin
     result.r:= (color1.r * weight1 + color2.r * weight2) div (weight1 + weight2);
     result.g:= (color1.g * weight1 + color2.g * weight2) div (weight1 + weight2);
     result.b:= (color1.b * weight1 + color2.b * weight2) div (weight1 + weight2);
 end;
 
-procedure RGBtoXYZ(color: tRGB; out X, Y, Z: real); inline;
+procedure RGBtoXYZ(color: TRGB32; out X, Y, Z: real); inline;
 var
     nr,ng,nb: real;
 begin
@@ -447,7 +447,7 @@ begin
         result:= 7.787037037*i + 0.137931034;
 end;
 
-function ColortoLab(c: tRGB): tLab; inline;
+function ColortoLab(c: TRGB32): tLab; inline;
 var
     X,Y,Z,sum,Xn,Yn,Zn: real;
 begin
@@ -467,7 +467,7 @@ begin
     result.b:= 500.0*(labmod(y/yn)-labmod(z/zn));
 end;
 
-function colorDistSqr(a,b:tRGB): integer; inline;
+function colorDistSqr(a,b:TRGB32): integer; inline;
 begin
     result:= (a.r-b.r)*(a.r-b.r)+(a.b-b.b)*(a.b-b.b)+(a.g-b.g)*(a.g-b.g);
 end;
@@ -475,20 +475,20 @@ end;
 function ExtractText(colors: PRGB32;{colors: tRGBArray;} w,h: integer): TNormArray;
 const
   GradientMax = 2.0;
-  white:  tRGB = ( b: $FF; g: $FF; r: $FF; a: $00 );
-  cyan:   tRGB = ( b: $FF; g: $FF; r: $00; a: $00 );
-  yellow: tRGB = ( b: $00; g: $EF; r: $FF; a: $00 );
-  red:    tRGB = ( b: $00; g: $00; r: $FF; a: $00 );
-  green:  tRGB = ( b: $00; g: $FF; r: $00; a: $00 );
+  white:  TRGB32= ( b: $FF; g: $FF; r: $FF; a: $00 );
+  cyan:   TRGB32= ( b: $FF; g: $FF; r: $00; a: $00 );
+  yellow: TRGB32= ( b: $00; g: $EF; r: $FF; a: $00 );
+  red:    TRGB32= ( b: $00; g: $00; r: $FF; a: $00 );
+  green:  TRGB32= ( b: $00; g: $FF; r: $00; a: $00 );
 var
   up, left: boolean;
   len,numblobs,thisblob,lastblob,i,j,used: integer;
   blobbed,blobcount,stack: array of integer;
   labs: array of tLab;
   a,b: tLab;
-  blobcolor: tRGBArray;
+  blobcolor: TRGB32Array;
   newcolors: array of integer;
-  c: tRGB;
+  c: TRGB32;
   norm: TNormArray;
 begin
   len:= w*h;
@@ -498,7 +498,7 @@ begin
   SetLength(stack,len);
   SetLength(labs,len);
   for i:= 0 to len-1 do
-    labs[i]:= ColorToLab(tRGB(colors[i]));
+    labs[i]:= ColorToLab( TRGB32(colors[i]));
   numblobs:= 0;
   for i:= 0 to len-1 do
   begin
@@ -519,7 +519,7 @@ begin
     begin
       thisblob:= blobbed[i-w];
       blobbed[i]:= thisblob;
-      blobcolor[thisblob]:= AvgColors(blobcolor[thisblob],blobcount[thisblob],tRGB(colors[i]),1);
+      blobcolor[thisblob]:= AvgColors(blobcolor[thisblob],blobcount[thisblob],tRGB32(colors[i]),1);
       blobcount[thisblob]:= blobcount[thisblob] + 1;
       lastblob:= blobbed[i-1];
       if lastblob <> thisblob then
@@ -547,19 +547,19 @@ begin
     begin
       thisblob:= blobbed[i-1];
       blobbed[i]:= thisblob;
-      blobcolor[thisblob]:= AvgColors(blobcolor[thisblob],blobcount[thisblob],tRGB(colors[i]),1);
+      blobcolor[thisblob]:= AvgColors(blobcolor[thisblob],blobcount[thisblob],tRGB32(colors[i]),1);
       blobcount[thisblob]:= blobcount[thisblob] + 1;
     end else if up then
     begin
       thisblob:= blobbed[i-w];
       blobbed[i]:= thisblob;
-      blobcolor[thisblob]:= AvgColors(blobcolor[thisblob],blobcount[thisblob],tRGB(colors[i]),1);
+      blobcolor[thisblob]:= AvgColors(blobcolor[thisblob],blobcount[thisblob],tRGB32(colors[i]),1);
       blobcount[thisblob]:= blobcount[thisblob] + 1;
     end else
     begin
       blobbed[i]:= numblobs;
       blobcount[numblobs]:= 1;
-      blobcolor[numblobs]:= tRGB(colors[i]);
+      blobcolor[numblobs]:= tRGB32(colors[i]);
       numblobs:= numblobs + 1;
    end;
   end;

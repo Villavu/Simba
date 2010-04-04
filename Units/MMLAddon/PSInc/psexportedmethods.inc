@@ -230,13 +230,14 @@ AddFunction(@GetKeyCode,'function GetKeyCode(c : char) : integer;');
 
 { OCR}
 SetCurrSection('OCR');
-AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
-AddFunction(@rs_GetUpTextAt, 'function rs_GetUpTextAt(x, y : integer): string;');
-AddFunction(@BitmapFromText, 'function BitmapFromText(text, font: String): integer;');
-AddFunction(@TPAFromText, 'function TPAFromText(text, font: String;var w,h : integer): TPointArray;');
-AddFunction(@TPAFromTextWrap,'procedure TPAFromTextWrap(text, font: String;var w,h : integer;var TPA : TPointArray);');
-AddFunction(@MaskFromText, 'function MaskFromText(text, font: String): TMask;');
-AddFunction(@GetTextAt,'function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer; font: string): string;');
+AddFunction(@ps_rs_GetUpText, 'function rs_GetUpText: string;');
+AddFunction(@ps_rs_GetUpTextAt, 'function rs_GetUpTextAt(x, y : integer): string;');
+AddFunction(@ps_BitmapFromText, 'function BitmapFromText(const text, font: String): integer;');
+AddFunction(@ps_TPAFromText, 'function TPAFromText(const text, font: String;var w,h : integer): TPointArray;');
+AddFunction(@ps_TPAFromTextWrap,'procedure TPAFromTextWrap(const text, font: String;var w,h : integer;var TPA : TPointArray);');
+AddFunction(@ps_MaskFromText, 'function MaskFromText(const text, font: String): TMask;');
+AddFunction(@ps_GetTextAt,'function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer;const font: string): string;');
+AddFunction(@ps_LoadSystemFont,'function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;');
 
 {Bitmaps}
 SetCurrSection('Bitmaps');

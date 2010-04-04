@@ -1,0 +1,14 @@
+program new;
+var
+  Font : TFont;
+begin
+  Font := TFont.Create;
+  Font.Name := 'Courier New';
+  Font.Size := 10;
+  Font.Style := [];
+  LoadSystemFont(Font,'test');
+  DisplayDebugImgWindow(0,0);
+  DisplayDebugImgWindow(150,50);
+  DrawBitmapDebugImg(BitmapFromText('BMP[0] has not been freed','test'));
+  Font.free;
+end.
