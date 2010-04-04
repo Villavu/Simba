@@ -49,10 +49,12 @@ type
   TMFonts = class(TObject)
   private
     Fonts: TList;
-    Path: String;
+    FPath: String;
     Client : TObject;
     function GetFontIndex(const Name: String): Integer;
     function GetFontByIndex(Index : integer): TMfont;
+    procedure SetPath(const aPath: String);
+    function GetPath: String;
   public
     constructor Create(Owner : TObject);
     destructor Destroy; override;
@@ -60,10 +62,9 @@ type
     function FreeFont(const Name: String): Boolean;
     function LoadFont(const Name: String; Shadow: Boolean): boolean;
     function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;
-    procedure SetPath(const aPath: String);
-    function GetPath: String;
     function Copy(Owner : TObject): TMFonts;
     function Count : integer;
+    property Path : string read GetPath write SetPath;
     property Font[Index : integer]: TMfont read GetFontByIndex; default;
   end;
 
@@ -155,12 +156,12 @@ end;
 
 procedure TMFonts.SetPath(const aPath: String);
 begin
-  Path := aPath;
+  FPath := aPath;
 end;
 
 function TMFonts.GetPath: String;
 begin
-  Exit(Path);
+  Exit(FPath);
 end;
 
 function TMFonts.GetFontIndex(const Name: String): Integer;
@@ -201,9 +202,9 @@ function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
 var
   f: TMFont;
 begin
-  if not DirectoryExists(Path + Name) then
+  if not DirectoryExists(FPath + Name) then
   begin
-    raise Exception.Create('LoadFont: Directory ' + Path + Name + ' does not exists.');
+    raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exists.');
     Exit(False);
   end;
 
@@ -211,7 +212,7 @@ begin
   f.Name := Name;
   if Shadow then
     F.Name := F.Name + '_s';
-  f.Data := InitOCR( LoadGlyphMasks(Path + Name + DS, Shadow));
+  f.Data := InitOCR( LoadGlyphMasks(FPath + Name + DS, Shadow));
   Fonts.Add(f);
   {$IFDEF FONTDEBUG}
   TClient(Client).Writeln('Loaded Font ' + f.Name);
@@ -270,7 +271,7 @@ var
   i:integer;
 begin
   Result := TMFonts.Create(Owner);
-  Result.Path := Self.GetPath();
+  Result.Path := FPath;
   for i := 0 to Self.Fonts.Count -1 do
     Result.Fonts.Add(TMFont(Self.Fonts.Items[i]).Copy());
 end;
