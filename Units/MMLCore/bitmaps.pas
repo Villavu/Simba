@@ -580,9 +580,9 @@ end;
 procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);
 
 begin
-  bmp.BeginUpdate();
+//  bmp.BeginUpdate();
   LoadFromRawImage(bmp.RawImage);
-  bmp.EndUpdate();
+//  bmp.EndUpdate();
 end;
 
 procedure TMufasaBitmap.FastSetPixel(x, y: integer; Color: TColor);

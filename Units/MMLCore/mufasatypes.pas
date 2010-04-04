@@ -54,6 +54,7 @@ type
     B, G, R, A: Byte;
   end;
   PRGB32 = ^TRGB32;
+  TRGB32Array = array of TRGB32;
 
   TRetData = record
     Ptr : PRGB32;
