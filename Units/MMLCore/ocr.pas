@@ -33,53 +33,51 @@ uses
   graphtype, intfgraphics,graphics;
   {End To-Remove unit}
 
-  type
 
-      { TMOCR }
+type
+    { TMOCR }
 
-      TMOCR = class(TObject)
-             constructor Create(Owner: TObject);
-             destructor Destroy; override;
-             function InitTOCR(path: string): boolean;
-             function  GetFonts:TMFonts;
-             procedure SetFonts(NewFonts: TMFonts);
+  TMOCR = class(TObject)
+  private
+    Client: TObject;
+    FFonts: TMFonts;
+    {$IFDEF OCRDEBUG}
+    debugbmp: TMufasaBitmap;
+    {$ENDIF}
+    function  GetFonts:TMFonts;
+    procedure SetFonts(NewFonts: TMFonts);
+  public
+    constructor Create(Owner: TObject);
+    destructor Destroy; override;
+    function InitTOCR(const path: string): boolean;
+    function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
+           var _chars, _shadows: T2DPointArray): Boolean;
+    function GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
+    function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
-             function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
-                      var _chars, _shadows: T2DPointArray): Boolean;
-             function GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
-             function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
+    procedure FilterUpTextByColour(bmp: TMufasaBitmap; w,h: integer);
+    procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
+    procedure FilterShadowBitmap(bmp: TMufasaBitmap);
+    procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
-             procedure FilterUpTextByColour(bmp: TMufasaBitmap; w,h: integer);
-             procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
-             procedure FilterShadowBitmap(bmp: TMufasaBitmap);
-             procedure FilterCharsBitmap(bmp: TMufasaBitmap);
+    function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
+                    color, tol, len: integer; font: string): string;
+    function TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
+    function TextToFontBitmap(Text, font: String): TMufasaBitmap;
+    function TextToMask(Text, font: String): TMask;
+    property Fonts : TMFonts read GetFonts write SetFonts;
+    {$IFDEF OCRDEBUG}
+    procedure DebugToBmp(bmp: TMufasaBitmap; hmod,h: integer);
+    {$ENDIF}
+  end;
 
-             function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
-                               color, tol, len: integer; font: string): string;
-             function TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
-             function TextToFontBitmap(Text, font: String): TMufasaBitmap;
-             function TextToMask(Text, font: String): TMask;
-
-
-             {$IFDEF OCRDEBUG}
-             procedure DebugToBmp(bmp: TMufasaBitmap; hmod,h: integer);
-             {$ENDIF}
-      private
-             Client: TObject;
-             Fonts: TMFonts;
-      {$IFDEF OCRDEBUG}
-      public
-             debugbmp: TMufasaBitmap;
-      {$ENDIF}
-
-      end;
-      {$IFDEF OCRDEBUG}
-        {$IFDEF LINUX}
-          const OCRDebugPath = '/tmp/';
-        {$ELSE}
-          const OCRDebugPath = '';
-        {$ENDIF}
-      {$ENDIF}
+  {$IFDEF OCRDEBUG}
+    {$IFDEF LINUX}
+      const OCRDebugPath = '/tmp/';
+    {$ELSE}
+      const OCRDebugPath = '';
+    {$ENDIF}
+  {$ENDIF}
 implementation
 
 uses
@@ -121,15 +119,13 @@ constructor TMOCR.Create(Owner: TObject);
 begin
   inherited Create;
   Self.Client := Owner;
-  Self.Fonts := TMFonts.Create(Owner);
+  Self.FFonts := TMFonts.Create(Owner);
 end;
 
 { Destructor }
 destructor TMOCR.Destroy;
-
 begin
-
-  Self.Fonts.Free;
+  Self.FFonts.Free;
   inherited Destroy;
 end;
 
@@ -137,34 +133,34 @@ end;
   InitTOCR loads all fonts in path
   We don't do this in the constructor because we may not yet have the path.
 }
-function TMOCR.InitTOCR(path: string): boolean;
+function TMOCR.InitTOCR(const path: string): boolean;
 var
    dirs: array of string;
    i: longint;
 begin
   // We're going to load all fonts now
-  Fonts.SetPath(path);
+  FFonts.SetPath(path);
   dirs := GetDirectories(path);
   Result := false;
   for i := 0 to high(dirs) do
   begin
-    if Fonts.LoadFont(dirs[i], false) then
+    if FFonts.LoadFont(dirs[i], false) then
       result := true;
   end;
   If DirectoryExists(path + 'UpChars') then
-    Fonts.LoadFont('UpChars', true); // shadow
+    FFonts.LoadFont('UpChars', true); // shadow
 end;
 
 { Get the current pointer to our list of Fonts }
 function TMOCR.GetFonts:TMFonts;
 begin
-  Exit(Self.Fonts);
+  Exit(Self.FFonts);
 end;
 
 { Set new Fonts. We set it to a Copy of NewFonts }
 procedure TMOCR.SetFonts(NewFonts: TMFonts);
 begin
-  Self.Fonts := NewFonts.Copy(Self.Client);
+  Self.FFonts := NewFonts.Copy(Self.Client);
 end;
 
 {
@@ -644,12 +640,12 @@ begin
 
   if shadow then
   begin
-    font := Fonts.GetFont('UpChars_s');
+    font := FFonts.GetFont('UpChars_s');
     thachars := shadows;
   end
   else
   begin
-    font := Fonts.GetFont('UpChars');
+    font := FFonts.GetFont('UpChars');
     thachars := chars;
   end;
 
@@ -714,7 +710,7 @@ var
    STPA: T2DPointArray;
 
 begin
-  fD := Fonts.GetFont(font);
+  fD := FFonts.GetFont(font);
   {writeln(format('W, H: %d, %d', [fD.max_width, fd.max_height]));}
 
   TClient(Client).IOManager.GetDimensions(w, h);
@@ -827,7 +823,7 @@ var
    an: integer;
 
 begin
-  fontD := Fonts.GetFont(font);
+  fontD := FFonts.GetFont(font);
   c := 0;
   off := 0;
   setlength(result, 0);

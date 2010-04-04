@@ -28,7 +28,7 @@ unit fontloader;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils,Graphics,bitmaps,
   ocrutil,lclintf; // contains the actual `loading'
 
 {
@@ -36,42 +36,36 @@ uses
 }
 
 type
-    TMFont = class(TObject)
-            constructor Create;
-            destructor Destroy; override;
+  TMFont = class(TObject)
+  public
+    Name: String;
+    Data: TOcrData;
+    constructor Create;
+    destructor Destroy; override;
+    function Copy: TMFont;
+  end;
+  { TMFonts }
 
-            function Copy: TMFont;
-        public
-            Name: String;
-            Data: TOcrData;
-    end;
-
-
-type
-
-    { TMFonts }
-
-    TMFonts = class(TObject)
-    private
-        function GetFontIndex(Name: String): Integer;
-        function GetFontByIndex(Index : integer): TMfont;
-    private
-      Fonts: TList;
-      Path: String;
-      Client : TObject;
-    public
-      constructor Create(Owner : TObject);
-      destructor Destroy; override;
-
-      function GetFont(Name: String): TOcrData;
-      function FreeFont(Name: String): boolean;
-      function LoadFont(Name: String; Shadow: Boolean): boolean;
-      procedure SetPath(aPath: String);
-      function GetPath: String;
-      function Copy(Owner : TObject): TMFonts;
-      function Count : integer;
-      property Font[Index : integer]: TMfont read GetFontByIndex; default;
-    end;
+  TMFonts = class(TObject)
+  private
+    Fonts: TList;
+    Path: String;
+    Client : TObject;
+    function GetFontIndex(const Name: String): Integer;
+    function GetFontByIndex(Index : integer): TMfont;
+  public
+    constructor Create(Owner : TObject);
+    destructor Destroy; override;
+    function GetFont(const Name: String): TOcrData;
+    function FreeFont(const Name: String): Boolean;
+    function LoadFont(const Name: String; Shadow: Boolean): boolean;
+    function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;
+    procedure SetPath(const aPath: String);
+    function GetPath: String;
+    function Copy(Owner : TObject): TMFonts;
+    function Count : integer;
+    property Font[Index : integer]: TMfont read GetFontByIndex; default;
+  end;
 
 implementation
 
@@ -159,7 +153,7 @@ begin
   inherited;
 end;
 
-procedure TMFonts.SetPath(aPath: String);
+procedure TMFonts.SetPath(const aPath: String);
 begin
   Path := aPath;
 end;
@@ -169,20 +163,20 @@ begin
   Exit(Path);
 end;
 
-function TMFonts.GetFontIndex(Name: String): Integer;
+function TMFonts.GetFontIndex(const Name: String): Integer;
 var
   i: integer;
 begin
   for i := 0 to Fonts.Count - 1 do
   begin
-    if Name = TMFont(Fonts.Items[i]).Name then
+    if lowercase(Name) = lowercase(TMFont(Fonts.Items[i]).Name) then
       Exit(i);
   end;
   raise Exception.Create('Font [' + Name + '] not found.');
   Exit(-1);
 end;
 
-function TMFonts.GetFont(Name: String): TOcrData;
+function TMFonts.GetFont(const Name: String): TOcrData;
 var
   i: integer;
 begin
@@ -190,7 +184,7 @@ begin
   Exit(TMFont(Fonts.Items[i]).Data);
 end;
 
-function TMFonts.FreeFont(Name: String): boolean;
+function TMFonts.FreeFont(const Name: String): boolean;
 var
   i: integer;
 begin
@@ -203,7 +197,7 @@ begin
   end;
 end;
 
-function TMFonts.LoadFont(Name: String; Shadow: Boolean): boolean;
+function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
 var
   f: TMFont;
 begin
@@ -217,11 +211,57 @@ begin
   f.Name := Name;
   if Shadow then
     F.Name := F.Name + '_s';
-  f.Data := InitOCR(Path + Name + DS, Shadow);
+  f.Data := InitOCR( LoadGlyphMasks(Path + Name + DS, Shadow));
   Fonts.Add(f);
   {$IFDEF FONTDEBUG}
   TClient(Client).Writeln('Loaded Font ' + f.Name);
   {$ENDIF}
+end;
+
+function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: string): boolean;
+var
+  Masks : TocrGlyphMaskArray;
+  i,c : integer;
+  w,h : integer;
+  Bmp : TBitmap;
+  NewFont : TMFont;
+  MBmp : TMufasaBitmap;
+begin
+  SetLength(Masks,255);
+  MBmp := TMufasaBitmap.Create;
+  Bmp := TBitmap.Create;
+  c := 0;
+  with Bmp.canvas do
+  begin
+    Font := SysFont;
+    Font.Color:= clWhite;
+    Font.Quality:=   fqNonAntialiased;
+    Brush.Color:= clBlack;
+    Pen.Style:= psClear;
+    for i := 1 to 255 do
+    begin
+      GetTextSize(chr(i),w,h);
+      if (w<=0) or (h<=0) then
+        Continue;
+      Bmp.SetSize(w,h);
+      TextOut(0,0,chr(i));
+      MBmp.LoadFromTBitmap(bmp);
+      Masks[c] := LoadGlyphMask(MBmp,false,chr(i));
+      inc(c);
+    end;
+  end;
+  setlength(masks,c);
+  if c > 0 then
+  begin
+    NewFont := TMFont.Create;
+    NewFont.Name:= FontName;
+    NewFont.Data := InitOCR(masks);
+    Fonts.Add(NewFont);
+    result := true;
+  end;
+  bmp.free;
+  MBmp.free;
+
 end;
 
 function TMFonts.Copy(Owner : TObject): TMFonts;

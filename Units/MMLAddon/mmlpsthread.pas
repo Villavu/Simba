@@ -572,7 +572,7 @@ var
   Fonts : TMFonts;
 begin
   {$I PSInc/pscompile.inc}
-  Fonts := Client.MOCR.GetFonts;
+  Fonts := Client.MOCR.Fonts;
   for i := fonts.count - 1 downto 0 do
     Sender.Comp.AddConstantN(Fonts[i].Name,'string').SetString(Fonts[i].Name);
 
