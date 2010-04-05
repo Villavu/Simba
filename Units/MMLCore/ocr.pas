@@ -808,7 +808,7 @@ begin
       if (tpa[j].x) + ((tpa[j].y) * fD.width) <= high(n) then
         n[(tpa[j].x) + ((tpa[j].y) * fD.width)] := 1
       else
-        raise Exception.Create('The automatically split characters are too wide. Try decreasing minspacing');
+        mDebugLn('The automatically split characters are too wide. Try decreasing minspacing');
     end;
     result := result + GuessGlyph(n, fD);
   end;
