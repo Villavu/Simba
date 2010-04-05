@@ -38,11 +38,12 @@ type
     TransparentColor : TRGB32;
     TransparentSet : boolean;
     FIndex : integer;
+    FName : string;
   public
     OnDestroy : procedure(Bitmap : TMufasaBitmap) of object;
-    FakeData : array of TRGB32;
+    //FakeData : array of TRGB32;
     FData : PRGB32;
-    BmpName : string; //Optional?
+    property Name : string read FName write FName;
     property Index : integer read FIndex write FIndex;
     procedure SetSize(AWidth,AHeight : integer);
     procedure StretchResize(AWidth,AHeight : integer);
@@ -69,15 +70,16 @@ type
     procedure CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);overload;
     procedure CopyClientToBitmap(MWindow : TObject;Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);overload;
     procedure RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );
-    procedure Desaturate;overload;
     procedure Desaturate(TargetBitmap : TMufasaBitmap); overload;
+    procedure Desaturate;overload;
     procedure GreyScale(TargetBitmap : TMufasaBitmap);overload;
     procedure GreyScale;
-    procedure Brightness(br: integer);overload;
     procedure Brightness(TargetBitmap : TMufasaBitmap; br : integer); overload;
-    procedure Contrast(co: Extended);overload;
+    procedure Brightness(br: integer);overload;
     procedure Contrast(TargetBitmap : TMufasaBitmap; co : Extended);overload;
-    procedure Invert;
+    procedure Contrast(co: Extended);overload;
+    procedure Invert(TargetBitmap : TMufasaBitmap);overload;
+    procedure Invert;overload;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
     function Copy: TMufasaBitmap;
@@ -369,7 +371,7 @@ function TMBitmaps.CreateBMPFromString(BmpName: string; width, height: integer;
   Data: string): integer;
 begin
   Result := Self.CreateBMPFromString(width,height,data);
-  Bmp[Result].BmpName:= BmpName;
+  Bmp[Result].Name:= BmpName;
 
 end;
 
@@ -578,9 +580,9 @@ end;
 procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);
 
 begin
-  bmp.BeginUpdate();
+//  bmp.BeginUpdate();
   LoadFromRawImage(bmp.RawImage);
-  bmp.EndUpdate();
+//  bmp.EndUpdate();
 end;
 
 procedure TMufasaBitmap.FastSetPixel(x, y: integer; Color: TColor);
@@ -1028,6 +1030,24 @@ begin
   end;
 end;
 
+procedure TMufasaBitmap.Invert(TargetBitmap: TMufasaBitmap);
+var
+  I : integer;
+  PtrOld,PtrNew : PRGB32;
+begin
+  TargetBitmap.SetSize(w,h);
+  PtrOld := Self.FData;
+  PtrNew := TargetBitmap.FData;
+  for i := (h*w-1) downto 0 do
+  begin;
+    PtrNew^.r := not PtrOld^.r;
+    PtrNew^.g := not PtrOld^.g;
+    PtrNew^.b := not PtrOld^.b;
+    inc(ptrOld);
+    inc(PtrNew);
+  end;
+end;
+
 procedure TMufasaBitmap.Posterize(TargetBitmap: TMufasaBitmap; Po: integer);
 var
   I : integer;
@@ -1127,10 +1147,10 @@ begin
   for i := 0 to BmpsCurr do
     if BmpArray[i] <> nil then
     begin;
-      if BmpArray[i].BmpName = '' then
+      if BmpArray[i].Name = '' then
         TClient(Client).Writeln(Format('BMP[%d] has not been freed in the script, freeing it now.',[i]))
       else
-        TClient(Client).Writeln(Format('BMP[%s] has not been freed in the script, freeing it now.',[BmpArray[i].BmpName]));
+        TClient(Client).Writeln(Format('BMP[%s] has not been freed in the script, freeing it now.',[BmpArray[i].Name]));
       FreeAndNil(BmpArray[i]);
     end;
   SetLength(BmpArray,0);
@@ -1206,7 +1226,7 @@ end;
 constructor TMufasaBitmap.Create;
 begin
   inherited Create;
-  BmpName:= '';
+  Name:= '';
   TransparentSet:= False;
   setSize(0,0);
   {FData:= nil;

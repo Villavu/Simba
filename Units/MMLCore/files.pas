@@ -43,14 +43,14 @@ type
           constructor Create(Owner : TObject);
           destructor Destroy; override;
       public
-          function CreateFile(Path: string): Integer;
-          function OpenFile(Path: string; Shared: Boolean): Integer;
-          function RewriteFile(Path: string; Shared: Boolean): Integer;
+          function CreateFile(const Path: string): Integer;
+          function OpenFile(const Path: string; Shared: Boolean): Integer;
+          function RewriteFile(const Path: string; Shared: Boolean): Integer;
           procedure CloseFile(FileNum: Integer);
           function EndOfFile(FileNum: Integer): Boolean;
           function FileSizeMuf(FileNum: Integer): LongInt;
           function ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
-          function WriteFileString(FileNum: Integer; s: string): Boolean;
+          function WriteFileString(FileNum: Integer;const s: string): Boolean;
           Function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
           function FilePointerPos(FileNum: Integer): Integer;
       protected
@@ -226,7 +226,7 @@ End;
   Returns -1 if unsuccesfull.
 /\}
 
-function TMFiles.CreateFile(Path: string): Integer;
+function TMFiles.CreateFile(const Path: string): Integer;
 
 Var
    FS: TFileStream;
@@ -249,7 +249,7 @@ end;
   Returns -1 if unsuccesfull.
 /\}
 
-function TMFiles.OpenFile(Path: string; Shared: Boolean): Integer;
+function TMFiles.OpenFile(const Path: string; Shared: Boolean): Integer;
 
 Var
    FS: TFileStream;
@@ -290,7 +290,7 @@ end;
   Returns -1 if unsuccesfull.
 /\}
 
-function TMFiles.RewriteFile(Path: string; Shared: Boolean): Integer;
+function TMFiles.RewriteFile(const Path: string; Shared: Boolean): Integer;
 
 Var
    FS: TFileStream;
@@ -454,7 +454,7 @@ end;
   Writes s in the given File.
 /\}
 
-function TMFiles.WriteFileString(FileNum: Integer; s: string): Boolean;
+function TMFiles.WriteFileString(FileNum: Integer;const  s: string): Boolean;
 begin
   If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
     raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);

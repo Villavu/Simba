@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-    SimbaVersion = 602;
+  SimbaVersion = 607;
 
 type
 
@@ -96,6 +96,7 @@ type
     ActionTabNext: TAction;
     ActionList: TActionList;
     CheckBoxMatchCase: TCheckBox;
+    LazHighlighter: TSynFreePascalSyn;
     frmFunctionList: TFunctionListFrame;
     LabeledEditSearch: TLabeledEdit;
     MainMenu: TMainMenu;
@@ -116,6 +117,7 @@ type
     MenuItemDivider9: TMenuItem;
     MouseTimer: TTimer;
     NewsTimer: TTimer;
+    SCARHighlighter: TSynFreePascalSyn;
     TT_Console: TToolButton;
     TT_Cut: TToolButton;
     TT_Copy: TToolButton;
@@ -327,18 +329,24 @@ type
     SearchStart : TPoint;
     LastTab  : integer;
     UpdatingFonts : boolean;
+    function GetExtPath: string;
     function GetFontPath: String;
+    function GetHighlighter: TSynCustomHighlighter;
     function GetIncludePath: String;
+    function GetPluginPath: string;
     function GetScriptState: TScriptState;
     function GetShowHintAuto: boolean;
+    function GetSimbaNews: String;
+    procedure SetExtPath(const AValue: string);
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
+    procedure SetPluginPath(const AValue: string);
     procedure SetShowHintAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
-    function LoadSettingDef(Key : string; Def : string) : string;
-    function CreateSetting(Key : string; Value : string) : string;
-    procedure SetSetting(key : string; Value : string; save : boolean = false);
-    function SettingExtists(key : string) : boolean;
+    function LoadSettingDef(const Key, Def : string) : string;
+    function CreateSetting(const Key, Value : string) : string;
+    procedure SetSetting(const key,Value : string; save : boolean = false);
+    function SettingExtists(const key : string) : boolean;
     procedure FontUpdate;
   public
     DebugStream: String;
@@ -382,13 +390,17 @@ type
     procedure CreateDefaultEnvironment;
     procedure LoadFormSettings;
     procedure SaveFormSettings;
-    procedure AddRecentFile(filename : string);
+    procedure LoadExtensions;
+    procedure AddRecentFile(const filename : string);
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
     property ShowHintAuto : boolean read GetShowHintAuto write SetShowHintAuto;
     property IncludePath : String read GetIncludePath write SetIncludePath;
     property FontPath : String read GetFontPath write SetFontPath;
+    property PluginPath : string read GetPluginPath write SetPluginPath;
+    property ExtPath : string read GetExtPath write SetExtPath;
+    property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
   end;
 
   { TProcThread }
@@ -996,11 +1008,15 @@ begin
   CreateSetting('Settings/MainForm/NormalSize','739:555');
   CreateSetting('Settings/FunctionList/ShowOnStart','True');
   CreateSetting('Settings/CodeHints/ShowAutomatically','True');
+  CreateSetting('Settings/SourceEditor/LazColors','True');
+  CreateSetting('Settings/Extensions/FileExtension','sex');
 
   CreateSetting('Settings/Updater/RemoteLink',SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
   CreateSetting('Settings/Updater/RemoteVersionLink',SimbaURL + 'Version');
   CreateSetting('Settings/Fonts/VersionLink', FontURL + 'Version');
   CreateSetting('Settings/Fonts/UpdateLink', FontURL + 'Fonts.tar.bz2');
+
+  CreateSetting('Settings/News/URL', 'http://simba.villavu.com/bin/news');
 
   {Creates the paths and returns the path}
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
@@ -1027,41 +1043,6 @@ begin
 end;
 
 procedure TForm1.LoadFormSettings;
-var
-  extCount : integer;
-  function LoadExtension(Number : integer) : boolean;
-  var
-    Path : string;
-    ExtPath : string;
-    ExtEnabled : boolean;
-  begin;
-    result := false;
-    if (number < 0) or (number >= extCount) then
-      exit;
-    path := 'Extensions/Extension' + inttostr(number);
-    if SettingExtists(Path) = false then
-      exit;
-    ExtPath := LoadSettingDef(Path + '/Path','');
-    if ExtPath = '' then
-      exit;
-    ExtEnabled := StrToBoolDef(LoadSettingDef(Path + '/Enabled','false'),false);
-    if ExtManager.LoadPSExtension(ExtPath,ExtEnabled) = false then
-      exit;
-    Result := true;
-  end;
-  procedure DeleteExtension(number : integer);
-  var
-    i : integer;
-    path : string;
-  begin;
-    path := 'Extensions/Extension';
-    SettingsForm.Settings.DeleteKey(path + inttostr(number));
-    for i := number + 1 to extCount - 1 do
-      SettingsForm.Settings.RenameKey(path + inttostr(i),'Extension' + inttostr(i-1));
-    SetSetting('Extensions/ExtensionCount',inttostr(extCount - 1),true);
-    dec(extCount);
-  end;
-
 var
   str,str2 : string;
   Data : TStringArray;
@@ -1105,14 +1086,6 @@ begin
   else
     ShowConsole(false);
   {$endif}
-  extCount := StrToIntDef(LoadSettingDef('Extensions/ExtensionCount/','0'),0);
-  for i := 0 to extCount - 1 do
-    while (i < extCount) and not LoadExtension(i) do
-      DeleteExtension(i);
-  SetSetting('Extensions/ExtensionCount',inttostr(extCount));
-  str := LoadSettingDef('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
-  str2 := LoadSettingDef('Settings/Extensions/FileExtension','sex');
-  ExtManager.LoadPSExtensionsDir(str,str2);
 end;
 
 procedure TForm1.SaveFormSettings;
@@ -1161,7 +1134,57 @@ begin
   end;
 end;
 
-procedure TForm1.AddRecentFile(filename: string);
+procedure TForm1.LoadExtensions;
+var
+  extCount : integer;
+  function LoadExtension(Number : integer) : boolean;
+  var
+    Path : string;
+    ExtPath : string;
+    ExtEnabled : boolean;
+  begin;
+    result := false;
+    if (number < 0) or (number >= extCount) then
+      exit;
+    path := 'Extensions/Extension' + inttostr(number);
+    if SettingExtists(Path) = false then
+      exit;
+    ExtPath := LoadSettingDef(Path + '/Path','');
+    if ExtPath = '' then
+      exit;
+    ExtEnabled := StrToBoolDef(LoadSettingDef(Path + '/Enabled','false'),false);
+    if ExtManager.LoadPSExtension(ExtPath,ExtEnabled) = false then
+      exit;
+    Result := true;
+  end;
+  procedure DeleteExtension(number : integer);
+  var
+    i : integer;
+    path : string;
+  begin;
+    path := 'Extensions/Extension';
+    SettingsForm.Settings.DeleteKey(path + inttostr(number));
+    for i := number + 1 to extCount - 1 do
+      SettingsForm.Settings.RenameKey(path + inttostr(i),'Extension' + inttostr(i-1));
+    SetSetting('Extensions/ExtensionCount',inttostr(extCount - 1),true);
+    dec(extCount);
+  end;
+
+var
+  str,str2 : string;
+  i : integer;
+begin
+  extCount := StrToIntDef(LoadSettingDef('Extensions/ExtensionCount/','0'),0);
+  for i := 0 to extCount - 1 do
+    while (i < extCount) and not LoadExtension(i) do
+      DeleteExtension(i);
+  SetSetting('Extensions/ExtensionCount',inttostr(extCount));
+  str := LoadSettingDef('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
+  str2 := LoadSettingDef('Settings/Extensions/FileExtension','sex');
+  ExtManager.LoadPSExtensionsDir(str,str2);
+end;
+
+procedure TForm1.AddRecentFile(const filename: string);
 var
   MaxRecentFiles : integer;
   Len,i : integer;
@@ -1189,22 +1212,20 @@ procedure TForm1.InitalizeTMThread(var Thread: TMThread);
 var
   DbgImgInfo : TDbgImgInfo;
   AppPath : string;
-  pluginspath: string;
   ScriptPath : string;
   UseCPascal: String;
   Se: TMMLSettingsSandbox;
   loadFontsOnScriptStart: boolean;
 begin
   AppPath:= MainDir + DS;
-  PluginsPath := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS)));
   CurrScript.ScriptErrorLine:= -1;
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
   UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');
   try
     if lowercase(UseCPascal) = 'true' then
-      Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginsPath)
+      Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginPath)
     else
-      Thread := TPSThread.Create(True,@CurrentSyncInfo,PluginsPath);
+      Thread := TPSThread.Create(True,@CurrentSyncInfo,PluginPath);
   except
     mDebugLn('Failed to initialise the library!');
     Exit;
@@ -1227,15 +1248,15 @@ begin
   if CurrScript.ScriptFile <> '' then
     ScriptPath := IncludeTrailingPathDelimiter(ExtractFileDir(CurrScript.ScriptFile));
 
-  if DirectoryExists(PluginsPath) then
-     PluginsGlob.AddPath(PluginsPath);
+  if DirectoryExists(PluginPath) then
+     PluginsGlob.AddPath(PluginPath);
   if not DirectoryExists(IncludePath) then
     if FirstRun then
       FormWritelnEx('Warning: The include directory specified in the Settings isn''t valid.');
   if not DirectoryExists(fontPath) then
     if FirstRun then
       FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
-  Thread.SetPaths(ScriptPath,AppPath,Includepath,PluginsPath,fontPath);
+  Thread.SetPaths(ScriptPath,AppPath,Includepath,PluginPath,fontPath);
 
   if selector.haspicked then Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
@@ -1246,10 +1267,10 @@ begin
   begin
     Self.OCR_Fonts := TMOCR.Create(Thread.Client);
     OCR_Fonts.InitTOCR(fontPath);
-    Thread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+    Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts
   end else
     if assigned(Self.OCR_Fonts) and loadFontsOnScriptStart then
-      Thread.Client.MOCR.SetFonts(OCR_Fonts.GetFonts);
+      Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts;
 
   Se := TMMLSettingsSandbox.Create(SettingsForm.Settings);
   Se.Prefix := 'Scripts/';
@@ -1289,15 +1310,15 @@ begin
   with CurrScript do
   begin
     ScriptFile:= SetDirSeparators(Filename);
-    ScriptName:= ExtractFileNameOnly(Filename);
+    ScriptName:= ExtractFileNameOnly(ScriptFile);
     mDebugLn('Script name will be: ' + ScriptName);
-    FormWritelnEx('Succesfully saved: ' + Filename);
+    FormWritelnEx('Succesfully saved: ' + ScriptFile);
     StartText:= SynEdit.Lines.Text;
     ScriptChanged := false;
     SynEdit.MarkTextAsSaved;
     Self.Caption:= Format(WindowTitle,[ScriptName]);
     CurrTab.TabSheet.Caption:= ScriptName;
-    Self.AddRecentFile(FileName);
+    Self.AddRecentFile(ScriptFile);
     StatusBar.Panels[Panel_ScriptName].Text:= ScriptName;
     StatusBar.Panels[Panel_ScriptPath].text:= ScriptFile;
   end;
@@ -1924,6 +1945,8 @@ begin
 
   //Fill the codeinsight buffer
   FillThread.Resume;
+  //Load the extensions
+  LoadExtensions;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -2029,7 +2052,7 @@ var
   SynExporterHTML : TSynExporterHTML;
 begin;
   SynExporterHTML := TSynExporterHTML.Create(nil);
-  SynExporterHTML.Highlighter := CurrScript.SynFreePascalSyn1;
+  SynExporterHTML.Highlighter := CurrHighlighter;
   SynExporterHTML.ExportAsText:= True;
   with TSaveDialog.Create(nil) do
     try
@@ -2175,12 +2198,12 @@ begin
   FunctionListShown(not MenuItemFunctionList.Checked);
 end;
 
-function GetSimbaNews: String;
+function TForm1.GetSimbaNews: String;
 var
   t: TDownloadThread;
 begin
   t := TDownloadThread.Create(true);
-  t.InputURL:='http://simba.villavu.com/bin/news';
+  t.InputURL:=LoadSettingDef('Settings/News/URL', 'http://simba.villavu.com/bin/news');
   t.Resume;
   while not t.done do
   begin
@@ -2188,6 +2211,11 @@ begin
     Sleep(50);
   end;
   Exit(t.ResultStr);
+end;
+
+procedure TForm1.SetExtPath(const AValue: string);
+begin
+  SetSetting('Settings/Extensions/Path',AValue,true);
 end;
 
 procedure TForm1.NewsTimerTimer(Sender: TObject);
@@ -2343,14 +2371,37 @@ begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+'Fonts' + DS)));
 end;
 
+function TForm1.GetExtPath: string;
+begin
+  result :=IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Extensions/Path', ExpandFileName(MainDir+DS+'Extensions' + DS)));
+end;
+
+function TForm1.GetHighlighter: TSynCustomHighlighter;
+begin
+  if lowercase(LoadSettingDef('Settings/SourceEditor/LazColors','True')) = 'true' then
+    result := LazHighlighter
+  else
+    result := SCARHighlighter;
+end;
+
 function TForm1.GetIncludePath: String;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
 end;
 
+function TForm1.GetPluginPath: string;
+begin
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+DS+'Plugins' + DS)));
+end;
+
 procedure TForm1.SetIncludePath(const AValue: String);
 begin
   SetSetting('Settings/Includes/Path',AValue,true);
+end;
+
+procedure TForm1.SetPluginPath(const AValue: string);
+begin
+  SetSetting('Settings/Plugins/Path',AValue,true);
 end;
 
 procedure TForm1.SetScriptState(const State: TScriptState);
@@ -2381,17 +2432,17 @@ begin
     end;
 end;
 
-function TForm1.LoadSettingDef(Key: string; Def: string): string;
+function TForm1.LoadSettingDef(const Key,Def: string): string;
 begin
   result := SettingsForm.Settings.GetKeyValueDefLoad(Key,def,SimbaSettingsFile);
 end;
 
-function TForm1.CreateSetting(Key: string; Value: string): string;
+function TForm1.CreateSetting(const Key,Value: string): string;
 begin
   result := SettingsForm.Settings.GetKeyValueDef(Key,value);
 end;
 
-procedure TForm1.SetSetting(key: string; Value: string; save : boolean);
+procedure TForm1.SetSetting(const key,Value: string; save : boolean);
 begin
   //Creates the setting if needed
   SettingsForm.Settings.SetKeyValue(key,value);
@@ -2399,7 +2450,7 @@ begin
     SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
 end;
 
-function TForm1.SettingExtists(key: string): boolean;
+function TForm1.SettingExtists(const key: string): boolean;
 begin
   result :=SettingsForm.Settings.KeyExists(key);
 end;
@@ -2545,7 +2596,8 @@ begin
       Exit;
   with TOpenDialog.Create(nil) do
   try
-    Filter:= 'Simba Files|*.simb;*.cogat;*.mufa;*.txt|Any files|*.*';
+    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
+             '|Any files|*.*';
     if Execute then
       if FileExists(filename) then
         result := LoadScriptFile(filename);
@@ -2626,12 +2678,14 @@ begin
   Result := false;
   with TSaveDialog.Create(nil) do
   try
-    Filter:= 'Simba files|*.simb;*.cogat;*.mufa;*.pas;*.txt|Any Files|*.*';
+    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +
+              LoadSettingDef('Settings/Extensions/FileExtension','sex')+
+              '|Any files|*.*';
     if Execute then
     begin;
       if ExtractFileExt(FileName) = '' then
       begin;
-        ScriptFile := FileName + '.simb';
+        ScriptFile := FileName + '.simba';
       end else
         ScriptFile := FileName;
       CurrScript.SynEdit.Lines.SaveToFile(ScriptFile);

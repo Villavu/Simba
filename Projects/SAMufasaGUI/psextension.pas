@@ -1,6 +1,6 @@
 unit psextension;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
@@ -49,7 +49,7 @@ uses
   uPSC_extctrls,uPSC_menus, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls,uPSR_menus, //Runtime-libs
-  testunit,updateform,settingssandbox//Writeln
+  testunit,updateform,settingssandbox,bitmaps,mmisc//Writeln
   ;
 
 function TSimbaPSExtension.HookExists(HookName: String): Boolean;
@@ -116,8 +116,18 @@ end;
 
 procedure TSimbaPSExtension.RegisterMyMethods(Sender: TPSScript);
 begin
+  Sender.Comp.AddTypes('TStringArray','Array of String');
+  Sender.Comp.AddConstantN('AppPath','string').SetString(MainDir + DirectorySeparator);
+  Sender.Comp.AddConstantN('IncludePath','string').SetString(Form1.IncludePath);
+  Sender.Comp.AddConstantN('PluginPath','string').SetString(Form1.PluginPath);
+  Sender.Comp.AddConstantN('FontPath','string').SetString(form1.FontPath);
+  Sender.Comp.AddConstantN('ExtPath','string').SetString(form1.ExtPath);
   Sender.AddFunction(@formWritelnEx,'procedure Writeln(s : string)');
-  Sender.AddFunction(@ext_GetPage,'function GetPage(url : string) : string');
+  Sender.AddFunction(@ext_GetPage,'function GetPage(const url : string) : string');
+  Sender.AddFunction(@ext_DecompressBZip2,'function DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;');
+  Sender.AddFunction(@ext_UnTar,'function UnTar(const Input : string; out Content : TStringArray) : boolean;');
+  Sender.AddFunction(@ext_UnTarEx,'function UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;');
+
   Sender.AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
   Sender.AddRegisteredVariable('Simba','TForm');
   Sender.AddRegisteredVariable('Simba_MainMenu','TMainMenu');
@@ -158,14 +168,14 @@ procedure TSimbaPSExtension.SIRegister_Settings(Cl: TPSPascalCompiler);
 begin
   with cl.AddClassN(nil,'TMMLSettingsSandbox') do
   begin;
-    RegisterMethod('function IsKey(KeyName: String): Boolean;');
-    RegisterMethod('function IsDirectory(KeyName: String): Boolean;');
-    RegisterMethod('function SetKeyValue(Keyname : string; Value : string) : boolean;');
-    RegisterMethod('function GetKeyValue(KeyName: String): String;');
-    RegisterMethod('function GetKeyValueDef(KeyName, defVal: String): String;');
-    RegisterMethod('function ListKeys(KeyName: String): TStringArray;');
-    RegisterMethod('function DeleteKey(KeyName: String): Boolean;');
-    RegisterMethod('function DeleteSubKeys(KeyName: String): Boolean;');
+    RegisterMethod('function IsKey(const KeyName: String): Boolean;');
+    RegisterMethod('function IsDirectory(const KeyName: String): Boolean;');
+    RegisterMethod('function SetKeyValue(const Keyname, Value : string) : boolean;');
+    RegisterMethod('function GetKeyValue(const KeyName: String): String;');
+    RegisterMethod('function GetKeyValueDef(const KeyName, defVal: String): String;');
+    RegisterMethod('function ListKeys(const KeyName: String; out Keys :TStringArray): boolean;');
+    RegisterMethod('function DeleteKey(const KeyName: String): Boolean;');
+    RegisterMethod('function DeleteSubKeys(const KeyName: String): Boolean;');
     RegisterProperty('Prefix','String',iptR);
   end;
 end;

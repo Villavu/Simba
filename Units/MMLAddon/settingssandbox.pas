@@ -22,7 +22,7 @@
 }
 unit settingssandbox;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
@@ -42,15 +42,14 @@ type
   public
     constructor Create(sett: TMMLSettings);
     destructor Destroy; override;
-
-    function IsKey(KeyName: String): Boolean;
-    function IsDirectory(KeyName: String): Boolean;
-    function SetKeyValue(Keyname : string; Value : string) : boolean;
-    function GetKeyValue(KeyName: String): String;
-    function GetKeyValueDef(KeyName, defVal: String): String;
-    function ListKeys(KeyName: String; out Keys : TStringArray): boolean;
-    function DeleteKey(KeyName: String): Boolean;
-    function DeleteSubKeys(KeyName: String): Boolean;
+    function IsKey(const KeyName: String): Boolean;
+    function IsDirectory(const KeyName: String): Boolean;
+    function SetKeyValue(const Keyname, Value : string) : boolean;
+    function GetKeyValue(const KeyName: String): String;
+    function GetKeyValueDef(const KeyName, defVal: String): String;
+    function ListKeys(const KeyName: String; out Keys : TStringArray): boolean;
+    function DeleteKey(const KeyName: String): Boolean;
+    function DeleteSubKeys(const KeyName: String): Boolean;
     property prefix : string read GetPrefix write SetPrefix;
   end;
 
@@ -80,45 +79,43 @@ begin
   FPrefix := s;
 end;
 
-function TMMLSettingsSandbox.ListKeys(KeyName: String; out Keys :TStringArray): boolean;
+function TMMLSettingsSandbox.ListKeys(const KeyName: String; out Keys :TStringArray): boolean;
 begin
   exit(ST.ListKeys(Prefix + KeyName,keys))
 end;
 
-function TMMLSettingsSandbox.GetKeyValue(KeyName: String): String;
+function TMMLSettingsSandbox.GetKeyValue(const KeyName: String): String;
 begin
   exit(ST.GetKeyValue(Prefix + KeyName))
 end;
 
-function TMMLSettingsSandbox.GetKeyValueDef(KeyName, defVal: String): String;
+function TMMLSettingsSandbox.GetKeyValueDef(const KeyName, defVal: String): String;
 begin
   exit(ST.GetKeyValueDef(Prefix + KeyName, defVal))
 end;
 
-function TMMLSettingsSandbox.IsKey(KeyName: String): Boolean;
+function TMMLSettingsSandbox.IsKey(const KeyName: String): Boolean;
 begin
   exit(ST.IsKey(Prefix + KeyName))
 end;
 
-function TMMLSettingsSandbox.IsDirectory(KeyName: String): Boolean;
+function TMMLSettingsSandbox.IsDirectory(const KeyName: String): Boolean;
 begin
   exit(ST.IsDirectory(Prefix + KeyName))
 end;
 
-function TMMLSettingsSandbox.SetKeyValue(Keyname: string; Value: string
+function TMMLSettingsSandbox.SetKeyValue(const Keyname,Value: string
   ): boolean;
 begin
-  Writeln(KeyName);
-  Writeln(Value);
   exit(ST.SetKeyValue(prefix + keyname,value,true));
 end;
 
-function TMMLSettingsSandbox.DeleteKey(KeyName: String): Boolean;
+function TMMLSettingsSandbox.DeleteKey(const KeyName: String): Boolean;
 begin
   exit(ST.DeleteKey(Prefix + KeyName));
 end;
 
-function TMMLSettingsSandbox.DeleteSubKeys(KeyName: String): Boolean;
+function TMMLSettingsSandbox.DeleteSubKeys(const KeyName: String): Boolean;
 begin
   exit(ST.DeleteSubKeys(Prefix + KeyName));
 end;

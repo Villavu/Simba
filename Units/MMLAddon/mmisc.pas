@@ -1,6 +1,6 @@
 unit mmisc;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
@@ -9,7 +9,7 @@ uses
 
 function DecompressBZip2(const input : TStream; const BlockSize : Cardinal = 4096) : TMemoryStream;
 function UnTar(const Input : TStream) : TStringArray;overload;
-function UnTar(const Input : TStream; outputdir : string; overwrite : boolean): boolean;overload;
+function UnTar(const Input : TStream;const outputdir : string; overwrite : boolean): boolean;overload;
 
 implementation
 
@@ -63,7 +63,7 @@ begin;
   Tar.Free;
 end;
 
-function UnTar(const Input: TStream; outputdir: string; overwrite: boolean): boolean; overload;
+function UnTar(const Input: TStream; const outputdir: string; overwrite: boolean): boolean; overload;
 var
   Tar : TTarArchive;
   DirRec : TTarDirRec;

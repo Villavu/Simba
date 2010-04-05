@@ -1,11 +1,11 @@
 unit extensionmanager;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils,virtualextension,psextension,mufasabase,mufasatypes;
+  Classes, SysUtils,virtualextension,psextension,mufasabase;
 
 type
     TExtension = TVirtualSimbaExtension;
@@ -38,7 +38,7 @@ var
 
 implementation
 uses
-  TestUnit, settingssandbox,simbasettings;
+  TestUnit, settingssandbox,simbasettings,MufasaTypes;
 
 procedure TExtensionManager.SetOnchange(const AValue: TNotifyEvent);
 var
@@ -149,6 +149,7 @@ begin
         if HookExists(HookName) then
           if ExecuteHook(HookName, Args, Result) <> 0 then
           begin
+            mDebugLn('Execute hook failed: Hookname: %s',[hookname]);
             // Not succesfull.
           end;
 end;

@@ -476,23 +476,6 @@ end;
 
 {***implementation TPSThread***}
 
-{
-  Note to Raymond: For PascalScript, Create it on the .Create,
-  Execute it on the .Execute, and don't forget to Destroy it on .Destroy.
-
-  Furthermore, all the wrappers can be in the unit "implementation" section.
-  Better still to create an .inc for it, otherwise this unit will become huge.
-  (You can even split up the .inc's in stuff like color, bitmap, etc. )
-
-  Also, don't add PS to this unit, but make a seperate unit for it.
-  Unit "MMLPSThread", perhaps?
-
-  See the TestUnit for use of this thread, it's pretty straightforward.
-
-  It may also be wise to turn the "Importing of wrappers" into an include as
-  well, it will really make the unit more straightforward to use and read.
-}
-
 constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 var
   I : integer;
@@ -572,7 +555,7 @@ var
   Fonts : TMFonts;
 begin
   {$I PSInc/pscompile.inc}
-  Fonts := Client.MOCR.GetFonts;
+  Fonts := Client.MOCR.Fonts;
   for i := fonts.count - 1 downto 0 do
     Sender.Comp.AddConstantN(Fonts[i].Name,'string').SetString(Fonts[i].Name);
 
@@ -600,14 +583,44 @@ begin
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
+var
+  PSClass : TPSCompileTimeClass;
 begin
-  with cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap') do
+  PSClass :=cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap');
+  with PSClass do
   begin;
+    RegisterMethod('procedure SetSize(AWidth,AHeight : integer);');
+    RegisterMethod('procedure StretchResize(AWidth,AHeight : integer);');
+    RegisterMethod('procedure FastSetPixel(x,y : integer; Color : TColor);');
+    RegisterMethod('procedure FastSetPixels(TPA : TPointArray; Colors : TIntegerArray);');
+    RegisterMethod('procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);');
+    RegisterMethod('procedure DrawTPA(TPA : TPointArray; Color : TColor);');
+    RegisterMethod('function FastGetPixel(x,y : integer) : TColor;');
+//      function FastGetPixels(TPA : TPointArray) : TIntegerArray;
+    RegisterMethod('procedure SetTransparentColor(Col : TColor);');
+    RegisterMethod('function GetTransparentColor : TColor;');
+    RegisterProperty('TransparentColorSet','Boolean',iptR);
+    RegisterMethod('procedure FastDrawClear(Color : TColor);');
+    RegisterMethod('procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);');
+    RegisterMethod('procedure FastReplaceColor(OldColor, NewColor: TColor);');
+    RegisterMethod('procedure RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );');
+    RegisterMethod('procedure Desaturate(TargetBitmap : TMufasaBitmap);');
+    RegisterMethod('procedure GreyScale(TargetBitmap : TMufasaBitmap);');
+    RegisterMethod('procedure Brightness(TargetBitmap : TMufasaBitmap; br : integer);');
+    RegisterMethod('procedure Contrast(TargetBitmap : TMufasaBitmap; co : Extended);');
+    RegisterMethod('procedure Invert(TargetBitmap : TMufasaBitmap);');
+    RegisterMethod('procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);');
+    RegisterMethod('function Copy: TMufasaBitmap;');
+    RegisterMethod('function ToString : string;');
+    RegisterMethod('function CreateTMask : TMask;');
     RegisterMethod('constructor create');
     RegisterMethod('procedure Free');
     RegisterMethod('function SaveToFile(const FileName : string) :boolean;');
     RegisterMethod('procedure LoadFromFile(const FileName : string);');
+    RegisterProperty('Width','Integer',iptR);
+    RegisterProperty('Height','Integer',iptR);
     RegisterProperty('Index','Integer',iptR);
+    RegisterProperty('Name','String',iptRW);
   end;
 end;
 
@@ -622,20 +635,51 @@ begin;
   CurrThread.Client.MBitmaps.FreeBMP(Self.Index);
 end;
 
-procedure MufasaBitmapIndex(self : TMufasaBitmap; var Index : integer);
-begin;
-  Index := self.Index;
-end;
+procedure MBmp_Index_r(self : TMufasaBitmap; var Index : integer);begin;  Index := self.Index; end;
+procedure MBmp_Width_r(self : TMufasaBitmap; var Width : integer);begin;  Width := self.Width; end;
+procedure MBmp_Height_r(self : TMufasaBitmap; var Height : integer);begin;  Height := self.Height; end;
+procedure MBmp_Name_r(self : TMufasaBitmap; var Name : String);begin;  Name := self.Name; end;
+procedure MBmp_Name_w(self : TMufasaBitmap; const Name : String);begin; Self.name := name; end;
+procedure MBmp_TransColorSet_r(Self : TMufasaBitmap; var IsSet : boolean); begin IsSet := self.TransparentColorSet; end;
 
 procedure RIRegister_Mufasa(cl: TPSRuntimeClassImporter);
+var
+  PSClass : TPSRuntimeClass;
 begin;
-  with cl.Add(TMufasaBitmap) do
+  PSClass :=cl.Add(TMufasaBitmap);
+  with PSClass do
   begin
+    RegisterMethod(@TMufasaBitmap.SetSize,'SETSIZE');
+    RegisterMethod(@TMufasaBitmap.StretchResize,'STRETCHRESIZE');
+    RegisterMethod(@TMufasaBitmap.FastSetPixel,'FASTSETPIXEL');
+    RegisterMethod(@TMufasaBitmap.FastSetPixels,'FASTSETPIXELS');
+    RegisterMethod(@TMufasaBitmap.DrawATPA,'DRAWATPA');
+    RegisterMethod(@TMufasaBitmap.DrawTPA,'DRAWTPA');
+    RegisterMethod(@TMufasaBitmap.FastGetPixel,'FASTGETPIXEL');
+    RegisterMethod(@TMufasaBitmap.SetTransparentColor,'SETTRANSPARENTCOLOR');
+    RegisterMethod(@TMufasaBitmap.GetTransparentColor,'GETTRANSPARENTCOLOR');
+    RegisterMethod(@TMufasaBitmap.FastDrawClear,'FASTDRAWCLEAR');
+    RegisterMethod(@TMufasaBitmap.FastDrawTransparent,'FASTDRAWTRANSPARENT');
+    RegisterMethod(@TMufasaBitmap.FastReplaceColor,'FASTREPLACECOLOR');
+    RegisterMethod(@TMufasaBitmap.RotateBitmap,'ROTATEBITMAP');
+    RegisterMethod(@TMufasaBitmap.Desaturate,'DESATURATE');
+    RegisterMethod(@TMufasaBitmap.GreyScale,'GREYSCALE');
+    RegisterMethod(@TMufasaBitmap.Brightness,'BRIGHTNESS');
+    RegisterMethod(@TMufasaBitmap.Contrast,'CONTRAST');
+    RegisterMethod(@TMufasaBitmap.Invert,'INVERT');
+    RegisterMethod(@TMufasaBitmap.Posterize,'POSTERIZE');
+    RegisterMethod(@TMufasaBitmap.Copy, 'COPY');
+    RegisterMethod(@TMufasaBitmap.ToString,'TOSTRING');
+    RegisterMethod(@TMufasaBitmap.CreateTMask,'CREATETMASK');
+    RegisterPropertyHelper(@MBmp_TransColorSet_r,nil,'TRANSPARENTCOLORSET');
+    RegisterPropertyHelper(@MBmp_Index_r,nil,'INDEX');
+    RegisterPropertyHelper(@MBmp_Width_r,nil,'WIDTH');
+    RegisterPropertyHelper(@MBmp_Height_r,nil,'HEIGHT');
+    RegisterPropertyHelper(@MBmp_Name_r,@MBmp_Name_w,'NAME');
     RegisterConstructor(@CreateMufasaBitmap,'CREATE');
     RegisterMethod(@FreeMufasaBitmap,'FREE');
     RegisterMethod(@TMufasaBitmap.SaveToFile, 'SAVETOFILE');
     RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LOADFROMFILE');
-    RegisterPropertyHelper(@MufasaBitmapIndex,nil,'INDEX');
   end;
 end;
 

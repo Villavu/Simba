@@ -69,13 +69,23 @@ interface
 
         function GetNativeWindow: TNativeWindow;
       private
+        { display is the connection to the X server }
         display: PDisplay;
+
+        { screen-number and selected window }
         screennum: integer;
         window: x.TWindow;
+
+        { Reference to the XImage }
         buffer: PXImage;
+
+        { For memory-leak checks }
         dirty: Boolean;  //true if image loaded
+
+        { KeyInput class }
         keyinput: TKeyInput;
 
+        { X Error Handler }
         oldXHandler: TXErrorHandler;
     end;
     
@@ -101,27 +111,32 @@ implementation
   uses GraphType, interfacebase, lcltype;
 
   { PROBLEM: .Create is called on the main thread. ErrorCS etc aren't
-    created on other threads. We will create them on the fly... }
+    created on other threads. We will create them on the fly...
+    More info below...}
   threadvar
     xerror: string;
   threadvar
     ErrorCS: syncobjs.TCriticalSection;
 
 
+ {
+    This is extremely hacky, but also very useful.
+    We have to install a X error handler, because otherwise X
+    will terminate out entire app on error.
 
-//***implementation*** TKeyInput
+    Since we want the right thread to recieve the right error, we have to
+    fiddle a bit with threadvars, mutexes / semaphores.
 
-  procedure TKeyInput.Down(Key: Word);
-  begin
-    DoDown(Key);
-  end;
+    Another problem is that the script thread is initialised on the main thread.
+    This means that all (threadvar!) semaphores initialised on the mainthread
+    are NOT initialised on the script thread, which has yet to be started.
+    Therefore, we check if it hasn't been created yet.
 
-  procedure TKeyInput.Up(Key: Word);
-  begin
-    DoUp(Key);
-  end;
+    ** Horrible solution, but WFM **
 
-//***implementation*** TWindow
+    This is the Handler function.
+
+  }
 
   function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
 
@@ -158,6 +173,20 @@ implementation
     mDebugLn('Type: ' + inttostr(para2^._type));
   end;
 
+ { TKeyInput }
+
+  procedure TKeyInput.Down(Key: Word);
+  begin
+    DoDown(Key);
+  end;
+
+  procedure TKeyInput.Up(Key: Word);
+  begin
+    DoUp(Key);
+  end;
+
+  { TWindow }
+
   function TWindow.GetError: String;
   begin
     exit(xerror);
@@ -173,6 +202,7 @@ implementation
     xerror := '';
   end;
 
+  { See if the semaphores / CS are initialised }
   constructor TWindow.Create(display: PDisplay; screennum: integer; window: x.TWindow); 
   begin 
     inherited Create;
