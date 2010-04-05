@@ -1,0 +1,10 @@
+- DTM Editor
+- BMP Editor
+- DTM Features
+- SRL Installer
+- Extra GUI icons
+- Installer
+- Test scripts
+- DWS
+- OCR exceptions + proper implementation of len
+- Documentation + wiki
