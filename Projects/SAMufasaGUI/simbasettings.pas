@@ -128,11 +128,9 @@ begin
   if N.Data <> nil then
     exit;
 
-  if N.GetFirstChild = nil then
-    exit;
-
-  if N.GetFirstChild.Data <> nil then
-    exit;
+  if N.GetFirstChild <> nil then
+    if N.GetFirstChild.Data <> nil then
+      exit;
 
   KeyName := InputBox('Create new Key', 'Please enter the key name', '');
 
@@ -140,14 +138,8 @@ begin
     exit;
   P := Settings.GetNodePath(N);
 
-  if Settings.CreateKey(P + '/' + NN.Text) then
-  begin
-    NN := TTreeNode.Create(SettingsTreeView.Items);
-
-    NN.Text := KeyName;
-
-    NN.MoveTo(N,naAddChild);
-  end;
+  if Settings.CreateKey(P + '/' + KeyName) then
+    writeln('Added key ' + KeyName);
 end;
 
 
@@ -169,6 +161,8 @@ begin
   N := SettingsTreeView.Selected;
   if N = nil then
     exit;
+
+  Path := Settings.GetNodePath(N);
 
   MBox := InputBox('Rename', 'Please fill in the new name', '');
   if MBox = '' then
