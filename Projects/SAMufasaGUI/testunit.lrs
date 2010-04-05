@@ -10,50 +10,50 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +'Visible'#9#0#8'TToolBar'#8'ToolBar1'#4'Left'#2#0#6'Height'#2#24#3'Top'#2#0#5
   +'Width'#3#154#2#7'Caption'#6#8'ToolBar1'#6'Images'#7#17'Mufasa_Image_List'#14
   +'ParentShowHint'#8#8'ShowHint'#9#8'TabOrder'#2#0#0#11'TToolButton'#6'TB_Run'
-  +#4'Left'#3#168#0#4'Hint'#6#3'Run'#3'Top'#2#2#6'Action'#7#15'ActionRunScript'
-  +#10'ImageIndex'#2#6#0#0#11'TToolButton'#8'TB_Pause'#4'Left'#3#191#0#4'Hint'#6
+  +#4'Left'#3#170#0#4'Hint'#6#3'Run'#3'Top'#2#2#6'Action'#7#15'ActionRunScript'
+  +#10'ImageIndex'#2#6#0#0#11'TToolButton'#8'TB_Pause'#4'Left'#3#193#0#4'Hint'#6
   +#5'Pause'#3'Top'#2#2#6'Action'#7#17'ActionPauseScript'#7'Enabled'#8#10'Image'
-  +'Index'#2#5#0#0#11'TToolButton'#7'TB_Stop'#4'Left'#3#214#0#4'Hint'#6#4'Stop'
+  +'Index'#2#5#0#0#11'TToolButton'#7'TB_Stop'#4'Left'#3#216#0#4'Hint'#6#4'Stop'
   +#3'Top'#2#2#6'Action'#7#16'ActionStopScript'#7'Enabled'#8#10'ImageIndex'#2#7
-  +#0#0#11'TToolButton'#11'ToolButton1'#4'Left'#3#237#0#3'Top'#2#2#5'Width'#2#3
+  +#0#0#11'TToolButton'#11'ToolButton1'#4'Left'#3#239#0#3'Top'#2#2#5'Width'#2#4
   +#7'Caption'#6#11'ToolButton1'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButton'#9
-  +'TB_NewTab'#4'Left'#3#240#0#4'Hint'#6#7'Add tab'#3'Top'#2#2#6'Action'#7#12'A'
-  +'ctionNewTab'#0#0#11'TToolButton'#11'TB_CloseTab'#4'Left'#3#7#1#4'Hint'#6#9
+  +'TB_NewTab'#4'Left'#3#243#0#4'Hint'#6#7'Add tab'#3'Top'#2#2#6'Action'#7#12'A'
+  +'ctionNewTab'#0#0#11'TToolButton'#11'TB_CloseTab'#4'Left'#3#10#1#4'Hint'#6#9
   +'Close tab'#3'Top'#2#2#6'Action'#7#14'ActionCloseTab'#0#0#11'TToolButton'#11
-  +'ToolButton4'#4'Left'#3#30#1#3'Top'#2#2#5'Width'#2#3#7'Caption'#6#11'ToolBut'
+  +'ToolButton4'#4'Left'#3'!'#1#3'Top'#2#2#5'Width'#2#4#7'Caption'#6#11'ToolBut'
   +'ton4'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButton'#13'TB_ClearDebug'#4'Lef'
-  +'t'#3'!'#1#4'Hint'#6#15'Clear debug box'#3'Top'#2#2#6'Action'#7#16'ActionCle'
-  +'arDebug'#0#0#11'TToolButton'#13'TB_PickColour'#4'Left'#3'8'#1#4'Hint'#6#12
+  +'t'#3'%'#1#4'Hint'#6#15'Clear debug box'#3'Top'#2#2#6'Action'#7#16'ActionCle'
+  +'arDebug'#0#0#11'TToolButton'#13'TB_PickColour'#4'Left'#3'<'#1#4'Hint'#6#12
   +'Pick a color'#3'Top'#2#2#7'Caption'#6#13'TB_PickColour'#10'ImageIndex'#2#0#7
   +'OnClick'#7#15'ButtonPickClick'#0#0#11'TToolButton'#15'TB_SelectClient'#4'Le'
-  +'ft'#3'O'#1#4'Hint'#6#15'Select a client'#3'Top'#2#2#7'Caption'#6#15'TB_Sele'
+  +'ft'#3'S'#1#4'Hint'#6#15'Select a client'#3'Top'#2#2#7'Caption'#6#15'TB_Sele'
   +'ctClient'#10'ImageIndex'#2#2#11'OnMouseDown'#7#18'ButtonSelectorDown'#0#0#11
-  +'TToolButton'#11'ToolButton8'#4'Left'#3'f'#1#3'Top'#2#2#5'Width'#2#3#7'Capti'
+  +'TToolButton'#11'ToolButton8'#4'Left'#3'j'#1#3'Top'#2#2#5'Width'#2#4#7'Capti'
   +'on'#6#11'ToolButton8'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButton'#16'TB_R'
-  +'eloadPlugins'#4'Left'#3'i'#1#4'Hint'#6#14'Reload plugins'#3'Top'#2#2#7'Capt'
+  +'eloadPlugins'#4'Left'#3'n'#1#4'Hint'#6#14'Reload plugins'#3'Top'#2#2#7'Capt'
   +'ion'#6#16'TB_ReloadPlugins'#7'Enabled'#8#10'ImageIndex'#2#13#0#0#11'TToolBu'
-  +'tton'#7'TB_Tray'#4'Left'#3#128#1#4'Hint'#6#16'Minimize to tray'#3'Top'#2#2#7
+  +'tton'#7'TB_Tray'#4'Left'#3#133#1#4'Hint'#6#16'Minimize to tray'#3'Top'#2#2#7
   +'Caption'#6#7'TB_Tray'#10'ImageIndex'#2#17#7'OnClick'#7#15'ButtonTrayClick'#0
   +#0#11'TToolButton'#6'TB_New'#4'Left'#2#1#4'Hint'#6#3'New'#3'Top'#2#2#6'Actio'
   +'n'#7#15'ActionNewScript'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolBut'
-  +'ton'#11'ToolButton2'#4'Left'#2']'#3'Top'#2#2#5'Width'#2#3#7'Caption'#6#11'T'
+  +'ton'#11'ToolButton2'#4'Left'#2']'#3'Top'#2#2#5'Width'#2#4#7'Caption'#6#11'T'
   +'oolButton2'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButton'#7'TB_Open'#4'Left'
   +#2#24#4'Hint'#6#4'Open'#3'Top'#2#2#6'Action'#7#16'ActionOpenScript'#14'Paren'
   +'tShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#7'TB_Save'#4'Left'#2'/'#4'Hi'
   +'nt'#6#4'Save'#3'Top'#2#2#6'Action'#7#16'ActionSaveScript'#0#0#11'TToolButto'
   +'n'#10'TB_SaveAll'#4'Left'#2'F'#4'Hint'#6#8'Save all'#3'Top'#2#2#6'Action'#7
   +#13'ActionSaveAll'#7'Enabled'#8#0#0#11'TToolButton'#11'ToolButton3'#4'Left'#3
-  +#174#1#3'Top'#2#2#5'Width'#2#3#7'Caption'#6#11'ToolButton3'#5'Style'#7#10'tb'
-  +'sDivider'#0#0#11'TToolButton'#9'TT_Update'#4'Left'#3#177#1#4'Hint'#6#25'A n'
+  +#179#1#3'Top'#2#2#5'Width'#2#4#7'Caption'#6#11'ToolButton3'#5'Style'#7#10'tb'
+  +'sDivider'#0#0#11'TToolButton'#9'TT_Update'#4'Left'#3#183#1#4'Hint'#6#25'A n'
   +'ew update is available'#3'Top'#2#2#7'Caption'#6#9'TT_Update'#10'ImageIndex'
   +#2#1#7'OnClick'#7#14'TT_UpdateClick'#0#0#11'TToolButton'#6'TT_Cut'#4'Left'#2
-  +'`'#3'Top'#2#2#7'Caption'#6#4'Cu&t'#10'ImageIndex'#2#3#7'OnClick'#7#16'Actio'
-  +'nCutExecute'#0#0#11'TToolButton'#7'TT_Copy'#4'Left'#2'w'#3'Top'#2#2#7'Capti'
+  +'a'#3'Top'#2#2#7'Caption'#6#4'Cu&t'#10'ImageIndex'#2#3#7'OnClick'#7#16'Actio'
+  +'nCutExecute'#0#0#11'TToolButton'#7'TT_Copy'#4'Left'#2'x'#3'Top'#2#2#7'Capti'
   +'on'#6#5'&Copy'#10'ImageIndex'#2#22#7'OnClick'#7#17'ActionCopyExecute'#0#0#11
-  +'TToolButton'#8'TT_Paste'#4'Left'#3#142#0#3'Top'#2#2#6'Action'#7#11'ActionPa'
-  +'ste'#0#0#11'TToolButton'#11'ToolButton9'#4'Left'#3#165#0#3'Top'#2#2#5'Width'
-  +#2#3#7'Caption'#6#11'ToolButton9'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButt'
-  +'on'#10'TT_Console'#4'Left'#3#151#1#4'Hint'#6#17'Hide/Show Console'#3'Top'#2
+  +'TToolButton'#8'TT_Paste'#4'Left'#3#143#0#3'Top'#2#2#6'Action'#7#11'ActionPa'
+  +'ste'#0#0#11'TToolButton'#11'ToolButton9'#4'Left'#3#166#0#3'Top'#2#2#5'Width'
+  +#2#4#7'Caption'#6#11'ToolButton9'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButt'
+  +'on'#10'TT_Console'#4'Left'#3#156#1#4'Hint'#6#17'Hide/Show Console'#3'Top'#2
   +#2#6'Action'#7#13'ActionConsole'#0#0#0#10'TStatusBar'#9'StatusBar'#4'Left'#2
   +#0#6'Height'#2#23#3'Top'#3#2#2#5'Width'#3#154#2#6'Panels'#14#1#5'Width'#2'<'
   +#0#1#4'Text'#6#8'MouseBla'#5'Width'#2'd'#0#1#4'Text'#6#8'Untitled'#5'Width'#2
@@ -150,8 +150,8 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +#7#17'LabeledEditSearch'#31'EditLabel.AnchorSideTop.Control'#7#17'LabeledEdi'
   +'tSearch'#28'EditLabel.AnchorSideTop.Side'#7#9'asrCenter!EditLabel.AnchorSid'
   +'eRight.Control'#7#17'LabeledEditSearch"EditLabel.AnchorSideBottom.Control'#7
-  +#17'LabeledEditSearch'#14'EditLabel.Left'#2'G'#16'EditLabel.Height'#2#16#13
-  +'EditLabel.Top'#2#8#15'EditLabel.Width'#2#30#17'EditLabel.Caption'#6#6'Find:'
+  +#17'LabeledEditSearch'#14'EditLabel.Left'#2'I'#16'EditLabel.Height'#2#14#13
+  +'EditLabel.Top'#2#9#15'EditLabel.Width'#2#28#17'EditLabel.Caption'#6#6'Find:'
   +' '#21'EditLabel.ParentColor'#8#13'LabelPosition'#7#6'lpLeft'#8'TabOrder'#2#0
   +#8'OnChange'#7#16'EditSearchChange'#7'OnEnter'#7#22'LabeledEditSearchEnter'#6
   +'OnExit'#7#21'LabeledEditSearchExit'#9'OnKeyDown'#7#24'LabeledEditSearchKeyD'
@@ -3142,5 +3142,15 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +'UpdateTimer'#8'Interval'#3#16''''#4'left'#3'`'#2#3'top'#3#144#0#0#0#6'TTime'
   +'r'#10'MouseTimer'#8'Interval'#2'd'#7'OnTimer'#7#17'ChangeMouseStatus'#4'lef'
   +'t'#3#192#1#3'top'#3#200#0#0#0#6'TTimer'#9'NewsTimer'#8'Interval'#3#244#1#7
-  +'OnTimer'#7#14'NewsTimerTimer'#4'left'#3#232#1#3'top'#3#200#0#0#0#0
+  +'OnTimer'#7#14'NewsTimerTimer'#4'left'#3#232#1#3'top'#3#200#0#0#0#17'TSynFre'
+  +'ePascalSyn'#14'LazHighlighter'#7'Enabled'#8#23'CommentAttri.Foreground'#7#6
+  +'clBlue'#18'CommentAttri.Style'#11#6'fsBold'#0#26'IdentifierAttri.Foreground'
+  +#7#9'clDefault'#22'NumberAttri.Foreground'#7#6'clNavy'#22'StringAttri.Foregr'
+  +'ound'#7#6'clBlue'#22'SymbolAttri.Foreground'#7#5'clRed'#25'DirectiveAttri.F'
+  +'oreground'#7#5'clRed'#20'DirectiveAttri.Style'#11#6'fsBold'#0#12'CompilerMo'
+  +'de'#7#9'pcmObjFPC'#14'NestedComments'#9#4'left'#3#16#2#3'top'#3#200#0#0#0#17
+  +'TSynFreePascalSyn'#15'SCARHighlighter'#7'Enabled'#8#23'CommentAttri.Foregro'
+  +'und'#7#7'clGreen'#18'CommentAttri.Style'#11#0#22'NumberAttri.Foreground'#7
+  +#10'clHotLight'#22'StringAttri.Foreground'#7#9'clFuchsia'#12'CompilerMode'#7
+  +#9'pcmObjFPC'#14'NestedComments'#9#4'left'#3'8'#2#3'top'#3#200#0#0#0#0
 ]);

@@ -5,7 +5,7 @@ unit extensionmanager;
 interface
 
 uses
-  Classes, SysUtils,virtualextension,psextension,mufasabase,mufasatypes;
+  Classes, SysUtils,virtualextension,psextension,mufasabase;
 
 type
     TExtension = TVirtualSimbaExtension;
@@ -38,7 +38,7 @@ var
 
 implementation
 uses
-  TestUnit, settingssandbox,simbasettings;
+  TestUnit, settingssandbox,simbasettings,MufasaTypes;
 
 procedure TExtensionManager.SetOnchange(const AValue: TNotifyEvent);
 var

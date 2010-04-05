@@ -28,14 +28,14 @@ object Form1: TForm1
     ShowHint = True
     TabOrder = 0
     object TB_Run: TToolButton
-      Left = 168
+      Left = 170
       Hint = 'Run'
       Top = 2
       Action = ActionRunScript
       ImageIndex = 6
     end
     object TB_Pause: TToolButton
-      Left = 191
+      Left = 193
       Hint = 'Pause'
       Top = 2
       Action = ActionPauseScript
@@ -43,7 +43,7 @@ object Form1: TForm1
       ImageIndex = 5
     end
     object TB_Stop: TToolButton
-      Left = 214
+      Left = 216
       Hint = 'Stop'
       Top = 2
       Action = ActionStopScript
@@ -51,39 +51,39 @@ object Form1: TForm1
       ImageIndex = 7
     end
     object ToolButton1: TToolButton
-      Left = 237
+      Left = 239
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton1'
       Style = tbsDivider
     end
     object TB_NewTab: TToolButton
-      Left = 240
+      Left = 243
       Hint = 'Add tab'
       Top = 2
       Action = ActionNewTab
     end
     object TB_CloseTab: TToolButton
-      Left = 263
+      Left = 266
       Hint = 'Close tab'
       Top = 2
       Action = ActionCloseTab
     end
     object ToolButton4: TToolButton
-      Left = 286
+      Left = 289
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton4'
       Style = tbsDivider
     end
     object TB_ClearDebug: TToolButton
-      Left = 289
+      Left = 293
       Hint = 'Clear debug box'
       Top = 2
       Action = ActionClearDebug
     end
     object TB_PickColour: TToolButton
-      Left = 312
+      Left = 316
       Hint = 'Pick a color'
       Top = 2
       Caption = 'TB_PickColour'
@@ -91,7 +91,7 @@ object Form1: TForm1
       OnClick = ButtonPickClick
     end
     object TB_SelectClient: TToolButton
-      Left = 335
+      Left = 339
       Hint = 'Select a client'
       Top = 2
       Caption = 'TB_SelectClient'
@@ -99,14 +99,14 @@ object Form1: TForm1
       OnMouseDown = ButtonSelectorDown
     end
     object ToolButton8: TToolButton
-      Left = 358
+      Left = 362
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
     object TB_ReloadPlugins: TToolButton
-      Left = 361
+      Left = 366
       Hint = 'Reload plugins'
       Top = 2
       Caption = 'TB_ReloadPlugins'
@@ -114,7 +114,7 @@ object Form1: TForm1
       ImageIndex = 13
     end
     object TB_Tray: TToolButton
-      Left = 384
+      Left = 389
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -132,7 +132,7 @@ object Form1: TForm1
     object ToolButton2: TToolButton
       Left = 93
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton2'
       Style = tbsDivider
     end
@@ -158,14 +158,14 @@ object Form1: TForm1
       Enabled = False
     end
     object ToolButton3: TToolButton
-      Left = 430
+      Left = 435
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object TT_Update: TToolButton
-      Left = 433
+      Left = 439
       Hint = 'A new update is available'
       Top = 2
       Caption = 'TT_Update'
@@ -173,33 +173,33 @@ object Form1: TForm1
       OnClick = TT_UpdateClick
     end
     object TT_Cut: TToolButton
-      Left = 96
+      Left = 97
       Top = 2
       Caption = 'Cu&t'
       ImageIndex = 3
       OnClick = ActionCutExecute
     end
     object TT_Copy: TToolButton
-      Left = 119
+      Left = 120
       Top = 2
       Caption = '&Copy'
       ImageIndex = 22
       OnClick = ActionCopyExecute
     end
     object TT_Paste: TToolButton
-      Left = 142
+      Left = 143
       Top = 2
       Action = ActionPaste
     end
     object ToolButton9: TToolButton
-      Left = 165
+      Left = 166
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton9'
       Style = tbsDivider
     end
     object TT_Console: TToolButton
-      Left = 407
+      Left = 412
       Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
@@ -396,10 +396,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 71
-        EditLabel.Height = 16
-        EditLabel.Top = 8
-        EditLabel.Width = 30
+        EditLabel.Left = 73
+        EditLabel.Height = 14
+        EditLabel.Top = 9
+        EditLabel.Width = 28
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -3083,6 +3083,32 @@ object Form1: TForm1
     Interval = 500
     OnTimer = NewsTimerTimer
     left = 488
+    top = 200
+  end
+  object LazHighlighter: TSynFreePascalSyn
+    Enabled = False
+    CommentAttri.Foreground = clBlue
+    CommentAttri.Style = [fsBold]
+    IdentifierAttri.Foreground = clDefault
+    NumberAttri.Foreground = clNavy
+    StringAttri.Foreground = clBlue
+    SymbolAttri.Foreground = clRed
+    DirectiveAttri.Foreground = clRed
+    DirectiveAttri.Style = [fsBold]
+    CompilerMode = pcmObjFPC
+    NestedComments = True
+    left = 528
+    top = 200
+  end
+  object SCARHighlighter: TSynFreePascalSyn
+    Enabled = False
+    CommentAttri.Foreground = clGreen
+    CommentAttri.Style = []
+    NumberAttri.Foreground = clHotLight
+    StringAttri.Foreground = clFuchsia
+    CompilerMode = pcmObjFPC
+    NestedComments = True
+    left = 568
     top = 200
   end
 end

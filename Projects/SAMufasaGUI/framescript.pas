@@ -46,7 +46,6 @@ type
 
   TScriptFrame = class(TFrame)
     SynEdit: TSynEdit;
-    SynFreePascalSyn1: TSynFreePascalSyn;
     procedure SynEditChange(Sender: TObject);
     procedure SynEditClickLink(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -608,8 +607,8 @@ begin
   FScriptState:= ss_None;
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
-  SynEdit.Options:= SynEdit.Options + [eoTabIndent] - [{eoGroupUndo,} eoSmartTabs];
-  //SynEdit.Options:= SynEdit.Options + [eoTabIndent];
+  SynEdit.Highlighter := Form1.CurrHighlighter;
+  SynEdit.Options:= SynEdit.Options + [eoTabIndent] - [eoSmartTabs];
   SynEdit.IncrementColor.Background := $30D070;
   SynEdit.HighlightAllColor.Background:= clYellow;
   SynEdit.HighlightAllColor.Foreground:= clDefault;
