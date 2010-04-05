@@ -139,7 +139,7 @@ begin
   P := Settings.GetNodePath(N);
 
   if Settings.CreateKey(P + '/' + KeyName) then
-    writeln('Added key ' + KeyName);
+    mDebugLn('Added key ' + KeyName);
 end;
 
 
