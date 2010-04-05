@@ -49,7 +49,7 @@ uses
   uPSC_extctrls,uPSC_menus, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls,uPSR_menus, //Runtime-libs
-  testunit,updateform,settingssandbox,bitmaps//Writeln
+  testunit,updateform,settingssandbox,bitmaps,mmisc//Writeln
   ;
 
 function TSimbaPSExtension.HookExists(HookName: String): Boolean;
@@ -116,8 +116,18 @@ end;
 
 procedure TSimbaPSExtension.RegisterMyMethods(Sender: TPSScript);
 begin
+  Sender.Comp.AddTypes('TStringArray','Array of String');
+  Sender.Comp.AddConstantN('AppPath','string').SetString(MainDir + DirectorySeparator);
+  Sender.Comp.AddConstantN('IncludePath','string').SetString(Form1.IncludePath);
+  Sender.Comp.AddConstantN('PluginPath','string').SetString(Form1.PluginPath);
+  Sender.Comp.AddConstantN('FontPath','string').SetString(form1.FontPath);
+  Sender.Comp.AddConstantN('ExtPath','string').SetString(form1.ExtPath);
   Sender.AddFunction(@formWritelnEx,'procedure Writeln(s : string)');
-  Sender.AddFunction(@ext_GetPage,'function GetPage(url : string) : string');
+  Sender.AddFunction(@ext_GetPage,'function GetPage(const url : string) : string');
+  Sender.AddFunction(@ext_DecompressBZip2,'function DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;');
+  Sender.AddFunction(@ext_UnTar,'function UnTar(const Input : string; out Content : TStringArray) : boolean;');
+  Sender.AddFunction(@ext_UnTarEx,'function UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;');
+
   Sender.AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
   Sender.AddRegisteredVariable('Simba','TForm');
   Sender.AddRegisteredVariable('Simba_MainMenu','TMainMenu');
