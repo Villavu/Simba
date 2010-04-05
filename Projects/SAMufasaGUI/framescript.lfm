@@ -52,7 +52,6 @@ object ScriptFrame: TScriptFrame
         Option = 0
         Priority = 0
       end>
-    Highlighter = SynFreePascalSyn1
     Keystrokes = <    
       item
         Command = ecUp
@@ -709,20 +708,5 @@ object ScriptFrame: TScriptFrame
           end>
       end
     end
-  end
-  object SynFreePascalSyn1: TSynFreePascalSyn
-    Enabled = False
-    CommentAttri.Foreground = clBlue
-    CommentAttri.Style = [fsBold]
-    IdentifierAttri.Foreground = clDefault
-    NumberAttri.Foreground = clNavy
-    StringAttri.Foreground = clBlue
-    SymbolAttri.Foreground = clRed
-    DirectiveAttri.Foreground = clRed
-    DirectiveAttri.Style = [fsBold]
-    CompilerMode = pcmObjFPC
-    NestedComments = True
-    left = 320
-    top = 16
   end
 end

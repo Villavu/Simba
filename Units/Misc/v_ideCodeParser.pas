@@ -92,7 +92,8 @@ type
   private
     function GetShortText: string; override;
   public
-    function HasField(Name: string; out Decl: TDeclaration; Return: TVarBase = vbName): Boolean;
+    function HasField(Name: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean; overload;
+    function HasField(Name: string; out Decl: TDeclaration; Return: TVarBase = vbName): Boolean; overload;
     function GetDefault(Return: TVarBase = vbName): TDeclaration;
   end;
 
@@ -119,7 +120,6 @@ type
     function GetName: TciProcedureName;
     function GetProcType: string;
     function GetParams: string;
-    function GetSynParams: string;
 
     function GetShortText: string; override;
   public
@@ -129,7 +129,6 @@ type
     property Name : TciProcedureName read GetName;
     property ProcType: string read GetProcType;
     property Params: string read GetParams;
-    property SynParams: string read GetSynParams;
   end;
 
   TciUsedUnit = class(TDeclaration);                                        //Included Units
@@ -185,6 +184,8 @@ type
   TciClassMethodHeading = class(TciProcedureDeclaration);                   //Record + Class
   TciClassProperty = class(TDeclaration);                                   //Record + Class
   TciPropertyDefault = class(TDeclaration);                                 //Record + Class
+  TciIdentifier = class(TDeclaration);                                      //Record + Class
+  TciPropertyParameterList = class(TDeclaration);                           //Record + Class
 
   TciSetType = class(TDeclaration);                                         //Set
   TciOrdinalType = class(TDeclaration);                                     //Set
@@ -263,6 +264,8 @@ type
     procedure PropertyName; override;                                           //Record + Class
     procedure TypeId; override;                                                 //Record + Class
     procedure PropertyDefault; override;                                        //Record + Class
+    procedure Identifier; override;                                             //Record + Class
+    procedure PropertyParameterList; override;                                  //Record + Class
 
     procedure SetType; override;                                                //Set
     procedure OrdinalType; override;                                            //Set + Array Range
@@ -630,10 +633,11 @@ begin
   Result := fShortText;
 end;
 
-function TciStruct.HasField(Name: string; out Decl: TDeclaration; Return: TVarBase = vbName): Boolean;
+function TciStruct.HasField(Name: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
 var
   a, b: TDeclarationArray;
   i, ii: Integer;
+  t: TDeclaration;
 begin
   Result := False;
   Name := PrepareString(Name);
@@ -665,6 +669,12 @@ begin
       if (PrepareString(b[ii].CleanText) = Name) then
       begin
         Result := True;
+
+        t := a[i].Items.GetFirstItemOfClass(TciPropertyParameterList);
+        if (t <> nil) then
+          //ArrayCount := ArrayCount + t.Items.Count;   [a, b] Indices count as 1
+          Inc(ArrayCount);
+
         if (Return = vbType) then
           Decl := b[ii].Owner.Items.GetFirstItemOfClass(TciTypeKind)
         else
@@ -683,12 +693,23 @@ begin
       begin
         Result := True;
         if (Return = vbType) then
-          Decl := b[ii].Owner
+          //Decl := b[ii].Owner
+          if (a[ii] is TciProcedureDeclaration) and (LowerCase(TciProcedureDeclaration(a[i]).ProcType) = 'constructor') then
+            Decl := Self
+          else
+            Decl := b[ii].Owner.Items.GetFirstItemOfClass(TciTypeKind)
         else
           Decl := b[ii];
         Exit;
       end;
   end;
+end;
+
+function TciStruct.HasField(Name: string; out Decl: TDeclaration; Return: TVarBase = vbName): Boolean;
+var
+  a: Integer;
+begin
+  Result := HasField(Name, Decl, Return, a);
 end;
 
 function TciStruct.GetDefault(Return: TVarBase = vbName): TDeclaration;
@@ -846,51 +867,6 @@ begin
       else
         fParams := fParams + a[i].ShortText;
     Result := fParams;
-  end;
-end;
-
-function TciProcedureDeclaration.GetSynParams: string;
-var
-  i, ii: Integer;
-  a, b: TDeclarationArray;
-  d: TDeclaration;
-  s, t: string;
-begin
-  Result := '';
-  if (fSynParams <> '') then
-    Result := fSynParams
-  else if (fItems.Count > 0) then
-  begin
-    a := GetParamDeclarations;
-    for i := Low(a) to High(a) do
-    begin
-      if (a[i] is TciConstParameter) then
-        s := 'const '
-      else if (a[i] is TciOutParameter) then
-        s := 'out '
-      else if (a[i] is TciInParameter) then
-        s := 'in '
-      else if (a[i] is TciVarParameter) then
-        s := 'var '
-      else
-        s := '';
-      d := a[i].Items.GetFirstItemOfClass(TciParameterType);
-      if (d <> nil) then
-        t := ': ' + d.ShortText
-      else
-        t := '';
-      b := a[i].Items.GetItemsOfClass(TciParameterName);
-      for ii := Low(b) to High(b) do
-      begin
-        if (fSynParams <> '') then
-          fSynParams := fSynParams + ';","' + s + b[ii].ShortText + t
-        else
-          fSynParams := '"' + s + b[ii].ShortText + t;
-      end;
-    end;
-    if (fSynParams <> '') then
-      fSynParams := fSynParams + '"';
-    Result := fSynParams;
   end;
 end;
 
@@ -1662,7 +1638,7 @@ end;
 
 procedure TCodeParser.TypeId;
 begin
-  if (not InDeclaration(TciClassProperty)) then
+  if (not InDeclarations([TciClassProperty, TciPropertyParameterList])) then
   begin
     inherited;
     Exit;
@@ -1682,6 +1658,32 @@ begin
   end;
 
   PushStack(TciPropertyDefault);
+  inherited;
+  PopStack;
+end;
+
+procedure TCodeParser.Identifier;
+begin
+  if (not InDeclaration(TciPropertyParameterList)) then
+  begin
+    inherited;
+    Exit;
+  end;
+
+  PushStack(TciIdentifier);
+  inherited;
+  PopStack;
+end;
+
+procedure TCodeParser.PropertyParameterList;
+begin
+  if (not InDeclaration(TciClassProperty)) then
+  begin
+    inherited;
+    Exit;
+  end;
+
+  PushStack(TciPropertyParameterList);
   inherited;
   PopStack;
 end;

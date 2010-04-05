@@ -54,6 +54,7 @@ type
     B, G, R, A: Byte;
   end;
   PRGB32 = ^TRGB32;
+  TRGB32Array = array of TRGB32;
 
   TRetData = record
     Ptr : PRGB32;
@@ -100,7 +101,7 @@ type
     add seperate tpa or boolean array for every point that is to be matched ?
    }
 
-  pDTM = packed record
+  pDTM = record
     l: Integer;
     p: TPointArray;
     c, t, asz, ash: TIntegerArray;

@@ -10,10 +10,32 @@ begin
   Writeln('Free your extension here');
 end;
 
-procedure Attach;
+function GetNumbers(const str : string) : string;
+var
+  i : integer;
 begin;
-  Settings.SetKeyValue('TestSetting','1337');
-  Writeln('Your extension has been enabled, do stuff here');
+  for i := 1 to length(str) do
+    case str[i] of
+      '0'..'9': result := result + str[i];
+    end;
+end;
+procedure Attach;
+var
+  Fonts : string;
+  Contents : string;
+  newvers :integer;
+  Vers : integer;
+begin;
+  Vers := StrToIntDef(Settings.GetKeyValueDef('FontVersion','-1'),-1);
+  newvers := strtointdef(GetNumbers(getpage('http://simba.villavu.com/bin/Fonts/Version')),-1);
+  if newVers > vers then
+  begin;
+    Writeln('Updating your fonts!');
+    fonts := GetPage('http://simba.villavu.com/bin/Fonts/Fonts.tar.bz2');
+    if DecompressBZip2(Fonts,Contents,4096) then
+      UnTarEx(Contents,FontPath,true);
+	Settings.SetKeyValue('FontVersion',inttostr(newvers));
+  end;  
 end;
 
 Procedure Detach;
@@ -24,7 +46,7 @@ end;
 //Called to retrieve the name of your extension
 function GetName : string;
 begin;
-  result := 'Test Extension';
+  result := 'Font updater example';
 end;
 
 //Called to retrieve the version of your extension

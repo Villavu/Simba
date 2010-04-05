@@ -334,6 +334,9 @@ begin
   Exit('');
 end;
 
+{
+  newKey is not the entire key path.
+}
 function TMMLSettings.RenameKey(oldKey, newKey: string): boolean;
 var
   Node : TTreeNode;
@@ -342,21 +345,25 @@ var
   i : integer;
 begin
   result := false;
+  writeln(oldkey);
   Path := KeyNameToKeys(OldKey);
   if length(path) = 1 then
     exit;
+
   if pos('/',newKey) > 0 then
     exit;
+
   if not KeyExists(oldkey) then
     exit;
-  for i := length(oldKey) downto 1 do
+
+{  for i := length(oldKey) downto 1 do
     if oldkey[i] = '/' then
     begin
       newstr:= Copy(oldkey,1,i) + NewKey;
       break;
     end;
   if KeyExists(NewKey) then
-    exit;
+    exit;   }
   Node := WalkToNode(oldKey);
   Node.Text:= NewKey;
   result := true;

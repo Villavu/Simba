@@ -548,7 +548,7 @@ begin
   end;
 end;
 
-function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount,CommaCount: Integer; out sp: Integer; IgnoreBrackets: Boolean): string;
+function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; out sp: Integer; IgnoreBrackets: Boolean): string;
 var
   i, StartPos, EndPos: Integer;
   s: string;
@@ -662,14 +662,14 @@ end;
 
 function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return: TVarBase = vbName): TDeclaration;
 
-  function PartOfWith(s: string; out Decl: TDeclaration; Return: TVarBase; CheckClass: Boolean): Boolean;
+  function PartOfWith(s: string; out Decl: TDeclaration; Return: TVarBase; CheckClass: Boolean; var ArrayCount: Integer): Boolean;
   var
     i: Integer;
   begin
     Result := False;
     for i := High(InWith) downto Low(InWith) do
       if CheckClass xor (i <> InClassFunction) then
-        if TciStruct(InWith[i]).HasField(s, Decl, Return) then
+        if TciStruct(InWith[i]).HasField(s, Decl, Return, ArrayCount) then
         begin
           Result := True;
           Break;
@@ -823,10 +823,10 @@ begin
       VarBase := vbType;
 
     if (InStruct <> nil) then
-      Found := InStruct.HasField(f, Result, VarBase)
+      Found := InStruct.HasField(f, Result, VarBase, NeedArrayCount)
     else
     begin
-      Found := CheckVar and PartOfWith(f, Result, VarBase, False);
+      Found := CheckVar and PartOfWith(f, Result, VarBase, False, NeedArrayCount);
       if (not Found) and (i = Low(sa)) then
       begin
         Found :=
@@ -835,7 +835,7 @@ begin
           DoFindStruct(f, Result, VarBase, NeedArrayCount);
       end;
       if (not Found) and CheckVar then
-        Found := PartOfWith(f, Result, VarBase, True);
+        Found := PartOfWith(f, Result, VarBase, True, NeedArrayCount);
     end;
 
     if Found and (Result is TciTypeKind) then
@@ -888,7 +888,7 @@ begin
   inherited Create;
 
   Proposal_InsertList := TStringList.Create;
-  //TStringList(Proposal_InsertList).Sorted := True;
+  TStringList(Proposal_InsertList).Sorted := True;
   Proposal_ItemList := TStringList.Create;
 
   fOnFindInclude := nil;
@@ -985,9 +985,12 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
   begin
     Result := 'Enumeration';
     if (Item.Items.Count > 0) then
+    begin
       Result := Result + '(' + Item.Items[0].ShortText;
-    if (Item.Items.Count > 1) then
-      Result := Result + '..' + Item.Items[Item.Items.Count - 1].ShortText + ')';
+      if (Item.Items.Count > 1) then
+        Result := Result + '..' + Item.Items[Item.Items.Count - 1].ShortText;
+      Result := Result + ')';
+    end;
   end;
 
   procedure AddEnums(Item: {TCodeInsight}TDeclaration; ItemList, InsertList: TStrings); overload;
@@ -1014,6 +1017,11 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
           end
           else if a[ii].HasOwnerClass(TciProcedureDeclaration, d, True) and (d.Owner <> nil) then
             Continue;}
+
+        {$IFDEF ciCHECKDUPLICATES}
+        if (InsertList.IndexOf(a[ii].ShortText) > -1) then
+          Continue;
+        {$ENDIF}
 
         s := FormatFirstColumn('enum') + FormatMainName(a[ii].ShortText);
         if a[ii].HasOwnerClass(TciTypeDeclaration, d, True) then
@@ -1047,6 +1055,11 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
       Exit;
     n := d.ShortText;
 
+    {$IFDEF ciCHECKDUPLICATES}
+    if (InsertList.IndexOf(n) > -1) then
+      Exit;
+    {$ENDIF}
+
     s := s + FormatMainName(n);
     if (Item.Params <> '') then
     begin
@@ -1063,6 +1076,38 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
     AddEnums(Item.GetParamDeclarations, ItemList, InsertList);
     if (d <> nil) then
       AddEnums(d, ItemList, InsertList);
+  end;
+
+  function PropertyIndex(Item: TciClassProperty): string;
+  var
+    i: Integer;
+    d: TDeclaration;
+    a: TDeclarationArray;
+  begin
+    d := Item.Items.GetFirstItemOfClass(TciPropertyParameterList);
+    Result := '';
+
+    if (d <> nil) then
+    begin
+      a := d.Items.GetItemsOfClass(TciIdentifier);
+      for i := Low(a) to High(a) do
+      begin
+        if (Result <> '') then
+          Result := Result + ', ';
+        Result := Result + a[i].ShortText;
+      end;
+
+      d := d.Items.GetFirstItemOfClass(TciTypeKind);
+      if (d <> nil) then
+      begin
+        if (Result <> '') then
+          Result := Result + ': ';
+        Result := Result + d.ShortText;
+      end;
+    end;
+
+    if (Result <> '') then
+      Result := '['+Result+']';
   end;
 
 var
@@ -1146,11 +1191,14 @@ begin
   for i := Low(a) to High(a) do
   begin
     n := a[i].ShortText;
-    (*{$IFDEF ciCHECKDUPLICATES}
+
+    {$IFDEF ciCHECKDUPLICATES}
     if (InsertList.IndexOf(n) > -1) then
       Continue;
-    {$ENDIF}*)
+    {$ENDIF}
     s := FirstColumn + FormatMainName(n);
+    if (Item is TciClassProperty) then
+      s := s + FormatMainExtra(PropertyIndex(TciClassProperty(Item)));
     if (b[1] <> nil) then
       s := s + FormatMainExtra(' = ' + b[1].ShortText);
     if (b[2] <> nil) then

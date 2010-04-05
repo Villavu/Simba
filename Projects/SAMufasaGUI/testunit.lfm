@@ -1,13 +1,13 @@
 object Form1: TForm1
-  Left = 345
-  Height = 555
-  Top = 260
-  Width = 739
+  Left = 423
+  Height = 557
+  Top = 159
+  Width = 666
   ActiveControl = ScriptPanel
   AllowDropFiles = True
   Caption = 'THA FUKING SIMBA'
-  ClientHeight = 535
-  ClientWidth = 739
+  ClientHeight = 537
+  ClientWidth = 666
   KeyPreview = True
   Menu = MainMenu
   OnClose = FormClose
@@ -21,21 +21,21 @@ object Form1: TForm1
     Left = 0
     Height = 24
     Top = 0
-    Width = 739
+    Width = 666
     Caption = 'ToolBar1'
     Images = Mufasa_Image_List
     ParentShowHint = False
     ShowHint = True
     TabOrder = 0
     object TB_Run: TToolButton
-      Left = 168
+      Left = 170
       Hint = 'Run'
       Top = 2
       Action = ActionRunScript
       ImageIndex = 6
     end
     object TB_Pause: TToolButton
-      Left = 191
+      Left = 193
       Hint = 'Pause'
       Top = 2
       Action = ActionPauseScript
@@ -43,7 +43,7 @@ object Form1: TForm1
       ImageIndex = 5
     end
     object TB_Stop: TToolButton
-      Left = 214
+      Left = 216
       Hint = 'Stop'
       Top = 2
       Action = ActionStopScript
@@ -51,39 +51,39 @@ object Form1: TForm1
       ImageIndex = 7
     end
     object ToolButton1: TToolButton
-      Left = 237
+      Left = 239
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton1'
       Style = tbsDivider
     end
     object TB_NewTab: TToolButton
-      Left = 240
+      Left = 243
       Hint = 'Add tab'
       Top = 2
       Action = ActionNewTab
     end
     object TB_CloseTab: TToolButton
-      Left = 263
+      Left = 266
       Hint = 'Close tab'
       Top = 2
       Action = ActionCloseTab
     end
     object ToolButton4: TToolButton
-      Left = 286
+      Left = 289
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton4'
       Style = tbsDivider
     end
     object TB_ClearDebug: TToolButton
-      Left = 289
+      Left = 293
       Hint = 'Clear debug box'
       Top = 2
       Action = ActionClearDebug
     end
     object TB_PickColour: TToolButton
-      Left = 312
+      Left = 316
       Hint = 'Pick a color'
       Top = 2
       Caption = 'TB_PickColour'
@@ -91,7 +91,7 @@ object Form1: TForm1
       OnClick = ButtonPickClick
     end
     object TB_SelectClient: TToolButton
-      Left = 335
+      Left = 339
       Hint = 'Select a client'
       Top = 2
       Caption = 'TB_SelectClient'
@@ -99,14 +99,14 @@ object Form1: TForm1
       OnMouseDown = ButtonSelectorDown
     end
     object ToolButton8: TToolButton
-      Left = 358
+      Left = 362
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
     object TB_ReloadPlugins: TToolButton
-      Left = 361
+      Left = 366
       Hint = 'Reload plugins'
       Top = 2
       Caption = 'TB_ReloadPlugins'
@@ -114,7 +114,7 @@ object Form1: TForm1
       ImageIndex = 13
     end
     object TB_Tray: TToolButton
-      Left = 384
+      Left = 389
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -132,7 +132,7 @@ object Form1: TForm1
     object ToolButton2: TToolButton
       Left = 93
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton2'
       Style = tbsDivider
     end
@@ -158,14 +158,14 @@ object Form1: TForm1
       Enabled = False
     end
     object ToolButton3: TToolButton
-      Left = 430
+      Left = 435
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object TT_Update: TToolButton
-      Left = 433
+      Left = 439
       Hint = 'A new update is available'
       Top = 2
       Caption = 'TT_Update'
@@ -173,33 +173,33 @@ object Form1: TForm1
       OnClick = TT_UpdateClick
     end
     object TT_Cut: TToolButton
-      Left = 96
+      Left = 97
       Top = 2
       Caption = 'Cu&t'
       ImageIndex = 3
       OnClick = ActionCutExecute
     end
     object TT_Copy: TToolButton
-      Left = 119
+      Left = 120
       Top = 2
       Caption = '&Copy'
       ImageIndex = 22
       OnClick = ActionCopyExecute
     end
     object TT_Paste: TToolButton
-      Left = 142
+      Left = 143
       Top = 2
       Action = ActionPaste
     end
     object ToolButton9: TToolButton
-      Left = 165
+      Left = 166
       Top = 2
-      Width = 3
+      Width = 4
       Caption = 'ToolButton9'
       Style = tbsDivider
     end
     object TT_Console: TToolButton
-      Left = 407
+      Left = 412
       Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
@@ -207,9 +207,9 @@ object Form1: TForm1
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 22
-    Top = 513
-    Width = 739
+    Height = 23
+    Top = 514
+    Width = 666
     Panels = <    
       item
         Width = 60
@@ -230,18 +230,21 @@ object Form1: TForm1
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 359
-    Width = 739
+    Top = 360
+    Width = 666
     Align = alBottom
     ClientHeight = 154
-    ClientWidth = 739
+    ClientWidth = 666
     TabOrder = 2
     object Memo1: TMemo
       Left = 1
       Height = 152
       Top = 1
-      Width = 737
+      Width = 664
       Align = alClient
+      Font.Height = -13
+      Font.Name = 'Courier New'
+      ParentFont = False
       ScrollBars = ssAutoBoth
       TabOrder = 0
     end
@@ -250,29 +253,29 @@ object Form1: TForm1
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 354
-    Width = 739
+    Top = 355
+    Width = 666
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 330
+    Height = 331
     Top = 24
-    Width = 739
+    Width = 666
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 330
-    ClientWidth = 739
+    ClientHeight = 331
+    ClientWidth = 666
     DockSite = True
     TabOrder = 4
     OnDockDrop = ScriptPanelDockDrop
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
       Left = 155
-      Height = 295
+      Height = 296
       Top = 0
-      Width = 584
+      Width = 511
       Align = alClient
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
@@ -289,12 +292,12 @@ object Form1: TForm1
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 295
-      Width = 739
+      Top = 296
+      Width = 666
       Align = alBottom
       BevelOuter = bvSpace
       ClientHeight = 35
-      ClientWidth = 739
+      ClientWidth = 666
       TabOrder = 1
       Visible = False
       object SpeedButtonSearch: TSpeedButton
@@ -385,7 +388,7 @@ object Form1: TForm1
       end
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 23
+        Height = 21
         Top = 6
         Width = 174
         EditLabel.AnchorSideLeft.Control = LabeledEditSearch
@@ -393,10 +396,10 @@ object Form1: TForm1
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 71
-        EditLabel.Height = 16
+        EditLabel.Left = 73
+        EditLabel.Height = 14
         EditLabel.Top = 9
-        EditLabel.Width = 30
+        EditLabel.Width = 28
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -409,9 +412,9 @@ object Form1: TForm1
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 19
+        Height = 17
         Top = 7
-        Width = 80
+        Width = 72
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -419,28 +422,28 @@ object Form1: TForm1
     end
     object SplitterFunctionList: TSplitter
       Left = 150
-      Height = 295
+      Height = 296
       Top = 0
       Width = 5
       OnCanResize = SplitterFunctionListCanResize
       Visible = False
     end
     inline frmFunctionList: TFunctionListFrame
-      Height = 295
+      Height = 296
       Width = 150
-      ClientHeight = 295
+      ClientHeight = 296
       ClientWidth = 150
       OnEndDock = nil
       TabOrder = 3
       inherited FunctionList: TTreeView
-        Height = 252
+        Height = 257
         Width = 150
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Top = 272
+        Top = 275
         Width = 150
         OnExit = editSearchListExit
         OnKeyDown = editSearchListKeyDown
@@ -3080,6 +3083,32 @@ object Form1: TForm1
     Interval = 500
     OnTimer = NewsTimerTimer
     left = 488
+    top = 200
+  end
+  object LazHighlighter: TSynFreePascalSyn
+    Enabled = False
+    CommentAttri.Foreground = clBlue
+    CommentAttri.Style = [fsBold]
+    IdentifierAttri.Foreground = clDefault
+    NumberAttri.Foreground = clNavy
+    StringAttri.Foreground = clBlue
+    SymbolAttri.Foreground = clRed
+    DirectiveAttri.Foreground = clRed
+    DirectiveAttri.Style = [fsBold]
+    CompilerMode = pcmObjFPC
+    NestedComments = True
+    left = 528
+    top = 200
+  end
+  object SCARHighlighter: TSynFreePascalSyn
+    Enabled = False
+    CommentAttri.Foreground = clGreen
+    CommentAttri.Style = []
+    NumberAttri.Foreground = clHotLight
+    StringAttri.Foreground = clFuchsia
+    CompilerMode = pcmObjFPC
+    NestedComments = True
+    left = 568
     top = 200
   end
 end
