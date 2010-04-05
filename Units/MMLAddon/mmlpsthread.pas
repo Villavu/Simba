@@ -476,23 +476,6 @@ end;
 
 {***implementation TPSThread***}
 
-{
-  Note to Raymond: For PascalScript, Create it on the .Create,
-  Execute it on the .Execute, and don't forget to Destroy it on .Destroy.
-
-  Furthermore, all the wrappers can be in the unit "implementation" section.
-  Better still to create an .inc for it, otherwise this unit will become huge.
-  (You can even split up the .inc's in stuff like color, bitmap, etc. )
-
-  Also, don't add PS to this unit, but make a seperate unit for it.
-  Unit "MMLPSThread", perhaps?
-
-  See the TestUnit for use of this thread, it's pretty straightforward.
-
-  It may also be wise to turn the "Importing of wrappers" into an include as
-  well, it will really make the unit more straightforward to use and read.
-}
-
 constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 var
   I : integer;
