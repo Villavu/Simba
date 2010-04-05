@@ -45,7 +45,7 @@ type
     debugbmp: TMufasaBitmap;
     {$ENDIF}
     function  GetFonts:TMFonts;
-    procedure SetFonts(NewFonts: TMFonts);
+    procedure SetFonts(const NewFonts: TMFonts);
   public
     constructor Create(Owner: TObject);
     destructor Destroy; override;
@@ -139,7 +139,7 @@ var
    i: longint;
 begin
   // We're going to load all fonts now
-  FFonts.SetPath(path);
+  FFonts.Path := path;
   dirs := GetDirectories(path);
   Result := false;
   for i := 0 to high(dirs) do
@@ -158,7 +158,7 @@ begin
 end;
 
 { Set new Fonts. We set it to a Copy of NewFonts }
-procedure TMOCR.SetFonts(NewFonts: TMFonts);
+procedure TMOCR.SetFonts(const NewFonts: TMFonts);
 begin
   Self.FFonts := NewFonts.Copy(Self.Client);
 end;
