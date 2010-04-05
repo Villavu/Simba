@@ -21,17 +21,17 @@
     File.inc for the Mufasa Macro Library
 }
 
-function ps_CreateFile(Path: string): Integer; extdecl;
+function ps_CreateFile(const Path: string): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.CreateFile(Path);
 end;
 
-function ps_OpenFile(Path: string; Shared: Boolean): Integer; extdecl;
+function ps_OpenFile(const Path: string; Shared: Boolean): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.OpenFile(Path, Shared);
 end;
 
-function ps_RewriteFile(Path: string; Shared: Boolean): Integer; extdecl;
+function ps_RewriteFile(const Path: string; Shared: Boolean): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.RewriteFile(Path, Shared);
 end;
@@ -81,7 +81,7 @@ begin
   result := CreateDir(directoryName);
 end;
 
-procedure ps_WriteINI(Section, KeyName, NewString, FileName: string);extdecl;
+procedure ps_WriteINI(const Section, KeyName, NewString, FileName: string);extdecl;
 var
   tempini : TIniFile;
 begin;
@@ -90,7 +90,7 @@ begin;
   tempini.free;
 end;
 
-function ps_ReadINI(Section, KeyName, FileName: string): string;extdecl;
+function ps_ReadINI(const Section, KeyName, FileName: string): string;extdecl;
 var
   tempini : TIniFile;
 begin;
@@ -99,7 +99,7 @@ begin;
   tempini.free;
 end;
 
-procedure ps_DeleteINI(Section, KeyName, FileName: string); extdecl;
+procedure ps_DeleteINI(const Section, KeyName, FileName: string); extdecl;
 var
   tempini : TIniFile;
 begin;

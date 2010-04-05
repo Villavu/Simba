@@ -26,22 +26,21 @@ AddFunction(@pswriteln,'procedure Writeln(x: string);'); //PS defines a special,
 
 { DTM }
 SetCurrSection('DTM');
-AddFunction(@ps_PrintpDTM, 'Procedure PrintpDTM(tDTM : pDTM);');
-AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer; out dtm: pDTM): Boolean;');
-AddFunction(@pDTMToTDTM, 'Function pDTMToTDTM(DTM: pDTM): TDTM;');
-AddFunction(@tDTMTopDTM, 'Function tDTMTopDTM(DTM: TDTM): pDTM;');
-AddFunction(@ps_SetDTMName, 'procedure SetDTMName(DTM : integer; name : string);');
-AddFunction(@ps_DTMFromString, 'function DTMFromString(DTMString: String): Integer;');
+AddFunction(@ps_SetDTMName, 'procedure SetDTMName(DTM : integer;const name : string);');
+AddFunction(@ps_DTMFromString, 'function DTMFromString(const DTMString: String): Integer;');
 AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
-AddFunction(@ps_FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer): Boolean;');
-AddFunction(@ps_FindDTMs, 'function FindDTMs(DTM: Integer; var p: TPointArray; x1, y1, x2, y2: Integer): Boolean;');
-AddFunction(@ps_FindDTMRotatedSE, 'function FindDTMRotatedSE(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
-AddFunction(@ps_FindDTMRotatedAlternating, 'function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
-AddFunction(@ps_FindDTMsRotatedSE, 'function FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
-AddFunction(@ps_FindDTMsRotatedAlternating, 'function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
-AddFunction(@ps_addDTM, 'function AddDTM(d: TDTM): Integer;');
-AddFunction(@ps_addpDTM, 'function AddpDTM(d: pDTM): Integer;');
-
+AddFunction(@ps_FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;');
+AddFunction(@ps_FindDTMs, 'function FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean;');
+AddFunction(@ps_FindDTMRotatedSE, 'function FindDTMRotatedSE(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
+AddFunction(@ps_FindDTMRotatedAlternating, 'function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
+AddFunction(@ps_FindDTMsRotatedSE, 'function FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
+AddFunction(@ps_FindDTMsRotatedAlternating, 'function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
+AddFunction(@ps_addDTM, 'function AddDTM(const d: TDTM): Integer;');
+AddFunction(@ps_addpDTM, 'function AddpDTM(const d: pDTM): Integer;');
+AddFunction(@ps_PrintpDTM, 'procedure PrintpDTM(const tDTM : pDTM);');
+AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer) : pDTM');
+AddFunction(@ps_pDTMToTDTM, 'function pDTMToTDTM(const DTM: pDTM): TDTM;');
+AddFunction(@ps_tDTMTopDTM, 'function tDTMTopDTM(const DTM: TDTM): pDTM;');
 
 {maths}
 SetCurrSection('Math');
@@ -55,13 +54,13 @@ AddFunction(@ps_minE,'function MinE(a, b: extended): Extended;');
 AddFunction(@ps_maxE,'function MaxE(a, b: extended): Extended;');
 AddFunction(@ps_iAbs,'function iAbs(a : integer) : integer;');
 AddFunction(@ps_ArcTan2,'function ArcTan2(x,y : extended) : extended;');
-AddFunction(@IntToBox,'function IntToBox(x1,y1,x2,y2 : integer) : TBox;');
+AddFunction(@IntToBox,'function IntToBox(xs,ys,xe,ye : integer) : TBox;');
 AddFunction(@IntInBox,'function IntInBox(x, y: Integer; Box: TBox): Boolean;');
 AddFunction(@PointToBox,'function PointToBox(PT1,PT2 : TPoint): TBox;');
 AddFunction(@PointInBox,'function PointInBox(PT : TPoint; Box: TBox): Boolean;');
 AddFunction(@ps_sqr,'function Sqr(e : extended) : extended;');
 AddFunction(@ps_point,'function Point(x,y:integer) : TPoint;');
-AddFunction(@ps_Distance,'function Distance(x1,y1,x2,y2 : integer) : integer;');
+AddFunction(@ps_Distance,'function Distance(xs,ys,xe,ye : integer) : integer;');
 AddFunction(@ps_hypot,'function Hypot(X, Y: Extended): Extended;');
 AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
 AddFunction(@ps_incex,'procedure IncEx(var x : integer; increase : integer);');
@@ -91,22 +90,22 @@ AddFunction(@IsTargetValid, 'function IsTargetValid: boolean;');
 
 {files}
 SetCurrSection('Files');
-AddFunction(@ps_CreateFile, 'function CreateFile(Path: string): Integer;');
-AddFunction(@ps_OpenFile, 'function OpenFile(Path: string; Shared: Boolean): Integer;');
-AddFunction(@ps_RewriteFile, 'function RewriteFile(Path: string; Shared: Boolean): Integer;');
+AddFunction(@ps_CreateFile, 'function CreateFile(const Path: string): Integer;');
+AddFunction(@ps_OpenFile, 'function OpenFile(const Path: string; Shared: Boolean): Integer;');
+AddFunction(@ps_RewriteFile, 'function RewriteFile(const Path: string; Shared: Boolean): Integer;');
 AddFunction(@ps_CloseFile, 'procedure CloseFile(FileNum: Integer);');
 AddFunction(@ps_EndOfFile, 'function EndOfFile(FileNum: Integer): Boolean;');
 AddFunction(@ps_FileSize, 'function FileSize(FileNum: Integer): LongInt;');
 AddFunction(@ps_ReadFileString, 'function ReadFileString(FileNum: Integer; var s: string; x: Integer): Boolean;');
 AddFunction(@ps_WriteFileString, 'function WriteFileString(FileNum: Integer; s: string): Boolean;');
-AddFunction(@ps_SetFileCharPointer, 'Function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;');
+AddFunction(@ps_SetFileCharPointer, 'function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;');
 AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Integer;');
-AddFunction(@ps_DirectoryExists,'function DirectoryExists( const DirectoryName : string ) : Boolean;');
-AddFunction(@ps_CreateDirectory,'function CreateDirectory( const DirectoryName : string) : boolean;');
-AddFunction(@ps_FileExists,'function FileExists ( const FileName : string ) : Boolean;');
-AddFunction(@ps_WriteINI,'procedure WriteINI(Section, KeyName, NewString, FileName: string);');
-AddFunction(@ps_ReadINI,'function ReadINI(Section, KeyName, FileName: string): string;');
-AddFunction(@ps_DeleteINI,'procedure DeleteINI(Section, KeyName, FileName: string);');
+AddFunction(@ps_DirectoryExists,'function DirectoryExists(const DirectoryName : string ) : Boolean;');
+AddFunction(@ps_CreateDirectory,'function CreateDirectory(const DirectoryName : string) : boolean;');
+AddFunction(@ps_FileExists,'function FileExists (const FileName : string ) : Boolean;');
+AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, FileName: string);');
+AddFunction(@ps_ReadINI,'function ReadINI(const Section, KeyName, FileName: string): string;');
+AddFunction(@ps_DeleteINI,'procedure DeleteINI(const Section, KeyName, FileName: string);');
 
 {other}
 SetCurrSection('Other');
@@ -129,7 +128,7 @@ AddFunction(@GetDebugBitmap,'function GetDebugBitmap: integer;');
 AddFunction(@ps_Random,'function Random(Int: integer): integer;');
 AddFunction(@ClearDebug,'procedure ClearDebug;');
 AddFunction(@PlaySound,'procedure PlaySound( Sound : string);');
-AddFunction(@StopSound,'Procedure StopSound;');
+AddFunction(@StopSound,'procedure StopSound;');
 AddFunction(@psSetScriptProp, 'function SetScriptProp(Prop : TSP_Property; Value: String): boolean;');
 AddFunction(@psGetScriptProp, 'function GetScriptProp(Prop : TSP_Property;var Value: String): boolean;');
 
@@ -196,10 +195,10 @@ AddFunction(@GetToleranceSpeed2Modifiers, 'procedure GetToleranceSpeed2Modifiers
 AddFunction(@GetColor,'function GetColor(x, y: Integer): Integer;');
 AddFunction(@GetColors,'function GetColors(Coords : TPointArray) : TIntegerArray;');
 AddFunction(@GetColorsWrap,'procedure GetColorsWrap(Coords : TPointArray; var Colors :TIntegerArray);');
-AddFunction(@FindColor, 'function FindColor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean;');
-AddFunction(@findcolortoleranceOptimised, 'function FindColorToleranceOptimised(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
-AddFunction(@FindColorTolerance, 'function FindColorTolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean;');
-AddFunction(@FindColors, 'function FindColors(var TPA: TPointArray; color, x1, y1, x2, y2: integer): boolean;');
+AddFunction(@FindColor, 'function FindColor(var x, y: integer; color, xs, ys, xe, ye: integer): boolean;');
+AddFunction(@findcolortoleranceOptimised, 'function FindColorToleranceOptimised(var x, y: integer; color, xs, ys, xe, ye, tol: integer): boolean;');
+AddFunction(@FindColorTolerance, 'function FindColorTolerance(var x, y: integer; color, xs, ys, xe, ye, tol: integer): boolean;');
+AddFunction(@FindColors, 'function FindColors(var TPA: TPointArray; color, xs, ys, xe, ye: integer): boolean;');
 AddFunction(@SimilarColors,'function SimilarColors(Col1, Col2, Tolerance: integer): boolean');
 AddFunction(@CountColor,'function CountColor(Color, xs, ys, xe, ye: Integer): Integer;');
 AddFunction(@CountColorTolerance,'function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;');
@@ -231,13 +230,14 @@ AddFunction(@GetKeyCode,'function GetKeyCode(c : char) : integer;');
 
 { OCR}
 SetCurrSection('OCR');
-AddFunction(@rs_GetUpText, 'function rs_GetUpText: string;');
-AddFunction(@rs_GetUpTextAt, 'function rs_GetUpTextAt(x, y : integer): string;');
-AddFunction(@BitmapFromText, 'function BitmapFromText(text, font: String): integer;');
-AddFunction(@TPAFromText, 'function TPAFromText(text, font: String;var w,h : integer): TPointArray;');
-AddFunction(@TPAFromTextWrap,'procedure TPAFromTextWrap(text, font: String;var w,h : integer;var TPA : TPointArray);');
-AddFunction(@MaskFromText, 'function MaskFromText(text, font: String): TMask;');
-AddFunction(@GetTextAt,'function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer; font: string): string;');
+AddFunction(@ps_rs_GetUpText, 'function rs_GetUpText: string;');
+AddFunction(@ps_rs_GetUpTextAt, 'function rs_GetUpTextAt(x, y : integer): string;');
+AddFunction(@ps_BitmapFromText, 'function BitmapFromText(const text, font: String): integer;');
+AddFunction(@ps_TPAFromText, 'function TPAFromText(const text, font: String;var w,h : integer): TPointArray;');
+AddFunction(@ps_TPAFromTextWrap,'procedure TPAFromTextWrap(const text, font: String;var w,h : integer;var TPA : TPointArray);');
+AddFunction(@ps_MaskFromText, 'function MaskFromText(const text, font: String): TMask;');
+AddFunction(@ps_GetTextAt,'function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer;const font: string): string;');
+AddFunction(@ps_LoadSystemFont,'function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;');
 
 {Bitmaps}
 SetCurrSection('Bitmaps');
@@ -280,7 +280,7 @@ AddFunction(@BrightnessBitmap,'function BrightnessBitmap(Bitmap,br : integer) : 
 AddFunction(@ContrastBitmap,'function ContrastBitmap(bitmap : integer; co : extended) : integer;');
 AddFunction(@PosterizeBitmap,'function PosterizeBitmap(Bitmap : integer; po : integer) : integer;');
 AddFunction(@CreateMaskFromBitmap,'function CreateMaskFromBitmap(Bitmap : integer) : TMask;');
-AddFunction(@FindMaskTolerance,'function FindMaskTolerance(mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
+AddFunction(@FindMaskTolerance,'function FindMaskTolerance(const mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 AddFunction(@FindBitmapMaskTolerance,'function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;');
 AddFunction(@FindDeformedBitmapToleranceIn,'function FindDeformedBitmapToleranceIn(bitmap: integer; var x,y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;');
 AddFunction(@DrawTPABitmap,'procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);');
@@ -323,7 +323,7 @@ AddFunction(@GetSamePointsATPA,'function GetSamePointsATPA( ATPA : T2DPointArray
 AddFunction(@FindTextTPAinTPA,'function FindTextTPAinTPA(Height : integer; SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;');
 AddFunction(@SortCircleWise,'procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Integer; SortUp, ClockWise: Boolean);');
 AddFunction(@LinearSort,'procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean);');
-AddFunction(@RotatePoint,'Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;');
+AddFunction(@RotatePoint,'function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;');
 AddFunction(@FindGapsTPA,'function FindGapsTPA(TPA: TPointArray; MinPixels: Integer): T2DPointArray;');
 AddFunction(@RemoveDistTPointArray,'function RemoveDistTPointArray(x, y, dist: Integer; ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;');
 AddFunction(@CombineTPA,'function CombineTPA(Ar1, Ar2: TPointArray): TPointArray;');
@@ -332,16 +332,16 @@ AddFunction(@ReArrangeandShortenArray,'function ReArrangeandShortenArray(a: TPoi
 AddFunction(@TPAtoATPAEx,'function TPAtoATPAEx(TPA: TPointArray; w, h: Integer): T2DPointArray;');
 AddFunction(@TPAtoATPA,'function TPAtoATPA(TPA: TPointArray; Dist: Integer): T2DPointArray;');
 AddFunction(@CombineIntArray,'function CombineIntArray(Ar1, Ar2: TIntegerArray): TIntegerArray;');
-AddFunction(@MergeATPA,'Function MergeATPA(ATPA : T2DPointArray)  : TPointArray;');
+AddFunction(@MergeATPA,'function MergeATPA(ATPA : T2DPointArray)  : TPointArray;');
 AddFunction(@TPAFromBox,'function TPAFromBox(const Box : TBox) : TPointArray;');
-AddFunction(@RotatePoints,'Function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;');
+AddFunction(@RotatePoints,'function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;');
 AddFunction(@FindTPAEdges,'function FindTPAEdges(p: TPointArray): TPointArray;');
 AddFunction(@ClearTPAFromTPA,'function ClearTPAFromTPA(arP, ClearPoints: TPointArray): TPointArray;');
-AddFunction(@ReturnPointsNotInTPA,'Function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; const Box: TBox): TPointArray;');
+AddFunction(@ReturnPointsNotInTPA,'function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; const Box: TBox): TPointArray;');
 AddFunction(@PointInTPA,'function PointInTPA(p: TPoint; arP: TPointArray): Boolean;');
 AddFunction(@ClearDoubleTPA,'procedure ClearDoubleTPA(var TPA: TPointArray);');
-AddFunction(@TPACountSort,'Procedure TPACountSort(Var TPA: TPointArray;const max: TPoint;Const SortOnX : Boolean);');
-AddFunction(@TPACountSortBase,'Procedure TPACountSortBase(Var TPA: TPointArray;const maxx, base: TPoint; const SortOnX : Boolean);');
+AddFunction(@TPACountSort,'procedure TPACountSort(Var TPA: TPointArray;const max: TPoint;Const SortOnX : Boolean);');
+AddFunction(@TPACountSortBase,'procedure TPACountSortBase(Var TPA: TPointArray;const maxx, base: TPoint; const SortOnX : Boolean);');
 AddFunction(@InvertTIA,'procedure InvertTIA(var tI: TIntegerArray);');
 AddFunction(@SumIntegerArray,'function SumIntegerArray(Ints : TIntegerArray): Integer;');
 AddFunction(@AverageTIA,'function AverageTIA(tI: TIntegerArray): Integer;');
@@ -371,6 +371,7 @@ AddFunction(@KeyIsSetting, 'function KeyIsSetting(KeyName: String): Boolean;');
 AddFunction(@KeyIsDirectory, 'function KeyIsDirectory(KeyName: String): Boolean;');
 AddFunction(@GetSettingValue, 'function GetSettingValue(KeyName: String): String;');
 AddFunction(@GetSettingValueDef, 'function GetSettingValueDef(KeyName, defVal: String): String;');
+AddFunction(@SetSettingValue,'function SetSettingValue(KeyName,value : string) : boolean;');
 AddFunction(@ListSettings, 'function ListSettings(KeyName: String; var KeyReturn: TStringArray) : boolean;');
 AddFunction(@DeleteSetting, 'function DeleteSetting(KeyName: String): Boolean;');
 AddFunction(@DeleteSubSettings, 'function DeleteSubSettings(KeyName: String): Boolean;');

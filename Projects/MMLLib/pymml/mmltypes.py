@@ -6,4 +6,4 @@ class POINT(Structure):
 
 PPOINT = POINTER(POINT)
 
-
+isiterable = lambda x: hasattr(x, '__iter__')

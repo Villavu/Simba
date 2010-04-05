@@ -1,6 +1,6 @@
 unit mufasabase;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 {$undefine mDebug}
