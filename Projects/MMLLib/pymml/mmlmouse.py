@@ -1,6 +1,5 @@
 from ctypes import *
-from mml import 
-from mmltypes import POINT
+from mmltypes import POINT, PPOINT
 
 # Usage:
 class Mouse(object):
