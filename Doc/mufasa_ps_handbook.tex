@@ -543,7 +543,13 @@ Since one point can be found on several angles, aFound is a 2d array.
 
 \subsection{DTMFromString}
 
+DTMFromString creates a DTM from a string. The string must represent a dtm,
+in a compressed state. Use tools like the DTM Editor or simply DTMToString to
+turn your dtm into a string.
+
 \subsection{DTMToString}
+
+Turns the given DTM into a compressed string.
 
 \subsection{AddDTM}
 
@@ -557,8 +563,11 @@ exception is raised.
 
 \subsection{tDTMtopDTM}
 
+Convert a TDTM to a pDTM.
+
 \subsection{pDTMtopDTM}
 
+Convert a pDTM to a TDTM.
 
 \chapter{OCR}
 
@@ -571,7 +580,14 @@ exception is raised.
 \subsection{TPAFromText}
 
 \subsection{rs\_GetUpText}
+
+rs\_GetUpText is a Runescape(tm)\footnote{http://www.runescape.com} specific function. It reads the text called
+``uptext'' from the client, and returns the read string.
+
 \subsection{rs\_GetUpTextAt}
+
+rs\_GetUpTextAt is similar to rs\_GetUpText in all but one way, it allows you to
+specify where to search for the ``uptext''.
 
 \subsection{GetTextAt}
 
@@ -609,27 +625,77 @@ previous target.
 
 \subsection{GetClientDimensions}
 
+GetClientDimensions returns the width and height of the current target.
+
 \subsection{ActivateClient}
+
+This functies tries to bring the current target to the front.
+This will only work if the target is a System Window. When a bitmap is set as a
+target, or a pointer to data, then it will not work.
 
 \subsection{IsTargetValid}
 
+Returns if the target is valid. For example, a window that does not\footnote{or
+no longer} exists, is invalid. A bitmap that is still loaded and set as target,
+or a window that still exists is valid.
+
 \subsection{SetTargetBitmap}
+
+Set the Target for all finding operations to this bitmap.
 
 \subsection{SetImageTarget}
 
+Set the target for all the finding.
+
 \subsection{SetTargetArray}
+
+Set a target array which is to be used as data for finding.
 
 \subsection{SetEIOSTarget}
 
 \subsection{SetKeyMouseTarget}
 
+Set the target Window (Bitmaps and Arrays don't handle user input) to use for
+all the input functions.
+
 \subsection{GetImageTarget}
+
+Returnsthe currently set target for finding.
 
 \subsection{GetKeyMouseTarget}
 
+Returs the currently set target for input operations.
+
 \subsection{FreeTarget}
 
-\section{Freeze and UnFreeze}
+Free the passed target.
+
+\section{Freeze and Unfreeze}
+
+\subsection{Concept}
+
+Freeze is an interesting concept. If one calls Freeze, the data that is
+\textbf{currently} in the finder target is stored, and the finder target is set
+to this data. This basically implies that while unfreeze is not called, you will
+be looking at the client data the way it was when you called freeze. This
+notably speeds up finding functions, as retreival of the data is instantly
+(Simba owns the data). So if you plan to do a lot of finding functions and want
+to analyse an exact frame, you should check out this functionality.
+
+\subsection{Freeze}
+
+Freeze the current client data. For more information see Concept.
+
+\subsection{Unfreeze} 
+
+Unfreeze the stored finder data. The finder target used before Freeze was called
+will be restored, and used again as finder target. So calling
+\begin{verbatim}
+Freeze;
+<stuff here>
+Unfreeze;
+\end{verbatim}
+will not affect your finder target outside \textbf{<stuff here>}
 
 % Files
 \chapter{Files and Web}
@@ -639,7 +705,6 @@ previous target.
 Files are used to load and save data to the hard drive.
 Simba provides several functions to access files - that is, read
 from them and write to them.
-
 
 \subsection{CreateFile}
 \subsection{OpenFile}
