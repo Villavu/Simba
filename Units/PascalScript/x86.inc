@@ -251,7 +251,9 @@ var
   RegUsage: Byte;
   CallData: TPSList;
   pp: ^Byte;
+{$IFDEF FPC}
   IsConstructor: Boolean;
+{$ENDIF}
 
   EAX, EDX, ECX: Longint;
 
@@ -502,10 +504,15 @@ var
   end;
 begin
   if (Integer(CallingConv) and 64) <> 0 then begin
-    IsConstructor := true;
+    {$IFDEF FPC}
+      IsConstructor := true;
+    {$ENDIF}
     CAllingConv := TPSCallingConvention(Integer(CallingConv) and not 64);
-  end else IsConstructor := false;
-
+  end else begin
+    {$IFDEF FPC}
+      IsConstructor := false;
+    {$ENDIF}
+  end;
   InnerfuseCall := False;
   if Address = nil then
     exit; // need address
@@ -566,7 +573,7 @@ begin
               btchar,btU8, btS8:    tbtu8(res.dta^) := RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 1, nil);
               {$IFNDEF PS_NOWIDESTRING}btWideChar, {$ENDIF}btu16, bts16:  tbtu16(res.dta^) := RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 2, nil);
               btClass :
-              {$IFDEF FPC}
+              {$IFDEF FPC_OLD_FIX}
               tbtu32(res.dta^) := RealCall_Register(Address, EDX, EAX, ECX,
               @Stack[Length(Stack) - 3], Length(Stack) div 4, 4, nil);
               {$ELSE}
@@ -574,7 +581,7 @@ begin
               @Stack[Length(Stack) - 3], Length(Stack) div 4, 4, nil);
               {$ENDIF}
 
-              btu32,bts32:   tbtu32(res.dta^) := RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 4, nil);
+              btu32,bts32{$IFDEF FPC},btArray{$ENDIF}:   tbtu32(res.dta^) := RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 4, nil);
               btPChar:       pansichar(res.dta^) := Pansichar(RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 4, nil));
               {$IFNDEF PS_NOINT64}bts64:
                 begin
@@ -586,7 +593,7 @@ begin
               btInterface,
               btVariant,
               {$IFNDEF PS_NOWIDESTRING}btWidestring,btUnicodestring, {$ENDIF}
-              btStaticArray, btArray, btrecord{$IFNDEF PS_FPCSTRINGWORKAROUND}, btstring {$ENDIF}:      RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 0, nil);
+              btStaticArray, {$IFNDEF FPC} btArray,{$ENDIF} btrecord{$IFNDEF PS_FPCSTRINGWORKAROUND}, btstring {$ENDIF}: RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 0, nil);
               {$IFDEF PS_FPCSTRINGWORKAROUND}
               btstring: begin
                  eax := RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 4, nil);

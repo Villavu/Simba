@@ -31,6 +31,7 @@ Sender.Comp.AddTypeS('TReplaceFlags','set of TReplaceFlag');
 Sender.Comp.AddTypeS('StrExtr','(Numbers, Letters, Others);');
 Sender.Comp.AddTypeS('TDateTime','Double');
 Sender.Comp.AddTypeS('TIntegerArray', 'Array of LongInt');
+Sender.Comp.AddTypeS('TByteArray','Array of byte');
 Sender.Comp.AddTypeS('TExtendedArray','Array of extended');
 Sender.Comp.AddTypeS('TBoolArray', 'Array of Boolean');
 Sender.Comp.AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
