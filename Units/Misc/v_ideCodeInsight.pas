@@ -596,7 +596,7 @@ begin
         Dec(StartPos);
       if not ((LastWasDot and (s[StartPos] in ['a'..'z', 'A'..'Z', '0'..'9', '_', ']', ')'])) or ((not LastWasDot) and (s[StartPos] = '.'))) then
       begin
-        StartPos := i;
+        StartPos := i - BracketCount - BraceCount;
         Break;
       end;
       Inc(StartPos);
@@ -636,10 +636,11 @@ begin
       Dec(StartPos, BracketCount);
       Break;
     end;
+
     LastWasDot := False;
     Dec(StartPos);
   end;
-  sp := startpos + d.StartPos;
+  sp := StartPos + d.StartPos;
   Result := CompressWhiteSpace(Copy(s, StartPos + 1, EndPos - StartPos));
 end;
 
