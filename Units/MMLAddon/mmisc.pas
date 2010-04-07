@@ -11,6 +11,16 @@ function DecompressBZip2(const input : TStream; const BlockSize : Cardinal = 409
 function UnTar(const Input : TStream) : TStringArray;overload;
 function UnTar(const Input : TStream;const outputdir : string; overwrite : boolean): boolean;overload;
 
+type
+  { TProcThread }
+  TProcThread = class(TThread)
+  public
+    StartWait : Cardinal;
+    ClassProc : procedure of object;
+    NormalProc : procedure;
+    procedure Execute; override;
+  end;
+
 implementation
 
 function DecompressBZip2(const input: TStream; const BlockSize: Cardinal): TMemoryStream;
@@ -91,6 +101,19 @@ begin;
   Tar.Free;
   Result := true;
 
+end;
+
+
+{ TProcThread }
+
+procedure TProcThread.Execute;
+begin
+  if startwait <> 0 then
+    sleep(StartWait);
+  if NormalProc <> nil then
+    NormalProc;
+  if ClassProc <> nil then
+    ClassProc;
 end;
 
 end.

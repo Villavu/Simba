@@ -118,6 +118,7 @@ type
     MouseTimer: TTimer;
     NewsTimer: TTimer;
     SCARHighlighter: TSynFreePascalSyn;
+    FunctionListTimer: TTimer;
     TT_Console: TToolButton;
     TT_Cut: TToolButton;
     TT_Copy: TToolButton;
@@ -255,6 +256,7 @@ type
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
+    procedure FunctionListTimerTimer(Sender: TObject);
     procedure MenuItemExtensionsClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
@@ -421,15 +423,6 @@ type
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
   end;
 
-  { TProcThread }
-
-  TProcThread = class(TThread)
-  public
-    StartWait : Cardinal;
-    ClassProc : procedure of object;
-    NormalProc : procedure;
-    procedure Execute; override;
-  end;
   procedure ClearDebug;
   procedure formWriteln( S : String);
   procedure formWritelnEx( S : String);
@@ -1860,6 +1853,12 @@ begin
 //  StatusBar.Panels[2].Text:= '';
 end;
 
+procedure TForm1.FunctionListTimerTimer(Sender: TObject);
+begin
+  if Self.Visible and (CurrScript <> nil) then
+    frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
+end;
+
 procedure TForm1.MenuItemExtensionsClick(Sender: TObject);
 begin
   ExtensionsForm.Show;
@@ -1941,6 +1940,7 @@ begin
       CloseAction := caNone;
       exit;
     end;
+  FunctionListTimer.Enabled:= false;
   FreeAndNil(ExtManager);
 end;
 
@@ -2791,7 +2791,7 @@ begin
       StartText := SynEdit.Lines.text;
       ScriptName:= ExtractFileNameOnly(filename);
       mDebugLn('Script name will be: ' + ScriptName);
-      ScriptFile:= SetDirSeparators(FileName);
+      ScriptFile:= FileName;
       ScriptChanged := false;
       AddRecentFile(filename);
       RefreshTab();
@@ -2917,18 +2917,6 @@ begin
   ScriptFrame.Free;
   TabSheet.Free;
   inherited Destroy;
-end;
-
-{ TProcThread }
-
-procedure TProcThread.Execute;
-begin
-  if startwait <> 0 then
-    sleep(StartWait);
-  if NormalProc <> nil then
-    NormalProc;
-  if ClassProc <> nil then
-    ClassProc;
 end;
 
 initialization
