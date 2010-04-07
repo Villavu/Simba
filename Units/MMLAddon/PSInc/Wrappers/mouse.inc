@@ -25,12 +25,12 @@ const
   ps_mouse_right = 0;
   ps_mouse_left = 1;
   ps_mouse_middle = 2;
-procedure MoveMouse(x, y: integer); extdecl;
+procedure ps_MoveMouse(x, y: integer); extdecl;
 begin
   CurrThread.Client.IOManager.SetMousePos(X, Y);
 end;
 
-procedure GetMousePos(out x, y: integer); extdecl;
+procedure ps_GetMousePos(out x, y: integer); extdecl;
 begin
    CurrThread.Client.IOManager.GetMousePos(X, Y);
 end;
@@ -45,22 +45,22 @@ begin;
   end;
 end;
 
-procedure HoldMouse(x, y: integer; clickType: integer); extdecl;
+procedure ps_HoldMouse(x, y: integer; clickType: integer); extdecl;
 begin
    CurrThread.Client.IOManager.HoldMouse(x, y, ConvIntClickType(clickType));
 end;
 
-procedure ReleaseMouse(x, y: integer; clickType: integer); extdecl;
+procedure ps_ReleaseMouse(x, y: integer; clickType: integer); extdecl;
 begin
    CurrThread.Client.IOManager.ReleaseMouse(x, y, ConvIntClickType(clickType));
 end;
 
-procedure ClickMouse(x, y: integer; clickType: integer); extdecl;
+procedure ps_ClickMouse(x, y: integer; clickType: integer); extdecl;
 begin
    CurrThread.Client.IOManager.ClickMouse(x, y, ConvIntClickType(clickType));
 end;
 
-function  IsMouseButtonDown( button : integer) : boolean; extdecl;
+function  ps_IsMouseButtonDown( button : integer) : boolean; extdecl;
 begin
   result := CurrThread.Client.IOManager.IsMouseButtonDown(ConvIntClickType(button));
 end;

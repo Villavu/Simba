@@ -215,7 +215,7 @@ uses
   lclintf  // for GetTickCount and others.
   ;
 {$ifdef Linux}
-{$define PS_StdCall}
+//{$define PS_StdCall}
 {$else}
 //{$define PS_StdCall}
 {$endif}
@@ -476,6 +476,7 @@ end;
 {$I PSInc/Wrappers/tpa.inc}
 {$I PSInc/Wrappers/strings.inc}
 {$I PSInc/Wrappers/colour.inc}
+{$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}

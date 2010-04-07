@@ -21,7 +21,7 @@
     Settings.inc for the Mufasa Macro Library
 }
 
-function SetSettingValue(KeyName,value : string) : boolean;
+function ps_SetSettingValue(const KeyName,value : string) : boolean; extdecl;
 begin
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.SetKeyValue(KeyName,Value)
@@ -29,7 +29,7 @@ begin
     result:=false;
 end;
 
-function KeyIsSetting(KeyName: String): Boolean;
+function ps_KeyIsSetting(const KeyName: String): Boolean; extdecl;
 begin
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.IsKey(KeyName)
@@ -37,7 +37,7 @@ begin
     result:=false;
 end;
 
-function KeyIsDirectory(KeyName: String): Boolean;
+function ps_KeyIsDirectory(const KeyName: String): Boolean;extdecl;
 begin
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.IsDirectory(KeyName)
@@ -45,7 +45,7 @@ begin
     result := false;
 end;
 
-function GetSettingValue(KeyName: String): String;
+function ps_GetSettingValue(const KeyName: String): String;extdecl;
 begin
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.GetKeyValue(KeyName)
@@ -53,7 +53,7 @@ begin
     result:='';
 end;
 
-function GetSettingValueDef(KeyName, defVal: String): String;
+function ps_GetSettingValueDef(const KeyName, defVal: String): String; extdecl;
 begin
   if CurrThread.Sett <> nil then
     result:= CurrThread.Sett.GetKeyValueDef(KeyName, defVal)
@@ -61,7 +61,7 @@ begin
     result:='';
 end;
 
-function ListSettings(KeyName: String; var KeyReturn: TStringArray) : boolean;
+function ps_ListSettings(const KeyName: String; var KeyReturn: TStringArray) : boolean; extdecl;
 begin
   if CurrThread.Sett <> nil then
     Result := CurrThread.Sett.ListKeys(KeyName,keyReturn)
@@ -69,7 +69,7 @@ begin
     result := false;
 end;
 
-function DeleteSetting(KeyName: String): Boolean;
+function ps_DeleteSetting(const KeyName: String): Boolean;extdecl;
 begin
   if CurrThread.Sett <> nil then
     Result := CurrThread.Sett.DeleteKey(KeyName)
@@ -77,7 +77,7 @@ begin
     result := False;
 end;
 
-function DeleteSubSettings(KeyName: String): Boolean;
+function ps_DeleteSubSettings(const KeyName: String): Boolean; extdecl;
 begin
     if CurrThread.Sett <> nil then
     Result := CurrThread.Sett.DeleteSubKeys(KeyName)

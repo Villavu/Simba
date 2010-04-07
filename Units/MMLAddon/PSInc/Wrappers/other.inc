@@ -21,17 +21,17 @@
     Other.inc for the Mufasa Macro Library
 }
 
-function psSetScriptProp(prop : TSP_Property; Value: String): boolean; extdecl;
+function ps_SetScriptProp(prop : TSP_Property; Value: String): boolean; extdecl;
 begin
   Exit(CurrThread.Prop.SetProp(prop, Value));
 end;
 
-function psGetScriptProp(prop : TSP_Property; var Value : string) : boolean; extdecl;
+function ps_GetScriptProp(prop : TSP_Property; var Value : string) : boolean; extdecl;
 begin;
   exit(CurrThread.Prop.GetProp(prop,value));
 end;
 
-procedure psWait(t: Integer); extdecl;
+procedure ps_Wait(t: Integer); extdecl;
 {$ifdef MSWINDOWS}
 begin
   Sleep(t);
@@ -52,7 +52,7 @@ begin
 end;
 {$endif}
 
-procedure PlaySound( Sound : string); extdecl;
+procedure ps_PlaySound( Sound : string); extdecl;
 begin
   {$ifdef MSWINDOWS}
   sndPlaySound(PChar(sound),SND_ASYNC or SND_NODEFAULT);
@@ -61,7 +61,7 @@ begin
   {$endif}
 end;
 
-Procedure StopSound; extdecl;
+Procedure ps_StopSound; extdecl;
 begin
   {$ifdef MSWINDOWS}
   sndPlaySoundW(nil,0);
@@ -70,13 +70,13 @@ begin
   {$endif}
 end;
 
-procedure ClearDebug; extdecl;
+procedure ps_ClearDebug; extdecl;
 begin
   if Assigned(CurrThread.DebugClear) then
     CurrThread.DebugClear();
 end;
 
-procedure SaveScreenshot(FileName: string); extdecl;
+procedure ps_SaveScreenshot(FileName: string); extdecl;
 var
   w,h : integer;
   bmp: TMufasaBitmap;
@@ -90,30 +90,30 @@ end;
 
 
 
-procedure DisplayDebugImgWindow(w,h : integer); extdecl;
+procedure ps_DisplayDebugImgWindow(w,h : integer); extdecl;
 begin;
   CurrThread.DebugImg.DispSize^ := Classes.Point(w,h);
   CurrThread.Synchronize( CurrThread.DebugImg.ShowForm);
 end;
 
-procedure DrawBitmapDebugImg(bmp : integer); extdecl;
+procedure ps_DrawBitmapDebugImg(bmp : integer); extdecl;
 begin;
   CurrThread.DebugImg.ToDrawBitmap^ := CurrThread.Client.MBitmaps[bmp];
   CurrThread.Synchronize(CurrThread.DebugImg.DrawBitmap);
 end;
 
-function GetDebugBitmap : integer; extdecl;
+function ps_GetDebugBitmap : integer; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
   CurrThread.DebugImg.GetDebugBitmap^ := CurrThread.Client.MBitmaps[result];
   CurrThread.Synchronize(CurrThread.DebugImg.GetBitmap);
 end;
 
-procedure TerminateScript; extdecl;
+procedure ps_TerminateScript; extdecl;
 begin;
   CurrThread.Terminate;
 end;
-function GetTimeRunning: LongWord; extdecl;
+function ps_GetTimeRunning: LongWord; extdecl;
 begin;
   result := GetTickCount - CurrThread.StartTime;
 end;
@@ -123,7 +123,7 @@ begin
   QuickSort(Arr,low(arr),high(arr));
 end;
 
-procedure ConvertTime(Time : integer; var h,m,s : integer); extdecl;
+procedure ps_ConvertTime(Time : integer; var h,m,s : integer); extdecl;
 var
   x : integer;
 begin;
@@ -154,7 +154,7 @@ function ps_GetTickCount : Longword; extdecl;
 begin
   result := GetTickCount;
 end;
-procedure HakunaMatata; extdecl;
+procedure ps_HakunaMatata; extdecl;
 begin;
   OpenWebPage('http://www.youtube.com/v/ejEVczA8PLU&hl=en&fs=1&autoplay=1');
 end;
