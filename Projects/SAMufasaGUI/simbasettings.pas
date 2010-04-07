@@ -238,7 +238,7 @@ begin
 end;
 
 initialization
-  {$I simbasettings.lrs}
+  {$R *.lfm}
 
 end.
 

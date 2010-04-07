@@ -3,7 +3,6 @@ object SimbaUpdateForm: TSimbaUpdateForm
   Height = 331
   Top = 219
   Width = 473
-  ActiveControl = UpdateButton
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Update Simba'
   ClientHeight = 331

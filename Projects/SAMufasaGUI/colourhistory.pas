@@ -553,7 +553,7 @@ begin
 end;
 
 initialization
-  {$I colourhistory.lrs}
+  {$R *.lfm}
 
 end.
 

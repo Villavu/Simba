@@ -3,7 +3,6 @@ object Form1: TForm1
   Height = 557
   Top = 159
   Width = 666
-  ActiveControl = ScriptPanel
   AllowDropFiles = True
   Caption = 'THA FUKING SIMBA'
   ClientHeight = 537

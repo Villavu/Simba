@@ -77,7 +77,7 @@ begin
 end;
 
 initialization
-  {$I about.lrs}
+  {$R *.lfm}
 
 end.
 

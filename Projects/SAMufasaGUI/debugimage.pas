@@ -118,7 +118,7 @@ begin
 end;
 
 initialization
-  {$I debugimage.lrs}
+  {$R *.lfm}
 
 end.
 
