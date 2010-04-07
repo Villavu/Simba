@@ -459,7 +459,7 @@ end;
 
 
 initialization
-  {$I framefunctionlist.lrs}
+  {$R *.lfm}
 
 end.
 

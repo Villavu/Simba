@@ -639,7 +639,7 @@ begin
 end;
 
 initialization
-  {$I framescript.lrs}
+  {$R *.lfm}
 
 end.
 

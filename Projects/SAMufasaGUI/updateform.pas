@@ -272,7 +272,7 @@ begin
 end;
 
 initialization
-  {$I updateform.lrs}
+  {$R *.lfm}
 
 end.
 
