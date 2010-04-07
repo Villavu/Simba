@@ -215,16 +215,17 @@ uses
   lclintf  // for GetTickCount and others.
   ;
 {$ifdef Linux}
-//{$define PS_StdCall}
+  {$define PS_SafeCall}
 {$else}
-//{$define PS_StdCall}
+//{$define PS_SafeCall}
 {$endif}
 {$MACRO ON}
-{$ifdef PS_StdCall}
-  {$define extdecl := stdcall}
-{$else}
+{$ifdef PS_SafeCall}
   {$define extdecl := safecall}
+{$else}
+  {$define extdecl := register}
 {$endif}
+
 
 {Some General PS Functions here}
 procedure psWriteln(str : string); extdecl;
@@ -614,7 +615,7 @@ begin
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
       Sender.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl,
-                             {$ifdef PS_StdCall}cdStdCall{$else}cdSafeCall{$endif});
+                             {$ifdef PS_SafeCall}cdSafeCall{$else}cdRegister{$endif});
 end;
 
 function TPSThread.RequireFile(Sender: TObject;
