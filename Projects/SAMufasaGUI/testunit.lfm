@@ -3110,4 +3110,10 @@ object Form1: TForm1
     left = 568
     top = 200
   end
+  object FunctionListTimer: TTimer
+    Interval = 750
+    OnTimer = FunctionListTimerTimer
+    left = 608
+    top = 200
+  end
 end
