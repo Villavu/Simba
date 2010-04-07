@@ -161,16 +161,16 @@ begin
   Sender.AddFunction(@testnormal,'function testnormal(num1,num2,num3,num4,num5,num6 : LongInt) : boolean;');
   Sender.AddFunctionEx(@teststdcall, 'function teststdcall(num1,num2,num3,num4,num5,num6 : LongInt) : boolean;stdcall;',cdStdCall);
   Sender.AddFunctionEx(@testcdecl, 'function testcdecl(num1,num2,num3,num4,num5,num6 : LongInt) : boolean; cdecl;',cdCdecl);
-  Sender.AddFunction(@DiffTest,'function DiffTest(num : integer; str : string; byt : byte; wor : longword; bool : boolean) : boolean;');
-  Sender.AddFunction(@TestParameters,'procedure TestParameters(Int1,Int2,Int3,Int4,Int5,Int6 : integer);');
-  Sender.AddFunction(@TestResult,'function TestResult(Int1,Int2,Int3,Int4,Int5,Int6 : integer): Integer;');
-  Sender.AddFunction(@TestString,'function TestString(Str1,Str2,Str3 : string) : string;');
-  Sender.AddFunction(@TestStringEdit,'function TestStringEdit(var Str : string) : String;');
-  Sender.AddFunction(@TestArrayPassing,'procedure TestArrayPassing(const Arr : TStringArray);');
-  Sender.AddFunction(@TestArrayEdit,'Procedure TestArrayEdit(var Arr : TStringArray);');
-  Sender.AddFunction(@TestArrayFull,'function TestArrayFull(var Arr1: TStringArray; Arr2 : TStringArray): TStringArray;');
-  Sender.AddFunction(@MakeArr,'function MakeArr : TStringArray;');
-  Sender.AddFunction(@makePoint, 'function makePoint(x, y: integer): w_Tpoint;');
+  Sender.AddFunctionEx(@DiffTest,'function DiffTest(num : integer; str : string; byt : byte; wor : longword; bool : boolean) : boolean;', cdSafeCall);
+  Sender.AddFunctionEx(@TestParameters,'procedure TestParameters(Int1,Int2,Int3,Int4,Int5,Int6 : integer);', cdSafeCall);
+  Sender.AddFunctionEx(@TestResult,'function TestResult(Int1,Int2,Int3,Int4,Int5,Int6 : integer): Integer;', cdSafeCall);
+  Sender.AddFunctionEx(@TestString,'function TestString(Str1,Str2,Str3 : string) : string;', cdSafeCall);
+  Sender.AddFunctionEx(@TestStringEdit,'function TestStringEdit(var Str : string) : String;', cdSafeCall);
+  Sender.AddFunctionEx(@TestArrayPassing,'procedure TestArrayPassing(const Arr : TStringArray);', cdSafeCall);
+  Sender.AddFunctionEx(@TestArrayEdit,'Procedure TestArrayEdit(var Arr : TStringArray);', cdSafeCall);
+  Sender.AddFunctionEx(@TestArrayFull,'function TestArrayFull(var Arr1: TStringArray; Arr2 : TStringArray): TStringArray;', cdSafeCall);
+  Sender.AddFunctionEx(@MakeArr,'function MakeArr : TStringArray;', cdSafeCall);
+  Sender.AddFunctionEx(@makePoint, 'function makePoint(x, y: integer): w_Tpoint;', cdSafeCall);
 end;
 
 
