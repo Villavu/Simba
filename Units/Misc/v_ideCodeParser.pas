@@ -1076,8 +1076,9 @@ begin
       end;
     end;}
 
-    while Lexer.IsJunk do
-    begin
+    //while Lexer.IsJunk do
+    //begin
+    repeat
       if (Lexer.TokenID in [tokAnsiComment, tokBorComment, tokSlashesComment]) then
       begin
         if (not InDeclaration(TciJunk)) then
@@ -1086,7 +1087,10 @@ begin
       else if InDeclaration(TciJunk) then
         PopStack;
       Lexer.Next;
-    end;
+    until (not Lexer.IsJunk);
+    //end;
+    if InDeclaration(TciJunk) then
+      PopStack;
   end;
 end;
 
