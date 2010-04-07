@@ -68,7 +68,7 @@ function ps_FilePointerPos(FileNum: Integer): Integer; extdecl;
 begin
   Result := CurrThread.Client.MFiles.FilePointerPos(FileNum);
 end;
-function ps_FileExists ( const FileName : string ) : Boolean;
+function ps_FileExists ( const FileName : string ) : Boolean;extdecl;
 begin
   result := FileExists(FileName);
 end;

@@ -21,84 +21,84 @@
     window.inc for the Mufasa Macro Library
 }
 
-procedure SetDesktopAsClient; extdecl;
+procedure ps_SetDesktopAsClient; extdecl;
 begin;
   CurrThread.Client.IOManager.SetDesktop;
 end;
 
-function SetTargetArray(P: Integer; w, h: integer): integer; extdecl;
+function ps_SetTargetArray(P: Integer; w, h: integer): integer; extdecl;
 begin
   result:= CurrThread.Client.IOManager.SetTarget(PRGB32(P), classes.point(w,h));
 end;
 
-function SetTargetBitmap(bitmap: Integer): integer; extdecl;
+function ps_SetTargetBitmap(bitmap: Integer): integer; extdecl;
 begin;
   result:= CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[Bitmap]);
 end;
 
-function SetEIOSTarget(name: string; args: Variant): integer; extdecl;
+function ps_SetEIOSTarget(name: string; args: Variant): integer; extdecl;
 begin
   result:= CurrThread.Client.IOManager.SetTarget(name, @args);
 end;
 
-procedure SetImageTarget(idx: integer); extdecl;
+procedure ps_SetImageTarget(idx: integer); extdecl;
 begin
   CurrThread.Client.IOManager.SetImageTarget(idx);
 end;
 
-procedure SetKeyMouseTarget(idx: integer); extdecl;
+procedure ps_SetKeyMouseTarget(idx: integer); extdecl;
 begin
   CurrThread.Client.IOManager.SetKeyMouseTarget(idx);
 end;
 
-function GetImageTarget: integer; extdecl;
+function ps_GetImageTarget: integer; extdecl;
 begin
   CurrThread.Client.IOManager.GetImageTarget(result);
 end;
 
-function GetKeyMouseTarget: integer; extdecl;
+function ps_GetKeyMouseTarget: integer; extdecl;
 begin
   CurrThread.Client.IOManager.GetKeyMouseTarget(result);
 end;
 
-function ExportImageTarget : TTarget_Exported;
+function ps_ExportImageTarget : TTarget_Exported;extdecl;
 begin;
   result := CurrThread.Client.IOManager.ExportImageTarget;
 end;
 
-function ExportKeyMouseTarget : TTarget_Exported;
+function ps_ExportKeyMouseTarget : TTarget_Exported; extdecl;
 begin;
   result := CurrThread.Client.IOManager.ExportKeyMouseTarget;
 end;
 
-procedure FreeTarget(idx: integer); extdecl;
+procedure ps_FreeTarget(idx: integer); extdecl;
 begin
   CurrThread.Client.IOManager.FreeTarget(idx);
 end;
 
-procedure GetClientDimensions(out w, h: integer); extdecl;
+procedure ps_GetClientDimensions(out w, h: integer); extdecl;
 begin
   CurrThread.Client.IOManager.GetDimensions(w, h);
 end;
 
-function Freeze: boolean; extdecl;
+function ps_Freeze: boolean; extdecl;
 begin
   CurrThread.Client.IOManager.SetFrozen(true);
   result := true; //dunno what the result is supposed to mean
 end;
 
-function Unfreeze: boolean; extdecl;
+function ps_Unfreeze: boolean; extdecl;
 begin
   CurrThread.Client.IOManager.SetFrozen(false);
   result := true; //dunno what the result is supposed to mean
 end;
 
-procedure ActivateClient; extdecl;
+procedure ps_ActivateClient; extdecl;
 begin
   CurrThread.Client.IOManager.ActivateClient;
 end;
 
-function IsTargetValid: boolean; extdecl;
+function ps_IsTargetValid: boolean; extdecl;
 begin
   result:= CurrThread.Client.IOManager.TargetValid;
 end;

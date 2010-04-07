@@ -98,7 +98,7 @@ begin
   x := x - Decrease;
 end;
 
-function Factorial(number: longword): Int64; extdecl;
+function ps_Factorial(number: longword): Int64; extdecl;
 var
   Loop : longword;
 begin
@@ -107,12 +107,12 @@ begin
     result := result * loop;
 end;
 
-function BinCoe(a, b: LongInt): Extended; extdecl;
+function ps_BinCoe(a, b: LongInt): Extended; extdecl;
 begin
-  result := Factorial(a) / (factorial(b) * factorial(a-b));
+  result := ps_Factorial(a) / (ps_Factorial(b) * ps_Factorial(a-b));
 end;
 
-function FixD(Degrees : extended) : Extended; extdecl;
+function ps_FixD(Degrees : extended) : Extended; extdecl;
 begin;
   Result := Degrees;
   while Result < 0 do
@@ -120,8 +120,12 @@ begin;
   while Result > 360 do
     Result := Result - 360;
 end;
+function ps_InRange(const value,min,max : integer) : boolean;extdecl;
+begin
+  Result := InRange(value,min,max);
+end;
 
-function IntToBox(x1,y1,x2,y2 : integer) : TBox; extdecl;
+function ps_IntToBox(x1,y1,x2,y2 : integer) : TBox; extdecl;
 begin;
   result.x1 := x1;
   result.y1 := y1;
@@ -129,12 +133,12 @@ begin;
   result.y2 := y2;
 end;
 
-function IntInBox(x, y: Integer; Box: TBox): Boolean; extdecl;
+function ps_IntInBox(x, y: Integer; Box: TBox): Boolean; extdecl;
 begin;
   result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
 end;
 
-function PointToBox(PT1,PT2 : TPoint) : TBox; extdecl;
+function ps_PointToBox(PT1,PT2 : TPoint) : TBox; extdecl;
 begin;
   result.x1 := PT1.x;
   result.y1 := PT1.y;
@@ -142,7 +146,7 @@ begin;
   result.y2 := PT2.y;
 end;
 
-function PointInBox(PT : TPoint; Box: TBox): Boolean; extdecl;
+function ps_PointInBox(PT : TPoint; Box: TBox): Boolean; extdecl;
 begin;
   result := (((PT.x >= Box.x1) and(PT.x <= Box.x2)) and ((PT.y>= box.y1) and (PT.y <= box.y2)));
 end;
