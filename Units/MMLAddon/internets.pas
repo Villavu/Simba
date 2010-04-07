@@ -5,7 +5,7 @@ unit internets;
 interface
 
 uses
-  Classes, SysUtils,httpsend;
+  Classes, SysUtils,httpsend,MufasaTypes;
 
 function GetPage(URL: String): String;
 
@@ -20,6 +20,7 @@ type
     PostVariables : TStringList;
     Client : TObject;
   public
+    OpenConnectionEvent : TOpenConnectionEvent;
     procedure SetHTTPUserAgent(agent : string);
     function GetHTTPPage(url : string ) : string;
     function PostHTTPPage(Url: string; PostData: string): string;overload;
@@ -37,6 +38,8 @@ type
     Connections : TList;
     HTTPClients : TList;
   public
+    OpenConnectionEvent : TOpenConnectionEvent;
+    function GetPage(URL: String): String;
     function CreateHTTPClient(HandleCookies : boolean = true) : integer;
     function GetHTTPClient(Index : integer) : THTTPClient;
     procedure FreeHTTPClient(Index: Integer);
@@ -66,11 +69,26 @@ begin;
   end;
 end;
 
+function TMInternet.GetPage(URL: String): String;
+var
+  Continue : boolean = true;
+begin
+  Result := '';
+  if Assigned(OpenConnectionEvent) then
+  begin;
+    OpenConnectionEvent(Self,url,continue);
+    if not Continue then
+      exit;
+  end;
+  Result := Internets.GetPage(url);
+end;
+
 { TMInternet }
 
 function TMInternet.CreateHTTPClient(HandleCookies: boolean = true): integer;
 begin;
   Result := HTTPClients.Add(THTTPClient.Create(Client,HandleCookies));
+  THttpClient(HTTPClients[result]).OpenConnectionEvent:= OpenConnectionEvent;
 end;
 
 function TMInternet.GetHTTPClient(Index: integer): THTTPClient;
@@ -129,7 +147,16 @@ begin
 end;
 
 function THTTPClient.GetHTTPPage(url: string): string;
+var
+  Continue : boolean = true;
 begin
+  Result := '';
+  if Assigned(OpenConnectionEvent) then
+  begin;
+    OpenConnectionEvent(Self,url,continue);
+    if not Continue then
+      exit;
+  end;
   if not fHandleCookies then
     HTTPSend.Cookies.Clear;
   HTTPSend.MimeType :=  'text/html';
@@ -168,7 +195,15 @@ function THTTPClient.PostHTTPPage(Url: string): string;
 var
   PostData : string;
   i : integer;
+  Continue : boolean = true;
 begin
+  Result := '';
+  if Assigned(OpenConnectionEvent) then
+  begin;
+    OpenConnectionEvent(Self,url,continue);
+    if not Continue then
+      exit;
+  end;
   PostData := '';
   for i := 0 to PostVariables.Count - 1 do
     PostData := PostData + PostVariables[i] +'&';

@@ -39,20 +39,21 @@ TClient is a full-blown instance of the MML.
 It binds all the components together.
 }
 
-  type
-    TClient = class(TObject)
-    public
-      IOManager: TIOManager;
-      MFiles: TMFiles;
-      MFinder: TMFinder;
-      MBitmaps : TMBitmaps;
-      MDTM: TMDTM;
-      MOCR: TMOCR;
-      WritelnProc : TWritelnProc;
-      procedure WriteLn(s : string);
-      constructor Create(plugin_dir: string);
-      destructor Destroy; override;
-    end;
+type
+
+  TClient = class(TObject)
+  public
+    IOManager: TIOManager;
+    MFiles: TMFiles;
+    MFinder: TMFinder;
+    MBitmaps : TMBitmaps;
+    MDTM: TMDTM;
+    MOCR: TMOCR;
+    WritelnProc : TWritelnProc;
+    procedure WriteLn(s : string);
+    constructor Create(plugin_dir: string);
+    destructor Destroy; override;
+  end;
 
 implementation
 

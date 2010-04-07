@@ -5,7 +5,7 @@ unit psextension;
 interface
 
 uses
-  Classes, SysUtils,mufasabase, virtualextension,
+  Classes, SysUtils,mufasabase, virtualextension, MufasaTypes,
   uPSComponent,uPSCompiler, uPSRuntime, uPSPreProcessor,forms;
 
 
@@ -31,8 +31,8 @@ type
       procedure RIRegister_Settings(Cl: TPSRuntimeClassImporter);
 
     public
-       function HookExists(HookName: String): Boolean;override;
-       function ExecuteHook(HookName: String; fArgs: Array of Variant; out OutVariant : Variant): Integer;override;
+       function HookExists(const HookName: String): Boolean;override;
+       function ExecuteHook(const HookName: String;var Args:TVariantArray; out OutVariant : Variant): Integer;override;
        property Working : boolean read FWorking;
     protected
        procedure RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
@@ -52,7 +52,7 @@ uses
   testunit,updateform,settingssandbox,bitmaps,mmisc//Writeln
   ;
 
-function TSimbaPSExtension.HookExists(HookName: String): Boolean;
+function TSimbaPSExtension.HookExists(const HookName: String): Boolean;
 begin
   Result := False;
   if FWorking then
@@ -60,13 +60,13 @@ begin
       result := True;
 end;
 
-function TSimbaPSExtension.ExecuteHook(HookName: String; fArgs: Array of Variant; out OutVariant : Variant): Integer;
+function TSimbaPSExtension.ExecuteHook(const HookName: String;var Args: TVariantArray; out OutVariant : Variant): Integer;
 begin
   result := SExt_error;
   if not FWorking then
     exit;
   try
-    outvariant := PSInstance.ExecuteFunction(fArgs, HookName);
+    outvariant := PSInstance.ExecuteFunction(Args, HookName);
     result := SExt_ok;
   except
     on e : exception do
@@ -106,10 +106,11 @@ end;
 function TSimbaPSExtension.FreeScript: boolean;
 var
   bla : variant;
+  Args : TVariantArray;
 begin
   if not HookExists('Free') then
     exit(false);
-  result := ExecuteHook('Free',[],bla) = SExt_ok;
+  result := ExecuteHook('Free',Args,bla) = SExt_ok;
 end;
 
 {$I ../../Units/MMLAddon/PSInc/Wrappers/extensions.inc}
@@ -143,6 +144,7 @@ end;
 procedure TSimbaPSExtension.SetEnabled(bool: boolean);
 var
   temp : variant;
+  Args : TVariantArray;
 begin
   if bool <> FEnabled then
   begin
@@ -155,11 +157,11 @@ begin
         if not FWorking then
           Exit;
         if hookexists('attach') then
-          ExecuteHook('attach',[],temp);
+          ExecuteHook('attach',Args,temp);
       end;
     end else
       if HookExists('detach') then
-        ExecuteHook('detach',[],temp);
+        ExecuteHook('detach',Args,temp);
   end;
   inherited SetEnabled(bool);
 end;

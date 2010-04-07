@@ -1,6 +1,6 @@
 function ps_GetPage(S: String): String; extdecl;
 begin
-  result := GetPage(S);
+  result := CurrThread.MInternet.GetPage(S);
 end;
 
 function ps_InitializeHTTPClient(HandleCookies: Boolean): Integer; extdecl;

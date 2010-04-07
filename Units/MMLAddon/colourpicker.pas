@@ -43,36 +43,33 @@ uses
 
 
 type
-  TPickEvent = procedure (Sender: TObject; Color, X, Y: Integer);
-
   TMColorPicker = class(TObject)
-        constructor Create(manager: TIOManager);
-        destructor Destroy; override;
+      constructor Create(manager: TIOManager);
+      destructor Destroy; override;
 
-        procedure Pick(Out C, X, Y: Integer);
+      procedure Pick(Out C, X, Y: Integer);
 
-        procedure ImageMainMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-        procedure ImageInfoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-       Procedure ColorPickUp(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer);
+      procedure ImageMainMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+      procedure ImageInfoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+     Procedure ColorPickUp(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer);
   public
-        manager: TIOManager;
+    manager: TIOManager;
+    { Form components }
+    ScreenForm, InfoForm : TForm;
+    ImageMain, ImageInfo: TImage;
+    Text : string;
+    FPickEvent : TColourPickEvent;
 
-        { Form components }
-        ScreenForm, InfoForm : TForm;
-        ImageMain, ImageInfo: TImage;
-        Text : string;
-        FPickEvent : TPickEvent;
+    { Some temp vars }
+    oldx, oldy, Color, colorx, colory: Integer;
+  //        targetleft,targettop : integer;
 
-        { Some temp vars }
-        oldx, oldy, Color, colorx, colory: Integer;
-//        targetleft,targettop : integer;
+    TheChangedEvent,TheChangingEvent : TNotifyEvent;
 
-        TheChangedEvent,TheChangingEvent : TNotifyEvent;
-
-        { Handles }
-        InfoHandle, ImageHandle : HDC;
+    { Handles }
+    InfoHandle, ImageHandle : HDC;
   public
-    property OnPick: TPickEvent read FPickEvent write FPickEvent;
+    property OnPick: TColourPickEvent read FPickEvent write FPickEvent;
   end;
 
 
@@ -284,7 +281,7 @@ begin;
   Color:=  WidgetSet.DCGetPixel(ImageMain.Canvas.Handle,x,y);
   Manager.GetMousePos(ColorX, ColorY);
 
-  if OnPick <> nil then
+  if Assigned(OnPick) then
     Onpick(Sender,Color,Colorx,Colory);
 
   { Tell Pick() that we are done }

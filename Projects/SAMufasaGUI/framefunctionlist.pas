@@ -236,6 +236,7 @@ begin
   ScriptNode.DeleteChildren;
   Analyzing := TCodeInsight.Create();
   Analyzing.OnFindInclude:= @Form1.OnCCFindInclude;
+  Analyzing.OnMessage:= @Form1.OnCCMessage;
   Analyzing.FileName:= Form1.CurrScript.ScriptFile;
   MS := TMemoryStream.Create;
   MS.Write(Script[1],length(script));

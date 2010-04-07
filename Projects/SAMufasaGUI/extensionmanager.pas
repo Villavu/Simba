@@ -5,7 +5,7 @@ unit extensionmanager;
 interface
 
 uses
-  Classes, SysUtils,virtualextension,psextension,mufasabase;
+  Classes, SysUtils,virtualextension,psextension,mufasabase,mufasatypes;
 
 type
     TExtension = TVirtualSimbaExtension;
@@ -30,7 +30,7 @@ type
       function GetExtensionIndex(Filename : string) : integer;
       function LoadPSExtension(Filename : string; enabled : boolean=false) : boolean;
       function LoadPSExtensionsDir(Directory,ext : string) : boolean;
-      function HandleHook(HookName: String; Args: Array of Variant): Variant;
+      function HandleHook(const HookName: String; var Args: TVariantArray): Variant;
     end;
 
 var
@@ -38,7 +38,7 @@ var
 
 implementation
 uses
-  TestUnit, settingssandbox,simbasettings,MufasaTypes;
+  TestUnit, settingssandbox,simbasettings;
 
 procedure TExtensionManager.SetOnchange(const AValue: TNotifyEvent);
 var
@@ -139,7 +139,7 @@ begin
 end;
 
 // How do we return more than one result?
-function TExtensionManager.HandleHook(HookName: String; Args: Array of Variant): Variant;
+function TExtensionManager.HandleHook(const HookName: String;var Args: TVariantArray): Variant;
 var
   i: Integer;
 begin
