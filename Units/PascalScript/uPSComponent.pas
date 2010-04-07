@@ -64,7 +64,7 @@ type
   
   TIFPS3CEPluginItem = class(TPSPluginItem);
 
-  
+
   TPSPlugins = class(TCollection)
   private
     FCompExec: TPSScript;
@@ -310,7 +310,7 @@ type
   public
 
     property FileName: tbtstring read FFileName write SetFileName;
-    
+
     property FileNameHash: Longint read FFileNameHash;
     
     property Line: Longint read FLine write FLine;
@@ -1006,6 +1006,7 @@ begin
   inherited Notification(AComponent, Operation);
   if (Operation = opRemove) and (aComponent is TPSPlugin) then
   begin
+    if Plugins <> nil then
     for i := Plugins.Count -1 downto 0 do
     begin
       if (Plugins.Items[i] as TPSPluginItem).Plugin = aComponent then

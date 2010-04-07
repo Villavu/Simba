@@ -2654,9 +2654,10 @@ begin
 end;
 
 procedure FinalizeA(var s: tbtString); overload; begin s := ''; end;
+{$IFNDEF PS_NOWIDESTRING}
 procedure FinalizeW(var s: tbtwidestring); overload; begin s := ''; end;
 procedure FinalizeU(var s: tbtunicodestring); overload; begin s := ''; end;
-
+{$ENDIF}
 procedure FinalizeVariant(var p: TIfRVariant);
 begin
   if (p.FType.BaseType = btString) or (p.FType.basetype = btSet) then
@@ -5187,15 +5188,19 @@ begin
         begin
           Params[c].ExpectedType := GetTypeNo(BlockInfo, Params[c].Val);
           if PType <> nil then
-          if (Params[c].ExpectedType = nil) or not (Params[c].ExpectedType.BaseType in [btString, btWideString, btUnicodeString, btChar, btWideChar]) then begin
+          if (Params[c].ExpectedType = nil) or not (Params[c].ExpectedType.BaseType in [btString,
+            {$IFNDEF PS_NOWIDESTRING}btWideString, btUnicodeString, btWideChar,{$ENDIF}
+            btChar]) then begin
             MakeError('', ecTypeMismatch, '');
             Result := False;
             exit;
           end;
           if Params[c].ExpectedType.BaseType = btChar then
             Params[c].ExpectedType := FindBaseType(btString) else
+{$IFNDEF PS_NOWIDESTRING}
           if Params[c].ExpectedType.BaseType = btWideChar then
             Params[c].ExpectedType := FindBaseType(btUnicodeString);
+{$ENDIF}            
         end else if (PType.BaseType = btArray) and (GetTypeNo(BlockInfo, Params[c].Val).BaseType = btArray) then
         begin
           if TPSArrayType(GetTypeNo(BlockInfo, Params[c].Val)).ArrayTypeNo <> TPSArrayType(PType).ArrayTypeNo then
@@ -5366,7 +5371,7 @@ function TPSPascalCompiler.ReadString: PIfRVariant;
         temp3 := temp3 + {$IFNDEF PS_NOWIDESTRING}{$IFDEF DELPHI6UP}System.{$IFDEF DELPHI2009UP}UTF8ToWidestring{$ELSE}UTF8Decode{$ENDIF}{$ENDIF}{$ENDIF}(PString(FParser.GetToken));
         {$IFNDEF PS_NOWIDESTRING}wchar:=true;{$ENDIF}
         end else
-          temp3 := temp3 + tbtUnicodestring(PString(FParser.GetToken));
+          temp3 := temp3 + {$IFNDEF PS_NOWIDESTRING}tbtUnicodestring{$ENDIF}(PString(FParser.GetToken));
 
         FParser.Next;
         if FParser.CurrTokenId = CSTI_String then
@@ -5562,7 +5567,7 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
       Temp.ResultType := TPSExternalProcedure(FProcs[ProcNo]).RegProc.Decl.Result;
     if (Temp.ResultType <> nil) and (Temp.ResultType = FAnyString) then begin // workaround to make the result type match
       for i := 0 to Par.Count -1 do begin
-        if Par[i].ExpectedType.BaseType in [btString, btWideString] then
+        if Par[i].ExpectedType.BaseType in [btString{$IFNDEF PS_NOWIDESTRING}, btWideString{$ENDIF}] then
           Temp.ResultType := Par[i].ExpectedType;
       end;
     end;
@@ -11172,7 +11177,8 @@ var
       TPSProcedure(FProcs[I]).Free;
     FProcs.Free;
     FProcs := nil;
-    for I := 0 to FTypes.Count - 1 do
+    //reverse free types: a custom type's attribute value type may point to a base type
+    for I := FTypes.Count - 1 downto 0 do
     begin
       PT := FTypes[I];
       pt.Free;
@@ -13919,9 +13925,9 @@ begin
   begin
     case FValue.FType.BaseType of
       btChar: FValue.tchar := (Val+#0)[1];
-      btWideChar: FValue.twidechar := WideChar((Val+#0)[1]);
       btString: tbtString(FValue.tstring) := val;
       {$IFNDEF PS_NOWIDESTRING}
+      btWideChar: FValue.twidechar := WideChar((Val+#0)[1]);
       btWideString: tbtwidestring(FValue.twidestring) := tbtwidestring(val);
       btUnicodeString: tbtunicodestring(FValue.tunistring) := tbtunicodestring(val);
       {$ENDIF}
@@ -14840,7 +14846,7 @@ begin
   GetPropInfos(fclass.ClassInfo, p);
   for i := Count -1 downto 0 do
   begin
-    if p^[i]^.PropType^.Kind in [tkLString, tkInteger, tkChar, tkEnumeration, tkFloat, tkString, tkSet, tkClass, tkMethod{$IFNDEF PS_NOWIDESTRING}, tkWString{$ENDIF}] then
+    if p^[i]^.PropType^.Kind in [tkLString, tkInteger, tkChar, tkEnumeration, tkFloat, tkString, tkSet, tkClass, tkMethod{$IFNDEF PS_NOWIDESTRING}, tkWString{$ENDIF}{$IFDEF DELPHI2009UP}, tkUString{$ENDIF}] then
     begin
       if (p^[i]^.GetProc <> nil) then
       begin
