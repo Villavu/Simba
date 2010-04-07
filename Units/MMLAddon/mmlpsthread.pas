@@ -223,7 +223,7 @@ uses
 {$ifdef PS_StdCall}
   {$define extdecl := stdcall}
 {$else}
-  {$define extdecl := REGISTER}
+  {$define extdecl := safecall}
 {$endif}
 
 {Some General PS Functions here}
@@ -613,7 +613,7 @@ begin
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
       Sender.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl,
-                             {$ifdef PS_StdCall}cdStdCall{$else}cdRegister {$endif});
+                             {$ifdef PS_StdCall}cdStdCall{$else}cdSafeCall{$endif});
 end;
 
 function TPSThread.RequireFile(Sender: TObject;
