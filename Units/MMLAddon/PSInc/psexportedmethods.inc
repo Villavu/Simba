@@ -155,6 +155,9 @@ AddFunction(@ps_Replace,'function ReplaceWrap(Text, FindStr, ReplaceStr: string;
 AddFunction(@ps_Implode,'function Implode(Glue: string; Pieces: TStringArray): string;');
 AddFunction(@ps_Explode,'function Explode(del, str: string): TStringArray;');
 AddFunction(@ps_explodewrap,'procedure ExplodeWrap(del, str: string; var res : TStringArray);');
+AddFunction(@ps_PadL,'function Padl(s: String; i: longInt): String;');
+AddFunction(@Ps_Padz,'function Padz(s: String; i: longInt): String;');
+AddFunction(@ps_padR,'function Padr(s: String; i: longInt): String;');
 
 {web}
 SetCurrSection('Web');

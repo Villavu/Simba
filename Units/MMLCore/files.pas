@@ -29,44 +29,43 @@ interface
 
 uses
   Classes, SysUtils, MufasaTypes;
+const
+  File_AccesError = -1;
+  File_EventError = -2;
 
 type
-    TMufasaFile = record
-      Path: String;
-      FS: TFileStream;
-      BytesRead, Mode: Integer;
-    end;
 
-    TMufasaFilesArray = Array Of TMufasaFile;
+  { TMFiles }
 
-    TMFiles = class(TObject)
-          constructor Create(Owner : TObject);
-          destructor Destroy; override;
-      public
-          function CreateFile(const Path: string): Integer;
-          function OpenFile(const Path: string; Shared: Boolean): Integer;
-          function RewriteFile(const Path: string; Shared: Boolean): Integer;
-          procedure CloseFile(FileNum: Integer);
-          function EndOfFile(FileNum: Integer): Boolean;
-          function FileSizeMuf(FileNum: Integer): LongInt;
-          function ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
-          function WriteFileString(FileNum: Integer;const s: string): Boolean;
-          Function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
-          function FilePointerPos(FileNum: Integer): Integer;
-      protected
-          MFiles: TMufasaFilesArray;
-          FreeSpots: Array Of Integer;
-          Client : TObject;
-      private
-          procedure FreeFileList;
-          function AddFileToManagedList(Path: string; FS: TFileStream; Mode: Integer): Integer;
-
-    end;
+  TMFiles = class(TObject)
+  public
+    OpenFileEvent : TOpenFileEvent;
+    WriteFileEvent: TWriteFileEvent;
+    function CreateFile(Path: string): Integer;
+    function OpenFile(Path: string; Shared: Boolean): Integer;
+    function RewriteFile(Path: string; Shared: Boolean): Integer;
+    procedure CloseFile(FileNum: Integer);
+    function EndOfFile(FileNum: Integer): Boolean;
+    function FileSizeMuf(FileNum: Integer): LongInt;
+    function ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
+    function WriteFileString(FileNum: Integer;const s: string): Boolean;
+    function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
+    function FilePointerPos(FileNum: Integer): Integer;
+    constructor Create(Owner : TObject);
+    destructor Destroy; override;
+  private
+    MFiles: TMufasaFilesArray;
+    FreeSpots: Array Of Integer;
+    Client : TObject;
+    procedure CheckFileNum(FileNum : integer);
+    procedure FreeFileList;
+    function AddFileToManagedList(Path: string; FS: TFileStream; Mode: Integer): Integer;
+  end;
 
     // We don't need one per object. :-)
-    function GetFiles(Path, Ext: string): TStringArray;
-    function GetDirectories(Path: string): TstringArray;
-    function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
+  function GetFiles(Path, Ext: string): TStringArray;
+  function GetDirectories(Path: string): TstringArray;
+  function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
 
 implementation
 uses
@@ -85,7 +84,7 @@ begin
     repeat
       inc(c);
       SetLength(Result,c);
-       Result[c-1] := SearchRec.Name;
+      Result[c-1] := SearchRec.Name;
     until FindNext(SearchRec) <> 0;
     SysUtils.FindClose(SearchRec);
   end;
@@ -141,15 +140,15 @@ var
   I : integer;
 begin;
   For I := 0 To High(MFiles) Do
-    If MFiles[i].FS <> nil Then
-    Begin
+    if MFiles[i].FS <> nil then
+    begin
       TClient(Client).Writeln(Format('File[%s] has not been freed in the script, freeing it now.',[MFiles[i].Path]));
-      Try
+      try
         MFiles[I].FS.Free;
-      Except
+      except
         TClient(Client).Writeln('FreeFileList - Exception when freeing FileStream');
-      End;
-    End;
+      end;
+    end;
   SetLength(MFiles, 0);
   SetLength(FreeSpots, 0);
 end;
@@ -160,197 +159,165 @@ begin
   inherited;
 end;
 
-Function TMFiles.AddFileToManagedList(Path: String; FS: TFileStream; Mode: Integer): Integer;
-Var
-   tFile: TMufasaFile;
-Begin
-   tFile.Path := Path;
-   tFile.FS := FS;
-   tFile.Mode := Mode;
-   tFile.BytesRead := 0;
-
-   If Length(FreeSpots) > 0 Then
-   Begin
-     //WriteLn('There is a free spot: ' + IntToStr(FreeSpots[High(FreeSpots)]));
-     MFiles[FreeSpots[High(FreeSpots)]] := tFile;
-     Result := FreeSpots[High(FreeSpots)];
-     SetLength(FreeSpots, High(FreeSpots));
-   End Else
-   Begin
-     // Increase by * 2.
-     //WriteLn('No Free Spot. Increasing the size');
-     SetLength(MFiles, Length(MFiles) + 1);
-     //Writeln('Length of Files: ' + IntToStr(Length(Files)));
-     MFiles[High(MFiles)] := tFile;
-     Result := High(MFiles);
-   End;
-End;
-
-Function TMFiles.SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
-Begin
-  If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
+procedure TMFiles.CheckFileNum(FileNum: integer);
+begin
+  if(FileNum < 0) or (FileNum >= Length(MFiles)) then
     raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);
+end;
 
-  {If Files[FileNum].Handle = -1 Then
-  Begin
-    WriteLn('SetFileCharPointer: Invalid Internal Handle');
-    Result := -1;
-    Exit;
-  End;}
+function TMFiles.AddFileToManagedList(Path: String; FS: TFileStream; Mode: Integer): Integer;
+var
+  tFile: TMufasaFile;
+begin
+  tFile.Path := Path;
+  tFile.FS := FS;
+  tFile.Mode := Mode;
+  tFile.BytesRead := 0;
+  if Length(FreeSpots) > 0 then
+  begin
+    MFiles[FreeSpots[High(FreeSpots)]] := tFile;
+    Result := FreeSpots[High(FreeSpots)];
+    SetLength(FreeSpots, High(FreeSpots));
+  end else
+  begin
+    SetLength(MFiles, Length(MFiles) + 1);
+    MFiles[High(MFiles)] := tFile;
+    Result := High(MFiles);
+  end;
+end;
 
+function TMFiles.SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
+begin
+  CheckFileNum(FileNum);
   case Origin of
     fsFromBeginning:
-                      If(cChars < 0) Then
+                      if(cChars < 0) then
                         raise Exception.CreateFmt('fsFromBeginning takes no negative cChars. (%d)',[cChars]);
     fsFromCurrent:
                   ;
     fsFromEnd:
-                  If(cChars > 0) Then
+                  if(cChars > 0) then
                     raise Exception.CreateFmt('fsFromEnd takes no positive cChars. (%d)',[cChars]);
     else
       raise Exception.CreateFmt('Invalid Origin: %d',[Origin]);
   end;
 
-  Try
+  try
     Result := MFiles[FileNum].FS.Seek(cChars, Origin);
-  Except
+  except
     TClient(Client).Writeln('SetFileCharPointer - Exception Occured.');
-    Result := -1;
-  End;
+    Result := File_AccesError;
+  end;
   //Result := FileSeek(Files[FileNum].Handle, cChars, Origin);
-End;
+end;
 
 {/\
   Creates a file for reading/writing.
   Returns the handle (index) to the File Array.
-  Returns -1 if unsuccesfull.
+  Returns File_AccesError if unsuccesfull.
 /\}
 
-function TMFiles.CreateFile(const Path: string): Integer;
-
-Var
-   FS: TFileStream;
-
+function TMFiles.CreateFile(Path: string): Integer;
+var
+  FS: TFileStream;
+  Continue : Boolean;
 begin
-  Try
+  if Assigned(WriteFileEvent) then
+  begin;
+    Continue := true;
+    WriteFileEvent(Self,path,continue);
+    if not Continue then
+      exit(File_EventError);
+  end;
+  try
     FS := TFileStream.Create(Path, fmCreate);
-  Except
-    Result := -1;
+    Result := AddFileToManagedList(Path, FS, fmCreate);
+  except
+    Result := File_AccesError;
     TClient(Client).Writeln(Format('CreateFile - Exception. Could not create file: %s',[path]));
-    Exit;
-  End;
-
-  Result := AddFileToManagedList(Path, FS, fmCreate);
+  end;
 end;
 
 {/\
   Opens a file for reading.
   Returns the handle (index) to the File Array.
-  Returns -1 if unsuccesfull.
+  Returns File_AccesError if unsuccesfull.
 /\}
 
-function TMFiles.OpenFile(const Path: string; Shared: Boolean): Integer;
-
-Var
-   FS: TFileStream;
-   fMode: Integer;
-
+function TMFiles.OpenFile(Path: string; Shared: Boolean): Integer;
+var
+  FS: TFileStream;
+  fMode: Integer;
+  Continue : Boolean;
 begin
-  If Shared Then
+  if Assigned(OpenFileEvent) then
+  begin;
+    Continue := true;
+    OpenFileEvent(Self,path,continue);
+    if not Continue then
+      exit(File_EventError);
+  end;
+  if Shared then
     fMode := fmOpenRead or fmShareDenyNone
-  Else
+  else
     fMode := fmOpenRead or fmShareExclusive;
-
-  Try
+  try
       FS := TFileStream.Create(Path, fMode)
-  Except
-    Result := -1;
+  except
+    Result := File_AccesError;
     TClient(Client).Writeln(Format('OpenFile - Exception. Could not open file: %s',[path]));
     Exit;
-  End;
-
+  end;
   Result := AddFileToManagedList(Path, FS, fMode);
-
-  {Result := FileOpen(Path, fmOpenRead);
-  If Result <> -1 Then
-  Begin
-    //WriteLn('File was successfully opened');
-    Result := AddFileToManagedList(Path, Result, fmOpenRead);
-    {If Result <> -1 Then
-      WriteLn('File was successfully added: ' + IntToStr(Result));}
-  End Else
-  Begin
-    WriteLn('Could not open file. Returning -1');
-  End; }
 end;
 
 {/\
-  Opens a file for writing.
+  Opens a file for writing. And deletes the contents.
   Returns the handle (index) to the File Array.
-  Returns -1 if unsuccesfull.
+  Returns File_AccesError if unsuccesfull.
 /\}
 
-function TMFiles.RewriteFile(const Path: string; Shared: Boolean): Integer;
-
-Var
-   FS: TFileStream;
-   fMode: Integer;
+function TMFiles.RewriteFile(Path: string; Shared: Boolean): Integer;
+var
+  FS: TFileStream;
+  fMode: Integer;
+  Continue : Boolean;
 begin
-  If Shared Then
+  if Assigned(WriteFileEvent) then
+  begin;
+    Continue := true;
+    WriteFileEvent(Self,path,continue);
+    if not Continue then
+      exit(File_EventError);
+  end;
+  if Shared then
     fMode := fmOpenReadWrite or fmShareDenyNone  or fmCreate
-  Else
+  else
     fMode := fmOpenReadWrite or fmShareDenyWrite or fmShareDenyRead or fmCreate;
-
-  Try
+  try
     FS := TFileStream.Create(Path, fMode);
-  Except
-    Result := -1;
+    FS.Size:=0;
+    Result := AddFileToManagedList(Path, FS, fMode);
+  except
+    Result := File_AccesError;
     TClient(Client).Writeln(Format('ReWriteFile - Exception. Could not create file: %s',[path]));
-    Exit;
-  End;
-
-  Result := AddFileToManagedList(Path, FS, fMode);
-
-  {Result := FileOpen(Path, fmOpenReadWrite);
-  If Result <> -1 Then
-  Begin
-    //WriteLn('File was successfully opened.');
-    Result := AddFileToManagedList(Path, Result, fmOpenReadWrite);
-    {If Result <> -1 Then
-      WriteLn('File was successfully added: ' + IntToStr(Result)); }
-  End Else
-  Begin
-    WriteLn('Could not open file. Returning -1');
-  End;  }
+  end;
 end;
 
 {/\
   Free's the given File at the given index.
 /\}
 procedure TMFiles.CloseFile(FileNum: Integer);
-
 begin
-  If (FileNum >= Length(MFiles)) or (FileNum < 0) Then
-    raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);
-
-  Try
-     MFiles[FileNum].FS.Free;
-  Except
+  CheckFileNum(filenum);
+  try
+    MFiles[FileNum].FS.Free;
+    MFiles[FileNum].FS := nil;
+    SetLength(FreeSpots, Length(FreeSpots) + 1);
+    FreeSpots[High(FreeSpots)] := FileNum;
+  except
     TClient(Client).Writeln(Format('CloseFile, exception when freeing the file: %d',[filenum]));
-    Exit;
-  End;
-
-  MFiles[FileNum].FS := nil;
-  SetLength(FreeSpots, Length(FreeSpots) + 1);
-  FreeSpots[High(FreeSpots)] := FileNum;
-
-  {If Files[FileNum].Handle = -1 Then
-  Begin
-    WriteLn('CloseFile: Invalid Internal Handle');
-    Exit;
-  End;
-  FileClose(Files[FileNum].Handle);  }
-
+  end;
 end;
 
 {/\
@@ -360,15 +327,13 @@ end;
 
 function TMFiles.EndOfFile(FileNum: Integer): Boolean;
 begin
-  If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
-    raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);
-  If MFiles[FileNum].FS = nil Then
-  Begin
+  CheckFileNum(filenum);
+  if MFiles[FileNum].FS = nil then
+  begin
     TClient(Client).Writeln(format('EndOfFile: Invalid Internal Handle of File: %d',[filenum]));
     Result := True;
     Exit;
-  End;
-
+  end;
   Result := FilePointerPos(FileNum) >= FileSizeMuf(FileNum);
 end;
 
@@ -378,52 +343,31 @@ end;
 
 function TMFiles.FileSizeMuf(FileNum: Integer): LongInt;
 begin
-  If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
-    raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);
-
-  If MFiles[FileNum].FS = nil Then
-  Begin
+  CheckFileNum(filenum);
+  if MFiles[FileNum].FS = nil then
+  begin
     TClient(Client).Writeln(format('FileSize: Invalid Internal Handle of File: %d',[filenum]));
-    Result := -1;
+    Result := File_AccesError;
     Exit;
-  End;
+  end;
 
   Result := MFiles[FileNum].FS.Size;
-
-  {
-  If Files[FileNum].Handle = -1 Then
-  Begin
-    WriteLn('FileSize: Invalid Internal Handle');
-    Result := -1;
-    Exit;
-  End;
-  // Get our current position.
-  tempPos := FileSeek(Files[FileNum].Handle, 0, fsFromCurrent);
-
-  // End of the file.
-  Result := FileSeek(Files[FileNum].Handle, 0, fsFromEnd);
-
-  // Reset the position.
-  FileSeek(Files[FileNum].Handle, tempPos, fsFromBeginning);  }
 end;
 
 function TMFiles.FilePointerPos(FileNum: Integer): Integer;
 begin
-  If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
-    raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);
-  If MFiles[FileNum].FS = nil Then
-  Begin
+  CheckFileNum(filenum);
+  if MFiles[FileNum].FS = nil then
+  begin
     TClient(Client).Writeln(format('FilePointerPos: Invalid Internal Handle of File: %d',[filenum]));
-    Result := -1;
+    Result := File_AccesError;
     Exit;
-  End;
-
+  end;
   try
     Result := MFiles[FileNum].FS.Seek(0, fsFromCurrent);
-  Except
+  except
     TClient(Client).Writeln('Exception in FilePointerPos');
-  End;
-  //Result := FileSeek(Files[FileNum].FS, 0, fsFromCurrent);
+  end;
 end;
 
 {/\
@@ -431,17 +375,14 @@ end;
 /\}
 
 function TMFiles.ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
-
 begin
-  If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
-    raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);
-  If MFiles[FileNum].FS = nil Then
-  Begin
+  CheckFileNum(filenum);
+  if MFiles[FileNum].FS = nil then
+  begin
     TClient(Client).Writeln(format('ReadFileString: Invalid Internal Handle of File: %d',[filenum]));
     Exit;
-  End;
+  end;
 
-  SetLength(S, 0);
   SetLength(S, X);
   MFiles[FileNum].FS.Read(S[1], x);
 
@@ -456,32 +397,21 @@ end;
 
 function TMFiles.WriteFileString(FileNum: Integer;const  s: string): Boolean;
 begin
-  If(FileNum < 0) or (FileNum >= Length(MFiles)) Then
-    raise Exception.CreateFmt('Invalid FileNum passed: %d',[FileNum]);
-  If(MFiles[FileNum].FS = nil) Then
-  Begin
+  result := false;
+  CheckFileNum(filenum);
+  if(MFiles[FileNum].FS = nil) then
+  begin
     TClient(Client).Writeln(format('WriteFileString: Invalid Internal Handle of File: %d',[filenum]));
-    Result := False;
     Exit;
-  End;
-
-  {If((Files[FileNum].Mode and fmOpenWrite) = 0) Then
-  Begin
-    WriteLn('This file may not write');
-    Exit;
-  End;  }
-
+  end;
+  if (MFiles[FileNum].Mode and (fmOpenWrite or fmOpenReadWrite)) = 0 then //Checks if we have write rights..
+    exit;
   try
     Result := MFiles[FileNum].FS.Write(S[1], Length(S)) <> 1;
   except
     TClient(Client).Writeln('Exception - WriteFileString.');
     Result := False;
   end;
-
-  {If(FileWrite(Files[FileNum].Handle, S[1], Length(S)) <> -1) Then
-    Result := True
-  Else
-    Result := False;  }
 end;
 
 end.

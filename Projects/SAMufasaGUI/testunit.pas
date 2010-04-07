@@ -301,6 +301,8 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure PickerPick(Sender: TObject; const Colour, colourx,
+      coloury: integer);
     procedure PopupItemFindClick(Sender: TObject);
     procedure ProcessDebugStream(Sender: TObject);
     procedure RecentFileItemsClick(Sender: TObject);
@@ -313,6 +315,13 @@ type
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
     procedure TB_ReloadPluginsClick(Sender: TObject);
+    procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
+      var Continue: boolean);
+    procedure ThreadOpenFileEvent(Sender: TObject; var Filename: string;
+      var Continue: boolean);
+    procedure ThreadWriteFileEvent(Sender: TObject; var Filename: string;
+      var Continue: boolean);
+    procedure ScriptStartEvent(Sender: TObject; var Script : string; var Continue : boolean);
     procedure TrayPopupPopup(Sender: TObject);
     procedure TT_UpdateClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
@@ -329,6 +338,14 @@ type
     SearchStart : TPoint;
     LastTab  : integer;
     UpdatingFonts : boolean;
+    OpenConnectionData : TOpenConnectionData;
+    OpenFileData : TOpenFileData;
+    WriteFileData : TWriteFileData;
+    ScriptStartData : TScriptStartData;
+    procedure HandleConnectionData;
+    procedure HandleOpenFileData;
+    procedure HandleWriteFileData;
+    procedure HandleScriptStartData;
     function GetExtPath: string;
     function GetFontPath: String;
     function GetHighlighter: TSynCustomHighlighter;
@@ -361,6 +378,7 @@ type
     OCR_Fonts: TMOCR;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
+    OnScriptStart : TScriptStartEvent;
     {$ifdef mswindows}
     ConsoleVisible : boolean;
     procedure ShowConsole( ShowIt : boolean);
@@ -513,6 +531,74 @@ begin
     result := false;
 end;
 
+procedure TForm1.HandleConnectionData;
+var
+  Args : TVariantArray;
+begin
+  SetLength(Args,2);
+  Args[0] := OpenConnectionData.URL^;
+  Args[1] := OpenConnectionData.Continue^;
+  try
+    ExtManager.HandleHook(EventHooks[SExt_onOpenConnection].HookName,Args);
+    OpenConnectionData.URL^ := Args[0];
+    OpenConnectionData.Continue^ := Args[1];
+  except
+    on e : Exception do
+      mDebugLn('ERROR in HandleConnectiondata: ' + e.message);
+  end;
+end;
+
+procedure TForm1.HandleOpenFileData;
+var
+  Args : TVariantArray;
+begin
+  SetLength(Args,2);
+  Args[0] := OpenFileData.FileName^;
+  Args[1] := OpenFileData.Continue^;
+  try
+    ExtManager.HandleHook(EventHooks[SExt_onOpenFile].HookName,Args);
+    OpenFileData.FileName^ := Args[0];
+    OpenFileData.Continue^ := Args[1];
+  except
+    on e : Exception do
+      mDebugLn('ERROR in HandleOpenFileData: ' + e.message);
+  end;
+end;
+
+procedure TForm1.HandleWriteFileData;
+var
+  Args : TVariantArray;
+begin
+  SetLength(Args,2);
+  Args[0] := WriteFileData.FileName^;
+  Args[1] := WriteFileData.Continue^;
+  try
+    ExtManager.HandleHook(EventHooks[SExt_onWriteFile].HookName,Args);
+    WriteFileData.FileName^ := Args[0];
+    WriteFileData.Continue^ := Args[1];
+  except
+    on e : Exception do
+      mDebugLn('ERROR in HandleWriteFileData: ' + e.message);
+  end;
+end;
+
+procedure TForm1.HandleScriptStartData;
+var
+  Args : TVariantArray;
+begin
+  SetLength(Args,2);
+  Args[0] := ScriptStartData.Script^;
+  Args[1] := ScriptStartData.Continue^;
+  try
+    ExtManager.HandleHook(EventHooks[SExt_onScriptStart].HookName,Args);
+    ScriptStartData.Script^ := Args[0];
+    ScriptStartData.Continue^ := Args[1];
+  except
+    on e : Exception do
+      mDebugLn('ERROR in HandleScriptStartData: ' + e.message);
+  end;
+end;
+
 procedure TForm1.ProcessDebugStream(Sender: TObject);
 begin
   if length(DebugStream) = 0 then
@@ -602,6 +688,32 @@ end;
 procedure TForm1.TB_ReloadPluginsClick(Sender: TObject);
 begin
 //  PluginsGlob.FreePlugins;
+end;
+
+procedure TForm1.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
+begin
+  OpenConnectionData.Sender := Sender;
+  OpenConnectionData.URL:= @URL;
+  OpenConnectionData.Continue:= @Continue;
+  TThread.Synchronize(nil,@HandleConnectionData);
+end;
+
+procedure TForm1.ThreadOpenFileEvent(Sender: TObject; var Filename: string;
+  var Continue: boolean);
+begin
+  OpenFileData.Sender := Sender;
+  OpenFileData.FileName:= @FileName;
+  OpenFileData.Continue:= @Continue;
+  TThread.Synchronize(nil,@HandleOpenFileData);
+end;
+
+procedure TForm1.ThreadWriteFileEvent(Sender: TObject; var Filename: string;
+  var Continue: boolean);
+begin
+  WriteFileData.Sender := Sender;
+  WriteFileData.FileName:= @FileName;
+  WriteFileData.Continue:= @Continue;
+  TThread.Synchronize(nil,@HandleWriteFileData);
 end;
 
 procedure TForm1.TrayPopupPopup(Sender: TObject);
@@ -1214,9 +1326,19 @@ var
   AppPath : string;
   ScriptPath : string;
   UseCPascal: String;
+  Script : string;
   Se: TMMLSettingsSandbox;
   loadFontsOnScriptStart: boolean;
+  Continue : boolean;
 begin
+  Script :=CurrScript.SynEdit.Lines.Text;
+  if Assigned(OnScriptStart) then
+  begin
+    Continue := True;
+    OnScriptStart(Self,script,continue);
+    if not Continue then
+      exit;
+  end;
   AppPath:= MainDir + DS;
   CurrScript.ScriptErrorLine:= -1;
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
@@ -1234,7 +1356,7 @@ begin
   Thread.SetDebug(@formWriteln);
   Thread.SetDebugClear(@ClearDebug);
   {$ENDIF}
-  Thread.SetScript(CurrScript.SynEdit.Lines.Text);
+  Thread.SetScript(Script);
   DbgImgInfo.DispSize := @DebugImgForm.DispSize;
   DbgImgInfo.ShowForm := @DebugImgForm.ShowDebugImgForm;
   DbgImgInfo.ToDrawBitmap:= @DebugImgForm.ToDrawBmp;
@@ -1275,6 +1397,9 @@ begin
   Se := TMMLSettingsSandbox.Create(SettingsForm.Settings);
   Se.Prefix := 'Scripts/';
   Thread.SetSettings(Se);
+  Thread.OpenConnectionEvent:=@ThreadOpenConnectionEvent;
+  Thread.WriteFileEvent:=@ThreadWriteFileEvent;
+  Thread.OpenFileEvent:=@ThreadOpenFileEvent;
 end;
 
 procedure TForm1.HandleParameters;
@@ -1899,6 +2024,9 @@ begin
   TT_Console.Visible:= false;
   {$endif}
   InitmDebug;
+
+  Self.OnScriptStart:= @ScriptStartEvent;
+
   FillThread := TProcThread.Create(true);
   FillThread.FreeOnTerminate:= True;
   FillThread.NormalProc:= @CCFillCore;
@@ -1922,6 +2050,7 @@ begin
   AddTab;//Give it alteast 1 tab ;-).
   Manager := TIOManager.Create; //No need to load plugins for the Global manager
   Picker := TMColorPicker.Create(Manager);
+  Picker.OnPick:=@PickerPick;
   Selector := TMWindowSelector.Create(Manager);
   { For writeln }
   SetLength(DebugStream, 0);
@@ -2345,6 +2474,18 @@ begin
       DeleteTab(PageControl1.TabIndexAtClientPos(Classes.Point(x,y)), False);
 end;
 
+procedure TForm1.PickerPick(Sender: TObject; const Colour, colourx,
+  coloury: integer);
+var
+  Args : TVariantArray;
+begin
+  SetLength(args,3);
+  Args[0] := Colour;
+  Args[1] := Colourx;
+  Args[2] := Coloury;
+  ExtManager.HandleHook(EventHooks[SExt_OnColourPick].HookName,Args);
+end;
+
 procedure TForm1.PopupItemFindClick(Sender: TObject);
 begin
   SearchString := CurrScript.SynEdit.SelText;
@@ -2500,6 +2641,15 @@ begin
   UpdatingFonts := False;
 end;
 
+procedure TForm1.ScriptStartEvent(Sender: TObject; var Script: string;
+  var Continue: boolean);
+begin
+  ScriptStartData.Sender:=Sender;
+  ScriptStartData.Script:= @Script;
+  ScriptStartData.Continue:= @Continue;
+  TThread.Synchronize(nil,@HandleScriptStartData);
+end;
+
 procedure TForm1.SetShowHintAuto(const AValue: boolean);
 begin
   SetSetting('Settings/CodeHints/ShowAutomatically',Booltostr(AValue,true));
@@ -2573,7 +2723,7 @@ begin
       with TPSThread(thread).PSScript do
       begin
         OnLine:=@OnLinePSScript;
-        CurrentSyncInfo.Res:= Exec.RunProcPVar(CurrentSyncInfo.V,Exec.GetProc(CurrentSyncInfo.MethodName));
+        CurrentSyncInfo.Res:= Exec.RunProcPVar(CurrentSyncInfo.V^,Exec.GetProc(CurrentSyncInfo.MethodName));
         Online := nil;
       end;
     end else
