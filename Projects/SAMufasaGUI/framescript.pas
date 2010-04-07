@@ -302,7 +302,7 @@ var
   dd: TDeclaration;
 begin
   if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or
-                                      ((Attri.Name = SYNS_AttrIdentifier) or (Attri.name = SYNS_AttrSymbol))) then
+                                      ((Attri.Name <> SYNS_AttrComment) and (Attri.name <> SYNS_AttrString) and (Attri.name <> SYNS_AttrDirective))) then
   begin
       {form1.FunctionListShown(True);
       with form1.frmFunctionList do
@@ -404,6 +404,7 @@ begin
         mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1,true);
       bcc := 1;bck := 0;cc := 0;
       s := mp.GetExpressionAtPos(bcc, bck, cc,posi, true);
+      WriteLn('is it '+s+'?');
       bracketpos := posi + length(s);
       if pos('(',s) > 0 then
       begin;
