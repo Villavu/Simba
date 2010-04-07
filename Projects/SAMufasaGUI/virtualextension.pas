@@ -5,7 +5,7 @@ unit virtualextension;
 interface
 
 uses
-  Classes, SysUtils,settingssandbox;
+  Classes, SysUtils,settingssandbox,MufasaTypes;
 
 type
     { TVirtualSimbaExtension }
@@ -21,10 +21,10 @@ type
     public
       OnChange : TNotifyEvent;
        { Must be implemented }
-       function HookExists(HookName: String): Boolean; virtual; abstract;
+       function HookExists(const HookName: String): Boolean; virtual; abstract;
 
        { No Custom Arguments just yet... }
-       function ExecuteHook(HookName: String; fArgs: Array of Variant; out OutVariant : variant): Integer; virtual; abstract;
+       function ExecuteHook(const HookName: String;var Args: TVariantArray; out OutVariant : variant): Integer; virtual; abstract;
 
        function GetName : string;
        function GetVersion : String;
@@ -47,15 +47,23 @@ type
 const
     SExt_ok = 0;
     SExt_error = 1;
-    EventHooks: Array [0..7] of TEventHook =
-      (    (HookName : 'onScriptCompile' ; ArgumentCount : 1),
-	   (HookName : 'onScriptStart'   ; ArgumentCount : 1),
+    SExt_OnColourPick = 0;
+    SExt_onOpenFile = 1;
+    SExt_onWriteFile = 2;
+    SExt_onOpenConnection = 3;
+    SExt_onScriptStart = 4;
+
+    EventHooks: Array [0..8] of TEventHook =
+    (	   (HookName : 'onColourPick'    ; ArgumentCount : 3), //const colour,colourx,coloury : integer;
+	   (HookName : 'onOpenFile'      ; ArgumentCount : 2), //var filename : string; var Continue : boolean
+	   (HookName : 'onWriteFile'     ; ArgumentCount : 2), //var filename : string; var Continue : boolean
+           (HookName : 'onOpenConnection'; ArgumentCount : 2), //var url : string; var Continue : boolean
+           (HookName : 'onScriptStart'   ; ArgumentCount : 2), //var Script : string; var Continue : boolean;   This is called BEFORE it compiles/executes
+           (HookName : 'onScriptCompile' ; ArgumentCount : 1),
+	   (HookName : 'onScriptExecute' ; ArgumentCount : 1),
 	   (HookName : 'onScriptPause'   ; ArgumentCount : 1),
-	   (HookName : 'onScriptStop'    ; ArgumentCount : 1),
-	   (HookName : 'onColourPick'    ; ArgumentCount : 3),
-	   (HookName : 'onOpenFile'      ; ArgumentCount : 1),
-	   (HookName : 'onOpenSocket'    ; ArgumentCount : 1),
-	   (HookName : 'onWriteFile'     ; ArgumentCount : 1));
+	   (HookName : 'onScriptStop'    ; ArgumentCount : 1));
+
 
 implementation
 
@@ -71,13 +79,14 @@ end;
 function TVirtualSimbaExtension.GetName: string;
 var
   OutPut : Variant;
+  Args : TVariantArray;
 begin
   Result := '';
   if FName <> '' then
     Result := FName
   else if self.HookExists('GetName') then
   begin;
-    if ExecuteHook('GetName',[],OutPut) <> SExt_ok then
+    if ExecuteHook('GetName',Args,OutPut) <> SExt_ok then
       FName := ''
     else
       FName := OutPut;
@@ -88,13 +97,14 @@ end;
 function TVirtualSimbaExtension.GetVersion: String;
 var
   OutPut : Variant;
+  Args : TVariantArray;
 begin
   Result := '';
   if FVersion <> '' then
     Result := FVersion
   else if self.HookExists('GetVersion') then
   begin;
-    if ExecuteHook('GetVersion',[],OutPut) <> SExt_ok then
+    if ExecuteHook('GetVersion',Args,OutPut) <> SExt_ok then
       FVersion := ''
     else
       FVersion := Output;

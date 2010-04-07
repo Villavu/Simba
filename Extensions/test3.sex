@@ -4,7 +4,39 @@ procedure init;
 begin;
   Writeln('init your extension here');
 end;
+procedure onOpenConnection(var url : string; var Cont : boolean);
+begin
+  Writeln('Opening url: '  + url);
+  Writeln('We shall allow this.. For now!! Gna Gna!');
+  Cont := True;
+end;
+procedure onWriteFile(var FileName : string; var Cont : boolean);
+begin
+  Writeln('So.. You want to write to file: ' + FileName);
+  Writeln('Well for this time only!');
+  Cont := True;
+end;
 
+procedure onOpenFile(var FileName : string; var Cont : boolean);
+begin
+  Writeln('So you want to open this file: ' + filename);
+  Writeln('Well I don''t care much, lets see what the other hooks think!');
+  //Not set Cont as we don't care, while other hooks might
+end;
+
+procedure onColourPick(const Colour,x,y : integer);
+begin
+  Writeln('So you''ve picked a color, huh!?');
+  Writeln(inttostr(colour) + ' attuh (' + inttostr(x) +',' + inttostr(y) + ')');
+end;
+ 
+procedure onScriptStart(var Script : string; var Cont : boolean);
+begin
+  Writeln('So you want to compile the following script!!');
+  Writeln(script);
+  Writeln('lets allow that for now ;)');
+  Cont := True;
+end;
 procedure free;
 begin
   Writeln('Free your extension here');

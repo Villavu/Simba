@@ -583,13 +583,17 @@ begin;
     exit;
   if beginpos.x > length(strings[beginpos.y]) then
     exit;
-  if endpos.x > length(strings[endpos.y]) then
+  if endpos.x > (length(strings[endpos.y])+1) then
     exit;
+  if EndPos.y = beginpos.y then
+  begin
+    result := copy(strings[beginpos.y],beginpos.x, endpos.x - beginpos.x + 1);
+    exit;
+  end;
   result := copy(strings[beginpos.y],beginpos.x, length(strings[beginpos.y]) - beginpos.x + 1);
   for i := beginpos.y + 1 to endpos.y-1 do
     result := result + strings[i];
-  if endpos.y <> beginpos.y then
-    result := result +  copy(strings[endpos.y],0,endpos.x);
+  result := result +  copy(strings[endpos.y],0,endpos.x-1); //Position <> count!
 end;
 
 function TParamHint.PrepareParamString(out Str: string; out MustHide : boolean): Integer;
@@ -606,7 +610,7 @@ begin
   MustHide := True;
   Parser := TmwPasLex.Create;                 //The position of the bracket
   parser.Origin:= PChar(StringListPartToText(Point(FBracketPoint.x,FBracketPoint.y-1),
-                                             point(min(FSynEdit.CaretX,length(FSynEdit.Lines[FSynEdit.CaretY - 1])),FSynEdit.CaretY-1),
+                                             point(min(FSynEdit.CaretX,length(FSynEdit.Lines[FSynEdit.CaretY - 1])+1),FSynEdit.CaretY-1),
                                              FSynEdit.lines));
   bracketcount := 0;
   ParameterIndex := -1;

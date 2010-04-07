@@ -39,7 +39,7 @@ uses
 type
     { TMMLPSThread }
     TSyncInfo = record
-      V : MufasaTypes.TVariantArray;
+      V : MufasaTypes.PVariantArray;
       MethodName : string;
       Res : Variant;
       SyncMethod : procedure of object;
@@ -76,6 +76,10 @@ type
     { TMThread }
 
     TMThread = class(TThread)
+    private
+      procedure SetOpenConnectionEvent(const AValue: TOpenConnectionEvent);
+      procedure SetOpenFileEvent(const AValue: TOpenFileEvent);
+      procedure SetWriteFileEvent(const AValue: TWriteFileEvent);
     protected
       ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
@@ -84,6 +88,9 @@ type
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
       Prop: TScriptProperties;
+      FOpenConnectionEvent : TOpenConnectionEvent;
+      FWriteFileEvent : TWriteFileEvent;
+      FOpenFileEvent : TOpenFileEvent;
       procedure LoadPlugin(plugidx: integer); virtual; abstract;
 
     public
@@ -97,6 +104,7 @@ type
       OnError  : TOnError; //Error handeler
 
       CompileOnly : boolean;
+
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
@@ -117,6 +125,10 @@ type
       destructor Destroy; override;
 
       class function GetExportedMethods : TExpMethodArr;
+
+      property OpenConnectionEvent : TOpenConnectionEvent read FOpenConnectionEvent write SetOpenConnectionEvent;
+      property WriteFileEvent : TWriteFileEvent read FWriteFileEvent write SetWriteFileEvent;
+      property OpenFileEvent : TOpenFileEvent read FOpenFileEvent write SetOpenFileEvent;
     end;
 
     TPSThread = class(TMThread)
@@ -190,6 +202,7 @@ uses
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
+
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_menus,
   files,
@@ -278,7 +291,13 @@ constructor TMThread.Create(CreateSuspended: boolean; TheSyncInfo: PSyncInfo; pl
 begin
   inherited Create(CreateSuspended);
   Client := TClient.Create(plugin_dir);
+  if Assigned(WriteFileEvent) then
+    Client.MFiles.WriteFileEvent := WriteFileEvent;
+  if Assigned(OpenFileEvent) then
+    Client.MFiles.OpenFileEvent := OpenFileEvent;
   MInternet := TMInternet.Create(Client);
+  if Assigned(OpenConnectionEvent) then
+    MInternet.OpenConnectionEvent := Self.OpenConnectionEvent;
   SyncInfo:= TheSyncInfo;
   ExportedMethods:= GetExportedMethods;
   FreeOnTerminate := True;
@@ -301,6 +320,27 @@ begin
   if Sett <> nil then
     Sett.Free;
   inherited Destroy;
+end;
+
+procedure TMThread.SetOpenConnectionEvent(const AValue: TOpenConnectionEvent);
+begin
+  FOpenConnectionEvent:= AValue;
+  if Assigned(MInternet) then
+    self.MInternet.OpenConnectionEvent := AValue;
+end;
+
+procedure TMThread.SetOpenFileEvent(const AValue: TOpenFileEvent);
+begin
+  FOpenFileEvent:= AValue;
+  if Assigned(Client) then
+    self.Client.MFiles.OpenFileEvent := AValue;
+end;
+
+procedure TMThread.SetWriteFileEvent(const AValue: TWriteFileEvent);
+begin
+  FWriteFileEvent:= AValue;
+  if Assigned(Client) then
+    self.Client.MFiles.WriteFileEvent := AValue;;
 end;
 
 procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
@@ -423,7 +463,7 @@ end;
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
 begin
   CurrThread.SyncInfo^.MethodName:= ProcName;
-  CurrThread.SyncInfo^.V:= V;
+  CurrThread.SyncInfo^.V:= @V;
   CurrThread.SyncInfo^.OldThread := CurrThread;
   CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
   Result := CurrThread.SyncInfo^.Res;

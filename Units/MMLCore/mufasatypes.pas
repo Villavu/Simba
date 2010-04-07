@@ -70,6 +70,7 @@ type
   TPointArray = array of TPoint;
   T2DPointArray = array of TPointArray;
   TVariantArray = Array of Variant;
+  PVariantArray = ^TVariantArray;
   TIntegerArray = Array of Integer;
   T2DIntArray = array of TIntegerArray;
   T2DIntegerArray = T2DIntArray;
@@ -83,6 +84,14 @@ type
     WhiteHi,BlackHi : integer;
     W,H : integer;
   end;
+  { File types }
+
+  TMufasaFile = record
+    Path: String;
+    FS: TFileStream;
+    BytesRead, Mode: Integer;
+  end;
+  TMufasaFilesArray = Array Of TMufasaFile;
 
   { DTM Types }
   {
@@ -123,6 +132,34 @@ type
   end;
 
   TWritelnProc = procedure(s: string);
+  {events}
+  TOpenFileEvent = procedure(Sender : TObject;var Filename : string; var Continue : boolean) of object;
+  TWriteFileEvent = TOpenFileEvent;
+  TOpenConnectionEvent = procedure(Sender : TObject; var url : string; var Continue : boolean) of object;
+  TColourPickEvent = procedure(Sender : TObject; const Colour,colourx,coloury : integer) of object;
+  TScriptStartEvent = procedure(Sender: TObject; var Script : string; var Continue : boolean) of object;
+  TScriptCompileEvent = procedure(Sender: TObject; var Script : string; var Continue : boolean);
+  TScriptExecuteEvent = procedure(Sender : TObject; const Script : string; var Continue : boolean);
+  TScriptPauseEvent = TScriptExecuteEvent;
+  TScriptStopEvent = TScriptExecuteEvent;
+  TOpenConnectionData = record
+    Sender : TObject;
+    URL : PString;
+    Continue : PBoolean;
+  end;
+  TOpenFileData = record
+    Sender : TObject;
+    FileName : PString;
+    Continue : PBoolean;
+  end;
+  TWriteFileData = TOpenFileData;
+  TScriptStartData = record
+    Sender : TObject;
+    Script : PString;
+    Continue : PBoolean;
+  end;
+
+
 type
   VirtualKeyInfo = record
       Str : string;
