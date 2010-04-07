@@ -28,7 +28,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,   SynEditMarkupHighAll,
-   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls,
+   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls,    SynEditStrConst,
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, SynEditHighlighter,synedittextbase;
 const
    ecCodeCompletion = ecUserFirst;
@@ -266,7 +266,7 @@ var
   s: string;
   Attri: TSynHighlighterAttributes;
 begin
-  AllowMouseLink := SynEdit.GetHighlighterAttriAtRowCol(Point(X, Y), s, Attri) and (Attri.Name = 'Identifier');
+  AllowMouseLink := SynEdit.GetHighlighterAttriAtRowCol(Point(X, Y), s, Attri) and (Attri.Name = SYNS_AttrIdentifier);
 end;
 
 procedure TScriptFrame.SynEditProcessCommand(Sender: TObject;
@@ -301,7 +301,8 @@ var
   d: TDeclaration;
   dd: TDeclaration;
 begin
-  if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or (Attri.Name = 'Identifier')) then
+  if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or
+                                      ((Attri.Name = SYNS_AttrIdentifier) or (Attri.name = SYNS_AttrSymbol))) then
   begin
       {form1.FunctionListShown(True);
       with form1.frmFunctionList do

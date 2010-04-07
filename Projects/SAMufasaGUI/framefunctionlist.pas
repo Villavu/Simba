@@ -6,10 +6,20 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, MufasaBase,Forms, ComCtrls, StdCtrls, Controls,
-  ExtCtrls, Buttons;
+  ExtCtrls, Buttons,mmisc,v_ideCodeInsight;
 
 type
 
+  { TFillThread }
+
+  TFillThread = class(TThread)
+  public
+    Analyzer : TCodeInsight;
+    MS : TMemoryStream;
+    FunctionList : ^TTreeView;
+    IncludesNode,ScriptNode : TTreeNode;
+    procedure execute; override;
+  end;
   { TFunctionListFrame }
 
   TFunctionListFrame = class(TFrame)
@@ -18,6 +28,7 @@ type
     FunctionListLabel: TLabel;
     CloseButton: TSpeedButton;
     procedure editSearchListChange(Sender: TObject);
+    procedure FillThreadTerminate(Sender: TObject);
     procedure FrameEndDock(Sender, Target: TObject; X, Y: Integer);
     procedure FunctionListDblClick(Sender: TObject);
     procedure FunctionListDeletion(Sender: TObject; Node: TTreeNode);
@@ -31,6 +42,9 @@ type
       Shift: TShiftState; X, Y: Integer);
   private
     FFilterTree : TTreeView;
+    FLastScript : string;
+    Filtering : boolean;
+    FillThread : TFillThread;
     procedure FilterTreeVis(Vis : boolean);
     function GetFilterTree: TTreeView;
     { private declarations }
@@ -58,13 +72,26 @@ type
 implementation
 
 uses
-  TestUnit, Graphics, stringutil, simpleanalyzer,v_ideCodeInsight,v_ideCodeParser,lclintf;
+  TestUnit, Graphics, stringutil, simpleanalyzer,v_ideCodeParser,lclintf;
 
 { TFunctionListFrame }
 
 procedure TFunctionListFrame.editSearchListChange(Sender: TObject);
 begin
   Find(false);
+end;
+
+procedure TFunctionListFrame.FillThreadTerminate(Sender: TObject);
+begin
+  FillThread.Analyzer.Free;
+  FreeAndNil(FillThread);
+  ScriptNode.Expand(true);
+  FunctionList.EndUpdate;
+  if Filtering then
+  begin
+    FilterTreeVis(True);
+    Find(false,false);
+  end;
 end;
 
 procedure TFunctionListFrame.FrameEndDock(Sender, Target: TObject; X, Y: Integer
@@ -183,77 +210,36 @@ begin
 end;
 
 procedure TFunctionListFrame.LoadScriptTree(Script: String);
-procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; Path : string);
-var
-  i : integer;
-  tmpNode : TTreeNode;
-begin;
-  for i := 0 to Procs.Count - 1 do
-    if (Procs[i] is TciProcedureDeclaration) then
-      with Procs[i] as TciProcedureDeclaration do
-      begin
-        tmpNode := FunctionList.Items.AddChild(Node,name.ShortText);
-        tmpNode.Data := GetMem(SizeOf(TMethodInfo));
-        FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
-        with PMethodInfo(tmpNode.Data)^ do
-        begin
-          MethodStr := strnew(Pchar(CleanDeclaration));
-          Filename:= strnew(pchar(path));
-          BeginPos:= name.StartPos ;
-          EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
-        end;
-      end;
-end;
-
-procedure AddIncludes(ParentNode : TTreeNode; Include : TCodeInsight);
-var
-  i : integer;
-begin;
-  parentNode := FunctionList.Items.AddChild(
-               IncludesNode,ExtractFileNameOnly(
-               Include.FileName));
-  AddProcsTree(parentNode,Include.Items,Include.FileName);
-  for i := 0 to high(Include.Includes) do
-    AddIncludes(ParentNode,Include.Includes[i])
-end;
-var
-  I : integer;
-  Analyzing : TCodeInsight;
-  MS : TMemoryStream;
-  time : longword;
 begin
-  Time := GetTickCount;
   if script = '' then
     exit;
   if ScriptNode = nil then
     exit;
-  if FilterTree.Visible then
-  begin
-    mDebugLn('Might get some acces violations now..');
+  if FillThread <> nil then {Already busy filling!}
     exit;
-  end;
+  if FLastScript = Script then
+    exit;
+  FLastScript:= Script;
+  Filtering := FilterTree.Visible;
+  if FilterTree.Visible then
+    FilterTreeVis(false);
   FunctionList.BeginUpdate;
   ScriptNode.DeleteChildren;
-  Analyzing := TCodeInsight.Create();
-  Analyzing.OnFindInclude:= @Form1.OnCCFindInclude;
-  Analyzing.OnMessage:= @Form1.OnCCMessage;
-  Analyzing.FileName:= Form1.CurrScript.ScriptFile;
-  MS := TMemoryStream.Create;
-  MS.Write(Script[1],length(script));
-  Analyzing.Run(MS,nil,-1,true);
-  AddProcsTree(ScriptNode,Analyzing.Items,Analyzing.FileName); //Add the procedures of the script to the script tree
-
-  //Lame condition.. We must check if nothing new has been included since
-  //last generation of the tree.. However, this will do fine for now ;)
-  if IncludesNode.Count <> length(Analyzing.Includes) then
-  begin;
-    IncludesNode.DeleteChildren;
-    for i := 0 to high(Analyzing.Includes) do
-      AddIncludes(IncludesNode, Analyzing.Includes[i]);
+  FillThread := TFillThread.Create(true);
+  FillThread.FunctionList := @Self.FunctionList;
+  FillThread.Analyzer := TCodeInsight.Create;
+  with  FillThread,FillThread.Analyzer do
+  begin
+    OnFindInclude := @Form1.OnCCFindInclude;
+    FileName := Form1.CurrScript.ScriptFile;
+    MS := TMemoryStream.Create;
+    MS.Write(Script[1],length(script));
+    OnTerminate:=@FillThreadTerminate;
+    FillThread.ScriptNode := self.ScriptNode;
+    FillThread.IncludesNode := self.IncludesNode;
   end;
-  ScriptNode.Expand(true);
-  FunctionList.EndUpdate;
-  Analyzing.Free;
+  FillThread.resume;
+ //See FillThreadTerminate for the rest of this procedure
 end;
 
 function TFunctionListFrame.Find(Next : boolean; backwards : boolean = false) : boolean;
@@ -457,6 +443,58 @@ begin
   DraggingNode := N;
 end;
 
+
+{ TFillThread }
+
+procedure TFillThread.execute;
+procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; Path : string);
+var
+  i : integer;
+  tmpNode : TTreeNode;
+begin;
+  for i := 0 to Procs.Count - 1 do
+    if (Procs[i] is TciProcedureDeclaration) then
+      with Procs[i] as TciProcedureDeclaration do
+      begin
+        tmpNode := FunctionList^.Items.AddChild(Node,name.ShortText);
+        tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+        FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
+        with PMethodInfo(tmpNode.Data)^ do
+        begin
+          MethodStr := strnew(Pchar(CleanDeclaration));
+          Filename:= strnew(pchar(path));
+          BeginPos:= name.StartPos ;
+          EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
+        end;
+      end;
+end;
+
+procedure AddIncludes(ParentNode : TTreeNode; Include : TCodeInsight);
+var
+  i : integer;
+begin;
+  parentNode := FunctionList^.Items.AddChild(
+               IncludesNode,ExtractFileNameOnly(
+               Include.FileName));
+  AddProcsTree(parentNode,Include.Items,Include.FileName);
+  for i := 0 to high(Include.Includes) do
+    AddIncludes(ParentNode,Include.Includes[i])
+end;
+var
+  i : integer;
+begin
+  Analyzer.Run(MS,nil,-1,true);
+  AddProcsTree(ScriptNode,Analyzer.Items,Analyzer.FileName); //Add the procedures of the script to the script tree
+
+  //Lame condition.. We must check if nothing new has been included since
+  //last generation of the tree.. However, this will do fine for now ;)
+  if IncludesNode.Count <> length(Analyzer.Includes) then
+  begin;
+    IncludesNode.DeleteChildren;
+    for i := 0 to high(Analyzer.Includes) do
+      AddIncludes(IncludesNode, Analyzer.Includes[i]);
+  end;
+end;
 
 initialization
   {$R *.lfm}

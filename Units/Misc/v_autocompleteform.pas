@@ -587,7 +587,7 @@ begin;
     exit;
   if EndPos.y = beginpos.y then
   begin
-    result := copy(strings[beginpos.y],beginpos.x, endpos.x - beginpos.x + 1);
+    result := copy(strings[beginpos.y],beginpos.x, endpos.x - beginpos.x);
     exit;
   end;
   result := copy(strings[beginpos.y],beginpos.x, length(strings[beginpos.y]) - beginpos.x + 1);
