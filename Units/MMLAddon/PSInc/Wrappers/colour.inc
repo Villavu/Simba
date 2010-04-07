@@ -31,7 +31,7 @@ begin
   Colors := CurrThread.Client.MFinder.GetColors(coords);
 end;
 
-function ps_GetColors(Coords : TPointArray) : TIntegerArray; extdecl;
+function ps_GetColors(const Coords : TPointArray) : TIntegerArray; extdecl;
 begin
   result := CurrThread.Client.MFinder.GetColors(coords);
 end;
