@@ -1,19 +1,20 @@
 object Form1: TForm1
-  Left = 347
-  Height = 300
-  Top = 314
-  Width = 400
+  Left = 237
+  Height = 302
+  Top = 312
+  Width = 536
   ActiveControl = Button1
   Caption = 'Bug in Pascal Script for Lazarus'
-  ClientHeight = 300
-  ClientWidth = 400
+  ClientHeight = 302
+  ClientWidth = 536
   LCLVersion = '0.9.29'
   object Memo1: TMemo
     Left = 0
-    Height = 137
+    Height = 139
     Top = 55
-    Width = 400
+    Width = 536
     Align = alBottom
+    Anchors = [akTop, akLeft, akRight, akBottom]
     Lines.Strings = (
       'program TestPS;'
       ''
@@ -66,7 +67,7 @@ object Form1: TForm1
       '  for i := 0 to high(arr1) do'
       '    Writeln(arr1[i]);'
       '  Writeln('''');'
-      '  Writeln(''Should writeln: Ik ben een geest!'');'
+      '  Writeln(''Should writeln: Testing!'');'
       '  for i := 0 to high(arr2) do'
       '   writeln(arr2[i]);'
       '  writeln('''');'
@@ -77,13 +78,15 @@ object Form1: TForm1
       'end.'
     )
     OnChange = Memo1Change
+    ScrollBars = ssAutoBoth
     TabOrder = 0
+    WordWrap = False
   end
   object Memo2: TMemo
     Left = 0
     Height = 108
-    Top = 192
-    Width = 400
+    Top = 194
+    Width = 536
     Align = alBottom
     TabOrder = 1
   end
@@ -91,8 +94,9 @@ object Form1: TForm1
     Left = 0
     Height = 55
     Top = 0
-    Width = 400
-    Align = alClient
+    Width = 536
+    Align = alCustom
+    Anchors = [akTop, akLeft, akRight]
     Caption = 'Compile'
     OnClick = Button1Click
     TabOrder = 2

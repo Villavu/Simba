@@ -13,15 +13,15 @@ type
     x, y:integer;
   end;
 
-  function MakeArr : TStringArray;
-procedure TestParameters(Int1,Int2,Int3,Int4,Int5,Int6 : integer);
-function TestResult(Int1,Int2,Int3,Int4,Int5,Int6 : integer): Integer;
-function TestString(Str1,Str2,Str3 : string) : string;
-function TestStringEdit(var Str : string) : String;
-procedure TestArrayPassing( Arr : TStringArray);
-Procedure TestArrayEdit(var Arr : TStringArray);
-function TestArrayFull(var Arr1: TStringArray; Arr2 : TStringArray): TStringArray;
-function makePoint(x, y: integer): w_Tpoint;
+function MakeArr : TStringArray; safecall;
+procedure TestParameters(Int1,Int2,Int3,Int4,Int5,Int6 : integer); safecall;
+function TestResult(Int1,Int2,Int3,Int4,Int5,Int6 : integer): Integer; safecall;
+function TestString(Str1,Str2,Str3 : string) : string; safecall;
+function TestStringEdit(var Str : string) : String; safecall;
+procedure TestArrayPassing( Arr : TStringArray); safecall;
+Procedure TestArrayEdit(var Arr : TStringArray); safecall;
+function TestArrayFull(var Arr1: TStringArray; Arr2 : TStringArray): TStringArray; safecall;
+function makePoint(x, y: integer): w_Tpoint; safecall;
 
 implementation
 
@@ -33,7 +33,7 @@ begin;
   Form1.Memo2.Lines.add(s);
 end;
 
-procedure TestParameters(Int1,Int2,Int3,Int4,Int5,Int6 : integer);
+procedure TestParameters(Int1,Int2,Int3,Int4,Int5,Int6 : integer); safecall;
 begin;
   Writeln('Parameters are: ' + format('%d %d %d %d %d %d',[int1,int2,int3,int4,int5,int6]));
   if (int1 <> 1) or (int2 <> 2) or (int3 <> 3) or (int4 <> 4) or (int5 <> 5) or (int6 <> 6) then
@@ -42,13 +42,13 @@ begin;
     Writeln('Passed this test');
 end;
 
-function TestResult(Int1,Int2,Int3,Int4,Int5,Int6 : integer): Integer;
+function TestResult(Int1,Int2,Int3,Int4,Int5,Int6 : integer): Integer; safecall;
 begin;
   Result := int1 + int2 + int3 + int4 + int5 + int6;
   Writeln('Result should be:' + inttostr(int1+int2+int3+int4+int5+int6));
 end;
 
-function TestString(Str1,Str2,Str3 : string) : string;
+function TestString(Str1,Str2,Str3 : string) : string; safecall;
 begin;
   if Str1+Str2+str3 = 'lol' then
     Writeln('Strings got passed over correctly.');
@@ -59,7 +59,7 @@ begin;
   Writeln('Result should be a');
 end;
 
-function TestStringEdit(var Str : string) : String;
+function TestStringEdit(var Str : string) : String; safecall;
 begin;
   Result := 'False';
   if Str <> 'Test' then
@@ -70,7 +70,7 @@ begin;
   Writeln('Result should be: hopla; Input str should be tseT');
 end;
 
-procedure TestArrayPassing(Arr : TStringArray);
+procedure TestArrayPassing(Arr : TStringArray); safecall;
 var
   i : integer;
 begin;
@@ -80,7 +80,7 @@ begin;
 end;
 
 
-Procedure TestArrayEdit(var Arr : TStringArray);
+Procedure TestArrayEdit(var Arr : TStringArray); safecall;
 begin;
   Writeln('Arr size is ' + inttostr(length(arr)));
   SetLength(arr,0);
@@ -92,7 +92,7 @@ begin;
   arr[4] := '!';
 end;
 
-function ConvStrArr( Arr : Array of String): TStringArray;
+function ConvStrArr( Arr : Array of String): TStringArray; safecall;
 var
   Len : Integer;
 begin;
@@ -101,7 +101,7 @@ begin;
   Move(Arr[Low(Arr)], Result[0], Len*SizeOf(String));
 end;
 
-function TestArrayFull(var Arr1: TStringArray; Arr2 : TStringArray): TStringArray;
+function TestArrayFull(var Arr1: TStringArray; Arr2 : TStringArray): TStringArray; safecall;
 begin
   Writeln(Format('Len(Arr1) = %d - Len(Arr2) = %d',[Length(Arr1),length(arr2)]));
   SetLength(Result,0);
@@ -115,14 +115,14 @@ begin
   Result := ConvStrArr(['Waza?','Gaat','Alles','Goed']);
 end;
 
-function MakeArr : TStringArray;
+function MakeArr : TStringArray; safecall;
 begin;
   setlength(result,2);
   result[0] := 'Test0';
   Result[1] := 'Wow!';
 end;
 
-function makePoint(x, y: integer): w_Tpoint;
+function makePoint(x, y: integer): w_Tpoint; safecall;
 begin
   result.x := x;
   result.y := y;
