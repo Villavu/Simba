@@ -131,7 +131,7 @@ begin
 end;
 
 initialization
-  {$I extensionmanagergui.lrs}
+  {$R *.lfm}
 
 end.
 

@@ -3,7 +3,6 @@ object ColourHistoryForm: TColourHistoryForm
   Height = 260
   Top = 335
   Width = 499
-  ActiveControl = SelectionName
   Caption = 'Colour Picker History'
   ClientHeight = 240
   ClientWidth = 499

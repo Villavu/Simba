@@ -3,7 +3,6 @@ object AboutForm: TAboutForm
   Height = 400
   Top = 270
   Width = 400
-  ActiveControl = AboutMemo
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'About'
@@ -42,7 +41,7 @@ object AboutForm: TAboutForm
     Left = 8
     Height = 27
     Top = 16
-    Width = 69
+    Width = 64
     Caption = 'Simba'
     Font.Height = -23
     Font.Name = 'Sans'
@@ -50,10 +49,10 @@ object AboutForm: TAboutForm
     ParentFont = False
   end
   object LabelRevision: TLabel
-    Left = 286
+    Left = 290
     Height = 20
     Top = 19
-    Width = 104
+    Width = 100
     Anchors = [akRight]
     Caption = 'Revision XXX'
     Font.Height = -17

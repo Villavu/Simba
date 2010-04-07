@@ -2932,7 +2932,7 @@ begin
 end;
 
 initialization
-  {$I testunit.lrs}
+  {$R *.lfm}
 
 
 end.
