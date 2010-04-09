@@ -710,6 +710,7 @@ var
    STPA: T2DPointArray;
 
 begin
+  Result := '';
   fD := FFonts.GetFont(font);
   {writeln(format('W, H: %d, %d', [fD.max_width, fd.max_height]));}
 
@@ -771,8 +772,10 @@ begin
   lbset := false;
   SetLength(Result, 0);
   SetLength(n, (fd.width + 1) * (fd.height + 1));
-  for i := 0 to min(high(STPA),len) do
+  for i := 0 to high(STPA) do
   begin
+    if length(result) >= len then
+      exit;
     for j := 0 to high(n) do
       n[j] := 0;
     TPA := STPA[i];
