@@ -1,0 +1,44 @@
+program new;
+
+const
+  MCX1 = 4;
+  MCY1 = 342;
+  MCX2 = 514;
+  MCY2 = 475;
+
+Function TextCoords(textn: Integer): TPoint;
+Begin
+  Result.X := 10;
+  Result.Y := 347 + (14 * (textn - 1));
+End;
+
+function GetChatBoxText(Line, TextCol: Integer): string;
+var
+  P: TPoint;
+  cArr: TPointArray;
+  B: TBox;
+begin
+  P := TextCoords(Line);
+  if (FindColorsTolerance(cArr, TextCol, MCX1, P.y, MCX2, P.y + 13, 0)) then
+  begin
+    B := GetTPABounds(cArr);
+   // Result := GetTextAt(B.x1 - 1, B.y1 - 1, 1, 3, 0, 0, 0, 100, 'SmallChars');
+
+    {Result := Trim(GetTextAtEx(B.x1 - 1, B.y1 - 2, 0, SmallChars, False, False,
+      0, 1, TextCol, 80, False, tr_AllChars)); }
+  end;
+end;
+
+var
+  bmp: integer;
+begin
+  bmp := LoadBitmap('/home/merlijn/Programs/trunk/pics/17.bmp');
+  SetTargetBitmap(bmp);
+ // freebitmap(bmp);
+{  GetChatBoxText(8, 0);    }
+
+  {SetDesktopAsClient;         }
+
+  // uncomment this for exception
+  freebitmap(bmp);
+end.
