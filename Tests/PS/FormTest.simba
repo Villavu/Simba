@@ -1,0 +1,35 @@
+program new;
+var
+  TempVar : Boolean;
+procedure OnClick(Sender : TObject);
+begin;
+  TempVar := True;
+  Writeln('YOU HAS CLICKED THE BUTTON');
+end;
+function x : Boolean;
+var
+  MyForm : TForm;
+  AButton : TButton;
+begin;
+  TempVar := False;
+  Result := false;
+  MyForm := TForm.Create(nil);
+  MyForm.Width := 250;
+  MyForm.Height := 250;
+  AButton := TButton.Create(MyForm);
+  AButton.Parent := MyForm;
+  Abutton.SetBounds(100,100,100,50);
+  AButton.OnClick := @OnClick;
+  AButton.Caption := 'Test';
+  MyForm.ShowModal;
+  MyForm.Free;
+  Result := TempVar;
+end;
+var
+  v : TVariantArray;
+begin
+  if ThreadSafeCall('x',v) then
+    Writeln('You clicked the button! WinnOr')
+  else
+    Writeln('You did not click the button, fail all the way');
+end.

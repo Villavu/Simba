@@ -1,0 +1,10 @@
+program new;
+var
+   i,t:integer;
+begin
+  t:=getsystemtime;
+  for i := 0 to 100 do
+    rs_getuptext;
+  writeln(inttostr(round(getsystemtime - t) / 100));
+  writeln(rs_getuptext);
+end.
