@@ -219,7 +219,7 @@ interface
 
     {Basically like TEIOS_Client, only this is exported to some plugin, whilst TEIOS_Client is Imported
      Not all functions have to be 'set', it depends on the kind of target (Image/KeyMouse) }
-    TTarget_Exported = packed record
+    TTarget_Exported = record
       Target : Pointer;
 
       GetTargetDimensions: procedure(target: pointer; var w, h: integer); stdcall;
@@ -467,6 +467,7 @@ end;
 
 function TIOManager_Abstract.ExportKeyMouseTarget: TTarget_Exported;
 begin
+  FillChar(result,sizeof(TTarget_Exported),0);
   with result do
   begin
     Target:= KeyMouse;
