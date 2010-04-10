@@ -56,7 +56,7 @@ Sender.Comp.AddTypeS('TStringArray','Array of string;');
 Sender.Comp.AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
 Sender.Comp.AddTypeS('Pointer', 'Integer');
 
-Sender.Comp.AddTypeS('TSP_Property','(SP_WriteTimeStamp)');
+Sender.Comp.AddTypeS('TSP_Property','(SP_WriteTimeStamp,SP_OnTerminate)');
 
 
 Sender.Comp.AddConstantN('mouse_Right','integer').SetInt(ps_mouse_right); //0
