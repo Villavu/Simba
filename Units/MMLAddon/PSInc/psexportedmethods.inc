@@ -129,8 +129,8 @@ AddFunction(@ps_Random,'function Random(Int: integer): integer;');
 AddFunction(@ps_ClearDebug,'procedure ClearDebug;');
 AddFunction(@ps_PlaySound,'procedure PlaySound( Sound : string);');
 AddFunction(@ps_StopSound,'procedure StopSound;');
-AddFunction(@ps_SetScriptProp, 'function SetScriptProp(Prop : TSP_Property; Value: String): boolean;');
-AddFunction(@ps_GetScriptProp, 'function GetScriptProp(Prop : TSP_Property;var Value: String): boolean;');
+AddFunction(@ps_SetScriptProp, 'function SetScriptProp(Prop : TSP_Property; Value: TVariantArray): boolean;');
+AddFunction(@ps_GetScriptProp, 'function GetScriptProp(Prop : TSP_Property;var Value: TVariantArray): boolean;');
 
 
 

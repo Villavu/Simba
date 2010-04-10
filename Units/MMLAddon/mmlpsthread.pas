@@ -131,6 +131,8 @@ type
       property OpenFileEvent : TOpenFileEvent read FOpenFileEvent write SetOpenFileEvent;
     end;
 
+    { TPSThread }
+
     TPSThread = class(TMThread)
       public
         procedure OnProcessDirective(Sender: TPSPreProcessor;
@@ -150,6 +152,7 @@ type
         procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
         procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
         procedure OutputMessages;
+        procedure HandleScriptTerminates;
       public
         PSScript : TPSScript;
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
@@ -801,6 +804,22 @@ begin
   end;
 end;
 
+procedure TPSThread.HandleScriptTerminates;
+var
+  I : integer;
+begin
+  if (PSScript.Exec.ExceptionCode =ErNoError) and  (SP_OnTerminate in Prop.Properties) then
+  begin;
+    for i := 0 to Prop.OnTerminateProcs.Count - 1 do
+    begin
+      try
+        PSScript.ExecuteFunction([],Prop.OnTerminateProcs[i]);
+      finally
+      end;
+    end;
+  end;
+end;
+
 procedure TPSThread.Execute;
 begin
   CurrThread := Self;
@@ -818,7 +837,10 @@ begin
           HandleError(PSScript.ExecErrorRow,PSScript.ExecErrorCol,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,
                       errRuntime, PSScript.ExecErrorFileName)
         else
+        begin
+          HandleScriptTerminates;
           psWriteln('Successfully executed.');
+        end;
     end else
     begin
       OutputMessages;

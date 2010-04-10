@@ -21,12 +21,12 @@
     Other.inc for the Mufasa Macro Library
 }
 
-function ps_SetScriptProp(prop : TSP_Property; Value: String): boolean; extdecl;
+function ps_SetScriptProp(prop : TSP_Property; Value: TVariantArray): boolean; extdecl;
 begin
   Exit(CurrThread.Prop.SetProp(prop, Value));
 end;
 
-function ps_GetScriptProp(prop : TSP_Property; var Value : string) : boolean; extdecl;
+function ps_GetScriptProp(prop : TSP_Property; var Value : TVariantArray) : boolean; extdecl;
 begin;
   exit(CurrThread.Prop.GetProp(prop,value));
 end;
