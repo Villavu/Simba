@@ -885,6 +885,8 @@ begin
 end;
 
 constructor TCodeInsight.Create(FileName: string = '');
+var
+  StrList : TStringList;
 begin
   inherited Create;
 
@@ -902,8 +904,11 @@ begin
   fOwnStream := (fFileName <> '');
   if fOwnStream then
   begin
+    StrList := TStringList.Create;
     fMemoryStream := TMemoryStream.Create;
-    fMemoryStream.LoadFromFile(fFileName);
+    StrList.LoadFromFile(filename);  //Converts the line-endings.
+    StrList.SaveToStream(fMemoryStream);
+    Strlist.free;
   end
   else
     fMemoryStream := nil;
