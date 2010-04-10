@@ -226,7 +226,6 @@ uses
   {$define extdecl := register}
 {$endif}
 
-
 {Some General PS Functions here}
 procedure psWriteln(str : string); extdecl;
 begin
@@ -936,7 +935,7 @@ begin
   interp_type(self.instance,'type T2DPointArray = array of array of TPoint;');   ;
   interp_type(self.instance,'type TPointArrayArray = T2DPointArray;');
 
-  interp_type(self.instance,'type TTarget_Exported = record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14:integer; end;');
+  interp_type(self.instance,'type TTarget_Exported = record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14, int15:integer; end;');
   interp_type(self.instance,'type TMask = record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
   interp_type(self.instance,'type TDTMPointDef = record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
   interp_type(self.instance,'type TDTMPointDefArray = Array Of TDTMPointDef;');
