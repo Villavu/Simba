@@ -191,13 +191,13 @@ begin
   end;
 end;
 
-{{$IFDEF FPC}
+{
 // mh: because FPC doesn't handle pointers to overloaded functions
 function TFileStreamCreate(filename: string; mode: word): TFileStream;
 begin
   result := TFilestream.Create(filename, mode);
-end;
-{$ENDIF}}
+end;}
+
 
 procedure RIRegisterTFILESTREAM(Cl: TPSRuntimeClassImporter);
 begin
