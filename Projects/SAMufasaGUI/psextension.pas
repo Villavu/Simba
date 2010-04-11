@@ -49,7 +49,7 @@ uses
   uPSC_extctrls,uPSC_menus, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls,uPSR_menus, //Runtime-libs
-  testunit,updateform,settingssandbox,bitmaps,mmisc//Writeln
+  testunit,updateform,settingssandbox,bitmaps,files,Dialogs, mmisc//Writeln
   ;
 
 function TSimbaPSExtension.HookExists(const HookName: String): Boolean;
@@ -123,12 +123,21 @@ begin
   Sender.Comp.AddConstantN('PluginPath','string').SetString(Form1.PluginPath);
   Sender.Comp.AddConstantN('FontPath','string').SetString(form1.FontPath);
   Sender.Comp.AddConstantN('ExtPath','string').SetString(form1.ExtPath);
+  Sender.Comp.AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmati'
+                                      +'on, mtCustom )');
+  Sender.Comp.AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, m'
+                                     +'bIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
+  Sender.Comp.AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
   Sender.AddFunction(@formWritelnEx,'procedure Writeln(s : string)');
   Sender.AddFunction(@ext_GetPage,'function GetPage(const url : string) : string');
   Sender.AddFunction(@ext_DecompressBZip2,'function DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;');
   Sender.AddFunction(@ext_UnTar,'function UnTar(const Input : string; out Content : TStringArray) : boolean;');
   Sender.AddFunction(@ext_UnTarEx,'function UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;');
-
+  Sender.AddFunction(@DirectoryExists,'Function DirectoryExists (Const Directory : String) : Boolean;');
+  Sender.AddFunction(@FileExists,'Function FileExists (Const FileName : String) : Boolean;');
+  Sender.AddFunction(@GetFiles, 'function GetFiles(Path, Ext: string): TStringArray;');
+  Sender.AddFunction(@GetDirectories,'function GetDirectories(Path: string): TstringArray;');
+  Sender.AddFunction(@ext_MessageDlg,'function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;');
   Sender.AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
   Sender.AddRegisteredVariable('Simba','TForm');
   Sender.AddRegisteredVariable('Simba_MainMenu','TMainMenu');

@@ -24,6 +24,7 @@
 AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 AddFunction(@pswriteln,'procedure Writeln(x: string);'); //PS defines a special, keep this for CPascal
 
+
 { DTM }
 SetCurrSection('DTM');
 AddFunction(@ps_SetDTMName, 'procedure SetDTMName(DTM : integer;const name : string);');
@@ -109,6 +110,7 @@ AddFunction(@ps_DeleteINI,'procedure DeleteINI(const Section, KeyName, FileName:
 
 {other}
 SetCurrSection('Other');
+AddFunction(@ps_SetSupressExceptions, 'procedure SetSupressExceptions(Supress : boolean);');
 AddFunction(@ps_SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
 AddFunction(@ps_Wait, 'procedure wait(t: integer);');
 AddFunction(@ps_Wait, 'procedure Sleep(t: integer);');
