@@ -92,3 +92,8 @@ begin
       mDebugLn('Exception in GetPage in Extensions: ' + e.message);
   end;
 end;
+
+function ext_MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;
+begin
+  result := MessageDlg(acaption,amsg,dlgtype,buttons,helpctx);
+end;

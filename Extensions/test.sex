@@ -19,6 +19,7 @@ begin;
       '0'..'9': result := result + str[i];
     end;
 end;
+  
 procedure Attach;
 var
   Fonts : string;
@@ -26,6 +27,11 @@ var
   newvers :integer;
   Vers : integer;
 begin;
+  case MessageDlg('Test me!', 'Do you want to test me?',mtConfirmation, [mbNo,mbYes,mbCancel],0) of
+    mrYes : Writeln('hell yeah!');
+    mrNo  : Writeln('Hell no!');
+    mrCancel : Writeln('CANCEL THIS SHIT!');
+  end;	
   Vers := StrToIntDef(Settings.GetKeyValueDef('FontVersion','-1'),-1);
   newvers := strtointdef(GetNumbers(getpage('http://simba.villavu.com/bin/Fonts/Version')),-1);
   if newVers > vers then
