@@ -573,7 +573,7 @@ begin
               btchar,btU8, btS8:    tbtu8(res.dta^) := RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 1, nil);
               {$IFNDEF PS_NOWIDESTRING}btWideChar, {$ENDIF}btu16, bts16:  tbtu16(res.dta^) := RealCall_Register(Address, EAX, EDX, ECX, @Stack[Length(Stack)-3], Length(Stack) div 4, 2, nil);
               btClass :
-              {$IFDEF FPC_OLD_FIX}
+              {$IFDEF FPC}
               tbtu32(res.dta^) := RealCall_Register(Address, EDX, EAX, ECX,
               @Stack[Length(Stack) - 3], Length(Stack) div 4, 4, nil);
               {$ELSE}

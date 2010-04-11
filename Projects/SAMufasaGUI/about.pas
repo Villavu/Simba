@@ -61,9 +61,6 @@ procedure TAboutForm.FormCreate(Sender: TObject);
 begin
   Self.Caption := format('About Simba r%d', [TestUnit.SimbaVersion]);
   Self.LabelRevision.Caption := format('Revision %d', [TestUnit.SimbaVersion]);
-  AboutMemo.Lines.Add('---Simba---');
-  AboutMemo.Lines.Add('');
-  AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Simba is released under the GPL license.');
   AboutMemo.Lines.Add(format('You are currently using version: %d',[Testunit.SimbaVersion]));
   AboutMemo.Lines.Add('');

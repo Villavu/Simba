@@ -35,8 +35,8 @@ type
   TMufasaBitmap = class(TObject)
   private
     w,h : integer;
-    TransparentColor : TRGB32;
-    TransparentSet : boolean;
+    FTransparentColor : TRGB32;
+    FTransparentSet : boolean;
     FIndex : integer;
     FName : string;
   public
@@ -61,9 +61,6 @@ type
     function CreateTPA(SearchCol : TColor) : TPointArray;
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(TPA : TPointArray) : TIntegerArray;
-    Procedure SetTransparentColor(Col : TColor);
-    Function GetTransparentColor : TColor;
-    property TransparentColorSet : boolean read TransparentSet;
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
@@ -88,6 +85,9 @@ type
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
     function CreateTMask : TMask;
+    procedure SetTransparentColor(Col : TColor);
+    function GetTransparentColor : TColor;
+    property TransparentColorSet : boolean read FTransparentSet;
     constructor Create;
     destructor Destroy;override;
   end;
@@ -210,6 +210,7 @@ function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;
 begin
   Result := GetNewIndex;
   BmpArray[Result] := _bmp;
+  BmpArray[result].Index:= Result;
 end;
 
 function TMBitmaps.CopyBMP(Bitmap: integer): Integer;
@@ -446,6 +447,7 @@ begin;
   Result.R := Color and $ff;
   Result.G := Color shr 8 and $ff;
   Result.B := Color shr 16 and $ff;
+  Result.A := 0;
 end;
 
 function TMufasaBitmap.Copy: TMufasaBitmap;
@@ -698,14 +700,14 @@ end;
 
 procedure TMufasaBitmap.SetTransparentColor(Col: TColor);
 begin
-  TransparentColor:= RGBToBGR(Col);
-  TransparentSet:= True;
+  self.FTransparentSet:= True;
+  self.FTransparentColor:= RGBToBGR(Col);
 end;
 
 function TMufasaBitmap.GetTransparentColor: TColor;
 begin
-  if TransparentSet then
-    Result := BGRToRGB(TransparentColor)
+  if FTransparentSet then
+    Result := BGRToRGB(FTransparentColor)
   else
     raise Exception.CreateFmt('Transparent color for Bitmap[%d] isn''t set',[index]);
 end;
@@ -731,16 +733,16 @@ var
   MinW,MinH,TargetW,TargetH : Integer;
   loopx,loopy : integer;
 begin
-  ValidatePoint(x,y);
+  TargetBitmap.ValidatePoint(x,y);
   TargetW := TargetBitmap.Width;
   TargetH := TargetBitmap.height;
   MinW := Min(w-1,TargetW-x-1);
   MinH := Min(h-1,TargetH-y-1);
-  if TransparentSet then
+  if FTransparentSet then
   begin;
     for loopy := 0 to MinH do
       for loopx := 0 to MinW do
-        if LongWord(FData[loopy * w + loopx]) <> LongWord(TransparentColor) then
+        if LongWord(FData[loopy * w + loopx]) <> LongWord(FTransparentColor) then
           TargetBitmap.FData[(loopy + y) * TargetW + loopx + x] := FData[Loopy * w + loopx];
 
   end
@@ -1227,7 +1229,7 @@ constructor TMufasaBitmap.Create;
 begin
   inherited Create;
   Name:= '';
-  TransparentSet:= False;
+  FTransparentSet:= False;
   setSize(0,0);
   {FData:= nil;
   w := 0;

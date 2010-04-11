@@ -1866,7 +1866,7 @@ end;
 
 procedure TForm1.MenuItemHandbookClick(Sender: TObject);
 begin
-  OpenURL('http://vila.villavu.com/mufasa/mufasa_ps_handbook/');
+  OpenURL('http://wizzup.org/simba/doc/ps_handbook/');
 end;
 
 procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
@@ -2713,9 +2713,11 @@ end;
 procedure TForm1.SafeCallThread;
 var
   thread: TMThread;
+  LocalCopy : TSyncInfo;
 begin
-  mDebugLn('Executing : ' + CurrentSyncInfo.MethodName);
-  thread:= TMThread(CurrentSyncInfo.OldThread);
+  LocalCopy := CurrentSyncInfo;
+  mDebugLn('Executing : ' + LocalCopy.MethodName);
+  thread:= TMThread(LocalCopy.OldThread);
   mmlpsthread.CurrThread:= thread;
   try
     if thread is TPSThread then
@@ -2723,7 +2725,7 @@ begin
       with TPSThread(thread).PSScript do
       begin
         OnLine:=@OnLinePSScript;
-        CurrentSyncInfo.Res:= Exec.RunProcPVar(CurrentSyncInfo.V^,Exec.GetProc(CurrentSyncInfo.MethodName));
+        LocalCopy.Res^:= Exec.RunProcPVar(LocalCopy.V^,Exec.GetProc(LocalCopy.MethodName));
         Online := nil;
       end;
     end else

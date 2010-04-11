@@ -76,6 +76,11 @@ begin
     CurrThread.DebugClear();
 end;
 
+procedure ps_SetSupressExceptions(Supress : boolean);extdecl;
+begin
+  CurrThread.Client.MFinder.WarnOnly:= Supress;
+end;
+
 procedure ps_SaveScreenshot(FileName: string); extdecl;
 var
   w,h : integer;

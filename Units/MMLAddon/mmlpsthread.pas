@@ -41,7 +41,7 @@ type
     TSyncInfo = record
       V : MufasaTypes.PVariantArray;
       MethodName : string;
-      Res : Variant;
+      Res : ^Variant;
       SyncMethod : procedure of object;
       OldThread : TThread;
     end;
@@ -465,11 +465,18 @@ end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
 begin
-  CurrThread.SyncInfo^.MethodName:= ProcName;
-  CurrThread.SyncInfo^.V:= @V;
-  CurrThread.SyncInfo^.OldThread := CurrThread;
-  CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
-  Result := CurrThread.SyncInfo^.Res;
+  if GetCurrentThreadId = MainThreadID then
+  begin
+    with TPSThread(currthread).PSScript do
+      Result := Exec.RunProcPVar(V,Exec.GetProc(Procname));
+  end else
+  begin
+    CurrThread.SyncInfo^.MethodName:= ProcName;
+    CurrThread.SyncInfo^.V:= @V;
+    CurrThread.SyncInfo^.OldThread := CurrThread;
+    CurrThread.SyncInfo^.Res := @Result;
+    CurrThread.Synchronize(CurrThread.SyncInfo^.SyncMethod);
+  end;
 end;
 
 {$I PSInc/Wrappers/other.inc}

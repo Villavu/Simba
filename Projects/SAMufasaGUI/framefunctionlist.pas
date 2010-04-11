@@ -452,6 +452,8 @@ var
   i : integer;
   tmpNode : TTreeNode;
 begin;
+  if procs = nil then
+    exit;
   for i := 0 to Procs.Count - 1 do
     if (Procs[i] is TciProcedureDeclaration) then
       with Procs[i] as TciProcedureDeclaration do
