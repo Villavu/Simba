@@ -78,7 +78,7 @@ interface
         keyinput: TKeyInput;
         procedure ValidateBuffer(w,h:integer);
       protected
-        function WindowRect : TRect;virtual;
+        function WindowRect(out Rect : TRect) : Boolean;virtual;
     end;
 
     { TDesktopWindow }
@@ -86,7 +86,7 @@ interface
     TDesktopWindow = class(TWindow)
     private
       constructor Create(DesktopHandle : HWND);
-      function WindowRect : TRect;override;
+      function WindowRect(out Rect : TRect) : Boolean;override;
     end;
     TIOManager = class(TIOManager_Abstract)
       public
@@ -224,7 +224,7 @@ implementation
   var
     Rect : TRect; 
   begin 
-    Rect := WindowRect;
+    WindowRect(rect);
     w:= Rect.Right - Rect.Left;
     h:= Rect.Bottom - Rect.Top;
   end;
@@ -248,9 +248,9 @@ implementation
     end;
   end;
 
-  function TWindow.WindowRect: TRect;
+  function TWindow.WindowRect(out Rect : TRect) : boolean;
   begin
-    GetWindowRect(self.handle,result);
+    result := GetWindowRect(self.handle,rect) <> 0;
   end;
   
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
@@ -274,7 +274,7 @@ implementation
     Rect : TRect;
   begin
     Windows.GetCursorPos(MousePoint);
-    Rect := WindowRect;
+    WindowRect(rect);
     x := MousePoint.x - Rect.Left;
     y := MousePoint.y - Rect.Top;
   end;
@@ -283,7 +283,7 @@ implementation
     rect : TRect;
     w,h: integer;
   begin
-    Rect := WindowRect;
+    WindowRect(rect);
     x := x + rect.left;
     y := y + rect.top;
     Windows.SetCursorPos(x, y);
@@ -293,7 +293,7 @@ implementation
     Input : TInput;
     Rect : TRect;
   begin
-    Rect := WindowRect;
+    WindowRect(rect);
     Input.Itype:= INPUT_MOUSE;
     FillChar(Input,Sizeof(Input),0);
     Input.mi.dx:= x + Rect.left;
@@ -310,7 +310,7 @@ implementation
     Input : TInput;
     Rect : TRect;
   begin
-    Rect := WindowRect;
+    WindowRect(rect);
     Input.Itype:= INPUT_MOUSE;
     FillChar(Input,Sizeof(Input),0);
     Input.mi.dx:= x + Rect.left;
@@ -420,12 +420,13 @@ begin
 end;
 
 
-function TDesktopWindow.WindowRect: TRect;
+function TDesktopWindow.WindowRect(out Rect : TRect) : Boolean;
 begin
-  result.Left:= GetSystemMetrics(SM_XVIRTUALSCREEN);
-  result.Top:= GetSystemMetrics(SM_YVIRTUALSCREEN);
-  result.Right := GetSystemMetrics(SM_CXVIRTUALSCREEN);
-  result.Bottom:= GetSystemMetrics(SM_CYVIRTUALSCREEN);
+  Rect.Left:= GetSystemMetrics(SM_XVIRTUALSCREEN);
+  Rect.Top:= GetSystemMetrics(SM_YVIRTUALSCREEN);
+  Rect.Right := GetSystemMetrics(SM_CXVIRTUALSCREEN);
+  Rect.Bottom:= GetSystemMetrics(SM_CYVIRTUALSCREEN);
+  Result := true;
 end;
 
 end.

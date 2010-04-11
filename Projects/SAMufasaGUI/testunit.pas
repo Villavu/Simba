@@ -1668,6 +1668,8 @@ procedure TForm1.ChangeMouseStatus(Sender: TObject);
 var
   x, y: Integer;
 begin
+  if Self.Manager.TargetValid = false then
+    self.Manager.SetDesktop;
   Self.Manager.GetMousePos(x, y);
   if self.Manager.ReceivedError() then
   begin
