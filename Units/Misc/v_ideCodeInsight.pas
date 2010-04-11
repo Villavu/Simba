@@ -550,7 +550,7 @@ end;
 
 function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; out sp: Integer; IgnoreBrackets: Boolean): string;
 var
-  i, StartPos, EndPos: Integer;
+  i, StartPos, EndPos, Dif: Integer;
   s: string;
   a: TDeclarationArray;
   d: TDeclaration;
@@ -575,12 +575,14 @@ begin
   EndPos := fPos - d.StartPos;
   s := d.CleanText;
 
+  Dif := EndPos;
   for i := Low(a) to High(a) do
     if (fPos > a[i].EndPos) then
       if (Pos(LineEnding, a[i].RawText) > 0) then
         EndPos := EndPos - a[i].EndPos + a[i].StartPos + Length(LineEnding)
       else
         EndPos := EndPos - a[i].EndPos + a[i].StartPos + 1;
+  Dif := Dif - EndPos;
 
   StartPos := EndPos;
   LastWasDot := False;
@@ -640,7 +642,7 @@ begin
     LastWasDot := False;
     Dec(StartPos);
   end;
-  sp := StartPos + d.StartPos;
+  sp := StartPos + d.StartPos + Dif;
   Result := CompressWhiteSpace(Copy(s, StartPos + 1, EndPos - StartPos));
 end;
 
