@@ -218,8 +218,9 @@ procedure NormalizeDTM(var dtm: pdtm);
 var
    i:integer;
 begin
-  if dtm.p[0] = Point(0,0) then  //Already normalized
-    exit;
+  // we don't need this check really...
+  {if dtm.p[0] = Point(0,0) then  //Already normalized
+    exit;}
   for i := 1 to dtm.l - 1 do
     dtm.p[i] := dtm.p[i] - dtm.p[0];
   dtm.p[0] := dtm.p[0] - dtm.p[0]; //Point(0,0);

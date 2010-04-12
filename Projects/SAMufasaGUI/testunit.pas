@@ -1868,7 +1868,7 @@ end;
 
 procedure TForm1.MenuItemHandbookClick(Sender: TObject);
 begin
-  OpenURL('http://wizzup.org/simba/doc/ps_handbook/');
+  OpenURL('http://wizzup.org/static/simba/doc/ps_handbook/');
 end;
 
 procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
