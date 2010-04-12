@@ -84,7 +84,8 @@ end;
 procedure TFunctionListFrame.FillThreadTerminate(Sender: TObject);
 begin
   FillThread.Analyzer.Free;
-  FreeAndNil(FillThread);
+  { Don't free the thread when it is already stopped... This causes deadlocks? }
+  //FreeAndNil(FillThread);
   ScriptNode.Expand(true);
   FunctionList.EndUpdate;
   if Filtering then
