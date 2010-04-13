@@ -289,3 +289,13 @@ function ps_FindDeformedBitmapToleranceIn(bitmap: integer; out x,
 begin;
   result := CurrThread.Client.MFinder.FindDeformedBitmapToleranceIn(CurrThread.Client.MBitmaps[Bitmap],x,y,xs,ys,xe,ye,tolerance,range,AllowPartialAccuracy,accuracy);
 end;
+
+procedure ps_RectangleBitmap(bitmap : integer; const box : TBox; Color : TColor); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bitmap].Rectangle(box,Color);
+end;
+
+procedure ps_FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bitmap].FloodFill(startPoint,searchcol,replacecol);
+end;

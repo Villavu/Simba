@@ -1941,6 +1941,7 @@ var
    // bounds
    W, H: integer;
    MA: TBox;
+   MaxX,MaxY : integer; //The maximum value X/Y can take (for subpoints)
 
    // for loops, etc
    xx, yy: integer;
@@ -1972,6 +1973,7 @@ begin
 
   // Get the area we should search in for the Main Point.
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
+  Writeln(MA.x1,'-',MA.y1,'-',MA.x2,'-',MA.y2);
 
   // Turn the bp into a more usable array.
   setlength(goodPoints, dtm.l);
@@ -2018,6 +2020,9 @@ begin
   MA.y1 := MA.y1 - y1;
   MA.x2 := MA.x2 - x1;
   MA.y2 := MA.y2 - y1;
+
+  MaxX := y2-y1;
+  MaxY := x2-x1;
   //MA is now fixed to the new (0,0) box...
 
   for yy := MA.y1  to MA.y2  do //Coord of the mainpoint in the search area
@@ -2030,8 +2035,8 @@ begin
         //With area it can go out of bounds, therefore this max/min check
         StartX := max(0,xx - dtm.asz[i] + dtm.p[i].x);
         StartY := max(0,yy - dtm.asz[i] + dtm.p[i].y);
-        EndX := Min(Ma.x2,xx + dtm.asz[i] + dtm.p[i].x);
-        EndY := Min(ma.y2,yy + dtm.asz[i] + dtm.p[i].y);
+        EndX := Min(MaxX,xx + dtm.asz[i] + dtm.p[i].x);
+        EndY := Min(MaxY,yy + dtm.asz[i] + dtm.p[i].y);
         for xxx := StartX to EndX do //The search area for the subpoint
         begin
           for yyy := StartY to EndY do
@@ -2041,7 +2046,7 @@ begin
             begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
-         //   if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
+//              if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
               if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
                 b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
@@ -2112,6 +2117,7 @@ var
    // bounds
    W, H: integer;
    MA: TBox;
+   MaxX,MaxY : integer;//The maximum value a (subpoint) can have!
 
    // for loops, etc
    xx, yy: integer;
@@ -2152,6 +2158,9 @@ begin
   setlength(goodPoints, DTM.l);
   for i := 0 to DTM.l - 1 do
     goodPoints[i] := not DTM.bp[i];
+
+  MaxX := x2 - x1;
+  MaxY := x2 - y1;
 
   // Init data structure B.
   W := x2 - x1;
@@ -2224,8 +2233,8 @@ begin
           //With area it can go out of bounds, therefore this max/min check
           StartX := max(0,xx - DTM.asz[i] + DTMRot.p[i].x);
           StartY := max(0,yy - DTM.asz[i] + DTMRot.p[i].y);
-          EndX := Min(Ma.x2,xx + DTM.asz[i] + DTMRot.p[i].x);
-          EndY := Min(ma.y2,yy + DTM.asz[i] + DTMRot.p[i].y);
+          EndX := Min(MaxX,xx + DTM.asz[i] + DTMRot.p[i].x);
+          EndY := Min(MaxY,yy + DTM.asz[i] + DTMRot.p[i].y);
           for xxx := StartX to EndX do //The search area for the subpoint
           begin
             for yyy := StartY to EndY do

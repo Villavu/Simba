@@ -605,7 +605,6 @@ var
   i,ii : integer;
   Fonts : TMFonts;
 begin
-  {$I PSInc/pscompile.inc}
   Fonts := Client.MOCR.Fonts;
   for i := fonts.count - 1 downto 0 do
     Sender.Comp.AddConstantN(Fonts[i].Name,'string').SetString(Fonts[i].Name);
@@ -647,6 +646,8 @@ begin
     RegisterMethod('procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);');
     RegisterMethod('procedure DrawTPA(TPA : TPointArray; Color : TColor);');
     RegisterMethod('function FastGetPixel(x,y : integer) : TColor;');
+    RegisterMethod('procedure Rectangle(const Box : TBox; FillCol : TColor);');
+    RegisterMethod('procedure FloodFill(const StartPT : TPoint; const SearchCol,ReplaceCol : TColor);');
 //      function FastGetPixels(TPA : TPointArray) : TIntegerArray;
     RegisterMethod('procedure SetTransparentColor(Col : TColor);');
     RegisterMethod('function GetTransparentColor : TColor;');
@@ -706,6 +707,8 @@ begin;
     RegisterMethod(@TMufasaBitmap.FastSetPixels,'FASTSETPIXELS');
     RegisterMethod(@TMufasaBitmap.DrawATPA,'DRAWATPA');
     RegisterMethod(@TMufasaBitmap.DrawTPA,'DRAWTPA');
+    RegisterMethod(@TMufasaBitmap.FloodFill,'FLOODFILL');
+    RegisterMethod(@TMufasaBitmap.Rectangle,'RECTANGLE');
     RegisterMethod(@TMufasaBitmap.FastGetPixel,'FASTGETPIXEL');
     RegisterMethod(@TMufasaBitmap.SetTransparentColor,'SETTRANSPARENTCOLOR');
     RegisterMethod(@TMufasaBitmap.GetTransparentColor,'GETTRANSPARENTCOLOR');
@@ -744,6 +747,7 @@ begin
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
+  {$I PSInc/pscompile.inc}
   SIRegister_Mufasa(x);
   with x.AddFunction('procedure writeln;').decl do
     with AddParam do
