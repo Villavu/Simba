@@ -1973,7 +1973,6 @@ begin
 
   // Get the area we should search in for the Main Point.
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
-  Writeln(MA.x1,'-',MA.y1,'-',MA.x2,'-',MA.y2);
 
   // Turn the bp into a more usable array.
   setlength(goodPoints, dtm.l);
