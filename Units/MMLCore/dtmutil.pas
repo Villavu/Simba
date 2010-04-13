@@ -103,6 +103,8 @@ var
   i : integer;
 begin;
   i := 0;
+  if aDTM.l = 0 then
+    exit;
   if adtm.n <> '' then
     mDebugLn('Name: ' + aDTM.n);
   mDebugLn('MainPoint ' + inttostr(aDTM.p[i].x) + ', ' + inttostr(aDTM.p[i].y) + ' col: ' + inttostr(aDTM.c[i]) + ', tol: ' + inttostr(aDTM.t[i]) + '; ashape ' + inttostr(aDTM.ash[i]) + ' asize ' + inttostr(aDTM.asz[i])+ ', Bad Point: ' + BoolToStr(aDTM.bp[i]));
