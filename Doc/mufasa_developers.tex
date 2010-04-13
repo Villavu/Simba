@@ -1,25 +1,35 @@
 \documentclass[a4paper, 10pt]{report} % perhaps book?
 
+% For images
 \usepackage{graphicx}
+
+% For URLs
+
 \usepackage{url}
+
+% For all our math joys
 \usepackage{amsmath}
+
+% For correct line-breaking.
+\usepackage[english]{babel}
+
 \setlength{\parskip}{1.5ex}
 
 \begin{document}
 \title{Mufasa Developers Manual}
-\author{Merlijn Wajer \and Raymond van Veneti\"{e}}
+\author{Merlijn Wajer (Wizzup?) \and Raymond van Veneti\"{e} (mastaraymond)}
 \maketitle
 \tableofcontents
 
 \chapter{Foreword}
 
-A word of thanks to the SRL Community{\footnote{http://villavu.com/} and some of
+A word of thanks to the SRL Community\footnote{http://villavu.com/} and some of
 it's members.
 The following persons (in no particular order) have contributed in some way to
 Simba, note that not all names correspond to the real name of a person, but
 rather to their corresponding internet name.
-Benjamin J Land (aka BenLand100), Nielsie95, Markus, Yakman, Mixster, ss23,
-Nava2, Dgby714, Widget.
+Benjamin J Land (aka BenLand100), Nielsie95, Markus, Bullzeye95,
+Yakman, Mixster, ss23, Nava2, Dgby714, Widget.
 
 A special word of thanks goes to Frederic Hannes (Freddy1990) for maintaining
 his program\footnote{SCAR, http://freddy1990.com}, for giving us inspiration
@@ -28,7 +38,7 @@ and generally for all the time he has put in SRL.
 That's about it for the foreword, we hope this Document will be of any use to
 you as reader.
 
-Merlijn and Raymond
+Wizzup? and Raymond
 
 \chapter{Introduction}
 
@@ -39,5 +49,94 @@ structure of a particular subject, and if necessary, spent a few sections
 on files linked with the subject. 
 As Simba depends heavily on the MML and the MML can also actively be used in 
 other languages, we will first discuss the MML, and then turn to Simba.
+
+\chapter{MML}
+
+The MML\footnote{Mufasa Macro Library} consists out of several
+modular\footnote{Even though they are seen as modular, some have dependencies on
+other modules} classes / objects. Each of these classes strive to be
+completely platform independent. We will look at each of these classes.
+\footnote{
+The last class - TMFiles - may be removed in the future, as it doesn't
+perform any special operations that are hard to do on other platforms or
+operating systems.
+}
+
+\begin{itemize}
+    \item   TIOManager
+    \item   TMFinder
+    \item   TMBitmaps
+    \item   TMDTM
+    \item   TMOCR
+    \item   TMFiles
+\end{itemize}
+
+And finally, to bundle all these components into one class, the MML contains a
+TMClient class, which simply initialises all the previously mentioned classes
+when it is created, and destroys them when it is destroyed. It also allows
+modules to access other modules, using the TMClient reference.
+
+\section{TMClient}
+
+\subsection{Introduction}
+
+% Don't confuse with a client
+
+\section{TIOManager}
+
+
+\subsection{Introduction}
+
+\subsection{TTarget}
+\subsection{TRawTarget}
+\subsection{TBitmapTarget}
+\subsection{TWindow\_Abstract}
+\subsection{TEIOS\_Client}
+\subsection{TEIOS\_Target}
+\subsection{TEIOS\_Controller}
+\subsection{TTarget\_Exported}
+\subsection{TIOManager\_Abstract}
+
+\section{TMFinder}
+
+\subsection{Introduction}
+
+The TMFinder class is basically a large collection of different object
+\footnote{Object being either a colour, bitmap or dtm} ``finding'' methods.
+It has a reference to it's ``parent'' Client object, since it needs to have
+access to TIOManager for retreiving client data, and access to managed bitmaps
+and dtm's in TMBitmaps and TMDTM.
+
+
+\subsection{Caching}
+% ClientTPA + CachedWidth/CachedHeight.
+
+\subsection{Colour Comparison Algorithms}
+
+% CTS 0,1,2
+
+
+\section{TMBitmaps}
+
+\section{TMDTM}
+
+\section{TMOCR}
+
+\section{TMFiles}
+
+\section{Portability to other languages}
+
+Since it is near to impossible to simply import the MML classes, we are
+currently writing a library called `libmml', which offers a non-OOP wrapper
+around the MML library.
+
+\chapter{Simba - General}
+% Loading/Saving
+% Auto updating
+% Settings?
+% Code Completion?
+
+\chapter{Simba and PascalScript}
+
 
 \end{document}
