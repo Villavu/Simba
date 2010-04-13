@@ -35,8 +35,8 @@ uses
 { TMFinder Class }
 
 {
-  Should be 100% independant, as all platform dependant code is in the
-  Window and Input classes.
+  Should be 100% OS independant, 
+  as all OS dependant code is in the IO Manager
 
   Let's try not to use any OS-specific defines here? ;)
 }
