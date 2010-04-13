@@ -52,15 +52,17 @@ type
     procedure ValidatePoint(x,y : integer);
     function SaveToFile(const FileName : string) :boolean;
     procedure LoadFromFile(const FileName : string);
+    procedure Rectangle(const Box : TBox;FillCol : TColor);
+    procedure FloodFill(const StartPT : TPoint; const SearchCol, ReplaceCol : TColor);
     procedure FastSetPixel(x,y : integer; Color : TColor);
-    procedure FastSetPixels(TPA : TPointArray; Colors : TIntegerArray);
+    procedure FastSetPixels(Points : TPointArray; Colors : TIntegerArray);
     procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);overload;
     procedure DrawATPA(ATPA : T2DPointArray);overload;
-    procedure DrawTPA(TPA : TPointArray; Color : TColor);
+    procedure DrawTPA(Points : TPointArray; Color : TColor);
     procedure DrawToCanvas(x,y : integer; Canvas : TCanvas);
     function CreateTPA(SearchCol : TColor) : TPointArray;
     function FastGetPixel(x,y : integer) : TColor;
-    function FastGetPixels(TPA : TPointArray) : TIntegerArray;
+    function FastGetPixels(Points : TPointArray) : TIntegerArray;
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
@@ -121,7 +123,7 @@ type
 implementation
 
 uses
-  paszlib,DCPbase64,math, client,
+  paszlib,DCPbase64,math, client,tpa,
   colour_conv,IOManager,mufasatypesutil;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
@@ -450,6 +452,66 @@ begin;
   Result.A := 0;
 end;
 
+procedure TMufasaBitmap.Rectangle(const Box: TBox;FillCol: TColor);
+var
+  y : integer;
+  Col : Longword;
+  Size : longword;
+begin
+  if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.w) or (Box.y2 >= self.h) then
+    raise exception.Create('The Box you passed to Rectangle exceed the bitmap''s bounds');
+  if (box.x1 > box.x2) or (Box.y1 > box.y2) then
+    raise exception.CreateFmt('The Box you passed to Rectangle doesn''t have normal bounds: (%d,%d) : (%d,%d)',
+                               [Box.x1,box.y1,box.x2,box.y2]);
+  col :=  Longword(RGBToBGR(FillCol));
+  Size := Box.x2 - box.x1 + 1;
+  for y := Box.y1 to Box.y2 do
+    FillDWord(FData[y * self.w + Box.x1],size,Col);
+end;
+
+procedure TMufasaBitmap.FloodFill(const StartPT: TPoint; const SearchCol,
+  ReplaceCol: TColor);
+var
+  Stack : TPointArray;
+  SIndex : Integer;
+  CurrX,CurrY : integer;
+  Search,Replace : LongWord;
+procedure AddToStack(x,y : integer);
+begin
+  if LongWord(FData[y * w + x]) = Search then
+  begin
+    LongWord(FData[y * w + x]) := Replace;
+    Stack[SIndex].x := x;
+    Stack[SIndex].y := y;
+    inc(SIndex);
+  end;
+end;
+begin
+  ValidatePoint(StartPT.x,StartPT.y);
+  Search := LongWord(RGBToBGR(SearchCol));
+  Replace := LongWord(RGBToBGR(ReplaceCol));
+  if LongWord(FData[StartPT.y * w + StartPT.x]) <> Search then //Only add items to the stack that are the searchcol.
+    Exit;
+  SetLength(Stack,w * h);
+  SIndex := 0;
+  AddToStack(StartPT.x,StartPT.y);
+  SIndex := 0;
+  while (SIndex >= 0) do
+  begin;
+    CurrX := Stack[SIndex].x;
+    Curry := Stack[SIndex].y;
+    if (CurrX > 0) and (CurrY > 0)         then AddToStack(CurrX - 1, CurrY - 1);
+    if (CurrX > 0)                         then AddToStack(CurrX - 1, CurrY);
+    if (CurrX > 0) and (CurrY + 1 < h)     then AddToStack(CurrX - 1, CurrY + 1);
+    if (CurrY + 1 < h)                     then AddToStack(CurrX   ,  CurrY + 1);
+    if (CurrX + 1 < w) and (CurrY + 1 < h) then AddToStack(CurrX + 1, CurrY + 1);
+    if (CurrX + 1 < w)                     then AddToStack(CurrX + 1, CurrY    );
+    if (CurrX + 1 < w) and (CurrY > 0)     then AddToStack(CurrX + 1, CurrY - 1);
+    if (CurrY > 0)                         then AddToStack(CurrX    , CurrY - 1);
+    Dec(SIndex);
+  end;
+end;
+
 function TMufasaBitmap.Copy: TMufasaBitmap;
 begin
   Result := TMufasaBitmap.Create;
@@ -593,18 +655,20 @@ begin
   FData[y*w+x] := RGBToBGR(Color);
 end;
 
-procedure TMufasaBitmap.FastSetPixels(TPA: TPointArray; Colors: TIntegerArray);
+procedure TMufasaBitmap.FastSetPixels(Points: TPointArray; Colors: TIntegerArray);
 var
   i,len : integer;
+  Box : TBox;
 begin
-  len := High(TPA);
+  len := High(Points);
   if Len <> High(colors) then
     Raise Exception.CreateFMT('TPA/Colors Length differ',[]);
-  for i := 0 to len do
-  begin;
-    ValidatePoint(TPA[i].x,TPA[i].y);
-    FData[TPA[i].y * w + TPA[i].x] := RGBToBGR(Colors[i]);
-  end;
+  Box := GetTPABounds(Points);
+  if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.w) or (Box.y2 >= self.h) then
+    raise exception.Create('The Points you passed to FastSetPixels exceed the bitmap''s bounds')
+  else
+    for i := 0 to len do
+      FData[Points[i].y * w + Points[i].x] := RGBToBGR(Colors[i]);
 end;
 
 procedure TMufasaBitmap.DrawATPA(ATPA: T2DPointArray; Colors: TIntegerArray);
@@ -612,6 +676,7 @@ var
   lenTPA,lenATPA : integer;
   i,ii : integer;
   Color : TRGB32;
+  Box : TBox;
 begin
   lenATPA := High(ATPA);
   if LenATPA <> High(colors) then
@@ -620,11 +685,12 @@ begin
   begin;
     lenTPA := High(ATPA[i]);
     Color := RGBToBGR(Colors[i]);
-    for ii := 0 to lenTPA do
-    begin;
-      ValidatePoint(ATPA[i][ii].x,ATPA[i][ii].y);
-      FData[ATPA[i][ii].y * w + ATPA[i][ii].x] := Color;
-    end;
+    Box := GetTPABounds(ATPA[i]);
+    if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.w) or (Box.y2 >= self.h) then
+      raise exception.Create('The Points you passed to DrawATPA exceed the bitmap''s bounds')
+    else
+      for ii := 0 to lenTPA do
+        FData[ATPA[i][ii].y * w + ATPA[i][ii].x] := Color;
   end;
 end;
 
@@ -641,9 +707,9 @@ begin
   DrawATPA(ATPA,Colors);
 end;
 
-procedure TMufasaBitmap.DrawTPA(TPA: TPointArray; Color: TColor);
+procedure TMufasaBitmap.DrawTPA(Points: TPointArray; Color: TColor);
 begin
-  DrawATPA(ConvArr([TPA]),ConvArr([Color]));
+  DrawATPA(ConvArr([Points]),ConvArr([Color]));
 end;
 
 procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas: TCanvas);
@@ -685,17 +751,18 @@ begin
   Result := BGRToRGB(FData[y*w+x]);
 end;
 
-function TMufasaBitmap.FastGetPixels(TPA: TPointArray): TIntegerArray;
+function TMufasaBitmap.FastGetPixels(Points: TPointArray): TIntegerArray;
 var
   i,len : integer;
+  Box  : TBox;
 begin
-  len := high(TPA);
+  len := high(Points);
+  Box := GetTPABounds(Points);
+  if (Box.x1 < 0) or (Box.y1 < 0) or (Box.x2 >= self.w) or (Box.y2 >= self.h) then
+    raise exception.Create('The Points you passed to FastGetPixels exceed the bitmap''s bounds');
   SetLength(result,len+1);
   for i := 0 to len do
-  begin;
-    ValidatePoint(TPA[i].x,TPA[i].y);
-    Result[i] := BGRToRGB(FData[TPA[i].y*w + TPA[i].x]);
-  end;
+    Result[i] := BGRToRGB(FData[Points[i].y*w + Points[i].x]);
 end;
 
 procedure TMufasaBitmap.SetTransparentColor(Col: TColor);
