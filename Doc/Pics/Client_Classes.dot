@@ -2,11 +2,16 @@ digraph Client {
 
 	Client [shape=box]
 	
-	Client -> Window
+	Client -> IOManager
 	Client -> Finder
 	Client -> Bitmaps
 	Client -> Files
 	Client -> OCR
 	Client -> DTM
 
+    Finder -> IOManager
+    Finder -> Bitmaps
+    Finder -> DTM
+
+    OCR -> IOManager
 }
