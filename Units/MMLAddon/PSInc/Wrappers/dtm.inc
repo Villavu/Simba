@@ -81,7 +81,7 @@ end;
 
 function ps_GetDTM(index: Integer) : pDTM; extdecl;
 begin
-  CurrThread.Client.MDTM.GetDTM(index);
+  result := CurrThread.Client.MDTM.GetDTM(index);
 end;
 
 function ps_AddDTM(const d: TDTM): Integer; extdecl;
