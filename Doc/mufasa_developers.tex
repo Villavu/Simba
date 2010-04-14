@@ -14,7 +14,7 @@
 \usepackage[english]{babel}
 
 % Syntax highlighting.
-\usepackage{listings}
+% \usepackage{listings}
 
 \usepackage{color}
 
@@ -25,13 +25,13 @@
 \author{Merlijn Wajer (Wizzup?) \and Raymond van Veneti\"{e} (mastaraymond)}
 \maketitle
 \tableofcontents
-\lstset{language=Pascal}
-\definecolor{lightgray}{rgb}{0.9,0.9,0.9} 
-\definecolor{mycommentcol}{rgb}{0.2,0.2,0.8} 
-
-\lstset{morecomment=[l][\color{mycommentcol}]{//},
-morecomment=[s][\color{mycommentcol}]{/*}{*/}}
-\lstset{backgroundcolor=\color{lightgray}}
+% \lstset{language=Pascal}
+% \definecolor{lightgray}{rgb}{0.9,0.9,0.9} 
+% \definecolor{mycommentcol}{rgb}{0.2,0.2,0.8} 
+% 
+% \lstset{morecomment=[l][\color{mycommentcol}]{//},
+% morecomment=[s][\color{mycommentcol}]{/*}{*/}}
+% \lstset{backgroundcolor=\color{lightgray}}
 
 \chapter{Foreword}
 
@@ -145,10 +145,10 @@ other, and may differ in colour, tolerance, area size and shape.
 A DTM consists out of one \textbf{Main Point}, and several \textbf{Sub Points}
 The structure of a DTM looks like this:
 
-\begin{figure}[ht]
-    \includegraphics[scale=0.4]{Pics/DTM}
-    \caption{Structure of a DTM.}
-\end{figure}
+%\begin{figure}[ht]
+%    \includegraphics[scale=0.4]{Pics/DTM}
+%    \caption{Structure of a DTM.}
+%\end{figure}
 
 Where each point in a DTM has a colour, tolerance, area size and area shape
 entity. The main point's ``point'' is typically $ (0, 0) $, and all the
@@ -157,7 +157,7 @@ sub point points are arelative to the main point. ``Point Match'' defines if a p
 Of course, the actual representation in Pascal is slightly different:
 
 
-\begin{lstlisting}
+\begin{verbatim}
   pDTM = record
     l: Integer;
     p: TPointArray;
@@ -165,7 +165,7 @@ Of course, the actual representation in Pascal is slightly different:
     bp: Array Of Boolean;
     n: String;
   end;
-\end{lstlisting}
+\end{verbatim}
 
 \subsubsection{DTM Example}
 
@@ -179,7 +179,7 @@ $$ SubPoint_2 = (120, 450) $$
 
 Then we could create the following pDTM structure:
 
-\begin{lstlisting}
+\begin{verbatim}
 	// Give dtm.p a length of three.
 	// Mainpoint
 	dtm.p[0] = Point(123, 456);
@@ -187,7 +187,7 @@ Then we could create the following pDTM structure:
 	// Subpoints
 	dtm.p[1] = Point(122, 460)
 	dtm.p[2] = Point(120, 450)
-\end{lstlisting}
+\end{verbatim}
 
 Note that we do not include other variables, such as colour, tolerance, area
 size and area shape; but they should be handled in a similar manner.
@@ -195,7 +195,7 @@ size and area shape; but they should be handled in a similar manner.
 However, this code is not very clear about the relation between the DTM's
  points. Better would be to write:
 
-\begin{lstlisting}
+\begin{verbatim}
     // Give dtm.p a length of three.
     // Mainpoint
     dtm.p[0] = Point(0, 0);
@@ -203,7 +203,7 @@ However, this code is not very clear about the relation between the DTM's
     // Subpoints
     dtm.p[1] = Point(-1, 4)  // 122 - 123 = -1, 460 - 456 = 4
     dtm.p[2] = Point(-3, -6) // 120 - 123 = -3, 450 - 456 = -6
-\end{lstlisting}
+\end{verbatim}
 
 As you can see it is perfectly valid to use negative points.
 
