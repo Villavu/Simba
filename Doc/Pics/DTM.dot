@@ -4,4 +4,5 @@ digraph DTM {
 	DTM -> Tolerances
 	DTM -> "Area Sizes"
 	DTM -> "Area Shapes"
+    DTM -> "Point Match"
 }
