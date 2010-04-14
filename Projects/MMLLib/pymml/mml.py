@@ -10,6 +10,10 @@ class MMLCoreException(Exception):
         Exception.__init__(self, err)
 
 class MMLCore(object):
+    '''
+        The MMLCore object is to be opened only once per Python instance.
+        It opens the libmml library, and calls init().
+    '''
     def __init__(self, dllpath):
         self.dll = CDLL(dllpath)
 

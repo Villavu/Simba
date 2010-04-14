@@ -8,6 +8,15 @@ class MouseException(Exception):
 
 # Usage:
 class Mouse(object):
+    '''
+        The MML Mouse object communicates directly with libmml,
+        but wraps it around a nice and easy to use layer.
+        It will allow several ways to set mouse positions and
+        buttons. __getitem__ and __setitem__ are also implemented,
+        so one can access mouse buttons states and positions with [].
+
+
+    '''
     # _mc = MMLCore reference.
     _mc = None
     Left ='Left'
@@ -19,7 +28,8 @@ class Mouse(object):
     _lpp = (0, 0)
 
     def __init__(self, MC):
-        '''Initialize the Mouse object'''
+        ''' Initialize the Mouse object. Needs a DLL Mufasa Core object 
+            (which contains the dll reference.)'''
         self._mc = MC
         self._initialiseDLLFuncs()
         pass
