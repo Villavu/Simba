@@ -13,6 +13,11 @@
 % For correct line-breaking.
 \usepackage[english]{babel}
 
+% Syntax highlighting.
+\usepackage{listings}
+
+\usepackage{color}
+
 \setlength{\parskip}{1.5ex}
 
 \begin{document}
@@ -20,6 +25,13 @@
 \author{Merlijn Wajer (Wizzup?) \and Raymond van Veneti\"{e} (mastaraymond)}
 \maketitle
 \tableofcontents
+\lstset{language=Pascal}
+\definecolor{lightgray}{rgb}{0.9,0.9,0.9} 
+\definecolor{mycommentcol}{rgb}{0.2,0.2,0.8} 
+
+\lstset{morecomment=[l][\color{mycommentcol}]{//},
+morecomment=[s][\color{mycommentcol}]{/*}{*/}}
+\lstset{backgroundcolor=\color{lightgray}}
 
 \chapter{Foreword}
 
@@ -120,15 +132,130 @@ and dtm's in TMBitmaps and TMDTM.
 
 \section{TMDTM}
 
+\subsection{The DTM}
+
+DTM is shorthand for Deformable Template Model. \\
+
+\emph{``DTM'' is the term used in SCAR. If it is actually a Deformable Template
+Model is definately debateable; but for now we will stick to ``DTM''.} \\
+
+A DTM is in my view just a relatively simple way of defining a relationship
+between several points. Each of these points have a relative offset to each
+other, and may differ in colour, tolerance, area size and shape.
+A DTM consists out of one \textbf{Main Point}, and several \textbf{Sub Points}
+The structure of a DTM looks like this:
+
+\begin{figure}[ht]
+    \includegraphics[scale=0.4]{Pics/DTM}
+    \caption{Structure of a DTM.}
+\end{figure}
+
+Where each point in a DTM has a colour, tolerance, area size and area shape
+entity. The main point's ``point'' is typically $ (0, 0) $, and all the
+sub point points are arelative to the main point. ``Point Match'' defines if a point should match or should \textbf{Not} match.
+
+Of course, the actual representation in Pascal is slightly different:
+
+
+\begin{lstlisting}
+  pDTM = record
+    l: Integer;
+    p: TPointArray;
+    c, t, asz, ash: TIntegerArray;
+    bp: Array Of Boolean;
+    n: String;
+  end;
+\end{lstlisting}
+
+\subsubsection{DTM Example}
+
+If one was to create his own DTM, he\footnote{Or she} would first have to
+think of a useful DTM structure.
+
+Say:
+$$ MainPoint = (123, 456)  $$
+$$ SubPoint_1 = (122, 460) $$
+$$ SubPoint_2 = (120, 450) $$
+
+Then we could create the following pDTM structure:
+
+\begin{lstlisting}
+	// Give dtm.p a length of three.
+	// Mainpoint
+	dtm.p[0] = Point(123, 456);
+
+	// Subpoints
+	dtm.p[1] = Point(122, 460)
+	dtm.p[2] = Point(120, 450)
+\end{lstlisting}
+
+Note that we do not include other variables, such as colour, tolerance, area
+size and area shape; but they should be handled in a similar manner.
+
+However, this code is not very clear about the relation between the DTM's
+ points. Better would be to write:
+
+\begin{lstlisting}
+    // Give dtm.p a length of three.
+    // Mainpoint
+    dtm.p[0] = Point(0, 0);
+
+    // Subpoints
+    dtm.p[1] = Point(-1, 4)  // 122 - 123 = -1, 460 - 456 = 4
+    dtm.p[2] = Point(-3, -6) // 120 - 123 = -3, 450 - 456 = -6
+\end{lstlisting}
+
+As you can see it is perfectly valid to use negative points.
+
+\subsubsection{Color and Tolerance}
+
+The colour value of a point in a DTM is just a RGB integer value.
+Black = 0, Red = 255, White = 16777215, et cetera.
+
+The value tolerance decides if a colour is similar enough to the given
+colour; if this is the case, we say that the colours \textbf{matched}.
+
+With no Area Size and Area Shape specified\footnote{Read: with Area
+Size = 0 and Area Shape = Rectangle} we say that a DTM matches if for each
+point in the DTM, the colour at the relative point matches the colour in dtm
+with the given tolerance.
+
+$$ \forall p \in P, \forall t \in Tol, \forall c \in Col : T(C(p), c) \leq t
+ $$
+
+With C() defining the colour at the given point, and T() defining the tolerance
+between the two given colours.
+
+\subsubsection{Area Size and Shape}
+
+Area Size and Shape add that nifty extra functionality to DTM's.
+\textbf{Area Size} defines the area that should all match the colour
+with the given tolerance. \\
+\textbf{Area Shape} is currently not implemented, mainly because
+we haven't found a good use for area shapes.
+
+\subsection{How does TMDTM fit in?}
+
+The TMDTM class is a DTM manager. It provides methods to add, store, load
+and free DTM's. It has a few other features. One of it's other features
+is keeping track of what DTMs are unfreed. It can also, for example help you
+find a bug in your code, by printing out information of the DTM that you forgot to free.
+You can also give names to DTMs, which eases debugging even further.
+
+If you try to access an invalid DTM, the MML will throw an exception.
+
 \section{TMOCR}
 
 \section{TMFiles}
+
+\section{Finding algorithms}
 
 \section{Portability to other languages}
 
 Since it is near to impossible to simply import the MML classes, we are
 currently writing a library called `libmml', which offers a non-OOP wrapper
 around the MML library.
+
 
 \chapter{Simba - General}
 % Loading/Saving
