@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 625;
+  SimbaVersion = 626;
 
 type
 
@@ -1153,6 +1153,7 @@ var
   Data : TStringArray;
   i,ii : integer;
 begin
+  self.BeginFormUpdate;
   str := LoadSettingDef('LastConfig/MainForm/Position','');
   if str <> '' then
   begin;
@@ -1191,6 +1192,7 @@ begin
   else
     ShowConsole(false);
   {$endif}
+  self.EndFormUpdate;
 end;
 
 procedure TForm1.SaveFormSettings;
@@ -2004,6 +2006,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 var
   FillThread : TProcThread;
 begin
+  self.BeginFormUpdate;
   Randomize;
   DecimalSeparator := '.';
   MainDir:= ExtractFileDir(Application.ExeName);
@@ -2078,6 +2081,7 @@ begin
   FillThread.Resume;
   //Load the extensions
   LoadExtensions;
+  self.EndFormUpdate;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -2250,6 +2254,7 @@ var
   Tree : TTreeView;
 begin
   SetLength(nodes,0);
+  frmFunctionList.FunctionList.BeginUpdate;
   if frmFunctionList.FunctionList.Items.Count = 0 then
   begin;
     Methods := TMThread.GetExportedMethods;
@@ -2286,6 +2291,7 @@ begin
     end;
     Sections.free;
   end;
+  frmFunctionList.FunctionList.EndUpdate;
   if CurrScript <> nil then
     frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
