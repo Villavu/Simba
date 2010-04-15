@@ -1171,13 +1171,15 @@ begin
   else
 //  if str = 'normal' then
     Self.WindowState := wsNormal;
-
-  str := LoadSettingDef('LastConfig/MainForm/RecentFiles','');
-  if str <> '' then
-  begin
-    Data := Explode(';',str);
-    for i := high(data) downto 0 do//First = entry should be added as last
-      AddRecentFile(data[i]);
+  if SettingExtists('LastConfig/MainForm/RecentFiles/Count') then
+  begin;
+    ii := StrToIntDef(LoadSettingDef('LastConfig/MainForm/RecentFiles/Count','-1'),-1);
+    for i := 0 to ii do
+    begin
+      str := LoadSettingDef('LastConfig/MainForm/RecentFiles/File' + inttostr(I),'');
+      if str <> '' then
+        AddRecentFile(str);
+    end;
   end;
   str := LowerCase(LoadSettingDef('Settings/FunctionList/ShowOnStart','True'));
   str2 := lowercase(LoadSettingDef('LastConfig/MainForm/FunctionListShown',''));
@@ -1211,14 +1213,14 @@ begin
       Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
       SetSetting('LastConfig/MainForm/Position', Implode(':',Data ));
     end;
+    DeleteKey('LastConfig/MainForm/RecentFiles');
     if RecentFiles.Count > 0 then
     begin
+      SetSetting('LastConfig/MainForm/RecentFiles/Count',inttostr(RecentFiles.Count));
       SetLength(data,RecentFiles.Count);
-      for i := 0 to high(data) do //First entry should be the last-opened
-        data[high(data) - i] := RecentFiles[i];
-      SetSetting('LastConfig/MainForm/RecentFiles',implode(';',data));
-    end else
-      SetSetting('LastConfig/MainForm/RecentFiles','');
+      for i := 0 to RecentFiles.Count - 1 do
+        SetSetting('LastConfig/MainForm/RecentFiles/File'+inttostr(i),RecentFiles[i]);
+    end;
     if MenuItemFunctionList.Checked then
       SetSetting('LastConfig/MainForm/FunctionListShown','True')
     else
