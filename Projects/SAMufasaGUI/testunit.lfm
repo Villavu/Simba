@@ -2471,7 +2471,7 @@ object Form1: TForm1
       00000000000000000000
     }
     Visible = True
-    OnClick = NoTray
+    OnClick = MTrayIconClick
     left = 528
     top = 104
   end
