@@ -84,11 +84,6 @@ end;
 procedure TFunctionListFrame.FillThreadTerminate(Sender: TObject);
 begin
   FillThread.Analyzer.Free;
-  { Don't free the thread when it is already stopped... This causes deadlocks? }
-  {$IFDEF Linux}
-  KillThread(FillThread.Handle);
-  {$ENDIF}
-  FreeAndNil(FillThread);
   ScriptNode.Expand(true);
   FunctionList.EndUpdate;
   if Filtering then
@@ -96,6 +91,7 @@ begin
     FilterTreeVis(True);
     Find(false,false);
   end;
+  FillThread := nil;
 end;
 
 procedure TFunctionListFrame.FrameEndDock(Sender, Target: TObject; X, Y: Integer
@@ -239,6 +235,7 @@ begin
     MS := TMemoryStream.Create;
     MS.Write(Script[1],length(script));
     OnTerminate:=@FillThreadTerminate;
+    FreeOnTerminate := True;
     FillThread.ScriptNode := self.ScriptNode;
     FillThread.IncludesNode := self.IncludesNode;
   end;
