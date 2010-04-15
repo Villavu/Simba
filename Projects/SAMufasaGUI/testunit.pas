@@ -285,12 +285,12 @@ type
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
     procedure MenuItemFunctionListClick(Sender: TObject);
+    procedure MTrayIconClick(Sender: TObject);
     procedure NewsTimerTimer(Sender: TObject);
     procedure OnLinePSScript(Sender: TObject);
     procedure ButtonPickClick(Sender: TObject);
     procedure ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-    procedure NoTray(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
     procedure ButtonTrayClick(Sender: TObject);
     procedure PageControl1Changing(Sender: TObject; var AllowChange: Boolean);
@@ -2337,6 +2337,13 @@ begin
   FunctionListShown(not MenuItemFunctionList.Checked);
 end;
 
+procedure TForm1.MTrayIconClick(Sender: TObject);
+begin
+  self.Show;
+  if Self.CanFocus then
+    self.SetFocus;
+end;
+
 function TForm1.GetSimbaNews: String;
 var
   t: TDownloadThread;
@@ -2402,14 +2409,6 @@ procedure TForm1.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
 begin
   Manager.SetTarget(Selector.Drag);
   FormWritelnEx('New window: ' + IntToStr(Selector.LastPick));
-end;
-
-procedure TForm1.NoTray(Sender: TObject);
-begin
-  if Not Form1.IsVisible then
-    Self.MenuItemShowClick(Sender)
-  else
-    Form1.Hide;
 end;
 
 procedure TForm1.PageControl1Change(Sender: TObject);
