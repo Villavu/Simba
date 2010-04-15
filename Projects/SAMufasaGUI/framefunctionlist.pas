@@ -85,7 +85,10 @@ procedure TFunctionListFrame.FillThreadTerminate(Sender: TObject);
 begin
   FillThread.Analyzer.Free;
   { Don't free the thread when it is already stopped... This causes deadlocks? }
-  //FreeAndNil(FillThread);
+  {$IFDEF Linux}
+  KillThread(FillThread.Handle);
+  {$ENDIF}
+  FreeAndNil(FillThread);
   ScriptNode.Expand(true);
   FunctionList.EndUpdate;
   if Filtering then
@@ -448,41 +451,41 @@ end;
 { TFillThread }
 
 procedure TFillThread.execute;
-procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; Path : string);
-var
-  i : integer;
-  tmpNode : TTreeNode;
-begin;
-  if procs = nil then
-    exit;
-  for i := 0 to Procs.Count - 1 do
-    if (Procs[i] is TciProcedureDeclaration) then
-      with Procs[i] as TciProcedureDeclaration do
-      begin
-        tmpNode := FunctionList^.Items.AddChild(Node,name.ShortText);
-        tmpNode.Data := GetMem(SizeOf(TMethodInfo));
-        FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
-        with PMethodInfo(tmpNode.Data)^ do
+  procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; Path : string);
+  var
+    i : integer;
+    tmpNode : TTreeNode;
+  begin;
+    if procs = nil then
+      exit;
+    for i := 0 to Procs.Count - 1 do
+      if (Procs[i] is TciProcedureDeclaration) then
+        with Procs[i] as TciProcedureDeclaration do
         begin
-          MethodStr := strnew(Pchar(CleanDeclaration));
-          Filename:= strnew(pchar(path));
-          BeginPos:= name.StartPos ;
-          EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
+          tmpNode := FunctionList^.Items.AddChild(Node,name.ShortText);
+          tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+          FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
+          with PMethodInfo(tmpNode.Data)^ do
+          begin
+            MethodStr := strnew(Pchar(CleanDeclaration));
+            Filename:= strnew(pchar(path));
+            BeginPos:= name.StartPos ;
+            EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
+          end;
         end;
-      end;
-end;
+  end;
 
-procedure AddIncludes(ParentNode : TTreeNode; Include : TCodeInsight);
-var
-  i : integer;
-begin;
-  parentNode := FunctionList^.Items.AddChild(
-               IncludesNode,ExtractFileNameOnly(
-               Include.FileName));
-  AddProcsTree(parentNode,Include.Items,Include.FileName);
-  for i := 0 to high(Include.Includes) do
-    AddIncludes(ParentNode,Include.Includes[i])
-end;
+  procedure AddIncludes(ParentNode : TTreeNode; Include : TCodeInsight);
+  var
+    i : integer;
+  begin;
+    parentNode := FunctionList^.Items.AddChild(
+                 IncludesNode,ExtractFileNameOnly(
+                 Include.FileName));
+    AddProcsTree(parentNode,Include.Items,Include.FileName);
+    for i := 0 to high(Include.Includes) do
+      AddIncludes(ParentNode,Include.Includes[i])
+  end;
 var
   i : integer;
 begin
