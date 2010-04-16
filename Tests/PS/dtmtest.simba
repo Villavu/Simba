@@ -15,8 +15,7 @@ begin
     movemouse(x,y);
   end else
     writeln('not found');
-  if getdtm(dtm, ppdtm) then
-    writeln('yay');
+  ppdtm := GetDTM(Dtm);
   printpdtm(tdtmtopdtm(pdtmtotdtm(ppdtm)));
   dtm := addpdtm(ppdtm);
   freedtm(dtm);
