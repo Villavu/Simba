@@ -21,6 +21,35 @@ type
     procedure Execute; override;
   end;
 
+  { TDecompressThread }
+
+  TDecompressThread = class(TThread)
+  private
+    FFinished : boolean;
+    Finput : TStream;
+    FBlockSize : Cardinal;
+  public
+    Result : TMemoryStream;
+    constructor Create(const input : TStream; const BlockSize : Cardinal = 4096);
+    procedure Execute; override;
+    property Finished : boolean read FFinished;
+  end;
+
+  { TUntarThread }
+
+  TUntarThread = class(TThread)
+  private
+    FFinished : boolean;
+    Finput : TStream;
+    FOverWrite : boolean;
+    FOutputDir : string;
+  public
+    Result : boolean;
+    constructor Create(const Input : TStream;const outputdir : string; overwrite : boolean);
+    procedure Execute; override;
+    property Finished : boolean read FFinished;
+  end;
+
 implementation
 
 function DecompressBZip2(const input: TStream; const BlockSize: Cardinal): TMemoryStream;
@@ -114,6 +143,45 @@ begin
     NormalProc;
   if ClassProc <> nil then
     ClassProc;
+end;
+
+constructor TDecompressThread.Create(const input: TStream;
+  const BlockSize: Cardinal);
+begin
+  inherited Create(True);
+  FFinished:= False;
+  FBlockSize:= BlockSize;
+  FInput := Input;
+  Result := nil;
+end;
+
+{ TDecompressThread }
+
+procedure TDecompressThread.Execute;
+begin
+  if Finput <> nil then
+    result := DecompressBZip2(Finput,FBlocksize);
+  Ffinished := True;
+end;
+
+{ TUntarThread }
+
+constructor TUntarThread.Create(const Input: TStream; const outputdir: string;
+  overwrite: boolean);
+begin
+  inherited Create(true);
+  FFinished:= false;
+  FInput := Input;
+  FOutputDir:= OutputDir;
+  FOverWrite:= overwrite;
+  Result:= False;
+end;
+
+procedure TUntarThread.Execute;
+begin
+  if (Finput <> nil) and (FOutputDir <> '') then
+    result := UnTar(FInput,Foutputdir,FOverWrite);
+  FFinished:= True;
 end;
 
 end.
