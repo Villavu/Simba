@@ -1,0 +1,184 @@
+program SRLUpdater;
+var
+  MainMenuItem, MenuCheck, MenuUpdate,AutoUpdate : TMenuItem;
+  started: Boolean;
+  Timer : TTimer;
+  Updating : boolean;
+
+
+function GetNumbers(const str : string) : string;
+var
+  i : integer;
+begin;
+  for i := 1 to length(str) do
+    case str[i] of
+      '0'..'9': result := result + str[i];
+    end;
+end;
+  
+procedure GetOnlineVersion(out PluginsVersion,SRLVersion : integer);
+begin
+  PluginsVersion := strtointdef(GetNumbers(getpage('http://wizzup.org/static/srl/plugins_version')),-1);  
+  SRLVersion := strtointdef(GetNumbers(getpage('http://wizzup.org/static/srl/srl_version')),-1);
+end;
+
+procedure GetLocalVersion(out PluginsVersion,SRLVersion : integer);
+begin
+  PluginsVersion := StrToIntDef(Settings.GetKeyValueDef('PluginsVersion','-1'),-1);
+  SRLVersion := StrToIntDef(Settings.GetKeyValueDef('SRLVersion','-1'),-1);  
+end;
+
+function UpdateSRL : boolean;
+var
+  LocalP,LocalS,OnlineP,OnlineS,I : integer;
+  Contents : String;
+  DeContents : string;
+  Files : TStringArray;
+  Failed,OverWrite : boolean;
+begin
+  Result := false;
+  if Updating then
+    exit;
+  Updating := True;
+  GetLocalVersion(LocalP,LocalS);
+  GetOnlineVersion(OnlineP,OnlineS);
+  Result := True;
+  if (OnlineP > LocalP) then
+  begin
+    Writeln('New plugin(s) are available');
+	Contents := GetPage('http://wizzup.org/static/srl/simba_plugins.tar.bz2');
+	Failed := True;
+	if DecompressBZip2(Contents,DeContents,4096) then
+	  if ForceDirectories(IncludePath + 'SRL/SimbaPlugins/') then
+	    if UnTarEx(DeContents,IncludePath + 'SRL/SimbaPlugins/',true) then
+		begin;
+		  Files := GetFiles(IncludePath + 'SRL/SimbaPlugins/','dll');
+		  for i := 0 to high(Files) do
+		    if FileExists(PluginPath + Files[i]) then
+			  OverWrite := True;
+		  if OverWrite then
+		  begin;
+		    case MessageDlg('SRL Updater', 'Do you want to overwrite the plugins?' ,mtConfirmation, [mbNo,mbYes],0) of
+		      mrYes : Failed := not UnTarEx(DeContents,PluginPath,True)
+		    else
+		      Failed := not UnTarEx(DeContents,PluginPath,false);
+			end;
+			Writeln('A restart is necessary to activate the new plugins.');
+		  end else
+		    Failed := not UnTarEx(DeContents,PluginPath,false);
+		end;
+	if Failed then
+	  Writeln('Somehow failed to update the plugins')
+	else
+	  Writeln('Succesfully updated your plugins!');
+	DeContents := '';
+	Contents := '';
+	Result := Failed;
+	if not Failed then
+	  Settings.SetKeyValue('PluginsVersion',inttostr(OnlineP));
+  end;
+  if (OnlineS > LocalS) then
+  begin
+    Writeln('SRL is outdated, updating now!');
+	Contents := GetPage('http://wizzup.org/static/srl/srl.tar.bz2');
+	Failed := True;
+	if DecompressBZip2(Contents,DeContents,4096) then
+      if UnTarEx(DeContents,IncludePath,true) then
+	    Failed := False;
+	if not Failed then
+	  Settings.SetKeyValue('SRLVersion',inttostr(OnlineS));
+	if Result then
+	  Result := Failed;
+	if not Failed then
+	  Writeln('Succesfully updated your SRL!');
+  end;  
+  Updating := False;
+end;
+
+procedure OnSRLCheckClick(Sender: TObject);
+var
+  LocalP,LocalS,OnlineP,OnlineS : integer;
+begin
+  GetLocalVersion(LocalP,LocalS);
+  GetOnlineVersion(OnlineP,OnlineS);
+  if (OnlineP > LocalP) or (OnlineS > LocalS) then
+    Writeln('A new SRL version is available');  
+end;
+
+procedure SetAutoUpdate(Sender: TObject);
+begin
+  AutoUpdate.Checked := not AutoUpdate.Checked;
+  Timer.Enabled := AutoUpdate.Checked;
+end;
+procedure OnSRLUpdateClick(Sender: TObject);
+begin
+  UpdateSRL;
+end;
+
+procedure OnUpdateTimer(Sender: TObject);
+begin;
+  Timer.Interval := 30 * 60 * 1000; //Every half hour
+  UpdateSRL; 
+end;
+
+procedure Init;
+begin;
+  MainMenuItem := TMenuItem.Create(Simba_MainMenu);  
+  MainMenuItem.Caption := 'SRL';
+  Simba_MainMenu.Items.Add(MainMenuItem);
+
+  MenuCheck := TMenuItem.Create(MainMenuItem);
+  MenuCheck.Caption := 'Check for new SRL';
+  MenuCheck.OnClick := @OnSRLCheckClick;
+  MainMenuItem.Add(MenuCheck);
+
+  MenuUpdate := TMenuItem.Create(MainMenuItem);
+  MenuUpdate.Caption := 'Update SRL';
+  MenuUpdate.OnClick := @OnSRLUpdateClick;
+  MainMenuItem.Add(MenuUpdate);
+  
+  AutoUpdate := TMenuItem.Create(MainMenuItem);
+  AutoUpdate.Caption := 'Automatically update';
+  AutoUpdate.OnClick := @SetAutoUpdate;
+  AutoUpdate.Checked := LowerCase(Settings.GetKeyValueDef('AutoUpdate','True')) = 'true';
+  MainMenuItem.Add(AutoUpdate);
+ 
+  Timer := TTimer.Create(Simba);
+  Timer.Interval := 5000;
+  Timer.OnTimer := @OnUpdateTimer;
+  Timer.Enabled :=AutoUpdate.Checked;
+
+  started := True;
+end;
+
+procedure Free;
+begin
+  if (started) then
+    Timer.Enabled := False;//Freeing the components is not needed, as they will be freed upon the freeing of Simba.
+  
+end;
+
+procedure Attach;
+begin;
+  Writeln('From now on, you shall be alerted as to when your SRL is out of date!');
+  MainMenuItem.Visible := True;
+  Timer.Enabled := AutoUpdate.Checked;
+end;
+
+Procedure Detach;
+begin
+  Timer.Enabled := False;
+  MainMenuItem.Visible := False;
+end;
+
+function GetName : string;
+begin;
+  result := 'SRL Updater';
+end;
+
+function GetVersion : string;
+begin;
+  result := '1.0';
+end;
+begin
+end.
