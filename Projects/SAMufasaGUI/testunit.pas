@@ -2359,7 +2359,7 @@ function TForm1.GetSimbaNews: String;
 var
   t: TDownloadThread;
 begin
-  t := TDownloadThread.Create(true);
+  t := TDownloadThread.Create;
   t.InputURL:=LoadSettingDef('Settings/News/URL', 'http://simba.villavu.com/bin/news');
   t.Resume;
   while not t.done do
