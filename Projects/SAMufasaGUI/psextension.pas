@@ -135,6 +135,7 @@ begin
   Sender.AddFunction(@ext_UnTarEx,'function UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;');
   Sender.AddFunction(@DirectoryExists,'Function DirectoryExists (Const Directory : String) : Boolean;');
   Sender.AddFunction(@FileExists,'Function FileExists (Const FileName : String) : Boolean;');
+  Sender.AddFunction(@ForceDirectories,'function ForceDirectories(Const Dir: string): Boolean;');
   Sender.AddFunction(@GetFiles, 'function GetFiles(Path, Ext: string): TStringArray;');
   Sender.AddFunction(@GetDirectories,'function GetDirectories(Path: string): TstringArray;');
   Sender.AddFunction(@ext_MessageDlg,'function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;');
