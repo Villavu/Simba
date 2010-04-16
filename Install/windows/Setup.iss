@@ -5,7 +5,7 @@
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{1DBDC946-E964-430C-9BD6-2AE5E426E5AC}
+AppId={{524C9B9A-B57F-4FEC-89BE-292202EBA44D}
 AppName=Simba
 AppVerName=Simba 1.0 Beta
 AppPublisherURL=http://simba.villavu.com/
@@ -13,7 +13,7 @@ AppSupportURL=http://simba.villavu.com/
 AppUpdatesURL=http://simba.villavu.com/
 DefaultDirName={pf}\Simba
 DefaultGroupName=Simba
-OutputDir=C:\Remake\Install\win32
+OutputDir=C:\Remake\Install\windows\
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
@@ -30,11 +30,13 @@ Name: "{app}\Extensions"
 Name: "{app}\Includes"
 Name: "{app}\Plugins"
 Name: "{app}\Scripts"
+Name: "{app}\Scripts\Tests"
 
 [Files]
 Source: "C:\Remake\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Remake\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Remake\Fonts\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Remake\Tests\PS\*"; DestDir:"{app}\Scripts\Tests\"; Flags: ignoreversion
+Source: "C:\Remake\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
