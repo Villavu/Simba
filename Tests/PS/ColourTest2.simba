@@ -1,4 +1,6 @@
 program new;
+const
+  bmppath = 'C:\Carina_1_by_Eeitam.png';
 var
    p1, p2: TPointArray;
    w, h: integer;
@@ -7,7 +9,7 @@ var
 
 begin
   SetColorToleranceSpeed(2);
-  bmp := LoadBitmap('/home/merlijn/Pictures/Mooi/Carina_1_by_Eeitam.png');
+  bmp := LoadBitmap(bmppath);
   SetTargetBitmap(bmp);
   GetClientDimensions(W, H);
   writeln(inttostr(w) + ' : ' + inttostr(h));

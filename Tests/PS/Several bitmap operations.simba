@@ -1,6 +1,6 @@
 program new;
 const
-  SaveDir = 'C:\';
+  SaveDir = ScriptPath;
 var
   Bmpz : integer;
   Bmp2 : integer;

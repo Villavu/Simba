@@ -1,4 +1,6 @@
 program new;
+const
+  savepath = scriptpath;
 var
   Bmpz : integer;
   w,h : integer;
@@ -134,9 +136,9 @@ begin
    GetBitmapSize(bmpz,w,h);
    Writeln(inttostr(w) + '-' + inttostr(h));
    SetBitmapSize(Bmpz,w div 2, h div 2);
-   SaveBitmap(Bmpz,'/tmp/test.bmp');
+   SaveBitmap(Bmpz,savepath + 'test.bmp');
    //FreeBitmap(Bmpz);
-   Bmpz := LoadBitmap('/tmp/test.bmp');
+   Bmpz := LoadBitmap(savepath + 'test.bmp');
    SetBitmapSize(bmpz,w,h);
-   SaveBitmap(Bmpz,'/tmp/test2.bmp');
+   SaveBitmap(Bmpz,savepath + 'test2.bmp');
 end.
