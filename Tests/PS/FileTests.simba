@@ -19,7 +19,6 @@ program Hoi;
 }
 
 Const
-    TestPath = './test';
 
     fsFromBeginning = 0; // offset must be pos or 0
     fsFromCurrent = 1; // offset pos or neg
@@ -27,10 +26,12 @@ Const
 
 var
   s, s2: string;
+  testPath : string;
   myFile, myFile2: Integer;
 
 begin
-  s := apppath;
+  testPath := scriptpath +'Test';
+  s := ScriptPath;
   Writeln('Our current path is: ' + s);
  { If DirectoryExists(s) Then
     writeln('Directory ' + s + ' exists.');    }

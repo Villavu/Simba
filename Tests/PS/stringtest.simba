@@ -34,6 +34,4 @@ begin
   end;
   Writeln(y);
   Writeln(TPointArray([Point(5,5),Point(20,1337),point(1,2)]));
-  J := TForm.Create(nil);
-  Writeln(j.canvas);
 end.
