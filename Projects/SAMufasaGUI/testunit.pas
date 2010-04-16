@@ -1098,7 +1098,6 @@ end;
 procedure TForm1.CreateDefaultEnvironment;
 var
   PluginsPath,extensionsPath : string;
-  FontUpdater : TProcThread;
 begin
   CreateSetting('Settings/Updater/CheckForUpdates','True');
   CreateSetting('Settings/Updater/CheckEveryXMinutes','30');
@@ -2606,12 +2605,19 @@ begin
 end;
 
 procedure TForm1.FontUpdate;
+  procedure Idler;
+  begin
+    Application.ProcessMessages;
+    Sleep(25);
+  end;
+
 var
   CurrVersion : integer;
   LatestVersion : integer;
   FontDownload : TDownloadThread;
   Stream : TStringStream;
-  Decompressed : TMemoryStream;
+  UnTarrer : TUntarThread;
+  Decompress : TDecompressThread;
 begin
   if UpdatingFonts then
     exit;
@@ -2625,23 +2631,32 @@ begin
     FontDownload.InputURL:= LoadSettingDef('Settings/Fonts/UpdateLink',FontURL + 'Fonts.tar.bz2');
     FontDownload.resume;
     while FontDownload.Done = false do
-    begin
-      Application.ProcessMessages;
-      Sleep(25);
-    end;
+      Idler;
     Stream := TStringStream.Create(FontDownload.ResultStr);
     try
-      Decompressed := DecompressBZip2(stream);
-      if UnTar(decompressed, FontPath,true) then
+      Decompress := TDecompressThread.Create(Stream);
+      Decompress.Resume;
+      while Decompress.Finished = false do
+        Idler;
+      if Decompress.Result <> nil then
       begin;
-        FormWriteln('Succesfully installed the new fonts!');
-        SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion),true);
-        if Assigned(self.OCR_Fonts) then
-          self.OCR_Fonts.Free;
-        Self.OCR_Fonts := TMOCR.Create(nil);
-        OCR_Fonts.InitTOCR(fontPath);
+        UnTarrer := TUntarThread.Create(Decompress.Result,FontPath,True);
+        UnTarrer.Resume;
+        while UnTarrer.Finished = false do
+          Idler;
+        if UnTarrer.Result then
+        begin;
+          FormWriteln('Succesfully installed the new fonts!');
+          SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion),true);
+          if Assigned(self.OCR_Fonts) then
+            self.OCR_Fonts.Free;
+          Self.OCR_Fonts := TMOCR.Create(nil);
+          OCR_Fonts.InitTOCR(fontPath);
+        end;
+        UnTarrer.Free;
+        Decompress.Result.Free;
       end;
-      Decompressed.free;
+      Decompress.free;
     finally
       Stream.Free;
       FontDownload.Free;

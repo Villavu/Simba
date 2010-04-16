@@ -40,35 +40,52 @@ end;
 function ext_UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;
 var
   Stream : TStringStream;
-  MS : TMemoryStream;
+  Untarrer : TUntarThread;
 begin
   result := false;
   try
     Stream := TStringStream.Create(Input);
-    result := UnTar(stream,outputdir,overwrite);
+    Untarrer := TUntarThread.Create(stream,outputdir,overwrite);
+    Untarrer.Resume;
+    while Untarrer.Finished = false do
+    begin
+      Application.ProcessMessages;
+      sleep(25);
+    end;
+    result := Untarrer.Result;
   finally
+    Untarrer.Free;
     stream.free;
   end;
 end;
 function ext_DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;
 var
   Stream : TStringStream;
+  Decompress : TDecompressThread;
   MS : TMemoryStream;
 begin
   result := false;
   try
     Stream := TStringStream.Create(Input);
-    ms := DecompressBZip2(Stream,blocksize);
+    Decompress := TDecompressThread.Create(Stream);
+    Decompress.Resume;
+    while Decompress.Finished = false do
+    begin
+      Application.ProcessMessages;
+      sleep(25);
+    end;
+    ms := Decompress.Result;
     if ms.size > 0 then
     begin
       ms.Position:= 0;
       SetLength(output,ms.Size);
       MS.Read(output[1],MS.size);
-      ms.free;
       result := true;
     end;
+    ms.free;
   finally
     stream.free;
+    Decompress.Free;
   end;
 end;
 
