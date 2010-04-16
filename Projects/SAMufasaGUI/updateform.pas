@@ -19,6 +19,7 @@ type
     ResultStr : string;
     InputURL : string;
     Done : boolean;
+    constructor Create;
     procedure Execute; override;
   end;
   TSimbaUpdateForm = class(TForm)
@@ -261,6 +262,12 @@ begin
   Self.UpdateButton.Caption := 'Update!';
   Self.CloseButton.Enabled := true;
   FUpdating:= false;
+end;
+
+constructor TDownloadThread.Create;
+begin
+  inherited Create(true);
+  FreeOnTerminate:= True;
 end;
 
 { TDownloadThread }

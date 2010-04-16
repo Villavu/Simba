@@ -18,6 +18,7 @@ type
     StartWait : Cardinal;
     ClassProc : procedure of object;
     NormalProc : procedure;
+    constructor Create;
     procedure Execute; override;
   end;
 
@@ -130,6 +131,12 @@ begin;
   Tar.Free;
   Result := true;
 
+end;
+
+constructor TProcThread.Create;
+begin
+  inherited Create(true);
+  FreeOnTerminate:= True;
 end;
 
 
