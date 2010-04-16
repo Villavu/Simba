@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 626;
+  SimbaVersion = 630;
 
 type
 
@@ -348,6 +348,7 @@ type
     procedure HandleOpenFileData;
     procedure HandleWriteFileData;
     procedure HandleScriptStartData;
+    function GetScriptPath : string;
     function GetExtPath: string;
     function GetFontPath: String;
     function GetHighlighter: TSynCustomHighlighter;
@@ -360,6 +361,7 @@ type
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
     procedure SetPluginPath(const AValue: string);
+    procedure SetScriptPath(const AValue: string);
     procedure SetShowHintAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
     function LoadSettingDef(const Key, Def : string) : string;
@@ -420,6 +422,7 @@ type
     property FontPath : String read GetFontPath write SetFontPath;
     property PluginPath : string read GetPluginPath write SetPluginPath;
     property ExtPath : string read GetExtPath write SetExtPath;
+    property ScriptDir : string read GetScriptPath write SetScriptPath;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
   end;
 
@@ -539,6 +542,11 @@ begin
     on e : Exception do
       mDebugLn('ERROR in HandleConnectiondata: ' + e.message);
   end;
+end;
+
+function TForm1.GetScriptPath: string;
+begin
+  result :=IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Scripts/Path', ExpandFileName(MainDir+DS+'Scripts' + DS)));
 end;
 
 procedure TForm1.HandleOpenFileData;
@@ -1140,6 +1148,10 @@ begin
     CreateDir(PluginsPath);
   if not DirectoryExists(extensionsPath) then
     CreateDir(extensionsPath);
+  if not DirectoryExists(ExtPath) then
+    CreateDir(ExtPath);
+  if not DirectoryExists(ScriptDir) then
+    CreateDir(ScriptDir);
   SettingsForm.SettingsTreeView.Items.GetFirstNode.Expand(false);
   SettingsForm.SaveCurrent;
   LoadFormSettings;
@@ -2551,6 +2563,11 @@ end;
 procedure TForm1.SetPluginPath(const AValue: string);
 begin
   SetSetting('Settings/Plugins/Path',AValue,true);
+end;
+
+procedure TForm1.SetScriptPath(const AValue: string);
+begin
+  SetSetting('Settings/Scripts/Path',AValue,True);
 end;
 
 procedure TForm1.SetScriptState(const State: TScriptState);
