@@ -30,7 +30,7 @@ begin
   CurrThread.Client.IOManager.SetMousePos(X, Y);
 end;
 
-procedure ps_GetMousePos(out x, y: integer); extdecl;
+procedure ps_GetMousePos(var x, y: integer); extdecl;
 begin
    CurrThread.Client.IOManager.GetMousePos(X, Y);
 end;
