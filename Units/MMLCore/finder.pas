@@ -263,6 +263,10 @@ end;
 
 destructor TMFinder.Destroy;
 begin
+    {   We don't really have to free stuff here.
+        The array is managed, so that is automatically freed.
+        The rest is either references to objects we may not destroy
+    }
 
   inherited;
 end;
