@@ -73,11 +73,12 @@ end;
 
 {$DEFINE DTM_DEBUG}
 destructor TMDTM.Destroy;
-
 var
-   i, j: integer;
-   b:boolean;
+  i, j: integer;
+  b:boolean;
+  WriteStr : string;
 begin
+  WriteStr := '[';
   for i := 0 to high(DTMList) do
   begin
     b := false;
@@ -90,11 +91,17 @@ begin
       if not b then
       begin;
         if DTMList[i].n <> '' then
-          TClient(Client).Writeln(Format('DTM[%s] has not been freed in the script, freeing it now.',[DTMList[i].n]))
+          WriteStr := WriteStr + DTMList[i].n + ', '
         else
-          TClient(Client).Writeln(Format('DTM[%d] has not been freed in the script, freeing it now.',[i]));
+          WriteStr := WriteStr + inttostr(i) + ', ';
         FreeDTM(i);
       end;
+  end;
+  if WriteStr <> '[' then  //Has unfreed DTMs
+  begin
+    SetLength(WriteStr,length(WriteStr)-1);
+    WriteStr[Length(writeStr)] := ']';
+    TClient(Client).Writeln(Format('The following DTMs were not freed: %s',[WriteStr]));
   end;
   SetLength(DTMList, 0);
   SetLength(FreeSpots, 0);

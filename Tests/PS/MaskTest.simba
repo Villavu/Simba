@@ -1,5 +1,8 @@
 program new;
 //http://nl.wikipedia.org/wiki/Lily_Allen
+//This finds a mask of the text 'Op 24 september',
+//so target wikipedia halfway down. Might not work because of
+//different font's/sizes in your browser.
 
 var
   Bmp : integer;
@@ -14,7 +17,7 @@ begin
        'KvJQNKa5mEcyAhoauI6N8ymAlkxWpdtwgL2bhPXCJc7+E7JLNJsgG' +
        'qQgL1jhHwX4VJdBsNZMbN5D//m/ob5XzwDp40wfg/jW9g024hbuPd' +
        'ritabVqaAj7zYVyxg9fol4M8FFG7YAfIG00k=');
-  Mask := CreateBitmapMask(Bmp);
+  Mask := CreateMaskFromBitmap(Bmp);
   GetClientDimensions(w,h);
 //  if FindBitmapMaskTolerance(Bmp,x,y,0, 0,w-1, h-1,1,5) then
   if FindMaskTolerance(Mask,x,y,0, 0,w-1, h-1,1,5) then

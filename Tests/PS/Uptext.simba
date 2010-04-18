@@ -5,6 +5,6 @@ begin
   t:=getsystemtime;
   for i := 0 to 100 do
     rs_getuptext;
-  writeln(inttostr(round(getsystemtime - t) / 100));
+  writeln(floattostr(round(getsystemtime - t) / 100.0));
   writeln(rs_getuptext);
 end.

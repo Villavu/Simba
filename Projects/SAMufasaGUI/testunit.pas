@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 630;
+  SimbaVersion = 632;
 
 type
 
@@ -2045,7 +2045,7 @@ begin
 
   Self.OnScriptStart:= @ScriptStartEvent;
 
-  FillThread := TProcThread.Create(true);
+  FillThread := TProcThread.Create;
   FillThread.FreeOnTerminate:= True;
   FillThread.NormalProc:= @CCFillCore;
   UpdateTimer.OnTimer:= @UpdateTimerCheck;
@@ -2359,15 +2359,14 @@ function TForm1.GetSimbaNews: String;
 var
   t: TDownloadThread;
 begin
-  t := TDownloadThread.Create(true);
-  t.InputURL:=LoadSettingDef('Settings/News/URL', 'http://simba.villavu.com/bin/news');
+  t := TDownloadThread.Create(LoadSettingDef('Settings/News/URL', 'http://simba.villavu.com/bin/news'),
+                              @Result);
   t.Resume;
   while not t.done do
   begin
     Application.ProcessMessages;
     Sleep(50);
   end;
-  Exit(t.ResultStr);
 end;
 
 procedure TForm1.SetExtPath(const AValue: string);
@@ -2634,6 +2633,7 @@ var
   FontDownload : TDownloadThread;
   Stream : TStringStream;
   UnTarrer : TUntarThread;
+  Fonts : string;
   Decompress : TDecompressThread;
 begin
   if UpdatingFonts then
@@ -2644,12 +2644,13 @@ begin
   if LatestVersion > CurrVersion then
   begin;
     formWriteln(format('New fonts available. Current version: %d. Latest version: %d',[CurrVersion,LatestVersion]));
-    FontDownload := TDownloadThread.Create(True);
-    FontDownload.InputURL:= LoadSettingDef('Settings/Fonts/UpdateLink',FontURL + 'Fonts.tar.bz2');
+    FontDownload := TDownloadThread.Create(LoadSettingDef('Settings/Fonts/UpdateLink',FontURL + 'Fonts.tar.bz2'),
+                                           @Fonts);
     FontDownload.resume;
     while FontDownload.Done = false do
       Idler;
-    Stream := TStringStream.Create(FontDownload.ResultStr);
+    //Fontdownload is freed now
+    Stream := TStringStream.Create(Fonts);
     try
       Decompress := TDecompressThread.Create(Stream);
       Decompress.Resume;
@@ -2676,7 +2677,6 @@ begin
       Decompress.free;
     finally
       Stream.Free;
-      FontDownload.Free;
     end;
   end;
   UpdatingFonts := False;
