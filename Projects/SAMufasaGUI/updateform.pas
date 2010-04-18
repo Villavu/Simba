@@ -15,11 +15,12 @@ type
   { TDownloadThread }
 
   TDownloadThread = class(TThread)
-  public
-    ResultStr : string;
+  private
     InputURL : string;
+    ResultStr : PString;
+  public
     Done : boolean;
-    constructor Create;
+    constructor Create(const URL : string; const Output : PString);
     procedure Execute; override;
   end;
   TSimbaUpdateForm = class(TForm)
@@ -91,20 +92,22 @@ begin
 end;
 
 function TSimbaUpdateForm.GetLatestFontVersion: integer;
+var
+  Vers : string;
 begin
   if FontVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    FontVersionThread := TDownloadThread.Create(true);
-    FontVersionThread.InputURL := SettingsForm.Settings.GetKeyValueDefLoad(
-                                  'Settings/Fonts/VersionLink',FontURL  + 'Version',SimbaSettingsFile);
+    FontVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
+                                                'Settings/Fonts/VersionLink',FontURL  + 'Version',SimbaSettingsFile),
+                                                @Vers);
     FontVersionThread.Resume;
     while FontVersionThread.Done = false do//Wait till thread is done
     begin
       Application.ProcessMessages;
       Sleep(25);
     end;
-    FFontVersion := StrToIntDef(Trim(FontVersionThread.ResultStr), -1);//Read output
-    FreeAndNil(FontVersionThread);//Free the thread
+    FFontVersion := StrToIntDef(Trim(Vers), -1);//Read output
+    FontVersionThread := nil; //It's already freed
   end else
   begin
     //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
@@ -119,21 +122,22 @@ begin
 end;
 
 function TSimbaUpdateForm.GetLatestSimbaVersion: Integer;
+var
+  Vers : string;
 begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    SimbaVersionThread := TDownloadThread.Create(true);
-
-    SimbaVersionThread.InputURL := SettingsForm.Settings.GetKeyValueDefLoad(
-                'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version',SimbaSettingsFile);
+    SimbaVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
+                                                 'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version'
+                                                 ,SimbaSettingsFile),@Vers);
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
       Application.ProcessMessages;
       Sleep(25);
     end;
-    FSimbaVersion := StrToIntDef(Trim(SimbaVersionThread.ResultStr), -1);//Read output
-    FreeAndNil(SimbaVersionThread);//Free the thread
+    FSimbaVersion := StrToIntDef(Trim(Vers), -1);//Read output
+    SimbaVersionThread := nil;//It's automatically freed
   end else
   begin
     //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
@@ -264,17 +268,19 @@ begin
   FUpdating:= false;
 end;
 
-constructor TDownloadThread.Create;
+constructor TDownloadThread.Create(const url : String; const Output : PString);
 begin
   inherited Create(true);
   FreeOnTerminate:= True;
+  InputURL:= url;
+  ResultStr:= Output;
 end;
 
 { TDownloadThread }
 
 procedure TDownloadThread.Execute;
 begin
-  ResultStr:= GetPage(InputURL);
+  ResultStr^:= GetPage(InputURL);
   done := true;
 end;
 

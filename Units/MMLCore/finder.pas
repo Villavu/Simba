@@ -69,7 +69,7 @@ type
     function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
     function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
     function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
-    function FindColors(out TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+    function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
     function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
     function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
     //Mask
@@ -1302,7 +1302,7 @@ begin
   TClient(Client).IOManager.FreeReturnData;
 end;
 
-function TMFinder.FindColors(out TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+function TMFinder.FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
 var
    PtrData: TRetData;
    Ptr: PRGB32;

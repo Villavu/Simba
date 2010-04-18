@@ -278,69 +278,69 @@ begin
   result := AverageExtended(te);
 end;
 
-procedure ps_SplitTPAExWrap(arr: TPointArray; w, h: Integer; out res : T2DPointArray);extdecl;
+procedure ps_SplitTPAExWrap(arr: TPointArray; w, h: Integer; var res : T2DPointArray);extdecl;
 begin
   res := SplitTPAEx(arr,w,h);
 end;
 
-procedure ps_SplitTPAWrap(arr: TPointArray; Dist: Integer; out res: T2DPointArray);extdecl;
+procedure ps_SplitTPAWrap(arr: TPointArray; Dist: Integer; var res: T2DPointArray);extdecl;
 begin
   res := SplitTPA(arr,dist);
 end;
 
-procedure ps_FindGapsTPAWrap(TPA: TPointArray; MinPixels: Integer; out Res : T2DPointArray); extdecl;
+procedure ps_FindGapsTPAWrap(TPA: TPointArray; MinPixels: Integer; var Res : T2DPointArray); extdecl;
 begin
   Res := FindGapsTPA(TPA,MinPixels);
 end;
-procedure ps_RemoveDistTPointArrayWrap(x, y, dist: Integer; ThePoints: TPointArray; RemoveHigher: Boolean; out Res :  TPointArray);extdecl;
+procedure ps_RemoveDistTPointArrayWrap(x, y, dist: Integer; ThePoints: TPointArray; RemoveHigher: Boolean; var Res :  TPointArray);extdecl;
 begin
   Res :=  RemoveDistTPointArray(x,y,dist,thepoints,removehigher);
 end;
-procedure ps_CombineTPAWrap(Ar1, Ar2: TPointArray; out Res :  TPointArray);extdecl;
+procedure ps_CombineTPAWrap(Ar1, Ar2: TPointArray; var Res :  TPointArray);extdecl;
 begin
   Res := CombineTPA(Ar1,Ar2);
 end;
-procedure ps_ReArrangeandShortenArrayExWrap(a: TPointArray; w, h: Integer; out Res :  TPointArray);extdecl;
+procedure ps_ReArrangeandShortenArrayExWrap(a: TPointArray; w, h: Integer; var Res :  TPointArray);extdecl;
 begin
   Res := ReArrangeandShortenArrayEx(a,w,h);
 end;
-procedure ps_ReArrangeandShortenArrayWrap(a: TPointArray; Dist: Integer; out Res :  TPointArray);extdecl;
+procedure ps_ReArrangeandShortenArrayWrap(a: TPointArray; Dist: Integer; var Res :  TPointArray);extdecl;
 begin
   Res := ReArrangeandShortenArray(a,dist);
 end;
-procedure ps_TPAtoATPAExWrap(TPA: TPointArray; w, h: Integer; out Res :  T2DPointArray);extdecl;
+procedure ps_TPAtoATPAExWrap(TPA: TPointArray; w, h: Integer; var Res :  T2DPointArray);extdecl;
 begin
   Res := TPAtoATPAEx(TPA,w,h);
 end;
-procedure ps_TPAtoATPAWrap(TPA: TPointArray; Dist: Integer; out Res :  T2DPointArray);extdecl;
+procedure ps_TPAtoATPAWrap(TPA: TPointArray; Dist: Integer; var Res :  T2DPointArray);extdecl;
 begin
   Res := TPAtoATPA(TPA,Dist);
 end;
-procedure ps_CombineIntArrayWrap(Ar1, Ar2: TIntegerArray; out Res :  TIntegerArray);extdecl;
+procedure ps_CombineIntArrayWrap(Ar1, Ar2: TIntegerArray; var Res :  TIntegerArray);extdecl;
 begin
   Res := CombineIntArray(Ar1,Ar2);
 end;
-procedure ps_MergeATPAWrap(ATPA : T2DPointArray; out Res: TPointArray); extdecl;
+procedure ps_MergeATPAWrap(ATPA : T2DPointArray; var Res: TPointArray); extdecl;
 begin
   Res := MergeATPA(ATPA);
 end;
-procedure ps_TPAFromBoxWrap(const Box : TBox; out Res : TPointArray);extdecl;
+procedure ps_TPAFromBoxWrap(const Box : TBox; var Res : TPointArray);extdecl;
 begin
   Res := TPAFromBox(Box);
 end;
-procedure ps_RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; out Res :  TPointArray);extdecl;
+procedure ps_RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; var Res :  TPointArray);extdecl;
 begin
   Res := RotatePoints(P,a,cx,cy);
 end;
-procedure ps_FindTPAEdgesWrap(p: TPointArray; out Res :  TPointArray);extdecl;
+procedure ps_FindTPAEdgesWrap(p: TPointArray; var Res :  TPointArray);extdecl;
 begin
   Res := FindTPAEdges(p);
 end;
-procedure ps_ClearTPAFromTPAWrap(arP, ClearPoints: TPointArray; out Res :  TPointArray);extdecl;
+procedure ps_ClearTPAFromTPAWrap(arP, ClearPoints: TPointArray; var Res :  TPointArray);extdecl;
 begin
   Res := ClearTPAFromTPA(arP, clearpoints);
 end;
-procedure ps_ReturnPointsNotInTPAWrap(Const TotalTPA: TPointArray; const Box: TBox; out Res :  TPointArray);extdecl;
+procedure ps_ReturnPointsNotInTPAWrap(Const TotalTPA: TPointArray; const Box: TBox; var Res :  TPointArray);extdecl;
 begin
   Res := ReturnPointsNotInTPA(TotalTPA,box);
 end;

@@ -32,8 +32,8 @@ AddFunction(@ps_DTMFromString, 'function DTMFromString(const DTMString: String):
 AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
 AddFunction(@ps_FindDTM, 'function FindDTM(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;');
 AddFunction(@ps_FindDTMs, 'function FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean;');
-AddFunction(@ps_FindDTMRotatedSE, 'function FindDTMRotatedSE(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
-AddFunction(@ps_FindDTMRotatedAlternating, 'function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;');
+AddFunction(@ps_FindDTMRotatedSE, 'function FindDTMRotatedSE(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean;');
+AddFunction(@ps_FindDTMRotatedAlternating, 'function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean;');
 AddFunction(@ps_FindDTMsRotatedSE, 'function FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
 AddFunction(@ps_FindDTMsRotatedAlternating, 'function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
 AddFunction(@ps_addDTM, 'function AddDTM(const d: TDTM): Integer;');
@@ -180,16 +180,16 @@ AddFunction(@ps_GetRawHeaders,'function GetRawHeaders(Client: Integer): string;'
 
 { Color Conversions and Speed }
 SetCurrSection('Color Convert');
-AddFunction(@ps_ColorToRGB, 'procedure ColorToRGB(Color: integer; var r, g, b: Byte);');
-AddFunction(@ps_RGBToColor, 'function RGBtoColor(r, g, b: Byte): TColor;');
+AddFunction(@ps_ColorToRGB, 'procedure ColorToRGB(Color: integer; var r, g, b: Integer);');
+AddFunction(@ps_RGBToColor, 'function RGBtoColor(r, g, b: Integer): TColor;');
 AddFunction(@ps_ColorToHSL, 'procedure ColorToHSL(Color: Integer; var h, s, l: Extended);');
 AddFunction(@ps_HSLToColor, 'function HSLToColor(H, S, L: Extended): TColor;');
 AddFunction(@ps_ColorToXYZ, 'procedure ColorToXYZ(Color: Integer; var x, y, z: Extended);');
 AddFunction(@ps_XYZToColor, 'function XYZToColor(X, Y, Z: Extended): TColor;');
-AddFunction(@ps_RGBToHSL, 'procedure RGBToHSL(R, G, B: Byte; var h, s, l: Extended);');
-AddFunction(@ps_HSLToRGB, 'procedure HSLtoRGB(H, S, L: extended; var R, G ,B: Byte);');
-AddFunction(@ps_RGBToXYZ, 'procedure RGBToXYZ(R, G, B: Byte;var x, y ,z: Extended);');
-AddFunction(@ps_XYZToRGB, 'procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Byte);');
+AddFunction(@ps_RGBToHSL, 'procedure RGBToHSL(R, G, B: Integer; var h, s, l: Extended);');
+AddFunction(@ps_HSLToRGB, 'procedure HSLtoRGB(H, S, L: extended; var R, G ,B: Integer);');
+AddFunction(@ps_RGBToXYZ, 'procedure RGBToXYZ(R, G, B: Integer;var x, y ,z: Extended);');
+AddFunction(@ps_XYZToRGB, 'procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Integer);');
 
 { Color Finding }
 SetCurrSection('Color');

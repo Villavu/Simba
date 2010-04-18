@@ -76,7 +76,7 @@ begin
   CurrThread.Client.IOManager.FreeTarget(idx);
 end;
 
-procedure ps_GetClientDimensions(out w, h: integer); extdecl;
+procedure ps_GetClientDimensions(var w, h: integer); extdecl;
 begin
   CurrThread.Client.IOManager.GetDimensions(w, h);
 end;
