@@ -134,7 +134,7 @@ begin;
   x := x mod (1000 * 60);
   s := x div (1000);
 end;
-procedure ps_DecodeDate ( const SourceDate  : TDateTime; out Year, Month, Day  : Word ); extdecl;
+procedure ps_DecodeDate ( const SourceDate  : TDateTime; var Year, Month, Day  : Word ); extdecl;
 begin
   decodedate(sourcedate,year,month,day);
 end;

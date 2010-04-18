@@ -81,7 +81,8 @@ type
     procedure Invert;overload;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
-    function Copy: TMufasaBitmap;
+    function Copy: TMufasaBitmap;overload;
+    function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function ToTBitmap: TBitmap;
     function ToString : string;
     procedure LoadFromTBitmap(bmp: TBitmap);
@@ -519,6 +520,18 @@ begin
   Move(self.FData[0], Result.FData[0],self.w * self.h * SizeOf(TRGB32));
 end;
 
+function TMufasaBitmap.Copy(const xs, ys, xe, ye: integer): TMufasaBitmap;
+var
+  i : integer;
+begin
+  ValidatePoint(xs,ys);
+  ValidatePoint(xe,ye);
+  Result := TMufasaBitmap.Create;
+  Result.SetSize(xe-xs+1, ye-ys+1);
+  for i := ys to ye do
+    Move(self.FData[i * self.w + xs], Result.FData[i-ys],result.Width * SizeOf(TRGB32));
+end;
+
 function TMufasaBitmap.ToTBitmap: TBitmap;
 
 var
@@ -733,12 +746,15 @@ begin
   StartPtr := Self.FData;
   For y := 0 to Self.h - 1 do
     For x := 0 to self.w - 1 do
+    begin
+      StartPtr^.A := 0;
       if LongWord(StartPtr^) = LongWord(Search) then
       begin;
         L := L + 1;
         Result[L].x := x;
         Result[L].y := y;
       end;
+    end;
   SetLength(Result,L + 1);
 end;
 
@@ -809,9 +825,11 @@ begin
   begin;
     for loopy := 0 to MinH do
       for loopx := 0 to MinW do
+      begin;
+        FData[loopy * w + loopx].A := 0;
         if LongWord(FData[loopy * w + loopx]) <> LongWord(FTransparentColor) then
           TargetBitmap.FData[(loopy + y) * TargetW + loopx + x] := FData[Loopy * w + loopx];
-
+      end;
   end
   else
     for loopy := 0 to MinH do
@@ -827,8 +845,11 @@ begin
   OldCol := RGBToBGR(OldColor);
   NewCol := RGBToBGR(NewColor);
   for i := w*h-1 downto 0 do
+  begin
+    FData[i].a := 0;
     if LongWord(FData[i]) = LongWord(OldCol) then
       FData[i] := NewCol;
+  end;
 end;
 
 procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);
@@ -1212,16 +1233,24 @@ end;
 destructor TMBitmaps.Destroy;
 var
   I : integer;
+  WriteStr : string;
 begin
+  WriteStr := '[';
   for i := 0 to BmpsCurr do
     if BmpArray[i] <> nil then
     begin;
       if BmpArray[i].Name = '' then
-        TClient(Client).Writeln(Format('BMP[%d] has not been freed in the script, freeing it now.',[i]))
+        WriteStr := WriteStr + inttostr(i) + ', '
       else
-        TClient(Client).Writeln(Format('BMP[%s] has not been freed in the script, freeing it now.',[BmpArray[i].Name]));
+        WriteStr := WriteStr + bmpArray[i].Name + ', ';
       FreeAndNil(BmpArray[i]);
     end;
+  if WriteStr <> '[' then  //Has unfreed bitmaps
+  begin
+    SetLength(WriteStr,length(WriteStr)-1);
+    WriteStr[Length(writeStr)] := ']';
+    TClient(Client).Writeln(Format('The following bitmaps were not freed: %s',[WriteStr]));
+  end;
   SetLength(BmpArray,0);
   SetLength(FreeSpots,0);
   inherited Destroy;
