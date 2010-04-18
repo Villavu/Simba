@@ -1,9 +1,14 @@
-procedure ps_ColorToRGB(Color: integer; var r, g, b: Byte);extdecl;
+procedure ps_ColorToRGB(Color: integer; var r, g, b: Integer);extdecl;
+var
+  RR,GG,BB : byte;
 begin
-  colour_conv.ColorToRGB(color,r,g,b);
+  colour_conv.ColorToRGB(color,rr,gg,bb);
+  r := rr;
+  g := gg;
+  b := bb;
 end;
 
-function ps_RGBtoColor(r, g, b: Byte): TColor;extdecl;
+function ps_RGBtoColor(r, g, b: Integer): TColor;extdecl;
 begin
   result := RGBtoColor(r,g,b);
 end;
@@ -28,21 +33,31 @@ begin
   result := XYZToColor(x,y,z);
 end;
 
-procedure ps_RGBToHSL(R, G, B: Byte; var h, s, l: Extended);extdecl;
+procedure ps_RGBToHSL(R, G, B: Integer; var h, s, l: Extended);extdecl;
 begin
   RGBToHSL(r,g,b,h,s,l);
 end;
 
-procedure ps_HSLtoRGB(H, S, L: extended; var R, G ,B: Byte);extdecl;
+procedure ps_HSLtoRGB(H, S, L: extended; var R, G ,B: Integer);extdecl;
+var
+  RR,GG,BB : byte;
 begin
-  HSLtoRGB(h,s,l,r,g,b);
+  HSLtoRGB(h,s,l,rr,gg,bb);
+  r := rr;
+  g := gg;
+  b := bb;
 end;
 
-procedure ps_RGBToXYZ(R, G, B: Byte;var x, y ,z: Extended);extdecl;
+procedure ps_RGBToXYZ(R, G, B: Integer;var x, y ,z: Extended);extdecl;
 begin
   RGBToXYZ(r,g,b,x,y,z);
 end;
-procedure ps_XYZToRGB(X, Y, Z: Extended; var R, G, B: Byte);extdecl;
-begin
-  XYZToRGB(x,y,z,r,g,b);
+procedure ps_XYZToRGB(X, Y, Z: Extended; var R, G, B: Integer);extdecl;
+var
+  RR,GG,BB : byte;
+begin;
+  XYZToRGB(x,y,z,rr,gg,bb);
+  r := rr;
+  g := gg;
+  b := bb;
 end;

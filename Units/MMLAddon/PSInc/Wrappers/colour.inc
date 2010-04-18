@@ -36,21 +36,21 @@ begin
   result := CurrThread.Client.MFinder.GetColors(coords);
 end;
 
-function ps_findcolor(out x, y: integer; color, x1, y1, x2, y2: integer): boolean; extdecl;
+function ps_findcolor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean; extdecl;
 begin
   Result := CurrThread.Client.MFinder.FindColor(x, y, color, x1, y1, x2, y2);
 end;
 
-function ps_findcolortoleranceOptimised(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean; extdecl;
+function ps_findcolortoleranceOptimised(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean; extdecl;
 begin
   Result := CurrThread.Client.MFinder.FindColorToleranceOptimised(x, y, color, x1, y1, x2, y2, tol);
 end;
-function ps_findcolortolerance(out x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean; extdecl;
+function ps_findcolortolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean; extdecl;
 begin
   Result := CurrThread.Client.MFinder.FindColorTolerance(x, y, color, x1, y1, x2, y2, tol);
 end;
 
-function ps_FindColors(out TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean; extdecl;
+function ps_FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean; extdecl;
 begin
   Result := CurrThread.Client.MFinder.FindColors(TPA, color, x1, y1, x2, y2);
 end;
@@ -70,7 +70,7 @@ begin
   CurrThread.Client.MFinder.SetToleranceSpeed2Modifiers(nHue, nSat);
 end;
 
-procedure ps_GetToleranceSpeed2Modifiers(out hMod, sMod: Extended); extdecl;
+procedure ps_GetToleranceSpeed2Modifiers(var hMod, sMod: Extended); extdecl;
 begin
   CurrThread.Client.MFinder.GetToleranceSpeed2Modifiers(hMod, sMod);
 end;
@@ -89,11 +89,11 @@ begin;
   result := CurrThread.Client.MFinder.CountColorTolerance(color,xs,ys,xe,ye,tolerance);
 end;
 
-function ps_FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean; extdecl;
+function ps_FindColorsToleranceOptimised(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean; extdecl;
 begin;
   result := CurrThread.Client.MFinder.FindColorsToleranceOptimised(points,color,xs,ys,xe,ye,tolerance);
 end;
-function ps_FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean; extdecl;
+function ps_FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean; extdecl;
 begin;
   result := CurrThread.Client.MFinder.FindColorsTolerance(points,color,xs,ys,xe,ye,tolerance);
 end;
@@ -108,7 +108,7 @@ begin
   result := CurrThread.Client.MFinder.FindColorSpiralTolerance(x,y,color,xs,ys,xe,ye,tol);
 end;
 
-function ps_FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean; extdecl;
+function ps_FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean; extdecl;
 begin;
   result := CurrThread.Client.MFinder.FindColorsSpiralTolerance(x,y,Points,color,xs,ys,xe,ye,tolerance);
 end;

@@ -155,3 +155,11 @@ function ps_floor(e : extended) : integer; extdecl;
 begin;
   result := floor(e);
 end;
+function ps_logn(base, x : extended): extended;extdecl;
+begin
+  result := logn(base,x);
+end;
+function ps_ln(x : extended) : extended;extdecl;
+begin
+  result := ln(x);
+end;
