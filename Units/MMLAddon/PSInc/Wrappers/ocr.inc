@@ -21,12 +21,12 @@ begin
   Result := CurrThread.Client.MOCR.TextToMask(text,font);
 end;
 
-procedure ps_TPAFromTextWrap(const text, font: String;out w,h : integer;out TPA : TPointArray); extdecl;
+procedure ps_TPAFromTextWrap(const text, font: String;var w,h : integer;out TPA : TPointArray); extdecl;
 begin
   TPA := CurrThread.Client.MOCR.TextToFontTPA(text, font, w, h);
 end;
 
-function ps_TPAFromText(const text, font: String;out w,h : integer): TPointArray; extdecl;
+function ps_TPAFromText(const text, font: String;var w,h : integer): TPointArray; extdecl;
 begin
   Result := CurrThread.Client.MOCR.TextToFontTPA(text, font, w, h);
 end;

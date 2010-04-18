@@ -2159,7 +2159,7 @@ begin
     goodPoints[i] := not DTM.bp[i];
 
   MaxX := x2 - x1;
-  MaxY := x2 - y1;
+  MaxY := y2 - y1;
 
   // Init data structure B.
   W := x2 - x1;
