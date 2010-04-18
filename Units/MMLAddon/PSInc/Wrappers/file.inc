@@ -51,7 +51,7 @@ begin
   Result := CurrThread.Client.MFiles.FileSizeMuf(FileNum);
 end;
 
-function ps_ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean; extdecl;
+function ps_ReadFileString(FileNum: Integer; var s: string; x: Integer): Boolean; extdecl;
 begin
   Result := CurrThread.Client.MFiles.ReadFileString(FileNum, s, x);
 end;
