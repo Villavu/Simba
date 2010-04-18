@@ -23,7 +23,7 @@
 
 type
   TStringArray = array of string;
-function ext_UnTar(const Input : string; out Content : TStringArray) : boolean;
+function ext_UnTar(const Input : string; var Content : TStringArray) : boolean;
 var
   Stream : TStringStream;
 begin
@@ -58,7 +58,7 @@ begin
     stream.free;
   end;
 end;
-function ext_DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;
+function ext_DecompressBZip2(const input: string;var output : string; const BlockSize: Cardinal): boolean;
 var
   Stream : TStringStream;
   Decompress : TDecompressThread;
@@ -95,15 +95,13 @@ var
 begin
   result := '';
   try
-    t := TDownloadThread.Create(true);
-    t.InputURL:=url;
+    t := TDownloadThread.Create(url,@result);
     t.Resume;
     while not t.done do
     begin
       Application.ProcessMessages;
       Sleep(25);
     end;
-    Exit(t.ResultStr);
   except
     on e : exception do
       mDebugLn('Exception in GetPage in Extensions: ' + e.message);

@@ -59,6 +59,6 @@ begin
   writeln(inttostr(w) + ' , ' + inttostr(h));
   if findcolortolerance(w,h,clwhite,0,0,764,502,300) then
     smartmovemouse(w,h);
-  savescreenshot('/tmp/smart.bmp');
-  //Wait(5000);
+   Wait(5000);
+  savescreenshot(scriptPath + 'smart.bmp');
 end.

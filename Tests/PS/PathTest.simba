@@ -2,4 +2,7 @@ program new;
 begin
   Writeln(AppPath);
   Writeln(ScriptPath);
+  Writeln(IncludePath);
+  Writeln(FontPath);
+  writeln(PluginPath);
 end.

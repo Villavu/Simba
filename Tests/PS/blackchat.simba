@@ -22,23 +22,10 @@ begin
   if (FindColorsTolerance(cArr, TextCol, MCX1, P.y, MCX2, P.y + 13, 0)) then
   begin
     B := GetTPABounds(cArr);
-   // Result := GetTextAt(B.x1 - 1, B.y1 - 1, 1, 3, 0, 0, 0, 100, 'SmallChars');
-
-    {Result := Trim(GetTextAtEx(B.x1 - 1, B.y1 - 2, 0, SmallChars, False, False,
-      0, 1, TextCol, 80, False, tr_AllChars)); }
+    Result := GetTextAt(B.x1 - 1, B.y1 - 1,1, 4, 1, 0, 0, 100, 'SmallChars');
   end;
 end;
 
-var
-  bmp: integer;
 begin
-  bmp := LoadBitmap('/home/merlijn/Programs/trunk/pics/17.bmp');
-  SetTargetBitmap(bmp);
- // freebitmap(bmp);
-{  GetChatBoxText(8, 0);    }
-
-  {SetDesktopAsClient;         }
-
-  // uncomment this for exception
-  freebitmap(bmp);
+  Writeln(GetChatBoxText(8, 0));
 end.

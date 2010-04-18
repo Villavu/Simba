@@ -1,17 +1,16 @@
 program new;
 begin
-SettingsGetSetDefaultKeyValue('Kanker/wat', 'YO WAT');
-SettingsGetSetDefaultKeyValue('Kanker/wat2', 'YO WAT2');
-writeln(SettingsGetKeyValue('Kanker/wat'));
-
-if SettingsIsDirectory('Kanker') then
-  writeln('Kanker has at least one child!');
-if SettingsIsKey('Kanker/wat') then
-  writeln('wat exists!');
-SettingsDeleteKey('Kanker/wat');
-writeln(SettingsGetKeyValue('Kanker/wat2'));
-writeln(SettingsGetKeyValue('Kanker/wat'));
-SettingsDeleteSubKeys('Kanker');
-if SettingsIsKey('Kanker') then
-  writeln('kanker is a key now!');
+  GetSettingValueDef('Testme/wat','Yo wat');
+  GetSettingValueDef('Testme/wat2','Yo wat2');
+  Writeln(GetSettingValue('Testme/wat'));
+  if KeyIsDirectory('Testme') then
+    Writeln('Testme has atleast one child!');
+  if KeyIsSetting('Testme/wat') then
+    writeln('wat exists in the parent Testme!');
+  DeleteSetting('Testme/wat');
+  Writeln(GetSettingValue('Testme/wat2'));
+  Writeln(GetSettingValue('Testme/wat'));
+  writeln(DeleteSubSettings('Testme'));
+  if KeyIsSetting('Testme') then
+    writeln('Testme is a key now!');
 end.
