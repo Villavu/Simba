@@ -52,11 +52,11 @@ type
     CTS: Integer;
 
     Procedure UpdateCachedValues(NewWidth,NewHeight : integer);
-    procedure DefaultOperations(var xs,ys,xe,ye : integer);
     //Loads the Spiral into ClientTPA (Will not cause problems)
     procedure LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
   public
     WarnOnly : boolean;
+    procedure DefaultOperations(var xs,ys,xe,ye : integer);
     function FindColorsToleranceOptimised(out Points: TPointArray; Color,xs, ys, xe, ye, Tol: Integer): Boolean;
     function FindColorToleranceOptimised(out x, y: Integer; Color, xs, ys,xe, ye, tol: Integer): Boolean;
     function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;

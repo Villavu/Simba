@@ -168,6 +168,7 @@ var
   ms: TMemoryStream;
   d: TDeclaration;
   sp, ep: Integer;
+  s : string;
 begin
   mp := TCodeInsight.Create;
   mp.FileName := ScriptFile;
@@ -179,7 +180,11 @@ begin
 
   try
     SynEdit.GetWordBoundsAtRowCol(SynEdit.CaretXY, sp, ep);
-    mp.Run(ms);
+    s := SynEdit.Lines[SynEdit.Carety-1];
+    if ep > length(s) then //We are outside the real text, go back to the last char
+      mp.Run(ms, nil, Synedit.SelStart - ep + length(s),false)
+    else
+      mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1,false);
     mp.Position := SynEdit.SelStart + (ep - SynEdit.CaretX) - 1;
 
     d := mp.FindVarBase(mp.GetExpressionAtPos);

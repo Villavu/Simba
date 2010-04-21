@@ -61,7 +61,10 @@ type
     procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
     function GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
-                    color, tol, len: integer; font: string): string;
+                    color, tol, len: integer; font: string): string;overload;
+    function GetTextAt(xs, ys, xe, ye, minvspacing, maxvspacing, hspacing,
+      color, tol: integer; font: string): string;overload;
+    function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; font: string): string;
     function TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
     function TextToFontBitmap(Text, font: String): TMufasaBitmap;
     function TextToMask(Text, font: String): TMask;
@@ -697,88 +700,27 @@ begin
     result := GetUpTextAtEx(atX, atY, false);
 end;
 
-function TMOCR.GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
-                               color, tol, len: integer; font: string): string;
-
+function TMOCR.GetTextATPA(const ATPA : T2DPointArray;const maxvspacing : integer; font: string): string;
 var
-   b, lb: TBox;
-   i, j, w, h: Integer;
-   lbset: boolean;
-   n: TNormArray;
-   fD: TocrData;
-   TPA: TPointArray;
-   STPA: T2DPointArray;
+  b, lb: TBox;
+  i, j, w, h: Integer;
+  lbset: boolean;
+  n: TNormArray;
+  fD: TocrData;
+  TPA: TPointArray;
 
 begin
   Result := '';
   fD := FFonts.GetFont(font);
-  {writeln(format('W, H: %d, %d', [fD.max_width, fd.max_height]));}
-
-  TClient(Client).IOManager.GetDimensions(w, h);
- { writeln('Dimensions: (' + inttostr(w) + ', ' + inttostr(h) + ')');    }
-
-  { Get the text points }
-  SetLength(TPA, 0);
-  if (atY + fD.max_height -1) >= h then
-    raise exception.createFMT('You are trying to get text that is out of is origin y-coordinate: %d',[aty]);
-
-  TClient(Client).MFinder.FindColorsTolerance(TPA, color, atX, atY,
-                                     min(atX + fD.max_width * len, w - 1),
-                                     atY + fD.max_height - 1, tol);
-{  b := GetTPABounds(TPA);
-  bmp := TMufasaBitmap.Create;
-  bmp.SetSize(b.x2+1,b.y2+1);
-  bmp.DrawTPA(TPA, clRed);
-  bmp.SaveToFile('c:\found.bmp');}
-
-  { Split the text points into something usable. }
-  { +1 because splittpa will not split well if we use 0 space ;) }
-  STPA := SplitTPAEx(TPA, minvspacing+1, hspacing+1);
-
-{  bmp.DrawATPA(STPA);
-  bmp.SaveToFile('c:\found2.bmp');
-  bmp.Free;
-
-  for i := 0 to high(STPA) do
-  begin
-    b := GetTPABounds(STPA[i]);
-    bmp := TMufasaBitmap.Create;
-    bmp.SetSize(b.x2+1,b.y2+1);
-    bmp.DrawTPA(STPA[i], clRed);
-    bmp.SaveToFile('c:\t_' + inttostr(i) + '.bmp');
-    bmp.Free;
-  end;    }
-
-  SortATPAFrom(STPA, Point(0, atY));
-  SortATPAFromFirstPoint(STPA, Point(0, atY));
-
-{  for i := 0 to high(STPA) do
-  begin
-    b := GetTPABounds(STPA[i]);
-    bmp := TMufasaBitmap.Create;
-    bmp.SetSize(b.x2-b.x1 + 2,b.y2-b.y1 + 2);
-    for j := 0 to high(STPA[i]) do
-      bmp.FastSetPixel(stpa[i][j].x-b.x1,stpa[i][j].y-b.y1,clred);
-    bmp.SaveToFile('c:\s_' + inttostr(i) + '.bmp');
-    bmp.Free;
-  end;  }
-
-  { We no longer need the points in TPA }
-  SetLength(TPA, 0);
-
-  fillchar(b, sizeof(tbox), 0);
-  fillchar(lb, sizeof(tbox), 0);
 
   lbset := false;
   SetLength(Result, 0);
   SetLength(n, (fd.width + 1) * (fd.height + 1));
-  for i := 0 to high(STPA) do
+  for i := 0 to high(ATPA) do
   begin
-    if length(result) >= len then
-      exit;
     for j := 0 to high(n) do
       n[j] := 0;
-    TPA := STPA[i];
+    TPA := ATPA[i];
     b := GetTPABounds(TPA);
     if not lbset then
     begin
@@ -815,6 +757,48 @@ begin
     end;
     result := result + GuessGlyph(n, fD);
   end;
+end;
+
+function TMOCR.GetTextAt(xs, ys, xe,ye, minvspacing, maxvspacing, hspacing,
+                               color, tol: integer; font: string): string;
+var
+  TPA : TPointArray;
+  STPA : T2DPointArray;
+  B : TBox;
+begin;
+  SetLength(TPA, 0);
+  TClient(Client).MFinder.FindColorsTolerance(TPA, color, xs,ys,xe,ye,tol);
+  b := GetTPABounds(TPA);
+
+  { Split the text points into something usable. }
+  { +1 because splittpa will not split well if we use 0 space ;) }
+  STPA := SplitTPAEx(TPA, minvspacing+1, hspacing+1);
+
+  SortATPAFrom(STPA, Point(0, ys));
+  SortATPAFromFirstPoint(STPA, Point(0, ys));
+  result := gettextatpa(STPA,maxvspacing,font);
+end;
+
+function TMOCR.GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
+                               color, tol, len: integer; font: string): string;
+var
+  w,h : integer;
+  fD: TocrData;
+
+begin
+  Result := '';
+  fD := FFonts.GetFont(font);
+  TClient(Client).IOManager.GetDimensions(w, h);
+ { writeln('Dimensions: (' + inttostr(w) + ', ' + inttostr(h) + ')');    }
+
+  { Get the text points }
+  if (atY + fD.height -1) >= h then
+    raise exception.createFMT('You are trying to get text that is out of is origin y-coordinate: %d',[aty]);
+  result := GetTextAt(atX, atY,min(atX + fD.max_width * len, w - 1),
+            atY + fD.max_height - 1, minvspacing,maxvspacing,hspacing,color,tol,font);
+  if length(result) > len then
+    setlength(result,len);
+
 end;
 
 function TMOCR.TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
