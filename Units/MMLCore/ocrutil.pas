@@ -38,7 +38,7 @@ type
     L,a,b: real;
   end;
 
-  procedure findBounds(glyphs: TocrGlyphMaskArray; out width,height: integer);
+  procedure findBounds(glyphs: TocrGlyphMaskArray; out width,height,maxwidth,maxheight: integer);
   function LoadGlyphMask(const bmp : TMufasaBitmap; shadow: boolean; const ascii : char): TocrGlyphMask;
   function LoadGlyphMasks(const path: string; shadow: boolean): TocrGlyphMaskArray;
   function InitOCR(const Masks : TocrGlyphMaskArray): TocrData;
@@ -56,14 +56,21 @@ uses
   {End To-Remove unit}
 
 {initalizes the remaining fields from a TocrGlyphMask and finds the global bounds}
-procedure findBounds(glyphs: TocrGlyphMaskArray; out width,height: integer);
+procedure findBounds(glyphs: TocrGlyphMaskArray; out width,height,maxwidth,maxheight: integer);
 var
   i,x,y,c,w,h: integer;
+  minx,miny,maxx,maxy : integer;
   l,r,t,b: integer;
   dat: TNormArray;
 begin
   width:= 0;
   height:= 0;
+  MaxWidth := 0;
+  MaxHeight := 0;
+  minx := 9000;
+  miny := 9000;
+  maxx := 0;
+  maxy := 0;
   for c:= 0 to length(glyphs) - 1 do
   begin
     dat:= glyphs[c].mask;
@@ -79,8 +86,12 @@ begin
       begin
         x:= i mod w;
         y:= i div w;
+        if x > maxx then maxx := x;
+        if x < minx then minx := x;
         if x > r then r:= x;
         if x < l then l:= x;
+        if y > maxy then maxy := y;
+        if y < miny then miny := y;
         if y > b then b:= y;
         if y < t then t:= y;
       end;
@@ -94,6 +105,8 @@ begin
     if (r - l + 1) > width then width:= r - l + 1;
     if (b - t + 1) > height then height:= b - t + 1;
   end;
+  maxwidth:= (maxx-minx) + 1;
+  maxheight := (maxy - miny) + 1;
 end;
 
 {Use whatever you want if you don't like this}
@@ -166,18 +179,19 @@ function InitOCR(const masks : TocrGlyphMaskArray): TocrData;
 var
   t,b,l,r,w,h,mw: integer;
   x,y: integer;
+  maxw,maxh : integer;
   c,i,len,size: integer;
   pos: integer;
   ascii: char;
 begin
   w:= 0;
   h:= 0;
-  findBounds(masks,w,h);
+  findBounds(masks,w,h,maxw,maxh);
   len:= Length(masks);
   result.width:= w;
   result.height:= h;
-  result.max_width:=0;
-  result.max_height:=0;
+  result.max_width := maxw;
+  result.max_height := maxh;
   size:= w * h;
   SetLength(result.pos,len,size);
   SetLength(result.pos_adj,len);
@@ -216,8 +230,6 @@ begin
     result.ascii[ord(ascii)].yoff:= masks[i].t;
     result.ascii[ord(ascii)].width:= masks[i].width;
     result.ascii[ord(ascii)].height:= masks[i].height;
-    result.max_width := max(result.max_width, masks[i].width);
-    result.max_height := max(result.max_height, masks[i].height);
   end;
   result.inputs:= size;
   result.outputs:= len;

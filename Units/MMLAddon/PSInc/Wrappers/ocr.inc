@@ -31,10 +31,21 @@ begin
   Result := CurrThread.Client.MOCR.TextToFontTPA(text, font, w, h);
 end;
 
+function ps_GetTextATPA(const ATPA : T2DPointArray; const maxvspacing : integer; const font : string): string; extdecl;
+begin
+  result := CurrThread.Client.MOCR.GetTextATPA(ATPA,maxvspacing,font);
+end;
+
 function ps_GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing,
                    color, tol, len: integer;const font: string): string; extdecl;
 begin
   result := CurrThread.Client.MOCR.GetTextAt(atx,aty,minvspacing,maxvspacing,hspacing,color,tol,len,font);
+end;
+
+function ps_GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,
+                   color, tol: integer;const font: string): string; extdecl;
+begin
+  result := CurrThread.Client.MOCR.GetTextAt(xs,ys,xe,ye,minvspacing,maxvspacing,hspacing,color,tol,font);
 end;
 
 function ps_LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;extdecl;

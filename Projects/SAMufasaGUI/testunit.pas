@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 633;
+  SimbaVersion = 635;
 
 type
 
@@ -457,6 +457,7 @@ uses
    syncobjs, // for the critical sections
    debugimage,
    files,
+   InterfaceBase,
    extensionmanagergui,
    colourhistory,
    math;
@@ -2314,7 +2315,7 @@ begin
   if Self.Visible = false then
     MenuItemShowClick(sender)
   else
-    Self.hide;
+    Self.Hide;
 end;
 
 procedure TForm1.MenuItemReportBugClick(Sender: TObject);
