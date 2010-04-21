@@ -89,14 +89,11 @@ end;
 
 procedure TDebugImgForm.DrawBitmap;
 var
-  rawImage : TRawImage;
   Bitmap : Graphics.TBitmap;
 begin
   if ToDrawBmp = nil then
     raise Exception.Create('ERROR in TDebugImgForm.DrawBitmap: ToDrawBmp = nil');
-  ArrDataToRawImage(ToDrawBmp.FData,Point(ToDrawBmp.width,ToDrawBmp.height),RawImage);
-  Bitmap := Graphics.TBitmap.Create;
-  Bitmap.LoadFromRawImage(Rawimage,false);
+  Bitmap := ToDrawBmp.ToTBitmap;
   DrawImage.Canvas.Draw(0,0,Bitmap);
   DrawImage.Repaint;
   Bitmap.Free;
@@ -109,7 +106,8 @@ end;
 
 procedure TDebugImgForm.ShowDebugImgForm;
 begin
-  Show;
+  if not Visible then
+    show;
   if (DispSize.x <> Width) or (DispSize.y  <> height) then
   begin;
     Width := DispSize.x;

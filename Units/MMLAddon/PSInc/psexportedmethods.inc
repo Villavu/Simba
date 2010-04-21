@@ -244,6 +244,9 @@ AddFunction(@ps_TPAFromText, 'function TPAFromText(const text, font: String;var 
 AddFunction(@ps_TPAFromTextWrap,'procedure TPAFromTextWrap(const text, font: String;var w,h : integer;var TPA : TPointArray);');
 AddFunction(@ps_MaskFromText, 'function MaskFromText(const text, font: String): TMask;');
 AddFunction(@ps_GetTextAt,'function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer;const font: string): string;');
+AddFunction(@ps_getTextAtEx,'function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,color, tol: integer;const font: string): string;');
+AddFunction(@ps_GetTextAtEx,'function GetTextAtExWrap(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,color, tol: integer;const font: string): string;');
+AddFunction(@ps_gettextATPA,'function GetTextATPA(const ATPA : T2DPointArray; const maxvspacing : integer; const font : string): string;');
 AddFunction(@ps_LoadSystemFont,'function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;');
 
 {Bitmaps}
