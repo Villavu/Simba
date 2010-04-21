@@ -162,6 +162,9 @@ AddFunction(@ps_explodewrap,'procedure ExplodeWrap(del, str: string; var res : T
 AddFunction(@ps_PadL,'function Padl(s: String; i: longInt): String;');
 AddFunction(@Ps_Padz,'function Padz(s: String; i: longInt): String;');
 AddFunction(@ps_padR,'function Padr(s: String; i: longInt): String;');
+AddFunction(@ps_ExecRegExpr,'function ExecRegExpr( const RegExpr, InputStr : String) : boolean;');
+AddFunction(@ps_SplitRegExpr,'procedure SplitRegExpr( const RegExpr, InputStr : String; Pieces : TStrings);');
+addfunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
 
 {web}
 SetCurrSection('Web');
