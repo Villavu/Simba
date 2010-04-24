@@ -83,6 +83,7 @@ type
 var
   CoreBuffer: TCodeInsightArray;
   IncludeBuffer: TIncludeBufferArray;
+  CoreDefines: TStringList;
 
 implementation
 
@@ -903,6 +904,8 @@ begin
   fPos := -1;
   Reset;
 
+  Lexer.Defines.AddStrings(CoreDefines);
+
   fOwnStream := (fFileName <> '');
   if fOwnStream then
   begin
@@ -943,7 +946,8 @@ begin
   if Assigned(BaseDefines) then
   begin
     Lexer.ClearDefines;
-    Lexer.Defines.Assign(BaseDefines);
+    Lexer.Defines.AddStrings(CoreDefines);
+    Lexer.Defines.AddStrings(BaseDefines);
   end;
   SetLength(fIncludes, 0);
 
@@ -1313,8 +1317,10 @@ end;
 
 initialization
   {nothing}
+  CoreDefines := TStringList.Create;
 finalization
   ClearIncludeBuffer;
   ClearCoreBuffer;
+  CoreDefines.Free;
 
 end.
