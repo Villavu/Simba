@@ -1987,7 +1987,6 @@ begin
       a.GetValueDefs(b);
 
       CoreDefines.AddStrings(a.Defines);
-      WriteLn('Defines: '+a.Defines.CommaText);
 
       SetLength(CoreBuffer, 1);
       CoreBuffer[0] := TCodeInsight.Create;
