@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 635;
+  SimbaVersion = 637;
 
 type
 
@@ -1846,6 +1846,18 @@ begin
   begin
     MethodInfo := PMethodInfo(node.Data)^;
     StatusBar.Panels[Panel_ScriptPath].Text := MethodInfo.MethodStr;
+    if frmFunctionList.DraggingNode = node then
+      if (MethodInfo.BeginPos > 0) then
+      begin;
+        if MethodInfo.Filename <> nil then
+          if MethodInfo.Filename <> '' then
+          begin;
+//            Writeln(MethodInfo.filename);
+            LoadScriptFile(MethodInfo.Filename,true,true);
+          end;
+        CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
+        CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
+      end;
   end;
 end;
 
@@ -1982,11 +1994,8 @@ begin
         a.OnCompile := OnCompile;
         a.OnCompImport := OnCompImport;
         a.OnExecImport := OnExecImport;
-        a.Defines.Assign(Defines);
       end;
       a.GetValueDefs(b);
-
-      CoreDefines.AddStrings(a.Defines);
 
       SetLength(CoreBuffer, 1);
       CoreBuffer[0] := TCodeInsight.Create;
@@ -1995,7 +2004,7 @@ begin
         OnMessage := @form1.OnCCMessage;
         b.SaveToStream(ms);
         Run(ms, nil, -1, True);
-        FileName := '"PSCORE"';
+        FileName := '!PSCORE!';
       end;
     finally
       b.Free;
