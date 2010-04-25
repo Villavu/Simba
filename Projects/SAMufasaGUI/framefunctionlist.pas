@@ -113,7 +113,8 @@ end;
 
 procedure TFunctionListFrame.FunctionListDblClick(Sender: TObject);
 var
-   Node : TTreeNode;
+  Node : TTreeNode;
+  MethodInfo : TMethodInfo;
 begin
   if FilterTree.Visible then
     Node := FilterTree.Selected
@@ -122,10 +123,27 @@ begin
   if node<> nil then
     if node.Level > 0 then
       if node.Data <> nil then
-      begin;
-        Form1.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.MethodStr,true));
-        Form1.RefreshTab;
-      end;
+        if InCodeCompletion then
+        begin
+          Form1.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.MethodStr,true));
+          Form1.RefreshTab;
+        end
+        else
+        begin
+          MethodInfo := PMethodInfo(node.Data)^;
+          if DraggingNode = node then
+            if (MethodInfo.BeginPos > 0) then
+            begin;
+              if MethodInfo.Filename <> nil then
+                if MethodInfo.Filename <> '' then
+                begin;
+//                Writeln(MethodInfo.filename);
+                  Form1.LoadScriptFile(MethodInfo.Filename,true,true);
+                end;
+              Form1.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
+              Form1.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
+            end;
+        end;
 end;
 
 procedure TFunctionListFrame.FunctionListDeletion(Sender: TObject;
