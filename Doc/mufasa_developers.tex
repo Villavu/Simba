@@ -47,7 +47,7 @@ A special word of thanks goes to Frederic Hannes (Freddy1990) for maintaining
 his program\footnote{SCAR, http://freddy1990.com}, for giving us inspiration
 and generally for all the time he has put in SRL.
 
-That's about it for the foreword, we hope this Document will be of any use to
+That's about it for the foreword, we hope this document will be of any use to
 you as reader.
 
 Wizzup? and Raymond
@@ -257,13 +257,70 @@ currently writing a library called `libmml', which offers a non-OOP wrapper
 around the MML library.
 
 
-\chapter{Simba - General}
+\chapter{Simba - the GUI}
+
+\section{Introduction}
+
+Simba is a frontend to the MML. It allows one to develop and run scripts that 
+use the MML. It features tabs, where each tab can not only hold a file, but also
+run a script; you can run multiple scripts at once in Simba. \\
+
+% XXX Move out of here?
+Simba also features some tools to ease development. There is a function list
+consisting of in-build functions, functions from includes and functions in your
+script. There is also a component called ``Auto completion'', which shows all
+possible options for your code. Another feature is ``Code hints'', which shows
+the variables a specific function requires.
+% XXX
+
+\section{Window selecting, Colour picking and mouse position polling}
+Simba internally uses an instance of TMClient, for window selecting, colour
+picking and mouse position polling. If a script instance is started, the
+currently selected window handle in Simba is passed to the script, and the script
+then creates its own TMClient with the given window handle.
+
+\section{Auto updaters}
+
+Simba includes an auto updater for several components. Most importantly, Simba
+itself. Simba compares its current version to an online one; on a different
+thread. If the online version is greater than Simba's current version, it
+downloads a new Simba executable and replaces the currently running Simba
+executabke with the new one. On Windows this is done by renaming the old
+Executable and deleting it on start. On Linux one can just replace the currently
+running Simba.
+
+Another auto updater in Simba is the font updater. It downloads the latest fonts
+in the same manner as Simba itself, with versions.
+
+\section{Extensions}
+
+A great feature of Simba is its support for so called ``Extensions''.
+This feature allows developers to quickly write an extension in a scripting
+language, and then include it in Simba. An extension can vary from a simple
+firewall to a rich bitmap editor. Currently, the Simba installer comes with a
+SRL downloader and updater extension.
+
+\section{Settings}
+
+Simba contains a powerful component for Settings. It consists out of a XML
+reader and writer; all Simba settings are stored in XML files. XML files can be
+turned into Tree Views. Simba settings also support sandboxing, where the root
+of a settings tree can be changed to a specific node. This can be used to
+provide settings per script, without allowing the access to the other Simba
+settings.
+
+\section{Interpreting code}
+
+See the next chapter titled ``Interpreters for Simba'' for more
+information on Simba and interpreters.
+
+
 % Loading/Saving
 % Auto updating
 % Settings?
 % Code Completion?
 
-\chapter{Simba and PascalScript}
+\chapter{Interpreters for Simba}
 
 
 \end{document}
