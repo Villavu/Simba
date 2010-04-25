@@ -27,7 +27,7 @@ unit os_windows;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, windows, graphics, LCLType, bitmaps, LCLIntf, IOManager, WinKeyInput;
+    Classes, SysUtils, mufasatypes, windows, graphics, LCLType, bitmaps, IOManager, WinKeyInput;
     
   type
 
@@ -88,6 +88,7 @@ interface
       constructor Create(DesktopHandle : HWND);
       function WindowRect(out Rect : TRect) : Boolean;override;
     end;
+
     TIOManager = class(TIOManager_Abstract)
       public
         constructor Create;
@@ -250,7 +251,7 @@ implementation
 
   function TWindow.WindowRect(out Rect : TRect) : boolean;
   begin
-    result := GetWindowRect(self.handle,rect) <> 0;
+    result := Windows.GetWindowRect(self.handle,rect);
   end;
   
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
@@ -262,8 +263,9 @@ implementation
     ValidateBuffer(w,h);
     if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
       raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
-    BitBlt(self.buffer.Canvas.Handle,0,0, width, height, self.dc, xs,ys, SRCCOPY);
+    Windows.BitBlt(self.buffer.Canvas.Handle,0,0, width, height, self.dc, xs,ys, SRCCOPY);
     Result.Ptr:= self.buffer_raw;
+
     Result.IncPtrWith:= w - width;
     Result.RowLen:= w;
   end;
@@ -418,6 +420,8 @@ begin
   self.dc := GetDC(DesktopHandle);
   self.handle:= DesktopHandle;
 end;
+
+
 
 
 function TDesktopWindow.WindowRect(out Rect : TRect) : Boolean;
