@@ -409,7 +409,7 @@ begin
         mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1,true);
       bcc := 1;bck := 0;cc := 0;
       s := mp.GetExpressionAtPos(bcc, bck, cc,posi, true);
-      WriteLn('is it '+s+'?');
+
       bracketpos := posi + length(s);
       if pos('(',s) > 0 then
       begin;
