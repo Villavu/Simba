@@ -47,30 +47,31 @@ A special word of thanks goes to Frederic Hannes (Freddy1990) for maintaining
 his program\footnote{SCAR, http://freddy1990.com}, for giving us inspiration
 and generally for all the time he has put in SRL.
 
-That's about it for the foreword, we hope this Document will be of any use to
-you as reader.
+That's about it for the foreword, we hope this document will be of any use to
+you, as reader.
 
 Wizzup? and Raymond
 
 \chapter{Introduction}
 
-This is the Simba / MML (Mufasa Macro Library) documentation, aimed at
-developers. The document will take several different approaches in treating and
-explaining Simba / MML internals. We will first discuss the general 
-structure of a particular subject, and if necessary, spent a few sections
-on files linked with the subject. 
 As Simba depends heavily on the MML and the MML can also actively be used in 
 other languages, we will first discuss the MML, and then turn to Simba.
 
+This is the Simba/MML (Mufasa Macro Library) documentation, aimed at
+developers. The document has several different parts, each explaining
+Simba/MML internals. We will first discuss the general structure of a
+particular subject, and if necessary, spend a few sections on files
+linked with the subject.
+
 \chapter{MML}
 
-The MML\footnote{Mufasa Macro Library} consists out of several
-modular\footnote{Even though they are seen as modular, some have dependencies on
-other modules} classes / objects. Each of these classes strive to be
+The MML\footnote{Mufasa Macro Library} consists of several
+modular\footnote{Modules are not completely self-contained}
+classes / objects. Each of these classes strive to be
 completely platform independent. We will look at each of these classes.
 \footnote{
-The last class - TMFiles - may be removed in the future, as it doesn't
-perform any special operations that are hard to do on other platforms or
+The last class, TMFiles, may be removed in the future, as it doesn't
+perform any specific operations that are hard to do on other platforms or
 operating systems.
 }
 
@@ -117,7 +118,7 @@ The TMFinder class is basically a large collection of different object
 \footnote{Object being either a colour, bitmap or dtm} ``finding'' methods.
 It has a reference to it's ``parent'' Client object, since it needs to have
 access to TIOManager for retreiving client data, and access to managed bitmaps
-and dtm's in TMBitmaps and TMDTM.
+and DTMs in TMBitmaps and TMDTM.
 
 
 \subsection{Caching}
@@ -134,15 +135,20 @@ and dtm's in TMBitmaps and TMDTM.
 
 \subsection{The DTM}
 
-DTM is shorthand for Deformable Template Model. \\
+DTM stands for Deformable Template Model. \\
 
 \emph{``DTM'' is the term used in SCAR. If it is actually a Deformable Template
 Model is definately debateable; but for now we will stick to ``DTM''.} \\
 
-A DTM is in my view just a relatively simple way of defining a relationship
-between several points. Each of these points have a relative offset to each
-other, and may differ in colour, tolerance, area size and shape.
-A DTM consists out of one \textbf{Main Point}, and several \textbf{Sub Points}
+A DTM is a relatively simple way of defining a relationship between several
+points. Each of these points have a relative offset to each other, and each 
+stores its own colour, tolerance, area size, and area shape. A DTM consists
+of one \textbf{main point}, and several \textbf{sub-points}
+
++The main point's value is typically $ (0, 0) $, and all the
++sub point points are relative to the main point. "Point match" defines if
++a given location should or should \textbf{not} match.
+
 The structure of a DTM looks like this:
 
 %\begin{figure}[ht]
@@ -152,9 +158,10 @@ The structure of a DTM looks like this:
 
 Where each point in a DTM has a colour, tolerance, area size and area shape
 entity. The main point's ``point'' is typically $ (0, 0) $, and all the
-sub point points are arelative to the main point. ``Point Match'' defines if a point should match or should \textbf{Not} match.
+sub point points are arelative to the main point. ``Point Match'' defines
+ if a point should match or should \textbf{Not} match.
 
-Of course, the actual representation in Pascal is slightly different:
+The actual representation in Pascal is slightly different:
 
 
 \begin{verbatim}
@@ -169,7 +176,7 @@ Of course, the actual representation in Pascal is slightly different:
 
 \subsubsection{DTM Example}
 
-If one was to create his own DTM, he\footnote{Or she} would first have to
+If one was to create his own DTM, s/he would first have to
 think of a useful DTM structure.
 
 Say:
@@ -177,7 +184,7 @@ $$ MainPoint = (123, 456)  $$
 $$ SubPoint_1 = (122, 460) $$
 $$ SubPoint_2 = (120, 450) $$
 
-Then we could create the following pDTM structure:
+We could then create the following pDTM structure:
 
 \begin{verbatim}
 	// Give dtm.p a length of three.
@@ -190,10 +197,10 @@ Then we could create the following pDTM structure:
 \end{verbatim}
 
 Note that we do not include other variables, such as colour, tolerance, area
-size and area shape; but they should be handled in a similar manner.
+size and area shape; they should be handled in a similar manner.
 
 However, this code is not very clear about the relation between the DTM's
- points. Better would be to write:
+ points. It would be better to write:
 
 \begin{verbatim}
     // Give dtm.p a length of three.
@@ -210,15 +217,15 @@ As you can see it is perfectly valid to use negative points.
 \subsubsection{Color and Tolerance}
 
 The colour value of a point in a DTM is just a RGB integer value.
-Black = 0, Red = 255, White = 16777215, et cetera.
+Black = 0, Red = 255, White = 16777215, etc.
 
 The value tolerance decides if a colour is similar enough to the given
-colour; if this is the case, we say that the colours \textbf{matched}.
+colour; if this is the case, we say that the colours matched.
 
-With no Area Size and Area Shape specified\footnote{Read: with Area
-Size = 0 and Area Shape = Rectangle} we say that a DTM matches if for each
-point in the DTM, the colour at the relative point matches the colour in dtm
-with the given tolerance.
+With no area size and area shape specified\footnote{With area size set to zero
+ and area shape specified as rectangle, the default} we say that a DTM matches if
+for each point in the DTM, the colour at the relative point matches the colour
+ in dtm with the given tolerance.
 
 $$ \forall p \in P, \forall t \in Tol, \forall c \in Col : T(C(p), c) \leq t
  $$
@@ -228,18 +235,18 @@ between the two given colours.
 
 \subsubsection{Area Size and Shape}
 
-Area Size and Shape add that nifty extra functionality to DTM's.
-\textbf{Area Size} defines the area that should all match the colour
+Area size and shape add that nifty extra functionality to DTM's.
+\textbf{Area size} defines the area that should all match the colour
 with the given tolerance. \\
-\textbf{Area Shape} is currently not implemented, mainly because
-we haven't found a good use for area shapes.
+\textbf{Area shape} is currently not implemented, mainly because
+current aplications work well with rectangular shapes.
 
 \subsection{How does TMDTM fit in?}
 
 The TMDTM class is a DTM manager. It provides methods to add, store, load
-and free DTM's. It has a few other features. One of it's other features
-is keeping track of what DTMs are unfreed. It can also, for example help you
-find a bug in your code, by printing out information of the DTM that you forgot to free.
+and free DTM's. It has a few other features. One of its other features
+is keeping track of what DTMs are unfreed. It can also, for example, help you
+find a bug in your code, by printing out information of the DTM as it if used 
 You can also give names to DTMs, which eases debugging even further.
 
 If you try to access an invalid DTM, the MML will throw an exception.
@@ -252,18 +259,74 @@ If you try to access an invalid DTM, the MML will throw an exception.
 
 \section{Portability to other languages}
 
-Since it is near to impossible to simply import the MML classes, we are
-currently writing a library called `libmml', which offers a non-OOP wrapper
-around the MML library.
+Since it is near to impossible to simply import the MML classes, a library
+called ``libmml'' is currently being written, which will offer a non-OOP 
+wrapper.
+
+\chapter{Simba - the GUI}
+
+\section{Introduction}
+
+Simba is a frontend to the MML. It allows one to develop and run scripts that 
+use the MML. It features tabs, where each tab can not only hold a file, but also
+run a script; you can run multiple scripts at once in Simba. \\
+
+% XXX Move out of here?
+Simba also features some tools to ease development. There is a function list
+consisting of in-build functions, functions from includes and functions in your
+script. There is also a component called ``Auto completion'', which shows all
+possible options for your code. Another feature is ``Code hints'', which shows
+the variables a specific function requires.
+% XXX
+
+\section{Window selecting, Colour picking and mouse position polling}
+Simba internally uses an instance of TMClient, for window selecting, colour
+picking and mouse position polling. If a script instance is started, the
+currently selected window handle in Simba is passed to the script, and the script
+then creates its own TMClient with the given window handle.
+
+\section{Auto updaters}
+
+Simba includes an auto updater for several components. Most importantly, Simba
+itself. Simba compares its current version to an online one; on a different
+thread. If the online version is greater than Simba's current version, it
+downloads a new Simba executable and replaces the currently running Simba
+executabke with the new one. On Windows this is done by renaming the old
+Executable and deleting it on start. On Linux one can just replace the currently
+running Simba.
+
+Another auto updater in Simba is the font updater. It downloads the latest fonts
+in the same manner as Simba itself, with versions.
+
+\section{Extensions}
+
+A great feature of Simba is its support for so called ``Extensions''.
+This feature allows developers to quickly write an extension in a scripting
+language, and then include it in Simba. An extension can vary from a simple
+firewall to a rich bitmap editor. Currently, the Simba installer comes with a
+SRL downloader and updater extension.
+
+\section{Settings}
+
+Simba contains a powerful component for Settings. It consists out of a XML
+reader and writer; all Simba settings are stored in XML files. XML files can be
+turned into Tree Views. Simba settings also support sandboxing, where the root
+of a settings tree can be changed to a specific node. This can be used to
+provide settings per script, without allowing the access to the other Simba
+settings.
+
+\section{Interpreting code}
+
+See the next chapter titled ``Interpreters for Simba'' for more
+information on Simba and interpreters.
 
 
-\chapter{Simba - General}
 % Loading/Saving
 % Auto updating
 % Settings?
 % Code Completion?
 
-\chapter{Simba and PascalScript}
+\chapter{Interpreters for Simba}
 
 
 \end{document}
