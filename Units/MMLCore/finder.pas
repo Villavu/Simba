@@ -2024,8 +2024,8 @@ begin
   MA.x2 := MA.x2 - x1;
   MA.y2 := MA.y2 - y1;
 
-  MaxX := y2-y1;
-  MaxY := x2-x1;
+  MaxX := x2-x1;
+  MaxY := y2-y1;
   //MA is now fixed to the new (0,0) box...
 
   for yy := MA.y1  to MA.y2  do //Coord of the mainpoint in the search area
