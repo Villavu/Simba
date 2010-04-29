@@ -214,9 +214,9 @@ begin
     F.Name := F.Name + '_s';
   f.Data := InitOCR( LoadGlyphMasks(FPath + Name + DS, Shadow));
   Fonts.Add(f);
-  {$IFDEF FONTDEBUG}
+  {{$IFDEF FONTDEBUG}
   TClient(Client).Writeln('Loaded Font ' + f.Name);
-  {$ENDIF}
+  {$ENDIF} }
 end;
 
 function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: string): boolean;
