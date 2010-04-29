@@ -12,6 +12,7 @@ clean:
 	rm -rvf $(intro_)
 	rm -rvf $(psbook_)
 	rm -rvf $(book_)
+	rm -rvf $(dev_)
 	find -iname "$(intro_)*" | grep -v svn | grep -v tex | xargs rm -vf
 	find -iname "$(psbook_)*" | grep -v svn | grep -v tex | xargs rm -vf
 	find -iname "$(book_)*" | grep -v svn | grep -v tex | xargs rm -vf

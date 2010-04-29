@@ -71,6 +71,8 @@ AddFunction(@ps_FixD,'function FixD(Degrees : extended) : Extended;');
 AddFunction(@ps_InRange,'function InRange(const value,min,max : integer) : boolean;');
 AddFunction(@ps_logn,'function logn(base, x : extended): extended;');
 AddFunction(@ps_ln,'function ln(x : extended) : extended;');
+AddFunction(@ps_inttohex,'function IntToHex(number : integer) : string');
+AddFunction(@ps_hextoint,'function HexToInt(Hex : string) : integer');
 
 {window}
 SetCurrSection('Window');
