@@ -248,6 +248,7 @@ type
     procedure ChangeMouseStatus(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
+    procedure doOnHide(Sender: TObject);
     procedure editSearchListExit(Sender: TObject);
     procedure editSearchListKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -1713,6 +1714,16 @@ begin
   SearchPanel.Visible:= false;
   if CurrScript.SynEdit.CanFocus then
     CurrScript.SynEdit.SetFocus;
+end;
+
+{
+  If we are being sent to the background; then minimize other active windows as
+  well.
+}
+procedure TForm1.doOnHide(Sender: TObject);
+begin
+  if DebugImgForm.Visible then
+    DebugImgForm.Hide;
 end;
 
 procedure TForm1.StopCodeCompletion;
