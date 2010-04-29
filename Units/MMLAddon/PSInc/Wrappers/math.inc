@@ -163,3 +163,13 @@ function ps_ln(x : extended) : extended;extdecl;
 begin
   result := ln(x);
 end;
+
+function ps_inttohex(value : integer) : string;
+begin
+  result := IntToHex(value,1);
+end;
+
+function ps_hextoint(hex : string) : integer;
+begin
+  result := StrToInt('$' + hex);
+end;
