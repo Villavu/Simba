@@ -140,6 +140,9 @@ function TMOCR.InitTOCR(const path: string): boolean;
 var
    dirs: array of string;
    i: longint;
+   {$IFDEF FONTDEBUG}
+   fonts_loaded: String = '';
+   {$ENDIF}
 begin
   // We're going to load all fonts now
   FFonts.Path := path;
@@ -147,8 +150,21 @@ begin
   Result := false;
   for i := 0 to high(dirs) do
   begin
+    {$IFDEF FONTDEBUG}
+    // REMOVING THIS WILL CAUSE FONTS_LOADED NOT BE ADDED SOMEHOW?
+    writeln('Loading: ' + dirs[i]);
+    {$ENDIF}
     if FFonts.LoadFont(dirs[i], false) then
+    begin
+      fonts_loaded := fonts_loaded + dirs[i] + ', ';
       result := true;
+    end;
+  end;
+  if length(fonts_loaded) > 2 then
+  begin
+    writeln(fonts_loaded);
+    setlength(fonts_loaded,length(fonts_loaded)-2);
+    TClient(Self.Client).WriteLn('Loaded fonts: ' + fonts_loaded);
   end;
   If DirectoryExists(path + 'UpChars') then
     FFonts.LoadFont('UpChars', true); // shadow
