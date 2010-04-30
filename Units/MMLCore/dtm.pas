@@ -37,7 +37,7 @@ type
     TMDTM = class(TObject)
     private
       Client: TObject;
-      DTMList: Array Of pDTM;
+      DTMList: Array Of PpDTM;
       FreeSpots: Array Of Integer;
       procedure CheckIndex(index : integer);
     public
@@ -90,8 +90,8 @@ begin
       end;
       if not b then
       begin;
-        if DTMList[i].n <> '' then
-          WriteStr := WriteStr + DTMList[i].n + ', '
+        if DTMList[i]^.n <> '' then
+          WriteStr := WriteStr + DTMList[i]^.n + ', '
         else
           WriteStr := WriteStr + inttostr(i) + ', ';
         FreeDTM(i);
@@ -171,7 +171,7 @@ end;
 
 procedure TMDTM.CheckIndex(index: integer);
 begin
-  if (index < 0) or (index >= Length(DTMList)) then
+  if (index < 0) or (index >= Length(DTMList)) or (DTMList[Index] = nil) then
     raise Exception.CreateFmt('The given DTM Index[%d] doesn''t exist',[index]);
 end;
 
@@ -185,20 +185,24 @@ end;
 /\}
 
 function TMDTM.AddpDTM(const d: pDTM): Integer;
+var
+  NewDTM : PpDTM;
 begin
+  New(NewDTM);
+  NewDTM^ := d;
+
   if Length(FreeSpots) > 0 then
   begin
-    DTMList[FreeSpots[High(FreeSpots)]] := d;
     Result := FreeSpots[High(FreeSpots)];
     SetLength(FreeSpots, High(FreeSpots));
   end
   else
   begin
     SetLength(DTMList, Length(DTMList) + 1);
-    DTMList[High(DTMList)] := d;
     Result := High(DTMList);
   end;
-  NormalizeDTM(DTMList[result]);
+  DTMList[Result] := NewDTM;
+  NormalizeDTM(DTMList[result]^);
 end;
 
 {/\
@@ -209,13 +213,13 @@ end;
 function TMDTM.GetDTM(index: Integer) :pDTM;
 begin
   CheckIndex(index);
-  result := DTMList[index];
+  result := DTMList[index]^;
 end;
 
 procedure TMDTM.SetDTMName(DTM: Integer;const s: string);
 begin
   CheckIndex(DTM);
-  DTMList[DTM].n := s;
+  DTMList[DTM]^.n := s;
 end;
 
 {/\
@@ -227,14 +231,19 @@ end;
 procedure TMDTM.FreeDTM(DTM: Integer);
 begin
   CheckIndex(DTM);
-  SetLength(DTMList[DTM].p, 0);
-  SetLength(DTMList[DTM].c, 0);
-  SetLength(DTMList[DTM].t, 0);
-  SetLength(DTMList[DTM].asz, 0);
-  SetLength(DTMList[DTM].ash, 0);
-  SetLength(DTMList[DTM].bp,0);
-  DTMList[DTM].l := 0;
-  DTMList[DTM].n := '';
+  with DTMList[DTM]^ do
+  begin
+    SetLength(p, 0);
+    SetLength(c, 0);
+    SetLength(t, 0);
+    SetLength(asz, 0);
+    SetLength(ash, 0);
+    SetLength(bp,0);
+    l := 0;
+    n := '';
+  end;
+  Dispose(DTMList[DTM]);
+  DTMList[DTM] := nil;
   SetLength(FreeSpots, Length(FreeSpots) + 1);
   FreeSpots[High(FreeSpots)] := DTM;
 end;
