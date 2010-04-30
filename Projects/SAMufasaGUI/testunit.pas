@@ -1390,8 +1390,8 @@ begin
       FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
   Thread.SetPaths(ScriptPath,AppPath,Includepath,PluginPath,fontPath);
 
-  if selector.haspicked then Thread.Client.IOManager.SetTarget(Selector.LastPick);
-
+  if selector.haspicked then
+    Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
   loadFontsOnScriptStart := (lowercase(LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True')) = 'true');
   // Copy our current fonts
