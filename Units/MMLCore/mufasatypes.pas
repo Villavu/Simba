@@ -118,6 +118,9 @@ type
     n: String;    // DOEN
   end;
 
+  PpDTM = ^pDTM;
+
+
   { Other DTM Types }
 
   TDTMPointDef = record
