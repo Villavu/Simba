@@ -52,3 +52,15 @@ function ps_LoadSystemFont(const SysFont : TFont; const FontName : string) : boo
 begin
   result := CurrThread.Client.MOCR.Fonts.LoadSystemFont(SysFont,FontName);
 end;
+
+function ps_LoadFont(const FontName: string; shadow: boolean): boolean; extdecl;
+begin
+  result := CurrThread.Client.MOCR.Fonts.LoadFont(FontName, shadow);
+end;
+
+function ps_FreeFont(const FontName: string): boolean; extdecl;
+begin
+  result := CurrThread.Client.MOCR.Fonts.FreeFont(FontName);
+end;
+
+

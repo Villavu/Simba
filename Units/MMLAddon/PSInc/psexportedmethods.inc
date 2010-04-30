@@ -253,6 +253,8 @@ AddFunction(@ps_getTextAtEx,'function GetTextAtEx(const xs,ys,xe,ye, minvspacing
 AddFunction(@ps_GetTextAtEx,'function GetTextAtExWrap(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,color, tol: integer;const font: string): string;');
 AddFunction(@ps_gettextATPA,'function GetTextATPA(const ATPA : T2DPointArray; const maxvspacing : integer; const font : string): string;');
 AddFunction(@ps_LoadSystemFont,'function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;');
+AddFunction(@ps_LoadFont, 'function LoadFont(const FontName: string; shadow: boolean): boolean;');
+AddFunction(@ps_FreeFont, 'function FreeFont(const FontName: string): boolean;');
 
 {Bitmaps}
 SetCurrSection('Bitmaps');
