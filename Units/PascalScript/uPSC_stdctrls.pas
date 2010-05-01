@@ -476,6 +476,7 @@ begin
     RegisterProperty('ITEMINDEX', 'INTEGER', iptrw);
     RegisterProperty('SELCOUNT', 'INTEGER', iptr);
     RegisterProperty('SELECTED', 'BOOLEAN INTEGER', iptrw);
+    RegisterProperty('ITEMHEIGHT','INTEGER',iptrw);
 
     {$IFNDEF PS_MINIVCL}
     RegisterMethod('procedure CLEAR');

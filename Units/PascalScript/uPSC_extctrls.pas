@@ -188,15 +188,19 @@ begin
   with Cl.AddClassN(cl.FindClass('TCUSTOMCONTROL'), 'TPAGE') do
   begin
     RegisterProperty('CAPTION', 'String', iptrw);
+    RegisterProperty('PageIndex','Integer',iptrw);
+    RegisterProperty('ONSHOW','TNotifyEvent',iptrw);
   end;
 end;
 procedure SIRegisterTNOTEBOOK(Cl: TPSPascalCompiler);
 begin
   with Cl.AddClassN(cl.FindClass('TCUSTOMCONTROL'), 'TNOTEBOOK') do
   begin
+    RegisterMethod('function TabIndexAtClientPos(ClientPos: TPoint): integer;');
     RegisterProperty('ACTIVEPAGE', 'String', iptrw);
     RegisterProperty('COLOR', 'TColor', iptrw);
     RegisterProperty('FONT', 'TFont', iptrw);
+    RegisterProperty('PAGECOUNT','INTEGER',iptr);
     RegisterProperty('PAGEINDEX', 'INTEGER', iptrw);
     RegisterProperty('PAGES', 'TSTRINGS', iptrw);
     RegisterProperty('PARENTCOLOR', 'Boolean', iptrw);
