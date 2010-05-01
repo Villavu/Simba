@@ -72,7 +72,10 @@ type
       FuncPtr : Pointer;
     end;
     TExpMethodArr = array of TExpMethod;
-
+    TInputQueryData = record
+      ACaption, APrompt,Value : String;
+      Res : boolean;
+    end;
     { TMThread }
 
     TMThread = class(TThread)
@@ -99,12 +102,14 @@ type
       StartTime : LongWord;
       Sett: TMMLSettingsSandbox;
 
+      InputQueryData : TInputQueryData;//We need this for InputQuery
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       ErrorData : PErrorData; //We need this for thread-safety etc
       OnError  : TOnError; //Error handeler
 
       CompileOnly : boolean;
 
+      procedure mInputQuery;
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
@@ -207,8 +212,9 @@ uses
   stringutil, //String st00f
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
-  uPSR_menus,
+  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs,
   files,
+  dialogs,
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
@@ -345,6 +351,12 @@ begin
   FWriteFileEvent:= AValue;
   if Assigned(Client) then
     self.Client.MFiles.WriteFileEvent := AValue;;
+end;
+
+procedure TMThread.mInputQuery;
+begin
+  InputQueryData.Res:= InputQuery(InputQueryData.ACaption,InputQueryData.APrompt,
+                                  InputQueryData.Value);
 end;
 
 procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
@@ -873,6 +885,8 @@ begin
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
+  SIRegister_ComCtrls(x);
+  SIRegister_Dialogs(x);
   {$I PSInc/pscompile.inc}
   SIRegister_Mufasa(x);
   with x.AddFunction('procedure writeln;').decl do
@@ -914,6 +928,8 @@ begin
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
   RIRegister_Mufasa(x);
+  RIRegister_ComCtrls(x);
+  RIRegister_Dialogs(x);
   se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
   se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
   se.RegisterFunctionName('SWAP',@swap_,nil,nil);

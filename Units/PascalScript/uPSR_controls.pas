@@ -49,6 +49,9 @@ procedure TCONTROLSHOWHINT_W(Self: TCONTROL; T: BOOLEAN); begin Self.SHOWHINT :=
 procedure TCONTROLSHOWHINT_R(Self: TCONTROL; var T: BOOLEAN); begin T := Self.SHOWHINT; end;
 procedure TCONTROLENABLED_W(Self: TCONTROL; T: BOOLEAN); begin Self.ENABLED := T; end;
 procedure TCONTROLENABLED_R(Self: TCONTROL; var T: BOOLEAN); begin T := Self.ENABLED; end;
+procedure TControlCaption_W(Self: TCONTROL; T: String); begin Self.Caption := T; end;
+procedure TControlCaption_R(Self: TCONTROL; var T: String); begin T := Self.Caption; end;
+procedure TControlBeginDrag(Self : TControl;Immediate : boolean); begin self.BeginDrag(Immediate); end;
 
 procedure RIRegisterTControl(Cl: TPSRuntimeClassImporter);
 begin
@@ -71,7 +74,7 @@ begin
     RegisterPropertyHelper(@TControlClientWidthR, @TControlClientWidthW, 'CLIENTWIDTH');
     RegisterPropertyHelper(@TControlVisibleR, @TControlVisibleW, 'VISIBLE');
     RegisterPropertyHelper(@TCONTROLENABLED_R, @TCONTROLENABLED_W, 'ENABLED');
-
+    RegisterPropertyHelper(@TControlCaption_R,@TControlCaption_W,'CAPTION');
     RegisterPropertyHelper(@TControlParentR, @TControlParentW, 'PARENT');
 
     {$IFNDEF PS_MINIVCL}
@@ -79,8 +82,8 @@ begin
     RegisterMethod(@TControl.HasParent, 'HASPARENT');
     RegisterMethod(@TCONTROL.CLIENTTOSCREEN, 'CLIENTTOSCREEN');
     RegisterMethod(@TCONTROL.DRAGGING, 'DRAGGING');
+    RegisterMethod(@TControlBeginDrag, 'BEGINDRAG');
    {$IFNDEF FPC} 
-    RegisterMethod(@TCONTROL.BEGINDRAG, 'BEGINDRAG');
     RegisterMethod(@TCONTROL.ENDDRAG, 'ENDDRAG');
    {$ENDIF}
     {$IFNDEF CLX}

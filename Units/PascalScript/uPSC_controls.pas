@@ -49,6 +49,7 @@ begin
     RegisterProperty('ClientHeight', 'Longint', iptRW);
     RegisterProperty('ClientWidth', 'Longint', iptRW);
     RegisterProperty('ShowHint', 'Boolean', iptRW);
+    RegisterProperty('Caption','STRING',iptRW);
     RegisterProperty('Visible', 'Boolean', iptRW);
     RegisterProperty('ENABLED', 'BOOLEAN', iptrw);
     RegisterProperty('CURSOR', 'TCURSOR', iptrw);
