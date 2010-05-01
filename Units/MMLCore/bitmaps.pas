@@ -63,6 +63,7 @@ type
     function CreateTPA(SearchCol : TColor) : TPointArray;
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(Points : TPointArray) : TIntegerArray;
+    function GetAreaColors(xs,ys,xe,ye : integer) : T2DIntArray;
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
@@ -91,6 +92,7 @@ type
     procedure SetTransparentColor(Col : TColor);
     function GetTransparentColor : TColor;
     property TransparentColorSet : boolean read FTransparentSet;
+    procedure SetAlphaValue(const value : byte);
     constructor Create;
     destructor Destroy;override;
   end;
@@ -120,7 +122,8 @@ type
   end;
 
   Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
-
+  function CalculatePixelShift(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox) : integer;
+  function CalculatePixelTolerance(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox; CTS : integer) : extended;
 implementation
 
 uses
@@ -161,6 +164,68 @@ Begin
                        * (RawImage.Description.bitsperpixel shr 3);
   RawImage.Data := PByte(Ptr);
 End;
+
+function CalculatePixelShift(Bmp1, Bmp2: TMufasaBitmap; CompareBox: TBox): integer;
+var
+  x,y : integer;
+  w1,w2 : integer;
+begin
+  Bmp1.ValidatePoint(comparebox.x1,comparebox.y1);
+  Bmp1.ValidatePoint(comparebox.x2,comparebox.y2);
+  Bmp2.ValidatePoint(comparebox.x1,comparebox.y1);
+  Bmp2.ValidatePoint(comparebox.x1,comparebox.y1);
+  Bmp1.SetAlphaValue(0);
+  Bmp2.SetAlphaValue(0);
+  w1 := bmp1.Width;
+  w2 := bmp2.width;
+  result := 0;
+  for y := CompareBox.y1 to CompareBox.y2 do
+    for x := CompareBox.x1 to CompareBox.x2 do
+      if LongWord(Bmp1.FData[y * w1 + x]) <> LongWord(Bmp2.Fdata[y * w2 + x]) then
+        inc(result);
+end;
+//CTS 0 counts the average difference in R,G,B per pixel
+//CTS 1 counts the average difference using SQRT(Sqr(r) + sqr(g)+sqr(b));
+function CalculatePixelTolerance(Bmp1, Bmp2: TMufasaBitmap; CompareBox: TBox;
+  CTS: integer): extended;
+var
+  x,y : integer;
+  w1,w2 : integer;
+  Diff : int64;
+begin
+  Bmp1.ValidatePoint(comparebox.x1,comparebox.y1);
+  Bmp1.ValidatePoint(comparebox.x2,comparebox.y2);
+  Bmp2.ValidatePoint(comparebox.x1,comparebox.y1);
+  Bmp2.ValidatePoint(comparebox.x1,comparebox.y1);
+  Bmp1.SetAlphaValue(0);
+  Bmp2.SetAlphaValue(0);
+  w1 := bmp1.Width;
+  w2 := bmp2.width;
+  result := 0;
+  if not InRange(CTS,0,1) then
+    raise exception.CreateFmt('CTS Passed to CalculateTolerance must be in [0..1], it currently is %d',[CTS]);
+  case CTS of
+    0 : begin
+          Diff := 0;
+          for y := CompareBox.y1 to CompareBox.y2 do
+            for x := CompareBox.x1 to CompareBox.x2 do
+            begin
+              Diff := Diff + abs(Bmp1.FData[y * w1 + x].r-Bmp2.Fdata[y * w2 + x].r) +
+                             abs(Bmp1.FData[y * w1 + x].g-Bmp2.Fdata[y * w2 + x].g) +
+                             abs(Bmp1.FData[y * w1 + x].b-Bmp2.Fdata[y * w2 + x].b);
+            end;
+          Result := Diff / (3 * (CompareBox.x2 - CompareBox.x1 + 1) * (CompareBox.y2-CompareBox.y1 + 1)); //We want the value for the whole Pixel; so divide by 3 (RGB)
+        end;
+    1 : begin
+          for y := CompareBox.y1 to CompareBox.y2 do
+            for x := CompareBox.x1 to CompareBox.x2 do
+              Result := Result + Sqrt(Sqr(Bmp1.FData[y * w1 + x].r-Bmp2.Fdata[y * w2 + x].r) +
+                                      Sqr(Bmp1.FData[y * w1 + x].g-Bmp2.Fdata[y * w2 + x].g) +
+                                      Sqr(Bmp1.FData[y * w1 + x].b-Bmp2.Fdata[y * w2 + x].b));
+          Result := Result / ((CompareBox.x2 - CompareBox.x1 + 1) * (CompareBox.y2-CompareBox.y1 + 1)); //We want the value for the whole Pixel;
+        end;
+  end;
+end;
 
 function Min(a,b:integer) : integer;
 begin
@@ -491,6 +556,7 @@ begin
   ValidatePoint(StartPT.x,StartPT.y);
   Search := LongWord(RGBToBGR(SearchCol));
   Replace := LongWord(RGBToBGR(ReplaceCol));
+  SetAlphaValue(0);
   if LongWord(FData[StartPT.y * w + StartPT.x]) <> Search then //Only add items to the stack that are the searchcol.
     Exit;
   SetLength(Stack,w * h);
@@ -781,6 +847,18 @@ begin
     Result[i] := BGRToRGB(FData[Points[i].y*w + Points[i].x]);
 end;
 
+function TMufasaBitmap.GetAreaColors(xs, ys, xe, ye : integer): T2DIntArray;
+var
+  x,y : integer;
+begin
+  ValidatePoint(xs,ys);
+  ValidatePoint(xe,ye);
+  setlength(result,xe-xs+1,ye-ys+1);
+  for x := xs to xe do
+    for y := ys to ye do
+      result[x-xs][y-ys] := BGRToRGB(FData[y*w+x]);
+end;
+
 procedure TMufasaBitmap.SetTransparentColor(Col: TColor);
 begin
   self.FTransparentSet:= True;
@@ -793,6 +871,14 @@ begin
     Result := BGRToRGB(FTransparentColor)
   else
     raise Exception.CreateFmt('Transparent color for Bitmap[%d] isn''t set',[index]);
+end;
+
+procedure TMufasaBitmap.SetAlphaValue(const value: byte);
+var
+  i : integer;
+begin
+  for i := w * h - 1 downto 0 do
+    FData[i].A:= Value;
 end;
 
 procedure TMufasaBitmap.FastDrawClear(Color: TColor);
