@@ -1,10 +1,10 @@
 object DebugImgForm: TDebugImgForm
-  Left = 491
+  Left = 1335
   Height = 300
-  Top = 266
+  Top = 172
   Width = 400
   BorderIcons = [biSystemMenu, biMinimize]
-  BorderStyle = bsToolWindow
+  BorderStyle = bsSingle
   Caption = 'DebugImgForm'
   ClientHeight = 300
   ClientWidth = 400

@@ -143,6 +143,7 @@ begin
                        end;
     SP_OnTerminate :
       begin
+        FOnTerminateProcs.Clear;
         for i := 0 to high(value) do
           FOnTerminateProcs.Add(Value[i]);
         FProperties := FProperties + [prop];
