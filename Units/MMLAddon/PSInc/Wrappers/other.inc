@@ -163,3 +163,13 @@ function ps_Random(Int: integer): integer; extdecl;
 begin
   result := Random(int);
 end;
+
+function ps_InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;extdecl;
+begin
+  CurrThread.InputQueryData.ACaption:= ACaption;
+  CurrThread.InputQueryData.APrompt:= APrompt;
+  CurrThread.InputQueryData.Value:= Value;
+  CurrThread.Synchronize(@CurrThread.mInputQuery);
+  Value := CurrThread.InputQueryData.Value;
+  result := CurrThread.InputQueryData.Res;
+end;

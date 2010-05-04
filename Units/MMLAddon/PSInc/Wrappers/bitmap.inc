@@ -105,6 +105,11 @@ begin;
   result := CurrThread.Client.MBitmaps[Bmp].FastGetPixels(TPA);
 end;
 
+function ps_GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntArray;extdecl;
+begin
+  result := CurrThread.Client.MBitmaps[bmp].GetAreaColors(xs,ys,xe,ye);
+end;
+
 procedure ps_FastSetPixel(Bmp,x,y : integer; Color : TColor); extdecl;
 begin
   CurrThread.Client.MBitmaps[bmp].FastSetPixel(x,y,color);
@@ -298,4 +303,16 @@ end;
 procedure ps_FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor); extdecl;
 begin
   CurrThread.Client.MBitmaps[bitmap].FloodFill(startPoint,searchcol,replacecol);
+end;
+
+function ps_CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+    result := CalculatePixelShift(GetBMP(bmp1),GetBMP(bmp2),comparebox);
+end;
+
+function ps_CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+    result := CalculatePixelTolerance(GetBMP(bmp1),GetBMP(bmp2),comparebox,cts);
 end;

@@ -71,6 +71,8 @@ AddFunction(@ps_FixD,'function FixD(Degrees : extended) : Extended;');
 AddFunction(@ps_InRange,'function InRange(const value,min,max : integer) : boolean;');
 AddFunction(@ps_logn,'function logn(base, x : extended): extended;');
 AddFunction(@ps_ln,'function ln(x : extended) : extended;');
+AddFunction(@ps_inttohex,'function IntToHex(number : integer) : string');
+AddFunction(@ps_hextoint,'function HexToInt(Hex : string) : integer');
 
 {window}
 SetCurrSection('Window');
@@ -109,6 +111,7 @@ AddFunction(@ps_FileExists,'function FileExists (const FileName : string ) : Boo
 AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, FileName: string);');
 AddFunction(@ps_ReadINI,'function ReadINI(const Section, KeyName, FileName: string): string;');
 AddFunction(@ps_DeleteINI,'procedure DeleteINI(const Section, KeyName, FileName: string);');
+AddFunction(@ps_ExtractFileExt,'function ExtractFileExt(const FileName: string): string;');
 
 {other}
 SetCurrSection('Other');
@@ -135,8 +138,7 @@ AddFunction(@ps_PlaySound,'procedure PlaySound( Sound : string);');
 AddFunction(@ps_StopSound,'procedure StopSound;');
 AddFunction(@ps_SetScriptProp, 'function SetScriptProp(Prop : TSP_Property; Value: TVariantArray): boolean;');
 AddFunction(@ps_GetScriptProp, 'function GetScriptProp(Prop : TSP_Property;var Value: TVariantArray): boolean;');
-
-
+AddFunction(@ps_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
 
 {string}
 SetCurrSection('String');
@@ -251,6 +253,8 @@ AddFunction(@ps_getTextAtEx,'function GetTextAtEx(const xs,ys,xe,ye, minvspacing
 AddFunction(@ps_GetTextAtEx,'function GetTextAtExWrap(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,color, tol: integer;const font: string): string;');
 AddFunction(@ps_gettextATPA,'function GetTextATPA(const ATPA : T2DPointArray; const maxvspacing : integer; const font : string): string;');
 AddFunction(@ps_LoadSystemFont,'function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;');
+AddFunction(@ps_LoadFont, 'function LoadFont(const FontName: string; shadow: boolean): boolean;');
+AddFunction(@ps_FreeFont, 'function FreeFont(const FontName: string): boolean;');
 
 {Bitmaps}
 SetCurrSection('Bitmaps');
@@ -270,6 +274,7 @@ AddFunction(@ps_FastSetPixel,'procedure FastSetPixel(bmp,x,y : integer; Color : 
 AddFunction(@ps_FastSetPixels,'procedure FastSetPixels(bmp : integer; TPA : TPointArray; Colors : TIntegerArray);');
 AddFunction(@ps_FastGetPixel,'function FastGetPixel(bmp, x,y : integer) : TColor;');
 AddFunction(@ps_FastGetPixels,'function FastGetPixels(Bmp : integer; TPA : TPointArray) : TIntegerArray;');
+AddFunction(@ps_GetBitmapAreaColors,'function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntegerArray;');
 AddFunction(@ps_FastDrawClear,'procedure FastDrawClear(bmp : integer; Color : TColor);');
 AddFunction(@ps_FastDrawTransparent,'procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer);');
 AddFunction(@ps_SetTransparentColor,'procedure SetTransparentColor(bmp : integer; Color : TColor);');
@@ -302,6 +307,8 @@ AddFunction(@ps_DrawATPABitmapEx,'procedure DrawATPABitmapEx(bitmap: integer; AT
 AddFunction(@ps_DrawBitmap,'procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);');
 AddFunction(@ps_RectangleBitmap,'procedure RectangleBitmap(bitmap : integer; const box : TBox; Color : TColor);');
 AddFunction(@ps_FloodfillBitmap,'procedure FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor);');
+AddFunction(@ps_CalculatePixelShift,'function CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;');
+AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
 
 {tpa}
 SetCurrSection('TPA');

@@ -110,3 +110,8 @@ begin;
     Tempini.DeleteKey(section,keyname);
   tempini.free;
 end;
+
+function ps_ExtractFileExt(const FileName: string): string; extdecl;
+begin
+  result := ExtractFileExt(filename);
+end;
