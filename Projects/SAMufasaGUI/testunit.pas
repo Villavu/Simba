@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 637;
+  SimbaVersion = 650;
 
 type
 
@@ -248,6 +248,7 @@ type
     procedure ChangeMouseStatus(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure CloseFindPanel;
+    procedure doOnHide(Sender: TObject);
     procedure editSearchListExit(Sender: TObject);
     procedure editSearchListKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -1389,8 +1390,8 @@ begin
       FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
   Thread.SetPaths(ScriptPath,AppPath,Includepath,PluginPath,fontPath);
 
-  if selector.haspicked then Thread.Client.IOManager.SetTarget(Selector.LastPick);
-
+  if selector.haspicked then
+    Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
   loadFontsOnScriptStart := (lowercase(LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True')) = 'true');
   // Copy our current fonts
@@ -1713,6 +1714,16 @@ begin
   SearchPanel.Visible:= false;
   if CurrScript.SynEdit.CanFocus then
     CurrScript.SynEdit.SetFocus;
+end;
+
+{
+  If we are being sent to the background; then minimize other active windows as
+  well.
+}
+procedure TForm1.doOnHide(Sender: TObject);
+begin
+  if DebugImgForm.Visible then
+    DebugImgForm.Hide;
 end;
 
 procedure TForm1.StopCodeCompletion;
