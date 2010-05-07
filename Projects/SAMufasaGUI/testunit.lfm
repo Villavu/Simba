@@ -437,15 +437,12 @@ object Form1: TForm1
       TabOrder = 3
       inherited FunctionList: TTreeView
         Height = 323
-        Top = 18
         Width = 150
-        DefaultItemHeight = 15
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Height = 21
         Top = 341
         Width = 150
         OnExit = editSearchListExit
@@ -453,7 +450,6 @@ object Form1: TForm1
         OnKeyPress = editSearchListKeyPress
       end
       inherited FunctionListLabel: TLabel
-        Height = 14
         Width = 146
       end
     end
