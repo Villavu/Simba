@@ -82,8 +82,8 @@ type
     procedure Invert;overload;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
-    function Copy: TMufasaBitmap;overload;
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
+    function Copy: TMufasaBitmap;overload;
     function ToTBitmap: TBitmap;
     function ToString : string;
     procedure LoadFromTBitmap(bmp: TBitmap);

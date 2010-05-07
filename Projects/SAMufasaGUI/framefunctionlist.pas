@@ -474,20 +474,21 @@ procedure TFillThread.execute;
     if procs = nil then
       exit;
     for i := 0 to Procs.Count - 1 do
-      if (Procs[i] is TciProcedureDeclaration) then
+      if (Procs[i] <> nil) and (Procs[i] is TciProcedureDeclaration) then
         with Procs[i] as TciProcedureDeclaration do
-        begin
-          tmpNode := FunctionList^.Items.AddChild(Node,name.ShortText);
-          tmpNode.Data := GetMem(SizeOf(TMethodInfo));
-          FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
-          with PMethodInfo(tmpNode.Data)^ do
+          if name <> nil then
           begin
-            MethodStr := strnew(Pchar(CleanDeclaration));
-            Filename:= strnew(pchar(path));
-            BeginPos:= name.StartPos ;
-            EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
+            tmpNode := FunctionList^.Items.AddChild(Node,name.ShortText);
+            tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+            FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
+            with PMethodInfo(tmpNode.Data)^ do
+            begin
+              MethodStr := strnew(Pchar(CleanDeclaration));
+              Filename:= strnew(pchar(path));
+              BeginPos:= name.StartPos ;
+              EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
+            end;
           end;
-        end;
   end;
 
   procedure AddIncludes(ParentNode : TTreeNode; Include : TCodeInsight);
