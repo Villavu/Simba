@@ -1,7 +1,7 @@
 object DebugImgForm: TDebugImgForm
-  Left = 1335
+  Left = 393
   Height = 300
-  Top = 172
+  Top = 278
   Width = 400
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
@@ -10,6 +10,7 @@ object DebugImgForm: TDebugImgForm
   ClientWidth = 400
   OnCreate = FormCreate
   OnHide = FormHide
+  Position = poMainFormCenter
   LCLVersion = '0.9.29'
   object DrawImage: TImage
     Left = 0
