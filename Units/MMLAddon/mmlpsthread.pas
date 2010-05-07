@@ -675,7 +675,7 @@ begin
     RegisterMethod('procedure Contrast(TargetBitmap : TMufasaBitmap; co : Extended);');
     RegisterMethod('procedure Invert(TargetBitmap : TMufasaBitmap);');
     RegisterMethod('procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);');
-    RegisterMethod('function Copy: TMufasaBitmap;');
+    RegisterMethod('function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap;');
     RegisterMethod('function ToString : string;');
     RegisterMethod('function CreateTMask : TMask;');
     RegisterMethod('constructor create');
@@ -740,6 +740,12 @@ end;
 procedure FreeMufasaBitmap(Self : TMufasaBitmap);
 begin;
   CurrThread.Client.MBitmaps.FreeBMP(Self.Index);
+end;
+
+function TMufasaBitmapCopy(Self : TMufasaBitmap;const xs,ys,xe,ye : integer) : TMufasaBitmap;
+begin
+  result := Self.Copy(xs,ys,xe,ye);
+  CurrThread.Client.MBitmaps.AddBMP(result);
 end;
 
 type
@@ -819,7 +825,7 @@ begin;
     RegisterMethod(@TMufasaBitmap.Contrast,'CONTRAST');
     RegisterMethod(@TMufasaBitmap.Invert,'INVERT');
     RegisterMethod(@TMufasaBitmap.Posterize,'POSTERIZE');
-    RegisterMethod(@TMufasaBitmap.Copy, 'COPY');
+    RegisterMethod(@TMufasaBitmapCopy, 'COPY');
     RegisterMethod(@TMufasaBitmap.ToString,'TOSTRING');
     RegisterMethod(@TMufasaBitmap.CreateTMask,'CREATETMASK');
     RegisterPropertyHelper(@MBmp_TransColorSet_r,nil,'TRANSPARENTCOLORSET');
