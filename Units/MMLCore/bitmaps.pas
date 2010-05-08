@@ -24,7 +24,7 @@
 unit bitmaps;
 
 {$mode objfpc}{$H+}
-
+{$Inline on}
 interface
 uses
   Classes, SysUtils, FPImage,IntfGraphics,graphtype,MufasaTypes,MufasaBase,graphics;
@@ -542,7 +542,7 @@ var
   SIndex : Integer;
   CurrX,CurrY : integer;
   Search,Replace : LongWord;
-procedure AddToStack(x,y : integer);
+procedure AddToStack(x,y : integer);inline;
 begin
   if LongWord(FData[y * w + x]) = Search then
   begin
