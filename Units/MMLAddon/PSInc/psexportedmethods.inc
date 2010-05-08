@@ -356,6 +356,7 @@ AddFunction(@ps_TPAtoATPAEx,'function TPAtoATPAEx(const TPA: TPointArray; w, h: 
 AddFunction(@ps_TPAtoATPA,'function TPAtoATPA(const TPA: TPointArray; Dist: Integer): T2DPointArray;');
 AddFunction(@ps_CombineIntArray,'function CombineIntArray(const Ar1, Ar2: TIntegerArray): TIntegerArray;');
 AddFunction(@ps_MergeATPA,'function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;');
+AddFunction(@ps_AppendTPA,'procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);');
 AddFunction(@ps_TPAFromBox,'function TPAFromBox(const Box : TBox) : TPointArray;');
 AddFunction(@ps_RotatePoints,'function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;');
 AddFunction(@ps_FindTPAEdges,'function FindTPAEdges(const p: TPointArray): TPointArray;');

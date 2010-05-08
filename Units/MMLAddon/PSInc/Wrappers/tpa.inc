@@ -218,6 +218,11 @@ begin
   result := MergeATPA(ATPA);
 end;
 
+procedure ps_AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);
+begin
+  AppendTPA(tpa,ToAppend);
+end;
+
 function ps_TPAFromBox(const Box : TBox) : TPointArray;  extdecl;
 begin
   result := TPAFromBox(box);
