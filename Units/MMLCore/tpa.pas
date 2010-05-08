@@ -1341,9 +1341,9 @@ begin;
   if height > SearchBox.y2 then
     Screenbox.y2 := Screenbox.y2 + (height - SearchBox.y2);
   SearchBox.y2 := Height;
-  SetLength(Screen, SearchBox.x2 + 1,Searchbox.y2 + 1);
-  for i := ScreenBox.x2 downto 0 do
-    FillChar(screen[i][0],screenbox.y2+1,0);
+  SetLength(Screen, SearchBox.x2 + 1,SearchBox.y2 + 1);
+  for i := SearchBox.x2 downto 0 do
+    FillChar(screen[i][0],SearchBox.y2+1,0);
   SetLength(InversedTPA,(SearchBox.x2 + 1) * (Searchbox.y2 + 1));
   for I := 0 to LenSearch do
     Screen[ SearchTPA[I].x,SearchTPA[I].y] := True;
