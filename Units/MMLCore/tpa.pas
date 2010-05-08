@@ -75,7 +75,8 @@ function GetSamePointsATPA(const ATPA : T2DPointArray; var Matches : TPointArray
 function FindGapsTPA(const TPA: TPointArray; MinPixels: Integer): T2DPointArray;
 procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Integer; SortUp, ClockWise: Boolean);
 procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean);
-Function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;
+function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;
+procedure AppendTPA(var TPA : TPointArray; const ToAppend : TPointArray);
 function TPAFromBox(const Box : TBox) : TPointArray;
 Function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;
 Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint; inline;
@@ -1668,10 +1669,20 @@ begin;
 end;
 
 
+procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);
+var
+  l,lo,i : integer;
+begin
+  l := high(ToAppend);
+  lo := length(TPA);
+  setlength(TPA,lo + l  + 1);
+  for i := 0 to l do
+    TPA[i + lo] := ToAppend[i];
+end;
+
 {/\
   Returns a TPointArray of a the full given Box.
 /\}
-
 function TPAFromBox(const Box : TBox) : TPointArray;
 var
   x, y: integer;
