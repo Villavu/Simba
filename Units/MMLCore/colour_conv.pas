@@ -24,6 +24,7 @@
 unit colour_conv;
 
 {$mode objfpc}{$H+}
+{$Inline on}
 
 interface
 
