@@ -1418,21 +1418,33 @@ var
   ErrorMsg : string;
 begin
   DoRun := false;
-  if Paramcount = 1 then
+  // paramcount = 1 means we got only one parameter. We assume this to be a file.
+  // and try to open it accordingly
+  if (Paramcount = 1) and not (Application.HasOption('open')) then
   begin
+    writeln('Opening file: ' + ParamStr(1));
     if FileExists(ParamStr(1)) then
+    begin
       LoadScriptFile(paramstr(1));
+    end;
   end else
-  begin;
-    ErrorMsg:=Application.CheckOptions('ro:','run open:');
+  // we have more parameters. Check for specific options. (-r -o, --run --open)
+  begin
+    ErrorMsg:=Application.CheckOptions('ro:',['run', 'open:']);
     if ErrorMsg <> '' then
-      mDebugLn(ErrorMSG)
-    else
+    begin
+      mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMSG)
+    end else
     begin
       if Application.HasOption('o','open') then
-      begin;
+      begin
+        writeln('Opening file: ' + Application.GetOptionValue('o','open'));
         LoadScriptFile(Application.GetOptionValue('o','open'));
         DoRun:= Application.HasOption('r','run');
+      end else
+      // no valid options
+      begin
+        writeln('No valid command line args are passed');
       end;
     end;
   end;
