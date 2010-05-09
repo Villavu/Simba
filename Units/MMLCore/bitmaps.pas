@@ -595,7 +595,7 @@ begin
   Result := TMufasaBitmap.Create;
   Result.SetSize(xe-xs+1, ye-ys+1);
   for i := ys to ye do
-    Move(self.FData[i * self.w + xs], Result.FData[i-ys],result.Width * SizeOf(TRGB32));
+    Move(self.FData[i * self.w + xs], Result.FData[(i-ys) * result.w],result.Width * SizeOf(TRGB32));
 end;
 
 function TMufasaBitmap.ToTBitmap: TBitmap;

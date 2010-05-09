@@ -133,6 +133,16 @@ begin
   FilterPointsPie(points,sd,ed,minr,maxr,mx,my);
 end;
 
+procedure ps_FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Integer); extdecl;
+begin
+  FilterPointsDist(points,mindist,maxdist,mx,my);
+end;
+
+procedure ps_FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);extdecl;
+begin
+  FilterPointsLine(points,radial,radius,mx,my);
+end;
+
 function ps_GetATPABounds(const ATPA: T2DPointArray): TBox;extdecl;
 begin
   result := GetATPABounds(ATPA);
@@ -353,11 +363,6 @@ end;
 procedure ps_ReturnPointsNotInTPAWrap(Const TotalTPA: TPointArray; const Box: TBox; var Res :  TPointArray);extdecl;
 begin
   Res := ReturnPointsNotInTPA(TotalTPA,box);
-end;
-
-procedure ps_FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);extdecl;
-begin
-  FilterPointsLine(points,radial,radius,mx,my);
 end;
 
 function ps_SameTPA(const aTPA, bTPA: TPointArray): Boolean;extdecl;
