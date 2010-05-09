@@ -65,6 +65,7 @@ function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
+procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
 function RemoveDistTPointArray(x, y, dist: Integer;const ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;
 function GetATPABounds(const ATPA: T2DPointArray): TBox;
@@ -1102,8 +1103,36 @@ begin
 end;
 
 {/\
+  Removes the points that don't have a dist between mindist/maxdist with (mx,my)
+/\}
+
+procedure FilterPointsDist(var Points: TPointArray; const MinDist,
+  MaxDist: Extended; Mx, My: Integer);
+var
+  c,i,l : integer;
+  d : extended;
+  mind,maxd : extended;
+begin
+  l := high(points);
+  c := 0;
+  mind := sqr(mindist);
+  maxd := sqr(maxdist);
+  for i := 0 to l do
+  begin
+    d := sqr(Points[i].x - mx) + sqr(points[i].y - my);
+    if (d >= mind) and (d <= maxd) then
+    begin
+      points[c] := points[i];
+      inc(c);
+    end;
+  end;
+  setlength(points,c);
+end;
+
+{/\
   Removes the points in the TPointArray Points that are not on the line defined by angle, radius and center.
 /\}
+
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
 var
   I, Hi, Ind, y: Integer;

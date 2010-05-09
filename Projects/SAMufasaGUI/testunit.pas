@@ -1418,13 +1418,13 @@ var
   ErrorMsg : string;
 begin
   DoRun := false;
-  if Paramcount = 1 then
+  if (Paramcount = 1) and not (Application.HasOption('open')) then
   begin
     if FileExists(ParamStr(1)) then
       LoadScriptFile(paramstr(1));
   end else
   begin;
-    ErrorMsg:=Application.CheckOptions('ro:','run open:');
+    ErrorMsg:=Application.CheckOptions('ro:',['run','open:']);
     if ErrorMsg <> '' then
       mDebugLn(ErrorMSG)
     else
