@@ -27,7 +27,7 @@ type
 implementation
 
 uses
-   Windows ,Messages ,CommDlg ,Graphics ,Controls ,Forms ,StdCtrls ,Dialogs;
+  { Windows ,}lcltype,Messages {,CommDlg },Graphics ,Controls ,Forms ,StdCtrls ,Dialogs;
 
 (* === compile-time registration functions === *)
 (*----------------------------------------------------------------------------*)
