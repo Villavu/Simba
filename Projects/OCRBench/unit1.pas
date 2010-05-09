@@ -96,7 +96,7 @@ begin
   // DS + .. + DS because InitOCR wants the directory of the Fonts, not UpChars
   // only.
   C.MOCR.InitTOCR(FontPath + DS);
-  C.MOCR.SetFonts(C.MOCR.GetFonts);
+  //C.MOCR.SetFonts(C.MOCR.GetFonts);
 
 
   t:=gettickcount;
@@ -125,6 +125,7 @@ begin
   Form1.Image1.Picture.SaveToFile(OCRDebugPath + 'ocrbench.bmp');
   {$ENDIF}
 
+  bmp.OnDestroy:=nil;
   bmp.Free;
   C.Free;
   Application.ProcessMessages;
