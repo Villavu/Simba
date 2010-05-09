@@ -339,6 +339,8 @@ AddFunction(@ps_SplitTPAEx,'function SplitTPAEx(const arr: TPointArray; w, h: In
 AddFunction(@ps_SplitTPA,'function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;');
 AddFunction(@ps_FloodFillTPA,'function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;');
 AddFunction(@ps_FilterPointsPie,'procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);');
+AddFunction(@ps_FilterPointsLine,'procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);');
+AddFunction(@ps_filterpointsdist,'procedure FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Integer);');
 AddFunction(@ps_GetATPABounds,'function GetATPABounds(const ATPA: T2DPointArray): TBox;');
 AddFunction(@ps_GetTPABounds,'function GetTPABounds(const TPA: TPointArray): TBox;');
 AddFunction(@ps_FindTPAinTPA,'function FindTPAinTPA(const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;');
@@ -386,7 +388,6 @@ AddFunction(@ps_TPAFromBoxWrap,'procedure TPAFromBoxWrap(const Box : TBox; var R
 AddFunction(@ps_RotatePointsWrap,'procedure RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; var Res :  TPointArray);');
 AddFunction(@ps_FindTPAEdgesWrap,'procedure FindTPAEdgesWrap(const p: TPointArray; var Res :  TPointArray);');
 AddFunction(@ps_ClearTPAFromTPAWrap,'procedure ClearTPAFromTPAWrap(const arP, ClearPoints: TPointArray;  var Res :  TPointArray);');
-AddFunction(@ps_FilterPointsLine,'procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);');
 AddFunction(@ps_SameTPA,'function SameTPA(const aTPA, bTPA: TPointArray): Boolean;');
 AddFunction(@ps_TPAInATPA,'function TPAInATPA(const TPA: TPointArray;const  InATPA: T2DPointArray; var Index: LongInt): Boolean;');
 AddFunction(@ps_offsetTPA,'procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);');
