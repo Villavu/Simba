@@ -252,7 +252,7 @@ var
   CallData: TPSList;
   pp: ^Byte;
 {$IFDEF FPC}
-  IsConstructor: Boolean;
+  IsConstructor,IsVirtualCons: Boolean;
 {$ENDIF}
 
   EAX, EDX, ECX: Longint;
@@ -503,6 +503,18 @@ var
     Result := True;
   end;
 begin
+  if (Integer(CallingConv) and 128) <> 0 then
+  begin
+    {$ifdef FPC}
+    IsVirtualCons := true;
+    {$endif}
+    CAllingConv := TPSCallingConvention(Integer(CallingConv) and not 128);
+  end else
+  begin
+    {$ifdef FPC}
+    IsVirtualCons:= false
+    {$endif}
+  end;
   if (Integer(CallingConv) and 64) <> 0 then begin
     {$IFDEF FPC}
       IsConstructor := true;
@@ -575,11 +587,12 @@ begin
               btClass :
               begin
               {$IFDEF FPC}
-                if IsConstructor then
+                if IsConstructor or IsVirtualCons then
                   tbtu32(res.dta^) := RealCall_Register(Address, EDX, EAX, ECX,
                   @Stack[Length(Stack) - 3], Length(Stack) div 4, 4, nil)
                 else
-              {$ENDIF}
+             {$ENDIF}
+//              {$ELSE}
                   tbtu32(res.dta^) := RealCall_Register(Address, EAX, EDX, ECX,
                   @Stack[Length(Stack) - 3], Length(Stack) div 4, 4, nil);
               end;
