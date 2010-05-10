@@ -173,7 +173,7 @@ begin
   Bmp1.ValidatePoint(comparebox.x1,comparebox.y1);
   Bmp1.ValidatePoint(comparebox.x2,comparebox.y2);
   Bmp2.ValidatePoint(comparebox.x1,comparebox.y1);
-  Bmp2.ValidatePoint(comparebox.x1,comparebox.y1);
+  Bmp2.ValidatePoint(comparebox.x2,comparebox.y2);
   Bmp1.SetAlphaValue(0);
   Bmp2.SetAlphaValue(0);
   w1 := bmp1.Width;
