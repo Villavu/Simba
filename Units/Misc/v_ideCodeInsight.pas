@@ -134,7 +134,7 @@ begin
 
   for i := l - 1 downto 0 do
   begin
-    if (IncludeBuffer[i].CodeInsight.FileName = FileName) then
+    if (IncludeBuffer[i].CodeInsight <> nil) and (IncludeBuffer[i].CodeInsight.FileName = FileName) then
     begin
       DefineMatch := (IncludeBuffer[i].DefinesIn.Defines = Defines.Defines) and (IncludeBuffer[i].DefinesIn.Stack = Defines.Stack);
 
