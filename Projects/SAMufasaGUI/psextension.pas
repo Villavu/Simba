@@ -49,7 +49,7 @@ uses
   uPSC_extctrls,uPSC_menus, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls,uPSR_menus, //Runtime-libs
-  testunit,updateform,settingssandbox,bitmaps,files,Dialogs, mmisc//Writeln
+  simba,updateform,settingssandbox,bitmaps,files,Dialogs, mmisc//Writeln
   ;
 
 function TSimbaPSExtension.HookExists(const HookName: String): Boolean;
@@ -119,10 +119,10 @@ procedure TSimbaPSExtension.RegisterMyMethods(Sender: TPSScript);
 begin
   Sender.Comp.AddTypes('TStringArray','Array of String');
   Sender.Comp.AddConstantN('AppPath','string').SetString(MainDir + DirectorySeparator);
-  Sender.Comp.AddConstantN('IncludePath','string').SetString(Form1.IncludePath);
-  Sender.Comp.AddConstantN('PluginPath','string').SetString(Form1.PluginPath);
-  Sender.Comp.AddConstantN('FontPath','string').SetString(form1.FontPath);
-  Sender.Comp.AddConstantN('ExtPath','string').SetString(form1.ExtPath);
+  Sender.Comp.AddConstantN('IncludePath','string').SetString(SimbaForm.IncludePath);
+  Sender.Comp.AddConstantN('PluginPath','string').SetString(SimbaForm.PluginPath);
+  Sender.Comp.AddConstantN('FontPath','string').SetString(SimbaForm.FontPath);
+  Sender.Comp.AddConstantN('ExtPath','string').SetString(SimbaForm.ExtPath);
   Sender.Comp.AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmati'
                                       +'on, mtCustom )');
   Sender.Comp.AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, m'
@@ -146,8 +146,8 @@ end;
 
 procedure TSimbaPSExtension.OnPSExecute(Sender: TPSScript);
 begin
-  Sender.SetVarToInstance('simba',Form1);
-  Sender.SetVarToInstance('Simba_MainMenu',Form1.MainMenu);
+  Sender.SetVarToInstance('simba',SimbaForm);
+  Sender.SetVarToInstance('Simba_MainMenu',SimbaForm.MainMenu);
   Sender.SetPointerToData('Settings',@Self.Settings,Sender.FindNamedType('TMMLSettingsSandbox'));
 end;
 

@@ -1,4 +1,4 @@
-object Form1: TForm1
+object SimbaForm: TSimbaForm
   Left = 150
   Height = 623
   Top = 69

@@ -81,14 +81,14 @@ var
 
 implementation
 uses
-  internets,  TestUnit, simbasettings,lclintf;
+  internets,  simba, simbasettings,lclintf;
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
   GetLatestSimbaVersion;
-  mDebugLn(format('Current Simba version: %d',[TestUnit.SimbaVersion]));
+  mDebugLn(format('Current Simba version: %d',[simba.SimbaVersion]));
   mDebugLn('Latest Simba Version: ' + IntToStr(FSimbaVersion));
-  Exit(testunit.SimbaVersion < FSimbaVersion);
+  Exit(simba.SimbaVersion < FSimbaVersion);
 end;
 
 function TSimbaUpdateForm.GetLatestFontVersion: integer;

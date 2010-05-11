@@ -31,12 +31,12 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads, cmem,
   {$ENDIF}{$ENDIF}
-  Interfaces, Forms, testunit, colourhistory, About, internets, debugimage,
+  Interfaces, Forms, simba, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform, simbasettings,
   libloader, mufasabase, v_ideCodeInsight, PSDump, v_ideCodeParser,
   v_AutoCompleteForm, CastaliaPasLex, CastaliaPasLexTypes, CastaliaSimplePasPar,
   CastaliaSimplePasParTypes, dcpbase64, mPasLex, v_Constants, v_MiscFunctions,
-  extensionmanagergui, mmisc;
+  extensionmanagergui, mmisc, bitmapconv;
 
 {$R project1.res}
 
@@ -44,11 +44,12 @@ begin
   Application.Title:='Simba';
   Application.Initialize;
 
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TSimbaForm, SimbaForm);
   Application.CreateForm(TColourHistoryForm, ColourHistoryForm);
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TDebugImgForm, DebugImgForm);
   Application.CreateForm(TExtensionsForm, ExtensionsForm);
+  Application.CreateForm(TBitmapConvForm, BitmapConvForm);
 //  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
 //  Application.CreateForm(TSettingsForm, SettingsForm); Done in FormCreate of MainForm
   Application.Run;
