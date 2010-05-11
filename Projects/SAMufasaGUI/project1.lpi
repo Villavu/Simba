@@ -40,19 +40,19 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="46">
+    <Units Count="47">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
       </Unit0>
       <Unit1>
-        <Filename Value="testunit.pas"/>
+        <Filename Value="simba.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
+        <ComponentName Value="SimbaForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="TestUnit"/>
+        <UnitName Value="simba"/>
       </Unit1>
       <Unit2>
         <Filename Value="../../Units/MMLCore/client.pas"/>
@@ -288,6 +288,13 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="v_MiscFunctions"/>
       </Unit45>
+      <Unit46>
+        <Filename Value="bitmapconv.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="BitmapConvForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="bitmapconv"/>
+      </Unit46>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -319,4 +326,11 @@
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="1">
+      <Item1>
+        <Name Value="ESyntaxError"/>
+      </Item1>
+    </Exceptions>
+  </Debugging>
 </CONFIG>
