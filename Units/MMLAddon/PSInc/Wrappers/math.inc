@@ -164,12 +164,26 @@ begin
   result := ln(x);
 end;
 
-function ps_inttohex(value : integer) : string;
+function ps_inttohex(value : integer) : string; extdecl;
 begin
   result := IntToHex(value,1);
 end;
 
-function ps_hextoint(hex : string) : integer;
+function ps_hextoint(hex : string) : integer;extdecl;
 begin
   result := StrToInt('$' + hex);
+end;
+function ps_sar(AValue : longint; shift : byte) : longint; extdecl;
+begin;
+  Shift:=Shift and 31;
+  Result:=longint(dword(dword(dword(AValue) shr Shift) or (dword(longint(dword(0-dword(dword(AValue) shr 31)) and dword(longint(0-(ord(Shift<>0){ and 1}))))) shl (32-Shift))));
+end;
+function ps_ror(num : longword; shift : byte) : LongWord; extdecl;
+begin
+  result := RorDWord(num,shift);
+end;
+
+function ps_rol(num : longword; shift : byte) : LongWord; extdecl;
+begin
+  result := RolDWord(num,shift);
 end;
