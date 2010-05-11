@@ -104,6 +104,7 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemBitmapConv: TMenuItem;
     MenuItemExtensions: TMenuItem;
     MenuItemSettingsButton: TMenuItem;
     MenuItemDivider10: TMenuItem;
@@ -258,6 +259,7 @@ type
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
     procedure FunctionListTimerTimer(Sender: TObject);
+    procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemExtensionsClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
@@ -459,6 +461,7 @@ uses
    debugimage,
    files,
    InterfaceBase,
+   bitmapconv,
    extensionmanagergui,
    colourhistory,
    math;
@@ -1888,9 +1891,18 @@ begin
     frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
 
+procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
+begin
+  BitmapConvForm.Show;
+end;
+
 procedure TSimbaForm.MenuItemExtensionsClick(Sender: TObject);
 begin
-  ExtensionsForm.Show;
+  MenuItemExtensions.Checked := not ExtensionsForm.Visible;
+  if MenuItemExtensions.Checked then
+    ExtensionsForm.Show
+  else
+    ExtensionsForm.Hide;
 end;
 
 procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
@@ -2972,7 +2984,7 @@ end;
 
 destructor TMufasaTab.Destroy;
 begin
-  ScriptFrame.Free;
+//  ScriptFrame.Free;
   TabSheet.Free;
   inherited Destroy;
 end;

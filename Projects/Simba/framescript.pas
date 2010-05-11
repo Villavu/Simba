@@ -85,7 +85,6 @@ type
     procedure MakeActiveScriptFrame;
     procedure ScriptThreadTerminate(Sender: TObject);
     constructor Create(TheOwner: TComponent); override;
-    destructor Destroy; override;
     { public declarations }
   end;
 
@@ -638,11 +637,6 @@ begin
   AddKey(SynEdit,ecCodeCompletion,VK_SPACE,[ssCtrl]);
   AddKey(SynEdit,ecCodeHints,VK_SPACE,[ssCtrl,ssShift]);
 //  TSynPasSyn(SynEdit.Highlighter).NestedComments:= false; Does not work :(
-end;
-
-destructor TScriptFrame.Destroy;
-begin
-  inherited Destroy;
 end;
 
 initialization

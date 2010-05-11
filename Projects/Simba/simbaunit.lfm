@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 150
+  Left = 143
   Height = 623
-  Top = 69
+  Top = 115
   Width = 660
   AllowDropFiles = True
   Caption = 'THA FUKING Simba'
@@ -1347,6 +1347,10 @@ object SimbaForm: TSimbaForm
       object MenuItemSettingsButton: TMenuItem
         Caption = 'Settings'
         OnClick = MenuItemSettingsButtonClick
+      end
+      object MenuItemBitmapConv: TMenuItem
+        Caption = 'New Item50'
+        OnClick = MenuItemBitmapConvClick
       end
       object MenuItemDivider10: TMenuItem
         Caption = '-'
