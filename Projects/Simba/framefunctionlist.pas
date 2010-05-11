@@ -72,7 +72,7 @@ type
 implementation
 
 uses
-  simba, Graphics, stringutil, simpleanalyzer,v_ideCodeParser,lclintf;
+  SimbaUnit, Graphics, stringutil, simpleanalyzer,v_ideCodeParser,lclintf;
 
 { TFunctionListFrame }
 

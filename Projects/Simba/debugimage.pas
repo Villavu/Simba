@@ -59,7 +59,7 @@ var
 implementation
 
 uses
-  MufasaTypes, math, graphtype, IntfGraphics,simba,lclintf,colour_conv,InterfaceBase;
+  MufasaTypes, math, graphtype, IntfGraphics,SimbaUnit,lclintf,colour_conv,InterfaceBase;
 { TDebugImgForm }
 
 procedure TDebugImgForm.FormCreate(Sender: TObject);

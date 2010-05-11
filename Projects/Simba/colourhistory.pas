@@ -104,7 +104,7 @@ var
 
 implementation
 uses
-  colour_conv, simba, lclintf, lcltype;
+  colour_conv, SimbaUnit, lclintf, lcltype;
 
 constructor TColourPickerObject.Create(C: Integer; P: TPoint; N: String);
 begin

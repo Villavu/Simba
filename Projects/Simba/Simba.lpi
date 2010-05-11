@@ -42,17 +42,17 @@
     </RequiredPackages>
     <Units Count="47">
       <Unit0>
-        <Filename Value="project1.lpr"/>
+        <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="project1"/>
+        <UnitName Value="Simba"/>
       </Unit0>
       <Unit1>
-        <Filename Value="simba.pas"/>
+        <Filename Value="simbaunit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="simba"/>
+        <UnitName Value="SimbaUnit"/>
       </Unit1>
       <Unit2>
         <Filename Value="../../Units/MMLCore/client.pas"/>
@@ -205,7 +205,7 @@
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsForm"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="simbasettings"/>
+        <UnitName Value="SimbaSettings"/>
       </Unit29>
       <Unit30>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/tpa.inc"/>
