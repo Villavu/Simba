@@ -38,7 +38,7 @@ var
 
 implementation
 uses
-  simba, settingssandbox,simbasettings;
+  SimbaUnit, settingssandbox,Simbasettings;
 
 procedure TExtensionManager.SetOnchange(const AValue: TNotifyEvent);
 var
