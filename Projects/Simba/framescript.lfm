@@ -5,7 +5,6 @@ object ScriptFrame: TScriptFrame
   Width = 397
   ClientHeight = 328
   ClientWidth = 397
-  LCLVersion = '0.9.29'
   TabOrder = 0
   DesignLeft = 159
   DesignTop = 420
