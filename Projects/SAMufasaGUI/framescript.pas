@@ -93,7 +93,7 @@ type
 
 implementation
 uses
-  TestUnit, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
+  simba, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1): string;
 var
@@ -156,7 +156,7 @@ begin
   if not ScriptChanged then
   begin;
     ScriptChanged:= True;
-    Form1.Caption:= Format(WindowTitle,[ScriptName + '*']);
+    SimbaForm.Caption:= Format(WindowTitle,[ScriptName + '*']);
     OwnerSheet.Caption:=ScriptName + '*';
   end;
 end;
@@ -172,8 +172,8 @@ var
 begin
   mp := TCodeInsight.Create;
   mp.FileName := ScriptFile;
-  mp.OnMessage := @Form1.OnCCMessage;
-  mp.OnFindInclude := @Form1.OnCCFindInclude;
+  mp.OnMessage := @SimbaForm.OnCCMessage;
+  mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
 
   ms := TMemoryStream.Create;
   SynEdit.Lines.SaveToStream(ms);
@@ -194,10 +194,10 @@ begin
       begin
         if FileExists(TCodeInsight(d.Parser).FileName) then
         begin;
-          if Form1.LoadScriptFile(TCodeInsight(d.Parser).FileName,true,true) then
+          if SimbaForm.LoadScriptFile(TCodeInsight(d.Parser).FileName,true,true) then
           begin;
-            Form1.CurrScript.SynEdit.SelStart:= d.StartPos + 1;
-            Form1.CurrScript.SynEdit.SelEnd := d.StartPos + Length(TrimRight(d.RawText)) + 1;
+            SimbaForm.CurrScript.SynEdit.SelStart:= d.StartPos + 1;
+            SimbaForm.CurrScript.SynEdit.SelEnd := d.StartPos + Length(TrimRight(d.RawText)) + 1;
           end;
         end
         else
@@ -220,7 +220,7 @@ procedure TScriptFrame.SynEditCommandProcessed(Sender: TObject;
 var
   Command2 : TSynEditorCommand;
 begin
-  if (Command = ecChar) and (AChar = '(') and (Form1.ParamHint.Visible = false) and (Form1.ShowHintAuto) then
+  if (Command = ecChar) and (AChar = '(') and (SimbaForm.ParamHint.Visible = false) and (SimbaForm.ShowHintAuto) then
   begin
     Command2:= ecCodeHints;
     SynEditProcessUserCommand(sender,command2,achar,nil);
@@ -237,12 +237,12 @@ end;
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
   State: TDragState; var Accept: Boolean);
 begin
-  Accept := Source = Form1.frmFunctionList;
+  Accept := Source = SimbaForm.frmFunctionList;
   if(Accept)then
   begin
     SynEdit.CaretXY := SynEdit.PixelsToLogicalPos(point(x, y));
-    if(not(Form1.Active))then Form1.BringToFront;
-    if(Form1.ActiveControl <> SynEdit)then Form1.ActiveControl := SynEdit;
+    if(not(SimbaForm.Active))then SimbaForm.BringToFront;
+    if(SimbaForm.ActiveControl <> SynEdit)then SimbaForm.ActiveControl := SynEdit;
   end;
 end;
 
@@ -251,18 +251,18 @@ procedure TScriptFrame.SynEditKeyDown(Sender: TObject; var Key: Word;
 begin
   if key = VK_F3 then
   begin;
-    Form1.ActionFindNextExecute(Sender);
+    SimbaForm.ActionFindNextExecute(Sender);
     key := 0;
   end;
   if key = VK_ESCAPE then
-    Form1.ParamHint.Hide;
+    SimbaForm.ParamHint.Hide;
 
-  Form1.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
+  SimbaForm.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
 end;
 
 procedure TScriptFrame.SynEditKeyPress(Sender: TObject; var Key: char);
 begin
-  Form1.CodeCompletionForm.HandleKeyPress(Sender, Key);
+  SimbaForm.CodeCompletionForm.HandleKeyPress(Sender, Key);
 end;
 
 procedure TScriptFrame.SynEditMouseLink(Sender: TObject; X, Y: Integer;
@@ -309,8 +309,8 @@ begin
   if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or
                                       ((Attri.Name <> SYNS_AttrComment) and (Attri.name <> SYNS_AttrString) and (Attri.name <> SYNS_AttrDirective))) then
   begin
-      {form1.FunctionListShown(True);
-      with form1.frmFunctionList do
+      {SimbaForm.FunctionListShown(True);
+      with SimbaForm.frmFunctionList do
         if editSearchList.CanFocus then
         begin;
           editSearchList.SetFocus;
@@ -348,8 +348,8 @@ begin
         end;}
     mp := TCodeInsight.Create;
     mp.FileName := ScriptFile;
-    mp.OnMessage := @Form1.OnCCMessage;
-    mp.OnFindInclude := @Form1.OnCCFindInclude;
+    mp.OnMessage := @SimbaForm.OnCCMessage;
+    mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
 
     ms := TMemoryStream.Create;
     ItemList := TStringList.Create;
@@ -360,7 +360,7 @@ begin
 
     try
       Filter := WordAtCaret(Synedit, sp, ep);
-      Form1.CodeCompletionStart := Point(sp, Synedit.CaretY);
+      SimbaForm.CodeCompletionStart := Point(sp, Synedit.CaretY);
 
       //mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
       s := SynEdit.Lines[SynEdit.Carety-1];
@@ -382,7 +382,7 @@ begin
       mp.FillSynCompletionProposal(ItemList, InsertList, s);
       p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
       p.y := p.y + SynEdit.LineHeight;
-      Form1.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
+      SimbaForm.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
     finally
       FreeAndNil(ms);
       FreeAndNil(mp);
@@ -392,11 +392,11 @@ begin
   end;
   if command = ecCodeHints then
   begin
-    if Form1.ParamHint.Visible = true then
-      form1.ParamHint.hide;
+    if SimbaForm.ParamHint.Visible = true then
+      SimbaForm.ParamHint.hide;
     mp := TCodeInsight.Create;
-    mp.OnMessage := @form1.OnCCMessage;
-    mp.OnFindInclude := @form1.OnCCFindInclude;
+    mp.OnMessage := @SimbaForm.OnCCMessage;
+    mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
 
     ms := TMemoryStream.Create;
     synedit.Lines.SaveToStream(ms);
@@ -441,7 +441,7 @@ begin
         if (not (d is TciProcedureDeclaration)) and (d.Owner is TciProcedureDeclaration) then
           d := d.Owner;
         if (TciProcedureDeclaration(d).Params <> '') then
-          Form1.ParamHint.Show(PosToCaretXY(synedit,posi + 1), PosToCaretXY(synedit,bracketpos),
+          SimbaForm.ParamHint.Show(PosToCaretXY(synedit,posi + 1), PosToCaretXY(synedit,bracketpos),
                               TciProcedureDeclaration(d), synedit,mp)
         else
           FormWriteln('<no parameters expected>');
@@ -452,21 +452,21 @@ begin
       //Do not free the MP, we need to use this.
     end;
   end;
-  if Form1.CodeCompletionForm.Visible then
+  if SimbaForm.CodeCompletionForm.Visible then
     case Command of
       ecDeleteChar, ecDeleteWord, ecDeleteEOL:
         begin
-          if (SynEdit.CaretY = Form1.CodeCompletionStart.y) then
+          if (SynEdit.CaretY = SimbaForm.CodeCompletionStart.y) then
           begin
             //e.GetWordBoundsAtRowCol(acp_start, sp, ep);
-            s := WordAtCaret(SynEdit, sp, ep, Form1.CodeCompletionStart.x);
-            if (SynEdit.CaretX >= Form1.CodeCompletionStart.x) and (SynEdit.CaretX <= ep) then
+            s := WordAtCaret(SynEdit, sp, ep, SimbaForm.CodeCompletionStart.x);
+            if (SynEdit.CaretX >= SimbaForm.CodeCompletionStart.x) and (SynEdit.CaretX <= ep) then
             begin
-              Form1.CodeCompletionForm.ListBox.Filter := s;
+              SimbaForm.CodeCompletionForm.ListBox.Filter := s;
               Exit;
             end;
           end;
-          Form1.CodeCompletionForm.Hide;
+          SimbaForm.CodeCompletionForm.Hide;
         end;
     end;
 end;
@@ -491,28 +491,28 @@ begin
   {$IFDEF UpdateEditButtons}
   if scSelection in changes then
   begin;
-    Form1.TT_Cut.Enabled := SynEdit.SelAvail;
-    form1.TT_Copy.Enabled:= Form1.TT_Cut.Enabled;
-    form1.TT_Paste.Enabled:= SynEdit.CanPaste;
+    SimbaForm.TT_Cut.Enabled := SynEdit.SelAvail;
+    SimbaForm.TT_Copy.Enabled:= SimbaForm.TT_Cut.Enabled;
+    SimbaForm.TT_Paste.Enabled:= SynEdit.CanPaste;
   end;
   {$ENDIF}
 
-  if Form1.CodeCompletionForm.Visible then
+  if SimbaForm.CodeCompletionForm.Visible then
     if (scAll in Changes) or (scTopLine in Changes) then
-      Form1.CodeCompletionForm.Visible := False
+      SimbaForm.CodeCompletionForm.Visible := False
     else if (scCaretX in Changes) or (scCaretY in Changes) or (scSelection in Changes) or (scModified in Changes) then
     begin
-      if (SynEdit.CaretY = Form1.CodeCompletionStart.y) then
+      if (SynEdit.CaretY = SimbaForm.CodeCompletionStart.y) then
       begin
-        s := WordAtCaret(SynEdit, sp, ep, Form1.CodeCompletionStart.x);
-        if (SynEdit.CaretX >= Form1.CodeCompletionStart.x) and (SynEdit.CaretX - 1 <= ep) then
+        s := WordAtCaret(SynEdit, sp, ep, SimbaForm.CodeCompletionStart.x);
+        if (SynEdit.CaretX >= SimbaForm.CodeCompletionStart.x) and (SynEdit.CaretX - 1 <= ep) then
         begin
-          Form1.CodeCompletionForm.ListBox.Filter := s;
+          SimbaForm.CodeCompletionForm.ListBox.Filter := s;
           Exit;
         end;
       end;
 
-      Form1.CodeCompletionForm.Hide;
+      SimbaForm.CodeCompletionForm.Hide;
     end;
 end;
 
@@ -522,7 +522,7 @@ begin
   if ScriptChanged then
     if SynEdit.Lines.Text = StartText then
     begin;
-      Form1.Caption:= format(WindowTitle,[ScriptName]);
+      SimbaForm.Caption:= format(WindowTitle,[ScriptName]);
       OwnerSheet.Caption:= ScriptName;
       ScriptChanged := false;
     end;
@@ -534,7 +534,7 @@ begin
   if ScriptChanged then
     if SynEdit.Lines.Text = StartText then
     begin;
-      Form1.Caption:= format(WindowTitle,[ScriptName]);
+      SimbaForm.Caption:= format(WindowTitle,[ScriptName]);
       OwnerSheet.Caption := ScriptName;
       ScriptChanged := false;
     end;
@@ -551,10 +551,10 @@ begin
     else
     begin
       ErrorData.Module:= SetDirSeparators(ErrorData.Module);// Set it right ;-)
-      Form1.LoadScriptFile(ErrorData.Module,true,true);//Checks if the file is already open!
+      SimbaForm.LoadScriptFile(ErrorData.Module,true,true);//Checks if the file is already open!
       ErrorData.Module:= '';
-      Form1.CurrScript.ErrorData := Self.ErrorData;
-      Form1.CurrScript.HandleErrorData;
+      SimbaForm.CurrScript.ErrorData := Self.ErrorData;
+      SimbaForm.CurrScript.HandleErrorData;
       exit;
     end;
   end;
@@ -575,7 +575,7 @@ procedure TScriptFrame.MakeActiveScriptFrame;
 var
   i : integer;
 begin
-  if Form1.Visible then
+  if SimbaForm.Visible then
   for i := 0 to OwnerPage.PageCount - 1 do
     if OwnerPage.Pages[i] = OwnerSheet then
     begin;
@@ -589,7 +589,7 @@ end;
 procedure TScriptFrame.ScriptThreadTerminate(Sender: TObject);
 begin
   FScriptState:= ss_None;
-  Form1.RefreshTab;
+  SimbaForm.RefreshTab;
 end;
 procedure AddKey(const SynEdit : TSynEdit; const ACmd: TSynEditorCommand; const AKey: word;const AShift: TShiftState);
 begin
@@ -614,7 +614,7 @@ begin
   FScriptState:= ss_None;
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
-  SynEdit.Highlighter := Form1.CurrHighlighter;
+  SynEdit.Highlighter := SimbaForm.CurrHighlighter;
   SynEdit.Options:= SynEdit.Options + [eoTabIndent] - [eoSmartTabs];
   SynEdit.IncrementColor.Background := $30D070;
   SynEdit.HighlightAllColor.Background:= clYellow;
