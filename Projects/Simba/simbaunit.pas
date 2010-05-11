@@ -18,10 +18,10 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    simba/GUI for the Mufasa Macro Library
+    Simba/GUI for the Mufasa Macro Library
 }
 
-unit simba;
+unit SimbaUnit;
 
 {$undef EditButtons}
 {$Undef ProcessMessages} //Define this for processmessages in ThreadSafeCall
@@ -41,7 +41,7 @@ uses
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,mmisc,
   stringutil,mufasatypesutil,mufasabase,  v_ideCodeParser,
-  about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
+  about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
@@ -1130,7 +1130,7 @@ begin
   CreateSetting('Settings/Fonts/VersionLink', FontURL + 'Version');
   CreateSetting('Settings/Fonts/UpdateLink', FontURL + 'Fonts.tar.bz2');
 
-  CreateSetting('Settings/News/URL', 'http://simba.villavu.com/bin/news');
+  CreateSetting('Settings/News/URL', 'http://Simba.villavu.com/bin/news');
 
   {Creates the paths and returns the path}
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
@@ -1895,7 +1895,7 @@ end;
 
 procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
 begin
-  OpenURL('http://wizzup.org/static/simba/doc/ps_handbook/');
+  OpenURL('http://wizzup.org/static/Simba/doc/ps_handbook/');
 end;
 
 procedure TSimbaForm.MenuItemColourHistoryClick(Sender: TObject);
@@ -2374,7 +2374,7 @@ function TSimbaForm.GetSimbaNews: String;
 var
   t: TDownloadThread;
 begin
-  t := TDownloadThread.Create(LoadSettingDef('Settings/News/URL', 'http://simba.villavu.com/bin/news'),
+  t := TDownloadThread.Create(LoadSettingDef('Settings/News/URL', 'http://Simba.villavu.com/bin/news'),
                               @Result);
   t.Resume;
   while not t.done do
@@ -2804,7 +2804,7 @@ begin
       Exit;
   with TOpenDialog.Create(nil) do
   try
-    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
+    Filter:= 'Simba Files|*.Simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
              '|Any files|*.*';
     if Execute then
       if FileExists(filename) then
@@ -2886,14 +2886,14 @@ begin
   Result := false;
   with TSaveDialog.Create(nil) do
   try
-    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +
+    filter := 'Simba Files|*.Simba;*.simb;*.cogat;*.mufa;*.txt;*.' +
               LoadSettingDef('Settings/Extensions/FileExtension','sex')+
               '|Any files|*.*';
     if Execute then
     begin;
       if ExtractFileExt(FileName) = '' then
       begin;
-        ScriptFile := FileName + '.simba';
+        ScriptFile := FileName + '.Simba';
       end else
         ScriptFile := FileName;
       CurrScript.SynEdit.Lines.SaveToFile(ScriptFile);

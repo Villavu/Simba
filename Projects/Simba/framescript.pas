@@ -93,7 +93,7 @@ type
 
 implementation
 uses
-  simba, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
+  SimbaUnit, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1): string;
 var

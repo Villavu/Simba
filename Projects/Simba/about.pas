@@ -54,15 +54,15 @@ var
 
 implementation
 uses
-  simba;
+  SimbaUnit;
 { TAboutForm }
 
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin
-  Self.Caption := format('About Simba r%d', [simba.SimbaVersion]);
-  Self.LabelRevision.Caption := format('Revision %d', [simba.SimbaVersion]);
+  Self.Caption := format('About Simba r%d', [SimbaUnit.SimbaVersion]);
+  Self.LabelRevision.Caption := format('Revision %d', [SimbaUnit.SimbaVersion]);
   AboutMemo.Lines.Add('Simba is released under the GPL license.');
-  AboutMemo.Lines.Add(format('You are currently using version: %d',[simba.SimbaVersion]));
+  AboutMemo.Lines.Add(format('You are currently using version: %d',[SimbaUnit.SimbaVersion]));
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Please report bugs at: http://mufasa.villavu.com/mantis/');
 end;

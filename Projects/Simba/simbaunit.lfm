@@ -4,7 +4,7 @@ object SimbaForm: TSimbaForm
   Top = 69
   Width = 660
   AllowDropFiles = True
-  Caption = 'THA FUKING SIMBA'
+  Caption = 'THA FUKING Simba'
   ClientHeight = 603
   ClientWidth = 660
   KeyPreview = True

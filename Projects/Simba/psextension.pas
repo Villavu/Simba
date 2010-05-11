@@ -49,7 +49,7 @@ uses
   uPSC_extctrls,uPSC_menus, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
   uPSR_extctrls,uPSR_menus, //Runtime-libs
-  simba,updateform,settingssandbox,bitmaps,files,Dialogs, mmisc//Writeln
+  SimbaUnit,updateform,settingssandbox,bitmaps,files,Dialogs, mmisc//Writeln
   ;
 
 function TSimbaPSExtension.HookExists(const HookName: String): Boolean;
@@ -146,7 +146,7 @@ end;
 
 procedure TSimbaPSExtension.OnPSExecute(Sender: TPSScript);
 begin
-  Sender.SetVarToInstance('simba',SimbaForm);
+  Sender.SetVarToInstance('Simba',SimbaForm);
   Sender.SetVarToInstance('Simba_MainMenu',SimbaForm.MainMenu);
   Sender.SetPointerToData('Settings',@Self.Settings,Sender.FindNamedType('TMMLSettingsSandbox'));
 end;

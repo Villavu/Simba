@@ -1,4 +1,4 @@
-unit simbasettings;
+unit Simbasettings;
 
 {$mode objfpc}{$H+}
 
