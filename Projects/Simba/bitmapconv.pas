@@ -5,22 +5,26 @@ unit bitmapconv;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, EditBtn, ExtDlgs;
+  Classes, SysUtils, FileUtil, bitmaps, LResources, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, EditBtn, ExtDlgs, ExtCtrls;
 
 type
 
   { TBitmapConvForm }
 
   TBitmapConvForm = class(TForm)
-    Button1: TButton;
-    Button2: TButton;
-    CheckBox1: TCheckBox;
-    OpenPictureDialog1: TOpenPictureDialog;
-    procedure Button2Click(Sender: TObject);
+    GroupBox: TGroupBox;
+    ToStringButton: TButton;
+    OpenButton: TButton;
+    PadOutput: TCheckBox;
+    ImagePreview: TImage;
+    OpenPictureDialog: TOpenPictureDialog;
+    procedure OpenButtonClick(Sender: TObject);
+    procedure ToStringButtonClick(Sender: TObject);
   private
     { private declarations }
   public
+    dispPic : TMufasaBitmap;
     { public declarations }
   end; 
 
@@ -28,15 +32,59 @@ var
   BitmapConvForm: TBitmapConvForm;
 
 implementation
-
+uses
+  SimbaUnit;
+const
+  BmpSizeTxt = '(%dx%d)';
 {$R *.lfm}
 
 { TBitmapConvForm }
 
-procedure TBitmapConvForm.Button2Click(Sender: TObject);
+procedure TBitmapConvForm.OpenButtonClick(Sender: TObject);
+var
+  x : TMufasaBitmap;
 begin
-  if OpenPictureDialog1.Execute then
-    writeln(OpenPictureDialog1.FileName);
+  if OpenPictureDialog.Execute then
+  begin
+    try
+      ImagePreview.Picture.LoadFromFile(OpenPictureDialog.FileName);
+      GroupBox.Caption:= Format(BmpSizeTxt,[ImagePreview.Picture.Width,ImagePreview.Picture.Height]);
+      x := TMufasaBitmap.Create;
+      x.LoadFromFile(OpenPictureDialog.FileName);
+      if dispPic <> nil then
+        dispPic.Free;
+      dispPic := x;
+    except
+      formWritelnEx('ERROR loading the file: ' + OpenPictureDialog.FileName);
+      ImagePreview.Picture := nil;
+      if dispPic <> nil then
+        FreeAndNil(dispPic);
+    end;
+  end;
+end;
+
+procedure TBitmapConvForm.ToStringButtonClick(Sender: TObject);
+var
+  str : string;
+  strend : string;
+  len : integer;
+begin
+  if dispPic <> nil then
+  begin
+    str := '  Bmp := BitmapFromString('+
+           inttostr(disppic.Width)+ ', ' + inttostr(disppic.height) +', '#39 + dispPic.ToString;
+    strend :=  #39 +');';
+    len := length(str);
+    if PadOutput.Checked then
+      while Len > 65 do
+      begin
+        formWritelnEx(Copy(str,1,62) + #39 + ' +');
+        delete(str,1,62);
+        str := StringOfChar(' ',8) + #39 + str;
+        len := length(str);
+      end;
+    formWritelnEx(str + strend);
+  end;
 end;
 
 end.
