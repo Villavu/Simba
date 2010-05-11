@@ -73,7 +73,9 @@ AddFunction(@ps_logn,'function logn(base, x : extended): extended;');
 AddFunction(@ps_ln,'function ln(x : extended) : extended;');
 AddFunction(@ps_inttohex,'function IntToHex(number : integer) : string');
 AddFunction(@ps_hextoint,'function HexToInt(Hex : string) : integer');
-
+AddFunction(@ps_sar,'function sar(AValue : longint; shift : byte) : longint;');
+AddFunction(@ps_ror,'function ror(num : longword; shift : byte) : LongWord;');
+AddFunction(@ps_rol,'function rol(num : longword; shift : byte) : LongWord;');
 {window}
 SetCurrSection('Window');
 AddFunction(@ps_Freeze, 'function Freeze: boolean;');
