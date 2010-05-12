@@ -81,6 +81,21 @@ begin
   result := CreateDir(directoryName);
 end;
 
+function ps_ForeDirectores(const dir : string) : boolean; extdecl;
+begin
+  result := ForceDirectories(dir);
+end;
+
+function ps_GetFiles(const Path, Ext : string) : TStringArray;extdecl;
+begin
+  result := GetFiles(path,ext);
+end;
+
+function ps_GetDirectories(const path : string) : TStringArray;extdecl;
+begin
+  result := GetDirectories(path);
+end;
+
 procedure ps_WriteINI(const Section, KeyName, NewString, FileName: string);extdecl;
 var
   tempini : TIniFile;
