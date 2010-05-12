@@ -271,7 +271,7 @@
       <Unit42>
         <Filename Value="../../Units/Misc/dcpbase64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="dcpbase64"/>
+        <UnitName Value="DCPbase64"/>
       </Unit42>
       <Unit43>
         <Filename Value="../../Units/Misc/mPasLex.pas"/>
