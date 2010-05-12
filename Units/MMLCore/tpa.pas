@@ -981,23 +981,24 @@ begin;
   fy := TempBox.y2 - TempBox.y1+3;
   fx := TempBox.x2 - TempBox.x1+2;
   for i := 0 to fx do
-    FillChar(PointsToFill[i][0],fy*sizeof(boolean),0);
+    FillChar(PointsToFill[i][0],fy,0);
   x := TempBox.x1 - 1;
   y := TempBox.y1 - 1;
   CurrentArray := -1;
   SetLength(Stack   , LengthTPA + 1);
   SetLength(Lengths , LengthTPA + 1);
   SetLength(TempTPA , LengthTPA + 1);
-  For I := 0 to LengthTPA do
+  for I := 0 to LengthTPA do
   begin;
     TempTPA[I].x := TPA[I].x - x;
     TempTPA[I].y := TPA[I].y - y;
   end;
-  For I := 0 to LengthTPA do
+  for I := 0 to LengthTPA do
     PointsToFill[TempTPA[I].x][TempTPA[I].y] := True;
-  For I := 0 to LengthTPA do
+  for I := 0 to LengthTPA do
     if PointsToFill[TempTPA[I].x][TempTPA[I].y] then
     begin;
+      PointsToFill[TempTPA[i].x][TempTPA[i].y] := false;
       inc(CurrentArray);
       SetLength(Result,CurrentArray + 1);
       SetLength(Result[CurrentArray],LengthTPA - I + 1);
