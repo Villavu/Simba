@@ -1,6 +1,6 @@
 unit bitmapconv;
 
-{$mode objfpc}
+{$mode objfpc}{$h+}
 
 interface
 
