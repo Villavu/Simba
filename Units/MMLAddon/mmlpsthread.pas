@@ -218,6 +218,7 @@ uses
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
+  mmath, //Real maths!
   strutils,
   tpa, //Tpa stuff
   forms,//Forms

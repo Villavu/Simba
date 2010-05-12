@@ -55,7 +55,7 @@ AddFunction(@ps_min,'function Min(a, b: Integer): Integer;');
 AddFunction(@ps_minE,'function MinE(a, b: extended): Extended;');
 AddFunction(@ps_maxE,'function MaxE(a, b: extended): Extended;');
 AddFunction(@ps_iAbs,'function iAbs(a : integer) : integer;');
-AddFunction(@ps_ArcTan2,'function ArcTan2(x,y : extended) : extended;');
+AddFunction(@ps_ArcTan2,'function ArcTan2(y,x : extended) : extended;');
 AddFunction(@ps_IntToBox,'function IntToBox(xs,ys,xe,ye : integer) : TBox;');
 AddFunction(@ps_IntInBox,'function IntInBox(x, y: Integer; Box: TBox): Boolean;');
 AddFunction(@ps_PointToBox,'function PointToBox(PT1,PT2 : TPoint): TBox;');
@@ -360,6 +360,8 @@ AddFunction(@ps_FindTextTPAinTPA,'function FindTextTPAinTPA(Height : integer;con
 AddFunction(@ps_SortCircleWise,'procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Integer; SortUp, ClockWise: Boolean);');
 AddFunction(@ps_LinearSort,'procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean);');
 AddFunction(@ps_RotatePoint,'function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;');
+AddFunction(@ps_ChangeDistPT,'function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;');
+AddFunction(@ps_ChangeDistTPA,'function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;');
 AddFunction(@ps_FindGapsTPA,'function FindGapsTPA(const TPA: TPointArray; MinPixels: Integer): T2DPointArray;');
 AddFunction(@ps_RemoveDistTPointArray,'function RemoveDistTPointArray(x, y, dist: Integer;const  ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;');
 AddFunction(@ps_CombineTPA,'function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray;');

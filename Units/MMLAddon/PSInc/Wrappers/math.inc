@@ -83,9 +83,9 @@ begin
   Result:=Random(Abs(aFrom-aTo))+Min(aTo,AFrom);
 end;
 
-function ps_ArcTan2(x,y : extended) : extended;  extdecl;
+function ps_ArcTan2(y,x : extended) : extended;  extdecl;
 begin
-  result := ArcTan2(x,y);
+  result := ArcTan2(y,x);
 end;
 
 procedure ps_IncEx(var x : integer; increase : integer); extdecl;

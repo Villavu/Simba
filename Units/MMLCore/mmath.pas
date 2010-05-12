@@ -31,17 +31,20 @@ interface
 uses
   Classes, SysUtils,MufasaTypes;
 
-function RotatePoints(P: TPointArray; A, cx, cy: Extended): TPointArray;
-function RotatePoint(p: TPoint; angle, mx, my: Extended): TPoint;
-
+function RotatePoints(const P: TPointArray;const A, cx, cy: Extended): TPointArray;
+function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint;
+function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;
+function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
 
 implementation
+uses
+  math;
 
 {/\
   Rotates the given points (P) by A (in radians) around the point defined by cx, cy.
 /\}
 
-function RotatePoints(P: TPointArray; A, cx, cy: Extended): TPointArray;
+function RotatePoints(const P: TPointArray;const A, cx, cy: Extended): TPointArray;
 
 var
    I, L: Integer;
@@ -60,11 +63,42 @@ end;
   Rotates the given point (p) by A (in radians) around the point defined by cx, cy.
 /\}
 
-function RotatePoint(p: TPoint; angle, mx, my: Extended): TPoint;
+function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint;
 
 begin
   Result.X := Round(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
   Result.Y := Round(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y- my));
+end;
+
+function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;
+var
+  angle : extended;
+begin
+  angle := ArcTan2(pt.y-my,pt.x-mx);
+  result.y := round(sin(angle) * newdist) + mx;
+  result.x := round(cos(angle) * newdist) + my;
+end;
+
+function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
+var
+  angle : extended;
+  i : integer;
+begin
+  result := false;
+  if length(TPA) < 1 then
+    exit;
+  result := true;
+  try
+    for i := high(TPA) downto 0 do
+    begin
+      angle := ArcTan2(TPA[i].y-my,TPA[i].x-mx);
+      TPA[i].y := round(sin(angle) * newdist) + mx;
+      TPA[i].x := round(cos(angle) * newdist) + my;
+    end;
+  except
+    result := false;
+  end;
+
 end;
 
 end.
