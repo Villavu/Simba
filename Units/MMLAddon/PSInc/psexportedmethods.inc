@@ -111,7 +111,7 @@ AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Inte
 AddFunction(@ps_DirectoryExists,'function DirectoryExists(const DirectoryName : string ) : Boolean;');
 AddFunction(@ps_CreateDirectory,'function CreateDirectory(const DirectoryName : string) : boolean;');
 AddFunction(@ps_FileExists,'function FileExists (const FileName : string ) : Boolean;');
-AddFunction(@ps_ForeDirectores,'function ForeDirectores(const dir : string) : boolean;');
+AddFunction(@ps_ForceDirectores,'function ForceDirectores(const dir : string) : boolean;');
 AddFunction(@ps_GetFiles,'function GetFiles(const Path, Ext : string) : TStringArray;');
 AddFunction(@ps_GetDirectories,'function GetDirectories(const path : string) : TStringArray;');
 AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, FileName: string);');

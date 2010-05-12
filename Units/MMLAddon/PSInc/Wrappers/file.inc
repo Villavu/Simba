@@ -81,7 +81,7 @@ begin
   result := CreateDir(directoryName);
 end;
 
-function ps_ForeDirectores(const dir : string) : boolean; extdecl;
+function ps_ForceDirectores(const dir : string) : boolean; extdecl;
 begin
   result := ForceDirectories(dir);
 end;
