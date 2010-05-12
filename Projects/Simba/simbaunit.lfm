@@ -798,6 +798,7 @@ object SimbaForm: TSimbaForm
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF006D9CD4896A9AD2FB6697CFEE
         }
+        ShortCut = 16465
         OnClick = ActionExitExecute
       end
     end
