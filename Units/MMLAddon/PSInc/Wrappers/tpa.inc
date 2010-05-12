@@ -183,6 +183,16 @@ begin
   result := RotatePoint(p,angle,mx,my);
 end;
 
+function ps_ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;extdecl;
+begin
+  result := ChangeDistPT(pt,mx,my,newdist);
+end;
+
+function ps_ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean; extdecl;
+begin
+  result := ChangeDistTPA(tpa,mx,my,newdist);
+end;
+
 function ps_FindGapsTPA(const TPA: TPointArray; MinPixels: Integer): T2DPointArray; extdecl;
 begin
   result := FindGapsTPA(TPA,minpixels);

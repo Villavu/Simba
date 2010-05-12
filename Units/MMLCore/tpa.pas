@@ -79,8 +79,6 @@ procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean)
 function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;
 procedure AppendTPA(var TPA : TPointArray; const ToAppend : TPointArray);
 function TPAFromBox(const Box : TBox) : TPointArray;
-Function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;
-Function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint; inline;
 function FindTPAEdges(const p: TPointArray): TPointArray;
 function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
@@ -100,7 +98,7 @@ procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
 implementation
 
 uses
-  math;
+  math,mmath;
 
 
 
