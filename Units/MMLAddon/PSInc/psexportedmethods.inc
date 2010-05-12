@@ -131,6 +131,7 @@ AddFunction(@ps_DecodeTime,'procedure DecodeTime(DateTime : TDateTime; var Hour,
 AddFunction(@ps_DecodeDate,'procedure DecodeDate ( const SourceDate  : TDateTime; var Year, Month, Day  : Word );');
 AddFunction(@ps_ConvertTime,'procedure ConvertTime(Time: integer; var h, m, s: integer);');
 AddFunction(@ps_HakunaMatata,'procedure HakunaMatata;');
+AddFunction(@ps_Simba,'procedure Simba;');
 AddFunction(@ps_TerminateScript,'procedure TerminateScript;');
 AddFunction(@ps_DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w, h: integer);');
 AddFunction(@ps_DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp: integer);');
@@ -146,6 +147,10 @@ AddFunction(@ps_InputQuery,'function InputQuery(const ACaption, APrompt : String
 {string}
 SetCurrSection('String');
 AddFunction(@ps_Capitalize,'function Capitalize(str : string) : string;');
+AddFunction(@ps_CompressString,'function CompressString(const Str : string) : string;');
+AddFunction(@ps_DecompressString,'function DecompressString(const Compressed : string) : string;');
+AddFunction(@ps_Base64Encode,'function Base64Encode(const str : string) : string;');
+AddFunction(@ps_Base64Decode,'function Base64Decode(const str : string) : string;');
 AddFunction(@ps_Format,'function Format(const fmt : string;const args : array of const) : string;');
 AddFunction(nil,'function ToStr(x) : string;');
 AddFunction(@ps_Between,'function Between(s1, s2, str: string): string;');

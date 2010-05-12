@@ -625,7 +625,7 @@ begin
     CorrectData[i].B := FData[i].B;
   end;
   DestLen := BufferLen;
-  if compress(Pchar(BufferString),destlen,PChar(DataStr),w*h*3) = Z_OK then
+  if compress(BufferString,destlen,PChar(DataStr),w*h*3) = Z_OK then
   begin;
     SetLength(DataStr,DestLen);
     move(bufferstring[0],dataStr[1],DestLen);
