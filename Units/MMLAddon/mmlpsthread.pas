@@ -218,6 +218,7 @@ uses
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
+  mmath, //Real maths!
   strutils,
   tpa, //Tpa stuff
   forms,//Forms
@@ -245,6 +246,13 @@ begin
     CurrThread.DebugTo(str)
   else
     mDebugLn(str);
+end;
+
+procedure ps_DebugLn(str : string); extdecl;
+begin
+  if CurrThread.Prop.WriteTimeStamp then
+    str := format('[%s]: %s', [TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount - CurrThread.StartTime))), str]);
+  mDebugLn(str);
 end;
 
 function MakeString(data : TPSVariantIFC) : string;
@@ -675,7 +683,7 @@ begin
     RegisterMethod('procedure Contrast(TargetBitmap : TMufasaBitmap; co : Extended);');
     RegisterMethod('procedure Invert(TargetBitmap : TMufasaBitmap);');
     RegisterMethod('procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);');
-    RegisterMethod('function Copy: TMufasaBitmap;');
+    RegisterMethod('function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap;');
     RegisterMethod('function ToString : string;');
     RegisterMethod('function CreateTMask : TMask;');
     RegisterMethod('constructor create');
@@ -740,6 +748,12 @@ end;
 procedure FreeMufasaBitmap(Self : TMufasaBitmap);
 begin;
   CurrThread.Client.MBitmaps.FreeBMP(Self.Index);
+end;
+
+function TMufasaBitmapCopy(Self : TMufasaBitmap;const xs,ys,xe,ye : integer) : TMufasaBitmap;
+begin
+  result := Self.Copy(xs,ys,xe,ye);
+  CurrThread.Client.MBitmaps.AddBMP(result);
 end;
 
 type
@@ -819,7 +833,7 @@ begin;
     RegisterMethod(@TMufasaBitmap.Contrast,'CONTRAST');
     RegisterMethod(@TMufasaBitmap.Invert,'INVERT');
     RegisterMethod(@TMufasaBitmap.Posterize,'POSTERIZE');
-    RegisterMethod(@TMufasaBitmap.Copy, 'COPY');
+    RegisterMethod(@TMufasaBitmapCopy, 'COPY');
     RegisterMethod(@TMufasaBitmap.ToString,'TOSTRING');
     RegisterMethod(@TMufasaBitmap.CreateTMask,'CREATETMASK');
     RegisterPropertyHelper(@MBmp_TransColorSet_r,nil,'TRANSPARENTCOLORSET');

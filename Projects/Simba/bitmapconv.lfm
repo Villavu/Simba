@@ -1,0 +1,68 @@
+object BitmapConvForm: TBitmapConvForm
+  Left = 726
+  Height = 240
+  Top = 192
+  Width = 320
+  Caption = 'Bitmap conversion'
+  ClientHeight = 240
+  ClientWidth = 320
+  Constraints.MinHeight = 240
+  Constraints.MinWidth = 320
+  LCLVersion = '0.9.29'
+  object ToStringButton: TButton
+    Left = 192
+    Height = 36
+    Top = 184
+    Width = 113
+    Anchors = [akRight, akBottom]
+    Caption = 'To string'
+    OnClick = ToStringButtonClick
+    TabOrder = 0
+  end
+  object PadOutput: TCheckBox
+    Left = 192
+    Height = 17
+    Top = 160
+    Width = 71
+    Anchors = [akRight, akBottom]
+    Caption = 'Pad output'
+    Checked = True
+    State = cbChecked
+    TabOrder = 1
+  end
+  object OpenButton: TButton
+    Left = 12
+    Height = 36
+    Top = 184
+    Width = 90
+    Anchors = [akRight, akBottom]
+    Caption = 'Open'
+    OnClick = OpenButtonClick
+    TabOrder = 2
+  end
+  object GroupBox: TGroupBox
+    Left = 12
+    Height = 145
+    Top = 8
+    Width = 284
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Caption = 'Image'
+    ClientHeight = 127
+    ClientWidth = 280
+    TabOrder = 3
+    object ImagePreview: TImage
+      Left = 0
+      Height = 127
+      Top = 0
+      Width = 280
+      Align = alClient
+      Center = True
+    end
+  end
+  object OpenPictureDialog: TOpenPictureDialog
+    FilterIndex = 2
+    Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    left = 128
+    top = 184
+  end
+end

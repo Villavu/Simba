@@ -26,6 +26,8 @@ x.AddConstantN('ScriptPath','string').SetString(Self.ScriptPath);
 x.AddConstantN('IncludePath','string').SetString(Self.IncludePath);
 x.AddConstantN('PluginPath','string').SetString(Self.PluginPath);
 x.AddConstantN('FontPath','string').SetString(Self.FontPath);
+x.AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
+x.AddConstantN('MaxInt','integer').SetInt(maxLongint);
 x.AddTypeS('TReplaceFlag', '(rfReplaceAll, rfIgnoreCase)');
 x.AddTypeS('TReplaceFlags','set of TReplaceFlag');
 x.AddTypeS('StrExtr','(Numbers, Letters, Others);');

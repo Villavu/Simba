@@ -24,7 +24,7 @@
 unit bitmaps;
 
 {$mode objfpc}{$H+}
-
+{$Inline on}
 interface
 uses
   Classes, SysUtils, FPImage,IntfGraphics,graphtype,MufasaTypes,MufasaBase,graphics;
@@ -82,8 +82,8 @@ type
     procedure Invert;overload;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
-    function Copy: TMufasaBitmap;overload;
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
+    function Copy: TMufasaBitmap;overload;
     function ToTBitmap: TBitmap;
     function ToString : string;
     procedure LoadFromTBitmap(bmp: TBitmap);
@@ -173,7 +173,7 @@ begin
   Bmp1.ValidatePoint(comparebox.x1,comparebox.y1);
   Bmp1.ValidatePoint(comparebox.x2,comparebox.y2);
   Bmp2.ValidatePoint(comparebox.x1,comparebox.y1);
-  Bmp2.ValidatePoint(comparebox.x1,comparebox.y1);
+  Bmp2.ValidatePoint(comparebox.x2,comparebox.y2);
   Bmp1.SetAlphaValue(0);
   Bmp2.SetAlphaValue(0);
   w1 := bmp1.Width;
@@ -542,7 +542,7 @@ var
   SIndex : Integer;
   CurrX,CurrY : integer;
   Search,Replace : LongWord;
-procedure AddToStack(x,y : integer);
+procedure AddToStack(x,y : integer);inline;
 begin
   if LongWord(FData[y * w + x]) = Search then
   begin
@@ -595,7 +595,7 @@ begin
   Result := TMufasaBitmap.Create;
   Result.SetSize(xe-xs+1, ye-ys+1);
   for i := ys to ye do
-    Move(self.FData[i * self.w + xs], Result.FData[i-ys],result.Width * SizeOf(TRGB32));
+    Move(self.FData[i * self.w + xs], Result.FData[(i-ys) * result.w],result.Width * SizeOf(TRGB32));
 end;
 
 function TMufasaBitmap.ToTBitmap: TBitmap;
@@ -625,7 +625,7 @@ begin
     CorrectData[i].B := FData[i].B;
   end;
   DestLen := BufferLen;
-  if compress(Pchar(BufferString),destlen,PChar(DataStr),w*h*3) = Z_OK then
+  if compress(BufferString,destlen,PChar(DataStr),w*h*3) = Z_OK then
   begin;
     SetLength(DataStr,DestLen);
     move(bufferstring[0],dataStr[1],DestLen);

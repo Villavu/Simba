@@ -1,10 +1,10 @@
-object Form1: TForm1
-  Left = 150
+object SimbaForm: TSimbaForm
+  Left = 143
   Height = 623
-  Top = 69
+  Top = 115
   Width = 660
   AllowDropFiles = True
-  Caption = 'THA FUKING SIMBA'
+  Caption = 'THA FUKING Simba'
   ClientHeight = 603
   ClientWidth = 660
   KeyPreview = True
@@ -437,15 +437,12 @@ object Form1: TForm1
       TabOrder = 3
       inherited FunctionList: TTreeView
         Height = 323
-        Top = 18
         Width = 150
-        DefaultItemHeight = 15
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Height = 21
         Top = 341
         Width = 150
         OnExit = editSearchListExit
@@ -453,7 +450,6 @@ object Form1: TForm1
         OnKeyPress = editSearchListKeyPress
       end
       inherited FunctionListLabel: TLabel
-        Height = 14
         Width = 146
       end
     end
@@ -802,6 +798,7 @@ object Form1: TForm1
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
           FF00FFFFFF00FFFFFF00FFFFFF006D9CD4896A9AD2FB6697CFEE
         }
+        ShortCut = 16465
         OnClick = ActionExitExecute
       end
     end
@@ -1351,6 +1348,10 @@ object Form1: TForm1
       object MenuItemSettingsButton: TMenuItem
         Caption = 'Settings'
         OnClick = MenuItemSettingsButtonClick
+      end
+      object MenuItemBitmapConv: TMenuItem
+        Caption = '&Bitmap conversion'
+        OnClick = MenuItemBitmapConvClick
       end
       object MenuItemDivider10: TMenuItem
         Caption = '-'

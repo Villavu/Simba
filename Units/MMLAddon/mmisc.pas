@@ -106,7 +106,9 @@ end;
 function UnTar(const Input: TStream; const outputdir: string; overwrite: boolean): boolean; overload;
 var
   Tar : TTarArchive;
+  Succ : boolean;
   DirRec : TTarDirRec;
+  FS : TFileStream;
 begin;
   result := false;
   if not DirectoryExists(outputdir) then
@@ -114,23 +116,33 @@ begin;
       exit;
   Tar := TTarArchive.Create(input);
   Tar.reset;
+  Succ := True;
   while Tar.FindNext(DirRec) do
   begin
     if (DirRec.FileType = ftDirectory) then
     begin;
       if not DirectoryExists(outputdir + DirRec.Name) and not CreateDir(outputdir + DirRec.Name) then
-        exit
+      begin
+        Succ := false;
+        break;
+      end;
     end else if (DirRec.FileType = ftNormal) then
     begin;
       if FileExists(outputdir + dirrec.name) and not overwrite then
         continue;
-      Tar.ReadFile(outputdir + dirrec.name);
+      try
+        FS := TFileStream.Create(outputdir +dirrec.name,fmCreate);
+        tar.ReadFile(fs);
+        FS.Free;
+      except
+        Succ := false;
+        break;
+      end;
     end else
       mDebugLn(format('Unknown filetype in archive. %s',[dirrec.name]));
   end;
   Tar.Free;
-  Result := true;
-
+  Result := Succ;
 end;
 
 constructor TProcThread.Create;

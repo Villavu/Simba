@@ -41,9 +41,6 @@ type
   private
     Client: TObject;
     FFonts: TMFonts;
-    {$IFDEF OCRDEBUG}
-    debugbmp: TMufasaBitmap;
-    {$ENDIF}
     function  GetFonts:TMFonts;
     procedure SetFonts(const NewFonts: TMFonts);
   public
@@ -71,6 +68,8 @@ type
     property Fonts : TMFonts read GetFonts write SetFonts;
     {$IFDEF OCRDEBUG}
     procedure DebugToBmp(bmp: TMufasaBitmap; hmod,h: integer);
+    public
+       debugbmp: TMufasaBitmap;
     {$ENDIF}
   end;
 
@@ -156,16 +155,20 @@ begin
     {$ENDIF}
     if FFonts.LoadFont(dirs[i], false) then
     begin
+      {$IFDEF FONTDEBUG}
       fonts_loaded := fonts_loaded + dirs[i] + ', ';
+      {$ENDIF}
       result := true;
     end;
   end;
+  {$IFDEF FONTDEBUG}
   if length(fonts_loaded) > 2 then
   begin
     writeln(fonts_loaded);
     setlength(fonts_loaded,length(fonts_loaded)-2);
     TClient(Self.Client).WriteLn('Loaded fonts: ' + fonts_loaded);
   end;
+  {$ENDIF}
   If DirectoryExists(path + 'UpChars') then
     FFonts.LoadFont('UpChars', true); // shadow
 end;
