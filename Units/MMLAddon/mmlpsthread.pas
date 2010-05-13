@@ -371,7 +371,7 @@ procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorS
 begin
   if OnError = nil then
     exit;
-  ErrorData^.Row:= ErrorRow;
+  ErrorData^.Row:= ErrorRow - 1;
   ErrorData^.Col := ErrorCol;
   ErrorData^.Position:= ErrorPosition;
   ErrorData^.Error:= ErrorStr;
@@ -650,7 +650,9 @@ end;
 function TPSThread.RequireFile(Sender: TObject;
   const OriginFileName: String; var FileName, OutPut: string): Boolean;
 begin
-  result:= LoadFile(OriginFileName,FileName,OutPut);
+  Result:= LoadFile(OriginFileName,FileName,OutPut);
+  if Result then
+    Output := '{$DEFINE IS_INCLUDE}'+LineEnding+Output+LineEnding+'{$UNDEF IS_INCLUDE}';
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
@@ -1026,7 +1028,7 @@ end;
 
 procedure TPSThread.SetScript(script: string);
 begin
-   PSScript.Script.Text:= Script;
+   PSScript.Script.Text:= LineEnding+Script; //A LineEnding to create space for future extra's in first line (defines?)
 end;
 
 {***implementation TCPThread***}
