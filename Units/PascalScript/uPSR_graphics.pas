@@ -54,23 +54,29 @@ procedure TCanvasHandleW(Self: TCanvas; T: Longint); begin Self.Handle:= T; end;
 
 procedure TCanvasPixelsR(Self: TCanvas; var T: Longint; X,Y: Longint); begin T := Self.Pixels[X,Y]; end;
 procedure TCanvasPixelsW(Self: TCanvas; T, X, Y: Longint); begin Self.Pixels[X,Y]:= T; end;
+procedure TCanvasArc(Self : TCanvas; X1, Y1, X2, Y2, X3, Y3, X4, Y4: Integer); begin Self.Arc(X1, Y1, X2, Y2, X3, Y3, X4, Y4); end;
+procedure TCanvasChord(Self : TCanvas; X1, Y1, X2, Y2, X3, Y3, X4, Y4: Integer); begin self.Chord(X1, Y1, X2, Y2, X3, Y3, X4, Y4); end;
+procedure TCanvasRectangle(Self : TCanvas; X1,Y1,X2,Y2 : integer); begin self.Rectangle(x1,y1,x2,y2); end;
+procedure TCanvasRoundRect(Self : TCanvas; X1, Y1, X2, Y2, X3, Y3 : integer); begin self.RoundRect(X1, Y1, X2, Y2, X3, Y3); end;
+procedure TCanvasEllipse(Self : TCanvas;X1, Y1, X2, Y2: Integer); begin self.Ellipse(X1, Y1, X2, Y2); end;
+procedure TCanvasFillRect(Self : TCanvas; const Rect: TRect); begin self.FillRect(rect); end;
+procedure TCanvasFloodFill(Self : TCanvas; X, Y: Integer; Color: TColor; FillStyle: TFillStyle); begin self.FloodFill(x,y,color,fillstyle); end;
 
 procedure RIRegisterTCanvas(cl: TPSRuntimeClassImporter); // requires TPersistent
 begin
   with Cl.Add(TCanvas) do
   begin
-{$IFNDEF FPC}
-    RegisterMethod(@TCanvas.Arc, 'ARC');
-    RegisterMethod(@TCanvas.Chord, 'CHORD');
-    RegisterMethod(@TCanvas.Rectangle, 'RECTANGLE');
-    RegisterMethod(@TCanvas.RoundRect, 'ROUNDRECT');
-    RegisterMethod(@TCanvas.Ellipse, 'ELLIPSE');
-    RegisterMethod(@TCanvas.FillRect, 'FILLRECT');
-{$ENDIF}
-    RegisterMethod(@TCanvas.Draw, 'DRAW');
+    RegisterMethod(@TCanvasArc, 'ARC');
+    RegisterMethod(@TCanvasChord, 'CHORD');
+    RegisterMethod(@TCanvasRectangle, 'RECTANGLE');
+    RegisterMethod(@TCanvasRoundRect, 'ROUNDRECT');
+    RegisterMethod(@TCanvasEllipse, 'ELLIPSE');
+    RegisterMethod(@TCanvasFillRect, 'FILLRECT');
+//    RegisterMethod(@TCanvasDraw, 'DRAW');
 {$IFNDEF CLX}
-    RegisterMethod(@TCanvas.FloodFill, 'FLOODFILL');
+    RegisterMethod(@TCanvasFloodFill, 'FLOODFILL');
 {$ENDIF}
+
     RegisterMethod(@TCanvas.Lineto, 'LINETO');
     RegisterMethod(@TCanvas.Moveto, 'MOVETO');
     RegisterMethod(@TCanvas.Pie, 'PIE');

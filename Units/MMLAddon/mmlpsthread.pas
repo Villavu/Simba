@@ -555,6 +555,7 @@ begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
   PSScript := TPSScript.Create(nil);
   PSScript.UsePreProcessor:= True;
+  PSScript.CompilerOptions := PSScript.CompilerOptions + [icBooleanShortCircuit];
   PSScript.OnNeedFile := @RequireFile;
   PSScript.OnProcessDirective:=@OnProcessDirective;
   PSScript.OnProcessUnknowDirective:=@PSScriptProcessUnknowDirective;
