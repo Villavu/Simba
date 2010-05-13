@@ -36,7 +36,7 @@ interface
 implementation
 
   uses
-    MufasaTypes,MufasaBase,FileUtil;
+    MufasaTypes,MufasaBase,FileUtil,  strutils;
 
   procedure TGenericLoader.AddPath(path: string);
   var
@@ -101,6 +101,8 @@ implementation
 
   function TGenericLoader.VerifyPath(Path: string): string;
   begin
+    if (@path = nil) or (path = '') then
+      exit('');
     Result := Path;
     if (Result[Length(Result)] <> DS) then
     begin;

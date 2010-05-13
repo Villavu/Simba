@@ -82,6 +82,8 @@ begin
   if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
   begin
     repeat
+      if (SearchRec.Attr and faDirectory) = faDirectory then
+        Continue;
       inc(c);
       SetLength(Result,c);
       Result[c-1] := SearchRec.Name;
@@ -99,7 +101,7 @@ begin
   if FindFirst(Path + '*', faDirectory, SearchRec) = 0 then
   begin
     repeat
-      if SearchRec.Name[1] = '.' then
+      if (SearchRec.Name[1] = '.') or ((SearchRec.Attr and faDirectory) <> faDirectory) then
         continue;
       inc(c);
       SetLength(Result,c);

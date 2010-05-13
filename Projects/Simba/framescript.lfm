@@ -20,7 +20,7 @@ object ScriptFrame: TScriptFrame
     Font.Quality = fqNonAntialiased
     ParentColor = False
     ParentFont = False
-    PopupMenu = Form1.ScriptPopup
+    PopupMenu = SimbaForm.ScriptPopup
     TabOrder = 0
     OnDragDrop = SynEditDragDrop
     OnDragOver = SynEditDragOver

@@ -104,7 +104,7 @@ var
 
 implementation
 uses
-  colour_conv, TestUnit, lclintf, lcltype;
+  colour_conv, SimbaUnit, lclintf, lcltype;
 
 constructor TColourPickerObject.Create(C: Integer; P: TPoint; N: String);
 begin
@@ -502,7 +502,7 @@ constructor TColourHistoryForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  PickNewColourButton.OnClick:= @Form1.ButtonPickClick;
+  PickNewColourButton.OnClick:= @SimbaForm.ButtonPickClick;
 end;
 
 destructor TColourHistoryForm.Destroy;
@@ -544,12 +544,12 @@ end;
 
 procedure TColourHistoryForm.SetCHShowMenu(Sender: TObject);
 begin
-  Form1.MenuItemColourHistory.Checked := True;
+  SimbaForm.MenuItemColourHistory.Checked := True;
 end;
 
 procedure TColourHistoryForm.UnSetCHShowMenu(Sender: TObject);
 begin
-  Form1.MenuItemColourHistory.Checked := False;
+  SimbaForm.MenuItemColourHistory.Checked := False;
 end;
 
 initialization
