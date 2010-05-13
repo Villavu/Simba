@@ -1,4 +1,4 @@
-#$ fpc  -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../../lazarus/components/synedit/units/x86_64-linux/ -Fu../../../lazarus/ideintf/units/x86_64-linux/ -Fu../../../lazarus/lcl/units/x86_64-linux/ -Fu../../../lazarus/lcl/units/x86_64-linux/gtk2/ -Fu../../../lazarus/packager/units/x86_64-linux/ -Fu. -oSAMufasaGUI -dUseCThreads -dM_MEMORY_DEBUG -dLCL -dLCLgtk2 project1.lpr
+#$ fpc  -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../../lazarus/components/synedit/units/x86_64-linux/ -Fu../../../lazarus/ideintf/units/x86_64-linux/ -Fu../../../lazarus/lcl/units/x86_64-linux/ -Fu../../../lazarus/lcl/units/x86_64-linux/gtk2/ -Fu../../../lazarus/packager/units/x86_64-linux/ -Fu. -oSAMufasaGUI -dUseCThreads -dM_MEMORY_DEBUG -dLCL -dLCLgtk2 Simba.lpr
 
 .PHONY: default clean
 
@@ -27,4 +27,4 @@ clean:
 	del $(binary) 
 
 $(binary):
-	$(CC) $(flags) $(units) $(lazarusunits) -o$(binary) $(defines) project1.lpr 
+	$(CC) $(flags) $(units) $(lazarusunits) -o$(binary) $(defines) Simba.lpr 

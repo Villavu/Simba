@@ -63,32 +63,32 @@ const
   DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
   SimbaURL =     {$IFDEF WINDOWS}
                   {$IFDEF CPUI386}
-                  'http://simba.villavu.com/bin/Windows/x86/Stable/'
+                  'http://Simba.villavu.com/bin/Windows/x86/Stable/'
                   {$ELSE}
-                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
+                  'http://Simba.villavu.com/bin/Windows/x86_64/Stable/'
                   {$ENDIF}
                 {$ELSE}
                   {$IFDEF CPUI386}
-                  'http://simba.villavu.com/bin/Linux/x86/Stable/'
+                  'http://Simba.villavu.com/bin/Linux/x86/Stable/'
                   {$ELSE}
-                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
+                  'http://Simba.villavu.com/bin/Linux/x86_64/Stable/'
                   {$ENDIF}
                 {$ENDIF};
-  FontURL = 'http://simba.villavu.com/bin/Fonts/';
+  FontURL = 'http://Simba.villavu.com/bin/Fonts/';
 
 var
   SimbaUpdateForm: TSimbaUpdateForm;
 
 implementation
 uses
-  internets,  TestUnit, simbasettings,lclintf;
+  internets,  SimbaUnit, Simbasettings,lclintf;
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
   GetLatestSimbaVersion;
-  mDebugLn(format('Current Simba version: %d',[TestUnit.SimbaVersion]));
+  mDebugLn(format('Current Simba version: %d',[SimbaUnit.SimbaVersion]));
   mDebugLn('Latest Simba Version: ' + IntToStr(FSimbaVersion));
-  Exit(testunit.SimbaVersion < FSimbaVersion);
+  Exit(SimbaUnit.SimbaVersion < FSimbaVersion);
 end;
 
 function TSimbaUpdateForm.GetLatestFontVersion: integer;

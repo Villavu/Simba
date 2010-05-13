@@ -59,7 +59,7 @@ var
 implementation
 
 uses
-  MufasaTypes, math, graphtype, IntfGraphics,TestUnit,lclintf,colour_conv,InterfaceBase;
+  MufasaTypes, math, graphtype, IntfGraphics,SimbaUnit,lclintf,colour_conv,InterfaceBase;
 { TDebugImgForm }
 
 procedure TDebugImgForm.FormCreate(Sender: TObject);
@@ -76,7 +76,7 @@ end;
 
 procedure TDebugImgForm.FormHide(Sender: TObject);
 begin
-  Form1.MenuItemDebugImage.Checked := False;
+  SimbaForm.MenuItemDebugImage.Checked := False;
 end;
 
 procedure TDebugImgForm.BlackDebugImage;

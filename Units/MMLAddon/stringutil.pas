@@ -13,8 +13,14 @@ function ExtractFromStr( Str : string; Extract : StrExtr) : string;
 function Capitalize(str : string) : string;
 function Implode(Glue : string; Pieces: TStringArray): string;
 function Explode(del, str: string): TStringArray;
+function CompressString(const Str : string) : string;
+function DecompressString(const Compressed : string) : string;
+function Base64Encode(const str : string) : string;
+function Base64Decode(const str : string) : string;
 
 implementation
+uses
+  paszlib,  DCPbase64;
 
 function Implode(Glue: string;Pieces: TStringArray): string;
 var
@@ -74,6 +80,53 @@ begin;
   inc(lenres);
   setlength(result,lenres);
   result[lenres-1] := Copy(str,lastpos,lenstr - lastpos + 1);
+end;
+
+function CompressString(const Str: string): string;
+var
+  Destlen:longword;
+begin
+  result := '';
+  Destlen :=BufferLen;
+  if length(str) <  1 then
+    exit;
+  if compress(BufferString,destlen,PChar(Str),length(str)) = Z_OK then
+  begin
+    setlength(result,Destlen + 4);
+    PInteger(@result[1])^ := Length(str);
+    Move(bufferstring[0],result[5],Destlen);
+  end;
+end;
+
+function DecompressString(const Compressed: string): string;
+var
+  destlen : Longword;
+  len,dest : integer;
+  Compress : PChar;
+begin
+  result := '';
+  len := Length(Compressed);
+  Compress := PChar(Compressed);
+  if len < 5 then
+    exit;
+  dest := PInteger(@compress[0])^;
+  Inc(Compress,sizeof(integer));
+  if dest < 1 then
+    exit;
+  destlen := dest;
+  setlength(result,destlen);
+  if uncompress(PChar(result),destlen,Compress,len) <> z_OK then
+    result := '';
+end;
+
+function Base64Encode(const str: string): string;
+begin
+  result := Base64EncodeStr(str);
+end;
+
+function Base64Decode(const str: string): string;
+begin
+  result := Base64DecodeStr(str);
 end;
 
 function Capitalize(str : string) : string;

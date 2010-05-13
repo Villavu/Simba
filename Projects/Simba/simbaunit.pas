@@ -18,10 +18,10 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    TestUnit/GUI for the Mufasa Macro Library
+    Simba/GUI for the Mufasa Macro Library
 }
 
-unit TestUnit;
+unit SimbaUnit;
 
 {$undef EditButtons}
 {$Undef ProcessMessages} //Define this for processmessages in ThreadSafeCall
@@ -41,12 +41,12 @@ uses
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,mmisc,
   stringutil,mufasatypesutil,mufasabase,  v_ideCodeParser,
-  about, framefunctionlist, ocr, updateform, simbasettings, psextension, virtualextension,
+  about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 650;
+  SimbaVersion = 668;
 
 type
 
@@ -64,9 +64,9 @@ type
   end;
 
 //  Tab
-  { TForm1 }
+  { TSimbaForm }
 
-  TForm1 = class(TForm)
+  TSimbaForm = class(TForm)
     ActionConsole: TAction;
     ActionNormalSize: TAction;
     ActionCompileScript: TAction;
@@ -104,6 +104,7 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemBitmapConv: TMenuItem;
     MenuItemExtensions: TMenuItem;
     MenuItemSettingsButton: TMenuItem;
     MenuItemDivider10: TMenuItem;
@@ -258,6 +259,7 @@ type
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
     procedure FunctionListTimerTimer(Sender: TObject);
+    procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemExtensionsClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
@@ -445,7 +447,7 @@ const
   Image_Stop = 7;
   Image_Terminate = 19;
 var
-  Form1: TForm1;
+  SimbaForm: TSimbaForm;
   MainDir : string;
   {$ifdef MSWindows}
   PrevWndProc : WNDPROC;
@@ -459,6 +461,7 @@ uses
    debugimage,
    files,
    InterfaceBase,
+   bitmapconv,
    extensionmanagergui,
    colourhistory,
    math;
@@ -466,7 +469,7 @@ uses
 {$ifdef mswindows}
 function ConsoleHandler( eventType : DWord) : WINBOOL;stdcall;
 begin
-  TThread.Synchronize(nil,@Form1.Close);
+  TThread.Synchronize(nil,@SimbaForm.Close);
   Result := true;
 end;
 
@@ -476,7 +479,7 @@ function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam;
 begin
   if uMsg = WM_HOTKEY then
   begin
-    Form1.ActionStopScript.Execute;
+    SimbaForm.ActionStopScript.Execute;
     Result := 0;
   end else
     Result := Windows.CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
@@ -487,7 +490,7 @@ end;
 var
    DebugCriticalSection: syncobjs.TCriticalSection;
 
-procedure TForm1.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
+procedure TSimbaForm.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
 begin
   if (Typ = meNotSupported) then
     Exit;
@@ -497,7 +500,7 @@ begin
   mDebugLn('ERROR: '+Format('%d:%d %s', [Y + 1, X, Msg])+' in '+TCodeInsight(Sender).FileName);
 end;
 
-procedure TForm1.OnCompleteCode(Str: string);
+procedure TSimbaForm.OnCompleteCode(Str: string);
 var
   sp, ep: Integer;
   s: string;
@@ -516,7 +519,7 @@ begin
   end;
 end;
 
-function TForm1.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
+function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
 var
   Temp : string;
 begin
@@ -529,7 +532,7 @@ begin
     result := false;
 end;
 
-procedure TForm1.HandleConnectionData;
+procedure TSimbaForm.HandleConnectionData;
 var
   Args : TVariantArray;
 begin
@@ -546,12 +549,12 @@ begin
   end;
 end;
 
-function TForm1.GetScriptPath: string;
+function TSimbaForm.GetScriptPath: string;
 begin
   result :=IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Scripts/Path', ExpandFileName(MainDir+DS+'Scripts' + DS)));
 end;
 
-procedure TForm1.HandleOpenFileData;
+procedure TSimbaForm.HandleOpenFileData;
 var
   Args : TVariantArray;
 begin
@@ -568,7 +571,7 @@ begin
   end;
 end;
 
-procedure TForm1.HandleWriteFileData;
+procedure TSimbaForm.HandleWriteFileData;
 var
   Args : TVariantArray;
 begin
@@ -585,7 +588,7 @@ begin
   end;
 end;
 
-procedure TForm1.HandleScriptStartData;
+procedure TSimbaForm.HandleScriptStartData;
 var
   Args : TVariantArray;
 begin
@@ -602,7 +605,7 @@ begin
   end;
 end;
 
-procedure TForm1.ProcessDebugStream(Sender: TObject);
+procedure TSimbaForm.ProcessDebugStream(Sender: TObject);
 begin
   if length(DebugStream) = 0 then
     Exit;
@@ -620,7 +623,7 @@ begin
   end;
 end;
 
-procedure TForm1.RecentFileItemsClick(Sender: TObject);
+procedure TSimbaForm.RecentFileItemsClick(Sender: TObject);
 var
   i : integer;
 begin
@@ -632,7 +635,7 @@ begin
     end;
 end;
 
-procedure TForm1.ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject;
+procedure TSimbaForm.ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject;
   X, Y: Integer);
 begin
   if(X <= (ScriptPanel.Width div 2))then
@@ -655,7 +658,7 @@ begin
   SplitterFunctionList.Show;
 end;
 
-procedure TForm1.ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; //is there a better way to do all of this?
+procedure TSimbaForm.ScriptPanelDockOver(Sender: TObject; Source: TDragDockObject; //is there a better way to do all of this?
   X, Y: Integer; State: TDragState; var Accept: Boolean);
 var
    P: TPoint;
@@ -671,29 +674,29 @@ begin
   end;
 end;
 
-procedure TForm1.ScriptPopupPopup(Sender: TObject);
+procedure TSimbaForm.ScriptPopupPopup(Sender: TObject);
 begin
   SetEditActions;
 end;
 
-procedure TForm1.SpeedButtonSearchClick(Sender: TObject);
+procedure TSimbaForm.SpeedButtonSearchClick(Sender: TObject);
 begin
   CloseFindPanel;
 end;
 
-procedure TForm1.SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
+procedure TSimbaForm.SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
   var Accept: Boolean);
 begin
   if(NewSize > ScriptPanel.Width div 2)then
     NewSize := ScriptPanel.Width div 2;
 end;
 
-procedure TForm1.TB_ReloadPluginsClick(Sender: TObject);
+procedure TSimbaForm.TB_ReloadPluginsClick(Sender: TObject);
 begin
 //  PluginsGlob.FreePlugins;
 end;
 
-procedure TForm1.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
+procedure TSimbaForm.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
 begin
   OpenConnectionData.Sender := Sender;
   OpenConnectionData.URL:= @URL;
@@ -701,7 +704,7 @@ begin
   TThread.Synchronize(nil,@HandleConnectionData);
 end;
 
-procedure TForm1.ThreadOpenFileEvent(Sender: TObject; var Filename: string;
+procedure TSimbaForm.ThreadOpenFileEvent(Sender: TObject; var Filename: string;
   var Continue: boolean);
 begin
   OpenFileData.Sender := Sender;
@@ -710,7 +713,7 @@ begin
   TThread.Synchronize(nil,@HandleOpenFileData);
 end;
 
-procedure TForm1.ThreadWriteFileEvent(Sender: TObject; var Filename: string;
+procedure TSimbaForm.ThreadWriteFileEvent(Sender: TObject; var Filename: string;
   var Continue: boolean);
 begin
   WriteFileData.Sender := Sender;
@@ -719,24 +722,24 @@ begin
   TThread.Synchronize(nil,@HandleWriteFileData);
 end;
 
-procedure TForm1.TrayPopupPopup(Sender: TObject);
+procedure TSimbaForm.TrayPopupPopup(Sender: TObject);
 begin
-  MenuItemHide.enabled:= Form1.Visible;
+  MenuItemHide.enabled:= SimbaForm.Visible;
   {$ifdef MSWindows}
-  MenuItemShow.Enabled:= not Form1.Visible;
-  if Form1.Visible then
-    if Form1.CanFocus then
-      form1.SetFocus;
+  MenuItemShow.Enabled:= not SimbaForm.Visible;
+  if SimbaForm.Visible then
+    if SimbaForm.CanFocus then
+      SimbaForm.SetFocus;
   {$endif}
 end;
 
-procedure TForm1.TT_UpdateClick(Sender: TObject);
+procedure TSimbaForm.TT_UpdateClick(Sender: TObject);
 begin
   SimbaUpdateForm.ShowModal;
   TT_Update.Visible:=False;
 end;
 
-procedure TForm1.UpdateTimerCheck(Sender: TObject);
+procedure TSimbaForm.UpdateTimerCheck(Sender: TObject);
 var
    chk: String;
    time:integer;
@@ -764,7 +767,7 @@ begin
   UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
 
-procedure TForm1.UpdateMenuButtonClick(Sender: TObject);
+procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
 begin
   SimbaUpdateForm.ShowModal;
 end;
@@ -772,9 +775,9 @@ end;
 procedure ClearDebug;
 begin
   {$IFNDEF MSWINDOWS}
-  Form1.ProcessDebugStream(nil);
+  SimbaForm.ProcessDebugStream(nil);
   {$ENDIF}
-  TThread.Synchronize(nil,@Form1.Memo1.Clear);
+  TThread.Synchronize(nil,@SimbaForm.Memo1.Clear);
 end;
 
 procedure formWriteln( S : String);
@@ -782,12 +785,12 @@ begin
   mDebugLn('formWriteln: ' + s);
   {$ifdef MSWindows}
   //Ha, we cán acces the debugmemo
-  Form1.Memo1.Lines.Add(s);
+  SimbaForm.Memo1.Lines.Add(s);
   {$else}
   DebugCriticalSection.Enter;
   try
     s := s + MEOL;
-    Form1.DebugStream:= Form1.DebugStream + s;
+    SimbaForm.DebugStream:= SimbaForm.DebugStream + s;
   finally
     DebugCriticalSection.Leave;
   end;
@@ -796,7 +799,7 @@ end;
 
 //{$ENDIF}
 
-procedure TForm1.RunScript;
+procedure TSimbaForm.RunScript;
 begin
   with CurrScript do
   begin
@@ -821,7 +824,7 @@ begin
   end;
 end;
 
-procedure TForm1.PauseScript;
+procedure TSimbaForm.PauseScript;
 begin
   with CurrScript do
   begin;
@@ -841,7 +844,7 @@ begin
   end;
 end;
 
-procedure TForm1.StopScript;
+procedure TSimbaForm.StopScript;
 begin
   with CurrScript do
   begin;
@@ -869,7 +872,7 @@ begin
   end;
 end;
 
-procedure TForm1.AddTab;
+procedure TSimbaForm.AddTab;
 var
   Tab : TMufasaTab;
 begin;
@@ -886,7 +889,7 @@ begin;
   end;
 end;
 
-function TForm1.DeleteTab(TabIndex: integer; CloseLast : boolean; Silent : boolean = false) : boolean;
+function TSimbaForm.DeleteTab(TabIndex: integer; CloseLast : boolean; Silent : boolean = false) : boolean;
 var
   Tab : TMufasaTab;
   OldIndex : integer;//So that we can switch back, if needed.
@@ -931,12 +934,12 @@ begin
     RefreshTab;
 end;
 
-procedure TForm1.ClearTab(TabIndex: integer);
+procedure TSimbaForm.ClearTab(TabIndex: integer);
 begin
   TMufasaTab(Tabs[TabIndex]).Clear;
 end;
 
-procedure TForm1.CloseTabs(Exclude: integer = -1; Silent : boolean = false);
+procedure TSimbaForm.CloseTabs(Exclude: integer = -1; Silent : boolean = false);
 var
   I : integer;
 begin
@@ -946,7 +949,7 @@ begin
         exit;
 end;
 
-procedure TForm1.SetEditActions;
+procedure TSimbaForm.SetEditActions;
 procedure EditActions(Undo,Redo,Cut,Copy,Paste,Delete : boolean);
 begin;
   ActionUndo.Enabled:= Undo;
@@ -994,7 +997,7 @@ begin
     EditActions(false,false,false,false,false,false);
 end;
 
-procedure TForm1.DoSearch(Next: boolean; HighlightAll : boolean);
+procedure TSimbaForm.DoSearch(Next: boolean; HighlightAll : boolean);
 var
   Res : integer;
   CurrPos : TPoint;
@@ -1052,7 +1055,7 @@ begin
   end;
 end;
 
-procedure TForm1.RefreshTab;
+procedure TSimbaForm.RefreshTab;
 var
   Tab : TMufasaTab;
   Script : TScriptFrame;
@@ -1100,12 +1103,12 @@ begin
   SetEditActions;
 end;
 
-procedure TForm1.RefreshTabSender(sender: PtrInt);
+procedure TSimbaForm.RefreshTabSender(sender: PtrInt);
 begin
   RefreshTab;
 end;
 
-procedure TForm1.CreateDefaultEnvironment;
+procedure TSimbaForm.CreateDefaultEnvironment;
 var
   PluginsPath,extensionsPath : string;
 begin
@@ -1130,7 +1133,7 @@ begin
   CreateSetting('Settings/Fonts/VersionLink', FontURL + 'Version');
   CreateSetting('Settings/Fonts/UpdateLink', FontURL + 'Fonts.tar.bz2');
 
-  CreateSetting('Settings/News/URL', 'http://simba.villavu.com/bin/news');
+  CreateSetting('Settings/News/URL', 'http://Simba.villavu.com/bin/news');
 
   {Creates the paths and returns the path}
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
@@ -1160,7 +1163,7 @@ begin
   UpdateTimer.Interval:=25;
 end;
 
-procedure TForm1.LoadFormSettings;
+procedure TSimbaForm.LoadFormSettings;
 var
   str,str2 : string;
   Data : TStringArray;
@@ -1210,7 +1213,7 @@ begin
   self.EndFormUpdate;
 end;
 
-procedure TForm1.SaveFormSettings;
+procedure TSimbaForm.SaveFormSettings;
 var
   Data : TStringArray;
   path : string;
@@ -1256,7 +1259,7 @@ begin
   end;
 end;
 
-procedure TForm1.LoadExtensions;
+procedure TSimbaForm.LoadExtensions;
 var
   extCount : integer;
   function LoadExtension(Number : integer) : boolean;
@@ -1306,7 +1309,7 @@ begin
   ExtManager.LoadPSExtensionsDir(str,str2);
 end;
 
-procedure TForm1.AddRecentFile(const filename: string);
+procedure TSimbaForm.AddRecentFile(const filename: string);
 var
   MaxRecentFiles : integer;
   Len,i : integer;
@@ -1330,7 +1333,7 @@ begin
     RecentFileItems[len - 1-i].Caption:= ExtractFileName(RecentFiles[i]);
 end;
 
-procedure TForm1.InitalizeTMThread(var Thread: TMThread);
+procedure TSimbaForm.InitalizeTMThread(var Thread: TMThread);
 var
   DbgImgInfo : TDbgImgInfo;
   AppPath : string;
@@ -1412,27 +1415,39 @@ begin
   Thread.OpenFileEvent:=@ThreadOpenFileEvent;
 end;
 
-procedure TForm1.HandleParameters;
+procedure TSimbaForm.HandleParameters;
 var
   DoRun : Boolean;
   ErrorMsg : string;
 begin
   DoRun := false;
-  if Paramcount = 1 then
+  // paramcount = 1 means we got only one parameter. We assume this to be a file.
+  // and try to open it accordingly
+  if (Paramcount = 1) and not (Application.HasOption('open')) then
   begin
+    writeln('Opening file: ' + ParamStr(1));
     if FileExists(ParamStr(1)) then
+    begin
       LoadScriptFile(paramstr(1));
+    end;
   end else
-  begin;
-    ErrorMsg:=Application.CheckOptions('ro:','run open:');
+  // we have more parameters. Check for specific options. (-r -o, --run --open)
+  begin
+    ErrorMsg:=Application.CheckOptions('ro:',['run', 'open:']);
     if ErrorMsg <> '' then
-      mDebugLn(ErrorMSG)
-    else
+    begin
+      mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMSG)
+    end else
     begin
       if Application.HasOption('o','open') then
-      begin;
+      begin
+        writeln('Opening file: ' + Application.GetOptionValue('o','open'));
         LoadScriptFile(Application.GetOptionValue('o','open'));
         DoRun:= Application.HasOption('r','run');
+      end else
+      // no valid options
+      begin
+        writeln('No valid command line args are passed');
       end;
     end;
   end;
@@ -1440,7 +1455,7 @@ begin
     Self.RunScript;
 end;
 
-procedure TForm1.OnSaveScript(const Filename: string);
+procedure TSimbaForm.OnSaveScript(const Filename: string);
 begin
   with CurrScript do
   begin
@@ -1460,7 +1475,7 @@ begin
 end;
 
 
-procedure TForm1.ActionTabLastExecute(Sender: TObject);
+procedure TSimbaForm.ActionTabLastExecute(Sender: TObject);
 var
   CurrIndex : integer;
 begin
@@ -1472,7 +1487,7 @@ begin
   PageControl1.TabIndex:= CurrIndex;
 end;
 
-procedure TForm1.ActionCloseTabExecute(Sender: TObject);
+procedure TSimbaForm.ActionCloseTabExecute(Sender: TObject);
 begin
   if(PageControl1.PageCount > 1)then
     Self.DeleteTab(PageControl1.TabIndex,false)
@@ -1480,7 +1495,7 @@ begin
     Self.ClearScript;  //DeleteTab would take care of this already, but yeah, it's neater this way.
 end;
 
-procedure TForm1.ActionCompileScriptExecute(Sender: TObject);
+procedure TSimbaForm.ActionCompileScriptExecute(Sender: TObject);
 var
   TempThread : TMThread;
 begin
@@ -1489,14 +1504,14 @@ begin
   TempThread.Resume;
 end;
 
-procedure TForm1.ActionConsoleExecute(Sender: TObject);
+procedure TSimbaForm.ActionConsoleExecute(Sender: TObject);
 begin
   {$ifdef mswindows}
   ShowConsole(not ConsoleVisible);
   {$endif}
 end;
 
-procedure TForm1.ActionCopyExecute(Sender: TObject);
+procedure TSimbaForm.ActionCopyExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.CopyToClipboard
@@ -1504,7 +1519,7 @@ begin
     Memo1.CopyToClipboard;
 end;
 
-procedure TForm1.ActionCutExecute(Sender: TObject);
+procedure TSimbaForm.ActionCutExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.CutToClipboard
@@ -1512,7 +1527,7 @@ begin
     Memo1.CutToClipboard;
 end;
 
-procedure TForm1.ActionDeleteExecute(Sender: TObject);
+procedure TSimbaForm.ActionDeleteExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.ClearSelection
@@ -1520,17 +1535,17 @@ begin
     Memo1.ClearSelection;
 end;
 
-procedure TForm1.ActionExitExecute(Sender: TObject);
+procedure TSimbaForm.ActionExitExecute(Sender: TObject);
 begin
   Self.Close;
 end;
 
-procedure TForm1.ActionFindNextExecute(Sender: TObject);
+procedure TSimbaForm.ActionFindNextExecute(Sender: TObject);
 begin
   DoSearch(true, false);
 end;
 
-procedure TForm1.ActionFindstartExecute(Sender: TObject);
+procedure TSimbaForm.ActionFindstartExecute(Sender: TObject);
 begin
   if frmFunctionList.Focused or frmFunctionList.FunctionList.Focused or frmFunctionList.editSearchList.Focused then
   begin
@@ -1544,23 +1559,23 @@ begin
   end;
 end;
 
-procedure TForm1.ActionClearDebugExecute(Sender: TObject);
+procedure TSimbaForm.ActionClearDebugExecute(Sender: TObject);
 begin
   Memo1.Clear;
 end;
 
-procedure TForm1.ActionNewExecute(Sender: TObject);
+procedure TSimbaForm.ActionNewExecute(Sender: TObject);
 begin
   //Self.ClearScript;
   Self.AddTab;
 end;
 
-procedure TForm1.ActionNewTabExecute(Sender: TObject);
+procedure TSimbaForm.ActionNewTabExecute(Sender: TObject);
 begin
   Self.AddTab;
 end;
 
-procedure TForm1.ActionNormalSizeExecute(Sender: TObject);
+procedure TSimbaForm.ActionNormalSizeExecute(Sender: TObject);
 var
   SizeStr : string;
   Data : TStringArray;
@@ -1578,12 +1593,12 @@ begin
   end;
 end;
 
-procedure TForm1.ActionOpenExecute(Sender: TObject);
+procedure TSimbaForm.ActionOpenExecute(Sender: TObject);
 begin
   Self.OpenScript;
 end;
 
-procedure TForm1.ActionPasteExecute(Sender: TObject);
+procedure TSimbaForm.ActionPasteExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.PasteFromClipboard
@@ -1596,12 +1611,12 @@ begin
 
 end;
 
-procedure TForm1.ActionPauseExecute(Sender: TObject);
+procedure TSimbaForm.ActionPauseExecute(Sender: TObject);
 begin
   Self.PauseScript;
 end;
 
-procedure TForm1.ActionRedoExecute(Sender: TObject);
+procedure TSimbaForm.ActionRedoExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.Redo
@@ -1609,19 +1624,19 @@ begin
     Memo1.Undo; //?
 end;
 
-procedure TForm1.ActionReplaceExecute(Sender: TObject);
+procedure TSimbaForm.ActionReplaceExecute(Sender: TObject);
 begin
   if(ScriptPopup.HandleAllocated)then
     dlgReplace.FindText:= CurrScript.SynEdit.SelText;
   dlgReplace.Execute;
 end;
 
-procedure TForm1.ActionRunExecute(Sender: TObject);
+procedure TSimbaForm.ActionRunExecute(Sender: TObject);
 begin
   Self.RunScript;
 end;
 
-procedure TForm1.ActionSaveAllExecute(Sender: TObject);
+procedure TSimbaForm.ActionSaveAllExecute(Sender: TObject);
 var
   i : integer;
   OldIndex : integer;
@@ -1635,17 +1650,17 @@ begin
   PageControl1.TabIndex:= oldindex;
 end;
 
-procedure TForm1.ActionSaveAsExecute(Sender: TObject);
+procedure TSimbaForm.ActionSaveAsExecute(Sender: TObject);
 begin
   Self.SaveCurrentScriptAs;
 end;
 
-procedure TForm1.ActionSaveExecute(Sender: TObject);
+procedure TSimbaForm.ActionSaveExecute(Sender: TObject);
 begin
   Self.SaveCurrentScript;
 end;
 
-procedure TForm1.ActionSelectAllExecute(Sender: TObject);
+procedure TSimbaForm.ActionSelectAllExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.SynEdit.SelectAll
@@ -1656,12 +1671,12 @@ begin
 
 end;
 
-procedure TForm1.ActionStopExecute(Sender: TObject);
+procedure TSimbaForm.ActionStopExecute(Sender: TObject);
 begin
   Self.StopScript;
 end;
 
-procedure TForm1.ActionTabNextExecute(Sender: TObject);
+procedure TSimbaForm.ActionTabNextExecute(Sender: TObject);
 var
   CurrIndex : integer;
 begin
@@ -1673,7 +1688,7 @@ begin
   PageControl1.TabIndex:= CurrIndex;
 end;
 
-procedure TForm1.ActionUndoExecute(Sender: TObject);
+procedure TSimbaForm.ActionUndoExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
     CurrScript.Undo
@@ -1681,7 +1696,7 @@ begin
     Memo1.Undo;
 end;
 
-procedure TForm1.ChangeMouseStatus(Sender: TObject);
+procedure TSimbaForm.ChangeMouseStatus(Sender: TObject);
 var
   x, y: Integer;
 begin
@@ -1697,7 +1712,7 @@ begin
   StatusBar.Panels[Panel_Coords].Text := Format('(%d, %d)', [x, y]);
 end;
 
-procedure TForm1.CheckBoxMatchCaseClick(Sender: TObject);
+procedure TSimbaForm.CheckBoxMatchCaseClick(Sender: TObject);
 begin
   RefreshTab;
   CurrScript.SynEdit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
@@ -1709,7 +1724,7 @@ end;
 
 
 
-procedure TForm1.CloseFindPanel;
+procedure TSimbaForm.CloseFindPanel;
 begin
   SearchPanel.Visible:= false;
   if CurrScript.SynEdit.CanFocus then
@@ -1720,13 +1735,13 @@ end;
   If we are being sent to the background; then minimize other active windows as
   well.
 }
-procedure TForm1.doOnHide(Sender: TObject);
+procedure TSimbaForm.doOnHide(Sender: TObject);
 begin
   if DebugImgForm.Visible then
     DebugImgForm.Hide;
 end;
 
-procedure TForm1.StopCodeCompletion;
+procedure TSimbaForm.StopCodeCompletion;
 begin
   CodeCompletionForm.Hide;
   if frmFunctionList.InCodeCompletion then
@@ -1748,12 +1763,12 @@ begin
     end;
 end;
 
-function TForm1.FindTab(filename: string): integer;
+function TSimbaForm.FindTab(filename: string): integer;
 var
   i : integer;
 begin
   FileName := SetDirSeparators(filename);
-  for i := 0 to Form1.Tabs.Count - 1 do
+  for i := 0 to SimbaForm.Tabs.Count - 1 do
     {$ifdef MSWindows} //Case insensitive
     if lowercase(TMufasaTab(Tabs[i]).ScriptFrame.ScriptFile) = lowercase(filename) then
     {$else}
@@ -1763,13 +1778,13 @@ begin
   result := -1;
 end;
 
-procedure TForm1.editSearchListExit(Sender: TObject);
+procedure TSimbaForm.editSearchListExit(Sender: TObject);
 begin
   frmFunctionList.editSearchList.Color := clWhite;
   StopCodeCompletion;
 end;
 
-procedure TForm1.editSearchListKeyDown(Sender: TObject; var Key: Word;
+procedure TSimbaForm.editSearchListKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if key = vk_up then
@@ -1784,7 +1799,7 @@ begin
   end;
 end;
 
-procedure TForm1.editSearchListKeyPress(Sender: TObject; var Key: char);
+procedure TSimbaForm.editSearchListKeyPress(Sender: TObject; var Key: char);
 var
   linetext : string;
 begin
@@ -1819,7 +1834,7 @@ begin
   end;
 end;
 
-procedure TForm1.FormDropFiles(Sender: TObject; const FileNames: array of String
+procedure TSimbaForm.FormDropFiles(Sender: TObject; const FileNames: array of String
   );
 var
   i : integer;
@@ -1845,7 +1860,7 @@ begin
   {$EndIf};
 end;
 
-procedure TForm1.FunctionListChange(Sender: TObject; Node: TTreeNode);
+procedure TSimbaForm.FunctionListChange(Sender: TObject; Node: TTreeNode);
 var
   MethodInfo : TMethodInfo;
 begin
@@ -1860,33 +1875,42 @@ begin
   end;
 end;
 
-procedure TForm1.FunctionListEnter(Sender: TObject);
+procedure TSimbaForm.FunctionListEnter(Sender: TObject);
 begin
   frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
 
-procedure TForm1.FunctionListExit(Sender: TObject);
+procedure TSimbaForm.FunctionListExit(Sender: TObject);
 begin
 //  StatusBar.Panels[2].Text:= '';
 end;
 
-procedure TForm1.FunctionListTimerTimer(Sender: TObject);
+procedure TSimbaForm.FunctionListTimerTimer(Sender: TObject);
 begin
   if Self.Visible and (CurrScript <> nil) then
     frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
 
-procedure TForm1.MenuItemExtensionsClick(Sender: TObject);
+procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
 begin
-  ExtensionsForm.Show;
+  BitmapConvForm.Show;
 end;
 
-procedure TForm1.MenuItemHandbookClick(Sender: TObject);
+procedure TSimbaForm.MenuItemExtensionsClick(Sender: TObject);
 begin
-  OpenURL('http://wizzup.org/static/simba/doc/ps_handbook/');
+  MenuItemExtensions.Checked := not ExtensionsForm.Visible;
+  if MenuItemExtensions.Checked then
+    ExtensionsForm.Show
+  else
+    ExtensionsForm.Hide;
 end;
 
-procedure TForm1.MenuItemColourHistoryClick(Sender: TObject);
+procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
+begin
+  OpenURL('http://wizzup.org/static/Simba/doc/ps_handbook/');
+end;
+
+procedure TSimbaForm.MenuItemColourHistoryClick(Sender: TObject);
 begin
   MenuItemColourHistory.Checked := not ColourHistoryForm.Visible;
   if MenuItemColourHistory.Checked then
@@ -1895,13 +1919,13 @@ begin
     ColourHistoryForm.Hide;
 end;
 
-procedure TForm1.dlgReplaceFind(Sender: TObject);
+procedure TSimbaForm.dlgReplaceFind(Sender: TObject);
 begin
   SearchString := dlgReplace.FindText;
   DoSearch(True, False);
 end;
 
-procedure TForm1.dlgReplaceReplace(Sender: TObject);
+procedure TSimbaForm.dlgReplaceReplace(Sender: TObject);
 var
   SOptions: TSynSearchOptions;
   P: TPoint;
@@ -1940,13 +1964,13 @@ begin
   end;
 end;
 
-procedure TForm1.EditSearchChange(Sender: TObject);
+procedure TSimbaForm.EditSearchChange(Sender: TObject);
 begin
   SearchString :=LabeledEditSearch.Text;
   DoSearch(false, true);
 end;
 
-procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TSimbaForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i : integer;
 begin
@@ -1969,21 +1993,21 @@ var
   b: TStringList;
   ms: TMemoryStream;
 begin
-  if form1.UpdatingFonts then
+  if SimbaForm.UpdatingFonts then
   begin
     mDebugLn('Updating the fonts, thus waiting a bit till we init the OCR.');
-    while form1.UpdatingFonts do
+    while SimbaForm.UpdatingFonts do
     begin
       if GetCurrentThreadId = MainThreadID then
         Application.ProcessMessages;
       sleep(25);
     end;
   end;
-  form1.InitalizeTMThread(t);
+  SimbaForm.InitalizeTMThread(t);
   KillThread(t.ThreadID);
   if (t is TPSThread) then
   try
-    a := TPSScriptExtension.Create(form1);
+    a := TPSScriptExtension.Create(SimbaForm);
     b := TStringList.Create;
     ms := TMemoryStream.Create;
 
@@ -2003,7 +2027,7 @@ begin
       CoreBuffer[0] := TCodeInsight.Create;
       with CoreBuffer[0] do
       begin
-        OnMessage := @form1.OnCCMessage;
+        OnMessage := @SimbaForm.OnCCMessage;
         b.SaveToStream(ms);
         Run(ms, nil, -1, True);
         FileName := '"PSCORE"';
@@ -2018,7 +2042,7 @@ begin
   end;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TSimbaForm.FormCreate(Sender: TObject);
 var
   FillThread : TProcThread;
 begin
@@ -2100,7 +2124,7 @@ begin
   self.EndFormUpdate;
 end;
 
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TSimbaForm.FormDestroy(Sender: TObject);
 var
   i : integer;
 begin
@@ -2125,7 +2149,7 @@ begin
   {$endif}
 end;
 
-procedure TForm1.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
+procedure TSimbaForm.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
 begin
   SetEditActions;
   Handled := ActionList.IsShortCut(Msg);
@@ -2133,7 +2157,7 @@ end;
 
 
 
-procedure TForm1.LabeledEditSearchEnter(Sender: TObject);
+procedure TSimbaForm.LabeledEditSearchEnter(Sender: TObject);
 begin
   SearchStart := CurrScript.SynEdit.LogicalCaretXY;
   with CurrScript.SynEdit do
@@ -2143,13 +2167,13 @@ begin
   end;
 end;
 
-procedure TForm1.LabeledEditSearchExit(Sender: TObject);
+procedure TSimbaForm.LabeledEditSearchExit(Sender: TObject);
 begin
   if not CheckBoxMatchCase.MouseEntered then
     RefreshTab;
 end;
 
-procedure TForm1.LabeledEditSearchKeyDown(Sender: TObject; var Key: Word;
+procedure TSimbaForm.LabeledEditSearchKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if (ssCtrl in Shift) and (key = vk_f) then
@@ -2163,7 +2187,7 @@ begin
   end;
 end;
 
-procedure TForm1.LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
+procedure TSimbaForm.LabeledEditSearchKeyPress(Sender: TObject; var Key: char);
 begin
   if key = #13 then
   begin;
@@ -2174,22 +2198,22 @@ begin
   end;
 end;
 
-procedure TForm1.MenuEditClick(Sender: TObject);
+procedure TSimbaForm.MenuEditClick(Sender: TObject);
 begin
   SetEditActions;
 end;
 
-procedure TForm1.MenuItemAboutClick(Sender: TObject);
+procedure TSimbaForm.MenuItemAboutClick(Sender: TObject);
 begin
   AboutForm.ShowModal;
 end;
 
-procedure TForm1.MenuItemCloseTabsClick(Sender: TObject);
+procedure TSimbaForm.MenuItemCloseTabsClick(Sender: TObject);
 begin
   Self.CloseTabs;
 end;
 
-procedure TForm1.MenuItemDebugImageClick(Sender: TObject);
+procedure TSimbaForm.MenuItemDebugImageClick(Sender: TObject);
 begin
   MenuItemDebugImage.Checked := not DebugImgForm.Visible;
   if MenuItemDebugImage.Checked then
@@ -2198,7 +2222,7 @@ begin
     DebugImgForm.Hide;
 end;
 
-procedure TForm1.MenuItemExportHTMLClick(Sender: TObject);
+procedure TSimbaForm.MenuItemExportHTMLClick(Sender: TObject);
 var
   SynExporterHTML : TSynExporterHTML;
 begin;
@@ -2227,7 +2251,7 @@ end;
 
 procedure formWritelnEx(S: String);
 begin
-  Form1.Memo1.Lines.Add(s);
+  SimbaForm.Memo1.Lines.Add(s);
 end;
 
 function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
@@ -2257,7 +2281,7 @@ begin;
     result := result + ';';
 end;
 
-procedure TForm1.MenuitemFillFunctionListClick(Sender: TObject);
+procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
 var
   Methods : TExpMethodArr;
   LastSection : string;
@@ -2312,7 +2336,7 @@ begin
     frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
 end;
 
-procedure TForm1.MenuItemHideClick(Sender: TObject);
+procedure TSimbaForm.MenuItemHideClick(Sender: TObject);
 begin
   if Self.Visible = false then
     MenuItemShowClick(sender)
@@ -2320,49 +2344,49 @@ begin
     Self.Hide;
 end;
 
-procedure TForm1.MenuItemReportBugClick(Sender: TObject);
+procedure TSimbaForm.MenuItemReportBugClick(Sender: TObject);
 begin
   OpenURL('http://mufasa.villavu.com/mantis/bug_report_page.php');
 end;
 
-procedure TForm1.MenuItemSettingsButtonClick(Sender: TObject);
+procedure TSimbaForm.MenuItemSettingsButtonClick(Sender: TObject);
 begin
   SettingsForm.ShowModal;
 end;
 
-procedure TForm1.MenuItemShowClick(Sender: TObject);
+procedure TSimbaForm.MenuItemShowClick(Sender: TObject);
 begin
   Self.Show;
   Self.WindowState := wsNormal;
 end;
 
-procedure TForm1.MenuItemTabCloseClick(Sender: TObject);
+procedure TSimbaForm.MenuItemTabCloseClick(Sender: TObject);
 begin
   DeleteTab(PopupTab,false);
 end;
 
-procedure TForm1.MenuItemTabCloseOthersClick(Sender: TObject);
+procedure TSimbaForm.MenuItemTabCloseOthersClick(Sender: TObject);
 begin
   CloseTabs(PopupTab);
 end;
 
-procedure TForm1.MenuItemFunctionListClick(Sender: TObject);
+procedure TSimbaForm.MenuItemFunctionListClick(Sender: TObject);
 begin
   FunctionListShown(not MenuItemFunctionList.Checked);
 end;
 
-procedure TForm1.MTrayIconClick(Sender: TObject);
+procedure TSimbaForm.MTrayIconClick(Sender: TObject);
 begin
   self.Show;
   if Self.CanFocus then
     self.SetFocus;
 end;
 
-function TForm1.GetSimbaNews: String;
+function TSimbaForm.GetSimbaNews: String;
 var
   t: TDownloadThread;
 begin
-  t := TDownloadThread.Create(LoadSettingDef('Settings/News/URL', 'http://simba.villavu.com/bin/news'),
+  t := TDownloadThread.Create(LoadSettingDef('Settings/News/URL', 'http://Simba.villavu.com/bin/news'),
                               @Result);
   t.Resume;
   while not t.done do
@@ -2372,12 +2396,12 @@ begin
   end;
 end;
 
-procedure TForm1.SetExtPath(const AValue: string);
+procedure TSimbaForm.SetExtPath(const AValue: string);
 begin
   SetSetting('Settings/Extensions/Path',AValue,true);
 end;
 
-procedure TForm1.NewsTimerTimer(Sender: TObject);
+procedure TSimbaForm.NewsTimerTimer(Sender: TObject);
 var
   s: String;
   News : TStringList; {Need it for correct EOL stuff}
@@ -2391,7 +2415,7 @@ begin
   News.free;
 end;
 
-procedure TForm1.OnLinePSScript(Sender: TObject);
+procedure TSimbaForm.OnLinePSScript(Sender: TObject);
 begin
   {$IFDEF ProcessMessages}
   Application.ProcessMessages; //Don't think that this is neccesary though
@@ -2400,7 +2424,7 @@ end;
 
 
 
-procedure TForm1.ButtonPickClick(Sender: TObject);
+procedure TSimbaForm.ButtonPickClick(Sender: TObject);
 var
    c, x, y: Integer;
    cobj: TColourPickerObject;
@@ -2417,30 +2441,30 @@ begin
 end;
 
 
-procedure TForm1.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
+procedure TSimbaForm.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   Manager.SetTarget(Selector.Drag);
   FormWritelnEx('New window: ' + IntToStr(Selector.LastPick));
 end;
 
-procedure TForm1.PageControl1Change(Sender: TObject);
+procedure TSimbaForm.PageControl1Change(Sender: TObject);
 begin
   RefreshTab();
 end;
 
-procedure TForm1.ButtonTrayClick(Sender: TObject);
+procedure TSimbaForm.ButtonTrayClick(Sender: TObject);
 begin
   self.hide;
 end;
 
-procedure TForm1.PageControl1Changing(Sender: TObject; var AllowChange: Boolean
+procedure TSimbaForm.PageControl1Changing(Sender: TObject; var AllowChange: Boolean
   );
 begin
   LastTab:= PageControl1.TabIndex;
 end;
 
-procedure TForm1.PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;
+procedure TSimbaForm.PageControl1ContextPopup(Sender: TObject; MousePos: TPoint;
   var Handled: Boolean);
 begin
   PopupTab := PageControl1.TabIndexAtClientPos(MousePos);
@@ -2451,7 +2475,7 @@ begin
   end;
 end;
 
-procedure TForm1.PageControl1DragDrop(Sender, Source: TObject; X, Y: Integer);
+procedure TSimbaForm.PageControl1DragDrop(Sender, Source: TObject; X, Y: Integer);
 var
   NewPos : integer;
   OldPos : integer;
@@ -2467,7 +2491,7 @@ begin
   end;
 end;
 
-procedure TForm1.PageControl1DragOver(Sender, Source: TObject; X, Y: Integer;
+procedure TSimbaForm.PageControl1DragOver(Sender, Source: TObject; X, Y: Integer;
   State: TDragState; var Accept: Boolean);
 var
   Pos: Integer;
@@ -2476,7 +2500,7 @@ begin
   Accept := (Pos <> PageControl1.TabIndex) and (Pos <> -1);
 end;
 
-procedure TForm1.PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
+procedure TSimbaForm.PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   if(Button = mbLeft)then
@@ -2488,7 +2512,7 @@ begin
   end;
 end;
 
-procedure TForm1.PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
+procedure TSimbaForm.PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   if(Button = mbMiddle) and (not(PageControl1.Dragging))then
@@ -2496,7 +2520,7 @@ begin
       DeleteTab(PageControl1.TabIndexAtClientPos(Classes.Point(x,y)), False);
 end;
 
-procedure TForm1.PickerPick(Sender: TObject; const Colour, colourx,
+procedure TSimbaForm.PickerPick(Sender: TObject; const Colour, colourx,
   coloury: integer);
 var
   Args : TVariantArray;
@@ -2508,38 +2532,38 @@ begin
   ExtManager.HandleHook(EventHooks[SExt_OnColourPick].HookName,Args);
 end;
 
-procedure TForm1.PopupItemFindClick(Sender: TObject);
+procedure TSimbaForm.PopupItemFindClick(Sender: TObject);
 begin
   SearchString := CurrScript.SynEdit.SelText;
   ActionFindNextExecute(ScriptPopup);
 end;
 
-function TForm1.GetScriptState: TScriptState;
+function TSimbaForm.GetScriptState: TScriptState;
 begin
   result := CurrScript.FScriptState;
 end;
 
-function TForm1.GetShowHintAuto: boolean;
+function TSimbaForm.GetShowHintAuto: boolean;
 begin
   Result := LowerCase(LoadSettingDef('Settings/CodeHints/ShowAutomatically','True')) = 'true';
 end;
 
-procedure TForm1.SetFontPath(const AValue: String);
+procedure TSimbaForm.SetFontPath(const AValue: String);
 begin
   SetSetting('Settings/Fonts/Path',AValue,true);
 end;
 
-function TForm1.GetFontPath: String;
+function TSimbaForm.GetFontPath: String;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+'Fonts' + DS)));
 end;
 
-function TForm1.GetExtPath: string;
+function TSimbaForm.GetExtPath: string;
 begin
   result :=IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Extensions/Path', ExpandFileName(MainDir+DS+'Extensions' + DS)));
 end;
 
-function TForm1.GetHighlighter: TSynCustomHighlighter;
+function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
 begin
   if lowercase(LoadSettingDef('Settings/SourceEditor/LazColors','True')) = 'true' then
     result := LazHighlighter
@@ -2547,32 +2571,32 @@ begin
     result := SCARHighlighter;
 end;
 
-function TForm1.GetIncludePath: String;
+function TSimbaForm.GetIncludePath: String;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
 end;
 
-function TForm1.GetPluginPath: string;
+function TSimbaForm.GetPluginPath: string;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+DS+'Plugins' + DS)));
 end;
 
-procedure TForm1.SetIncludePath(const AValue: String);
+procedure TSimbaForm.SetIncludePath(const AValue: String);
 begin
   SetSetting('Settings/Includes/Path',AValue,true);
 end;
 
-procedure TForm1.SetPluginPath(const AValue: string);
+procedure TSimbaForm.SetPluginPath(const AValue: string);
 begin
   SetSetting('Settings/Plugins/Path',AValue,true);
 end;
 
-procedure TForm1.SetScriptPath(const AValue: string);
+procedure TSimbaForm.SetScriptPath(const AValue: string);
 begin
   SetSetting('Settings/Scripts/Path',AValue,True);
 end;
 
-procedure TForm1.SetScriptState(const State: TScriptState);
+procedure TSimbaForm.SetScriptState(const State: TScriptState);
 begin
   CurrScript.FScriptState:= State;
   with Self.StatusBar.panels[Panel_State] do
@@ -2600,17 +2624,17 @@ begin
     end;
 end;
 
-function TForm1.LoadSettingDef(const Key,Def: string): string;
+function TSimbaForm.LoadSettingDef(const Key,Def: string): string;
 begin
   result := SettingsForm.Settings.GetKeyValueDefLoad(Key,def,SimbaSettingsFile);
 end;
 
-function TForm1.CreateSetting(const Key,Value: string): string;
+function TSimbaForm.CreateSetting(const Key,Value: string): string;
 begin
   result := SettingsForm.Settings.GetKeyValueDef(Key,value);
 end;
 
-procedure TForm1.SetSetting(const key,Value: string; save : boolean);
+procedure TSimbaForm.SetSetting(const key,Value: string; save : boolean);
 begin
   //Creates the setting if needed
   SettingsForm.Settings.SetKeyValue(key,value);
@@ -2618,12 +2642,12 @@ begin
     SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
 end;
 
-function TForm1.SettingExtists(const key: string): boolean;
+function TSimbaForm.SettingExtists(const key: string): boolean;
 begin
   result :=SettingsForm.Settings.KeyExists(key);
 end;
 
-procedure TForm1.FontUpdate;
+procedure TSimbaForm.FontUpdate;
   procedure Idler;
   begin
     Application.ProcessMessages;
@@ -2685,7 +2709,7 @@ begin
   UpdatingFonts := False;
 end;
 
-procedure TForm1.ScriptStartEvent(Sender: TObject; var Script: string;
+procedure TSimbaForm.ScriptStartEvent(Sender: TObject; var Script: string;
   var Continue: boolean);
 begin
   ScriptStartData.Sender:=Sender;
@@ -2694,7 +2718,7 @@ begin
   TThread.Synchronize(nil,@HandleScriptStartData);
 end;
 
-procedure TForm1.SetShowHintAuto(const AValue: boolean);
+procedure TSimbaForm.SetShowHintAuto(const AValue: boolean);
 begin
   SetSetting('Settings/CodeHints/ShowAutomatically',Booltostr(AValue,true));
 end;
@@ -2702,7 +2726,7 @@ end;
 {$ifdef mswindows}
 function GetConsoleWindow: HWND; stdcall; external kernel32 name 'GetConsoleWindow';
 
-procedure TForm1.ShowConsole(ShowIt: boolean);
+procedure TSimbaForm.ShowConsole(ShowIt: boolean);
 var
   ProcessId : DWOrd;
 begin
@@ -2722,7 +2746,7 @@ begin
 end;
 {$endif}
 
-procedure TForm1.FunctionListShown(ShowIt: boolean);
+procedure TSimbaForm.FunctionListShown(ShowIt: boolean);
 begin
   with MenuItemFunctionList, frmFunctionList do
   begin
@@ -2754,7 +2778,7 @@ begin
 end;
 
 
-procedure TForm1.SafeCallThread;
+procedure TSimbaForm.SafeCallThread;
 var
   thread: TMThread;
   LocalCopy : TSyncInfo;
@@ -2781,7 +2805,7 @@ begin
   end;
 end;
 
-function TForm1.OpenScript: boolean;
+function TSimbaForm.OpenScript: boolean;
 var
   OpenInNewTab : boolean;
 begin
@@ -2792,7 +2816,7 @@ begin
       Exit;
   with TOpenDialog.Create(nil) do
   try
-    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
+    Filter:= 'Simba Files|*.Simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
              '|Any files|*.*';
     if Execute then
       if FileExists(filename) then
@@ -2802,7 +2826,7 @@ begin
   end;
 end;
 
-function TForm1.LoadScriptFile(filename: string; AlwaysOpenInNewTab: boolean; CheckOtherTabs : boolean
+function TSimbaForm.LoadScriptFile(filename: string; AlwaysOpenInNewTab: boolean; CheckOtherTabs : boolean
   ): boolean;
 var
   OpenInNewTab : boolean;
@@ -2846,7 +2870,7 @@ begin
   end;
 end;
 
-function TForm1.SaveCurrentScript: boolean;
+function TSimbaForm.SaveCurrentScript: boolean;
 begin
   with CurrScript do
   begin
@@ -2867,21 +2891,21 @@ begin
   end;
 end;
 
-function TForm1.SaveCurrentScriptAs: boolean;
+function TSimbaForm.SaveCurrentScriptAs: boolean;
 var
   ScriptFile : string;
 begin
   Result := false;
   with TSaveDialog.Create(nil) do
   try
-    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +
+    filter := 'Simba Files|*.Simba;*.simb;*.cogat;*.mufa;*.txt;*.' +
               LoadSettingDef('Settings/Extensions/FileExtension','sex')+
               '|Any files|*.*';
     if Execute then
     begin;
       if ExtractFileExt(FileName) = '' then
       begin;
-        ScriptFile := FileName + '.simba';
+        ScriptFile := FileName + '.Simba';
       end else
         ScriptFile := FileName;
       CurrScript.SynEdit.Lines.SaveToFile(ScriptFile);
@@ -2892,7 +2916,7 @@ begin
   end;
 end;
 
-function TForm1.CanExitOrOpen: boolean;
+function TSimbaForm.CanExitOrOpen: boolean;
 begin;
   Self.Enabled := False;//We HAVE to answer the popup
   Result := True;
@@ -2925,7 +2949,7 @@ begin;
     Self.SetFocus;
 end;
 
-function TForm1.ClearScript: boolean;
+function TSimbaForm.ClearScript: boolean;
 begin
   result := false;
   if CanExitOrOpen then
@@ -2960,7 +2984,7 @@ end;
 
 destructor TMufasaTab.Destroy;
 begin
-  ScriptFrame.Free;
+//  ScriptFrame.Free;
   TabSheet.Free;
   inherited Destroy;
 end;

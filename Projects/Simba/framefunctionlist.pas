@@ -72,7 +72,7 @@ type
 implementation
 
 uses
-  TestUnit, Graphics, stringutil, simpleanalyzer,v_ideCodeParser,lclintf;
+  SimbaUnit, Graphics, stringutil, simpleanalyzer,v_ideCodeParser,lclintf;
 
 { TFunctionListFrame }
 
@@ -99,14 +99,14 @@ procedure TFunctionListFrame.FrameEndDock(Sender, Target: TObject; X, Y: Integer
 begin
   if Target is TPanel then
   begin
-     Form1.SplitterFunctionList.Visible := true;
+     SimbaForm.SplitterFunctionList.Visible := true;
      CloseButton.Visible:= true;
   end
   else if Target is TCustomDockForm then
   begin
     TCustomDockForm(Target).Caption := 'Functionlist';
     TCustomDockForm(Target).OnClose := @DockFormOnClose;
-    Form1.SplitterFunctionList.Visible:= false;
+    SimbaForm.SplitterFunctionList.Visible:= false;
     CloseButton.Visible:= false;
   end;
 end;
@@ -125,8 +125,8 @@ begin
       if node.Data <> nil then
         if InCodeCompletion then
         begin
-          Form1.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.MethodStr,true));
-          Form1.RefreshTab;
+          SimbaForm.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.MethodStr,true));
+          SimbaForm.RefreshTab;
         end
         else
         begin
@@ -138,10 +138,10 @@ begin
                 if MethodInfo.Filename <> '' then
                 begin;
 //                Writeln(MethodInfo.filename);
-                  Form1.LoadScriptFile(MethodInfo.Filename,true,true);
+                  SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true);
                 end;
-              Form1.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
-              Form1.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
+              SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
+              SimbaForm.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
             end;
         end;
 end;
@@ -172,13 +172,13 @@ end;
 procedure TFunctionListFrame.DockFormOnClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   CloseAction := caHide;
-  Form1.MenuItemFunctionList.Checked := False;
+  SimbaForm.MenuItemFunctionList.Checked := False;
 end;
 
 procedure TFunctionListFrame.CloseButtonClick(Sender: TObject);
 begin
   self.Hide;
-  Form1.MenuItemFunctionList.Checked := False;
+  SimbaForm.MenuItemFunctionList.Checked := False;
 end;
 
 procedure TFunctionListFrame.FunctionListMouseUp(Sender: TObject;
@@ -248,8 +248,8 @@ begin
   FillThread.Analyzer := TCodeInsight.Create;
   with  FillThread,FillThread.Analyzer do
   begin
-    OnFindInclude := @Form1.OnCCFindInclude;
-    FileName := Form1.CurrScript.ScriptFile;
+    OnFindInclude := @SimbaForm.OnCCFindInclude;
+    FileName := SimbaForm.CurrScript.ScriptFile;
     MS := TMemoryStream.Create;
     MS.Write(Script[1],length(script));
     OnTerminate:=@FillThreadTerminate;
@@ -278,9 +278,9 @@ begin
     FunctionList.FullCollapse;
     if InCodeCompletion then
     begin;
-      Form1.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
-      Form1.CurrScript.SynEdit.LogicalCaretXY:= point(CompletionCaret.x,CompletionCaret.y);
-      Form1.CurrScript.SynEdit.SelEnd:= Form1.CurrScript.SynEdit.SelStart;
+      SimbaForm.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
+      SimbaForm.CurrScript.SynEdit.LogicalCaretXY:= point(CompletionCaret.x,CompletionCaret.y);
+      SimbaForm.CurrScript.SynEdit.SelEnd:= SimbaForm.CurrScript.SynEdit.SelStart;
     end;
     FilterTreeVis(False);
     ScriptNode.Expand(true);
@@ -403,7 +403,7 @@ begin
         FilterTreeVis(false);
         editSearchList.Color := 6711039;
         if InCodeCompletion then
-          Form1.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
+          SimbaForm.CurrScript.SynEdit.Lines[CompletionCaret.y - 1] := CompletionStart;
       end;
     FilterTree.EndUpdate;
   end;
@@ -411,7 +411,7 @@ begin
   if result and InCodeCompletion then
     begin;
       str := format(CompletionLine, [InsertStr]);
-      with Form1.CurrScript.SynEdit do
+      with SimbaForm.CurrScript.SynEdit do
       begin;
         Lines[CompletionCaret.y - 1] := str;
         LogicalCaretXY:= StartWordCompletion;
@@ -474,20 +474,21 @@ procedure TFillThread.execute;
     if procs = nil then
       exit;
     for i := 0 to Procs.Count - 1 do
-      if (Procs[i] is TciProcedureDeclaration) then
+      if (Procs[i] <> nil) and (Procs[i] is TciProcedureDeclaration) then
         with Procs[i] as TciProcedureDeclaration do
-        begin
-          tmpNode := FunctionList^.Items.AddChild(Node,name.ShortText);
-          tmpNode.Data := GetMem(SizeOf(TMethodInfo));
-          FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
-          with PMethodInfo(tmpNode.Data)^ do
+          if name <> nil then
           begin
-            MethodStr := strnew(Pchar(CleanDeclaration));
-            Filename:= strnew(pchar(path));
-            BeginPos:= name.StartPos ;
-            EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
+            tmpNode := FunctionList^.Items.AddChild(Node,name.ShortText);
+            tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+            FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
+            with PMethodInfo(tmpNode.Data)^ do
+            begin
+              MethodStr := strnew(Pchar(CleanDeclaration));
+              Filename:= strnew(pchar(path));
+              BeginPos:= name.StartPos ;
+              EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
+            end;
           end;
-        end;
   end;
 
   procedure AddIncludes(ParentNode : TTreeNode; Include : TCodeInsight);
