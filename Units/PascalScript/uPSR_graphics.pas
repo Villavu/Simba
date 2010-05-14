@@ -14,6 +14,7 @@ procedure RIRegisterTBRUSH(Cl: TPSRuntimeClassImporter);
 procedure RIRegisterTCanvas(cl: TPSRuntimeClassImporter);
 procedure RIRegisterTGraphic(CL: TPSRuntimeClassImporter);
 procedure RIRegisterTBitmap(CL: TPSRuntimeClassImporter; Streams: Boolean);
+procedure RIRegisterTPicture(CL: TPSRuntimeClassImporter);
 
 procedure RIRegister_Graphics(Cl: TPSRuntimeClassImporter; Streams: Boolean);
 
@@ -203,6 +204,14 @@ begin
   end;
 end;
 
+procedure TPictureBitmap_W(Self: TPicture; const T: TBitmap); begin Self.Bitmap := T; end;
+procedure TPictureBitmap_R(Self: TPicture; var T: TBitmap); begin T := Self.Bitmap; end;
+procedure RIRegisterTPicture(CL: TPSRuntimeClassImporter);
+begin
+  with TPSRuntimeClass(CL.Add(TPicture)) do
+    registerPropertyHelper(@TPictureBitmap_R,@TPictureBitmap_W,'Bitmap');
+end;
+
 procedure RIRegister_Graphics(Cl: TPSRuntimeClassImporter; Streams: Boolean);
 begin
   RIRegisterTGRAPHICSOBJECT(cl);
@@ -212,6 +221,7 @@ begin
   RIRegisterTBRUSH(cl);
   RIRegisterTGraphic(CL);
   RIRegisterTBitmap(CL, Streams);
+  RIRegisterTPicture(CL);
 end;
 
 // PS_MINIVCL changes by Martijn Laan (mlaan at wintax _dot_ nl)

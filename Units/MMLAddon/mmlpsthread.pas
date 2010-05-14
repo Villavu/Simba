@@ -688,6 +688,7 @@ begin
     RegisterMethod('procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);');
     RegisterMethod('function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap;');
     RegisterMethod('function ToString : string;');
+    RegisterMethod('function ToTBitmap : TBitmap;');
     RegisterMethod('function CreateTMask : TMask;');
     RegisterMethod('constructor create');
     RegisterMethod('procedure Free');
@@ -815,6 +816,7 @@ begin;
   PSClass :=cl.Add(TMufasaBitmap);
   with PSClass do
   begin
+    RegisterMethod(@TMufasaBitmap.ToTBitmap,'ToTBitmap');
     RegisterMethod(@TMufasaBitmap.SetSize,'SETSIZE');
     RegisterMethod(@TMufasaBitmap.StretchResize,'STRETCHRESIZE');
     RegisterMethod(@TMufasaBitmap.FastSetPixel,'FASTSETPIXEL');
