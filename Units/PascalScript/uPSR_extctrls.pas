@@ -44,12 +44,15 @@ begin
 end;
 
 procedure TIMAGECANVAS_R(Self: TIMAGE; var T: TCANVAS); begin T := Self.CANVAS; end;
+procedure TIMAGEPICTURE_R(Self: TIMAGE; var T: TPicture); begin T := Self.Picture; end;
+procedure TIMAGEPICTURE_W(Self: TIMAGE; const T: TPicture); begin Self.Picture := t; end;
 
 procedure RIRegisterTIMAGE(Cl: TPSRuntimeClassImporter);
 begin
   with Cl.Add(TIMAGE) do
   begin
     RegisterPropertyHelper(@TIMAGECANVAS_R, nil, 'CANVAS');
+    RegisterPropertyHelper(@TIMAGEPICTURE_R,@TIMAGEPICTURE_W,'PICTURE');
   end;
 end;
 
