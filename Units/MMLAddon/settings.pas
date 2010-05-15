@@ -95,7 +95,7 @@ type
 
 implementation
 uses
-  stringutil;
+  stringutil,fileutil;
 
 constructor TSettingData.Create;
 begin
@@ -595,13 +595,13 @@ var
     Doc: TXMLDocument;
 begin
   Nodes.Clear;
-  if not fileExists(fileName) then
+  if not fileExistsUTF8(fileName) then
   begin
     mDebugLn('SettingsFile hasn''t been created yet.');
     // create file.
     SaveToXML(fileName);
   end;
-  ReadXMLFile(Doc, fileName);
+  ReadXMLFile(Doc, utf8tosys(fileName));
   InternalLoadFromXML(Doc);
   Doc.Free;
 end;
@@ -667,7 +667,7 @@ begin
   end;
 
   try
-    WriteXMLFile(XMLDoc, fileName);
+    WriteXMLFile(XMLDoc, utf8tosys(fileName));
   except
     mDebugLn('Failed to write ' + fileName);
   end;

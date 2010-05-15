@@ -128,7 +128,7 @@ implementation
 
 uses
   paszlib,DCPbase64,math, client,tpa,
-  colour_conv,IOManager,mufasatypesutil;
+  colour_conv,IOManager,mufasatypesutil,FileUtil;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
@@ -482,7 +482,7 @@ begin
 //  Bmp := Graphics.TBitmap.Create;
   try
     Bmp := TLazIntfImage.Create(RawImage,false);
-    Bmp.SaveToFile(FileName);
+    Bmp.SaveToFile(UTF8ToSys(FileName));
     Bmp.Free;
   except
     result := false;
@@ -494,12 +494,12 @@ var
   LazIntf : TLazIntfImage;
   RawImageDesc : TRawImageDescription;
 begin
-  if FileExists(FileName) then
+  if FileExistsUTF8(FileName) then
   begin;
     LazIntf := TLazIntfImage.Create(0,0);
     RawImageDesc.Init_BPP32_B8G8R8_BIO_TTB(LazIntf.Width,LazIntf.Height);
     LazIntf.DataDescription := RawImageDesc;
-    LazIntf.LoadFromFile(FileName);
+    LazIntf.LoadFromFile(UTF8ToSys(FileName));
     if Assigned(FData) then
       Freemem(FData);
     Self.W := LazIntf.Width;

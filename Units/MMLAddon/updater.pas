@@ -86,6 +86,9 @@ type
 
 implementation
 
+uses
+  FileUtil;
+
 
 procedure TMMLFileDownloader.SetBasePath(s: string);
 begin
@@ -164,7 +167,7 @@ begin
   if FileURL = '' then
     raise Exception.Create('FileURL not set');
 
-  Response := TFileStream.Create(FBasePath + FReplacementFile + '_', fmCreate);
+  Response := TFileStream.Create(UTF8ToSys(FBasePath + FReplacementFile + '_'), fmCreate);
   try
     Result := HTTPSend.HTTPMethod('GET', FileURL);
 
@@ -199,21 +202,21 @@ begin
     exit(False);
     //raise Exception.Create('ReplacementFile not set');
   end;
-  if not FileExists(FBasePath + FReplacementFile) then
+  if not fileExistsUTF8(FBasePath + FReplacementFile) then
   begin
     mDebugLn('ReplacementFile not found');
     exit(False);
     //raise Exception.Create('ReplacementFile not found');
   end;
-  if not FileExists(FBasePath + FReplacementFile+ '_') then
+  if not fileExistsUTF8(FBasePath + FReplacementFile+ '_') then
   begin
     mDebugLn('ReplacementFile + _ not found');
     exit(False);
     //raise Exception.Create('ReplacementFile + _ not found');
   end;
-  RenameFile(FBasePath + FReplacementFile, FBasePath + FReplacementFile+'_old_');
-  RenameFile(FBasePath + FReplacementFile +'_', FBasePath + FReplacementFile);
-  DeleteFile(FBasePath + FReplacementFile+'_old_');
+  RenameFileUTF8(FBasePath + FReplacementFile, FBasePath + FReplacementFile+'_old_');
+  RenameFileUTF8(FBasePath + FReplacementFile +'_', FBasePath + FReplacementFile);
+  DeleteFileUTF8(FBasePath + FReplacementFile+'_old_');
   {$IFDEF LINUX}
   fpchmod(FBasePath + FReplacementFile, S_IRUSR or S_IWUSR or S_IXUSR or S_IRGRP
                 or S_IXGRP or S_IROTH or S_IXOTH);
