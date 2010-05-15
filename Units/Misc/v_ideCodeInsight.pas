@@ -539,7 +539,7 @@ begin
           if (Decl is TciStruct) then
             Result := True
           else
-            Result := (Decl <> nil) and FindStruct(Decl.CleanText, Decl, Return, ArrayCount);
+            Result := (Decl <> nil) and (PrepareString(Decl.CleanText) <> s) and FindStruct(Decl.CleanText, Decl, Return, ArrayCount);
         end
         else
           Decl := b[ii];
