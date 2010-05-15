@@ -220,6 +220,7 @@ uses
   math, //Maths!
   mmath, //Real maths!
   strutils,
+  fileutil,
   tpa, //Tpa stuff
   forms,//Forms
   SynRegExpr,
@@ -406,7 +407,7 @@ begin
   Includes.Add(path);
 
   try
-    f:= TFileStream.Create(Path, fmOpenRead or fmShareDenyWrite);
+    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead or fmShareDenyWrite);
     SetLength(contents, f.Size);
     f.Read(contents[1], Length(contents));
     result:= true;

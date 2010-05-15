@@ -69,7 +69,7 @@ type
 
 implementation
 uses
-  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client;
+  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client,FileUtil;
 
 { GetFiles in independant of the TMFiles class }
 
@@ -115,13 +115,13 @@ function FindFile(filename : string; Dirs : array of string) : string; //Results
 var
   i : integer;
 begin;
-  if fileexists(filename) then
+  if FileExistsUTF8(filename) then
     result := filename
   else
   begin
     for i := 0 to high(Dirs) do
       if (Dirs[i] <> '') and DirectoryExists(dirs[i]) then
-        if fileexists(dirs[i] + filename) then
+        if fileexistsUTF8(dirs[i] + filename) then
         begin
           result := dirs[i] + filename;
           exit;
@@ -232,7 +232,7 @@ begin
       exit(File_EventError);
   end;
   try
-    FS := TFileStream.Create(Path, fmCreate);
+    FS := TFileStream.Create(UTF8ToSys(Path), fmCreate);
     Result := AddFileToManagedList(Path, FS, fmCreate);
   except
     Result := File_AccesError;
@@ -264,7 +264,7 @@ begin
   else
     fMode := fmOpenRead or fmShareExclusive;
   try
-      FS := TFileStream.Create(Path, fMode)
+      FS := TFileStream.Create(UTF8ToSys(Path), fMode)
   except
     Result := File_AccesError;
     TClient(Client).Writeln(Format('OpenFile - Exception. Could not open file: %s',[path]));
@@ -297,7 +297,7 @@ begin
   else
     fMode := fmOpenReadWrite or fmShareDenyWrite or fmShareDenyRead or fmCreate;
   try
-    FS := TFileStream.Create(Path, fMode);
+    FS := TFileStream.Create(UTF8ToSys(Path), fMode);
     FS.Size:=0;
     Result := AddFileToManagedList(Path, FS, fMode);
   except
