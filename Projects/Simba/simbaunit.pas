@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 668;
+  SimbaVersion = 670;
 
 type
 
@@ -1426,10 +1426,8 @@ begin
   if (Paramcount = 1) and not (Application.HasOption('open')) then
   begin
     writeln('Opening file: ' + ParamStr(1));
-    if FileExists(ParamStr(1)) then
-    begin
-      LoadScriptFile(paramstr(1));
-    end;
+    if FileExistsUTF8(ParamStrUTF8(1)) then
+      LoadScriptFile(ParamStrUTF8(1));
   end else
   // we have more parameters. Check for specific options. (-r -o, --run --open)
   begin
@@ -2819,7 +2817,7 @@ begin
     Filter:= 'Simba Files|*.Simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
              '|Any files|*.*';
     if Execute then
-      if FileExists(filename) then
+      if FileExistsUTF8(filename) then
         result := LoadScriptFile(filename);
   finally
     Free;
@@ -2841,7 +2839,7 @@ begin
     CheckTabsFirst := True
   else
     CheckTabsFirst := (Lowercase(LoadSettingDef('Settings/Tabs/CheckTabsBeforeOpen','True')) = 'true');
-  if FileExists(FileName) then
+  if FileExistsUTF8(FileName) then
   begin;
     if CheckTabsFirst then
     begin;
@@ -2857,7 +2855,7 @@ begin
     with CurrScript do
     begin
       filename := SetDirSeparators(filename);
-      SynEdit.Lines.LoadFromFile(FileName);
+      SynEdit.Lines.LoadFromFile(filename);
       StartText := SynEdit.Lines.text;
       ScriptName:= ExtractFileNameOnly(filename);
       mDebugLn('Script name will be: ' + ScriptName);

@@ -53,6 +53,9 @@ type
 
 implementation
 
+uses
+  FileUtil;
+
 function DecompressBZip2(const input: TStream; const BlockSize: Cardinal): TMemoryStream;
 var
   Unzipper : TDecompressBzip2Stream;
@@ -128,10 +131,10 @@ begin;
       end;
     end else if (DirRec.FileType = ftNormal) then
     begin;
-      if FileExists(outputdir + dirrec.name) and not overwrite then
+      if FileExistsUTF8(outputdir + dirrec.name) and not overwrite then
         continue;
       try
-        FS := TFileStream.Create(outputdir +dirrec.name,fmCreate);
+        FS := TFileStream.Create(UTF8ToSys(outputdir +dirrec.name),fmCreate);
         tar.ReadFile(fs);
         FS.Free;
       except

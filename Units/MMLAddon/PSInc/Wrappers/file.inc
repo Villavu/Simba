@@ -70,20 +70,20 @@ begin
 end;
 function ps_FileExists ( const FileName : string ) : Boolean;extdecl;
 begin
-  result := FileExists(FileName);
+  result := FileExistsUTF8(FileName);
 end;
 function ps_DirectoryExists ( const DirectoryName : string ) : Boolean; extdecl;
 begin
-  result := DirectoryExists(DirectoryName);
+  result := DirectoryExistsUTF8(DirectoryName);
 end;
 function ps_CreateDirectory( const DirectoryName : string) : boolean; extdecl;
 begin
-  result := CreateDir(directoryName);
+  result := CreateDirUTF8(directoryName);
 end;
 
 function ps_ForceDirectores(const dir : string) : boolean; extdecl;
 begin
-  result := ForceDirectories(dir);
+  result := ForceDirectoriesUTF8(dir);
 end;
 
 function ps_GetFiles(const Path, Ext : string) : TStringArray;extdecl;
@@ -100,7 +100,7 @@ procedure ps_WriteINI(const Section, KeyName, NewString, FileName: string);extde
 var
   tempini : TIniFile;
 begin;
-  tempini := TIniFile.Create(FileName,True);
+  tempini := TIniFile.Create(UTF8ToSys(FileName),True);
   tempini.WriteString(Section,keyname,newstring);
   tempini.free;
 end;
@@ -109,7 +109,7 @@ function ps_ReadINI(const Section, KeyName, FileName: string): string;extdecl;
 var
   tempini : TIniFile;
 begin;
-  tempini := TIniFile.Create(FileName,True);
+  tempini := TIniFile.Create(UTF8ToSys(FileName),True);
   Result := tempini.ReadString(section,keyname,'');
   tempini.free;
 end;
@@ -118,7 +118,7 @@ procedure ps_DeleteINI(const Section, KeyName, FileName: string); extdecl;
 var
   tempini : TIniFile;
 begin;
-  tempini := TIniFile.Create(FileName,True);
+  tempini := TIniFile.Create(utf8tosys(FileName),True);
   if KeyName = '' then
     tempini.EraseSection(Section)
   else
