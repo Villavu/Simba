@@ -246,9 +246,10 @@ begin
   FillThread := TFillThread.Create(true);
   FillThread.FunctionList := @Self.FunctionList;
   FillThread.Analyzer := TCodeInsight.Create;
-  with  FillThread,FillThread.Analyzer do
+  with FillThread,FillThread.Analyzer do
   begin
     OnFindInclude := @SimbaForm.OnCCFindInclude;
+    OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
     FileName := SimbaForm.CurrScript.ScriptFile;
     MS := TMemoryStream.Create;
     MS.Write(Script[1],length(script));
