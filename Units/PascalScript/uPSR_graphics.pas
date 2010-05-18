@@ -74,6 +74,7 @@ begin
     RegisterMethod(@TCanvasEllipse, 'ELLIPSE');
     RegisterMethod(@TCanvasFillRect, 'FILLRECT');
 //    RegisterMethod(@TCanvasDraw, 'DRAW');
+
 {$IFNDEF CLX}
     RegisterMethod(@TCanvasFloodFill, 'FLOODFILL');
 {$ENDIF}

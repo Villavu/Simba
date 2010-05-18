@@ -87,9 +87,9 @@ type
   
   TPSEvent = procedure (Sender: TPSScript) of object;
   
-  TPSOnCompImport = procedure (Sender: TObject; x: TPSPascalCompiler) of object;
+  TPSOnCompImportEvent = procedure (Sender: TObject; x: TPSPascalCompiler) of object;
 
-  TPSOnExecImport = procedure (Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter) of object;
+  TPSOnExecImportEvent = procedure (Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter) of object;
   {Script engine event function}
   TPSOnNeedFile = function (Sender: TObject; const OrginFileName: tbtstring; var FileName, Output: tbtstring): Boolean of object;
 
@@ -113,8 +113,8 @@ type
     FOnLine: TNotifyEvent;
     FUseDebugInfo: Boolean;
     FOnAfterExecute, FOnCompile, FOnExecute: TPSEvent;
-    FOnCompImport: TPSOnCompImport;
-    FOnExecImport: TPSOnExecImport;
+    FOnCompImport: TPSOnCompImportEvent;
+    FOnExecImport: TPSOnExecImportEvent;
     RI: TPSRuntimeClassImporter;
     FPlugins: TPSPlugins;
     FPP: TPSPreProcessor;
@@ -271,9 +271,9 @@ type
     
     property OnAfterExecute: TPSEvent read FOnAfterExecute write FOnAfterExecute;
     
-    property OnCompImport: TPSOnCompImport read FOnCompImport write FOnCompImport;
+    property OnCompImport: TPSOnCompImportEvent read FOnCompImport write FOnCompImport;
 
-    property OnExecImport: TPSOnExecImport read FOnExecImport write FOnExecImport;
+    property OnExecImport: TPSOnExecImportEvent read FOnExecImport write FOnExecImport;
 
     property UseDebugInfo: Boolean read FUseDebugInfo write FUseDebugInfo default True;
 
@@ -367,14 +367,14 @@ type
   
   TIFPS3DebugCompExec = class(TPSScriptDebugger);
   
-  TPSCustumPlugin = class(TPSPlugin)
+  TPSCustomPlugin = class(TPSPlugin)
   private
     FOnCompileImport2: TPSEvent;
     FOnExecOnUses: TPSEvent;
     FOnCompOnUses: TPSEvent;
     FOnCompileImport1: TPSEvent;
-    FOnExecImport1: TPSOnExecImport;
-    FOnExecImport2: TPSOnExecImport;
+    FOnExecImport1: TPSOnExecImportEvent;
+    FOnExecImport2: TPSOnExecImportEvent;
   public
     procedure CompOnUses(CompExec: TPSScript); override;
     procedure ExecOnUses(CompExec: TPSScript); override;
@@ -389,8 +389,8 @@ type
     property OnExecOnUses: TPSEvent read FOnExecOnUses write FOnExecOnUses;
     property OnCompileImport1: TPSEvent read FOnCompileImport1 write FOnCompileImport1; 
     property OnCompileImport2: TPSEvent read FOnCompileImport2 write FOnCompileImport2;
-    property OnExecImport1: TPSOnExecImport read FOnExecImport1 write FOnExecImport1;
-    property OnExecImport2: TPSOnExecImport read FOnExecImport2 write FOnExecImport2;
+    property OnExecImport1: TPSOnExecImportEvent read FOnExecImport1 write FOnExecImport1;
+    property OnExecImport2: TPSOnExecImportEvent read FOnExecImport2 write FOnExecImport2;
   end;  
 
 implementation
@@ -1459,7 +1459,7 @@ begin
 end;
 
 { TPSCustomPlugin }
-procedure TPSCustumPlugin.CompileImport1(CompExec: TPSScript);
+procedure TPSCustomPlugin.CompileImport1(CompExec: TPSScript);
 begin
   IF @FOnCompileImport1 <> nil then
     FOnCompileImport1(CompExec)
@@ -1467,7 +1467,7 @@ begin
     inherited;
 end;
 
-procedure TPSCustumPlugin.CompileImport2(CompExec: TPSScript);
+procedure TPSCustomPlugin.CompileImport2(CompExec: TPSScript);
 begin
   IF @FOnCompileImport2 <> nil then
     FOnCompileImport2(CompExec)
@@ -1475,7 +1475,7 @@ begin
     inherited;
 end;
 
-procedure TPSCustumPlugin.CompOnUses(CompExec: TPSScript);
+procedure TPSCustomPlugin.CompOnUses(CompExec: TPSScript);
 begin
   IF @FOnCompOnUses <> nil then
     FOnCompOnUses(CompExec)
@@ -1483,7 +1483,7 @@ begin
     inherited;
 end;
 
-procedure TPSCustumPlugin.ExecImport1(CompExec: TPSScript;
+procedure TPSCustomPlugin.ExecImport1(CompExec: TPSScript;
   const ri: TPSRuntimeClassImporter);
 begin
   IF @FOnExecImport1 <> nil then
@@ -1492,7 +1492,7 @@ begin
     inherited;
 end;
 
-procedure TPSCustumPlugin.ExecImport2(CompExec: TPSScript;
+procedure TPSCustomPlugin.ExecImport2(CompExec: TPSScript;
   const ri: TPSRuntimeClassImporter);
 begin
   IF @FOnExecImport2 <> nil then
@@ -1501,7 +1501,7 @@ begin
     inherited;
 end;
 
-procedure TPSCustumPlugin.ExecOnUses(CompExec: TPSScript);
+procedure TPSCustomPlugin.ExecOnUses(CompExec: TPSScript);
 begin
   IF @FOnExecOnUses <> nil then
     FOnExecOnUses(CompExec)

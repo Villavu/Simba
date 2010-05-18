@@ -261,7 +261,7 @@ end;
 
 procedure SIRegisterTPicture(CL: TPSPascalCompiler);
 begin
-  with TPSCompileTimeClass(CL.AddClassN(CL.FindClass('TPersistent'),'TPicture')) do
+  with CL.AddClassN(CL.FindClass('TPersistent'),'TPicture') do
   begin
     RegisterProperty('Bitmap','TBitmap',iptrw);
   end;
