@@ -94,15 +94,14 @@ begin
   FillThread := nil;
 end;
 
-procedure TFunctionListFrame.FrameEndDock(Sender, Target: TObject; X, Y: Integer
-  );
+procedure TFunctionListFrame.FrameEndDock(Sender, Target: TObject; X, Y: Integer);
 begin
-  if Target is TPanel then
+  if (Target is TPanel) then
   begin
      SimbaForm.SplitterFunctionList.Visible := true;
      CloseButton.Visible:= true;
   end
-  else if Target is TCustomDockForm then
+  else if (Target is TCustomDockForm) then
   begin
     TCustomDockForm(Target).Caption := 'Functionlist';
     TCustomDockForm(Target).OnClose := @DockFormOnClose;
@@ -120,30 +119,25 @@ begin
     Node := FilterTree.Selected
   else
     node := FunctionList.Selected;
-  if node<> nil then
-    if node.Level > 0 then
-      if node.Data <> nil then
-        if InCodeCompletion then
+
+  if (node<> nil) and (node.Level > 0) and (node.Data <> nil) then
+    if InCodeCompletion then
+    begin
+      SimbaForm.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.MethodStr,true));
+      SimbaForm.RefreshTab;
+    end
+    else
+    begin
+      MethodInfo := PMethodInfo(node.Data)^;
+      if (DraggingNode = node) and (MethodInfo.BeginPos > 0) then
+        if (MethodInfo.Filename <> nil) and ((MethodInfo.Filename = '') xor FileExistsUTF8(MethodInfo.Filename)) then
         begin
-          SimbaForm.CurrScript.SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(node.Data)^.MethodStr,true));
-          SimbaForm.RefreshTab;
-        end
-        else
-        begin
-          MethodInfo := PMethodInfo(node.Data)^;
-          if DraggingNode = node then
-            if (MethodInfo.BeginPos > 0) then
-            begin;
-              if MethodInfo.Filename <> nil then
-                if MethodInfo.Filename <> '' then
-                begin;
-//                Writeln(MethodInfo.filename);
-                  SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true);
-                end;
-              SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
-              SimbaForm.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
-            end;
+          if (MethodInfo.Filename <> '') then
+            SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true);
+          SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
+          SimbaForm.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
         end;
+    end;
 end;
 
 procedure TFunctionListFrame.FunctionListDeletion(Sender: TObject;
