@@ -180,7 +180,15 @@ begin
     begin
       Assign(ci);
       //Lexer.CloneDefinesFrom(ci.Lexer);
+
+      if (ci.Lexer.Defines.IndexOf('IS_INCLUDE') < 0) then
+        i := ci.Lexer.Defines.Add('IS_INCLUDE')
+      else
+        i := -1;
       Run;
+      if (i > -1) then
+        ci.Lexer.Defines.Delete(i);
+
       //DefinesOut := Lexer.SaveDefines;  Weird bug, so moved out of the with statement
       ci.Lexer.CloneDefinesFrom(Lexer);
     end;
@@ -274,7 +282,7 @@ end;
 procedure TCodeInsight.OnInclude(Sender: TmwBasePasLex);
 var
   Param: string;
-  i: Integer;
+  i, p: Integer;
 begin
   Param := Sender.DirectiveParamOriginal;
   {$IFDEF FPC}
@@ -284,14 +292,16 @@ begin
   {$ENDIF}
   if (not Sender.IsJunk) and (Param <> '') then
   begin
-    if (Pos('loaddll', LowerCase(Sender.Token)) <= 3) then
+    p := Pos('loaddll', LowerCase(Sender.Token));
+    if (p > 0) and (p <= 3) then
     begin
       if LoadLibrary(Param) then
         Param := '';
     end
     else if FindInclude(Param) then
     begin
-      if (Pos('include_once', LowerCase(Sender.Token)) <= 3) then
+      p := Pos('include_once', LowerCase(Sender.Token));
+      if (p > 0) and (p <= 3) then
         for i := High(fIncludes) downto 0 do
           if (fIncludes[i].FileName = Param) then
           begin

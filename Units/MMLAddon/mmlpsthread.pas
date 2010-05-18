@@ -652,9 +652,13 @@ end;
 function TPSThread.RequireFile(Sender: TObject;
   const OriginFileName: String; var FileName, OutPut: string): Boolean;
 begin
-  Result:= LoadFile(OriginFileName,FileName,OutPut);
+  Result := LoadFile(OriginFileName,FileName,OutPut);
+
   if Result then
-    Output := '{$DEFINE IS_INCLUDE}'+LineEnding+Output+LineEnding+'{$UNDEF IS_INCLUDE}';
+    Output :=
+      '{$IFNDEF IS_INCLUDE}{$DEFINE IS_INCLUDE}{$DEFINE __REMOVE_IS_INCLUDE}{$ENDIF}' + LineEnding +
+      Output + LineEnding +
+      '{$IFDEF __REMOVE_IS_INCLUDE}{$UNDEF IS_INCLUDE}{$ENDIF}';
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
