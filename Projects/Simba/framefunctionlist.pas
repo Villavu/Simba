@@ -130,9 +130,9 @@ begin
     begin
       MethodInfo := PMethodInfo(node.Data)^;
       if (DraggingNode = node) and (MethodInfo.BeginPos > 0) then
-        if (MethodInfo.Filename <> nil) and ((MethodInfo.Filename = '') xor FileExistsUTF8(MethodInfo.Filename)) then
+        if (MethodInfo.Filename = nil) or ((MethodInfo.Filename = '') xor FileExistsUTF8(MethodInfo.Filename)) then
         begin
-          if (MethodInfo.Filename <> '') then
+          if (MethodInfo.Filename <> nil) and (MethodInfo.Filename <> '') then
             SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true);
           SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
           SimbaForm.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
