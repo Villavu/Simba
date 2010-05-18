@@ -219,12 +219,31 @@ procedure TScriptFrame.SynEditCommandProcessed(Sender: TObject;
   var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 var
   Command2 : TSynEditorCommand;
+  s: string;
+  sp, ep: Integer;
 begin
   if (Command = ecChar) and (AChar = '(') and (SimbaForm.ParamHint.Visible = false) and (SimbaForm.ShowHintAuto) then
   begin
     Command2:= ecCodeHints;
     SynEditProcessUserCommand(sender,command2,achar,nil);
   end;
+
+  if SimbaForm.CodeCompletionForm.Visible then
+    case Command of
+      ecDeleteChar, ecDeleteWord, ecDeleteEOL:
+        begin
+          if (SynEdit.CaretY = SimbaForm.CodeCompletionStart.y) then
+          begin
+            s := WordAtCaret(SynEdit, sp, ep, SimbaForm.CodeCompletionStart.x);
+            if (SynEdit.CaretX >= SimbaForm.CodeCompletionStart.x) and (SynEdit.CaretX <= ep) then
+            begin
+              SimbaForm.CodeCompletionForm.ListBox.Filter := s;
+              Exit;
+            end;
+          end;
+          SimbaForm.CodeCompletionForm.Hide;
+        end;
+    end;
 end;
 
 procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
@@ -454,23 +473,6 @@ begin
       //Do not free the MP, we need to use this.
     end;
   end;
-  if SimbaForm.CodeCompletionForm.Visible then
-    case Command of
-      ecDeleteChar, ecDeleteWord, ecDeleteEOL:
-        begin
-          if (SynEdit.CaretY = SimbaForm.CodeCompletionStart.y) then
-          begin
-            //e.GetWordBoundsAtRowCol(acp_start, sp, ep);
-            s := WordAtCaret(SynEdit, sp, ep, SimbaForm.CodeCompletionStart.x);
-            if (SynEdit.CaretX >= SimbaForm.CodeCompletionStart.x) and (SynEdit.CaretX <= ep) then
-            begin
-              SimbaForm.CodeCompletionForm.ListBox.Filter := s;
-              Exit;
-            end;
-          end;
-          SimbaForm.CodeCompletionForm.Hide;
-        end;
-    end;
 end;
 
 procedure TScriptFrame.SynEditSpecialLineColors(Sender: TObject;
@@ -484,8 +486,7 @@ begin
   end;
 end;
 
-procedure TScriptFrame.SynEditStatusChange(Sender: TObject;
-  Changes: TSynStatusChanges);
+procedure TScriptFrame.SynEditStatusChange(Sender: TObject; Changes: TSynStatusChanges);
 var
   sp, ep: Integer;
   s: string;
@@ -501,7 +502,7 @@ begin
 
   if SimbaForm.CodeCompletionForm.Visible then
     if (scAll in Changes) or (scTopLine in Changes) then
-      SimbaForm.CodeCompletionForm.Visible := False
+      SimbaForm.CodeCompletionForm.Hide
     else if (scCaretX in Changes) or (scCaretY in Changes) or (scSelection in Changes) or (scModified in Changes) then
     begin
       if (SynEdit.CaretY = SimbaForm.CodeCompletionStart.y) then

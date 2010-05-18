@@ -82,8 +82,6 @@ type
     property InsertProc: TInsertProc read getInsertProc write setInsertProc;
   end;
 
-  { TParamHint }
-
   TParamHint = class(THintWindow)
   private
     fPreparedString : string;
@@ -341,6 +339,13 @@ begin
   begin
     Font.Style := [];
     Font.Color := clBlack;
+
+    if (Index = Count - 1) and (ARect.Bottom < ClientHeight - 1) then
+    begin
+      Brush.Color := clWhite;
+      FillRect(Rect(0, ARect.Bottom + 1, ClientWidth, ClientHeight));
+    end;
+
     if (odSelected in State) then
       Brush.Color := clHighlight
     else if (odHotLight in State) then
@@ -970,6 +975,7 @@ procedure TParamHint.ApplicationIdle(Sender: TObject; var Done: Boolean);
 begin
   if not Visible then exit;
   UpdateHint;
+  Sleep(1);
 end;
 
 end.
