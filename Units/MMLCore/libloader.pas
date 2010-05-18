@@ -133,7 +133,7 @@ implementation
         ii := i;
       end;
     if ii = -1 then
-      raise Exception.CreateFMT('Plugins(%s) has not been found',[PluginName]);
+      raise Exception.CreateFMT('Plugin(%s) has not been found',[PluginName]);
     for i := 0 to PluginLen - 1 do
       if Loaded[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
         Exit(i);

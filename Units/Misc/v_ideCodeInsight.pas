@@ -292,7 +292,7 @@ begin
   {$ENDIF}
   if (not Sender.IsJunk) and (Param <> '') then
   begin
-    p := Pos('loaddll', LowerCase(Sender.Token));
+    p := Pos('loadlib', LowerCase(Sender.Token));
     if (p > 0) and (p <= 3) then
     begin
       if LoadLibrary(Param) then
@@ -1322,6 +1322,8 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
   var
     i: Integer;
   begin
+    if item = nil then
+      exit;
     if (not Item.Proposal_Filled) then
       Item.FillProposal;
 
