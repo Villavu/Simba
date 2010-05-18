@@ -335,6 +335,7 @@ type
     procedure OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
     procedure OnCompleteCode(Str: string);
     function OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
+    function OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
   private
     PopupTab : integer;
     RecentFileItems : array of TMenuItem;
@@ -530,6 +531,39 @@ begin
     result := true;
   end else
     result := false;
+end;
+
+function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
+var
+  i, Index: Integer;
+  b: TStringList;
+  ms: TMemoryStream;
+begin
+  Index := PluginsGlob.LoadPlugin(LibName);
+  if (Index < 0) then
+    Exit(False)
+  else
+  begin
+    b := TStringList.Create;
+    try
+      ms := TMemoryStream.Create;
+
+      with PluginsGlob.MPlugins[Index] do
+        for i := 0 to MethodLen - 1 do
+          b.Add(Methods[i].FuncStr + 'forward;');
+      ci := TCodeInsight.Create;
+      with ci do
+      begin
+        OnMessage := @SimbaForm.OnCCMessage;
+        b.SaveToStream(ms);
+        b.SaveToFile('C:\Lazarus\Mufasa Git\libdebug.txt');
+        FileName := LibName;
+        Run(ms, nil, -1, True);
+      end;
+    finally
+      b.Free;
+    end;
+  end;
 end;
 
 procedure TSimbaForm.HandleConnectionData;
@@ -1982,7 +2016,6 @@ begin
   FunctionListTimer.Enabled:= false;
   FreeAndNil(ExtManager);
 end;
-
 
 procedure CCFillCore;
 var

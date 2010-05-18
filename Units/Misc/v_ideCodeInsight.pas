@@ -15,6 +15,7 @@ type
   TCodeInsightArray = array of TCodeInsight;
 
   TOnFindInclude = function(Sender: TObject; var FileName: string): Boolean of object;
+  TOnLoadLibrary = function(Sender: TObject; var FileName: string; out ci: TCodeInsight): Boolean of object;
 
   { TCodeInsight }
 
@@ -28,6 +29,7 @@ type
     fDeclarationAtPos: TDeclaration;
 
     fOnFindInclude: TOnFindInclude;
+    fOnLoadLibrary: TOnLoadLibrary;
     fIncludes: TCodeInsightArray;
 
     InFunc: TDeclarationArray;
@@ -45,6 +47,7 @@ type
 
     function FindInclude(var FileName: string): Boolean;
     procedure ParseInclude(FileName: string);
+    function LoadLibrary(var LibName: string): Boolean;
     procedure OnInclude(Sender: TmwBasePasLex); override;
 
     function GetVarType(s: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
@@ -66,6 +69,7 @@ type
     procedure FillSynCompletionProposal(ItemList, InsertList: TStrings; Prefix: string = '');
 
     property OnFindInclude: TOnFindInclude read fOnFindInclude write fOnFindInclude;
+    property OnLoadLibrary: TOnLoadLibrary read fOnLoadLibrary write fOnLoadLibrary;
     property FileName: string read fFileName write fFileName;
     property Position: Integer read fPos write SetPos;
     property DeclarationAtPos: TDeclaration read fDeclarationAtPos;
@@ -79,6 +83,9 @@ type
     CodeInsight: TCodeInsight;
   end;
   TIncludeBufferArray = array of TIncludeBuffer;
+
+const
+  LibPrefix = 'lib:';
 
 var
   CoreBuffer: TCodeInsightArray;
@@ -223,22 +230,68 @@ begin
   fIncludes[l] := GetIncludeBuffer(FileName, Self).CodeInsight;
 end;
 
+function TCodeInsight.LoadLibrary(var LibName: string): Boolean;
+var
+  i: Integer;
+  s: string;
+  ci: TCodeInsight;
+begin
+  Result := False;
+
+  for i := High(fIncludes) downto 0 do
+    if (fIncludes[i].FileName = LibPrefix+LibName) then
+      Exit(True);
+
+  for i := High(IncludeBuffer) downto 0 do
+    if (IncludeBuffer[i].Script = LibPrefix+LibName) then
+    begin
+      SetLength(fIncludes, Length(fIncludes) + 1);
+      fIncludes[High(fIncludes)] := IncludeBuffer[i].CodeInsight;
+
+      Exit(True);
+    end;
+
+  s := LibName;
+  if Assigned(OnLoadLibrary) and OnLoadLibrary(Self, s, ci) and (ci <> nil) then
+  begin
+    LibName := s;
+
+    SetLength(fIncludes, Length(fIncludes) + 1);
+    fIncludes[High(fIncludes)] := ci;
+
+    SetLength(IncludeBuffer, Length(IncludeBuffer) + 1);
+    with IncludeBuffer[High(IncludeBuffer)] do
+    begin
+      Script := LibPrefix+LibName;
+      CodeInsight := ci;
+      CodeInsight.FileName := LibPrefix+LibName;
+    end;
+
+    Exit(True);
+  end;
+end;
+
 procedure TCodeInsight.OnInclude(Sender: TmwBasePasLex);
 var
   Param: string;
   i: Integer;
 begin
   Param := Sender.DirectiveParamOriginal;
-  {$ifdef FPC}
-  param := SetDirSeparators(param);
+  {$IFDEF FPC}
+  Param := SetDirSeparators(param);
   {$ELSE}
   Param := StringReplace(Param, '/', '\', [rfReplaceAll]);
   {$ENDIF}
   if (not Sender.IsJunk) and (Param <> '') then
   begin
-    if FindInclude(Param) then
+    if (Pos('loaddll', LowerCase(Sender.Token)) <= 3) then
     begin
-      if (LowerCase(Sender.Token) = 'include_once') then
+      if LoadLibrary(Param) then
+        Param := '';
+    end
+    else if FindInclude(Param) then
+    begin
+      if (Pos('include_once', LowerCase(Sender.Token)) <= 3) then
         for i := High(fIncludes) downto 0 do
           if (fIncludes[i].FileName = Param) then
           begin
@@ -247,9 +300,13 @@ begin
           end;
 
       if (Param <> '') then
+      begin
         ParseInclude(Param);
-    end
-    else if Assigned(OnMessage) then
+        Param := '';
+      end;
+    end;
+
+    if (Param <> '') and Assigned(OnMessage) then
       OnMessage(Self, meError, Format(ci_UnknownInclude, [Param]), Sender.PosXY.X, Sender.PosXY.Y);
   end;
 
@@ -888,8 +945,6 @@ begin
 end;
 
 constructor TCodeInsight.Create(FileName: string = '');
-var
-  StrList : TStringList;
 begin
   inherited Create;
 
@@ -898,6 +953,7 @@ begin
   Proposal_ItemList := TStringList.Create;
 
   fOnFindInclude := nil;
+  fOnLoadLibrary := nil;
   fFileName := FileName;
   if (fFileName <> '') and (not FileExists(fFileName)) then
     fFileName := '';
@@ -909,11 +965,13 @@ begin
   fOwnStream := (fFileName <> '');
   if fOwnStream then
   begin
-    StrList := TStringList.Create;
     fMemoryStream := TMemoryStream.Create;
-    StrList.LoadFromFile(filename);  //Converts the line-endings.
-    StrList.SaveToStream(fMemoryStream);
-    Strlist.free;
+    with TStringList.Create do
+    begin
+      LoadFromFile(filename);  //Converts the line-endings.
+      SaveToStream(fMemoryStream);
+      Free;
+    end;
   end
   else
     fMemoryStream := nil;
@@ -936,6 +994,7 @@ begin
     with From as TCodeInsight do
     begin
       Self.OnFindInclude := OnFindInclude;
+      Self.OnLoadLibrary := OnLoadLibrary;
     end;
 
   inherited;
