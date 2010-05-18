@@ -424,7 +424,7 @@ var
   path : string;
 begin
   result := false;
-  if CompareText(DirectiveName,'LOADDLL') = 0 then
+  if CompareText(DirectiveName,'LOADLIB') = 0 then
   begin
     if DirectiveArgs <> '' then
     begin;
@@ -436,7 +436,7 @@ begin
         result:= True;
       end;
     end else
-      psWriteln('Your LoadDLL directive has no params, thus cannot find the plugin');
+      psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
   end else
   if CompareText(DirectiveName,'INCLUDE_ONCE') = 0 then
   begin
@@ -598,7 +598,7 @@ procedure TPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean);
 begin
-  Continue:= ProcessDirective(DirectiveName, DirectiveParam);
+  Continue:=not ProcessDirective(DirectiveName, DirectiveParam);
 end;
 
 function Muf_Conv_to_PS_Conv( conv : integer) : TDelphiCallingConvention;

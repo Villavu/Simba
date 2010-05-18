@@ -1546,7 +1546,7 @@ begin
         FDirectiveParamOrigin := FOrigin + FTokenPos;
         FTokenPos := Run;
         case KeyHash of
-          60: if KeyComp('LOADDLL') then
+          55: if KeyComp('LOADLIB') then
                 fTokenID := tokIncludeDirect
               else
                 fTokenID := tokBorComment;
@@ -2388,6 +2388,10 @@ begin
       if KeyComp('UNDEF') then
         Result := tokUndefDirect else
         Result := tokCompDirect;
+    55:
+      if KeyComp('LOADLIB') then
+        result := tokIncludeDirect else
+        result := tokCompDirect;
     56:
       if KeyComp('ELSEIF') then
         Result := tokElseIfDirect else

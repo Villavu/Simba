@@ -166,7 +166,7 @@ begin
   with CL.AddClassN(CL.FindClass('TPage'),'TTabSheet') do
   begin
     RegisterProperty('PageControl', 'TPageControl', iptrw);
-    RegisterProperty('TabIndex', 'Integer', iptrw);
+    RegisterProperty('TabIndex', 'Integer', iptr);
     RegisterProperty('OnMouseDown','TMouseEvent',iptrw);
     RegisterProperty('OnMouseMove','TMouseMoveEvent',iptrw);
     RegisterProperty('OnMouseUp','TMouseEvent',iptrw);
@@ -434,8 +434,10 @@ procedure TPageControlActivePageIndex_R(Self: TPageControl; var T: Integer);
 begin T := Self.ActivePageIndex; end;
 
 (*----------------------------------------------------------------------------*)
+{$IFNDEF FPC}
 procedure TTabSheetTabIndex_W(Self: TTabSheet; const T: Integer);
 begin Self.TabIndex := T; end;
+{$ENDIF}
 
 (*----------------------------------------------------------------------------*)
 procedure TTabSheetTabIndex_R(Self: TTabSheet; var T: Integer);
@@ -671,7 +673,7 @@ begin
   with CL.Add(TTabSheet) do
   begin
     RegisterPropertyHelper(@TTabSheetPageControl_R,@TTabSheetPageControl_W,'PageControl');
-    RegisterPropertyHelper(@TTabSheetTabIndex_R,@TTabSheetTabIndex_W,'TabIndex');
+    RegisterPropertyHelper(@TTabSheetTabIndex_R,nil,'TabIndex');
     RegisterEventPropertyHelper(@TControlOnMouseDown_R,@TControlOnMouseDown_W,'OnMouseDown');
     RegisterEventPropertyHelper(@TControlOnMouseMove_R,@TControlOnMouseMove_W,'OnMouseMove');
     RegisterEventPropertyHelper(@TControlOnMouseUp_R,@TControlOnMouseUp_W,'OnMouseUp');
