@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 670;
+  SimbaVersion = 675;
 
 type
 
@@ -539,7 +539,12 @@ var
   b: TStringList;
   ms: TMemoryStream;
 begin
-  Index := PluginsGlob.LoadPlugin(LibName);
+  try
+    Index := PluginsGlob.LoadPlugin(LibName);
+  except
+    Result := false;
+    Index := -1;
+  end;
   if (Index < 0) then
     Exit(False)
   else
@@ -2022,6 +2027,7 @@ var
   a: TPSScriptExtension;
   b: TStringList;
   ms: TMemoryStream;
+  buf : TCodeInsight;
 begin
   if SimbaForm.UpdatingFonts then
   begin
@@ -2053,15 +2059,16 @@ begin
 
       CoreDefines.AddStrings(a.Defines);
 
-      SetLength(CoreBuffer, 1);
-      CoreBuffer[0] := TCodeInsight.Create;
-      with CoreBuffer[0] do
+      buf := TCodeInsight.Create;
+      with buf do
       begin
         OnMessage := @SimbaForm.OnCCMessage;
         b.SaveToStream(ms);
         Run(ms, nil, -1, True);
         FileName := '"PSCORE"';
       end;
+      SetLength(CoreBuffer, 1);
+      CoreBuffer[0] := buf;
     finally
       b.Free;
       a.Free;
@@ -2517,7 +2524,7 @@ begin
   if (NewPos <> OldPos) and (NewPos <> -1) then
   begin;
     Tabs.Move(OldPos,NewPos);
-    PageControl1.Pages[OldPos].TabIndex:= NewPos;
+    PageControl1.Pages[OldPos].PageIndex := NewPos;
   end;
 end;
 
