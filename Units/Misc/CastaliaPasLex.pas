@@ -1546,6 +1546,10 @@ begin
         FDirectiveParamOrigin := FOrigin + FTokenPos;
         FTokenPos := Run;
         case KeyHash of
+          60: if KeyComp('LOADDLL') then
+                fTokenID := tokIncludeDirect
+              else
+                fTokenID := tokBorComment;
           68: if KeyComp('INCLUDE') then
                 fTokenID := tokIncludeDirect
               else

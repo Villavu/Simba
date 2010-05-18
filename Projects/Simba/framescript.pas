@@ -173,6 +173,7 @@ begin
   mp.FileName := ScriptFile;
   mp.OnMessage := @SimbaForm.OnCCMessage;
   mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
+  mp.OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
 
   ms := TMemoryStream.Create;
   SynEdit.Lines.SaveToStream(ms);
@@ -349,6 +350,7 @@ begin
     mp.FileName := ScriptFile;
     mp.OnMessage := @SimbaForm.OnCCMessage;
     mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
+    mp.OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
 
     ms := TMemoryStream.Create;
     ItemList := TStringList.Create;
@@ -396,6 +398,7 @@ begin
     mp := TCodeInsight.Create;
     mp.OnMessage := @SimbaForm.OnCCMessage;
     mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
+    mp.OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
 
     ms := TMemoryStream.Create;
     synedit.Lines.SaveToStream(ms);
