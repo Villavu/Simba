@@ -556,7 +556,6 @@ begin
       begin
         OnMessage := @SimbaForm.OnCCMessage;
         b.SaveToStream(ms);
-        b.SaveToFile('C:\Lazarus\Mufasa Git\libdebug.txt');
         FileName := LibName;
         Run(ms, nil, -1, True);
       end;
