@@ -503,28 +503,18 @@ var
     Result := True;
   end;
 begin
-  if (Integer(CallingConv) and 128) <> 0 then
-  begin
-    {$ifdef FPC}
+  {$IFDEF FPC}
+  if (Integer(CallingConv) and 128) <> 0 then begin
     IsVirtualCons := true;
-    {$endif}
     CAllingConv := TPSCallingConvention(Integer(CallingConv) and not 128);
   end else
-  begin
-    {$ifdef FPC}
-    IsVirtualCons:= false
-    {$endif}
-  end;
+    IsVirtualCons:= false;
   if (Integer(CallingConv) and 64) <> 0 then begin
-    {$IFDEF FPC}
-      IsConstructor := true;
-    {$ENDIF}
+    IsConstructor := true;
     CAllingConv := TPSCallingConvention(Integer(CallingConv) and not 64);
-  end else begin
-    {$IFDEF FPC}
+  end else
       IsConstructor := false;
-    {$ENDIF}
-  end;
+  {$ENDIF}
   InnerfuseCall := False;
   if Address = nil then
     exit; // need address
@@ -592,7 +582,6 @@ begin
                   @Stack[Length(Stack) - 3], Length(Stack) div 4, 4, nil)
                 else
              {$ENDIF}
-//              {$ELSE}
                   tbtu32(res.dta^) := RealCall_Register(Address, EAX, EDX, ECX,
                   @Stack[Length(Stack) - 3], Length(Stack) div 4, 4, nil);
               end;

@@ -1539,7 +1539,7 @@ begin
 	  {$IFNDEF PS_NOWIDESTRING}
       tkWString: begin Result := ''''+tbtString(GetWideStrProp(Instance, pp))+''; end;
 	  {$IFDEF DELPHI2009UP}
-      tkUString: begin Result := ''''+tbtUnicodeString(GetUnicodeStrProp(Instance, pp))+''; end;
+      tkUString: begin Result := ''''+tbtString(GetUnicodeStrProp(Instance, pp))+''; end;
 	  {$ENDIF}
       {$ENDIF}
 	  {$ENDIF}
@@ -3988,6 +3988,10 @@ begin
         begin
           for i := 0 to Len -1 do
           begin
+            if Pointer(Dest^) <> nil then
+            begin
+              PSDynArraySetLength(Pointer(Dest^), aType, 0);
+            end;
             Pointer(Dest^) := Pointer(Src^);
             if Pointer(Dest^) <> nil then
             begin
@@ -4574,19 +4578,19 @@ begin
       if Tmp is EDivByZero then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
       if Tmp is EZeroDivide then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
       if Tmp is EMathError then
       begin
         Result := False;
-        CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erMathError, tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
     end;
@@ -5265,19 +5269,19 @@ begin
       if Tmp is EDivByZero then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
       if Tmp is EZeroDivide then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
       if Tmp is EMathError then
       begin
         Result := False;
-        CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erMathError, tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
     end;
@@ -6283,19 +6287,19 @@ begin
       if Tmp is EDivByZero then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
       if Tmp is EZeroDivide then
       begin
         Result := False;
-        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
       if Tmp is EMathError then
       begin
         Result := False;
-        CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
+        CMD_Err3(erMathError,tbtString(Exception(Tmp).Message), Tmp);
         Exit;
       end;
     end;
@@ -7181,19 +7185,19 @@ begin
           if Tmp is EDivByZero then
           begin
             Result := False;
-            CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+            CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
             Exit;
           end;
           if Tmp is EZeroDivide then
           begin
             Result := False;
-            CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+            CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
             Exit;
           end;
           if Tmp is EMathError then
           begin
             Result := False;
-            CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
+            CMD_Err3(erMathError, tbtString(Exception(Tmp).Message), Tmp);
             Exit;
           end;
         end;
@@ -7830,17 +7834,17 @@ begin
                     end else
                     if Tmp is EDivByZero then
                     begin
-                      CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+                      CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
                       Break;
                     end;
                     if Tmp is EZeroDivide then
                     begin
-                      CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+                      CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
                       Break;
                     end;
                     if Tmp is EMathError then
                     begin
-                      CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
+                      CMD_Err3(erMathError, tbtString(Exception(Tmp).Message), Tmp);
                       Break;
                     end;
                   end;
@@ -8516,17 +8520,17 @@ begin
                       end else
                       if Tmp is EDivByZero then
                       begin
-                        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+                        CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
                         break;
                       end;
                       if Tmp is EZeroDivide then
                       begin
-                        CMD_Err3(erDivideByZero, Exception(Tmp).Message, Tmp);
+                        CMD_Err3(erDivideByZero, tbtString(Exception(Tmp).Message), Tmp);
                         break;
                       end;
                       if Tmp is EMathError then
                       begin
-                        CMD_Err3(erMathError, Exception(Tmp).Message, Tmp);
+                        CMD_Err3(erMathError, tbtString(Exception(Tmp).Message), Tmp);
                         break;
                       end;
                     end;
@@ -8794,12 +8798,12 @@ begin
     12:
 {$IFNDEF PS_NOWIDESTRING}
       if Stack.GetItem(Stack.Count -2)^.FType.BaseType = btUnicodeString then
-        Stack.SetUnicodeString(-1, SysUtils.Trim(Stack.GetUnicodestring(-2))) // Uppercase
+        Stack.SetUnicodeString(-1, SysUtils.Trim(Stack.GetUnicodestring(-2))) // Trim
       else if Stack.GetItem(Stack.Count -2)^.FType.BaseType = btWideString then
-        Stack.SetWideString(-1, SysUtils.Trim(Stack.GetWideString(-2))) // Uppercase
+        Stack.SetWideString(-1, SysUtils.Trim(Stack.GetWideString(-2))) // Trim
       else
 {$ENDIF}      
-        Stack.SetAnsiString(-1, SysUtils.Trim(Stack.GetAnsiString(-2)));// Trim
+        Stack.SetAnsiString(-1, AnsiString(SysUtils.Trim(String(Stack.GetAnsiString(-2)))));// Trim
     13: Stack.SetInt(-1, Length(Stack.GetAnsiString(-2))); // Length
     14: // SetLength
       begin
@@ -10123,7 +10127,7 @@ begin
     v := NewPPSVariantIFC(Stack[CurrStack + 1], True);
   end else v := nil;
   try
-    Result := Caller.InnerfuseCall(FSelf, p.Ext1, TPSCallingConvention(Integer(cc) or 64), MyList, v);
+    Result := Caller.InnerfuseCall(FSelf, p.Ext1, {$IFDEF FPC}TPSCallingConvention(Integer(cc) or 64){$ELSE}cc{$ENDIF}, MyList, v);
   finally
     DisposePPSVariantIFC(v);
     DisposePPSVariantIFCList(mylist);
@@ -10208,7 +10212,7 @@ begin
     v := NewPPSVariantIFC(Stack[CurrStack + 1], True);
   end else v := nil;
   try
-    Result := Caller.InnerfuseCall(FSelf, VirtualClassMethodPtrToPtr(p.Ext1, FSelf), TPSCallingConvention(Integer(cc) or 128), MyList, v);
+    Result := Caller.InnerfuseCall(FSelf, VirtualClassMethodPtrToPtr(p.Ext1, FSelf), {$IFDEF FPC}TPSCallingConvention(Integer(cc) or 128){$ELSE}cc{$ENDIF}, MyList, v);
   finally
     DisposePPSVariantIFC(v);
     DisposePPSVariantIFCList(mylist);

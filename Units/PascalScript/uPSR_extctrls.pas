@@ -100,11 +100,14 @@ begin
 end;
 
 procedure TNoteBookPageCount_R(Self: TNoteBook; var T: INTEGER); begin T := Self.PageCount; end;
+
 procedure RIRegisterTNOTEBOOK(Cl: TPSRuntimeClassImporter);
 begin
   with Cl.Add(TNOTEBOOK) do
   begin
+    {$IFDEF FPC}
     RegisterMethod(@TNoteBook.TabIndexAtClientPos,'TABINDEXATCLIENTPOS');
+    {$ENDIF}
     RegisterPropertyHelper(@TNoteBookPageCount_R,nil,'PAGECOUNT');
   end;
 end;
