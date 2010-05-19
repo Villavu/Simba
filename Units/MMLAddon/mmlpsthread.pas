@@ -423,7 +423,7 @@ var
   plugin_idx, i: integer;
   path : string;
 begin
-  result := false;
+  Result := False;
   if CompareText(DirectiveName,'LOADLIB') = 0 then
   begin
     if DirectiveArgs <> '' then
@@ -431,28 +431,30 @@ begin
       plugin_idx:= PluginsGlob.LoadPlugin(DirectiveArgs);
       if plugin_idx < 0 then
         psWriteln(Format('Your DLL %s has not been found',[DirectiveArgs]))
-      else begin
+      else
+      begin
         LoadPlugin(plugin_idx);
-        result:= True;
+        Result:= True;
       end;
-    end else
+    end
+    else
       psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
-  end else
-  if CompareText(DirectiveName,'INCLUDE_ONCE') = 0 then
+  end
+  else if CompareText(DirectiveName,'INCLUDE_ONCE') = 0 then
   begin
-    result := true; //Lets to the actual file checking later on in the preprocessor ;-)
-    if DirectiveArgs <> '' then
+    Result := True; //Lets to the actual file checking later on in the preprocessor ;-)
+    if (DirectiveArgs <> '') then
     begin
       path := FindFile(DirectiveArgs,[ScriptPath,IncludePath]);
-      if path <> '' then
+      if (path <> '') then
         if Includes.Find(path,i) then
         begin
           psWriteln('Include_Once file already included');
-          result := false;
+          Result := False;
         end;
     end;
   end else
-    result := true;
+    Result := True;
 end;
 
 procedure TMThread.SetDebug(writelnProc: TWritelnProc);
@@ -585,6 +587,7 @@ procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean);
 begin
+  Continue := ProcessDirective(DirectiveName, DirectiveParam);
 end;
 
 function TPSThread.PSScriptFindUnknownFile(Sender: TObject;
@@ -598,7 +601,7 @@ procedure TPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean);
 begin
-  Continue:=not ProcessDirective(DirectiveName, DirectiveParam);
+  Continue:= not ProcessDirective(DirectiveName, DirectiveParam);
 end;
 
 function Muf_Conv_to_PS_Conv( conv : integer) : TDelphiCallingConvention;
