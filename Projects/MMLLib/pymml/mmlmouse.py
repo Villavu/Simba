@@ -14,15 +14,10 @@ class Mouse(object):
         It will allow several ways to set mouse positions and
         buttons. __getitem__ and __setitem__ are also implemented,
         so one can access mouse buttons states and positions with [].
-
-
     '''
     # _mc = MMLCore reference.
     _mc = None
-    Left ='Left'
-    Right = 'Right'
-    Middle = 'Middle'
-    Pos = 'Pos'
+    Left, Right, Middle, Pos = 'Left', 'Right', 'Middle', 'Pos'
 
     # last pointer position
     _lpp = (0, 0)
