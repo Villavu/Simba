@@ -44,6 +44,7 @@ AddFunction(@ps_PrintDTM, 'procedure PrintDTM(const DTM : TMDTM);');
 AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer) : TMDTM');
 AddFunction(@ps_MDTMToSDTM, 'function MDTMToSDTM(Const DTM: TMDTM): TSDTM;');
 AddFunction(@ps_SDTMToMDTM, 'function SDTMToMDTM(Const DTM: TSDTM): TMDTM;');
+AddFunction(@ps_CreateDTMPoint,'function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;');
 
 {maths}
 SetCurrSection('Math');

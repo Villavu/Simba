@@ -92,7 +92,7 @@ begin
     exit;
   if compress(BufferString,destlen,PChar(Str),length(str)) = Z_OK then
   begin
-    setlength(result,Destlen + 4);
+    setlength(result,Destlen + SizeOf(Integer));
     PInteger(@result[1])^ := Length(str);
     Move(bufferstring[0],result[5],Destlen);
   end;

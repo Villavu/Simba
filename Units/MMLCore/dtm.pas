@@ -47,6 +47,10 @@ type
       Index : integer;
       function ToString : string;
       function Valid : boolean;
+      procedure DeletePoint( Point : integer);
+      procedure SwapPoint(p1,p2 : integer);
+      procedure MovePoint(fromIndex,toIndex : integer);
+      procedure AddPoint( Point : TMDTMPoint);
       property PPoints : PMDTMPoint read GetPointerPoints;
       property Count : integer read FLen write SetPointCount;
       property Points : TMDTMPointArray read FPoints;
@@ -62,7 +66,7 @@ type
       function AddDTM(const d: TMDTM): Integer;overload;
       function GetDTM(index: Integer) :TMDTM;
       procedure FreeDTM(DTM: Integer);
-      function StringToDTM(const S: String): TMDTM;
+      function StringToDTM(const S: String): Integer;
       property DTM[Index : integer]: TMDTM read GetDTM; default;
       constructor Create(Owner: TObject);
       destructor Destroy; override;
@@ -72,6 +76,7 @@ implementation
 uses
     dtmutil, paszlib,
     client,
+    DCPbase64,
     graphics, // for TColor
     math // for max
     ;
@@ -139,41 +144,92 @@ begin
    Result:=StrToInt('$' + HexNum);
 end;
 
-function TMDTMS.StringToDTM(const S: String): TMDTM;
+function TMDTMS.StringToDTM(const S: String): Integer;
 var
   b: PBufferByteArray;
+  MDTM : TMDTM;
   Source : String;
   DestLen : longword;
   i,ii,c : integer;
   DPoints : PMDTMPoint;
+  Ptr : Pointer;
+function ReadInteger : integer;
 begin
-  Result := TMDTM.Create;
+  Result := PInteger(ptr)^;
+  inc(ptr,sizeof(integer));
+end;
+function ReadBoolean : boolean;
+begin
+  result := PBoolean(ptr)^;
+  inc(ptr,sizeof(boolean));
+end;
+
+begin
+  MDTM := TMDTM.Create;
+  Result := AddDTM(MDTM);
   ii := Length(S);
-  if (ii = 0) or (ii mod 2 <> 0) then
-    Exit;
-  ii := ii div 2;
-  SetLength(Source,ii);
-  for i := 1 to ii do
-    Source[i] := Chr(HexToInt(S[i * 2 - 1] + S[i * 2]));
-  DestLen := BufferLen;
-  if uncompress(Bufferstring,Destlen,pchar(Source), ii) = Z_OK then
-  begin;
-    if (Destlen mod 36) > 0 then
-      raise Exception.CreateFmt('Invalid DTM passed to StringToDTM: %s',[s]);
-    DestLen := DestLen div 36;
-    Result.Count:= DestLen;
-    DPoints := result.PPoints;
-    b := PBufferByteArray(BufferString);
-    for i := 0 to DestLen - 1 do
+  if (ii = 0) then
+    exit;
+  if S[1] = 'm' then
+  begin
+    if ii < 9 then
+      raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
+    Writeln(copy(s,2,ii-1));
+    Source := Base64DecodeStr(copy(s,2,ii-1));
+    i:= PLongint(@source[1])^; //The 4 four bytes should contain the dest len!
+    if i < 1 then
+      raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
+    DestLen := BufferLen;
+    ptr := @Source[1 + sizeof(longint)];
+    if uncompress(BufferString,DestLen,ptr,length(source)-sizeof(integer)) = Z_OK then
+    begin
+      ptr := BufferString;
+      MDTM.Count:= ReadInteger;
+      ii := MDTM.Count;
+      if (MDTM.Count * TMDTMPointSize) <> (Destlen - SizeOf(integer)) then
+        raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
+      DPoints := MDTM.PPoints;
+      for i := 0 to ii-1 do
+        DPoints[i].x := ReadInteger;
+      for i := 0 to ii-1 do
+        DPoints[i].y := ReadInteger;
+      for i := 0 to ii-1 do
+        DPoints[i].c := ReadInteger;
+      for i := 0 to ii-1 do
+        DPoints[i].t := ReadInteger;
+      for i := 0 to ii-1 do
+        DPoints[i].asz := ReadInteger;
+      for i := 0 to ii-1 do
+        DPoints[i].bp := ReadBoolean;
+    end;
+  end else
+  begin
+    if (ii mod 2 <> 0) then
+      exit;
+    ii := ii div 2;
+    SetLength(Source,ii);
+    for i := 1 to ii do
+      Source[i] := Chr(HexToInt(S[i * 2 - 1] + S[i * 2]));
+    DestLen := BufferLen;
+    if uncompress(Bufferstring,Destlen,pchar(Source), ii) = Z_OK then
     begin;
-      c := i * 36;
-      DPoints[i].x := PInteger(@b^[c+1])^;
-      DPoints[i].y := PInteger(@b^[c+5])^;
-      DPoints[i].asz := PInteger(@b^[c+12])^;
-//      Result.ash[i] := PInteger(@b^[c+16])^;
-      DPoints[i].c := PInteger(@b^[c+20])^;
-      DPoints[i].t := PInteger(@b^[c+24])^;
-      DPoints[i].bp := False;
+      if (Destlen mod 36) > 0 then
+        raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
+      DestLen := DestLen div 36;
+      MDTM.Count:= DestLen;
+      DPoints := MDTM.PPoints;
+      b := PBufferByteArray(BufferString);
+      for i := 0 to DestLen - 1 do
+      begin;
+        c := i * 36;
+        DPoints[i].x := PInteger(@b^[c+1])^;
+        DPoints[i].y := PInteger(@b^[c+5])^;
+        DPoints[i].asz := PInteger(@b^[c+12])^;
+  //    DPoints.ash[i] := PInteger(@b^[c+16])^;
+        DPoints[i].c := PInteger(@b^[c+20])^;
+        DPoints[i].t := PInteger(@b^[c+24])^;
+        DPoints[i].bp := False;
+      end;
     end;
   end;
 end;
@@ -254,9 +310,59 @@ begin
   FLen := AValue;
 end;
 
-function TMDTM.ToString: string;
-begin
+//We save the data as arrays for each point (so we can add features to DTMs without having to change
+//the way the ToString is done..
+//E.G. A DTM with 3 points would become
+//LenXXXYYYCCCTTTASZASZASZBPBPBP
 
+function TMDTM.ToString: string;
+var
+  i,len : integer;
+  Ptr,Start : Pointer;
+  Destlen : Longword;
+procedure WriteInteger(int : integer);
+begin
+  PLongInt(Ptr)^ := int;
+  Inc(ptr,sizeof(int));
+end;
+procedure WriteBool(bool : boolean);
+begin;
+  PBoolean(Ptr)^ := bool;
+  inc(ptr,sizeof(boolean));
+end;
+
+begin
+  result := '';
+  if Count < 1 then
+    exit;
+  len := Count * TMDTMPointSize + SizeOf(Integer);
+  Start:= GetMem(len);
+  Ptr := Start;
+  WriteInteger(FLen);
+  for i := 0 to FLen-1 do
+    WriteInteger(FPoints[i].x);
+  for i := 0 to FLen-1 do
+    WriteInteger(FPoints[i].y);
+  for i := 0 to FLen-1 do
+    WriteInteger(FPoints[i].c);
+  for i := 0 to FLen-1 do
+    WriteInteger(FPoints[i].t);
+  for i := 0 to FLen-1 do
+    WriteInteger(FPoints[i].asz);
+  for i := 0 to FLen-1 do
+    WriteBool(FPoints[i].bp);
+  Destlen :=BufferLen;
+  if compress(BufferString,destlen,pchar(start),len) = Z_OK then
+  begin
+    setlength(result,Destlen + SizeOf(Integer));
+    PInteger(@result[1])^ := len;
+    Writeln(len);
+    Move(bufferstring[0],result[1 + sizeof(integer)],Destlen);
+    //We now have Size + Compressed data.. Lets Base64Encrypt it!
+    Result := 'm' + Base64EncodeStr(result);
+    //It now looks like m + base64encoded data! The 'm' is to indicate we used this encryption method.
+  end;
+  Freemem(start,len);
 end;
 
 function TMDTM.Valid: boolean;
@@ -264,7 +370,42 @@ begin
   result := false;
   if Count < 1 then
     exit;
+  NormalizeDTM(self);
   result := true;
+end;
+
+procedure TMDTM.DeletePoint(Point: integer);
+begin
+  MovePoint(Point,FLen-1);
+  Count := Count - 1;
+end;
+
+procedure TMDTM.SwapPoint(p1, p2: integer);
+var
+  Temp : TMDTMPoint;
+begin
+  Temp := FPoints[p1];
+  FPoints[p1] := FPoints[p2];
+  FPoints[p2] := Temp;
+end;
+
+procedure TMDTM.MovePoint(fromIndex, toIndex: integer);
+var
+  i : integer;
+begin
+  if fromIndex > toIndex then //We are going down
+  begin
+    for i := fromindex downto Toindex+1 do
+      SwapPoint(i,i-1);
+  end else if fromIndex < toIndex then
+    for i := fromindex to toindex - 1 do
+      SwapPoint(i,i+1);
+end;
+
+procedure TMDTM.AddPoint(Point: TMDTMPoint);
+begin
+  Count:= Count + 1;
+  FPoints[FLen-1] := Point;
 end;
 
 end.
