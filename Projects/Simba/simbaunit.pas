@@ -67,6 +67,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionSaveDef: TAction;
     ActionConsole: TAction;
     ActionNormalSize: TAction;
     ActionCompileScript: TAction;
@@ -96,14 +97,15 @@ type
     ActionTabNext: TAction;
     ActionList: TActionList;
     CheckBoxMatchCase: TCheckBox;
-    LazHighlighter: TSynFreePascalSyn;
     frmFunctionList: TFunctionListFrame;
     LabeledEditSearch: TLabeledEdit;
+    LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     Memo1: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemSaveDef: TMenuItem;
     MenuItemBitmapConv: TMenuItem;
     MenuItemExtensions: TMenuItem;
     MenuItemSettingsButton: TMenuItem;
@@ -118,8 +120,8 @@ type
     MenuItemDivider9: TMenuItem;
     MouseTimer: TTimer;
     NewsTimer: TTimer;
-    SCARHighlighter: TSynFreePascalSyn;
     FunctionListTimer: TTimer;
+    SCARHighlighter: TSynPasSyn;
     TT_Console: TToolButton;
     TT_Cut: TToolButton;
     TT_Copy: TToolButton;
@@ -240,6 +242,7 @@ type
     procedure ActionRunExecute(Sender: TObject);
     procedure ActionSaveAllExecute(Sender: TObject);
     procedure ActionSaveAsExecute(Sender: TObject);
+    procedure ActionSaveDefExecute(Sender: TObject);
     procedure ActionSaveExecute(Sender: TObject);
     procedure ActionSelectAllExecute(Sender: TObject);
     procedure ActionStopExecute(Sender: TObject);
@@ -359,14 +362,16 @@ type
     function GetIncludePath: String;
     function GetPluginPath: string;
     function GetScriptState: TScriptState;
-    function GetShowHintAuto: boolean;
+    function GetShowParamHintAuto: boolean;
+    function GetShowCodeCompletionAuto: Boolean;
     function GetSimbaNews: String;
     procedure SetExtPath(const AValue: string);
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
     procedure SetPluginPath(const AValue: string);
     procedure SetScriptPath(const AValue: string);
-    procedure SetShowHintAuto(const AValue: boolean);
+    procedure SetShowParamHintAuto(const AValue: boolean);
+    procedure SetShowCodeCompletionAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
     function LoadSettingDef(const Key, Def : string) : string;
     function CreateSetting(const Key, Value : string) : string;
@@ -398,6 +403,7 @@ type
     function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false; CheckOtherTabs : boolean = true) : boolean;
     function SaveCurrentScript : boolean;
     function SaveCurrentScriptAs : boolean;
+    function SaveCurrentScriptAsDefault : boolean;
     function CanExitOrOpen : boolean;
     function ClearScript : boolean;
     procedure RunScript;
@@ -421,7 +427,8 @@ type
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
-    property ShowHintAuto : boolean read GetShowHintAuto write SetShowHintAuto;
+    property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
+    property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
     property IncludePath : String read GetIncludePath write SetIncludePath;
     property FontPath : String read GetFontPath write SetFontPath;
     property PluginPath : string read GetPluginPath write SetPluginPath;
@@ -1163,6 +1170,7 @@ begin
   CreateSetting('Settings/MainForm/NormalSize','739:555');
   CreateSetting('Settings/FunctionList/ShowOnStart','True');
   CreateSetting('Settings/CodeHints/ShowAutomatically','True');
+  CreateSetting('Settings/CodeCompletion/ShowAutomatically','True');
   CreateSetting('Settings/SourceEditor/LazColors','True');
   CreateSetting('Settings/Extensions/FileExtension','sex');
 
@@ -1691,6 +1699,11 @@ begin
   Self.SaveCurrentScriptAs;
 end;
 
+procedure TSimbaForm.ActionSaveDefExecute(Sender: TObject);
+begin
+  Self.SaveCurrentScriptAsDefault;
+end;
+
 procedure TSimbaForm.ActionSaveExecute(Sender: TObject);
 begin
   Self.SaveCurrentScript;
@@ -2093,7 +2106,6 @@ begin
   //AutoCompletionStart := Point(-1, -1);
   CodeCompletionForm := TAutoCompletePopup.Create(Self);
   CodeCompletionForm.InsertProc := @OnCompleteCode;
-
   ParamHint := TParamHint.Create(self);
 
   {$ifdef MSWindows}
@@ -2580,9 +2592,14 @@ begin
   result := CurrScript.FScriptState;
 end;
 
-function TSimbaForm.GetShowHintAuto: boolean;
+function TSimbaForm.GetShowParamHintAuto: boolean;
 begin
   Result := LowerCase(LoadSettingDef('Settings/CodeHints/ShowAutomatically','True')) = 'true';
+end;
+
+function TSimbaForm.GetShowCodeCompletionAuto: boolean;
+begin
+  Result := LowerCase(LoadSettingDef('Settings/CodeCompletion/ShowAutomatically','True')) = 'true';
 end;
 
 procedure TSimbaForm.SetFontPath(const AValue: String);
@@ -2755,9 +2772,14 @@ begin
   TThread.Synchronize(nil,@HandleScriptStartData);
 end;
 
-procedure TSimbaForm.SetShowHintAuto(const AValue: boolean);
+procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
 begin
-  SetSetting('Settings/CodeHints/ShowAutomatically',Booltostr(AValue,true));
+  SetSetting('Settings/CodeHints/ShowAutomatically', Booltostr(AValue,true));
+end;
+
+procedure TSimbaForm.SetShowCodeCompletionAuto(const AValue: boolean);
+begin
+  SetSetting('Settings/CodeCompletion/ShowAutomatically', Booltostr(AValue,true));
 end;
 
 {$ifdef mswindows}
@@ -2844,6 +2866,7 @@ end;
 
 function TSimbaForm.OpenScript: boolean;
 var
+  i: Integer;
   OpenInNewTab : boolean;
 begin
   Result := False;
@@ -2853,11 +2876,19 @@ begin
       Exit;
   with TOpenDialog.Create(nil) do
   try
-    Filter:= 'Simba Files|*.Simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
+    Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
+    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
              '|Any files|*.*';
     if Execute then
-      if FileExistsUTF8(filename) then
-        result := LoadScriptFile(filename);
+    begin
+      Result := True;
+      for i := 0 to Files.Count - 1 do
+        if (not FileExistsUTF8(Files[i])) or (not LoadScriptFile(Files[i])) then
+        begin
+          Result := False;
+          Break;
+        end;
+    end;
   finally
     Free;
   end;
@@ -2950,6 +2981,21 @@ begin
     end;
   finally
     free;
+  end;
+end;
+
+function TSimbaForm.SaveCurrentScriptAsDefault : boolean;
+begin
+  with CurrScript do
+  begin
+    try
+      SynEdit.Lines.SaveToFile(MainDir + DS + 'default.simba');
+      mDebugLn('Script saved as default.');
+      Result := True;
+    except
+      mDebugLn('Cannot save script as default.');
+      Result := False;
+    end;
   end;
 end;
 
