@@ -359,14 +359,16 @@ type
     function GetIncludePath: String;
     function GetPluginPath: string;
     function GetScriptState: TScriptState;
-    function GetShowHintAuto: boolean;
+    function GetShowParamHintAuto: boolean;
+    function GetShowCodeCompletionAuto: Boolean;
     function GetSimbaNews: String;
     procedure SetExtPath(const AValue: string);
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
     procedure SetPluginPath(const AValue: string);
     procedure SetScriptPath(const AValue: string);
-    procedure SetShowHintAuto(const AValue: boolean);
+    procedure SetShowParamHintAuto(const AValue: boolean);
+    procedure SetShowCodeCompletionAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
     function LoadSettingDef(const Key, Def : string) : string;
     function CreateSetting(const Key, Value : string) : string;
@@ -421,7 +423,8 @@ type
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
-    property ShowHintAuto : boolean read GetShowHintAuto write SetShowHintAuto;
+    property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
+    property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
     property IncludePath : String read GetIncludePath write SetIncludePath;
     property FontPath : String read GetFontPath write SetFontPath;
     property PluginPath : string read GetPluginPath write SetPluginPath;
@@ -1163,6 +1166,7 @@ begin
   CreateSetting('Settings/MainForm/NormalSize','739:555');
   CreateSetting('Settings/FunctionList/ShowOnStart','True');
   CreateSetting('Settings/CodeHints/ShowAutomatically','True');
+  CreateSetting('Settings/CodeCompletion/ShowAutomatically','True');
   CreateSetting('Settings/SourceEditor/LazColors','True');
   CreateSetting('Settings/Extensions/FileExtension','sex');
 
@@ -2580,9 +2584,14 @@ begin
   result := CurrScript.FScriptState;
 end;
 
-function TSimbaForm.GetShowHintAuto: boolean;
+function TSimbaForm.GetShowParamHintAuto: boolean;
 begin
   Result := LowerCase(LoadSettingDef('Settings/CodeHints/ShowAutomatically','True')) = 'true';
+end;
+
+function TSimbaForm.GetShowCodeCompletionAuto: boolean;
+begin
+  Result := LowerCase(LoadSettingDef('Settings/CodeCompletion/ShowAutomatically','True')) = 'true';
 end;
 
 procedure TSimbaForm.SetFontPath(const AValue: String);
@@ -2755,9 +2764,14 @@ begin
   TThread.Synchronize(nil,@HandleScriptStartData);
 end;
 
-procedure TSimbaForm.SetShowHintAuto(const AValue: boolean);
+procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
 begin
-  SetSetting('Settings/CodeHints/ShowAutomatically',Booltostr(AValue,true));
+  SetSetting('Settings/CodeHints/ShowAutomatically', Booltostr(AValue,true));
+end;
+
+procedure TSimbaForm.SetShowCodeCompletionAuto(const AValue: boolean);
+begin
+  SetSetting('Settings/CodeCompletion/ShowAutomatically', Booltostr(AValue,true));
 end;
 
 {$ifdef mswindows}
