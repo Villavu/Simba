@@ -2390,8 +2390,8 @@ begin
         Result := tokCompDirect;
     55:
       if KeyComp('LOADLIB') then
-        result := tokIncludeDirect else
-        result := tokCompDirect;
+        Result := tokIncludeDirect else
+        Result := tokCompDirect;
     56:
       if KeyComp('ELSEIF') then
         Result := tokElseIfDirect else
@@ -2405,8 +2405,11 @@ begin
         Result := tokIncludeDirect else
         Result := tokCompDirect;
     104:
-      if KeyComp('Resource') then
+      if KeyComp('RESOURCE') then
         Result := tokResourceDirect else
+        Result := tokCompDirect;
+    136: if KeyComp('INCLUDE_ONCE') then
+        Result := tokIncludeDirect else
         Result := tokCompDirect;
   else Result := tokCompDirect;
   end;
