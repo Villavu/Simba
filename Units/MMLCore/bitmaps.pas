@@ -966,12 +966,11 @@ var
 begin
   if Resize then
     Self.SetSize(xe-xs+1 + x,ye-ys+1 + y);
-
-  wi := Min(xe-xs + 1 + x,Self.w);
-  hi := Min(ye-ys + 1 + y,Self.h);
-  PtrRet := TIOManager_Abstract(MWindow).ReturnData(xs,ys,wi - x,hi - y);
-
-  for yy := 0 to (hi-1 - y) do
+  ValidatePoint(x,y);
+  wi := Min(xe-xs + 1 + x,Self.w)-x;
+  hi := Min(ye-ys + 1 + y,Self.h)-y;
+  PtrRet := TIOManager_Abstract(MWindow).ReturnData(xs,ys,wi,hi);
+  for yy := 0 to (hi-1) do
     Move(PtrRet.Ptr[yy * (PtrRet.RowLen)], FData[(yy + y) * self.w + x],wi * SizeOf(TRGB32));
   TIOManager_Abstract(MWindow).FreeReturnData;
 end;

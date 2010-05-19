@@ -175,6 +175,11 @@ begin
 end;
 
 
+procedure TMufasaBitmapCopyClientToBitmap(self : TMufasaBitmap; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);
+begin
+  self.CopyClientToBitmap(SimbaForm.Manager,resize,x,y,xs,ys,xe,ye);
+end;
+
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 begin
   SIRegister_Std(x);
@@ -199,6 +204,8 @@ begin
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
   RIRegister_MML(x);
+  with x.FindClass('TMufasaBitmap') do
+    RegisterMethod(@TMufasaBitmapCopyClientToBitmap,'CopyClientToBitmap');
 end;
 
 destructor TSimbaPSExtension.Destroy;

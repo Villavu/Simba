@@ -204,14 +204,14 @@ uses
   colour_conv,dtmutil,
   {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
-  uPSC_extctrls, //Compile-libs
+  uPSC_extctrls, uPSC_mml, //Compile-libs
   uPSUtils,
   fontloader,
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
 
-  uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
+  uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs,
   files,
   dialogs,
@@ -666,8 +666,6 @@ begin
       '{$IFDEF __REMOVE_IS_INCLUDE}{$UNDEF IS_INCLUDE}{$ENDIF}';
 end;
 
-{$I PSInc/pscmml.inc}
-
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
 begin
   SIRegister_MML(cl);
@@ -714,7 +712,6 @@ begin
   end;
 end;
 
-{$I PSInc/psrmml.inc}
 function TMufasaBitmapCreate : TMufasaBitmap;
 begin;
   result := TMufasaBitmap.Create;
@@ -725,6 +722,10 @@ function TMufasaBitmapCopy(Self : TMufasaBitmap;const xs,ys,xe,ye : integer) : T
 begin
   result := Self.Copy(xs,ys,xe,ye);
   CurrThread.Client.MBitmaps.AddBMP(result);
+end;
+procedure TMufasaBitmapCopyClientToBitmap(self : TMufasaBitmap; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);
+begin
+  self.CopyClientToBitmap(CurrThread.Client.IOManager,resize,x,y,xs,ys,xe,ye);
 end;
 function TMDTMCreate : TMDTM;
 begin
@@ -745,6 +746,7 @@ begin
     RegisterConstructor(@TMufasaBitmapCreate,'Create');
     RegisterMethod(@TMufasaBitmapFree,'Free');
     RegisterMethod(@TMufasaBitmapCopy,'Copy');
+    RegisterMethod(@TMufasaBitmapCopyClientToBitmap,'CopyClientToBitmap');
   end;
   With cl.FindClass('TMDTM') do
   begin

@@ -58,6 +58,7 @@ interface
         procedure ActivateClient; override;
         procedure GetMousePosition(var x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
+        procedure ScrollMouse(x,y, lines : integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
@@ -290,6 +291,24 @@ implementation
     y := y + rect.top;
     Windows.SetCursorPos(x, y);
   end;
+
+const
+  MOUSEEVENTF_WHEEL = $800;
+procedure TWindow.ScrollMouse(x, y, lines: integer);
+var
+  Input : TInput;
+  Rect : TRect;
+begin
+  WindowRect(rect);
+  Input.Itype:= INPUT_MOUSE;
+  FillChar(Input,Sizeof(Input),0);
+  Input.mi.dx:= x + Rect.left;
+  Input.mi.dy:= y + Rect.Top;
+  Input.mi.dwFlags:= MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_WHEEL;
+  Input.mi.mouseData:= lines * WHEEL_DELTA;
+  SendInput(1,Input, sizeof(Input));
+end;
+
   procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
   var
     Input : TInput;
