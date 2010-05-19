@@ -587,7 +587,6 @@ procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean);
 begin
-  Continue := ProcessDirective(DirectiveName, DirectiveParam);
 end;
 
 function TPSThread.PSScriptFindUnknownFile(Sender: TObject;
