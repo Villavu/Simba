@@ -1,3 +1,15 @@
+unit uPSR_mml;
+
+interface
+uses
+  uPSRuntime;
+
+procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
+
+implementation
+uses
+  SynRegExpr,bitmaps,dtm,mufasatypes,settingssandbox;
+
 type
   TRegExp = class(SynRegExpr.TRegExpr);
 procedure MBmp_Index_r(self : TMufasaBitmap; var Index : integer);begin;  Index := self.Index; end;
@@ -49,6 +61,7 @@ procedure TRegExprExpression_R(Self: TRegExp; var T: RegExprString);begin T := S
 procedure TMDTMCount_W(Self: TMDTM; const T: Integer);begin Self.Count := T; end;
 procedure TMDTMCount_R(Self: TMDTM; var T: Integer);begin T := Self.Count; end;
 procedure TMDTMPoints_R(Self : TMDTM; var T : TMDTMPointArray); begin t := self.Points; end;
+procedure SettingsPrefix(self : TMMLSettingsSandbox; var Prefix : String);begin; Prefix := self.Prefix; end;
 
 procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 var
@@ -144,6 +157,20 @@ begin;
     Registermethod(@TMDTM.MovePoint,'MovePoint');
     RegisterMethod(@TMDTM.AddPoint,'AddPoint');
     RegisterPropertyHelper(@TMDTMCount_R,@TMDTMCount_W,'Count');
-    RegisterMethod(@TMDTMPoints_R,nil,'Points');
+    RegisterPropertyHelper(@TMDTMPoints_R,nil,'Points');
+  end;
+  with cl.Add(TMMLSettingsSandbox) do
+  begin
+    RegisterMethod(@TMMLSettingsSandbox.IsKey,'ISKEY');
+    RegisterMethod(@TMMLSettingsSandbox.IsDirectory,'ISDIRECTORY');
+    RegisterMethod(@TMMLSettingsSandbox.SetKeyValue,'SETKEYVALUE');
+    RegisterMethod(@TMMLSettingsSandbox.GetKeyValue,'GETKEYVALUE');
+    RegisterMethod(@TMMLSettingsSandbox.GetKeyValueDef,'GETKEYVALUEDEF');
+    RegisterMethod(@TMMLSettingsSandbox.ListKeys,'LISTKEYS');
+    RegisterMethod(@TMMLSettingsSandbox.DeleteKey,'DELETEKEY');
+    RegisterMethod(@TMMLSettingsSandbox.DeleteSubKeys,'DELETESUBKEYS');
+    RegisterPropertyHelper(@SettingsPrefix,nil,'Prefix');
   end;
 end;
+
+end.
