@@ -120,6 +120,7 @@ function SDTMToMDTM(Const DTM: TSDTM): TMDTM;
 var
    I: Integer;
 begin
+  Result := TMDTM.Create;
   Result.Count := Length(DTM.SubPoints) + 1; //The mainpoint is in a different structure
 
   Result.Points[0].x   := DTM.MainPoint.x;
@@ -145,7 +146,7 @@ procedure NormalizeDTM(var dtm: TMDTM);
 var
    i:integer;
 begin
-  if (dtm.count < 1) or ((dtm.Points[0].x = 0) and (dtm.Points[0].y = 0)) then  //Already normalized
+  if (dtm = nil) or (dtm.count < 1) or ((dtm.Points[0].x = 0) and (dtm.Points[0].y = 0)) then  //Already normalized
     exit;
   for i := 1 to dtm.Count - 1 do
   begin
