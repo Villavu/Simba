@@ -61,6 +61,7 @@ procedure TRegExprExpression_R(Self: TRegExp; var T: RegExprString);begin T := S
 procedure TMDTMCount_W(Self: TMDTM; const T: Integer);begin Self.Count := T; end;
 procedure TMDTMCount_R(Self: TMDTM; var T: Integer);begin T := Self.Count; end;
 procedure TMDTMPoints_R(Self : TMDTM; var T : TMDTMPointArray); begin t := self.Points; end;
+procedure TMDTMIndex_R(Self : TMDTM; var T : integer); begin t := self.Index; end;
 procedure SettingsPrefix(self : TMMLSettingsSandbox; var Prefix : String);begin; Prefix := self.Prefix; end;
 
 
@@ -163,6 +164,7 @@ begin
     RegisterMethod(@TMDTM.AddPoint,'AddPoint');
     RegisterPropertyHelper(@TMDTMCount_R,@TMDTMCount_W,'Count');
     RegisterPropertyHelper(@TMDTMPoints_R,nil,'Points');
+    RegisterPropertyHelper(@TMDTMIndex_r,nil,'Index');
   end;
 end;
 procedure RIRegister_TMMLSettingsSandbox(cl : TPSRuntimeClassImporter);
