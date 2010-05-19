@@ -28,21 +28,21 @@ unit dtmutil;
 interface
 
 uses
-  Classes, SysUtils, MufasaTypes;
+  Classes, SysUtils, dtm,tpa,MufasaTypes;
 
 
-function pDTMToTDTM(Const DTM: pDTM): TDTM;
-function tDTMTopDTM(Const DTM: TDTM): pDTM;
-procedure PrintpDTM(const aDTM : pDTM);
+function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
+function SDTMToMDTM(Const DTM: TSDTM): TMDTM;
+procedure PrintDTM(const aDTM : TMDTM);
 
-procedure initdtm(out d: pdtm; len: integer);
-function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
-function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;const
+{procedure iniTSDTM(out d: TMDTM; len: integer);}
+function ValidMainPointBox(var dtm: TMDTM; const x1, y1, x2, y2: Integer): TBox;
+function ValidMainPointBox(const TPA: TPointArray; const x1, y1, x2, y2: Integer): TBox;
+function ValidMainPointBoxRotated(var dtm: TMDTM; const x1, y1, x2, y2: Integer;const
                                   sAngle, eAngle, aStep: Extended): TBox;
-function DTMConsistent(const dtm: pdtm): boolean;
-procedure NormalizeDTM(var dtm: pdtm);
-function RotateDTM(const dtm: pdtm; angle: extended) : pdtm;
-function copydtm(const dtm: pdtm): pdtm;
+procedure NormalizeDTM(var dtm: TMDTM);
+{function RotateDTM(const dtm: TMDTM; angle: extended) : TMDTM;
+function copydtm(const dtm: TMDTM): TMDTM;                     }
 
 const
     dtm_Rectangle = 0;
@@ -71,164 +71,99 @@ Begin
   // I recon it's faster than Point().
 End;
 
-// macro
-procedure initdtm(out d: pdtm; len: integer);
-var
-   i: integer = 0;
-begin
-  d.l := len;
-  d.n := '';
-  setlength(d.p, len);
-  setlength(d.c, len);
-  setlength(d.t, len);
-  setlength(d.ash, len);
-  setlength(d.asz, len);
-  setlength(d.bp, len);
 
-  FillChar(d.p[0], SizeOf(TPoint) * len, 0);
-  FillChar(d.c[0], SizeOf(Integer) * len, 0);
-  FillChar(d.t[0], SizeOf(Integer) * len, 0);
-  FillChar(d.ash[0], SizeOf(Integer) * len, 0);
 
-  // Better set it to 1, than fill with 0.
-  FillChar(d.asz[0], SizeOf(Integer) * len, 0);
-
-  //FillChar(d.gp[0], SizeOf(Boolean) * len, 0);
-  for i := 0 to len - 1 do
-    d.bp[i] := False;
-end;
-
-procedure PrintpDTM(const aDTM : pDTM);
+procedure PrintDTM(const aDTM : TMDTM);
 var
   i : integer;
 begin;
   i := 0;
-  if aDTM.l = 0 then
+  if aDTM.count = 0 then
     exit;
-  if adtm.n <> '' then
-    mDebugLn('Name: ' + aDTM.n);
-  mDebugLn('MainPoint ' + inttostr(aDTM.p[i].x) + ', ' + inttostr(aDTM.p[i].y) + ' col: ' + inttostr(aDTM.c[i]) + ', tol: ' + inttostr(aDTM.t[i]) + '; ashape ' + inttostr(aDTM.ash[i]) + ' asize ' + inttostr(aDTM.asz[i])+ ', Bad Point: ' + BoolToStr(aDTM.bp[i]));
-  for I := 1 to High(aDTM.p) do
-    mDebugLn('SubPoint['+IntToStr(I) + '] ' + inttostr(aDTM.p[i].x) + ', ' + inttostr(aDTM.p[i].y) + ' col: ' + inttostr(aDTM.c[i]) + ', tol: ' + inttostr(aDTM.t[i]) + '; ashape ' + inttostr(aDTM.ash[i]) + ' asize ' + inttostr(aDTM.asz[i]) + ', Bad Point: ' + BoolToStr(aDTM.bp[i]));
+  if adtm.Name <> '' then
+    mDebugLn('Name: ' + aDTM.name);
+  mDebugLn('MainPoint ' + inttostr(aDTM.Points[i].x) + ', ' + inttostr(aDTM.Points[i].y) + ' col: ' + inttostr(aDTM.Points[i].c) + ', tol: ' + inttostr(aDTM.Points[i].t) + ', asize: ' + inttostr(aDTM.Points[i].asz)+ ', Bad Point: ' + BoolToStr(aDTM.Points[i].bp));
+  for I := 1 to High(aDTM.Points) do
+    mDebugLn('SubPoint['+IntToStr(I) + '] ' + inttostr(aDTM.Points[i].x) + ', ' + inttostr(aDTM.Points[i].y) + ' col: ' + inttostr(aDTM.Points[i].c) + ', tol: ' + inttostr(aDTM.Points[i].t) +', asize: ' + inttostr(aDTM.Points[i].asz) + ', Bad Point: ' + BoolToStr(aDTM.Points[i].bp));
 end;
 
-function pDTMToTDTM(Const DTM: pDTM): TDTM;
+function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
 
 Var
-   Temp: TDTMPointDef;
+   Temp: TSDTMPointDef;
    I: Integer;
 
 Begin
   For I := 0 To 0 Do
   Begin
-    Temp.X := DTM.p[i].x;
-    Temp.Y := DTM.p[i].y;
-    Temp.AreaSize := DTM.asz[i];
-    Temp.AreaShape := DTM.ash[i];
-    Temp.Color := DTM.c[i];
-    Temp.Tolerance := DTM.t[i];
+    Temp.X := DTM.Points[i].x;
+    Temp.Y := DTM.Points[i].y;
+    Temp.AreaSize := DTM.Points[i].asz;
+    Temp.AreaShape := 0;
+    Temp.Color := DTM.Points[i].c;
+    Temp.Tolerance := DTM.Points[i].t;
   End;
   Result.MainPoint := Temp;
-  SetLength(Result.SubPoints, Length(DTM.p) - 1);
+  SetLength(Result.SubPoints, DTM.Count - 1);
 
-  For I := 1 To DTM.l-1 Do
+  For I := 1 To DTM.Count-1 Do
   Begin
     Temp.X := 0; Temp.Y := 0; Temp.AreaSize := 0; Temp.AreaShape := 0; Temp.Color := 0; Temp.Tolerance := 0;
-    Temp.X := DTM.p[i].x;
-    Temp.Y := DTM.p[i].y;
-    Temp.AreaSize := DTM.asz[i];
-    Temp.AreaShape := DTM.ash[i];
-    Temp.Color := DTM.c[i];
-    Temp.Tolerance := DTM.t[i];
+    Temp.X := DTM.Points[i].x;
+    Temp.Y := DTM.Points[i].y;
+    Temp.AreaSize := DTM.Points[i].asz;
+    Temp.AreaShape := 0;
+    Temp.Color := DTM.Points[i].c;
+    Temp.Tolerance := DTM.Points[i].t;
     Result.SubPoints[I - 1] := Temp;
   End;
 End;
 
 {/\
-  Converts a TDTM to a pDTM.
+  Converts a TSDTM to a TMDTM.
 /\}
 
-function tDTMTopDTM(Const DTM: TDTM): pDTM;
+function SDTMToMDTM(Const DTM: TSDTM): TMDTM;
 var
    I: Integer;
 begin
-  Result.l := Length(DTM.SubPoints) + 1; //The mainpoint is in a different structure
-  SetLength(Result.p, Result.l);
-  SetLength(Result.c, Result.l);
-  SetLength(Result.t, Result.l);
-  SetLength(Result.asz, Result.l);
-  SetLength(Result.ash, Result.l);
-  SetLength(Result.bp, Result.l);
+  Result.Count := Length(DTM.SubPoints) + 1; //The mainpoint is in a different structure
 
-  Result.p[0].x := DTM.MainPoint.x;
-  Result.p[0].y := DTM.MainPoint.y;
-  Result.c[0]   := DTM.MainPoint.Color;
-  Result.t[0]   := DTM.MainPoint.Tolerance;
-  Result.asz[0] := DTM.MainPoint.AreaSize;
-  Result.ash[0] := DTM.MainPoint.AreaShape;
+  Result.Points[0].x   := DTM.MainPoint.x;
+  Result.Points[0].y   := DTM.MainPoint.y;
+  Result.Points[0].c   := DTM.MainPoint.Color;
+  Result.Points[0].t   := DTM.MainPoint.Tolerance;
+  Result.Points[0].asz := DTM.MainPoint.AreaSize;
 
-  For I := 1 To Result.l - 1 Do  // High + 1 = Length
+  For I := 1 To Result.Count - 1 Do  // High + 1 = Length
   Begin
-    Result.p[I].x := DTM.SubPoints[I - 1].x;
-    Result.p[I].y := DTM.SubPoints[I - 1].y;
-    Result.c[I]   := DTM.SubPoints[I - 1].Color;
-    Result.t[I]   := DTM.SubPoints[I - 1].Tolerance;
-    Result.asz[I] := DTM.SubPoints[I - 1].AreaSize;
-    Result.ash[I] := DTM.SubPoints[I - 1].AreaShape;
+    Result.Points[I].x   := DTM.SubPoints[I - 1].x;
+    Result.Points[I].y   := DTM.SubPoints[I - 1].y;
+    Result.Points[I].c   := DTM.SubPoints[I - 1].Color;
+    Result.Points[I].t   := DTM.SubPoints[I - 1].Tolerance;
+    Result.Points[I].asz := DTM.SubPoints[I - 1].AreaSize;
   End;
 
-  setlength(result.bp, result.l);
-  for i := 0 to result.l -1 do
-    result.bp[i] := false;
+  for i := 0 to result.Count -1 do
+    result.Points[i].bp := false;
 end;
 
-{ TODO: Check if bounds are correct? }
-function DTMConsistent(const dtm: pdtm): boolean;
-var
-   i: integer;
-begin
-  if dtm.l = 0 then
-    Exit(False);
-  if dtm.l <> length(dtm.p) then
-    Exit(False);
-  if dtm.l <> length(dtm.c) then
-    Exit(False);
-  if dtm.l <> length(dtm.t) then
-    Exit(False);
-  if dtm.l <> length(dtm.asz) then
-    Exit(False);
-  if dtm.l <> length(dtm.ash) then
-    Exit(False);
-  if dtm.l <> length(dtm.bp) then
-    Exit(False);
-  for i := 0 to dtm.l-1 do
-    if dtm.asz[i] < 0 then
-      Exit(False);
-  for i := 0 to dtm.l-1 do
-    if dtm.c[i] < 0 then
-      Exit(False);
-  for i := 0 to dtm.l-1 do
-    if dtm.t[i] < 0 then
-      Exit(False);
-  for i := 0 to dtm.l-1 do
-    if dtm.ash[i] < 0 then
-      Exit(False);
-  Exit(True);
-end;
-
-procedure NormalizeDTM(var dtm: pdtm);
+procedure NormalizeDTM(var dtm: TMDTM);
 var
    i:integer;
 begin
-  // we don't need this check really...
-  {if dtm.p[0] = Point(0,0) then  //Already normalized
-    exit;}
-  for i := 1 to dtm.l - 1 do
-    dtm.p[i] := dtm.p[i] - dtm.p[0];
-  dtm.p[0] := dtm.p[0] - dtm.p[0]; //Point(0,0);
+  if (dtm.count < 1) or ((dtm.Points[0].x = 0) and (dtm.Points[0].y = 0)) then  //Already normalized
+    exit;
+  for i := 1 to dtm.Count - 1 do
+  begin
+    dtm.Points[i].x := dtm.Points[i].x - dtm.Points[0].x;
+    dtm.Points[i].y := dtm.Points[i].y - dtm.Points[0].y;
+  end;
+  dtm.Points[0].x := 0;
+  dtm.Points[0].y := 0;
 end;
 
-function ValidMainPointBox(var dtm: pDTM; const x1, y1, x2, y2: Integer): TBox;
+function ValidMainPointBox(var dtm: TMDTM; const x1, y1, x2, y2: Integer): TBox;
 
 var
    i: Integer;
@@ -240,12 +175,12 @@ begin
   FillChar(b, SizeOf(TBox), 0); //Sets all the members to 0
   b.x1 := MaxInt;
   b.y1 := MaxInt;
-  for i := 0 to dtm.l - 1 do
+  for i := 0 to dtm.Count - 1 do
   begin
-    b.x1 := min(b.x1, dtm.p[i].x);// - dtm.asz[i]);
-    b.y1 := min(b.y1, dtm.p[i].y);// - dtm.asz[i]);
-    b.x2 := max(b.x2, dtm.p[i].x);// + dtm.asz[i]);
-    b.y2 := max(b.y2, dtm.p[i].y);// + dtm.asz[i]);
+    b.x1 := min(b.x1, dtm.Points[i].x);// - dtm.asz[i]);
+    b.y1 := min(b.y1, dtm.Points[i].y);// - dtm.asz[i]);
+    b.x2 := max(b.x2, dtm.Points[i].x);// + dtm.asz[i]);
+    b.y2 := max(b.y2, dtm.Points[i].y);// + dtm.asz[i]);
   end;
 
   //writeln(Format('DTM Bounding Box: %d, %d : %d, %d', [b.x1, b.y1,b.x2,b.y2]));
@@ -254,8 +189,19 @@ begin
   Result.x2 := x2 - b.x2;
   Result.y2 := y2 - b.y2;
 end;
+function ValidMainPointBox(const TPA: TPointArray; const x1, y1, x2, y2: Integer): TBox;
+var
+  i: Integer;
+  b: TBox;
+begin
+  b := GetTPABounds(TPA);
+  Result.x1 := x1 - b.x1;
+  Result.y1 := y1 - b.y1;
+  Result.x2 := x2 - b.x2;
+  Result.y2 := y2 - b.y2;
+end;
 
-function ValidMainPointBoxRotated(var dtm: pDTM; const x1, y1, x2, y2: Integer;
+function ValidMainPointBoxRotated(var dtm: TMDTM; const x1, y1, x2, y2: Integer;
                                   const sAngle, eAngle, aStep: Extended): TBox;
 
 var
@@ -280,17 +226,17 @@ begin
   Result.y2 := y2 - ceil(d);
 end;
 
-function RotateDTM(const dtm: pdtm; angle: extended) : pDTM;
+{function RotateDTM(const dtm: TMDTM; angle: extended) : TMDTM;
 begin
-  if length(dtm.p) = 0 then
+  if DTM.c then
     raise Exception.Create('RotateDTM, no points in DTM.');
   result := copydtm(dtm);
   RotatePoints_(result.p, angle, result.p[0].x, result.p[0].y);
-end;
+end;    }
 
-function copydtm(const dtm: pdtm): pdtm;
+{function copydtm(const dtm: TMDTM): TMDTM;
 begin
-  initdtm(result,dtm.l);
+  iniTSDTM(result,dtm.l);
   Move(dtm.p[0], result.p[0], length(dtm.p) * sizeof(Tpoint));
   Move(dtm.c[0], result.c[0], length(dtm.c) * sizeof(Integer));
   Move(dtm.t[0], result.t[0], length(dtm.t) * sizeof(Integer));
@@ -298,7 +244,7 @@ begin
   Move(dtm.ash[0], result.ash[0], length(dtm.ash) * sizeof(Integer));
   Move(dtm.bp[0], result.bp[0], length(dtm.bp) * sizeof(Boolean));
   result.n := 'Copy of ' + dtm.n;
-end;
+end;  }
 
 end.
 

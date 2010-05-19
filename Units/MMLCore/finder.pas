@@ -30,7 +30,7 @@ interface
 
 {$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 uses
-  colour_conv, Classes, SysUtils,bitmaps,MufasaBase,  MufasaTypes; // Types
+  colour_conv, Classes, SysUtils,bitmaps,MufasaBase,DTM,  MufasaTypes; // Types
 
 { TMFinder Class }
 
@@ -84,10 +84,10 @@ type
     function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
     function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
 
-    function FindDTM(const DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
-    function FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2 : integer; maxToFind: Integer = 0): Boolean;
-    function FindDTMRotated(const DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
-    function FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer = 0): Boolean;
+    function FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+    function FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2 : integer; maxToFind: Integer = 0): Boolean;
+    function FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
+    function FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer = 0): Boolean;
     //Donno
     function GetColors(const Coords: TPointArray): TIntegerArray;
     // tol speeds
@@ -1914,7 +1914,7 @@ end;
   been found at in x, y and result to true.
 }
 
-function TMFinder.FindDTM(const DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+function TMFinder.FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
 var
    P: TPointArray;
 begin
@@ -1929,8 +1929,11 @@ begin
 end;
 
 //MaxToFind, if it's < 1 it won't stop looking
-function TMFinder.FindDTMs(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
+function TMFinder.FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
 var
+  //Cache DTM stuff
+  Len : integer;       //Len of the points
+  DPoints : PMDTMPoint; //DTM Points
    // Colours of DTMs
    clR,clG,clB : array of byte;
 
@@ -1973,16 +1976,18 @@ var
 begin
   // Is the area valid?
   DefaultOperations(x1, y1, x2, y2);
-  if not DTMConsistent(dtm) then
-    raise Exception.CreateFmt('FindDTMs: DTM[%s] is not consistent.', [DTM.n]);
+  if not DTM.Valid then
+    raise Exception.CreateFmt('FindDTMs: DTM[%s] is not valid.', [DTM.name]);
 
   // Get the area we should search in for the Main Point.
   MA := ValidMainPointBox(DTM, x1, y1, x2, y2);
-
+  //Load the DTM-cache variables
+  Len := dtm.Count;
+  DPoints:= dtm.PPoints;
   // Turn the bp into a more usable array.
-  setlength(goodPoints, dtm.l);
-  for i := 0 to dtm.l - 1 do
-    goodPoints[i] := not dtm.bp[i];
+  setlength(goodPoints, Len);
+  for i := 0 to Len - 1 do
+    goodPoints[i] := not DPoints[i].bp;
 
   // Init data structure b and ch.
   W := x2 - x1;
@@ -1999,17 +2004,17 @@ begin
   end;
 
   // C = DTM.C
-  SetLength(clR,dtm.l);
-  SetLength(clG,dtm.l);
-  SetLength(clB,dtm.l);
-  for i := 0 to DTM.l - 1 do
-    ColorToRGB(dtm.c[i],clR[i],clG[i],clB[i]);
+  SetLength(clR,Len);
+  SetLength(clG,Len);
+  SetLength(clB,Len);
+  for i := 0 to Len - 1 do
+    ColorToRGB(DPoints[i].c,clR[i],clG[i],clB[i]);
 
-  SetLength(hh,dtm.l);
-  SetLength(ss,dtm.l);
-  SetLength(ll,dtm.l);
-  for i := 0 to DTM.l - 1 do
-    ColorToHSL(dtm.c[i],hh[i],ss[i],ll[i]);
+  SetLength(hh,Len);
+  SetLength(ss,Len);
+  SetLength(ll,Len);
+  for i := 0 to Len - 1 do
+    ColorToHSL(DPoints[i].c,hh[i],ss[i],ll[i]);
 
   GetToleranceSpeed2Modifiers(hMod, sMod);
 
@@ -2033,14 +2038,14 @@ begin
     for xx := MA.x1  to MA.x2 do
     begin
       //Mainpoint can have area size as well, so we must check that just like any subpoint.
-      for i := 0 to dtm.l - 1 do
+      for i := 0 to Len - 1 do
       begin //change to use other areashapes too.
         Found := false;
         //With area it can go out of bounds, therefore this max/min check
-        StartX := max(0,xx - dtm.asz[i] + dtm.p[i].x);
-        StartY := max(0,yy - dtm.asz[i] + dtm.p[i].y);
-        EndX := Min(MaxX,xx + dtm.asz[i] + dtm.p[i].x);
-        EndY := Min(MaxY,yy + dtm.asz[i] + dtm.p[i].y);
+        StartX := max(0,xx - DPoints[i].asz + DPoints[i].x);
+        StartY := max(0,yy - DPoints[i].asz + DPoints[i].y);
+        EndX := Min(MaxX,xx + DPoints[i].asz + DPoints[i].x);
+        EndY := Min(MaxY,yy + DPoints[i].asz + DPoints[i].y);
         for xxx := StartX to EndX do //The search area for the subpoint
         begin
           for yyy := StartY to EndY do
@@ -2050,8 +2055,8 @@ begin
             begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
-//              if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), dtm.t[i]) then
-              if ColorSame(ccts,dtm.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
+//              if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), DPoints[i].t) then
+              if ColorSame(ccts,DPoints[i].t,clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
                 b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
 
@@ -2088,7 +2093,7 @@ begin
   Result := (pc > 0);
 end;
 
-function TMFinder.FindDTMRotated(const DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
+function TMFinder.FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
 
 var
    P: TPointArray;
@@ -2103,9 +2108,25 @@ begin
   Exit(True);
 end;
 
-function TMFinder.FindDTMsRotated(DTM: pDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer): Boolean;
+procedure RotPoints_DTM(const P: TPointArray;var RotTPA : TPointArray; const A: Extended);
 var
-   DTMRot: pDTM;
+   I, L: Integer;
+begin
+  L := High(P);
+  for I := 0 to L do
+  begin
+    RotTPA[I].X := Round(cos(A) * p[i].x  - sin(A) * p[i].y);
+    RotTPA[I].Y := Round(sin(A) * p[i].x  + cos(A) * p[i].y);
+  end;
+end;
+
+function TMFinder.FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer): Boolean;
+var
+  //Cached variables
+  Len : integer;
+  DPoints : PMDTMPoint;
+  DTPA : TPointArray;
+  RotTPA: TPointArray;
    // Colours of DTMs
    clR,clG,clB : array of byte;
 
@@ -2154,14 +2175,17 @@ var
 begin
   // Is the area valid?
   DefaultOperations(x1, y1, x2, y2);
-  if not DTMConsistent(dtm) then
-    raise Exception.CreateFmt('FindDTMs: DTM[%s] is not consistent.', [DTM.n]);
+  if not dtm.Valid then
+    raise Exception.CreateFmt('FindDTMs: DTM[%s] is not consistent.', [DTM.name]);
 
   NormalizeDTM(DTM);
 
-  setlength(goodPoints, DTM.l);
-  for i := 0 to DTM.l - 1 do
-    goodPoints[i] := not DTM.bp[i];
+  Len := DTM.Count;
+  DPoints:= DTM.PPoints;
+
+  setlength(goodPoints, Len);
+  for i := 0 to Len - 1 do
+    goodPoints[i] := not DPoints[i].bp;
 
   MaxX := x2 - x1;
   MaxY := y2 - y1;
@@ -2180,22 +2204,27 @@ begin
   end;
 
   // Convert colors to there components
-  SetLength(clR,DTM.l);
-  SetLength(clG,DTM.l);
-  SetLength(clB,DTM.l);
-  for i := 0 to DTM.l - 1 do
-    ColorToRGB(DTM.c[i],clR[i],clG[i],clB[i]);
+  SetLength(clR,Len);
+  SetLength(clG,Len);
+  SetLength(clB,Len);
+  for i := 0 to Len - 1 do
+    ColorToRGB(DPoints[i].c,clR[i],clG[i],clB[i]);
   //Compiler hints
 
-  SetLength(hh,DTM.l);
-  SetLength(ss,DTM.l);
-  SetLength(ll,DTM.l);
-  for i := 0 to DTM.l - 1 do
-    ColorToHSL(DTM.c[i],hh[i],ss[i],ll[i]);
+  SetLength(hh,Len);
+  SetLength(ss,Len);
+  SetLength(ll,Len);
+  for i := 0 to Len - 1 do
+    ColorToHSL(DPoints[i].c,hh[i],ss[i],ll[i]);
 
-  {We create a kinda 'fake' rotated DTM. This dtm only has points + len, no other crap.
-   Since this other 'crap' equals the original DTM, no need to copy that!}
-  DTMRot.l := DTM.l;
+  {
+  When we search for a rotated DTM, everything is the same, except the coordinates..
+  Therefore we create a TPA of the 'original' DTM, containing all the Points.
+  This then will be used to rotate the points}
+  SetLength(DTPA,len);
+  SetLength(RotTPA,len);
+  for i := 0 to len-1 do
+    DTPA[i] := Point(DPoints[i].x,DPoints[i].y);
 
   GetToleranceSpeed2Modifiers(hMod, sMod);
   ccts := CTS;
@@ -2215,12 +2244,11 @@ begin
     s := sAngle;
   while s < eAngle do
   begin
-//    DTMRot := RotateDTM(DTM, s);
-    DTMRot.p := RotatePoints(DTM.p,s,0,0);
+    RotPoints_DTM(DTPA,RotTPA,s);
     //DTMRot now has the same points as the original DTM, just rotated!
     //The other stuff in the structure doesn't matter, as it's the same as the original DTM..
-    //So from now on if we want to see what 'point' we're at, use DTMRot.p, for the rest just use the original DTM
-    MA := ValidMainPointBox(DTMRot, x1, y1, x2, y2);
+    //So from now on if we want to see what 'point' we're at, use RotTPA, for the rest just use the original DTM
+    MA := ValidMainPointBox(RotTPA, x1, y1, x2, y2);
     //CD(ClientData) starts at 0,0.. We must adjust the MA, since this is still based on the xs,ys,xe,ye box.
     MA.x1 := MA.x1 - x1;
     MA.y1 := MA.y1 - y1;
@@ -2231,14 +2259,14 @@ begin
       for xx := MA.x1  to MA.x2 do
       begin
         //Mainpoint can have area size as well, so we must check that just like any subpoint.
-        for i := 0 to DTMRot.l - 1 do
+        for i := 0 to Len - 1 do
         begin //change to use other areashapes too.
           Found := false;
           //With area it can go out of bounds, therefore this max/min check
-          StartX := max(0,xx - DTM.asz[i] + DTMRot.p[i].x);
-          StartY := max(0,yy - DTM.asz[i] + DTMRot.p[i].y);
-          EndX := Min(MaxX,xx + DTM.asz[i] + DTMRot.p[i].x);
-          EndY := Min(MaxY,yy + DTM.asz[i] + DTMRot.p[i].y);
+          StartX := max(0,xx - DPoints[i].asz + RotTPA[i].x);
+          StartY := max(0,yy - DPoints[i].asz + RotTPA[i].y);
+          EndX := Min(MaxX,xx + DPoints[i].asz + RotTPA[i].x);
+          EndY := Min(MaxY,yy + DPoints[i].asz + RotTPA[i].y);
           for xxx := StartX to EndX do //The search area for the subpoint
           begin
             for yyy := StartY to EndY do
@@ -2249,7 +2277,7 @@ begin
                 // Checking point i now. (Store that we matched it)
                 ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-                if ColorSame(ccts,DTM.t[i],clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
+                if ColorSame(ccts,DPoints[i].t,clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
                   b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
               end;
 
