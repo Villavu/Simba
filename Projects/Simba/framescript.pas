@@ -92,7 +92,7 @@ type
 
 implementation
 uses
-  SimbaUnit, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
+  SimbaUnit, MufasaTypes, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 var
@@ -585,6 +585,9 @@ begin
   inherited Create(TheOwner);
   OwnerSheet := TTabSheet(TheOwner);
   OwnerPage := TPageControl(OwnerSheet.Owner);
+
+  if FileExists(MainDir + DS + 'default.simba') then
+    SynEdit.Lines.LoadFromFile(MainDir + DS + 'default.simba');
   StartText:= SynEdit.Lines.text;
   ScriptDefault:= StartText;
   ScriptName:= 'Untitled';
