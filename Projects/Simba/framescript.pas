@@ -585,6 +585,7 @@ var
 begin
   inherited Create(TheOwner);
   SyncEdit := TSynPluginSyncroEdit.Create(SynEdit);
+  SimbaForm.Mufasa_Image_List.GetBitmap(28,SyncEdit.GutterGlyph);
   OwnerSheet := TTabSheet(TheOwner);
   OwnerPage := TPageControl(OwnerSheet.Owner);
 
