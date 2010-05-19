@@ -47,7 +47,7 @@ type
     MFiles: TMFiles;
     MFinder: TMFinder;
     MBitmaps : TMBitmaps;
-    MDTM: TMDTM;
+    MDTMs: TMDTMS;
     MOCR: TMOCR;
     WritelnProc : TWritelnProc;
     procedure WriteLn(s : string);
@@ -76,7 +76,7 @@ begin
   MFiles := TMFiles.Create(self);
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(self);
-  MDTM := TMDTM.Create(self);
+  MDTMs := TMDTMS.Create(self);
   MOCR := TMOCR.Create(self);
 end;
 
@@ -85,7 +85,7 @@ begin
   IOManager.SetState(True);
 
   MOCR.Free;
-  MDTM.Free;
+  MDTMs.Free;
   MBitmaps.Free;
   MFinder.Free;
   MFiles.Free;

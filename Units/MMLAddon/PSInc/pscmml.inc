@@ -1,0 +1,97 @@
+procedure SIRegister_MML(cl: TPSPascalCompiler);
+var
+  PSClass : TPSCompileTimeClass;
+begin
+  PSClass :=cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap');
+  with PSClass do
+  begin;
+    RegisterMethod('procedure SetSize(AWidth,AHeight : integer);');
+    RegisterMethod('procedure StretchResize(AWidth,AHeight : integer);');
+    RegisterMethod('procedure FastSetPixel(x,y : integer; Color : TColor);');
+    RegisterMethod('procedure FastSetPixels(TPA : TPointArray; Colors : TIntegerArray);');
+    RegisterMethod('procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);');
+    RegisterMethod('procedure DrawTPA(TPA : TPointArray; Color : TColor);');
+    RegisterMethod('function FastGetPixel(x,y : integer) : TColor;');
+    RegisterMethod('procedure Rectangle(const Box : TBox; FillCol : TColor);');
+    RegisterMethod('procedure FloodFill(const StartPT : TPoint; const SearchCol,ReplaceCol : TColor);');
+//      function FastGetPixels(TPA : TPointArray) : TIntegerArray;
+    RegisterMethod('procedure SetTransparentColor(Col : TColor);');
+    RegisterMethod('function GetTransparentColor : TColor;');
+    RegisterProperty('TransparentColorSet','Boolean',iptR);
+    RegisterMethod('procedure FastDrawClear(Color : TColor);');
+    RegisterMethod('procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);');
+    RegisterMethod('procedure FastReplaceColor(OldColor, NewColor: TColor);');
+    RegisterMethod('procedure RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );');
+    RegisterMethod('procedure Desaturate(TargetBitmap : TMufasaBitmap);');
+    RegisterMethod('procedure GreyScale(TargetBitmap : TMufasaBitmap);');
+    RegisterMethod('procedure Brightness(TargetBitmap : TMufasaBitmap; br : integer);');
+    RegisterMethod('procedure Contrast(TargetBitmap : TMufasaBitmap; co : Extended);');
+    RegisterMethod('procedure Invert(TargetBitmap : TMufasaBitmap);');
+    RegisterMethod('procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);');
+    RegisterMethod('function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap;');
+    RegisterMethod('function ToString : string;');
+    RegisterMethod('function ToTBitmap : TBitmap;');
+    RegisterMethod('function CreateTMask : TMask;');
+    RegisterMethod('constructor create');
+    RegisterMethod('procedure Free');
+    RegisterMethod('function SaveToFile(const FileName : string) :boolean;');
+    RegisterMethod('procedure LoadFromFile(const FileName : string);');
+    RegisterProperty('Width','Integer',iptR);
+    RegisterProperty('Height','Integer',iptR);
+    RegisterProperty('Index','Integer',iptR);
+    RegisterProperty('Name','String',iptRW);
+  end;
+  with CL.AddClassN(CL.FindClass('Exception'),'ERegExpr') do
+  begin
+    RegisterProperty('ErrorCode', 'integer', iptrw);
+    RegisterProperty('CompilerErrorPos', 'integer', iptrw);
+  end;
+  PSClass :=cl.AddClassN(cl.FindClass('TObject'),'TRegExp');
+  with PSClass do
+  begin
+    RegisterMethod('Constructor Create');
+    RegisterMethod('Function VersionMajor : integer');
+    RegisterMethod('Function VersionMinor : integer');
+    RegisterProperty('Expression', 'String', iptrw);
+    RegisterProperty('ModifierStr', 'String', iptrw);
+    RegisterProperty('ModifierI', 'boolean', iptrw);
+    RegisterProperty('ModifierR', 'boolean', iptrw);
+    RegisterProperty('ModifierS', 'boolean', iptrw);
+    RegisterProperty('ModifierG', 'boolean', iptrw);
+    RegisterProperty('ModifierM', 'boolean', iptrw);
+    RegisterProperty('ModifierX', 'boolean', iptrw);
+    RegisterMethod('Function Exec( const AInputString : String) : boolean;');
+    RegisterMethod('Function ExecNext : boolean');
+    RegisterMethod('Function ExecPos( AOffset : integer) : boolean');
+    RegisterProperty('InputString', 'String', iptrw);
+    RegisterMethod('Function Substitute( const ATemplate : String) : String');
+    RegisterMethod('Procedure Split( AInputStr : String; APieces : TStrings)');
+    RegisterMethod('Function Replace( AInputStr : String; const AReplaceStr : String; AUseSubstitution : boolean) : String;');
+    RegisterProperty('SubExprMatchCount', 'integer', iptr);
+    RegisterProperty('MatchPos', 'integer integer', iptr);
+    RegisterProperty('MatchLen', 'integer integer', iptr);
+    RegisterProperty('Match', 'String integer', iptr);
+    RegisterMethod('Function LastError : integer');
+    RegisterMethod('Function ErrorMsg( AErrorID : integer) : String');
+    RegisterProperty('CompilerErrorPos', 'integer', iptr);
+    RegisterProperty('SpaceChars', 'String', iptrw);
+    RegisterProperty('WordChars', 'String', iptrw);
+    RegisterProperty('LineSeparators', 'String', iptrw);
+    RegisterProperty('LinePairedSeparator', 'String', iptrw);
+    RegisterMethod('Function InvertCaseFunction( const Ch : Char) : Char');
+    RegisterProperty('InvertCase', 'TRegExprInvertCaseFunction', iptrw);
+    RegisterMethod('Procedure Compile');
+    RegisterMethod('Function Dump : String');
+  end;
+  PSClass :=cl.AddClassN(cl.FindClass('TObject'),'TMDTM');
+  with PSClass do
+  begin
+    RegisterMethod('constructor create;');
+    RegisterMethod('procedure free;');
+    RegisterProperty('Name','String',iptrw);
+    RegisterMethod('function ToString : string');
+    RegisterMethod('function Valid:boolean');
+    RegisterProperty('Count','Integer',iptrw);
+    RegisterProperty('Points','TMDTMPointArray',iptr);
+  end;
+end; 

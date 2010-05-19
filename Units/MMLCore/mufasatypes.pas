@@ -75,6 +75,7 @@ type
   T2DIntArray = array of TIntegerArray;
   T2DIntegerArray = T2DIntArray;
   TBoolArray = array of boolean;
+  TBooleanArray = TBoolArray;
   T2DBoolArray = Array of TBoolArray;
   TExtendedArray = Array of Extended;
   T2DExtendedArray = Array of Array of Extended;
@@ -109,29 +110,33 @@ type
   { not points -
     add seperate tpa or boolean array for every point that is to be matched ?
    }
-
-  pDTM = record
-    l: Integer;
-    p: TPointArray;
-    c, t, asz, ash: TIntegerArray;
-    bp: Array Of Boolean;
-    n: String;    // DOEN
+   {
+     x,y : Coordinates;
+     c : Color;
+     t : Tolerance;
+     Asz: Area size;
+     bp: Bad Point;
+   }
+  TMDTMPoint = record //TMufasaDTMPoint
+    x,y,c,t,asz : integer;
+    bp : boolean;
   end;
 
-  PpDTM = ^pDTM;
+  PMDTMPoint = ^TMDTMPoint; //PointerMufasaDTMPoint
+  TMDTMPointArray = array of TMDTMPoint; //TMufasaDTMPointArray
 
 
   { Other DTM Types }
 
-  TDTMPointDef = record
+  TSDTMPointDef = record
     x, y, Color, Tolerance, AreaSize, AreaShape: integer;
   end;
 
-  TDTMPointDefArray = Array Of TDTMPointDef;
+  TSDTMPointDefArray = Array Of TSDTMPointDef;
 
-  TDTM = record
-    MainPoint: TDTMPointDef;
-    SubPoints: TDTMPointDefArray;
+  TSDTM = record
+    MainPoint: TSDTMPointDef;
+    SubPoints: TSDTMPointDefArray;
   end;
 
   TWritelnProc = procedure(s: string);
