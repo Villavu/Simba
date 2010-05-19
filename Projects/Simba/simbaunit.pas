@@ -2866,6 +2866,7 @@ end;
 
 function TSimbaForm.OpenScript: boolean;
 var
+  i: Integer;
   OpenInNewTab : boolean;
 begin
   Result := False;
@@ -2875,11 +2876,19 @@ begin
       Exit;
   with TOpenDialog.Create(nil) do
   try
-    Filter:= 'Simba Files|*.Simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
+    Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
+    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
              '|Any files|*.*';
     if Execute then
-      if FileExistsUTF8(filename) then
-        result := LoadScriptFile(filename);
+    begin
+      Result := True;
+      for i := 0 to Files.Count - 1 do
+        if (not FileExistsUTF8(Files[i])) or (not LoadScriptFile(Files[i])) then
+        begin
+          Result := False;
+          Break;
+        end;
+    end;
   finally
     Free;
   end;
