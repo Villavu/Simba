@@ -117,6 +117,9 @@ type
      Asz: Area size;
      bp: Bad Point;
    }
+const
+  TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
+type
   TMDTMPoint = record //TMufasaDTMPoint
     x,y,c,t,asz : integer;
     bp : boolean;
