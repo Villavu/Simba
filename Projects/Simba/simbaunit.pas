@@ -67,6 +67,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionSaveDef: TAction;
     ActionConsole: TAction;
     ActionNormalSize: TAction;
     ActionCompileScript: TAction;
@@ -104,6 +105,7 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemSaveDef: TMenuItem;
     MenuItemBitmapConv: TMenuItem;
     MenuItemExtensions: TMenuItem;
     MenuItemSettingsButton: TMenuItem;
@@ -240,6 +242,7 @@ type
     procedure ActionRunExecute(Sender: TObject);
     procedure ActionSaveAllExecute(Sender: TObject);
     procedure ActionSaveAsExecute(Sender: TObject);
+    procedure ActionSaveDefExecute(Sender: TObject);
     procedure ActionSaveExecute(Sender: TObject);
     procedure ActionSelectAllExecute(Sender: TObject);
     procedure ActionStopExecute(Sender: TObject);
@@ -400,6 +403,7 @@ type
     function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false; CheckOtherTabs : boolean = true) : boolean;
     function SaveCurrentScript : boolean;
     function SaveCurrentScriptAs : boolean;
+    function SaveCurrentScriptAsDefault : boolean;
     function CanExitOrOpen : boolean;
     function ClearScript : boolean;
     procedure RunScript;
@@ -1695,6 +1699,11 @@ begin
   Self.SaveCurrentScriptAs;
 end;
 
+procedure TSimbaForm.ActionSaveDefExecute(Sender: TObject);
+begin
+  Self.SaveCurrentScriptAsDefault;
+end;
+
 procedure TSimbaForm.ActionSaveExecute(Sender: TObject);
 begin
   Self.SaveCurrentScript;
@@ -2963,6 +2972,21 @@ begin
     end;
   finally
     free;
+  end;
+end;
+
+function TSimbaForm.SaveCurrentScriptAsDefault : boolean;
+begin
+  with CurrScript do
+  begin
+    try
+      SynEdit.Lines.SaveToFile(MainDir + DS + 'default.simba');
+      mDebugLn('Script saved as default.');
+      Result := True;
+    except
+      mDebugLn('Cannot save script as default.');
+      Result := False;
+    end;
   end;
 end;
 
