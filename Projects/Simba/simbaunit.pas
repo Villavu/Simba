@@ -355,6 +355,7 @@ type
     procedure HandleOpenFileData;
     procedure HandleWriteFileData;
     procedure HandleScriptStartData;
+    function GetDefScriptPath: string;
     function GetScriptPath : string;
     function GetExtPath: string;
     function GetFontPath: String;
@@ -365,6 +366,7 @@ type
     function GetShowParamHintAuto: boolean;
     function GetShowCodeCompletionAuto: Boolean;
     function GetSimbaNews: String;
+    procedure SetDefScriptPath(const AValue: string);
     procedure SetExtPath(const AValue: string);
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
@@ -434,6 +436,7 @@ type
     property PluginPath : string read GetPluginPath write SetPluginPath;
     property ExtPath : string read GetExtPath write SetExtPath;
     property ScriptDir : string read GetScriptPath write SetScriptPath;
+    property DefScriptPath : string read GetDefScriptPath write SetDefScriptPath;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
   end;
 
@@ -592,6 +595,11 @@ begin
     on e : Exception do
       mDebugLn('ERROR in HandleConnectiondata: ' + e.message);
   end;
+end;
+
+function TSimbaForm.GetDefScriptPath: string;
+begin
+  result :=LoadSettingDef('Settings/SourceEditor/DefScriptPath', ExpandFileName(MainDir+DS+'default.simba'));
 end;
 
 function TSimbaForm.GetScriptPath: string;
@@ -1956,7 +1964,7 @@ end;
 
 procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
 begin
-  OpenURL('http://wizzup.org/static/Simba/doc/ps_handbook/');
+  OpenURL('http://wizzup.org/static/simba/doc/ps_handbook/');
 end;
 
 procedure TSimbaForm.MenuItemColourHistoryClick(Sender: TObject);
@@ -2031,6 +2039,7 @@ begin
       exit;
     end;
   FunctionListTimer.Enabled:= false;
+  CloseAction := caFree;
   FreeAndNil(ExtManager);
 end;
 
@@ -2182,7 +2191,7 @@ begin
   for i := 0 to high(RecentFileItems) do
     RecentFileItems[i].Free;
   if ExtManager <> nil then
-    ExtManager.free;
+    FreeAndNil(extmanager);
   Tabs.free;
   Selector.Free;
   Picker.Free;
@@ -2443,6 +2452,11 @@ begin
     Application.ProcessMessages;
     Sleep(50);
   end;
+end;
+
+procedure TSimbaForm.SetDefScriptPath(const AValue: string);
+begin
+  SetSetting('Settings/SourceEditor/DefScriptPath',AValue,True);
 end;
 
 procedure TSimbaForm.SetExtPath(const AValue: string);
@@ -2989,7 +3003,7 @@ begin
   with CurrScript do
   begin
     try
-      SynEdit.Lines.SaveToFile(MainDir + DS + 'default.simba');
+      SynEdit.Lines.SaveToFile(DefScriptPath);
       mDebugLn('Script saved as default.');
       Result := True;
     except

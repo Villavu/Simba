@@ -70,8 +70,7 @@ end;
 
 function ps_DTMFromString(const DTMString: String): Integer; extdecl;
 begin
-  With CurrThread.Client.MDTMs do
-    Result := AddDTM(StringToDTM(DTMString));
+  Result := CurrThread.Client.MDTMs.StringToDTM(DTMString);
 end;
 
 procedure ps_FreeDTM(DTM: Integer); extdecl;
@@ -107,4 +106,9 @@ end;
 function ps_SDTMToMDTM(Const DTM: TSDTM): TMDTM;extdecl;
 begin
   result := SDTMToMDTM(DTM);
+end;
+
+function ps_CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
+begin
+  result := CreateDTMPoint(x,y,c,t,asz,bp);
 end;

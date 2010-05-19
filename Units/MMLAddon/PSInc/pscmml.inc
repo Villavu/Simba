@@ -91,6 +91,10 @@ begin
     RegisterProperty('Name','String',iptrw);
     RegisterMethod('function ToString : string');
     RegisterMethod('function Valid:boolean');
+    RegisterMethod('procedure DeletePoint( Point : integer);');
+    RegisterMethod('procedure SwapPoint(p1,p2 : integer);');
+    RegisterMethod('procedure MovePoint(fromIndex,toIndex : integer);');
+    RegisterMethod('procedure AddPoint( Point : TMDTMPoint);');
     RegisterProperty('Count','Integer',iptrw);
     RegisterProperty('Points','TMDTMPointArray',iptr);
   end;

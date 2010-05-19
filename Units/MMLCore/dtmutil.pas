@@ -34,6 +34,7 @@ uses
 function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
 function SDTMToMDTM(Const DTM: TSDTM): TMDTM;
 procedure PrintDTM(const aDTM : TMDTM);
+function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
 
 {procedure iniTSDTM(out d: TMDTM; len: integer);}
 function ValidMainPointBox(var dtm: TMDTM; const x1, y1, x2, y2: Integer): TBox;
@@ -54,24 +55,16 @@ const
 implementation
 uses math,MufasaBase;
 
-procedure RotatePoints_(Var P: TPointArray; A, cx, cy: Extended);
-Var
-   I, L: Integer;
-   CosA,SinA : extended;
 
-Begin
-  L := High(P);
-  CosA := Cos(a);
-  SinA := Sin(a);
-  For I := 0 To L Do
-  Begin
-    P[I].X := Trunc(cx + CosA * (p[i].x - cx) - SinA * (p[i].y - cy));
-    P[I].Y := Trunc(cy + SinA * (p[i].x - cx) + CosA * (p[i].y - cy));
-  End;
-  // I recon it's faster than Point().
-End;
-
-
+function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
+begin
+  result.x := x;
+  result.y := y;
+  result.c := c;
+  result.t := t;
+  result.asz := asz;
+  result.bp := bp;
+end;
 
 procedure PrintDTM(const aDTM : TMDTM);
 var
