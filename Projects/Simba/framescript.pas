@@ -88,13 +88,13 @@ type
     { public declarations }
   end;
 
-  function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1): string;
+  function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 
 implementation
 uses
-  SimbaUnit, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
+  SimbaUnit, MufasaTypes, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
 
-function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1): string;
+function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 var
   s: string;
   l: Integer;
@@ -102,6 +102,7 @@ begin
   Result := '';
   if (Start = -1) then
     Start := e.CaretX;
+  Start := Start + Offset;
   sp := Start - 1;
   ep := Start - 1;
   s := e.Lines[e.CaretY - 1];
@@ -222,11 +223,17 @@ var
   s: string;
   sp, ep: Integer;
 begin
-  if (Command = ecChar) and (AChar = '(') and (SimbaForm.ParamHint.Visible = false) and (SimbaForm.ShowHintAuto) then
-  begin
-    Command2:= ecCodeHints;
-    SynEditProcessUserCommand(sender,command2,achar,nil);
-  end;
+  if (Command = ecChar) then
+    if(AChar = '(') and (SimbaForm.ParamHint.Visible = False) and (SimbaForm.ShowParamHintAuto) then
+    begin
+      Command2:= ecCodeHints;
+      SynEditProcessUserCommand(sender,command2,achar,nil);
+    end
+    else if(AChar = '.') and (SimbaForm.CodeCompletionForm.Visible = False) and (SimbaForm.ShowCodeCompletionAuto) then
+    begin
+      Command2:= ecCodeCompletion;
+      SynEditProcessUserCommand(sender,command2,achar, Pointer(@s));
+    end;
 
   if SimbaForm.CodeCompletionForm.Visible then
     case Command of
@@ -328,43 +335,6 @@ begin
   if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or
                                       ((Attri.Name <> SYNS_AttrComment) and (Attri.name <> SYNS_AttrString) and (Attri.name <> SYNS_AttrDirective))) then
   begin
-      {SimbaForm.FunctionListShown(True);
-      with SimbaForm.frmFunctionList do
-        if editSearchList.CanFocus then
-        begin;
-          editSearchList.SetFocus;
-          LineText := SynEdit.LineText;
-          Caret:=SynEdit.LogicalCaretXY;
-          i := Caret.X - 1;
-          endi := caret.x;
-          if (i > length(LineText)) or ((i = 0) and (length(lineText) = 0)) then
-          begin
-            SearchText:= '';
-            CompletionLine := PadRight(linetext,caret.x);
-          end
-          else begin
-            while (i > 0) and (LineText[i] in ['a'..'z','A'..'Z','0'..'9','_']) do
-              dec(i);
-            while LineText[endi] in ['a'..'z','A'..'Z','0'..'9','_'] do
-              inc(endi);
-            SearchText := Trim(copy(LineText, i + 1, Caret.X - i - 1));
-            CompletionLine := LineText;
-          end;
-          CompletionStart:= LineText;
-          Delete(CompletionLine,i+1,endi - i - 1);
-          Insert('%s',CompletionLine,i+1);
-          CompletionCaret := Point(endi,Caret.y);
-          StartWordCompletion:= Point(i+1,caret.y);
-          mDebugLn(CompletionLine);
-          mDebugLn(CompletionStart);
-          InCodeCompletion := true;
-          editSearchList.Text:= SearchText;
-          editSearchList.SelStart:= Length(searchText);
-          SynEdit.SelectedColor.Style:= [fsUnderline];
-          SynEdit.SelectedColor.Foreground:= clBlack;
-          SynEdit.SelectedColor.Background:= clWhite;
-          Synedit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
-        end;}
     mp := TCodeInsight.Create;
     mp.FileName := ScriptFile;
     mp.OnMessage := @SimbaForm.OnCCMessage;
@@ -399,10 +369,17 @@ begin
           s := '';
       end;
 
-      mp.FillSynCompletionProposal(ItemList, InsertList, s);
-      p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
-      p.y := p.y + SynEdit.LineHeight;
-      SimbaForm.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
+      if (Data <> nil) then //If showing automatically
+        if (s <> '') and (((mp.DeclarationAtPos <> nil) and (mp.DeclarationAtPos is TciCompoundStatement)) or ((mp.DeclarationAtPos.Owner <> nil) and (mp.DeclarationAtPos.Owner is TciCompoundStatement))) then
+          Data := nil;
+
+      if (Data = nil) then
+      begin
+        mp.FillSynCompletionProposal(ItemList, InsertList, s);
+        p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
+        p.y := p.y + SynEdit.LineHeight;
+        SimbaForm.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
+      end;
     finally
       FreeAndNil(ms);
       FreeAndNil(mp);
@@ -425,9 +402,9 @@ begin
       Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
       s := SynEdit.Lines[SynEdit.Carety-1];
       if ep > length(s) then //We are outside the real text, go back to the last char
-        mp.Run(ms, nil, Synedit.SelStart - ep + length(s),true)
+        mp.Run(ms, nil, Synedit.SelStart - ep + length(s), True)
       else
-        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1,true);
+        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1, True);
       bcc := 1;bck := 0;cc := 0;
       s := mp.GetExpressionAtPos(bcc, bck, cc,posi, true);
 
@@ -463,7 +440,7 @@ begin
           d := d.Owner;
         if (TciProcedureDeclaration(d).Params <> '') then
           SimbaForm.ParamHint.Show(PosToCaretXY(synedit,posi + 1), PosToCaretXY(synedit,bracketpos),
-                              TciProcedureDeclaration(d), synedit,mp)
+                                   TciProcedureDeclaration(d), synedit,mp)
         else
           FormWriteln('<no parameters expected>');
       end;
@@ -544,8 +521,6 @@ begin
 end;
 
 procedure TScriptFrame.HandleErrorData;
-var
-  i : integer;
 begin
   if ErrorData.Module <> '' then
   begin;
@@ -610,6 +585,9 @@ begin
   inherited Create(TheOwner);
   OwnerSheet := TTabSheet(TheOwner);
   OwnerPage := TPageControl(OwnerSheet.Owner);
+
+  if FileExists(MainDir + DS + 'default.simba') then
+    SynEdit.Lines.LoadFromFile(MainDir + DS + 'default.simba');
   StartText:= SynEdit.Lines.text;
   ScriptDefault:= StartText;
   ScriptName:= 'Untitled';
