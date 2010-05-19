@@ -44,7 +44,7 @@ x.AddTypeS('TPointArrayArray','Array of TPointArray');
 x.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
 x.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
 x.addtypeS('PPoint','record R,T : extended; end;');
-x.AddTypeS('TTarget_Exported','record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14,int15:integer; end;');
+x.AddTypeS('TTarget_Exported','record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14,int15,int16:integer; end;');
 
 x.AddTypes('TSDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
 x.AddTypes('TSDTMPointDefArray', 'Array Of TSDTMPointDef;');

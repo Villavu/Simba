@@ -238,6 +238,7 @@ AddFunction(@ps_FindColoredAreaTolerance, 'function FindColoredAreaTolerance(var
 {Mouse etc.}
 SetCurrSection('Mouse');
 AddFunction(@ps_MoveMouse, 'procedure MoveMouse(x, y: integer);');
+AddFunction(@ps_ScrollMouse,'procedure Scrollmouse(x,y : integer; Clicks : integer);');
 AddFunction(@ps_GetMousePos, 'procedure GetMousePos(var x, y: integer);');
 AddFunction(@ps_HoldMouse, 'procedure HoldMouse(x, y: integer; clickType: integer);');
 AddFunction(@ps_ReleaseMouse, 'procedure ReleaseMouse(x, y: integer; clickType: integer);');

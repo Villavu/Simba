@@ -27,7 +27,12 @@ const
   ps_mouse_middle = 2;
 procedure ps_MoveMouse(x, y: integer); extdecl;
 begin
-  CurrThread.Client.IOManager.SetMousePos(X, Y);
+  CurrThread.Client.IOManager.MoveMouse(X, Y);
+end;
+
+procedure ps_ScrollMouse(x,y : integer; Clicks : integer); extdecl;
+begin
+  CurrThread.Client.IOManager.ScrollMouse(x,y,Clicks);
 end;
 
 procedure ps_GetMousePos(var x, y: integer); extdecl;
