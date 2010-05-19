@@ -592,6 +592,10 @@ object SimbaForm: TSimbaForm
         Caption = 'Save as...'
         OnClick = ActionSaveAsExecute
       end
+      object MenuItemSaveDef: TMenuItem
+        Action = ActionSaveDef
+        OnClick = ActionSaveDefExecute
+      end
       object MenuItemSaveAll: TMenuItem
         Action = ActionSaveAll
         Enabled = False
@@ -2693,6 +2697,16 @@ object SimbaForm: TSimbaForm
       Caption = 'Save as..'
       OnExecute = ActionSaveAsExecute
     end
+    object ActionSaveDef: TAction
+      Caption = 'Save as Default'
+      OnExecute = ActionSaveDefExecute
+    end
+    object ActionSaveAll: TAction
+      Caption = 'Save All'
+      ImageIndex = 21
+      OnExecute = ActionSaveAllExecute
+      ShortCut = 24659
+    end
     object ActionRunScript: TAction
       Caption = '&Run'
       OnExecute = ActionRunExecute
@@ -2706,12 +2720,6 @@ object SimbaForm: TSimbaForm
       Caption = '&Stop'
       OnExecute = ActionStopExecute
       ShortCut = 113
-    end
-    object ActionSaveAll: TAction
-      Caption = 'Save All'
-      ImageIndex = 21
-      OnExecute = ActionSaveAllExecute
-      ShortCut = 24659
     end
     object ActionClearDebug: TAction
       Caption = 'Clear'
@@ -3090,7 +3098,24 @@ object SimbaForm: TSimbaForm
     left = 488
     top = 200
   end
-  object LazHighlighter: TSynFreePascalSyn
+  object FunctionListTimer: TTimer
+    Interval = 750
+    OnTimer = FunctionListTimerTimer
+    left = 608
+    top = 200
+  end
+  object SCARHighlighter: TSynPasSyn
+    Enabled = False
+    CommentAttri.Foreground = clGreen
+    CommentAttri.Style = []
+    NumberAttri.Foreground = clNavy
+    StringAttri.Foreground = clFuchsia
+    CompilerMode = pcmObjFPC
+    NestedComments = False
+    left = 568
+    top = 200
+  end
+  object LazHighlighter: TSynPasSyn
     Enabled = False
     CommentAttri.Foreground = clBlue
     CommentAttri.Style = [fsBold]
@@ -3104,23 +3129,6 @@ object SimbaForm: TSimbaForm
     CompilerMode = pcmObjFPC
     NestedComments = False
     left = 528
-    top = 200
-  end
-  object SCARHighlighter: TSynFreePascalSyn
-    Enabled = False
-    CommentAttri.Foreground = clGreen
-    CommentAttri.Style = []
-    NumberAttri.Foreground = clHotLight
-    StringAttri.Foreground = clFuchsia
-    CompilerMode = pcmObjFPC
-    NestedComments = False
-    left = 568
-    top = 200
-  end
-  object FunctionListTimer: TTimer
-    Interval = 750
-    OnTimer = FunctionListTimerTimer
-    left = 608
     top = 200
   end
 end
