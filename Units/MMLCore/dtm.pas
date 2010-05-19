@@ -34,20 +34,36 @@ type
 
     { TMDTM }
 
+    { TMDTM }
+
     TMDTM = class(TObject)
     private
+      FPoints : TMDTMPointArray;
+      FLen    : integer;
+      function GetPointerPoints: PMDTMPoint;
+      procedure SetPointCount(const AValue: integer);
+    public
+      Name : string;
+      Index : integer;
+      function ToString : string;
+      function Valid : boolean;
+      property PPoints : PMDTMPoint read GetPointerPoints;
+      property Count : integer read FLen write SetPointCount;
+      property Points : TMDTMPointArray read FPoints;
+    end;
+    TMDTMS = class(TObject) //Manages the DTMs   TMufasaDTMs
+    private
       Client: TObject;
-      DTMList: Array Of PpDTM;
+      DTMList: Array Of TMDTM;
       FreeSpots: Array Of Integer;
       procedure CheckIndex(index : integer);
     public
-      function AddDTM(const d: TDTM): Integer;
-      function AddpDTM(const d: pDTM): Integer;
-      function GetDTM(index: Integer) :ppDTM;
+      function AddDTM(const d: TSDTM): Integer;overload;
+      function AddDTM(const d: TMDTM): Integer;overload;
+      function GetDTM(index: Integer) :TMDTM;
       procedure FreeDTM(DTM: Integer);
-      function StringToDTM(const S: String): pDTM;
-      function DTMToString(const DTM : PDTM) : string;
-      procedure SetDTMName(DTM: Integer;const S: String);
+      function StringToDTM(const S: String): TMDTM;
+      property DTM[Index : integer]: TMDTM read GetDTM; default;
       constructor Create(Owner: TObject);
       destructor Destroy; override;
     end;
@@ -63,7 +79,7 @@ uses
 
 
 
-constructor TMDTM.Create(Owner: TObject);
+constructor TMDTMS.Create(Owner: TObject);
 begin
   inherited Create;
   Self.Client := Owner;
@@ -73,7 +89,7 @@ begin
 end;
 
 {$DEFINE DTM_DEBUG}
-destructor TMDTM.Destroy;
+destructor TMDTMS.Destroy;
 var
   i, j: integer;
   b:boolean;
@@ -91,8 +107,8 @@ begin
       end;
       if not b then
       begin;
-        if DTMList[i]^.n <> '' then
-          WriteStr := WriteStr + DTMList[i]^.n + ', '
+        if DTMList[i].name <> '' then
+          WriteStr := WriteStr + DTMList[i].name + ', '
         else
           WriteStr := WriteStr + inttostr(i) + ', ';
         FreeDTM(i);
@@ -123,18 +139,15 @@ begin
    Result:=StrToInt('$' + HexNum);
 end;
 
-function TMDTM.StringToDTM(const S: String): pDTM;
+function TMDTMS.StringToDTM(const S: String): TMDTM;
 var
   b: PBufferByteArray;
   Source : String;
   DestLen : longword;
   i,ii,c : integer;
+  DPoints : PMDTMPoint;
 begin
-  SetLength(Result.p,0);
-  SetLength(Result.c,0);
-  SetLength(Result.t,0);
-  SetLength(Result.asz,0);
-  SetLength(Result.ash,0);
+  Result := TMDTM.Create;
   ii := Length(S);
   if (ii = 0) or (ii mod 2 <> 0) then
     Exit;
@@ -148,58 +161,41 @@ begin
     if (Destlen mod 36) > 0 then
       raise Exception.CreateFmt('Invalid DTM passed to StringToDTM: %s',[s]);
     DestLen := DestLen div 36;
-    SetLength(Result.p,DestLen);
-    SetLength(Result.c,DestLen);
-    SetLength(Result.t,DestLen);
-    SetLength(Result.asz,DestLen);
-    SetLength(Result.ash,DestLen);
-    SetLength(Result.bp,DestLen);
+    Result.Count:= DestLen;
+    DPoints := result.PPoints;
     b := PBufferByteArray(BufferString);
     for i := 0 to DestLen - 1 do
     begin;
       c := i * 36;
-      Result.p[i].x := PInteger(@b^[c+1])^;
-      Result.p[i].y := PInteger(@b^[c+5])^;
-      Result.asz[i] := PInteger(@b^[c+12])^;
-      Result.ash[i] := PInteger(@b^[c+16])^;
-      Result.c[i] := PInteger(@b^[c+20])^;
-      Result.t[i] := PInteger(@b^[c+24])^;
-      Result.bp[i] := False;
+      DPoints[i].x := PInteger(@b^[c+1])^;
+      DPoints[i].y := PInteger(@b^[c+5])^;
+      DPoints[i].asz := PInteger(@b^[c+12])^;
+//      Result.ash[i] := PInteger(@b^[c+16])^;
+      DPoints[i].c := PInteger(@b^[c+20])^;
+      DPoints[i].t := PInteger(@b^[c+24])^;
+      DPoints[i].bp := False;
     end;
   end;
-  result.l := length(result.p);
 end;
 
 
-function TMDTM.DTMToString(const DTM: PDTM): string;
-var
-  i : integer;
-begin
-  if DTM.l = 0 then
-    exit;
-end;
-
-procedure TMDTM.CheckIndex(index: integer);
+procedure TMDTMS.CheckIndex(index: integer);
 begin
   if (index < 0) or (index >= Length(DTMList)) or (DTMList[Index] = nil) then
     raise Exception.CreateFmt('The given DTM Index[%d] doesn''t exist',[index]);
 end;
 
-function TMDTM.AddDTM(const d: TDTM): Integer;
+function TMDTMS.AddDTM(const d: TSDTM): Integer;
 begin
-  Result := AddpDTM(tDTMTopDTM(d));
+  Result := AddDTM(SDTMToMDTM(d));
 end;
 
 {/\
   Adds the given pDTM to the DTM Array, and returns it's index.
 /\}
 
-function TMDTM.AddpDTM(const d: pDTM): Integer;
-var
-  NewDTM : PpDTM;
+function TMDTMS.AddDTM(const d: TMDTM): Integer;
 begin
-  New(NewDTM);
-  NewDTM^ := d;
 
   if Length(FreeSpots) > 0 then
   begin
@@ -211,8 +207,9 @@ begin
     SetLength(DTMList, Length(DTMList) + 1);
     Result := High(DTMList);
   end;
-  DTMList[Result] := NewDTM;
-  NormalizeDTM(DTMList[result]^);
+  DTMList[Result] := d;
+  DTMList[Result].Index:= Result;
+  NormalizeDTM(DTMList[result]);
 end;
 
 {/\
@@ -220,16 +217,10 @@ end;
    Returns true is succesfull, false if the dtm does not exist.
 /\}
 
-function TMDTM.GetDTM(index: Integer) :ppDTM;
+function TMDTMS.GetDTM(index: Integer) :TMDTM;
 begin
   CheckIndex(index);
   result := DTMList[index];
-end;
-
-procedure TMDTM.SetDTMName(DTM: Integer;const s: string);
-begin
-  CheckIndex(DTM);
-  DTMList[DTM]^.n := s;
 end;
 
 {/\
@@ -238,112 +229,43 @@ end;
   Will keep track of not used index, so it is very memory efficient.
 /\}
 
-procedure TMDTM.FreeDTM(DTM: Integer);
+procedure TMDTMS.FreeDTM(DTM: Integer);
 begin
   CheckIndex(DTM);
-  with DTMList[DTM]^ do
-  begin
-    SetLength(p, 0);
-    SetLength(c, 0);
-    SetLength(t, 0);
-    SetLength(asz, 0);
-    SetLength(ash, 0);
-    SetLength(bp,0);
-    l := 0;
-    n := '';
-  end;
-  Dispose(DTMList[DTM]);
+  DTMList[DTM].Free;
   DTMList[DTM] := nil;
   SetLength(FreeSpots, Length(FreeSpots) + 1);
   FreeSpots[High(FreeSpots)] := DTM;
 end;
 
-{wat}
-// Then, first find all occurances of all colours on the given client.
-// Each point has a colour, and we call them C_0...C_n.
-// MP denotes the points of the main point colour on the client.
-// P_i denotes the points on the client for C_i
-// O_i denotes the point offset, and possible area shape and size.
-// B_i denotes a boolean representation of P_i for C_i, for C_1...C_n.
-// B_0 and O_0 are the merry exception here, as we don't need them for C_0,
-// which we will show later.
+{ TMDTM }
 
-// I hope it is clear how this will be respresented in computer data
-// structures.
-
-// Now, we iterate for i in range(1, n),
-  // We use MP_i, and iterate for j in range(0, dtm_points),
-    // Calculate the B_j indices (with MP_i and O_j) for each j, and
-    // see if B_j is not true, go on with MP_i + 1.
-    // Possible using areasize/shape.
-
-    // else, if B_j is true, continue with this inner loop.
-  // If B_{0...dtm_points} were all true, the point is valid.
-
-{/\
-  Tries to find the given DTM (index). If found will put the point the dtm has
-  been found at in x, y and result to true.
-  Will rotate the DTM starting at sAngle, increasing by aStep until eAngle has been reached, or when the DTM has been found.
-  Returns all Angles in an Extended array.
-/\}
-
-{function TMDTM.FindDTMRotated(DTM: Integer; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
-Var
-   temp: pDTM;
-Begin
-  If GetDTM(DTM, temp) Then
-    Result := pFindDTMRotated(temp, x, y, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound)
+function TMDTM.GetPointerPoints: PMDTMPoint;
+begin
+  if count < 1 then
+    result := nil
   else
-  Begin
-    x := 0;
-    y := 0;
-    aFound := 0.0;
-    Result := False;
-  end;
-end;  }
+    result := @FPoints[0];
+end;
 
-{/\
-  Tries to find the given pDTM. If found will put the point the dtm has
-  been found at in x, y and result to true.
-  Will rotate the DTM starting at sAngle, increasing by aStep until eAngle has been reached, or when the DTM has been found.
-  Returns all Angles in an Extended array.
-/\}
+procedure TMDTM.SetPointCount(const AValue: integer);
+begin
+  SetLength(FPoints,AValue);
+  FLen := AValue;
+end;
 
-{function TMDTM.pFindDTMRotated(DTM: pDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
+function TMDTM.ToString: string;
+begin
 
-Begin
+end;
 
-end;   }
-
-{/\
-  Tries to find the given DTM (index). Will return true if it has found one or more
-  DTM's. All the occurances are stored in the Points (TPointArray)
-  Will rotate the DTM starting at sAngle, increasing by aStep until eAngle has been reached.
-  Does not stop rotating when one occurance of a DTM has been found.
-  Returns all Angles in a Two Dimensional Extended array.
-/\}
-
-{function TMDTM.FindDTMsRotated(DTM: Integer; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray): Boolean;
-Var
-   temp: pDTM;
-Begin
-  If GetDTM(DTM, temp) Then
-    Result := pFindDTMsRotated(temp, Points, x1, y1, x2, y2, sAngle, eAngle, aStep, aFound)
-  else
-  Begin
-    SetLength(Points, 0);
-    SetLength(aFound, 0);
-    Result := False;
-  end;
-end;    }
-
-{/\
-  Tries to find the given pDTM. Will return true if it has found one or more
-  DTM's. All the occurances are stored in the Points (TPointArray)
-  Will rotate the DTM starting at sAngle, increasing by aStep until eAngle has been reached.
-  Does not stop rotating when one occurance of a DTM has been found.
-  Returns all Angles in a Two Dimensional Extended array.
-/\}
+function TMDTM.Valid: boolean;
+begin
+  result := false;
+  if Count < 1 then
+    exit;
+  result := true;
+end;
 
 end.
 
