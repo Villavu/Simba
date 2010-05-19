@@ -3090,7 +3090,24 @@ object SimbaForm: TSimbaForm
     left = 488
     top = 200
   end
-  object LazHighlighter: TSynFreePascalSyn
+  object FunctionListTimer: TTimer
+    Interval = 750
+    OnTimer = FunctionListTimerTimer
+    left = 608
+    top = 200
+  end
+  object SCARHighlighter: TSynPasSyn
+    Enabled = False
+    CommentAttri.Foreground = clGreen
+    CommentAttri.Style = []
+    NumberAttri.Foreground = clNavy
+    StringAttri.Foreground = clFuchsia
+    CompilerMode = pcmObjFPC
+    NestedComments = False
+    left = 568
+    top = 200
+  end
+  object LazHighlighter: TSynPasSyn
     Enabled = False
     CommentAttri.Foreground = clBlue
     CommentAttri.Style = [fsBold]
@@ -3104,23 +3121,6 @@ object SimbaForm: TSimbaForm
     CompilerMode = pcmObjFPC
     NestedComments = False
     left = 528
-    top = 200
-  end
-  object SCARHighlighter: TSynFreePascalSyn
-    Enabled = False
-    CommentAttri.Foreground = clGreen
-    CommentAttri.Style = []
-    NumberAttri.Foreground = clHotLight
-    StringAttri.Foreground = clFuchsia
-    CompilerMode = pcmObjFPC
-    NestedComments = False
-    left = 568
-    top = 200
-  end
-  object FunctionListTimer: TTimer
-    Interval = 750
-    OnTimer = FunctionListTimerTimer
-    left = 608
     top = 200
   end
 end
