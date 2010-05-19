@@ -106,6 +106,7 @@ end;
 function ps_SDTMToMDTM(Const DTM: TSDTM): TMDTM;extdecl;
 begin
   result := SDTMToMDTM(DTM);
+  CurrThread.Client.MDTMs.AddDTM(result);
 end;
 
 function ps_CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
