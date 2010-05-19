@@ -51,6 +51,8 @@ procedure TCONTROLENABLED_W(Self: TCONTROL; T: BOOLEAN); begin Self.ENABLED := T
 procedure TCONTROLENABLED_R(Self: TCONTROL; var T: BOOLEAN); begin T := Self.ENABLED; end;
 procedure TControlCaption_W(Self: TCONTROL; T: String); begin Self.Caption := T; end;
 procedure TControlCaption_R(Self: TCONTROL; var T: String); begin T := Self.Caption; end;
+procedure TControlBiDiMode_W(Self: TCONTROL; T: TBiDiMode); begin Self.BiDiMode := T; end;
+procedure TControlBiDiMode_R(Self: TCONTROL; var T: TBiDiMode); begin T := Self.BiDiMode; end;
 procedure TControlBeginDrag(Self : TControl;Immediate : boolean); begin self.BeginDrag(Immediate); end;
 
 procedure RIRegisterTControl(Cl: TPSRuntimeClassImporter);
@@ -75,6 +77,7 @@ begin
     RegisterPropertyHelper(@TControlVisibleR, @TControlVisibleW, 'VISIBLE');
     RegisterPropertyHelper(@TCONTROLENABLED_R, @TCONTROLENABLED_W, 'ENABLED');
     RegisterPropertyHelper(@TControlCaption_R,@TControlCaption_W,'CAPTION');
+    RegisterPropertyHelper(@TControlBiDiMode_R,@TControlBiDiMode_W,'BiDiMode');
     RegisterPropertyHelper(@TControlParentR, @TControlParentW, 'PARENT');
 
     {$IFNDEF PS_MINIVCL}

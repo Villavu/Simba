@@ -6,12 +6,10 @@ uses
 procedure SIRegister_MML(cl: TPSPascalCompiler);
 
 implementation
-procedure SIRegister_MML(cl: TPSPascalCompiler);
-var
-  PSClass : TPSCompileTimeClass;
+
+procedure SIRegister_TMufasaBitmap(cl : TPSPascalCompiler);
 begin
-  PSClass :=cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap');
-  with PSClass do
+  with cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap') do
   begin;
     RegisterMethod('procedure SetSize(AWidth,AHeight : integer);');
     RegisterMethod('procedure StretchResize(AWidth,AHeight : integer);');
@@ -20,6 +18,7 @@ begin
     RegisterMethod('procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);');
     RegisterMethod('procedure DrawTPA(TPA : TPointArray; Color : TColor);');
     RegisterMethod('function FastGetPixel(x,y : integer) : TColor;');
+    RegisterMethod('procedure CopyClientToBitmap(Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);');
     RegisterMethod('procedure Rectangle(const Box : TBox; FillCol : TColor);');
     RegisterMethod('procedure FloodFill(const StartPT : TPoint; const SearchCol,ReplaceCol : TColor);');
 //      function FastGetPixels(TPA : TPointArray) : TIntegerArray;
@@ -49,13 +48,16 @@ begin
     RegisterProperty('Index','Integer',iptR);
     RegisterProperty('Name','String',iptRW);
   end;
+end;
+
+procedure SIRegister_TRegExp(cl : TPSPascalCompiler);
+begin
   with CL.AddClassN(CL.FindClass('Exception'),'ERegExpr') do
   begin
     RegisterProperty('ErrorCode', 'integer', iptrw);
     RegisterProperty('CompilerErrorPos', 'integer', iptrw);
   end;
-  PSClass :=cl.AddClassN(cl.FindClass('TObject'),'TRegExp');
-  with PSClass do
+  with cl.AddClassN(cl.FindClass('TObject'),'TRegExp') do
   begin
     RegisterMethod('Constructor Create');
     RegisterMethod('Function VersionMajor : integer');
@@ -91,8 +93,11 @@ begin
     RegisterMethod('Procedure Compile');
     RegisterMethod('Function Dump : String');
   end;
-  PSClass :=cl.AddClassN(cl.FindClass('TObject'),'TMDTM');
-  with PSClass do
+end;
+
+procedure SIRegister_TMDTM(cl : TPSPascalCompiler);
+begin
+  with cl.AddClassN(cl.FindClass('TObject'),'TMDTM') do
   begin
     RegisterMethod('constructor create;');
     RegisterMethod('procedure free;');
@@ -106,6 +111,10 @@ begin
     RegisterProperty('Count','Integer',iptrw);
     RegisterProperty('Points','TMDTMPointArray',iptr);
   end;
+end;
+
+procedure SIRegister_TMMLSettingsSandbox(CL : TPSPascalCompiler);
+begin
   with cl.AddClassN(nil,'TMMLSettingsSandbox') do
   begin;
     RegisterMethod('function IsKey(const KeyName: String): Boolean;');
@@ -118,6 +127,14 @@ begin
     RegisterMethod('function DeleteSubKeys(const KeyName: String): Boolean;');
     RegisterProperty('Prefix','String',iptR);
   end;
+end;
+
+procedure SIRegister_MML(cl: TPSPascalCompiler);
+begin
+  SIRegister_TMufasaBitmap(cl);
+  SIRegister_TRegExp(cl);
+  SIRegister_TMDTM(cL);
+  SIRegister_TMMLSettingsSandbox(cl);
 end;
 
 end.

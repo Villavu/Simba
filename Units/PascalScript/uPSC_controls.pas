@@ -53,6 +53,7 @@ begin
     RegisterProperty('Visible', 'Boolean', iptRW);
     RegisterProperty('ENABLED', 'BOOLEAN', iptrw);
     RegisterProperty('CURSOR', 'TCURSOR', iptrw);
+    RegisterProperty('BiDiMode','TBiDiMode',iptrw);
 
     {$IFNDEF PS_MINIVCL}
     RegisterMethod('function Dragging: Boolean;');
@@ -133,6 +134,7 @@ begin
   Cl.addTypeS('TEShiftState','(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble,' +
   'ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum,ssScroll,ssTriple,ssQuad)');
   {$ENDIF}
+  cl.AddTypeS('TBiDiMode','(bdLeftToRight,bdRightToLeft,bdRightToLeftNoAlign,bdRightToLeftReadingOnly)');
   Cl.addTypeS('TShiftState','set of TEShiftState');
   cl.AddTypeS('TMouseButton', '(mbLeft, mbRight, mbMiddle)');
   cl.AddTypeS('TDragMode', '(dmManual, dmAutomatic)');

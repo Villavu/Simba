@@ -58,6 +58,7 @@ interface
         | raise exceptions }
         procedure GetMousePosition(var x,y: integer); virtual;
         procedure MoveMouse(x,y: integer); virtual;
+        procedure ScrollMouse(x,y : integer; Lines : integer); virtual;
         procedure HoldMouse(x,y: integer; button: TClickType); virtual;
         procedure ReleaseMouse(x,y: integer; button: TClickType); virtual;
         function  IsMouseButtonHeld( button : TClickType) : boolean ; virtual;
@@ -114,6 +115,7 @@ interface
         procedure ActivateClient; override; abstract;
         procedure GetMousePosition(var x,y: integer); override; abstract;
         procedure MoveMouse(x,y: integer); override; abstract;
+        procedure ScrollMouse(x,y : integer; Lines : integer); override; abstract;
         procedure HoldMouse(x,y: integer; button: TClickType); override; abstract;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override; abstract;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override; abstract;
@@ -140,6 +142,7 @@ interface
 
       GetMousePosition: procedure(target: pointer; var x,y: integer); stdcall;
       MoveMouse: procedure(target: pointer; x,y: integer); stdcall;
+      ScrollMouse: procedure(target : pointer; x,y : integer; lines : integer); stdcall;
       HoldMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
       ReleaseMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
       IsMouseButtonHeld : function  (target : pointer; left : Boolean) : boolean; stdcall;
@@ -170,6 +173,7 @@ interface
 
         procedure GetMousePosition(var x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
+        procedure ScrollMouse(x,y : integer; Lines : integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
@@ -229,6 +233,7 @@ interface
 
       GetMousePosition: procedure(target: pointer; var x,y: integer); stdcall;
       MoveMouse: procedure(target: pointer; x,y: integer); stdcall;
+      ScrollMouse: procedure(target: pointer; x,y : integer; Lines : integer); stdcall;
       HoldMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
       ReleaseMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
       IsMouseButtonHeld : function  (target : pointer; left : boolean) : boolean;stdcall;
@@ -279,7 +284,8 @@ interface
         procedure SetFrozen(makefrozen: boolean);
         
         procedure GetMousePos(var X, Y: Integer);
-        procedure SetMousePos(X, Y: Integer);
+        procedure MoveMouse(X, Y: Integer);
+        procedure ScrollMouse(x,y : integer; Lines : integer);
         procedure HoldMouse(x,y : integer; button: TClickType);
         procedure ReleaseMouse(x,y : integer; button: TClickType);
         procedure ClickMouse(X, Y: Integer; button: TClickType);
@@ -334,6 +340,7 @@ interface
 
     procedure TTarget_Exported_GetMousePosition(target: pointer; var x,y: integer); stdcall;
     procedure TTarget_Exported_MoveMouse(target: pointer; x,y: integer); stdcall;
+    procedure TTarget_Exported_ScrollMouse(target: pointer; x,y : integer; Lines : integer); stdcall;
     procedure TTarget_Exported_HoldMouse(target: pointer; x,y: integer; left: boolean); stdcall;
     procedure TTarget_Exported_ReleaseMouse(target: pointer; x,y: integer; left: boolean); stdcall;
     function TTarget_Exported_IsMouseButtonHeld(target: pointer; left : boolean) : boolean;stdcall;
@@ -473,6 +480,7 @@ begin
     Target:= KeyMouse;
     GetMousePosition := @TTarget_Exported_GetMousePosition;
     MoveMouse := @TTarget_Exported_MoveMouse;
+    ScrollMouse:= @TTarget_Exported_ScrollMouse;
     HoldMouse := @TTarget_Exported_HoldMouse;
     ReleaseMouse := @TTarget_Exported_ReleaseMouse;
 
@@ -602,10 +610,17 @@ procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer);
 begin
   keymouse.GetMousePosition(x,y)
 end;
-procedure TIOManager_Abstract.SetMousePos(X, Y: Integer);
+
+procedure TIOManager_Abstract.MoveMouse(X, Y: Integer);
 begin
   keymouse.MoveMouse(x,y);
 end;
+
+procedure TIOManager_Abstract.ScrollMouse(x, y: integer; Lines: integer);
+begin
+  keymouse.ScrollMouse(x,y,lines);
+end;
+
 procedure TIOManager_Abstract.HoldMouse(x,y : integer; button: TClickType);
 begin
   keymouse.HoldMouse(x,y,button);
@@ -698,6 +713,7 @@ function TTarget.TargetValid: boolean; begin result:= true; end;
 
 procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Create('GetMousePosition not available for this target'); end;
 procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not available for this target'); end;
+procedure TTarget.ScrollMouse(x,y : integer; lines : integer); begin raise Exception.Create('ScrollMouse is not available for this target'); end;
 procedure TTarget.HoldMouse(x,y: integer; button: TClickType); begin raise Exception.Create('HoldMouse not available for this target'); end;
 procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType); begin raise Exception.Create('ReleaseMouse not available for this target'); end;
 function TTarget.IsMouseButtonHeld(button: TClickType): boolean; begin  raise Exception.Create('IsMouseButtonHeld not available for this target'); end;
@@ -763,6 +779,14 @@ begin
   else
     inherited MoveMouse(x,y);
 end;
+procedure TEIOS_Target.ScrollMouse(x,y : integer; Lines : integer);
+begin
+  if Pointer(Client.ScrollMouse) <> nil then
+    client.ScrollMouse(target,x,y,lines)
+  else
+    inherited Scrollmouse(x,y,lines);
+end;
+
 procedure TEIOS_Target.HoldMouse(x,y: integer; button: TClickType);
 begin
   if Pointer(client.HoldMouse) <> nil then
@@ -942,6 +966,7 @@ begin
 
     Pointer(GetMousePosition):= GetProcAddress(plugin, PChar('EIOS_GetMousePosition'));
     Pointer(MoveMouse):= GetProcAddress(plugin, PChar('EIOS_MoveMouse'));
+    Pointer(ScrollMouse) := GetProcAddress(plugin,PChar('EIOS_ScrollMouse'));
     Pointer(HoldMouse):= GetProcAddress(plugin, PChar('EIOS_HoldMouse'));
     Pointer(ReleaseMouse):= GetProcAddress(plugin, PChar('EIOS_ReleaseMouse'));
 
@@ -1010,6 +1035,11 @@ end;
 procedure TTarget_Exported_MoveMouse(target: pointer; x, y: integer); stdcall;
 begin
   TTarget(Target).MoveMouse(x,y);
+end;
+ procedure TTarget_Exported_ScrollMouse(target: pointer; x, y: integer;
+  Lines: integer); stdcall;
+begin
+  TTarget(Target).ScrollMouse(x,y,lines);
 end;
 
 procedure TTarget_Exported_HoldMouse(target: pointer; x, y: integer;

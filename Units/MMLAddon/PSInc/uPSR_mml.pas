@@ -63,12 +63,10 @@ procedure TMDTMCount_R(Self: TMDTM; var T: Integer);begin T := Self.Count; end;
 procedure TMDTMPoints_R(Self : TMDTM; var T : TMDTMPointArray); begin t := self.Points; end;
 procedure SettingsPrefix(self : TMMLSettingsSandbox; var Prefix : String);begin; Prefix := self.Prefix; end;
 
-procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
-var
-  PSClass : TPSRuntimeClass;
-begin;
-  PSClass :=cl.Add(TMufasaBitmap);
-  with PSClass do
+
+procedure RIRegister_TMufasaBitmap(cl : TPSRuntimeClassImporter);
+begin
+  with cl.Add(TMufasaBitmap) do
   begin
     RegisterMethod(@TMufasaBitmap.ToTBitmap,'ToTBitmap');
     RegisterMethod(@TMufasaBitmap.SetSize,'SETSIZE');
@@ -105,6 +103,10 @@ begin;
     RegisterMethod(@TMufasaBitmap.SaveToFile, 'SAVETOFILE');
     RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LOADFROMFILE');
   end;
+end;
+
+procedure RIRegister_TRegExp(cl : TPSRuntimeClassImporter);
+begin
   with CL.Add(ERegExpr) do
   begin
     RegisterPropertyHelper(@ERegExprErrorCode_R,@ERegExprErrorCode_W,'ErrorCode');
@@ -146,6 +148,9 @@ begin;
     RegisterMethod(@TRegExp.Compile, 'Compile');
     RegisterMethod(@TRegExp.Dump, 'Dump');
   end;
+end;
+procedure RIRegister_TMDTM(cl : TPSRuntimeClassImporter);
+begin
   with CL.Add(TMDTM) do
   begin
     RegisterConstructor(@TMDTM.Create,'Create');
@@ -159,6 +164,9 @@ begin;
     RegisterPropertyHelper(@TMDTMCount_R,@TMDTMCount_W,'Count');
     RegisterPropertyHelper(@TMDTMPoints_R,nil,'Points');
   end;
+end;
+procedure RIRegister_TMMLSettingsSandbox(cl : TPSRuntimeClassImporter);
+begin
   with cl.Add(TMMLSettingsSandbox) do
   begin
     RegisterMethod(@TMMLSettingsSandbox.IsKey,'ISKEY');
@@ -171,6 +179,14 @@ begin;
     RegisterMethod(@TMMLSettingsSandbox.DeleteSubKeys,'DELETESUBKEYS');
     RegisterPropertyHelper(@SettingsPrefix,nil,'Prefix');
   end;
+end;
+
+procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
+begin;
+  RIRegister_TMufasaBitmap(cl);
+  RIRegister_TRegExp(cl);
+  RIRegister_TMDTM(cl);
+  RIRegister_TMMLSettingsSandbox(cl);
 end;
 
 end.
