@@ -103,6 +103,9 @@ type
     x1, y1, x2, y2: Integer;
   end;
 
+const
+  TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
+type
   { TODO: add cts per colour/tolerance? }
 
   // TODO DTM-Not points. Not very hard really.
@@ -117,9 +120,6 @@ type
      Asz: Area size;
      bp: Bad Point;
    }
-const
-  TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
-type
   TMDTMPoint = record //TMufasaDTMPoint
     x,y,c,t,asz : integer;
     bp : boolean;

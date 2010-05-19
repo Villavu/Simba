@@ -109,6 +109,7 @@ begin
     RegisterMethod('procedure MovePoint(fromIndex,toIndex : integer);');
     RegisterMethod('procedure AddPoint( Point : TMDTMPoint);');
     RegisterProperty('Count','Integer',iptrw);
+    RegisterProperty('Index','Integer',iptr);
     RegisterProperty('Points','TMDTMPointArray',iptr);
   end;
 end;
