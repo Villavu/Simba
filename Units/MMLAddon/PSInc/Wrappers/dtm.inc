@@ -24,13 +24,13 @@
 function ps_FindDTM(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean; extdecl;
 begin
   with CurrThread.Client do
-    result := MFinder.FindDTM(MDTM.GetDTM(DTM),x,y,xs,ys,xe,ye);
+    result := MFinder.FindDTM(MDTM.GetDTM(DTM)^,x,y,xs,ys,xe,ye);
 end;
 
 function ps_FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean; extdecl;
 begin
    with CurrThread.Client do
-     result := MFinder.FindDTMs(MDTM.GetDTM(DTM), p, xs, ys, xe, ye);
+     result := MFinder.FindDTMs(MDTM.GetDTM(DTM)^, p, xs, ys, xe, ye);
 end;
 
 function ps_FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, xe, ye:
@@ -38,7 +38,7 @@ function ps_FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, x
                            var aFound: Extended): Boolean; extdecl;
 begin
   with CurrThread.Client do
-    result := MFinder.FindDTMRotated(MDTM.GetDTM(DTM), x,y, xs, ys, xe, ye, sAngle, eAngle, aStep, aFound,true);
+    result := MFinder.FindDTMRotated(MDTM.GetDTM(DTM)^, x,y, xs, ys, xe, ye, sAngle, eAngle, aStep, aFound,true);
 end;
 
 function ps_FindDTMRotatedSE(DTM: Integer; var x, y: Integer; xs, ys, xe, ye:
@@ -46,20 +46,20 @@ function ps_FindDTMRotatedSE(DTM: Integer; var x, y: Integer; xs, ys, xe, ye:
                            var aFound: Extended): Boolean; extdecl;
 begin
   with CurrThread.Client do
-    result := MFinder.FindDTMRotated(MDTM.GetDTM(DTM), x, y, xs, ys, xe, ye, sAngle, eAngle, aStep, aFound,false);
+    result := MFinder.FindDTMRotated(MDTM.GetDTM(DTM)^, x, y, xs, ys, xe, ye, sAngle, eAngle, aStep, aFound,false);
 end;
 
 function ps_FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray): Boolean; extdecl;
 begin
   with CurrThread.Client do
-    result := MFinder.FindDTMsRotated(MDTM.GetDTM(DTM), Points, xs, ys, xe, ye,
+    result := MFinder.FindDTMsRotated(MDTM.GetDTM(DTM)^, Points, xs, ys, xe, ye,
                                   sAngle, eAngle, aStep, aFound, true);
 end;
 
 function ps_FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray): Boolean; extdecl;
 begin
   with CurrThread.Client do
-    result := MFinder.FindDTMsRotated(MDTM.GetDTM(DTM), Points, xs, ys, xe, ye,
+    result := MFinder.FindDTMsRotated(MDTM.GetDTM(DTM)^, Points, xs, ys, xe, ye,
                                   sAngle, eAngle, aStep, aFound, false);
 end;
 
@@ -81,7 +81,7 @@ end;
 
 function ps_GetDTM(index: Integer) : pDTM; extdecl;
 begin
-  result := CurrThread.Client.MDTM.GetDTM(index);
+  result := CurrThread.Client.MDTM.GetDTM(index)^;
 end;
 
 function ps_AddDTM(const d: TDTM): Integer; extdecl;

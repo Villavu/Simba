@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 143
+  Left = 483
   Height = 623
-  Top = 115
+  Top = 95
   Width = 660
   AllowDropFiles = True
   Caption = 'THA FUKING Simba'
@@ -3098,10 +3098,11 @@ object SimbaForm: TSimbaForm
     NumberAttri.Foreground = clNavy
     StringAttri.Foreground = clBlue
     SymbolAttri.Foreground = clRed
+    CaseLabelAttri.Style = [fsItalic]
     DirectiveAttri.Foreground = clRed
     DirectiveAttri.Style = [fsBold]
     CompilerMode = pcmObjFPC
-    NestedComments = True
+    NestedComments = False
     left = 528
     top = 200
   end
@@ -3112,7 +3113,7 @@ object SimbaForm: TSimbaForm
     NumberAttri.Foreground = clHotLight
     StringAttri.Foreground = clFuchsia
     CompilerMode = pcmObjFPC
-    NestedComments = True
+    NestedComments = False
     left = 568
     top = 200
   end
