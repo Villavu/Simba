@@ -174,7 +174,6 @@ begin
   begin
     if ii < 9 then
       raise Exception.CreateFMT('Invalid DTM-String passed to StringToDTM: %s',[s]);
-    Writeln(copy(s,2,ii-1));
     Source := Base64DecodeStr(copy(s,2,ii-1));
     i:= PLongint(@source[1])^; //The 4 four bytes should contain the dest len!
     if i < 1 then
@@ -356,7 +355,6 @@ begin
   begin
     setlength(result,Destlen + SizeOf(Integer));
     PInteger(@result[1])^ := len;
-    Writeln(len);
     Move(bufferstring[0],result[1 + sizeof(integer)],Destlen);
     //We now have Size + Compressed data.. Lets Base64Encrypt it!
     Result := 'm' + Base64EncodeStr(result);
