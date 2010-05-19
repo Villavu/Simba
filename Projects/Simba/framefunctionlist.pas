@@ -231,6 +231,8 @@ begin
     exit;
   if FLastScript = Script then
     exit;
+  if SimbaForm.CurrScript = nil then
+    exit;
   FLastScript:= Script;
   Filtering := FilterTree.Visible;
   if FilterTree.Visible then
