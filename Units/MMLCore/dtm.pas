@@ -34,8 +34,6 @@ type
 
     { TMDTM }
 
-    { TMDTM }
-
     TMDTM = class(TObject)
     private
       FPoints : TMDTMPointArray;
@@ -51,6 +49,9 @@ type
       property Count : integer read FLen write SetPointCount;
       property Points : TMDTMPointArray read FPoints;
     end;
+
+    { TMDTMS }
+
     TMDTMS = class(TObject) //Manages the DTMs   TMufasaDTMs
     private
       Client: TObject;
@@ -256,15 +257,12 @@ end;
 
 function TMDTM.ToString: string;
 begin
-
+  Result := '';
 end;
 
 function TMDTM.Valid: boolean;
 begin
-  result := false;
-  if Count < 1 then
-    exit;
-  result := true;
+  Result := Count > 0;
 end;
 
 end.
