@@ -43,9 +43,10 @@ type
     public
       function AddDTM(const d: TDTM): Integer;
       function AddpDTM(const d: pDTM): Integer;
-      function GetDTM(index: Integer) :pDTM;
+      function GetDTM(index: Integer) :ppDTM;
       procedure FreeDTM(DTM: Integer);
       function StringToDTM(const S: String): pDTM;
+      function DTMToString(const DTM : PDTM) : string;
       procedure SetDTMName(DTM: Integer;const S: String);
       constructor Create(Owner: TObject);
       destructor Destroy; override;
@@ -169,6 +170,15 @@ begin
   result.l := length(result.p);
 end;
 
+
+function TMDTM.DTMToString(const DTM: PDTM): string;
+var
+  i : integer;
+begin
+  if DTM.l = 0 then
+    exit;
+end;
+
 procedure TMDTM.CheckIndex(index: integer);
 begin
   if (index < 0) or (index >= Length(DTMList)) or (DTMList[Index] = nil) then
@@ -210,10 +220,10 @@ end;
    Returns true is succesfull, false if the dtm does not exist.
 /\}
 
-function TMDTM.GetDTM(index: Integer) :pDTM;
+function TMDTM.GetDTM(index: Integer) :ppDTM;
 begin
   CheckIndex(index);
-  result := DTMList[index]^;
+  result := DTMList[index];
 end;
 
 procedure TMDTM.SetDTMName(DTM: Integer;const s: string);
