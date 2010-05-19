@@ -1,3 +1,11 @@
+unit uPSC_mml;
+interface
+uses
+  uPSCompiler;
+
+procedure SIRegister_MML(cl: TPSPascalCompiler);
+
+implementation
 procedure SIRegister_MML(cl: TPSPascalCompiler);
 var
   PSClass : TPSCompileTimeClass;
@@ -98,4 +106,18 @@ begin
     RegisterProperty('Count','Integer',iptrw);
     RegisterProperty('Points','TMDTMPointArray',iptr);
   end;
-end; 
+  with cl.AddClassN(nil,'TMMLSettingsSandbox') do
+  begin;
+    RegisterMethod('function IsKey(const KeyName: String): Boolean;');
+    RegisterMethod('function IsDirectory(const KeyName: String): Boolean;');
+    RegisterMethod('function SetKeyValue(const Keyname, Value : string) : boolean;');
+    RegisterMethod('function GetKeyValue(const KeyName: String): String;');
+    RegisterMethod('function GetKeyValueDef(const KeyName, defVal: String): String;');
+    RegisterMethod('function ListKeys(const KeyName: String; out Keys :TStringArray): boolean;');
+    RegisterMethod('function DeleteKey(const KeyName: String): Boolean;');
+    RegisterMethod('function DeleteSubKeys(const KeyName: String): Boolean;');
+    RegisterProperty('Prefix','String',iptR);
+  end;
+end;
+
+end.

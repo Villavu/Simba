@@ -27,8 +27,6 @@ type
       function FreeScript: boolean;
       function InitScript: Boolean;
       procedure OutputMessages;
-      procedure SIRegister_Settings(Cl: TPSPascalCompiler);
-      procedure RIRegister_Settings(Cl: TPSRuntimeClassImporter);
 
     public
        function HookExists(const HookName: String): Boolean;override;
@@ -46,9 +44,9 @@ type
 implementation
 uses
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
-  uPSC_extctrls,uPSC_menus, //Compile libs
+  uPSC_extctrls,uPSC_menus, uPSC_mml, //Compile libs
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
-  uPSR_extctrls,uPSR_menus, //Runtime-libs
+  uPSR_extctrls,uPSR_menus, uPSR_mml, //Runtime-libs
   SimbaUnit,updateform,settingssandbox,bitmaps,files,Dialogs, mmisc//Writeln
   ;
 
@@ -176,40 +174,6 @@ begin
   inherited SetEnabled(bool);
 end;
 
-procedure TSimbaPSExtension.SIRegister_Settings(Cl: TPSPascalCompiler);
-begin
-  with cl.AddClassN(nil,'TMMLSettingsSandbox') do
-  begin;
-    RegisterMethod('function IsKey(const KeyName: String): Boolean;');
-    RegisterMethod('function IsDirectory(const KeyName: String): Boolean;');
-    RegisterMethod('function SetKeyValue(const Keyname, Value : string) : boolean;');
-    RegisterMethod('function GetKeyValue(const KeyName: String): String;');
-    RegisterMethod('function GetKeyValueDef(const KeyName, defVal: String): String;');
-    RegisterMethod('function ListKeys(const KeyName: String; out Keys :TStringArray): boolean;');
-    RegisterMethod('function DeleteKey(const KeyName: String): Boolean;');
-    RegisterMethod('function DeleteSubKeys(const KeyName: String): Boolean;');
-    RegisterProperty('Prefix','String',iptR);
-  end;
-end;
-
-procedure SettingsPrefix(self : TMMLSettingsSandbox; var Prefix : String);
-begin; Prefix := self.Prefix; end;
-
-procedure TSimbaPSExtension.RIRegister_Settings(Cl: TPSRuntimeClassImporter);
-begin
-  with cl.Add(TMMLSettingsSandbox) do
-  begin
-    RegisterMethod(@TMMLSettingsSandbox.IsKey,'ISKEY');
-    RegisterMethod(@TMMLSettingsSandbox.IsDirectory,'ISDIRECTORY');
-    RegisterMethod(@TMMLSettingsSandbox.SetKeyValue,'SETKEYVALUE');
-    RegisterMethod(@TMMLSettingsSandbox.GetKeyValue,'GETKEYVALUE');
-    RegisterMethod(@TMMLSettingsSandbox.GetKeyValueDef,'GETKEYVALUEDEF');
-    RegisterMethod(@TMMLSettingsSandbox.ListKeys,'LISTKEYS');
-    RegisterMethod(@TMMLSettingsSandbox.DeleteKey,'DELETEKEY');
-    RegisterMethod(@TMMLSettingsSandbox.DeleteSubKeys,'DELETESUBKEYS');
-    RegisterPropertyHelper(@SettingsPrefix,nil,'Prefix');
-  end;
-end;
 
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 begin
@@ -221,7 +185,7 @@ begin
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
-  SIRegister_Settings(x);
+  SIRegister_MML(x);
 end;
 
 procedure TSimbaPSExtension.RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
@@ -234,7 +198,7 @@ begin
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
-  RIRegister_Settings(x);
+  RIRegister_MML(x);
 end;
 
 destructor TSimbaPSExtension.Destroy;

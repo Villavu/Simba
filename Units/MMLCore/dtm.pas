@@ -34,8 +34,6 @@ type
 
     { TMDTM }
 
-    { TMDTM }
-
     TMDTM = class(TObject)
     private
       FPoints : TMDTMPointArray;
@@ -55,6 +53,8 @@ type
       property Count : integer read FLen write SetPointCount;
       property Points : TMDTMPointArray read FPoints;
     end;
+    { TMDTMS }
+
     TMDTMS = class(TObject) //Manages the DTMs   TMufasaDTMs
     private
       Client: TObject;
