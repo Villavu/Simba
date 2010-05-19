@@ -46,10 +46,11 @@ x.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : intege
 x.addtypeS('PPoint','record R,T : extended; end;');
 x.AddTypeS('TTarget_Exported','record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14,int15:integer; end;');
 
-x.AddTypes('TDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
-x.AddTypes('TDTMPointDefArray', 'Array Of TDTMPointDef;');
-x.AddTypes('TDTM','record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
-x.AddTypeS('pDTM','record l: Integer;p: TPointArray;c, t, asz, ash: TIntegerArray; bp: Array Of Boolean; n: String; end;');
+x.AddTypes('TSDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
+x.AddTypes('TSDTMPointDefArray', 'Array Of TSDTMPointDef;');
+x.AddTypes('TSDTM','record MainPoint: TSDTMPointDef; SubPoints: TSDTMPointDefArray; end;');
+x.AddTypes('TMDTMPoint','record x,y,c,t,asz : integer; bp : boolean; end;');
+x.AddTypes('TMDTMPointArray','array of TMDTMPoint;');
 
 x.AddTypeS('T2DExtendedArray', 'array of array of extended;');
 x.AddTypeS('T3DExtendedArray','array of array of array of extended;');

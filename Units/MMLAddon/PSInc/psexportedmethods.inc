@@ -37,12 +37,13 @@ AddFunction(@ps_FindDTMRotatedSE, 'function FindDTMRotatedSE(DTM: Integer; var x
 AddFunction(@ps_FindDTMRotatedAlternating, 'function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean;');
 AddFunction(@ps_FindDTMsRotatedSE, 'function FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
 AddFunction(@ps_FindDTMsRotatedAlternating, 'function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
-AddFunction(@ps_addDTM, 'function AddDTM(const d: TDTM): Integer;');
-AddFunction(@ps_addpDTM, 'function AddpDTM(const d: pDTM): Integer;');
-AddFunction(@ps_PrintpDTM, 'procedure PrintpDTM(const tDTM : pDTM);');
-AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer) : pDTM');
-AddFunction(@ps_pDTMToTDTM, 'function pDTMToTDTM(const DTM: pDTM): TDTM;');
-AddFunction(@ps_tDTMTopDTM, 'function tDTMTopDTM(const DTM: TDTM): pDTM;');
+AddFunction(@ps_addDTM, 'function AddMDTM(const d: TMDTM): Integer;');
+AddFunction(@ps_addDTM, 'function AddDTM(const d: TMDTM): Integer;');
+AddFunction(@ps_addTSDTM, 'function AddSDTM(const d: TSDTM): Integer;');
+AddFunction(@ps_PrintDTM, 'procedure PrintDTM(const DTM : TMDTM);');
+AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer) : TMDTM');
+AddFunction(@ps_MDTMToSDTM, 'function MDTMToSDTM(Const DTM: TMDTM): TSDTM;');
+AddFunction(@ps_SDTMToMDTM, 'function SDTMToMDTM(Const DTM: TSDTM): TMDTM;');
 
 {maths}
 SetCurrSection('Math');
