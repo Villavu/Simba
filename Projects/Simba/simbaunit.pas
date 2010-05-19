@@ -96,9 +96,9 @@ type
     ActionTabNext: TAction;
     ActionList: TActionList;
     CheckBoxMatchCase: TCheckBox;
-    LazHighlighter: TSynFreePascalSyn;
     frmFunctionList: TFunctionListFrame;
     LabeledEditSearch: TLabeledEdit;
+    LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     Memo1: TMemo;
     MenuFile: TMenuItem;
@@ -118,8 +118,8 @@ type
     MenuItemDivider9: TMenuItem;
     MouseTimer: TTimer;
     NewsTimer: TTimer;
-    SCARHighlighter: TSynFreePascalSyn;
     FunctionListTimer: TTimer;
+    SCARHighlighter: TSynPasSyn;
     TT_Console: TToolButton;
     TT_Cut: TToolButton;
     TT_Copy: TToolButton;
@@ -2097,7 +2097,6 @@ begin
   //AutoCompletionStart := Point(-1, -1);
   CodeCompletionForm := TAutoCompletePopup.Create(Self);
   CodeCompletionForm.InsertProc := @OnCompleteCode;
-
   ParamHint := TParamHint.Create(self);
 
   {$ifdef MSWindows}
