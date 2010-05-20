@@ -86,17 +86,17 @@ type
     protected
       ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
-      DebugClear : TClearDebugProc;
-      DebugImg : TDbgImgInfo;
+      FDebugClear : TClearDebugProc;
+      FDebugImg : TDbgImgInfo;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
-      Prop: TScriptProperties;
       FOpenConnectionEvent : TOpenConnectionEvent;
       FWriteFileEvent : TWriteFileEvent;
       FOpenFileEvent : TOpenFileEvent;
       procedure LoadPlugin(plugidx: integer); virtual; abstract;
 
     public
+      Prop: TScriptProperties;
       Client : TClient;
       MInternet : TMInternet;
       StartTime : LongWord;
@@ -134,6 +134,8 @@ type
       property OpenConnectionEvent : TOpenConnectionEvent read FOpenConnectionEvent write SetOpenConnectionEvent;
       property WriteFileEvent : TWriteFileEvent read FWriteFileEvent write SetWriteFileEvent;
       property OpenFileEvent : TOpenFileEvent read FOpenFileEvent write SetOpenFileEvent;
+      property DebugClear : TClearDebugProc read FDebugClear write SetDebugClear;
+      property DebugImg : TDbgImgInfo read FDebugImg write SetDbgImg;
     end;
 
     { TPSThread }
@@ -255,55 +257,6 @@ begin
   if CurrThread.Prop.WriteTimeStamp then
     str := format('[%s]: %s', [TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount - CurrThread.StartTime))), str]);
   mDebugLn(str);
-end;
-
-function MakeString(data : TPSVariantIFC) : string;
-begin;
-  if data.Dta = nil then
-    result := 'Nil'
-  else
-  if data.aType.basetype in [btString,btChar] then
-    result := PSGetAnsiString(Data.Dta,data.aType)
-  else if data.aType.ExportName = 'BOOLEAN' then
-    result := BoolToStr(PSGetInt(Data.Dta,data.aType) <> 0,true)
-  else
-    result := PSVariantToString(data,'');
-end;
-
-function writeln_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
-begin
-  Result:=true;
-  psWriteln(makeString(NewTPSVariantIFC(Stack[Stack.Count-1],false)));
-end;
-
-function swap_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
-var
-  Param1,Param2: TPSVariantIFC;
-  tempCopy : pointer;
-begin
-  Result:=true;
-  Param1 := NewTPSVariantIFC(Stack[Stack.count-1],true);
-  Param2 := NewTPSVariantIFC(Stack[Stack.count-2],true);
-  if Param1.aType.BaseType <> Param2.aType.BaseType then
-    exit(false)
-  else
-  begin
-    Param1.aType.CalcSize;
-    param2.aType.CalcSize;
-    if Param1.aType.RealSize <> Param2.aType.RealSize then
-      exit(false);
-    GetMem(tempcopy,Param1.aType.RealSize);
-    Move(Param1.Dta^,tempCopy^,param1.atype.realsize);
-    Move(Param2.Dta^,Param1.Dta^,param1.atype.realsize);
-    Move(tempCopy^,Param2.Dta^,param1.atype.realsize);
-    Freemem(tempcopy);
-  end;
-end;
-
-function ToStr_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
-begin
-  result := true;
-  Stack.SetAnsiString(-1, MakeString(NewTPSVariantIFC(Stack[Stack.Count-2],false)));
 end;
 
 {***implementation TMThread***}
@@ -466,12 +419,12 @@ end;
 
 procedure TMThread.SetDebugClear(clearProc: TClearDebugProc);
 begin
-  DebugClear:= clearProc;
+  FDebugClear:= clearProc;
 end;
 
 procedure TMThread.SetDbgImg(DebugImageInfo: TDbgImgInfo);
 begin
-  DebugImg := DebugImageInfo;
+  FDebugImg := DebugImageInfo;
 end;
 
 procedure TMThread.SetSettings(S: TMMLSettingsSandbox);
@@ -567,8 +520,13 @@ begin
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
   PSScript.OnFindUnknownFile:=@PSScriptFindUnknownFile;
-  // Set some defines
-  {$I PSInc/psdefines.inc}
+
+  with PSScript do
+  begin
+    // Set some defines
+    {$I PSInc/psdefines.inc}
+  end;
+
   for i := 0 to high(ExportedMethods) do
     if pos('Writeln',exportedmethods[i].FuncDecl) > 0 then
     begin
@@ -683,7 +641,12 @@ begin
   SIRegister_Menus(x);
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
-  {$I PSInc/pscompile.inc}
+
+  with x do
+  begin
+    {$I PSInc/pscompile.inc}
+  end;
+
   SIRegister_Mufasa(x);
   with x.AddFunction('procedure writeln;').decl do
     with AddParam do
@@ -792,7 +755,6 @@ begin
         psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
     end else
       psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
-
   end;
 end;
 
