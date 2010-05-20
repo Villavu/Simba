@@ -41,7 +41,6 @@ function ValidMainPointBox(var dtm: TMDTM; const x1, y1, x2, y2: Integer): TBox;
 function ValidMainPointBox(const TPA: TPointArray; const x1, y1, x2, y2: Integer): TBox;
 function ValidMainPointBoxRotated(var dtm: TMDTM; const x1, y1, x2, y2: Integer;const
                                   sAngle, eAngle, aStep: Extended): TBox;
-procedure NormalizeDTM(var dtm: TMDTM);
 {function RotateDTM(const dtm: TMDTM; angle: extended) : TMDTM;
 function copydtm(const dtm: TMDTM): TMDTM;                     }
 
@@ -142,21 +141,6 @@ begin
     result.Points[i].bp := false;
 end;
 
-procedure NormalizeDTM(var dtm: TMDTM);
-var
-   i:integer;
-begin
-  if (dtm = nil) or (dtm.count < 1) or ((dtm.Points[0].x = 0) and (dtm.Points[0].y = 0)) then  //Already normalized
-    exit;
-  for i := 1 to dtm.Count - 1 do
-  begin
-    dtm.Points[i].x := dtm.Points[i].x - dtm.Points[0].x;
-    dtm.Points[i].y := dtm.Points[i].y - dtm.Points[0].y;
-  end;
-  dtm.Points[0].x := 0;
-  dtm.Points[0].y := 0;
-end;
-
 function ValidMainPointBox(var dtm: TMDTM; const x1, y1, x2, y2: Integer): TBox;
 
 var
@@ -164,7 +148,7 @@ var
    b: TBox;
 
 begin
-  NormalizeDTM(dtm);
+  dtm.Normalize;
 
   FillChar(b, SizeOf(TBox), 0); //Sets all the members to 0
   b.x1 := MaxInt;
@@ -203,7 +187,7 @@ var
    d:extended;
 
 begin
-  NormalizeDTM(dtm);
+  dtm.normalize;
 
 { Delete the ASZ
   for i := 0 to high(dtm.c) do

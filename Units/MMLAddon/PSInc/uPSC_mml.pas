@@ -104,6 +104,7 @@ begin
     RegisterMethod('procedure free;');
     RegisterProperty('Name','String',iptrw);
     RegisterMethod('function ToString : string');
+    RegisterMethod('function LoadFromString(const s : string) : boolean;');
     RegisterMethod('function Valid:boolean');
     RegisterMethod('procedure DeletePoint( Point : integer);');
     RegisterMethod('procedure SwapPoint(p1,p2 : integer);');
