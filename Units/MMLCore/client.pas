@@ -42,6 +42,8 @@ It binds all the components together.
 type
 
   TClient = class(TObject)
+  private
+    FOwnIOManager : boolean;
   public
     IOManager: TIOManager;
     MFiles: TMFiles;
@@ -51,7 +53,7 @@ type
     MOCR: TMOCR;
     WritelnProc : TWritelnProc;
     procedure WriteLn(s : string);
-    constructor Create(plugin_dir: string);
+    constructor Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
     destructor Destroy; override;
   end;
 
@@ -68,11 +70,15 @@ begin
 end;
 
 // Possibly pass arguments to a default window.
-constructor TClient.Create(plugin_dir: string);
+constructor TClient.Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
 begin
   inherited Create;
   WritelnProc:= nil;
-  IOManager:= TIOManager.Create(plugin_dir);
+  if UseIOManager = nil then
+    IOManager := TIOManager.Create(plugin_dir)
+  else
+    IOManager := UseIOManager;
+  FOwnIOManager := (UseIOManager = nil);
   MFiles := TMFiles.Create(self);
   MFinder := TMFinder.Create(Self);
   MBitmaps := TMBitmaps.Create(self);
@@ -82,14 +88,16 @@ end;
 
 destructor TClient.Destroy;
 begin
-  IOManager.SetState(True);
+  if FOwnIOManager then
+    IOManager.SetState(True);
 
   MOCR.Free;
   MDTMs.Free;
   MBitmaps.Free;
   MFinder.Free;
   MFiles.Free;
-  IOManager.Free;
+  if FOwnIOManager then
+    IOManager.Free;
 
   inherited;
 end;
