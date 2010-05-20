@@ -105,7 +105,7 @@ begin
     result := SExt_ok;
   except
     on e : exception do
-      //formWritelnEx(format('Error in Simba extension (%s): %s',[Self.GetName,e.message]));
+      psWriteLn(format('Error in Simba extension (%s): %s',[Self.GetName,e.message]));
   end;
 end;
 
@@ -149,22 +149,22 @@ begin
 end;
 
 {$DEFINE MML_EXPORT_THREADSAFE}
-{$I Wrappers/other.inc}
-{$I Wrappers/settings.inc}
-{$I Wrappers/bitmap.inc}
-{$I Wrappers/window.inc}
-{$I Wrappers/tpa.inc}
-{$I Wrappers/strings.inc}
-{$I Wrappers/colour.inc}
-{$I Wrappers/colourconv.inc}
-{$I Wrappers/math.inc}
-{$I Wrappers/mouse.inc}
-{$I Wrappers/file.inc}
-{$I Wrappers/keyboard.inc}
-{$I Wrappers/dtm.inc}
-{$I Wrappers/ocr.inc}
-{$I Wrappers/internets.inc}
-{$I Wrappers/extensions.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/other.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/settings.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/bitmap.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/window.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/tpa.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/strings.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/colour.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/colourconv.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/math.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/mouse.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/file.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/keyboard.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/dtm.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/ocr.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/internets.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/extensions.inc}
 
 procedure TSimbaPSExtension.RegisterMyMethods(x: TPSScript);
 
@@ -196,11 +196,13 @@ begin
 
     {$i ../../Units/MMLAddon/PSInc/psexportedmethods.inc}
 
+    AddFunction(@ext_SDTMToMDTM,'function SDTMToMDTM(Const DTM: TSDTM): TMDTM;');
     AddFunction(@ext_GetPage,'function GetPage(const url : string) : string');
     AddFunction(@ext_DecompressBZip2,'function DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;');
     AddFunction(@ext_UnTar,'function UnTar(const Input : string; out Content : TStringArray) : boolean;');
     AddFunction(@ext_UnTarEx,'function UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;');
     AddFunction(@ext_MessageDlg,'function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;');
+    AddFunction(@ext_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
     AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
     AddRegisteredVariable('Simba','TForm');
     AddRegisteredVariable('Simba_MainMenu','TMainMenu');
