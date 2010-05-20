@@ -76,6 +76,7 @@ begin
     RegisterMethod(@TMufasaBitmap.FastSetPixels,'FASTSETPIXELS');
     RegisterMethod(@TMufasaBitmap.DrawATPA,'DRAWATPA');
     RegisterMethod(@TMufasaBitmap.DrawTPA,'DRAWTPA');
+    RegisterMethod(@TMufasaBitmap.DrawToCanvas, 'DRAWTOCANVAS');
     RegisterMethod(@TMufasaBitmap.FloodFill,'FLOODFILL');
     RegisterMethod(@TMufasaBitmap.Rectangle,'RECTANGLE');
     RegisterMethod(@TMufasaBitmap.FastGetPixel,'FASTGETPIXEL');

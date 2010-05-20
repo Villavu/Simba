@@ -21,10 +21,6 @@
     Mouse.inc for the Mufasa Macro Library
 }
 
-const
-  ps_mouse_right = 0;
-  ps_mouse_left = 1;
-  ps_mouse_middle = 2;
 procedure ps_MoveMouse(x, y: integer); extdecl;
 begin
   CurrThread.Client.IOManager.MoveMouse(X, Y);

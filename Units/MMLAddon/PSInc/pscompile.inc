@@ -21,47 +21,46 @@
     PSCompile.inc for the Mufasa Macro Library
 }
 
-x.AddConstantN('AppPath','string').SetString(Self.AppPath);
-x.AddConstantN('ScriptPath','string').SetString(Self.ScriptPath);
-x.AddConstantN('IncludePath','string').SetString(Self.IncludePath);
-x.AddConstantN('PluginPath','string').SetString(Self.PluginPath);
-x.AddConstantN('FontPath','string').SetString(Self.FontPath);
-x.AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
-x.AddConstantN('MaxInt','integer').SetInt(maxLongint);
-x.AddTypeS('TReplaceFlag', '(rfReplaceAll, rfIgnoreCase)');
-x.AddTypeS('TReplaceFlags','set of TReplaceFlag');
-x.AddTypeS('StrExtr','(Numbers, Letters, Others);');
-x.AddTypeS('TDateTime','Double');
-x.AddTypeS('TIntegerArray', 'Array of LongInt');
-x.AddTypeS('TByteArray','Array of byte');
-x.AddTypeS('TExtendedArray','Array of extended');
-x.AddTypeS('TBoolArray', 'Array of Boolean');
-x.AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
-x.AddTypeS('TBoxArray','Array of TBox');
-x.AddTypeS('TPointArray','Array of TPoint');
-x.AddTypeS('T2DPointArray','Array of TPointArray');
-x.AddTypeS('TPointArrayArray','Array of TPointArray');
-x.AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
-x.AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
-x.addtypeS('PPoint','record R,T : extended; end;');
-x.AddTypeS('TTarget_Exported','record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14,int15,int16:integer; end;');
+AddConstantN('AppPath','string').SetString(AppPath);
+AddConstantN('ScriptPath','string').SetString(ScriptPath);
+AddConstantN('IncludePath','string').SetString(IncludePath);
+AddConstantN('PluginPath','string').SetString(PluginPath);
+AddConstantN('FontPath','string').SetString(FontPath);
+AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
+AddConstantN('MaxInt','integer').SetInt(maxLongint);
+AddTypeS('TReplaceFlag', '(rfReplaceAll, rfIgnoreCase)');
+AddTypeS('TReplaceFlags','set of TReplaceFlag');
+AddTypeS('StrExtr','(Numbers, Letters, Others);');
+AddTypeS('TDateTime','Double');
+AddTypeS('TIntegerArray', 'Array of LongInt');
+AddTypeS('TByteArray','Array of byte');
+AddTypeS('TExtendedArray','Array of extended');
+AddTypeS('TBoolArray', 'Array of Boolean');
+AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
+AddTypeS('TBoxArray','Array of TBox');
+AddTypeS('TPointArray','Array of TPoint');
+AddTypeS('T2DPointArray','Array of TPointArray');
+AddTypeS('TPointArrayArray','Array of TPointArray');
+AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
+AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
+addtypeS('PPoint','record R,T : extended; end;');
+AddTypeS('TTarget_Exported','record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14,int15,int16:integer; end;');
 
-x.AddTypes('TSDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
-x.AddTypes('TSDTMPointDefArray', 'Array Of TSDTMPointDef;');
-x.AddTypes('TSDTM','record MainPoint: TSDTMPointDef; SubPoints: TSDTMPointDefArray; end;');
-x.AddTypes('TMDTMPoint','record x,y,c,t,asz : integer; bp : boolean; end;');
-x.AddTypes('TMDTMPointArray','array of TMDTMPoint;');
+AddTypes('TSDTMPointDef', 'record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
+AddTypes('TSDTMPointDefArray', 'Array Of TSDTMPointDef;');
+AddTypes('TSDTM','record MainPoint: TSDTMPointDef; SubPoints: TSDTMPointDefArray; end;');
+AddTypes('TMDTMPoint','record x,y,c,t,asz : integer; bp : boolean; end;');
+AddTypes('TMDTMPointArray','array of TMDTMPoint;');
 
-x.AddTypeS('T2DExtendedArray', 'array of array of extended;');
-x.AddTypeS('T3DExtendedArray','array of array of array of extended;');
-x.AddTypeS('T2DIntegerArray','array of array of integer;');
-x.AddTypeS('TStringArray','Array of string;');
-x.AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
-x.AddTypeS('Pointer', 'Integer');
+AddTypeS('T2DExtendedArray', 'array of array of extended;');
+AddTypeS('T3DExtendedArray','array of array of array of extended;');
+AddTypeS('T2DIntegerArray','array of array of integer;');
+AddTypeS('TStringArray','Array of string;');
+AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
+AddTypeS('Pointer', 'Integer');
 
-x.AddTypeS('TSP_Property','(SP_WriteTimeStamp,SP_OnTerminate)');
+AddTypeS('TSP_Property','(SP_WriteTimeStamp,SP_OnTerminate)');
 
-
-x.AddConstantN('mouse_Right','integer').SetInt(ps_mouse_right); //0
-x.AddConstantN('mouse_Left','integer').SetInt(ps_mouse_left);//1
-x.AddConstantN('mouse_Middle','integer').SetInt(ps_mouse_middle);//2
+AddConstantN('mouse_Right','integer').SetInt(ps_mouse_right); //0
+AddConstantN('mouse_Left','integer').SetInt(ps_mouse_left);//1
+AddConstantN('mouse_Middle','integer').SetInt(ps_mouse_middle);//2

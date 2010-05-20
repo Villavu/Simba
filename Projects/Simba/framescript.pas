@@ -370,7 +370,7 @@ begin
       end;
 
       if (Data <> nil) then //If showing automatically
-        if (s <> '') and (((mp.DeclarationAtPos <> nil) and (mp.DeclarationAtPos is TciCompoundStatement)) or ((mp.DeclarationAtPos.Owner <> nil) and (mp.DeclarationAtPos.Owner is TciCompoundStatement))) then
+        if (s <> '') and ((mp.DeclarationAtPos <> nil) and ((mp.DeclarationAtPos is TciCompoundStatement) or mp.DeclarationAtPos.HasOwnerClass(TciCompoundStatement, d, True))) then
           Data := nil;
 
       if (Data = nil) then

@@ -22,17 +22,17 @@
 }
 
 {$IFDEF CPU386 }
-PSScript.Defines.Add('CPU386');
+Defines.Add('CPU386');
 {$ENDIF }
-PSScript.Defines.Add('MUFASA');
-PSScript.Defines.Add('COGAT');
-PSScript.Defines.Add('SIMBA');
-PSScript.Defines.Add('RAYMONDPOWNS');
+Defines.Add('MUFASA');
+Defines.Add('COGAT');
+Defines.Add('SIMBA');
+Defines.Add('RAYMONDPOWNS');
 {$IFDEF MSWINDOWS }
-PSScript.Defines.Add('MSWINDOWS');
-PSScript.Defines.Add('WIN32');
-PSScript.Defines.Add('WINDOWS');
+Defines.Add('MSWINDOWS');
+Defines.Add('WIN32');
+Defines.Add('WINDOWS');
 {$ENDIF }
 {$IFDEF LINUX }
-PSScript.Defines.Add('LINUX');
+Defines.Add('LINUX');
 {$ENDIF }

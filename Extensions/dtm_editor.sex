@@ -1,0 +1,1349 @@
+program DTMEditor_Extension;
+
+const
+  Version = '0.5';
+  ZoomPixels = 3; //Should be an odd number (1, 3, 5, 7, ..)
+
+var
+  Simba_Menu: TMenuItem;
+
+  frm: TForm;
+  mm: TMainMenu;
+  sm: array [0..31] of TMenuItem;
+  ResizeTimer: TTimer;
+  DotTimer: TTimer;
+
+  sb: TScrollBox;
+  img, imgZoom: TImage;
+  pnl: TPanel;
+  rbMouseClick: array[0..2] of TRadioButton;
+  lb: TListBox;
+  btnAdd, btnDel, btnMark: TButton;
+  edX, edY, edASize, edColour, edTolerance: TEdit;
+  cbAShape: TComboBox;
+  shColour: TShape;
+
+  bmpOverlay, bmpBuffer, bmp: TMufasaBitmap;
+  sp: TPoint;
+  Zoom: Single;
+  p: TSDTMPointDefArray;
+  curP: Integer;
+
+  MarkCol: Integer;
+  PaintDTM, BufferChanged: Boolean;
+
+function GetLine(p1, p2: TPoint): TPointArray;
+var
+  dx, dy: Extended;
+  i, d: Integer;
+begin
+  SetLength(Result, 0);
+  dx := p2.x - p1.x;
+  dy := p2.y - p1.y;
+  d := Max(Round(Abs(dx)), Round(Abs(dy)));
+  if (d = 0) then
+    Exit;
+
+  dx := dx / d;
+  dy := dy / d;
+
+  SetLength(Result, d + 1);
+  for i := 0 to d do
+  begin
+    Result[i].x := p1.x + Round(dx * i);
+    Result[i].y := p1.y + Round(dy * i);
+  end;
+
+  ClearDoubleTPA(Result);
+end;
+
+function InvertColor(Color: Integer): Integer;
+var
+  h, s, l: Extended;
+begin
+  ColorToHSL(Color, h, s, l);
+
+  if (((h + s + l) < 120) and ((l < 75) or (h + s + l > 145))) or (l < 35) then
+    Result := (clWhite * 3 + HSLtoColor(100 - (h / 2.0), 100, 100 - l)) div 4
+  else if (h + s + l > 200) or (l > 75) then
+    Result := HSLtoColor(100 - (h / 2.0), 100, 100 - l) div 2
+  else
+    Result := HSLtoColor(100 - (h / 2.0), 100, 100 - l) + clWhite div 3;
+end;
+
+function toSDTM: TSDTM;
+var
+  i, l: Integer;
+begin
+  if (Length(p) < 1) then
+    Exit;
+
+  with Result do
+  begin
+    MainPoint := p[0];
+    l := Length(p) - 1;
+    SetLength(SubPoints, l);
+
+    for i := 0 to l - 1 do
+      SubPoints[i] := p[i + 1];
+  end;
+end;
+
+function DTMPointDef(x, y, Area, Shape, Color, Tolerance: Integer): TSDTMPointDef;
+begin
+  Result.x := x;
+  Result.y := y;
+  Result.AreaSize := Area;
+  Result.AreaShape := Shape;
+  Result.Color := Color;
+  Result.Tolerance := Tolerance;
+end;
+
+function FindClosePoint(x, y, maxDist: Integer): Integer;
+var
+  i, d1, d2: Integer;
+begin
+  Result := -1;
+  if (Length(p) < 1) then
+    Exit;
+
+  maxDist := Round(maxDist / Zoom);
+
+  d1 := maxDist + 1;
+  for i := High(p) downto 0 do
+  begin
+    d2 := Max(iAbs(p[i].x - x), iAbs(p[i].y - y)) - Max(Round(p[i].AreaSize * Zoom / 2.0), 1);
+
+    if (d2 < d1) then
+    begin
+      d1 := d2;
+      Result := i;
+    end;
+  end;
+
+  if (Result > -1) and (d1 > maxDist) then
+    Result := -1;
+end;
+
+function FixImgPoint(var x, y: Integer): Boolean;
+begin
+  x := x - sp.x;
+  y := y - sp.y;
+  if (Zoom <> 1.0) and (Zoom > 0.0) then
+  begin
+    x := Round(x / Zoom);
+    y := Round(y / Zoom);
+  end;
+  Result := not ((x < 0) or (y < 0) or (x >= bmpBuffer.Width) or (y >= bmpBuffer.Height));
+end;
+
+function getIntFromEdit(Edit: TEdit): Integer;
+begin
+  Result := StrToIntDef(Edit.Text, -1);
+  if (Result = -1) then
+  begin
+    Result := 0;
+    Edit.Color := 7435495;
+  end
+  else
+    Edit.Color := clWhite;
+end;
+
+function getX: Integer;
+begin
+  Result := getIntFromEdit(edX);
+end;
+
+function getY: Integer;
+begin
+  Result := getIntFromEdit(edY);
+end;
+
+function getASize: Integer;
+begin
+  Result := getIntFromEdit(edASize);
+end;
+
+function getAShape: Integer;
+begin
+  Result := cbAShape.ItemIndex;
+  if (Result = -1) then
+  begin
+    Result := 0;
+    cbAShape.Color := 7435495;
+  end
+  else
+    cbAShape.Color := clWhite;
+end;
+
+function getColour: Integer;
+begin
+  Result := getIntFromEdit(edColour);
+end;
+
+function getTolerance: Integer;
+begin
+  Result := getIntFromEdit(edTolerance);
+end;
+
+procedure DrawDot(p: TSDTMPointDef; Color: Integer; OnBuffer: Boolean);
+var
+  x, y, z, w, h: Integer;
+begin
+  if OnBuffer then
+  begin
+    z := Max(p.AreaSize shr 1, 1);
+    w := bmpBuffer.Width;
+    h := bmpBuffer.Height;
+    BufferChanged := True;
+  end
+  else
+  begin
+    z := Max(Round(p.AreaSize * Zoom / 2.0), 1);
+    if (Zoom <> 1.0) and (Zoom > 0.0) then
+    begin
+      p.x := Round(p.x * Zoom);
+      p.y := Round(p.y * Zoom);
+    end;
+
+    w := Round(bmpBuffer.Width * Zoom);
+    h := Round(bmpBuffer.Height * Zoom);
+  end;
+
+  for x := -z to z do
+    for y := -z to z do
+      if (p.x + x >= 0) and (p.x + x < w) and (p.y + y >= 0) and (p.y + y < h) then
+        if OnBuffer then
+          bmpBuffer.FastSetPixel(p.x + x, p.y + y, Color)
+        else
+          img.Canvas.Pixels[p.x + x + sp.x, p.y + y + sp.y] := Color;
+end;
+
+procedure DrawDots(OnBuffer: Boolean);
+var
+  i: Integer;
+begin
+  for i := 0 to High(p) do
+    DrawDot(p[i], MarkCol, OnBuffer);
+end;
+
+procedure DrawPoints(OnBuffer: Boolean);
+var
+  Points: TPointArray;
+  a: Boolean;
+  i: Integer;
+  z: Single;
+begin
+  if (not PaintDTM) then
+    Exit;
+  a := DotTimer.Enabled;
+  DotTimer.Enabled := False;
+
+  if OnBuffer then
+  begin
+    for i := 1 to High(p) do
+      Points := CombineTPA(Points, GetLine(Point(Max(Min(p[0].x, bmpBuffer.Width - 1), 0), Max(Min(p[0].y, bmpBuffer.Height - 1), 0)), Point(Max(Min(p[i].x, bmpBuffer.Width - 1), 0), Max(Min(p[i].y, bmpBuffer.Height - 1), 0))));
+    //bmpBuffer.DrawTPA(Points, MarkCol);
+
+    DrawDots(True);
+    BufferChanged := True;
+  end
+  else
+  begin
+    img.Canvas.Pen.Width := Max(Round(Zoom), 1);
+    img.Canvas.Pen.Color := MarkCol;
+
+    z := Zoom;
+    if (Zoom <= 0.0) then
+      Zoom := 1.0;
+
+    for i := 1 to High(p) do
+    begin
+      img.Canvas.MoveTo(Round(Max(Min(p[0].x, bmpBuffer.Width - 1), 0) * z) + sp.x, Round(Max(Min(p[0].y, bmpBuffer.Height - 1), 0) * z) + sp.y);
+      img.Canvas.LineTo(Round(Max(Min(p[i].x, bmpBuffer.Width - 1), 0) * z) + sp.x, Round(Max(Min(p[i].y, bmpBuffer.Height - 1), 0) * z) + sp.y);
+    end;
+    DrawDots(False);
+  end;
+
+  DotTimer.Enabled := a;
+end;
+
+function AddPoint(x, y, Area, Shape, Color, Tolerance: Integer): Integer;
+begin
+  Result := Length(p);
+  SetLength(p, Result + 1);
+  p[Result] := DTMPointDef(x, y, Area, Shape, Color, Tolerance);
+  lb.Items.Add(ToStr(p[Result]));
+end;
+
+function DoAddPoint: Integer;
+begin
+  Result := AddPoint(getX, getY, getASize, getAShape, getColour, getTolerance);
+end;
+
+procedure setActivePoint(Index: Integer);
+var
+  a: Boolean;
+  c: TNotifyEvent;
+begin
+  a := DotTimer.Enabled;
+  DotTimer.Enabled := False;
+
+  if (curP > -1) and (curP <> Index) then
+    DrawDot(p[curP], MarkCol, False);
+
+  curP := Index;
+  if (lb.ItemIndex <> Index) then
+  begin
+    c := lb.OnClick;
+    lb.ItemIndex := Index;
+    lb.OnClick := c;
+  end;
+
+  if (curP > -1) then
+    with p[curP] do
+    begin
+      edX.Text := IntToStr(x);
+      edY.Text := IntToStr(y);
+      edASize.Text := IntToStr(AreaSize);
+      cbAShape.ItemIndex := AreaShape;
+      edColour.Text := IntToStr(Color);
+      edTolerance.Text := IntToStr(Tolerance);
+    end;
+
+  DotTimer.Enabled := a;
+end;
+
+procedure ResetBuffer;
+begin
+  if (bmpBuffer <> nil) then
+    bmpBuffer.Free;
+
+  bmpBuffer := bmp.Copy(0, 0, bmp.Width - 1, bmp.Height - 1);
+  BufferChanged := False;
+end;
+
+procedure UpdateBitmap(EnsurePaint, BufferPoints: Boolean);
+var
+  b: TMufasaBitmap;
+  tmpBitmap: TBitmap;
+begin
+  if (Zoom = 1.0) or (Zoom <= 0.0) then
+    if (bmpOverlay <> nil) then
+      b := bmpOverlay
+    else
+      b := bmpBuffer
+  else
+  begin
+    if (bmpOverlay <> nil) then
+      b := bmpOverlay.Copy(0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1)
+    else
+      b := bmpBuffer.Copy(0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1);
+    b.StretchResize(Max(Round(b.Width * Zoom), 1), Max(Round(b.Height * Zoom), 1));
+  end;
+
+  img.Width := b.Width;
+  img.Height := b.Height;
+  img.Picture.Bitmap.Width := Max(b.Width, sb.ClientWidth);
+  img.Picture.Bitmap.Height := Max(b.Height, sb.ClientHeight);
+
+  if (sp.x > 0) and (sp.x + b.Width > sb.ClientWidth - 1) then
+    EnsurePaint := True
+  else if (sp.y > 0) and (sp.y + b.Height > sb.ClientHeight - 1) then
+    EnsurePaint := True;
+  sp := Point(0, 0);
+
+  if (b.Width < sb.ClientWidth - 1) or (b.Height < sb.ClientHeight - 1) then
+  begin
+    if (b.Width < sb.ClientWidth - 1) then
+    begin
+      img.Width := sb.ClientWidth - 1;
+      sp.x := (img.Width - b.Width) div 2;
+    end;
+    if (b.Height < sb.ClientHeight - 1) then
+    begin
+      img.Height := sb.ClientHeight - 1;
+      sp.y := (img.Height - b.Height) div 2;
+    end;
+
+    with img.Canvas do
+    begin
+      Pen.Color := clNavy;
+      Brush.Style := bsSolid;
+      Brush.Color := clWhite;
+      Rectangle(0, 0, img.Width - 1, img.Height - 1);
+      Brush.Style := bsDiagCross;
+      Brush.Color := clNavy;
+      Rectangle(0, 0, img.Width - 1, img.Height - 1);
+    end;
+    EnsurePaint := True;
+  end;
+
+  if EnsurePaint then
+  begin
+    if BufferPoints then
+      DrawPoints(True);
+
+    if (sp.x = 0) and (sp.y = 0) then
+    begin
+      tmpBitmap := b.ToTBitmap;
+      img.Picture.Bitmap.Assign(tmpBitmap);
+      tmpBitmap.Free;
+    end
+    else
+      b.DrawToCanvas(sp.x, sp.y, img.Canvas);
+
+    if (not BufferPoints) then
+      DrawPoints(False);
+  end;
+
+  if (Zoom > 0.0) and (Zoom <> 1.0) then
+    b.Free;
+end;
+
+procedure LoadClientBitmap;
+var
+  w, h: Integer;
+begin
+  bmp.CopyClientToBitmap(False, 0, 0, 0, 0, 1620, 1280);
+  //GetClientDimensions(w, h);
+  //bmp.SetSize(w, h);
+  //CopyClientToBitmap(bmp.Index, 0, 0, w - 1, h - 1);
+
+  ResetBuffer;
+  UpdateBitmap(True, False);
+end;
+
+procedure frmResize(Sender: TObject);
+begin
+  ResizeTimer.Enabled := False;
+  ResizeTimer.Enabled := True;
+end;
+
+procedure frmKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = VK_CONTROL) and (img.Cursor = crHandPoint) then
+    img.Cursor := crDefault
+  else if (Key = VK_DELETE) then
+    btnDel.OnClick(nil);
+end;
+
+procedure timerResize(Sender: TObject);
+begin
+  //TTimer(Sender).Enabled := False;
+  ResizeTimer.Enabled := False;
+  UpdateBitmap(False, False);
+end;
+
+procedure timerDot(Sender: TObject);
+begin
+  if (not PaintDTM) then
+    Exit;
+
+  //TTimer(Sender).Enabled := False;
+  DotTimer.Enabled := False;
+
+  if (curP > -1) then
+  begin
+    if (TTimer(Sender).Tag = clYellow) then
+      TTimer(Sender).Tag := clBlack
+    else
+      TTimer(Sender).Tag := clYellow;
+
+    DrawDot(p[curP], TTimer(Sender).Tag, False);
+  end;
+
+  //TTimer(Sender).Enabled := True;
+  DotTimer.Enabled := True;
+end;
+
+procedure edFilterText(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (not (
+    (Key = VK_DELETE) or
+    (Key = VK_BACK) or
+    ((Key >= VK_0) and (Key <= VK_9)) or
+    ((Key >= VK_Left) and (Key <= VK_DOWN)) or
+    ((Key >= VK_NUMPAD0) and (Key <= VK_NUMPAD9))
+  )) or (Shift <> []) then
+    Key := 0;
+end;
+
+procedure edChange(Sender: TObject);
+var
+  pt: TSDTMPointDef;
+begin
+  with pt do
+  begin
+    x := getX;
+    y := getY;
+    AreaSize := getASize;
+    AreaShape := getAShape;
+    Color := getColour;
+    shColour.Brush.Color := Color;
+    Tolerance := getTolerance;
+  end;
+
+  if (curP > -1) and TWinControl(Sender).Focused then
+  begin
+    p[curP] := pt;
+    lb.Items[curP] := ToStr(pt);
+
+    UpdateBitmap(True, False);
+  end;
+end;
+
+procedure mnuNew(Sender: TObject);
+begin
+  SetLength(p, 0);
+  curP := -1;
+  PaintDTM := True;
+
+  lb.Clear;
+  rbMouseClick[0].Checked := True; //Mouse click creates point
+  sm[15].Click; //Zoom
+  sm[20].Click; //Marking Colour
+
+  cbAShape.ItemIndex := 0;
+  edASize.Text := '1';
+  edX.Text := '0';
+  edY.Text := '0';
+  edColour.Text := '0';
+  edTolerance.Text := '0';
+  shColour.Brush.Color := clWhite;
+
+  if (bmpOverlay <> nil) then
+  begin
+    bmpOverlay.Free;
+    bmpOverlay := nil;
+  end;
+  ResetBuffer;
+  UpdateBitmap(True, False);
+  frm.ActiveControl := lb;
+end;
+
+procedure mnuOpen(Sender: TObject);
+begin
+end;
+
+procedure mnuSave(Sender: TObject);
+begin
+end;
+
+procedure mnuExit(Sender: TObject);
+begin
+  frm.Close;
+end;
+
+procedure mnuOpenImg(Sender: TObject);
+begin
+  DotTimer.Enabled := False;
+  with TOpenDialog.Create(frm) do
+  begin
+    Filter := 'Graphic (*.bmp;*.xpm;*.png;*.pbm;*.pgm;*.ppm;*.ico;*.icns;*.cur;*.jpg;*.jpeg;*.jpe;*.jfif)|*.bmp;*.xpm;*.png;*.pbm;*.pgm;*.ppm;*.ico;*.icns;*.cur;*.jpg;*.jpeg;*.jpe;*.jfif|Bitmaps (*.bmp)|*.bmp|Pixmap (*.xpm)|*.xpm|Portable Network Graphic (*.png)|*.png|Portable PixMap (*.pbm;*.pgm;*.ppm)|*.pbm;*.pgm;*.ppm|Icon (*.ico)|*.ico|OSX Icon Resource (*.icns)|*.icns|Cursor (*.cur)|*.cur|Joint Picture Expert Group (*.jpg;*.jpeg;*.jpe;*.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|All files (*.*)|*.*|';
+    Options := Options + [ofFileMustExist, ofOverwritePrompt];
+    if Execute then
+    begin
+      bmp.LoadFromFile(FileName);
+      ResetBuffer;
+      UpdateBitmap(True, False);
+    end;
+    Free;
+  end;
+  DotTimer.Enabled := True;
+end;
+
+procedure mnuClientImg(Sender: TObject);
+begin
+  LoadClientBitmap;
+end;
+
+procedure mnuClientDesktop(Sender: TObject);
+begin
+  //SetDesktopAsClient;
+  LoadClientBitmap;
+end;
+
+procedure mnuZoom(Sender: TObject);
+var
+  i: Integer;
+  z: Single;
+begin
+  for i := 0 to sm[12].Count - 1 do
+    sm[12].Items[i].Checked := False;
+  TMenuItem(Sender).Checked := True;
+
+  z := TMenuItem(Sender).Tag / 100.0;
+  if (Zoom <> z) then
+  begin
+    Zoom := z;
+    UpdateBitmap(True, False);
+  end;
+end;
+
+procedure mnuSetMarkCol(Sender: TObject);
+var
+  i: Integer;
+begin
+  for i := 0 to sm[19].Count - 1 do
+    sm[19].Items[i].Checked := False;
+  TMenuItem(Sender).Checked := True;
+
+  if (MarkCol <> TMenuItem(Sender).Tag) then
+  begin
+    MarkCol := TMenuItem(Sender).Tag;
+    UpdateBitmap(True, False);
+  end;
+end;
+
+procedure mnuMatchCols(Sender: TObject);
+var
+  h: Integer;
+  Points: TPointArray;
+begin
+  BufferChanged := True;
+  PaintDTM := False;
+
+  {h := GetImageTarget;
+  if (bmpOverlay = nil) then
+    bmpOverlay := bmpBuffer.Copy(0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1);
+  SetTargetBitmap(bmpBuffer.Index);
+
+  if FindColorsTolerance(Points, getColour, 0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1, getTolerance) then
+    bmpOverlay.DrawTPA(Points, MarkCol);
+
+  SetImageTarget(h);}
+  UpdateBitmap(True, False);
+end;
+
+procedure mnuMatchDTMs(Sender: TObject);
+var
+  p1, p2: TPointArray;
+  dtm, i, h: Integer;
+begin
+  BufferChanged := True;
+  PaintDTM := False;
+
+  if (Length(p) > 0) then
+  begin
+    {dtm := AddSDTM(toSDTM);
+    h := GetImageTarget;
+    if (bmpOverlay = nil) then
+      bmpOverlay := bmpBuffer.Copy(0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1);
+    SetTargetBitmap(bmpBuffer.Index);
+
+    if FindDTMs(dtm, p1, 0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1) then
+    begin
+      for i := 0 to High(p1) do
+        p2 := CombineTPA(p2,
+          CombineTPA(
+            GetLine(Point(Max(Min(p1[i].x - 4, bmpBuffer.Width - 1), 0), Max(Min(p1[i].y - 4, bmpBuffer.Height - 1), 0)), Point(Max(Min(p1[i].x + 4, bmpBuffer.Width - 1), 0), Max(Min(p1[i].y + 4, bmpBuffer.Height - 1), 0))),
+            GetLine(Point(Max(Min(p1[i].x - 4, bmpBuffer.Width - 1), 0), Max(Min(p1[i].y + 4, bmpBuffer.Height - 1), 0)), Point(Max(Min(p1[i].x + 4, bmpBuffer.Width - 1), 0), Max(Min(p1[i].y - 4, bmpBuffer.Height - 1), 0)))
+          )
+        );
+      bmpOverlay.DrawTPA(p2, MarkCol);
+    end;
+
+    SetImageTarget(h);
+    FreeDTM(dtm);}
+  end;
+  UpdateBitmap(True, False);
+end;
+
+procedure mnuRefresh(Sender: TObject);
+begin
+  PaintDTM := True;
+
+  if (bmpOverlay <> nil) then
+  begin
+    bmpOverlay.Free;
+    bmpOverlay := nil;
+  end
+  else
+    ResetBuffer;
+  UpdateBitmap(True, False);
+end;
+
+procedure mnuDTMfromString(Sender: TObject);
+var
+  s: string;
+  dtm, i: Integer;
+  mdtm: TMDTM;
+  sdtm: TSDTM;
+begin
+  {if InputQuery('DTM From String', 'Enter DTM string:', s) and (s <> '') then
+  begin
+    mnuNew(nil);
+
+    dtm := DTMFromString(s);
+    mdtm := GetDTM(dtm);
+    sdtm := MDTMToSDTM(mdtm);
+
+    SetLength(p, mdtm.Count);
+    if (mdtm.Count > 0) then
+    begin
+      p[0] := sdtm.MainPoint;
+      for i := mdtm.Count - 1 downto 1 do
+        p[i] := sdtm.SubPoints[i - 1];
+    end;
+
+    mdtm.Free;
+    UpdateBitmap(True, False);
+  end;}
+end;
+
+procedure mnuPrintDTM(Sender: TObject);
+var
+  mdtm: TMDTM;
+begin
+  if (Length(p) > 0) then
+  begin
+    {mdtm := SDTMToMDTM(toSDTM);
+    AddDTM(mdtm);
+
+    WriteLn('');
+    WriteLn(mdtm.ToString);
+    WriteLn('');
+    mdtm.Free;}
+  end;
+end;
+
+procedure lbDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+begin
+  Accept := (Source = lb);
+end;
+
+var
+  lbStartDrag: Integer;
+procedure lbDragDrop(Sender, Source: TObject; X, Y: Integer);
+var
+  lbEndDrag, i: Integer;
+  tmp: TSDTMPointDef;
+begin
+  DotTimer.Enabled := False;
+
+  with lb do
+  begin
+    lbEndDrag := ItemAtPos(Point(x, y), True);
+    if (lbStartDrag > -1) and (lbEndDrag > -1) and (lbStartDrag <> lbEndDrag) then
+    begin
+      Items.Move(lbStartDrag, lbEndDrag);
+
+      if (lbStartDrag > lbEndDrag) then
+      begin
+        tmp := p[lbStartDrag];
+        for i := lbStartDrag - 1 downto lbEndDrag do
+          p[i + 1] := p[i];
+        p[lbEndDrag] := tmp;
+      end
+      else
+      begin
+        tmp := p[lbStartDrag];
+        for i := lbStartDrag to lbEndDrag - 1 do
+          p[i] := p[i + 1];
+        p[lbEndDrag] := tmp;
+      end;
+
+      setActivePoint(lbEndDrag);
+      if (lbStartDrag = 0) or (lbEndDrag = 0) then
+        UpdateBitmap(True, False);
+    end;
+  end;
+
+  DotTimer.Enabled := True;
+end;
+
+procedure lbMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  lbStartDrag := lb.ItemAtPos(Point(x, y), True);
+end;
+
+procedure lbClick(Sender: TObject);
+begin
+  setActivePoint(lb.ItemIndex);
+end;
+
+procedure btnAddPoint(Sender: TObject);
+begin
+  setActivePoint(DoAddPoint);
+  DrawPoints(False);
+end;
+
+procedure btnDelPoint(Sender: TObject);
+var
+  i, l: Integer;
+begin
+  if (curP > -1) then
+  begin
+    l := High(p);
+    for i := curP to l - 1 do
+      Swap(p[i], p[i + 1]);
+    SetLength(p, l);
+    lb.Items.Delete(curP);
+    if (curP = l) then
+      Dec(curP);
+    setActivePoint(curP);
+    UpdateBitmap(True, False);
+  end;
+end;
+
+procedure imgMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; x, y: integer);
+var
+  i: Integer;
+begin
+  frm.ActiveControl := lb;
+  if (not PaintDTM) or (not FixImgPoint(x, y)) then
+    Exit;
+
+  if (not (ssCtrl in Shift)) then
+  begin
+    i := FindClosePoint(x, y, 1);
+    if (i > -1) then
+    begin
+      setActivePoint(i);
+      Exit;
+    end;
+  end;
+
+  if (not rbMouseClick[2].Checked) then //Not Mouse click picks colour
+  begin
+    edX.Text := IntToStr(x);
+    edY.Text := IntToStr(y);
+
+    if rbMouseClick[1].Checked and (curP > -1) then
+    begin
+      p[curP].x := x;
+      p[curP].y := y;
+      lb.Items[curP] := ToStr(p[curP]);
+      UpdateBitmap(True, False);
+      Exit;
+    end;
+  end;
+
+  if (not rbMouseClick[1].Checked) then //Not Mouse click moves point
+  begin
+    i := bmpBuffer.FastGetPixel(x, y);
+    edColour.Text := IntToStr(i);
+
+    if rbMouseClick[2].Checked and (curP > -1) then
+    begin
+      p[curP].Color := i;
+      lb.Items[curP] := ToStr(p[curP]);
+      Exit;
+    end;
+  end;
+
+  if rbMouseClick[0].Checked then //Mouse click creates point
+  begin
+    setActivePoint(DoAddPoint);
+    DrawPoints(False);
+  end;
+end;
+
+procedure imgMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var
+  b, dx, dy, TheColour, AvgColour: Integer;
+  px, py: Single;
+  w, h: Single;
+begin
+  with imgZoom.Canvas do
+  begin
+    Pen.Color := clNavy;
+    Brush.Style := bsSolid;
+    Brush.Color := clWhite;
+    Rectangle(0, 0, imgZoom.Width - 1, imgZoom.Height - 1);
+    Brush.Style := bsDiagCross;
+    Brush.Color := clNavy;
+    Rectangle(0, 0, imgZoom.Width - 1, imgZoom.Height - 1);
+  end;
+  w := imgZoom.Width / (ZoomPixels + 0.0);
+  h := imgZoom.Height / (ZoomPixels + 0.0);
+  TheColour := -1;
+  AvgColour := 0;
+
+  try
+    if (not FixImgPoint(x, y)) then
+    begin
+      img.Cursor := crDefault;
+      Exit;
+    end;
+
+    if PaintDTM and (not (ssCtrl in Shift)) and (FindClosePoint(x, y, 1) > -1) then
+      img.Cursor := crHandPoint
+    else
+      img.Cursor := crDefault;
+
+    px := 0.0;
+    b := Floor(ZoomPixels / 2.0);
+    for dx := -b to b do
+    begin
+      py := 0.0;
+      for dy := -b to b do
+      begin
+        if ((x + dx) >= 0) and ((x + dx) < bmpBuffer.Width) and ((y + dy) >= 0) and ((y + dy) < bmpBuffer.Height) then
+          with imgZoom.Canvas do
+          begin
+            Pen.Color := bmpBuffer.FastGetPixel(x + dx, y + dy);
+            Brush.Style := bsSolid;
+            Brush.Color := Pen.Color;
+
+            if {(dx <= 0) and} (dy = -b) then
+              AvgColour := AvgColour + Pen.Color;
+            if (dx = 0) and (dy = 0) then
+              TheColour := Pen.Color;
+
+            Rectangle(Round(px), Round(py), Round(px + w), Round(py + h));
+          end
+        else if {(dx <= 0) and} (dy = -b) then
+          AvgColour := AvgColour + clWhite;
+
+        py := py + h;
+      end;
+      px := px + w;
+    end;
+  finally
+    with imgZoom.Canvas do
+    begin
+      Pen.Color := MarkCol;
+      Brush.Style := bsClear;
+      Rectangle((imgZoom.Width shr 1) - Round(w / 2.0), (imgZoom.Height shr 1) - Round(h / 2.0), (imgZoom.Width shr 1) + Round(w / 2.0), (imgZoom.Height shr 1) + Round(h / 2.0));
+
+      if (b > 0) then
+        AvgColour := AvgColour div (b + 1);
+      Font.Size := 8;
+      Font.Color := InvertColor(AvgColour);
+      TextOut(2, 2, 'Colour: '+IntToStr(TheColour));
+    end;
+  end;
+end;
+
+procedure CreateMenu;
+var
+  i: integer;
+begin
+  mm := TMainMenu.Create(frm);
+
+  for i := 0 to 2 do
+  begin
+    sm[i] := TMenuItem.Create(frm);
+    with sm[i] do
+      case i of
+        0: Caption := 'File';
+        1: Caption := 'Image';
+        2: Caption := 'DTM';
+      end;
+    mm.Items.Add(sm[i]);
+  end;
+
+  for i := 3 to 31 do
+  begin
+    sm[i] := TMenuItem.Create(frm);
+    with mm.Items do
+      case i of
+        //File
+        3:  begin Items[0].Add(sm[i]); sm[i].Caption := 'New';                sm[i].OnClick := @mnuNew;           sm[i].Shortcut := 16462{ctrl + N};  end;
+        4:  begin Items[0].Add(sm[i]); sm[i].Caption := 'Open DTM';           sm[i].OnClick := @mnuOpen;          sm[i].Shortcut := 16463{ctrl + O};  end;
+        5:  begin Items[0].Add(sm[i]); sm[i].Caption := 'Save DTM';           sm[i].OnClick := @mnuSave;          sm[i].Shortcut := 16467{ctrl + S};  end;
+        6:  begin Items[0].Add(sm[i]); sm[i].Caption := '-';                                                                                          end;
+        7:  begin Items[0].Add(sm[i]); sm[i].Caption := 'Exit';               sm[i].OnClick := @mnuExit;                                              end;
+
+        //Image
+        8:  begin Items[1].Add(sm[i]); sm[i].Caption := 'Open Image';         sm[i].OnClick := @mnuOpenImg;       sm[i].Shortcut := 16460{ctrl + L};  end;
+        9:  begin Items[1].Add(sm[i]); sm[i].Caption := 'Load Client Image';  sm[i].OnClick := @mnuClientImg;                                         end;
+        10: begin Items[1].Add(sm[i]); sm[i].Caption := 'Load Desktop Image'; sm[i].OnClick := @mnuClientDesktop;                                     end;
+        11: begin Items[1].Add(sm[i]); sm[i].Caption := '-';                                                                                          end;
+        12: begin Items[1].Add(sm[i]); sm[i].Caption := 'Zoom';                                                                                       end;
+            13:  begin sm[12].Add(sm[i]); sm[i].Caption := '25%'; sm[i].Tag := 25;   sm[i].OnClick := @mnuZoom;                                       end;
+            14:  begin sm[12].Add(sm[i]); sm[i].Caption := '50%'; sm[i].Tag := 50;   sm[i].OnClick := @mnuZoom;                                       end;
+            15:  begin sm[12].Add(sm[i]); sm[i].Caption := '100%'; sm[i].Tag := 100; sm[i].OnClick := @mnuZoom;                                       end;
+            16:  begin sm[12].Add(sm[i]); sm[i].Caption := '150%'; sm[i].Tag := 150; sm[i].OnClick := @mnuZoom;                                       end;
+            17:  begin sm[12].Add(sm[i]); sm[i].Caption := '200%'; sm[i].Tag := 200; sm[i].OnClick := @mnuZoom;                                       end;
+            18:  begin sm[12].Add(sm[i]); sm[i].Caption := '300%'; sm[i].Tag := 300; sm[i].OnClick := @mnuZoom;                                       end;
+        19: begin Items[1].Add(sm[i]); sm[i].Caption := 'Marking Colour';                                                                             end;
+            20:  begin sm[19].Add(sm[i]); sm[i].Caption := 'Red';    sm[i].Tag := clRed;    sm[i].OnClick := @mnuSetMarkCol;                          end;
+            21:  begin sm[19].Add(sm[i]); sm[i].Caption := 'Blue';   sm[i].Tag := clBlue;   sm[i].OnClick := @mnuSetMarkCol;                          end;
+            22:  begin sm[19].Add(sm[i]); sm[i].Caption := 'Yellow'; sm[i].Tag := clYellow; sm[i].OnClick := @mnuSetMarkCol;                          end;
+            23:  begin sm[19].Add(sm[i]); sm[i].Caption := 'Green';  sm[i].Tag := clGreen;  sm[i].OnClick := @mnuSetMarkCol;                          end;
+            24:  begin sm[19].Add(sm[i]); sm[i].Caption := 'Black';  sm[i].Tag := clBlack;  sm[i].OnClick := @mnuSetMarkCol;                          end;
+            25:  begin sm[19].Add(sm[i]); sm[i].Caption := 'White';  sm[i].Tag := clWhite;  sm[i].OnClick := @mnuSetMarkCol;                          end;
+        26: begin Items[1].Add(sm[i]); sm[i].Caption := '-';                                                                                          end;
+        27: begin Items[1].Add(sm[i]); sm[i].Caption := 'Show Matching Colours'; sm[i].OnClick := @mnuMatchCols;  sm[i].Shortcut := 16461{ctrl + M};  end;
+        28: begin Items[1].Add(sm[i]); sm[i].Caption := 'Show Matching DTM''s';  sm[i].OnClick := @mnuMatchDTMs;  sm[i].Shortcut := 16452{ctrl + D};  end;
+        29: begin Items[1].Add(sm[i]); sm[i].Caption := 'Refresh Image';         sm[i].OnClick := @mnuRefresh;    sm[i].Shortcut := 116{F5};          end;
+
+        //DTM
+        30: begin Items[2].Add(sm[i]); sm[i].Caption := 'DTM From String';    sm[i].OnClick := @mnuDTMfromString;                                     end;
+        31: begin Items[2].Add(sm[i]); sm[i].Caption := 'Print DTM';          sm[i].OnClick := @mnuPrintDTM;      sm[i].Shortcut := 16464{ctrl + P};  end;
+      end;
+  end;
+end;
+
+procedure CreateForm;
+var
+  i: Integer;
+begin
+  with frm do
+  begin
+    Width := 800;
+    Height := 600;
+    Caption := 'Simba DDTM Editor - Nielsie95';
+
+    OnResize := @frmResize;
+    OnKeyDown := @frmKeyDown;
+  end;
+
+  CreateMenu;
+
+  sb := TScrollBox.Create(frm);
+  with sb do
+  begin
+    Parent := frm;
+    Align := alClient;
+    BorderStyle := bsNone;
+
+    img := TImage.Create(frm);
+    with img do
+    begin
+      Parent := sb;
+      Width := 3000;
+      Height := 3000;
+      BorderStyle := bsNone;
+
+      OnMouseDown := @imgMouseDown;
+      OnMouseMove := @imgMouseMove;
+    end;
+  end;
+
+  pnl := TPanel.Create(frm);
+  with pnl do
+  begin
+    Parent := frm;
+    Align := alRight;
+    Width := 230;
+    BevelOuter := bvLowered;
+
+    imgZoom := TImage.Create(frm);
+    with imgZoom do
+    begin
+      Parent := pnl;
+      Left := 10;
+      Top := 10;
+      Width := 100;
+      Height := 100;
+    end;
+
+    with TLabel.Create(frm) do
+    begin
+      Parent := pnl;
+      Left := 120;
+      Top := 20;
+      Caption := 'Mouse Click:';
+    end;
+
+    for i := 0 to 2 do
+    begin
+      rbMouseClick[i] := TRadioButton.Create(frm);
+      with rbMouseClick[i] do
+      begin
+        Parent := pnl;
+        Left := 130;
+        Top := 40 + (21 * i);
+        case i of
+          0 : Caption := 'Creates Point';
+          1 : Caption := 'Moves Point';
+          2 : Caption := 'Picks Colour';
+        end;
+        Height := 17;
+        Width := 50;
+
+        OnKeyDown := @frmKeyDown; //For delete "hotkey"
+      end;
+    end;
+
+    //TBevel doesn't like bsTopLine
+    with TShape.Create(frm) do
+    begin
+      Parent := pnl;
+      Width := 220;
+      Left := 5;
+      Top := 117;
+      //Style := bsTopLine;
+      Height := 1;
+    end;
+
+    lb := TListBox.Create(frm);
+    with lb do
+    begin
+      Parent := pnl;
+      Left := 10;
+      Top := 125;
+      Width := 210;
+      Height := 150;
+
+      DragMode := dmAutomatic;
+      OnDragOver := @lbDragOver;
+      OnDragDrop := @lbDragDrop;
+      OnMouseDown := @lbMouseDown;
+      OnClick := @lbClick;
+      OnKeyDown := @frmKeyDown; //For delete "hotkey"
+    end;
+
+    btnAdd := TButton.Create(frm);
+    with btnAdd do
+    begin
+      Parent := pnl;
+      Left := 10;
+      Top := 280;
+      Caption := 'Add Point';
+      Width := 100;
+
+      OnClick := @btnAddPoint;
+    end;
+
+    btnDel := TButton.Create(frm);
+    with btnDel do
+    begin
+      Parent := pnl;
+      Left := 120;
+      Top := 280;
+      Caption := 'Delete Point';
+      Width := 100;
+
+      OnClick := @btnDelPoint;
+    end;
+
+    with TLabel.Create(frm) do
+    begin
+      Parent := pnl;
+      Left := 10;
+      Top := 320;
+      Caption := 'X:';
+    end;
+
+    edX := TEdit.Create(frm);
+    with edX do
+    begin
+      Parent := pnl;
+      Left := 30;
+      Top := 315;
+      Width := 80;
+      BiDiMode := bdRightToLeft;
+
+      OnKeyDown := @edFilterText;
+      OnChange := @edChange;
+    end;
+
+    with TLabel.Create(frm) do
+    begin
+      Parent := pnl;
+      Left := 120;
+      Top := 320;
+      Caption := 'Y:';
+    end;
+
+    edY := TEdit.Create(frm);
+    with edY do
+    begin
+      Parent := pnl;
+      Left := 140;
+      Top := 315;
+      Width := 80;
+      BiDiMode := bdRightToLeft;
+
+      OnKeyDown := @edFilterText;
+      OnChange := @edChange;
+    end;
+
+    with TLabel.Create(frm) do
+    begin
+      Parent := pnl;
+      Left := 10;
+      Top := 350;
+      Caption := 'Area Size:';
+    end;
+
+    edASize := TEdit.Create(frm);
+    with edASize do
+    begin
+      Parent := pnl;
+      Left := 65;
+      Top := 345;
+      Width := 45;
+      BiDiMode := bdRightToLeft;
+
+      OnKeyDown := @edFilterText;
+      OnChange := @edChange;
+    end;
+
+    cbAShape := TComboBox.Create(frm);
+    with cbAShape do
+    begin
+      Parent := pnl;
+      Left := 120;
+      Top := 345;
+      Width := 100;
+
+      Items.Add('Rectangle');
+      Items.Add('Cross');
+      Items.Add('Diagonal Cross');
+
+      Style := csDropDownList;
+      OnChange := @edChange;
+    end;
+
+    with TLabel.Create(frm) do
+    begin
+      Parent := pnl;
+      Left := 10;
+      Top := 380;
+      Caption := 'Colour:';
+    end;
+
+    edColour := TEdit.Create(frm);
+    with edColour do
+    begin
+      Parent := pnl;
+      Left := 55;
+      Top := 375;
+      Width := 100;
+      BiDiMode := bdRightToLeft;
+
+      OnKeyDown := @edFilterText;
+      OnChange := @edChange;
+    end;
+
+    shColour := TShape.Create(frm);
+    with shColour do
+    begin
+      Parent := pnl;
+      Left := 165;
+      Top := 375;
+      Width := 55;
+      Height := edColour.Height;
+    end;
+
+    with TLabel.Create(frm) do
+    begin
+      Parent := pnl;
+      Left := 10;
+      Top := 410;
+      Caption := 'Tolerance:';
+    end;
+
+    edTolerance := TEdit.Create(frm);
+    with edTolerance do
+    begin
+      Parent := pnl;
+      Left := 70;
+      Top := 405;
+      Width := 85;
+      BiDiMode := bdRightToLeft;
+
+      OnKeyDown := @edFilterText;
+      OnChange := @edChange;
+    end;
+
+    btnMark := TButton.Create(frm);
+    with btnMark do
+    begin
+      Parent := pnl;
+      Left := 165;
+      Top := 405;
+      Width := 55;
+      Height := edColour.Height;
+      Caption := 'Mark';
+
+      OnClick := @mnuMatchCols;
+    end;
+
+    //edX, edY, edASize, edAShape, edColour, edTolerance
+  end;
+
+  ResizeTimer := TTimer.Create(frm);
+  with ResizeTimer do
+  begin
+    Interval := 25;
+    OnTimer := @timerResize;
+    Enabled := True;
+  end;
+
+  DotTimer := TTimer.Create(frm);
+  with DotTimer do
+  begin
+    Interval := 200;
+    OnTimer := @timerDot;
+    Enabled := True;
+  end;
+
+  LoadClientBitmap;
+  mnuNew(nil); //Initialize
+end;
+
+function ShowForm: Integer;
+begin
+  frm := TForm.Create(nil);
+  bmp := TMufasaBitmap.Create;
+
+  try
+    CreateForm;
+    Result := frm.ShowModal;
+  finally
+    if (bmpOverlay <> nil) then
+      bmpOverlay.Free;
+    if (bmpBuffer <> nil) then
+      bmpBuffer.Free;
+    bmp.Free;
+    frm.Free;
+  end;
+end;
+
+{procedure ThreadSafe_ShowForm;
+var
+  v: TVariantArray;
+begin
+  ThreadSafeCall('ShowForm', v);
+end;}
+
+{
+  Simba integration
+}
+ 
+procedure OnClick(sender : TObject);
+begin;
+  ShowForm;
+end;
+
+procedure Init;
+begin;
+  Simba_Menu := TMenuItem.Create(Simba_MainMenu);
+  Simba_Menu.Caption := 'DTM Editor';
+  Simba_MainMenu.Items.Items[4].Insert(5, Simba_Menu);
+  Simba_Menu.OnClick := @OnClick;
+end;
+
+procedure Free;
+begin
+end;
+
+procedure Attach;
+begin;
+  Simba_Menu.Visible := True;
+end;
+
+Procedure Detach;
+begin
+  Simba_Menu.Visible := False;
+end;
+
+function GetName: string;
+begin;
+  Result := 'DDTM Editor (by Nielsie95)';
+end;
+
+function GetVersion : string;
+begin;
+  Result := Version;
+end;
+
+begin
+end.
