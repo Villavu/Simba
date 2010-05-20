@@ -112,3 +112,13 @@ function ext_MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Butto
 begin
   result := MessageDlg(acaption,amsg,dlgtype,buttons,helpctx);
 end;
+
+function ext_SDTMToMDTM(Const DTM: TSDTM): TMDTM;
+begin
+  result := SDTMToMDTM(DTM);
+end;
+
+function ext_InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;
+begin
+  result := InputQuery(acaption,aprompt,value);
+end;
