@@ -21,13 +21,16 @@
     psexportedmethods.inc for the Mufasa Macro Library
 }
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 AddFunction(@pswriteln,'procedure Writeln(x: string);'); //PS defines a special, keep this for CPascal
 AddFunction(@ps_debugln,'procedure DebugLn(str : string);');
+{$ENDIF}
 
 
 { DTM }
 SetCurrSection('DTM');
+{$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(@ps_SetDTMName, 'procedure SetDTMName(DTM : integer;const name : string);');
 AddFunction(@ps_DTMFromString, 'function DTMFromString(const DTMString: String): Integer;');
 AddFunction(@ps_FreeDTM, 'procedure FreeDTM(DTM: Integer);');
@@ -42,6 +45,7 @@ AddFunction(@ps_addDTM, 'function AddDTM(const d: TMDTM): Integer;');
 AddFunction(@ps_addTSDTM, 'function AddSDTM(const d: TSDTM): Integer;');
 AddFunction(@ps_PrintDTM, 'procedure PrintDTM(const DTM : TMDTM);');
 AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer) : TMDTM');
+{$ENDIF}
 AddFunction(@ps_MDTMToSDTM, 'function MDTMToSDTM(Const DTM: TMDTM): TSDTM;');
 AddFunction(@ps_SDTMToMDTM, 'function SDTMToMDTM(Const DTM: TSDTM): TMDTM;');
 AddFunction(@ps_CreateDTMPoint,'function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;');
@@ -79,6 +83,8 @@ AddFunction(@ps_hextoint,'function HexToInt(Hex : string) : integer');
 AddFunction(@ps_sar,'function sar(AValue : longint; shift : byte) : longint;');
 AddFunction(@ps_ror,'function ror(num : longword; shift : byte) : LongWord;');
 AddFunction(@ps_rol,'function rol(num : longword; shift : byte) : LongWord;');
+
+{$IFNDEF MML_EXPORT_THREADSAFE}
 {window}
 SetCurrSection('Window');
 AddFunction(@ps_Freeze, 'function Freeze: boolean;');
@@ -97,10 +103,12 @@ AddFunction(@ps_FreeTarget,'procedure FreeTarget(idx: integer);');
 AddFunction(@ps_SetDesktopAsClient,'procedure SetDesktopAsClient;');
 AddFunction(@ps_ActivateClient, 'procedure ActivateClient;');
 AddFunction(@ps_IsTargetValid, 'function IsTargetValid: boolean;');
+{$ENDIF}
 
 {files}
 SetCurrSection('Files');
 AddFunction(@ps_CreateFile, 'function CreateFile(const Path: string): Integer;');
+{$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(@ps_OpenFile, 'function OpenFile(const Path: string; Shared: Boolean): Integer;');
 AddFunction(@ps_RewriteFile, 'function RewriteFile(const Path: string; Shared: Boolean): Integer;');
 AddFunction(@ps_CloseFile, 'procedure CloseFile(FileNum: Integer);');
@@ -110,10 +118,11 @@ AddFunction(@ps_ReadFileString, 'function ReadFileString(FileNum: Integer; var s
 AddFunction(@ps_WriteFileString, 'function WriteFileString(FileNum: Integer; s: string): Boolean;');
 AddFunction(@ps_SetFileCharPointer, 'function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;');
 AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Integer;');
+{$ENDIF}
 AddFunction(@ps_DirectoryExists,'function DirectoryExists(const DirectoryName : string ) : Boolean;');
 AddFunction(@ps_CreateDirectory,'function CreateDirectory(const DirectoryName : string) : boolean;');
 AddFunction(@ps_FileExists,'function FileExists (const FileName : string ) : Boolean;');
-AddFunction(@ps_ForceDirectores,'function ForceDirectores(const dir : string) : boolean;');
+AddFunction(@ps_ForceDirectores,'function ForceDirectories(const dir : string) : boolean;');
 AddFunction(@ps_GetFiles,'function GetFiles(const Path, Ext : string) : TStringArray;');
 AddFunction(@ps_GetDirectories,'function GetDirectories(const path : string) : TStringArray;');
 AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, FileName: string);');
@@ -123,31 +132,37 @@ AddFunction(@ps_ExtractFileExt,'function ExtractFileExt(const FileName: string):
 
 {other}
 SetCurrSection('Other');
-AddFunction(@ps_SetSupressExceptions, 'procedure SetSupressExceptions(Supress : boolean);');
-AddFunction(@ps_SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
 AddFunction(@ps_Wait, 'procedure wait(t: integer);');
 AddFunction(@ps_Wait, 'procedure Sleep(t: integer);');
+{$IFNDEF MML_EXPORT_THREADSAFE}
+AddFunction(@ps_SetSupressExceptions, 'procedure SetSupressExceptions(Supress : boolean);');
+AddFunction(@ps_SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
+AddFunction(@ps_TerminateScript,'procedure TerminateScript;');
+{$ENDIF}
 AddFunction(@ps_now,'function Now: TDateTime;');
 AddFunction(@ps_date,'function Date : TDateTime;');
 AddFunction(@ps_GetTickCount, 'function GetSystemTime: LongWord;');
 AddFunction(@ps_GetTickCount, 'function GetTickCount: LongWord;');
+{$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(@ps_GetTimeRunning,'function GetTimeRunning: LongWord;');
+{$ENDIF}
 AddFunction(@ps_DecodeTime,'procedure DecodeTime(DateTime : TDateTime; var Hour,Min,Sec,MSec : word);');
 AddFunction(@ps_DecodeDate,'procedure DecodeDate ( const SourceDate  : TDateTime; var Year, Month, Day  : Word );');
 AddFunction(@ps_ConvertTime,'procedure ConvertTime(Time: integer; var h, m, s: integer);');
 AddFunction(@ps_HakunaMatata,'procedure HakunaMatata;');
 AddFunction(@ps_Simba,'procedure Simba;');
-AddFunction(@ps_TerminateScript,'procedure TerminateScript;');
+AddFunction(@ps_Random,'function Random(Int: integer): integer;');
+AddFunction(@ps_PlaySound,'procedure PlaySound( Sound : string);');
+AddFunction(@ps_StopSound,'procedure StopSound;');
+{$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(@ps_DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w, h: integer);');
 AddFunction(@ps_DrawBitmapDebugImg,'procedure DrawBitmapDebugImg(bmp: integer);');
 AddFunction(@ps_GetDebugBitmap,'function GetDebugBitmap: integer;');
-AddFunction(@ps_Random,'function Random(Int: integer): integer;');
 AddFunction(@ps_ClearDebug,'procedure ClearDebug;');
-AddFunction(@ps_PlaySound,'procedure PlaySound( Sound : string);');
-AddFunction(@ps_StopSound,'procedure StopSound;');
 AddFunction(@ps_SetScriptProp, 'function SetScriptProp(Prop : TSP_Property; Value: TVariantArray): boolean;');
 AddFunction(@ps_GetScriptProp, 'function GetScriptProp(Prop : TSP_Property;var Value: TVariantArray): boolean;');
 AddFunction(@ps_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
+{$ENDIF}
 
 {string}
 SetCurrSection('String');
@@ -157,7 +172,9 @@ AddFunction(@ps_DecompressString,'function DecompressString(const Compressed : s
 AddFunction(@ps_Base64Encode,'function Base64Encode(const str : string) : string;');
 AddFunction(@ps_Base64Decode,'function Base64Decode(const str : string) : string;');
 AddFunction(@ps_Format,'function Format(const fmt : string;const args : array of const) : string;');
+{$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(nil,'function ToStr(x) : string;');
+{$ENDIF}
 AddFunction(@ps_Between,'function Between(s1, s2, str: string): string;');
 AddFunction(@ps_IntToStr, 'function IntToStr(value: Integer): String;');
 AddFunction(@ps_FloatToStr, 'function FloatToStr(value: Extended): String;');
@@ -181,6 +198,7 @@ AddFunction(@ps_ExecRegExpr,'function ExecRegExpr( const RegExpr, InputStr : Str
 AddFunction(@ps_SplitRegExpr,'procedure SplitRegExpr( const RegExpr, InputStr : String; Pieces : TStrings);');
 addfunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 {web}
 SetCurrSection('Web');
 AddFunction(@ps_OpenWebPage,'procedure OpenWebPage(const url : string);');
@@ -195,8 +213,7 @@ AddFunction(@ps_PostHTTPPageEx,'function PostHTTPPageEx(Client: Integer;const Ur
 AddFunction(@ps_ClearPostData,'procedure ClearPostData(Client: Integer);');
 AddFunction(@ps_AddPostVariable,'procedure AddPostVariable(Client: Integer;const VarName, VarValue: string);');
 AddFunction(@ps_GetRawHeaders,'function GetRawHeaders(Client: Integer): string;');
-
-
+{$ENDIF}
 
 { Color Conversions and Speed }
 SetCurrSection('Color Convert');
@@ -211,6 +228,7 @@ AddFunction(@ps_HSLToRGB, 'procedure HSLtoRGB(H, S, L: extended; var R, G ,B: In
 AddFunction(@ps_RGBToXYZ, 'procedure RGBToXYZ(R, G, B: Integer;var x, y ,z: Extended);');
 AddFunction(@ps_XYZToRGB, 'procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Integer);');
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 { Color Finding }
 SetCurrSection('Color');
 AddFunction(@ps_SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(cts: integer);');
@@ -234,7 +252,9 @@ AddFunction(@ps_FindColorSpiralTolerance,'function FindColorSpiralTolerance(var 
 AddFunction(@ps_FindColorsSpiralTolerance,'function FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;');
 AddFunction(@ps_FindColoredArea, 'function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye, MinArea: Integer): Boolean');
 AddFunction(@ps_FindColoredAreaTolerance, 'function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe, ye, MinArea, Tolerance : Integer): Boolean');
+{$ENDIF}
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 {Mouse etc.}
 SetCurrSection('Mouse');
 AddFunction(@ps_MoveMouse, 'procedure MoveMouse(x, y: integer);');
@@ -244,7 +264,9 @@ AddFunction(@ps_HoldMouse, 'procedure HoldMouse(x, y: integer; clickType: intege
 AddFunction(@ps_ReleaseMouse, 'procedure ReleaseMouse(x, y: integer; clickType: integer);');
 AddFunction(@ps_ClickMouse, 'procedure ClickMouse(x, y: integer; clickType: integer);');
 AddFunction(@ps_IsMouseButtonDown,'function IsMouseButtonDown( button : integer) : boolean;');
+{$ENDIF}
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 {Keyboard}
 SetCurrSection('Keyboard');
 AddFunction(@ps_KeyDown, 'procedure KeyDown(key: Word);');
@@ -253,7 +275,9 @@ AddFunction(@ps_PressKey, 'procedure PressKey(key: Word);');
 AddFunction(@ps_SendKeys, 'procedure SendKeys(const s: string);');
 AddFunction(@ps_isKeyDown, 'function IsKeyDown(key: Word): Boolean;');
 AddFunction(@ps_GetKeyCode,'function GetKeyCode(c : char) : integer;');
+{$ENDIF}
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 { OCR}
 SetCurrSection('OCR');
 AddFunction(@ps_rs_GetUpText, 'function rs_GetUpText: string;');
@@ -269,7 +293,9 @@ AddFunction(@ps_gettextATPA,'function GetTextATPA(const ATPA : T2DPointArray; co
 AddFunction(@ps_LoadSystemFont,'function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;');
 AddFunction(@ps_LoadFont, 'function LoadFont(const FontName: string; shadow: boolean): boolean;');
 AddFunction(@ps_FreeFont, 'function FreeFont(const FontName: string): boolean;');
+{$ENDIF}
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 {Bitmaps}
 SetCurrSection('Bitmaps');
 AddFunction(@ps_CreateBitmapString,'function CreateBitmapString(bmp : integer) : string;');
@@ -323,6 +349,7 @@ AddFunction(@ps_RectangleBitmap,'procedure RectangleBitmap(bitmap : integer; con
 AddFunction(@ps_FloodfillBitmap,'procedure FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor);');
 AddFunction(@ps_CalculatePixelShift,'function CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;');
 AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
+{$ENDIF}
 
 {tpa}
 SetCurrSection('TPA');
@@ -411,6 +438,7 @@ AddFunction(@ps_offsetATPA,'procedure OffsetATPA(var ATPA : T2DPointArray; const
 AddFunction(@ps_copyTPA,'function CopyTPA(const TPA : TPointArray) : TPointArray;');
 AddFunction(@ps_CopyATPA,'function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;');
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 SetCurrSection('Settings');
 AddFunction(@ps_KeyIsSetting, 'function KeyIsSetting(const KeyName: String): Boolean;');
 AddFunction(@ps_KeyIsDirectory, 'function KeyIsDirectory(const KeyName: String): Boolean;');
@@ -420,3 +448,4 @@ AddFunction(@ps_SetSettingValue,'function SetSettingValue(const KeyName,value : 
 AddFunction(@ps_ListSettings, 'function ListSettings(const KeyName: String; var KeyReturn: TStringArray) : boolean;');
 AddFunction(@ps_DeleteSetting, 'function DeleteSetting(const KeyName: String): Boolean;');
 AddFunction(@ps_DeleteSubSettings, 'function DeleteSubSettings(const KeyName: String): Boolean;');
+{$ENDIF}

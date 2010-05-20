@@ -21,6 +21,56 @@
     Other.inc for the Mufasa Macro Library
 }
 
+function MakeString(data : TPSVariantIFC) : string;
+begin;
+  if data.Dta = nil then
+    result := 'Nil'
+  else
+  if data.aType.basetype in [btString,btChar] then
+    result := PSGetAnsiString(Data.Dta,data.aType)
+  else if data.aType.ExportName = 'BOOLEAN' then
+    result := BoolToStr(PSGetInt(Data.Dta,data.aType) <> 0,true)
+  else
+    result := PSVariantToString(data,'');
+end;
+
+function writeln_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+begin
+  Result:=true;
+  psWriteln(makeString(NewTPSVariantIFC(Stack[Stack.Count-1],false)));
+end;
+
+function swap_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  Param1,Param2: TPSVariantIFC;
+  tempCopy : pointer;
+begin
+  Result:=true;
+  Param1 := NewTPSVariantIFC(Stack[Stack.count-1],true);
+  Param2 := NewTPSVariantIFC(Stack[Stack.count-2],true);
+  if Param1.aType.BaseType <> Param2.aType.BaseType then
+    exit(false)
+  else
+  begin
+    Param1.aType.CalcSize;
+    param2.aType.CalcSize;
+    if Param1.aType.RealSize <> Param2.aType.RealSize then
+      exit(false);
+    GetMem(tempcopy,Param1.aType.RealSize);
+    Move(Param1.Dta^,tempCopy^,param1.atype.realsize);
+    Move(Param2.Dta^,Param1.Dta^,param1.atype.realsize);
+    Move(tempCopy^,Param2.Dta^,param1.atype.realsize);
+    Freemem(tempcopy);
+  end;
+end;
+
+function ToStr_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+begin
+  result := true;
+  Stack.SetAnsiString(-1, MakeString(NewTPSVariantIFC(Stack[Stack.Count-2],false)));
+end;
+
+{$IFNDEF MML_EXPORT_THREADSAFE}
 function ps_SetScriptProp(prop : TSP_Property; Value: TVariantArray): boolean; extdecl;
 begin
   Exit(CurrThread.Prop.SetProp(prop, Value));
@@ -30,6 +80,7 @@ function ps_GetScriptProp(prop : TSP_Property; var Value : TVariantArray) : bool
 begin;
   exit(CurrThread.Prop.GetProp(prop,value));
 end;
+{$ENDIF}
 
 procedure ps_Wait(t: Integer); extdecl;
 {$ifdef MSWINDOWS}
@@ -70,6 +121,7 @@ begin
   {$endif}
 end;
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 procedure ps_ClearDebug; extdecl;
 begin
   if Assigned(CurrThread.DebugClear) then
@@ -122,6 +174,7 @@ function ps_GetTimeRunning: LongWord; extdecl;
 begin;
   result := GetTickCount - CurrThread.StartTime;
 end;
+{$ENDIF}
 
 procedure ps_ConvertTime(Time : integer; var h,m,s : integer); extdecl;
 var
@@ -174,6 +227,7 @@ begin
   result := Random(int);
 end;
 
+{$IFNDEF MML_EXPORT_THREADSAFE}
 function ps_InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;extdecl;
 begin
   CurrThread.InputQueryData.ACaption:= ACaption;
@@ -183,3 +237,4 @@ begin
   Value := CurrThread.InputQueryData.Value;
   result := CurrThread.InputQueryData.Res;
 end;
+{$ENDIF}

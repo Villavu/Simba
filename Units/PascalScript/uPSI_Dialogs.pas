@@ -198,11 +198,11 @@ begin
   CL.AddTypeS('TFindOptions', 'set of TFindOption');
   SIRegister_TFindDialog(CL);
   SIRegister_TReplaceDialog(CL);
-  CL.AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmati'
-   +'on, mtCustom )');
-  CL.AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, m'
-   +'bIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
-  CL.AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
+  //CL.AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmati'
+  // +'on, mtCustom )');
+  //CL.AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, m'
+  // +'bIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
+  //CL.AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
  CL.AddConstantN('mbYesNoCancel','LongInt').SetInt(ord(mbYes) or ord(mbNo) or ord(mbCancel));
  CL.AddConstantN('mbOKCancel','LongInt').SetInt(ord(mbOK) or ord(mbCancel));
  CL.AddConstantN('mbAbortRetryIgnore','LongInt').SetInt(ord(mbAbort) or ord(mbRetry) or ord(mbIgnore));
@@ -565,13 +565,13 @@ begin T := Self.Handle; end;
 procedure RIRegister_Dialogs_Routines(S: TPSExec);
 begin
  S.RegisterDelphiFunction(@CreateMessageDialog, 'CreateMessageDialog', cdRegister);
- S.RegisterDelphiFunction(@MessageDlg, 'MessageDlg', cdRegister);
+ {S.RegisterDelphiFunction(@MessageDlg, 'MessageDlg', cdRegister);
  S.RegisterDelphiFunction(@MessageDlgPos, 'MessageDlgPos', cdRegister);
  S.RegisterDelphiFunction(@MessageDlgPosHelp, 'MessageDlgPosHelp', cdRegister);
  S.RegisterDelphiFunction(@ShowMessage, 'ShowMessage', cdRegister);
  S.RegisterDelphiFunction(@ShowMessagePos, 'ShowMessagePos', cdRegister);
  S.RegisterDelphiFunction(@InputBox, 'InputBox', cdRegister);
- S.RegisterDelphiFunction(@InputQuery, 'InputQuery', cdRegister);
+ S.RegisterDelphiFunction(@InputQuery, 'InputQuery', cdRegister);}
 end;
 
 (*----------------------------------------------------------------------------*)

@@ -33,6 +33,9 @@ uses
 const
   DS = DirectorySeparator;
   MEOL = {$ifdef MSWINDOWS}#13+{$endif}#10;
+  ps_mouse_right = 0;
+  ps_mouse_left = 1;
+  ps_mouse_middle = 2;
 
 { Overloaded Operators}
 

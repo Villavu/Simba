@@ -5,8 +5,9 @@ unit psextension;
 interface
 
 uses
-  Classes, SysUtils,mufasabase, virtualextension, MufasaTypes,
-  uPSComponent,uPSCompiler, uPSRuntime, uPSPreProcessor,forms;
+  Classes, SysUtils, virtualextension, forms, client, uPSComponent,uPSCompiler,
+  uPSRuntime, stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
+  bitmaps, plugins, libloader, dynlibs,internets,scriptproperties, settingssandbox;
 
 
 
@@ -35,7 +36,7 @@ type
     protected
        procedure RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
        procedure RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
-       procedure RegisterMyMethods(Sender: TPSScript);
+       procedure RegisterMyMethods(x: TPSScript);
        procedure OnPSExecute(Sender: TPSScript);
        procedure SetEnabled(bool : boolean);override;
     end;
@@ -43,12 +44,48 @@ type
 
 implementation
 uses
-  uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms,
-  uPSC_extctrls,uPSC_menus, uPSC_mml, //Compile libs
-  uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms,
-  uPSR_extctrls,uPSR_menus, uPSR_mml, //Runtime-libs
-  SimbaUnit,updateform,settingssandbox,bitmaps,files,Dialogs, mmisc//Writeln
-  ;
+  colour_conv,dtmutil,
+  {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
+  uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
+  uPSC_extctrls, uPSC_mml, //Compile-libs
+  uPSUtils,
+  fontloader,
+  IOmanager,//TTarget_Exported
+  IniFiles,//Silly INI files
+  stringutil, //String st00f
+
+  uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
+  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs,
+  files,
+  dialogs,
+  dtm, //Dtms!
+  uPSR_extctrls, //Runtime-libs
+  Graphics, //For Graphics types
+  math, //Maths!
+  mmath, //Real maths!
+  strutils,
+  fileutil,
+  tpa, //Tpa stuff
+  SynRegExpr,
+  lclintf,
+  SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
+
+{$ifdef Linux}
+  {$define PS_SafeCall}
+{$else}
+//{$define PS_SafeCall}
+{$endif}
+{$MACRO ON}
+{$ifdef PS_SafeCall}
+  {$define extdecl := safecall}
+{$else}
+  {$define extdecl := register}
+{$endif}
+
+procedure psWriteLn(s: string);
+begin
+  formWritelnEx(s);
+end;
 
 function TSimbaPSExtension.HookExists(const HookName: String): Boolean;
 begin
@@ -68,7 +105,7 @@ begin
     result := SExt_ok;
   except
     on e : exception do
-      formWritelnEx(format('Error in Simba extension (%s): %s',[Self.GetName,e.message]));
+      //formWritelnEx(format('Error in Simba extension (%s): %s',[Self.GetName,e.message]));
   end;
 end;
 
@@ -111,35 +148,63 @@ begin
   result := ExecuteHook('Free',Args,bla) = SExt_ok;
 end;
 
-{$I ../../Units/MMLAddon/PSInc/Wrappers/extensions.inc}
+{$DEFINE MML_EXPORT_THREADSAFE}
+{$I Wrappers/other.inc}
+{$I Wrappers/settings.inc}
+{$I Wrappers/bitmap.inc}
+{$I Wrappers/window.inc}
+{$I Wrappers/tpa.inc}
+{$I Wrappers/strings.inc}
+{$I Wrappers/colour.inc}
+{$I Wrappers/colourconv.inc}
+{$I Wrappers/math.inc}
+{$I Wrappers/mouse.inc}
+{$I Wrappers/file.inc}
+{$I Wrappers/keyboard.inc}
+{$I Wrappers/dtm.inc}
+{$I Wrappers/ocr.inc}
+{$I Wrappers/internets.inc}
+{$I Wrappers/extensions.inc}
 
-procedure TSimbaPSExtension.RegisterMyMethods(Sender: TPSScript);
+procedure TSimbaPSExtension.RegisterMyMethods(x: TPSScript);
+
+  procedure SetCurrSection(s: string);
+  begin
+  end;
+
+var
+  AppPath, ScriptPath: string;
+  i: Integer;
 begin
-  Sender.Comp.AddTypes('TStringArray','Array of String');
-  Sender.Comp.AddConstantN('AppPath','string').SetString(MainDir + DirectorySeparator);
-  Sender.Comp.AddConstantN('IncludePath','string').SetString(SimbaForm.IncludePath);
-  Sender.Comp.AddConstantN('PluginPath','string').SetString(SimbaForm.PluginPath);
-  Sender.Comp.AddConstantN('FontPath','string').SetString(SimbaForm.FontPath);
-  Sender.Comp.AddConstantN('ExtPath','string').SetString(SimbaForm.ExtPath);
-  Sender.Comp.AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmati'
-                                      +'on, mtCustom )');
-  Sender.Comp.AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, m'
-                                     +'bIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
-  Sender.Comp.AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
-  Sender.AddFunction(@formWritelnEx,'procedure Writeln(s : string)');
-  Sender.AddFunction(@ext_GetPage,'function GetPage(const url : string) : string');
-  Sender.AddFunction(@ext_DecompressBZip2,'function DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;');
-  Sender.AddFunction(@ext_UnTar,'function UnTar(const Input : string; out Content : TStringArray) : boolean;');
-  Sender.AddFunction(@ext_UnTarEx,'function UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;');
-  Sender.AddFunction(@DirectoryExists,'Function DirectoryExists (Const Directory : String) : Boolean;');
-  Sender.AddFunction(@FileExists,'Function FileExists (Const FileName : String) : Boolean;');
-  Sender.AddFunction(@ForceDirectories,'function ForceDirectories(Const Dir: string): Boolean;');
-  Sender.AddFunction(@GetFiles, 'function GetFiles(Path, Ext: string): TStringArray;');
-  Sender.AddFunction(@GetDirectories,'function GetDirectories(Path: string): TstringArray;');
-  Sender.AddFunction(@ext_MessageDlg,'function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;');
-  Sender.AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
-  Sender.AddRegisteredVariable('Simba','TForm');
-  Sender.AddRegisteredVariable('Simba_MainMenu','TMainMenu');
+  AppPath := MainDir + DirectorySeparator;
+  ScriptPath := ExtractFileDir(Filename);
+
+  with SimbaForm, x do
+  begin
+    with Comp do
+    begin
+      {$I ../../Units/MMLAddon/PSInc/pscompile.inc}
+      AddTypes('TStringArray','Array of String');
+      AddConstantN('ExtPath','string').SetString(ExtPath);
+      AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmation, mtCustom )');
+      AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
+      AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
+
+      for i := 0 to high(VirtualKeys) do
+        AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
+    end;
+
+    {$i ../../Units/MMLAddon/PSInc/psexportedmethods.inc}
+
+    AddFunction(@ext_GetPage,'function GetPage(const url : string) : string');
+    AddFunction(@ext_DecompressBZip2,'function DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;');
+    AddFunction(@ext_UnTar,'function UnTar(const Input : string; out Content : TStringArray) : boolean;');
+    AddFunction(@ext_UnTarEx,'function UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;');
+    AddFunction(@ext_MessageDlg,'function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;');
+    AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
+    AddRegisteredVariable('Simba','TForm');
+    AddRegisteredVariable('Simba_MainMenu','TMainMenu');
+  end;
 end;
 
 procedure TSimbaPSExtension.OnPSExecute(Sender: TPSScript);
@@ -183,14 +248,42 @@ end;
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 begin
   SIRegister_Std(x);
-  SIRegister_Classes(x, True);
   SIRegister_Controls(x);
-  SIRegister_Graphics(x, True);
+  SIRegister_Classes(x, true);
+  SIRegister_Graphics(x, true);
   SIRegister_stdctrls(x);
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
+  SIRegister_ComCtrls(x);
+  SIRegister_Dialogs(x);
   SIRegister_MML(x);
+
+  with x.AddFunction('procedure writeln;').decl do
+    with AddParam do
+    begin
+      OrgName:= 'x';
+      Mode:= pmIn;
+    end;
+  with x.AddFunction('function ToStr:string').decl do
+    with addparam do
+    begin
+      OrgName:= 'x';
+      Mode:= pmIn;
+    end;
+  with x.AddFunction('procedure swap;').decl do
+  begin
+    with addparam do
+    begin
+      OrgName:= 'x';
+      Mode:= pmInOut;
+    end;
+    with addparam do
+    begin
+      OrgName:= 'y';
+      Mode:= pmInOut;
+    end;
+  end;
 end;
 
 procedure TSimbaPSExtension.RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
@@ -203,9 +296,17 @@ begin
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
+  RIRegister_ComCtrls(x);
+  RIRegister_Dialogs(x);
   RIRegister_MML(x);
   with x.FindClass('TMufasaBitmap') do
+  begin
     RegisterMethod(@TMufasaBitmapCopyClientToBitmap,'CopyClientToBitmap');
+  end;
+
+  se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
+  se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
+  se.RegisterFunctionName('SWAP',@swap_,nil,nil);
 end;
 
 destructor TSimbaPSExtension.Destroy;
@@ -222,6 +323,11 @@ begin
     exit;//Already started..
   { Create script, and see if the extension is valid. (If it compiles) }
   PSInstance := TPSScript.Create(nil);
+
+  with PSInstance do
+  begin
+    {$I ../../Units/MMLAddon/PSInc/psdefines.inc}
+  end;
 
   PSInstance.Script := Self.Script;
   PSInstance.OnCompImport:=@RegisterPSCComponents;
