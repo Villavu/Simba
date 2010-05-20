@@ -105,6 +105,7 @@ begin
     RegisterProperty('Name','String',iptrw);
     RegisterMethod('function ToString : string');
     RegisterMethod('function LoadFromString(const s : string) : boolean;');
+    RegisterMethod('procedure Normalize;');
     RegisterMethod('function Valid:boolean');
     RegisterMethod('procedure DeletePoint( Point : integer);');
     RegisterMethod('procedure SwapPoint(p1,p2 : integer);');
