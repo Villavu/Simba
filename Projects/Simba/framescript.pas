@@ -29,7 +29,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,   SynEditMarkupHighAll,
    mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls,    SynEditStrConst,
-  v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, SynEditHighlighter,synedittextbase;
+  v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, SynEditHighlighter,synedittextbase,SynPluginSyncroEdit;
 const
    ecCodeCompletion = ecUserFirst;
    ecCodeHints = ecUserFirst + 1;
@@ -46,6 +46,7 @@ type
 
   TScriptFrame = class(TFrame)
     SynEdit: TSynEdit;
+    SyncEdit : TSynPluginSyncroEdit;
     procedure SynEditChange(Sender: TObject);
     procedure SynEditClickLink(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -583,6 +584,8 @@ var
   MarkCaret : TSynEditMarkupHighlightAllCaret;
 begin
   inherited Create(TheOwner);
+  SyncEdit := TSynPluginSyncroEdit.Create(SynEdit);
+  SimbaForm.Mufasa_Image_List.GetBitmap(28,SyncEdit.GutterGlyph);
   OwnerSheet := TTabSheet(TheOwner);
   OwnerPage := TPageControl(OwnerSheet.Owner);
 
