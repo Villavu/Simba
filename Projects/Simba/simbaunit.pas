@@ -2135,7 +2135,7 @@ begin
   FillThread.NormalProc:= @CCFillCore;
   UpdateTimer.OnTimer:= @UpdateTimerCheck;
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
-  if FileExists(SimbaSettingsFile) then
+  if FileExistsUTF8(SimbaSettingsFile) then
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
     Self.LoadFormSettings;
