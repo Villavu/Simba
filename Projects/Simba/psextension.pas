@@ -47,7 +47,7 @@ uses
   colour_conv,dtmutil,
   {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
-  uPSC_extctrls, uPSC_mml, //Compile-libs
+  uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
   uPSUtils,
   fontloader,
   IOmanager,//TTarget_Exported
@@ -55,7 +55,7 @@ uses
   stringutil, //String st00f
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
-  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs,
+  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
   files,
   dialogs,
   dtm, //Dtms!
@@ -258,6 +258,7 @@ begin
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
   SIRegister_MML(x);
+  RegisterDll_Compiletime(x);
 
   with x.AddFunction('procedure writeln;').decl do
     with AddParam do
@@ -298,6 +299,7 @@ begin
   RIRegister_Menus(x);
   RIRegister_ComCtrls(x);
   RIRegister_Dialogs(x);
+  RegisterDLLRuntime(se);
   RIRegister_MML(x);
   with x.FindClass('TMufasaBitmap') do
   begin
