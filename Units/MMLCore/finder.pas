@@ -2178,7 +2178,7 @@ begin
   if not dtm.Valid then
     raise Exception.CreateFmt('FindDTMs: DTM[%s] is not consistent.', [DTM.name]);
 
-  NormalizeDTM(DTM);
+  dtm.Normalize;;
 
   Len := DTM.Count;
   DPoints:= DTM.PPoints;
