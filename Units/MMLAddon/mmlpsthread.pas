@@ -206,7 +206,7 @@ uses
   colour_conv,dtmutil,
   {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
-  uPSC_extctrls, uPSC_mml, //Compile-libs
+  uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
   uPSUtils,
   fontloader,
   IOmanager,//TTarget_Exported
@@ -214,7 +214,7 @@ uses
   stringutil, //String st00f
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
-  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs,
+  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
   files,
   dialogs,
   dtm, //Dtms!
@@ -519,7 +519,7 @@ begin
   PSScript.OnCompile:= @OnCompile;
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
-  PSScript.OnFindUnknownFile:=@PSScriptFindUnknownFile;
+  PSScript.OnFindUnknownFile:= @PSScriptFindUnknownFile;
 
   with PSScript do
   begin
@@ -641,6 +641,7 @@ begin
   SIRegister_Menus(x);
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
+  RegisterDll_Compiletime(x);
 
   with x do
   begin
@@ -732,6 +733,7 @@ begin
   RIRegister_Mufasa(x);
   RIRegister_ComCtrls(x);
   RIRegister_Dialogs(x);
+  RegisterDLLRuntime(se);
   se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
   se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
   se.RegisterFunctionName('SWAP',@swap_,nil,nil);
