@@ -158,6 +158,8 @@ begin
     RegisterConstructor(@TMDTM.Create,'Create');
     RegisterMethod(@TMDTM.Free,'Free');
     RegisterMethod(@TMDTM.ToString,'ToString');
+    RegisterMethod(@TMDTM.LoadFromString,'LoadFromString');
+    RegisterMethod(@TMDTM.Normalize,'Normalize');
     RegisterMethod(@TMDTM.Valid,'Valid');
     RegisterMethod(@TMDTM.DeletePoint,'DeletePoint');
     RegisterMethod(@TMDTM.SwapPoint,'SwapPoint');

@@ -43,11 +43,11 @@ AddFunction(@ps_FindDTMsRotatedAlternating, 'function FindDTMsRotatedAlternating
 AddFunction(@ps_addDTM, 'function AddMDTM(const d: TMDTM): Integer;');
 AddFunction(@ps_addDTM, 'function AddDTM(const d: TMDTM): Integer;');
 AddFunction(@ps_addTSDTM, 'function AddSDTM(const d: TSDTM): Integer;');
-AddFunction(@ps_PrintDTM, 'procedure PrintDTM(const DTM : TMDTM);');
 AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer) : TMDTM');
-{$ENDIF}
-AddFunction(@ps_MDTMToSDTM, 'function MDTMToSDTM(Const DTM: TMDTM): TSDTM;');
 AddFunction(@ps_SDTMToMDTM, 'function SDTMToMDTM(Const DTM: TSDTM): TMDTM;');
+{$ENDIF}
+AddFunction(@ps_PrintDTM, 'procedure PrintDTM(const DTM : TMDTM);');
+AddFunction(@ps_MDTMToSDTM, 'function MDTMToSDTM(Const DTM: TMDTM): TSDTM;');
 AddFunction(@ps_CreateDTMPoint,'function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;');
 
 {maths}
@@ -107,8 +107,8 @@ AddFunction(@ps_IsTargetValid, 'function IsTargetValid: boolean;');
 
 {files}
 SetCurrSection('Files');
-AddFunction(@ps_CreateFile, 'function CreateFile(const Path: string): Integer;');
 {$IFNDEF MML_EXPORT_THREADSAFE}
+AddFunction(@ps_CreateFile, 'function CreateFile(const Path: string): Integer;');
 AddFunction(@ps_OpenFile, 'function OpenFile(const Path: string; Shared: Boolean): Integer;');
 AddFunction(@ps_RewriteFile, 'function RewriteFile(const Path: string; Shared: Boolean): Integer;');
 AddFunction(@ps_CloseFile, 'procedure CloseFile(FileNum: Integer);');
@@ -198,10 +198,11 @@ AddFunction(@ps_ExecRegExpr,'function ExecRegExpr( const RegExpr, InputStr : Str
 AddFunction(@ps_SplitRegExpr,'procedure SplitRegExpr( const RegExpr, InputStr : String; Pieces : TStrings);');
 addfunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
 
-{$IFNDEF MML_EXPORT_THREADSAFE}
+
 {web}
 SetCurrSection('Web');
 AddFunction(@ps_OpenWebPage,'procedure OpenWebPage(const url : string);');
+{$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(@ps_GetPage,'function GetPage(const url : string): string;');
 AddFunction(@ps_InitializeHTTPClient,'function InitializeHTTPClient(HandleCookies: Boolean): Integer;');
 AddFunction(@ps_InitializeHTTPClient,'function InitializeHTTPClientWrap(HandleCookies: Boolean): Integer;');

@@ -1299,7 +1299,7 @@ begin
     if ConsoleVisible then
       SetSetting('LastConfig/Console/Visible','True')
     else
-      SetSetting('LastConfig/Console/Visible','false');
+      SetSetting('LastConfig/Console/Visible','False');
     {$endif}
     SetSetting('Extensions/ExtensionCount',inttostr(ExtManager.Extensions.Count));
     for i := 0 to ExtManager.Extensions.Count-1 do
@@ -2135,7 +2135,7 @@ begin
   FillThread.NormalProc:= @CCFillCore;
   UpdateTimer.OnTimer:= @UpdateTimerCheck;
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
-  if FileExists(SimbaSettingsFile) then
+  if FileExistsUTF8(SimbaSettingsFile) then
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
     Self.LoadFormSettings;
