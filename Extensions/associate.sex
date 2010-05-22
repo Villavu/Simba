@@ -1,0 +1,261 @@
+program AssociateFiles;
+
+const
+  Extensions = 'simb,simba,sex';
+
+var
+  SimbaMenu: TMenuItem;
+
+type
+  TCharArray = array of Char;
+
+  function GetModuleFileName(
+    Module: Cardinal; FileName: TCharArray; Size: Cardinal
+  ): Cardinal; external 'GetModuleFileNameA@kernel32 stdcall';
+
+  function RegCreateKeyEx(
+    Key: LongWord; lpSubKey: TCharArray{PChar}; Reserved: LongInt; lpClass: Integer;
+    dwOptions: LongInt; samDesired: LongWord; SecurityAttributes: Integer;
+    var pResult: LongWord; dwDisposition: TIntegerArray{PInteger}
+  ): LongInt; external 'RegCreateKeyExA@advapi32.dll stdcall';
+
+  function RegCloseKeyEx(
+    Key: LongWord
+  ): Integer; external 'RegCloseKey@advapi32.dll stdcall';
+
+  function RegSetValueEx(
+    Key: LongWord; lpValueName: TCharArray{PChar}; Reserved: LongInt; dwType: LongInt;
+    Data: TByteArray{PByte}; cbData: LongInt
+  ): Integer; external 'RegSetValueExA@advapi32.dll stdcall';
+
+  procedure SHChangeNotify(
+    EventID: Integer; Flags: Cardinal; Item1, Item2: Integer
+  ); external 'SHChangeNotify@shell32.dll stdcall';
+
+const
+  REG_OPTION_NON_VOLATILE = 0;
+  //KEY_ALL_ACCESS = 983130;
+  KEY_WRITE = 131087;
+
+  ERROR_SUCCESS       = 0;
+  ERROR_ACCESS_DENIED = 5;
+  ERROR_BADKEY        = 1010;
+  ERROR_CANTOPEN      = 1011;
+  ERROR_CANTREAD      = 1012;
+  ERROR_CANTWRITE     = 1013;
+  ERROR_KEY_DELETED   = 1018;
+
+  HKEY_CLASSES_ROOT   = $80000000;
+  HKEY_CURRENT_USER   = $80000001;
+  HKEY_LOCAL_MACHINE  = $80000002;
+  HKEY_USERS          = $80000003;
+  HKEY_CURRENT_CONFIG = $80000005;
+
+  REG_NONE       = 0;
+  REG_SZ         = 1;
+  REG_EXPAND_SZ  = 2;
+  REG_BINARY     = 3;
+  REG_DWORD      = 4;
+
+  SHCNE_ASSOCCHANGED = $08000000;
+  SHCNF_IDLIST       = 0;
+
+function StringToCharArray(s: string): TCharArray;
+var
+  i, l: Integer;
+begin
+  l := Length(s);
+  SetLength(Result, l + 1);
+  for i := l downto 1 do
+    Result[i - 1] := s[i];
+  Result[l] := #0;
+end;
+
+function StringToByteArray(s: string): TByteArray;
+var
+  i, l: Integer;
+begin
+  l := Length(s);
+  SetLength(Result, l + 1);
+  for i := l downto 1 do
+    Result[i - 1] := Ord(s[i]);
+  Result[l] := 0;
+end;
+
+function SetString(Buffer: TCharArray; Len: Cardinal): string;
+var
+  i: Integer;
+begin
+  if (Len < 1) then
+    Result := ''
+  else
+  begin
+    SetLength(Result, Len);
+    for i := 0 to Len - 1 do
+      Result[i + 1] := Buffer[i];
+  end;
+end;
+
+function GetExeName: string;
+var
+  Buffer: array of Char;
+begin
+  SetLength(Buffer, 261);
+  Result := SetString(Buffer, GetModuleFileName(0, Buffer, Length(Buffer)));
+end;
+
+function RegOpenKey(KeyName: string; Root: LongWord; out Key: LongWord): Boolean;
+var
+  s: TCharArray;
+  disp: TIntegerArray;
+begin
+  Result := False;
+  s := StringToCharArray(KeyName); //Conversion to "PChar"
+  SetLength(disp, 1);
+  case RegCreateKeyEx(Root, s, 0, 0, REG_OPTION_NON_VOLATILE, KEY_WRITE, 0, Key, disp) of
+    ERROR_SUCCESS: Result := True;
+    ERROR_ACCESS_DENIED: WriteLn('Access denied');
+    ERROR_BADKEY: WriteLn('Bad key');
+    ERROR_CANTOPEN: WriteLn('Can''t open');
+    ERROR_CANTREAD: WriteLn('Can''t read');
+    ERROR_CANTWRITE: WriteLn('Can''t write');
+    ERROR_KEY_DELETED: WriteLn('Key marked for deletion');
+  end;
+
+  case disp[0] of
+    1: WriteLn('Key "'+KeyName+'" did not exist and was created.');
+    2: WriteLn('Key "'+KeyName+'" existed and was simply opened without being changed.');
+  end;
+end;
+
+function RegCloseKey(Key: LongWord): Boolean;
+begin
+  Result := RegCloseKeyEx(Key) = ERROR_SUCCESS;
+end;
+
+function RegCreateKey(KeyName: string; Root: LongWord): Boolean;
+var
+  t: LongWord;
+begin
+  if RegOpenKey(KeyName, Root, t) then
+    Result := RegCloseKey(t)
+  else
+    Result := False;
+end;
+
+function RegWriteString(Key: LongWord; Name, Value: string): Boolean;
+var
+  n: TCharArray;
+  v: TByteArray;
+begin
+  n := StringToCharArray(Name);
+  v := StringToByteArray(Value);
+  Result := RegSetValueEx(Key, n, 0, REG_SZ, v, Length(v)) = ERROR_SUCCESS;
+end;
+
+function AssociateExtension(Extension, ContentType, App: string): Boolean;
+var
+  t: LongWord;
+begin
+  Result := False;
+  if (Extension = '') then
+    Exit;
+
+  if (not RegOpenKey('.' + Extension, HKEY_CLASSES_ROOT, t)) then
+    Exit;
+  RegWriteString(t, '', 'Simba.' + Extension);
+  if (ContentType <> '') then
+    RegWriteString(t, 'Content Type', ContentType);
+  RegCloseKey(t);
+
+  if (App <> '') then
+  begin
+    if (not RegOpenKey('Simba.' + Extension + '\DefaultIcon', HKEY_CLASSES_ROOT, t)) then
+      Exit;
+    RegWriteString(t, '', App + ',0');
+    RegCloseKey(t);
+
+    if (not RegOpenKey('Simba.' + Extension + '\shell', HKEY_CLASSES_ROOT, t)) then
+      Exit;
+    RegWriteString(t, '', 'open');
+    RegCloseKey(t);
+
+    if (not RegOpenKey('Simba.' + Extension + '\shell\open\command', HKEY_CLASSES_ROOT, t)) then
+      Exit;
+    RegWriteString(t, '', '"' + App + '" "%1"');
+    RegCloseKey(t);
+  end;
+
+  Result := True;
+end;
+
+procedure UpdateAssociations;
+var
+  s: string;
+  e: TStringArray;
+  i: Integer;
+begin
+  s := GetExeName;
+  e := Explode(',', Extensions);
+
+  if (s <> '') and (Length(e) > 0) then
+  begin
+    for i := High(e) downto 0 do
+      if (not AssociateExtension(e[i], 'text', s)) then
+        Break;
+
+    if (i >= 0) then
+      WriteLn('Association failed!')
+    else
+    begin
+      SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, 0, 0);
+      WriteLn('Associations updated!');
+    end;
+  end;
+end;
+
+procedure OnClick(sender : TObject);
+begin;
+  UpdateAssociations;
+end;
+
+procedure Init;
+var
+  m: TMenuItem;
+begin;
+  m := TMenuItem.Create(Simba_MainMenu);
+  m.Caption := '-';
+  Simba_MainMenu.Items.Items[4].Insert(Simba_MainMenu.Items.Items[4].Count - 2, m);
+
+  SimbaMenu := TMenuItem.Create(Simba_MainMenu);
+  SimbaMenu.Caption := 'Associate File Extensions';
+  SimbaMenu.OnClick := @OnClick;
+  Simba_MainMenu.Items.Items[4].Insert(Simba_MainMenu.Items.Items[4].Count - 2, SimbaMenu);
+end;
+
+procedure Free;
+begin
+end;
+
+procedure Attach;
+begin;
+  SimbaMenu.Visible := True;
+end;
+
+Procedure Detach;
+begin
+  SimbaMenu.Visible := False;
+end;
+
+function GetName : string;
+begin;
+  Result := 'Associate File Extensions (by Nielsie95)';
+end;
+
+function GetVersion : string;
+begin;
+  result := '0.1';
+end;
+
+begin
+end.
