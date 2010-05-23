@@ -582,6 +582,8 @@ var
   i : integer;
 begin;
   result := '';
+  if (Strings = nil) then
+    exit;
   if endpos.y < beginpos.y then
     exit;
   if endpos.y >= strings.Count then
@@ -598,7 +600,7 @@ begin;
   result := copy(strings[beginpos.y],beginpos.x, length(strings[beginpos.y]) - beginpos.x + 1);
   for i := beginpos.y + 1 to endpos.y-1 do
     result := result + strings[i];
-  result := result +  copy(strings[endpos.y],0,endpos.x-1); //Position <> count!
+  result := result + copy(strings[endpos.y],0,endpos.x-1); //Position <> count!
 end;
 
 function TParamHint.PrepareParamString(out Str: string; out MustHide : boolean): Integer;
@@ -612,35 +614,41 @@ var
   CursorXY : TPoint;
 begin
   result := -1;
+  if (FSynEdit = nil) or (FParameters = nil) then
+    Exit;
   MustHide := True;
   Parser := TmwPasLex.Create;                 //The position of the bracket
-  parser.Origin:= PChar(StringListPartToText(Point(FBracketPoint.x,FBracketPoint.y-1),
-                                             point(min(FSynEdit.CaretX,length(FSynEdit.Lines[FSynEdit.CaretY - 1])+1),FSynEdit.CaretY-1),
-                                             FSynEdit.lines));
-  bracketcount := 0;
-  ParameterIndex := -1;
-  while parser.TokenID <> tkNull do
-  begin
-    case parser.tokenID of
-      tkRoundOpen,tkSquareOpen:
-        begin
-          inc(BracketCount);
-          if BracketCount = 1 then
-            ParameterIndex := 0;
+  try
+    Parser.Origin:= PChar(StringListPartToText(Point(FBracketPoint.x,FBracketPoint.y-1),
+                                               Point(min(FSynEdit.CaretX,length(FSynEdit.Lines[FSynEdit.CaretY - 1])+1),FSynEdit.CaretY-1),
+                                               FSynEdit.lines));
+    bracketcount := 0;
+    ParameterIndex := -1;
+    while parser.TokenID <> tkNull do
+    begin
+      case parser.tokenID of
+        tkRoundOpen,tkSquareOpen:
+          begin
+            inc(BracketCount);
+            if BracketCount = 1 then
+              ParameterIndex := 0;
+          end;
+        tkRoundClose, tkSquareClose:
+          begin
+            dec(BracketCount);
+            if bracketcount =0 then
+              exit;
+          end;
+        tkComma:
+          begin
+            if bracketcount = 1 then
+              inc(parameterIndex);
+          end;
         end;
-      tkRoundClose, tkSquareClose:
-        begin
-          dec(BracketCount);
-          if bracketcount =0 then
-            exit;
-        end;
-      tkComma:
-        begin
-          if bracketcount = 1 then
-            inc(parameterIndex);
-        end;
-      end;
-    parser.NextNoJunk;
+      parser.NextNoJunk;
+    end;
+  finally
+    Parser.Free;
   end;
   if parameterindex = -1 then
     exit;
@@ -653,11 +661,11 @@ begin
   end;
   str := '';
   ParamC := 0;
-  typedecl := FDecl.Name;
+  {typedecl := FDecl.Name;
   if typedecl = nil then
     exit;
   if typedecl.shorttext = '' then
-    exit;
+    exit;}
   for i := 0 to high(FParameters) do
   begin
     if (FParameters[i] is TciConstParameter) then
@@ -703,17 +711,22 @@ begin
     else
       str := s + params + typestr;
   end;
-  TypeDecl := FDecl.Items.GetFirstItemOfClass(TciReturnType);
+  if (FDecl <> nil) then
+    TypeDecl := FDecl.Items.GetFirstItemOfClass(TciReturnType)
+  else
+    TypeDecl := nil;
   if TypeDecl <> nil then
     TypeStr := ': ' + typedecl.ShortText
   else
     TypeStr := '';
-  str := FDecl.Name.ShortText + '(' +  str + ')' + TypeStr + ';';
+
+  str :=  '(' +  str + ')' + TypeStr + ';';
+  if (FDecl <> nil) and (FDecl.Name <> nil) then
+    str := FDecl.Name.ShortText + str;
   str := StringReplace(str,'\\','',[rfReplaceAll]); //Delete all the \\, something like \const \\x\ is the same as \const x\
   MustHide := False;
   Result := parameterindex;
   fPreparedString := str;
-  Parser.Free;
 end;
 
 destructor TParamHint.Destroy;
@@ -742,6 +755,8 @@ var
   ClientXY: TPoint;
   ScreenXY: TPoint;
 begin
+  if (FSynEdit = nil) then
+    Exit;
   ScreenTextXY := FSynEdit.LogicalToPhysicalPos(FStartPoint);
   ClientXY := FSynEdit.RowColumnToPixels(ScreenTextXY);
   DrawWidth := FSynEdit.ClientWidth;  //Maximum width it can have..
@@ -799,6 +814,9 @@ procedure TParamHint.ParamHintHide(Sender: TObject);
 begin
   if FMP <> nil then
     freeandnil(Fmp);
+  FDecl := nil;
+  FParameters:= nil;
+  FSynEdit := nil;
 end;
 
 procedure TParamHint.DrawHints(var MaxWidth, MaxHeight: Integer;

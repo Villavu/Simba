@@ -1794,7 +1794,7 @@ end;
 }
 procedure TSimbaForm.doOnHide(Sender: TObject);
 begin
-  if DebugImgForm.Visible then
+  if (not (csDestroying in ComponentState)) and (DebugImgForm <> nil) and DebugImgForm.Showing then
     DebugImgForm.Hide;
 end;
 

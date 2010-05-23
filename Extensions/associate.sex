@@ -16,7 +16,7 @@ type
   function RegCreateKeyEx(
     Key: LongWord; lpSubKey: TCharArray{PChar}; Reserved: LongInt; lpClass: Integer;
     dwOptions: LongInt; samDesired: LongWord; SecurityAttributes: Integer;
-    var pResult: LongWord; dwDisposition: TIntegerArray{PInteger}
+    var pResult: LongWord; var dwDisposition: Integer
   ): LongInt; external 'RegCreateKeyExA@advapi32.dll stdcall';
 
   function RegCloseKeyEx(
@@ -107,11 +107,10 @@ end;
 function RegOpenKey(KeyName: string; Root: LongWord; out Key: LongWord): Boolean;
 var
   s: TCharArray;
-  disp: TIntegerArray;
+  disp: Integer;
 begin
   Result := False;
   s := StringToCharArray(KeyName); //Conversion to "PChar"
-  SetLength(disp, 1);
   case RegCreateKeyEx(Root, s, 0, 0, REG_OPTION_NON_VOLATILE, KEY_WRITE, 0, Key, disp) of
     ERROR_SUCCESS: Result := True;
     ERROR_ACCESS_DENIED: WriteLn('Access denied');
@@ -122,7 +121,7 @@ begin
     ERROR_KEY_DELETED: WriteLn('Key marked for deletion');
   end;
 
-  case disp[0] of
+  case disp of
     1: WriteLn('Key "'+KeyName+'" did not exist and was created.');
     2: WriteLn('Key "'+KeyName+'" existed and was simply opened without being changed.');
   end;
