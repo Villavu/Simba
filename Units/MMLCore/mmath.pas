@@ -75,8 +75,8 @@ var
   angle : extended;
 begin
   angle := ArcTan2(pt.y-my,pt.x-mx);
-  result.y := round(sin(angle) * newdist) + mx;
-  result.x := round(cos(angle) * newdist) + my;
+  result.x := round(cos(angle) * newdist) + mx;
+  result.y := round(sin(angle) * newdist) + my;
 end;
 
 function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
@@ -92,8 +92,8 @@ begin
     for i := high(TPA) downto 0 do
     begin
       angle := ArcTan2(TPA[i].y-my,TPA[i].x-mx);
-      TPA[i].y := round(sin(angle) * newdist) + mx;
-      TPA[i].x := round(cos(angle) * newdist) + my;
+      TPA[i].x := round(cos(angle) * newdist) + mx;
+      TPA[i].y := round(sin(angle) * newdist) + my;
     end;
   except
     result := false;
