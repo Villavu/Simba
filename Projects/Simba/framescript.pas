@@ -426,7 +426,7 @@ begin
         if (d <> nil) then
         begin
           d := TciTypeKind(d).GetRealType;
-          if (d is TciReturnType) then
+          if (d <> nil) and (d is TciReturnType) then
             d := d.Owner;
         end;
         if (d <> nil) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) then

@@ -614,7 +614,7 @@ var
   CursorXY : TPoint;
 begin
   result := -1;
-  if (FSynEdit = nil) or (FParameters = nil) then
+  if (FSynEdit = nil) then
     Exit;
   MustHide := True;
   Parser := TmwPasLex.Create;                 //The position of the bracket
@@ -812,10 +812,9 @@ end;
 
 procedure TParamHint.ParamHintHide(Sender: TObject);
 begin
-  if FMP <> nil then
-    freeandnil(Fmp);
+  if Fmp <> nil then
+    FreeAndNil(Fmp);
   FDecl := nil;
-  FParameters:= nil;
   FSynEdit := nil;
 end;
 
@@ -976,14 +975,19 @@ procedure TParamHint.Show(StartPoint,BracketPoint: TPoint;Decl : TciProcedureDec
 begin
   if self.Visible then
     self.hide;
-  FDecl := Decl;
+
   Fmp := mp;
   FParameters:= Decl.GetParamDeclarations;
   if Length(FParameters) = 0 then //Method has no Parameters
-    exit;
+  begin
+    FreeAndNil(Fmp);
+    Exit;
+  end;
+  FDecl := Decl;
   FSynEdit := Editor;
   FStartPoint:= StartPoint;
   FBracketPoint:= BracketPoint;
+
   CalculateBounds;  //Calculate the size we need!
   self.Visible := true;
 end;
