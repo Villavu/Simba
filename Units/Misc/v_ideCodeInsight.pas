@@ -153,7 +153,6 @@ begin
       end
       else if DefineMatch then
       begin
-
         //if (IncludeBuffer[i].LastChanged = lc) then
         begin
           ci.Lexer.LoadDefines(IncludeBuffer[i].DefinesOut);
@@ -182,13 +181,16 @@ begin
       //Lexer.CloneDefinesFrom(ci.Lexer);
 
       if (ci.Lexer.Defines.IndexOf('IS_INCLUDE') < 0) then
-        i := ci.Lexer.Defines.Add('IS_INCLUDE')
+        i := ci.Lexer.Defines.Add('IS_INCLUDE');
       else
         i := -1;
       Run;
       if (i > -1) then
-        ci.Lexer.Defines.Delete(i);
-
+      begin
+        i := ci.Lexer.Defines.IndexOf('IS_INCLUDE');
+        if (i > -1) then
+          ci.Lexer.Defines.Delete(i);
+      end;
       //DefinesOut := Lexer.SaveDefines;  Weird bug, so moved out of the with statement
       ci.Lexer.CloneDefinesFrom(Lexer);
     end;
@@ -475,7 +477,7 @@ begin
             c[3] := nil;
           end;
         else
-          Continue;
+          Break;
       end;
      if (i = High(InFunc) + 1) then
         a := fItems.GetItemsOfClass(c[1])
@@ -664,7 +666,7 @@ begin
       Dec(StartPos);
       while (StartPos > 0) and (s[StartPos] in [#10, #11, #13, #32]) do
         Dec(StartPos);
-      if not ((LastWasDot and (s[StartPos] in ['a'..'z', 'A'..'Z', '0'..'9', '_', ']', ')'])) or ((not LastWasDot) and (s[StartPos] = '.'))) then
+      if (StartPos > 0) and (not ((LastWasDot and (s[StartPos] in ['a'..'z', 'A'..'Z', '0'..'9', '_', ']', ')'])) or ((not LastWasDot) and (s[StartPos] = '.')))) then
       begin
         StartPos := i - BracketCount - BraceCount;
         Break;

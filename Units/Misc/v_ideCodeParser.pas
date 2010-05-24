@@ -112,8 +112,7 @@ type
   private
     fProcType: string;
     fParams: string;
-    fSynParams: string;
-    fName : TciProcedureName;
+    fName: TciProcedureName;
     fCleanDecl : string;
 
     function GetCleanDeclaration: string;
@@ -356,7 +355,7 @@ function TDeclarationList.GetItemsOfClass(AClass: TDeclarationClass; SubSearch: 
   var
     i: Integer;
   begin
-    if (Item is AClass) then
+    if ((Item = nil) and (AClass = nil)) or (Item is AClass) then
     begin
       SetLength(Res, ResIndex + 1);
       Res[ResIndex] := Item;
@@ -384,7 +383,7 @@ function TDeclarationList.GetFirstItemOfClass(AClass: TDeclarationClass; SubSear
     i: Integer;
   begin
     Result := False;
-    if (Item is AClass) then
+    if ((Item = nil) and (AClass = nil)) or (Item is AClass) then
     begin
       Res := Item;
       Result := True;
@@ -549,7 +548,7 @@ function TDeclaration.HasOwnerClass(AClass: TDeclarationClass; out Declaration: 
 
   function IsOwner(Item: TDeclaration; AClass: TDeclarationClass; out Decl: TDeclaration; Recursive: Boolean): Boolean;
   begin
-    if (Item.Owner is AClass) then
+    if ((AClass = nil) and (Item.Owner = nil)) or (Item.Owner is AClass) then
     begin
       Result := True;
       Decl := Item.Owner;
@@ -576,7 +575,7 @@ function TDeclaration.GetOwnersOfClass(AClass: TDeclarationClass): TDeclarationA
     var Res: TDeclarationArray;
     var ResIndex: Integer);
   begin
-    if (Item.Owner is AClass) then
+    if ((AClass = nil) and (Item.Owner = nil)) or (Item.Owner is AClass) then
     begin
       SetLength(Res, ResIndex + 1);
       Res[ResIndex] := Item.Owner;
@@ -597,6 +596,8 @@ end;
 
 constructor TDeclaration.Create(AParser: TmwSimplePasPar; AOwner: TDeclaration; AOrigin: PAnsiChar; AStart, AEnd: Integer);
 begin
+  inherited Create;
+
   fParser := AParser;
   fOwner := AOwner;
   fOrigin := AOrigin;
@@ -797,7 +798,7 @@ begin
     if (LowerCase(fProcType) = 'class') then
     begin
       Delete(s, 1, 6);
-      fProcType := GetFirstWord(s);
+      fProcType := 'class ' + GetFirstWord(s);
     end;
 
     if (fProcType = '') then
@@ -811,19 +812,13 @@ begin
 end;
 
 function TciProcedureDeclaration.GetName: TciProcedureName;
-var
-  ProcedureName : TciProcedureName;
 begin
   if (fName <> nil) then
-    result := fName
+    Result := fName
   else
   begin
-    ProcedureName := TciProcedureName(fItems.GetFirstItemOfClass(TciProcedureName));
-    if ProcedureName <> nil then
-      result := ProcedureName
-    else
-      Result := nil;
-    fName := result;
+    fName := TciProcedureName(fItems.GetFirstItemOfClass(TciProcedureName));
+    Result := fName;
   end;
 end;
 
@@ -835,11 +830,10 @@ begin
     result := fCleanDecl
   else
   begin
-    result := '';
-    if Name = nil then
-      exit;
-    result := proctype + ' ' + Name.ShortText;
-    if Params <> '' then
+    result := proctype;
+    if (Name <> nil) then
+      result := result + ' ' + Name.ShortText;
+    if (Params <> '') then
       result := result + '(' + params + ')';
     Return := fItems.GetFirstItemOfClass(TciReturnType) as TciReturnType;
     if (Return <> nil) then
@@ -848,7 +842,6 @@ begin
       result := result + ';';
   end;
 end;
-
 
 function TciProcedureDeclaration.GetParams: string;
 var
