@@ -413,8 +413,7 @@ begin
   end;
 
   SetLength(S, X);
-  MFiles[FileNum].FS.Read(S[1], x);
-
+  Result := MFiles[FileNum].FS.Read(S[1], x) = x;
   {Files[FileNum].BytesRead := Files[FileNum].BytesRead + X;
   FileRead(Files[FileNum].Handle, S[1], X);
   SetLength(S, X); }
