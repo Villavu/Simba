@@ -36,6 +36,11 @@ begin
   Result := CurrThread.Client.MFiles.RewriteFile(Path, Shared);
 end;
 
+function ps_AppendFile(const Path: string): Integer; extdecl;
+begin
+  Result := CurrThread.Client.MFiles.AppendFile(Path);
+end;
+
 procedure ps_CloseFile(FileNum: Integer); extdecl;
 begin
   CurrThread.Client.MFiles.CloseFile(FileNum);

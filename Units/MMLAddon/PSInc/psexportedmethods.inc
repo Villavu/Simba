@@ -111,6 +111,7 @@ SetCurrSection('Files');
 AddFunction(@ps_CreateFile, 'function CreateFile(const Path: string): Integer;');
 AddFunction(@ps_OpenFile, 'function OpenFile(const Path: string; Shared: Boolean): Integer;');
 AddFunction(@ps_RewriteFile, 'function RewriteFile(const Path: string; Shared: Boolean): Integer;');
+AddFunction(@ps_AppendFile, 'function AppendFile(const Path: string): Integer;');
 AddFunction(@ps_CloseFile, 'procedure CloseFile(FileNum: Integer);');
 AddFunction(@ps_EndOfFile, 'function EndOfFile(FileNum: Integer): Boolean;');
 AddFunction(@ps_FileSize, 'function FileSize(FileNum: Integer): LongInt;');

@@ -707,17 +707,77 @@ Simba provides several functions to access files - that is, read
 from them and write to them.
 
 \subsection{CreateFile}
+
+CreateFile creates a file. It will only create
+the file if ti doesn't already exist.
+
+Events called:
+\begin{itemize}
+\item WriteFileEvent
+\end{itemize}
+
 \subsection{OpenFile}
+
+Opens a file for reading.
+
+Events called:
+\begin{itemize}
+\item ReadFileEvent
+\end{itemize}
 \subsection{RewriteFile}
+
+Rewrite files opens a file for reading and writing, but will remove all the
+contents of a file. To open a file for appending, use AppendFile.
+
+Events called:
+\begin{itemize}
+\item WriteFileEvent
+\end{itemize}
+\subsection{AppendFile}
+AppendFile opens a file for reading and writing, and will not remove the
+contents of the file.
+
+Events called:
+\begin{itemize}
+\item WriteFileEvent
+\end{itemize}
 \subsection{CloseFile}
+
+CloseFile closes the given file.
+
 \subsection{EndOfFile}
+
+EndOfFile returns true if the character pointer in the file has reached the end
+of the file.
+
 \subsection{FileSize}
+
+FileSize returns the length of the file in bytes.
+
 \subsection{ReadFileString}
+
+ReadFileString reads a string from a file.
+
 \subsection{WriteFileString}
+
+WriteFileString writes a string to a file
+
 \subsection{SetFileCharPointer}
+
+Set the char pointer to a specific position.
+
 \subsection{FilePointerPos}
+
+Get the position of the char pointer.
+
 \subsection{DirectoryExists}
+
+Returns true if the directory exists.
+
 \subsection{FileExists}
+
+Returns true if the file exists.
+
 \subsection{WriteINI}
 \subsection{ReadINI}
 \subsection{DeleteINI}
