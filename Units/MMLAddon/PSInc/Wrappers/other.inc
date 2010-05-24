@@ -30,6 +30,8 @@ begin;
     result := PSGetAnsiString(Data.Dta,data.aType)
   else if data.aType.ExportName = 'BOOLEAN' then
     result := BoolToStr(PSGetInt(Data.Dta,data.aType) <> 0,true)
+  else if data.aType.BaseType in [btExtended,btSingle,btDouble] then
+    result := FloatToStr(PSGetReal(data.Dta,data.aType))
   else
     result := PSVariantToString(data,'');
 end;
