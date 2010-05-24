@@ -44,6 +44,7 @@ type
     function CreateFile(Path: string): Integer;
     function OpenFile(Path: string; Shared: Boolean): Integer;
     function RewriteFile(Path: string; Shared: Boolean): Integer;
+    function AppendFile(Path: string): Integer;
     procedure CloseFile(FileNum: Integer);
     function EndOfFile(FileNum: Integer): Boolean;
     function FileSizeMuf(FileNum: Integer): LongInt;
@@ -271,6 +272,32 @@ begin
     Exit;
   end;
   Result := AddFileToManagedList(Path, FS, fMode);
+end;
+
+function TMFiles.AppendFile(Path: string): Integer;
+var
+  FS: TFileStream;
+  fMode: Integer;
+  Continue : Boolean;
+begin
+  if Assigned(WriteFileEvent) then
+  begin
+    Continue := true;
+    WriteFileEvent(Self,path,continue);
+    if not Continue then
+      exit(File_EventError);
+  end;
+  fMode := fmOpenReadWrite;
+  if not FileExists(Path) then
+    fMode := fMode or fmCreate;
+  try
+    FS := TFileStream.Create(UTF8ToSys(Path), fMode);
+    FS.Seek(0, fsFromEnd);
+    Result := AddFileToManagedList(Path, FS, fMode);
+  except
+    Result := File_AccesError;
+    TClient(Client).Writeln(Format('AppendFile - Exception. Could not create file: %s',[path]));
+  end;
 end;
 
 {/\
