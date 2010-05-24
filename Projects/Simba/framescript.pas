@@ -363,9 +363,9 @@ begin
       s := mp.GetExpressionAtPos;
       if (s <> '') then
       begin
-        sp := LastDelimiter('.', s);
-        if (sp > 0) then
-          Delete(s, sp, Length(s) - sp + 1)
+        ep := LastDelimiter('.', s);
+        if (ep > 0) then
+          Delete(s, ep, Length(s) - ep + 1)
         else
           s := '';
       end;
@@ -377,7 +377,7 @@ begin
       if (Data = nil) then
       begin
         mp.FillSynCompletionProposal(ItemList, InsertList, s);
-        p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(ep, SynEdit.CaretY)));
+        p := SynEdit.ClientToScreen(SynEdit.RowColumnToPixels(Point(sp, SynEdit.CaretY)));
         p.y := p.y + SynEdit.LineHeight;
         SimbaForm.CodeCompletionForm.Show(p, ItemList, InsertList, Filter, SynEdit);
       end;
@@ -410,11 +410,15 @@ begin
       s := mp.GetExpressionAtPos(bcc, bck, cc,posi, true);
 
       bracketpos := posi + length(s);
-      if pos('(',s) > 0 then
+      cc := LastDelimiter('(',s);
+      if cc > 0 then
       begin;
-        bracketpos := pos('(',s) + posi;
-        delete(s,pos('(',s),length(s) - pos('(',s) + 1);
+        bracketpos := cc + posi;
+        delete(s, cc, length(s) - cc + 1);
       end;
+      cc := LastDelimiter('.',s);
+      if cc > 0 then
+        posi := posi + cc;
       d := mp.FindVarBase(s);
       dd := nil;
       //Find the declaration -> For example if one uses var x : TNotifyEvent..

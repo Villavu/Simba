@@ -613,10 +613,10 @@ var
   i,ii :integer;
   CursorXY : TPoint;
 begin
-  result := -1;
+  Result := -1;
+  MustHide := True;
   if (FSynEdit = nil) then
     Exit;
-  MustHide := True;
   Parser := TmwPasLex.Create;                 //The position of the bracket
   try
     Parser.Origin:= PChar(StringListPartToText(Point(FBracketPoint.x,FBracketPoint.y-1),
@@ -745,6 +745,10 @@ begin
   OnHide:=@ParamHintHide;
   LastParameterIndex:= -1;
   Application.AddOnIdleHandler(@ApplicationIdle);
+
+  Fmp := nil;
+  FDecl := nil;
+  FSynEdit := nil;
 end;
 
 procedure TParamHint.CalculateBounds;
@@ -870,7 +874,7 @@ var
         continue;
       end;
       StartPos := Pos;
-      if (Line[Pos] in ['a'..'z', 'A'..'Z', '0'..'9', '_']) then //We are in a word, lets draw that completely ;)
+      if (Pos <= Length(Line)) and (Line[Pos] in ['a'..'z', 'A'..'Z', '0'..'9', '_']) then //We are in a word, lets draw that completely ;)
       begin
         while ((Pos < length(line)) and (Line[Pos + 1] in ['a'..'z', 'A'..'Z', '0'..'9', '_'])) do
           inc(pos);
