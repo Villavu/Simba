@@ -181,7 +181,7 @@ begin
       //Lexer.CloneDefinesFrom(ci.Lexer);
 
       if (ci.Lexer.Defines.IndexOf('IS_INCLUDE') < 0) then
-        i := ci.Lexer.Defines.Add('IS_INCLUDE');
+        i := ci.Lexer.Defines.Add('IS_INCLUDE')
       else
         i := -1;
       Run;
