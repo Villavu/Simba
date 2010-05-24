@@ -361,7 +361,7 @@ begin
   Includes.Add(path);
 
   try
-    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead or fmShareDenyWrite);
+    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
     SetLength(contents, f.Size);
     f.Read(contents[1], Length(contents));
     result:= true;
