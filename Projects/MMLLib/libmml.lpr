@@ -9,7 +9,6 @@ uses
 
 type
   PTPoint = ^TPoint;
-  PPDTM = ^PDTM;
 
 
 Const
@@ -31,12 +30,6 @@ begin
   result:=0;
 end;
 
-function test: pchar; cdecl;
-begin
-  result := PChar('hello world');
-  raise exception.Create('wat');
-end;
-
 { Mouse }
 
 function getMousePos(var t: tpoint): integer; cdecl;
@@ -56,7 +49,7 @@ end;
 function setMousePos(var t: tpoint): integer; cdecl;
 begin
   try
-    C.IOManager.SetMousePos(t.x,t.y);
+    C.IOManager.MoveMouse(t.x,t.y);
     result := RESULT_OK;
   except on e : Exception do
   begin
@@ -109,6 +102,11 @@ begin
 end;
 
 
+function findColor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean;
+begin
+  C.MFinder.FindColor(x, y, color, x1, y1, x2, y2);
+end;
+
 function returnpoints: PTPoint;  cdecl;
 
 begin
@@ -131,7 +129,7 @@ begin
   i := i + 1;
 end;
 
-function givedtm:PPDTM;   cdecl;
+{function givedtm:PPDTM;   cdecl;
 var
   dtm: PPDTM;
 begin
@@ -152,7 +150,7 @@ begin
   result:=dtm;
   //result.n := PChar('wat');
   //writeln('woohoo');
-end;
+end;                }
 
 function returnarray: tpointarray;  cdecl;
 var
@@ -214,17 +212,19 @@ end;
 
 
 exports
-  test,
   init,
+  { Mouse }
   getMousePos,
   setMousePos,
   getMouseButtonState,
   setMouseButtonState,
+
+  { Finder }
+  findColor,
+
   returnpoints,
   printpoints,
   hoi,
-  givedtm,
-  givedtm2,
   returnarray,
   printarray,
   fpc_freemem_,
