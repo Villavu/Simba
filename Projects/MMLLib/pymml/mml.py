@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from ctypes import *
-import platform
 from mmlmouse import Mouse
+from mmlcolor import Color
 from time import sleep
 
 class MMLCoreException(Exception):
@@ -28,12 +28,19 @@ class MMLCore(object):
 
 DLL = MMLCore('../libmml.so')
 
+c = Color(DLL)
+ret = c.find((0, 0, 100, 100), 0)
+print ret
+
+
 m = Mouse(DLL)
 
 
 print m[(Mouse.Pos, Mouse.Left, Mouse.Right)]
 m[(Mouse.Pos, Mouse.Right)] = ((300,300), True)
 print m.getButtonStates()
+sleep(0.5)
+m.setPos((200,200))
 
 sleep(2)
 
@@ -43,7 +50,8 @@ for v in zip((Mouse.Left, Mouse.Right), m[(Mouse.Left, Mouse.Right)]):
     print v
 print m.getPos()
 
+if hasattr(ret,'__iter__'):
+    m.setPos(ret)
+
 
 del DLL
-
-

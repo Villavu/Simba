@@ -19,7 +19,7 @@ class Mouse(object):
     _mc = None
     Left, Right, Middle, Pos = 'Left', 'Right', 'Middle', 'Pos'
 
-    # last pointer position
+    # last mouse pointer position
     _lpp = (0, 0)
 
     def __init__(self, MC):
@@ -87,7 +87,7 @@ class Mouse(object):
         else:
             if item in ak:
                 if item == self.Pos:
-                    self_.setMousePos(value)
+                    self._setMousePos(value)
                 elif item in self._getButtons().keys():
                     self._setMouseButtonState(self._buttonToInt(item), \
                                               1 if value else 0)
@@ -135,7 +135,8 @@ class Mouse(object):
         return ok == 1
 
     def _setMouseButtonState(self, button, state):
-        ok = self._mc.dll.setMouseButtonState(c_int(button), c_int(state), *map(lambda x: c_int(x), self._getMousePos()))
+        ok = self._mc.dll.setMouseButtonState(c_int(button), c_int(state), 
+                *map(lambda x: c_int(x), self._getMousePos()))
         if ok != 0:
             pass # Raise exception
         return ok
