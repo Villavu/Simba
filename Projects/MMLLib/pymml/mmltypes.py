@@ -9,5 +9,6 @@ class POINT(Structure):
                 ('y', c_int)]
 
 PPOINT = POINTER(POINT)
+PINTEGER = POINTER(c_int)
 
 isiterable = lambda x: hasattr(x, '__iter__')
