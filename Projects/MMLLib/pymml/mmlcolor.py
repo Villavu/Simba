@@ -20,14 +20,22 @@ class Color(object):
         self._mc = MC
         self._initialiseDLLFuncs()
 
-    def find(self, box, color):
+    def find(self, box, color, tol = 0):
         x, y = (c_int(-1), c_int(-1))
-        self._mc.dll.findColor(byref(x), byref(y), color, *box)
+        if tol is 0:
+            ret = self._mc.dll.findColor(byref(x), byref(y), color, *box)
+        else:
+            ret = self._mc.dll.findColorTolerance(byref(x), byref(y), color,
+                    tol, *box)
         return (x, y)
 
-    def findAll(self, box, color):
+    def findAll(self, box, color, tol = 0):
         ptr = PPOINT()
-        self._mc.dll.findColors(byref(ptr), color, *box)
+        if tol is 0:
+            self._mc.dll.findColors(byref(ptr), color, *box)
+        else:
+            self._mc.dll.findColors(byref(ptr), color, tol, *box)
+
         arr = PascalArray(POINT, ptr, self._mc)
         print 'Length:', len(arr)
 #        for i in range(len(arr)):
