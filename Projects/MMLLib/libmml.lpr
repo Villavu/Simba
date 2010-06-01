@@ -102,9 +102,16 @@ begin
 end;
 
 
-function findColor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean;
+function findColor(var x, y: integer; color, x1, y1, x2, y2: integer): integer;
 begin
-  C.MFinder.FindColor(x, y, color, x1, y1, x2, y2);
+  try
+    C.MFinder.FindColor(x, y, color, x1, y1, x2, y2);
+  except on e : Exception do
+  begin
+    result := RESULT_ERROR;
+    last_error := PChar(e.Message);
+  end;
+  end;
 end;
 
 function returnpoints: PTPoint;  cdecl;
