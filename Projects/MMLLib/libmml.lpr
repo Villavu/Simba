@@ -13,6 +13,7 @@ type
 
 Const
   RESULT_OK = 0;
+  RESULT_FALSE = 1;
   RESULT_ERROR = -1;
 
   MOUSE_UP = 0;
@@ -101,11 +102,13 @@ begin
   end;
 end;
 
-
 function findColor(var x, y: integer; color, x1, y1, x2, y2: integer): integer;
 begin
   try
-    C.MFinder.FindColor(x, y, color, x1, y1, x2, y2);
+    if C.MFinder.FindColor(x, y, color, x1, y1, x2, y2) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
   except on e : Exception do
   begin
     result := RESULT_ERROR;
@@ -114,107 +117,68 @@ begin
   end;
 end;
 
-function returnpoints: PTPoint;  cdecl;
-
+function findColorTolerance(var x, y: integer; color, tol, x1, y1, x2, y2: integer): integer;
 begin
-  result := AllocMem(sizeof(TPoint) * 2);
-  result[0].x := 5;
-  result[0].y := 10;
-  result[1].x := 20;
-  result[1].y := 30;
+  try
+    if C.MFinder.FindColorTolerance(x, y, color, x1, y1, x2, y2, tol) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
+  begin
+    result := RESULT_ERROR;
+    last_error := PChar(e.Message);
+  end;
+  end;
 end;
 
-function printpoints(b: PTPoint; len: integer): boolean;   cdecl;
-var i:integer;
-begin
-  for i := 0 to len - 1 do
-    writeln('X, Y: (' + inttostr(b[i].x) + ', ' + inttostr(b[i].y) + ')');
-end;
-
-procedure hoi(var i: integer);  cdecl;
-begin
-  i := i + 1;
-end;
-
-{function givedtm:PPDTM;   cdecl;
+function findColors(var ptr: PTPoint; color, x1, y1, x2, y2: integer): integer;
 var
-  dtm: PPDTM;
+  TPA: TPointArray;
 begin
-  writeln('Size: ' + inttostr(sizeof(pdtm)));
-  writeln('Size: ' + inttostr(sizeof(ptruint)));
-  dtm := AllocMem(sizeof(pdtm));
-  initdtm(dtm^,2);
-  result:=dtm;
-  dtm^.n := PChar('wat');
+  try
+    C.MFinder.FindColors(TPA, color, x1, y1, x2, y2);
+  except on e : Exception do
+  begin
+    result := RESULT_ERROR;
+    last_error := PChar(e.Message);
+  end;
+  end;
+  ptr := AllocMem(sizeof(tpoint) * (length(TPA) + 1));
+  PInteger(ptr)[0] := length(TPA);
+  Move(TPA[0], ptr[1], length(TPA)*sizeof(tpoint));
 end;
 
-function givedtm2:PDTM; cdecl;
-
+function findColorsTolerance(var ptr: PTPoint; color, tol, x1, y1, x2, y2: integer): integer;
 var
-  dtm: pdtm;
+  TPA: TPointArray;
 begin
-  initdtm(dtm,2);
-  result:=dtm;
-  //result.n := PChar('wat');
-  //writeln('woohoo');
-end;                }
-
-function returnarray: tpointarray;  cdecl;
-var
-  i:integer;
-begin
-  setlength(result,5);
-  for i := 0 to high(result) do
-    result[i] := Point(i * 50, i + 50);
-  writeln('res: ' + IntToStr(PtrUInt(result)));
-  gr := @result[0];
-end;
-
-procedure printarray2(var arr: TPointArray); cdecl;
-var i:integer;
-begin
-  for i := 0 to high(arr) do
-    writeln(inttostr(arr[i].x) + ',' + inttostr(arr[i].y));
-  setlength(arr,0);
-  writeln('GR: ' + inttostr(tpoint(tpointarray(gr)[0]).y));
-end;
-
-procedure printarray(arr: PTPoint); cdecl;
-var
-  i:integer;
-  arr2: TPointArray;
-begin
-  writeln('arr: ' + IntToStr(PtrUInt(@arr[0])));
-  setlength(arr2,0);
-  arr2 := @arr[0];
-  writeln('arr2: ' + IntToStr(PtrUInt(@arr2[0])));
- { for i := 0 to 4 do
-    writeln(inttostr(arr[i].x) + ',' + inttostr(arr[i].y));
-
-  writeln(length(arr2));
-  for i := 0 to high(arr2) do
-    writeln(inttostr(arr2[i].x) + ',' + inttostr(arr2[i].y)); }
-
-  printarray2(arr2);
-  writeln(inttostr(length(arr2)));
-  writeln(inttostr(arr[0].x) + ',' + inttostr(arr[0].y));
+  try
+    C.MFinder.FindColorsTolerance(TPA, color, x1, y1, x2, y2, tol);
+  except on e : Exception do
+  begin
+    result := RESULT_ERROR;
+    last_error := PChar(e.Message);
+  end;
+  end;
+  ptr := AllocMem(sizeof(tpoint) * (length(TPA) + 1));
+  PInteger(ptr)[0] := length(TPA);
+  Move(TPA[0], ptr[1], length(TPA)*sizeof(tpoint));
 end;
 
 procedure fpc_freemem_(p:pointer); cdecl;
 begin
-  writeln('free: ' + inttostr(qword(p)));
   freemem(pointer(ptruint(p)));
 end;
 
 function fpc_allocmem_(size: ptruint): pointer; cdecl;
 begin
-  result:=AllocMem(size);
-  writeln('alloc: ' + inttostr(qword(result)));
+  result:= AllocMem(size);
 end;
 
 function fpc_reallocmem_(size: ptruint; ptr: pointer): pointer;
 begin
-  result:=ReAllocMem(ptr, size);
+  result:= ReAllocMem(ptr, size);
 end;
 
 
@@ -228,12 +192,9 @@ exports
 
   { Finder }
   findColor,
+  findColors,
 
-  returnpoints,
-  printpoints,
-  hoi,
-  returnarray,
-  printarray,
+  { Mem Management }
   fpc_freemem_,
   fpc_allocmem_,
   fpc_reallocmem_;
