@@ -25,6 +25,6 @@ class Color(object):
         return (x, y)
 
     def _initialiseDLLFuncs(self):
-        self._mc.dll.findColor.restype = c_bool
+        self._mc.dll.findColor.restype = c_int
         self._mc.dll.findColor.argtypes = [PINTEGER, PINTEGER, c_int, c_int,
                 c_int, c_int, c_int]
