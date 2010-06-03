@@ -812,12 +812,20 @@ begin
 end;
 
 function TciProcedureDeclaration.GetName: TciProcedureName;
+var
+  d: TDeclaration;
 begin
   if (fName <> nil) then
     Result := fName
   else
   begin
     fName := TciProcedureName(fItems.GetFirstItemOfClass(TciProcedureName));
+    if (fName = nil) and (HasOwnerClass(TciClassField, d, True)) then
+      fName := TciProcedureName(d.Items.GetFirstItemOfClass(TciFieldName));
+    if (fName = nil) and (HasOwnerClass(TciVarDeclaration, d, True)) then
+      fName := TciProcedureName(d.Items.GetFirstItemOfClass(TciVarName));
+    if (fName = nil) and (HasOwnerClass(TciTypeDeclaration, d, True)) then
+      fName := TciProcedureName(d.Items.GetFirstItemOfClass(TciTypeName));
     Result := fName;
   end;
 end;
