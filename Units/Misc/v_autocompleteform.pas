@@ -5,7 +5,7 @@ interface
 {$I ValistusDefines.inc}
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, Forms, Controls, Graphics,
   StdCtrls, ExtCtrls,  SynEdit, SynEditKeyCmds, v_ideCodeParser, v_ideCodeInsight,
 
   {$IFDEF FPC}
@@ -597,14 +597,12 @@ begin;
   if EndPos.y = beginpos.y then
   begin
     result := copy(strings[beginpos.y], beginpos.x, endpos.x - beginpos.x + 1);
-    //ShowMessage(Result);
     exit;
   end;
   result := copy(strings[beginpos.y],beginpos.x, length(strings[beginpos.y]) - beginpos.x + 1);
   for i := beginpos.y + 1 to endpos.y-1 do
     result := result + strings[i];
   result := result + copy(strings[endpos.y], 1, endpos.x - 1); //Position <> count!
-  //ShowMessage(Result);
 end;
 
 function TParamHint.PrepareParamString(out Str: string; out MustHide : boolean): Integer;
@@ -738,7 +736,6 @@ begin
   Application.RemoveOnIdleHandler(@ApplicationIdle);
   inherited Destroy;
 end;
-
 
 constructor TParamHint.Create(TheOwner: TComponent);
 begin
@@ -1007,9 +1004,13 @@ end;
 
 procedure TParamHint.ApplicationIdle(Sender: TObject; var Done: Boolean);
 begin
-  if not Visible then exit;
-  UpdateHint;
-  Sleep(1);
+  if (not Visible) then exit;
+  try
+    UpdateHint;
+    Sleep(1);
+  except
+    Hide;
+  end;
 end;
 
 end.

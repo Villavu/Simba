@@ -187,12 +187,14 @@ begin
 
   try
     SynEdit.GetWordBoundsAtRowCol(SynEdit.CaretXY, sp, ep);
-    s := SynEdit.Lines[SynEdit.Carety-1];
-    if ep > length(s) then //We are outside the real text, go back to the last char
-      mp.Run(ms, nil, Synedit.SelStart - ep + length(s),false)
+    if (SynEdit.CaretY <= 0) or (SynEdit.CaretY > SynEdit.Lines.Count) then
+      s := ''
     else
-      mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1,false);
-    mp.Position := SynEdit.SelStart + (ep - SynEdit.CaretX) - 1;
+      s := SynEdit.Lines[SynEdit.CaretY - 1];
+    if ep > length(s) then //We are outside the real text, go back to the last char
+       mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX))
+    else
+       mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
 
     d := mp.FindVarBase(mp.GetExpressionAtPos);
     if (d <> nil) then
@@ -278,15 +280,14 @@ begin
   end;
 end;
 
-procedure TScriptFrame.SynEditKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure TScriptFrame.SynEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if key = VK_F3 then
   begin;
     SimbaForm.ActionFindNextExecute(Sender);
     key := 0;
-  end;
-  if key = VK_ESCAPE then
+  end
+  else if key = VK_ESCAPE then
     SimbaForm.ParamHint.Hide;
 
   SimbaForm.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
@@ -360,7 +361,7 @@ begin
       if (SynEdit.CaretY <= 0) or (SynEdit.CaretY > SynEdit.Lines.Count) then
         s := ''
       else
-        s := SynEdit.Lines[SynEdit.Carety - 1];
+        s := SynEdit.Lines[SynEdit.CaretY - 1];
       if ep > length(s) then //We are outside the real text, go back to the last char
          mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX) + 1)
       else
