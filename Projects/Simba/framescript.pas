@@ -408,7 +408,7 @@ begin
     synedit.Lines.SaveToStream(ms);
     try
       Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
-      if (SynEDit.CaretY <= 0) or (SynEdit.CaretY > SynEdit.Lines.Count) then
+      if (SynEdit.CaretY <= 0) or (SynEdit.CaretY > SynEdit.Lines.Count) then
         s := ''
       else
         s := SynEdit.Lines[SynEdit.CaretY - 1];
