@@ -27,8 +27,8 @@ unit framescript;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit,   SynEditMarkupHighAll,
-   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls,    SynEditStrConst,
+  Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, SynEditMarkupHighAll,
+  mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, SynEditMarkupSpecialLine, Graphics, Controls, SynEditStrConst,
   v_ideCodeInsight, v_ideCodeParser, CastaliaPasLexTypes, CastaliaSimplePasPar, SynEditHighlighter,synedittextbase,SynPluginSyncroEdit;
 const
    ecCodeCompletion = ecUserFirst;
@@ -106,10 +106,11 @@ begin
   Start := Start + Offset;
   sp := Start - 1;
   ep := Start - 1;
-  s := e.Lines[e.CaretY - 1];
+  if (e.CaretY <= 0) or (e.CaretY > e.Lines.Count) then
+    s := ''
+  else
+    s := e.Lines[e.CaretY - 1];
   l := Length(s);
-  //if (sp > l) then
-  //  Dec(sp);
 
   if (sp < 1) or (sp > l) or (not (s[sp] in ['a'..'z', 'A'..'Z', '0'..'9', '_'])) then
   begin
@@ -124,7 +125,10 @@ begin
   while (ep >= 1) and (ep < l) and (s[ep + 1] in ['a'..'z', 'A'..'Z', '0'..'9', '_']) do
     Inc(ep);
 
-  Result := Copy(s, sp, ep - sp + 1);
+  if (ep > l) then
+    Result := ''
+  else
+    Result := Copy(s, sp, ep - sp + 1);
 end;
 
 function PosToCaretXY(e : TSynEdit; pos : integer) : TPoint;
@@ -141,7 +145,8 @@ begin
   loop := 0;
   count := 0;
   Lines := e.Lines;
-  while (loop < Lines.Count) and (count + llen(Lines[loop]) < pos) do begin
+  while (loop < Lines.Count) and (count + llen(Lines[loop]) < pos) do
+  begin
     count := count + llen(Lines[loop]);
     inc(loop);
   end;
@@ -333,7 +338,7 @@ var
   d: TDeclaration;
   dd: TDeclaration;
 begin
-  if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(SynEdit.CaretXY, s, Attri)) or
+  if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(Point(SynEdit.CaretX - 1, SynEdit.CaretY), s, Attri)) or
                                       ((Attri.Name <> SYNS_AttrComment) and (Attri.name <> SYNS_AttrString) and (Attri.name <> SYNS_AttrDirective))) then
   begin
     mp := TCodeInsight.Create;
@@ -348,17 +353,18 @@ begin
     InsertList.Sorted := True;
 
     Synedit.Lines.SaveToStream(ms);
-
     try
       Filter := WordAtCaret(Synedit, sp, ep);
       SimbaForm.CodeCompletionStart := Point(sp, Synedit.CaretY);
 
-      //mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
-      s := SynEdit.Lines[SynEdit.Carety-1];
-      if ep > length(s) then //We are outside the real text, go back to the last char
-        mp.Run(ms, nil, Synedit.SelStart - ep + length(s))
+      if (SynEdit.CaretY <= 0) or (SynEdit.CaretY > SynEdit.Lines.Count) then
+        s := ''
       else
-        mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1);
+        s := SynEdit.Lines[SynEdit.Carety - 1];
+      if ep > length(s) then //We are outside the real text, go back to the last char
+         mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX) + 1)
+      else
+         mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX));
 
       s := mp.GetExpressionAtPos;
       if (s <> '') then
@@ -373,7 +379,6 @@ begin
       if (Data <> nil) then //If showing automatically
         if (s <> '') and ((mp.DeclarationAtPos <> nil) and ((mp.DeclarationAtPos is TciCompoundStatement) or mp.DeclarationAtPos.HasOwnerClass(TciCompoundStatement, d, True))) then
           Data := nil;
-
       if (Data = nil) then
       begin
         mp.FillSynCompletionProposal(ItemList, InsertList, s);
@@ -387,8 +392,10 @@ begin
       ItemList.Free;
       InsertList.Free;
     end;
-  end;
-  if command = ecCodeHints then
+  end
+
+  else if (Command = ecCodeHints) and ((not SynEdit.GetHighlighterAttriAtRowCol(Point(SynEdit.CaretX - 1, SynEdit.CaretY), s, Attri)) or
+                                      ((Attri.Name <> SYNS_AttrComment) and (Attri.name <> SYNS_AttrString) and (Attri.name <> SYNS_AttrDirective))) then
   begin
     if SimbaForm.ParamHint.Visible = true then
       SimbaForm.ParamHint.hide;
@@ -401,26 +408,29 @@ begin
     synedit.Lines.SaveToStream(ms);
     try
       Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
-      s := SynEdit.Lines[SynEdit.Carety-1];
+      if (SynEDit.CaretY <= 0) or (SynEdit.CaretY > SynEdit.Lines.Count) then
+        s := ''
+      else
+        s := SynEdit.Lines[SynEdit.CaretY - 1];
       if ep > length(s) then //We are outside the real text, go back to the last char
-        mp.Run(ms, nil, Synedit.SelStart - ep + length(s), True)
+        mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX), True)
       else
         mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX) - 1, True);
-      bcc := 1;bck := 0;cc := 0;
-      s := mp.GetExpressionAtPos(bcc, bck, cc,posi, true);
 
-      bracketpos := posi + length(s);
-      cc := LastDelimiter('(',s);
+      bcc := 1;bck := 0;cc := 0;
+      s := mp.GetExpressionAtPos(bcc, bck, cc, ep, posi, bracketpos, true);
+      if (posi = -1) then
+        posi := SynEdit.SelStart + (SynEdit.CaretX - sp);
+      if (bracketpos = -1) then
+        bracketpos := posi + length(s);
+
+      cc := LastDelimiter('(', s);
       if cc > 0 then
-      begin;
-        bracketpos := cc + posi;
         delete(s, cc, length(s) - cc + 1);
-      end;
-      cc := LastDelimiter('.',s);
-      if cc > 0 then
-        posi := posi + cc;
+
       d := mp.FindVarBase(s);
       dd := nil;
+
       //Find the declaration -> For example if one uses var x : TNotifyEvent..
       //You have to get the owner of x, to find the declaration of TNotifyEvent etc..
       while (d <> nil) and (d <> dd) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) do
@@ -444,10 +454,10 @@ begin
         if (not (d is TciProcedureDeclaration)) and (d.Owner is TciProcedureDeclaration) then
           d := d.Owner;
         if (TciProcedureDeclaration(d).Params <> '') then
-          SimbaForm.ParamHint.Show(PosToCaretXY(synedit,posi + 1), PosToCaretXY(synedit,bracketpos),
+          SimbaForm.ParamHint.Show(PosToCaretXY(synedit,posi), PosToCaretXY(synedit,bracketpos),
                                    TciProcedureDeclaration(d), synedit,mp)
         else
-          FormWriteln('<no parameters expected>');
+          mDebugLn('<no parameters expected>');
       end;
     except
       on e : exception do

@@ -54,7 +54,7 @@ type
     function GetFuncType(FuncName, FuncClass: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
     function FindStruct(s: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
   public
-    function GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; out sp : Integer; IgnoreBrackets: Boolean = False): string; overload;
+    function GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; out sp, ssp, bp: Integer; IgnoreBrackets: Boolean = False): string; overload;
     function GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; IgnoreBrackets: Boolean = False): string; overload;
     function GetExpressionAtPos: string; overload;
     function FindVarBase(s: string; GetStruct: Boolean = False; Return: TVarBase = vbName): TDeclaration;
@@ -618,7 +618,7 @@ begin
   end;
 end;
 
-function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; out sp: Integer; IgnoreBrackets: Boolean): string;
+function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; out sp, ssp, bp: Integer; IgnoreBrackets: Boolean): string;
 var
   i, StartPos, EndPos, Dif: Integer;
   s: string;
@@ -628,6 +628,9 @@ var
 begin
   Result := '';
   d := nil;
+  sp := -1;
+  ssp := -1;
+  bp := -1;
   if (fDeclarationAtPos = nil) or
      (fDeclarationAtPos is TciJunk) or
      (not (
@@ -656,71 +659,83 @@ begin
 
   StartPos := EndPos;
   LastWasDot := False;
-  while (StartPos > 0) do
-  begin
-    if (BraceCount = 0) and ((BracketCount = 0) or IgnoreBrackets) and (s[StartPos] in ['a'..'z', 'A'..'Z', '0'..'9', '_']) then
-      {nothing}
-    else if (BraceCount = 0) and ((BracketCount = 0) or IgnoreBrackets) and (s[StartPos] in [#10, #11, #13, #32]) then
+  if (StartPos <= Length(s)) then
+    while (StartPos > 0) do
     begin
-      i := StartPos;
-      Dec(StartPos);
-      while (StartPos > 0) and (s[StartPos] in [#10, #11, #13, #32]) do
-        Dec(StartPos);
-      if (StartPos > 0) and (not ((LastWasDot and (s[StartPos] in ['a'..'z', 'A'..'Z', '0'..'9', '_', ']', ')'])) or ((not LastWasDot) and (s[StartPos] = '.')))) then
+      if (BraceCount = 0) and ((BracketCount = 0) or IgnoreBrackets) and (s[StartPos] in ['a'..'z', 'A'..'Z', '0'..'9', '_']) then
+        {nothing}
+      else if (BraceCount = 0) and ((BracketCount = 0) or IgnoreBrackets) and (s[StartPos] in [#10, #11, #13, #32]) then
       begin
-        StartPos := i - BracketCount - BraceCount;
+        i := StartPos;
+        Dec(StartPos);
+        while (StartPos > 0) and (s[StartPos] in [#10, #11, #13, #32]) do
+          Dec(StartPos);
+        if (StartPos > 0) and (not ((LastWasDot and (s[StartPos] in ['a'..'z', 'A'..'Z', '0'..'9', '_', ']', ')'])) or ((not LastWasDot) and (s[StartPos] = '.')))) then
+        begin
+          StartPos := i - BracketCount - BraceCount;
+          if (ssp = -1) then ssp := StartPos;
+          Break;
+        end;
+        Inc(StartPos);
+      end
+      else if (s[StartPos] = '.') then
+      begin
+        if (ssp = -1) then ssp := StartPos;
+        LastWasDot := True;
+        Dec(StartPos);
+        Continue;
+      end
+      else if (s[StartPos] = ']') then
+        Inc(BracketCount)
+      else if (s[StartPos] = '[') then
+      begin
+        Dec(BracketCount);
+        LastWasDot := True;
+        Dec(StartPos);
+        Continue;
+      end
+      else if (s[StartPos] = ')') then
+        Inc(BraceCount)
+      else if (s[StartPos] = '(') then
+      begin
+        Dec(BraceCount);
+        LastWasDot := True;
+        Dec(StartPos);
+        if (BraceCount = 0) then
+          bp := StartPos;
+        Continue;
+      end
+      else if (BraceCount = 1) and (BracketCount = 0) and (s[StartPos] = ',')  then
+        Inc(CommaCount)
+      else if (BraceCount = 0) and ((BracketCount = 0) or IgnoreBrackets) then
+        Break;
+
+      if (BraceCount < 0) or ((BracketCount < 0) and (not IgnoreBrackets)) then
+      begin
+        Dec(StartPos, BraceCount);
+        Dec(StartPos, BracketCount);
         Break;
       end;
-      Inc(StartPos);
-    end
-    else if (s[StartPos] = '.') then
-    begin
-      LastWasDot := True;
-      Dec(StartPos);
-      Continue;
-    end
-    else if (s[StartPos] = ']') then
-      Inc(BracketCount)
-    else if (s[StartPos] = '[') then
-    begin
-      Dec(BracketCount);
-      LastWasDot := True;
-      Dec(StartPos);
-      Continue;
-    end
-    else if (s[StartPos] = ')') then
-      Inc(BraceCount)
-    else if (s[StartPos] = '(') then
-    begin
-      Dec(BraceCount);
-      LastWasDot := True;
-      Dec(StartPos);
-      Continue;
-    end
-    else if (BraceCount = 1) and (BracketCount = 0) and (s[StartPos] = ',')  then
-      Inc(CommaCount)
-    else if (BraceCount = 0) and ((BracketCount = 0) or IgnoreBrackets) then
-      Break;
 
-    if (BraceCount < 0) or ((BracketCount < 0) and (not IgnoreBrackets)) then
-    begin
-      Dec(StartPos, BraceCount);
-      Dec(StartPos, BracketCount);
-      Break;
+      LastWasDot := False;
+      Dec(StartPos);
     end;
-
-    LastWasDot := False;
-    Dec(StartPos);
-  end;
-  sp := StartPos + d.StartPos + Dif;
-  Result := CompressWhiteSpace(Copy(s, StartPos + 1, EndPos - StartPos));
+  if (ssp = -1) then ssp := StartPos;
+  if (bp = -1) then bp := EndPos;
+  sp := StartPos + d.StartPos + Dif + 1;
+  ssp := ssp + d.StartPos + Dif + 1;
+  bp := bp + d.StartPos + Dif + 1;
+  if (EndPos > Length(s)) then
+    Result := ''
+  else
+    Result := CompressWhiteSpace(Copy(s, StartPos + 1, EndPos - StartPos - 1));
 end;
 
 function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; IgnoreBrackets: Boolean = False): string;
 var
-  sp : integer;
+  sp, ssp, bp: integer;
 begin
-  result := GetExpressionAtPos(bracecount,bracketcount,commacount,sp,ignorebrackets);
+  result := GetExpressionAtPos(bracecount,bracketcount,commacount,sp,ssp,bp,ignorebrackets);
 end;
 
 function TCodeInsight.GetExpressionAtPos: string;
