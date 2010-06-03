@@ -728,7 +728,7 @@ begin
   if (EndPos > Length(s)) then
     Result := ''
   else
-    Result := CompressWhiteSpace(Copy(s, StartPos + 1, EndPos - StartPos - 1));
+    Result := CompressWhiteSpace(Copy(s, StartPos + 1, EndPos - StartPos));
 end;
 
 function TCodeInsight.GetExpressionAtPos(var BraceCount, BracketCount, CommaCount: Integer; IgnoreBrackets: Boolean = False): string;
