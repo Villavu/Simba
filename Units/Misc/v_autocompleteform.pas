@@ -586,21 +586,25 @@ begin;
     exit;
   if endpos.y < beginpos.y then
     exit;
+  if beginpos.y < 0 then
+    exit;
   if endpos.y >= strings.Count then
     exit;
   if beginpos.x > length(strings[beginpos.y]) then
     exit;
-  if endpos.x > (length(strings[endpos.y])+1) then
+  if endpos.x > (length(strings[endpos.y]) + 1) then
     exit;
   if EndPos.y = beginpos.y then
   begin
-    result := copy(strings[beginpos.y],beginpos.x, endpos.x - beginpos.x);
+    result := copy(strings[beginpos.y], beginpos.x, endpos.x - beginpos.x + 1);
+    //ShowMessage(Result);
     exit;
   end;
   result := copy(strings[beginpos.y],beginpos.x, length(strings[beginpos.y]) - beginpos.x + 1);
   for i := beginpos.y + 1 to endpos.y-1 do
     result := result + strings[i];
-  result := result + copy(strings[endpos.y],0,endpos.x-1); //Position <> count!
+  result := result + copy(strings[endpos.y], 1, endpos.x - 1); //Position <> count!
+  //ShowMessage(Result);
 end;
 
 function TParamHint.PrepareParamString(out Str: string; out MustHide : boolean): Integer;
@@ -797,12 +801,15 @@ begin
     if not Assigned(FSynEdit) then
       exit;
     if FSynEdit.Focused = false then //No focus, hide this hint
-      exit;          //Exits to the finally statement ;)
-    CursorXY := FSynEdit.LogicalCaretXY;
-    if (CursorXY.x <= FBracketPoint.x) and (CursorXY.y <= FBracketPoint.y) then //Cursor moved in front of the bracket
+      exit;                          //Exits to the finally statement ;)
+    CursorXY := FSynEdit.CaretXY;
+    if (CursorXY.y < FBracketPoint.y) or ((CursorXY.x <= FBracketPoint.x) and (CursorXY.y <= FBracketPoint.y)) then //Cursor moved in front of the bracket
       exit;
-    Line:=FSynEdit.Lines[FBracketPoint.Y-1];
-    if (length(Line)<FBracketPoint.X) or (not (Line[FBracketPoint.X] in ['(','['])) then
+    if (FBracketPoint.Y <= 0) or (FBracketPoint.Y > FSynEdit.Lines.Count) then
+      Line := ''
+    else
+      Line:=FSynEdit.Lines[FBracketPoint.Y - 1];
+    if (FBracketPoint.X > length(Line)) or (not (Line[FBracketPoint.X] in ['(','['])) then
       exit;
     if PrepareParamString(Line,MustHide) = LastParameterIndex then
       exit
@@ -820,6 +827,7 @@ begin
     FreeAndNil(Fmp);
   FDecl := nil;
   FSynEdit := nil;
+  LastParameterIndex := -1;
 end;
 
 procedure TParamHint.DrawHints(var MaxWidth, MaxHeight: Integer;
