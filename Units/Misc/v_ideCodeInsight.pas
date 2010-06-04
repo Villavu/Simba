@@ -1215,6 +1215,8 @@ var
   b: array[1..2] of TDeclaration;
   c: array[0..2] of TDeclarationClass;
 begin
+  if item = nil then
+    exit;
   if (Item is TciProcedureDeclaration) then
   begin
     AddFuncDeclaration(TciProcedureDeclaration(Item), ItemList, InsertList);
@@ -1339,7 +1341,7 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
   var
     i: Integer;
   begin
-    if item = nil then
+    if (item = nil) or (ItemList = nil) or (InsertList = nil) or (Item.Proposal_InsertList = nil) or (Item.Proposal_ItemList = nil) then
       exit;
     if (not Item.Proposal_Filled) then
       Item.FillProposal;
