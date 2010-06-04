@@ -8,7 +8,9 @@ procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 
 implementation
 uses
-  SynRegExpr,bitmaps,dtm,mufasatypes,settingssandbox;
+  SynRegExpr,bitmaps,dtm,mufasatypes,client,ocr,lcltype,classes,finder,files,iomanager,settingssandbox,
+  {$IFDEF MSWINDOWS} os_windows {$ENDIF}
+  {$IFDEF LINUX} os_linux {$ENDIF};
 
 type
   TRegExp = class(SynRegExpr.TRegExpr);
@@ -63,7 +65,40 @@ procedure TMDTMCount_R(Self: TMDTM; var T: Integer);begin T := Self.Count; end;
 procedure TMDTMPoints_R(Self : TMDTM; var T : TMDTMPointArray); begin t := self.Points; end;
 procedure TMDTMIndex_R(Self : TMDTM; var T : integer); begin t := self.Index; end;
 procedure SettingsPrefix(self : TMMLSettingsSandbox; var Prefix : String);begin; Prefix := self.Prefix; end;
-
+procedure TClientWritelnProc_W(Self: TClient; const T: TWritelnProc);Begin Self.WritelnProc := T; end;
+procedure TClientWritelnProc_R(Self: TClient; var T: TWritelnProc);Begin T := Self.WritelnProc; end;
+procedure TClientMOCR_W(Self: TClient; const T: TMOCR);Begin Self.MOCR := T; end;
+procedure TClientMOCR_R(Self: TClient; var T: TMOCR); Begin T := Self.MOCR; end;
+procedure TClientMDTMs_W(Self: TClient; const T: TMDTMS);Begin Self.MDTMs := T; end;
+procedure TClientMDTMs_R(Self: TClient; var T: TMDTMS);Begin T := Self.MDTMs; end;
+procedure TClientMBitmaps_W(Self: TClient; const T: TMBitmaps);Begin Self.MBitmaps := T; end;
+procedure TClientMBitmaps_R(Self: TClient; var T: TMBitmaps);Begin T := Self.MBitmaps; end;
+procedure TClientMFinder_W(Self: TClient; const T: TMFinder);Begin Self.MFinder := T; end;
+procedure TClientMFinder_R(Self: TClient; var T: TMFinder);Begin T := Self.MFinder; end;
+procedure TClientMFiles_W(Self: TClient; const T: TMFiles);Begin Self.MFiles := T; end;
+procedure TClientMFiles_R(Self: TClient; var T: TMFiles);Begin T := Self.MFiles; end;
+procedure TClientIOManager_W(Self: TClient; const T: TIOManager);Begin Self.IOManager := T; end;
+procedure TClientIOManager_R(Self: TClient; var T: TIOManager);Begin T := Self.IOManager; end;
+procedure TMFinderWarnOnly_W(Self: TMFinder; const T: boolean);Begin Self.WarnOnly := T; end;
+procedure TMFinderWarnOnly_R(Self: TMFinder; var T: boolean);Begin T := Self.WarnOnly; end;
+procedure TMDTMSDTM_R(Self: TMDTMS; var T: TMDTM; const t1: integer);begin T := Self.DTM[t1]; end;
+Function TMDTMSAddMDTM_P(Self: TMDTMS;  const d : TMDTM) : Integer;Begin Result := Self.AddDTM(d); END;
+Function TMDTMSAddSDTM_P(Self: TMDTMS;  const d : TSDTM) : Integer;Begin Result := Self.AddDTM(d); END;
+Function TMBitmapsCreateBMPFromString_P(Self: TMBitmaps;  width, height : integer; Data : string) : integer;Begin Result := Self.CreateBMPFromString(width, height, Data); END;
+procedure TMBitmapsBmp_R(Self: TMBitmaps; var T: TMufasaBitmap; const t1: integer);begin T := Self.Bmp[t1]; end;
+Procedure TIOManager_AbstractGetKeyMouseTarget_P(Self: TIOManager_Abstract;  var idx : integer);Begin Self.GetKeyMouseTarget(idx); END;
+Procedure TIOManager_AbstractGetImageTarget_P(Self: TIOManager_Abstract;  var idx : integer);Begin Self.GetImageTarget(idx); END;
+Function TIOManager_AbstractExportKeyMouseTarget_P(Self: TIOManager_Abstract) : TTarget_Exported;Begin Result := Self.ExportKeyMouseTarget; END;
+Function TIOManager_AbstractExportImageTarget_P(Self: TIOManager_Abstract) : TTarget_Exported;Begin Result := Self.ExportImageTarget; END;
+Function TIOManager_AbstractGetKeyMouseTarget_P(Self: TIOManager_Abstract) : TTarget;Begin Result := Self.GetKeyMouseTarget; END;
+Function TIOManager_AbstractGetImageTarget_P(Self: TIOManager_Abstract) : TTarget;Begin Result := Self.GetImageTarget; END;
+Function TIOManager_AbstractSetTargetBmp_P(Self: TIOManager_Abstract;  bmp : TMufasaBitmap) : integer;Begin Result := Self.SetTarget(bmp); END;
+Function TIOManager_AbstractSetTargetArr_P(Self: TIOManager_Abstract;  ArrPtr : Integer; Size : TPoint) : integer;Begin Result := Self.SetTarget(PRGB32(ArrPtr), Size); END;
+function TWindowCreate(handle : hwnd) : TWindow; begin result := TWindow.Create(handle); end;
+function TIOManagerCreate(plugin_dir : string) : TIOManager; begin result := TIOManager.Create(plugin_dir); end;
+function TIOManager_AbstractCreate(plugin_dir : string) : TIOManager_Abstract; begin result := TIOManager_Abstract.Create(plugin_dir); end;
+Function TIOManagerSetTarget_P(Self: TIOManager;  target : TNativeWindow) : integer;Begin Result := Self.SetTarget(target); END;
+procedure TMufasaBitmapCopyClientToBitmap(Self : TMufasaBitmap; MWindow : TObject; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);begin self.CopyClientToBitmap(MWindow,Resize,x,y,xs,ys,xe,ye); end;
 
 procedure RIRegister_TMufasaBitmap(cl : TPSRuntimeClassImporter);
 begin
@@ -80,6 +115,7 @@ begin
     RegisterMethod(@TMufasaBitmap.FloodFill,'FLOODFILL');
     RegisterMethod(@TMufasaBitmap.Rectangle,'RECTANGLE');
     RegisterMethod(@TMufasaBitmap.FastGetPixel,'FASTGETPIXEL');
+    RegisterMethod(@TMufasaBitmapCopyClientToBitmap,'COPYCLIENTTOBITMAP');
     RegisterMethod(@TMufasaBitmap.SetTransparentColor,'SETTRANSPARENTCOLOR');
     RegisterMethod(@TMufasaBitmap.GetTransparentColor,'GETTRANSPARENTCOLOR');
     RegisterMethod(@TMufasaBitmap.FastDrawClear,'FASTDRAWCLEAR');
@@ -186,12 +222,240 @@ begin
   end;
 end;
 
+procedure RIRegister_TMDTMS(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TMDTMS) do
+  begin
+    RegisterMethod(@TMDTMSAddSDTM_P, 'AddSDTM');
+    RegisterMethod(@TMDTMSAddMDTM_P, 'AddMDTM');
+    RegisterMethod(@TMDTMS.GetDTM, 'GetDTM');
+    RegisterMethod(@TMDTMS.FreeDTM, 'FreeDTM');
+    RegisterMethod(@TMDTMS.StringToDTM, 'StringToDTM');
+    RegisterPropertyHelper(@TMDTMSDTM_R,nil,'DTM');
+    RegisterConstructor(@TMDTMS.Create, 'Create');
+  end;
+end;
+
+procedure RIRegister_TMFinder(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TMFinder) do
+  begin
+    RegisterPropertyHelper(@TMFinderWarnOnly_R,@TMFinderWarnOnly_W,'WarnOnly');
+    RegisterMethod(@TMFinder.DefaultOperations, 'DefaultOperations');
+    RegisterMethod(@TMFinder.FindColorsToleranceOptimised, 'FindColorsToleranceOptimised');
+    RegisterMethod(@TMFinder.FindColorToleranceOptimised, 'FindColorToleranceOptimised');
+    RegisterMethod(@TMFinder.CountColorTolerance, 'CountColorTolerance');
+    RegisterMethod(@TMFinder.CountColor, 'CountColor');
+    RegisterMethod(@TMFinder.SimilarColors, 'SimilarColors');
+    RegisterMethod(@TMFinder.FindColor, 'FindColor');
+    RegisterMethod(@TMFinder.FindColorSpiral, 'FindColorSpiral');
+    RegisterMethod(@TMFinder.FindColorSpiralTolerance, 'FindColorSpiralTolerance');
+    RegisterMethod(@TMFinder.FindColorTolerance, 'FindColorTolerance');
+    RegisterMethod(@TMFinder.FindColorsTolerance, 'FindColorsTolerance');
+    RegisterMethod(@TMFinder.FindColorsSpiralTolerance, 'FindColorsSpiralTolerance');
+    RegisterMethod(@TMFinder.FindColors, 'FindColors');
+    RegisterMethod(@TMFinder.FindColoredArea, 'FindColoredArea');
+    RegisterMethod(@TMFinder.FindColoredAreaTolerance, 'FindColoredAreaTolerance');
+    RegisterMethod(@TMFinder.FindMaskTolerance, 'FindMaskTolerance');
+    RegisterMethod(@TMFinder.CheckMask, 'CheckMask');
+    RegisterMethod(@TMFinder.FindBitmap, 'FindBitmap');
+    RegisterMethod(@TMFinder.FindBitmapIn, 'FindBitmapIn');
+    RegisterMethod(@TMFinder.FindBitmapToleranceIn, 'FindBitmapToleranceIn');
+    RegisterMethod(@TMFinder.FindBitmapSpiral, 'FindBitmapSpiral');
+    RegisterMethod(@TMFinder.FindBitmapSpiralTolerance, 'FindBitmapSpiralTolerance');
+    RegisterMethod(@TMFinder.FindBitmapsSpiralTolerance, 'FindBitmapsSpiralTolerance');
+    RegisterMethod(@TMFinder.FindDeformedBitmapToleranceIn, 'FindDeformedBitmapToleranceIn');
+    RegisterMethod(@TMFinder.FindDTM, 'FindDTM');
+    RegisterMethod(@TMFinder.FindDTMs, 'FindDTMs');
+    RegisterMethod(@TMFinder.FindDTMRotated, 'FindDTMRotated');
+    RegisterMethod(@TMFinder.FindDTMsRotated, 'FindDTMsRotated');
+    RegisterMethod(@TMFinder.GetColors, 'GetColors');
+    RegisterMethod(@TMFinder.SetToleranceSpeed, 'SetToleranceSpeed');
+    RegisterMethod(@TMFinder.GetToleranceSpeed, 'GetToleranceSpeed');
+    RegisterMethod(@TMFinder.SetToleranceSpeed2Modifiers, 'SetToleranceSpeed2Modifiers');
+    RegisterMethod(@TMFinder.GetToleranceSpeed2Modifiers, 'GetToleranceSpeed2Modifiers');
+    RegisterConstructor(@TMFinder.Create, 'Create');
+  end;
+end;
+
+procedure RIRegister_TMBitmaps(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TMBitmaps) do
+  begin
+    RegisterMethod(@TMBitmaps.GetBMP, 'GetBMP');
+    RegisterPropertyHelper(@TMBitmapsBmp_R,nil,'Bmp');
+    RegisterMethod(@TMBitmaps.CreateBMP, 'CreateBMP');
+    RegisterMethod(@TMBitmaps.AddBMP, 'AddBMP');
+    RegisterMethod(@TMBitmaps.CopyBMP, 'CopyBMP');
+    RegisterMethod(@TMBitmaps.CreateMirroredBitmap, 'CreateMirroredBitmap');
+    RegisterMethod(@TMBitmaps.CreateBMPFromFile, 'CreateBMPFromFile');
+    RegisterMethod(@TMBitmapsCreateBMPFromString_P, 'CreateBMPFromString');
+    RegisterMethod(@TMBitmaps.FreeBMP, 'FreeBMP');
+    RegisterConstructor(@TMBitmaps.Create, 'Create');
+  end;
+end;
+
+procedure RIRegister_TTarget(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TTarget) do
+  begin
+    RegisterVirtualMethod(@TTarget.GetTargetDimensions, 'GetTargetDimensions');
+    RegisterVirtualMethod(@TTarget.GetColor, 'GetColor');
+    RegisterVirtualMethod(@TTarget.ReturnData, 'ReturnData');
+    RegisterVirtualMethod(@TTarget.FreeReturnData, 'FreeReturnData');
+    RegisterVirtualMethod(@TTarget.ActivateClient, 'ActivateClient');
+    RegisterVirtualMethod(@TTarget.TargetValid, 'TargetValid');
+{    RegisterVirtualAbstractMethod(TTarget,@TTarget.GetError, 'GetError');
+    RegisterVirtualAbstractMethod(TTarget,@TTarget.ReceivedError, 'ReceivedError');
+    RegisterVirtualAbstractMethod(Ttarget,@TTarget.ResetError, 'ResetError');}
+    RegisterVirtualMethod(@TTarget.GetMousePosition, 'GetMousePosition');
+    RegisterVirtualMethod(@TTarget.MoveMouse, 'MoveMouse');
+    RegisterVirtualMethod(@TTarget.ScrollMouse, 'ScrollMouse');
+    RegisterVirtualMethod(@TTarget.HoldMouse, 'HoldMouse');
+    RegisterVirtualMethod(@TTarget.ReleaseMouse, 'ReleaseMouse');
+    RegisterVirtualMethod(@TTarget.IsMouseButtonHeld, 'IsMouseButtonHeld');
+    RegisterVirtualMethod(@TTarget.SendString, 'SendString');
+    RegisterVirtualMethod(@TTarget.HoldKey, 'HoldKey');
+    RegisterVirtualMethod(@TTarget.ReleaseKey, 'ReleaseKey');
+    RegisterVirtualMethod(@TTarget.IsKeyHeld, 'IsKeyHeld');
+    RegisterVirtualMethod(@TTarget.GetKeyCode, 'GetKeyCode');
+  end;
+end;
+
+procedure RIRegister_TRawTarget(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TRawTarget) do
+  begin
+    RegisterConstructor(@TRawTarget.Create, 'Create');
+  end;
+end;
+
+procedure RIRegister_TBitmapTarget(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TBitmapTarget) do
+  begin
+    RegisterConstructor(@TBitmapTarget.Create, 'Create');
+  end;
+end;
+
+procedure RIRegister_TWindow_Abstract(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TWindow_Abstract) do
+  begin
+  end;
+end;
+
+procedure RIRegister_TEIOS_Target(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TEIOS_Target) do
+  begin
+    RegisterConstructor(@TEIOS_Target.Create, 'Create');
+  end;
+end;
+
+procedure RIRegister_TWindow(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TWindow) do
+  begin
+    RegisterConstructor(@TWindowCreate, 'Create');
+    RegisterMethod(@TWindow.GetNativeWindow, 'GetNativeWindow');
+  end;
+end;
+
+procedure RIRegister_TIOManager_Abstract(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TIOManager_Abstract) do
+  begin
+    RegisterConstructor(@TIOManager_AbstractCreate, 'Create');
+    RegisterMethod(@TIOManager_Abstract.GetError, 'GetError');
+    RegisterMethod(@TIOManager_Abstract.ReceivedError, 'ReceivedError');
+    RegisterMethod(@TIOManager_Abstract.ResetError, 'ResetError');
+//    RegisterVirtualAbstractMethod(TIOManager_Abstract, @TIOManager_Abstract.SetDesktop, 'SetDesktop');
+    RegisterMethod(@TIOManager_AbstractSetTargetArr_P, 'SetTargetArr');
+    RegisterMethod(@TIOManager_AbstractSetTargetBmp_P, 'SetTargetBmp');
+    RegisterMethod(@TIOManager_Abstract.TargetValid, 'TargetValid');
+    RegisterMethod(@TIOManager_Abstract.BitmapDestroyed, 'BitmapDestroyed');
+    RegisterMethod(@TIOManager_Abstract.GetColor, 'GetColor');
+    RegisterMethod(@TIOManager_Abstract.ReturnData, 'ReturnData');
+    RegisterMethod(@TIOManager_Abstract.FreeReturnData, 'FreeReturnData');
+    RegisterMethod(@TIOManager_Abstract.GetDimensions, 'GetDimensions');
+    RegisterMethod(@TIOManager_Abstract.ActivateClient, 'ActivateClient');
+    RegisterMethod(@TIOManager_Abstract.IsFrozen, 'IsFrozen');
+    RegisterMethod(@TIOManager_Abstract.SetFrozen, 'SetFrozen');
+    RegisterMethod(@TIOManager_Abstract.GetMousePos, 'GetMousePos');
+    RegisterMethod(@TIOManager_Abstract.MoveMouse, 'MoveMouse');
+    RegisterMethod(@TIOManager_Abstract.ScrollMouse, 'ScrollMouse');
+    RegisterMethod(@TIOManager_Abstract.HoldMouse, 'HoldMouse');
+    RegisterMethod(@TIOManager_Abstract.ReleaseMouse, 'ReleaseMouse');
+    RegisterMethod(@TIOManager_Abstract.ClickMouse, 'ClickMouse');
+    RegisterMethod(@TIOManager_Abstract.IsMouseButtonDown, 'IsMouseButtonDown');
+    RegisterMethod(@TIOManager_Abstract.KeyUp, 'KeyUp');
+    RegisterMethod(@TIOManager_Abstract.KeyDown, 'KeyDown');
+    RegisterMethod(@TIOManager_Abstract.PressKey, 'PressKey');
+    RegisterMethod(@TIOManager_Abstract.SendText, 'SendText');
+    RegisterMethod(@TIOManager_Abstract.isKeyDown, 'isKeyDown');
+    RegisterMethod(@TIOManager_Abstract.GetKeyCode, 'GetKeyCode');
+    RegisterMethod(@TIOManager_AbstractGetImageTarget_P, 'GetImageTarget');
+    RegisterMethod(@TIOManager_AbstractGetKeyMouseTarget_P, 'GetKeyMouseTarget');
+    RegisterMethod(@TIOManager_AbstractExportImageTarget_P, 'ExportImageTarget');
+    RegisterMethod(@TIOManager_AbstractExportKeyMouseTarget_P, 'ExportKeyMouseTarget');
+    RegisterMethod(@TIOManager_AbstractGetImageTarget_P, 'GetImageTarget');
+    RegisterMethod(@TIOManager_AbstractGetKeyMouseTarget_P, 'GetKeyMouseTarget');
+    RegisterMethod(@TIOManager_Abstract.SetImageTarget, 'SetImageTarget');
+    RegisterMethod(@TIOManager_Abstract.SetKeyMouseTarget, 'SetKeyMouseTarget');
+    RegisterMethod(@TIOManager_Abstract.FreeTarget, 'FreeTarget');
+    RegisterMethod(@TIOManager_Abstract.SetState, 'SetState');
+  end;
+end;
+
+procedure RIRegister_TIOManager(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TIOManager) do
+  begin
+    RegisterConstructor(@TIOManagerCreate, 'Create');
+    RegisterMethod(@TIOManagerSetTarget_P, 'SetTarget');
+  end;
+end;
+
+procedure RIRegister_IOManager(CL: TPSRuntimeClassImporter);
+begin
+  RIRegister_TTarget(CL);
+  RIRegister_TRawTarget(CL);
+  RIRegister_TBitmapTarget(CL);
+  RIRegister_TWindow_Abstract(CL);
+  RIRegister_TEIOS_Target(CL);
+  RIRegister_TWindow(cl);
+  RIRegister_TIOManager_Abstract(CL);
+  RIRegister_TIOManager(cl);
+end;
+
+procedure RIRegister_TClient(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TClient) do
+  begin
+    RegisterPropertyHelper(@TClientIOManager_R,@TClientIOManager_W,'IOManager');
+    RegisterPropertyHelper(@TClientMFiles_R,@TClientMFiles_W,'MFiles');
+    RegisterPropertyHelper(@TClientMFinder_R,@TClientMFinder_W,'MFinder');
+    RegisterPropertyHelper(@TClientMBitmaps_R,@TClientMBitmaps_W,'MBitmaps');
+    RegisterPropertyHelper(@TClientMDTMs_R,@TClientMDTMs_W,'MDTMs');
+    RegisterPropertyHelper(@TClientMOCR_R,@TClientMOCR_W,'MOCR');
+    RegisterPropertyHelper(@TClientWritelnProc_R,@TClientWritelnProc_W,'WritelnProc');
+    RegisterMethod(@TClient.WriteLn, 'WriteLn');
+    RegisterConstructor(@TClient.Create, 'Create');
+  end;
+end;
+
 procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 begin;
   RIRegister_TMufasaBitmap(cl);
   RIRegister_TRegExp(cl);
   RIRegister_TMDTM(cl);
   RIRegister_TMMLSettingsSandbox(cl);
+  RIRegister_TMDTMS(cl);
+  RIRegister_TMFinder(cl);
+  RIRegister_TMBitmaps(cl);
+  RIRegister_IOManager(cl);
+  RIRegister_TClient(cl);
 end;
 
 end.
