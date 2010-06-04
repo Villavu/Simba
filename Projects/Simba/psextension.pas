@@ -15,32 +15,29 @@ type
 
     { TSimbaPSExtension }
 
-    TSimbaPSExtension = class(TVirtualSimbaExtension)
-    public
-      constructor Create(FileStr: String; StartDisabled : boolean = false);
-      destructor Destroy; override;
-    private
-      PSInstance: TPSScript;
-      FWorking: Boolean;
-      Script: TStringList;
-      procedure StartExtension;
-    private
-      function FreeScript: boolean;
-      function InitScript: Boolean;
-      procedure OutputMessages;
-
-    public
-       function HookExists(const HookName: String): Boolean;override;
-       function ExecuteHook(const HookName: String;var Args:TVariantArray; out OutVariant : Variant): Integer;override;
-       property Working : boolean read FWorking;
-    protected
-       procedure RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
-       procedure RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
-       procedure RegisterMyMethods(x: TPSScript);
-       procedure OnPSExecute(Sender: TPSScript);
-       procedure SetEnabled(bool : boolean);override;
-    end;
-
+  TSimbaPSExtension = class(TVirtualSimbaExtension)
+  private
+    PSInstance: TPSScript;
+    FWorking: Boolean;
+    Script: TStringList;
+    FClient : TClient;
+    procedure StartExtension;
+    function FreeScript: boolean;
+    function InitScript: Boolean;
+    procedure OutputMessages;
+  protected
+    procedure RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
+    procedure RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
+    procedure RegisterMyMethods(x: TPSScript);
+    procedure OnPSExecute(Sender: TPSScript);
+    procedure SetEnabled(bool : boolean);override;
+  public
+    constructor Create(FileStr: String; StartDisabled : boolean = false);
+    destructor Destroy; override;
+    function HookExists(const HookName: String): Boolean;override;
+    function ExecuteHook(const HookName: String;var Args:TVariantArray; out OutVariant : Variant): Integer;override;
+    property Working : boolean read FWorking;
+  end;
 
 implementation
 uses
@@ -113,6 +110,7 @@ constructor TSimbaPSExtension.Create(FileStr: String; StartDisabled: boolean = f
 begin
   inherited create;
   FWorking := False;
+  FClient := TClient.Create('',SimbaForm.Manager);
   FileName := FileStr;
   try
     Script := TStringList.Create;
@@ -206,6 +204,7 @@ begin
     AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
     AddRegisteredVariable('Simba','TForm');
     AddRegisteredVariable('Simba_MainMenu','TMainMenu');
+    AddRegisteredVariable('Client','TClient');
   end;
 end;
 
@@ -213,6 +212,7 @@ procedure TSimbaPSExtension.OnPSExecute(Sender: TPSScript);
 begin
   Sender.SetVarToInstance('Simba',SimbaForm);
   Sender.SetVarToInstance('Simba_MainMenu',SimbaForm.MainMenu);
+  Sender.SetVarToInstance('Client',FClient);
   Sender.SetPointerToData('Settings',@Self.Settings,Sender.FindNamedType('TMMLSettingsSandbox'));
 end;
 
@@ -315,6 +315,7 @@ end;
 
 destructor TSimbaPSExtension.Destroy;
 begin
+  FClient.free;
   FreeScript;
   if Assigned(PSInstance) then
     FreeAndNil(PSInstance);
