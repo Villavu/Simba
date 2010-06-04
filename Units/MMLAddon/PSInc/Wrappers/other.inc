@@ -176,6 +176,12 @@ function ps_GetTimeRunning: LongWord; extdecl;
 begin;
   result := GetTickCount - CurrThread.StartTime;
 end;
+
+function ps_GetTClient : TClient; extdecl;
+begin
+  Result := CurrThread.Client;
+end;
+
 {$ENDIF}
 
 procedure ps_ConvertTime(Time : integer; var h,m,s : integer); extdecl;
