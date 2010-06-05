@@ -103,20 +103,19 @@ var
 begin
   for i := 0 to High(CoreBuffer) do
     FreeAndNil(CoreBuffer[i]);
-
   SetLength(IncludeBuffer, 0);
 end;
 
 procedure DeleteIncludeBufferIndex(Index: Integer);
 var
   i: Integer;
+  tmp : TCodeInsight;
 begin
-  IncludeBuffer[Index].CodeInsight.Free;
-
+  tmp := IncludeBuffer[Index].CodeInsight;
   for i := Index to High(IncludeBuffer) - 1 do
     IncludeBuffer[i] := IncludeBuffer[i + 1];
-
   SetLength(IncludeBuffer, Length(IncludeBuffer) - 1);
+  tmp.free;
 end;
 
 procedure ClearIncludeBuffer;
@@ -134,6 +133,8 @@ var
   i, l, lc: Integer;
   Defines: TSaveDefinesRec;
   DefineMatch: Boolean;
+  NewBuf : TIncludeBuffer;
+  CS : TRTLCriticalSection;
 begin
   lc := 1;//FileAge(FileName);
   Defines := ci.Lexer.SaveDefines;
@@ -166,9 +167,7 @@ begin
       end;
     end;
   end;
-
-  SetLength(IncludeBuffer, l + 1);
-  with IncludeBuffer[l] do
+  with NewBuf do
   begin
     Script := ci.FileName;
     DefinesIn := Defines;
@@ -194,9 +193,16 @@ begin
       //DefinesOut := Lexer.SaveDefines;  Weird bug, so moved out of the with statement
       ci.Lexer.CloneDefinesFrom(Lexer);
     end;
-
   end;
-
+  InitCriticalSection(cs);
+  EnterCriticalsection(cs);
+  try
+    SetLength(IncludeBuffer, l + 1);
+    IncludeBuffer[l] := NewBuf;
+  finally
+    LeaveCriticalsection(cs);
+  end;
+  DoneCriticalsection(cs);
   IncludeBuffer[l].DefinesOut := IncludeBuffer[l].CodeInsight.Lexer.SaveDefines;
   Result := IncludeBuffer[l];
 end;
@@ -245,6 +251,8 @@ var
   i: Integer;
   s: string;
   ci: TCodeInsight;
+  tmp : TIncludeBuffer;
+  CS : TRTLCriticalSection;
 begin
   Result := False;
 
@@ -269,14 +277,21 @@ begin
     SetLength(fIncludes, Length(fIncludes) + 1);
     fIncludes[High(fIncludes)] := ci;
 
-    SetLength(IncludeBuffer, Length(IncludeBuffer) + 1);
-    with IncludeBuffer[High(IncludeBuffer)] do
+    with tmp do
     begin
       Script := LibPrefix+LibName;
       CodeInsight := ci;
       CodeInsight.FileName := LibPrefix+LibName;
     end;
-
+    InitCriticalSection(cs);
+    EnterCriticalsection(cs);
+    try
+      SetLength(IncludeBuffer, Length(IncludeBuffer) + 1);
+      IncludeBuffer[high(IncludeBuffer)] := tmp;
+    finally
+      LeaveCriticalsection(cs);
+    end;
+    DoneCriticalsection(cs);
     Exit(True);
   end;
 end;
