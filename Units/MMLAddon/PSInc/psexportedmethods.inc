@@ -136,6 +136,7 @@ SetCurrSection('Other');
 AddFunction(@ps_Wait, 'procedure wait(t: integer);');
 AddFunction(@ps_Wait, 'procedure Sleep(t: integer);');
 {$IFNDEF MML_EXPORT_THREADSAFE}
+AddFunction(@ps_GetTClient,'function GetTClient : TClient;');
 AddFunction(@ps_SetSupressExceptions, 'procedure SetSupressExceptions(Supress : boolean);');
 AddFunction(@ps_SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
 AddFunction(@ps_TerminateScript,'procedure TerminateScript;');

@@ -8,8 +8,8 @@ object FunctionListFrame: TFunctionListFrame
   ClientWidth = 182
   OnEndDock = FrameEndDock
   TabOrder = 0
-  DesignLeft = 401
-  DesignTop = 219
+  DesignLeft = 434
+  DesignTop = 200
   object FunctionList: TTreeView
     Left = 0
     Height = 483
