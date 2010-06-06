@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <Flags>
+        <UseDefaultCompilerOptions Value="True"/>
+      </Flags>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <Language Value=""/>
+      <CharSet Value=""/>
+      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="3">
+      <Unit0>
+        <Filename Value="project1.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="project1"/>
+        <UsageCount Value="24"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="scriptmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="scriptmanager"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="77" Y="17"/>
+        <UsageCount Value="24"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="../../../lazarus/lcl/interfaces/gtk/gtkwidgetset.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1276"/>
+        <CursorPos X="1" Y="1294"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit2>
+    </Units>
+    <JumpHistory Count="16" HistoryIndex="15">
+      <Position1>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="15" Column="32" TopLine="1"/>
+      </Position1>
+      <Position2>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="19" Column="32" TopLine="1"/>
+      </Position2>
+      <Position3>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="13" Column="32" TopLine="1"/>
+      </Position3>
+      <Position4>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="35" Column="29" TopLine="4"/>
+      </Position4>
+      <Position5>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="37" Column="29" TopLine="4"/>
+      </Position5>
+      <Position6>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="36" Column="29" TopLine="4"/>
+      </Position6>
+      <Position7>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="37" Column="29" TopLine="4"/>
+      </Position7>
+      <Position8>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="36" Column="29" TopLine="4"/>
+      </Position8>
+      <Position9>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="37" Column="29" TopLine="4"/>
+      </Position9>
+      <Position10>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="36" Column="29" TopLine="4"/>
+      </Position10>
+      <Position11>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="37" Column="29" TopLine="4"/>
+      </Position11>
+      <Position12>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="38" Column="37" TopLine="7"/>
+      </Position12>
+      <Position13>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="37" Column="37" TopLine="6"/>
+      </Position13>
+      <Position14>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="36" Column="37" TopLine="5"/>
+      </Position14>
+      <Position15>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="11" Column="52" TopLine="1"/>
+      </Position15>
+      <Position16>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="24" Column="86" TopLine="1"/>
+      </Position16>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <Target>
+      <Filename Value="project1"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)/"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <UseAnsiStrings Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <TargetCPU Value="arm"/>
+      <TargetOS Value="Linux"/>
+    </CodeGeneration>
+    <Linking>
+      <Options>
+        <PassLinkerOptions Value="True"/>
+        <LinkerOptions Value="-L/home/merlijn/Programs/fpc/libcross/"/>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
