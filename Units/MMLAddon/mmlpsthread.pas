@@ -687,10 +687,6 @@ begin
   result := Self.Copy(xs,ys,xe,ye);
   CurrThread.Client.MBitmaps.AddBMP(result);
 end;
-procedure TMufasaBitmapCopyClientToBitmap(self : TMufasaBitmap; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);
-begin
-  self.CopyClientToBitmap(CurrThread.Client.IOManager,resize,x,y,xs,ys,xe,ye);
-end;
 function TMDTMCreate : TMDTM;
 begin
   result := TMDTM.Create;
@@ -710,7 +706,6 @@ begin
     RegisterConstructor(@TMufasaBitmapCreate,'Create');
     RegisterMethod(@TMufasaBitmapFree,'Free');
     RegisterMethod(@TMufasaBitmapCopy,'Copy');
-    RegisterMethod(@TMufasaBitmapCopyClientToBitmap,'CopyClientToBitmap');
   end;
   With cl.FindClass('TMDTM') do
   begin
