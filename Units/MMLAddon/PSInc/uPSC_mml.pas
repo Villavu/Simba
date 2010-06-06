@@ -19,7 +19,7 @@ begin
     RegisterMethod('procedure DrawTPA(TPA : TPointArray; Color : TColor);');
     RegisterMethod('procedure DrawToCanvas(x, y: Integer; Canvas: TCanvas);');
     RegisterMethod('function FastGetPixel(x,y : integer) : TColor;');
-    RegisterMethod('procedure CopyClientToBitmap(Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);');
+    RegisterMethod('procedure CopyClientToBitmap(IOManager : TObject; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);');
     RegisterMethod('procedure Rectangle(const Box : TBox; FillCol : TColor);');
     RegisterMethod('procedure FloodFill(const StartPT : TPoint; const SearchCol,ReplaceCol : TColor);');
 //      function FastGetPixels(TPA : TPointArray) : TIntegerArray;
@@ -133,12 +133,242 @@ begin
   end;
 end;
 
+procedure SIRegister_TMDTMS(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TObject'),'TMDTMS') do
+  begin
+    RegisterMethod('Function AddSDTM( const d : TSDTM) : Integer;');
+    RegisterMethod('Function AddMDTM( const d : TMDTM) : Integer;');
+    RegisterMethod('Function GetDTM( index : Integer) : TMDTM');
+    RegisterMethod('Procedure FreeDTM( DTM : Integer)');
+    RegisterMethod('Function StringToDTM( const S : String) : Integer');
+    RegisterProperty('DTM', 'TMDTM integer', iptr);
+    SetDefaultPropery('DTM');
+    RegisterMethod('Constructor Create( Owner : TObject)');
+  end;
+end;
+
+procedure SIRegister_TMFinder(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TObject'),'TMFinder') do
+  begin
+    RegisterProperty('WarnOnly', 'boolean', iptrw);
+    RegisterMethod('Procedure DefaultOperations( var xs, ys, xe, ye : integer)');
+    RegisterMethod('Function FindColorsToleranceOptimised( out Points : TPointArray; Color, xs, ys, xe, ye, Tol : Integer) : Boolean');
+    RegisterMethod('Function FindColorToleranceOptimised( out x, y : Integer; Color, xs, ys, xe, ye, tol : Integer) : Boolean');
+    RegisterMethod('Function CountColorTolerance( Color, xs, ys, xe, ye, Tolerance : Integer) : Integer');
+    RegisterMethod('Function CountColor( Color, xs, ys, xe, ye : Integer) : Integer');
+    RegisterMethod('Function SimilarColors( Color1, Color2, Tolerance : Integer) : boolean');
+    RegisterMethod('Function FindColor( out x, y : Integer; Color, xs, ys, xe, ye : Integer) : Boolean');
+    RegisterMethod('Function FindColorSpiral( var x, y : Integer; color, xs, ys, xe, ye : Integer) : Boolean');
+    RegisterMethod('Function FindColorSpiralTolerance( var x, y : Integer; color, xs, ys, xe, ye, Tol : Integer) : Boolean');
+    RegisterMethod('Function FindColorTolerance( out x, y : Integer; Color, xs, ys, xe, ye, tol : Integer) : Boolean');
+    RegisterMethod('Function FindColorsTolerance( out Points : TPointArray; Color, xs, ys, xe, ye, Tol : Integer) : Boolean');
+    RegisterMethod('Function FindColorsSpiralTolerance( x, y : Integer; out Points : TPointArray; color, xs, ys, xe, ye : Integer; Tolerance : Integer) : boolean');
+    RegisterMethod('Function FindColors( var TPA : TPointArray; Color, xs, ys, xe, ye : Integer) : Boolean');
+    RegisterMethod('Function FindColoredArea( var x, y : Integer; color, xs, ys, xe, ye : Integer; MinArea : Integer) : Boolean');
+    RegisterMethod('Function FindColoredAreaTolerance( var x, y : Integer; color, xs, ys, xe, ye : Integer; MinArea, tol : Integer) : Boolean');
+    RegisterMethod('Function FindMaskTolerance( const mask : TMask; out x, y : Integer; xs, ys, xe, ye : Integer; Tolerance, ContourTolerance : Integer) : Boolean');
+    RegisterMethod('Procedure CheckMask( const Mask : TMask)');
+    RegisterMethod('Function FindBitmap( bitmap : TMufasaBitmap; out x, y : Integer) : Boolean');
+    RegisterMethod('Function FindBitmapIn( bitmap : TMufasaBitmap; out x, y : Integer; xs, ys, xe, ye : Integer) : Boolean');
+    RegisterMethod('Function FindBitmapToleranceIn( bitmap : TMufasaBitmap; out x, y : Integer; xs, ys, xe, ye : Integer; tolerance : Integer) : Boolean');
+    RegisterMethod('Function FindBitmapSpiral( bitmap : TMufasaBitmap; var x, y : Integer; xs, ys, xe, ye : Integer) : Boolean');
+    RegisterMethod('Function FindBitmapSpiralTolerance( bitmap : TMufasaBitmap; var x, y : Integer; xs, ys, xe, ye, tolerance : integer) : Boolean');
+    RegisterMethod('Function FindBitmapsSpiralTolerance( bitmap : TMufasaBitmap; x, y : Integer; out Points : TPointArray; xs, ys, xe, ye, tolerance : Integer) : Boolean');
+    RegisterMethod('Function FindDeformedBitmapToleranceIn( bitmap : TMufasaBitmap; out x, y : Integer; xs, ys, xe, ye : Integer; tolerance : Integer; Range : Integer; AllowPartialAccuracy : Boolean; out accuracy : Extended) : Boolean');
+    RegisterMethod('Function FindDTM( DTM : TMDTM; out x, y : Integer; x1, y1, x2, y2 : Integer) : Boolean');
+    RegisterMethod('Function FindDTMs( DTM : TMDTM; out Points : TPointArray; x1, y1, x2, y2 : integer; maxToFind : Integer) : Boolean');
+    RegisterMethod('Function FindDTMRotated( DTM : TMDTM; out x, y : Integer; x1, y1, x2, y2 : Integer; sAngle, eAngle, aStep : Extended; out aFound : Extended; Alternating : boolean) : Boolean');
+    RegisterMethod('Function FindDTMsRotated( DTM : TMDTM; out Points : TPointArray; x1, y1, x2, y2 : Integer; sAngle, eAngle, aStep : Extended; out aFound : T2DExtendedArray; Alternating : boolean; maxToFind : Integer) : Boolean');
+    RegisterMethod('Function GetColors( const Coords : TPointArray) : TIntegerArray');
+    RegisterMethod('Procedure SetToleranceSpeed( nCTS : Integer)');
+    RegisterMethod('Function GetToleranceSpeed : Integer');
+    RegisterMethod('Procedure SetToleranceSpeed2Modifiers( const nHue, nSat : Extended)');
+    RegisterMethod('Procedure GetToleranceSpeed2Modifiers( out hMod, sMod : Extended)');
+    RegisterMethod('Constructor Create( aClient : TObject)');
+  end;
+end;
+
+procedure SIRegister_TMBitmaps(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TObject'),'TMBitmaps') do
+  begin
+    RegisterMethod('Function GetBMP( Index : integer) : TMufasaBitmap');
+    RegisterProperty('Bmp', 'TMufasaBitmap integer', iptr);
+    SetDefaultPropery('Bmp');
+    RegisterMethod('Function CreateBMP( w, h : integer) : Integer');
+    RegisterMethod('Function AddBMP( _bmp : TMufasaBitmap) : Integer');
+    RegisterMethod('Function CopyBMP( Bitmap : integer) : Integer');
+    RegisterMethod('Function CreateMirroredBitmap( bitmap : Integer; MirrorStyle : TBmpMirrorStyle) : Integer');
+    RegisterMethod('Function CreateBMPFromFile( const Path : string) : integer');
+    RegisterMethod('Function CreateBMPFromString( width, height : integer; Data : string) : integer;');
+    RegisterMethod('Procedure FreeBMP( Number : integer)');
+    RegisterMethod('Constructor Create( Owner : TObject)');
+  end;
+end;
+
+procedure SIRegister_TTarget(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TObject'),'TTarget') do
+  begin
+    RegisterMethod('Procedure GetTargetDimensions( var w, h : integer)');
+    RegisterMethod('Function GetColor( x, y : integer) : TColor');
+    RegisterMethod('Function ReturnData( xs, ys, width, height : Integer) : TRetData');
+    RegisterMethod('Procedure FreeReturnData');
+    RegisterMethod('Procedure ActivateClient');
+    RegisterMethod('Function TargetValid : boolean');
+    RegisterMethod('Function GetError : String');
+    RegisterMethod('Function ReceivedError : Boolean');
+    RegisterMethod('Procedure ResetError');
+    RegisterMethod('Procedure GetMousePosition( var x, y : integer)');
+    RegisterMethod('Procedure MoveMouse( x, y : integer)');
+    RegisterMethod('Procedure ScrollMouse( x, y : integer; Lines : integer)');
+    RegisterMethod('Procedure HoldMouse( x, y : integer; button : TClickType)');
+    RegisterMethod('Procedure ReleaseMouse( x, y : integer; button : TClickType)');
+    RegisterMethod('Function IsMouseButtonHeld( button : TClickType) : boolean');
+    RegisterMethod('Procedure SendString( str : string)');
+    RegisterMethod('Procedure HoldKey( key : integer)');
+    RegisterMethod('Procedure ReleaseKey( key : integer)');
+    RegisterMethod('Function IsKeyHeld( key : integer) : boolean');
+    RegisterMethod('Function GetKeyCode( C : char) : integer');
+  end;
+end;
+
+procedure SIRegister_TRawTarget(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TTarget'),'TRawTarget') do
+  begin
+    RegisterMethod('Constructor Create( rgb : Integer; w, h : integer; CopyData : boolean)');
+  end;
+end;
+
+procedure SIRegister_TBitmapTarget(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TTarget'),'TBitmapTarget') do
+  begin
+    RegisterMethod('Constructor Create( bitmap : TMufasaBitmap)');
+  end;
+end;
+
+procedure SIRegister_TWindow_Abstract(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TTarget'),'TWindow_Abstract') do
+  begin
+  end;
+end;
+
+procedure SIRegister_TEIOS_Target(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TTarget'),'TEIOS_Target') do
+  begin
+    RegisterMethod('Constructor Create( client : TEIOS_Client; initval : pointer)');
+  end;
+end;
+
+procedure SIRegister_TWindow(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TWindow_Abstract'),'TWindow') do
+  begin
+    RegisterMethod('Constructor Create( target : Hwnd)');
+    RegisterMethod('Function GetNativeWindow : TNativeWindow');
+  end;
+end;
+
+procedure SIRegister_TIOManager_Abstract(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TObject'),'TIOManager_Abstract') do
+  begin
+    RegisterMethod('Constructor Create( plugin_dir : string)');
+    RegisterMethod('Function GetError : String');
+    RegisterMethod('Function ReceivedError : Boolean');
+    RegisterMethod('Procedure ResetError');
+    RegisterMethod('Procedure SetDesktop');
+    RegisterMethod('Function SetTargetArr( ArrPtr : Integer; Size : TPoint) : integer;');
+    RegisterMethod('Function SetTargetBmp( bmp : TMufasaBitmap) : integer;');
+    RegisterMethod('Function TargetValid : Boolean');
+    RegisterMethod('Procedure BitmapDestroyed( Bitmap : TMufasaBitmap)');
+    RegisterMethod('Function GetColor( x, y : integer) : TColor');
+    RegisterMethod('Function ReturnData( xs, ys, width, height : Integer) : TRetData');
+    RegisterMethod('Procedure FreeReturnData');
+    RegisterMethod('Procedure GetDimensions( var W, H : Integer)');
+    RegisterMethod('Procedure ActivateClient');
+    RegisterMethod('Function IsFrozen : boolean');
+    RegisterMethod('Procedure SetFrozen( makefrozen : boolean)');
+    RegisterMethod('Procedure GetMousePos( var X, Y : Integer)');
+    RegisterMethod('Procedure MoveMouse( X, Y : Integer)');
+    RegisterMethod('Procedure ScrollMouse( x, y : integer; Lines : integer)');
+    RegisterMethod('Procedure HoldMouse( x, y : integer; button : TClickType)');
+    RegisterMethod('Procedure ReleaseMouse( x, y : integer; button : TClickType)');
+    RegisterMethod('Procedure ClickMouse( X, Y : Integer; button : TClickType)');
+    RegisterMethod('Function IsMouseButtonDown( button : TClickType) : boolean');
+    RegisterMethod('Procedure KeyUp( key : Word)');
+    RegisterMethod('Procedure KeyDown( key : Word)');
+    RegisterMethod('Procedure PressKey( key : Word)');
+    RegisterMethod('Procedure SendText( text : string)');
+    RegisterMethod('Function isKeyDown( key : Word) : Boolean');
+    RegisterMethod('Function GetKeyCode( c : char) : integer');
+    RegisterMethod('Function GetImageTarget : TTarget;');
+    RegisterMethod('Function GetKeyMouseTarget : TTarget;');
+    RegisterMethod('Function ExportImageTarget : TTarget_Exported;');
+    RegisterMethod('Function ExportKeyMouseTarget : TTarget_Exported;');
+    RegisterMethod('Procedure GetImageTarget( var idx : integer);');
+    RegisterMethod('Procedure GetKeyMouseTarget( var idx : integer);');
+    RegisterMethod('Procedure SetImageTarget( idx : integer)');
+    RegisterMethod('Procedure SetKeyMouseTarget( idx : integer)');
+    RegisterMethod('Procedure FreeTarget( idx : integer)');
+    RegisterMethod('Procedure SetState( val : Boolean)');
+  end;
+end;
+
+procedure SIRegister_TIOManager(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TIOManager_Abstract'),'TIOManager') do
+  begin
+    RegisterMethod('Constructor Create( plugin_dir : string)');
+    RegisterMethod('Function SetTarget( target : TNativeWindow) : integer;');
+  end;
+end;
+
+procedure SIRegister_IOManager(CL: TPSPascalCompiler);
+begin
+  SIRegister_TTarget(CL);
+  SIRegister_TRawTarget(CL);
+  SIRegister_TBitmapTarget(CL);
+  SIRegister_TWindow_Abstract(CL);
+  SIRegister_TEIOS_Target(CL);
+  SIRegister_TWindow(cl);
+  SIRegister_TIOManager_Abstract(CL);
+  SIRegister_TIOManager(cl);
+end;
+
+procedure SIRegister_TClient(CL: TPSPascalCompiler);
+begin
+  with CL.AddClassN(CL.FindClass('TObject'),'TClient') do
+  begin
+    RegisterProperty('IOManager', 'TIOManager', iptrw);
+    RegisterProperty('MFiles', 'TMFiles', iptrw);
+    RegisterProperty('MFinder', 'TMFinder', iptrw);
+    RegisterProperty('MBitmaps', 'TMBitmaps', iptrw);
+    RegisterProperty('MDTMs', 'TMDTMS', iptrw);
+    RegisterProperty('MOCR', 'TMOCR', iptrw);
+    RegisterProperty('WritelnProc', 'TWritelnProc', iptrw);
+    RegisterMethod('Procedure WriteLn( s : string)');
+    RegisterMethod('Constructor Create( const plugin_dir : string; const UseIOManager : TIOManager)');
+  end;
+end;
+
 procedure SIRegister_MML(cl: TPSPascalCompiler);
 begin
   SIRegister_TMufasaBitmap(cl);
   SIRegister_TRegExp(cl);
   SIRegister_TMDTM(cL);
   SIRegister_TMMLSettingsSandbox(cl);
+  SIRegister_TMDTMS(cl);
+  SIRegister_TMFinder(cl);
+  SIRegister_TMBitmaps(cl);
+  SIRegister_IOManager(cl);
+  SIRegister_TClient(cl);
 end;
 
 end.
