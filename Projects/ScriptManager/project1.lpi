@@ -10,7 +10,6 @@
       <TargetFileExt Value=""/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
-      <Icon Value="0"/>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
     <VersionInfo>
@@ -35,12 +34,12 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="9">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="36"/>
       </Unit0>
       <Unit1>
         <Filename Value="scriptmanager.pas"/>
@@ -51,9 +50,9 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="77" Y="17"/>
-        <UsageCount Value="24"/>
+        <TopLine Value="34"/>
+        <CursorPos X="6" Y="58"/>
+        <UsageCount Value="36"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
@@ -61,76 +60,186 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1276"/>
         <CursorPos X="1" Y="1294"/>
-        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
+        <UnitName Value="bitmaps"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="112"/>
+        <CursorPos X="79" Y="138"/>
+        <UsageCount Value="9"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../../Units/MMLAddon/settings.pas"/>
+        <UnitName Value="settings"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="45"/>
+        <CursorPos X="5" Y="74"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="../../Units/MMLCore/os_linux.pas"/>
+        <UnitName Value="os_linux"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="11"/>
+        <CursorPos X="64" Y="29"/>
+        <UsageCount Value="9"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
+        <UnitName Value="MufasaTypes"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="23"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
+        <UnitName Value="mufasabase"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="7"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="../../../lazarus/lcl/include/treeview.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2214"/>
+        <CursorPos X="1" Y="2232"/>
+        <SyntaxHighlighter Value="Delphi"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Text"/>
-      </Unit2>
+      </Unit8>
     </Units>
-    <JumpHistory Count="16" HistoryIndex="15">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="15" Column="32" TopLine="1"/>
+        <Caret Line="36" Column="29" TopLine="4"/>
       </Position1>
       <Position2>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="19" Column="32" TopLine="1"/>
+        <Caret Line="37" Column="29" TopLine="4"/>
       </Position2>
       <Position3>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="13" Column="32" TopLine="1"/>
+        <Caret Line="38" Column="37" TopLine="7"/>
       </Position3>
       <Position4>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="35" Column="29" TopLine="4"/>
+        <Caret Line="37" Column="37" TopLine="6"/>
       </Position4>
       <Position5>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="37" Column="29" TopLine="4"/>
+        <Caret Line="36" Column="37" TopLine="5"/>
       </Position5>
       <Position6>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="36" Column="29" TopLine="4"/>
+        <Caret Line="11" Column="52" TopLine="1"/>
       </Position6>
       <Position7>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="37" Column="29" TopLine="4"/>
+        <Caret Line="24" Column="86" TopLine="1"/>
       </Position7>
       <Position8>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="36" Column="29" TopLine="4"/>
+        <Caret Line="19" Column="26" TopLine="6"/>
       </Position8>
       <Position9>
-        <Filename Value="scriptmanager.pas"/>
-        <Caret Line="37" Column="29" TopLine="4"/>
+        <Filename Value="../../Units/MMLAddon/settings.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position9>
       <Position10>
-        <Filename Value="scriptmanager.pas"/>
-        <Caret Line="36" Column="29" TopLine="4"/>
+        <Filename Value="../../Units/MMLAddon/settings.pas"/>
+        <Caret Line="31" Column="54" TopLine="1"/>
       </Position10>
       <Position11>
-        <Filename Value="scriptmanager.pas"/>
-        <Caret Line="37" Column="29" TopLine="4"/>
+        <Filename Value="../../Units/MMLAddon/settings.pas"/>
+        <Caret Line="31" Column="71" TopLine="1"/>
       </Position11>
       <Position12>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="38" Column="37" TopLine="7"/>
+        <Caret Line="41" Column="10" TopLine="6"/>
       </Position12>
       <Position13>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="37" Column="37" TopLine="6"/>
+        <Caret Line="35" Column="82" TopLine="10"/>
       </Position13>
       <Position14>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="36" Column="37" TopLine="5"/>
+        <Caret Line="21" Column="69" TopLine="10"/>
       </Position14>
       <Position15>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="11" Column="52" TopLine="1"/>
+        <Caret Line="41" Column="39" TopLine="11"/>
       </Position15>
       <Position16>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="24" Column="86" TopLine="1"/>
+        <Caret Line="42" Column="15" TopLine="11"/>
       </Position16>
+      <Position17>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="30" Column="62" TopLine="12"/>
+      </Position17>
+      <Position18>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="29" Column="62" TopLine="12"/>
+      </Position18>
+      <Position19>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="31" Column="31" TopLine="12"/>
+      </Position19>
+      <Position20>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="37" Column="23" TopLine="19"/>
+      </Position20>
+      <Position21>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="64" Column="25" TopLine="36"/>
+      </Position21>
+      <Position22>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="55" Column="11" TopLine="45"/>
+      </Position22>
+      <Position23>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="52" Column="5" TopLine="28"/>
+      </Position23>
+      <Position24>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="59" Column="13" TopLine="34"/>
+      </Position24>
+      <Position25>
+        <Filename Value="../../Units/MMLAddon/settings.pas"/>
+        <Caret Line="63" Column="24" TopLine="52"/>
+      </Position25>
+      <Position26>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="53" Column="12" TopLine="34"/>
+      </Position26>
+      <Position27>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="57" Column="22" TopLine="35"/>
+      </Position27>
+      <Position28>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="55" Column="21" TopLine="38"/>
+      </Position28>
+      <Position29>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="33" Column="17" TopLine="27"/>
+      </Position29>
+      <Position30>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="58" Column="34" TopLine="50"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -140,6 +249,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
+      <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/MMLAddon/PSInc/;$(ProjPath)../../Units/Linux/;$(LazarusDir)/components/mouseandkeyinput/"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -148,12 +258,11 @@
       </SyntaxOptions>
     </Parsing>
     <CodeGeneration>
-      <TargetCPU Value="arm"/>
+      <TargetCPU Value="x86_64"/>
       <TargetOS Value="Linux"/>
     </CodeGeneration>
     <Linking>
       <Options>
-        <PassLinkerOptions Value="True"/>
         <LinkerOptions Value="-L/home/merlijn/Programs/fpc/libcross/"/>
         <Win32>
           <GraphicApplication Value="True"/>
