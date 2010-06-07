@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 369
+  Left = 1499
   Height = 567
-  Top = 144
+  Top = 51
   Width = 825
   ActiveControl = Button1
   Caption = 'Form1'
@@ -12,7 +12,7 @@ object Form1: TForm1
     Left = 32
     Height = 520
     Top = 24
-    Width = 216
+    Width = 384
     Columns = <    
       item
         Caption = 'Scripts'
@@ -20,12 +20,6 @@ object Form1: TForm1
       end>
     IconOptions.Arrangement = iaLeft
     ItemIndex = -1
-    Items.LazData = {
-      640000000400000000000000FFFFFFFFFFFFFFFF000000000100000061000000
-      00FFFFFFFFFFFFFFFF00000000050000004974656D3100000000FFFFFFFFFFFF
-      FFFF00000000040000006664686400000000FFFFFFFFFFFFFFFF000000000200
-      00006466
-    }
     LargeImages = ImageList1
     ScrollBars = ssAutoBoth
     SmallImages = ImageList1
@@ -33,34 +27,26 @@ object Form1: TForm1
     TabOrder = 0
     ViewStyle = vsReport
   end
-  object ListBox1: TListBox
-    Left = 560
-    Height = 520
-    Top = 24
-    Width = 240
-    Items.Strings = (
-      'wat'
-      'wa'
-      'asd'
-      'd'
-      'd'
-    )
-    ItemHeight = 40
-    Style = lbOwnerDrawFixed
-    TabOrder = 1
-  end
   object Button1: TButton
-    Left = 360
+    Left = 432
     Height = 25
-    Top = 24
+    Top = 504
     Width = 75
     Caption = 'Button1'
     OnClick = Button1Click
+    TabOrder = 1
+  end
+  object TreeView1: TTreeView
+    Left = 528
+    Height = 528
+    Top = 16
+    Width = 272
+    DefaultItemHeight = 19
     TabOrder = 2
   end
   object ImageList1: TImageList
-    left = 288
-    top = 16
+    left = 368
+    top = 504
     Bitmap = {
       4C69010000001000000010000000424242004242420042424200424242004242
       420042424200424242004242420042424200424242004242420042424200A155
