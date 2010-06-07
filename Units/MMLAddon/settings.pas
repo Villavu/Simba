@@ -60,7 +60,6 @@ type
   private
     Nodes: TTreeNodes;
     function KeyNameToKeys(KeyName: String): TStringArray;
-    function WalkToNode(KeyName: String): TTreeNode;
 
     procedure InternalLoadFromXML(XMLDoc: TXMLDocument);
     procedure WriteXMLData(n: TTreeNode;
@@ -72,6 +71,8 @@ type
   public
     constructor Create(aNodes: TTreeNodes);
     destructor Destroy; override;
+
+    function WalkToNode(KeyName: String): TTreeNode;
     function GetNodePath(Node: TTreeNode): String;
     function ListKeys(KeyName: String; out Keys :TStringArray) : boolean;
 
