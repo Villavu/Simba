@@ -38,7 +38,8 @@ class Color(object):
         else:
             ret = self._mc.dll.findColorTolerance(byref(x), byref(y), color,
                     tol, *box)
-        if ret is RESULT_OK then:
+
+        if ret is RESULT_OK:
             return (x, y)
 
         return None
