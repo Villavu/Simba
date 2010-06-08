@@ -8,13 +8,13 @@ class MouseException(Exception):
 
 # Usage:
 class Mouse(object):
-    '''
+    """
         The MML Mouse object communicates directly with libmml,
         but wraps it around a nice and easy to use layer.
         It will allow several ways to set mouse positions and
         buttons. __getitem__ and __setitem__ are also implemented,
         so one can access mouse buttons states and positions with [].
-    '''
+    """
     # _mc = MMLCore reference.
     _mc = None
     Left, Right, Middle, Pos = 'Left', 'Right', 'Middle', 'Pos'
@@ -23,28 +23,40 @@ class Mouse(object):
     _lpp = (0, 0)
 
     def __init__(self, MC):
-        ''' Initialize the Mouse object. Needs a DLL Mufasa Core object 
-            (which contains the dll reference.)'''
+        """ Initialize the Mouse object. Needs a DLL Mufasa Core object 
+            (which contains the dll reference.)"""
         self._mc = MC
         self._initialiseDLLFuncs()
         pass
     
     def setPos(self, pos):
+        """
+            Set the mouse position to the tuple _pos_.
+        """
         return self.__setitem__(Mouse.Pos, pos)
 
     def getPos(self):
+        """
+            Get the current mouse position as a tuple.
+        """
         return self._getMousePos()
 
     def getButtonStates(self):
+        """
+            Get the current states of the mouse buttons.
+        """
         return zip(self._getButtons().keys(), \
                     self.__getitem__(self._getButtons().keys()))
 
     def setButtonState(self, button, downup):
+        """
+            Set the states of the mouse buttons.
+        """
         return self.__setitem__(button, downup)
 
     def __getitem__(self, item):
-        '''Can currently return the state of mouse buttons as well as the
-            mouse position. Supports iterable arguments'''
+        """Can currently return the state of mouse buttons as well as the
+            mouse position. Supports iterable arguments"""
         if isiterable(item):
             res = []
             for i in item:
@@ -65,8 +77,8 @@ class Mouse(object):
         raise MouseException('item is not iterable nor a (valid) string')
 
     def __setitem__(self, item, value):
-        '''Can currently set the state of mouse buttons as well as the
-            mouse position. Supports iterable arguments'''
+        """Can currently set the state of mouse buttons as well as the
+            mouse position. Supports iterable arguments"""
         ak = self._getButtons().keys() + [self.Pos]
 
         if isiterable(item) and isiterable(value):
@@ -101,11 +113,11 @@ class Mouse(object):
 
     # Tools
     def _getButtons(self):
-        '''Return mouse buttons with their corresponding button DLL number as dict'''
+        """Return mouse buttons with their corresponding button DLL number as dict"""
         return {self.Left : 0, self.Right : 1, self.Middle : 2}
 
     def _buttonToInt(self, button):
-        '''Return button number for button'''
+        """Return button number for button"""
         return self._getButtons()[button]
     
 
@@ -142,7 +154,7 @@ class Mouse(object):
         return ok
 
     def _initialiseDLLFuncs(self):
-        '''Define all mouse related DLL-calls'''
+        """Define all mouse related DLL-calls"""
         self._mc.dll.getMousePos.restype = c_int
         self._mc.dll.getMousePos.argtypes = [PPOINT]
 
