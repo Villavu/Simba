@@ -3,3 +3,5 @@
 *.o
 *.compiled
 *.or
+*.s
+^Doc\/sphinx\/\_build
