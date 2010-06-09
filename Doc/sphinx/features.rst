@@ -1,5 +1,9 @@
 Feature overview
 ================
 
-Yo
+.. toctree::
 
+    scriptmanager.rst
+
+
+Most stuff here is probably misplaced anyway.
