@@ -1,4 +1,4 @@
-{
+﻿{
 	This file is part of the Mufasa Macro Library (MML)
 	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
 
@@ -216,6 +216,7 @@ AddFunction(@ps_PostHTTPPageEx,'function PostHTTPPageEx(Client: Integer;const Ur
 AddFunction(@ps_ClearPostData,'procedure ClearPostData(Client: Integer);');
 AddFunction(@ps_AddPostVariable,'procedure AddPostVariable(Client: Integer;const VarName, VarValue: string);');
 AddFunction(@ps_GetRawHeaders,'function GetRawHeaders(Client: Integer): string;');
+AddFunction(@ps_SetProxy,'procedure SetProxy(Client : Integer; pHost, pPort : String);');
 {$ENDIF}
 
 { Color Conversions and Speed }
