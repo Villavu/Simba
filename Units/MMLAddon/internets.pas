@@ -28,6 +28,7 @@ type
     function GetRawHeaders: string;
     procedure ClearPostData;
     procedure AddPostVariable(VarName, VarValue: string);
+    procedure SetProxy(pHost, pPort : String);
     constructor Create(Owner : TObject; HandleCookies : boolean = true);
     destructor Destroy;override;
   end;
@@ -47,6 +48,8 @@ type
     destructor Destroy;override;
   end;
 
+var
+  ProxyHost, ProxyPort : String;
 implementation
 
 uses
@@ -159,6 +162,11 @@ begin
   end;
   if not fHandleCookies then
     HTTPSend.Cookies.Clear;
+  if (ProxyHost <> '') and (ProxyPort <> '') then
+  begin
+    HTTPSend.ProxyHost := ProxyHost;
+    HTTPSend.ProxyPort := ProxyPort;
+  end;
   HTTPSend.MimeType :=  'text/html';
   try
     if HTTPSend.HTTPMethod('GET',url) then
@@ -175,6 +183,11 @@ end;
 
 function THTTPClient.PostHTTPPage(Url: string; PostData: string): string;
 begin
+  if (ProxyHost <> '') and (ProxyPort <> '') then
+  begin
+    HTTPSend.ProxyHost := ProxyHost;
+    HTTPSend.ProxyPort := ProxyPort;
+  end;
   HTTPSend.MimeType := 'application/x-www-form-urlencoded';
   HTTPSend.Document.Clear;
   HTTPSend.Document.Write(Postdata[1],length(postdata));
@@ -227,6 +240,12 @@ begin
   PostVariables.Add(Varname + '=' + VarValue);
 end;
 
+procedure THTTPClient.SetProxy(pHost, pPort : String);
+begin
+  ProxyHost := pHost;
+  ProxyPort := pPort;
+end;
+
 constructor THTTPClient.Create(Owner : TObject; HandleCookies : boolean = true);
 begin
   inherited Create;
@@ -244,4 +263,3 @@ begin
 end;
 
 end.
-
