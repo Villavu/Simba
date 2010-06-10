@@ -54,5 +54,5 @@ end;
 
 procedure ps_SetProxy(Client : Integer; pHost, pPort : String); extdecl;
 begin
-CurrThread.MInternet.GetHTTPClient(client).SetProx y(pHost, pPort);
+CurrThread.MInternet.GetHTTPClient(client).SetProxy(pHost, pPort);
 end;
