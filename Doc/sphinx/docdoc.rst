@@ -24,7 +24,7 @@ If you want to build the documentation yourself, you should install
 sphinx-python. 
 
 Move to the ``Simba/doc/sphinx`` directory and call ``make all``. 
-This will place the doc in html format in _build/html. 
+This will place the doc in html format in ``_build/html``. 
 
 .. note::
     The build instructions are for Linux only. If you want to build the doc on
@@ -54,6 +54,7 @@ you are writing a new chapter, then placing the file in the correct directory is
 something we'd like you to consider.
 
 If you wrote a chapter for the ``Simba Reference`` or ``Scripting Reference``
-part of the documentation, place it in the ``simbaref`` or ``scriptref``
-repectively. Any other files can be put directly in the root of the sphinx
-folder. (The same place as ``index.rst``)
+part of the documentation, place it in the ``simbaref`` folder or in the
+``scriptref`` folder repectively.
+Any other files can be put directly in the root of the sphinx folder.
+(The same place as ``index.rst``)
