@@ -29,18 +29,23 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls, settings, MufasaTypes;
+  ExtCtrls, ComCtrls, ActnList, Menus, settings, MufasaTypes;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
-    Button1: TButton;
     ImageList1: TImageList;
     ListView1: TListView;
+    Memo1: TMemo;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    ScriptPopup: TPopupMenu;
     TreeView1: TTreeView;
-    procedure Button1Click(Sender: TObject);
+    procedure ClickItem(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormCreate(Sender: TObject);
   private
     { private declarations }
   public
@@ -83,6 +88,8 @@ begin
     writeln(s.GetKeyValue('Scripts/ScriptList/Script/Name'));
     ss := TSimbaScript.Create();
     ss.Name := s.GetKeyValue('Scripts/ScriptList/Script/Name');
+    ss.Author:=   s.GetKeyValue('Scripts/ScriptList/Script/Author');
+    ss.Description:= s.GetKeyValue('Scripts/ScriptList/Script/Description');
     LI := Form1.ListView1.Items.Add;
     LI.Caption := ss.Name;
     LI.Data := ss;
@@ -92,14 +99,41 @@ begin
   end;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.FormCreate(Sender: TObject);
 var
   s: TMMLSettings;
 begin
   s := TMMLSettings.Create(TreeView1.Items);
   s.LoadFromXML('/scratch/gittest/list.xml');
   fill(s);
-  s.Free;
+  s.Free();
+end;
+
+procedure TForm1.ClickItem(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  item: TListItem;
+begin
+  item := Form1.ListView1.GetItemAt(x, y);
+  if item = nil then
+    exit;
+  if item.data = nil then
+    exit;
+
+  { Any selection causes the description to change }
+  form1.Memo1.Lines.Clear();
+  form1.Memo1.Lines.Append(TSimbaScript(item.data).Description);
+
+  if Button = mbLeft then
+  begin
+
+  end else if Button = mbRight then
+  begin
+    { Popup Actions }
+    Form1.ScriptPopup.Items[0].Caption:= 'Install ' +  TSimbaScript(item.data).Name;
+    Form1.ScriptPopup.PopUp();
+  end;
+  //form1.Memo1.Text := TSimbaScript(item.data).Description;
 end;
 
 { TSimbaScript }
