@@ -158,8 +158,8 @@ Called when Simba requests the version of the extension.
 More extension hooks
 ~~~~~~~~~~~~~~~~~~~~
 
-The following hooks are called upon if the event that the name describes has
- happened.
+The following hooks are called upon if the event that the name describes has 
+happened.
 
 .. code-block:: pascal
 
