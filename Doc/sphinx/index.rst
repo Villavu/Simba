@@ -17,6 +17,7 @@ Contents:
     features.rst
     whysimba.rst
     gettingstarted.rst
+    troubleshooting.rst
     tutorial.rst
     reference.rst
     scriptreference.rst
