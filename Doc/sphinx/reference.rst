@@ -9,5 +9,3 @@ All Simba documentation should be in here.
     simbaref/scriptmanager.rst
     simbaref/extensions.rst
 
-.. note::
-    This is not the same as a function reference... I think

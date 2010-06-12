@@ -28,7 +28,7 @@ This will place the doc in html format in ``_build/html``.
 
 .. note::
     The build instructions are for Linux only. If you want to build the doc on
-    Windows, you are on your own. The sphinx resource site if probably a good
+    Windows, you are on your own. The sphinx resource site is probably a good
     place to start.
 
 Writing documentation
@@ -54,7 +54,8 @@ you are writing a new chapter, then placing the file in the correct directory is
 something we'd like you to consider.
 
 If you wrote a chapter for the ``Simba Reference`` or ``Scripting Reference``
-part of the documentation, place it in the ``simbaref`` folder or in the
-``scriptref`` folder repectively.
+or ``Features``
+part of the documentation, place it in the ``simbaref``, ``scriptref`` or
+``features`` folder repectively.
 Any other files can be put directly in the root of the sphinx folder.
 (The same place as ``index.rst``)
