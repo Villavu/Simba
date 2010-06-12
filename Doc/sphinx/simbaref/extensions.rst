@@ -13,11 +13,6 @@ Extensions are event based. This means you don't have some ``loop`` in your
 program that never ends and does all the logic for you. When a system is event
 based, you implement some functions and those are called on a certain event.
 
-Hooks overview
---------------
-
-.. references
-
 Extension core hooks
 --------------------
 
