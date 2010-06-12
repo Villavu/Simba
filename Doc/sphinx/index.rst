@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to the Simba documentation!
-=================================
+===================================
 
 Welcome to the Documentation of the Simba project.
 
@@ -19,6 +19,8 @@ Contents:
     gettingstarted.rst
     tutorial.rst
     reference.rst
+    scriptreference.rst
+    docdoc.rst
 
 
 Indices and tables
