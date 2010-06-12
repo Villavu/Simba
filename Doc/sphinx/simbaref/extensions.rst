@@ -31,7 +31,6 @@ init
 Called when the Extension is initialized. 
 
 .. code-block:: pascal
-    :linenos:
 
     procedure init;
     begin;
@@ -81,7 +80,6 @@ free
 Called upon freeing the extension. Usually this means that Simba is closed.
 
 .. code-block:: pascal
-    :linenos:
     
     procedure free;
     begin
@@ -92,7 +90,6 @@ Called upon freeing the extension. Usually this means that Simba is closed.
 From the SRL updater extension:
 
 .. code-block:: pascal
-    :linenos:
 
     procedure Free;
     begin
@@ -110,11 +107,11 @@ Called when your extension has been enabled.
 From the SRL updater extension:
 
 .. code-block:: pascal
-    :linenos:
       
     procedure Attach;
     begin;
-      Writeln('From now on, you shall be alerted as to when your SRL is out of date!');
+      Writeln('From now on, you shall be alerted as to when your SRL is'+
+                +'out of date!');
       MainMenuItem.Visible := True;
       Timer.Enabled := AutoUpdate.Checked;
     end;        
@@ -141,7 +138,6 @@ GetName
 Called when Simba requests the name of your extension.
 
 .. code-block:: pascal
-    :linenos:
 
     function GetName : string;
     begin;
@@ -154,7 +150,6 @@ GetVersion
 Called when Simba requests the version of the extension.
 
 .. code-block:: pascal
-    :linenos:
 
     function GetVersion : string;
     begin;
@@ -164,8 +159,24 @@ Called when Simba requests the version of the extension.
 More extension hooks
 ~~~~~~~~~~~~~~~~~~~~
 
-The following hooks are called upon if the event that the name describes has happened.
+The following hooks are called upon if the event that the name describes has
+ happened.
 
+.. code-block:: pascal
+
+    EventHooks: Array [0..8] of TEventHook =
+    (      (HookName : 'onColourPick'    ; ArgumentCount : 3), 
+       (HookName : 'onOpenFile'      ; ArgumentCount : 2), 
+       (HookName : 'onWriteFile'     ; ArgumentCount : 2),
+           (HookName : 'onOpenConnection'; ArgumentCount : 2), 
+           (HookName : 'onScriptStart'   ; ArgumentCount : 2), 
+           (HookName : 'onScriptCompile' ; ArgumentCount : 1),
+       (HookName : 'onScriptExecute' ; ArgumentCount : 1),
+       (HookName : 'onScriptPause'   ; ArgumentCount : 1),
+       (HookName : 'onScriptStop'    ; ArgumentCount : 1));       
+
+For the exact arguments to all these functions, refer to
+:ref:`extension-example-code`.
 
 onOpenConnection
 ~~~~~~~~~~~~~~~~
@@ -182,14 +193,47 @@ onColourPick
 onScriptStart
 ~~~~~~~~~~~~~
 
+Special cases
+-------------
+
+Multiple extensions hooking onto the same event
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So what happens when multiple extensions hook onto the same event/hook?
+
+The behaviour is currently defined, but prone to change in the near future.
+Currently simply all extensions are called. The order is simple the order they
+were loaded. 
+
+The behaviour will probably change to something like the following:
+
+    In loading order, extensions are called with the proper hook. As soon as one
+    extension returns something that is not equal to zero, it will bail and stop
+    calling other events. Apart from not calling other events, the hook will not
+    allow the action it is bound to.
+
+Pitfalls
+--------
+
+Extensions can be very dangerous in the sense that they run on the main thread
+of Simba, it is very simple to crash Simba or make it infinitely loop. There is
+no way to prevent this, so make sure to check what you're doing before you try
+your own (or someone else's extension)
+    
+
+
+.. _extension-example-code:
 
 Example code
 ------------
 
-Explanatory code for all:
+Example code for most hooks:
 
 .. literalinclude:: extraextensionhooks.sex
     :language: pascal
     :linenos:
 
+.. note::
 
+    If you need more examples, you can always look at the Extensions in the
+    Simba git repository. 
