@@ -6,4 +6,4 @@ crosshair: http://led24.de/iconset/ or http://led24.de/ would be appreciated. Fo
 
 Delete: http://www.oxygen-icons.org/ licensed under GPL
 close:http://titancreations.org/
-search: http://wefunction.com/2008/07/function-free-icon-set
+search, Box, Box_Download: http://wefunction.com/2008/07/function-free-icon-set
