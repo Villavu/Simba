@@ -124,7 +124,6 @@ detach
 Called when your extension has been disabled. (This is not the same as freeing)
 
 .. code-block:: pascal
-    :linenos:
 
     Procedure Detach;
     begin
