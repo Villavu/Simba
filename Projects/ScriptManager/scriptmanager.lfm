@@ -1,9 +1,9 @@
 object Form1: TForm1
-  Left = 1499
+  Left = 1490
   Height = 567
-  Top = 51
+  Top = 293
   Width = 825
-  ActiveControl = Button1
+  ActiveControl = TreeView1
   Caption = 'Form1'
   ClientHeight = 567
   ClientWidth = 825
