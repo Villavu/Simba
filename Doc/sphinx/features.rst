@@ -3,7 +3,7 @@ Feature overview
 
 .. toctree::
 
-    scriptmanager.rst
+    features/scriptmanager.rst
 
 
 Most stuff here is probably misplaced anyway.
