@@ -16,9 +16,14 @@ Documentation TODO
 
 *   extend getting started. this probably requires some script manager stuff
 
-*   think of good chapters for the complete tutorial.
+*   think of good chapters for the complete tutorial. (it should teach basic
+    stuff, not document all features. script reference is for that
 
 *   write a lot more chapters for simba references. There's plenty to document.
+
+*   add problems (+ solutions if any) to troublshooting.
+
+*   write working with files for scriptreference (or any other chapter)
 
 
 * Expand "Troubleshooting"
