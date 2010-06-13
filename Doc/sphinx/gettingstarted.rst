@@ -1,10 +1,10 @@
-Getting started with Simba
+Getting Started With Simba
 ==========================
 
 This page will help you install Simba and highlight some basic Simba
 features.
 
-Installing Simba
+Installing simba
 ----------------
 
 Installing Simba is pretty straighforward and will only take a couple of
@@ -32,14 +32,14 @@ Tools -> Update.
 .. note::
     Updating Simba regularly is recommended.
 
-Simba Binary
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Downloading Simba binary
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is not the recommended method due to some computers having problems
-with FreePascal and Lazarus. However, all you must do is install FreePascal
-and Lazarus (from repos or non) and open the Simba project file located
-in the repository (retrieve the project with git).
-You should then see a prominent "compile" button. Yay!
+This is harder and not recommended. Steps on how to do this will follow later.
+
+For now, simply stick to the installer and update Simba after the install has 
+completed.
+
 
 Setting up SRL 4 with Simba
 ---------------------------

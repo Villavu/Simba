@@ -57,3 +57,14 @@ part of the documentation, place it in the ``simbaref``, ``scriptref`` or
 ``features`` folder repectively.
 Any other files can be put directly in the root of the sphinx folder.
 (The same place as ``index.rst``)
+
+Capitalisation
+~~~~~~~~~~~~~~
+
+The titles of all major sections have all worlds capitalized. (The ones with
+===)
+The minor sections and subsections (---) and (~~~) have only the first word
+Simba specific words (like Simba itself) capitalized.
+
+Try to stick to the Python documentation standards. 
+( http://docs.python.org/using/index.html )
