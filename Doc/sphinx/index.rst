@@ -13,11 +13,13 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
+    whatis.rst
     whatsnew.rst
     features.rst
     whysimba.rst
     gettingstarted.rst
     troubleshooting.rst
+    bugreport.rst
     tutorial.rst
     reference.rst
     scriptreference.rst

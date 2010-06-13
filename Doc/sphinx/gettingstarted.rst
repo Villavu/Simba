@@ -1,8 +1,11 @@
+
 Getting Started With Simba
 ==========================
 
 This page will help you install Simba and highlight some basic Simba
 features.
+
+.. _installingsimba:
 
 Installing simba
 ----------------
