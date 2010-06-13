@@ -1,7 +1,7 @@
 PyMML Color
 ===========
 
-This is the PyMML color class.
+This is the PyMML Color class.
 
 .. automodule:: mmlcolor
     :members:

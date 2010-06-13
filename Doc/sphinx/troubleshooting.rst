@@ -4,7 +4,7 @@ Troubleshooting
 ===============
 
 This is a general troubleshooting page and will hopefully cover all potential
-problem you may run into.
+problems you may encounter.
 
 Problems when installing or starting Simba
 ------------------------------------------
