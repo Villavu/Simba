@@ -1,4 +1,4 @@
-.. _whimsical:
+.. _whysimba:
 
 Why Simba?
 ==========
@@ -49,7 +49,7 @@ However this does not guarantee a bug free program.
 (Bug free programs don't exist)
 
 Should you encouter a bug, please consider sending a bug report so we can
-resolve the issue: :ref:`bug report`.
+resolve the issue: :ref:`bugreport`.
 
 Cross Platform
 ~~~~~~~~~~~~~~
@@ -70,6 +70,7 @@ Fast
 ~~~~
 
 The Simba developers have designed and written Simba with speed in mind.
-However, some speed was sacrificed for readability and maintainability,
-regardless, Simba is still quite fast.
-
+It is important to understand, however, that premature optimization usually
+ends up hurting development by introducing bugs and other forms of
+instability. Simba attempts to find a middle-ground and has sacrificed some
+speed for readability and maintainability, but is overall still quite fast.

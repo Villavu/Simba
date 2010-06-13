@@ -1,9 +1,21 @@
 # Change a minus to a plus when something is being worked on.
 # Remove it when you are done.
 
-- Run spellcheck before you commit.
-- Remove small/extraneous pages (merge them as a section with another).
+# GENERAL
+
+- Run spellcheck before you commit (make sure you ignore section names
+  and the like).
+- Remove small/extraneous pages (merge them as a section with another or
+  mark that you will add stuff to them).
 - Create some conventions. Capitalize Simba whenever it occurs, and pick
   either color or colour (it'd probably be best to use color, as the code
   seems to use it).
 - Find stuff to add to this list.
+
+# ADDING CONTENT
+
+- Expand "Troubleshooting"
+	- And its subsection.
+- Expand "Feature Overview"
+	- And its subs. There's like nothing in them, those are the type
+	  of pages I was talking about. Combine them under feature overview?
