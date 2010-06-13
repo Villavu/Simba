@@ -1,4 +1,5 @@
 Simba Script Manager
 ====================
 
-Non technical script manager doc.
+Community-created scripts will be available for download from the 
+Script Manager.

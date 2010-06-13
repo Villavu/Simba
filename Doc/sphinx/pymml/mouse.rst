@@ -1,7 +1,7 @@
 PyMML Mouse
 ===========
 
-This is the PyMML mouse class.
+This is the PyMML Mouse class.
 
 .. automodule:: mmlmouse
     :members:

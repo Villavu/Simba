@@ -1,9 +1,8 @@
 Updater in Simba
 ================
 
-A button appear, and a text message. blabla
+A notice should appear in the Simba GUI, or you can alternatively
+use Tools -> Update.
 
-
-
-Don't forget to restart Simba when it has been updated, blabla
+Don't forget to restart Simba when it has been updated!
 

@@ -1,17 +1,15 @@
 Writing Simba Extensions
 ========================
 
-Simba extensions are scripts written in PascalScript that can be embedded into
-Simba. Purposes vary from updaters to full blown dtm and bitmap editors.
+Simba extensions are scripts written for the interpreter that can be embedded into
+Simba. Purposes vary from updaters to editors.
 
 .. FIXME link to dtm and bitmap
 
 How they work
 -------------
 
-Extensions are event based. This means you don't have some ``loop`` in your
-program that never ends and does all the logic for you. When a system is event
-based, you implement some functions and those are called on a certain event.
+Extensions are event based. Functions from the extension are called based on external events.
 
 Extension core hooks
 --------------------
@@ -29,7 +27,7 @@ Called when the Extension is initialized.
 
     procedure init;
     begin;
-        Writeln('Init your extension here.');
+        Writeln('Initialize your extension here.');
     end;    
 
 If you want to add a button to the menu, do it now.
@@ -79,7 +77,7 @@ Called upon freeing the extension. Usually this means that Simba is closed.
     procedure free;
     begin
         if started then
-            writeln('Init was called');
+            writeln('Free() was called');
     end;
 
 From the SRL updater extension:
@@ -91,7 +89,7 @@ From the SRL updater extension:
       if (started) then
         Timer.Enabled := False;
         { Freeing the components is not needed, as they will be freed
-           upon the freeing of Simba. }
+           upon the closure of Simba. }
     end;    
 
 attach
@@ -187,8 +185,8 @@ onColourPick
 onScriptStart
 ~~~~~~~~~~~~~
 
-Special cases
--------------
+Special Cases
+~~~~~~~~~~~~~
 
 Multiple extensions hooking onto the same event
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -196,23 +194,20 @@ Multiple extensions hooking onto the same event
 So what happens when multiple extensions hook onto the same event/hook?
 
 The behaviour is currently defined, but prone to change in the near future.
-Currently simply all extensions are called. The order is simple the order they
-were loaded. 
+Currently all extensions are called in the order they were loaded. 
 
 The behaviour will probably change to something like the following:
 
-    In loading order, extensions are called with the proper hook. As soon as one
-    extension returns something that is not equal to zero, it will bail and stop
-    calling other events. Apart from not calling other events, the hook will not
-    allow the action it is bound to.
+    In the order they were loaded, call any available extensions. The first
+    extension to return non-zero terminates the calling loop.
 
 Pitfalls
 --------
 
 Extensions can be very dangerous in the sense that they run on the main thread
-of Simba, it is very simple to crash Simba or make it infinitely loop. There is
+of Simba, it is very easy to crash Simba or make it hang. There is
 no way to prevent this, so make sure to check what you're doing before you try
-your own (or someone else's extension)
+your own (or someone else's) extension.
     
 
 

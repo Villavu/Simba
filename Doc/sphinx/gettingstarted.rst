@@ -1,7 +1,7 @@
 Getting started with Simba
 ==========================
 
-This page will help you install Simba and point you at some basic Simba
+This page will help you install Simba and highlight some basic Simba
 features.
 
 Installing Simba
@@ -19,33 +19,32 @@ Simba installer
 Everyone can download Simba at http://wizzup.org/simba/
 Go to download, and download the Simba installer.
 
-Once it is done downloading, simple run the installer and follow the steps.
+Once it is done downloading, simply run the installer and follow the steps.
 
 .. note::
     Simba will install to C:/ by default; if you want to install it
-    somewhere else, make sure you select a different location in the installer.
+    somewhere else, make sure you select a different location!
 
-Once you have installed Simba, make sure you update it at least once, 
-to get a more recent version of Simba. 
-
-Simba will tell you there is an update and an update button will appear.
-Alternatively you can update Simba using Tools -> Update.
+Simba will probably tell you there is an update available. In this case, an
+update button will appear. Alternatively you can update Simba using
+Tools -> Update.
 
 .. note::
     Updating Simba regularly is recommended.
 
-Simba binary
+Simba Binary
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is harder and not recommended. Steps on how to do this will follow later.
-
-For now, simply stick to the installer and update
-Simba after the install has completed.
+This is not the recommended method due to some computers having problems
+with FreePascal and Lazarus. However, all you must do is install FreePascal
+and Lazarus (from repos or non) and open the Simba project file located
+in the repository (retrieve the project with git).
+You should then see a prominent "compile" button. Yay!
 
 Setting up SRL 4 with Simba
 ---------------------------
 
-If you were using the :ref:`simba-installer` then you can simple enable the
+If you were using the :ref:`simba-installer` then you can simply enable the
 ``SRL Updater`` extension. (Go to View -> Extensions and enable srl.sex)
 
 This is the only supported way. You can simply do a svn checkout on the srl
@@ -63,5 +62,5 @@ Scripts can be downloaded with the Script Manager, in Tools -> Script Manager.
 Troubleshooting
 ---------------
 
-If you run into problems that are not mentioned here, make sure you check out
+If you run into problems that are not mentioned here, make sure you look at
 the :ref:`Troubleshooting` page.

@@ -6,7 +6,7 @@
 Welcome to the Simba documentation!
 ===================================
 
-Welcome to the Documentation of the Simba project.
+Welcome to the Documentation for the Simba project.
 
 Contents:
 
