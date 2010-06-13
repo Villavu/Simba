@@ -8,8 +8,6 @@ So why would you use Simba?
 For several reasons. Number one is probably the active community combined with
 the open-mindedness of the Simba developers.
 
-Simba is:
-
 Free
 ~~~~
 
