@@ -1,4 +1,4 @@
-Feature overview
+Feature Overview
 ================
 
 .. toctree::
