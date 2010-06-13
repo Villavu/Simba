@@ -189,8 +189,6 @@ onOpenFile
 onColourPick
 ~~~~~~~~~~~~
 
-This function breaks naming procedure. Bug Wizzup to use "Color".
-
 onScriptStart
 ~~~~~~~~~~~~~
 
