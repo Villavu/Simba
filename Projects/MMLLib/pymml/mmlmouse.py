@@ -2,6 +2,13 @@ from ctypes import *
 from mmltypes import POINT, PPOINT
 from mmltypes import isiterable
 
+"""
+The Mouseclass
+---------------
+
+The Mouse class controls the mouse movement and key presses.
+"""
+
 class MouseException(Exception):
     def __init__(self, err):
         Exception.__init__(self, err)
@@ -11,6 +18,7 @@ class Mouse(object):
     """
         The MML Mouse object communicates directly with libmml,
         but wraps it around a nice and easy to use layer.
+
         It will allow several ways to set mouse positions and
         buttons. __getitem__ and __setitem__ are also implemented,
         so one can access mouse buttons states and positions with [].

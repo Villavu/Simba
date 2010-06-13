@@ -4,6 +4,12 @@ from mmltypes import POINT, PPOINT, PINTEGER
 from mmltypes import PascalArray
 from mmltypes import RESULT_OK, RESULT_FALSE, RESULT_ERROR
 
+"""
+The Color Class
+---------------
+
+This class does the color finding.
+"""
 
 class ColorException(Exception):
     def __init__(self, err):
