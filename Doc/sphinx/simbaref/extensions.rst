@@ -9,7 +9,12 @@ Simba. Purposes vary from updaters to editors.
 How they work
 -------------
 
-Extensions are event based. Functions from the extension are called based on external events.
+..  Explain what event based is. The documents are not just for people who are
+    already familiar with the term event based.
+
+Extensions are event based. This means you don't have some ``loop`` in your
+program that never ends and does all the logic for you. When a system is event
+based, you implement some functions and those are called on a certain event.
 
 Extension core hooks
 --------------------
@@ -185,8 +190,12 @@ onColourPick
 onScriptStart
 ~~~~~~~~~~~~~
 
+
 Special Cases
-~~~~~~~~~~~~~
+-------------
+
+..  his is supposed to document the special cases, and multiple extensions
+    hooking onto the same event is a special case.
 
 Multiple extensions hooking onto the same event
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -208,8 +217,6 @@ Extensions can be very dangerous in the sense that they run on the main thread
 of Simba, it is very easy to crash Simba or make it hang. There is
 no way to prevent this, so make sure to check what you're doing before you try
 your own (or someone else's) extension.
-    
-
 
 .. _extension-example-code:
 
