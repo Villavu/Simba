@@ -61,9 +61,9 @@ Any other files can be put directly in the root of the sphinx folder.
 Capitalisation
 ~~~~~~~~~~~~~~
 
-The titles of all major sections have all worlds capitalized. (The ones with
+The titles of all major sections have all words capitalized. (The ones with
 ===)
-The minor sections and subsections (---) and (~~~) have only the first word
+The minor sections and subsections (---) and (~~~) have only the first word and
 Simba specific words (like Simba itself) capitalized.
 
 Try to stick to the Python documentation standards. 

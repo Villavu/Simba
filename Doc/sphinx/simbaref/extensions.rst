@@ -187,6 +187,8 @@ onOpenFile
 onColourPick
 ~~~~~~~~~~~~
 
+This function breaks naming procedure. Bug Wizzup to use "Color".
+
 onScriptStart
 ~~~~~~~~~~~~~
 
@@ -194,11 +196,11 @@ onScriptStart
 Special Cases
 -------------
 
-..  his is supposed to document the special cases, and multiple extensions
+..  This is supposed to document the special cases, and multiple extensions
     hooking onto the same event is a special case.
 
-Multiple extensions hooking onto the same event
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Multiple extensions hooking the same event
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 So what happens when multiple extensions hook onto the same event/hook?
 
@@ -214,7 +216,7 @@ Pitfalls
 --------
 
 Extensions can be very dangerous in the sense that they run on the main thread
-of Simba, it is very easy to crash Simba or make it hang. There is
+of Simba; it is very easy to crash Simba or cause it to hang. There is
 no way to prevent this, so make sure to check what you're doing before you try
 your own (or someone else's) extension.
 
