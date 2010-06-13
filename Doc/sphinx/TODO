@@ -1,0 +1,9 @@
+# Change a minus to a plus when something is being worked on.
+# Remove it when you are done.
+
+- Run spellcheck before you commit.
+- Remove small/extraneous pages (merge them as a section with another).
+- Create some conventions. Capitalize Simba whenever it occurs, and pick
+  either color or colour (it'd probably be best to use color, as the code
+  seems to use it).
+- Find stuff to add to this list.

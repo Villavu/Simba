@@ -1,5 +1,5 @@
 
-Getting Started With Simba
+Getting Started with Simba
 ==========================
 
 This page will help you install Simba and highlight some basic Simba

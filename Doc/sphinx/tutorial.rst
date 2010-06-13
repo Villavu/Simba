@@ -1,4 +1,4 @@
-Complete tutorial
+Tutorial
 =================
 
-Complete tutorial
+Complete tutorial.
