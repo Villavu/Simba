@@ -1,6 +1,9 @@
 # Change a minus to a plus when something is being worked on.
 # Remove it when you are done.
 
+
+
+
 # GENERAL
 
 - Run spellcheck before you commit (make sure you ignore section names
@@ -14,8 +17,3 @@
 
 # ADDING CONTENT
 
-- Expand "Troubleshooting"
-	- And its subsection.
-- Expand "Feature Overview"
-	- And its subs. There's like nothing in them, those are the type
-	  of pages I was talking about. Combine them under feature overview?
