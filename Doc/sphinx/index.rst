@@ -22,6 +22,7 @@ Contents:
     reference.rst
     scriptreference.rst
     docdoc.rst
+    pymml.rst
 
 
 Indices and tables
