@@ -24,6 +24,7 @@ Contents:
     reference.rst
     scriptreference.rst
     docdoc.rst
+    todo.rst
     pymml.rst
 
 
