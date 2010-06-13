@@ -1,3 +1,5 @@
+.. _writing-simba-extensions:
+
 Writing Simba Extensions
 ========================
 
