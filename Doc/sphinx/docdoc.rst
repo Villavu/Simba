@@ -39,7 +39,7 @@ http://docutils.sourceforge.net/docs/user/rst/quickstart.html
 
 As stated above, the markup language is not the hard part about writing
 documentation; the hard part is simply coming up with good content suited for
-the documentation.
+the documentation. Be sure to check :ref:`todo`
 
 Directory structure
 ~~~~~~~~~~~~~~~~~~~

@@ -1,9 +1,6 @@
 # Change a minus to a plus when something is being worked on.
 # Remove it when you are done.
 
-
-
-
 # GENERAL
 
 - Run spellcheck before you commit (make sure you ignore section names
