@@ -38,7 +38,7 @@ end;
 function FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean;
 begin
   with Client do
-    result := MFinder.FindDTMs(MDTMs[DTM], p, xs, ys, xe, ye);
+    result := MFinder.FindDTMs(MDTMs.GetDTM(DTM), p, xs, ys, xe, ye,0);
 end;
 
 procedure FreeDTM(DTM: Integer);
@@ -53,5 +53,15 @@ end;
 
 function AddDTM(const d: TMDTM): Integer;
 begin
-  Result := Client.MDTMs.AddDTM(d);
+  Result := Client.MDTMs.AddMDTM(d);
+end;
+
+function GetDTM(const index : integer) : TMDTM;
+begin
+  result := Client.MDTMs.GetDTM(index);
+end;
+
+function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;
+begin;
+  result := Client.MFinder.FindColorsTolerance(points,color,xs,ys,xe,ye,tolerance);
 end;
