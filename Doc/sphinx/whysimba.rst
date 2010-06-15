@@ -79,7 +79,7 @@ Open Minded
 Open minded. We appreciate your help, ideas and critisism!
 
 Well Documented
-===============
+~~~~~~~~~~~~~~~
 
 Simba is well documented. (You're looking the documentation right now...)
 There is still stuff left to document but overall the documentation is pretty
