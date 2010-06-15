@@ -1,5 +1,6 @@
 program DTMEditor_Extension;
 
+{$i mml.simba}
 const
   Version = '0.5';
   ZoomPixels = 3; //Should be an odd number (1, 3, 5, 7, ..)
@@ -28,7 +29,6 @@ var
   Zoom: Single;
   p: TSDTMPointDefArray;
   curP: Integer;
-
   MarkCol: Integer;
   PaintDTM, BufferChanged: Boolean;
 
@@ -243,7 +243,7 @@ begin
   begin
     for i := 1 to High(p) do
       Points := CombineTPA(Points, GetLine(Point(Max(Min(p[0].x, bmpBuffer.Width - 1), 0), Max(Min(p[0].y, bmpBuffer.Height - 1), 0)), Point(Max(Min(p[i].x, bmpBuffer.Width - 1), 0), Max(Min(p[i].y, bmpBuffer.Height - 1), 0))));
-    //bmpBuffer.DrawTPA(Points, MarkCol);
+    bmpBuffer.DrawTPA(Points, MarkCol);
 
     DrawDots(True);
     BufferChanged := True;
@@ -405,11 +405,8 @@ procedure LoadClientBitmap;
 var
   w, h: Integer;
 begin
-  bmp.CopyClientToBitmap(False, 0, 0, 0, 0, 1620, 1280);
-  //GetClientDimensions(w, h);
-  //bmp.SetSize(w, h);
-  //CopyClientToBitmap(bmp.Index, 0, 0, w - 1, h - 1);
-
+  GetClientDimensions(w, h);
+  bmp.CopyClientToBitmap(client.IOManager,true,0,0,0,0,w-1,h-1);
   ResetBuffer;
   UpdateBitmap(True, False);
 end;
@@ -560,7 +557,7 @@ end;
 
 procedure mnuClientDesktop(Sender: TObject);
 begin
-  //SetDesktopAsClient;
+  SetDesktopAsClient;
   LoadClientBitmap;
 end;
 
@@ -604,7 +601,7 @@ begin
   BufferChanged := True;
   PaintDTM := False;
 
-  {h := GetImageTarget;
+  h := GetImageTarget;
   if (bmpOverlay = nil) then
     bmpOverlay := bmpBuffer.Copy(0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1);
   SetTargetBitmap(bmpBuffer.Index);
@@ -626,11 +623,11 @@ begin
 
   if (Length(p) > 0) then
   begin
-    {dtm := AddSDTM(toSDTM);
+    dtm := Client.MDTMs.AddSDTM(toSDTM);
     h := GetImageTarget;
     if (bmpOverlay = nil) then
       bmpOverlay := bmpBuffer.Copy(0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1);
-    SetTargetBitmap(bmpBuffer.Index);
+    SetTargetBitmap(bmpBuffer);
 
     if FindDTMs(dtm, p1, 0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1) then
     begin
@@ -645,7 +642,7 @@ begin
     end;
 
     SetImageTarget(h);
-    FreeDTM(dtm);}
+    FreeDTM(dtm);
   end;
   UpdateBitmap(True, False);
 end;
@@ -671,7 +668,7 @@ var
   mdtm: TMDTM;
   sdtm: TSDTM;
 begin
-  {if InputQuery('DTM From String', 'Enter DTM string:', s) and (s <> '') then
+  if InputQuery('DTM From String', 'Enter DTM string:', s) and (s <> '') then
   begin
     mnuNew(nil);
 
@@ -689,7 +686,7 @@ begin
 
     mdtm.Free;
     UpdateBitmap(True, False);
-  end;}
+  end;
 end;
 
 procedure mnuPrintDTM(Sender: TObject);
@@ -698,13 +695,11 @@ var
 begin
   if (Length(p) > 0) then
   begin
-    {mdtm := SDTMToMDTM(toSDTM);
-    AddDTM(mdtm);
-
+    mdtm := SDTMToMDTM(toSDTM);
     WriteLn('');
     WriteLn(mdtm.ToString);
     WriteLn('');
-    mdtm.Free;}
+    mdtm.Free;
   end;
 end;
 

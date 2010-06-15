@@ -30,6 +30,7 @@ type
     procedure RegisterPSRComponents(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
     procedure RegisterMyMethods(x: TPSScript);
     procedure OnPSExecute(Sender: TPSScript);
+    function OnNeedFile(Sender: TObject;const OrginFileName: string; var FilePath, Output: string): Boolean;
     procedure SetEnabled(bool : boolean);override;
   public
     constructor Create(FileStr: String; StartDisabled : boolean = false);
@@ -165,35 +166,13 @@ end;
 {$I ../../Units/MMLAddon/PSInc/Wrappers/extensions.inc}
 
 procedure TSimbaPSExtension.RegisterMyMethods(x: TPSScript);
-
   procedure SetCurrSection(s: string);
   begin
   end;
-
-var
-  AppPath, ScriptPath: string;
-  i: Integer;
 begin
-  AppPath := MainDir + DirectorySeparator;
-  ScriptPath := ExtractFileDir(Filename);
-
   with SimbaForm, x do
   begin
-    with Comp do
-    begin
-      {$I ../../Units/MMLAddon/PSInc/pscompile.inc}
-      AddTypes('TStringArray','Array of String');
-      AddConstantN('ExtPath','string').SetString(ExtPath);
-      AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmation, mtCustom )');
-      AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
-      AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
-
-      for i := 0 to high(VirtualKeys) do
-        AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
-    end;
-
     {$i ../../Units/MMLAddon/PSInc/psexportedmethods.inc}
-
     AddFunction(@ext_SDTMToMDTM,'function SDTMToMDTM(Const DTM: TSDTM): TMDTM;');
     AddFunction(@ext_GetPage,'function GetPage(const url : string) : string');
     AddFunction(@ext_DecompressBZip2,'function DecompressBZip2(const input: string;out output : string; const BlockSize: Cardinal): boolean;');
@@ -248,6 +227,9 @@ begin
 end;
 
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
+var
+  AppPath, ScriptPath: string;
+  i: Integer;
 begin
   SIRegister_Std(x);
   SIRegister_Controls(x);
@@ -259,6 +241,20 @@ begin
   SIRegister_Menus(x);
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
+
+  AppPath := MainDir + DirectorySeparator;
+  ScriptPath := ExtractFileDir(Filename);
+  with SimbaForm,x do
+  begin
+    {$I ../../Units/MMLAddon/PSInc/pscompile.inc}
+    AddTypes('TStringArray','Array of String');
+    AddConstantN('ExtPath','string').SetString(ExtPath);
+    AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmation, mtCustom )');
+    AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
+    AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
+    for i := 0 to high(VirtualKeys) do
+      AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
+  end;
   SIRegister_MML(x);
   RegisterDll_Compiletime(x);
 
@@ -303,10 +299,10 @@ begin
   RIRegister_Dialogs(x);
   RegisterDLLRuntime(se);
   RIRegister_MML(x);
-  with x.FindClass('TMufasaBitmap') do
+{  with x.FindClass('TMufasaBitmap') do
   begin
     RegisterMethod(@TMufasaBitmapCopyClientToBitmap,'CopyClientToBitmap');
-  end;
+  end;}
 
   se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
   se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
@@ -320,6 +316,34 @@ begin
   if Assigned(PSInstance) then
     FreeAndNil(PSInstance);
   inherited;
+end;
+
+function TSimbaPSExtension.OnNeedFile(Sender: TObject;
+  const OrginFileName: string; var FilePath, Output: string): Boolean;
+var
+  path: string;
+  f: TFileStream;
+begin
+  with SimbaForm do
+    path := FindFile(FilePath,[includepath,  ExtractFileDir(Filename),ExtractFileDir(OrginFileName)]);
+  if path = '' then
+  begin
+    psWriteln(Path + ' doesn''t exist');
+    Result := false;
+    Exit;
+  end;
+  FilePath := path;//Yeah!
+
+  try
+    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
+    SetLength(Output, f.Size);
+    f.Read(Output[1], Length(Output));
+    result:= true;
+    f.free;
+  except
+    Result := false;
+    psWriteln('TSimbaPSExtension.OnNeedFile');
+  end;
 end;
 
 procedure TSimbaPSExtension.StartExtension;
@@ -339,6 +363,8 @@ begin
   PSInstance.OnExecImport:=@RegisterPSRComponents;
   PSInstance.OnCompile:=@RegisterMyMethods;
   PSInstance.OnExecute:=@OnPSExecute;
+  PSInstance.OnNeedFile:=@OnNeedFile;
+  PSInstance.UsePreProcessor:= True;
 
   formWritelnEx(Format('Loading extension %s', [FileName]));
   try
