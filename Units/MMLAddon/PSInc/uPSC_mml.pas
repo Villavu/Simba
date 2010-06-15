@@ -270,7 +270,9 @@ procedure SIRegister_TWindow(CL: TPSPascalCompiler);
 begin
   with CL.AddClassN(CL.FindClass('TWindow_Abstract'),'TWindow') do
   begin
+    {$ifdef mswindows}
     RegisterMethod('Constructor Create( target : Hwnd)');
+    {$endif}
     RegisterMethod('Function GetNativeWindow : TNativeWindow');
   end;
 end;
@@ -284,8 +286,8 @@ begin
     RegisterMethod('Function ReceivedError : Boolean');
     RegisterMethod('Procedure ResetError');
     RegisterMethod('Procedure SetDesktop');
-    RegisterMethod('Function SetTargetArr( ArrPtr : Integer; Size : TPoint) : integer;');
-    RegisterMethod('Function SetTargetBmp( bmp : TMufasaBitmap) : integer;');
+    RegisterMethod('Function SetTargetArray( ArrPtr : Integer; Size : TPoint) : integer;');
+    RegisterMethod('Function SetTargetBitmap( bmp : TMufasaBitmap) : integer;');
     RegisterMethod('Function TargetValid : Boolean');
     RegisterMethod('Procedure BitmapDestroyed( Bitmap : TMufasaBitmap)');
     RegisterMethod('Function GetColor( x, y : integer) : TColor');
