@@ -1,0 +1,67 @@
+procedure GetClientDimensions(var w,h : integer);
+begin
+  Client.IOManager.GetDimensions(w, h);
+end;
+
+procedure SetDesktopAsClient;
+begin
+  Client.IOManager.SetDesktop;
+end;
+
+function SetTargetBitmap(bitmap: TMufasaBitmap): integer;
+begin;
+  result:= Client.IOManager.SetTargetBitmap(Bitmap);
+end;
+
+procedure SetImageTarget(idx: integer);
+begin
+  Client.IOManager.SetImageTarget(idx);
+end;
+
+function GetImageTarget: integer;
+begin
+  Client.IOManager.GetImageTarget(result);
+end;
+
+function Freeze: boolean;
+begin
+  Client.IOManager.SetFrozen(true);
+  result := true; //dunno what the result is supposed to mean
+end;
+
+function Unfreeze: boolean;
+begin
+  Client.IOManager.SetFrozen(false);
+  result := true; //dunno what the result is supposed to mean
+end;
+
+function FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean;
+begin
+  with Client do
+    result := MFinder.FindDTMs(MDTMs.GetDTM(DTM), p, xs, ys, xe, ye,0);
+end;
+
+procedure FreeDTM(DTM: Integer);
+begin
+  Client.MDTMs.FreeDTM(DTM);
+end;
+
+function DTMFromString(const DTMString: String): Integer;
+begin
+  Result := Client.MDTMs.StringToDTM(DTMString);
+end;
+
+function AddDTM(const d: TMDTM): Integer;
+begin
+  Result := Client.MDTMs.AddMDTM(d);
+end;
+
+function GetDTM(const index : integer) : TMDTM;
+begin
+  result := Client.MDTMs.GetDTM(index);
+end;
+
+function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean;
+begin;
+  result := Client.MFinder.FindColorsTolerance(points,color,xs,ys,xe,ye,tolerance);
+end;
