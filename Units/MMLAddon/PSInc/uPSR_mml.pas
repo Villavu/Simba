@@ -417,6 +417,7 @@ begin
   with CL.Add(TIOManager) do
   begin
     RegisterConstructor(@TIOManagerCreate, 'Create');
+    RegisterMethod(@TIOManager.SetDesktop,'SetDesktop');
     RegisterMethod(@TIOManagerSetTarget_P, 'SetTarget');
   end;
 end;
