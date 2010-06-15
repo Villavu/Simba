@@ -18,7 +18,7 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-      Linux OS specific implemetation for Mufasa Macro Library
+      Linux OS specific implementation for Mufasa Macro Library
 }
 {$mode objfpc}{$H+} 
 unit os_linux;
