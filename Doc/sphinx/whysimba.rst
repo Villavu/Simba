@@ -72,3 +72,15 @@ It is important to understand, however, that premature optimization usually
 ends up hurting development by introducing bugs and other forms of
 instability. Simba attempts to find a middle-ground and has sacrificed some
 speed for readability and maintainability, but is overall still quite fast.
+
+Open Minded
+~~~~~~~~~~~
+
+Open minded. We appreciate your help, ideas and critisism!
+
+Well Documented
+===============
+
+Simba is well documented. (You're looking the documentation right now...)
+There is still stuff left to document but overall the documentation is pretty
+good.
