@@ -328,6 +328,7 @@ begin
   with CL.AddClassN(CL.FindClass('TIOManager_Abstract'),'TIOManager') do
   begin
     RegisterMethod('Constructor Create( plugin_dir : string)');
+    RegisterMethod('procedure SetDesktop;');
     RegisterMethod('Function SetTarget( target : TNativeWindow) : integer;');
   end;
 end;

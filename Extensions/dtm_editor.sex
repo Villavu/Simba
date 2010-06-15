@@ -1,5 +1,8 @@
 program DTMEditor_Extension;
 
+var
+  Client : TClient;
+  Simba_MainMenu : TMainMenu;
 {$i mml.simba}
 const
   Version = '0.5';
@@ -1292,12 +1295,12 @@ begin
   end;
 end;
 
-{procedure ThreadSafe_ShowForm;
+procedure ThreadSafe_ShowForm;
 var
   v: TVariantArray;
 begin
   ThreadSafeCall('ShowForm', v);
-end;}
+end;
 
 {
   Simba integration
@@ -1341,4 +1344,6 @@ begin;
 end;
 
 begin
+  Client := GetTClient;
+  ThreadSafe_ShowForm;
 end.
