@@ -6,6 +6,9 @@
 Welcome to the Simba documentation!
 ===================================
 
+.. note::
+    The documentation is still WIP (Work In Progress)
+
 Welcome to the Documentation for the Simba project.
 
 Contents:
@@ -21,8 +24,9 @@ Contents:
     troubleshooting.rst
     bugreport.rst
     tutorial.rst
-    reference.rst
-    scriptreference.rst
+    referencescript.rst
+    referencesimba.rst
+    referencemml.rst
     docdoc.rst
     todo.rst
     pymml.rst
