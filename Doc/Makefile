@@ -33,3 +33,7 @@ html:
 	latex2html $(psbook_).tex -local_icons -nofootnode
 	latex2html $(book_).tex -local_icons -nofootnode
 	latex2html $(dev_).tex -local_icons -nofootnode
+
+sphinx:
+	$(MAKE) -C Pics/
+	$(MAKE) html -C sphinx 

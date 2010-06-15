@@ -8,4 +8,15 @@ digraph Client {
 	Files -> Client 
 	OCR -> Client 
 	DTM -> Client 
+
+    Finder -> IOManager
+    Finder -> Bitmaps
+    Finder -> DTM
+
+    OCR -> IOManager
+    OCR -> Bitmaps
+    OCR -> Finder
+
+    Bitmaps -> IOManager
+
 }
