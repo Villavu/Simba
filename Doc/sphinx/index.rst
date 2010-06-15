@@ -25,8 +25,8 @@ Contents:
     bugreport.rst
     tutorial.rst
     referencescript.rst
-    referencesimba.rst
     referencemml.rst
+    referencesimba.rst
     docdoc.rst
     todo.rst
     pymml.rst

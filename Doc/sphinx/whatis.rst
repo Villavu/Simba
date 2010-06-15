@@ -16,10 +16,11 @@ Simba can:
     *   Find and read colours on the screen.
     *   Click or move the mouse to a specific position on the screen. Typically
         this is the position of a found color or bitmap.
-    *   Read and write files.
-    *   Connect to the internet to read websites and post data to them.
     *   Read text on the screen and turn it into actual text. (Optical Character
         Recognition)
+    *   Capture and analyse images on the screen.
+    *   Read and write files.
+    *   Connect to the internet to read websites and post data to them.
     *   Run pascal programs for you. If you're a bit creative you can have a lot
         of fun stuff with Simba, you can even make a game in it.
 
