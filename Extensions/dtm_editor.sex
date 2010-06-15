@@ -609,7 +609,7 @@ begin
   if FindColorsTolerance(Points, getColour, 0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1, getTolerance) then
     bmpOverlay.DrawTPA(Points, MarkCol);
 
-  SetImageTarget(h);}
+  SetImageTarget(h);
   UpdateBitmap(True, False);
 end;
 
