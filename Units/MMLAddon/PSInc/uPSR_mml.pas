@@ -94,7 +94,9 @@ Function TIOManager_AbstractGetKeyMouseTarget_P(Self: TIOManager_Abstract) : TTa
 Function TIOManager_AbstractGetImageTarget_P(Self: TIOManager_Abstract) : TTarget;Begin Result := Self.GetImageTarget; END;
 Function TIOManager_AbstractSetTargetBmp_P(Self: TIOManager_Abstract;  bmp : TMufasaBitmap) : integer;Begin Result := Self.SetTarget(bmp); END;
 Function TIOManager_AbstractSetTargetArr_P(Self: TIOManager_Abstract;  ArrPtr : Integer; Size : TPoint) : integer;Begin Result := Self.SetTarget(PRGB32(ArrPtr), Size); END;
+{$ifdef MSWindows}
 function TWindowCreate(handle : hwnd) : TWindow; begin result := TWindow.Create(handle); end;
+{$endif}
 function TIOManagerCreate(plugin_dir : string) : TIOManager; begin result := TIOManager.Create(plugin_dir); end;
 function TIOManager_AbstractCreate(plugin_dir : string) : TIOManager_Abstract; begin result := TIOManager_Abstract.Create(plugin_dir); end;
 Function TIOManagerSetTarget_P(Self: TIOManager;  target : TNativeWindow) : integer;Begin Result := Self.SetTarget(target); END;
@@ -357,7 +359,9 @@ procedure RIRegister_TWindow(CL: TPSRuntimeClassImporter);
 begin
   with CL.Add(TWindow) do
   begin
+    {$ifdef MSWindows}
     RegisterConstructor(@TWindowCreate, 'Create');
+    {$endif}
     RegisterMethod(@TWindow.GetNativeWindow, 'GetNativeWindow');
   end;
 end;
@@ -371,8 +375,8 @@ begin
     RegisterMethod(@TIOManager_Abstract.ReceivedError, 'ReceivedError');
     RegisterMethod(@TIOManager_Abstract.ResetError, 'ResetError');
 //    RegisterVirtualAbstractMethod(TIOManager_Abstract, @TIOManager_Abstract.SetDesktop, 'SetDesktop');
-    RegisterMethod(@TIOManager_AbstractSetTargetArr_P, 'SetTargetArr');
-    RegisterMethod(@TIOManager_AbstractSetTargetBmp_P, 'SetTargetBmp');
+    RegisterMethod(@TIOManager_AbstractSetTargetArr_P, 'SetTargetArray');
+    RegisterMethod(@TIOManager_AbstractSetTargetBmp_P, 'SetTargetBitmap');
     RegisterMethod(@TIOManager_Abstract.TargetValid, 'TargetValid');
     RegisterMethod(@TIOManager_Abstract.BitmapDestroyed, 'BitmapDestroyed');
     RegisterMethod(@TIOManager_Abstract.GetColor, 'GetColor');
