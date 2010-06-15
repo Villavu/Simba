@@ -20,6 +20,8 @@ Simba can:
     *   Connect to the internet to read websites and post data to them.
     *   Read text on the screen and turn it into actual text. (Optical Character
         Recognition)
+    *   Run pascal programs for you. If you're a bit creative you can have a lot
+        of fun stuff with Simba, you can even make a game in it.
 
 and much, much more. Start now by :ref:`installingsimba`.
 
