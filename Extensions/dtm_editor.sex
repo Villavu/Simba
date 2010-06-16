@@ -1,8 +1,10 @@
 program DTMEditor_Extension;
-
 var
+{$ifndef PS_EXTENSION}
   Client : TClient;
   Simba_MainMenu : TMainMenu;
+{$endif}
+
 {$i mml.simba}
 const
   Version = '0.5';
@@ -607,7 +609,7 @@ begin
   h := GetImageTarget;
   if (bmpOverlay = nil) then
     bmpOverlay := bmpBuffer.Copy(0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1);
-  SetTargetBitmap(bmpBuffer.Index);
+  SetTargetBitmap(bmpBuffer);
 
   if FindColorsTolerance(Points, getColour, 0, 0, bmpBuffer.Width - 1, bmpBuffer.Height - 1, getTolerance) then
     bmpOverlay.DrawTPA(Points, MarkCol);
@@ -1295,12 +1297,14 @@ begin
   end;
 end;
 
+{$ifndef PS_EXTENSION}
 procedure ThreadSafe_ShowForm;
 var
   v: TVariantArray;
 begin
   ThreadSafeCall('ShowForm', v);
 end;
+{$ENDIF}
 
 {
   Simba integration
@@ -1344,6 +1348,8 @@ begin;
 end;
 
 begin
+  {$ifndef PS_EXTENSION}
   Client := GetTClient;
   ThreadSafe_ShowForm;
+  {$endif}
 end.
