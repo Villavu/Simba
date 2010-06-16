@@ -21,6 +21,10 @@
     Math.inc for the Mufasa Macro Library
 }
 
+function ps_round(e : extended) : integer; extdecl;
+begin
+  result := round(e);
+end;
 function ps_iAbs(a : integer) : integer;extdecl;
 begin
   result := abs(a);
