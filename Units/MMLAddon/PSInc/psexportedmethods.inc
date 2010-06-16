@@ -52,7 +52,7 @@ AddFunction(@ps_CreateDTMPoint,'function CreateDTMPoint(x,y,c,t,asz : integer; b
 
 {maths}
 SetCurrSection('Math');
-AddFunction(nil,'function Round(e:extended) : integer');
+AddFunction(@ps_round,'function Round(e:extended) : integer');
 AddFunction(@ps_ceil,'function ceil(e : extended) : integer');
 AddFunction(@ps_floor,'function floor(e : extended) : integer');
 AddFunction(@ps_pow,'function pow(base,exponent : extended) : extended');
