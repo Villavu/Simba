@@ -1,6 +1,6 @@
 program DTMEditor_Extension;
-var
 {$ifndef PS_EXTENSION}
+var
   Client : TClient;
   Simba_MainMenu : TMainMenu;
 {$endif}
