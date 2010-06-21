@@ -2042,7 +2042,7 @@ var
   i, h: Integer;
 begin
   h := High(tI);
-  Temp := tI;
+  Temp := Copy(tI);
   for i := 0 to h do
     tI[i] := Temp[h - i];
 end;
