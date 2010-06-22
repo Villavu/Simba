@@ -106,11 +106,24 @@ begin
   end;
 end;
 
+procedure TPenColor_W(Self: TPen; const T: TColor);begin Self.Color := T; end;
+procedure TPenColor_R(Self: TPen; var T: TColor);begin T := Self.Color; end;
+procedure TPenMode_W(Self: TPen; const T: TPENMODE);begin Self.Mode := T; end;
+procedure TPenMode_R(Self: TPen; var T: TPENMODE);begin T := Self.Mode; end;
+procedure TPenWidth_W(Self: TPen; const T: Integer);begin Self.Width := T; Writeln(t); end;
+procedure TPenWidth_R(Self: TPen; var T: Integer);begin T := Self.Width; Writeln(self.width) end;
+procedure TPenStyle_W(Self: TPen; const T: TPenStyle);begin Self.Style := T; end;
+procedure TPenStyle_R(Self: TPen; var T: TPenStyle);begin T := Self.Style; end;
+
 procedure RIRegisterTPEN(Cl: TPSRuntimeClassImporter);
 begin
   with Cl.Add(TPEN) do
   begin
     RegisterConstructor(@TPEN.CREATE, 'CREATE');
+    RegisterPropertyHelper(@TPenStyle_R,@TPenStyle_W,'Style');
+    RegisterPropertyHelper(@TPenWidth_R,@TPenWidth_W,'Width');
+    RegisterPropertyHelper(@TPenMode_R,@TPenMode_W,'Mode');
+    RegisterPropertyHelper(@TPenColor_R,@TPenColor_W,'Color');
   end;
 end;
 
