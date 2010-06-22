@@ -8,6 +8,9 @@ A few variables are exported for working with Mufasa Mouse Functions.
 
 TClickType, which defines the click type.
 
+Mouse Functions
+---------------
+
 .. code-block:: pascal
 
     const
