@@ -356,6 +356,8 @@ begin
   with PSInstance do
   begin
     {$I ../../Units/MMLAddon/PSInc/psdefines.inc}
+    Defines.Add('PS_EXTENSION');
+    Defines.Add('EXTENSION');
   end;
 
   PSInstance.Script := Self.Script;
