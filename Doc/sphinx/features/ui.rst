@@ -68,7 +68,7 @@ Edit Menu
     occurences
 
 Script
-------
+~~~~~~
 *   Run, F9, Compile and start executing the script
 
 *   Compile, Ctrl+F9, Only compile the script without executing
