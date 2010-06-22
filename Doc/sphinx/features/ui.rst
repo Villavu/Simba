@@ -233,7 +233,7 @@ For a list of all Simba extensions, have a look here.
     stills needs to be created.
 
 Colour Picker History
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 The colour picker history form is launched from the View menu via the 
 Colour History item.
@@ -246,14 +246,14 @@ the right.
 It is, by default, displayed after picking a colour using the button on the main Simba toolbar.
 
 Update Form
-~~~~~~~~~~~
+-----------
 
 The update form is launched from Tools menu via the Update item.
 Informs user if no update is currently available before displaying the form.
 Gives the option of updating when the current version is not the latest.
 
 Settings Form
-~~~~~~~~~~~~~
+-------------
 
 The Simba settings form is launched from the Tools menu via the Settings item.
 The main tree consists of 3 sections: one for the functionality of 
