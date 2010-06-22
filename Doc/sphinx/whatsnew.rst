@@ -17,5 +17,4 @@ Changelog for X.XXX::
 	- Did some stuff
 		- Important note about stuff here.
 	- Other stuff
-	- Jesus Christ even more stuff!
 
