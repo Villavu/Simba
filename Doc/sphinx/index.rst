@@ -18,11 +18,11 @@ Contents:
 
     whatis.rst
     whatsnew.rst
-    features.rst
     whysimba.rst
     gettingstarted.rst
     troubleshooting.rst
     bugreport.rst
+    features.rst
     tutorial.rst
     referencescript.rst
     referencemml.rst
