@@ -3,6 +3,7 @@ Feature Overview
 
 .. toctree::
 
+    features/ui.rst
     features/scriptmanager.rst
     features/autoupdate.rst
 
