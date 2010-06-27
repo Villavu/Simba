@@ -78,6 +78,15 @@ Open Minded
 
 Open minded. We appreciate your help, ideas and critisism!
 
+Debug Friendly
+~~~~~~~~~~~~~~
+
+Simba aims to be debug friendly. It will show you where your errors are during
+complation, and when you are running scripts Simba will point out where you are
+passing invalid arguments. The action Simba takes when this happens is
+configurable. (It can issue a warning and continue, or simply terminate
+the script)
+
 Well Documented
 ~~~~~~~~~~~~~~~
 

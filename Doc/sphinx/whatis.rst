@@ -22,8 +22,8 @@ Simba can:
     *   Read and write files.
     *   Connect to the internet to read websites and post data to them.
     *   Run pascal programs for you. If you're a bit creative you can have a lot
-        of fun stuff with Simba, you can even make a game in it.
+        of fun stuff with Simba, you could even make a game in it!
 
-and much, much more. Start now by :ref:`installingsimba`.
+and more. Start now by :ref:`installingsimba`.
 
 If you want to know more about Simba, see :ref:`whysimba`
