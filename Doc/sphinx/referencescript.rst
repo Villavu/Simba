@@ -11,4 +11,5 @@ default (Pascal) engine.
 .. toctree::
 
     scriptref/mouseandkeyboard.rst
+    scriptref/colourfinding.rst
     scriptref/files.rst
