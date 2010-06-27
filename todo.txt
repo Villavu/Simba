@@ -1,9 +1,5 @@
-- DTM Editor
-- BMP Editor
 - DTM Features
-- SRL Installer
 - Extra GUI icons
-- Installer
 - Test scripts
 - DWS
 - Documentation + wiki
