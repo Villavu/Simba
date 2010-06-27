@@ -6,7 +6,7 @@ Finding colours on the screen is quite simple. Simba offers methods like
 
 .. note::
 
-    Although the documentation uses follows the ``English`` spelling of 
+    Although the documentation uses the ``English`` spelling of 
     ``colour``; the code for compatibility sake uses ``color``, without the u.
 
 Colour Finding Methods
@@ -47,7 +47,7 @@ FindColorsTolerance
 
 .. code-block:: pascal
 
-    function FindColorsTolerance( out pts: TPointArray; col, x1, y1, x2, y2, 
+    function FindColorsTolerance(var pts: TPointArray; col, x1, y1, x2, y2, 
     tol: Integer): Boolean; 
 
 FindColorsTolerance returns true if at least one point was found. A point is found if it is within the
