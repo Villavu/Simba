@@ -22,6 +22,7 @@ type
     procedure ExtensionsListAdvancedCustomDrawItem(Sender: TCustomListView;
       Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
       var DefaultDraw: Boolean);
+    procedure ExtensionsListDblClick(Sender: TObject);
     procedure ExtensionsListSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure FormCreate(Sender: TObject);
@@ -64,6 +65,16 @@ begin
     Sender.Canvas.Brush.Color := $CCFFCC//$7AFF95
   else
     sender.canvas.brush.color := $CCCCFF//$FF3D64;
+end;
+
+procedure TExtensionsForm.ExtensionsListDblClick(Sender: TObject);
+begin
+  if ExtensionsList.Selected <> nil then
+    with TVirtualSimbaExtension(ExtManager.Extensions[ExtensionsList.Selected.Index]) do
+    begin;
+      Enabled := not ExtEnabled.Checked;
+      ExtEnabled.Checked := Enabled;
+    end;
 end;
 
 procedure TExtensionsForm.ExtensionsListSelectItem(Sender: TObject;
