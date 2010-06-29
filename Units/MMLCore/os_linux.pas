@@ -163,7 +163,7 @@ implementation
         xerror := 'UNKNOWN';
     end;
     result := 0;
-    mDebugLn('X Error: ');
+    mDebugLn('X Error: ' + xerror);
     mDebugLn('Error code: ' + inttostr(para2^.error_code));
     mDebugLn('Display: ' + inttostr(LongWord(para2^.display)));
     mDebugLn('Minor code: ' + inttostr(para2^.minor_code));
