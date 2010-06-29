@@ -53,7 +53,7 @@ class Color(object):
     def findAll(self, box, color, tol = 0):
         """
             find all colors in a box, with a specific tolerance.
-            returned are all the matching points/
+            returned are all the matching points
         """
         ptr = PPOINT()
         if tol is 0:
