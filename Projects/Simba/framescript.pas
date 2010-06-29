@@ -314,10 +314,12 @@ begin
     ecUndo :  begin
                 Command:= ecNone;
                 Self.Undo;
+                Self.ScriptChanged:=True;
               end;
     ecRedo :  begin
                 Command := ecNone;
                 self.Redo;
+                Self.ScriptChanged:=True;
               end;
   end;
 end;

@@ -2954,6 +2954,11 @@ end;
 
 function TSimbaForm.SaveCurrentScript: boolean;
 begin
+  if not CurrScript.ScriptChanged then
+  begin
+    writeln('SaveScript - no changes.');
+    exit(false);
+  end;
   with CurrScript do
   begin
     Result := (ScriptFile <> '');
