@@ -193,6 +193,8 @@ exports
   { Finder }
   findColor,
   findColors,
+  findColorTolerance,
+  findColorsTolerance,
 
   { Mem Management }
   fpc_freemem_,
