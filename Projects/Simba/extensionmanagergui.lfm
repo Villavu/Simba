@@ -49,6 +49,7 @@ object ExtensionsForm: TExtensionsForm
       TabOrder = 0
       ViewStyle = vsReport
       OnAdvancedCustomDrawItem = ExtensionsListAdvancedCustomDrawItem
+      OnDblClick = ExtensionsListDblClick
       OnSelectItem = ExtensionsListSelectItem
     end
     object Button: TButton
