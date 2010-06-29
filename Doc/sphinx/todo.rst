@@ -13,7 +13,11 @@ Documentation TODO
 *   write working with files for scriptreference (or any other chapter)
     It may be useful to check http://wizzup.org/simba/article/4
 *   Features -> Perhaps (interactive) images?
-
+*   Scripting reference:
+        -   Files
+        -   Bitmaps
+        -   DTM
+        -   Internet
 
 *   Expand "Troubleshooting"
 	    - And its subsection.
