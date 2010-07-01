@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 700;
+  SimbaVersion = 701;
 
 type
 
@@ -2890,6 +2890,10 @@ begin
       Exit;
   with TOpenDialog.Create(nil) do
   try
+    if (CurrScript.ScriptFile <> '') then
+      InitialDir := ExtractFileDir(CurrScript.ScriptFile)
+    else
+      InitialDir := ScriptDir;
     Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
     Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
              '|Any files|*.*';
@@ -2985,6 +2989,10 @@ begin
   Result := false;
   with TSaveDialog.Create(nil) do
   try
+    if (CurrScript.ScriptFile <> '') then
+      InitialDir := ExtractFileDir(CurrScript.ScriptFile)
+    else
+      InitialDir := ScriptDir;
     filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +
               LoadSettingDef('Settings/Extensions/FileExtension','sex')+
               '|Any files|*.*';
