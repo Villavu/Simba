@@ -1,9 +1,9 @@
 object ExtensionsForm: TExtensionsForm
-  Left = 200
+  Left = 645
   Height = 256
-  Top = 139
+  Top = 170
   Width = 389
-  Caption = 'ExtensionsForm'
+  Caption = 'Simba Extensions'
   ClientHeight = 256
   ClientWidth = 389
   OnCreate = FormCreate
@@ -15,12 +15,12 @@ object ExtensionsForm: TExtensionsForm
     Width = 389
     Align = alClient
     Caption = 'Extensions'
-    ClientHeight = 238
+    ClientHeight = 237
     ClientWidth = 385
     TabOrder = 0
     object ExtensionsList: TListView
       Left = 6
-      Height = 192
+      Height = 191
       Top = 8
       Width = 371
       Align = alCustom
@@ -40,7 +40,7 @@ object ExtensionsForm: TExtensionsForm
           AutoSize = True
           Caption = 'Version'
           MinWidth = 60
-          Width = 60
+          Width = 109
         end>
       HideSelection = False
       ItemIndex = -1
@@ -63,9 +63,9 @@ object ExtensionsForm: TExtensionsForm
     end
     object ExtEnabled: TCheckBox
       Left = 6
-      Height = 17
+      Height = 20
       Top = 208
-      Width = 72
+      Width = 93
       Caption = 'ExtEnabled'
       OnChange = ExtEnabledChange
       TabOrder = 2
