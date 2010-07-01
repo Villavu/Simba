@@ -35,6 +35,8 @@ Name: "{app}\Scripts\Tests"
 [Files]
 Source: "C:\Remake\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Remake\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Remake\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Remake\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Remake\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Remake\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
