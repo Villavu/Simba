@@ -1264,6 +1264,11 @@ begin
   else
     ShowConsole(false);
   {$endif}
+  if Lowercase(LoadSettingDef('Settings/Tray/AlwaysVisible', 'True')) <> 'true' then
+  begin
+    MTrayIcon.Hide;
+    writeln('Hiding tray.');
+  end;
   self.EndFormUpdate;
 end;
 
@@ -2436,6 +2441,8 @@ end;
 procedure TSimbaForm.MTrayIconClick(Sender: TObject);
 begin
   self.Show;
+  if Lowercase(LoadSettingDef('Settings/Tray/AlwaysVisible', 'True')) <> 'true' then
+    MTrayIcon.Hide;
   if Self.CanFocus then
     self.SetFocus;
 end;
@@ -2518,6 +2525,7 @@ end;
 
 procedure TSimbaForm.ButtonTrayClick(Sender: TObject);
 begin
+  MTrayIcon.Show;
   self.hide;
 end;
 
