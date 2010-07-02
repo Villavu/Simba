@@ -3,6 +3,8 @@ object ExtensionsForm: TExtensionsForm
   Height = 256
   Top = 170
   Width = 389
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
   Caption = 'Simba Extensions'
   ClientHeight = 256
   ClientWidth = 389
@@ -40,7 +42,7 @@ object ExtensionsForm: TExtensionsForm
           AutoSize = True
           Caption = 'Version'
           MinWidth = 60
-          Width = 109
+          Width = 111
         end>
       HideSelection = False
       ItemIndex = -1
@@ -63,9 +65,9 @@ object ExtensionsForm: TExtensionsForm
     end
     object ExtEnabled: TCheckBox
       Left = 6
-      Height = 20
+      Height = 22
       Top = 208
-      Width = 93
+      Width = 97
       Caption = 'ExtEnabled'
       OnChange = ExtEnabledChange
       TabOrder = 2
