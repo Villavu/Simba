@@ -24,3 +24,6 @@ Documentation TODO
 *   Expand "Feature Overview"
 	    - And its subs. There's like nothing in them, those are the type
 	      of pages I was talking about. Combine them under feature overview?
+*   Algorithm on how to write algorithms efficiently.
+    Like, remove points in TPA that are in a box. Override points or create new
+    array and add points. Also perhaps non linear algorithms.

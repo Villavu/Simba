@@ -1,3 +1,5 @@
+.. _simbaext:
+
 Simba Extensions
 ================
 
@@ -17,7 +19,8 @@ Recommended:
     *   Associate Files
 
 .. note::
-    You can also use the Reflection Updater (and Downloader)
+    You can also use the Reflection Updater (and Downloader) for updating
+    Reflection.
 
 ..  Not listed as directly recommended but still worth noting.
 
