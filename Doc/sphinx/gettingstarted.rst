@@ -54,6 +54,8 @@ Setting up SRL 4 with Simba
 If you were using the :ref:`simba-installer` then you can simply enable the
 ``SRL Updater`` extension. (Go to View -> Extensions and enable ``srl.sex``)
 
+See :ref:`simbaext` for more information on Extensions.
+
 This is the only supported way. You can simply do a svn checkout on the srl
 repository, but if you can do that, then you should be able to set up SRL
 yourself as well.
