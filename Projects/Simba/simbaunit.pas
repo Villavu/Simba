@@ -1120,6 +1120,7 @@ begin
     exit;
   end;
   NewTab := PageControl1.TabIndex;
+  if NewTab < 0 then exit;
   Tab := TMufasaTab(Tabs[Newtab]);
   Script := Tab.ScriptFrame;
   Self.CurrScript := Script;
