@@ -446,8 +446,6 @@ type
   function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
 
 const
-  // Rip Mufasa -> Simba ftw
-  //WindowTitle = 'Mufasa v2 - %s';//Title, where %s = the place of the filename.
   WindowTitle = 'Simba - %s';//Title, where %s = the place of the filename.
   Panel_State = 0;
   Panel_Coords = 1;
@@ -1187,7 +1185,7 @@ begin
   CreateSetting('Settings/Fonts/VersionLink', FontURL + 'Version');
   CreateSetting('Settings/Fonts/UpdateLink', FontURL + 'Fonts.tar.bz2');
 
-  CreateSetting('Settings/News/URL', 'http://Simba.villavu.com/bin/news');
+  CreateSetting('Settings/News/URL', 'http://simba.villavu.com/bin/news');
 
   {Creates the paths and returns the path}
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
@@ -1199,6 +1197,7 @@ begin
   CreateSetting('LastConfig/Console/Visible','True');
   ShowConsole(True);
   {$endif}
+  CreateSetting('Settings/Tray/AlwaysVisible', 'True');
   if not DirectoryExists(IncludePath) then
     CreateDir(IncludePath);
   if not DirectoryExists(FontPath) then
