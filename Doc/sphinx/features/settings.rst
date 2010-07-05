@@ -204,7 +204,7 @@ Source colouring
 ``LazColors``
 
 The default colour theme is the same as Lazarus' colours. If you prefer another
-(more familiar?) theme, set this to *False*
+(more familiar?) theme, set this to *False*.
 
 Default script
 ~~~~~~~~~~~~~~
@@ -231,6 +231,3 @@ If you want the tray icon only to be visible when Simba is minized, set this to
     Here should be a list of the most important Simba settings; what they
     influence, plus the possible values for them.
 
-
-.. note::
-    Extensions that dont have to be documented:
