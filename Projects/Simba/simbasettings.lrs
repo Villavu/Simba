@@ -1,0 +1,26 @@
+LazarusResources.Add('TSettingsForm','FORMDATA',[
+  'TPF0'#13'TSettingsForm'#12'SettingsForm'#4'Left'#3'3'#2#6'Height'#3'.'#2#3'T'
+  +'op'#3#173#0#5'Width'#3'h'#1#7'Caption'#6#14'Simba Settings'#12'ClientHeight'
+  +#3'.'#2#11'ClientWidth'#3'h'#1#8'OnCreate'#7#10'FormCreate'#9'OnDestroy'#7#11
+  +'FormDestroy'#9'OnMouseUp'#7#7'MouseUp'#10'LCLVersion'#6#6'0.9.29'#0#9'TTree'
+  +'View'#16'SettingsTreeView'#4'Left'#2#16#6'Height'#3#217#1#3'Top'#2#16#5'Wid'
+  +'th'#3'D'#1#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0#17'Def'
+  +'aultItemHeight'#2#15#8'ReadOnly'#9#10'ScrollBars'#7#10'ssAutoBoth'#8'TabOrd'
+  +'er'#2#0#10'OnDblClick'#7#24'SettingsTreeViewDblClick'#10'OnKeyPress'#7#10'O'
+  +'nKeyPress'#9'OnMouseUp'#7#7'MouseUp'#7'Options'#11#17'tvoAutoItemHeight'#16
+  +'tvoHideSelection'#21'tvoKeepCollapsedNodes'#11'tvoReadOnly'#14'tvoShowButto'
+  +'ns'#12'tvoShowLines'#11'tvoShowRoot'#11'tvoToolTips'#0#0#0#7'TButton'#20'Se'
+  +'ttingsFormButtonOK'#4'Left'#3#9#1#6'Height'#2#25#3'Top'#3#255#1#5'Width'#2
+  +'K'#7'Anchors'#11#7'akRight'#8'akBottom'#0#7'Caption'#6#2'OK'#7'OnClick'#7#25
+  +'SettingsFormButtonOKClick'#8'TabOrder'#2#1#0#0#7'TButton'#24'SettingsFormBu'
+  +'ttonCancel'#4'Left'#2#16#6'Height'#2#25#3'Top'#3#255#1#5'Width'#2'K'#7'Anch'
+  +'ors'#11#6'akLeft'#8'akBottom'#0#7'Caption'#6#6'Cancel'#7'OnClick'#7#29'Sett'
+  +'ingsFormButtonCancelClick'#8'TabOrder'#2#2#0#0#7'TButton'#12'DeleteButton'#4
+  +'Left'#2'x'#6'Height'#2#25#3'Top'#3#255#1#5'Width'#2'x'#7'Anchors'#11#8'akBo'
+  +'ttom'#0#7'Caption'#6#15'Delete Selected'#7'OnClick'#7#14'DeleteSelected'#8
+  +'TabOrder'#2#3#0#0#10'TPopupMenu'#13'SettingsPopup'#4'left'#2'('#3'top'#2' '
+  +#0#9'TMenuItem'#11'PopupRename'#7'Caption'#6#6'Rename'#7'OnClick'#7#16'Popup'
+  +'RenameClick'#0#0#9'TMenuItem'#11'PopupDelete'#7'Caption'#6#6'Delete'#7'OnCl'
+  +'ick'#7#16'PopupDeleteClick'#0#0#9'TMenuItem'#11'PopupCreate'#7'Caption'#6#13
+  +'Create subkey'#7'OnClick'#7#14'PopupCreateKey'#0#0#0#0
+]);
