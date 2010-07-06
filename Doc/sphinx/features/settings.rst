@@ -10,6 +10,11 @@ icon to show at all times.
 Settings can be changed by going to the menubar titled *Tools* and the
 selecting the *Settings* option.
 
+If you at any time have serious problems with Simba not behaving it as you
+expect it should and you changed something in the settings, you could try
+closing Simba and deleting ``settings.xml``. Simba will create one with
+default settings if it does not exist.
+
 
 General Settings
 ----------------
