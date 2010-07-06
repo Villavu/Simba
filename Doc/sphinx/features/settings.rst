@@ -3,11 +3,11 @@
 Simba settings
 ==============
 
-The Simba settings form can be used to tweak various Simba settings. Varying
-from how often Simba will check for an update to wether or not you want the tray
-icon to show at all times. 
+The Simba settings form can be used to modify the settings. These options vary
+from how often Simba will check for an update to whether the tray icon is
+displayed at all times.
 
-Settings can be changed by going to the menubar titled *Tools* and the
+Settings can be changed by going to the menu *Tools* menu and the
 selecting the *Settings* option.
 
 If you at any time have serious problems with Simba not behaving it as you
@@ -16,6 +16,7 @@ closing Simba and deleting ``settings.xml``. Simba will create one with
 default settings if it does not exist.
 
 
+=======
 General Settings
 ----------------
 
@@ -26,7 +27,7 @@ Recent files history
 
 ``MaxRecentFiles``
 
-Stores the amount of recent files to remember. *10* is default.
+Stores the amount of recent files to remember. The default is *10*.
 
 
 Extensions
@@ -129,7 +130,8 @@ Automatically pop up Code Hints
 ``ShowAutomatically``
 
 If set to *True*, code hints will be shown when appropriate.
-On *False* code hints will never be shown automatically.
+On *False* code hints will never be shown automatically, but can still be
+accessed by pressing *Ctrl+Space*.
 
 
 Code Hints
@@ -160,7 +162,7 @@ It true is set to *True*, the function list will be visible on startup. *False*
 requires you to enable it yourself.
 
 
-Colour Picker
+Color Picker
 -------------
 
 ``Settings/ColourPicker``
@@ -184,9 +186,9 @@ Script opening mode
 
 ``OpenScriptInNewTab``
 
-Simba can load Scripts in two diffferent ways. It can open every script in a new
+Simba can load Scripts in two different ways. It can open every script in a new
 tab, or it can override the currently active tab. Setting this to *True* opens
-scripts in new tabs; this is also the default.
+scripts in new tabs, this is the default.
 
 Behaviour when closing tabs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
