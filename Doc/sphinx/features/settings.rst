@@ -16,7 +16,6 @@ closing Simba and deleting ``settings.xml``. Simba will create one with
 default settings if it does not exist.
 
 
-=======
 General Settings
 ----------------
 
@@ -93,7 +92,7 @@ Contains the directory Simba will look for when searching for fonts.
 
 
 Updater
-------
+-------
 
 ``Settings/Updater/``
 
