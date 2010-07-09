@@ -1466,9 +1466,16 @@ begin
     if assigned(Self.OCR_Fonts) and loadFontsOnScriptStart then
       Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts;
 
-  Se := TMMLSettingsSandbox.Create(SettingsForm.Settings);
-  Se.Prefix := 'Scripts/';
-  Thread.SetSettings(Se);
+  {
+    We pass the entire settings to the script; it will then create a Sandbox
+    for settings that are exported to the script. This way we can access all
+    the settings from the PSTHread, and scripts can only access limited
+    resources. Hopefully this won't cause any form / thread related problems?
+    (Settings doesn't use the Settings form, iirc)
+    Well, it was like this previously as well, we just passed a sandbox to it
+    directly, but the sandbox still called Settings.
+  }
+  Thread.SetSettings(SettingsForm.Settings, SimbaSettingsFile);
   Thread.OpenConnectionEvent:=@ThreadOpenConnectionEvent;
   Thread.WriteFileEvent:=@ThreadWriteFileEvent;
   Thread.OpenFileEvent:=@ThreadOpenFileEvent;
