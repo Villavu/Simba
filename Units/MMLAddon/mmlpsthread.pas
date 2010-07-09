@@ -649,9 +649,10 @@ begin
   if self.settings <> nil then
   begin
     if lowercase(self.settings.GetKeyValueDefLoad('Settings/Interpreter/AllowSysCalls',
-    'False', Self.SimbaSettingsFile)) = 'true' then
+      'False', Self.SimbaSettingsFile)) = 'true' then
     begin
-      writeln('Allowing SysCalls');
+      { Can remove later }
+      psWriteln('Allowing API/SysCalls.');
       RegisterDll_Compiletime(x);
     end;
   end;
