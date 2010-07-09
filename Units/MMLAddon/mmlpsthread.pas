@@ -33,7 +33,7 @@ uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
   bitmaps, plugins, libloader, dynlibs,internets,scriptproperties,
-  settingssandbox;
+  settings,settingssandbox;
 
 
 type
@@ -100,6 +100,8 @@ type
       Client : TClient;
       MInternet : TMInternet;
       StartTime : LongWord;
+      Settings: TMMLSettings;
+      SimbaSettingsFile: String;
       Sett: TMMLSettingsSandbox;
 
       InputQueryData : TInputQueryData;//We need this for InputQuery
@@ -119,7 +121,7 @@ type
       procedure SetDebugClear( clearProc : TClearDebugProc );
       procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
       procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
-      procedure SetSettings(S: TMMLSettingsSandbox);
+      procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
 
       procedure OnThreadTerminate(Sender: TObject);
       procedure SetScript(script: string); virtual; abstract;
@@ -427,9 +429,12 @@ begin
   FDebugImg := DebugImageInfo;
 end;
 
-procedure TMThread.SetSettings(S: TMMLSettingsSandbox);
+procedure TMThread.SetSettings(S: TMMLSettings; SimbaSetFile: String);
 begin
-  Self.Sett := S;
+  Self.SimbaSettingsFile := SimbaSetFile;
+  Self.Settings := S;
+  Self.Sett := TMMLSettingsSandbox.Create(Self.Settings);
+  Self.Sett.prefix := 'Scripts/';
 end;
 
 procedure TMThread.SetPaths(ScriptP, AppP,IncludeP,PluginP,FontP: string);
@@ -641,7 +646,15 @@ begin
   SIRegister_Menus(x);
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
-  RegisterDll_Compiletime(x);
+  if self.settings <> nil then
+  begin
+    if lowercase(self.settings.GetKeyValueDefLoad('Settings/Interpreter/AllowSysCalls',
+    'False', Self.SimbaSettingsFile)) = 'true' then
+    begin
+      writeln('Allowing SysCalls');
+      RegisterDll_Compiletime(x);
+    end;
+  end;
 
   with x do
   begin
