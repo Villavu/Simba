@@ -1976,7 +1976,7 @@ end;
 
 procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
 begin
-  OpenURL('http://wizzup.org/static/simbadoc/');
+  OpenURL('http://wizzup.org/simbadoc/');
 end;
 
 procedure TSimbaForm.MenuItemColourHistoryClick(Sender: TObject);
