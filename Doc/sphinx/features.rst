@@ -8,6 +8,7 @@ Feature Overview
     features/exten.rst
     features/settings.rst
     features/ui.rst
+    features/notwellknown.rst
 
 
 Most stuff here is probably misplaced anyway.
