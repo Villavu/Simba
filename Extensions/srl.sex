@@ -45,7 +45,8 @@ begin
   Result := True;
   if (OnlineP > LocalP) then
   begin
-    Writeln('New plugin(s) are available');
+    Writeln('New plugin(s) are available.');
+    Writeln('Downloading the new plugins now. Please do not close Simba.');
 	Contents := GetPage('http://wizzup.org/static/srl/simba_plugins.tar.bz2');
 	Failed := True;
 	if DecompressBZip2(Contents,DeContents,4096) then
@@ -80,6 +81,7 @@ begin
   if (OnlineS > LocalS) then
   begin
     Writeln('SRL is outdated, updating now!');
+    Writeln('Downloading the new SRL now. Please do not close Simba.');
 	Contents := GetPage('http://wizzup.org/static/srl/srl.tar.bz2');
 	Failed := True;
 	if DecompressBZip2(Contents,DeContents,4096) then
