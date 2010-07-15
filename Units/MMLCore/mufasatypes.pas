@@ -109,20 +109,6 @@ type
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
 type
-  { TODO: add cts per colour/tolerance? }
-
-  // TODO DTM-Not points. Not very hard really.
-
-  { not points -
-    add seperate tpa or boolean array for every point that is to be matched ?
-   }
-   {
-     x,y : Coordinates;
-     c : Color;
-     t : Tolerance;
-     Asz: Area size;
-     bp: Bad Point;
-   }
   TMDTMPoint = record //TMufasaDTMPoint
     x,y,c,t,asz : integer;
     bp : boolean;
