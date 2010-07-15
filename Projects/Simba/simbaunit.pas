@@ -21,6 +21,8 @@
     Simba/GUI for the Mufasa Macro Library
 }
 
+{TODO: Implement Disguise and Status bars}
+
 unit SimbaUnit;
 
 {$undef EditButtons}
@@ -46,7 +48,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
 
 const
-  SimbaVersion = 701;
+  SimbaVersion = 702;
 
 type
 
@@ -2509,11 +2511,13 @@ begin
   Picker.Pick(c, x, y);
   cobj := TColourPickerObject.Create(c, Classes.Point(x,y), '');
 
-  if lowercase(LoadSettingDef('Settings/ColourPicker/ShowHistoryOnPick', 'True')) = 'true' then
-  begin
+  { TODO: This should be no problem if the form is hidden? }
+  if lowercase(LoadSettingDef('Settings/ColourPicker/AddToHistoryOnPick', 'True')) = 'true' then
     ColourHistoryForm.AddColObj(cobj, true);
+
+  if lowercase(LoadSettingDef('Settings/ColourPicker/ShowHistoryOnPick', 'True')) = 'true' then
     ColourHistoryForm.Show;
-  end;
+
   FormWritelnEx('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
 
