@@ -7,13 +7,13 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{524C9B9A-B57F-4FEC-89BE-292202EBA44D}
 AppName=Simba
-AppVerName=Simba 1.0 Beta
+AppVerName=Simba Release Candidate
 AppPublisherURL=http://simba.villavu.com/
 AppSupportURL=http://simba.villavu.com/
 AppUpdatesURL=http://simba.villavu.com/
 DefaultDirName={sd}\Simba
 DefaultGroupName=Simba
-OutputDir=C:\Remake\Install\windows\
+OutputDir=C:\simba\Install\windows\
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
@@ -33,12 +33,14 @@ Name: "{app}\Scripts"
 Name: "{app}\Scripts\Tests"
 
 [Files]
-Source: "C:\Remake\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Remake\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "C:\Remake\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "C:\Remake\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "C:\Remake\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Remake\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
+Source: "C:\Simba\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\reflection.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
+Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
