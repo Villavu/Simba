@@ -5,3 +5,6 @@
 *.or
 *.s
 ^Doc\/sphinx\/\_build
+*.res
+*.pyc
+*.log
