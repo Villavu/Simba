@@ -132,7 +132,7 @@ begin
   GetOnlineVersion(OnlineR);
 
   if (OnlineR <= LocalR) then
-    MessageDlg('Reflection Updater', 'No Reflection update' ,mtConfirmation, [mbYes],0);
+    MessageDlg('Reflection Updater', 'No Reflection update' ,mtConfirmation, [mbYes],0)
   else
     Update;
 end;
