@@ -1,5 +1,5 @@
 program new;
-{.LoadDLL libsmart}
+{$Loadlib libsmart}
 function IsKeyDown(C:Char): Boolean;
 begin
   Result := SmartIsKeyDown(ord(c));
@@ -54,11 +54,12 @@ var
   w,h:integer;
 begin
   SmartSetup('http://world19.runescape.com/', 'plugin.js?param=o0,a1,m0', 765, 503);
-  SetTargetArray(SmartImageArray, 765,503);
+  wait(30000);
+ { SetTargetArray(SmartImageArray, 765,503);
   getclientdimensions(w,h);
   writeln(inttostr(w) + ' , ' + inttostr(h));
   if findcolortolerance(w,h,clwhite,0,0,764,502,300) then
     smartmovemouse(w,h);
    Wait(5000);
-  savescreenshot(scriptPath + 'smart.bmp');
+  savescreenshot(scriptPath + 'smart.bmp');  }
 end.
