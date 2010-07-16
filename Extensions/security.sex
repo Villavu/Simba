@@ -1,0 +1,1437 @@
+program SecurityExtension;
+
+type
+  TNamedArray = record
+    a: TStringArray;
+    name: String;
+  end;
+
+{ var SecurityEnabled: Boolean;
+  Global variable which decides whether or not to pass through any security
+  measures. It is toggled by the Menu Item (Tools -> Security -> Enabled).     }
+var
+  SecurityEnabled: Boolean;
+  Settings_FIRE_WALL_ENABLED, Settings_FILE_WALL_ENABLED: Boolean;
+
+{ var Menu*: TMenuItem;
+  Different variables for the different parts of the Menu added to Simba's
+  TMainMenu.                                                                   }
+{$IFDEF EXTENSION}
+var
+  MenuHead, MenuCheck, MenuEdit: TMenuItem;
+{$ENDIF}
+
+{ var Icon_Lock: TMufasaBitmap;
+  Holds the lock image so that it is not reloaded each and every time. The
+  license for this icon can be found here:
+    [url]http://www.iconarchive.com/icons/aha-soft/security/license.txt[/url]
+  And the image can be found here:
+    [url]http://icons2.iconarchive.com/icons/aha-soft/security/48/lock-icon.png[/url]     }
+var
+  Icon_Lock: TMufasaBitmap;
+
+{ var PathArr: array of TNamedArray;
+  Array which stores the different lists of URLs and Files/Directories. Each one
+  is accessed through the consants listed later which are prefixed with `P_'.  }
+var
+  PathArr: array [0..1] of array of TNamedArray;
+
+{ const P_?_*: Integer;
+  Each constant is associated with a Path. W/B/L depicts whether is a White,
+  Black, or Local list respectively. These constants are in reference to indexes
+  in the `PathArr' variable.                                                   }
+const
+  WALL_FIRE = 0;
+  WALL_FILE = 1;
+
+  ALLOW_ONCE   = -2;
+  DENY_ONCE    = -1;
+  ALLOW_LOCAL  = 0;
+  DENY_LOCAL   = 1;
+  ALLOW_ALWAYS = 2;
+  DENY_ALWAYS  = 3;
+  ALLOW_ALWAYS_DIR = 4;
+  DENY_ALWAYS_DIR  = 5;
+
+  DirectorySeparator = '\';
+
+{ var Settings_DEFAULT_(URL|FILE): Integer;
+  Depict the default option for when the Option dialog times out. These values
+  must be part of the constants. *MAY CRASH SIMBA IF NOT ONE OF THE CONSTANTS* }
+var
+  Settings_DEFAULT_URL, Settings_DEFAULT_FILE: Integer;
+
+{ var Settings_DEFAULT_TIMEOUT: Integer;
+  Time to wait in seconds before timing out the Option Dialog. This allows
+  scripts to progress without needing User Interaction and will choose the
+  Settings_DEFAULT_(URL|FILE) respectively.                                    }
+var
+  Settings_DEFAULT_TIMEOUT: Integer;
+
+{
+  Checks if `s' occurs in TStringArray `a'.
+}
+function InStrArray(s: String; a: TStringArray): Boolean;
+var
+  i, h: Integer;
+begin
+  Result := True;
+  h := High(a);
+  for i := 0 to h do
+  begin
+    if (s = a[i]) then
+      Exit;
+  end;
+  Result := False;
+end;
+
+{
+  Like `pos(substr, s)' but searches from the end of a string backwards.
+}
+function LastPos(SubStr, Str: string): integer;
+var
+  i, p: integer;
+  s, ss: string;
+begin
+  for i := Length(str) downto 1 do
+    S := S + Str[i];
+  for i := Length(substr) downto 1 do
+    ss := ss + substr[i];
+  p := Pos(ss, S);
+  if P > 0 then
+    Result := Length(Str) - p
+end;
+
+{
+  Remove the PHP params being passed around.
+}
+function trimPHPParams(url: String): String;
+var
+  qPos: Integer;
+begin
+  qPos := pos('?', url);
+  if (qPos > 0) then
+    Result := Copy(url, 1, qPos-1)
+  else
+    Result := url;
+end;
+
+{
+  Replaces the paths found with an easier to read name. Will remove all the
+  specified constants from within Simba.
+}
+function substitutePaths(path: String): String;
+var
+  paths, names: TStringArray;
+  i, p: Integer;
+begin
+  paths := [ScriptPath, IncludePath, PluginPath, FontPath, AppPath];
+  names := ['SCRIPTPATH', 'INCLUDEPATH', 'PLUGINPATH', 'FONTPATH', 'SIMBAPATH'];
+
+  for i := 0 to 4 do
+  begin
+    p := pos(paths[i], path);
+    if (p > 0) then
+    begin
+      Result := format(
+        '%%%s%%%s%s',
+        [names[i], DirectorySeparator, copy(path,p+length(paths[i]),Length(path))]
+      );
+      writeln(Result);
+      Exit;
+    end;
+    p := 0;
+  end;
+
+  Result := '';
+end;
+
+{
+  Private method for adding to the global arrays.
+}
+procedure _AddStr(s: String; uf, p: Integer);
+var
+  l: Integer;
+  {$IFDEF EXTENSION}tmp: String;{$ENDIF}
+begin
+  if (p < 0) then Exit;
+  { Increase the size of the array, adding the new value }
+  l := Length(PathArr[uf][p].a);
+  SetLength(PathArr[uf][p].a, l + 1);
+  PathArr[uf][p].a[l] := s;
+  {$IFDEF EXTENSION}
+  { Write to the Settings.xml }
+  tmp := Settings.getKeyValueDef(PathArr[uf][p].name, '');
+  Settings.setKeyValue(PathArr[uf][p].name, tmp + DirectorySeparator + s);
+  {$ENDIF}
+end;
+
+{
+  Changes MS into a format of: HH:MM:SS.
+
+  Taken from SRL4/core/Timing.scar
+}
+function MsToTime(MS: Integer): string;
+var
+  STA: TVariantArray;
+  Time: array [0..2] of Integer;
+  i: Integer;
+begin
+  STA := [':', ':', '', True, 2];
+  ConvertTime(MS, Time[0], Time[1], Time[2]);
+  for i := 0 to 2 do
+    if (Time[i] > 0) or (STA[3]) or (i = 2) then
+      Result := Result + PadZ(IntToStr(Time[i]), STA[4]) + STA[i];
+end;
+
+{
+  Prints a warning message whenever something attempts to break security
+  measures.
+}
+procedure SecurityWarn(msg: String);
+begin
+  Writeln(
+    Format('[%s] :: SECURITY WARNING :: %s', [MSToTime(GetSystemTime), msg])
+  );
+end;
+
+{ var Option*: FormComponents
+  Various Form components associated with the User Input Dialog.               }
+var
+  OptionForm: TForm;
+  Option_Label_Path, Option_Label_Default, Option_Label_Title: TLabel;
+  Option_Button_Okay: TButton;
+  Option_Timer, Option_Timer_Label: TTimer;
+  Option_ComboBox: TComboBox;
+  Option_Default_Time: Integer;
+  Option_Lock_Image: TImage;
+
+{ var Option_*_Options: TStringArray;
+  The different options for the option dialog. Consts are associated with these
+  arrays.                                                                      }
+var
+  Option_URL_Options, Option_File_Options: TStringArray;
+
+{
+  Method to close the form, disables `Option_Timer' as well.
+}
+procedure OptionCloseForm(Sender: TObject);
+begin
+  OptionForm.MODALRESULT := mrOk;
+  Option_Timer.ENABLED := False;
+end;
+
+{
+  Method which will reset the `Option_Timer' when User Input is detected. It is
+  currently called when the User Click on a radio button of `Option_RadGrp'.
+}
+procedure OptionResetTimer(Sender: TObject);
+begin
+  Option_Timer.ENABLED := False;
+  Option_Timer_Label.ENABLED := False;
+
+  Option_Timer.ENABLED := True;
+  Option_Timer_Label.ENABLED := True;
+
+  Option_Default_Time := GetSystemTime;
+  Option_Timer_Label.ONTIMER(Option_Timer_Label);
+end;
+
+{
+  Modifies a label based on a timer to show how many seconds left until the form
+  auto-picks the option listed.
+}
+procedure DefaultLabel(Sender: TObject);
+var
+  t: Integer;
+begin
+  t := Settings_DEFAULT_TIMEOUT-((GetSystemTime-Option_Default_Time) div 1000);
+  Option_Label_Default.CAPTION := format('Selecting in %ds', [t]);
+  if (t < 6) then
+    Option_Label_Default.FONT.Style := [fsBold]
+  else
+    Option_Label_Default.FONT.Style := [];
+end;
+
+{
+  Loads and Shows the form. `isURL' depicts whether or not its a file path vs. a
+  URL. `path' is the actual path which is displayed on the form.
+
+  This method needs to be called in a SafeThread when testing. This is covered
+  later on using the `TESTING' define.
+}
+procedure LoadOptionDialog(const isURL: Boolean; const path: String);
+var
+  i, w, h: Integer;
+begin
+  {
+    Load the form.
+  }
+  OptionForm := TForm.Create(nil);
+  OptionForm.BringToFront;
+  OptionForm.Visible := False;
+  OptionForm.BORDERSTYLE := bsSingle;
+  OptionForm.BORDERICONS := [biSystemMenu];
+  OptionForm.SetBounds({L} 100, {T} 100, {W} 200, {H} 150);
+  OptionForm.POSITION := poDesktopCenter;
+
+  Option_Lock_Image := TImage.Create(OptionForm);
+  Option_Lock_Image.Parent := OptionForm;
+  w := Icon_Lock.Width;
+  h := Icon_Lock.Height;
+  Icon_Lock.DrawToCanvas(0, 0, Option_Lock_Image.Canvas);
+  Option_Lock_Image.SetBounds({L} 140, {T} 10, w, h);
+  Option_Lock_Image.Visible:= True;
+
+  Option_Label_Title := TLabel.Create(OptionForm);
+  Option_Label_Title.Parent := OptionForm;
+  Option_Label_Title.setBounds({L} 10, {T} 20, {W} 130, {H} 50);
+  Option_Label_Title.FONT.Size := 20;
+  Option_Label_Title.Visible := True;
+  Option_Label_Title.WORDWRAP := True;
+
+  Option_Label_Path := TLabel.Create(OptionForm);
+  Option_Label_Path.Parent := OptionForm;
+  Option_Label_Path.Left := 10;
+  Option_Label_Path.Top := 65;
+  Option_Label_Path.Visible := True;
+  Option_Label_Path.FONT.Style := [fsBold];
+  Option_Label_Path.WORDWRAP := True;
+  Option_Label_Path.ShowHint := True;
+
+  Option_Button_Okay := TButton.Create(OptionForm);
+  Option_Button_Okay.Parent := OptionForm;
+  Option_Button_Okay.CAPTION := 'Okay';
+  Option_Button_Okay.Left := 115;
+  Option_Button_Okay.Top := 120;
+  Option_Button_Okay.Visible := True;
+  Option_Button_Okay.ONCLICK := @OptionCloseForm;
+
+  Option_Label_Default := TLabel.Create(OptionForm);
+  Option_Label_Default.Parent := OptionForm;
+  Option_Label_Default.Left := 10;
+  Option_Label_Default.Top := 125;
+  Option_Label_Default.Visible := True;
+
+  Option_Timer := TTimer.Create(OptionForm);
+  Option_Timer.INTERVAL := Settings_DEFAULT_TIMEOUT * 1000;
+  Option_Timer.ONTIMER := @OptionCloseForm;
+  Option_Timer.ENABLED := True;
+
+  Option_Timer_Label := TTimer.Create(OptionForm);
+  Option_Timer_Label.INTERVAL := 1000;
+  Option_Timer_Label.ONTIMER := @DefaultLabel;
+  Option_Timer_Label.ENABLED := True;
+  Option_Default_Time := GetSystemTime;
+  Option_Timer_Label.ONTIMER(Option_Timer_Label);
+
+  Option_ComboBox := TComboBox.Create(OptionForm);
+  Option_ComboBox.Parent := OptionForm;
+  Option_ComboBox.SetBounds({L} 10, {T} 90, {W} 180, {H} 30);
+  Option_ComboBox.ONCHANGE := @OptionResetTimer;
+  Option_ComboBox.CLEAR;
+
+  {
+    Use the passed parameters to change how the form looks depending on whether
+    its a URL or a File path.
+  }
+  if (isURL) then
+  begin
+    { Form Caption }
+    OptionForm.CAPTION := 'Security - Fire Wall';
+    Option_Label_Title.CAPTION := 'Fire Wall';
+
+    { Fill the combo box with options. }
+    for i := 0 to high(Option_URL_Options) do
+      Option_ComboBox.ITEMS.Add(Option_URL_Options[i]);
+
+    { Default Option: }
+    Option_ComboBox.ITEMINDEX := Settings_DEFAULT_URL;
+
+    { Show the path in question. }
+    Option_Label_Path.CAPTION := Path;
+  end else
+  begin
+    { Form Captions. }
+    OptionForm.CAPTION := 'Security - File Wall';
+    Option_Label_Title.CAPTION := 'File Wall';
+
+    { Fill the combo box with options. }
+    for i := 0 to high(Option_File_Options) do
+      Option_ComboBox.ITEMS.Add(Option_File_Options[i]);
+
+    { Default Option: }
+    Option_ComboBox.ITEMINDEX := Settings_DEFAULT_FILE;
+
+    { Show the path in question. }
+    Option_Label_Path.CAPTION := substitutePaths(Path);
+  end;
+
+  { Display the full path as a hint. }
+  Option_Label_Path.Hint := Path;
+
+  OptionForm.ShowModal;
+end;
+
+function ShowOptionDialog(const isURL: Boolean; const path: String): Integer;
+{$IFNDEF EXTENSION}
+var
+  V: TVariantArray;
+{$ENDIF}
+begin
+  {$IFNDEF EXTENSION}
+  V := [isURL, path];
+  ThreadSafeCall('LoadOptionDialog', V);
+  {$ELSE}
+  LoadOptionDialog(isURL, path);
+  {$ENDIF}
+
+  Result := Option_ComboBox.ITEMINDEX - 2;
+
+  OptionForm.Free;
+end;
+
+function _checkPath(p: String; w: Integer; var cont: Boolean): Boolean;
+var
+  i, h: Integer;
+begin
+  Result := False;
+  h := High(pathArr[w]);
+  for i := 0 to h do
+  begin
+    if InStrArray(p, pathArr[w][i].a) then
+    begin
+      Result := True;
+      cont := (i mod 2) = 0;
+      Exit;
+    end;
+  end;
+end;
+
+procedure onOpenConnection(var url: string; var Cont: boolean);
+var
+  tmp_url: String;
+begin
+  if (not (SecurityEnabled and Settings_FIRE_WALL_ENABLED)) then
+    Exit;
+
+  tmp_url := trimPHPParams(lowercase(url));
+
+  { Check the Loaded URLs }
+  if _checkPath(tmp_url, WALL_FIRE, cont) then
+  begin
+    if (not cont) then
+      SecurityWarn(
+        Format('Blocked URL ''%s'' was attempted to be accessed.', [tmp_url])
+      );
+
+    Exit;
+  end;
+
+  {
+    Ask what to do with URL using the Dialog.
+  }
+  case ShowOptionDialog(True, tmp_url) of
+    ALLOW_ONCE:
+      Cont := True;
+    DENY_ONCE:
+      Cont := False;
+
+    ALLOW_LOCAL:
+      begin
+        _AddStr(tmp_url, WALL_FIRE, ALLOW_LOCAL);
+        Cont := True;
+      end;
+    DENY_LOCAL:
+      begin
+        _AddStr(tmp_url, WALL_FIRE, DENY_LOCAL);
+        Cont := False;
+      end;
+
+    ALLOW_ALWAYS:
+      begin
+        _AddStr(tmp_url, WALL_FIRE, ALLOW_ALWAYS);
+        Cont := True;
+      end;
+    DENY_ALWAYS:
+      begin
+        _AddStr(tmp_url, WALL_FIRE, DENY_ALWAYS);
+        Cont := False;
+      end;
+  end;
+
+  Writeln(Format('Cont [%s] URL [%s]', [BoolToStr(Cont), tmp_url]));
+end;
+
+procedure onOpenFile(var FileName : string; var Cont : boolean);
+var
+  dir: String;
+begin
+  if (not (SecurityEnabled and Settings_FILE_WALL_ENABLED)) then
+    Exit;
+  {
+    check if in either Allowed_URLs, or Local_Allowed_URL
+  }
+  dir := Copy(FileName, 1, LastPos('\', FileName));
+
+  //Writeln(Format('Dir [%s] File [%s]', [dir, FileName]));
+
+  { Check the Loaded URLs }
+  if InStrArray(dir, PathArr[WALL_FILE][ALLOW_ALWAYS_DIR].a) then
+  begin
+    Cont := True;
+    Exit;
+  end;
+
+  if InStrArray(dir, PathArr[WALL_FILE][DENY_ALWAYS_DIR].a) then
+  begin
+    SecurityWarn(Format('File in dir: %s was attempted to be used.', [dir]));
+    Cont := False;
+    Exit;
+  end;
+
+  if InStrArray(FileName, PathArr[WALL_FILE][ALLOW_LOCAL].a) then
+  begin
+    Cont := True;
+    Exit;
+  end;
+
+  if InStrArray(FileName, PathArr[WALL_FILE][DENY_LOCAL].a) then
+  begin
+    SecurityWarn(Format('File: %s was attempted to be used.', [FileName]));
+    Cont := False;
+    Exit;
+  end;
+
+  if InStrArray(FileName, PathArr[WALL_FILE][ALLOW_ALWAYS].a) then
+  begin
+    Cont := True;
+    Exit;
+  end;
+
+  if InStrArray(FileName, PathArr[WALL_FILE][DENY_ALWAYS].a) then
+  begin
+    SecurityWarn(Format('File: %s was attempted to be used.', [FileName]));
+    Cont := False;
+    Exit;
+  end;
+
+  {
+    Ask what to do with File Path using the Dialog.
+  }
+  case ShowOptionDialog(False, FileName) of
+    ALLOW_ONCE:
+      Cont := True;
+    DENY_ONCE:
+      Cont := False;
+
+    ALLOW_LOCAL:
+      begin
+        _AddStr(FileName, WALL_FILE, ALLOW_LOCAL);
+        Cont := True;
+      end;
+    DENY_LOCAL:
+      begin
+        _AddStr(FileName, WALL_FILE, DENY_LOCAL);
+        Cont := False;
+      end;
+
+    ALLOW_ALWAYS:
+      begin
+        _AddStr(FileName, WALL_FILE, ALLOW_ALWAYS);
+        Cont := True;
+      end;
+    DENY_ALWAYS:
+      begin
+        _AddStr(FileName, WALL_FILE, DENY_ALWAYS);
+        Cont := False;
+      end;
+
+    ALLOW_ALWAYS_DIR:
+      begin
+        _AddStr(dir, WALL_FILE, ALLOW_ALWAYS_DIR);
+        Cont := True;
+      end;
+    DENY_ALWAYS_DIR:
+      begin
+        _AddStr(dir, WALL_FILE, DENY_ALWAYS_DIR);
+        Cont := False;
+      end;
+  end;
+
+  Writeln(Format('Cont [%s] File [%s]', [BoolToStr(Cont), FileName]));
+end;
+
+procedure onWriteFile(var FileName : string; var Cont : boolean);
+begin
+  onOpenFile(FileName, Cont);
+end;
+
+
+{
+   Shows a dialog to make sure one wants to quit.
+}
+{$IFDEF EXTENSION}
+procedure OnMenuCheckClick(Sender: TObject);
+begin
+  if (MenuCheck.checked) then
+  begin
+    case MessageDlg(
+      'Security',
+      'Are you sure you want to disable Security?',
+      mtConfirmation,
+      [mbNo,mbYes],
+      0
+    ) of
+          mrNo : Exit;
+          else
+            Writeln('Security Disabled.');
+    end;
+  end else
+    Writeln('Security Enabled.');
+
+  MenuCheck.checked := not MenuCheck.checked;
+  Settings.setKeyValue('SecurityEnabled', toStr(MenuCheck.checked));
+  SecurityEnabled := MenuCheck.CHECKED;
+end;
+{$ENDIF}
+
+{
+  Consts for array parts in the different components of the settings form.
+}
+const
+  TAB_MAIN = 0;
+  TAB_FIRE = 1;
+  TAB_FILE = 2;
+  LIST_BLACK = 0;
+  LIST_WHITE = 1;
+
+  LIST_FILE = 0;
+  LIST_DIR = 1;
+  BUTTON_ADD = 0;
+  BUTTON_DELETE = 1;
+
+  DEFAULT_FIRE_OPT = 0;
+  DEFAULT_FILE_OPT = 1;
+
+{
+  var SForm_*;
+  Variables for the different components of the settings form.
+}
+var
+  SettingsForm: TForm;
+  SForm_PageControl: TPageControl;
+  SForm_Tabs: array [0..2] of TTabSheet;
+  SForm_File_ListBoxs: array [0..1] of array [0..1] of TListBox;
+  SForm_File_Radios: array [0..1] of TRadioButton;
+  SForm_Fire_ListBoxs: array [0..1] of TListBox;
+  SForm_ListLabels: array [1..2] of array [0..1] of TLabel;
+  SForm_ManiButtons: array [1..2] of array [0..1] of TButton;
+  SForm_ChkBox_Enabled: array [1..2] of TCheckBox;
+  SForm_DefOpts_Labels: array [0..3] of TLabel;
+  SForm_DefOpts_Combobox: array [0..1] of TComboBox;
+  SForm_DefOpts_SpinEdit: TEdit; //SpinEdit;
+  SForm_Title: TLabel;
+  SForm_QuitButton: TButton;
+  SForm_Icon: TImage;
+
+{
+  Change between working with directories or with Files.
+}
+procedure SForm_ChangeFileDir(Sender: TObject);
+var
+  b: Boolean;
+  i: Integer;
+begin
+  b := (Sender = SForm_File_Radios[LIST_FILE]);
+  for i := 0 to 1 do
+  begin
+    SForm_File_ListBoxs[List_FILE][i].Visible := b;
+    SForm_File_ListBoxs[List_FILE][i].Enabled := b;
+    SForm_File_ListBoxs[List_DIR][i].Visible := not b;
+    SForm_File_ListBoxs[List_DIR][i].Enabled := not b;
+  end;
+end;
+
+var
+  __SForm_ListBox_DragPoint: TPoint;
+  __SForm_ListBox: TListBox;
+
+{
+  Load a point, then store where it started from.
+}
+procedure SForm_List_MouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if (Button <> mbMiddle) then
+  begin
+    __SForm_ListBox_DragPoint := Point(x, y);
+    __SForm_ListBox := TListBox(Sender);
+  end;
+end;
+
+{
+  Check if the sender is not the same as the source, thus allowable to be
+  dragged.
+}
+procedure SForm_List_DragOver(
+  Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean
+);
+begin
+  Accept := Sender <> Source;
+end;
+
+{
+  Moves item from Source to Sender.
+}
+procedure SForm_List_DragDrop(Sender, Source: TObject; X, Y: Integer);
+var
+  src, snd: TListBox;
+  srcPos: Integer;
+begin
+  if (Sender = Source) then Exit;
+
+  src := TListBox(Source);
+  snd := TListBox(Sender);
+
+  { Get the items at the source position. }
+  srcPos := src.ITEMATPOS(__SForm_ListBox_DragPoint, True);
+
+  __SForm_ListBox_DragPoint := Point(-1,-1);
+
+  { If the source position doesn't exist, we can't move anything, eh. }
+  if (srcPos < 0) then
+    Exit;
+
+  { Move the items around. }
+  snd.ITEMS.Add(src.ITEMS.Strings[srcPos]);
+  src.ITEMS.Delete(srcPos);
+end;
+
+{
+  Adds and removes items based on which items are clicked.
+}
+procedure SForm_ManiItems(Sender: TObject);
+var
+  addString: String;
+  delInd: Integer;
+begin
+  if (__SForm_ListBox = nil) then
+    Exit;
+
+  case Sender of
+    SForm_ManiButtons[TAB_FIRE][BUTTON_ADD],
+    SForm_ManiButtons[TAB_FILE][BUTTON_ADD]:
+      begin
+        //writeln('pushed button_add');
+        if (not InputQuery(
+          'Add Item:',
+          'Please input your new item.',
+          addString)
+        ) then
+          Exit;
+
+        __SForm_ListBox.ITEMS.Add(addString);
+      end;
+
+    SForm_ManiButtons[TAB_FIRE][BUTTON_DELETE],
+    SForm_ManiButtons[TAB_FILE][BUTTON_DELETE]:
+      begin
+        delInd := __SForm_ListBox.ITEMATPOS(__SForm_ListBox_DragPoint, True);
+        __SForm_ListBox.ITEMS.Delete(delInd);
+      end;
+  end;
+
+  __SForm_ListBox := nil;
+  __SForm_ListBox_DragPoint := Point(-1, -1);
+end;
+
+{
+  Small Hack to remove the need to disable all the different items each time.
+}
+procedure SForm_PC_Change(Sender: TObject);
+begin
+  __SForm_ListBox := nil;
+  __SForm_ListBox_DragPoint := Point(-1, -1);
+end;
+
+{
+  Handles when the enabling check boxs are clicked. It will disable the
+  necessary components.
+}
+procedure SForm_ChkBox_Click(Sender: TObject);
+var
+  i, j: Integer;
+  b, bb: Boolean;
+begin
+  b := TCheckBox(Sender).Checked;
+  case Sender of
+    SForm_ChkBox_Enabled[Tab_FIRE]:
+      begin
+        for i := 0 to 1 do
+        begin
+          SForm_Fire_ListBoxs[i].Enabled := b;
+          SForm_ManiButtons[Tab_FIRE][i].Enabled := b;
+        end;
+      end;
+
+    SForm_ChkBox_Enabled[Tab_FILE]:
+      begin
+        bb := SForm_File_Radios[0].Checked;
+        for i := 0 to 1 do
+        begin
+          for j := 0 to 1 do
+            SForm_File_ListBoxs[i][j].Enabled := b;
+          SForm_ManiButtons[Tab_FILE][i].Enabled := b;
+          SForm_File_Radios[i].Enabled := b;
+          if (b) then
+          begin
+            if (i = 1) then bb := not bb;
+            SForm_File_ListBoxs[i][0].Enabled := bb;
+            SForm_File_ListBoxs[i][1].Enabled := bb;
+          end;
+        end;
+      end;
+  end;
+end;
+
+procedure asdf();
+begin
+end;
+
+{
+  Loads the settings from the XML document to the forms components.
+}
+procedure LoadSettingsXML;
+var
+  i,j,k,h: Integer;
+begin
+  {$IFDEF EXTENSION}
+  Settings_DEFAULT_URL := 2 + StrToInt(
+    Settings.getKeyValueDef('Default_URL', toStr(ALLOW_ONCE))
+  );
+  Settings_DEFAULT_FILE := 2 + StrToInt(
+    Settings.getKeyValueDef('Default_File', toStr(ALLOW_ONCE))
+  );
+  Settings_DEFAULT_TIMEOUT := StrToInt(
+    Settings.getKeyValueDef('Settings_TimeOut', '60')
+  );
+  Settings_FILE_WALL_ENABLED := StrToBool(
+    Settings.getKeyValueDef('Settings_FileWallOn', 'True')
+  );
+  Settings_FIRE_WALL_ENABLED := StrToBool(
+    Settings.getKeyValueDef('Settings_FireWallOn', 'True')
+  );
+  {$ENDIF}
+  SForm_ChkBox_Enabled[Tab_FIRE].CHECKED := Settings_FIRE_WALL_ENABLED;
+  SForm_ChkBox_Enabled[Tab_FILE].CHECKED := Settings_FILE_WALL_ENABLED;
+  SForm_DefOpts_Combobox[0].ITEMINDEX := Settings_DEFAULT_URL;
+  SForm_DefOpts_ComboBox[1].ITEMINDEX := Settings_DEFAULT_FILE;
+  SForm_DefOpts_SpinEdit.TEXT := toStr(Settings_DEFAULT_TIMEOUT);
+
+  if (not SForm_ChkBox_Enabled[Tab_FIRE].checked) then
+    for i := 0 to 1 do
+      begin
+        SForm_Fire_ListBoxs[i].Enabled := False;
+        SForm_ManiButtons[Tab_FIRE][i].Enabled := False;
+      end;
+
+  if (not SForm_ChkBox_Enabled[Tab_FILE].checked) then
+    for i := 0 to 1 do
+    begin
+      for j := 0 to 1 do
+        SForm_File_ListBoxs[i][j].Enabled := False;
+      SForm_ManiButtons[Tab_FILE][i].Enabled := False;
+      SForm_File_Radios[i].Enabled := False;
+      SForm_File_ListBoxs[i][0].Enabled := False;
+      SForm_File_ListBoxs[i][1].Enabled := False;
+    end;
+
+  for i := LIST_BLACK to LIST_WHITE do
+  begin
+    { Depending on which list, you know which list to use. }
+    if (i = LIST_BLACK) then
+      h := DENY_ALWAYS
+    else
+      h := ALLOW_ALWAYS;
+    for j := 0 to High(PathArr[WALL_FIRE][h].a) do
+      SForm_Fire_ListBoxs[i].ITEMS.Add(
+        PathArr[WALL_FIRE][h].a[j]
+      );
+  end;
+
+  for i := 0 to 1 do
+    for j := LIST_BLACK to LIST_WHITE do
+    begin
+      { Depending on which list, you know which list to use. }
+      if (j = LIST_BLACK) then
+        h := DENY_ALWAYS
+      else
+        h := ALLOW_ALWAYS;
+      for k := 0 to High(PathArr[WALL_FILE][h].a) do
+        SForm_File_ListBoxs[i][j].ITEMS.Add(
+          PathArr[WALL_FILE][h].a[k]
+        );
+    end;
+end;
+
+{
+  Private method for imploding the TListBox strings into a single String object.
+}
+function __implodeListBox(obj: TListBox): String;
+var
+  i, h: Integer;
+  t: String;
+begin
+  h := obj.ITEMS.Count - 1;
+  Result := '';
+  t := DirectorySeparator;
+  for i := 0 to h do
+    if (obj.ITEMS.Strings[i] <> '') then
+      Result := Result + obj.ITEMS.Strings[i] + t;
+
+  Delete(Result, Length(Result)-Length(t), Length(Result));
+end;
+
+{
+  Private method for converting from TStrings to TStringArray.
+}
+function __TStringsToStrArr(obj: TStrings): TStringArray;
+var
+  i, h: Integer;
+begin
+  SetLength(Result, obj.Count);
+  h := obj.count - 1;
+  for i := 0 to h do
+    Result[i] := obj.Strings[i];
+end;
+
+{
+  Method to save the various settings from the various form components.
+}
+procedure SaveSettingsXML;
+begin
+  {$IFDEF EXTENSION}
+  Settings.setKeyValue('Default_URL', toStr(SForm_DefOpts_ComboBox[0].ITEMINDEX-2));
+  Settings.setKeyValue('Default_File', toStr(SForm_DefOpts_ComboBox[1].ITEMINDEX-2));
+  Settings.setKeyValue('Settings_TimeOut', SForm_DefOpts_SpinEdit.TEXT);
+  Settings.setKeyValue(
+    'Settings_FireWallOn',
+    toStr(SForm_ChkBox_Enabled[Tab_FIRE].CHECKED)
+  );
+  Settings.setKeyValue(
+    'Settings_FileWallOn',
+    toStr(SForm_ChkBox_Enabled[Tab_FILE].CHECKED)
+  );
+
+  { Save the lists. }
+
+  Settings.setKeyValue(
+    PathArr[WALL_FIRE][ALLOW_ALWAYS].name,
+    __implodeListBox(SForm_Fire_ListBoxs[LIST_WHITE])
+  );
+
+  Settings.setKeyValue(
+    PathArr[WALL_FIRE][DENY_ALWAYS].name,
+    __implodeListBox(SForm_Fire_ListBoxs[LIST_BLACK])
+  );
+
+  Settings.setKeyValue(
+    PathArr[WALL_FILE][ALLOW_ALWAYS].name,
+    __implodeListBox(SForm_File_ListBoxs[LIST_FILE][LIST_WHITE])
+  );
+
+  Settings.setKeyValue(
+    PathArr[WALL_FILE][DENY_ALWAYS].name,
+    __implodeListBox(SForm_File_ListBoxs[LIST_FILE][LIST_BLACK])
+  );
+
+  Settings.setKeyValue(
+    PathArr[WALL_FILE][ALLOW_ALWAYS_DIR].name,
+    __implodeListBox(SForm_File_ListBoxs[LIST_DIR][LIST_WHITE])
+  );
+
+  Settings.setKeyValue(
+    PathArr[WALL_FILE][DENY_ALWAYS_DIR].name,
+    __implodeListBox(SForm_File_ListBoxs[LIST_DIR][LIST_BLACK])
+  );
+  {$ENDIF}
+
+  PathArr[WALL_FIRE][ALLOW_ALWAYS].a := __TStringsToStrArr(
+    SForm_Fire_ListBoxs[LIST_WHITE].ITEMS
+  );
+
+  PathArr[WALL_FIRE][DENY_ALWAYS].a := __TStringsToStrArr(
+    SForm_Fire_ListBoxs[LIST_BLACK].ITEMS
+  );
+
+  PathArr[WALL_FILE][ALLOW_ALWAYS].a := __TStringsToStrArr(
+    SForm_File_ListBoxs[LIST_FILE][LIST_WHITE].ITEMS
+  );
+
+  PathArr[WALL_FILE][DENY_ALWAYS].a := __TStringsToStrArr(
+    SForm_File_ListBoxs[LIST_FILE][LIST_BLACK].ITEMS
+  );
+
+  PathArr[WALL_FILE][ALLOW_ALWAYS_DIR].a := __TStringsToStrArr(
+    SForm_File_ListBoxs[LIST_DIR][LIST_WHITE].ITEMS
+  );
+
+  PathArr[WALL_FILE][DENY_ALWAYS_DIR].a := __TStringsToStrArr(
+    SForm_File_ListBoxs[LIST_DIR][LIST_BLACK].ITEMS
+  );
+end;
+
+procedure SForm_OnQuit(Sender: TObject);
+begin
+  SaveSettingsXML;
+  SettingsForm.MODALRESULT := mrOK;
+end;
+
+procedure LoadSettingsForm;
+var
+  i, j, w, h: Integer;
+  tmpStrings: TStringArray;
+begin
+  { MainForm: }
+  SettingsForm := TForm.Create(nil);
+  SettingsForm.SetBounds({L} 200, {T} 100, {L} 400, {H} 290);
+  SettingsForm.BringToFront;
+  SettingsForm.Visible := False;
+  SettingsForm.BORDERSTYLE := bsSingle;
+  SettingsForm.BORDERICONS := [biSystemMenu];
+  SettingsForm.CAPTION := 'Security Settings';
+  SettingsForm.POSITION := poDesktopCenter;
+
+  SForm_PageControl := TPageControl.Create(SettingsForm);
+  SForm_PageControl.Parent := SettingsForm;
+  SForm_PageControl.SetBounds({L} 0, {T} 0, {W} 400, {H} 230);
+
+  { Tab Setups: }
+  { Load all the tabs }
+  tmpStrings := ['Main', 'Fire Wall', 'File Wall'];
+  for i := 0 to 2 do
+  begin
+    SForm_Tabs[i] := TTabSheet.Create(SettingsForm);
+    SForm_Tabs[i].Parent := SettingsForm;
+    SForm_Tabs[i].PageControl := SForm_PageControl;
+    SForm_Tabs[i].CAPTION := tmpStrings[i];
+    SForm_Tabs[i].ONSHOW := @SForm_PC_Change;
+  end;
+
+  tmpStrings := [
+    'Default Option Timeout:', 'Default Fire Wall:', 'Default File Wall:'
+  ];
+  for i := 0 to 2 do
+  begin
+    SForm_DefOpts_Labels[i] := TLabel.Create(SForm_Tabs[0]);
+    SForm_DefOpts_Labels[i].Parent := SForm_Tabs[0];
+    SForm_DefOpts_Labels[i].CAPTION := tmpStrings[i];
+    SForm_DefOpts_Labels[i].SetBounds({L} 255,{T} 20+50*i,{W} 100,{H} 20);
+  end;
+
+  SForm_DefOpts_SpinEdit := TEdit.Create(SForm_Tabs[0]);
+  SForm_DefOpts_SpinEdit.Parent := SForm_Tabs[0];
+  SForm_DefOpts_SpinEdit.SetBounds(250, 40, 125, 20);
+
+  for i  := 0 to 1 do
+  begin
+    SForm_DefOpts_Combobox[i] := TComboBox.Create(SForm_Tabs[0]);
+    SForm_DefOpts_Combobox[i].Parent := SForm_Tabs[0];
+    SForm_DefOpts_Combobox[i].SetBounds({L} 250, {T} 90+50*i,{W} 125,{H} 20);
+    if (i=0) then
+      tmpStrings := Option_URL_Options
+    else
+      tmpStrings := Option_File_Options;
+
+    h := High(tmpStrings);
+    for j := 0 to h do
+      SForm_DefOpts_Combobox[i].ITEMS.Add(tmpStrings[j]);
+  end;
+
+  tmpStrings := ['Always Allow:', 'Always Deny:', 'Fire', 'File'];
+  for i := Tab_FIRE to Tab_FILE do
+  begin
+    { Load list labels. }
+    for j := LIST_BLACK to LIST_WHITE do
+    begin
+      SForm_ListLabels[i][j] := TLabel.Create(SForm_Tabs[i]);
+      SForm_ListLabels[i][j].Parent := SForm_Tabs[i];
+      SForm_ListLabels[i][j].CAPTION := tmpStrings[j];
+      SForm_ListLabels[i][j].SetBounds(5 + 250*j, 30, 150, 150);
+    end;
+
+    { Load Enabling CheckBoxs: }
+    SForm_ChkBox_Enabled[i] := TCheckBox.Create(SForm_Tabs[i]);
+    SForm_ChkBox_Enabled[i].Parent := SForm_Tabs[i];
+    SForm_ChkBox_Enabled[i].SetBounds({L} 5, {T} 8, {W} 150, {H} 100);
+    SForm_ChkBox_Enabled[i].CAPTION := 'Enable ' + tmpStrings[1+i] + ' Wall';
+    SForm_ChkBox_Enabled[i].ONCLICK := @SForm_ChkBox_Click;
+  end;
+
+  { Fire Wall Tab: }
+  for i := LIST_BLACK to LIST_WHITE do
+  begin
+    SForm_Fire_ListBoxs[i] := TListBox.Create(SForm_Tabs[TAB_FIRE]);
+    SForm_Fire_ListBoxs[i].Parent := SForm_Tabs[TAB_FIRE];
+    SForm_Fire_ListBoxs[i].SetBounds({L} 250*i, {T} 50, {W} 150, {H} 150);
+    SForm_Fire_ListBoxs[i].DRAGMODE := dmAutomatic;
+    SForm_Fire_ListBoxs[i].ENABLED := True;
+    SForm_Fire_ListBoxs[i].ONDRAGDROP := @SForm_List_DragDrop;
+    SForm_Fire_ListBoxs[i].ONMOUSEDOWN := @SForm_List_MouseDown;
+    SForm_Fire_ListBoxs[i].ONDRAGOVER := @SForm_List_DragOver;
+  end;
+
+  {
+    File Wall:
+  }
+  tmpStrings := ['Files', 'Directories'];
+  for i := 0 to 1 do
+  begin
+    SForm_File_Radios[i] := TRadioButton.Create(SForm_Tabs[Tab_FILE]);
+    SForm_File_Radios[i].Parent := SForm_Tabs[Tab_FILE];
+    SForm_File_Radios[i].SetBounds({L}200 + 90*i, {T}10, {W}150, 10);
+    SForm_File_Radios[i].CHECKED := (i = 0);
+    SForm_File_Radios[i].CAPTION := tmpStrings[i];
+    SForm_File_Radios[i].ONCLICK := @SForm_ChangeFileDir;
+  end;
+
+  { Create lists. }
+  for i := 0 to 1 do
+    for j := LIST_BLACK to LIST_WHITE do
+    begin
+      SForm_File_ListBoxs[i][j] := TListBox.Create(SForm_Tabs[TAB_FILE]);
+      SForm_File_ListBoxs[i][j].Parent := SForm_Tabs[TAB_FILE];
+      SForm_File_ListBoxs[i][j].SetBounds({L} 250*j, {T} 50, {W} 150, {H} 150);
+      SForm_File_ListBoxs[i][j].DRAGMODE := dmAutomatic;
+      SForm_File_ListBoxs[i][j].Visible := (i = 0);
+      SForm_File_ListBoxs[i][j].ENABLED := (i = 0);
+      SForm_File_ListBoxs[i][j].ONDRAGDROP := @SForm_List_DragDrop;
+      SForm_File_ListBoxs[i][j].ONMOUSEDOWN := @SForm_List_MouseDown;
+      SForm_File_ListBoxs[i][j].ONDRAGOVER := @SForm_List_DragOver;
+    end;
+
+  // Manipulation Buttons
+  tmpStrings := ['Add', 'Delete'];
+  for i := 1 to 2 do
+    for j := BUTTON_ADD to BUTTON_DELETE do
+    begin
+      SForm_ManiButtons[i][j] := TButton.Create(SForm_Tabs[i]);
+      SForm_ManiButtons[i][j].Parent := SForm_Tabs[i];
+      SForm_ManiButtons[i][j].setBounds({L} 175, {T} 100 + 30*j, {W} 50, {H} 20);
+      SForm_ManiButtons[i][j].Caption := tmpStrings[j];
+      SForm_ManiButtons[i][j].ONCLICK := @SForm_ManiItems;
+    end;
+
+  SForm_Icon := TImage.Create(SettingsForm);
+  SForm_Icon.Parent := SettingsForm;
+  w := Icon_Lock.Width;
+  h := Icon_Lock.Height;
+  Icon_Lock.DrawToCanvas(0, 0, SForm_Icon.Canvas);
+  SForm_Icon.SetBounds({L} 10, {T} 235, w, h);
+  SForm_Icon.Visible:= True;
+
+  SForm_QuitButton := TButton.Create(SettingsForm);
+  SForm_QuitButton.Parent := SettingsForm;
+  SForm_QuitButton.SetBounds({L}300, {T}250, {W}80, {H}20);
+  SForm_QuitButton.CAPTION := 'Save and Quit';
+  SForm_QuitButton.ONCLICK := @SForm_OnQuit;
+
+  SForm_Title := TLabel.Create(SettingsForm);
+  SForm_Title.Parent := SettingsForm;
+  SForm_Title.SetBounds(10 + w + 10, 235+(h div 2)-12, 200, 40);
+  SForm_Title.CAPTION := 'Security Settings';
+  SForm_Title.FONT.height := 25;
+
+  LoadSettingsXML;
+
+  SettingsForm.ShowModal;
+end;
+
+procedure ShowSettingsForm(Sender: TObject);
+{$IFNDEF EXTENSION}
+var
+  V: TVariantArray;
+{$ENDIF}
+begin
+  writeln('showing extention form.');
+  {$IFNDEF EXTENSION}
+  V := [];
+  ThreadSafeCall('LoadSettingsForm', V);
+  {$ELSE}
+  LoadSettingsForm;
+  {$ENDIF}
+
+  SettingsForm.Free;
+end;
+
+procedure Init;
+var
+  i, j, l: Integer;
+  ToolsMenu : TMenuItem;
+begin;
+  {
+    Load consts for the User Input Form.
+  }
+  Option_URL_Options := [
+    'Allow Once',
+    'Deny Once',
+    'Allow This Session',
+    'Deny This Session',
+    'Always Allow',
+    'Never Allow'
+  ];
+  Option_FILE_Options := [
+    'Allow Once',
+    'Deny Once',
+    'Allow This Session',
+    'Deny This Session',
+    'Always Allow for File',
+    'Never Allow for File',
+    'Always allow for Directory',
+    'Never allow for Directory'
+  ];
+
+  for i := 0 to 1 do
+  begin
+    if (i = 0) then
+      l := Length(Option_URL_Options)-2
+    else
+      l := Length(Option_FILE_Options)-2;
+
+    setLength(pathArr[i], l);
+    dec(l);
+    for j := 0 to l do
+    begin
+      pathArr[i][j].name := format('lists[%d][%d]', [i, j]);
+      {$IFDEF EXTENSION}
+      {
+        Load the previously saved settings.
+      }
+      //s :=
+      PathArr[i][j].a := Explode(
+        DirectorySeparator,
+        Settings.getKeyValue(PathArr[i][j].name)
+      );
+      {$ENDIF}
+    end;
+  end;
+
+  {$IFDEF EXTENSION}
+  {
+    Load Default Settings from Settings.xml
+  }
+  Settings_DEFAULT_URL := StrToInt(
+    Settings.getKeyValueDef('Default_URL', toStr(ALLOW_ONCE))
+  );
+  Settings_DEFAULT_FILE := StrToInt(
+    Settings.getKeyValueDef('Default_File', toStr(ALLOW_ONCE))
+  );
+  Settings_DEFAULT_TIMEOUT := StrToInt(
+    Settings.getKeyValueDef('Settings_TimeOut', '60')
+  );
+  Settings_FILE_WALL_ENABLED := StrToBool(
+    Settings.getKeyValueDef('Settings_FileWallOn', 'True')
+  );
+  Settings_FIRE_WALL_ENABLED := StrToBool(
+    Settings.getKeyValueDef('Settings_FireWallOn', 'True')
+  );
+  {
+    Find the Tools Menu.
+  }
+  for i := 0 to Simba_MainMenu.Items.count - 1 do
+  begin
+    if (Simba_MainMenu.Items.items[i].caption = '&Tools') then
+    begin
+      ToolsMenu := Simba_MainMenu.Items.items[i];
+      Break;
+    end;
+  end;
+
+  if (ToolsMenu = nil) then
+  begin
+    Writeln('Could not find tools menu.');
+    Exit;
+  end;
+
+  { Load the Menu Items into the Tools menu. }
+  MenuHead := TMenuItem.Create(ToolsMenu);
+  MenuHead.caption := 'Se&curity';
+  ToolsMenu.Add(MenuHead);
+
+  MenuCheck := TMenuItem.CREATE(MenuHead);
+  MenuCheck.caption := 'Security &Enabled';
+  MenuCheck.checked := LowerCase(Settings.getKeyValueDef('SecurityEnabled',
+                                                         'true')) = 'true';
+  MenuCheck.OnClick := @OnMenuCheckClick;
+  MenuHead.add(MenuCheck);
+  SecurityEnabled := MenuCheck.CHECKED;
+
+  MenuEdit := TMenuItem.CREATE(MenuHead);
+  MenuEdit.caption := '&Settings';
+  MenuEdit.OnClick := @ShowSettingsForm;
+  MenuHead.Add(MenuEdit);
+  {$ELSE}
+  SecurityEnabled := True;
+
+  Settings_DEFAULT_URL := ALLOW_ONCE;
+  Settings_DEFAULT_FILE := ALLOW_ONCE;
+  Settings_DEFAULT_TIMEOUT := 30;
+  Settings_FILE_WALL_ENABLED := True;
+  Settings_FIRE_WALL_ENABLED := True;
+  {$ENDIF}
+
+  Icon_Lock := GetMufasaBitmap(
+    BitmapFromString(
+      48, 48,
+      'meJzFmAlUk3fWxnG3gI61TqeLa5' +
+      '3W+aZal7p+LqAoCtZdQEERBAEXRCwqSt2qVo/S1rpVqfpZkUUWUUG' +
+      'QHQIJBLIvJCQsISyBkH0PAe7cVz4Zj2PV8ejMPTmc5Jx/3vze5z53' +
+      'ebGze4fBZDLPnz+/d+/eHTt27N69+/Dhw7GxsTU1Ne/yN18cubm5h' +
+      'w4d2rp1a1RU1NWrV+Pj42/fvv3TTz9FRET4+/uHh4cXFRX9x2BYLF' +
+      'ZgYCCqQaFQFAqF2WyGp6HX6+l0+oULF/DAgQMHGhsb3zXMgwcPtmz' +
+      'ZcunSpebmZpVK1dTU1NLSgm+sVis8EwKB4NSpU35+fgUFBe8O5pdf' +
+      'fgkICEhKSmptbZVIJFVVVXw+v7a2tr6+HvGeQ7LZbMnJyZi+1NTUd' +
+      'wETGRm5a9euwsJCFITL5VKp1LKyMhKJdPPmzaNHj6Kdzp07h2o8mz' +
+      '4M1BNthn57iyRisTg4OBity2azGxoakCQvLy8rKwtvHzEwKceOHbt' +
+      '48eLBgwd9fX2/++47rLseGI1Ggwm9fPkyIkml0jcGKNJBiR563hfk' +
+      '5OAvYl1jUkQiERZOWloaFhRaCGs8NDRUKBT2fhGlO3HiBOYID6C38' +
+      'SOyZWZm7tmzB+V9A5IbCUmTBWBXCX1oMFsM0cnpoZs2JCQmyuVyDo' +
+      'eTnZ19586dK1euHD9+HBU7cuTICy+Sn5+Pt4DA6OrHjx/HxcWdPHk' +
+      'SqwBL79+CSVaDIxscC7WL7lUtTa8eTjEMeVR/Ma+sW6PksJjp6enX' +
+      'rl374YcfsMlgOWPbecmlMK3ofCRJSUnBVGJCMZX43deH2SwhNBmT1' +
+      'bwxmb4tlb4lhb4umTUyX/mnKtjPlmWnP7x+5dKRo0cxQUFBQXjXr7' +
+      'wgpgwFRD3PnDmzf/9+Hx+fkJCQ1yGpNsNnfOhPscy5Xx2SQgtMY25' +
+      'MZngmM9cnMVbH0ybcq7Er65hcLI04HR0R6PdtUIBYIHidy8pkMrQN' +
+      'mhl9jrewYsUKTOIrv3WuFQYyYUS+wiOFFXGvMvAe0zuZ4XGXsTaJs' +
+      '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' +
+      'NOJAeU='
+    )
+  );
+  Icon_Lock.Name := 'Security-lock-icon.bmp';
+  Icon_Lock.FastReplaceColor(clBlack, 13160660);
+end;
+
+procedure Free;
+begin
+  // Only here so people won't freak out. :)
+  Icon_Lock.Free;
+end;
+
+{$IFDEF EXTENSION}
+procedure Attach;
+begin;
+  Writeln('Security Extention started.');
+  MenuHead.Visible := True;
+  SecurityEnabled := MenuCheck.CHECKED;
+end;
+
+procedure Detach;
+begin
+  MenuHead.Visible := False;
+  SecurityEnabled := False;
+end;
+
+function GetName: string;
+begin;
+  result := 'Security Extension';
+end;
+
+function GetVersion: string;
+begin;
+  result := '0.1';
+end;
+{$ENDIF}
+
+{$IFNDEF EXTENSION}
+var
+  cont: Boolean;
+  URL, FileName: String;
+{$ENDIF}
+begin
+  {$IFNDEF EXTENSION}Init;
+
+  ShowSettingsForm(nil);
+  {
+  //writeln(DirectorySeperator);
+  URL := 'http://www.google.ca/search?sourceid=chrome&ie=UTF-8&q=fpc+format';
+  onOpenConnection(URL, cont);
+  onOpenConnection(URL, cont);
+
+  FileName := ScriptPath + 'tmp.txt';
+  onOpenFile(FileName, cont);
+       }
+  Free;
+  {$ENDIF}
+end.
