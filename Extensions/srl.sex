@@ -65,15 +65,15 @@ begin
 		    Failed := not UnTarEx(DeContents,PluginPath,false);
 		end;
 	if Failed then
-  begin
+    begin
 	  Writeln('Failed to update the plugins');
-    Memo.Lines.Add('Failed to update the plugins');
-  end
+      Memo.Lines.Add('Failed to update the plugins');
+    end
 	else
-  begin
+    begin
 	  Writeln('Succesfully updated your plugins.');
-    Memo.Lines.Add('Succesfully updated your plugins.');
-  end;
+      Memo.Lines.Add('Succesfully updated your plugins.');
+    end;
 	DeContents := '';
 	Contents := '';
 	Result := Failed;
@@ -87,10 +87,10 @@ var
   DeContents : string;
   Failed : boolean;
 begin
-  Memo.Lines.Add('Downloading SRL...');
+    Memo.Lines.Add('Downloading SRL...');
 	Contents := GetPage('http://wizzup.org/static/srl/srl.tar.bz2');
 	Failed := True;
-  Memo.Lines.Add('Uncompressing SRL...');
+    Memo.Lines.Add('Uncompressing SRL...');
 	if DecompressBZip2(Contents,DeContents,4096) then
       if UnTarEx(DeContents,IncludePath,true) then
 	    Failed := False;
@@ -99,10 +99,10 @@ begin
 	if Result then
 	  Result := Failed;
 	if not Failed then
-  begin
-    Memo.Lines.Add('Succesfully updated your SRL!');
+    begin
+      Memo.Lines.Add('Succesfully updated your SRL!');
 	  Writeln('Succesfully updated your SRL!');
-  end;
+    end;
 end;
 
 procedure DoUpdate(Sender: TObject);
@@ -132,18 +132,16 @@ begin
     Exit;
   Updating := True;
 
-  GetLocalVersion(LocalP,LocalS);
-  GetOnlineVersion(OnlineP,OnlineS);
 
   if (LocalP < OnlineP) or (LocalS < OnlineS) then
   begin
-	   case MessageDlg('SRL Updater', 'Updates are available. '+
-                      'Do you want to open the Updater now?',
-                      mtConfirmation, [mbNo,mbYes],0) of
-		   mrYes : OpenForm := True;
- 	  else
-	 	   OpenForm := False;
- 	  end;
+	case MessageDlg('SRL Updater', 'Updates are available. '+
+                    'Do you want to open the Updater now?',
+                    mtConfirmation, [mbNo,mbYes],0) of
+	  mrYes : OpenForm := True;
+ 	else
+	  OpenForm := False;
+ 	end;
     if not OpenForm then
     begin
       Updating := False;
@@ -153,7 +151,6 @@ begin
     f.ShowModal;
   end else
   begin
-    MessageDlg('SRL Updater', 'No SRL update / Plugins update available!' ,mtConfirmation, [mbYes],0);
     writeln('No SRL update / Plugins update available!');
   end;
 
@@ -183,9 +180,15 @@ begin
   else
     Settings.SetKeyValue('AutoUpdate', 'True');
 end;
+
 procedure OnSRLUpdateClick(Sender: TObject);
 begin
-  Update;
+  GetLocalVersion(LocalP,LocalS);
+  GetOnlineVersion(OnlineP,OnlineS);
+  if (OnlineP <= LocalP) and (OnlineS <= LocalS) then
+    MessageDlg('SRL Updater', 'No SRL update / Plugins update available!', mtConfirmation, [mbYes], 0);
+  else
+    Update;
 end;
 
 procedure OnUpdateTimer(Sender: TObject);
