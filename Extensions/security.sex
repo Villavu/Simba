@@ -1281,7 +1281,7 @@ begin;
   Settings_FIRE_WALL_ENABLED := True;
   {$ENDIF}
 
-  Icon_Lock := GetMufasaBitmap(
+{  Icon_Lock := GetMufasaBitmap(
     BitmapFromString(
       48, 48,
       'meJzFmAlUk3fWxnG3gI61TqeLa5' +
@@ -1378,7 +1378,11 @@ begin;
       'emQlng3//qpF610H3wzj2TCQAUNZRKf678L0RlQT+Ne94J8qbxz/A' +
       'NOJAeU='
     )
-  );
+  );}
+
+  { Temp hack }
+  Icon_Lock := TMufasaBitmap.Create();
+  Icon_lock.SetSize(48, 48);
   Icon_Lock.Name := 'Security-lock-icon.bmp';
   Icon_Lock.FastReplaceColor(clBlack, 13160660);
 end;
