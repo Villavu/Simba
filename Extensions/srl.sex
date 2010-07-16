@@ -186,7 +186,7 @@ begin
   GetLocalVersion(LocalP,LocalS);
   GetOnlineVersion(OnlineP,OnlineS);
   if (OnlineP <= LocalP) and (OnlineS <= LocalS) then
-    MessageDlg('SRL Updater', 'No SRL update / Plugins update available!', mtConfirmation, [mbYes], 0);
+    MessageDlg('SRL Updater', 'No SRL update / Plugins update available!', mtConfirmation, [mbYes], 0)
   else
     Update;
 end;
