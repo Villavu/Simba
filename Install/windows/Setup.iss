@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{524C9B9A-B57F-4FEC-89BE-292202EBA44D}
 AppName=Simba
-AppVerName=Simba Release Candidate
+AppVerName=Simba Release Candidate 2
 AppPublisherURL=http://simba.villavu.com/
 AppSupportURL=http://simba.villavu.com/
 AppUpdatesURL=http://simba.villavu.com/
