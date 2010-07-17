@@ -193,9 +193,9 @@ end;
 
 procedure OnUpdateTimer(Sender: TObject);
 begin;
+  Timer.Interval := 30 * 60 * 1000; //Every half hour
   GetLocalVersion(LocalP,LocalS);
   GetOnlineVersion(OnlineP,OnlineS);
-  Timer.Interval := 30 * 60 * 1000; //Every half hour
   Update;
 end;
 
