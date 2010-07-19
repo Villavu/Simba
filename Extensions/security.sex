@@ -1204,7 +1204,7 @@ begin;
     dec(l);
     for j := 0 to l do
     begin
-      pathArr[i][j].name := format('lists[%d][%d]', [i, j]);
+      pathArr[i][j].name := format('lists_%d_%d', [i, j]);
       {$IFDEF EXTENSION}
       {
         Load the previously saved settings.
