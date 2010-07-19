@@ -53,7 +53,11 @@ const
   ALLOW_ALWAYS_DIR = 4;
   DENY_ALWAYS_DIR  = 5;
 
+  {$IFDEF WINDOWS}
   DirectorySeparator = '\';
+  {$ELSE}
+  DirectorySeparator = '/';
+  {$ENDIF}
 
 { var Settings_DEFAULT_(URL|FILE): Integer;
   Depict the default option for when the Option dialog times out. These values
@@ -473,7 +477,7 @@ begin
   {
     check if in either Allowed_URLs, or Local_Allowed_URL
   }
-  dir := Copy(FileName, 1, LastPos('\', FileName));
+  dir := Copy(FileName, 1, LastPos(DirectorySeparator, FileName));
 
   //Writeln(Format('Dir [%s] File [%s]', [dir, FileName]));
 
