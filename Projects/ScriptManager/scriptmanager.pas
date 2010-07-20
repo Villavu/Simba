@@ -36,7 +36,12 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    Button1: TButton;
+    SearchIn: TComboBox;
+    Edit1: TEdit;
     ImageList1: TImageList;
+    Label1: TLabel;
+    Label2: TLabel;
     ListView1: TListView;
     Memo1: TMemo;
     MenuItem1: TMenuItem;
@@ -79,6 +84,8 @@ var
   ss: TSimbaScript;
   LI: TListItem;
   strarr: TStringArray;
+  b: TButton;
+
 begin
   if not s.ListKeys('Scripts/ScriptList', strarr) then
     writeln('ListKeys returned false');
