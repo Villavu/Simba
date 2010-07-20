@@ -2311,7 +2311,7 @@ begin;
         if CurrScript.ScriptName <> '' then
           SynExporterHTML.Title:= 'Simba - ' + CurrScript.ScriptName
         else
-          SynExporterHTML.Title:= 'Cogat - Untitled';
+          SynExporterHTML.Title:= 'Simba - Untitled';
         SynExporterHTML.ExportAll(CurrScript.SynEdit.Lines);
         SynExporterHTML.SaveToFile(FileName);
       end;
