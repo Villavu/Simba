@@ -1,18 +1,18 @@
 object Form1: TForm1
-  Left = 478
-  Height = 556
-  Top = 156
-  Width = 556
+  Left = 544
+  Height = 615
+  Top = 169
+  Width = 554
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Form1'
-  ClientHeight = 556
-  ClientWidth = 556
+  ClientHeight = 615
+  ClientWidth = 554
   OnCreate = FormCreate
   LCLVersion = '0.9.29'
   object ListView1: TListView
     Left = 16
-    Height = 520
-    Top = 16
+    Height = 512
+    Top = 8
     Width = 232
     Anchors = [akTop, akLeft, akBottom]
     Columns = <    
@@ -41,14 +41,64 @@ object Form1: TForm1
   end
   object Memo1: TMemo
     Left = 272
-    Height = 520
+    Height = 504
     Top = 16
-    Width = 264
+    Width = 262
     Anchors = [akTop, akLeft, akRight, akBottom]
     Lines.Strings = (
       'Memo1'
     )
     TabOrder = 2
+  end
+  object Button1: TButton
+    Left = 16
+    Height = 33
+    Top = 576
+    Width = 520
+    Anchors = [akLeft, akBottom]
+    Caption = 'Button1'
+    TabOrder = 3
+  end
+  object Edit1: TEdit
+    Left = 72
+    Height = 27
+    Top = 536
+    Width = 176
+    Anchors = [akLeft, akBottom]
+    TabOrder = 4
+  end
+  object Label1: TLabel
+    Left = 24
+    Height = 18
+    Top = 536
+    Width = 35
+    Anchors = [akLeft, akBottom]
+    Caption = 'Filter:'
+    ParentColor = False
+  end
+  object SearchIn: TComboBox
+    Left = 344
+    Height = 29
+    Top = 534
+    Width = 192
+    ItemHeight = 0
+    ItemIndex = 0
+    Items.Strings = (
+      'Tags, Name, Author'
+      'Name'
+      'Tags'
+      'Author'
+    )
+    TabOrder = 5
+    Text = 'Tags, Name, Author'
+  end
+  object Label2: TLabel
+    Left = 272
+    Height = 18
+    Top = 536
+    Width = 53
+    Caption = 'Filter by:'
+    ParentColor = False
   end
   object ImageList1: TImageList
     left = 80
