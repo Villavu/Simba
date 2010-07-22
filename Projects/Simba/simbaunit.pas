@@ -396,6 +396,7 @@ type
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
     OnScriptStart : TScriptStartEvent;
+    FScriptState: TScriptState;
     {$ifdef mswindows}
     ConsoleVisible : boolean;
     procedure ShowConsole( ShowIt : boolean);
@@ -410,6 +411,7 @@ type
     function SaveCurrentScriptAsDefault : boolean;
     function CanExitOrOpen : boolean;
     function ClearScript : boolean;
+    procedure ScriptThreadTerminate(Sender: TObject);
     procedure RunScript;
     procedure PauseScript;
     procedure StopScript;
@@ -852,13 +854,24 @@ end;
 
 //{$ENDIF}
 
+procedure TSimbaForm.ScriptThreadTerminate(Sender: TObject);
+begin
+  mDebugLn('Thread terminated');
+  ScriptState := ss_None;
+  CurrThread := nil;
+end;
+
 procedure TSimbaForm.RunScript;
 begin
+  if CurrThread <> nil then
+    exit;
+
   with CurrScript do
   begin
     if ScriptState = ss_Paused then
     begin;
-      ScriptThread.Resume;
+      CurrThread.Resume;
+    //  ScriptThread.Resume;
       ScriptState := ss_Running;
       Exit;
     end else
@@ -867,13 +880,13 @@ begin
       FormWritelnEx('The script hasn''t stopped yet, so we cannot start a new one.');
       exit;
     end;
-    InitalizeTMThread(scriptthread);
-    ScriptThread.CompileOnly:= false;
-    ScriptThread.OnTerminate:=@ScriptThreadTerminate;
+    InitalizeTMThread(CurrThread);
+    CurrThread.CompileOnly:= false;
+    CurrThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;
     FirstRun := false;
     //Lets run it!
-    ScriptThread.Resume;
+    CurrThread.Resume;
   end;
 end;
 
@@ -884,14 +897,14 @@ begin
     if ScriptState = ss_Running then
     begin;
       {$ifdef MSWindows}
-      ScriptThread.Suspended:= True;
+      CurrThread.Suspended:= True;
       ScriptState:= ss_Paused;
       {$else}
       mDebugLn('Linux users are screwed, no pause button for u!');
       {$endif}
     end else if ScriptState = ss_Paused then
     begin;
-      ScriptThread.Resume;
+      CurrThread.Resume;
       ScriptState := ss_Running;
     end;
   end;
@@ -905,20 +918,20 @@ begin
       ss_Stopping:
         begin    //Terminate the thread the tough way.
           mDebugLn('Terminating the Scriptthread');
-          mDebugLn('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
-          WaitForThreadTerminate(ScriptThread.Handle, 0);
-          ScriptThread.Free;
+          mDebugLn('Exit code terminate: ' +inttostr(KillThread(CurrThread.Handle)));
+          WaitForThreadTerminate(CurrThread.Handle, 0);
+          CurrThread.Free;
           ScriptState := ss_None;
         end;
       ss_Running:
         begin
-          ScriptThread.Terminate;
+          CurrThread.Terminate;
           ScriptState := ss_Stopping;
         end;
       ss_Paused:
         begin
-          ScriptThread.Resume;
-          ScriptThread.Terminate;
+          CurrThread.Resume;
+          CurrThread.Terminate;
           ScriptState:= ss_Stopping;
         end;
     end;
@@ -1136,7 +1149,11 @@ begin
   end;
   StatusBar.Panels[Panel_ScriptName].Text:= Script.ScriptName;
   StatusBar.Panels[Panel_ScriptPath].text:= Script.ScriptFile;
-  SetScriptState(Tab.ScriptFrame.FScriptState);//To set the buttons right
+
+  { XXX: No longer update buttons }
+  // SetScriptState(Tab.ScriptFrame.FScriptState);//To set the buttons right
+
+
   if Self.Showing then
     if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
       if CurrScript.SynEdit.CanFocus then
@@ -2622,7 +2639,7 @@ end;
 
 function TSimbaForm.GetScriptState: TScriptState;
 begin
-  result := CurrScript.FScriptState;
+  result := FScriptState;
 end;
 
 function TSimbaForm.GetShowParamHintAuto: boolean;
@@ -2685,7 +2702,7 @@ end;
 
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
 begin
-  CurrScript.FScriptState:= State;
+  FScriptState:= State;
   with Self.StatusBar.panels[Panel_State] do
     case state of
       ss_Running : begin Text := 'Running'; TB_Run.Enabled:= False; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
@@ -2878,7 +2895,7 @@ begin
   LocalCopy := CurrentSyncInfo;
   mDebugLn('Executing : ' + LocalCopy.MethodName);
   thread:= TMThread(LocalCopy.OldThread);
-  mmlpsthread.CurrThread:= thread;
+  //mmlpsthread.CurrThread:= thread;
   try
     if thread is TPSThread then
     begin
@@ -2893,7 +2910,7 @@ begin
       raise Exception.Create('ThreadSafeCall not implemented on this client');
     end;
   finally
-    mmlpsthread.CurrThread:= nil;
+    //mmlpsthread.CurrThread:= nil;
   end;
 end;
 
