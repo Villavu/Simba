@@ -702,7 +702,7 @@ begin
   begin
     mdtm := SDTMToMDTM(toSDTM);
     WriteLn('');
-    WriteLn(mdtm.ToString);
+    WriteLn('DTM := DTMFromString(''' + mdtm.ToString + ''');');
     WriteLn('');
     mdtm.Free;
   end;
