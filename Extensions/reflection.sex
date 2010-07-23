@@ -213,8 +213,8 @@ procedure Free;
 begin
   if (started) then
      Timer.Enabled := False;//Freeing the components is not needed, as they will be freed upon the freeing of Simba.
-  if F <> nil then
-    F.Free;
+{  if F <> nil then
+    F.Free; }
 end;
 
 procedure Attach;

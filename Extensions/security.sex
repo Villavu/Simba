@@ -1395,7 +1395,7 @@ end;
 procedure Free;
 begin
   // Only here so people won't freak out. :)
-  Icon_Lock.Free;
+{  Icon_Lock.Free; }
 end;
 
 {$IFDEF EXTENSION}
