@@ -38,10 +38,10 @@ var
   DeContents : string;
   Failed : boolean;
 begin
-  Memo.Lines.Add('Downloading Reflection...');
+    Memo.Lines.Add('Downloading Reflection...');
     Contents := GetPage('http://wizzup.org/static/srl/srlref.tar.bz2');
     Failed := True;
-  Memo.Lines.Add('Uncompressing Reflection...');
+    Memo.Lines.Add('Uncompressing Reflection...');
     if DecompressBZip2(Contents,DeContents,4096) then
       if UnTarEx(DeContents,IncludePath,true) then
         Failed := False;
@@ -77,9 +77,6 @@ begin
     Exit;
   Updating := True;
 
-  GetLocalVersion(LocalR);
-  GetOnlineVersion(OnlineR);
-
   if (LocalR < OnlineR) then
   begin
        case MessageDlg('Reflection Updater', 'Updates are available. '+
@@ -98,7 +95,6 @@ begin
     f.ShowModal;
   end else
   begin
-    MessageDlg('Reflection Updater', 'No Reflection update' ,mtConfirmation, [mbYes],0);
     writeln('No Reflection update');
   end;
 
@@ -132,12 +128,20 @@ end;
 
 procedure OnReflectionUpdateClick(Sender: TObject);
 begin
-  Update;
+  GetLocalVersion(LocalR);
+  GetOnlineVersion(OnlineR);
+
+  if (OnlineR <= LocalR) then
+    MessageDlg('Reflection Updater', 'No Reflection update' ,mtConfirmation, [mbYes],0)
+  else
+    Update;
 end;
 
 procedure OnUpdateTimer(Sender: TObject);
 begin;
   Timer.Interval := 30 * 60 * 1000; //Every half hour
+  GetLocalVersion(LocalR);
+  GetOnlineVersion(OnlineR);
   Update;
 end;
 

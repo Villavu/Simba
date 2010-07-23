@@ -78,13 +78,12 @@ type
     ScriptName : string;//The name of the currently opened/saved file.
     ScriptDefault : string;//The default script e.g. program new; begin end.
     ScriptChanged : boolean;//We need this for that little * (edited star).
-    ScriptThread : TMThread;//Just one thread for now..
-    FScriptState : TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
+   // ScriptThread : TMThread;//Just one thread for now..
+   // FScriptState : TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
     procedure undo;
     procedure redo;
     procedure HandleErrorData;
     procedure MakeActiveScriptFrame;
-    procedure ScriptThreadTerminate(Sender: TObject);
     constructor Create(TheOwner: TComponent); override;
     { public declarations }
   end;
@@ -582,11 +581,6 @@ begin
     end;
 end;
 
-procedure TScriptFrame.ScriptThreadTerminate(Sender: TObject);
-begin
-  FScriptState:= ss_None;
-  SimbaForm.RefreshTab;
-end;
 procedure AddKey(const SynEdit : TSynEdit; const ACmd: TSynEditorCommand; const AKey: word;const AShift: TShiftState);
 begin
   with SynEdit.KeyStrokes.Add do
@@ -612,7 +606,7 @@ begin
   ScriptDefault:= StartText;
   ScriptName:= 'Untitled';
   ScriptChanged := false;
-  FScriptState:= ss_None;
+
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
   SynEdit.Highlighter := SimbaForm.CurrHighlighter;
