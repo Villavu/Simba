@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{524C9B9A-B57F-4FEC-89BE-292202EBA44D}
 AppName=Simba
-AppVerName=Simba Release Candidate
+AppVerName=Simba Release Candidate 2
 AppPublisherURL=http://simba.villavu.com/
 AppSupportURL=http://simba.villavu.com/
 AppUpdatesURL=http://simba.villavu.com/
@@ -38,6 +38,7 @@ Source: "C:\Simba\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignor
 Source: "C:\Simba\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\reflection.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\security.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
 Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
