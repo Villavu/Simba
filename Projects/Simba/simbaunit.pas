@@ -854,6 +854,9 @@ end;
 
 procedure TSimbaForm.RunScript;
 begin
+  if CurrThread <> nil then
+    exit;
+
   with CurrScript do
   begin
     if ScriptState = ss_Paused then
