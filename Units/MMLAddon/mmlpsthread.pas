@@ -188,10 +188,8 @@ type
         procedure AddMethod(meth: TExpMethod); override;
     end;
 
-
-var
+threadvar
   CurrThread : TMThread;
-
 var
   PluginsGlob: TMPlugins;
 
