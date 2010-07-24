@@ -543,7 +543,7 @@ begin
       VK_DOWN:
         if (ListBox.Count > 0) and (ListBox.ItemIndex + 1 < ListBox.Count) then
           ListBox.ItemIndex := ListBox.ItemIndex + 1;
-      VK_RETURN:
+      VK_RETURN, VK_TAB:
         ListBox.DblClick;
       VK_ESCAPE:
         Hide;
