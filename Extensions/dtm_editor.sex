@@ -321,8 +321,12 @@ end;
 
 procedure ResetBuffer;
 begin
+  {
+  Freeing the BmpBuffer here causes access violations.
+  It will have to investigated later.
   if (bmpBuffer <> nil) then
     bmpBuffer.Free;
+  }
 
   bmpBuffer := bmp.Copy(0, 0, bmp.Width - 1, bmp.Height - 1);
   BufferChanged := False;
