@@ -45,10 +45,10 @@ uses
   stringutil,mufasatypesutil,mufasabase,  v_ideCodeParser,
   about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
-  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump;
+  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings_usergui2;
 
 const
-  SimbaVersion = 705;
+  SimbaVersion = 706;
 
 type
 
@@ -107,6 +107,10 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuItemOpenPluginsFolder: TMenuItem;
+    MenuItemOpenIncludesFolder: TMenuItem;
+    MenuItemOpenScriptsFolder: TMenuItem;
+    MenuItemDivider11: TMenuItem;
     MenuItemSaveDef: TMenuItem;
     MenuItemBitmapConv: TMenuItem;
     MenuItemExtensions: TMenuItem;
@@ -287,6 +291,9 @@ type
     procedure MenuItemExportHTMLClick(Sender: TObject);
     procedure MenuitemFillFunctionListClick(Sender: TObject);
     procedure MenuItemHideClick(Sender: TObject);
+    procedure MenuItemOpenIncludesFolderClick(Sender: TObject);
+    procedure MenuItemOpenPluginsFolderClick(Sender: TObject);
+    procedure MenuItemOpenScriptsFolderClick(Sender: TObject);
     procedure MenuItemReportBugClick(Sender: TObject);
     procedure MenuItemSettingsButtonClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
@@ -377,7 +384,6 @@ type
     procedure SetShowParamHintAuto(const AValue: boolean);
     procedure SetShowCodeCompletionAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
-    function LoadSettingDef(const Key, Def : string) : string;
     function CreateSetting(const Key, Value : string) : string;
     procedure SetSetting(const key,Value : string; save : boolean = false);
     function SettingExtists(const key : string) : boolean;
@@ -400,6 +406,9 @@ type
     ConsoleVisible : boolean;
     procedure ShowConsole( ShowIt : boolean);
     {$endif}
+
+    function LoadSettingDef(const Key, Def : string) : string;
+
     procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
@@ -2419,6 +2428,21 @@ begin
     Self.Hide;
 end;
 
+procedure TSimbaForm.MenuItemOpenIncludesFolderClick(Sender: TObject);
+begin
+  OpenDocument(Self.IncludePath);
+end;
+
+procedure TSimbaForm.MenuItemOpenPluginsFolderClick(Sender: TObject);
+begin
+  OpenDocument(Self.PluginPath);
+end;
+
+procedure TSimbaForm.MenuItemOpenScriptsFolderClick(Sender: TObject);
+begin
+  OpenDocument(Self.ScriptDir);
+end;
+
 procedure TSimbaForm.MenuItemReportBugClick(Sender: TObject);
 begin
   OpenURL('http://mufasa.villavu.com/mantis/bug_report_page.php');
@@ -2426,7 +2450,8 @@ end;
 
 procedure TSimbaForm.MenuItemSettingsButtonClick(Sender: TObject);
 begin
-  SettingsForm.ShowModal;
+  //SettingsForm.ShowModal;
+  SettingsGUIForm.ShowModal;
 end;
 
 procedure TSimbaForm.MenuItemShowClick(Sender: TObject);
@@ -3125,4 +3150,4 @@ initialization
   {$R *.lfm}
 
 
-end.
+end.
