@@ -191,3 +191,108 @@ function ps_rol(num : longword; shift : byte) : LongWord; extdecl;
 begin
   result := RolDWord(num,shift);
 end;
+
+function ps_tan(e: extended): extended;
+begin
+  result:= tan(e);
+end;
+
+function ps_radians(e: extended): extended;
+begin
+  result := e / 180.0 * pi;
+end;
+
+function ps_degrees(e: extended): extended;
+begin
+  result := e * 180.0 / pi;
+end;
+
+function ps_ArcSin(e: extended): extended;
+begin
+  result := ArcSin(e);
+end;
+
+function ps_ArcCos(e: extended): extended;
+begin
+  result := ArcCos(e);
+end;
+
+function ps_ArcTan(e: extended): extended;
+begin
+  result := ArcTan(e);
+end;
+
+function ps_Cotan(e: extended): extended;
+begin
+  result := Cotan(e);
+end;
+
+function ps_Secant(e: extended): extended;
+begin
+  result := Secant(e);
+end;
+
+function ps_Cosecant(e: extended): extended;
+begin
+  result := Cosecant(e);
+end;
+
+function ps_Cot(e: extended): extended;
+begin
+  result := Cot(e);
+end;
+
+function ps_Sec(e: extended): extended;
+begin
+  result := Sec(e);
+end;
+
+function ps_Csc(e: extended): extended;
+begin
+  result := Csc(e);
+end;
+
+function ps_Cosh(e: extended): extended;
+begin
+  result := Cosh(e);
+end;
+
+function ps_Sinh(e: extended): extended;
+begin
+  result := Sinh(e);
+end;
+
+function ps_Tanh(e: extended): extended;
+begin
+  result := tanh(e);
+end;
+
+function ps_CotH(e: extended): extended;
+begin
+  result := cotan(e);
+end;
+
+function ps_SecH(e: extended): extended;
+begin
+  result := secant(e);
+end;
+
+function ps_CscH(e: extended): extended;
+begin
+  result := Csc(e);
+end;
+
+function ps_ArcCosh(e: extended): extended;
+begin
+  result := ArcCosh(e);
+end;
+
+function ps_ArcSinh(e: extended): extended;
+begin
+  result := ArcSinh(e);
+end;
+
+function DecRet(e: Extended): Extended;
+begin
+  result := e - Trunc(e);
+end;

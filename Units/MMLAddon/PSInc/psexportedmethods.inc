@@ -83,6 +83,28 @@ AddFunction(@ps_hextoint,'function HexToInt(Hex : string) : integer');
 AddFunction(@ps_sar,'function sar(AValue : longint; shift : byte) : longint;');
 AddFunction(@ps_ror,'function ror(num : longword; shift : byte) : LongWord;');
 AddFunction(@ps_rol,'function rol(num : longword; shift : byte) : LongWord;');
+AddFunction(@ps_tan, 'function ps_tan(e: extended): extended;');
+AddFunction(@ps_radians, 'function radians(e: extended): extended;');
+AddFunction(@ps_degrees, 'function degrees(e: extended): extended;');
+AddFunction(@ps_ArcSin, 'function ArcSin(e: extended): extended;');
+AddFunction(@ps_ArcCos, 'function ArcCos(e: extended): extended;');
+AddFunction(@ps_ArcTan, 'function ArcTan(e: extended): extended;');
+AddFunction(@ps_Cotan, 'function Cotan(e: extended): extended;');
+AddFunction(@ps_Secant, 'function Secant(e: extended): extended;');
+AddFunction(@ps_Cosecant, 'function Cosecant(e: extended): extended;');
+AddFunction(@ps_Hypot, 'function Hypot(e: extended): extended;');
+AddFunction(@ps_Cot, 'function Cot(e: extended): extended;');
+AddFunction(@ps_Sec, 'function Sec(e: extended): extended;');
+AddFunction(@ps_Csc, 'function Csc(e: extended): extended;');
+AddFunction(@ps_Cosh, 'function Cosh(e: extended): extended;');
+AddFunction(@ps_Sinh, 'function Sinh(e: extended): extended;');
+AddFunction(@ps_Tanh, 'function Tanh(e: extended): extended;');
+AddFunction(@ps_CotH, 'function CotH(e: extended): extended;');
+AddFunction(@ps_SecH, 'function SecH(e: extended): extended;');
+AddFunction(@ps_CscH, 'function CscH(e: extended): extended;');
+AddFunction(@ps_ArcCosh, 'function ArcCosh(e: extended): extended;');
+AddFunction(@ps_ArcSinh, 'function ArcSinh(e: extended): extended;');
+AddFunction(@DecRet, 'function DecRet(e: Extended): Extended;');
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 {window}
