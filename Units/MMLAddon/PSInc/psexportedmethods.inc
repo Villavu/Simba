@@ -220,7 +220,9 @@ AddFunction(@Ps_Padz,'function Padz(s: String; i: longInt): String;');
 AddFunction(@ps_padR,'function Padr(s: String; i: longInt): String;');
 AddFunction(@ps_ExecRegExpr,'function ExecRegExpr( const RegExpr, InputStr : String) : boolean;');
 AddFunction(@ps_SplitRegExpr,'procedure SplitRegExpr( const RegExpr, InputStr : String; Pieces : TStrings);');
-addfunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
+AddFunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
+AddFunction(@ps_posex, 'function PosEx(needle, haystack: String; offset: integer): integer;');
+
 
 
 {web}
