@@ -48,7 +48,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings;
 
 const
-  SimbaVersion = 706;
+  SimbaVersion = 707;
 
 type
 
@@ -3150,3 +3150,4 @@ initialization
 
 
 end.
+
