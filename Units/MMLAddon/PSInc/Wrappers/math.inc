@@ -77,6 +77,11 @@ begin
   Result := Round(Sqrt(Sqr(x2-x1) + Sqr(y2-y1)));
 end;
 
+function ps_Hypot(X, Y: Extended): Extended;extdecl;
+begin
+  result := hypot(x,y);
+end;
+
 function ps_RandomRange(const aFrom, aTo: Integer): Integer; extdecl;
 begin
   Result:=Random(Abs(aFrom-aTo))+Min(aTo,AFrom);

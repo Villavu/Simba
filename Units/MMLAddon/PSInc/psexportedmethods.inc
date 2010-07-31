@@ -69,6 +69,7 @@ AddFunction(@ps_PointInBox,'function PointInBox(PT : TPoint; Box: TBox): Boolean
 AddFunction(@ps_sqr,'function Sqr(e : extended) : extended;');
 AddFunction(@ps_point,'function Point(x,y:integer) : TPoint;');
 AddFunction(@ps_Distance,'function Distance(xs,ys,xe,ye : integer) : integer;');
+AddFunction(@ps_hypot,'function Hypot(X, Y: Extended): Extended;');
 AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
 AddFunction(@ps_incex,'procedure IncEx(var x : integer; increase : integer);');
 AddFunction(@ps_DecEx,'procedure DecEx(var x : integer; Decrease : integer);');
@@ -91,7 +92,6 @@ AddFunction(@ps_ArcTan, 'function ArcTan(e: extended): extended;');
 AddFunction(@ps_Cotan, 'function Cotan(e: extended): extended;');
 AddFunction(@ps_Secant, 'function Secant(e: extended): extended;');
 AddFunction(@ps_Cosecant, 'function Cosecant(e: extended): extended;');
-//AddFunction(@ps_Hypot, 'function Hypot(e: extended): extended;');
 AddFunction(@ps_Cot, 'function Cot(e: extended): extended;');
 AddFunction(@ps_Sec, 'function Sec(e: extended): extended;');
 AddFunction(@ps_Csc, 'function Csc(e: extended): extended;');
