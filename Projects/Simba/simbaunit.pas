@@ -45,7 +45,7 @@ uses
   stringutil,mufasatypesutil,mufasabase,  v_ideCodeParser,
   about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
-  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings_usergui2;
+  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings;
 
 const
   SimbaVersion = 706;
@@ -2445,13 +2445,12 @@ end;
 
 procedure TSimbaForm.MenuItemReportBugClick(Sender: TObject);
 begin
-  OpenURL('http://mufasa.villavu.com/mantis/bug_report_page.php');
+  OpenURL('http://bugs.villavu.com/mantis/bug_report_page.php');
 end;
 
 procedure TSimbaForm.MenuItemSettingsButtonClick(Sender: TObject);
 begin
-  //SettingsForm.ShowModal;
-  SettingsGUIForm.ShowModal;
+  SettingsForm.ShowModal;
 end;
 
 procedure TSimbaForm.MenuItemShowClick(Sender: TObject);
@@ -3150,4 +3149,5 @@ initialization
   {$R *.lfm}
 
 
-end.
+end.
+
