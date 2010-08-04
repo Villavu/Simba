@@ -7,7 +7,7 @@ var
 
 {$i mml.simba}
 const
-  Version = '0.5';
+  Version = '0.6';
   ZoomPixels = 3; //Should be an odd number (1, 3, 5, 7, ..)
 
 var
@@ -36,6 +36,15 @@ var
   curP: Integer;
   MarkCol: Integer;
   PaintDTM, BufferChanged: Boolean;
+
+procedure FreeAndNil(var Bmp: TMufasaBitmap);
+begin
+  if (Bmp <> nil) then
+  begin
+    Bmp.Free;
+    Bmp := nil;
+  end;
+end;
 
 function GetLine(p1, p2: TPoint): TPointArray;
 var
@@ -321,13 +330,7 @@ end;
 
 procedure ResetBuffer;
 begin
-  {
-  Freeing the BmpBuffer here causes access violations.
-  It will have to investigated later.
-  if (bmpBuffer <> nil) then
-    bmpBuffer.Free;
-  }
-
+  FreeAndNil(bmpBuffer);
   bmpBuffer := bmp.Copy(0, 0, bmp.Width - 1, bmp.Height - 1);
   BufferChanged := False;
 end;
@@ -518,11 +521,7 @@ begin
   edTolerance.Text := '0';
   shColour.Brush.Color := clWhite;
 
-  if (bmpOverlay <> nil) then
-  begin
-    bmpOverlay.Free;
-    bmpOverlay := nil;
-  end;
+  FreeAndNil(bmpOverlay);
   ResetBuffer;
   UpdateBitmap(True, False);
   frm.ActiveControl := lb;
@@ -661,10 +660,7 @@ begin
   PaintDTM := True;
 
   if (bmpOverlay <> nil) then
-  begin
-    bmpOverlay.Free;
-    bmpOverlay := nil;
-  end
+    FreeAndNil(bmpOverlay)
   else
     ResetBuffer;
   UpdateBitmap(True, False);
@@ -1292,10 +1288,8 @@ begin
     CreateForm;
     Result := frm.ShowModal;
   finally
-    if (bmpOverlay <> nil) then
-      bmpOverlay.Free;
-    if (bmpBuffer <> nil) then
-      bmpBuffer.Free;
+    FreeAndNil(bmpOverlay);
+    FreeAndNil(bmpBuffer);
     bmp.Free;
     frm.Free;
   end;
