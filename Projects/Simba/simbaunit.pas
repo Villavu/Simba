@@ -69,6 +69,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionExtensions: TAction;
     ActionSaveDef: TAction;
     ActionConsole: TAction;
     ActionNormalSize: TAction;
@@ -235,6 +236,8 @@ type
     procedure ActionCutExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
     procedure ActionExitExecute(Sender: TObject);
+    procedure ActionExtensionsExecute(Sender: TObject);
+    procedure ActionExtensionsUpdate(Sender: TObject);
     procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
@@ -269,7 +272,6 @@ type
     procedure FunctionListExit(Sender: TObject);
     procedure FunctionListTimerTimer(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
-    procedure MenuItemExtensionsClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
     procedure dlgReplaceFind(Sender: TObject);
@@ -1618,6 +1620,19 @@ begin
   Self.Close;
 end;
 
+procedure TSimbaForm.ActionExtensionsExecute(Sender: TObject);
+begin
+  if not ExtensionsForm.Showing then
+    ExtensionsForm.Show
+  else
+    ExtensionsForm.Hide;
+end;
+
+procedure TSimbaForm.ActionExtensionsUpdate(Sender: TObject);
+begin
+  TAction(Sender).Checked := ExtensionsForm.Showing;
+end;
+
 procedure TSimbaForm.ActionFindNextExecute(Sender: TObject);
 begin
   DoSearch(true, false);
@@ -1977,15 +1992,6 @@ end;
 procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
 begin
   BitmapConvForm.Show;
-end;
-
-procedure TSimbaForm.MenuItemExtensionsClick(Sender: TObject);
-begin
-  MenuItemExtensions.Checked := not ExtensionsForm.Visible;
-  if MenuItemExtensions.Checked then
-    ExtensionsForm.Show
-  else
-    ExtensionsForm.Hide;
 end;
 
 procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
