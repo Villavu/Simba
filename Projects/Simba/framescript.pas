@@ -616,7 +616,8 @@ begin
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
   SynEdit.Highlighter := SimbaForm.CurrHighlighter;
-  SynEdit.Options:= SynEdit.Options + [eoTabIndent] - [eoSmartTabs];
+  SynEdit.Options := SynEdit.Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing] - [eoSmartTabs];
+  SynEdit.Options2 := SynEdit.Options2 + [eoCaretSkipsSelection];
   SynEdit.IncrementColor.Background := $30D070;
   SynEdit.HighlightAllColor.Background:= clYellow;
   SynEdit.HighlightAllColor.Foreground:= clDefault;
@@ -638,7 +639,6 @@ begin
   end;
   AddKey(SynEdit,ecCodeCompletion,VK_SPACE,[ssCtrl]);
   AddKey(SynEdit,ecCodeHints,VK_SPACE,[ssCtrl,ssShift]);
-//  TSynPasSyn(SynEdit.Highlighter).NestedComments:= false; Does not work :(
 end;
 
 initialization
