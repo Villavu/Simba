@@ -5065,7 +5065,18 @@ begin
                   Set_Equal(var1, var2, TPSTypeRec_Record(var1Type).RealSize, b);
                   b := not b;
                 end else result := False;
-              end
+              end;
+            btArray:
+              begin
+                if (var1Type = var2Type) or ((var2Type.BaseType = btArray) and (TPSTypeRec_Array(var1Type).FArrayType = TPSTypeRec_Array(var2Type).FArrayType)) then
+                begin
+                  if (PSDynArrayGetLength(Pointer(var1^), var1Type) <> PSDynArrayGetLength(Pointer(var2^), var2Type)) then
+                    b := False
+                  else
+                    Set_Equal(Pointer(var1^), Pointer(var2^), PSDynArrayGetLength(Pointer(var1^), var1Type) * TPSTypeRec_Array(var1Type).FArrayType.RealSize, b);
+                  b := not b;
+                end else result := False;
+              end;
 
           else begin
               CMD_Err(erTypeMismatch);
@@ -5173,7 +5184,18 @@ begin
                 begin
                   Set_Equal(var1, var2, TPSTypeRec_Record(var1Type).RealSize, b);
                 end else result := False;
-              end
+              end;
+            btArray:
+              begin
+                if (var1Type = var2Type) or ((var2Type.BaseType = btArray) and (TPSTypeRec_Array(var1Type).FArrayType = TPSTypeRec_Array(var2Type).FArrayType)) then
+                begin
+                  if (PSDynArrayGetLength(Pointer(var1^), var1Type) <> PSDynArrayGetLength(Pointer(var2^), var2Type)) then
+                    b := False
+                  else
+                    Set_Equal(Pointer(var1^), Pointer(var2^), PSDynArrayGetLength(Pointer(var1^), var1Type) * TPSTypeRec_Array(var1Type).FArrayType.RealSize, b);
+                end else result := False;
+              end;
+
           else begin
               CMD_Err(erTypeMismatch);
               exit;
@@ -5477,6 +5499,16 @@ begin
                 if var1Type = var2Type then
                 begin
                   Set_Union(var1, var2, TPSTypeRec_Set(var1Type).aByteSize);
+                end else result := False;
+              end;
+
+            btArray:
+              begin
+                if (var1Type = var2Type) or ((var2Type.BaseType = btArray) and (TPSTypeRec_Array(var1Type).FArrayType = TPSTypeRec_Array(var2Type).FArrayType)) then
+                begin
+                  tvar := PSDynArrayGetLength(Pointer(var1^), var1Type);
+                  PSDynArraySetLength(Pointer(var1^), var1Type, tvar + PSDynArrayGetLength(Pointer(var2^), var2Type));
+                  CopyArrayContents(Pointer(PtrInt(var1^) + Integer(tvar) * TPSTypeRec_Array(var1Type).ArrayType.RealSize), Pointer(var2^), PSDynArrayGetLength(Pointer(var2^), var2Type), TPSTypeRec_Array(var1Type).ArrayType);
                 end else result := False;
               end;
 
