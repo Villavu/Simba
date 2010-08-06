@@ -8194,6 +8194,10 @@ function TPSPascalCompiler.ProcessSub(BlockInfo: TPSBlockInfo): Boolean;
             ((t2.BaseType = btString) or (t2.BaseType = btChar) or (t2.BaseType = btPchar) or (t2.BaseType = btWideString) or (t2.BaseType = btWideChar) or (t2.BaseType = btUnicodeString)) then
               Result := at2ut(FindBaseType(btWideString))
             {$ENDIF}
+
+            else if (t1.BaseType = btArray) and (t1 = t2) then
+              Result := t1
+
             else
               Result := nil;
           end;
