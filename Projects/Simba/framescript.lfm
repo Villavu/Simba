@@ -52,6 +52,30 @@ object ScriptFrame: TScriptFrame
         Option = 0
         Priority = 0
       end>
+    RightGutter.Width = 0
+    RightGutter.MouseActions = <    
+      item
+        Shift = []
+        ShiftMask = []
+        Button = mbLeft
+        ClickCount = ccAny
+        ClickDir = cdDown
+        Command = 13
+        MoveCaret = False
+        Option = 0
+        Priority = 0
+      end    
+      item
+        Shift = []
+        ShiftMask = []
+        Button = mbRight
+        ClickCount = ccSingle
+        ClickDir = cdUp
+        Command = 12
+        MoveCaret = False
+        Option = 0
+        Priority = 0
+      end>
     Keystrokes = <    
       item
         Command = ecUp
@@ -600,7 +624,7 @@ object ScriptFrame: TScriptFrame
     OnStatusChange = SynEditStatusChange
     inline TSynGutterPartList
       object TSynGutterMarks
-        Width = 23
+        Width = 24
       end
       object TSynGutterLineNumber
         Width = 17
@@ -704,6 +728,8 @@ object ScriptFrame: TScriptFrame
             Priority = 0
           end>
       end
+    end
+    inline SynRightGutterPartList1: TSynRightGutterPartList
     end
   end
 end
