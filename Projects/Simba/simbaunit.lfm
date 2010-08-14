@@ -388,7 +388,7 @@ object SimbaForm: TSimbaForm
       end
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 23
+        Height = 21
         Top = 6
         Width = 80
         EditLabel.AnchorSideLeft.Control = LabeledEditSearch
@@ -396,10 +396,10 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 71
-        EditLabel.Height = 16
+        EditLabel.Left = 73
+        EditLabel.Height = 14
         EditLabel.Top = 9
-        EditLabel.Width = 30
+        EditLabel.Width = 28
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -412,9 +412,9 @@ object SimbaForm: TSimbaForm
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 19
+        Height = 17
         Top = 7
-        Width = 80
+        Width = 72
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -436,24 +436,20 @@ object SimbaForm: TSimbaForm
       OnEndDock = nil
       TabOrder = 3
       inherited FunctionList: TTreeView
-        Height = 319
-        Top = 20
+        Height = 323
         Width = 150
-        DefaultItemHeight = 17
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Height = 23
-        Top = 339
+        Top = 341
         Width = 150
         OnExit = editSearchListExit
         OnKeyDown = editSearchListKeyDown
         OnKeyPress = editSearchListKeyPress
       end
       inherited FunctionListLabel: TLabel
-        Height = 16
         Width = 146
       end
     end
@@ -1263,7 +1259,7 @@ object SimbaForm: TSimbaForm
         OnClick = MenuItemFunctionListClick
       end
       object MenuItemExtensions: TMenuItem
-        Caption = '&Extensions'
+        Action = ActionExtensions
         OnClick = MenuItemExtensionsClick
       end
     end
@@ -2975,6 +2971,11 @@ object SimbaForm: TSimbaForm
       Caption = 'ActionConsole'
       ImageIndex = 27
       OnExecute = ActionConsoleExecute
+    end
+    object ActionExtensions: TAction
+      Caption = '&Extensions'
+      OnExecute = ActionExtensionsExecute
+      OnUpdate = ActionExtensionsUpdate
     end
   end
   object DebugTimer: TTimer

@@ -93,7 +93,7 @@ type
 
 implementation
 uses
-  SimbaUnit, MufasaTypes, SynEditTypes, LCLIntF, StrUtils,framefunctionlist;
+  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF, StrUtils,framefunctionlist;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 var
@@ -496,7 +496,7 @@ begin
   {$ENDIF}
 
   if SimbaForm.CodeCompletionForm.Visible then
-    if (scAll in Changes) or (scTopLine in Changes) then
+    if {(scAll in Changes) or} (scTopLine in Changes) then
       SimbaForm.CodeCompletionForm.Hide
     else if (scCaretX in Changes) or (scCaretY in Changes) or (scSelection in Changes) or (scModified in Changes) then
     begin
@@ -597,8 +597,11 @@ begin
   end;
 end;
 constructor TScriptFrame.Create(TheOwner: TComponent);
+const
+  AdditionalFolds:TPascalCodeFoldBlockTypes = [cfbtSlashComment,cfbtBorCommand,cfbtAnsiComment];
 var
   MarkCaret : TSynEditMarkupHighlightAllCaret;
+  I : TPascalCodeFoldBlockType;
 begin
   inherited Create(TheOwner);
   SyncEdit := TSynPluginSyncroEdit.Create(SynEdit);
@@ -618,6 +621,10 @@ begin
   SynEdit.Highlighter := SimbaForm.CurrHighlighter;
   SynEdit.Options := SynEdit.Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing] - [eoSmartTabs];
   SynEdit.Options2 := SynEdit.Options2 + [eoCaretSkipsSelection];
+  SynEdit.Gutter.CodeFoldPart.MarkupInfo.Background:= clWhite;
+  for i := low(i) to high(i) do
+    if i in AdditionalFolds then
+      TSynCustomFoldHighlighter(SynEdit.Highlighter).FoldConfig[ord(i)].Enabled:= True;
   SynEdit.IncrementColor.Background := $30D070;
   SynEdit.HighlightAllColor.Background:= clYellow;
   SynEdit.HighlightAllColor.Foreground:= clDefault;
