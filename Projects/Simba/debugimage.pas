@@ -42,13 +42,10 @@ type
   private
     { private declarations }
   public
-    DispSize : TPoint;
-    ToDrawBmp: TMufasaBitmap;//The bitmap we should draw!
-    GetDbgBmp : TMufasaBitmap;
     procedure BlackDebugImage;
-    procedure DrawBitmap;
-    procedure GetDebugImage;
-    procedure ShowDebugImgForm; //Uses the global var for w/h
+    procedure DrawBitmap(ToDrawBmp: TMufasaBitmap);
+    procedure GetDebugImage(GetDbgBmp : TMufasaBitmap);
+    procedure ShowDebugImgForm(DispSize : TPoint);
     { public declarations }
   end;
 
@@ -87,7 +84,7 @@ begin
   DrawImage.Repaint;
 end;
 
-procedure TDebugImgForm.DrawBitmap;
+procedure TDebugImgForm.DrawBitmap(ToDrawBmp : TMufasaBitmap);
 var
   Bitmap : Graphics.TBitmap;
 begin
@@ -99,12 +96,12 @@ begin
   Bitmap.Free;
 end;
 
-procedure TDebugImgForm.GetDebugImage;
+procedure TDebugImgForm.GetDebugImage(GetDbgBmp : TMufasaBitmap);
 begin;
   GetDbgBmp.LoadFromRawImage(DrawImage.Picture.Bitmap.RawImage);
 end;
 
-procedure TDebugImgForm.ShowDebugImgForm;
+procedure TDebugImgForm.ShowDebugImgForm(DispSize : TPoint);
 begin
   if not Visible then
     show;

@@ -162,8 +162,7 @@ begin
   if not ScriptChanged then
   begin;
     ScriptChanged:= True;
-    SimbaForm.Caption:= Format(WindowTitle,[ScriptName + '*']);
-    OwnerSheet.Caption:=ScriptName + '*';
+    SimbaForm.UpdateTitle;
   end;
 end;
 
@@ -520,8 +519,7 @@ begin
   if ScriptChanged then
     if SynEdit.Lines.Text = StartText then
     begin;
-      SimbaForm.Caption:= format(WindowTitle,[ScriptName]);
-      OwnerSheet.Caption:= ScriptName;
+      SimbaForm.UpdateTitle;
       ScriptChanged := false;
     end;
 end;
@@ -532,8 +530,7 @@ begin
   if ScriptChanged then
     if SynEdit.Lines.Text = StartText then
     begin;
-      SimbaForm.Caption:= format(WindowTitle,[ScriptName]);
-      OwnerSheet.Caption := ScriptName;
+      SimbaForm.UpdateTitle;
       ScriptChanged := false;
     end;
 end;

@@ -35,9 +35,22 @@ uses
   bitmaps, plugins, libloader, dynlibs,internets,scriptproperties,
   settings,settingssandbox;
 
-
+const
+  m_Status = 0; //Data = PChar to new status
+  m_Disguise = 1; //Data = PChar to new title
+  m_DisplayDebugImgWindow = 2; //Data = PPoint to window size
+  m_DrawBitmapDebugImg = 3; //Data = TMufasaBitmap
+  m_GetDebugBitmap = 4; //Data = TMufasaBitmap
+  m_ClearDebugImg = 5; //Data = nil
+  m_ClearDebug = 6; //Data = nil
 type
     { TMMLPSThread }
+    TCallBackData = record
+      FormCallBack : procedure of object;
+      cmd : integer;
+      data : pointer;
+    end;
+    PCallBackData = ^TCallBackData;
     TSyncInfo = record
       V : MufasaTypes.PVariantArray;
       MethodName : string;
@@ -46,15 +59,6 @@ type
       OldThread : TThread;
     end;
 
-    TClearDebugProc = procedure;
-    TDbgImgInfo = record
-      DispSize : ^TPoint;
-      ShowForm : procedure of object;
-      ToDrawBitmap : ^TMufasaBitmap;
-      DrawBitmap : procedure of object;
-      GetDebugBitmap : ^TMufasaBitmap;
-      GetBitmap : procedure of object;
-    end;
     PSyncInfo = ^TSyncInfo;
     TErrorType = (errRuntime,errCompile);
     TOnError = procedure of object;
@@ -86,8 +90,6 @@ type
     protected
       ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
-      FDebugClear : TClearDebugProc;
-      FDebugImg : TDbgImgInfo;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
       FOpenConnectionEvent : TOpenConnectionEvent;
@@ -104,6 +106,7 @@ type
       SimbaSettingsFile: String;
       Sett: TMMLSettingsSandbox;
 
+      CallBackData : PCallBackData; //Handles general callback functions for threadsafety
       InputQueryData : TInputQueryData;//We need this for InputQuery
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       ErrorData : PErrorData; //We need this for thread-safety etc
@@ -111,6 +114,8 @@ type
 
       CompileOnly : boolean;
 
+      procedure FormCallBackEx(cmd : integer; var data : pointer);
+      procedure FormCallBack(cmd : integer; data : pointer);
       procedure mInputQuery;
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
@@ -118,8 +123,6 @@ type
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
-      procedure SetDebugClear( clearProc : TClearDebugProc );
-      procedure SetDbgImg( DebugImageInfo : TDbgImgInfo);
       procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
       procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
 
@@ -136,8 +139,6 @@ type
       property OpenConnectionEvent : TOpenConnectionEvent read FOpenConnectionEvent write SetOpenConnectionEvent;
       property WriteFileEvent : TWriteFileEvent read FWriteFileEvent write SetWriteFileEvent;
       property OpenFileEvent : TOpenFileEvent read FOpenFileEvent write SetOpenFileEvent;
-      property DebugClear : TClearDebugProc read FDebugClear write SetDebugClear;
-      property DebugImg : TDbgImgInfo read FDebugImg write SetDbgImg;
     end;
 
     { TPSThread }
@@ -318,6 +319,25 @@ begin
     self.Client.MFiles.WriteFileEvent := AValue;;
 end;
 
+procedure TMThread.FormCallBackEx(cmd: integer; var data: pointer);
+begin
+  if (CallBackData = nil) or not Assigned(CallBackData^.FormCallBack) then
+    exit;
+  CallBackData^.cmd:= cmd;
+  CallBackData^.data:= data;
+  Synchronize(CallBackData^.FormCallBack);
+  data := CallBackData^.data;
+end;
+
+procedure TMThread.FormCallBack(cmd: integer; data: pointer);
+begin
+  if (CallBackData = nil) or (not Assigned(CallBackData^.FormCallBack)) then
+    exit;
+  CallBackData^.cmd:= cmd;
+  CallBackData^.data:= data;
+  Synchronize(CallBackData^.FormCallBack);
+end;
+
 procedure TMThread.mInputQuery;
 begin
   InputQueryData.Res:= InputQuery(InputQueryData.ACaption,InputQueryData.APrompt,
@@ -417,16 +437,6 @@ procedure TMThread.SetDebug(writelnProc: TWritelnProc);
 begin
   DebugTo := writelnProc;
   Client.WritelnProc:= writelnProc;
-end;
-
-procedure TMThread.SetDebugClear(clearProc: TClearDebugProc);
-begin
-  FDebugClear:= clearProc;
-end;
-
-procedure TMThread.SetDbgImg(DebugImageInfo: TDbgImgInfo);
-begin
-  FDebugImg := DebugImageInfo;
 end;
 
 procedure TMThread.SetSettings(S: TMMLSettings; SimbaSetFile: String);

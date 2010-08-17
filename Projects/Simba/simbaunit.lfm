@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 602
+  Left = 674
   Height = 623
-  Top = 75
+  Top = 308
   Width = 660
   AllowDropFiles = True
   Caption = 'THA FUKING Simba'
@@ -1260,7 +1260,6 @@ object SimbaForm: TSimbaForm
       end
       object MenuItemExtensions: TMenuItem
         Action = ActionExtensions
-        OnClick = MenuItemExtensionsClick
       end
     end
     object MenuTools: TMenuItem
