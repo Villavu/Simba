@@ -44,6 +44,7 @@ type
       Name : string;
       Index : integer;
       function ToString : string;
+      function SaveToFile(const FileName : string) : boolean;
       function LoadFromString(const s : string) : boolean;
       procedure Normalize;
       function Valid : boolean;
@@ -283,6 +284,11 @@ begin
     //It now looks like m + base64encoded data! The 'm' is to indicate we used this encryption method.
   end;
   Freemem(start,len);
+end;
+
+function TMDTM.SaveToFile(const FileName: string): boolean;
+begin
+
 end;
 
 function TMDTM.LoadFromString(const s: string): boolean;
