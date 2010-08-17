@@ -20,9 +20,6 @@
 
     Simba/GUI for the Mufasa Macro Library
 }
-
-{TODO: Implement Disguise and Status bars}
-
 unit SimbaUnit;
 
 {$undef EditButtons}
@@ -404,16 +401,18 @@ type
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
     OnScriptStart : TScriptStartEvent;
+    FormCallBackData : TCallBackData;
     {$ifdef mswindows}
     ConsoleVisible : boolean;
     procedure ShowConsole( ShowIt : boolean);
     {$endif}
 
+    procedure FormCallBack;
     function LoadSettingDef(const Key, Def : string) : string;
-
     procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
     procedure SafeCallThread;
+    procedure UpdateTitle;
     function OpenScript : boolean;
     function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false; CheckOtherTabs : boolean = true) : boolean;
     function SaveCurrentScript : boolean;
@@ -464,6 +463,7 @@ const
   Panel_Coords = 1;
   Panel_ScriptName = 2;
   Panel_ScriptPath = 3;
+  Panel_General = 3;
 
 
   Image_Stop = 7;
@@ -484,6 +484,7 @@ uses
    files,
    InterfaceBase,
    bitmapconv,
+   bitmaps,
    extensionmanagergui,
    colourhistory,
    math;
@@ -1139,17 +1140,6 @@ begin
   Script := Tab.ScriptFrame;
   Self.CurrScript := Script;
   Self.CurrTab := Tab;
-  if Script.ScriptChanged then
-  begin;
-    Tab.TabSheet.Caption:= Script.ScriptName + '*';
-    Self.Caption := Format(WindowTitle,[Script.ScriptName + '*'])
-  end else
-  begin;
-    Tab.TabSheet.Caption:= Script.ScriptName;
-    Self.Caption := Format(WindowTitle,[Script.ScriptName]);
-  end;
-  StatusBar.Panels[Panel_ScriptName].Text:= Script.ScriptName;
-  StatusBar.Panels[Panel_ScriptPath].text:= Script.ScriptFile;
   SetScriptState(Tab.ScriptFrame.FScriptState);//To set the buttons right
   if Self.Showing then
     if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
@@ -1410,7 +1400,6 @@ end;
 
 procedure TSimbaForm.InitalizeTMThread(var Thread: TMThread);
 var
-  DbgImgInfo : TDbgImgInfo;
   AppPath : string;
   ScriptPath : string;
   UseCPascal: String;
@@ -1442,18 +1431,12 @@ begin
   end;
   {$IFNDEF TERMINALWRITELN}
   Thread.SetDebug(@formWriteln);
-  Thread.SetDebugClear(@ClearDebug);
   {$ENDIF}
   Thread.SetScript(Script);
-  DbgImgInfo.DispSize := @DebugImgForm.DispSize;
-  DbgImgInfo.ShowForm := @DebugImgForm.ShowDebugImgForm;
-  DbgImgInfo.ToDrawBitmap:= @DebugImgForm.ToDrawBmp;
-  DbgImgInfo.DrawBitmap:= @DebugImgForm.DrawBitmap;
-  DbgImgInfo.GetDebugBitmap:= @DebugImgForm.GetDbgBmp;
-  DbgImgInfo.GetBitmap:= @DebugImgForm.GetDebugImage;
-  Thread.SetDbgImg(DbgImgInfo);
   Thread.ErrorData:= @CurrScript.ErrorData;
   Thread.OnError:= @CurrScript.HandleErrorData;
+  FormCallBackData.FormCallBack:= @self.FormCallBack;
+  Thread.CallBackData:=@FormCallBackData;
 
   if CurrScript.ScriptFile <> '' then
     ScriptPath := IncludeTrailingPathDelimiter(ExtractFileDir(CurrScript.ScriptFile));
@@ -1546,11 +1529,9 @@ begin
     StartText:= SynEdit.Lines.Text;
     ScriptChanged := false;
     SynEdit.MarkTextAsSaved;
-    Self.Caption:= Format(WindowTitle,[ScriptName]);
     CurrTab.TabSheet.Caption:= ScriptName;
     Self.AddRecentFile(ScriptFile);
-    StatusBar.Panels[Panel_ScriptName].Text:= ScriptName;
-    StatusBar.Panels[Panel_ScriptPath].text:= ScriptFile;
+    UpdateTitle;
   end;
 end;
 
@@ -1965,11 +1946,11 @@ begin
   if node = nil then
     exit;
   if Node.level = 0 then
-    StatusBar.Panels[Panel_ScriptPath].Text := 'Section: ' + Node.Text;
+    StatusBar.Panels[Panel_General].Text := 'Section: ' + Node.Text;
   if (Node.Level > 0) and (Node.Data <> nil) then
   begin
     MethodInfo := PMethodInfo(node.Data)^;
-    StatusBar.Panels[Panel_ScriptPath].Text := MethodInfo.MethodStr;
+    StatusBar.Panels[Panel_General].Text := MethodInfo.MethodStr;
   end;
 end;
 
@@ -2211,6 +2192,7 @@ begin
   FillThread.Resume;
   //Load the extensions
   LoadExtensions;
+  UpdateTitle;
   self.EndFormUpdate;
 end;
 
@@ -2565,6 +2547,7 @@ end;
 procedure TSimbaForm.PageControl1Change(Sender: TObject);
 begin
   RefreshTab();
+  UpdateTitle;
 end;
 
 procedure TSimbaForm.ButtonTrayClick(Sender: TObject);
@@ -2869,7 +2852,22 @@ begin
   end else
     Writeln('You cannot hide the window, since its not created by Simba');
 end;
+
 {$endif}
+
+procedure TSimbaForm.FormCallBack;
+begin
+  with FormCallBackData do
+    case Cmd of
+      m_Status: StatusBar.Panels[Panel_General].Text:= PChar(data);
+      m_Disguise: Self.Caption:= Pchar(Data);
+      m_DisplayDebugImgWindow: DebugImgForm.ShowDebugImgForm(ppoint(data)^);
+      m_DrawBitmapDebugImg: DebugImgForm.DrawBitmap(TMufasaBitmap(data));
+      m_GetDebugBitmap : DebugImgForm.GetDebugImage(TMufasaBitmap(data));
+      m_ClearDebugImg : DebugImgForm.BlackDebugImage;
+      m_ClearDebug : Self.memo1.clear;
+    end;
+end;
 
 procedure TSimbaForm.FunctionListShown(ShowIt: boolean);
 begin
@@ -2930,6 +2928,21 @@ begin
   end;
 end;
 
+procedure TSimbaForm.UpdateTitle;
+begin
+  if CurrScript.ScriptChanged then
+  begin;
+    CurrTab.TabSheet.Caption:= CurrScript.ScriptName + '*';
+    Self.Caption := Format(WindowTitle,[CurrScript.ScriptName + '*'])
+  end else
+  begin;
+    CurrTab.TabSheet.Caption:= CurrScript.ScriptName;
+    Self.Caption := Format(WindowTitle,[CurrScript.ScriptName]);
+  end;
+  StatusBar.Panels[Panel_ScriptName].Text:= CurrScript.ScriptName;
+  StatusBar.Panels[Panel_ScriptPath].text:= CurrScript.ScriptFile;
+end;
+
 function TSimbaForm.OpenScript: boolean;
 var
   i: Integer;
@@ -2962,6 +2975,8 @@ begin
   finally
     Free;
   end;
+  if result then
+    UpdateTitle;
 end;
 
 function TSimbaForm.LoadScriptFile(filename: string; AlwaysOpenInNewTab: boolean; CheckOtherTabs : boolean
@@ -3006,6 +3021,8 @@ begin
       Result := True;
     end;
   end;
+  if Result then
+    UpdateTitle;
 end;
 
 function TSimbaForm.SaveCurrentScript: boolean;

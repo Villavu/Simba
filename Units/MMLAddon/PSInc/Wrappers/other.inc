@@ -126,8 +126,7 @@ end;
 {$IFNDEF MML_EXPORT_THREADSAFE}
 procedure ps_ClearDebug; extdecl;
 begin
-  if Assigned(CurrThread.DebugClear) then
-    CurrThread.DebugClear();
+  CurrThread.FormCallBack(m_ClearDebug,nil);
 end;
 
 procedure ps_SetSupressExceptions(Supress : boolean);extdecl;
@@ -150,22 +149,49 @@ end;
 
 
 procedure ps_DisplayDebugImgWindow(w,h : integer); extdecl;
+var
+  DispSize : TPoint;
 begin;
-  CurrThread.DebugImg.DispSize^ := Classes.Point(w,h);
-  CurrThread.Synchronize( CurrThread.DebugImg.ShowForm);
+  DispSize := Classes.Point(w,h);
+  Currthread.FormCallBack(m_DisplayDebugImgWindow,@DispSize);
 end;
 
 procedure ps_DrawBitmapDebugImg(bmp : integer); extdecl;
+var
+  mbmp : TMufasaBitmap;
 begin;
-  CurrThread.DebugImg.ToDrawBitmap^ := CurrThread.Client.MBitmaps[bmp];
-  CurrThread.Synchronize(CurrThread.DebugImg.DrawBitmap);
+  mbmp := CurrThread.Client.MBitmaps[bmp];
+  CurrThread.FormCallBack(m_DrawBitmapDebugImg,Pointer(mbmp));
 end;
 
 function ps_GetDebugBitmap : integer; extdecl;
+var
+  mbmp : TMufasaBitmap;
 begin;
   result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
-  CurrThread.DebugImg.GetDebugBitmap^ := CurrThread.Client.MBitmaps[result];
-  CurrThread.Synchronize(CurrThread.DebugImg.GetBitmap);
+  mbmp := CurrThread.Client.MBitmaps[result];
+  CurrThread.FormCallBack(m_GetDebugBitmap,pointer(mbmp));
+end;
+
+procedure ps_ClearDebugImg; extdecl;
+begin
+  CurrThread.FormCallBack(m_ClearDebugImg,nil);
+end;
+
+procedure ps_Status(Status : string); extdecl;
+var
+  PStatus : PChar;
+begin
+  PStatus:= PChar(Status);
+  CurrThread.FormCallBack(m_Status,PStatus);
+end;
+
+procedure ps_Disguise(Caption : string); extdecl;
+var
+  PCaption : PChar;
+begin
+  PCaption := PChar(Caption);
+  CurrThread.FormCallBack(m_Disguise,PCaption);
 end;
 
 procedure ps_TerminateScript; extdecl;
