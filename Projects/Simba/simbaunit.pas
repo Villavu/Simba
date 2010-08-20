@@ -47,6 +47,10 @@ uses
 const
   SimbaVersion = 707;
 
+  interp_PS = 0; //PascalScript
+  interp_RT = 1; //RUTIS
+  interp_CP = 2; //CPascal
+
 type
 
   { TMufasaTab }
@@ -66,6 +70,9 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionCPascal: TAction;
+    ActionRUTIS: TAction;
+    ActionPascalScript: TAction;
     ActionExtensions: TAction;
     ActionSaveDef: TAction;
     ActionConsole: TAction;
@@ -105,6 +112,11 @@ type
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
+    MenuDivider7: TMenuItem;
+    MenuInterpreters: TMenuItem;
+    MenuItemPascalScript: TMenuItem;
+    MenuItemCPascal: TMenuItem;
+    MenuItemRUTIS: TMenuItem;
     MenuItemOpenPluginsFolder: TMenuItem;
     MenuItemOpenIncludesFolder: TMenuItem;
     MenuItemOpenScriptsFolder: TMenuItem;
@@ -230,6 +242,7 @@ type
     procedure ActionCompileScriptExecute(Sender: TObject);
     procedure ActionConsoleExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
+    procedure ActionCPascalExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
     procedure ActionExitExecute(Sender: TObject);
@@ -241,11 +254,13 @@ type
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionNormalSizeExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
+    procedure ActionPascalScriptExecute(Sender: TObject);
     procedure ActionPasteExecute(Sender: TObject);
     procedure ActionPauseExecute(Sender: TObject);
     procedure ActionRedoExecute(Sender: TObject);
     procedure ActionReplaceExecute(Sender: TObject);
     procedure ActionRunExecute(Sender: TObject);
+    procedure ActionRUTISExecute(Sender: TObject);
     procedure ActionSaveAllExecute(Sender: TObject);
     procedure ActionSaveAsExecute(Sender: TObject);
     procedure ActionSaveDefExecute(Sender: TObject);
@@ -359,10 +374,12 @@ type
     OpenFileData : TOpenFileData;
     WriteFileData : TWriteFileData;
     ScriptStartData : TScriptStartData;
+    procedure UpdateInterpreter;
     procedure HandleConnectionData;
     procedure HandleOpenFileData;
     procedure HandleWriteFileData;
     procedure HandleScriptStartData;
+    function GetInterpreter: Integer;
     function GetDefScriptPath: string;
     function GetScriptPath : string;
     function GetExtPath: string;
@@ -378,6 +395,7 @@ type
     procedure SetExtPath(const AValue: string);
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
+    procedure SetInterpreter(const AValue: Integer);
     procedure SetPluginPath(const AValue: string);
     procedure SetScriptPath(const AValue: string);
     procedure SetShowParamHintAuto(const AValue: boolean);
@@ -441,6 +459,7 @@ type
     procedure InitalizeTMThread(var Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
+    property Interpreter : Integer read GetInterpreter  write SetInterpreter;
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
     property IncludePath : String read GetIncludePath write SetIncludePath;
@@ -450,6 +469,7 @@ type
     property ScriptDir : string read GetScriptPath write SetScriptPath;
     property DefScriptPath : string read GetDefScriptPath write SetDefScriptPath;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
+    function DefaultScript : string;
   end;
 
   procedure ClearDebug;
@@ -592,6 +612,18 @@ begin
   end;
 end;
 
+procedure TSimbaForm.UpdateInterpreter;
+begin
+  ActionPascalScript.Checked:= false;
+  ActionRUTIS.Checked:= false;
+  ActionCPascal.Checked:= false;
+  case Interpreter of
+    interp_PS: ActionPascalScript.Checked:= True;
+    interp_CP: ActionCPascal.Checked:= True;
+    interp_RT: ActionRUTIS.Checked:= true;
+  end;
+end;
+
 procedure TSimbaForm.HandleConnectionData;
 var
   Args : TVariantArray;
@@ -606,6 +638,16 @@ begin
   except
     on e : Exception do
       mDebugLn('ERROR in HandleConnectiondata: ' + e.message);
+  end;
+end;
+
+function TSimbaForm.GetInterpreter: Integer;
+begin
+  result := StrToIntDef(LoadSettingDef('Settings/Interpreter/Type','0'),0);
+  if (result < 0) or (result > 2) then
+  begin
+    SetInterpreter(0);
+    result := 0;
   end;
 end;
 
@@ -1172,7 +1214,7 @@ var
 begin
   CreateSetting('Settings/Updater/CheckForUpdates','True');
   CreateSetting('Settings/Updater/CheckEveryXMinutes','30');
-  CreateSetting('Settings/Interpreter/UseCPascal', 'False');
+  CreateSetting('Settings/Interpreter/Type', '0');
   CreateSetting('Settings/Fonts/LoadOnStartUp', 'True');
   CreateSetting('Settings/Fonts/Version','-1');
   CreateSetting('Settings/Tabs/OpenNextOnClose','False');
@@ -1275,6 +1317,7 @@ begin
     MTrayIcon.Hide;
     writeln('Hiding tray.');
   end;
+  UpdateInterpreter;
   self.EndFormUpdate;
 end;
 
@@ -1419,14 +1462,14 @@ begin
   AppPath:= MainDir + DS;
   CurrScript.ScriptErrorLine:= -1;
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
-  UseCPascal := LoadSettingDef('Settings/Interpreter/UseCPascal', 'False');
   try
-    if lowercase(UseCPascal) = 'true' then
-      Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginPath)
-    else
-      Thread := TPSThread.Create(True,@CurrentSyncInfo,PluginPath);
+    case Interpreter of
+      interp_PS : Thread := TPSThread.Create(true,@CurrentSyncInfo,PluginPath);
+      interp_RT : Thread := TRTThread.Create(true,@CurrentSyncInfo,PluginPath);
+      interp_CP : Thread := TCPThread.Create(true,@CurrentSyncInfo,PluginPath);
+    end;
   except
-    mDebugLn('Failed to initialise the library!');
+    mDebugLn('Failed to initialise the interpreter');
     Exit;
   end;
   {$IFNDEF TERMINALWRITELN}
@@ -1535,6 +1578,26 @@ begin
   end;
 end;
 
+function TSimbaForm.DefaultScript: string;
+var
+  x : TStringList;
+begin
+  result := '';
+  case Interpreter of
+    interp_PS : begin
+                  if FileExistsUTF8(SimbaForm.DefScriptPath) then
+                  begin
+                    x := TStringList.Create;
+                    x.LoadFromFile(SimbaForm.DefScriptPath);
+                    result := x.Text;
+                  end else
+                    result := 'program new;'+LineEnding + 'begin'+LineEnding+'end.' + LineEnding;
+                end;
+    interp_RT : result := 'program untitled;' + LineEnding + lineEnding + 'interface' + LineEnding + LineEnding +
+                          'implementation' + LineEnding + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
+  end;
+end;
+
 
 procedure TSimbaForm.ActionTabLastExecute(Sender: TObject);
 var
@@ -1578,6 +1641,11 @@ begin
     CurrScript.SynEdit.CopyToClipboard
   else if Memo1.Focused then
     Memo1.CopyToClipboard;
+end;
+
+procedure TSimbaForm.ActionCPascalExecute(Sender: TObject);
+begin
+  Interpreter:= interp_CP;
 end;
 
 procedure TSimbaForm.ActionCutExecute(Sender: TObject);
@@ -1672,6 +1740,11 @@ begin
   Self.OpenScript;
 end;
 
+procedure TSimbaForm.ActionPascalScriptExecute(Sender: TObject);
+begin
+  Interpreter:= interp_PS;
+end;
+
 procedure TSimbaForm.ActionPasteExecute(Sender: TObject);
 begin
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
@@ -1708,6 +1781,11 @@ end;
 procedure TSimbaForm.ActionRunExecute(Sender: TObject);
 begin
   Self.RunScript;
+end;
+
+procedure TSimbaForm.ActionRUTISExecute(Sender: TObject);
+begin
+  Interpreter:= interp_RT;
 end;
 
 procedure TSimbaForm.ActionSaveAllExecute(Sender: TObject);
@@ -2687,6 +2765,21 @@ end;
 procedure TSimbaForm.SetIncludePath(const AValue: String);
 begin
   SetSetting('Settings/Includes/Path',AValue,true);
+end;
+
+procedure TSimbaForm.SetInterpreter(const AValue: Integer);
+var
+  UpdateCurrScript: Boolean;
+begin
+  UpdateCurrScript := false;
+  if (CurrScript <> nil) then
+    with CurrScript.Synedit do
+      if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
+        UpdateCurrScript := true;
+  SetSetting('Settings/Interpreter/Type',Inttostr(AValue),true);
+  UpdateInterpreter;
+  if UpdateCurrScript then
+    CurrScript.SynEdit.Lines.text := DefaultScript;
 end;
 
 procedure TSimbaForm.SetPluginPath(const AValue: string);

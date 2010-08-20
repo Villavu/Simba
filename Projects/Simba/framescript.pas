@@ -606,8 +606,7 @@ begin
   OwnerSheet := TTabSheet(TheOwner);
   OwnerPage := TPageControl(OwnerSheet.Owner);
 
-  if FileExistsUTF8(SimbaForm.DefScriptPath) then
-    SynEdit.Lines.LoadFromFile(SimbaForm.DefScriptPath);
+  SynEdit.Lines.text := SimbaForm.DefaultScript;
   StartText:= SynEdit.Lines.text;
   ScriptDefault:= StartText;
   ScriptName:= 'Untitled';

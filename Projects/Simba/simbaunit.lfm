@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 674
+  Left = 531
   Height = 623
-  Top = 308
+  Top = 290
   Width = 660
   AllowDropFiles = True
   Caption = 'THA FUKING Simba'
@@ -1242,6 +1242,24 @@ object SimbaForm: TSimbaForm
         }
         ImageIndex = 7
         OnClick = ActionStopExecute
+      end
+      object MenuDivider7: TMenuItem
+        Caption = '-'
+      end
+      object MenuInterpreters: TMenuItem
+        Caption = 'Interpreter'
+        object MenuItemPascalScript: TMenuItem
+          Action = ActionPascalScript
+          RadioItem = True
+        end
+        object MenuItemRUTIS: TMenuItem
+          Action = ActionRUTIS
+          RadioItem = True
+        end
+        object MenuItemCPascal: TMenuItem
+          Action = ActionCPascal
+          RadioItem = True
+        end
       end
     end
     object MenuView: TMenuItem
@@ -2975,6 +2993,19 @@ object SimbaForm: TSimbaForm
       Caption = '&Extensions'
       OnExecute = ActionExtensionsExecute
       OnUpdate = ActionExtensionsUpdate
+    end
+    object ActionPascalScript: TAction
+      Caption = 'ActionPascalScript'
+      OnExecute = ActionPascalScriptExecute
+    end
+    object ActionRUTIS: TAction
+      Caption = 'ActionRUTIS'
+      OnExecute = ActionRUTISExecute
+    end
+    object ActionCPascal: TAction
+      Caption = 'ActionCPascal'
+      Enabled = False
+      OnExecute = ActionCPascalExecute
     end
   end
   object DebugTimer: TTimer
