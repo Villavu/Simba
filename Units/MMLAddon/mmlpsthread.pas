@@ -988,7 +988,10 @@ end;
 
 procedure TRTThread.RTOnError(s: String; ErrorType: TRutisErrorType);
 begin
-  psWriteln(s);
+  if ErrorType in [etRuntimeError,etCompilerError] then
+    psWriteln(s)
+  else
+    writeln(s);
 end;
 
 constructor TRTThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo;
@@ -999,6 +1002,7 @@ begin
   RUTIS.OnWrite:= @RTOnWrite;
   RUTIS.OnError:= @RTOnError;
   RUTIS.OptProcessTimer:= false;
+  RUTIS.Compiler.optArrayRangeCheck:= true;
 end;
 
 destructor TRTThread.Destroy;
@@ -1026,7 +1030,7 @@ begin
       RUTIS.Run;
     end else
     begin
-      CurrThread.HandleError(RUTIS.Error.ELine+1,RUTIS.Error.EChrPos,-1,RUTIS.Error.Message,errCompile,'');
+      CurrThread.HandleError(RUTIS.Error.ELine + 2,RUTIS.Error.EChrPos,-1,RUTIS.Error.Message,errCompile,'');
       psWriteln('Compiling failed.');
     end;
   except
