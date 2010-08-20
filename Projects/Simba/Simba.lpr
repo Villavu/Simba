@@ -41,7 +41,6 @@ uses
 {$R Simba.res}
 
 begin
-  Application.Title:='Simba';
   Application.Initialize;
 
   Application.CreateForm(TSimbaForm, SimbaForm);

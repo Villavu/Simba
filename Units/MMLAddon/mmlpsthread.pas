@@ -33,7 +33,7 @@ uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
   bitmaps, plugins, libloader, dynlibs,internets,scriptproperties,
-  settings,settingssandbox;
+  settings,settingssandbox, Rutis_Engine,Rutis_Defs;
 
 const
   m_Status = 0; //Data = PChar to new status
@@ -188,6 +188,22 @@ type
         procedure Terminate; override;
         procedure AddMethod(meth: TExpMethod); override;
     end;
+
+    { TRTThread }
+
+    TRTThread = class(TMThread)
+    private
+      procedure RTOnWrite(s : String);
+      procedure RTOnError(s : String; ErrorType : TRutisErrorType);
+    public
+      RUTIS : TRutisEngine;
+      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+      destructor Destroy; override;
+      procedure SetScript(script: string); override;
+      procedure Execute; override;
+      procedure Terminate; override;
+    end;
+
 
 threadvar
   CurrThread : TMThread;
@@ -961,6 +977,67 @@ end;
 procedure TCPThread.Terminate;
 begin
   raise Exception.Create('Stopping Interpreter not yet implemented');
+end;
+
+{ TRTThread }
+
+procedure TRTThread.RTOnWrite(s: String);
+begin
+  psWriteln(s);
+end;
+
+procedure TRTThread.RTOnError(s: String; ErrorType: TRutisErrorType);
+begin
+  psWriteln(s);
+end;
+
+constructor TRTThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo;
+  plugin_dir: string);
+begin
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
+  RUTIS := TRutisEngine.Create;
+  RUTIS.OnWrite:= @RTOnWrite;
+  RUTIS.OnError:= @RTOnError;
+  RUTIS.OptProcessTimer:= false;
+end;
+
+destructor TRTThread.Destroy;
+begin
+  RUTIS.Free;
+  inherited Destroy;
+end;
+
+procedure TRTThread.SetScript(script: string);
+begin
+  RUTIS.ScriptCode.Text:= Script;
+end;
+
+procedure TRTThread.Execute;
+begin
+  CurrThread := self;
+  Starttime := lclintf.GetTickCount;
+  try
+    RUTIS.Compile;
+    if not RUTIS.CompilerError then
+    begin
+      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      if CompileOnly then
+        exit;
+      RUTIS.Run;
+    end else
+    begin
+      CurrThread.HandleError(RUTIS.Error.ELine+1,RUTIS.Error.EChrPos,-1,RUTIS.Error.Message,errCompile,'');
+      psWriteln('Compiling failed.');
+    end;
+  except
+     on E : Exception do
+       psWriteln('Exception in Script: ' + e.message);
+  end;
+end;
+
+procedure TRTThread.Terminate;
+begin
+  RUTIS.Stop;
 end;
 
 initialization
