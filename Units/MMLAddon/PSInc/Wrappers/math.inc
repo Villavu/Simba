@@ -192,107 +192,107 @@ begin
   result := RolDWord(num,shift);
 end;
 
-function ps_tan(e: extended): extended;
+function ps_tan(e: extended): extended; extdecl;
 begin
   result:= tan(e);
 end;
 
-function ps_radians(e: extended): extended;
+function ps_radians(e: extended): extended; extdecl;
 begin
   result := e / 180.0 * pi;
 end;
 
-function ps_degrees(e: extended): extended;
+function ps_degrees(e: extended): extended; extdecl;
 begin
   result := e * 180.0 / pi;
 end;
 
-function ps_ArcSin(e: extended): extended;
+function ps_ArcSin(e: extended): extended; extdecl;
 begin
   result := ArcSin(e);
 end;
 
-function ps_ArcCos(e: extended): extended;
+function ps_ArcCos(e: extended): extended; extdecl;
 begin
   result := ArcCos(e);
 end;
 
-function ps_ArcTan(e: extended): extended;
+function ps_ArcTan(e: extended): extended; extdecl;
 begin
   result := ArcTan(e);
 end;
 
-function ps_Cotan(e: extended): extended;
+function ps_Cotan(e: extended): extended; extdecl;
 begin
   result := Cotan(e);
 end;
 
-function ps_Secant(e: extended): extended;
+function ps_Secant(e: extended): extended; extdecl;
 begin
   result := Secant(e);
 end;
 
-function ps_Cosecant(e: extended): extended;
+function ps_Cosecant(e: extended): extended;extdecl;
 begin
   result := Cosecant(e);
 end;
 
-function ps_Cot(e: extended): extended;
+function ps_Cot(e: extended): extended; extdecl;
 begin
   result := Cot(e);
 end;
 
-function ps_Sec(e: extended): extended;
+function ps_Sec(e: extended): extended; extdecl;
 begin
   result := Sec(e);
 end;
 
-function ps_Csc(e: extended): extended;
+function ps_Csc(e: extended): extended; extdecl;
 begin
   result := Csc(e);
 end;
 
-function ps_Cosh(e: extended): extended;
+function ps_Cosh(e: extended): extended; extdecl;
 begin
   result := Cosh(e);
 end;
 
-function ps_Sinh(e: extended): extended;
+function ps_Sinh(e: extended): extended; extdecl;
 begin
   result := Sinh(e);
 end;
 
-function ps_Tanh(e: extended): extended;
+function ps_Tanh(e: extended): extended; extdecl;
 begin
   result := tanh(e);
 end;
 
-function ps_CotH(e: extended): extended;
+function ps_CotH(e: extended): extended;extdecl;
 begin
   result := cotan(e);
 end;
 
-function ps_SecH(e: extended): extended;
+function ps_SecH(e: extended): extended; extdecl;
 begin
   result := secant(e);
 end;
 
-function ps_CscH(e: extended): extended;
+function ps_CscH(e: extended): extended;extdecl;
 begin
   result := Csc(e);
 end;
 
-function ps_ArcCosh(e: extended): extended;
+function ps_ArcCosh(e: extended): extended;extdecl;
 begin
   result := ArcCosh(e);
 end;
 
-function ps_ArcSinh(e: extended): extended;
+function ps_ArcSinh(e: extended): extended; extdecl;
 begin
   result := ArcSinh(e);
 end;
 
-function DecRet(e: Extended): Extended;
+function DecRet(e: Extended): Extended; extdecl;
 begin
   result := e - Trunc(e);
 end;
