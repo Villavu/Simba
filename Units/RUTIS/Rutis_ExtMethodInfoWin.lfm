@@ -1,0 +1,28 @@
+object FExtMethodListInfo: TFExtMethodListInfo
+  Left = 76
+  Height = 305
+  Top = 99
+  Width = 526
+  BorderIcons = [biSystemMenu, biMaximize]
+  Caption = 'EXT Methods Info'
+  ClientHeight = 305
+  ClientWidth = 526
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  FormStyle = fsStayOnTop
+  Position = poScreenCenter
+  LCLVersion = '0.9.28.2'
+  object ExtList: TListBox
+    Left = 0
+    Height = 305
+    Top = 0
+    Width = 526
+    Align = alClient
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    ItemHeight = 0
+    ParentFont = False
+    TabOrder = 0
+  end
+end
