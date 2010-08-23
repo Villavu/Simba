@@ -165,9 +165,12 @@ type
       Str : string;
       Key : byte;
   end;
+
 type
    TBufferByteArray = Array[0..524287] of Byte;
    PBufferByteArray = ^TBufferByteArray;
+
+   PPoint = ^TPoint;
 
 var
   BufferString : PChar;
