@@ -42,7 +42,7 @@ Interface
 {$ENDIF}
 
 Uses
-  Windows, Forms, Classes,
+  lclintf, Forms, Classes,
   {$ifdef DELPHI_7_UP}Variants,{$endif}
   SysUtils,
   Rutis_Defs, File_Manager;

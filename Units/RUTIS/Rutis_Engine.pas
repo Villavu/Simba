@@ -44,7 +44,7 @@ Interface
 {.$define DEBUG}
 
 Uses
-  Windows, Forms, Classes,
+  lclintf, Forms, Classes,
   {$ifdef DELPHI_7_UP}Variants,{$endif}
   SysUtils, Math,
   Rutis_Stack, Rutis_Defs, Rutis_Errors, RUTIS_Classes, RUTIS_Compiler_Delphi,
@@ -2088,9 +2088,10 @@ End;
 //======================= Compiler =============================================
 //==============================================================================
 
-{$ifdef FPC}
+/// XXX TODO OMG WTF
+{{$ifdef FPC}
 function LoadLibraryA(lpLibFileName: LPCSTR): HINST; external KernelDLL name 'LoadLibraryA';
-{$endif FPC}
+{$endif FPC}              }
 
 Function TRutisEngine.RegisterExtDll(FileName : String) : Boolean;
 Var i  : Integer;
@@ -2102,7 +2103,7 @@ Begin
   i := length(fExtDlls);
   SetLength(fExtDlls, i + 1);
 
-  fExtDlls[i].DllHandle := LoadLibraryA(PAnsiChar(FileName));
+ // fExtDlls[i].DllHandle := LoadLibraryA(PAnsiChar(FileName));
 
   If fExtDlls[i].DllHandle = 0 Then
   Begin
@@ -2112,11 +2113,11 @@ Begin
 
   With fExtDlls[i] Do
   Begin
-    RegisterEXTMethods := TRegisterEXTMethods(GetProcAddress(DllHandle, 'RegisterEXTMethods'));
+ {   RegisterEXTMethods := TRegisterEXTMethods(GetProcAddress(DllHandle, 'RegisterEXTMethods'));
     StartScript := TScriptAction(GetProcAddress(DllHandle, 'StartScript'));
     StopScript := TScriptAction(GetProcAddress(DllHandle, 'StopScript'));
     PauseScript := TScriptAction(GetProcAddress(DllHandle, 'PauseScript'));
-    Destroy := TScriptAction(GetProcAddress(DllHandle, 'Destroy'));
+    Destroy := TScriptAction(GetProcAddress(DllHandle, 'Destroy'));            }
   End;
 
   fExtDlls[i].RegisterEXTMethods(self);
@@ -2127,8 +2128,8 @@ End;
 Procedure TRutisEngine.UnloadExtDlls;
 Var i  : Integer;
 Begin
-  For i := 0 To high(fExtDlls) Do
-    FreeLibrary(fExtDlls[i].DllHandle);
+ { For i := 0 To high(fExtDlls) Do
+    FreeLibrary(fExtDlls[i].DllHandle);       }
   SetLength(fExtDlls, 0);
 End;
 

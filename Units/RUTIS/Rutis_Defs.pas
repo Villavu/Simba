@@ -42,7 +42,7 @@ Interface
 {$ENDIF}
 
 Uses
-  Windows, {$ifdef DELPHI_7_UP}Variants, {$endif}
+  lclintf, {$ifdef DELPHI_7_UP}Variants, {$endif}
   SysUtils, Rutis_Stack;
 
  //====================================================================
