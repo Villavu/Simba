@@ -9,7 +9,7 @@ Interface
 {$ENDIF}
 
 Uses
-  Windows, Forms, Math, Dialogs, SysUtils,
+  lclintf, Forms, Math, Dialogs, SysUtils,
   Rutis_Stack, Rutis_Defs, Rutis_Classes, TypInfo;
 
 Type
@@ -246,13 +246,15 @@ End;
 
 Procedure _GetAsyncKeyState(Params : PRutisParamInfoArray; Result : PRutisParamInfo);
 Begin
-  PBoolean(Result^.Data)^ := Boolean(GetAsyncKeyState(GetPWord(Params^[0].Data)) <> 0);
+  // XXX TODO FIXME OMG
+  //PBoolean(Result^.Data)^ := Boolean(GetAsyncKeyState(GetPWord(Params^[0].Data)) <> 0);
 End;
 
 {$ifndef WINCE}
 Procedure _Beep(Params : PRutisParamInfoArray; Result : PRutisParamInfo);
 Begin
-  Windows.Beep(GetPCardinal(Params^[0].Data), GetPCardinal(Params^[1].Data));
+  // XXX TO FIXME OMG
+  //Windows.Beep(GetPCardinal(Params^[0].Data), GetPCardinal(Params^[1].Data));
 End;
 {$endif WINCE}
 
