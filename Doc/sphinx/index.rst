@@ -10,6 +10,8 @@ Welcome to the Simba documentation!
     The documentation is still WIP (Work In Progress)
 
 Welcome to the Documentation for the Simba project.
+This documentation is aimed at providing documentation on just about anything
+you'd want to know about Simba.
 
 Contents:
 
