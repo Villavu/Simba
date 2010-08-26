@@ -16,3 +16,8 @@
 
 -   Create a list of Simba Extensions. If the extension has a doc on it's own,
     dont forget to link to it.
+-   Create scriptref/ articles. A lot of functionality that Simba exposes to the
+    Scripters is currently not documented.
+-   Write mmlref/ article (only for developers of Simba)
+-   Write tutorial?
+-   Fix up articles?
