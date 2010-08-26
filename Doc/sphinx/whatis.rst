@@ -8,10 +8,6 @@ certain input.
 
 This "input" can vary greatly; from data in files to colors and text on the screen.
 
-..  This needs more info
-    yep
-    Not really, you basically covered what Simba is in the above paragraph.
-
 Simba can:
     *   Find and read colours on the screen.
     *   Click or move the mouse to a specific position on the screen. Typically
