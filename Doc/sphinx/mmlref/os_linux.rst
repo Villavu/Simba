@@ -14,3 +14,8 @@ the ``FreeReturnData`` procedure. Alternatively we could copy the image data to
 another place and then free the XImage, but this would result in additional
 overhead.
 
+Most mouse related functionality is implemented with XQueryPointer, XWarpPointer
+and XTestFakeButtonEvent. (Requires XTest Extension)
+
+All the keyboard functions use XTest as well. It currently lacks the
+functionality to test if a key on the keyboard is down.

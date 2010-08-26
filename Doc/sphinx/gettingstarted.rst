@@ -19,7 +19,7 @@ Simba installer
 ~~~~~~~~~~~~~~~
 
 Everyone can download Simba at http://wizzup.org/simba/
-Go to download, and download the Simba installer.
+Go to download and download the Simba installer.
 
 Once it is done downloading, simply run the installer and follow the steps.
 
