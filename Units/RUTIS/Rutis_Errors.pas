@@ -1,4 +1,4 @@
-Unit RUTIS_Errors;
+Unit Rutis_Errors;
 
 Interface
 

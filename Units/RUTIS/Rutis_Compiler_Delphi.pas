@@ -31,7 +31,7 @@ The Legal Code (the full license) can be read at the following Address:
 //==============================================================================
 //==============================================================================}
 
-Unit RUTIS_Compiler_Delphi;
+Unit Rutis_Compiler_Delphi;
 
 Interface
 
