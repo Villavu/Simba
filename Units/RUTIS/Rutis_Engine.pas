@@ -47,7 +47,7 @@ Uses
   lclintf, Forms, Classes,
   {$ifdef DELPHI_7_UP}Variants,{$endif}
   SysUtils, Math,
-  Rutis_Stack, Rutis_Defs, Rutis_Errors, RUTIS_Classes, RUTIS_Compiler_Delphi,
+  Rutis_Stack, Rutis_Defs, Rutis_Errors, Rutis_Classes, Rutis_Compiler_Delphi,
   Rutis_EXT_Common, Rutis_ExtMethodInfoWin;
 
 Type
