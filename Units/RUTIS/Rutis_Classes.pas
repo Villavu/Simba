@@ -31,7 +31,7 @@ The Legal Code (the full license) can be read at the following adress:
 //==============================================================================
 //==============================================================================}
 
-Unit RUTIS_Classes;
+Unit Rutis_Classes;
 
 Interface
 
