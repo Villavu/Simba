@@ -1,9 +1,6 @@
 ..  _scriptref_colour:
 
 
-.. note::
-    Not all colour finding functions have been documented yet.
-
 Colour Finding
 ==============
 
@@ -12,6 +9,7 @@ Finding colours on the screen is quite simple. Simba offers methods like
 
 These methods are usually composed out of several (but not always all) 
 components:
+
     *   The colour to search for.
     *   An area to search in, defined by *x1*, *y1*, *x2*, *y2*.
     *   Tolerance applied to the colour matching. With a maximum tolerance all
@@ -48,6 +46,51 @@ SimilarColors
 
 SimilarColors returns true if the two passed colours are *similar* given the
 passed tolerance. 
+
+GetColor
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetColor(x, y: Integer): Integer;
+
+GetColor returns the color on the coordinate (*x*, *y*).
+
+*Example: Printing the colour on coordinate (25, 25)*
+
+.. code-block:: pascal
+
+    Writeln('Colour is ' + IntToStr(GetColor(25, 25)))
+
+GetColors
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetColors(const Coords : TPointArray) : TIntegerArray;
+
+GetColor returns the color on the coordinate (x, y) defined by *Coords*.
+
+
+CountColor
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
+
+Returns how many times *Color* occurs in the area defined by (*xs*, *ys*), 
+(*xe*, *ye*)
+
+CountColorTolerance
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
+
+Returns how many times *Color* occurs (within *Tolerance*)
+in the area defined by (*xs*, *ys*), (*xe*, *ye*)
 
 FindColor
 ~~~~~~~~~
@@ -137,6 +180,26 @@ FindColorsSpiralTolerance
 
 Same as FindColorsTolerance, but starts searching from *x*, *y*.
 
+Find areas of colours
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye,
+    MinArea: Integer): Boolean;
+
+FindColoredArea finds an area that consists out of *Color* and has a minimal
+size of *MinArea*. If you want minimal area of 5x5 pixels (25), then set MinArea
+to 25.
+
+.. code-block:: pascal
+
+    function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe,
+    ye, MinArea, Tolerance : Integer): Boolean;
+
+FindColoredArea finds an area that consists out of Colours that match *Color* with
+the given *Tolerance* and has a minimal size of *MinArea*.
+If you want minimal area of 5x5 pixels (25), then set MinArea to 25.
 
 .. _scriptref_CTS:
 
@@ -144,13 +207,81 @@ Colour tolerance
 ----------------
 
 Simba contains several algorithms for determining if two colours are equal
-given a tolerance. There are three algorithms:
+given a tolerance. There are three algorithms, from fastest to slowest:
 
-..  XXX FIXME COMPLETE ME
+    *   CTS 0: Quick and dirty comparison. Matches if the differences between the 
+        three RGB values are <= Tolerance
 
-.. note::
-    This is a stub and needs to be expanded.
+    *   CTS 1: RGB comparison that uses the Pythagorean distance in the RGB cube
+        to define tolerance. Matches if the distance <= Tolerance.
 
-    *   CTS 0:    
-    *   CTS 1:
-    *   CTS 2:
+    *   CTS 2: HSL comparison. It has two modifiers that modify the
+        result tolerance, Hue and Saturation. The lower the modifier, the higher
+        tolerance required for a match. They can be set seperately and therefore
+        used to distinguish very specific colours. Some differ a lot in saturation, but
+        very little in hue. Luminance is assigned a somewhat static function, and
+        has no modifier.
+
+
+Get and Set Colour Tolerance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetColorToleranceSpeed(cts: integer);
+
+Set the current colour tolerance speed. Valid values are: 0, 1 and 2.
+Somewhat improperly named compared to the other CTS functions.
+
+.. code-block:: pascal
+
+    SetColorToleranceSpeed(2);
+
+And the proper way to get the current tolerance is to use the following
+function, which returns the current colour tolerance speed:
+
+.. code-block:: pascal
+
+    function GetToleranceSpeed: Integer;
+
+*Example: Printing the Color Tolerance*
+
+.. code-block:: pascal
+
+    Writeln(Format('Tolerance Speed = %d', [GetToleranceSpeed]))
+
+Get And Set Colour Modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);
+
+Set colour speed 2 modifiers.
+
+.. code-block:: pascal
+
+    // 42.0 is a very high value, but this doesn't matter as this code is
+    // only meant to illustrate how to use this function
+    SetToleranceSpeed2Modifiers(42.0, 0.4)
+
+The following function
+    
+.. code-block:: pascal
+
+    procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended);
+
+returns colour speed 2 modifiers.
+
+*Example: Getting the modifiers*
+
+.. code-block:: pascal
+
+    procedure WriteModifiers;
+    var
+        H, S: Extended;
+    begin
+        GetToleranceSpeed2Modifiers(H, S);
+        Writeln(format('H = %f; S = %f', [H, S])); 
+    end;
+
