@@ -1,6 +1,9 @@
 ..  _scriptref_colour:
 
 
+.. note::
+    Not all colour finding functions have been documented yet.
+
 Colour Finding
 ==============
 
