@@ -1,0 +1,35 @@
+#$ fpc  -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../../lazarus/components/synedit/units/x86_64-linux/ -Fu../../../lazarus/ideintf/units/x86_64-linux/ -Fu../../../lazarus/lcl/units/x86_64-linux/ -Fu../../../lazarus/lcl/units/x86_64-linux/gtk2/ -Fu../../../lazarus/packager/units/x86_64-linux/ -Fu. -oSAMufasaGUI -dUseCThreads -dM_MEMORY_DEBUG -dLCL -dLCLgtk2 Simba.lpr
+
+.PHONY: default clean
+
+#Set these ----------
+platform := i386-linux
+widgetset := gtk2
+#lazaruspath := /usr/lib/lazarus/0.9.28.2
+lazaruspath := /home/mopar/simba/lazarus
+
+#-dUseCThreads on linux, none on windows. :) 
+platformdefines := -dUseCThreads
+#End set there -------
+
+CC := fpc
+build := $(CC)
+binary := Simba.$(platform)
+flags := -Pi386 -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu.
+defines := $(platformdefines) -dM_MEMORY_DEBUG -dLCL -dLCL$(widgetset)
+units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/
+
+
+
+lclplatpath := $(lazaruspath)/lcl/units/$(platform)/
+
+lazarusunits := -Fu$(lazaruspath)/components/synedit/units/$(platform)/ -Fu$(lazaruspath)ideintf/units/$(platform)/ -Fu$(lclplatpath) -Fu$(lclplatpath)$(widgetset)/ -Fu$(lazaruspath)/packager/units/$(platform)/ -Fu$(lazaruspath)/components/mouseandkeyinput/
+
+default: $(binary)
+
+clean:
+	rm -f *.o *.ppu $(binary) 
+
+$(binary):
+	$(CC) $(flags) $(units) $(lazarusunits) -o$(binary) $(defines) Simba.lpr
+	strip $(binary) 
