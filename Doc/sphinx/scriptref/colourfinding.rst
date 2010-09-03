@@ -10,15 +10,26 @@ Finding colours on the screen is quite simple. Simba offers methods like
 These methods are usually composed out of several (but not always all) 
 components:
 
-    *   The colour to search for.
+    *   The colour to search for. This is an RGB color.
+
     *   An area to search in, defined by *x1*, *y1*, *x2*, *y2*.
+        If any of coordinates are outside the clients bounds; two things can
+        happen depending on your settings:
+
+            -   Simba throws an Exception.
+            -   Simba will resize the bounds to fit the client without notifying
+                you.
+
     *   Tolerance applied to the colour matching. With a maximum tolerance all
         colours are matched.
+
     *   Spiral. A spiral defines a point where the search will start from.
         This is particulary useful if you want the first result near specific
         coordinates.
+
     *   AreaSize. The size the box of colours should be. Usually this is not
         adjustable.
+
     *   A single point in *x*, *y* can be returned, or a set or points called
         a *TPointArray*.
 
@@ -45,7 +56,7 @@ SimilarColors
     function SimilarColors(C1, C2, Tolerance: Integer): Boolean;
 
 SimilarColors returns true if the two passed colours are *similar* given the
-passed tolerance. 
+passed *Tolerance*. 
 
 GetColor
 ~~~~~~~~

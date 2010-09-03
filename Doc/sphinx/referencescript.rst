@@ -12,4 +12,5 @@ default (Pascal) engine.
 
     scriptref/mouseandkeyboard.rst
     scriptref/colourfinding.rst
+    scriptref/colourconverting.rst
     scriptref/files.rst
