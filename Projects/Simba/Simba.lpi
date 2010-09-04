@@ -12,6 +12,7 @@
       <UseXPManifest Value="True"/>
       <Icon Value="0"/>
     </General>
+    <LazDoc Paths="../../LazDoc"/>
     <VersionInfo>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
@@ -38,7 +39,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="47">
+    <Units Count="48">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -203,7 +204,7 @@
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsForm"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="SimbaSettings"/>
+        <UnitName Value="Simbasettings"/>
       </Unit29>
       <Unit30>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/tpa.inc"/>
@@ -293,6 +294,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="bitmapconv"/>
       </Unit46>
+      <Unit47>
+        <Filename Value="../../Units/MMLCore/os_linux.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="os_linux"/>
+      </Unit47>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
