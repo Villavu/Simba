@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="Simba">
+    <module name="os_linux">
+      <element name="TWindow.GetTargetDimensions">
+        <descr>Returns the dimension of the TWindow</descr>
+        <short>Uses XGetWindowAttributes to retrieve the dimensions of the stored TWindow.</short>
+      </element>
+      <element name="TWindow.HoldKey">
+        <short>Uses TKeyInput class from lazarus to fake a keydown event.</short>
+      </element>
+      <element name="TWindow.ReleaseKey">
+        <short>Uses TKeyInput class from lazarus to fake a keyup event.</short>
+      </element>
+      <element name="TWindow.IsKeyHeld">
+        <short>Should return true if the given key is held down. NOT YET IMPLEMENTED ON LINUX</short>
+      </element>
+      <element name="TWindow.TargetValid">
+        <short>Uses XGetWindowAttributes to check if the currently selected window is valid. If we have not recieved an error, the window is valid.</short>
+      </element>
+      <element name="TWindow.ActivateClient">
+        <short>Selects the current client as input focus for the X11 windowing system</short>
+      </element>
+      <element name="TWindow.ReturnData">
+        <short>Uses XGetImage to get the pixel data of the currently stored TWindow. The image data is passed as result.</short>
+      </element>
+      <element name="TWindow.FreeReturnData">
+        <short>Frees the XImage object called buffer if it is set. This should be called once the ReturnData result is no longer required.</short>
+      </element>
+      <element name="TWindow.GetMousePosition">
+        <short>Uses XQueryPointer to query the current mouse position relative to the stored TWindow.</short>
+      </element>
+      <element name="TWindow.MoveMouse">
+        <short>Uses XWarpPointer to move the mouse to the specific position relative to the stored TWindow.</short>
+      </element>
+      <element name="TWindow.HoldMouse">
+        <short>Uses XTest to fake a mouse button press.</short>
+      </element>
+      <element name="TWindow.ReleaseMouse">
+        <short>Uses XTest to fake a mouse button release.</short>
+      </element>
+      <element name="TWindow.IsMouseButtonHeld">
+        <short>Uses XQueryPointer to return if the given mouse button is held.</short>
+      </element>
+      <element name="TIOManager">
+        <short>Linux/X11 implementation of the TIOManager</short>
+      </element>
+      <element name="TIOManager.SetTarget">
+        <short>Set the stored TWindow to the passed TNativeWindow.</short>
+      </element>
+      <element name="TIOManager.SetDesktop">
+        <short>Set the desktop as stored TWindow.</short>
+      </element>
+      <element name="TIOManager.NativeInit">
+        <short>Open the X11 connection</short>
+      </element>
+      <element name="TIOManager.NativeFree">
+        <short>Close the X11 connection.</short>
+      </element>
+      <element name="MufasaXErrorHandler">
+        <short>X Error Handler.</short>
+        <descr>    This is extremely hacky, but also very useful.
+    We have to install a X error handler, because otherwise X
+    will terminate out entire app on error.
+
+    Since we want the right thread to recieve the right error, we have to
+    fiddle a bit with threadvars, mutexes / semaphores.
+
+    Another problem is that the script thread is initialised on the main thread.
+    This means that all (threadvar!) semaphores initialised on the mainthread
+    are NOT initialised on the script thread, which has yet to be started.
+    Therefore, we check if it hasn't been created yet.
+
+    ** Horrible solution, but WFM **
+
+    This is the Handler function.     </descr>
+      </element>
+      <element name="TWindow.ReceivedError">
+        <short>Returns true if we have received an error</short>
+      </element>
+      <element name="TWindow.GetNativeWindow">
+        <short>Returns the stored TWindow</short>
+      </element>
+    </module>
+  </package>
+</fpdoc-descriptions>
