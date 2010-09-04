@@ -472,6 +472,12 @@ begin
   BmpArray[number] := nil;
 end;
 
+{
+
+ Implementation TMufasaBitmap
+
+}
+
 function TMufasaBitmap.SaveToFile(const FileName: string): boolean;
 var
   rawImage : TRawImage;
