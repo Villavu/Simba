@@ -33,7 +33,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, Forms, SimbaUnit, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform, Simbasettings,
-  libloader, mufasabase, v_ideCodeInsight, PSDump, v_ideCodeParser,
+  libloader, mufasabase, os_linux, v_ideCodeInsight, PSDump, v_ideCodeParser,
   v_AutoCompleteForm, CastaliaPasLex, CastaliaPasLexTypes, CastaliaSimplePasPar,
   CastaliaSimplePasParTypes, dcpbase64, mPasLex, v_Constants, v_MiscFunctions,
   extensionmanagergui, mmisc, bitmapconv;
