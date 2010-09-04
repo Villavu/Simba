@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="Simba">
+    <module name="dtm">
+      <element name="TMDTM">
+        <short>DTM Class</short>
+      </element>
+      <element name="TMDTM.Valid">
+        <short>Returns true if the DTM is valid.</short>
+      </element>
+    </module>
+  </package>
+</fpdoc-descriptions>

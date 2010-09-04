@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="Simba">
+    <module name="Simbasettings"/>
+  </package>
+</fpdoc-descriptions>
