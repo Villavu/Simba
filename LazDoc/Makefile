@@ -1,8 +1,8 @@
 
 .PHONY:	default clean
 
-docunits := os_linux dtm mufasatypes
-coreunits := os_linux dtm mufasatypes
+docunits := os_linux dtm mufasatypes bitmaps
+coreunits := os_linux dtm mufasatypes bitmaps
 
 default:
 	
