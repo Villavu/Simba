@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="Simba">
+    <module name="bitmaps">
+      <element name="TMufasaBitmap">
+        <short>Bitmap class for the Mufasa library</short>
+      </element>
+      <element name="TMufasaBitmap.OnDestroy">
+        <short>Called when destroying the TMufasaBitmap</short>
+      </element>
+      <element name="TMufasaBitmap.Name">
+        <short>Name of the bitmap. Mainly for debugging purposes.</short>
+      </element>
+      <element name="TMufasaBitmap.SetSize">
+        <short>Set the bitmap to the given size.</short>
+      </element>
+      <element name="TMufasaBitmap.ValidatePoint">
+        <short>Returns true if the point is within the bitmap size.</short>
+      </element>
+      <element name="TMufasaBitmap.Posterize">
+        <short>Posterizes the target bitmap</short>
+      </element>
+      <element name="TMufasaBitmap.Invert">
+        <short>Invert the colours on the bitmap.</short>
+      </element>
+      <element name="TMufasaBitmap.Contrast">
+        <short>Change contrast.</short>
+      </element>
+      <element name="TMufasaBitmap.Brightness">
+        <short>Change brightness</short>
+      </element>
+      <element name="TMufasaBitmap.GreyScale">
+        <short>Greyscales the bitmap</short>
+      </element>
+      <element name="TMufasaBitmap.Desaturate">
+        <short>Desaturates the bitmap.</short>
+      </element>
+      <element name="TMufasaBitmap.RotateBitmap">
+        <short>Rotate the bitmap.</short>
+      </element>
+      <element name="TMufasaBitmap.CopyClientToBitmap">
+        <short>Copy (a part of) the Window to the bitmap.</short>
+      </element>
+      <element name="TMufasaBitmap.FastReplaceColor">
+        <short>Replace OldColor with NewColor.</short>
+      </element>
+      <element name="TMufasaBitmap.FastDrawClear">
+        <short>Fill the bitmap with a specific colour.</short>
+      </element>
+      <element name="TMufasaBitmap.GetAreaColors">
+        <short>Return the bitmap data in a two dimensional array.</short>
+      </element>
+      <element name="TMufasaBitmap.FastGetPixels">
+        <short>Return the corresponding colour of each point.</short>
+      </element>
+      <element name="TMufasaBitmap.FastGetPixel">
+        <short>Returns the colour at the corresponding point.</short>
+      </element>
+      <element name="TMufasaBitmap.DrawToCanvas">
+        <short>Draw the bitmap on a canvas.</short>
+      </element>
+      <element name="TMufasaBitmap.DrawTPA">
+        <short>Draw the points in the tpointarray on the bitmap with the given colour.</short>
+      </element>
+      <element name="TMufasaBitmap.LoadFromRawImage">
+        <short>Loads a bitmap from a RawImage type.</short>
+        <descr>This can be virtually any type. As long as the RawImage is specified correctly, this function will load it and transform it into a TMufasaBitmap. It will do all the necessary shifts and swizzles to get the image in the TMufasaBitmap format.</descr>
+      </element>
+      <element name="TMufasaBitmap.LoadFromTBitmap">
+        <short>Load the data of a TBitmap into the TMufasaBitmap</short>
+      </element>
+      <element name="TMufasaBitmap.ToString">
+        <short>Turn the bitmap data into a string, base64 encoded.</short>
+      </element>
+      <element name="TMufasaBitmap.ToTBitmap">
+        <short>Creates a TBitmap from a TMufasaBitmap.</short>
+      </element>
+      <element name="TMufasaBitmap.Copy">
+        <short>Create a (partial) copy of the TMufasaBitmap.</short>
+      </element>
+      <element name="TMufasaBitmap.LoadFromFile">
+        <short>Load a TMufasaBitmap from file. All bitmap types supported by TLazIntFImage are supported.</short>
+      </element>
+      <element name="TMufasaBitmap.LoadFromFile.FileName">
+        <short>Path to the file that is to be loaded.</short>
+      </element>
+      <element name="TMufasaBitmap.SaveToFile">
+        <short>Save the TMufasaBitmap to a file.</short>
+      </element>
+      <element name="ArrDataToRawImage">
+        <short>Create a TRawImage from passed pixel data.</short>
+      </element>
+    </module>
+  </package>
+</fpdoc-descriptions>
