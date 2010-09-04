@@ -59,7 +59,7 @@
       </element>
       <element name="MufasaXErrorHandler">
         <short>X Error Handler.</short>
-        <descr>    This is extremely hacky, but also very useful.
+        <descr>This is extremely hacky, but also very useful.
     We have to install a X error handler, because otherwise X
     will terminate out entire app on error.
 
@@ -80,6 +80,36 @@
       </element>
       <element name="TWindow.GetNativeWindow">
         <short>Returns the stored TWindow</short>
+      </element>
+      <element name="TWindow.display">
+        <short>X11 display connection</short>
+      </element>
+      <element name="TWindow.window">
+        <short>Currently selected TWindow</short>
+      </element>
+      <element name="TWindow.buffer">
+        <short>XImage buffer</short>
+      </element>
+      <element name="TWindow.dirty">
+        <short>Used to determine wether we still have an image loaded or not.</short>
+      </element>
+      <element name="TWindow.keyinput">
+        <short>keyinput class from Lazarus</short>
+      </element>
+      <element name="TWindow.oldXHandler">
+        <short>The old X error handler</short>
+      </element>
+      <element name="TIOManager.display">
+        <short>X Display Connection</short>
+      </element>
+      <element name="TIOManager.desktop">
+        <short>Desktop TWindow</short>
+      </element>
+      <element name="ErrorCS">
+        <short>Critical Section used to handle X errors in a pretty way.</short>
+      </element>
+      <element name="xerror">
+        <short>xerror contains the last known X error that hasn't been handled.</short>
       </element>
     </module>
   </package>

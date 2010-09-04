@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="Simba">
+    <module name="MufasaTypes">
+      <element name="TRetData">
+        <short>Structure containing pixel data pointer and information about the pointer</short>
+      </element>
+      <element name="DS">
+        <short>The directory seperator constant</short>
+      </element>
+      <element name="TMousePress">
+        <short>Mouse press enum</short>
+      </element>
+      <element name="TMousePress.mouse_Down">
+        <short>Mouse down</short>
+      </element>
+      <element name="TMousePress.mouse_Up">
+        <short>Mouse up</short>
+      </element>
+      <element name="TTargetWindowMode">
+        <short>Target Window Mode</short>
+      </element>
+      <element name="TTargetWindowMode.w_BMP">
+        <short>Bitmap Window Mode</short>
+      </element>
+      <element name="TTargetWindowMode.w_Window">
+        <short>MS Windows Window Mode</short>
+      </element>
+      <element name="TTargetWindowMode.w_HDC">
+        <short>HDC Window Mode</short>
+      </element>
+      <element name="TTargetWindowMode.w_ArrayPtr">
+        <short>Raw Data Window Mode</short>
+      </element>
+      <element name="TTargetWindowMode.w_XWindow">
+        <short>X11 Window Mode</short>
+      </element>
+    </module>
+  </package>
+</fpdoc-descriptions>
