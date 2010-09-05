@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  StdCtrls, SynEdit, SynHighlighterPas;
+  StdCtrls, SynEdit, SynHighlighterPas,wrapfiles;
 
 type
 
@@ -14,6 +14,7 @@ type
 
   TfrmMain = class(TForm)
     btnGo: TButton;
+    btnAdvanced: TButton;
     pnlMain: TPanel;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
@@ -21,13 +22,14 @@ type
     eOut: TSynEdit;
     eDebug: TSynEdit;
     PasHL: TSynPasSyn;
+    procedure btnAdvancedClick(Sender: TObject);
     procedure btnGoClick(Sender: TObject);
   private
     { private declarations }
   public
     { public declarations }
   end; 
-
+procedure ConvertRT(Input, Dbg, Output : TStrings);
 var
   frmMain: TfrmMain;
 
@@ -40,14 +42,13 @@ uses
 
 { TfrmMain }
 
-procedure TfrmMain.btnGoClick(Sender: TObject);
-
+procedure ConvertRT(Input, Dbg, Output : TStrings);
   procedure Debug(s: string); overload;
   begin
-    if (Trim(eOut.Text) <> '') then
-      eDebug.Lines.Append(s)
+    if (Trim(Output.Text) <> '') then
+      Dbg.Append(s)
     else
-      eDebug.Text := s;
+      Dbg.Text := s;
   end;
 
   procedure Debug(v: Variant); overload;
@@ -57,10 +58,10 @@ procedure TfrmMain.btnGoClick(Sender: TObject);
 
   procedure Write(s: string); overload;
   begin
-    if (Trim(eOut.Text) <> '') then
-      eOut.Text := eOut.Text + s
+    if (Trim(Output.Text) <> '') then
+      Output.Text := Output.Text + s
     else
-      eOut.Text := s;
+      Output.Text := s;
   end;
 
   procedure Write(v: Variant); overload;
@@ -81,12 +82,12 @@ begin
   m := TMemoryStream.Create;
 
   try
-    eOut.BeginUpdate;
-    eOut.ClearAll;
-    eDebug.BeginUpdate;
-    eDebug.ClearAll;
+    Output.BeginUpdate;
+    Output.Clear;
+    Dbg.BeginUpdate;
+    Dbg.Clear;
 
-    eIn.Lines.SaveToStream(m);
+    Input.SaveToStream(m);
 
     try
       p.Run(m);
@@ -158,10 +159,20 @@ begin
     m.Free;
     p.Free;
 
-    eOut.EndUpdate;
-    eDebug.EndUpdate;
+    Output.EndUpdate;
+    Dbg.EndUpdate;
   end;
   Debug('Done :)');
+end;
+
+procedure TfrmMain.btnGoClick(Sender: TObject);
+begin
+  ConvertRT(eIn.Lines,eDebug.Lines,eOut.Lines);
+end;
+
+procedure TfrmMain.btnAdvancedClick(Sender: TObject);
+begin
+  WrapFilesForm.ShowModal;
 end;
 
 end.
