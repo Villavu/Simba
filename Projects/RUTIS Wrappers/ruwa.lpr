@@ -9,13 +9,14 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, main, v_MiscFunctions, CastaliaPasLex, CastaliaPasLexTypes,
   CastaliaSimplePasPar, CastaliaSimplePasParTypes,
-  v_Constants, v_ideCodeParser;
+  v_Constants, v_ideCodeParser, wrapfiles;
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.CreateForm(TfrmMain, frmMain);
+  Application.CreateForm(TWrapFilesForm, WrapFilesForm);
   Application.Run;
 end.
 
