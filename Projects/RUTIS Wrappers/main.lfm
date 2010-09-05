@@ -2185,6 +2185,15 @@ object frmMain: TfrmMain
       inline SynRightGutterPartList1: TSynRightGutterPartList
       end
     end
+    object btnAdvanced: TButton
+      Left = 544
+      Height = 25
+      Top = 5
+      Width = 80
+      Caption = 'Advanced'
+      OnClick = btnAdvancedClick
+      TabOrder = 2
+    end
   end
   object Splitter1: TSplitter
     Left = 335
