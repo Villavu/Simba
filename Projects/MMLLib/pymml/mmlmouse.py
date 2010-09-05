@@ -30,10 +30,11 @@ class Mouse(object):
     # last mouse pointer position
     _lpp = (0, 0)
 
-    def __init__(self, MC):
+    def __init__(self, MC, cli):
         """ Initialize the Mouse object. Needs a DLL Mufasa Core object 
             (which contains the dll reference.)"""
         self._mc = MC
+        self._cli = cli
         self._initialiseDLLFuncs()
         pass
     
@@ -132,7 +133,7 @@ class Mouse(object):
     # Internal DLL stuff
     def _getMousePos(self):
         ret = POINT()
-        ok = self._mc.dll.getMousePos(byref(ret))
+        ok = self._mc.dll.get_mouse_pos(self._cli, byref(ret))
         # FIXME: Perhaps use some sort of assertion?
         # We should print dll.last_error is ok != 0
 
@@ -142,37 +143,38 @@ class Mouse(object):
     def _setMousePos(self, p):
         ret = POINT()
         ret.x, ret.y = p
-        ok = self._mc.dll.setMousePos(byref(ret))
+        ok = self._mc.dll.set_mouse_pos(self._cli, byref(ret))
         if ok != 0:
             pass # Raise exception
         self._lpp = (ret.x, ret.y)
         return ok
 
     def _getMouseButtonState(self, button):
-        ok = self._mc.dll.getMouseButtonState(button)
+        ok = self._mc.dll.get_mouse_button_state(self._cli, button)
         if ok < 0:
             pass #Raise exception
         return ok == 1
 
     def _setMouseButtonState(self, button, state):
-        ok = self._mc.dll.setMouseButtonState(c_int(button), c_int(state), 
-                *map(lambda x: c_int(x), self._getMousePos()))
+        ok = self._mc.dll.set_mouse_button_state(self._cli, c_int(button),
+                c_int(state), *map(lambda x: c_int(x), self._getMousePos()))
         if ok != 0:
             pass # Raise exception
         return ok
 
     def _initialiseDLLFuncs(self):
         """Define all mouse related DLL-calls"""
-        self._mc.dll.getMousePos.restype = c_int
-        self._mc.dll.getMousePos.argtypes = [PPOINT]
+        self._mc.dll.get_mouse_pos.restype = c_int
+        self._mc.dll.get_mouse_pos.argtypes = [c_ulong, PPOINT]
 
-        self._mc.dll.setMousePos.restype = c_int
-        self._mc.dll.setMousePos.argtypes = [PPOINT]
+        self._mc.dll.set_mouse_pos.restype = c_int
+        self._mc.dll.set_mouse_pos.argtypes = [c_ulong, PPOINT]
 
-        self._mc.dll.getMouseButtonState.restype = c_int
-        self._mc.dll.getMouseButtonState.argtypes = [c_int]
+        self._mc.dll.get_mouse_button_state.restype = c_int
+        self._mc.dll.get_mouse_button_state.argtypes = [c_ulong, c_int]
 
-        self._mc.dll.setMouseButtonState.restype = c_int
-        self._mc.dll.setMouseButtonState.argtypes = [c_int, c_int, c_int, c_int]
+        self._mc.dll.set_mouse_button_state.restype = c_int
+        self._mc.dll.set_mouse_button_state.argtypes = [c_ulong, c_int, c_int,
+                c_int, c_int]
         pass
 
