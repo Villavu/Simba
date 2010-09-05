@@ -90,6 +90,18 @@
       <element name="ArrDataToRawImage">
         <short>Create a TRawImage from passed pixel data.</short>
       </element>
+      <short>The MML bitmap unit</short>
+      <descr>Contains the TMufasaClass and a class that manages an array of TMufasaBitmaps.</descr>
+      <element name="TMBitmaps">
+        <short>Manages TMufasaBitmaps in an array.</short>
+      </element>
+      <element name="RGBToBGR">
+        <short>Function to convert RGB to BGR.</short>
+        <descr>The function is inline so there won't be any function calling overhead.</descr>
+      </element>
+      <element name="TMufasaBitmap.Rectangle">
+        <short>Fill a rectangle with a specific colour.</short>
+      </element>
     </module>
   </package>
 </fpdoc-descriptions>
