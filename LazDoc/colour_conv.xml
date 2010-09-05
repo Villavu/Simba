@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="Simba">
+    <module name="colour_conv">
+      <element name="RGBtoColor">
+        <short>Convert R, G, B to a Win32 Colour.</short>
+      </element>
+      <element name="ColorToRGB">
+        <short>Convert a Win32 colour to RGB.</short>
+      </element>
+      <element name="RGBToXYZ">
+        <short>Convert R, G, B to X, Y, Z.</short>
+      </element>
+      <element name="XYZToRGB">
+        <short>Convert X, Y, Z to R, G, B.</short>
+      </element>
+      <element name="RGBToHSL">
+        <short>Convert R, G, B to H, S, L.</short>
+        <descr>This function multiplies the H, S, L values returned by 100.</descr>
+      </element>
+      <element name="HSLtoRGB">
+        <short>Convert H, S, L to R, G, B.</short>
+      </element>
+      <element name="RGBToHSLNonFixed">
+        <short>Convert R, G, B to H, S, L.</short>
+        <descr>This function does not multiply the returned H, S, L by 100.</descr>
+      </element>
+      <element name="ColorToHSL">
+        <short>Convert win32 colour to H, S, L.</short>
+      </element>
+      <element name="ColorToXYZ">
+        <short>Convert Win32 colour to X, Y, Z.</short>
+      </element>
+      <element name="HSLToColor">
+        <short>Convert H, S, L to win32 colour.</short>
+      </element>
+      <element name="XYZToColor">
+        <short>Convert X, Y, Z to win32 colour.</short>
+      </element>
+      <element name="BGRToRGB">
+        <short>Swizzle B, G, R to R, G, B.</short>
+      </element>
+    </module>
+  </package>
+</fpdoc-descriptions>
