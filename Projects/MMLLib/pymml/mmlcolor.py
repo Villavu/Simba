@@ -1,7 +1,6 @@
 from ctypes import *
 from mmltypes import isiterable
 from mmltypes import POINT, PPOINT, PINTEGER
-from mmltypes import PascalArray
 from mmltypes import RESULT_OK, RESULT_FALSE, RESULT_ERROR
 
 """
@@ -25,11 +24,12 @@ class Color(object):
 
     _mc = None
 
-    def __init__(self, MC):
+    def __init__(self, MC, cli):
         """
             Initialise the Color object.
         """
         self._mc = MC
+        self._cli = cli
         self._initialiseDLLFuncs()
 
     def find(self, box, color, tol = 0):
@@ -40,10 +40,11 @@ class Color(object):
         """
         x, y = (c_int(-1), c_int(-1))
         if tol is 0:
-            ret = self._mc.dll.findColor(byref(x), byref(y), color, *box)
+            ret = self._mc.dll.find_color(self._cli, byref(x), byref(y),
+                    color, *box)
         else:
-            ret = self._mc.dll.findColorTolerance(byref(x), byref(y), color,
-                    tol, *box)
+            ret = self._mc.dll.find_color_tolerance(self._cli, byref(x),
+                    byref(y), color, tol, *box)
 
         if ret is RESULT_OK:
             return (x, y)
@@ -55,29 +56,33 @@ class Color(object):
             find all colors in a box, with a specific tolerance.
             returned are all the matching points
         """
-        ptr = PPOINT()
+        ptr, _len = PPOINT(), c_int(42)
+        print type(_len)
         if tol is 0:
-            self._mc.dll.findColors(byref(ptr), color, *box)
+            self._mc.dll.find_colors(self._cli, byref(ptr), byref(_len),
+                    color, *box)
         else:
-            self._mc.dll.findColorsTolerance(byref(ptr), color, tol, *box)
+            self._mc.dll.find_colors_tolerance(self._cli, byref(ptr),
+                    byref(_len), color, tol, *box)
 
-        arr = PascalArray(POINT, ptr, self._mc)
-#        print 'Length:', len(arr)
-#        for i in range(len(arr)):
-#            print i, arr[i].x, arr[i].y
+#        print 'Length:', _len
+#        for x in range(_len.value):
+#            print ptr[x].x
+#        print ptr
         # FIXME return python list?
-        return arr
+        return ''
 
     def _initialiseDLLFuncs(self):
-        self._mc.dll.findColor.restype = c_int
-        self._mc.dll.findColor.argtypes = [PINTEGER, PINTEGER, c_int, c_int,
-                c_int, c_int, c_int]
-        self._mc.dll.findColorTolerance.restype = c_int
-        self._mc.dll.findColorTolerance.argtypes = [PINTEGER, PINTEGER, c_int, c_int,
+        self._mc.dll.find_color.restype = c_int
+        self._mc.dll.find_color.argtypes = [c_ulong, PINTEGER, PINTEGER, c_int,
                 c_int, c_int, c_int, c_int]
-        self._mc.dll.findColors.restype = c_int
-        self._mc.dll.findColors.argtypes = [POINTER(PPOINT), c_int, c_int,
-                c_int, c_int, c_int]
-        self._mc.dll.findColorsTolerance.restype = c_int
-        self._mc.dll.findColorsTolerance.argtypes = [POINTER(PPOINT), c_int, c_int,
+        self._mc.dll.find_color_tolerance.restype = c_int
+        self._mc.dll.find_color_tolerance.argtypes = [c_ulong, PINTEGER,
+                PINTEGER, c_int, c_int, c_int, c_int, c_int, c_int]
+        self._mc.dll.find_colors.restype = c_int
+        self._mc.dll.find_colors.argtypes = [c_ulong, POINTER(PPOINT),
+                POINTER(c_int), c_int, c_int, c_int, c_int, c_int]
+        self._mc.dll.find_colors_tolerance.restype = c_int
+        self._mc.dll.find_colors_tolerance.argtypes = [c_ulong,
+                POINTER(PPOINT), POINTER(c_int), c_int, c_int,
                 c_int, c_int, c_int, c_int]
