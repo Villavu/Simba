@@ -35,12 +35,12 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="20">
+    <Units Count="22">
       <Unit0>
         <Filename Value="ruwa.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ruwa"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
       </Unit0>
       <Unit1>
         <Filename Value="main.pas"/>
@@ -50,9 +50,9 @@
         <UnitName Value="main"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="7"/>
-        <CursorPos X="24" Y="28"/>
-        <UsageCount Value="22"/>
+        <TopLine Value="34"/>
+        <CursorPos X="15" Y="32"/>
+        <UsageCount Value="24"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -60,36 +60,36 @@
         <Filename Value="..\..\Units\Misc\v_MiscFunctions.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="v_MiscFunctions"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
       </Unit2>
       <Unit3>
         <Filename Value="..\..\Units\Misc\ValistusDefines.inc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
       </Unit3>
       <Unit4>
         <Filename Value="..\..\Units\Misc\CastaliaPasLex.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CastaliaPasLex"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
       </Unit4>
       <Unit5>
         <Filename Value="..\..\Units\Misc\CastaliaPasLexTypes.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CastaliaPasLexTypes"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
       </Unit5>
       <Unit6>
         <Filename Value="..\..\Units\Misc\CastaliaSimplePasPar.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CastaliaSimplePasPar"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
       </Unit6>
       <Unit7>
         <Filename Value="..\..\Units\Misc\CastaliaSimplePasParTypes.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CastaliaSimplePasParTypes"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
       </Unit7>
       <Unit8>
         <Filename Value="..\..\Units\Misc\v_autocompleteform.pas"/>
@@ -100,7 +100,7 @@
         <Filename Value="..\..\Units\Misc\v_Constants.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="v_Constants"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
       </Unit9>
       <Unit10>
         <Filename Value="..\..\Units\Misc\v_ideCodeInsight.pas"/>
@@ -114,11 +114,11 @@
         <Filename Value="..\..\Units\Misc\v_ideCodeParser.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="v_ideCodeParser"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="8"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="8" Y="8"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="24"/>
         <Loaded Value="True"/>
       </Unit11>
       <Unit12>
@@ -154,170 +154,188 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="64"/>
-        <CursorPos X="40" Y="80"/>
-        <UsageCount Value="22"/>
+        <TopLine Value="44"/>
+        <CursorPos X="29" Y="48"/>
+        <UsageCount Value="24"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit15>
       <Unit16>
         <Filename Value="C:\lazarus\lcl\fileutil.pas"/>
         <UnitName Value="FileUtil"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
         <TopLine Value="23"/>
         <CursorPos X="10" Y="49"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit16>
       <Unit17>
         <Filename Value="C:\lazarus\lcl\include\fileutil.inc"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="7"/>
         <WindowIndex Value="0"/>
         <TopLine Value="379"/>
         <CursorPos X="3" Y="391"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit17>
       <Unit18>
         <Filename Value="C:\FPC\FPCCheckout\rtl\objpas\classes\classesh.inc"/>
         <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="573"/>
-        <CursorPos X="15" Y="599"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="633"/>
+        <CursorPos X="3" Y="659"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit18>
       <Unit19>
         <Filename Value="C:\FPC\FPCCheckout\rtl\objpas\classes\stringl.inc"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
         <TopLine Value="592"/>
         <CursorPos X="3" Y="597"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit19>
+      <Unit20>
+        <Filename Value="C:\FPC\FPCCheckout\rtl\objpas\classes\streams.inc"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="450"/>
+        <CursorPos X="20" Y="466"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="C:\FPC\FPCCheckout\rtl\objpas\sysutils\filutilh.inc"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="42"/>
+        <CursorPos X="18" Y="64"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit21>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="main.pas"/>
-        <Caret Line="147" Column="18" TopLine="125"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="43" Column="1" TopLine="25"/>
       </Position1>
       <Position2>
-        <Filename Value="main.pas"/>
-        <Caret Line="150" Column="41" TopLine="115"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="44" Column="1" TopLine="26"/>
       </Position2>
       <Position3>
-        <Filename Value="main.pas"/>
-        <Caret Line="152" Column="41" TopLine="133"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="42" Column="1" TopLine="28"/>
       </Position3>
       <Position4>
-        <Filename Value="main.pas"/>
-        <Caret Line="9" Column="49" TopLine="7"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="41" Column="1" TopLine="27"/>
       </Position4>
       <Position5>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="15" Column="72" TopLine="1"/>
+        <Caret Line="43" Column="1" TopLine="29"/>
       </Position5>
       <Position6>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="19" Column="72" TopLine="1"/>
+        <Caret Line="44" Column="1" TopLine="30"/>
       </Position6>
       <Position7>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="20" Column="72" TopLine="1"/>
+        <Caret Line="46" Column="1" TopLine="32"/>
       </Position7>
       <Position8>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="22" Column="72" TopLine="3"/>
+        <Caret Line="51" Column="15" TopLine="35"/>
       </Position8>
       <Position9>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="43" Column="1" TopLine="25"/>
+        <Caret Line="52" Column="15" TopLine="36"/>
       </Position9>
       <Position10>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="44" Column="1" TopLine="26"/>
+        <Caret Line="37" Column="8" TopLine="23"/>
       </Position10>
       <Position11>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="42" Column="1" TopLine="28"/>
+        <Caret Line="71" Column="31" TopLine="56"/>
       </Position11>
       <Position12>
-        <Filename Value="wrapfiles.pas"/>
-        <Caret Line="41" Column="1" TopLine="27"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="90" Column="10" TopLine="39"/>
       </Position12>
       <Position13>
-        <Filename Value="wrapfiles.pas"/>
-        <Caret Line="43" Column="1" TopLine="29"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="49" Column="11" TopLine="23"/>
       </Position13>
       <Position14>
-        <Filename Value="wrapfiles.pas"/>
-        <Caret Line="44" Column="1" TopLine="30"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="88" Column="14" TopLine="48"/>
       </Position14>
       <Position15>
-        <Filename Value="wrapfiles.pas"/>
-        <Caret Line="46" Column="1" TopLine="32"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="90" Column="11" TopLine="64"/>
       </Position15>
       <Position16>
-        <Filename Value="wrapfiles.pas"/>
-        <Caret Line="51" Column="15" TopLine="35"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="170" Column="46" TopLine="128"/>
       </Position16>
       <Position17>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="52" Column="15" TopLine="36"/>
+        <Caret Line="72" Column="14" TopLine="27"/>
       </Position17>
       <Position18>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="37" Column="8" TopLine="23"/>
+        <Caret Line="46" Column="23" TopLine="27"/>
       </Position18>
       <Position19>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="71" Column="31" TopLine="56"/>
+        <Caret Line="50" Column="20" TopLine="32"/>
       </Position19>
       <Position20>
-        <Filename Value="main.pas"/>
-        <Caret Line="90" Column="10" TopLine="39"/>
+        <Filename Value="C:\FPC\FPCCheckout\rtl\objpas\classes\stringl.inc"/>
+        <Caret Line="625" Column="14" TopLine="608"/>
       </Position20>
       <Position21>
-        <Filename Value="main.pas"/>
-        <Caret Line="49" Column="11" TopLine="23"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="48" Column="48" TopLine="33"/>
       </Position21>
       <Position22>
-        <Filename Value="main.pas"/>
-        <Caret Line="88" Column="14" TopLine="48"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="54" Column="1" TopLine="52"/>
       </Position22>
       <Position23>
-        <Filename Value="main.pas"/>
-        <Caret Line="90" Column="11" TopLine="64"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="83" Column="110" TopLine="37"/>
       </Position23>
       <Position24>
-        <Filename Value="main.pas"/>
-        <Caret Line="170" Column="46" TopLine="128"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="95" Column="18" TopLine="46"/>
       </Position24>
       <Position25>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="72" Column="14" TopLine="27"/>
+        <Caret Line="86" Column="61" TopLine="49"/>
       </Position25>
       <Position26>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="46" Column="23" TopLine="27"/>
+        <Caret Line="101" Column="19" TopLine="55"/>
       </Position26>
       <Position27>
-        <Filename Value="wrapfiles.pas"/>
-        <Caret Line="50" Column="20" TopLine="32"/>
+        <Filename Value="C:\FPC\FPCCheckout\rtl\objpas\classes\streams.inc"/>
+        <Caret Line="466" Column="20" TopLine="450"/>
       </Position27>
       <Position28>
-        <Filename Value="C:\FPC\FPCCheckout\rtl\objpas\classes\stringl.inc"/>
-        <Caret Line="625" Column="14" TopLine="608"/>
+        <Filename Value="wrapfiles.pas"/>
+        <Caret Line="102" Column="21" TopLine="55"/>
       </Position28>
       <Position29>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="48" Column="48" TopLine="33"/>
+        <Caret Line="108" Column="35" TopLine="63"/>
       </Position29>
       <Position30>
         <Filename Value="wrapfiles.pas"/>
-        <Caret Line="54" Column="1" TopLine="52"/>
+        <Caret Line="99" Column="56" TopLine="63"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
@@ -344,7 +362,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="3">
+    <Exceptions Count="4">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -354,6 +372,9 @@
       <Item3>
         <Name Value="EFOpenError"/>
       </Item3>
+      <Item4>
+        <Name Value="ESyntaxError"/>
+      </Item4>
     </Exceptions>
   </Debugging>
 </CONFIG>

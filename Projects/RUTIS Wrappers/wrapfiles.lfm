@@ -65,6 +65,7 @@ object WrapFilesForm: TWrapFilesForm
     TabOrder = 4
   end
   object FileDialog: TOpenDialog
+    Filter = 'Include files (*.inc)|*.inc|All files (*.*)|*.*'
     Options = [ofAllowMultiSelect, ofFileMustExist, ofEnableSizing, ofViewDetail]
     left = 32
     top = 56
