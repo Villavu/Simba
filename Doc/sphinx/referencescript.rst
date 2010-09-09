@@ -14,3 +14,5 @@ default (Pascal) engine.
     scriptref/colourfinding.rst
     scriptref/colourconverting.rst
     scriptref/files.rst
+    scriptref/ocr.rst
+    scriptref/dtm.rst
