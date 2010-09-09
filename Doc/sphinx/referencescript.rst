@@ -16,3 +16,6 @@ default (Pascal) engine.
     scriptref/files.rst
     scriptref/ocr.rst
     scriptref/dtm.rst
+    scriptref/window.rst
+    scriptref/web.rst
+    scriptref/bitmaps.rst
