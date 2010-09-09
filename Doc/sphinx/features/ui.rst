@@ -4,8 +4,7 @@ User Interface
 Menu items
 ----------
 (Format)
-Main menu item
-  Submenu item, [shortcut, ]description
+Main menu item Submenu item, [shortcut, ]description
 
 File Menu
 ~~~~~~~~~
