@@ -37,7 +37,7 @@ Say:
     SubPoint_1 = (122, 460)
     SubPoint_2 = (120, 450)
 
-Then we could create the following pDTM structure:
+Then we could create the following MDTM structure:
 
 .. code-block:: pascal
 
@@ -105,7 +105,7 @@ It is also possible to load a DTM from a *zipped* string.
 The details of the algorithm will not be explained here. (Have a look at dtm.pas
 if you're interested)
 
-pDTM and TDTM
+MDTM and TDTM
 -------------
 
 One may know DTM's as a different type:
@@ -123,7 +123,7 @@ One may know DTM's as a different type:
     SubPoints: TDTMPointDefArray;
   end;            
 
-The MML provides the two functions *pDTMtoTDTM* and *TDTMtopDTM* to
+The MML provides the two functions *MDTMtoTDTM* and *TDTMtoMDTM* to
 directly convert between the two types.
 
 Main Point and AreaSize / Shape
