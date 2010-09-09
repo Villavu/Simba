@@ -2,7 +2,7 @@
 .. _scriptref_ocr:
 
 OCR 
-==============================
+===
 Simba has OCR functions (Optical Text Recognition); these are used to *read* text from an image.
 
 It also has a wide variation of text *finding* functions. Both will be covered in
@@ -160,7 +160,7 @@ GetTextAtEx
 
 A general function for reading text.
 Reads text in the rectangle defined by (*xs*, *ys*), (*xe*, *ye*)
- with a minimal vertical spacing of *minvspacing*
+with a minimal vertical spacing of *minvspacing*
 and a maximal vertical spacing of *maxvspacing*, the text colour should match
 the colour *color* with the given tolerance *Tolerance*; the length of the text
 is specified with *len*. Finally, the font to use for the identifying is
