@@ -1,8 +1,11 @@
-..  _scriptref_colour:
+.. _scriptref-colour:
 
+
+.. _scriptref-finding:
 
 Colour Finding
 ==============
+
 
 Finding colours on the screen is quite simple. Simba offers methods like
 ``FindColor`` to locate colours on the screen.
@@ -35,7 +38,7 @@ components:
 
 .. note::
     Other techniques exist, which involve relative point distance from one point
-    to another; these are found in the :ref:`_scriptref_DTM` section.
+    to another; these are found in the :ref:`scriptref-dtm` section.
 
 .. note::
 
