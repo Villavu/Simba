@@ -29,9 +29,9 @@ object WrapFilesForm: TWrapFilesForm
     TabOrder = 1
   end
   object SaveDirEdit: TDirectoryEdit
-    Left = 200
+    Left = 192
     Height = 21
-    Top = 16
+    Top = 20
     Width = 152
     ShowHidden = False
     ButtonWidth = 23
@@ -40,7 +40,7 @@ object WrapFilesForm: TWrapFilesForm
     TabOrder = 2
   end
   object SaveDirLabel: TLabel
-    Left = 120
+    Left = 104
     Height = 14
     Top = 20
     Width = 78
@@ -48,7 +48,7 @@ object WrapFilesForm: TWrapFilesForm
     ParentColor = False
   end
   object wrpBtn: TButton
-    Left = 472
+    Left = 568
     Height = 25
     Top = 16
     Width = 75
@@ -63,6 +63,27 @@ object WrapFilesForm: TWrapFilesForm
     Width = 616
     Anchors = [akRight, akBottom]
     TabOrder = 4
+  end
+  object FileNameEdit1: TFileNameEdit
+    Left = 448
+    Height = 21
+    Top = 20
+    Width = 80
+    DialogOptions = []
+    FilterIndex = 0
+    HideDirectories = False
+    ButtonWidth = 23
+    NumGlyphs = 0
+    MaxLength = 0
+    TabOrder = 5
+  end
+  object Label1: TLabel
+    Left = 383
+    Height = 14
+    Top = 25
+    Width = 57
+    Caption = 'MethodFile:'
+    ParentColor = False
   end
   object FileDialog: TOpenDialog
     Filter = 'Include files (*.inc)|*.inc|All files (*.*)|*.*'

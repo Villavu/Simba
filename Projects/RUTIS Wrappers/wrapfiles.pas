@@ -14,6 +14,8 @@ type
 
   TWrapFilesForm = class(TForm)
     dbgMemo: TMemo;
+    FileNameEdit1: TFileNameEdit;
+    Label1: TLabel;
     wrpBtn: TButton;
     SaveDirEdit: TDirectoryEdit;
     FileButton: TButton;
@@ -62,7 +64,7 @@ procedure TWrapFilesForm.wrpBtnClick(Sender: TObject);
 
 var
   i : integer;
-  Input, Output : TStringList;
+  Input, Output,Procnames : TStringList;
   NewFile : string;
   YesToAll, NoToAll : boolean;
 begin
@@ -78,6 +80,7 @@ begin
     dbg('No files loaded');
     exit;
   end;
+  Procnames := TStringList.Create;
   for i := 0 to FileBox.Items.Count - 1 do
   begin
     if not FileExists(filebox.items[i]) then
@@ -99,13 +102,14 @@ begin
                     end;
         mrYesToAll : YesToAll:= true;
       end;
+      dbg(BoolToStr(YesToAll,true));
     end;
     dbg(NewFile);
     try
       Input := TStringList.Create;
       Input.LoadFromFile(filebox.items[i]);
       Output :=  TStringList.Create;
-      ConvertRT(Input,dbgMemo.Lines,Output);
+      ConvertRT(Input,dbgMemo.Lines,Output,Procnames);
       Output.SaveToFile(NewFile);
       Input.free;
       Output.free;
@@ -113,6 +117,10 @@ begin
       dbg('Something went wrong');
     end;
   end;
+  dbg(Procnames.Text);
+  if FileNameEdit1.Text <> '' then
+    Procnames.SaveToFile(FileNameEdit1.text);
+  Procnames.Free;
 end;
 
 end.
