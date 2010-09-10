@@ -22,6 +22,7 @@
 }
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
+AddFunction(@CallProc,'function CallProc(ProcName: string; var V: TVariantArray): Variant;');
 AddFunction(@ThreadSafeCall,'function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;');
 AddFunction(@pswriteln,'procedure Writeln(x: string);'); //PS defines a special, keep this for CPascal
 AddFunction(@ps_debugln,'procedure DebugLn(str : string);');

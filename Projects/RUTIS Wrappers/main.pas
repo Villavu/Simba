@@ -29,7 +29,7 @@ type
   public
     { public declarations }
   end; 
-procedure ConvertRT(Input, Dbg, Output : TStrings);
+procedure ConvertRT(Input, Dbg, Output : TStrings; procnames : TStrings = nil);
 var
   frmMain: TfrmMain;
 
@@ -42,7 +42,7 @@ uses
 
 { TfrmMain }
 
-procedure ConvertRT(Input, Dbg, Output : TStrings);
+procedure ConvertRT(Input, Dbg, Output : TStrings; procnames : TStrings = nil);
   procedure Debug(s: string); overload;
   begin
     if (Trim(Output.Text) <> '') then
@@ -69,12 +69,29 @@ procedure ConvertRT(Input, Dbg, Output : TStrings);
     Write(string(v));
   end;
 
+  function FixName( str : string) : string;
+  begin
+    if (length(str) > 3) and (str[1] = 'p') and (str[2] = 's') and (str[3] = '_') then
+      result := Copy(str,4,length(str)-3);
+  end;
+
+  function PtrName ( str : string) : String;
+  begin
+    debug(str);
+    if (length(str) > 1) and (str[1] in ['T','t']) then
+      result := 'P' + copy(str,2,length(str)-1)
+    else
+      result := 'P' + str;
+    debug(result);
+  end;
+
 var
   p: TCodeParser;
   m: TMemoryStream;
   a, b, c: TDeclarationArray;
   i, ii, iii, pc: Integer;
   s: string;
+  rutiss,tmp : string;
   d: TDeclaration;
   Fail: Boolean;
 begin
@@ -106,19 +123,24 @@ begin
           Continue;
         end;
 
-        s := 'procedure _RUTIS_'+Name.ShortText+
-          '(Stack: TRutisStack; Params: PRutisParamInfoArray; Result: PRutisParamInfo);'+LineEnding+
+        s := 'procedure RUTIS_'+Name.ShortText+
+          '(Params: PRutisParamInfoArray; Result: PRutisParamInfo);'+LineEnding+
           'begin'+LineEnding+'  ';
 
         d := Items.GetFirstItemOfClass(TciReturnType);
         if (d <> nil) then
-          s := s+'P'+d.ShortText+'(Result^.Data)^ := ';
+        begin
+          s := s+PtrName(d.ShortText)+'(Result^.Data)^ := ';
+          rutiss := 'RutisEngine.RegExtMethod(''%s'',%s, [%s], '''+d.CleanText +''');';
+        end else
+          rutiss := 'RutisEngine.RegExtMethod(''%s'',%s, [%s], '''');';
 
         s := s+Name.ShortText+'(';
 
         pc := 0;
         Fail := False;
         b := GetParamDeclarations();
+        tmp := '';
         for ii := 0 to High(b) do
         begin
           d := b[ii].Items.GetFirstItemOfClass(TciParameterType);
@@ -141,10 +163,13 @@ begin
           begin
             if (pc > 0) then
               s := s+', ';
-            s := s+'P'+d.ShortText+'(Params^['+IntToStr(pc)+'].Data)^';
+            s := s+PtrName(d.ShortText)+'(Params^['+IntToStr(pc)+'].Data)^';
+            tmp := tmp + #39 + d.ShortText + #39 +',';
             Inc(pc);
           end;
         end;
+        if tmp <> '' then
+          setlength(tmp,length(tmp)-1);
 
         if Fail then
           Continue;
@@ -153,7 +178,11 @@ begin
         if (i > 0) then
           s := LineEnding+s;
         Write(s);
+        rutiss := Format(rutiss,[FixName(name.ShortText),'@RUTIS_' + name.ShortText,tmp]);
+        if procnames <> nil then
+          procnames.Add(rutiss);
         Debug('Done "'+Name.ShortText+'"!');
+        Debug('Prog-name "' + rutiss + '"');
       end;
   finally
     m.Free;
