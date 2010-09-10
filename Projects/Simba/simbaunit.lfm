@@ -2995,15 +2995,15 @@ object SimbaForm: TSimbaForm
       OnUpdate = ActionExtensionsUpdate
     end
     object ActionPascalScript: TAction
-      Caption = 'ActionPascalScript'
+      Caption = 'PascalScript'
       OnExecute = ActionPascalScriptExecute
     end
     object ActionRUTIS: TAction
-      Caption = 'ActionRUTIS'
+      Caption = 'RUTIS'
       OnExecute = ActionRUTISExecute
     end
     object ActionCPascal: TAction
-      Caption = 'ActionCPascal'
+      Caption = 'CPascal'
       Enabled = False
       OnExecute = ActionCPascalExecute
     end

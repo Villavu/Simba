@@ -488,6 +488,12 @@ begin
   end;
 end;
 
+function CallProc(ProcName: string; var V: TVariantArray): Variant; extdecl;
+begin
+  with TPSThread(currthread).PSScript do
+    Result := Exec.RunProcPVar(V,Exec.GetProc(Procname));
+end;
+
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/settings.inc}
 {$I PSInc/Wrappers/bitmap.inc}
@@ -994,8 +1000,47 @@ begin
     writeln(s);
 end;
 
+type
+  PBoolean = ^Boolean;
+  PStringArray = ^TStringArray;
+  PBmpMirrorStyle = ^TBmpMirrorStyle;
+  PPointArray = ^TPointArray;
+  P2DIntArray = ^T2DIntArray;
+  PCanvas = ^TCanvas;
+  P2DPointArray = ^T2DPointArray;
+  PMask = ^Tmask;
+  PBox = ^TBox;
+  PTarget_Exported = ^TTarget_Exported;
+  PIntegerArray = ^TIntegerArray;
+  PExtendedArray = ^TExtendedArray;
+//  PStrExtr = ^TStrExtr;
+  PReplaceFlags = ^TReplaceFlags;
+  PClickType = ^TClickType;
+  P2DExtendedArray = ^T2DExtendedArray;
+  PMDTM = ^TMDTM;
+  PSDTM = ^TSDTM;
+
+{$I RTInc/other.inc}
+{$I RTInc/settings.inc}
+{$I RTInc/bitmap.inc}
+{$I RTInc/window.inc}
+{$I RTInc/tpa.inc}
+{$I RTInc/strings.inc}
+{$I RTInc/colour.inc}
+{$I RTInc/colourconv.inc}
+{$I RTInc/math.inc}
+{$I RTInc/mouse.inc}
+{$I RTInc/file.inc}
+{$I RTInc/keyboard.inc}
+{$I RTInc/dtm.inc}
+{$I RTInc/ocr.inc}
+{$I RTInc/internets.inc}
+
+
 constructor TRTThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo;
   plugin_dir: string);
+var
+  RutisEngine  : TRutisEngine;
 begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
   RUTIS := TRutisEngine.Create;
@@ -1003,6 +1048,8 @@ begin
   RUTIS.OnError:= @RTOnError;
   RUTIS.OptProcessTimer:= false;
   RUTIS.Compiler.optArrayRangeCheck:= true;
+  RutisEngine := RUTIS;
+  {$I RTInc/rtexportedmethods.inc}
 end;
 
 destructor TRTThread.Destroy;

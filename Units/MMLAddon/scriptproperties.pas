@@ -14,6 +14,7 @@ type
       SP_WriteTimeStamp, //Writes the time infront of a writeln
       SP_OnTerminate
     );
+    PSP_Property = ^TSP_Property;
     TSP_Properties = set of TSP_Property;
 
 
