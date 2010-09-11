@@ -206,6 +206,9 @@ begin
  CL.AddConstantN('mbYesNoCancel','LongInt').SetInt(ord(mbYes) or ord(mbNo) or ord(mbCancel));
  CL.AddConstantN('mbOKCancel','LongInt').SetInt(ord(mbOK) or ord(mbCancel));
  CL.AddConstantN('mbAbortRetryIgnore','LongInt').SetInt(ord(mbAbort) or ord(mbRetry) or ord(mbIgnore));
+ CL.AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmation, mtCustom )');
+ CL.AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
+ CL.AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
 { CL.AddDelphiFunction('Function CreateMessageDialog( const Msg : string; DlgType : TMsgDlgType; Buttons : TMsgDlgButtons) : TForm');
  CL.AddDelphiFunction('Function MessageDlg( const Msg : string; DlgType : TMsgDlgType; Buttons : TMsgDlgButtons; HelpCtx : Longint) : Integer');
  CL.AddDelphiFunction('Function MessageDlgPos( const Msg : string; DlgType : TMsgDlgType; Buttons : TMsgDlgButtons; HelpCtx : Longint; X, Y : Integer) : Integer');

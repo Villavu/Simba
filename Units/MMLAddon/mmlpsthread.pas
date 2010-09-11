@@ -33,7 +33,7 @@ uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
   bitmaps, plugins, libloader, dynlibs,internets,scriptproperties,
-  settings,settingssandbox, Rutis_Engine,Rutis_Defs;
+  settings,settingssandbox, Rutis_Engine,Rutis_Defs,lcltype, dialogs;
 
 const
   m_Status = 0; //Data = PChar to new status
@@ -43,6 +43,10 @@ const
   m_GetDebugBitmap = 4; //Data = TMufasaBitmap
   m_ClearDebugImg = 5; //Data = nil
   m_ClearDebug = 6; //Data = nil
+  m_InputQuery = 7; //Data = PInputQueryData
+  m_ShowMessage = 8; //Data = PChar
+  m_MessageBox = 9; //Data =  PMessageBoxData
+  m_MessageDlg = 10; //Data = PMessageDlg
 type
     { TMMLPSThread }
     TCallBackData = record
@@ -80,6 +84,20 @@ type
       ACaption, APrompt,Value : String;
       Res : boolean;
     end;
+    PInputQueryData = ^TInputQueryData;
+    TMessageBoxData = record
+      AText, ACaption : PChar;
+      AFlags, res : integer;
+    end;
+    PMessageBoxData = ^TMessageBoxdata;
+    TMessageDlgData = record
+      ACaption, AMsg : string;
+      ADlgType : TMsgDlgType;
+      AButtons : TMsgDlgButtons;
+      Res : integer;
+    end;
+    PMessageDlgData = ^TMessageDlgData;
+
     { TMThread }
 
     TMThread = class(TThread)
@@ -107,7 +125,6 @@ type
       Sett: TMMLSettingsSandbox;
 
       CallBackData : PCallBackData; //Handles general callback functions for threadsafety
-      InputQueryData : TInputQueryData;//We need this for InputQuery
       SyncInfo : PSyncInfo; //We need this for callthreadsafe
       ErrorData : PErrorData; //We need this for thread-safety etc
       OnError  : TOnError; //Error handeler
@@ -116,7 +133,6 @@ type
 
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
-      procedure mInputQuery;
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
@@ -235,7 +251,6 @@ uses
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
   files,
-  dialogs,
   dtm, //Dtms!
   uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
@@ -352,12 +367,6 @@ begin
   CallBackData^.cmd:= cmd;
   CallBackData^.data:= data;
   Synchronize(CallBackData^.FormCallBack);
-end;
-
-procedure TMThread.mInputQuery;
-begin
-  InputQueryData.Res:= InputQuery(InputQueryData.ACaption,InputQueryData.APrompt,
-                                  InputQueryData.Value);
 end;
 
 procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);

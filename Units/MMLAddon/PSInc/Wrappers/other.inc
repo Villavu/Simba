@@ -194,6 +194,57 @@ begin
   CurrThread.FormCallBack(m_Disguise,PCaption);
 end;
 
+procedure ps_ShowMessage(msg : string); extdecl;
+var
+  PMsg : Pchar;
+begin
+  PMsg := PChar(msg);
+  CurrThread.FormCallBack(m_ShowMessage,PMsg);
+end;
+
+
+function ps_MessageBox(Text, Caption: string; Flags: LongInt): Integer;
+var
+  MessageBoxData : TMessageBoxdata;
+begin
+  with MessageBoxData do
+  begin
+    AText := PChar(text);
+    ACaption := PChar(Caption);
+    AFlags := Flags;
+    CurrThread.FormCallBack(m_MessageBox,@MessageBoxData);
+    Result := res;
+  end;
+end;
+
+function ps_MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType;
+  Buttons: TMsgDlgButtons) : integer;
+var
+  MessageDlgData : TMessageDlgData;
+begin
+  with MessageDlgData do
+  begin
+    ACaption := Caption;
+    AMsg := Msg;
+    ADlgType := DlgType;
+    Abuttons := Buttons;
+    CurrThread.FormCallBack(m_MessageDlg,@MessageDlgData);
+    Result := res;
+  end;
+end;
+
+function ps_InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;extdecl;
+var
+  InputQueryData : TInputQueryData;
+begin
+  InputQueryData.ACaption:= ACaption;
+  InputQueryData.APrompt:= APrompt;
+  InputQueryData.Value:= Value;
+  CurrThread.FormCallBack(m_InputQuery,@InputQueryData);
+  Result := InputQueryData.Res;
+  Value := InputQueryData.Value;
+end;
+
 procedure ps_TerminateScript; extdecl;
 begin;
   CurrThread.Terminate;
@@ -260,15 +311,3 @@ function ps_Random(Int: integer): integer; extdecl;
 begin
   result := Random(int);
 end;
-
-{$IFNDEF MML_EXPORT_THREADSAFE}
-function ps_InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;extdecl;
-begin
-  CurrThread.InputQueryData.ACaption:= ACaption;
-  CurrThread.InputQueryData.APrompt:= APrompt;
-  CurrThread.InputQueryData.Value:= Value;
-  CurrThread.Synchronize(@CurrThread.mInputQuery);
-  Value := CurrThread.InputQueryData.Value;
-  result := CurrThread.InputQueryData.Res;
-end;
-{$ENDIF}
