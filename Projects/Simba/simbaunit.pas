@@ -70,6 +70,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionGoto: TAction;
     ActionCPascal: TAction;
     ActionRUTIS: TAction;
     ActionPascalScript: TAction;
@@ -114,6 +115,8 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    MenuItemGoto: TMenuItem;
+    MenuItemDivider50: TMenuItem;
     MenuItemPascalScript: TMenuItem;
     MenuItemCPascal: TMenuItem;
     MenuItemRUTIS: TMenuItem;
@@ -250,6 +253,7 @@ type
     procedure ActionExtensionsUpdate(Sender: TObject);
     procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
+    procedure ActionGotoExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionNormalSizeExecute(Sender: TObject);
@@ -1698,6 +1702,22 @@ begin
     SearchPanel.Visible:= true;
     if LabeledEditSearch.CanFocus then
       LabeledEditSearch.SetFocus;
+  end;
+end;
+
+procedure TSimbaForm.ActionGotoExecute(Sender: TObject);
+var
+  Value : string;
+  P : TPoint;
+begin
+  Value := '';
+  if InputQuery('Goto line','Goto line:',Value) then
+  begin
+    P.x := 1;
+    P.y := StrToIntDef(Value,-1);
+    if p.y < 1 then p.y :=1;
+    CurrScript.SynEdit.CaretXY := p;
+    CurrScript.SynEdit.TopLine:= max(P.y - (CurrScript.SynEdit.LinesInWindow div 2),1);
   end;
 end;
 

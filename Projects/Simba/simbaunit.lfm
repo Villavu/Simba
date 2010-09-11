@@ -1111,6 +1111,12 @@ object SimbaForm: TSimbaForm
         Action = ActionReplace
         OnClick = ActionReplaceExecute
       end
+      object MenuItemDivider50: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemGoto: TMenuItem
+        Action = ActionGoto
+      end
     end
     object MenuItemScript: TMenuItem
       Caption = '&Script'
@@ -3006,6 +3012,11 @@ object SimbaForm: TSimbaForm
       Caption = 'CPascal'
       Enabled = False
       OnExecute = ActionCPascalExecute
+    end
+    object ActionGoto: TAction
+      Caption = 'Goto line'
+      OnExecute = ActionGotoExecute
+      ShortCut = 16455
     end
   end
   object DebugTimer: TTimer
