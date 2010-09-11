@@ -1,0 +1,13 @@
+program new;
+var
+  x : TMufasaBitmap;
+begin
+  x := TMufasaBitmap.create;
+  x.SetSize(50,50);
+  x.Rectangle(IntToBox(5,5,25,25),clRed);
+  x.Rectangle(IntToBox(10,10,15,15),clPurple);
+  x.SaveToFile(ScriptPath + 'testme.bmp');
+  x.FloodFill(point(5,5),clred,clyellow);
+  x.SaveToFile(ScriptPath + 'testme2.bmp');
+  x.free;
+end.

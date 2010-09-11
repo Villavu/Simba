@@ -1,0 +1,6 @@
+program new;
+{$i srl/srl.scar}
+{$i srl/srl/misc/users.scar}
+begin
+  SRLPlayerForm(true,['Jemoeder'],[],[],[]);
+end.

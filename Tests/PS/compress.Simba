@@ -1,0 +1,9 @@
+program new;
+var
+  comp,decomp : string;
+begin
+  comp := Base64Encode(CompressString('Dit is een test'));
+  writeln(comp);
+  decomp := DecompressString(Base64Decode(comp));
+  Writeln(decomp);
+end.

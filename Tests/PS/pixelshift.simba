@@ -1,0 +1,18 @@
+program new;
+var
+  bmp1,bmp2 : integer;
+begin
+  repeat
+  bmp1 := BitmapFromClient(0,0,514,240);
+  wait(150);
+  bmp2 := BitmapFromClient(0,0,514,240);
+
+  Writeln(CalculatePixelShift(bmp1,bmp2,inttobox(416,87,514,240)));
+  Writeln(floattostr(CalculatePixelTolerance(bmp1,bmp2,inttobox(416,87,514,240),0)));
+  Writeln(floattostr(CalculatePixelTolerance(bmp1,bmp2,inttobox(416,87,514,240),1)));
+  freebitmap(bmp1);
+  freebitmap(bmp2);
+  wait(150);
+  until false;
+
+end.
