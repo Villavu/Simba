@@ -1,0 +1,11 @@
+program new;
+var
+  x : TRegExp;
+begin
+  x := TRegExp.create;
+  x.Expression := 'W?alk';
+  x.InputString := 'Lets talk bitch!';
+  Writeln(x.ExecPos(1));
+  writeln(x.Match[0]);
+  x.free;
+end.
