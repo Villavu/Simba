@@ -25,7 +25,7 @@ end;
 
 procedure RUTIS_ps_ListSettings(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  Pboolean(Result^.Data)^ := ps_ListSettings(PString(Params^[0].Data)^, PStringArray(Params^[1].Data)^);
+  Pboolean(Result^.Data)^ := ps_ListSettings(PString(Params^[0].Data)^, PStringArray(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_DeleteSetting(Params: PRutisParamInfoArray; Result: PRutisParamInfo);

@@ -1,31 +1,31 @@
 procedure RUTIS_ps_FindDTM(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindDTM(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindDTM(PInteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_FindDTMs(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindDTMs(PInteger(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindDTMs(PInteger(Params^[0].Data)^, PPointArray(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^);
 end;
 
 procedure RUTIS_ps_FindDTMRotatedAlternating(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindDTMRotatedAlternating(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PExtended(Params^[7].Data)^, PExtended(Params^[8].Data)^, PExtended(Params^[9].Data)^, PExtended(Params^[10].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindDTMRotatedAlternating(PInteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PExtended(Params^[7].Data)^, PExtended(Params^[8].Data)^, PExtended(Params^[9].Data)^, PExtended(PPointer(Params^[10].Data)^)^);
 end;
 
 procedure RUTIS_ps_FindDTMRotatedSE(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindDTMRotatedSE(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PExtended(Params^[7].Data)^, PExtended(Params^[8].Data)^, PExtended(Params^[9].Data)^, PExtended(Params^[10].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindDTMRotatedSE(PInteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PExtended(Params^[7].Data)^, PExtended(Params^[8].Data)^, PExtended(Params^[9].Data)^, PExtended(PPointer(Params^[10].Data)^)^);
 end;
 
 procedure RUTIS_ps_FindDTMsRotatedAlternating(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindDTMsRotatedAlternating(PInteger(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PExtended(Params^[6].Data)^, PExtended(Params^[7].Data)^, PExtended(Params^[8].Data)^, P2DExtendedArray(Params^[9].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindDTMsRotatedAlternating(PInteger(Params^[0].Data)^, PPointArray(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PExtended(Params^[6].Data)^, PExtended(Params^[7].Data)^, PExtended(Params^[8].Data)^, P2DExtendedArray(PPointer(Params^[9].Data)^)^);
 end;
 
 procedure RUTIS_ps_FindDTMsRotatedSE(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindDTMsRotatedSE(PInteger(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PExtended(Params^[6].Data)^, PExtended(Params^[7].Data)^, PExtended(Params^[8].Data)^, P2DExtendedArray(Params^[9].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindDTMsRotatedSE(PInteger(Params^[0].Data)^, PPointArray(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PExtended(Params^[6].Data)^, PExtended(Params^[7].Data)^, PExtended(Params^[8].Data)^, P2DExtendedArray(PPointer(Params^[9].Data)^)^);
 end;
 
 procedure RUTIS_ps_SetDTMName(Params: PRutisParamInfoArray; Result: PRutisParamInfo);

@@ -150,7 +150,6 @@ begin
             Fail := True;
             Break;
           end;
-
           c := b[ii].Items.GetItemsOfClass(TciParameterName);
           if (Length(c) < 1) then
           begin
@@ -163,8 +162,15 @@ begin
           begin
             if (pc > 0) then
               s := s+', ';
-            s := s+PtrName(d.ShortText)+'(Params^['+IntToStr(pc)+'].Data)^';
-            tmp := tmp + #39 + d.ShortText + #39 +',';
+            if b[ii] is TciVarParameter then
+            begin
+              tmp := tmp + #39 + 'var ' + d.ShortText + #39 +',';
+              s := s+PtrName(d.ShortText)+'(PPointer(Params^['+IntToStr(pc)+'].Data)^)^';
+            end else
+            begin
+              s := s+PtrName(d.ShortText)+'(Params^['+IntToStr(pc)+'].Data)^';
+              tmp := tmp + #39 + d.ShortText + #39 +',';
+            end;
             Inc(pc);
           end;
         end;

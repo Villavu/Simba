@@ -1,8 +1,3 @@
-{procedure RUTIS_ps_Format(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
-begin
-  Pstring(Result^.Data)^ := ps_Format(Pstring(Params^[0].Data)^, Parray of const(Params^[1].Data)^);
-end;}
-
 procedure RUTIS_ps_Capitalize(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
   Pstring(Result^.Data)^ := ps_Capitalize(Pstring(Params^[0].Data)^);
@@ -28,10 +23,10 @@ begin
   Pstring(Result^.Data)^ := ps_Base64Decode(Pstring(Params^[0].Data)^);
 end;
 
-{procedure RUTIS_ps_ExtractFromStr(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
+procedure RUTIS_ps_ExtractFromStr(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
   Pstring(Result^.Data)^ := ps_ExtractFromStr(Pstring(Params^[0].Data)^, PStrExtr(Params^[1].Data)^);
-end;}
+end;
 
 procedure RUTIS_ps_BoolToStr(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin

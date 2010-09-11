@@ -9,6 +9,7 @@ uses
 
 type
   StrExtr =(Numbers, Letters, Others);
+  PStrExtr = ^StrExtr;
 function ExtractFromStr( Str : string; Extract : StrExtr) : string;
 function Capitalize(str : string) : string;
 function Implode(Glue : string; Pieces: TStringArray): string;

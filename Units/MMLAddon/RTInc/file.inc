@@ -35,7 +35,7 @@ end;
 
 procedure RUTIS_ps_ReadFileString(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_ReadFileString(PInteger(Params^[0].Data)^, Pstring(Params^[1].Data)^, PInteger(Params^[2].Data)^);
+  PBoolean(Result^.Data)^ := ps_ReadFileString(PInteger(Params^[0].Data)^, Pstring(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^);
 end;
 
 procedure RUTIS_ps_WriteFileString(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
