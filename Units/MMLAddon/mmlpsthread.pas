@@ -518,6 +518,7 @@ end;
 {$I PSInc/Wrappers/dtm.inc}
 {$I PSInc/Wrappers/ocr.inc}
 {$I PSInc/Wrappers/internets.inc}
+{$I PSInc/psmethods.inc}
 
 class function TMThread.GetExportedMethods: TExpMethodArr;
 var

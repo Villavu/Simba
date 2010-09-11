@@ -70,12 +70,12 @@ end;
 
 procedure RUTIS_ps_IncEx(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_IncEx(Pinteger(Params^[0].Data)^, Pinteger(Params^[1].Data)^);
+  ps_IncEx(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_DecEx(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_DecEx(Pinteger(Params^[0].Data)^, Pinteger(Params^[1].Data)^);
+  ps_DecEx(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_Factorial(Params: PRutisParamInfoArray; Result: PRutisParamInfo);

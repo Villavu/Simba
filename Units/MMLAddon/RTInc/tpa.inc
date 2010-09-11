@@ -1,31 +1,31 @@
 procedure RUTIS_ps_Quicksort(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_Quicksort(PIntegerArray(Params^[0].Data)^);
+  ps_Quicksort(PIntegerArray(PPointer(Params^[0].Data)^)^);
 end;
 
 procedure RUTIS_ps_tSwap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_tSwap(PPoint(Params^[0].Data)^, PPoint(Params^[1].Data)^);
+  ps_tSwap(PPoint(PPointer(Params^[0].Data)^)^, PPoint(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_tpaSwap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_tpaSwap(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^);
+  ps_tpaSwap(PPointArray(PPointer(Params^[0].Data)^)^, PPointArray(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_SwapE(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SwapE(PExtended(Params^[0].Data)^, PExtended(Params^[1].Data)^);
+  ps_SwapE(PExtended(PPointer(Params^[0].Data)^)^, PExtended(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_RAaSTPAEx(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_RAaSTPAEx(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^);
+  ps_RAaSTPAEx(PPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^);
 end;
 
 procedure RUTIS_ps_RAaSTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_RAaSTPA(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^);
+  ps_RAaSTPA(PPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_NearbyPointInArrayEx(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -40,42 +40,42 @@ end;
 
 procedure RUTIS_ps_QuickTPASort(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_QuickTPASort(PIntegerArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PBoolean(Params^[4].Data)^);
+  ps_QuickTPASort(PIntegerArray(PPointer(Params^[0].Data)^)^, PPointArray(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PBoolean(Params^[4].Data)^);
 end;
 
 procedure RUTIS_ps_QuickATPASort(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_QuickATPASort(PIntegerArray(Params^[0].Data)^, P2DPointArray(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PBoolean(Params^[4].Data)^);
+  ps_QuickATPASort(PIntegerArray(PPointer(Params^[0].Data)^)^, P2DPointArray(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PBoolean(Params^[4].Data)^);
 end;
 
 procedure RUTIS_ps_SortTPAFrom(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SortTPAFrom(PPointArray(Params^[0].Data)^, PPoint(Params^[1].Data)^);
+  ps_SortTPAFrom(PPointArray(PPointer(Params^[0].Data)^)^, PPoint(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_SortATPAFrom(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SortATPAFrom(P2DPointArray(Params^[0].Data)^, PPoint(Params^[1].Data)^);
+  ps_SortATPAFrom(P2DPointArray(PPointer(Params^[0].Data)^)^, PPoint(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_SortATPAFromFirstPoint(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SortATPAFromFirstPoint(P2DPointArray(Params^[0].Data)^, PPoint(Params^[1].Data)^);
+  ps_SortATPAFromFirstPoint(P2DPointArray(PPointer(Params^[0].Data)^)^, PPoint(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_InvertTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_InvertTPA(PPointArray(Params^[0].Data)^);
+  ps_InvertTPA(PPointArray(PPointer(Params^[0].Data)^)^);
 end;
 
 procedure RUTIS_ps_InvertATPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_InvertATPA(P2DPointArray(Params^[0].Data)^);
+  ps_InvertATPA(P2DPointArray(PPointer(Params^[0].Data)^)^);
 end;
 
 procedure RUTIS_ps_MiddleTPAEx(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_MiddleTPAEx(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^);
+  PBoolean(Result^.Data)^ := ps_MiddleTPAEx(PPointArray(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_MiddleTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -85,17 +85,17 @@ end;
 
 procedure RUTIS_ps_SortATPASize(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SortATPASize(P2DPointArray(Params^[0].Data)^, PBoolean(Params^[1].Data)^);
+  ps_SortATPASize(P2DPointArray(PPointer(Params^[0].Data)^)^, PBoolean(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_SortATPAFromSize(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SortATPAFromSize(P2DPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PBoolean(Params^[2].Data)^);
+  ps_SortATPAFromSize(P2DPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^, PBoolean(Params^[2].Data)^);
 end;
 
 procedure RUTIS_ps_InIntArrayEx(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_InIntArrayEx(PIntegerArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^);
+  PBoolean(Result^.Data)^ := ps_InIntArrayEx(PIntegerArray(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^);
 end;
 
 procedure RUTIS_ps_InIntArray(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -105,12 +105,12 @@ end;
 
 procedure RUTIS_ps_ClearSameIntegers(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_ClearSameIntegers(PIntegerArray(Params^[0].Data)^);
+  ps_ClearSameIntegers(PIntegerArray(PPointer(Params^[0].Data)^)^);
 end;
 
 procedure RUTIS_ps_ClearSameIntegersAndTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_ClearSameIntegersAndTPA(PIntegerArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^);
+  ps_ClearSameIntegersAndTPA(PIntegerArray(PPointer(Params^[0].Data)^)^, PPointArray(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_SplitTPAEx(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -130,17 +130,17 @@ end;
 
 procedure RUTIS_ps_FilterPointsPie(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_FilterPointsPie(PPointArray(Params^[0].Data)^, PExtended(Params^[1].Data)^, PExtended(Params^[2].Data)^, PExtended(Params^[3].Data)^, PExtended(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
+  ps_FilterPointsPie(PPointArray(PPointer(Params^[0].Data)^)^, PExtended(Params^[1].Data)^, PExtended(Params^[2].Data)^, PExtended(Params^[3].Data)^, PExtended(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_FilterPointsDist(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_FilterPointsDist(PPointArray(Params^[0].Data)^, PExtended(Params^[1].Data)^, PExtended(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^);
+  ps_FilterPointsDist(PPointArray(PPointer(Params^[0].Data)^)^, PExtended(Params^[1].Data)^, PExtended(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^);
 end;
 
 procedure RUTIS_ps_FilterPointsLine(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_FilterPointsLine(PPointArray(Params^[0].Data)^, PExtended(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^);
+  ps_FilterPointsLine(PPointArray(PPointer(Params^[0].Data)^)^, PExtended(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^);
 end;
 
 procedure RUTIS_ps_GetATPABounds(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -155,27 +155,27 @@ end;
 
 procedure RUTIS_ps_FindTPAinTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindTPAinTPA(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PPointArray(Params^[2].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindTPAinTPA(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PPointArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_GetSamePointsATPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  Pboolean(Result^.Data)^ := ps_GetSamePointsATPA(P2DPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^);
+  Pboolean(Result^.Data)^ := ps_GetSamePointsATPA(P2DPointArray(Params^[0].Data)^, PPointArray(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_FindTextTPAinTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindTextTPAinTPA(Pinteger(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PPointArray(Params^[2].Data)^, PPointArray(Params^[3].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindTextTPAinTPA(Pinteger(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PPointArray(Params^[2].Data)^, PPointArray(PPointer(Params^[3].Data)^)^);
 end;
 
 procedure RUTIS_ps_SortCircleWise(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SortCircleWise(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PBoolean(Params^[4].Data)^, PBoolean(Params^[5].Data)^);
+  ps_SortCircleWise(PPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PBoolean(Params^[4].Data)^, PBoolean(Params^[5].Data)^);
 end;
 
 procedure RUTIS_ps_LinearSort(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_LinearSort(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PBoolean(Params^[4].Data)^);
+  ps_LinearSort(PPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PBoolean(Params^[4].Data)^);
 end;
 
 procedure RUTIS_ps_RotatePoint(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -190,7 +190,7 @@ end;
 
 procedure RUTIS_ps_ChangeDistTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  Pboolean(Result^.Data)^ := ps_ChangeDistTPA(PPointArray(Params^[0].Data)^, Pinteger(Params^[1].Data)^, Pinteger(Params^[2].Data)^, Pextended(Params^[3].Data)^);
+  Pboolean(Result^.Data)^ := ps_ChangeDistTPA(PPointArray(PPointer(Params^[0].Data)^)^, Pinteger(Params^[1].Data)^, Pinteger(Params^[2].Data)^, Pextended(Params^[3].Data)^);
 end;
 
 procedure RUTIS_ps_FindGapsTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -240,7 +240,7 @@ end;
 
 procedure RUTIS_ps_AppendTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_AppendTPA(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^);
+  ps_AppendTPA(PPointArray(PPointer(Params^[0].Data)^)^, PPointArray(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_TPAFromBox(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -275,22 +275,22 @@ end;
 
 procedure RUTIS_ps_ClearDoubleTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_ClearDoubleTPA(PPointArray(Params^[0].Data)^);
+  ps_ClearDoubleTPA(PPointArray(PPointer(Params^[0].Data)^)^);
 end;
 
 procedure RUTIS_ps_TPACountSort(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_TPACountSort(PPointArray(Params^[0].Data)^, PPoint(Params^[1].Data)^, PBoolean(Params^[2].Data)^);
+  ps_TPACountSort(PPointArray(PPointer(Params^[0].Data)^)^, PPoint(Params^[1].Data)^, PBoolean(Params^[2].Data)^);
 end;
 
 procedure RUTIS_ps_TPACountSortBase(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_TPACountSortBase(PPointArray(Params^[0].Data)^, PPoint(Params^[1].Data)^, PPoint(Params^[2].Data)^, PBoolean(Params^[3].Data)^);
+  ps_TPACountSortBase(PPointArray(PPointer(Params^[0].Data)^)^, PPoint(Params^[1].Data)^, PPoint(Params^[2].Data)^, PBoolean(Params^[3].Data)^);
 end;
 
 procedure RUTIS_ps_InvertTIA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_InvertTIA(PIntegerArray(Params^[0].Data)^);
+  ps_InvertTIA(PIntegerArray(PPointer(Params^[0].Data)^)^);
 end;
 
 procedure RUTIS_ps_SumIntegerArray(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -310,82 +310,82 @@ end;
 
 procedure RUTIS_ps_SplitTPAExWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SplitTPAExWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, P2DPointArray(Params^[3].Data)^);
+  ps_SplitTPAExWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, P2DPointArray(PPointer(Params^[3].Data)^)^);
 end;
 
 procedure RUTIS_ps_SplitTPAWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_SplitTPAWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, P2DPointArray(Params^[2].Data)^);
+  ps_SplitTPAWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, P2DPointArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_FindGapsTPAWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_FindGapsTPAWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, P2DPointArray(Params^[2].Data)^);
+  ps_FindGapsTPAWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, P2DPointArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_RemoveDistTPointArrayWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_RemoveDistTPointArrayWrap(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PPointArray(Params^[3].Data)^, PBoolean(Params^[4].Data)^, PPointArray(Params^[5].Data)^);
+  ps_RemoveDistTPointArrayWrap(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PPointArray(Params^[3].Data)^, PBoolean(Params^[4].Data)^, PPointArray(PPointer(Params^[5].Data)^)^);
 end;
 
 procedure RUTIS_ps_CombineTPAWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_CombineTPAWrap(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PPointArray(Params^[2].Data)^);
+  ps_CombineTPAWrap(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PPointArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_ReArrangeandShortenArrayExWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_ReArrangeandShortenArrayExWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PPointArray(Params^[3].Data)^);
+  ps_ReArrangeandShortenArrayExWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PPointArray(PPointer(Params^[3].Data)^)^);
 end;
 
 procedure RUTIS_ps_ReArrangeandShortenArrayWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_ReArrangeandShortenArrayWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PPointArray(Params^[2].Data)^);
+  ps_ReArrangeandShortenArrayWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PPointArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_TPAtoATPAExWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_TPAtoATPAExWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, P2DPointArray(Params^[3].Data)^);
+  ps_TPAtoATPAExWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, P2DPointArray(PPointer(Params^[3].Data)^)^);
 end;
 
 procedure RUTIS_ps_TPAtoATPAWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_TPAtoATPAWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, P2DPointArray(Params^[2].Data)^);
+  ps_TPAtoATPAWrap(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, P2DPointArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_CombineIntArrayWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_CombineIntArrayWrap(PIntegerArray(Params^[0].Data)^, PIntegerArray(Params^[1].Data)^, PIntegerArray(Params^[2].Data)^);
+  ps_CombineIntArrayWrap(PIntegerArray(Params^[0].Data)^, PIntegerArray(Params^[1].Data)^, PIntegerArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_MergeATPAWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_MergeATPAWrap(P2DPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^);
+  ps_MergeATPAWrap(P2DPointArray(Params^[0].Data)^, PPointArray(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_TPAFromBoxWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_TPAFromBoxWrap(PBox(Params^[0].Data)^, PPointArray(Params^[1].Data)^);
+  ps_TPAFromBoxWrap(PBox(Params^[0].Data)^, PPointArray(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_RotatePointsWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_RotatePointsWrap(PPointArray(Params^[0].Data)^, PExtended(Params^[1].Data)^, PExtended(Params^[2].Data)^, PExtended(Params^[3].Data)^, PPointArray(Params^[4].Data)^);
+  ps_RotatePointsWrap(PPointArray(Params^[0].Data)^, PExtended(Params^[1].Data)^, PExtended(Params^[2].Data)^, PExtended(Params^[3].Data)^, PPointArray(PPointer(Params^[4].Data)^)^);
 end;
 
 procedure RUTIS_ps_FindTPAEdgesWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_FindTPAEdgesWrap(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^);
+  ps_FindTPAEdgesWrap(PPointArray(Params^[0].Data)^, PPointArray(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_ClearTPAFromTPAWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_ClearTPAFromTPAWrap(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PPointArray(Params^[2].Data)^);
+  ps_ClearTPAFromTPAWrap(PPointArray(Params^[0].Data)^, PPointArray(Params^[1].Data)^, PPointArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_ReturnPointsNotInTPAWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_ReturnPointsNotInTPAWrap(PPointArray(Params^[0].Data)^, PBox(Params^[1].Data)^, PPointArray(Params^[2].Data)^);
+  ps_ReturnPointsNotInTPAWrap(PPointArray(Params^[0].Data)^, PBox(Params^[1].Data)^, PPointArray(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_SameTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -395,17 +395,17 @@ end;
 
 procedure RUTIS_ps_TPAInATPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_TPAInATPA(PPointArray(Params^[0].Data)^, P2DPointArray(Params^[1].Data)^, PLongInt(Params^[2].Data)^);
+  PBoolean(Result^.Data)^ := ps_TPAInATPA(PPointArray(Params^[0].Data)^, P2DPointArray(Params^[1].Data)^, PLongInt(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_OffsetTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_OffsetTPA(PPointArray(Params^[0].Data)^, PPoint(Params^[1].Data)^);
+  ps_OffsetTPA(PPointArray(PPointer(Params^[0].Data)^)^, PPoint(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_OffsetATPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_OffsetATPA(P2DPointArray(Params^[0].Data)^, PPoint(Params^[1].Data)^);
+  ps_OffsetATPA(P2DPointArray(PPointer(Params^[0].Data)^)^, PPoint(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_CopyTPA(Params: PRutisParamInfoArray; Result: PRutisParamInfo);

@@ -5,7 +5,7 @@ end;
 
 procedure RUTIS_ps_GetColorsWrap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_GetColorsWrap(PPointArray(Params^[0].Data)^, PIntegerArray(Params^[1].Data)^);
+  ps_GetColorsWrap(PPointArray(Params^[0].Data)^, PIntegerArray(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_GetColors(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -15,22 +15,22 @@ end;
 
 procedure RUTIS_ps_findcolor(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  Pboolean(Result^.Data)^ := ps_findcolor(Pinteger(Params^[0].Data)^, Pinteger(Params^[1].Data)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^);
+  Pboolean(Result^.Data)^ := ps_findcolor(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(PPointer(Params^[1].Data)^)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_findcolortoleranceOptimised(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  Pboolean(Result^.Data)^ := ps_findcolortoleranceOptimised(Pinteger(Params^[0].Data)^, Pinteger(Params^[1].Data)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^, Pinteger(Params^[7].Data)^);
+  Pboolean(Result^.Data)^ := ps_findcolortoleranceOptimised(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(PPointer(Params^[1].Data)^)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^, Pinteger(Params^[7].Data)^);
 end;
 
 procedure RUTIS_ps_findcolortolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  Pboolean(Result^.Data)^ := ps_findcolortolerance(Pinteger(Params^[0].Data)^, Pinteger(Params^[1].Data)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^, Pinteger(Params^[7].Data)^);
+  Pboolean(Result^.Data)^ := ps_findcolortolerance(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(PPointer(Params^[1].Data)^)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^, Pinteger(Params^[7].Data)^);
 end;
 
 procedure RUTIS_ps_FindColors(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindColors(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindColors(PPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^);
 end;
 
 procedure RUTIS_ps_SetColorToleranceSpeed(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -50,7 +50,7 @@ end;
 
 procedure RUTIS_ps_GetToleranceSpeed2Modifiers(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_GetToleranceSpeed2Modifiers(PExtended(Params^[0].Data)^, PExtended(Params^[1].Data)^);
+  ps_GetToleranceSpeed2Modifiers(PExtended(PPointer(Params^[0].Data)^)^, PExtended(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_SimilarColors(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -70,35 +70,35 @@ end;
 
 procedure RUTIS_ps_FindColorsToleranceOptimised(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindColorsToleranceOptimised(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindColorsToleranceOptimised(PPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_FindColorsTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindColorsTolerance(PPointArray(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindColorsTolerance(PPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_FindColorSpiral(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindColorSpiral(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindColorSpiral(PInteger(PPointer(Params^[0].Data)^)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_FindColorSpiralTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindColorSpiralTolerance(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindColorSpiralTolerance(PInteger(PPointer(Params^[0].Data)^)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^);
 end;
 
 procedure RUTIS_ps_FindColorsSpiralTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  Pboolean(Result^.Data)^ := ps_FindColorsSpiralTolerance(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PPointArray(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
+  Pboolean(Result^.Data)^ := ps_FindColorsSpiralTolerance(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PPointArray(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
 end;
 
 procedure RUTIS_ps_FindColoredArea(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindColoredArea(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindColoredArea(PInteger(PPointer(Params^[0].Data)^)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^);
 end;
 
 procedure RUTIS_ps_FindColoredAreaTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindColoredAreaTolerance(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindColoredAreaTolerance(PInteger(PPointer(Params^[0].Data)^)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
 end;

@@ -55,7 +55,7 @@ end;
 
 procedure RUTIS_ps_GetClientDimensions(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_GetClientDimensions(Pinteger(Params^[0].Data)^, Pinteger(Params^[1].Data)^);
+  ps_GetClientDimensions(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ps_Freeze(Params: PRutisParamInfoArray; Result: PRutisParamInfo);

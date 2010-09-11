@@ -45,7 +45,7 @@ end;
 
 procedure RUTIS_ps_GetBitmapSize(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_GetBitmapSize(Pinteger(Params^[0].Data)^, Pinteger(Params^[1].Data)^, Pinteger(Params^[2].Data)^);
+  ps_GetBitmapSize(Pinteger(Params^[0].Data)^, Pinteger(PPointer(Params^[1].Data)^)^, Pinteger(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_SetBitmapName(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -145,32 +145,32 @@ end;
 
 procedure RUTIS_ps_FindBitmap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindBitmap(Pinteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindBitmap(Pinteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^);
 end;
 
 procedure RUTIS_ps_FindBitmapIn(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindBitmapIn(Pinteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindBitmapIn(Pinteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_FindBitmapToleranceIn(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindBitmapToleranceIn(Pinteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindBitmapToleranceIn(Pinteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^);
 end;
 
 procedure RUTIS_ps_FindBitmapSpiral(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindBitmapSpiral(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindBitmapSpiral(PInteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_FindBitmapsSpiralTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindBitmapsSpiralTolerance(Pinteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PPointArray(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindBitmapsSpiralTolerance(Pinteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PPointArray(PPointer(Params^[3].Data)^)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
 end;
 
 procedure RUTIS_ps_FindBitmapSpiralTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindBitmapSpiralTolerance(Pinteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^, Pinteger(Params^[7].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindBitmapSpiralTolerance(Pinteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^, Pinteger(Params^[7].Data)^);
 end;
 
 procedure RUTIS_ps_RotateBitmap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
@@ -220,17 +220,17 @@ end;
 
 procedure RUTIS_ps_FindMaskTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindMaskTolerance(PMask(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindMaskTolerance(PMask(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
 end;
 
 procedure RUTIS_ps_FindBitmapMaskTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindBitmapMaskTolerance(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindBitmapMaskTolerance(PInteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^);
 end;
 
 procedure RUTIS_ps_FindDeformedBitmapToleranceIn(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  PBoolean(Result^.Data)^ := ps_FindDeformedBitmapToleranceIn(Pinteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^, PBoolean(Params^[9].Data)^, PExtended(Params^[10].Data)^);
+  PBoolean(Result^.Data)^ := ps_FindDeformedBitmapToleranceIn(Pinteger(Params^[0].Data)^, PInteger(PPointer(Params^[1].Data)^)^, PInteger(PPointer(Params^[2].Data)^)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^, PInteger(Params^[7].Data)^, PInteger(Params^[8].Data)^, PBoolean(Params^[9].Data)^, PExtended(PPointer(Params^[10].Data)^)^);
 end;
 
 procedure RUTIS_ps_RectangleBitmap(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
