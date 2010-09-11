@@ -10,7 +10,7 @@ end;
 
 procedure RUTIS_ps_GetMousePos(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  ps_GetMousePos(Pinteger(Params^[0].Data)^, Pinteger(Params^[1].Data)^);
+  ps_GetMousePos(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(PPointer(Params^[1].Data)^)^);
 end;
 
 procedure RUTIS_ConvIntClickType(Params: PRutisParamInfoArray; Result: PRutisParamInfo);

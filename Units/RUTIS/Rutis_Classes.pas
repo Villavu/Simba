@@ -1408,8 +1408,17 @@ Begin
     SetLength(Params, Length(AParams));
     For i := 0 To high(AParams) Do
     Begin
-      Params[i].Name       := AParams[i];
-      Params[i].isVarParam := False;
+      if (Pos('var ', Lowercase(AParams[i])) = 1) then
+      begin
+        Delete(AParams[i], 1, 4);
+        Params[i].Name       := AParams[i];
+        Params[i].isVarParam := True;
+      end
+      else
+      begin
+        Params[i].Name       := AParams[i];
+        Params[i].isVarParam := False;
+      end;
       {id := FindDeclarationID(AParams[i], @StaticDeclarations);
       If (id < 0) or
         (not (StaticDeclarations[id] is TRutisTypeDecl)) Then
