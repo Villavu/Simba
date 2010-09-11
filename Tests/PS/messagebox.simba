@@ -1,4 +1,6 @@
 program new;
+var
+  Value : string;
 begin
   ShowMessage('ShowMessage!');
   Writeln('MessageBox -> ');
@@ -14,4 +16,7 @@ begin
     mrIgnore: Writeln('Pressed Ignore');
     mrCancel: Writeln('pressed Cancel');
   end;
+  Writeln('InputQuery -> ');
+  Value := 'Edit.. or not?';
+  Writeln(format('Result of inputquery = [%s] the value = [%s]',[booltostr(InputQuery('Enter something funny','ENTER HERE',value)),value]));
 end.
