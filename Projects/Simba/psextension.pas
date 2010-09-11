@@ -249,9 +249,6 @@ begin
     {$I ../../Units/MMLAddon/PSInc/pscompile.inc}
     AddTypes('TStringArray','Array of String');
     AddConstantN('ExtPath','string').SetString(ExtPath);
-    AddTypeS('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmation, mtCustom )');
-    AddTypeS('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
-    AddTypeS('TMsgDlgButtons', 'set of TMsgDlgBtn');
     for i := 0 to high(VirtualKeys) do
       AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
   end;
