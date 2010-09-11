@@ -189,6 +189,9 @@ AddFunction(@ps_Disguise,'procedure Disguise(Caption : string);');
 AddFunction(@ps_SetScriptProp, 'function SetScriptProp(Prop : TSP_Property; Value: TVariantArray): boolean;');
 AddFunction(@ps_GetScriptProp, 'function GetScriptProp(Prop : TSP_Property;var Value: TVariantArray): boolean;');
 AddFunction(@ps_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
+AddFunction(@ps_ShowMessage,'procedure ShowMessage(msg : string);');
+AddFunction(@ps_messageBox,'function MessageBox(Text, Caption: string; Flags: LongInt): Integer;');
+AddFunction(@ps_MessageDlg,'function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType;  Buttons: TMsgDlgButtons) : integer;');
 {$ENDIF}
 
 {string}

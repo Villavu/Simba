@@ -2959,6 +2959,10 @@ begin
       m_GetDebugBitmap : DebugImgForm.GetDebugImage(TMufasaBitmap(data));
       m_ClearDebugImg : DebugImgForm.BlackDebugImage;
       m_ClearDebug : Self.memo1.clear;
+      m_InputQuery : with PInputQueryData(data)^ do Res := InputQuery(ACaption,APrompt,Value);
+      m_ShowMessage : ShowMessage(PChar(data));
+      m_MessageBox : with PMessageBoxData(data)^ do res := Application.MessageBox(AText,ACaption,AFlags);
+      m_MessageDlg : with PMessageDlgData(data)^ do res := MessageDlg(ACaption,AMsg,ADlgType,AButtons,0);
     end;
 end;
 
