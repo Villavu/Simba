@@ -164,6 +164,7 @@ end;
 {$I ../../Units/MMLAddon/PSInc/Wrappers/ocr.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/internets.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/extensions.inc}
+{$I ../../Units/MMLAddon/PSInc/psmethods.inc}
 
 procedure TSimbaPSExtension.RegisterMyMethods(x: TPSScript);
   procedure SetCurrSection(s: string);
