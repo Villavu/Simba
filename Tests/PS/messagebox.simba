@@ -1,0 +1,17 @@
+program new;
+begin
+  ShowMessage('ShowMessage!');
+  Writeln('MessageBox -> ');
+  case MessageBox('This is the text','My Caption', mbYesNoCancel) of
+    mrYes : Writeln('Pressed yes!');
+    mrNo  : Writeln('Pressed no!');
+    mrCancel : Writeln('Pressed Cancel!');
+  end;
+  Writeln('MessageDlg -> ');
+  case MessageDlg('Caption','Press a button!',mtError, [mbAbort,mbYes,mbIgnore]) of
+    mrAbort : Writeln('Pressed abort!');
+    mrYes   : Writeln('Pressed Yes');
+    mrIgnore: Writeln('Pressed Ignore');
+    mrCancel: Writeln('pressed Cancel');
+  end;
+end.

@@ -1,0 +1,7 @@
+program new;
+begin
+  Writeln(inttohex(clwhite));
+  Writeln(hextoint('FAFAFA'));
+  Writeln($FAFAFA);
+  Writeln(StrToInt('$FAFAFA'));
+end.
