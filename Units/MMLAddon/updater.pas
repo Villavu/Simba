@@ -16,6 +16,18 @@ type
           constructor Create(CreateSuspended: Boolean);
           destructor Destroy; override;
     end;       }
+    { TDownloadThread }
+
+    TDownloadThread = class(TThread)
+    private
+      InputURL : string;
+      ResultStr : PString;
+    public
+      Done : boolean;
+      constructor Create(const URL : string; const Output : PString);
+      procedure Execute; override;
+    end;
+
     TMemory = pointer;
     TMMLFunctionBoolean = function: boolean of object;
 
@@ -87,8 +99,23 @@ type
 implementation
 
 uses
-  FileUtil;
+  FileUtil,internets;
 
+constructor TDownloadThread.Create(const url : String; const Output : PString);
+begin
+  inherited Create(true);
+  FreeOnTerminate:= True;
+  InputURL:= url;
+  ResultStr:= Output;
+end;
+
+{ TDownloadThread }
+
+procedure TDownloadThread.Execute;
+begin
+  ResultStr^:= GetPage(InputURL);
+  done := true;
+end;
 
 procedure TMMLFileDownloader.SetBasePath(s: string);
 begin
