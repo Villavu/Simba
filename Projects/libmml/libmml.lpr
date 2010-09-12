@@ -99,7 +99,7 @@ begin
     if debug then
       writeln(last_error);
   end else
-    Free(ptr);
+    FreeMem(ptr);
 end;
 
 function alloc_mem(size, objsize: PtrUInt): Pointer;
@@ -109,7 +109,7 @@ end;
 
 function realloc_mem(ptr: Pointer; size, objsize: PtrUInt): Pointer;
 begin
-  result := ReAlloc(ptr, size*objsize);
+  result := ReAllocMem(ptr, size*objsize);
 end;
 
 { Mouse }
