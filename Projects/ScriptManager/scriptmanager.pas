@@ -28,8 +28,10 @@ unit scriptmanager;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls, ActnList, Menus, settings, updater,strutils, MufasaTypes,dom;
+  {$IFDEF UNIX}cthreads,cmem,{$ENDIF} Classes, SysUtils, FileUtil, Forms,
+  Controls, Graphics, Dialogs, StdCtrls,
+  ExtCtrls, ComCtrls, ActnList, Menus, settings, updater,strutils, MufasaTypes,
+  dom;
 
 type
 
