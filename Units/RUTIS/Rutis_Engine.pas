@@ -220,27 +220,28 @@ Begin
 End;
 
 Function TRutisEngine.GetExtAddrRange(P : Pointer; Exact : Boolean = False) : Integer;
+var
+  i: Integer;
 Begin
   With ScriptData Do
     If Exact Then
     Begin
-      For Result := 0 To high(ScriptData.AddrRanges) Do
-        If P = ScriptData.AddrRanges[Result].Start Then
-          exit;
+      For i := 0 To high(ScriptData.AddrRanges) Do
+        If P = ScriptData.AddrRanges[i].Start Then
+          exit(i);
     End
     Else
-      For Result := 0 To high(ScriptData.AddrRanges) Do
+      For i := 0 To high(ScriptData.AddrRanges) Do
       Begin
-        If (Cardinal(P) >= Cardinal(ScriptData.AddrRanges[Result].Start)) and
-          (Cardinal(P) < Cardinal(ScriptData.AddrRanges[Result].Start) + ScriptData.AddrRanges[Result].Size) Then
+        If (PtrUInt(P) >= PtrUInt(ScriptData.AddrRanges[i].Start)) and
+          (PtrUInt(P) < PtrUInt(ScriptData.AddrRanges[i].Start) + ScriptData.AddrRanges[i].Size) Then
         Begin
-          exit;
+          exit(i);
         End;
       End;
   If ScriptData.Stack.PointerInBlockData(P) Then
   Begin
-    Result := -2;
-    exit;
+    Exit(-2);
   End;
   Result := -1;
 End;
@@ -317,7 +318,7 @@ End;
 
 Procedure TRutisEngine.OpCheckPtr;
 Begin
-  fLastAdress := Pointer(ScriptData.Stack.ReadCardinal(ScriptData.Stack.Top - 4));
+  fLastAdress := Pointer(ScriptData.Stack.ReadCardinal(ScriptData.Stack.Top - 8));
   If GetExtAddrRange(fLastAdress) = -1 Then
   Begin
     ScriptMessage('Address Error');
