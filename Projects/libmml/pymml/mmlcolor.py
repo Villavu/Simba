@@ -2,6 +2,7 @@ from ctypes import *
 from mmltypes import isiterable
 from mmltypes import POINT, PPOINT, PINTEGER
 from mmltypes import RESULT_OK, RESULT_FALSE, RESULT_ERROR
+from mmltypes import MMLException
 
 """
 The Color Class
@@ -10,9 +11,9 @@ The Color Class
 This class does the color finding.
 """
 
-class ColorException(Exception):
+class ColorException(MMLException):
     def __init__(self, err):
-        Exception.__init__(self, err)
+        MMLException.__init__(self, err)
 
 
 # FIXME: Complete...
@@ -48,7 +49,6 @@ class Color(object):
         if ret is RESULT_OK:
             return (x, y)
         elif ret is RESULT_ERROR:
-            print self._mc
             raise ColorException(self._mc.get_last_error())
 
         return None
@@ -59,7 +59,6 @@ class Color(object):
             returned are all the matching points
         """
         ptr, _len = PPOINT(), c_int(42)
-        print type(_len)
         if tol is 0:
             self._mc.dll.find_colors(self._cli, byref(ptr), byref(_len),
                     color, *box)
@@ -67,12 +66,13 @@ class Color(object):
             self._mc.dll.find_colors_tolerance(self._cli, byref(ptr),
                     byref(_len), color, tol, *box)
 
-#        print 'Length:', _len
-#        for x in range(_len.value):
-#            print ptr[x].x
-#        print ptr
-        # FIXME return python list?
-        return ''
+        # Construct list
+        l = [(ptr[x].x, ptr[x].y) for x in range(_len.value)]
+
+        # Free PPOINT
+        self._mc.free(ptr)
+
+        return l
 
     def _initialiseDLLFuncs(self):
         self._mc.dll.find_color.restype = c_int
