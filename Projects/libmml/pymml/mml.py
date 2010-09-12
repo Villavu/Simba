@@ -21,9 +21,19 @@ class MMLCore(object):
         self.dll.init.argtypes = None
         self.dll.create_client.restype = c_ulong
         self.dll.create_client.argtypes = None
+
+        self.dll.get_last_error.restype = c_char_p
+        self.dll.get_last_error.argtypes = None
+
         if self.dll.init() != 0:
             del self.dll
             raise MMLCoreException("Could not initialize the DLL")
+
+    def get_last_error(self):
+        t = self.dll.get_last_error()
+        s = str(t)
+        del t
+        return s
 
     def __del__(self):
         del self.dll
@@ -38,14 +48,15 @@ if __name__ == '__main__':
         raise Exception('Could create a client');
 
     c = Color(DLL, client)
+
+
+    ret = c.find((0, 0, 100000, 10000), 0)
+
     ret = c.find((0, 0, 100, 100), 0)
     print ret
 
     ret = c.findAll((0, 0, 100, 100), 0)
     print ret
-
-    raise Exception('WAT')
-    
     
     m = Mouse(DLL, client)
     
@@ -59,14 +70,10 @@ if __name__ == '__main__':
    
     sleep(2)
     print 'Done'
-#    
-#    # Reset all buttons..
+
     m[(Mouse.Left, Mouse.Right, Mouse.Middle)] = [False for x in range(3)]
     for v in zip((Mouse.Left, Mouse.Right), m[(Mouse.Left, Mouse.Right)]):
         print v
     print m.getPos()
-    
-#    if hasattr(ret,'__iter__'):
-#        m.setPos(ret)
     
     del DLL
