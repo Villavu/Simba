@@ -15,7 +15,6 @@ class ColorException(Exception):
         Exception.__init__(self, err)
 
 
-
 # FIXME: Complete...
 class Color(object):
     '''
@@ -48,6 +47,9 @@ class Color(object):
 
         if ret is RESULT_OK:
             return (x, y)
+        elif ret is RESULT_ERROR:
+            print self._mc
+            raise ColorException(self._mc.get_last_error())
 
         return None
 
@@ -86,3 +88,4 @@ class Color(object):
         self._mc.dll.find_colors_tolerance.argtypes = [c_ulong,
                 POINTER(PPOINT), POINTER(c_int), c_int, c_int,
                 c_int, c_int, c_int, c_int]
+        
