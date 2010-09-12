@@ -4,6 +4,7 @@ from ctypes import *
 from mmlmouse import Mouse
 from mmlcolor import Color
 from time import sleep
+from mmltypes import PINTEGER
 
 class MMLCoreException(Exception):
     def __init__(self, err):
@@ -25,6 +26,9 @@ class MMLCore(object):
         self.dll.get_last_error.restype = c_char_p
         self.dll.get_last_error.argtypes = None
 
+        self.dll.free_ptr.restype = c_bool
+        self.dll.free_ptr.argtypes = [c_void_p]
+
         if self.dll.init() != 0:
             del self.dll
             raise MMLCoreException("Could not initialize the DLL")
@@ -34,6 +38,10 @@ class MMLCore(object):
         s = str(t)
         del t
         return s
+
+    def free(self, ptr):
+        _ptr = cast(ptr, c_void_p)
+        self.dll.free_ptr(_ptr)
 
     def __del__(self):
         del self.dll
@@ -50,14 +58,12 @@ if __name__ == '__main__':
     c = Color(DLL, client)
 
 
-    ret = c.find((0, 0, 100000, 10000), 0)
-
     ret = c.find((0, 0, 100, 100), 0)
     print ret
 
-    ret = c.findAll((0, 0, 100, 100), 0)
+    ret = c.findAll((0, 0, 100, 100), 0, tol=100)
     print ret
-    
+
     m = Mouse(DLL, client)
     
    

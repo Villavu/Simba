@@ -10,6 +10,11 @@ class POINT(Structure):
     _fields_ = [('x', c_int),
                 ('y', c_int)]
 
+class MMLException(Exception):
+    def __init__(self, err):
+        Exception.__init__(self, err)
+
+
 #class PascalArray(object):
 #    """
 #        PascalArray is a class that allows one to easily use a Pascal-style
