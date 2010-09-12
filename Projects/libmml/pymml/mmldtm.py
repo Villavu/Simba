@@ -1,48 +1,31 @@
-#!/usr/bin/env python
-class Bitmap(object):
-    
-    # Pixels, alleen ter illustratie atm
-    pixels = None
+from ctypes import *
+from mmltypes import RESULT_OK, RESULT_FALSE, RESULT_ERROR
 
-    # Index van de managed bitmaps
-    _index = None
-    def __init__(self):
-        self.pixels = [range(100) for x in range(100)]
-        pass
+# TODO:
+#   Load from user defined points. (So called dynamic)
 
-    def __getitem__(self, item):
-        if iterable(item):
-            return self.pixels[item[0]][item[1]]
 
-    def find(self, searchbox = (), tol = 0, frm = (), _type = 'default', client
-            = None):
-        if iterable(searchbox):
-            if len(searchbox) != 4:
-                raise Exception("Invalid argument")
-        # Hier volgen gewoon de juiste calls
-
-class Mouse(object):
-    lastPolledPos = (0,0)
-    states = None
+class DTM(object):
 
     def __init__(self):
-        self.states = {'left': 'down', 'right' : 'up', 'middle' : ' up'}
         pass
 
-    def _getButtonState(self, button):
-        return self.states[button]
+    def __del__(self):
+        pass
 
-    def __getitem__(self, item):
-        if iterable(item):
-            if item['state'] in ('left', 'right', 'middle'):
-                return self._getButtonState(item['state'])
-        
+    def __repr__(self):
+        pass
 
-iterable = lambda x: hasattr(x, '__iter__')
+    def to_str(self):
+        pass
 
-m = Mouse()
-print m[{'state' : 'left'}]
+    def from_str(self):
+        pass
 
-a = Bitmap()
-print a[(2,3)]
-a.find()
+    def find(self):
+        pass
+
+    def set_name(self):
+        pass
+
+
