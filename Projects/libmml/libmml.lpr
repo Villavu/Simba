@@ -16,7 +16,7 @@ Const
   MOUSE_DOWN = 1;
 
 var
-  last_error: PChar;
+  last_error: String;
   debug: boolean;
 
 function init: integer;
@@ -31,7 +31,7 @@ begin
   result := Assigned(C);
   if not result then
   begin
-    last_error := PChar('PClient is NULL');
+    last_error := 'PClient is NULL';
     if debug then
       writeln(last_error);
   end;
@@ -48,7 +48,7 @@ begin
     begin
       writeln('ERROR');
       result := PtrUInt(RESULT_ERROR);
-      last_error := PChar(e.Message);
+      last_error := e.Message;
     end;
   end;
   writeln(format('C: %d, IOManager: %d', [PtrUInt(C), PtrUInt(C.IOManager)]));
@@ -73,9 +73,15 @@ begin
   exit(debug);
 end;
 
+{
+  VERY IMPORTANT: If you use get_last_error, you must immediately store the
+  resulting string somewhere else. As soon as you do other calls, the last error
+  may be reset or assigned a different memory position, making your old
+  pointer invalid.
+}
 function get_last_error: pchar;
 begin
-  exit(last_error);
+  exit(@last_error[1]);
 end;
 
 function array_to_ptr(ptr: Pointer; size: PtrUInt; objsize: PtrUInt): Pointer;
@@ -93,7 +99,7 @@ begin
     if debug then
       writeln(last_error);
   end else
-    Free(ptr);
+    FreeMem(ptr);
 end;
 
 function alloc_mem(size, objsize: PtrUInt): Pointer;
@@ -103,7 +109,7 @@ end;
 
 function realloc_mem(ptr: Pointer; size, objsize: PtrUInt): Pointer;
 begin
-  result := ReAlloc(ptr, size*objsize);
+  result := ReAllocMem(ptr, size*objsize);
 end;
 
 { Mouse }
@@ -122,7 +128,7 @@ begin
   except on e : Exception do
     begin
       result := RESULT_ERROR;
-      last_error := PChar(e.Message);
+      last_error := e.Message;
     end;
   end;
 end;
@@ -140,7 +146,7 @@ begin
   except on e : Exception do
     begin
       result := RESULT_ERROR;
-      last_error := PChar(e.Message);
+      last_error := e.Message;
     end;
   end;
 end;
@@ -168,7 +174,7 @@ begin
   except on e : Exception do
     begin
       result := RESULT_ERROR;
-      last_error := PChar(e.Message);
+      last_error := e.Message;
     end;
   end;
 end;
@@ -193,7 +199,7 @@ begin
   except on e : Exception do
     begin
       result := RESULT_ERROR;
-      last_error := PChar(e.Message);
+      last_error := e.Message;
     end;
   end;
 end;
@@ -213,7 +219,8 @@ begin
   except on e : Exception do
     begin
       result := RESULT_ERROR;
-      last_error := PChar(e.Message);
+      last_error := e.Message;
+      writeln('last_error: ' + last_error);
     end;
   end;
 end;
@@ -234,7 +241,7 @@ begin
   except on e : Exception do
     begin
       result := RESULT_ERROR;
-      last_error := PChar(e.Message);
+      last_error := e.Message;
     end;
   end;
 end;
@@ -254,7 +261,7 @@ begin
   except on e : Exception do
     begin
       result := RESULT_ERROR;
-      last_error := PChar(e.Message);
+      last_error := e.Message;
     end;
   end;
 
@@ -278,7 +285,7 @@ begin
   except on e : Exception do
     begin
       result := RESULT_ERROR;
-      last_error := PChar(e.Message);
+      last_error := e.Message;
     end;
   end;
 

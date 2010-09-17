@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, virtualextension, forms, client, uPSComponent,uPSCompiler,
   uPSRuntime, stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
-  bitmaps, plugins, libloader, dynlibs,internets,scriptproperties, settingssandbox;
+  bitmaps, plugins, libloader, dynlibs,internets,scriptproperties, settingssandbox, updater;
 
 
 

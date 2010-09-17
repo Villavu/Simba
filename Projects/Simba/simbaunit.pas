@@ -42,7 +42,7 @@ uses
   stringutil,mufasatypesutil,mufasabase,  v_ideCodeParser,
   about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
-  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings;
+  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings, updater;
 
 const
   SimbaVersion = 715;
