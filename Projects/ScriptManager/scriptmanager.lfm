@@ -35,7 +35,7 @@ object Form1: TForm1
     Height = 24
     Top = 440
     Width = 32
-    DefaultItemHeight = 19
+    DefaultItemHeight = 15
     TabOrder = 1
     Visible = False
   end
@@ -57,31 +57,32 @@ object Form1: TForm1
     Width = 520
     Anchors = [akLeft, akBottom]
     Caption = 'Button1'
+    OnClick = Button1Click
     TabOrder = 3
   end
   object Edit1: TEdit
     Left = 72
-    Height = 27
-    Top = 536
+    Height = 21
+    Top = 542
     Width = 176
     Anchors = [akLeft, akBottom]
     TabOrder = 4
   end
   object Label1: TLabel
     Left = 24
-    Height = 18
-    Top = 536
-    Width = 35
+    Height = 14
+    Top = 540
+    Width = 29
     Anchors = [akLeft, akBottom]
     Caption = 'Filter:'
     ParentColor = False
   end
   object SearchIn: TComboBox
     Left = 344
-    Height = 29
+    Height = 21
     Top = 534
     Width = 192
-    ItemHeight = 0
+    ItemHeight = 13
     ItemIndex = 0
     Items.Strings = (
       'Tags, Name, Author'
@@ -94,9 +95,9 @@ object Form1: TForm1
   end
   object Label2: TLabel
     Left = 272
-    Height = 18
+    Height = 14
     Top = 536
-    Width = 53
+    Width = 44
     Caption = 'Filter by:'
     ParentColor = False
   end

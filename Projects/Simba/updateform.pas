@@ -11,18 +11,6 @@ uses
 type
 
   { TSimbaUpdateForm }
-
-  { TDownloadThread }
-
-  TDownloadThread = class(TThread)
-  private
-    InputURL : string;
-    ResultStr : PString;
-  public
-    Done : boolean;
-    constructor Create(const URL : string; const Output : PString);
-    procedure Execute; override;
-  end;
   TSimbaUpdateForm = class(TForm)
     DownloadSpeed: TLabel;
     UpdateLog: TMemo;
@@ -266,22 +254,6 @@ begin
   Self.UpdateButton.Caption := 'Update!';
   Self.CloseButton.Enabled := true;
   FUpdating:= false;
-end;
-
-constructor TDownloadThread.Create(const url : String; const Output : PString);
-begin
-  inherited Create(true);
-  FreeOnTerminate:= True;
-  InputURL:= url;
-  ResultStr:= Output;
-end;
-
-{ TDownloadThread }
-
-procedure TDownloadThread.Execute;
-begin
-  ResultStr^:= GetPage(InputURL);
-  done := true;
 end;
 
 initialization

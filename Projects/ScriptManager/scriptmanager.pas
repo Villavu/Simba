@@ -28,8 +28,10 @@ unit scriptmanager;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls, ActnList, Menus, settings, MufasaTypes;
+  {$IFDEF UNIX}cthreads,cmem,{$ENDIF} Classes, SysUtils, FileUtil, Forms,
+  Controls, Graphics, Dialogs, StdCtrls,
+  ExtCtrls, ComCtrls, ActnList, Menus, settings, updater,strutils, MufasaTypes,
+  dom;
 
 type
 
@@ -48,6 +50,7 @@ type
     MenuItem2: TMenuItem;
     ScriptPopup: TPopupMenu;
     TreeView1: TTreeView;
+    procedure Button1Click(Sender: TObject);
     procedure ClickItem(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure FormCreate(Sender: TObject);
@@ -57,24 +60,59 @@ type
     { public declarations }
   end;
 
-  TSimbaScript = class(TObject)
+  { TSimbaScript }
 
+  TSimbaScript = class(TObject)
+  private
+    procedure LoadFromNode( Script : TDOMNode);
   public
     Name, Version, Author, Description: String;
-    Tags, Files: TStringArray;
-
-  private
-
-  public
+    Tags, Files: TStringList;
+    procedure Dbg;
     constructor Create;
-    destructor Delete;
+    destructor Destroy; override;
   end;
+
+  { TLSimbaScript }
+
+  TLSimbaScript = class(TSimbaScript) //Installed Script (Local Simba Script)
+  public
+    procedure LoadFromFile(const filename : string);
+    procedure SaveToFile(const FileName : string);
+    procedure Save(const MainDir : string); //MainDir = maindir of ScriptManager
+  end;
+
+  { TScriptManager }
+
+  TScriptManager = class (TObject)
+  private
+    FScripts : TList; //Array of the online scripts
+    FLScripts: TList; //Array of the local scripts
+    FVersion : String;
+    FUpdating : boolean;
+    function GetLScriptCount: integer;
+    function GetScriptCount: integer;
+  public
+    MainDir : string;
+    procedure Update; //Gets the new online scripts
+    procedure LUpdate; //Loads the local scripts, uses MainDir
+    procedure LSave; //Saves the local scripts, uses MainDir
+    property LScriptCount : integer read GetLScriptCount; //LScript = Local Script = Installed Script
+    property ScriptCount : integer read GetScriptCount; //Online script
+    property Version : string read FVersion;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+
 
 var
   Form1: TForm1; 
 
 implementation
 
+uses
+  XMLRead,XMLWrite;
 {$R *.lfm}
 
 { TForm1 }
@@ -110,10 +148,10 @@ procedure TForm1.FormCreate(Sender: TObject);
 var
   s: TMMLSettings;
 begin
-  s := TMMLSettings.Create(TreeView1.Items);
+{  s := TMMLSettings.Create(TreeView1.Items);
   s.LoadFromXML('/scratch/gittest/list.xml');
   fill(s);
-  s.Free();
+  s.Free();}
 end;
 
 procedure TForm1.ClickItem(Sender: TObject; Button: TMouseButton;
@@ -143,7 +181,71 @@ begin
   //form1.Memo1.Text := TSimbaScript(item.data).Description;
 end;
 
+procedure TForm1.Button1Click(Sender: TObject);
+var
+  Mngr : TScriptManager;
+begin
+  Mngr := TScriptManager.Create;
+  Mngr.Update;
+  Mngr.free;
+end;
+
 { TSimbaScript }
+
+procedure TSimbaScript.LoadFromNode(Script: TDOMNode);
+  function NodeContents(ItemStr : string; node : TDOMNode) : string;
+  var
+    tmpNode : TDOMNode;
+  begin
+    result := '';
+    if node = nil then
+      exit;
+    tmpNode := node.FindNode(itemstr);
+    if tmpNode <> nil then
+      result := Trim(tmpNode.TextContent);
+  end;
+  function NodeSubContents(ItemStr : string; node : TDOMNode) : TStringList;
+  var
+    tmpNode : TDOMNode;
+  begin
+    Result := TStringList.Create;
+    if node = nil then
+      exit;
+    tmpNode := node.FindNode(itemstr);
+    if tmpNode <> nil then
+    begin
+      tmpNode := tmpNode.FirstChild;
+      while tmpNode <> nil do
+      begin
+        Result.add(trim(tmpNode.TextContent));
+        tmpNode := tmpNode.NextSibling;
+      end;
+    end;
+  end;
+begin
+  Author:= NodeContents('Author',script);
+  Name := NodeContents('Name',script);
+  Version := NodeContents('Version',script);
+  Description:= NodeContents('Description',script);
+  Tags := NodeSubContents('Tags',script);
+  Files := NodeSubContents('Files',script);
+end;
+
+procedure TSimbaScript.Dbg;
+var
+  i : integer;
+begin
+  Writeln(Name);
+  Writeln('  Author: ' + Author);
+  Writeln('  Version: ' + Version);
+  Writeln('  Description: ' + Description);
+  Writeln('  Tags:');
+  for i := 0 to Tags.Count - 1 do
+    Writeln('    ' + Tags[i]);
+  Writeln('  Files:');
+  for i := 0 to Files.Count - 1 do
+    Writeln('    ' + Files[i]);
+end;
 
 constructor TSimbaScript.Create;
 begin
@@ -152,12 +254,183 @@ begin
   {stuff here}
 end;
 
-destructor TSimbaScript.Delete;
+destructor TSimbaScript.Destroy;
 begin
-
+  if Files <> nil then
+    FreeAndNil(Files);
+  if Tags <> nil then
+    FreeAndNil(Tags);
   {stuff here}
 
   inherited;
+end;
+
+{ TScriptManager }
+
+function TScriptManager.GetLScriptCount: integer;
+begin
+  result := FLScripts.Count;
+end;
+
+function TScriptManager.GetScriptCount: integer;
+begin
+  result := FScripts.Count;
+end;
+
+procedure TScriptManager.Update;
+var
+  XMLFile : string;
+  Stream  : TStringStream;
+  XMLDoc  : TXMLDocument;
+  Node,Script : TDOMNode;
+  Subs : TStringList;
+  Down : TDownloadThread;
+  SimbaScript : TLSimbaScript;
+begin
+  if FUpdating then
+    exit;
+  FUpdating := True;
+  Down := TDownloadThread.Create('http://old.villavu.com/sm',@XMLFile);
+  down.Execute;
+  while down.Done = false do
+  begin
+    Application.ProcessMessages;
+    Sleep(25);
+  end;
+  Stream := TStringStream.Create(XMLFile);
+  ReadXMLFile(XMLDoc,Stream);
+  Stream.Free;
+  Node := XMLDoc.FirstChild.FindNode('Version');
+  if node <> nil then
+    FVersion:= Node.TextContent;
+  Node := XMLDoc.FirstChild.FindNode('ScriptList');
+  if node <> nil then
+  begin
+    script := Node.FirstChild;
+    while Script <> nil do
+    begin
+      SimbaScript := TLSimbaScript.Create;
+      SimbaScript.LoadFromNode(Script);
+      FLScripts.Add(SimbaScript);
+      SimbaScript.Dbg;
+      Script := Script.NextSibling;
+    end;
+  end;
+  SimbaScript.SaveToFile('c:\testme.xml');
+  XMLDoc.Free;
+  FUpdating := false;
+end;
+
+procedure TScriptManager.LUpdate;
+begin
+  if DirectoryExists(MainDir) = false then
+    exit;
+  if FileExists( IncludeTrailingPathDelimiter(maindir) + 'General' + DirectorySeparator+
+     'scripts.xml') then
+  begin
+
+  end;
+end;
+
+procedure TScriptManager.LSave;
+var
+  XMLDoc : TXMLDocument;
+procedure AddTextElement(root : TDOMNode; Element : string; Text : string);
+var
+  node : TDOMNode;
+begin
+  Node := XMLDoc.createElement(Element);
+  root.AppendChild(node);
+  node.TextContent:= Text;
+end;
+var
+  Node : TDOMNode;
+  i : integer;
+begin
+  if DirectoryExists(MainDir) = false then
+    exit;
+  XMLDoc := TXMLDocument.Create;
+  Node := XMLDoc.CreateElement('Scripts');
+  XMLDoc.AppendChild(node);
+  for i := 0 to FLScripts.Count - 1 do
+    AddTextElement(node,'Script', TLSimbaScript(FLScripts[i]).Name);
+  WriteXMLFile(XMLDoc,IncludeTrailingPathDelimiter(maindir) + 'General' + DirectorySeparator+
+     'scripts.xml');
+  XMLDoc.Free;
+end;
+
+constructor TScriptManager.Create;
+begin
+  inherited;
+  FLScripts := TList.Create;
+  FScripts := TList.Create;
+  FVersion := '';
+  FUpdating:= False;
+end;
+
+destructor TScriptManager.Destroy;
+begin
+  while FScripts.Count > 0 do
+  begin
+    TSimbaScript(FScripts[0]).Free;
+    FScripts.Delete(0);
+  end;
+  while FLScripts.Count > 0 do
+  begin
+    TLSimbaScript(FLScripts[0]).Free;
+    FLScripts.Delete(0);
+  end;
+  inherited Destroy;
+end;
+
+{ TLSimbaScript }
+
+procedure TLSimbaScript.LoadFromFile(const filename: string);
+var
+  XMLDoc : TXMLDocument;
+begin
+  ReadXMLFile(XMLDoc,filename);
+  Self.LoadFromNode(XMLDoc.FirstChild);
+end;
+
+procedure TLSimbaScript.SaveToFile(const FileName: string);
+
+var
+  XMLDoc : TXMLDocument;
+procedure AddTextElement(root : TDOMNode; Element : string; Text : string);
+var
+  node : TDOMNode;
+begin
+  Node := XMLDoc.createElement(Element);
+  root.AppendChild(node);
+  node.TextContent:= Text;
+end;
+var
+  Node,SubNode : TDOMNode;
+  i : integer;
+begin
+  XMLDoc := TXMLDocument.Create;
+  Node := XMLDoc.CreateElement('Script');
+  XMLDoc.AppendChild(Node);
+  AddTextElement(node,'Name',Name);
+  AddTextElement(node,'Author',Author);
+  AddTextElement(node,'Version',Version);
+  AddTextElement(node,'Description',description);
+  SubNode := XMLDoc.CreateElement('Tags');
+  Node.AppendChild(SubNode);
+  for i := 0 to Tags.Count - 1 do
+    AddTextElement(SubNode,'Tag',Tags[i]);
+  SubNode := XMLDoc.CreateElement('Files');
+  Node.AppendChild(SubNode);
+  for i := 0 to Files.Count - 1 do
+    AddTextElement(SubNode,'File',Files[i]);
+  WriteXMLFile(XMLDoc,FileName);
+  XMLDoc.Free;
+end;
+
+procedure TLSimbaScript.Save(const MainDir: string);
+begin
+
 end;
 
 end.
