@@ -202,6 +202,7 @@ function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
 var
   f: TMFont;
 begin
+  Result := True;
   if not DirectoryExists(FPath + Name) then
   begin
     raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exists.');
