@@ -128,7 +128,7 @@ In code:
         // NOTE THAT IT ALSO HAS TO BE THE SAME COLOUR
         // UPTEXT IN THIS CASE.
         // I'm still not sure if this is a good idea or not.
-        // Perhaos it should match *any* uptext colour.
+        // Perhaps it should match *any* uptext colour.
         if (bmp.fastgetpixel(x,y) = bmp.fastgetpixel(x+1,y+1) ) then
           continue;
 
@@ -174,7 +174,7 @@ Normal OCR
 
 .. note::
     To do :-)
-    A large part is already explained abov e.
+    A large part is already explained above.
     Most of the other OCR functions are simply used for plain identifying
     and have no filtering tasks.
 
