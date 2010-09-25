@@ -17,7 +17,6 @@ object ScriptFrame: TScriptFrame
     Font.Height = -13
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
-    Font.Quality = fqNonAntialiased
     ParentColor = False
     ParentFont = False
     PopupMenu = SimbaForm.ScriptPopup
