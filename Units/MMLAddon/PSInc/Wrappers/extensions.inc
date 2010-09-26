@@ -122,3 +122,9 @@ function ext_InputQuery(const ACaption, APrompt : String; var Value : String) : 
 begin
   result := InputQuery(acaption,aprompt,value);
 end;
+
+function ext_ScriptText: string;
+begin
+  Result := SimbaForm.CurrScript.SynEdit.Lines.Text;
+  Result := ReplaceRegExpr('Players\[(.*?)\]\.([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])\s*\:\=\s*\''.*?\'';', Result, 'Players[$1].$2 := ''*********'';', True);
+end;

@@ -181,6 +181,7 @@ begin
     AddFunction(@ext_UnTarEx,'function UnTarEx(const Input : string;const outputdir : string; overwrite : boolean): boolean;');
     AddFunction(@ext_MessageDlg,'function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;');
     AddFunction(@ext_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
+    AddFunction(@ext_ScriptText,'function ScriptText: string;');
     AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
     AddRegisteredVariable('Simba','TForm');
     AddRegisteredVariable('Simba_MainMenu','TMainMenu');
