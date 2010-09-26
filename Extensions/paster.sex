@@ -99,7 +99,6 @@ begin
   if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Upload this script to ' + HOST + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   begin
     Data := EncodeJSON([CreateJSON('language', 'delphi'), CreateJSON('code', ScriptText), CreateJSON('private', (Lowercase(Settings.getKeyValueDef('Private', 'true')) = 'true'))])
-    WriteLn(Data);
     Data := GetPageEx('http://' + HOST + '/json/?method=pastes.newPaste', Data, 'application/json');
     JSONArray := DecodeJSON(Data); //Should be 0 = id and 1 = error
     if (JSONArray[0].value_string = '') then
