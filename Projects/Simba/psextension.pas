@@ -66,6 +66,7 @@ uses
   tpa, //Tpa stuff
   SynRegExpr,
   lclintf,
+  httpsend,
   SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}
@@ -183,6 +184,7 @@ begin
     AddFunction(@ext_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
     AddFunction(@ext_ScriptText,'function ScriptText: string;');
     AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
+    AddFunction(@ext_GetPageEx,'function GetPageEx(const URL, PostData, MimeType: string): string;');
     AddRegisteredVariable('Simba','TForm');
     AddRegisteredVariable('Simba_MainMenu','TMainMenu');
     AddRegisteredVariable('Client','TClient');
