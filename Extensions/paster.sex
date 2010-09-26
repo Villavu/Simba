@@ -1,0 +1,119 @@
+program Paster;
+
+var
+  Simba_Menu: TMenuItem;
+  HOST: string;
+
+type
+  TJSON = record
+    name: string;
+    value: string;
+  end;
+  TJSONArray = array of TJSON;
+
+function Encode(str: string): string;
+var
+  Pattern, Replacement: TStringArray;
+  I: integer;
+begin
+  Pattern     := ['\',   #8,   #9,  #10,  #11,  #12,  #13,  '"',   {#39,}   '/'];
+  Replacement := ['\\', '\b', '\t', '\n', '\v', '\f', '\r', '\"', {'\'#39,} '\/'];
+  Result := str;
+  if (Length(Pattern) = Length(Replacement)) then
+    for I := 0 to High(Pattern) do
+      Result := Replace(Result, Pattern[I], Replacement[I], [rfIgnoreCase, rfReplaceAll]);
+end;
+
+function CJSON(name, value: string): TJSON;
+begin
+  Result.name := Encode(name);
+  Result.value := Encode(value);
+end;
+
+function DecodeJSON(JSON: string): TJSONArray;
+var
+  StringArray: TStringArray;
+  AStringArray: array of TStringArray;
+  I: integer;
+begin
+  JSON := Between('{', '}', JSON);
+  StringArray := Explode(', ', JSON);
+  SetArrayLength(AStringArray, Length(StringArray));
+  for I := 0 to High(StringArray) do
+    AStringArray[I] := Explode('": ', StringArray[I]);
+  SetArrayLength(Result, Length(AStringArray));
+  for I := 0 to High(AStringArray) do
+    Result[I] := CJSON(Between('"', '"', AStringArray[I][0] + '"'), Between('"', '"', AStringArray[I][1]));
+end;
+
+function EncodeJSON(JSON: TJSONArray): string;
+var
+  I: integer;
+begin
+  Result := '{';
+  for I := 0 to High(JSON) do
+  begin
+    Result := Result + '"' + JSON[I].name + '": "' + JSON[I].value + '"';
+    if (I < High(JSON)) then
+      Result := Result + ', ';
+  end;
+  Result := Result + '}';
+end;
+
+function PasteIt(out Data: string): boolean;
+var
+  JSONArray: TJSONArray;
+begin
+  HOST := Settings.getKeyValueDef('Host', 'paste.sheeva.villavu.com');
+  if (MessageDlg('Paster Plugin', 'Upload this script to ' + HOST + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+  begin
+      Data := EncodeJSON([CJSON('language', 'delphi'), CJSON('code', ScriptText), CJSON('private', 'True')]);
+      WriteLn(Data);
+      Data := GetPageEx('http://' + HOST + '/json/?method=pastes.newPaste', Data, 'application/json');
+      JSONArray := DecodeJSON(Data); //Should be 0 = id and 1 = error
+      if (JSONArray[0].value = '') then
+	  begin
+        Data := '[Paster]Error: ' + JSONArray[1].value
+        Result := False;
+	  end else
+	  begin
+        Data := 'http://' + HOST + '/show/' + JSONArray[0].value + '/';
+		Result := True;
+	  end;
+  end;
+end;
+
+procedure OnClick(sender : TObject);
+var
+  Data: string;
+begin;
+  if PasteIt(Data) then
+  begin
+    WriteLn('Opening pasted script at "' + Data + '"!');
+    OpenWebPage(Data);
+  end else
+    WriteLn(Data);
+end;
+
+function GetName: string;
+begin;
+  Result := 'Paster';
+end;
+
+function GetVersion: string;
+begin;
+  Result := '0.1a';
+end;
+
+procedure Init;
+begin;
+  Simba_Menu := TMenuItem.Create(Simba_MainMenu);
+  Simba_Menu.Caption := 'Paste It!';
+  Simba_Menu.OnClick := @OnClick;
+  Simba_MainMenu.Items.Add(Simba_Menu);
+  Settings.getKeyValueDef('Host', 'paste.sheeva.villavu.com');
+  WriteLn(GetName + ' ' + GetVersion + ' Plugin Loaded!');
+end;
+
+begin
+end.
