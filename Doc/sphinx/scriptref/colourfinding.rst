@@ -83,7 +83,7 @@ GetColors
 
     function GetColors(const Coords : TPointArray) : TIntegerArray;
 
-GetColor returns the color on the coordinate (x, y) defined by *Coords*.
+GetColors returns an array of the colours at the given *Coords*.
 
 
 CountColor

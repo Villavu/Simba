@@ -80,7 +80,7 @@ BitmapFromText
 
 This function creates a bitmap from a string *text* with the given *font*.
 For an explanation on how to use and work with Bitmaps, please refer to 
-:ref:`scriptref_bitmaps`.
+:ref:`scriptref-bitmaps`.
 
 TPAFromText
 ~~~~~~~~~~~
@@ -91,7 +91,7 @@ TPAFromText
 
 This function creates a TPA from a string *text* with the given *font*.
 For an explanation on how to use and work with TPAs, please refer to 
-:ref:`scriptref_tpointarray`.
+:ref:`scriptref-tpointarray`.
 
 TPAFromTextWrap
 ~~~~~~~~~~~~~~~
@@ -112,7 +112,7 @@ MaskFromText
 
 This function creates a Mask from a string *text* with the given *font*.
 For an explanation on how to use and work with TPAs, please refer to 
-:ref:`scriptref_masks`.
+:ref:`scriptref-masks`.
 
 Reading Text
 ------------
@@ -126,6 +126,8 @@ rs_GetUpText
 
 This function is a function specific to RuneScape(tm); it reads the text 
 in the upper left corner into a string.
+
+How these functions actually work can be found here: :ref:`uptext-filter`.
 
 rs_GetUpTextAt
 ~~~~~~~~~~~~~~
