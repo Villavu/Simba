@@ -23,6 +23,7 @@ interface
         procedure FreePlugins;
         procedure LoadPluginsDir(DirIndex : integer);
         function VerifyPath(Path : string) : string;
+        function LoadPluginNoFallback(PluginName : string) : integer;
       protected
         function InitPlugin(plugin: TLibHandle): boolean; virtual; abstract;
       public
@@ -113,8 +114,7 @@ implementation
     end;
   end;
 
-
-  function TGenericLoader.LoadPlugin(PluginName: string): Integer;
+  function TGenericLoader.LoadPluginNoFallback(PluginName: string): Integer;
   var
     i, ii : integer;
     PlugExt: String = {$IFDEF LINUX}'.so';{$ELSE}'.dll';{$ENDIF}
@@ -148,6 +148,19 @@ implementation
     else
       FreeLibrary(Loaded[PluginLen].handle);
     Result:= PluginLen - 1;
+  end;
+
+
+  function TGenericLoader.LoadPlugin(PluginName: string): Integer;
+  var
+    CpuBits: String = {$IFDEF CPU32}'32';{$ELSE}'64';{$ENDIF}
+  begin
+    try
+      Result := LoadPluginNoFallback(PluginName);
+    except
+      on exception do Result:= LoadPluginNoFallback(PluginName+CpuBits);
+    end;
+
   end;
 
 
