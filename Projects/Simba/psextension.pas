@@ -67,6 +67,7 @@ uses
   SynRegExpr,
   lclintf,
   httpsend,
+  superobject,
   SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}
@@ -185,6 +186,7 @@ begin
     AddFunction(@ext_ScriptText,'function ScriptText: string;');
     AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
     AddFunction(@ext_GetPageEx,'function GetPageEx(const URL, PostData, MimeType: string): string;');
+    AddFunction(@ext_GetJSONValue,'function GetJSONValue(const Data, Value: string): string;');
     AddRegisteredVariable('Simba','TForm');
     AddRegisteredVariable('Simba_MainMenu','TMainMenu');
     AddRegisteredVariable('Client','TClient');

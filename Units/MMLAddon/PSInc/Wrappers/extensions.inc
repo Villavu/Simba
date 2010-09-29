@@ -153,3 +153,11 @@ begin
     HTTPSend.Free;
   end;
 end;
+
+function ext_GetJSONValue(const Data, Value: string): string;
+var
+  SuperObject: ISuperObject;
+begin
+  SuperObject := SO(Data);
+  Result := SuperObject.AsObject.S[Value];
+end;
