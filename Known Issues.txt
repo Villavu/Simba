@@ -6,4 +6,5 @@ Linux:
     * IsKeyDown doesn't work yet.
 
 Windows:
+    * Interpreter doesn't work well on x64.
 
