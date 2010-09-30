@@ -2,7 +2,8 @@ program Paster;
 //{$DEFINE DEV}
 {$IFDEF EXTENSION}
 var
-  Paster_Menu, GetPaste_MenuItem, Private_MenuItem, Paster_MenuItem, AltHost_Menu: TMenuItem;
+  Paster_Menu, GetPaste_MenuItem, Private_MenuItem: TMenuItem;
+  Browser_MenuItem, Paster_MenuItem, AltHost_Menu: TMenuItem;
   Divider_MenuItems: array[1..2] of TMenuItem;
   AltHost_Menus: array[1..5] of TMenuItem;
   AltHost_MenuItems: array[1..5] of array[1..4] of TMenuItem;
@@ -44,8 +45,6 @@ begin;
 end;
 
 function JSONRequest(var Data: string; const HOST, Method: string): boolean;
-{$IFDEF DEV}var
-  I: integer;{$ENDIF}
 begin
   {$IFDEF DEV}
   WriteLn('(HOST, Method) := ('#39 + HOST + #39', '#39 + Method + #39');');
@@ -90,34 +89,29 @@ begin
       Exit;
     end;
 
-    if ((GetJSONValue(Data, 'code') = 'null') and (GetJSONValue(Data, 'error') = 'null')) then
+    if ((GetJSONValue(Data, 'code') = '') and (GetJSONValue(Data, 'error') = '')) then
     begin
       WriteLn('[Paster]Error: Invalid Paste ID!');
       Result := False;
       Exit;
     end;
 
-    Data := GetJSONValue(Data, 'code');
-    WriteLn('[Paster]Info: Sorry guys I can''t open a script from extensions yet...');
-    WriteLn(Data);
+    OpenScript('Paste #' + GetJSONValue(Data, 'paste_id'), GetJSONValue(Data, 'code'));
     Result := True;
   end;
 end;
 
 function PasteIt(out Data: string; HOST: string): boolean;
-var
-  is_private: boolean;
 begin
   if (HOST = '') then
     HOST := 'paste.sheeva.villavu.com';
   if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Upload this script to ' + HOST + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   begin
-    is_private := (Lowercase(Settings.getKeyValueDef('Private', 'true')) = 'true');
-    Data := '{"language": "delphi", "code": "' + EncodeString(ScriptText) + '", "private": ' + Lowercase(BoolToStr(is_private)) + '}';
+    Data := '{"language": "delphi", "code": "' + EncodeString(ScriptText) + '", "private": ' + Lowercase(BoolToStr(Private_MenuItem.Checked)) + '}';
     JSONRequest(Data, HOST, 'pastes.newPaste');
     if (GetJSONValue(Data, 'error') = 'null') then
     begin
-      Data := 'http://' + HOST + '/show/' + GetJSONValue(Data, 'data') + '/';
+      Data := GetJSONValue(Data, 'data');
       Result := True;
     end else
       Data := '[Paster]Error: ' + GetJSONValue(Data, 'error');
@@ -130,8 +124,12 @@ var
 begin
   if PasteIt(Data, Host) then
   begin
-    WriteLn('Opening pasted script at "' + Data + '"!');
-    OpenWebPage(Data);
+    if (Browser_MenuItem.Checked) then
+    begin
+      WriteLn('Opening pasted script at "http://' + HOST + '/show/' + Data + '/"!');
+      OpenWebPage('http://' + HOST + '/show/' + Data + '/');
+    end else
+      WriteLn('Script pasted at id "' + Data + '"');
   end else
     WriteLn(Data);
 end;
@@ -166,6 +164,11 @@ begin;
       Private_MenuItem.Checked := (not (Private_MenuItem.Checked));
       Settings.setKeyValue('Private', Lowercase(BoolToStr(Private_MenuItem.Checked)));
       {$IFDEF DEV}WriteLn('Private = ' + Lowercase(BoolToStr(Private_MenuItem.Checked)));{$ENDIF}
+    end;
+    Browser_MenuItem: begin
+      Browser_MenuItem.Checked := (not (Browser_MenuItem.Checked));
+      Settings.setKeyValue('OpenBrowser', Lowercase(BoolToStr(Browser_MenuItem.Checked)));
+      {$IFDEF DEV}WriteLn('OpenBrowser = ' + Lowercase(BoolToStr(Browser_MenuItem.Checked)));{$ENDIF}
     end;
   end;
   for I := 1 to 5 do
@@ -233,7 +236,6 @@ begin;
   begin
     Caption := 'Get Paste!';
     OnClick := @OnClick;
-    {$IFNDEF DEV}Visible := False;{$ENDIF}
   end;
   Paster_Menu.Add(GetPaste_MenuItem);
 
@@ -253,6 +255,15 @@ begin;
     Checked := (Lowercase(Settings.getKeyValueDef('Private', 'true')) = 'true');
   end;
   Paster_Menu.Add(Private_MenuItem);
+
+  Browser_MenuItem := TMenuItem.Create(Paster_Menu);
+  with Browser_MenuItem do
+  begin
+    Caption := 'Open in Browser';
+    OnClick := @OnClick;
+    Checked := (Lowercase(Settings.getKeyValueDef('OpenBrowser', 'true')) = 'true');
+  end;
+  Paster_Menu.Add(Browser_MenuItem);
 
   Paster_Menu.Add(Divider_MenuItems[2]);
   
@@ -278,9 +289,6 @@ begin;
       AltHost_MenuItems[I][K].OnClick := @OnClick;
       if ((not ((K = 3) or (K = 4))) and (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I))) then
         AltHost_MenuItems[I][K].Enabled := False;
-
-      {$IFNDEF DEV}if (K = 2) then
-        AltHost_MenuItems[I][K].Visible := False;{$ENDIF}
 
       AltHost_Menus[I].Add(AltHost_MenuItems[I][K]);
     end;
