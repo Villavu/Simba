@@ -126,7 +126,18 @@ end;
 function ext_ScriptText: string;
 begin
   Result := SimbaForm.CurrScript.SynEdit.Lines.Text;
-  Result := ReplaceRegExpr('Players\[(.*?)\]\.([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])\s*\:\=\s*\''.*?\'';', Result, 'Players[$1].$2 := ''*********'';', True);
+  Result := ReplaceRegExpr('([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])\s*\:\=\s*\''.*?\'';', Result, '$1 := ''*********'';', True);
+end;
+
+procedure ext_OpenScript(Name, Data: string);
+begin
+  if (Name = '') then
+    Name := 'Untitled';
+  SimbaForm.AddTab;
+  SimbaForm.CurrScript.SynEdit.Lines.Text := Data;
+  SimbaForm.CurrScript.ScriptName := Name;
+  SimbaForm.RefreshTab;
+  SimbaForm.UpdateTitle;
 end;
 
 function ext_GetPageEx(const URL, PostData, MimeType: string): string;
