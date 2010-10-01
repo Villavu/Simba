@@ -21,19 +21,6 @@ begin
       Result := Replace(Result, Pattern[I], Replacement[I], [rfIgnoreCase, rfReplaceAll]);
 end;
 
-function DecodeString(Data: string): string;
-var
-  Pattern, Replacement: TStringArray;
-  I: integer;
-begin
-  Pattern     := ['\\', '\b', '\t', '\n', '\v', '\f', '\r', '\"', {'\'#39,} '\/'];
-  Replacement := ['\',   #8,   #9,  #10,  #11,  #12,  #13,  '"',   {#39,}   '/'];
-  Result := Data;
-  if (Length(Pattern) = Length(Replacement)) then
-    for I := Low(Pattern) to High(Pattern) do
-      Result := Replace(Result, Pattern[I], Replacement[I], [rfIgnoreCase, rfReplaceAll]);
-end;
-
 function GetName: string;
 begin;
   Result := 'Paster';
@@ -89,13 +76,14 @@ begin
       Exit;
     end;
 
-    if ((GetJSONValue(Data, 'code') = '') and (GetJSONValue(Data, 'error') = '')) then
+    if ((GetJSONValue(Data, 'data') = 'null') and (GetJSONValue(Data, 'error') = 'null')) then
     begin
       WriteLn('[Paster]Error: Invalid Paste ID!');
       Result := False;
       Exit;
     end;
 
+    WriteLn('Opening Paste #' + GetJSONValue(Data, 'paste_id') + ' in a new tab!');
     OpenScript('Paste #' + GetJSONValue(Data, 'paste_id'), GetJSONValue(Data, 'code'));
     Result := True;
   end;
@@ -142,10 +130,18 @@ begin
   begin
     {$IFDEF DEV}WriteLn('Data := '#39 + Data + #39';');{$ENDIF}
     if (Data = '') then
-    begin
-      WriteLn('[Paster] Error: The server cannot be blank!');
-      Exit;
-    end;
+      if (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I)) then
+      begin
+        WriteLn('[Paster]Error: The host cannot be blank!');
+        Exit;
+      end else
+      begin
+        AltHost_Menus[I].Caption := 'Host ' + IntToStr(I);
+        AltHost_MenuItems[I][1].Enabled := False;
+        AltHost_MenuItems[I][2].Enabled := False;
+        Settings.setKeyValue('Host' + IntToStr(I), 'Host ' + IntToStr(I));
+        Exit;
+      end;
     AltHost_Menus[I].Caption := Data;
     AltHost_MenuItems[I][1].Enabled := True;
     AltHost_MenuItems[I][2].Enabled := True;
