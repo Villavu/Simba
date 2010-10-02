@@ -1,8 +1,8 @@
 program DTMEditor_Extension;
 {$ifndef PS_EXTENSION}
 var
-  Client : TClient;
-  Simba_MainMenu : TMainMenu;
+  Client: TClient;
+  Simba_MainMenu: TMainMenu;
 {$endif}
 
 {$i mml.simba}

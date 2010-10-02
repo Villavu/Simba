@@ -1,0 +1,421 @@
+program CRov;
+
+{$IFNDEF PS_EXTENSION}
+var
+  Client: TClient;
+  Simba_MainMenu: TMainMenu;
+{$ENDIF}
+
+const
+  Version = '0.6';
+  SettingsMenu = False; //True if you want to be able to set the saving interval through the menu (otherwise it's accessible through plugin settings)
+  ForceSave = True; //Force user to save the script, instead of opening it
+  Dir = 'CRov\'; //Appended to AppPath
+  DefInterval = '300000'; //every 5 minutes
+
+type
+  TCharArray = array of Char;
+
+  function _DeleteFile(lpFileName: TCharArray{PChar}): Boolean; external 'DeleteFileA@kernel32.dll stdcall';
+
+var
+  Simba_Menu: TMenuItem;
+  Timer: TTimer;
+  PageControl: TPageControl;
+
+  Tab: Integer;
+  FileNames: TStringList;
+
+function StringToCharArray(s: string): TCharArray;
+var
+  i, l: Integer;
+begin
+  l := Length(s);
+  SetLength(Result, l + 1);
+  for i := l downto 1 do
+    Result[i - 1] := s[i];
+  Result[l] := #0;
+end;
+
+function DeleteFile(FileName: string): Boolean;
+begin
+  Result := _DeleteFile(StringToCharArray(FileName));
+end;
+
+function FindPageControlWithName(c: TWinControl; Name: string): TPageControl;
+var
+  i: Integer;
+begin
+  Result := nil;
+  if (c = nil) then
+    Exit;
+  Name := LowerCase(Name);
+
+  for i := 0 to c.ControlCount - 1 do
+    if (c.Controls[i] is TPageControl) and (LowerCase(c.Controls[i].Name) = Name) then
+    begin
+      Result := TPageControl(c.Controls[i]);
+      Exit;
+    end
+    else if (c.Controls[i] is TWinControl) then
+    begin
+      Result := FindPageControlWithName(TWinControl(c.Controls[i]), Name);
+      if (Result <> nil) then
+        Exit;
+    end;
+end;
+
+function LastChar(s: string): Char;
+begin
+  if (Length(s) < 1) then
+    Result := #0
+  else
+    Result := s[Length(s)];
+end;
+
+function MyTime: string;
+var
+  Hour, Mins, Sec, MSec: Word;
+  Year, Month, Day: Word;
+begin
+  DecodeTime(Now, Hour, Mins, Sec, MSec);
+  DecodeDate(Date, Year, Month, Day);
+  Result :=
+    PadZ(IntToStr(Day), 2)+PadZ(IntToStr(Month), 2)+PadZ(IntToStr(Year mod 100), 2)+
+    '_'+
+    Padz(IntToStr(Hour), 2)+PadZ(IntToStr(Mins), 2);
+end;
+
+function GetFileInfo(Tab: Integer; out LastFileName, LastScript: string): Boolean;
+var
+  i: Integer;
+  v: string;
+begin
+  Result := False;
+  i := FileNames.IndexOfName(IntToStr(Tab));
+  if (i < 0) then
+    Exit;
+  v := FileNames.Values[IntToStr(Tab)];
+
+  LastFileName := Trim(Copy(v, 1, 255));
+  LastScript := Copy(v, 256, Length(v) - 255);
+  Result := True;
+end;
+
+procedure SetFileInfo(Tab: Integer; FileName, Script: string);
+begin
+  FileNames.Values[IntToStr(Tab)] := PadL(FileName, 255)+Script;
+end;
+
+procedure SplitRecoverInfo(Input: string; out FileName, Date, Time: string);
+var
+  i: Integer;
+  s: TStringArray;
+begin
+  FileName := '';
+  Date := '';
+  Time := '';
+
+  s := Explode('_', Input);
+  if (Length(s) < 2) then
+    Exit
+  else
+  begin
+    Time := s[High(s)];
+    Insert(':', Time, 3);
+    Date := s[High(s) - 1];
+    //Insert('''', Date, 5);
+    Insert('/', Date, 5);
+    Insert('/', Date, 3);
+    for i := 0 to High(s) - 2 do
+    begin
+      if (i > 0) then
+        FileName := FileName + '_';
+      FileName := FileName + s[i];
+    end;
+  end;
+end;
+
+procedure SetInterval(Sender: TObject);
+var
+  i, intv: Integer;
+begin
+  intv := Max(TMenuItem(Sender).Tag * 1000, 10000);
+  Settings.SetKeyValue('CRovInterval', IntToStr(intv));
+  Timer.Interval := intv;
+
+  for i := 0 to Simba_Menu.Count - 1 do
+    Simba_Menu.Items[i].Checked := False;
+
+  TMenuItem(Sender).Checked := True;
+end;
+
+procedure ClearFiles(Sender: TObject);
+var
+  i, t: Integer;
+begin
+  if
+    (MessageDlg('CRov Extension (by Nielsie95)',
+      'This will erase all recovered files. Are you sure you want to continue?',
+       mtConfirmation, [mbYes, mbNo], 0
+    ) <> mrYes)
+  then
+    Exit;
+
+  for i := Simba_Menu.Count - 1 downto 0 do
+  begin
+    t := Simba_Menu.Items[0].Tag;
+    if (t = 1) and FileExists(Simba_Menu.Items[0].Hint) then
+      DeleteFile(Simba_Menu.Items[0].Hint);
+    Simba_Menu.Delete(0);
+    if (t >= 3) then
+      Break;
+  end;
+
+  Simba_Menu.Visible := Simba_Menu.Count > 0;
+end;
+
+procedure TabChanged(Sender: TObject);
+begin
+  Tab := Pointer(TPageControl(Sender).ActivePage);
+  Timer.Enabled := False;
+  Timer.Enabled := True; //Reset timer
+end;
+
+procedure OnTimer(Sender: TObject);
+var
+  s: TStringList;
+  LastScript, LastFile,
+  Script, Title: string;
+begin
+  TTimer(Sender).Enabled := False;
+
+  if (TTimer(Sender).Tag = 1) then
+  begin
+    TTimer(Sender).Tag := 0;
+
+    PageControl := FindPageControlWithName(Simba, 'PageControl1');
+    if (PageControl <> nil) then
+      PageControl.OnPageChanged := @TabChanged
+    else
+      WriteLn('CRov: PageControl not found!');
+
+    TTimer(Sender).Interval := StrToIntDef(Settings.GetKeyValueDef('CRovInterval', DefInterval), 30000);
+  end;
+
+  try
+    Title := MyTime;
+    Script := ScriptText;
+
+    if (PageControl <> nil) then
+      if (LastChar(PageControl.ActivePage.Caption) = '*') then
+        Title := Replace(PageControl.ActivePage.Caption, '*', '', [rfReplaceAll])+'_'+Title
+      else
+      begin
+        //File saved/not modified, delete recovery file
+        if GetFileInfo(Tab, LastFile, LastScript) and (LastFile <> '') and (FileExists(LastFile)) then
+          DeleteFile(LastFile);
+        Exit;
+      end;
+
+    if GetFileInfo(Tab, LastFile, LastScript) and (LastScript = Script) then
+      Exit;
+    if (LastFile <> '') and (FileExists(LastFile)) then
+      DeleteFile(LastFile);
+
+    Title := Title+'.crov';
+    s := TStringList.Create;
+    try
+      s.Text := Script;
+      //WriteLn('Saving recovery file to "'+Title+'"');
+      s.SaveToFile(AppPath+Dir+Title);
+      SetFileInfo(Tab, AppPath+Dir+Title, Script);
+    finally
+      s.Free;
+    end;
+  finally
+    TTimer(Sender).Enabled := True;
+  end;
+end;
+
+procedure OnRecover(Sender: TObject);
+var
+  a, b, c: string;
+  s: TStringList;
+begin
+  a := TMenuItem(Sender).Hint;
+  Delete(a, Length(a) - Length('.crov') + 1, Length('.crov'));
+  SplitRecoverInfo(a, a, b, c);
+
+  if (not ForceSave) then
+  begin
+    s := TStringList.Create;
+    try
+      s.LoadFromFile(TMenuItem(Sender).Hint);
+      OpenScript(a, s.Text);
+    finally
+      s.Free;
+    end;
+  end
+  else
+    with TSaveDialog.Create(Simba) do
+    begin
+      Title := 'Simba - Save Recovered File';
+      InitialDir := AppPath;
+      Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.sex|Any files|*.*';
+      DefaultExt := 'simba';
+      FileName := a;
+      Options := Options + [ofOverwritePrompt];
+
+      if Execute then
+      begin
+        s := TStringList.Create;
+        try
+          s.LoadFromFile(TMenuItem(Sender).Hint);
+          s.SaveToFile(FileName);
+        finally
+          s.Free;
+        end;
+      end;
+    end;
+end;
+
+procedure Init;
+var
+  i: Integer;
+  f: TStringArray;
+  a, b, c: string;
+  Item: TMenuItem;
+begin;
+  Simba_Menu := TMenuItem.Create(Simba_MainMenu);
+  Simba_Menu.Caption := 'Recover';
+  Simba_MainMenu.Items.Items[0].Insert(4, Simba_Menu);
+
+  Timer := TTimer.Create(Simba);
+  Timer.Interval := 2000;
+  Timer.OnTimer := @OnTimer;
+  Timer.Enabled := True;
+  Timer.Tag := 1;
+
+  FileNames := TStringList.Create;
+
+  if (not DirectoryExists(AppPath+Dir)) then
+    CreateDirectory(AppPath+Dir)
+  else
+  begin
+    f := GetFiles(AppPath+Dir, 'crov');
+    for i := 0 to High(f) do
+    begin
+      Item := TMenuItem.Create(Simba_Menu);
+      Item.Hint := AppPath+Dir+f[i];
+      Item.Tag := 1;
+      Item.OnClick := @OnRecover;
+
+      Delete(f[i], Length(f[i]) - Length('.crov') + 1, Length('.crov'));
+      SplitRecoverInfo(f[i], a, b, c);
+      if (a = '') then
+        a := '*UNTITLED*';
+      Item.Caption := a + '  (at '+c+'  '+b+')';
+
+      Simba_Menu.Add(Item);
+    end;
+  end;
+
+  if (Length(f) > 0) then
+  begin
+    Item := TMenuItem.Create(Simba_Menu);
+    Item.Caption := 'Clear';
+    Item.Tag := 2;
+    Item.OnClick := @ClearFiles;
+    Simba_Menu.Add(Item);
+
+    a := 'Simba did not close correctly. There ';
+    if (Length(f) = 1) then
+      a := a + 'is 1 file'
+    else
+      a := a + 'are ' + IntToStr(Length(f)) + ' files';
+    a := a + ' found for recovery. You can find the files through the ' +
+      '"File>Recover" menu. If you do not wish to recover or if you are done ' +
+      'recovering, please clear the list through the menu.';
+    MessageDlg('CRov Extension (by Nielsie95)', a, mtInformation, [mbOK], 0);
+  end;
+
+  if SettingsMenu then
+  begin
+    if (Length(f) > 0) then
+    begin
+      Item := TMenuItem.Create(Simba_Menu);
+      Item.Caption := '-';
+      Item.Tag := 3;
+      Simba_Menu.Add(Item);
+    end;
+
+    Item := TMenuItem.Create(Simba_Menu);
+    Item.Caption := 'Backup every 30s';
+    Item.Tag := 30;
+    Item.Checked := Settings.GetKeyValueDef('CRovInterval', DefInterval) = '30000';
+    Item.OnClick := @SetInterval;
+    Simba_Menu.Add(Item);
+
+    Item := TMenuItem.Create(Simba_Menu);
+    Item.Caption := 'Backup every 5m';
+    Item.Tag := 5 * 60;
+    Item.Checked := Settings.GetKeyValueDef('CRovInterval', DefInterval) = '300000';
+    Item.OnClick := @SetInterval;
+    Simba_Menu.Add(Item);
+
+    Item := TMenuItem.Create(Simba_Menu);
+    Item.Caption := 'Backup every 20m';
+    Item.Tag := 20 * 60;
+    Item.Checked := Settings.GetKeyValueDef('CRovInterval', DefInterval) = '1200000';
+    Item.OnClick := @SetInterval;
+    Simba_Menu.Add(Item);
+  end;
+
+  Simba_Menu.Visible := Simba_Menu.Count > 0;
+end;
+
+procedure Free;
+var
+  i: Integer;
+  a, b: string;
+begin
+  Timer.Enabled := False;
+
+  try
+    for i := 0 to FileNames.Count - 1 do
+    begin
+      if (not GetFileInfo(StrToIntDef(FileNames.Names[i], -1), a, b)) then
+        Continue;
+      if (a <> '') and FileExists(a) then
+        DeleteFile(a);
+    end;
+  finally
+    FileNames.Free;
+  end;
+end;
+
+procedure Attach;
+begin
+  Simba_Menu.Visible := Simba_Menu.Count > 0;
+  Timer.Enabled := True;
+end;
+
+Procedure Detach;
+begin
+  Timer.Enabled := False;
+  Simba_Menu.Visible := False;
+end;
+
+function GetName: string;
+begin
+  Result := 'Crash Recovery (by Nielsie95)';
+end;
+
+function GetVersion: string;
+begin
+  Result := Version;
+end;
+
+begin
+end.
