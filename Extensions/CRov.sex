@@ -227,8 +227,8 @@ begin
     s := TStringList.Create;
     try
       s.Text := Script;
-      s.SaveToFile(AppPath+Dir+Title);
-      SetFileInfo(Tab, AppPath+Dir+Title, Script);
+      s.SaveToFile(Dir+Title);
+      SetFileInfo(Tab, Dir+Title, Script);
     finally
       s.Free;
     end;
@@ -288,7 +288,7 @@ var
 begin
   SettingsMenu := LowerCase(Settings.GetKeyValueDef('SettingsInMenu', SettingsMenuDef)) = 'true';
   ForceSave := LowerCase(Settings.GetKeyValueDef('ForceSave', ForceSaveDef)) = 'true';
-  Dir := Settings.GetKeyValueDef('Directory', DirDef);
+  Dir := Settings.GetKeyValueDef('Directory', AppPath+DirDef);
   Extension := Settings.GetKeyValueDef('Extension', ExtensionDef);
 
   Simba_Menu := TMenuItem.Create(Simba_MainMenu);
@@ -303,15 +303,13 @@ begin
 
   FileNames := TStringList.Create;
 
-  if (not DirectoryExists(AppPath+Dir)) then
-    CreateDirectory(AppPath+Dir)
-  else
+  if DirectoryExists(Dir) then
   begin
-    f := GetFiles(AppPath+Dir, Extension);
+    f := GetFiles(Dir, Extension);
     for i := 0 to High(f) do
     begin
       Item := TMenuItem.Create(Simba_Menu);
-      Item.Hint := AppPath+Dir+f[i];
+      Item.Hint := Dir+f[i];
       Item.Tag := 1;
       Item.OnClick := @OnRecover;
 
@@ -323,6 +321,11 @@ begin
 
       Simba_Menu.Add(Item);
     end;
+  end
+  else if (not CreateDirectory(Dir)) then
+  begin
+    WriteLn('CRov: Unknown directory! Falling back to Simba folder..');
+    Dir := AppPath;
   end;
 
   if (Length(f) > 0) then
