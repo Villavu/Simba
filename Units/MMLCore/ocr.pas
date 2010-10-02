@@ -52,7 +52,7 @@ type
     function GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
-    procedure FilterUpTextByColour(bmp: TMufasaBitmap; w,h: integer);
+    procedure FilterUpTextByColour(bmp: TMufasaBitmap);
     procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
     procedure FilterShadowBitmap(bmp: TMufasaBitmap);
     procedure FilterCharsBitmap(bmp: TMufasaBitmap);
@@ -197,84 +197,124 @@ end;
   Non optimised. We can make it use direct data instead of fastgetpixel and
   fastsetpixel, but speed isn't really an issue. The entire algorithm is still
   fast enough.
+
+  There are some issues with this method; since later on the algorithm
+  (if I recall correctly) throws aways some pixels if a character isn't just
+  one colour)
+
+  We will match shadow as well; we need it later on.
 }
 
-procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap; w,h: integer);
+procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
 var
    x, y,r, g, b: Integer;
 begin
-  // We're going to filter the bitmap solely on colours first.
-  // If we found one, we set it to it's `normal' colour.
+  {
+    We're going to filter the bitmap solely on colours first.
+    If we found one, we set it to it's `normal' colour.
+
+    Note that these values aren't randomly chosen, but I didn't spent too
+    much time on finding the exact values either.
+
+    We will iterate over each pixel in the bitmap, and if it matches any of the
+    ``rules'' for the colour; we will set it to a constant colour which
+    represents this colour (and corresponding rule). Usually the ``base''
+    colour.
+
+    If it doesn't match any rule, we can safely make the pixel black.
+
+    To my knowledge this algorithm doesn't remove any valid points. It does
+    not remove *all* invalid points either; but that is simply not possible
+    based purely on the colour. (If someone has a good idea, let me know)
+  }
   for y := 0 to bmp.Height - 1 do
     for x := 0 to bmp.Width - 1 do
     begin
       colortorgb(bmp.fastgetpixel(x,y),r,g,b);
-      // the abs(g-b) < 15 seems to help heaps when taking out crap points
+      {
+        abs(g-b) < 15 seems to help heaps when taking out invalid (white) points
+        obviously if a colour is ``white'' R, G B should all be approx the
+        same value. That is what the last part of the if statement checks.
+      }
       if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High)
-         // 50 or 55. 55 seems to be better.
          and (abs(r-g) + abs(r-b) + abs(g-b) < 55) then
-         // TODO: make 55 a var, and make it so that it can be set
       begin
         bmp.fastsetpixel(x,y,ocr_White);
         continue;
       end;
+
+      { Quite straightforward and works quite well, afaik }
       if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b > ocr_Limit_High) then
       begin
         bmp.fastsetpixel(x,y,ocr_Blue);
         continue;
       end;
+
+      { Ditto }
       if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
       begin
         bmp.fastsetpixel(x,y,ocr_Green);
         continue;
       end;
 
-      // false results with fire
+      { False results with fire }
       if(r > ocr_Limit_High) and (g > 100) and (g < ocr_Limit_High) and (b > 40) and (b < 127) then
       begin
         bmp.fastsetpixel(x,y,ocr_ItemC);
         continue;
       end;
+
+      { Works fine afaik }
       if(r > ocr_Limit_High) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
       begin
         bmp.fastsetpixel(x,y,ocr_Yellow);
         continue;
       end;
-      // better use g < 40 than ocr_Limit_Low imo
+
+      // better use g < 40 than ocr_Limit_Low imo (TODO)
       if (r > ocr_Limit_High) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
       begin
         bmp.fastsetpixel(x,y,ocr_Red);
         continue;
       end;
+
+      { Red as well }
       if (r > ocr_Limit_High) and (g > ocr_Limit_Low) and (b < ocr_Limit_Low) then
       begin
         bmp.fastsetpixel(x,y,ocr_Red);
         continue;
       end;
+
       if (r > ocr_Limit_Med) and (r < (ocr_Limit_High + 10)) and (g > ocr_Limit_Low - 10) and
           (b < 20) then
-          begin
-            bmp.fastsetpixel(x,y,ocr_Green);
-            continue;
-          end;
-      //shadow
+      begin
+        bmp.fastsetpixel(x,y,ocr_Green);
+        continue;
+      end;
+
+      // Match Shadow as well. We will need it later.
       if (r < ocr_Limit_Low) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
       begin
         bmp.FastSetPixel(x,y, ocr_Purple);
         continue;
       end;
 
+      // Black if no match
       bmp.fastsetpixel(x,y,0);
     end;
 
-
-    // make outline black for shadow characteristics filter
-    // first and last horiz line = 0
+    {
+      Make outline black for shadow characteristics filter
+      First and last horiz line = 0. This makes using the shadow algo easier.
+      We don't really throw away information either since we already took the
+      bitmap a bit larger than required.
+    }
     for x := 0 to bmp.width -1 do
       bmp.fastsetpixel(x,0,0);
     for x := 0 to bmp.width -1 do
       bmp.fastsetpixel(x,bmp.height-1,0);
-    // same for vertical lines
+
+    // Same for vertical lines
     for y := 0 to bmp.Height -1 do
       bmp.fastsetpixel(0, y, 0);
     for y := 0 to bmp.Height -1 do
@@ -288,7 +328,6 @@ end;
   on characteristics.
 
   For the uptext, a few things apply...
-  First of all:
 
   *** Remove False Shadow ***
       if shadow[x,y] then not shadow[x-1,y-1]
@@ -300,7 +339,6 @@ end;
      will soon see that this algorithm will be a *lot* more efficient if we
      start at the right bottom, instead of the left top. Which means we should
      work with x-1 and y-1, rather than x+1,y+1
-     Yeah.... My comments are vague.
     )
 
   *** UpText chars identity 1 and 2 ***
@@ -314,11 +352,14 @@ procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
 var
    x,y: Integer;
 begin
-  // Filter 2
-  // This performs a `simple' filter.
-  // What we are doing here is simple checking that if Colour[x,y] is part
-  // of the uptext, then so must Colour[x+1,y+1], or Colour[x+1,y+1] is a shadow.
-  // if it is neither, we can safely remove it.
+  { Filter 2
+    This performs a `simple' filter.
+    What we are doing here is simple checking that if Colour[x,y] is part
+    of the uptext, then so must Colour[x+1,y+1], or Colour[x+1,y+1] is a shadow.
+    if it is neither, we can safely remove it.
+
+    XXX: This causes the previously mentioned fuckup.
+  }
  for y := 0 to bmp.Height - 2 do
    for x := 0 to bmp.Width - 2 do
    begin
@@ -326,11 +367,20 @@ begin
        continue;
      if bmp.fastgetpixel(x,y) = clBlack then
        continue;
-     if (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x+1,y+1)) and (bmp.fastgetpixel(x+1,y+1) <> clpurple) then
+     if (bmp.fastgetpixel(x,y) <> bmp.fastgetpixel(x+1,y+1)) and
+          (bmp.fastgetpixel(x+1,y+1) <> clpurple) then
        bmp.fastsetpixel(x,y,{clAqua}0);
    end;
 
-  // Remove false shadow
+  {
+    Remove false shadow. (A shadow isn't larger than 1 pixel. So if x, y is
+    shadow, thex x+1, y+1 can't be shadow. If it is, we can safely remove it.
+    (As well as x+2, y+2, etc).
+
+    The tricky part of the algorithm is that it starts at the bottom,
+    removing shadow point x,y if x-1,y-1 is also shadow.
+  }
+
  for y := bmp.Height - 1 downto 1 do
    for x := bmp.Width - 1 downto 1 do
    begin
@@ -346,24 +396,24 @@ begin
    end;
 
   // Now we do another filter, with uptext chars identity 1 and 2.
- for y := bmp.Height - 2 downto 0 do
-   for x := bmp.Width - 2 downto 0 do
-   begin
-     if bmp.fastgetpixel(x,y) = clPurple then
-       continue;
-     if bmp.fastgetpixel(x,y) = clBlack then
-       continue;
+  for y := bmp.Height - 2 downto 0 do
+    for x := bmp.Width - 2 downto 0 do
+    begin
+      if bmp.fastgetpixel(x,y) = clPurple then
+        continue;
+      if bmp.fastgetpixel(x,y) = clBlack then
+        continue;
 
-     // identity 1
-     if (bmp.fastgetpixel(x,y) = bmp.fastgetpixel(x+1,y+1) ) then
-       continue;
+      // identity 1
+      if (bmp.fastgetpixel(x,y) = bmp.fastgetpixel(x+1,y+1) ) then
+        continue;
 
-     // identity 2
-     if bmp.fastgetpixel(x+1,y+1) <> clPurple then
-     begin
-       bmp.fastsetpixel(x,y,clOlive);
-       continue;
-     end;
+      // identity 2
+      if bmp.fastgetpixel(x+1,y+1) <> clPurple then
+      begin
+        bmp.fastsetpixel(x,y,clOlive);
+        continue;
+      end;
 
      // If we make it to here, it means the pixel is part of the uptext.
    end;
@@ -505,7 +555,7 @@ begin
   {$ENDIF}
 
   // Filter 1
-  FilterUpTextByColour(bmp,w,h);
+  FilterUpTextByColour(bmp);
   {$IFDEF OCRSAVEBITMAP}
   bmp.SaveToFile(OCRDebugPath + 'ocrcol.bmp');
   {$ENDIF}
@@ -542,8 +592,8 @@ begin
 
   // TODO:
   // We should make a different TPA
-  // for each colour, rather than put them all in one. Noise can be a of a
-  // differnet colour.
+  // for each colour, rather than put them all in one. Noise can be of a
+  // different colour.
   setlength(chars, charsbmp.height * charsbmp.width);
   charscount:=0;
   for y := 0 to charsbmp.height - 1 do

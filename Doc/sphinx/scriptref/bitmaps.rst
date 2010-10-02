@@ -1,5 +1,5 @@
 
-.. _scriptref_bitmaps:
+.. _scriptref-bitmaps:
 
 Bitmaps
 =======
