@@ -1,0 +1,299 @@
+program Paster;
+//{$DEFINE DEV}
+{$IFDEF EXTENSION}
+var
+  Paster_Menu, GetPaste_MenuItem, Private_MenuItem: TMenuItem;
+  Browser_MenuItem, Paster_MenuItem, AltHost_Menu: TMenuItem;
+  Divider_MenuItems: array[1..2] of TMenuItem;
+  AltHost_Menus: array[1..5] of TMenuItem;
+  AltHost_MenuItems: array[1..5] of array[1..4] of TMenuItem;
+
+function EncodeString(Data: string): string;
+var
+  Pattern, Replacement: TStringArray;
+  I: integer;
+begin
+  Pattern     := ['\',   #8,   #9,  #10,  #11,  #12,  #13,  '"',   {#39,}   '/'];
+  Replacement := ['\\', '\b', '\t', '\n', '\v', '\f', '\r', '\"', {'\'#39,} '\/'];
+  Result := Data;
+  if (Length(Pattern) = Length(Replacement)) then
+    for I := Low(Pattern) to High(Pattern) do
+      Result := Replace(Result, Pattern[I], Replacement[I], [rfIgnoreCase, rfReplaceAll]);
+end;
+
+function GetName: string;
+begin;
+  Result := 'Paster';
+end;
+
+function GetVersion: string;
+begin;
+  Result := '0.2a';
+end;
+
+function JSONRequest(var Data: string; const HOST, Method: string): boolean;
+begin
+  {$IFDEF DEV}
+  WriteLn('(HOST, Method) := ('#39 + HOST + #39', '#39 + Method + #39');');
+  WriteLn('Data := '#39 + Data + #39';');
+  {$ENDIF}
+  Data := GetPageEx('http://' + HOST + '/json/?method=' + Method, Data, 'application/json');
+  {$IFDEF DEV}WriteLn('Data := '#39 + Data + #39';');{$ENDIF}
+  if (Data = '') then
+  begin
+    Data := '{"data": null, "error": "Server unresponsive!"}';
+    Result := False;
+    Exit;
+  end;
+
+  if (Method = 'pastes.getPaste') then
+  begin
+    //Little hack for getPaste too work....
+    Data := Replace(Data, '{"data": {', '{', []);
+    Data := Replace(Data, '}, "error": ', ', "error": ', []);
+  end;
+
+  Result := True;
+end;
+
+function GetPaste(HOST: string): boolean;
+var
+  Data: string;
+begin
+  if (HOST = '') then
+    HOST := 'paste.sheeva.villavu.com';
+  if (InputQuery(GetName + ' ' + GetVersion + ' Extension', 'Which ID would you like too grab?', Data)) then
+  begin
+    if IntToStr(StrToInt(Data)) = Data then
+      Data := '{"paste_id": ' + Data + '}'
+    else
+      Data := '{"paste_id": "' + Data + '"}';
+
+    if (not (JSONRequest(Data, HOST, 'pastes.getPaste'))) then
+    begin
+      WriteLn('[Paster]Error: ' + GetJSONValue(Data, 'error'));
+      Result := False;
+      Exit;
+    end;
+
+    if ((GetJSONValue(Data, 'data') = 'null') and (GetJSONValue(Data, 'error') = 'null')) then
+    begin
+      WriteLn('[Paster]Error: Invalid Paste ID!');
+      Result := False;
+      Exit;
+    end;
+
+    WriteLn('Opening Paste #' + GetJSONValue(Data, 'paste_id') + ' in a new tab!');
+    OpenScript('Paste #' + GetJSONValue(Data, 'paste_id'), GetJSONValue(Data, 'code'));
+    Result := True;
+  end;
+end;
+
+function PasteIt(out Data: string; HOST: string): boolean;
+begin
+  if (HOST = '') then
+    HOST := 'paste.sheeva.villavu.com';
+  if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Upload this script to ' + HOST + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+  begin
+    Data := '{"language": "delphi", "code": "' + EncodeString(ScriptText) + '", "private": ' + Lowercase(BoolToStr(Private_MenuItem.Checked)) + '}';
+    JSONRequest(Data, HOST, 'pastes.newPaste');
+    if (GetJSONValue(Data, 'error') = 'null') then
+    begin
+      Data := GetJSONValue(Data, 'data');
+      Result := True;
+    end else
+      Data := '[Paster]Error: ' + GetJSONValue(Data, 'error');
+  end;
+end;
+
+procedure Paste(Host: string);
+var
+  Data: string;
+begin
+  if PasteIt(Data, Host) then
+  begin
+    if (Browser_MenuItem.Checked) then
+    begin
+      WriteLn('Opening pasted script at "http://' + HOST + '/show/' + Data + '/"!');
+      OpenWebPage('http://' + HOST + '/show/' + Data + '/');
+    end else
+      WriteLn('Script pasted at id "' + Data + '"');
+  end else
+    WriteLn(Data);
+end;
+
+procedure UpdateHost(I: integer);
+var
+  Data: string;
+begin
+  if InputQuery(GetName + ' ' + GetVersion + ' Extension', 'Please input the LodgeIt Host! (Ex: paste.pocoo.org)', Data) then
+  begin
+    {$IFDEF DEV}WriteLn('Data := '#39 + Data + #39';');{$ENDIF}
+    if (Data = '') then
+      if (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I)) then
+      begin
+        WriteLn('[Paster]Error: The host cannot be blank!');
+        Exit;
+      end else
+      begin
+        AltHost_Menus[I].Caption := 'Host ' + IntToStr(I);
+        AltHost_MenuItems[I][1].Enabled := False;
+        AltHost_MenuItems[I][2].Enabled := False;
+        Settings.setKeyValue('Host' + IntToStr(I), 'Host ' + IntToStr(I));
+        Exit;
+      end;
+    AltHost_Menus[I].Caption := Data;
+    AltHost_MenuItems[I][1].Enabled := True;
+    AltHost_MenuItems[I][2].Enabled := True;
+    Settings.setKeyValue('Host' + IntToStr(I), Data);
+  end;
+end;
+
+procedure OnClick(Sender: TObject);
+var
+  I, K: integer;
+begin;
+  case Sender of
+    Paster_MenuItem: Paste('');
+    GetPaste_MenuItem: GetPaste('');
+    Private_MenuItem: begin
+      Private_MenuItem.Checked := (not (Private_MenuItem.Checked));
+      Settings.setKeyValue('Private', Lowercase(BoolToStr(Private_MenuItem.Checked)));
+      {$IFDEF DEV}WriteLn('Private = ' + Lowercase(BoolToStr(Private_MenuItem.Checked)));{$ENDIF}
+    end;
+    Browser_MenuItem: begin
+      Browser_MenuItem.Checked := (not (Browser_MenuItem.Checked));
+      Settings.setKeyValue('OpenBrowser', Lowercase(BoolToStr(Browser_MenuItem.Checked)));
+      {$IFDEF DEV}WriteLn('OpenBrowser = ' + Lowercase(BoolToStr(Browser_MenuItem.Checked)));{$ENDIF}
+    end;
+  end;
+  for I := 1 to 5 do
+    for K := 1 to 4 do
+      if (Sender = AltHost_MenuItems[I][K]) then
+      begin
+        {$IFDEF DEV}WriteLn('Sender = ' + IntToStr(I) + ', ' + IntToStr(K));{$ENDIF}
+        if (K = 4) then
+          UpdateHost(I);
+        if (K = 2) then
+          GetPaste(Settings.getKeyValue('Host' + IntToStr(I)));
+        if (K = 1) then
+          Paste(Settings.getKeyValue('Host' + IntToStr(I)));
+        Break;
+      end;
+end;
+
+procedure Attach;
+begin;
+  WriteLn(GetName + ' ' + GetVersion + ' Plugin Loaded!');
+  Paster_Menu.Visible := True;
+end;
+
+procedure Detach;
+begin
+  Paster_Menu.Visible := False;
+end;
+
+procedure Free;
+var
+  I, K: integer;
+begin
+  for I := 5 downto 1 do
+  begin
+    for K := 4 downto 1 do
+      AltHost_MenuItems[I][K].Free;
+    AltHost_Menus[I].Free;
+  end;
+  AltHost_Menu.Free;
+  Private_MenuItem.Free;
+  for I := 2 downto 1 do
+    Divider_MenuItems[I].Free;
+  Paster_MenuItem.Free;
+  Paster_Menu.Free;
+end;
+
+procedure init;
+var
+  I, K: integer;
+begin;
+  Paster_Menu := TMenuItem.Create(Simba_MainMenu);
+  Paster_Menu.Caption := GetName;
+  Simba_MainMenu.Items.Add(Paster_Menu);
+  
+  Paster_MenuItem := TMenuItem.Create(Paster_Menu);
+  with Paster_MenuItem do
+  begin
+    Caption := 'Paste It!';
+    OnClick := @OnClick;
+  end;
+  Paster_Menu.Add(Paster_MenuItem);
+
+  GetPaste_MenuItem := TMenuItem.Create(Paster_Menu);
+  with GetPaste_MenuItem do
+  begin
+    Caption := 'Get Paste!';
+    OnClick := @OnClick;
+  end;
+  Paster_Menu.Add(GetPaste_MenuItem);
+
+  for I := 1 to 2 do
+  begin
+    Divider_MenuItems[I] := TMenuItem.Create(Paster_Menu);
+    Divider_MenuItems[I].Caption := '-';
+  end;
+
+  Paster_Menu.Add(Divider_MenuItems[1]);
+
+  Private_MenuItem := TMenuItem.Create(Paster_Menu);
+  with Private_MenuItem do
+  begin
+    Caption := 'Private';
+    OnClick := @OnClick;
+    Checked := (Lowercase(Settings.getKeyValueDef('Private', 'true')) = 'true');
+  end;
+  Paster_Menu.Add(Private_MenuItem);
+
+  Browser_MenuItem := TMenuItem.Create(Paster_Menu);
+  with Browser_MenuItem do
+  begin
+    Caption := 'Open in Browser';
+    OnClick := @OnClick;
+    Checked := (Lowercase(Settings.getKeyValueDef('OpenBrowser', 'true')) = 'true');
+  end;
+  Paster_Menu.Add(Browser_MenuItem);
+
+  Paster_Menu.Add(Divider_MenuItems[2]);
+  
+  AltHost_Menu := TMenuItem.Create(Paster_Menu);
+  AltHost_Menu.Caption := 'Alternate Hosts';
+  Paster_Menu.Add(AltHost_Menu);
+  
+  for I := 1 to 5 do
+  begin
+    AltHost_Menus[I] := TMenuItem.Create(AltHost_Menu);
+    AltHost_Menus[I].Caption := Settings.getKeyValueDef('Host' + IntToStr(I), 'Host ' + IntToStr(I));
+    AltHost_Menu.Add(AltHost_Menus[I]);
+	
+    for K := 1 to 4 do
+    begin
+      AltHost_MenuItems[I][K] := TMenuItem.Create(AltHost_Menus[I]);
+      case K of
+        1: AltHost_MenuItems[I][1].Caption := 'Paste It!';
+        2: AltHost_MenuItems[I][2].Caption := 'Get Paste!';
+        3: AltHost_MenuItems[I][3].Caption := '-';
+        4: AltHost_MenuItems[I][4].Caption := 'Update Host';
+      end;
+      AltHost_MenuItems[I][K].OnClick := @OnClick;
+      if ((not ((K = 3) or (K = 4))) and (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I))) then
+        AltHost_MenuItems[I][K].Enabled := False;
+
+      AltHost_Menus[I].Add(AltHost_MenuItems[I][K]);
+    end;
+  end;
+end;
+{$ENDIF}
+begin
+{$IFNDEF EXTENSION}
+  WriteLn('This is a Extension for Simba. If you are in Simba click View->Extensions and enable paster.sex!');
+{$ENDIF}
+end.
+

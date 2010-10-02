@@ -122,3 +122,53 @@ function ext_InputQuery(const ACaption, APrompt : String; var Value : String) : 
 begin
   result := InputQuery(acaption,aprompt,value);
 end;
+
+function ext_ScriptText: string;
+begin
+  Result := SimbaForm.CurrScript.SynEdit.Lines.Text;
+  Result := ReplaceRegExpr('([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])\s*\:\=\s*\''.*?\'';', Result, '$1 := ''*********'';', True);
+end;
+
+procedure ext_OpenScript(Name, Data: string);
+begin
+  if (Name = '') then
+    Name := 'Untitled';
+  SimbaForm.AddTab;
+  SimbaForm.CurrScript.SynEdit.Lines.Text := Data;
+  SimbaForm.CurrScript.ScriptName := Name;
+  SimbaForm.RefreshTab;
+  SimbaForm.UpdateTitle;
+end;
+
+function ext_GetPageEx(const URL, PostData, MimeType: string): string;
+var
+  HTTPSend: THTTPSend;
+begin
+  HTTPSend := THTTPSend.Create;
+  try
+    HTTPSend.MimeType := MimeType;
+    HTTPSend.Document.Clear;
+    HTTPSend.Document.Write(PostData[1], Length(PostData));
+    try
+      if HTTPSend.HTTPMethod('POST', URL) then
+      begin;
+        SetLength(Result, HTTPSend.Document.Size);
+        HTTPSend.Document.Read(Result[1], Length(Result));
+      end else
+        Result := '';
+    except
+      on e : exception do
+        mDebugLn('Exception in GetPage in Extensions: ' + e.message);
+	end;
+  finally
+    HTTPSend.Free;
+  end;
+end;
+
+function ext_GetJSONValue(const Data, Value: string): string;
+var
+  SuperObject: ISuperObject;
+begin
+  SuperObject := SO(Data);
+  Result := SuperObject.AsObject.S[Value];
+end;
