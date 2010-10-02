@@ -1,10 +1,11 @@
 program AssociateFiles;
 
 const
-  Extensions = 'simb,simba,sex';
+  ExtensionsDef = 'simb,simba,sex';
 
 var
   SimbaMenu: TMenuItem;
+  Extensions: string;
 
 type
   TCharArray = array of Char;
@@ -222,6 +223,8 @@ procedure Init;
 var
   m: TMenuItem;
 begin;
+  Extensions := Settings.GetKeyValueDef('Extensions', ExtensionsDef);
+
   m := TMenuItem.Create(Simba_MainMenu);
   m.Caption := '-';
   Simba_MainMenu.Items.Items[4].Insert(Simba_MainMenu.Items.Items[4].Count - 2, m);
