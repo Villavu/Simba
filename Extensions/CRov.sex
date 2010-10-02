@@ -8,9 +8,10 @@ var
 
 const
   Version = '0.6';
-  SettingsMenu = False; //True if you want to be able to set the saving interval through the menu (otherwise it's accessible through plugin settings)
-  ForceSave = True; //Force user to save the script, instead of opening it
-  Dir = 'CRov\'; //Appended to AppPath
+  SettingsMenuDef = 'False'; //True if you want to be able to set the saving interval through the menu (otherwise it's accessible through plugin settings)
+  ForceSaveDef = 'True'; //Force user to save the script, instead of opening it
+  DirDef = 'CRov\'; //Appended to AppPath
+  ExtensionDef = 'crov';
   DefInterval = '300000'; //every 5 minutes
 
 type
@@ -25,6 +26,9 @@ var
 
   Tab: Integer;
   FileNames: TStringList;
+
+  SettingsMenu, ForceSave: Boolean;
+  Dir, Extension: string;
 
 function StringToCharArray(s: string): TCharArray;
 var
@@ -141,7 +145,7 @@ var
   i, intv: Integer;
 begin
   intv := Max(TMenuItem(Sender).Tag * 1000, 10000);
-  Settings.SetKeyValue('CRovInterval', IntToStr(intv));
+  Settings.SetKeyValue('Interval', IntToStr(intv));
   Timer.Interval := intv;
 
   for i := 0 to Simba_Menu.Count - 1 do
@@ -200,7 +204,7 @@ begin
     else
       WriteLn('CRov: PageControl not found!');
 
-    TTimer(Sender).Interval := StrToIntDef(Settings.GetKeyValueDef('CRovInterval', DefInterval), 30000);
+    TTimer(Sender).Interval := StrToIntDef(Settings.GetKeyValueDef('Interval', DefInterval), 30000);
   end;
 
   try
@@ -223,7 +227,7 @@ begin
     if (LastFile <> '') and (FileExists(LastFile)) then
       DeleteFile(LastFile);
 
-    Title := Title+'.crov';
+    Title := Title+'.'+Extension;
     s := TStringList.Create;
     try
       s.Text := Script;
@@ -244,7 +248,7 @@ var
   s: TStringList;
 begin
   a := TMenuItem(Sender).Hint;
-  Delete(a, Length(a) - Length('.crov') + 1, Length('.crov'));
+  Delete(a, Length(a) - Length('.'+Extension) + 1, Length('.'+Extension));
   SplitRecoverInfo(a, a, b, c);
 
   if (not ForceSave) then
@@ -286,7 +290,12 @@ var
   f: TStringArray;
   a, b, c: string;
   Item: TMenuItem;
-begin;
+begin
+  SettingsMenu := LowerCase(Settings.GetKeyValueDef('SettingsInMenu', SettingsMenuDef)) = 'true';
+  ForceSave := LowerCase(Settings.GetKeyValueDef('ForceSave', ForceSaveDef)) = 'true';
+  Dir := Settings.GetKeyValueDef('Directory', DirDef);
+  Extension := Settings.GetKeyValueDef('Extension', ExtensionDef);
+
   Simba_Menu := TMenuItem.Create(Simba_MainMenu);
   Simba_Menu.Caption := 'Recover';
   Simba_MainMenu.Items.Items[0].Insert(4, Simba_Menu);
@@ -303,7 +312,7 @@ begin;
     CreateDirectory(AppPath+Dir)
   else
   begin
-    f := GetFiles(AppPath+Dir, 'crov');
+    f := GetFiles(AppPath+Dir, Extension);
     for i := 0 to High(f) do
     begin
       Item := TMenuItem.Create(Simba_Menu);
@@ -311,7 +320,7 @@ begin;
       Item.Tag := 1;
       Item.OnClick := @OnRecover;
 
-      Delete(f[i], Length(f[i]) - Length('.crov') + 1, Length('.crov'));
+      Delete(f[i], Length(f[i]) - Length('.'+Extension) + 1, Length('.'+Extension));
       SplitRecoverInfo(f[i], a, b, c);
       if (a = '') then
         a := '*UNTITLED*';
@@ -353,21 +362,21 @@ begin;
     Item := TMenuItem.Create(Simba_Menu);
     Item.Caption := 'Backup every 30s';
     Item.Tag := 30;
-    Item.Checked := Settings.GetKeyValueDef('CRovInterval', DefInterval) = '30000';
+    Item.Checked := Settings.GetKeyValueDef('Interval', DefInterval) = '30000';
     Item.OnClick := @SetInterval;
     Simba_Menu.Add(Item);
 
     Item := TMenuItem.Create(Simba_Menu);
     Item.Caption := 'Backup every 5m';
     Item.Tag := 5 * 60;
-    Item.Checked := Settings.GetKeyValueDef('CRovInterval', DefInterval) = '300000';
+    Item.Checked := Settings.GetKeyValueDef('Interval', DefInterval) = '300000';
     Item.OnClick := @SetInterval;
     Simba_Menu.Add(Item);
 
     Item := TMenuItem.Create(Simba_Menu);
     Item.Caption := 'Backup every 20m';
     Item.Tag := 20 * 60;
-    Item.Checked := Settings.GetKeyValueDef('CRovInterval', DefInterval) = '1200000';
+    Item.Checked := Settings.GetKeyValueDef('Interval', DefInterval) = '1200000';
     Item.OnClick := @SetInterval;
     Simba_Menu.Add(Item);
   end;
