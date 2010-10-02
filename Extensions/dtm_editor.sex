@@ -1,4 +1,7 @@
 program DTMEditor_Extension;
+//(D)DTM Editor for Simba By Nielsie95
+//http://villavu.com/forum/showthread.php?t=56151
+
 {$ifndef PS_EXTENSION}
 var
   Client: TClient;

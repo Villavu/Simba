@@ -1,4 +1,6 @@
 program AssociateFiles;
+//File association extension for Simba by Nielsie95
+//http://villavu.com/forum/showthread.php?t=56853
 
 const
   ExtensionsDef = 'simb,simba,sex';
