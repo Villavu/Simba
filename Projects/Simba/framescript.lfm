@@ -17,7 +17,7 @@ object ScriptFrame: TScriptFrame
     Font.Height = -13
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
-    Font.Quality = fqNonAntialiased
+    Font.Quality = fqProof
     ParentColor = False
     ParentFont = False
     PopupMenu = SimbaForm.ScriptPopup
@@ -28,7 +28,7 @@ object ScriptFrame: TScriptFrame
     OnKeyPress = SynEditKeyPress
     OnClickLink = SynEditClickLink
     OnMouseLink = SynEditMouseLink
-    Gutter.Width = 57
+    Gutter.Width = 59
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -627,7 +627,7 @@ object ScriptFrame: TScriptFrame
         Width = 24
       end
       object TSynGutterLineNumber
-        Width = 17
+        Width = 19
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone

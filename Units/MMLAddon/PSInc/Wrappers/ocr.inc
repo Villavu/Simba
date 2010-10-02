@@ -3,6 +3,11 @@ begin
   Result := CurrThread.Client.MOCR.GetUpTextAtEx(7, 7, true);
 end;
 
+function ps_rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string; extdecl;
+begin
+  result := CurrThread.Client.MOCR.GetUpTextAtEx(x, y, shadow);
+end;
+
 function ps_rs_GetUpTextAt(x, y : integer): string; extdecl;
 begin
   result := CurrThread.Client.MOCR.GetUpTextAtEx(x,y,true);
