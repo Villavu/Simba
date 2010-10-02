@@ -1,10 +1,6 @@
 program CRov;
-
-{$IFNDEF PS_EXTENSION}
-var
-  Client: TClient;
-  Simba_MainMenu: TMainMenu;
-{$ENDIF}
+//Crash recovery extension for Simba by Nielsie95
+//http://villavu.com/forum/showthread.php?p=740535
 
 const
   Version = '0.6';
@@ -231,7 +227,6 @@ begin
     s := TStringList.Create;
     try
       s.Text := Script;
-      //WriteLn('Saving recovery file to "'+Title+'"');
       s.SaveToFile(AppPath+Dir+Title);
       SetFileInfo(Tab, AppPath+Dir+Title, Script);
     finally
