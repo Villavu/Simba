@@ -4,11 +4,12 @@ program CRov;
 
 const
   Version = '0.6';
-  SettingsMenuDef = 'False'; //True if you want to be able to set the saving interval through the menu (otherwise it's accessible through plugin settings)
-  ForceSaveDef = 'True'; //Force user to save the script, instead of opening it
-  DirDef = 'CRov\'; //Appended to AppPath
+  SettingsMenuDef = 'False';          //True if you want to be able to set the saving interval through the menu (otherwise it's accessible through plugin settings)
+  ForceSaveDef = 'True';              //Force user to save the script, instead of opening it
+  SaveOnRunDef = 'True';              //Make backup when user compiles/runs the script
+  DirDef = 'CRov\';                   //Appended to AppPath
   ExtensionDef = 'crov';
-  DefInterval = '300000'; //every 5 minutes
+  DefInterval = '300000';             //every 5 minutes
 
 type
   TCharArray = array of Char;
@@ -23,7 +24,7 @@ var
   Tab: Integer;
   FileNames: TStringList;
 
-  SettingsMenu, ForceSave: Boolean;
+  SettingsMenu, ForceSave, SaveOnRun: Boolean;
   Dir, Extension: string;
 
 function StringToCharArray(s: string): TCharArray;
@@ -279,6 +280,20 @@ begin
     end;
 end;
 
+procedure onScriptStart(var Script: string; var Cont: Boolean);
+begin
+  if SaveOnRun then
+    OnTimer(Timer);
+  Cont := True;
+end;
+
+procedure onScriptCompile(var Cont: Boolean);
+begin
+  if SaveOnRun then
+    OnTimer(Timer);
+  Cont := True;
+end;
+
 procedure Init;
 var
   i: Integer;
@@ -288,6 +303,7 @@ var
 begin
   SettingsMenu := LowerCase(Settings.GetKeyValueDef('SettingsInMenu', SettingsMenuDef)) = 'true';
   ForceSave := LowerCase(Settings.GetKeyValueDef('ForceSave', ForceSaveDef)) = 'true';
+  SaveOnRun := LowerCase(Settings.GetKeyValueDef('SaveOnRun', SaveOnRunDef)) = 'true';
   Dir := Settings.GetKeyValueDef('Directory', AppPath+DirDef);
   Extension := Settings.GetKeyValueDef('Extension', ExtensionDef);
 
