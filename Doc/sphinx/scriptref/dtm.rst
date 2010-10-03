@@ -170,6 +170,11 @@ FindDTM
     function FindDTM(DTM: Integer; var x, y: Integer;
     xs, ys, xe, ye: Integer): Boolean;
 
+FindDTM is the most basic DTM finding function. It takes a box to search in,
+defined by *x1, y1, x2, y2*; and if the DTM is found, it will set *x* and 
+*y* to the coordinate the DTM was found at and it will also return true. 
+Else, it returns false. Once a DTM is found, it will stop searching.
+In other words; it always returns the first found DTM.
 
 FindDTMs
 --------
@@ -179,6 +184,8 @@ FindDTMs
     function FindDTMs(DTM: Integer; var p: TPointArray;
     xs, ys, xe, ye: Integer): Boolean;
 
+FindDTMs is like FindDTM, but it returns an array of
+*x* and *y*, as the *TPointArray* type.
 
 FindDTMRotatedSE
 ----------------
@@ -189,6 +196,9 @@ FindDTMRotatedSE
     xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended;
     var aFound: Extended): Boolean;
 
+FindDTMRotatedSE is behaves like FindDTM. Only, it will rotate the DTM between 
+sAngle and eAngle by aStep each time. It will also return the angle which the
+DTM was found at. Start rotating at StartAngle.
 
 FindDTMRotatedAlternating
 -------------------------
@@ -198,6 +208,10 @@ FindDTMRotatedAlternating
     function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer;
     xs, ys, xe, ye: Integer;
     sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean;
+
+FindDTMRotated is behaves like FindDTM. Only, it will rotate the DTM between 
+sAngle and eAngle by aStep each time. It will also return the angle which the
+DTM was found at. Starts at 0 degrees and alternatives between - and + aStep to search for the DTM.
 
 
 FindDTMsRotatedSE
@@ -209,6 +223,8 @@ FindDTMsRotatedSE
     xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended;
     var aFound: T2DExtendedArray) : Boolean;
 
+FindDTMsRotatedSE behaves like FindRotatedDTMSE, but finds all DTM occurances.
+Since one point can be found on several angles, aFound is a 2d array.
 
 FindDTMsRotatedAlternating
 --------------------------
@@ -219,6 +235,9 @@ FindDTMsRotatedAlternating
     var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: 
     Extended; var aFound: T2DExtendedArray) : Boolean;
 
+FindDTMsRotatedAlternating behaves like FindRotatedDTMAlternating,
+but finds all DTM occurances.
+Since one point can be found on several angles, aFound is a 2d array.
 
 AddMDTM
 -------
@@ -235,6 +254,9 @@ AddDTM
 
     function AddDTM(const d: TMDTM): Integer;
 
+Load a TMDTM structure as DTM in Simba's system. (After it is loaded you can use
+it in FindDTM, etc)
+
 
 AddSDTM
 -------
@@ -242,6 +264,9 @@ AddSDTM
 .. code-block:: pascal
 
     function AddSDTM(const d: TSDTM): Integer;
+
+Load a TSDTM structure as DTM in Simba's system. (After it is loaded you can use
+it in FindDTM, etc)
 
 
 GetDTM
@@ -251,6 +276,8 @@ GetDTM
 
     function GetDTM(index: Integer) : TMDTM
 
+Returns the TMDTM of the given DTM index.
+
 
 SDTMToMDTM
 ----------
@@ -259,6 +286,7 @@ SDTMToMDTM
 
     function SDTMToMDTM(Const DTM: TSDTM): TMDTM;
 
+Convert a SDTM to MDTM.
 
 PrintDTM
 --------
@@ -275,6 +303,7 @@ MDTMToSDTM
 
     function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
 
+Convert a MDTM to SDTM.
 
 CreateDTMPoint
 --------------
@@ -284,3 +313,4 @@ CreateDTMPoint
     function CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
 
 
+Create a DTM point.
