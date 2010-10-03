@@ -196,7 +196,7 @@ FindDTMRotatedSE
     xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended;
     var aFound: Extended): Boolean;
 
-FindDTMRotatedSE is behaves like FindDTM. Only, it will rotate the DTM between 
+FindDTMRotatedSE behaves like FindDTM. Only, it will rotate the DTM between 
 sAngle and eAngle by aStep each time. It will also return the angle which the
 DTM was found at. Start rotating at StartAngle.
 
@@ -209,7 +209,7 @@ FindDTMRotatedAlternating
     xs, ys, xe, ye: Integer;
     sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean;
 
-FindDTMRotated is behaves like FindDTM. Only, it will rotate the DTM between 
+FindDTMRotated behaves like FindDTM. Only, it will rotate the DTM between 
 sAngle and eAngle by aStep each time. It will also return the angle which the
 DTM was found at. Starts at 0 degrees and alternatives between - and + aStep to search for the DTM.
 
