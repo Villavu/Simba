@@ -35,7 +35,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure SettingsTreeViewDblClick(Sender: TObject);
-    function LastStance: Boolean;
+    function FixSettingsFile: Boolean;
     { private declarations }
   public
     procedure SaveCurrent;
@@ -55,7 +55,7 @@ uses LCLtype;
 
 { TSettingsForm }
 
-function TSettingsForm.LastStance: Boolean;
+function TSettingsForm.FixSettingsFile: Boolean;
 begin
   result := true;
   mDebugLn('Could not load settings.xml!');
@@ -92,7 +92,7 @@ begin
 
   if not Settings.LoadFromXML(SimbaSettingsFile) then
   begin
-    if not LastStance then
+    if not FixSettingsFile() then
     begin
       mDebugLn('Could not create, move or delete settings.xml.');
       mDebugLn('***************** Giving up... ********************');
