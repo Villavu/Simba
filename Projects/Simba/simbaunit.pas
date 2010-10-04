@@ -2245,7 +2245,9 @@ begin
   FillThread.FreeOnTerminate:= True;
   FillThread.NormalProc:= @CCFillCore;
   UpdateTimer.OnTimer:= @UpdateTimerCheck;
+
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
+
   if FileExistsUTF8(SimbaSettingsFile) then
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
@@ -2253,6 +2255,7 @@ begin
   end else
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
+
     Self.CreateDefaultEnvironment;
     FillThread.StartWait:= 250;
   end;
@@ -2292,6 +2295,9 @@ begin
   LoadExtensions;
   UpdateTitle;
   self.EndFormUpdate;
+
+  if SettingsForm.Oops then
+    formWriteln('WARNING: No permissions to write to settings.xml!');
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
