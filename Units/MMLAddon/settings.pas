@@ -90,8 +90,8 @@ type
     function RenameKey(oldKey,newKey : string) : boolean;
     function GetKeyValueDefLoad(KeyName, defVal, fileName: String): String;
 
-    procedure LoadFromXML(fileName: String);
-    procedure SaveToXML(fileName: String);
+    function LoadFromXML(fileName: String): Boolean;
+    function SaveToXML(fileName: String): Boolean;
   end;
 
 implementation
@@ -591,7 +591,7 @@ end;
 
 
 { load from xml }
-procedure TMMLSettings.LoadFromXML(fileName: String);
+function TMMLSettings.LoadFromXML(fileName: String): Boolean;
 var
     Doc: TXMLDocument;
 begin
@@ -602,9 +602,16 @@ begin
     // create file.
     SaveToXML(fileName);
   end;
-  ReadXMLFile(Doc, utf8tosys(fileName));
-  InternalLoadFromXML(Doc);
-  Doc.Free;
+
+  try
+    ReadXMLFile(Doc, utf8tosys(fileName));
+    InternalLoadFromXML(Doc);
+    Doc.Free;
+    Result := True;
+  except
+    Result := False;
+  end;
+
 end;
 
 procedure TMMLSettings.WriteXMLData(n: TTreeNode;
@@ -644,7 +651,7 @@ end;
 
 { save to xml }
 
-procedure TMMLSettings.SaveToXML(fileName: String);
+function TMMLSettings.SaveToXML(fileName: String): Boolean;
 var
    XMLDoc: TXMLDocument;
    Simba,DOMNode: TDOMNode;
@@ -669,8 +676,10 @@ begin
 
   try
     WriteXMLFile(XMLDoc, utf8tosys(fileName));
+    Result := True;
   except
     mDebugLn('Failed to write ' + fileName);
+    Result := False;
   end;
   XMLDoc.Free;
 end;
