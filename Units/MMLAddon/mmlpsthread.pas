@@ -288,7 +288,7 @@ end;
 
 procedure ps_DebugLn(str : string); extdecl;
 begin
-  if CurrThread.Prop.WriteTimeStamp then
+  if Assigned(CurrThread) and CurrThread.Prop.WriteTimeStamp then
     str := format('[%s]: %s', [TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount - CurrThread.StartTime))), str]);
   mDebugLn(str);
 end;
