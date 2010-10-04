@@ -1,8 +1,22 @@
 program Paster;
 //{$DEFINE DEV}
+const
+  HOSTDef = 'paste.sheeva.villavu.com';
+  
+function GetName: string;
+begin;
+  Result := 'Paster';
+end;
+
+function GetVersion: string;
+begin;
+  Result := '0.3a';
+end;
+
 {$IFDEF EXTENSION}
+
 var
-  Paster_Menu, GetPaste_MenuItem, Private_MenuItem: TMenuItem;
+  Paster_Menu, GetPaste_MenuItem, Private_MenuItem,
   Browser_MenuItem, Paster_MenuItem, AltHost_Menu: TMenuItem;
   Divider_MenuItems: array[1..2] of TMenuItem;
   AltHost_Menus: array[1..5] of TMenuItem;
@@ -19,16 +33,6 @@ begin
   if (Length(Pattern) = Length(Replacement)) then
     for I := Low(Pattern) to High(Pattern) do
       Result := Replace(Result, Pattern[I], Replacement[I], [rfIgnoreCase, rfReplaceAll]);
-end;
-
-function GetName: string;
-begin;
-  Result := 'Paster';
-end;
-
-function GetVersion: string;
-begin;
-  Result := '0.2a';
 end;
 
 function JSONRequest(var Data: string; const HOST, Method: string): boolean;
@@ -61,7 +65,7 @@ var
   Data: string;
 begin
   if (HOST = '') then
-    HOST := 'paste.sheeva.villavu.com';
+    HOST := HOSTDef;
   if (InputQuery(GetName + ' ' + GetVersion + ' Extension', 'Which ID would you like too grab?', Data)) then
   begin
     if IntToStr(StrToInt(Data)) = Data then
@@ -92,7 +96,7 @@ end;
 function PasteIt(out Data: string; HOST: string): boolean;
 begin
   if (HOST = '') then
-    HOST := 'paste.sheeva.villavu.com';
+    HOST := HOSTDef;
   if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Upload this script to ' + HOST + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   begin
     Data := '{"language": "delphi", "code": "' + EncodeString(ScriptText) + '", "private": ' + Lowercase(BoolToStr(Private_MenuItem.Checked)) + '}';
@@ -184,7 +188,7 @@ end;
 
 procedure Attach;
 begin;
-  WriteLn(GetName + ' ' + GetVersion + ' Plugin Loaded!');
+  WriteLn(GetName + ' v' + GetVersion + ' by Dgby714 Loaded!');
   Paster_Menu.Visible := True;
 end;
 
@@ -194,10 +198,10 @@ begin
 end;
 
 procedure Free;
-var
-  I, K: integer;
+{var
+  I, K: integer;}
 begin
-  for I := 5 downto 1 do
+  {for I := 5 downto 1 do
   begin
     for K := 4 downto 1 do
       AltHost_MenuItems[I][K].Free;
@@ -208,7 +212,7 @@ begin
   for I := 2 downto 1 do
     Divider_MenuItems[I].Free;
   Paster_MenuItem.Free;
-  Paster_Menu.Free;
+  Paster_Menu.Free;}
 end;
 
 procedure init;
@@ -291,9 +295,13 @@ begin;
   end;
 end;
 {$ENDIF}
+
 begin
 {$IFNDEF EXTENSION}
-  WriteLn('This is a Extension for Simba. If you are in Simba click View->Extensions and enable paster.sex!');
+  MessageDlg(GetName + ' v' + GetVersion + ' by Dgby714!',
+  'This is a Extension for Simba.'#13#10
+  'If you are in Simba click View->Extensions and enable paster.sex!',
+  mtWarning, [mbOK]);
 {$ENDIF}
 end.
 
