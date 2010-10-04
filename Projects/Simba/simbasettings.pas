@@ -35,11 +35,14 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure SettingsTreeViewDblClick(Sender: TObject);
+    function LastStance: Boolean;
     { private declarations }
   public
     procedure SaveCurrent;
     procedure Reload;
     { public declarations }
+  public
+    Oops: Boolean;
   end; 
 
 var
@@ -52,10 +55,33 @@ uses LCLtype;
 
 { TSettingsForm }
 
+function TSettingsForm.LastStance: Boolean;
+begin
+  result := true;
+  mDebugLn('Could not load settings.xml!');
+  if renamefileUTF8('settings.xml', 'settings.bak') then
+  begin
+    mDebugLn('Moved settings.xml to settings.bak');
+  end else
+  begin
+    mDebugLn('Could not move settings.xml to settings.bak');
+    if not deletefile('settings.xml') then
+    begin
+      mDebugLn('Couldnt delete the file either.');
+      exit(false);
+    end;
+  end;
+
+  SettingsTreeView.Items.Clear;
+  Settings.SaveToXML(SimbaSettingsFile);
+end;
+
 procedure TSettingsForm.FormCreate(Sender: TObject);
 var
   FirstNode : TTreeNode;
+
 begin
+  Oops := False;
   Settings := TMMLSettings.Create(SettingsTreeView.Items);
   if not FileExists(SimbaSettingsFile) then
   begin
@@ -63,7 +89,17 @@ begin
     Settings.SaveToXML(SimbaSettingsFile);
   end;
   SettingsTreeView.Items.Clear;
-  Settings.LoadFromXML(SimbaSettingsFile);
+
+  if not Settings.LoadFromXML(SimbaSettingsFile) then
+  begin
+    if not LastStance then
+    begin
+      mDebugLn('Could not create, move or delete settings.xml.');
+      mDebugLn('***************** Giving up... ********************');
+      Oops := True;
+    end;
+  end;
+
   FirstNode := SettingsTreeView.Items.GetFirstNode;
   if FirstNode <> nil then
     if FirstNode.Text = 'Settings' then
