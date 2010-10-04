@@ -278,9 +278,9 @@ uses
 {Some General PS Functions here}
 procedure psWriteln(str : string); extdecl;
 begin
-  if CurrThread.Prop.WriteTimeStamp then
+  if Assigned(CurrThread) and CurrThread.Prop.WriteTimeStamp then
     str := format('[%s]: %s', [TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount - CurrThread.StartTime))), str]);
-  if Assigned(CurrThread.DebugTo) then
+  if Assigned(CurrThread) and Assigned(CurrThread.DebugTo) then
     CurrThread.DebugTo(str)
   else
     mDebugLn(str);
