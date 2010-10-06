@@ -47,6 +47,7 @@ interface
         constructor Create(target: Hwnd); 
         destructor Destroy; override;
         procedure GetTargetDimensions(var w, h: integer); override;
+        procedure GetTargetPosition(var left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         function GetColor(x,y : integer) : TColor; override;
 
@@ -229,6 +230,15 @@ implementation
     WindowRect(rect);
     w:= Rect.Right - Rect.Left;
     h:= Rect.Bottom - Rect.Top;
+  end;
+
+  procedure TWindow.GetTargetPosition(var left, top: integer);
+  var
+    Rect : TRect;
+  begin
+    WindowRect(rect);
+    left := Rect.Left;
+    top := Rect.Top;
   end;
   
   function TWindow.GetColor(x,y : integer) : TColor;
