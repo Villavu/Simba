@@ -65,7 +65,7 @@ begin
   end else
   begin
     mDebugLn('Could not move settings.xml to settings.bak');
-    if not deletefile('settings.xml') then
+    if not deletefileUTF8('settings.xml') then
     begin
       mDebugLn('Couldnt delete the file either.');
       exit(false);
