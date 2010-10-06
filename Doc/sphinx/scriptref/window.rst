@@ -51,8 +51,8 @@ GetClientDimensions
 Return the size of the client in *w* and *h*.
 If it fails, it returns -1 for both h and w.
 
-GetClientDimensions
--------------------
+GetClientPosition
+-----------------
 
 .. code-block:: pascal
 
