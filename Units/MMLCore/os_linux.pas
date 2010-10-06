@@ -46,6 +46,7 @@ interface
         constructor Create(display: PDisplay; screennum: integer; window: x.TWindow); 
         destructor Destroy; override;
         procedure GetTargetDimensions(var w, h: integer); override;
+        procedure GetTargetPosition(var left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         procedure FreeReturnData; override;
 
@@ -266,6 +267,25 @@ implementation
     begin
       W := -1;
       H := -1;
+    end;
+  end;
+
+  procedure TWindow.GetTargetPosition(var left, top: integer);
+  var
+    Attrib: TXWindowAttributes;
+    newx, newy: integer;
+    childwindow: x.TWindow;
+  begin
+    if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
+    begin
+      left := Attrib.x;
+      top := attrib.y;
+    end else
+    begin
+      // XXX: this is tricky; what do we return when it doesn't exist?
+      // The window can very well be at -1, -1. We'll return 0 for now.
+      left := 0;
+      top := 0;
     end;
   end;
 

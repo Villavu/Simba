@@ -49,6 +49,17 @@ GetClientDimensions
     procedure GetClientDimensions(var w, h:integer);
 
 Return the size of the client in *w* and *h*.
+If it fails, it returns -1 for both h and w.
+
+GetClientDimensions
+-------------------
+
+.. code-block:: pascal
+
+    procedure GetClientPosition(var left, top:integer);
+
+Return the position of the client in *left* and *top*.
+May return negative values.
 
 
 SetTargetBitmap
