@@ -81,6 +81,11 @@ begin
   CurrThread.Client.IOManager.GetDimensions(w, h);
 end;
 
+procedure ps_GetClientPosition(var left, top: integer); extdecl;
+begin
+  CurrThread.Client.IOManager.GetPosition(left, top);
+end;
+
 function ps_Freeze: boolean; extdecl;
 begin
   CurrThread.Client.IOManager.SetFrozen(true);

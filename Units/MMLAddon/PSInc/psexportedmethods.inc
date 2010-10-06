@@ -112,6 +112,7 @@ SetCurrSection('Window');
 AddFunction(@ps_Freeze, 'function Freeze: boolean;');
 AddFunction(@ps_Unfreeze, 'function Unfreeze: boolean;');
 AddFunction(@ps_GetClientDimensions, 'procedure GetClientDimensions(var w, h:integer);');
+AddFunction(@ps_GetClientPosition, 'procedure GetClientPosition(var left, top:integer);');
 AddFunction(@ps_SetTargetBitmap,'function SetTargetBitmap(Bitmap : integer): integer;');
 AddFunction(@ps_SetTargetArray, 'function SetTargetArray(P: Integer; w, h: integer): integer;');
 AddFunction(@ps_SetEIOSTarget, 'function SetEIOSTarget(name: string; initargs: Variant): integer;');

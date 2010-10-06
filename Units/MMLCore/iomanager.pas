@@ -43,6 +43,7 @@ interface
         | to raise exceptions. GetColor provides default functionality using ReturData of width 1.     
         | FreeReturnData provides default of doing nothing. }
         procedure GetTargetDimensions(var w, h: integer); virtual;
+        procedure GetTargetPosition(var left, top: integer); virtual;
         function GetColor(x,y : integer) : TColor; virtual;
         function ReturnData(xs, ys, width, height: Integer): TRetData; virtual;
         procedure FreeReturnData; virtual;
@@ -80,6 +81,7 @@ interface
         destructor Destroy; override;
         
         procedure GetTargetDimensions(var w, h: integer); override;
+        procedure GetTargetPosition(var left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
       protected
@@ -108,6 +110,7 @@ interface
     TWindow_Abstract = class(TTarget)
       public
         procedure GetTargetDimensions(var w, h: integer); override; abstract;
+        procedure GetTargetPosition(var left, top: integer); override; abstract;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override; abstract;
 
         function TargetValid: boolean; override; abstract;
@@ -136,6 +139,7 @@ interface
       ReleaseTarget: procedure(target: pointer); stdcall;
 
       GetTargetDimensions: procedure(target: pointer; var w, h: integer); stdcall;
+      GetTargetPosition: procedure(var left, top: integer); stdcall;
       GetImageBuffer: function(target: pointer): prgb32; stdcall;
       UpdateImageBuffer: procedure(target: pointer); stdcall;
       UpdateImageBufferBounds: procedure(target: pointer; sx,sy,ex,ey: integer); stdcall;
@@ -169,6 +173,7 @@ interface
         destructor Destroy; override;
         
         procedure GetTargetDimensions(var w, h: integer); override;
+        procedure GetTargetPosition(var left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
         procedure GetMousePosition(var x,y: integer); override;
@@ -227,6 +232,7 @@ interface
       Target : Pointer;
 
       GetTargetDimensions: procedure(target: pointer; var w, h: integer); stdcall;
+      GetTargetPosition: procedure(target: pointer; var top, left: integer); stdcall;
       GetColor : function(target: pointer;x,y : integer) : integer; stdcall;
       ReturnData : function(target: pointer;xs, ys, width, height: Integer): TRetData; stdcall;
       FreeReturnData : procedure(target: pointer); stdcall;
@@ -278,6 +284,7 @@ interface
         procedure FreeReturnData;
 
         procedure GetDimensions(var W, H: Integer);
+        procedure GetPosition(var Left, Top: Integer);
         procedure ActivateClient;
 
         function IsFrozen: boolean;
@@ -334,6 +341,7 @@ interface
 
     {These wrappers are for an exported TTarget_Exported. This is done so a plugin can acces the current target and use its methodes}
     procedure TTarget_Exported_GetTargetDimensions(target: pointer; var w, h: integer); stdcall;
+    procedure TTarget_Exported_GetTargetPosition(target: pointer; var left, top: integer); stdcall;
     function TTarget_Exported_GetColor (target: pointer;x,y : integer) : integer; stdcall;
     function TTarget_Exported_ReturnData (target: pointer;xs, ys, width, height: Integer): TRetData; stdcall;
     procedure TTarget_Exported_FreeReturnData(target: pointer); stdcall;
@@ -466,6 +474,7 @@ begin
   begin
     Target:= image;
     GetTargetDimensions:= @TTarget_Exported_GetTargetDimensions;
+    GetTargetPosition := @TTarget_Exported_GetTargetPosition;
     GetColor:= @TTarget_Exported_GetColor;
     ReturnData := @TTarget_Exported_ReturnData;
     FreeReturnData:= @TTarget_Exported_FreeReturnData;
@@ -532,10 +541,12 @@ function TIOManager_Abstract.GetColor(x,y : integer) : TColor;
 begin
   result:= image.GetColor(x,y);
 end;
+
 function TIOManager_Abstract.ReturnData(xs,ys,width,height: integer): TRetData;
 begin
   result:= image.ReturnData(xs,ys,width,height);
 end;
+
 procedure TIOManager_Abstract.FreeReturnData;
 begin
   image.freeReturnData();
@@ -599,7 +610,16 @@ begin
     result := (keymouse.TargetValid and image.TargetValid);
 end;
 
-procedure TIOManager_Abstract.GetDimensions(var W, H: Integer); begin image.GetTargetDimensions(w,h) end;
+procedure TIOManager_Abstract.GetDimensions(var W, H: Integer);
+begin
+  image.GetTargetDimensions(w,h)
+end;
+
+procedure TIOManager_Abstract.GetPosition(var Left, Top: Integer);
+begin
+  image.GetTargetPosition(Left, Top);
+end;
+
 procedure TIOManager_Abstract.ActivateClient; 
 begin 
   keymouse.ActivateClient(); 
@@ -699,30 +719,88 @@ end;
 
 //***implementation*** TTarget
 
-procedure TTarget.GetTargetDimensions(var w, h: integer); begin raise Exception.Create('GetTargetDimensions not available for this target'); end;
+procedure TTarget.GetTargetDimensions(var w, h: integer);
+begin
+  raise Exception.Create('GetTargetDimensions not available for this target');
+end;
+
+procedure TTarget.GetTargetPosition(var left, top: integer);
+begin
+  raise Exception.Create('GetTargetDimensions not available for this target');
+end;
+
 function TTarget.GetColor(x,y : integer) : TColor;
 begin
   with ReturnData(x,y,1,1) do
     Result := RGBToColor(Ptr[0].r,Ptr[0].g,Ptr[0].b);
   FreeReturnData;
 end;
-function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;  begin raise Exception.Create('ReturnData not available for this target'); end;
-procedure TTarget.FreeReturnData; begin {do nothing by default} end;
-procedure TTarget.ActivateClient; begin raise Exception.Create('ActivateClient not available for this target'); end;
-function TTarget.TargetValid: boolean; begin result:= true; end;
+function TTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
+begin
+  raise Exception.Create('ReturnData not available for this target');
+end;
+procedure TTarget.FreeReturnData;
+begin
+  {do nothing by default}
+end;
+procedure TTarget.ActivateClient;
+begin
+  raise Exception.Create('ActivateClient not available for this target');
+end;
+function TTarget.TargetValid: boolean;
+begin
+  result:= true;
+end;
 
-procedure TTarget.GetMousePosition(var x,y: integer); begin raise Exception.Create('GetMousePosition not available for this target'); end;
-procedure TTarget.MoveMouse(x,y: integer); begin raise Exception.Create('MoveMouse not available for this target'); end;
-procedure TTarget.ScrollMouse(x,y : integer; lines : integer); begin raise Exception.Create('ScrollMouse is not available for this target'); end;
-procedure TTarget.HoldMouse(x,y: integer; button: TClickType); begin raise Exception.Create('HoldMouse not available for this target'); end;
-procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType); begin raise Exception.Create('ReleaseMouse not available for this target'); end;
-function TTarget.IsMouseButtonHeld(button: TClickType): boolean; begin  raise Exception.Create('IsMouseButtonHeld not available for this target'); end;
+procedure TTarget.GetMousePosition(var x,y: integer);
+begin
+  raise Exception.Create('GetMousePosition not available for this target');
+end;
+procedure TTarget.MoveMouse(x,y: integer);
+begin
+  raise Exception.Create('MoveMouse not available for this target');
+end;
+procedure TTarget.ScrollMouse(x,y : integer; lines : integer);
+begin
+  raise Exception.Create('ScrollMouse is not available for this target');
+end;
+procedure TTarget.HoldMouse(x,y: integer; button: TClickType);
+begin
+  raise Exception.Create('HoldMouse not available for this target');
+end;
+procedure TTarget.ReleaseMouse(x,y: integer; button: TClickType);
+begin
+  raise Exception.Create('ReleaseMouse not available for this target');
+end;
+function TTarget.IsMouseButtonHeld(button: TClickType): boolean;
+begin
+  raise Exception.Create('IsMouseButtonHeld not available for this target');
+end;
 
-procedure TTarget.SendString(str: string); begin raise Exception.Create('SendString not available for this target'); end;
-procedure TTarget.HoldKey(key: integer); begin raise Exception.Create('HoldKey not available for this target'); end;
-procedure TTarget.ReleaseKey(key: integer); begin raise Exception.Create('ReleaseKey not available for this target'); end;
-function TTarget.IsKeyHeld(key: integer): boolean; begin raise Exception.Create('IsKeyHeld not available for this target'); end;
-function TTarget.GetKeyCode(C: char): integer;begin Exception.CreateFMT('GetKeyCode - char (%s) to key is not available for this target.',[c]); end;
+procedure TTarget.SendString(str: string);
+begin
+  raise Exception.Create('SendString not available for this target');
+end;
+
+procedure TTarget.HoldKey(key: integer);
+begin
+  raise Exception.Create('HoldKey not available for this target');
+end;
+
+procedure TTarget.ReleaseKey(key: integer);
+begin
+  raise Exception.Create('ReleaseKey not available for this target');
+end;
+
+function TTarget.IsKeyHeld(key: integer): boolean;
+begin
+  raise Exception.Create('IsKeyHeld not available for this target');
+end;
+
+function TTarget.GetKeyCode(C: char): integer;
+begin
+  Exception.CreateFMT('GetKeyCode - char (%s) to key is not available for this target.',[c]);
+end;
 
 //***implementation*** TEIOS_Target
 
@@ -750,6 +828,15 @@ begin
   else
     inherited GetTargetDimensions(w,h);
 end;
+
+procedure TEIOS_Target.GetTargetPosition(var left, top: integer);
+begin
+  if Pointer(client.GetTargetDimensions) <> nil then
+    client.GetTargetDimensions(target,left,top)
+  else
+    inherited GetTargetDimensions(left,top);
+end;
+
 function TEIOS_Target.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
   if Pointer(client.UpdateImageBufferBounds) <> nil then
@@ -891,6 +978,13 @@ begin
   h:= self.h;
 end;
 
+procedure TRawTarget.GetTargetPosition(var left, top: integer);
+begin
+  { The RawTarget has no position on the screen }
+  left := 0;
+  top := 0;
+end;
+
 function TRawTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
   result.Ptr := rgb;
@@ -1007,6 +1101,12 @@ procedure TTarget_Exported_GetTargetDimensions(target: pointer; var w,
   h: integer); stdcall;
 begin
   TTarget(Target).GetTargetDimensions(w,h);
+end;
+
+procedure TTarget_Exported_GetTargetPosition(target: pointer; var left,
+  top: integer); stdcall;
+begin
+  TTarget(Target).GetTargetPosition(left,top);
 end;
 
 function TTarget_Exported_GetColor(target: pointer;x, y: integer): integer; stdcall;
