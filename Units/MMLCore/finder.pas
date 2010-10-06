@@ -475,7 +475,7 @@ begin
         inc(result);
       Inc(Ptr);
     end;
-    Inc(Ptr, PtrInc)
+    Inc(Ptr, PtrInc);
   end;
 
   TClient(Client).IOManager.FreeReturnData;
