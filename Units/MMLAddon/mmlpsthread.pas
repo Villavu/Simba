@@ -261,8 +261,8 @@ uses
   tpa, //Tpa stuff
   forms,//Forms
   SynRegExpr,
-  lclintf  // for GetTickCount and others.
-  ;
+  lclintf,  // for GetTickCount and others.
+  Clipbrd;
 {$ifdef Linux}
   {$define PS_SafeCall}
 {$else}

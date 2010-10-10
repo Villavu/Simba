@@ -264,3 +264,13 @@ function ps_Random(Int: integer): integer; extdecl;
 begin
   result := Random(int);
 end;
+
+procedure ps_SetClipBoard(const Data: string); extdecl;
+begin
+  Clipboard.AsText := Data;
+end;
+
+function ps_GetClipBoard: string; extdecl;
+begin
+  Result := Clipboard.AsText;
+end;
