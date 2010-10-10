@@ -68,6 +68,7 @@ uses
   lclintf,
   httpsend,
   superobject,
+  Clipbrd,
   SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}
