@@ -267,10 +267,20 @@ end;
 
 procedure ps_SetClipBoard(const Data: string); extdecl;
 begin
-  Clipboard.AsText := Data;
+  try
+    Clipboard.AsText := Data;
+  except
+    on e: exception do
+      mDebugLn('Exception in SetClipBoard: ' + e.message);
+  end;
 end;
 
 function ps_GetClipBoard: string; extdecl;
 begin
-  Result := Clipboard.AsText;
+  try
+    Result := Clipboard.AsText;
+  except
+    on e: exception do
+      mDebugLn('Exception in GetClipBoard: ' + e.message);
+  end;
 end;
