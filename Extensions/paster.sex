@@ -95,8 +95,6 @@ end;
 
 function PasteIt(out Data: string; HOST: string): boolean;
 begin
-  if (HOST = '') then
-    HOST := HOSTDef;
   if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Upload this script to ' + HOST + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   begin
     Data := '{"language": "delphi", "code": "' + EncodeString(ScriptText) + '", "private": ' + Lowercase(BoolToStr(Private_MenuItem.Checked)) + '}';
@@ -114,6 +112,8 @@ procedure Paste(Host: string);
 var
   Data: string;
 begin
+  if (HOST = '') then
+    HOST := HOSTDef;
   if PasteIt(Data, Host) then
   begin
     if (Browser_MenuItem.Checked) then
@@ -157,31 +157,33 @@ procedure OnClick(Sender: TObject);
 var
   I, K: integer;
 begin;
+  {$IFDEF DEV}
+  if (Sender is TMenuItem) then
+    WriteLn('Sender is '#39 + TMenuItem(Sender).Name + #39'.'); //(Sender as TMenuItem).Name
+  {$ENDIF}
   case Sender of
     Paster_MenuItem: Paste('');
     GetPaste_MenuItem: GetPaste('');
     Private_MenuItem: begin
-      Private_MenuItem.Checked := (not (Private_MenuItem.Checked));
-      Settings.setKeyValue('Private', Lowercase(BoolToStr(Private_MenuItem.Checked)));
-      {$IFDEF DEV}WriteLn('Private = ' + Lowercase(BoolToStr(Private_MenuItem.Checked)));{$ENDIF}
-    end;
+        Private_MenuItem.Checked := (not (Private_MenuItem.Checked));
+        Settings.setKeyValue('Private', Lowercase(BoolToStr(Private_MenuItem.Checked)));
+        {$IFDEF DEV}WriteLn('Private = ' + Lowercase(BoolToStr(Private_MenuItem.Checked)));{$ENDIF}
+      end;
     Browser_MenuItem: begin
-      Browser_MenuItem.Checked := (not (Browser_MenuItem.Checked));
-      Settings.setKeyValue('OpenBrowser', Lowercase(BoolToStr(Browser_MenuItem.Checked)));
-      {$IFDEF DEV}WriteLn('OpenBrowser = ' + Lowercase(BoolToStr(Browser_MenuItem.Checked)));{$ENDIF}
-    end;
+        Browser_MenuItem.Checked := (not (Browser_MenuItem.Checked));
+        Settings.setKeyValue('OpenBrowser', Lowercase(BoolToStr(Browser_MenuItem.Checked)));
+        {$IFDEF DEV}WriteLn('OpenBrowser = ' + Lowercase(BoolToStr(Browser_MenuItem.Checked)));{$ENDIF}
+      end;
   end;
   for I := 1 to 5 do
     for K := 1 to 4 do
       if (Sender = AltHost_MenuItems[I][K]) then
       begin
-        {$IFDEF DEV}WriteLn('Sender = ' + IntToStr(I) + ', ' + IntToStr(K));{$ENDIF}
-        if (K = 4) then
-          UpdateHost(I);
-        if (K = 2) then
-          GetPaste(Settings.getKeyValue('Host' + IntToStr(I)));
-        if (K = 1) then
-          Paste(Settings.getKeyValue('Host' + IntToStr(I)));
+        case K of
+          4: UpdateHost(I);
+          2: GetPaste(Settings.getKeyValue('Host' + IntToStr(I)));
+          1: Paste(Settings.getKeyValue('Host' + IntToStr(I)));
+        end;
         Break;
       end;
 end;
@@ -226,6 +228,7 @@ begin;
   Paster_MenuItem := TMenuItem.Create(Paster_Menu);
   with Paster_MenuItem do
   begin
+    Name := 'Default_Paste';
     Caption := 'Paste It!';
     OnClick := @OnClick;
   end;
@@ -234,6 +237,7 @@ begin;
   GetPaste_MenuItem := TMenuItem.Create(Paster_Menu);
   with GetPaste_MenuItem do
   begin
+    Name := 'Default_GetPaste';
     Caption := 'Get Paste!';
     OnClick := @OnClick;
   end;
@@ -250,6 +254,7 @@ begin;
   Private_MenuItem := TMenuItem.Create(Paster_Menu);
   with Private_MenuItem do
   begin
+    Name := 'Private_Setting';
     Caption := 'Private';
     OnClick := @OnClick;
     Checked := (Lowercase(Settings.getKeyValueDef('Private', 'true')) = 'true');
@@ -259,6 +264,7 @@ begin;
   Browser_MenuItem := TMenuItem.Create(Paster_Menu);
   with Browser_MenuItem do
   begin
+    Name := 'Browser_Setting';
     Caption := 'Open in Browser';
     OnClick := @OnClick;
     Checked := (Lowercase(Settings.getKeyValueDef('OpenBrowser', 'true')) = 'true');
@@ -281,10 +287,19 @@ begin;
     begin
       AltHost_MenuItems[I][K] := TMenuItem.Create(AltHost_Menus[I]);
       case K of
-        1: AltHost_MenuItems[I][1].Caption := 'Paste It!';
-        2: AltHost_MenuItems[I][2].Caption := 'Get Paste!';
+        1: begin
+            AltHost_MenuItems[I][1].Name := 'Host' + IntToStr(I) + '_Paste';
+            AltHost_MenuItems[I][1].Caption := 'Paste It!';
+          end;
+        2: begin
+            AltHost_MenuItems[I][2].Name := 'Host' + IntToStr(I) + '_GetPaste';
+            AltHost_MenuItems[I][2].Caption := 'Get Paste!';
+          end;
         3: AltHost_MenuItems[I][3].Caption := '-';
-        4: AltHost_MenuItems[I][4].Caption := 'Update Host';
+        4: begin
+            AltHost_MenuItems[I][4].Name := 'Host' + IntToStr(I) + '_Update';
+            AltHost_MenuItems[I][4].Caption := 'Update Host';
+          end;
       end;
       AltHost_MenuItems[I][K].OnClick := @OnClick;
       if ((not ((K = 3) or (K = 4))) and (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I))) then
