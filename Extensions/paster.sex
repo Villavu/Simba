@@ -1,5 +1,5 @@
 program Paster;
-//{$DEFINE DEV}
+{$DEFINE DEV}
 const
   HOSTDef = 'paste.villavu.com';
   
@@ -10,7 +10,7 @@ end;
 
 function GetVersion: string;
 begin;
-  Result := '0.3a';
+  Result := '0.4a';
 end;
 
 {$IFDEF EXTENSION}
@@ -20,7 +20,7 @@ var
   Browser_MenuItem, Paster_MenuItem, AltHost_Menu: TMenuItem;
   Divider_MenuItems: array[1..2] of TMenuItem;
   AltHost_Menus: array[1..5] of TMenuItem;
-  AltHost_MenuItems: array[1..5] of array[1..4] of TMenuItem;
+  AltHost_MenuItems: array[1..5] of array[1..5] of TMenuItem;
 
 function EncodeString(Data: string): string;
 var
@@ -37,10 +37,7 @@ end;
 
 function JSONRequest(var Data: string; const HOST, Method: string): boolean;
 begin
-  {$IFDEF DEV}
-  WriteLn('(HOST, Method) := ('#39 + HOST + #39', '#39 + Method + #39');');
-  WriteLn('Data := '#39 + Data + #39';');
-  {$ENDIF}
+  {$IFDEF DEV}WriteLn('JSONRequest('#39 + Data + #39', '#39 + HOST + #39', '#39 + Method + #39');');{$ENDIF}
   Data := GetPageEx('http://' + HOST + '/json/?method=' + Method, Data, 'application/json');
   {$IFDEF DEV}WriteLn('Data := '#39 + Data + #39';');{$ENDIF}
   if (Data = '') then
@@ -126,6 +123,18 @@ begin
     WriteLn(Data);
 end;
 
+procedure UpdateDefault(I: integer);
+var
+  J: integer;
+begin
+  Settings.setKeyValue('DefaultHost', IntToStr(I));
+  for J := 1 to 5 do
+    if (J = I) then
+      AltHost_MenuItems[J][4].Checked := True
+    else
+      AltHost_MenuItems[J][4].Checked := False;
+end;
+
 procedure UpdateHost(I: integer);
 var
   Data: string;
@@ -143,12 +152,16 @@ begin
         AltHost_Menus[I].Caption := 'Host ' + IntToStr(I);
         AltHost_MenuItems[I][1].Enabled := False;
         AltHost_MenuItems[I][2].Enabled := False;
+        AltHost_MenuItems[I][4].Enabled := False;
         Settings.setKeyValue('Host' + IntToStr(I), 'Host ' + IntToStr(I));
+        if (Settings.getKeyValueDef('DefaultHost', '1') = IntToStr(I)) then
+          UpdateDefault(1);
         Exit;
       end;
     AltHost_Menus[I].Caption := Data;
     AltHost_MenuItems[I][1].Enabled := True;
     AltHost_MenuItems[I][2].Enabled := True;
+    AltHost_MenuItems[I][4].Enabled := True;
     Settings.setKeyValue('Host' + IntToStr(I), Data);
   end;
 end;
@@ -162,8 +175,8 @@ begin;
     WriteLn('Sender is '#39 + TMenuItem(Sender).Name + #39'.'); //(Sender as TMenuItem).Name
   {$ENDIF}
   case Sender of
-    Paster_MenuItem: Paste('');
-    GetPaste_MenuItem: GetPaste('');
+    Paster_MenuItem: Paste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')));
+    GetPaste_MenuItem: GetPaste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')));
     Private_MenuItem: begin
         Private_MenuItem.Checked := (not (Private_MenuItem.Checked));
         Settings.setKeyValue('Private', Lowercase(BoolToStr(Private_MenuItem.Checked)));
@@ -176,13 +189,14 @@ begin;
       end;
   end;
   for I := 1 to 5 do
-    for K := 1 to 4 do
+    for K := 1 to 5 do
       if (Sender = AltHost_MenuItems[I][K]) then
       begin
         case K of
-          4: UpdateHost(I);
-          2: GetPaste(Settings.getKeyValue('Host' + IntToStr(I)));
           1: Paste(Settings.getKeyValue('Host' + IntToStr(I)));
+          2: GetPaste(Settings.getKeyValue('Host' + IntToStr(I)));
+          4: UpdateDefault(I);
+          5: UpdateHost(I);
         end;
         Break;
       end;
@@ -205,7 +219,7 @@ procedure Free;
 begin
   {for I := 5 downto 1 do
   begin
-    for K := 4 downto 1 do
+    for K := 5 downto 1 do
       AltHost_MenuItems[I][K].Free;
     AltHost_Menus[I].Free;
   end;
@@ -274,16 +288,19 @@ begin;
   Paster_Menu.Add(Divider_MenuItems[2]);
   
   AltHost_Menu := TMenuItem.Create(Paster_Menu);
-  AltHost_Menu.Caption := 'Alternate Hosts';
+  AltHost_Menu.Caption := 'Hosts';
   Paster_Menu.Add(AltHost_Menu);
   
   for I := 1 to 5 do
   begin
     AltHost_Menus[I] := TMenuItem.Create(AltHost_Menu);
-    AltHost_Menus[I].Caption := Settings.getKeyValueDef('Host' + IntToStr(I), 'Host ' + IntToStr(I));
+    if (I = 1) then
+      AltHost_Menus[I].Caption := HOSTDef
+    else
+      AltHost_Menus[I].Caption := Settings.getKeyValueDef('Host' + IntToStr(I), 'Host ' + IntToStr(I));
     AltHost_Menu.Add(AltHost_Menus[I]);
 	
-    for K := 1 to 4 do
+    for K := 1 to 5 do
     begin
       AltHost_MenuItems[I][K] := TMenuItem.Create(AltHost_Menus[I]);
       case K of
@@ -297,14 +314,20 @@ begin;
           end;
         3: AltHost_MenuItems[I][3].Caption := '-';
         4: begin
-            AltHost_MenuItems[I][4].Name := 'Host' + IntToStr(I) + '_Update';
-            AltHost_MenuItems[I][4].Caption := 'Update Host';
+            AltHost_MenuItems[I][4].Name := 'Host' + IntToStr(I) + '_Default';
+            AltHost_MenuItems[I][4].Caption := 'Default';
+            AltHost_MenuItems[I][4].Checked := (Settings.getKeyValueDef('DefaultHost', '1') = IntToStr(I));
+          end;
+        5: begin
+            AltHost_MenuItems[I][5].Name := 'Host' + IntToStr(I) + '_Update';
+            AltHost_MenuItems[I][5].Caption := 'Update Host';
           end;
       end;
       AltHost_MenuItems[I][K].OnClick := @OnClick;
-      if ((not ((K = 3) or (K = 4))) and (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I))) then
+      if ((not ((K = 3) or (K = 5))) and (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I))) then
         AltHost_MenuItems[I][K].Enabled := False;
-
+      if ((I = 1) and (K = 5)) then
+        AltHost_MenuItems[I][K].Visible := False;
       AltHost_Menus[I].Add(AltHost_MenuItems[I][K]);
     end;
   end;
