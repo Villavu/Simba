@@ -1,5 +1,5 @@
 program Paster;
-{$DEFINE DEV}
+//{$DEFINE DEV}
 const
   HOSTDef = 'paste.villavu.com';
   
