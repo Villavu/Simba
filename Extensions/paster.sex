@@ -63,7 +63,7 @@ var
 begin
   if (HOST = '') then
     HOST := HOSTDef;
-  if (InputQuery(GetName + ' ' + GetVersion + ' Extension', 'Which ID would you like too grab?', Data)) then
+  if (InputQuery(GetName + ' ' + GetVersion + ' Extension', 'Which ID would you like to grab?', Data)) then
   begin
     if IntToStr(StrToInt(Data)) = Data then
       Data := '{"paste_id": ' + Data + '}'
