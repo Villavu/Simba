@@ -47,6 +47,13 @@ begin
     Exit;
   end;
 
+  if (not ((Data[1] = '{') and (Data[Length(Data)] = '}'))) then
+  begin
+    Data := '{"data": null, "error": "Host \"' + HOST + '\" is not a LodgeIt Server!"}';
+    Result := False;
+    Exit;
+  end;
+
   if (Method = 'pastes.getPaste') then
   begin
     //Little hack for getPaste too work....
