@@ -47,7 +47,7 @@ begin
     Exit;
   end;
 
-  if (not ((Data[1] = '{') and (Data[Length(Data)] = '}'))) then
+  if (not ((Data[1] = '{') and (Data[Length(Data) - 1] = '}'))) then
   begin
     Data := '{"data": null, "error": "Host \"' + HOST + '\" is not a LodgeIt Server!"}';
     Result := False;
