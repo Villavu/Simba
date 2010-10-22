@@ -69,6 +69,12 @@ uses
   httpsend,
   superobject,
   Clipbrd,
+  DCPcrypt2,
+  DCPhaval,
+  DCPmd4, DCPmd5,
+  DCPripemd128, DCPripemd160,
+  DCPsha1, DCPsha256, DCPsha512,
+  DCPtiger,
   SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}
@@ -157,6 +163,7 @@ end;
 {$I ../../Units/MMLAddon/PSInc/Wrappers/window.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/tpa.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/strings.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/crypto.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colour.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colourconv.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/math.inc}
