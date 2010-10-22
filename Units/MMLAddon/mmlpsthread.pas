@@ -262,7 +262,13 @@ uses
   forms,//Forms
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
-  Clipbrd;
+  Clipbrd,
+  DCPcrypt2,
+  DCPhaval,  
+  DCPmd4, DCPmd5,
+  DCPripemd128, DCPripemd160,
+  DCPsha1, DCPsha256, DCPsha512,
+  DCPtiger;
 {$ifdef Linux}
   {$define PS_SafeCall}
 {$else}
@@ -509,6 +515,7 @@ end;
 {$I PSInc/Wrappers/window.inc}
 {$I PSInc/Wrappers/tpa.inc}
 {$I PSInc/Wrappers/strings.inc}
+{$I PSInc/Wrappers/crypto.inc}
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
