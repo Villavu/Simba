@@ -232,7 +232,18 @@ AddFunction(@ps_SplitRegExpr,'procedure SplitRegExpr( const RegExpr, InputStr : 
 AddFunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
 AddFunction(@ps_posex, 'function PosEx(needle, haystack: String; offset: integer): integer;');
 
-
+{crypto}
+SetCurrSection('Crypto');
+AddFunction(@ps_haval, 'function haval(Data: string): string;');
+AddFunction(@ps_md4, 'function md4(Data: string): string;');
+AddFunction(@ps_md5, 'function md5(Data: string): string;');
+AddFunction(@ps_ripemd128, 'function ripemd128(Data: string): string;');
+AddFunction(@ps_ripemd160, 'function ripemd160(Data: string): string;');
+AddFunction(@ps_sha1, 'function sha1(Data: string): string;');
+AddFunction(@ps_sha256, 'function sha256(Data: string): string;');
+AddFunction(@ps_sha384, 'function sha384(Data: string): string;');
+AddFunction(@ps_sha512, 'function sha512(Data: string): string;');
+AddFunction(@ps_tiger, 'function tiger(Data: string): string;');
 
 {web}
 SetCurrSection('Web');
