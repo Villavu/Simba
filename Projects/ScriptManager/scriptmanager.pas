@@ -41,31 +41,6 @@ uses
 
 type
 
-  { TForm1 }
-
-  TForm1 = class(TForm)
-    Button1: TButton;
-    SearchIn: TComboBox;
-    Edit1: TEdit;
-    ImageList1: TImageList;
-    Label1: TLabel;
-    Label2: TLabel;
-    ListView1: TListView;
-    Memo1: TMemo;
-    MenuItem1: TMenuItem;
-    MenuItem2: TMenuItem;
-    ScriptPopup: TPopupMenu;
-    TreeView1: TTreeView;
-    procedure Button1Click(Sender: TObject);
-    procedure ClickItem(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure FormCreate(Sender: TObject);
-  private
-    { private declarations }
-  public
-    { public declarations }
-  end;
-
   { TSimbaScript }
 
   TSimbaScript = class(TObject)
@@ -103,9 +78,11 @@ type
     FUpdating : boolean;
     function GetLScriptCount: integer;
     function GetMainDir: string;
+    function GetScript(index : integer): TSimbaScript;
     function GetScriptCount: integer;
   public
     property MainDir : string read GetMainDir write FMaindir;
+    property SimbaScript[index : integer] : TSimbaScript read GetScript;
     procedure Update; //Gets the online scripts
     procedure LUpdate; //Loads the local scripts, uses MainDir
     function NewVersion(Script : integer) : boolean; //Checks for updates for Script
@@ -118,6 +95,26 @@ type
     constructor Create;
     destructor Destroy; override;
   end;
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    GroupBox1: TGroupBox;
+    ListView1: TListView;
+    Memo1: TMemo;
+    procedure Button1Click(Sender: TObject);
+    procedure ClickItem(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FormCreate(Sender: TObject);
+    procedure ListView1Change(Sender: TObject; Item: TListItem;
+      Change: TItemChange);
+  private
+    Mng : TScriptManager;
+  public
+    { public declarations }
+  end;
+
 
 
 
@@ -160,13 +157,25 @@ begin
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
-var
-  s: TMMLSettings;
 begin
-{  s := TMMLSettings.Create(TreeView1.Items);
-  s.LoadFromXML('/scratch/gittest/list.xml');
-  fill(s);
-  s.Free();}
+  Mng := TScriptManager.Create;
+  ListView1.Columns.Add.Width:= ClientWidth;
+end;
+
+procedure TForm1.ListView1Change(Sender: TObject; Item: TListItem;
+  Change: TItemChange);
+var
+  Script : TSimbaScript;
+begin
+  if Item.Data <> nil then
+  begin
+    Memo1.Clear;
+    Script := TSimbaScript(Item.data);
+    Memo1.Lines.Add('Name: ' + Script.Name);
+    Memo1.lines.add('Author: ' + Script.Author);
+    Memo1.Lines.add('Version: ' + Script.Version);
+    Memo1.Lines.Add('Description: ' + Script.Description);
+  end;
 end;
 
 procedure TForm1.ClickItem(Sender: TObject; Button: TMouseButton;
@@ -181,7 +190,7 @@ begin
     exit;
 
   { Any selection causes the description to change }
-  form1.Memo1.Lines.Clear();
+{  form1.Memo1.Lines.Clear();
   form1.Memo1.Lines.Append(TSimbaScript(item.data).Description);
 
   if Button = mbLeft then
@@ -193,16 +202,21 @@ begin
     Form1.ScriptPopup.Items[0].Caption:= 'Install ' +  TSimbaScript(item.data).Name;
     Form1.ScriptPopup.PopUp();
   end;
-  //form1.Memo1.Text := TSimbaScript(item.data).Description;
+  //form1.Memo1.Text := TSimbaScript(item.data).Description; }
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
-  Mngr : TScriptManager;
+  i : integer;
+  Item : TListItem;
 begin
-  Mngr := TScriptManager.Create;
-  Mngr.Update;
-  Mngr.free;
+  Mng.Update;
+  for i := 0 to Mng.ScriptCount - 1 do
+  begin
+    Item := ListView1.Items.Add;
+    Item.Data:= Mng.SimbaScript[i];
+    Item.Caption:= Mng.SimbaScript[i].Name;
+  end;
 end;
 
 { TSimbaScript }
@@ -292,6 +306,11 @@ begin
   result := IncludeTrailingPathDelimiter(FMainDir);
 end;
 
+function TScriptManager.GetScript(index : integer): TSimbaScript;
+begin
+  result := TSimbaScript(FScripts[index]);
+end;
+
 function TScriptManager.GetScriptCount: integer;
 begin
   result := FScripts.Count;
@@ -305,7 +324,7 @@ var
   Node,Script : TDOMNode;
   Subs : TStringList;
   Down : TDownloadThread;
-  SimbaScript : TSimbaScript;
+  SScript : TSimbaScript;
 begin
   if FUpdating then
     exit;
@@ -329,10 +348,10 @@ begin
     script := Node.FirstChild;
     while Script <> nil do
     begin
-      SimbaScript := TSimbaScript.Create;
-      SimbaScript.LoadFromNode(Script);
-      FScripts.Add(SimbaScript);
-      SimbaScript.Dbg;
+      SScript := TSimbaScript.Create;
+      SScript.LoadFromNode(Script);
+      FScripts.Add(SScript);
+      SScript.Dbg;
       Script := Script.NextSibling;
     end;
   end;
@@ -346,7 +365,7 @@ var
   Node,Script : TDOMNode;
   Subs : TStringList;
   Down : TDownloadThread;
-  SimbaScript : TLSimbaScript;
+  SScript : TLSimbaScript;
 begin
   if DirectoryExists(MainDir) = false then
     exit;
@@ -359,10 +378,10 @@ begin
       script := Node.FirstChild;
       while Script <> nil do
       begin
-        SimbaScript := TLSimbaScript.Create;
-        SimbaScript.LoadFromName(Node.TextContent,maindir);
-        FLScripts.Add(SimbaScript);
-        SimbaScript.Dbg;
+        SScript := TLSimbaScript.Create;
+        SScript.LoadFromName(Node.TextContent,maindir);
+        FLScripts.Add(SScript);
+        SScript.Dbg;
         Script := Script.NextSibling;
       end;
     end;
@@ -380,7 +399,7 @@ begin
     for i := 0 to ScriptCount-1 do
       if TSimbaScript(FScripts[i]).Name = Scrpt.Name then
       begin
-        Scrpt.OnlineScript = TSimbaScript(FScripts[i]);
+        Scrpt.OnlineScript := TSimbaScript(FScripts[i]);
         Break;
       end;
   result := Scrpt.OnlineScript.Version <> Scrpt.Version;
@@ -407,13 +426,13 @@ end;
 
 procedure TScriptManager.UpdateScript(Script: integer);
 var
-  LScript : TLSimbaScript;
+  LScrpt : TLSimbaScript;
   Scrpt : TSimbaScript;
 begin
-  LScript := TLSimbaScript(FLScripts[Script]);
+  LScrpt := TLSimbaScript(FLScripts[Script]);
   if not NewVersion(Script) then
     Exit;
-  Scrpt := LScript.OnlineScript;
+  Scrpt := LScrpt.OnlineScript;
   with LScrpt do
   begin
     Version:= Scrpt.Version;
