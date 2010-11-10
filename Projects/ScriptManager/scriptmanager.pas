@@ -21,6 +21,12 @@
     Script Manager for the Simba project.
 }
 
+{
+Raymond`, 11-9-2010 20:26:27:
+ScriptManager/General/Settings.xml (Lijst van alle geinstaleerde scripts)
+ScriptManager/General/<Scriptname>/Info.xml (Informatie over het script)
+ScriptManager/<ScriptName>/<Files> (Alle files die het script nodig heeft)
+}
 unit scriptmanager;
 
 {$mode objfpc}{$H+}
@@ -77,25 +83,34 @@ type
 
   TLSimbaScript = class(TSimbaScript) //Installed Script (Local Simba Script)
   public
+    AutoCheckUpdates : boolean;
+    OnlineScript : TSimbaScript;
     procedure LoadFromFile(const filename : string);
+    function LoadFromName(const ScriptName,maindir : string) : boolean; //Maindir = maindir of ScriptManager
     procedure SaveToFile(const FileName : string);
     procedure Save(const MainDir : string); //MainDir = maindir of ScriptManager
+    constructor create;
   end;
 
   { TScriptManager }
 
   TScriptManager = class (TObject)
   private
+    FMaindir: string;
     FScripts : TList; //Array of the online scripts
     FLScripts: TList; //Array of the local scripts
     FVersion : String;
     FUpdating : boolean;
     function GetLScriptCount: integer;
+    function GetMainDir: string;
     function GetScriptCount: integer;
   public
-    MainDir : string;
-    procedure Update; //Gets the new online scripts
+    property MainDir : string read GetMainDir write FMaindir;
+    procedure Update; //Gets the online scripts
     procedure LUpdate; //Loads the local scripts, uses MainDir
+    function NewVersion(Script : integer) : boolean; //Checks for updates for Script
+    procedure InstallNewScript(Script : integer); //Installs Script (Online -> Local)
+    procedure UpdateScript(Script : integer); //Updates all the info/files of local script
     procedure LSave; //Saves the local scripts, uses MainDir
     property LScriptCount : integer read GetLScriptCount; //LScript = Local Script = Installed Script
     property ScriptCount : integer read GetScriptCount; //Online script
@@ -272,6 +287,11 @@ begin
   result := FLScripts.Count;
 end;
 
+function TScriptManager.GetMainDir: string;
+begin
+  result := IncludeTrailingPathDelimiter(FMainDir);
+end;
+
 function TScriptManager.GetScriptCount: integer;
 begin
   result := FScripts.Count;
@@ -285,7 +305,7 @@ var
   Node,Script : TDOMNode;
   Subs : TStringList;
   Down : TDownloadThread;
-  SimbaScript : TLSimbaScript;
+  SimbaScript : TSimbaScript;
 begin
   if FUpdating then
     exit;
@@ -309,27 +329,102 @@ begin
     script := Node.FirstChild;
     while Script <> nil do
     begin
-      SimbaScript := TLSimbaScript.Create;
+      SimbaScript := TSimbaScript.Create;
       SimbaScript.LoadFromNode(Script);
-      FLScripts.Add(SimbaScript);
+      FScripts.Add(SimbaScript);
       SimbaScript.Dbg;
       Script := Script.NextSibling;
     end;
   end;
-  SimbaScript.SaveToFile('c:\testme.xml');
   XMLDoc.Free;
   FUpdating := false;
 end;
 
 procedure TScriptManager.LUpdate;
+var
+  XMLDoc  : TXMLDocument;
+  Node,Script : TDOMNode;
+  Subs : TStringList;
+  Down : TDownloadThread;
+  SimbaScript : TLSimbaScript;
 begin
   if DirectoryExists(MainDir) = false then
     exit;
-  if FileExists( IncludeTrailingPathDelimiter(maindir) + 'General' + DirectorySeparator+
-     'scripts.xml') then
+  if FileExists(maindir + 'General' + DirectorySeparator+  'scripts.xml') then
   begin
-
+    ReadXMLFile(XMLDoc,maindir + 'General' + DirectorySeparator+ 'scripts.xml');
+    Node := XMLDoc.FirstChild.FindNode('Scripts');
+    if node <> nil then
+    begin
+      script := Node.FirstChild;
+      while Script <> nil do
+      begin
+        SimbaScript := TLSimbaScript.Create;
+        SimbaScript.LoadFromName(Node.TextContent,maindir);
+        FLScripts.Add(SimbaScript);
+        SimbaScript.Dbg;
+        Script := Script.NextSibling;
+      end;
+    end;
+    XMLDoc.Free;
   end;
+end;
+
+function TScriptManager.NewVersion(Script: integer): boolean;
+var
+  Scrpt : TLSimbaScript;
+  I : integer;
+begin
+  Scrpt := TLSimbaScript(FLScripts[Script]);
+  if Scrpt.OnlineScript = nil then
+    for i := 0 to ScriptCount-1 do
+      if TSimbaScript(FScripts[i]).Name = Scrpt.Name then
+      begin
+        Scrpt.OnlineScript = TSimbaScript(FScripts[i]);
+        Break;
+      end;
+  result := Scrpt.OnlineScript.Version <> Scrpt.Version;
+end;
+
+procedure TScriptManager.InstallNewScript(Script: integer);
+var
+  Scrpt : TSimbaScript;
+  LScrpt: TLSimbaScript;
+  Dir : string;
+begin
+  Scrpt := TSimbaScript(FScripts[Script]);
+  LScrpt := TLSimbaScript.create;
+  FLScripts.Add(LScrpt);
+  LScrpt.Name:= Scrpt.Name;
+  LScrpt.OnlineScript := Scrpt;
+  Dir := MainDir + LScrpt.Name + DirectorySeparator;
+  if DirectoryExists(dir) then
+    Writeln('Directory already exists, yet continue?');
+  if not CreateDir(Dir) then
+    Writeln('Failed to create dir..');
+  UpdateScript(FLScripts.Count - 1);
+end;
+
+procedure TScriptManager.UpdateScript(Script: integer);
+var
+  LScript : TLSimbaScript;
+  Scrpt : TSimbaScript;
+begin
+  LScript := TLSimbaScript(FLScripts[Script]);
+  if not NewVersion(Script) then
+    Exit;
+  Scrpt := LScript.OnlineScript;
+  with LScrpt do
+  begin
+    Version:= Scrpt.Version;
+    Name:= Scrpt.Name;
+    Author := Scrpt.Author;
+    Description:= Scrpt.Version;
+    Tags.Assign(Scrpt.Tags);
+    Files.Assign(Scrpt.Files);
+  end;
+  LScrpt.Save(MainDir);      //Saves the setting file, now we only need to update the files
+  //Download files & write to folder
 end;
 
 procedure TScriptManager.LSave;
@@ -354,8 +449,7 @@ begin
   XMLDoc.AppendChild(node);
   for i := 0 to FLScripts.Count - 1 do
     AddTextElement(node,'Script', TLSimbaScript(FLScripts[i]).Name);
-  WriteXMLFile(XMLDoc,IncludeTrailingPathDelimiter(maindir) + 'General' + DirectorySeparator+
-     'scripts.xml');
+  WriteXMLFile(XMLDoc,maindir + 'General' + DirectorySeparator+  'scripts.xml');
   XMLDoc.Free;
 end;
 
@@ -391,6 +485,20 @@ var
 begin
   ReadXMLFile(XMLDoc,filename);
   Self.LoadFromNode(XMLDoc.FirstChild);
+  XMLDoc.Free;
+end;
+
+function TLSimbaScript.LoadFromName(const ScriptName,MainDir : string) : boolean;
+begin
+  Result := false;
+  if FileExists(MainDir + 'General' + DirectorySeparator + ScriptName +
+                'info.xml') then
+  begin
+    Result := true;
+    LoadFromFile(MainDir + 'General' + DirectorySeparator + ScriptName +
+                'info.xml');
+
+  end;
 end;
 
 procedure TLSimbaScript.SaveToFile(const FileName: string);
@@ -416,6 +524,7 @@ begin
   AddTextElement(node,'Author',Author);
   AddTextElement(node,'Version',Version);
   AddTextElement(node,'Description',description);
+  AddTextElement(node,'AutoCheckUpdates', BoolToStr(AutoCheckUpdates,true));
   SubNode := XMLDoc.CreateElement('Tags');
   Node.AppendChild(SubNode);
   for i := 0 to Tags.Count - 1 do
@@ -430,7 +539,16 @@ end;
 
 procedure TLSimbaScript.Save(const MainDir: string);
 begin
+  if not DirectoryExists(MainDir + 'General' + DirectorySeparator + Name) then
+    CreateDir(MainDir + 'General' + DirectorySeparator + Name);
+  SaveToFile(MainDir + 'General' + DirectorySeparator + Name + DirectorySeparator +
+             'info.xml');
+end;
 
+constructor TLSimbaScript.create;
+begin
+  inherited;
+  AutoCheckUpdates:= true;
 end;
 
 end.
