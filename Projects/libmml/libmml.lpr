@@ -250,6 +250,8 @@ begin
       set_last_error(e.Message);
     end;
   end;
+
+  result := RESULT_OK;
 end;
 
 { Find color on client C in area (x1,y1,x2,y2) and return coordinate (if any) in x, y }
@@ -450,7 +452,6 @@ begin
     exit(RESULT_FALSE);
   end;
 
-  // FIXME: Catch exceptions.
   C.IOManager.SetTarget(Arr, Size);
 
   result := RESULT_OK;
