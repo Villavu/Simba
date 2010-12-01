@@ -1,5 +1,5 @@
 from ctypes import *
-from mmltypes import RESULT_OK, RESULT_FALSE, RESULT_ERROR
+from mtypes import RESULT_OK, RESULT_FALSE, RESULT_ERROR
 
 # There are several problems with DTM and libMML.
 # We could create them in the libMML DTM manager, but we'll have to keep track
