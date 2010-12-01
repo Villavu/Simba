@@ -1,8 +1,8 @@
 from ctypes import *
-from mmltypes import isiterable
-from mmltypes import POINT, PPOINT, PINTEGER
-from mmltypes import RESULT_OK, RESULT_FALSE, RESULT_ERROR
-from mmltypes import MMLException
+from mtypes import isiterable
+from mtypes import POINT, PPOINT, PINTEGER
+from mtypes import RESULT_OK, RESULT_FALSE, RESULT_ERROR
+from mtypes import MMLException
 
 """
 The Color Class

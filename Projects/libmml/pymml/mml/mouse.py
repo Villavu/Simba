@@ -1,6 +1,6 @@
 from ctypes import *
-from mmltypes import POINT, PPOINT
-from mmltypes import isiterable
+from mtypes import POINT, PPOINT
+from mtypes import isiterable
 
 """
 The Mouseclass
