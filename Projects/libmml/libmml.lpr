@@ -3,7 +3,7 @@ library libmml;
 {$mode objfpc}{$H+}
 
 uses
-  cmem,Classes,interfaces,graphics,client,sysutils,MufasaTypes,dtmutil;
+  cmem,Classes,interfaces,graphics,client,sysutils,MufasaTypes,dtmutil, dtm;
 
 {$R *.res}
 
@@ -19,7 +19,7 @@ var
   last_error: String;
   debug: boolean;
 
-function init: integer;
+function init: integer;  cdecl;
 begin
   last_error := '';
   debug := true;
@@ -54,7 +54,7 @@ begin
   writeln(format('C: %d, IOManager: %d', [PtrUInt(C), PtrUInt(C.IOManager)]));
 end;
 
-function destroy_client(C: TClient): integer;
+function destroy_client(C: TClient): integer; cdecl;
 begin
   if not validate_client(C) then
   begin
@@ -79,18 +79,18 @@ end;
   may be reset or assigned a different memory position, making your old
   pointer invalid.
 }
-function get_last_error: pchar;
+function get_last_error: pchar; cdecl;
 begin
   exit(@last_error[1]);
 end;
 
-function array_to_ptr(ptr: Pointer; size: PtrUInt; objsize: PtrUInt): Pointer;
+function array_to_ptr(ptr: Pointer; size: PtrUInt; objsize: PtrUInt): Pointer; cdecl;
 begin
   result := GetMem(objsize * size);
   Move(ptr^, result^, objsize * size);
 end;
 
-function free_ptr(ptr: pointer): boolean;
+function free_ptr(ptr: pointer): boolean; cdecl;
 begin
   result := Assigned(ptr);
   if not result then
@@ -102,12 +102,12 @@ begin
     FreeMem(ptr);
 end;
 
-function alloc_mem(size, objsize: PtrUInt): Pointer;
+function alloc_mem(size, objsize: PtrUInt): Pointer; cdecl;
 begin
   result := GetMem(size * objsize);
 end;
 
-function realloc_mem(ptr: Pointer; size, objsize: PtrUInt): Pointer;
+function realloc_mem(ptr: Pointer; size, objsize: PtrUInt): Pointer; cdecl;
 begin
   result := ReAllocMem(ptr, size*objsize);
 end;
@@ -160,7 +160,7 @@ begin
   end;
 end;
 
-function get_mouse_button_state(C: TClient; But: Integer): Integer;
+function get_mouse_button_state(C: TClient; But: Integer): Integer;  cdecl;
 begin
   if not validate_client(C) then
   begin
@@ -179,7 +179,7 @@ begin
   end;
 end;
 
-function set_mouse_button_state(C: TClient; But, State, X, Y: Integer): Integer;
+function set_mouse_button_state(C: TClient; But, State, X, Y: Integer): Integer;  cdecl;
 begin
   if not validate_client(C) then
   begin
@@ -204,7 +204,7 @@ begin
   end;
 end;
 
-function find_color(C: TClient; var x, y: integer; color, x1, y1, x2, y2: integer): integer;
+function find_color(C: TClient; var x, y: integer; color, x1, y1, x2, y2: integer): integer; cdecl;
 begin
   if not validate_client(C) then
   begin
@@ -225,7 +225,9 @@ begin
   end;
 end;
 
-function find_color_tolerance(C: TClient; var x, y: integer; color, tol, x1, y1, x2, y2: integer): integer;
+{ Colour }
+
+function find_color_tolerance(C: TClient; var x, y: integer; color, tol, x1, y1, x2, y2: integer): integer;  cdecl;
 
 begin
   if not validate_client(C) then
@@ -246,7 +248,7 @@ begin
   end;
 end;
 
-function find_colors(C: TClient; var ptr: PPoint; var len: Integer; color, x1, y1, x2, y2: integer): integer;
+function find_colors(C: TClient; var ptr: PPoint; var len: integer; color, x1, y1, x2, y2: integer): integer;  cdecl;
 var
   TPA: TPointArray;
 begin
@@ -271,7 +273,8 @@ begin
   setlength(tpa, 0);
 end;
 
-function find_colors_tolerance(C: TClient; var ptr: PPoint; var len: Integer; color, tol, x1, y1, x2, y2: integer): integer;
+function find_colors_tolerance(C: TClient; var ptr: PPoint; var len: Integer;
+               color, tol, x1, y1, x2, y2: integer): integer;  cdecl;
 var
   TPA: TPointArray;
 begin
@@ -293,6 +296,99 @@ begin
   ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
   result := RESULT_OK;
 end;
+
+{ DTM }
+
+{ FIXME: DTM has not been tested yet! }
+
+{ Create a MDTM}
+function create_dtm(PointLen: integer; Points: PMDTMPoint; DTM: TMDTM): integer;
+var
+  i: integer;
+begin
+  DTM := TMDTM.Create;
+  for i := 0 to PointLen - 1 do
+    DTM.AddPoint(Points[i]);
+
+  if DTM.Valid then
+    exit(RESULT_OK);
+
+  DTM.Free;
+  last_error := 'Invalid DTM';
+  result := RESULT_ERROR;
+end;
+
+{ Delete a MDTM. Don't delete it if it is managed! use remove_dtm instead }
+function delete_dtm(C: TClient; DTM: TMDTM): integer;
+begin
+  if not validate_client(C) then
+  begin
+    exit(RESULT_ERROR);
+  end;
+
+  if not assigned(DTM) then
+  begin
+    last_error := 'DTM is NULL';
+    exit(RESULT_ERROR);
+  end;
+
+  DTM.Free;
+
+  result := RESULT_OK;
+end;
+
+{ Add a previously created DTM to the DTM Manager }
+function add_dtm(C: TClient; DTM: TMDTM; var index: integer): integer;
+begin
+  if not validate_client(C) then
+  begin
+    exit(RESULT_ERROR);
+  end;
+
+  if not assigned(DTM) then
+  begin
+    last_error := 'DTM is NULL';
+    exit(RESULT_ERROR);
+  end;
+
+  C.MDTMs.AddDTM(DTM);
+end;
+
+{ Remove a previously added DTM from the DTM manager. This also frees the DTM }
+function remove_dtm(C: TClient; DTMi: integer): integer;
+begin
+  if not validate_client(C) then
+  begin
+    exit(RESULT_ERROR);
+  end;
+
+  C.MDTMs.FreeDTM(DTMi);
+end;
+
+function find_dtm(C: TClient; DTMi: integer; var x, y: integer; x1, y1, x2, y2: integer): integer;
+var
+  res: boolean;
+begin
+  if not validate_client(C) then
+  begin
+    exit(RESULT_ERROR);
+  end;
+
+  try
+    res := C.MFinder.FindDTM(C.MDTMs.DTM[DTMi], x, y, x1, y1, x2, y2);
+  except on e : Exception do
+    begin
+      result := RESULT_ERROR;
+      last_error := e.Message;
+    end;
+  end;
+
+  if res then
+    result := RESULT_OK
+  else
+    result := RESULT_FALSE;
+end;
+
 
 exports
 
