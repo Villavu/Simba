@@ -1,6 +1,6 @@
 {
-	This file is part of the Simba Project
-	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+    This file is part of the Simba Project
+    Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
 
     Simba is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with MML.  If not, see <http://www.gnu.org/licenses/>.
 
-	See the file COPYING, included in this distribution,
-	for details about the copyright.
+    See the file COPYING, included in this distribution,
+    for details about the copyright.
 
     Script Manager for the Simba project.
 }
@@ -45,10 +45,13 @@ type
 
   TSimbaScript = class(TObject)
   private
+    function IsInstalled: boolean;
     procedure LoadFromNode( Script : TDOMNode);
   public
     Name, Version, Author, Description: String;
     Tags, Files: TStringList;
+    LocalScript : TSimbaScript;
+    property Installed : boolean read IsInstalled;
     procedure Dbg;
     constructor Create;
     destructor Destroy; override;
@@ -76,10 +79,13 @@ type
     FLScripts: TList; //Array of the local scripts
     FVersion : String;
     FUpdating : boolean;
+    function FindScriptByName(name : string) : Integer;
+    function FindLScriptByName(name : string) : Integer;
     function GetLScriptCount: integer;
     function GetMainDir: string;
     function GetScript(index : integer): TSimbaScript;
     function GetScriptCount: integer;
+    procedure MatchLocalOnline;
   public
     property MainDir : string read GetMainDir write FMaindir;
     property SimbaScript[index : integer] : TSimbaScript read GetScript;
@@ -87,7 +93,7 @@ type
     procedure LUpdate; //Loads the local scripts, uses MainDir
     function NewVersion(Script : integer) : boolean; //Checks for updates for Script
     procedure InstallNewScript(Script : integer); //Installs Script (Online -> Local)
-    procedure UpdateScript(Script : integer); //Updates all the info/files of local script
+    procedure UpdateScript(Script : integer; ignoreupdating : boolean = false); //Updates all the info/files of local script
     procedure LSave; //Saves the local scripts, uses MainDir
     property LScriptCount : integer read GetLScriptCount; //LScript = Local Script = Installed Script
     property ScriptCount : integer read GetScriptCount; //Online script
@@ -128,34 +134,6 @@ uses
 {$R *.lfm}
 
 { TForm1 }
-procedure fill(s: TMMLSettings);
-var
-  i:integer;
-  ss: TSimbaScript;
-  LI: TListItem;
-  strarr: TStringArray;
-  b: TButton;
-
-begin
-  if not s.ListKeys('Scripts/ScriptList', strarr) then
-    writeln('ListKeys returned false');
-  writeln('strarr length: ' + inttostr(length(strarr)));
-  for i := 0 to high(strarr) do
-  begin
-    writeln(s.GetKeyValue('Scripts/ScriptList/Script/Name'));
-    ss := TSimbaScript.Create();
-    ss.Name := s.GetKeyValue('Scripts/ScriptList/Script/Name');
-    ss.Author:=   s.GetKeyValue('Scripts/ScriptList/Script/Author');
-    ss.Description:= s.GetKeyValue('Scripts/ScriptList/Script/Description');
-    LI := Form1.ListView1.Items.Add;
-    LI.Caption := ss.Name;
-    LI.Data := ss;
-    LI.ImageIndex:= 0;
-
-    s.DeleteKey('Scripts/ScriptList/Script');
-  end;
-end;
-
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Mng := TScriptManager.Create;
@@ -171,10 +149,11 @@ begin
   begin
     Memo1.Clear;
     Script := TSimbaScript(Item.data);
-    Memo1.Lines.Add('Name: ' + Script.Name);
+    Memo1.Lines.add('Name: ' + Script.Name);
     Memo1.lines.add('Author: ' + Script.Author);
     Memo1.Lines.add('Version: ' + Script.Version);
-    Memo1.Lines.Add('Description: ' + Script.Description);
+    Memo1.Lines.add('Installed: '+ BoolToStr(Script.Installed,true));
+    Memo1.Lines.add('Description: ' + Script.Description);
   end;
 end;
 
@@ -220,6 +199,11 @@ begin
 end;
 
 { TSimbaScript }
+
+function TSimbaScript.IsInstalled: boolean;
+begin
+  Result := (LocalScript <> nil);
+end;
 
 procedure TSimbaScript.LoadFromNode(Script: TDOMNode);
   function NodeContents(ItemStr : string; node : TDOMNode) : string;
@@ -268,6 +252,7 @@ begin
   Writeln('  Author: ' + Author);
   Writeln('  Version: ' + Version);
   Writeln('  Description: ' + Description);
+  Writeln('  Installed: '+ BoolToStr(Installed,true));
   Writeln('  Tags:');
   for i := 0 to Tags.Count - 1 do
     Writeln('    ' + Tags[i]);
@@ -279,7 +264,6 @@ end;
 constructor TSimbaScript.Create;
 begin
   inherited;
-
   {stuff here}
 end;
 
@@ -295,6 +279,26 @@ begin
 end;
 
 { TScriptManager }
+
+function TScriptManager.FindScriptByName(name: string): Integer;
+var
+  I : integer;
+begin
+  for i := FScripts.Count - 1 downto 0 do
+    if TSimbaScript(FScripts[i]).Name = Name then
+      exit(i);
+  result := -1;
+end;
+
+function TScriptManager.FindLScriptByName(name: string): Integer;
+var
+  I : integer;
+begin
+  for i := FScripts.Count - 1 downto 0 do
+    if TLSimbaScript(FLScripts[i]).Name = Name then
+      exit(i);
+  result := -1;
+end;
 
 function TScriptManager.GetLScriptCount: integer;
 begin
@@ -316,6 +320,25 @@ begin
   result := FScripts.Count;
 end;
 
+procedure TScriptManager.MatchLocalOnline;
+var
+  Scrpt : TLSimbaScript;
+  I,II : integer;
+begin
+  for ii := 0 to LScriptCount - 1 do
+  begin
+    Scrpt := TLSimbaScript(FLScripts[ii]);
+    if Scrpt.OnlineScript = nil then
+      for i := 0 to ScriptCount-1 do
+        if TSimbaScript(FScripts[i]).Name = Scrpt.Name then
+        begin
+          Scrpt.OnlineScript := TSimbaScript(FScripts[i]);
+          Break;
+        end;
+    Scrpt.OnlineScript.LocalScript := Scrpt;
+  end;
+end;
+
 procedure TScriptManager.Update;
 var
   XMLFile : string;
@@ -325,6 +348,7 @@ var
   Subs : TStringList;
   Down : TDownloadThread;
   SScript : TSimbaScript;
+  I : integer;
 begin
   if FUpdating then
     exit;
@@ -350,13 +374,21 @@ begin
     begin
       SScript := TSimbaScript.Create;
       SScript.LoadFromNode(Script);
-      FScripts.Add(SScript);
       SScript.Dbg;
+      i := FindScriptByName(SScript.Name);
+      if (i = -1) then
+        FScripts.Add(SScript)
+      else
+      begin
+        SScript.free;
+        TSimbaScript(FScripts[i]).LoadFromNode(Script);
+      end;
       Script := Script.NextSibling;
     end;
   end;
   XMLDoc.Free;
   FUpdating := false;
+  MatchLocalOnline;
 end;
 
 procedure TScriptManager.LUpdate;
@@ -366,6 +398,7 @@ var
   Subs : TStringList;
   Down : TDownloadThread;
   SScript : TLSimbaScript;
+  I : integer;
 begin
   if DirectoryExists(MainDir) = false then
     exit;
@@ -380,29 +413,28 @@ begin
       begin
         SScript := TLSimbaScript.Create;
         SScript.LoadFromName(Node.TextContent,maindir);
-        FLScripts.Add(SScript);
+        i := FindLScriptByName(SScript.Name);
         SScript.Dbg;
+        if (i = -1) then
+          FLScripts.Add(SScript)
+        else
+        begin
+          SScript.free;
+          TLSimbaScript(FLScripts[i]).LoadFromName(Node.TextContent,maindir);
+        end;
         Script := Script.NextSibling;
       end;
     end;
     XMLDoc.Free;
   end;
+  MatchLocalOnline;
 end;
 
 function TScriptManager.NewVersion(Script: integer): boolean;
-var
-  Scrpt : TLSimbaScript;
-  I : integer;
 begin
-  Scrpt := TLSimbaScript(FLScripts[Script]);
-  if Scrpt.OnlineScript = nil then
-    for i := 0 to ScriptCount-1 do
-      if TSimbaScript(FScripts[i]).Name = Scrpt.Name then
-      begin
-        Scrpt.OnlineScript := TSimbaScript(FScripts[i]);
-        Break;
-      end;
-  result := Scrpt.OnlineScript.Version <> Scrpt.Version;
+  MatchLocalOnline;
+  with TLSimbaScript(FLScripts[Script]) do
+    result := OnlineScript.Version <> Version;
 end;
 
 procedure TScriptManager.InstallNewScript(Script: integer);
@@ -411,6 +443,9 @@ var
   LScrpt: TLSimbaScript;
   Dir : string;
 begin
+  if FUpdating then
+    exit;
+  FUpdating := true;
   Scrpt := TSimbaScript(FScripts[Script]);
   LScrpt := TLSimbaScript.create;
   FLScripts.Add(LScrpt);
@@ -421,17 +456,21 @@ begin
     Writeln('Directory already exists, yet continue?');
   if not CreateDir(Dir) then
     Writeln('Failed to create dir..');
-  UpdateScript(FLScripts.Count - 1);
+  UpdateScript(FLScripts.Count - 1,true);
 end;
 
-procedure TScriptManager.UpdateScript(Script: integer);
+procedure TScriptManager.UpdateScript(Script: integer; ignoreupdating : boolean = false);
 var
   LScrpt : TLSimbaScript;
   Scrpt : TSimbaScript;
+  DownloadThread : TDownloadThread;
 begin
-  LScrpt := TLSimbaScript(FLScripts[Script]);
   if not NewVersion(Script) then
     Exit;
+  if FUpdating and not ignoreupdating then
+    exit;
+  FUpdating := true;
+  LScrpt := TLSimbaScript(FLScripts[Script]);
   Scrpt := LScrpt.OnlineScript;
   with LScrpt do
   begin
@@ -444,6 +483,8 @@ begin
   end;
   LScrpt.Save(MainDir);      //Saves the setting file, now we only need to update the files
   //Download files & write to folder
+
+  FUPdating := false;
 end;
 
 procedure TScriptManager.LSave;
@@ -497,7 +538,6 @@ begin
 end;
 
 { TLSimbaScript }
-
 procedure TLSimbaScript.LoadFromFile(const filename: string);
 var
   XMLDoc : TXMLDocument;
@@ -571,4 +611,3 @@ begin
 end;
 
 end.
-
