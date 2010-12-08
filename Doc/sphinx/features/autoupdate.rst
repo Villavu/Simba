@@ -1,8 +1,9 @@
 Updater in Simba
 ================
 
-A notice should appear in the Simba GUI, or you can alternatively
-use Tools -> Update.
+As soon as there is an update for Simba, an extra icon will appear in the icon
+bar. If you click it, an update window will appear. Click *update* and Simba
+will update itself. Note that you will have to restart Simba to use the updated
+version.
 
-Don't forget to restart Simba when it has been updated!
-
+Alternatively you can use Tools -> Update to update.
