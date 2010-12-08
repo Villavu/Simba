@@ -64,6 +64,10 @@ some issues remain. The biggest issue is the interpreter that
 executes your program. It is an external component and does not
 play too well on Linux. Hopefully this will be improved upon soon.
 
+There are plans on supporting interpreter for alternative languages such as
+Python, these would largely resolve the current problems wit the PascalScript
+interpreter on Linux/Mac.
+
 Fast
 ~~~~
 
@@ -91,5 +95,5 @@ Well Documented
 ~~~~~~~~~~~~~~~
 
 Simba is well documented. (You're looking the documentation right now...)
-There is still stuff left to document but overall the documentation is pretty
+There is still a lot left to document but overall the documentation is pretty
 good.
