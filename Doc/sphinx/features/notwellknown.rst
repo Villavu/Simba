@@ -1,10 +1,13 @@
 Not Well Known Features
 =======================
 
+Simba has several features that are relatively unknown.
+A few will be listed here.
+
 Timestamped Writeln
 -------------------
 
-Simba can timestamp all your *writeln* calls.
+Simba can timestamp all your debug.
 
 .. code-block:: pascal
 
