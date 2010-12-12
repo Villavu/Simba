@@ -60,6 +60,11 @@ This is the only supported way. You can simply do a svn checkout on the srl
 repository, but if you can do that, then you should be able to set up SRL
 yourself as well.
 
+Setting up SRL 5 with Simba
+---------------------------
+
+This will follow later, upon SRL 5 release. (Which will be quite soon)
+
 Installing scripts
 ------------------
 
