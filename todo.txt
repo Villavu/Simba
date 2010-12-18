@@ -1,5 +1,0 @@
-- DTM Features
-- Extra GUI icons
-- Test scripts
-- DWS
-- Documentation + wiki
