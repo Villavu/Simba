@@ -539,7 +539,7 @@ end;
 
 procedure AddFunction( Ptr : Pointer; DeclStr : String);
 begin;
-  if c >= 400 then
+  if c >= 500 then
     raise exception.create('PSThread.LoadMethods: Exported more than 400 functions');
   Result[c].FuncDecl:= DeclStr;
   Result[c].FuncPtr:= Ptr;
@@ -550,7 +550,7 @@ end;
 begin
   c := 0;
   CurrSection := 'Other';
-  SetLength(Result,400);
+  SetLength(Result, 500);
 
   {$i PSInc/psexportedmethods.inc}
 
