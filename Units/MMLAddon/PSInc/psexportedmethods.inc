@@ -263,6 +263,23 @@ AddFunction(@ps_GetRawHeaders,'function GetRawHeaders(Client: Integer): string;'
 AddFunction(@ps_SetProxy,'procedure SetProxy(Client : Integer; pHost, pPort : String);');
 {$ENDIF}
 
+{socket}
+{$IFNDEF MML_EXPORT_THREADSAFE}
+SetCurrSection('Socket');
+AddFunction(@ps_CreateSocket, 'function CreateSocket: integer;');
+AddFunction(@ps_FreeSocket, 'procedure FreeSocket(Index: integer);');
+AddFunction(@ps_ConnectSocket, 'procedure ConnectSocket(Client: integer; IP, Port: string);');
+AddFunction(@ps_BindSocket, 'procedure BindSocket(Client: integer; IP, Port: string);');
+AddFunction(@ps_ListenSocket, 'procedure ListenSocket(Client: integer);');
+AddFunction(@ps_AcceptSocket, 'function AcceptSocket(Client: integer): integer;');
+AddFunction(@ps_CloseSocket, 'procedure CloseSocket(Client: integer);');
+AddFunction(@ps_RecvSocket, 'function RecvSocket(Client: integer): string;');
+AddFunction(@ps_RecvSocketStr, 'function RecvSocketStr(Client: integer): string;');
+AddFunction(@ps_RecvSocketEx, 'function RecvSocketEx(Client, Length: integer): string;');
+AddFunction(@ps_SendSocket, 'procedure SendSocket(Client: integer; Data: string);');
+AddFunction(@ps_SetSocketTimeout, 'procedure SetTimeout(Client, Time: integer);');
+{$ENDIF}
+
 { Color Conversions and Speed }
 SetCurrSection('Color Convert');
 AddFunction(@ps_ColorToRGB, 'procedure ColorToRGB(Color: integer; var r, g, b: Integer);');
