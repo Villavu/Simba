@@ -56,3 +56,63 @@ procedure ps_SetProxy(Client : Integer; pHost, pPort : String); extdecl;
 begin
   CurrThread.MInternet.GetHTTPClient(client).SetProxy(pHost, pPort);
 end;
+
+function ps_RecvSocketStr(Client: integer): string;
+begin
+  Result := CurrThread.Socks.GetSocket(Client).RecvString;
+end;
+
+function ps_RecvSocket(Client: integer): string;
+begin
+  Result := CurrThread.Socks.GetSocket(Client).Recv;
+end;
+
+function ps_RecvSocketEx(Client, Length: integer): string;
+begin
+  Result := CurrThread.Socks.GetSocket(Client).RecvBufferStr(Length);
+end;
+
+procedure ps_SendSocket(Client: integer; Data: string);
+begin
+  CurrThread.Socks.GetSocket(Client).Send(Data);
+end;
+
+procedure ps_ConnectSocket(Client: integer; IP, Port: string);
+begin
+  CurrThread.Socks.GetSocket(Client).Connect(IP, Port);
+end;
+
+procedure ps_CloseSocket(Client: integer);
+begin
+  CurrThread.Socks.GetSocket(Client).Close;
+end;
+
+procedure ps_SetSocketTimeout(Client, Time: integer);
+begin
+  CurrThread.Socks.GetSocket(Client).SetTimeout(Time);
+end;
+
+procedure ps_BindSocket(Client: integer; IP, Port: string);
+begin
+  CurrThread.Socks.GetSocket(Client).Bind(IP, Port);
+end;
+
+procedure ps_ListenSocket(Client: integer);
+begin
+  CurrThread.Socks.GetSocket(Client).Listen;
+end;
+
+function ps_AcceptSocket(Client: integer): integer;
+begin
+  Result := CurrThread.Socks.CreateSocketEx(CurrThread.Socks.GetSocket(Client).Accept);
+end;
+
+function ps_CreateSocket: integer; extdecl;
+begin
+  Result := CurrThread.Socks.CreateSocket();
+end;
+
+procedure ps_FreeSocket(Client: integer); extdecl;
+begin;
+  CurrThread.Socks.FreeSocket(Client);
+end;
