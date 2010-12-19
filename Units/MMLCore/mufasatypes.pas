@@ -106,6 +106,14 @@ type
     x1, y1, x2, y2: Integer;
   end;
 
+  TProcess = record
+    Title: string;
+    Handle: integer;
+    Pid: integer;
+    Width, Height: integer;
+  end;
+  TProcessArray = array of TProcess;
+
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
 type

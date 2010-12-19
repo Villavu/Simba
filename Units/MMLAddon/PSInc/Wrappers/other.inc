@@ -284,3 +284,39 @@ begin
       mDebugLn('Exception in GetClipBoard: ' + e.message);
   end;
 end;
+
+var
+  ProcArr: TProcessArray;
+
+function EnumProcess(Handle: LongWord; lParam: LongInt): LongBool; stdcall;
+var
+  Proc: TProcess;
+  I: integer;
+  pPid: DWORD;
+begin
+  Result := (not ((Handle = 0) or (Handle = null)));
+  if (Result) then
+  begin
+    I := Length(ProcArr);
+    SetLength(ProcArr, I + 1);
+    ProcArr[I].Handle := Handle;
+    SetLength(ProcArr[I].Title, 255);
+    SetLength(ProcArr[I].Title, GetWindowText(Handle, PChar(ProcArr[I].Title), Length(ProcArr[I].Title)));
+    GetWindowSize(Handle, ProcArr[I].Width, ProcArr[I].Height);
+    GetWindowThreadProcessId(Handle, pPid);
+    ProcArr[I].Pid := pPid;
+  end;
+end;
+
+function ps_GetProcesses: TProcessArray;
+begin
+  SetLength(ProcArr, 0);
+  EnumWindows(@EnumProcess, 0);
+  Result := ProcArr;
+  SetLength(ProcArr, 0);
+end;
+
+procedure ps_SetTarget(Handle: integer);
+begin
+  CurrThread.Client.IOManager.SetTarget(Handle);
+end;

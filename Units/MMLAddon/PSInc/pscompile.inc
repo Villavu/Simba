@@ -37,6 +37,8 @@ AddTypeS('TByteArray','Array of byte');
 AddTypeS('TExtendedArray','Array of extended');
 AddTypeS('TBoolArray', 'Array of Boolean');
 AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
+AddTypes('TProcess', 'record Title: string; Handle, Pid, Width, Height: integer; end;');
+AddTypes('TProcessArray', 'array of TProcess;');
 AddTypeS('TBoxArray','Array of TBox');
 AddTypeS('TPointArray','Array of TPoint');
 AddTypeS('T2DPointArray','Array of TPointArray');
