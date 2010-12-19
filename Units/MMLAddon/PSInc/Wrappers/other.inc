@@ -285,7 +285,7 @@ begin
   end;
 end;
 
-var
+threadvar
   ProcArr: array of TProcessArray;
 
 function EnumProcess(Handle: LongWord; ID: LongInt): LongBool; stdcall;
