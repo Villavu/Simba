@@ -286,11 +286,11 @@ begin
 end;
 
 threadvar
-  ProcArr: array of TProcessArray;
+  ProcArr: array of TProcArr;
 
 function EnumProcess(Handle: LongWord; lParam: LongInt): LongBool; stdcall;
 var
-  Proc: TProcess;
+  Proc: TProc;
   I: integer;
   pPid: DWORD;
 begin
@@ -308,7 +308,7 @@ begin
   end;
 end;
 
-function ps_GetProcesses: TProcessArray;
+function ps_GetProcesses: TProcArr;
 begin
   SetLength(ProcArr, 0);
   EnumWindows(@EnumProcess, 0);
