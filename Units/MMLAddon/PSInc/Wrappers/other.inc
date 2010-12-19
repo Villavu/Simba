@@ -286,9 +286,9 @@ begin
 end;
 
 var
-  ProcArr: TProcessArray;
+  ProcArr: array of TProcessArray;
 
-function EnumProcess(Handle: LongWord; lParam: LongInt): LongBool; stdcall;
+function EnumProcess(Handle: LongWord; ID: LongInt): LongBool; stdcall;
 var
   Proc: TProcess;
   I: integer;
@@ -297,23 +297,42 @@ begin
   Result := (not ((Handle = 0) or (Handle = null)));
   if (Result) then
   begin
-    I := Length(ProcArr);
-    SetLength(ProcArr, I + 1);
-    ProcArr[I].Handle := Handle;
-    SetLength(ProcArr[I].Title, 255);
-    SetLength(ProcArr[I].Title, GetWindowText(Handle, PChar(ProcArr[I].Title), Length(ProcArr[I].Title)));
-    GetWindowSize(Handle, ProcArr[I].Width, ProcArr[I].Height);
+    I := Length(ProcArr[ID]);
+    SetLength(ProcArr[ID], I + 1);
+    ProcArr[ID][I].Handle := Handle;
+    SetLength(ProcArr[ID][I].Title, 255);
+    SetLength(ProcArr[ID][I].Title, GetWindowText(Handle, PChar(ProcArr[ID][I].Title), Length(ProcArr[ID][I].Title)));
+    GetWindowSize(Handle, ProcArr[ID][I].Width, ProcArr[ID][I].Height);
     GetWindowThreadProcessId(Handle, pPid);
-    ProcArr[I].Pid := pPid;
+    ProcArr[ID][I].Pid := pPid;
   end;
 end;
 
 function ps_GetProcesses: TProcessArray;
+var
+  I: integer;
 begin
-  SetLength(ProcArr, 0);
-  EnumWindows(@EnumProcess, 0);
-  Result := ProcArr;
-  SetLength(ProcArr, 0);
+  if (Length(ProcArr) = 0) then
+  begin
+    I := Length(ProcArr) + 1;
+    SetLength(ProcArr, I);
+  end;
+
+  for I := 0 to High(ProcArr) do
+    if (Length(ProcArr[I]) = 0) then
+      Break;
+
+  if ((I = High(ProcArr)) and (not (Length(ProcArr[I]) = 0))) then
+  begin
+    I := Length(ProcArr) + 1;
+    SetLength(ProcArr, I);
+  end;
+
+  WriteLn('GetProcesses: Using ProcArr[' + IntToStr(I) + '].');
+  SetLength(ProcArr[I], 0);
+  EnumWindows(@EnumProcess, I);
+  Result := ProcArr[I];
+  SetLength(ProcArr[I], 0);
 end;
 
 procedure ps_SetTarget(Handle: integer);
