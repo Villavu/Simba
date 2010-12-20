@@ -99,7 +99,7 @@ interface
         procedure SetDesktop; override;
 
         function GetProcesses: TProcArr; override;
-        procedure SetTargetEx(Proc: TProc); overload;
+        procedure SetTargetEx(Proc: TProc); override;
       protected
         DesktopHWND : Hwnd;
         procedure NativeInit; override;

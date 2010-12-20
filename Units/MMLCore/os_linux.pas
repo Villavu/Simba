@@ -98,7 +98,7 @@ interface
         procedure SetDesktop; override;
 
         function GetProcesses: TProcArr; override;
-        procedure SetTargetEx(Proc: TProc); overload;
+        procedure SetTargetEx(Proc: TProc); override;
       private
         procedure NativeInit; override;
         procedure NativeFree; override;
