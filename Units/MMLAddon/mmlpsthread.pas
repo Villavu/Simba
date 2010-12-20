@@ -119,7 +119,6 @@ type
       Prop: TScriptProperties;
       Client : TClient;
       MInternet : TMInternet;
-      Socks: TSocks;
       StartTime : LongWord;
       Settings: TMMLSettings;
       SimbaSettingsFile: String;
@@ -310,7 +309,6 @@ begin
   if Assigned(OpenFileEvent) then
     Client.MFiles.OpenFileEvent := OpenFileEvent;
   MInternet := TMInternet.Create(Client);
-  Socks := TSocks.Create(Client);
   if Assigned(OpenConnectionEvent) then
     MInternet.OpenConnectionEvent := Self.OpenConnectionEvent;
   SyncInfo:= TheSyncInfo;
