@@ -97,6 +97,9 @@ interface
         constructor Create(plugin_dir: string);
         function SetTarget(target: TNativeWindow): integer; overload;
         procedure SetDesktop; override;
+
+        function GetProcesses: TProcArr; override;
+        procedure SetTargetEx(Proc: TProc); overload;
       protected
         DesktopHWND : Hwnd;
         procedure NativeInit; override;
@@ -440,6 +443,41 @@ end;
   begin
     SetBothTargets(TWindow.Create(target));
   end;
+  
+threadvar
+  ProcArr: TProcArr;
+
+function EnumProcess(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
+var
+  Proc: TProc;
+  I: integer;
+  pPid: DWORD;
+begin
+  Result := (not ((Handle = 0) or (Handle = null)));
+  if ((Result) and (IsWindowVisible(Handle))) then
+  begin
+    I := Length(ProcArr);
+    SetLength(ProcArr, I + 1);
+    ProcArr[I].Handle := Handle;
+    SetLength(ProcArr[I].Title, 255);
+    SetLength(ProcArr[I].Title, GetWindowText(Handle, PChar(ProcArr[I].Title), Length(ProcArr[I].Title)));
+    GetWindowSize(Handle, ProcArr[I].Width, ProcArr[I].Height);
+    GetWindowThreadProcessId(Handle, pPid);
+    ProcArr[I].Pid := pPid;
+  end;
+end;
+
+function TIOManager.GetProcesses: TProcArr;
+begin
+  SetLength(ProcArr, 0);
+  EnumWindows(@EnumProcess, 0);
+  Result := ProcArr;
+end;
+
+procedure TIOManager.SetTargetEx(Proc: TProc);
+begin
+  SetTarget(Proc.Handle);
+end;
 
 { TDesktopWindow }
 
