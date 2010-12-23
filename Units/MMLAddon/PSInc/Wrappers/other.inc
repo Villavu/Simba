@@ -284,3 +284,13 @@ begin
       mDebugLn('Exception in GetClipBoard: ' + e.message);
   end;
 end;
+
+function ps_GetProcesses: TProcArr;
+begin
+  Result := CurrThread.Client.IOManager.GetProcesses;
+end;
+
+procedure ps_SetTarget(Proc: TProc);
+begin
+  CurrThread.Client.IOManager.SetTargetEx(Proc);
+end;

@@ -96,6 +96,9 @@ interface
         constructor Create(plugin_dir: string);
         function SetTarget(target: TNativeWindow): integer; overload;
         procedure SetDesktop; override;
+
+        function GetProcesses: TProcArr; override;
+        procedure SetTargetEx(Proc: TProc); overload;
       private
         procedure NativeInit; override;
         procedure NativeFree; override;
@@ -509,5 +512,15 @@ implementation
   begin
     SetBothTargets(TWindow.Create(display, screennum, target))
   end;
-  
+
+  function TIOManager.GetProcesses: TProcArr;
+  begin
+    raise Exception.Create('GetProcesses: Not Implemented.');
+  end;
+
+  procedure TIOManager.SetTargetEx(Proc: TProc);
+  begin
+    raise Exception.Create('SetTargetEx: Not Implemented.');
+  end;
+
 end.
