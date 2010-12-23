@@ -38,20 +38,28 @@ class Color(object):
         Yields integer.
         """
         col = c_int(-1)
+        if isiterable(pt):
+            if len(pt) != 2:
+                raise ColorException("Invalid point")
+                pt = (0, 0)
         self._mc.dll.get_color(self._cli, pt[0], pt[1], byref(col))
         if col is RESULT_OK:
             return col
         elif ret is RESULT_ERROR:
             raise ColorException(self._mc.get_last_error())
         return None
-        
-    def find(self, box, color, tol = 0):
+    
+    def find(self, color, box = (), tol = 0):
         """
             find a color in a box, with a specific tolerance.
             returns a tuple of the x, y value of a matched color.
             None if no color was found.
         """
         x, y = (c_int(-1), c_int(-1))
+        if isiterable(box):
+            if len(box) != 4:
+                raise ColorException("Invalid search area")
+                box = (0, 0, 0, 0)
         if tol is 0:
             ret = self._mc.dll.find_color(self._cli, byref(x), byref(y),
                     color, *box)
@@ -66,17 +74,21 @@ class Color(object):
 
         return None
 
-    def find_all(self, box, color, tol = 0):
+    def find_all(self, color, box = (), tol = 0):
         """
             find all colors in a box, with a specific tolerance.
             returned are all the matching points
         """
         ptr, _len = PPOINT(), c_int(42)
+        if isiterable(box):
+            if len(box) != 4:
+                raise ColorException("Invalid search area")
+                box = (0, 0, 0, 0)
         if tol is 0:
-            self._mc.dll.find_colors(self._cli, byref(ptr), byref(_len),
+            ret = self._mc.dll.find_colors(self._cli, byref(ptr), byref(_len),
                     color, *box)
         else:
-            self._mc.dll.find_colors_tolerance(self._cli, byref(ptr),
+            ret = self._mc.dll.find_colors_tolerance(self._cli, byref(ptr),
                     byref(_len), color, tol, *box)
 
         # Construct list
@@ -84,43 +96,59 @@ class Color(object):
 
         # Free PPOINT
         self._mc.free(ptr)
-
-        return l
         
-    def find_spiral(self, col, box, tol = 0):
+        if ret is RESULT_OK:
+            return l
+        elif ret is RESULT_ERROR:
+            raise ColorException(self._mc.get_last_error())
+            
+        return None
+
+    def find_spiral(self, col, box = (), tol = 0):
         """
         Find a color in a box, searching in the direction of a spiral, with a
             specific tolerance.
         Yields a tuple of x, y values of found color.
         """
         x, y = (c_int(-1), c_int(-1))
+        if isiterable(box):
+            if len(box) != 4:
+                raise ColorException("Invalid search area")
+                box = (0, 0, 0, 0)
+        x1, y1, x2, y2 = box
         if tol is 0:
             ret = self._mc.dll.find_color_spiral(self._cli, byref(x), byref(y),
                                                  col, *box)
         else:
             ret = self._mc.dll.find_color_spiral_tolerance(self._cli, byref(x),
-                                                           byref(y), col, *box,
-                                                           tol)
+                                                           byref(y), col, x1,
+                                                           y1, x2, y2, tol)
         if ret is RESULT_OK:
             return (x, y)
         elif ret is RESULT_ERROR:
             raise ColorException(self._mc.get_last_error())
         return None
         
-    def find_area(self, col, box, min_a, tol = 0):
+    def find_area(self, col, box = (), min_a = 0, tol = 0):
         """
         Finds a colored area in box with min area min_a with a specific
             tolerance.
         Yields a tuple of x, y values of found area.
         """
-        x, y = (c_int(-1), c_int(-1))
+        x, y = (c_int(-1), c_int(-1))        
+        if isiterable(box):
+            if len(box) != 4:
+                raise ColorException("Invalid search area")
+                box = (0, 0, 0, 0)
+        x1, y1, x2, y2 = box
         if tol is 0:
             ret = self._mc.dll.find_colored_area(self._cli, byref(x), byref(y),
-                                                 col, *box, min_a)
+                                                 col, x1, y1, x2, y2, min_a)
         else:
             ret = self._mc.dll.find_colored_area_tolerance(self._cli, byref(x),
-                                                           byref(y), col, *box,
-                                                           min_a, tol)
+                                                           byref(y), col, x1,
+                                                           y1, x2, y2, min_a,
+                                                           tol)
         if ret is RESULT_OK:
             return (x, y)
         elif ret is RESULT_ERROR:
@@ -133,11 +161,12 @@ class Color(object):
         Yields integer of count.
         """
         count = 0
+        x1, y1, x2, y2 = box
         if tol is 0:
             ret = self._mc.dll.count_color(self._cli, count, col, *box)
         else:
             ret = self._mc.dll.count_color_tolerance(self._cli, count, col,
-                                                     *box, tol)
+                                                     x1, y1, x2, y2, tol)
         if ret is RESULT_OK:
             return count
         elif ret is RESULT_ERROR:
