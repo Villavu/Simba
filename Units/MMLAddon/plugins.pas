@@ -39,16 +39,23 @@ uses
 const
   cv_StdCall = 0; //StdCall
   cv_Register = 1; //Register
+  
 type
+  TType = record
+    TypeName, TypeDef: string;
+  end;
+  
   TMPluginMethod = record
-    FuncPtr : pointer;
-    FuncStr : string;
+    FuncPtr: pointer;
+    FuncStr: string;
     FuncConv: integer;
   end;
 
   TMPlugin = record
-    Methods : Array of TMPluginMethod;
-    MethodLen : integer;
+    Methods: array of TMPluginMethod;
+    MethodLen: integer;
+    Types: array of TType;
+    TypesLen: integer;
   end;
   TMPluginArray = array of TMPlugin;
 
@@ -58,13 +65,13 @@ type
 
   TMPlugins = class (TGenericLoader)
     private
-      Plugins : TMPluginArray;
-      NumPlugins : integer;
+      Plugins: TMPluginArray;
+      NumPlugins: integer;
     protected
       function InitPlugin(plugin: TLibHandle): boolean; override;
     public
-      property MPlugins : TMPluginArray read Plugins;
-      property Count : integer read NumPlugins;
+      property MPlugins: TMPluginArray read Plugins;
+      property Count: integer read NumPlugins;
   end;
 
 implementation
@@ -74,43 +81,79 @@ uses
 
 { TMPlugins }
 
-function TMPlugins.InitPlugin(plugin: TLibHandle): boolean;
+function TMPlugins.InitPlugin(Plugin: TLibHandle): boolean;
 var
-  pntrArrc     :  function : integer; stdcall;
-  GetFuncInfo  :  function (x: Integer; var ProcAddr: Pointer; var ProcDef: PChar) : Integer; stdcall;
-  GetFuncConv  :  function (x: integer) : integer; stdcall;
-  GetTypeCount :  function : Integer; stdcall;
-  GetTypeInfo  :  function (x: Integer; var sType, sTypeDef: string): Integer; stdcall;
-  PD : PChar;
-  pntr : Pointer;
-  arrc, ii : integer;
+  GetFuncCount: function: integer; stdcall;
+  GetFuncInfo: function(x: Integer; var ProcAddr: Pointer; var ProcDef: PChar): integer; stdcall;
+  GetFuncConv: function(x: integer): integer; stdcall;
+  GetTypeCount: function: integer; stdcall;
+  GetTypeInfo: function(x: Integer; var sType, sTypeDef: string): integer; stdcall;
+  PD: PChar;
+  pntr: Pointer;
+  ArrC, I: integer;
 begin
-  Pointer(pntrArrc) := GetProcAddress(plugin, PChar('GetFunctionCount'));
-  if pntrArrc = nil then begin result:= false; exit; end;
-  Pointer(GetFuncInfo) := GetProcAddress(plugin, PChar('GetFunctionInfo'));
-  if GetFuncInfo = nil then begin result:= false; exit; end;
-  Pointer(GetFuncConv) := GetProcAddress(plugin,pchar('GetFunctionCallingConv'));
-
-  arrc := pntrArrc();
-  SetLength(Plugins,NumPlugins+1);
-  Plugins[NumPlugins].MethodLen := Arrc;
-  SetLength(Plugins[NumPlugins].Methods, ArrC);
-  pd := StrAlloc(255);
-  for ii := 0 to ArrC-1 do
-  begin;
-    if (GetFuncInfo(ii, pntr, pd) < 0) then
-      Continue;
-    Plugins[NumPlugins].Methods[ii].FuncPtr := pntr;
-    Plugins[NumPlugins].Methods[ii].FuncStr := pd;
-    if GetFuncConv <> nil then
-      Plugins[NumPlugins].Methods[ii].FuncConv := GetFuncConv(ii)
-    else
-      Plugins[NumPlugins].Methods[ii].FuncConv := cv_stdcall;
+  Pointer(GetFuncCount) := GetProcAddress(Plugin, PChar('GetFunctionCount'));
+  if (GetFuncCount = nil) then
+  begin
+    Result := False;
+    Exit;
   end;
-  StrDispose(pd);
+  
+  Pointer(GetFuncInfo) := GetProcAddress(Plugin, PChar('GetFunctionInfo'));
+  if (GetFuncInfo = nil) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  
+  Pointer(GetFuncConv) := GetProcAddress(Plugin, PChar('GetFunctionCallingConv'));
+  
+  SetLength(Plugins, NumPlugins + 1);
+  
+  Pointer(GetTypeCount) := GetProcAddress(Plugin, PChar('GetTypeCount'));
+  if (not (GetTypeCount = nil)) then
+  begin
+    Pointer(GetTypeInfo) := GetProcAddress(Plugin, PChar('GetTypeInfo'));
+    if (not (GetTypeInfo = nil)) then
+    begin
+      ArrC := GetTypeCount();
+      Plugins[NumPlugins].TypesLen := ArrC;
+      SetLength(Plugins[NumPlugins].Types, ArrC);
+      for I := 0 to ArrC - 1 do
+      begin
+        if (GetTypeInfo(I, Plugins[NumPlugins].Types[I].TypeName, Plugins[NumPlugins].Types[I].TypeDef) < 0) then
+        begin
+          WriteLn('Failed...');
+          Plugins[NumPlugins].Types[I].TypeName := '';
+          Plugins[NumPlugins].Types[I].TypeDef := '';
+        end;
+        WriteLn(Plugins[NumPlugins].Types[I].TypeName + ' = ' + Plugins[NumPlugins].Types[I].TypeDef);
+      end;
+    end;
+  end;
 
-  inc(NumPlugins);
-  result:= true;
+  ArrC := GetFuncCount();
+  WriteLn(ArrC);
+  Plugins[NumPlugins].MethodLen := ArrC;
+  SetLength(Plugins[NumPlugins].Methods, ArrC);
+  
+  PD := StrAlloc(255);
+  for I := 0 to ArrC - 1 do
+  begin;
+    if (GetFuncInfo(I, pntr, PD) < 0) then
+      Continue;
+    WriteLn(PD);
+    Plugins[NumPlugins].Methods[I].FuncPtr := pntr;
+    Plugins[NumPlugins].Methods[I].FuncStr := PD;
+
+    if (GetFuncConv <> nil) then
+      Plugins[NumPlugins].Methods[I].FuncConv := GetFuncConv(I)
+    else
+      Plugins[NumPlugins].Methods[I].FuncConv := cv_stdcall;
+  end;
+  StrDispose(PD);  
+  Inc(NumPlugins);
+  Result := True;
 end;
 
 end.

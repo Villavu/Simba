@@ -651,12 +651,18 @@ begin
   for i := fonts.count - 1 downto 0 do
     Sender.Comp.AddConstantN(Fonts[i].Name,'string').SetString(Fonts[i].Name);
 
-  for i := high(PluginsToLoad) downto 0 do
+  for i := High(PluginsToLoad) downto 0 do
+  begin
+    for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].TypesLen - 1 do
+      Sender.Comp.AddTypeS(PluginsGlob.MPlugins[PluginsToLoad[i]].Types[ii].TypeName,
+                      PluginsGlob.MPlugins[PluginsToLoad[i]].Types[ii].TypeDef);
+
     for ii := 0 to PluginsGlob.MPlugins[PluginsToLoad[i]].MethodLen - 1 do
       Sender.AddFunctionEx(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncPtr,
                            PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncStr,
                            Muf_Conv_to_PS_Conv(PluginsGlob.MPlugins[PluginsToLoad[i]].Methods[ii].FuncConv));
-
+  end;
+  
   for i := 0 to high(VirtualKeys) do
     Sender.Comp.AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
   // Here we add all the Consts/Types to the engine.
