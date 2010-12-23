@@ -106,13 +106,13 @@ type
     x1, y1, x2, y2: Integer;
   end;
 
-  TProc = record
+  TSysProc = record
     Title: string;
     Handle: integer;
     Pid: integer;
     Width, Height: integer;
   end;
-  TProcArr = array of TProc;
+  TSysProcArr = array of TSysProc;
 
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);

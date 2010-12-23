@@ -285,12 +285,12 @@ begin
   end;
 end;
 
-function ps_GetProcesses: TProcArr;
+function ps_GetProcesses: TSysProcArr;
 begin
   Result := CurrThread.Client.IOManager.GetProcesses;
 end;
 
-procedure ps_SetTarget(Proc: TProc);
+procedure ps_SetTarget(Proc: TSysProc);
 begin
   CurrThread.Client.IOManager.SetTargetEx(Proc);
 end;

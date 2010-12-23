@@ -97,8 +97,9 @@ interface
         constructor Create(plugin_dir: string);
         function SetTarget(target: TNativeWindow): integer; overload;
         procedure SetDesktop; override;
-        function GetProcesses: TProcArr; override;
-        procedure SetTargetEx(Proc: TProc); overload;
+        
+        function GetProcesses: TSysProcArr; override;
+        procedure SetTargetEx(Proc: TSysProc); overload;
       protected
         DesktopHWND : Hwnd;
         procedure NativeInit; override;
@@ -444,11 +445,11 @@ end;
   end;
 
   threadvar
-    ProcArr: TProcArr;
+    ProcArr: TSysProcArr;
 
   function EnumProcess(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
   var
-    Proc: TProc;
+    Proc: TSysProc;
     I: integer;
     pPid: DWORD;
   begin
@@ -466,14 +467,14 @@ end;
     end;
   end;
 
-  function TIOManager.GetProcesses: TProcArr;
+  function TIOManager.GetProcesses: TSysProcArr;
   begin
     SetLength(ProcArr, 0);
     EnumWindows(@EnumProcess, 0);
     Result := ProcArr;
   end;
 
-  procedure TIOManager.SetTargetEx(Proc: TProc);
+  procedure TIOManager.SetTargetEx(Proc: TSysProc);
   begin
     SetTarget(Proc.Handle);
   end;
