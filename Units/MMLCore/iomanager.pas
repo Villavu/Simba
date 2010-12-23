@@ -316,7 +316,9 @@ interface
         procedure SetKeyMouseTarget(idx: integer);
         procedure FreeTarget(idx: integer);
         procedure SetState(val: Boolean);
-
+        
+        function GetProcesses: TSysProcArr; virtual; abstract;
+        procedure SetTargetEx(Proc: TSysProc); virtual; abstract;
       protected
         function SetImageTarget(target: TTarget): integer;
         function SetKeyMouseTarget(target: TTarget): integer;
