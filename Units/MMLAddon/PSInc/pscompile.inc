@@ -65,5 +65,5 @@ AddConstantN('mouse_Right','integer').SetInt(ps_mouse_right); //0
 AddConstantN('mouse_Left','integer').SetInt(ps_mouse_left);//1
 AddConstantN('mouse_Middle','integer').SetInt(ps_mouse_middle);//2
 
-AddTypes('TProc', 'record Title: string; Handle: integer; Pid: integer; Width, Height: integer; end;');
-AddTypes('TProcArr', 'array of TProc;');
+AddTypes('TSysProc', 'record Title: string; Handle: integer; Pid: integer; Width, Height: integer; end;');
+AddTypes('TSysProcArr', 'array of TSysProc;');

@@ -195,8 +195,8 @@ AddFunction(@ps_messageBox,'function MessageBox(Text, Caption: string; Flags: Lo
 AddFunction(@ps_MessageDlg,'function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType;  Buttons: TMsgDlgButtons) : integer;');
 AddFunction(@ps_SetClipBoard, 'procedure SetClipBoard(const Data: string);');
 AddFunction(@ps_GetClipBoard, 'function GetClipBoard: string;');
-AddFunction(@ps_GetProcesses, 'function GetProcesses: TProcArr;');
-AddFunction(@ps_SetTarget, 'procedure SetTarget(Proc: TProc);');
+AddFunction(@ps_GetProcesses, 'function GetProcesses: TSysProcArr;');
+AddFunction(@ps_SetTarget, 'procedure SetTarget(Proc: TSysProc);');
 {$ENDIF}
 
 {string}
