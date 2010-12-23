@@ -133,11 +133,37 @@ procedure ext_OpenScript(Name, Data: string);
 begin
   if (Name = '') then
     Name := 'Untitled';
-  SimbaForm.AddTab;
-  SimbaForm.CurrScript.SynEdit.Lines.Text := Data;
-  SimbaForm.CurrScript.ScriptName := Name;
-  SimbaForm.RefreshTab;
-  SimbaForm.UpdateTitle;
+    
+  with SimbaForm do
+  begin
+    AddTab();
+    with CurrScript do
+    begin
+      SynEdit.Lines.Text := Data;
+      ScriptName := Name;
+    end;
+    RefreshTab();
+    UpdateTitle();
+  end;
+end;
+
+procedure ext_OpenScriptEx(FileName: string);
+begin
+  FileName := SetDirSeparators(FileName);
+  with SimbaForm do
+  begin
+    AddTab();
+    with CurrScript do
+    begin
+      SynEdit.Lines.LoadFromFile(FileName);
+      StartText := SynEdit.Lines.Text;
+      ScriptName := ExtractFileNameOnly(FileName);
+      ScriptFile := FileName;
+      ScriptChanged := False;
+    end;
+    RefreshTab();
+    UpdateTitle();
+  end;
 end;
 
 function ext_GetPageEx(const URL, PostData, MimeType: string): string;
