@@ -542,7 +542,7 @@ end;
 procedure AddFunction( Ptr : Pointer; DeclStr : String);
 begin;
   if c >= 500 then
-    raise exception.create('PSThread.LoadMethods: Exported more than 400 functions');
+    raise exception.create('PSThread.LoadMethods: Exported more than 500 functions');
   Result[c].FuncDecl:= DeclStr;
   Result[c].FuncPtr:= Ptr;
   Result[c].Section:= CurrSection;
