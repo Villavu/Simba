@@ -41,7 +41,7 @@ const
   cv_Register = 1; //Register
   
 type
-  TType = record
+  TPasScriptType = record
     TypeName, TypeDef: string;
   end;
   
@@ -54,7 +54,7 @@ type
   TMPlugin = record
     Methods: array of TMPluginMethod;
     MethodLen: integer;
-    Types: array of TType;
+    Types: array of TPasScriptType;
     TypesLen: integer;
   end;
   TMPluginArray = array of TMPlugin;
