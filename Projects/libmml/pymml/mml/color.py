@@ -98,9 +98,11 @@ class Color(object):
             ret = self._mc.dll.find_color_spiral(self._cli, byref(x), byref(y),
                                                  col, *box)
         else:
-            ret = self._mc.dll.find_color_spiral_tolerance(self._cli, byref(x),
-                                                           byref(y), col, *box,
-                                                           tol)
+            pass
+# FIXME
+#            ret = self._mc.dll.find_color_spiral_tolerance(self._cli, byref(x),
+#                                                           byref(y), col, *box,
+#                                                           tol)
         if ret is RESULT_OK:
             return (x, y)
         elif ret is RESULT_ERROR:
@@ -115,12 +117,16 @@ class Color(object):
         """
         x, y = (c_int(-1), c_int(-1))
         if tol is 0:
-            ret = self._mc.dll.find_colored_area(self._cli, byref(x), byref(y),
-                                                 col, *box, min_a)
+            pass
+# FIXME
+#            ret = self._mc.dll.find_colored_area(self._cli, byref(x), byref(y),
+#                                                 col, *box, min_a)
         else:
-            ret = self._mc.dll.find_colored_area_tolerance(self._cli, byref(x),
-                                                           byref(y), col, *box,
-                                                           min_a, tol)
+            pass
+# FIXME
+#            ret = self._mc.dll.find_colored_area_tolerance(self._cli, byref(x),
+#                                                           byref(y), col, *box,
+#                                                           min_a, tol)
         if ret is RESULT_OK:
             return (x, y)
         elif ret is RESULT_ERROR:
@@ -136,8 +142,10 @@ class Color(object):
         if tol is 0:
             ret = self._mc.dll.count_color(self._cli, count, col, *box)
         else:
-            ret = self._mc.dll.count_color_tolerance(self._cli, count, col,
-                                                     *box, tol)
+            pass
+# FIXME
+#            ret = self._mc.dll.count_color_tolerance(self._cli, count, col,
+#                                                     *box, tol)
         if ret is RESULT_OK:
             return count
         elif ret is RESULT_ERROR:
