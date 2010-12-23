@@ -97,8 +97,8 @@ interface
         function SetTarget(target: TNativeWindow): integer; overload;
         procedure SetDesktop; override;
 
-        function GetProcesses: TProcArr; override;
-        procedure SetTargetEx(Proc: TProc); overload;
+        function GetProcesses: TSysProcArr; override;
+        procedure SetTargetEx(Proc: TSysProc); overload;
       private
         procedure NativeInit; override;
         procedure NativeFree; override;
@@ -513,12 +513,12 @@ implementation
     SetBothTargets(TWindow.Create(display, screennum, target))
   end;
 
-  function TIOManager.GetProcesses: TProcArr;
+  function TIOManager.GetProcesses: TSysProcArr;
   begin
     raise Exception.Create('GetProcesses: Not Implemented.');
   end;
 
-  procedure TIOManager.SetTargetEx(Proc: TProc);
+  procedure TIOManager.SetTargetEx(Proc: TSysProc);
   begin
     raise Exception.Create('SetTargetEx: Not Implemented.');
   end;
