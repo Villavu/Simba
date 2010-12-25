@@ -123,17 +123,14 @@ begin
       begin
         if (GetTypeInfo(I, Plugins[NumPlugins].Types[I].TypeName, Plugins[NumPlugins].Types[I].TypeDef) < 0) then
         begin
-          WriteLn('Failed...');
           Plugins[NumPlugins].Types[I].TypeName := '';
           Plugins[NumPlugins].Types[I].TypeDef := '';
         end;
-        WriteLn(Plugins[NumPlugins].Types[I].TypeName + ' = ' + Plugins[NumPlugins].Types[I].TypeDef);
       end;
     end;
   end;
 
   ArrC := GetFuncCount();
-  WriteLn(ArrC);
   Plugins[NumPlugins].MethodLen := ArrC;
   SetLength(Plugins[NumPlugins].Methods, ArrC);
   
@@ -142,7 +139,6 @@ begin
   begin;
     if (GetFuncInfo(I, pntr, PD) < 0) then
       Continue;
-    WriteLn(PD);
     Plugins[NumPlugins].Methods[I].FuncPtr := pntr;
     Plugins[NumPlugins].Methods[I].FuncStr := PD;
 
