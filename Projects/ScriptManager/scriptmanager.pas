@@ -37,7 +37,7 @@ uses
   {$IFDEF UNIX}cthreads,cmem,{$ENDIF} Classes, SysUtils, FileUtil, Forms,
   Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, ComCtrls, ActnList, Menus, settings, updater,strutils, MufasaTypes,
-  dom;
+  dom, mmisc;
 
 type
 
@@ -48,7 +48,7 @@ type
     function IsInstalled: boolean;
     procedure LoadFromNode( Script : TDOMNode);
   public
-    Name, Version, Author, Description: String;
+    Name, Version, Author, Description, URL: String;
     Tags, Files: TStringList;
     LocalScript : TSimbaScript;
     property Installed : boolean read IsInstalled;
@@ -79,21 +79,21 @@ type
     FLScripts: TList; //Array of the local scripts
     FVersion : String;
     FUpdating : boolean;
-    function FindScriptByName(name : string) : Integer;
-    function FindLScriptByName(name : string) : Integer;
     function GetLScriptCount: integer;
     function GetMainDir: string;
     function GetScript(index : integer): TSimbaScript;
     function GetScriptCount: integer;
     procedure MatchLocalOnline;
   public
+    function FindScriptByName(name : string) : Integer;
+    function FindLScriptByName(name : string) : Integer;
     property MainDir : string read GetMainDir write FMaindir;
     property SimbaScript[index : integer] : TSimbaScript read GetScript;
     procedure Update; //Gets the online scripts
     procedure LUpdate; //Loads the local scripts, uses MainDir
     function NewVersion(Script : integer) : boolean; //Checks for updates for Script
     procedure InstallNewScript(Script : integer); //Installs Script (Online -> Local)
-    procedure UpdateScript(Script : integer; ignoreupdating : boolean = false); //Updates all the info/files of local script
+    function UpdateScript(Script : integer; ignoreupdating : boolean = false) : boolean; //Updates all the info/files of local script
     procedure LSave; //Saves the local scripts, uses MainDir
     property LScriptCount : integer read GetLScriptCount; //LScript = Local Script = Installed Script
     property ScriptCount : integer read GetScriptCount; //Online script
@@ -106,10 +106,12 @@ type
 
   TForm1 = class(TForm)
     Button1: TButton;
+    Button2: TButton;
     GroupBox1: TGroupBox;
     ListView1: TListView;
     Memo1: TMemo;
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
     procedure ClickItem(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure FormCreate(Sender: TObject);
@@ -190,11 +192,23 @@ var
   Item : TListItem;
 begin
   Mng.Update;
+  ListView1.Items.Clear;
   for i := 0 to Mng.ScriptCount - 1 do
   begin
     Item := ListView1.Items.Add;
     Item.Data:= Mng.SimbaScript[i];
     Item.Caption:= Mng.SimbaScript[i].Name;
+  end;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+var
+  Script : TSimbaScript;
+begin
+  if (ListView1.Selected <> nil) and (ListView1.Selected.Data <> nil) then
+  begin
+    Script := TSimbaScript(ListView1.Selected.Data);
+    Mng.InstallNewScript(mng.FindScriptByName(Script.Name));
   end;
 end;
 
@@ -242,6 +256,7 @@ begin
   Description:= NodeContents('Description',script);
   Tags := NodeSubContents('Tags',script);
   Files := NodeSubContents('Files',script);
+  URL := 'http://old.villavu.com/sm/scripts/'+Name+'.tar.bz2';
 end;
 
 procedure TSimbaScript.Dbg;
@@ -459,12 +474,13 @@ begin
   UpdateScript(FLScripts.Count - 1,true);
 end;
 
-procedure TScriptManager.UpdateScript(Script: integer; ignoreupdating : boolean = false);
+function TScriptManager.UpdateScript(Script: integer; ignoreupdating : boolean = false) : boolean;
 var
   LScrpt : TLSimbaScript;
   Scrpt : TSimbaScript;
-  DownloadThread : TDownloadThread;
+  DownloadThread : TDownloadDecompressThread;
 begin
+  Result := true;
   if not NewVersion(Script) then
     Exit;
   if FUpdating and not ignoreupdating then
@@ -480,10 +496,19 @@ begin
     Description:= Scrpt.Version;
     Tags.Assign(Scrpt.Tags);
     Files.Assign(Scrpt.Files);
+    URL := 'http://old.villavu.com/sm/scripts/'+name+ '.tar.bz2';
   end;
   LScrpt.Save(MainDir);      //Saves the setting file, now we only need to update the files
-  //Download files & write to folder
-
+  DownloadThread := TDownloadDecompressThread.Create(LScrpt.URL,MainDir + LScrpt.Name + DS,true);
+  DownloadThread.execute;
+  while DownloadThread.Done = false do
+  begin
+    Application.ProcessMessages;
+    Sleep(25);
+  end;
+  Result := DownloadThread.Succeeded;
+  DownloadThread.Free;
+  LSave; //Update the scripts XML file
   FUPdating := false;
 end;
 
@@ -520,6 +545,8 @@ begin
   FScripts := TList.Create;
   FVersion := '';
   FUpdating:= False;
+  FMainDir:= ExtractFileDir(Application.ExeName);
+  CreateDir(MainDir + 'General');
 end;
 
 destructor TScriptManager.Destroy;
@@ -607,6 +634,8 @@ end;
 constructor TLSimbaScript.create;
 begin
   inherited;
+  Tags := TStringList.Create; //Might leak, but careface
+  Files := TStringList.create; //Same ^
   AutoCheckUpdates:= true;
 end;
 
