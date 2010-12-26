@@ -51,10 +51,25 @@ type
     property Finished : boolean read FFinished;
   end;
 
+  { TDownloadDecompressThread }
+
+  TDownloadDecompressThread = class(TThread)
+  private
+    InputURL : string;
+    Folder : string;
+    FData : string;
+    FOverWrite : boolean;
+  public
+    Done : boolean;
+    Succeeded : boolean;
+    property Rawdata : string read FData;
+    constructor Create(const URL, OutputDir : string; const Overwrite : boolean);
+    procedure execute; override;
+  end;
 implementation
 
 uses
-  FileUtil;
+  FileUtil, internets;
 
 function DecompressBZip2(const input: TStream; const BlockSize: Cardinal): TMemoryStream;
 var
@@ -146,6 +161,46 @@ begin;
   end;
   Tar.Free;
   Result := Succ;
+end;
+
+{ TDownloadDecompressThread }
+
+constructor TDownloadDecompressThread.Create(const URL, OutputDir: string; const Overwrite : boolean);
+begin
+  inherited Create(true);
+  FreeOnTerminate := False;
+  InputURL:= URL;
+  Folder:= OutputDir;
+  Done := false;
+  FData := '';
+  Succeeded:= false;
+  FOverWrite:= Overwrite;
+end;
+
+procedure TDownloadDecompressThread.execute;
+var
+  SStream : TStringStream;
+  DecompressData : TMemoryStream;
+begin
+  Succeeded:= False;
+  try
+    if ((InputURL = '') or (Folder = '')) then
+      Exit;
+    FData := Getpage(InputURL);
+    if FData = '' then
+      Exit; //Goes to finally
+    SStream := TStringStream.Create(FData);
+    DecompressData := DecompressBZip2(SStream);
+    if DecompressData = nil then
+      Exit; //Goes to finally
+    if not Untar(DecompressData,Folder,FOverwrite) then
+      Exit;
+    DecompressData.Free;
+    SStream.free;
+    Succeeded:= True;
+  finally
+    Done := true;
+  end;
 end;
 
 constructor TProcThread.Create;

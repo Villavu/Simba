@@ -1,5 +1,5 @@
 
-function ps_haval(Data: string): string;
+function ps_haval(Data: string): string;  extdecl;
 var
   HASH: TDCP_haval;
   Digest: array[0..31] of byte;
@@ -19,7 +19,7 @@ begin
   end;
 end;
 
-function ps_md4(Data: string): string;
+function ps_md4(Data: string): string;  extdecl;
 var
   HASH: TDCP_md4;
   Digest: array[0..15] of byte;
@@ -39,7 +39,7 @@ begin
   end;
 end; 
 
-function ps_md5(Data: string): string;
+function ps_md5(Data: string): string;  extdecl;
 var
   HASH: TDCP_md5;
   Digest: array[0..15] of byte;
@@ -59,7 +59,7 @@ begin
   end;
 end;
 
-function ps_ripemd128(Data: string): string;
+function ps_ripemd128(Data: string): string;  extdecl;
 var
   HASH: TDCP_ripemd128;
   Digest: array[0..15] of byte;
@@ -79,7 +79,7 @@ begin
   end;
 end;
 
-function ps_ripemd160(Data: string): string;
+function ps_ripemd160(Data: string): string;  extdecl;
 var
   HASH: TDCP_ripemd160;
   Digest: array[0..19] of byte;
@@ -99,7 +99,7 @@ begin
   end;
 end;
 
-function ps_sha1(Data: string): string;
+function ps_sha1(Data: string): string;   extdecl;
 var
   HASH: TDCP_sha1;
   Digest: array[0..19] of byte;
@@ -119,7 +119,7 @@ begin
   end;
 end;
 
-function ps_sha256(Data: string): string;
+function ps_sha256(Data: string): string;  extdecl;
 var
   HASH: TDCP_sha256;
   Digest: array[0..31] of byte;
@@ -139,7 +139,7 @@ begin
   end;
 end;
 
-function ps_sha384(Data: string): string;
+function ps_sha384(Data: string): string;  extdecl;
 var
   HASH: TDCP_sha384;
   Digest: array[0..47] of byte;
@@ -159,7 +159,7 @@ begin
   end;
 end;
 
-function ps_sha512(Data: string): string;
+function ps_sha512(Data: string): string;  extdecl;
 var
   HASH: TDCP_sha512;
   Digest: array[0..63] of byte;
@@ -179,7 +179,7 @@ begin
   end;
 end;
 
-function ps_tiger(Data: string): string;
+function ps_tiger(Data: string): string;  extdecl;
 var
   HASH: TDCP_tiger;
   Digest: array[0..23] of byte;
@@ -198,4 +198,3 @@ begin
     Hash.Free;
   end;
 end;
-
