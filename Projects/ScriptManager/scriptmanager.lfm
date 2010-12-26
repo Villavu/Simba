@@ -12,10 +12,10 @@ object Form1: TForm1
   object Button1: TButton
     Left = 16
     Height = 33
-    Top = 365
+    Top = 384
     Width = 680
     Anchors = [akLeft, akBottom]
-    Caption = 'Button1'
+    Caption = 'Refresh'
     OnClick = Button1Click
     TabOrder = 0
   end
@@ -51,5 +51,14 @@ object Form1: TForm1
     Columns = <>
     TabOrder = 2
     OnChange = ListView1Change
+  end
+  object Button2: TButton
+    Left = 21
+    Height = 38
+    Top = 338
+    Width = 672
+    Caption = 'Install'
+    OnClick = Button2Click
+    TabOrder = 3
   end
 end
