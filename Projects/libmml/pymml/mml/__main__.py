@@ -14,7 +14,7 @@ if __name__ == '__main__':
     ret = c.find((0, 0, 100, 100), 0)
     print ret
 
-    ret = c.findAll((0, 0, 100, 100), 0, tol=100)
+    ret = c.find_all((0, 0, 100, 100), 0, tol=100)
     print ret
 
     m = Mouse(DLL, client)
