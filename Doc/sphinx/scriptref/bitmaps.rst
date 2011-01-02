@@ -4,13 +4,25 @@
 Bitmaps
 =======
 
-CreateBitmapString
-------------------
+Bitmaps in Simba are internally all instances of *TMufasBitmap*. Scripts should
+generally access bitmaps using their *handle*: an integer. All functions
+referenced here either require a bitmap *handle* or return one.
+
+If you want to gain more access over a specific bitmap, see the
+*GetMufasaBitmap* function. It is highly unrecommended to create bitmaps with:
 
 .. code-block:: pascal
 
-    function CreateBitmapString(bmp : integer) : string;
+    var bmp: TMufasaBitmap;
+    bmp := TMufasBitmap.Create;
 
+Because there is no way to get a *handle* to this bitmap; as it will not be
+managed by Simba internally. (All Bitmaps created by *CreateBitmap* are managed
+by Simba, if you don't know what this means: you generally want Simba to manage
+the bitmaps)
+
+If you still want access to the TMufasaBitmap, use *GetMufasaBitmap*, described
+below.
 
 GetMufasaBitmap
 ---------------
@@ -19,6 +31,32 @@ GetMufasaBitmap
 
     function GetMufasaBitmap(bmp : integer) : TMufasaBitmap;
 
+Returns the *TMufasaBitmap* for the given bitmap. They both reference the same
+bitmap. TMufasaBitmap is a more advanced interface to bitmaps in Simba.
+There is no way to get a *internal* (integer)
+reference to a bitmap if you create it with TMufasaBitmap.Create; so the
+recommended way is to use *CreateBitmap* to get the integer reference/handle and
+then call this function to get the class reference.
+
+
+.. code-block:: pascal
+
+    var bmp: TMufasaBitmap;
+        bmph: integer;
+    bmph := CreateBitmap(100, 100);
+    bmp := GetMufasaBitmap(bmph);
+
+    bmp.SetSize(150,150); // also changes bmph, as they are the same bitmap.
+
+
+CreateBitmapString
+------------------
+
+.. code-block:: pascal
+
+    function CreateBitmapString(bmp : integer) : string;
+
+Creates a string for the given bitmap.
 
 CreateBitmap
 ------------
@@ -26,6 +64,8 @@ CreateBitmap
 .. code-block:: pascal
 
     function CreateBitmap(w,h :integer) : integer;
+
+Create a bitmap with width *h* and height *h*. Returns the bitmap reference.
 
 
 FreeBitmap
@@ -35,6 +75,10 @@ FreeBitmap
 
     procedure FreeBitmap(Bmp : integer);
 
+Free the bitmap. You should do this when you no longer need the bitmap.
+Be careful when working with bitmaps: not freeing it when you no longer need it
+leads to memory leaks, which will eventually make your script crash. (Unless you
+stop it in time, in which case Simba will free the bitmaps for you)
 
 SaveBitmap
 ----------
@@ -43,6 +87,7 @@ SaveBitmap
 
     procedure SaveBitmap(Bmp : integer; path : string);
 
+Save the given bitmap to the specified path.
 
 BitmapFromString
 ----------------
@@ -50,6 +95,9 @@ BitmapFromString
 .. code-block:: pascal
 
     function BitmapFromString(Width,Height : integer; Data : string): integer;
+
+Load a bitmap from the given string. This command is usually generated with the
+Bitmap to String feature in Simba.
 
 
 LoadBitmap
@@ -59,6 +107,8 @@ LoadBitmap
 
     function LoadBitmap(Path : string) : integer;
 
+Load a bitmap from a path to a file. Known formats are .bmp and .png. (Possibly
+others, don't know for sure)
 
 SetBitmapSize
 -------------
@@ -67,6 +117,7 @@ SetBitmapSize
 
     procedure SetBitmapSize(Bmp,NewW,NewH : integer);
 
+Change the size of the bitmap. Previous data will be preserved (if possible).
 
 GetBitmapSize
 -------------
@@ -75,6 +126,7 @@ GetBitmapSize
 
     procedure GetBitmapSize(Bmp : integer; var BmpW,BmpH : integer);
 
+Returns the size of the bitmap in *BmpW*, *BmpH*.
 
 StretchBitmapResize
 -------------------
@@ -107,6 +159,7 @@ FastSetPixel
 
     procedure FastSetPixel(bmp,x,y : integer; Color : TColor);
 
+Set the pixel on the bitmap at position x, y to *color*.
 
 FastSetPixels
 -------------
@@ -114,6 +167,8 @@ FastSetPixels
 .. code-block:: pascal
 
     procedure FastSetPixels(bmp : integer; TPA : TPointArray; Colors : TIntegerArray);
+
+Set the pixels on the bitmap at position TPA[index] to Colors[index].
 
 
 FastGetPixel
@@ -123,6 +178,7 @@ FastGetPixel
 
     function FastGetPixel(bmp, x,y : integer) : TColor;
 
+Return the colour of pixel on the bitmap, position specified by x, y.
 
 FastGetPixels
 -------------
@@ -130,6 +186,8 @@ FastGetPixels
 .. code-block:: pascal
 
     function FastGetPixels(Bmp : integer; TPA : TPointArray) : TIntegerArray;
+
+Return an array of the colours on the bitmap; positions specified by *TPA*.
 
 
 GetBitmapAreaColors
@@ -139,6 +197,8 @@ GetBitmapAreaColors
 
     function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntegerArray;
 
+Returns all the colours in the area defined by (*xs*, *xy*, *xe*, *ye*) on the
+bitmap in a two dimensions integer array.
 
 FastDrawClear
 -------------
