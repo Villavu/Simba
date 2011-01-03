@@ -46,9 +46,6 @@ var
 begin
   with UpdaterArr[I] do
   begin
-    if ((Settings.GetKeyValueDef(Name + '_DontUpdate', 'false') = 'true') and (not (Sender = UpdateMenuItem))) then
-      Exit;
-
     if (Locked) then
       Exit;
 
@@ -104,10 +101,7 @@ begin
     begin
       case Sender of
         UpdaterArr[I].Timer: Name := 'Timer';
-        UpdaterArr[I].CheckMenuItem: begin
-           Name := 'Check';
-           Settings.SetKeyValue(UpdaterArr[I].Name + '_DontUpdate', 'false');
-          end;
+        UpdaterArr[I].CheckMenuItem: Name := 'Check';
       end;
       if (not (Name = '')) then
         Break;
@@ -168,7 +162,7 @@ begin
               if ((IntToStr(StrToIntDef(Value, -1)) = Value) and InRange(StrToIntDef(Value, -1), 1, 100000)) then
               begin
                 Timer.Interval := StrToIntDef(Value, (Timer.Interval / 1000)) * 1000;
-                TimerMenuItem.Caption := 'Timer Interval: ' + IntToStr(Timer.Interval);
+                TimerMenuItem.Caption := 'Timer Interval: ' + IntToStr(Timer.Interval / 1000);
                 Settings.SetKeyValue(Name + '_TimerInterval', IntToStr(Timer.Interval));
               end;
             end;
@@ -245,7 +239,6 @@ begin
     Folder := ExFolder;
     CreateMenu := ShowMenu;
     NoMenuTimer := TimerIfNoMenu;
-    Settings.SetKeyValue(Name + '_DontUpdate', 'false');
 
     if (CreateMenu) then
     begin
@@ -306,7 +299,7 @@ begin
       MainMenu.Add(SettingsMenu);
 
       TimerMenuItem := TMenuItem.Create(SettingsMenu);
-      TimerMenuItem.Caption := 'Timer Interval: ' + ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '3600000'), Numbers);
+      TimerMenuItem.Caption := 'Timer Interval: ' + IntToStr(StrToIntDef(ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '3600000'), Numbers), 3600000) / 1000);
       TimerMenuItem.OnClick := @Click;
       SettingsMenu.Add(TimerMenuItem);
 
