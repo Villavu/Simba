@@ -92,7 +92,7 @@ begin
     end;
 
     WriteLn('Opening Paste #' + GetJSONValue(Data, 'paste_id') + ' in a new tab!');
-    OpenScript('Paste #' + GetJSONValue(Data, 'paste_id'), GetJSONValue(Data, 'code'));
+    OpenScript('Paste #' + GetJSONValue(Data, 'paste_id'), GetJSONValue(Data, 'code'), False);
     Result := True;
   end;
 end;

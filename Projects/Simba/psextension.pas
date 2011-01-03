@@ -192,8 +192,8 @@ begin
     AddFunction(@ext_MessageDlg,'function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;');
     AddFunction(@ext_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
     AddFunction(@ext_ScriptText,'function ScriptText: string;');
-    AddFunction(@ext_OpenScript,'procedure OpenScript(Name, Data: string);');
-    AddFunction(@ext_OpenScriptEx,'procedure OpenScriptEx(FileName: string);');
+    AddFunction(@ext_OpenScript,'procedure OpenScript(Name, Data: string; Run: boolean);');
+    AddFunction(@ext_OpenScriptEx,'procedure OpenScriptEx(FileName: string; Run: boolean);');
     AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
     AddFunction(@ext_GetPageEx,'function GetPageEx(const URL, PostData, MimeType: string): string;');
     AddFunction(@ext_GetJSONValue,'function GetJSONValue(const Data, Value: string): string;');

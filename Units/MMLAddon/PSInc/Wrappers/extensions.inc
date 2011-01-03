@@ -129,10 +129,10 @@ begin
   Result := ReplaceRegExpr('([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])\s*\:\=\s*\''.*?\'';', Result, '$1 := ''*********'';', True);
 end;
 
-procedure ext_OpenScript(Name, Data: string);
+procedure ext_OpenScript(vName, Data: string; Run: boolean);
 begin
-  if (Name = '') then
-    Name := 'Untitled';
+  if (vName = '') then
+    vName := 'Untitled';
     
   with SimbaForm do
   begin
@@ -140,14 +140,18 @@ begin
     with CurrScript do
     begin
       SynEdit.Lines.Text := Data;
-      ScriptName := Name;
+      ScriptName := vName;
+      ScriptChanged := True;
     end;
     RefreshTab();
     UpdateTitle();
   end;
+
+  if (Run) then
+    SimbaForm.RunScript();
 end;
 
-procedure ext_OpenScriptEx(FileName: string);
+procedure ext_OpenScriptEx(FileName: string; Run: boolean);
 begin
   FileName := SetDirSeparators(FileName);
   with SimbaForm do
@@ -164,6 +168,9 @@ begin
     RefreshTab();
     UpdateTitle();
   end;
+
+  if (Run) then
+    SimbaForm.RunScript();
 end;
 
 function ext_GetPageEx(const URL, PostData, MimeType: string): string;
