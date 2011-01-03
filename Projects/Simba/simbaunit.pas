@@ -45,7 +45,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings, updater;
 
 const
-  SimbaVersion = 750;
+  SimbaVersion = 800;
 
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
@@ -2917,6 +2917,8 @@ begin
           SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion),true);
           if Assigned(self.OCR_Fonts) then
             self.OCR_Fonts.Free;
+          FormWriteln('Freeing the current fonts. Creating new ones now');
+          // XXX: Can this cause problems when running scripts?
           Self.OCR_Fonts := TMOCR.Create(nil);
           OCR_Fonts.InitTOCR(fontPath);
         end;
