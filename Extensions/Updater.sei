@@ -279,7 +279,7 @@ begin
       MainMenu.Add(CheckMenuItem);
 
       AutoMenu := TMenuItem.Create(MainMenu);
-      AutoMenu.Caption := 'Automaticaly ...';
+      AutoMenu.Caption := 'Automatically ...';
       MainMenu.Add(AutoMenu);
 
       AUpdateMenuItem := TMenuItem.Create(AutoMenu);
