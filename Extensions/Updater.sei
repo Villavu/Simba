@@ -1,0 +1,363 @@
+
+const
+  ATTACH_HOOK = 0;
+  DETACH_HOOK = 1;
+  CHECK_FOR_UPDATE = 2;
+  BEFORE_UPDATE = 3;
+  SUCCESS_UPDATE = 4;
+  AFTER_UPDATE = 5;
+
+type
+  THookFunc = function(Param1: string; Param2: integer): boolean;
+  THookArr = array[ATTACH_HOOK..AFTER_UPDATE] of THookFunc;
+  TUpdater = record
+    Name, URL, VersionURL, Folder: string;
+    CreateMenu, NoMenuTimer, Locked: boolean;
+    Hooks: THookArr;
+    ViewMenuItem: TMenuItem;
+    MainMenu, UpdateMenuItem, CheckMenuItem: TMenuItem;
+    AutoMenu, AUpdateMenuItem, ACheckMenuItem: TMenuItem;
+    SettingsMenu, TimerMenuItem, OverrideUpdateMenuItem: TMenuItem;
+    Timer: TTimer;
+  end;
+  TUpdaterArr = array of TUpdater;
+
+var
+  UpdaterArr: TUpdaterArr;
+
+function GetOVersion(Updater: TUpdater): integer;
+begin
+  Result := StrToIntDef(ExtractFromStr(GetPage(Updater.VersionURL), Numbers), -1);
+end;
+
+function GetLVersion(Updater: TUpdater): integer;
+begin
+  Result := StrToIntDef(ExtractFromStr(Settings.GetKeyValueDef(Updater.Name + '_Version', '-1'), Numbers), -1);
+end;
+
+procedure SetLVersion(Updater: TUpdater; Version: integer);
+begin
+  Settings.SetKeyValue(Updater.Name + '_Version', IntToStr(Version));
+end;
+
+procedure Update(const Sender: TObject; const I: integer);
+var
+  Cont, ExCont: string;
+begin
+  with UpdaterArr[I] do
+  begin
+    if (Locked) then
+      Exit;
+
+    if (Hooks[BEFORE_UPDATE] <> nil) then
+      if (not (Hooks[BEFORE_UPDATE]('', I))) then
+        Exit;
+
+    Locked := True;
+
+    WriteLn(Name + ' Updater: Local Version - "' + IntToStr(GetLVersion(UpdaterArr[I])) + '"  |  Remote Version = "' + IntToStr(GetOVersion(UpdaterArr[I])) + '"');
+    WriteLn(Name + ' Updater: Update File - "' + URL + '"');
+    WriteLn(Name + ' Updater: Downloading...');
+    Cont := GetPage(URL);
+    if (Cont <> '') then
+    begin
+      WriteLn(Name + ' Updater: Decompressing...');
+      if (DecompressBZip2(Cont, ExCont, 4096)) then
+      begin
+        WriteLn(Name + ' Updater: Extracting...');
+        if (UnTarEx(ExCont, Folder, True)) then
+        begin
+          if (Hooks[SUCCESS_UPDATE] <> nil) then
+            if (not (Hooks[SUCCESS_UPDATE](ExCont, I))) then
+            begin
+              WriteLn(Name + ' Update ERROR: Kill recieved from Updater.');
+              Exit;
+            end;
+          SetLVersion(UpdaterArr[I], GetOVersion(UpdaterArr[I]));
+          WriteLn(Name + ' Update Successful!');
+          if (CreateMenu) then
+            UpdateMenuItem.Enabled := OverrideUpdateMenuItem.Checked;
+        end else
+          WriteLn(Name + ' Update ERROR: Couldn''t extract the tar archive.');
+      end else
+        WriteLn(Name + ' Update ERROR: Couldn''t decompress the bzip archive.');
+    end else
+      WriteLn(Name + ' Update ERROR: Didn''t recieve any data from Update URL.');
+
+    Locked := False;
+    if (Hooks[AFTER_UPDATE] <> nil) then
+      if (not (Hooks[AFTER_UPDATE]('', I))) then
+        Exit;
+  end;
+end;
+
+procedure Tick(const Sender: TObject);
+var
+  I: integer;
+  Name: string;
+begin
+  for I := 0 to High(UpdaterArr) + 1 do
+    if (not (I = High(UpdaterArr) + 1)) then
+    begin
+      case Sender of
+        UpdaterArr[I].Timer: Name := 'Timer';
+        UpdaterArr[I].CheckMenuItem: Name := 'Check';
+      end;
+      if (not (Name = '')) then
+        Break;
+    end else
+      Exit;
+
+  if (UpdaterArr[I].Locked) then
+    Exit;
+
+  if (UpdaterArr[I].Hooks[CHECK_FOR_UPDATE] <> nil) then
+    if (not (UpdaterArr[I].Hooks[CHECK_FOR_UPDATE](Name, I))) then
+      Exit;
+
+  if (GetLVersion(UpdaterArr[I]) < GetOVersion(UpdaterArr[I])) then
+  begin
+    WriteLn('You have a new update available for ' + UpdaterArr[I].Name + '!');
+
+    if (UpdaterArr[I].CreateMenu) then
+    begin
+      UpdaterArr[I].UpdateMenuItem.Enabled := True;
+      if (UpdaterArr[I].AUpdateMenuItem.Checked or (Sender = UpdaterArr[I].CheckMenuItem)) then
+        Update(Sender, I);
+    end else
+      Update(Sender, I);
+  end else
+    if (Sender = UpdaterArr[I].CheckMenuItem) then
+      WriteLn('No ' + UpdaterArr[I].Name + ' update available.');
+end;
+
+procedure Click(Sender: TObject);
+var
+  I: integer;
+  Value: string;
+begin
+  for I := 0 to High(UpdaterArr) do
+    with UpdaterArr[I] do
+    begin
+      case Sender of
+        ViewMenuItem: begin
+            ViewMenuItem.Checked := (not (ViewMenuItem.Checked));
+            Settings.SetKeyValue(Name + '_Visible', Lowercase(BoolToStr(ViewMenuItem.Checked)));
+            MainMenu.Visible := ViewMenuItem.Checked;
+          end;
+        UpdateMenuItem: Update(Sender, I);
+        CheckMenuItem: Tick(Sender);
+        AUpdateMenuItem, ACheckMenuItem, OverrideUpdateMenuItem: begin
+            TMenuItem(Sender).Checked := (not (TMenuItem(Sender).Checked));
+            Settings.SetKeyValue(UpdaterArr[I].Name + '_' + ExtractFromStr(TMenuItem(Sender).Caption, Letters), BoolToStr(TMenuItem(Sender).Checked));
+            case Sender of
+              OverrideUpdateMenuItem: UpdateMenuItem.Enabled := OverrideUpdateMenuItem.Checked;
+              ACheckMenuItem: Timer.Enabled := ACheckMenuItem.Checked;
+            end;
+          end;
+        TimerMenuItem: begin
+            if (InputQuery(Name + ' Updater', 'What would you like the Timer Interval to be? (1 - 100000 seconds)', Value)) then
+            begin
+              Value := ExtractFromStr(Value, Numbers);
+              if ((IntToStr(StrToIntDef(Value, -1)) = Value) and InRange(StrToIntDef(Value, -1), 1, 100000)) then
+              begin
+                Timer.Interval := StrToIntDef(Value, (Timer.Interval / 1000)) * 1000;
+                TimerMenuItem.Caption := 'Timer Interval: ' + IntToStr(Timer.Interval / 1000);
+                Settings.SetKeyValue(Name + '_TimerInterval', IntToStr(Timer.Interval));
+              end;
+            end;
+          end;
+      end;
+    end;
+end;
+
+function InMenu(const Name: string; const Menu: TMenuItem; out Item: TMenuItem): boolean;
+var
+  I: integer;
+begin
+  for I := 0 to Menu.Count - 1 do
+    if (Lowercase(Menu.Items[I].Caption) = Lowercase(Name)) then
+    begin
+      Result := True;
+      Item := Menu.Items[I];
+      Exit;
+    end;
+end;
+
+function GetMenuByName(const Name: string; Menu: TMenuItem): TMenuItem;
+begin
+  if (not (InMenu(Name, Menu, Result))) then
+  begin
+    Result := TMenuItem.Create(Menu);
+    Result.Caption := Name;
+    Menu.Add(Result);
+  end;
+end;
+
+function MoveMenuItem(Menu: TMenuItem; FromIndex, ToIndex: integer): TMenuItem;
+var
+  TempMenuItem: TMenuItem;
+begin
+  if (InRange(FromIndex, 0, Menu.Count - 1) and InRange(ToIndex, 0, Menu.Count - 1)) then
+  begin
+    TempMenuItem := Menu.Items[FromIndex];
+    Menu.Delete(FromIndex);
+    Menu.Insert(ToIndex, TempMenuItem);
+    Result := Menu.Items[ToIndex];
+  end;
+end;
+
+function GetIndex(Menu, MenuItem: TMenuItem): integer;
+begin
+  for Result := 0 to Menu.Count - 1 do
+    if (Menu.Items[Result] = MenuItem) then
+      Exit;
+  Result := -1;
+end;
+
+function IsUpdateMenu(const Menu: TMenuItem): boolean;
+var
+  I: integer;
+begin
+  for I := 0 to Menu.Count - 1 do
+    if (Menu.Items[I].Caption = 'Update') then
+      Result := True;
+end;
+
+function AddUpdater(const IncludeName, UpdateURL, VerURL, ExFolder: string; const ShowMenu, TimerIfNoMenu: boolean; var ID: integer): boolean;
+var
+  Seperator: array[0..1] of TMenuItem;
+  ViewMenu: TMenuItem;
+begin
+  ID := Length(UpdaterArr);
+  SetLength(UpdaterArr, ID + 1);
+  with UpdaterArr[ID] do
+  begin
+    Name := IncludeName;
+    URL := UpdateURL;
+    VersionURL := VerURL;
+    Folder := ExFolder;
+    CreateMenu := ShowMenu;
+    NoMenuTimer := TimerIfNoMenu;
+
+    if (CreateMenu) then
+    begin
+      ViewMenu := GetMenuByName('&View', Simba_MainMenu.Items);
+      if (ViewMenu.Count = 4) then
+      begin
+        Seperator[0] := TMenuItem.Create(ViewMenu);
+        Seperator[0].Caption := '-';
+        ViewMenu.Add(Seperator[0])
+      end;
+
+      ViewMenuItem := GetMenuByName(Name + ' Menu', ViewMenu);
+      ViewMenuItem.OnClick := @Click;
+      ViewMenuItem.Checked := (LowerCase(Settings.GetKeyValueDef(Name + '_Visible', 'true')) = 'true');
+      ViewMenuItem.Visible := False;
+
+      MainMenu := GetMenuByName(Name, Simba_MainMenu.Items);
+      MainMenu.Visible := False;
+      if (IsUpdateMenu(MainMenu)) then
+        Exit;
+
+      if (MainMenu.Count > 0) then
+      begin
+        Seperator[1] := TMenuItem.Create(MainMenu);
+        Seperator[1].Caption := '-';
+        MainMenu.Add(Seperator[1])
+      end;
+
+      UpdateMenuItem := TMenuItem.Create(MainMenu);
+      UpdateMenuItem.Caption := 'Update';
+      UpdateMenuItem.OnClick := @Click;
+      UpdateMenuItem.Enabled := (LowerCase(Settings.GetKeyValueDef(Name + '_OverrideUpdate', 'false')) = 'true');
+      MainMenu.Add(UpdateMenuItem);
+
+      CheckMenuItem := TMenuItem.Create(MainMenu);
+      CheckMenuItem.Caption := 'Check for Update';
+      CheckMenuItem.OnClick := @Click;
+      MainMenu.Add(CheckMenuItem);
+
+      AutoMenu := TMenuItem.Create(MainMenu);
+      AutoMenu.Caption := 'Automaticaly ...';
+      MainMenu.Add(AutoMenu);
+
+      AUpdateMenuItem := TMenuItem.Create(AutoMenu);
+      AUpdateMenuItem.Caption := 'Update';
+      AUpdateMenuItem.OnClick := @Click;
+      AUpdateMenuItem.Checked := (LowerCase(Settings.GetKeyValueDef(Name + '_Update', 'true')) = 'true');
+      AutoMenu.Add(AUpdateMenuItem);
+
+      ACheckMenuItem := TMenuItem.Create(AutoMenu);
+      ACheckMenuItem.Caption := 'Check for Updates';
+      ACheckMenuItem.OnClick := @Click;
+      ACheckMenuItem.Checked := (LowerCase(Settings.GetKeyValueDef(Name + '_CheckforUpdates', 'true')) = 'true');
+      AutoMenu.Add(ACheckMenuItem);
+
+      SettingsMenu := TMenuItem.Create(MainMenu);
+      SettingsMenu.Caption := 'Settings';
+      MainMenu.Add(SettingsMenu);
+
+      TimerMenuItem := TMenuItem.Create(SettingsMenu);
+      TimerMenuItem.Caption := 'Timer Interval: ' + IntToStr(StrToIntDef(ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '3600000'), Numbers), 3600000) / 1000);
+      TimerMenuItem.OnClick := @Click;
+      SettingsMenu.Add(TimerMenuItem);
+
+      OverrideUpdateMenuItem := TMenuItem.Create(SettingsMenu);
+      OverrideUpdateMenuItem.Caption := 'Override Update';
+      OverrideUpdateMenuItem.OnClick := @Click;
+      OverrideUpdateMenuItem.Checked := (LowerCase(Settings.GetKeyValueDef(Name + '_OverrideUpdate', 'false')) = 'true');
+      SettingsMenu.Add(OverrideUpdateMenuItem);
+    end;
+
+    Timer := TTimer.Create(nil);
+    Timer.Interval := StrToIntDef(ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '3600000'), Numbers), 3600000);
+    if (ShowMenu) then
+      Timer.Enabled := ACheckMenuItem.Checked
+    else
+      Timer.Enabled := NoMenuTimer;
+    Timer.OnTimer := @Tick;
+  end;
+
+  Result := True;
+end;
+
+procedure Attach;
+var
+  I: integer;
+begin
+  for I := 0 to High(UpdaterArr) do
+  begin
+    if (UpdaterArr[I].Hooks[ATTACH_HOOK] <> nil) then
+      UpdaterArr[I].Hooks[ATTACH_HOOK]('', I);
+
+    if (UpdaterArr[I].CreateMenu) then
+    begin
+      UpdaterArr[I].ViewMenuItem.Visible := True;
+      UpdaterArr[I].MainMenu.Visible := UpdaterArr[I].ViewMenuItem.Checked;
+      UpdaterArr[I].Timer.Enabled := UpdaterArr[I].ACheckMenuItem.Checked;
+    end else
+      UpdaterArr[I].Timer.Enabled := UpdaterArr[I].NoMenuTimer;
+    WriteLn(UpdaterArr[I].Name + ' Updater Enabled!');
+  end;
+end;
+
+procedure Detach;
+var
+  I: integer;
+begin
+  for I := High(UpdaterArr) downto 0 do
+  begin
+    if (UpdaterArr[I].Hooks[DETACH_HOOK] <> nil) then
+      UpdaterArr[I].Hooks[DETACH_HOOK]('', I);
+
+    if (UpdaterArr[I].CreateMenu) then
+    begin
+      UpdaterArr[I].ViewMenuItem.Visible := False;
+      UpdaterArr[I].MainMenu.Visible := False;
+    end;
+    UpdaterArr[I].Timer.Enabled := False;
+    WriteLn(UpdaterArr[I].Name + ' Updater Disabled.');
+  end;
+end;
+
