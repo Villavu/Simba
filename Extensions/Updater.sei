@@ -12,7 +12,7 @@ type
   THookArr = array[ATTACH_HOOK..AFTER_UPDATE] of THookFunc;
   TUpdater = record
     Name, URL, VersionURL, Folder: string;
-    CreateMenu, NoMenuTimer: boolean;
+    CreateMenu, NoMenuTimer, Locked: boolean;
     Hooks: THookArr;
     ViewMenuItem: TMenuItem;
     MainMenu, UpdateMenuItem, CheckMenuItem: TMenuItem;
@@ -24,7 +24,6 @@ type
 
 var
   UpdaterArr: TUpdaterArr;
-  Locked: boolean;
 
 function GetOVersion(Updater: TUpdater): integer;
 begin
@@ -58,14 +57,6 @@ begin
         Exit;
 
     Locked := True;
-
-    if (not ((Sender = UpdateMenuItem) or (AUpdateMenuItem.Checked))) then
-      if (not (MessageDlg(Name + ' Updater', 'Updates are available! Do you wish to Update now?', mtConfirmation, [mbNo, mbYes], 0) = mrYes)) then
-      begin
-        Settings.SetKeyValue(Name + '_DontUpdate', 'true');
-        Locked := False;
-        Exit;
-      end;
 
     WriteLn(Name + ' Updater: Local Version - "' + IntToStr(GetLVersion(UpdaterArr[I])) + '"  |  Remote Version = "' + IntToStr(GetOVersion(UpdaterArr[I])) + '"');
     WriteLn(Name + ' Updater: Update File - "' + URL + '"');
@@ -108,9 +99,6 @@ var
   I: integer;
   Name: string;
 begin
-  if (Locked) then
-    Exit;
-
   for I := 0 to High(UpdaterArr) + 1 do
     if (not (I = High(UpdaterArr) + 1)) then
     begin
@@ -118,13 +106,16 @@ begin
         UpdaterArr[I].Timer: Name := 'Timer';
         UpdaterArr[I].CheckMenuItem: begin
            Name := 'Check';
-           Settings.SetKeyValue(Name + '_DontUpdate', 'false');
+           Settings.SetKeyValue(UpdaterArr[I].Name + '_DontUpdate', 'false');
           end;
       end;
       if (not (Name = '')) then
         Break;
     end else
       Exit;
+
+  if (UpdaterArr[I].Locked) then
+    Exit;
 
   if (UpdaterArr[I].Hooks[CHECK_FOR_UPDATE] <> nil) then
     if (not (UpdaterArr[I].Hooks[CHECK_FOR_UPDATE](Name, I))) then
@@ -171,12 +162,12 @@ begin
             end;
           end;
         TimerMenuItem: begin
-            if (InputQuery(Name + ' Updater', 'What would you like the Timer Interval to be? (1000 - 25000)', Value)) then
+            if (InputQuery(Name + ' Updater', 'What would you like the Timer Interval to be? (1 - 100000 seconds)', Value)) then
             begin
               Value := ExtractFromStr(Value, Numbers);
-              if ((IntToStr(StrToIntDef(Value, -1)) = Value) and InRange(StrToIntDef(Value, -1), 1000, 25000)) then
+              if ((IntToStr(StrToIntDef(Value, -1)) = Value) and InRange(StrToIntDef(Value, -1), 1, 100000)) then
               begin
-                Timer.Interval := StrToIntDef(Value, Timer.Interval);
+                Timer.Interval := StrToIntDef(Value, (Timer.Interval / 1000)) * 1000;
                 TimerMenuItem.Caption := 'Timer Interval: ' + IntToStr(Timer.Interval);
                 Settings.SetKeyValue(Name + '_TimerInterval', IntToStr(Timer.Interval));
               end;
@@ -315,7 +306,7 @@ begin
       MainMenu.Add(SettingsMenu);
 
       TimerMenuItem := TMenuItem.Create(SettingsMenu);
-      TimerMenuItem.Caption := 'Timer Interval: ' + ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '10000'), Numbers);
+      TimerMenuItem.Caption := 'Timer Interval: ' + ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '3600000'), Numbers);
       TimerMenuItem.OnClick := @Click;
       SettingsMenu.Add(TimerMenuItem);
 
@@ -327,7 +318,7 @@ begin
     end;
 
     Timer := TTimer.Create(nil);
-    Timer.Interval := StrToIntDef(ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '10000'), Numbers), 10000);
+    Timer.Interval := StrToIntDef(ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '3600000'), Numbers), 3600000);
     if (ShowMenu) then
       Timer.Enabled := ACheckMenuItem.Checked
     else
