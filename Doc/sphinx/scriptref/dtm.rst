@@ -295,6 +295,7 @@ PrintDTM
 
     procedure PrintDTM(const DTM : TMDTM);
 
+Print the DTM contents.
 
 MDTMToSDTM
 ----------
