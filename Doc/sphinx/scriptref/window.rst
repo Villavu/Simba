@@ -22,6 +22,7 @@ specific frame.
 Use like:
 
 .. code-block:: pascal
+
     Freeze;
 
     if findcolors(...) then
