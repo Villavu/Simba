@@ -1,6 +1,11 @@
 Working with Files
 ==================
 
+Files in Simba are all *integers*, internal handles for Simba which on their
+turn point to operating system files. Functions like CreateFile and OpenFile
+return a file handle. You should not forget to close these when you no longer
+need them.
+
 CreateFile
 ----------
 
@@ -8,6 +13,8 @@ CreateFile
 
     function CreateFile(const Path: string): Integer;
 
+Create a file with *Path*. Raturns -1 on failure, otherwise returns the handle
+to the file.
 
 OpenFile
 --------
@@ -15,6 +22,9 @@ OpenFile
 .. code-block:: pascal
 
     function OpenFile(const Path: string; Shared: Boolean): Integer;
+
+Opens file for reading. Opens shared if *Shared* is true.
+Returns -1 on failure, otherwise returns the handle to the file.
 
 
 RewriteFile

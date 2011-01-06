@@ -207,6 +207,7 @@ FastDrawClear
 
     procedure FastDrawClear(bmp : integer; Color : TColor);
 
+Draw *Color* on every pixel on the bitmap.
 
 FastDrawTransparent
 -------------------
@@ -247,6 +248,7 @@ CopyClientToBitmap
 
     procedure CopyClientToBitmap(bmp, xs, ys, xe, ye: Integer);
 
+Copy client area *xs, ys, xe, ye* to specified bitmap.
 
 BitmapFromClient
 ----------------
@@ -255,6 +257,7 @@ BitmapFromClient
 
     function BitmapFromClient(const xs, ys, xe, ye: Integer): Integer;
 
+Create a bitmap from the client. Area specified by *xs, ye, xe, ye*.
 
 SetBitmapName
 -------------
@@ -263,6 +266,8 @@ SetBitmapName
 
     procedure SetBitmapName(Bmp : integer; name : string);
 
+Assign a name to the bitmap. Mainly for debugging purposes. (It will write the
+name of the bitmap if it hasn't been freed.)
 
 FindBitmap
 ----------
@@ -438,6 +443,8 @@ DrawBitmap
 .. code-block:: pascal
 
     procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);
+
+Draw the bitmap to a TCanvas.
 
 
 RectangleBitmap
