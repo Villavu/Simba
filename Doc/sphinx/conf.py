@@ -18,7 +18,8 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.append(os.path.abspath('.'))
 
-sys.path.append(os.path.abspath('../../Projects/MMLLib/pymml'))
+sys.path.append(os.path.abspath('../../Projects/libmml/pymml/mml'))
+sys.path.append(os.path.abspath('../../Projects/libmml/pymml'))
 
 # -- General configuration -----------------------------------------------------
 
