@@ -1592,8 +1592,12 @@ begin
                   if FileExistsUTF8(SimbaForm.DefScriptPath) then
                   begin
                     x := TStringList.Create;
-                    x.LoadFromFile(SimbaForm.DefScriptPath);
-                    result := x.Text;
+                    try
+                      x.LoadFromFile(SimbaForm.DefScriptPath);
+                    except
+                      mDebugLn('Couldn''t load default script file.');
+                    end;
+                    Result := x.Text;
                   end else
                     result := 'program new;'+LineEnding + 'begin'+LineEnding+'end.' + LineEnding;
                 end;
