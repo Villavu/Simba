@@ -35,6 +35,7 @@ Name: "{app}\Scripts\Tests"
 [Files]
 Source: "C:\Simba\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\msi.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\security.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
