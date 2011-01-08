@@ -1,0 +1,50 @@
+program MSIUpdater;
+
+{$INCLUDE ..\Extensions\Updater.sei}
+
+procedure ClickMSI(Sender: TObject);
+begin
+  if (not (FileExists(IncludePath + 'msi\RunMe.simba'))) then
+  begin
+    WriteLn('MSI: Couldn''t find MSI!');
+    Exit;
+  end;
+
+  if (TMenuItem(Sender).Caption = 'Run') then
+    WriteLn('Running MSI...')
+  else
+    WriteLn('Opening MSI...');
+  OpenScriptEx(IncludePath + 'msi\RunMe.simba', (TMenuItem(Sender).Caption = 'Run'));
+end;
+
+procedure Init;
+var
+  MSI, I: integer;
+  MenuItems: array[0..1] of TMenuItem;
+  Names: array of string;
+begin
+  if (AddUpdater('MSI', 'http://wizzup.org/static/srl/msi.tar.bz2', 'http://wizzup.org/static/srl/msi_version', IncludePath, True, True, MSI)) then
+  begin
+    Names := ['Run', 'Open'];
+    for I := 0 to 1 do
+    begin
+      MenuItems[I] := TMenuItem.Create(UpdaterArr[MSI].MainMenu);
+      MenuItems[I].OnClick := @ClickMSI;
+      MenuItems[I].Caption := Names[I];
+      UpdaterArr[MSI].MainMenu.Insert(I, MenuItems[I]);
+    end;
+  end;
+end;
+
+function GetName: string;
+begin
+  Result := 'MSI Updater';
+end;
+
+function GetVersion: string;
+begin
+  Result := '0.1';
+end;
+
+begin
+end.
