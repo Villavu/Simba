@@ -276,6 +276,8 @@ FindBitmap
 
     function FindBitmap(bitmap: integer; var x, y: Integer): Boolean;
 
+Searches for the Bitmap *bmp* on the entire client. Returns true if found.
+If found, *x, y* specifies the position where the bitmap was found.
 
 FindBitmapIn
 ------------
@@ -285,6 +287,10 @@ FindBitmapIn
     function FindBitmapIn(bitmap: integer; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
 
 
+Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
+Returns true if found. If found, *x, y* specifies the position where the bitmap
+was found.
+
 FindBitmapToleranceIn
 ---------------------
 
@@ -292,6 +298,11 @@ FindBitmapToleranceIn
 
     function FindBitmapToleranceIn(bitmap: integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
 
+Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
+Tolerance defines the tolerance per pixel when matching bitmaps. See
+:ref:`scriptref_CTS` for more information on tolerance.
+Returns true if found. If found, *x, y* specifies the position where the bitmap
+was found.
 
 FindBitmapSpiral
 ----------------
@@ -299,6 +310,10 @@ FindBitmapSpiral
 .. code-block:: pascal
 
     function FindBitmapSpiral(bitmap: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
+
+Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
+Returns true if found. If found, *x, y* specifies the position where the bitmap
+was found. Search starts from a point defined by *x, y*.
 
 
 FindBitmapsSpiralTolerance
@@ -309,6 +324,12 @@ FindBitmapsSpiralTolerance
     function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
 
 
+Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
+Tolerance defines the tolerance per pixel when matching bitmaps. See
+:ref:`scriptref_CTS` for more information on tolerance.
+Search starts from a point defined by *x, y*.
+Returns true if found. If found, each point in *TPA* specifies a match.
+
 FindBitmapSpiralTolerance
 -------------------------
 
@@ -316,6 +337,12 @@ FindBitmapSpiralTolerance
 
     function FindBitmapSpiralTolerance(bitmap: integer; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
 
+Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
+Tolerance defines the tolerance per pixel when matching bitmaps. See
+:ref:`scriptref_CTS` for more information on tolerance.
+Search starts from a point defined by *x, y*.
+Returns true if found. If found, *x, y* specifies the position where the bitmap
+was found.
 
 RotateBitmap
 ------------
@@ -348,6 +375,7 @@ CopyBitmap
 
     function CopyBitmap(Bitmap:  integer) : integer)
 
+Creates a copy of the *Bitmap*. Returns the bitmap copy.
 
 GreyScaleBitmap
 ---------------
@@ -355,6 +383,8 @@ GreyScaleBitmap
 .. code-block:: pascal
 
     function GreyScaleBitmap(bitmap : integer) : integer
+
+Creates a copy of the bitmap, greyscaled.
 
 
 BrightnessBitmap
@@ -364,6 +394,11 @@ BrightnessBitmap
 
     function BrightnessBitmap(Bitmap,br : integer) : integer;
 
+Changes the brightness of a bitmap, intensity defined by *br*.
+Returns a new bitmap with the brightness applied.
+
+If you instead want to apply brightness to the current bitmap, see
+:ref:`filter_apply_bitmap`
 
 ContrastBitmap
 --------------
@@ -371,6 +406,9 @@ ContrastBitmap
 .. code-block:: pascal
 
     function ContrastBitmap(bitmap : integer; co : extended) : integer;
+
+Changes the constrast of a bitmap, returns a new bitmap with the contrast
+applied.
 
 
 PosterizeBitmap
@@ -380,6 +418,28 @@ PosterizeBitmap
 
     function PosterizeBitmap(Bitmap : integer; po : integer) : integer;
 
+Posterizes a bitmap, intensity defined by *po*; returns a new bitmap with the
+posterisation applied.
+
+
+.. _filter_apply_bitmap:
+
+Applying a filter on the current bitmap
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    var b: integer;
+    begin
+        // Dummy bitmap. You'll want something that's not just a blank bitmap.
+        B:=CreateBitmap(100,100);
+
+        // Apply the filter (Posterize in this case) without making a copy.
+        GetMufasaBitmap(b).Posterize(GetMufasaBitmap(b), 10);
+
+        // Always free your bitmaps when you no longer use them. :) 
+        FreeBitmap(b);
+    end.
 
 CreateMaskFromBitmap
 --------------------
@@ -420,6 +480,10 @@ DrawTPABitmap
 
     procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);
 
+*Draws* a TPointArray on a bitmap. Each point in the TPointArray is *painted*
+on the bitmap by setting the pixel on the bitmap (position defined by tpa point)
+to *color*.
+
 
 DrawATPABitmap
 --------------
@@ -428,6 +492,10 @@ DrawATPABitmap
 
     procedure DrawATPABitmap(bitmap: integer; ATPA: T2DPointArray);
 
+*Draws* a Array of TPointArray on a bitmap.
+Each point in the TPointArray is *painted* on the bitmap by setting
+the pixel on the bitmap (position defined by tpa point)
+to a color. Colors differ per TPointArray (group).
 
 DrawATPABitmapEx
 ----------------
@@ -435,6 +503,11 @@ DrawATPABitmapEx
 .. code-block:: pascal
 
     procedure DrawATPABitmapEx(bitmap: integer; ATPA: T2DPointArray; Colors: TIntegerArray);
+
+*Draws* a Array of TPointArray on a bitmap.
+Each point in the TPointArray is *painted* on the bitmap by setting
+the pixel on the bitmap (position defined by tpa point)
+to a color. Colors are defined by *Colors*.
 
 
 DrawBitmap
@@ -445,7 +518,6 @@ DrawBitmap
     procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);
 
 Draw the bitmap to a TCanvas.
-
 
 RectangleBitmap
 ---------------
