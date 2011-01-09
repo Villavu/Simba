@@ -40,12 +40,18 @@ end;
 procedure ps_Wait(t: Integer); extdecl;
 {$ifdef MSWINDOWS}
 begin
-  Sleep(t);
+  if t < 0 then
+    raise Exception.CreateFmt('The given wait time ([%d]) is invalid.',[t])
+  else
+    Sleep(t);
 end;
 {$else}
 var
   EndTime : DWord;
 begin
+  if t < 0 then
+    raise Exception.CreateFmt('The given wait time ([%d]) is invalid.',[t]);
+
   if t > 50 then
   begin;
     EndTime := GetTickCount + t;
