@@ -34,6 +34,9 @@ RewriteFile
 
     function RewriteFile(const Path: string; Shared: Boolean): Integer;
 
+Opens file for rewriting. (File is cleared on open)
+Opens shared if *Shared* is true.
+Returns -1 on failure, otherwise returns the handle to the file.
 
 AppendFile
 ----------
@@ -42,6 +45,8 @@ AppendFile
 
     function AppendFile(const Path: string): Integer;
 
+Opens file for writing (appending).
+Returns -1 on failure, otherwise returns the handle to the file.
 
 CloseFile
 ---------
@@ -49,6 +54,8 @@ CloseFile
 .. code-block:: pascal
 
     procedure CloseFile(FileNum: Integer);
+
+Close the file defined by *FileNum*. Never forget to close your files!
 
 
 EndOfFile
@@ -58,6 +65,7 @@ EndOfFile
 
     function EndOfFile(FileNum: Integer): Boolean;
 
+Returns true if the end of the file has been reached.
 
 FileSize
 --------
@@ -65,6 +73,8 @@ FileSize
 .. code-block:: pascal
 
     function FileSize(FileNum: Integer): LongInt;
+
+Returns the file size in characters.
 
 
 ReadFileString
@@ -75,6 +85,8 @@ ReadFileString
     function ReadFileString(FileNum: Integer; var s: string; x: Integer):
     Boolean;
 
+Read *x* characters into string *s* from file *FileNum*.
+Returns true if the number of characters read equals *x*.
 
 WriteFileString
 ---------------
@@ -82,6 +94,8 @@ WriteFileString
 .. code-block:: pascal
 
     function WriteFileString(FileNum: Integer; s: string): Boolean;
+
+Writes *s* to file *FileNum*. Returns false on failure.
 
 
 SetFileCharPointer
@@ -91,6 +105,16 @@ SetFileCharPointer
 
     function SetFileCharPointer(FileNum, cChars, Origin: Integer): Integer;
 
+*Seek* through the file. Set the cursor to *cChars* from *Origin*.
+
+Origin can be any of these:
+
+.. code-block:: pascal
+
+    { File seek origins }
+    FsFromBeginning = 0;
+    FsFromCurrent   = 1;
+    FsFromEnd       = 2;
 
 FilePointerPos
 --------------
@@ -99,6 +123,8 @@ FilePointerPos
 
     function FilePointerPos(FileNum: Integer): Integer;
 
+Returns the position of the *cursur* in the file.
+(What character # you are at)
 
 DirectoryExists
 ---------------
@@ -107,6 +133,7 @@ DirectoryExists
 
     function DirectoryExists(const DirectoryName : string ) : Boolean;
 
+Returns true if the directory exists.
 
 CreateDirectory
 ---------------
@@ -115,6 +142,7 @@ CreateDirectory
 
     function CreateDirectory(const DirectoryName : string) : boolean;
 
+Creates a directory. Returns true on success.
 
 FileExists 
 -----------
@@ -122,6 +150,8 @@ FileExists
 .. code-block:: pascal
 
     function FileExists (const FileName : string ) : Boolean;
+
+Returns true if the file exists.
 
 
 ForceDirectories
@@ -131,6 +161,7 @@ ForceDirectories
 
     function ForceDirectories(const dir : string) : boolean;
 
+Creates multiple *nested* directories. Returns true on success.
 
 GetFiles
 --------
@@ -139,6 +170,7 @@ GetFiles
 
     function GetFiles(const Path, Ext : string) : TStringArray;
 
+Returns the files in the directory defined by *Path* with extension *Ext*.
 
 GetDirectories
 --------------
@@ -147,6 +179,7 @@ GetDirectories
 
     function GetDirectories(const path : string) : TStringArray;
 
+Returns the directories in *path*.
 
 WriteINI
 --------
@@ -179,4 +212,4 @@ ExtractFileExt
 
     function ExtractFileExt(const FileName: string): string;');   
 
-
+Returns the file extension from file *Filename*.
