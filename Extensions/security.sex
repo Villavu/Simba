@@ -142,7 +142,7 @@ begin
         '%%%s%%%s%s',
         [names[i], DirectorySeparator, copy(path,p+length(paths[i]),Length(path))]
       );
-      writeln(Result);
+      //writeln(Result);
       Exit;
     end;
     p := 0;
@@ -889,7 +889,7 @@ begin
   Result := '';
   t := LIST_SEPARATOR;
   for i := 0 to h do
-    if (obj.ITEMS.Strings[i] <> '') then
+    if (Length(obj.ITEMS.Strings[i]) > 1) then
       Result := Result + obj.ITEMS.Strings[i] + t;
 
   Delete(Result, Length(Result)-Length(t), Length(Result));
@@ -900,12 +900,18 @@ end;
 }
 function __TStringsToStrArr(obj: TStrings): TStringArray;
 var
-  i, h: Integer;
+  i, j, h: Integer;
 begin
   SetLength(Result, obj.Count);
   h := obj.count - 1;
+  j := 0;
   for i := 0 to h do
-    Result[i] := obj.Strings[i];
+    if (length(obj.Strings[i]) > 1) then
+	begin
+	  Result[j] := obj.Strings[i];
+	  Inc(j);
+    end;
+  SetLength(Result, j);
 end;
 
 {
@@ -1169,8 +1175,9 @@ end;
 
 procedure Init;
 var
-  i, j, l: Integer;
+  i, j, k, h, l: Integer;
   ToolsMenu : TMenuItem;
+  tmpStrings: TStringArray;
 begin;
   {
     Load consts for the User Input Form.
@@ -1210,11 +1217,20 @@ begin;
       {
         Load the previously saved settings.
       }
-      //s :=
-      PathArr[i][j].a := Explode(
-        LIST_SEPARATOR,
-        Settings.getKeyValue(PathArr[i][j].name)
+      tmpStrings :=  Explode(
+				LIST_SEPARATOR,
+				Settings.getKeyValue(PathArr[i][j].name)
       );
+
+      h := 0;
+	  SetLength(PathArr[i][j].a, Length(tmpStrings));
+	  for k := 0 to High(tmpStrings) do
+        if (Length(tmpStrings[k]) > 1) then  
+        begin
+		  PathArr[i][j].a[h] := tmpStrings[k];
+		  Inc(h);
+		end;
+
       {$ENDIF}
     end;
   end;
