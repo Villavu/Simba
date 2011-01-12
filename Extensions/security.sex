@@ -58,6 +58,7 @@ const
   {$ELSE}
   DirectorySeparator = '/';
   {$ENDIF}
+  LIST_SEPARATOR = ';;';
 
 { var Settings_DEFAULT_(URL|FILE): Integer;
   Depict the default option for when the Option dialog times out. These values
@@ -167,7 +168,7 @@ begin
   {$IFDEF EXTENSION}
   { Write to the Settings.xml }
   tmp := Settings.getKeyValueDef(PathArr[uf][p].name, '');
-  Settings.setKeyValue(PathArr[uf][p].name, tmp + DirectorySeparator + s);
+  Settings.setKeyValue(PathArr[uf][p].name, tmp + LIST_SEPARATOR + s);
   {$ENDIF}
 end;
 
@@ -800,10 +801,6 @@ begin
   end;
 end;
 
-procedure asdf();
-begin
-end;
-
 {
   Loads the settings from the XML document to the forms components.
 }
@@ -890,7 +887,7 @@ var
 begin
   h := obj.ITEMS.Count - 1;
   Result := '';
-  t := DirectorySeparator;
+  t := LIST_SEPARATOR;
   for i := 0 to h do
     if (obj.ITEMS.Strings[i] <> '') then
       Result := Result + obj.ITEMS.Strings[i] + t;
@@ -1159,7 +1156,7 @@ var
   V: TVariantArray;
 {$ENDIF}
 begin
-  writeln('showing extention form.');
+ // writeln('showing extention form.');
   {$IFNDEF EXTENSION}
   V := [];
   ThreadSafeCall('LoadSettingsForm', V);
@@ -1215,7 +1212,7 @@ begin;
       }
       //s :=
       PathArr[i][j].a := Explode(
-        DirectorySeparator,
+        LIST_SEPARATOR,
         Settings.getKeyValue(PathArr[i][j].name)
       );
       {$ENDIF}
@@ -1286,7 +1283,7 @@ begin;
   Settings_FIRE_WALL_ENABLED := True;
   {$ENDIF}
 
-{  Icon_Lock := GetMufasaBitmap(
+  Icon_Lock := GetMufasaBitmap(
     BitmapFromString(
       48, 48,
       'meJzFmAlUk3fWxnG3gI61TqeLa5' +
@@ -1383,7 +1380,7 @@ begin;
       'emQlng3//qpF610H3wzj2TCQAUNZRKf678L0RlQT+Ne94J8qbxz/A' +
       'NOJAeU='
     )
-  );}
+  );
 
   { Temp hack }
   Icon_Lock := TMufasaBitmap.Create();
@@ -1395,7 +1392,7 @@ end;
 procedure Free;
 begin
   // Only here so people won't freak out. :)
-{  Icon_Lock.Free; }
+  Icon_Lock.Free; 
 end;
 
 {$IFDEF EXTENSION}
