@@ -126,7 +126,23 @@ end;
 function ext_ScriptText: string;
 begin
   Result := SimbaForm.CurrScript.SynEdit.Lines.Text;
-  Result := ReplaceRegExpr('([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])\s*\:\=\s*\''.*?\'';', Result, '$1 := ''*********'';', True);
+end;
+
+function ext_GetSelectedText: string;
+var
+  I: integer;
+begin
+  with SimbaForm.CurrScript.SynEdit do
+  begin
+    if (not (BlockBegin.Y = BlockEnd.Y)) then
+    begin
+      Result := Copy(Lines[BlockBegin.Y - 1], BlockBegin.X, Length(Lines[BlockBegin.Y - 1])) + MEOL;
+      for I := BlockBegin.Y + 1 to BlockEnd.Y - 1 do
+        Result := Result + Lines[I - 1] + MEOL;
+      Result := Result + Copy(Lines[BlockEnd.Y - 1], 1, BlockEnd.X - 1);
+    end else
+      Result := Copy(Lines[BlockBegin.Y - 1], BlockBegin.X, BlockEnd.X - BlockBegin.X);
+  end;
 end;
 
 procedure ext_OpenScript(vName, Data: string; Run: boolean);
