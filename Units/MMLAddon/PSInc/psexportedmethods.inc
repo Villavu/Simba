@@ -280,6 +280,7 @@ AddFunction(@ps_RecvSocketStr, 'function RecvSocketStr(Client: integer): string;
 AddFunction(@ps_RecvSocketEx, 'function RecvSocketEx(Client, Length: integer): string;');
 AddFunction(@ps_SendSocket, 'procedure SendSocket(Client: integer; Data: string);');
 AddFunction(@ps_SetSocketTimeout, 'procedure SetTimeout(Client, Time: integer);');
+AddFunction(@ps_SocketInfo, 'procedure SocketInfo(Client: integer; out IP, Port: string);');
 {$ENDIF}
 
 { Color Conversions and Speed }
