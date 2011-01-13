@@ -64,6 +64,7 @@ type
     procedure Bind(IP, Port: string);
     procedure Listen;
     function Accept: TTCPBlockSocket;
+    procedure Info(out IP, Port: string);
     constructor Create(Owner: TObject; Socket: TTCPBlockSocket = nil);
     destructor Destroy; override;
   end;
@@ -418,6 +419,12 @@ begin
   Result := Socket;
   if (Sock.LastError <> 0) then
      raise Exception.Create('Socket Error ' + IntToStr(Sock.LastError) + ': ' + Sock.LastErrorDesc);
+end;
+
+procedure TSock.Info(out IP, Port: string);
+begin
+  IP := Sock.GetRemoteSinIP;
+  Port := IntToStr(Sock.GetRemoteSinPort);
 end;
 
 constructor TSock.Create(Owner: TObject; Socket: TTCPBlockSocket = nil);
