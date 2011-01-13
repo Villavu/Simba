@@ -329,6 +329,7 @@ end;
 destructor TMThread.Destroy;
 begin
   MInternet.Free;
+  Socks.Free;
   Client.Free;
   Includes.free;
   Prop.Free;
