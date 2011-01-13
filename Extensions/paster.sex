@@ -98,10 +98,18 @@ begin
 end;
 
 function PasteIt(out Data: string; HOST: string): boolean;
+var
+  ScriptTextEx: string;
 begin
   if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Upload this script to ' + HOST + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   begin
-    Data := '{"language": "delphi", "code": "' + EncodeString(ScriptText) + '", "private": ' + Lowercase(BoolToStr(Private_MenuItem.Checked)) + '}';
+    ScriptTextEx := ScriptText;
+
+    if (ExecRegExpr('([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])', ScriptTextEx)) then
+      if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Would you like to mask sensitive data?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+        ScriptTextEx := ReplaceRegExpr('([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])\s*\:\=\s*\''.*?\'';', ScriptTextEx, '$1 := ''*********'';', True);
+
+    Data := '{"language": "delphi", "code": "' + EncodeString(ScriptTextEx) + '", "private": ' + Lowercase(BoolToStr(Private_MenuItem.Checked)) + '}';
     JSONRequest(Data, HOST, 'pastes.newPaste');
     if (GetJSONValue(Data, 'error') = 'null') then
     begin
