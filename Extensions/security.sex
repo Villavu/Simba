@@ -58,6 +58,7 @@ const
   {$ELSE}
   DirectorySeparator = '/';
   {$ENDIF}
+  LIST_SEPARATOR = ';;';
 
 { var Settings_DEFAULT_(URL|FILE): Integer;
   Depict the default option for when the Option dialog times out. These values
@@ -141,7 +142,7 @@ begin
         '%%%s%%%s%s',
         [names[i], DirectorySeparator, copy(path,p+length(paths[i]),Length(path))]
       );
-      writeln(Result);
+      //writeln(Result);
       Exit;
     end;
     p := 0;
@@ -167,7 +168,7 @@ begin
   {$IFDEF EXTENSION}
   { Write to the Settings.xml }
   tmp := Settings.getKeyValueDef(PathArr[uf][p].name, '');
-  Settings.setKeyValue(PathArr[uf][p].name, tmp + DirectorySeparator + s);
+  Settings.setKeyValue(PathArr[uf][p].name, tmp + LIST_SEPARATOR + s);
   {$ENDIF}
 end;
 
@@ -800,10 +801,6 @@ begin
   end;
 end;
 
-procedure asdf();
-begin
-end;
-
 {
   Loads the settings from the XML document to the forms components.
 }
@@ -890,9 +887,9 @@ var
 begin
   h := obj.ITEMS.Count - 1;
   Result := '';
-  t := DirectorySeparator;
+  t := LIST_SEPARATOR;
   for i := 0 to h do
-    if (obj.ITEMS.Strings[i] <> '') then
+    if (Length(obj.ITEMS.Strings[i]) > 1) then
       Result := Result + obj.ITEMS.Strings[i] + t;
 
   Delete(Result, Length(Result)-Length(t), Length(Result));
@@ -903,12 +900,18 @@ end;
 }
 function __TStringsToStrArr(obj: TStrings): TStringArray;
 var
-  i, h: Integer;
+  i, j, h: Integer;
 begin
   SetLength(Result, obj.Count);
   h := obj.count - 1;
+  j := 0;
   for i := 0 to h do
-    Result[i] := obj.Strings[i];
+    if (length(obj.Strings[i]) > 1) then
+	begin
+	  Result[j] := obj.Strings[i];
+	  Inc(j);
+    end;
+  SetLength(Result, j);
 end;
 
 {
@@ -1159,7 +1162,7 @@ var
   V: TVariantArray;
 {$ENDIF}
 begin
-  writeln('showing extention form.');
+ // writeln('showing extention form.');
   {$IFNDEF EXTENSION}
   V := [];
   ThreadSafeCall('LoadSettingsForm', V);
@@ -1172,8 +1175,9 @@ end;
 
 procedure Init;
 var
-  i, j, l: Integer;
+  i, j, k, h, l: Integer;
   ToolsMenu : TMenuItem;
+  tmpStrings: TStringArray;
 begin;
   {
     Load consts for the User Input Form.
@@ -1213,11 +1217,20 @@ begin;
       {
         Load the previously saved settings.
       }
-      //s :=
-      PathArr[i][j].a := Explode(
-        DirectorySeparator,
-        Settings.getKeyValue(PathArr[i][j].name)
+      tmpStrings :=  Explode(
+				LIST_SEPARATOR,
+				Settings.getKeyValue(PathArr[i][j].name)
       );
+
+      h := 0;
+	  SetLength(PathArr[i][j].a, Length(tmpStrings));
+	  for k := 0 to High(tmpStrings) do
+        if (Length(tmpStrings[k]) > 1) then  
+        begin
+		  PathArr[i][j].a[h] := tmpStrings[k];
+		  Inc(h);
+		end;
+
       {$ENDIF}
     end;
   end;
@@ -1286,7 +1299,7 @@ begin;
   Settings_FIRE_WALL_ENABLED := True;
   {$ENDIF}
 
-{  Icon_Lock := GetMufasaBitmap(
+  Icon_Lock := GetMufasaBitmap(
     BitmapFromString(
       48, 48,
       'meJzFmAlUk3fWxnG3gI61TqeLa5' +
@@ -1383,7 +1396,7 @@ begin;
       'emQlng3//qpF610H3wzj2TCQAUNZRKf678L0RlQT+Ne94J8qbxz/A' +
       'NOJAeU='
     )
-  );}
+  );
 
   { Temp hack }
   Icon_Lock := TMufasaBitmap.Create();
@@ -1395,7 +1408,7 @@ end;
 procedure Free;
 begin
   // Only here so people won't freak out. :)
-{  Icon_Lock.Free; }
+  Icon_Lock.Free; 
 end;
 
 {$IFDEF EXTENSION}
