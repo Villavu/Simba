@@ -107,6 +107,11 @@ begin
   Result := CurrThread.Socks.CreateSocketEx(CurrThread.Socks.GetSocket(Client).Accept);
 end;
 
+procedure ps_SocketInfo(Client: integer; out IP, Port: string);
+begin
+  CurrThread.Socks.GetSocket(Client).Info(IP, Port);
+end;
+
 function ps_CreateSocket: integer; extdecl;
 begin
   Result := CurrThread.Socks.CreateSocket();
