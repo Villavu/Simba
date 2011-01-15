@@ -192,6 +192,7 @@ begin
     AddFunction(@ext_MessageDlg,'function MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType;Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer;');
     AddFunction(@ext_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
     AddFunction(@ext_ScriptText,'function ScriptText: string;');
+    AddFunction(@ext_GetSelectedText, 'function GetSelectedText: string;');
     AddFunction(@ext_OpenScript,'procedure OpenScript(Name, Data: string; Run: boolean);');
     AddFunction(@ext_OpenScriptEx,'procedure OpenScriptEx(FileName: string; Run: boolean);');
     AddRegisteredPTRVariable('Settings','TMMLSettingsSandbox');
