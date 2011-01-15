@@ -678,9 +678,15 @@ var
 begin
   if InputQuery('DTM From String', 'Enter DTM string:', s) and (s <> '') then
   begin
-    mnuNew(nil);
+    try
+      dtm := DTMFromString(Trim(s));
+    except
+      if (MessageDlg('Invalid DTM', 'Invalid string! Make sure you only enter the string (without quotes), not stuff like "DTM := DTMFromString("!', mtError, [mbOk, mbCancel] {$ifdef PS_EXTENSION}, 0{$endif}) = 1) then
+        mnuDTMfromString(Sender);
+      Exit;
+    end;
 
-    dtm := DTMFromString(s);
+    mnuNew(nil);
     mdtm := GetDTM(dtm);
     sdtm := MDTMToSDTM(mdtm);
 
@@ -1354,3 +1360,5 @@ begin
   ThreadSafe_ShowForm;
   {$endif}
 end.
+
+
