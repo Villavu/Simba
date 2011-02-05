@@ -23,6 +23,7 @@
 unit SimbaUnit;
 
 {$undef EditButtons}
+{$define USE_RUTIS}
 {$Undef ProcessMessages} //Define this for processmessages in ThreadSafeCall
 {$mode objfpc}{$H+}
 
@@ -1469,7 +1470,7 @@ begin
   try
     case Interpreter of
       interp_PS : Thread := TPSThread.Create(true,@CurrentSyncInfo,PluginPath);
-      interp_RT : Thread := TRTThread.Create(true,@CurrentSyncInfo,PluginPath);
+      interp_RT : {$IFDEF USE_RUTIS}Thread := TRTThread.Create(true,@CurrentSyncInfo,PluginPath){$ELSE}formWriteln('RUTIS NOT SUPPORTED') {$ENDIF};
       interp_CP : Thread := TCPThread.Create(true,@CurrentSyncInfo,PluginPath);
     end;
   except
