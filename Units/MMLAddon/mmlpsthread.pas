@@ -33,7 +33,10 @@ uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
   bitmaps, plugins, libloader, dynlibs,internets,scriptproperties,
-  settings,settingssandbox, Rutis_Engine,Rutis_Defs,lcltype, dialogs;
+  settings,settingssandbox, lcltype, dialogs
+  {$IFDEF USE_RUTIS}
+  ,Rutis_Engine,Rutis_Defs
+  {$ENDIF};
 
 const
   m_Status = 0; //Data = PChar to new status
@@ -207,7 +210,7 @@ type
     end;
 
     { TRTThread }
-
+    {$IFDEF USE_RUTIS}
     TRTThread = class(TMThread)
     private
       procedure RTOnWrite(s : String);
@@ -220,6 +223,7 @@ type
       procedure Execute; override;
       procedure Terminate; override;
     end;
+   {$ENDIF}
 
 
 threadvar
@@ -1012,7 +1016,7 @@ begin
 end;
 
 { TRTThread }
-
+{$IFDEF USE_RUTIS}
 procedure TRTThread.RTOnWrite(s: String);
 begin
   psWriteln(s);
@@ -1116,6 +1120,7 @@ procedure TRTThread.Terminate;
 begin
   RUTIS.Stop;
 end;
+{$ENDIF}
 
 initialization
   PluginsGlob := TMPlugins.Create;
