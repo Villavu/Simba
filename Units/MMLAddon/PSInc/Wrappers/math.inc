@@ -43,6 +43,26 @@ begin
     result := power(base,exponent);
 end;
 
+function ps_RiemannGauss(Xstart,StepSize,Sigma : extended; AmountSteps : integer) : extended; extdecl;
+begin
+  result := RiemannGauss(Xstart,StepSize,Sigma,AmountSteps);
+end;
+
+function ps_DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray; extdecl;
+begin
+  result := DiscreteGauss(Xstart,Xend,Sigma);
+end;
+
+function ps_GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray; extdecl;
+begin
+  result := GaussMatrix(N,sigma);
+end;
+
+function ps_exp(exponent : extended) : extended; extdecl;
+begin
+  result := exp(exponent);
+end;
+
 function ps_Max(a,b : integer) : integer; extdecl;
 begin
   result := max(a,b);

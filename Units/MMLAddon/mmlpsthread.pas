@@ -24,7 +24,7 @@
 unit mmlpsthread;
 
 {$Define PS_USESSUPPORT}
-
+{$define USE_RUTIS}
 {$mode objfpc}{$H+}
 
 interface

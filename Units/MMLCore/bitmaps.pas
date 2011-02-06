@@ -82,10 +82,12 @@ type
     procedure Invert;overload;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
+    procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
     function ToTBitmap: TBitmap;
     function ToString : string;
+    function RowPtrs : TPRGB32Array;
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
     function CreateTMask : TMask;
@@ -638,6 +640,15 @@ begin
     result := 'm' + Base64EncodeStr(datastr);
     SetLength(datastr,0);
   end;
+end;
+
+function TMufasaBitmap.RowPtrs: TPRGB32Array;
+var
+  I : integer;
+begin;
+  setlength(result,h);
+  for i := 0 to h - 1 do
+    result[i] := FData + w * i;
 end;
 
 procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);
@@ -1274,6 +1285,46 @@ begin
     ptr^.b := min(Round(ptr^.b / po) * Po, 255);
     inc(ptr);
   end;
+end;
+
+procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix: T2DExtendedArray);
+var
+  x,y,xx,yy : integer;
+  mw,mh : integer; //Matrix-Width/Matrix-height;
+  Row,RowT : TPRGB32Array;
+  R,G,B : extended;
+  midX,midY : integer;
+  xmax,ymax : integer;
+begin
+  mw := Length(Matrix);
+  mh := Length(Matrix[0]);
+  if ((mw mod 2) = 0) or ((mh mod 2) = 0) then
+    exit;
+  TargetBitmap.SetSize(w,h);
+  Row := RowPtrs;
+  RowT := TargetBitmap.RowPtrs; //Target
+  midX := mw div 2;
+  midY := mh div 2;
+  xmax := w-1-midX;
+  ymax := h-1-midY;
+  dec(mw); dec(mh); //Faster in loop.
+  for x := midx to xmax do
+    for y := midy to ymax do
+    begin
+      R := 0;
+      G := 0;
+      B := 0;
+      for xx := mw downto 0 do // for xx := x - midx to x + midx do
+        for yy := mh downto 0 do
+        begin
+          r := r + Row[y+yy-midy][x+xx-midx].r * Matrix[xx][yy];
+          g := g + Row[y+yy-midy][x+xx-midx].g * Matrix[xx][yy];
+          b := b + Row[y+yy-midy][x+xx-midx].b * Matrix[xx][yy];
+        end;
+      RowT[y][x].r := round(r);
+      RowT[y][x].g := round(g);
+      RowT[y][x].b := round(b);
+    end;
 end;
 
 function TMufasaBitmap.CreateTMask: TMask;

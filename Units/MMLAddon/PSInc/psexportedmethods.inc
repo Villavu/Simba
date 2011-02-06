@@ -57,6 +57,10 @@ AddFunction(@ps_round,'function Round(e:extended) : integer');
 AddFunction(@ps_ceil,'function ceil(e : extended) : integer');
 AddFunction(@ps_floor,'function floor(e : extended) : integer');
 AddFunction(@ps_pow,'function pow(base,exponent : extended) : extended');
+AddFunction(@ps_exp,'function exp(exponent : extended) : extended');
+AddFunction(@ps_RiemannGauss,'function RiemannGauss(Xstart,StepSize,Sigma : extended; AmountSteps : integer) : extended;');
+AddFunction(@ps_DiscreteGauss,'function DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray;');
+AddFunction(@ps_GaussMatrix,'function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;');
 AddFunction(@ps_max,'function Max(a, b: Integer): Integer;');
 AddFunction(@ps_min,'function Min(a, b: Integer): Integer;');
 AddFunction(@ps_minE,'function MinE(a, b: extended): Extended;');
@@ -416,6 +420,7 @@ AddFunction(@ps_DrawATPABitmapEx,'procedure DrawATPABitmapEx(bitmap: integer; AT
 AddFunction(@ps_DrawBitmap,'procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);');
 AddFunction(@ps_RectangleBitmap,'procedure RectangleBitmap(bitmap : integer; const box : TBox; Color : TColor);');
 AddFunction(@ps_FloodfillBitmap,'procedure FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor);');
+AddFunction(@ps_ConvoluteBitmap,'function ConvoluteBitmap(bitmap : integer; matrix : T2DExtendedArray) : integer;');
 AddFunction(@ps_CalculatePixelShift,'function CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;');
 AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
 {$ENDIF}

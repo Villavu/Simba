@@ -305,6 +305,14 @@ begin
   CurrThread.Client.MBitmaps[bitmap].FloodFill(startPoint,searchcol,replacecol);
 end;
 
+function ps_ConvoluteBitmap(bitmap : integer; matrix : T2DExtendedArray) : integer; extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+  begin
+    result := CreateBMP(0,0);
+    Bmp[bitmap].Convolute(Bmp[Result],matrix);
+  end;
+end;
 function ps_CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;extdecl;
 begin
   with CurrThread.Client.MBitmaps do
