@@ -1,0 +1,89 @@
+program new;
+
+function BlurBMP( Bmp : TMufasaBitmap; N : integer; Sigma : extended) : TMufasaBitmap;
+var
+  Matrix : T2DExtendedArray;
+  x,y,xx,yy : integer;
+  R,G,B : extended;
+  RR,GG,BB : integer;
+  mid : integer;
+  xmax,ymax : integer;
+begin
+  Matrix := GaussMatrix(n,sigma);
+  result := GetMufasaBitmap(ConvoluteBitmap(bmp.Index,matrix));
+end;
+
+function BlurBMP2( Bmp : TMufasaBitmap; N : integer; Sigma : extended) : TMufasaBitmap;
+var
+  Mat : TExtendedArray;
+  Values : Array of Array of Array[0..2] of Extended;
+  x,y,xx,yy : integer;
+  R,G,B : extended;
+  RR,GG,BB : integer;
+  mid : integer;
+  xmax,ymax : integer;
+begin
+  Result := TMufasaBitmap.create;
+  result.SetSize(Bmp.Width,bmp.Height);
+  Setlength(Values,bmp.width);
+  for x := 0 to high(values) do
+    setlength(Values[x],bmp.height);
+  mid := (N*2-1)/2;
+  Mat := DiscreteGauss(-mid,mid,sigma);
+  xmax :=bmp.Width - 1 - mid;
+  ymax := bmp.height - 1 - mid;
+  for x := mid to xmax do
+    for y := mid to ymax do
+    begin
+      R := 0;
+      G := 0;
+      B := 0;
+      for xx := x to x + 2*mid do
+      begin
+        ColorToRGB(Bmp.FastGetPixel(xx-mid,y),RR,GG,BB);
+        r := r + RR * Mat[xx-x];
+        g := g + GG * Mat[xx-x];
+        b := b + BB * Mat[xx-x];
+      end;
+      Values[x][y][0] := r;
+      Values[x][y][1] := g;
+      Values[x][y][2] := b;
+    end;
+  for x := mid to xmax do
+    for y := mid to ymax do
+    begin
+      R := 0;
+      G := 0;
+      B := 0;
+      for yy := y to y + 2*mid do
+      begin
+        r := r + Values[x][yy-mid][0] * Mat[yy-y];
+        g := g + Values[x][yy-mid][1] * Mat[yy-y];
+        b := b + Values[x][yy-mid][2] * Mat[yy-y];
+      end;
+      Result.FastSetPixel(x,y,RGBtoColor(Round(R),Round(G),Round(B)));
+    end;
+end;
+var
+  s : extended;
+  sArr : TextendedArray;
+  Matrix : T2DExtendedArray;
+  i,ii : integer;
+  BMP : TMufasaBitmap;
+  BMP2 : TMufasaBitmap;
+begin
+  BMP := TMufasaBitmap.create;
+  BMP.LoadFromFile('c:\rs.png');
+  i := GetSystemTime;
+  BMP2 := BlurBMP(BMP,2,0.9);
+  Writeln(GetSystemTime - i);
+  BMP2.SaveToFile( 'c:\rs2.bmp');
+  BMP2.Free;
+  i := GetSystemTime;
+  BMP2 := BlurBMP2(BMP,2,0.9);
+  Writeln(GetSystemTime-i);
+  BMP2.SaveToFile('c:\rs3.bmp');
+  BMP2.Free;
+
+
+end.
