@@ -305,7 +305,6 @@ object SimbaForm: TSimbaForm
         Height = 19
         Top = 7
         Width = 16
-        Color = clBtnFace
         Flat = True
         Glyph.Data = {
           36090000424D3609000000000000360000002800000018000000180000000100
@@ -3324,10 +3323,21 @@ object SimbaForm: TSimbaForm
   end
   object SCARHighlighter: TSynPasSyn
     Enabled = False
+    AsmAttri.FrameEdges = sfeAround
     CommentAttri.Foreground = clGreen
+    CommentAttri.FrameEdges = sfeAround
     CommentAttri.Style = []
+    IDEDirectiveAttri.FrameEdges = sfeAround
+    IdentifierAttri.FrameEdges = sfeAround
+    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clNavy
+    NumberAttri.FrameEdges = sfeAround
+    SpaceAttri.FrameEdges = sfeAround
     StringAttri.Foreground = clFuchsia
+    StringAttri.FrameEdges = sfeAround
+    SymbolAttri.FrameEdges = sfeAround
+    CaseLabelAttri.FrameEdges = sfeAround
+    DirectiveAttri.FrameEdges = sfeAround
     CompilerMode = pcmObjFPC
     NestedComments = False
     left = 568
@@ -3335,14 +3345,25 @@ object SimbaForm: TSimbaForm
   end
   object LazHighlighter: TSynPasSyn
     Enabled = False
+    AsmAttri.FrameEdges = sfeAround
     CommentAttri.Foreground = clBlue
+    CommentAttri.FrameEdges = sfeAround
     CommentAttri.Style = [fsBold]
+    IDEDirectiveAttri.FrameEdges = sfeAround
     IdentifierAttri.Foreground = clDefault
+    IdentifierAttri.FrameEdges = sfeAround
+    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clNavy
+    NumberAttri.FrameEdges = sfeAround
+    SpaceAttri.FrameEdges = sfeAround
     StringAttri.Foreground = clBlue
+    StringAttri.FrameEdges = sfeAround
     SymbolAttri.Foreground = clRed
+    SymbolAttri.FrameEdges = sfeAround
+    CaseLabelAttri.FrameEdges = sfeAround
     CaseLabelAttri.Style = [fsItalic]
     DirectiveAttri.Foreground = clRed
+    DirectiveAttri.FrameEdges = sfeAround
     DirectiveAttri.Style = [fsBold]
     CompilerMode = pcmObjFPC
     NestedComments = False
