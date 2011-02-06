@@ -58,6 +58,7 @@ type
   end;
   PRGB32 = ^TRGB32;
   TRGB32Array = array of TRGB32;
+  TPRGB32Array = array of PRGB32; //Array of Pointers
 
   TRetData = record
     Ptr : PRGB32;

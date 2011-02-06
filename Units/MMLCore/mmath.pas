@@ -35,10 +35,60 @@ function RotatePoints(const P: TPointArray;const A, cx, cy: Extended): TPointArr
 function RotatePoint(const p: TPoint;const angle, mx, my: Extended): TPoint;
 function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;
 function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
-
+function RiemannGauss(Xstart,StepSize,Sigma : extended; AmountSteps : integer) : extended;
+function DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray;
+function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;
 implementation
 uses
   math;
+{/\
+  Returns a GaussianMatrix with size of X*X, where X is Nth odd-number.
+/\}
+function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;
+var
+  x,y,mid : integer;
+  Val : TExtendedArray;
+begin
+  N := N * 2-  1;
+  SetLength(Result,N);
+  for x := 0 to n-1 do
+    Setlength(result[x],N);
+  mid := n div 2;
+  Val := DiscreteGauss(-mid,mid,sigma);
+  for x := 0 to n-1 do
+    for y := 0 to n-1 do
+      Result[x][y] := Val[x] * Val[y];
+end;
+
+{/\
+  Returns the discrete Gaussian values, uses RiemanGauss with 100 steps.
+/\}
+function DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray;
+var
+  i : integer;
+begin
+  setlength(Result,Xend-xstart+1);
+  for i := xstart to xend do
+    result[i-xstart] :=  RiemannGauss(i-0.5,0.01,Sigma,100);
+end;
+
+{/\
+  RiemannGauss integrates the Gaussian function using the Riemann method.
+/\}
+function RiemannGauss(Xstart,StepSize,Sigma : extended; AmountSteps : integer) : extended;
+var
+  i : integer;
+  x : extended;
+begin
+  result := 0;
+  x := xstart - 0.5 * stepsize;
+  for i := 1 to AmountSteps do
+  begin
+    x := x + stepsize; //Get the middle value
+    result := Result + exp(-x*x/(2*sigma*sigma)); //Better accuracy to do the sig^2 here?
+  end;
+  result := result * stepsize * 1 / (Sqrt(2 * pi) * sigma);
+end;
 
 {/\
   Rotates the given points (P) by A (in radians) around the point defined by cx, cy.
@@ -98,7 +148,6 @@ begin
   except
     result := false;
   end;
-
 end;
 
 end.

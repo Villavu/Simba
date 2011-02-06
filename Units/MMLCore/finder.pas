@@ -108,8 +108,6 @@ uses
     tpa, //TPABounds
     dtmutil
     ;
-type
-  TPRGB32Array = array of PRGB32;
 
 procedure TMFinder.LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
 var
@@ -175,12 +173,8 @@ begin;
 end;
 
 function CalculateRowPtrs(Bitmap : TMufasaBitmap) : TPRGB32Array;overload;
-var
-  I : integer;
-begin;
-  setlength(result,Bitmap.Height);
-  for i := 0 to Bitmap.Height - 1 do
-    result[i] := Bitmap.FData + Bitmap.Width * i;
+begin
+  Result := Bitmap.RowPtrs;
 end;
 //SkipCoords[y][x] = False/True; True means its "transparent" and therefore not needed to be checked.
 procedure CalculateBitmapSkipCoords(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray);
