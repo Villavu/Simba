@@ -170,21 +170,7 @@ end;
 procedure ext_OpenScriptEx(FileName: string; Run: boolean);
 begin
   FileName := SetDirSeparators(FileName);
-  with SimbaForm do
-  begin
-    AddTab();
-    with CurrScript do
-    begin
-      SynEdit.Lines.LoadFromFile(FileName);
-      StartText := SynEdit.Lines.Text;
-      ScriptName := ExtractFileNameOnly(FileName);
-      ScriptFile := FileName;
-      ScriptChanged := False;
-    end;
-    RefreshTab();
-    UpdateTitle();
-  end;
-
+  SimbaForm.LoadScriptFile(FileName,True,false);
   if (Run) then
     SimbaForm.RunScript();
 end;
