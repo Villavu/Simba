@@ -107,6 +107,16 @@ begin
   Result:=Random(Abs(aFrom-aTo))+Min(aTo,AFrom);
 end;
 
+function ps_Random(Int: integer): integer; extdecl;
+begin
+  result := Random(int);
+end;
+
+function ps_RandomE : extended;
+begin
+  result := Random;
+end;
+
 function ps_ArcTan2(y,x : extended) : extended;  extdecl;
 begin
   result := ArcTan2(y,x);
