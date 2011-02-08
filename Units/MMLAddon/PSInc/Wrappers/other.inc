@@ -37,21 +37,15 @@ begin;
 end;
 {$ENDIF}
 
-procedure ps_Wait(t: Integer); extdecl;
+procedure ps_Wait(t: DWord); extdecl;
 {$ifdef MSWINDOWS}
 begin
-  if t < 0 then
-    raise Exception.CreateFmt('The given wait time ([%d]) is invalid.',[t])
-  else
-    Sleep(t);
+  Sleep(t);
 end;
 {$else}
 var
   EndTime : DWord;
 begin
-  if t < 0 then
-    raise Exception.CreateFmt('The given wait time ([%d]) is invalid.',[t]);
-
   if t > 50 then
   begin;
     EndTime := GetTickCount + t;
@@ -264,11 +258,6 @@ begin
             'RKvhJxsGt5wzKI8PApjpQTQmj5CkIRIO6S3REPXZjD1kyNGxABm60IxLkdu8HqQOaRmt0TcTVVFHzCdq2oX6ae2CMRuo/bWuhdHfMhfSI8PTE3xIjAuIRu7An'+
             'hv0kN+e38+1GMPYH/hq1PcyKsywdWvI1n9Y4YXzsLydgSphI4G7i/AexYRTW2RJmBPqFqTcgtUW7T6dgQlwIDfrsIsyDCphcbot5eDPgviZ8Yt0S4Ne4Iuoy/H'+
             '+//1sR/NLyhCQ==')));
-end;
-
-function ps_Random(Int: integer): integer; extdecl;
-begin
-  result := Random(int);
 end;
 
 procedure ps_SetClipBoard(const Data: string); extdecl;

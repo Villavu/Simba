@@ -76,6 +76,8 @@ AddFunction(@ps_point,'function Point(x,y:integer) : TPoint;');
 AddFunction(@ps_Distance,'function Distance(xs,ys,xe,ye : integer) : integer;');
 AddFunction(@ps_hypot,'function Hypot(X, Y: Extended): Extended;');
 AddFunction(@ps_RandomRange,'function RandomRange(aFrom,aTo: Integer): Integer;');
+AddFunction(@ps_Random,'function Random(Int: integer): integer;');
+AddFunction(@ps_RandomE,'function RandomE: extended;');
 AddFunction(@ps_incex,'procedure IncEx(var x : integer; increase : integer);');
 AddFunction(@ps_DecEx,'procedure DecEx(var x : integer; Decrease : integer);');
 AddFunction(@ps_BinCoe,'function BinCoe(a, b: LongInt): Extended;');
@@ -160,8 +162,8 @@ AddFunction(@ps_ExtractFileExt,'function ExtractFileExt(const FileName: string):
 
 {other}
 SetCurrSection('Other');
-AddFunction(@ps_Wait, 'procedure wait(t: integer);');
-AddFunction(@ps_Wait, 'procedure Sleep(t: integer);');
+AddFunction(@ps_Wait, 'procedure wait(t: LongWord);');
+AddFunction(@ps_Wait, 'procedure Sleep(t: LongWord);');
 {$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(@ps_GetTClient,'function GetTClient : TClient;');
 AddFunction(@ps_SetSupressExceptions, 'procedure SetSupressExceptions(Supress : boolean);');
@@ -180,7 +182,6 @@ AddFunction(@ps_DecodeDate,'procedure DecodeDate ( const SourceDate  : TDateTime
 AddFunction(@ps_ConvertTime,'procedure ConvertTime(Time: integer; var h, m, s: integer);');
 AddFunction(@ps_HakunaMatata,'procedure HakunaMatata;');
 AddFunction(@ps_Simba,'procedure Simba;');
-AddFunction(@ps_Random,'function Random(Int: integer): integer;');
 AddFunction(@ps_PlaySound,'procedure PlaySound( Sound : string);');
 AddFunction(@ps_StopSound,'procedure StopSound;');
 {$IFNDEF MML_EXPORT_THREADSAFE}
