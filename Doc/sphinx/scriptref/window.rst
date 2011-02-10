@@ -12,7 +12,7 @@ Freeze
     function Freeze: boolean;
 
 
-If you call Freeze, the data that is *currently* currently in the client
+If you call Freeze, the data that is *currently* in the client
 is stored into memory. Simba will then target this memory for all further
 finding operations; until *Unfreeze* is called. This can dramatically increase
 speed if you don't care if the image doesn't change. It can be even more
