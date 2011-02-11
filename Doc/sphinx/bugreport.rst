@@ -23,10 +23,10 @@ exist, follow these steps:
    If you can not decide, choose "Simba". The developers can move the ticket as needed.
 
 3. Now, choose the Category that the bug is in. This should be self-explanatory; choose
-   a topic related to what you were doing when the bug occured. Choose general if you
+   a topic related to what you were doing when the bug occurred. Choose general if you
    are unsure. Developers can, again, change the ticket if required.
 
-4. Select the reproducability. If this is a request for a feature, choose "N/A".
+4. Select the reproducibility. If this is a request for a feature, choose "N/A".
 
 5. Severity should be ranked according to how much the bug affects the program.
    Crashes will be dealt with first, then blocks, etc. This step goes along with

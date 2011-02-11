@@ -55,16 +55,16 @@ Edit Menu
 
 *   Select All, Ctrl+A, Makes all the text in the open tab selected
 
-*   Find, Ctrl+F, Allows user to search for the first occurence of a text 
+*   Find, Ctrl+F, Allows user to search for the first occurrence of a text 
     sequence, making it selected, with or without case matching as well 
-    as highlighting other occurences
+    as highlighting other occurrences
 
-*   Find next, F3, Selects next occurence of text sequence being searched for
+*   Find next, F3, Selects next occurrence of text sequence being searched for
 
 *   Replace, Ctrl+R, Opens a find/replace dialogue box, allowing a 
     search string to be specified as well as a replacement string, 
-    with options of finding occurences and replacing a single or all
-    occurences
+    with options of finding occurrences and replacing a single or all
+    occurrences
 
 Script
 ~~~~~~

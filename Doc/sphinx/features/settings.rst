@@ -229,7 +229,7 @@ Visiblity of the tray icon
 
 ``AlwaysVisible``
 
-If you want the tray icon only to be visible when Simba is minized, set this to
+If you want the tray icon only to be visible when Simba is minimized, set this to
 *False*.
 
 .. note::
