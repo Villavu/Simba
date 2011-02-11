@@ -10,7 +10,7 @@ features.
 Installing simba
 ----------------
 
-Installing Simba is pretty straighforward and will only take a couple of
+Installing Simba is pretty straightforward and will only take a couple of
 minutes.
 
 .. _simba-installer:
@@ -63,7 +63,7 @@ yourself as well.
 Setting up SRL 5 with Simba
 ---------------------------
 
-This will follow later, upon SRL 5 release. (Which will be quite soon)
+This will follow later, upon SRL 5 release.
 
 Installing scripts
 ------------------

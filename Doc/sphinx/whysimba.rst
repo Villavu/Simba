@@ -17,8 +17,7 @@ It is free as in Free Beer **and** Freedom.
 Simba is 100% free to use. In fact, we welcome you to share it with the 
 rest of the world.
 
-The source code to the program is also freely available, under the GPL
-license. 
+The source code to the program is freely available, under the GPL (v3) license. 
 
 .. note:: 
       The source code allows everyone to see how the program actually
@@ -46,7 +45,7 @@ We as a team do our best to make Simba into a quality product.
 However this does not guarantee a bug free program.
 (Bug free programs don't exist)
 
-Should you encouter a bug, please consider sending a bug report so we can
+Should you encounter a bug, please consider sending a bug report so we can
 resolve the issue: :ref:`bugreport`.
 
 Cross Platform
@@ -65,7 +64,7 @@ executes your program. It is an external component and does not
 play too well on Linux. Hopefully this will be improved upon soon.
 
 There are plans on supporting interpreter for alternative languages such as
-Python, these would largely resolve the current problems wit the PascalScript
+Python, these would largely resolve the current problems with the PascalScript
 interpreter on Linux/Mac.
 
 Fast
@@ -80,13 +79,13 @@ speed for readability and maintainability, but is overall still quite fast.
 Open Minded
 ~~~~~~~~~~~
 
-Open minded. We appreciate your help, ideas and critisism!
+Open minded. We appreciate your help, ideas and criticism!
 
 Debug Friendly
 ~~~~~~~~~~~~~~
 
 Simba aims to be debug friendly. It will show you where your errors are during
-complation, and when you are running scripts Simba will point out where you are
+compilation, and when you are running scripts Simba will point out where you are
 passing invalid arguments. The action Simba takes when this happens is
 configurable. (It can issue a warning and continue, or simply terminate
 the script)
