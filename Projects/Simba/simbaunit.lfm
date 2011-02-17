@@ -15,7 +15,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '0.9.29'
+  LCLVersion = '0.9.31'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0

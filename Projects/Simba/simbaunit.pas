@@ -3063,9 +3063,11 @@ begin
   if CurrScript.ScriptChanged then
   begin;
     CurrTab.TabSheet.Caption:= CurrScript.ScriptName + '*';
-    Self.Caption := Format(WindowTitle,[CurrScript.ScriptName + '*'])
+    Self.Caption := Format(WindowTitle,[CurrScript.ScriptName + '*']);
+    ActionSaveScript.Enabled:= True;
   end else
   begin;
+    ActionSaveScript.Enabled:= False;
     CurrTab.TabSheet.Caption:= CurrScript.ScriptName;
     Self.Caption := Format(WindowTitle,[CurrScript.ScriptName]);
   end;
