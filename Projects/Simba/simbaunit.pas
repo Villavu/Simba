@@ -1248,8 +1248,8 @@ begin
   CreateSetting('LastConfig/MainForm/Position','');
   CreateSetting('LastConfig/MainForm/State','Normal');
   {$ifdef MSWindows}
-  CreateSetting('LastConfig/Console/Visible','True');
-  ShowConsole(True);
+  CreateSetting('LastConfig/Console/Visible','False');
+  ShowConsole(False);
   {$endif}
   CreateSetting('Settings/Tray/AlwaysVisible', 'True');
   if not DirectoryExists(IncludePath) then
@@ -2986,7 +2986,7 @@ begin
   with FormCallBackData do
     case Cmd of
       m_Status: StatusBar.Panels[Panel_General].Text:= PChar(data);
-      m_Disguise: Self.Caption:= Pchar(Data);
+      m_Disguise: begin Self.Caption:= Pchar(Data); Application.Title:= PChar(Data); end;
       m_DisplayDebugImgWindow: DebugImgForm.ShowDebugImgForm(ppoint(data)^);
       m_DrawBitmapDebugImg: DebugImgForm.DrawBitmap(TMufasaBitmap(data));
       m_GetDebugBitmap : DebugImgForm.GetDebugImage(TMufasaBitmap(data));
@@ -3060,6 +3060,7 @@ end;
 
 procedure TSimbaForm.UpdateTitle;
 begin
+  Application.Title:= PChar('Simba');
   if CurrScript.ScriptChanged then
   begin;
     CurrTab.TabSheet.Caption:= CurrScript.ScriptName + '*';
