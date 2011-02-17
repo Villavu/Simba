@@ -479,7 +479,7 @@ end;
 
 constructor TAutoCompletePopup.Create(TheOwner: TComponent);
 begin
-  inherited;
+  inherited CreateNew(TheOwner);
 
   l := TAutoCompleteListBox.Create(Self);
   with l do
@@ -524,6 +524,7 @@ begin
   ClientHeight := (Round(ClientHeight / l.ItemHeight) * l.ItemHeight);
   Constraints.MinHeight := l.ItemHeight;
   Constraints.MinWidth := 100;
+  Resize;
 end;
 
 procedure TAutoCompletePopup.DoHide;
