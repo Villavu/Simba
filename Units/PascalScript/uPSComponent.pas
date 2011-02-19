@@ -93,6 +93,10 @@ type
   {Script engine event function}
   TPSOnNeedFile = function (Sender: TObject; const OrginFileName: tbtstring; var FileName, Output: tbtstring): Boolean of object;
 
+  { Added by Wizzup }
+  TPSOnFileAlreadyIncluded = function (Sender: TObject; FileName: tbtstring): Boolean of object;
+  { Wizzup out }
+
   TPSOnProcessDirective = procedure (
                             Sender: TPSPreProcessor;
                             Parser: TPSPascalPreProcessorParser;
@@ -120,6 +124,9 @@ type
     FPP: TPSPreProcessor;
     FMainFileName: tbtstring;
     FOnNeedFile: TPSOnNeedFile;
+    { Added by Wizzup }
+    FOnFileAlreadyIncluded: TPSOnFileAlreadyIncluded;
+    { Wizzup out }
     FUsePreProcessor: Boolean;
     FDefines: TStrings;
     FOnVerifyProc: TPSVerifyProc;
@@ -152,6 +159,9 @@ type
 
     //--jgv new
     function  DoOnNeedFile (Sender: TObject; const OrginFileName: tbtstring; var FileName, Output: tbtstring): Boolean; virtual;
+    { Added by Wizzup }
+    function  DoOnFileAlreadyIncluded (Sender: TObject; FileName: tbtstring): Boolean; virtual;
+    { Wizzup out }
     function  DoOnUnknowUses (Sender: TPSPascalCompiler; const Name: tbtstring): Boolean; virtual; // return true if processed
     procedure DoOnCompImport; virtual;
     procedure DoOnCompile; virtual;
@@ -284,6 +294,10 @@ type
     property UsePreProcessor: Boolean read FUsePreProcessor write FUsePreProcessor;
 
     property OnNeedFile: TPSOnNeedFile read FOnNeedFile write FOnNeedFile;
+
+    { Added by Wizzup }
+    property OnFileAlreadyIncluded: TPSOnFileAlreadyIncluded read FOnFileAlreadyIncluded write FOnFileAlreadyIncluded;
+    { Wizzup out }
 
     property Defines: TStrings read FDefines write SetDefines;
 
@@ -535,6 +549,13 @@ begin
   Result := TPSScript (Sender.ID).DoOnNeedFile(Sender.ID, CallingFileName, FileName, Output);
 end;
 
+{ Added by Wizzup }
+function CEOnFileAlreadyIncluded(Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
+begin
+  Result := TPSScript (Sender.ID).DoOnFileAlreadyIncluded(Sender.ID, Filename);
+end;
+{ Wizzup out }
+
 procedure CompTranslateLineInfo(Sender: TPSPascalCompiler; var Pos, Row, Col: Cardinal; var Name: tbtstring);
 var
   res: TPSLineInfoResults;
@@ -648,6 +669,10 @@ begin
   FPP := TPSPreProcessor.Create;
   FPP.Id := Self;
   FPP.OnNeedFile := CENeedFile;
+
+  { Added by Wizzup }
+  FPP.OnFileAlreadyIncluded:= CEOnFileAlreadyIncluded;
+  { Wizzup out }
 
   FDefines := TStringList.Create;
 end;
@@ -1048,6 +1073,17 @@ begin
   else
     Result := False;
 end;
+
+{ Added by Wizzup }
+function TPSScript.DoOnFileAlreadyIncluded(Sender: TObject;
+  FileName: tbtstring): Boolean;
+begin
+  If Assigned (OnFileAlreadyIncluded) then
+    Result := OnFileAlreadyIncluded(Sender, FileName)
+  else
+    Result := False;
+end;
+{ Wizzup out }
 
 function TPSScript.DoOnUnknowUses(Sender: TPSPascalCompiler;
   const Name: tbtstring): Boolean;

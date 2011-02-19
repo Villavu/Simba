@@ -14,6 +14,11 @@ type
   TPSPascalPreProcessorParser = class;
 
   TPSOnNeedFile = function (Sender: TPSPreProcessor; const callingfilename: tbtstring; var FileName, Output: tbtstring): Boolean;
+
+  { Added by Wizzup }
+  TPSOnFileAlreadyIncluded = function (Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
+  { Wizzup out }
+
   TPSOnProcessDirective = procedure (
                             Sender: TPSPreProcessor;
                             Parser: TPSPascalPreProcessorParser;
@@ -91,6 +96,9 @@ type
     FCurrentDefines, FDefines: TStringList;
     FCurrentLineInfo: TPSLineInfoList;
     FOnNeedFile: TPSOnNeedFile;
+    { Added by Wizzup }
+    FOnFileAlreadyIncluded: TPSOnFileAlreadyIncluded;
+    { Wizzup out }
     FAddedPosition: Cardinal;
     FDefineState: TPSDefineStates;
     FMaxLevel: Longint;
@@ -108,6 +116,10 @@ type
     property CurrentLineInfo: TPSLineInfoList read FCurrentLineInfo;
 
     property OnNeedFile: TPSOnNeedFile read FOnNeedFile write FOnNeedFile;
+
+    { Added by Wizzup }
+    property OnFileAlreadyIncluded: TPSOnFileAlreadyIncluded read FOnFileAlreadyIncluded write FOnFileAlreadyIncluded;
+    { Wizzup out }
 
     property Defines: TStringList read FDefines write FDefines;
 
@@ -213,6 +225,9 @@ const
 
   RPS_TooManyNestedInclude = 'Too many nested include files while processing ''%s'' from ''%s''';
   RPS_IncludeNotFound = 'Unable to find file ''%s'' used from ''%s''';
+  { Added by Wizzup }
+  RPS_IncludeOnceNotFound = 'Unable to check if file ''%s'' is already included, used from ''%s''';
+  { Wizzup out }
   RPS_DefineTooManyParameters = 'Too many parameters at %d:%d';
   RPS_NoIfdefForEndif = 'No IFDEF for ENDIF at %d:%d';
   RPS_NoIfdefForElse = 'No IFDEF for ELSE at %d:%d';
@@ -614,7 +629,7 @@ begin
         If AppContinue then
         //-- end jgv
 
-          if (Name = 'I') or (Name = 'INCLUDE') or (Name = 'INCLUDE_ONCE') then
+          if (Name = 'I') or (Name = 'INCLUDE') then
           begin
             if FDefineState.DoWrite then
             begin
@@ -623,6 +638,23 @@ begin
               FCurrentLineInfo.Current := current;
               FAddedPosition := Cardinal(Dest.Position) - Item.StartPos - Parser.Pos;
             end;
+          { Added by Wizzup }
+          end else if (Name = 'INCLUDE_ONCE') then
+          begin
+              if FDefineState.DoWrite then
+              if (@OnFileAlreadyIncluded = nil) then
+                 raise EPSPreProcessor.CreateFmt(RPS_IncludeOnceNotFound, [FileName, OrgFileName])
+              else
+              begin
+                if not OnFileAlreadyIncluded(Self, FileName) then
+                begin
+                  FAddedPosition := 0;
+                  IntPreProcess(Level +1, FileName, s, Dest);
+                  FCurrentLineInfo.Current := current;
+                  FAddedPosition := Cardinal(Dest.Position) - Item.StartPos - Parser.Pos;
+                end;
+              end;
+            { Wizzup out }
           end else if (Name = 'DEFINE') then
           begin
             if FDefineState.DoWrite then
