@@ -24,7 +24,7 @@
 unit mmlpsthread;
 
 {$Define PS_USESSUPPORT}
-{$define USE_RUTIS}
+//{$define USE_RUTIS}
 {$mode objfpc}{$H+}
 
 interface
@@ -36,7 +36,8 @@ uses
   settings,settingssandbox, lcltype, dialogs
   {$IFDEF USE_RUTIS}
   ,Rutis_Engine,Rutis_Defs
-  {$ENDIF};
+  {$ENDIF}
+  ;
 
 const
   m_Status = 0; //Data = PChar to new status

@@ -23,7 +23,7 @@
 unit SimbaUnit;
 
 {$undef EditButtons}
-{$define USE_RUTIS}
+//{$define USE_RUTIS}
 {$Undef ProcessMessages} //Define this for processmessages in ThreadSafeCall
 {$mode objfpc}{$H+}
 
@@ -461,7 +461,7 @@ type
     procedure SaveFormSettings;
     procedure LoadExtensions;
     procedure AddRecentFile(const filename : string);
-    procedure InitalizeTMThread(var Thread : TMThread);
+    procedure InitializeTMThread(var Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
     property Interpreter : Integer read GetInterpreter  write SetInterpreter;
@@ -929,7 +929,7 @@ begin
       FormWritelnEx('The script hasn''t stopped yet, so we cannot start a new one.');
       exit;
     end;
-    InitalizeTMThread(scriptthread);
+    InitializeTMThread(scriptthread);
     ScriptThread.CompileOnly:= false;
     ScriptThread.OnTerminate:=@ScriptThreadTerminate;
     ScriptState:= ss_Running;
@@ -1446,11 +1446,10 @@ begin
     RecentFileItems[len - 1-i].Caption:= ExtractFileName(RecentFiles[i]);
 end;
 
-procedure TSimbaForm.InitalizeTMThread(var Thread: TMThread);
+procedure TSimbaForm.InitializeTMThread(var Thread: TMThread);
 var
   AppPath : string;
   ScriptPath : string;
-  UseCPascal: String;
   Script : string;
   Se: TMMLSettingsSandbox;
   loadFontsOnScriptStart: boolean;
@@ -1632,7 +1631,7 @@ procedure TSimbaForm.ActionCompileScriptExecute(Sender: TObject);
 var
   TempThread : TMThread;
 begin
-  InitalizeTMThread(TempThread);
+  InitializeTMThread(TempThread);
   TempThread.CompileOnly:= true;
   TempThread.Resume;
 end;
@@ -1810,7 +1809,9 @@ end;
 
 procedure TSimbaForm.ActionRUTISExecute(Sender: TObject);
 begin
+  {$IFDEF USE_RUTIS}
   Interpreter:= interp_RT;
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.ActionSaveAllExecute(Sender: TObject);
@@ -2177,7 +2178,7 @@ begin
       sleep(25);
     end;
   end;
-  SimbaForm.InitalizeTMThread(t);
+  SimbaForm.InitializeTMThread(t);
   KillThread(t.ThreadID);
   if (t is TPSThread) then
   try
@@ -2299,6 +2300,10 @@ begin
   //Load the extensions
   LoadExtensions;
   UpdateTitle;
+
+  {$IFNDEF USE_RUTIS}
+  MenuItemRUTIS.Enabled:=False;
+  {$ENDIF}
   self.EndFormUpdate;
 
   if SettingsForm.Oops then
