@@ -46,7 +46,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings, updater;
 
 const
-  SimbaVersion = 800;
+  SimbaVersion = 820;
 
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
