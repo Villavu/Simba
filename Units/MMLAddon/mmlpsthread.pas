@@ -180,6 +180,8 @@ type
         procedure OnCompile(Sender: TPSScript);
         function RequireFile(Sender: TObject; const OriginFileName: String;
                             var FileName, OutPut: string): Boolean;
+        function FileAlreadyIncluded(Sender: TObject; FileName: string): Boolean;
+
         procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
         procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
         procedure OutputMessages;
@@ -464,9 +466,9 @@ begin
       if (path <> '') then
         if Includes.Find(path,i) then
         begin
-          psWriteln('Include_Once file already included');
+          Writeln('include_once: File already included.'); // debug message
           Result := False;
-        end;
+        end
     end;
   end else
     Result := True;
@@ -576,6 +578,7 @@ begin
   PSScript.UsePreProcessor:= True;
   PSScript.CompilerOptions := PSScript.CompilerOptions + [icBooleanShortCircuit];
   PSScript.OnNeedFile := @RequireFile;
+  PSScript.OnFileAlreadyIncluded := @FileAlreadyIncluded;
   PSScript.OnProcessDirective:=@OnProcessDirective;
   PSScript.OnProcessUnknowDirective:=@PSScriptProcessUnknowDirective;
   PSScript.OnCompile:= @OnCompile;
@@ -690,6 +693,22 @@ begin
       '{$IFNDEF IS_INCLUDE}{$DEFINE IS_INCLUDE}{$DEFINE __REMOVE_IS_INCLUDE}{$ENDIF}' + LineEnding +
       Output + LineEnding +
       '{$IFDEF __REMOVE_IS_INCLUDE}{$UNDEF IS_INCLUDE}{$ENDIF}';
+end;
+
+function TPSThread.FileAlreadyIncluded(Sender: TObject; FileName: string): Boolean;
+var
+  path: string;
+  i: integer;
+begin
+  path := FindFile(Filename,[ScriptPath,IncludePath]);
+  if (path <> '') then
+    if Includes.Find(path,i) then
+    begin
+      psWriteln('Include_Once file already included');
+      Result := False;
+    end;
+  Includes.Add(path);
+  Result := True;
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
