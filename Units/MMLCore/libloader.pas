@@ -37,7 +37,7 @@ interface
 implementation
 
   uses
-    MufasaTypes,MufasaBase,FileUtil,  strutils;
+    MufasaTypes,MufasaBase,FileUtil;
 
   procedure TGenericLoader.AddPath(path: string);
   var

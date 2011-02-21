@@ -98,7 +98,7 @@ procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
 implementation
 
 uses
-  math,mmath;
+  math;
 
 
 
@@ -205,11 +205,11 @@ begin
   if Lo < iHi then QuickSort(A, Lo, iHi) ;
 end;
 
-const
+{const
   flnC=545947;
   fsqrtA:single=0.5;
 
-{{$ASMMODE INTEL}
+{$ASMMODE INTEL}
 function fsqrt(x: Single): Single;
 begin
   asm
