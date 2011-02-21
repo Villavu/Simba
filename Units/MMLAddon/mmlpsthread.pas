@@ -31,8 +31,8 @@ interface
 
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
-  uPSRuntime,stdCtrls, uPSPreProcessor,MufasaTypes,MufasaBase, web,
-  bitmaps, plugins, libloader, dynlibs,internets,scriptproperties,
+  uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web,
+  bitmaps, plugins, dynlibs,internets,scriptproperties,
   settings,settingssandbox, lcltype, dialogs
   {$IFDEF USE_RUTIS}
   ,Rutis_Engine,Rutis_Defs
@@ -443,8 +443,7 @@ function TMThread.ProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser;
         DirectiveName, DirectiveArgs: string; FileName: string): boolean;
 var
-  plugin_idx, i: integer;
-  path : string;
+  plugin_idx: integer;
 
 begin
   Result := False;
@@ -988,8 +987,7 @@ begin
 end;
 
 constructor TCPThread.Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
-var
-  plugin_idx: integer;
+
 begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
   if libcpascal = 0 then
