@@ -217,7 +217,7 @@ end;
 
 procedure WriteXMLData(n: TTreeNode;
                        XMLNode: TDOMNode; XMLDoc: TXMLDocument;
-                       var XMLChild: TDOMNode; var C: Integer);
+                       out XMLChild: TDOMNode; var C: Integer);
 
 var
    DDataNode, DataNode, Data: TDOMNode;
@@ -254,7 +254,7 @@ procedure WalkTree(Node: TTreeNode; XMLNode: TDOMNode; XMLDoc: TXMLDocument;
                    var C: Integer);
 var
    N: TTreeNode;
-   XMLChild, DDataNode, DataNode, Data: TDOMNode;
+   XMLChild: TDOMNode;
 
 begin
   N := Node.GetFirstChild;
