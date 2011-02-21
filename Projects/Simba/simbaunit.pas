@@ -461,7 +461,7 @@ type
     procedure SaveFormSettings;
     procedure LoadExtensions;
     procedure AddRecentFile(const filename : string);
-    procedure InitializeTMThread(var Thread : TMThread);
+    procedure InitializeTMThread(out Thread : TMThread);
     procedure HandleParameters;
     procedure OnSaveScript(const Filename : string);
     property Interpreter : Integer read GetInterpreter  write SetInterpreter;
@@ -1446,7 +1446,7 @@ begin
     RecentFileItems[len - 1-i].Caption:= ExtractFileName(RecentFiles[i]);
 end;
 
-procedure TSimbaForm.InitializeTMThread(var Thread: TMThread);
+procedure TSimbaForm.InitializeTMThread(out Thread: TMThread);
 var
   AppPath : string;
   ScriptPath : string;
