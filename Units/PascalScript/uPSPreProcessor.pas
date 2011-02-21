@@ -24,7 +24,8 @@ type
                             Parser: TPSPascalPreProcessorParser;
                             const Active: Boolean;
                             const DirectiveName, DirectiveParam: tbtString;
-                            Var Continue: Boolean); //- jgv - application set continue to false to stop the normal directive processing
+                            Var Continue: Boolean;
+                            FileName: tbtString); //- jgv - application set continue to false to stop the normal directive processing
 
   TPSLineInfo = class(TObject)
   private
@@ -625,10 +626,9 @@ begin
 
         //-- 20050707_jgv - ask the application
         AppContinue := True;
-        If @OnProcessDirective <> Nil then OnProcessDirective (Self, Parser, FDefineState.DoWrite, name, s, AppContinue);
+        If @OnProcessDirective <> Nil then OnProcessDirective (Self, Parser, FDefineState.DoWrite, name, s, AppContinue, Filename);
         If AppContinue then
         //-- end jgv
-
           if (Name = 'I') or (Name = 'INCLUDE') then
           begin
             if FDefineState.DoWrite then
@@ -710,7 +710,7 @@ begin
           //-- 20050710_jgv custom application error process
           else if Parser.Token[2] <> '.' then begin
             If @OnProcessUnknowDirective <> Nil then begin
-              OnProcessUnknowDirective (Self, Parser, FDefineState.DoWrite, name, s, AppContinue);
+              OnProcessUnknowDirective (Self, Parser, FDefineState.DoWrite, name, s, AppContinue, Filename);
             end;
             If AppContinue then
             //-- end jgv
