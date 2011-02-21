@@ -495,15 +495,15 @@ begin
     if (DirectiveArgs <> '') then
     begin
       Result := True;
-      if FileName = '' then
+      {if FileName = '' then
         psWriteln(format('Error: In %s: at row: %d, col: %d, pos %d: %s',
                                ['Main script', Parser.row, Parser.col,
                                Parser.pos, DirectiveArgs]))
       else
         psWriteln(format('Error: In file %s: at row: %d, col: %d, pos %d: %s',
                              [FileName, Parser.row, Parser.col,
-                             Parser.pos, DirectiveArgs]));
-      HandleError(Parser.Row + 1, Parser.Col, Parser.Pos, 'Error at ' + DirectiveArgs, errCompile, FileName);
+                             Parser.pos, DirectiveArgs])); }
+      HandleError(Parser.Row + 1, Parser.Col, Parser.Pos, 'Error: ' + DirectiveArgs, errCompile, FileName);
       raise EPSPreProcessor.Create('ERROR directive found');
     end;
   end else
