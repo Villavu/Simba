@@ -46,8 +46,8 @@ interface
         constructor Create;
         constructor Create(target: Hwnd); 
         destructor Destroy; override;
-        procedure GetTargetDimensions(var w, h: integer); override;
-        procedure GetTargetPosition(var left, top: integer); override;
+        procedure GetTargetDimensions(out w, h: integer); override;
+        procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         function GetColor(x,y : integer) : TColor; override;
 
@@ -57,7 +57,7 @@ interface
 
         function TargetValid: boolean; override;
         procedure ActivateClient; override;
-        procedure GetMousePosition(var x,y: integer); override;
+        procedure GetMousePosition(out x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
         procedure ScrollMouse(x,y, lines : integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
@@ -226,7 +226,7 @@ implementation
     SetForegroundWindow(handle);
   end;
 
-  procedure TWindow.GetTargetDimensions(var w, h: integer);
+  procedure TWindow.GetTargetDimensions(out w, h: integer);
   var
     Rect : TRect; 
   begin 
@@ -235,7 +235,7 @@ implementation
     h:= Rect.Bottom - Rect.Top;
   end;
 
-  procedure TWindow.GetTargetPosition(var left, top: integer);
+  procedure TWindow.GetTargetPosition(out left, top: integer);
   var
     Rect : TRect;
   begin
@@ -284,7 +284,7 @@ implementation
     Result.RowLen:= w;
   end;
 
-  procedure TWindow.GetMousePosition(var x,y: integer);
+  procedure TWindow.GetMousePosition(out x,y: integer);
   var
     MousePoint : TPoint;
     Rect : TRect;
