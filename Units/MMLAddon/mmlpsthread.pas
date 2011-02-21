@@ -448,7 +448,6 @@ var
 
 begin
   Result := False;
-  writeln('ProcessDirective called');
   if CompareText(DirectiveName,'LOADLIB') = 0 then
   begin
     if DirectiveArgs <> '' then
@@ -465,24 +464,51 @@ begin
     else
       psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
   end
-  else if CompareText(DirectiveName,'FIXME') = 0 then
+  else if CompareText(DirectiveName,'WARNING') = 0 then
   begin
     if (sender = nil) or (parser = nil) then
     begin
-      psWriteln('ERROR: FIXME directive not supported for this interpreter');
+      psWriteln('ERROR: WARNING directive not supported for this interpreter');
       exit(False);
     end;
 
     if (DirectiveArgs <> '') then
     begin
       Result := True;
-      HandleError(Parser.Row, Parser.Col, Parser.Pos, 'FIXME AT ' + DirectiveArgs, errCompile, 'test');
-      psWriteln(format('FIXME: In file %s: at row: %d, col: %d, pos %d: %s',
-                               [FileName, Parser.row, Parser.col,
-                               Parser.pos, DirectiveArgs]));
+      if FileName = '' then
+        psWriteln(format('Warning: In %s: at row: %d, col: %d, pos %d: %s',
+                               ['Main script', Parser.row, Parser.col,
+                               Parser.pos, DirectiveArgs]))
+      else
+        psWriteln(format('Warning: In file %s: at row: %d, col: %d, pos %d: %s',
+                             [FileName, Parser.row, Parser.col,
+                             Parser.pos, DirectiveArgs]));
+      //HandleError(Parser.Row + 1, Parser.Col, Parser.Pos, 'Warning at ' + DirectiveArgs, errCompile, FileName);
+    end;
+  end else if CompareText(DirectiveName,'ERROR') = 0 then
+  begin
+    if (sender = nil) or (parser = nil) then
+    begin
+      psWriteln('ERROR: ERROR directive not supported for this interpreter');
+      exit(False);
+    end;
+
+    if (DirectiveArgs <> '') then
+    begin
+      Result := True;
+      if FileName = '' then
+        psWriteln(format('Error: In %s: at row: %d, col: %d, pos %d: %s',
+                               ['Main script', Parser.row, Parser.col,
+                               Parser.pos, DirectiveArgs]))
+      else
+        psWriteln(format('Error: In file %s: at row: %d, col: %d, pos %d: %s',
+                             [FileName, Parser.row, Parser.col,
+                             Parser.pos, DirectiveArgs]));
+      HandleError(Parser.Row + 1, Parser.Col, Parser.Pos, 'Error at ' + DirectiveArgs, errCompile, FileName);
+      raise EPSPreProcessor.Create('ERROR directive found');
     end;
   end else
-    Result := True; // If we do not know the directive; return true so Continue
+    Result := False; // If we do not know the directive; return true so Continue
                     // will be false.
 end;
 
@@ -623,7 +649,9 @@ procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean; Filename: String);
 begin
-  if (CompareText(DirectiveName, 'LOADLIB') = 0) or (CompareText(DirectiveName, 'FIXME') = 0) then
+  if (CompareText(DirectiveName, 'LOADLIB') = 0)
+  or (CompareText(DirectiveName, 'WARNING') = 0)
+  or (CompareText(DirectiveName, 'ERROR') = 0)  then
     Continue := not ProcessDirective(Sender, Parser, DirectiveName,DirectiveParam,
              FileName);
 end;
@@ -640,7 +668,6 @@ procedure TPSThread.PSScriptProcessUnknownDirective(Sender: TPSPreProcessor;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean;
   Filename: string);
 begin
-  writeln('PSScriptProcessUnknownDirective called');
   Continue:= not ProcessDirective(Sender, Parser, DirectiveName, DirectiveParam,
                FileName);
 end;
