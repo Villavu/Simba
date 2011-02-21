@@ -5,7 +5,7 @@ unit XTest;
 interface
 
 uses
-  Classes, SysUtils, x, xutil, xlib, ctypes, XKB, xinput;
+  Classes, SysUtils, x, xlib, ctypes, xinput;
 
 { type
       PXDevice  = Pointer; // ^XDevice ?   }

@@ -3,10 +3,10 @@ unit mufasabase;
 {$mode objfpc}{$H+}
 
 interface
-{$undefine mDebug}
+{$undef mDebug}
 
 uses
-  files, Classes, SysUtils{$ifdef MSWindows},windows{$endif};
+  Classes, SysUtils{$ifdef MSWindows},windows{$endif};
 
 procedure mDebugLn( s : string);overload;
 procedure mDebugLn( s : string; f : array of const);overload;

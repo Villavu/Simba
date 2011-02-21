@@ -26,7 +26,7 @@ unit os_linux;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest, keysym,
+    Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest,
     syncobjs, mufasabase;
   
   type
@@ -45,8 +45,8 @@ interface
       public
         constructor Create(display: PDisplay; screennum: integer; window: x.TWindow); 
         destructor Destroy; override;
-        procedure GetTargetDimensions(var w, h: integer); override;
-        procedure GetTargetPosition(var left, top: integer); override;
+        procedure GetTargetDimensions(out w, h: integer); override;
+        procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
         procedure FreeReturnData; override;
 
@@ -56,7 +56,7 @@ interface
 
         function TargetValid: boolean; override;
         procedure ActivateClient; override;
-        procedure GetMousePosition(var x,y: integer); override;
+        procedure GetMousePosition(out x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
@@ -256,11 +256,9 @@ implementation
     result := self.window;
   end;
 
-  procedure TWindow.GetTargetDimensions(var w, h: integer); 
+  procedure TWindow.GetTargetDimensions(out w, h: integer);
   var
     Attrib: TXWindowAttributes;
-    newx, newy: integer;
-    childwindow: x.TWindow;
   begin
     if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
     begin
@@ -273,11 +271,9 @@ implementation
     end;
   end;
 
-  procedure TWindow.GetTargetPosition(var left, top: integer);
+  procedure TWindow.GetTargetPosition(out left, top: integer);
   var
     Attrib: TXWindowAttributes;
-    newx, newy: integer;
-    childwindow: x.TWindow;
   begin
     if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
     begin
@@ -350,7 +346,7 @@ implementation
     end;
   end;
 
-  procedure TWindow.GetMousePosition(var x,y: integer);
+  procedure TWindow.GetMousePosition(out x,y: integer);
   var
     b:integer;
     root, child: twindow;
@@ -510,7 +506,7 @@ implementation
   
   function TIOManager.SetTarget(target: x.TWindow): integer;
   begin
-    SetBothTargets(TWindow.Create(display, screennum, target))
+    result := SetBothTargets(TWindow.Create(display, screennum, target))
   end;
 
   function TIOManager.GetProcesses: TSysProcArr;

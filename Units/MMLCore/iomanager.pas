@@ -42,8 +42,8 @@ interface
         { ONLY override some of the following methods if the target provides image functions, defaults 
         | to raise exceptions. GetColor provides default functionality using ReturData of width 1.     
         | FreeReturnData provides default of doing nothing. }
-        procedure GetTargetDimensions(var w, h: integer); virtual;
-        procedure GetTargetPosition(var left, top: integer); virtual;
+        procedure GetTargetDimensions(out w, h: integer); virtual;
+        procedure GetTargetPosition(out left, top: integer); virtual;
         function GetColor(x,y : integer) : TColor; virtual;
         function ReturnData(xs, ys, width, height: Integer): TRetData; virtual;
         procedure FreeReturnData; virtual;
@@ -57,7 +57,7 @@ interface
 
         { ONLY override the following methods if the target provides mouse functions, defaults to 
         | raise exceptions }
-        procedure GetMousePosition(var x,y: integer); virtual;
+        procedure GetMousePosition(out x,y: integer); virtual;
         procedure MoveMouse(x,y: integer); virtual;
         procedure ScrollMouse(x,y : integer; Lines : integer); virtual;
         procedure HoldMouse(x,y: integer; button: TClickType); virtual;
@@ -80,8 +80,8 @@ interface
         constructor Create(rgb: prgb32; w,h: integer; CopyData : boolean = false);
         destructor Destroy; override;
         
-        procedure GetTargetDimensions(var w, h: integer); override;
-        procedure GetTargetPosition(var left, top: integer); override;
+        procedure GetTargetDimensions(out w, h: integer); override;
+        procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
       protected
@@ -95,7 +95,7 @@ interface
         constructor Create(bitmap: TMufasaBitmap);
         destructor Destroy; override;
 
-        procedure GetTargetDimensions(var w, h: integer); override;
+        procedure GetTargetDimensions(out w, h: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
       protected
@@ -109,14 +109,14 @@ interface
 
     TWindow_Abstract = class(TTarget)
       public
-        procedure GetTargetDimensions(var w, h: integer); override; abstract;
-        procedure GetTargetPosition(var left, top: integer); override; abstract;
+        procedure GetTargetDimensions(out w, h: integer); override; abstract;
+        procedure GetTargetPosition(out left, top: integer); override; abstract;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override; abstract;
 
         function TargetValid: boolean; override; abstract;
 
         procedure ActivateClient; override; abstract;
-        procedure GetMousePosition(var x,y: integer); override; abstract;
+        procedure GetMousePosition(out x,y: integer); override; abstract;
         procedure MoveMouse(x,y: integer); override; abstract;
         procedure ScrollMouse(x,y : integer; Lines : integer); override; abstract;
         procedure HoldMouse(x,y: integer; button: TClickType); override; abstract;
@@ -172,11 +172,11 @@ interface
         constructor Create(client: TEIOS_Client; initval: pointer);
         destructor Destroy; override;
         
-        procedure GetTargetDimensions(var w, h: integer); override;
-        procedure GetTargetPosition(var left, top: integer); override;
+        procedure GetTargetDimensions(out w, h: integer); override;
+        procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
-        procedure GetMousePosition(var x,y: integer); override;
+        procedure GetMousePosition(out x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
         procedure ScrollMouse(x,y : integer; Lines : integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
@@ -283,7 +283,7 @@ interface
         function ReturnData(xs, ys, width, height: Integer): TRetData;
         procedure FreeReturnData;
 
-        procedure GetDimensions(var W, H: Integer);
+        procedure GetDimensions(out W, H: Integer);
         procedure GetPosition(var Left, Top: Integer);
         procedure ActivateClient;
 
@@ -612,7 +612,7 @@ begin
     result := (keymouse.TargetValid and image.TargetValid);
 end;
 
-procedure TIOManager_Abstract.GetDimensions(var W, H: Integer);
+procedure TIOManager_Abstract.GetDimensions(out W, H: Integer);
 begin
   image.GetTargetDimensions(w,h)
 end;
@@ -721,12 +721,12 @@ end;
 
 //***implementation*** TTarget
 
-procedure TTarget.GetTargetDimensions(var w, h: integer);
+procedure TTarget.GetTargetDimensions(out w, h: integer);
 begin
   raise Exception.Create('GetTargetDimensions not available for this target');
 end;
 
-procedure TTarget.GetTargetPosition(var left, top: integer);
+procedure TTarget.GetTargetPosition(out left, top: integer);
 begin
   raise Exception.Create('GetTargetDimensions not available for this target');
 end;
@@ -754,7 +754,7 @@ begin
   result:= true;
 end;
 
-procedure TTarget.GetMousePosition(var x,y: integer);
+procedure TTarget.GetMousePosition(out x,y: integer);
 begin
   raise Exception.Create('GetMousePosition not available for this target');
 end;
@@ -823,7 +823,7 @@ destructor TEIOS_Target.Destroy; begin
   inherited Destroy;
 end;
 
-procedure TEIOS_Target.GetTargetDimensions(var w, h: integer);
+procedure TEIOS_Target.GetTargetDimensions(out w, h: integer);
 begin
   if Pointer(client.GetTargetDimensions) <> nil then
     client.GetTargetDimensions(target,w,h)
@@ -831,7 +831,7 @@ begin
     inherited GetTargetDimensions(w,h);
 end;
 
-procedure TEIOS_Target.GetTargetPosition(var left, top: integer);
+procedure TEIOS_Target.GetTargetPosition(out left, top: integer);
 begin
   if Pointer(client.GetTargetDimensions) <> nil then
     client.GetTargetDimensions(target,left,top)
@@ -854,7 +854,7 @@ begin
   Inc(result.Ptr, ys * result.RowLen + xs);
 end;
 
-procedure TEIOS_Target.GetMousePosition(var x,y: integer);
+procedure TEIOS_Target.GetMousePosition(out x,y: integer);
 begin
   if Pointer(client.GetMousePosition) <> nil then
     client.GetMousePosition(target,x,y)
@@ -974,13 +974,13 @@ begin
   inherited Destroy;
 end;
 
-procedure TRawTarget.GetTargetDimensions(var w, h: integer);
+procedure TRawTarget.GetTargetDimensions(out w, h: integer);
 begin
   w:= self.w;
   h:= self.h;
 end;
 
-procedure TRawTarget.GetTargetPosition(var left, top: integer);
+procedure TRawTarget.GetTargetPosition(out left, top: integer);
 begin
   { The RawTarget has no position on the screen }
   left := 0;
@@ -1008,7 +1008,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TBitmapTarget.GetTargetDimensions(var w, h: integer);
+procedure TBitmapTarget.GetTargetDimensions(out w, h: integer);
 begin
   h:= bitmap.Height;
   w:= bitmap.Width;
