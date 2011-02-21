@@ -102,7 +102,8 @@ type
                             Parser: TPSPascalPreProcessorParser;
                             const Active: Boolean;
                             const DirectiveName, DirectiveParam: tbtstring;
-                            Var Continue: Boolean) of Object;  // jgv
+                            Var Continue: Boolean;
+                            Filename: tbtString) of Object;  // jgv
 
   TPSScript = class(TComponent)
   private
@@ -177,12 +178,14 @@ type
                 Parser: TPSPascalPreProcessorParser;
                 const Active: Boolean;
                 const DirectiveName, DirectiveParam: tbtstring;
-                Var Continue: Boolean); virtual;
+                Var Continue: Boolean;
+                Filename: tbtString); virtual;
     procedure DoOnProcessUnknowDirective (Sender: TPSPreProcessor;
                 Parser: TPSPascalPreProcessorParser;
                 const Active: Boolean;
                 const DirectiveName, DirectiveParam: tbtstring;
-                Var Continue: Boolean); virtual;
+                Var Continue: Boolean;
+                Filename: tbtString); virtual;
   public
     property RuntimeImporter: TPSRuntimeClassImporter read RI;
 
@@ -459,9 +462,9 @@ procedure callObjectOnProcessDirective (
   Parser: TPSPascalPreProcessorParser;
   const Active: Boolean;
   const DirectiveName, DirectiveParam: tbtstring;
-  Var Continue: Boolean);
+  Var Continue: Boolean; Filename: tbtstring);
 begin
-  TPSScript (Sender.ID).DoOnProcessDirective(Sender, Parser, Active, DirectiveName, DirectiveParam, Continue);
+  TPSScript (Sender.ID).DoOnProcessDirective(Sender, Parser, Active, DirectiveName, DirectiveParam, Continue, Filename);
 end;
 
 procedure callObjectOnProcessUnknowDirective (
@@ -469,9 +472,9 @@ procedure callObjectOnProcessUnknowDirective (
   Parser: TPSPascalPreProcessorParser;
   const Active: Boolean;
   const DirectiveName, DirectiveParam: tbtstring;
-  Var Continue: Boolean);
+  Var Continue: Boolean; Filename: tbtString);
 begin
-  TPSScript (Sender.ID).DoOnProcessUnknowDirective(Sender, Parser, Active, DirectiveName, DirectiveParam, Continue);
+  TPSScript (Sender.ID).DoOnProcessUnknowDirective(Sender, Parser, Active, DirectiveName, DirectiveParam, Continue, Filename);
 end;
 
 
@@ -1051,18 +1054,20 @@ end;
 
 procedure TPSScript.DoOnProcessDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-  const DirectiveName, DirectiveParam: tbtstring; var Continue: Boolean);
+  const DirectiveName, DirectiveParam: tbtstring; var Continue: Boolean;
+  Filename: tbtString);
 begin
   If Assigned (OnProcessDirective) then
-    OnProcessDirective (Sender, Parser, Active, DirectiveName, DirectiveParam, Continue);
+    OnProcessDirective (Sender, Parser, Active, DirectiveName, DirectiveParam, Continue, Filename);
 end;
 
 procedure TPSScript.DoOnProcessUnknowDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-  const DirectiveName, DirectiveParam: tbtstring; var Continue: Boolean);
+  const DirectiveName, DirectiveParam: tbtstring; var Continue: Boolean;
+  FileName: tbtString);
 begin
   If Assigned (OnProcessUnknowDirective) then
-    OnProcessUnknowDirective (Sender, Parser, Active, DirectiveName, DirectiveParam, Continue);
+    OnProcessUnknowDirective (Sender, Parser, Active, DirectiveName, DirectiveParam, Continue,Filename);
 end;
 
 function TPSScript.DoOnNeedFile(Sender: TObject;

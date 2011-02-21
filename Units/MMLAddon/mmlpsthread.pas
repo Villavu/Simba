@@ -139,7 +139,9 @@ type
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
-      function ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
+      function ProcessDirective(Sender: TPSPreProcessor;
+                    Parser: TPSPascalPreProcessorParser;
+                    DirectiveName, DirectiveArgs: string; Filename:String): boolean;
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
       procedure AddMethod(meth: TExpMethod); virtual;
 
@@ -168,12 +170,14 @@ type
       public
         procedure OnProcessDirective(Sender: TPSPreProcessor;
           Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-          const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+          const DirectiveName, DirectiveParam: string; var Continue: Boolean;
+          Filename: String);
         function PSScriptFindUnknownFile(Sender: TObject;
           const OrginFileName: string; var FileName, Output: string): Boolean;
-        procedure PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
+        procedure PSScriptProcessUnknownDirective(Sender: TPSPreProcessor;
           Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-          const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+          const DirectiveName, DirectiveParam: string; var Continue: Boolean;
+          Filename: string);
       protected
         PluginsToload : array of integer;
         procedure LoadPlugin(plugidx: integer); override;
@@ -435,12 +439,16 @@ begin
   end;
 end;
 
-function TMThread.ProcessDirective(DirectiveName, DirectiveArgs: string): boolean;
+function TMThread.ProcessDirective(Sender: TPSPreProcessor;
+        Parser: TPSPascalPreProcessorParser;
+        DirectiveName, DirectiveArgs: string; FileName: string): boolean;
 var
   plugin_idx, i: integer;
   path : string;
+
 begin
   Result := False;
+  writeln('ProcessDirective called');
   if CompareText(DirectiveName,'LOADLIB') = 0 then
   begin
     if DirectiveArgs <> '' then
@@ -457,21 +465,25 @@ begin
     else
       psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
   end
-  else if CompareText(DirectiveName,'INCLUDE_ONCE') = 0 then
+  else if CompareText(DirectiveName,'FIXME') = 0 then
   begin
-    Result := True; //Lets to the actual file checking later on in the preprocessor ;-)
+    if (sender = nil) or (parser = nil) then
+    begin
+      psWriteln('ERROR: FIXME directive not supported for this interpreter');
+      exit(False);
+    end;
+
     if (DirectiveArgs <> '') then
     begin
-      path := FindFile(DirectiveArgs,[ScriptPath,IncludePath]);
-      if (path <> '') then
-        if Includes.Find(path,i) then
-        begin
-          Writeln('include_once: File already included.'); // debug message
-          Result := False;
-        end
+      Result := True;
+      HandleError(Parser.Row, Parser.Col, Parser.Pos, 'FIXME AT ' + DirectiveArgs, errCompile, 'test');
+      psWriteln(format('FIXME: In file %s: at row: %d, col: %d, pos %d: %s',
+                               [FileName, Parser.row, Parser.col,
+                               Parser.pos, DirectiveArgs]));
     end;
   end else
-    Result := True;
+    Result := True; // If we do not know the directive; return true so Continue
+                    // will be false.
 end;
 
 procedure TMThread.SetDebug(writelnProc: TWritelnProc);
@@ -580,7 +592,7 @@ begin
   PSScript.OnNeedFile := @RequireFile;
   PSScript.OnFileAlreadyIncluded := @FileAlreadyIncluded;
   PSScript.OnProcessDirective:=@OnProcessDirective;
-  PSScript.OnProcessUnknowDirective:=@PSScriptProcessUnknowDirective;
+  PSScript.OnProcessUnknowDirective:=@PSScriptProcessUnknownDirective;
   PSScript.OnCompile:= @OnCompile;
   PSScript.OnCompImport:= @OnCompImport;
   PSScript.OnExecImport:= @OnExecImport;
@@ -609,10 +621,11 @@ end;
 
 procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-  const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+  const DirectiveName, DirectiveParam: string; var Continue: Boolean; Filename: String);
 begin
-  if CompareText(DirectiveName, 'LOADLIB') = 0 then
-    Continue := not ProcessDirective(DirectiveName,DirectiveParam);
+  if (CompareText(DirectiveName, 'LOADLIB') = 0) or (CompareText(DirectiveName, 'FIXME') = 0) then
+    Continue := not ProcessDirective(Sender, Parser, DirectiveName,DirectiveParam,
+             FileName);
 end;
 
 function TPSThread.PSScriptFindUnknownFile(Sender: TObject;
@@ -622,11 +635,14 @@ begin
   Result := false;
 end;
 
-procedure TPSThread.PSScriptProcessUnknowDirective(Sender: TPSPreProcessor;
+procedure TPSThread.PSScriptProcessUnknownDirective(Sender: TPSPreProcessor;
   Parser: TPSPascalPreProcessorParser; const Active: Boolean;
-  const DirectiveName, DirectiveParam: string; var Continue: Boolean);
+  const DirectiveName, DirectiveParam: string; var Continue: Boolean;
+  Filename: string);
 begin
-  Continue:= not ProcessDirective(DirectiveName, DirectiveParam);
+  writeln('PSScriptProcessUnknownDirective called');
+  Continue:= not ProcessDirective(Sender, Parser, DirectiveName, DirectiveParam,
+               FileName);
 end;
 
 function Muf_Conv_to_PS_Conv( conv : integer) : TDelphiCallingConvention;
@@ -773,11 +789,16 @@ begin
 end;
 
 function TMufasaBitmapCreate : TMufasaBitmap;
-begin;
+begin
   result := TMufasaBitmap.Create;
   CurrThread.Client.MBitmaps.AddBMP(result);
 end;
-procedure TMufasaBitmapFree(Self : TMufasaBitmap);begin; CurrThread.Client.MBitmaps.FreeBMP(Self.Index); end;
+
+procedure TMufasaBitmapFree(Self : TMufasaBitmap);
+begin
+  CurrThread.Client.MBitmaps.FreeBMP(Self.Index);
+end;
+
 function TMufasaBitmapCopy(Self : TMufasaBitmap;const xs,ys,xe,ye : integer) : TMufasaBitmap;
 begin
   result := Self.Copy(xs,ys,xe,ye);
@@ -928,7 +949,7 @@ end;
 function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
 
 begin
-  result:= CurrThread.ProcessDirective(name, args);
+  result:= CurrThread.ProcessDirective(nil, nil, name, args, '');
 end;
 
 procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar; runtime: boolean); stdcall;
