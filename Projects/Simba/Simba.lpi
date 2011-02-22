@@ -14,9 +14,11 @@
     </General>
     <LazDoc Paths="../../LazDoc"/>
     <VersionInfo>
-      <Language Value="0419"/>
+      <UseVersionInfo Value="True"/>
+      <MinorVersionNr Value="96"/>
+      <Language Value="0809"/>
       <CharSet Value="04B0"/>
-      <StringTable ProductVersion=""/>
+      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="0.97"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
@@ -33,14 +35,18 @@
         <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="LCLBase"/>
+        <MinVersion Major="1" Release="1" Valid="True"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="SynEdit"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item2>
+      <Item3>
+        <PackageName Value="LCL"/>
+      </Item3>
     </RequiredPackages>
     <Units Count="48">
       <Unit0>
@@ -305,7 +311,7 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <Target>
       <Filename Value="../../Simba"/>
     </Target>
@@ -321,7 +327,6 @@
     </Parsing>
     <CodeGeneration>
       <Optimizations>
-        <VariablesInRegisters Value="True"/>
         <OptimizationLevel Value="2"/>
       </Optimizations>
     </CodeGeneration>
