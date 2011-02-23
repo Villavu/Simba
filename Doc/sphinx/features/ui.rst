@@ -256,8 +256,9 @@ Update Form
 -----------
 
 The update form is launched from Tools menu via the Update item.
-Informs user if no update is currently available before displaying the form.
-Gives the option of updating when the current version is not the latest.
+Informs user if no update is currently available; else it will 
+displaying the form. Gives the option of updating when the current
+version is not the latest.
 
 Settings Form
 -------------
