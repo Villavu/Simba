@@ -597,6 +597,7 @@ begin
     Command := ACmd;
   end;
 end;
+
 constructor TScriptFrame.Create(TheOwner: TComponent);
 const
   AdditionalFolds:TPascalCodeFoldBlockTypes = [cfbtSlashComment,cfbtBorCommand,cfbtAnsiComment];
@@ -618,6 +619,9 @@ begin
   FScriptState:= ss_None;
   ScriptErrorLine:= -1;
   OwnerSheet.Caption:= ScriptName;
+
+  SynEdit.Enabled := True; // For some reason we need this?
+
   SynEdit.Highlighter := SimbaForm.CurrHighlighter;
   SynEdit.Options := SynEdit.Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing] - [eoSmartTabs];
   SynEdit.Options2 := SynEdit.Options2 + [eoCaretSkipsSelection];
@@ -668,14 +672,22 @@ var
 begin
   try
     ExternScript := TFileStream.Create(ScriptFile, fmOpenRead);
-    ExternScript.Read(NewScript, ExternScript.Size);
-
-    SynEdit.Lines.SetText(PChar(NewScript));
   except
     on EFOpenError do
     begin
       formWriteln('Could not open extern script :' + ScriptFile);
+      exit;
     end;
+  end;
+
+  try
+      SetLength(NewScript, ExternScript.Size);
+      ExternScript.Read(NewScript[1], ExternScript.Size);
+
+      SynEdit.Lines.SetText(PChar(NewScript));
+      SetLength(NewScript, 0);
+  finally
+    ExternScript.Free;
   end;
 end;
 
