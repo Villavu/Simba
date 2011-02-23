@@ -83,9 +83,13 @@ type
     procedure undo;
     procedure redo;
     procedure HandleErrorData;
+    function GetReadOnly: Boolean;
+    procedure SetReadOnly(ReadOnly: Boolean);
     procedure MakeActiveScriptFrame;
     procedure ScriptThreadTerminate(Sender: TObject);
     constructor Create(TheOwner: TComponent); override;
+
+    procedure ReloadScript;
     { public declarations }
   end;
 
@@ -642,6 +646,37 @@ begin
   end;
   AddKey(SynEdit,ecCodeCompletion,VK_SPACE,[ssCtrl]);
   AddKey(SynEdit,ecCodeHints,VK_SPACE,[ssCtrl,ssShift]);
+end;
+
+function TScriptFrame.GetReadOnly: Boolean;
+begin
+  Result := SynEdit.ReadOnly;
+end;
+
+procedure TScriptFrame.SetReadOnly(ReadOnly: Boolean);
+begin
+  SynEdit.ReadOnly := ReadOnly;
+  SynEdit.Enabled := not ReadOnly;
+  if not ReadOnly and SynEdit.CanFocus then
+    SynEdit.SetFocus;
+end;
+
+procedure TScriptFrame.ReloadScript;
+var
+   newScript: String;
+   ExternScript: TFileStream;
+begin
+  try
+    ExternScript := TFileStream.Create(ScriptFile, fmOpenRead);
+    ExternScript.Read(NewScript, ExternScript.Size);
+
+    SynEdit.Lines.SetText(PChar(NewScript));
+  except
+    on EFOpenError do
+    begin
+      formWriteln('Could not open extern script :' + ScriptFile);
+    end;
+  end;
 end;
 
 initialization
