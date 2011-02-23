@@ -30,7 +30,7 @@ unit SimbaUnit;
 interface
 
 uses
-  {$ifdef linux}cthreads,{$endif}Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  {$ifdef linux}cthreads,cmem,{$endif}Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas,
   //Client,
   MufasaTypes,
@@ -116,6 +116,7 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    MenuItemReadOnlyTab: TMenuItem;
     MenuItemGoto: TMenuItem;
     MenuItemDivider50: TMenuItem;
     MenuItemPascalScript: TMenuItem;
@@ -288,6 +289,7 @@ type
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
     procedure FunctionListTimerTimer(Sender: TObject);
+    procedure MenuItemReadOnlyTabClick(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
     procedure MenuItemColourHistoryClick(Sender: TObject);
@@ -408,7 +410,7 @@ type
     procedure SetScriptState(const State: TScriptState);
     function CreateSetting(const Key, Value : string) : string;
     procedure SetSetting(const key,Value : string; save : boolean = false);
-    function SettingExtists(const key : string) : boolean;
+    function SettingExists(const key : string) : boolean;
     procedure FontUpdate;
   public
     DebugStream: String;
@@ -1191,7 +1193,8 @@ begin
   if Self.Showing then
     if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
       if CurrScript.SynEdit.CanFocus then
-        CurrScript.SynEdit.SetFocus;
+        CurrScript.SynEdit.SetFocus;      // XXX: This is never called
+
   StopCodeCompletion;//To set the highlighting back to normal;
   frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
   with CurrScript.SynEdit do
@@ -1204,6 +1207,7 @@ begin
   LabeledEditSearch.SelLength:= 0;
   LabeledEditSearch.Color:= clWindow;
   LabeledEditSearch.Font.Color:= clWindowText;
+
   //Set tha edit buttons right
   SetEditActions;
 end;
@@ -1294,7 +1298,7 @@ begin
   else
 //  if str = 'normal' then
     Self.WindowState := wsNormal;
-  if SettingExtists('LastConfig/MainForm/RecentFiles/Count') then
+  if SettingExists('LastConfig/MainForm/RecentFiles/Count') then
   begin;
     ii := StrToIntDef(LoadSettingDef('LastConfig/MainForm/RecentFiles/Count','-1'),-1);
     for i := 0 to ii do
@@ -1385,7 +1389,7 @@ var
     if (number < 0) or (number >= extCount) then
       exit;
     path := 'Extensions/Extension' + inttostr(number);
-    if SettingExtists(Path) = false then
+    if SettingExists(Path) = false then
       exit;
     ExtPath := LoadSettingDef(Path + '/Path','');
     if ExtPath = '' then
@@ -1454,8 +1458,16 @@ var
   Se: TMMLSettingsSandbox;
   loadFontsOnScriptStart: boolean;
   Continue : boolean;
+
 begin
-  Script :=CurrScript.SynEdit.Lines.Text;
+  if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
+  begin
+    formWriteln('Reloading read only script');
+    CurrScript.ReloadScript;
+  end;
+
+  Script := CurrScript.SynEdit.Lines.Text;
+
   if Assigned(OnScriptStart) then
   begin
     Continue := True;
@@ -1480,6 +1492,7 @@ begin
   Thread.SetDebug(@formWriteln);
   {$ENDIF}
   Thread.SetScript(Script);
+
   Thread.ErrorData:= @CurrScript.ErrorData;
   Thread.OnError:= @CurrScript.HandleErrorData;
   FormCallBackData.FormCallBack:= @self.FormCallBack;
@@ -2081,7 +2094,7 @@ end;
 
 procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
 begin
-  OpenURL('http://wizzup.org/simbadoc/');
+  OpenURL('http://docs.wizzup.org/simba/');
 end;
 
 procedure TSimbaForm.MenuItemColourHistoryClick(Sender: TObject);
@@ -2571,6 +2584,17 @@ begin
   CloseTabs(PopupTab);
 end;
 
+
+procedure TSimbaForm.MenuItemReadOnlyTabClick(Sender: TObject);
+var
+  Tab: TMufasaTab;
+
+begin
+  Tab := TMufasaTab(Tabs[PopupTab]);
+  Tab.ScriptFrame.SetReadOnly(not Tab.ScriptFrame.GetReadOnly());
+  MenuItemReadOnlyTab.Checked := not Tab.ScriptFrame.GetReadOnly();
+end;
+
 procedure TSimbaForm.MenuItemFunctionListClick(Sender: TObject);
 begin
   FunctionListShown(not MenuItemFunctionList.Checked);
@@ -2684,6 +2708,9 @@ begin
   begin
     mDebugLn('We couldn''t find which tab you clicked on, closing the popup');
     Handled := true;
+  end else
+  begin
+    MenuItemReadOnlyTab.Checked := TMufasaTab(Tabs[PopupTab]).ScriptFrame.GetReadOnly();
   end;
 end;
 
@@ -2874,7 +2901,7 @@ begin
     SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
 end;
 
-function TSimbaForm.SettingExtists(const key: string): boolean;
+function TSimbaForm.SettingExists(const key: string): boolean;
 begin
   result :=SettingsForm.Settings.KeyExists(key);
 end;
@@ -3065,7 +3092,7 @@ end;
 
 procedure TSimbaForm.UpdateTitle;
 begin
-  Application.Title:= PChar('Simba');
+  Application.Title:= PChar('Simba'); // XXX - Sure you want to do this for Disguise?
   if CurrScript.ScriptChanged then
   begin;
     CurrTab.TabSheet.Caption:= CurrScript.ScriptName + '*';
@@ -3165,6 +3192,11 @@ end;
 
 function TSimbaForm.SaveCurrentScript: boolean;
 begin
+  if CurrScript.GetReadOnly() then
+  begin
+    formWriteln('Script is in read-only/external editor mode. Not saving!');
+    exit(false);
+  end;
   if not CurrScript.ScriptChanged then
   begin
     writeln('SaveScript - no changes.');
