@@ -199,6 +199,14 @@ that type.
 Trying to edit something not in a box causes SyncEdit to exit, 
 as it would when pressing Esc.
 
+Read Only / External Editor Mode
+--------------------------------
+
+Simba has a read only mode that can be enabled and disabled per tab.
+If a tab is read only, it will reload the file the script belongs to every time,
+and you're obviously not able to edit the script in Simba. This is particularly
+useful if you're editing from a different editor.
+
 Function list
 -------------
 
