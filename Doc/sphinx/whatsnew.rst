@@ -8,5 +8,3 @@ plain missing.
 Simba is being updated almost every day. To see changes as they are added, view
 https://github.com/MerlijnWajer/Simba. Each commit should be explained
 in one line, and the exact changes can be viewed with "commitdiff".
-
-A list of new features since 750 will show up here eventually.
