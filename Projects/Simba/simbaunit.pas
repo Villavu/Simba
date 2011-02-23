@@ -2584,7 +2584,6 @@ begin
   CloseTabs(PopupTab);
 end;
 
-
 procedure TSimbaForm.MenuItemReadOnlyTabClick(Sender: TObject);
 var
   Tab: TMufasaTab;
