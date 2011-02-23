@@ -657,7 +657,7 @@ procedure TScriptFrame.SetReadOnly(ReadOnly: Boolean);
 begin
   SynEdit.ReadOnly := ReadOnly;
   SynEdit.Enabled := not ReadOnly;
-  if not ReadOnly then
+  if not ReadOnly and SynEdit.CanFocus then
     SynEdit.SetFocus;
 end;
 

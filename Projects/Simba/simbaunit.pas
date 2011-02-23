@@ -410,7 +410,7 @@ type
     procedure SetScriptState(const State: TScriptState);
     function CreateSetting(const Key, Value : string) : string;
     procedure SetSetting(const key,Value : string; save : boolean = false);
-    function SettingExtists(const key : string) : boolean;
+    function SettingExists(const key : string) : boolean;
     procedure FontUpdate;
   public
     DebugStream: String;
@@ -1193,7 +1193,8 @@ begin
   if Self.Showing then
     if Tab.TabSheet.TabIndex = Self.PageControl1.TabIndex then
       if CurrScript.SynEdit.CanFocus then
-        CurrScript.SynEdit.SetFocus;
+        CurrScript.SynEdit.SetFocus;      // XXX: This is never called
+
   StopCodeCompletion;//To set the highlighting back to normal;
   frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
   with CurrScript.SynEdit do
@@ -1297,7 +1298,7 @@ begin
   else
 //  if str = 'normal' then
     Self.WindowState := wsNormal;
-  if SettingExtists('LastConfig/MainForm/RecentFiles/Count') then
+  if SettingExists('LastConfig/MainForm/RecentFiles/Count') then
   begin;
     ii := StrToIntDef(LoadSettingDef('LastConfig/MainForm/RecentFiles/Count','-1'),-1);
     for i := 0 to ii do
@@ -1388,7 +1389,7 @@ var
     if (number < 0) or (number >= extCount) then
       exit;
     path := 'Extensions/Extension' + inttostr(number);
-    if SettingExtists(Path) = false then
+    if SettingExists(Path) = false then
       exit;
     ExtPath := LoadSettingDef(Path + '/Path','');
     if ExtPath = '' then
@@ -1633,7 +1634,7 @@ end;
 
 procedure TSimbaForm.ActionCloseTabExecute(Sender: TObject);
 begin
-  if(PageControl1.PageCount > 1)then
+  if(PageControl1.PageCount > 1) then
     Self.DeleteTab(PageControl1.TabIndex,false)
   else
     Self.ClearScript;  //DeleteTab would take care of this already, but yeah, it's neater this way.
@@ -2093,7 +2094,7 @@ end;
 
 procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
 begin
-  OpenURL('http://wizzup.org/simbadoc/');
+  OpenURL('http://docs.wizzup.org/simba/');
 end;
 
 procedure TSimbaForm.MenuItemColourHistoryClick(Sender: TObject);
@@ -2900,7 +2901,7 @@ begin
     SettingsForm.Settings.SaveToXML(SimbaSettingsFile);
 end;
 
-function TSimbaForm.SettingExtists(const key: string): boolean;
+function TSimbaForm.SettingExists(const key: string): boolean;
 begin
   result :=SettingsForm.Settings.KeyExists(key);
 end;
