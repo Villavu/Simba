@@ -162,7 +162,7 @@ begin
   Self.DownloadSpeed.Visible := false;
   if not CanUpdate then
   begin
-    ShowMessage('No Updates Available!');
+    //ShowMessage('No Updates Available!');
     Self.UpdateLog.Lines.Add('No Updates Available!');
     Self.UpdateButton.Enabled := False;
   end else
