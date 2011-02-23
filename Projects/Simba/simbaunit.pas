@@ -883,7 +883,10 @@ end;
 
 procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
 begin
-  SimbaUpdateForm.ShowModal;
+  if SimbaUpdateForm.CanUpdate then
+    SimbaUpdateForm.ShowModal
+  else
+    ShowMessage('No Updates Available!');
 end;
 
 procedure ClearDebug;
