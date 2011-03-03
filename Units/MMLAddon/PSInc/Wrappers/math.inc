@@ -326,3 +326,8 @@ function DecRet(e: Extended): Extended; extdecl;
 begin
   result := e - Trunc(e);
 end;
+
+function ps_log10(f: Extended): Extended; extdecl;
+begin
+  result := log10(f);
+end;
