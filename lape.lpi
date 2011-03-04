@@ -59,7 +59,7 @@
         <UnitName Value="Main"/>
         <EditorIndex Value="9"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="182"/>
+        <TopLine Value="179"/>
         <CursorPos X="40" Y="205"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -139,11 +139,10 @@
         <Filename Value="lpvartypes.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="lpvartypes"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1022"/>
-        <CursorPos X="14" Y="1026"/>
+        <TopLine Value="3107"/>
+        <CursorPos X="76" Y="943"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit9>
@@ -170,18 +169,19 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="2127"/>
-        <CursorPos X="56" Y="2166"/>
+        <TopLine Value="2266"/>
+        <CursorPos X="1" Y="2276"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit12>
       <Unit13>
         <Filename Value="lpeval_res.inc"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="2141"/>
-        <CursorPos X="48" Y="2162"/>
+        <TopLine Value="2263"/>
+        <CursorPos X="64" Y="2263"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit13>
@@ -190,8 +190,8 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="2128"/>
-        <CursorPos X="111" Y="1628"/>
+        <TopLine Value="2240"/>
+        <CursorPos X="108" Y="2249"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit14>
@@ -314,7 +314,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="45" Y="11"/>
-        <UsageCount Value="199"/>
+        <UsageCount Value="198"/>
       </Unit30>
       <Unit31>
         <Filename Value="..\FPC\Source\rtl\objpas\fgl.pp"/>
@@ -322,7 +322,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="94"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit31>
       <Unit32>
         <Filename Value="lpdisassembler.pas"/>
@@ -355,129 +355,129 @@
         <WindowIndex Value="0"/>
         <TopLine Value="53"/>
         <CursorPos X="1" Y="64"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit35>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2089" Column="45" TopLine="2072"/>
+        <Filename Value="lpeval_arr.inc"/>
+        <Caret Line="1057" Column="65" TopLine="1042"/>
       </Position1>
       <Position2>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2103" Column="55" TopLine="2085"/>
+        <Filename Value="lpeval_arr.inc"/>
+        <Caret Line="1628" Column="49" TopLine="1613"/>
       </Position2>
       <Position3>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2106" Column="53" TopLine="2088"/>
+        <Filename Value="lpeval_arr.inc"/>
+        <Caret Line="1693" Column="59" TopLine="1678"/>
       </Position3>
       <Position4>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2043" Column="18" TopLine="2038"/>
+        <Filename Value="lpeval_arr.inc"/>
+        <Caret Line="2129" Column="73" TopLine="2114"/>
       </Position4>
       <Position5>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="3" Column="56" TopLine="1"/>
+        <Filename Value="lpeval_arr.inc"/>
+        <Caret Line="2192" Column="71" TopLine="2176"/>
       </Position5>
       <Position6>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2043" Column="57" TopLine="2039"/>
+        <Filename Value="lpeval_arr.inc"/>
+        <Caret Line="2242" Column="78" TopLine="2224"/>
       </Position6>
       <Position7>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2044" Column="26" TopLine="2039"/>
+        <Filename Value="lpeval_arr.inc"/>
+        <Caret Line="2266" Column="1" TopLine="2260"/>
       </Position7>
       <Position8>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2045" Column="26" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2047" Column="18" TopLine="2044"/>
       </Position8>
       <Position9>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2046" Column="55" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2048" Column="51" TopLine="2044"/>
       </Position9>
       <Position10>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2047" Column="26" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2049" Column="51" TopLine="2044"/>
       </Position10>
       <Position11>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2048" Column="59" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2050" Column="54" TopLine="2044"/>
       </Position11>
       <Position12>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2049" Column="59" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2077" Column="73" TopLine="2065"/>
       </Position12>
       <Position13>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2050" Column="62" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2048" Column="1" TopLine="2046"/>
       </Position13>
       <Position14>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2051" Column="57" TopLine="2039"/>
+        <Filename Value="lpeval_arr.inc"/>
+        <Caret Line="2048" Column="1" TopLine="2040"/>
       </Position14>
       <Position15>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2052" Column="57" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2130" Column="1" TopLine="2118"/>
       </Position15>
       <Position16>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2054" Column="27" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2100" Column="1" TopLine="2094"/>
       </Position16>
       <Position17>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2055" Column="27" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2152" Column="1" TopLine="2142"/>
       </Position17>
       <Position18>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2056" Column="27" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2222" Column="1" TopLine="2201"/>
       </Position18>
       <Position19>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2057" Column="27" TopLine="2039"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2204" Column="1" TopLine="2203"/>
       </Position19>
       <Position20>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2058" Column="27" TopLine="2055"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2250" Column="1" TopLine="2229"/>
       </Position20>
       <Position21>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2059" Column="27" TopLine="2055"/>
+        <Filename Value="lpeval_functions.inc"/>
+        <Caret Line="2232" Column="1" TopLine="2231"/>
       </Position21>
       <Position22>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2060" Column="27" TopLine="2055"/>
+        <Caret Line="2044" Column="4" TopLine="2029"/>
       </Position22>
       <Position23>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2061" Column="27" TopLine="2055"/>
+        <Caret Line="2045" Column="4" TopLine="2029"/>
       </Position23>
       <Position24>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2064" Column="40" TopLine="2055"/>
+        <Caret Line="2041" Column="45" TopLine="2029"/>
       </Position24>
       <Position25>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2069" Column="42" TopLine="2055"/>
+        <Caret Line="2044" Column="73" TopLine="2029"/>
       </Position25>
       <Position26>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2084" Column="43" TopLine="2066"/>
+        <Caret Line="2045" Column="73" TopLine="2029"/>
       </Position26>
       <Position27>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2089" Column="45" TopLine="2071"/>
+        <Caret Line="2046" Column="76" TopLine="2029"/>
       </Position27>
       <Position28>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2103" Column="55" TopLine="2085"/>
+        <Caret Line="2073" Column="73" TopLine="2056"/>
       </Position28>
       <Position29>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="2106" Column="53" TopLine="2097"/>
+        <Caret Line="2209" Column="1" TopLine="2200"/>
       </Position29>
       <Position30>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="3" Column="73" TopLine="1"/>
+        <Caret Line="2246" Column="1" TopLine="2234"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
