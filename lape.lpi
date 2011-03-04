@@ -71,8 +71,8 @@
         <UnitName Value="lpparser"/>
         <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="806"/>
-        <CursorPos X="1" Y="817"/>
+        <TopLine Value="308"/>
+        <CursorPos X="6" Y="326"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit2>
@@ -91,10 +91,11 @@
         <Filename Value="lptypes.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="lptypes"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="347"/>
-        <CursorPos X="54" Y="364"/>
+        <TopLine Value="296"/>
+        <CursorPos X="72" Y="3"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit4>
@@ -175,7 +176,6 @@
       <Unit12>
         <Filename Value="lpeval_arr.inc"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="9"/>
         <WindowIndex Value="0"/>
         <TopLine Value="2042"/>
@@ -369,15 +369,15 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1095" Column="1" TopLine="1081"/>
+        <Caret Line="1101" Column="1" TopLine="1083"/>
       </Position1>
       <Position2>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1100" Column="1" TopLine="1082"/>
+        <Caret Line="1107" Column="1" TopLine="1096"/>
       </Position2>
       <Position3>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1101" Column="1" TopLine="1083"/>
+        <Caret Line="951" Column="1" TopLine="940"/>
       </Position3>
       <Position4>
         <Filename Value="lpvartypes.pas"/>
@@ -385,107 +385,107 @@
       </Position4>
       <Position5>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="951" Column="1" TopLine="940"/>
+        <Caret Line="1108" Column="1" TopLine="1096"/>
       </Position5>
       <Position6>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1107" Column="1" TopLine="1096"/>
+        <Caret Line="1110" Column="1" TopLine="1096"/>
       </Position6>
       <Position7>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1108" Column="1" TopLine="1096"/>
+        <Caret Line="1112" Column="1" TopLine="1096"/>
       </Position7>
       <Position8>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1110" Column="1" TopLine="1096"/>
+        <Caret Line="1113" Column="1" TopLine="1096"/>
       </Position8>
       <Position9>
-        <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1112" Column="1" TopLine="1096"/>
+        <Filename Value="lpeval.pas"/>
+        <Caret Line="104" Column="1" TopLine="93"/>
       </Position9>
       <Position10>
         <Filename Value="lpvartypes.pas"/>
         <Caret Line="1113" Column="1" TopLine="1096"/>
       </Position10>
       <Position11>
-        <Filename Value="lpeval.pas"/>
-        <Caret Line="104" Column="1" TopLine="93"/>
+        <Filename Value="lpvartypes.pas"/>
+        <Caret Line="1117" Column="1" TopLine="1108"/>
       </Position11>
       <Position12>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1113" Column="1" TopLine="1096"/>
+        <Caret Line="1118" Column="1" TopLine="1108"/>
       </Position12>
       <Position13>
         <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1117" Column="1" TopLine="1108"/>
+        <Caret Line="1120" Column="108" TopLine="1108"/>
       </Position13>
       <Position14>
-        <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1118" Column="1" TopLine="1108"/>
+        <Filename Value="lptypes.pas"/>
+        <Caret Line="105" Column="31" TopLine="99"/>
       </Position14>
       <Position15>
-        <Filename Value="lpvartypes.pas"/>
-        <Caret Line="1120" Column="108" TopLine="1108"/>
+        <Filename Value="lptypes.pas"/>
+        <Caret Line="310" Column="39" TopLine="295"/>
       </Position15>
       <Position16>
         <Filename Value="lptypes.pas"/>
-        <Caret Line="105" Column="31" TopLine="99"/>
+        <Caret Line="331" Column="54" TopLine="314"/>
       </Position16>
       <Position17>
-        <Filename Value="lptypes.pas"/>
-        <Caret Line="310" Column="39" TopLine="295"/>
+        <Filename Value="lpeval_res.inc"/>
+        <Caret Line="1927" Column="10" TopLine="1912"/>
       </Position17>
       <Position18>
-        <Filename Value="lptypes.pas"/>
-        <Caret Line="331" Column="54" TopLine="314"/>
+        <Filename Value="lpeval_res.inc"/>
+        <Caret Line="1919" Column="11" TopLine="1912"/>
       </Position18>
       <Position19>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1927" Column="10" TopLine="1912"/>
+        <Caret Line="1920" Column="11" TopLine="1912"/>
       </Position19>
       <Position20>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1919" Column="11" TopLine="1912"/>
+        <Caret Line="1921" Column="11" TopLine="1912"/>
       </Position20>
       <Position21>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1920" Column="11" TopLine="1912"/>
+        <Caret Line="1922" Column="11" TopLine="1912"/>
       </Position21>
       <Position22>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1921" Column="11" TopLine="1912"/>
+        <Caret Line="1923" Column="11" TopLine="1912"/>
       </Position22>
       <Position23>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1922" Column="11" TopLine="1912"/>
+        <Caret Line="1924" Column="11" TopLine="1912"/>
       </Position23>
       <Position24>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1923" Column="11" TopLine="1912"/>
+        <Caret Line="1925" Column="11" TopLine="1912"/>
       </Position24>
       <Position25>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1924" Column="11" TopLine="1912"/>
+        <Caret Line="1926" Column="11" TopLine="1912"/>
       </Position25>
       <Position26>
         <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1925" Column="11" TopLine="1912"/>
+        <Caret Line="1927" Column="11" TopLine="1912"/>
       </Position26>
       <Position27>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1926" Column="11" TopLine="1912"/>
-      </Position27>
-      <Position28>
-        <Filename Value="lpeval_res.inc"/>
-        <Caret Line="1927" Column="11" TopLine="1912"/>
-      </Position28>
-      <Position29>
         <Filename Value="lpeval_arr.inc"/>
         <Caret Line="200" Column="55" TopLine="198"/>
-      </Position29>
-      <Position30>
+      </Position27>
+      <Position28>
         <Filename Value="lpeval_arr.inc"/>
         <Caret Line="1628" Column="54" TopLine="1613"/>
+      </Position28>
+      <Position29>
+        <Filename Value="lpparser.pas"/>
+        <Caret Line="162" Column="22" TopLine="160"/>
+      </Position29>
+      <Position30>
+        <Filename Value="lpparser.pas"/>
+        <Caret Line="206" Column="51" TopLine="195"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

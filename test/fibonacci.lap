@@ -1,0 +1,13 @@
+function fib(n: Int64): Int64;
+begin
+  if (n < 1) then
+    Result := 0
+  else if (n <= 2) then
+    Result := 1
+  else
+    Result := fib(n - 2) + fib(n - 1);
+end;
+
+begin
+  WriteLn(fib(30));
+end;
