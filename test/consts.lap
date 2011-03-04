@@ -1,3 +1,6 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
 const ONE = 1;
 const TWO = ONE + ONE;
 const MINUS_ONE = -ONE;

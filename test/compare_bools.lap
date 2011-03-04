@@ -1,3 +1,6 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
 var
   aa = True;
   bb = False;
