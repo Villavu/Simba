@@ -2160,8 +2160,3 @@ Arr[op_Minus][ltPointer][ltUInt32] := ltPointer;
 Arr[op_Minus][ltPointer][ltInt32] := ltPointer;
 Arr[op_Minus][ltPointer][ltUInt64] := ltPointer;
 Arr[op_Minus][ltPointer][ltInt64] := ltPointer;
-
-//Array
-Arr[op_cmp_Equal][ltPointer][ltPointer] := Arr[op_cmp_Equal][ltPointer][ltPointer];
-Arr[op_cmp_NotEqual][ltPointer][ltPointer] := Arr[op_cmp_NotEqual][ltPointer][ltPointer];
-

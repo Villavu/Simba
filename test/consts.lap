@@ -1,0 +1,16 @@
+const ONE = 1;
+const TWO = ONE + ONE;
+const MINUS_ONE = -ONE;
+
+procedure PrintOut(value: Int32 = MINUS_ONE);
+begin
+  WriteLn(value);
+end;
+
+begin
+  PrintOut();
+  PrintOut(TWO+MINUS_ONE-ONE);
+  PrintOut(ONE);
+  PrintOut(TWO);
+  PrintOut($100);
+end;
