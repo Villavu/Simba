@@ -1617,15 +1617,15 @@ Arr[op_Multiply][ltExtended][ltSingle] := @lpeExtended_MUL_Single;
 Arr[op_Multiply][ltExtended][ltDouble] := @lpeExtended_MUL_Double;
 Arr[op_Multiply][ltExtended][ltCurrency] := @lpeExtended_MUL_Currency;
 Arr[op_Multiply][ltExtended][ltExtended] := @lpeExtended_MUL_Extended;
-Arr[op_NEG][ltUInt8][ltUnknown] := @lpeUInt8_NEG;
-Arr[op_NEG][ltInt8][ltUnknown] := @lpeInt8_NEG;
-Arr[op_NEG][ltUInt16][ltUnknown] := @lpeUInt16_NEG;
-Arr[op_NEG][ltInt16][ltUnknown] := @lpeInt16_NEG;
-Arr[op_NEG][ltUInt32][ltUnknown] := @lpeUInt32_NEG;
-Arr[op_NEG][ltInt32][ltUnknown] := @lpeInt32_NEG;
-Arr[op_NEG][ltUInt64][ltUnknown] := @lpeUInt64_NEG;
-Arr[op_NEG][ltInt64][ltUnknown] := @lpeInt64_NEG;
-Arr[op_NEG][ltBoolean][ltUnknown] := @lpeBoolean_NEG;
+Arr[op_NOT][ltUInt8][ltUnknown] := @lpeUInt8_NOT;
+Arr[op_NOT][ltInt8][ltUnknown] := @lpeInt8_NOT;
+Arr[op_NOT][ltUInt16][ltUnknown] := @lpeUInt16_NOT;
+Arr[op_NOT][ltInt16][ltUnknown] := @lpeInt16_NOT;
+Arr[op_NOT][ltUInt32][ltUnknown] := @lpeUInt32_NOT;
+Arr[op_NOT][ltInt32][ltUnknown] := @lpeInt32_NOT;
+Arr[op_NOT][ltUInt64][ltUnknown] := @lpeUInt64_NOT;
+Arr[op_NOT][ltInt64][ltUnknown] := @lpeInt64_NOT;
+Arr[op_NOT][ltBoolean][ltUnknown] := @lpeBoolean_NOT;
 Arr[op_OR][ltUInt8][ltUInt8] := @lpeUInt8_OR_UInt8;
 Arr[op_OR][ltUInt8][ltInt8] := @lpeUInt8_OR_Int8;
 Arr[op_OR][ltUInt8][ltUInt16] := @lpeUInt8_OR_UInt16;
@@ -2042,17 +2042,6 @@ Arr[op_UnaryMinus][ltSingle][ltUnknown] := @lpeSingle_UMIN;
 Arr[op_UnaryMinus][ltDouble][ltUnknown] := @lpeDouble_UMIN;
 Arr[op_UnaryMinus][ltCurrency][ltUnknown] := @lpeCurrency_UMIN;
 Arr[op_UnaryMinus][ltExtended][ltUnknown] := @lpeExtended_UMIN;
-
-//not
-Arr[op_NOT][ltUInt8][ltUnknown] := @lpeUInt8_NOT;
-Arr[op_NOT][ltInt8][ltUnknown] := @lpeInt8_NOT;
-Arr[op_NOT][ltUInt16][ltUnknown] := @lpeUInt16_NOT;
-Arr[op_NOT][ltInt16][ltUnknown] := @lpeInt16_NOT;
-Arr[op_NOT][ltUInt32][ltUnknown] := @lpeUInt32_NOT;
-Arr[op_NOT][ltInt32][ltUnknown] := @lpeInt32_NOT;
-Arr[op_NOT][ltUInt64][ltUnknown] := @lpeUInt64_NOT;
-Arr[op_NOT][ltInt64][ltUnknown] := @lpeInt64_NOT;
-Arr[op_NOT][ltBoolean][ltUnknown] := @lpeBoolean_NOT;
 
 //string + char
 Arr[op_Plus][ltAnsiString][ltAnsiString] := @lpeAString_PLUS_AString;

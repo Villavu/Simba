@@ -1916,15 +1916,15 @@ Arr[op_UnaryMinus][ltSingle][ltUnknown] := ltSingle;
 Arr[op_UnaryMinus][ltDouble][ltUnknown] := ltDouble;
 Arr[op_UnaryMinus][ltCurrency][ltUnknown] := ltCurrency;
 Arr[op_UnaryMinus][ltExtended][ltUnknown] := ltExtended;
-Arr[op_NEG][ltBoolean][ltUnknown] := ltBoolean;
-Arr[op_NEG][ltUInt8][ltUnknown] := ltUInt8;
-Arr[op_NEG][ltInt8][ltUnknown] := ltInt8;
-Arr[op_NEG][ltUInt16][ltUnknown] := ltUInt16;
-Arr[op_NEG][ltInt16][ltUnknown] := ltInt16;
-Arr[op_NEG][ltUInt32][ltUnknown] := ltUInt32;
-Arr[op_NEG][ltInt32][ltUnknown] := ltInt32;
-Arr[op_NEG][ltUInt64][ltUnknown] := ltUInt64;
-Arr[op_NEG][ltInt64][ltUnknown] := ltInt64;
+Arr[op_NOT][ltBoolean][ltUnknown] := ltBoolean;
+Arr[op_NOT][ltUInt8][ltUnknown] := ltUInt8;
+Arr[op_NOT][ltInt8][ltUnknown] := ltInt8;
+Arr[op_NOT][ltUInt16][ltUnknown] := ltUInt16;
+Arr[op_NOT][ltInt16][ltUnknown] := ltInt16;
+Arr[op_NOT][ltUInt32][ltUnknown] := ltUInt32;
+Arr[op_NOT][ltInt32][ltUnknown] := ltInt32;
+Arr[op_NOT][ltUInt64][ltUnknown] := ltUInt64;
+Arr[op_NOT][ltInt64][ltUnknown] := ltInt64;
 Arr[op_Assign][ltBoolean][ltBoolean] := ltBoolean;
 Arr[op_Assign][ltUInt8][ltUInt8] := ltUInt8;
 Arr[op_Assign][ltUInt8][ltInt8] := ltUInt8;
@@ -2038,17 +2038,6 @@ Arr[op_Assign][ltExtended][ltSingle] := ltExtended;
 Arr[op_Assign][ltExtended][ltDouble] := ltExtended;
 Arr[op_Assign][ltExtended][ltCurrency] := ltExtended;
 Arr[op_Assign][ltExtended][ltExtended] := ltExtended;
-
-//not
-Arr[op_NOT][ltBoolean][ltUnknown] := ltBoolean;
-Arr[op_NOT][ltUInt8][ltUnknown] := ltBoolean;
-Arr[op_NOT][ltInt8][ltUnknown] := ltBoolean;
-Arr[op_NOT][ltUInt16][ltUnknown] := ltBoolean;
-Arr[op_NOT][ltInt16][ltUnknown] := ltBoolean;
-Arr[op_NOT][ltUInt32][ltUnknown] := ltBoolean;
-Arr[op_NOT][ltInt32][ltUnknown] := ltBoolean;
-Arr[op_NOT][ltUInt64][ltUnknown] := ltBoolean;
-Arr[op_NOT][ltInt64][ltUnknown] := ltBoolean;
 
 //string + char
 Arr[op_Plus][ltAnsiString][ltAnsiString] := ltAnsiString;

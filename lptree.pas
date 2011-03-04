@@ -386,12 +386,9 @@ begin
 
         if (t <> nil) then
         begin
+          //Ensure smallest possible integer type
           if (t.BaseType in LapeIntegerTypes) then
-          begin
-            //Ensure smallest possible integer type
-            Replacement := TLapeTree_Integer.Create(t.AsString, Compiler);
-            t.Free();
-          end
+            Replacement := TLapeTree_Integer.Create(t.AsString, Compiler)
           else
             Replacement := TLapeTree_GlobalVar.Create(t, Compiler);
           Replacement.Parent := Root.FParent;

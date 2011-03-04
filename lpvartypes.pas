@@ -1023,7 +1023,7 @@ begin
   if (t = nil) or ({$IFNDEF FPC}@{$ENDIF}p = nil) or ({$IFNDEF FPC}@{$ENDIF}p = {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) then
     if (op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) then
       LapeException(lpeIncompatibleAssignment, [Right.VarType.AsString, AsString])
-    else if (not (op in UnaryOperators)) and (Right <> nil) and (Right.VarType <> nil) then
+    else if (not (op in UnaryOperators)) and (Right <> nil) and (Right.VarType <> nil) and (not Left.VarType.Equals(Right.VarType)) then
     begin
       if Left.VarType.Equals(Right.VarType) or
         ((Left.VarType.Size >= Right.VarType.Size) and (not TryCast(True, Result)) and (not TryCast(False, Result))) or
@@ -1117,7 +1117,7 @@ begin
   if (Result.VarType = nil) or ({$IFNDEF FPC}@{$ENDIF}p = nil) or ({$IFNDEF FPC}@{$ENDIF}p = {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) then
     if (op = op_Assign) and (Right.VarType <> nil) then
       LapeException(lpeIncompatibleAssignment, [Right.VarType.AsString, AsString])
-    else if (not (op in UnaryOperators)) and (Right.VarType <> nil) then
+    else if (not (op in UnaryOperators)) and (Right.VarType <> nil) and (not Left.VarType.Equals(Right.VarType)) then
     begin
       if ((Left.VarType.Size >= Right.VarType.Size) and (not TryCast(True, Result)) and (not TryCast(False, Result))) or
          ((Left.VarType.Size <  Right.VarType.Size) and (not TryCast(False, Result)) and (not TryCast(True, Result))) then

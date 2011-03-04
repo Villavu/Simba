@@ -122,7 +122,6 @@ type
     op_Minus,
     op_MOD,
     op_Multiply,
-    op_NEG,
     op_NOT,
     op_OR,
     op_Plus,
@@ -308,7 +307,7 @@ const
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes;
   LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes;
 
-  UnaryOperators = [op_Addr, op_Deref, op_NEG, op_NOT, op_UnaryMinus, op_UnaryPlus];
+  UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
   OperatorAssociative: array[EOperator] of EOperatorAssociative = (
     assocNone,                          //op_Unkown
 
@@ -330,7 +329,6 @@ const
     assocLeft,                          //op_Minus
     assocLeft,                          //op_MOD
     assocLeft,                          //op_Multiply
-    assocRight,                         //op_NEG
     assocRight,                         //op_NOT
     assocRight,                         //op_OR
     assocLeft,                          //op_Plus
@@ -364,7 +362,6 @@ const
     6,                                  //op_Minus
     5,                                  //op_MOD
     5,                                  //op_Multiply
-    3,                                  //op_NEG
     3,                                  //op_NOT
     6,                                  //op_OR
     6,                                  //op_Plus
@@ -379,10 +376,10 @@ const
 
   op_str: array[EOperator] of string = ('',
     '=', '>', '>=', '<', '<=', '<>', '@', 'and', ':=', '^', 'div', '/', '.' , '[',
-    '-', 'mod', '*', 'not'{neg}, 'not', 'or', '+', '**', 'shl', 'shr', 'xor', '-', '+');
+    '-', 'mod', '*', 'not', 'or', '+', '**', 'shl', 'shr', 'xor', '-', '+');
   op_name: array[EOperator] of string = ('',
     'EQ', 'GT', 'GTEQ', 'LT', 'LTEQ', 'NEQ', {'ADDR'}'', 'AND', 'ASGN', {'DREF'}'', 'IDIV', 'DIV', {'dot'}'', {'index'}'',
-    'SUB', 'MOD', 'MUL', 'NEG', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'POS'}'');
+    'SUB', 'MOD', 'MUL', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'POS'}'');
 
 var
   lowUInt8: UInt8 = Low(UInt8);    highUInt8: UInt8 = High(UInt8);
