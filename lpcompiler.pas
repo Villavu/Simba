@@ -207,9 +207,10 @@ var
   t: TLapeTree_Base;
   b: Boolean;
 begin
-  f := TLapeFuncForwards.Create(nil, dupError);
+
+  Result := TLapeTree_StatementList.Create(Self, getPDocPos());
   try
-    Result := TLapeTree_StatementList.Create(Self, getPDocPos());
+    f := TLapeFuncForwards.Create(nil, dupError);
 
     try
       b := False;
@@ -232,17 +233,16 @@ begin
         FTokenizer.Expect([tk_sym_Dot, tk_sym_SemiColon], False, False);
       until b;
 
-    except
-      Result.Free();
-      raise;
+      if (f.Count > 0) then
+        LapeException(lpeInvalidForward, [f[0].Name], f[0].VarType.DocPos);
+    finally
+      while (f.Count > 0) do
+        f.Delete(0).Free();
+      f.Free();
     end;
-
-    if (f.Count > 0) then
-      LapeException(lpeInvalidForward, [f[0].Name], f[0].VarType.DocPos);
-  finally
-    while (f.Count > 0) do
-      f.Delete(0).Free();
-    f.Free();
+  except
+    Result.Free();
+    raise;
   end;
 end;
 
