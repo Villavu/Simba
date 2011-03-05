@@ -368,8 +368,10 @@ type
     constructor Create(ACompiler: TLapeCompilerBase; AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); overload; virtual;
     destructor Destroy; override;
 
+    function Equals(Other: TLapeType): Boolean; override;
     function CreateCopy: TLapeType; override;
     procedure addParam(p: TLapeParameter); virtual;
+
     property Params: TLapeParameterList read FParams;
     property ParamSize: Integer read getParamSize;
   end;
@@ -397,7 +399,8 @@ type
     function CreateCopy: TLapeType; override;
     function NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
     procedure addMethod(AMethod: TLapeGlobalVar); virtual;
-    function getMethod(AParams: TLapeTypeArray; AResult: TLapeType = nil): TLapeGlobalVar; virtual;
+    function getMethod(AType: TLapeType_Method): TLapeGlobalVar; overload; virtual;
+    function getMethod(AParams: TLapeTypeArray; AResult: TLapeType = nil): TLapeGlobalVar; overload; virtual;
 
     property Methods: TLapeDeclarationList read FMethods;
   end;
@@ -890,7 +893,6 @@ function TLapeType.Equals(Other: TLapeType): Boolean;
 begin
   Result := (Other = Self) or (
     (Other <> nil) and
-    //((not CheckName) or (UpperCase(Other.Name) = UpperCase(Name))) and
     (Other.BaseType = BaseType) and
     (Other.Size = Size) and
     (Other.AsString = AsString)
@@ -2197,14 +2199,18 @@ begin
     begin
       if (i > 0) then
         FAsString := FAsString + ',';
+      if (FParams[i].ParType in [lptVar, lptOut]) then
+        FAsString := FAsString + '<';
       if (FParams[i].Default <> nil) then
         FAsString := FAsString + '[';
       if (FParams[i].VarType = nil) then
-        FAsString := FAsString + '<unknown>'
+        FAsString := FAsString + '*unknown*'
       else
         FAsString := FAsString + FParams[i].VarType.AsString;
       if (FParams[i].Default <> nil) then
         FAsString := FAsString + ']';
+      if (FParams[i].ParType in [lptVar, lptOut]) then
+        FAsString := FAsString + '>';
     end;
 
     FAsString := FAsString + ')';
@@ -2267,13 +2273,16 @@ begin
   inherited;
 end;
 
+function TLapeType_Method.Equals(Other: TLapeType): Boolean;
+begin
+  Result := (Other <> nil) and (Other is TLapeType_Method) and (AsString = Other.AsString);
+end;
+
 function TLapeType_Method.CreateCopy: TLapeType;
 type TLapeClassType = class of TLapeType_Method;
 begin
   Result := TLapeClassType(Self.ClassType).Create(FCompiler, FParams, Res, Name, @DocPos);
 end;
-
-
 
 procedure TLapeType_Method.addParam(p: TLapeParameter);
 begin
@@ -2344,6 +2353,16 @@ begin
     if (TLapeGlobalVar(FMethods.Items[i]).VarType.Equals(AMethod.VarType)) then
       LapeException(lpeDuplicateDeclaration, [AMethod.VarType.AsString]);
   FMethods.addDeclaration(AMethod);
+end;
+
+function TLapeType_OverloadedMethod.getMethod(AType: TLapeType_Method): TLapeGlobalVar;
+var
+  i: Integer;
+begin
+  for i := 0 to FMethods.Items.Count - 1 do
+    if (TLapeGlobalVar(FMethods.Items[i]).VarType.Equals(AType)) then
+      Exit(TLapeGlobalVar(FMethods.Items[i]));
+  Result := nil;
 end;
 
 function TLapeType_OverloadedMethod.getMethod(AParams: TLapeTypeArray; AResult: TLapeType = nil): TLapeGlobalVar;

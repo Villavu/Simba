@@ -1055,8 +1055,6 @@ procedure lpeExtended_ASGN_Double(const Dest, Left, Right: Pointer); begin PExte
 procedure lpeExtended_ASGN_Currency(const Dest, Left, Right: Pointer); begin PExtended(Dest)^ := PCurrency(Left)^; end;
 procedure lpeExtended_ASGN_Extended(const Dest, Left, Right: Pointer); begin PExtended(Dest)^ := PExtended(Left)^; end;
 procedure lpeBoolean_ASGN_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^; end;
-procedure lpeAnsiString_ASGN_AnsiString(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiString(Left)^; end;
-procedure lpeWideString_ASGN_WideString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^; end;
 procedure lpeUInt8_IDIV_UInt8(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := PUInt8(Left)^ div PUInt8(Right)^; end;
 procedure lpeUInt8_IDIV_Int8(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := PUInt8(Left)^ div PInt8(Right)^; end;
 procedure lpeUInt8_IDIV_UInt16(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := PUInt8(Left)^ div PUInt16(Right)^; end;
@@ -1835,8 +1833,6 @@ procedure lpeExtended_ADD_Single(const Dest, Left, Right: Pointer); begin PExten
 procedure lpeExtended_ADD_Double(const Dest, Left, Right: Pointer); begin PExtended(Dest)^ := PExtended(Left)^ + PDouble(Right)^; end;
 procedure lpeExtended_ADD_Currency(const Dest, Left, Right: Pointer); begin PCurrency(Dest)^ := PExtended(Left)^ + PCurrency(Right)^; end;
 procedure lpeExtended_ADD_Extended(const Dest, Left, Right: Pointer); begin PExtended(Dest)^ := PExtended(Left)^ + PExtended(Right)^; end;
-procedure lpeAnsiString_ADD_AnsiString(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiString(Left)^ + PAnsiString(Right)^; end;
-procedure lpeWideString_ADD_WideString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PWideString(Right)^; end;
 procedure lpeUInt8_SHL_UInt8(const Dest, Left, Right: Pointer); begin PUInt32(Dest)^ := PUInt8(Left)^ shl PUInt8(Right)^; end;
 procedure lpeUInt8_SHL_Int8(const Dest, Left, Right: Pointer); begin PUInt32(Dest)^ := PUInt8(Left)^ shl PInt8(Right)^; end;
 procedure lpeUInt8_SHL_UInt16(const Dest, Left, Right: Pointer); begin PUInt32(Dest)^ := PUInt8(Left)^ shl PUInt16(Right)^; end;
@@ -2081,11 +2077,11 @@ procedure lpeAString_ASGN_WString(const Dest, Left, Right: Pointer); begin PAnsi
 procedure lpeAString_ASGN_UString(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PUnicodeString(Left)^; end;
 procedure lpeAString_ASGN_AChar(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiChar(Left)^; end;
 procedure lpeAString_ASGN_WChar(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PWideChar(Left)^; end;
-procedure lpeAString_PLUS_AString(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiString(Left)^ + PAnsiString(Right)^; end;
-procedure lpeAString_PLUS_WString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PAnsiString(Left)^ + PWideString(Right)^; end;
-procedure lpeAString_PLUS_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiString(Left)^ + PUnicodeString(Right)^; end;
-procedure lpeAString_PLUS_AChar(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiString(Left)^ + PAnsiChar(Right)^; end;
-procedure lpeAString_PLUS_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiString(Left)^ + PWideChar(Right)^; end;
+procedure lpeAString_ADD_AString(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiString(Left)^ + PAnsiString(Right)^; end;
+procedure lpeAString_ADD_WString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PAnsiString(Left)^ + PWideString(Right)^; end;
+procedure lpeAString_ADD_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiString(Left)^ + PUnicodeString(Right)^; end;
+procedure lpeAString_ADD_AChar(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiString(Left)^ + PAnsiChar(Right)^; end;
+procedure lpeAString_ADD_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiString(Left)^ + PWideChar(Right)^; end;
 
 procedure lpeAString_IND_Int8(const Dest, Left, Right: Pointer); begin PAnsiChar(Dest)^ := PAnsiString(Left)^[PInt8(Right)^]; end;
 procedure lpeAString_IND_UInt8(const Dest, Left, Right: Pointer); begin PAnsiChar(Dest)^ := PAnsiString(Left)^[PUInt8(Right)^]; end;
@@ -2133,11 +2129,11 @@ procedure lpeWString_ASGN_AString(const Dest, Left, Right: Pointer); begin PWide
 procedure lpeWString_ASGN_UString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PUnicodeString(Left)^; end;
 procedure lpeWString_ASGN_WChar(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideChar(Left)^; end;
 procedure lpeWString_ASGN_AChar(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PAnsiChar(Left)^; end;
-procedure lpeWString_PLUS_WString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PWideString(Right)^; end;
-procedure lpeWString_PLUS_AString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PAnsiString(Right)^; end;
-procedure lpeWString_PLUS_UString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PUnicodeString(Right)^; end;
-procedure lpeWString_PLUS_WChar(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PWideChar(Right)^; end;
-procedure lpeWString_PLUS_AChar(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PAnsiChar(Right)^; end;
+procedure lpeWString_ADD_WString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PWideString(Right)^; end;
+procedure lpeWString_ADD_AString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PAnsiString(Right)^; end;
+procedure lpeWString_ADD_UString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PUnicodeString(Right)^; end;
+procedure lpeWString_ADD_WChar(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PWideChar(Right)^; end;
+procedure lpeWString_ADD_AChar(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideString(Left)^ + PAnsiChar(Right)^; end;
 
 procedure lpeWString_IND_Int8(const Dest, Left, Right: Pointer); begin PWideChar(Dest)^ := PWideString(Left)^[PInt8(Right)^]; end;
 procedure lpeWString_IND_UInt8(const Dest, Left, Right: Pointer); begin PWideChar(Dest)^ := PWideString(Left)^[PUInt8(Right)^]; end;
@@ -2185,11 +2181,11 @@ procedure lpeUString_ASGN_AString(const Dest, Left, Right: Pointer); begin PUnic
 procedure lpeUString_ASGN_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^; end;
 procedure lpeUString_ASGN_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^; end;
 procedure lpeUString_ASGN_AChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiChar(Left)^; end;
-procedure lpeUString_PLUS_WString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PWideString(Right)^; end;
-procedure lpeUString_PLUS_AString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PAnsiString(Right)^; end;
-procedure lpeUString_PLUS_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PUnicodeString(Right)^; end;
-procedure lpeUString_PLUS_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PWideChar(Right)^; end;
-procedure lpeUString_PLUS_AChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PAnsiChar(Right)^; end;
+procedure lpeUString_ADD_WString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PWideString(Right)^; end;
+procedure lpeUString_ADD_AString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PAnsiString(Right)^; end;
+procedure lpeUString_ADD_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PUnicodeString(Right)^; end;
+procedure lpeUString_ADD_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PWideChar(Right)^; end;
+procedure lpeUString_ADD_AChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PUnicodeString(Left)^ + PAnsiChar(Right)^; end;
 
 procedure lpeUString_IND_Int8(const Dest, Left, Right: Pointer); begin PWideChar(Dest)^ := PUnicodeString(Left)^[PInt8(Right)^]; end;
 procedure lpeUString_IND_UInt8(const Dest, Left, Right: Pointer); begin PWideChar(Dest)^ := PUnicodeString(Left)^[PUInt8(Right)^]; end;
@@ -2222,11 +2218,11 @@ procedure lpeAChar_NEQ_UString(const Dest, Left, Right: Pointer); begin PBoolean
 
 procedure lpeAChar_ASGN_AChar(const Dest, Left, Right: Pointer); begin PAnsiChar(Dest)^ := PAnsiChar(Left)^; end;
 procedure lpeAChar_ASGN_WChar(const Dest, Left, Right: Pointer); begin PAnsiChar(Dest)^ := AnsiChar(PWideChar(Left)^); end;
-procedure lpeAChar_PLUS_AString(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiChar(Left)^ + PAnsiString(Right)^; end;
-procedure lpeAChar_PLUS_WString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PAnsiChar(Left)^ + PWideString(Right)^; end;
-procedure lpeAChar_PLUS_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiChar(Left)^ + PUnicodeString(Right)^; end;
-procedure lpeAChar_PLUS_AChar(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiChar(Left)^ + PAnsiChar(Right)^; end;
-procedure lpeAChar_PLUS_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiChar(Left)^ + PWideChar(Right)^; end;
+procedure lpeAChar_ADD_AString(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiChar(Left)^ + PAnsiString(Right)^; end;
+procedure lpeAChar_ADD_WString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PAnsiChar(Left)^ + PWideString(Right)^; end;
+procedure lpeAChar_ADD_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiChar(Left)^ + PUnicodeString(Right)^; end;
+procedure lpeAChar_ADD_AChar(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiChar(Left)^ + PAnsiChar(Right)^; end;
+procedure lpeAChar_ADD_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiChar(Left)^ + PWideChar(Right)^; end;
 
 //WideChar
 procedure lpeWChar_EQ_AString(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PWideChar(Left)^ = PAnsiString(Right)^; end;
@@ -2250,11 +2246,11 @@ procedure lpeWChar_NEQ_UString(const Dest, Left, Right: Pointer); begin PBoolean
 
 procedure lpeWChar_ASGN_WChar(const Dest, Left, Right: Pointer); begin PWideChar(Dest)^ := PWideChar(Left)^; end;
 procedure lpeWChar_ASGN_AChar(const Dest, Left, Right: Pointer); begin PWideChar(Dest)^ := WideChar(PAnsiChar(Left)^); end;
-procedure lpeWChar_PLUS_WString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideChar(Left)^ + PWideString(Right)^; end;
-procedure lpeWChar_PLUS_AString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^ + PAnsiString(Right)^; end;
-procedure lpeWChar_PLUS_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiChar(Left)^ + PUnicodeString(Right)^; end;
-procedure lpeWChar_PLUS_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^ + PWideChar(Right)^; end;
-procedure lpeWChar_PLUS_AChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^ + PAnsiChar(Right)^; end;
+procedure lpeWChar_ADD_WString(const Dest, Left, Right: Pointer); begin PWideString(Dest)^ := PWideChar(Left)^ + PWideString(Right)^; end;
+procedure lpeWChar_ADD_AString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^ + PAnsiString(Right)^; end;
+procedure lpeWChar_ADD_UString(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiChar(Left)^ + PUnicodeString(Right)^; end;
+procedure lpeWChar_ADD_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^ + PWideChar(Right)^; end;
+procedure lpeWChar_ADD_AChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^ + PAnsiChar(Right)^; end;
 
 //Pointer
 procedure lpePointer_EQ_Pointer(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PPointer(Left)^ = PPointer(Right)^; end;

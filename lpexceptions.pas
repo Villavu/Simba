@@ -24,6 +24,7 @@ resourcestring
   lpeCannotAssign = 'Target cannot be assigned to';
   lpeCannotEvalConstProc = 'Procedures cannot be used for constant evaluation';
   lpeCannotInvoke = 'Cannot invoke identifier';
+  lpeCannotOverload = 'Cannot overload function';
   lpeClosingParenthesisExpected = 'Closing parenthesis expected';
   lpeDefaultToMoreThanOne = 'Runtime default value can only be assigned to one variable';
   lpeDuplicateDeclaration = 'Duplicate declaration "%s"';
@@ -57,6 +58,7 @@ resourcestring
   lpeUnexpectedToken = 'Found unexpected token "%s"';
   lpeUnknownDeclaration = 'Unknown declaration "%s"';
   lpeUnknownOC = 'Unknown OpCode';
+  lpeUnknownParent = 'Cannot find parent declaration';
   lpeVariableExpected = 'Variable Expected';
   lpeVariableOfTypeExpected = 'Expected variable of type "%s", got "%s"';
 

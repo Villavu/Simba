@@ -340,6 +340,7 @@ var
   t: TLapeType_InternalMethod;
   n: string;
   d: TDocPos;
+  decl: TLapeDeclaration;
 begin
   Result := nil;
   IncStackInfo();
@@ -347,13 +348,60 @@ begin
   try
     t := TLapeType_InternalMethod(ParseMethodHeader(n));
     if (n = '') or (not (t is TLapeType_InternalMethod)) then
-      LapeException(lpeBlockExpected, FTokenizer.DocPos)
-    else if (getDeclaration(n, FStackInfo.Owner, True) <> nil) then
-      LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos);
-    FTokenizer.Expect(tk_sym_SemiColon, True, False);
+      LapeException(lpeBlockExpected, FTokenizer.DocPos);
 
-    Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(t.NewGlobalVar(0, n), FStackInfo.Owner)), FStackInfo, Self, @d);
+    FTokenizer.Expect(tk_sym_SemiColon, True, False);
+    if (FTokenizer.PeekNoJunk() in [tk_kw_Forward, tk_kw_Overload{, tk_kw_Override}]) then
+      FTokenizer.NextNoJunk();
+
+    decl := getDeclaration(n, FStackInfo.Owner);
+    Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(t.NewGlobalVar(0), FStackInfo.Owner)), FStackInfo, Self, @d);
     try
+      if (FTokenizer.Tok = tk_kw_Overload) then
+      begin
+        FTokenizer.Expect(tk_sym_SemiColon, True, False);
+
+        if (decl = nil) or ((decl is TLapeGlobalVar) and (TLapeGlobalVar(decl).VarType is TLapeType_Method)) then
+          with TLapeType_OverloadedMethod(addLocalDecl(TLapeType_OverloadedMethod.Create(Self, nil, '', @d), FStackInfo.Owner)) do
+          begin
+            if (decl <> nil) then
+              addMethod(TLapeGlobalVar(decl));
+            decl := addLocalDecl(NewGlobalVar(n, @d), FStackInfo.Owner);
+          end
+        else if (not (decl is TLapeGlobalVar)) or (not (TLapeGlobalVar(decl).VarType is TLapeType_OverloadedMethod)) or (TLapeType_OverloadedMethod(TLapeGlobalVar(decl).VarType).getMethod(t) <> nil) then
+          LapeException(lpeCannotOverload, FTokenizer.DocPos);
+
+        try
+          TLapeType_OverloadedMethod(TLapeGlobalVar(decl).VarType).addMethod(Result.Method);
+        except on E: lpException do
+          LapeException(E.Message, FTokenizer.DocPos);
+        end;
+
+        if (FTokenizer.PeekNoJunk() = tk_kw_Forward) then
+          FTokenizer.NextNoJunk();
+      end
+      {else if (FTokenizer.Tok = tk_kw_Override) then
+      begin
+        FTokenizer.Expect(tk_sym_SemiColon, True, False);
+
+        if (decl <> nil) and (decl is TLapeGlobalVar) and (TLapeGlobalVar(decl).VarType is TLapeType_OverloadedMethod) then
+          decl := TLapeType_OverloadedMethod(TLapeGlobalVar(decl).VarType).getMethod(t);
+        if (decl = nil) or (not (decl is TLapeGlobalVar)) or (not (TLapeGlobalVar(decl).VarType is TLapeType_Method)) then
+          LapeException(lpeUnknownParent, FTokenizer.DocPos);
+        if (getDeclaration('inherited', FStackInfo, True) <> nil) then
+          LapeException(lpeDuplicateDeclaration, ['inherited'], FTokenizer.DocPos);
+
+        decl.Name := 'inherited';
+        addLocalDecl(decl, FStackInfo);
+        Result.Method.Name := n;
+      end}
+      else
+      begin
+        if (getDeclaration(n, FStackInfo.Owner, True) <> nil) then
+          LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos);
+        Result.Method.Name := n;
+      end;
+
       Result.Statements := ParseBlockList();
       if (Result.Statements = nil) or (Result.Statements.Statements.Count < 1) or (not (Result.Statements.Statements[Result.Statements.Statements.Count - 1] is TLapeTree_StatementList)) then
         FTokenizer.Expect(tk_kw_Begin, False, False)
