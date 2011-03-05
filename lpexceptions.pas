@@ -52,7 +52,8 @@ resourcestring
   lpeNoForwardMatch = 'Forwarded declaration doesn''t match';
   lpeNoOverloadedMethod = 'Don''t know which overloaded method to call';
   lpeOperatorExpected = 'Operator Expected';
-  lpeOutOfStackRange = 'Out of Stack Range';
+  lpeOutOfStackRange = 'Out of stack Range';
+  lpeOutOfTypeRange = 'Out of type Range';
   lpeRuntime = 'Runtime Error: "%s"';
   lpeTooMuchParameters = 'Too much parameters found';
   lpeTypeExpected = 'Type Expected';

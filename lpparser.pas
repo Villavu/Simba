@@ -45,6 +45,7 @@ type
     tk_kw_Out,
     tk_kw_Overload,
     //tk_kw_Override,
+    tk_kw_Packed,
     tk_kw_Procedure,
     tk_kw_Record,
     tk_kw_Repeat,
@@ -203,7 +204,7 @@ const
   ParserToken_Symbols = [tk_sym_BracketClose..tk_sym_SemiColon];
   ParserToken_Types = [tk_typ_Float..tk_typ_Char];
 
-  Lape_Keywords: array[0..37] of TLapeKeyword = (
+  Lape_Keywords: array[0..38] of TLapeKeyword = (
       (Keyword: 'AND';          Token: tk_op_AND),
       (Keyword: 'DIV';          Token: tk_op_DIV),
       (Keyword: 'MOD';          Token: tk_op_MOD),
@@ -232,6 +233,7 @@ const
       (Keyword: 'OUT';          Token: tk_kw_Out),
       (Keyword: 'OVERLOAD';     Token: tk_kw_Overload),
       //(Keyword: 'OVERRIDE';     Token: tk_kw_Override),
+      (Keyword: 'PACKED';       Token: tk_kw_Packed),
       (Keyword: 'PROCEDURE';    Token: tk_kw_Procedure),
       (Keyword: 'RECORD';       Token: tk_kw_Record),
       (Keyword: 'REPEAT';       Token: tk_kw_Repeat),

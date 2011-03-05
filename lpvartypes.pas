@@ -266,6 +266,53 @@ type
   TLapeType_WideChar = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Char<WideChar>)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
+  TLapeType_SubRange = class(TLapeType)
+  protected
+    FRange: TLapeRange;
+    FVarType: TLapeType;
+    function getAsString: lpString; override;
+  public
+    constructor Create(ARange: TLapeRange; ACompiler: TLapeCompilerBase; AVarType: TLapeType; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function CreateCopy: TLapeType; override;
+    function NewGlobalVar(Value: Int64 = 0; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
+
+    property Range: TLapeRange read FRange;
+    property VarType: TLapeType read FVarType;
+  end;
+
+  TEnumMap = {$IFDEF FPC}specialize{$ENDIF} TLapeList<lpString>;
+  TLapeType_Enum = class(TLapeType_SubRange)
+  protected
+    FMemberMap: TEnumMap;
+    function getAsString: lpString; override;
+  public
+    FreeMemberMap: Boolean;
+    constructor Create(ACompiler: TLapeCompilerBase; AMemberMap: TEnumMap; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    destructor Destroy; override;
+    procedure addMember(Value: Int16; AName: lpString); virtual;
+
+    function VarToString(v: Pointer): lpString; override;
+    function CreateCopy: TLapeType; override;
+    function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
+
+    property MemberMap: TEnumMap read FMemberMap;
+  end;
+
+  TLapeType_Set = class(TLapeType)
+  protected
+    FRange: TLapeType_SubRange;
+    FSmall: Boolean;
+    function getAsString: lpString; override;
+  public
+    constructor Create(ARange: TLapeType_SubRange; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function VarToString(v: Pointer): lpString; override;
+    function CreateCopy: TLapeType; override;
+    function NewGlobalVar(Values: array of UInt8; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
+
+    property Range: TLapeType_SubRange read FRange;
+    property Small: Boolean read FSmall;
+  end;
+
   TLapeType_Pointer = class(TLapeType)
   protected
     FPType: TLapeType;
@@ -328,7 +375,6 @@ type
   TLapeType_Record = class(TLapeType)
   protected
     FFieldMap: TRecordFieldMap;
-
     function getAsString: lpString; override;
   public
     FreeFieldMap: Boolean;
@@ -368,7 +414,6 @@ type
     constructor Create(ACompiler: TLapeCompilerBase; AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); overload; virtual;
     destructor Destroy; override;
 
-    function Equals(Other: TLapeType): Boolean; override;
     function CreateCopy: TLapeType; override;
     procedure addParam(p: TLapeParameter); virtual;
 
@@ -454,7 +499,7 @@ type
 
   end;
 
-  ECompilerOption = (lcoShortCircuit);
+  ECompilerOption = (lcoAssertions, lcoShortCircuit);
   ECompilerOptionsSet = set of ECompilerOption;
 
   TLapeCompilerBase = class(TLapeBaseClass)
@@ -469,6 +514,9 @@ type
     procedure setEmitter(AEmitter: TLapeCodeEmitter); virtual;
   public
     Options: ECompilerOptionsSet;
+    Options_PackEnum: UInt8;
+    Options_PackRecords: UInt8;
+    Options_PackSet: UInt8;
     FreeEmitter: Boolean;
 
     constructor Create(AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True); reintroduce; virtual;
@@ -516,6 +564,8 @@ const
   VarResVar:  TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpVar;  StackVar : nil));
   StackResVar:TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpStack;StackVar : nil));
   NullIMemPos: TIMemPos = (MemPos: mpNone; isPointer: False; POffset: 0; Ptr: nil);
+
+  Lape_PackRecordsDef = 4;
 
 implementation
 
@@ -1489,6 +1539,179 @@ begin
   inherited Create(ltWideChar, ACompiler, AName, ADocPos);
 end;
 
+function TLapeType_SubRange.getAsString: lpString;
+begin
+  if (FVarType <> nil) then
+    Result := FVarType.VarToString(@FRange.Lo) + '..' + FVarType.VarToString(@FRange.Hi)
+  else
+    Result := IntToStr(FRange.Lo) + '..' + IntToStr(FRange.Hi);
+end;
+
+constructor TLapeType_SubRange.Create(ARange: TLapeRange; ACompiler: TLapeCompilerBase; AVarType: TLapeType; AName: lpString = ''; ADocPos: PDocPos = nil);
+begin
+  inherited Create(ltUnknown, ACompiler, AName, ADocPos);
+  if (AVarType = nil) then
+    if (FRange.Lo < 0) then
+      AVarType := FCompiler.getBaseType(DetermineIntType(ARange.Hi))
+    else
+      AVarType := FCompiler.getBaseType(DetermineIntType('-'+IntToStr(ARange.Hi)));
+ if (AVarType <> nil) then
+   FBaseType := AVarType.BaseType;
+ FRange := ARange;
+ FVarType := AVarType;
+end;
+
+function TLapeType_SubRange.CreateCopy: TLapeType;
+type TLapeClassType = class of TLapeType_SubRange;
+begin
+  Result := TLapeClassType(Self.ClassType).Create(FRange, FCompiler, FVarType, Name, @DocPos);
+end;
+
+function TLapeType_SubRange.NewGlobalVar(Value: Int64 = 0; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  if (Value < FRange.Lo) or (Value > FRange.Hi) then
+    LapeException(lpeOutOfTypeRange);
+
+  if (FVarType <> nil) then
+    Result := FVarType.NewGlobalVarStr(IntToStr(Value), AName)
+  else
+    Result := NewGlobalVarStr(IntToStr(Value), AName);
+end;
+
+function TLapeType_Enum.getAsString: lpString;
+var
+  i: Integer;
+begin
+  if (FAsString = '') then
+  begin
+    FAsString := '(';
+    for i := 0 to FMemberMap.Count - 1 do
+    begin
+      if (FMemberMap[i] = '') then
+        Continue;
+      if (i > 0) then
+        FAsString := FAsString + ', ';
+      FAsString := FAsString + FMemberMap[i] + '=' + IntToStr(i);
+    end;
+    FAsString := FAsString + ')';
+  end;
+  Result := inherited;
+end;
+
+constructor TLapeType_Enum.Create(ACompiler: TLapeCompilerBase; AMemberMap: TEnumMap; AName: lpString = ''; ADocPos: PDocPos = nil);
+const NullRange: TLapeRange = (Lo: 0; Hi: 0);
+begin
+  inherited Create(NullRange, ACompiler, nil, AName, ADocPos);
+  FBaseType := ltEnum;
+
+  FreeMemberMap := (AMemberMap = nil);
+  if (AMemberMap = nil) then
+    AMemberMap := TEnumMap.Create('');
+  FMemberMap := AMemberMap;
+  FRange.Hi := FMemberMap.Count;
+end;
+
+destructor TLapeType_Enum.Destroy;
+begin
+  if FreeMemberMap then
+    FMemberMap.Free();
+  inherited;
+end;
+
+procedure TLapeType_Enum.addMember(Value: Int16; AName: lpString);
+var
+  i: Integer;
+begin
+  if (Value < FMemberMap.Count) then
+    LapeException(lpeInvalidRange)
+  else if (AName = '') or FMemberMap.ExistsItem(AName) then
+    LapeException(lpeDuplicateDeclaration);
+
+  for i := FMemberMap.Count to Value - 1 do
+    FMemberMap.add('');
+  FMemberMap.add(AName);
+  FRange.Hi := FMemberMap.Count;
+end;
+
+function TLapeType_Enum.VarToString(v: Pointer): lpString;
+begin
+  try
+    Result := FMemberMap[Ord(PLapeSmallEnum(v)^)];
+    if (Result = '') then
+      Result := 'InvalidEnum';
+  except
+    Result := 'EnumOutOfRange';
+  end;
+end;
+
+function TLapeType_Enum.CreateCopy: TLapeType;
+type TLapeClassType = class of TLapeType_Enum;
+begin
+  Result := TLapeClassType(Self.ClassType).Create(FCompiler, FMemberMap, Name, @DocPos);
+end;
+
+function TLapeType_Enum.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  try
+    Result := NewGlobalVar(StrToInt(Str), AName, ADocPos);
+  except
+    Result := NewGlobalVar(FMemberMap.IndexOf(Str), AName, ADocPos);
+  end;
+end;
+
+function TLapeType_Set.getAsString: lpString;
+begin
+  if (FAsString = '') then
+    FAsString := 'set of ' + FRange.AsString;
+  Result := inherited;
+end;
+
+constructor TLapeType_Set.Create(ARange: TLapeType_SubRange; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+begin
+  Assert(ARange <> nil);
+  if (ARange.Range.Lo < 0) or (ARange.Range.Hi > 255) then
+    LapeException(lpeOutOfTypeRange);
+
+  inherited Create(ltLargeSet, ACompiler, AName, ADocPos);
+
+  FSmall := (ARange.Range.Hi < 32);
+  if FSmall then
+    FBaseType := ltSmallSet;
+end;
+
+function TLapeType_Set.VarToString(v: Pointer): lpString;
+var
+  i: Integer;
+begin
+  Result := '[';
+  for i := FRange.Range.Lo to FRange.Range.Hi do
+    if (FSmall and (ELapeSmallEnum(i) in PLapeSmallSet(v)^)) or ((not FSmall) and (ELapeLargeEnum(i) in PLapeLargeSet(v)^)) then
+    begin
+      if (Result <> '[') then
+        Result := Result + ', ';
+      Result := Result + FRange.VarToString(@i);
+    end;
+  Result := Result + ']';
+end;
+
+function TLapeType_Set.CreateCopy: TLapeType;
+type TLapeClassType = class of TLapeType_Set;
+begin
+  Result := TLapeClassType(Self.ClassType).Create(FRange, FCompiler, Name, @DocPos);
+end;
+
+function TLapeType_Set.NewGlobalVar(Values: array of UInt8; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+var
+  i: Integer;
+begin
+  Result := NewGlobalVarP(nil, AName);
+  for i := 0 to High(Values) do
+    if FSmall then
+      PLapeSmallSet(Result.Ptr)^ := PLapeSmallSet(Result.Ptr)^ + [ELapeSmallEnum(Values[i])]
+    else
+      PLapeLargeSet(Result.Ptr)^ := PLapeLargeSet(Result.Ptr)^ + [ELapeLargeEnum(Values[i])]
+end;
+
 function TLapeType_Pointer.getAsString: lpString;
 begin
   if (FAsString = '') then
@@ -1536,7 +1759,7 @@ begin
   if AsValue then
   begin
     Result := inherited NewGlobalVarP(nil, AName, ADocPos);
-    PPointer(Result.Ptr)^ := Ptr;
+    PPointer(Result.FPtr)^ := Ptr;
   end
   else if (Ptr = nil) then
   begin
@@ -2273,11 +2496,6 @@ begin
   inherited;
 end;
 
-function TLapeType_Method.Equals(Other: TLapeType): Boolean;
-begin
-  Result := (Other <> nil) and (Other is TLapeType_Method) and (AsString = Other.AsString);
-end;
-
 function TLapeType_Method.CreateCopy: TLapeType;
 type TLapeClassType = class of TLapeType_Method;
 begin
@@ -2867,6 +3085,9 @@ end;
 constructor TLapeCompilerBase.Create(AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True);
 begin
   inherited Create();
+
+  Options := [];
+  Options_PackRecords := Lape_PackRecordsDef;
 
   FreeEmitter := ManageEmitter;
   if (AEmitter = nil) then

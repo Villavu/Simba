@@ -32,7 +32,8 @@ type
     procedure Reset; override;
     procedure setTokenizer(ATokenizer: TLapeTokenizerBase); virtual;
     function EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase; virtual;
-    function EnsureRange(Node: TLapeTree_Base): TLapeTree_Range; virtual;
+    function EnsureRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeTree_Range; overload; virtual;
+    function EnsureRange(Node: TLapeTree_Base): TLapeTree_Range; overload; virtual;
     function EnsureConstantRange(Node: TLapeTree_Base): TLapeRange; virtual;
    public
     FreeTokenizer: Boolean;
@@ -126,8 +127,9 @@ begin
    Result := TLapeTree_ExprBase.Create(Self, getPDocPos());
 end;
 
-function TLapeCompiler.EnsureRange(Node: TLapeTree_Base): TLapeTree_Range;
+function TLapeCompiler.EnsureRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeTree_Range;
 begin
+  VarType := nil;
   if (Node <> nil) and (Node is TLapeTree_Range) then
     Result := TLapeTree_Range(Node)
   else if (Node <> nil) and (Node is TLapeTree_ExprBase) then
@@ -146,6 +148,17 @@ begin
     LapeException(lpeInvalidRange, Node.DocPos)
   else
     LapeException(lpeInvalidRange, FTokenizer.DocPos);
+
+  if (Result.Lo <> nil) and (Result.Hi <> nil) then
+    VarType := Result.Lo.resType();
+  if (VarType = nil) or (not (VarType.CompatibleWith(Result.Hi.resType()))) then
+    LapeException(lpeInvalidRange);
+end;
+
+function TLapeCompiler.EnsureRange(Node: TLapeTree_Base): TLapeTree_Range;
+var v: TLapeType;
+begin
+  Result := EnsureRange(Node, v);
 end;
 
 function TLapeCompiler.EnsureConstantRange(Node: TLapeTree_Base): TLapeRange;
@@ -240,6 +253,7 @@ begin
         f.Delete(0).Free();
       f.Free();
     end;
+
   except
     Result.Free();
     raise;
@@ -493,7 +507,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
       Result := addManagedType(TLapeType_DynArray.Create(ParseType(nil), Self, '', @d));
   end;
 
-  procedure ParseRecord; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure ParseRecord(IsPacked: Boolean = False); {$IFDEF Lape_Inline}inline;{$ENDIF}
   var
     rr: TLapeType_Record absolute Result;
     x: TLapeType;
@@ -511,7 +525,10 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
       x := ParseType(nil);
       FTokenizer.Expect(tk_sym_SemiColon, True, False);
       for i := 0 to High(a) do
-        rr.addField(x, a[i]);
+        if IsPacked then
+          rr.addField(x, a[i], 1)
+        else
+          rr.addField(x, a[i], Options_PackRecords);
 
       if (FTokenizer.PeekNoJunk() = tk_kw_End) then
       begin
@@ -549,6 +566,11 @@ begin
     case FTokenizer.NextNoJunk() of
       tk_kw_Array: ParseArray();
       tk_kw_Record, tk_kw_Union: ParseRecord();
+      tk_kw_Packed:
+        begin
+          FTokenizer.NextNoJunk();
+          ParseRecord(True);
+        end;
       tk_sym_Caret: ParsePointer();
 
       tk_Identifier:
