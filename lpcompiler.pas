@@ -17,6 +17,7 @@ uses
 
 type
   TLapeTypeForwards = {$IFDEF FPC}specialize{$ENDIF} TLapeStringMap<TLapeType>;
+  TLapeFuncForwards = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeGlobalVar>;
   TLapeTree_NodeStack = {$IFDEF FPC}specialize{$ENDIF} TLapeStack<TLapeTree_ExprBase>;
   TLapeTree_OpStack = {$IFDEF FPC}specialize{$ENDIF} TLapeStack<TLapeTree_Operator>;
 
@@ -46,7 +47,7 @@ type
     function ParseIdentifierList: TStringArray; virtual;
     function ParseBlockList(StopAfterBeginEnd: Boolean = True): TLapeTree_StatementList; virtual;
     function ParseMethodHeader(out Name: lpString; addToScope: Boolean = True): TLapeType_Method;
-    function ParseMethod: TLapeTree_Method;
+    function ParseMethod(FuncForwards: TLapeFuncForwards): TLapeTree_Method;
     function ParseType(TypeForwards: TLapeTypeForwards): TLapeType; virtual;
     procedure ParseTypeBlock; virtual;
     function ParseVarBlock: TLapeTree_VarList; virtual;
@@ -65,6 +66,7 @@ type
 
     function Compile: Boolean; virtual;
 
+    function getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration; override;
     function addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration; override;
     function addLocalVar(v: TLapeType; Name: lpString = ''): TLapeVar; virtual;
     function addGlobalVar(v: TLapeGlobalVar; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
@@ -201,35 +203,46 @@ end;
 
 function TLapeCompiler.ParseBlockList(StopAfterBeginEnd: Boolean = True): TLapeTree_StatementList;
 var
+  f: TLapeFuncForwards;
   t: TLapeTree_Base;
   b: Boolean;
 begin
-  Result := TLapeTree_StatementList.Create(Self, getPDocPos());
+  f := TLapeFuncForwards.Create(nil, dupError);
   try
+    Result := TLapeTree_StatementList.Create(Self, getPDocPos());
 
-    b := False;
-    repeat
-      t := nil;
-      case FTokenizer.PeekNoJunk() of
-        tk_NULL: Break;
-        tk_kw_Begin:
-          begin
-            t := ParseBeginEnd(not StopAfterBeginEnd);
-            b := (FTokenizer.Tok = tk_sym_Dot) or StopAfterBeginEnd;
-          end;
-        tk_kw_Const, tk_kw_Var: t := ParseVarBlock();
-        tk_kw_Function, tk_kw_Procedure: t := ParseMethod();
-        tk_kw_Type: ParseTypeBlock();
-        else LapeException(lpeBlockExpected, FTokenizer.DocPos);
-      end;
-      if (t <> nil) then
-        Result.addStatement(t);
-      FTokenizer.Expect([tk_sym_Dot, tk_sym_SemiColon], False, False);
-    until b;
+    try
+      b := False;
+      repeat
+        t := nil;
+        case FTokenizer.PeekNoJunk() of
+          tk_NULL: Break;
+          tk_kw_Begin:
+            begin
+              t := ParseBeginEnd(not StopAfterBeginEnd);
+              b := (FTokenizer.Tok = tk_sym_Dot) or StopAfterBeginEnd;
+            end;
+          tk_kw_Const, tk_kw_Var: t := ParseVarBlock();
+          tk_kw_Function, tk_kw_Procedure: t := ParseMethod(f);
+          tk_kw_Type: ParseTypeBlock();
+          else LapeException(lpeBlockExpected, FTokenizer.DocPos);
+        end;
+        if (t <> nil) then
+          Result.addStatement(t);
+        FTokenizer.Expect([tk_sym_Dot, tk_sym_SemiColon], False, False);
+      until b;
 
-  except
-    Result.Free();
-    raise;
+    except
+      Result.Free();
+      raise;
+    end;
+
+    if (f.Count > 0) then
+      LapeException(lpeInvalidForward, [f[0].Name], f[0].VarType.DocPos);
+  finally
+    while (f.Count > 0) do
+      f.Delete(0).Free();
+    f.Free();
   end;
 end;
 
@@ -335,7 +348,7 @@ begin
   end;
 end;
 
-function TLapeCompiler.ParseMethod: TLapeTree_Method;
+function TLapeCompiler.ParseMethod(FuncForwards: TLapeFuncForwards): TLapeTree_Method;
 var
   t: TLapeType_InternalMethod;
   n: string;
@@ -397,10 +410,46 @@ begin
       end}
       else
       begin
-        if (getDeclaration(n, FStackInfo.Owner, True) <> nil) then
-          LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos);
+        decl := getDeclaration(n, FStackInfo.Owner, True);
+        if (decl <> nil) and (decl is TLapeGlobalVar) and (TLapeGlobalVar(decl).VarType is TLapeType_OverloadedMethod) then
+        begin
+          decl := TLapeType_OverloadedMethod(TLapeGlobalVar(decl).VarType).getMethod(t);
+          if (decl = nil) then
+            LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos)
+        end;
+        if (decl <> nil) then
+          if (FuncForwards <> nil) and FuncForwards.ExistsItem(TLapeGlobalVar(decl)) then
+          begin
+            if (not TLapeGlobalVar(decl).VarType.Equals(t)) then
+              LapeException(lpeNoForwardMatch, FTokenizer.DocPos);
+            Result.FreeStackInfo := False;
+            Result.Free();
+
+            Result := TLapeTree_Method.Create(TLapeGlobalVar(decl), FStackInfo, Self, @d);
+          end
+          else
+            LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos);
+
         Result.Method.Name := n;
       end;
+
+      if (FTokenizer.Tok = tk_kw_Forward) then
+      begin
+        FTokenizer.Expect(tk_sym_SemiColon, True, False);
+        if (FuncForwards = nil) then
+          LapeException(lpeBlockExpected, FTokenizer.DocPos)
+        else if FuncForwards.ExistsItem(Result.Method) then
+          LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos)
+        else
+          FuncForwards.add(Result.Method);
+
+        Result.FreeStackInfo := False;
+        FreeAndNil(Result);
+        Exit;
+      end;
+
+      if (FuncForwards <> nil) and (decl is TLapeGlobalVar) then
+        FuncForwards.DeleteItem(TLapeGlobalVar(decl));
 
       Result.Statements := ParseBlockList();
       if (Result.Statements = nil) or (Result.Statements.Statements.Count < 1) or (not (Result.Statements.Statements[Result.Statements.Statements.Count - 1] is TLapeTree_StatementList)) then
@@ -408,6 +457,7 @@ begin
       else
         FTokenizer.Expect(tk_sym_SemiColon, False, False);
     except
+      Result.FreeStackInfo := False;
       Result.Free();
       raise;
     end;
@@ -1204,6 +1254,13 @@ begin
     Reset();
     raise;
   end;
+end;
+
+function TLapeCompiler.getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration;
+begin
+  Result := inherited;
+  if (Result = nil) and LocalOnly and (AStackInfo.Owner = nil) then
+    Result := inherited getDeclaration(Name, nil, Localonly);
 end;
 
 function TLapeCompiler.addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration;

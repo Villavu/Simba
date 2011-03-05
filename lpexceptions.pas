@@ -49,6 +49,7 @@ resourcestring
   lpeInvalidValueForType = 'Invalid value for type "%s"';
   lpeLostClosingParenthesis = 'Found closing parenthesis without matching opening parenthesis';
   lpeNoDefaultForParam = 'No default value for parameter %d found';
+  lpeNoForwardMatch = 'Forwarded declaration doesn''t match';
   lpeNoOverloadedMethod = 'Don''t know which overloaded method to call';
   lpeOperatorExpected = 'Operator Expected';
   lpeOutOfStackRange = 'Out of Stack Range';

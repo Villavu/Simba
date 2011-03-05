@@ -206,6 +206,8 @@ type
     procedure setStatements(Node: TLapeTree_StatementList); virtual;
     procedure DeleteChild(Node: TLapeTree_Base); override;
   public
+    FreeStackInfo: Boolean;
+
     constructor Create(AMethod: TLapeGlobalVar; AStackInfo: TLapeStackInfo; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; virtual;
     destructor Destroy; override;
     function Compile(var Offset: Integer): TResVar; override;
@@ -1325,6 +1327,7 @@ begin
   Assert(AStackInfo <> nil);
   inherited Create(ACompiler, ADocPos);
 
+  FreeStackInfo := True;
   FMethod := AMethod;
   FStackInfo := AStackInfo;
 end;
@@ -1332,7 +1335,8 @@ end;
 destructor TLapeTree_Method.Destroy;
 begin
   setStatements(nil);
-  FStackInfo.Free();
+  if FreeStackInfo then
+    FStackInfo.Free();
   inherited;
 end;
 
