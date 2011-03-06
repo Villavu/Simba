@@ -34,7 +34,8 @@ type
     function EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase; virtual;
     function EnsureRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeTree_Range; overload; virtual;
     function EnsureRange(Node: TLapeTree_Base): TLapeTree_Range; overload; virtual;
-    function EnsureConstantRange(Node: TLapeTree_Base): TLapeRange; virtual;
+    function EnsureConstantRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeRange; overload; virtual;
+    function EnsureConstantRange(Node: TLapeTree_Base): TLapeRange; overload; virtual;
    public
     FreeTokenizer: Boolean;
     FreeTree: Boolean;
@@ -161,12 +162,12 @@ begin
   Result := EnsureRange(Node, v);
 end;
 
-function TLapeCompiler.EnsureConstantRange(Node: TLapeTree_Base): TLapeRange;
+function TLapeCompiler.EnsureConstantRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeRange;
 var
   res: TlapeTree_Range;
   l, r: TLapeGlobalVar;
 begin
-  res := EnsureRange(Node);
+  res := EnsureRange(Node, VarType);
   try
     if (Node = nil) then
       LapeException(lpeInvalidRange, FTokenizer.DocPos);
@@ -184,6 +185,12 @@ begin
     if (res <> Node) then
       res.Free();
   end;
+end;
+
+function TLapeCompiler.EnsureConstantRange(Node: TLapeTree_Base): TLapeRange;
+var v: TLapeType;
+begin
+  Result := EnsureConstantRange(Node, v);
 end;
 
 constructor TLapeCompiler.Create(
@@ -488,9 +495,10 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     r: TLapeRange;
     d: TDocPos;
   begin
+    FTokenizer.Expect(tk_kw_Array, True, False);
     d := FTokenizer.DocPos;
-    FTokenizer.Expect([tk_sym_BracketOpen, tk_kw_Of], True, False);
 
+    FTokenizer.Expect([tk_sym_BracketOpen, tk_kw_Of], True, False);
     if (FTokenizer.Tok = tk_sym_BracketOpen) then
     begin
       t := ParseTypeExpression();
@@ -500,7 +508,8 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
         FTokenizer.Expect(tk_kw_Of, True, False);
         Result := addManagedType(TLapeType_StaticArray.Create(r, ParseType(nil), Self, '', @d));
       finally
-        t.Free();
+        if (t <> nil) then
+          t.Free();
       end;
     end
     else
@@ -514,12 +523,13 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     a: TStringArray;
     i: Integer;
   begin
-    repeat
-      if (FTokenizer.Tok = tk_kw_Record) then
-        rr := TLapeType_Record.Create(Self, nil, '', getPDocPos())
-      else
-        rr := TLapeType_Union.Create(Self, nil, '', getPDocPos());
+    FTokenizer.Expect([tk_kw_Record, tk_kw_Union], True, False);
+    if (FTokenizer.Tok = tk_kw_Record) then
+      rr := TLapeType_Record.Create(Self, nil, '', getPDocPos())
+    else
+      rr := TLapeType_Union.Create(Self, nil, '', getPDocPos());
 
+    repeat
       a := ParseIdentifierList();
       FTokenizer.Expect(tk_sym_Colon, False, False);
       x := ParseType(nil);
@@ -536,7 +546,25 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
         Break;
       end;
     until False;
+
     Result := addManagedType(rr);
+  end;
+
+  procedure ParseSet; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  var
+    t: TLapeType;
+  begin
+    FTokenizer.Expect(tk_kw_Set, True, False);
+    FTokenizer.Expect(tk_kw_Of, True, False);
+    t := ParseType(nil);
+    if (not (t is TLapeType_SubRange)) then
+      LapeException(lpeInvalidRange, FTokenizer.DocPos);
+
+    try
+      Result := addManagedType(TLapeType_Set.Create(TLapeType_SubRange(t), Self, '', GetPDocPos));
+    except on E: lpException do
+      LapeException(E.Message, FTokenizer.DocPos);
+    end;
   end;
 
   procedure ParsePointer; {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -544,7 +572,9 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     x: TLapeType;
     d: TDocPos;
   begin
+    FTokenizer.Expect(tk_sym_Caret, True, False);
     d := FTokenizer.DocPos;
+
     FTokenizer.Expect(tk_Identifier, True, False);
     x := TLapeType(getDeclaration(FTokenizer.TokString));
     if ((x = nil) and (TypeForwards = nil)) or ((x <> nil) and (not (x is TLapeType))) then
@@ -559,28 +589,89 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     end;
   end;
 
+  procedure ParseEnum; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  var
+    re: TLapeType_Enum absolute Result;
+    n: lpString;
+    t: TlapeTree_ExprBase;
+    v: TLapeGlobalVar;
+  begin
+    FTokenizer.Expect(tk_sym_ParenthesisOpen, True, False);
+    re := TLapeType_Enum.Create(Self, nil, '', getPDocPos());
+
+    repeat
+      FTokenizer.Expect(tk_Identifier, True, False);
+      n := FTokenizer.TokString;
+      if (getDeclaration(n, FStackInfo.Owner, True) <> nil) then
+        LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos);
+
+      FTokenizer.Expect([tk_sym_Comma, tk_sym_ParenthesisClose, tk_cmp_Equal], True, False);
+      if (FTokenizer.Tok = tk_cmp_Equal) then
+      try
+        t := ParseExpression([tk_sym_Comma, tk_sym_ParenthesisClose]);
+        try
+          if (t <> nil) then
+            v := t.Evaluate()
+          else
+            v := nil;
+
+          if (v = nil) or (v.VarType = nil) or (v.VarType.BaseIntType = ltUnknown) then
+            LapeException(lpeExpressionExpected, FTokenizer.DocPos);
+          addLocalDecl(re.NewGlobalVar(re.addMember(v.AsInteger, n), n), FStackInfo.Owner);
+        finally
+          t.Free();
+        end;
+      except on E: lpException do
+        LapeException(E.Message, FTokenizer.DocPos);
+      end
+      else
+        addLocalDecl(re.NewGlobalVar(re.addMember(n), n), FStackInfo.Owner);
+    until (FTokenizer.Tok in [tk_NULL, tk_sym_ParenthesisClose]);
+    Result := addManagedType(re);
+  end;
+
+  procedure ParseDef; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  var
+    t: TlapeTree_Base;
+    r: TLapeRange;
+    v: TLapeType;
+  begin
+    t := ParseTypeExpression();
+    try
+      if (t <> nil) and (t is TLapeTree_Range) then
+      begin
+        r := EnsureConstantRange(t, v);
+        Result := addManagedType(TLapeType_SubRange.Create(r, Self, v, '', getPDocPos()))
+      end
+      else if (t <> nil) and (t is TLapeTree_VarType) and (TLapeTree_VarType(t).VarType <> nil) then
+        Result := TLapeTree_VarType(t).VarType
+      else
+        LapeException(lpeTypeExpected, FTokenizer.DocPos);
+    finally
+      if (t <> nil) then
+        t.Free();
+    end;
+
+    if (t <> nil) then
+      FTokenizer.Pos := FTokenizer.Pos - 1;
+  end;
+
 begin
   Result := nil;
   try
 
-    case FTokenizer.NextNoJunk() of
+    case FTokenizer.PeekNoJunk() of
       tk_kw_Array: ParseArray();
       tk_kw_Record, tk_kw_Union: ParseRecord();
+      tk_kw_Set: ParseSet();
       tk_kw_Packed:
         begin
           FTokenizer.NextNoJunk();
           ParseRecord(True);
         end;
       tk_sym_Caret: ParsePointer();
-
-      tk_Identifier:
-        begin
-        Result := TLapeType(getDeclaration(FTokenizer.TokString));
-          if (Result = nil) or (not (Result is TLapeType)) then
-            LapeException(lpeUnknownDeclaration, [FTokenizer.TokString], FTokenizer.DocPos);
-        end;
-
-      else LapeException(lpeTypeExpected, FTokenizer.DocPos);
+      tk_sym_ParenthesisOpen: ParseEnum();
+      else ParseDef();
     end;
 
   except
@@ -670,7 +761,8 @@ begin
           FTokenizer.Expect(tk_sym_SemiColon, False, False);
           v2 := b.Evaluate();
         finally
-          FreeAndNil(b);
+          if (b <> nil) then
+            FreeAndNil(b);
         end;
       end
       else if (FTokenizer.Tok = tk_op_Assign) then
@@ -1281,7 +1373,7 @@ end;
 function TLapeCompiler.getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration;
 begin
   Result := inherited;
-  if (Result = nil) and LocalOnly and (AStackInfo.Owner = nil) then
+  if (Result = nil) and LocalOnly and (AStackInfo <> nil) and (AStackInfo.Owner = nil) then
     Result := inherited getDeclaration(Name, nil, Localonly);
 end;
 

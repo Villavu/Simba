@@ -49,6 +49,7 @@ type
     tk_kw_Procedure,
     tk_kw_Record,
     tk_kw_Repeat,
+    tk_kw_Set,
     tk_kw_Step,
     tk_kw_Then,
     tk_kw_To,
@@ -204,7 +205,7 @@ const
   ParserToken_Symbols = [tk_sym_BracketClose..tk_sym_SemiColon];
   ParserToken_Types = [tk_typ_Float..tk_typ_Char];
 
-  Lape_Keywords: array[0..38] of TLapeKeyword = (
+  Lape_Keywords: array[0..39] of TLapeKeyword = (
       (Keyword: 'AND';          Token: tk_op_AND),
       (Keyword: 'DIV';          Token: tk_op_DIV),
       (Keyword: 'MOD';          Token: tk_op_MOD),
@@ -237,6 +238,7 @@ const
       (Keyword: 'PROCEDURE';    Token: tk_kw_Procedure),
       (Keyword: 'RECORD';       Token: tk_kw_Record),
       (Keyword: 'REPEAT';       Token: tk_kw_Repeat),
+      (Keyword: 'SET';          Token: tk_kw_Set),
       (Keyword: 'STEP';         Token: tk_kw_Step),
       (Keyword: 'THEN';         Token: tk_kw_Then),
       (Keyword: 'TO';           Token: tk_kw_To),
