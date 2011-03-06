@@ -91,7 +91,7 @@ type
     ltSingle, ltDouble, ltCurrency, ltExtended,                               //Real
     ltBoolean, ltByteBool, ltWordBool, ltLongBool,                            //Boolean
     ltAnsiString, ltWideString, ltUnicodeString, ltAnsiChar, ltWideChar,      //String
-    ltEnum, ltSmallSet, ltLargeSet,                                           //Set
+    ltSmallEnum, ltLargeEnum, ltSmallSet, ltLargeSet,                                           //Set
     ltPointer,                                                                //Pointer
     ltRecord, ltUnion,                                                        //Struct
     ltDynArray, ltStaticArray,                                                //Array
@@ -300,7 +300,7 @@ const
     SizeOf(Single), SizeOf(Double), SizeOf(Currency), SizeOf(Extended),
     SizeOf(Boolean), SizeOf(ByteBool), SizeOf(WordBool), SizeOf(LongBool),
     SizeOf(AnsiString), SizeOf(WideString), SizeOf(UnicodeString), SizeOf(AnsiChar), SizeOf(WideChar),
-    SizeOf(ELapeSmallEnum), SizeOf(TLapeSmallSet), SizeOf(TLapeLargeSet),
+    SizeOf(ELapeSmallEnum), SizeOf(ELapeLargeEnum), SizeOf(TLapeSmallSet), SizeOf(TLapeLargeSet),
     SizeOf(Pointer),
     -1, -1,
     SizeOf(Pointer), -1,
@@ -312,13 +312,17 @@ const
   LapeBoolTypes = [ltBoolean..ltLongBool];
   LapeStringTypes = [ltAnsiString..ltUnicodeString];
   LapeCharTypes = [ltAnsiChar..ltWideChar];
-  LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + [ltEnum];
-  LapeSetTypes = [ltSmallSet, ltLargeSet];
+  LapeEnumTypes = [ltSmallEnum..ltLargeEnum];
+  LapeSetTypes = [ltSmallSet..ltLargeSet];
+  LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
   LapePointerTypes = [ltPointer, ltDynArray, ltProc, ltExternalProc];
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes;
   LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes;
 
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
+  BinaryOperators = [op_AND, op_NOT, op_OR, op_XOR];
+  CompareOperators = [op_cmp_Equal, op_cmp_GreaterThan, op_cmp_GreaterThanOrEqual, op_cmp_LessThan, op_cmp_LessThanOrEqual, op_cmp_NotEqual];
+  EnumOperators = BinaryOperators + CompareOperators + [op_Assign];
   OperatorAssociative: array[EOperator] of EOperatorAssociative = (
     assocNone,                          //op_Unkown
 

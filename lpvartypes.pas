@@ -245,8 +245,6 @@ type
   TLapeType_Extended = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Float<Extended>)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
-  TLapeType_Boolean = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Bool<Boolean>)
-    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
   TLapeType_ByteBool = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Bool<ByteBool>)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
   TLapeType_WordBool = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Bool<WordBool>)
@@ -284,6 +282,7 @@ type
   TLapeType_Enum = class(TLapeType_SubRange)
   protected
     FMemberMap: TEnumMap;
+    FSmall: Boolean;
     function getAsString: lpString; override;
   public
     FreeMemberMap: Boolean;
@@ -297,7 +296,17 @@ type
     function NewGlobalVar(Value: Int64 = 0; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
 
+    function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
+    function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
+    function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
+
     property MemberMap: TEnumMap read FMemberMap;
+    property Small: Boolean read FSmall;
+  end;
+
+  TLapeType_Boolean = class(TLapeType_Enum)
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
   end;
 
   TLapeType_Set = class(TLapeType)
@@ -1054,7 +1063,6 @@ begin
     Left := Right;
     Right := nil;
   end;
-  Assert(Left.VarType = Self);
   if (Op = op_UnaryPlus) then
     Exit(Left);
 
@@ -1151,7 +1159,6 @@ begin
     Left := Right;
     Right := NullResVar;
   end;
-  Assert(Left.VarType = Self);
   if (op = op_UnaryPlus) then
   begin
     setNullResVar(Dest);
@@ -1496,11 +1503,6 @@ begin
   inherited Create(ltExtended, ACompiler, AName, ADocPos);
 end;
 
-constructor TLapeType_Boolean.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-begin
-  inherited Create(ltBoolean, ACompiler, AName, ADocPos);
-end;
-
 constructor TLapeType_ByteBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
 begin
   inherited Create(ltByteBool, ACompiler, AName, ADocPos);
@@ -1613,14 +1615,18 @@ constructor TLapeType_Enum.Create(ACompiler: TLapeCompilerBase; AMemberMap: TEnu
 const NullRange: TLapeRange = (Lo: 0; Hi: 0);
 begin
   inherited Create(NullRange, ACompiler, nil, AName, ADocPos);
-  FBaseType := ltEnum;
+  FBaseType := ltLargeEnum;
   FVarType := nil;
 
   FreeMemberMap := (AMemberMap = nil);
   if (AMemberMap = nil) then
     AMemberMap := TEnumMap.Create('', dupAccept);
   FMemberMap := AMemberMap;
-  FRange.Hi := FMemberMap.Count;
+
+  FRange.Hi := FMemberMap.Count - 1;
+  FSmall := (FRange.Hi < 32);
+  if FSmall then
+    FBaseType := ltSmallEnum;
 end;
 
 destructor TLapeType_Enum.Destroy;
@@ -1644,7 +1650,10 @@ begin
   FMemberMap.add(AName);
 
   Result := FMemberMap.Count;
-  FRange.Hi := Result;
+  FRange.Hi := Result - 1;
+  FSmall := (FRange.Hi < 32);
+  if (not FSmall) then
+    FBaseType := ltLargeEnum;
 end;
 
 function TLapeType_Enum.addMember(AName: lpString): Int16;
@@ -1682,6 +1691,80 @@ begin
   except
     Result := NewGlobalVar(FMemberMap.IndexOf(Str), AName, ADocPos);
   end;
+end;
+
+function TLapeType_Enum.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
+var
+  v: TLapeType;
+begin
+  if (op in EnumOperators) and (Right <> nil) and Equals(Right) then
+    if (BaseIntType = ltUnknown) or (Right.BaseIntType = ltUnknown) then
+      Exit(nil)
+    else
+    begin
+      v := FCompiler.getBaseType(BaseIntType);
+      Result := v.EvalRes(Op, v);
+    end
+  else
+    Result := inherited;
+end;
+
+function TLapeType_Enum.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
+var
+  v: TLapeType;
+begin
+  Assert(FCompiler <> nil);
+  Assert((Left = nil) or (Left.VarType = Self));
+
+  if (op in EnumOperators) and (Right <> nil) and ((Op = op_Assign) or Equals(Right.VarType)) then
+  try
+    v := Right.FVarType;
+    if (BaseIntType = ltUnknown) or (Right.FVarType = nil) or (Right.FVarType.BaseIntType = ltUnknown) then
+      LapeException(lpeInvalidEvaluation);
+
+    Left.FVarType := FCompiler.getBaseType(BaseIntType);
+    Right.FVarType := FCompiler.getBaseType(Right.FVarType.BaseIntType);
+
+    Result := Left.VarType.EvalConst(Op, Left, Right);
+  finally
+    Left.FVarType := Self;
+    Right.FVarType := v;
+  end
+  else
+    Result := inherited;
+end;
+
+function TLapeType_Enum.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
+var
+  v: TLapeType;
+begin
+  Assert(FCompiler <> nil);
+  Assert(Left.VarType = Self);
+
+  if (op in EnumOperators) and ((Op = op_Assign) or Equals(Right.VarType)) then
+  try
+    v := Right.VarType;
+    if (BaseIntType = ltUnknown) or (Right.VarType = nil) or (Right.VarType.BaseIntType = ltUnknown) then
+      LapeException(lpeInvalidEvaluation);
+
+    Left.VarType := FCompiler.getBaseType(BaseIntType);
+    Right.VarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
+
+    Result := Left.VarType.Eval(Op, Dest, Left, Right, Offset, Pos);
+  finally
+    Left.VarType := Self;
+    Right.VarType := v;
+  end
+  else
+    Result := inherited;
+end;
+
+constructor TLapeType_Boolean.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+begin
+  inherited Create(ACompiler, nil, AName, ADocPos);
+  addMember('False');
+  addMember('True');
+  FBaseType := ltBoolean;
 end;
 
 function TLapeType_Set.getAsString: lpString;
@@ -1823,7 +1906,7 @@ var
   s, r: TLapeGlobalVar;
 begin
   Assert(FCompiler <> nil);
-  Assert((Left = nil) or (Left.VarType = Self));
+  Assert((Left = nil) or (Left.VarType is TLapeType_Pointer));
 
   if (op = op_Index) and (Right <> nil) then
   try
@@ -1865,7 +1948,7 @@ var
   v: TLapeType;
 begin
   Assert(FCompiler <> nil);
-  Assert(Left.VarType = Self);
+  Assert(Left.VarType is TLapeType_Pointer);
   a := NullResVar;
 
   if (op = op_Index) then
@@ -1951,7 +2034,7 @@ var
   b: ELapeBaseType;
   l: TLapeGlobalVar;
 begin
-  Assert((Left = nil) or (Left.VarType = Self));
+  Assert((Left = nil) or (Left.VarType is TLapeType_Pointer));
   if (op = op_Index) then
   begin
     b := FBaseType;
@@ -1980,11 +2063,11 @@ var
   a: TResVar;
   b: ELapeBaseType;
 begin
-  Assert(Left.VarType = Self);
+  Assert(Left.VarType is TLapeType_Pointer);
   a := NullResVar;
 
   if (op = op_Index) then
-  begin
+  try
     b := FBaseType;
     FBaseType := ltPointer;
     if (not Left.VarPos.isPointer) then
@@ -2003,6 +2086,7 @@ begin
           Offset,
           Pos
         );
+  finally
     FBaseType := b;
   end
   else
@@ -2042,8 +2126,7 @@ begin
   if (ArrayType <> nil) and ArrayType.NeedInitialization then
     FInit := __Yes;
 
-  FRange.Lo := ARange.Lo;
-  FRange.Hi := ARange.Hi;
+  FRange := ARange;
 end;
 
 function TLapeType_StaticArray.VarToString(v: Pointer): lpString;
@@ -2078,7 +2161,7 @@ var
   low, l, r: TLapeGlobalVar;
 begin
   Assert(FCompiler <> nil);
-  Assert((Left = nil) or (Left.VarType = Self));
+  Assert((Left = nil) or (Left.VarType is TLapeType_Pointer));
 
   if (op = op_Index) and (Right <> nil) then
   try
@@ -2110,11 +2193,11 @@ begin
             low.Free();
           if (r <> nil) then
             r.Free();
-          Right.FVarType := v;
         end;
       end;
     finally
       l.Free();
+      Right.FVarType := v;
     end;
   except
     if (Right.VarType <> nil) then
@@ -2132,7 +2215,7 @@ var
   v: TLapeType;
 begin
   Assert(FCompiler <> nil);
-  Assert(Left.VarType = Self);
+  Assert(Left.VarType is TLapeType_Pointer);
   a := NullResVar;
 
   if (op = op_Index) then
@@ -2142,7 +2225,7 @@ begin
     if (FRange.Lo = 0) then
       Result := inherited Eval(Op, Dest, t, Right, Offset, Pos)
     else
-    begin
+    try
       v := Right.VarType;
       if (Right.VarType = nil) or (Right.VarType.BaseIntType = ltUnknown) then
         LapeException(lpeImpossible)
@@ -2162,6 +2245,7 @@ begin
           Offset,
           Pos
         );
+    finally
       Right.VarType := v;
     end;
   except

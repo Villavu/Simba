@@ -151,7 +151,6 @@ procedure lpeExtended_EQ_Single(const Dest, Left, Right: Pointer); begin PBoolea
 procedure lpeExtended_EQ_Double(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ = PDouble(Right)^; end;
 procedure lpeExtended_EQ_Currency(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ = PCurrency(Right)^; end;
 procedure lpeExtended_EQ_Extended(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ = PExtended(Right)^; end;
-procedure lpeBoolean_EQ_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ = PBoolean(Right)^; end;
 procedure lpeUInt8_GT_UInt8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ > PUInt8(Right)^; end;
 procedure lpeUInt8_GT_Int8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ > PInt8(Right)^; end;
 procedure lpeUInt8_GT_UInt16(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ > PUInt16(Right)^; end;
@@ -296,7 +295,6 @@ procedure lpeExtended_GT_Single(const Dest, Left, Right: Pointer); begin PBoolea
 procedure lpeExtended_GT_Double(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ > PDouble(Right)^; end;
 procedure lpeExtended_GT_Currency(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ > PCurrency(Right)^; end;
 procedure lpeExtended_GT_Extended(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ > PExtended(Right)^; end;
-procedure lpeBoolean_GT_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ > PBoolean(Right)^; end;
 procedure lpeUInt8_GTEQ_UInt8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ >= PUInt8(Right)^; end;
 procedure lpeUInt8_GTEQ_Int8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ >= PInt8(Right)^; end;
 procedure lpeUInt8_GTEQ_UInt16(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ >= PUInt16(Right)^; end;
@@ -441,7 +439,6 @@ procedure lpeExtended_GTEQ_Single(const Dest, Left, Right: Pointer); begin PBool
 procedure lpeExtended_GTEQ_Double(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ >= PDouble(Right)^; end;
 procedure lpeExtended_GTEQ_Currency(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ >= PCurrency(Right)^; end;
 procedure lpeExtended_GTEQ_Extended(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ >= PExtended(Right)^; end;
-procedure lpeBoolean_GTEQ_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ >= PBoolean(Right)^; end;
 procedure lpeUInt8_LT_UInt8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ < PUInt8(Right)^; end;
 procedure lpeUInt8_LT_Int8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ < PInt8(Right)^; end;
 procedure lpeUInt8_LT_UInt16(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ < PUInt16(Right)^; end;
@@ -586,7 +583,6 @@ procedure lpeExtended_LT_Single(const Dest, Left, Right: Pointer); begin PBoolea
 procedure lpeExtended_LT_Double(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ < PDouble(Right)^; end;
 procedure lpeExtended_LT_Currency(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ < PCurrency(Right)^; end;
 procedure lpeExtended_LT_Extended(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ < PExtended(Right)^; end;
-procedure lpeBoolean_LT_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ < PBoolean(Right)^; end;
 procedure lpeUInt8_LTEQ_UInt8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ <= PUInt8(Right)^; end;
 procedure lpeUInt8_LTEQ_Int8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ <= PInt8(Right)^; end;
 procedure lpeUInt8_LTEQ_UInt16(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ <= PUInt16(Right)^; end;
@@ -731,7 +727,6 @@ procedure lpeExtended_LTEQ_Single(const Dest, Left, Right: Pointer); begin PBool
 procedure lpeExtended_LTEQ_Double(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ <= PDouble(Right)^; end;
 procedure lpeExtended_LTEQ_Currency(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ <= PCurrency(Right)^; end;
 procedure lpeExtended_LTEQ_Extended(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ <= PExtended(Right)^; end;
-procedure lpeBoolean_LTEQ_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ <= PBoolean(Right)^; end;
 procedure lpeUInt8_NEQ_UInt8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ <> PUInt8(Right)^; end;
 procedure lpeUInt8_NEQ_Int8(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ <> PInt8(Right)^; end;
 procedure lpeUInt8_NEQ_UInt16(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PUInt8(Left)^ <> PUInt16(Right)^; end;
@@ -876,7 +871,6 @@ procedure lpeExtended_NEQ_Single(const Dest, Left, Right: Pointer); begin PBoole
 procedure lpeExtended_NEQ_Double(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ <> PDouble(Right)^; end;
 procedure lpeExtended_NEQ_Currency(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ <> PCurrency(Right)^; end;
 procedure lpeExtended_NEQ_Extended(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PExtended(Left)^ <> PExtended(Right)^; end;
-procedure lpeBoolean_NEQ_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ <> PBoolean(Right)^; end;
 procedure lpeUInt8_AND_UInt8(const Dest, Left, Right: Pointer); begin PUInt8(Dest)^ := PUInt8(Left)^ and PUInt8(Right)^; end;
 procedure lpeUInt8_AND_Int8(const Dest, Left, Right: Pointer); begin PUInt8(Dest)^ := PUInt8(Left)^ and PInt8(Right)^; end;
 procedure lpeUInt8_AND_UInt16(const Dest, Left, Right: Pointer); begin PUInt16(Dest)^ := PUInt8(Left)^ and PUInt16(Right)^; end;
@@ -941,7 +935,6 @@ procedure lpeInt64_AND_UInt32(const Dest, Left, Right: Pointer); begin PInt64(De
 procedure lpeInt64_AND_Int32(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := PInt64(Left)^ and PInt32(Right)^; end;
 procedure lpeInt64_AND_UInt64(const Dest, Left, Right: Pointer); begin PUInt64(Dest)^ := PInt64(Left)^ and PUInt64(Right)^; end;
 procedure lpeInt64_AND_Int64(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := PInt64(Left)^ and PInt64(Right)^; end;
-procedure lpeBoolean_AND_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ and PBoolean(Right)^; end;
 procedure lpeUInt8_ASGN_UInt8(const Dest, Left, Right: Pointer); begin PUInt8(Dest)^ := PUInt8(Left)^; end;
 procedure lpeUInt8_ASGN_Int8(const Dest, Left, Right: Pointer); begin PUInt8(Dest)^ := PInt8(Left)^; end;
 procedure lpeUInt8_ASGN_UInt16(const Dest, Left, Right: Pointer); begin PUInt8(Dest)^ := PUInt16(Left)^; end;
@@ -1054,7 +1047,6 @@ procedure lpeExtended_ASGN_Single(const Dest, Left, Right: Pointer); begin PExte
 procedure lpeExtended_ASGN_Double(const Dest, Left, Right: Pointer); begin PExtended(Dest)^ := PDouble(Left)^; end;
 procedure lpeExtended_ASGN_Currency(const Dest, Left, Right: Pointer); begin PExtended(Dest)^ := PCurrency(Left)^; end;
 procedure lpeExtended_ASGN_Extended(const Dest, Left, Right: Pointer); begin PExtended(Dest)^ := PExtended(Left)^; end;
-procedure lpeBoolean_ASGN_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^; end;
 procedure lpeUInt8_IDIV_UInt8(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := PUInt8(Left)^ div PUInt8(Right)^; end;
 procedure lpeUInt8_IDIV_Int8(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := PUInt8(Left)^ div PInt8(Right)^; end;
 procedure lpeUInt8_IDIV_UInt16(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := PUInt8(Left)^ div PUInt16(Right)^; end;
@@ -1623,7 +1615,6 @@ procedure lpeUInt32_NOT(const Dest, Left, Right: Pointer); begin PUInt32(Dest)^ 
 procedure lpeInt32_NOT(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := not PInt32(Left)^; end;
 procedure lpeUInt64_NOT(const Dest, Left, Right: Pointer); begin PUInt64(Dest)^ := not PUInt64(Left)^; end;
 procedure lpeInt64_NOT(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := not PInt64(Left)^; end;
-procedure lpeBoolean_NOT(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := not PBoolean(Left)^; end;
 procedure lpeUInt8_OR_UInt8(const Dest, Left, Right: Pointer); begin PUInt8(Dest)^ := PUInt8(Left)^ or PUInt8(Right)^; end;
 procedure lpeUInt8_OR_Int8(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := PUInt8(Left)^ or PInt8(Right)^; end;
 procedure lpeUInt8_OR_UInt16(const Dest, Left, Right: Pointer); begin PUInt16(Dest)^ := PUInt8(Left)^ or PUInt16(Right)^; end;
@@ -1688,7 +1679,6 @@ procedure lpeInt64_OR_UInt32(const Dest, Left, Right: Pointer); begin PInt64(Des
 procedure lpeInt64_OR_Int32(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := PInt64(Left)^ or PInt32(Right)^; end;
 procedure lpeInt64_OR_UInt64(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := PInt64(Left)^ or PUInt64(Right)^; end;
 procedure lpeInt64_OR_Int64(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := PInt64(Left)^ or PInt64(Right)^; end;
-procedure lpeBoolean_OR_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ or PBoolean(Right)^; end;
 procedure lpeUInt8_ADD_UInt8(const Dest, Left, Right: Pointer); begin PUInt32(Dest)^ := PUInt8(Left)^ + PUInt8(Right)^; end;
 procedure lpeUInt8_ADD_Int8(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := PUInt8(Left)^ + PInt8(Right)^; end;
 procedure lpeUInt8_ADD_UInt16(const Dest, Left, Right: Pointer); begin PUInt32(Dest)^ := PUInt8(Left)^ + PUInt16(Right)^; end;
@@ -2025,7 +2015,6 @@ procedure lpeInt64_XOR_UInt32(const Dest, Left, Right: Pointer); begin PInt64(De
 procedure lpeInt64_XOR_Int32(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := PInt64(Left)^ xor PInt32(Right)^; end;
 procedure lpeInt64_XOR_UInt64(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := PInt64(Left)^ xor PUInt64(Right)^; end;
 procedure lpeInt64_XOR_Int64(const Dest, Left, Right: Pointer); begin PInt64(Dest)^ := PInt64(Left)^ xor PInt64(Right)^; end;
-procedure lpeBoolean_XOR_Boolean(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PBoolean(Left)^ xor PBoolean(Right)^; end;
 procedure lpeUInt8_UMIN(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := -PUInt8(Left)^; end;
 procedure lpeInt8_UMIN(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := -PInt8(Left)^; end;
 procedure lpeUInt16_UMIN(const Dest, Left, Right: Pointer); begin PInt32(Dest)^ := -PUInt16(Left)^; end;

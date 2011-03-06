@@ -139,11 +139,18 @@ begin
       LapeException(lpeInvalidRange, Node.DocPos);
 
     Result := TLapeTree_Range.Create(Self, @Node.DocPos);
-    with TLapeTree_VarType(Node).VarType do
-    begin
-      Result.Lo := TLapeTree_GlobalVar.Create(TLapeGlobalVar(addManagedVar(getBaseType(BaseIntType).NewGlobalVarP(LapeTypeLow[BaseIntType]))), Self, @Node.DocPos);
-      Result.Hi := TLapeTree_GlobalVar.Create(TLapeGlobalVar(addManagedVar(getBaseType(BaseIntType).NewGlobalVarP(LapeTypeHigh[BaseIntType]))), Self, @Node.DocPos);
-    end;
+    if (TLapeTree_VarType(Node).VarType is TLapeType_SubRange) then
+      with TLapeType_SubRange(TLapeTree_VarType(Node).VarType) do
+      begin
+        Result.Lo := TLapeTree_GlobalVar.Create(TLapeGlobalVar(addManagedVar(getBaseType(BaseIntType).NewGlobalVarStr(IntToStr(Range.Lo)))), Self, @Node.DocPos);
+        Result.Hi := TLapeTree_GlobalVar.Create(TLapeGlobalVar(addManagedVar(getBaseType(BaseIntType).NewGlobalVarStr(IntToStr(Range.Hi)))), Self, @Node.DocPos);
+      end
+    else
+      with TLapeTree_VarType(Node).VarType do
+      begin
+        Result.Lo := TLapeTree_GlobalVar.Create(TLapeGlobalVar(addManagedVar(getBaseType(BaseIntType).NewGlobalVarP(LapeTypeLow[BaseIntType]))), Self, @Node.DocPos);
+        Result.Hi := TLapeTree_GlobalVar.Create(TLapeGlobalVar(addManagedVar(getBaseType(BaseIntType).NewGlobalVarP(LapeTypeHigh[BaseIntType]))), Self, @Node.DocPos);
+      end;
   end
   else if (Node <> nil) then
     LapeException(lpeInvalidRange, Node.DocPos)
@@ -1445,7 +1452,7 @@ end;
 
 function TLapeCompiler.addGlobalVar(Value: Boolean; Name: lpString = ''): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_Boolean(FBaseTypes[ltBoolean]).NewGlobalVar(Value), Name);
+  Result := addGlobalVar(TLapeType_Boolean(FBaseTypes[ltBoolean]).NewGlobalVar(Ord(Value)), Name);
 end;
 
 function TLapeCompiler.addGlobalVar(Value: AnsiString; Name: lpString = ''): TLapeGlobalVar;

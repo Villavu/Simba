@@ -74,7 +74,9 @@ var
   xxx: array[Boolean] of Byte;
   yyy: array[0..9] of Byte;
   a: TTestArray;
+  b: set of 0..100;
 begin
+  WriteLn(SizeOf(b));
   a[5] := 'lol';
   WriteLn(PtrUInt(@a[5]));
   TestProc(a);
