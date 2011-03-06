@@ -62,26 +62,10 @@ type
     arr: TPointArray;
   end;
 
-procedure TestProc(var a: TTestArray);
-begin
-  WriteLn(SizeOf(a), ' :: ', PtrUInt(@a[5]));
-  a[5] := 'hello';
-end;
-
 procedure TForm1.btnGoClick(Sender: TObject);
 var
   i: Integer;
-  xxx: array[Boolean] of Byte;
-  yyy: array[0..9] of Byte;
-  a: TTestArray;
-  b: set of 0..100;
 begin
-  WriteLn(SizeOf(b));
-  a[5] := 'lol';
-  WriteLn(PtrUInt(@a[5]));
-  TestProc(a);
-  WriteLn(a[5]);
-  WriteLn(SizeOf(xxx), ' ::: ', SizeOf(yyy), ' ::: ', Low(xxx));
   for i := 0 to lpgList.Count - 1 do
     WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
 end;

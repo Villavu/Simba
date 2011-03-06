@@ -2285,3 +2285,50 @@ Arr[op_Minus][ltPointer][ltUInt32] := ltPointer;
 Arr[op_Minus][ltPointer][ltInt32] := ltPointer;
 Arr[op_Minus][ltPointer][ltUInt64] := ltPointer;
 Arr[op_Minus][ltPointer][ltInt64] := ltPointer;
+
+//Set
+//Small
+Arr[op_cmp_Equal][ltSmallSet][ltSmallSet] := ltBoolean;
+Arr[op_cmp_GreaterThanOrEqual][ltSmallSet][ltSmallSet] := ltBoolean;
+Arr[op_cmp_LessThanOrEqual][ltSmallSet][ltSmallSet] := ltBoolean;
+Arr[op_cmp_NotEqual][ltSmallSet][ltSmallSet] := ltBoolean;
+
+Arr[op_IN][ltInt8][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltUInt8][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltInt16][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltUInt16][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltInt32][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltUInt32][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltInt64][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltUInt64][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltSmallEnum][ltSmallSet] := ltBoolean;
+Arr[op_IN][ltAnsiChar][ltLargeSet] := Arr[op_IN][ltUInt8][ltSmallSet];
+Arr[op_IN][ltWideChar][ltLargeSet] := Arr[op_IN][ltUInt16][ltSmallSet];
+
+Arr[op_Assign][ltSmallSet][ltSmallSet] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltSmallSet] := ltSmallSet;
+Arr[op_Minus][ltSmallSet][ltSmallSet] := ltSmallSet;
+Arr[op_Multiply][ltSmallSet][ltSmallSet] := ltSmallSet;
+
+//Large
+Arr[op_cmp_Equal][ltLargeSet][ltLargeSet] := ltBoolean;
+Arr[op_cmp_GreaterThanOrEqual][ltLargeSet][ltLargeSet] := ltBoolean;
+Arr[op_cmp_LessThanOrEqual][ltLargeSet][ltLargeSet] := ltBoolean;
+Arr[op_cmp_NotEqual][ltLargeSet][ltLargeSet] := ltBoolean;
+
+Arr[op_IN][ltInt8][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltUInt8][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltInt16][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltUInt16][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltInt32][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltUInt32][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltInt64][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltUInt64][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltLargeEnum][ltLargeSet] := ltBoolean;
+Arr[op_IN][ltAnsiChar][ltLargeSet] := Arr[op_IN][ltUInt8][ltLargeSet];
+Arr[op_IN][ltWideChar][ltLargeSet] := Arr[op_IN][ltUInt16][ltLargeSet];
+
+Arr[op_Assign][ltLargeSet][ltLargeSet] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltLargeSet] := ltLargeSet;
+Arr[op_Minus][ltLargeSet][ltLargeSet] := ltLargeSet;
+Arr[op_Multiply][ltLargeSet][ltLargeSet] := ltLargeSet;

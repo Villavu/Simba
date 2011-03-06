@@ -61,7 +61,7 @@ resourcestring
   lpeUnknownDeclaration = 'Unknown declaration "%s"';
   lpeUnknownOC = 'Unknown opcode';
   lpeUnknownParent = 'Cannot find parent declaration';
-  lpeVariableExpected = 'Variable Expected';
+  lpeVariableExpected = 'Variable expected';
   lpeVariableOfTypeExpected = 'Expected variable of type "%s", got "%s"';
 
 procedure LapeException(Msg: string); overload; inline;

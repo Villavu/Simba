@@ -76,6 +76,7 @@ type
     tk_op_DIV,
     tk_op_Divide,
     tk_op_Dot,
+    tk_op_IN,
     tk_op_Index,
     tk_op_Minus,
     tk_op_MOD,
@@ -205,9 +206,10 @@ const
   ParserToken_Symbols = [tk_sym_BracketClose..tk_sym_SemiColon];
   ParserToken_Types = [tk_typ_Float..tk_typ_Char];
 
-  Lape_Keywords: array[0..39] of TLapeKeyword = (
+  Lape_Keywords: array[0..40] of TLapeKeyword = (
       (Keyword: 'AND';          Token: tk_op_AND),
       (Keyword: 'DIV';          Token: tk_op_DIV),
+      (Keyword: 'IN';           Token: tk_op_IN),
       (Keyword: 'MOD';          Token: tk_op_MOD),
       (Keyword: 'NOT';          Token: tk_op_NOT),
       (Keyword: 'OR';           Token: tk_op_OR),

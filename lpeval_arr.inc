@@ -2293,3 +2293,50 @@ Arr[op_Minus][ltPointer][ltUInt32] := @lpePointer_SUB_UInt32;
 Arr[op_Minus][ltPointer][ltInt32] := @lpePointer_SUB_Int32;
 Arr[op_Minus][ltPointer][ltUInt64] := @lpePointer_SUB_UInt64;
 Arr[op_Minus][ltPointer][ltInt64] := @lpePointer_SUB_Int64;
+
+//Set
+//small set
+Arr[op_cmp_Equal][ltSmallSet][ltSmallSet] := @lpeSSet_EQ_SSet;
+Arr[op_cmp_GreaterThanOrEqual][ltSmallSet][ltSmallSet] := @lpeSSet_GTE_SSet;
+Arr[op_cmp_LessThanOrEqual][ltSmallSet][ltSmallSet] := @lpeSSet_LTE_SSet;
+Arr[op_cmp_NotEqual][ltSmallSet][ltSmallSet] := @lpeSSet_NE_SSet;
+
+Arr[op_IN][ltInt8][ltSmallSet] := @lpeInt8_IN_SSet;
+Arr[op_IN][ltUInt8][ltSmallSet] := @lpeUInt8_IN_SSet;
+Arr[op_IN][ltInt16][ltSmallSet] := @lpeInt16_IN_SSet;
+Arr[op_IN][ltUInt16][ltSmallSet] := @lpeUInt16_IN_SSet;
+Arr[op_IN][ltInt32][ltSmallSet] := @lpeInt32_IN_SSet;
+Arr[op_IN][ltUInt32][ltSmallSet] := @lpeUInt32_IN_SSet;
+Arr[op_IN][ltInt64][ltSmallSet] := @lpeInt64_IN_SSet;
+Arr[op_IN][ltUInt64][ltSmallSet] := @lpeUInt64_IN_SSet;
+Arr[op_IN][ltSmallEnum][ltSmallSet] := @lpeSEnum_IN_SSet;
+Arr[op_IN][ltAnsiChar][ltSmallSet] := Arr[op_IN][ltUInt8][ltSmallSet];
+Arr[op_IN][ltWideChar][ltSmallSet] := Arr[op_IN][ltUInt16][ltSmallSet];
+
+Arr[op_Assign][ltSmallSet][ltSmallSet] := @lpeSSet_ASGN_SSet;
+Arr[op_Plus][ltSmallSet][ltSmallSet] := @lpeSSet_ADD_SSet;
+Arr[op_Minus][ltSmallSet][ltSmallSet] := @lpeSSet_SUB_SSet;
+Arr[op_Multiply][ltSmallSet][ltSmallSet] := @lpeSSet_MUL_SSet;
+
+//large set
+Arr[op_cmp_Equal][ltLargeSet][ltLargeSet] := @lpeLSet_EQ_LSet;
+Arr[op_cmp_GreaterThanOrEqual][ltLargeSet][ltLargeSet] := @lpeLSet_GTE_LSet;
+Arr[op_cmp_LessThanOrEqual][ltLargeSet][ltLargeSet] := @lpeLSet_LTE_LSet;
+Arr[op_cmp_NotEqual][ltLargeSet][ltLargeSet] := @lpeLSet_NE_LSet;
+
+Arr[op_IN][ltInt8][ltLargeSet] := @lpeInt8_IN_LSet;
+Arr[op_IN][ltUInt8][ltLargeSet] := @lpeUInt8_IN_LSet;
+Arr[op_IN][ltInt16][ltLargeSet] := @lpeInt16_IN_LSet;
+Arr[op_IN][ltUInt16][ltLargeSet] := @lpeUInt16_IN_LSet;
+Arr[op_IN][ltInt32][ltLargeSet] := @lpeInt32_IN_LSet;
+Arr[op_IN][ltUInt32][ltLargeSet] := @lpeUInt32_IN_LSet;
+Arr[op_IN][ltInt64][ltLargeSet] := @lpeInt64_IN_LSet;
+Arr[op_IN][ltUInt64][ltLargeSet] := @lpeUInt64_IN_LSet;
+Arr[op_IN][ltLargeEnum][ltLargeSet] := @lpeLEnum_IN_LSet;
+Arr[op_IN][ltAnsiChar][ltLargeSet] := Arr[op_IN][ltUInt8][ltLargeSet];
+Arr[op_IN][ltWideChar][ltLargeSet] := Arr[op_IN][ltUInt16][ltLargeSet];
+
+Arr[op_Assign][ltLargeSet][ltLargeSet] := @lpeLSet_ASGN_LSet;
+Arr[op_Plus][ltLargeSet][ltLargeSet] := @lpeLSet_ADD_LSet;
+Arr[op_Minus][ltLargeSet][ltLargeSet] := @lpeLSet_SUB_LSet;
+Arr[op_Multiply][ltLargeSet][ltLargeSet] := @lpeLSet_MUL_LSet;

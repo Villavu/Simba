@@ -118,6 +118,7 @@ type
     op_DIV,
     op_Divide,
     op_Dot,
+    op_IN,
     op_Index,
     op_Minus,
     op_MOD,
@@ -340,6 +341,7 @@ const
     assocLeft,                          //op_DIV
     assocLeft,                          //op_Divide
     assocLeft,                          //op_Dot
+    assocRight,                         //op_IN
     assocLeft,                          //op_Index
     assocLeft,                          //op_Minus
     assocLeft,                          //op_MOD
@@ -373,6 +375,7 @@ const
     5,                                  //op_DIV
     5,                                  //op_Divide
     1,                                  //op_Dot
+    8,                                  //op_IN
     1,                                  //op_Index
     6,                                  //op_Minus
     5,                                  //op_MOD
@@ -390,11 +393,11 @@ const
   );
 
   op_str: array[EOperator] of string = ('',
-    '=', '>', '>=', '<', '<=', '<>', '@', 'and', ':=', '^', 'div', '/', '.' , '[',
-    '-', 'mod', '*', 'not', 'or', '+', '**', 'shl', 'shr', 'xor', '-', '+');
+    '=', '>', '>=', '<', '<=', '<>', '@', 'and', ':=', '^', 'div', '/', '.' , 'in',
+    '[', '-', 'mod', '*', 'not', 'or', '+', '**', 'shl', 'shr', 'xor', '-', '+');
   op_name: array[EOperator] of string = ('',
-    'EQ', 'GT', 'GTEQ', 'LT', 'LTEQ', 'NEQ', {'ADDR'}'', 'AND', 'ASGN', {'DREF'}'', 'IDIV', 'DIV', {'dot'}'', {'index'}'',
-    'SUB', 'MOD', 'MUL', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'POS'}'');
+    'EQ', 'GT', 'GTEQ', 'LT', 'LTEQ', 'NEQ', {'ADDR'}'', 'AND', 'ASGN', {'DREF'}'', 'IDIV', 'DIV', {'dot'}'', 'IN',
+    {'index'}'', 'SUB', 'MOD', 'MUL', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'POS'}'');
 
 var
   lowUInt8: UInt8 = Low(UInt8);    highUInt8: UInt8 = High(UInt8);

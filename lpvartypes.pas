@@ -1649,7 +1649,9 @@ begin
     FMemberMap.add('');
   FMemberMap.add(AName);
 
-  Result := FMemberMap.Count;
+  FAsString := '';
+  Result:= FMemberMap.Count;
+
   FRange.Hi := Result - 1;
   FSmall := (FRange.Hi < 32);
   if (not FSmall) then
@@ -1694,17 +1696,12 @@ begin
 end;
 
 function TLapeType_Enum.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
-var
-  v: TLapeType;
 begin
-  if (op in EnumOperators) and (Right <> nil) and Equals(Right) then
+  if (op in EnumOperators) and (Right <> nil) and ((Op = op_Assign) or Equals(Right)) then
     if (BaseIntType = ltUnknown) or (Right.BaseIntType = ltUnknown) then
       Exit(nil)
     else
-    begin
-      v := FCompiler.getBaseType(BaseIntType);
-      Result := v.EvalRes(Op, v);
-    end
+      Result := FCompiler.getBaseType(BaseIntType).EvalRes(Op, FCompiler.getBaseType(Right.BaseIntType))
   else
     Result := inherited;
 end;
@@ -1779,11 +1776,12 @@ begin
   Assert(ARange <> nil);
   inherited Create(ltLargeSet, ACompiler, AName, ADocPos);
 
-  FSmall := (ARange.Range.Hi < 32);
+  FRange := ARange;
+  FSmall := (FRange.Range.Hi < 32);
   if FSmall then
     FBaseType := ltSmallSet;
 
-  if (ARange.Range.Lo < 0) or (ARange.Range.Hi > 255) then
+  if (FRange.Range.Lo < 0) or (FRange.Range.Hi > 255) then
     LapeException(lpeOutOfTypeRange);
 end;
 
