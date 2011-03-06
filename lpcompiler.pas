@@ -643,7 +643,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     r: TLapeRange;
     v: TLapeType;
   begin
-    t := ParseTypeExpression();
+    t := ParseTypeExpression([tk_sym_Equals]);
     try
       if (t <> nil) and (t is TLapeTree_Range) then
       begin
@@ -764,6 +764,9 @@ begin
       if (FTokenizer.Tok = tk_sym_Equals) then
       begin
         b := ParseExpression();
+        if (t <> nil) and (b is TLapeTree_OpenArray) then
+          TLapeTree_OpenArray(b).ToType := t;
+
         try
           FTokenizer.Expect(tk_sym_SemiColon, False, False);
           v2 := b.Evaluate();
@@ -946,6 +949,24 @@ var
       PushVarStack(TLapeTree_String.Create(s, Self, @d));
   end;
 
+  procedure ParseAndPushArray;
+  var
+    r: TLapeTree_OpenArray;
+  begin
+    r := TLapeTree_OpenArray.Create(Self, getPDocPos());
+    try
+      while (not (FTokenizer.Tok in [tk_NULL, tk_sym_BracketClose])) do
+      begin
+        r.addValue(ParseTypeExpression());
+        FTokenizer.Expect([tk_sym_Comma, tk_sym_BracketClose], False, False);
+      end;
+    except
+      r.Free();
+      raise;
+    end;
+    PushVarStack(r);
+  end;
+
   procedure ParseOperator(op: EOperator = op_Unknown);
   begin
     if (op = op_Unknown) and (_LastNode = _Var) then
@@ -956,6 +977,12 @@ var
       end;
     if (op = op_Unknown) then
       op := ParserTokenToOperator(FTokenizer.Tok);
+
+    if (op = op_Index) and (_LastNode <> _Var) then
+    begin
+      ParseAndPushArray();
+      Exit;
+    end;
 
     //Unary minus and double negation
     if (op = op_Minus) then
@@ -1013,7 +1040,10 @@ begin
 
   try
     while True do
-      case FTokenizer.NextNoJunk() of
+    begin
+      if (FTokenizer.NextNoJunk() in ReturnOn) then
+        Break;
+      case FTokenizer.Tok of
         tk_kw_Nil: PushVarStack(TLapeTree_Pointer.Create(nil, Self, getPDocPos()));
         tk_typ_Integer: PushVarStack(TLapeTree_Integer.Create(FTokenizer.TokString, Self, getPDocPos()));
         tk_typ_Integer_Hex: PushVarStack(TLapeTree_Integer.Create(IntToStr(FTokenizer.TokInt64), Self, getPDocPos()));
@@ -1069,8 +1099,6 @@ begin
           end;
         tk_sym_ParenthesisClose:
           begin
-            if (tk_sym_ParenthesisClose in ReturnOn) then
-              Break;
             while (OpStack.Cur >= 0) and (OpStack.Top <> TLapeTree_Operator(ParenthesisOpen)) do
               PopOpNode();
             if (OpStack.Cur < 0) or (OpStack.Pop() <> TLapeTree_Operator(ParenthesisOpen)) then
@@ -1081,6 +1109,7 @@ begin
         else
           Break;
       end;
+    end;
 
     while (OpStack.Cur >= 0) do
     begin
@@ -1117,8 +1146,11 @@ end;
 function TLapeCompiler.ParseTypeExpression(ReturnOn: EParserTokenSet = []): TLapeTree_Base;
 var
   r: TLapeTree_ExprBase;
+  v: TLapeType;
 begin
   Result := nil;
+  v := nil;
+
   r := ParseExpression(ReturnOn);
   if (FTokenizer.Tok <> tk_sym_DotDot) then
     Result := r
@@ -1127,6 +1159,11 @@ begin
     Result := TLapeTree_Range.Create(Self, getPDocPos());
     TLapeTree_Range(Result).Lo := r;
     TLapeTree_Range(Result).Hi := ParseExpression(ReturnOn);
+
+    if (r <> nil) and (TLapeTree_Range(Result).Hi <> nil) then
+      v := r.resType();
+    if (v = nil) or (v.BaseIntType = ltUnknown) or (not (v.CompatibleWith(TLapeTree_Range(Result).Hi.resType()))) then
+      LapeException(lpeInvalidRange);
   except
     if (Result <> nil) then
       Result.Free();

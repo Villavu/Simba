@@ -64,10 +64,10 @@ resourcestring
   lpeVariableExpected = 'Variable expected';
   lpeVariableOfTypeExpected = 'Expected variable of type "%s", got "%s"';
 
-procedure LapeException(Msg: string); overload; inline;
-procedure LapeException(Msg: string; DocPos: TDocPos); overload; inline;
-procedure LapeException(Msg: string; Args: array of const); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
-procedure LapeException(Msg: string; Args: array of const; DocPos: TDocPos); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
+procedure LapeException(Msg: string); overload;
+procedure LapeException(Msg: string; DocPos: TDocPos); overload;
+procedure LapeException(Msg: string; Args: array of const); overload; {$IFDEF FPC}inline;{$ENDIF}
+procedure LapeException(Msg: string; Args: array of const; DocPos: TDocPos); overload; {$IFDEF FPC}inline;{$ENDIF}
 
 implementation
 

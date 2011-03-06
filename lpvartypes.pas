@@ -564,11 +564,11 @@ type
 
 procedure ClearBaseTypes(var Arr: TLapeBaseTypes);
 procedure LoadBaseTypes(var Arr: TLapeBaseTypes; Compiler: TLapeCompilerBase);
-procedure setNullResVar(var v: TResVar; Unlock: Integer = 0); inline;
-function getResVar(v: TLapeVar): TResVar; inline;
-function ResVarToIMemPos(v: TResVar): TIMemPos; inline;
-procedure getDestVar(var Dest, Res: TResVar; Op: EOperator; Compiler: TLapeCompilerBase); inline;
-function isVariable(v: TResVar): Boolean; inline;
+procedure setNullResVar(var v: TResVar; Unlock: Integer = 0); {$IFDEF Lape_Inline}inline;{$ENDIF}
+function getResVar(v: TLapeVar): TResVar; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function ResVarToIMemPos(v: TResVar): TIMemPos; {$IFDEF Lape_Inline}inline;{$ENDIF}
+procedure getDestVar(var Dest, Res: TResVar; Op: EOperator; Compiler: TLapeCompilerBase); {$IFDEF Lape_Inline}inline;{$ENDIF}
+function isVariable(v: TResVar): Boolean; {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 const
   NullResVar: TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpNone; GlobalVar: nil));
@@ -693,7 +693,7 @@ function isVariable(v: TResVar): Boolean;
 begin
   Result := v.VarPos.isPointer or
     ((v.VarPos.MemPos = mpMem) and (v.VarPos.GlobalVar <> nil) and (not v.VarPos.GlobalVar.isConstant)) or
-    ((v.VarPos.MemPos = mpVar) and (v.VarPos.StackVar <> nil) and (not v.VarPos.StackVar.isConstant) and (not (v.VarPos.StackVar is TLapeStackTempVar)));
+    ((v.VarPos.MemPos = mpVar) and (v.VarPos.StackVar <> nil) and (not v.VarPos.StackVar.isConstant) {and (not (v.VarPos.StackVar is TLapeStackTempVar))});
 end;
 
 function TLapeVar.getBaseType: ELapeBaseType;
@@ -971,11 +971,13 @@ begin
     ((FBaseType in LapeStringTypes) and (Other.BaseType in LapeStringTypes + LapeCharTypes)) or
     ((FBaseType = ltPointer) and (Other.BaseType = ltPointer))
   );}
-  if (Other <> nil) then
+  {if (Other <> nil) then
     p := getEvalProc(op_Assign, FBaseType, Other.BaseType)
   else
     p := nil;
   Result := ({$IFNDEF FPC}@{$ENDIF}p <> nil) and ({$IFNDEF FPC}@{$ENDIF}p <> {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc);
+  }
+  Result := (EvalRes(op_Assign, Other) <> nil);
 end;
 
 function TLapeType.CreateCopy: TLapeType;
@@ -1070,7 +1072,9 @@ begin
   begin
     t := EvalRes(Op, nil);
     if (op = op_Addr) then
-      Exit(t.NewGlobalVarP(@Left.Ptr));
+      Exit(t.NewGlobalVarP(@Left.Ptr))
+    else if (op = op_Deref) then
+      Exit(t.NewGlobalVarP(PPointer(Left.Ptr)^));
 
     p := getEvalProc(Op, FBaseType, ltUnknown);
   end
@@ -1890,11 +1894,13 @@ function TLapeType_Pointer.EvalRes(Op: EOperator; Right: TLapeType = nil): TLape
 begin
   if (op = op_Deref) then
     Result := FPType
+  else if (op = op_Index) then
+    Result := Self
   else
   begin
     Result := inherited;
-    if (Result <> nil) and (Result.BaseType = ltPointer) and (TLapeType_Pointer(Result).PType = nil) and (FCompiler <> nil) then
-      Result := FCompiler.getPointerType(FPType);
+    if (Result <> nil) and (Result.BaseType = ltPointer) and (TLapeType_Pointer(Result).PType = nil) then
+      Result := Self;
   end;
 end;
 
