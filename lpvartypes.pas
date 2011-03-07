@@ -202,19 +202,6 @@ type
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
   end;
 
-  TLapeType_String = class(TLapeType)
-  public
-    function VarToString(v: Pointer): lpString; override;
-    function NewGlobalVarStr(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
-    function NewGlobalVar(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload;
-  {$IFNDEF Lape_NoWideString}
-    function NewGlobalVarStr(Str: WideString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
-    function NewGlobalVar(Str: WideString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload;
-  {$ENDIF}
-    function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
-    function NewGlobalVar(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload;
-  end;
-
   {$IFDEF FPC}generic{$ENDIF} TLapeType_Char<_Type> = class(TLapeType)
   protected type
     PType = ^_Type;
@@ -255,13 +242,6 @@ type
   TLapeType_WordBool = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Bool<WordBool>)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
   TLapeType_LongBool = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Bool<LongBool>)
-    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
-
-  TLapeType_AnsiString = class(TLapeType_String)
-    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
-  TLapeType_WideString = class(TLapeType_String)
-    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
-  TLapeType_UnicodeString = class(TLapeType_String)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
   TLapeType_AnsiChar = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Char<AnsiChar>)
@@ -383,6 +363,26 @@ type
 
     property Range: TLapeRange read FRange;
   end;
+
+  TLapeType_String = class(TLapeType_DynArray)
+  public
+    function VarToString(v: Pointer): lpString; override;
+    function NewGlobalVarStr(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
+    function NewGlobalVar(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload;
+  {$IFNDEF Lape_NoWideString}
+    function NewGlobalVarStr(Str: WideString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
+    function NewGlobalVar(Str: WideString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload;
+  {$ENDIF}
+    function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
+    function NewGlobalVar(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload;
+  end;
+
+  TLapeType_AnsiString = class(TLapeType_String)
+    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
+  TLapeType_WideString = class(TLapeType_String)
+    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
+  TLapeType_UnicodeString = class(TLapeType_String)
+    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
   TRecordField = record
     Offset: Word;
@@ -619,12 +619,12 @@ begin
   Arr[ltByteBool] := TLapeType_ByteBool.Create(Compiler, LapeTypeToString(ltByteBool));
   Arr[ltWordBool] := TLapeType_WordBool.Create(Compiler, LapeTypeToString(ltWordBool));
   Arr[ltLongBool] := TLapeType_LongBool.Create(Compiler, LapeTypeToString(ltLongBool));
-  Arr[ltAnsiString] := TLapeType_AnsiString.Create(Compiler, LapeTypeToString(ltAnsiString));
-  Arr[ltWideString] := TLapeType_WideString.Create(Compiler, LapeTypeToString(ltWideString));
-  Arr[ltUnicodeString] := TLapeType_UnicodeString.Create(Compiler, LapeTypeToString(ltUnicodeString));
   Arr[ltAnsiChar] := TLapeType_AnsiChar.Create(Compiler, LapeTypeToString(ltAnsiChar));
   Arr[ltWideChar] := TLapeType_WideChar.Create(Compiler, LapeTypeToString(ltWideChar));
   Arr[ltPointer] := TLapeType_Pointer.Create(Compiler, nil, LapeTypeToString(ltPointer));
+  Arr[ltAnsiString] := TLapeType_AnsiString.Create(Compiler, LapeTypeToString(ltAnsiString));
+  Arr[ltWideString] := TLapeType_WideString.Create(Compiler, LapeTypeToString(ltWideString));
+  Arr[ltUnicodeString] := TLapeType_UnicodeString.Create(Compiler, LapeTypeToString(ltUnicodeString));
 end;
 
 procedure setNullResVar(var v: TResVar; Unlock: Integer = 0);
@@ -700,7 +700,7 @@ end;
 
 function isVariable(v: TResVar): Boolean;
 begin
-  Result := v.VarPos.isPointer or
+  Result := ((v.VarPos.MemPos = mpStack) and v.VarPos.isPointer) or
     ((v.VarPos.MemPos = mpMem) and (v.VarPos.GlobalVar <> nil) and (not v.VarPos.GlobalVar.isConstant)) or
     ((v.VarPos.MemPos = mpVar) and (v.VarPos.StackVar <> nil) and (not v.VarPos.StackVar.isConstant) {and (not (v.VarPos.StackVar is TLapeStackTempVar))});
 end;
@@ -919,12 +919,10 @@ end;
 function TLapeType.getInitialization: Boolean;
 begin
   if (FInit = __Unknown) then
-  begin
-    if (FBaseType in (LapeOrdinalTypes + LapeRealTypes + LapePointerTypes - [ltDynArray])) then
+    if (FBaseType in (LapeStackTypes + LapePointerTypes - [ltDynArray])) then
       FInit := __No
     else
       FInit := __Yes;
-  end;
   Result := (FInit = __Yes) and (Size > 0);
 end;
 
@@ -1140,6 +1138,9 @@ begin
     else
       p(Result.Ptr, Left.Ptr, Right.Ptr);
   end;
+
+  if (Result <> nil) and (Left <> nil) then
+    Result.isConstant := Left.isConstant and ((Right = nil) or Right.isConstant);
 end;
 
 function TLapeType.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
@@ -1207,11 +1208,11 @@ begin
     if (op = op_Assign) and (Right.VarType <> nil) then
       LapeException(lpeIncompatibleAssignment, [Right.VarType.AsString, AsString])
     else if (not (op in UnaryOperators)) and (Right.VarType <> nil) and (not Left.VarType.Equals(Right.VarType)) then
-    begin
       if ((Left.VarType.Size >= Right.VarType.Size) and (not TryCast(True, Result)) and (not TryCast(False, Result))) or
          ((Left.VarType.Size <  Right.VarType.Size) and (not TryCast(False, Result)) and (not TryCast(True, Result))) then
-      LapeException(lpeIncompatibleOperator2, [LapeOperatorToString(op), AsString, Right.VarType.AsString])
-    end
+        LapeException(lpeIncompatibleOperator2, [LapeOperatorToString(op), AsString, Right.VarType.AsString])
+      else
+        Exit
     else if (op in UnaryOperators) then
       LapeException(lpeIncompatibleOperator1, [LapeOperatorToString(op), AsString])
     else
@@ -1234,6 +1235,20 @@ begin
 
   if (op = op_Deref) then
     Result.VarPos.isPointer := (Result.VarPos.MemPos = mpVar);
+  if (Result.VarPos.MemPos = mpMem) and (Result.VarPos.GlobalVar <> nil) then
+  begin
+    if (Left.VarPos.MemPos = mpMem) and (Left.VarPos.GlobalVar <> nil) then
+      Result.VarPos.GlobalVar.isConstant := Left.VarPos.GlobalVar.isConstant
+    else if (Left.VarPos.MemPos = mpVar) and (Left.VarPos.StackVar <> nil) then
+      Result.VarPos.GlobalVar.isConstant := Left.VarPos.StackVar.isConstant;
+  end
+  else if (Result.VarPos.MemPos = mpVar) and (Result.VarPos.StackVar <> nil) then
+  begin
+    if (Left.VarPos.MemPos = mpMem) and (Left.VarPos.GlobalVar <> nil) then
+      Result.VarPos.StackVar.isConstant := Left.VarPos.GlobalVar.isConstant
+    else if (Left.VarPos.MemPos = mpVar) and (Left.VarPos.StackVar <> nil) then
+      Result.VarPos.StackVar.isConstant := Left.VarPos.StackVar.isConstant;
+  end;
 end;
 
 function TLapeType.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; Pos: PDocPos = nil): TResVar;
@@ -1395,53 +1410,6 @@ begin
   {$ENDIF}
 end;
 
-function TLapeType_String.VarToString(v: Pointer): lpString;
-begin
-  if (FBaseType = ltAnsiString) then
-    Result := '`'+PAnsiString(v)^+'`'
-  else if (FBaseType = ltWideString) then
-    Result := '`'+PWideString(v)^+'`'
-  else if (FBaseType = ltUnicodeString) then
-    Result := '`'+PUnicodeString(v)^+'`'
-  else
-    Result := '`'+PlpString(v)^+'`';
-end;
-
-function TLapeType_String.NewGlobalVarStr(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
-begin
-  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
-  PAnsiString(Result.Ptr)^ := Str;
-end;
-
-function TLapeType_String.NewGlobalVar(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
-begin
-  Result := NewGlobalVarStr(Str, AName, ADocPos);
-end;
-
-{$IFNDEF Lape_NoWideString}
-function TLapeType_String.NewGlobalVarStr(Str: WideString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
-begin
-  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
-  PWideString(Result.Ptr)^ := Str;
-end;
-
-function TLapeType_String.NewGlobalVar(Str: WideString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
-begin
-  Result := NewGlobalVarStr(Str, AName, ADocPos);
-end;
-{$ENDIF}
-
-function TLapeType_String.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
-begin
-  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
-  PUnicodeString(Result.Ptr)^ := Str;
-end;
-
-function TLapeType_String.NewGlobalVar(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
-begin
-  Result := NewGlobalVarStr(Str, AName, ADocPos);
-end;
-
 function TLapeType_Char{$IFNDEF FPC}<_Type>{$ENDIF}.VarToString(v: Pointer): lpString;
 begin
   {$IFDEF FPC}
@@ -1544,21 +1512,6 @@ end;
 constructor TLapeType_LongBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
 begin
   inherited Create(ltLongBool, ACompiler, AName, ADocPos);
-end;
-
-constructor TLapeType_AnsiString.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-begin
-  inherited Create(ltAnsiString, ACompiler, AName, ADocPos);
-end;
-
-constructor TLapeType_WideString.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-begin
-  inherited Create(ltWideString, ACompiler, AName, ADocPos);
-end;
-
-constructor TLapeType_UnicodeString.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-begin
-  inherited Create(ltUnicodeString, ACompiler, AName, ADocPos);
 end;
 
 constructor TLapeType_AnsiChar.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
@@ -1866,7 +1819,7 @@ end;
 
 function TLapeType_Pointer.getAsString: lpString;
 begin
-  if (FAsString = '') then
+  if (FAsString = '') and (FBaseType = ltPointer) then
     if (FPType <> nil) then
       FAsString := '^'+FPType.AsString;
   Result := inherited;
@@ -1941,8 +1894,8 @@ begin
   else
   begin
     Result := inherited;
-    if (Result <> nil) and (Result.BaseType = ltPointer) and (TLapeType_Pointer(Result).PType = nil) then
-      Result := Self;
+    if (Result <> nil) and (Result.BaseType = ltPointer) and (TLapeType_Pointer(Result).PType = nil) and (FCompiler <> nil) then
+      Result := FCompiler.getPointerType(FPType);
   end;
 end;
 
@@ -2034,11 +1987,11 @@ end;
 
 function TLapeType_DynArray.getAsString: lpString;
 begin
-  if (FAsString = '') then
+  if (FAsString = '') and (FBaseType = ltDynArray) then
     if (FPType <> nil) then
-      Result := 'array of ' + FPType.AsString
+      FAsString := 'array of ' + FPType.AsString
     else
-      Result := 'array';
+      FAsString := 'array';
   Result := inherited;
 end;
 
@@ -2142,7 +2095,11 @@ end;
 procedure TLapeType_DynArray.Finalize(v: TResVar; var Offset: Integer; UseCompiler: Boolean = True; Pos: PDocPos = nil);
 begin
   Assert(v.VarType = Self);
-  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
+  if (not (FBaseType in LapeArrayTypes)) then
+  begin
+    inherited;
+    Exit;
+  end else  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
     Exit;
 end;
 
@@ -2170,7 +2127,9 @@ begin
   inherited Create(ArrayType, ACompiler, AName, ADocPos);
   FBaseType := ltStaticArray;
   if (ArrayType <> nil) and ArrayType.NeedInitialization then
-    FInit := __Yes;
+    FInit := __Yes
+  else
+    FInit := __No;
 
   FRange := ARange;
 end;
@@ -2346,6 +2305,74 @@ begin
   end;
 end;
 
+function TLapeType_String.VarToString(v: Pointer): lpString;
+begin
+  if (FBaseType = ltAnsiString) then
+    Result := '`'+PAnsiString(v)^+'`'
+  else if (FBaseType = ltWideString) then
+    Result := '`'+PWideString(v)^+'`'
+  else if (FBaseType = ltUnicodeString) then
+    Result := '`'+PUnicodeString(v)^+'`'
+  else
+    Result := '`'+PlpString(v)^+'`';
+end;
+
+function TLapeType_String.NewGlobalVarStr(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
+  PAnsiString(Result.Ptr)^ := Str;
+end;
+
+function TLapeType_String.NewGlobalVar(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := NewGlobalVarStr(Str, AName, ADocPos);
+end;
+
+{$IFNDEF Lape_NoWideString}
+function TLapeType_String.NewGlobalVarStr(Str: WideString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
+  PWideString(Result.Ptr)^ := Str;
+end;
+
+function TLapeType_String.NewGlobalVar(Str: WideString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := NewGlobalVarStr(Str, AName, ADocPos);
+end;
+{$ENDIF}
+
+function TLapeType_String.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
+  PUnicodeString(Result.Ptr)^ := Str;
+end;
+
+function TLapeType_String.NewGlobalVar(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := NewGlobalVarStr(Str, AName, ADocPos);
+end;
+
+constructor TLapeType_AnsiString.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+begin
+  Assert(ACompiler <> nil);
+  inherited Create(ACompiler.getBaseType(ltAnsiChar), ACompiler, AName, ADocPos);
+  FBaseType := ltAnsiString;
+end;
+
+constructor TLapeType_WideString.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+begin
+  Assert(ACompiler <> nil);
+  inherited Create(ACompiler.getBaseType(ltWideChar), ACompiler, AName, ADocPos);
+  FBaseType := ltWideChar;
+end;
+
+constructor TLapeType_UnicodeString.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+begin
+  Assert(ACompiler <> nil);
+  inherited Create(ACompiler.getBaseType(ltWideChar), ACompiler, AName, ADocPos);
+  FBaseType := ltUnicodeString;
+end;
+
 function TLapeType_Record.getAsString: lpString;
 var
   i: Integer;
@@ -2439,7 +2466,7 @@ begin
       Result := FFieldMap[s].FieldType.NewGlobalVarP(Pointer(PtrUInt(Left.Ptr) + FFieldMap[s].Offset))
     else
       LapeException(lpeUnknownDeclaration, [s]);
-    Result.isConstant := False;
+    Result.isConstant := Left.isConstant;
   end
   else
     inherited;

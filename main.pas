@@ -63,18 +63,9 @@ type
   end;
 
 procedure TForm1.btnGoClick(Sender: TObject);
-type
-  eenum = (mol, vol);
 var
   i: Integer;
-  xx: (lol, bol);
-  yy: set of eenum;
 begin
-  yy := [eenum(0)];
-  if (mol in yy) then
-    WriteLn('good');
-  WRiteLn(Integer(lol));
-  WriteLn(Integer(mol));
   for i := 0 to lpgList.Count - 1 do
     WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
 end;

@@ -315,6 +315,7 @@ const
   LapeCharTypes = [ltAnsiChar..ltWideChar];
   LapeEnumTypes = [ltSmallEnum..ltLargeEnum];
   LapeSetTypes = [ltSmallSet..ltLargeSet];
+  LapeArrayTypes = [ltDynArray..ltStaticArray];
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
   LapePointerTypes = [ltPointer, ltDynArray, ltProc, ltExternalProc];
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes;
