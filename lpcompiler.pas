@@ -844,6 +844,7 @@ var
   v: TLapeDeclaration;
   f: TLapeTree_Invoke;
   _LastNode: (_None, _Var, _Op);
+  InExpr: Integer;
 
   procedure PopOpNode; {$IFDEF Lape_Inline}inline;{$ENDIF}
   var
@@ -1037,11 +1038,12 @@ begin
   VarStack := TLapeTree_NodeStack.Create(8);
   OpStack := TLapeTree_OpStack.Create(16);
   _LastNode := _None;
+  InExpr := 0;
 
   try
     while True do
     begin
-      if (FTokenizer.NextNoJunk() in ReturnOn) then
+      if (FTokenizer.NextNoJunk() in ReturnOn) and (InExpr <= 0) then
         Break;
       case FTokenizer.Tok of
         tk_kw_Nil: PushVarStack(TLapeTree_Pointer.Create(nil, Self, getPDocPos()));
@@ -1096,6 +1098,7 @@ begin
             end
             else
               PushOpStack(TLapeTree_Operator(ParenthesisOpen));
+            Inc(InExpr);
           end;
         tk_sym_ParenthesisClose:
           begin
@@ -1103,6 +1106,7 @@ begin
               PopOpNode();
             if (OpStack.Cur < 0) or (OpStack.Pop() <> TLapeTree_Operator(ParenthesisOpen)) then
               LapeException(lpeLostClosingParenthesis, FTokenizer.DocPos);
+            Dec(InExpr);
           end;
 
         ParserToken_FirstOperator..ParserToken_LastOperator: ParseOperator();

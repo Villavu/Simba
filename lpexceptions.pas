@@ -50,7 +50,7 @@ resourcestring
   lpeLostClosingParenthesis = 'Found closing parenthesis without matching opening parenthesis';
   lpeNoDefaultForParam = 'No default value for parameter %d found';
   lpeNoForwardMatch = 'Forwarded declaration doesn''t match';
-  lpeNoOverloadedMethod = 'Don''t know which overloaded method to call';
+  lpeNoOverloadedMethod = 'Don''t know which overloaded method to call with params (%s)';
   lpeOperatorExpected = 'Operator expected';
   lpeOutOfStackRange = 'Out of stack range';
   lpeOutOfTypeRange = 'Out of type range';

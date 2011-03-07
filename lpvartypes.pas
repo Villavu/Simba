@@ -919,7 +919,7 @@ end;
 function TLapeType.getInitialization: Boolean;
 begin
   if (FInit = __Unknown) then
-    if (FBaseType in (LapeStackTypes + LapePointerTypes - [ltDynArray])) then
+    if (FBaseType in (LapeOrdinalTypes + LapeRealTypes + LapePointerTypes - [ltDynArray])) then
       FInit := __No
     else
       FInit := __Yes;
@@ -1841,7 +1841,7 @@ end;
 
 function TLapeType_Pointer.VarToString(v: Pointer): lpString;
 begin
-  if (PPointer(v)^ = nil) then
+  if ((v = nil) or (PPointer(v)^ = nil)) then
     Result := 'nil'
   else
   begin
@@ -2444,6 +2444,7 @@ type TLapeClassType = class of TLapeType_Record;
 begin
   Result := TLapeClassType(Self.ClassType).Create(FCompiler, FFieldMap, Name, @DocPos);
   Result.FInit := FInit;
+  Result.FSize := FSize;
 end;
 
 function TLapeType_Record.NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;

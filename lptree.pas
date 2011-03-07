@@ -83,6 +83,7 @@ type
     procedure setIdent(Node: TLapeTree_ExprBase); virtual;
     procedure DeleteChild(Node: TLapeTree_Base); override;
     function getParamTypes: TLapeTypeArray; virtual;
+    function getParamTypesStr: lpString; virtual;
   public
     constructor Create(Ident: TLapeTree_ExprBase; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; virtual;
     destructor Destroy; override;
@@ -784,6 +785,27 @@ begin
       Result[i] := FParams[i].resType();
 end;
 
+function TLapeTree_Invoke.getParamTypesStr: lpString;
+var
+  i: Integer;
+  v: TLapeType;
+begin
+  Result := '';
+  for i := 0 to FParams.Count - 1 do
+  begin
+    if (i > 0) then
+      Result := Result + ', ';
+    if (FParams[i] = nil) or (FParams[i].ClassType = TLapeTree_ExprBase) then
+      v := nil
+    else
+      v := FParams[i].resType();
+    if (v <> nil) then
+      Result := Result + v.AsString
+    else
+      Result := Result + '*unknown*';
+  end;
+end;
+
 constructor TLapeTree_Invoke.Create(Ident: TLapeTree_ExprBase; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil);
 begin
   inherited Create(ACompiler, ADocPos);
@@ -944,7 +966,7 @@ begin
     begin
       f := TLapeType_OverloadedMethod(f.VarType).getMethod(getParamTypes());
       if (f = nil) then
-        LapeException(lpeNoOverloadedMethod, FIdent.DocPos);
+        LapeException(lpeNoOverloadedMethod, [getParamTypesStr()], FIdent.DocPos);
     end
     else if (f.Ptr = nil) or (not (f.VarType.BaseType in [ltExternalProc])) then
       LapeException(lpeCannotInvoke, FIdent.DocPos);
@@ -1161,7 +1183,7 @@ begin
     begin
       a := getResVar(TLapeType_OverloadedMethod(a.VarType).getMethod(getParamTypes(), FDest.VarType));
       if (a.VarType = nil) then
-        LapeException(lpeNoOverloadedMethod, FIdent.DocPos);
+        LapeException(lpeNoOverloadedMethod, [getParamTypesStr()], FIdent.DocPos);
     end
     else if (a.VarType = nil) or (not (a.VarType.BaseType in [ltProc, ltExternalProc])) then
       LapeException(lpeCannotInvoke, FIdent.DocPos);
@@ -1255,7 +1277,9 @@ end;
 
 function TLapeTree_Operator.isConstant: Boolean;
 begin
-  Result := ((FLeft = nil) or FLeft.isConstant()) and ((FRight = nil) or FRight.isConstant());
+  Result :=
+    ((FOperatorType = op_Dot) and (FRight <> nil) and FRight.isConstant()) or
+    ((FLeft = nil) or FLeft.isConstant()) and ((FRight = nil) or FRight.isConstant());
 end;
 
 function TLapeTree_Operator.resType: TLapeType;
