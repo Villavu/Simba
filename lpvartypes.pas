@@ -355,8 +355,9 @@ type
     constructor Create(ARange: TLapeRange; ArrayType: TLapeType; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
     function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
-
     function NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload;
+
+    function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
     function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
     function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
     procedure Finalize(v: TResVar; var Offset: Integer; UseCompiler: Boolean = True; Pos: PDocPos = nil); overload; override;
@@ -983,22 +984,7 @@ begin
 end;
 
 function TLapeType.CompatibleWith(Other: TLapeType): Boolean;
-var
-  p: TLapeEvalProc;
 begin
-  {Result := (Other <> nil) and (
-    Equals(Other) or
-    ((FBaseType in LapeOrdinalTypes) and (Other.BaseType in LapeOrdinalTypes)) or
-    ((FBaseType in LapeRealTypes) and (Other.BaseType in LapeRealTypes + LapeIntegerTypes)) or
-    ((FBaseType in LapeStringTypes) and (Other.BaseType in LapeStringTypes + LapeCharTypes)) or
-    ((FBaseType = ltPointer) and (Other.BaseType = ltPointer))
-  );}
-  {if (Other <> nil) then
-    p := getEvalProc(op_Assign, FBaseType, Other.BaseType)
-  else
-    p := nil;
-  Result := ({$IFNDEF FPC}@{$ENDIF}p <> nil) and ({$IFNDEF FPC}@{$ENDIF}p <> {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc);
-  }
   Result := (EvalRes(op_Assign, Other) <> nil);
 end;
 
@@ -1276,7 +1262,6 @@ begin
     l.VarPos.GlobalVar := TLapeGlobalVar(FCompiler.addManagedVar(TLapeType_Pointer(FCompiler.getBaseType(ltPointer)).NewGlobalVar()))
   else
     l.VarPos.GlobalVar := TLapeType_Pointer.Create(nil).NewGlobalVar();
-  l.VarPos.GlobalVar.isConstant := False;
 
   try
     p := getEvalProc(op_Assign, FBaseType, FBaseType);
@@ -1833,8 +1818,8 @@ end;
 
 function TLapeType_Pointer.Equals(Other: TLapeType): Boolean;
 begin
-  if (Other <> nil) and (Other is TLapeType_Pointer) then
-    Result := (FPType = nil) or (TLapeType_Pointer(Other).PType = nil)
+  if (Other <> nil) and (Other.BaseType = BaseType) then
+    Result := (FPType = nil) or (TLapeType_Pointer(Other).PType = nil) or inherited
   else
     Result := inherited;
 end;
@@ -1908,10 +1893,13 @@ begin
   Assert((Left = nil) or (Left.VarType is TLapeType_Pointer));
 
   if (op = op_Index) and (Right <> nil) then
-  try
+  begin
     v := Right.FVarType;
     if (Right.FVarType = nil) or (Right.FVarType.BaseIntType = ltUnknown) then
-      LapeException(lpeImpossible)
+      if (Right <> nil) and (Right.VarType <> nil) then
+        LapeException(lpeInvalidIndex, [Right.VarType.AsString])
+      else
+        LapeException(lpeInvalidEvaluation)
     else
       Right.FVarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
 
@@ -1931,11 +1919,6 @@ begin
       s.Free();
       Right.FVarType := v;
     end;
-  except
-    if (Right <> nil) and (Right.VarType <> nil) then
-      LapeException(lpeInvalidIndex, [Right.VarType.AsString])
-    else
-      LapeException(lpeInvalidEvaluation);
   end
   else
     Result := inherited;
@@ -1951,10 +1934,13 @@ begin
   a := NullResVar;
 
   if (op = op_Index) then
-  try
+  begin
     v := Right.VarType;
     if (Right.VarType = nil) or (Right.VarType.BaseIntType = ltUnknown) then
-      LapeException(lpeImpossible)
+      if (Right.VarType <> nil) then
+        LapeException(lpeInvalidIndex, [Right.VarType.AsString])
+      else
+        LapeException(lpeInvalidEvaluation)
     else
       Right.VarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
 
@@ -1975,11 +1961,6 @@ begin
         Pos
       );
     Right.VarType := v;
-  except
-    if (Right.VarType <> nil) then
-      LapeException(lpeInvalidIndex, [Right.VarType.AsString])
-    else
-      LapeException(lpeInvalidEvaluation);
   end
   else
     Result := inherited;
@@ -2076,15 +2057,19 @@ begin
       Result.VarType := FPType;
     end
     else
+    begin
+      a := inherited Eval(Op, a, Left, Right, Offset, Pos);
       Result := //Result := Pointer[Index]^
         Eval(
           op_Deref,
           Dest,
-          inherited Eval(Op, a, Left, Right, Offset, Pos),
+          a,
           NullResVar,
           Offset,
           Pos
         );
+      SetNullResVar(a, 1);
+    end;
   finally
     FBaseType := b;
   end
@@ -2099,7 +2084,7 @@ begin
   begin
     inherited;
     Exit;
-  end else  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
+  end else if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
     Exit;
 end;
 
@@ -2160,8 +2145,19 @@ begin
   Result := inherited NewGlobalVarP(nil, AName, ADocPos);
 end;
 
+function TLapeType_StaticArray.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
+begin
+  if (op = op_Assign) and (FPType <> nil) and (Right <> nil) and (Right is TLapeType_StaticArray) and
+     ((TLapeType_StaticArray(Right).Range.Hi - TLapeType_StaticArray(Right).Range.Lo) = (Range.Hi - Range.Lo)) and
+     FPType.CompatibleWith(TLapeType_StaticArray(Right).FPType) then
+    Result := Self
+  else
+    Result := inherited;
+end;
+
 function TLapeType_StaticArray.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
 var
+  i: Integer;
   v: TLapeType;
   low, l, r: TLapeGlobalVar;
 begin
@@ -2169,10 +2165,13 @@ begin
   Assert((Left = nil) or (Left.VarType is TLapeType_Pointer));
 
   if (op = op_Index) and (Right <> nil) then
-  try
+  begin
     v := Right.FVarType;
     if (Right.VarType = nil) or (Right.FVarType.BaseIntType = ltUnknown) then
-      LapeException(lpeImpossible)
+      if (Right.VarType <> nil) then
+        LapeException(lpeInvalidIndex, [Right.VarType.AsString])
+      else
+        LapeException(lpeInvalidEvaluation)
     else
       Right.FVarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
 
@@ -2204,11 +2203,19 @@ begin
       l.Free();
       Right.FVarType := v;
     end;
-  except
-    if (Right.VarType <> nil) then
-      LapeException(lpeInvalidIndex, [Right.VarType.AsString])
-    else
-      LapeException(lpeInvalidEvaluation);
+  end
+  else if (op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
+  begin
+    for i := 0 to FRange.Hi - FRange.Lo do
+    try
+      l := FPType.NewGlobalVarP(Pointer(PtrInt(Left.Ptr) + (FPType.Size * i)));
+      r := FPType.NewGlobalVarP(Pointer(PtrInt(Right.Ptr) + (FPType.Size * i)));
+      FPType.EvalConst(op_Assign, l, r);
+    finally
+      FreeAndNil(l);
+      FreeAndNil(r);
+    end;
+    Result := Left;
   end
   else
     Result := inherited;
@@ -2217,14 +2224,24 @@ end;
 function TLapeType_StaticArray.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
 var
   a, t: TResVar;
+  b: Boolean;
   v: TLapeType;
+  c, l, h: TLapeVar;
+  o: Integer;
 begin
   Assert(FCompiler <> nil);
   Assert(Left.VarType is TLapeType_Pointer);
   a := NullResVar;
+  t := NullResVar;
 
   if (op = op_Index) then
   try
+    b := ((Left.VarPos.MemPos = mpMem) and (Left.VarPos.GlobalVar <> nil) and Left.VarPos.GlobalVar.isConstant) or ((Left.VarPos.MemPos = mpVar) and (Left.VarPos.StackVar <> nil) and Left.VarPos.StackVar.isConstant);
+    if b and (Left.VarPos.MemPos = mpMem) then
+      Left.VarPos.GlobalVar.isConstant := False
+    else if b and (Left.VarPos.MemPos = mpVar) then
+      Left.VarPos.StackVar.isConstant := False;
+
     t := Eval(op_Addr, a, Left, NullResVar, Offset, Pos);
 
     if (FRange.Lo = 0) then
@@ -2233,7 +2250,10 @@ begin
     try
       v := Right.VarType;
       if (Right.VarType = nil) or (Right.VarType.BaseIntType = ltUnknown) then
-        LapeException(lpeImpossible)
+        if (Right.VarType <> nil) then
+          LapeException(lpeInvalidIndex, [Right.VarType.AsString])
+        else
+          LapeException(lpeInvalidEvaluation)
       else
         Right.VarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
 
@@ -2253,11 +2273,25 @@ begin
     finally
       Right.VarType := v;
     end;
-  except
-    if (Right.VarType <> nil) then
-      LapeException(lpeInvalidIndex, [Right.VarType.AsString])
-    else
-      LapeException(lpeInvalidEvaluation);
+  finally
+    SetNullResVar(t, 1);
+    if b and (Left.VarPos.MemPos = mpMem) then
+      Left.VarPos.GlobalVar.isConstant := False
+    else if b and (Left.VarPos.MemPos = mpVar) then
+      Left.VarPos.StackVar.isConstant := False;
+  end
+  else if (op = op_Assign) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
+  begin
+    c := FCompiler.getTempVar(ltInt64, 2);
+    l := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Lo - 1)).NewGlobalVarStr(IntToStr(FRange.Lo)));
+    h := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Hi + 1)).NewGlobalVarStr(IntToStr(FRange.Hi)));
+    t := c.VarType.Eval(op_Assign, t, GetResVar(c), GetResVar(l), Offset, Pos);
+    o := Offset;
+    FPType.Eval(op_Assign, a, Eval(op_Index, a, Left, t, Offset, Pos), Eval(op_Index, a, Right, t, Offset, Pos), Offset, Pos);
+    c.VarType.Eval(op_Assign, a, t, c.VarType.Eval(op_Plus, a, t, getResVar(FCompiler.addManagedVar(c.VarType.NewGlobalVarStr('1'))), Offset, Pos), Offset, Pos);
+    FCompiler.Emitter._JmpRIf(o - Offset, c.VarType.Eval(op_cmp_LessThanOrEqual, a, t, getResVar(h), Offset, Pos), Offset, Pos);
+    setNullResVar(t, 2);
+    Result := Left;
   end
   else
     Result := inherited;
@@ -2278,31 +2312,27 @@ begin
   if UseCompiler and (FCompiler <> nil) then
   begin
     c := FCompiler.getTempVar(ltInt64, 2);
-    l := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Lo)).NewGlobalVarStr(IntToStr(FRange.Lo)));
-    h := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Hi)).NewGlobalVarStr(IntToStr(FRange.Hi)));
+    l := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Lo - 1)).NewGlobalVarStr(IntToStr(FRange.Lo)));
+    h := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Hi + 1)).NewGlobalVarStr(IntToStr(FRange.Hi)));
     _v := c.VarType.Eval(op_Assign, _v, GetResVar(c), GetResVar(l), Offset, Pos);
     o := Offset;
     FPType.Finalize(Eval(op_Index, a, v, _v, Offset, Pos), Offset, UseCompiler, Pos);
     c.VarType.Eval(op_Assign, a, _v, c.VarType.Eval(op_Plus, a, _v, getResVar(FCompiler.addManagedVar(c.VarType.NewGlobalVarStr('1'))), Offset, Pos), Offset, Pos);
-    FCompiler.Emitter._JmpRIf(o - Offset, c.VarType.Eval(op_cmp_LessThan, a, _v, getResVar(h), Offset, Pos), Offset, Pos);
-    TLapeStackTempVar(c).DecLock(2);
+    FCompiler.Emitter._JmpRIf(o - Offset, c.VarType.Eval(op_cmp_LessThanOrEqual, a, _v, getResVar(h), Offset, Pos), Offset, Pos);
+    setNullResVar(_v, 2);
   end
+  else if (v.VarPos.MemPos <> mpMem) then
+    LapeException(lpeImpossible)
   else
-  begin
-    if (v.VarPos.MemPos <> mpMem) then
-      LapeException(lpeImpossible);
     for i := 0 to FRange.Hi - FRange.Lo do
     try
       _v := v;
       _v.VarType := FPType;
       _v.VarPos.GlobalVar := _v.VarType.NewGlobalVarP(Pointer(PtrInt(_v.VarPos.GlobalVar.Ptr) + (FPType.Size * i)));
-      _v.VarPos.GlobalVar.isConstant := False;
       FPType.Finalize(_v, Offset, UseCompiler, Pos);
     finally
       FreeAndNil(_v.VarPos.GlobalVar);
-      setNullResVar(_v, 1);
     end;
-  end;
 end;
 
 function TLapeType_String.VarToString(v: Pointer): lpString;
@@ -2526,18 +2556,11 @@ begin
     _v.VarType := FFieldMap.ItemsI[i].FieldType;
     case _v.VarPos.MemPos of
       mpMem:
-        begin
-          if UseCompiler and (FCompiler <> nil) then
-            _v.VarPos.GlobalVar := TLapeGlobalVar(FCompiler.addManagedVar(_v.VarType.NewGlobalVarP(Pointer(PtrUInt(_v.VarPos.GlobalVar.Ptr) + FFieldMap.ItemsI[i].Offset))))
-          else
-            _v.VarPos.GlobalVar := _v.VarType.NewGlobalVarP(Pointer(PtrUInt(_v.VarPos.GlobalVar.Ptr) + FFieldMap.ItemsI[i].Offset));
-          _v.VarPos.GlobalVar.isConstant := False;
-        end;
-      mpVar:
-        begin
-          _v.VarPos.Offset := _v.VarPos.Offset + FFieldMap.ItemsI[i].Offset;
-          _v.VarPos.StackVar.isConstant := False;
-        end
+        if UseCompiler and (FCompiler <> nil) then
+          _v.VarPos.GlobalVar := TLapeGlobalVar(FCompiler.addManagedVar(_v.VarType.NewGlobalVarP(Pointer(PtrUInt(_v.VarPos.GlobalVar.Ptr) + FFieldMap.ItemsI[i].Offset))))
+        else
+          _v.VarPos.GlobalVar := _v.VarType.NewGlobalVarP(Pointer(PtrUInt(_v.VarPos.GlobalVar.Ptr) + FFieldMap.ItemsI[i].Offset));
+      mpVar: _v.VarPos.Offset := _v.VarPos.Offset + FFieldMap.ItemsI[i].Offset;
       else LapeException(lpeImpossible);
     end;
     _v.VarType.Finalize(_v, Offset, UseCompiler, Pos);
@@ -3371,9 +3394,11 @@ begin
           while (i < Count) do
           begin
             if Items[i].NeedFinalization then
+            begin
               Items[i].VarType.Finalize(Items[i], Offset, True, Pos);
-            if (Items[i] is TLapeStackTempVar) then
-              TLapeStackTempVar(Items[i]).Locked := True;
+              if (Items[i] is TLapeStackTempVar) then
+                TLapeStackTempVar(Items[i]).Locked := True;
+            end;
             Inc(i);
           end;
           for i := 0 to Count - 1 do

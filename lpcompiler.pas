@@ -160,7 +160,7 @@ begin
   if (Result.Lo <> nil) and (Result.Hi <> nil) then
     VarType := Result.Lo.resType();
   if (VarType = nil) or (not (VarType.CompatibleWith(Result.Hi.resType()))) then
-    LapeException(lpeInvalidRange);
+    LapeException(lpeInvalidRange, Node.DocPos);
 end;
 
 function TLapeCompiler.EnsureRange(Node: TLapeTree_Base): TLapeTree_Range;
@@ -1167,7 +1167,7 @@ begin
     if (r <> nil) and (TLapeTree_Range(Result).Hi <> nil) then
       v := r.resType();
     if (v = nil) or (v.BaseIntType = ltUnknown) or (not (v.CompatibleWith(TLapeTree_Range(Result).Hi.resType()))) then
-      LapeException(lpeInvalidRange);
+      LapeException(lpeInvalidRange, FTokenizer.DocPos);
   except
     if (Result <> nil) then
       Result.Free();
