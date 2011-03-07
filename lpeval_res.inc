@@ -2305,6 +2305,18 @@ Arr[op_IN][ltSmallEnum][ltSmallSet] := ltBoolean;
 Arr[op_IN][ltAnsiChar][ltLargeSet] := Arr[op_IN][ltUInt8][ltSmallSet];
 Arr[op_IN][ltWideChar][ltLargeSet] := Arr[op_IN][ltUInt16][ltSmallSet];
 
+Arr[op_Plus][ltSmallSet][ltInt8] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltUInt8] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltInt16] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltUInt16] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltInt32] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltUInt32] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltInt64] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltUInt64] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltSmallEnum] := ltSmallSet;
+Arr[op_Plus][ltSmallSet][ltAnsiChar] := Arr[op_Plus][ltUInt8][ltSmallSet];
+Arr[op_Plus][ltSmallSet][ltWideChar] := Arr[op_Plus][ltUInt16][ltSmallSet];
+
 Arr[op_Assign][ltSmallSet][ltSmallSet] := ltSmallSet;
 Arr[op_Plus][ltSmallSet][ltSmallSet] := ltSmallSet;
 Arr[op_Minus][ltSmallSet][ltSmallSet] := ltSmallSet;
@@ -2327,6 +2339,18 @@ Arr[op_IN][ltUInt64][ltLargeSet] := ltBoolean;
 Arr[op_IN][ltLargeEnum][ltLargeSet] := ltBoolean;
 Arr[op_IN][ltAnsiChar][ltLargeSet] := Arr[op_IN][ltUInt8][ltLargeSet];
 Arr[op_IN][ltWideChar][ltLargeSet] := Arr[op_IN][ltUInt16][ltLargeSet];
+
+Arr[op_Plus][ltLargeSet][ltInt8] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltUInt8] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltInt16] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltUInt16] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltInt32] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltUInt32] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltInt64] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltUInt64] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltLargeEnum] := ltLargeSet;
+Arr[op_Plus][ltLargeSet][ltAnsiChar] := Arr[op_Plus][ltUInt8][ltLargeSet];
+Arr[op_Plus][ltLargeSet][ltWideChar] := Arr[op_Plus][ltUInt16][ltLargeSet];
 
 Arr[op_Assign][ltLargeSet][ltLargeSet] := ltLargeSet;
 Arr[op_Plus][ltLargeSet][ltLargeSet] := ltLargeSet;

@@ -51,6 +51,7 @@ type
     function getBaseType: ELapeBaseType; virtual;
     function getSize: Integer; virtual;
     function getInitialization: Boolean; virtual;
+    function getFinalization: Boolean; virtual;
   public
     isConstant: Boolean;
     constructor Create(AVarType: TLapeType; AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil); reintroduce; virtual;
@@ -59,6 +60,7 @@ type
     property BaseType: ELapeBaseType read getBaseType;
     property Size: Integer read getSize;
     property NeedInitialization: Boolean read getInitialization;
+    property NeedFinalization: Boolean read getFinalization;
   end;
 
   TLapeStackVar = class(TLapeVar)
@@ -91,6 +93,7 @@ type
     FParType: TLapeParameterType;
     function getSize: Integer; override;
     function getInitialization: Boolean; override;
+    function getFinalization: Boolean; override;
   public
     constructor Create(AParType: TLapeParameterType; AVarType: TLapeType; AStack: TLapeVarStack; AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil); reintroduce; virtual;
     property ParType: TLapeParameterType read FParType;
@@ -124,6 +127,7 @@ type
     function getSize: Integer; virtual;
     function getBaseIntType: ELapeBaseType; virtual;
     function getInitialization: Boolean; virtual;
+    function getFinalization: Boolean; virtual;
     function getAsString: lpString; virtual;
   public
     constructor Create(ABaseType: ELapeBaseType; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
@@ -156,6 +160,7 @@ type
     property Size: Integer read getSize;
     property BaseIntType: ELapeBaseType read getBaseIntType;
     property NeedInitialization: Boolean read getInitialization;
+    property NeedFinalization: Boolean read getFinalization;
     property AsString: lpString read getAsString;
   end;
 
@@ -318,7 +323,9 @@ type
     constructor Create(ARange: TLapeType_SubRange; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
     function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
+
     function NewGlobalVar(Values: array of UInt8; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
+    function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
 
     property Range: TLapeType_SubRange read FRange;
     property Small: Boolean read FSmall;
@@ -472,6 +479,7 @@ type
     function getTotalParamSize: Integer; virtual;
     function getTotalNoParamSize: Integer; virtual;
     function getInitialization: Boolean; virtual;
+    function getFinalization: Boolean; virtual;
   public
     Owner: TLapeStackInfo;
     FreeVars: Boolean;
@@ -495,6 +503,7 @@ type
     property TotalParamSize: Integer read getTotalParamSize;
     property TotalNoParamSize: Integer read getTotalNoParamSize;
     property NeedInitialization: Boolean read getInitialization;
+    property NeedFinalization: Boolean read getFinalization;
   end;
 
   TLapeCodeEmitter = class(TLapeCodeEmitterBase)
@@ -711,6 +720,11 @@ begin
   Result := FVarType.NeedInitialization;
 end;
 
+function TLapeVar.getFinalization: Boolean;
+begin
+  Result := FVarType.NeedFinalization;
+end;
+
 constructor TLapeVar.Create(AVarType: TLapeType; AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil);
 begin
   Assert(AVarType <> nil);
@@ -802,6 +816,11 @@ begin
 end;
 
 function TLapeParameterVar.getInitialization: Boolean;
+begin
+  Result := False;
+end;
+
+function TLapeParameterVar.getFinalization: Boolean;
 begin
   Result := (not (FParType in [lptVar, lptOut])) and inherited;
 end;
@@ -907,6 +926,11 @@ begin
       FInit := __Yes;
   end;
   Result := (FInit = __Yes) and (Size > 0);
+end;
+
+function TLapeType.getFinalization: Boolean;
+begin
+  Result := (not (FBaseType in LapeSetTypes)) and NeedInitialization;
 end;
 
 function TLapeType.getAsString: lpString;
@@ -1226,7 +1250,7 @@ var
   l, r: TResVar;
 begin
   Assert(v.VarType = Self);
-  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedInitialization) then
+  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
     Exit;
 
   r := NullResVar;
@@ -1649,14 +1673,14 @@ begin
   else if (AName = '') or FMemberMap.ExistsItem(AName) then
     LapeException(lpeDuplicateDeclaration);
 
+  FAsString := '';
+  Result:= FMemberMap.Count;
+
   for i := FMemberMap.Count to Value - 1 do
     FMemberMap.add('');
   FMemberMap.add(AName);
 
-  FAsString := '';
-  Result:= FMemberMap.Count;
-
-  FRange.Hi := Result - 1;
+  FRange.Hi := Result;
   FSmall := (FRange.Hi < 32);
   if (not FSmall) then
     FBaseType := ltLargeEnum;
@@ -1820,6 +1844,24 @@ begin
       PLapeSmallSet(Result.Ptr)^ := PLapeSmallSet(Result.Ptr)^ + [ELapeSmallEnum(Values[i])]
     else
       PLapeLargeSet(Result.Ptr)^ := PLapeLargeSet(Result.Ptr)^ + [ELapeLargeEnum(Values[i])]
+end;
+
+function TLapeType_Set.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
+begin
+  Result := nil;
+  if (Right = nil) then
+    Result := inherited
+  else
+    case getEvalRes(Op, FBaseType, Right.FBaseType) of
+      ltSmallEnum, ltLargeEnum:
+        if (not (Right.FBaseType in LapeEnumTypes)) or Right.Equals(FRange) then
+          Result := FRange.VarType;
+      ltSmallSet, ltLargeSet:
+        if (not (Right.FBaseType in LapeEnumTypes + LapeSetTypes)) or Right.Equals(FRange) or Equals(Right) then
+          Result := Self;
+      else
+        Result := inherited;
+    end;
 end;
 
 function TLapeType_Pointer.getAsString: lpString;
@@ -2100,7 +2142,7 @@ end;
 procedure TLapeType_DynArray.Finalize(v: TResVar; var Offset: Integer; UseCompiler: Boolean = True; Pos: PDocPos = nil);
 begin
   Assert(v.VarType = Self);
-  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedInitialization) then
+  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
     Exit;
 end;
 
@@ -2269,7 +2311,7 @@ var
   c, l, h: TLapeVar;
 begin
   Assert(v.VarType = Self);
-  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedInitialization) then
+  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
     Exit;
 
   _v := NullResVar;
@@ -2447,7 +2489,7 @@ var
   _v: TResVar;
 begin
   Assert(v.VarType = Self);
-  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedInitialization) then
+  if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
     Exit;
 
   for i := 0 to FFieldMap.Count - 1 do
@@ -2793,11 +2835,25 @@ begin
 end;
 
 function TLapeStackInfo.getInitialization: Boolean;
+{$IFDEF Lape_AlwaysInitialize}
+begin Result := True;
+{$ELSE}
 var
   i: Integer;
 begin
   for i := 0 to FVarStack.Count - 1 do
-    if (not (FVarStack[i] is TLapeParameterVar)) and FVarStack[i].NeedInitialization then
+    if FVarStack[i].NeedInitialization then
+      Exit(True);
+  Result := False;
+{$ENDIF}
+end;
+
+function TLapeStackInfo.getFinalization: Boolean;
+var
+  i: Integer;
+begin
+  for i := 0 to FVarStack.Count - 1 do
+    if FVarStack[i].NeedFinalization then
       Exit(True);
   Result := False;
 end;
@@ -3286,7 +3342,7 @@ begin
           i := 0;
           while (i < Count) do
           begin
-            if Items[i].NeedInitialization then
+            if Items[i].NeedFinalization then
               Items[i].VarType.Finalize(Items[i], Offset, True, Pos);
             if (Items[i] is TLapeStackTempVar) then
               TLapeStackTempVar(Items[i]).Locked := True;
@@ -3306,23 +3362,15 @@ begin
         WriteLn('Vars on stack: ', FStackInfo.Count);
 
         if (not InFunction) then
-          {$IFDEF Lape_AlwaysInitialize}
-          Emitter._ExpandVarAndInit(FStackInfo.TotalSize, FStackInfo.CodePos, Pos)
-          {$ELSE}
           if FStackInfo.NeedInitialization then
             Emitter._ExpandVarAndInit(FStackInfo.TotalSize, FStackInfo.CodePos, Pos)
           else
             Emitter._ExpandVar(FStackInfo.TotalSize, FStackInfo.CodePos, Pos)
-          {$ENDIF}
         else //if (FStackInfo.TotalNoParamSize > 0) then
-          {$IFDEF Lape_AlwaysInitialize}
-          Emitter._GrowVarAndInit(FStackInfo.TotalNoParamSize, FStackInfo.CodePos, Pos);
-          {$ELSE}
           if FStackInfo.NeedInitialization then
             Emitter._GrowVarAndInit(FStackInfo.TotalNoParamSize, FStackInfo.CodePos, Pos)
           else
             Emitter._GrowVar(FStackInfo.TotalNoParamSize, FStackInfo.CodePos, Pos);
-          {$ENDIF}
       end
       ;//else
       //  Emitter.Delete(FStackInfo.CodePos, ocSize*2 + SizeOf(UInt16) + SizeOf(Int32));

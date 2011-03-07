@@ -2285,6 +2285,16 @@ procedure lpeInt64_IN_SSet(const Dest, Left, Right: Pointer); begin PBoolean(Des
 procedure lpeUInt64_IN_SSet(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := ELapeSmallEnum(PUInt64(Left)^) in PLapeSmallSet(Right)^; end;
 procedure lpeSEnum_IN_SSet(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PLapeSmallEnum(Left)^ in PLapeSmallSet(Right)^; end;
 
+procedure lpeSSet_ADD_Int8(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [ELapeSmallEnum(PInt8(Right)^)]; end;
+procedure lpeSSet_ADD_UInt8(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [ELapeSmallEnum(PUInt8(Right)^)]; end;
+procedure lpeSSet_ADD_Int16(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [ELapeSmallEnum(PInt16(Right)^)]; end;
+procedure lpeSSet_ADD_UInt16(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [ELapeSmallEnum(PUInt16(Right)^)]; end;
+procedure lpeSSet_ADD_Int32(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [ELapeSmallEnum(PInt32(Right)^)]; end;
+procedure lpeSSet_ADD_UInt32(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [ELapeSmallEnum(PUInt32(Right)^)]; end;
+procedure lpeSSet_ADD_Int64(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [ELapeSmallEnum(PInt64(Right)^)]; end;
+procedure lpeSSet_ADD_UInt64(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [ELapeSmallEnum(PUInt64(Right)^)]; end;
+procedure lpeSSet_ADD_SEnum(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + [PLapeSmallEnum(Right)^]; end;
+
 procedure lpeSSet_ASGN_SSet(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^; end;
 procedure lpeSSet_ADD_SSet(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ + PLapeSmallSet(Right)^; end;
 procedure lpeSSet_SUB_SSet(const Dest, Left, Right: Pointer); begin PLapeSmallSet(Dest)^ := PLapeSmallSet(Left)^ - PLapeSmallSet(Right)^; end;
@@ -2305,6 +2315,16 @@ procedure lpeUInt32_IN_LSet(const Dest, Left, Right: Pointer); begin PBoolean(De
 procedure lpeInt64_IN_LSet(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := ELapeLargeEnum(PInt64(Left)^) in PLapeLargeSet(Right)^; end;
 procedure lpeUInt64_IN_LSet(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := ELapeLargeEnum(PUInt64(Left)^) in PLapeLargeSet(Right)^; end;
 procedure lpeLEnum_IN_LSet(const Dest, Left, Right: Pointer); begin PBoolean(Dest)^ := PLapeLargeEnum(Left)^ in PLapeLargeSet(Right)^; end;
+
+procedure lpeLSet_ADD_Int8(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [ELapeLargeEnum(PInt8(Right)^)]; end;
+procedure lpeLSet_ADD_UInt8(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [ELapeLargeEnum(PUInt8(Right)^)]; end;
+procedure lpeLSet_ADD_Int16(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [ELapeLargeEnum(PInt16(Right)^)]; end;
+procedure lpeLSet_ADD_UInt16(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [ELapeLargeEnum(PUInt16(Right)^)]; end;
+procedure lpeLSet_ADD_Int32(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [ELapeLargeEnum(PInt32(Right)^)]; end;
+procedure lpeLSet_ADD_UInt32(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [ELapeLargeEnum(PUInt32(Right)^)]; end;
+procedure lpeLSet_ADD_Int64(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [ELapeLargeEnum(PInt64(Right)^)]; end;
+procedure lpeLSet_ADD_UInt64(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [ELapeLargeEnum(PUInt64(Right)^)]; end;
+procedure lpeLSet_ADD_LEnum(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + [PLapeLargeEnum(Right)^]; end;
 
 procedure lpeLSet_ASGN_LSet(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^; end;
 procedure lpeLSet_ADD_LSet(const Dest, Left, Right: Pointer); begin PLapeLargeSet(Dest)^ := PLapeLargeSet(Left)^ + PLapeLargeSet(Right)^; end;

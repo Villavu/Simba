@@ -706,6 +706,7 @@ begin
     for i := FValues.Count - 1 downto 0 do
       with TLapeTree_Operator.Create(op_Plus, FCompiler, @FValues[i].DocPos) do
       try
+        Dest := Result;
         Left := TLapeTree_ResVar.Create(Result, FCompiler, @FValues[i].DocPos);
         Right := TLapeTree_ExprBase(FValues[i]);
         Result := Compile(Offset);
@@ -1430,7 +1431,7 @@ end;
 
 function TLapeTree_GlobalVar.isConstant: Boolean;
 begin
-  Result := FGlobalVar.Name = '';
+  Result := FGlobalVar.isConstant;
 end;
 
 function TLapeTree_GlobalVar.resType: TLapeType;

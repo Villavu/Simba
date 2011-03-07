@@ -2313,6 +2313,18 @@ Arr[op_IN][ltSmallEnum][ltSmallSet] := @lpeSEnum_IN_SSet;
 Arr[op_IN][ltAnsiChar][ltSmallSet] := Arr[op_IN][ltUInt8][ltSmallSet];
 Arr[op_IN][ltWideChar][ltSmallSet] := Arr[op_IN][ltUInt16][ltSmallSet];
 
+Arr[op_Plus][ltSmallSet][ltInt8] := @lpeSSet_ADD_Int8;
+Arr[op_Plus][ltSmallSet][ltUInt8] := @lpeSSet_ADD_UInt8;
+Arr[op_Plus][ltSmallSet][ltInt16] := @lpeSSet_ADD_Int16;
+Arr[op_Plus][ltSmallSet][ltUInt16] := @lpeSSet_ADD_UInt16;
+Arr[op_Plus][ltSmallSet][ltInt32] := @lpeSSet_ADD_Int32;
+Arr[op_Plus][ltSmallSet][ltUInt32] := @lpeSSet_ADD_UInt32;
+Arr[op_Plus][ltSmallSet][ltInt64] := @lpeSSet_ADD_Int64;
+Arr[op_Plus][ltSmallSet][ltUInt64] := @lpeSSet_ADD_UInt64;
+Arr[op_Plus][ltSmallSet][ltSmallEnum] := @lpeSSet_ADD_SEnum;
+Arr[op_Plus][ltSmallSet][ltAnsiChar] := Arr[op_Plus][ltSmallSet][ltUInt8];
+Arr[op_Plus][ltSmallSet][ltWideChar] := Arr[op_Plus][ltSmallSet][ltUInt16];
+
 Arr[op_Assign][ltSmallSet][ltSmallSet] := @lpeSSet_ASGN_SSet;
 Arr[op_Plus][ltSmallSet][ltSmallSet] := @lpeSSet_ADD_SSet;
 Arr[op_Minus][ltSmallSet][ltSmallSet] := @lpeSSet_SUB_SSet;
@@ -2335,6 +2347,18 @@ Arr[op_IN][ltUInt64][ltLargeSet] := @lpeUInt64_IN_LSet;
 Arr[op_IN][ltLargeEnum][ltLargeSet] := @lpeLEnum_IN_LSet;
 Arr[op_IN][ltAnsiChar][ltLargeSet] := Arr[op_IN][ltUInt8][ltLargeSet];
 Arr[op_IN][ltWideChar][ltLargeSet] := Arr[op_IN][ltUInt16][ltLargeSet];
+
+Arr[op_Plus][ltLargeSet][ltInt8] := @lpeLSet_ADD_Int8;
+Arr[op_Plus][ltLargeSet][ltUInt8] := @lpeLSet_ADD_UInt8;
+Arr[op_Plus][ltLargeSet][ltInt16] := @lpeLSet_ADD_Int16;
+Arr[op_Plus][ltLargeSet][ltUInt16] := @lpeLSet_ADD_UInt16;
+Arr[op_Plus][ltLargeSet][ltInt32] := @lpeLSet_ADD_Int32;
+Arr[op_Plus][ltLargeSet][ltUInt32] := @lpeLSet_ADD_UInt32;
+Arr[op_Plus][ltLargeSet][ltInt64] := @lpeLSet_ADD_Int64;
+Arr[op_Plus][ltLargeSet][ltUInt64] := @lpeLSet_ADD_UInt64;
+Arr[op_Plus][ltLargeSet][ltSmallEnum] := @lpeLSet_ADD_LEnum;
+Arr[op_Plus][ltLargeSet][ltAnsiChar] := Arr[op_Plus][ltLargeSet][ltUInt8];
+Arr[op_Plus][ltLargeSet][ltWideChar] := Arr[op_Plus][ltLargeSet][ltUInt16];
 
 Arr[op_Assign][ltLargeSet][ltLargeSet] := @lpeLSet_ASGN_LSet;
 Arr[op_Plus][ltLargeSet][ltLargeSet] := @lpeLSet_ADD_LSet;

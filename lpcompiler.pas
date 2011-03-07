@@ -624,7 +624,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
 
           if (v = nil) or (v.VarType = nil) or (v.VarType.BaseIntType = ltUnknown) then
             LapeException(lpeExpressionExpected, FTokenizer.DocPos);
-          addLocalDecl(re.NewGlobalVar(re.addMember(v.AsInteger, n), n), FStackInfo.Owner);
+          TLapeGlobalVar(addLocalDecl(re.NewGlobalVar(re.addMember(v.AsInteger, n), n), FStackInfo.Owner)).isConstant := True;
         finally
           t.Free();
         end;
@@ -632,7 +632,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
         LapeException(E.Message, FTokenizer.DocPos);
       end
       else
-        addLocalDecl(re.NewGlobalVar(re.addMember(n), n), FStackInfo.Owner);
+        TLapeGlobalVar(addLocalDecl(re.NewGlobalVar(re.addMember(n), n), FStackInfo.Owner)).isConstant := True;
     until (FTokenizer.Tok in [tk_NULL, tk_sym_ParenthesisClose]);
     Result := addManagedType(re);
   end;
@@ -643,7 +643,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     r: TLapeRange;
     v: TLapeType;
   begin
-    t := ParseTypeExpression([tk_sym_Equals]);
+    t := ParseTypeExpression([tk_sym_Equals, tk_sym_ParenthesisClose]);
     try
       if (t <> nil) and (t is TLapeTree_Range) then
       begin
