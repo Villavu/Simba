@@ -1097,8 +1097,10 @@ begin
               f := nil;
             end
             else
+            begin
               PushOpStack(TLapeTree_Operator(ParenthesisOpen));
-            Inc(InExpr);
+              Inc(InExpr);
+            end;
           end;
         tk_sym_ParenthesisClose:
           begin

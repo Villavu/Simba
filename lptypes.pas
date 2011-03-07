@@ -451,7 +451,10 @@ begin
   {$IFDEF Lape_TrackObjects}
   Inc(lpgCounter);
   lpgList.add(Pointer(Self));
-  WriteLn('New(', ClassName, ') ', lpgCounter, ' -- [',  PtrInt(Self), ']');
+  if (Self is TLapeDeclaration) and (TLapeDeclaration(Self).Name <> '') then
+    WriteLn('New(', ClassName, '::', TLapeDeclaration(Self).Name, ') ', lpgCounter, ' -- [',  PtrInt(Self), ']')
+  else
+    WriteLn('New(', ClassName, ') ', lpgCounter, ' -- [',  PtrInt(Self), ']');
   {$ENDIF}
 end;
 
@@ -460,7 +463,10 @@ destructor TLapeBaseClass.Destroy;
 begin
   Dec(lpgCounter);
   lpgList.Delete(lpgList.IndexOf(Pointer(Self)));
-  WriteLn('Free(', ClassName, ') ', lpgCounter, ' -- [',  PtrInt(Self), ']');
+  if (Self is TLapeDeclaration) and (TLapeDeclaration(Self).Name <> '') then
+    WriteLn('Free(', ClassName, '::', TLapeDeclaration(Self).Name, ') ', lpgCounter, ' -- [',  PtrInt(Self), ']')
+  else
+    WriteLn('Free(', ClassName, ') ', lpgCounter, ' -- [',  PtrInt(Self), ']');
   inherited;
 end;
 {$ENDIF}
@@ -933,7 +939,7 @@ var
   i: Integer;
 begin
   a := getByClass(AClass);
-  for i := 0 to High(a) do
+  for i := High(a) downto 0 do
     Delete(a[i], DoFree);
 end;
 

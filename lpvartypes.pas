@@ -3338,8 +3338,8 @@ begin
   Reset();
 
   FGlobalDeclarations.Delete(TLapeVar, True);
-  FGlobalDeclarations.Clear();
   FManagedDeclarations.Delete(TLapeVar, True);
+  FGlobalDeclarations.Clear();
   FManagedDeclarations.Clear();
 end;
 
