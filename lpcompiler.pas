@@ -1080,7 +1080,9 @@ begin
             begin
               PopOpStack(op_Invoke);
               f := TLapeTree_Invoke.Create(VarStack.Pop(), Self, getPDocPos());
-              if (FTokenizer.PeekNoJunk() <> tk_sym_ParenthesisClose) then
+              if (FTokenizer.PeekNoJunk() = tk_sym_ParenthesisClose) then
+                FTokenizer.NextNoJunk()
+              else
               begin
                 f.addParam(EnsureExpression(ParseExpression([tk_sym_ParenthesisClose, tk_sym_Comma])));
                 while True do
@@ -1090,9 +1092,7 @@ begin
                     else
                       LapeException(lpeClosingParenthesisExpected, FTokenizer.DocPos);
                   end;
-              end
-              else
-                FTokenizer.NextNoJunk();
+              end;
               VarStack.Push(f);
               f := nil;
             end

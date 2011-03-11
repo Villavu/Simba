@@ -561,9 +561,9 @@ begin
     Exit(False);
 
   t := nil;
-  if (ToType is TLapeType_Set) and (TLapeType_Set(ToType).Range <> nil) then
+  if (ToType is TLapeType_Set) then
     t := TLapeType_Set(ToType).Range
-  else if (ToType is TLapeType_DynArray) and (TLapeType_DynArray(ToType).PType <> nil) then
+  else if (ToType is TLapeType_DynArray) then
     t := TLapeType_DynArray(ToType).PType;
   if (t = nil) then
     Exit(False);
@@ -606,14 +606,16 @@ end;
 
 function TLapeTree_OpenArray.Evaluate: TLapeGlobalVar;
 var
-  i, c: Integer;
+  i, c, tmp: Integer;
   t: TLapeType;
-  low, v, r: TLapeGlobalVar;
+  counter, v, r: TLapeGlobalVar;
 begin
   if (not canCast()) then
     LapeException(lpeInvalidEvaluation, DocPos);
 
   Result := ToType.NewGlobalVarP();
+  v := nil;
+
   try
     if (ToType is TLapeType_Set) then
     begin
@@ -625,51 +627,59 @@ begin
           r.Free();
         end
         else if (FValues[i] is TLapeTree_Range) then
+        try
+          v := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@c);
           for c := TLapeTree_Range(FValues[i]).Lo.Evaluate().AsInteger to TLapeTree_Range(FValues[i]).Hi.Evaluate().AsInteger do
           begin
-            v := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@c);
-            try
-              r := Result;
-              Result := ToType.EvalConst(op_Plus, Result, v);
-              r.Free();
-            finally
-              v.Free();
-            end;
+            r := Result;
+            Result := ToType.EvalConst(op_Plus, Result, v);
+            r.Free();
           end;
+        finally
+          v.Free();
+        end
+        else
+          LapeException(lpeInvalidCast, DocPos);
     end
     else if (ToType is TLapeType_StaticArray) then
     try
-      low := FCompiler.getBaseType(DetermineIntType(TLapeType_StaticArray(ToType).Range.Lo)).NewGlobalVarStr(IntToStr(TLapeType_StaticArray(ToType).Range.Lo));
+      tmp := 0;
+      counter := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@tmp);
+
       for i := 0 to FValues.Count - 1 do
       begin
-        v := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@i);
+        if (FValues[i] is TLapeTree_ExprBase) then
         try
-          r := v.VarType.EvalConst(op_Minus, v, low);
-          v.Free();
-          v := r;
-
-          r := ToType.EvalConst(op_Index, Result, v);
-          v.Free();
-          v := r;
-
-          if (FValues[i] is TLapeTree_ExprBase) then
-            v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate())
-          else if (FValues[i] is TLapeTree_Range) then
-            for c := TLapeTree_Range(FValues[i]).Lo.Evaluate().AsInteger to TLapeTree_Range(FValues[i]).Hi.Evaluate().AsInteger do
-            begin
-              r := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@c);
-              try
-                v.VarType.EvalConst(op_Assign, v, r);
-              finally
-                r.Free();
-              end;
-            end;
+          v := ToType.EvalConst(op_Index, Result, counter);
+          v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate())
         finally
-          v.Free();
-        end;
-      end
+          if (v <> nil) then
+            FreeAndNil(v);
+        end
+        else if (FValues[i] is TLapeTree_Range) then
+        try
+          r := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@c);
+          for c := TLapeTree_Range(FValues[i]).Lo.Evaluate().AsInteger to TLapeTree_Range(FValues[i]).Hi.Evaluate().AsInteger do
+          try
+            v := ToType.EvalConst(op_Index, Result, counter);
+            v.VarType.EvalConst(op_Assign, v, r);
+          finally
+            Inc(tmp);
+            if (v <> nil) then
+              FreeAndNil(v);
+          end;
+        finally
+          Dec(tmp);
+          r.Free();
+        end
+        else
+          LapeException(lpeInvalidCast, DocPos);
+        Inc(tmp);
+      end;
     finally
-      low.Free();
+      counter.Free();
+      if (tmp <= TLapeType_StaticArray(ToType).Range.Hi - TLapeType_StaticArray(ToType).Range.Lo) then
+        LapeException(lpeVariableExpected, DocPos);
     end;
 
     Result := TLapeGlobalVar(FCompiler.AddManagedVar(Result));
@@ -705,16 +715,18 @@ begin
   if (ToType is TLapeType_Set) then
   begin
     for i := FValues.Count - 1 downto 0 do
-      with TLapeTree_Operator.Create(op_Plus, FCompiler, @FValues[i].DocPos) do
-      try
-        Dest := Result;
-        Left := TLapeTree_ResVar.Create(Result, FCompiler, @FValues[i].DocPos);
-        Right := TLapeTree_ExprBase(FValues[i]);
-        Result := Compile(Offset);
-      finally
-        Free();
-      end;
+      if (FValues[i] is TLapeTree_ExprBase) then
+        with TLapeTree_Operator.Create(op_Plus, FCompiler, @FValues[i].DocPos) do
+        try
+          Dest := Result;
+          Left := TLapeTree_ResVar.Create(Result, FCompiler, @FValues[i].DocPos);
+          Right := TLapeTree_ExprBase(FValues[i]);
+          Result := Compile(Offset);
+        finally
+          Free();
+        end
       {else if (FValues[i] is TLapeTree_Range) then
+      begin
         for c := TLapeTree_Range(FValues[i]).Lo.Evaluate().AsInteger to TLapeTree_Range(FValues[i]).Hi.Evaluate().AsInteger do
         begin
           v := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@c);
@@ -725,12 +737,18 @@ begin
           finally
             v.Free();
           end;
-        end;}
+        end;
+      end                                     }
+      else
+        LapeException(lpeInvalidCast, DocPos);
   end
   else if (ToType is TLapeType_StaticArray) then
   begin
     low := getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(TLapeType_StaticArray(ToType).Range.Lo)).NewGlobalVarStr(IntToStr(TLapeType_StaticArray(ToType).Range.Lo))));
     for i := FValues.Count - 1 downto 0 do
+      if (not (FValues[i] is TLapeTree_ExprBase)) then
+        LapeException(lpeInvalidCast, DocPos)
+      else
       with TLapeTree_Operator.Create(op_Assign, FCompiler, @FValues[i].DocPos) do
       try
         Left := TLapeTree_Operator.Create(op_Index, FCompiler, @FValues[i].DocPos);
@@ -750,7 +768,9 @@ begin
         Free();
       end;
     setNullResVar(low);
-  end;
+  end
+  else
+    LapeException(lpeInvalidCast, DocPos);
 
   if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) and (Result.VarPos.MemPos = mpVar) then
     Result.VarPos.StackVar.isConstant := (Result.VarPos.StackVar is TLapeStackTempVar);

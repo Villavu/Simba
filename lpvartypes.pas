@@ -2174,6 +2174,8 @@ begin
         LapeException(lpeInvalidIndex, [Right.VarType.AsString])
       else
         LapeException(lpeInvalidEvaluation)
+    else if (Right.AsInteger < FRange.Lo) or (Right.AsInteger > FRange.Hi) then
+      LapeException(lpeOutOfTypeRange)
     else
       Right.FVarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
 
