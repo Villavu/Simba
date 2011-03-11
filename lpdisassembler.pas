@@ -208,9 +208,9 @@ begin
           proc := getEvalProc(op, t1, t2);
           if ({$IFNDEF FPC}@{$ENDIF}proc <> nil) and ({$IFNDEF FPC}@{$ENDIF}proc <>{$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) then
             if (t2 = ltUnknown) then
-              pMap[IntToStr(PtrUInt(proc))] := 'lpe'+LapeTypeToString(t1)+'_'+op_name[op]
+              pMap[IntToStr(PtrUInt({$IFNDEF FPC}@{$ENDIF}proc))] := 'lpe'+LapeTypeToString(t1)+'_'+op_name[op]
             else
-              pMap[IntToStr(PtrUInt(proc))] := 'lpe'+LapeTypeToString(t1)+'_'+op_name[op]+'_'+LapeTypeToString(t2);
+              pMap[IntToStr(PtrUInt({$IFNDEF FPC}@{$ENDIF}proc))] := 'lpe'+LapeTypeToString(t1)+'_'+op_name[op]+'_'+LapeTypeToString(t2);
         end;
     end;
     pMap[IntToStr(PtrUInt(getEvalProc(op_Addr, ltUnknown, ltUnknown)))] := 'lpeAddr';
@@ -235,7 +235,7 @@ begin
           p.FileName := FileName;
           p.Line := Line;
           p.Col := Col;
-          _WriteLn('--> File "'+FileName+'", Line '+intToStr(Line)+', Col '+IntToStr(Col)+'   ');
+          _WriteLn('--> File "'+lpString(FileName)+'", Line '+intToStr(Line)+', Col '+IntToStr(Col)+'   ');
         end;
       {$ENDIF}
       {$I lpinterpreter_opcodecase.inc}

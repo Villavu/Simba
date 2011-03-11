@@ -379,7 +379,7 @@ end;
 function TLapeCompiler.ParseMethod(FuncForwards: TLapeFuncForwards): TLapeTree_Method;
 var
   t: TLapeType_InternalMethod;
-  n: string;
+  n: lpString;
   d: TDocPos;
   decl: TLapeDeclaration;
 begin
