@@ -12,6 +12,10 @@ Explain some colour spaces here.
 Colour Conversion Methods
 -------------------------
 
+
+ColorToRGB
+~~~~~~~~~~
+
 .. code-block:: pascal
 
     procedure ColorToRGB(Color: integer; var r, g, b: Integer);
