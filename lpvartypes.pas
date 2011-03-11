@@ -1039,8 +1039,10 @@ var
   var
     a: TLapeGlobalVar;
   begin
-    if (DoRight and (not Left.VarType.CompatibleWith(Right.VarType))) or
-       ((not DoRight) and (not Right.VarType.CompatibleWith(Left.VarType))) then
+    if Left.VarType.Equals(Right.VarType) or
+       (DoRight and (not Left.VarType.CompatibleWith(Right.VarType))) or
+       ((not DoRight) and (not Right.VarType.CompatibleWith(Left.VarType)))
+    then
       Exit(False);
 
     try
@@ -1136,8 +1138,10 @@ var
   var
     a, b: TResVar;
   begin
-    if (DoRight and (not Left.VarType.CompatibleWith(Right.VarType))) or
-       ((not DoRight) and (not Right.VarType.CompatibleWith(Left.VarType))) then
+    if Left.VarType.Equals(Right.VarType) or
+       (DoRight and (not Left.VarType.CompatibleWith(Right.VarType))) or
+       ((not DoRight) and (not Right.VarType.CompatibleWith(Left.VarType)))
+    then
       Exit(False);
 
     a := NullResVar;
@@ -1411,9 +1415,23 @@ end;
 
 function TLapeType_Char{$IFNDEF FPC}<_Type>{$ENDIF}.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
 {$IFNDEF FPC}var a: WideChar; b: PType;{$ENDIF}
+var
+  c: Integer;
 begin
   if (Length(Str) <> 1) then
-    LapeException(lpeInvalidValueForType, [AsString]);
+    try
+      if (Str[1] = '#') then
+        Delete(Str, 1, 1);
+      c := StrToInt(Str);
+      Result := inherited NewGlobalVarP(nil, AName, ADocPos);
+      case Size of
+        1: PUInt8(Result.Ptr)^ := c;
+        2: PUInt16(Result.Ptr)^ := c;
+        else LapeException(lpeImpossible);
+      end;
+    except
+      LapeException(lpeInvalidValueForType, [AsString]);
+    end;
 
   {$IFDEF FPC}
   Result := NewGlobalVar(_Type(Str[1]), AName, ADocPos);
@@ -1665,11 +1683,15 @@ end;
 
 function TLapeType_Enum.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
 begin
-  if (op in EnumOperators) and (Right <> nil) and ((Op = op_Assign) or Equals(Right)) then
+  if (op in EnumOperators) and ((Right = nil) or (not (Right.BaseType in LapeEnumTypes)) or Equals(Right)) then
     if (BaseIntType = ltUnknown) or (Right.BaseIntType = ltUnknown) then
       Exit(nil)
     else
-      Result := FCompiler.getBaseType(BaseIntType).EvalRes(Op, FCompiler.getBaseType(Right.BaseIntType))
+    begin
+      Result := FCompiler.getBaseType(BaseIntType).EvalRes(Op, FCompiler.getBaseType(Right.BaseIntType));
+      if (not (op in CompareOperators)) then
+        Result := Self;
+    end
   else
     Result := inherited;
 end;
@@ -1677,11 +1699,12 @@ end;
 function TLapeType_Enum.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
 var
   v: TLapeType;
+  t: TLapeGlobalVar;
 begin
   Assert(FCompiler <> nil);
   Assert((Left = nil) or (Left.VarType = Self));
 
-  if (op in EnumOperators) and (Right <> nil) and ((Op = op_Assign) or Equals(Right.VarType)) then
+  if (op in EnumOperators) and (Right <> nil) and ((Right.FVarType = nil) or (not (Right.FVarType.BaseType in LapeEnumTypes)) or Equals(Right.FVarType)) then
   try
     v := Right.FVarType;
     if (BaseIntType = ltUnknown) or (Right.FVarType = nil) or (Right.FVarType.BaseIntType = ltUnknown) then
@@ -1691,6 +1714,17 @@ begin
     Right.FVarType := FCompiler.getBaseType(Right.FVarType.BaseIntType);
 
     Result := Left.VarType.EvalConst(Op, Left, Right);
+    if (not (op in CompareOperators)) then
+      if (Result.VarType.BaseIntType = BaseIntType) then
+        Result.FVarType := Self
+      else
+      try
+        t := Result;
+        Result := NewGlobalVarP();
+        Result := EvalConst(op_Assign, Result, t);
+      finally
+        FreeAndNil(t);
+      end;
   finally
     Left.FVarType := Self;
     Right.FVarType := v;
@@ -1702,12 +1736,15 @@ end;
 function TLapeType_Enum.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
 var
   v: TLapeType;
+  a, t: TResVar;
 begin
   Assert(FCompiler <> nil);
   Assert(Left.VarType = Self);
 
-  if (op in EnumOperators) and ((Op = op_Assign) or Equals(Right.VarType)) then
+  if (op in EnumOperators) and ((Right.VarType = nil) or (not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType)) then
   try
+    a := NullResVar;
+    t := NullResVar;
     v := Right.VarType;
     if (BaseIntType = ltUnknown) or (Right.VarType = nil) or (Right.VarType.BaseIntType = ltUnknown) then
       LapeException(lpeInvalidEvaluation);
@@ -1715,7 +1752,23 @@ begin
     Left.VarType := FCompiler.getBaseType(BaseIntType);
     Right.VarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
 
+    if (Dest.VarType <> nil) and Equals(Dest.VarType) then
+      t := Dest;
     Result := Left.VarType.Eval(Op, Dest, Left, Right, Offset, Pos);
+    if (not (op in CompareOperators)) then
+      if (Result.VarType.BaseIntType = BaseIntType) then
+        Result.VarType := Self
+      else
+      try
+        Dest := t;
+        t := Result;
+        Result := NullResVar;
+        Result.VarType := Self;
+        getDestVar(Dest, Result, op_Unknown, FCompiler);
+        Result := Eval(op_Assign, a, Result, t, Offset, Pos);
+      finally
+        SetNullResVar(t, 1);
+      end;
   finally
     Left.VarType := Self;
     Right.VarType := v;

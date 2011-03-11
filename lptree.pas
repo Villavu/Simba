@@ -643,15 +643,19 @@ begin
     end
     else if (ToType is TLapeType_StaticArray) then
     try
-      tmp := 0;
+      tmp := TLapeType_StaticArray(ToType).Range.Lo;
       counter := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@tmp);
 
       for i := 0 to FValues.Count - 1 do
       begin
         if (FValues[i] is TLapeTree_ExprBase) then
         try
-          v := ToType.EvalConst(op_Index, Result, counter);
-          v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate())
+          try
+            v := ToType.EvalConst(op_Index, Result, counter);
+            v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate())
+          except on E: lpException do
+            LapeException(E.Message, FValues[i].DocPos);
+          end;
         finally
           if (v <> nil) then
             FreeAndNil(v);
@@ -661,8 +665,12 @@ begin
           r := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@c);
           for c := TLapeTree_Range(FValues[i]).Lo.Evaluate().AsInteger to TLapeTree_Range(FValues[i]).Hi.Evaluate().AsInteger do
           try
-            v := ToType.EvalConst(op_Index, Result, counter);
-            v.VarType.EvalConst(op_Assign, v, r);
+            try
+              v := ToType.EvalConst(op_Index, Result, counter);
+              v.VarType.EvalConst(op_Assign, v, r);
+            except on E: lpException do
+              LapeException(E.Message, FValues[i].DocPos);
+            end;
           finally
             Inc(tmp);
             if (v <> nil) then
@@ -673,14 +681,16 @@ begin
           r.Free();
         end
         else
-          LapeException(lpeInvalidCast, DocPos);
+          LapeException(lpeInvalidCast, FValues[i].DocPos);
         Inc(tmp);
       end;
     finally
       counter.Free();
-      if (tmp <= TLapeType_StaticArray(ToType).Range.Hi - TLapeType_StaticArray(ToType).Range.Lo) then
-        LapeException(lpeVariableExpected, DocPos);
-    end;
+      if (tmp <> TLapeType_StaticArray(ToType).Range.Hi - TLapeType_StaticArray(ToType).Range.Lo + 1) then
+        LapeException(lpeInvalidRange, DocPos);
+    end
+    else
+      LapeException(lpeInvalidCast, DocPos);
 
     Result := TLapeGlobalVar(FCompiler.AddManagedVar(Result));
   except
@@ -691,13 +701,15 @@ end;
 
 function TLapeTree_OpenArray.Compile(var Offset: Integer): TResVar;
 var
-  i, c: Integer;
+  i: Integer;
   t: TLapeType;
-  low: TResVar;
+  low, v: TResVar;
+  c: TLapeVar;
 begin
   if (not canCast()) then
     LapeException(lpeInvalidEvaluation, DocPos);
 
+  v := NullResVar;
   if (FDest.VarType <> nil) and (FDest.VarPos.MemPos <> NullResVar.VarPos.MemPos) and ToType.Equals(FDest.VarType) then
     Result := FDest
   else
@@ -725,29 +737,42 @@ begin
         finally
           Free();
         end
-      {else if (FValues[i] is TLapeTree_Range) then
+      else if (FValues[i] is TLapeTree_Range) then
       begin
-        for c := TLapeTree_Range(FValues[i]).Lo.Evaluate().AsInteger to TLapeTree_Range(FValues[i]).Hi.Evaluate().AsInteger do
-        begin
-          v := FCompiler.getBaseType(ltInt32).NewGlobalVarP(@c);
-          try
-            r := Result;
-            Result := ToType.EvalConst(op_Plus, Result, v);
-            r.Free();
-          finally
-            v.Free();
+        c := FCompiler.getTempVar(TLapeType_Set(ToType).Range, 2);
+        c.isConstant := False;
+        v := c.VarType.Eval(op_Assign, v, GetResVar(c), TLapeTree_Range(FValues[i]).Lo.Compile(Offset), Offset, @FValues[i].DocPos);
+
+        with TLapeTree_For.Create(FCompiler, @FValues[i].DocPos) do
+        try
+          Counter := TLapeTree_ResVar.Create(v, FCompiler, @FValues[i].DocPos);
+          Limit := TLapeTree_Range(FValues[i]).Hi;
+          Body := TLapeTree_Operator.Create(op_Plus, FCompiler, @FValues[i].DocPos);
+          with TLapeTree_Operator(Body) do
+          begin
+            Dest := Result;
+            Left := TLapeTree_ResVar.Create(Result, FCompiler, @FValues[i].DocPos);
+            Right := TLapeTree_ResVar.Create(v, FCompiler, @FValues[i].DocPos);
           end;
+          Result := Compile(Offset);
+        finally
+          Free();
+          c.isConstant := True;
+          SetNullResVar(v, 2);
         end;
-      end                                     }
+      end
       else
-        LapeException(lpeInvalidCast, DocPos);
+        LapeException(lpeInvalidCast, FValues[i].DocPos);
   end
   else if (ToType is TLapeType_StaticArray) then
   begin
+    if (FValues.Count <> TLapeType_StaticArray(ToType).Range.Hi - TLapeType_StaticArray(ToType).Range.Lo + 1) then
+      LapeException(lpeInvalidRange, DocPos);
+
     low := getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(TLapeType_StaticArray(ToType).Range.Lo)).NewGlobalVarStr(IntToStr(TLapeType_StaticArray(ToType).Range.Lo))));
     for i := FValues.Count - 1 downto 0 do
       if (not (FValues[i] is TLapeTree_ExprBase)) then
-        LapeException(lpeInvalidCast, DocPos)
+        LapeException(lpeInvalidCast, FValues[i].DocPos)
       else
       with TLapeTree_Operator.Create(op_Assign, FCompiler, @FValues[i].DocPos) do
       try
@@ -2127,30 +2152,52 @@ begin
   inherited;
 end;
 
+type __TLapeVar = class(TLapeVar);
 function TLapeTree_For.Compile(var Offset: Integer): TResVar;
 var
   cnt, lim, stp: TResVar;
   o: TLapeTree_Operator;
   tb: TLapeTree_Base;
+  a, b, c: TLapeType;
+
+  function changeVarType(var x: TResVar; t: TLapeType): TLapeType;
+  begin
+    Result := x.VarType;
+    x.VarType := t;
+    if (x.VarPos.MemPos = mpMem) and (x.VarPos.GlobalVar <> nil) then
+      __TLapeVar(x.VarPos.GlobalVar).FVarType := t
+    else if (x.VarPos.MemPos = mpVar) and (x.VarPos.StackVar <> nil) then
+      __TLapeVar(x.VarPos.StackVar).FVarType := t;
+  end;
+
 begin
   Result := NullResVar;
   Assert(FCondition = nil);
   Assert(FCounter <> nil);
   Assert(FLimit <> nil);
 
+  a := nil;
+  b := nil;
+  c := nil;
+
   tb := nil;
   cnt := FCounter.Compile(Offset);
   try
-    if (not getTempVar(FLimit, Offset, lim)) or (cnt.VarType = nil) or (lim.VarType = nil) {or (lim.VarType.BaseIntType = ltUnknown)} then
-      LapeException(lpeInvalidEvaluation, DocPos);
+    if (not getTempVar(FLimit, Offset, lim)) or (cnt.VarType = nil) or (lim.VarType = nil) or (lim.VarType.BaseIntType = ltUnknown) then
+      LapeException(lpeInvalidEvaluation, FLimit.DocPos);
+
+    if (not isVariable(cnt)) or (cnt.VarType.BaseIntType = ltUnknown) then
+      LapeException(lpeInvalidIterator, FCounter.DocPos);
+
+    a := changeVarType(cnt, FCompiler.getBaseType(cnt.VarType.BaseIntType));
+    b := changeVarType(lim, FCompiler.getBaseType(lim.VarType.BaseIntType));
 
     if (FStep = nil) then
       stp := getResVar(FCompiler.addManagedVar(cnt.VarType.NewGlobalVarStr('1')))
-    else if (not getTempVar(FStep, Offset, stp)) then
+    else if (not getTempVar(FStep, Offset, stp)) or (stp.VarType = nil) or (stp.VarType.BaseIntType = ltUnknown) then
       LapeException(lpeInvalidEvaluation, FStep.DocPos);
 
-    if (not isVariable(cnt)) {or (cnt.VarType.BaseIntType = ltUnknown)} then
-      LapeException(lpeInvalidIterator, FCounter.DocPos);
+    c := changeVarType(stp, FCompiler.getBaseType(stp.VarType.BaseIntType));
 
     if WalkDown then
       FCondition := TLapeTree_Operator.Create(op_cmp_GreaterThanOrEqual, FCompiler, @DocPos)
@@ -2168,6 +2215,10 @@ begin
     TLapeTree_Operator(o.Right).Left := TLapeTree_ResVar.Create(cnt, FCompiler, @FCounter.DocPos);
     TLapeTree_Operator(o.Right).Right := TLapeTree_ResVar.Create(stp, FCompiler, @FCounter.DocPos);
 
+    changeVarType(cnt, a); a := nil;
+    changeVarType(lim, b); b := nil;
+    changeVarType(stp, c); c := nil;
+
     tb := FBody;
     if (tb <> nil) then
     begin
@@ -2180,6 +2231,13 @@ begin
 
     Result := inherited;
   finally
+    if (a <> nil) then
+      changeVarType(cnt, a);
+    if (b <> nil) then
+      changeVarType(lim, b);
+    if (c <> nil) then
+      changeVarType(stp, c);
+
     if (tb <> nil) then
       TLapeTree_StatementList(FBody).Statements.Delete(0).setParent(nil);
     setBody(tb);
