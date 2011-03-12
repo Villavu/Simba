@@ -1914,7 +1914,10 @@ begin
   if (not (cnd.VarType.Size in [1, 2, 4, 8])) then
   begin
     tmp := cnd;
-    cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr('0'))), Offset, @FCondition.DocPos);
+    if (cnd.VarType.BaseType in LapeStringTypes + LapeCharTypes) then
+      cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(''))), Offset, @FCondition.DocPos)
+    else
+      cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr('0'))), Offset, @FCondition.DocPos);
     setNullResVar(tmp);
   end;
 
@@ -2215,7 +2218,6 @@ begin
   inherited;
 end;
 
-type __TLapeVar = class(TLapeVar);
 function TLapeTree_For.Compile(var Offset: Integer): TResVar;
 var
   cnt, lim, stp: TResVar;
@@ -2228,10 +2230,6 @@ var
   begin
     Result := x.VarType;
     x.VarType := t;
-    if (x.VarPos.MemPos = mpMem) and (x.VarPos.GlobalVar <> nil) then
-      __TLapeVar(x.VarPos.GlobalVar).FVarType := t
-    else if (x.VarPos.MemPos = mpVar) and (x.VarPos.StackVar <> nil) then
-      __TLapeVar(x.VarPos.StackVar).FVarType := t;
   end;
 
 begin

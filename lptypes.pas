@@ -90,8 +90,9 @@ type
     ltUInt8, ltInt8, ltUInt16, ltInt16, ltUInt32, ltInt32, ltUInt64, ltInt64, //Integer
     ltSingle, ltDouble, ltCurrency, ltExtended,                               //Real
     ltBoolean, ltByteBool, ltWordBool, ltLongBool,                            //Boolean
-    ltAnsiChar, ltWideChar, ltAnsiString, ltWideString, ltUnicodeString,      //String
-    ltSmallEnum, ltLargeEnum, ltSmallSet, ltLargeSet,                                           //Set
+    ltAnsiChar, ltWideChar,                                                   //Char
+    ltShortString, ltAnsiString, ltWideString, ltUnicodeString,               //String
+    ltSmallEnum, ltLargeEnum, ltSmallSet, ltLargeSet,                         //Set
     ltPointer,                                                                //Pointer
     ltRecord, ltUnion,                                                        //Struct
     ltDynArray, ltStaticArray,                                                //Array
@@ -305,7 +306,8 @@ const
     SizeOf(Int32), SizeOf(UInt64), SizeOf(Int64),
     SizeOf(Single), SizeOf(Double), SizeOf(Currency), SizeOf(Extended),
     SizeOf(Boolean), SizeOf(ByteBool), SizeOf(WordBool), SizeOf(LongBool),
-    SizeOf(AnsiString), SizeOf(WideString), SizeOf(UnicodeString), SizeOf(AnsiChar), SizeOf(WideChar),
+    SizeOf(AnsiChar), SizeOf(WideChar),
+    SizeOf(ShortString), SizeOf(AnsiString), SizeOf(WideString), SizeOf(UnicodeString),
     SizeOf(ELapeSmallEnum), SizeOf(ELapeLargeEnum), SizeOf(TLapeSmallSet), SizeOf(TLapeLargeSet),
     SizeOf(Pointer),
     -1, -1,
@@ -316,15 +318,16 @@ const
   LapeIntegerTypes = [Low(LapeIntegerTypeRange)..High(LapeIntegerTypeRange)];
   LapeRealTypes = [ltSingle..ltExtended];
   LapeBoolTypes = [ltBoolean..ltLongBool];
-  LapeStringTypes = [ltAnsiString..ltUnicodeString];
+  LapeStringTypes = [ltShortString..ltUnicodeString];
   LapeCharTypes = [ltAnsiChar..ltWideChar];
   LapeEnumTypes = [ltSmallEnum..ltLargeEnum, ltBoolean];
   LapeSetTypes = [ltSmallSet..ltLargeSet];
-  LapeArrayTypes = [ltDynArray..ltStaticArray];
+  LapeArrayTypes = [ltDynArray..ltStaticArray] + LapeStringTypes;
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
-  LapePointerTypes = [ltPointer, ltDynArray, ltProc, ltExternalProc];
-  LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes;
+  LapePointerTypes = [ltPointer, ltDynArray, ltProc, ltExternalProc] + LapeStringTypes - [ltShortString];
+  LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes + [ltShortString];
   LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes;
+  LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltProc, ltExternalProc, ltShortString];
 
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
   BinaryOperators = [op_AND, op_NOT, op_OR, op_XOR];

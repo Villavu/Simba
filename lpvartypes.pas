@@ -385,6 +385,20 @@ type
   TLapeType_UnicodeString = class(TLapeType_String)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
+  TLapeType_ShortString = class(TLapeType_StaticArray)
+  protected
+    function getAsString: lpString; override;
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; ASize: UInt8 = High(UInt8); AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function VarToString(v: Pointer): lpString; override;
+    function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
+    function NewGlobalVar(Str: ShortString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
+
+    function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
+    function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
+    function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
+  end;
+
   TRecordField = record
     Offset: Word;
     FieldType: TLapeType;
@@ -621,10 +635,11 @@ begin
   Arr[ltLongBool] := TLapeType_LongBool.Create(Compiler, LapeTypeToString(ltLongBool));
   Arr[ltAnsiChar] := TLapeType_AnsiChar.Create(Compiler, LapeTypeToString(ltAnsiChar));
   Arr[ltWideChar] := TLapeType_WideChar.Create(Compiler, LapeTypeToString(ltWideChar));
-  Arr[ltPointer] := TLapeType_Pointer.Create(Compiler, nil, LapeTypeToString(ltPointer));
+  Arr[ltShortString] := TLapeType_ShortString.Create(Compiler, High(UInt8), LapeTypeToString(ltShortString));
   Arr[ltAnsiString] := TLapeType_AnsiString.Create(Compiler, LapeTypeToString(ltAnsiString));
   Arr[ltWideString] := TLapeType_WideString.Create(Compiler, LapeTypeToString(ltWideString));
   Arr[ltUnicodeString] := TLapeType_UnicodeString.Create(Compiler, LapeTypeToString(ltUnicodeString));
+  Arr[ltPointer] := TLapeType_Pointer.Create(Compiler, nil, LapeTypeToString(ltPointer));
 end;
 
 procedure setNullResVar(var v: TResVar; Unlock: Integer = 0);
@@ -919,7 +934,7 @@ end;
 function TLapeType.getInitialization: Boolean;
 begin
   if (FInit = __Unknown) then
-    if (FBaseType in (LapeOrdinalTypes + LapeRealTypes + LapePointerTypes - [ltDynArray])) then
+    if (FBaseType in LapeNoInitTypes) then
       FInit := __No
     else
       FInit := __Yes;
@@ -2135,7 +2150,7 @@ end;
 procedure TLapeType_DynArray.Finalize(v: TResVar; var Offset: Integer; UseCompiler: Boolean = True; Pos: PDocPos = nil);
 begin
   Assert(v.VarType = Self);
-  if (not (FBaseType in LapeArrayTypes)) then
+  if (FBaseType in LapeStringTypes) then
   begin
     inherited;
     Exit;
@@ -2261,7 +2276,7 @@ begin
       Right.FVarType := v;
     end;
   end
-  else if (op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
+  else if (op = op_Assign) and (not (BaseType in LapeStringTypes)) and (Right <> nil) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
   begin
     for i := 0 to FRange.Hi - FRange.Lo do
     try
@@ -2337,7 +2352,7 @@ begin
     else if b and (Left.VarPos.MemPos = mpVar) then
       Left.VarPos.StackVar.isConstant := False;
   end
-  else if (op = op_Assign) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
+  else if (op = op_Assign) and (not (BaseType in LapeStringTypes)) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
   begin
     c := FCompiler.getTempVar(ltInt64, 2);
     l := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Lo - 1)).NewGlobalVarStr(IntToStr(FRange.Lo)));
@@ -2458,6 +2473,129 @@ begin
   Assert(ACompiler <> nil);
   inherited Create(ACompiler.getBaseType(ltWideChar), ACompiler, AName, ADocPos);
   FBaseType := ltUnicodeString;
+end;
+
+function TLapeType_ShortString.getAsString: lpString;
+begin
+  if (FAsString = '') then
+  begin
+    FAsString := inherited;
+    FAsString := FAsString + '[' + IntToStr(FRange.Hi) + ']';
+  end;
+  Result := inherited;
+end;
+
+constructor TLapeType_ShortString.Create(ACompiler: TLapeCompilerBase; ASize: UInt8 = High(UInt8); AName: lpString = ''; ADocPos: PDocPos = nil);
+var
+  r: TLapeRange;
+begin
+  r.Lo := 0;
+  r.Hi := ASize;
+  Assert(ACompiler <> nil);
+  inherited Create(r, ACompiler.getBaseType(ltAnsiChar), ACompiler, AName, ADocPos);
+  FBaseType := ltShortString;
+end;
+
+function TLapeType_ShortString.VarToString(v: Pointer): lpString;
+begin
+  Result := '`'+PShortString(v)^+'`';
+end;
+
+function TLapeType_ShortString.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
+  if (Length(Str) >= FRange.Hi) then
+    Delete(Str, FRange.Hi, Length(Str) - FRange.Hi + 1);
+  PShortString(Result.Ptr)^ := Str;
+end;
+
+function TLapeType_ShortString.NewGlobalVar(Str: ShortString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
+  PShortString(Result.Ptr)^ := Str;
+end;
+
+function TLapeType_ShortString.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
+begin
+  Result := inherited;
+  if (Result <> nil) and (Result.BaseType = ltShortString) and (Op = op_Assign) then
+    Result := Self;
+end;
+
+function TLapeType_ShortString.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
+var
+  p: TLapeEvalProc;
+begin
+  Assert(FCompiler <> nil);
+  Assert((Left = nil) or (Left.VarType is TLapeType_Pointer));
+
+  if (op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
+    if (Right.VarType is TLapeType_ShortString) and (FRange.Hi <> TLapeType_ShortString(Right.VarType).Range.Hi) then
+    begin
+      p := getEvalProc(op_Assign, ltShortString, ltUInt8);
+      Assert(({$IFNDEF FPC}@{$ENDIF}p <> nil) and ({$IFNDEF FPC}@{$ENDIF}p <> {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc));
+      p(Left.Ptr, Right.Ptr, @FRange.Hi);
+    end
+    else
+    begin
+      if (FRange.Hi < High(UInt8)) then
+      begin
+        Result := FCompiler.getBaseType(ltShortString).NewGlobalVarP();
+        Result := Result.VarType.EvalConst(Op, Result, Right);
+      end
+      else
+        Result := inherited;
+
+      Result := inherited;
+      if (Result <> nil) and (Result.VarType <> nil) and (Result.VarType is TLapeType_ShortString) and (FRange.Hi <> TLapeType_ShortString(Result.VarType).Range.Hi) then
+        with Result do
+        begin
+          Result := EvalConst(op_Assign, Left, Result);
+          Free();
+        end;
+    end
+  else
+    Result := inherited;
+end;
+
+function TLapeType_ShortString.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
+var
+  p: TLapeEvalProc;
+  a: TResVar;
+begin
+  Assert(FCompiler <> nil);
+  Assert(Left.VarType is TLapeType_Pointer);
+  Result := NullResVar;
+  a := NullResVar;
+
+  if (op = op_Assign) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
+    if (Right.VarType is TLapeType_ShortString) and (FRange.Hi <> TLapeType_ShortString(Right.VarType).Range.Hi) then
+    begin
+      p := getEvalProc(op_Assign, ltShortString, ltUInt8);
+      Assert(({$IFNDEF FPC}@{$ENDIF}p <> nil) and ({$IFNDEF FPC}@{$ENDIF}p <> {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc));
+      FCompiler.Emitter._Eval(p, Left, Right, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltUInt8).NewGlobalVarStr(IntToStr(FRange.Hi)))), Offset, Pos);
+      Result := Left;
+    end
+    else
+    begin
+      if (FRange.Hi < High(UInt8)) then
+      begin
+        a := StackResVar;
+        a.VarType := FCompiler.getBaseType(ltShortString);
+        getDestVar(Dest, a, op_Unknown, FCompiler);
+        Result := a.VarType.Eval(Op, Dest, a, Right, Offset, Pos)
+      end
+      else
+        Result := inherited;
+
+      if (Result.VarType <> nil) and (Result.VarType is TLapeType_ShortString) and (FRange.Hi <> TLapeType_ShortString(Result.VarType).Range.Hi) then
+      begin
+        Result := Eval(op_Assign, Dest, Left, Result, Offset, Pos);
+        SetNullResVar(a, 1);
+      end;
+    end
+  else
+    Result := inherited;
 end;
 
 function TLapeType_Record.getAsString: lpString;

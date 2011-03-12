@@ -650,17 +650,34 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
         r := EnsureConstantRange(t, v);
         Result := addManagedType(TLapeType_SubRange.Create(r, Self, v, '', getPDocPos()))
       end
+      else if (t <> nil) and (t is TLapeTree_Operator) and (TLapeTree_Operator(t).OperatorType = op_Index) then
+        with TLapeTree_Operator(t) do
+        begin
+          r.Hi := -1;
+          try
+            if (Right <> nil) and (Right is TLapeTree_ExprBase) then
+              r.Hi := TLapeTree_ExprBase(Right).Evaluate().AsInteger;
+          finally
+            if (r.Hi < 0) or (r.Hi > High(UInt8)) then
+              LapeException(lpeInvalidRange, Right.DocPos);
+          end;
+
+          if (left <> nil) and (Left is TLapeTree_VarType) and (TLapeTree_VarType(Left).VarType <> nil) and (TLapeTree_VarType(Left).VarType.BaseType = ltAnsiString) then
+            Result := addManagedType(TLapeType_ShortString.Create(Self, r.Hi, '', @Left.DocPos))
+          else
+            LapeException(lpeOutOfTypeRange, FTokenizer.DocPos);
+        end
       else if (t <> nil) and (t is TLapeTree_VarType) and (TLapeTree_VarType(t).VarType <> nil) then
         Result := TLapeTree_VarType(t).VarType
       else
         LapeException(lpeTypeExpected, FTokenizer.DocPos);
     finally
       if (t <> nil) then
+      begin
+        FTokenizer.Pos := FTokenizer.Pos - 1;
         t.Free();
+      end;
     end;
-
-    if (t <> nil) then
-      FTokenizer.Pos := FTokenizer.Pos - 1;
   end;
 
 begin

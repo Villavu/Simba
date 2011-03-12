@@ -65,7 +65,13 @@ type
 procedure TForm1.btnGoClick(Sender: TObject);
 var
   i: Integer;
+  x: string[5];
+  y: AnsiString;
 begin
+  y := 'hello world';
+
+  x := y;
+  WriteLn(x);
   for i := 0 to lpgList.Count - 1 do
     WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
 end;
