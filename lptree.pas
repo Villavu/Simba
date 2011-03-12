@@ -2222,6 +2222,7 @@ var
   o: TLapeTree_Operator;
   tb: TLapeTree_Base;
   a, b, c: TLapeType;
+  v: TLapeVar;
 
   function changeVarType(var x: TResVar; t: TLapeType): TLapeType;
   begin
@@ -2242,14 +2243,21 @@ begin
   a := nil;
   b := nil;
   c := nil;
+  v := nil;
 
   tb := nil;
   cnt := FCounter.Compile(Offset);
   try
-    if (not getTempVar(FLimit, Offset, lim)) or (cnt.VarType = nil) or (lim.VarType = nil) or (lim.VarType.BaseIntType = ltUnknown) then
+    if (not getTempVar(FLimit, Offset, lim)) or (lim.VarType = nil) or (lim.VarType.BaseIntType = ltUnknown) then
       LapeException(lpeInvalidEvaluation, FLimit.DocPos);
 
-    if (not isVariable(cnt)) or (cnt.VarType.BaseIntType = ltUnknown) then
+    if (cnt.VarType <> nil) and (not isVariable(cnt)) then
+    begin
+      v := FCompiler.getTempVar(cnt.VarType, 2);
+      v.isConstant := False;
+      cnt := v.VarType.Eval(op_Assign, Result, GetResVar(v), cnt, Offset, @FCounter.DocPos);
+    end;
+    if (cnt.VarType = nil) or (not isVariable(cnt)) or (cnt.VarType.BaseIntType = ltUnknown) then
       LapeException(lpeInvalidIterator, FCounter.DocPos);
 
     a := changeVarType(cnt, FCompiler.getBaseType(cnt.VarType.BaseIntType));
@@ -2305,7 +2313,13 @@ begin
       TLapeTree_StatementList(FBody).Statements.Delete(0).setParent(nil);
     setBody(tb);
     setCondition(nil);
-    setNullResVar(cnt, 1);
+    if (v <> nil) then
+    begin
+      v.isConstant := True;
+      setNullResVar(cnt, 2);
+    end
+    else
+      setNullResVar(cnt, 1);
     setNullResVar(lim, 2);
     setNullResVar(stp, 2);
   end;
