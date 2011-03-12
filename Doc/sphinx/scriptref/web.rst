@@ -5,7 +5,7 @@ Internet Functions
 ==================
 
 OpenWebPage
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -13,7 +13,7 @@ OpenWebPage
 
 
 GetPage
--------
+~~~~~~~
 
 .. code-block:: pascal
 
