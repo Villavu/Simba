@@ -45,7 +45,7 @@ FreeHTTPClient
 
 
 GetHTTPPage
-~~~~~~~~~~-
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -77,7 +77,7 @@ PostHTTPPageEx
 
 
 ClearPostData
-~~~~~~~~~~~~-
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -85,7 +85,7 @@ ClearPostData
 
 
 AddPostVariable
-~~~~~~~~~~~~~~-
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -93,7 +93,7 @@ AddPostVariable
 
 
 GetRawHeaders
-~~~~~~~~~~~~-
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
