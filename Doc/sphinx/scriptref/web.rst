@@ -21,7 +21,7 @@ GetPage
 
 
 InitializeHTTPClient
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -29,7 +29,7 @@ InitializeHTTPClient
 
 
 InitializeHTTPClientWrap
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -37,7 +37,7 @@ InitializeHTTPClientWrap
 
 
 FreeHTTPClient
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -45,7 +45,7 @@ FreeHTTPClient
 
 
 GetHTTPPage
------------
+~~~~~~~~~~-
 
 .. code-block:: pascal
 
@@ -53,7 +53,7 @@ GetHTTPPage
 
 
 SetHTTPUserAgent
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -61,7 +61,7 @@ SetHTTPUserAgent
 
 
 PostHTTPPage
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -69,7 +69,7 @@ PostHTTPPage
 
 
 PostHTTPPageEx
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -77,7 +77,7 @@ PostHTTPPageEx
 
 
 ClearPostData
--------------
+~~~~~~~~~~~~-
 
 .. code-block:: pascal
 
@@ -85,7 +85,7 @@ ClearPostData
 
 
 AddPostVariable
----------------
+~~~~~~~~~~~~~~-
 
 .. code-block:: pascal
 
@@ -93,7 +93,7 @@ AddPostVariable
 
 
 GetRawHeaders
--------------
+~~~~~~~~~~~~-
 
 .. code-block:: pascal
 
@@ -101,11 +101,11 @@ GetRawHeaders
 
 
 SetProxy
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
-    procedure SetProxy(Client : Integer; pHost, pPort : String);');           
+    procedure SetProxy(Client : Integer; pHost, pPort : String);');
 
 
 CreateSocket
