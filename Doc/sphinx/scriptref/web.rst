@@ -108,3 +108,106 @@ SetProxy
     procedure SetProxy(Client : Integer; pHost, pPort : String);');           
 
 
+CreateSocket
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function CreateSocket: integer;
+
+
+FreeSocket
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure FreeSocket(Index: integer);
+
+
+ConnectSocket
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ConnectSocket(Client: integer; IP, Port: string);
+
+
+BindSocket
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure BindSocket(Client: integer; IP, Port: string);
+
+
+ListenSocket
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ListenSocket(Client: integer);
+
+
+AcceptSocket
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function AcceptSocket(Client: integer): integer;
+
+
+CloseSocket
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure CloseSocket(Client: integer);
+
+RecvSocket
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function RecvSocket(Client: integer): string;
+
+
+RecvSocketStr
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function RecvSocketStr(Client: integer): string;
+
+
+RecvSocketEx
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    unction RecvSocketEx(Client, Length: integer): string;
+
+
+SendSocket
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SendSocket(Client: integer; Data: string);
+
+
+SetTimeout
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetTimeout(Client, Time: integer);
+
+
+SocketInfo
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SocketInfo(Client: integer; out IP, Port: string);
+
+
