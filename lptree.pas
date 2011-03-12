@@ -558,6 +558,8 @@ begin
   if (ToType = nil) and (FDest.VarType <> nil) then
     ToType := FDest.VarType;
   if (ToType = nil) then
+    ToType := resType();
+  if (ToType = nil) then
     Exit(False);
 
   t := nil;
@@ -600,8 +602,69 @@ begin
 end;
 
 function TLapeTree_OpenArray.resType: TLapeType;
+var
+  i: Integer;
+  t: TLapeType;
+  r: TLapeRange;
+
+  function determineArrType(v: TLapeType): TLapeType;
+  begin
+    if (v = nil) then
+      Exit(nil)
+    else if (v.BaseType in LapeIntegerTypes) then
+      Result := FCompiler.getBaseType(ltInt32)
+    else if (v.BaseType in LapeRealTypes) then
+      Result := FCompiler.getBaseType(ltExtended)
+    else if (v.BaseType in LapeBoolTypes) then
+      Result := FCompiler.getBaseType(ltBoolean)
+    else if (v.BaseType in LapeStringTypes) then
+      Result := FCompiler.getBaseType(ltString)
+    else
+      Result := v;
+  end;
+
 begin
   Result := ToType;
+  if (Result = nil) and (FValues.Count > 0) then
+  begin
+    r.Lo := 0;
+    r.Hi := FValues.Count - 1;
+
+    for i := 0 to r.Hi do
+    begin
+      if (FValues[i] is TLapeTree_Range) and (TLapeTree_Range(FValues[i]).Hi <> nil) then
+      begin
+        t := TLapeTree_Range(FValues[i]).Hi.resType();
+        if (t = nil) or (not (t is TLapeType_SubRange)) or ((Result <> nil) and (not t.CompatibleWith(Result))) then
+          Exit(nil);
+        Exit(FCompiler.addManagedType(TLapeType_Set.Create(TLapeType_SubRange(t), FCompiler, '', @DocPos)))
+      end
+      else if (not (FValues[i] is TLapeTree_ExprBase)) then
+        Exit(nil)
+      else
+        t := determineArrType(TLapeTree_ExprBase(FValues[i]).resType());
+
+      if (Result = nil) then
+        Result := t
+      else if (t <> nil) and t.Equals(Result) then
+        {nothing}
+      else if (t <> nil) and (t.BaseType > Result.BaseType) and t.CompatibleWith(Result) then
+        Result := t
+      else if (t <> nil) and (Result.BaseType >= t.BaseType) and Result.CompatibleWith(t) then
+        {nothing}
+      else
+      begin
+        Result := nil;
+        Break;
+      end;
+    end;
+
+    if (Result <> nil) then
+      if (Result is TLapeType_Enum) then
+        Result := FCompiler.addManagedType(TLapeType_Set.Create(TLapeType_Enum(Result), FCompiler, '', @DocPos))
+      else
+        Result := FCompiler.addManagedType(TLapeType_StaticArray.Create(r, Result, FCompiler, '', @DocPos));
+  end;
 end;
 
 function TLapeTree_OpenArray.Evaluate: TLapeGlobalVar;

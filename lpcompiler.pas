@@ -158,8 +158,8 @@ begin
     LapeException(lpeInvalidRange, FTokenizer.DocPos);
 
   if (Result.Lo <> nil) and (Result.Hi <> nil) then
-    VarType := Result.Lo.resType();
-  if (VarType = nil) or (not (VarType.CompatibleWith(Result.Hi.resType()))) then
+    VarType := Result.Hi.resType();
+  if (VarType = nil) or (not (VarType.CompatibleWith(Result.Lo.resType()))) then
     LapeException(lpeInvalidRange, Node.DocPos);
 end;
 
@@ -1167,8 +1167,8 @@ begin
     TLapeTree_Range(Result).Hi := ParseExpression(ReturnOn);
 
     if (r <> nil) and (TLapeTree_Range(Result).Hi <> nil) then
-      v := r.resType();
-    if (v = nil) or (v.BaseIntType = ltUnknown) or (not (v.CompatibleWith(TLapeTree_Range(Result).Hi.resType()))) then
+      v := TLapeTree_Range(Result).Hi.resType();
+    if (v = nil) or (not (v.CompatibleWith(r.resType()))) then
       LapeException(lpeInvalidRange, FTokenizer.DocPos);
   except
     if (Result <> nil) then

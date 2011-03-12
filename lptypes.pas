@@ -90,7 +90,7 @@ type
     ltUInt8, ltInt8, ltUInt16, ltInt16, ltUInt32, ltInt32, ltUInt64, ltInt64, //Integer
     ltSingle, ltDouble, ltCurrency, ltExtended,                               //Real
     ltBoolean, ltByteBool, ltWordBool, ltLongBool,                            //Boolean
-    ltAnsiString, ltWideString, ltUnicodeString, ltAnsiChar, ltWideChar,      //String
+    ltAnsiChar, ltWideChar, ltAnsiString, ltWideString, ltUnicodeString,      //String
     ltSmallEnum, ltLargeEnum, ltSmallSet, ltLargeSet,                                           //Set
     ltPointer,                                                                //Pointer
     ltRecord, ltUnion,                                                        //Struct
@@ -318,7 +318,7 @@ const
   LapeBoolTypes = [ltBoolean..ltLongBool];
   LapeStringTypes = [ltAnsiString..ltUnicodeString];
   LapeCharTypes = [ltAnsiChar..ltWideChar];
-  LapeEnumTypes = [ltSmallEnum..ltLargeEnum];
+  LapeEnumTypes = [ltSmallEnum..ltLargeEnum, ltBoolean];
   LapeSetTypes = [ltSmallSet..ltLargeSet];
   LapeArrayTypes = [ltDynArray..ltStaticArray];
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
@@ -327,6 +327,7 @@ const
   LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes;
 
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
+  BinaryOperators = [op_AND, op_NOT, op_OR, op_XOR];
   CompareOperators = [op_cmp_Equal, op_cmp_GreaterThan, op_cmp_GreaterThanOrEqual, op_cmp_LessThan, op_cmp_LessThanOrEqual, op_cmp_NotEqual];
   EnumOperators = [op_Plus, op_Minus, op_Assign] + CompareOperators;
 

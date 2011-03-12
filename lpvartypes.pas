@@ -1741,7 +1741,7 @@ begin
   Assert(FCompiler <> nil);
   Assert(Left.VarType = Self);
 
-  if (op in EnumOperators) and ((Right.VarType = nil) or (not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType)) then
+  if ((BaseType in LapeBoolTypes) and (op in BinaryOperators)) or ((op in EnumOperators) and ((Right.VarType = nil) or (not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType))) then
   try
     a := NullResVar;
     t := NullResVar;
