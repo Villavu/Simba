@@ -65,13 +65,7 @@ type
 procedure TForm1.btnGoClick(Sender: TObject);
 var
   i: Integer;
-  x: string[5];
-  y: AnsiString;
 begin
-  y := 'hello world';
-
-  x := y;
-  WriteLn(x);
   for i := 0 to lpgList.Count - 1 do
     WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
 end;
@@ -192,6 +186,7 @@ begin
     Compiler.addGlobalVar(func2.NewGlobalVar(@MyIntToString, 'IntToStr'));
     Compiler.addGlobalVar(func3.NewGlobalVar(@MyStringToInt, 'StrToInt'));
 
+    Compiler.addGlobalVar(Compiler.addGlobalType('record x, y: Int32; end', 'TPoint'), @tpa[0], 'myPoint');
     Compiler.addGlobalVar(Compiler.getBaseType(ltString).NewGlobalVarP(@MyString, 'MyString'));
     Compiler.addGlobalVar(456, 'b');
     Compiler.addGlobalVar(789, 'c');

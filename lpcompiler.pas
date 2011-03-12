@@ -71,21 +71,33 @@ type
     function getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration; override;
     function addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration; override;
     function addLocalVar(v: TLapeType; Name: lpString = ''): TLapeVar; virtual;
-    function addGlobalVar(v: TLapeGlobalVar; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: Int32; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: UInt32; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: Int64; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: UInt64; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: Extended; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: Boolean; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: AnsiString; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
+
+    function addGlobalVar(v: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Typ: TLapeType; AName: lpString; Value: lpString = ''): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Typ: ELapeBaseType; AName: lpString; Value: lpString = ''): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Typ: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Typ: ELapeBaseType; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
+
+    function addGlobalVar(Value: Int32; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: UInt32; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: Int64; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: UInt64; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: Extended; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: Boolean; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: ShortString; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: AnsiString; AName: lpString): TLapeGlobalVar; overload; virtual;
 	{$IFNDEF Lape_NoWideString}
-    function addGlobalVar(Value: WideString; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: WideString; AName: lpString): TLapeGlobalVar; overload; virtual;
 	{$ENDIF}
-    function addGlobalVar(Value: UnicodeString; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: AnsiChar; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: WideChar; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: Pointer; Name: lpString = ''): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: UnicodeString; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: AnsiChar; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: WideChar; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
+
+    function addGlobalType(t: TLapeType; AName: lpString = ''): TLapeType; overload; virtual;
+    function addGlobalType(s: lpString; AName: lpString): TLapeType; overload; virtual;
 
     property Tokenizer: TLapeTokenizerBase read FTokenizer write setTokenizer;
     property Tree: TLapeTree_Base read FTree;
@@ -1471,12 +1483,12 @@ begin
     Result := addStackVar(v, Name);
 end;
 
-function TLapeCompiler.addGlobalVar(v: TLapeGlobalVar; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(v: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar;
 begin
   if (v <> nil) then
   begin
-    if (Name <> '') then
-      v.Name := Name;
+    if (AName <> '') then
+      v.Name := AName;
     if (Length(FGlobalDeclarations.getByName(v.Name)) > 0) then
       LapeException(lpeDuplicateDeclaration, [v.Name]);
     v.isConstant := False;
@@ -1485,66 +1497,163 @@ begin
   Result := v;
 end;
 
-function TLapeCompiler.addGlobalVar(Value: Int32; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
+var
+  s: lpString;
+  t: TLapeStackInfo;
+  p: TLapeTokenizerBase;
 begin
-  Result := addGlobalVar(TLapeType_Int32(FBaseTypes[ltInt32]).NewGlobalVar(Value), Name);
+  s := 'var ' + AName + ': ' + Typ;
+  if (Value <> '') then
+   s := s + ' = ' + Value;
+
+  t := FStackInfo;
+  p := FTokenizer;
+  FTokenizer := TLapeTokenizerString.Create(s + ';');
+  try
+    FStackInfo := nil;
+    ParseVarBlock().Free();
+    Result := FGlobalDeclarations.Items[FGlobalDeclarations.Items.Count - 1] as TLapeGlobalVar;
+  finally
+    FTokenizer.Free();
+    FTokenizer := p;
+    FStackInfo := t;
+  end;
 end;
 
-function TLapeCompiler.addGlobalVar(Value: UInt32; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Typ: TLapeType; AName: lpString; Value: lpString = ''): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_UInt32(FBaseTypes[ltUInt32]).NewGlobalVar(Value), Name);
+  if (Typ.Name <> '') then
+    Result := addGlobalVar(Typ.Name, Value, AName)
+  else
+    Result := addGlobalVar(Typ.AsString, Value, AName);
 end;
 
-function TLapeCompiler.addGlobalVar(Value: Int64; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Typ: ELapeBaseType; AName: lpString; Value: lpString = ''): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_Int64(FBaseTypes[ltInt64]).NewGlobalVar(Value), Name);
+  Result := addGlobalVar(getBaseType(Typ), Value, AName);
 end;
 
-function TLapeCompiler.addGlobalVar(Value: UInt64; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_UInt64(FBaseTypes[ltUInt64]).NewGlobalVar(Value), Name);
+  with addGlobalVar(Typ, '', AName) do
+  begin
+    Name := '';
+    Result := AddGlobalVar(VarType.NewGlobalVarP(Value), AName);
+    Free();
+  end;
 end;
 
-function TLapeCompiler.addGlobalVar(Value: Extended; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Typ: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_Extended(FBaseTypes[ltExtended]).NewGlobalVar(Value), Name);
+  if (Typ.Name <> '') then
+    Result := addGlobalVar(Typ.Name, Value, AName)
+  else
+    Result := addGlobalVar(Typ.AsString, Value, AName);
 end;
 
-function TLapeCompiler.addGlobalVar(Value: Boolean; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Typ: ELapeBaseType; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_Boolean(FBaseTypes[ltBoolean]).NewGlobalVar(Ord(Value)), Name);
+  Result := addGlobalVar(getBaseType(Typ), Value, AName);
 end;
 
-function TLapeCompiler.addGlobalVar(Value: AnsiString; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Value: Int32; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_AnsiString(FBaseTypes[ltAnsiString]).NewGlobalVar(Value), Name);
+  Result := addGlobalVar(TLapeType_Int32(FBaseTypes[ltInt32]).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalVar(Value: UInt32; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_UInt32(FBaseTypes[ltUInt32]).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalVar(Value: Int64; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_Int64(FBaseTypes[ltInt64]).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalVar(Value: UInt64; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_UInt64(FBaseTypes[ltUInt64]).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalVar(Value: Extended; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_Extended(FBaseTypes[ltExtended]).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalVar(Value: Boolean; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_Boolean(FBaseTypes[ltBoolean]).NewGlobalVar(Ord(Value)), AName);
+end;
+
+function TLapeCompiler.addGlobalVar(Value: ShortString; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_ShortString(FBaseTypes[ltShortString]).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalVar(Value: AnsiString; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_AnsiString(FBaseTypes[ltAnsiString]).NewGlobalVar(Value), AName);
 end;
 
 {$IFNDEF Lape_NoWideString}
-function TLapeCompiler.addGlobalVar(Value: WideString; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Value: WideString; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_WideString(FBaseTypes[ltWideString]).NewGlobalVar(Value), Name);
+  Result := addGlobalVar(TLapeType_WideString(FBaseTypes[ltWideString]).NewGlobalVar(Value), AName);
 end;
 {$ENDIF}
 
-function TLapeCompiler.addGlobalVar(Value: UnicodeString; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Value: UnicodeString; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_UnicodeString(FBaseTypes[ltUnicodeString]).NewGlobalVar(Value), Name);
+  Result := addGlobalVar(TLapeType_UnicodeString(FBaseTypes[ltUnicodeString]).NewGlobalVar(Value), AName);
 end;
 
-function TLapeCompiler.addGlobalVar(Value: AnsiChar; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Value: AnsiChar; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_AnsiChar(FBaseTypes[ltAnsiChar]).NewGlobalVar(Value), Name);
+  Result := addGlobalVar(TLapeType_AnsiChar(FBaseTypes[ltAnsiChar]).NewGlobalVar(Value), AName);
 end;
 
-function TLapeCompiler.addGlobalVar(Value: WideChar; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Value: WideChar; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_WideChar(FBaseTypes[ltWideChar]).NewGlobalVar(Value), Name);
+  Result := addGlobalVar(TLapeType_WideChar(FBaseTypes[ltWideChar]).NewGlobalVar(Value), AName);
 end;
 
-function TLapeCompiler.addGlobalVar(Value: Pointer; Name: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_Pointer(FBaseTypes[ltPointer]).NewGlobalVar(Value), Name);
+  Result := addGlobalVar(TLapeType_Pointer(FBaseTypes[ltPointer]).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalType(t: TLapeType; AName: lpString = ''): TLapeType;
+begin
+  if (t <> nil) then
+  begin
+    if (AName <> '') then
+      t.Name := AName;
+    if (Length(FGlobalDeclarations.getByName(t.Name)) > 0) then
+      LapeException(lpeDuplicateDeclaration, [t.Name]);
+    FGlobalDeclarations.addDeclaration(t);
+  end;
+  Result := t;
+end;
+
+function TLapeCompiler.addGlobalType(s: lpString; AName: lpString): TLapeType;
+var
+  t: TLapeStackInfo;
+  p: TLapeTokenizerBase;
+begin
+  t := FStackInfo;
+  p := FTokenizer;
+  FTokenizer := TLapeTokenizerString.Create('type ' + AName + ' = ' + s + ';');
+  try
+    FStackInfo := nil;
+    ParseTypeBlock();
+    Result := FGlobalDeclarations.Items[FGlobalDeclarations.Items.Count - 1] as TLapeType;
+  finally
+    FTokenizer.Free();
+    FTokenizer := p;
+    FStackInfo := t;
+  end;
 end;
 
 end.
