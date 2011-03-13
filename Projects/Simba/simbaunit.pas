@@ -1588,7 +1588,7 @@ begin
     ScriptFile:= SetDirSeparators(Filename);
     ScriptName:= ExtractFileNameOnly(ScriptFile);
     mDebugLn('Script name will be: ' + ScriptName);
-    FormWritelnEx('Succesfully saved: ' + ScriptFile);
+    FormWritelnEx('Successfully saved: ' + ScriptFile);
     StartText:= SynEdit.Lines.Text;
     ScriptChanged := false;
     SynEdit.MarkTextAsSaved;
