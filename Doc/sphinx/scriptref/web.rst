@@ -4,6 +4,16 @@
 Internet Functions
 ==================
 
+The internet functions in Simba range from HTTP functions and low-level
+socket functions. With the HTTP functions you can scrape the web, send form data
+to web pages.
+
+With the socket functions you can implement virtually any network procotol:
+there have been several IRC bots.
+
+HTTP Functions
+--------------
+
 OpenWebPage
 ~~~~~~~~~~~
 
@@ -12,6 +22,12 @@ OpenWebPage
     procedure OpenWebPage(const url : string);
 
 OpenWebPage opens the given web page (url) with your default browser.
+
+Example:
+
+.. code-block:: pascal
+
+    OpenWebPage('http://villavu.com');
 
 GetPage
 ~~~~~~~
@@ -123,15 +139,8 @@ GetRawHeaders
 GetRawHeaders returns a string of headers from the specified client.
 
 
-SetProxy
-~~~~~~~~
-
-.. code-block:: pascal
-
-    procedure SetProxy(Client : Integer; pHost, pPort : String);');
-
-SetProxy configures a proxy with the given client (Client) proxy host (pHost)
-and port (pPort).
+Socket Functions
+----------------
 
 CreateSocket
 ~~~~~~~~~~~~
@@ -258,3 +267,16 @@ SocketInfo
     procedure SocketInfo(Client: integer; out IP, Port: string);
 
 SocketInfo sets where a bound socket will be sending data to (out IP, out Port).
+
+Generic functions
+-----------------
+
+SetProxy
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetProxy(Client : Integer; pHost, pPort : String);');
+
+SetProxy configures a proxy with the given client (Client) proxy host (pHost)
+and port (pPort).
