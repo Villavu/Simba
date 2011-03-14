@@ -5,9 +5,9 @@ procedure MyProc;
 const
   two = 2;
 var
-  i: Int32 := two;
+  i: Int32 = two;
   j := i;
-  iStr = IntToStr(i);
+  iStr := IntToStr(i);
 begin
   if i=j then
     WriteLn('match int');
