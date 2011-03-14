@@ -1,0 +1,21 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+procedure MyProc;
+const
+  two = 2;
+var
+  i: Int32 := two;
+  j := i;
+  iStr = IntToStr(i);
+begin
+  if i=j then
+    WriteLn('match int');
+
+  if iStr='2' then
+    WriteLn('match str');
+end;
+
+begin
+  MyProc();
+end;

@@ -498,7 +498,7 @@ begin
         FTokenizer.Expect(tk_sym_SemiColon, False, False);
     except
       Result.FreeStackInfo := False;
-      Result.Free();
+      FreeAndNil(Result);
       raise;
     end;
   finally
@@ -686,7 +686,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     finally
       if (t <> nil) then
       begin
-        FTokenizer.Pos := FTokenizer.Pos - 1;
+        FTokenizer.Pos := FTokenizer.TokStart - 1;
         t.Free();
       end;
     end;
@@ -1221,7 +1221,7 @@ begin
 
     tk_sym_SemiColon, tk_kw_Else:
       begin
-        if (not (FTokenizer.Tok in [tk_sym_SemiColon, tk_kw_Else])) then
+        //if (not (FTokenizer.Tok in [tk_sym_SemiColon, tk_kw_Else])) then
           FTokenizer.NextNoJunk();
         Result := nil;
       end;

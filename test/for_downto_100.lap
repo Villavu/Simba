@@ -1,0 +1,11 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var
+  i : Int32;
+  r : Int32 = 1;
+begin
+  for i := 200 downto 0 do r := i;
+  if r <> 0 then
+    WriteLn('r was '+IntToStr(r));
+end;

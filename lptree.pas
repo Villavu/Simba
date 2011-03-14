@@ -1510,11 +1510,11 @@ var
         TLapeTree_Operator(Body).Left := TLapeTree_ResVar.Create(FDest, FCompiler, @DocPos);
         TLapeTree_Operator(ElseBody).Left.Free();
         TLapeTree_Operator(ElseBody).Left := TLapeTree_ResVar.Create(FDest, FCompiler, @DocPos);
-     end
-     else
-       FDest := NullResVar;
+      end
+      else
+        FDest := NullResVar;
 
-     Result := Compile(Offset);
+      Result := Compile(Offset);
     end;
   end;
 
@@ -1883,7 +1883,8 @@ var
   b: Boolean;
 begin
   Result := NullResVar;
-  for i := FVars.Count - 1 downto 0 do
+  i := 0;
+  while (i < FVars.Count) do
     if (FVars[i].VarDecl <> nil) and (FVars[i].Default <> nil) then
       with FVars[i], TLapeTree_Operator.Create(op_Assign, Compiler, @Default.DocPos) do
       try
@@ -1899,7 +1900,9 @@ begin
           TLapeVar(VarDecl).isConstant := True;
       finally
         Free();
-      end;
+      end
+    else
+      Inc(i);
 end;
 
 procedure TLapeTree_If.setCondition(Node: TLapeTree_ExprBase);
@@ -1968,7 +1971,6 @@ var
 begin
   Result := NullResVar;
   Assert(FCondition <> nil);
-  Assert((FBody <> nil) or (FElse <> nil));
 
   e := NullResVar;
   cnd := FCondition.Compile(Offset);
