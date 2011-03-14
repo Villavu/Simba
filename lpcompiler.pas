@@ -624,7 +624,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
       if (getDeclaration(n, FStackInfo.Owner, True) <> nil) then
         LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos);
 
-      FTokenizer.Expect([tk_sym_Comma, tk_sym_ParenthesisClose, tk_cmp_Equal], True, False);
+      FTokenizer.Expect([tk_sym_Comma, tk_sym_ParenthesisClose, tk_sym_Equals], True, False);
       if (FTokenizer.Tok = tk_cmp_Equal) then
       try
         t := ParseExpression([tk_sym_Comma, tk_sym_ParenthesisClose]);
@@ -655,7 +655,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     r: TLapeRange;
     v: TLapeType;
   begin
-    t := ParseTypeExpression([tk_sym_Equals, tk_sym_ParenthesisClose]);
+    t := ParseTypeExpression([tk_sym_Equals, tk_op_Assign, tk_sym_ParenthesisClose]);
     try
       if (t <> nil) and (t is TLapeTree_Range) then
       begin

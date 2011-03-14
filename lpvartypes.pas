@@ -263,7 +263,7 @@ type
     property VarType: TLapeType read FVarType;
   end;
 
-  TEnumMap = {$IFDEF FPC}specialize{$ENDIF} TLapeList<lpString>;
+  TEnumMap = TStringList;
   TLapeType_Enum = class(TLapeType_SubRange)
   protected
     FMemberMap: TEnumMap;
@@ -1618,11 +1618,14 @@ begin
 
   FreeMemberMap := (AMemberMap = nil);
   if (AMemberMap = nil) then
-    AMemberMap := TEnumMap.Create('', dupAccept);
+  begin
+    AMemberMap := TEnumMap.Create();
+    AMemberMap.CaseSensitive := False;
+  end;
   FMemberMap := AMemberMap;
 
   FRange.Hi := FMemberMap.Count - 1;
-  FSmall := (FRange.Hi < 32);
+  FSmall := (FRange.Hi <= Ord(High(ELapeSmallEnum)));
   if FSmall then
     FBaseType := ltSmallEnum;
 end;
@@ -1640,7 +1643,7 @@ var
 begin
   if (Value < FMemberMap.Count) then
     LapeException(lpeInvalidRange)
-  else if (AName = '') or FMemberMap.ExistsItem(AName) then
+  else if (AName = '') or (FMemberMap.IndexOf(AName) > -1) then
     LapeException(lpeDuplicateDeclaration);
 
   FAsString := '';
@@ -1651,7 +1654,7 @@ begin
   FMemberMap.add(AName);
 
   FRange.Hi := Result;
-  FSmall := (FRange.Hi < 32);
+  FSmall := (FRange.Hi <= Ord(High(ELapeSmallEnum)));
   if (not FSmall) then
     FBaseType := ltLargeEnum;
 end;
@@ -1662,9 +1665,15 @@ begin
 end;
 
 function TLapeType_Enum.VarToString(v: Pointer): lpString;
+var
+  i: Integer;
 begin
   try
-    Result := FMemberMap[Ord(PLapeSmallEnum(v)^)];
+    Result := '';
+    i := Ord(PLapeSmallEnum(v)^);
+    if (i > -1) and (i < FMemberMap.Count) then
+      Result := FMemberMap[i];
+
     if (Result = '') then
       Result := 'InvalidEnum';
   except
@@ -1813,11 +1822,11 @@ begin
   inherited Create(ltLargeSet, ACompiler, AName, ADocPos);
 
   FRange := ARange;
-  FSmall := (FRange.Range.Hi < 32);
+  FSmall := (FRange.Range.Hi <= Ord(High(ELapeSmallEnum)));
   if FSmall then
     FBaseType := ltSmallSet;
 
-  if (FRange.Range.Lo < 0) or (FRange.Range.Hi > 255) then
+  if (FRange.Range.Lo < Ord(Low(ELapeSmallEnum))) or (FRange.Range.Hi > Ord(High(ELapeLargeEnum))) then
     LapeException(lpeOutOfTypeRange);
 end;
 
