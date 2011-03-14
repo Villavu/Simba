@@ -1050,12 +1050,10 @@ var
     else if (op = op_Index) then
     begin
       PushVarStack(ParseExpression());
-      case FTokenizer.Tok of
-        tk_sym_BracketClose: {nothing};
-        tk_sym_Comma: ParseOperator(op_Index);
-        else
-          LapeException(lpeExpected, [']'], FTokenizer.DocPos);
-      end;
+      if (FTokenizer.Tok = tk_sym_Comma) then
+        ParseOperator(op_Index)
+      else
+        FTokenizer.Expect(tk_sym_BracketClose, False, False);
     end;
   end;
 

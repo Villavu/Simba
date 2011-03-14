@@ -778,14 +778,17 @@ begin
     Result := FDest
   else
   begin
+    FDest := NullResVar;
     if (ToType is TLapeType_DynArray) then
-      Result := VarResVar
-    else
-      Result := NullResVar;
-    Result.VarType := ToType;
-    getDestVar(FDest, Result, op_Unknown, FCompiler);
-    if (Result.VarPos.MemPos = mpVar) then
+    begin
+      Result := getResVar(FCompiler.getTempVar(ToType));
       Result.VarPos.StackVar.isConstant := False;
+    end
+    else
+    begin
+      Result := StackResVar;
+      Result.VarType := ToType;
+    end;
   end;
 
   if (ToType is TLapeType_Set) then
@@ -818,7 +821,7 @@ begin
             Left := TLapeTree_ResVar.Create(Result, FCompiler, @FValues[i].DocPos);
             Right := TLapeTree_ResVar.Create(v, FCompiler, @FValues[i].DocPos);
           end;
-          Result := Compile(Offset);
+          Compile(Offset);
         finally
           Free();
           c.isConstant := True;
@@ -1422,7 +1425,7 @@ begin
 
   if (Result = nil) and (FOperatorType = op_IN) and (FRight <> nil) and (FRight is TLapeTree_OpenArray) then
   begin
-    TLapeTree_Base(FLeft) := TLapeTree_ExprBase(TLapeTree_MultiIf.Create(FLeft, FRight as TLapeTree_OpenArray));
+    TLapeTree_Base(FLeft) := TLapeTree_MultiIf.Create(FLeft, FRight as TLapeTree_OpenArray);
     with TLapeTree_MultiIf(TLapeTree_Base(FLeft)) do
     begin
       v := NullResVar;
@@ -1789,7 +1792,7 @@ var
 begin
   Result := NullResVar;
   for i := 0 to FStatements.Count - 1 do
-    FStatements[i].Compile(Offset);
+    Result := FStatements[i].Compile(Offset);
 end;
 
 procedure TLapeTree_Method.setStatements(Node: TLapeTree_StatementList);
@@ -1894,7 +1897,7 @@ begin
 
         Left := TLapeTree_ResVar.Create(getResVar(VarDecl), Compiler, @Default.DocPos);
         Right := Default;
-        Compile(Offset);
+        Result := Compile(Offset);
 
         if b then
           TLapeVar(VarDecl).isConstant := True;
