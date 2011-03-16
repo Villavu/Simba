@@ -1421,7 +1421,11 @@ begin
     l := r;
     r := nil;
   end;
-  Result := l.EvalRes(FOperatorType, r);
+
+  if (FRight <> nil) and (FRight is TLapeTree_GlobalVar) then
+    Result := l.EvalRes(FOperatorType, TLapeTree_GlobalVar(FRight).GlobalVar);
+  else
+    Result := l.EvalRes(FOperatorType, r);
 
   if (Result = nil) and (FOperatorType = op_IN) and (FRight <> nil) and (FRight is TLapeTree_OpenArray) then
   begin
