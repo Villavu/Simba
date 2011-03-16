@@ -1073,7 +1073,6 @@ begin
       if (FTokenizer.NextNoJunk() in ReturnOn) and (InExpr <= 0) then
         Break;
       case FTokenizer.Tok of
-        tk_kw_Nil: PushVarStack(TLapeTree_Pointer.Create(nil, Self, getPDocPos()));
         tk_typ_Integer: PushVarStack(TLapeTree_Integer.Create(FTokenizer.TokString, Self, getPDocPos()));
         tk_typ_Integer_Hex: PushVarStack(TLapeTree_Integer.Create(IntToStr(FTokenizer.TokInt64), Self, getPDocPos()));
         tk_typ_Integer_Bin: PushVarStack(TLapeTree_Integer.Create(IntToStr(FTokenizer.TokInt64), Self, getPDocPos()));

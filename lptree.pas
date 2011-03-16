@@ -982,16 +982,7 @@ var
 
       Result := FParams[0].Evaluate();
       if VarType.Equals(Result.VarType) or ((Result.VarType <> nil) and (VarType.Size = Result.VarType.Size)) then
-      begin
-        t := Result.VarType.EvalConst(op_Assign, Result.VarType.NewGlobalVarP(), Result);
-        try
-          t.DoManage := False;
-          Result := TLapeGlobalVar(FCompiler.addManagedVar(VarType.NewGlobalVarP(t.Ptr)));
-          Result.DoManage := True;
-        finally
-          t.Free();
-        end;
-      end
+        Result := TLapeGlobalVar(FCompiler.addManagedVar(VarType.NewGlobalVarP(Result.Ptr)))
       else if VarType.CompatibleWith(Result.VarType) then
         Result := TLapeGlobalVar(FCompiler.addManagedVar(VarType.EvalConst(op_Assign, VarType.NewGlobalVarP(), Result)))
       else
@@ -1120,11 +1111,7 @@ var
         if (FDest.VarPos.MemPos <> NullResVar.VarPos.MemPos) then
           b := FDest
         else
-        begin
-          b.VarPos.MemPos := mpVar;
-          b.VarType := VarType;
-          b.VarPos.StackVar := Compiler.getTempVar(b.VarType);
-        end;
+          b := getResVar(Compiler.getTempVar(b.VarType));
 
         tmp := Result;
         Result := VarType.Eval(op_Assign, a, b, Result, Offset, @Self.DocPos);
