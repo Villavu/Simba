@@ -1106,7 +1106,7 @@ begin
 
   if (Right = nil) then
   begin
-    t := EvalRes(Op, nil);
+    t := EvalRes(Op);
     if (op = op_Addr) then
       Exit(t.NewGlobalVarP(@Left.Ptr))
     else if (op = op_Deref) then
@@ -2299,14 +2299,19 @@ begin
   end
   else if (op = op_Assign) and (not (BaseType in LapeStringTypes)) and (Right <> nil) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
   begin
+    l := nil;
+    r := nil;
+
     for i := 0 to FRange.Hi - FRange.Lo do
     try
       l := FPType.NewGlobalVarP(Pointer(PtrInt(Left.Ptr) + (FPType.Size * i)));
       r := FPType.NewGlobalVarP(Pointer(PtrInt(Right.Ptr) + (FPType.Size * i)));
       FPType.EvalConst(op_Assign, l, r);
     finally
-      FreeAndNil(l);
-      FreeAndNil(r);
+      if (l <> nil) then
+        FreeAndNil(l);
+      if (r <> nil) then
+        FreeAndNil(r);
     end;
     Result := Left;
   end
@@ -2695,7 +2700,7 @@ begin
   if Result and (not ContextOnly) and (Other <> Self) and (Other is TLapeType_Record) then
   try
     for i := 0 to FFieldMap.Count - 1 do
-      if (LowerCase(FFieldMap.Index[i]) <> False(TLapeType_Record(Other).FieldMap.Index[i])) then
+      if (LowerCase(FFieldMap.Index[i]) <> LowerCase(TLapeType_Record(Other).FieldMap.Index[i])) then
         Exit(False);
   except
     Result := False;
@@ -2750,7 +2755,7 @@ end;
 
 function TLapeType_Record.EvalRes(Op: EOperator; Right: TLapeGlobalVar): TLapeType;
 begin
-  if (Op = op_Dot) and (Left <> nil) and (Right <> nil) and (Right.VarType <> nil) and (Right.VarType.BaseType = ltString) then
+  if (Op = op_Dot) and (Right <> nil) and (Right.BaseType = ltString) then
     Result := FFieldMap[PlpString(Right.Ptr)^].FieldType
   else
     Result := inherited;
@@ -2760,7 +2765,7 @@ function TLapeType_Record.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar):
 var
   i: Integer;
   s: lpString;
-  l, r, t: TLapeGlobalVar;
+  l, r, ls, rs: TLapeGlobalVar;
 begin
   Assert((Left = nil) or (Left.VarType = Self));
   if (Op = op_Dot) and (Left <> nil) and (Right <> nil) and (Right.VarType <> nil) and (Right.VarType.BaseType = ltString) then
@@ -2777,16 +2782,28 @@ begin
   end
   else if (op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
   begin
+    ls := nil;
+    rs := nil;
+    l := nil;
+    r := nil;
+
     for i := 0 to FFieldMap.Count - 1 do
     try
-      t := FCompiler.getBaseType(ltString).NewGlobalVarStr(FFieldMap.Index[i]);
-      l := EvalConst(op_Dot, Left, t);
-      r := Right.VarType.EvalConst(op_Dot, Right, t);
-      EvalConst(op_Assign, l, r);
+      ls := FCompiler.getBaseType(ltString).NewGlobalVarStr(FFieldMap.Index[i]);
+      rs := FCompiler.getBaseType(ltString).NewGlobalVarStr(TLapeType_Record(Right.VarType).FieldMap.Index[i]);
+
+      l := EvalConst(op_Dot, Left, ls);
+      r := Right.VarType.EvalConst(op_Dot, Right, rs);
+      l.VarType.EvalConst(op_Assign, l, r);
     finally
-      FreeAndNil(t);
-      FreeAndNil(l);
-      FreeAndNil(r);
+      if (ls <> nil) then
+        FreeAndNil(ls);
+      if (rs <> nil) then
+        FreeAndNil(rs);
+      if (l <> nil) then
+        FreeAndNil(l);
+      if (r <> nil) then
+        FreeAndNil(r);
     end;
     Result := Left;
   end
@@ -2798,7 +2815,7 @@ function TLapeType_Record.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TR
 var
   i: Integer;
   s: lpString;
-  a, l, r, t: TResVar;
+  a, l, r, ls, rs: TResVar;
   v: TLapeType;
 begin
   Assert(FCompiler <> nil);
@@ -2852,12 +2869,13 @@ begin
     begin
       for i := 0 to FFieldMap.Count - 1 do
       try
-        t := getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(FFieldMap.Index[i])));
-        l := Eval(op_Dot, a, Left, t, Offset, Pos);
-        r := Right.VarType.Eval(op_Dot, a, Right, t, Offset, Pos);
-        Eval(op_Assign, Dest, l, r, Offset, Pos);
+        ls := getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(FFieldMap.Index[i])));
+        rs := getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(TLapeType_Record(Right.VarType).FieldMap.Index[i])));
+
+        l := Eval(op_Dot, a, Left, ls, Offset, Pos);
+        r := Right.VarType.Eval(op_Dot, a, Right, rs, Offset, Pos);
+        l.VarType.Eval(op_Assign, Dest, l, r, Offset, Pos);
       finally
-        SetNullResVar(t, 1);
         SetNullResVar(l, 1);
         SetNullResVar(r, 1);
       end;

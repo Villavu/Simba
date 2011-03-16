@@ -1423,7 +1423,7 @@ begin
   end;
 
   if (FRight <> nil) and (FRight is TLapeTree_GlobalVar) then
-    Result := l.EvalRes(FOperatorType, TLapeTree_GlobalVar(FRight).GlobalVar);
+    Result := l.EvalRes(FOperatorType, TLapeTree_GlobalVar(FRight).GlobalVar)
   else
     Result := l.EvalRes(FOperatorType, r);
 
