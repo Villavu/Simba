@@ -419,6 +419,7 @@ type
     function CreateCopy: TLapeType; override;
     function NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
 
+    function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
     function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
     function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
     procedure Finalize(v: TResVar; var Offset: Integer; UseCompiler: Boolean = True; Pos: PDocPos = nil); override;
@@ -2362,18 +2363,34 @@ begin
       Left.VarPos.StackVar.isConstant := False;
   end
   else if (op = op_Assign) and (not (BaseType in LapeStringTypes)) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
-  begin
-    c := FCompiler.getTempVar(ltInt64, 2);
-    l := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Lo - 1)).NewGlobalVarStr(IntToStr(FRange.Lo)));
-    h := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Hi + 1)).NewGlobalVarStr(IntToStr(FRange.Hi)));
-    t := c.VarType.Eval(op_Assign, t, GetResVar(c), GetResVar(l), Offset, Pos);
-    o := Offset;
-    FPType.Eval(op_Assign, a, Eval(op_Index, a, Left, t, Offset, Pos), Eval(op_Index, a, Right, t, Offset, Pos), Offset, Pos);
-    c.VarType.Eval(op_Assign, a, t, c.VarType.Eval(op_Plus, a, t, getResVar(FCompiler.addManagedVar(c.VarType.NewGlobalVarStr('1'))), Offset, Pos), Offset, Pos);
-    FCompiler.Emitter._JmpRIf(o - Offset, c.VarType.Eval(op_cmp_LessThanOrEqual, a, t, getResVar(h), Offset, Pos), Offset, Pos);
-    setNullResVar(t, 2);
-    Result := Left;
-  end
+    if (not NeedInitialization) and Equals(Right.VarType) and (Size in [1, 2, 4, 8]) then
+    try
+      v := Right.VarType;
+      case Size of
+        1: Left.VarType := FCompiler.getBaseType(ltUInt8);
+        2: Left.VarType := FCompiler.getBaseType(ltUInt16);
+        4: Left.VarType := FCompiler.getBaseType(ltUInt32);
+        8: Left.VarType := FCompiler.getBaseType(ltUInt64);
+      end;
+      Right.VarType := Left.VarType;
+      Result := Left.VarType.Eval(op_Assign, Dest, Left, Right, Offset, Pos);
+    finally
+      Left.VarType := Self;
+      Right.VarType := v;
+    end
+    else
+    begin
+      c := FCompiler.getTempVar(ltInt64, 2);
+      l := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Lo - 1)).NewGlobalVarStr(IntToStr(FRange.Lo)));
+      h := FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(FRange.Hi + 1)).NewGlobalVarStr(IntToStr(FRange.Hi)));
+      t := c.VarType.Eval(op_Assign, t, GetResVar(c), GetResVar(l), Offset, Pos);
+      o := Offset;
+      FPType.Eval(op_Assign, a, Eval(op_Index, a, Left, t, Offset, Pos), Eval(op_Index, a, Right, t, Offset, Pos), Offset, Pos);
+      c.VarType.Eval(op_Assign, a, t, c.VarType.Eval(op_Plus, a, t, getResVar(FCompiler.addManagedVar(c.VarType.NewGlobalVarStr('1'))), Offset, Pos), Offset, Pos);
+      FCompiler.Emitter._JmpRIf(o - Offset, c.VarType.Eval(op_cmp_LessThanOrEqual, a, t, getResVar(h), Offset, Pos), Offset, Pos);
+      setNullResVar(t, 2);
+      Result := Left;
+    end
   else
     Result := inherited;
 end;
@@ -2686,9 +2703,30 @@ begin
   Result := inherited NewGlobalVarP(nil, AName, ADocPos);
 end;
 
+function TLapeType_Record.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
+var
+  i: Integer;
+begin
+  if (op = op_Assign) and (Right <> nil) and (Right is TLapeType_Record) and
+     (TLapeType_Record(Right).FieldMap.Count = FFieldMap.Count) then
+  begin
+    for i := 0 to FFieldMap.Count - 1 do
+      if (not FFieldMap.ItemsI[i].FieldType.CompatibleWith(TLapeType_Record(Right).FieldMap.ItemsI[i].FieldType)) then
+      begin
+        Result := inherited;
+        Exit;
+      end;
+    Result := Self
+  end
+  else
+    Result := inherited;
+end;
+
 function TLapeType_Record.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
 var
+  i: Integer;
   s: lpString;
+  l, r, t: TLapeGlobalVar;
 begin
   Assert((Left = nil) or (Left.VarType = Self));
   if (Op = op_Dot) and (Left <> nil) and (Right <> nil) and (Right.VarType <> nil) and (Right.VarType.BaseType = ltString) then
@@ -2697,11 +2735,26 @@ begin
       s := PlpString(Right.Ptr)^
     else
       s := '';
-    if FFieldMap.ExistsItemI(s) then
+    if (s <> '') and FFieldMap.ExistsItemI(s) then
       Result := FFieldMap[s].FieldType.NewGlobalVarP(Pointer(PtrUInt(Left.Ptr) + FFieldMap[s].Offset))
     else
       LapeException(lpeUnknownDeclaration, [s]);
     Result.isConstant := Left.isConstant;
+  end
+  else if (op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
+  begin
+    for i := 0 to FFieldMap.Count - 1 do
+    try
+      t := FCompiler.getBaseType(ltString).NewGlobalVarStr(FFieldMap.Index[i]);
+      l := EvalConst(op_Dot, Left, t);
+      r := Right.VarType.EvalConst(op_Dot, Right, t);
+      EvalConst(op_Assign, l, r);
+    finally
+      FreeAndNil(t);
+      FreeAndNil(l);
+      FreeAndNil(r);
+    end;
+    Result := Left;
   end
   else
     inherited;
@@ -2709,10 +2762,14 @@ end;
 
 function TLapeType_Record.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
 var
+  i: Integer;
   s: lpString;
+  a, l, r, t: TResVar;
+  v: TLapeType;
 begin
   Assert(FCompiler <> nil);
   Assert(Left.VarType = Self);
+  a := NullResVar;
 
   if (Op = op_Dot) and (Right.VarPos.MemPos = mpMem) and (Right.VarType <> nil) and (Right.VarType.BaseType = ltString) then
   begin
@@ -2723,7 +2780,7 @@ begin
 
     setNullResVar(Dest);
     Result := Left;
-    if (not FFieldMap.ExistsItemI(s)) then
+    if (s = '') or (not FFieldMap.ExistsItemI(s)) then
       LapeException(lpeUnknownDeclaration, [s]);
 
     Result.VarType := FFieldMap[s].FieldType;
@@ -2741,6 +2798,37 @@ begin
       else LapeException(lpeImpossible);
     end
   end
+  else if (op = op_Assign) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
+    if (not NeedInitialization) and Equals(Right.VarType) and (Size in [1, 2, 4, 8]) then
+    try
+      v := Right.VarType;
+      case Size of
+        1: Left.VarType := FCompiler.getBaseType(ltUInt8);
+        2: Left.VarType := FCompiler.getBaseType(ltUInt16);
+        4: Left.VarType := FCompiler.getBaseType(ltUInt32);
+        8: Left.VarType := FCompiler.getBaseType(ltUInt64);
+      end;
+      Right.VarType := Left.VarType;
+      Result := Left.VarType.Eval(op_Assign, Dest, Left, Right, Offset, Pos);
+    finally
+      Left.VarType := Self;
+      Right.VarType := v;
+    end
+    else
+    begin
+      for i := 0 to FFieldMap.Count - 1 do
+      try
+        t := getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(FFieldMap.Index[i])));
+        l := Eval(op_Dot, a, Left, t, Offset, Pos);
+        r := Right.VarType.Eval(op_Dot, a, Right, t, Offset, Pos);
+        Eval(op_Assign, Dest, l, r, Offset, Pos);
+      finally
+        SetNullResVar(t, 1);
+        SetNullResVar(l, 1);
+        SetNullResVar(r, 1);
+      end;
+      Result := Left;
+    end
   else
     inherited;
 end;

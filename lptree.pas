@@ -416,7 +416,7 @@ begin
       if (t <> nil) then
       begin
         //Ensure smallest possible integer type
-        if (t.BaseType in LapeIntegerTypes) then
+        if t.isConstant and (t.BaseType in LapeIntegerTypes) then
           Replacement := TLapeTree_Integer.Create(t.AsString, Root.Compiler)
         else
           Replacement := TLapeTree_GlobalVar.Create(t, Root.Compiler);
