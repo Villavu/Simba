@@ -230,7 +230,7 @@ type
   public
     InvalidVal: _T;
 
-    constructor Create(InvalidValue: _T; CaseSensitive: Boolean = False; Duplicates: TDuplicates = dupError); reintroduce; virtual;
+    constructor Create(InvalidValue: _T; CaseSensitive: Boolean = {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF}; Duplicates: TDuplicates = dupError); reintroduce; virtual;
     destructor Destroy; override;
 
     procedure Clear; virtual;
@@ -300,7 +300,7 @@ const
   ltCharInt = ltUInt8;
   {$ENDIF}
 
-  LapeTypeSize: array[ELapeBaseType] of ShortInt = (
+  LapeTypeSize: array[ELapeBaseType] of Integer = (
     -1,
     SizeOf(UInt8), SizeOf(Int8), SizeOf(UInt16), SizeOf(Int16), SizeOf(UInt32),
     SizeOf(Int32), SizeOf(UInt64), SizeOf(Int64),
@@ -427,8 +427,9 @@ var
     @highUInt8, @highInt8, @highUInt16, @highInt16, @highUInt32, @highInt32, @highUInt64, @highInt64
   );
 
-function LapeTypeToString(Token: ELapeBaseType): lpString;
-function LapeOperatorToString(Token: EOperator): lpString;
+function LapeCase(const s: lpString): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function LapeTypeToString(Token: ELapeBaseType): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function LapeOperatorToString(Token: EOperator): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 {$IFDEF Lape_TrackObjects}
 var
@@ -441,6 +442,15 @@ implementation
 uses
   typinfo,
   lpexceptions;
+
+function LapeCase(const s: lpString): lpString;
+begin
+  {$IFDEF Lape_CaseSensitive}
+  Result := s;
+  {$ELSE}
+  Result := LowerCase(s);
+  {$ENDIF}
+end;
 
 function LapeTypeToString(Token: ELapeBaseType): lpString;
 begin
@@ -721,7 +731,7 @@ begin
     Result := '';
 end;
 
-constructor TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.Create(InvalidValue: _T; CaseSensitive: Boolean = False; Duplicates: TDuplicates = dupError);
+constructor TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.Create(InvalidValue: _T; CaseSensitive: Boolean = {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF}; Duplicates: TDuplicates = dupError);
 begin
   inherited Create();
 
@@ -910,10 +920,10 @@ var
   i: Integer;
 begin
   Result := nil;
-  AName := UpperCase(AName);
+  AName := LapeCase(AName);
   if (FList <> nil) then
     for i := 0 to FList.Count - 1 do
-      if (FList[i] <> nil) and (UpperCase(FList[i].Name) = AName) then
+      if (FList[i] <> nil) and (LapeCase(FList[i].Name) = AName) then
       begin
         SetLength(Result, Length(Result) + 1);
         Result[High(Result)] := FList[i];

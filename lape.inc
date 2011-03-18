@@ -10,6 +10,7 @@
 {$ENDIF}
 
 {.$DEFINE Lape_AlwaysInitialize}         //Always initialize (local) variables to 0/nil (slower, safer)
+{.$DEFINE Lape_CaseSensitive}            //Case sentive in script
 {$DEFINE Lape_DoubleKeywordsCache}      //Create a double cache for keywords to speed up parsing (more memory, faster)
 {$DEFINE Lape_EmitPos}                  //Emit source position when compiling (more memory)
 {.$DEFINE Lape_Inline}                   //Compile with function inlining where it could be benefitial (faster, harder debugging)

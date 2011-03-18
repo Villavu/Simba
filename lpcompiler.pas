@@ -369,7 +369,7 @@ begin
           if addToScope then
             if (FStackInfo = nil) or (FStackInfo.Owner = nil) then
               LapeException(lpeImpossible, FTokenizer.DocPos)
-            else if (LowerCase(a[i]) = LowerCase(Name)) or (getDeclaration(a[i], True) <> nil) then
+            else if (LapeCase(a[i]) = LapeCase(Name)) or (getDeclaration(a[i], True) <> nil) then
               LapeException(lpeDuplicateDeclaration, [a[i]], FTokenizer.DocPos)
             else
               FStackInfo.addVar(p.ParType, p.VarType, a[i]);
@@ -389,7 +389,7 @@ begin
       if addToScope then
         if (FStackInfo = nil) or (FStackInfo.Owner = nil) then
           LapeException(lpeImpossible, FTokenizer.DocPos)
-        else if (LowerCase(Name) = 'result') or (getDeclaration('result', True) <> nil) then
+        else if (LapeCase(Name) = LapeCase('Result')) or (getDeclaration('Result', True) <> nil) then
           LapeException(lpeDuplicateDeclaration, ['Result'], FTokenizer.DocPos)
         else
           FStackInfo.addVar(lptOut, Result.Res, 'Result');
@@ -750,7 +750,7 @@ var
   t: TLapeType;
   s: lpString;
 begin
-  f := TLapeTypeForwards.Create(nil, False, dupIgnore);
+  f := TLapeTypeForwards.Create(nil, {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF}, dupIgnore);
   try
     FTokenizer.Expect(tk_kw_Type, True, False);
     repeat

@@ -1634,7 +1634,7 @@ begin
   if (AMemberMap = nil) then
   begin
     AMemberMap := TEnumMap.Create();
-    AMemberMap.CaseSensitive := False;
+    AMemberMap.CaseSensitive := {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF};
   end;
   FMemberMap := AMemberMap;
 
@@ -2710,7 +2710,7 @@ begin
   if Result and (not ContextOnly) and (Other <> Self) and (Other is TLapeType_Record) then
   try
     for i := 0 to FFieldMap.Count - 1 do
-      if (LowerCase(FFieldMap.Index[i]) <> LowerCase(TLapeType_Record(Other).FieldMap.Index[i])) then
+      if (LapeCase(FFieldMap.Index[i]) <> LapeCase(TLapeType_Record(Other).FieldMap.Index[i])) then
         Exit(False);
   except
     Result := False;
@@ -3293,9 +3293,9 @@ function TLapeStackInfo.getDeclaration(Name: lpString): TLapeDeclaration;
 var
   i: Integer;
 begin
-  Name := LowerCase(Name);
+  Name := LapeCase(Name);
   for i := 0 to FDeclarations.Count - 1 do
-    if (LowerCase(FDeclarations[i].Name) = Name) then
+    if (LapeCase(FDeclarations[i].Name) = Name) then
       Exit(FDeclarations[i]);
   Result := nil;
 end;
@@ -3799,9 +3799,9 @@ function TLapeCompilerBase.getBaseType(Name: lpString): TLapeType;
 var
   t: ELapeBaseType;
 begin
-  Name := UpperCase(Name);
+  Name := LapeCase(Name);
   for t := Low(FBaseTypes) to High(FBaseTypes) do
-    if (FBaseTypes[t] <> nil) and (UpperCase(FBaseTypes[t].Name) = Name) then
+    if (FBaseTypes[t] <> nil) and (LapeCase(FBaseTypes[t].Name) = Name) then
       Exit(FBaseTypes[t]);
   Result := nil;
 end;
