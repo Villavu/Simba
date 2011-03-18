@@ -16,20 +16,29 @@ uses
   lptypes, lpinterpreter, lpparser;
 
 type
+  TLapeCodePointers = {$IFDEF FPC}specialize{$ENDIF} TLapeList<PUInt32>;
   TLapeCodeEmitterBase = class(TLapeBaseClass)
   protected
     FCode: TCodeArray;
     FCodeStart: Integer;
     FCodeCur: Integer;
     FCodeSize: Integer;
+    FCodePointers: TLapeCodePointers;
     function getCode: Pointer;
    public
     CodeGrowSize: Word;
     Tokenizer: TLapeTokenizerBase;
 
     constructor Create; override;
+    destructor Destroy; override;
     procedure Reset; virtual;
-    procedure Delete(StartOffset, Len: Integer); virtual;
+    procedure Delete(StartOffset, Len: Integer); overload; virtual;
+    procedure Delete(StartOffset, Len: Integer; var Offset: Integer); overload; virtual;
+
+    function addCodePointer(p: PUInt32): Integer; virtual;
+    procedure deleteCodePointer(i: Integer); overload; virtual;
+    procedure deleteCodePointer(p: PUInt32); overload; virtual;
+    procedure adjustCodePointers(Pos, Offset: Integer); virtual;
 
     procedure EnsureCodeGrowth(Len: Word); virtual;
     function getCodeOffset(Offset: Integer): Integer; virtual;
@@ -109,16 +118,26 @@ end;
 
 constructor TLapeCodeEmitterBase.Create;
 begin
-  inherited Create();
+  inherited;
 
+  FCodePointers := TLapeCodePointers.Create(nil, dupIgnore);
   CodeGrowSize := 256;
   Reset();
 end;
 
+destructor TLapeCodeEmitterBase.Destroy;
+begin
+  FCodePointers.Free();
+  inherited;
+end;
+
 procedure TLapeCodeEmitterBase.Reset;
+var
+  i: Integer;
 begin
   FCodeSize := CodeGrowSize;
   SetLength(FCode, FCodeSize);
+  FCodePointers.Clear();
 
   {$IFDEF Lape_SmallCode}
   FCodeStart := 0;
@@ -138,6 +157,41 @@ begin
   for i := StartOffset + Len to FCodeCur - 1 do
     FCode[i - Len] := FCode[i];
   Dec(FCodeCur, Len);
+  adjustCodePointers(StartOffset, -Len);
+end;
+
+procedure TLapeCodeEmitterBase.Delete(StartOffset, Len: Integer; var Offset: Integer);
+begin
+  Delete(StartOffset, Len);
+  if (Offset > StartOffset) then
+    Dec(Offset, Len);
+end;
+
+function TLapeCodeEmitterBase.addCodePointer(p: PUInt32): Integer;
+begin
+  if (p <> nil) then
+    Result := FCodePointers.add(p)
+  else
+    Result := -1;
+end;
+
+procedure TLapeCodeEmitterBase.deleteCodePointer(i: Integer);
+begin
+  FCodePointers.Delete(i);
+end;
+
+procedure TLapeCodeEmitterBase.deleteCodePointer(p: PUInt32);
+begin
+  FCodePointers.DeleteItem(p);
+end;
+
+procedure TLapeCodeEmitterBase.adjustCodePointers(Pos, Offset: Integer);
+var
+  i: Integer;
+begin
+  for i := 0 to FCodePointers.Count - 1 do
+    if (FCodePointers[i]^ > Pos) then
+      Inc(FCodePointers[i]^, Offset);
 end;
 
 procedure TLapeCodeEmitterBase.EnsureCodeGrowth(Len: Word);

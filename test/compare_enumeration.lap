@@ -21,4 +21,4 @@ begin
 
   PrintBool('1 in [2, 3] is ', enOne in [enTwo, enThree]);
   PrintBool('2 in [2, 3] is ', enTwo in [enTwo, enThree]);
-nd;
+end;

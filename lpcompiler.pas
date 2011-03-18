@@ -99,7 +99,9 @@ type
     function addGlobalType(t: TLapeType; AName: lpString = ''): TLapeType; overload; virtual;
     function addGlobalType(s: lpString; AName: lpString): TLapeType; overload; virtual;
 
-    function addGlobalFunc(s: lpString; Value: Pointer): TLapeGlobalVar; virtual;
+    function addGlobalFunc(s: lpString; Value: Pointer): TLapeGlobalVar; overload; virtual;
+    function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
 
     property Tokenizer: TLapeTokenizerBase read FTokenizer write setTokenizer;
     property Tree: TLapeTree_Base read FTree;
@@ -119,6 +121,10 @@ begin
     FTree.Free();
   FTree := nil;
 
+  if (getDeclaration('String') = nil) then
+    addGlobalType(getBaseType(ltString).createCopy(), 'String');
+  if (getDeclaration('Char') = nil) then
+    addGlobalType(getBaseType(ltChar).createCopy(), 'Char');
   if (getDeclaration('True') = nil) then
     addGlobalVar(True, 'True').isConstant := True;
   if (getDeclaration('False') = nil) then
@@ -1698,6 +1704,16 @@ begin
     FTokenizer := p;
     FStackInfo := t;
   end;
+end;
+
+function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_ExternalMethod(addManagedType(TLapeType_ExternalMethod.Create(Self, AParams, AParTypes, AParDefaults, ARes))).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalFunc(AParams, AParTypes, AParDefaults, nil, Value, AName);
 end;
 
 end.

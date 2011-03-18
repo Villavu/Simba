@@ -1829,6 +1829,7 @@ begin
   Assert(FMethod <> nil);
   if_o := FCompiler.Emitter._JmpR(0, Offset, @DocPos);
   PUInt32(FMethod.Ptr)^ := FCompiler.Emitter.getCodeOffset(Offset);
+  FCompiler.Emitter.addCodePointer(FMethod.Ptr);
   FCompiler.IncStackInfo(FStackInfo, Offset, True, @DocPos);
   Result := FStatements.Compile(Offset);
   FCompiler.DecStackInfo(Offset, True, True, False, @DocPos);

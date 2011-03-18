@@ -339,6 +339,7 @@ type
   public
     constructor Create(ArrayType: TLapeType; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
     function VarToString(v: Pointer): lpString; override;
+    function CreateCopy: TLapeType; override;
 
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
     function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
@@ -392,6 +393,7 @@ type
   public
     constructor Create(ACompiler: TLapeCompilerBase; ASize: UInt8 = High(UInt8); AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
     function VarToString(v: Pointer): lpString; override;
+
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
     function NewGlobalVar(Str: ShortString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
 
@@ -608,7 +610,7 @@ const
 implementation
 
 uses
-  lpeval, lpexceptions;
+  lpeval, lpexceptions, lpinterpreter;
 
 procedure ClearBaseTypes(var Arr: TLapeBaseTypes);
 var
@@ -2092,6 +2094,13 @@ begin
   Result := Result + ']';
 end;
 
+function TLapeType_DynArray.CreateCopy: TLapeType;
+type TLapeClassType = class of TLapeType_DynArray;
+begin
+  Result := TLapeClassType(Self.ClassType).Create(FPType, FCompiler, Name, @DocPos);
+  Result.FBaseTYpe := FBaseType;
+end;
+
 function TLapeType_DynArray.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
 begin
   if (op = op_Index) then
@@ -2229,6 +2238,7 @@ function TLapeType_StaticArray.CreateCopy: TLapeType;
 type TLapeClassType = class of TLapeType_StaticArray;
 begin
   Result := TLapeClassType(Self.ClassType).Create(FRange, FPType, FCompiler, Name, @DocPos);
+  Result.FBaseTYpe := FBaseType;
 end;
 
 function TLapeType_StaticArray.NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -3726,8 +3736,8 @@ begin
     if Emit then
       if (FStackInfo.TotalSize > 0) or InFunction then
       begin
-        //if InFunction and (FStackInfo.TotalNoParamSize <= 0) then
-        //  Emitter.Delete(FStackInfo.CodePos, ocSize + SizeOf(UInt16));
+        if InFunction and (FStackInfo.TotalNoParamSize <= 0) then
+          Emitter.Delete(FStackInfo.CodePos, ocSize + SizeOf(UInt16), Offset);
 
         Emitter._DecTry(Offset, Pos);
         Emitter._IncTry(Offset - FStackInfo.CodePos, FStackInfo.CodePos, Pos);
@@ -3763,14 +3773,14 @@ begin
             Emitter._ExpandVarAndInit(FStackInfo.TotalSize, FStackInfo.CodePos, Pos)
           else
             Emitter._ExpandVar(FStackInfo.TotalSize, FStackInfo.CodePos, Pos)
-        else //if (FStackInfo.TotalNoParamSize > 0) then
+        else if (FStackInfo.TotalNoParamSize > 0) then
           if FStackInfo.NeedInitialization then
             Emitter._GrowVarAndInit(FStackInfo.TotalNoParamSize, FStackInfo.CodePos, Pos)
           else
             Emitter._GrowVar(FStackInfo.TotalNoParamSize, FStackInfo.CodePos, Pos);
       end
-      ;//else
-      //  Emitter.Delete(FStackInfo.CodePos, ocSize*2 + SizeOf(UInt16) + SizeOf(Int32));
+      else
+        Emitter.Delete(FStackInfo.CodePos, ocSize*2 + SizeOf(UInt16) + SizeOf(Int32), Offset);
 
     if DoFree then
       FStackInfo.Free();
