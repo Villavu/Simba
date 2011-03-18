@@ -192,7 +192,7 @@ begin
     Compiler.addGlobalVar(func1.NewGlobalVar(@MyRandom, 'Random'));
     //Compiler.addGlobalVar(func2.NewGlobalVar(@MyIntToString, 'IntToStr'));
     Compiler.addGlobalFunc('function IntToStr(x: Int32): AnsiString; overload;', @MyIntToString);
-    Compiler.addGlobalFunc('function IntToStr(x: Int64): AnsiString; overload;', @MyInt64ToString);
+    Compiler.addGlobalFunc('function IntToStr(x: Int64 = 123): AnsiString; overload;', @MyInt64ToString);
     Compiler.addGlobalVar(func3.NewGlobalVar(@MyStringToInt, 'StrToInt'));
 
     Compiler.addGlobalVar(Compiler.addGlobalType('record x, y: Int32; end', 'TPoint'), @tpa[0], 'myPoint');
@@ -208,9 +208,6 @@ begin
     Compiler.addGlobalVar(rec.NewGlobalVarP(@q), 'q');
     Compiler.addGlobalVar(Compiler.getPointerType(rec).NewGlobalVar(@q, 'qp'));
     Compiler.addGlobalVar(Compiler.getPointerType(ttpa).NewGlobalVar(@tpa, 'tpap'));
-    Compiler.addGlobalVar(True, 'True');
-    Compiler.addGlobalVar(False, 'False');
-    //Compiler.addGlobalVar(nil, 'nil');
 
     try
       if Compiler.Compile() then

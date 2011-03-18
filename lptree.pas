@@ -1305,7 +1305,7 @@ begin
               else
                 LapeException(lpeVariableExpected, Self.DocPos);
           end
-          else if (FParams[i] <> nil) then
+          else if (i < FParams.Count) and (FParams[i] <> nil) then
             LapeException(lpeNoDefaultForParam, [i + 1], FParams[i].DocPos)
           else
             LapeException(lpeNoDefaultForParam, [i + 1], Self.DocPos)

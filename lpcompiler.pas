@@ -118,6 +118,13 @@ begin
   if FreeTree and (FTree <> nil) then
     FTree.Free();
   FTree := nil;
+
+  if (getDeclaration('True') = nil) then
+    addGlobalVar(True, 'True').isConstant := True;
+  if (getDeclaration('False') = nil) then
+    addGlobalVar(False, 'False').isConstant := True;
+  if (getDeclaration('nil') = nil) then
+    addGlobalVar(nil, 'nil').isConstant := True;
 end;
 
 function TLapeCompiler.getPDocPos: PDocPos;
