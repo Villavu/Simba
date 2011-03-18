@@ -49,7 +49,7 @@ type
     function ParseIdentifierList: TStringArray; virtual;
     function ParseBlockList(StopAfterBeginEnd: Boolean = True): TLapeTree_StatementList; virtual;
     function ParseMethodHeader(out Name: lpString; addToScope: Boolean = True): TLapeType_Method;
-    function ParseMethod(FuncForwards: TLapeFuncForwards): TLapeTree_Method;
+    function ParseMethod(FuncForwards: TLapeFuncForwards; isExternal: Boolean = False): TLapeTree_Method;
     function ParseType(TypeForwards: TLapeTypeForwards): TLapeType; virtual;
     procedure ParseTypeBlock; virtual;
     function ParseVarBlock: TLapeTree_VarList; virtual;
@@ -98,6 +98,8 @@ type
 
     function addGlobalType(t: TLapeType; AName: lpString = ''): TLapeType; overload; virtual;
     function addGlobalType(s: lpString; AName: lpString): TLapeType; overload; virtual;
+
+    function addGlobalFunc(s: lpString; Value: Pointer): TLapeGlobalVar; virtual;
 
     property Tokenizer: TLapeTokenizerBase read FTokenizer write setTokenizer;
     property Tree: TLapeTree_Base read FTree;
@@ -388,9 +390,9 @@ begin
   end;
 end;
 
-function TLapeCompiler.ParseMethod(FuncForwards: TLapeFuncForwards): TLapeTree_Method;
+function TLapeCompiler.ParseMethod(FuncForwards: TLapeFuncForwards; isExternal: Boolean = False): TLapeTree_Method;
 var
-  t: TLapeType_InternalMethod;
+  t: TLapeType_Method;
   n: lpString;
   d: TDocPos;
   decl: TLapeDeclaration;
@@ -399,8 +401,11 @@ begin
   IncStackInfo();
   d := FTokenizer.DocPos;
   try
-    t := TLapeType_InternalMethod(ParseMethodHeader(n));
-    if (n = '') or (not (t is TLapeType_InternalMethod)) then
+    if isExternal then
+      t := TLapeType_ExternalMethod(ParseMethodHeader(n, False))
+    else
+      t := TLapeType_InternalMethod(ParseMethodHeader(n));
+    if (n = '') then
       LapeException(lpeBlockExpected, FTokenizer.DocPos);
 
     FTokenizer.Expect(tk_sym_SemiColon, True, False);
@@ -408,7 +413,11 @@ begin
       FTokenizer.NextNoJunk();
 
     decl := getDeclaration(n, FStackInfo.Owner);
-    Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(t.NewGlobalVar(0), FStackInfo.Owner)), FStackInfo, Self, @d);
+    if isExternal then
+      Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(TLapeType_ExternalMethod(t).NewGlobalVar(nil), FStackInfo.Owner)), FStackInfo, Self, @d)
+    else
+      Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(TLapeType_InternalMethod(t).NewGlobalVar(0), FStackInfo.Owner)), FStackInfo, Self, @d);
+
     try
       if (FTokenizer.Tok = tk_kw_Overload) then
       begin
@@ -487,6 +496,9 @@ begin
         FreeAndNil(Result);
         Exit;
       end;
+
+      if isExternal then
+        Exit;
 
       if (FuncForwards <> nil) and (decl is TLapeGlobalVar) then
         FuncForwards.DeleteItem(TLapeGlobalVar(decl));
@@ -1646,6 +1658,34 @@ begin
     FStackInfo := nil;
     ParseTypeBlock();
     Result := FGlobalDeclarations.Items[FGlobalDeclarations.Items.Count - 1] as TLapeType;
+  finally
+    FTokenizer.Free();
+    FTokenizer := p;
+    FStackInfo := t;
+  end;
+end;
+
+function TLapeCompiler.addGlobalFunc(s: lpString; Value: Pointer): TLapeGlobalVar;
+var
+  t: TLapeStackInfo;
+  p: TLapeTokenizerBase;
+  f: TLapeTree_Method;
+begin
+  t := FStackInfo;
+  p := FTokenizer;
+  FTokenizer := TLapeTokenizerString.Create(s + ';');
+  try
+    FStackInfo := nil;
+    f := ParseMethod(nil, True);
+    try
+      if (f.Method = nil) or (f.Method.VarType = nil) or (not (f.Method.VarType is TLapeType_ExternalMethod)) then
+        LapeException(lpeInvalidEvaluation);
+
+      Result := f.Method;
+      PPointer(Result.Ptr)^ := Value;
+    finally
+      FreeAndNil(f);
+    end;
   finally
     FTokenizer.Free();
     FTokenizer := p;

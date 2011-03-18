@@ -1804,7 +1804,7 @@ end;
 constructor TLapeTree_Method.Create(AMethod: TLapeGlobalVar; AStackInfo: TLapeStackInfo; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil);
 begin
   Assert(AMethod <> nil);
-  Assert(AMethod.VarType is TLapeType_InternalMethod);
+  Assert(AMethod.VarType is TLapeType_Method);
   Assert(AStackInfo <> nil);
   inherited Create(ACompiler, ADocPos);
 

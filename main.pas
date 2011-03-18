@@ -49,7 +49,6 @@ uses
 type
   TPointArray = array of TPoint;
   T2DPointArray = array of TPointArray;
-  TTestArray = array[0..10] of string;
 
   _rec2 = record
     a: Integer;
@@ -65,7 +64,10 @@ type
 procedure TForm1.btnGoClick(Sender: TObject);
 var
   i: Integer;
+  a: class of TForm;
 begin
+  a := TForm1;
+  WriteLn(PtrUInt(a));
   for i := 0 to lpgList.Count - 1 do
     WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
 end;
@@ -95,6 +97,11 @@ begin
   PlpString(Result)^ := IntToStr(PInt32(Params^[0])^);
 end;
 
+procedure MyInt64ToString(Params: PParamArray; Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PInt64(Params^[0])^);
+end;
+
 procedure MyStringToInt(Params: PParamArray; Result: Pointer);
 begin
   PInt32(Result)^ := StrToInt(PlpString(Params^[0])^);
@@ -102,7 +109,7 @@ end;
 
 procedure MyStupidProc(Params: PParamArray);
 begin
-  raise Exception.Create('Stupid Proc!');
+  raise Exception.Create('Stupid Proc!!');
 end;
 
 var
@@ -183,7 +190,9 @@ begin
     //Compiler.addGlobalVar(proc1.NewGlobalVar(@MyWriteLn, 'WriteLn'));
     Compiler.addGlobalVar(overloaded_proc.NewGlobalVar('WriteLn'));
     Compiler.addGlobalVar(func1.NewGlobalVar(@MyRandom, 'Random'));
-    Compiler.addGlobalVar(func2.NewGlobalVar(@MyIntToString, 'IntToStr'));
+    //Compiler.addGlobalVar(func2.NewGlobalVar(@MyIntToString, 'IntToStr'));
+    Compiler.addGlobalFunc('function IntToStr(x: Int32): AnsiString; overload;', @MyIntToString);
+    Compiler.addGlobalFunc('function IntToStr(x: Int64): AnsiString; overload;', @MyInt64ToString);
     Compiler.addGlobalVar(func3.NewGlobalVar(@MyStringToInt, 'StrToInt'));
 
     Compiler.addGlobalVar(Compiler.addGlobalType('record x, y: Int32; end', 'TPoint'), @tpa[0], 'myPoint');
