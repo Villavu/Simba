@@ -460,13 +460,13 @@ type
     property ParamSize: Integer read getParamSize;
   end;
 
-  TLapeType_ExternalMethod = class(TLapeType_Method)
+  TLapeType_ImportedMethod = class(TLapeType_Method)
   public
     constructor Create(ACompiler: TLapeCompilerBase; AParams: TLapeParameterList; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); override;
     function NewGlobalVar(Ptr: Pointer = nil; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
   end;
 
-  TLapeType_InternalMethod = class(TLapeType_Method)
+  TLapeType_ScriptMethod = class(TLapeType_Method)
   public
     constructor Create(ACompiler: TLapeCompilerBase; AParams: TLapeParameterList; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); override;
     function NewGlobalVar(Offset: UInt32; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
@@ -3028,7 +3028,6 @@ begin
     AParams := TLapeParameterList.Create(NullPar, dupAccept);
   FParams := AParams;
   Res := ARes;
-  FBaseType := ltExternalProc;
 end;
 
 constructor TLapeType_Method.Create(ACompiler: TLapeCompilerBase; AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil);
@@ -3069,25 +3068,25 @@ begin
   FParams.Add(p);
 end;
 
-constructor TLapeType_ExternalMethod.Create(ACompiler: TLapeCompilerBase; AParams: TLapeParameterList; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil);
+constructor TLapeType_ImportedMethod.Create(ACompiler: TLapeCompilerBase; AParams: TLapeParameterList; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil);
 begin
   inherited;
-  FBaseType := ltExternalProc;
+  FBaseType := ltImportedMethod;
 end;
 
-function TLapeType_ExternalMethod.NewGlobalVar(Ptr: Pointer = nil; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+function TLapeType_ImportedMethod.NewGlobalVar(Ptr: Pointer = nil; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
 begin
   Result := inherited NewGlobalVarP(nil, AName, ADocPos);
   PPointer(Result.Ptr)^ := Ptr;
 end;
 
-constructor TLapeType_InternalMethod.Create(ACompiler: TLapeCompilerBase; AParams: TLapeParameterList; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil);
+constructor TLapeType_ScriptMethod.Create(ACompiler: TLapeCompilerBase; AParams: TLapeParameterList; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil);
 begin
   inherited;
-  FBaseType := ltProc;
+  FBaseType := ltScriptMethod;
 end;
 
-function TLapeType_InternalMethod.NewGlobalVar(Offset: UInt32; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+function TLapeType_ScriptMethod.NewGlobalVar(Offset: UInt32; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
 begin
   Result := inherited NewGlobalVarP(nil, AName, ADocPos);
   PUInt32(Result.Ptr)^ := Offset;

@@ -132,8 +132,6 @@ begin
 end;
 
 procedure TLapeCodeEmitterBase.Reset;
-var
-  i: Integer;
 begin
   FCodeSize := CodeGrowSize;
   SetLength(FCode, FCodeSize);

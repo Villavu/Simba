@@ -23,6 +23,7 @@ resourcestring
   lpeBlockExpected = 'Block expected';
   lpeCannotAssign = 'Target cannot be assigned to';
   lpeCannotEvalConstProc = 'Procedures cannot be used for constant evaluation';
+  lpeCannotEvalRunTime = 'Cannot be evaluated at runtime';
   lpeCannotInvoke = 'Cannot invoke identifier';
   lpeCannotOverload = 'Cannot overload function';
   lpeClosingParenthesisExpected = 'Closing parenthesis expected';
@@ -63,6 +64,7 @@ resourcestring
   lpeUnknownParent = 'Cannot find parent declaration';
   lpeVariableExpected = 'Variable expected';
   lpeVariableOfTypeExpected = 'Expected variable of type "%s", got "%s"';
+  lpeWrongNumberParams = 'Wrong number of parameters found, expected %d';
 
 procedure LapeException(Msg: string); overload; inline;
 procedure LapeException(Msg: string; DocPos: TDocPos); overload; inline;

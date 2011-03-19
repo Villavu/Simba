@@ -64,10 +64,7 @@ type
 procedure TForm1.btnGoClick(Sender: TObject);
 var
   i: Integer;
-  a: class of TForm;
 begin
-  a := TForm1;
-  WriteLn(PtrUInt(a));
   for i := 0 to lpgList.Count - 1 do
     WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
 end;
@@ -137,7 +134,7 @@ var
   rec, rec2, tp: TLapeType_Record;
   ttpa, t2dpa: TLapeType_DynArray;
   q: _rec;
-  proc1, proc2, proc3, func1, func2, func3: TLapeType_ExternalMethod;
+  proc1, proc2, proc3, func1, func2, func3: TLapeType_ImportedMethod;
   overloaded_proc: TLapeType_OverloadedMethod;
   tpa: TPointArray;
   atpa: T2DPointArray;
@@ -166,13 +163,13 @@ begin
 
     a := Compiler.addGlobalVar(123, 'a');
 
-    proc1 := TLapeType_ExternalMethod.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)]);
-    proc2 := TLapeType_ExternalMethod.Create(Compiler, [Compiler.getBaseType(ltInt64)], [lptNormal], [TLapeGlobalVar(nil)]);
-    proc3 := TLapeType_ExternalMethod.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)]);
+    proc1 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)]);
+    proc2 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltInt64)], [lptNormal], [TLapeGlobalVar(nil)]);
+    proc3 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)]);
 
-    func1 := TLapeType_ExternalMethod.Create(Compiler, [Compiler.getBaseType(ltInt32), Compiler.getBaseType(ltInt32)], [lptNormal, lptNormal], [nil, a], Compiler.getBaseType(ltInt32));
-    func2 := TLapeType_ExternalMethod.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltString));
-    func3 := TLapeType_ExternalMethod.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltInt32));
+    func1 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltInt32), Compiler.getBaseType(ltInt32)], [lptNormal, lptNormal], [nil, a], Compiler.getBaseType(ltInt32));
+    func2 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltString));
+    func3 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltInt32));
 
     overloaded_proc := TLapeType_OverloadedMethod.Create(Compiler, nil);
     overloaded_proc.addMethod(proc1.NewGlobalVar(@MyWriteLn_String));

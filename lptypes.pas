@@ -96,7 +96,7 @@ type
     ltPointer,                                                                //Pointer
     ltRecord, ltUnion,                                                        //Struct
     ltDynArray, ltStaticArray,                                                //Array
-    ltProc, ltExternalProc                                                    //Methods
+    ltScriptMethod, ltImportedMethod                                          //Methods
   );
   LapeIntegerTypeRange = ltUInt8..ltInt64;
 
@@ -324,10 +324,10 @@ const
   LapeSetTypes = [ltSmallSet..ltLargeSet];
   LapeArrayTypes = [ltDynArray..ltStaticArray] + LapeStringTypes;
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
-  LapePointerTypes = [ltPointer, ltDynArray, ltProc, ltExternalProc] + LapeStringTypes - [ltShortString];
+  LapePointerTypes = [ltPointer, ltDynArray, ltScriptMethod, ltImportedMethod] + LapeStringTypes - [ltShortString];
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes + [ltShortString];
   LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes;
-  LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltProc, ltExternalProc, ltShortString];
+  LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltScriptMethod, ltImportedMethod, ltShortString];
 
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
   BinaryOperators = [op_AND, op_NOT, op_OR, op_XOR];
