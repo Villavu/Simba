@@ -1850,11 +1850,11 @@ begin
     if (a.VarType.BaseType = ltPointer) then
       with TLapeTree_Operator.Create(op_Index, FCompiler, @DocPos) do
       try
-        Dest := FDest;
+        Dest := Self.Dest;
         Left := TLapeTree_ResVar.Create(a, FCompiler, @DocPos);
         Right := TLapeTree_ResVar.Create(b, FCompiler, @DocPos);
         Result := Compile(Offset);
-        FDest := Dest;
+        Self.Dest := Dest;
       finally
         Free();
       end
@@ -1864,7 +1864,7 @@ begin
       a.VarType := FCompiler.getBaseType(a.VarType.BaseIntType);
       with TLapeTree_Operator.Create(op_Plus, FCompiler, @DocPos) do
       try
-        Dest := FDest;
+        Dest := Self.Dest;
         Left := TLapeTree_ResVar.Create(a, FCompiler, @DocPos);
         Right := TLapeTree_ResVar.Create(b, FCompiler, @DocPos);
         Result := Compile(Offset);
@@ -1880,8 +1880,8 @@ begin
           setIdent(TLapeTree_VarType.Create(a.VarType, FCompiler, @DocPos));
           Result := inherited;
           Result.VarType := t;
-          if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
-            FDest := c;
+          if (Self.Dest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
+            Self.Dest := c;
         finally
           FParams.Delete(0).Free();
           addParam(f);
