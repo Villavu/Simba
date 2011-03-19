@@ -241,6 +241,18 @@ begin
 
   FInternalMethodMap := TLapeInternalMethodMap.Create(nil);
   FInternalMethodMap['SizeOf'] := TLapeTree_InternalMethod_SizeOf;
+  FInternalMethodMap['Ord'] := TLapeTree_InternalMethod_Ord;
+  FInternalMethodMap['Low'] := TLapeTree_InternalMethod_Low;
+  FInternalMethodMap['High'] := TLapeTree_InternalMethod_High;
+  FInternalMethodMap['Length'] := TLapeTree_InternalMethod_Length;
+  FInternalMethodMap['Succ'] := TLapeTree_InternalMethod_Succ;
+  FInternalMethodMap['Pred'] := TLapeTree_InternalMethod_Pred;
+  FInternalMethodMap['Inc'] := TLapeTree_InternalMethod_Inc;
+  FInternalMethodMap['Dec'] := TLapeTree_InternalMethod_Dec;
+
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high');
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length');
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeStrLen, '!strlen');
 
   setTokenizer(ATokenizer); //Calls Reset(), which initializes the FCode array
 end;

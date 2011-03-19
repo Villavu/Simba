@@ -103,13 +103,72 @@ type
   public
     constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); override;
     function isConstant: Boolean; override;
-    function Compile(var Offset: Integer): TResVar; override;
   end;
 
   TLapeTree_InternalMethod_SizeOf = class(TLapeTree_InternalMethod)
   public
+    function isConstant: Boolean; override;
     function resType: TLapeType; override;
     function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_Ord = class(TLapeTree_InternalMethod)
+  public
+    function resType: TLapeType; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_Low = class(TLapeTree_InternalMethod)
+  public
+    function isConstant: Boolean; override;
+    function resType: TLapeType; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_High = class(TLapeTree_InternalMethod)
+  public
+    function isConstant: Boolean; override;
+    function resType: TLapeType; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_Length = class(TLapeTree_InternalMethod)
+  public
+    function isConstant: Boolean; override;
+    function resType: TLapeType; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_Succ = class(TLapeTree_InternalMethod)
+  public
+    function resType: TLapeType; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_Pred = class(TLapeTree_InternalMethod)
+  public
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_Inc = class(TLapeTree_InternalMethod)
+  public
+    function isConstant: Boolean; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_Dec = class(TLapeTree_InternalMethod)
+  public
+    function isConstant: Boolean; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
   end;
 
   TLapeTree_Operator = class(TLapeTree_DestExprBase)
@@ -141,6 +200,7 @@ type
   public
     constructor Create(AResVar: TResVar; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; virtual;
 
+    function isConstant: Boolean; override;
     function resType: TLapeType; override;
     function Evaluate: TLapeGlobalVar; override;
     function Compile(var Offset: Integer): TResVar; override;
@@ -480,7 +540,7 @@ end;
 procedure TLapeTree_Base.setParent(Parent: TLapeTree_Base);
 begin
   Assert((Parent = nil) or (Parent.Compiler = FCompiler));
-  if (FParent <> nil) then
+  if (FParent <> nil) and (FParent <> Parent) then
     FParent.DeleteChild(Self);
   FParent := Parent;
 end;
@@ -1026,7 +1086,7 @@ var
     end;
   end;
 
-  function DoExternalMethod(f: TLapeGlobalVar): TLapeGlobalVar;
+  function DoImportedMethod(f: TLapeGlobalVar): TLapeGlobalVar;
   var
     i: Integer;
     t: TLapeGlobalVar;
@@ -1106,7 +1166,7 @@ begin
     else if (f.Ptr = nil) or (not (f.VarType.BaseType in [ltImportedMethod])) then
       LapeException(lpeCannotInvoke, FIdent.DocPos);
 
-    Result := DoExternalMethod(f);
+    Result := DoImportedMethod(f);
   end;
 end;
 
@@ -1142,10 +1202,13 @@ var
       end
       else if VarType.CompatibleWith(Result.VarType) then
       begin
-        if (FDest.VarPos.MemPos <> NullResVar.VarPos.MemPos) then
+        if (FDest.VarPos.MemPos <> NullResVar.VarPos.MemPos) and (FDest.VarType <> nil) and VarType.Equals(FDest.VarType) then
           b := FDest
         else
-          b := getResVar(Compiler.getTempVar(b.VarType));
+        begin
+          setNullResVar(FDest);
+          b := getResVar(Compiler.getTempVar(VarType));
+        end;
 
         tmp := Result;
         Result := VarType.Eval(op_Assign, a, b, Result, Offset, @Self.DocPos);
@@ -1158,7 +1221,7 @@ var
     end;
   end;
 
-  function DoInternalMethod(a: TResVar; c: TResVarArray): TResVar;
+  function DoScriptMethod(a: TResVar; c: TResVarArray): TResVar;
   var
     i: Integer;
     b, e, tmp: TResVar;
@@ -1240,7 +1303,7 @@ var
     end;
   end;
 
-  function DoExternalMethod(a: TResVar; c: TResVarArray): TResVar;
+  function DoImportedMethod(a: TResVar; c: TResVarArray): TResVar;
   var
     i: Integer;
     b, e, tmp: TResVar;
@@ -1351,9 +1414,9 @@ begin
         end;
 
       if (a.VarType.BaseType = ltScriptMethod) then
-        Result := DoInternalMethod(a, c)
+        Result := DoScriptMethod(a, c)
       else
-        Result := DoExternalMethod(a, c);
+        Result := DoImportedMethod(a, c);
     end;
 
     setNullResVar(a, 1);
@@ -1369,12 +1432,12 @@ end;
 
 function TLapeTree_InternalMethod.isConstant: Boolean;
 begin
-  Result := True;
+  Result := (FParams.Count = 1) and (FParams[0] <> nil) and FParams[0].isConstant();
 end;
 
-function TLapeTree_InternalMethod.Compile(var Offset: Integer): TResVar;
+function TLapeTree_InternalMethod_SizeOf.isConstant: Boolean;
 begin
-  LapeException(lpeCannotEvalRunTime, DocPos);
+  Result := True;
 end;
 
 function TLapeTree_InternalMethod_SizeOf.resType: TLapeType;
@@ -1390,20 +1453,586 @@ begin
   if (FParams.Count <> 1) or (FParams[0] = nil) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
+  t := nil;
   v := FParams[0].Evaluate();
-  try
-    t := nil;
-    if (v <> nil) then
-      t := v.VarType;
+
+  if (v <> nil) then
+    t := v.VarType;
+  if (t <> nil) and (t is TLapeType_Type) then
+    t := TLapeType_Type(t).TType;
+  if (t = nil) then
+    LapeException(lpeInvalidEvaluation, DocPos);
+
+  Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(t.Size))));
+end;
+
+function TLapeTree_InternalMethod_SizeOf.Compile(var Offset: Integer): TResVar;
+begin
+  Result := NullResVar;
+  LapeException(lpeCannotEvalRunTime, DocPos);
+end;
+
+function TLapeTree_InternalMethod_Ord.resType: TLapeType;
+var
+  t: TLapeType;
+begin
+  Result := nil;
+  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  begin
+    t := FParams[0].resType();
     if (t <> nil) and (t is TLapeType_Type) then
       t := TLapeType_Type(t).TType;
-    if (t = nil) then
+    if (t <> nil) then
+      Result := FCompiler.getBaseType(t.BaseIntType);
+  end;
+end;
+
+function TLapeTree_InternalMethod_Ord.Evaluate: TLapeGlobalVar;
+begin
+  if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  setIdent(TLapeTree_VarType.Create(resType(), FCompiler, @DocPos));
+  Result := inherited;
+end;
+
+function TLapeTree_InternalMethod_Ord.Compile(var Offset: Integer): TResVar;
+begin
+  if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  setIdent(TLapeTree_VarType.Create(resType(), FCompiler, @DocPos));
+  Result := inherited;
+end;
+
+function TLapeTree_InternalMethod_Low.isConstant: Boolean;
+begin
+  Result := True;
+end;
+
+function TLapeTree_InternalMethod_Low.resType: TLapeType;
+var
+  t: TLapeType;
+begin
+  Result := nil;
+  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  begin
+    t := FParams[0].resType();
+    if (t <> nil) and (t is TLapeType_Type) then
+      t := TLapeType_Type(t).TType;
+    if (t <> nil) and (t.BaseType in LapeOrdinalTypes) then
+      Result := t
+    else if (t <> nil) and (t.BaseType in LapeArrayTypes - LapeStringTypes + [ltShortString]) then
+      Result := FCompiler.getBaseType(ltInt32);
+  end;
+end;
+
+function TLapeTree_InternalMethod_Low.Evaluate: TLapeGlobalVar;
+var
+  v: TLapeGlobalVar;
+  t: TLapeType;
+begin
+  if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  t := nil;
+  v := FParams[0].Evaluate();
+
+  if (v <> nil) then
+    t := v.VarType;
+  if (t <> nil) and (t is TLapeType_Type) then
+    t := TLapeType_Type(t).TType;
+  if (t = nil) or (not (t.BaseType in LapeOrdinalTypes + LapeArrayTypes  - LapeStringTypes + [ltShortString])) then
+    LapeException(lpeInvalidEvaluation, DocPos);
+
+  if (t is TLapeType_SubRange) then
+    with TLapeType_SubRange(t) do
+      Result := TLapeGlobalVar(FCompiler.addManagedVar(t.NewGlobalVarStr(IntToStr(Range.Lo))))
+  else if (t is TLapeType_StaticArray) then
+    with TLapeType_StaticArray(t) do
+      Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(Range.Lo))))
+  else if (t is TLapeType_DynArray) then
+    Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr('0')))
+  else
+    Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(t.BaseIntType).NewGlobalVarP(LapeTypeLow[t.BaseIntType])))
+end;
+
+function TLapeTree_InternalMethod_Low.Compile(var Offset: Integer): TResVar;
+begin
+  Result := NullResVar;
+  LapeException(lpeCannotEvalRunTime, DocPos);
+end;
+
+function TLapeTree_InternalMethod_High.isConstant: Boolean;
+var
+  t: TLapeType;
+begin
+  Result := True;
+  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  begin
+    t := FParams[0].resType();
+    if (t <> nil) and (t is TLapeType_Type) then
+      t := TLapeType_Type(t).TType;
+    if (t <> nil) and (t.BaseType = ltDynArray) then
+      Result := False;
+  end;
+end;
+
+function TLapeTree_InternalMethod_High.resType: TLapeType;
+var
+  t: TLapeType;
+begin
+  Result := nil;
+  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  begin
+    t := FParams[0].resType();
+    if (t <> nil) and (t is TLapeType_Type) then
+      t := TLapeType_Type(t).TType;
+    if (t <> nil) and (t.BaseType in LapeOrdinalTypes) then
+      Result := t
+    else if (t <> nil) and (t.BaseType in LapeArrayTypes - LapeStringTypes + [ltShortString]) then
+      Result := FCompiler.getBaseType(ltInt32);
+  end;
+end;
+
+function TLapeTree_InternalMethod_High.Evaluate: TLapeGlobalVar;
+var
+  v: TLapeGlobalVar;
+  t: TLapeType;
+begin
+  if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  t := nil;
+  v := FParams[0].Evaluate();
+
+  if (v <> nil) then
+    t := v.VarType;
+  if (t <> nil) and (t is TLapeType_Type) then
+    t := TLapeType_Type(t).TType;
+  if (t = nil) or (not (t.BaseType in LapeOrdinalTypes + LapeArrayTypes - LapeStringTypes + [ltShortString])) then
+    LapeException(lpeInvalidEvaluation, DocPos);
+
+  if (t is TLapeType_SubRange) then
+    with TLapeType_SubRange(t) do
+      Result := TLapeGlobalVar(FCompiler.addManagedVar(t.NewGlobalVarStr(IntToStr(Range.Hi))))
+  else if (t is TLapeType_StaticArray) then
+    with TLapeType_StaticArray(t) do
+      Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(Range.Hi))))
+  else if (t is TLapeType_DynArray) then
+    LapeException(lpeCannotEvalConst, DocPos)
+  else
+    Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(t.BaseIntType).NewGlobalVarP(LapeTypeHigh[t.BaseIntType])))
+end;
+
+function TLapeTree_InternalMethod_High.Compile(var Offset: Integer): TResVar;
+begin
+  if isConstant() or (resType() = nil) then
+    LapeException(lpeCannotEvalRunTime, DocPos)
+  else if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  Result := NullResVar;
+  Result.VarPos.MemPos := mpStack;
+  Result.VarType := Compiler.getBaseType(ltPointer);
+  FCompiler.Emitter._Eval(getEvalProc(op_Addr, ltUnknown, ltUnknown), Result, FParams[0].Compile(Offset), NullResVar, Offset, @Self.DocPos);
+
+  Result := NullResVar;
+  Result.VarType := FCompiler.getBaseType(ltInt32);
+  if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
+    FDest := VarResVar;
+  getDestVar(FDest, Result, op_Unknown, FCompiler);
+  FCompiler.Emitter._InvokeExternalFunc(ResVarToIMemPos(getResVar(FCompiler.getDeclaration('!high') as TLapeVar)), ResVarToIMemPos(Result), LapeTypeSize[ltPointer], Offset, @Self.DocPos);
+end;
+
+function TLapeTree_InternalMethod_Length.isConstant: Boolean;
+var
+  t: TLapeType;
+begin
+  Result := False;
+  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  begin
+    t := FParams[0].resType();
+    if (t <> nil) and (t is TLapeType_Type) then
+      t := TLapeType_Type(t).TType;
+    if (t <> nil) and (t.BaseType  = ltStaticArray) then
+      Result := True;
+  end;
+end;
+
+function TLapeTree_InternalMethod_Length.resType: TLapeType;
+var
+  t: TLapeType;
+begin
+  Result := FCompiler.getBaseType(ltInt32);
+  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  begin
+    t := FParams[0].resType();
+    if (t <> nil) and (t is TLapeType_Type) then
+      t := TLapeType_Type(t).TType;
+    if (t <> nil) and (t.BaseType = ltShortString) then
+      Result := FCompiler.getBaseType(ltUInt8);
+  end;
+end;
+
+function TLapeTree_InternalMethod_Length.Evaluate: TLapeGlobalVar;
+var
+  v: TLapeGlobalVar;
+  t: TLapeType;
+begin
+  if (not isConstant()) then
+    LapeException(lpeCannotEvalRunTime, DocPos)
+  else if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  t := nil;
+  v := FParams[0].Evaluate();
+
+  if (v <> nil) then
+    t := v.VarType;
+  if (t <> nil) and (t is TLapeType_Type) then
+    t := TLapeType_Type(t).TType;
+  if (t = nil) or (t.BaseType <> ltStaticArray) then
+    LapeException(lpeInvalidEvaluation, DocPos);
+
+  with TLapeType_StaticArray(t) do
+    Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(Range.Hi - Range.Lo + 1))));
+end;
+
+function TLapeTree_InternalMethod_Length.Compile(var Offset: Integer): TResVar;
+var
+  a: TResVar;
+begin
+  if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  a := FParams[0].Compile(Offset);
+  if (a.VarType = nil) or (not (a.VarType.BaseType in LapeArrayTypes - [ltStaticArray])) then
+    LapeException(lpeInvalidEvaluation, DocPos);
+
+  if (a.VarType.BaseType = ltShortString) then
+  begin
+    SetNullResVar(FDest);
+    Result := a;
+    Result.VarType := FCompiler.getBaseType(ltUInt8);
+  end
+  else
+  begin
+    Result := NullResVar;
+    Result.VarPos.MemPos := mpStack;
+    Result.VarType := Compiler.getBaseType(ltPointer);
+    FCompiler.Emitter._Eval(getEvalProc(op_Addr, ltUnknown, ltUnknown), Result, a, NullResVar, Offset, @Self.DocPos);
+
+    Result := NullResVar;
+    Result.VarType := FCompiler.getBaseType(ltInt32);
+    if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
+      FDest := VarResVar;
+    getDestVar(FDest, Result, op_Unknown, FCompiler);
+    if (a.VarType.BaseType in LapeStringTypes) then
+      FCompiler.Emitter._InvokeExternalFunc(ResVarToIMemPos(getResVar(FCompiler.getDeclaration('!strlen') as TLapeVar)), ResVarToIMemPos(Result), LapeTypeSize[ltPointer], Offset, @Self.DocPos)
+    else
+      FCompiler.Emitter._InvokeExternalFunc(ResVarToIMemPos(getResVar(FCompiler.getDeclaration('!length') as TLapeVar)), ResVarToIMemPos(Result), LapeTypeSize[ltPointer], Offset, @Self.DocPos);
+  end;
+end;
+
+function TLapeTree_InternalMethod_Succ.resType: TLapeType;
+begin
+  Result := nil;
+  if (FParams.Count in [1, 2]) and (FParams[0] <> nil) then
+  begin
+    Result := FParams[0].resType();
+    if (Result <> nil) and (Result is TLapeType_Type) then
+      Result := TLapeType_Type(Result).TType;
+  end;
+end;
+
+function TLapeTree_InternalMethod_Succ.Evaluate: TLapeGlobalVar;
+var
+  a, b: TLapeGlobalVar;
+  f, d: TLapeTree_ExprBase;
+  t: TLapeType;
+begin
+  b := nil;
+  d := nil;
+  if (FParams.Count = 2) then
+    if (FParams[0] = nil) then
+      LapeException(lpeNoDefaultForParam, [1], DocPos)
+    else if (FParams[1] = nil) then
+      LapeException(lpeNoDefaultForParam, [2], DocPos)
+    else
+      d := FParams.Delete(1)
+  else if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  try
+    if (d <> nil) then
+      b := d.Evaluate()
+    else
+      b := FCompiler.getBaseType(ltInt8).NewGlobalVarStr('1');
+
+    a := FParams[0].Evaluate();
+    if (a = nil) or (a.VarType = nil) or (a.VarType.BaseIntType = ltUnknown) then
       LapeException(lpeInvalidEvaluation, DocPos);
 
-    Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(t.Size))));
+    if (a.VarType.BaseType = ltPointer) then
+      with TLapeTree_Operator.Create(op_Index, FCompiler, @DocPos) do
+      try
+        Left := TLapeTree_GlobalVar.Create(a, FCompiler, @DocPos);
+        Right := TLapeTree_GlobalVar.Create(b, FCompiler, @DocPos);
+        Result := Evaluate();
+      finally
+        Free();
+      end
+    else
+    begin
+      t := a.VarType;
+      a := FCompiler.getBaseType(a.VarType.BaseIntType).NewGlobalVarP(a.Ptr);
+      with TLapeTree_Operator.Create(op_Plus, FCompiler, @DocPos) do
+      try
+        Left := TLapeTree_GlobalVar.Create(a, FCompiler, @DocPos);
+        Right := TLapeTree_GlobalVar.Create(b, FCompiler, @DocPos);
+        Result := Evaluate();
+
+        f := FParams.Delete(0);
+        addParam(TLapeTree_GlobalVar.Create(Result, FCompiler, @DocPos));
+        try
+          setIdent(TLapeTree_VarType.Create(a.VarType, FCompiler, @DocPos));
+          Result := inherited;
+
+          a.Free();
+          a := Result;
+          Result := t.NewGlobalVarP(a.Ptr);
+        finally
+          FParams.Delete(0).Free();
+          addParam(f);
+        end;
+      finally
+        a.Free();
+        Free();
+      end;
+    end;
   finally
-    if (v <> nil) then
-      v.Free();
+    if (d <> nil) then
+      addParam(d)
+    else if (b <> nil) then
+      b.Free();
+  end;
+end;
+
+function TLapeTree_InternalMethod_Succ.Compile(var Offset: Integer): TResVar;
+var
+  a, b, c: TResVar;
+  f, d: TLapeTree_ExprBase;
+  t: TLapeType;
+begin
+  b := NullResVar;
+  d := nil;
+  if (FParams.Count = 2) then
+    if (FParams[0] = nil) then
+      LapeException(lpeNoDefaultForParam, [1], DocPos)
+    else if (FParams[1] = nil) then
+      LapeException(lpeNoDefaultForParam, [2], DocPos)
+    else
+      d := FParams.Delete(1)
+  else if (FParams.Count <> 1) or (FParams[0] = nil) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  try
+    if (d <> nil) then
+      b := d.Compile(Offset)
+    else
+      b := getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt8).NewGlobalVarStr('1')));
+
+    a := FParams[0].Compile(Offset);
+    if (a.VarType = nil) or (a.VarType.BaseIntType = ltUnknown) then
+      LapeException(lpeInvalidEvaluation, DocPos);
+
+    if (a.VarType.BaseType = ltPointer) then
+      with TLapeTree_Operator.Create(op_Index, FCompiler, @DocPos) do
+      try
+        Dest := FDest;
+        Left := TLapeTree_ResVar.Create(a, FCompiler, @DocPos);
+        Right := TLapeTree_ResVar.Create(b, FCompiler, @DocPos);
+        Result := Compile(Offset);
+        FDest := Dest;
+      finally
+        Free();
+      end
+    else
+    begin
+      t := a.VarType;
+      a.VarType := FCompiler.getBaseType(a.VarType.BaseIntType);
+      with TLapeTree_Operator.Create(op_Plus, FCompiler, @DocPos) do
+      try
+        Dest := FDest;
+        Left := TLapeTree_ResVar.Create(a, FCompiler, @DocPos);
+        Right := TLapeTree_ResVar.Create(b, FCompiler, @DocPos);
+        Result := Compile(Offset);
+
+        if (Dest.VarPos.MemPos <> NullResVar.VarPos.MemPos) then
+          c := Dest
+        else
+          c := NullResVar;
+
+        f := FParams.Delete(0);
+        addParam(TLapeTree_ResVar.Create(Result, FCompiler, @DocPos));
+        try
+          setIdent(TLapeTree_VarType.Create(a.VarType, FCompiler, @DocPos));
+          Result := inherited;
+          Result.VarType := t;
+          if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
+            FDest := c;
+        finally
+          FParams.Delete(0).Free();
+          addParam(f);
+        end;
+      finally
+        Free();
+      end;
+    end;
+  finally
+    if (d <> nil) then
+      addParam(d)
+    else
+      setNullResVar(b);
+  end;
+end;
+
+function TLapeTree_InternalMethod_Pred.Evaluate: TLapeGlobalVar;
+var
+  b: TLapeTree_Operator;
+begin
+  b := nil;
+
+  if (FParams.Count < 2) then
+    addParam(TLapeTree_GlobalVar.Create(FCompiler.getBaseType(ltInt8).NewGlobalVarStr('-1'), FCompiler, @DocPos))
+  else if (FParams[1] <> nil) and (FParams.Count = 2) then
+  begin
+    b := TLapeTree_Operator.Create(op_UnaryMinus, FCompiler, @DocPos);
+    b.Left := FParams.Delete(1);
+    addParam(b);
+  end;
+
+  Result := inherited;
+
+  if (FParams.Count = 2) then
+  begin
+    if (b <> nil) then
+      addParam(b.Left)
+    else
+      TLapeTree_GlobalVar(FParams[1]).GlobalVar.Free();
+    FParams.Delete(1).Free();
+  end;
+end;
+
+function TLapeTree_InternalMethod_Pred.Compile(var Offset: Integer): TResVar;
+var
+  b: TLapeTree_Operator;
+begin
+  b := nil;
+
+  if (FParams.Count < 2) then
+    addParam(TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt8).NewGlobalVarStr('-1'))), FCompiler, @DocPos))
+  else if (FParams[1] <> nil) and (FParams.Count = 2) then
+  begin
+    b := TLapeTree_Operator.Create(op_UnaryMinus, FCompiler, @DocPos);
+    b.Left := FParams.Delete(1);
+    addParam(b);
+  end;
+
+  Result := inherited;
+
+  if (FParams.Count = 2) then
+  begin
+    if (b <> nil) then
+      addParam(b.Left);
+    FParams.Delete(1).Free();
+  end;
+end;
+
+function TLapeTree_InternalMethod_Inc.isConstant: Boolean;
+begin
+  Result := False;
+end;
+
+function TLapeTree_InternalMethod_Inc.Evaluate: TLapeGlobalVar;
+begin
+  Result := nil;
+  LapeException(lpeCannotEvalConstProc, DocPos);
+end;
+
+function TLapeTree_InternalMethod_Inc.Compile(var Offset: Integer): TResVar;
+var
+  a, b: TLapeTree_ExprBase;
+  c: TLapeTree_Operator;
+begin
+  if (not (FParams.Count in [1, 2])) then
+    lapeException(lpeWrongNumberParams, [1], DocPos);
+  a := FParams.Delete(0);
+  if (FParams.Count > 0) then
+    b := FParams.Delete(0)
+  else
+    b := nil;
+  c := nil;
+
+  try
+    Result := a.Compile(Offset);
+    c := TLapeTree_Operator.Create(op_Assign, FCompiler, @DocPos);
+    c.Left := TLapeTree_ResVar.Create(Result, FCompiler, @DocPos);
+    c.Right := TLapeTree_InternalMethod_Succ.Create(FCompiler, @DocPos);
+    TLapeTree_InternalMethod_Succ(c.Right).addParam(TLapeTree_ResVar.Create(Result, FCompiler, @DocPos));
+    if (b <> nil) then
+      TLapeTree_InternalMethod_Succ(c.Right).addParam(b);
+    Result := c.Compile(Offset);
+  finally
+    addParam(a);
+    if (b <> nil) then
+      addParam(b);
+    if (c <> nil) then
+      c.Free();
+  end;
+end;
+
+function TLapeTree_InternalMethod_Dec.isConstant: Boolean;
+begin
+  Result := False;
+end;
+
+function TLapeTree_InternalMethod_Dec.Evaluate: TLapeGlobalVar;
+begin
+  Result := nil;
+  LapeException(lpeCannotEvalConstProc, DocPos);
+end;
+
+function TLapeTree_InternalMethod_Dec.Compile(var Offset: Integer): TResVar;
+var
+  a, b: TLapeTree_ExprBase;
+  c: TLapeTree_Operator;
+begin
+  if (not (FParams.Count in [1, 2])) then
+    lapeException(lpeWrongNumberParams, [1], DocPos);
+  a := FParams.Delete(0);
+  if (FParams.Count > 0) then
+    b := FParams.Delete(0)
+  else
+    b := nil;
+  c := nil;
+
+  try
+    Result := a.Compile(Offset);
+    c := TLapeTree_Operator.Create(op_Assign, FCompiler, @DocPos);
+    c.Left := TLapeTree_ResVar.Create(Result, FCompiler, @DocPos);
+    c.Right := TLapeTree_InternalMethod_Pred.Create(FCompiler, @DocPos);
+    TLapeTree_InternalMethod_Succ(c.Right).addParam(TLapeTree_ResVar.Create(Result, FCompiler, @DocPos));
+    if (b <> nil) then
+      TLapeTree_InternalMethod_Succ(c.Right).addParam(b);
+    Result := c.Compile(Offset);
+  finally
+    addParam(a);
+    if (b <> nil) then
+      addParam(b);
+    if (c <> nil) then
+      c.Free();
   end;
 end;
 
@@ -1661,6 +2290,11 @@ constructor TLapeTree_ResVar.Create(AResVar: TResVar; ACompiler: TLapeCompilerBa
 begin
   inherited Create(ACompiler, ADocPos);
   FResVar := AResVar;
+end;
+
+function TLapeTree_ResVar.isConstant: Boolean;
+begin
+  Result := (FResVar.VarPos.MemPos = mpMem) and (FResVar.VarPos.GlobalVar <> nil) and FResVar.VarPos.GlobalVar.isConstant;
 end;
 
 function TLapeTree_ResVar.resType: TLapeType;

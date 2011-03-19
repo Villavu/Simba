@@ -22,6 +22,7 @@ resourcestring
   lpeArrayLengthsDontMatch = 'Length of arrays (%s) don''t match';
   lpeBlockExpected = 'Block expected';
   lpeCannotAssign = 'Target cannot be assigned to';
+  lpeCannotEvalConst = 'Cannot be evaluated as constant';
   lpeCannotEvalConstProc = 'Procedures cannot be used for constant evaluation';
   lpeCannotEvalRunTime = 'Cannot be evaluated at runtime';
   lpeCannotInvoke = 'Cannot invoke identifier';

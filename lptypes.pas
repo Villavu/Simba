@@ -68,7 +68,7 @@ type
   TVarStackOffset = UInt16;
   TStackOffset = UInt16;
   TStackInc = Int16;
-  TPointerOffset = UInt16;
+  TPointerOffset = Int16;
 
   TMemoryPos = (mpNone, mpStack, mpMem, mpVar);
   TLapeEvalProc = procedure(const Dest, Left, Right: Pointer);

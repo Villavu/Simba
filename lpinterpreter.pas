@@ -99,12 +99,30 @@ const
 
   ocSize = SizeOf(opCodeType) {$IFDEF Lape_EmitPos}+SizeOf(TDocPos){$ENDIF};
 
+procedure _LapeHigh(Params: PParamArray; Result: Pointer);
+procedure _LapeLength(Params: PParamArray; Result: Pointer);
+procedure _LapeStrLen(Params: PParamArray; Result: Pointer);
 procedure RunCode(Code: PByte); {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 implementation
 
 uses
   lpexceptions;
+
+procedure _LapeHigh(Params: PParamArray; Result: Pointer);
+begin
+  PInt32(Result)^ := High(PCodeArray(Params^[0])^);
+end;
+
+procedure _LapeLength(Params: PParamArray; Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PCodeArray(Params^[0])^);
+end;
+
+procedure _LapeStrLen(Params: PParamArray; Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PlpString(Params^[0])^);
+end;
 
 procedure RunCode(Code: PByte);
 const

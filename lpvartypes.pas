@@ -378,6 +378,9 @@ type
   {$ENDIF}
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
     function NewGlobalVar(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
+
+    function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
+    function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
   end;
 
   TLapeType_AnsiString = class(TLapeType_String)
@@ -1334,7 +1337,10 @@ end;
 
 function TLapeType_Type.getAsString: lpString;
 begin
-  Result := FTType.AsString;
+  if (FTType <> nil) then
+    Result := FTType.AsString
+  else
+    Result := '';
 end;
 
 constructor TLapeType_Type.Create(AType: TLapeType; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
@@ -1999,7 +2005,11 @@ begin
     s := TLapeType_Int32(FCompiler.getBaseType(ltInt32)).NewGlobalVar(FPType.Size);
     r := nil;
     try
-      r := Right.VarType.EvalConst(op_Multiply, Right, s);
+      if (FPType.Size <> 1) then
+        r := Right.VarType.EvalConst(op_Multiply, Right, s)
+      else
+        r := Right;
+
       Result := //Result := (Pointer + Index * PSize)
         EvalConst(
           op_Plus,
@@ -2019,7 +2029,7 @@ end;
 
 function TLapeType_Pointer.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
 var
-  a: TResVar;
+  a, r: TResVar;
   v: TLapeType;
 begin
   Assert(FCompiler <> nil);
@@ -2037,11 +2047,9 @@ begin
     else
       Right.VarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
 
-    Result := //Result := (Pointer + Index * PSize)
-      Eval(
-        op_Plus,
-        Dest,
-        Left,
+    r := Right;
+    if (FPType.Size <> 1) then
+      r :=
         Right.VarType.Eval(
           op_Multiply,
           a,
@@ -2049,7 +2057,14 @@ begin
           getResVar(FCompiler.addManagedVar(TLapeType_Int32(FCompiler.getBaseType(ltInt32)).NewGlobalVar(FPType.Size))),
           Offset,
           Pos
-        ),
+        );
+
+    Result := //Result := (Pointer + Index * PSize)
+      Eval(
+        op_Plus,
+        Dest,
+        Left,
+        r,
         Offset,
         Pos
       );
@@ -2504,6 +2519,63 @@ end;
 function TLapeType_String.NewGlobalVar(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
 begin
   Result := NewGlobalVarStr(Str, AName, ADocPos);
+end;
+
+function TLapeType_String.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
+var
+  v: TLapeType;
+  low, r: TLapeGlobalVar;
+begin
+  Assert(FCompiler <> nil);
+  Assert((Left = nil) or (Left.VarType is TLapeType_Pointer));
+
+  if (op = op_Index) and (Right <> nil) then
+  begin
+    v := Right.FVarType;
+    if (Right.VarType = nil) or (Right.FVarType.BaseIntType = ltUnknown) then
+      if (Right.VarType <> nil) then
+        LapeException(lpeInvalidIndex, [Right.VarType.AsString])
+      else
+        LapeException(lpeInvalidEvaluation)
+    else if (Right.AsInteger < 1) then
+      LapeException(lpeOutOfTypeRange)
+    else
+      Right.FVarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
+
+    r := nil;
+    try
+      low := FCompiler.getBaseType(ltUInt8).NewGlobalVarStr('1');
+      r := Right.VarType.EvalConst(op_Minus, Right, low);
+      Result := //Result := Pointer[Index - 1]^
+        inherited EvalConst(
+          Op,
+          Left,
+          r
+        );
+    finally
+      if (low <> nil) then
+        low.Free();
+      if (r <> nil) then
+        r.Free();
+      Right.FVarType := v;
+    end;
+  end
+  else
+    Result := inherited;
+end;
+
+function TLapeType_String.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
+begin
+  Assert(FCompiler <> nil);
+  Assert(Left.VarType is TLapeType_Pointer);
+
+  Result := inherited;
+  if (op = op_Index) and (FPType <> nil) then
+  begin
+    if (not Result.VarPos.isPointer) then
+      LapeException(lpeImpossible);
+    Result.VarPos.Offset := -FPType.Size;
+  end;
 end;
 
 constructor TLapeType_AnsiString.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
