@@ -1099,7 +1099,7 @@ var
 begin
   Result := False;
   if (FIdent is TLapeTree_VarType) then
-    Result := (FParams.Count = 1) and FParams[0].isConstant()
+    Result := (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) and FParams[0].isConstant()
   else
   begin
     f := FIdent.Evaluate();
@@ -1144,7 +1144,7 @@ var
 
     with TLapeTree_VarType(FIdent) do
     try
-      if (FParams.Count <> 1) or (VarType = nil) then
+      if (FParams.Count <> 1) or (VarType = nil) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
         LapeException(lpeInvalidCast);
       if (FParams[0] is TLapeTree_OpenArray) then
         TLapeTree_OpenArray(FParams[0]).ToType := VarType;
@@ -1264,7 +1264,7 @@ var
 
     with TLapeTree_VarType(FIdent) do
     try
-      if (FParams.Count <> 1) or (VarType = nil) then
+      if (FParams.Count <> 1) or (VarType = nil) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
         LapeException(lpeInvalidCast);
       if (FParams[0] is TLapeTree_OpenArray) then
         TLapeTree_OpenArray(FParams[0]).ToType := VarType;
@@ -1507,7 +1507,7 @@ end;
 
 function TLapeTree_InternalMethod.isConstant: Boolean;
 begin
-  Result := (FParams.Count = 1) and (FParams[0] <> nil) and FParams[0].isConstant();
+  Result := (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) and FParams[0].isConstant();
 end;
 
 function TLapeTree_InternalMethod_FlowStatement.isConstant: Boolean;
@@ -1533,7 +1533,7 @@ begin
   if (not (FParams.Count in [0, 1])) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
-  if (FParams.Count < 1) or (FParams[0] = nil) then
+  if (FParams.Count < 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     a := 1
   else
     with FParams[0].Evaluate() do
@@ -1579,7 +1579,7 @@ begin
   if (not (FParams.Count in [0, 1])) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
-  if (FParams.Count < 1) or (FParams[0] = nil) then
+  if (FParams.Count < 1) or (FParams[0] = nil) or (FParams[1].ClassType = TLapeTree_ExprBase) then
     a := 1
   else
     with FParams[0].Evaluate() do
@@ -1625,7 +1625,7 @@ begin
   if (FParams.Count <> 0) then
     if (FParams.Count <> 1) then
       LapeException(lpeWrongNumberParams, [1], DocPos)
-    else if (FParams[0] = nil) then
+    else if (FParams[0] = nil) or (FParams[1].ClassType = TLapeTree_ExprBase) then
       LapeException(lpeNoDefaultForParam, [1], DocPos);
 
   if (FParams.Count = 1) then
@@ -1668,7 +1668,7 @@ var
   v: TLapeGlobalVar;
   t: TLapeType;
 begin
-  if (FParams.Count <> 1) or (FParams[0] = nil) then
+  if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   t := nil;
@@ -1695,7 +1695,7 @@ var
   t: TLapeType;
 begin
   Result := nil;
-  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  if (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) then
   begin
     t := FParams[0].resType();
     if (t <> nil) and (t is TLapeType_Type) then
@@ -1707,7 +1707,7 @@ end;
 
 function TLapeTree_InternalMethod_Ord.Evaluate: TLapeGlobalVar;
 begin
-  if (FParams.Count <> 1) or (FParams[0] = nil) then
+  if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   setIdent(TLapeTree_VarType.Create(resType(), FCompiler, @DocPos));
@@ -1716,7 +1716,7 @@ end;
 
 function TLapeTree_InternalMethod_Ord.Compile(var Offset: Integer): TResVar;
 begin
-  if (FParams.Count <> 1) or (FParams[0] = nil) then
+  if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   setIdent(TLapeTree_VarType.Create(resType(), FCompiler, @DocPos));
@@ -1733,7 +1733,7 @@ var
   t: TLapeType;
 begin
   Result := nil;
-  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  if (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) then
   begin
     t := FParams[0].resType();
     if (t <> nil) and (t is TLapeType_Type) then
@@ -1750,7 +1750,7 @@ var
   v: TLapeGlobalVar;
   t: TLapeType;
 begin
-  if (FParams.Count <> 1) or (FParams[0] = nil) then
+  if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   t := nil;
@@ -1786,7 +1786,7 @@ var
   t: TLapeType;
 begin
   Result := True;
-  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  if (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) then
   begin
     t := FParams[0].resType();
     if (t <> nil) and (t is TLapeType_Type) then
@@ -1801,7 +1801,7 @@ var
   t: TLapeType;
 begin
   Result := nil;
-  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  if (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) then
   begin
     t := FParams[0].resType();
     if (t <> nil) and (t is TLapeType_Type) then
@@ -1818,7 +1818,7 @@ var
   v: TLapeGlobalVar;
   t: TLapeType;
 begin
-  if (FParams.Count <> 1) or (FParams[0] = nil) then
+  if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   t := nil;
@@ -1847,7 +1847,7 @@ function TLapeTree_InternalMethod_High.Compile(var Offset: Integer): TResVar;
 begin
   if isConstant() or (resType() = nil) then
     LapeException(lpeCannotEvalRunTime, DocPos)
-  else if (FParams.Count <> 1) or (FParams[0] = nil) then
+  else if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   Result := NullResVar;
@@ -1868,7 +1868,7 @@ var
   t: TLapeType;
 begin
   Result := False;
-  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  if (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) then
   begin
     t := FParams[0].resType();
     if (t <> nil) and (t is TLapeType_Type) then
@@ -1883,7 +1883,7 @@ var
   t: TLapeType;
 begin
   Result := FCompiler.getBaseType(ltInt32);
-  if (FParams.Count = 1) and (FParams[0] <> nil) then
+  if (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) then
   begin
     t := FParams[0].resType();
     if (t <> nil) and (t is TLapeType_Type) then
@@ -1900,7 +1900,7 @@ var
 begin
   if (not isConstant()) then
     LapeException(lpeCannotEvalRunTime, DocPos)
-  else if (FParams.Count <> 1) or (FParams[0] = nil) then
+  else if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   t := nil;
@@ -1921,7 +1921,7 @@ function TLapeTree_InternalMethod_Length.Compile(var Offset: Integer): TResVar;
 var
   a: TResVar;
 begin
-  if (FParams.Count <> 1) or (FParams[0] = nil) then
+  if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   a := FParams[0].Compile(Offset);
@@ -1956,7 +1956,7 @@ end;
 function TLapeTree_InternalMethod_Succ.resType: TLapeType;
 begin
   Result := nil;
-  if (FParams.Count in [1, 2]) and (FParams[0] <> nil) then
+  if (FParams.Count in [1, 2]) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) then
   begin
     Result := FParams[0].resType();
     if (Result <> nil) and (Result is TLapeType_Type) then
@@ -1973,13 +1973,13 @@ begin
   b := nil;
   d := nil;
   if (FParams.Count = 2) then
-    if (FParams[0] = nil) then
+    if (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
       LapeException(lpeNoDefaultForParam, [1], DocPos)
-    else if (FParams[1] = nil) then
+    else if (FParams[1] = nil) or (FParams[1].ClassType = TLapeTree_ExprBase) then
       LapeException(lpeNoDefaultForParam, [2], DocPos)
     else
       d := FParams.Delete(1)
-  else if (FParams.Count <> 1) or (FParams[0] = nil) then
+  else if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   try
@@ -2046,13 +2046,13 @@ begin
   b := NullResVar;
   d := nil;
   if (FParams.Count = 2) then
-    if (FParams[0] = nil) then
+    if (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
       LapeException(lpeNoDefaultForParam, [1], DocPos)
-    else if (FParams[1] = nil) then
+    else if (FParams[1] = nil) or (FParams[1].ClassType = TLapeTree_ExprBase) then
       LapeException(lpeNoDefaultForParam, [2], DocPos)
     else
       d := FParams.Delete(1)
-  else if (FParams.Count <> 1) or (FParams[0] = nil) then
+  else if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
   try
@@ -2124,7 +2124,7 @@ begin
 
   if (FParams.Count < 2) then
     addParam(TLapeTree_GlobalVar.Create(FCompiler.getBaseType(ltInt8).NewGlobalVarStr('-1'), FCompiler, @DocPos))
-  else if (FParams[1] <> nil) and (FParams.Count = 2) then
+  else if (FParams[1] <> nil) and (FParams[1].ClassType <> TLapeTree_ExprBase) and (FParams.Count = 2) then
   begin
     b := TLapeTree_Operator.Create(op_UnaryMinus, FCompiler, @DocPos);
     b.Left := FParams.Delete(1);
@@ -2151,7 +2151,7 @@ begin
 
   if (FParams.Count < 2) then
     addParam(TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt8).NewGlobalVarStr('-1'))), FCompiler, @DocPos))
-  else if (FParams[1] <> nil) and (FParams.Count = 2) then
+  else if (FParams[1] <> nil) and (FParams[1].ClassType <> TLapeTree_ExprBase) and (FParams.Count = 2) then
   begin
     b := TLapeTree_Operator.Create(op_UnaryMinus, FCompiler, @DocPos);
     b.Left := FParams.Delete(1);
