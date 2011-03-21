@@ -1335,9 +1335,9 @@ begin
   FTokenizer.Expect(tk_kw_End, True, False);
 
   if AllowDot then
-    FTokenizer.Expect([tk_sym_SemiColon, tk_kw_Else], True, False)
+    FTokenizer.Expect([tk_sym_SemiColon, tk_kw_Else, tk_sym_Dot], True, False)
   else
-    FTokenizer.Expect([tk_sym_SemiColon, tk_kw_Else, tk_sym_Dot], True, False);
+    FTokenizer.Expect([tk_sym_SemiColon, tk_kw_Else], True, False);
 end;
 
 function TLapeCompiler.ParseCase: TLapeTree_Case;

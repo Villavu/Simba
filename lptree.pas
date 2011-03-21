@@ -194,7 +194,7 @@ type
     function Compile(var Offset: Integer): TResVar; override;
   end;
 
-  TLapeTree_InternalMethod_Pred = class(TLapeTree_InternalMethod)
+  TLapeTree_InternalMethod_Pred = class(TLapeTree_InternalMethod_Succ)
   public
     function Evaluate: TLapeGlobalVar; override;
     function Compile(var Offset: Integer): TResVar; override;
@@ -2241,9 +2241,9 @@ begin
     c := TLapeTree_Operator.Create(op_Assign, FCompiler, @DocPos);
     c.Left := TLapeTree_ResVar.Create(Result, FCompiler, @DocPos);
     c.Right := TLapeTree_InternalMethod_Pred.Create(FCompiler, @DocPos);
-    TLapeTree_InternalMethod_Succ(c.Right).addParam(TLapeTree_ResVar.Create(Result, FCompiler, @DocPos));
+    TLapeTree_InternalMethod_Pred(c.Right).addParam(TLapeTree_ResVar.Create(Result, FCompiler, @DocPos));
     if (b <> nil) then
-      TLapeTree_InternalMethod_Succ(c.Right).addParam(b);
+      TLapeTree_InternalMethod_Pred(c.Right).addParam(b);
     Result := c.Compile(Offset);
   finally
     addParam(a);
