@@ -41,7 +41,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="41">
+    <Units Count="40">
       <Unit0>
         <Filename Value="lape.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -59,8 +59,8 @@
         <UnitName Value="Main"/>
         <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="59"/>
-        <CursorPos X="14" Y="66"/>
+        <TopLine Value="155"/>
+        <CursorPos X="125" Y="166"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -153,8 +153,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="lpcodeemitter"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="246"/>
-        <CursorPos X="1" Y="257"/>
+        <TopLine Value="458"/>
+        <CursorPos X="22" Y="475"/>
         <UsageCount Value="201"/>
       </Unit10>
       <Unit11>
@@ -273,7 +273,7 @@
         <Filename Value="lpcodeemitter_jumpheader.inc"/>
         <IsPartOfProject Value="True"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="34"/>
+        <TopLine Value="22"/>
         <CursorPos X="1" Y="1"/>
         <UsageCount Value="201"/>
       </Unit26>
@@ -281,8 +281,8 @@
         <Filename Value="lpcodeemitter_jumpbody.inc"/>
         <IsPartOfProject Value="True"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="2"/>
-        <CursorPos X="1" Y="18"/>
+        <TopLine Value="198"/>
+        <CursorPos X="38" Y="210"/>
         <UsageCount Value="201"/>
       </Unit27>
       <Unit28>
@@ -292,8 +292,8 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="443"/>
-        <CursorPos X="40" Y="454"/>
+        <TopLine Value="3227"/>
+        <CursorPos X="92" Y="3234"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
       </Unit28>
@@ -310,7 +310,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="45" Y="11"/>
-        <UsageCount Value="180"/>
+        <UsageCount Value="179"/>
       </Unit30>
       <Unit31>
         <Filename Value="lpdisassembler.pas"/>
@@ -338,180 +338,172 @@
         <UsageCount Value="200"/>
       </Unit33>
       <Unit34>
-        <Filename Value="..\LazSVN\lcl\utrace.pp"/>
-        <UnitName Value="UTrace"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="53"/>
-        <CursorPos X="1" Y="64"/>
-        <UsageCount Value="1"/>
-      </Unit34>
-      <Unit35>
         <Filename Value="..\..\LazSVN\lcl\utrace.pp"/>
         <UnitName Value="UTrace"/>
         <WindowIndex Value="0"/>
         <TopLine Value="53"/>
         <CursorPos X="1" Y="64"/>
-        <UsageCount Value="6"/>
-      </Unit35>
-      <Unit36>
+        <UsageCount Value="5"/>
+      </Unit34>
+      <Unit35>
         <Filename Value="..\..\LazSVN\lcl\forms.pp"/>
         <UnitName Value="Forms"/>
         <WindowIndex Value="0"/>
         <TopLine Value="35"/>
         <CursorPos X="3" Y="46"/>
-        <UsageCount Value="3"/>
-      </Unit36>
-      <Unit37>
+        <UsageCount Value="2"/>
+      </Unit35>
+      <Unit36>
         <Filename Value="..\..\FPC\Source\rtl\inc\compproc.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="19"/>
         <CursorPos X="1" Y="33"/>
-        <UsageCount Value="3"/>
-      </Unit37>
-      <Unit38>
+        <UsageCount Value="2"/>
+      </Unit36>
+      <Unit37>
         <Filename Value="..\..\LazSVN\lcl\interfaces\win32\win32wsstdctrls.pp"/>
         <UnitName Value="Win32WSStdCtrls"/>
         <WindowIndex Value="0"/>
         <TopLine Value="295"/>
         <CursorPos X="1" Y="306"/>
-        <UsageCount Value="6"/>
-      </Unit38>
-      <Unit39>
+        <UsageCount Value="5"/>
+      </Unit37>
+      <Unit38>
         <Filename Value="..\..\LazSVN\lcl\interfaces\win32\win32int.pp"/>
         <UnitName Value="Win32Int"/>
         <WindowIndex Value="0"/>
         <TopLine Value="16"/>
         <CursorPos X="16" Y="19"/>
-        <UsageCount Value="6"/>
-      </Unit39>
-      <Unit40>
+        <UsageCount Value="5"/>
+      </Unit38>
+      <Unit39>
         <Filename Value="..\..\LazSVN\lcl\include\customform.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1960"/>
         <CursorPos X="60" Y="1971"/>
-        <UsageCount Value="6"/>
-      </Unit40>
+        <UsageCount Value="5"/>
+      </Unit39>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="lptree.pas"/>
-        <Caret Line="614" Column="1" TopLine="603"/>
+        <Caret Line="491" Column="35" TopLine="473"/>
       </Position1>
       <Position2>
         <Filename Value="lptree.pas"/>
-        <Caret Line="615" Column="1" TopLine="603"/>
+        <Caret Line="1558" Column="29" TopLine="1540"/>
       </Position2>
       <Position3>
         <Filename Value="lptree.pas"/>
-        <Caret Line="617" Column="1" TopLine="603"/>
+        <Caret Line="3155" Column="47" TopLine="3137"/>
       </Position3>
       <Position4>
         <Filename Value="lptree.pas"/>
-        <Caret Line="618" Column="1" TopLine="603"/>
+        <Caret Line="3089" Column="17" TopLine="3087"/>
       </Position4>
       <Position5>
         <Filename Value="lptree.pas"/>
-        <Caret Line="2795" Column="1" TopLine="2784"/>
+        <Caret Line="442" Column="21" TopLine="428"/>
       </Position5>
       <Position6>
         <Filename Value="lptree.pas"/>
-        <Caret Line="949" Column="68" TopLine="944"/>
+        <Caret Line="3120" Column="45" TopLine="3102"/>
       </Position6>
       <Position7>
         <Filename Value="lptree.pas"/>
-        <Caret Line="439" Column="18" TopLine="428"/>
+        <Caret Line="2842" Column="17" TopLine="2833"/>
       </Position7>
       <Position8>
         <Filename Value="lptree.pas"/>
-        <Caret Line="453" Column="40" TopLine="444"/>
+        <Caret Line="382" Column="8" TopLine="380"/>
       </Position8>
       <Position9>
         <Filename Value="lptree.pas"/>
-        <Caret Line="229" Column="73" TopLine="226"/>
+        <Caret Line="3098" Column="6" TopLine="3086"/>
       </Position9>
       <Position10>
         <Filename Value="lptree.pas"/>
-        <Caret Line="2628" Column="29" TopLine="2616"/>
+        <Caret Line="442" Column="29" TopLine="432"/>
       </Position10>
       <Position11>
         <Filename Value="lptree.pas"/>
-        <Caret Line="2648" Column="34" TopLine="2636"/>
+        <Caret Line="2822" Column="3" TopLine="2809"/>
       </Position11>
       <Position12>
         <Filename Value="lptree.pas"/>
-        <Caret Line="2704" Column="7" TopLine="2693"/>
+        <Caret Line="3207" Column="18" TopLine="3205"/>
       </Position12>
       <Position13>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3109" Column="42" TopLine="3103"/>
+        <Caret Line="465" Column="66" TopLine="453"/>
       </Position13>
       <Position14>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3140" Column="21" TopLine="3126"/>
+        <Caret Line="3213" Column="24" TopLine="3193"/>
       </Position14>
       <Position15>
         <Filename Value="lptree.pas"/>
-        <Caret Line="733" Column="72" TopLine="729"/>
+        <Caret Line="3216" Column="118" TopLine="3205"/>
       </Position15>
       <Position16>
         <Filename Value="lptree.pas"/>
-        <Caret Line="2628" Column="29" TopLine="2610"/>
+        <Caret Line="3218" Column="19" TopLine="3204"/>
       </Position16>
       <Position17>
         <Filename Value="lptree.pas"/>
-        <Caret Line="2648" Column="34" TopLine="2630"/>
+        <Caret Line="3210" Column="14" TopLine="3202"/>
       </Position17>
       <Position18>
-        <Filename Value="lptree.pas"/>
-        <Caret Line="2702" Column="38" TopLine="2693"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="66" Column="14" TopLine="59"/>
       </Position18>
       <Position19>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3109" Column="42" TopLine="3088"/>
+        <Caret Line="3232" Column="45" TopLine="3219"/>
       </Position19>
       <Position20>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3142" Column="45" TopLine="3132"/>
+        <Caret Line="3310" Column="13" TopLine="3277"/>
       </Position20>
       <Position21>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3132" Column="14" TopLine="3130"/>
+        <Caret Line="3281" Column="1" TopLine="3277"/>
       </Position21>
       <Position22>
         <Filename Value="lptree.pas"/>
-        <Caret Line="439" Column="18" TopLine="434"/>
+        <Caret Line="3282" Column="1" TopLine="3277"/>
       </Position22>
       <Position23>
         <Filename Value="lptree.pas"/>
-        <Caret Line="454" Column="40" TopLine="436"/>
+        <Caret Line="3283" Column="1" TopLine="3277"/>
       </Position23>
       <Position24>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3294" Column="7" TopLine="3278"/>
+        <Caret Line="3284" Column="1" TopLine="3277"/>
       </Position24>
       <Position25>
         <Filename Value="lptree.pas"/>
-        <Caret Line="2641" Column="1" TopLine="2630"/>
+        <Caret Line="3286" Column="1" TopLine="3277"/>
       </Position25>
       <Position26>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3294" Column="7" TopLine="3276"/>
+        <Caret Line="3287" Column="1" TopLine="3277"/>
       </Position26>
       <Position27>
         <Filename Value="lptree.pas"/>
-        <Caret Line="2641" Column="1" TopLine="2630"/>
+        <Caret Line="3281" Column="1" TopLine="3277"/>
       </Position27>
       <Position28>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3287" Column="18" TopLine="3279"/>
+        <Caret Line="3238" Column="9" TopLine="3225"/>
       </Position28>
       <Position29>
         <Filename Value="lptree.pas"/>
-        <Caret Line="634" Column="1" TopLine="623"/>
+        <Caret Line="3281" Column="1" TopLine="3276"/>
       </Position29>
       <Position30>
         <Filename Value="lptree.pas"/>
-        <Caret Line="3216" Column="18" TopLine="3213"/>
+        <Caret Line="2387" Column="1" TopLine="2376"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

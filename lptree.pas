@@ -381,6 +381,7 @@ type
 
   TLapeTree_If = class(TLapeTree_Base)
   protected
+    FStartBodyOffset: Integer;
     FCondition: TLapeTree_ExprBase;
     FBody: TLapeTree_Base;
     FElse: TLapeTree_Base;
@@ -461,6 +462,7 @@ type
     procedure setLimit(Node: TLapeTree_ExprBase); virtual;
     procedure setStep(Node: TLapeTree_ExprBase); virtual;
     procedure DeleteChild(Node: TLapeTree_Base); override;
+    function CompileBody(var Offset: Integer): TResVar; override;
   public
     WalkDown: Boolean;
     constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); override;
@@ -2816,6 +2818,9 @@ end;
 
 function TLapeTree_If.CompileBody(var Offset: Integer): TResVar;
 begin
+  if (FStartBodyOffset <= 0) then
+    FStartBodyOffset := FCompiler.Emitter.CheckOffset(Offset);
+
   if (FBody <> nil) then
     Result := FBody.Compile(Offset)
   else
@@ -2843,10 +2848,12 @@ var
   cnd, tmp, e: TResVar;
   if_o, if_e: Integer;
 begin
-  Result := NullResVar;
   Assert(FCondition <> nil);
 
+  Result := NullResVar;
+  FStartBodyOffset := 0;
   e := NullResVar;
+
   cnd := FCondition.Compile(Offset);
   if (cnd.VarType = nil) or (not (cnd.VarType.BaseType in LapeIfTypes)) then
     LapeException(lpeInvalidCondition, FCondition.DocPos);
@@ -3089,15 +3096,17 @@ end;
 function TLapeTree_While.CompileBody(var Offset: Integer): TResVar;
 var
   cnd, tmp, e: TResVar;
-  o, i: Integer;
+  i: Integer;
 begin
-  o := FCompiler.Emitter.CheckOffset(Offset);
   Result := inherited;
 
-  FContinueCount := FContinueStatements.Count;
-  for i := 0 to FContinueCount - 1 do
-    with FContinueStatements[i] do
-      CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+  if (FContinueStatements <> nil) then
+  begin
+    FContinueCount := FContinueStatements.Count;
+    for i := 0 to FContinueCount - 1 do
+      with FContinueStatements[i] do
+        CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+  end;
 
   e := NullResVar;
   cnd := FCondition.Compile(Offset);
@@ -3112,7 +3121,7 @@ begin
     setNullResVar(tmp);
   end;
 
-  FCompiler.Emitter._JmpRIf(o - Offset, cnd, Offset, @DocPos);
+  FCompiler.Emitter._JmpRIf(FStartBodyOffset - Offset, cnd, Offset, @DocPos);
   setNullResVar(cnd);
 end;
 
@@ -3196,6 +3205,57 @@ begin
     inherited;
 end;
 
+function TLapeTree_For.CompileBody(var Offset: Integer): TResVar;
+var
+  i: Integer;
+  m: TLapeTree_InternalMethod;
+  b: TLapeTree_Base;
+  s: TLapeFlowStatementList;
+begin
+  Assert((FCondition <> nil) and (FCondition is TLapeTree_Operator));
+  Assert((TLapeTree_Operator(FCondition).Right <> nil) and (TLapeTree_Operator(FCondition).Right is TLapeTree_ResVar));
+
+  FStartBodyOffset := FCompiler.Emitter.CheckOffset(Offset);
+  if (FBody <> nil) then
+    Result := FBody.Compile(Offset)
+  else
+    Result := NullResVar;
+
+  FContinueCount := FContinueStatements.Count;
+  for i := 0 to FContinueCount - 1 do
+    with FContinueStatements[i] do
+      CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+
+  if WalkDown then
+    m := TLapeTree_InternalMethod_Dec.Create(FCompiler, @DocPos)
+  else
+    m := TLapeTree_InternalMethod_Inc.Create(FCompiler, @DocPos);
+  try
+    m.addParam(TLapeTree_ResVar.Create(TLapeTree_ResVar(TLapeTree_Operator(FCondition).Left).ResVar, FCompiler, @FCounter.DocPos));
+    if (FStep <> nil) then
+    begin
+      m.addParam(FStep);
+      m.Compile(Offset);
+      Step := m.Params.Delete(1);
+    end
+    else
+      m.Compile(Offset);
+  finally
+    m.Free();
+  end;
+
+  b := FBody;
+  s := FContinueStatements;
+  try
+    FBody := nil;
+    FContinueStatements := nil;
+    inherited;
+  finally
+    FBody := b;
+    FContinueStatements := s;
+  end;
+end;
+
 constructor TLapeTree_For.Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil);
 begin
   inherited;
@@ -3215,30 +3275,15 @@ end;
 
 function TLapeTree_For.Compile(var Offset: Integer): TResVar;
 var
-  cnt, lim, stp: TResVar;
-  o: TLapeTree_Operator;
-  tb: TLapeTree_Base;
-  a, b, c: TLapeType;
+  cnt, lim: TResVar;
   v: TLapeVar;
-
-  function changeVarType(var x: TResVar; t: TLapeType): TLapeType;
-  begin
-    Result := x.VarType;
-    x.VarType := t;
-  end;
-
 begin
   Result := NullResVar;
   Assert(FCondition = nil);
   Assert(FCounter <> nil);
   Assert(FLimit <> nil);
 
-  a := nil;
-  b := nil;
-  c := nil;
   v := nil;
-
-  tb := nil;
   cnt := FCounter.Compile(Offset);
   try
     if (not getTempVar(FLimit, Offset, lim)) or (lim.VarType = nil) or (lim.VarType.BaseIntType = ltUnknown) then
@@ -3253,16 +3298,6 @@ begin
     if (cnt.VarType = nil) or (not isVariable(cnt)) or (cnt.VarType.BaseIntType = ltUnknown) then
       LapeException(lpeInvalidIterator, FCounter.DocPos);
 
-    a := changeVarType(cnt, FCompiler.getBaseType(cnt.VarType.BaseIntType));
-    b := changeVarType(lim, FCompiler.getBaseType(lim.VarType.BaseIntType));
-
-    if (FStep = nil) then
-      stp := getResVar(FCompiler.addManagedVar(cnt.VarType.NewGlobalVarStr('1')))
-    else if (not getTempVar(FStep, Offset, stp)) or (stp.VarType = nil) or (stp.VarType.BaseIntType = ltUnknown) then
-      LapeException(lpeInvalidEvaluation, FStep.DocPos);
-
-    c := changeVarType(stp, FCompiler.getBaseType(stp.VarType.BaseIntType));
-
     if WalkDown then
       FCondition := TLapeTree_Operator.Create(op_cmp_GreaterThanOrEqual, FCompiler, @DocPos)
     else
@@ -3270,42 +3305,8 @@ begin
     TLapeTree_Operator(FCondition).Left := TLapeTree_ResVar.Create(cnt, FCompiler, @FCounter.DocPos);
     TLapeTree_Operator(FCondition).Right := TLapeTree_ResVar.Create(lim, FCompiler, @FLimit.DocPos);
 
-    o := TLapeTree_Operator.Create(op_Assign, FCompiler, @FLimit.DocPos);
-    o.Left := TLapeTree_ResVar.Create(cnt, FCompiler, @FCounter.DocPos);
-    if WalkDown then
-      o.Right := TLapeTree_Operator.Create(op_Minus, FCompiler, @FLimit.DocPos)
-    else
-      o.Right := TLapeTree_Operator.Create(op_Plus, FCompiler, @FLimit.DocPos);
-    TLapeTree_Operator(o.Right).Left := TLapeTree_ResVar.Create(cnt, FCompiler, @FCounter.DocPos);
-    TLapeTree_Operator(o.Right).Right := TLapeTree_ResVar.Create(stp, FCompiler, @FCounter.DocPos);
-
-    changeVarType(cnt, a); a := nil;
-    changeVarType(lim, b); b := nil;
-    changeVarType(stp, c); c := nil;
-
-    tb := FBody;
-    FBody := nil;
-    if (tb <> nil) then
-    begin
-      Body := TLapeTree_StatementList.Create(FCompiler, @tb.DocPos);
-      TLapeTree_StatementList(FBody).addStatement(tb);
-      TLapeTree_StatementList(FBody).addStatement(o);
-    end
-    else
-      Body := o;
-
     Result := inherited;
   finally
-    if (a <> nil) then
-      changeVarType(cnt, a);
-    if (b <> nil) then
-      changeVarType(lim, b);
-    if (c <> nil) then
-      changeVarType(stp, c);
-
-    if (tb <> nil) then
-      TLapeTree_StatementList(FBody).Statements.Delete(0).setParent(nil);
-    setBody(tb);
     setCondition(nil);
     if (v <> nil) then
     begin
@@ -3315,7 +3316,6 @@ begin
     else
       setNullResVar(cnt, 1);
     setNullResVar(lim, 2);
-    setNullResVar(stp, 2);
   end;
 end;
 
