@@ -18,8 +18,8 @@ object Form1: TForm1
   end
   inline e: TSynEdit
     Left = 0
-    Height = 186
-    Top = 221
+    Height = 183
+    Top = 224
     Width = 470
     Align = alBottom
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -756,7 +756,7 @@ object Form1: TForm1
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 216
+    Top = 219
     Width = 470
     Align = alBottom
     ResizeAnchor = akBottom
@@ -790,7 +790,7 @@ object Form1: TForm1
   end
   object d: TMemo
     Left = 0
-    Height = 83
+    Height = 86
     Top = 133
     Width = 470
     Align = alBottom

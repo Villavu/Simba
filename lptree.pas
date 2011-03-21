@@ -1525,56 +1525,121 @@ function TLapeTree_InternalMethod_Break.Compile(var Offset: Integer): TResVar;
 var
   p: TLapeTree_Base;
   i: ILapeTree_CanBreak;
+  a, b: Integer;
 begin
   Result := NullResVar;
   p := FParent;
 
+  if (not (FParams.Count in [0, 1])) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  if (FParams.Count < 1) or (FParams[0] = nil) then
+    a := 1
+  else
+    with FParams[0].Evaluate() do
+    begin
+      a := AsInteger;
+      if (not isConstant) then
+        LapeException(lpeConstantExpected, FParams[0].DocPos)
+      else if (a < 1) then
+        LapeException(lpeOutOfTypeRange, FParams[0].DocPos);
+    end;
+
+  b := 1;
   while (p <> nil) do
   begin
-    WriteLn(p.ClassName);
     if (p.QueryInterface(ILapeTree_CanBreak, i) = 0) then
-    begin
-      i.addBreakStatement(Offset, @DocPos);
-      i := nil;
-      Break;
-    end;
+      if (b < a) then
+        Inc(b)
+      else
+      begin
+        i.addBreakStatement(Offset, @DocPos);
+        i := nil;
+        Break;
+      end;
     p := p.Parent;
   end;
 
   if (p = nil) then
-    LapeException(lpeCannotBreak, DocPos);
+    if (b < a) then
+      LapeException(lpeOutOfTypeRange, FParams[0].DocPos)
+    else
+      LapeException(lpeCannotBreak, DocPos);
 end;
 
 function TLapeTree_InternalMethod_Continue.Compile(var Offset: Integer): TResVar;
 var
   p: TLapeTree_Base;
   i: ILapeTree_CanContinue;
+  a, b: Integer;
 begin
   Result := NullResVar;
   p := FParent;
 
+  if (not (FParams.Count in [0, 1])) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  if (FParams.Count < 1) or (FParams[0] = nil) then
+    a := 1
+  else
+    with FParams[0].Evaluate() do
+    begin
+      a := AsInteger;
+      if (not isConstant) then
+        LapeException(lpeConstantExpected, FParams[0].DocPos)
+      else if (a < 1) then
+        LapeException(lpeOutOfTypeRange, FParams[0].DocPos);
+    end;
+
+  b := 1;
   while (p <> nil) do
   begin
     if (p.QueryInterface(ILapeTree_CanContinue, i) = 0) then
-    begin
-      i.addContinueStatement(Offset, @DocPos);
-      i := nil;
-      Break;
-    end;
+      if (b < a) then
+        Inc(b)
+      else
+      begin
+        i.addContinueStatement(Offset, @DocPos);
+        i := nil;
+        Break;
+      end;
     p := p.Parent;
   end;
 
   if (p = nil) then
-    LapeException(lpeCannotContinue, DocPos);
+    if (b < a) then
+      LapeException(lpeOutOfTypeRange, FParams[0].DocPos)
+    else
+      LapeException(lpeCannotContinue, DocPos);
 end;
 
 function TLapeTree_InternalMethod_Exit.Compile(var Offset: Integer): TResVar;
 var
   p: TLapeTree_Base;
   i: ILapeTree_CanExit;
+  d: TLapeDeclaration;
 begin
   Result := NullResVar;
   p := FParent;
+
+  if (FParams.Count <> 0) then
+    if (FParams.Count <> 1) then
+      LapeException(lpeWrongNumberParams, [1], DocPos)
+    else if (FParams[0] = nil) then
+      LapeException(lpeNoDefaultForParam, [1], DocPos);
+
+  if (FParams.Count = 1) then
+    with TLapeTree_Operator.Create(op_Assign, FCompiler, @FParams[0].DocPos) do
+    try
+      d := FCompiler.getDeclaration('Result');
+      if (d = nil) or (not (d is TLapeParameterVar)) then
+        LapeException(lpeWrongNumberParams, [0], DocPos);
+      Left := TLapeTree_ResVar.Create(getResVar(d as TLapeVar), FCompiler, @FParams[0].DocPos);
+      Right := TLapeTree_ResVar.Create(FParams[0].Compile(Offset), FCompiler, @FParams[0].DocPos);
+      Compile(Offset);
+    finally
+      Free();
+    end;
 
   while (p <> nil) do
   begin
