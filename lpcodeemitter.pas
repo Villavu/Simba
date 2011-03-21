@@ -298,10 +298,8 @@ begin
 end;
 
 function TLapeCodeEmitterBase._DocPos(var Offset: Integer): Integer;
-const
-  NullPos: TDocPos = (Line: 0; Col: 0; FileName: nil);
 begin
-  Result := _DocPos(NullPos, Offset);
+  Result := _DocPos(NullDocPos, Offset);
 end;
 
 function TLapeCodeEmitterBase._op(op: opCode; var Offset: Integer; Pos: PDocPos = nil): Integer;

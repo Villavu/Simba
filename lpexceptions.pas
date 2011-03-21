@@ -22,12 +22,15 @@ resourcestring
   lpeArrayLengthsDontMatch = 'Length of arrays (%s) don''t match';
   lpeBlockExpected = 'Block expected';
   lpeCannotAssign = 'Target cannot be assigned to';
+  lpeCannotBreak = 'Cannot break out of this statement';
+  lpeCannotContinue = 'Cannot use continue in this context';
   lpeCannotEvalConst = 'Cannot be evaluated as constant';
   lpeCannotEvalConstProc = 'Procedures cannot be used for constant evaluation';
   lpeCannotEvalRunTime = 'Cannot be evaluated at runtime';
   lpeCannotInvoke = 'Cannot invoke identifier';
   lpeCannotOverload = 'Cannot overload function';
   lpeClosingParenthesisExpected = 'Closing parenthesis expected';
+  lpeConstantExpected = 'Constant expression expected';
   lpeDefaultToMoreThanOne = 'Runtime default value can only be assigned to one variable';
   lpeDuplicateDeclaration = 'Duplicate declaration "%s"';
   lpeExceptionAt = '%s at line %d, column %d';
@@ -57,6 +60,7 @@ resourcestring
   lpeOutOfStackRange = 'Out of stack range';
   lpeOutOfTypeRange = 'Out of type range';
   lpeRuntime = 'Runtime error: "%s"';
+  lpeStatementNotAllowed = 'Statement not allowed here';
   lpeTooMuchParameters = 'Too much parameters found';
   lpeTypeExpected = 'Type expected';
   lpeUnexpectedToken = 'Found unexpected token "%s"';

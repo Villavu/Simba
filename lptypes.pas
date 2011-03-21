@@ -156,12 +156,16 @@ type
   PLapeSmallSet = ^TLapeSmallSet;
   PLapeLargeSet = ^TLapeLargeSet;
 
-  TLapeBaseClass = class
+  TLapeBaseClass = class(IUnknown)
+  protected
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
   public
     constructor Create; virtual;
     {$IFDEF Lape_TrackObjects}
     destructor Destroy; override;
     {$ENDIF}
+    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
   end;
 
   {$IFDEF FPC}generic{$ENDIF} TLapeStack<_T> = class(TLapeBaseClass)
@@ -329,6 +333,8 @@ const
   LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes;
   LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltScriptMethod, ltImportedMethod, ltShortString];
 
+  NullDocPos: TDocPos = (Line: 0; Col: 0; FileName: nil);
+
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
   BinaryOperators = [op_AND, op_NOT, op_OR, op_XOR];
   CompareOperators = [op_cmp_Equal, op_cmp_GreaterThan, op_cmp_GreaterThanOrEqual, op_cmp_LessThan, op_cmp_LessThanOrEqual, op_cmp_NotEqual];
@@ -464,6 +470,16 @@ begin
   Delete(Result, 1, 3);
 end;
 
+function TLapeBaseClass._AddRef: Integer; stdcall;
+begin
+  Result := -1;
+end;
+
+function TLapeBaseClass._Release: Integer; stdcall;
+begin
+  Result := -1;
+end;
+
 constructor TLapeBaseClass.Create;
 begin
   inherited;
@@ -489,6 +505,14 @@ begin
   inherited;
 end;
 {$ENDIF}
+
+function TLapeBaseClass.QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+begin
+  if getInterface(IId, Obj) then
+    Result := 0
+  else
+    Result := E_NOINTERFACE;
+end;
 
 procedure TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.Grow(AGrowSize: Integer);
 begin

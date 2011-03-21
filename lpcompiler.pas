@@ -212,8 +212,11 @@ begin
     l := res.Lo.Evaluate();
     r := res.Hi.Evaluate();
     if (l = nil) or (l.VarType = nil) or (l.VarType.BaseIntType = ltUnknown) or
-       (r = nil) or (r.VarType = nil) or (r.VarType.BaseIntType = ltUnknown) then
-      LapeException(lpeInvalidRange, Node.DocPos);
+       (r = nil) or (r.VarType = nil) or (r.VarType.BaseIntType = ltUnknown)
+    then
+      LapeException(lpeInvalidRange, Node.DocPos)
+    else if (not l.isConstant) or (r.isConstant) then
+      LapeException(lpeConstantExpected, Node.DocPos);
     Result.Lo := l.AsInteger;
     Result.Hi := r.AsInteger;
     if (Result.Hi < Result.Lo) then
@@ -240,6 +243,9 @@ begin
   FreeTree := True;
 
   FInternalMethodMap := TLapeInternalMethodMap.Create(nil);
+  FInternalMethodMap['Break'] := TLapeTree_InternalMethod_Break;
+  FInternalMethodMap['Continue'] := TLapeTree_InternalMethod_Continue;
+  FInternalMethodMap['Exit'] := TLapeTree_InternalMethod_Exit;
   FInternalMethodMap['SizeOf'] := TLapeTree_InternalMethod_SizeOf;
   FInternalMethodMap['Ord'] := TLapeTree_InternalMethod_Ord;
   FInternalMethodMap['Low'] := TLapeTree_InternalMethod_Low;
@@ -679,7 +685,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
           else
             v := nil;
 
-          if (v = nil) or (v.VarType = nil) or (v.VarType.BaseIntType = ltUnknown) then
+          if (v = nil) or (v.VarType = nil) or (v.VarType.BaseIntType = ltUnknown) or (not v.isConstant) then
             LapeException(lpeExpressionExpected, FTokenizer.DocPos);
           TLapeGlobalVar(addLocalDecl(re.NewGlobalVar(re.addMember(v.AsInteger, n), n), FStackInfo.Owner)).isConstant := True;
         finally
@@ -713,10 +719,16 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
           r.Hi := -1;
           try
             if (Right <> nil) and (Right is TLapeTree_ExprBase) then
-              r.Hi := TLapeTree_ExprBase(Right).Evaluate().AsInteger;
+              if TLapeTree_ExprBase(Right).isConstant() then
+                r.Hi := TLapeTree_ExprBase(Right).Evaluate().AsInteger
+              else
+                LapeException(lpeConstantExpected, Right.DocPos);
           finally
             if (r.Hi < 0) or (r.Hi > High(UInt8)) then
-              LapeException(lpeInvalidRange, Right.DocPos);
+              if (Right <> nil) then
+                LapeException(lpeInvalidRange, DocPos)
+              else
+                LapeException(lpeInvalidRange, Right.DocPos);
           end;
 
           if (left <> nil) and (Left is TLapeTree_VarType) and (TLapeTree_VarType(Left).VarType <> nil) and (TLapeTree_VarType(Left).VarType.BaseType = ltAnsiString) then
@@ -838,6 +850,8 @@ begin
       if (FTokenizer.Tok = tk_sym_Equals) then
       begin
         b := ParseExpression();
+        if (b <> nil) and (not b.isConstant()) then
+          LapeException(lpeConstantExpected, b.DocPos);
         if (t <> nil) and (b is TLapeTree_OpenArray) then
           TLapeTree_OpenArray(b).ToType := t;
 
