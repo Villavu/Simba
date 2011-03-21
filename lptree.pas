@@ -1579,7 +1579,7 @@ begin
   if (not (FParams.Count in [0, 1])) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
-  if (FParams.Count < 1) or (FParams[0] = nil) or (FParams[1].ClassType = TLapeTree_ExprBase) then
+  if (FParams.Count < 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     a := 1
   else
     with FParams[0].Evaluate() do
@@ -1625,7 +1625,7 @@ begin
   if (FParams.Count <> 0) then
     if (FParams.Count <> 1) then
       LapeException(lpeWrongNumberParams, [1], DocPos)
-    else if (FParams[0] = nil) or (FParams[1].ClassType = TLapeTree_ExprBase) then
+    else if (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
       LapeException(lpeNoDefaultForParam, [1], DocPos);
 
   if (FParams.Count = 1) then
