@@ -51,6 +51,7 @@ const
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
   interp_CP = 2; //CPascal
+  interp_LP = 3; //LA-PE
 
 type
 
@@ -71,6 +72,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionLAPE: TAction;
     ActionGoto: TAction;
     ActionCPascal: TAction;
     ActionRUTIS: TAction;
@@ -116,6 +118,7 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    MenuItemLAPE: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
     MenuItemGoto: TMenuItem;
     MenuItemDivider50: TMenuItem;
@@ -256,6 +259,7 @@ type
     procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionGotoExecute(Sender: TObject);
+    procedure ActionLAPEExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionNormalSizeExecute(Sender: TObject);
@@ -621,13 +625,16 @@ end;
 
 procedure TSimbaForm.UpdateInterpreter;
 begin
-  ActionPascalScript.Checked:= false;
-  ActionRUTIS.Checked:= false;
-  ActionCPascal.Checked:= false;
+  ActionPascalScript.Checked := False;
+  ActionRUTIS.Checked := False;
+  ActionCPascal.Checked := False;
+  ActionLAPE.Checked := False;
+
   case Interpreter of
-    interp_PS: ActionPascalScript.Checked:= True;
-    interp_CP: ActionCPascal.Checked:= True;
-    interp_RT: ActionRUTIS.Checked:= true;
+    interp_PS: ActionPascalScript.Checked := True;
+    interp_CP: ActionCPascal.Checked := True;
+    interp_RT: ActionRUTIS.Checked := True;
+    interp_LP: ActionLAPE.Checked := True;
   end;
 end;
 
@@ -648,13 +655,13 @@ begin
   end;
 end;
 
-function TSimbaForm.GetInterpreter: Integer;
+function TSimbaForm.GetInterpreter: integer;
 begin
-  result := StrToIntDef(LoadSettingDef('Settings/Interpreter/Type','0'),0);
-  if (result < 0) or (result > 2) then
+  Result := StrToIntDef(LoadSettingDef('Settings/Interpreter/Type', '0'),0);
+  if ((Result < 0) or (Result > 3)) then
   begin
     SetInterpreter(0);
-    result := 0;
+    Result := 0;
   end;
 end;
 
@@ -1478,14 +1485,16 @@ begin
     if not Continue then
       exit;
   end;
+
   AppPath:= MainDir + DS;
   CurrScript.ScriptErrorLine:= -1;
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
   try
     case Interpreter of
-      interp_PS : Thread := TPSThread.Create(true,@CurrentSyncInfo,PluginPath);
-      interp_RT : {$IFDEF USE_RUTIS}Thread := TRTThread.Create(true,@CurrentSyncInfo,PluginPath){$ELSE}formWriteln('RUTIS NOT SUPPORTED') {$ENDIF};
-      interp_CP : Thread := TCPThread.Create(true,@CurrentSyncInfo,PluginPath);
+      interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, PluginPath);
+      interp_RT: {$IFDEF USE_RUTIS}Thread := TRTThread.Create(True, @CurrentSyncInfo, PluginPath){$ELSE}formWriteln('RUTIS NOT SUPPORTED') {$ENDIF};
+      interp_CP: Thread := TCPThread.Create(True, @CurrentSyncInfo, PluginPath);
+      interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, PluginPath);
     end;
   except
     mDebugLn('Failed to initialise the interpreter');
@@ -1619,6 +1628,7 @@ begin
                 end;
     interp_RT : result := 'program untitled;' + LineEnding + lineEnding + 'interface' + LineEnding + LineEnding +
                           'implementation' + LineEnding + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
+    interp_LP: result := 'begin' + LineEnding + 'end;' + LineEnding;
   end;
 end;
 
@@ -1674,7 +1684,7 @@ end;
 
 procedure TSimbaForm.ActionCPascalExecute(Sender: TObject);
 begin
-  Interpreter:= interp_CP;
+  Interpreter := interp_CP;
 end;
 
 procedure TSimbaForm.ActionCutExecute(Sender: TObject);
@@ -1746,6 +1756,11 @@ begin
   end;
 end;
 
+procedure TSimbaForm.ActionLAPEExecute(Sender: TObject);
+begin
+  Interpreter := interp_LP;
+end;
+
 procedure TSimbaForm.ActionClearDebugExecute(Sender: TObject);
 begin
   Memo1.Clear;
@@ -1787,7 +1802,7 @@ end;
 
 procedure TSimbaForm.ActionPascalScriptExecute(Sender: TObject);
 begin
-  Interpreter:= interp_PS;
+  Interpreter := interp_PS;
 end;
 
 procedure TSimbaForm.ActionPasteExecute(Sender: TObject);
@@ -1831,7 +1846,7 @@ end;
 procedure TSimbaForm.ActionRUTISExecute(Sender: TObject);
 begin
   {$IFDEF USE_RUTIS}
-  Interpreter:= interp_RT;
+  Interpreter := interp_RT;
   {$ENDIF}
 end;
 

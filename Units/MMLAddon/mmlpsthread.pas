@@ -30,14 +30,15 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,
-  uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web,
-  bitmaps, plugins, dynlibs,internets,scriptproperties,
-  settings,settingssandbox, lcltype, dialogs
+  Classes, SysUtils, client, uPSComponent, uPSCompiler,
+  uPSRuntime, uPSPreProcessor, MufasaTypes, MufasaBase, web,
+  bitmaps, plugins, dynlibs, internets, scriptproperties,
+  settings, settingssandbox, lcltype, dialogs
   {$IFDEF USE_RUTIS}
-  ,Rutis_Engine,Rutis_Defs
+  , Rutis_Engine, Rutis_Defs
   {$ENDIF}
-  ;
+  , lpparser, lpcompiler, lptypes, lpvartypes, lpeval, lpinterpreter,
+  lpdisassembler;
 
 const
   m_Status = 0; //Data = PChar to new status
@@ -232,9 +233,21 @@ type
     end;
    {$ENDIF}
 
+   { TLPThread }
+   TLPThread = class(TMThread)
+   public
+     Parser: TLapeTokenizerString;
+     Compiler: TLapeCompiler;
+     constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+     destructor Destroy; override;
+     procedure SetScript(Script: string); override;
+     procedure Execute; override;
+     procedure Terminate; override;
+   end;
+
 
 threadvar
-  CurrThread : TMThread;
+  CurrThread: TMThread;
 var
   PluginsGlob: TMPlugins;
 
@@ -325,7 +338,7 @@ begin
   if Assigned(OpenConnectionEvent) then
     MInternet.OpenConnectionEvent := Self.OpenConnectionEvent;
   SyncInfo:= TheSyncInfo;
-  ExportedMethods:= GetExportedMethods;
+  ExportedMethods := GetExportedMethods;
   FreeOnTerminate := True;
   CompileOnly := false;
   OnTerminate := @OnThreadTerminate;
@@ -1187,6 +1200,82 @@ begin
   RUTIS.Stop;
 end;
 {$ENDIF}
+
+{ TLPThread }
+
+constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
+begin
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
+  Parser := TLapeTokenizerString.Create('');
+  Compiler := TLapeCompiler.Create(Parser);
+end;
+
+destructor TLPThread.Destroy;
+begin
+  Compiler.Free;
+  inherited Destroy;
+end;
+
+procedure TLPThread.SetScript(Script: string);
+begin
+  Parser.Doc := Script;
+end;
+
+type
+  PStringArray = ^TStringArray;
+  PIntegerArray = ^TIntegerArray;
+  PPointArray = ^TPointArray;
+
+{$I LPInc/Wrappers/colour.inc}
+{$I LPInc/Wrappers/colourconv.inc}
+{$I LPInc/Wrappers/keyboard.inc}
+{$I LPInc/Wrappers/mouse.inc}
+{$I LPInc/Wrappers/other.inc}
+{$I LPInc/Wrappers/settings.inc}
+
+procedure TLPThread.Execute;
+  function CombineDeclArray(a, b: TLapeDeclArray): TLapeDeclArray;
+  var
+    i, l: Integer;
+  begin
+    Result := a;
+    l := Length(a);
+    SetLength(Result, l + Length(b));
+    for i := High(b) downto 0 do
+      Result[l + i] := b[i];
+  end;
+var
+  I: integer;
+  Fonts: TMFonts;
+begin
+  CurrThread := self;
+  try
+    Fonts := Client.MOCR.Fonts;
+    with Compiler do
+    begin
+      {$I LPInc/lpcompile.inc}
+
+      //{$I LPInc/lpexportedmethods.inc}
+    end;
+    Starttime := lclintf.GetTickCount;
+    if Compiler.Compile() then
+    begin
+      DisassembleCode(Compiler.Emitter.Code, CombineDeclArray(Compiler.ManagedDeclarations.getByClass(TLapeGlobalVar), Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar)));
+      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      if CompileOnly then
+        Exit;
+      RunCode(Compiler.Emitter.Code);
+    end else
+      psWriteln('Compiling failed.');
+  except
+     on E : Exception do
+       psWriteln('Exception in Script: ' + e.message);
+  end;
+end;
+
+procedure TLPThread.Terminate;
+begin
+end;
 
 initialization
   PluginsGlob := TMPlugins.Create;

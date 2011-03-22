@@ -1269,6 +1269,10 @@ object SimbaForm: TSimbaForm
           Action = ActionCPascal
           RadioItem = True
         end
+        object MenuItemLAPE: TMenuItem
+          Action = ActionLAPE
+          RadioItem = True
+        end
       end
     end
     object MenuView: TMenuItem
@@ -3024,6 +3028,10 @@ object SimbaForm: TSimbaForm
       Caption = 'Goto line'
       OnExecute = ActionGotoExecute
       ShortCut = 16455
+    end
+    object ActionLAPE: TAction
+      Caption = 'LA-PE'
+      OnExecute = ActionLAPEExecute
     end
   end
   object DebugTimer: TTimer
