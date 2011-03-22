@@ -73,8 +73,8 @@ resourcestring
 
 procedure LapeException(Msg: string); overload; inline;
 procedure LapeException(Msg: string; DocPos: TDocPos); overload; inline;
-procedure LapeException(Msg: string; Args: array of const); overload; {$IFDEF FPC}inline;{$ENDIF}
-procedure LapeException(Msg: string; Args: array of const; DocPos: TDocPos); overload; {$IFDEF FPC}inline;{$ENDIF}
+procedure LapeException(Msg: string; Args: array of const); overload;
+procedure LapeException(Msg: string; Args: array of const; DocPos: TDocPos); overload;
 
 implementation
 

@@ -2002,7 +2002,7 @@ begin
     else
       Right.FVarType := FCompiler.getBaseType(Right.VarType.BaseIntType);
 
-    s := TLapeType_Int32(FCompiler.getBaseType(ltInt32)).NewGlobalVar(FPType.Size);
+    s := FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(FPType.Size));
     r := nil;
     try
       if (FPType.Size <> 1) then
@@ -2017,7 +2017,7 @@ begin
           r
         );
     finally
-      if (r <> nil) then
+      if (r <> nil) and (r <> Right) then
         r.Free();
       s.Free();
       Right.FVarType := v;
@@ -2054,7 +2054,7 @@ begin
           op_Multiply,
           a,
           Right,
-          getResVar(FCompiler.addManagedVar(TLapeType_Int32(FCompiler.getBaseType(ltInt32)).NewGlobalVar(FPType.Size))),
+          getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(FPType.Size)))),
           Offset,
           Pos
         );
