@@ -2238,8 +2238,12 @@ Arr[op_cmp_Equal][ltAnsiChar][ltAnsiChar] := Arr[op_cmp_Equal][ltUInt8][ltUInt8]
 Arr[op_cmp_Equal][ltAnsiChar][ltWideChar] := Arr[op_cmp_Equal][ltUInt8][ltUInt16];
 Arr[op_cmp_GreaterThan][ltAnsiChar][ltAnsiChar] := Arr[op_cmp_GreaterThan][ltUInt8][ltUInt8];
 Arr[op_cmp_GreaterThan][ltAnsiChar][ltWideChar] := Arr[op_cmp_GreaterThan][ltUInt8][ltUInt16];
+Arr[op_cmp_GreaterThanOrEqual][ltAnsiChar][ltAnsiChar] := Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltUInt8];
+Arr[op_cmp_GreaterThanOrEqual][ltAnsiChar][ltWideChar] := Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltUInt16];
 Arr[op_cmp_LessThan][ltAnsiChar][ltAnsiChar] := Arr[op_cmp_LessThan][ltUInt8][ltUInt8];
 Arr[op_cmp_LessThan][ltAnsiChar][ltWideChar] := Arr[op_cmp_LessThan][ltUInt8][ltUInt16];
+Arr[op_cmp_LessThanOrEqual][ltAnsiChar][ltAnsiChar] := Arr[op_cmp_LessThanOrEqual][ltUInt8][ltUInt8];
+Arr[op_cmp_LessThanOrEqual][ltAnsiChar][ltWideChar] := Arr[op_cmp_LessThanOrEqual][ltUInt8][ltUInt16];
 Arr[op_cmp_NotEqual][ltAnsiChar][ltAnsiChar] := Arr[op_cmp_NotEqual][ltUInt8][ltUInt8];
 Arr[op_cmp_NotEqual][ltAnsiChar][ltWideChar] := Arr[op_cmp_NotEqual][ltUInt8][ltUInt16];
 
@@ -2282,8 +2286,12 @@ Arr[op_cmp_Equal][ltWideChar][ltAnsiChar] := Arr[op_cmp_Equal][ltUInt16][ltUInt8
 Arr[op_cmp_Equal][ltWideChar][ltWideChar] := Arr[op_cmp_Equal][ltUInt16][ltUInt16];
 Arr[op_cmp_GreaterThan][ltWideChar][ltAnsiChar] := Arr[op_cmp_GreaterThan][ltUInt16][ltUInt8];
 Arr[op_cmp_GreaterThan][ltWideChar][ltWideChar] := Arr[op_cmp_GreaterThan][ltUInt16][ltUInt16];
+Arr[op_cmp_GreaterThanOrEqual][ltWideChar][ltAnsiChar] := Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltUInt8];
+Arr[op_cmp_GreaterThanOrEqual][ltWideChar][ltWideChar] := Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltUInt16];
 Arr[op_cmp_LessThan][ltWideChar][ltAnsiChar] := Arr[op_cmp_LessThan][ltUInt16][ltUInt8];
 Arr[op_cmp_LessThan][ltWideChar][ltWideChar] := Arr[op_cmp_LessThan][ltUInt16][ltUInt16];
+Arr[op_cmp_LessThanOrEqual][ltWideChar][ltAnsiChar] := Arr[op_cmp_LessThanOrEqual][ltUInt16][ltUInt8];
+Arr[op_cmp_LessThanOrEqual][ltWideChar][ltWideChar] := Arr[op_cmp_LessThanOrEqual][ltUInt16][ltUInt16];
 Arr[op_cmp_NotEqual][ltWideChar][ltAnsiChar] := Arr[op_cmp_NotEqual][ltUInt16][ltUInt8];
 Arr[op_cmp_NotEqual][ltWideChar][ltWideChar] := Arr[op_cmp_NotEqual][ltUInt16][ltUInt16];
 

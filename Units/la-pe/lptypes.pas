@@ -68,7 +68,7 @@ type
   TVarStackOffset = UInt16;
   TStackOffset = UInt16;
   TStackInc = Int16;
-  TPointerOffset = UInt16;
+  TPointerOffset = Int16;
 
   TMemoryPos = (mpNone, mpStack, mpMem, mpVar);
   TLapeEvalProc = procedure(const Dest, Left, Right: Pointer);
@@ -96,7 +96,7 @@ type
     ltPointer,                                                                //Pointer
     ltRecord, ltUnion,                                                        //Struct
     ltDynArray, ltStaticArray,                                                //Array
-    ltProc, ltExternalProc                                                    //Methods
+    ltScriptMethod, ltImportedMethod                                          //Methods
   );
   LapeIntegerTypeRange = ltUInt8..ltInt64;
 
@@ -156,12 +156,16 @@ type
   PLapeSmallSet = ^TLapeSmallSet;
   PLapeLargeSet = ^TLapeLargeSet;
 
-  TLapeBaseClass = class
+  TLapeBaseClass = class(IUnknown)
+  protected
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
   public
     constructor Create; virtual;
     {$IFDEF Lape_TrackObjects}
     destructor Destroy; override;
     {$ENDIF}
+    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
   end;
 
   {$IFDEF FPC}generic{$ENDIF} TLapeStack<_T> = class(TLapeBaseClass)
@@ -230,7 +234,7 @@ type
   public
     InvalidVal: _T;
 
-    constructor Create(InvalidValue: _T; CaseSensitive: Boolean = False; Duplicates: TDuplicates = dupError); reintroduce; virtual;
+    constructor Create(InvalidValue: _T; CaseSensitive: Boolean = {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF}; Duplicates: TDuplicates = dupError); reintroduce; virtual;
     destructor Destroy; override;
 
     procedure Clear; virtual;
@@ -300,7 +304,7 @@ const
   ltCharInt = ltUInt8;
   {$ENDIF}
 
-  LapeTypeSize: array[ELapeBaseType] of ShortInt = (
+  LapeTypeSize: array[ELapeBaseType] of Integer = (
     -1,
     SizeOf(UInt8), SizeOf(Int8), SizeOf(UInt16), SizeOf(Int16), SizeOf(UInt32),
     SizeOf(Int32), SizeOf(UInt64), SizeOf(Int64),
@@ -324,10 +328,12 @@ const
   LapeSetTypes = [ltSmallSet..ltLargeSet];
   LapeArrayTypes = [ltDynArray..ltStaticArray] + LapeStringTypes;
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
-  LapePointerTypes = [ltPointer, ltDynArray, ltProc, ltExternalProc] + LapeStringTypes - [ltShortString];
+  LapePointerTypes = [ltPointer, ltDynArray, ltScriptMethod, ltImportedMethod] + LapeStringTypes - [ltShortString];
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes + [ltShortString];
   LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes;
-  LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltProc, ltExternalProc, ltShortString];
+  LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltScriptMethod, ltImportedMethod, ltShortString];
+
+  NullDocPos: TDocPos = (Line: 0; Col: 0; FileName: nil);
 
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
   BinaryOperators = [op_AND, op_NOT, op_OR, op_XOR];
@@ -427,8 +433,9 @@ var
     @highUInt8, @highInt8, @highUInt16, @highInt16, @highUInt32, @highInt32, @highUInt64, @highInt64
   );
 
-function LapeTypeToString(Token: ELapeBaseType): lpString;
-function LapeOperatorToString(Token: EOperator): lpString;
+function LapeCase(const s: lpString): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function LapeTypeToString(Token: ELapeBaseType): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function LapeOperatorToString(Token: EOperator): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 {$IFDEF Lape_TrackObjects}
 var
@@ -442,6 +449,15 @@ uses
   typinfo,
   lpexceptions;
 
+function LapeCase(const s: lpString): lpString;
+begin
+  {$IFDEF Lape_CaseSensitive}
+  Result := s;
+  {$ELSE}
+  Result := LowerCase(s);
+  {$ENDIF}
+end;
+
 function LapeTypeToString(Token: ELapeBaseType): lpString;
 begin
   Result := getEnumName(TypeInfo(ELapeBaseType), Ord(Token));
@@ -452,6 +468,16 @@ function LapeOperatorToString(Token: EOperator): lpString;
 begin
   Result := getEnumName(TypeInfo(EOperator), Ord(Token));
   Delete(Result, 1, 3);
+end;
+
+function TLapeBaseClass._AddRef: Integer; stdcall;
+begin
+  Result := -1;
+end;
+
+function TLapeBaseClass._Release: Integer; stdcall;
+begin
+  Result := -1;
 end;
 
 constructor TLapeBaseClass.Create;
@@ -479,6 +505,14 @@ begin
   inherited;
 end;
 {$ENDIF}
+
+function TLapeBaseClass.QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+begin
+  if getInterface(IId, Obj) then
+    Result := 0
+  else
+    Result := E_NOINTERFACE;
+end;
 
 procedure TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.Grow(AGrowSize: Integer);
 begin
@@ -721,7 +755,7 @@ begin
     Result := '';
 end;
 
-constructor TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.Create(InvalidValue: _T; CaseSensitive: Boolean = False; Duplicates: TDuplicates = dupError);
+constructor TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.Create(InvalidValue: _T; CaseSensitive: Boolean = {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF}; Duplicates: TDuplicates = dupError);
 begin
   inherited Create();
 
@@ -910,10 +944,10 @@ var
   i: Integer;
 begin
   Result := nil;
-  AName := UpperCase(AName);
+  AName := LapeCase(AName);
   if (FList <> nil) then
     for i := 0 to FList.Count - 1 do
-      if (FList[i] <> nil) and (UpperCase(FList[i].Name) = AName) then
+      if (FList[i] <> nil) and (LapeCase(FList[i].Name) = AName) then
       begin
         SetLength(Result, Length(Result) + 1);
         Result[High(Result)] := FList[i];

@@ -51,3 +51,18 @@ begin
   psWriteLn(FloatToStr(PExtended(Params^[0])^));
 end;
 
+procedure lpRandom(Params: PParamArray; Result: Pointer);
+begin
+  PInt32(Result)^ := Random(PInt32(Params^[0])^);
+end;
+
+procedure lpWait(Params: PParamArray);
+begin
+  ps_Wait(PLongWord(Params^[0])^);
+end;
+
+procedure lpWait_Rand(Params: PParamArray);
+begin
+  ps_Wait(PLongWord(Params^[0])^ + Random(PLongWord(Params^[1])^));
+end;
+

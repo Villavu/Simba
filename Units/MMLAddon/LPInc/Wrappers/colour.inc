@@ -23,7 +23,7 @@
 
 procedure lpGetColor(Params: PParamArray; Result: Pointer);
 begin;
-  PInt32(Result)^ := CurrThread.Client.IOManager.GetColor(PInt32(Params^[0])^, PInt32(Params^[1])^);
+  PLongInt(Result)^ := CurrThread.Client.IOManager.GetColor(PLongInt(Params^[0])^, PLongInt(Params^[1])^);
 end;
 
 procedure lpGetColorsWrap(Params: PParamArray);
@@ -38,32 +38,32 @@ end;
 
 procedure lpFindColor(Params: PParamArray; Result: Pointer);
 begin
-  PBool(Result)^ := CurrThread.Client.MFinder.FindColor(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColor(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^);
 end;
 
 procedure lpFindColorToleranceOptimised(Params: PParamArray; Result: Pointer);
 begin
-  PBool(Result)^ := CurrThread.Client.MFinder.FindColorToleranceOptimised(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColorToleranceOptimised(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^);
 end;
 
 procedure lpFindColorTolerance(Params: PParamArray; Result: Pointer);
 begin
-  PBool(Result)^ := CurrThread.Client.MFinder.FindColorTolerance(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColorTolerance(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^);
 end;
 
-{function ps_FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean; extdecl;
+procedure lpFindColors(Params: PParamArray; Result: Pointer);
 begin
-  Result := CurrThread.Client.MFinder.FindColors(TPA, color, x1, y1, x2, y2);
-end;}
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColors(PPointArray(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^);
+end;
 
 procedure lpSetColorToleranceSpeed(Params: PParamArray);
 begin
-  CurrThread.Client.MFinder.SetToleranceSpeed(PInt32(Params^[0])^);
+  CurrThread.Client.MFinder.SetToleranceSpeed(PLongInt(Params^[0])^);
 end;
 
 procedure lpGetToleranceSpeed(Params: PParamArray; Result: Pointer);
 begin
-  PInt32(Result)^ := CurrThread.Client.MFinder.GetToleranceSpeed;
+  PLongInt(Result)^ := CurrThread.Client.MFinder.GetToleranceSpeed;
 end;
 
 procedure lpSetToleranceSpeed2Modifiers(Params: PParamArray);
@@ -78,51 +78,50 @@ end;
 
 procedure lpSimilarColors(Params: PParamArray; Result: Pointer);
 begin;
-  PBool(Result)^ := CurrThread.Client.MFinder.SimilarColors(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^);
+  PBool(Result)^ := CurrThread.Client.MFinder.SimilarColors(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^);
 end;
 
-{function ps_CountColor(Color, xs, ys, xe, ye: Integer): Integer; extdecl;
+procedure lpCountColor(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MFinder.CountColor(color,xs,ys,xe,ye);
+  PLongInt(Result)^ := CurrThread.Client.MFinder.CountColor(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^);
 end;
 
-function ps_CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer; extdecl;
+procedure lpCountColorTolerance(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MFinder.CountColorTolerance(color,xs,ys,xe,ye,tolerance);
-end;}
-
-{function ps_FindColorsToleranceOptimised(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean; extdecl;
-begin;
-  result := CurrThread.Client.MFinder.FindColorsToleranceOptimised(points,color,xs,ys,xe,ye,tolerance);
+  PLongInt(Result)^ := CurrThread.Client.MFinder.CountColorTolerance(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^);
 end;
 
-function ps_FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean; extdecl;
+procedure lpFindColorsToleranceOptimised(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MFinder.FindColorsTolerance(points,color,xs,ys,xe,ye,tolerance);
-end;}
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColorsToleranceOptimised(PPointArray(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^);
+end;
+
+procedure lpFindColorsTolerance(Params: PParamArray; Result: Pointer);
+begin;
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColorsTolerance(PPointArray(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^);
+end;
 
 procedure lpFindColorSpiral(Params: PParamArray; Result: Pointer);
 begin;
-  PBool(Result)^ := CurrThread.Client.MFinder.FindColorSpiral(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColorSpiral(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^);
 end;
 
 procedure lpFindColorSpiralTolerance(Params: PParamArray; Result: Pointer);
 begin
-  PBool(Result)^ := CurrThread.Client.MFinder.FindColorSpiralTolerance(PInt32(Params^[0])^, PInt32(Params^[1])^, PInt32(Params^[2])^, PInt32(Params^[3])^, PInt32(Params^[4])^, PInt32(Params^[5])^, PInt32(Params^[6])^, PInt32(Params^[7])^);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColorSpiralTolerance(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^);
 end;
 
-{function ps_FindColorsSpiralTolerance(x, y: Integer; var Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean; extdecl;
+procedure lpFindColorsSpiralTolerance(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MFinder.FindColorsSpiralTolerance(x,y,Points,color,xs,ys,xe,ye,tolerance);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColorsSpiralTolerance(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PPointArray(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^, PLongInt(Params^[8])^);
 end;
 
-function ps_FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean; extdecl;
+procedure lpFindColoredArea(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MFinder.FindColoredArea(x,y,color,xs,ys,xe,ye,minarea);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColoredArea(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^);
 end;
 
-function ps_FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean;  extdecl;
+procedure lpFindColoredAreaTolerance(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MFinder.FindColoredAreaTolerance(x,y,color,xs,ys,xe,ye,minarea,tol);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindColoredAreaTolerance(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^, PLongInt(Params^[8])^);
 end;
-}

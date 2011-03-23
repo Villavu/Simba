@@ -235,6 +235,8 @@ type
 
    { TLPThread }
    TLPThread = class(TMThread)
+   private
+     IScript: string;
    public
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
@@ -425,7 +427,7 @@ procedure TMThread.AddMethod(meth: TExpMethod);
 begin
 end;
 
-function TMThread.LoadFile(ParentFile : string; var filename, contents: string): boolean;
+function TMThread.LoadFile(ParentFile: string; var filename, contents: string): boolean;
 var
   path: string;
   f: TFileStream;
@@ -1206,32 +1208,55 @@ end;
 constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
-  Parser := TLapeTokenizerString.Create('');
-  Compiler := TLapeCompiler.Create(Parser);
 end;
 
 destructor TLPThread.Destroy;
 begin
-  Compiler.Free;
   inherited Destroy;
 end;
 
 procedure TLPThread.SetScript(Script: string);
 begin
-  Parser.Doc := Script;
+  IScript := Script;
 end;
 
 type
+  PBoolean = ^Boolean;
   PStringArray = ^TStringArray;
-  PIntegerArray = ^TIntegerArray;
+  PBmpMirrorStyle = ^TBmpMirrorStyle;
   PPointArray = ^TPointArray;
+  P2DIntArray = ^T2DIntArray;
+  PCanvas = ^TCanvas;
+  P2DPointArray = ^T2DPointArray;
+  PMask = ^TMask;
+  PBox = ^TBox;
+  PTarget_Exported = ^TTarget_Exported;
+  PIntegerArray = ^TIntegerArray;
+  PExtendedArray = ^TExtendedArray;
+//  PStrExtr = ^TStrExtr;
+  PReplaceFlags = ^TReplaceFlags;
+  PClickType = ^TClickType;
+  P2DExtendedArray = ^T2DExtendedArray;
+  PMDTM = ^TMDTM;
+  PMDTMPoint = ^TMDTMPoint;
+  PSDTM = ^TSDTM;
 
-{$I LPInc/Wrappers/colour.inc}
-{$I LPInc/Wrappers/colourconv.inc}
-{$I LPInc/Wrappers/keyboard.inc}
-{$I LPInc/Wrappers/mouse.inc}
 {$I LPInc/Wrappers/other.inc}
 {$I LPInc/Wrappers/settings.inc}
+//{$I LPInc/Wrappers/bitmap.inc}
+//{$I LPInc/Wrappers/window.inc}
+//{$I LPInc/Wrappers/tpa.inc}
+//{$I LPInc/Wrappers/strings.inc}
+{$I LPInc/Wrappers/colour.inc}
+{$I LPInc/Wrappers/colourconv.inc}
+{$I LPInc/Wrappers/crypto.inc}
+//{$I LPInc/Wrappers/math.inc}
+{$I LPInc/Wrappers/mouse.inc}
+//{$I LPInc/Wrappers/file.inc}
+{$I LPInc/Wrappers/keyboard.inc}
+{$I LPInc/Wrappers/dtm.inc}
+//{$I LPInc/Wrappers/ocr.inc}
+//{$I LPInc/Wrappers/internets.inc}
 
 procedure TLPThread.Execute;
   function CombineDeclArray(a, b: TLapeDeclArray): TLapeDeclArray;
@@ -1249,27 +1274,40 @@ var
   Fonts: TMFonts;
 begin
   CurrThread := self;
+  Parser := TLapeTokenizerString.Create(IScript);
+  Compiler := TLapeCompiler.Create(Parser);
   try
-    Fonts := Client.MOCR.Fonts;
-    with Compiler do
-    begin
-      {$I LPInc/lpcompile.inc}
+    try
+      Fonts := Client.MOCR.Fonts;
+      with Compiler do
+      begin
+        for I := Fonts.Count - 1 downto 0 do
+          addGlobalVar(Fonts[I].Name, Fonts[I].Name);
 
-      //{$I LPInc/lpexportedmethods.inc}
+        for I := 0 to High(VirtualKeys) do
+          addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
+
+        {$I LPInc/lpcompile.inc}
+
+        {$I LPInc/lpexportedmethods.inc}
+      end;
+      Starttime := lclintf.GetTickCount;
+      if Compiler.Compile() then
+      begin
+        DisassembleCode(Compiler.Emitter.Code, CombineDeclArray(Compiler.ManagedDeclarations.getByClass(TLapeGlobalVar), Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar)));
+        psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+        if CompileOnly then
+          Exit;
+        RunCode(Compiler.Emitter.Code);
+      end else
+        psWriteln('Compiling failed.');
+    except
+       on E : Exception do
+         psWriteln('Exception in Script: ' + e.message);
     end;
-    Starttime := lclintf.GetTickCount;
-    if Compiler.Compile() then
-    begin
-      DisassembleCode(Compiler.Emitter.Code, CombineDeclArray(Compiler.ManagedDeclarations.getByClass(TLapeGlobalVar), Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar)));
-      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
-      if CompileOnly then
-        Exit;
-      RunCode(Compiler.Emitter.Code);
-    end else
-      psWriteln('Compiling failed.');
-  except
-     on E : Exception do
-       psWriteln('Exception in Script: ' + e.message);
+  finally
+    Compiler.Free;
+    Parser.Free;
   end;
 end;
 
