@@ -1243,7 +1243,7 @@ type
 
 {$I LPInc/Wrappers/other.inc}
 {$I LPInc/Wrappers/settings.inc}
-//{$I LPInc/Wrappers/bitmap.inc}
+{$I LPInc/Wrappers/bitmap.inc}
 //{$I LPInc/Wrappers/window.inc}
 //{$I LPInc/Wrappers/tpa.inc}
 //{$I LPInc/Wrappers/strings.inc}

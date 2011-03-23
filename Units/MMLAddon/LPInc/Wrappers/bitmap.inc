@@ -143,194 +143,196 @@ end;
 
 procedure lpDrawBitmap(Params: PParamArray);
 begin
-  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].DrawToCanvas(PLongInt(Params^[2])^, PLongInt()^, PCanvas(Params^[1])^);
+  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].DrawToCanvas(PLongInt(Params^[2])^, PLongInt(Params^[3])^, PCanvas(Params^[1])^);
 end;
 
-procedure lpFastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer); extdecl;
+procedure lpFastDrawTransparent(Params: PParamArray);
 begin;
-  CurrThread.Client.MBitmaps[SourceBitmap].FastDrawTransparent(x,y,CurrThread.Client.MBitmaps[TargetBitmap]);
+  with CurrThread.Client do
+    MBitmaps[PLongInt(Params^[2])^].FastDrawTransparent(PLongInt(Params^[0])^, PLongInt(Params^[1])^, MBitmaps[PLongInt(Params^[3])^]);
 end;
 
-procedure lpSetTransparentColor(Bmp : integer; Color : TColor); extdecl;
+procedure lpSetTransparentColor(Params: PParamArray);
 begin
-  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].SetTransparentColor(Color);
+  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].SetTransparentColor(PLongInt(Params^[1])^);
 end;
 
-procedure lpGetTransparentColor(Bmp : integer) : TColor; extdecl;
+procedure lpGetTransparentColor(Params: PParamArray; Result: Pointer);
 begin;
-  Result := CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].GetTransparentColor;
+  PLongInt(Result)^ := CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].GetTransparentColor;
 end;
 
-procedure lpFastReplaceColor(bmp: Integer; OldColor, NewColor: TColor); extdecl;
+procedure lpFastReplaceColor(Params: PParamArray);
 begin
-  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].FastReplaceColor(OldColor,NewColor);
+  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].FastReplaceColor(PLongInt(Params^[1])^, PLongInt(Params^[2])^);
 end;
 
-procedure lpCopyClientToBitmap(bmp, xs, ys, xe, ye: Integer); extdecl;
+procedure lpCopyClientToBitmap(Params: PParamArray);
 begin
-  CurrThread.Client.MBitmaps.GetBMP(PLongInt(Params^[0])^).CopyClientToBitmap(CurrThread.Client.IOManager, True, xs, ys, xe, ye);
+  with CurrThread.Client do
+    MBitmaps.GetBMP(PLongInt(Params^[0])^).CopyClientToBitmap(IOManager, True, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^);
 end;
 
-procedure lpBitmapFromClient(const xs, ys, xe, ye: Integer): Integer; extdecl;
-begin;
-  result := CurrThread.Client.MBitmaps.CreateBMP(0,0);
-  CurrThread.Client.MBitmaps[result].CopyClientToBitmap(CurrThread.Client.IOManager,True,xs,ys,xe,ye);
-end;
-
-procedure lpFindBitmap(Bitmap: integer; var x, y: Integer): Boolean; extdecl;
+procedure lpBitmapFromClient(Params: PParamArray; Result: Pointer);
 begin;
   with CurrThread.Client do
-    result := MFinder.FindBitmap(MBitmaps[PLongInt(Params^[0])^],x,y);
-end;
-
-procedure lpFindBitmapIn(bitmap: integer; var x, y: Integer;  xs, ys, xe, ye: Integer): Boolean; extdecl;
-begin;
-  with CurrThread.Client do
-    result := MFinder.FindBitmapIn(MBitmaps[PLongInt(Params^[0])^],x,y,xs,ys,xe,ye);
-end;
-
-procedure lpFindBitmapToleranceIn(bitmap: integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean; extdecl;
-begin;
-  with CurrThread.Client do
-    result := MFinder.FindBitmapToleranceIn( MBitmaps[PLongInt(Params^[0])^],x,y,xs,ys,xe,ye,tolerance);
-end;
-
-
-procedure lpFindBitmapSpiral(bitmap: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean; extdecl;
-begin;
-  with CurrThread.Client do
-    result := MFinder.FindBitmapSpiral(Mbitmaps[PLongInt(Params^[0])^],x,y,xs,ys,xe,ye);
-end;
-
-procedure lpFindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; var Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean; extdecl;
-begin;
-  with CurrThread.Client do
-    result := MFinder.FindBitmapsSpiralTolerance(MBitmaps[PLongInt(Params^[0])^],x,y,points,xs,ys,xe,ye,tolerance);
-end;
-
-procedure lpFindBitmapSpiralTolerance(bitmap: integer; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean; extdecl;
-begin;
-  with CurrThread.Client do
-    result := MFinder.FindBitmapSpiralTolerance(MBitmaps[PLongInt(Params^[0])^],x,y,xs,ys,xe,ye,tolerance);
-end;
-
-procedure lpRotateBitmap(bitmap: Integer; angle: Extended): Integer; extdecl;
-begin;
-  with CurrThread.Client.MBitmaps do
-  begin;
-    Result := CreateBMP(0,0);
-    Bmp[PLongInt(Params^[0])^].RotateBitmap(angle,Bmp[result]);
+  begin
+    PLongInt(Result)^ := MBitmaps.CreateBMP(0, 0);
+    MBitmaps[PLongInt(Result)^].CopyClientToBitmap(IOManager, True, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^);
   end;
 end;
 
-procedure lpDesaturate(Bitmap : integer) : integer; extdecl;
+procedure lpFindBitmap(Params: PParamArray; Result: Pointer);
+begin;
+  with CurrThread.Client do
+    PBoolean(Result)^ := MFinder.FindBitmap(MBitmaps[PLongInt(Params^[0])^], PLongInt(Params^[1])^, PLongInt(Params^[2])^);
+end;
+
+procedure lpFindBitmapIn(Params: PParamArray; Result: Pointer);
+begin;
+  with CurrThread.Client do
+    PBoolean(Result)^ := MFinder.FindBitmapIn(MBitmaps[PLongInt(Params^[0])^], PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^);
+end;
+
+procedure lpFindBitmapToleranceIn(Params: PParamArray; Result: Pointer);
+begin;
+  with CurrThread.Client do
+    PBoolean(Result)^ := MFinder.FindBitmapToleranceIn( MBitmaps[PLongInt(Params^[0])^], PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^);
+end;
+
+
+procedure lpFindBitmapSpiral(Params: PParamArray; Result: Pointer);
+begin;
+  with CurrThread.Client do
+    PBoolean(Result)^ := MFinder.FindBitmapSpiral(Mbitmaps[PLongInt(Params^[0])^], PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^);
+end;
+
+procedure lpFindBitmapsSpiralTolerance(Params: PParamArray; Result: Pointer);
+begin;
+  with CurrThread.Client do
+    PBoolean(Result)^ := MFinder.FindBitmapsSpiralTolerance(MBitmaps[PLongInt(Params^[0])^], PLongInt(Params^[1])^, PLongInt(Params^[2])^, PPointArray(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^, PLongInt(Params^[8])^);
+end;
+
+procedure lpFindBitmapSpiralTolerance(Params: PParamArray; Result: Pointer);
+begin;
+  with CurrThread.Client do
+    PBoolean(Result)^ := MFinder.FindBitmapSpiralTolerance(MBitmaps[PLongInt(Params^[0])^], PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^);
+end;
+
+procedure lpRotateBitmap(Params: PParamArray; Result: Pointer);
 begin;
   with CurrThread.Client.MBitmaps do
   begin;
-    result := CreateBMP(0,0);
-    Bmp[PLongInt(Params^[0])^].Desaturate(Bmp[result]);
+    PLongInt(Result)^ := CreateBMP(0, 0);
+    Bmp[PLongInt(Params^[0])^].RotateBitmap(PExtended(Params^[1])^, Bmp[PLongInt(Result)^]);
   end;
 end;
 
-procedure lpInvertBitmap(Bitmap : integer); extdecl;
+procedure lpDesaturate(Params: PParamArray; Result: Pointer);
+begin;
+  with CurrThread.Client.MBitmaps do
+  begin;
+    PLongInt(Result)^ := CreateBMP(0, 0);
+    Bmp[PLongInt(Params^[0])^].Desaturate(Bmp[PLongInt(Result)^]);
+  end;
+end;
+
+procedure lpInvertBitmap(Params: PParamArray);
 begin;
   CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].Invert;
 end;
 
-procedure lpCopyBitmap(Bitmap : integer) : integer; extdecl;
+procedure lpCopyBitmap(Params: PParamArray; Result: Pointer);
 begin;
-  result := Currthread.Client.MBitmaps.CopyBMP(PLongInt(Params^[0])^);
+  PLongInt(Result)^ := Currthread.Client.MBitmaps.CopyBMP(PLongInt(Params^[0])^);
 end;
 
-procedure lpGreyScaleBitmap(Bitmap : integer) : integer; extdecl;
-begin;
-  with CurrThread.Client.MBitmaps do
-  begin;
-    result := CreateBMP(0,0);
-    Bmp[PLongInt(Params^[0])^].GreyScale(Bmp[result]);
-  end;
-end;
-
-procedure lpBrightnessBitmap(Bitmap,br : integer) : integer; extdecl;
+procedure lpGreyScaleBitmap(Params: PParamArray; Result: Pointer);
 begin;
   with CurrThread.Client.MBitmaps do
   begin;
-    result := CreateBMP(0,0);
-    Bmp[PLongInt(Params^[0])^].Brightness(Bmp[result],br);
+    PLongInt(Result)^ := CreateBMP(0,0);
+    Bmp[PLongInt(Params^[0])^].GreyScale(Bmp[PLongInt(Result)^]);
   end;
 end;
 
-procedure lpContrastBitmap(bitmap : integer; co : extended) : integer; extdecl;
+procedure lpBrightnessBitmap(Params: PParamArray; Result: Pointer);
 begin;
   with CurrThread.Client.MBitmaps do
   begin;
-    result := CreateBMP(0,0);
-    Bmp[PLongInt(Params^[0])^].Contrast(Bmp[result],co);
+    PLongInt(Result)^ := CreateBMP(0,0);
+    Bmp[PLongInt(Params^[0])^].Brightness(Bmp[PLongInt(Result)^], PLongInt(Params^[1])^);
   end;
 end;
 
-procedure lpPosterizeBitmap(Bitmap : integer; po : integer) : integer; extdecl;
+procedure lpContrastBitmap(Params: PParamArray; Result: Pointer);
+begin;
+  with CurrThread.Client.MBitmaps do
+  begin;
+    PLongInt(Result)^ := CreateBMP(0, 0);
+    Bmp[PLongInt(Params^[0])^].Contrast(Bmp[PLongInt(Result)^], PExtended(Params^[1])^);
+  end;
+end;
+
+procedure lpPosterizeBitmap(Params: PParamArray; Result: Pointer);
 begin;
   with CurrThread.Client.MBitmaps do
   begin
-    result := CreateBMP(0,0);
-    Bmp[PLongInt(Params^[0])^].Posterize(Bmp[result],po);
+    PLongInt(Result)^ := CreateBMP(0, 0);
+    Bmp[PLongInt(Params^[0])^].Posterize(Bmp[PLongInt(Result)^], PLongInt(Params^[1])^);
   end;
 end;
 
-procedure lpCreateMaskFromBitmap(Bitmap : integer) : TMask; extdecl;
+procedure lpCreateMaskFromBitmap(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].CreateTMask;
+  PMask(Result)^ := CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].CreateTMask;
 end;
 
-procedure lpFindMaskTolerance(const mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; extdecl;
+procedure lpFindMaskTolerance(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MFinder.FindMaskTolerance(PLongInt(Params^[0])^,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.FindMaskTolerance(PMask(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^, PLongInt(Params^[8])^);
 end;
 
-procedure lpFindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean; extdecl;
+procedure lpFindBitmapMaskTolerance(Params: PParamArray; Result: Pointer);
 begin;
-  {$ifdef mDebug}
-  mDebugLn('Better be using FindMaskTolerance in combination with CreateMaskFromBitmap, more efficient.');
-  {$endif}
+  {$IFDEF mDebug}mDebugLn('Better be using FindMaskTolerance in combination with CreateMaskFromBitmap, more efficient.');{$ENDIF}
   with CurrThread.Client do
-    result := MFinder.FindMaskTolerance(MBitmaps[PLongInt(Params^[0])^].CreateTMask,x,y,xs,ys,xe,ye,tolerance,contourtolerance);
+    PBoolean(Result)^ := MFinder.FindMaskTolerance(MBitmaps[PLongInt(Params^[0])^].CreateTMask, PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^, PLongInt(Params^[8])^);
 end;
 
-procedure lpFindDeformedBitmapToleranceIn(bitmap: integer; var x,
-  y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer;
-  AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean; extdecl;
+procedure lpFindDeformedBitmapToleranceIn(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.MFinder.FindDeformedBitmapToleranceIn(CurrThread.Client.MBitmaps[PLongInt(Params^[0])^],x,y,xs,ys,xe,ye,tolerance,range,AllowPartialAccuracy,accuracy);
+  with CurrThread.Client do
+    PBoolean(Result)^ := MFinder.FindDeformedBitmapToleranceIn(MBitmaps[PLongInt(Params^[0])^], PLongInt(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^, PLongInt(Params^[4])^, PLongInt(Params^[5])^, PLongInt(Params^[6])^, PLongInt(Params^[7])^, PLongInt(Params^[8])^, PBoolean(Params^[9])^, PExtended(Params^[10])^);
 end;
 
-procedure lpRectangleBitmap(bitmap : integer; const box : TBox; Color : TColor); extdecl;
+procedure lpRectangleBitmap(Params: PParamArray);
 begin
-  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].Rectangle(box,Color);
+  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].Rectangle(PBox(Params^[1])^, PLongInt(Params^[2])^);
 end;
 
-procedure lpFloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor); extdecl;
+procedure lpFloodFillBitmap(Params: PParamArray);
 begin
-  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].FloodFill(startPoint,searchcol,replacecol);
+  CurrThread.Client.MBitmaps[PLongInt(Params^[0])^].FloodFill(PPoint(Params^[1])^, PLongInt(Params^[2])^, PLongInt(Params^[3])^);
 end;
 
-procedure lpConvoluteBitmap(bitmap : integer; matrix : T2DExtendedArray) : integer; extdecl;
+procedure lpConvoluteBitmap(Params: PParamArray; Result: Pointer);
 begin
   with CurrThread.Client.MBitmaps do
   begin
-    result := CreateBMP(0,0);
-    Bmp[PLongInt(Params^[0])^].Convolute(Bmp[Result],matrix);
+    PLongInt(Result)^ := CreateBMP(0, 0);
+    Bmp[PLongInt(Params^[0])^].Convolute(Bmp[PLongInt(Result)^], P2dExtendedArray(Params^[1])^);
   end;
 end;
 
-procedure lpCalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;extdecl;
+procedure lpCalculatePixelShift(Params: PParamArray; Result: Pointer);
 begin
   with CurrThread.Client.MBitmaps do
-    result := CalculatePixelShift(GetBMP(PLongInt(Params^[0])^),GetBMP(bmp2),comparebox);
+    PLongInt(Result)^ := CalculatePixelShift(GetBMP(PLongInt(Params^[0])^), GetBMP(PLongInt(Params^[1])^), PBox(Params^[2])^);
 end;
 
-procedure lpCalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;extdecl;
+procedure lpCalculatePixelTolerance(Params: PParamArray; Result: Pointer);
 begin
   with CurrThread.Client.MBitmaps do
-    result := CalculatePixelTolerance(GetBMP(PLongInt(Params^[0])^),GetBMP(bmp2),comparebox,cts);
+    PExtended(Result)^ := CalculatePixelTolerance(GetBMP(PLongInt(Params^[0])^), GetBMP(PLongInt(Params^[1])^), PBox(Params^[2])^, PLongInt(Params^[3])^);
 end;
