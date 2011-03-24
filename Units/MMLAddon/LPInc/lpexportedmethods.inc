@@ -115,26 +115,26 @@ addGlobalFunc('function ArcSinh(e: extended): extended;', @lpArcSinh);
 addGlobalFunc('function DecRet(e: Extended): Extended;', @DecRet);}
 
 {window}
-{addGlobalFunc('function Freeze: boolean;', @lpFreeze);
+addGlobalFunc('function Freeze: boolean;', @lpFreeze);
 addGlobalFunc('function Unfreeze: boolean;', @lpUnfreeze);
 addGlobalFunc('procedure GetClientDimensions(var w, h:integer);', @lpGetClientDimensions);
 addGlobalFunc('procedure GetClientPosition(var left, top:integer);', @lpGetClientPosition);
 addGlobalFunc('function SetTargetBitmap(Bitmap : integer): integer;', @lpSetTargetBitmap);
 addGlobalFunc('function SetTargetArray(P: Integer; w, h: integer): integer;', @lpSetTargetArray);
-addGlobalFunc('function SetEIOSTarget(name: string; initargs: Variant): integer;', @lpSetEIOSTarget);
+//addGlobalFunc('function SetEIOSTarget(name: string; initargs: Variant): integer;', @lpSetEIOSTarget);
 addGlobalFunc('procedure SetImageTarget(idx: integer);', @lpSetImageTarget);
 addGlobalFunc('procedure SetKeyMouseTarget(idx: integer);', @lpSetKeyMouseTarget);
 addGlobalFunc('function GetImageTarget: integer;', @lpGetImageTarget);
 addGlobalFunc('function GetKeyMouseTarget: integer;', @lpGetKeyMouseTarget);
-addGlobalFunc('function ExportImageTarget : TTarget_Exported;', @lpExportImageTarget);
-addGlobalFunc('function ExportKeyMouseTarget : TTarget_Exported;', @lpExportKeyMouseTarget);
+//addGlobalFunc('function ExportImageTarget : TTarget_Exported;', @lpExportImageTarget);
+//addGlobalFunc('function ExportKeyMouseTarget : TTarget_Exported;', @lpExportKeyMouseTarget);
 addGlobalFunc('procedure FreeTarget(idx: integer);', @lpFreeTarget);
 addGlobalFunc('procedure SetDesktopAsClient;', @lpSetDesktopAsClient);
 addGlobalFunc('procedure ActivateClient;', @lpActivateClient);
-addGlobalFunc('function IsTargetValid: boolean;', @lpIsTargetValid);}
+addGlobalFunc('function IsTargetValid: boolean;', @lpIsTargetValid);
 
 {files}
-{addGlobalFunc('function CreateFile(const Path: string): Integer;', @lpCreateFile);
+addGlobalFunc('function CreateFile(const Path: string): Integer;', @lpCreateFile);
 addGlobalFunc('function OpenFile(const Path: string; Shared: Boolean): Integer;', @lpOpenFile);
 addGlobalFunc('function RewriteFile(const Path: string; Shared: Boolean): Integer;', @lpRewriteFile);
 addGlobalFunc('function AppendFile(const Path: string): Integer;', @lpAppendFile);
@@ -154,7 +154,7 @@ addGlobalFunc('function GetDirectories(const path : string) : TStringArray;', @l
 addGlobalFunc('procedure WriteINI(const Section, KeyName, NewString, FileName: string);', @lpWriteINI);
 addGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): string;', @lpReadINI);
 addGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @lpDeleteINI);
-addGlobalFunc('function ExtractFileExt(const FileName: string): string;', @lpExtractFileExt);}
+addGlobalFunc('function ExtractFileExt(const FileName: string): string;', @lpExtractFileExt);
 
 {other}
 addGlobalFunc('procedure Wait(t: LongWord);', @lpWait);
@@ -240,7 +240,7 @@ addGlobalFunc('function sha512(Data: string): string;', @lpsha512);
 addGlobalFunc('function tiger(Data: string): string;', @lptiger);
 
 {web}
-{addGlobalFunc('procedure OpenWebPage(const url : string);', @lpOpenWebPage);
+addGlobalFunc('procedure OpenWebPage(const url : string);', @lpOpenWebPage);
 addGlobalFunc('function GetPage(const url : string): string;', @lpGetPage);
 addGlobalFunc('function InitializeHTTPClient(HandleCookies: Boolean): Integer;', @lpInitializeHTTPClient);
 addGlobalFunc('function InitializeHTTPClientWrap(HandleCookies: Boolean): Integer;', @lpInitializeHTTPClient);
@@ -252,10 +252,10 @@ addGlobalFunc('function PostHTTPPageEx(Client: Integer;const Url: string): strin
 addGlobalFunc('procedure ClearPostData(Client: Integer);', @lpClearPostData);
 addGlobalFunc('procedure AddPostVariable(Client: Integer;const VarName, VarValue: string);', @lpAddPostVariable);
 addGlobalFunc('function GetRawHeaders(Client: Integer): string;', @lpGetRawHeaders);
-addGlobalFunc('procedure SetProxy(Client : Integer; pHost, pPort : String);', @lpSetProxy);}
+addGlobalFunc('procedure SetProxy(Client : Integer; pHost, pPort : String);', @lpSetProxy);
 
 {socket}
-{addGlobalFunc('function CreateSocket: integer;', @lpCreateSocket);
+addGlobalFunc('function CreateSocket: integer;', @lpCreateSocket);
 addGlobalFunc('procedure FreeSocket(Index: integer);', @lpFreeSocket);
 addGlobalFunc('procedure ConnectSocket(Client: integer; IP, Port: string);', @lpConnectSocket);
 addGlobalFunc('procedure BindSocket(Client: integer; IP, Port: string);', @lpBindSocket);
@@ -267,7 +267,7 @@ addGlobalFunc('function RecvSocketStr(Client: integer): string;', @lpRecvSocketS
 addGlobalFunc('function RecvSocketEx(Client, Length: integer): string;', @lpRecvSocketEx);
 addGlobalFunc('procedure SendSocket(Client: integer; Data: string);', @lpSendSocket);
 addGlobalFunc('procedure SetTimeout(Client, Time: integer);', @lpSetSocketTimeout);
-addGlobalFunc('procedure SocketInfo(Client: integer; out IP, Port: string);', @lpSocketInfo);}
+addGlobalFunc('procedure SocketInfo(Client: integer; out IP, Port: string);', @lpSocketInfo);
 
 { Color Conversions and Speed }
 addGlobalFunc('procedure ColorToRGB(Color: integer; var r, g, b: Integer);', @lpColorToRGB);

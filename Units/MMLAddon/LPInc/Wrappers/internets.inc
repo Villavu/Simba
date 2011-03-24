@@ -1,123 +1,146 @@
-procedure ps_OpenWebPage( const url : string); extdecl;
+{
+	This file is part of the Mufasa Macro Library (MML)
+	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+
+    MML is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    MML is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with MML.  If not, see <http://www.gnu.org/licenses/>.
+
+	See the file COPYING, included in this distribution,
+	for details about the copyright.
+
+    internets.inc for the Mufasa Macro Library
+}
+
+procedure lpOpenWebPage(Params: PParamArray);
 begin
-  OpenWebPage(url)
+  OpenWebPage(PlpString(Params^[0])^)
 end;
 
-function ps_GetPage(const S: String): String; extdecl;
+procedure lpGetPage(Params: PParamArray; Result: Pointer);
 begin
-  result := CurrThread.MInternet.GetPage(S);
+  PlpString(Result)^ := CurrThread.MInternet.GetPage(PlpString(Params^[0])^);
 end;
 
-function ps_InitializeHTTPClient(HandleCookies: Boolean): Integer; extdecl;
+procedure lpInitializeHTTPClient(Params: PParamArray; Result: Pointer);
 begin
-  result := CurrThread.MInternet.CreateHTTPClient(HandleCookies);
+  PLongInt(Result)^ := CurrThread.MInternet.CreateHTTPClient(PBoolean(Params^[0])^);
 end;
 
-procedure ps_FreeHTTPClient(Client: Integer); extdecl;
+procedure lpFreeHTTPClient(Params: PParamArray);
 begin;
-  CurrThread.MInternet.FreeHTTPClient(client);
+  CurrThread.MInternet.FreeHTTPClient(PLongInt(Params^[0])^);
 end;
 
-function ps_GetHTTPPage(Client: Integer;const URL: string): string; extdecl;
+procedure lpGetHTTPPage(Params: PParamArray; Result: Pointer);
 begin
-  result := CurrThread.MInternet.GetHTTPClient(Client).GetHTTPPage(url);
+  PlpString(Result)^ := CurrThread.MInternet.GetHTTPClient(PLongInt(Params^[0])^).GetHTTPPage(PlpString(Params^[1])^);
 end;
-procedure ps_SetHTTPUserAgent(Client: Integer;const Agent: string); extdecl;
+procedure lpSetHTTPUserAgent(Params: PParamArray);
 begin
-  CurrThread.MInternet.GetHTTPClient(Client).SetHTTPUserAgent(agent);
-end;
-
-function ps_PostHTTPPage(Client: Integer;const Url,PostData: string): string; extdecl;
-begin
-  result := CurrThread.MInternet.GetHTTPClient(Client).PostHTTPPage(url,postdata);
+  CurrThread.MInternet.GetHTTPClient(PLongInt(Params^[0])^).SetHTTPUserAgent(PlpString(Params^[1])^);
 end;
 
-function ps_PostHTTPPageEx(Client: Integer;const Url: string): string; extdecl;
+procedure lpPostHTTPPage(Params: PParamArray; Result: Pointer);
 begin
-  result := CurrThread.MInternet.GetHTTPClient(Client).PostHTTPPage(url);
+  PlpString(Result)^ := CurrThread.MInternet.GetHTTPClient(PLongInt(Params^[0])^).PostHTTPPage(PlpString(Params^[1])^, PlpString(Params^[2])^);
 end;
 
-procedure ps_ClearPostData(Client: Integer); extdecl;
+procedure lpPostHTTPPageEx(Params: PParamArray; Result: Pointer);
 begin
-  CurrThread.MInternet.GetHTTPClient(Client).ClearPostData;
+  PlpString(Result)^ := CurrThread.MInternet.GetHTTPClient(PLongInt(Params^[0])^).PostHTTPPage(PlpString(Params^[1])^);
 end;
 
-procedure ps_AddPostVariable(Client: Integer;const VarName, VarValue: string); extdecl;
+procedure lpClearPostData(Params: PParamArray);
 begin
-  CurrThread.MInternet.GetHTTPClient(Client).AddPostVariable(varname,varvalue);
+  CurrThread.MInternet.GetHTTPClient(PLongInt(Params^[0])^).ClearPostData;
 end;
 
-function ps_GetRawHeaders(Client: Integer): string; extdecl;
+procedure lpAddPostVariable(Params: PParamArray);
 begin
-  result := CurrThread.MInternet.GetHTTPClient(client).GetRawHeaders;
+  CurrThread.MInternet.GetHTTPClient(PLongInt(Params^[0])^).AddPostVariable(PlpString(Params^[1])^, PlpString(Params^[2])^);
 end;
 
-procedure ps_SetProxy(Client : Integer; pHost, pPort : String); extdecl;
+procedure lpGetRawHeaders(Params: PParamArray; Result: Pointer);
 begin
-  CurrThread.MInternet.GetHTTPClient(client).SetProxy(pHost, pPort);
+  PlpString(Result)^ := CurrThread.MInternet.GetHTTPClient(PLongInt(Params^[0])^).GetRawHeaders;
 end;
 
-function ps_RecvSocketStr(Client: integer): string;
+procedure lpSetProxy(Params: PParamArray);
 begin
-  Result := CurrThread.Socks.GetSocket(Client).RecvString;
+  CurrThread.MInternet.GetHTTPClient(PLongInt(Params^[0])^).SetProxy(PlpString(Params^[1])^, PlpString(Params^[2])^);
 end;
 
-function ps_RecvSocket(Client: integer): string;
+procedure lpRecvSocketStr(Params: PParamArray; Result: Pointer);
 begin
-  Result := CurrThread.Socks.GetSocket(Client).Recv;
+  PlpString(Result)^ := CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).RecvString;
 end;
 
-function ps_RecvSocketEx(Client, Length: integer): string;
+procedure lpRecvSocket(Params: PParamArray; Result: Pointer);
 begin
-  Result := CurrThread.Socks.GetSocket(Client).RecvBufferStr(Length);
+  PlpString(Result)^ := CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).Recv;
 end;
 
-procedure ps_SendSocket(Client: integer; Data: string);
+procedure lpRecvSocketEx(Params: PParamArray; Result: Pointer);
 begin
-  CurrThread.Socks.GetSocket(Client).Send(Data);
+  PlpString(Result)^ := CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).RecvBufferStr(PLongInt(Params^[1])^);
 end;
 
-procedure ps_ConnectSocket(Client: integer; IP, Port: string);
+procedure lpSendSocket(Params: PParamArray);
 begin
-  CurrThread.Socks.GetSocket(Client).Connect(IP, Port);
+  CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).Send(PlpString(Params^[1])^);
 end;
 
-procedure ps_CloseSocket(Client: integer);
+procedure lpConnectSocket(Params: PParamArray);
 begin
-  CurrThread.Socks.GetSocket(Client).Close;
+  CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).Connect(PlpString(Params^[1])^, PlpString(Params^[2])^);
 end;
 
-procedure ps_SetSocketTimeout(Client, Time: integer);
+procedure lpCloseSocket(Params: PParamArray);
 begin
-  CurrThread.Socks.GetSocket(Client).SetTimeout(Time);
+  CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).Close;
 end;
 
-procedure ps_BindSocket(Client: integer; IP, Port: string);
+procedure lpSetSocketTimeout(Params: PParamArray);
 begin
-  CurrThread.Socks.GetSocket(Client).Bind(IP, Port);
+  CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).SetTimeout(PLongInt(Params^[1])^);
 end;
 
-procedure ps_ListenSocket(Client: integer);
+procedure lpBindSocket(Params: PParamArray);
 begin
-  CurrThread.Socks.GetSocket(Client).Listen;
+  CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).Bind(PlpString(Params^[1])^, PlpString(Params^[2])^);
 end;
 
-function ps_AcceptSocket(Client: integer): integer;
+procedure lpListenSocket(Params: PParamArray);
 begin
-  Result := CurrThread.Socks.CreateSocketEx(CurrThread.Socks.GetSocket(Client).Accept);
+  CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).Listen;
 end;
 
-procedure ps_SocketInfo(Client: integer; out IP, Port: string);
+procedure lpAcceptSocket(Params: PParamArray; Result: Pointer);
 begin
-  CurrThread.Socks.GetSocket(Client).Info(IP, Port);
+  PLongInt(Result)^ := CurrThread.Socks.CreateSocketEx(CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).Accept);
 end;
 
-function ps_CreateSocket: integer; extdecl;
+procedure lpSocketInfo(Params: PParamArray);
 begin
-  Result := CurrThread.Socks.CreateSocket();
+  CurrThread.Socks.GetSocket(PLongInt(Params^[0])^).Info(PlpString(Params^[1])^, PlpString(Params^[2])^);
 end;
 
-procedure ps_FreeSocket(Client: integer); extdecl;
+procedure lpCreateSocket(Params: PParamArray; Result: Pointer);
+begin
+  PLongInt(Result)^ := CurrThread.Socks.CreateSocket();
+end;
+
+procedure lpFreeSocket(Params: PParamArray);
 begin;
-  CurrThread.Socks.FreeSocket(Client);
+  CurrThread.Socks.FreeSocket(PLongInt(Params^[0])^);
 end;

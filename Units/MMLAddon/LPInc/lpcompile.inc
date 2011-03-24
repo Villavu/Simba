@@ -33,13 +33,6 @@ addGlobalVar(ps_mouse_right, 'mouse_Right');//0
 addGlobalVar(ps_mouse_left, 'mouse_Left');//1
 addGlobalVar(ps_mouse_middle, 'mouse_Middle');//2
 
-//addGlobalType('(rfReplaceAll, rfIgnoreCase)', 'TReplaceFlag');
-//addGlobalType('set of TReplaceFlag', 'TReplaceFlags');
-
-//addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
-
-addGlobalType('Double', 'TDateTime');
-
 addGlobalType('UInt8', 'Byte');
 addGlobalType('Int8', 'ShortInt');
 addGlobalType('UInt16', 'Word');
@@ -47,9 +40,18 @@ addGlobalType('Int16', 'SmallInt');
 addGlobalType('UInt32', 'LongWord');
 addGlobalType('Int32', 'LongInt');
 addGlobalType('UInt64', 'QWord');
-addGlobalType('Int64', 'Integer');
+addGlobalType('LongInt', 'Integer');
 
 addGlobalType('Integer', 'TColor');
+addGlobalType('Double', 'TDateTime');
+
+//addGlobalType('(rfReplaceAll, rfIgnoreCase)', 'TReplaceFlag');
+//addGlobalType('set of TReplaceFlag', 'TReplaceFlags');
+
+//addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
+//addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
+//addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
+//addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
 
 addGlobalType('array of string', 'TStringArray');
 addGlobalType('array of Integer', 'TIntegerArray');
@@ -68,11 +70,9 @@ addGlobalType('array of TBox', 'TBoxArray');
 addGlobalType('record X, Y: integer; end', 'TPoint');
 addGlobalType('array of TPoint', 'TPointArray');
 addGlobalType('array of TPointArray', 'T2DPointArray');
-addGlobalType('array of TPointArray', 'TPointArrayArray');
+addGlobalType('T2DPointArray', 'TPointArrayArray');
 
-//addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
-
-addGlobalType('record  White, Black: TPointarray; WhiteHi, BlackHi: integer; W, H: integer; end', 'TMask');
+addGlobalType('record White, Black: TPointarray; WhiteHi, BlackHi: integer; W, H: integer; end', 'TMask');
 
 addGlobalType('record R, T: extended; end', 'PPoint');
 
@@ -84,11 +84,6 @@ addGlobalType('record MainPoint: TSDTMPointDef; SubPoints: TSDTMPointDefarray; e
 
 addGlobalType('record x, y, c, t, asz: integer; bp: boolean; end', 'TMDTMPoint');
 addGlobalType('array of TMDTMPoint', 'TMDTMPointArray');
-
-//addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
-
-//addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
-//addGlobalType('Integer', 'Pointer');
 
 addGlobalType('record Title: string; Handle: integer; Pid: integer; Width, Height: integer; end', 'TSysProc');
 addGlobalType('array of TSysProc', 'TSysProcArr');

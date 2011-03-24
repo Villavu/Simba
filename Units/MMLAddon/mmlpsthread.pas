@@ -1245,7 +1245,7 @@ type
 {$I LPInc/Wrappers/other.inc}
 {$I LPInc/Wrappers/settings.inc}
 {$I LPInc/Wrappers/bitmap.inc}
-//{$I LPInc/Wrappers/window.inc}
+{$I LPInc/Wrappers/window.inc}
 //{$I LPInc/Wrappers/tpa.inc}
 //{$I LPInc/Wrappers/strings.inc}
 {$I LPInc/Wrappers/colour.inc}
@@ -1253,11 +1253,11 @@ type
 {$I LPInc/Wrappers/crypto.inc}
 //{$I LPInc/Wrappers/math.inc}
 {$I LPInc/Wrappers/mouse.inc}
-//{$I LPInc/Wrappers/file.inc}
+{$I LPInc/Wrappers/file.inc}
 {$I LPInc/Wrappers/keyboard.inc}
 {$I LPInc/Wrappers/dtm.inc}
 {$I LPInc/Wrappers/ocr.inc}
-//{$I LPInc/Wrappers/internets.inc}
+{$I LPInc/Wrappers/internets.inc}
 
 procedure TLPThread.Execute;
   function CombineDeclArray(a, b: TLapeDeclArray): TLapeDeclArray;
@@ -1319,7 +1319,7 @@ end;
 
 initialization
   PluginsGlob := TMPlugins.Create;
-  libcpascal:= 0;
+  libcpascal := 0;
 finalization
   //PluginsGlob.Free;
   //Its a nice idea, but it will segfault... the program is closing anyway.

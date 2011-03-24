@@ -21,89 +21,89 @@
     window.inc for the Mufasa Macro Library
 }
 
-procedure ps_SetDesktopAsClient; extdecl;
+procedure lpSetDesktopAsClient(Params: PParamArray);
 begin;
   CurrThread.Client.IOManager.SetDesktop;
 end;
 
-function ps_SetTargetArray(P: Integer; w, h: integer): integer; extdecl;
+procedure lpSetTargetArray(Params: PParamArray; Result: Pointer);
 begin
-  result:= CurrThread.Client.IOManager.SetTarget(PRGB32(P), classes.point(w,h));
+  PLongInt(Result)^ := CurrThread.Client.IOManager.SetTarget(PRGB32(PLongInt(Params^[0])^), classes.point(PLongInt(Params^[1])^, PLongInt(Params^[2])^));
 end;
 
-function ps_SetTargetBitmap(bitmap: Integer): integer; extdecl;
+procedure lpSetTargetBitmap(Params: PParamArray; Result: Pointer);
 begin;
-  result:= CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[Bitmap]);
+  PLongInt(Result)^ := CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[PLongInt(Params^[0])^]);
 end;
 
-function ps_SetEIOSTarget(name: string; args: Variant): integer; extdecl;
+procedure lpSetEIOSTarget(Params: PParamArray; Result: Pointer);
 begin
-  result:= CurrThread.Client.IOManager.SetTarget(name, @args);
+  PLongInt(Result)^ := CurrThread.Client.IOManager.SetTarget(PlpString(Params^[0])^, @PVariant(Params^[1])^);
 end;
 
-procedure ps_SetImageTarget(idx: integer); extdecl;
+procedure lpSetImageTarget(Params: PParamArray);
 begin
-  CurrThread.Client.IOManager.SetImageTarget(idx);
+  CurrThread.Client.IOManager.SetImageTarget(PLongInt(Params^[0])^);
 end;
 
-procedure ps_SetKeyMouseTarget(idx: integer); extdecl;
+procedure lpSetKeyMouseTarget(Params: PParamArray);
 begin
-  CurrThread.Client.IOManager.SetKeyMouseTarget(idx);
+  CurrThread.Client.IOManager.SetKeyMouseTarget(PLongInt(Params^[0])^);
 end;
 
-function ps_GetImageTarget: integer; extdecl;
+procedure lpGetImageTarget(Params: PParamArray; Result: Pointer);
 begin
-  CurrThread.Client.IOManager.GetImageTarget(result);
+  CurrThread.Client.IOManager.GetImageTarget(PLongInt(Result)^);
 end;
 
-function ps_GetKeyMouseTarget: integer; extdecl;
+procedure lpGetKeyMouseTarget(Params: PParamArray; Result: Pointer);
 begin
-  CurrThread.Client.IOManager.GetKeyMouseTarget(result);
+  CurrThread.Client.IOManager.GetKeyMouseTarget(PLongInt(Result)^);
 end;
 
-function ps_ExportImageTarget : TTarget_Exported;extdecl;
+procedure lpExportImageTarget(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.IOManager.ExportImageTarget;
+  PTarget_Exported(Result)^ := CurrThread.Client.IOManager.ExportImageTarget;
 end;
 
-function ps_ExportKeyMouseTarget : TTarget_Exported; extdecl;
+procedure lpExportKeyMouseTarget(Params: PParamArray; Result: Pointer);
 begin;
-  result := CurrThread.Client.IOManager.ExportKeyMouseTarget;
+  PTarget_Exported(Result)^ := CurrThread.Client.IOManager.ExportKeyMouseTarget;
 end;
 
-procedure ps_FreeTarget(idx: integer); extdecl;
+procedure lpFreeTarget(Params: PParamArray);
 begin
-  CurrThread.Client.IOManager.FreeTarget(idx);
+  CurrThread.Client.IOManager.FreeTarget(PLongInt(Params^[0])^);
 end;
 
-procedure ps_GetClientDimensions(var w, h: integer); extdecl;
+procedure lpGetClientDimensions(Params: PParamArray);
 begin
-  CurrThread.Client.IOManager.GetDimensions(w, h);
+  CurrThread.Client.IOManager.GetDimensions(PLongInt(Params^[0])^, PLongInt(Params^[1])^);
 end;
 
-procedure ps_GetClientPosition(var left, top: integer); extdecl;
+procedure lpGetClientPosition(Params: PParamArray);
 begin
-  CurrThread.Client.IOManager.GetPosition(left, top);
+  CurrThread.Client.IOManager.GetPosition(PLongInt(Params^[0])^, PLongInt(Params^[1])^);
 end;
 
-function ps_Freeze: boolean; extdecl;
+procedure lpFreeze(Params: PParamArray; Result: Pointer);
 begin
-  CurrThread.Client.IOManager.SetFrozen(true);
-  result := true; //dunno what the result is supposed to mean
+  CurrThread.Client.IOManager.SetFrozen(True);
+  PBoolean(Result)^ := True; //dunno what the result is supposed to mean
 end;
 
-function ps_Unfreeze: boolean; extdecl;
+procedure lpUnfreeze(Params: PParamArray; Result: Pointer);
 begin
-  CurrThread.Client.IOManager.SetFrozen(false);
-  result := true; //dunno what the result is supposed to mean
+  CurrThread.Client.IOManager.SetFrozen(False);
+  PBoolean(Result)^ := True; //dunno what the result is supposed to mean
 end;
 
-procedure ps_ActivateClient; extdecl;
+procedure lpActivateClient(Params: PParamArray);
 begin
   CurrThread.Client.IOManager.ActivateClient;
 end;
 
-function ps_IsTargetValid: boolean; extdecl;
+procedure lpIsTargetValid(Params: PParamArray; Result: Pointer);
 begin
-  result:= CurrThread.Client.IOManager.TargetValid;
+  PBoolean(Result)^ := CurrThread.Client.IOManager.TargetValid;
 end;
