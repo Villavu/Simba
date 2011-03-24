@@ -51,6 +51,16 @@ begin
   psWriteLn(FloatToStr(PExtended(Params^[0])^));
 end;
 
+procedure lpCallProc(Params: PParamArray; Result: Pointer);
+begin
+  PVariant(Result)^ := CallProc(PlpString(Params^[0])^, PVariantArray(Params^[1])^);
+end;
+
+procedure lpThreadSafeCall(Params: PParamArray; Result: Pointer);
+begin
+  PVariant(Result)^ := ThreadSafeCall(PlpString(Params^[0])^, PVariantArray(Params^[1])^);
+end;
+
 procedure lpRandom(Params: PParamArray; Result: Pointer);
 begin
   PInt32(Result)^ := Random(PInt32(Params^[0])^);

@@ -28,11 +28,10 @@ addGlobalFunc('procedure WriteLn(i: int64); overload;', @lpWriteLn_Int64);
 addGlobalFunc('procedure WriteLn(b: boolean); overload;', @lpWriteLn_Bool);
 addGlobalFunc('procedure WriteLn(e: extended); overload;', @lpWriteLn_Extended);
 
-{addGlobalFunc('function CallProc(ProcName: string; var V: TVariantArray): Variant;', @CallProc)
-addGlobalFunc('function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;', @ThreadSafeCall);
-addGlobalFunc('procedure Writeln(x: string);', @pswriteln); //PS defines a special, keep this for CPascal
-addGlobalFunc('procedure DebugLn(str : string);', @lpdebugln);}
+//addGlobalFunc('procedure WriteLn(s: string; fmt: array of const);', @lpWriteLn_FMT);
 
+//addGlobalFunc('function CallProc(ProcName: string; var V: TVariantArray): Variant;', @lpCallProc)
+//addGlobalFunc('function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant;', @lpThreadSafeCall);
 
 { DTM }
 addGlobalFunc('procedure SetDTMName(DTM : integer;const name : string);', @lpSetDTMName);
@@ -323,20 +322,20 @@ addGlobalFunc('function IsKeyDown(key: Word): Boolean;', @lpisKeyDown);
 addGlobalFunc('function GetKeyCode(c : char) : integer;', @lpGetKeyCode);
 
 {OCR}
-{addGlobalFunc('function rs_GetUpText: string;', @lprs_GetUpText);
+addGlobalFunc('function rs_GetUpText: string;', @lprs_GetUpText);
 addGlobalFunc('function rs_GetUpTextAt(x, y : integer): string;', @lprs_GetUpTextAt);
 addGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string', @lprs_GetUpTextAtEx);
 addGlobalFunc('function BitmapFromText(const text, font: String): integer;', @lpBitmapFromText);
 addGlobalFunc('function TPAFromText(const text, font: String;var w,h : integer): TPointArray;', @lpTPAFromText);
 addGlobalFunc('procedure TPAFromTextWrap(const text, font: String;var w,h : integer;var TPA : TPointArray);', @lpTPAFromTextWrap);
-addGlobalFunc('function MaskFromText(const text, font: String): TMask;', @lpMaskFromText);
+//addGlobalFunc('function MaskFromText(const text, font: String): TMask;', @lpMaskFromText);
 addGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer;const font: string): string;', @lpGetTextAt);
 addGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,color, tol: integer;const font: string): string;', @lpgetTextAtEx);
 addGlobalFunc('function GetTextAtExWrap(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,color, tol: integer;const font: string): string;', @lpGetTextAtEx);
 addGlobalFunc('function GetTextATPA(const ATPA : T2DPointArray; const maxvspacing : integer; const font : string): string;', @lpgettextATPA);
-addGlobalFunc('function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;', @lpLoadSystemFont);
+//addGlobalFunc('function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;', @lpLoadSystemFont);
 addGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean;', @lpLoadFont);
-addGlobalFunc('function FreeFont(const FontName: string): boolean;', @lpFreeFont);}
+addGlobalFunc('function FreeFont(const FontName: string): boolean;', @lpFreeFont);
 
 {Bitmaps}
 addGlobalFunc('function CreateBitmapString(bmp: integer): string;', @lpCreateBitmapString);
@@ -391,6 +390,7 @@ addGlobalFunc('procedure FloodFillBitmap(bitmap: integer; const StartPoint: TPoi
 addGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArray): integer;', @lpConvoluteBitmap);
 addGlobalFunc('function CalculatePixelShift(Bmp1, Bmp2: Integer; CompareBox: TBox): integer;', @lpCalculatePixelShift);
 addGlobalFunc('function CalculatePixelTolerance(Bmp1, Bmp2: Integer; CompareBox: TBox; CTS: integer): extended;', @lpCalculatePixelTolerance);
+
 {tpa}
 {addGlobalFunc('procedure Quicksort(var Arr : TIntegerArray);', @lpQuicksort);
 addGlobalFunc('procedure tSwap(var a, b: TPoint);', @lptSwap);

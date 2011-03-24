@@ -1233,6 +1233,7 @@ type
   PTarget_Exported = ^TTarget_Exported;
   PIntegerArray = ^TIntegerArray;
   PExtendedArray = ^TExtendedArray;
+  PFont = ^TFont;
 //  PStrExtr = ^TStrExtr;
   PReplaceFlags = ^TReplaceFlags;
   PClickType = ^TClickType;
@@ -1255,7 +1256,7 @@ type
 //{$I LPInc/Wrappers/file.inc}
 {$I LPInc/Wrappers/keyboard.inc}
 {$I LPInc/Wrappers/dtm.inc}
-//{$I LPInc/Wrappers/ocr.inc}
+{$I LPInc/Wrappers/ocr.inc}
 //{$I LPInc/Wrappers/internets.inc}
 
 procedure TLPThread.Execute;
@@ -1299,6 +1300,7 @@ begin
         if CompileOnly then
           Exit;
         RunCode(Compiler.Emitter.Code);
+        psWriteln('Successfully executed.');
       end else
         psWriteln('Compiling failed.');
     except
