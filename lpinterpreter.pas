@@ -66,6 +66,7 @@ type
 const
   Try_NoFinally: UInt32 = UInt32(-1);
   Try_NoExcept: UInt32 = UInt32(-2);
+  EndJump: UInt32 = UInt32(-1);
 
   StackSize = 2048 * SizeOf(Pointer); //bytes
 
@@ -168,6 +169,8 @@ var
       Dec(TryStackPos);
       Code := TryStack[TryStackPos].JmpFinally;
     end
+    else if (CodeBase = PByte(PtrUInt(InSafeJump) - EndJump)) then
+      Code := @opNone
     else
     begin
       Code := InSafeJump;

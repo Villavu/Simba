@@ -1630,7 +1630,6 @@ var
   p: TLapeTree_Base;
   i: ILapeTree_CanExit;
   d: TLapeDeclaration;
-  JumpSafe: Boolean;
 begin
   Result := NullResVar;
   p := FParent;
@@ -1654,19 +1653,19 @@ begin
       Free();
     end;
 
-  JumpSafe := False;
   while (p <> nil) do
   begin
     if (p.QueryInterface(ILapeTree_CanExit, i) = 0) then
     begin
-      i.addExitStatement(JumpSafe, Offset, @DocPos);
+      i.addExitStatement(True, Offset, @DocPos);
       i := nil;
       Break;
-    end
-    else if (p is TLapeTree_Try) then
-      JumpSafe := True;
+    end;
     p := p.Parent;
   end;
+
+  if (p = nil) then
+    FCompiler.Emitter._JmpSafe(EndJump, Offset, @DocPos);
 end;
 
 function TLapeTree_InternalMethod_SizeOf.isConstant: Boolean;
@@ -2789,10 +2788,7 @@ begin
     with FExitStatements[i] do
     begin
       co := CodeOffset;
-      if JumpSafe then
-        FCompiler.Emitter._JmpSafeR(Offset - co, co, @DocPos)
-      else
-        FCompiler.Emitter._JmpR(Offset - co, co, @DocPos);
+      FCompiler.Emitter._JmpSafeR(Offset - co, co, @DocPos);
     end;
 
   FCompiler.DecStackInfo(Offset, True, True, False, @DocPos);
@@ -2801,10 +2797,7 @@ end;
 
 procedure TLapeTree_Method.addExitStatement(JumpSafe: Boolean; var Offset: Integer; Pos: PDocPos = nil);
 begin
-  if JumpSafe then
-    FExitStatements.add(getFlowStatement(FCompiler.Emitter._JmpSafeR(0, Offset, Pos), Pos, JumpSafe))
-  else
-    FExitStatements.add(getFlowStatement(FCompiler.Emitter._JmpR(0, Offset, Pos), Pos, JumpSafe));
+  FExitStatements.add(getFlowStatement(FCompiler.Emitter._JmpSafeR(0, Offset, Pos), Pos, JumpSafe));
 end;
 
 procedure TLapeTree_VarList.DeleteChild(Node: TLapeTree_Base);
