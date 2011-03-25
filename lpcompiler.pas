@@ -215,7 +215,7 @@ begin
        (r = nil) or (r.VarType = nil) or (r.VarType.BaseIntType = ltUnknown)
     then
       LapeException(lpeInvalidRange, Node.DocPos)
-    else if (not l.isConstant) or (r.isConstant) then
+    else if (not l.isConstant) or (not r.isConstant) then
       LapeException(lpeConstantExpected, Node.DocPos);
     Result.Lo := l.AsInteger;
     Result.Hi := r.AsInteger;
