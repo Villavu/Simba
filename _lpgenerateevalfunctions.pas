@@ -20,7 +20,7 @@ procedure LapePrintEvalArr;
 implementation
 
 uses
-  Main, lptypes, lpeval;
+  Unit1, lptypes, lpeval;
 
 procedure LapePrintEvalRes;
   procedure DoWrite(s: string);
@@ -45,13 +45,13 @@ procedure LapePrintEvalRes;
   function Test(a: UInt64): string; overload; begin Result := 'ltUInt64'; end;
   function getInt64(a: Integer): Int64; begin Result := Int64(a); end;
   function Test(a: Int64): string; overload; begin Result := 'ltInt64'; end;
-  function getSingle(a: Integer): Single; begin Result := Single(a); end;
+  function getSingle(a: Integer): Single; begin Result := a; end;
   function Test(a: Single): string; overload; begin Result := 'ltSingle'; end;
-  function getDouble(a: Integer): Double; begin Result := Double(a); end;
+  function getDouble(a: Integer): Double; begin Result := a; end;
   function Test(a: Double): string; overload; begin Result := 'ltDouble'; end;
-  function getCurrency(a: Integer): Currency; begin Result := Currency(a); end;
+  function getCurrency(a: Integer): Currency; begin Result := a; end;
   function Test(a: Currency): string; overload; begin Result := 'ltCurrency'; end;
-  function getExtended(a: Integer): Extended; begin Result := Extended(a); end;
+  function getExtended(a: Integer): Extended; begin Result := a; end;
   function Test(a: Extended): string; overload; begin Result := 'ltExtended'; end;
 
 begin

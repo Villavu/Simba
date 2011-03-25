@@ -1730,6 +1730,7 @@ var
   p: TLapeTokenizerBase;
   f: TLapeTree_Method;
 begin
+  Result := nil;
   t := FStackInfo;
   p := FTokenizer;
   FTokenizer := TLapeTokenizerString.Create(s + ';');

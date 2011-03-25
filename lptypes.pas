@@ -156,7 +156,7 @@ type
   PLapeSmallSet = ^TLapeSmallSet;
   PLapeLargeSet = ^TLapeLargeSet;
 
-  TLapeBaseClass = class(IUnknown)
+  TLapeBaseClass = class(TObject, IUnknown)
   protected
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;

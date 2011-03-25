@@ -53,7 +53,7 @@ type
   public
     DocPos: TDocPos;
 
-    constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); overload; virtual;
+    constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; overload; virtual;
     destructor Destroy; override;
 
     function Compile(var Offset: Integer): TResVar; overload; virtual; abstract;
@@ -123,7 +123,7 @@ type
   TLapeTree_InternalMethodClass = class of TLapeTree_InternalMethod;
   TLapeTree_InternalMethod = class(TLapeTree_Invoke)
   public
-    constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); override;
+    constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; virtual;
     function isConstant: Boolean; override;
   end;
 
@@ -278,22 +278,22 @@ type
   TLapeTree_Integer = class(TLapeTree_GlobalVar)
   public
     constructor Create(AValue: Integer; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; overload;
-    constructor Create(AStr: lpString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); overload;
+    constructor Create(AStr: lpString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; overload;
   end;
 
   TLapeTree_Float = class(TLapeTree_GlobalVar)
   public
     constructor Create(AValue: Extended; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; overload;
-    constructor Create(AStr: lpString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); overload;
+    constructor Create(AStr: lpString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; overload;
   end;
 
   TLapeTree_String = class(TLapeTree_GlobalVar)
   public
     constructor Create(AValue: AnsiString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; overload;
     {$IFNDEF Lape_NoWideString}
-    constructor Create(AValue: WideString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); overload;
+    constructor Create(AValue: WideString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; overload;
 	{$ENDIF}
-    constructor Create(AValue: UnicodeString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); overload;
+    constructor Create(AValue: UnicodeString; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; overload;
   end;
   TLapeTree_Field = class(TLapeTree_String);
 
@@ -698,7 +698,9 @@ begin
   begin
     Result := FValues.add(p);
     p.Parent := Self;
-  end;
+  end
+  else
+    Result := -1;
 end;
 
 function TLapeTree_OpenArray.canCast: Boolean;
@@ -1970,8 +1972,10 @@ var
   f, d: TLapeTree_ExprBase;
   t: TLapeType;
 begin
+  Result := nil;
   b := nil;
   d := nil;
+
   if (FParams.Count = 2) then
     if (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
       LapeException(lpeNoDefaultForParam, [1], DocPos)
@@ -2756,7 +2760,7 @@ end;
 
 function TLapeTree_Method.Compile(var Offset: Integer): TResVar;
 var
-  if_o, i: Integer;
+  if_o, i, co: Integer;
 begin
   Assert(FCompiler <> nil);
   Assert(FMethod <> nil);
@@ -2769,7 +2773,10 @@ begin
 
   for i := 0 to FExitStatements.Count - 1 do
     with FExitStatements[i] do
-      CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+    begin
+      co := CodeOffset;
+      FCompiler.Emitter._JmpR(Offset - co, co, @DocPos);
+    end;
 
   FCompiler.DecStackInfo(Offset, True, True, False, @DocPos);
   FCompiler.Emitter._JmpR(Offset - if_o, if_o, @DocPos);
@@ -3161,7 +3168,7 @@ end;
 function TLapeTree_While.CompileBody(var Offset: Integer): TResVar;
 var
   cnd, tmp, e: TResVar;
-  i: Integer;
+  i, co: Integer;
 begin
   Result := inherited;
 
@@ -3170,7 +3177,10 @@ begin
     FContinueCount := FContinueStatements.Count;
     for i := 0 to FContinueCount - 1 do
       with FContinueStatements[i] do
-        CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+      begin
+        co := CodeOffset;
+        FCompiler.Emitter._JmpR(Offset - co, co, @DocPos);
+      end;
   end;
 
   e := NullResVar;
@@ -3206,7 +3216,7 @@ end;
 
 function TLapeTree_While.Compile(var Offset: Integer): TResVar;
 var
-  i: Integer;
+  i, co: Integer;
 begin
   FContinueCount := 0;
   FBreakStatements.Clear();
@@ -3218,7 +3228,10 @@ begin
 
   for i := 0 to FBreakStatements.Count - 1 do
     with FBreakStatements[i] do
-      CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+    begin
+      co := CodeOffset;
+      FCompiler.Emitter._JmpR(Offset - co, co, @DocPos);
+    end;
 end;
 
 procedure TLapeTree_While.addBreakStatement(var Offset: Integer; Pos: PDocPos = nil);
@@ -3272,7 +3285,7 @@ end;
 
 function TLapeTree_For.CompileBody(var Offset: Integer): TResVar;
 var
-  i: Integer;
+  i, co: Integer;
   m: TLapeTree_InternalMethod;
   b: TLapeTree_Base;
   s: TLapeFlowStatementList;
@@ -3289,7 +3302,10 @@ begin
   FContinueCount := FContinueStatements.Count;
   for i := 0 to FContinueCount - 1 do
     with FContinueStatements[i] do
-      CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+    begin
+      co := CodeOffset;
+      FCompiler.Emitter._JmpR(Offset - co, co, @DocPos);
+    end;
 
   if WalkDown then
     m := TLapeTree_InternalMethod_Dec.Create(FCompiler, @DocPos)
@@ -3432,7 +3448,7 @@ end;
 function TLapeTree_Repeat.Compile(var Offset: Integer): TResVar;
 var
   cnd, tmp, e: TResVar;
-  o, i: Integer;
+  i, o, co: Integer;
 begin
   FBreakStatements.Clear();
   FContinueStatements.Clear();
@@ -3444,7 +3460,10 @@ begin
 
   for i := 0 to FContinueStatements.Count - 1 do
     with FContinueStatements[i] do
-      CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+    begin
+      co := CodeOffset;
+      FCompiler.Emitter._JmpR(Offset - co, co, @DocPos);
+    end;
 
   e := NullResVar;
   cnd := FCondition.Compile(Offset);
@@ -3462,7 +3481,10 @@ begin
 
   for i := 0 to FBreakStatements.Count - 1 do
     with FBreakStatements[i] do
-      CodeOffset := FCompiler.Emitter._JmpR(Offset - CodeOffset, CodeOffset, @DocPos);
+    begin
+      co := CodeOffset;
+      FCompiler.Emitter._JmpR(Offset - co, co, @DocPos);
+    end;
 
   setNullResVar(cnd);
 end;
