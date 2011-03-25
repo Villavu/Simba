@@ -1217,7 +1217,7 @@ var
       end;
 
       Result := Res.NewGlobalVarP();
-      TLapeCallbackFunc(f.Ptr^)(@a[0], Result.Ptr);
+      TLapeImportedFunc(f.Ptr^)(@a[0], Result.Ptr);
       Result := TLapeGlobalVar(FCompiler.addManagedVar(Result));
     end;
   end;
@@ -1376,7 +1376,7 @@ var
         FCompiler.Emitter._Eval(getEvalProc(op_Addr, ltUnknown, ltUnknown), b, Result, NullResVar, Offset, @Self.DocPos);
       end;
 
-      FCompiler.Emitter._IncCall(ResVarToIMemPos(a), ParamSize, Offset, @Self.DocPos);
+      FCompiler.Emitter._IncCall(a, ParamSize, Offset, @Self.DocPos);
     end;
   end;
 
@@ -1427,7 +1427,7 @@ var
       if (Res = nil) then
       begin
         setNullResVar(FDest);
-        FCompiler.Emitter._InvokeExternalProc(ResVarToIMemPos(a), Params.Count * LapeTypeSize[ltPointer], Offset, @Self.DocPos)
+        FCompiler.Emitter._InvokeImportedProc(a, Params.Count * LapeTypeSize[ltPointer], Offset, @Self.DocPos)
       end
       else
       begin
@@ -1435,7 +1435,7 @@ var
         if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
           FDest := VarResVar;
         getDestVar(FDest, Result, op_Unknown, FCompiler);
-        FCompiler.Emitter._InvokeExternalFunc(ResVarToIMemPos(a), ResVarToIMemPos(Result), Params.Count * LapeTypeSize[ltPointer], Offset, @Self.DocPos)
+        FCompiler.Emitter._InvokeImportedFunc(a, Result, Params.Count * LapeTypeSize[ltPointer], Offset, @Self.DocPos)
       end;
     end;
   end;
@@ -1862,7 +1862,7 @@ begin
   if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
     FDest := VarResVar;
   getDestVar(FDest, Result, op_Unknown, FCompiler);
-  FCompiler.Emitter._InvokeExternalFunc(ResVarToIMemPos(getResVar(FCompiler.getDeclaration('!high') as TLapeVar)), ResVarToIMemPos(Result), LapeTypeSize[ltPointer], Offset, @Self.DocPos);
+  FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!high') as TLapeVar), Result, LapeTypeSize[ltPointer], Offset, @Self.DocPos);
 end;
 
 function TLapeTree_InternalMethod_Length.isConstant: Boolean;
@@ -1949,9 +1949,9 @@ begin
       FDest := VarResVar;
     getDestVar(FDest, Result, op_Unknown, FCompiler);
     if (a.VarType.BaseType in LapeStringTypes) then
-      FCompiler.Emitter._InvokeExternalFunc(ResVarToIMemPos(getResVar(FCompiler.getDeclaration('!strlen') as TLapeVar)), ResVarToIMemPos(Result), LapeTypeSize[ltPointer], Offset, @Self.DocPos)
+      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!strlen') as TLapeVar), Result, LapeTypeSize[ltPointer], Offset, @Self.DocPos)
     else
-      FCompiler.Emitter._InvokeExternalFunc(ResVarToIMemPos(getResVar(FCompiler.getDeclaration('!length') as TLapeVar)), ResVarToIMemPos(Result), LapeTypeSize[ltPointer], Offset, @Self.DocPos);
+      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!length') as TLapeVar), Result, LapeTypeSize[ltPointer], Offset, @Self.DocPos);
   end;
 end;
 

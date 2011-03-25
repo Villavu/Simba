@@ -23,13 +23,10 @@ case opCode(opCodeTypeP(Code)^) of
   ocEndTry: DoEndTry();
   ocCatchException: DoCatchException();
 
-  ocIncCall: DoIncCall();
   ocDecCall: DoDecCall();
   ocDecCall_EndTry: DoDecCall_EndTry();
 
-  ocInvokeExternalProc: DoInvokeExternalProc;
-  ocInvokeExternalFunc: DoInvokeExternalFunc;
-
+  {$I lpinterpreter_invokecase.inc}
   {$I lpinterpreter_jumpcase.inc}
   {$I lpinterpreter_evalcase.inc}
 

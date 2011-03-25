@@ -194,6 +194,7 @@ begin
     Compiler.addGlobalVar(func3.NewGlobalVar(@MyStringToInt, 'StrToInt'));
 
     Compiler.addGlobalVar(Compiler.addGlobalType('record x, y: Int32; end', 'TPoint'), @tpa[0], 'myPoint');
+    Compiler.addGlobalType('(enum1, enum2)', 'TMyEnum');
     Compiler.addGlobalVar(Compiler.getBaseType(ltString).NewGlobalVarP(@MyString, 'MyString'));
     Compiler.addGlobalVar(456, 'b');
     Compiler.addGlobalVar(789, 'c');

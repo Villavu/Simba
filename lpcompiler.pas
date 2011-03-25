@@ -559,7 +559,7 @@ end;
 
 function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
 
-  procedure ParseArray; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure ParseArray;
   var
     t: TLapeTree_Base;
     r: TLapeRange;
@@ -586,7 +586,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
       Result := addManagedType(TLapeType_DynArray.Create(ParseType(nil), Self, '', @d));
   end;
 
-  procedure ParseRecord(IsPacked: Boolean = False); {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure ParseRecord(IsPacked: Boolean = False);
   var
     rr: TLapeType_Record absolute Result;
     x: TLapeType;
@@ -620,7 +620,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     Result := addManagedType(rr);
   end;
 
-  procedure ParseSet; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure ParseSet;
   var
     t: TLapeType;
   begin
@@ -637,7 +637,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     end;
   end;
 
-  procedure ParsePointer; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure ParsePointer;
   var
     x: TLapeType;
     d: TDocPos;
@@ -659,20 +659,25 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     end;
   end;
 
-  procedure ParseEnum; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure ParseEnum;
   var
     re: TLapeType_Enum absolute Result;
     n: lpString;
     t: TlapeTree_ExprBase;
     v: TLapeGlobalVar;
+    so: TLapeStackInfo;
   begin
     FTokenizer.Expect(tk_sym_ParenthesisOpen, True, False);
     re := TLapeType_Enum.Create(Self, nil, '', getPDocPos());
+    if (FStackInfo = nil) then
+      so := nil
+    else
+      so := FStackInfo.Owner;
 
     repeat
       FTokenizer.Expect(tk_Identifier, True, False);
       n := FTokenizer.TokString;
-      if (getDeclaration(n, FStackInfo.Owner, True) <> nil) then
+      if (getDeclaration(n, so, True) <> nil) then
         LapeException(lpeDuplicateDeclaration, [n], FTokenizer.DocPos);
 
       FTokenizer.Expect([tk_sym_Comma, tk_sym_ParenthesisClose, tk_sym_Equals], True, False);
@@ -687,7 +692,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
 
           if (v = nil) or (v.VarType = nil) or (v.VarType.BaseIntType = ltUnknown) or (not v.isConstant) then
             LapeException(lpeExpressionExpected, FTokenizer.DocPos);
-          TLapeGlobalVar(addLocalDecl(re.NewGlobalVar(re.addMember(v.AsInteger, n), n), FStackInfo.Owner)).isConstant := True;
+          TLapeGlobalVar(addLocalDecl(re.NewGlobalVar(re.addMember(v.AsInteger, n), n), so)).isConstant := True;
         finally
           t.Free();
         end;
@@ -695,12 +700,12 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
         LapeException(E.Message, FTokenizer.DocPos);
       end
       else
-        TLapeGlobalVar(addLocalDecl(re.NewGlobalVar(re.addMember(n), n), FStackInfo.Owner)).isConstant := True;
+        TLapeGlobalVar(addLocalDecl(re.NewGlobalVar(re.addMember(n), n), so)).isConstant := True;
     until (FTokenizer.Tok in [tk_NULL, tk_sym_ParenthesisClose]);
     Result := addManagedType(re);
   end;
 
-  procedure ParseDef; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure ParseDef;
   var
     t: TlapeTree_Base;
     r: TLapeRange;
@@ -934,7 +939,7 @@ var
   _LastNode: (_None, _Var, _Op);
   InExpr: Integer;
 
-  procedure PopOpNode; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure PopOpNode;
   var
     OpNode: TLapeTree_Operator;
   begin
@@ -954,7 +959,7 @@ var
     end;
   end;
 
-  procedure PopOpStack(op: EOperator = op_Unknown); {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure PopOpStack(op: EOperator = op_Unknown);
   var
     Associative: ShortInt;
   begin
@@ -975,7 +980,7 @@ var
     end;
   end;
 
-  function PushVarStack(Item: TLapeTree_ExprBase): Integer; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  function PushVarStack(Item: TLapeTree_ExprBase): Integer;
   begin
     if (_LastNode = _Var) then
       LapeException(lpeOperatorExpected, FTokenizer.DocPos)
@@ -984,7 +989,7 @@ var
     Result := VarStack.Push(Item);
   end;
 
-  function PushOpStack(Item: TLapeTree_Operator): Integer; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  function PushOpStack(Item: TLapeTree_Operator): Integer;
   begin
     if (Item = TLapeTree_Operator(ParenthesisOpen)) or (Item.OperatorType = op_Assign) then
       _LastNode := _None
@@ -997,7 +1002,7 @@ var
     Result := OpStack.Push(Item);
   end;
 
-  function getString: lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  function getString: lpString;
   begin
     Result := FTokenizer.TokString;
     if (Length(Result) > 1) then
@@ -1007,7 +1012,7 @@ var
     end;
   end;
 
-  procedure ParseAndPushString(ForceString: Boolean = False); {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure ParseAndPushString(ForceString: Boolean = False);
   var
     s: lpString;
     d: TDocPos;

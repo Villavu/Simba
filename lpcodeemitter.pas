@@ -90,18 +90,12 @@ type
     function _CatchException(var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _CatchException(Pos: PDocPos = nil): Integer; overload;
 
-    function _IncCall(ACodePos: TIMemPos; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
-    function _IncCall(ACodePos: TIMemPos; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
     function _DecCall(var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _DecCall(Pos: PDocPos = nil): Integer; overload;
     function _DecCall_EndTry(var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _DecCall_EndTry(Pos: PDocPos = nil): Integer; overload;
 
-    function _InvokeExternalProc(AMemPos: TIMemPos; AParamLen: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
-    function _InvokeExternalProc(AMemPos: TIMemPos; AParamLen: UInt16; Pos: PDocPos = nil): Integer; overload;
-    function _InvokeExternalFunc(AMemPos, AResPos: TIMemPos; AParamLen: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
-    function _InvokeExternalFunc(AMemPos, AResPos: TIMemPos; AParamLen: UInt16; Pos: PDocPos = nil): Integer; overload;
-
+    {$I lpcodeemitter_invokeheader.inc}
     {$I lpcodeemitter_jumpheader.inc}
     {$I lpcodeemitter_evalheader.inc}
 
@@ -379,17 +373,6 @@ begin
   Result := _op(ocCatchException, Offset, Pos);
 end;
 
-function TLapeCodeEmitterBase._IncCall(ACodePos: TIMemPos; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
-begin
-  Result := _op(ocIncCall, Offset, Pos);
-  CheckOffset(Offset, SizeOf(TOC_IncCall));
-  with POC_IncCall(@FCode[Offset])^ do begin
-    CodePos := ACodePos;
-    ParamSize := AParamSize;
-  end;
-  Inc(Offset, SizeOf(TOC_IncCall));
-end;
-
 function TLapeCodeEmitterBase._DecCall(var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
   Result := _op(ocDecCall, Offset, Pos);
@@ -398,29 +381,6 @@ end;
 function TLapeCodeEmitterBase._DecCall_EndTry(var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
   Result := _op(ocDecCall_EndTry, Offset, Pos);
-end;
-
-function TLapeCodeEmitterBase._InvokeExternalProc(AMemPos: TIMemPos; AParamLen: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
-begin
-  Result := _op(ocInvokeExternalProc, Offset, Pos);
-  CheckOffset(Offset, SizeOf(TOC_InvokeExternalProc));
-  with POC_InvokeExternalProc(@FCode[Offset])^ do begin
-    MemPos := AMemPos;
-    ParamLen := AParamLen;
-  end;
-  Inc(Offset, SizeOf(TOC_InvokeExternalProc));
-end;
-
-function TLapeCodeEmitterBase._InvokeExternalFunc(AMemPos, AResPos: TIMemPos; AParamLen: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
-begin
-  Result := _op(ocInvokeExternalFunc, Offset, Pos);
-  CheckOffset(Offset, SizeOf(TOC_InvokeExternalFunc));
-  with POC_InvokeExternalFunc(@FCode[Offset])^ do begin
-    MemPos := AMemPos;
-    ResPos := AResPos;
-    ParamLen := AParamLen;
-  end;
-  Inc(Offset, SizeOf(TOC_InvokeExternalFunc));
 end;
 
 function TLapeCodeEmitterBase.CheckOffset(Len: Word = 0): Integer;
@@ -460,18 +420,12 @@ function TLapeCodeEmitterBase._EndTry(Pos: PDocPos = nil): Integer;
 function TLapeCodeEmitterBase._CatchException(Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _CatchException(o, Pos); end;
 
-function TLapeCodeEmitterBase._IncCall(ACodePos: TIMemPos; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
-  var o: Integer; begin o := -1; Result := _IncCall(ACodePos, AParamSize, o, Pos); end;
 function TLapeCodeEmitterBase._DecCall(Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _DecCall(o, Pos); end;
 function TLapeCodeEmitterBase._DecCall_EndTry(Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _DecCall_EndTry(o, Pos); end;
 
-function TLapeCodeEmitterBase._InvokeExternalProc(AMemPos: TIMemPos; AParamLen: UInt16; Pos: PDocPos = nil): Integer;
-  var o: Integer; begin o := -1; Result := _InvokeExternalProc(AMemPos, AParamLen, o, Pos); end;
-function TLapeCodeEmitterBase._InvokeExternalFunc(AMemPos, AResPos: TIMemPos; AParamLen: UInt16; Pos: PDocPos = nil): Integer;
-  var o: Integer; begin o := -1; Result := _InvokeExternalFunc(AMemPos, AResPos, AParamLen, o, Pos); end;
-
+{$I lpcodeemitter_invokebody.inc}
 {$I lpcodeemitter_jumpbody.inc}
 {$I lpcodeemitter_evalbody.inc}
 

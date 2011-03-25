@@ -257,10 +257,10 @@ var
   Lape_KeywordsCache: array[Byte] of array of TLapeKeyword;
   {$ENDIF}
 
-function LapeTokenToString(Token: EParserToken): lpString;
-function ParserTokenToOperator(Token: EParserToken): EOperator;
-function StrToFloatDot(s: lpString): Extended; inline;
-function StrToFloatDotDef(s: lpString; Default: Extended): Extended; inline;
+function LapeTokenToString(Token: EParserToken): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function ParserTokenToOperator(Token: EParserToken): EOperator; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function StrToFloatDot(s: lpString): Extended; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function StrToFloatDotDef(s: lpString; Default: Extended): Extended; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function DetermineIntType(s: lpString): ELapeBaseType; overload;
 function DetermineIntType(i: Int64): ELapeBaseType; overload;
 

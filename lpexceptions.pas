@@ -71,8 +71,8 @@ resourcestring
   lpeVariableOfTypeExpected = 'Expected variable of type "%s", got "%s"';
   lpeWrongNumberParams = 'Wrong number of parameters found, expected %d';
 
-procedure LapeException(Msg: string); overload; inline;
-procedure LapeException(Msg: string; DocPos: TDocPos); overload; inline;
+procedure LapeException(Msg: string); overload;
+procedure LapeException(Msg: string; DocPos: TDocPos); overload;
 procedure LapeException(Msg: string; Args: array of const); overload;
 procedure LapeException(Msg: string; Args: array of const; DocPos: TDocPos); overload;
 

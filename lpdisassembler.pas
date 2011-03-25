@@ -63,18 +63,6 @@ var
     _WriteLn(Format(s, args));
   end;
 
-  function getTIMemPosPtr(p: TIMemPos): string; {$IFDEF Lape_Inline}inline;{$ENDIF}
-  begin
-    case p.MemPos of
-      mpMem: Result := IntToStr(p.Ptr);
-      mpVar: Result := 'VarStack[VarStackPos + ' + IntToStr(p.VOffset) + ']';
-      mpStack: Result := 'Stack[StackPos - ' + IntToStr(p.SOffset) + ']';
-      else LapeException(lpeImpossible);
-    end;
-    if p.isPointer then
-      Result := '(' + Result + ')^+'+IntToStr(p.POffset);
-  end;
-
   procedure DoInitStackLen; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
     _WriteLn('InitStackLen %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
@@ -147,13 +135,6 @@ var
     Inc(Code, ocSize);
   end;
 
-  procedure DoIncCall; {$IFDEF Lape_Inline}inline;{$ENDIF}
-  begin
-    with POC_IncCall(PtrUInt(Code) + ocSize)^ do
-      _WriteLn('IncCall %s %d', [GetTIMemPosPtr(CodePos), ParamSize]);
-    Inc(Code, SizeOf(TOC_IncCall) + ocSize);
-  end;
-
   procedure DoDecCall; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
     _WriteLn('DecCall');
@@ -166,26 +147,7 @@ var
     Inc(Code, ocSize);
   end;
 
-  procedure DoInvokeExternalProc; {$IFDEF Lape_Inline}inline;{$ENDIF}
-  begin
-    with POC_InvokeExternalProc(PtrUInt(Code) + ocSize)^ do
-    begin
-      _WriteLn('InvokeExternalProc %s %d', [GetTIMemPosPtr(MemPos), ParamLen]);
-      _WriteLn('DecStackPos %d', [ParamLen]);
-    end;
-    Inc(Code, SizeOf(TOC_InvokeExternalProc) + ocSize)
-  end;
-
-  procedure DoInvokeExternalFunc; {$IFDEF Lape_Inline}inline;{$ENDIF}
-  begin
-    with POC_InvokeExternalFunc(PtrUInt(Code) + ocSize)^ do
-    begin
-      _WriteLn('InvokeExternalFunc %s %d %s', [GetTIMemPosPtr(MemPos), ParamLen,getTIMemPosPtr(ResPos)]);
-      _WriteLn('DecStackPos %d', [ParamLen]);
-    end;
-    Inc(Code, SizeOf(TOC_InvokeExternalFunc) + ocSize)
-  end;
-
+  {$I lpdisassembler_doinvoke.inc}
   {$I lpdisassembler_dojump.inc}
   {$I lpdisassembler_doeval.inc}
 

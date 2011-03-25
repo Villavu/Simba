@@ -32,13 +32,10 @@ type
     ocEndTry,                                                  //EndTry
     ocCatchException,                                          //CatchException
 
-    ocIncCall,                                                 //IncCall TIMemPos UInt16
     ocDecCall,                                                 //DecCall
     ocDecCall_EndTry,                                          //DecCall_EndTry
 
-    ocInvokeExternalProc,                                      //InvokeExternalProc TIMemPos UInt16
-    ocInvokeExternalFunc,                                      //InvokeExternalFunc TIMemPos TIMemPos UInt16
-
+    {$I lpinterpreter_invokeopcodes.inc}
     {$I lpinterpreter_jumpopcodes.inc}
     {$I lpinterpreter_evalopcodes.inc}
   );
@@ -54,25 +51,7 @@ type
     StackP, VarStackP: UInt32;
   end;
 
-  POC_IncCall = ^TOC_IncCall;
-  TOC_IncCall = record
-    CodePos: TIMemPos;
-    ParamSize: UInt16;
-  end;
-
-  POC_InvokeExternalProc = ^TOC_InvokeExternalProc;
-  TOC_InvokeExternalProc = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
-    MemPos: TIMemPos;
-    ParamLen: UInt16;
-  end;
-
-  POC_InvokeExternalFunc = ^TOC_InvokeExternalFunc;
-  TOC_InvokeExternalFunc = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
-    MemPos: TIMemPos;
-    ResPos: TIMemPos;
-    ParamLen: UInt16;
-  end;
-
+  {$I lpinterpreter_invokerecords.inc}
   {$I lpinterpreter_jumprecords.inc}
   {$I lpinterpreter_evalrecords.inc}
 
@@ -173,18 +152,6 @@ var
       SetLength(VarStack, VarStackLen + (VarStackSize div 2));
     {$ENDIF}
     Move(Stack[StackPos], VarStack[VarStackPos], Size);
-  end;
-
-  function getTIMemPosPtr(const p: TIMemPos): Pointer; {$IFDEF Lape_Inline}inline;{$ENDIF}
-  begin
-    case p.MemPos of
-      mpMem: Result := p.Ptr;
-      mpVar: Result := @VarStack[VarStackPos + p.VOffset];
-      mpStack: Result := @Stack[StackPos - p.SOffset];
-      else LapeException(lpeImpossible);
-    end;
-    if p.isPointer then
-      Result := Pointer(PtrUInt(PPointer(Result)^) + p.POffset);
   end;
 
   procedure DoInitStackLen; {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -298,19 +265,19 @@ var
     Inc(Code, ocSize);
   end;
 
-  procedure DoIncCall; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure DoIncCall(RecSize: Integer; Jmp: UInt32; ParamSize: UInt16; StackPosOffset: Integer = 0); {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
     {$IFDEF Lape_UnlimitedCallStackSize}
     if (CallStackPos >= Length(CallStack)) then
       SetLength(CallStack, CallStackPos + (CallStackSize div 2));
     {$ENDIF}
-    with CallStack[CallStackPos], POC_IncCall(PtrUInt(Code) + ocSize)^ do
+    with CallStack[CallStackPos] do
     begin
-      CalledFrom := PByte(PtrUInt(Code) + ocSize + SizeOf(TOC_IncCall));
+      CalledFrom := PByte(PtrUInt(Code) + ocSize + RecSize);
       VarStackP := VarStackPos;
       PushToVar(ParamSize);
-      StackP := StackPos;
-      JumpTo(PUInt32(getTIMemPosPtr(CodePos))^);
+      StackP := StackPos + StackPosOffset;
+      JumpTo(Jmp);
       Inc(CallStackPos);
     end;
   end;
@@ -339,26 +306,21 @@ var
       HandleException();
   end;
 
-  procedure DoInvokeExternalProc; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure DoInvokeImportedProc(RecSize: Integer; Ptr: Pointer; ParamSize: UInt16; StackPosOffset: Integer = 0); {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    with POC_InvokeExternalProc(PtrUInt(Code) + ocSize)^ do
-    begin
-      TLapeCallbackProc(PPointer(getTIMemPosPtr(MemPos))^)(@Stack[StackPos - ParamLen]);
-      Dec(StackPos, ParamLen);
-    end;
-    Inc(Code, SizeOf(TOC_InvokeExternalProc) + ocSize);
+    TLapeImportedProc(Ptr)(@Stack[StackPos - ParamSize]);
+    Dec(StackPos, ParamSize - StackPosOffset);
+    Inc(Code, RecSize + ocSize);
   end;
 
-  procedure DoInvokeExternalFunc; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  procedure DoInvokeImportedFunc(RecSize: Integer; Ptr, Res: Pointer; ParamSize: UInt16; StackPosOffset: Integer = 0); {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    with POC_InvokeExternalFunc(PtrUInt(Code) + ocSize)^ do
-    begin
-      TLapeCallbackFunc(PPointer(getTIMemPosPtr(MemPos))^)(@Stack[StackPos - ParamLen], getTIMemPosPtr(ResPos));
-      Dec(StackPos, ParamLen);
-    end;
-    Inc(Code, SizeOf(TOC_InvokeExternalFunc) + ocSize);
+    TLapeImportedFunc(Ptr)(@Stack[StackPos - ParamSize], Res);
+    Dec(StackPos, ParamSize - StackPosOffset);
+    Inc(Code, RecSize + ocSize);
   end;
 
+  {$I lpinterpreter_doinvoke.inc}
   {$I lpinterpreter_dojump.inc}
   {$I lpinterpreter_doeval.inc}
 
