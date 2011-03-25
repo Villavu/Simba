@@ -356,13 +356,13 @@ begin
   _UInt16(Len, Offset);
 end;
 
-function TLapeCodeEmitterBase._JmpSafe(Target: UInt32; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+function TLapeCodeEmitterBase._JmpSafe(Target: UInt32; var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
   Result := _op(ocJmpSafe, Offset, Pos);
   _UInt32(Target, Offset);
 end;
 
-function TLapeCodeEmitterBase._JmpSafeR(Jmp: Int32; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+function TLapeCodeEmitterBase._JmpSafeR(Jmp: Int32; var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
   Result := _op(ocJmpSafeR, Offset, Pos);
   _Int32(Jmp, Offset);
