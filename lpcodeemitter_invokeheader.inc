@@ -7,23 +7,25 @@
 }
 {%MainUnit lpcodeemitter.pas}
 
-function _IncCall_Stk(ASOffset: TStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
-function _IncCall_PStk(AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+//function _IncCall_Stk(ASOffset: TStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+//function _IncCall_PStk(AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _IncCall_Var(AVOffset: TVarStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _IncCall_PVar(AVOffset: TVarStackOffset; APOffset: TPointerOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _IncCall_Ptr(APtr: Pointer; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 
-function _InvokeImported_Stk(ASOffset: TStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
-function _InvokeImported_PStk(AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+//function _InvokeImported_Stk(ASOffset: TStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+//function _InvokeImported_PStk(AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Var(AVOffset: TVarStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_PVar(AVOffset: TVarStackOffset; APOffset: TPointerOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Ptr(APtr: Pointer; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 
+{
 function _InvokeImported_Stk_Stk(ASOffset: TStackOffset; AParamSize: UInt16; AStackInc: TStackInc; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Stk_PStk(ASOffset: TStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Stk_Var(ASOffset: TStackOffset; AVOffsetD: TVarStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Stk_PVar(ASOffset: TStackOffset; AVOffsetD: TVarStackOffset; APOffset: TPointerOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Stk_Ptr(ASOffset: TStackOffset; APtrD: Pointer; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+}
 
 function _InvokeImported_Var_Stk(AVOffsetS: TVarStackOffset; AParamSize: UInt16; AStackInc: TStackInc; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Var_PStk(AVOffsetS: TVarStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
@@ -44,23 +46,25 @@ function _InvokeImported_Ptr_PVar(APtrS: Pointer; AVOffsetD: TVarStackOffset; AP
 function _InvokeImported_Ptr_Ptr(APtrS, APtrD: Pointer; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
 
 
-function _IncCall_Stk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
-function _IncCall_PStk(AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
+//function _IncCall_Stk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
+//function _IncCall_PStk(AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _IncCall_Var(AVOffset: TVarStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _IncCall_PVar(AVOffset: TVarStackOffset; APOffset: TPointerOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _IncCall_Ptr(APtr: Pointer; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 
-function _InvokeImported_Stk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
-function _InvokeImported_PStk(AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
+//function _InvokeImported_Stk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
+//function _InvokeImported_PStk(AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Var(AVOffset: TVarStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_PVar(AVOffset: TVarStackOffset; APOffset: TPointerOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Ptr(APtr: Pointer; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 
+{
 function _InvokeImported_Stk_Stk(ASOffset: TStackOffset; AParamSize: UInt16; AStackInc: TStackInc; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Stk_PStk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Stk_Var(ASOffset: TStackOffset; AVOffsetD: TVarStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Stk_PVar(ASOffset: TStackOffset; AVOffsetD: TVarStackOffset; APOffset: TPointerOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Stk_Ptr(ASOffset: TStackOffset; APtrD: Pointer; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
+}
 
 function _InvokeImported_Var_Stk(AVOffsetS: TVarStackOffset; AParamSize: UInt16; AStackInc: TStackInc; Pos: PDocPos = nil): Integer; overload;
 function _InvokeImported_Var_PStk(AVOffsetS: TVarStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;

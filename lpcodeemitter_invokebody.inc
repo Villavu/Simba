@@ -7,6 +7,7 @@
 }
 {%MainUnit lpcodeemitter.pas}
 
+{
 function TLapeCodeEmitterBase._IncCall_Stk(ASOffset: TStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
   Result := _op(ocIncCall_Stk, Offset, Pos);
@@ -23,6 +24,7 @@ begin
   Result := _op(ocIncCall_PStk, Offset, Pos);
   _UInt16(AParamSize, Offset);
 end;
+}
 
 function TLapeCodeEmitterBase._IncCall_Var(AVOffset: TVarStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
@@ -58,6 +60,7 @@ begin
   Inc(Offset, SizeOf(TOC_Invoke_Ptr));
 end;
 
+{
 function TLapeCodeEmitterBase._InvokeImported_Stk(ASOffset: TStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
 var
   o: Integer;
@@ -73,6 +76,7 @@ begin
   o := _IncCall_PStk(AParamSize, Offset, Pos);
   Result := _op(ocInvokeImported_PStk, o, Pos);
 end;
+}
 
 function TLapeCodeEmitterBase._InvokeImported_Var(AVOffset: TVarStackOffset; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
 var
@@ -98,6 +102,7 @@ begin
   Result := _op(ocInvokeImported_Ptr, o, Pos);
 end;
 
+{
 function TLapeCodeEmitterBase._InvokeImported_Stk_Stk(ASOffset: TStackOffset; AParamSize: UInt16; AStackInc: TStackInc; var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
   Result := _op(ocInvokeImported_Stk_Stk, Offset, Pos);
@@ -157,7 +162,7 @@ begin
   end;
   Inc(Offset, SizeOf(TOC_Invoke_Stk_Ptr));
 end;
-
+}
 
 function TLapeCodeEmitterBase._InvokeImported_Var_Stk(AVOffsetS: TVarStackOffset; AParamSize: UInt16; AStackInc: TStackInc; var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
@@ -347,10 +352,10 @@ begin
 end;
 
 
-function TLapeCodeEmitterBase._IncCall_Stk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
-  var o: Integer; begin o := -1; Result := _IncCall_Stk(ASOffset, AParamSize, o, Pos); end;
-function TLapeCodeEmitterBase._IncCall_PStk(AParamSize: UInt16; Pos: PDocPos = nil): Integer;
-  var o: Integer; begin o := -1; Result := _IncCall_PStk(AParamSize, o, Pos); end;
+//function TLapeCodeEmitterBase._IncCall_Stk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
+//  var o: Integer; begin o := -1; Result := _IncCall_Stk(ASOffset, AParamSize, o, Pos); end;
+//function TLapeCodeEmitterBase._IncCall_PStk(AParamSize: UInt16; Pos: PDocPos = nil): Integer;
+//  var o: Integer; begin o := -1; Result := _IncCall_PStk(AParamSize, o, Pos); end;
 function TLapeCodeEmitterBase._IncCall_Var(AVOffset: TVarStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _IncCall_Var(AVOffset, AParamSize, o, Pos); end;
 function TLapeCodeEmitterBase._IncCall_PVar(AVOffset: TVarStackOffset; APOffset: TPointerOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
@@ -358,10 +363,10 @@ function TLapeCodeEmitterBase._IncCall_PVar(AVOffset: TVarStackOffset; APOffset:
 function TLapeCodeEmitterBase._IncCall_Ptr(APtr: Pointer; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _IncCall_Ptr(APtr, AParamSize, o, Pos); end;
 
-function TLapeCodeEmitterBase._InvokeImported_Stk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
-  var o: Integer; begin o := -1; Result := _InvokeImported_Stk(ASOffset, AParamSize, o, Pos); end;
-function TLapeCodeEmitterBase._InvokeImported_PStk(AParamSize: UInt16; Pos: PDocPos = nil): Integer;
-  var o: Integer; begin o := -1; Result := _InvokeImported_PStk(AParamSize, o, Pos); end;
+//function TLapeCodeEmitterBase._InvokeImported_Stk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
+//  var o: Integer; begin o := -1; Result := _InvokeImported_Stk(ASOffset, AParamSize, o, Pos); end;
+//function TLapeCodeEmitterBase._InvokeImported_PStk(AParamSize: UInt16; Pos: PDocPos = nil): Integer;
+//  var o: Integer; begin o := -1; Result := _InvokeImported_PStk(AParamSize, o, Pos); end;
 function TLapeCodeEmitterBase._InvokeImported_Var(AVOffset: TVarStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _InvokeImported_Var(AVOffset, AParamSize, o, Pos); end;
 function TLapeCodeEmitterBase._InvokeImported_PVar(AVOffset: TVarStackOffset; APOffset: TPointerOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
@@ -369,6 +374,7 @@ function TLapeCodeEmitterBase._InvokeImported_PVar(AVOffset: TVarStackOffset; AP
 function TLapeCodeEmitterBase._InvokeImported_Ptr(APtr: Pointer; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _InvokeImported_Ptr(APtr, AParamSize, o, Pos); end;
 
+{
 function TLapeCodeEmitterBase._InvokeImported_Stk_Stk(ASOffset: TStackOffset; AParamSize: UInt16; AStackInc: TStackInc; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _InvokeImported_Stk_Stk(ASOffset, AParamSize, AStackInc, o, Pos); end;
 function TLapeCodeEmitterBase._InvokeImported_Stk_PStk(ASOffset: TStackOffset; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
@@ -379,6 +385,7 @@ function TLapeCodeEmitterBase._InvokeImported_Stk_PVar(ASOffset: TStackOffset; A
   var o: Integer; begin o := -1; Result := _InvokeImported_Stk_PVar(ASOffset, AVOffsetD, APOffset, AParamSize, o, Pos); end;
 function TLapeCodeEmitterBase._InvokeImported_Stk_Ptr(ASOffset: TStackOffset; APtrD: Pointer; AParamSize: UInt16; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _InvokeImported_Stk_Ptr(ASOffset, APtrD, AParamSize, o, Pos); end;
+}
 
 function TLapeCodeEmitterBase._InvokeImported_Var_Stk(AVOffsetS: TVarStackOffset; AParamSize: UInt16; AStackInc: TStackInc; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _InvokeImported_Var_Stk(AVOffsetS, AParamSize, AStackInc, o, Pos); end;

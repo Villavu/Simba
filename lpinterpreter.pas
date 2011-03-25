@@ -26,8 +26,10 @@ type
     ocGrowVar,                                                 //GrowVar UInt16
     ocGrowVarAndInit,                                          //GrowVarAndInit UInt16
     ocPopVar,                                                  //PopVar UInt16
+    ocJmpSafe,                                                 //JmpSafe UInt32
+    ocJmpSafeR,                                                //JmpSafeR Int32
 
-    ocIncTry,                                                  //IncTry Int32
+    ocIncTry,                                                  //IncTry Int32 UInt32
     ocDecTry,                                                  //DecTry
     ocEndTry,                                                  //EndTry
     ocCatchException,                                          //CatchException
@@ -51,11 +53,20 @@ type
     StackP, VarStackP: UInt32;
   end;
 
+  POC_IncTry = ^TOC_IncTry;
+  TOC_IncTry = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
+    Jmp: Int32;
+    JmpFinally: UInt32;
+  end;
+
   {$I lpinterpreter_invokerecords.inc}
   {$I lpinterpreter_jumprecords.inc}
   {$I lpinterpreter_evalrecords.inc}
 
 const
+  Try_NoFinally: UInt32 = UInt32(-1);
+  Try_NoExcept: UInt32 = UInt32(-2);
+
   StackSize = 2048 * SizeOf(Pointer); //bytes
 
   {$IFDEF Lape_UnlimitedVarStackSize}
@@ -114,9 +125,13 @@ var
   VarStack: array of Byte;
   VarStackPos, VarStackLen: UInt32;
 
-  TryStack: array of PByte;
+  TryStack: array of record
+    Jmp: PByte;
+    JmpFinally: PByte;
+  end;
   TryStackPos: UInt32;
   InException: Exception;
+  InSafeJump: PByte;
 
   CallStack: array of TCallRec;
   CallStackPos: UInt32;
@@ -136,10 +151,28 @@ var
     if (TryStackPos > 0) then
     begin
       Dec(TryStackPos);
-      Code := TryStack[TryStackPos];
+      Code := TryStack[TryStackPos].Jmp;
     end
     else
       raise InException;
+  end;
+
+  procedure HandleSafeJump; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    while (TryStackPos > 0) and (TryStack[TryStackPos - 1].Jmp < InSafeJump) and (TryStack[TryStackPos - 1].JmpFinally = nil) do
+      Dec(TryStackPos);
+
+    if (TryStackPos > 0) and (TryStack[TryStackPos - 1].JmpFinally <> nil) then
+    begin
+      Assert(TryStack[TryStackPos - 1].JmpFinally >= Code);
+      Dec(TryStackPos);
+      Code := TryStack[TryStackPos].JmpFinally;
+    end
+    else
+    begin
+      Code := InSafeJump;
+      InSafeJump := nil;
+    end;
   end;
 
   procedure PushToVar(const Size: UInt16); {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -233,15 +266,38 @@ var
     Inc(Code, SizeOf(UInt16) + ocSize);
   end;
 
+  procedure DoJmpSafe; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    InSafeJump := PByte(PtrUInt(CodeBase) + PUInt32(PtrUInt(Code) + ocSize)^);
+    HandleSafeJump();
+  end;
+
+  procedure DoJmpSafeR; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    InSafeJump := PByte(PtrInt(Code) + PInt32(PtrUInt(Code) + ocSize)^);
+    HandleSafeJump();
+  end;
+
   procedure DoIncTry; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
     {$IFDEF Lape_UnlimitedTryStackSize}
     if (TryStackPos >= Length(TryStack)) then
       SetLength(TryStack, TryStackPos + (TryStackSize div 2));
     {$ENDIF}
-    TryStack[TryStackPos] := PByte(PtrUInt(Code) + PInt32(PtrUInt(Code) + ocSize)^);
+
+    with POC_IncTry(PtrUInt(Code) + ocSize)^ do
+    begin
+      TryStack[TryStackPos].Jmp := PByte(PtrInt(Code) + Jmp);
+      if (JmpFinally = Try_NoFinally) then
+        TryStack[TryStackPos].JmpFinally := nil
+      else if (JmpFinally = Try_NoExcept) then
+        TryStack[TryStackPos].JmpFinally := TryStack[TryStackPos].Jmp
+      else
+        TryStack[TryStackPos].JmpFinally := PByte(PtrUInt(Code) + JmpFinally + Jmp);
+    end;
+
     Inc(TryStackPos);
-    Inc(Code, SizeOf(Int32) + ocSize);
+    Inc(Code, ocSize + SizeOf(TOC_IncTry));
   end;
 
   procedure DoDecTry; {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -254,6 +310,8 @@ var
   begin
     if (InException <> nil) then
       HandleException()
+    else if (InSafeJump <> nil) then
+      HandleSafeJump()
     else
       Inc(Code, ocSize);
   end;
@@ -303,7 +361,9 @@ var
   begin
     DoDecCall();
     if (InException <> nil) then
-      HandleException();
+      HandleException()
+    else if (InSafeJump <> nil) then
+      HandleSafeJump();
   end;
 
   procedure DoInvokeImportedProc(RecSize: Integer; Ptr: Pointer; ParamSize: UInt16; StackPosOffset: Integer = 0); {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -350,6 +410,7 @@ begin
     TryStackPos := 0;
     CallStackpos := 0;
     InException := nil;
+    InSafeJump := nil;
 
     DaLoop();
   except

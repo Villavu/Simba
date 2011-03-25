@@ -80,9 +80,13 @@ type
     function _GrowVarAndInit(Len: UInt16; Pos: PDocPos = nil): Integer; overload;
     function _PopVar(Len: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _PopVar(Len: UInt16; Pos: PDocPos = nil): Integer; overload;
+    function _JmpSafe(Target: UInt32; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+    function _JmpSafe(Target: UInt32; Pos: PDocPos = nil): Integer; overload;
+    function _JmpSafeR(Jmp: Int32; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+    function _JmpSafeR(Jmp: Int32; Pos: PDocPos = nil): Integer; overload;
 
-    function _IncTry(Jmp: Int32; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
-    function _IncTry(Jmp: Int32; Pos: PDocPos = nil): Integer; overload;
+    function _IncTry(AJmp: Int32; AJmpFinally: UInt32; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+    function _IncTry(AJmp: Int32; AJmpFinally: UInt32; Pos: PDocPos = nil): Integer; overload;
     function _DecTry(var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _DecTry(Pos: PDocPos = nil): Integer; overload;
     function _EndTry(var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
@@ -352,10 +356,28 @@ begin
   _UInt16(Len, Offset);
 end;
 
-function TLapeCodeEmitterBase._IncTry(Jmp: Int32; var Offset: Integer; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitterBase._JmpSafe(Target: UInt32; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+begin
+  Result := _op(ocJmpSafe, Offset, Pos);
+  _UInt32(Target, Offset);
+end;
+
+function TLapeCodeEmitterBase._JmpSafeR(Jmp: Int32; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+begin
+  Result := _op(ocJmpSafeR, Offset, Pos);
+  _Int32(Jmp, Offset);
+end;
+
+function TLapeCodeEmitterBase._IncTry(AJmp: Int32; AJmpFinally: UInt32; var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
   Result := _op(ocIncTry, Offset, Pos);
-  _Int32(Jmp, Offset);
+  CheckOffset(Offset, SizeOf(TOC_IncTry));
+  with POC_IncTry(@FCode[Offset])^ do
+  begin
+    Jmp := AJmp;
+    JmpFinally := AJmpFinally;
+  end;
+  Inc(Offset, SizeOf(TOC_IncTry));
 end;
 
 function TLapeCodeEmitterBase._DecTry(var Offset: Integer; Pos: PDocPos = nil): Integer;
@@ -407,12 +429,15 @@ function TLapeCodeEmitterBase._GrowVar(Len: UInt16; Pos: PDocPos = nil): Integer
   var o: Integer; begin o := -1; Result := _ExpandVar(Len, o, Pos); end;
 function TLapeCodeEmitterBase._GrowVarAndInit(Len: UInt16; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _ExpandVarAndInit(Len, o, Pos); end;
-
 function TLapeCodeEmitterBase._PopVar(Len: UInt16; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _PopVar(Len, o, Pos); end;
+function TLapeCodeEmitterBase._JmpSafe(Target: UInt32; Pos: PDocPos = nil): Integer;
+  var o: Integer; begin o := -1; Result := _JmpSafe(Target, o, Pos); end;
+function TLapeCodeEmitterBase._JmpSafeR(Jmp: Int32; Pos: PDocPos = nil): Integer;
+  var o: Integer; begin o := -1; Result := _JmpSafeR(Jmp, o, Pos); end;
 
-function TLapeCodeEmitterBase._IncTry(Jmp: Int32; Pos: PDocPos = nil): Integer;
-  var o: Integer; begin o := -1; Result := _IncTry(Jmp, o, Pos); end;
+function TLapeCodeEmitterBase._IncTry(AJmp: Int32; AJmpFinally: UInt32; Pos: PDocPos = nil): Integer;
+  var o: Integer; begin o := -1; Result := _IncTry(AJmp, AJmpFinally, o, Pos); end;
 function TLapeCodeEmitterBase._DecTry(Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _DecTry(o, Pos); end;
 function TLapeCodeEmitterBase._EndTry(Pos: PDocPos = nil): Integer;

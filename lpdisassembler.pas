@@ -111,10 +111,23 @@ var
     Inc(Code, SizeOf(UInt16) + ocSize);
   end;
 
+  procedure DoJmpSafe; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    _WriteLn('JmpSafe %d', [PUInt32(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, ocSize + SizeOf(UInt32));
+  end;
+
+  procedure DoJmpSafeR; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    _WriteLn('JmpSafeR %d', [PInt32(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, ocSize + SizeOf(Int32));
+  end;
+
   procedure DoIncTry; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('IncTry %d', [PInt32(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(Int32) + ocSize);
+    with POC_IncTry(PtrUInt(Code) + ocSize)^ do
+      _WriteLn('IncTry %d %d', [Jmp, JmpFinally]);
+    Inc(Code, ocSize + SizeOf(TOC_IncTry));
   end;
 
   procedure DoDecTry; {$IFDEF Lape_Inline}inline;{$ENDIF}

@@ -7,23 +7,25 @@
 }
 {%MainUnit lpinterpreter.pas}
 
-ocIncCall_Stk,                                             //IncCall_Stk TStackOffset UInt16
-ocIncCall_PStk,                                            //IncCall_PStk TStackOffset UInt16
+//ocIncCall_Stk,                                             //IncCall_Stk TStackOffset UInt16
+//ocIncCall_PStk,                                            //IncCall_PStk TStackOffset UInt16
 ocIncCall_Var,                                             //IncCall_Var TVarStackOffset UInt16
 ocIncCall_PVar,                                            //IncCall_PVar TVarStackOffset TPointerOffset UInt16
 ocIncCall_Ptr,                                             //IncCall_Ptr Ptr UInt16
 
-ocInvokeImported_Stk,                                      //InvokeImported_Stk TStackOffset UInt16
-ocInvokeImported_PStk,                                     //InvokeImported_PStk TStackOffset UInt16
+//ocInvokeImported_Stk,                                      //InvokeImported_Stk TStackOffset UInt16
+//ocInvokeImported_PStk,                                     //InvokeImported_PStk TStackOffset UInt16
 ocInvokeImported_Var,                                      //InvokeImported_Var TVarStackOffset UInt16
 ocInvokeImported_PVar,                                     //InvokeImported_PVar TVarStackOffset TPointerOffset UInt16
 ocInvokeImported_Ptr,                                      //InvokeImported_Ptr Ptr UInt16
 
+{
 ocInvokeImported_Stk_Stk,                                  //InvokeImported_Stk_Stk TStackOffset UInt16 TStackInc
 ocInvokeImported_Stk_PStk,                                 //InvokeImported_Stk_Stk TStackOffset UInt16
 ocInvokeImported_Stk_Var,                                  //InvokeImported_Stk_Var TStackOffset TVarStackOffset UInt16
 ocInvokeImported_Stk_PVar,                                 //InvokeImported_Stk_PVar TStackOffset TVarStackOffset TPointerOffset UInt16
 ocInvokeImported_Stk_Ptr,                                  //InvokeImported_Stk_Ptr TStackOffset Ptr UInt16
+}
 
 ocInvokeImported_Var_Stk,                                  //InvokeImported_Var_Stk TVarStackOffset UInt16 TStackInc
 ocInvokeImported_Var_PStk,                                 //InvokeImported_Var_PStk TVarStackOffset UInt16
