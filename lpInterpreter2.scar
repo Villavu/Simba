@@ -1,0 +1,397 @@
+program New;
+
+function GetRecType(i: Integer): string;
+begin
+  Result := '';
+  case i of
+    0: Result := 'Pointer';
+    1: Result := 'TVarStackOffset';
+    2: Result := 'TStackOffset';
+  end;
+end;
+
+function GetRecVar(i, ii: Integer): string;
+begin
+  Result := '';
+  case i of
+    0: //Ptr
+      case ii of
+        0: Result := 'PtrD';
+        1: Result := 'PtrL';
+        2: Result := 'PtrR';
+      end;
+    1: //Var
+      case ii of
+        0: Result := 'VOffsetD';
+        1: Result := 'VOffsetL';
+        2: Result := 'VOffsetR';
+      end;
+    2: //Stk
+      case ii of
+        0: Result := 'SOffsetD';
+        1: Result := 'SOffsetL';
+        2: Result := 'SOffsetR';
+      end;
+  end;
+end;
+
+function GetParams(a, b, c: Integer; P1, P2, P3: Boolean; out s: Integer; out ss, sss, ssss: string): string;
+var
+  p, pp: array[0..2] of String;
+  t: string;
+begin
+  s := 0;
+  ss := '';
+  sss := '';
+  
+  case c of
+    0:
+      begin
+        p[2] := GetRecVar(0, 2);
+        pp[2] := 'Right.VarPos.GlobalVar.Ptr';
+      end;
+    1:
+      begin
+        if P3 then
+        begin
+          p[2] := 'Pointer(PtrUInt(PPointer(@VarStack[VarStackLen - '+GetRecVar(1, 2)+'])^) + PRightOffset)'
+          pp[2] := 'Right.VarPos.StackVar.Offset, Right.VarPos.Offset';
+        end
+        else
+        begin
+          p[2] := '@VarStack[VarStackLen - '+GetRecVar(1, 2)+']';
+          pp[2] := 'Right.VarPos.StackVar.Offset + Right.VarPos.Offset';
+        end;
+      end;
+    2:
+      if P3 then
+      begin
+        s := 1;
+        p[2] := 'PPointer(@Stack[StackPos - SizeOf(Pointer)])^';
+      end
+      else
+      begin
+        s := -2;
+        p[2] := '@Stack[StackPos - '+GetRecVar(2, 2)+']';
+        if P3 then
+          p[2] := 'PPointer('+p[2]+')^';
+        pp[2] := 'Right.VarType.Size';
+      end;
+  end;
+  
+  if (c < 2) or (not P3) then
+    sss := GetRecVar(c, 2)+':'+GetRecType(c);
+  if (c = 1) and P3 then
+    sss := sss + ',PRightOffset:TPointerOffset';
+  
+  case b of
+    0:
+      begin
+        p[1] := GetRecVar(0, 1);
+        pp[1] := 'Left.VarPos.GlobalVar.Ptr';
+      end;
+    1:
+      begin
+        if P2 then
+        begin
+          p[1] := 'Pointer(PtrUInt(PPointer(@VarStack[VarStackLen - '+GetRecVar(1, 1)+'])^) + PLeftOffset)'
+          pp[1] := 'Left.VarPos.StackVar.Offset, Left.VarPos.Offset';
+        end
+        else
+        begin
+          p[1] := '@VarStack[VarStackLen - '+GetRecVar(1, 1)+']';
+          pp[1] := 'Left.VarPos.StackVar.Offset + Left.VarPos.Offset';
+        end;
+      end;
+    2:
+      if P2 and (s >= 0) then
+      begin
+        Inc(s);
+        if (s = 1) then
+          p[1] := 'PPointer(@Stack[StackPos - SizeOf(Pointer)])^'
+        else
+          p[1] := 'PPointer(@Stack[StackPos - '+IntToStr(s)+'*SizeOf(Pointer)])^';
+      end
+      else
+      begin
+        if (s = -2) then
+          pp[1] := 'Left.VarType.Size + Right.VarType.Size'
+        else
+          pp[1] := 'Left.VarType.Size';
+          
+        s := -1;
+        p[1] := '@Stack[StackPos - '+GetRecVar(2, 1)+']';
+        if P2 then
+          p[1] := 'PPointer('+p[1]+')^';
+      end;
+  end;
+  
+  if (b < 2) or (not P2) or (s < 0) then
+  begin
+    t := GetRecVar(b, 1)+':'+GetRecType(b);
+    if (b = 1) and P2 then
+      if (sss <> '') then
+        sss := 'PLeftOffset:TPointerOffset,'+sss
+      else
+        sss := 'PLeftOffset:TPointerOffset';
+    if (Pos(t, sss) <= 0) then
+      if (sss = '') then
+        sss := t
+      else
+        sss := t+','+sss;
+  end;
+  
+  case a of
+    0:
+      begin
+        p[0] := GetRecVar(0, 0);
+        pp[0] := 'Dest.VarPos.GlobalVar.Ptr';
+      end;
+    1:
+      begin
+        if P1 then
+        begin
+          p[0] := 'Pointer(PtrUInt(PPointer(@VarStack[VarStackLen - '+GetRecVar(1, 0)+'])^) + PDestOffset)'
+          pp[0] := 'Dest.VarPos.StackVar.Offset, Dest.VarPos.Offset';
+        end
+        else
+        begin
+          p[0] := '@VarStack[VarStackLen - '+GetRecVar(1, 0)+']';
+          pp[0] := 'Dest.VarPos.StackVar.Offset + Dest.VarPos.Offset';
+        end;
+      end;
+    2:
+      if ((s > 0) or P1) and (s >= 0) then
+      begin
+        if P1 then
+          Inc(s);
+        if (s = 1) then
+          p[0] := '@Stack[StackPos - SizeOf(Pointer)]'
+        else
+          p[0] := '@Stack[StackPos - '+IntToStr(s)+'*SizeOf(Pointer)]';
+        if P1 then
+          p[0] := 'PPointer('+p[0]+')^'
+        else
+          s := 0;
+        Dec(s);
+      end
+      else
+      begin
+        if (s = 0) then
+          p[0] := '@Stack[StackPos]'
+        else
+        begin
+          p[0] := '@Stack[StackPos - '+GetRecVar(2, iAbs(s))+']';
+          
+          if (s = 0) then
+            pp[0] := 'Dest.VarType.Size';
+        end;
+        if P1 then
+          p[0] := 'PPointer('+p[0]+')^';
+        s := -1;
+      end;
+  end;
+  
+  if (a < 2) then
+  begin
+    t := GetRecVar(a, 0)+':'+GetRecType(a);
+    if (a = 1) and P1 then
+      if (sss <> '') then
+        sss := 'PDestOffset:TPointerOffset,'+sss
+      else
+        sss := 'PDestOffset:TPointerOffset';
+    if (Pos(t, sss) <= 0) then
+      if (sss = '') then
+        sss := t
+      else
+        sss := t+','+sss;
+  end;
+  
+  Result := p[0]+', '+p[1]+', '+p[2];
+  if (s < 0) then
+  begin
+    ss := 'Inc(StackPos, StackInc)';
+    if (sss = '') then
+      sss := 'StackInc:TStackInc'
+    else
+      sss := sss + ',StackInc:TStackInc';
+  end
+  else if (s > 0) then
+    if (iAbs(s) = 1) then
+      ss := 'Dec(StackPos, SizeOf(Pointer))'
+    else
+      ss := 'Dec(StackPos, '+IntToStr(iAbs(s))+'*SizeOf(Pointer))';
+  ssss := pp[0];
+  if (pp[1] <> '') then
+    if (ssss <> '') then
+      ssss := ssss + ', ' + pp[1]
+    else
+      ssss := pp[1];
+  if (pp[2] <> '') then
+    if (ssss <> '') then
+      ssss := ssss + ', ' + pp[2]
+    else
+      ssss := pp[2];
+end;
+
+function GetPos(i: Integer; prefix: string): string;
+begin
+  Result := '';
+  case i of
+    0: Result := prefix+'.VarPos.GlobalVar.Ptr';
+    1, 3: Result := prefix+'.VarPos.Offset';
+    2: Result := prefix+'.VarType.Size';
+    4: Result := 'SizeOf(Pointer)';
+  end;
+end;
+
+var
+  s, va, z: TStringArray;
+  zz: array of array of string;
+  a, b, c, x, i: Integer;
+  pa, pb, pc: Boolean;
+  t, q, r, u, v, w: string;
+  p: string;
+begin
+  ClearDebug;
+
+  s := ['Ptr', 'Var', 'Stk', 'PVar', 'PStk'];
+  
+  WriteLn('case d of');
+  for a := 0 to 4 do
+  begin
+    WriteLn('  mmp'+s[a]+': case l of');
+    for b := 0 to 4 do
+    begin
+      WriteLn('    mmp'+s[b]+': case r of');
+      for c := 0 to 4 do
+      begin
+        p := '';
+        if (a = 2) then
+          p := 'StackIncD';
+        if (b = 2) or (b = 4) then
+        begin
+          if (p <> '') then p := p + ' - ' else p := '-';
+          {if (b = 2) then} p := p + 'StackIncL';
+          //if (b = 4) then p := p + 'SizeOf(Pointer)';
+        end;
+        if (c = 2) or (c = 4) then
+        begin
+          if (p <> '') then p := p + ' - ' else p := '-';;
+          {if (c = 2) then} p := p + 'StackIncR';
+          //if (c = 4) then p := p + 'SizeOf(Pointer)';
+        end;
+          
+        q := +s[a]+'D_'+s[b]+'L_'+s[c]+'R';
+        pa := (a > 2);
+        pb := (b > 2);
+        pc := (c > 2);
+        w := GetParams((a mod 3) + Integer(pa), (b mod 3) + Integer(pb), (c mod 3) + Integer(pc), pa, pb, pc, x, u, v, r);
+        
+        z := Explode(',', v);
+        SetLength(zz, Length(z));
+        for i := 0 to High(z) do
+          zz[i] := Explode(':', z[i]);
+          
+        //_Eval
+        t := '_Eval__'+q+'(AProc';
+        if (r <> '') then
+          t := t + ', ' + r;
+        if (Length(zz) > 0) then if (Length(zz[High(zz)]) > 0) then if (zz[High(zz)][0] = 'StackInc') then
+          if (p <> '') then
+            t := t + ', ' + p
+          else
+            t := t + ', 0';
+        t := t + ', Offset, Pos)';
+        if (c = 0) then
+          WriteLn('      mmpNone: Result := '+Replace(t, 'Right.VarPos.GlobalVar.Ptr', 'nil', [rfReplaceAll])+';');
+        WriteLn('      mmp'+s[c]+': Result := '+t+';');
+        
+        //Set
+        //AddToReport('ocEval_'+q+',');
+
+        //Case
+        //AddToReport('ocEval_'+q+': DoEval__'+q+'();');
+
+        //Inline Procedure
+        (*WriteLn('procedure DoEval__'+q+'; inline; begin');
+        t := '  with POC_Eval__'+q+'(PtrUInt(Code) + ocSize)^ do';
+        if (u <> '') then
+          t := t + ' begin';
+        WriteLn(t);
+        WriteLn('    Proc('+w+');');
+        if (u <> '') then
+        begin
+          WriteLn('    '+u+';');
+          WriteLn('  end;');
+        end;
+        WriteLn('  Inc(Code, SizeOf(TOC_Eval__'+q+') + ocSize);');
+        WriteLn('end;');*)
+          
+        //Record
+        (*t := 'Proc: TLapeEvalProc; ';
+        i := 0;
+        while (i < Length(zz)) do
+        begin
+          t := t + zz[i][0];
+          while (i < Length(z) - 1) do
+            if (zz[i + 1][1] = zz[i][1]) then
+            begin
+              Inc(i);
+              t := t + ', ' + zz[i][0];
+            end
+            else
+              Break;
+          if (Length(zz[i]) > 1) then
+            t := t + ': ' + zz[i][1] + '; ';
+          Inc(i);
+        end;
+        WriteLn('POC_Eval__'+q+' = ^TOC_Eval__'+q+';');
+        WriteLn('TOC_Eval__'+q+' = {$IFDEF Lape_SmallCode}packed{$ENDIF} record '+t+'end;');*)
+
+        //Compiler Procedure
+        (*t := 'AProc: TLapeEvalProc';
+        i := 0;
+        while (i < Length(zz)) do
+        begin
+          if (t <> '') then
+            t := t + '; ';
+          t := t + 'A' + zz[i][0];
+          while (i < Length(z) - 1) do
+            if (zz[i + 1][1] = zz[i][1]) then
+            begin
+              Inc(i);
+              t := t + ', A' + zz[i][0];
+            end
+            else
+              Break;
+          t := t + ': ' + zz[i][1];
+          Inc(i);
+        end;
+        AddToReport('function _Eval__'+q+'('+t+'; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;');
+        AddToReport('function _Eval__'+q+'('+t+'; Pos: PDocPos = nil): Integer; overload;');
+        WriteLn('function TLapeCodeEmitterBase._Eval__'+q+'('+t+'; var Offset: Integer; Pos: PDocPos = nil): Integer; begin');
+        WriteLn('  Result := _op(ocEval_'+q+', Offset, Pos);');
+        WriteLn('  CheckOffset(Offset, SizeOf(TOC_Eval__'+q+'));');
+        WriteLn('  with POC_Eval__'+q+'(@FCode[Offset])^ do begin');
+        WriteLn('    Proc := AProc;');
+        for i := 0 to High(zz) do
+          WriteLn('    '+zz[i][0]+' := A'+zz[i][0]+';');
+        WriteLn('  end;');
+        WriteLn('  Inc(Offset, SizeOf(TOC_Eval__'+q+'));');
+        WriteLn('end;');
+        t := 'function TLapeCodeEmitterBase._Eval__'+q+'('+t+'; Pos: PDocPos = nil): Integer; var o: Integer; begin o := -1; Result := _Eval__'+q+'(AProc';
+        for i := 0 to High(zz) do
+          t := t + ',A' + zz[i][0];
+        WriteLn(t+',o,Pos); end;'); *)
+      end;
+      
+      WriteLn('      else e := True;');
+      WriteLn('    end;');
+    end;
+    WriteLn('    else e := True;');
+    WriteLn('  end;');
+  end;
+  WriteLn('  else e := True;');
+  WriteLn('end;');
+end.
