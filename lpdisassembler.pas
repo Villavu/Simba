@@ -65,62 +65,62 @@ var
 
   procedure DoInitStackLen; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('InitStackLen %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(UInt16) + ocSize);
+    _WriteLn('InitStackLen %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoInitVarLen; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('InitVarStackLen %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(UInt16) + ocSize);
+    _WriteLn('InitVarStackLen %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoInitStack; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('InitStack %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(UInt16) + ocSize);
+    _WriteLn('InitStack %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoExpandVar; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('ExpandVarStack %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(UInt16) + ocSize);
+    _WriteLn('ExpandVarStack %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoExpandVarAndInit; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('ExpandVarStackAndInit %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(UInt16) + ocSize);
+    _WriteLn('ExpandVarStackAndInit %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoGrowVar; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('GrowVarStack %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(UInt16) + ocSize);
+    _WriteLn('GrowVarStack %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoGrowVarAndInit; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('GrowVarStackAndInit %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(UInt16) + ocSize);
+    _WriteLn('GrowVarStackAndInit %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoPopVar; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('PopVarStack %d', [PUInt16(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, SizeOf(UInt16) + ocSize);
+    _WriteLn('PopVarStack %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoJmpSafe; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('JmpSafe %d', [PUInt32(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, ocSize + SizeOf(UInt32));
+    _WriteLn('JmpSafe %d', [PCodePos(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, ocSize + SizeOf(TCodePos));
   end;
 
   procedure DoJmpSafeR; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    _WriteLn('JmpSafeR %d', [PInt32(PtrUInt(Code) + ocSize)^]);
-    Inc(Code, ocSize + SizeOf(Int32));
+    _WriteLn('JmpSafeR %d', [PCodeOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, ocSize + SizeOf(TCodeOffset));
   end;
 
   procedure DoIncTry; {$IFDEF Lape_Inline}inline;{$ENDIF}

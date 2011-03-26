@@ -65,10 +65,27 @@ type
     FileName: PlpChar;
   end;
 
+  TCodePos = UInt32;
+  TCodeOffset = Int32;
+  {$IFDEF Lape_SmallCode}
+  //Means Lape can only locate up to 65kb of local variables (per stackframe)
+  TStackInc = Int16;
   TVarStackOffset = UInt16;
   TStackOffset = UInt16;
-  TStackInc = Int16;
   TPointerOffset = Int16;
+  TParamSize = UInt16;
+  {$ELSE}
+  TStackInc = Int32;
+  TVarStackOffset = UInt32;
+  TStackOffset = UInt32;
+  TPointerOffset = Int32;
+  TParamSize = UInt32;
+  {$ENDIF}
+
+  PStackOffset = ^TStackOffset;
+  PParamSize = ^TParamSize;
+  PCodePos = ^TCodePos;
+  PCodeOffset = ^TCodeOffset;
 
   TMemoryPos = (mpNone, mpStack, mpMem, mpVar);
   TLapeEvalProc = procedure(const Dest, Left, Right: Pointer);

@@ -1202,7 +1202,7 @@ var
           t := FParams[i].Evaluate();
         end;
 
-        if (t = nil) or (Params[i].ParType in [lptVar, lptOut]) then
+        if (t = nil) or (Params[i].ParType in Lape_RefParams) then
           LapeException(lpeCannotInvoke, FParams[i].DocPos);
 
         if (Params[i].VarType <> nil) and (not Params[i].VarType.Equals(t.VarType)) then
@@ -1327,7 +1327,7 @@ var
         if (c[i].VarPos.MemPos = NullResVar.VarPos.MemPos) then
           c[i] := getStackVar(FParams[i], Offset);
 
-        if (Params[i].ParType in [lptVar, lptOut]) then
+        if (Params[i].ParType in Lape_RefParams) then
           if (not isVariable(c[i])) then
             LapeException(lpeVariableExpected)
           else if c[i].VarPos.isPointer then
@@ -1402,11 +1402,11 @@ var
 
         if (c[i].VarPos.MemPos = mpStack) or (c[i].VarType = nil) then
           LapeException(lpeCannotInvoke, FParams[i].DocPos)
-        else if (Params[i].ParType in [lptVar, lptOut]) and (not isVariable(c[i])) then
+        else if (Params[i].ParType in Lape_RefParams) and (not isVariable(c[i])) then
           LapeException(lpeVariableExpected, FParams[i].DocPos);
 
         if (Params[i].VarType <> nil) and (not Params[i].VarType.Equals(c[i].VarType)) then
-          if (not (Params[i].ParType in [lptVar, lptOut])) and Params[i].VarType.CompatibleWith(c[i].VarType) then
+          if (not (Params[i].ParType in Lape_RefParams)) and Params[i].VarType.CompatibleWith(c[i].VarType) then
           try
             b.VarPos.MemPos := mpVar;
             b.VarType := Params[i].VarType;
@@ -1429,7 +1429,7 @@ var
       if (Res = nil) then
       begin
         setNullResVar(FDest);
-        FCompiler.Emitter._InvokeImportedProc(a, Params.Count * LapeTypeSize[ltPointer], Offset, @Self.DocPos)
+        FCompiler.Emitter._InvokeImportedProc(a, Params.Count * SizeOf(Pointer), Offset, @Self.DocPos)
       end
       else
       begin
@@ -1437,7 +1437,7 @@ var
         if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
           FDest := VarResVar;
         getDestVar(FDest, Result, op_Unknown, FCompiler);
-        FCompiler.Emitter._InvokeImportedFunc(a, Result, Params.Count * LapeTypeSize[ltPointer], Offset, @Self.DocPos)
+        FCompiler.Emitter._InvokeImportedFunc(a, Result, Params.Count * SizeOf(Pointer), Offset, @Self.DocPos)
       end;
     end;
   end;
@@ -1475,7 +1475,7 @@ begin
           if (Params[i].Default <> nil) then
           begin
             c[i] := getResVar(Params[i].Default);
-            if (Params[i].ParType in [lptVar, lptOut]) and (not isVariable(c[i])) then
+            if (Params[i].ParType in Lape_RefParams) and (not isVariable(c[i])) then
               if (FParams[i] <> nil) then
                 LapeException(lpeVariableExpected, FParams[i].DocPos)
               else
@@ -1875,7 +1875,7 @@ begin
   if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
     FDest := VarResVar;
   getDestVar(FDest, Result, op_Unknown, FCompiler);
-  FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!high') as TLapeVar), Result, LapeTypeSize[ltPointer], Offset, @Self.DocPos);
+  FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!high') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
 end;
 
 function TLapeTree_InternalMethod_Length.isConstant: Boolean;
@@ -1962,9 +1962,9 @@ begin
       FDest := VarResVar;
     getDestVar(FDest, Result, op_Unknown, FCompiler);
     if (a.VarType.BaseType in LapeStringTypes) then
-      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!strlen') as TLapeVar), Result, LapeTypeSize[ltPointer], Offset, @Self.DocPos)
+      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!strlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos)
     else
-      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!length') as TLapeVar), Result, LapeTypeSize[ltPointer], Offset, @Self.DocPos);
+      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!length') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
   end;
 end;
 

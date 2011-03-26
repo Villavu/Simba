@@ -31,6 +31,7 @@ type
     case MemPos: TMemoryPos of
       mpVar: (StackVar: TLapeStackVar);
       mpMem: (GlobalVar: TLapeGlobalVar);
+      mpStack: (ForceVariable: Boolean);
   end;
   TResVar = record
     VarType: TLapeType;
@@ -611,10 +612,11 @@ procedure getDestVar(var Dest, Res: TResVar; Op: EOperator; Compiler: TLapeCompi
 function isVariable(v: TResVar): Boolean; {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 const
-  NullResVar: TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpNone; GlobalVar: nil));
-  VarResVar:  TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpVar;  StackVar : nil));
-  StackResVar:TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpStack;StackVar : nil));
+  NullResVar: TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpNone; GlobalVar: nil; ForceVariable: False));
+  VarResVar:  TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpVar;  StackVar : nil; ForceVariable: False));
+  StackResVar:TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpStack;StackVar : nil; ForceVariable: False));
 
+  Lape_RefParams = [lptOut, lptVar];
   Lape_PackRecordsDef = 4;
 
 implementation
@@ -682,7 +684,7 @@ begin
       Result.VarPos.GlobalVar := v as TLapeGlobalVar;
     end;
     if (v is TLapeParameterVar) then
-      Result.VarPos.isPointer := (TLapeParameterVar(v).ParType in [lptVar, lptOut]);
+      Result.VarPos.isPointer := (TLapeParameterVar(v).ParType in Lape_RefParams);
   end;
 end;
 
@@ -711,7 +713,7 @@ end;
 
 function isVariable(v: TResVar): Boolean;
 begin
-  Result := ((v.VarPos.MemPos = mpStack) and v.VarPos.isPointer) or
+  Result := ((v.VarPos.MemPos = mpStack) and (v.VarPos.isPointer or v.VarPos.ForceVariable)) or
     ((v.VarPos.MemPos = mpMem) and (v.VarPos.GlobalVar <> nil) and (not v.VarPos.GlobalVar.isConstant)) or
     ((v.VarPos.MemPos = mpVar) and (v.VarPos.StackVar <> nil) and (not v.VarPos.StackVar.isConstant) {and (not (v.VarPos.StackVar is TLapeStackTempVar))});
 end;
@@ -820,7 +822,7 @@ end;
 
 function TLapeParameterVar.getSize: Integer;
 begin
-  if (FParType in [lptVar, lptOut]) then
+  if (FParType in Lape_RefParams) then
     Result := SizeOf(Pointer)
   else
     Result := inherited;
@@ -833,7 +835,7 @@ end;
 
 function TLapeParameterVar.getFinalization: Boolean;
 begin
-  Result := (not (FParType in [lptVar, lptOut])) and inherited;
+  Result := (not (FParType in Lape_RefParams)) and inherited;
 end;
 
 constructor TLapeParameterVar.Create(AParType: TLapeParameterType; AVarType: TLapeType; AStack: TLapeVarStack; AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil);
@@ -870,7 +872,9 @@ begin
   if Initialize and (FVarType.Size > 0) then
   begin
     {$IFDEF Lape_SmallCode}
-    getMem(FPtr, FVarType.Size);
+    //getMem(FPtr, FVarType.Size);
+    getMem(FBasePtr, FVarType.Size + 4);
+    FPtr := {$IFDEF FPC}Align(FBasePtr, 4){$ELSE}Pointer(PtrUInt(FBasePtr) + PtrUInt(FBasePtr) mod 4){$ENDIF};
     {$ELSE}
     //Assure aligned memory
     getMem(FBasePtr, FVarType.Size + 16);
@@ -892,6 +896,7 @@ begin
   begin
     if (FVarType <> nil) then
       FVarType.Finalize(Self, False);
+
     if (FBasePtr <> nil) then
       FreeMem(FBaseptr)
     else
@@ -1248,15 +1253,21 @@ begin
     if (Left.VarPos.MemPos = mpMem) and (Left.VarPos.GlobalVar <> nil) then
       Result.VarPos.GlobalVar.isConstant := Left.VarPos.GlobalVar.isConstant
     else if (Left.VarPos.MemPos = mpVar) and (Left.VarPos.StackVar <> nil) then
-      Result.VarPos.GlobalVar.isConstant := Left.VarPos.StackVar.isConstant;
+      Result.VarPos.GlobalVar.isConstant := Left.VarPos.StackVar.isConstant
+    else if (Left.VarPos.MemPos = mpStack) then
+      Result.VarPos.GlobalVar.isConstant := not Left.VarPos.ForceVariable;
   end
   else if (Result.VarPos.MemPos = mpVar) and (Result.VarPos.StackVar <> nil) then
   begin
     if (Left.VarPos.MemPos = mpMem) and (Left.VarPos.GlobalVar <> nil) then
       Result.VarPos.StackVar.isConstant := Left.VarPos.GlobalVar.isConstant
     else if (Left.VarPos.MemPos = mpVar) and (Left.VarPos.StackVar <> nil) then
-      Result.VarPos.StackVar.isConstant := Left.VarPos.StackVar.isConstant;
-  end;
+      Result.VarPos.StackVar.isConstant := Left.VarPos.StackVar.isConstant
+    else if (Left.VarPos.MemPos = mpStack) then
+      Result.VarPos.StackVar.isConstant := not Left.VarPos.ForceVariable;
+  end
+  else if (Result.VarPos.MemPos = mpStack) and (Left.VarPos.MemPos = mpStack) and Left.VarPos.ForceVariable then
+    Result.VarPos.ForceVariable := True;
 end;
 
 function TLapeType.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; Pos: PDocPos = nil): TResVar;
@@ -2346,11 +2357,15 @@ begin
 
   if (op = op_Index) then
   try
-    b := ((Left.VarPos.MemPos = mpMem) and (Left.VarPos.GlobalVar <> nil) and Left.VarPos.GlobalVar.isConstant) or ((Left.VarPos.MemPos = mpVar) and (Left.VarPos.StackVar <> nil) and Left.VarPos.StackVar.isConstant);
-    if b and (Left.VarPos.MemPos = mpMem) then
-      Left.VarPos.GlobalVar.isConstant := False
-    else if b and (Left.VarPos.MemPos = mpVar) then
-      Left.VarPos.StackVar.isConstant := False;
+    b := ((Left.VarPos.MemPos = mpMem) and (Left.VarPos.GlobalVar <> nil) and Left.VarPos.GlobalVar.isConstant) or
+      ((Left.VarPos.MemPos = mpVar) and (Left.VarPos.StackVar <> nil) and Left.VarPos.StackVar.isConstant) or
+      ((Left.VarPos.MemPos = mpStack) and (not Left.VarPos.ForceVariable));
+    if b then
+      case Left.VarPos.MemPos of
+        mpMem: Left.VarPos.GlobalVar.isConstant := False;
+        mpVar: Left.VarPos.StackVar.isConstant := False;
+        mpStack: Left.VarPos.ForceVariable := True;
+      end;
 
     t := Eval(op_Addr, a, Left, NullResVar, Offset, Pos);
 
@@ -2385,10 +2400,13 @@ begin
     end;
   finally
     SetNullResVar(t, 1);
-    if b and (Left.VarPos.MemPos = mpMem) then
-      Left.VarPos.GlobalVar.isConstant := False
-    else if b and (Left.VarPos.MemPos = mpVar) then
-      Left.VarPos.StackVar.isConstant := False;
+
+    if b then
+      case Left.VarPos.MemPos of
+        mpMem: Left.VarPos.GlobalVar.isConstant := True;
+        mpVar: Left.VarPos.StackVar.isConstant := True;
+        mpStack: Left.VarPos.ForceVariable := False;
+      end;
   end
   else if (op = op_Assign) and (not (BaseType in LapeStringTypes)) and (Right.VarType <> nil) and CompatibleWith(Right.VarType) then
     if (not NeedInitialization) and Equals(Right.VarType) and (Size in [1, 2, 4, 8]) then
@@ -2914,7 +2932,12 @@ begin
         begin
           Result.VarPos.Offset := Result.VarPos.Offset + FFieldMap[s].Offset;
           Result.VarPos.StackVar.isConstant := Left.VarPos.StackVar.isConstant;
-        end
+        end;
+      mpStack:
+        begin
+          Result.VarPos.Offset := Result.VarPos.Offset - FFieldMap[s].Offset;
+          Result.VarPos.ForceVariable := Left.VarPos.ForceVariable;
+        end;
       else LapeException(lpeImpossible);
     end
   end
@@ -3041,7 +3064,7 @@ begin
     begin
       if (i > 0) then
         FAsString := FAsString + ',';
-      if (FParams[i].ParType in [lptVar, lptOut]) then
+      if (FParams[i].ParType in Lape_RefParams) then
         FAsString := FAsString + '<';
       if (FParams[i].Default <> nil) then
         FAsString := FAsString + '[';
@@ -3051,7 +3074,7 @@ begin
         FAsString := FAsString + FParams[i].VarType.AsString;
       if (FParams[i].Default <> nil) then
         FAsString := FAsString + ']';
-      if (FParams[i].ParType in [lptVar, lptOut]) then
+      if (FParams[i].ParType in Lape_RefParams) then
         FAsString := FAsString + '>';
     end;
 
@@ -3068,7 +3091,7 @@ var
 begin
   Result := 0;
   for i := 0 to FParams.Count - 1 do
-    if (FParams[i].ParType in [lptVar, lptOut]) then
+    if (FParams[i].ParType in Lape_RefParams) then
       Result := Result + SizeOf(Pointer)
     else
       Result := Result + FParams[i].VarType.Size;
@@ -3238,7 +3261,7 @@ begin
           Break
         else if (((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default <> nil)) or ((Params[i].VarType <> nil) and Params[i].VarType.Equals(AParams[i])) then
           c := c - 1
-        else if (Params[i].ParType in [lptVar, lptOut]) then
+        else if (Params[i].ParType in Lape_RefParams) then
           Break
         else if (Params[i].VarType <> nil) and (not Params[i].VarType.CompatibleWith(AParams[i])) then
           Break
