@@ -1320,7 +1320,9 @@ var
           begin
             b.VarPos.MemPos := mpStack;
             b.VarType := FCompiler.getBaseType(ltPointer);
+
             c[i].VarType := b.VarType;
+            c[i].VarPos.isPointer := False;
 
             tmp := c[i];
             c[i] := b.VarType.Eval(op_Assign, e, b, c[i], Offset, @Self.DocPos);
@@ -2304,7 +2306,7 @@ end;
 function TLapeTree_Operator.isConstant: Boolean;
 begin
   Result := ((FLeft = nil) or (not (TLapeTree_Base(FLeft) is TLapeTree_MultiIf))) and (
-    ((FOperatorType in [op_Dot, op_Index]) and (FRight <> nil) and FRight.isConstant()) or
+    ((FOperatorType in [op_Dot, op_Index]) and (FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and (FRight <> nil) and FRight.isConstant()) or
     ((FLeft = nil) or FLeft.isConstant()) and ((FRight = nil) or FRight.isConstant())
   );
 end;

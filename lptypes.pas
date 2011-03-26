@@ -323,7 +323,7 @@ const
     SizeOf(Pointer),
     -1, -1,
     SizeOf(Pointer), -1,
-    SizeOf(UInt32), SizeOf(Pointer)
+    SizeOf(TCodeOffset), SizeOf(Pointer)
   );
 
   LapeIntegerTypes = [Low(LapeIntegerTypeRange)..High(LapeIntegerTypeRange)];

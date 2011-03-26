@@ -1103,57 +1103,59 @@ begin
   if (Op = op_UnaryPlus) then
     Exit(Left);
 
-  if (Right = nil) then
-  begin
-    t := EvalRes(Op);
-    if (op = op_Addr) then
-      Exit(t.NewGlobalVarP(@Left.Ptr))
-    else if (op = op_Deref) then
-      Exit(t.NewGlobalVarP(PPointer(Left.Ptr)^));
-
-    p := getEvalProc(Op, FBaseType, ltUnknown);
-  end
-  else if (op <> op_Assign) or Left.VarType.CompatibleWith(Right.VarType) then
-  begin
-    p := getEvalProc(Op, FBaseType, Right.BaseType);
-    t := EvalRes(Op, Right);
-  end
-  else
-    p := nil;
-
-  if (t = nil) or ({$IFNDEF FPC}@{$ENDIF}p = nil) or ({$IFNDEF FPC}@{$ENDIF}p = {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) then
-    if (op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) then
-      LapeException(lpeIncompatibleAssignment, [Right.VarType.AsString, AsString])
-    else if (not (op in UnaryOperators)) and (Right <> nil) and (Right.VarType <> nil) and (not Left.VarType.Equals(Right.VarType)) then
+  try
+    if (Right = nil) then
     begin
-      if Left.VarType.Equals(Right.VarType) or
-        ((Left.VarType.Size >= Right.VarType.Size) and (not TryCast(True, Result)) and (not TryCast(False, Result))) or
-        ((Left.VarType.Size <  Right.VarType.Size) and (not TryCast(False, Result)) and (not TryCast(True, Result))) then
-      LapeException(lpeIncompatibleOperator2, [LapeOperatorToString(op), AsString, Right.VarType.AsString])
+      t := EvalRes(Op);
+      if (op = op_Addr) then
+        Exit(t.NewGlobalVarP(@Left.Ptr))
+      else if (op = op_Deref) then
+        Exit(t.NewGlobalVarP(PPointer(Left.Ptr)^));
+
+      p := getEvalProc(Op, FBaseType, ltUnknown);
     end
-    else if (op in UnaryOperators) then
-      LapeException(lpeIncompatibleOperator1, [LapeOperatorToString(op), AsString])
+    else if (op <> op_Assign) or Left.VarType.CompatibleWith(Right.VarType) then
+    begin
+      p := getEvalProc(Op, FBaseType, Right.BaseType);
+      t := EvalRes(Op, Right);
+    end
     else
-      LapeException(lpeIncompatibleOperator, [LapeOperatorToString(op)]);
+      p := nil;
 
-  if (Op = op_Assign) then
-  begin
-    if (Right = nil) then
-      LapeException(lpeInvalidAssignment);
-    Result := Left;
-    p(Result.Ptr, Right.Ptr, nil);
-  end
-  else
-  begin
-    Result := t.NewGlobalVarP();
-    if (Right = nil) then
-      p(Result.Ptr, Left.Ptr, nil)
+    if (t = nil) or ({$IFNDEF FPC}@{$ENDIF}p = nil) or ({$IFNDEF FPC}@{$ENDIF}p = {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) then
+      if (op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) then
+        LapeException(lpeIncompatibleAssignment, [Right.VarType.AsString, AsString])
+      else if (not (op in UnaryOperators)) and (Right <> nil) and (Right.VarType <> nil) and (not Left.VarType.Equals(Right.VarType)) then
+      begin
+        if Left.VarType.Equals(Right.VarType) or
+          ((Left.VarType.Size >= Right.VarType.Size) and (not TryCast(True, Result)) and (not TryCast(False, Result))) or
+          ((Left.VarType.Size <  Right.VarType.Size) and (not TryCast(False, Result)) and (not TryCast(True, Result))) then
+        LapeException(lpeIncompatibleOperator2, [LapeOperatorToString(op), AsString, Right.VarType.AsString])
+      end
+      else if (op in UnaryOperators) then
+        LapeException(lpeIncompatibleOperator1, [LapeOperatorToString(op), AsString])
+      else
+        LapeException(lpeIncompatibleOperator, [LapeOperatorToString(op)]);
+
+    if (Op = op_Assign) then
+    begin
+      if (Right = nil) then
+        LapeException(lpeInvalidAssignment);
+      Result := Left;
+      p(Result.Ptr, Right.Ptr, nil);
+    end
     else
-      p(Result.Ptr, Left.Ptr, Right.Ptr);
+    begin
+      Result := t.NewGlobalVarP();
+      if (Right = nil) then
+        p(Result.Ptr, Left.Ptr, nil)
+      else
+        p(Result.Ptr, Left.Ptr, Right.Ptr);
+    end;
+  finally
+    if (op <> op_Assign) and (Result <> nil) and (Left <> nil) then
+      Result.isConstant := Left.isConstant and ((Right = nil) or Right.isConstant);
   end;
-
-  if (Result <> nil) and (Left <> nil) then
-    Result.isConstant := Left.isConstant and ((Right = nil) or (op = op_Assign) or Right.isConstant);
 end;
 
 function TLapeType.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
@@ -2366,7 +2368,14 @@ begin
         mpStack: Left.VarPos.ForceVariable := True;
       end;
 
-    t := Eval(op_Addr, a, Left, NullResVar, Offset, Pos);
+    if (not Left.VarPos.isPointer) then
+      t := Eval(op_Addr, a, Left, NullResVar, Offset, Pos)
+    else
+    begin
+      t := Left;
+      t.VarPos.isPointer := False;
+      t.VarType := FCompiler.getPointerType(PType);
+    end;
 
     if (FRange.Lo = 0) then
       Result := inherited Eval(Op, Dest, t, Right, Offset, Pos)
@@ -2398,7 +2407,8 @@ begin
       Right.VarType := v;
     end;
   finally
-    SetNullResVar(t, 1);
+    if (not Left.VarPos.isPointer) then
+      SetNullResVar(t, 1);
 
     if b then
       case Left.VarPos.MemPos of
@@ -4059,7 +4069,7 @@ begin
       if (FStackInfo.TotalSize > 0) or InFunction then
       begin
         if InFunction and (FStackInfo.TotalNoParamSize <= 0) then
-          Emitter.Delete(FStackInfo.CodePos, ocSize + SizeOf(UInt16), Offset);
+          Emitter.Delete(FStackInfo.CodePos, ocSize + SizeOf(TStackOffset), Offset);
 
         Emitter._DecTry(Offset, Pos);
         Emitter._IncTry(Offset - FStackInfo.CodePos, Try_NoExcept, FStackInfo.CodePos, Pos);
@@ -4102,7 +4112,7 @@ begin
             Emitter._GrowVar(FStackInfo.TotalNoParamSize, FStackInfo.CodePos, Pos);
       end
       else
-        Emitter.Delete(FStackInfo.CodePos, ocSize*2 + SizeOf(UInt16) + SizeOf(TOC_IncTry), Offset);
+        Emitter.Delete(FStackInfo.CodePos, ocSize*2 + SizeOf(TStackOffset) + SizeOf(TOC_IncTry), Offset);
 
     if DoFree then
       FStackInfo.Free();

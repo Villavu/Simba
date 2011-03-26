@@ -1,0 +1,65 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+const
+  size = 100;
+var
+  swaps: Int32 = 0;
+type
+  TData = array [0 ..size - 1] of Int32;
+
+procedure ShowData(d: TData);
+var
+  x: Int32;
+begin
+  WriteLn('Data:');
+  for x := 0 to size - 1 do
+    WriteLn(d[x]);
+end;
+
+procedure ShuffleData(var d: TData);
+var
+  x, tmp, idxa, idxb: Int32;
+begin
+  for x := 0 to size - 1 do
+    d[x] := x;
+
+  for x := 1 to size do
+  begin
+    idxa := Random(0, size - 1);
+    idxb := Random(0, size - 1);
+    tmp := d[idxa];
+    d[idxa] := d[idxb];
+    d[idxb] := tmp;
+  end;
+end;
+
+procedure SelectionSort(var dat: TData);
+var
+  i, j, tmp, minindex, minkey: Int32;
+begin
+  for i := 0 to size - 2 do 
+  begin
+    minindex := i;
+    minkey := dat[i];
+    for j := i + 1 to size - 1 do
+      if dat[j] < minkey then 
+      begin
+        minkey := dat[j];
+        minindex := j;
+      end;
+    tmp := dat[minindex];
+    dat[minindex] := dat[i];
+    dat[i] := tmp;
+    swaps := swaps + 1;
+  end;
+end;
+
+var 
+  data: TData;
+begin
+  ShuffleData(data);
+  SelectionSort(data);
+  //WriteLn('Swaps: ' + IntToStr(swaps));
+  ShowData(data);
+end;
