@@ -21,6 +21,7 @@ type
     ocInitStackLen,                                            //InitStackLen TStackOffset
     ocInitVarLen,                                              //InitVarLen TStackOffset
     ocInitStack,                                               //InitStack TStackOffset
+    ocGrowStack,                                               //GrowStack TStackOffset
     ocExpandVar,                                               //ExpandVar TStackOffset
     ocExpandVarAndInit,                                        //ExpandVarAndInit TStackOffset
     ocGrowVar,                                                 //GrowVar TStackOffset
@@ -68,7 +69,12 @@ const
   Try_NoExcept: UInt32 = UInt32(-2);
   EndJump: TCodePos = TCodePos(-1);
 
+
+  {$IFDEF Lape_UnlimitedStackSize}
+  StackSize = 512 * SizeOf(Pointer); //bytes
+  {$ELSE}
   StackSize = 2048 * SizeOf(Pointer); //bytes
+  {$ENDIF}
 
   {$IFDEF Lape_UnlimitedVarStackSize}
   VarStackSize = 256 * SizeOf(Pointer); //bytes
@@ -203,8 +209,28 @@ var
   end;
 
   procedure DoInitStack; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  var
+    o: TStackOffset;
   begin
-    FillChar(Stack[StackPos], PStackOffset(PtrUInt(Code) + ocSize)^, 0);
+    o := PStackOffset(PtrUInt(Code) + ocSize)^;
+    {$IFDEF Lape_UnlimitedStackSize}
+    if (StackPos + o > Length(VarStack)) then
+      SetLength(Stack, StackPos + o + (StackSize div 2));
+    {$ENDIF}
+    FillChar(Stack[StackPos], o, 0);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
+  end;
+
+  procedure DoGrowStack; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  var
+    o: TStackOffset;
+  begin
+    o := PStackOffset(PtrUInt(Code) + ocSize)^;
+    {$IFDEF Lape_UnlimitedStackSize}
+    if (StackPos + o > Length(VarStack)) then
+      SetLength(Stack, StackPos + o + (StackSize div 2));
+    {$ENDIF}
+    Inc(StackPos, o);
     Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 

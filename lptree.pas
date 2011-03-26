@@ -1097,26 +1097,11 @@ begin
 end;
 
 function TLapeTree_Invoke.isConstant: Boolean;
-var
-  i: Integer;
-  f: TLapeGlobalVar;
 begin
-  Result := False;
   if (FIdent is TLapeTree_VarType) then
     Result := (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) and FParams[0].isConstant()
   else
-  begin
-    f := FIdent.Evaluate();
-    if (f <> nil) and (f.VarType <> nil) and (f.VarType is TLapeType_OverloadedMethod) then
-      f := TLapeType_OverloadedMethod(f.VarType).getMethod(getParamTypes());
-    if (f <> nil) and (f.VarType <> nil) and (f.VarType.BaseType = ltImportedMethod) and (TLapeType_ImportedMethod(f.VarType).Res <> nil) then
-    begin
-      for i := 0 to FParams.Count - 1 do
-        if (not FParams[i].isConstant()) then
-          Exit(False);
-      Result := True;
-    end;
-  end;
+    Result := False;
 end;
 
 function TLapeTree_Invoke.resType: TLapeType;
@@ -1320,7 +1305,8 @@ var
 
     with TLapeType_ScriptMethod(a.VarType) do
     begin
-      FCompiler.Emitter._InitStack(ParamSize, Offset, @Self.DocPos);
+      if ParamInitialization then
+        FCompiler.Emitter._InitStack(ParamSize, Offset, @Self.DocPos);
       for i := 0 to Params.Count - 1 do
       try
         b := NullResVar;

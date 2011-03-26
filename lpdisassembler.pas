@@ -81,6 +81,12 @@ var
     Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
+  procedure DoGrowStack; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    _WriteLn('GrowStack %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);
+    Inc(Code, SizeOf(TStackOffset) + ocSize);
+  end;
+
   procedure DoExpandVar; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
     _WriteLn('ExpandVarStack %d', [PStackOffset(PtrUInt(Code) + ocSize)^]);

@@ -914,8 +914,8 @@ begin
           b := nil;
         end;
 
-        if isConst and (v is TLapeVar) then
-          TLapeVar(v).isConstant := True;
+        if (v is TLapeVar) then
+          TLapeVar(v).isConstant := isConst;
       end;
     until (FTokenizer.PeekNoJunk() <> tk_Identifier);
 
@@ -947,14 +947,13 @@ var
     try
       with OpNode do
       begin
-        if (OperatorType = op_UnaryPlus) then
-          Exit;
         if (not (OperatorType in UnaryOperators)) then
           Right := VarStack.Pop();
         Left := VarStack.Pop();
       end;
       VarStack.Push(OpNode);
     except
+      OpNode.Free();
       LapeException(lpeInvalidEvaluation, OpNode.DocPos);
     end;
   end;
@@ -982,24 +981,33 @@ var
 
   function PushVarStack(Item: TLapeTree_ExprBase): Integer;
   begin
-    if (_LastNode = _Var) then
-      LapeException(lpeOperatorExpected, FTokenizer.DocPos)
-    else
-      _LastNode := _Var;
-    Result := VarStack.Push(Item);
+    try
+      if (_LastNode = _Var) then
+        LapeException(lpeOperatorExpected, FTokenizer.DocPos)
+      else
+        _LastNode := _Var;
+      Result := VarStack.Push(Item);
+    except
+      Item.Free();
+    end;
   end;
 
   function PushOpStack(Item: TLapeTree_Operator): Integer;
   begin
-    if (Item = TLapeTree_Operator(ParenthesisOpen)) or (Item.OperatorType = op_Assign) then
-      _LastNode := _None
-    else if (_LastNode <> _Var) and (not (Item.OperatorType in UnaryOperators)) then
-      LapeException(lpeExpressionExpected, FTokenizer.DocPos)
-    else if (Item.OperatorType = op_Deref) then
-      _LastNode := _Var
-    else
-      _LastNode := _Op;
-    Result := OpStack.Push(Item);
+    try
+      if (Item = TLapeTree_Operator(ParenthesisOpen)) or (Item.OperatorType = op_Assign) then
+        _LastNode := _None
+      else if (_LastNode <> _Var) and (not (Item.OperatorType in UnaryOperators)) then
+        LapeException(lpeExpressionExpected, FTokenizer.DocPos)
+      else if (Item.OperatorType = op_Deref) then
+        _LastNode := _Var
+      else
+        _LastNode := _Op;
+      Result := OpStack.Push(Item);
+    except
+      if (Item <> TLapeTree_Operator(ParenthesisOpen)) then
+        Item.Free();
+    end;
   end;
 
   function getString: lpString;
@@ -1079,13 +1087,16 @@ var
     end;
 
     //Unary minus and double negation
-    if (op = op_Minus) then
+    if (op in [op_Minus, op_Plus]) then
       if (_LastNode = _None) or
            ((FTokenizer.LastTok in ParserToken_Operators) and
-           (OperatorPrecedence[ParserTokenToOperator(FTokenizer.LastTok)] < OperatorPrecedence[op]))
+           (OperatorPrecedence[ParserTokenToOperator(FTokenizer.LastTok)] <> OperatorPrecedence[op]))
       then
-        op := op_UnaryMinus
-      else if (FTokenizer.LastTok in [tk_op_Plus, tk_op_Minus]) then
+        if (op = op_Minus) then
+          op := op_UnaryMinus
+        else
+          Exit
+      else if (op = op_Minus) and (FTokenizer.LastTok in [tk_op_Plus, tk_op_Minus]) then
       begin
         case opStack.Top.OperatorType of
           op_Plus: opStack.Top.OperatorType := op_Minus;
@@ -1095,9 +1106,9 @@ var
         end;
         Exit;
       end;
-    if (op = op_Plus) then
-      if (FTokenizer.LastTok in [tk_NULL, tk_sym_ParenthesisOpen, tk_op_Plus, tk_op_Minus]) then
-        Exit;
+
+    if (op = op_UnaryPlus) then
+      Exit;
 
     if (_LastNode <> _Var) and (not (op in UnaryOperators)) then
       LapeException(lpeExpressionExpected, FTokenizer.DocPos);
