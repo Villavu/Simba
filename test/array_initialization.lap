@@ -1,0 +1,17 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var
+  ai: array [0..1] of Int32 = [789, 123];
+  ai2: array [1..3] of Int32 = [12, 34, 56];
+begin
+  WriteLn(Low(ai));
+  WriteLn(High(ai));
+  WriteLn(ai[0]);
+  WriteLn(ai[1]);
+
+  WriteLn(IntToStr(Low(ai2))+' - '+IntToStr(High(ai2))+' - '+IntToStr(Length(ai2)));
+  WriteLn(ai2[1]);
+  WriteLn(ai2[2]);
+  WriteLn(ai2[3]);
+end;

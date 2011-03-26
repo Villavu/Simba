@@ -2298,7 +2298,6 @@ begin
         Result := inherited EvalConst(Op, l, Right)
       else
       begin
-        l := nil;
         r := nil;
         try
           low := FCompiler.getBaseType(DetermineIntType(FRange.Lo)).NewGlobalVarStr(IntToStr(FRange.Lo));

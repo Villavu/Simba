@@ -169,7 +169,7 @@ var
     while (TryStackPos > 0) and (TryStack[TryStackPos - 1].Jmp < InSafeJump) and (TryStack[TryStackPos - 1].JmpFinally = nil) do
       Dec(TryStackPos);
 
-    if (TryStackPos > 0) and (TryStack[TryStackPos - 1].JmpFinally <> nil) then
+    if (TryStackPos > 0) and (TryStack[TryStackPos - 1].Jmp < InSafeJump) and  (TryStack[TryStackPos - 1].JmpFinally <> nil) then
     begin
       Assert(TryStack[TryStackPos - 1].JmpFinally >= Code);
       Dec(TryStackPos);

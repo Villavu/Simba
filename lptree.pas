@@ -3600,8 +3600,8 @@ begin
       FCompiler.Emitter._IncTry(Offset - o_try, Try_NoFinally, o_try, @DocPos)
     else
       o_except := Offset;
-    FExcept.Compile(Offset);
     FCompiler.Emitter._CatchException(Offset, @FExcept.DocPos);
+    FExcept.Compile(Offset);
     FCompiler.Emitter._JmpR(Offset - o_jmp, o_jmp, @FExcept.DocPos);
   end;
   if (FFinally <> nil) then

@@ -191,6 +191,7 @@ begin
     //Compiler.addGlobalVar(func2.NewGlobalVar(@MyIntToString, 'IntToStr'));
     Compiler.addGlobalFunc('function IntToStr(x: Int32): AnsiString; overload;', @MyIntToString);
     Compiler.addGlobalFunc('function IntToStr(x: Int64 = 123): AnsiString; overload;', @MyInt64ToString);
+    Compiler.addGlobalFunc('procedure MyStupidProc', @MyStupidProc);
     Compiler.addGlobalVar(func3.NewGlobalVar(@MyStringToInt, 'StrToInt'));
 
     Compiler.addGlobalVar(Compiler.addGlobalType('record x, y: Int32; end', 'TPoint'), @tpa[0], 'myPoint');

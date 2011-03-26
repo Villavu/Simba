@@ -1,0 +1,49 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var 
+  i: Int32;
+begin
+  WriteLn('Upward for');
+  for i:=1 to 10 do 
+  begin
+    if (i and 1)=0 then continue;
+    if i>7 then break;
+    WriteLn(i);
+  end;
+
+  WriteLn('Downward for');
+  for i:=10 downto 1 do 
+  begin
+    if (i and 1)=0 then continue;
+    if i<4 then break;
+    WriteLn(i);
+  end;
+
+  WriteLn('While');
+  i:=1;
+  while i<=10 do
+  begin
+    if (i and 1)=0 then 
+    begin
+      i:=i+1;
+      continue;
+    end;
+    if i>7 then break;
+    WriteLn(i);
+    i:=i+1;
+  end;
+
+  WriteLn('Repeat');
+  i:=1;
+  repeat
+    if (i and 1)=0 then 
+    begin
+      i:=i+1;
+      continue;
+   end;
+   if i>7 then break;    
+   WriteLn(i);
+   i:=i+1;
+  until i>10;
+end;
