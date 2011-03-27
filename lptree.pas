@@ -1411,7 +1411,15 @@ var
 
         b.VarPos.MemPos := mpStack;
         b.VarType := Compiler.getBaseType(ltPointer);
-        FCompiler.Emitter._Eval(getEvalProc(op_Addr, ltUnknown, ltUnknown), b, c[i], NullResVar, Offset, @Self.DocPos);
+        if c[i].VarPos.isPointer then
+        begin
+          c[i].VarType := b.VarType;
+          c[i].VarPos.isPointer := False;
+          b.VarType.Eval(op_Assign, e, b, c[i], Offset, @Self.DocPos);
+          c[i].VarPos.isPointer := True;
+        end
+        else
+          FCompiler.Emitter._Eval(getEvalProc(op_Addr, ltUnknown, ltUnknown), b, c[i], NullResVar, Offset, @Self.DocPos);
       end;
 
       if (Res = nil) then
