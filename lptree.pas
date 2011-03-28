@@ -766,14 +766,14 @@ var
   begin
     if (v = nil) then
       Exit(nil)
-    else if (v.BaseType in LapeIntegerTypes) then
+    else if (v.BaseType in LapeIntegerTypes - [ltUInt64, ltInt64]) then
       Result := FCompiler.getBaseType(ltInt32)
-    else if (v.BaseType in LapeRealTypes) then
-      Result := FCompiler.getBaseType(ltExtended)
-    else if (v.BaseType in LapeBoolTypes) then
-      Result := FCompiler.getBaseType(ltBoolean)
-    else if (v.BaseType in LapeStringTypes) then
-      Result := FCompiler.getBaseType(ltString)
+    //else if (v.BaseType in LapeRealTypes) then
+    //  Result := FCompiler.getBaseType(ltExtended)
+    //else if (v.BaseType in LapeBoolTypes) then
+    //  Result := FCompiler.getBaseType(ltBoolean)
+    //else if (v.BaseType in LapeStringTypes) then
+    //  Result := FCompiler.getBaseType(ltString)
     else
       Result := v;
   end;
@@ -807,6 +807,8 @@ begin
         Result := t
       else if (t <> nil) and (Result.BaseType >= t.BaseType) and Result.CompatibleWith(t) then
         {nothing}
+      else if FCompiler.getBaseType(ltVariant).CompatibleWith(t) and FCompiler.getBaseType(ltVariant).CompatibleWith(Result) then
+        Result := FCompiler.getBaseType(ltVariant)
       else
       begin
         Result := nil;
