@@ -22,6 +22,7 @@ type
     tk_Unkown,
     tk_Identifier,
     tk_Comment,
+    tk_Directive,
     tk_WhiteSpace,
     tk_NewLine,
 
@@ -146,6 +147,7 @@ type
     function getState: Pointer; virtual;
     procedure setState(const State: Pointer; FreeState: Boolean = True); virtual;
     function getChar(Offset: Integer = 0): lpChar; virtual; abstract;
+    function TempRollBack: EParserToken; virtual;
 
     function Next: EParserToken; virtual;
     function NextNoWhiteSpace: EParserToken; virtual;
@@ -567,8 +569,13 @@ begin
     '{':
       begin
         Inc(FPos);
-        while (not (CurChar in ['}', #0])) do Inc(FPos);
-        Result := setTok(tk_Comment);
+        if (CurChar <> '$') then
+        begin
+          while (not (CurChar in ['}', #0])) do Inc(FPos);
+          Result := setTok(tk_Comment);
+        end
+        else
+          Result := setTok(tk_Directive);
       end;
 
     //Integer and Float
@@ -790,6 +797,14 @@ begin
   end;
   if FreeState then
     Dispose(PTokenizerState(State));
+end;
+
+function TLapeTokenizerBase.TempRollBack: EParserToken;
+begin
+  Result := FTok;
+  FTok := FLastTok;
+  FLastTok := tk_NULL;
+  FPos := FPos - 1;
 end;
 
 function TLapeTokenizerBase.Next: EParserToken;

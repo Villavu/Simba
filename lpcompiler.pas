@@ -748,7 +748,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     finally
       if (t <> nil) then
       begin
-        FTokenizer.Pos := FTokenizer.TokStart - 1;
+        FTokenizer.TempRollBack();
         t.Free();
       end;
     end;
@@ -989,6 +989,7 @@ var
       Result := VarStack.Push(Item);
     except
       Item.Free();
+      raise;
     end;
   end;
 
@@ -1007,6 +1008,7 @@ var
     except
       if (Item <> TLapeTree_Operator(ParenthesisOpen)) then
         Item.Free();
+      raise;
     end;
   end;
 
