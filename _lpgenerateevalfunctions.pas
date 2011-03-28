@@ -27,8 +27,8 @@ procedure LapePrintEvalRes;
   begin
     Form1.e.Lines.add(s);
   end;
-  function getBoolean(a: Integer): Boolean; begin Result := Boolean(a); end;
-  function Test(a: Boolean): string; overload; begin Result := 'ltBoolean'; end;
+  function getBoolean(a: Boolean): Boolean; begin Result := Boolean(a); end;
+  function Test(a: Boolean): string; overload; begin Result := 'ltEvalBool'; end;
   function getUInt8(a: Integer): UInt8; begin Result := UInt8(a); end;
   function Test(a: UInt8): string; overload; begin Result := 'ltUInt8'; end;
   function getInt8(a: Integer): Int8; begin Result := Int8(a); end;
@@ -45,6 +45,8 @@ procedure LapePrintEvalRes;
   function Test(a: UInt64): string; overload; begin Result := 'ltUInt64'; end;
   function getInt64(a: Integer): Int64; begin Result := Int64(a); end;
   function Test(a: Int64): string; overload; begin Result := 'ltInt64'; end;
+  function getVariant(a: Integer): Variant; begin Result := Variant(a); end;
+  function Test(a: Variant): string; overload; begin Result := 'ltVariant'; end;
   function getSingle(a: Integer): Single; begin Result := Single(a); end;
   function Test(a: Single): string; overload; begin Result := 'ltSingle'; end;
   function getDouble(a: Integer): Double; begin Result := Double(a); end;
@@ -55,7 +57,6 @@ procedure LapePrintEvalRes;
   function Test(a: Extended): string; overload; begin Result := 'ltExtended'; end;
 
 begin
-  DoWrite('Arr[op_cmp_Equal][ltBoolean][ltBoolean] := '+Test(getBoolean(123) = getBoolean(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltUInt8] := '+Test(getUInt8(123) = getUInt8(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltInt8] := '+Test(getUInt8(123) = getInt8(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltUInt16] := '+Test(getUInt8(123) = getUInt16(123))+';');
@@ -64,6 +65,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltInt32] := '+Test(getUInt8(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltUInt64] := '+Test(getUInt8(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltInt64] := '+Test(getUInt8(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltUInt8][ltVariant] := '+Test(getUInt8(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltSingle] := '+Test(getUInt8(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltDouble] := '+Test(getUInt8(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt8][ltCurrency] := '+Test(getUInt8(123) = getCurrency(123))+';');
@@ -76,6 +78,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltInt8][ltInt32] := '+Test(getInt8(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt8][ltUInt64] := '+Test(getInt8(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt8][ltInt64] := '+Test(getInt8(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltInt8][ltVariant] := '+Test(getInt8(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt8][ltSingle] := '+Test(getInt8(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt8][ltDouble] := '+Test(getInt8(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt8][ltCurrency] := '+Test(getInt8(123) = getCurrency(123))+';');
@@ -88,6 +91,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltUInt16][ltInt32] := '+Test(getUInt16(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt16][ltUInt64] := '+Test(getUInt16(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt16][ltInt64] := '+Test(getUInt16(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltUInt16][ltVariant] := '+Test(getUInt16(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt16][ltSingle] := '+Test(getUInt16(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt16][ltDouble] := '+Test(getUInt16(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt16][ltCurrency] := '+Test(getUInt16(123) = getCurrency(123))+';');
@@ -100,6 +104,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltInt16][ltInt32] := '+Test(getInt16(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt16][ltUInt64] := '+Test(getInt16(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt16][ltInt64] := '+Test(getInt16(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltInt16][ltVariant] := '+Test(getInt16(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt16][ltSingle] := '+Test(getInt16(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt16][ltDouble] := '+Test(getInt16(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt16][ltCurrency] := '+Test(getInt16(123) = getCurrency(123))+';');
@@ -112,6 +117,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltUInt32][ltInt32] := '+Test(getUInt32(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt32][ltUInt64] := '+Test(getUInt32(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt32][ltInt64] := '+Test(getUInt32(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltUInt32][ltVariant] := '+Test(getUInt32(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt32][ltSingle] := '+Test(getUInt32(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt32][ltDouble] := '+Test(getUInt32(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt32][ltCurrency] := '+Test(getUInt32(123) = getCurrency(123))+';');
@@ -124,6 +130,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltInt32][ltInt32] := '+Test(getInt32(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt32][ltUInt64] := '+Test(getInt32(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt32][ltInt64] := '+Test(getInt32(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltInt32][ltVariant] := '+Test(getInt32(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt32][ltSingle] := '+Test(getInt32(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt32][ltDouble] := '+Test(getInt32(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt32][ltCurrency] := '+Test(getInt32(123) = getCurrency(123))+';');
@@ -136,6 +143,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltUInt64][ltInt32] := '+Test(getUInt64(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt64][ltUInt64] := '+Test(getUInt64(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt64][ltInt64] := '+Test(getUInt64(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltUInt64][ltVariant] := '+Test(getUInt64(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt64][ltSingle] := '+Test(getUInt64(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt64][ltDouble] := '+Test(getUInt64(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltUInt64][ltCurrency] := '+Test(getUInt64(123) = getCurrency(123))+';');
@@ -148,10 +156,24 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltInt64][ltInt32] := '+Test(getInt64(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt64][ltUInt64] := '+Test(getInt64(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt64][ltInt64] := '+Test(getInt64(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltInt64][ltVariant] := '+Test(getInt64(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt64][ltSingle] := '+Test(getInt64(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt64][ltDouble] := '+Test(getInt64(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt64][ltCurrency] := '+Test(getInt64(123) = getCurrency(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltInt64][ltExtended] := '+Test(getInt64(123) = getExtended(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltUInt8] := '+Test(getVariant(123) = getUInt8(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltInt8] := '+Test(getVariant(123) = getInt8(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltUInt16] := '+Test(getVariant(123) = getUInt16(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltInt16] := '+Test(getVariant(123) = getInt16(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltUInt32] := '+Test(getVariant(123) = getUInt32(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltInt32] := '+Test(getVariant(123) = getInt32(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltUInt64] := '+Test(getVariant(123) = getUInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltInt64] := '+Test(getVariant(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltVariant] := '+Test(getVariant(123) = getVariant(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltSingle] := '+Test(getVariant(123) = getSingle(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltDouble] := '+Test(getVariant(123) = getDouble(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltCurrency] := '+Test(getVariant(123) = getCurrency(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltVariant][ltExtended] := '+Test(getVariant(123) = getExtended(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltUInt8] := '+Test(getSingle(123) = getUInt8(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltInt8] := '+Test(getSingle(123) = getInt8(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltUInt16] := '+Test(getSingle(123) = getUInt16(123))+';');
@@ -160,6 +182,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltInt32] := '+Test(getSingle(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltUInt64] := '+Test(getSingle(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltInt64] := '+Test(getSingle(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltSingle][ltVariant] := '+Test(getSingle(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltSingle] := '+Test(getSingle(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltDouble] := '+Test(getSingle(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltSingle][ltCurrency] := '+Test(getSingle(123) = getCurrency(123))+';');
@@ -172,6 +195,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltDouble][ltInt32] := '+Test(getDouble(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltDouble][ltUInt64] := '+Test(getDouble(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltDouble][ltInt64] := '+Test(getDouble(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltDouble][ltVariant] := '+Test(getDouble(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltDouble][ltSingle] := '+Test(getDouble(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltDouble][ltDouble] := '+Test(getDouble(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltDouble][ltCurrency] := '+Test(getDouble(123) = getCurrency(123))+';');
@@ -184,6 +208,7 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltCurrency][ltInt32] := '+Test(getCurrency(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltCurrency][ltUInt64] := '+Test(getCurrency(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltCurrency][ltInt64] := '+Test(getCurrency(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltCurrency][ltVariant] := '+Test(getCurrency(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltCurrency][ltSingle] := '+Test(getCurrency(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltCurrency][ltDouble] := '+Test(getCurrency(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltCurrency][ltCurrency] := '+Test(getCurrency(123) = getCurrency(123))+';');
@@ -196,11 +221,11 @@ begin
   DoWrite('Arr[op_cmp_Equal][ltExtended][ltInt32] := '+Test(getExtended(123) = getInt32(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltExtended][ltUInt64] := '+Test(getExtended(123) = getUInt64(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltExtended][ltInt64] := '+Test(getExtended(123) = getInt64(123))+';');
+  DoWrite('Arr[op_cmp_Equal][ltExtended][ltVariant] := '+Test(getExtended(123) = getVariant(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltExtended][ltSingle] := '+Test(getExtended(123) = getSingle(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltExtended][ltDouble] := '+Test(getExtended(123) = getDouble(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltExtended][ltCurrency] := '+Test(getExtended(123) = getCurrency(123))+';');
   DoWrite('Arr[op_cmp_Equal][ltExtended][ltExtended] := '+Test(getExtended(123) = getExtended(123))+';');
-  DoWrite('Arr[op_cmp_GreaterThan][ltBoolean][ltBoolean] := '+Test(getBoolean(123) > getBoolean(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltUInt8] := '+Test(getUInt8(123) > getUInt8(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltInt8] := '+Test(getUInt8(123) > getInt8(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltUInt16] := '+Test(getUInt8(123) > getUInt16(123))+';');
@@ -209,6 +234,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltInt32] := '+Test(getUInt8(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltUInt64] := '+Test(getUInt8(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltInt64] := '+Test(getUInt8(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltVariant] := '+Test(getUInt8(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltSingle] := '+Test(getUInt8(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltDouble] := '+Test(getUInt8(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt8][ltCurrency] := '+Test(getUInt8(123) > getCurrency(123))+';');
@@ -221,6 +247,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltInt8][ltInt32] := '+Test(getInt8(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt8][ltUInt64] := '+Test(getInt8(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt8][ltInt64] := '+Test(getInt8(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltInt8][ltVariant] := '+Test(getInt8(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt8][ltSingle] := '+Test(getInt8(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt8][ltDouble] := '+Test(getInt8(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt8][ltCurrency] := '+Test(getInt8(123) > getCurrency(123))+';');
@@ -233,6 +260,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt16][ltInt32] := '+Test(getUInt16(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt16][ltUInt64] := '+Test(getUInt16(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt16][ltInt64] := '+Test(getUInt16(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltUInt16][ltVariant] := '+Test(getUInt16(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt16][ltSingle] := '+Test(getUInt16(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt16][ltDouble] := '+Test(getUInt16(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt16][ltCurrency] := '+Test(getUInt16(123) > getCurrency(123))+';');
@@ -245,6 +273,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltInt16][ltInt32] := '+Test(getInt16(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt16][ltUInt64] := '+Test(getInt16(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt16][ltInt64] := '+Test(getInt16(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltInt16][ltVariant] := '+Test(getInt16(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt16][ltSingle] := '+Test(getInt16(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt16][ltDouble] := '+Test(getInt16(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt16][ltCurrency] := '+Test(getInt16(123) > getCurrency(123))+';');
@@ -257,6 +286,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt32][ltInt32] := '+Test(getUInt32(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt32][ltUInt64] := '+Test(getUInt32(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt32][ltInt64] := '+Test(getUInt32(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltUInt32][ltVariant] := '+Test(getUInt32(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt32][ltSingle] := '+Test(getUInt32(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt32][ltDouble] := '+Test(getUInt32(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt32][ltCurrency] := '+Test(getUInt32(123) > getCurrency(123))+';');
@@ -269,6 +299,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltInt32][ltInt32] := '+Test(getInt32(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt32][ltUInt64] := '+Test(getInt32(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt32][ltInt64] := '+Test(getInt32(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltInt32][ltVariant] := '+Test(getInt32(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt32][ltSingle] := '+Test(getInt32(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt32][ltDouble] := '+Test(getInt32(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt32][ltCurrency] := '+Test(getInt32(123) > getCurrency(123))+';');
@@ -281,6 +312,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt64][ltInt32] := '+Test(getUInt64(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt64][ltUInt64] := '+Test(getUInt64(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt64][ltInt64] := '+Test(getUInt64(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltUInt64][ltVariant] := '+Test(getUInt64(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt64][ltSingle] := '+Test(getUInt64(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt64][ltDouble] := '+Test(getUInt64(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltUInt64][ltCurrency] := '+Test(getUInt64(123) > getCurrency(123))+';');
@@ -293,10 +325,24 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltInt64][ltInt32] := '+Test(getInt64(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt64][ltUInt64] := '+Test(getInt64(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt64][ltInt64] := '+Test(getInt64(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltInt64][ltVariant] := '+Test(getInt64(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt64][ltSingle] := '+Test(getInt64(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt64][ltDouble] := '+Test(getInt64(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt64][ltCurrency] := '+Test(getInt64(123) > getCurrency(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltInt64][ltExtended] := '+Test(getInt64(123) > getExtended(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltUInt8] := '+Test(getVariant(123) > getUInt8(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltInt8] := '+Test(getVariant(123) > getInt8(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltUInt16] := '+Test(getVariant(123) > getUInt16(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltInt16] := '+Test(getVariant(123) > getInt16(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltUInt32] := '+Test(getVariant(123) > getUInt32(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltInt32] := '+Test(getVariant(123) > getInt32(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltUInt64] := '+Test(getVariant(123) > getUInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltInt64] := '+Test(getVariant(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltVariant] := '+Test(getVariant(123) > getVariant(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltSingle] := '+Test(getVariant(123) > getSingle(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltDouble] := '+Test(getVariant(123) > getDouble(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltCurrency] := '+Test(getVariant(123) > getCurrency(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltVariant][ltExtended] := '+Test(getVariant(123) > getExtended(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltUInt8] := '+Test(getSingle(123) > getUInt8(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltInt8] := '+Test(getSingle(123) > getInt8(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltUInt16] := '+Test(getSingle(123) > getUInt16(123))+';');
@@ -305,6 +351,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltInt32] := '+Test(getSingle(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltUInt64] := '+Test(getSingle(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltInt64] := '+Test(getSingle(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltVariant] := '+Test(getSingle(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltSingle] := '+Test(getSingle(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltDouble] := '+Test(getSingle(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltSingle][ltCurrency] := '+Test(getSingle(123) > getCurrency(123))+';');
@@ -317,6 +364,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltDouble][ltInt32] := '+Test(getDouble(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltDouble][ltUInt64] := '+Test(getDouble(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltDouble][ltInt64] := '+Test(getDouble(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltDouble][ltVariant] := '+Test(getDouble(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltDouble][ltSingle] := '+Test(getDouble(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltDouble][ltDouble] := '+Test(getDouble(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltDouble][ltCurrency] := '+Test(getDouble(123) > getCurrency(123))+';');
@@ -329,6 +377,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltCurrency][ltInt32] := '+Test(getCurrency(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltCurrency][ltUInt64] := '+Test(getCurrency(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltCurrency][ltInt64] := '+Test(getCurrency(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltCurrency][ltVariant] := '+Test(getCurrency(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltCurrency][ltSingle] := '+Test(getCurrency(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltCurrency][ltDouble] := '+Test(getCurrency(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltCurrency][ltCurrency] := '+Test(getCurrency(123) > getCurrency(123))+';');
@@ -341,11 +390,11 @@ begin
   DoWrite('Arr[op_cmp_GreaterThan][ltExtended][ltInt32] := '+Test(getExtended(123) > getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltExtended][ltUInt64] := '+Test(getExtended(123) > getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltExtended][ltInt64] := '+Test(getExtended(123) > getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThan][ltExtended][ltVariant] := '+Test(getExtended(123) > getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltExtended][ltSingle] := '+Test(getExtended(123) > getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltExtended][ltDouble] := '+Test(getExtended(123) > getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltExtended][ltCurrency] := '+Test(getExtended(123) > getCurrency(123))+';');
   DoWrite('Arr[op_cmp_GreaterThan][ltExtended][ltExtended] := '+Test(getExtended(123) > getExtended(123))+';');
-  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltBoolean][ltBoolean] := '+Test(getBoolean(123) >= getBoolean(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltUInt8] := '+Test(getUInt8(123) >= getUInt8(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltInt8] := '+Test(getUInt8(123) >= getInt8(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltUInt16] := '+Test(getUInt8(123) >= getUInt16(123))+';');
@@ -354,6 +403,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltInt32] := '+Test(getUInt8(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltUInt64] := '+Test(getUInt8(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltInt64] := '+Test(getUInt8(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltVariant] := '+Test(getUInt8(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltSingle] := '+Test(getUInt8(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltDouble] := '+Test(getUInt8(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt8][ltCurrency] := '+Test(getUInt8(123) >= getCurrency(123))+';');
@@ -366,6 +416,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt8][ltInt32] := '+Test(getInt8(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt8][ltUInt64] := '+Test(getInt8(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt8][ltInt64] := '+Test(getInt8(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt8][ltVariant] := '+Test(getInt8(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt8][ltSingle] := '+Test(getInt8(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt8][ltDouble] := '+Test(getInt8(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt8][ltCurrency] := '+Test(getInt8(123) >= getCurrency(123))+';');
@@ -378,6 +429,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltInt32] := '+Test(getUInt16(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltUInt64] := '+Test(getUInt16(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltInt64] := '+Test(getUInt16(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltVariant] := '+Test(getUInt16(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltSingle] := '+Test(getUInt16(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltDouble] := '+Test(getUInt16(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt16][ltCurrency] := '+Test(getUInt16(123) >= getCurrency(123))+';');
@@ -390,6 +442,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt16][ltInt32] := '+Test(getInt16(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt16][ltUInt64] := '+Test(getInt16(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt16][ltInt64] := '+Test(getInt16(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt16][ltVariant] := '+Test(getInt16(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt16][ltSingle] := '+Test(getInt16(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt16][ltDouble] := '+Test(getInt16(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt16][ltCurrency] := '+Test(getInt16(123) >= getCurrency(123))+';');
@@ -402,6 +455,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt32][ltInt32] := '+Test(getUInt32(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt32][ltUInt64] := '+Test(getUInt32(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt32][ltInt64] := '+Test(getUInt32(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt32][ltVariant] := '+Test(getUInt32(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt32][ltSingle] := '+Test(getUInt32(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt32][ltDouble] := '+Test(getUInt32(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt32][ltCurrency] := '+Test(getUInt32(123) >= getCurrency(123))+';');
@@ -414,6 +468,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt32][ltInt32] := '+Test(getInt32(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt32][ltUInt64] := '+Test(getInt32(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt32][ltInt64] := '+Test(getInt32(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt32][ltVariant] := '+Test(getInt32(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt32][ltSingle] := '+Test(getInt32(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt32][ltDouble] := '+Test(getInt32(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt32][ltCurrency] := '+Test(getInt32(123) >= getCurrency(123))+';');
@@ -426,6 +481,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt64][ltInt32] := '+Test(getUInt64(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt64][ltUInt64] := '+Test(getUInt64(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt64][ltInt64] := '+Test(getUInt64(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt64][ltVariant] := '+Test(getUInt64(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt64][ltSingle] := '+Test(getUInt64(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt64][ltDouble] := '+Test(getUInt64(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltUInt64][ltCurrency] := '+Test(getUInt64(123) >= getCurrency(123))+';');
@@ -438,10 +494,24 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt64][ltInt32] := '+Test(getInt64(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt64][ltUInt64] := '+Test(getInt64(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt64][ltInt64] := '+Test(getInt64(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt64][ltVariant] := '+Test(getInt64(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt64][ltSingle] := '+Test(getInt64(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt64][ltDouble] := '+Test(getInt64(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt64][ltCurrency] := '+Test(getInt64(123) >= getCurrency(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltInt64][ltExtended] := '+Test(getInt64(123) >= getExtended(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltUInt8] := '+Test(getVariant(123) >= getUInt8(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltInt8] := '+Test(getVariant(123) >= getInt8(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltUInt16] := '+Test(getVariant(123) >= getUInt16(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltInt16] := '+Test(getVariant(123) >= getInt16(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltUInt32] := '+Test(getVariant(123) >= getUInt32(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltInt32] := '+Test(getVariant(123) >= getInt32(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltUInt64] := '+Test(getVariant(123) >= getUInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltInt64] := '+Test(getVariant(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltVariant] := '+Test(getVariant(123) >= getVariant(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltSingle] := '+Test(getVariant(123) >= getSingle(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltDouble] := '+Test(getVariant(123) >= getDouble(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltCurrency] := '+Test(getVariant(123) >= getCurrency(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltVariant][ltExtended] := '+Test(getVariant(123) >= getExtended(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltUInt8] := '+Test(getSingle(123) >= getUInt8(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltInt8] := '+Test(getSingle(123) >= getInt8(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltUInt16] := '+Test(getSingle(123) >= getUInt16(123))+';');
@@ -450,6 +520,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltInt32] := '+Test(getSingle(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltUInt64] := '+Test(getSingle(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltInt64] := '+Test(getSingle(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltVariant] := '+Test(getSingle(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltSingle] := '+Test(getSingle(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltDouble] := '+Test(getSingle(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltSingle][ltCurrency] := '+Test(getSingle(123) >= getCurrency(123))+';');
@@ -462,6 +533,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltDouble][ltInt32] := '+Test(getDouble(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltDouble][ltUInt64] := '+Test(getDouble(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltDouble][ltInt64] := '+Test(getDouble(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltDouble][ltVariant] := '+Test(getDouble(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltDouble][ltSingle] := '+Test(getDouble(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltDouble][ltDouble] := '+Test(getDouble(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltDouble][ltCurrency] := '+Test(getDouble(123) >= getCurrency(123))+';');
@@ -474,6 +546,7 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltCurrency][ltInt32] := '+Test(getCurrency(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltCurrency][ltUInt64] := '+Test(getCurrency(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltCurrency][ltInt64] := '+Test(getCurrency(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltCurrency][ltVariant] := '+Test(getCurrency(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltCurrency][ltSingle] := '+Test(getCurrency(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltCurrency][ltDouble] := '+Test(getCurrency(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltCurrency][ltCurrency] := '+Test(getCurrency(123) >= getCurrency(123))+';');
@@ -486,11 +559,11 @@ begin
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltExtended][ltInt32] := '+Test(getExtended(123) >= getInt32(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltExtended][ltUInt64] := '+Test(getExtended(123) >= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltExtended][ltInt64] := '+Test(getExtended(123) >= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltExtended][ltVariant] := '+Test(getExtended(123) >= getVariant(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltExtended][ltSingle] := '+Test(getExtended(123) >= getSingle(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltExtended][ltDouble] := '+Test(getExtended(123) >= getDouble(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltExtended][ltCurrency] := '+Test(getExtended(123) >= getCurrency(123))+';');
   DoWrite('Arr[op_cmp_GreaterThanOrEqual][ltExtended][ltExtended] := '+Test(getExtended(123) >= getExtended(123))+';');
-  DoWrite('Arr[op_cmp_LessThan][ltBoolean][ltBoolean] := '+Test(getBoolean(123) < getBoolean(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltUInt8] := '+Test(getUInt8(123) < getUInt8(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltInt8] := '+Test(getUInt8(123) < getInt8(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltUInt16] := '+Test(getUInt8(123) < getUInt16(123))+';');
@@ -499,6 +572,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltInt32] := '+Test(getUInt8(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltUInt64] := '+Test(getUInt8(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltInt64] := '+Test(getUInt8(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltVariant] := '+Test(getUInt8(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltSingle] := '+Test(getUInt8(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltDouble] := '+Test(getUInt8(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt8][ltCurrency] := '+Test(getUInt8(123) < getCurrency(123))+';');
@@ -511,6 +585,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltInt8][ltInt32] := '+Test(getInt8(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt8][ltUInt64] := '+Test(getInt8(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt8][ltInt64] := '+Test(getInt8(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltInt8][ltVariant] := '+Test(getInt8(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt8][ltSingle] := '+Test(getInt8(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt8][ltDouble] := '+Test(getInt8(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt8][ltCurrency] := '+Test(getInt8(123) < getCurrency(123))+';');
@@ -523,6 +598,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltUInt16][ltInt32] := '+Test(getUInt16(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt16][ltUInt64] := '+Test(getUInt16(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt16][ltInt64] := '+Test(getUInt16(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltUInt16][ltVariant] := '+Test(getUInt16(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt16][ltSingle] := '+Test(getUInt16(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt16][ltDouble] := '+Test(getUInt16(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt16][ltCurrency] := '+Test(getUInt16(123) < getCurrency(123))+';');
@@ -535,6 +611,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltInt16][ltInt32] := '+Test(getInt16(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt16][ltUInt64] := '+Test(getInt16(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt16][ltInt64] := '+Test(getInt16(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltInt16][ltVariant] := '+Test(getInt16(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt16][ltSingle] := '+Test(getInt16(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt16][ltDouble] := '+Test(getInt16(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt16][ltCurrency] := '+Test(getInt16(123) < getCurrency(123))+';');
@@ -547,6 +624,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltUInt32][ltInt32] := '+Test(getUInt32(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt32][ltUInt64] := '+Test(getUInt32(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt32][ltInt64] := '+Test(getUInt32(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltUInt32][ltVariant] := '+Test(getUInt32(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt32][ltSingle] := '+Test(getUInt32(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt32][ltDouble] := '+Test(getUInt32(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt32][ltCurrency] := '+Test(getUInt32(123) < getCurrency(123))+';');
@@ -559,6 +637,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltInt32][ltInt32] := '+Test(getInt32(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt32][ltUInt64] := '+Test(getInt32(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt32][ltInt64] := '+Test(getInt32(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltInt32][ltVariant] := '+Test(getInt32(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt32][ltSingle] := '+Test(getInt32(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt32][ltDouble] := '+Test(getInt32(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt32][ltCurrency] := '+Test(getInt32(123) < getCurrency(123))+';');
@@ -571,6 +650,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltUInt64][ltInt32] := '+Test(getUInt64(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt64][ltUInt64] := '+Test(getUInt64(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt64][ltInt64] := '+Test(getUInt64(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltUInt64][ltVariant] := '+Test(getUInt64(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt64][ltSingle] := '+Test(getUInt64(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt64][ltDouble] := '+Test(getUInt64(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltUInt64][ltCurrency] := '+Test(getUInt64(123) < getCurrency(123))+';');
@@ -583,10 +663,24 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltInt64][ltInt32] := '+Test(getInt64(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt64][ltUInt64] := '+Test(getInt64(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt64][ltInt64] := '+Test(getInt64(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltInt64][ltVariant] := '+Test(getInt64(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt64][ltSingle] := '+Test(getInt64(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt64][ltDouble] := '+Test(getInt64(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt64][ltCurrency] := '+Test(getInt64(123) < getCurrency(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltInt64][ltExtended] := '+Test(getInt64(123) < getExtended(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltUInt8] := '+Test(getVariant(123) < getUInt8(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltInt8] := '+Test(getVariant(123) < getInt8(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltUInt16] := '+Test(getVariant(123) < getUInt16(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltInt16] := '+Test(getVariant(123) < getInt16(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltUInt32] := '+Test(getVariant(123) < getUInt32(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltInt32] := '+Test(getVariant(123) < getInt32(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltUInt64] := '+Test(getVariant(123) < getUInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltInt64] := '+Test(getVariant(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltVariant] := '+Test(getVariant(123) < getVariant(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltSingle] := '+Test(getVariant(123) < getSingle(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltDouble] := '+Test(getVariant(123) < getDouble(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltCurrency] := '+Test(getVariant(123) < getCurrency(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltVariant][ltExtended] := '+Test(getVariant(123) < getExtended(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltUInt8] := '+Test(getSingle(123) < getUInt8(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltInt8] := '+Test(getSingle(123) < getInt8(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltUInt16] := '+Test(getSingle(123) < getUInt16(123))+';');
@@ -595,6 +689,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltInt32] := '+Test(getSingle(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltUInt64] := '+Test(getSingle(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltInt64] := '+Test(getSingle(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltSingle][ltVariant] := '+Test(getSingle(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltSingle] := '+Test(getSingle(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltDouble] := '+Test(getSingle(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltSingle][ltCurrency] := '+Test(getSingle(123) < getCurrency(123))+';');
@@ -607,6 +702,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltDouble][ltInt32] := '+Test(getDouble(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltDouble][ltUInt64] := '+Test(getDouble(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltDouble][ltInt64] := '+Test(getDouble(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltDouble][ltVariant] := '+Test(getDouble(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltDouble][ltSingle] := '+Test(getDouble(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltDouble][ltDouble] := '+Test(getDouble(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltDouble][ltCurrency] := '+Test(getDouble(123) < getCurrency(123))+';');
@@ -619,6 +715,7 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltCurrency][ltInt32] := '+Test(getCurrency(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltCurrency][ltUInt64] := '+Test(getCurrency(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltCurrency][ltInt64] := '+Test(getCurrency(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltCurrency][ltVariant] := '+Test(getCurrency(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltCurrency][ltSingle] := '+Test(getCurrency(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltCurrency][ltDouble] := '+Test(getCurrency(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltCurrency][ltCurrency] := '+Test(getCurrency(123) < getCurrency(123))+';');
@@ -631,11 +728,11 @@ begin
   DoWrite('Arr[op_cmp_LessThan][ltExtended][ltInt32] := '+Test(getExtended(123) < getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltExtended][ltUInt64] := '+Test(getExtended(123) < getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltExtended][ltInt64] := '+Test(getExtended(123) < getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThan][ltExtended][ltVariant] := '+Test(getExtended(123) < getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltExtended][ltSingle] := '+Test(getExtended(123) < getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltExtended][ltDouble] := '+Test(getExtended(123) < getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltExtended][ltCurrency] := '+Test(getExtended(123) < getCurrency(123))+';');
   DoWrite('Arr[op_cmp_LessThan][ltExtended][ltExtended] := '+Test(getExtended(123) < getExtended(123))+';');
-  DoWrite('Arr[op_cmp_LessThanOrEqual][ltBoolean][ltBoolean] := '+Test(getBoolean(123) <= getBoolean(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltUInt8] := '+Test(getUInt8(123) <= getUInt8(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltInt8] := '+Test(getUInt8(123) <= getInt8(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltUInt16] := '+Test(getUInt8(123) <= getUInt16(123))+';');
@@ -644,6 +741,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltInt32] := '+Test(getUInt8(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltUInt64] := '+Test(getUInt8(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltInt64] := '+Test(getUInt8(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltVariant] := '+Test(getUInt8(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltSingle] := '+Test(getUInt8(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltDouble] := '+Test(getUInt8(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt8][ltCurrency] := '+Test(getUInt8(123) <= getCurrency(123))+';');
@@ -656,6 +754,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt8][ltInt32] := '+Test(getInt8(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt8][ltUInt64] := '+Test(getInt8(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt8][ltInt64] := '+Test(getInt8(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt8][ltVariant] := '+Test(getInt8(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt8][ltSingle] := '+Test(getInt8(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt8][ltDouble] := '+Test(getInt8(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt8][ltCurrency] := '+Test(getInt8(123) <= getCurrency(123))+';');
@@ -668,6 +767,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt16][ltInt32] := '+Test(getUInt16(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt16][ltUInt64] := '+Test(getUInt16(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt16][ltInt64] := '+Test(getUInt16(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt16][ltVariant] := '+Test(getUInt16(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt16][ltSingle] := '+Test(getUInt16(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt16][ltDouble] := '+Test(getUInt16(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt16][ltCurrency] := '+Test(getUInt16(123) <= getCurrency(123))+';');
@@ -680,6 +780,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt16][ltInt32] := '+Test(getInt16(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt16][ltUInt64] := '+Test(getInt16(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt16][ltInt64] := '+Test(getInt16(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt16][ltVariant] := '+Test(getInt16(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt16][ltSingle] := '+Test(getInt16(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt16][ltDouble] := '+Test(getInt16(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt16][ltCurrency] := '+Test(getInt16(123) <= getCurrency(123))+';');
@@ -692,6 +793,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt32][ltInt32] := '+Test(getUInt32(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt32][ltUInt64] := '+Test(getUInt32(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt32][ltInt64] := '+Test(getUInt32(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt32][ltVariant] := '+Test(getUInt32(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt32][ltSingle] := '+Test(getUInt32(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt32][ltDouble] := '+Test(getUInt32(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt32][ltCurrency] := '+Test(getUInt32(123) <= getCurrency(123))+';');
@@ -704,6 +806,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt32][ltInt32] := '+Test(getInt32(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt32][ltUInt64] := '+Test(getInt32(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt32][ltInt64] := '+Test(getInt32(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt32][ltVariant] := '+Test(getInt32(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt32][ltSingle] := '+Test(getInt32(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt32][ltDouble] := '+Test(getInt32(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt32][ltCurrency] := '+Test(getInt32(123) <= getCurrency(123))+';');
@@ -716,6 +819,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt64][ltInt32] := '+Test(getUInt64(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt64][ltUInt64] := '+Test(getUInt64(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt64][ltInt64] := '+Test(getUInt64(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt64][ltVariant] := '+Test(getUInt64(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt64][ltSingle] := '+Test(getUInt64(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt64][ltDouble] := '+Test(getUInt64(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltUInt64][ltCurrency] := '+Test(getUInt64(123) <= getCurrency(123))+';');
@@ -728,10 +832,24 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt64][ltInt32] := '+Test(getInt64(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt64][ltUInt64] := '+Test(getInt64(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt64][ltInt64] := '+Test(getInt64(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt64][ltVariant] := '+Test(getInt64(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt64][ltSingle] := '+Test(getInt64(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt64][ltDouble] := '+Test(getInt64(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt64][ltCurrency] := '+Test(getInt64(123) <= getCurrency(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltInt64][ltExtended] := '+Test(getInt64(123) <= getExtended(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltUInt8] := '+Test(getVariant(123) <= getUInt8(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltInt8] := '+Test(getVariant(123) <= getInt8(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltUInt16] := '+Test(getVariant(123) <= getUInt16(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltInt16] := '+Test(getVariant(123) <= getInt16(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltUInt32] := '+Test(getVariant(123) <= getUInt32(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltInt32] := '+Test(getVariant(123) <= getInt32(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltUInt64] := '+Test(getVariant(123) <= getUInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltInt64] := '+Test(getVariant(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltVariant] := '+Test(getVariant(123) <= getVariant(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltSingle] := '+Test(getVariant(123) <= getSingle(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltDouble] := '+Test(getVariant(123) <= getDouble(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltCurrency] := '+Test(getVariant(123) <= getCurrency(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltVariant][ltExtended] := '+Test(getVariant(123) <= getExtended(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltUInt8] := '+Test(getSingle(123) <= getUInt8(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltInt8] := '+Test(getSingle(123) <= getInt8(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltUInt16] := '+Test(getSingle(123) <= getUInt16(123))+';');
@@ -740,6 +858,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltInt32] := '+Test(getSingle(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltUInt64] := '+Test(getSingle(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltInt64] := '+Test(getSingle(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltVariant] := '+Test(getSingle(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltSingle] := '+Test(getSingle(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltDouble] := '+Test(getSingle(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltSingle][ltCurrency] := '+Test(getSingle(123) <= getCurrency(123))+';');
@@ -752,6 +871,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltDouble][ltInt32] := '+Test(getDouble(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltDouble][ltUInt64] := '+Test(getDouble(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltDouble][ltInt64] := '+Test(getDouble(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltDouble][ltVariant] := '+Test(getDouble(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltDouble][ltSingle] := '+Test(getDouble(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltDouble][ltDouble] := '+Test(getDouble(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltDouble][ltCurrency] := '+Test(getDouble(123) <= getCurrency(123))+';');
@@ -764,6 +884,7 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltCurrency][ltInt32] := '+Test(getCurrency(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltCurrency][ltUInt64] := '+Test(getCurrency(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltCurrency][ltInt64] := '+Test(getCurrency(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltCurrency][ltVariant] := '+Test(getCurrency(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltCurrency][ltSingle] := '+Test(getCurrency(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltCurrency][ltDouble] := '+Test(getCurrency(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltCurrency][ltCurrency] := '+Test(getCurrency(123) <= getCurrency(123))+';');
@@ -776,11 +897,11 @@ begin
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltExtended][ltInt32] := '+Test(getExtended(123) <= getInt32(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltExtended][ltUInt64] := '+Test(getExtended(123) <= getUInt64(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltExtended][ltInt64] := '+Test(getExtended(123) <= getInt64(123))+';');
+  DoWrite('Arr[op_cmp_LessThanOrEqual][ltExtended][ltVariant] := '+Test(getExtended(123) <= getVariant(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltExtended][ltSingle] := '+Test(getExtended(123) <= getSingle(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltExtended][ltDouble] := '+Test(getExtended(123) <= getDouble(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltExtended][ltCurrency] := '+Test(getExtended(123) <= getCurrency(123))+';');
   DoWrite('Arr[op_cmp_LessThanOrEqual][ltExtended][ltExtended] := '+Test(getExtended(123) <= getExtended(123))+';');
-  DoWrite('Arr[op_cmp_NotEqual][ltBoolean][ltBoolean] := '+Test(getBoolean(123) <> getBoolean(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltUInt8] := '+Test(getUInt8(123) <> getUInt8(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltInt8] := '+Test(getUInt8(123) <> getInt8(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltUInt16] := '+Test(getUInt8(123) <> getUInt16(123))+';');
@@ -789,6 +910,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltInt32] := '+Test(getUInt8(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltUInt64] := '+Test(getUInt8(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltInt64] := '+Test(getUInt8(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltVariant] := '+Test(getUInt8(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltSingle] := '+Test(getUInt8(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltDouble] := '+Test(getUInt8(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt8][ltCurrency] := '+Test(getUInt8(123) <> getCurrency(123))+';');
@@ -801,6 +923,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltInt8][ltInt32] := '+Test(getInt8(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt8][ltUInt64] := '+Test(getInt8(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt8][ltInt64] := '+Test(getInt8(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltInt8][ltVariant] := '+Test(getInt8(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt8][ltSingle] := '+Test(getInt8(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt8][ltDouble] := '+Test(getInt8(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt8][ltCurrency] := '+Test(getInt8(123) <> getCurrency(123))+';');
@@ -813,6 +936,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltUInt16][ltInt32] := '+Test(getUInt16(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt16][ltUInt64] := '+Test(getUInt16(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt16][ltInt64] := '+Test(getUInt16(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltUInt16][ltVariant] := '+Test(getUInt16(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt16][ltSingle] := '+Test(getUInt16(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt16][ltDouble] := '+Test(getUInt16(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt16][ltCurrency] := '+Test(getUInt16(123) <> getCurrency(123))+';');
@@ -825,6 +949,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltInt16][ltInt32] := '+Test(getInt16(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt16][ltUInt64] := '+Test(getInt16(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt16][ltInt64] := '+Test(getInt16(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltInt16][ltVariant] := '+Test(getInt16(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt16][ltSingle] := '+Test(getInt16(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt16][ltDouble] := '+Test(getInt16(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt16][ltCurrency] := '+Test(getInt16(123) <> getCurrency(123))+';');
@@ -837,6 +962,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltUInt32][ltInt32] := '+Test(getUInt32(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt32][ltUInt64] := '+Test(getUInt32(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt32][ltInt64] := '+Test(getUInt32(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltUInt32][ltVariant] := '+Test(getUInt32(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt32][ltSingle] := '+Test(getUInt32(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt32][ltDouble] := '+Test(getUInt32(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt32][ltCurrency] := '+Test(getUInt32(123) <> getCurrency(123))+';');
@@ -849,6 +975,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltInt32][ltInt32] := '+Test(getInt32(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt32][ltUInt64] := '+Test(getInt32(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt32][ltInt64] := '+Test(getInt32(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltInt32][ltVariant] := '+Test(getInt32(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt32][ltSingle] := '+Test(getInt32(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt32][ltDouble] := '+Test(getInt32(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt32][ltCurrency] := '+Test(getInt32(123) <> getCurrency(123))+';');
@@ -861,6 +988,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltUInt64][ltInt32] := '+Test(getUInt64(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt64][ltUInt64] := '+Test(getUInt64(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt64][ltInt64] := '+Test(getUInt64(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltUInt64][ltVariant] := '+Test(getUInt64(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt64][ltSingle] := '+Test(getUInt64(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt64][ltDouble] := '+Test(getUInt64(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltUInt64][ltCurrency] := '+Test(getUInt64(123) <> getCurrency(123))+';');
@@ -873,10 +1001,24 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltInt64][ltInt32] := '+Test(getInt64(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt64][ltUInt64] := '+Test(getInt64(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt64][ltInt64] := '+Test(getInt64(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltInt64][ltVariant] := '+Test(getInt64(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt64][ltSingle] := '+Test(getInt64(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt64][ltDouble] := '+Test(getInt64(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt64][ltCurrency] := '+Test(getInt64(123) <> getCurrency(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltInt64][ltExtended] := '+Test(getInt64(123) <> getExtended(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltUInt8] := '+Test(getVariant(123) <> getUInt8(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltInt8] := '+Test(getVariant(123) <> getInt8(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltUInt16] := '+Test(getVariant(123) <> getUInt16(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltInt16] := '+Test(getVariant(123) <> getInt16(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltUInt32] := '+Test(getVariant(123) <> getUInt32(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltInt32] := '+Test(getVariant(123) <> getInt32(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltUInt64] := '+Test(getVariant(123) <> getUInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltInt64] := '+Test(getVariant(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltVariant] := '+Test(getVariant(123) <> getVariant(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltSingle] := '+Test(getVariant(123) <> getSingle(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltDouble] := '+Test(getVariant(123) <> getDouble(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltCurrency] := '+Test(getVariant(123) <> getCurrency(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltVariant][ltExtended] := '+Test(getVariant(123) <> getExtended(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltUInt8] := '+Test(getSingle(123) <> getUInt8(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltInt8] := '+Test(getSingle(123) <> getInt8(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltUInt16] := '+Test(getSingle(123) <> getUInt16(123))+';');
@@ -885,6 +1027,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltInt32] := '+Test(getSingle(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltUInt64] := '+Test(getSingle(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltInt64] := '+Test(getSingle(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltVariant] := '+Test(getSingle(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltSingle] := '+Test(getSingle(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltDouble] := '+Test(getSingle(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltSingle][ltCurrency] := '+Test(getSingle(123) <> getCurrency(123))+';');
@@ -897,6 +1040,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltDouble][ltInt32] := '+Test(getDouble(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltDouble][ltUInt64] := '+Test(getDouble(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltDouble][ltInt64] := '+Test(getDouble(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltDouble][ltVariant] := '+Test(getDouble(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltDouble][ltSingle] := '+Test(getDouble(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltDouble][ltDouble] := '+Test(getDouble(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltDouble][ltCurrency] := '+Test(getDouble(123) <> getCurrency(123))+';');
@@ -909,6 +1053,7 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltCurrency][ltInt32] := '+Test(getCurrency(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltCurrency][ltUInt64] := '+Test(getCurrency(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltCurrency][ltInt64] := '+Test(getCurrency(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltCurrency][ltVariant] := '+Test(getCurrency(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltCurrency][ltSingle] := '+Test(getCurrency(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltCurrency][ltDouble] := '+Test(getCurrency(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltCurrency][ltCurrency] := '+Test(getCurrency(123) <> getCurrency(123))+';');
@@ -921,11 +1066,11 @@ begin
   DoWrite('Arr[op_cmp_NotEqual][ltExtended][ltInt32] := '+Test(getExtended(123) <> getInt32(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltExtended][ltUInt64] := '+Test(getExtended(123) <> getUInt64(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltExtended][ltInt64] := '+Test(getExtended(123) <> getInt64(123))+';');
+  DoWrite('Arr[op_cmp_NotEqual][ltExtended][ltVariant] := '+Test(getExtended(123) <> getVariant(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltExtended][ltSingle] := '+Test(getExtended(123) <> getSingle(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltExtended][ltDouble] := '+Test(getExtended(123) <> getDouble(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltExtended][ltCurrency] := '+Test(getExtended(123) <> getCurrency(123))+';');
   DoWrite('Arr[op_cmp_NotEqual][ltExtended][ltExtended] := '+Test(getExtended(123) <> getExtended(123))+';');
-  //DoWrite('Arr[op_Plus][ltBoolean][ltBoolean] := '+Test(getBoolean(123) + getBoolean(123))+';');
   DoWrite('Arr[op_Plus][ltUInt8][ltUInt8] := '+Test(getUInt8(123) + getUInt8(123))+';');
   DoWrite('Arr[op_Plus][ltUInt8][ltInt8] := '+Test(getUInt8(123) + getInt8(123))+';');
   DoWrite('Arr[op_Plus][ltUInt8][ltUInt16] := '+Test(getUInt8(123) + getUInt16(123))+';');
@@ -934,6 +1079,7 @@ begin
   DoWrite('Arr[op_Plus][ltUInt8][ltInt32] := '+Test(getUInt8(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltUInt8][ltUInt64] := '+Test(getUInt8(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltUInt8][ltInt64] := '+Test(getUInt8(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltUInt8][ltVariant] := '+Test(getUInt8(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltUInt8][ltSingle] := '+Test(getUInt8(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltUInt8][ltDouble] := '+Test(getUInt8(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltUInt8][ltCurrency] := '+Test(getUInt8(123) + getCurrency(123))+';');
@@ -946,6 +1092,7 @@ begin
   DoWrite('Arr[op_Plus][ltInt8][ltInt32] := '+Test(getInt8(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltInt8][ltUInt64] := '+Test(getInt8(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltInt8][ltInt64] := '+Test(getInt8(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltInt8][ltVariant] := '+Test(getInt8(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltInt8][ltSingle] := '+Test(getInt8(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltInt8][ltDouble] := '+Test(getInt8(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltInt8][ltCurrency] := '+Test(getInt8(123) + getCurrency(123))+';');
@@ -958,6 +1105,7 @@ begin
   DoWrite('Arr[op_Plus][ltUInt16][ltInt32] := '+Test(getUInt16(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltUInt16][ltUInt64] := '+Test(getUInt16(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltUInt16][ltInt64] := '+Test(getUInt16(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltUInt16][ltVariant] := '+Test(getUInt16(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltUInt16][ltSingle] := '+Test(getUInt16(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltUInt16][ltDouble] := '+Test(getUInt16(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltUInt16][ltCurrency] := '+Test(getUInt16(123) + getCurrency(123))+';');
@@ -970,6 +1118,7 @@ begin
   DoWrite('Arr[op_Plus][ltInt16][ltInt32] := '+Test(getInt16(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltInt16][ltUInt64] := '+Test(getInt16(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltInt16][ltInt64] := '+Test(getInt16(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltInt16][ltVariant] := '+Test(getInt16(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltInt16][ltSingle] := '+Test(getInt16(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltInt16][ltDouble] := '+Test(getInt16(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltInt16][ltCurrency] := '+Test(getInt16(123) + getCurrency(123))+';');
@@ -982,6 +1131,7 @@ begin
   DoWrite('Arr[op_Plus][ltUInt32][ltInt32] := '+Test(getUInt32(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltUInt32][ltUInt64] := '+Test(getUInt32(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltUInt32][ltInt64] := '+Test(getUInt32(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltUInt32][ltVariant] := '+Test(getUInt32(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltUInt32][ltSingle] := '+Test(getUInt32(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltUInt32][ltDouble] := '+Test(getUInt32(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltUInt32][ltCurrency] := '+Test(getUInt32(123) + getCurrency(123))+';');
@@ -994,6 +1144,7 @@ begin
   DoWrite('Arr[op_Plus][ltInt32][ltInt32] := '+Test(getInt32(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltInt32][ltUInt64] := '+Test(getInt32(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltInt32][ltInt64] := '+Test(getInt32(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltInt32][ltVariant] := '+Test(getInt32(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltInt32][ltSingle] := '+Test(getInt32(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltInt32][ltDouble] := '+Test(getInt32(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltInt32][ltCurrency] := '+Test(getInt32(123) + getCurrency(123))+';');
@@ -1006,6 +1157,7 @@ begin
   DoWrite('Arr[op_Plus][ltUInt64][ltInt32] := '+Test(getUInt64(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltUInt64][ltUInt64] := '+Test(getUInt64(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltUInt64][ltInt64] := '+Test(getUInt64(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltUInt64][ltVariant] := '+Test(getUInt64(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltUInt64][ltSingle] := '+Test(getUInt64(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltUInt64][ltDouble] := '+Test(getUInt64(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltUInt64][ltCurrency] := '+Test(getUInt64(123) + getCurrency(123))+';');
@@ -1018,10 +1170,24 @@ begin
   DoWrite('Arr[op_Plus][ltInt64][ltInt32] := '+Test(getInt64(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltInt64][ltUInt64] := '+Test(getInt64(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltInt64][ltInt64] := '+Test(getInt64(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltInt64][ltVariant] := '+Test(getInt64(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltInt64][ltSingle] := '+Test(getInt64(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltInt64][ltDouble] := '+Test(getInt64(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltInt64][ltCurrency] := '+Test(getInt64(123) + getCurrency(123))+';');
   DoWrite('Arr[op_Plus][ltInt64][ltExtended] := '+Test(getInt64(123) + getExtended(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltUInt8] := '+Test(getVariant(123) + getUInt8(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltInt8] := '+Test(getVariant(123) + getInt8(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltUInt16] := '+Test(getVariant(123) + getUInt16(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltInt16] := '+Test(getVariant(123) + getInt16(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltUInt32] := '+Test(getVariant(123) + getUInt32(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltInt32] := '+Test(getVariant(123) + getInt32(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltUInt64] := '+Test(getVariant(123) + getUInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltInt64] := '+Test(getVariant(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltVariant] := '+Test(getVariant(123) + getVariant(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltSingle] := '+Test(getVariant(123) + getSingle(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltDouble] := '+Test(getVariant(123) + getDouble(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltCurrency] := '+Test(getVariant(123) + getCurrency(123))+';');
+  DoWrite('Arr[op_Plus][ltVariant][ltExtended] := '+Test(getVariant(123) + getExtended(123))+';');
   DoWrite('Arr[op_Plus][ltSingle][ltUInt8] := '+Test(getSingle(123) + getUInt8(123))+';');
   DoWrite('Arr[op_Plus][ltSingle][ltInt8] := '+Test(getSingle(123) + getInt8(123))+';');
   DoWrite('Arr[op_Plus][ltSingle][ltUInt16] := '+Test(getSingle(123) + getUInt16(123))+';');
@@ -1030,6 +1196,7 @@ begin
   DoWrite('Arr[op_Plus][ltSingle][ltInt32] := '+Test(getSingle(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltSingle][ltUInt64] := '+Test(getSingle(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltSingle][ltInt64] := '+Test(getSingle(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltSingle][ltVariant] := '+Test(getSingle(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltSingle][ltSingle] := '+Test(getSingle(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltSingle][ltDouble] := '+Test(getSingle(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltSingle][ltCurrency] := '+Test(getSingle(123) + getCurrency(123))+';');
@@ -1042,6 +1209,7 @@ begin
   DoWrite('Arr[op_Plus][ltDouble][ltInt32] := '+Test(getDouble(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltDouble][ltUInt64] := '+Test(getDouble(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltDouble][ltInt64] := '+Test(getDouble(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltDouble][ltVariant] := '+Test(getDouble(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltDouble][ltSingle] := '+Test(getDouble(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltDouble][ltDouble] := '+Test(getDouble(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltDouble][ltCurrency] := '+Test(getDouble(123) + getCurrency(123))+';');
@@ -1054,6 +1222,7 @@ begin
   DoWrite('Arr[op_Plus][ltCurrency][ltInt32] := '+Test(getCurrency(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltCurrency][ltUInt64] := '+Test(getCurrency(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltCurrency][ltInt64] := '+Test(getCurrency(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltCurrency][ltVariant] := '+Test(getCurrency(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltCurrency][ltSingle] := '+Test(getCurrency(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltCurrency][ltDouble] := '+Test(getCurrency(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltCurrency][ltCurrency] := '+Test(getCurrency(123) + getCurrency(123))+';');
@@ -1066,11 +1235,11 @@ begin
   DoWrite('Arr[op_Plus][ltExtended][ltInt32] := '+Test(getExtended(123) + getInt32(123))+';');
   DoWrite('Arr[op_Plus][ltExtended][ltUInt64] := '+Test(getExtended(123) + getUInt64(123))+';');
   DoWrite('Arr[op_Plus][ltExtended][ltInt64] := '+Test(getExtended(123) + getInt64(123))+';');
+  DoWrite('Arr[op_Plus][ltExtended][ltVariant] := '+Test(getExtended(123) + getVariant(123))+';');
   DoWrite('Arr[op_Plus][ltExtended][ltSingle] := '+Test(getExtended(123) + getSingle(123))+';');
   DoWrite('Arr[op_Plus][ltExtended][ltDouble] := '+Test(getExtended(123) + getDouble(123))+';');
   DoWrite('Arr[op_Plus][ltExtended][ltCurrency] := '+Test(getExtended(123) + getCurrency(123))+';');
   DoWrite('Arr[op_Plus][ltExtended][ltExtended] := '+Test(getExtended(123) + getExtended(123))+';');
-  //DoWrite('Arr[op_Minus][ltBoolean][ltBoolean] := '+Test(getBoolean(123) - getBoolean(123))+';');
   DoWrite('Arr[op_Minus][ltUInt8][ltUInt8] := '+Test(getUInt8(123) - getUInt8(123))+';');
   DoWrite('Arr[op_Minus][ltUInt8][ltInt8] := '+Test(getUInt8(123) - getInt8(123))+';');
   DoWrite('Arr[op_Minus][ltUInt8][ltUInt16] := '+Test(getUInt8(123) - getUInt16(123))+';');
@@ -1079,6 +1248,7 @@ begin
   DoWrite('Arr[op_Minus][ltUInt8][ltInt32] := '+Test(getUInt8(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltUInt8][ltUInt64] := '+Test(getUInt8(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltUInt8][ltInt64] := '+Test(getUInt8(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltUInt8][ltVariant] := '+Test(getUInt8(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltUInt8][ltSingle] := '+Test(getUInt8(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltUInt8][ltDouble] := '+Test(getUInt8(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltUInt8][ltCurrency] := '+Test(getUInt8(123) - getCurrency(123))+';');
@@ -1091,6 +1261,7 @@ begin
   DoWrite('Arr[op_Minus][ltInt8][ltInt32] := '+Test(getInt8(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltInt8][ltUInt64] := '+Test(getInt8(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltInt8][ltInt64] := '+Test(getInt8(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltInt8][ltVariant] := '+Test(getInt8(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltInt8][ltSingle] := '+Test(getInt8(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltInt8][ltDouble] := '+Test(getInt8(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltInt8][ltCurrency] := '+Test(getInt8(123) - getCurrency(123))+';');
@@ -1103,6 +1274,7 @@ begin
   DoWrite('Arr[op_Minus][ltUInt16][ltInt32] := '+Test(getUInt16(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltUInt16][ltUInt64] := '+Test(getUInt16(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltUInt16][ltInt64] := '+Test(getUInt16(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltUInt16][ltVariant] := '+Test(getUInt16(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltUInt16][ltSingle] := '+Test(getUInt16(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltUInt16][ltDouble] := '+Test(getUInt16(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltUInt16][ltCurrency] := '+Test(getUInt16(123) - getCurrency(123))+';');
@@ -1115,6 +1287,7 @@ begin
   DoWrite('Arr[op_Minus][ltInt16][ltInt32] := '+Test(getInt16(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltInt16][ltUInt64] := '+Test(getInt16(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltInt16][ltInt64] := '+Test(getInt16(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltInt16][ltVariant] := '+Test(getInt16(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltInt16][ltSingle] := '+Test(getInt16(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltInt16][ltDouble] := '+Test(getInt16(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltInt16][ltCurrency] := '+Test(getInt16(123) - getCurrency(123))+';');
@@ -1127,6 +1300,7 @@ begin
   DoWrite('Arr[op_Minus][ltUInt32][ltInt32] := '+Test(getUInt32(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltUInt32][ltUInt64] := '+Test(getUInt32(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltUInt32][ltInt64] := '+Test(getUInt32(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltUInt32][ltVariant] := '+Test(getUInt32(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltUInt32][ltSingle] := '+Test(getUInt32(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltUInt32][ltDouble] := '+Test(getUInt32(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltUInt32][ltCurrency] := '+Test(getUInt32(123) - getCurrency(123))+';');
@@ -1139,6 +1313,7 @@ begin
   DoWrite('Arr[op_Minus][ltInt32][ltInt32] := '+Test(getInt32(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltInt32][ltUInt64] := '+Test(getInt32(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltInt32][ltInt64] := '+Test(getInt32(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltInt32][ltVariant] := '+Test(getInt32(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltInt32][ltSingle] := '+Test(getInt32(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltInt32][ltDouble] := '+Test(getInt32(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltInt32][ltCurrency] := '+Test(getInt32(123) - getCurrency(123))+';');
@@ -1151,6 +1326,7 @@ begin
   DoWrite('Arr[op_Minus][ltUInt64][ltInt32] := '+Test(getUInt64(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltUInt64][ltUInt64] := '+Test(getUInt64(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltUInt64][ltInt64] := '+Test(getUInt64(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltUInt64][ltVariant] := '+Test(getUInt64(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltUInt64][ltSingle] := '+Test(getUInt64(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltUInt64][ltDouble] := '+Test(getUInt64(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltUInt64][ltCurrency] := '+Test(getUInt64(123) - getCurrency(123))+';');
@@ -1163,10 +1339,24 @@ begin
   DoWrite('Arr[op_Minus][ltInt64][ltInt32] := '+Test(getInt64(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltInt64][ltUInt64] := '+Test(getInt64(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltInt64][ltInt64] := '+Test(getInt64(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltInt64][ltVariant] := '+Test(getInt64(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltInt64][ltSingle] := '+Test(getInt64(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltInt64][ltDouble] := '+Test(getInt64(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltInt64][ltCurrency] := '+Test(getInt64(123) - getCurrency(123))+';');
   DoWrite('Arr[op_Minus][ltInt64][ltExtended] := '+Test(getInt64(123) - getExtended(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltUInt8] := '+Test(getVariant(123) - getUInt8(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltInt8] := '+Test(getVariant(123) - getInt8(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltUInt16] := '+Test(getVariant(123) - getUInt16(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltInt16] := '+Test(getVariant(123) - getInt16(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltUInt32] := '+Test(getVariant(123) - getUInt32(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltInt32] := '+Test(getVariant(123) - getInt32(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltUInt64] := '+Test(getVariant(123) - getUInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltInt64] := '+Test(getVariant(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltVariant] := '+Test(getVariant(123) - getVariant(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltSingle] := '+Test(getVariant(123) - getSingle(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltDouble] := '+Test(getVariant(123) - getDouble(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltCurrency] := '+Test(getVariant(123) - getCurrency(123))+';');
+  DoWrite('Arr[op_Minus][ltVariant][ltExtended] := '+Test(getVariant(123) - getExtended(123))+';');
   DoWrite('Arr[op_Minus][ltSingle][ltUInt8] := '+Test(getSingle(123) - getUInt8(123))+';');
   DoWrite('Arr[op_Minus][ltSingle][ltInt8] := '+Test(getSingle(123) - getInt8(123))+';');
   DoWrite('Arr[op_Minus][ltSingle][ltUInt16] := '+Test(getSingle(123) - getUInt16(123))+';');
@@ -1175,6 +1365,7 @@ begin
   DoWrite('Arr[op_Minus][ltSingle][ltInt32] := '+Test(getSingle(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltSingle][ltUInt64] := '+Test(getSingle(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltSingle][ltInt64] := '+Test(getSingle(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltSingle][ltVariant] := '+Test(getSingle(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltSingle][ltSingle] := '+Test(getSingle(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltSingle][ltDouble] := '+Test(getSingle(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltSingle][ltCurrency] := '+Test(getSingle(123) - getCurrency(123))+';');
@@ -1187,6 +1378,7 @@ begin
   DoWrite('Arr[op_Minus][ltDouble][ltInt32] := '+Test(getDouble(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltDouble][ltUInt64] := '+Test(getDouble(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltDouble][ltInt64] := '+Test(getDouble(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltDouble][ltVariant] := '+Test(getDouble(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltDouble][ltSingle] := '+Test(getDouble(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltDouble][ltDouble] := '+Test(getDouble(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltDouble][ltCurrency] := '+Test(getDouble(123) - getCurrency(123))+';');
@@ -1199,6 +1391,7 @@ begin
   DoWrite('Arr[op_Minus][ltCurrency][ltInt32] := '+Test(getCurrency(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltCurrency][ltUInt64] := '+Test(getCurrency(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltCurrency][ltInt64] := '+Test(getCurrency(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltCurrency][ltVariant] := '+Test(getCurrency(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltCurrency][ltSingle] := '+Test(getCurrency(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltCurrency][ltDouble] := '+Test(getCurrency(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltCurrency][ltCurrency] := '+Test(getCurrency(123) - getCurrency(123))+';');
@@ -1211,11 +1404,11 @@ begin
   DoWrite('Arr[op_Minus][ltExtended][ltInt32] := '+Test(getExtended(123) - getInt32(123))+';');
   DoWrite('Arr[op_Minus][ltExtended][ltUInt64] := '+Test(getExtended(123) - getUInt64(123))+';');
   DoWrite('Arr[op_Minus][ltExtended][ltInt64] := '+Test(getExtended(123) - getInt64(123))+';');
+  DoWrite('Arr[op_Minus][ltExtended][ltVariant] := '+Test(getExtended(123) - getVariant(123))+';');
   DoWrite('Arr[op_Minus][ltExtended][ltSingle] := '+Test(getExtended(123) - getSingle(123))+';');
   DoWrite('Arr[op_Minus][ltExtended][ltDouble] := '+Test(getExtended(123) - getDouble(123))+';');
   DoWrite('Arr[op_Minus][ltExtended][ltCurrency] := '+Test(getExtended(123) - getCurrency(123))+';');
   DoWrite('Arr[op_Minus][ltExtended][ltExtended] := '+Test(getExtended(123) - getExtended(123))+';');
-  //DoWrite('Arr[op_Multiply][ltBoolean][ltBoolean] := '+Test(getBoolean(123) * getBoolean(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt8][ltUInt8] := '+Test(getUInt8(123) * getUInt8(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt8][ltInt8] := '+Test(getUInt8(123) * getInt8(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt8][ltUInt16] := '+Test(getUInt8(123) * getUInt16(123))+';');
@@ -1224,6 +1417,7 @@ begin
   DoWrite('Arr[op_Multiply][ltUInt8][ltInt32] := '+Test(getUInt8(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt8][ltUInt64] := '+Test(getUInt8(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt8][ltInt64] := '+Test(getUInt8(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltUInt8][ltVariant] := '+Test(getUInt8(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt8][ltSingle] := '+Test(getUInt8(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt8][ltDouble] := '+Test(getUInt8(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt8][ltCurrency] := '+Test(getUInt8(123) * getCurrency(123))+';');
@@ -1236,6 +1430,7 @@ begin
   DoWrite('Arr[op_Multiply][ltInt8][ltInt32] := '+Test(getInt8(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltInt8][ltUInt64] := '+Test(getInt8(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltInt8][ltInt64] := '+Test(getInt8(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltInt8][ltVariant] := '+Test(getInt8(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltInt8][ltSingle] := '+Test(getInt8(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltInt8][ltDouble] := '+Test(getInt8(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltInt8][ltCurrency] := '+Test(getInt8(123) * getCurrency(123))+';');
@@ -1248,6 +1443,7 @@ begin
   DoWrite('Arr[op_Multiply][ltUInt16][ltInt32] := '+Test(getUInt16(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt16][ltUInt64] := '+Test(getUInt16(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt16][ltInt64] := '+Test(getUInt16(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltUInt16][ltVariant] := '+Test(getUInt16(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt16][ltSingle] := '+Test(getUInt16(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt16][ltDouble] := '+Test(getUInt16(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt16][ltCurrency] := '+Test(getUInt16(123) * getCurrency(123))+';');
@@ -1260,6 +1456,7 @@ begin
   DoWrite('Arr[op_Multiply][ltInt16][ltInt32] := '+Test(getInt16(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltInt16][ltUInt64] := '+Test(getInt16(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltInt16][ltInt64] := '+Test(getInt16(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltInt16][ltVariant] := '+Test(getInt16(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltInt16][ltSingle] := '+Test(getInt16(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltInt16][ltDouble] := '+Test(getInt16(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltInt16][ltCurrency] := '+Test(getInt16(123) * getCurrency(123))+';');
@@ -1272,6 +1469,7 @@ begin
   DoWrite('Arr[op_Multiply][ltUInt32][ltInt32] := '+Test(getUInt32(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt32][ltUInt64] := '+Test(getUInt32(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt32][ltInt64] := '+Test(getUInt32(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltUInt32][ltVariant] := '+Test(getUInt32(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt32][ltSingle] := '+Test(getUInt32(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt32][ltDouble] := '+Test(getUInt32(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt32][ltCurrency] := '+Test(getUInt32(123) * getCurrency(123))+';');
@@ -1284,6 +1482,7 @@ begin
   DoWrite('Arr[op_Multiply][ltInt32][ltInt32] := '+Test(getInt32(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltInt32][ltUInt64] := '+Test(getInt32(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltInt32][ltInt64] := '+Test(getInt32(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltInt32][ltVariant] := '+Test(getInt32(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltInt32][ltSingle] := '+Test(getInt32(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltInt32][ltDouble] := '+Test(getInt32(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltInt32][ltCurrency] := '+Test(getInt32(123) * getCurrency(123))+';');
@@ -1296,6 +1495,7 @@ begin
   DoWrite('Arr[op_Multiply][ltUInt64][ltInt32] := '+Test(getUInt64(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt64][ltUInt64] := '+Test(getUInt64(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt64][ltInt64] := '+Test(getUInt64(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltUInt64][ltVariant] := '+Test(getUInt64(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt64][ltSingle] := '+Test(getUInt64(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt64][ltDouble] := '+Test(getUInt64(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltUInt64][ltCurrency] := '+Test(getUInt64(123) * getCurrency(123))+';');
@@ -1308,10 +1508,24 @@ begin
   DoWrite('Arr[op_Multiply][ltInt64][ltInt32] := '+Test(getInt64(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltInt64][ltUInt64] := '+Test(getInt64(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltInt64][ltInt64] := '+Test(getInt64(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltInt64][ltVariant] := '+Test(getInt64(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltInt64][ltSingle] := '+Test(getInt64(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltInt64][ltDouble] := '+Test(getInt64(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltInt64][ltCurrency] := '+Test(getInt64(123) * getCurrency(123))+';');
   DoWrite('Arr[op_Multiply][ltInt64][ltExtended] := '+Test(getInt64(123) * getExtended(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltUInt8] := '+Test(getVariant(123) * getUInt8(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltInt8] := '+Test(getVariant(123) * getInt8(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltUInt16] := '+Test(getVariant(123) * getUInt16(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltInt16] := '+Test(getVariant(123) * getInt16(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltUInt32] := '+Test(getVariant(123) * getUInt32(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltInt32] := '+Test(getVariant(123) * getInt32(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltUInt64] := '+Test(getVariant(123) * getUInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltInt64] := '+Test(getVariant(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltVariant] := '+Test(getVariant(123) * getVariant(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltSingle] := '+Test(getVariant(123) * getSingle(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltDouble] := '+Test(getVariant(123) * getDouble(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltCurrency] := '+Test(getVariant(123) * getCurrency(123))+';');
+  DoWrite('Arr[op_Multiply][ltVariant][ltExtended] := '+Test(getVariant(123) * getExtended(123))+';');
   DoWrite('Arr[op_Multiply][ltSingle][ltUInt8] := '+Test(getSingle(123) * getUInt8(123))+';');
   DoWrite('Arr[op_Multiply][ltSingle][ltInt8] := '+Test(getSingle(123) * getInt8(123))+';');
   DoWrite('Arr[op_Multiply][ltSingle][ltUInt16] := '+Test(getSingle(123) * getUInt16(123))+';');
@@ -1320,6 +1534,7 @@ begin
   DoWrite('Arr[op_Multiply][ltSingle][ltInt32] := '+Test(getSingle(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltSingle][ltUInt64] := '+Test(getSingle(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltSingle][ltInt64] := '+Test(getSingle(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltSingle][ltVariant] := '+Test(getSingle(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltSingle][ltSingle] := '+Test(getSingle(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltSingle][ltDouble] := '+Test(getSingle(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltSingle][ltCurrency] := '+Test(getSingle(123) * getCurrency(123))+';');
@@ -1332,6 +1547,7 @@ begin
   DoWrite('Arr[op_Multiply][ltDouble][ltInt32] := '+Test(getDouble(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltDouble][ltUInt64] := '+Test(getDouble(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltDouble][ltInt64] := '+Test(getDouble(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltDouble][ltVariant] := '+Test(getDouble(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltDouble][ltSingle] := '+Test(getDouble(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltDouble][ltDouble] := '+Test(getDouble(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltDouble][ltCurrency] := '+Test(getDouble(123) * getCurrency(123))+';');
@@ -1344,6 +1560,7 @@ begin
   DoWrite('Arr[op_Multiply][ltCurrency][ltInt32] := '+Test(getCurrency(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltCurrency][ltUInt64] := '+Test(getCurrency(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltCurrency][ltInt64] := '+Test(getCurrency(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltCurrency][ltVariant] := '+Test(getCurrency(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltCurrency][ltSingle] := '+Test(getCurrency(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltCurrency][ltDouble] := '+Test(getCurrency(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltCurrency][ltCurrency] := '+Test(getCurrency(123) * getCurrency(123))+';');
@@ -1356,11 +1573,11 @@ begin
   DoWrite('Arr[op_Multiply][ltExtended][ltInt32] := '+Test(getExtended(123) * getInt32(123))+';');
   DoWrite('Arr[op_Multiply][ltExtended][ltUInt64] := '+Test(getExtended(123) * getUInt64(123))+';');
   DoWrite('Arr[op_Multiply][ltExtended][ltInt64] := '+Test(getExtended(123) * getInt64(123))+';');
+  DoWrite('Arr[op_Multiply][ltExtended][ltVariant] := '+Test(getExtended(123) * getVariant(123))+';');
   DoWrite('Arr[op_Multiply][ltExtended][ltSingle] := '+Test(getExtended(123) * getSingle(123))+';');
   DoWrite('Arr[op_Multiply][ltExtended][ltDouble] := '+Test(getExtended(123) * getDouble(123))+';');
   DoWrite('Arr[op_Multiply][ltExtended][ltCurrency] := '+Test(getExtended(123) * getCurrency(123))+';');
   DoWrite('Arr[op_Multiply][ltExtended][ltExtended] := '+Test(getExtended(123) * getExtended(123))+';');
-  //DoWrite('Arr[op_Divide][ltBoolean][ltBoolean] := '+Test(getBoolean(123) / getBoolean(123))+';');
   DoWrite('Arr[op_Divide][ltUInt8][ltUInt8] := '+Test(getUInt8(123) / getUInt8(123))+';');
   DoWrite('Arr[op_Divide][ltUInt8][ltInt8] := '+Test(getUInt8(123) / getInt8(123))+';');
   DoWrite('Arr[op_Divide][ltUInt8][ltUInt16] := '+Test(getUInt8(123) / getUInt16(123))+';');
@@ -1369,6 +1586,7 @@ begin
   DoWrite('Arr[op_Divide][ltUInt8][ltInt32] := '+Test(getUInt8(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltUInt8][ltUInt64] := '+Test(getUInt8(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltUInt8][ltInt64] := '+Test(getUInt8(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltUInt8][ltVariant] := '+Test(getUInt8(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltUInt8][ltSingle] := '+Test(getUInt8(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltUInt8][ltDouble] := '+Test(getUInt8(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltUInt8][ltCurrency] := '+Test(getUInt8(123) / getCurrency(123))+';');
@@ -1381,6 +1599,7 @@ begin
   DoWrite('Arr[op_Divide][ltInt8][ltInt32] := '+Test(getInt8(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltInt8][ltUInt64] := '+Test(getInt8(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltInt8][ltInt64] := '+Test(getInt8(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltInt8][ltVariant] := '+Test(getInt8(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltInt8][ltSingle] := '+Test(getInt8(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltInt8][ltDouble] := '+Test(getInt8(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltInt8][ltCurrency] := '+Test(getInt8(123) / getCurrency(123))+';');
@@ -1393,6 +1612,7 @@ begin
   DoWrite('Arr[op_Divide][ltUInt16][ltInt32] := '+Test(getUInt16(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltUInt16][ltUInt64] := '+Test(getUInt16(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltUInt16][ltInt64] := '+Test(getUInt16(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltUInt16][ltVariant] := '+Test(getUInt16(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltUInt16][ltSingle] := '+Test(getUInt16(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltUInt16][ltDouble] := '+Test(getUInt16(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltUInt16][ltCurrency] := '+Test(getUInt16(123) / getCurrency(123))+';');
@@ -1405,6 +1625,7 @@ begin
   DoWrite('Arr[op_Divide][ltInt16][ltInt32] := '+Test(getInt16(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltInt16][ltUInt64] := '+Test(getInt16(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltInt16][ltInt64] := '+Test(getInt16(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltInt16][ltVariant] := '+Test(getInt16(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltInt16][ltSingle] := '+Test(getInt16(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltInt16][ltDouble] := '+Test(getInt16(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltInt16][ltCurrency] := '+Test(getInt16(123) / getCurrency(123))+';');
@@ -1417,6 +1638,7 @@ begin
   DoWrite('Arr[op_Divide][ltUInt32][ltInt32] := '+Test(getUInt32(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltUInt32][ltUInt64] := '+Test(getUInt32(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltUInt32][ltInt64] := '+Test(getUInt32(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltUInt32][ltVariant] := '+Test(getUInt32(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltUInt32][ltSingle] := '+Test(getUInt32(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltUInt32][ltDouble] := '+Test(getUInt32(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltUInt32][ltCurrency] := '+Test(getUInt32(123) / getCurrency(123))+';');
@@ -1429,6 +1651,7 @@ begin
   DoWrite('Arr[op_Divide][ltInt32][ltInt32] := '+Test(getInt32(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltInt32][ltUInt64] := '+Test(getInt32(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltInt32][ltInt64] := '+Test(getInt32(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltInt32][ltVariant] := '+Test(getInt32(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltInt32][ltSingle] := '+Test(getInt32(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltInt32][ltDouble] := '+Test(getInt32(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltInt32][ltCurrency] := '+Test(getInt32(123) / getCurrency(123))+';');
@@ -1441,6 +1664,7 @@ begin
   DoWrite('Arr[op_Divide][ltUInt64][ltInt32] := '+Test(getUInt64(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltUInt64][ltUInt64] := '+Test(getUInt64(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltUInt64][ltInt64] := '+Test(getUInt64(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltUInt64][ltVariant] := '+Test(getUInt64(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltUInt64][ltSingle] := '+Test(getUInt64(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltUInt64][ltDouble] := '+Test(getUInt64(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltUInt64][ltCurrency] := '+Test(getUInt64(123) / getCurrency(123))+';');
@@ -1453,10 +1677,24 @@ begin
   DoWrite('Arr[op_Divide][ltInt64][ltInt32] := '+Test(getInt64(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltInt64][ltUInt64] := '+Test(getInt64(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltInt64][ltInt64] := '+Test(getInt64(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltInt64][ltVariant] := '+Test(getInt64(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltInt64][ltSingle] := '+Test(getInt64(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltInt64][ltDouble] := '+Test(getInt64(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltInt64][ltCurrency] := '+Test(getInt64(123) / getCurrency(123))+';');
   DoWrite('Arr[op_Divide][ltInt64][ltExtended] := '+Test(getInt64(123) / getExtended(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltUInt8] := '+Test(getVariant(123) / getUInt8(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltInt8] := '+Test(getVariant(123) / getInt8(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltUInt16] := '+Test(getVariant(123) / getUInt16(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltInt16] := '+Test(getVariant(123) / getInt16(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltUInt32] := '+Test(getVariant(123) / getUInt32(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltInt32] := '+Test(getVariant(123) / getInt32(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltUInt64] := '+Test(getVariant(123) / getUInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltInt64] := '+Test(getVariant(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltVariant] := '+Test(getVariant(123) / getVariant(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltSingle] := '+Test(getVariant(123) / getSingle(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltDouble] := '+Test(getVariant(123) / getDouble(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltCurrency] := '+Test(getVariant(123) / getCurrency(123))+';');
+  DoWrite('Arr[op_Divide][ltVariant][ltExtended] := '+Test(getVariant(123) / getExtended(123))+';');
   DoWrite('Arr[op_Divide][ltSingle][ltUInt8] := '+Test(getSingle(123) / getUInt8(123))+';');
   DoWrite('Arr[op_Divide][ltSingle][ltInt8] := '+Test(getSingle(123) / getInt8(123))+';');
   DoWrite('Arr[op_Divide][ltSingle][ltUInt16] := '+Test(getSingle(123) / getUInt16(123))+';');
@@ -1465,6 +1703,7 @@ begin
   DoWrite('Arr[op_Divide][ltSingle][ltInt32] := '+Test(getSingle(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltSingle][ltUInt64] := '+Test(getSingle(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltSingle][ltInt64] := '+Test(getSingle(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltSingle][ltVariant] := '+Test(getSingle(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltSingle][ltSingle] := '+Test(getSingle(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltSingle][ltDouble] := '+Test(getSingle(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltSingle][ltCurrency] := '+Test(getSingle(123) / getCurrency(123))+';');
@@ -1477,6 +1716,7 @@ begin
   DoWrite('Arr[op_Divide][ltDouble][ltInt32] := '+Test(getDouble(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltDouble][ltUInt64] := '+Test(getDouble(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltDouble][ltInt64] := '+Test(getDouble(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltDouble][ltVariant] := '+Test(getDouble(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltDouble][ltSingle] := '+Test(getDouble(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltDouble][ltDouble] := '+Test(getDouble(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltDouble][ltCurrency] := '+Test(getDouble(123) / getCurrency(123))+';');
@@ -1489,6 +1729,7 @@ begin
   DoWrite('Arr[op_Divide][ltCurrency][ltInt32] := '+Test(getCurrency(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltCurrency][ltUInt64] := '+Test(getCurrency(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltCurrency][ltInt64] := '+Test(getCurrency(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltCurrency][ltVariant] := '+Test(getCurrency(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltCurrency][ltSingle] := '+Test(getCurrency(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltCurrency][ltDouble] := '+Test(getCurrency(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltCurrency][ltCurrency] := '+Test(getCurrency(123) / getCurrency(123))+';');
@@ -1501,11 +1742,11 @@ begin
   DoWrite('Arr[op_Divide][ltExtended][ltInt32] := '+Test(getExtended(123) / getInt32(123))+';');
   DoWrite('Arr[op_Divide][ltExtended][ltUInt64] := '+Test(getExtended(123) / getUInt64(123))+';');
   DoWrite('Arr[op_Divide][ltExtended][ltInt64] := '+Test(getExtended(123) / getInt64(123))+';');
+  DoWrite('Arr[op_Divide][ltExtended][ltVariant] := '+Test(getExtended(123) / getVariant(123))+';');
   DoWrite('Arr[op_Divide][ltExtended][ltSingle] := '+Test(getExtended(123) / getSingle(123))+';');
   DoWrite('Arr[op_Divide][ltExtended][ltDouble] := '+Test(getExtended(123) / getDouble(123))+';');
   DoWrite('Arr[op_Divide][ltExtended][ltCurrency] := '+Test(getExtended(123) / getCurrency(123))+';');
   DoWrite('Arr[op_Divide][ltExtended][ltExtended] := '+Test(getExtended(123) / getExtended(123))+';');
-  DoWrite('Arr[op_AND][ltBoolean][ltBoolean] := '+Test(getBoolean(123) and getBoolean(123))+';');
   DoWrite('Arr[op_AND][ltUInt8][ltUInt8] := '+Test(getUInt8(123) and getUInt8(123))+';');
   DoWrite('Arr[op_AND][ltUInt8][ltInt8] := '+Test(getUInt8(123) and getInt8(123))+';');
   DoWrite('Arr[op_AND][ltUInt8][ltUInt16] := '+Test(getUInt8(123) and getUInt16(123))+';');
@@ -1514,6 +1755,7 @@ begin
   DoWrite('Arr[op_AND][ltUInt8][ltInt32] := '+Test(getUInt8(123) and getInt32(123))+';');
   DoWrite('Arr[op_AND][ltUInt8][ltUInt64] := '+Test(getUInt8(123) and getUInt64(123))+';');
   DoWrite('Arr[op_AND][ltUInt8][ltInt64] := '+Test(getUInt8(123) and getInt64(123))+';');
+  DoWrite('Arr[op_AND][ltUInt8][ltVariant] := '+Test(getUInt8(123) and getVariant(123))+';');
   DoWrite('Arr[op_AND][ltInt8][ltUInt8] := '+Test(getInt8(123) and getUInt8(123))+';');
   DoWrite('Arr[op_AND][ltInt8][ltInt8] := '+Test(getInt8(123) and getInt8(123))+';');
   DoWrite('Arr[op_AND][ltInt8][ltUInt16] := '+Test(getInt8(123) and getUInt16(123))+';');
@@ -1522,6 +1764,7 @@ begin
   DoWrite('Arr[op_AND][ltInt8][ltInt32] := '+Test(getInt8(123) and getInt32(123))+';');
   DoWrite('Arr[op_AND][ltInt8][ltUInt64] := '+Test(getInt8(123) and getUInt64(123))+';');
   DoWrite('Arr[op_AND][ltInt8][ltInt64] := '+Test(getInt8(123) and getInt64(123))+';');
+  DoWrite('Arr[op_AND][ltInt8][ltVariant] := '+Test(getInt8(123) and getVariant(123))+';');
   DoWrite('Arr[op_AND][ltUInt16][ltUInt8] := '+Test(getUInt16(123) and getUInt8(123))+';');
   DoWrite('Arr[op_AND][ltUInt16][ltInt8] := '+Test(getUInt16(123) and getInt8(123))+';');
   DoWrite('Arr[op_AND][ltUInt16][ltUInt16] := '+Test(getUInt16(123) and getUInt16(123))+';');
@@ -1530,6 +1773,7 @@ begin
   DoWrite('Arr[op_AND][ltUInt16][ltInt32] := '+Test(getUInt16(123) and getInt32(123))+';');
   DoWrite('Arr[op_AND][ltUInt16][ltUInt64] := '+Test(getUInt16(123) and getUInt64(123))+';');
   DoWrite('Arr[op_AND][ltUInt16][ltInt64] := '+Test(getUInt16(123) and getInt64(123))+';');
+  DoWrite('Arr[op_AND][ltUInt16][ltVariant] := '+Test(getUInt16(123) and getVariant(123))+';');
   DoWrite('Arr[op_AND][ltInt16][ltUInt8] := '+Test(getInt16(123) and getUInt8(123))+';');
   DoWrite('Arr[op_AND][ltInt16][ltInt8] := '+Test(getInt16(123) and getInt8(123))+';');
   DoWrite('Arr[op_AND][ltInt16][ltUInt16] := '+Test(getInt16(123) and getUInt16(123))+';');
@@ -1538,6 +1782,7 @@ begin
   DoWrite('Arr[op_AND][ltInt16][ltInt32] := '+Test(getInt16(123) and getInt32(123))+';');
   DoWrite('Arr[op_AND][ltInt16][ltUInt64] := '+Test(getInt16(123) and getUInt64(123))+';');
   DoWrite('Arr[op_AND][ltInt16][ltInt64] := '+Test(getInt16(123) and getInt64(123))+';');
+  DoWrite('Arr[op_AND][ltInt16][ltVariant] := '+Test(getInt16(123) and getVariant(123))+';');
   DoWrite('Arr[op_AND][ltUInt32][ltUInt8] := '+Test(getUInt32(123) and getUInt8(123))+';');
   DoWrite('Arr[op_AND][ltUInt32][ltInt8] := '+Test(getUInt32(123) and getInt8(123))+';');
   DoWrite('Arr[op_AND][ltUInt32][ltUInt16] := '+Test(getUInt32(123) and getUInt16(123))+';');
@@ -1546,6 +1791,7 @@ begin
   DoWrite('Arr[op_AND][ltUInt32][ltInt32] := '+Test(getUInt32(123) and getInt32(123))+';');
   DoWrite('Arr[op_AND][ltUInt32][ltUInt64] := '+Test(getUInt32(123) and getUInt64(123))+';');
   DoWrite('Arr[op_AND][ltUInt32][ltInt64] := '+Test(getUInt32(123) and getInt64(123))+';');
+  DoWrite('Arr[op_AND][ltUInt32][ltVariant] := '+Test(getUInt32(123) and getVariant(123))+';');
   DoWrite('Arr[op_AND][ltInt32][ltUInt8] := '+Test(getInt32(123) and getUInt8(123))+';');
   DoWrite('Arr[op_AND][ltInt32][ltInt8] := '+Test(getInt32(123) and getInt8(123))+';');
   DoWrite('Arr[op_AND][ltInt32][ltUInt16] := '+Test(getInt32(123) and getUInt16(123))+';');
@@ -1554,6 +1800,7 @@ begin
   DoWrite('Arr[op_AND][ltInt32][ltInt32] := '+Test(getInt32(123) and getInt32(123))+';');
   DoWrite('Arr[op_AND][ltInt32][ltUInt64] := '+Test(getInt32(123) and getUInt64(123))+';');
   DoWrite('Arr[op_AND][ltInt32][ltInt64] := '+Test(getInt32(123) and getInt64(123))+';');
+  DoWrite('Arr[op_AND][ltInt32][ltVariant] := '+Test(getInt32(123) and getVariant(123))+';');
   DoWrite('Arr[op_AND][ltUInt64][ltUInt8] := '+Test(getUInt64(123) and getUInt8(123))+';');
   DoWrite('Arr[op_AND][ltUInt64][ltInt8] := '+Test(getUInt64(123) and getInt8(123))+';');
   DoWrite('Arr[op_AND][ltUInt64][ltUInt16] := '+Test(getUInt64(123) and getUInt16(123))+';');
@@ -1562,6 +1809,7 @@ begin
   DoWrite('Arr[op_AND][ltUInt64][ltInt32] := '+Test(getUInt64(123) and getInt32(123))+';');
   DoWrite('Arr[op_AND][ltUInt64][ltUInt64] := '+Test(getUInt64(123) and getUInt64(123))+';');
   DoWrite('Arr[op_AND][ltUInt64][ltInt64] := '+Test(getUInt64(123) and getInt64(123))+';');
+  DoWrite('Arr[op_AND][ltUInt64][ltVariant] := '+Test(getUInt64(123) and getVariant(123))+';');
   DoWrite('Arr[op_AND][ltInt64][ltUInt8] := '+Test(getInt64(123) and getUInt8(123))+';');
   DoWrite('Arr[op_AND][ltInt64][ltInt8] := '+Test(getInt64(123) and getInt8(123))+';');
   DoWrite('Arr[op_AND][ltInt64][ltUInt16] := '+Test(getInt64(123) and getUInt16(123))+';');
@@ -1570,7 +1818,16 @@ begin
   DoWrite('Arr[op_AND][ltInt64][ltInt32] := '+Test(getInt64(123) and getInt32(123))+';');
   DoWrite('Arr[op_AND][ltInt64][ltUInt64] := '+Test(getInt64(123) and getUInt64(123))+';');
   DoWrite('Arr[op_AND][ltInt64][ltInt64] := '+Test(getInt64(123) and getInt64(123))+';');
-  DoWrite('Arr[op_OR][ltBoolean][ltBoolean] := '+Test(getBoolean(123) or getBoolean(123))+';');
+  DoWrite('Arr[op_AND][ltInt64][ltVariant] := '+Test(getInt64(123) and getVariant(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltUInt8] := '+Test(getVariant(123) and getUInt8(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltInt8] := '+Test(getVariant(123) and getInt8(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltUInt16] := '+Test(getVariant(123) and getUInt16(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltInt16] := '+Test(getVariant(123) and getInt16(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltUInt32] := '+Test(getVariant(123) and getUInt32(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltInt32] := '+Test(getVariant(123) and getInt32(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltUInt64] := '+Test(getVariant(123) and getUInt64(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltInt64] := '+Test(getVariant(123) and getInt64(123))+';');
+  DoWrite('Arr[op_AND][ltVariant][ltVariant] := '+Test(getVariant(123) and getVariant(123))+';');
   DoWrite('Arr[op_OR][ltUInt8][ltUInt8] := '+Test(getUInt8(123) or getUInt8(123))+';');
   DoWrite('Arr[op_OR][ltUInt8][ltInt8] := '+Test(getUInt8(123) or getInt8(123))+';');
   DoWrite('Arr[op_OR][ltUInt8][ltUInt16] := '+Test(getUInt8(123) or getUInt16(123))+';');
@@ -1579,6 +1836,7 @@ begin
   DoWrite('Arr[op_OR][ltUInt8][ltInt32] := '+Test(getUInt8(123) or getInt32(123))+';');
   DoWrite('Arr[op_OR][ltUInt8][ltUInt64] := '+Test(getUInt8(123) or getUInt64(123))+';');
   DoWrite('Arr[op_OR][ltUInt8][ltInt64] := '+Test(getUInt8(123) or getInt64(123))+';');
+  DoWrite('Arr[op_OR][ltUInt8][ltVariant] := '+Test(getUInt8(123) or getVariant(123))+';');
   DoWrite('Arr[op_OR][ltInt8][ltUInt8] := '+Test(getInt8(123) or getUInt8(123))+';');
   DoWrite('Arr[op_OR][ltInt8][ltInt8] := '+Test(getInt8(123) or getInt8(123))+';');
   DoWrite('Arr[op_OR][ltInt8][ltUInt16] := '+Test(getInt8(123) or getUInt16(123))+';');
@@ -1587,6 +1845,7 @@ begin
   DoWrite('Arr[op_OR][ltInt8][ltInt32] := '+Test(getInt8(123) or getInt32(123))+';');
   DoWrite('Arr[op_OR][ltInt8][ltUInt64] := '+Test(getInt8(123) or getUInt64(123))+';');
   DoWrite('Arr[op_OR][ltInt8][ltInt64] := '+Test(getInt8(123) or getInt64(123))+';');
+  DoWrite('Arr[op_OR][ltInt8][ltVariant] := '+Test(getInt8(123) or getVariant(123))+';');
   DoWrite('Arr[op_OR][ltUInt16][ltUInt8] := '+Test(getUInt16(123) or getUInt8(123))+';');
   DoWrite('Arr[op_OR][ltUInt16][ltInt8] := '+Test(getUInt16(123) or getInt8(123))+';');
   DoWrite('Arr[op_OR][ltUInt16][ltUInt16] := '+Test(getUInt16(123) or getUInt16(123))+';');
@@ -1595,6 +1854,7 @@ begin
   DoWrite('Arr[op_OR][ltUInt16][ltInt32] := '+Test(getUInt16(123) or getInt32(123))+';');
   DoWrite('Arr[op_OR][ltUInt16][ltUInt64] := '+Test(getUInt16(123) or getUInt64(123))+';');
   DoWrite('Arr[op_OR][ltUInt16][ltInt64] := '+Test(getUInt16(123) or getInt64(123))+';');
+  DoWrite('Arr[op_OR][ltUInt16][ltVariant] := '+Test(getUInt16(123) or getVariant(123))+';');
   DoWrite('Arr[op_OR][ltInt16][ltUInt8] := '+Test(getInt16(123) or getUInt8(123))+';');
   DoWrite('Arr[op_OR][ltInt16][ltInt8] := '+Test(getInt16(123) or getInt8(123))+';');
   DoWrite('Arr[op_OR][ltInt16][ltUInt16] := '+Test(getInt16(123) or getUInt16(123))+';');
@@ -1603,6 +1863,7 @@ begin
   DoWrite('Arr[op_OR][ltInt16][ltInt32] := '+Test(getInt16(123) or getInt32(123))+';');
   DoWrite('Arr[op_OR][ltInt16][ltUInt64] := '+Test(getInt16(123) or getUInt64(123))+';');
   DoWrite('Arr[op_OR][ltInt16][ltInt64] := '+Test(getInt16(123) or getInt64(123))+';');
+  DoWrite('Arr[op_OR][ltInt16][ltVariant] := '+Test(getInt16(123) or getVariant(123))+';');
   DoWrite('Arr[op_OR][ltUInt32][ltUInt8] := '+Test(getUInt32(123) or getUInt8(123))+';');
   DoWrite('Arr[op_OR][ltUInt32][ltInt8] := '+Test(getUInt32(123) or getInt8(123))+';');
   DoWrite('Arr[op_OR][ltUInt32][ltUInt16] := '+Test(getUInt32(123) or getUInt16(123))+';');
@@ -1611,6 +1872,7 @@ begin
   DoWrite('Arr[op_OR][ltUInt32][ltInt32] := '+Test(getUInt32(123) or getInt32(123))+';');
   DoWrite('Arr[op_OR][ltUInt32][ltUInt64] := '+Test(getUInt32(123) or getUInt64(123))+';');
   DoWrite('Arr[op_OR][ltUInt32][ltInt64] := '+Test(getUInt32(123) or getInt64(123))+';');
+  DoWrite('Arr[op_OR][ltUInt32][ltVariant] := '+Test(getUInt32(123) or getVariant(123))+';');
   DoWrite('Arr[op_OR][ltInt32][ltUInt8] := '+Test(getInt32(123) or getUInt8(123))+';');
   DoWrite('Arr[op_OR][ltInt32][ltInt8] := '+Test(getInt32(123) or getInt8(123))+';');
   DoWrite('Arr[op_OR][ltInt32][ltUInt16] := '+Test(getInt32(123) or getUInt16(123))+';');
@@ -1619,6 +1881,7 @@ begin
   DoWrite('Arr[op_OR][ltInt32][ltInt32] := '+Test(getInt32(123) or getInt32(123))+';');
   DoWrite('Arr[op_OR][ltInt32][ltUInt64] := '+Test(getInt32(123) or getUInt64(123))+';');
   DoWrite('Arr[op_OR][ltInt32][ltInt64] := '+Test(getInt32(123) or getInt64(123))+';');
+  DoWrite('Arr[op_OR][ltInt32][ltVariant] := '+Test(getInt32(123) or getVariant(123))+';');
   DoWrite('Arr[op_OR][ltUInt64][ltUInt8] := '+Test(getUInt64(123) or getUInt8(123))+';');
   DoWrite('Arr[op_OR][ltUInt64][ltInt8] := '+Test(getUInt64(123) or getInt8(123))+';');
   DoWrite('Arr[op_OR][ltUInt64][ltUInt16] := '+Test(getUInt64(123) or getUInt16(123))+';');
@@ -1627,6 +1890,7 @@ begin
   DoWrite('Arr[op_OR][ltUInt64][ltInt32] := '+Test(getUInt64(123) or getInt32(123))+';');
   DoWrite('Arr[op_OR][ltUInt64][ltUInt64] := '+Test(getUInt64(123) or getUInt64(123))+';');
   DoWrite('Arr[op_OR][ltUInt64][ltInt64] := '+Test(getUInt64(123) or getInt64(123))+';');
+  DoWrite('Arr[op_OR][ltUInt64][ltVariant] := '+Test(getUInt64(123) or getVariant(123))+';');
   DoWrite('Arr[op_OR][ltInt64][ltUInt8] := '+Test(getInt64(123) or getUInt8(123))+';');
   DoWrite('Arr[op_OR][ltInt64][ltInt8] := '+Test(getInt64(123) or getInt8(123))+';');
   DoWrite('Arr[op_OR][ltInt64][ltUInt16] := '+Test(getInt64(123) or getUInt16(123))+';');
@@ -1635,7 +1899,16 @@ begin
   DoWrite('Arr[op_OR][ltInt64][ltInt32] := '+Test(getInt64(123) or getInt32(123))+';');
   DoWrite('Arr[op_OR][ltInt64][ltUInt64] := '+Test(getInt64(123) or getUInt64(123))+';');
   DoWrite('Arr[op_OR][ltInt64][ltInt64] := '+Test(getInt64(123) or getInt64(123))+';');
-  DoWrite('Arr[op_XOR][ltBoolean][ltBoolean] := '+Test(getBoolean(123) xor getBoolean(123))+';');
+  DoWrite('Arr[op_OR][ltInt64][ltVariant] := '+Test(getInt64(123) or getVariant(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltUInt8] := '+Test(getVariant(123) or getUInt8(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltInt8] := '+Test(getVariant(123) or getInt8(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltUInt16] := '+Test(getVariant(123) or getUInt16(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltInt16] := '+Test(getVariant(123) or getInt16(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltUInt32] := '+Test(getVariant(123) or getUInt32(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltInt32] := '+Test(getVariant(123) or getInt32(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltUInt64] := '+Test(getVariant(123) or getUInt64(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltInt64] := '+Test(getVariant(123) or getInt64(123))+';');
+  DoWrite('Arr[op_OR][ltVariant][ltVariant] := '+Test(getVariant(123) or getVariant(123))+';');
   DoWrite('Arr[op_XOR][ltUInt8][ltUInt8] := '+Test(getUInt8(123) xor getUInt8(123))+';');
   DoWrite('Arr[op_XOR][ltUInt8][ltInt8] := '+Test(getUInt8(123) xor getInt8(123))+';');
   DoWrite('Arr[op_XOR][ltUInt8][ltUInt16] := '+Test(getUInt8(123) xor getUInt16(123))+';');
@@ -1644,6 +1917,7 @@ begin
   DoWrite('Arr[op_XOR][ltUInt8][ltInt32] := '+Test(getUInt8(123) xor getInt32(123))+';');
   DoWrite('Arr[op_XOR][ltUInt8][ltUInt64] := '+Test(getUInt8(123) xor getUInt64(123))+';');
   DoWrite('Arr[op_XOR][ltUInt8][ltInt64] := '+Test(getUInt8(123) xor getInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltUInt8][ltVariant] := '+Test(getUInt8(123) xor getVariant(123))+';');
   DoWrite('Arr[op_XOR][ltInt8][ltUInt8] := '+Test(getInt8(123) xor getUInt8(123))+';');
   DoWrite('Arr[op_XOR][ltInt8][ltInt8] := '+Test(getInt8(123) xor getInt8(123))+';');
   DoWrite('Arr[op_XOR][ltInt8][ltUInt16] := '+Test(getInt8(123) xor getUInt16(123))+';');
@@ -1652,6 +1926,7 @@ begin
   DoWrite('Arr[op_XOR][ltInt8][ltInt32] := '+Test(getInt8(123) xor getInt32(123))+';');
   DoWrite('Arr[op_XOR][ltInt8][ltUInt64] := '+Test(getInt8(123) xor getUInt64(123))+';');
   DoWrite('Arr[op_XOR][ltInt8][ltInt64] := '+Test(getInt8(123) xor getInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltInt8][ltVariant] := '+Test(getInt8(123) xor getVariant(123))+';');
   DoWrite('Arr[op_XOR][ltUInt16][ltUInt8] := '+Test(getUInt16(123) xor getUInt8(123))+';');
   DoWrite('Arr[op_XOR][ltUInt16][ltInt8] := '+Test(getUInt16(123) xor getInt8(123))+';');
   DoWrite('Arr[op_XOR][ltUInt16][ltUInt16] := '+Test(getUInt16(123) xor getUInt16(123))+';');
@@ -1660,6 +1935,7 @@ begin
   DoWrite('Arr[op_XOR][ltUInt16][ltInt32] := '+Test(getUInt16(123) xor getInt32(123))+';');
   DoWrite('Arr[op_XOR][ltUInt16][ltUInt64] := '+Test(getUInt16(123) xor getUInt64(123))+';');
   DoWrite('Arr[op_XOR][ltUInt16][ltInt64] := '+Test(getUInt16(123) xor getInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltUInt16][ltVariant] := '+Test(getUInt16(123) xor getVariant(123))+';');
   DoWrite('Arr[op_XOR][ltInt16][ltUInt8] := '+Test(getInt16(123) xor getUInt8(123))+';');
   DoWrite('Arr[op_XOR][ltInt16][ltInt8] := '+Test(getInt16(123) xor getInt8(123))+';');
   DoWrite('Arr[op_XOR][ltInt16][ltUInt16] := '+Test(getInt16(123) xor getUInt16(123))+';');
@@ -1668,6 +1944,7 @@ begin
   DoWrite('Arr[op_XOR][ltInt16][ltInt32] := '+Test(getInt16(123) xor getInt32(123))+';');
   DoWrite('Arr[op_XOR][ltInt16][ltUInt64] := '+Test(getInt16(123) xor getUInt64(123))+';');
   DoWrite('Arr[op_XOR][ltInt16][ltInt64] := '+Test(getInt16(123) xor getInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltInt16][ltVariant] := '+Test(getInt16(123) xor getVariant(123))+';');
   DoWrite('Arr[op_XOR][ltUInt32][ltUInt8] := '+Test(getUInt32(123) xor getUInt8(123))+';');
   DoWrite('Arr[op_XOR][ltUInt32][ltInt8] := '+Test(getUInt32(123) xor getInt8(123))+';');
   DoWrite('Arr[op_XOR][ltUInt32][ltUInt16] := '+Test(getUInt32(123) xor getUInt16(123))+';');
@@ -1676,6 +1953,7 @@ begin
   DoWrite('Arr[op_XOR][ltUInt32][ltInt32] := '+Test(getUInt32(123) xor getInt32(123))+';');
   DoWrite('Arr[op_XOR][ltUInt32][ltUInt64] := '+Test(getUInt32(123) xor getUInt64(123))+';');
   DoWrite('Arr[op_XOR][ltUInt32][ltInt64] := '+Test(getUInt32(123) xor getInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltUInt32][ltVariant] := '+Test(getUInt32(123) xor getVariant(123))+';');
   DoWrite('Arr[op_XOR][ltInt32][ltUInt8] := '+Test(getInt32(123) xor getUInt8(123))+';');
   DoWrite('Arr[op_XOR][ltInt32][ltInt8] := '+Test(getInt32(123) xor getInt8(123))+';');
   DoWrite('Arr[op_XOR][ltInt32][ltUInt16] := '+Test(getInt32(123) xor getUInt16(123))+';');
@@ -1684,6 +1962,7 @@ begin
   DoWrite('Arr[op_XOR][ltInt32][ltInt32] := '+Test(getInt32(123) xor getInt32(123))+';');
   DoWrite('Arr[op_XOR][ltInt32][ltUInt64] := '+Test(getInt32(123) xor getUInt64(123))+';');
   DoWrite('Arr[op_XOR][ltInt32][ltInt64] := '+Test(getInt32(123) xor getInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltInt32][ltVariant] := '+Test(getInt32(123) xor getVariant(123))+';');
   DoWrite('Arr[op_XOR][ltUInt64][ltUInt8] := '+Test(getUInt64(123) xor getUInt8(123))+';');
   DoWrite('Arr[op_XOR][ltUInt64][ltInt8] := '+Test(getUInt64(123) xor getInt8(123))+';');
   DoWrite('Arr[op_XOR][ltUInt64][ltUInt16] := '+Test(getUInt64(123) xor getUInt16(123))+';');
@@ -1692,6 +1971,7 @@ begin
   DoWrite('Arr[op_XOR][ltUInt64][ltInt32] := '+Test(getUInt64(123) xor getInt32(123))+';');
   DoWrite('Arr[op_XOR][ltUInt64][ltUInt64] := '+Test(getUInt64(123) xor getUInt64(123))+';');
   DoWrite('Arr[op_XOR][ltUInt64][ltInt64] := '+Test(getUInt64(123) xor getInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltUInt64][ltVariant] := '+Test(getUInt64(123) xor getVariant(123))+';');
   DoWrite('Arr[op_XOR][ltInt64][ltUInt8] := '+Test(getInt64(123) xor getUInt8(123))+';');
   DoWrite('Arr[op_XOR][ltInt64][ltInt8] := '+Test(getInt64(123) xor getInt8(123))+';');
   DoWrite('Arr[op_XOR][ltInt64][ltUInt16] := '+Test(getInt64(123) xor getUInt16(123))+';');
@@ -1700,7 +1980,16 @@ begin
   DoWrite('Arr[op_XOR][ltInt64][ltInt32] := '+Test(getInt64(123) xor getInt32(123))+';');
   DoWrite('Arr[op_XOR][ltInt64][ltUInt64] := '+Test(getInt64(123) xor getUInt64(123))+';');
   DoWrite('Arr[op_XOR][ltInt64][ltInt64] := '+Test(getInt64(123) xor getInt64(123))+';');
-  //DoWrite('Arr[op_DIV][ltBoolean][ltBoolean] := '+Test(getBoolean(123) div getBoolean(123))+';');
+  DoWrite('Arr[op_XOR][ltInt64][ltVariant] := '+Test(getInt64(123) xor getVariant(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltUInt8] := '+Test(getVariant(123) xor getUInt8(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltInt8] := '+Test(getVariant(123) xor getInt8(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltUInt16] := '+Test(getVariant(123) xor getUInt16(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltInt16] := '+Test(getVariant(123) xor getInt16(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltUInt32] := '+Test(getVariant(123) xor getUInt32(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltInt32] := '+Test(getVariant(123) xor getInt32(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltUInt64] := '+Test(getVariant(123) xor getUInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltInt64] := '+Test(getVariant(123) xor getInt64(123))+';');
+  DoWrite('Arr[op_XOR][ltVariant][ltVariant] := '+Test(getVariant(123) xor getVariant(123))+';');
   DoWrite('Arr[op_DIV][ltUInt8][ltUInt8] := '+Test(getUInt8(123) div getUInt8(123))+';');
   DoWrite('Arr[op_DIV][ltUInt8][ltInt8] := '+Test(getUInt8(123) div getInt8(123))+';');
   DoWrite('Arr[op_DIV][ltUInt8][ltUInt16] := '+Test(getUInt8(123) div getUInt16(123))+';');
@@ -1709,6 +1998,7 @@ begin
   DoWrite('Arr[op_DIV][ltUInt8][ltInt32] := '+Test(getUInt8(123) div getInt32(123))+';');
   DoWrite('Arr[op_DIV][ltUInt8][ltUInt64] := '+Test(getUInt8(123) div getUInt64(123))+';');
   DoWrite('Arr[op_DIV][ltUInt8][ltInt64] := '+Test(getUInt8(123) div getInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltUInt8][ltVariant] := '+Test(getUInt8(123) div getVariant(123))+';');
   DoWrite('Arr[op_DIV][ltInt8][ltUInt8] := '+Test(getInt8(123) div getUInt8(123))+';');
   DoWrite('Arr[op_DIV][ltInt8][ltInt8] := '+Test(getInt8(123) div getInt8(123))+';');
   DoWrite('Arr[op_DIV][ltInt8][ltUInt16] := '+Test(getInt8(123) div getUInt16(123))+';');
@@ -1717,6 +2007,7 @@ begin
   DoWrite('Arr[op_DIV][ltInt8][ltInt32] := '+Test(getInt8(123) div getInt32(123))+';');
   DoWrite('Arr[op_DIV][ltInt8][ltUInt64] := '+Test(getInt8(123) div getUInt64(123))+';');
   DoWrite('Arr[op_DIV][ltInt8][ltInt64] := '+Test(getInt8(123) div getInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltInt8][ltVariant] := '+Test(getInt8(123) div getVariant(123))+';');
   DoWrite('Arr[op_DIV][ltUInt16][ltUInt8] := '+Test(getUInt16(123) div getUInt8(123))+';');
   DoWrite('Arr[op_DIV][ltUInt16][ltInt8] := '+Test(getUInt16(123) div getInt8(123))+';');
   DoWrite('Arr[op_DIV][ltUInt16][ltUInt16] := '+Test(getUInt16(123) div getUInt16(123))+';');
@@ -1725,6 +2016,7 @@ begin
   DoWrite('Arr[op_DIV][ltUInt16][ltInt32] := '+Test(getUInt16(123) div getInt32(123))+';');
   DoWrite('Arr[op_DIV][ltUInt16][ltUInt64] := '+Test(getUInt16(123) div getUInt64(123))+';');
   DoWrite('Arr[op_DIV][ltUInt16][ltInt64] := '+Test(getUInt16(123) div getInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltUInt16][ltVariant] := '+Test(getUInt16(123) div getVariant(123))+';');
   DoWrite('Arr[op_DIV][ltInt16][ltUInt8] := '+Test(getInt16(123) div getUInt8(123))+';');
   DoWrite('Arr[op_DIV][ltInt16][ltInt8] := '+Test(getInt16(123) div getInt8(123))+';');
   DoWrite('Arr[op_DIV][ltInt16][ltUInt16] := '+Test(getInt16(123) div getUInt16(123))+';');
@@ -1733,6 +2025,7 @@ begin
   DoWrite('Arr[op_DIV][ltInt16][ltInt32] := '+Test(getInt16(123) div getInt32(123))+';');
   DoWrite('Arr[op_DIV][ltInt16][ltUInt64] := '+Test(getInt16(123) div getUInt64(123))+';');
   DoWrite('Arr[op_DIV][ltInt16][ltInt64] := '+Test(getInt16(123) div getInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltInt16][ltVariant] := '+Test(getInt16(123) div getVariant(123))+';');
   DoWrite('Arr[op_DIV][ltUInt32][ltUInt8] := '+Test(getUInt32(123) div getUInt8(123))+';');
   DoWrite('Arr[op_DIV][ltUInt32][ltInt8] := '+Test(getUInt32(123) div getInt8(123))+';');
   DoWrite('Arr[op_DIV][ltUInt32][ltUInt16] := '+Test(getUInt32(123) div getUInt16(123))+';');
@@ -1741,6 +2034,7 @@ begin
   DoWrite('Arr[op_DIV][ltUInt32][ltInt32] := '+Test(getUInt32(123) div getInt32(123))+';');
   DoWrite('Arr[op_DIV][ltUInt32][ltUInt64] := '+Test(getUInt32(123) div getUInt64(123))+';');
   DoWrite('Arr[op_DIV][ltUInt32][ltInt64] := '+Test(getUInt32(123) div getInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltUInt32][ltVariant] := '+Test(getUInt32(123) div getVariant(123))+';');
   DoWrite('Arr[op_DIV][ltInt32][ltUInt8] := '+Test(getInt32(123) div getUInt8(123))+';');
   DoWrite('Arr[op_DIV][ltInt32][ltInt8] := '+Test(getInt32(123) div getInt8(123))+';');
   DoWrite('Arr[op_DIV][ltInt32][ltUInt16] := '+Test(getInt32(123) div getUInt16(123))+';');
@@ -1749,6 +2043,7 @@ begin
   DoWrite('Arr[op_DIV][ltInt32][ltInt32] := '+Test(getInt32(123) div getInt32(123))+';');
   DoWrite('Arr[op_DIV][ltInt32][ltUInt64] := '+Test(getInt32(123) div getUInt64(123))+';');
   DoWrite('Arr[op_DIV][ltInt32][ltInt64] := '+Test(getInt32(123) div getInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltInt32][ltVariant] := '+Test(getInt32(123) div getVariant(123))+';');
   DoWrite('Arr[op_DIV][ltUInt64][ltUInt8] := '+Test(getUInt64(123) div getUInt8(123))+';');
   DoWrite('Arr[op_DIV][ltUInt64][ltInt8] := '+Test(getUInt64(123) div getInt8(123))+';');
   DoWrite('Arr[op_DIV][ltUInt64][ltUInt16] := '+Test(getUInt64(123) div getUInt16(123))+';');
@@ -1757,6 +2052,7 @@ begin
   DoWrite('Arr[op_DIV][ltUInt64][ltInt32] := '+Test(getUInt64(123) div getInt32(123))+';');
   DoWrite('Arr[op_DIV][ltUInt64][ltUInt64] := '+Test(getUInt64(123) div getUInt64(123))+';');
   DoWrite('Arr[op_DIV][ltUInt64][ltInt64] := '+Test(getUInt64(123) div getInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltUInt64][ltVariant] := '+Test(getUInt64(123) div getVariant(123))+';');
   DoWrite('Arr[op_DIV][ltInt64][ltUInt8] := '+Test(getInt64(123) div getUInt8(123))+';');
   DoWrite('Arr[op_DIV][ltInt64][ltInt8] := '+Test(getInt64(123) div getInt8(123))+';');
   DoWrite('Arr[op_DIV][ltInt64][ltUInt16] := '+Test(getInt64(123) div getUInt16(123))+';');
@@ -1765,7 +2061,16 @@ begin
   DoWrite('Arr[op_DIV][ltInt64][ltInt32] := '+Test(getInt64(123) div getInt32(123))+';');
   DoWrite('Arr[op_DIV][ltInt64][ltUInt64] := '+Test(getInt64(123) div getUInt64(123))+';');
   DoWrite('Arr[op_DIV][ltInt64][ltInt64] := '+Test(getInt64(123) div getInt64(123))+';');
-  //DoWrite('Arr[op_MOD][ltBoolean][ltBoolean] := '+Test(getBoolean(123) mod getBoolean(123))+';');
+  DoWrite('Arr[op_DIV][ltInt64][ltVariant] := '+Test(getInt64(123) div getVariant(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltUInt8] := '+Test(getVariant(123) div getUInt8(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltInt8] := '+Test(getVariant(123) div getInt8(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltUInt16] := '+Test(getVariant(123) div getUInt16(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltInt16] := '+Test(getVariant(123) div getInt16(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltUInt32] := '+Test(getVariant(123) div getUInt32(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltInt32] := '+Test(getVariant(123) div getInt32(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltUInt64] := '+Test(getVariant(123) div getUInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltInt64] := '+Test(getVariant(123) div getInt64(123))+';');
+  DoWrite('Arr[op_DIV][ltVariant][ltVariant] := '+Test(getVariant(123) div getVariant(123))+';');
   DoWrite('Arr[op_MOD][ltUInt8][ltUInt8] := '+Test(getUInt8(123) mod getUInt8(123))+';');
   DoWrite('Arr[op_MOD][ltUInt8][ltInt8] := '+Test(getUInt8(123) mod getInt8(123))+';');
   DoWrite('Arr[op_MOD][ltUInt8][ltUInt16] := '+Test(getUInt8(123) mod getUInt16(123))+';');
@@ -1774,6 +2079,7 @@ begin
   DoWrite('Arr[op_MOD][ltUInt8][ltInt32] := '+Test(getUInt8(123) mod getInt32(123))+';');
   DoWrite('Arr[op_MOD][ltUInt8][ltUInt64] := '+Test(getUInt8(123) mod getUInt64(123))+';');
   DoWrite('Arr[op_MOD][ltUInt8][ltInt64] := '+Test(getUInt8(123) mod getInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltUInt8][ltVariant] := '+Test(getUInt8(123) mod getVariant(123))+';');
   DoWrite('Arr[op_MOD][ltInt8][ltUInt8] := '+Test(getInt8(123) mod getUInt8(123))+';');
   DoWrite('Arr[op_MOD][ltInt8][ltInt8] := '+Test(getInt8(123) mod getInt8(123))+';');
   DoWrite('Arr[op_MOD][ltInt8][ltUInt16] := '+Test(getInt8(123) mod getUInt16(123))+';');
@@ -1782,6 +2088,7 @@ begin
   DoWrite('Arr[op_MOD][ltInt8][ltInt32] := '+Test(getInt8(123) mod getInt32(123))+';');
   DoWrite('Arr[op_MOD][ltInt8][ltUInt64] := '+Test(getInt8(123) mod getUInt64(123))+';');
   DoWrite('Arr[op_MOD][ltInt8][ltInt64] := '+Test(getInt8(123) mod getInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltInt8][ltVariant] := '+Test(getInt8(123) mod getVariant(123))+';');
   DoWrite('Arr[op_MOD][ltUInt16][ltUInt8] := '+Test(getUInt16(123) mod getUInt8(123))+';');
   DoWrite('Arr[op_MOD][ltUInt16][ltInt8] := '+Test(getUInt16(123) mod getInt8(123))+';');
   DoWrite('Arr[op_MOD][ltUInt16][ltUInt16] := '+Test(getUInt16(123) mod getUInt16(123))+';');
@@ -1790,6 +2097,7 @@ begin
   DoWrite('Arr[op_MOD][ltUInt16][ltInt32] := '+Test(getUInt16(123) mod getInt32(123))+';');
   DoWrite('Arr[op_MOD][ltUInt16][ltUInt64] := '+Test(getUInt16(123) mod getUInt64(123))+';');
   DoWrite('Arr[op_MOD][ltUInt16][ltInt64] := '+Test(getUInt16(123) mod getInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltUInt16][ltVariant] := '+Test(getUInt16(123) mod getVariant(123))+';');
   DoWrite('Arr[op_MOD][ltInt16][ltUInt8] := '+Test(getInt16(123) mod getUInt8(123))+';');
   DoWrite('Arr[op_MOD][ltInt16][ltInt8] := '+Test(getInt16(123) mod getInt8(123))+';');
   DoWrite('Arr[op_MOD][ltInt16][ltUInt16] := '+Test(getInt16(123) mod getUInt16(123))+';');
@@ -1798,6 +2106,7 @@ begin
   DoWrite('Arr[op_MOD][ltInt16][ltInt32] := '+Test(getInt16(123) mod getInt32(123))+';');
   DoWrite('Arr[op_MOD][ltInt16][ltUInt64] := '+Test(getInt16(123) mod getUInt64(123))+';');
   DoWrite('Arr[op_MOD][ltInt16][ltInt64] := '+Test(getInt16(123) mod getInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltInt16][ltVariant] := '+Test(getInt16(123) mod getVariant(123))+';');
   DoWrite('Arr[op_MOD][ltUInt32][ltUInt8] := '+Test(getUInt32(123) mod getUInt8(123))+';');
   DoWrite('Arr[op_MOD][ltUInt32][ltInt8] := '+Test(getUInt32(123) mod getInt8(123))+';');
   DoWrite('Arr[op_MOD][ltUInt32][ltUInt16] := '+Test(getUInt32(123) mod getUInt16(123))+';');
@@ -1806,6 +2115,7 @@ begin
   DoWrite('Arr[op_MOD][ltUInt32][ltInt32] := '+Test(getUInt32(123) mod getInt32(123))+';');
   DoWrite('Arr[op_MOD][ltUInt32][ltUInt64] := '+Test(getUInt32(123) mod getUInt64(123))+';');
   DoWrite('Arr[op_MOD][ltUInt32][ltInt64] := '+Test(getUInt32(123) mod getInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltUInt32][ltVariant] := '+Test(getUInt32(123) mod getVariant(123))+';');
   DoWrite('Arr[op_MOD][ltInt32][ltUInt8] := '+Test(getInt32(123) mod getUInt8(123))+';');
   DoWrite('Arr[op_MOD][ltInt32][ltInt8] := '+Test(getInt32(123) mod getInt8(123))+';');
   DoWrite('Arr[op_MOD][ltInt32][ltUInt16] := '+Test(getInt32(123) mod getUInt16(123))+';');
@@ -1814,6 +2124,7 @@ begin
   DoWrite('Arr[op_MOD][ltInt32][ltInt32] := '+Test(getInt32(123) mod getInt32(123))+';');
   DoWrite('Arr[op_MOD][ltInt32][ltUInt64] := '+Test(getInt32(123) mod getUInt64(123))+';');
   DoWrite('Arr[op_MOD][ltInt32][ltInt64] := '+Test(getInt32(123) mod getInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltInt32][ltVariant] := '+Test(getInt32(123) mod getVariant(123))+';');
   DoWrite('Arr[op_MOD][ltUInt64][ltUInt8] := '+Test(getUInt64(123) mod getUInt8(123))+';');
   DoWrite('Arr[op_MOD][ltUInt64][ltInt8] := '+Test(getUInt64(123) mod getInt8(123))+';');
   DoWrite('Arr[op_MOD][ltUInt64][ltUInt16] := '+Test(getUInt64(123) mod getUInt16(123))+';');
@@ -1822,6 +2133,7 @@ begin
   DoWrite('Arr[op_MOD][ltUInt64][ltInt32] := '+Test(getUInt64(123) mod getInt32(123))+';');
   DoWrite('Arr[op_MOD][ltUInt64][ltUInt64] := '+Test(getUInt64(123) mod getUInt64(123))+';');
   DoWrite('Arr[op_MOD][ltUInt64][ltInt64] := '+Test(getUInt64(123) mod getInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltUInt64][ltVariant] := '+Test(getUInt64(123) mod getVariant(123))+';');
   DoWrite('Arr[op_MOD][ltInt64][ltUInt8] := '+Test(getInt64(123) mod getUInt8(123))+';');
   DoWrite('Arr[op_MOD][ltInt64][ltInt8] := '+Test(getInt64(123) mod getInt8(123))+';');
   DoWrite('Arr[op_MOD][ltInt64][ltUInt16] := '+Test(getInt64(123) mod getUInt16(123))+';');
@@ -1830,7 +2142,16 @@ begin
   DoWrite('Arr[op_MOD][ltInt64][ltInt32] := '+Test(getInt64(123) mod getInt32(123))+';');
   DoWrite('Arr[op_MOD][ltInt64][ltUInt64] := '+Test(getInt64(123) mod getUInt64(123))+';');
   DoWrite('Arr[op_MOD][ltInt64][ltInt64] := '+Test(getInt64(123) mod getInt64(123))+';');
-  //DoWrite('Arr[op_SHL][ltBoolean][ltBoolean] := '+Test(getBoolean(123) shl getBoolean(123))+';');
+  DoWrite('Arr[op_MOD][ltInt64][ltVariant] := '+Test(getInt64(123) mod getVariant(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltUInt8] := '+Test(getVariant(123) mod getUInt8(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltInt8] := '+Test(getVariant(123) mod getInt8(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltUInt16] := '+Test(getVariant(123) mod getUInt16(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltInt16] := '+Test(getVariant(123) mod getInt16(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltUInt32] := '+Test(getVariant(123) mod getUInt32(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltInt32] := '+Test(getVariant(123) mod getInt32(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltUInt64] := '+Test(getVariant(123) mod getUInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltInt64] := '+Test(getVariant(123) mod getInt64(123))+';');
+  DoWrite('Arr[op_MOD][ltVariant][ltVariant] := '+Test(getVariant(123) mod getVariant(123))+';');
   DoWrite('Arr[op_SHL][ltUInt8][ltUInt8] := '+Test(getUInt8(123) shl getUInt8(123))+';');
   DoWrite('Arr[op_SHL][ltUInt8][ltInt8] := '+Test(getUInt8(123) shl getInt8(123))+';');
   DoWrite('Arr[op_SHL][ltUInt8][ltUInt16] := '+Test(getUInt8(123) shl getUInt16(123))+';');
@@ -1839,6 +2160,7 @@ begin
   DoWrite('Arr[op_SHL][ltUInt8][ltInt32] := '+Test(getUInt8(123) shl getInt32(123))+';');
   DoWrite('Arr[op_SHL][ltUInt8][ltUInt64] := '+Test(getUInt8(123) shl getUInt64(123))+';');
   DoWrite('Arr[op_SHL][ltUInt8][ltInt64] := '+Test(getUInt8(123) shl getInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltUInt8][ltVariant] := '+Test(getUInt8(123) shl getVariant(123))+';');
   DoWrite('Arr[op_SHL][ltInt8][ltUInt8] := '+Test(getInt8(123) shl getUInt8(123))+';');
   DoWrite('Arr[op_SHL][ltInt8][ltInt8] := '+Test(getInt8(123) shl getInt8(123))+';');
   DoWrite('Arr[op_SHL][ltInt8][ltUInt16] := '+Test(getInt8(123) shl getUInt16(123))+';');
@@ -1847,6 +2169,7 @@ begin
   DoWrite('Arr[op_SHL][ltInt8][ltInt32] := '+Test(getInt8(123) shl getInt32(123))+';');
   DoWrite('Arr[op_SHL][ltInt8][ltUInt64] := '+Test(getInt8(123) shl getUInt64(123))+';');
   DoWrite('Arr[op_SHL][ltInt8][ltInt64] := '+Test(getInt8(123) shl getInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltInt8][ltVariant] := '+Test(getInt8(123) shl getVariant(123))+';');
   DoWrite('Arr[op_SHL][ltUInt16][ltUInt8] := '+Test(getUInt16(123) shl getUInt8(123))+';');
   DoWrite('Arr[op_SHL][ltUInt16][ltInt8] := '+Test(getUInt16(123) shl getInt8(123))+';');
   DoWrite('Arr[op_SHL][ltUInt16][ltUInt16] := '+Test(getUInt16(123) shl getUInt16(123))+';');
@@ -1855,6 +2178,7 @@ begin
   DoWrite('Arr[op_SHL][ltUInt16][ltInt32] := '+Test(getUInt16(123) shl getInt32(123))+';');
   DoWrite('Arr[op_SHL][ltUInt16][ltUInt64] := '+Test(getUInt16(123) shl getUInt64(123))+';');
   DoWrite('Arr[op_SHL][ltUInt16][ltInt64] := '+Test(getUInt16(123) shl getInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltUInt16][ltVariant] := '+Test(getUInt16(123) shl getVariant(123))+';');
   DoWrite('Arr[op_SHL][ltInt16][ltUInt8] := '+Test(getInt16(123) shl getUInt8(123))+';');
   DoWrite('Arr[op_SHL][ltInt16][ltInt8] := '+Test(getInt16(123) shl getInt8(123))+';');
   DoWrite('Arr[op_SHL][ltInt16][ltUInt16] := '+Test(getInt16(123) shl getUInt16(123))+';');
@@ -1863,6 +2187,7 @@ begin
   DoWrite('Arr[op_SHL][ltInt16][ltInt32] := '+Test(getInt16(123) shl getInt32(123))+';');
   DoWrite('Arr[op_SHL][ltInt16][ltUInt64] := '+Test(getInt16(123) shl getUInt64(123))+';');
   DoWrite('Arr[op_SHL][ltInt16][ltInt64] := '+Test(getInt16(123) shl getInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltInt16][ltVariant] := '+Test(getInt16(123) shl getVariant(123))+';');
   DoWrite('Arr[op_SHL][ltUInt32][ltUInt8] := '+Test(getUInt32(123) shl getUInt8(123))+';');
   DoWrite('Arr[op_SHL][ltUInt32][ltInt8] := '+Test(getUInt32(123) shl getInt8(123))+';');
   DoWrite('Arr[op_SHL][ltUInt32][ltUInt16] := '+Test(getUInt32(123) shl getUInt16(123))+';');
@@ -1871,6 +2196,7 @@ begin
   DoWrite('Arr[op_SHL][ltUInt32][ltInt32] := '+Test(getUInt32(123) shl getInt32(123))+';');
   DoWrite('Arr[op_SHL][ltUInt32][ltUInt64] := '+Test(getUInt32(123) shl getUInt64(123))+';');
   DoWrite('Arr[op_SHL][ltUInt32][ltInt64] := '+Test(getUInt32(123) shl getInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltUInt32][ltVariant] := '+Test(getUInt32(123) shl getVariant(123))+';');
   DoWrite('Arr[op_SHL][ltInt32][ltUInt8] := '+Test(getInt32(123) shl getUInt8(123))+';');
   DoWrite('Arr[op_SHL][ltInt32][ltInt8] := '+Test(getInt32(123) shl getInt8(123))+';');
   DoWrite('Arr[op_SHL][ltInt32][ltUInt16] := '+Test(getInt32(123) shl getUInt16(123))+';');
@@ -1879,6 +2205,7 @@ begin
   DoWrite('Arr[op_SHL][ltInt32][ltInt32] := '+Test(getInt32(123) shl getInt32(123))+';');
   DoWrite('Arr[op_SHL][ltInt32][ltUInt64] := '+Test(getInt32(123) shl getUInt64(123))+';');
   DoWrite('Arr[op_SHL][ltInt32][ltInt64] := '+Test(getInt32(123) shl getInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltInt32][ltVariant] := '+Test(getInt32(123) shl getVariant(123))+';');
   DoWrite('Arr[op_SHL][ltUInt64][ltUInt8] := '+Test(getUInt64(123) shl getUInt8(123))+';');
   DoWrite('Arr[op_SHL][ltUInt64][ltInt8] := '+Test(getUInt64(123) shl getInt8(123))+';');
   DoWrite('Arr[op_SHL][ltUInt64][ltUInt16] := '+Test(getUInt64(123) shl getUInt16(123))+';');
@@ -1887,6 +2214,7 @@ begin
   DoWrite('Arr[op_SHL][ltUInt64][ltInt32] := '+Test(getUInt64(123) shl getInt32(123))+';');
   DoWrite('Arr[op_SHL][ltUInt64][ltUInt64] := '+Test(getUInt64(123) shl getUInt64(123))+';');
   DoWrite('Arr[op_SHL][ltUInt64][ltInt64] := '+Test(getUInt64(123) shl getInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltUInt64][ltVariant] := '+Test(getUInt64(123) shl getVariant(123))+';');
   DoWrite('Arr[op_SHL][ltInt64][ltUInt8] := '+Test(getInt64(123) shl getUInt8(123))+';');
   DoWrite('Arr[op_SHL][ltInt64][ltInt8] := '+Test(getInt64(123) shl getInt8(123))+';');
   DoWrite('Arr[op_SHL][ltInt64][ltUInt16] := '+Test(getInt64(123) shl getUInt16(123))+';');
@@ -1895,7 +2223,16 @@ begin
   DoWrite('Arr[op_SHL][ltInt64][ltInt32] := '+Test(getInt64(123) shl getInt32(123))+';');
   DoWrite('Arr[op_SHL][ltInt64][ltUInt64] := '+Test(getInt64(123) shl getUInt64(123))+';');
   DoWrite('Arr[op_SHL][ltInt64][ltInt64] := '+Test(getInt64(123) shl getInt64(123))+';');
-  //DoWrite('Arr[op_SHR][ltBoolean][ltBoolean] := '+Test(getBoolean(123) shr getBoolean(123))+';');
+  DoWrite('Arr[op_SHL][ltInt64][ltVariant] := '+Test(getInt64(123) shl getVariant(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltUInt8] := '+Test(getVariant(123) shl getUInt8(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltInt8] := '+Test(getVariant(123) shl getInt8(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltUInt16] := '+Test(getVariant(123) shl getUInt16(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltInt16] := '+Test(getVariant(123) shl getInt16(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltUInt32] := '+Test(getVariant(123) shl getUInt32(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltInt32] := '+Test(getVariant(123) shl getInt32(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltUInt64] := '+Test(getVariant(123) shl getUInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltInt64] := '+Test(getVariant(123) shl getInt64(123))+';');
+  DoWrite('Arr[op_SHL][ltVariant][ltVariant] := '+Test(getVariant(123) shl getVariant(123))+';');
   DoWrite('Arr[op_SHR][ltUInt8][ltUInt8] := '+Test(getUInt8(123) shr getUInt8(123))+';');
   DoWrite('Arr[op_SHR][ltUInt8][ltInt8] := '+Test(getUInt8(123) shr getInt8(123))+';');
   DoWrite('Arr[op_SHR][ltUInt8][ltUInt16] := '+Test(getUInt8(123) shr getUInt16(123))+';');
@@ -1904,6 +2241,7 @@ begin
   DoWrite('Arr[op_SHR][ltUInt8][ltInt32] := '+Test(getUInt8(123) shr getInt32(123))+';');
   DoWrite('Arr[op_SHR][ltUInt8][ltUInt64] := '+Test(getUInt8(123) shr getUInt64(123))+';');
   DoWrite('Arr[op_SHR][ltUInt8][ltInt64] := '+Test(getUInt8(123) shr getInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltUInt8][ltVariant] := '+Test(getUInt8(123) shr getVariant(123))+';');
   DoWrite('Arr[op_SHR][ltInt8][ltUInt8] := '+Test(getInt8(123) shr getUInt8(123))+';');
   DoWrite('Arr[op_SHR][ltInt8][ltInt8] := '+Test(getInt8(123) shr getInt8(123))+';');
   DoWrite('Arr[op_SHR][ltInt8][ltUInt16] := '+Test(getInt8(123) shr getUInt16(123))+';');
@@ -1912,6 +2250,7 @@ begin
   DoWrite('Arr[op_SHR][ltInt8][ltInt32] := '+Test(getInt8(123) shr getInt32(123))+';');
   DoWrite('Arr[op_SHR][ltInt8][ltUInt64] := '+Test(getInt8(123) shr getUInt64(123))+';');
   DoWrite('Arr[op_SHR][ltInt8][ltInt64] := '+Test(getInt8(123) shr getInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltInt8][ltVariant] := '+Test(getInt8(123) shr getVariant(123))+';');
   DoWrite('Arr[op_SHR][ltUInt16][ltUInt8] := '+Test(getUInt16(123) shr getUInt8(123))+';');
   DoWrite('Arr[op_SHR][ltUInt16][ltInt8] := '+Test(getUInt16(123) shr getInt8(123))+';');
   DoWrite('Arr[op_SHR][ltUInt16][ltUInt16] := '+Test(getUInt16(123) shr getUInt16(123))+';');
@@ -1920,6 +2259,7 @@ begin
   DoWrite('Arr[op_SHR][ltUInt16][ltInt32] := '+Test(getUInt16(123) shr getInt32(123))+';');
   DoWrite('Arr[op_SHR][ltUInt16][ltUInt64] := '+Test(getUInt16(123) shr getUInt64(123))+';');
   DoWrite('Arr[op_SHR][ltUInt16][ltInt64] := '+Test(getUInt16(123) shr getInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltUInt16][ltVariant] := '+Test(getUInt16(123) shr getVariant(123))+';');
   DoWrite('Arr[op_SHR][ltInt16][ltUInt8] := '+Test(getInt16(123) shr getUInt8(123))+';');
   DoWrite('Arr[op_SHR][ltInt16][ltInt8] := '+Test(getInt16(123) shr getInt8(123))+';');
   DoWrite('Arr[op_SHR][ltInt16][ltUInt16] := '+Test(getInt16(123) shr getUInt16(123))+';');
@@ -1928,6 +2268,7 @@ begin
   DoWrite('Arr[op_SHR][ltInt16][ltInt32] := '+Test(getInt16(123) shr getInt32(123))+';');
   DoWrite('Arr[op_SHR][ltInt16][ltUInt64] := '+Test(getInt16(123) shr getUInt64(123))+';');
   DoWrite('Arr[op_SHR][ltInt16][ltInt64] := '+Test(getInt16(123) shr getInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltInt16][ltVariant] := '+Test(getInt16(123) shr getVariant(123))+';');
   DoWrite('Arr[op_SHR][ltUInt32][ltUInt8] := '+Test(getUInt32(123) shr getUInt8(123))+';');
   DoWrite('Arr[op_SHR][ltUInt32][ltInt8] := '+Test(getUInt32(123) shr getInt8(123))+';');
   DoWrite('Arr[op_SHR][ltUInt32][ltUInt16] := '+Test(getUInt32(123) shr getUInt16(123))+';');
@@ -1936,6 +2277,7 @@ begin
   DoWrite('Arr[op_SHR][ltUInt32][ltInt32] := '+Test(getUInt32(123) shr getInt32(123))+';');
   DoWrite('Arr[op_SHR][ltUInt32][ltUInt64] := '+Test(getUInt32(123) shr getUInt64(123))+';');
   DoWrite('Arr[op_SHR][ltUInt32][ltInt64] := '+Test(getUInt32(123) shr getInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltUInt32][ltVariant] := '+Test(getUInt32(123) shr getVariant(123))+';');
   DoWrite('Arr[op_SHR][ltInt32][ltUInt8] := '+Test(getInt32(123) shr getUInt8(123))+';');
   DoWrite('Arr[op_SHR][ltInt32][ltInt8] := '+Test(getInt32(123) shr getInt8(123))+';');
   DoWrite('Arr[op_SHR][ltInt32][ltUInt16] := '+Test(getInt32(123) shr getUInt16(123))+';');
@@ -1944,6 +2286,7 @@ begin
   DoWrite('Arr[op_SHR][ltInt32][ltInt32] := '+Test(getInt32(123) shr getInt32(123))+';');
   DoWrite('Arr[op_SHR][ltInt32][ltUInt64] := '+Test(getInt32(123) shr getUInt64(123))+';');
   DoWrite('Arr[op_SHR][ltInt32][ltInt64] := '+Test(getInt32(123) shr getInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltInt32][ltVariant] := '+Test(getInt32(123) shr getVariant(123))+';');
   DoWrite('Arr[op_SHR][ltUInt64][ltUInt8] := '+Test(getUInt64(123) shr getUInt8(123))+';');
   DoWrite('Arr[op_SHR][ltUInt64][ltInt8] := '+Test(getUInt64(123) shr getInt8(123))+';');
   DoWrite('Arr[op_SHR][ltUInt64][ltUInt16] := '+Test(getUInt64(123) shr getUInt16(123))+';');
@@ -1952,6 +2295,7 @@ begin
   DoWrite('Arr[op_SHR][ltUInt64][ltInt32] := '+Test(getUInt64(123) shr getInt32(123))+';');
   DoWrite('Arr[op_SHR][ltUInt64][ltUInt64] := '+Test(getUInt64(123) shr getUInt64(123))+';');
   DoWrite('Arr[op_SHR][ltUInt64][ltInt64] := '+Test(getUInt64(123) shr getInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltUInt64][ltVariant] := '+Test(getUInt64(123) shr getVariant(123))+';');
   DoWrite('Arr[op_SHR][ltInt64][ltUInt8] := '+Test(getInt64(123) shr getUInt8(123))+';');
   DoWrite('Arr[op_SHR][ltInt64][ltInt8] := '+Test(getInt64(123) shr getInt8(123))+';');
   DoWrite('Arr[op_SHR][ltInt64][ltUInt16] := '+Test(getInt64(123) shr getUInt16(123))+';');
@@ -1960,7 +2304,16 @@ begin
   DoWrite('Arr[op_SHR][ltInt64][ltInt32] := '+Test(getInt64(123) shr getInt32(123))+';');
   DoWrite('Arr[op_SHR][ltInt64][ltUInt64] := '+Test(getInt64(123) shr getUInt64(123))+';');
   DoWrite('Arr[op_SHR][ltInt64][ltInt64] := '+Test(getInt64(123) shr getInt64(123))+';');
-  //DoWrite('Arr[op_UnaryMinus][ltBoolean][ltUnknown] := '+Test(getBoolean(123) - getBoolean(123))+';');
+  DoWrite('Arr[op_SHR][ltInt64][ltVariant] := '+Test(getInt64(123) shr getVariant(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltUInt8] := '+Test(getVariant(123) shr getUInt8(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltInt8] := '+Test(getVariant(123) shr getInt8(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltUInt16] := '+Test(getVariant(123) shr getUInt16(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltInt16] := '+Test(getVariant(123) shr getInt16(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltUInt32] := '+Test(getVariant(123) shr getUInt32(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltInt32] := '+Test(getVariant(123) shr getInt32(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltUInt64] := '+Test(getVariant(123) shr getUInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltInt64] := '+Test(getVariant(123) shr getInt64(123))+';');
+  DoWrite('Arr[op_SHR][ltVariant][ltVariant] := '+Test(getVariant(123) shr getVariant(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltUInt8][ltUnknown] := '+Test(getUInt8(123) - getUInt8(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltInt8][ltUnknown] := '+Test(getInt8(123) - getUInt8(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltUInt16][ltUnknown] := '+Test(getUInt16(123) - getUInt8(123))+';');
@@ -1969,11 +2322,11 @@ begin
   DoWrite('Arr[op_UnaryMinus][ltInt32][ltUnknown] := '+Test(getInt32(123) - getUInt8(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltUInt64][ltUnknown] := '+Test(getUInt64(123) - getUInt8(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltInt64][ltUnknown] := '+Test(getInt64(123) - getUInt8(123))+';');
+  DoWrite('Arr[op_UnaryMinus][ltVariant][ltUnknown] := '+Test(getVariant(123) - getUInt8(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltSingle][ltUnknown] := '+Test(getSingle(123) - getUInt8(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltDouble][ltUnknown] := '+Test(getDouble(123) - getUInt8(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltCurrency][ltUnknown] := '+Test(getCurrency(123) - getUInt8(123))+';');
   DoWrite('Arr[op_UnaryMinus][ltExtended][ltUnknown] := '+Test(getExtended(123) - getUInt8(123))+';');
-  DoWrite('Arr[op_NOT][ltBoolean][ltUnknown] := ltBoolean;');
   DoWrite('Arr[op_NOT][ltUInt8][ltUnknown] := ltUInt8;');
   DoWrite('Arr[op_NOT][ltInt8][ltUnknown] := ltInt8;');
   DoWrite('Arr[op_NOT][ltUInt16][ltUnknown] := ltUInt16;');
@@ -1982,7 +2335,7 @@ begin
   DoWrite('Arr[op_NOT][ltInt32][ltUnknown] := ltInt32;');
   DoWrite('Arr[op_NOT][ltUInt64][ltUnknown] := ltUInt64;');
   DoWrite('Arr[op_NOT][ltInt64][ltUnknown] := ltInt64;');
-  DoWrite('Arr[op_Assign][ltBoolean][ltBoolean] := ltBoolean;');
+  DoWrite('Arr[op_NOT][ltVariant][ltUnknown] := ltVariant;');
   DoWrite('Arr[op_Assign][ltUInt8][ltUInt8] := ltUInt8;');
   DoWrite('Arr[op_Assign][ltUInt8][ltInt8] := ltUInt8;');
   DoWrite('Arr[op_Assign][ltUInt8][ltUInt16] := ltUInt8;');
@@ -1991,6 +2344,7 @@ begin
   DoWrite('Arr[op_Assign][ltUInt8][ltInt32] := ltUInt8;');
   DoWrite('Arr[op_Assign][ltUInt8][ltUInt64] := ltUInt8;');
   DoWrite('Arr[op_Assign][ltUInt8][ltInt64] := ltUInt8;');
+  DoWrite('Arr[op_Assign][ltUInt8][ltVariant] := ltUInt8;');
   DoWrite('Arr[op_Assign][ltInt8][ltUInt8] := ltInt8;');
   DoWrite('Arr[op_Assign][ltInt8][ltInt8] := ltInt8;');
   DoWrite('Arr[op_Assign][ltInt8][ltUInt16] := ltInt8;');
@@ -1999,6 +2353,7 @@ begin
   DoWrite('Arr[op_Assign][ltInt8][ltInt32] := ltInt8;');
   DoWrite('Arr[op_Assign][ltInt8][ltUInt64] := ltInt8;');
   DoWrite('Arr[op_Assign][ltInt8][ltInt64] := ltInt8;');
+  DoWrite('Arr[op_Assign][ltInt8][ltVariant] := ltInt8;');
   DoWrite('Arr[op_Assign][ltUInt16][ltUInt8] := ltUInt16;');
   DoWrite('Arr[op_Assign][ltUInt16][ltInt8] := ltUInt16;');
   DoWrite('Arr[op_Assign][ltUInt16][ltUInt16] := ltUInt16;');
@@ -2007,6 +2362,7 @@ begin
   DoWrite('Arr[op_Assign][ltUInt16][ltInt32] := ltUInt16;');
   DoWrite('Arr[op_Assign][ltUInt16][ltUInt64] := ltUInt16;');
   DoWrite('Arr[op_Assign][ltUInt16][ltInt64] := ltUInt16;');
+  DoWrite('Arr[op_Assign][ltUInt16][ltVariant] := ltUInt16;');
   DoWrite('Arr[op_Assign][ltInt16][ltUInt8] := ltInt16;');
   DoWrite('Arr[op_Assign][ltInt16][ltInt8] := ltInt16;');
   DoWrite('Arr[op_Assign][ltInt16][ltUInt16] := ltInt16;');
@@ -2015,6 +2371,7 @@ begin
   DoWrite('Arr[op_Assign][ltInt16][ltInt32] := ltInt16;');
   DoWrite('Arr[op_Assign][ltInt16][ltUInt64] := ltInt16;');
   DoWrite('Arr[op_Assign][ltInt16][ltInt64] := ltInt16;');
+  DoWrite('Arr[op_Assign][ltInt16][ltVariant] := ltInt16;');
   DoWrite('Arr[op_Assign][ltUInt32][ltUInt8] := ltUInt32;');
   DoWrite('Arr[op_Assign][ltUInt32][ltInt8] := ltUInt32;');
   DoWrite('Arr[op_Assign][ltUInt32][ltUInt16] := ltUInt32;');
@@ -2023,6 +2380,7 @@ begin
   DoWrite('Arr[op_Assign][ltUInt32][ltInt32] := ltUInt32;');
   DoWrite('Arr[op_Assign][ltUInt32][ltUInt64] := ltUInt32;');
   DoWrite('Arr[op_Assign][ltUInt32][ltInt64] := ltUInt32;');
+  DoWrite('Arr[op_Assign][ltUInt32][ltVariant] := ltUInt32;');
   DoWrite('Arr[op_Assign][ltInt32][ltUInt8] := ltInt32;');
   DoWrite('Arr[op_Assign][ltInt32][ltInt8] := ltInt32;');
   DoWrite('Arr[op_Assign][ltInt32][ltUInt16] := ltInt32;');
@@ -2031,6 +2389,7 @@ begin
   DoWrite('Arr[op_Assign][ltInt32][ltInt32] := ltInt32;');
   DoWrite('Arr[op_Assign][ltInt32][ltUInt64] := ltInt32;');
   DoWrite('Arr[op_Assign][ltInt32][ltInt64] := ltInt32;');
+  DoWrite('Arr[op_Assign][ltInt32][ltVariant] := ltInt32;');
   DoWrite('Arr[op_Assign][ltUInt64][ltUInt8] := ltUInt64;');
   DoWrite('Arr[op_Assign][ltUInt64][ltInt8] := ltUInt64;');
   DoWrite('Arr[op_Assign][ltUInt64][ltUInt16] := ltUInt64;');
@@ -2039,6 +2398,7 @@ begin
   DoWrite('Arr[op_Assign][ltUInt64][ltInt32] := ltUInt64;');
   DoWrite('Arr[op_Assign][ltUInt64][ltUInt64] := ltUInt64;');
   DoWrite('Arr[op_Assign][ltUInt64][ltInt64] := ltUInt64;');
+  DoWrite('Arr[op_Assign][ltUInt64][ltVariant] := ltUInt64;');
   DoWrite('Arr[op_Assign][ltInt64][ltUInt8] := ltInt64;');
   DoWrite('Arr[op_Assign][ltInt64][ltInt8] := ltInt64;');
   DoWrite('Arr[op_Assign][ltInt64][ltUInt16] := ltInt64;');
@@ -2047,6 +2407,20 @@ begin
   DoWrite('Arr[op_Assign][ltInt64][ltInt32] := ltInt64;');
   DoWrite('Arr[op_Assign][ltInt64][ltUInt64] := ltInt64;');
   DoWrite('Arr[op_Assign][ltInt64][ltInt64] := ltInt64;');
+  DoWrite('Arr[op_Assign][ltInt64][ltVariant] := ltInt64;');
+  DoWrite('Arr[op_Assign][ltVariant][ltUInt8] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltInt8] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltUInt16] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltInt16] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltUInt32] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltInt32] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltUInt64] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltInt64] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltVariant] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltSingle] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltDouble] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltCurrency] := ltVariant;');
+  DoWrite('Arr[op_Assign][ltVariant][ltExtended] := ltVariant;');
   DoWrite('Arr[op_Assign][ltSingle][ltUInt8] := ltSingle;');
   DoWrite('Arr[op_Assign][ltSingle][ltInt8] := ltSingle;');
   DoWrite('Arr[op_Assign][ltSingle][ltUInt16] := ltSingle;');
@@ -2055,6 +2429,7 @@ begin
   DoWrite('Arr[op_Assign][ltSingle][ltInt32] := ltSingle;');
   DoWrite('Arr[op_Assign][ltSingle][ltUInt64] := ltSingle;');
   DoWrite('Arr[op_Assign][ltSingle][ltInt64] := ltSingle;');
+  DoWrite('Arr[op_Assign][ltSingle][ltVariant] := ltSingle;');
   DoWrite('Arr[op_Assign][ltSingle][ltSingle] := ltSingle;');
   DoWrite('Arr[op_Assign][ltSingle][ltDouble] := ltSingle;');
   DoWrite('Arr[op_Assign][ltSingle][ltCurrency] := ltSingle;');
@@ -2067,6 +2442,7 @@ begin
   DoWrite('Arr[op_Assign][ltDouble][ltInt32] := ltDouble;');
   DoWrite('Arr[op_Assign][ltDouble][ltUInt64] := ltDouble;');
   DoWrite('Arr[op_Assign][ltDouble][ltInt64] := ltDouble;');
+  DoWrite('Arr[op_Assign][ltDouble][ltVariant] := ltDouble;');
   DoWrite('Arr[op_Assign][ltDouble][ltSingle] := ltDouble;');
   DoWrite('Arr[op_Assign][ltDouble][ltDouble] := ltDouble;');
   DoWrite('Arr[op_Assign][ltDouble][ltCurrency] := ltDouble;');
@@ -2079,6 +2455,7 @@ begin
   DoWrite('Arr[op_Assign][ltCurrency][ltInt32] := ltCurrency;');
   DoWrite('Arr[op_Assign][ltCurrency][ltUInt64] := ltCurrency;');
   DoWrite('Arr[op_Assign][ltCurrency][ltInt64] := ltCurrency;');
+  DoWrite('Arr[op_Assign][ltCurrency][ltVariant] := ltCurrency;');
   DoWrite('Arr[op_Assign][ltCurrency][ltSingle] := ltCurrency;');
   DoWrite('Arr[op_Assign][ltCurrency][ltDouble] := ltCurrency;');
   DoWrite('Arr[op_Assign][ltCurrency][ltCurrency] := ltCurrency;');
@@ -2091,6 +2468,7 @@ begin
   DoWrite('Arr[op_Assign][ltExtended][ltInt32] := ltExtended;');
   DoWrite('Arr[op_Assign][ltExtended][ltUInt64] := ltExtended;');
   DoWrite('Arr[op_Assign][ltExtended][ltInt64] := ltExtended;');
+  DoWrite('Arr[op_Assign][ltExtended][ltVariant] := ltExtended;');
   DoWrite('Arr[op_Assign][ltExtended][ltSingle] := ltExtended;');
   DoWrite('Arr[op_Assign][ltExtended][ltDouble] := ltExtended;');
   DoWrite('Arr[op_Assign][ltExtended][ltCurrency] := ltExtended;');
@@ -2128,6 +2506,9 @@ begin
     begin
       for t2 := Low(ELapeBaseType) to High(ELapeBaseType) do
       begin
+        if (not ((t1 in LapeIntegerTypes + LapeRealTypes + [ltVariant]) and (t2 in LapeIntegerTypes + LapeRealTypes + [ltVariant, ltUnknown]))) then
+          Continue;
+
         t3 := EvalRes[op][t1][t2];
         if (t3 = ltUnknown) then
           Continue;
@@ -2139,7 +2520,10 @@ begin
         DoDebug('Arr[op_'+LapeOperatorToString(op)+'][lt'+LapeTypeToString(t1)+'][lt'+LapeTypeToString(t2)+'] := @'+s+';');
         s := 'procedure ' + s;
         s := s + '(const Dest, Left, Right: Pointer); begin ';
-        s := s + 'P'+LapeTypeToString(t3)+'(Dest)^ := ';
+        if (t3 = ltEvalBool) then
+          s := s + 'PEvalBool(Dest)^ := '
+        else
+          s := s + 'P'+LapeTypeToString(t3)+'(Dest)^ := ';
         if op in UnaryOperators + [op_Assign] then
         begin
           if (op_str[op] <> ':=') then

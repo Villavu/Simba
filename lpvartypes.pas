@@ -235,6 +235,15 @@ type
   TLapeType_WideChar = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Char<WideChar>)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
+  TLapeType_Variant = class(TLapeType)
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function VarToString(v: Pointer): lpString; override;
+
+    function NewGlobalVar(Val: Variant; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
+    function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
+  end;
+
   TLapeType_SubRange = class(TLapeType)
   protected
     FRange: TLapeRange;
@@ -671,6 +680,7 @@ begin
   Arr[ltAnsiString] := TLapeType_AnsiString.Create(Compiler, LapeTypeToString(ltAnsiString));
   Arr[ltWideString] := TLapeType_WideString.Create(Compiler, LapeTypeToString(ltWideString));
   Arr[ltUnicodeString] := TLapeType_UnicodeString.Create(Compiler, LapeTypeToString(ltUnicodeString));
+  Arr[ltVariant] := TLapeType_Variant.Create(Compiler, LapeTypeToString(ltVariant));
   Arr[ltPointer] := TLapeType_Pointer.Create(Compiler, nil, LapeTypeToString(ltPointer));
 end;
 
@@ -1531,6 +1541,30 @@ begin
   inherited Create(ltWideChar, ACompiler, AName, ADocPos);
 end;
 
+constructor TLapeType_Variant.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+begin
+  inherited Create(ltVariant, ACompiler, AName, ADocPos);
+end;
+
+function TLapeType_Variant.VarToString(v: Pointer): lpString;
+begin
+  if (v <> nil) then
+    Result := PVariant(v)^
+  else
+    Result := inherited;
+end;
+
+function TLapeType_Variant.NewGlobalVar(Val: Variant; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := NewGlobalVarP(nil, AName, ADocPos);
+  PVariant(Result.Ptr)^ := Val;
+end;
+
+function TLapeType_Variant.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  Result := NewGlobalVar(Str, AName, ADocPos);
+end;
+
 function TLapeType_SubRange.getAsString: lpString;
 begin
   if (FAsString = '') then
@@ -1679,14 +1713,23 @@ begin
   try
     Result := '';
     i := VarToInt(v);
-    if (i > -1) and (i < FMemberMap.Count) then
-      Result := FMemberMap[i];
 
-    if (Result = '') then
-      if (Name <> '') then
-        Result := Name + '(' + IntToStr(i) + ')'
+    if (FBaseType in LapeBoolTypes) then
+      if (i = 0) then
+        Result := 'False'
       else
-        Result := 'InvalidEnum';
+        Result := 'True'
+    else
+    begin
+      if (i > -1) and (i < FMemberMap.Count) then
+        Result := FMemberMap[i];
+
+      if (Result = '') then
+        if (Name <> '') then
+          Result := Name + '(' + IntToStr(i) + ')'
+        else
+          Result := 'InvalidEnum';
+    end;
   except
     Result := 'EnumException';
   end;

@@ -1,14 +1,15 @@
 program New;
 const
   typ_prefix = 'lt';
-  ctypes = 'Boolean,ByteBool,WordBool,LongBool,' +
+  ctypes = //'Boolean,ByteBool,WordBool,LongBool,' +
     'UInt8,Int8,UInt16,Int16,UInt32,Int32,UInt64,Int64,' +
+    'Variant,' +
     'Single,Double,Currency,Extended';
   cops = 'op_cmp_Equal==,op_cmp_GreaterThan=>,op_cmp_GreaterThanOrEqual=>=,' +
     'op_cmp_LessThan=<,op_cmp_LessThanOrEqual=<=,op_cmp_NotEqual=<>,op_Plus=+,' +
     'op_Minus=-,op_Multiply=*,op_Divide=/,op_AND=and,op_OR=or,op_XOR=xor,'+
     'op_DIV=div,op_MOD=mod,op_SHL=shl,op_SHR=shr,'+
-    'op_UnaryMinus=-,op_NEG=not,op_Assign=:=';
+    'op_UnaryMinus=-,op_NOT=not,op_Assign=:=';
   proc_test = 'Test';
   proc_write = 'DoWrite';
   resarr = 'Arr';
@@ -56,15 +57,15 @@ begin
     for ii := Low(types) to High(types) do
       for iii := Low(types) to High(types) do
       begin
-        if (ii <= 3) xor (iii <= 3) then
-          Continue;
+        //if (ii <= 3) xor (iii <= 3) then
+        //  Continue;
         if (ii > 8) or (iii > 8) then
           if InRange(Ord(op[1]), Ord('a'), Ord('z')) then
             Continue;
             
         if (i = High(ops)) then
         begin
-          if (ii <= 8) and (iii > 8) then
+          if (ii < 8) and (iii > 8) then
             Continue;
           WriteLn('  ' + proc_write + '('#39 + resarr + '[' + op_Name + '][' + typ_prefix + types[ii] + '][' + typ_prefix + types[iii] + '] := '+typ_prefix + types[ii]+';'#39');')
         end
@@ -79,9 +80,6 @@ begin
           Break;
         end;
       end;
-  end;
-  for i := 1 to 8 do
-  begin
   end;
   
   WriteLn('end;');

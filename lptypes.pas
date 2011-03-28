@@ -108,6 +108,9 @@ type
   );
   LapeIntegerTypeRange = ltUInt8..ltInt64;
 
+  EvalBool = Boolean;
+  PEvalBool = ^EvalBool;
+
   EOperatorAssociative = (assocNone, assocLeft, assocRight);
   EOperator = (
     op_Unknown,
@@ -311,6 +314,7 @@ const
   ltChar = ltAnsiChar;
   ltCharInt = ltUInt8;
   {$ENDIF}
+  ltEvalBool = ltBoolean;
 
   LapeTypeSize: array[ELapeBaseType] of Integer = (
     -1,
@@ -423,7 +427,7 @@ const
     '[', '-', 'mod', '*', 'not', 'or', '+', '**', 'shl', 'shr', 'xor', '-', '+');
   op_name: array[EOperator] of string = ('',
     'EQ', 'GT', 'GTEQ', 'LT', 'LTEQ', 'NEQ', {'ADDR'}'', 'AND', 'ASGN', {'DREF'}'', 'IDIV', 'DIV', {'dot'}'', 'IN',
-    {'index'}'', 'SUB', 'MOD', 'MUL', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'POS'}'');
+    {'index'}'', 'SUB', 'MOD', 'MUL', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'UPOS'}'');
 
 var
   lowUInt8: UInt8 = Low(UInt8);    highUInt8: UInt8 = High(UInt8);
