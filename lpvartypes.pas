@@ -645,6 +645,7 @@ const
 implementation
 
 uses
+  Variants,
   lpeval, lpexceptions, lpinterpreter;
 
 procedure ClearBaseTypes(var Arr: TLapeBaseTypes);
@@ -1302,12 +1303,26 @@ end;
 
 procedure TLapeType.Finalize(v: TResVar; var Offset: Integer; UseCompiler: Boolean = True; Pos: PDocPos = nil);
 var
-  t: TLapeType;
   p: TLapeEvalProc;
   l, r: TResVar;
+
+  function FullNil(p: Pointer; Size: Integer): Boolean;
+  var
+    i: Integer;
+  begin
+    if (p = nil) then
+      Exit(True);
+    for i := 0 to Size - 1 do
+      if (PByteArray(p)^[i] <> 0) then
+        Exit(False);
+    Result := True;
+  end;
+
 begin
   Assert(v.VarType = Self);
   if (v.VarPos.MemPos = NullResVar.VarPos.MemPos) or (not NeedFinalization) then
+    Exit;
+  if (v.VarPos.MemPos = mpMem) and (v.VarPos.GlobalVar <> nil) and FullNil(v.VarPos.GlobalVar.Ptr, Size) then
     Exit;
 
   r := NullResVar;
@@ -1315,9 +1330,9 @@ begin
   l.VarType := Self;
   l.VarPos.MemPos := mpMem;
   if UseCompiler and (FCompiler <> nil) then
-    l.VarPos.GlobalVar := TLapeGlobalVar(FCompiler.addManagedVar(TLapeType_Pointer(FCompiler.getBaseType(ltPointer)).NewGlobalVar()))
+    l.VarPos.GlobalVar := TLapeGlobalVar(FCompiler.addManagedVar(NewGlobalVarP()))
   else
-    l.VarPos.GlobalVar := TLapeType_Pointer.Create(nil).NewGlobalVar();
+    l.VarPos.GlobalVar := NewGlobalVarP();
 
   try
     p := getEvalProc(op_Assign, FBaseType, FBaseType);
@@ -1328,12 +1343,7 @@ begin
         p(v.VarPos.GlobalVar.Ptr, l.VarPos.GlobalVar.Ptr, nil);
   finally
     if (not UseCompiler) or (FCompiler = nil) then
-    begin
-      t := l.VarPos.GlobalVar.VarType;
       FreeAndNil(l.VarPos.GlobalVar);
-      FreeAndNil(t);
-      setNullResVar(l, 1);
-    end;
   end;
 end;
 
@@ -1549,7 +1559,11 @@ end;
 function TLapeType_Variant.VarToString(v: Pointer): lpString;
 begin
   if (v <> nil) then
-    Result := PVariant(v)^
+  try
+    Result := VarTypeAsText(VarType(PVariant(v)^));
+    Result := Result + '(' + PVariant(v)^ + ')';
+  except
+  end
   else
     Result := inherited;
 end;
@@ -4283,7 +4297,7 @@ function TLapeCompilerBase.addManagedVar(v: TLapeVar): TLapeVar;
 var
   i: Integer;
   p: TLapeEvalProc;
-  d: Boolean;
+  d: EvalBool;
   a: TLapeDeclArray;
 begin
   if (v = nil) then
@@ -4297,7 +4311,7 @@ begin
       else if TLapeGlobalVar(a[i]).isConstant and (a[i].Name = '') and (TLapeGlobalVar(a[i]).VarType <> nil) and TLapeGlobalVar(a[i]).VarType.Equals(v.VarType, False) then
       begin
         p := getEvalProc(op_cmp_Equal, TLapeGlobalVar(a[i]).VarType.BaseType, v.VarType.BaseType);
-        if ({$IFNDEF FPC}@{$ENDIF}p = nil) or ({$IFNDEF FPC}@{$ENDIF}p = {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) or (getEvalRes(op_cmp_Equal, TLapeGlobalVar(a[i]).VarType.BaseType, v.VarType.BaseType) <> ltBoolean) then
+        if ({$IFNDEF FPC}@{$ENDIF}p = nil) or ({$IFNDEF FPC}@{$ENDIF}p = {$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) or (getEvalRes(op_cmp_Equal, TLapeGlobalVar(a[i]).VarType.BaseType, v.VarType.BaseType) <> ltEvalBool) then
           Continue;
         p(@d, TLapeGlobalVar(a[i]).Ptr, TLapeGlobalVar(v).Ptr);
         if d then

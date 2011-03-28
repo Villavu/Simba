@@ -2327,7 +2327,7 @@ begin
   Result := nil;
   if (FLeft <> nil) then
     if (TLapeTree_Base(FLeft) is TLapeTree_MultiIf) then
-      Exit(FCompiler.getBaseType(ltBoolean))
+      Exit(FCompiler.getBaseType(ltEvalBool))
     else
       l := FLeft.resType()
   else
@@ -2359,7 +2359,7 @@ begin
     with TLapeTree_MultiIf(TLapeTree_Base(FLeft)) do
     begin
       v := NullResVar;
-      v.VarType := FCompiler.getBaseType(ltBoolean);
+      v.VarType := FCompiler.getBaseType(ltEvalBool);
       Result := v.VarType;
 
       if (FDest.VarType <> nil) and (FDest.VarPos.MemPos <> NullResVar.VarPos.MemPos) and v.VarType.Equals(FDest.VarType) then
@@ -2367,7 +2367,7 @@ begin
       else
       begin
         FDest := NullResVar;
-        v := getResVar(FCompiler.getTempVar(ltBoolean));
+        v := getResVar(FCompiler.getTempVar(ltEvalBool));
         if (v.VarPos.MemPos = mpVar) then
           v.VarPos.StackVar.isConstant := False;
       end;

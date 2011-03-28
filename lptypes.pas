@@ -74,18 +74,21 @@ type
   TStackOffset = UInt16;
   TPointerOffset = Int16;
   TParamSize = UInt16;
+  EvalBool = Boolean;
   {$ELSE}
   TStackInc = Int32;
   TVarStackOffset = UInt32;
   TStackOffset = UInt32;
   TPointerOffset = Int32;
   TParamSize = UInt32;
+  EvalBool = LongBool;
   {$ENDIF}
 
   PStackOffset = ^TStackOffset;
   PParamSize = ^TParamSize;
   PCodePos = ^TCodePos;
   PCodeOffset = ^TCodeOffset;
+  PEvalBool = ^EvalBool;
 
   TMemoryPos = (mpNone, mpStack, mpMem, mpVar);
   TLapeEvalProc = procedure(const Dest, Left, Right: Pointer);
@@ -107,9 +110,6 @@ type
     ltScriptMethod, ltImportedMethod                                          //Methods
   );
   LapeIntegerTypeRange = ltUInt8..ltInt64;
-
-  EvalBool = Boolean;
-  PEvalBool = ^EvalBool;
 
   EOperatorAssociative = (assocNone, assocLeft, assocRight);
   EOperator = (
@@ -314,7 +314,7 @@ const
   ltChar = ltAnsiChar;
   ltCharInt = ltUInt8;
   {$ENDIF}
-  ltEvalBool = ltBoolean;
+  ltEvalBool = ltLongBool;
 
   LapeTypeSize: array[ELapeBaseType] of Integer = (
     -1,
