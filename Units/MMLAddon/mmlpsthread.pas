@@ -53,6 +53,7 @@ const
   m_MessageBox = 9; //Data =  PMessageBoxData
   m_MessageDlg = 10; //Data = PMessageDlg
 type
+  //TStringArray = array of string;
     { TMMLPSThread }
     TCallBackData = record
       FormCallBack : procedure of object;

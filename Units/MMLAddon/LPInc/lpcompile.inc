@@ -45,13 +45,13 @@ addGlobalType('LongInt', 'Integer');
 addGlobalType('Integer', 'TColor');
 addGlobalType('Double', 'TDateTime');
 
-//addGlobalType('(rfReplaceAll, rfIgnoreCase)', 'TReplaceFlag');
-//addGlobalType('set of TReplaceFlag', 'TReplaceFlags');
+addGlobalType('(rfReplaceAll, rfIgnoreCase)', 'TReplaceFlag');
+addGlobalType('set of TReplaceFlag', 'TReplaceFlags');
 
-//addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
-//addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
-//addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
-//addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
+addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
+addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
+addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
+addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
 
 addGlobalType('array of string', 'TStringArray');
 addGlobalType('array of Integer', 'TIntegerArray');

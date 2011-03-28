@@ -72,18 +72,8 @@ type
 
   TMemoryPos = (mpNone, mpStack, mpMem, mpVar);
   TLapeEvalProc = procedure(const Dest, Left, Right: Pointer);
-  TLapeCallbackProc = procedure(const Params: PParamArray);
-  TLapeCallbackFunc = procedure(const Params: PParamArray; const Result: Pointer);
-
-  TIMemPos = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
-    MemPos: TMemoryPos;
-    isPointer: Boolean;
-    POffset: TPointerOffset;
-    case TMemoryPos of
-      mpMem: (Ptr: Pointer);
-      mpVar: (VOffset: TVarStackOffset);
-      mpStack: (SOffset: TStackOffset);
-  end;
+  TLapeImportedProc = procedure(const Params: PParamArray);
+  TLapeImportedFunc = procedure(const Params: PParamArray; const Result: Pointer);
 
   ELapeBaseType = (
     ltUnknown,
@@ -156,7 +146,7 @@ type
   PLapeSmallSet = ^TLapeSmallSet;
   PLapeLargeSet = ^TLapeLargeSet;
 
-  TLapeBaseClass = class(IUnknown)
+  TLapeBaseClass = class(TObject, IUnknown)
   protected
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;

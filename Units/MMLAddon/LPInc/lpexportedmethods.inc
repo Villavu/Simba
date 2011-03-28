@@ -328,7 +328,7 @@ addGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string
 addGlobalFunc('function BitmapFromText(const text, font: String): integer;', @lpBitmapFromText);
 addGlobalFunc('function TPAFromText(const text, font: String;var w,h : integer): TPointArray;', @lpTPAFromText);
 addGlobalFunc('procedure TPAFromTextWrap(const text, font: String;var w,h : integer;var TPA : TPointArray);', @lpTPAFromTextWrap);
-//addGlobalFunc('function MaskFromText(const text, font: String): TMask;', @lpMaskFromText);
+addGlobalFunc('function MaskFromText(const text, font: String): TMask;', @lpMaskFromText);
 addGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing,color, tol, len: integer;const font: string): string;', @lpGetTextAt);
 addGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,color, tol: integer;const font: string): string;', @lpgetTextAtEx);
 addGlobalFunc('function GetTextAtExWrap(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing,color, tol: integer;const font: string): string;', @lpGetTextAtEx);
@@ -349,7 +349,7 @@ addGlobalFunc('procedure SetBitmapSize(Bmp, NewW, NewH: integer);', @lpSetBitmap
 addGlobalFunc('procedure GetBitmapSize(Bmp: integer; var BmpW, BmpH: integer);', @lpGetBitmapSize);
 addGlobalFunc('procedure StretchBitmapResize(Bmp, NewW, NewH: integer);', @lpStretchBitmapResize);
 addGlobalFunc('function CreateMirroredBitmap(Bmp: integer): integer;', @lpCreateMirroredBitmap);
-//addGlobalFunc('function CreateMirroredBitmapEx(Bmp : integer; MirrorStyle : TBmpMirrorStyle) : integer;', @lpCreateMirroredBitmapEx);
+addGlobalFunc('function CreateMirroredBitmapEx(Bmp : integer; MirrorStyle : TBmpMirrorStyle) : integer;', @lpCreateMirroredBitmapEx);
 addGlobalFunc('procedure FastSetPixel(bmp, x, y: integer; Color: TColor);', @lpFastSetPixel);
 addGlobalFunc('procedure FastSetPixels(bmp: integer; TPA: TPointArray; Colors: TIntegerArray);', @lpFastSetPixels);
 addGlobalFunc('function FastGetPixel(bmp, x, y: integer): TColor;', @lpFastGetPixel);
@@ -377,8 +377,8 @@ addGlobalFunc('function GreyScaleBitmap(bitmap: integer): integer', @lpGreyScale
 addGlobalFunc('function BrightnessBitmap(Bitmap, br: integer): integer;', @lpBrightnessBitmap);
 addGlobalFunc('function ContrastBitmap(bitmap: integer; co: extended): integer;', @lpContrastBitmap);
 addGlobalFunc('function PosterizeBitmap(Bitmap: integer; po: integer): integer;', @lpPosterizeBitmap);
-//addGlobalFunc('function CreateMaskFromBitmap(Bitmap : integer) : TMask;', @lpCreateMaskFromBitmap);
-//addGlobalFunc('function FindMaskTolerance(const mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;', @lpFindMaskTolerance);
+addGlobalFunc('function CreateMaskFromBitmap(Bitmap : integer) : TMask;', @lpCreateMaskFromBitmap);
+addGlobalFunc('function FindMaskTolerance(const mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;', @lpFindMaskTolerance);
 addGlobalFunc('function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;', @lpFindBitmapMaskTolerance);
 addGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: integer; var x,y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;', @lpFindDeformedBitmapToleranceIn);
 addGlobalFunc('procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);', @lpDrawTPABitmap);
