@@ -99,6 +99,7 @@ type
     ltBoolean, ltByteBool, ltWordBool, ltLongBool,                            //Boolean
     ltAnsiChar, ltWideChar,                                                   //Char
     ltShortString, ltAnsiString, ltWideString, ltUnicodeString,               //String
+    ltVariant,                                                                //Variant
     ltSmallEnum, ltLargeEnum, ltSmallSet, ltLargeSet,                         //Set
     ltPointer,                                                                //Pointer
     ltRecord, ltUnion,                                                        //Struct
@@ -319,6 +320,7 @@ const
     SizeOf(Boolean), SizeOf(ByteBool), SizeOf(WordBool), SizeOf(LongBool),
     SizeOf(AnsiChar), SizeOf(WideChar),
     SizeOf(ShortString), SizeOf(AnsiString), SizeOf(WideString), SizeOf(UnicodeString),
+    SizeOf(Variant),
     SizeOf(ELapeSmallEnum), SizeOf(ELapeLargeEnum), SizeOf(TLapeSmallSet), SizeOf(TLapeLargeSet),
     SizeOf(Pointer),
     -1, -1,
@@ -341,6 +343,7 @@ const
   LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltScriptMethod, ltImportedMethod, ltShortString];
 
   NullDocPos: TDocPos = (Line: 0; Col: 0; FileName: nil);
+  NullRange: TLapeRange = (Lo: 0; Hi: 0);
 
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
   BinaryOperators = [op_AND, op_NOT, op_OR, op_XOR];

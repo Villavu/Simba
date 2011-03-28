@@ -195,15 +195,6 @@ type
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
   end;
 
-  {$IFDEF FPC}generic{$ENDIF} TLapeType_Bool<_Type> = class(TLapeType)
-  protected type
-    PType = ^_Type;
-  var public
-    function VarToString(v: Pointer): lpString; override;
-    function NewGlobalVar(Val: _Type; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
-    function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
-  end;
-
   {$IFDEF FPC}generic{$ENDIF} TLapeType_Char<_Type> = class(TLapeType)
   protected type
     PType = ^_Type;
@@ -239,13 +230,6 @@ type
   TLapeType_Extended = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Float<Extended>)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
-  TLapeType_ByteBool = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Bool<ByteBool>)
-    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
-  TLapeType_WordBool = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Bool<WordBool>)
-    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
-  TLapeType_LongBool = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Bool<LongBool>)
-    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
-
   TLapeType_AnsiChar = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Char<AnsiChar>)
     public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
   TLapeType_WideChar = class({$IFDEF FPC}specialize{$ENDIF} TLapeType_Char<WideChar>)
@@ -258,8 +242,11 @@ type
     function getAsString: lpString; override;
   public
     constructor Create(ARange: TLapeRange; ACompiler: TLapeCompilerBase; AVarType: TLapeType; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
+
     function NewGlobalVar(Value: Int64 = 0; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
+    function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
 
     property Range: TLapeRange read FRange;
     property VarType: TLapeType read FVarType;
@@ -292,6 +279,31 @@ type
   end;
 
   TLapeType_Boolean = class(TLapeType_Enum)
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+  end;
+
+  TLapeType_Bool = class(TLapeType_SubRange)
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    destructor Destroy; override;
+
+    function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
+    function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
+    function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
+  end;
+
+  TLapeType_ByteBool = class(TLapeType_Bool)
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+  end;
+
+  TLapeType_WordBool = class(TLapeType_Bool)
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+  end;
+
+  TLapeType_LongBool = class(TLapeType_Bool)
   public
     constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
   end;
@@ -1406,32 +1418,6 @@ begin
   {$ENDIF}
 end;
 
-function TLapeType_Bool{$IFNDEF FPC}<_Type>{$ENDIF}.VarToString(v: Pointer): lpString;
-begin
-  {$IFDEF FPC}
-  Result := BoolToStr(PType(v)^);
-  {$ELSE}
-  Result := 'Not implemented yet';
-  {$ENDIF}
-end;
-
-function TLapeType_Bool{$IFNDEF FPC}<_Type>{$ENDIF}.NewGlobalVar(Val: _Type; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
-begin
-  Result := inherited NewGlobalVarP(nil, AName, ADocPos);
-  PType(Result.Ptr)^ := Val;
-end;
-
-function TLapeType_Bool{$IFNDEF FPC}<_Type>{$ENDIF}.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
-{$IFNDEF FPC}var a: Boolean; b: PType;{$ENDIF}
-begin
-  {$IFDEF FPC}
-  Result := NewGlobalVar(StrToBool(Str), AName, ADocPos);
-  {$ELSE}
-  a := StrToBool(Str); b := @a;
-  Result := NewGlobalVar(b^ , AName, ADocPos);
-  {$ENDIF}
-end;
-
 function TLapeType_Char{$IFNDEF FPC}<_Type>{$ENDIF}.VarToString(v: Pointer): lpString;
 begin
   {$IFDEF FPC}
@@ -1535,21 +1521,6 @@ begin
   inherited Create(ltExtended, ACompiler, AName, ADocPos);
 end;
 
-constructor TLapeType_ByteBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-begin
-  inherited Create(ltByteBool, ACompiler, AName, ADocPos);
-end;
-
-constructor TLapeType_WordBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-begin
-  inherited Create(ltWordBool, ACompiler, AName, ADocPos);
-end;
-
-constructor TLapeType_LongBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-begin
-  inherited Create(ltLongBool, ACompiler, AName, ADocPos);
-end;
-
 constructor TLapeType_AnsiChar.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
 begin
   inherited Create(ltAnsiChar, ACompiler, AName, ADocPos);
@@ -1575,19 +1546,28 @@ begin
   inherited Create(ltUnknown, ACompiler, AName, ADocPos);
   if (AVarType = nil) then
     if (FRange.Lo < 0) then
-      AVarType := FCompiler.getBaseType(DetermineIntType(ARange.Hi))
+      AVarType := FCompiler.getBaseType(DetermineIntType('-'+IntToStr(ARange.Hi)))
     else
-      AVarType := FCompiler.getBaseType(DetermineIntType('-'+IntToStr(ARange.Hi)));
+      AVarType := FCompiler.getBaseType(DetermineIntType(ARange.Hi));
  if (AVarType <> nil) then
    FBaseType := AVarType.BaseType;
  FRange := ARange;
  FVarType := AVarType;
 end;
 
+function TLapeType_SubRange.VarToString(v: Pointer): lpString;
+begin
+  if (FVarType <> nil) then
+    Result := FVarType.VarToString(v)
+  else
+    Result := IntToStr(VarToInt(v));
+end;
+
 function TLapeType_SubRange.CreateCopy: TLapeType;
 type TLapeClassType = class of TLapeType_SubRange;
 begin
   Result := TLapeClassType(Self.ClassType).Create(FRange, FCompiler, FVarType, Name, @DocPos);
+  Result.FBaseType := FBaseType;
 end;
 
 function TLapeType_SubRange.NewGlobalVar(Value: Int64 = 0; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -1605,6 +1585,16 @@ begin
     ltUInt32: PUInt32(Result.Ptr)^ := Value;
     ltInt64: PInt64(Result.Ptr)^ := Value;
     ltUInt64: PUInt64(Result.Ptr)^ := Value;
+  end;
+end;
+
+function TLapeType_SubRange.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
+begin
+  with FVarType.NewGlobalVarStr(Str) do
+  try
+    Result := NewGlobalVar(AsInteger, AName, ADocPos);
+  finally
+    Free();
   end;
 end;
 
@@ -1629,7 +1619,6 @@ begin
 end;
 
 constructor TLapeType_Enum.Create(ACompiler: TLapeCompilerBase; AMemberMap: TEnumMap; AName: lpString = ''; ADocPos: PDocPos = nil);
-const NullRange: TLapeRange = (Lo: 0; Hi: 0);
 begin
   inherited Create(NullRange, ACompiler, nil, AName, ADocPos);
   FBaseType := ltLargeEnum;
@@ -1689,14 +1678,17 @@ var
 begin
   try
     Result := '';
-    i := Ord(PLapeSmallEnum(v)^);
+    i := VarToInt(v);
     if (i > -1) and (i < FMemberMap.Count) then
       Result := FMemberMap[i];
 
     if (Result = '') then
-      Result := 'InvalidEnum';
+      if (Name <> '') then
+        Result := Name + '(' + IntToStr(i) + ')'
+      else
+        Result := 'InvalidEnum';
   except
-    Result := 'EnumOutOfRange';
+    Result := 'EnumException';
   end;
 end;
 
@@ -1704,6 +1696,7 @@ function TLapeType_Enum.CreateCopy: TLapeType;
 type TLapeClassType = class of TLapeType_Enum;
 begin
   Result := TLapeClassType(Self.ClassType).Create(FCompiler, FMemberMap, Name, @DocPos);
+  Result.FBaseType := FBaseType;
 end;
 
 function TLapeType_Enum.NewGlobalVar(Value: Int64 = 0; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -1747,7 +1740,9 @@ begin
   Assert(FCompiler <> nil);
   Assert((Left = nil) or (Left.VarType = Self));
 
-  if (op in EnumOperators) and (Right <> nil) and ((Right.FVarType = nil) or (not (Right.FVarType.BaseType in LapeEnumTypes)) or Equals(Right.FVarType)) then
+  if ((BaseType in LapeBoolTypes) and (op in BinaryOperators + EnumOperators) and (Right <> nil) and (Right.VarType <> nil) and (Right.VarType.BaseType in LapeBoolTypes)) or
+     ((op in EnumOperators) and ((Right = nil) or (Right.VarType = nil) or (not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType)))
+  then
   try
     v := Right.FVarType;
     if (BaseIntType = ltUnknown) or (Right.FVarType = nil) or (Right.FVarType.BaseIntType = ltUnknown) then
@@ -1784,7 +1779,9 @@ begin
   Assert(FCompiler <> nil);
   Assert(Left.VarType = Self);
 
-  if ((BaseType in LapeBoolTypes) and (op in BinaryOperators)) or ((op in EnumOperators) and ((Right.VarType = nil) or (not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType))) then
+  if ((BaseType in LapeBoolTypes) and (op in BinaryOperators + EnumOperators) and (Right.VarType <> nil) and (Right.VarType.BaseType in LapeBoolTypes)) or
+     ((op in EnumOperators) and ((Right.VarType = nil) or (not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType)))
+  then
   try
     a := NullResVar;
     t := NullResVar;
@@ -1826,6 +1823,71 @@ begin
   addMember('False');
   addMember('True');
   FBaseType := ltBoolean;
+end;
+
+constructor TLapeType_Bool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+begin
+  inherited Create(NullRange, ACompiler, ACompiler.getBaseType(ltBoolean).CreateCopy(), AName, ADocPos);
+end;
+
+destructor TLapeType_Bool.Destroy;
+begin
+  FVarType.Free();
+  inherited;
+end;
+
+function TLapeType_Bool.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
+begin
+  Result := FVarType.EvalRes(Op, Right);
+end;
+
+function TLapeType_Bool.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
+begin
+  Assert(Left.VarType = Self);
+  Left.FVarType := FVarType;
+  try
+    Result := FVarType.EvalConst(Op, Left, Right);
+  finally
+    Left.FVarType := Self;
+  end;
+end;
+
+function TLapeType_Bool.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
+begin
+  Assert(Left.VarType = Self);
+  Left.VarType := FVarType;
+  try
+    Result := FVarType.Eval(Op, Dest, Left, Right, Offset, Pos);
+  finally
+    Left.VarType := Self;
+  end;
+end;
+
+constructor TLapeType_ByteBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+const BoolRange: TLapeRange =(Lo: Ord(Low(ByteBool)); Hi: Ord(High(ByteBool)));
+begin
+  inherited Create(ACompiler, AName, ADocPos);
+  FRange := BoolRange;
+  FBaseType := ltByteBool;
+  FVarType.FSize := LapeTypeSize[ltByteBool];
+end;
+
+constructor TLapeType_WordBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+const BoolRange: TLapeRange =(Lo: Ord(Low(WordBool)); Hi: Ord(High(WordBool)));
+begin
+  inherited Create(ACompiler, AName, ADocPos);
+  FRange := BoolRange;
+  FBaseType := ltWordBool;
+  FVarType.FSize := LapeTypeSize[ltWordBool];
+end;
+
+constructor TLapeType_LongBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
+const BoolRange: TLapeRange =(Lo: Ord(Low(LongBool)); Hi: Ord(High(LongBool)));
+begin
+  inherited Create(ACompiler, AName, ADocPos);
+  FRange := BoolRange;
+  FBaseType := ltLongBool;
+  FVarType.FSize := LapeTypeSize[ltLongBool];
 end;
 
 function TLapeType_Set.getAsString: lpString;
@@ -2112,7 +2174,7 @@ function TLapeType_DynArray.CreateCopy: TLapeType;
 type TLapeClassType = class of TLapeType_DynArray;
 begin
   Result := TLapeClassType(Self.ClassType).Create(FPType, FCompiler, Name, @DocPos);
-  Result.FBaseTYpe := FBaseType;
+  Result.FBaseType := FBaseType;
 end;
 
 function TLapeType_DynArray.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
