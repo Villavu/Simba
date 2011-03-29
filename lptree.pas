@@ -19,7 +19,7 @@ type
   TLapeTree_Base = class;
   TLapeTree_ExprBase = class;
 
-  TLapeFlowStatement = record
+  TLapeFlowStatement = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
     CodeOffset: Integer;
     DocPos: TDocPos;
     JumpSafe: Boolean;
@@ -780,48 +780,51 @@ var
 
 begin
   Result := ToType;
-  if (Result = nil) and (FValues.Count > 0) then
-  begin
-    r.Lo := 0;
-    r.Hi := FValues.Count - 1;
-
-    for i := 0 to r.Hi do
+  if (Result = nil) then
+    if (FValues.Count > 0) then
     begin
-      if (FValues[i] is TLapeTree_Range) and (TLapeTree_Range(FValues[i]).Hi <> nil) then
-      begin
-        t := TLapeTree_Range(FValues[i]).Hi.resType();
-        if (t = nil) or (not (t is TLapeType_SubRange)) or ((Result <> nil) and (not t.CompatibleWith(Result))) then
-          Exit(nil);
-        Exit(FCompiler.addManagedType(TLapeType_Set.Create(TLapeType_SubRange(t), FCompiler, '', @DocPos)))
-      end
-      else if (not (FValues[i] is TLapeTree_ExprBase)) then
-        Exit(nil)
-      else
-        t := determineArrType(TLapeTree_ExprBase(FValues[i]).resType());
+      r.Lo := 0;
+      r.Hi := FValues.Count - 1;
 
-      if (Result = nil) then
-        Result := t
-      else if (t <> nil) and t.Equals(Result) then
-        {nothing}
-      else if (t <> nil) and (t.BaseType > Result.BaseType) and t.CompatibleWith(Result) then
-        Result := t
-      else if (t <> nil) and (Result.BaseType >= t.BaseType) and Result.CompatibleWith(t) then
-        {nothing}
-      else if FCompiler.getBaseType(ltVariant).CompatibleWith(t) and FCompiler.getBaseType(ltVariant).CompatibleWith(Result) then
-        Result := FCompiler.getBaseType(ltVariant)
-      else
+      for i := 0 to r.Hi do
       begin
-        Result := nil;
-        Break;
+        if (FValues[i] is TLapeTree_Range) and (TLapeTree_Range(FValues[i]).Hi <> nil) then
+        begin
+          t := TLapeTree_Range(FValues[i]).Hi.resType();
+          if (t = nil) or (not (t is TLapeType_SubRange)) or ((Result <> nil) and (not t.CompatibleWith(Result))) then
+            Exit(nil);
+          Exit(FCompiler.addManagedType(TLapeType_Set.Create(TLapeType_SubRange(t), FCompiler, '', @DocPos)))
+        end
+        else if (not (FValues[i] is TLapeTree_ExprBase)) then
+          Exit(nil)
+        else
+          t := determineArrType(TLapeTree_ExprBase(FValues[i]).resType());
+
+        if (Result = nil) then
+          Result := t
+        else if (t <> nil) and t.Equals(Result) then
+          {nothing}
+        else if (t <> nil) and (t.BaseType > Result.BaseType) and t.CompatibleWith(Result) then
+          Result := t
+        else if (t <> nil) and (Result.BaseType >= t.BaseType) and Result.CompatibleWith(t) then
+          {nothing}
+        else if FCompiler.getBaseType(ltVariant).CompatibleWith(t) and FCompiler.getBaseType(ltVariant).CompatibleWith(Result) then
+          Result := FCompiler.getBaseType(ltVariant)
+        else
+        begin
+          Result := nil;
+          Break;
+        end;
       end;
-    end;
 
-    if (Result <> nil) then
-      if (Result is TLapeType_Enum) then
-        Result := FCompiler.addManagedType(TLapeType_Set.Create(TLapeType_Enum(Result), FCompiler, '', @DocPos))
-      else
-        Result := FCompiler.addManagedType(TLapeType_StaticArray.Create(r, Result, FCompiler, '', @DocPos));
-  end;
+      if (Result <> nil) then
+        if (Result is TLapeType_Enum) then
+          Result := FCompiler.addManagedType(TLapeType_Set.Create(TLapeType_Enum(Result), FCompiler, '', @DocPos))
+        else
+          Result := FCompiler.addManagedType(TLapeType_StaticArray.Create(r, Result, FCompiler, '', @DocPos));
+    end
+    else
+      Result := TLapeType_StaticArray.Create(NullRange, FCompiler.getBaseType(ltVariant), FCompiler, '', @DocPos);
 end;
 
 function TLapeTree_OpenArray.Evaluate: TLapeGlobalVar;
@@ -1003,7 +1006,7 @@ begin
           Right := TLapeTree_Operator.Create(op_Minus, FCompiler, @FValues[i].DocPos);
           with TLapeTree_Operator(Right) do
           begin
-            Left := TLapeTree_ResVar.Create(getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(i)).NewGlobalVarStr(IntToStr(i)))), FCompiler, @FValues[i].DocPos);
+            Left := TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(i)).NewGlobalVarStr(IntToStr(i)))), FCompiler, @FValues[i].DocPos);
             Right := TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(DetermineIntType(TLapeType_StaticArray(ToType).Range.Lo)).NewGlobalVarStr(IntToStr(TLapeType_StaticArray(ToType).Range.Lo)))), FCompiler, @FValues[i].DocPos);
           end;
         end;

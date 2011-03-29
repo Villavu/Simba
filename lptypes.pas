@@ -65,8 +65,13 @@ type
     FileName: PlpChar;
   end;
 
+  TLapeRange = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
+    Lo, Hi: Int64;
+  end;
+
   TCodePos = UInt32;
   TCodeOffset = Int32;
+
   {$IFDEF Lape_SmallCode}
   //Means Lape can only locate up to 65kb of local variables (per stackframe)
   TStackInc = Int16;
@@ -147,10 +152,6 @@ type
     op_UnaryMinus,
     op_UnaryPlus
   );
-
-  TLapeRange = record
-    Lo, Hi: Int64;
-  end;
 
   ELapeSmallEnum = (__LapeSmallEnum1,__LapeSmallEnum2,__LapeSmallEnum3,__LapeSmallEnum4,__LapeSmallEnum5,__LapeSmallEnum6,__LapeSmallEnum7,__LapeSmallEnum8,__LapeSmallEnum9,__LapeSmallEnum10,__LapeSmallEnum11,__LapeSmallEnum12,__LapeSmallEnum13,__LapeSmallEnum14,__LapeSmallEnum15,__LapeSmallEnum16,__LapeSmallEnum17,__LapeSmallEnum18,__LapeSmallEnum19,__LapeSmallEnum20,__LapeSmallEnum21,__LapeSmallEnum22,__LapeSmallEnum23,__LapeSmallEnum24,__LapeSmallEnum25,__LapeSmallEnum26,__LapeSmallEnum27,__LapeSmallEnum28,__LapeSmallEnum29,__LapeSmallEnum30,__LapeSmallEnum31,__LapeSmallEnum32);
   ELapeLargeEnum = (__LapeLargeEnum1,__LapeLargeEnum2,__LapeLargeEnum3,__LapeLargeEnum4,__LapeLargeEnum5,__LapeLargeEnum6,__LapeLargeEnum7,__LapeLargeEnum8,__LapeLargeEnum9,__LapeLargeEnum10,__LapeLargeEnum11,__LapeLargeEnum12,__LapeLargeEnum13,__LapeLargeEnum14,__LapeLargeEnum15,__LapeLargeEnum16,__LapeLargeEnum17,__LapeLargeEnum18,__LapeLargeEnum19,__LapeLargeEnum20,__LapeLargeEnum21,__LapeLargeEnum22,__LapeLargeEnum23,__LapeLargeEnum24,__LapeLargeEnum25,__LapeLargeEnum26,__LapeLargeEnum27,__LapeLargeEnum28,__LapeLargeEnum29,__LapeLargeEnum30,__LapeLargeEnum31,__LapeLargeEnum32,__LapeLargeEnum33,__LapeLargeEnum34,__LapeLargeEnum35,__LapeLargeEnum36,__LapeLargeEnum37,__LapeLargeEnum38,__LapeLargeEnum39,__LapeLargeEnum40,__LapeLargeEnum41,__LapeLargeEnum42,__LapeLargeEnum43,__LapeLargeEnum44,__LapeLargeEnum45,__LapeLargeEnum46,__LapeLargeEnum47,__LapeLargeEnum48,__LapeLargeEnum49,__LapeLargeEnum50,
@@ -314,7 +315,12 @@ const
   ltChar = ltAnsiChar;
   ltCharInt = ltUInt8;
   {$ENDIF}
+
+  {$IFDEF Lape_SmallCode}
+  ltEvalBool = ltBoolean;
+  {$ELSE}
   ltEvalBool = ltLongBool;
+  {$ENDIF}
 
   LapeTypeSize: array[ELapeBaseType] of Integer = (
     -1,

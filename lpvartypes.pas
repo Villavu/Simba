@@ -590,9 +590,7 @@ type
     procedure setEmitter(AEmitter: TLapeCodeEmitter); virtual;
   public
     Options: ECompilerOptionsSet;
-    Options_PackEnum: UInt8;
     Options_PackRecords: UInt8;
-    Options_PackSet: UInt8;
     FreeEmitter: Boolean;
 
     constructor Create(AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True); reintroduce; virtual;
@@ -4096,7 +4094,8 @@ begin
   if FreeEmitter and (FEmitter <> nil) then
     FEmitter.Free();
   FEmitter := AEmitter;
-  Reset();
+  if (FEmitter <> nil) then
+    FEmitter.Reset();
 end;
 
 procedure TLapeCompilerBase.Reset;
@@ -4126,9 +4125,7 @@ end;
 destructor TLapeCompilerBase.Destroy;
 begin
   Clear();
-
-  if FreeEmitter and (FEmitter <> nil) then
-    FreeAndNil(FEmitter);
+  setEmitter(nil);
 
   FreeAndNil(FGlobalDeclarations);
   FreeAndNil(FManagedDeclarations);
@@ -4316,7 +4313,6 @@ begin
         p(@d, TLapeGlobalVar(a[i]).Ptr, TLapeGlobalVar(v).Ptr);
         if d then
         begin
-          WriteLn('No Doubles! ', v.Name);
           v.Free();
           Exit(TLapeGlobalVar(a[i]));
         end;
@@ -4398,7 +4394,7 @@ end;
 
 function TLapeCompilerBase.getDeclaration(Name: lpString; LocalOnly: Boolean = False): TLapeDeclaration;
 begin
-  Result := getDeclaration(Name, FStackInfo, Localonly);
+  Result := getDeclaration(Name, FStackInfo, LocalOnly);
 end;
 
 end.

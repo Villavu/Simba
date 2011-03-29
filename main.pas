@@ -66,8 +66,8 @@ var
   i: Integer;
 begin
   WriteLn(Ord(Low(opCode)), '..', Ord(High(opCode)));
-  for i := 0 to lpgList.Count - 1 do
-    WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
+  //for i := 0 to lpgList.Count - 1 do
+  //  WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
 end;
 
 procedure MyWriteLn_String(Params: PParamArray);

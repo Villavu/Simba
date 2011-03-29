@@ -54,7 +54,7 @@ type
     function ParseMethod(FuncForwards: TLapeFuncForwards; isExternal: Boolean = False): TLapeTree_Method;
     function ParseType(TypeForwards: TLapeTypeForwards): TLapeType; virtual;
     procedure ParseTypeBlock; virtual;
-    function ParseVarBlock: TLapeTree_VarList; virtual;
+    function ParseVarBlock(OneOnly: Boolean = False; ValidEnd: EParserTokenSet = [tk_sym_SemiColon]): TLapeTree_VarList; virtual;
 
     function ParseExpression(ReturnOn: EParserTokenSet = []): TLapeTree_ExprBase; virtual;
     function ParseTypeExpression(ReturnOn: EParserTokenSet = []): TLapeTree_Base; virtual;
@@ -306,6 +306,9 @@ begin
           tk_kw_Const, tk_kw_Var: t := ParseVarBlock();
           tk_kw_Function, tk_kw_Procedure: t := ParseMethod(f);
           tk_kw_Type: ParseTypeBlock();
+          {$IFNDEF Lape_ForceBlock}
+          else if (not StopAfterBeginEnd) then t := ParseExpression()
+          {$ENDIF}
           else LapeException(lpeBlockExpected, FTokenizer.DocPos);
         end;
         if (t <> nil) then
@@ -748,7 +751,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     finally
       if (t <> nil) then
       begin
-        FTokenizer.TempRollBack();
+        FTokenizer.tempRollBack();
         t.Free();
       end;
     end;
@@ -819,7 +822,7 @@ begin
   end;
 end;
 
-function TLapeCompiler.ParseVarBlock: TLapeTree_VarList;
+function TLapeCompiler.ParseVarBlock(OneOnly: Boolean = False; ValidEnd: EParserTokenSet = [tk_sym_SemiColon]): TLapeTree_VarList;
 var
   isConst: Boolean;
   a: TStringArray;
@@ -849,7 +852,7 @@ begin
         if isConst then
           FTokenizer.Expect([tk_op_Assign, tk_sym_Equals], True, False)
         else
-          FTokenizer.Expect([tk_op_Assign, tk_sym_Equals, tk_sym_SemiColon], True, False);
+          FTokenizer.Expect([tk_op_Assign, tk_sym_Equals] + ValidEnd, True, False);
       end;
 
       if (FTokenizer.Tok = tk_sym_Equals) then
@@ -861,7 +864,7 @@ begin
           TLapeTree_OpenArray(b).ToType := t;
 
         try
-          FTokenizer.Expect(tk_sym_SemiColon, False, False);
+          FTokenizer.Expect(ValidEnd, False, False);
           v2 := b.Evaluate();
         finally
           if (b <> nil) then
@@ -874,7 +877,7 @@ begin
           LapeException(lpeDefaultToMoreThanOne, FTokenizer.DocPos);
 
         b := ParseExpression();
-        FTokenizer.Expect(tk_sym_SemiColon, False, False);
+        FTokenizer.Expect(ValidEnd, False, False);
       end;
 
       if (t = nil) then
@@ -917,7 +920,7 @@ begin
         if (v is TLapeVar) then
           TLapeVar(v).isConstant := isConst;
       end;
-    until (FTokenizer.PeekNoJunk() <> tk_Identifier);
+    until OneOnly or (FTokenizer.PeekNoJunk() <> tk_Identifier);
 
   except
     Result.Free();
@@ -1299,6 +1302,9 @@ begin
 
     tk_kw_Begin: Result := ParseBeginEnd();
     tk_kw_Case: Result := ParseCase();
+    {$IFNDEF Lape_ForceBlock}
+    tk_kw_Const, tk_kw_Var: Result := ParseVarBlock(True);
+    {$ENDIF}
     tk_kw_For: Result := ParseFor();
     tk_kw_If: Result := ParseIf();
     tk_kw_Repeat: Result := ParseRepeat();
@@ -1413,7 +1419,30 @@ begin
   Result := TLapeTree_For.Create(Self, getPDocPos());
   try
 
-    Result.Counter := ParseExpression();
+    {$IFNDEF Lape_ForceBlock}
+    if (FTokenizer.PeekNoJunk() = tk_kw_Var) then
+      with ParseVarBlock(True, [tk_kw_To]) do
+      try
+        if (Vars.Count <> 1) then
+          LapeException(lpeVariableExpected, DocPos);
+
+        if (Vars[0].Default <> nil) then
+        begin
+          Result.Counter := TLapeTree_Operator.Create(op_Assign, Compiler, @DocPos);
+          with TLapeTree_Operator(Result.Counter) do
+          begin
+            Left := TLapeTree_ResVar.Create(getResVar(Vars[0].VarDecl), Compiler, @DocPos);
+            Right := Vars[0].Default;
+          end;
+        end
+        else
+          Result.Counter := TLapeTree_ResVar.Create(getResVar(Vars[0].VarDecl), Compiler, @DocPos);
+      finally
+        Free();
+      end
+    else
+    {$ENDIF}
+      Result.Counter := ParseExpression();
     FTokenizer.Expect([tk_kw_To, tk_kw_DownTo], False, False);
     if (FTokenizer.Tok = tk_kw_DownTo) then
       Result.WalkDown := True;

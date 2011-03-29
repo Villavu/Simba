@@ -112,7 +112,7 @@ type
   EParserTokenSet = set of EParserToken;
 
   PTokenizerState = ^TTokenizerState;
-  TTokenizerState = record
+  TTokenizerState = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
     TokStart, Pos: Integer;
     LastTok, Tok: EParserToken;
     DocPos: TDocPos;
@@ -147,7 +147,7 @@ type
     function getState: Pointer; virtual;
     procedure setState(const State: Pointer; FreeState: Boolean = True); virtual;
     function getChar(Offset: Integer = 0): lpChar; virtual; abstract;
-    function TempRollBack: EParserToken; virtual;
+    function tempRollBack: EParserToken; virtual;
 
     function Next: EParserToken; virtual;
     function NextNoWhiteSpace: EParserToken; virtual;
@@ -189,7 +189,7 @@ type
     property Doc: lpString read FDoc write setDoc;
   end;
 
-  TLapeKeyword = record
+  TLapeKeyword = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
     Keyword: lpString;
     Token: EParserToken;
   end;
@@ -199,6 +199,9 @@ const
   tk_sym_Caret = tk_op_Deref;
   tk_sym_Dot = tk_op_Dot;
   tk_sym_Equals = tk_cmp_Equal;
+
+  TokWhiteSpace = [tk_WhiteSpace, tk_NewLine];
+  TokJunk = TokWhiteSpace + [tk_Comment, tk_Directive];
 
   ParserToken_FirstOperator = tk_cmp_Equal;
   ParserToken_LastOperator = tk_op_XOR;
@@ -804,7 +807,8 @@ begin
   Result := FTok;
   FTok := FLastTok;
   FLastTok := tk_NULL;
-  FPos := FPos - 1;
+  FPos := FTokStart - 1;
+  FTokStart := FPos;
 end;
 
 function TLapeTokenizerBase.Next: EParserToken;
@@ -829,7 +833,7 @@ begin
   lTok := FTok;
   repeat
     Result := Next();
-  until (not (Result in [tk_WhiteSpace, tk_NewLine]));
+  until (not (Result in TokWhiteSpace));
   FLastTok := lTok;
 end;
 
@@ -840,7 +844,7 @@ begin
   lTok := FTok;
   repeat
     Result := Next();
-  until (not (Result in [tk_WhiteSpace, tk_NewLine, tk_Comment]));
+  until (not (Result in TokJunk));
   FLastTok := lTok;
 end;
 
@@ -849,8 +853,11 @@ var
   p: Pointer;
 begin
   p := getState;
-  Result := Next();
-  setState(p);
+  try
+    Result := Next();
+  finally
+    setState(p);
+  end;
 end;
 
 function TLapeTokenizerBase.PeekNoWhiteSpace: EParserToken;
@@ -858,8 +865,11 @@ var
   p: Pointer;
 begin
   p := getState;
-  Result := NextNoWhiteSpace();
-  setState(p);
+  try
+    Result := NextNoWhiteSpace();
+  finally
+    setState(p);
+  end;
 end;
 
 function TLapeTokenizerBase.PeekNoJunk: EParserToken;
@@ -867,8 +877,11 @@ var
   p: Pointer;
 begin
   p := getState;
-  Result := NextNoJunk();
-  setState(p);
+  try
+    Result := NextNoJunk();
+  finally
+    setState(p);
+  end;
 end;
 
 function TLapeTokenizerBase.Expect(Token: EParserToken; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken;
