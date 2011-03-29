@@ -942,10 +942,7 @@ begin
       Result.VarPos.StackVar.isConstant := False;
     end
     else
-    begin
-      Result := StackResVar;
-      Result.VarType := ToType;
-    end;
+      Result := FCompiler.getTempStackVar(ToType)
   end;
 
   if (ToType is TLapeType_Set) then
@@ -2947,7 +2944,9 @@ begin
   if (not (cnd.VarType.Size in [1, 2, 4, 8])) then
   begin
     tmp := cnd;
-    if (cnd.VarType.BaseType in LapeStringTypes + LapeCharTypes) then
+    if FCompiler.getBaseType(ltEvalBool).CompatibleWith(cnd.VarType) then
+      cnd := FCompiler.getBaseType(ltEvalBool).Eval(op_Assign, e, FCompiler.getTempStackVar(ltEvalBool), cnd, Offset, @FCondition.DocPos)
+    else if (cnd.VarType.BaseType in LapeStringTypes + LapeCharTypes) then
       cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(''))), Offset, @FCondition.DocPos)
     else
       cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr('0'))), Offset, @FCondition.DocPos);
@@ -3206,7 +3205,9 @@ begin
   if (not (cnd.VarType.Size in [1, 2, 4, 8])) then
   begin
     tmp := cnd;
-    if (cnd.VarType.BaseType in LapeStringTypes + LapeCharTypes) then
+    if FCompiler.getBaseType(ltEvalBool).CompatibleWith(cnd.VarType) then
+      cnd := FCompiler.getBaseType(ltEvalBool).Eval(op_Assign, e, FCompiler.getTempStackVar(ltEvalBool), cnd, Offset, @FCondition.DocPos)
+    else if (cnd.VarType.BaseType in LapeStringTypes + LapeCharTypes) then
       cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(''))), Offset, @FCondition.DocPos)
     else
       cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr('0'))), Offset, @FCondition.DocPos);
@@ -3503,7 +3504,9 @@ begin
   if (not (cnd.VarType.Size in [1, 2, 4, 8])) then
   begin
     tmp := cnd;
-    if (cnd.VarType.BaseType in LapeStringTypes + LapeCharTypes) then
+    if FCompiler.getBaseType(ltEvalBool).CompatibleWith(cnd.VarType) then
+      cnd := FCompiler.getBaseType(ltEvalBool).Eval(op_Assign, e, FCompiler.getTempStackVar(ltEvalBool), cnd, Offset, @FCondition.DocPos)
+    else if (cnd.VarType.BaseType in LapeStringTypes + LapeCharTypes) then
       cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(''))), Offset, @FCondition.DocPos)
     else
       cnd := cnd.VarType.Eval(op_cmp_NotEqual, e, cnd, getResVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr('0'))), Offset, @FCondition.DocPos);

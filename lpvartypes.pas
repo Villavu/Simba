@@ -317,6 +317,12 @@ type
     constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
   end;
 
+  {$IFDEF Lape_SmallCode}
+  TLapeType_EvalBool = TLapeType_Boolean;
+  {$ELSE}
+  TLapeType_EvalBool = TLapeType_LongBool;
+  {$ENDIF}
+
   TLapeType_Set = class(TLapeType)
   protected
     FRange: TLapeType_SubRange;
@@ -613,6 +619,8 @@ type
     function addStackVar(VarType: TLapeType; Name: lpString): TLapeStackVar; virtual;
     function getTempVar(VarType: ELapeBaseType; Lock: Integer = 1): TLapeStackTempVar; overload; virtual;
     function getTempVar(VarType: TLapeType; Lock: Integer = 1): TLapeStackTempVar; overload; virtual;
+    function getTempStackVar(VarType: ELapeBaseType): TResVar; overload; virtual;
+    function getTempStackVar(VarType: TLapeType): TResVar; overload; virtual;
     function getPointerType(PType: ELapeBaseType): TLapeType_Pointer; overload; virtual;
     function getPointerType(PType: TLapeType): TLapeType_Pointer; overload; virtual;
     function getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration; overload; virtual;
@@ -638,7 +646,7 @@ const
   StackResVar:TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpStack;StackVar : nil; ForceVariable: False));
 
   Lape_RefParams = [lptOut, lptVar];
-  Lape_PackRecordsDef = 4;
+  Lape_PackRecordsDef = 2;
 
 implementation
 
@@ -1774,15 +1782,15 @@ end;
 
 function TLapeType_Enum.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
 begin
-  if (op in EnumOperators) and ((Right = nil) or (not (Right.BaseType in LapeEnumTypes)) or Equals(Right)) then
-    if (BaseIntType = ltUnknown) or (Right.BaseIntType = ltUnknown) then
-      Exit(nil)
-    else
-    begin
-      Result := FCompiler.getBaseType(BaseIntType).EvalRes(Op, FCompiler.getBaseType(Right.BaseIntType));
-      if (not (op in CompareOperators)) then
-        Result := Self;
-    end
+  if (Right <> nil) and (Right.BaseIntType <> ltUnknown) and
+     (((BaseType in LapeBoolTypes) and (op in BinaryOperators + EnumOperators) and (Right.BaseType in LapeBoolTypes)) or
+     ((op in EnumOperators) and ((not (Right.BaseType in LapeEnumTypes)) or Equals(Right))))
+  then
+  begin
+    Result := FCompiler.getBaseType(BaseIntType).EvalRes(Op, FCompiler.getBaseType(Right.BaseIntType));
+    if (not (op in CompareOperators)) then
+      Result := Self;
+  end
   else
     Result := inherited;
 end;
@@ -1793,10 +1801,11 @@ var
   t: TLapeGlobalVar;
 begin
   Assert(FCompiler <> nil);
-  Assert((Left = nil) or (Left.VarType = Self));
+  Assert((Left = nil) or (Left.VarType = Self));;
 
-  if ((BaseType in LapeBoolTypes) and (op in BinaryOperators + EnumOperators) and (Right <> nil) and (Right.VarType <> nil) and (Right.VarType.BaseType in LapeBoolTypes)) or
-     ((op in EnumOperators) and ((Right = nil) or (Right.VarType = nil) or (not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType)))
+  if (Right <> nil) and (Right.VarType <> nil) and (Right.VarType.BaseIntType <> ltUnknown) and
+     (((BaseType in LapeBoolTypes) and (op in BinaryOperators + EnumOperators) and (Right.VarType.BaseType in LapeBoolTypes)) or
+     ((op in EnumOperators) and ((not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType))))
   then
   try
     v := Right.FVarType;
@@ -1834,8 +1843,9 @@ begin
   Assert(FCompiler <> nil);
   Assert(Left.VarType = Self);
 
-  if ((BaseType in LapeBoolTypes) and (op in BinaryOperators + EnumOperators) and (Right.VarType <> nil) and (Right.VarType.BaseType in LapeBoolTypes)) or
-     ((op in EnumOperators) and ((Right.VarType = nil) or (not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType)))
+  if (Right.VarType <> nil) and (Right.VarType.BaseIntType <> ltUnknown) and
+     (((BaseType in LapeBoolTypes) and (op in BinaryOperators + EnumOperators) and (Right.VarType.BaseType in LapeBoolTypes)) or
+     ((op in EnumOperators) and ((not (Right.VarType.BaseType in LapeEnumTypes)) or Equals(Right.VarType))))
   then
   try
     a := NullResVar;
@@ -1919,7 +1929,7 @@ begin
 end;
 
 constructor TLapeType_ByteBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-const BoolRange: TLapeRange =(Lo: Ord(Low(ByteBool)); Hi: Ord(High(ByteBool)));
+const BoolRange: TLapeRange =(Lo: Ord(Low(UInt8{ByteBool})); Hi: Ord(High(UInt8{ByteBool})));
 begin
   inherited Create(ACompiler, AName, ADocPos);
   FRange := BoolRange;
@@ -1928,7 +1938,7 @@ begin
 end;
 
 constructor TLapeType_WordBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-const BoolRange: TLapeRange =(Lo: Ord(Low(WordBool)); Hi: Ord(High(WordBool)));
+const BoolRange: TLapeRange =(Lo: Ord(Low(UInt16{WordBool})); Hi: Ord(High(UInt16{WordBool})));
 begin
   inherited Create(ACompiler, AName, ADocPos);
   FRange := BoolRange;
@@ -1937,7 +1947,7 @@ begin
 end;
 
 constructor TLapeType_LongBool.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
-const BoolRange: TLapeRange =(Lo: Ord(Low(LongBool)); Hi: Ord(High(LongBool)));
+const BoolRange: TLapeRange =(Lo: Ord(Low(UInt32{LongBool})); Hi: Ord(High(UInt32{LongBool})));
 begin
   inherited Create(ACompiler, AName, ADocPos);
   FRange := BoolRange;
@@ -4356,6 +4366,17 @@ end;
 function TLapeCompilerBase.getTempVar(VarType: TLapeType; Lock: Integer = 1): TLapeStackTempVar;
 begin
   Result := FStackInfo.getTempVar(VarType, Lock);
+end;
+
+function TLapeCompilerBase.getTempStackVar(VarType: ELapeBaseType): TResVar;
+begin
+  Result := getTempStackVar(FBaseTypes[VarType]);
+end;
+
+function TLapeCompilerBase.getTempStackVar(VarType: TLapeType): TResVar;
+begin
+  Result := StackResVar;
+  Result.VarType := VarType;
 end;
 
 function TLapeCompilerBase.getPointerType(PType: ELapeBaseType): TLapeType_Pointer;

@@ -2425,12 +2425,22 @@ Arr[op_UnaryMinus][ltExtended][ltUnknown] := @lpeExtended_UMIN;
 Arr[op_UnaryMinus][ltVariant][ltUnknown] := @lpeVariant_UMIN;
 
 //Variant
-Arr[op_Assign][ltVariant][ltAnsiChar] := Arr[op_Assign][ltVariant][ltUInt8];
-Arr[op_Assign][ltVariant][ltWideChar] := Arr[op_Assign][ltVariant][ltUInt16];
+Arr[op_Assign][ltVariant][ltBoolean] := @lpeVariant_ASGN_Boolean;
+Arr[op_Assign][ltVariant][ltByteBool] := Arr[op_Assign][ltVariant][ltBoolean];
+Arr[op_Assign][ltVariant][ltWordBool] := @lpeVariant_ASGN_WBool;
+Arr[op_Assign][ltVariant][ltLongBool] := @lpeVariant_ASGN_LBool;
+Arr[op_Assign][ltVariant][ltAnsiChar] := @lpeVariant_ASGN_AChar;
+Arr[op_Assign][ltVariant][ltWideChar] := @lpeVariant_ASGN_WChar;
 Arr[op_Assign][ltVariant][ltShortString] := @lpeVariant_ASGN_SString;
 Arr[op_Assign][ltVariant][ltAnsiString] := @lpeVariant_ASGN_AString;
 Arr[op_Assign][ltVariant][ltWideString] := @lpeVariant_ASGN_WString;
 Arr[op_Assign][ltVariant][ltUnicodeString] := @lpeVariant_ASGN_UString;
+
+//Boolean
+Arr[op_Assign][ltBoolean][ltVariant] := @lpeBoolean_ASGN_Variant;
+Arr[op_Assign][ltByteBool][ltVariant] := Arr[op_Assign][ltBoolean][ltVariant];
+Arr[op_Assign][ltWordBool][ltVariant] := @lpeWBool_ASGN_Variant;
+Arr[op_Assign][ltLongBool][ltVariant] := @lpeLBool_ASGN_Variant;
 
 //string + char
 //ShortString
@@ -2684,10 +2694,6 @@ Arr[op_cmp_LessThanOrEqual][ltAnsiChar][ltWideChar] := Arr[op_cmp_LessThanOrEqua
 Arr[op_cmp_NotEqual][ltAnsiChar][ltAnsiChar] := Arr[op_cmp_NotEqual][ltUInt8][ltUInt8];
 Arr[op_cmp_NotEqual][ltAnsiChar][ltWideChar] := Arr[op_cmp_NotEqual][ltUInt8][ltUInt16];
 
-Arr[op_Assign][ltAnsiChar][ltAnsiChar] := Arr[op_Assign][ltUInt8][ltUInt8];
-Arr[op_Assign][ltAnsiChar][ltWideChar] := Arr[op_Assign][ltUInt8][ltUInt16];
-Arr[op_Assign][ltAnsiChar][ltVariant] := Arr[op_Assign][ltUInt8][ltVariant];
-
 Arr[op_cmp_Equal][ltAnsiChar][ltShortString] := @lpeAChar_EQ_SString;
 Arr[op_cmp_Equal][ltAnsiChar][ltAnsiString] := @lpeAChar_EQ_AString;
 Arr[op_cmp_Equal][ltAnsiChar][ltWideString] := @lpeAChar_EQ_WString;
@@ -2726,6 +2732,9 @@ Arr[op_Plus][ltAnsiChar][ltUnicodeString] := @lpeAChar_ADD_UString;
 Arr[op_Plus][ltAnsiChar][ltVariant] := @lpeAChar_ADD_Variant;
 Arr[op_Plus][ltAnsiChar][ltAnsiChar] := @lpeAChar_ADD_AChar;
 Arr[op_Plus][ltAnsiChar][ltWideChar] := @lpeAChar_ADD_WChar;
+Arr[op_Assign][ltAnsiChar][ltAnsiChar] := Arr[op_Assign][ltUInt8][ltUInt8];
+Arr[op_Assign][ltAnsiChar][ltWideChar] := Arr[op_Assign][ltUInt8][ltUInt16];
+Arr[op_Assign][ltAnsiChar][ltVariant] := @lpeAChar_ASGN_Variant;
 
 //WideChar
 Arr[op_cmp_Equal][ltWideChar][ltAnsiChar] := Arr[op_cmp_Equal][ltUInt16][ltUInt8];
@@ -2740,10 +2749,6 @@ Arr[op_cmp_LessThanOrEqual][ltWideChar][ltAnsiChar] := Arr[op_cmp_LessThanOrEqua
 Arr[op_cmp_LessThanOrEqual][ltWideChar][ltWideChar] := Arr[op_cmp_LessThanOrEqual][ltUInt16][ltUInt16];
 Arr[op_cmp_NotEqual][ltWideChar][ltAnsiChar] := Arr[op_cmp_NotEqual][ltUInt16][ltUInt8];
 Arr[op_cmp_NotEqual][ltWideChar][ltWideChar] := Arr[op_cmp_NotEqual][ltUInt16][ltUInt16];
-
-Arr[op_Assign][ltWideChar][ltWideChar] := Arr[op_Assign][ltUInt16][ltUInt16];
-Arr[op_Assign][ltWideChar][ltAnsiChar] := Arr[op_Assign][ltUInt16][ltUInt8];
-Arr[op_Assign][ltWideChar][ltVariant] := Arr[op_Assign][ltUInt16][ltVariant];
 
 Arr[op_cmp_Equal][ltWideChar][ltShortString] := @lpeWChar_EQ_SString;
 Arr[op_cmp_Equal][ltWideChar][ltAnsiString] := @lpeWChar_EQ_AString;
@@ -2783,6 +2788,9 @@ Arr[op_Plus][ltWideChar][ltUnicodeString] := @lpeWChar_ADD_UString;
 Arr[op_Plus][ltWideChar][ltVariant] := @lpeWChar_ADD_Variant;
 Arr[op_Plus][ltWideChar][ltWideChar] := @lpeWChar_ADD_WChar;
 Arr[op_Plus][ltWideChar][ltAnsiChar] := @lpeWChar_ADD_AChar;
+Arr[op_Assign][ltWideChar][ltWideChar] := Arr[op_Assign][ltUInt16][ltUInt16];
+Arr[op_Assign][ltWideChar][ltAnsiChar] := Arr[op_Assign][ltUInt16][ltUInt8];
+Arr[op_Assign][ltWideChar][ltVariant] := @lpeWChar_ASGN_Variant;
 
 //Pointer
 Arr[op_cmp_Equal][ltPointer][ltPointer] := @lpePointer_EQ_Pointer;

@@ -2425,12 +2425,22 @@ Arr[op_Assign][ltExtended][ltCurrency] := ltExtended;
 Arr[op_Assign][ltExtended][ltExtended] := ltExtended;
 
 //Variant
-Arr[op_Assign][ltVariant][ltAnsiChar] := Arr[op_Assign][ltVariant][ltUInt8];
-Arr[op_Assign][ltVariant][ltWideChar] := Arr[op_Assign][ltVariant][ltUInt16];
+Arr[op_Assign][ltVariant][ltBoolean] := ltVariant;
+Arr[op_Assign][ltVariant][ltByteBool] := Arr[op_Assign][ltVariant][ltBoolean];
+Arr[op_Assign][ltVariant][ltWordBool] := ltVariant;
+Arr[op_Assign][ltVariant][ltLongBool] := ltVariant;
+Arr[op_Assign][ltVariant][ltAnsiChar] := ltVariant;
+Arr[op_Assign][ltVariant][ltWideChar] := ltVariant;
 Arr[op_Assign][ltVariant][ltShortString] := ltVariant;
 Arr[op_Assign][ltVariant][ltAnsiString] := ltVariant;
 Arr[op_Assign][ltVariant][ltWideString] := ltVariant;
 Arr[op_Assign][ltVariant][ltUnicodeString] := ltVariant;
+
+//Boolean
+Arr[op_Assign][ltBoolean][ltVariant] := ltBoolean;
+Arr[op_Assign][ltByteBool][ltVariant] := ltByteBool;
+Arr[op_Assign][ltWordBool][ltVariant] := ltWordBool;
+Arr[op_Assign][ltLongBool][ltVariant] := ltLongBool;
 
 //string + char
 //ShortString
@@ -2682,10 +2692,6 @@ Arr[op_cmp_LessThanOrEqual][ltAnsiChar][ltWideChar] := Arr[op_cmp_LessThanOrEqua
 Arr[op_cmp_NotEqual][ltAnsiChar][ltAnsiChar] := Arr[op_cmp_NotEqual][ltUInt8][ltUInt8];
 Arr[op_cmp_NotEqual][ltAnsiChar][ltWideChar] := Arr[op_cmp_NotEqual][ltUInt8][ltUInt16];
 
-Arr[op_Assign][ltAnsiChar][ltAnsiChar] := Arr[op_Assign][ltUInt8][ltUInt8];
-Arr[op_Assign][ltAnsiChar][ltWideChar] := Arr[op_Assign][ltUInt8][ltUInt16];
-Arr[op_Assign][ltAnsiChar][ltVariant] := Arr[op_Assign][ltUInt8][ltVariant];
-
 Arr[op_cmp_Equal][ltAnsiChar][ltShortString] := ltEvalBool;
 Arr[op_cmp_Equal][ltAnsiChar][ltAnsiString] := ltEvalBool;
 Arr[op_cmp_Equal][ltAnsiChar][ltWideString] := ltEvalBool;
@@ -2724,6 +2730,9 @@ Arr[op_Plus][ltAnsiChar][ltUnicodeString] := ltUnicodeString;
 Arr[op_Plus][ltAnsiChar][ltVariant] := ltVariant;
 Arr[op_Plus][ltAnsiChar][ltAnsiChar] := ltAnsiString;
 Arr[op_Plus][ltAnsiChar][ltWideChar] := ltUnicodeString;
+Arr[op_Assign][ltAnsiChar][ltAnsiChar] := ltAnsiChar;
+Arr[op_Assign][ltAnsiChar][ltWideChar] := ltAnsiChar;
+Arr[op_Assign][ltAnsiChar][ltVariant] := ltAnsiChar;
 
 //WideChar
 Arr[op_cmp_Equal][ltWideChar][ltAnsiChar] := Arr[op_cmp_Equal][ltUInt16][ltUInt8];
@@ -2738,10 +2747,6 @@ Arr[op_cmp_LessThanOrEqual][ltWideChar][ltAnsiChar] := Arr[op_cmp_LessThanOrEqua
 Arr[op_cmp_LessThanOrEqual][ltWideChar][ltWideChar] := Arr[op_cmp_LessThanOrEqual][ltUInt16][ltUInt16];
 Arr[op_cmp_NotEqual][ltWideChar][ltAnsiChar] := Arr[op_cmp_NotEqual][ltUInt16][ltUInt8];
 Arr[op_cmp_NotEqual][ltWideChar][ltWideChar] := Arr[op_cmp_NotEqual][ltUInt16][ltUInt16];
-
-Arr[op_Assign][ltWideChar][ltWideChar] := Arr[op_Assign][ltuInt16][ltUInt16];
-Arr[op_Assign][ltWideChar][ltAnsiChar] := Arr[op_Assign][ltuInt16][ltUInt8];
-Arr[op_Assign][ltWideChar][ltVariant] := Arr[op_Assign][ltuInt16][ltVariant];
 
 Arr[op_cmp_Equal][ltWideChar][ltShortString] := ltEvalBool;
 Arr[op_cmp_Equal][ltWideChar][ltAnsiString] := ltEvalBool;
@@ -2781,6 +2786,9 @@ Arr[op_Plus][ltWideChar][ltUnicodeString] := ltUnicodeString;
 Arr[op_Plus][ltWideChar][ltVariant] := ltVariant;
 Arr[op_Plus][ltWideChar][ltWideChar] := ltUnicodeString;
 Arr[op_Plus][ltWideChar][ltAnsiChar] := ltUnicodeString;
+Arr[op_Assign][ltWideChar][ltWideChar] := ltWideChar;
+Arr[op_Assign][ltWideChar][ltAnsiChar] := ltWideChar;
+Arr[op_Assign][ltWideChar][ltVariant] := ltWideChar;
 
 //Pointer
 Arr[op_cmp_Equal][ltPointer][ltPointer] := ltEvalBool;

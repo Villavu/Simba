@@ -87,7 +87,7 @@ type
     function addGlobalVar(Value: Int64; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Value: UInt64; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Value: Extended; AName: lpString): TLapeGlobalVar; overload; virtual;
-    function addGlobalVar(Value: Boolean; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: EvalBool; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Value: ShortString; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Value: AnsiString; AName: lpString): TLapeGlobalVar; overload; virtual;
 	{$IFNDEF Lape_NoWideString}
@@ -96,6 +96,7 @@ type
     function addGlobalVar(Value: UnicodeString; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Value: AnsiChar; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Value: WideChar; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(Value: Variant; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
 
     function addGlobalType(t: TLapeType; AName: lpString = ''): TLapeType; overload; virtual;
@@ -113,6 +114,7 @@ type
 implementation
 
 uses
+  Variants,
   lpexceptions, lpinterpreter;
 
 procedure TLapeCompiler.Reset;
@@ -129,11 +131,13 @@ begin
   if (getDeclaration('Char') = nil) then
     addGlobalType(getBaseType(ltChar).createCopy(), 'Char');
   if (getDeclaration('True') = nil) then
-    addGlobalVar(True, 'True').isConstant := True;
+    addGlobalVar(Ord(True), 'True').isConstant := True;
   if (getDeclaration('False') = nil) then
     addGlobalVar(False, 'False').isConstant := True;
   if (getDeclaration('nil') = nil) then
     addGlobalVar(nil, 'nil').isConstant := True;
+  if (getDeclaration('Null') = nil) then
+    addGlobalVar(Null, 'Null').isConstant := True;
 end;
 
 function TLapeCompiler.getPDocPos: PDocPos;
@@ -307,7 +311,7 @@ begin
           tk_kw_Function, tk_kw_Procedure: t := ParseMethod(f);
           tk_kw_Type: ParseTypeBlock();
           {$IFNDEF Lape_ForceBlock}
-          else if (not StopAfterBeginEnd) then t := ParseExpression()
+          else if (not StopAfterBeginEnd) then t := ParseStatement()
           {$ENDIF}
           else LapeException(lpeBlockExpected, FTokenizer.DocPos);
         end;
@@ -1697,9 +1701,9 @@ begin
   Result := addGlobalVar(TLapeType_Extended(FBaseTypes[ltExtended]).NewGlobalVar(Value), AName);
 end;
 
-function TLapeCompiler.addGlobalVar(Value: Boolean; AName: lpString): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(Value: EvalBool; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_Boolean(FBaseTypes[ltBoolean]).NewGlobalVar(Ord(Value)), AName);
+  Result := addGlobalVar(TLapeType_EvalBool(FBaseTypes[ltEvalBool]).NewGlobalVar(Ord(Value)), AName);
 end;
 
 function TLapeCompiler.addGlobalVar(Value: ShortString; AName: lpString): TLapeGlobalVar;
@@ -1732,6 +1736,11 @@ end;
 function TLapeCompiler.addGlobalVar(Value: WideChar; AName: lpString): TLapeGlobalVar;
 begin
   Result := addGlobalVar(TLapeType_WideChar(FBaseTypes[ltWideChar]).NewGlobalVar(Value), AName);
+end;
+
+function TLapeCompiler.addGlobalVar(Value: Variant; AName: lpString): TLapeGlobalVar;
+begin
+  Result := addGlobalVar(TLapeType_Variant(FBaseTypes[ltVariant]).NewGlobalVar(Value), AName);
 end;
 
 function TLapeCompiler.addGlobalVar(Value: Pointer; AName: lpString): TLapeGlobalVar;
