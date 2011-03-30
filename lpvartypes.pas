@@ -584,6 +584,11 @@ type
   ECompilerOption = (lcoAssertions, lcoShortCircuit);
   ECompilerOptionsSet = set of ECompilerOption;
 
+const
+  Lape_OptionsDef = [];
+  Lape_PackRecordsDef = 2;
+
+type
   TLapeCompilerBase = class(TLapeBaseClass)
   protected
     FEmitter: TLapeCodeEmitter;
@@ -592,11 +597,12 @@ type
     FGlobalDeclarations: TLapeDeclarationList;
     FManagedDeclarations: TLapeDeclarationList;
 
+    FOptions: ECompilerOptionsSet;
+    FOptions_PackRecords: UInt8;
+
     procedure Reset; virtual;
     procedure setEmitter(AEmitter: TLapeCodeEmitter); virtual;
   public
-    Options: ECompilerOptionsSet;
-    Options_PackRecords: UInt8;
     FreeEmitter: Boolean;
 
     constructor Create(AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True); reintroduce; virtual;
@@ -626,11 +632,14 @@ type
     function getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration; overload; virtual;
     function getDeclaration(Name: lpString; LocalOnly: Boolean = False): TLapeDeclaration; overload; virtual;
 
-    property Emitter: TLapeCodeEmitter read FEmitter write setEmitter;
     property StackInfo: TLapeStackInfo read FStackInfo;
     property BaseTypes: TLapeBaseTypes read FBaseTypes;
     property GlobalDeclarations: TLapeDeclarationList read FGlobalDeclarations;
     property ManagedDeclarations: TLapeDeclarationList read FManagedDeclarations;
+  published
+    property Emitter: TLapeCodeEmitter read FEmitter write setEmitter;
+    property Options: ECompilerOptionsSet read FOptions write FOptions default Lape_OptionsDef;
+    property Options_PackRecords: UInt8 read FOptions_PackRecords write FOptions_PackRecords default Lape_PackRecordsDef;
   end;
 
 procedure ClearBaseTypes(var Arr: TLapeBaseTypes);
@@ -646,7 +655,6 @@ const
   StackResVar:TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpStack;StackVar : nil; ForceVariable: False));
 
   Lape_RefParams = [lptOut, lptVar];
-  Lape_PackRecordsDef = 2;
 
 implementation
 
@@ -4119,7 +4127,7 @@ constructor TLapeCompilerBase.Create(AEmitter: TLapeCodeEmitter = nil; ManageEmi
 begin
   inherited Create();
 
-  Options := [];
+  Options := Lape_OptionsDef;
   Options_PackRecords := Lape_PackRecordsDef;
 
   FreeEmitter := ManageEmitter;
