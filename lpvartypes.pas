@@ -15,6 +15,10 @@ uses
   Classes, SysUtils,
   lptypes, lpparser, lpcodeemitter;
 
+const
+  Lape_OptionsDef = [];
+  Lape_PackRecordsDef = 2;
+
 type
   TLapeType = class;
   TLapeStackVar = class;
@@ -584,11 +588,6 @@ type
   ECompilerOption = (lcoAssertions, lcoShortCircuit);
   ECompilerOptionsSet = set of ECompilerOption;
 
-const
-  Lape_OptionsDef = [];
-  Lape_PackRecordsDef = 2;
-
-type
   TLapeCompilerBase = class(TLapeBaseClass)
   protected
     FEmitter: TLapeCodeEmitter;
@@ -650,9 +649,9 @@ procedure getDestVar(var Dest, Res: TResVar; Op: EOperator; Compiler: TLapeCompi
 function isVariable(v: TResVar): Boolean; {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 const
-  NullResVar: TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpNone; GlobalVar: nil; ForceVariable: False));
-  VarResVar:  TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpVar;  StackVar : nil; ForceVariable: False));
-  StackResVar:TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpStack;StackVar : nil; ForceVariable: False));
+  NullResVar: TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpNone;  GlobalVar: nil));
+  VarResVar:  TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpVar;   StackVar : nil));
+  StackResVar:TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpStack; ForceVariable: False));
 
   Lape_RefParams = [lptOut, lptVar];
 

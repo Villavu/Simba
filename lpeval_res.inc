@@ -2732,7 +2732,9 @@ Arr[op_Plus][ltAnsiChar][ltAnsiChar] := ltAnsiString;
 Arr[op_Plus][ltAnsiChar][ltWideChar] := ltUnicodeString;
 Arr[op_Assign][ltAnsiChar][ltAnsiChar] := ltAnsiChar;
 Arr[op_Assign][ltAnsiChar][ltWideChar] := ltAnsiChar;
+{$IFDEF FPC}
 Arr[op_Assign][ltAnsiChar][ltVariant] := ltAnsiChar;
+{$ENDIF}
 
 //WideChar
 Arr[op_cmp_Equal][ltWideChar][ltAnsiChar] := Arr[op_cmp_Equal][ltUInt16][ltUInt8];
@@ -2788,7 +2790,9 @@ Arr[op_Plus][ltWideChar][ltWideChar] := ltUnicodeString;
 Arr[op_Plus][ltWideChar][ltAnsiChar] := ltUnicodeString;
 Arr[op_Assign][ltWideChar][ltWideChar] := ltWideChar;
 Arr[op_Assign][ltWideChar][ltAnsiChar] := ltWideChar;
+{$IFDEF FPC}
 Arr[op_Assign][ltWideChar][ltVariant] := ltWideChar;
+{$ENDIF}
 
 //Pointer
 Arr[op_cmp_Equal][ltPointer][ltPointer] := ltEvalBool;

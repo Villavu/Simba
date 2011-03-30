@@ -36,6 +36,7 @@ type
   {$IFNDEF FPC}
   PtrInt = Int32;
   PtrUInt = UInt32;
+  PLongBool = ^LongBool;
   {$ENDIF}
 
   {$IFDEF Lape_Unicode}

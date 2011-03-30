@@ -2717,7 +2717,9 @@ procedure lpeAChar_ADD_UString(const Dest, Left, Right: Pointer); begin PUnicode
 procedure lpeAChar_ADD_Variant(const Dest, Left, Right: Pointer); begin PVariant(Dest)^ := PAnsiChar(Left)^ + PVariant(Right)^; end;
 procedure lpeAChar_ADD_AChar(const Dest, Left, Right: Pointer); begin PAnsiString(Dest)^ := PAnsiChar(Left)^ + PAnsiChar(Right)^; end;
 procedure lpeAChar_ADD_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PAnsiChar(Left)^ + PWideChar(Right)^; end;
+{$IFDEF FPC}
 procedure lpeAChar_ASGN_Variant(const Dest, Left, Right: Pointer); begin PAnsiChar(Dest)^ := PVariant(Left)^; end;
+{$ENDIF}
 
 //WideChar
 procedure lpeWChar_EQ_SString(const Dest, Left, Right: Pointer); begin PEvalBool(Dest)^ := PWideChar(Left)^ = PShortString(Right)^; end;
@@ -2758,7 +2760,9 @@ procedure lpeWChar_ADD_UString(const Dest, Left, Right: Pointer); begin PUnicode
 procedure lpeWChar_ADD_Variant(const Dest, Left, Right: Pointer); begin PVariant(Dest)^ := PAnsiChar(Left)^ + PVariant(Right)^; end;
 procedure lpeWChar_ADD_WChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^ + PWideChar(Right)^; end;
 procedure lpeWChar_ADD_AChar(const Dest, Left, Right: Pointer); begin PUnicodeString(Dest)^ := PWideChar(Left)^ + PAnsiChar(Right)^; end;
+{$IFDEF FPC}
 procedure lpeWChar_ASGN_Variant(const Dest, Left, Right: Pointer); begin PWideChar(Dest)^ := PVariant(Left)^; end;
+{$ENDIF}
 
 //Pointer
 procedure lpePointer_EQ_Pointer(const Dest, Left, Right: Pointer); begin PEvalBool(Dest)^ := PPointer(Left)^ = PPointer(Right)^; end;

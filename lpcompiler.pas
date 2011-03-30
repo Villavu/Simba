@@ -314,14 +314,14 @@ begin
   Result := False;
   t := nil;
 
-  if (FOnHandleDirective <> nil) then
+  if ({$IFNDEF FPC}@{$ENDIF}FOnHandleDirective <> nil) then
     if FOnHandleDirective(Self, Directive, Argument, Sender.InPeek) then
       Exit(True);
 
   Directive := LowerCase(Directive);
   if (Directive = 'i') or (Directive = 'include') or (Directive = 'include_once') then
   begin
-    if (FOnFindFile <> nil) then
+    if ({$IFNDEF FPC}@{$ENDIF}FOnFindFile <> nil) then
       t := FOnFindFile(Self, Argument);
 
     if (not Sender.InPeek) then

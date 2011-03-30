@@ -703,11 +703,11 @@ var
   d, a: lpString;
 begin
   try
-    if (FOnParseDirective <> nil) then
+    if ({$IFNDEF FPC}@{$ENDIF}FOnParseDirective <> nil) then
       if FOnParseDirective(Self) then
         Exit(True);
 
-    if (FOnHandleDirective <> nil) then
+    if ({$IFNDEF FPC}@{$ENDIF}FOnHandleDirective <> nil) then
     begin
       Next();
       Expect(tk_Identifier, False, False);
