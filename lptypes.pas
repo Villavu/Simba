@@ -62,7 +62,7 @@ type
   PDocPos = ^TDocPos;
   TDocPos = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
     Line, Col: UInt16;
-    FileName: PlpChar;
+    FileName: lpString;
   end;
 
   TLapeRange = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
@@ -352,7 +352,7 @@ const
   LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes + [ltVariant];
   LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltScriptMethod, ltImportedMethod, ltShortString];
 
-  NullDocPos: TDocPos = (Line: 0; Col: 0; FileName: nil);
+  NullDocPos: TDocPos = (Line: 0; Col: 0; FileName: '');
   NullRange: TLapeRange = (Lo: 0; Hi: 0);
 
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
@@ -1028,7 +1028,7 @@ begin
   if (ADocPos <> nil) then
     DocPos := ADocPos^
   else
-    FillChar(DocPos, SizeOf(TDocPos), 0);
+    DocPos := NullDocPos;
   setList(AList);
 end;
 

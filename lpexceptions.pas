@@ -88,7 +88,7 @@ procedure LapeException(Msg: string; DocPos: TDocPos);
 begin
   if (DocPos.Line > 0) and (DocPos.Col > 0) then
     Msg := Format(lpeExceptionAt, [Msg, DocPos.Line, DocPos.Col]);
-  if (lpString(DocPos.FileName) <> '') then
+  if (DocPos.FileName <> '') then
     Msg := Format(lpeExceptionIn, [Msg, DocPos.FileName]);
   LapeException(Msg);
 end;
@@ -103,7 +103,7 @@ begin
   Msg := Format(Msg, Args);
   if (DocPos.Line > 0) and (DocPos.Col > 0) then
     Msg := Format(lpeExceptionAt, [Msg, DocPos.Line, DocPos.Col]);
-  if (lpString(DocPos.FileName) <> '') then
+  if (DocPos.FileName <> '') then
     Msg := Format(lpeExceptionIn, [Msg, DocPos.FileName]);
   LapeException(Msg);
 end;

@@ -523,7 +523,7 @@ function getTempVar(Node: TLapeTree_Base; var Offset: Integer; out v: TresVar; L
 function getFlowStatement(Offset: Integer; Pos: PDocPos = nil; JumpSafe: Boolean = False): TLapeFlowStatement; {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 const
-  NullFlowStatement: TLapeFlowStatement = (CodeOffset: 0; DocPos: (Line: 0; Col: 0; FileName: nil); JumpSafe: False);
+  NullFlowStatement: TLapeFlowStatement = (CodeOffset: 0; DocPos: (Line: 0; Col: 0; FileName: ''); JumpSafe: False);
 
 implementation
 
@@ -637,7 +637,7 @@ begin
   if (ADocPos <> nil) then
     DocPos := ADocPos^
   else
-    FillChar(DocPos, SizeOf(TDocPos), 0);
+    DocPos := NullDocPos;
 end;
 
 destructor TLapeTree_Base.Destroy;

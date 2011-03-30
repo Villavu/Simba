@@ -216,7 +216,7 @@ begin
           p.FileName := FileName;
           p.Line := Line;
           p.Col := Col;
-          _WriteLn('--> File "'+lpString(FileName)+'", Line '+intToStr(Line)+', Col '+IntToStr(Col)+'   ');
+          _WriteLn('--> File "'+FileName+'", Line '+IntToStr(Line)+', Col '+IntToStr(Col)+'   ');
         end;
       {$ENDIF}
       {$I lpinterpreter_opcodecase.inc}

@@ -804,7 +804,7 @@ begin
     Result.Col := 0
   else
     Result.Col := FTokStart - FDocPos.Col + 1;
-  Result.FileName := PlpChar(FFileName);
+  Result.FileName := FFileName;
 end;
 
 constructor TLapeTokenizerBase.Create(AFileName: lpString = '');
