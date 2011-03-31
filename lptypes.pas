@@ -96,7 +96,7 @@ type
   PCodeOffset = ^TCodeOffset;
   PEvalBool = ^EvalBool;
 
-  TMemoryPos = (mpNone, mpStack, mpMem, mpVar);
+  EMemoryPos = (mpNone, mpStack, mpMem, mpVar);
   TLapeEvalProc = procedure(const Dest, Left, Right: Pointer);
   TLapeImportedProc = procedure(const Params: PParamArray);
   TLapeImportedFunc = procedure(const Params: PParamArray; const Result: Pointer);
@@ -182,7 +182,9 @@ type
   end;
 
   {$IFDEF FPC}generic{$ENDIF} TLapeStack<_T> = class(TLapeBaseClass)
-  protected
+  public type
+    TTArray = array of _T;
+  var protected
     FArr: array of _T;
     FLen: Integer;
     FCur: Integer;
@@ -201,6 +203,9 @@ type
     function Pop: _T; virtual;
     function Push(Item: _T): Integer; virtual;
 
+    procedure ImportFromArray(a: TTArray); virtual;
+    function ExportToArray: TTArray; virtual;
+
     property Items[Index: Integer]: _T read getItem; default;
     property Top: _T read getCurItem write setCurItem;
     property Size: Integer read FLen;
@@ -209,7 +214,9 @@ type
   end;
 
   {$IFDEF FPC}generic{$ENDIF} TLapeList<_T> = class(TLapeBaseClass)
-  protected
+  public type
+    TTArray = array of _T;
+  var protected
     FDuplicates: TDuplicates;
     FItems: array of _T;
     FLen: Integer;
@@ -227,6 +234,9 @@ type
     function DeleteItem(Item: _T): _T; overload; virtual;
     function IndexOf(Item: _T): Integer; overload; virtual;
     function ExistsItem(Item: _T): Boolean; overload;
+
+    procedure ImportFromArray(a: TTArray); virtual;
+    function ExportToArray: TTArray; virtual;
 
     property Items[Index: Integer]: _T read getItem write setItem; default;
     property Count: Integer read FLen;
@@ -588,7 +598,11 @@ constructor TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.Create(StartBufLen: Cardinal = 3
 begin
   inherited Create();
 
-  Reset;
+  GrowSize := StartBufLen div 2;
+  if (GrowSize < 1) then
+    GrowSize := 1;
+
+  Reset();
   Grow(StartBufLen);
 end;
 
@@ -611,6 +625,23 @@ begin
   CheckIndex(FCur, True);
   FArr[FCur] := Item;
   Result := FCur;
+end;
+
+procedure TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(a: TTArray);
+begin
+  FArr := a;
+  FCur := High(a);
+  FLen := Length(a);
+end;
+
+function TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ExportToArray: TTArray;
+var
+  i: Integer;
+begin
+  //Result := Copy(FArr, 0, FCur + 1);
+  SetLength(Result, FCur + 1);
+  for i := 0 to FCur do
+    Result[i] := FArr[i];
 end;
 
 function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.getItem(Index: Integer): _T;
@@ -717,6 +748,22 @@ end;
 function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ExistsItem(Item: _T): Boolean;
 begin
   Result := (IndexOf(Item) > -1);
+end;
+
+procedure TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(a: TTArray);
+begin
+  FItems := a;
+  FLen := Length(a);
+end;
+
+function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ExportToArray: TTArray;
+var
+  i: Integer;
+begin
+  //Result := Copy(FItems);
+  SetLength(Result, FLen);
+  for i := 0 to FLen - 1 do
+    Result[i] := FItems[i];
 end;
 
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.getItem(Index: lpString): _T;

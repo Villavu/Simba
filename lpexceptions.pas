@@ -30,6 +30,7 @@ resourcestring
   lpeCannotInvoke = 'Cannot invoke identifier';
   lpeCannotOverload = 'Cannot overload function';
   lpeClosingParenthesisExpected = 'Closing parenthesis expected';
+  lpeConditionalNotClosed = 'Conditional statement not properly closed';
   lpeConstantExpected = 'Constant expression expected';
   lpeDefaultToMoreThanOne = 'Runtime default value can only be assigned to one variable';
   lpeDuplicateDeclaration = 'Duplicate declaration "%s"';
@@ -54,6 +55,7 @@ resourcestring
   lpeInvalidRange = 'Expression is not a valid range';
   lpeInvalidValueForType = 'Invalid value for type "%s"';
   lpeLostClosingParenthesis = 'Found closing parenthesis without matching opening parenthesis';
+  lpeLostConditional = 'Found conditional without matching opening statement';
   lpeNoDefaultForParam = 'No default value for parameter %d found';
   lpeNoForwardMatch = 'Forwarded declaration doesn''t match';
   lpeNoOverloadedMethod = 'Don''t know which overloaded method to call with params (%s)';

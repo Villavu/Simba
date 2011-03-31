@@ -27,6 +27,20 @@ type
   TLapeFindFile = function(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase of object;
   TLapeTokenizerArray = array of TLapeTokenizerBase;
 
+  TLapeConditional = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
+    Eval: Boolean;
+    Pos: TDocPos;
+  end;
+  TLapeConditionalStack = {$IFDEF FPC}specialize{$ENDIF} TLapeStack<TLapeConditional>;
+
+  PCompilerState = ^TCompilerState;
+  TCompilerState = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
+    Tokenizer: Integer;
+    Tokenizers: array of Pointer;
+    Defines: lpString;
+    Conditionals: TLapeConditionalStack.TTArray;
+  end;
+
   TLapeCompiler = class(TLapeCompilerBase)
   private
     __tmp: TDocPos;
@@ -36,16 +50,23 @@ type
     FTokenizer: Integer;
     FInternalMethodMap: TLapeInternalMethodMap;
     FTree: TLapeTree_Base;
+
     FIncludes: TStringList;
+    FBaseDefines: TStringList;
+    FDefines: TStringList;
+    FConditionalStack: TLapeConditionalStack;
 
     FOnHandleDirective: TLapeHandleDirective;
     FOnFindFile: TLapeFindFile;
 
     procedure Reset; override;
+    procedure setBaseDefines(Defines: TStringList); virtual;
     function getTokenizer: TLapeTokenizerBase; virtual;
     procedure setTokenizer(ATokenizer: TLapeTokenizerBase); virtual;
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); virtual;
     function popTokenizer: TLapeTokenizerBase; virtual;
+    procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); virtual;
+    function popConditional: TDocPos; virtual;
 
     function EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase; virtual;
     function EnsureRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeTree_Range; overload; virtual;
@@ -54,6 +75,7 @@ type
     function EnsureConstantRange(Node: TLapeTree_Base): TLapeRange; overload; virtual;
 
     function HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean; virtual;
+    function InIgnore: Boolean; virtual;
     function Next: EParserToken; virtual;
     function Peek: EParserToken; virtual;
     function Expect(Token: EParserToken; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken; overload; virtual;
@@ -88,8 +110,11 @@ type
     ); reintroduce; virtual;
     destructor Destroy; override;
 
+    function getState: Pointer; virtual;
+    procedure setState(const State: Pointer; FreeState: Boolean = True); virtual;
     function ParseFile: TLapeTree_Base; virtual;
     function Compile: Boolean; virtual;
+    procedure CheckAfterCompile; virtual;
 
     function getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration; override;
     function addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration; override;
@@ -124,13 +149,14 @@ type
     function addGlobalType(s: lpString; AName: lpString): TLapeType; overload; virtual;
 
     function addGlobalFunc(s: lpString; Value: Pointer): TLapeGlobalVar; overload; virtual;
-    function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
-    function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
+    function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
 
     property InternalMethodMap: TLapeInternalMethodMap read FInternalMethodMap;
     property Tree: TLapeTree_Base read FTree;
   published
     property Tokenizer: TLapeTokenizerBase read getTokenizer write setTokenizer;
+    property BaseDefines: TStringList read FBaseDefines write setBaseDefines;
     property OnHandleDirective: TLapeHandleDirective read FOnHandleDirective write FOnHandleDirective;
     property OnFindFile: TLapeFindFile read FOnFindFile write FOnFindFile;
   end;
@@ -140,6 +166,12 @@ implementation
 uses
   Variants,
   lpexceptions, lpinterpreter;
+
+function TLapeCompiler.getPDocPos: PDocPos;
+begin
+  __tmp := Tokenizer.DocPos;
+  Result := @__tmp;
+end;
 
 procedure TLapeCompiler.Reset;
 begin
@@ -158,25 +190,39 @@ begin
 
   if (FIncludes <> nil) then
     FIncludes.Clear();
+  if (FConditionalStack <> nil) then
+    FConditionalStack.Reset();
 
   if (getDeclaration('String') = nil) then
     addGlobalType(getBaseType(ltString).createCopy(), 'String');
   if (getDeclaration('Char') = nil) then
     addGlobalType(getBaseType(ltChar).createCopy(), 'Char');
   if (getDeclaration('True') = nil) then
-    addGlobalVar(Ord(True), 'True').isConstant := True;
+    addGlobalVar(True, 'True').isConstant := True;
   if (getDeclaration('False') = nil) then
     addGlobalVar(False, 'False').isConstant := True;
   if (getDeclaration('nil') = nil) then
     addGlobalVar(nil, 'nil').isConstant := True;
   if (getDeclaration('Null') = nil) then
     addGlobalVar(Null, 'Null').isConstant := True;
+
+  if (FBaseDefines <> nil) then
+  with FBaseDefines do
+  begin
+    add('Lape');
+    add('Sesquipedalian');
+    if (FDefines <> nil) then
+      FDefines.Assign(FBaseDefines);
+  end
+  else if (FDefines <> nil) then
+    FDefines.Clear();
 end;
 
-function TLapeCompiler.getPDocPos: PDocPos;
+procedure TLapeCompiler.setBaseDefines(Defines: TStringList);
 begin
-  __tmp := Tokenizer.DocPos;
-  Result := @__tmp;
+  Assert(FBaseDefines <> nil);
+  FBaseDefines.Assign(Defines);
+  Reset();
 end;
 
 type
@@ -221,6 +267,28 @@ function TLapeCompiler.popTokenizer: TLapeTokenizerBase;
 begin
   setTokenizer(nil);
   Dec(FTokenizer);
+end;
+
+procedure TLapeCompiler.pushConditional(AEval: Boolean; ADocPos: TDocPos);
+var
+  r: TLapeConditional;
+begin
+  Assert(FConditionalStack <> nil);
+  with r do
+  begin
+    Eval := AEval;
+    Pos := ADocPos;
+  end;
+  FConditionalStack.Push(r);
+end;
+
+function TLapeCompiler.popConditional: TDocPos;
+begin
+  Assert(FConditionalStack <> nil);
+  if (FConditionalStack.Size > 0) then
+    Result := FConditionalStack.Pop().Pos
+  else
+    LapeException(lpeLostConditional, Tokenizer.DocPos);
 end;
 
 function TLapeCompiler.EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase;
@@ -309,6 +377,21 @@ end;
 function TLapeCompiler.HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean;
 var
   t: TLapeTokenizerBase;
+
+  procedure switchConditional;
+  var
+    r: TLapeConditional;
+  begin
+    if (FConditionalStack.Size <= 0) then
+      LapeException(lpeLostConditional, Sender.DocPos)
+    else
+    begin
+      r := FConditionalStack.Pop();
+      r.Eval := not r.Eval;
+      FConditionalStack.Push(r);
+    end;
+  end;
+
 begin
   Assert(Sender = Tokenizer);
   Result := False;
@@ -319,6 +402,27 @@ begin
       Exit(True);
 
   Directive := LowerCase(Directive);
+  if (Directive = 'ifdef') or (Directive = 'ifndef') then
+  begin
+    pushConditional((not InIgnore()) and ((FDefines.IndexOf(Trim(Argument)) > -1) xor (Directive = 'ifndef')), Sender.DocPos);
+    Exit(True);
+  end
+  else if (Directive = 'else') then
+  begin
+    switchConditional();
+    Exit(True);
+  end
+  else if (Directive = 'endif') then
+  begin
+    popConditional();
+    Exit(True);
+  end;
+
+  if InIgnore() then
+    Exit(True);
+
+  if (Directive = 'define') then
+    FDefines.add(Trim(Argument));
   if (Directive = 'i') or (Directive = 'include') or (Directive = 'include_once') then
   begin
     if ({$IFNDEF FPC}@{$ENDIF}FOnFindFile <> nil) then
@@ -326,27 +430,33 @@ begin
 
     if (not Sender.InPeek) then
       if (Directive = 'include_once') and (FIncludes.IndexOf(Argument) > -1) then
-        LapeException(lpeDuplicateDeclaration, [Argument], Tokenizer.DocPos)
+        LapeException(lpeDuplicateDeclaration, [Argument], Sender.DocPos)
       else
         FIncludes.add(Argument);
 
-    if (t = nil) and ((Argument = '') or (not FileExists(Argument))) then
-      LapeException(lpeFileNotFound, [Argument], Tokenizer.DocPos)
-    else if (t = nil) then
+    if (t = nil) then
       if (FTokenizer + 1 < Length(FTokenizers)) and (FTokenizers[FTokenizer + 1] <> nil) and (FTokenizers[FTokenizer + 1].FileName = Argument) then
       begin
         t := FTokenizers[FTokenizer + 1];
         t.Reset();
       end
+      else if ((Argument = '') or (not FileExists(Argument))) then
+        LapeException(lpeFileNotFound, [Argument], Sender.DocPos)
       else
         t := TLapeTokenizerFile.Create(Argument);
 
     pushTokenizer(t);
+    Exit(True);
   end;
 
   if Sender.InPeek then
     Exit(True);
   WriteLn('DIRECTIVE: '+Directive);
+end;
+
+function TLapeCompiler.InIgnore: Boolean;
+begin
+  Result := (FConditionalStack.Cur >= 0) and (not FConditionalStack.Top.Eval);
 end;
 
 function TLapeCompiler.Next: EParserToken;
@@ -364,35 +474,23 @@ begin
         popTokenizer();
       Result := Tokenizer.Next{NoWhiteSpace}();
     end;
-  until (not (Result in TokJunk));
+  until (Result = tk_NULL) or ((not (Result in TokJunk)) and (not InIgnore()));
   __LapeTokenizerBase(Tokenizer).FLastTok := lTok;
 end;
 
 function TLapeCompiler.Peek: EParserToken;
 var
-  t, i: Integer;
-  p: array of Pointer;
+  i: Integer;
+  p: Pointer;
 begin
-  t := FTokenizer;
-  SetLength(p, Length(FTokenizers));
-  for i := 0 to High(FTokenizers) do
-    if (FTokenizers[i] <> nil) then
-      p[i] := FTokenizers[i].getState()
-    else
-      p[i] := nil;
-
+  p := getState();
   try
     for i := 0 to High(FTokenizers) do
       if (FTokenizers[i] <> nil) then
         __LapeTokenizerBase(FTokenizers[i]).FInPeek := True;
     Result := Next();
   finally
-    Assert(Length(FTokenizers) >= Length(p));
-    FTokenizer := t;
-
-    for i := 0 to High(p) do
-      if (p[i] <> nil) and (FTokenizers[i] <> nil) then
-        FTokenizers[i].setState(p[i]);
+    setState(p);
   end;
 end;
 
@@ -1707,8 +1805,15 @@ begin
   FreeTokenizer := ManageTokenizer;
   FreeTree := True;
 
-  FIncludes := TStringList.Create;
+  FIncludes := TStringList.Create();
   FIncludes.Duplicates := dupIgnore;
+  FIncludes.CaseSensitive := {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF};
+  FDefines := TStringList.Create();
+  FDefines.Duplicates := dupIgnore;
+  FDefines.CaseSensitive := {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF};
+  FBaseDefines := TStringList.Create();
+  FBaseDefines.CaseSensitive := {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF};
+  FConditionalStack := TLapeConditionalStack.Create(0);
 
   FOnHandleDirective := nil;
   FOnFindFile := nil;
@@ -1737,27 +1842,81 @@ end;
 
 destructor TLapeCompiler.Destroy;
 begin
-  Reset();
   setTokenizer(nil);
   FreeAndNil(FIncludes);
+  FreeAndNil(FDefines);
+  FreeAndNil(FBaseDefines);
+  FreeAndNil(FConditionalStack);
   FreeAndNil(FInternalMethodMap);
   inherited;
 end;
 
+function TLapeCompiler.getState: Pointer;
+var
+  i: Integer;
+begin
+  New(PCompilerState(Result));
+  with PCompilerState(Result)^ do
+  begin
+    Tokenizer := FTokenizer;
+
+    SetLength(Tokenizers, Length(FTokenizers));
+    for i := 0 to High(FTokenizers) do
+      if (FTokenizers[i] <> nil) then
+        Tokenizers[i] := FTokenizers[i].getState()
+      else
+        Tokenizers[i] := nil;
+
+    Defines := FDefines.Text;
+    Conditionals := FConditionalStack.ExportToArray();
+  end;
+end;
+
+procedure TLapeCompiler.setState(const State: Pointer; FreeState: Boolean = True);
+var
+  i: Integer;
+begin
+  with PCompilerState(State)^ do
+  begin
+    Assert(Length(FTokenizers) >= Length(Tokenizers));
+    FTokenizer := Tokenizer;
+
+    for i := 0 to High(Tokenizers) do
+      if (Tokenizers[i] <> nil) and (FTokenizers[i] <> nil) then
+        FTokenizers[i].setState(Tokenizers[i]);
+
+    FDefines.Text := Defines;
+    FConditionalStack.ImportFromArray(Conditionals);
+  end;
+  if FreeState then
+    Dispose(PCompilerState(State));
+end;
+
 function TLapeCompiler.ParseFile: TLapeTree_Base;
 begin
+  Result := nil;
   Assert(Tokenizer <> nil);
 
-  case Peek() of
-    tk_NULL: Result := nil;
-    tk_kw_Program:
-      begin
-        Expect(tk_kw_Program, True, False);
-        Expect(tk_Identifier, True, False);
-        Expect(tk_sym_SemiColon, True, False);
-        Result := ParseBlockList(False);
-      end
-    else Result := ParseBlockList(False);
+  try
+    if (FDefines <> nil) and (FBaseDefines <> nil) then
+      FDefines.Assign(FBaseDefines);
+
+    case Peek() of
+      tk_kw_Program:
+        begin
+          Expect(tk_kw_Program, True, False);
+          Expect(tk_Identifier, True, False);
+          Expect(tk_sym_SemiColon, True, False);
+          Result := ParseBlockList(False);
+        end
+      else Result := ParseBlockList(False);
+    end;
+
+    CheckAfterCompile();
+  except
+    if (Result <> nil) then
+      Result.Free();
+    raise;
   end;
 end;
 
@@ -1769,15 +1928,28 @@ begin
     Reset();
     IncStackInfo(True);
     FTree := ParseFile();
+    if (FTree = nil) then
+      LapeException(lpeExpressionExpected);
     FTree.Compile();
-    DecStackInfo(False, True, True);
     FEmitter._op(ocNone);
+    FreeAndNil(FTree);
+    DecStackInfo(False, True, True);
     Result := True;
 
   except
     Reset();
     raise;
   end;
+end;
+
+procedure TLapeCompiler.CheckAfterCompile;
+begin
+  Assert(Tokenizer <> nil);
+
+  if (FTokenizer > 0) then
+    LapeException(lpeImpossible, Tokenizer.DocPos);
+  if (FConditionalStack.Cur >= 0) then
+    LapeException(lpeConditionalNotClosed, popConditional());
 end;
 
 function TLapeCompiler.getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration;
@@ -1831,8 +2003,9 @@ end;
 function TLapeCompiler.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
 var
   s: lpString;
-  t: TLapeStackInfo;
-  p: TLapeTokenizerBase;
+  f: TLapeStackInfo;
+  t: TLapeTokenizerBase;
+  p: Pointer;
   i: Integer;
 begin
   s := 'var ' + AName + ': ' + Typ;
@@ -1841,9 +2014,10 @@ begin
 
   if (FTokenizer < 0) then
     SetLength(FTokenizers, 1);
-  t := FStackInfo;
+  f := FStackInfo;
   i := FTokenizer;
-  p := FTokenizers[0];
+  t := FTokenizers[0];
+  p := getState();
 
   FTokenizer := 0;
   FTokenizers[0] := TLapeTokenizerString.Create(s + ';');
@@ -1851,11 +2025,13 @@ begin
     FStackInfo := nil;
     ParseVarBlock().Free();
     Result := FGlobalDeclarations.Items[FGlobalDeclarations.Items.Count - 1] as TLapeGlobalVar;
+    CheckAfterCompile();
   finally
     FTokenizers[0].Free();
-    FTokenizers[0] := p;
+    FTokenizers[0] := t;
     FTokenizer := i;
-    FStackInfo := t;
+    FStackInfo := f;
+    setState(p);
   end;
 end;
 
@@ -1922,7 +2098,7 @@ end;
 
 function TLapeCompiler.addGlobalVar(Value: EvalBool; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_EvalBool(FBaseTypes[ltEvalBool]).NewGlobalVar(Ord(Value)), AName);
+  Result := addGlobalVar(TLapeType_EvalBool(FBaseTypes[ltEvalBool]).NewGlobalVar(Ord(Boolean(Value))), AName);
 end;
 
 function TLapeCompiler.addGlobalVar(Value: ShortString; AName: lpString): TLapeGlobalVar;
@@ -1982,15 +2158,18 @@ end;
 
 function TLapeCompiler.addGlobalType(s: lpString; AName: lpString): TLapeType;
 var
-  t: TLapeStackInfo;
-  p: TLapeTokenizerBase;
+  f: TLapeStackInfo;
+  t: TLapeTokenizerBase;
+  p: Pointer;
   i: Integer;
 begin
+  Result := nil;
   if (FTokenizer < 0) then
     SetLength(FTokenizers, 1);
-  t := FStackInfo;
+  f := FStackInfo;
   i := FTokenizer;
-  p := FTokenizers[0];
+  t := FTokenizers[0];
+  p := getState();
 
   FTokenizer := 0;
   FTokenizers[0] := TLapeTokenizerString.Create('type ' + AName + ' = ' + s + ';');
@@ -1998,56 +2177,63 @@ begin
     FStackInfo := nil;
     ParseTypeBlock();
     Result := FGlobalDeclarations.Items[FGlobalDeclarations.Items.Count - 1] as TLapeType;
+    CheckAfterCompile();
   finally
     FTokenizers[0].Free();
-    FTokenizers[0] := p;
+    FTokenizers[0] := t;
     FTokenizer := i;
-    FStackInfo := t;
+    FStackInfo := f;
+    setState(p);
   end;
 end;
 
 function TLapeCompiler.addGlobalFunc(s: lpString; Value: Pointer): TLapeGlobalVar;
 var
-  t: TLapeStackInfo;
-  p: TLapeTokenizerBase;
+  f: TLapeStackInfo;
+  t: TLapeTokenizerBase;
+  p: Pointer;
   i: Integer;
-  f: TLapeTree_Method;
+  m: TLapeTree_Method;
 begin
   Result := nil;
   if (FTokenizer < 0) then
     SetLength(FTokenizers, 1);
-  t := FStackInfo;
+  f := FStackInfo;
   i := FTokenizer;
-  p := FTokenizers[0];
+  t := FTokenizers[0];
+  p := getState();
 
   FTokenizer := 0;
   FTokenizers[0] := TLapeTokenizerString.Create(s + ';');
   try
     FStackInfo := nil;
-    f := ParseMethod(nil, True);
+    m := ParseMethod(nil, True);
+    CheckAfterCompile();
+
     try
-      if (f.Method = nil) or (f.Method.VarType = nil) or (not (f.Method.VarType is TLapeType_ImportedMethod)) then
+      if (m.Method = nil) or (m.Method.VarType = nil) or (not (m.Method.VarType is TLapeType_ImportedMethod)) then
         LapeException(lpeInvalidEvaluation);
 
-      Result := f.Method;
+      Result := m.Method;
       PPointer(Result.Ptr)^ := Value;
     finally
-      FreeAndNil(f);
+      FreeAndNil(m);
     end;
   finally
     FTokenizers[0].Free();
-    FTokenizers[0] := p;
+    FTokenizers[0] := t;
     FTokenizer := i;
-    FStackInfo := t;
+    FStackInfo := f;
+    setState(p);
   end;
 end;
 
-function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar;
+function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
   Result := addGlobalVar(TLapeType_ImportedMethod(addManagedType(TLapeType_ImportedMethod.Create(Self, AParams, AParTypes, AParDefaults, ARes))).NewGlobalVar(Value), AName);
 end;
 
-function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar;
+function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
   Result := addGlobalFunc(AParams, AParTypes, AParDefaults, nil, Value, AName);
 end;

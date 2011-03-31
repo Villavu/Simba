@@ -32,7 +32,7 @@ type
   TVarPos = record
     isPointer: Boolean;
     Offset: Integer;
-    case MemPos: TMemoryPos of
+    case MemPos: EMemoryPos of
       mpVar: (StackVar: TLapeStackVar);
       mpMem: (GlobalVar: TLapeGlobalVar);
       mpStack: (ForceVariable: Boolean);
@@ -42,9 +42,9 @@ type
     VarPos: TVarPos;
   end;
 
-  TLapeParameterType = (lptNormal, lptConst, lptVar, lptOut);
+  ELapeParameterType = (lptNormal, lptConst, lptVar, lptOut);
   TLapeParameter = record
-    ParType: TLapeParameterType;
+    ParType: ELapeParameterType;
     VarType: TLapeType;
     Default: TLapeGlobalVar;
   end;
@@ -95,13 +95,13 @@ type
 
   TLapeParameterVar = class(TLapeStackVar)
   protected
-    FParType: TLapeParameterType;
+    FParType: ELapeParameterType;
     function getSize: Integer; override;
     function getInitialization: Boolean; override;
     function getFinalization: Boolean; override;
   public
-    constructor Create(AParType: TLapeParameterType; AVarType: TLapeType; AStack: TLapeVarStack; AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil); reintroduce; virtual;
-    property ParType: TLapeParameterType read FParType;
+    constructor Create(AParType: ELapeParameterType; AVarType: TLapeType; AStack: TLapeVarStack; AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil); reintroduce; virtual;
+    property ParType: ELapeParameterType read FParType;
   end;
 
   TLapeGlobalVar = class(TLapeVar)
@@ -486,7 +486,7 @@ type
     Res: TLapeType;
 
     constructor Create(ACompiler: TLapeCompilerBase; AParams: TLapeParameterList; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; overload; virtual;
-    constructor Create(ACompiler: TLapeCompilerBase; AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; overload; virtual;
+    constructor Create(ACompiler: TLapeCompilerBase; AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; overload; virtual;
     destructor Destroy; override;
 
     function CreateCopy: TLapeType; override;
@@ -551,7 +551,7 @@ type
     function addDeclaration(Decl: TLapeDeclaration): Integer; virtual;
     function addVar(StackVar: TLapeStackVar): TLapeStackVar; overload; virtual;
     function addVar(VarType: TLapeType; Name: lpString = ''): TLapeStackVar; overload; virtual;
-    function addVar(ParType: TLapeParameterType; VarType: TLapeType; Name: lpString = ''): TLapeStackVar; overload; virtual;
+    function addVar(ParType: ELapeParameterType; VarType: TLapeType; Name: lpString = ''): TLapeStackVar; overload; virtual;
 
     property Declarations: TLapeDeclCollection read FDeclarations;
     property VarStack: TLapeVarStack read FVarStack;
@@ -876,7 +876,7 @@ begin
   Result := (not (FParType in Lape_RefParams)) and inherited;
 end;
 
-constructor TLapeParameterVar.Create(AParType: TLapeParameterType; AVarType: TLapeType; AStack: TLapeVarStack; AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil);
+constructor TLapeParameterVar.Create(AParType: ELapeParameterType; AVarType: TLapeType; AStack: TLapeVarStack; AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil);
 begin
   inherited Create(AVarType, AStack, AName, ADocPos, AList);
   FParType := AParType;
@@ -3276,7 +3276,7 @@ begin
   Res := ARes;
 end;
 
-constructor TLapeType_Method.Create(ACompiler: TLapeCompilerBase; AParams: array of TLapeType; AParTypes: array of TLapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil);
+constructor TLapeType_Method.Create(ACompiler: TLapeCompilerBase; AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil);
 var
   a: TLapeParameter;
   i: Integer;
@@ -3586,16 +3586,16 @@ begin
     Result := addVar(TLapeStackVar.Create(VarType, nil, Name));
 end;
 
-function TLapeStackInfo.addVar(ParType: TLapeParameterType; VarType: TLapeType; Name: lpString = ''): TLapeStackVar;
+function TLapeStackInfo.addVar(ParType: ELapeParameterType; VarType: TLapeType; Name: lpString = ''): TLapeStackVar;
 begin
   Result := addVar(TLapeParameterVar.Create(ParType, VarType, nil, Name));
 end;
 
 function TLapeCodeEmitter._IncCall(ACodePos: TResVar; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
-  TMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
+  EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
-  function getMemoryPos(v: TVarPos): TMyMemoryPos; inline;
+  function getMemoryPos(v: TVarPos): EMyMemoryPos; inline;
   begin
     Result := mmpNone;
     case v.MemPos of
@@ -3644,9 +3644,9 @@ end;
 
 function TLapeCodeEmitter._InvokeImportedProc(AMemPos: TResVar; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
-  TMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
+  EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
-  function getMemoryPos(v: TVarPos): TMyMemoryPos; inline;
+  function getMemoryPos(v: TVarPos): EMyMemoryPos; inline;
   begin
     Result := mmpNone;
     case v.MemPos of
@@ -3695,9 +3695,9 @@ end;
 
 function TLapeCodeEmitter._InvokeImportedFunc(AMemPos, AResPos: TResVar; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
-  TMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
+  EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
-  function getMemoryPos(v: TVarPos): TMyMemoryPos; inline;
+  function getMemoryPos(v: TVarPos): EMyMemoryPos; inline;
   begin
     Result := mmpNone;
     case v.MemPos of
@@ -3783,9 +3783,9 @@ end;
 {
 function TLapeCodeEmitter._JmpIf(Target: UInt32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
-  TMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
+  EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
-  function getMemoryPos(v: TVarPos): TMyMemoryPos; inline;
+  function getMemoryPos(v: TVarPos): EMyMemoryPos; inline;
   begin
     Result := mmpNone;
     case v.MemPos of
@@ -3870,9 +3870,9 @@ end;
 
 function TLapeCodeEmitter._JmpRIf(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
-  TMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
+  EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
-  function getMemoryPos(v: TVarPos): TMyMemoryPos; inline;
+  function getMemoryPos(v: TVarPos): EMyMemoryPos; inline;
   begin
     Result := mmpNone;
     case v.MemPos of
@@ -3956,9 +3956,9 @@ end;
 
 function TLapeCodeEmitter._JmpRIfNot(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
-  TMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
+  EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
-  function getMemoryPos(v: TVarPos): TMyMemoryPos; inline;
+  function getMemoryPos(v: TVarPos): EMyMemoryPos; inline;
   begin
     Result := mmpNone;
     case v.MemPos of
@@ -4042,9 +4042,9 @@ end;
 
 function TLapeCodeEmitter._Eval(AProc: TLapeEvalProc; Dest, Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
-  TMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
+  EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
-  function getMemoryPos(v: TVarPos): TMyMemoryPos; inline;
+  function getMemoryPos(v: TVarPos): EMyMemoryPos; inline;
   begin
     Result := mmpNone;
     case v.MemPos of
@@ -4067,7 +4067,7 @@ type
   end;
 
 var
-  d, l, r: TMyMemoryPos;
+  d, l, r: EMyMemoryPos;
   StackIncD, StackIncL, StackIncR: TStackInc;
   e: Boolean;
 begin
@@ -4153,12 +4153,11 @@ end;
 
 procedure TLapeCompilerBase.Clear;
 begin
-  Reset();
-
   FGlobalDeclarations.Delete(TLapeVar, True);
   FManagedDeclarations.Delete(TLapeVar, True);
   FGlobalDeclarations.Clear();
   FManagedDeclarations.Clear();
+  Reset();
 end;
 
 function TLapeCompilerBase.IncStackInfo(AStackInfo: TLapeStackInfo; var Offset: Integer; Emit: Boolean = True; Pos: PDocPos = nil): TLapeStackInfo;

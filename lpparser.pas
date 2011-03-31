@@ -710,13 +710,18 @@ begin
     if ({$IFNDEF FPC}@{$ENDIF}FOnHandleDirective <> nil) then
     begin
       Next();
-      Expect(tk_Identifier, False, False);
+      Expect([tk_Identifier] + ParserToken_Keywords, False, False);
       d := TokString;
 
       NextNoWhiteSpace();
-      while (not (getChar(1) in ['}', #0])) do Inc(FPos);
-      a := TokString;
-      Inc(FPos);
+      if (CurChar = '}') then
+        a := ''
+      else
+      begin
+        while (not (getChar(1) in ['}', #0])) do Inc(FPos);
+        a := TokString;
+        Inc(FPos);
+      end;
 
       if FOnHandleDirective(Self, d, a) then
         Exit(True);
