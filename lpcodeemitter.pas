@@ -140,6 +140,7 @@ procedure TLapeCodeEmitterBase.Reset;
 begin
   FCodeSize := CodeGrowSize;
   SetLength(FCode, FCodeSize);
+  FillChar(FCode[0], FCodeSize, 0);
   FCodePointers.Clear();
 
   {$IFDEF Lape_SmallCode}
@@ -159,7 +160,9 @@ begin
     Exit;
   for i := StartOffset + Len to FCodeCur - 1 do
     FCode[i - Len] := FCode[i];
+
   Dec(FCodeCur, Len);
+  FillChar(FCode[FCodeCur], Len, 0);
   adjustCodePointers(StartOffset, -Len);
 end;
 
@@ -205,7 +208,9 @@ begin
       FCodeSize := FCodeSize + Len
     else
       FCodeSize := FCodeSize + CodeGrowSize;
+
     SetLength(FCode, FCodeSize);
+    FillChar(FCode[FCodeCur], FCodeSize - FCodeCur, 0);
   end;
 end;
 
