@@ -392,38 +392,41 @@ var
     end;
   end;
 
+  procedure RemoveFromStringList(l: TStringList; s: lpString);
+  var
+    i: Integer;
+  begin
+    i := l.IndexOf(s);
+    while (i > -1) do
+    begin
+      l.Delete(i);
+      i := l.IndexOf(s);
+    end;
+  end;
+
 begin
   Assert(Sender = Tokenizer);
-  Result := False;
+  Result := True;
   t := nil;
 
   if ({$IFNDEF FPC}@{$ENDIF}FOnHandleDirective <> nil) then
     if FOnHandleDirective(Self, Directive, Argument, Sender.InPeek) then
-      Exit(True);
+      Exit;
 
   Directive := LowerCase(Directive);
   if (Directive = 'ifdef') or (Directive = 'ifndef') then
-  begin
-    pushConditional((not InIgnore()) and ((FDefines.IndexOf(Trim(Argument)) > -1) xor (Directive = 'ifndef')), Sender.DocPos);
-    Exit(True);
-  end
+    pushConditional((not InIgnore()) and ((FDefines.IndexOf(Trim(Argument)) > -1) xor (Directive = 'ifndef')), Sender.DocPos)
   else if (Directive = 'else') then
-  begin
-    switchConditional();
-    Exit(True);
-  end
+    switchConditional()
   else if (Directive = 'endif') then
-  begin
-    popConditional();
-    Exit(True);
-  end;
-
-  if InIgnore() then
-    Exit(True);
-
-  if (Directive = 'define') then
-    FDefines.add(Trim(Argument));
-  if (Directive = 'i') or (Directive = 'include') or (Directive = 'include_once') then
+    popConditional()
+  else if InIgnore() then
+    {nothing}
+  else if (Directive = 'define') then
+    FDefines.add(Trim(Argument))
+  else if (Directive = 'undef') then
+    RemoveFromStringList(FDefines, Trim(Argument))
+  else if (Directive = 'i') or (Directive = 'include') or (Directive = 'include_once') then
   begin
     if ({$IFNDEF FPC}@{$ENDIF}FOnFindFile <> nil) then
       t := FOnFindFile(Self, Argument);
@@ -446,11 +449,12 @@ begin
         t := TLapeTokenizerFile.Create(Argument);
 
     pushTokenizer(t);
-    Exit(True);
-  end;
+  end
+  else if Sender.InPeek then
+    {nothing}
+  else
+    Result := False;
 
-  if Sender.InPeek then
-    Exit(True);
   WriteLn('DIRECTIVE: '+Directive);
 end;
 
