@@ -77,6 +77,8 @@ type
     function HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean; virtual;
     function InIgnore: Boolean; virtual;
     function Next: EParserToken; virtual;
+    function isNext(Tokens: EParserTokenSet; out Token: EParserToken): Boolean; virtual; overload;
+    function isNext(Tokens: EParserTokenSet): Boolean; virtual; overload;
     function Peek: EParserToken; virtual;
     function Expect(Token: EParserToken; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken; overload; virtual;
     function Expect(Tokens: EParserTokenSet; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken; overload; virtual;
@@ -89,8 +91,8 @@ type
     procedure ParseTypeBlock; virtual;
     function ParseVarBlock(OneOnly: Boolean = False; ValidEnd: EParserTokenSet = [tk_sym_SemiColon]): TLapeTree_VarList; virtual;
 
-    function ParseExpression(ReturnOn: EParserTokenSet = []): TLapeTree_ExprBase; virtual;
-    function ParseTypeExpression(ReturnOn: EParserTokenSet = []): TLapeTree_Base; virtual;
+    function ParseExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True): TLapeTree_ExprBase; virtual;
+    function ParseTypeExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True): TLapeTree_Base; virtual;
     function ParseStatement: TLapeTree_Base; virtual;
     function ParseStatementList: TLapeTree_StatementList; virtual;
     function ParseBeginEnd(AllowDot: Boolean = False): TLapeTree_StatementList; virtual;
@@ -111,7 +113,8 @@ type
     destructor Destroy; override;
 
     function getState: Pointer; virtual;
-    procedure setState(const State: Pointer; FreeState: Boolean = True); virtual;
+    procedure setState(const State: Pointer; DoFreeState: Boolean = True); virtual;
+    procedure freeState(const State: Pointer); virtual;
     function ParseFile: TLapeTree_Base; virtual;
     function Compile: Boolean; virtual;
     procedure CheckAfterCompile; virtual;
@@ -265,6 +268,7 @@ end;
 
 function TLapeCompiler.popTokenizer: TLapeTokenizerBase;
 begin
+  Result := Tokenizer;
   setTokenizer(nil);
   Dec(FTokenizer);
 end;
@@ -482,6 +486,39 @@ begin
   __LapeTokenizerBase(Tokenizer).FLastTok := lTok;
 end;
 
+function TLapeCompiler.isNext(Tokens: EParserTokenSet; out Token: EParserToken): Boolean;
+var
+  i: Integer;
+  p: Pointer;
+begin
+  Result := False;
+  p := getState();
+  try
+    for i := 0 to High(FTokenizers) do
+      if (FTokenizers[i] <> nil) then
+        __LapeTokenizerBase(FTokenizers[i]).FInPeek := True;
+    Token := Next();
+    Result := Token in Tokens;
+  finally
+    if (not Result) then
+      setState(p)
+    else
+    begin
+      freeState(p);
+      for i := 0 to High(FTokenizers) do
+        if (FTokenizers[i] <> nil) then
+          __LapeTokenizerBase(FTokenizers[i]).FInPeek := False;
+    end;
+  end;
+end;
+
+function TLapeCompiler.IsNext(Tokens: EParserTokenSet): Boolean;
+var
+  t: EParserToken;
+begin
+  Result := isNext(Tokens, t);
+end;
+
 function TLapeCompiler.Peek: EParserToken;
 var
   i: Integer;
@@ -533,7 +570,8 @@ end;
 function TLapeCompiler.ParseBlockList(StopAfterBeginEnd: Boolean = True): TLapeTree_StatementList;
 var
   f: TLapeFuncForwards;
-  t: TLapeTree_Base;
+  n: TLapeTree_Base;
+  t: EParserToken;
   b: Boolean;
 begin
 
@@ -544,24 +582,28 @@ begin
     try
       b := False;
       repeat
-        t := nil;
-        case Peek() of
-          tk_NULL: Break;
-          tk_kw_Begin:
-            begin
-              t := ParseBeginEnd(not StopAfterBeginEnd);
-              b := (Tokenizer.Tok = tk_sym_Dot) or StopAfterBeginEnd;
-            end;
-          tk_kw_Const, tk_kw_Var: t := ParseVarBlock();
-          tk_kw_Function, tk_kw_Procedure: t := ParseMethod(f);
-          tk_kw_Type: ParseTypeBlock();
-          {$IFNDEF Lape_ForceBlock}
-          else if (not StopAfterBeginEnd) then t := ParseStatement()
-          {$ENDIF}
-          else LapeException(lpeBlockExpected, Tokenizer.DocPos);
-        end;
-        if (t <> nil) then
-          Result.addStatement(t);
+        n := nil;
+        if isNext([tk_NULL, tk_kw_Begin, tk_kw_Const, tk_kw_Var, tk_kw_Function, tk_kw_Procedure, tk_kw_Type], t) then
+          case t of
+            tk_NULL: Break;
+            tk_kw_Begin:
+              begin
+                n := ParseBeginEnd(not StopAfterBeginEnd);
+                b := (Tokenizer.Tok = tk_sym_Dot) or StopAfterBeginEnd;
+              end;
+            tk_kw_Const, tk_kw_Var: n := ParseVarBlock();
+            tk_kw_Function, tk_kw_Procedure: n := ParseMethod(f);
+            tk_kw_Type: ParseTypeBlock();
+          end
+        {$IFNDEF Lape_ForceBlock}
+        else if (not StopAfterBeginEnd) then
+          n := ParseStatement()
+        {$ENDIF}
+        else
+          LapeException(lpeBlockExpected, Tokenizer.DocPos);
+
+        if (n <> nil) then
+          Result.addStatement(n);
         Expect([tk_sym_Dot, tk_sym_SemiColon], False, False);
       until b;
 
@@ -585,8 +627,9 @@ var
   a: TStringArray;
   i: Integer;
   p: TLapeParameter;
+  t: EParserToken;
 begin
-  Expect([tk_kw_Function, tk_kw_Procedure], True, False);
+  //Expect([tk_kw_Function, tk_kw_Procedure], True, False);
   isFunction := (Tokenizer.Tok = tk_kw_Function);
   if addToScope then
     Result := TLapeType_ScriptMethod.Create(Self, nil, nil, '', getPDocPos())
@@ -595,30 +638,29 @@ begin
 
   try
 
-    if (Peek() = tk_Identifier) then
+    if isNext([tk_Identifier], t) then
     begin
-      Next();
       Name := Tokenizer.TokString;
+      t := tk_NULL;
     end;
 
-    if (Peek() = tk_sym_ParenthesisOpen) then
-    begin
-      Next();
+    if (t = tk_sym_ParenthesisOpen) or ((t = tk_NULL) and isNext([tk_sym_ParenthesisOpen])) then
       repeat
-        case Peek() of
-          tk_NULL: Break;
-          tk_sym_ParenthesisClose:
-            begin
-              if (Tokenizer.Tok <> tk_sym_ParenthesisOpen) then
-                Expect(tk_sym_SemiColon, True, False);
-              Next();
-              Break;
-            end;
-          tk_kw_Const: begin p.ParType := lptConst; Next(); end;
-          tk_kw_Out:   begin p.ParType := lptOut;   Next(); end;
-          tk_kw_Var:   begin p.ParType := lptVar;   Next(); end;
-          else p.ParType := lptNormal;
-        end;
+        if isNext([tk_NULL, tk_sym_ParenthesisClose, tk_kw_Const, tk_kw_Out, tk_kw_Var], t) then
+          case t of
+            tk_NULL: Break;
+            tk_sym_ParenthesisClose:
+              begin
+                if (Tokenizer.LastTok <> tk_sym_ParenthesisOpen) then
+                  Expect(tk_sym_SemiColon, False, False);
+                Break;
+              end;
+            tk_kw_Const: p.ParType := lptConst;
+            tk_kw_Out:   p.ParType := lptOut;
+            tk_kw_Var:   p.ParType := lptVar;
+          end
+        else
+          p.ParType := lptNormal;
 
         a := ParseIdentifierList();
         Expect(tk_sym_Colon, False, False);
@@ -655,7 +697,6 @@ begin
           Result.addParam(p);
         end;
       until (Tokenizer.Tok = tk_sym_ParenthesisClose);
-    end;
 
     if isFunction then
     begin
@@ -700,8 +741,7 @@ begin
       LapeException(lpeBlockExpected, Tokenizer.DocPos);
 
     Expect(tk_sym_SemiColon, True, False);
-    if (Peek() in [tk_kw_Forward, tk_kw_Overload{, tk_kw_Override}]) then
-      Next();
+    isNext([tk_kw_Forward, tk_kw_Overload{, tk_kw_Override}]);
 
     decl := getDeclaration(n, FStackInfo.Owner);
     if isExternal then
@@ -730,8 +770,7 @@ begin
           LapeException(E.Message, Tokenizer.DocPos);
         end;
 
-        if (Peek() = tk_kw_Forward) then
-          Next();
+        isNext([tk_kw_Forward]);
       end
       {else if (Tokenizer.Tok = tk_kw_Override) then
       begin
@@ -810,14 +849,13 @@ begin
 end;
 
 function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
-
   procedure ParseArray;
   var
     t: TLapeTree_Base;
     r: TLapeRange;
     d: TDocPos;
   begin
-    Expect(tk_kw_Array, True, False);
+    //Expect(tk_kw_Array, True, False);
     d := Tokenizer.DocPos;
 
     Expect([tk_sym_BracketOpen, tk_kw_Of], True, False);
@@ -845,7 +883,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     a: TStringArray;
     i: Integer;
   begin
-    Expect([tk_kw_Record, tk_kw_Union], True, False);
+    //Expect([tk_kw_Record, tk_kw_Union], True, False);
     if (Tokenizer.Tok = tk_kw_Record) then
       rr := TLapeType_Record.Create(Self, nil, '', getPDocPos())
     else
@@ -862,11 +900,8 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
         else
           rr.addField(x, a[i], Options_PackRecords);
 
-      if (Peek() = tk_kw_End) then
-      begin
-        Expect(tk_kw_End, True, False);
+      if isNext([tk_kw_End]) then
         Break;
-      end;
     until False;
 
     Result := addManagedType(rr);
@@ -876,7 +911,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
   var
     t: TLapeType;
   begin
-    Expect(tk_kw_Set, True, False);
+    //Expect(tk_kw_Set, True, False);
     Expect(tk_kw_Of, True, False);
     t := ParseType(nil);
     if (not (t is TLapeType_SubRange)) then
@@ -894,7 +929,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     x: TLapeType;
     d: TDocPos;
   begin
-    Expect(tk_sym_Caret, True, False);
+    //Expect(tk_sym_Caret, True, False);
     d := Tokenizer.DocPos;
 
     Expect(tk_Identifier, True, False);
@@ -919,7 +954,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     v: TLapeGlobalVar;
     so: TLapeStackInfo;
   begin
-    Expect(tk_sym_ParenthesisOpen, True, False);
+    //Expect(tk_sym_ParenthesisOpen, True, False);
     re := TLapeType_Enum.Create(Self, nil, '', getPDocPos());
     if (FStackInfo = nil) then
       so := nil
@@ -963,7 +998,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     r: TLapeRange;
     v: TLapeType;
   begin
-    t := ParseTypeExpression([tk_sym_Equals, tk_op_Assign, tk_sym_ParenthesisClose]);
+    t := ParseTypeExpression([tk_sym_Equals, tk_op_Assign, tk_sym_ParenthesisClose], False);
     try
       if (t <> nil) and (t is TLapeTree_Range) then
       begin
@@ -1010,13 +1045,13 @@ begin
   Result := nil;
   try
 
-    case Peek() of
+    case Next() of
       tk_kw_Array: ParseArray();
       tk_kw_Record, tk_kw_Union: ParseRecord();
       tk_kw_Set: ParseSet();
       tk_kw_Packed:
         begin
-          Next();
+          Expect(tk_kw_Record, True, False);
           ParseRecord(True);
         end;
       tk_sym_Caret: ParsePointer();
@@ -1041,7 +1076,7 @@ var
 begin
   f := TLapeTypeForwards.Create(nil, {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF}, dupIgnore);
   try
-    Expect(tk_kw_Type, True, False);
+    //Expect(tk_kw_Type, True, False);
     repeat
       Expect(tk_Identifier, True, False);
       s := Tokenizer.TokString;
@@ -1085,7 +1120,7 @@ begin
   Result := TLapeTree_VarList.Create(Self, getPDocPos());
   try
 
-    Expect([tk_kw_Const, tk_kw_Var], True, False);
+    //Expect([tk_kw_Const, tk_kw_Var], True, False);
     isConst := (Tokenizer.Tok = tk_kw_Const);
     repeat
       t := nil;
@@ -1179,7 +1214,7 @@ begin
   end;
 end;
 
-function TLapeCompiler.ParseExpression(ReturnOn: EParserTokenSet = []): TLapeTree_ExprBase;
+function TLapeCompiler.ParseExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True): TLapeTree_ExprBase;
 const
   ParenthesisOpen = Pointer(-1);
 var
@@ -1190,6 +1225,7 @@ var
   f: TLapeTree_Invoke;
   _LastNode: (_None, _Var, _Op);
   InExpr: Integer;
+  DoNext: Boolean;
 
   procedure PopOpNode;
   var
@@ -1278,6 +1314,7 @@ var
   var
     s: lpString;
     d: TDocPos;
+    t: EParserToken;
   begin
     d := Tokenizer.DocPos;
     case Tokenizer.Tok of
@@ -1285,9 +1322,9 @@ var
       tk_typ_Char: s := Tokenizer.TokChar;
       else LapeException(lpeImpossible);
     end;
-    while (Peek() in [tk_typ_String, tk_typ_Char]) do
+    while isNext([tk_typ_String, tk_typ_Char], t) do
     begin
-      case Next() of
+      case t of
         tk_typ_String:
           if (Tokenizer.LastTok = tk_typ_String) then
             s := s + #39 + getString()
@@ -1393,12 +1430,15 @@ begin
   OpStack := TLapeTree_OpStack.Create(16);
   _LastNode := _None;
   InExpr := 0;
+  DoNext := FirstNext;
 
   try
     while True do
     begin
-      if (Next() in ReturnOn) and (InExpr <= 0) then
+      if ((DoNext and (Next() in ReturnOn)) or ((not DoNext) and (Tokenizer.Tok in ReturnOn))) and (InExpr <= 0) then
         Break;
+      DoNext := True;
+
       case Tokenizer.Tok of
         tk_typ_Integer: PushVarStack(TLapeTree_Integer.Create(Tokenizer.TokString, Self, getPDocPos()));
         tk_typ_Integer_Hex: PushVarStack(TLapeTree_Integer.Create(IntToStr(Tokenizer.TokInt64), Self, getPDocPos()));
@@ -1407,10 +1447,10 @@ begin
         tk_typ_String: ParseAndPushString();
         tk_typ_Char:
           begin
-            if (Peek() in [tk_typ_String, tk_typ_Char]) then
+            //if (Peek() in [tk_typ_String, tk_typ_Char]) then
               ParseAndPushString()
-            else
-              PushVarStack(TLapeTree_Char.Create(Tokenizer.TokChar, Self, getPDocPos()));
+            //else
+            //  PushVarStack(TLapeTree_Char.Create(Tokenizer.TokChar, Self, getPDocPos()));
           end;
 
         tk_Identifier:
@@ -1426,7 +1466,8 @@ begin
             else if (FInternalMethodMap[Tokenizer.TokString] <> nil) then
             begin
               f := FInternalMethodMap[Tokenizer.TokString].Create(Self, getPDocPos());
-              if (Peek() = tk_sym_ParenthesisOpen) then
+              DoNext := False;
+              if (Next() = tk_sym_ParenthesisOpen) then
                 _LastNode := _Var
               else
               begin
@@ -1445,9 +1486,7 @@ begin
               PopOpStack(op_Invoke);
               if (f = nil) then
                 f := TLapeTree_Invoke.Create(VarStack.Pop(), Self, getPDocPos());
-              if (Peek() = tk_sym_ParenthesisClose) then
-                Next()
-              else
+              if (not isNext([tk_sym_ParenthesisClose])) then
               begin
                 f.addParam(EnsureExpression(ParseExpression([tk_sym_ParenthesisClose, tk_sym_Comma])));
                 while True do
@@ -1514,7 +1553,7 @@ begin
   end;
 end;
 
-function TLapeCompiler.ParseTypeExpression(ReturnOn: EParserTokenSet = []): TLapeTree_Base;
+function TLapeCompiler.ParseTypeExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True): TLapeTree_Base;
 var
   r: TLapeTree_ExprBase;
   v: TLapeType;
@@ -1522,7 +1561,7 @@ begin
   Result := nil;
   v := nil;
 
-  r := ParseExpression(ReturnOn);
+  r := ParseExpression(ReturnOn, FirstNext);
   if (Tokenizer.Tok <> tk_sym_DotDot) then
     Result := r
   else
@@ -1543,36 +1582,31 @@ begin
 end;
 
 function TLapeCompiler.ParseStatement: TLapeTree_Base;
+var
+  t: EParserToken;
 begin
-  case Peek() of
-    tk_NULL, tk_kw_End, tk_kw_Finally, tk_kw_Except, tk_kw_Until: Result := nil;
+  Result := nil;
 
-    tk_kw_Begin: Result := ParseBeginEnd();
-    tk_kw_Case: Result := ParseCase();
-    {$IFNDEF Lape_ForceBlock}
-    tk_kw_Const, tk_kw_Var: Result := ParseVarBlock(True);
-    {$ENDIF}
-    tk_kw_For: Result := ParseFor();
-    tk_kw_If: Result := ParseIf();
-    tk_kw_Repeat: Result := ParseRepeat();
-    tk_kw_While: Result := ParseWhile();
-    tk_kw_Try: Result := ParseTry();
-
-    tk_sym_SemiColon, tk_kw_Else:
-      begin
-        //if (not (Tokenizer.Tok in [tk_sym_SemiColon, tk_kw_Else])) then
-          Next();
-        Result := nil;
-      end;
-    else
-    begin
-      Result := ParseExpression();
-      try
-        Expect([tk_sym_SemiColon, tk_kw_Else], False, False);
-      except
-        Result.Free();
-        raise;
-      end;
+  if isNext([tk_NULL, tk_Identifier, tk_kw_Begin, tk_kw_Case {$IFNDEF Lape_ForceBlock}, tk_kw_Const, tk_kw_Var {$ENDIF}, tk_kw_For, tk_kw_If, tk_kw_Repeat, tk_kw_While, tk_kw_Try, tk_sym_SemiColon, tk_kw_Else], t) then
+    case t of
+      tk_Identifier: Result := ParseExpression([], False);
+      tk_kw_Begin: Result := ParseBeginEnd();
+      tk_kw_Case: Result := ParseCase();
+      tk_kw_Const, tk_kw_Var: Result := ParseVarBlock(True);
+      tk_kw_For: Result := ParseFor();
+      tk_kw_If: Result := ParseIf();
+      tk_kw_Repeat: Result := ParseRepeat();
+      tk_kw_While: Result := ParseWhile();
+      tk_kw_Try: Result := ParseTry();
+    end
+  else if (not (t in [tk_kw_End, tk_kw_Finally, tk_kw_Except, tk_kw_Until])) then
+  begin
+    Result := ParseExpression();
+    try
+      Expect([tk_sym_SemiColon, tk_kw_Else], False, False);
+    except
+      Result.Free();
+      raise;
     end;
   end;
 end;
@@ -1601,7 +1635,7 @@ end;
 
 function TLapeCompiler.ParseBeginEnd(AllowDot: Boolean = False): TLapeTree_StatementList;
 begin
-  Expect(tk_kw_Begin, True, False);
+  //Expect(tk_kw_Begin, True, False);
   Result := ParseStatementList();
 
   try
@@ -1623,7 +1657,7 @@ var
   t: TLapeTree_Base;
   Field: TLapeTree_MultiIf;
 begin
-  Expect(tk_kw_Case, True, False);
+  //Expect(tk_kw_Case, True, False);
   Result := TLapeTree_Case.Create(Self, getPDocPos());
   t := nil;
   Field := nil;
@@ -1631,9 +1665,9 @@ begin
     Result.Condition := ParseExpression();
     Expect(tk_kw_Of, False, False);
 
-    while (not (Peek() in [tk_Null, tk_kw_Else, tk_kw_End])) do
+    while (not (Next() in [tk_Null, tk_kw_Else, tk_kw_End])) do
     begin
-      t := ParseTypeExpression();
+      t := ParseTypeExpression([], False);
       Field := TLapeTree_MultiIf.Create(nil, Self, @t.DocPos);
       repeat
         Field.addValue(t);
@@ -1649,7 +1683,7 @@ begin
       Field := nil;
     end;
 
-    Expect([tk_kw_Else, tk_kw_End], True, False);
+    Expect([tk_kw_Else, tk_kw_End], False, False);
     if (Tokenizer.Tok = tk_kw_Else) then
     begin
       Result.ElseBody := ParseStatement();
@@ -1669,7 +1703,7 @@ end;
 
 function TLapeCompiler.ParseFor: TLapeTree_For;
 begin
-  Expect(tk_kw_For, True, False);
+  //Expect(tk_kw_For, True, False);
   Result := TLapeTree_For.Create(Self, getPDocPos());
   try
 
@@ -1719,7 +1753,7 @@ end;
 
 function TLapeCompiler.ParseIf: TLapeTree_If;
 begin
-  Expect(tk_kw_If, True, False);
+  //Expect(tk_kw_If, True, False);
   Result := TLapeTree_If.Create(Self, getPDocPos());
 
   try
@@ -1756,8 +1790,9 @@ end;
 
 function TLapeCompiler.ParseTry: TLapeTree_Try;
 begin
-  Expect(tk_kw_Try, True, False);
+  //Expect(tk_kw_Try, True, False);
   Result := TLapeTree_Try.Create(Self, getPDocPos());
+
   try
 
     Result.Body := ParseStatementList();
@@ -1782,7 +1817,7 @@ end;
 
 function TLapeCompiler.ParseWhile: TLapeTree_While;
 begin
-  Expect(tk_kw_While, True, False);
+  //Expect(tk_kw_While, True, False);
   Result := TLapeTree_While.Create(Self, getPDocPos());
 
   try
@@ -1876,7 +1911,7 @@ begin
   end;
 end;
 
-procedure TLapeCompiler.setState(const State: Pointer; FreeState: Boolean = True);
+procedure TLapeCompiler.setState(const State: Pointer; DoFreeState: Boolean = True);
 var
   i: Integer;
 begin
@@ -1887,13 +1922,24 @@ begin
 
     for i := 0 to High(Tokenizers) do
       if (Tokenizers[i] <> nil) and (FTokenizers[i] <> nil) then
-        FTokenizers[i].setState(Tokenizers[i]);
+        FTokenizers[i].setState(Tokenizers[i], False);
 
     FDefines.Text := Defines;
     FConditionalStack.ImportFromArray(Conditionals);
   end;
-  if FreeState then
-    Dispose(PCompilerState(State));
+  if DoFreeState then
+    freeState(State);
+end;
+
+procedure TLapeCompiler.freeState(const State: Pointer);
+var
+  i: Integer;
+begin
+  with PCompilerState(State)^ do
+    for i := 0 to High(Tokenizers) do
+      if (Tokenizers[i] <> nil) and (FTokenizers[i] <> nil) then
+        FTokenizers[i].freeState(Tokenizers[i]);
+  Dispose(PCompilerState(State));
 end;
 
 function TLapeCompiler.ParseFile: TLapeTree_Base;
@@ -1905,16 +1951,14 @@ begin
     if (FDefines <> nil) and (FBaseDefines <> nil) then
       FDefines.Assign(FBaseDefines);
 
-    case Peek() of
-      tk_kw_Program:
-        begin
-          Expect(tk_kw_Program, True, False);
-          Expect(tk_Identifier, True, False);
-          Expect(tk_sym_SemiColon, True, False);
-          Result := ParseBlockList(False);
-        end
-      else Result := ParseBlockList(False);
-    end;
+    if isNext([tk_kw_Program]) then
+    begin
+      Expect(tk_Identifier, True, False);
+      Expect(tk_sym_SemiColon, True, False);
+      Result := ParseBlockList(False);
+    end
+    else
+      Result := ParseBlockList(False);
 
     CheckAfterCompile();
   except
@@ -2012,7 +2056,7 @@ var
   p: Pointer;
   i: Integer;
 begin
-  s := 'var ' + AName + ': ' + Typ;
+  s := AName + ': ' + Typ;
   if (Value <> '') then
    s := s + ' = ' + Value;
 
@@ -2176,7 +2220,7 @@ begin
   p := getState();
 
   FTokenizer := 0;
-  FTokenizers[0] := TLapeTokenizerString.Create('type ' + AName + ' = ' + s + ';');
+  FTokenizers[0] := TLapeTokenizerString.Create(AName + ' = ' + s + ';');
   try
     FStackInfo := nil;
     ParseTypeBlock();
@@ -2211,6 +2255,7 @@ begin
   FTokenizers[0] := TLapeTokenizerString.Create(s + ';');
   try
     FStackInfo := nil;
+    Expect([tk_kw_Function, tk_kw_Procedure]);
     m := ParseMethod(nil, True);
     CheckAfterCompile();
 

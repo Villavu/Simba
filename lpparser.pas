@@ -156,7 +156,8 @@ type
     constructor Create(AFileName: lpString = ''); reintroduce; virtual;
     procedure Reset(ClearDoc: Boolean = False); virtual;
     function getState: Pointer; virtual;
-    procedure setState(const State: Pointer; FreeState: Boolean = True); virtual;
+    procedure setState(const State: Pointer; DoFreeState: Boolean = True); virtual;
+    procedure freeState(const State: Pointer); virtual;
     function getChar(Offset: Integer = 0): lpChar; virtual; abstract;
     function tempRollBack: EParserToken; virtual;
 
@@ -854,7 +855,7 @@ begin
   end;
 end;
 
-procedure TLapeTokenizerBase.setState(const State: Pointer; FreeState: Boolean = True);
+procedure TLapeTokenizerBase.setState(const State: Pointer; DoFreeState: Boolean = True);
 begin
   with PTokenizerState(State)^ do
   begin
@@ -865,8 +866,13 @@ begin
     FInPeek := InPeek;
     FDocPos := DocPos;
   end;
-  if FreeState then
-    Dispose(PTokenizerState(State));
+  if DoFreeState then
+    freeState(State);
+end;
+
+procedure TLapeTokenizerBase.freeState(const State: Pointer);
+begin
+  Dispose(PTokenizerState(State));
 end;
 
 function TLapeTokenizerBase.TempRollBack: EParserToken;
