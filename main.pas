@@ -66,8 +66,10 @@ var
   i: Integer;
 begin
   WriteLn(Ord(Low(opCode)), '..', Ord(High(opCode)));
+  {$IFDEF Lape_TrackObjects}
   for i := 0 to lpgList.Count - 1 do
     WriteLn('unfreed: ', TLapeBaseClass(lpgList[i]).ClassName, ' -- [',  PtrInt(lpgList[i]), ']');
+  {$ENDIF}
 end;
 
 procedure MyWriteLn_String(Params: PParamArray);
@@ -210,16 +212,15 @@ begin
     Compiler.addGlobalVar(Compiler.getPointerType(ttpa).NewGlobalVar(@tpa, 'tpap'));
 
     try
+      t := getTickCount;
       if Compiler.Compile() then
       begin
+        m.Lines.add('Compiling Time: ' + IntToStr(getTickCount - t) + 'ms.');
         DisassembleCode(Compiler.Emitter.Code, CombineDeclArray(Compiler.ManagedDeclarations.getByClass(TLapeGlobalVar), Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar)));
+
         t := getTickCount;
         RunCode(Compiler.Emitter.Code);
-        t := getTickCount - t;
-        m.Lines.add('Time: ' + IntToStr(t) + 'ms.');
-
-        //m.Lines.add('a='+IntToStr(PInteger(Compiler.GlobalVars['a'].Ptr)^)+', b='+IntToStr(PInteger(Compiler.GlobalVars['b'].Ptr)^)+', c='+IntToStr(PInteger(Compiler.GlobalVars['c'].Ptr)^)+', d='+IntToStr(di)+', s='#39+PlpString(Compiler.GlobalVars['s'].Ptr)^+#39', t='#39+PlpString(Compiler.GlobalVars['t'].Ptr)^+#39);
-        WriteLn(rec.VarToString(@q));
+        m.Lines.add('Running Time: ' + IntToStr(getTickCount - t) + 'ms.');
       end
       else
         m.Lines.add('Error!');

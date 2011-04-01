@@ -574,6 +574,7 @@ end;
 
 procedure PrintTree(Root: TLapeTree_Base; Indent: Integer = 0);
 begin
+  Exit;
   Write(StringOfChar('-', Indent)+Root.ClassName);
   if (Root is TLapeTree_GlobalVar) then
     WriteLn('('+TLapeTree_GlobalVar(Root).GlobalVar.VarType.AsString+': '+TLapeTree_GlobalVar(Root).VarAsString+')')
@@ -1108,19 +1109,32 @@ end;
 
 function TLapeTree_Invoke.resType: TLapeType;
 var
-  f: TLapeGlobalVar;
+  t: TLapeType;
+
+  function getVarType(v: TLapeGlobalVar): TLapeType;
+  begin
+    if (v = nil) then
+      Result := nil
+    else
+      Result := v.VarType;
+  end;
+
 begin
   if (FIdent is TLapeTree_VarType) then
     Result := TLapeTree_VarType(FIdent).VarType
   else
   begin
-    f := FIdent.Evaluate();
-    if (f <> nil) and (f.VarType <> nil) and (f.VarType is TLapeType_OverloadedMethod) then
-      f := TLapeType_OverloadedMethod(f.VarType).getMethod(getParamTypes());
-    if (f = nil) or (f.VarType = nil) or (not (f.VarType.BaseType in [ltScriptMethod, ltImportedMethod])) then
+    if (FIdent is TLapeTree_ResVar) or (FIdent is TLapeTree_GlobalVar) then
+      t := FIdent.Compile().VarType
+    else
+      t := nil;
+
+    if (t <> nil) and (t is TLapeType_OverloadedMethod) then
+      t := getVarType(TLapeType_OverloadedMethod(t).getMethod(getParamTypes()));
+    if (t = nil) or (not (t.BaseType in [ltScriptMethod, ltImportedMethod])) then
       Result := nil
     else
-      Result := TLapeType_Method(f.VarType).Res;
+      Result := TLapeType_Method(t).Res;
   end;
 end;
 
@@ -1413,14 +1427,14 @@ var
 
         b.VarPos.MemPos := mpStack;
         b.VarType := Compiler.getBaseType(ltPointer);
-        if c[i].VarPos.isPointer then
+        {if c[i].VarPos.isPointer then
         begin
           c[i].VarType := b.VarType;
           c[i].VarPos.isPointer := False;
           b.VarType.Eval(op_Assign, e, b, c[i], Offset, @Self.DocPos);
           c[i].VarPos.isPointer := True;
         end
-        else
+        else}
           FCompiler.Emitter._Eval(getEvalProc(op_Addr, ltUnknown, ltUnknown), b, c[i], NullResVar, Offset, @Self.DocPos);
       end;
 
@@ -1678,17 +1692,16 @@ end;
 
 function TLapeTree_InternalMethod_SizeOf.Evaluate: TLapeGlobalVar;
 var
-  v: TLapeGlobalVar;
   t: TLapeType;
 begin
   if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
-  t := nil;
-  v := FParams[0].Evaluate();
+  if (FParams[0] is TLapeTree_ResVar) or (FParams[0] is TLapeTree_GlobalVar) then
+    t := FParams[0].Compile().VarType
+  else
+    t := nil;
 
-  if (v <> nil) then
-    t := v.VarType;
   if (t <> nil) and (t is TLapeType_Type) then
     t := TLapeType_Type(t).TType;
   if (t = nil) then
@@ -1760,17 +1773,16 @@ end;
 
 function TLapeTree_InternalMethod_Low.Evaluate: TLapeGlobalVar;
 var
-  v: TLapeGlobalVar;
   t: TLapeType;
 begin
   if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
-  t := nil;
-  v := FParams[0].Evaluate();
+  if (FParams[0] is TLapeTree_ResVar) or (FParams[0] is TLapeTree_GlobalVar) then
+    t := FParams[0].Compile().VarType
+  else
+    t := nil;
 
-  if (v <> nil) then
-    t := v.VarType;
   if (t <> nil) and (t is TLapeType_Type) then
     t := TLapeType_Type(t).TType;
   if (t = nil) or (not (t.BaseType in LapeOrdinalTypes + LapeArrayTypes  - LapeStringTypes + [ltShortString])) then
@@ -1802,9 +1814,7 @@ begin
   if (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) then
   begin
     t := FParams[0].resType();
-    if (t <> nil) and (t is TLapeType_Type) then
-      t := TLapeType_Type(t).TType;
-    if (t <> nil) and (t.BaseType = ltDynArray) then
+    if (t <> nil) and (not (t is TLapeType_Type)) and (t.BaseType = ltDynArray) then
       Result := False;
   end;
 end;
@@ -1828,17 +1838,16 @@ end;
 
 function TLapeTree_InternalMethod_High.Evaluate: TLapeGlobalVar;
 var
-  v: TLapeGlobalVar;
   t: TLapeType;
 begin
   if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
-  t := nil;
-  v := FParams[0].Evaluate();
+  if (FParams[0] is TLapeTree_ResVar) or (FParams[0] is TLapeTree_GlobalVar) then
+    t := FParams[0].Compile().VarType
+  else
+    t := nil;
 
-  if (v <> nil) then
-    t := v.VarType;
   if (t <> nil) and (t is TLapeType_Type) then
     t := TLapeType_Type(t).TType;
   if (t = nil) or (not (t.BaseType in LapeOrdinalTypes + LapeArrayTypes - LapeStringTypes + [ltShortString])) then
@@ -1908,7 +1917,6 @@ end;
 
 function TLapeTree_InternalMethod_Length.Evaluate: TLapeGlobalVar;
 var
-  v: TLapeGlobalVar;
   t: TLapeType;
 begin
   if (not isConstant()) then
@@ -1916,11 +1924,11 @@ begin
   else if (FParams.Count <> 1) or (FParams[0] = nil) or (FParams[0].ClassType = TLapeTree_ExprBase) then
     LapeException(lpeWrongNumberParams, [1], DocPos);
 
-  t := nil;
-  v := FParams[0].Evaluate();
+  if (FParams[0] is TLapeTree_ResVar) or (FParams[0] is TLapeTree_GlobalVar) then
+    t := FParams[0].Compile().VarType
+  else
+    t := nil;
 
-  if (v <> nil) then
-    t := v.VarType;
   if (t <> nil) and (t is TLapeType_Type) then
     t := TLapeType_Type(t).TType;
   if (t = nil) or (t.BaseType <> ltStaticArray) then
