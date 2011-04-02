@@ -236,8 +236,6 @@ type
 
    { TLPThread }
    TLPThread = class(TMThread)
-   private
-     IScript: string;
    public
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
@@ -1207,27 +1205,6 @@ end;
 
 { TLPThread }
 
-constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
-begin
-  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
-end;
-
-destructor TLPThread.Destroy;
-begin
-  inherited Destroy;
-end;
-
-procedure TLPThread.SetScript(Script: string);
-begin
-  IScript := Script;
-end;
-
-function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
-begin
-  Result := nil;
-  FileName := IncludePath + FileName;
-end;
-
 type
   PBoolean = ^Boolean;
   PStringArray = ^TStringArray;
@@ -1267,6 +1244,59 @@ type
 {$I LPInc/Wrappers/ocr.inc}
 {$I LPInc/Wrappers/internets.inc}
 
+constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
+var
+  I: integer;
+  Fonts: TMFonts;
+begin
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
+  
+  Parser := TLapeTokenizerString.Create('');
+  Compiler := TLapeCompiler.Create(Parser);
+  Compiler.OnFindFile := @OnFindFile;
+  Fonts := Client.MOCR.Fonts;
+  with Compiler do
+  begin
+    for I := Fonts.Count - 1 downto 0 do
+      addGlobalVar(Fonts[I].Name, Fonts[I].Name);
+      
+    for I := 0 to High(VirtualKeys) do
+      addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
+
+    {$I LPInc/lpdefines.inc}
+    {$I LPInc/lpcompile.inc}
+
+    {$I LPInc/lpexportedmethods.inc}
+  end;
+end;
+
+destructor TLPThread.Destroy;
+begin
+  try
+    {if (Compiler <> nil) then
+      Compiler.Free;}
+    
+    if (Parser <> nil) then
+      Parser.Free;
+  except
+    on E: Exception do
+      psWriteln('Exception TLPThread.Destroy: ' + e.message);
+  end;
+
+  inherited Destroy;
+end;
+
+procedure TLPThread.SetScript(Script: string);
+begin
+  Parser.Doc := Script;
+end;
+
+function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+begin
+  Result := nil;
+  FileName := IncludePath + FileName;
+end;
+
 procedure TLPThread.Execute;
   function CombineDeclArray(a, b: TLapeDeclArray): TLapeDeclArray;
   var
@@ -1278,48 +1308,23 @@ procedure TLPThread.Execute;
     for i := High(b) downto 0 do
       Result[l + i] := b[i];
   end;
-var
-  I: integer;
-  Fonts: TMFonts;
 begin
   CurrThread := self;
-  Parser := TLapeTokenizerString.Create(IScript);
-  Compiler := TLapeCompiler.Create(Parser);
   try
-    try
-      Fonts := Client.MOCR.Fonts;
-      Compiler.OnFindFile := @OnFindFile;
-      with Compiler do
-      begin
-        for I := Fonts.Count - 1 downto 0 do
-          addGlobalVar(Fonts[I].Name, Fonts[I].Name);
-
-        for I := 0 to High(VirtualKeys) do
-          addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
-
-        {$I LPInc/lpdefines.inc}
-        {$I LPInc/lpcompile.inc}
-
-        {$I LPInc/lpexportedmethods.inc}
-      end;
-      Starttime := lclintf.GetTickCount;
-      if Compiler.Compile() then
-      begin
-        DisassembleCode(Compiler.Emitter.Code, CombineDeclArray(Compiler.ManagedDeclarations.getByClass(TLapeGlobalVar), Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar)));
-        psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
-        if CompileOnly then
-          Exit;
-        RunCode(Compiler.Emitter.Code);
-        psWriteln('Successfully executed.');
-      end else
-        psWriteln('Compiling failed.');
-    except
-       on E : Exception do
-         psWriteln('Exception in Script: ' + e.message);
-    end;
-  finally
-    Compiler.Free;
-    Parser.Free;
+    Starttime := lclintf.GetTickCount;
+    if Compiler.Compile() then
+    begin
+      DisassembleCode(Compiler.Emitter.Code, CombineDeclArray(Compiler.ManagedDeclarations.getByClass(TLapeGlobalVar), Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar)));
+      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      if CompileOnly then
+        Exit;
+      RunCode(Compiler.Emitter.Code);
+      psWriteln('Successfully executed.');
+    end else
+      psWriteln('Compiling failed.');
+  except
+     on E : Exception do
+       psWriteln('Exception in Script: ' + e.message);
   end;
 end;
 
