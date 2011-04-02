@@ -15,10 +15,10 @@ end;
 
 procedure DoIncCall_PStk; {$IFDEF Lape_Inline}inline;{$ENDIF}
 var
-  ParamSize: UInt16;
+  ParamSize: TParamSize;
 begin
-  ParamSize := PUInt16(PtrUInt(Code) + ocSize)^;
-  DoIncCall(SizeOf(UInt16), PUInt32(PPointer(@Stack[StackPos - ParamSize - SizeOf(Pointer)])^)^, ParamSize, -SizeOf(Pointer));
+  ParamSize := PParamSize(PtrUInt(Code) + ocSize)^;
+  DoIncCall(SizeOf(TParamSize), PCodePos(PPointer(@Stack[StackPos - ParamSize - SizeOf(Pointer)])^)^, ParamSize, -SizeOf(Pointer));
 end;
 
 procedure DoIncCall_Var; {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -47,10 +47,10 @@ end;
 
 procedure DoInvokeImported_PStk; {$IFDEF Lape_Inline}inline;{$ENDIF}
 var
-  ParamSize: UInt16;
+  ParamSize: TParamSize;
 begin
-  ParamSize := PUInt16(PtrUInt(Code) + ocSize)^;
-  DoInvokeImportedProc(SizeOf(UInt16), PPointer(PPointer(@Stack[StackPos - ParamSize - SizeOf(Pointer)])^)^, ParamSize, -SizeOf(Pointer));
+  ParamSize := PParamSize(PtrUInt(Code) + ocSize)^;
+  DoInvokeImportedProc(SizeOf(TParamSize), PPointer(PPointer(@Stack[StackPos - ParamSize - SizeOf(Pointer)])^)^, ParamSize, -SizeOf(Pointer));
 end;
 
 procedure DoInvokeImported_Var; {$IFDEF Lape_Inline}inline;{$ENDIF}

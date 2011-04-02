@@ -36,6 +36,7 @@ type
   {$IFNDEF FPC}
   PtrInt = Int32;
   PtrUInt = UInt32;
+  PLongBool = ^LongBool;
   {$ENDIF}
 
   {$IFDEF Lape_Unicode}
@@ -62,15 +63,40 @@ type
   PDocPos = ^TDocPos;
   TDocPos = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
     Line, Col: UInt16;
-    FileName: PlpChar;
+    FileName: lpString;
   end;
 
+  TLapeRange = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
+    Lo, Hi: Int64;
+  end;
+
+  TCodePos = UInt32;
+  TCodeOffset = Int32;
+
+  {$IFDEF Lape_SmallCode}
+  //Means Lape can only locate up to 65kb of local variables (per stackframe)
+  TStackInc = Int16;
   TVarStackOffset = UInt16;
   TStackOffset = UInt16;
-  TStackInc = Int16;
   TPointerOffset = Int16;
+  TParamSize = UInt16;
+  EvalBool = Boolean;
+  {$ELSE}
+  TStackInc = Int32;
+  TVarStackOffset = UInt32;
+  TStackOffset = UInt32;
+  TPointerOffset = Int32;
+  TParamSize = UInt32;
+  EvalBool = LongBool;
+  {$ENDIF}
 
-  TMemoryPos = (mpNone, mpStack, mpMem, mpVar);
+  PStackOffset = ^TStackOffset;
+  PParamSize = ^TParamSize;
+  PCodePos = ^TCodePos;
+  PCodeOffset = ^TCodeOffset;
+  PEvalBool = ^EvalBool;
+
+  EMemoryPos = (mpNone, mpStack, mpMem, mpVar);
   TLapeEvalProc = procedure(const Dest, Left, Right: Pointer);
   TLapeImportedProc = procedure(const Params: PParamArray);
   TLapeImportedFunc = procedure(const Params: PParamArray; const Result: Pointer);
@@ -82,6 +108,7 @@ type
     ltBoolean, ltByteBool, ltWordBool, ltLongBool,                            //Boolean
     ltAnsiChar, ltWideChar,                                                   //Char
     ltShortString, ltAnsiString, ltWideString, ltUnicodeString,               //String
+    ltVariant,                                                                //Variant
     ltSmallEnum, ltLargeEnum, ltSmallSet, ltLargeSet,                         //Set
     ltPointer,                                                                //Pointer
     ltRecord, ltUnion,                                                        //Struct
@@ -127,10 +154,6 @@ type
     op_UnaryPlus
   );
 
-  TLapeRange = record
-    Lo, Hi: Int64;
-  end;
-
   ELapeSmallEnum = (__LapeSmallEnum1,__LapeSmallEnum2,__LapeSmallEnum3,__LapeSmallEnum4,__LapeSmallEnum5,__LapeSmallEnum6,__LapeSmallEnum7,__LapeSmallEnum8,__LapeSmallEnum9,__LapeSmallEnum10,__LapeSmallEnum11,__LapeSmallEnum12,__LapeSmallEnum13,__LapeSmallEnum14,__LapeSmallEnum15,__LapeSmallEnum16,__LapeSmallEnum17,__LapeSmallEnum18,__LapeSmallEnum19,__LapeSmallEnum20,__LapeSmallEnum21,__LapeSmallEnum22,__LapeSmallEnum23,__LapeSmallEnum24,__LapeSmallEnum25,__LapeSmallEnum26,__LapeSmallEnum27,__LapeSmallEnum28,__LapeSmallEnum29,__LapeSmallEnum30,__LapeSmallEnum31,__LapeSmallEnum32);
   ELapeLargeEnum = (__LapeLargeEnum1,__LapeLargeEnum2,__LapeLargeEnum3,__LapeLargeEnum4,__LapeLargeEnum5,__LapeLargeEnum6,__LapeLargeEnum7,__LapeLargeEnum8,__LapeLargeEnum9,__LapeLargeEnum10,__LapeLargeEnum11,__LapeLargeEnum12,__LapeLargeEnum13,__LapeLargeEnum14,__LapeLargeEnum15,__LapeLargeEnum16,__LapeLargeEnum17,__LapeLargeEnum18,__LapeLargeEnum19,__LapeLargeEnum20,__LapeLargeEnum21,__LapeLargeEnum22,__LapeLargeEnum23,__LapeLargeEnum24,__LapeLargeEnum25,__LapeLargeEnum26,__LapeLargeEnum27,__LapeLargeEnum28,__LapeLargeEnum29,__LapeLargeEnum30,__LapeLargeEnum31,__LapeLargeEnum32,__LapeLargeEnum33,__LapeLargeEnum34,__LapeLargeEnum35,__LapeLargeEnum36,__LapeLargeEnum37,__LapeLargeEnum38,__LapeLargeEnum39,__LapeLargeEnum40,__LapeLargeEnum41,__LapeLargeEnum42,__LapeLargeEnum43,__LapeLargeEnum44,__LapeLargeEnum45,__LapeLargeEnum46,__LapeLargeEnum47,__LapeLargeEnum48,__LapeLargeEnum49,__LapeLargeEnum50,
                     __LapeLargeEnum51,__LapeLargeEnum52,__LapeLargeEnum53,__LapeLargeEnum54,__LapeLargeEnum55,__LapeLargeEnum56,__LapeLargeEnum57,__LapeLargeEnum58,__LapeLargeEnum59,__LapeLargeEnum60,__LapeLargeEnum61,__LapeLargeEnum62,__LapeLargeEnum63,__LapeLargeEnum64,__LapeLargeEnum65,__LapeLargeEnum66,__LapeLargeEnum67,__LapeLargeEnum68,__LapeLargeEnum69,__LapeLargeEnum70,__LapeLargeEnum71,__LapeLargeEnum72,__LapeLargeEnum73,__LapeLargeEnum74,__LapeLargeEnum75,__LapeLargeEnum76,__LapeLargeEnum77,__LapeLargeEnum78,__LapeLargeEnum79,__LapeLargeEnum80,__LapeLargeEnum81,__LapeLargeEnum82,__LapeLargeEnum83,__LapeLargeEnum84,__LapeLargeEnum85,__LapeLargeEnum86,__LapeLargeEnum87,__LapeLargeEnum88,__LapeLargeEnum89,__LapeLargeEnum90,__LapeLargeEnum91,__LapeLargeEnum92,__LapeLargeEnum93,__LapeLargeEnum94,__LapeLargeEnum95,__LapeLargeEnum96,__LapeLargeEnum97,__LapeLargeEnum98,__LapeLargeEnum99,__LapeLargeEnum100,
@@ -159,7 +182,9 @@ type
   end;
 
   {$IFDEF FPC}generic{$ENDIF} TLapeStack<_T> = class(TLapeBaseClass)
-  protected
+  public type
+    TTArray = array of _T;
+  var protected
     FArr: array of _T;
     FLen: Integer;
     FCur: Integer;
@@ -178,6 +203,9 @@ type
     function Pop: _T; virtual;
     function Push(Item: _T): Integer; virtual;
 
+    procedure ImportFromArray(a: TTArray); virtual;
+    function ExportToArray: TTArray; virtual;
+
     property Items[Index: Integer]: _T read getItem; default;
     property Top: _T read getCurItem write setCurItem;
     property Size: Integer read FLen;
@@ -186,7 +214,9 @@ type
   end;
 
   {$IFDEF FPC}generic{$ENDIF} TLapeList<_T> = class(TLapeBaseClass)
-  protected
+  public type
+    TTArray = array of _T;
+  var protected
     FDuplicates: TDuplicates;
     FItems: array of _T;
     FLen: Integer;
@@ -204,6 +234,9 @@ type
     function DeleteItem(Item: _T): _T; overload; virtual;
     function IndexOf(Item: _T): Integer; overload; virtual;
     function ExistsItem(Item: _T): Boolean; overload;
+
+    procedure ImportFromArray(a: TTArray); virtual;
+    function ExportToArray: TTArray; virtual;
 
     property Items[Index: Integer]: _T read getItem write setItem; default;
     property Count: Integer read FLen;
@@ -294,6 +327,12 @@ const
   ltCharInt = ltUInt8;
   {$ENDIF}
 
+  {$IFDEF Lape_SmallCode}
+  ltEvalBool = ltBoolean;
+  {$ELSE}
+  ltEvalBool = ltLongBool;
+  {$ENDIF}
+
   LapeTypeSize: array[ELapeBaseType] of Integer = (
     -1,
     SizeOf(UInt8), SizeOf(Int8), SizeOf(UInt16), SizeOf(Int16), SizeOf(UInt32),
@@ -302,11 +341,12 @@ const
     SizeOf(Boolean), SizeOf(ByteBool), SizeOf(WordBool), SizeOf(LongBool),
     SizeOf(AnsiChar), SizeOf(WideChar),
     SizeOf(ShortString), SizeOf(AnsiString), SizeOf(WideString), SizeOf(UnicodeString),
+    SizeOf(Variant),
     SizeOf(ELapeSmallEnum), SizeOf(ELapeLargeEnum), SizeOf(TLapeSmallSet), SizeOf(TLapeLargeSet),
     SizeOf(Pointer),
     -1, -1,
     SizeOf(Pointer), -1,
-    SizeOf(UInt32), SizeOf(Pointer)
+    SizeOf(TCodeOffset), SizeOf(Pointer)
   );
 
   LapeIntegerTypes = [Low(LapeIntegerTypeRange)..High(LapeIntegerTypeRange)];
@@ -320,10 +360,11 @@ const
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
   LapePointerTypes = [ltPointer, ltDynArray, ltScriptMethod, ltImportedMethod] + LapeStringTypes - [ltShortString];
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes + [ltShortString];
-  LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes;
+  LapeIfTypes = LapeOrdinalTypes + LapeStringTypes + LapePointerTypes + LapeRealTypes + [ltVariant];
   LapeNoInitTypes = LapeOrdinalTypes + LapeRealTypes + [ltPointer, ltScriptMethod, ltImportedMethod, ltShortString];
 
-  NullDocPos: TDocPos = (Line: 0; Col: 0; FileName: nil);
+  NullDocPos: TDocPos = (Line: 0; Col: 0; FileName: '');
+  NullRange: TLapeRange = (Lo: 0; Hi: 0);
 
   UnaryOperators = [op_Addr, op_Deref, op_NOT, op_UnaryMinus, op_UnaryPlus];
   BinaryOperators = [op_AND, op_NOT, op_OR, op_XOR];
@@ -403,7 +444,7 @@ const
     '[', '-', 'mod', '*', 'not', 'or', '+', '**', 'shl', 'shr', 'xor', '-', '+');
   op_name: array[EOperator] of string = ('',
     'EQ', 'GT', 'GTEQ', 'LT', 'LTEQ', 'NEQ', {'ADDR'}'', 'AND', 'ASGN', {'DREF'}'', 'IDIV', 'DIV', {'dot'}'', 'IN',
-    {'index'}'', 'SUB', 'MOD', 'MUL', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'POS'}'');
+    {'index'}'', 'SUB', 'MOD', 'MUL', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'UPOS'}'');
 
 var
   lowUInt8: UInt8 = Low(UInt8);    highUInt8: UInt8 = High(UInt8);
@@ -557,7 +598,11 @@ constructor TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.Create(StartBufLen: Cardinal = 3
 begin
   inherited Create();
 
-  Reset;
+  GrowSize := StartBufLen div 2;
+  if (GrowSize < 1) then
+    GrowSize := 1;
+
+  Reset();
   Grow(StartBufLen);
 end;
 
@@ -580,6 +625,23 @@ begin
   CheckIndex(FCur, True);
   FArr[FCur] := Item;
   Result := FCur;
+end;
+
+procedure TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(a: TTArray);
+begin
+  FArr := a;
+  FCur := High(a);
+  FLen := Length(a);
+end;
+
+function TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ExportToArray: TTArray;
+var
+  i: Integer;
+begin
+  //Result := Copy(FArr, 0, FCur + 1);
+  SetLength(Result, FCur + 1);
+  for i := 0 to FCur do
+    Result[i] := FArr[i];
 end;
 
 function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.getItem(Index: Integer): _T;
@@ -686,6 +748,22 @@ end;
 function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ExistsItem(Item: _T): Boolean;
 begin
   Result := (IndexOf(Item) > -1);
+end;
+
+procedure TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(a: TTArray);
+begin
+  FItems := a;
+  FLen := Length(a);
+end;
+
+function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ExportToArray: TTArray;
+var
+  i: Integer;
+begin
+  //Result := Copy(FItems);
+  SetLength(Result, FLen);
+  for i := 0 to FLen - 1 do
+    Result[i] := FItems[i];
 end;
 
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.getItem(Index: lpString): _T;
@@ -998,7 +1076,7 @@ begin
   if (ADocPos <> nil) then
     DocPos := ADocPos^
   else
-    FillChar(DocPos, SizeOf(TDocPos), 0);
+    DocPos := NullDocPos;
   setList(AList);
 end;
 

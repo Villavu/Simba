@@ -62,7 +62,7 @@ addGlobalType('array of extended', 'TExtendedArray');
 addGlobalType('array of TExtendedArray', 'T2DExtendedArray');
 addGlobalType('array of T2DExtendedArray', 'T3DExtendedArray');
 addGlobalType('array of boolean', 'TBoolArray');
-//addGlobalType('array of variant', 'TVariantArray');
+addGlobalType('array of variant', 'TVariantArray');
 
 addGlobalType('record X1, Y1, X2, Y2: integer; end', 'TBox');
 addGlobalType('array of TBox', 'TBoxArray');

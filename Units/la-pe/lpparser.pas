@@ -22,6 +22,7 @@ type
     tk_Unkown,
     tk_Identifier,
     tk_Comment,
+    tk_Directive,
     tk_WhiteSpace,
     tk_NewLine,
 
@@ -46,6 +47,7 @@ type
     //tk_kw_Override,
     tk_kw_Packed,
     tk_kw_Procedure,
+    tk_kw_Program,
     tk_kw_Record,
     tk_kw_Repeat,
     tk_kw_Set,
@@ -111,11 +113,16 @@ type
   EParserTokenSet = set of EParserToken;
 
   PTokenizerState = ^TTokenizerState;
-  TTokenizerState = record
+  TTokenizerState = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
     TokStart, Pos: Integer;
     LastTok, Tok: EParserToken;
+    InPeek: Boolean;
     DocPos: TDocPos;
   end;
+
+  TLapeTokenizerBase = class;
+  TLapeParseDirective = function(Sender: TLapeTokenizerBase): Boolean of object;
+  TLapeHandleDirective = function(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean of object;
 
   TLapeTokenizerBase = class(TLapeBaseClass)
   protected
@@ -126,9 +133,14 @@ type
     FPos: Integer;
     FDocPos: TDocPos;
     FLen: Integer;
+    FInPeek: Boolean;
+
+    FOnParseDirective: TLapeParseDirective;
+    FOnHandleDirective: TLapeHandleDirective;
 
     function Compare(Key: lpString): Boolean; virtual; abstract;
     function Identify: EParserToken; virtual;
+    function HandleDirective: Boolean; virtual;
 
     function setTok(ATok: EParserToken): EParserToken; virtual;
     function getTokString: lpString; virtual; abstract;
@@ -144,8 +156,10 @@ type
     constructor Create(AFileName: lpString = ''); reintroduce; virtual;
     procedure Reset(ClearDoc: Boolean = False); virtual;
     function getState: Pointer; virtual;
-    procedure setState(const State: Pointer; FreeState: Boolean = True); virtual;
+    procedure setState(const State: Pointer; DoFreeState: Boolean = True); virtual;
+    procedure freeState(const State: Pointer); virtual;
     function getChar(Offset: Integer = 0): lpChar; virtual; abstract;
+    function tempRollBack: EParserToken; virtual;
 
     function Next: EParserToken; virtual;
     function NextNoWhiteSpace: EParserToken; virtual;
@@ -170,12 +184,15 @@ type
     property Pos: Integer read FPos write setPos;
     property DocPos: TDocPos read getDocPos;
     property Len: Integer read FLen;
+    property InPeek: Boolean read FInPeek;
+  published
+    property OnParseDirective: TLapeParseDirective read FOnParseDirective write FOnParseDirective;
+    property OnHandleDirective: TLapeHandleDirective read FOnHandleDirective write FOnHandleDirective;
   end;
 
   TLapeTokenizerString = class(TLapeTokenizerBase)
   protected
     FDoc: lpString;
-
     function Compare(Key: lpString): Boolean; override;
     function getTokString: lpString; override;
     procedure setDoc(const ADoc: lpString); virtual;
@@ -183,11 +200,16 @@ type
     procedure Reset(ClearDoc: Boolean = False); override;
     constructor Create(ADoc: lpString; AFileName: lpString = ''); reintroduce; virtual;
     function getChar(Offset: Integer = 0): lpChar; override;
-
+  published
     property Doc: lpString read FDoc write setDoc;
   end;
 
-  TLapeKeyword = record
+  TLapeTokenizerFile = class(TLapeTokenizerString)
+  public
+    constructor Create(AFileName: lpString = ''); reintroduce; virtual;
+  end;
+
+  TLapeKeyword = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
     Keyword: lpString;
     Token: EParserToken;
   end;
@@ -198,6 +220,9 @@ const
   tk_sym_Dot = tk_op_Dot;
   tk_sym_Equals = tk_cmp_Equal;
 
+  TokWhiteSpace = [tk_WhiteSpace, tk_NewLine];
+  TokJunk = TokWhiteSpace + [tk_Comment, tk_Directive];
+
   ParserToken_FirstOperator = tk_cmp_Equal;
   ParserToken_LastOperator = tk_op_XOR;
   ParserToken_Operators = [ParserToken_FirstOperator..ParserToken_LastOperator];
@@ -205,7 +230,7 @@ const
   ParserToken_Symbols = [tk_sym_BracketClose..tk_sym_SemiColon];
   ParserToken_Types = [tk_typ_Float..tk_typ_Char];
 
-  Lape_Keywords: array[0..39] of TLapeKeyword = (
+  Lape_Keywords: array[0..40] of TLapeKeyword = (
       (Keyword: 'AND';          Token: tk_op_AND),
       (Keyword: 'DIV';          Token: tk_op_DIV),
       (Keyword: 'IN';           Token: tk_op_IN),
@@ -236,6 +261,7 @@ const
       //(Keyword: 'OVERRIDE';     Token: tk_kw_Override),
       (Keyword: 'PACKED';       Token: tk_kw_Packed),
       (Keyword: 'PROCEDURE';    Token: tk_kw_Procedure),
+      (Keyword: 'PROGRAM';      Token: tk_kw_Program),
       (Keyword: 'RECORD';       Token: tk_kw_Record),
       (Keyword: 'REPEAT';       Token: tk_kw_Repeat),
       (Keyword: 'SET';          Token: tk_kw_Set),
@@ -567,8 +593,16 @@ begin
     '{':
       begin
         Inc(FPos);
-        while (not (CurChar in ['}', #0])) do Inc(FPos);
-        Result := setTok(tk_Comment);
+        if (CurChar = '$') then
+        begin
+          HandleDirective();
+          Result := setTok(tk_Directive);
+        end
+        else
+        begin
+          while (not (CurChar in ['}', #0])) do Inc(FPos);
+          Result := setTok(tk_Comment);
+        end;
       end;
 
     //Integer and Float
@@ -665,6 +699,44 @@ begin
   end;
 end;
 
+function TLapeTokenizerBase.HandleDirective: Boolean;
+var
+  d, a: lpString;
+begin
+  try
+    if ({$IFNDEF FPC}@{$ENDIF}FOnParseDirective <> nil) then
+      if FOnParseDirective(Self) then
+        Exit(True);
+
+    if ({$IFNDEF FPC}@{$ENDIF}FOnHandleDirective <> nil) then
+    begin
+      Next();
+      Expect([tk_Identifier] + ParserToken_Keywords, False, False);
+      d := TokString;
+
+      NextNoWhiteSpace();
+      if (CurChar = '}') then
+        a := ''
+      else
+      begin
+        while (not (getChar(1) in ['}', #0])) do Inc(FPos);
+        a := TokString;
+        Inc(FPos);
+      end;
+
+      if FOnHandleDirective(Self, d, a) then
+        Exit(True);
+    end
+    else
+      while (not (CurChar in ['}', #0])) do Inc(FPos);
+
+    Result := False;
+  finally
+    if (CurChar <> '}') then
+      LapeException(lpeExpectedOther, [LapeTokenToString(FTok), '}'], DocPos);
+  end;
+end;
+
 function TLapeTokenizerBase.setTok(ATok: EParserToken): EParserToken;
 begin
   FLastTok := FTok;
@@ -738,7 +810,7 @@ begin
     Result.Col := 0
   else
     Result.Col := FTokStart - FDocPos.Col + 1;
-  Result.FileName := PlpChar(FFileName);
+  Result.FileName := FFileName;
 end;
 
 constructor TLapeTokenizerBase.Create(AFileName: lpString = '');
@@ -746,6 +818,9 @@ begin
   inherited Create();
 
   FFileName := AFileName;
+  FOnParseDirective := nil;
+  FOnHandleDirective := nil;
+
   Reset();
 end;
 
@@ -755,6 +830,7 @@ begin
   FTok := tk_NULL;
   FTokStart := 0;
   FPos := -1;
+  FInPeek := False;
   if ClearDoc then
     FLen := 0;
 
@@ -774,11 +850,12 @@ begin
     Pos := FPos;
     LastTok := FLastTok;
     Tok := FTok;
+    InPeek := FInPeek;
     DocPos := FDocPos;
   end;
 end;
 
-procedure TLapeTokenizerBase.setState(const State: Pointer; FreeState: Boolean = True);
+procedure TLapeTokenizerBase.setState(const State: Pointer; DoFreeState: Boolean = True);
 begin
   with PTokenizerState(State)^ do
   begin
@@ -786,10 +863,25 @@ begin
     FPos := Pos;
     FLastTok := LastTok;
     FTok := Tok;
+    FInPeek := InPeek;
     FDocPos := DocPos;
   end;
-  if FreeState then
-    Dispose(PTokenizerState(State));
+  if DoFreeState then
+    freeState(State);
+end;
+
+procedure TLapeTokenizerBase.freeState(const State: Pointer);
+begin
+  Dispose(PTokenizerState(State));
+end;
+
+function TLapeTokenizerBase.TempRollBack: EParserToken;
+begin
+  Result := FTok;
+  FTok := FLastTok;
+  FLastTok := tk_NULL;
+  FPos := FTokStart - 1;
+  FTokStart := FPos;
 end;
 
 function TLapeTokenizerBase.Next: EParserToken;
@@ -814,7 +906,7 @@ begin
   lTok := FTok;
   repeat
     Result := Next();
-  until (not (Result in [tk_WhiteSpace, tk_NewLine]));
+  until (not (Result in TokWhiteSpace));
   FLastTok := lTok;
 end;
 
@@ -825,7 +917,7 @@ begin
   lTok := FTok;
   repeat
     Result := Next();
-  until (not (Result in [tk_WhiteSpace, tk_NewLine, tk_Comment]));
+  until (not (Result in TokJunk));
   FLastTok := lTok;
 end;
 
@@ -833,27 +925,39 @@ function TLapeTokenizerBase.Peek: EParserToken;
 var
   p: Pointer;
 begin
-  p := getState;
-  Result := Next();
-  setState(p);
+  p := getState();
+  try
+    FInPeek := True;
+    Result := Next();
+  finally
+    setState(p);
+  end;
 end;
 
 function TLapeTokenizerBase.PeekNoWhiteSpace: EParserToken;
 var
   p: Pointer;
 begin
-  p := getState;
-  Result := NextNoWhiteSpace();
-  setState(p);
+  p := getState();
+  try
+    FInPeek := True;
+    Result := NextNoWhiteSpace();
+  finally
+    setState(p);
+  end;
 end;
 
 function TLapeTokenizerBase.PeekNoJunk: EParserToken;
 var
   p: Pointer;
 begin
-  p := getState;
-  Result := NextNoJunk();
-  setState(p);
+  p := getState();
+  try
+    FInPeek := True;
+    Result := NextNoJunk();
+  finally
+    setState(p);
+  end;
 end;
 
 function TLapeTokenizerBase.Expect(Token: EParserToken; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken;
@@ -930,6 +1034,18 @@ begin
     Result := FDoc[FPos + Offset + 1];
 end;
 
+constructor TLapeTokenizerFile.Create(AFileName: lpString = '');
+var
+  s: TStringList;
+begin
+  s := TStringList.Create();
+  try
+    s.LoadFromFile(AFileName);
+    inherited Create(s.Text, AFileName);
+  finally
+    s.Free();
+  end;
+end;
 
 initialization
   Lape_InitKeywordsCache;

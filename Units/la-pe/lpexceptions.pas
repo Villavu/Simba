@@ -30,6 +30,7 @@ resourcestring
   lpeCannotInvoke = 'Cannot invoke identifier';
   lpeCannotOverload = 'Cannot overload function';
   lpeClosingParenthesisExpected = 'Closing parenthesis expected';
+  lpeConditionalNotClosed = 'Conditional statement not properly closed';
   lpeConstantExpected = 'Constant expression expected';
   lpeDefaultToMoreThanOne = 'Runtime default value can only be assigned to one variable';
   lpeDuplicateDeclaration = 'Duplicate declaration "%s"';
@@ -38,6 +39,7 @@ resourcestring
   lpeExpected = '%s expected';
   lpeExpectedOther = 'Found unexpected token "%s", expected "%s"';
   lpeExpressionExpected = 'Expression expected';
+  lpeFileNotFound = 'File "%s" not found';
   lpeImpossible = 'It''s impossible!';
   lpeIncompatibleAssignment = 'Can''t assign "%s" to "%s"';
   lpeIncompatibleOperator = 'Operator "%s" not compatible with types';
@@ -53,6 +55,7 @@ resourcestring
   lpeInvalidRange = 'Expression is not a valid range';
   lpeInvalidValueForType = 'Invalid value for type "%s"';
   lpeLostClosingParenthesis = 'Found closing parenthesis without matching opening parenthesis';
+  lpeLostConditional = 'Found conditional without matching opening statement';
   lpeNoDefaultForParam = 'No default value for parameter %d found';
   lpeNoForwardMatch = 'Forwarded declaration doesn''t match';
   lpeNoOverloadedMethod = 'Don''t know which overloaded method to call with params (%s)';
@@ -87,7 +90,7 @@ procedure LapeException(Msg: string; DocPos: TDocPos);
 begin
   if (DocPos.Line > 0) and (DocPos.Col > 0) then
     Msg := Format(lpeExceptionAt, [Msg, DocPos.Line, DocPos.Col]);
-  if (lpString(DocPos.FileName) <> '') then
+  if (DocPos.FileName <> '') then
     Msg := Format(lpeExceptionIn, [Msg, DocPos.FileName]);
   LapeException(Msg);
 end;
@@ -102,7 +105,7 @@ begin
   Msg := Format(Msg, Args);
   if (DocPos.Line > 0) and (DocPos.Col > 0) then
     Msg := Format(lpeExceptionAt, [Msg, DocPos.Line, DocPos.Col]);
-  if (lpString(DocPos.FileName) <> '') then
+  if (DocPos.FileName <> '') then
     Msg := Format(lpeExceptionIn, [Msg, DocPos.FileName]);
   LapeException(Msg);
 end;

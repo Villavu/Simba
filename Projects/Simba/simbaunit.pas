@@ -1611,24 +1611,27 @@ function TSimbaForm.DefaultScript: string;
 var
   x : TStringList;
 begin
-  result := '';
+  Result := '';
   case Interpreter of
-    interp_PS : begin
-                  if FileExistsUTF8(SimbaForm.DefScriptPath) then
-                  begin
-                    x := TStringList.Create;
-                    try
-                      x.LoadFromFile(SimbaForm.DefScriptPath);
-                    except
-                      mDebugLn('Couldn''t load default script file.');
-                    end;
-                    Result := x.Text;
-                  end else
-                    result := 'program new;'+LineEnding + 'begin'+LineEnding+'end.' + LineEnding;
-                end;
+    interp_PS, interp_LP: begin
+        if (FileExistsUTF8(SimbaForm.DefScriptPath)) then
+          with TStringList.Create do
+            try
+              try
+                LoadFromFile(SimbaForm.DefScriptPath);
+                Result := Text;
+              finally
+                Free;
+              end;
+            except
+              mDebugLn('Couldn''t load default script file.');
+              Result := 'program new;' + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
+            end
+        else
+          Result := 'program new;' + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
+      end;
     interp_RT : result := 'program untitled;' + LineEnding + lineEnding + 'interface' + LineEnding + LineEnding +
                           'implementation' + LineEnding + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
-    interp_LP: result := 'begin' + LineEnding + 'end;' + LineEnding;
   end;
 end;
 

@@ -246,6 +246,7 @@ type
      procedure SetScript(Script: string); override;
      procedure Execute; override;
      procedure Terminate; override;
+     function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
    end;
 
 
@@ -1221,6 +1222,12 @@ begin
   IScript := Script;
 end;
 
+function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+begin
+  Result := nil;
+  FileName := IncludePath + FileName;
+end;
+
 type
   PBoolean = ^Boolean;
   PStringArray = ^TStringArray;
@@ -1281,6 +1288,7 @@ begin
   try
     try
       Fonts := Client.MOCR.Fonts;
+      Compiler.OnFindFile := @OnFindFile;
       with Compiler do
       begin
         for I := Fonts.Count - 1 downto 0 do
@@ -1289,6 +1297,7 @@ begin
         for I := 0 to High(VirtualKeys) do
           addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
 
+        {$I LPInc/lpdefines.inc}
         {$I LPInc/lpcompile.inc}
 
         {$I LPInc/lpexportedmethods.inc}

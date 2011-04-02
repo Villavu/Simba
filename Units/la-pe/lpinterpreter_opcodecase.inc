@@ -12,6 +12,7 @@ case opCode(opCodeTypeP(Code)^) of
   ocInitStackLen: DoInitStackLen();
   ocInitVarLen: DoInitVarLen();
   ocInitStack: DoInitStack();
+  ocGrowStack: DoGrowStack();
   ocExpandVar: DoExpandVar();
   ocExpandVarAndInit: DoExpandVarAndInit();
   ocGrowVar: DoGrowVar();

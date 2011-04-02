@@ -121,7 +121,7 @@ addGlobalFunc('procedure GetClientDimensions(var w, h:integer);', @lpGetClientDi
 addGlobalFunc('procedure GetClientPosition(var left, top:integer);', @lpGetClientPosition);
 addGlobalFunc('function SetTargetBitmap(Bitmap : integer): integer;', @lpSetTargetBitmap);
 addGlobalFunc('function SetTargetArray(P: Integer; w, h: integer): integer;', @lpSetTargetArray);
-//addGlobalFunc('function SetEIOSTarget(name: string; initargs: Variant): integer;', @lpSetEIOSTarget);
+addGlobalFunc('function SetEIOSTarget(name: string; initargs: Variant): integer;', @lpSetEIOSTarget);
 addGlobalFunc('procedure SetImageTarget(idx: integer);', @lpSetImageTarget);
 addGlobalFunc('procedure SetKeyMouseTarget(idx: integer);', @lpSetKeyMouseTarget);
 addGlobalFunc('function GetImageTarget: integer;', @lpGetImageTarget);
