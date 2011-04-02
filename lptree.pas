@@ -1173,10 +1173,10 @@ var
     a: array of Pointer;
   begin
     Assert(f <> nil);
-    Assert(f.VarType is TLapeType_ImportedMethod);
+    Assert(f.VarType.BaseType = ltImportedMethod);
     Result := nil;
 
-    with TLapeType_ImportedMethod(f.VarType) do
+    with TLapeType_Method(f.VarType) do
     begin
       if (Res = nil) then
         LapeException(lpeCannotEvalConstProc, FIdent.DocPos);
@@ -1314,12 +1314,12 @@ var
     end;
 
   begin
-    Assert(a.VarType is TLapeType_ScriptMethod);
-    Assert(Length(c) = TLapeType_ScriptMethod(a.VarType).Params.Count);
+    Assert(a.VarType.BaseType = ltScriptMethod);
+    Assert(Length(c) = TLapeType_Method(a.VarType).Params.Count);
     Result := NullResVar;
     e := NullResVar;
 
-    with TLapeType_ScriptMethod(a.VarType) do
+    with TLapeType_Method(a.VarType) do
     begin
       if ParamInitialization then
         FCompiler.Emitter._InitStack(ParamSize, Offset, @Self.DocPos);
@@ -1391,12 +1391,12 @@ var
     i: Integer;
     b, e, tmp: TResVar;
   begin
-    Assert(a.VarType is TLapeType_ImportedMethod);
-    Assert(Length(c) = TLapeType_ImportedMethod(a.VarType).Params.Count);
+    Assert(a.VarType.BaseType = ltImportedMethod);
+    Assert(Length(c) = TLapeType_Method(a.VarType).Params.Count);
     Result := NullResVar;
     e := NullResVar;
 
-    with TLapeType_ImportedMethod(a.VarType) do
+    with TLapeType_Method(a.VarType) do
     begin
       for i := 0 to Params.Count - 1 do
       begin

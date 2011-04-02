@@ -1,6 +1,6 @@
 unit Main;
 
-{$mode objfpc}{$H+}
+{$I lape.inc}
 
 interface
 
@@ -137,7 +137,7 @@ var
   rec, rec2, tp: TLapeType_Record;
   ttpa, t2dpa: TLapeType_DynArray;
   q: _rec;
-  proc1, proc2, proc3, func1, func2, func3: TLapeType_ImportedMethod;
+  proc1, proc2, proc3, func1, func2, func3: TLapeType_Method;
   overloaded_proc: TLapeType_OverloadedMethod;
   tpa: TPointArray;
   atpa: T2DPointArray;
@@ -166,13 +166,13 @@ begin
 
     a := Compiler.addGlobalVar(123, 'a');
 
-    proc1 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)]);
-    proc2 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltInt64)], [lptNormal], [TLapeGlobalVar(nil)]);
-    proc3 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)]);
+    proc1 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)]);
+    proc2 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltInt64)], [lptNormal], [TLapeGlobalVar(nil)]);
+    proc3 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)]);
 
-    func1 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltInt32), Compiler.getBaseType(ltInt32)], [lptNormal, lptNormal], [nil, a], Compiler.getBaseType(ltInt32));
-    func2 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltString));
-    func3 := TLapeType_ImportedMethod.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltInt32));
+    func1 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltInt32), Compiler.getBaseType(ltInt32)], [lptNormal, lptNormal], [nil, a], Compiler.getBaseType(ltInt32));
+    func2 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltString));
+    func3 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltInt32));
 
     overloaded_proc := TLapeType_OverloadedMethod.Create(Compiler, nil);
     overloaded_proc.addMethod(proc1.NewGlobalVar(@MyWriteLn_String));
@@ -232,13 +232,13 @@ begin
     Dispose(q.z^.test);
     Dispose(q.z);
 
+    overloaded_proc.Free();
     Compiler.Free();
     rec2.Free();
     rec.Free();
     tp.Free();
     ttpa.Free();
     t2dpa.Free();
-    overloaded_proc.Free();
     proc1.Free();
     proc2.Free();
     proc3.Free();
