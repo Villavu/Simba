@@ -79,8 +79,8 @@ type
     function HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean; virtual;
     function InIgnore: Boolean; virtual;
     function Next: EParserToken; virtual;
-    function isNext(Tokens: EParserTokenSet; out Token: EParserToken): Boolean; virtual; overload;
-    function isNext(Tokens: EParserTokenSet): Boolean; virtual; overload;
+    function isNext(Tokens: EParserTokenSet; out Token: EParserToken): Boolean; overload; virtual;
+    function isNext(Tokens: EParserTokenSet): Boolean; overload; virtual;
     function Peek: EParserToken; virtual;
     function Expect(Token: EParserToken; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken; overload; virtual;
     function Expect(Tokens: EParserTokenSet; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken; overload; virtual;
