@@ -386,6 +386,7 @@ end;
 function TLapeCompiler.HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean;
 var
   t: TLapeTokenizerBase;
+  p: TDocPos;
 
   procedure switchConditional;
   var
@@ -428,7 +429,7 @@ begin
   else if (Directive = 'else') then
     switchConditional()
   else if (Directive = 'endif') then
-    popConditional()
+    p := popConditional() //Assign to a variable to work around FPC internal compiler error
   else if InIgnore() then
     {nothing}
   else if (Directive = 'define') then
@@ -2022,8 +2023,6 @@ procedure TLapeCompiler.CheckAfterCompile;
 begin
   Assert(Tokenizer <> nil);
 
-  if (FTokenizer > 0) then
-    LapeException(lpeImpossible, Tokenizer.DocPos);
   if (FConditionalStack.Cur >= 0) then
     LapeException(lpeConditionalNotClosed, popConditional());
 end;
