@@ -43,7 +43,7 @@ end;
 
 procedure lpWriteLn_Bool(Params: PParamArray);
 begin
-  psWriteLn(BoolToStr(PBool(Params^[0])^));
+  psWriteLn(BoolToStr(PBoolean(Params^[0])^));
 end;
 
 procedure lpWriteLn_Extended(Params: PParamArray);

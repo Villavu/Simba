@@ -53,5 +53,5 @@ end;
 
 procedure lpIsMouseButtonDown(Params: PParamArray; Result: Pointer);
 begin
-  PBool(Result)^ := CurrThread.Client.IOManager.IsMouseButtonDown(ConvIntClickType(PInt32(Params^[0])^));
+  PBoolean(Result)^ := CurrThread.Client.IOManager.IsMouseButtonDown(ConvIntClickType(PInt32(Params^[0])^));
 end;

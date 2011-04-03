@@ -24,9 +24,9 @@
 procedure lpSetSettingValue(Params: PParamArray; Result: Pointer);
 begin
   if (CurrThread.Sett <> nil) then
-    PBool(Result)^ := CurrThread.Sett.SetKeyValue(PlpString(Params^[0])^, PlpString(Params^[1])^)
+    PBoolean(Result)^ := CurrThread.Sett.SetKeyValue(PlpString(Params^[0])^, PlpString(Params^[1])^)
   else
-    PBool(Result)^ := False;
+    PBoolean(Result)^ := False;
 end;
 
 procedure lpGetSettingValue(Params: PParamArray; Result: Pointer);
@@ -48,39 +48,39 @@ end;
 procedure lpListSettings(Params: PParamArray; Result: Pointer);
 begin
   if (CurrThread.Sett <> nil) then
-    PBool(Result)^ := CurrThread.Sett.ListKeys(PlpString(Params^[0])^, PStringArray(Params^[1])^)
+    PBoolean(Result)^ := CurrThread.Sett.ListKeys(PlpString(Params^[0])^, PStringArray(Params^[1])^)
   else
-    PBool(Result)^ := False;
+    PBoolean(Result)^ := False;
 end;
 
 procedure lpKeyIsSetting(Params: PParamArray; Result: Pointer);
 begin
   if (CurrThread.Sett <> nil) then
-    PBool(Result)^ := CurrThread.Sett.IsKey(PlpString(Params^[0])^)
+    PBoolean(Result)^ := CurrThread.Sett.IsKey(PlpString(Params^[0])^)
   else
-    PBool(Result)^ := False;
+    PBoolean(Result)^ := False;
 end;
 
 procedure lpKeyIsDirectory(Params: PParamArray; Result: Pointer);
 begin
   if (CurrThread.Sett <> nil) then
-    PBool(Result)^ := CurrThread.Sett.IsDirectory(PlpString(Params^[0])^)
+    PBoolean(Result)^ := CurrThread.Sett.IsDirectory(PlpString(Params^[0])^)
   else
-    PBool(Result)^ := False;
+    PBoolean(Result)^ := False;
 end;
 
 procedure lpDeleteSetting(Params: PParamArray; Result: Pointer);
 begin
   if (CurrThread.Sett <> nil) then
-    PBool(Result)^ := CurrThread.Sett.DeleteKey(PlpString(Params^[0])^)
+    PBoolean(Result)^ := CurrThread.Sett.DeleteKey(PlpString(Params^[0])^)
   else
-    PBool(Result)^ := False;
+    PBoolean(Result)^ := False;
 end;
 
 procedure lpDeleteSubSettings(Params: PParamArray; Result: Pointer);
 begin
   if (CurrThread.Sett <> nil) then
-    PBool(Result)^ := CurrThread.Sett.DeleteSubKeys(PlpString(Params^[0])^)
+    PBoolean(Result)^ := CurrThread.Sett.DeleteSubKeys(PlpString(Params^[0])^)
   else
-    PBool(Result)^ := False;
+    PBoolean(Result)^ := False;
 end;

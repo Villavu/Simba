@@ -78,7 +78,7 @@ end;
 
 procedure lpSimilarColors(Params: PParamArray; Result: Pointer);
 begin;
-  PBool(Result)^ := CurrThread.Client.MFinder.SimilarColors(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^);
+  PBoolean(Result)^ := CurrThread.Client.MFinder.SimilarColors(PLongInt(Params^[0])^, PLongInt(Params^[1])^, PLongInt(Params^[2])^);
 end;
 
 procedure lpCountColor(Params: PParamArray; Result: Pointer);

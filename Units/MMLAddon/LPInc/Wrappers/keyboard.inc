@@ -43,7 +43,7 @@ end;
 
 procedure lpisKeyDown(Params: PParamArray; Result: Pointer);
 begin
-  PBool(Result)^ := CurrThread.Client.IOManager.isKeyDown(PWord(Params^[0])^);
+  PBoolean(Result)^ := CurrThread.Client.IOManager.isKeyDown(PWord(Params^[0])^);
 end;
 
 procedure lpGetKeyCode(Params: PParamArray; Result: Pointer);
