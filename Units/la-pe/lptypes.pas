@@ -185,7 +185,7 @@ type
   public type
     TTArray = array of _T;
   var protected
-    FArr: array of _T;
+    FArr: TTArray;
     FLen: Integer;
     FCur: Integer;
 
@@ -218,7 +218,7 @@ type
     TTArray = array of _T;
   var protected
     FDuplicates: TDuplicates;
-    FItems: array of _T;
+    FItems: TTArray;
     FLen: Integer;
 
     function getItem(Index: Integer): _T; virtual;
@@ -279,7 +279,7 @@ type
   TLapeDeclaration = class;
   TLapeDeclarationClass = class of TLapeDeclaration;
   TLapeDeclArray = array of TLapeDeclaration;
-  TLapeDeclCollection = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeDeclaration>;
+  TLapeDeclCollection = class({$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeDeclaration>); //Needs class() for Delphi support!!
 
   TLapeDeclarationList = class(TLapeBaseClass)
   protected
@@ -630,8 +630,8 @@ end;
 procedure TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(a: TTArray);
 begin
   FArr := a;
-  FCur := High(a);
   FLen := Length(a);
+  FCur := FLen - 1;
 end;
 
 function TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ExportToArray: TTArray;

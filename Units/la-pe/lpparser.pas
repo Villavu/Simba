@@ -44,7 +44,7 @@ type
     tk_kw_Of,
     tk_kw_Out,
     tk_kw_Overload,
-    //tk_kw_Override,
+    tk_kw_Override,
     tk_kw_Packed,
     tk_kw_Procedure,
     tk_kw_Program,
@@ -230,7 +230,7 @@ const
   ParserToken_Symbols = [tk_sym_BracketClose..tk_sym_SemiColon];
   ParserToken_Types = [tk_typ_Float..tk_typ_Char];
 
-  Lape_Keywords: array[0..40] of TLapeKeyword = (
+  Lape_Keywords: array[0..41] of TLapeKeyword = (
       (Keyword: 'AND';          Token: tk_op_AND),
       (Keyword: 'DIV';          Token: tk_op_DIV),
       (Keyword: 'IN';           Token: tk_op_IN),
@@ -258,7 +258,7 @@ const
       (Keyword: 'OF';           Token: tk_kw_Of),
       (Keyword: 'OUT';          Token: tk_kw_Out),
       (Keyword: 'OVERLOAD';     Token: tk_kw_Overload),
-      //(Keyword: 'OVERRIDE';     Token: tk_kw_Override),
+      (Keyword: 'OVERRIDE';     Token: tk_kw_Override),
       (Keyword: 'PACKED';       Token: tk_kw_Packed),
       (Keyword: 'PROCEDURE';    Token: tk_kw_Procedure),
       (Keyword: 'PROGRAM';      Token: tk_kw_Program),

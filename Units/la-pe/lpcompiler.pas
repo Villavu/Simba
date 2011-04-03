@@ -16,6 +16,7 @@ uses
   lptypes, lpvartypes, lpparser, lptree;
 
 type
+  TLapeTreeMethodMap = {$IFDEF FPC}specialize{$ENDIF} TLapeStringMap<TLapeTree_Method>;
   TLapeInternalMethodMap = {$IFDEF FPC}specialize{$ENDIF} TLapeStringMap<TLapeTree_InternalMethodClass>;
   TLapeTypeForwards = {$IFDEF FPC}specialize{$ENDIF} TLapeStringMap<TLapeType>;
   TLapeFuncForwards = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeGlobalVar>;
@@ -48,6 +49,7 @@ type
   protected
     FTokenizers: TLapeTokenizerArray;
     FTokenizer: Integer;
+    FTreeMethodMap: TLapeTreeMethodMap;
     FInternalMethodMap: TLapeInternalMethodMap;
     FTree: TLapeTree_Base;
 
@@ -77,8 +79,8 @@ type
     function HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean; virtual;
     function InIgnore: Boolean; virtual;
     function Next: EParserToken; virtual;
-    function isNext(Tokens: EParserTokenSet; out Token: EParserToken): Boolean; virtual; overload;
-    function isNext(Tokens: EParserTokenSet): Boolean; virtual; overload;
+    function isNext(Tokens: EParserTokenSet; out Token: EParserToken): Boolean; overload; virtual;
+    function isNext(Tokens: EParserTokenSet): Boolean; overload; virtual;
     function Peek: EParserToken; virtual;
     function Expect(Token: EParserToken; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken; overload; virtual;
     function Expect(Tokens: EParserTokenSet; NextBefore: Boolean = True; NextAfter: Boolean = False): EParserToken; overload; virtual;
@@ -190,6 +192,9 @@ begin
   if FreeTree and (FTree <> nil) then
     FTree.Free();
   FTree := nil;
+
+  if (FTreeMethodMap <> nil) then
+    FTreeMethodMap.Clear();
 
   if (FIncludes <> nil) then
     FIncludes.Clear();
@@ -381,6 +386,7 @@ end;
 function TLapeCompiler.HandleDirective(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean;
 var
   t: TLapeTokenizerBase;
+  p: TDocPos;
 
   procedure switchConditional;
   var
@@ -423,7 +429,7 @@ begin
   else if (Directive = 'else') then
     switchConditional()
   else if (Directive = 'endif') then
-    popConditional()
+    p := popConditional() //Assign to a variable to work around FPC internal compiler error
   else if InIgnore() then
     {nothing}
   else if (Directive = 'define') then
@@ -631,10 +637,7 @@ var
 begin
   //Expect([tk_kw_Function, tk_kw_Procedure], True, False);
   isFunction := (Tokenizer.Tok = tk_kw_Function);
-  if addToScope then
-    Result := TLapeType_ScriptMethod.Create(Self, nil, nil, '', getPDocPos())
-  else
-    Result := TLapeType_ImportedMethod.Create(Self, nil, nil, '', getPDocPos());
+  Result := TLapeType_Method.Create(Self, nil, nil, '', getPDocPos());
 
   try
 
@@ -722,32 +725,44 @@ begin
   end;
 end;
 
+type
+  __LapeTree_Method = class(TLapeTree_Method);
 function TLapeCompiler.ParseMethod(FuncForwards: TLapeFuncForwards; isExternal: Boolean = False): TLapeTree_Method;
 var
   t: TLapeType_Method;
   n: lpString;
   d: TDocPos;
   decl: TLapeDeclaration;
+
+  procedure swapMethodTree(varFrom, varTo: TLapeGlobalVar);
+  var
+    f: TLapeTree_Method;
+  begin
+    f := FTreeMethodMap[IntToStr(PtrUInt(varFrom))];
+    if (f <> nil) then
+    begin
+      __LapeTree_Method(f).FMethod := varTo;
+      FTreeMethodMap[IntToStr(PtrUInt(varTo))] := f;
+    end;
+  end;
+
 begin
   Result := nil;
   IncStackInfo();
   d := Tokenizer.DocPos;
   try
-    if isExternal then
-      t := TLapeType_ImportedMethod(ParseMethodHeader(n, False))
-    else
-      t := TLapeType_ScriptMethod(ParseMethodHeader(n));
+    t := ParseMethodHeader(n, not isExternal);
     if (n = '') then
       LapeException(lpeBlockExpected, Tokenizer.DocPos);
 
     Expect(tk_sym_SemiColon, True, False);
-    isNext([tk_kw_Forward, tk_kw_Overload{, tk_kw_Override}]);
+    isNext([tk_kw_Forward, tk_kw_Overload, tk_kw_Override]);
 
     decl := getDeclaration(n, FStackInfo.Owner);
     if isExternal then
-      Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(TLapeType_ImportedMethod(t).NewGlobalVar(nil), FStackInfo.Owner)), FStackInfo, Self, @d)
+      Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(t.NewGlobalVar(nil), FStackInfo.Owner)), FStackInfo, Self, @d)
     else
-      Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(TLapeType_ScriptMethod(t).NewGlobalVar(0), FStackInfo.Owner)), FStackInfo, Self, @d);
+      Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(t.NewGlobalVar(EndJump), FStackInfo.Owner)), FStackInfo, Self, @d);
 
     try
       if (Tokenizer.Tok = tk_kw_Overload) then
@@ -772,21 +787,30 @@ begin
 
         isNext([tk_kw_Forward]);
       end
-      {else if (Tokenizer.Tok = tk_kw_Override) then
+      else if (Tokenizer.Tok = tk_kw_Override) then
       begin
         Expect(tk_sym_SemiColon, True, False);
 
         if (decl <> nil) and (decl is TLapeGlobalVar) and (TLapeGlobalVar(decl).VarType is TLapeType_OverloadedMethod) then
           decl := TLapeType_OverloadedMethod(TLapeGlobalVar(decl).VarType).getMethod(t);
-        if (decl = nil) or (not (decl is TLapeGlobalVar)) or (not (TLapeGlobalVar(decl).VarType is TLapeType_Method)) then
+        if (decl = nil) or (not (decl is TLapeGlobalVar))or (not TLapeGlobalVar(decl).isConstant) or (not (TLapeGlobalVar(decl).VarType is TLapeType_Method)) then
           LapeException(lpeUnknownParent, Tokenizer.DocPos);
+        if (not TLapeGlobalVar(decl).VarType.Equals(t)) then
+          LapeException(lpeNoForwardMatch, Tokenizer.DocPos);
         if (getDeclaration('inherited', FStackInfo, True) <> nil) then
           LapeException(lpeDuplicateDeclaration, ['inherited'], Tokenizer.DocPos);
 
-        decl.Name := 'inherited';
-        addLocalDecl(decl, FStackInfo);
-        Result.Method.Name := n;
-      end}
+        if (TLapeType_Method(TLapeGlobalVar(decl).VarType).BaseType = ltScriptMethod) then
+          swapMethodTree(TLapeGlobalVar(decl), Result.Method);
+
+        Result.Method.Name := 'inherited';
+        TLapeType_Method(Result.Method.VarType).setImported(Result.Method, TLapeType_Method(TLapeGlobalVar(decl).VarType).BaseType = ltImportedMethod);
+        Move(TLapeGlobalVar(decl).Ptr^, Result.Method.Ptr^, t.Size);
+        addLocalDecl(Result.Method, FStackInfo);
+
+        __LapeTree_Method(Result).FMethod := TLapeGlobalVar(decl);
+        TLapeType_Method(Result.Method.VarType).setImported(Result.Method, False);
+      end
       else
       begin
         decl := getDeclaration(n, FStackInfo.Owner, True);
@@ -827,6 +851,7 @@ begin
         Exit;
       end;
 
+      Result.Method.isConstant := True;
       if isExternal then
         Exit;
 
@@ -834,6 +859,8 @@ begin
         FuncForwards.DeleteItem(TLapeGlobalVar(decl));
 
       Result.Statements := ParseBlockList();
+      FTreeMethodMap[IntToStr(PtrUInt(Result.Method))] := Result;
+
       if (Result.Statements = nil) or (Result.Statements.Statements.Count < 1) or (not (Result.Statements.Statements[Result.Statements.Statements.Count - 1] is TLapeTree_StatementList)) then
         Expect(tk_kw_Begin, False, False)
       else
@@ -1857,6 +1884,7 @@ begin
   FOnHandleDirective := nil;
   FOnFindFile := nil;
 
+  FTreeMethodMap := TLapeTreeMethodMap.Create(nil);
   FInternalMethodMap := TLapeInternalMethodMap.Create(nil);
   FInternalMethodMap['Break'] := TLapeTree_InternalMethod_Break;
   FInternalMethodMap['Continue'] := TLapeTree_InternalMethod_Continue;
@@ -1886,6 +1914,7 @@ begin
   FreeAndNil(FDefines);
   FreeAndNil(FBaseDefines);
   FreeAndNil(FConditionalStack);
+  FreeAndNil(FTreeMethodMap);
   FreeAndNil(FInternalMethodMap);
   inherited;
 end;
@@ -1994,8 +2023,6 @@ procedure TLapeCompiler.CheckAfterCompile;
 begin
   Assert(Tokenizer <> nil);
 
-  if (FTokenizer > 0) then
-    LapeException(lpeImpossible, Tokenizer.DocPos);
   if (FConditionalStack.Cur >= 0) then
     LapeException(lpeConditionalNotClosed, popConditional());
 end;
@@ -2260,7 +2287,7 @@ begin
     CheckAfterCompile();
 
     try
-      if (m.Method = nil) or (m.Method.VarType = nil) or (not (m.Method.VarType is TLapeType_ImportedMethod)) then
+      if (m.Method = nil) or (m.Method.VarType = nil) or (not (m.Method.VarType.BaseType = ltImportedMethod)) then
         LapeException(lpeInvalidEvaluation);
 
       Result := m.Method;
@@ -2279,7 +2306,7 @@ end;
 
 function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
-  Result := addGlobalVar(TLapeType_ImportedMethod(addManagedType(TLapeType_ImportedMethod.Create(Self, AParams, AParTypes, AParDefaults, ARes))).NewGlobalVar(Value), AName);
+  Result := addGlobalVar(TLapeType_Method(addManagedType(TLapeType_Method.Create(Self, AParams, AParTypes, AParDefaults, ARes))).NewGlobalVar(Value), AName);
 end;
 
 function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar;

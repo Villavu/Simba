@@ -1278,6 +1278,8 @@ begin
     
     if (Parser <> nil) then
       Parser.Free;
+
+    psWriteLn(BoolToStr(Compiler = nil));
   except
     on E: Exception do
       psWriteln('Exception TLPThread.Destroy: ' + e.message);

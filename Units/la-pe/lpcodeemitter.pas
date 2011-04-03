@@ -140,7 +140,6 @@ procedure TLapeCodeEmitterBase.Reset;
 begin
   FCodeSize := CodeGrowSize;
   SetLength(FCode, FCodeSize);
-  FillChar(FCode[0], FCodeSize, 0);
   FCodePointers.Clear();
 
   {$IFDEF Lape_SmallCode}
@@ -162,7 +161,6 @@ begin
     FCode[i - Len] := FCode[i];
 
   Dec(FCodeCur, Len);
-  FillChar(FCode[FCodeCur], Len, 0);
   adjustCodePointers(StartOffset, -Len);
 end;
 
@@ -210,7 +208,6 @@ begin
       FCodeSize := FCodeSize + CodeGrowSize;
 
     SetLength(FCode, FCodeSize);
-    FillChar(FCode[FCodeCur], FCodeSize - FCodeCur, 0);
   end;
 end;
 
@@ -322,6 +319,7 @@ function TLapeCodeEmitterBase._DocPos(Pos: TDocPos; var Offset: Integer): Intege
 begin
 {$IFDEF Lape_EmitPos}
   Result := CheckOffset(Offset, SizeOf(TDocPos));
+  Pointer(PDocPos(@FCode[Offset])^.FileName) := nil;
   PDocPos(@FCode[Offset])^ := Pos;
   Inc(Offset, SizeOf(TDocPos));
 {$ENDIF}
