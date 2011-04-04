@@ -568,12 +568,12 @@ type
     function _InvokeImportedFunc(AMemPos, AResPos: TResVar; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _InvokeImportedFunc(AMemPos, AResPos: TResVar; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 
-    //function _JmpIf(Target: UInt32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
-    //function _JmpIf(Target: UInt32; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
-    function _JmpRIf(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
-    function _JmpRIf(Jmp: Int32; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
-    function _JmpRIfNot(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
-    function _JmpRIfNot(Jmp: Int32; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
+    //function _JmpIf(Target: TCodePos; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
+    //function _JmpIf(Target: TCodePos; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
+    function _JmpRIf(Jmp: TCodeOffset; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
+    function _JmpRIf(Jmp: TCodeOffset; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
+    function _JmpRIfNot(Jmp: TCodeOffset; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
+    function _JmpRIfNot(Jmp: TCodeOffset; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
 
     function _Eval(AProc: TLapeEvalProc; Dest, Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
     function _Eval(AProc: TLapeEvalProc; Dest, Left, Right: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
@@ -3807,7 +3807,7 @@ begin
 end;
 
 {
-function TLapeCodeEmitter._JmpIf(Target: UInt32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpIf(Target: TCodePos; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
   EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
@@ -3886,7 +3886,7 @@ begin
     LapeException(lpeInvalidEvaluation);
 end;
 
-function TLapeCodeEmitter._JmpIf(Target: UInt32; Cond: TResVar; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpIf(Target: TCodePos; Cond: TResVar; Pos: PDocPos = nil): Integer;
 var o: Integer;
 begin
   o := -1;
@@ -3894,7 +3894,7 @@ begin
 end;
 }
 
-function TLapeCodeEmitter._JmpRIf(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpRIf(Jmp: TCodeOffset; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
   EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
@@ -3973,14 +3973,14 @@ begin
     LapeException(lpeInvalidEvaluation);
 end;
 
-function TLapeCodeEmitter._JmpRIf(Jmp: Int32; Cond: TResVar; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpRIf(Jmp: TCodeOffset; Cond: TResVar; Pos: PDocPos = nil): Integer;
 var o: Integer;
 begin
   o := -1;
   Result := _JmpRIf(Jmp, Cond, o, Pos);
 end;
 
-function TLapeCodeEmitter._JmpRIfNot(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpRIfNot(Jmp: TCodeOffset; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
   EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
@@ -4059,7 +4059,7 @@ begin
     LapeException(lpeInvalidEvaluation);
 end;
 
-function TLapeCodeEmitter._JmpRIfNot(Jmp: Int32; Cond: TResVar; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpRIfNot(Jmp: TCodeOffset; Cond: TResVar; Pos: PDocPos = nil): Integer;
 var o: Integer;
 begin
   o := -1;

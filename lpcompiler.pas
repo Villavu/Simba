@@ -641,7 +641,7 @@ begin
 
   try
 
-    if isNext([tk_Identifier], t) then
+    if isNext([tk_Identifier, tk_sym_ParenthesisOpen], t) and (t = tk_Identifier) then
     begin
       Name := Tokenizer.TokString;
       t := tk_NULL;
@@ -875,6 +875,8 @@ begin
   end;
 end;
 
+type
+  __LapeType = class(TLapeType);
 function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
   procedure ParseArray;
   var
@@ -977,7 +979,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
   var
     re: TLapeType_Enum absolute Result;
     n: lpString;
-    t: TlapeTree_ExprBase;
+    t: TLapeTree_ExprBase;
     v: TLapeGlobalVar;
     so: TLapeStackInfo;
   begin
@@ -1017,6 +1019,32 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
         TLapeGlobalVar(addLocalDecl(re.NewGlobalVar(re.addMember(n), n), so)).isConstant := True;
     until (Tokenizer.Tok in [tk_NULL, tk_sym_ParenthesisClose]);
     Result := addManagedType(re);
+  end;
+
+  procedure ParseMethodType;
+  var
+    e: ELapeBaseType;
+    n: lpString;
+  begin
+    //Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_External, tk_kw_Export, tk_kw_Private], True, False);
+    e := ltUnknown;
+    if (Tokenizer.Tok in [tk_kw_External, {tk_kw_Export,} tk_kw_Private]) then
+    begin
+      if (Tokenizer.Tok = tk_kw_External) then
+        e := ltImportedMethod
+      //else if (Tokenizer.Tok = tk_kw_Export) then
+      else if (Tokenizer.Tok = tk_kw_Private) then
+        e := ltScriptMethod;
+
+      Expect([tk_kw_Function, tk_kw_Procedure], True, False);
+    end;
+
+    Result := ParseMethodHeader(n, False);
+    if (n <> '') or (Result = nil) then
+      LapeException(lpeTypeExpected, Tokenizer.DocPos);
+
+    __LapeType(Result).FBaseType := e;
+    Result := addManagedType(Result);
   end;
 
   procedure ParseDef;
@@ -1083,6 +1111,8 @@ begin
         end;
       tk_sym_Caret: ParsePointer();
       tk_sym_ParenthesisOpen: ParseEnum();
+      tk_kw_Function, tk_kw_Procedure,
+      tk_kw_External, {tk_kw_Export,} tk_kw_Private: ParseMethodType();
       else ParseDef();
     end;
 
@@ -1901,7 +1931,9 @@ begin
 
   addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high');
   addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length');
-  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeStrLen, '!strlen');
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeAStrLen, '!astrlen');
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeWStrLen, '!wstrlen');
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeUStrLen, '!ustrlen');
 
   setTokenizer(ATokenizer);
   Reset();
@@ -2008,9 +2040,9 @@ begin
     if (FTree = nil) then
       LapeException(lpeExpressionExpected);
     FTree.Compile();
+    DecStackInfo(False, True, True);
     FEmitter._op(ocNone);
     FreeAndNil(FTree);
-    DecStackInfo(False, True, True);
     Result := True;
 
   except

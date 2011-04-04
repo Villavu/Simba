@@ -98,7 +98,9 @@ const
 
 procedure _LapeHigh(Params: PParamArray; Result: Pointer);
 procedure _LapeLength(Params: PParamArray; Result: Pointer);
-procedure _LapeStrLen(Params: PParamArray; Result: Pointer);
+procedure _LapeAStrLen(Params: PParamArray; Result: Pointer);
+procedure _LapeWStrLen(Params: PParamArray; Result: Pointer);
+procedure _LapeUStrLen(Params: PParamArray; Result: Pointer);
 procedure RunCode(Code: PByte); {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 implementation
@@ -116,9 +118,19 @@ begin
   PInt32(Result)^ := Length(PCodeArray(Params^[0])^);
 end;
 
-procedure _LapeStrLen(Params: PParamArray; Result: Pointer);
+procedure _LapeAStrLen(Params: PParamArray; Result: Pointer);
 begin
-  PInt32(Result)^ := Length(PlpString(Params^[0])^);
+  PInt32(Result)^ := Length(PAnsiString(Params^[0])^);
+end;
+
+procedure _LapeWStrLen(Params: PParamArray; Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PWideString(Params^[0])^);
+end;
+
+procedure _LapeUStrLen(Params: PParamArray; Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PUnicodeString(Params^[0])^);
 end;
 
 procedure RunCode(Code: PByte);
@@ -145,6 +157,8 @@ var
 
   procedure JumpTo(const Target: TCodePos); {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
+    if (Target = 0) then
+      LapeException(lpeInvalidJump);
     Code := PByte(PtrUInt(CodeBase) + Target);
   end;
 

@@ -1242,8 +1242,8 @@ begin
       f := TLapeType_OverloadedMethod(f.VarType).getMethod(getParamTypes());
       if (f = nil) then
         LapeException(lpeNoOverloadedMethod, [getParamTypesStr()], FIdent.DocPos);
-    end
-    else if (f.Ptr = nil) or (not (f.VarType.BaseType in [ltImportedMethod])) then
+    end;
+    if (f.Ptr = nil) or (f.VarType.BaseType <> ltImportedMethod) then
       LapeException(lpeCannotInvoke, FIdent.DocPos);
 
     Result := DoImportedMethod(f);
@@ -1469,8 +1469,8 @@ begin
       a := getResVar(TLapeType_OverloadedMethod(a.VarType).getMethod(getParamTypes(), FDest.VarType));
       if (a.VarType = nil) then
         LapeException(lpeNoOverloadedMethod, [getParamTypesStr()], FIdent.DocPos);
-    end
-    else if (a.VarType = nil) or (not (a.VarType.BaseType in [ltScriptMethod, ltImportedMethod])) then
+    end;
+    if (a.VarType = nil) or (not (a.VarType.BaseType in [ltScriptMethod, ltImportedMethod])) then
       LapeException(lpeCannotInvoke, FIdent.DocPos);
 
     with TLapeType_Method(a.VarType) do
@@ -1967,10 +1967,13 @@ begin
     if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
       FDest := VarResVar;
     getDestVar(FDest, Result, op_Unknown, FCompiler);
-    if (a.VarType.BaseType in LapeStringTypes) then
-      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!strlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos)
-    else
-      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!length') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+
+    case a.VarType.BaseType of
+      ltAnsiString: FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!astrlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+      ltWideString: FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!wstrlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+      ltUnicodeString: FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!ustrlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+      else FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!length') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+    end;
   end;
 end;
 
@@ -2324,7 +2327,7 @@ end;
 function TLapeTree_Operator.isConstant: Boolean;
 begin
   Result := ((FLeft = nil) or (not (TLapeTree_Base(FLeft) is TLapeTree_MultiIf))) and (
-    ((FOperatorType in [op_Dot, op_Index]) and (FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and (FRight <> nil) and FRight.isConstant()) or
+    ((FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and ((FOperatorType = op_Dot) or ((FOperatorType = op_Index) and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltShortString, ltStaticArray]))) and (FRight <> nil) and FRight.isConstant()) or
     ((FLeft = nil) or FLeft.isConstant()) and ((FRight = nil) or FRight.isConstant())
   );
 end;
