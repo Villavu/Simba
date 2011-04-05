@@ -1202,7 +1202,7 @@ var
   var
     a, b: TResVar;
   begin
-    if Left.VarType.Equals(Right.VarType) or
+    if Left.VarType.Equals(Right.VarType, False) or
        (DoRight and (not Left.VarType.CompatibleWith(Right.VarType))) or
        ((not DoRight) and (not Right.VarType.CompatibleWith(Left.VarType)))
     then
@@ -1261,6 +1261,14 @@ begin
 
   Result.VarType := EvalRes(Op, Right.VarType);
   getDestVar(Dest, Result, Op, FCompiler);
+
+  Write(Left.VarType.AsString, ' ', LapeOperatorToString(op), ' ');
+  if (Right.VarType <> nil) then
+    Write(Right.VarType.AsString, ' ');
+  if (Result.VarType <> nil) then
+    WriteLn('-> ', Result.VarType.AsString)
+  else
+    WriteLn('-> ?');
 
   if (Right.VarType = nil) then
     p := getEvalProc(Op, FBaseType, ltUnknown)
@@ -3276,7 +3284,7 @@ constructor TLapeType_Method.Create(ACompiler: TLapeCompilerBase; AParams: TLape
 const
   NullPar: TLapeParameter = (ParType: lptNormal; VarType: nil; Default: nil);
 begin
-  inherited Create(ltUnknown, ACompiler, AName, ADocPos);
+  inherited Create(ltPointer, ACompiler, AName, ADocPos);
 
   FreeParams := (AParams = nil);
   if (AParams = nil) then
@@ -3348,7 +3356,6 @@ begin
   v.FVarType.FBaseType := b;
   if (FCompiler <> nil) then
     v.FVarType := FCompiler.addManagedType(v.FVarType);
-  WriteLn('After setImported: ', AsString);
 end;
 
 function TLapeType_Method.NewGlobalVar(Ptr: Pointer = nil; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -3367,7 +3374,7 @@ end;
 
 function TLapeType_Method.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
 begin
-  if (FBaseType = ltUnknown) and (Op = op_Assign) and Equals(Right) then
+  if (FBaseType = ltPointer) and (Op = op_Assign) and (Right <> nil) and ((Right.BaseType = ltPointer) or Equals(Right)) then
     Result := Self
   else
     Result := inherited;
@@ -3377,14 +3384,15 @@ function TLapeType_Method.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar):
 var
   t: TLapeType;
 begin
-  if (FBaseType = ltUnknown) and (Op = op_Assign) and (Right <> nil) and Equals(Right.VarType) then
+  if (FBaseType = ltPointer) and (Op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) and ((Right.VarType.BaseType = ltPointer) or Equals(Right.VarType)) then
     try
       FBaseType := ltImportedMethod;
       t := Right.FVarType;
-      Right.FVarType := Self;
+      if (t.BaseType = ltPointer) then
+        Right.FVarType := Self;
       Result := inherited;
     finally
-      FBaseType := ltUnknown;
+      FBaseType := ltPointer;
       Right.FVarType := t;
     end
   else
@@ -3395,14 +3403,15 @@ function TLapeType_Method.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TR
 var
   t: TLapeType;
 begin
-  if (FBaseType = ltUnknown) and (Op = op_Assign) and Equals(Right.VarType) then
+  if (FBaseType = ltPointer) and (Op = op_Assign) and (Right.VarType <> nil) and ((Right.VarType.BaseType = ltPointer) or Equals(Right.VarType)) then
     try
       FBaseType := ltImportedMethod;
       t := Right.VarType;
-      Right.VarType := Self;
+      if (t.BaseType = ltPointer) then
+        Right.VarType := Self;
       Result := inherited;
     finally
-      FBaseType := ltUnknown;
+      FBaseType := ltPointer;
       Right.VarType := t;
     end
   else

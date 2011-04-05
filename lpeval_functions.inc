@@ -2772,6 +2772,7 @@ procedure lpePointer_LT_Pointer(const Dest, Left, Right: Pointer); begin PEvalBo
 procedure lpePointer_LTEQ_Pointer(const Dest, Left, Right: Pointer); begin PEvalBool(Dest)^ := PtrInt(PPointer(Left)^) <= PtrInt(PPointer(Right)^); end;
 procedure lpePointer_NEQ_Pointer(const Dest, Left, Right: Pointer); begin PEvalBool(Dest)^ := PPointer(Left)^ <> PPointer(Right)^; end;
 procedure lpePointer_ASGN_Pointer(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := PPointer(Left)^; end;
+procedure lpePointer_ASGN_SMethod(const Dest, Left, Right: Pointer); begin PCodePos(Dest)^ := PtrUInt(PPointer(Left)^); end;
 
 procedure lpePointer_ADD_UInt8(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := Pointer(PtrUInt(PPointer(Left)^) + PUInt8(Right)^); end;
 procedure lpePointer_ADD_Int8(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := Pointer(PtrInt(PPointer(Left)^) + PInt8(Right)^); end;

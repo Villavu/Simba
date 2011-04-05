@@ -364,6 +364,7 @@ const
   LapeEnumTypes = [ltSmallEnum..ltLargeEnum, ltBoolean];
   LapeSetTypes = [ltSmallSet..ltLargeSet];
   LapeArrayTypes = [ltDynArray..ltStaticArray] + LapeStringTypes;
+  LapeStructures = [ltRecord..ltUnion];
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
   LapePointerTypes = [ltPointer, ltDynArray, ltScriptMethod, ltImportedMethod] + LapeStringTypes - [ltShortString];
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes + [ltShortString];

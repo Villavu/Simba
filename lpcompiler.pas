@@ -1009,7 +1009,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     n: lpString;
   begin
     //Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_External, tk_kw_Export, tk_kw_Private], True, False);
-    e := ltUnknown;
+    e := ltPointer;
     if (Tokenizer.Tok in [tk_kw_External, {tk_kw_Export,} tk_kw_Private]) then
     begin
       if (Tokenizer.Tok = tk_kw_External) then

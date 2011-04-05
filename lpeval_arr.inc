@@ -2804,6 +2804,8 @@ Arr[op_cmp_LessThan][ltPointer][ltPointer] := @lpePointer_LT_Pointer;
 Arr[op_cmp_LessThanOrEqual][ltPointer][ltPointer] := @lpePointer_LTEQ_Pointer;
 Arr[op_cmp_NotEqual][ltPointer][ltPointer] := @lpePointer_NEQ_Pointer;
 Arr[op_Assign][ltPointer][ltPointer] := @lpePointer_ASGN_Pointer;
+Arr[op_Assign][ltPointer][ltImportedMethod] := Arr[op_Assign][ltPointer][ltPointer];
+Arr[op_Assign][ltPointer][ltScriptMethod] := @lpePointer_ASGN_SMethod;
 
 Arr[op_Plus][ltPointer][ltUInt8] := @lpePointer_ADD_UInt8;
 Arr[op_Plus][ltPointer][ltInt8] := @lpePointer_ADD_Int8;
