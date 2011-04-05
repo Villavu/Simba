@@ -15,7 +15,7 @@ uses
   Classes, SysUtils,
   lptypes, lpinterpreter;
 
-procedure DisassembleCode(Code: PByte; PointerNames: TLapeDeclArray = nil); {$IFDEF Lape_Inline}inline;{$ENDIF}
+procedure DisassembleCode(Code: PByte; PointerNames: TLapeDeclArray = nil);
 
 implementation
 
@@ -61,6 +61,13 @@ var
   procedure _WriteLn(s: string; args: array of const); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
     _WriteLn(Format(s, args));
+  end;
+
+  procedure DoCheckInternal; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    _WriteLn('IsInternal');
+    _WriteLn('IncStack %d', [SizeOf(EvalBool) - SizeOf(Pointer)]);
+    Inc(Code, ocSize);
   end;
 
   procedure DoInitStackLen; {$IFDEF Lape_Inline}inline;{$ENDIF}

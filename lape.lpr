@@ -10,7 +10,7 @@ uses
   Forms, Main,
 
   lpparser, lpcompiler, lptypes, lpeval, lpinterpreter, lpexceptions,
-  lpvartypes, lpcodeemitter, _lpgenerateevalfunctions, lptree, lpdisassembler;
+  lpvartypes, lpcodeemitter, lptree, lpdisassembler;
 
 {$R *.res}
 

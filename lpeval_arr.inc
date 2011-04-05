@@ -2823,6 +2823,12 @@ Arr[op_Minus][ltPointer][ltInt32] := @lpePointer_SUB_Int32;
 Arr[op_Minus][ltPointer][ltUInt64] := @lpePointer_SUB_UInt64;
 Arr[op_Minus][ltPointer][ltInt64] := @lpePointer_SUB_Int64;
 
+//Method
+Arr[op_Assign][ltImportedMethod][ltPointer] := Arr[op_Assign][ltPointer][ltPointer];
+Arr[op_Assign][ltImportedMethod][ltImportedMethod] := Arr[op_Assign][ltPointer][ltPointer];
+Arr[op_Assign][ltScriptMethod][ltPointer] := @lpeSMethod_ASGN_Pointer;
+Arr[op_Assign][ltScriptMethod][ltScriptMethod] := @lpeSMethod_ASGN_SMethod;
+
 //Set
 //small set
 Arr[op_cmp_Equal][ltSmallSet][ltSmallSet] := @lpeSSet_EQ_SSet;

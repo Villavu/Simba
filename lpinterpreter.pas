@@ -18,6 +18,7 @@ uses
 type
   opCode = (
     ocNone,
+    ocIsInternal,                                              //IsInternal
     ocInitStackLen,                                            //InitStackLen TStackOffset
     ocInitVarLen,                                              //InitVarLen TStackOffset
     ocInitStack,                                               //InitStack TStackOffset
@@ -212,6 +213,13 @@ var
       SetLength(VarStack, VarStackLen + (VarStackSize div 2));
     {$ENDIF}
     Move(Stack[StackPos], VarStack[VarStackPos], Size);
+  end;
+
+  procedure DoCheckInternal; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    PEvalBool(@Stack[StackPos - SizeOf(EvalBool)])^ := opCodeTypeP(PtrUInt(CodeBase) + PtrUInt(PCodePos(@Stack[StackPos - SizeOf(Pointer)])^))^ = opCodeType(ocIncTry);
+    Inc(StackPos, SizeOf(EvalBool) - SizeOf(Pointer));
+    Inc(Code, ocSize);
   end;
 
   procedure DoInitStackLen; {$IFDEF Lape_Inline}inline;{$ENDIF}

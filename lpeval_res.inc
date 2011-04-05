@@ -2794,6 +2794,12 @@ Arr[op_Assign][ltWideChar][ltAnsiChar] := ltWideChar;
 Arr[op_Assign][ltWideChar][ltVariant] := ltWideChar;
 {$ENDIF}
 
+//Method
+Arr[op_Assign][ltImportedMethod][ltPointer] := ltImportedMethod;
+Arr[op_Assign][ltImportedMethod][ltImportedMethod] := ltImportedMethod;
+Arr[op_Assign][ltScriptMethod][ltPointer] := ltScriptMethod;
+Arr[op_Assign][ltScriptMethod][ltScriptMethod] := ltScriptMethod;
+
 //Pointer
 Arr[op_cmp_Equal][ltPointer][ltPointer] := ltEvalBool;
 Arr[op_cmp_GreaterThan][ltPointer][ltPointer] := ltEvalBool;

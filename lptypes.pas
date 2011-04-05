@@ -349,8 +349,12 @@ const
     SizeOf(Pointer),
     -1, -1,
     SizeOf(Pointer), -1,
-    SizeOf(TCodeOffset), SizeOf(Pointer)
+    SizeOf(TCodePos), SizeOf(Pointer)
   );
+
+  {$IF SizeOf(TCodePos) > SizeOf(Pointer)}
+    {$MESSAGE Fatal 'TCodePos should be <= Pointer for universal methods'}
+  {$ENDIF}
 
   LapeIntegerTypes = [Low(LapeIntegerTypeRange)..High(LapeIntegerTypeRange)];
   LapeRealTypes = [ltSingle..ltExtended];

@@ -39,7 +39,7 @@ var
 implementation
 
 uses
-  lpparser, lpcompiler, lptypes, lpvartypes, lpeval, lpinterpreter, lpdisassembler, _lpgenerateevalfunctions,
+  lpparser, lpcompiler, lptypes, lpvartypes, lpeval, lpinterpreter, lpdisassembler, {_lpgenerateevalfunctions,}
   LCLIntf, Variants;
 
 {$R *.lfm}
@@ -250,12 +250,12 @@ end;
 
 procedure TForm1.btnGo3Click(Sender: TObject);
 begin
-  LapePrintEvalRes;
+  //LapePrintEvalRes;
 end;
 
 procedure TForm1.btnGo4Click(Sender: TObject);
 begin
-  LapePrintEvalArr;
+  //LapePrintEvalArr;
 end;
 
 end.

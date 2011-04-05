@@ -128,6 +128,13 @@ type
     function isConstant: Boolean; override;
   end;
 
+  TLapeTree_InternalMethod_IsScriptMethod = class(TLapeTree_InternalMethod)
+    function isConstant: Boolean; override;
+    function resType: TLapeType; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
   TLapeTree_InternalMethod_FlowStatement = class(TLapeTree_InternalMethod)
   public
     function isConstant: Boolean; override;
@@ -1131,7 +1138,7 @@ begin
 
     if (t <> nil) and (t is TLapeType_OverloadedMethod) then
       t := getVarType(TLapeType_OverloadedMethod(t).getMethod(getParamTypes()));
-    if (t = nil) or (not (t.BaseType in [ltScriptMethod, ltImportedMethod])) then
+    if (t = nil) or (not (t is TLapeType_Method)) then
       Result := nil
     else
       Result := TLapeType_Method(t).Res;
@@ -1314,7 +1321,8 @@ var
     end;
 
   begin
-    Assert(a.VarType.BaseType = ltScriptMethod);
+    Assert(a.VarType is TLapeType_Method);
+    Assert(a.VarType.BaseType in [ltUnknown, ltScriptMethod]);
     Assert(Length(c) = TLapeType_Method(a.VarType).Params.Count);
     Result := NullResVar;
     e := NullResVar;
@@ -1391,7 +1399,8 @@ var
     i: Integer;
     b, e, tmp: TResVar;
   begin
-    Assert(a.VarType.BaseType = ltImportedMethod);
+    Assert(a.VarType is TLapeType_Method);
+    Assert(a.VarType.BaseType in [ltUnknown, ltImportedMethod]);
     Assert(Length(c) = TLapeType_Method(a.VarType).Params.Count);
     Result := NullResVar;
     e := NullResVar;
@@ -1454,6 +1463,35 @@ var
     end;
   end;
 
+  function DoCombiMethod(a: TResVar; c: TResVarArray): TResVar;
+  var
+    o_if, o_else, i: Integer;
+    b, d, e: TResVar;
+    cc: TResVarArray;
+  begin
+    with TLapeTree_InternalMethod_IsScriptMethod.Create(FCompiler, @DocPos) do
+    try
+      addParam(TLapeTree_ResVar.Create(a, FCompiler, @DocPos));
+      b := Compile(Offset);
+    finally
+      Free();
+    end;
+
+    cc := Copy(c);
+    o_if := FCompiler.Emitter._JmpRIfNot(0, b, Offset, @DocPos);
+    e := DoScriptMethod(a, cc);
+    d := FDest;
+    FDest := e;
+    for i := 0 to FParams.Count - 1 do
+      setNullResVar(c[i], 1);
+
+    o_else := FCompiler.Emitter._JmpR(0, Offset, @DocPos);
+    FCompiler.Emitter._JmpRIfNot(Offset - o_if, b, o_if, @DocPos);
+    Result := DoImportedMethod(a, c);
+    FCompiler.Emitter._JmpR(Offset - o_else, o_else, @DocPos);
+    FDest := d;
+  end;
+
 begin
   Result := NullResVar;
   Assert(FIdent <> nil);
@@ -1470,7 +1508,7 @@ begin
       if (a.VarType = nil) then
         LapeException(lpeNoOverloadedMethod, [getParamTypesStr()], FIdent.DocPos);
     end;
-    if (a.VarType = nil) or (not (a.VarType.BaseType in [ltScriptMethod, ltImportedMethod])) then
+    if (a.VarType = nil) or (not (a.VarType is TLapeType_Method)) then
       LapeException(lpeCannotInvoke, FIdent.DocPos);
 
     with TLapeType_Method(a.VarType) do
@@ -1506,8 +1544,10 @@ begin
 
       if (a.VarType.BaseType = ltScriptMethod) then
         Result := DoScriptMethod(a, c)
+      else if (a.VarType.BaseType = ltImportedMethod) then
+        Result := DoImportedMethod(a, c)
       else
-        Result := DoImportedMethod(a, c);
+        Result := DoCombiMethod(a, c);
     end;
 
     setNullResVar(a, 1);
@@ -1524,6 +1564,46 @@ end;
 function TLapeTree_InternalMethod.isConstant: Boolean;
 begin
   Result := (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) and FParams[0].isConstant();
+end;
+
+function TLapeTree_InternalMethod_IsScriptMethod.isConstant: Boolean;
+begin
+  Result := False;
+end;
+
+function TLapeTree_InternalMethod_IsScriptMethod.resType: TLapeType;
+begin
+  Result := FCompiler.getBaseType(ltEvalBool);
+end;
+
+function TLapeTree_InternalMethod_IsScriptMethod.Evaluate: TLapeGlobalVar;
+begin
+  Result := nil;
+  LapeException(lpeCannotEvalConst, DocPos);
+end;
+
+function TLapeTree_InternalMethod_IsScriptMethod.Compile(var Offset: Integer): TResVar;
+var
+  e, b, c: TResVar;
+begin
+  Result := NullResVar;
+  if (FParams.Count <> 1) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  e := NullResVar;
+  c := FParams[0].Compile(Offset);
+  if (c.VarType = nil) or (not (c.VarType is TLapeType_Method)) then
+    LapeException(lpeInvalidCondition, DocPos);
+
+  b := NullResVar;
+  b.VarPos.MemPos := mpStack;
+  b.VarType := c.VarType;
+  b.VarType.Eval(op_Assign, e, b, c, Offset, @DocPos);
+  SetNullResVar(c, 1);
+
+  FCompiler.Emitter._IsInternal(Offset, @DocPos);
+  Result.VarPos.MemPos := mpStack;
+  Result.VarType := resType();
 end;
 
 function TLapeTree_InternalMethod_FlowStatement.isConstant: Boolean;

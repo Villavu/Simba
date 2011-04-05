@@ -970,7 +970,7 @@ begin
     NextNoJunk();
   Result := FTok;
   if (FTok <> Token) then
-    LapeException(lpeExpectedOther, [LapeTokenToString(FTok), LapeTokenToString(Token)], DocPos);
+    LapeException(lpeExpectedOther, [TokString, LapeTokenToString(Token)], DocPos);
   if NextAfter then
     NextNoJunk();
 end;

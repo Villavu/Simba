@@ -201,29 +201,11 @@ begin
   if (FConditionalStack <> nil) then
     FConditionalStack.Reset();
 
-  if (getDeclaration('String') = nil) then
-    addGlobalType(getBaseType(ltString).createCopy(), 'String');
-  if (getDeclaration('Char') = nil) then
-    addGlobalType(getBaseType(ltChar).createCopy(), 'Char');
-  if (getDeclaration('True') = nil) then
-    addGlobalVar(True, 'True').isConstant := True;
-  if (getDeclaration('False') = nil) then
-    addGlobalVar(False, 'False').isConstant := True;
-  if (getDeclaration('nil') = nil) then
-    addGlobalVar(nil, 'nil').isConstant := True;
-  if (getDeclaration('Null') = nil) then
-    addGlobalVar(Null, 'Null').isConstant := True;
-
-  if (FBaseDefines <> nil) then
-  with FBaseDefines do
-  begin
-    add('Lape');
-    add('Sesquipedalian');
-    if (FDefines <> nil) then
-      FDefines.Assign(FBaseDefines);
-  end
-  else if (FDefines <> nil) then
-    FDefines.Clear();
+  if (FDefines <> nil) then
+    if (FBaseDefines <> nil) then
+      FDefines.Assign(FBaseDefines)
+    else
+      FDefines.Clear();
 end;
 
 procedure TLapeCompiler.setBaseDefines(Defines: TStringList);
@@ -547,7 +529,7 @@ begin
     Next();
   Result := Tokenizer.Tok;
   if (Result <> Token) then
-    LapeException(lpeExpectedOther, [LapeTokenToString(Result), LapeTokenToString(Token)], Tokenizer.DocPos);
+    LapeException(lpeExpectedOther, [Tokenizer.TokString, LapeTokenToString(Token)], Tokenizer.DocPos);
   if NextAfter then
     Next();
 end;
@@ -1043,6 +1025,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     if (n <> '') or (Result = nil) then
       LapeException(lpeTypeExpected, Tokenizer.DocPos);
 
+    Result := Result.CreateCopy();
     __LapeType(Result).FBaseType := e;
     Result := addManagedType(Result);
   end;
@@ -1907,15 +1890,30 @@ begin
   FDefines := TStringList.Create();
   FDefines.Duplicates := dupIgnore;
   FDefines.CaseSensitive := {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF};
-  FBaseDefines := TStringList.Create();
-  FBaseDefines.CaseSensitive := {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF};
   FConditionalStack := TLapeConditionalStack.Create(0);
 
   FOnHandleDirective := nil;
   FOnFindFile := nil;
 
+  FBaseDefines := TStringList.Create();
+  FBaseDefines.CaseSensitive := {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF};
+  with FBaseDefines do
+  begin
+    add('Lape');
+    add('Sesquipedalian');
+  end;
+
+  addGlobalType(getBaseType(ltString).createCopy(), 'String');
+  addGlobalType(getBaseType(ltChar).createCopy(), 'Char');
+  addGlobalType(getBaseType(ltEvalBool).createCopy(), 'EvalBool');
+  addGlobalVar(True, 'True').isConstant := True;
+  addGlobalVar(False, 'False').isConstant := True;
+  addGlobalVar(nil, 'nil').isConstant := True;
+  addGlobalVar(Null, 'Null').isConstant := True;
+
   FTreeMethodMap := TLapeTreeMethodMap.Create(nil);
   FInternalMethodMap := TLapeInternalMethodMap.Create(nil);
+  FInternalMethodMap['IsScriptMethod'] := TLapeTree_InternalMethod_IsScriptMethod;
   FInternalMethodMap['Break'] := TLapeTree_InternalMethod_Break;
   FInternalMethodMap['Continue'] := TLapeTree_InternalMethod_Continue;
   FInternalMethodMap['Exit'] := TLapeTree_InternalMethod_Exit;

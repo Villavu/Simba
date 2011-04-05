@@ -69,6 +69,8 @@ type
     function _op(op: opCode; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _op(op: opCode; Pos: PDocPos = nil): Integer; overload;
 
+    function _IsInternal(var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
+    function _IsInternal(Pos: PDocPos = nil): Integer; overload;
     function _InitStackLen(Len: TStackOffset; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _InitStackLen(Len: TStackOffset; Pos: PDocPos = nil): Integer; overload;
     function _InitVarLen(Len: TStackOffset; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
@@ -346,6 +348,11 @@ begin
   _DocPos(Pos, Offset);
 end;
 
+function TLapeCodeEmitterBase._IsInternal(var Offset: Integer; Pos: PDocPos = nil): Integer;
+begin
+  Result := _op(ocIsInternal, Offset, Pos);
+end;
+
 function TLapeCodeEmitterBase._InitStackLen(Len: TStackOffset; var Offset: Integer; Pos: PDocPos = nil): Integer;
 begin
   Result := _op(ocInitStackLen, Offset, Pos);
@@ -459,6 +466,8 @@ function TLapeCodeEmitterBase._DocPos(): Integer;
   var o: Integer; begin o := -1; Result := _DocPos(o); end;
 function TLapeCodeEmitterBase._op(op: opCode; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _op(op, o, Pos); end;
+function TLapeCodeEmitterBase._IsInternal(Pos: PDocPos = nil): Integer;
+  var o: Integer; begin o := -1; Result := _IsInternal(o, Pos); end;
 function TLapeCodeEmitterBase._InitStackLen(Len: TStackOffset; Pos: PDocPos = nil): Integer;
   var o: Integer; begin o := -1; Result := _InitStackLen(Len, o, Pos); end;
 function TLapeCodeEmitterBase._InitVarLen(Len: TStackOffset; Pos: PDocPos = nil): Integer;
