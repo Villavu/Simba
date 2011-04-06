@@ -71,6 +71,7 @@ type
     function popConditional: TDocPos; virtual;
 
     function EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase; virtual;
+    function EnsureTypeExpression(Node: TLapeTree_Base): TLapeTree_Base; virtual;
     function EnsureRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeTree_Range; overload; virtual;
     function EnsureRange(Node: TLapeTree_Base): TLapeTree_Range; overload; virtual;
     function EnsureConstantRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeRange; overload; virtual;
@@ -290,6 +291,14 @@ begin
    Result := TLapeTree_ExprBase.Create(Self, getPDocPos());
 end;
 
+function TLapeCompiler.EnsureTypeExpression(Node: TLapeTree_Base): TLapeTree_Base;
+begin
+ if (Node <> nil) then
+   Result := Node
+ else
+   Result := TLapeTree_Base.Create(Self, getPDocPos());
+end;
+
 function TLapeCompiler.EnsureRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeTree_Range;
 begin
   VarType := nil;
@@ -500,7 +509,7 @@ begin
   end;
 end;
 
-function TLapeCompiler.IsNext(Tokens: EParserTokenSet): Boolean;
+function TLapeCompiler.isNext(Tokens: EParserTokenSet): Boolean;
 var
   t: EParserToken;
 begin
@@ -674,7 +683,7 @@ begin
           if addToScope then
             if (FStackInfo = nil) or (FStackInfo.Owner = nil) then
               LapeException(lpeImpossible, Tokenizer.DocPos)
-            else if (LapeCase(a[i]) = LapeCase(Name)) or (getDeclaration(a[i], True) <> nil) then
+            else if (LapeCase(a[i]) = LapeCase(Name)) or hasDeclaration(a[i], True) then
               LapeException(lpeDuplicateDeclaration, [a[i]], Tokenizer.DocPos)
             else
               FStackInfo.addVar(p.ParType, p.VarType, a[i]);
@@ -693,7 +702,7 @@ begin
       if addToScope then
         if (FStackInfo = nil) or (FStackInfo.Owner = nil) then
           LapeException(lpeImpossible, Tokenizer.DocPos)
-        else if (LapeCase(Name) = LapeCase('Result')) or (getDeclaration('Result', True) <> nil) then
+        else if (LapeCase(Name) = LapeCase('Result')) or hasDeclaration('Result', True) then
           LapeException(lpeDuplicateDeclaration, ['Result'], Tokenizer.DocPos)
         else
           FStackInfo.addVar(lptOut, Result.Res, 'Result');
@@ -723,6 +732,7 @@ var
     f := FTreeMethodMap[IntToStr(PtrUInt(varFrom))];
     if (f <> nil) then
     begin
+      varTo.isConstant := True;
       __LapeTree_Method(f).FMethod := varTo;
       FTreeMethodMap[IntToStr(PtrUInt(varTo))] := f;
     end;
@@ -779,7 +789,7 @@ begin
           LapeException(lpeUnknownParent, Tokenizer.DocPos);
         if (not TLapeGlobalVar(decl).VarType.Equals(t)) then
           LapeException(lpeNoForwardMatch, Tokenizer.DocPos);
-        if (getDeclaration('inherited', FStackInfo, True) <> nil) then
+        if hasDeclaration('inherited', FStackInfo, True) then
           LapeException(lpeDuplicateDeclaration, ['inherited'], Tokenizer.DocPos);
 
         if (TLapeType_Method(TLapeGlobalVar(decl).VarType).BaseType = ltScriptMethod) then
@@ -975,7 +985,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     repeat
       Expect(tk_Identifier, True, False);
       n := Tokenizer.TokString;
-      if (getDeclaration(n, so, True) <> nil) then
+      if hasDeclaration(n, so, True) then
         LapeException(lpeDuplicateDeclaration, [n], Tokenizer.DocPos);
 
       Expect([tk_sym_Comma, tk_sym_ParenthesisClose, tk_sym_Equals], True, False);
@@ -1120,7 +1130,7 @@ begin
     repeat
       Expect(tk_Identifier, True, False);
       s := Tokenizer.TokString;
-      if (getDeclaration(s, True) <> nil) then
+      if hasDeclaration(s, True) then
         LapeException(lpeDuplicateDeclaration, [s], Tokenizer.DocPos);
       Expect(tk_sym_Equals, True, False);
 
@@ -1216,7 +1226,7 @@ begin
 
       for i := 0 to High(a) do
       begin
-        if (getDeclaration(a[i], True) <> nil) then
+        if hasDeclaration(a[i], True) then
           LapeException(lpeDuplicateDeclaration, [a[i]], Tokenizer.DocPos);
 
         if isConst then
@@ -1388,10 +1398,15 @@ var
   begin
     r := TLapeTree_OpenArray.Create(Self, getPDocPos());
     try
-      while (not (Tokenizer.Tok in [tk_NULL, tk_sym_BracketClose])) do
+      if (Next() <> tk_sym_BracketClose) then
       begin
-        r.addValue(ParseTypeExpression());
-        Expect([tk_sym_Comma, tk_sym_BracketClose], False, False);
+        r.addValue(EnsureTypeExpression(ParseTypeExpression([tk_sym_BracketClose, tk_sym_Comma], False)));
+        while True do
+          case Tokenizer.Tok of
+            tk_sym_BracketClose: Break;
+            tk_sym_Comma: r.addValue(EnsureTypeExpression(ParseTypeExpression([tk_sym_BracketClose, tk_sym_Comma])));
+            else Expect(tk_sym_BracketClose, False, False);
+          end;
       end;
     except
       r.Free();
@@ -1526,9 +1541,9 @@ begin
               PopOpStack(op_Invoke);
               if (f = nil) then
                 f := TLapeTree_Invoke.Create(VarStack.Pop(), Self, getPDocPos());
-              if (not isNext([tk_sym_ParenthesisClose])) then
+              if (Next() <> tk_sym_ParenthesisClose) then
               begin
-                f.addParam(EnsureExpression(ParseExpression([tk_sym_ParenthesisClose, tk_sym_Comma])));
+                f.addParam(EnsureExpression(ParseExpression([tk_sym_ParenthesisClose, tk_sym_Comma], False)));
                 while True do
                   case Tokenizer.Tok of
                     tk_sym_ParenthesisClose: Break;
@@ -2068,7 +2083,7 @@ function TLapeCompiler.addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackI
 begin
   if (v = nil) then
     Exit(nil);
-  if (v.Name <> '') and (getDeclaration(v.Name, AStackInfo, True) <> nil) then
+  if (v.Name <> '') and hasDeclaration(v.Name, AStackInfo, True) then
     LapeException(lpeDuplicateDeclaration, [v.Name]);
 
   Result := v;
@@ -2082,7 +2097,7 @@ function TLapeCompiler.addLocalVar(v: TLapeType; Name: lpString = ''): TLapeVar;
 begin
   if (v = nil) then
     Exit(nil);
-  if (Name <> '') and (getDeclaration(Name, True) <> nil) then
+  if (Name <> '') and hasDeclaration(Name, True) then
     LapeException(lpeDuplicateDeclaration, [Name]);
 
   if (FStackInfo = nil) or (FStackInfo.Owner = nil) then

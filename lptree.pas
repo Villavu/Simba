@@ -735,7 +735,9 @@ begin
 
   for i := 0 to FValues.Count - 1 do
   begin
-    if (FValues[i] is TLapeTree_OpenArray) then
+    if (FValues[i].ClassType = TLapeTree_Base) then
+      Continue
+    else if (FValues[i] is TLapeTree_OpenArray) then
       TLapeTree_OpenArray(FValues[i]).ToType := t;
 
     if (FValues[i] is TLapeTree_ExprBase) and t.CompatibleWith(TLapeTree_ExprBase(FValues[i]).resType()) then
@@ -755,7 +757,9 @@ begin
   if (not canCast()) then
     Exit(False);
   for i := 0 to FValues.Count - 1 do
-    if (FValues[i] is TLapeTree_ExprBase) and TLapeTree_ExprBase(FValues[i]).isConstant() then
+    if (FValues[i].ClassType = TLapeTree_Base) then
+      {nothing}
+    else if (FValues[i] is TLapeTree_ExprBase) and TLapeTree_ExprBase(FValues[i]).isConstant() then
       {nothing}
     else if (FValues[i] is TLapeTree_Range) and TLapeTree_Range(FValues[i]).Lo.isConstant() and TLapeTree_Range(FValues[i]).Hi.isConstant() then
       {nothing}
@@ -796,7 +800,9 @@ begin
 
       for i := 0 to r.Hi do
       begin
-        if (FValues[i] is TLapeTree_Range) and (TLapeTree_Range(FValues[i]).Hi <> nil) then
+        if (FValues[i].ClassType = TLapeTree_Base) then
+          Continue
+        else if (FValues[i] is TLapeTree_Range) and (TLapeTree_Range(FValues[i]).Hi <> nil) then
         begin
           t := TLapeTree_Range(FValues[i]).Hi.resType();
           if (t = nil) or (not (t is TLapeType_SubRange)) or ((Result <> nil) and (not t.CompatibleWith(Result))) then
@@ -850,7 +856,9 @@ begin
     if (ToType is TLapeType_Set) then
     begin
       for i := 0 to FValues.Count - 1 do
-        if (FValues[i] is TLapeTree_ExprBase) then
+        if (FValues[i].ClassType = TLapeTree_Base) then
+          LapeException(lpeInvalidCast, FValues[i].DocPos)
+        else if (FValues[i] is TLapeTree_ExprBase) then
         begin
           r := Result;
           Result := ToType.EvalConst(op_Plus, r, TLapeTree_ExprBase(FValues[i]).Evaluate());
@@ -878,7 +886,9 @@ begin
 
       for i := 0 to FValues.Count - 1 do
       begin
-        if (FValues[i] is TLapeTree_ExprBase) then
+        if (FValues[i].ClassType = TLapeTree_Base) then
+          LapeException(lpeInvalidCast, FValues[i].DocPos)
+        else if (FValues[i] is TLapeTree_ExprBase) then
         try
           try
             v := ToType.EvalConst(op_Index, Result, counter);
@@ -914,10 +924,11 @@ begin
           LapeException(lpeInvalidCast, FValues[i].DocPos);
         Inc(tmp);
       end;
-    finally
-      counter.Free();
+
       if (tmp <> TLapeType_StaticArray(ToType).Range.Hi - TLapeType_StaticArray(ToType).Range.Lo + 1) then
         LapeException(lpeInvalidRange, DocPos);
+    finally
+      counter.Free();
     end
     else
       LapeException(lpeInvalidCast, DocPos);
@@ -956,7 +967,9 @@ begin
   if (ToType is TLapeType_Set) then
   begin
     for i := FValues.Count - 1 downto 0 do
-      if (FValues[i] is TLapeTree_ExprBase) then
+      if (FValues[i].ClassType = TLapeTree_Base) then
+        LapeException(lpeInvalidCast, FValues[i].DocPos)
+      else if (FValues[i] is TLapeTree_ExprBase) then
         with TLapeTree_Operator.Create(op_Plus, FCompiler, @FValues[i].DocPos) do
         try
           Dest := Result;
@@ -2400,14 +2413,16 @@ destructor TLapeTree_Operator.Destroy;
 begin
   setLeft(nil);
   setRight(nil);
-
   inherited;
 end;
 
 function TLapeTree_Operator.isConstant: Boolean;
 begin
   Result := ((FLeft = nil) or (not (TLapeTree_Base(FLeft) is TLapeTree_MultiIf))) and (
-    ((FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and ((FOperatorType = op_Dot) or ((FOperatorType = op_Index) and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltShortString, ltStaticArray]))) and (FRight <> nil) and FRight.isConstant()) or
+    ((FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and (
+        ((FOperatorType = op_Dot)   and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltRecord, ltUnion])) or
+        ((FOperatorType = op_Index) and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltShortString, ltStaticArray]))
+      ) and (FRight <> nil) and FRight.isConstant()) or
     ((FLeft = nil) or FLeft.isConstant()) and ((FRight = nil) or FRight.isConstant())
   );
 end;

@@ -354,7 +354,7 @@ const
 
   {$IF SizeOf(TCodePos) > SizeOf(Pointer)}
     {$MESSAGE Fatal 'TCodePos should be <= Pointer for universal methods'}
-  {$ENDIF}
+  {$IFEND}
 
   LapeIntegerTypes = [Low(LapeIntegerTypeRange)..High(LapeIntegerTypeRange)];
   LapeRealTypes = [ltSingle..ltExtended];
@@ -364,7 +364,7 @@ const
   LapeEnumTypes = [ltSmallEnum..ltLargeEnum, ltBoolean];
   LapeSetTypes = [ltSmallSet..ltLargeSet];
   LapeArrayTypes = [ltDynArray..ltStaticArray] + LapeStringTypes;
-  LapeStructures = [ltRecord..ltUnion];
+  LapeStructTypes = [ltRecord..ltUnion];
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
   LapePointerTypes = [ltPointer, ltDynArray, ltScriptMethod, ltImportedMethod] + LapeStringTypes - [ltShortString];
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes + [ltShortString];
