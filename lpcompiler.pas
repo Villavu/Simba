@@ -94,8 +94,8 @@ type
     procedure ParseTypeBlock; virtual;
     function ParseVarBlock(OneOnly: Boolean = False; ValidEnd: EParserTokenSet = [tk_sym_SemiColon]): TLapeTree_VarList; virtual;
 
-    function ParseExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True): TLapeTree_ExprBase; virtual;
-    function ParseTypeExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True): TLapeTree_Base; virtual;
+    function ParseExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True; DoFold: Boolean = True): TLapeTree_ExprBase; virtual;
+    function ParseTypeExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True; DoFold: Boolean = True): TLapeTree_Base; virtual;
     function ParseStatement: TLapeTree_Base; virtual;
     function ParseStatementList: TLapeTree_StatementList; virtual;
     function ParseBeginEnd(AllowDot: Boolean = False): TLapeTree_StatementList; virtual;
@@ -625,6 +625,7 @@ var
   i: Integer;
   p: TLapeParameter;
   t: EParserToken;
+  b: TLapeTree_ExprBase;
 begin
   //Expect([tk_kw_Function, tk_kw_Procedure], True, False);
   isFunction := (Tokenizer.Tok = tk_kw_Function);
@@ -665,13 +666,15 @@ begin
 
         if (Tokenizer.Tok = tk_sym_Equals) then
         begin
-          with ParseExpression([tk_sym_ParenthesisClose]) do
+          b := ParseExpression([tk_sym_ParenthesisClose], True, False);
           try
-            p.Default := Evaluate();
+            if (p.VarType <> nil) and (b is TLapeTree_OpenArray) then
+              TLapeTree_OpenArray(b).ToType := p.VarType;
+            p.Default := b.Evaluate();
             if (p.ParType in [lptVar, lptOut]) and p.Default.isConstant then
-              LapeException(lpeVariableExpected, DocPos);
+              LapeException(lpeVariableExpected, b.DocPos);
           finally
-            Free();
+            b.Free();
           end;
           Expect([tk_sym_SemiColon, tk_sym_ParenthesisClose], False, False);
         end
@@ -991,7 +994,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
       Expect([tk_sym_Comma, tk_sym_ParenthesisClose, tk_sym_Equals], True, False);
       if (Tokenizer.Tok = tk_cmp_Equal) then
       try
-        t := ParseExpression([tk_sym_Comma, tk_sym_ParenthesisClose]);
+        t := ParseExpression([tk_sym_Comma, tk_sym_ParenthesisClose], True, False);
         try
           if (t <> nil) then
             v := t.Evaluate()
@@ -1191,7 +1194,7 @@ begin
 
       if (Tokenizer.Tok = tk_sym_Equals) then
       begin
-        b := ParseExpression();
+        b := ParseExpression([], True, False);
         if (b <> nil) and (not b.isConstant()) then
           LapeException(lpeConstantExpected, b.DocPos);
         if (t <> nil) and (b is TLapeTree_OpenArray) then
@@ -1264,7 +1267,7 @@ begin
   end;
 end;
 
-function TLapeCompiler.ParseExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True): TLapeTree_ExprBase;
+function TLapeCompiler.ParseExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True; DoFold: Boolean = True): TLapeTree_ExprBase;
 const
   ParenthesisOpen = Pointer(-1);
 var
@@ -1590,7 +1593,9 @@ begin
       else
         LapeException(lpeInvalidEvaluation, Tokenizer.DocPos);
 
-    Result := TLapeTree_ExprBase(FoldConstants(VarStack.Pop()));
+    Result := VarStack.Pop();
+    if DoFold then
+      Result := TLapeTree_ExprBase(FoldConstants(Result));
     PrintTree(Result);
   finally
     if (f <> nil) then
@@ -1608,7 +1613,7 @@ begin
   end;
 end;
 
-function TLapeCompiler.ParseTypeExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True): TLapeTree_Base;
+function TLapeCompiler.ParseTypeExpression(ReturnOn: EParserTokenSet = []; FirstNext: Boolean = True; DoFold: Boolean = True): TLapeTree_Base;
 var
   r: TLapeTree_ExprBase;
   v: TLapeType;
@@ -1616,14 +1621,14 @@ begin
   Result := nil;
   v := nil;
 
-  r := ParseExpression(ReturnOn, FirstNext);
+  r := ParseExpression(ReturnOn, FirstNext, DoFold);
   if (Tokenizer.Tok <> tk_sym_DotDot) then
     Result := r
   else
   try
     Result := TLapeTree_Range.Create(Self, getPDocPos());
     TLapeTree_Range(Result).Lo := r;
-    TLapeTree_Range(Result).Hi := ParseExpression(ReturnOn);
+    TLapeTree_Range(Result).Hi := ParseExpression(ReturnOn, True, DoFold);
 
     if (r <> nil) and (TLapeTree_Range(Result).Hi <> nil) then
       v := TLapeTree_Range(Result).Hi.resType();

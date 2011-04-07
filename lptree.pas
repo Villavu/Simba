@@ -730,13 +730,18 @@ begin
     t := TLapeType_Set(ToType).Range
   else if (ToType is TLapeType_DynArray) then
     t := TLapeType_DynArray(ToType).PType;
-  if (t = nil) then
+  if (t = nil) xor (ToType is TLapeType_Record) then
     Exit(False);
 
   for i := 0 to FValues.Count - 1 do
   begin
     if (FValues[i].ClassType = TLapeTree_Base) then
       Continue
+    else if (ToType is TLapeType_Record) then
+      t := TLapeType_Record(ToType).FieldMap.ItemsI[i].FieldType;
+
+    if (t = nil) then
+      Exit(False)
     else if (FValues[i] is TLapeTree_OpenArray) then
       TLapeTree_OpenArray(FValues[i]).ToType := t;
 
@@ -851,6 +856,7 @@ begin
 
   Result := ToType.NewGlobalVarP();
   v := nil;
+  r := nil;
 
   try
     if (ToType is TLapeType_Set) then
@@ -892,7 +898,7 @@ begin
         try
           try
             v := ToType.EvalConst(op_Index, Result, counter);
-            v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate())
+            v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate());
           except on E: lpException do
             LapeException(E.Message, FValues[i].DocPos);
           end;
@@ -929,6 +935,29 @@ begin
         LapeException(lpeInvalidRange, DocPos);
     finally
       counter.Free();
+    end
+    else if (ToType is TLapeType_Record) then
+    begin
+      if (FValues.Count > TLapeType_Record(ToType).FieldMap.Count) then
+        LapeException(lpeInvalidRange, DocPos);
+      for i := 0 to FValues.Count - 1 do
+        if (FValues[i] is TLapeTree_ExprBase) then
+        try
+          r := FCompiler.getBaseType(ltString).NewGlobalVarStr(TLapeType_Record(ToType).FieldMap.Index[i]);
+          try
+            v := ToType.EvalConst(op_Dot, Result, r);
+            v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate());
+          except on E: lpException do
+            LapeException(E.Message, FValues[i].DocPos);
+          end;
+        finally
+          if (v <> nil) then
+            FreeAndNil(v);
+          if (r <> nil) then
+            FreeAndNil(r);
+        end
+        else if (FValues[i].ClassType <> TLapeTree_Base) then
+          LapeException(lpeInvalidCast, FValues[i].DocPos);
     end
     else
       LapeException(lpeInvalidCast, DocPos);
@@ -1033,6 +1062,29 @@ begin
       finally
         Free();
       end;
+  end
+  else if (ToType is TLapeType_Record) then
+  begin
+    if (FValues.Count > TLapeType_Record(ToType).FieldMap.Count) then
+      LapeException(lpeInvalidRange, DocPos);
+
+    for i := FValues.Count - 1 downto 0 do
+      if (FValues[i] is TLapeTree_ExprBase) then
+        with TLapeTree_Operator.Create(op_Assign, FCompiler, @FValues[i].DocPos) do
+        try
+          Left := TLapeTree_Operator.Create(op_Dot, FCompiler, @FValues[i].DocPos);
+          with TLapeTree_Operator(Left) do
+          begin
+            Left := TLapeTree_ResVar.Create(Result, FCompiler, @FValues[i].DocPos);
+            Right := TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(TLapeType_Record(ToType).FieldMap.Index[i]))), FCompiler, @FValues[i].DocPos);
+          end;
+          Right := TLapeTree_ExprBase(FValues[i]);
+          Compile(Offset);
+        finally
+          Free();
+        end
+      else if (FValues[i].ClassType <> TLapeTree_Base) then
+        LapeException(lpeInvalidCast, FValues[i].DocPos)
   end
   else
     LapeException(lpeInvalidCast, DocPos);

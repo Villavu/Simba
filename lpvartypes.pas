@@ -3675,7 +3675,7 @@ end;
 
 function TLapeStackInfo.addDeclaration(Decl: TLapeDeclaration): Integer;
 begin
-  if FDeclarations.ExistsItem(Decl) or ((Decl.Name <> '') and (not hasDeclaration(Decl.Name))) then
+  if FDeclarations.ExistsItem(Decl) or ((Decl.Name <> '') and hasDeclaration(Decl.Name)) then
     LapeException(lpeDuplicateDeclaration, [Decl.Name]);
   Result := FDeclarations.add(Decl);
 end;
