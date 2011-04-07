@@ -84,7 +84,7 @@ object SimbaForm: TSimbaForm
     end
     object TB_PickColour: TToolButton
       Left = 316
-      Hint = 'Pick a color'
+      Hint = 'Pick a colour'
       Top = 2
       Caption = 'TB_PickColour'
       ImageIndex = 0
@@ -395,10 +395,10 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 67
+        EditLabel.Left = 66
         EditLabel.Height = 18
         EditLabel.Top = 10
-        EditLabel.Width = 34
+        EditLabel.Width = 35
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -411,9 +411,9 @@ object SimbaForm: TSimbaForm
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 22
+        Height = 19
         Top = 7
-        Width = 97
+        Width = 93
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
