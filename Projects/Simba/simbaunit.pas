@@ -514,7 +514,8 @@ uses
    bitmaps,
    extensionmanagergui,
    colourhistory,
-   math;
+   math,
+   keybinder;
 
 {$ifdef mswindows}
 function ConsoleHandler( eventType : DWord) : WINBOOL;stdcall;
@@ -523,7 +524,7 @@ begin
   Result := true;
 end;
 
-
+{ Used for global callbacks on WINDOWS }
 function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam;
   lParam: LParam): LRESULT stdcall;
 begin
@@ -533,6 +534,14 @@ begin
     Result := 0;
   end else
     Result := Windows.CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
+end;
+
+{$else}
+{$WARNING This will probably not work if people don't have libkeybinder installed. Perhaps ship it with Simba? }
+{ Used for global callbacks on LINUX }
+procedure keybinder_callback(keystring: PChar; user_data: PtrUInt); cdecl;
+begin
+  SimbaForm.ActionStopScript.Execute;
 end;
 
 {$endif}
@@ -2257,14 +2266,24 @@ begin
 
   {$ifdef MSWindows}
   ConsoleVisible := True;
+
+  { Bind CTRL+ALT+S to Script stop }
   PrevWndProc := Windows.WNDPROC(GetWindowLong(self.handle,GWL_WNDPROC));
   SetWindowLong(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback));
   if not RegisterHotkey(Self.Handle,0,MOD_CONTROL or MOD_ALT,VK_S) then
-    mDebugLn('Unable to register ctrl + alt + s as global hotkey');
+    mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
   {$else}
-  TT_Console.Visible:= false;
+  TT_Console.Visible:= False;
+
+  { Bind CTRL+ALT+S to Script stop }
+  keybinder_init(); { Initialise keybinder }
+
+  { Bind keys }
+  if not keybinder_bind(PChar('<Ctrl><Alt>S'), @keybinder_callback, PtrUInt(0)) then
+    mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
   {$endif}
-  InitmDebug;
+
+  InitmDebug; { Perhaps we need to place this before our mDebugLines?? }
 
   Self.OnScriptStart:= @ScriptStartEvent;
 
