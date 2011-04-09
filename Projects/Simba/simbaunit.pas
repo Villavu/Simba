@@ -2111,7 +2111,7 @@ end;
 
 procedure TSimbaForm.MenuItemHandbookClick(Sender: TObject);
 begin
-  OpenURL('http://docs.wizzup.org/simba/');
+  OpenURL('http://docs.villavu.com/simba/');
 end;
 
 procedure TSimbaForm.MenuItemColourHistoryClick(Sender: TObject);
