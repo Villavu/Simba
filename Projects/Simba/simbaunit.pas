@@ -18,7 +18,7 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    Simba/GUI for the Mufasa Macro Library
+    Simba: GUI for the Mufasa Macro Library
 }
 unit SimbaUnit;
 
@@ -30,20 +30,31 @@ unit SimbaUnit;
 interface
 
 uses
-  {$ifdef linux}cthreads,cmem,{$endif}Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  {$IFDEF LINUX}cthreads, cmem, heaptrc,{$ENDIF}
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas,
-  //Client,
+
   MufasaTypes,
-  mmlpsthread,synedittypes,
+  mmlpsthread, // Code to use the interpreters in threads.
+  synedittypes,
+
   {$IFDEF MSWINDOWS} os_windows, windows,{$ENDIF} //For ColorPicker etc.
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
-  colourpicker, framescript, windowselector, lcltype, ActnList,
+
+  colourpicker, windowselector, // We need these for the Colour Picker and Window Selector
+
+  framescript, lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,mmisc,
   stringutil,mufasatypesutil,mufasabase,  v_ideCodeParser,
   about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
-  extensionmanager, settingssandbox, v_ideCodeInsight, CastaliaPasLexTypes,
-  CastaliaSimplePasPar, v_AutoCompleteForm, PSDump, settings, updater;
+  extensionmanager, settingssandbox,
+
+  v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
+  CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
+  PSDump,
+
+  settings, updater;
 
 const
   SimbaVersion = 820;
@@ -503,10 +514,13 @@ var
   {$endif}
   CurrentSyncInfo : TSyncInfo;//We need this for SafeCallThread
 
+
+
+
 implementation
 uses
    lclintf,
-   syncobjs, // for the critical sections
+   syncobjs, // for the critical sections / mutexes
    debugimage,
    files,
    InterfaceBase,
@@ -516,6 +530,9 @@ uses
    colourhistory,
    math,
    keybinder;
+
+
+
 
 {$ifdef mswindows}
 function ConsoleHandler( eventType : DWord) : WINBOOL;stdcall;
