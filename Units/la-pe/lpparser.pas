@@ -36,6 +36,7 @@ type
     tk_kw_Else,
     tk_kw_End,
     tk_kw_Except,
+    tk_kw_External,
     tk_kw_Finally,
     tk_kw_For,
     tk_kw_Forward,
@@ -46,6 +47,7 @@ type
     tk_kw_Overload,
     tk_kw_Override,
     tk_kw_Packed,
+    tk_kw_Private,
     tk_kw_Procedure,
     tk_kw_Program,
     tk_kw_Record,
@@ -230,7 +232,7 @@ const
   ParserToken_Symbols = [tk_sym_BracketClose..tk_sym_SemiColon];
   ParserToken_Types = [tk_typ_Float..tk_typ_Char];
 
-  Lape_Keywords: array[0..41] of TLapeKeyword = (
+  Lape_Keywords: array[0..43] of TLapeKeyword = (
       (Keyword: 'AND';          Token: tk_op_AND),
       (Keyword: 'DIV';          Token: tk_op_DIV),
       (Keyword: 'IN';           Token: tk_op_IN),
@@ -250,6 +252,7 @@ const
       (Keyword: 'ELSE';         Token: tk_kw_Else),
       (Keyword: 'END';          Token: tk_kw_End),
       (Keyword: 'EXCEPT';       Token: tk_kw_Except),
+      (Keyword: 'EXTERNAL';     Token: tk_kw_External),
       (Keyword: 'FINALLY';      Token: tk_kw_Finally),
       (Keyword: 'FOR';          Token: tk_kw_For),
       (Keyword: 'FORWARD';      Token: tk_kw_Forward),
@@ -260,6 +263,7 @@ const
       (Keyword: 'OVERLOAD';     Token: tk_kw_Overload),
       (Keyword: 'OVERRIDE';     Token: tk_kw_Override),
       (Keyword: 'PACKED';       Token: tk_kw_Packed),
+      (Keyword: 'PRIVATE';      Token: tk_kw_Private),
       (Keyword: 'PROCEDURE';    Token: tk_kw_Procedure),
       (Keyword: 'PROGRAM';      Token: tk_kw_Program),
       (Keyword: 'RECORD';       Token: tk_kw_Record),
@@ -966,7 +970,7 @@ begin
     NextNoJunk();
   Result := FTok;
   if (FTok <> Token) then
-    LapeException(lpeExpectedOther, [LapeTokenToString(FTok), LapeTokenToString(Token)], DocPos);
+    LapeException(lpeExpectedOther, [TokString, LapeTokenToString(Token)], DocPos);
   if NextAfter then
     NextNoJunk();
 end;

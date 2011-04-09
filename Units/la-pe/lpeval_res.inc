@@ -2802,6 +2802,8 @@ Arr[op_cmp_LessThan][ltPointer][ltPointer] := ltEvalBool;
 Arr[op_cmp_LessThanOrEqual][ltPointer][ltPointer] := ltEvalBool;
 Arr[op_cmp_NotEqual][ltPointer][ltPointer] := ltEvalBool;
 Arr[op_Assign][ltPointer][ltPointer] := ltPointer;
+Arr[op_Assign][ltPointer][ltImportedMethod] := ltPointer;
+Arr[op_Assign][ltPointer][ltScriptMethod] := ltPointer;
 
 Arr[op_Plus][ltPointer][ltUInt8] := ltPointer;
 Arr[op_Plus][ltPointer][ltInt8] := ltPointer;
@@ -2820,6 +2822,12 @@ Arr[op_Minus][ltPointer][ltUInt32] := ltPointer;
 Arr[op_Minus][ltPointer][ltInt32] := ltPointer;
 Arr[op_Minus][ltPointer][ltUInt64] := ltPointer;
 Arr[op_Minus][ltPointer][ltInt64] := ltPointer;
+
+//Method
+Arr[op_Assign][ltImportedMethod][ltPointer] := ltImportedMethod;
+Arr[op_Assign][ltImportedMethod][ltImportedMethod] := ltImportedMethod;
+Arr[op_Assign][ltScriptMethod][ltPointer] := ltScriptMethod;
+Arr[op_Assign][ltScriptMethod][ltScriptMethod] := ltScriptMethod;
 
 //Set
 //Small

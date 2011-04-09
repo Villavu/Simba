@@ -9,6 +9,7 @@
 
 case opCode(opCodeTypeP(Code)^) of
   ocNone: Break;
+  ocIsInternal: DoCheckInternal();
   ocInitStackLen: DoInitStackLen();
   ocInitVarLen: DoInitVarLen();
   ocInitStack: DoInitStack();

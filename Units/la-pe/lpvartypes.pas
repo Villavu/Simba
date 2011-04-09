@@ -136,11 +136,12 @@ type
     function getAsString: lpString; virtual;
   public
     constructor Create(ABaseType: ELapeBaseType; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    function VarToString(v: Pointer): lpString; virtual;
-    function VarToInt(v: Pointer): Int64; virtual;
+    function CreateCopy: TLapeType; virtual;
     function Equals(Other: TLapeType; ContextOnly: Boolean = True): Boolean; reintroduce; virtual;
     function CompatibleWith(Other: TLapeType): Boolean; virtual;
-    function CreateCopy: TLapeType; virtual;
+
+    function VarToString(v: Pointer): lpString; virtual;
+    function VarToInt(v: Pointer): Int64; virtual;
 
     function NewGlobalVarP(Ptr: Pointer = nil; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
     function NewGlobalVarStr(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
@@ -149,6 +150,9 @@ type
 	{$ENDIF}
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual; abstract;
     function NewGlobalVarTok(Parser: TLapeTokenizerBase; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
+
+    function CanHaveChild: Boolean; virtual;
+    function HasChild(n: lpString): Boolean; virtual;
 
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; overload; virtual;
     function EvalRes(Op: EOperator; Right: TLapeGlobalVar): TLapeType; overload; virtual;
@@ -255,9 +259,9 @@ type
     function getAsString: lpString; override;
   public
     constructor Create(ARange: TLapeRange; ACompiler: TLapeCompilerBase; AVarType: TLapeType; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
 
+    function VarToString(v: Pointer): lpString; override;
     function NewGlobalVar(Value: Int64 = 0; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
 
@@ -274,12 +278,13 @@ type
   public
     FreeMemberMap: Boolean;
     constructor Create(ACompiler: TLapeCompilerBase; AMemberMap: TEnumMap; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function CreateCopy: TLapeType; override;
     destructor Destroy; override;
+
     function addMember(Value: Int16; AName: lpString): Int16; overload; virtual;
     function addMember(AName: lpString): Int16; overload; virtual;
 
     function VarToString(v: Pointer): lpString; override;
-    function CreateCopy: TLapeType; override;
     function NewGlobalVar(Value: Int64 = 0; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
 
@@ -292,13 +297,12 @@ type
   end;
 
   TLapeType_Boolean = class(TLapeType_Enum)
-  public
-    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-  end;
+    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
   TLapeType_Bool = class(TLapeType_SubRange)
   public
     constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function CreateCopy: TLapeType; override;
     destructor Destroy; override;
 
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
@@ -307,19 +311,13 @@ type
   end;
 
   TLapeType_ByteBool = class(TLapeType_Bool)
-  public
-    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-  end;
+    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
   TLapeType_WordBool = class(TLapeType_Bool)
-  public
-    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-  end;
+    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
   TLapeType_LongBool = class(TLapeType_Bool)
-  public
-    constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-  end;
+    public constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual; end;
 
   {$IFDEF Lape_SmallCode}
   TLapeType_EvalBool = TLapeType_Boolean;
@@ -334,9 +332,9 @@ type
     function getAsString: lpString; override;
   public
     constructor Create(ARange: TLapeType_SubRange; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
 
+    function VarToString(v: Pointer): lpString; override;
     function NewGlobalVar(Values: array of UInt8; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
 
@@ -350,10 +348,10 @@ type
     function getAsString: lpString; override;
   public
     constructor Create(ACompiler: TLapeCompilerBase; PointerType: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    function Equals(Other: TLapeType; ContextOnly: Boolean = True): Boolean; override;
-    function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
+    function Equals(Other: TLapeType; ContextOnly: Boolean = True): Boolean; override;
 
+    function VarToString(v: Pointer): lpString; override;
     function NewGlobalVar(Ptr: Pointer = nil; AName: lpString = ''; ADocPos: PDocPos = nil; AsValue: Boolean = True): TLapeGlobalVar; virtual;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
 
@@ -370,8 +368,8 @@ type
     function getAsString: lpString; override;
   public
     constructor Create(ArrayType: TLapeType; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
+    function VarToString(v: Pointer): lpString; override;
 
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
     function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
@@ -387,8 +385,9 @@ type
     function getAsString: lpString; override;
   public
     constructor Create(ARange: TLapeRange; ArrayType: TLapeType; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
+
+    function VarToString(v: Pointer): lpString; override;
     function NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; reintroduce; virtual;
 
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
@@ -427,12 +426,11 @@ type
     function getAsString: lpString; override;
   public
     constructor Create(ACompiler: TLapeCompilerBase; ASize: UInt8 = High(UInt8); AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    function VarToString(v: Pointer): lpString; override;
 
+    function VarToString(v: Pointer): lpString; override;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
     function NewGlobalVar(Str: ShortString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; reintroduce; overload; virtual;
 
-    function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
     function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
     function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
   end;
@@ -450,12 +448,12 @@ type
   public
     FreeFieldMap: Boolean;
     constructor Create(ACompiler: TLapeCompilerBase; AFieldMap: TRecordFieldMap; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    destructor Destroy; override;
-    procedure addField(FieldType: TLapeType; AName: lpString; Alignment: Byte = 1); virtual;
-
-    function Equals(Other: TLapeType; ContextOnly: Boolean = True): Boolean; override;
-    function VarToString(v: Pointer): lpString; override;
     function CreateCopy: TLapeType; override;
+    destructor Destroy; override;
+    function Equals(Other: TLapeType; ContextOnly: Boolean = True): Boolean; override;
+
+    procedure addField(FieldType: TLapeType; AName: lpString; Alignment: Byte = 1); virtual;
+    function VarToString(v: Pointer): lpString; override;
     function NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
 
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
@@ -488,15 +486,18 @@ type
 
     constructor Create(ACompiler: TLapeCompilerBase; AParams: TLapeParameterList; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; overload; virtual;
     constructor Create(ACompiler: TLapeCompilerBase; AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType = nil; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; overload; virtual;
-    destructor Destroy; override;
-
-    function Equals(Other: TLapeType; ContextOnly: Boolean = True): Boolean; override;
     function CreateCopy: TLapeType; override;
-    procedure addParam(p: TLapeParameter); virtual;
+    destructor Destroy; override;
+    function Equals(Other: TLapeType; ContextOnly: Boolean = True): Boolean; override;
 
+    procedure addParam(p: TLapeParameter); virtual;
     procedure setImported(v: TLapeGlobalVar; isImported: Boolean); virtual;
     function NewGlobalVar(Ptr: Pointer = nil; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
     function NewGlobalVar(CodePos: TCodePos; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
+
+    function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
+    function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
+    function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
 
     property Params: TLapeParameterList read FParams;
     property ParamSize: Integer read getParamSize;
@@ -509,17 +510,18 @@ type
   public
     FreeMethods: Boolean;
     constructor Create(ACompiler: TLapeCompilerBase; AMethods: TLapeDeclarationList; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function CreateCopy: TLapeType; override;
     destructor Destroy; override;
 
-    function CreateCopy: TLapeType; override;
-    function NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
     procedure addMethod(AMethod: TLapeGlobalVar); virtual;
     function getMethod(AType: TLapeType_Method): TLapeGlobalVar; overload; virtual;
     function getMethod(AParams: TLapeTypeArray; AResult: TLapeType = nil): TLapeGlobalVar; overload; virtual;
+    function NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
 
     property Methods: TLapeDeclarationList read FMethods;
   end;
 
+  TLapeWithList = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeType>;
   TLapeStackInfo = class(TLapeBaseClass)
   protected
     FDeclarations: TLapeDeclCollection;
@@ -541,6 +543,7 @@ type
     destructor Destroy; override;
 
     function getDeclaration(Name: lpString): TLapeDeclaration; virtual;
+    function hasDeclaration(Name: lpString): Boolean; virtual;
     function getTempVar(VarType: TLapeType; Lock: Integer = 1): TLapeStackTempVar; virtual;
     function addDeclaration(Decl: TLapeDeclaration): Integer; virtual;
     function addVar(StackVar: TLapeStackVar): TLapeStackVar; overload; virtual;
@@ -568,12 +571,12 @@ type
     function _InvokeImportedFunc(AMemPos, AResPos: TResVar; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer; overload;
     function _InvokeImportedFunc(AMemPos, AResPos: TResVar; AParamSize: UInt16; Pos: PDocPos = nil): Integer; overload;
 
-    //function _JmpIf(Target: UInt32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
-    //function _JmpIf(Target: UInt32; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
-    function _JmpRIf(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
-    function _JmpRIf(Jmp: Int32; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
-    function _JmpRIfNot(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
-    function _JmpRIfNot(Jmp: Int32; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
+    //function _JmpIf(Target: TCodePos; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
+    //function _JmpIf(Target: TCodePos; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
+    function _JmpRIf(Jmp: TCodeOffset; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
+    function _JmpRIf(Jmp: TCodeOffset; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
+    function _JmpRIfNot(Jmp: TCodeOffset; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
+    function _JmpRIfNot(Jmp: TCodeOffset; Cond: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
 
     function _Eval(AProc: TLapeEvalProc; Dest, Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer; overload; virtual;
     function _Eval(AProc: TLapeEvalProc; Dest, Left, Right: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
@@ -624,6 +627,8 @@ type
     function getPointerType(PType: TLapeType): TLapeType_Pointer; overload; virtual;
     function getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration; overload; virtual;
     function getDeclaration(Name: lpString; LocalOnly: Boolean = False): TLapeDeclaration; overload; virtual;
+    function hasDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): Boolean; overload; virtual;
+    function hasDeclaration(Name: lpString; LocalOnly: Boolean = False): Boolean; overload; virtual;
 
     property StackInfo: TLapeStackInfo read FStackInfo;
     property BaseTypes: TLapeBaseTypes read FBaseTypes;
@@ -1066,12 +1071,33 @@ begin
   Result := NewGlobalVarStr(Parser.TokString, AName, ADocPos);
 end;
 
+function TLapeType.CanHaveChild: Boolean;
+begin
+  Result := FBaseType in LapeStructTypes;
+end;
+
+function TLapeType.HasChild(n: lpString): Boolean;
+var
+  s: TLapeGlobalVar;
+begin
+  if (not CanHaveChild()) or (FCompiler = nil) then
+    Exit(False);
+  s := FCompiler.getBaseType(ltString).NewGlobalVarStr(n);
+  try
+    Result := EvalRes(op_Dot, s) <> nil;
+  finally
+    s.Free();
+  end;
+end;
+
 function TLapeType.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
 begin
   Assert(FCompiler <> nil);
 
   if (Op = op_Addr) then
     Result := FCompiler.getPointerType(Self)
+  else if (Op = op_Assign) and (Right <> nil) and (getEvalRes(Op, FBaseType, Right.BaseType) <> ltUnknown) then
+    Result := Self
   else if (Right = nil) then
     Result := FCompiler.getBaseType(getEvalRes(Op, FBaseType, ltUnknown))
   else
@@ -1196,7 +1222,7 @@ var
   var
     a, b: TResVar;
   begin
-    if Left.VarType.Equals(Right.VarType) or
+    if Left.VarType.Equals(Right.VarType, False) or
        (DoRight and (not Left.VarType.CompatibleWith(Right.VarType))) or
        ((not DoRight) and (not Right.VarType.CompatibleWith(Left.VarType)))
     then
@@ -1255,6 +1281,16 @@ begin
 
   Result.VarType := EvalRes(Op, Right.VarType);
   getDestVar(Dest, Result, Op, FCompiler);
+
+  {
+  Write(Left.VarType.AsString, ' ', LapeOperatorToString(op), ' ');
+  if (Right.VarType <> nil) then
+    Write(Right.VarType.AsString, ' ');
+  if (Result.VarType <> nil) then
+    WriteLn('-> ', Result.VarType.AsString)
+  else
+    WriteLn('-> ?');
+  }
 
   if (Right.VarType = nil) then
     p := getEvalProc(Op, FBaseType, ltUnknown)
@@ -1900,6 +1936,15 @@ destructor TLapeType_Bool.Destroy;
 begin
   FVarType.Free();
   inherited;
+end;
+
+function TLapeType_Bool.CreateCopy: TLapeType;
+type TLapeClassType = class of TLapeType_Bool;
+begin
+  Result := TLapeClassType(Self.ClassType).Create(FCompiler, Name, @DocPos);
+  Result.FBaseType := FBaseType;
+  TLapeType_Bool(Result).FRange := FRange;
+  TLapeType_Bool(Result).FVarType.FSize := FVarType.FSize;
 end;
 
 function TLapeType_Bool.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
@@ -2792,13 +2837,6 @@ begin
   PShortString(Result.Ptr)^ := Str;
 end;
 
-function TLapeType_ShortString.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
-begin
-  Result := inherited;
-  if (Result <> nil) and (Result.BaseType = ltShortString) and (Op = op_Assign) then
-    Result := Self;
-end;
-
 function TLapeType_ShortString.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
 var
   p: TLapeEvalProc;
@@ -3200,11 +3238,7 @@ end;
 function TLapeType_Method.getSize: Integer;
 begin
   if (FSize = 0) then
-  begin
-    FSize := LapeTypeSize[ltScriptMethod];
-    if (LapeTypeSize[ltImportedMethod] > FSize) then
-      FSize := LapeTypeSize[ltImportedMethod];
-  end;
+    FSize := LapeTypeSize[ltImportedMethod];
   Result := inherited;
 end;
 
@@ -3272,7 +3306,7 @@ constructor TLapeType_Method.Create(ACompiler: TLapeCompilerBase; AParams: TLape
 const
   NullPar: TLapeParameter = (ParType: lptNormal; VarType: nil; Default: nil);
 begin
-  inherited Create(ltUnknown, ACompiler, AName, ADocPos);
+  inherited Create(ltPointer, ACompiler, AName, ADocPos);
 
   FreeParams := (AParams = nil);
   if (AParams = nil) then
@@ -3358,6 +3392,52 @@ begin
   Result := NewGlobalVarP(nil, AName, ADocPos);
   setImported(Result, False);
   PCodePos(Result.Ptr)^ := CodePos;
+end;
+
+function TLapeType_Method.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType;
+begin
+  if (FBaseType = ltPointer) and (Op = op_Assign) and (Right <> nil) and ((Right.BaseType = ltPointer) or Equals(Right)) then
+    Result := Self
+  else
+    Result := inherited;
+end;
+
+function TLapeType_Method.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
+var
+  t: TLapeType;
+begin
+  if (FBaseType = ltPointer) and (Op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) and ((Right.VarType.BaseType = ltPointer) or Equals(Right.VarType)) then
+    try
+      FBaseType := ltImportedMethod;
+      t := Right.FVarType;
+      if (t.BaseType = ltPointer) then
+        Right.FVarType := Self;
+      Result := inherited;
+    finally
+      FBaseType := ltPointer;
+      Right.FVarType := t;
+    end
+  else
+    Result := inherited;
+end;
+
+function TLapeType_Method.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
+var
+  t: TLapeType;
+begin
+  if (FBaseType = ltPointer) and (Op = op_Assign) and (Right.VarType <> nil) and ((Right.VarType.BaseType = ltPointer) or Equals(Right.VarType)) then
+    try
+      FBaseType := ltImportedMethod;
+      t := Right.VarType;
+      if (t.BaseType = ltPointer) then
+        Right.VarType := Self;
+      Result := inherited;
+    finally
+      FBaseType := ltPointer;
+      Right.VarType := t;
+    end
+  else
+    Result := inherited;
 end;
 
 constructor TLapeType_OverloadedMethod.Create(ACompiler: TLapeCompilerBase; AMethods: TLapeDeclarationList; AName: lpString = ''; ADocPos: PDocPos = nil);
@@ -3567,6 +3647,11 @@ begin
   Result := nil;
 end;
 
+function TLapeStackInfo.hasDeclaration(Name: lpString): Boolean;
+begin
+  Result := getDeclaration(Name) <> nil;
+end;
+
 function TLapeStackInfo.getTempVar(VarType: TLapeType; Lock: Integer = 1): TLapeStackTempVar;
 var
   i: Integer;
@@ -3590,7 +3675,7 @@ end;
 
 function TLapeStackInfo.addDeclaration(Decl: TLapeDeclaration): Integer;
 begin
-  if FDeclarations.ExistsItem(Decl) or ((Decl.Name <> '') and (getDeclaration(Decl.Name) <> nil)) then
+  if FDeclarations.ExistsItem(Decl) or ((Decl.Name <> '') and hasDeclaration(Decl.Name)) then
     LapeException(lpeDuplicateDeclaration, [Decl.Name]);
   Result := FDeclarations.add(Decl);
 end;
@@ -3807,7 +3892,7 @@ begin
 end;
 
 {
-function TLapeCodeEmitter._JmpIf(Target: UInt32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpIf(Target: TCodePos; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
   EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
@@ -3886,7 +3971,7 @@ begin
     LapeException(lpeInvalidEvaluation);
 end;
 
-function TLapeCodeEmitter._JmpIf(Target: UInt32; Cond: TResVar; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpIf(Target: TCodePos; Cond: TResVar; Pos: PDocPos = nil): Integer;
 var o: Integer;
 begin
   o := -1;
@@ -3894,7 +3979,7 @@ begin
 end;
 }
 
-function TLapeCodeEmitter._JmpRIf(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpRIf(Jmp: TCodeOffset; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
   EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
@@ -3973,14 +4058,14 @@ begin
     LapeException(lpeInvalidEvaluation);
 end;
 
-function TLapeCodeEmitter._JmpRIf(Jmp: Int32; Cond: TResVar; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpRIf(Jmp: TCodeOffset; Cond: TResVar; Pos: PDocPos = nil): Integer;
 var o: Integer;
 begin
   o := -1;
   Result := _JmpRIf(Jmp, Cond, o, Pos);
 end;
 
-function TLapeCodeEmitter._JmpRIfNot(Jmp: Int32; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpRIfNot(Jmp: TCodeOffset; Cond: TResVar; var Offset: Integer; Pos: PDocPos = nil): Integer;
 type
   EMyMemoryPos = (mmpNone, mmpPtr, mmpVar, mmpStk, mmpPVar, mmpPStk);
 
@@ -4059,7 +4144,7 @@ begin
     LapeException(lpeInvalidEvaluation);
 end;
 
-function TLapeCodeEmitter._JmpRIfNot(Jmp: Int32; Cond: TResVar; Pos: PDocPos = nil): Integer;
+function TLapeCodeEmitter._JmpRIfNot(Jmp: TCodeOffset; Cond: TResVar; Pos: PDocPos = nil): Integer;
 var o: Integer;
 begin
   o := -1;
@@ -4423,31 +4508,47 @@ end;
 
 function TLapeCompilerBase.getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration;
 var
-  s: TLapeStackInfo;
   a: TLapeDeclArray;
 begin
-  s := AStackInfo;
-  //while (s <> nil) do
-  if (s <> nil) then
+  if (AStackInfo <> nil) then
   begin
-    Result := s.getDeclaration(Name);
+    Result := AStackInfo.getDeclaration(Name);
     if (Result <> nil) or LocalOnly then
       Exit;
-    //s := s.Owner;
   end;
 
   a := GlobalDeclarations.getByName(Name);
   if (Length(a) > 1) then
     LapeException(lpeDuplicateDeclaration, [Name])
   else if (Length(a) > 0) and (a[0] <> nil) then
-    Exit(a[0]);
-
-  Result := getBaseType(Name);
+    Result := a[0]
+  else
+    Result := getBaseType(Name);
 end;
 
 function TLapeCompilerBase.getDeclaration(Name: lpString; LocalOnly: Boolean = False): TLapeDeclaration;
 begin
   Result := getDeclaration(Name, FStackInfo, LocalOnly);
+end;
+
+function TLapeCompilerBase.hasDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): Boolean;
+begin
+  if (AStackInfo <> nil) then
+  begin
+    Result := AStackInfo.hasDeclaration(Name);
+    if Result or LocalOnly then
+      Exit;
+  end;
+
+  if (Length(GlobalDeclarations.getByName(Name)) > 0) then
+    Result := True
+  else
+    Result := getBaseType(Name) <> nil;
+end;
+
+function TLapeCompilerBase.hasDeclaration(Name: lpString; LocalOnly: Boolean = False): Boolean;
+begin
+  Result := hasDeclaration(Name, FStackInfo, LocalOnly);
 end;
 
 end.

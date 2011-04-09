@@ -52,6 +52,7 @@ resourcestring
   lpeInvalidForward = 'Forwarded declaration "%s" not resolved';
   lpeInvalidIndex = 'Invalid index "%s"';
   lpeInvalidIterator = 'Variable cannot be used for iteration';
+  lpeInvalidJump = 'Invalid jump';
   lpeInvalidRange = 'Expression is not a valid range';
   lpeInvalidValueForType = 'Invalid value for type "%s"';
   lpeLostClosingParenthesis = 'Found closing parenthesis without matching opening parenthesis';

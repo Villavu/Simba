@@ -18,6 +18,7 @@ uses
 type
   opCode = (
     ocNone,
+    ocIsInternal,                                              //IsInternal
     ocInitStackLen,                                            //InitStackLen TStackOffset
     ocInitVarLen,                                              //InitVarLen TStackOffset
     ocInitStack,                                               //InitStack TStackOffset
@@ -98,7 +99,9 @@ const
 
 procedure _LapeHigh(Params: PParamArray; Result: Pointer);
 procedure _LapeLength(Params: PParamArray; Result: Pointer);
-procedure _LapeStrLen(Params: PParamArray; Result: Pointer);
+procedure _LapeAStrLen(Params: PParamArray; Result: Pointer);
+procedure _LapeWStrLen(Params: PParamArray; Result: Pointer);
+procedure _LapeUStrLen(Params: PParamArray; Result: Pointer);
 procedure RunCode(Code: PByte); {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 implementation
@@ -116,9 +119,19 @@ begin
   PInt32(Result)^ := Length(PCodeArray(Params^[0])^);
 end;
 
-procedure _LapeStrLen(Params: PParamArray; Result: Pointer);
+procedure _LapeAStrLen(Params: PParamArray; Result: Pointer);
 begin
-  PInt32(Result)^ := Length(PlpString(Params^[0])^);
+  PInt32(Result)^ := Length(PAnsiString(Params^[0])^);
+end;
+
+procedure _LapeWStrLen(Params: PParamArray; Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PWideString(Params^[0])^);
+end;
+
+procedure _LapeUStrLen(Params: PParamArray; Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PUnicodeString(Params^[0])^);
 end;
 
 procedure RunCode(Code: PByte);
@@ -145,6 +158,8 @@ var
 
   procedure JumpTo(const Target: TCodePos); {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
+    if (Target = 0) then
+      LapeException(lpeInvalidJump);
     Code := PByte(PtrUInt(CodeBase) + Target);
   end;
 
@@ -198,6 +213,13 @@ var
       SetLength(VarStack, VarStackLen + (VarStackSize div 2));
     {$ENDIF}
     Move(Stack[StackPos], VarStack[VarStackPos], Size);
+  end;
+
+  procedure DoCheckInternal; {$IFDEF Lape_Inline}inline;{$ENDIF}
+  begin
+    PEvalBool(@Stack[StackPos - SizeOf(EvalBool)])^ := opCodeTypeP(PtrUInt(CodeBase) + PtrUInt(PCodePos(@Stack[StackPos - SizeOf(Pointer)])^))^ = opCodeType(ocIncTry);
+    Inc(StackPos, SizeOf(EvalBool) - SizeOf(Pointer));
+    Inc(Code, ocSize);
   end;
 
   procedure DoInitStackLen; {$IFDEF Lape_Inline}inline;{$ENDIF}

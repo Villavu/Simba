@@ -2772,6 +2772,7 @@ procedure lpePointer_LT_Pointer(const Dest, Left, Right: Pointer); begin PEvalBo
 procedure lpePointer_LTEQ_Pointer(const Dest, Left, Right: Pointer); begin PEvalBool(Dest)^ := PtrInt(PPointer(Left)^) <= PtrInt(PPointer(Right)^); end;
 procedure lpePointer_NEQ_Pointer(const Dest, Left, Right: Pointer); begin PEvalBool(Dest)^ := PPointer(Left)^ <> PPointer(Right)^; end;
 procedure lpePointer_ASGN_Pointer(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := PPointer(Left)^; end;
+procedure lpePointer_ASGN_SMethod(const Dest, Left, Right: Pointer); begin PCodePos(Dest)^ := PtrUInt(PPointer(Left)^); end;
 
 procedure lpePointer_ADD_UInt8(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := Pointer(PtrUInt(PPointer(Left)^) + PUInt8(Right)^); end;
 procedure lpePointer_ADD_Int8(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := Pointer(PtrInt(PPointer(Left)^) + PInt8(Right)^); end;
@@ -2790,6 +2791,10 @@ procedure lpePointer_SUB_UInt32(const Dest, Left, Right: Pointer); begin PPointe
 procedure lpePointer_SUB_Int32(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := Pointer(PtrInt(PPointer(Left)^) + PInt32(Right)^); end;
 procedure lpePointer_SUB_UInt64(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := Pointer(PtrUInt(PPointer(Left)^) + PUInt64(Right)^); end;
 procedure lpePointer_SUB_Int64(const Dest, Left, Right: Pointer); begin PPointer(Dest)^ := Pointer(PtrInt(PPointer(Left)^) + PInt64(Right)^); end;
+
+//Method
+procedure lpeSMethod_ASGN_Pointer(const Dest, Left, Right: Pointer); begin PCodePos(Dest)^ := PtrUInt(PPointer(Left)^); end;
+procedure lpeSMethod_ASGN_SMethod(const Dest, Left, Right: Pointer); begin PCodePos(Dest)^ := PCodePos(Left)^; end;
 
 //Set
 //small set

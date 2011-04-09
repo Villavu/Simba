@@ -2804,6 +2804,8 @@ Arr[op_cmp_LessThan][ltPointer][ltPointer] := @lpePointer_LT_Pointer;
 Arr[op_cmp_LessThanOrEqual][ltPointer][ltPointer] := @lpePointer_LTEQ_Pointer;
 Arr[op_cmp_NotEqual][ltPointer][ltPointer] := @lpePointer_NEQ_Pointer;
 Arr[op_Assign][ltPointer][ltPointer] := @lpePointer_ASGN_Pointer;
+Arr[op_Assign][ltPointer][ltImportedMethod] := Arr[op_Assign][ltPointer][ltPointer];
+Arr[op_Assign][ltPointer][ltScriptMethod] := @lpePointer_ASGN_SMethod;
 
 Arr[op_Plus][ltPointer][ltUInt8] := @lpePointer_ADD_UInt8;
 Arr[op_Plus][ltPointer][ltInt8] := @lpePointer_ADD_Int8;
@@ -2822,6 +2824,12 @@ Arr[op_Minus][ltPointer][ltUInt32] := @lpePointer_SUB_UInt32;
 Arr[op_Minus][ltPointer][ltInt32] := @lpePointer_SUB_Int32;
 Arr[op_Minus][ltPointer][ltUInt64] := @lpePointer_SUB_UInt64;
 Arr[op_Minus][ltPointer][ltInt64] := @lpePointer_SUB_Int64;
+
+//Method
+Arr[op_Assign][ltImportedMethod][ltPointer] := Arr[op_Assign][ltPointer][ltPointer];
+Arr[op_Assign][ltImportedMethod][ltImportedMethod] := Arr[op_Assign][ltPointer][ltPointer];
+Arr[op_Assign][ltScriptMethod][ltPointer] := @lpeSMethod_ASGN_Pointer;
+Arr[op_Assign][ltScriptMethod][ltScriptMethod] := @lpeSMethod_ASGN_SMethod;
 
 //Set
 //small set

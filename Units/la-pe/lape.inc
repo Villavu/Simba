@@ -11,7 +11,7 @@
 
 //Change {*} to runtime settings
 
-{.$DEFINE Lape_AlwaysInitialize}   {*}   //Always initialize (local) variables to 0/nil (slower, safer)
+{$DEFINE Lape_AlwaysInitialize}   {*}   //Always initialize (local) variables to 0/nil (slower, safer)
 {.$DEFINE Lape_CaseSensitive}      {*}   //Case sentive in script
 {$DEFINE Lape_DoubleKeywordsCache}      //Create a double cache for keywords to speed up parsing (more memory, faster)
 {$DEFINE Lape_EmitPos}                  //Emit source position when compiling (more memory)
@@ -27,14 +27,3 @@
 {$DEFINE Lape_UnlimitedStackSize}       //Increase stack size when needed at runtime (less memory, slower)
 {$DEFINE Lape_UnlimitedTryStackSize}    //Increase trystack size when needed at runtime (less memory, slower)
 {$DEFINE Lape_UnlimitedVarStackSize}    //Increase varstack size when needed at runtime (less memory, slower)
-
-{$IFDEF FPC}
-  {$IFNDEF Lape_SmallCode}
-    {$CODEALIGN proc=16}
-    {$CODEALIGN jump=16}
-    {$CODEALIGN loop=16}
-    {$CODEALIGN constmin=16}
-    {$CODEALIGN varmin=16}
-    {$CODEALIGN localmin=16}
-  {$ENDIF}
-{$ENDIF}

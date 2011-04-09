@@ -128,6 +128,13 @@ type
     function isConstant: Boolean; override;
   end;
 
+  TLapeTree_InternalMethod_IsScriptMethod = class(TLapeTree_InternalMethod)
+    function isConstant: Boolean; override;
+    function resType: TLapeType; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
   TLapeTree_InternalMethod_FlowStatement = class(TLapeTree_InternalMethod)
   public
     function isConstant: Boolean; override;
@@ -723,12 +730,19 @@ begin
     t := TLapeType_Set(ToType).Range
   else if (ToType is TLapeType_DynArray) then
     t := TLapeType_DynArray(ToType).PType;
-  if (t = nil) then
+  if (t = nil) xor (ToType is TLapeType_Record) then
     Exit(False);
 
   for i := 0 to FValues.Count - 1 do
   begin
-    if (FValues[i] is TLapeTree_OpenArray) then
+    if (FValues[i].ClassType = TLapeTree_Base) then
+      Continue
+    else if (ToType is TLapeType_Record) then
+      t := TLapeType_Record(ToType).FieldMap.ItemsI[i].FieldType;
+
+    if (t = nil) then
+      Exit(False)
+    else if (FValues[i] is TLapeTree_OpenArray) then
       TLapeTree_OpenArray(FValues[i]).ToType := t;
 
     if (FValues[i] is TLapeTree_ExprBase) and t.CompatibleWith(TLapeTree_ExprBase(FValues[i]).resType()) then
@@ -748,7 +762,9 @@ begin
   if (not canCast()) then
     Exit(False);
   for i := 0 to FValues.Count - 1 do
-    if (FValues[i] is TLapeTree_ExprBase) and TLapeTree_ExprBase(FValues[i]).isConstant() then
+    if (FValues[i].ClassType = TLapeTree_Base) then
+      {nothing}
+    else if (FValues[i] is TLapeTree_ExprBase) and TLapeTree_ExprBase(FValues[i]).isConstant() then
       {nothing}
     else if (FValues[i] is TLapeTree_Range) and TLapeTree_Range(FValues[i]).Lo.isConstant() and TLapeTree_Range(FValues[i]).Hi.isConstant() then
       {nothing}
@@ -789,7 +805,9 @@ begin
 
       for i := 0 to r.Hi do
       begin
-        if (FValues[i] is TLapeTree_Range) and (TLapeTree_Range(FValues[i]).Hi <> nil) then
+        if (FValues[i].ClassType = TLapeTree_Base) then
+          Continue
+        else if (FValues[i] is TLapeTree_Range) and (TLapeTree_Range(FValues[i]).Hi <> nil) then
         begin
           t := TLapeTree_Range(FValues[i]).Hi.resType();
           if (t = nil) or (not (t is TLapeType_SubRange)) or ((Result <> nil) and (not t.CompatibleWith(Result))) then
@@ -838,12 +856,15 @@ begin
 
   Result := ToType.NewGlobalVarP();
   v := nil;
+  r := nil;
 
   try
     if (ToType is TLapeType_Set) then
     begin
       for i := 0 to FValues.Count - 1 do
-        if (FValues[i] is TLapeTree_ExprBase) then
+        if (FValues[i].ClassType = TLapeTree_Base) then
+          LapeException(lpeInvalidCast, FValues[i].DocPos)
+        else if (FValues[i] is TLapeTree_ExprBase) then
         begin
           r := Result;
           Result := ToType.EvalConst(op_Plus, r, TLapeTree_ExprBase(FValues[i]).Evaluate());
@@ -871,11 +892,13 @@ begin
 
       for i := 0 to FValues.Count - 1 do
       begin
-        if (FValues[i] is TLapeTree_ExprBase) then
+        if (FValues[i].ClassType = TLapeTree_Base) then
+          LapeException(lpeInvalidCast, FValues[i].DocPos)
+        else if (FValues[i] is TLapeTree_ExprBase) then
         try
           try
             v := ToType.EvalConst(op_Index, Result, counter);
-            v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate())
+            v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate());
           except on E: lpException do
             LapeException(E.Message, FValues[i].DocPos);
           end;
@@ -907,10 +930,34 @@ begin
           LapeException(lpeInvalidCast, FValues[i].DocPos);
         Inc(tmp);
       end;
-    finally
-      counter.Free();
+
       if (tmp <> TLapeType_StaticArray(ToType).Range.Hi - TLapeType_StaticArray(ToType).Range.Lo + 1) then
         LapeException(lpeInvalidRange, DocPos);
+    finally
+      counter.Free();
+    end
+    else if (ToType is TLapeType_Record) then
+    begin
+      if (FValues.Count > TLapeType_Record(ToType).FieldMap.Count) then
+        LapeException(lpeInvalidRange, DocPos);
+      for i := 0 to FValues.Count - 1 do
+        if (FValues[i] is TLapeTree_ExprBase) then
+        try
+          r := FCompiler.getBaseType(ltString).NewGlobalVarStr(TLapeType_Record(ToType).FieldMap.Index[i]);
+          try
+            v := ToType.EvalConst(op_Dot, Result, r);
+            v.VarType.EvalConst(op_Assign, v, TLapeTree_ExprBase(FValues[i]).Evaluate());
+          except on E: lpException do
+            LapeException(E.Message, FValues[i].DocPos);
+          end;
+        finally
+          if (v <> nil) then
+            FreeAndNil(v);
+          if (r <> nil) then
+            FreeAndNil(r);
+        end
+        else if (FValues[i].ClassType <> TLapeTree_Base) then
+          LapeException(lpeInvalidCast, FValues[i].DocPos);
     end
     else
       LapeException(lpeInvalidCast, DocPos);
@@ -949,7 +996,9 @@ begin
   if (ToType is TLapeType_Set) then
   begin
     for i := FValues.Count - 1 downto 0 do
-      if (FValues[i] is TLapeTree_ExprBase) then
+      if (FValues[i].ClassType = TLapeTree_Base) then
+        LapeException(lpeInvalidCast, FValues[i].DocPos)
+      else if (FValues[i] is TLapeTree_ExprBase) then
         with TLapeTree_Operator.Create(op_Plus, FCompiler, @FValues[i].DocPos) do
         try
           Dest := Result;
@@ -1013,6 +1062,29 @@ begin
       finally
         Free();
       end;
+  end
+  else if (ToType is TLapeType_Record) then
+  begin
+    if (FValues.Count > TLapeType_Record(ToType).FieldMap.Count) then
+      LapeException(lpeInvalidRange, DocPos);
+
+    for i := FValues.Count - 1 downto 0 do
+      if (FValues[i] is TLapeTree_ExprBase) then
+        with TLapeTree_Operator.Create(op_Assign, FCompiler, @FValues[i].DocPos) do
+        try
+          Left := TLapeTree_Operator.Create(op_Dot, FCompiler, @FValues[i].DocPos);
+          with TLapeTree_Operator(Left) do
+          begin
+            Left := TLapeTree_ResVar.Create(Result, FCompiler, @FValues[i].DocPos);
+            Right := TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltString).NewGlobalVarStr(TLapeType_Record(ToType).FieldMap.Index[i]))), FCompiler, @FValues[i].DocPos);
+          end;
+          Right := TLapeTree_ExprBase(FValues[i]);
+          Compile(Offset);
+        finally
+          Free();
+        end
+      else if (FValues[i].ClassType <> TLapeTree_Base) then
+        LapeException(lpeInvalidCast, FValues[i].DocPos)
   end
   else
     LapeException(lpeInvalidCast, DocPos);
@@ -1131,7 +1203,7 @@ begin
 
     if (t <> nil) and (t is TLapeType_OverloadedMethod) then
       t := getVarType(TLapeType_OverloadedMethod(t).getMethod(getParamTypes()));
-    if (t = nil) or (not (t.BaseType in [ltScriptMethod, ltImportedMethod])) then
+    if (t = nil) or (not (t is TLapeType_Method)) then
       Result := nil
     else
       Result := TLapeType_Method(t).Res;
@@ -1242,8 +1314,8 @@ begin
       f := TLapeType_OverloadedMethod(f.VarType).getMethod(getParamTypes());
       if (f = nil) then
         LapeException(lpeNoOverloadedMethod, [getParamTypesStr()], FIdent.DocPos);
-    end
-    else if (f.Ptr = nil) or (not (f.VarType.BaseType in [ltImportedMethod])) then
+    end;
+    if (f.Ptr = nil) or (f.VarType.BaseType <> ltImportedMethod) then
       LapeException(lpeCannotInvoke, FIdent.DocPos);
 
     Result := DoImportedMethod(f);
@@ -1314,7 +1386,8 @@ var
     end;
 
   begin
-    Assert(a.VarType.BaseType = ltScriptMethod);
+    Assert(a.VarType is TLapeType_Method);
+    Assert(a.VarType.BaseType in [ltUnknown, ltScriptMethod]);
     Assert(Length(c) = TLapeType_Method(a.VarType).Params.Count);
     Result := NullResVar;
     e := NullResVar;
@@ -1391,7 +1464,8 @@ var
     i: Integer;
     b, e, tmp: TResVar;
   begin
-    Assert(a.VarType.BaseType = ltImportedMethod);
+    Assert(a.VarType is TLapeType_Method);
+    Assert(a.VarType.BaseType in [ltUnknown, ltImportedMethod]);
     Assert(Length(c) = TLapeType_Method(a.VarType).Params.Count);
     Result := NullResVar;
     e := NullResVar;
@@ -1454,6 +1528,35 @@ var
     end;
   end;
 
+  function DoCombiMethod(a: TResVar; c: TResVarArray): TResVar;
+  var
+    o_if, o_else, i: Integer;
+    b, d, e: TResVar;
+    cc: TResVarArray;
+  begin
+    with TLapeTree_InternalMethod_IsScriptMethod.Create(FCompiler, @DocPos) do
+    try
+      addParam(TLapeTree_ResVar.Create(a, FCompiler, @DocPos));
+      b := Compile(Offset);
+    finally
+      Free();
+    end;
+
+    cc := Copy(c);
+    o_if := FCompiler.Emitter._JmpRIfNot(0, b, Offset, @DocPos);
+    e := DoScriptMethod(a, cc);
+    d := FDest;
+    FDest := e;
+    for i := 0 to FParams.Count - 1 do
+      setNullResVar(c[i], 1);
+
+    o_else := FCompiler.Emitter._JmpR(0, Offset, @DocPos);
+    FCompiler.Emitter._JmpRIfNot(Offset - o_if, b, o_if, @DocPos);
+    Result := DoImportedMethod(a, c);
+    FCompiler.Emitter._JmpR(Offset - o_else, o_else, @DocPos);
+    FDest := d;
+  end;
+
 begin
   Result := NullResVar;
   Assert(FIdent <> nil);
@@ -1469,8 +1572,8 @@ begin
       a := getResVar(TLapeType_OverloadedMethod(a.VarType).getMethod(getParamTypes(), FDest.VarType));
       if (a.VarType = nil) then
         LapeException(lpeNoOverloadedMethod, [getParamTypesStr()], FIdent.DocPos);
-    end
-    else if (a.VarType = nil) or (not (a.VarType.BaseType in [ltScriptMethod, ltImportedMethod])) then
+    end;
+    if (a.VarType = nil) or (not (a.VarType is TLapeType_Method)) then
       LapeException(lpeCannotInvoke, FIdent.DocPos);
 
     with TLapeType_Method(a.VarType) do
@@ -1506,8 +1609,10 @@ begin
 
       if (a.VarType.BaseType = ltScriptMethod) then
         Result := DoScriptMethod(a, c)
+      else if (a.VarType.BaseType = ltImportedMethod) then
+        Result := DoImportedMethod(a, c)
       else
-        Result := DoImportedMethod(a, c);
+        Result := DoCombiMethod(a, c);
     end;
 
     setNullResVar(a, 1);
@@ -1524,6 +1629,46 @@ end;
 function TLapeTree_InternalMethod.isConstant: Boolean;
 begin
   Result := (FParams.Count = 1) and (FParams[0] <> nil) and (FParams[0].ClassType <> TLapeTree_ExprBase) and FParams[0].isConstant();
+end;
+
+function TLapeTree_InternalMethod_IsScriptMethod.isConstant: Boolean;
+begin
+  Result := False;
+end;
+
+function TLapeTree_InternalMethod_IsScriptMethod.resType: TLapeType;
+begin
+  Result := FCompiler.getBaseType(ltEvalBool);
+end;
+
+function TLapeTree_InternalMethod_IsScriptMethod.Evaluate: TLapeGlobalVar;
+begin
+  Result := nil;
+  LapeException(lpeCannotEvalConst, DocPos);
+end;
+
+function TLapeTree_InternalMethod_IsScriptMethod.Compile(var Offset: Integer): TResVar;
+var
+  e, b, c: TResVar;
+begin
+  Result := NullResVar;
+  if (FParams.Count <> 1) then
+    LapeException(lpeWrongNumberParams, [1], DocPos);
+
+  e := NullResVar;
+  c := FParams[0].Compile(Offset);
+  if (c.VarType = nil) or (not (c.VarType is TLapeType_Method)) then
+    LapeException(lpeInvalidCondition, DocPos);
+
+  b := NullResVar;
+  b.VarPos.MemPos := mpStack;
+  b.VarType := c.VarType;
+  b.VarType.Eval(op_Assign, e, b, c, Offset, @DocPos);
+  SetNullResVar(c, 1);
+
+  FCompiler.Emitter._IsInternal(Offset, @DocPos);
+  Result.VarPos.MemPos := mpStack;
+  Result.VarType := resType();
 end;
 
 function TLapeTree_InternalMethod_FlowStatement.isConstant: Boolean;
@@ -1967,10 +2112,13 @@ begin
     if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
       FDest := VarResVar;
     getDestVar(FDest, Result, op_Unknown, FCompiler);
-    if (a.VarType.BaseType in LapeStringTypes) then
-      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!strlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos)
-    else
-      FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!length') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+
+    case a.VarType.BaseType of
+      ltAnsiString: FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!astrlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+      ltWideString: FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!wstrlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+      ltUnicodeString: FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!ustrlen') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+      else FCompiler.Emitter._InvokeImportedFunc(getResVar(FCompiler.getDeclaration('!length') as TLapeVar), Result, SizeOf(Pointer), Offset, @Self.DocPos);
+    end;
   end;
 end;
 
@@ -2317,14 +2465,16 @@ destructor TLapeTree_Operator.Destroy;
 begin
   setLeft(nil);
   setRight(nil);
-
   inherited;
 end;
 
 function TLapeTree_Operator.isConstant: Boolean;
 begin
   Result := ((FLeft = nil) or (not (TLapeTree_Base(FLeft) is TLapeTree_MultiIf))) and (
-    ((FOperatorType in [op_Dot, op_Index]) and (FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and (FRight <> nil) and FRight.isConstant()) or
+    ((FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and (
+        ((FOperatorType = op_Dot)   and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltRecord, ltUnion])) or
+        ((FOperatorType = op_Index) and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltShortString, ltStaticArray]))
+      ) and (FRight <> nil) and FRight.isConstant()) or
     ((FLeft = nil) or FLeft.isConstant()) and ((FRight = nil) or FRight.isConstant())
   );
 end;

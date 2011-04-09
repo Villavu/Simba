@@ -33,9 +33,12 @@ type
   PUInt64 = ^UInt64;
   //PInt64 = ^Int64;   Already defined
 
-  {$IFNDEF FPC}
-  PtrInt = Int32;
-  PtrUInt = UInt32;
+  {$IFDEF FPC}
+  NativeInt = PtrInt;
+  NativeUInt = PtrUInt;
+  {$ELSE}
+  PtrInt = NativeInt;
+  PtrUInt = NativeUInt;
   PLongBool = ^LongBool;
   {$ENDIF}
 
@@ -62,7 +65,7 @@ type
 
   PDocPos = ^TDocPos;
   TDocPos = {$IFDEF Lape_SmallCode}packed{$ENDIF} record
-    Line, Col: UInt16;
+    Line, Col: {$IFDEF Lape_SmallCode}UInt16{$ELSE}UInt32{$ENDIF};
     FileName: lpString;
   end;
 
@@ -70,8 +73,8 @@ type
     Lo, Hi: Int64;
   end;
 
-  TCodePos = UInt32;
-  TCodeOffset = Int32;
+  TCodePos = NativeUInt;
+  TCodeOffset = NativeInt;
 
   {$IFDEF Lape_SmallCode}
   //Means Lape can only locate up to 65kb of local variables (per stackframe)
@@ -82,11 +85,11 @@ type
   TParamSize = UInt16;
   EvalBool = Boolean;
   {$ELSE}
-  TStackInc = Int32;
-  TVarStackOffset = UInt32;
-  TStackOffset = UInt32;
-  TPointerOffset = Int32;
-  TParamSize = UInt32;
+  TStackInc = NativeInt;
+  TVarStackOffset = NativeUInt;
+  TStackOffset = NativeUInt;
+  TPointerOffset = NativeInt;
+  TParamSize = NativeUInt;
   EvalBool = LongBool;
   {$ENDIF}
 
@@ -346,8 +349,12 @@ const
     SizeOf(Pointer),
     -1, -1,
     SizeOf(Pointer), -1,
-    SizeOf(TCodeOffset), SizeOf(Pointer)
+    SizeOf(TCodePos), SizeOf(Pointer)
   );
+
+  {$IF SizeOf(TCodePos) > SizeOf(Pointer)}
+    {$MESSAGE Fatal 'TCodePos should be <= Pointer for universal methods'}
+  {$IFEND}
 
   LapeIntegerTypes = [Low(LapeIntegerTypeRange)..High(LapeIntegerTypeRange)];
   LapeRealTypes = [ltSingle..ltExtended];
@@ -357,6 +364,7 @@ const
   LapeEnumTypes = [ltSmallEnum..ltLargeEnum, ltBoolean];
   LapeSetTypes = [ltSmallSet..ltLargeSet];
   LapeArrayTypes = [ltDynArray..ltStaticArray] + LapeStringTypes;
+  LapeStructTypes = [ltRecord..ltUnion];
   LapeOrdinalTypes = LapeIntegerTypes + LapeBoolTypes + LapeCharTypes + LapeEnumTypes;
   LapePointerTypes = [ltPointer, ltDynArray, ltScriptMethod, ltImportedMethod] + LapeStringTypes - [ltShortString];
   LapeStackTypes = LapeOrdinalTypes + LapeRealTypes + LapeSetTypes + [ltShortString];
