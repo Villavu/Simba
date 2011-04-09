@@ -23,14 +23,16 @@
 unit SimbaUnit;
 
 {$undef EditButtons}
-//{$define USE_RUTIS}
 {$Undef ProcessMessages} //Define this for processmessages in ThreadSafeCall
+
 {$mode objfpc}{$H+}
+
+{$I Simba.inc}
 
 interface
 
 uses
-  {$IFDEF LINUX}cthreads, cmem, heaptrc,{$ENDIF}
+  {$IFDEF LINUX}cthreads, cmem,{$ENDIF}
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas,
 
@@ -43,10 +45,12 @@ uses
 
   colourpicker, windowselector, // We need these for the Colour Picker and Window Selector
 
-  framescript, lcltype, ActnList,
+  framescript,
+
+  lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
-  SynEditMarkupHighAll, LMessages, Buttons,mmisc,
-  stringutil,mufasatypesutil,mufasabase,  v_ideCodeParser,
+  SynEditMarkupHighAll, LMessages, Buttons,
+  mmisc, stringutil,mufasatypesutil, mufasabase,  v_ideCodeParser,
   about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox,
 
@@ -62,6 +66,9 @@ const
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
   interp_CP = 2; //CPascal
+
+  { Place the shortcuts here }
+  shortcut_StopScript = '<Ctrl><Alt>S';
 
 type
 
@@ -528,18 +535,25 @@ uses
    bitmaps,
    extensionmanagergui,
    colourhistory,
-   math,
-   keybinder;
+   math
 
+   {$IFDEF LINUX_HOTKEYS}
+   ,keybinder
+   {$ENDIF}
+   ;
 
-
-
-{$ifdef mswindows}
+{ Console handler }
+{$IFDEF MSWINDOWS}
 function ConsoleHandler( eventType : DWord) : WINBOOL;stdcall;
 begin
   TThread.Synchronize(nil,@SimbaForm.Close);
   Result := true;
 end;
+{$ENDIF}
+
+{Global Hotkey Binding }
+
+{$ifdef mswindows}
 
 { Used for global callbacks on WINDOWS }
 function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam;
@@ -553,15 +567,38 @@ begin
     Result := Windows.CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
 end;
 
-{$else}
+procedure Bind_Windows_Keys;
+
+begin
+  PrevWndProc := Windows.WNDPROC(GetWindowLong(self.handle,GWL_WNDPROC));
+  SetWindowLong(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback));
+  if not RegisterHotkey(Self.Handle,0,MOD_CONTROL or MOD_ALT,VK_S) then
+    mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
+end;
+
+
+{$ELSE}
+  {$IFDEF LINUX_HOTKEYS}
 {$WARNING This will probably not work if people don't have libkeybinder installed. Perhaps ship it with Simba? }
+
 { Used for global callbacks on LINUX }
 procedure keybinder_callback(keystring: PChar; user_data: PtrUInt); cdecl;
 begin
   SimbaForm.ActionStopScript.Execute;
 end;
 
-{$endif}
+{ XXX, TODO: Pressing the stop shortcut twice (quickly) may crash Simba. }
+procedure Bind_Linux_Keys;
+begin
+  keybinder_init(); { Initialise keybinder }
+
+  { Bind keys }
+  if not keybinder_bind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0)) then
+    mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
+end;
+  {$ENDIF}
+
+{$ENDIF}
 
 var
    DebugCriticalSection: syncobjs.TCriticalSection;
@@ -2226,7 +2263,7 @@ begin
     end;
   end;
   SimbaForm.InitializeTMThread(t);
-  KillThread(t.ThreadID);
+  KillThread(t.ThreadID); { XXX: Why do we kill the thread again ? }
   if (t is TPSThread) then
   try
     a := TPSScriptExtension.Create(SimbaForm);
@@ -2281,24 +2318,20 @@ begin
   CodeCompletionForm.InsertProc := @OnCompleteCode;
   ParamHint := TParamHint.Create(self);
 
-  {$ifdef MSWindows}
+  {$IFDEF MSWindows}
   ConsoleVisible := True;
 
   { Bind CTRL+ALT+S to Script stop }
-  PrevWndProc := Windows.WNDPROC(GetWindowLong(self.handle,GWL_WNDPROC));
-  SetWindowLong(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback));
-  if not RegisterHotkey(Self.Handle,0,MOD_CONTROL or MOD_ALT,VK_S) then
-    mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
-  {$else}
+  Bind_Windows_Keys();
+
+  {$ELSE}
   TT_Console.Visible:= False;
 
   { Bind CTRL+ALT+S to Script stop }
-  keybinder_init(); { Initialise keybinder }
-
-  { Bind keys }
-  if not keybinder_bind(PChar('<Ctrl><Alt>S'), @keybinder_callback, PtrUInt(0)) then
-    mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
-  {$endif}
+    {$IFDEF LINUX_HOTKEYS}
+    Bind_Linux_Keys();
+    {$ENDIF}
+  {$ENDIF}
 
   InitmDebug; { Perhaps we need to place this before our mDebugLines?? }
 
@@ -2332,30 +2365,40 @@ begin
   Picker := TMColorPicker.Create(Manager);
   Picker.OnPick:=@PickerPick;
   Selector := TMWindowSelector.Create(Manager);
+
   { For writeln }
   SetLength(DebugStream, 0);
   DebugCriticalSection := syncobjs.TCriticalSection.Create;
-  {$ifdef mswindows}
+
+  {$ifdef mswindows}  { The Debug timer checks for new stuff to print }
   DebugTimer.Enabled:= false;
   {$endif}
+
   Application.QueueAsyncCall(@RefreshTabSender,0);
-  {$ifdef mswindows}
+
+  {$ifdef mswindows}   { Only windows can't remove files if they are in use }
   if FileExists(Application.ExeName+'_old_') then
   begin
-    mDebugLn('We still have an out-dated exe file in the dir, lets remove!');
-    mDebugLn(format('Sucesfully deleted the file? %s',[BoolToStr(DeleteFile(PChar(Application.ExeName + '_old_')),true)]));
+    mDebugLn('We still have an out-dated exe file in the dir. Lets remove!');
+    mDebugLn(format('Successfully deleted the file? %s',[BoolToStr(DeleteFile(PChar(Application.ExeName + '_old_')),true)]));
   end;
   SetConsoleCtrlHandler(@ConsoleHandler,true);
   {$endif}
+
   frmFunctionList.OnEndDock:= @frmFunctionList.FrameEndDock;
-  FirstRun := true;//Our next run is the first run.
-  HandleParameters;
+
+  FirstRun := True;//Our next run is the first run.
+
+  HandleParameters; { Handle command line parameters }
+
   TT_Update.Visible:= false;
 
   //Fill the codeinsight buffer
   FillThread.Resume;
+
   //Load the extensions
   LoadExtensions;
+
   UpdateTitle;
 
   {$IFNDEF USE_RUTIS}
@@ -2371,24 +2414,37 @@ procedure TSimbaForm.FormDestroy(Sender: TObject);
 var
   i : integer;
 begin
+  { Free the tabs }
   for i := Tabs.Count - 1 downto 0 do
     TMufasaTab(Tabs[i]).Free;
+
   for i := 0 to high(RecentFileItems) do
     RecentFileItems[i].Free;
+
   if ExtManager <> nil then
     FreeAndNil(extmanager);
-  Tabs.free;
+
+  Tabs.Free;
+
+  { Free MML Core stuff }
   Selector.Free;
   Picker.Free;
   Manager.Free;
+
+  { Free the plugins }
   PluginsGlob.Free;
+
   SetLength(DebugStream, 0);
-  RecentFiles.Free;
   DebugCriticalSection.Free;
+
+  RecentFiles.Free;
   ParamHint.Free;
+
   {$ifdef MSWindows}
   if not UnRegisterHotkey(Self.Handle,0) then
     mDebugLn('Unable to unregister ctrl + alt + s as global hotkey');
+  {$else}
+  keybinder_unbind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0));
   {$endif}
 end;
 
