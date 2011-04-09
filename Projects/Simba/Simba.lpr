@@ -29,7 +29,7 @@ program Simba;
 
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads, cmem, heaptrc,
+  cthreads, cmem, {heaptrc, }
   {$ENDIF}{$ENDIF}
   Interfaces, Forms, SimbaUnit, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform, Simbasettings,
