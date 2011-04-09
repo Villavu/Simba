@@ -576,10 +576,16 @@ begin
     mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
 end;
 
+procedure Unbind_Windows_Keys;
+begin
+  if not UnRegisterHotkey(Self.Handle,0) then
+    mDebugLn('Unable to unregister ctrl + alt + s as global hotkey');
+end;
+
 
 {$ELSE}
   {$IFDEF LINUX_HOTKEYS}
-{$WARNING This will probably not work if people don't have libkeybinder installed. Perhaps ship it with Simba? }
+  {$WARNING This will probably not work if people don't have libkeybinder installed. Perhaps ship it with Simba? }
 
 { Used for global callbacks on LINUX }
 procedure keybinder_callback(keystring: PChar; user_data: PtrUInt); cdecl;
@@ -595,6 +601,11 @@ begin
   { Bind keys }
   if not keybinder_bind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0)) then
     mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
+end;
+
+procedure Unbind_Linux_Keys;
+begin
+  keybinder_unbind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0));
 end;
   {$ENDIF}
 
@@ -2441,10 +2452,11 @@ begin
   ParamHint.Free;
 
   {$ifdef MSWindows}
-  if not UnRegisterHotkey(Self.Handle,0) then
-    mDebugLn('Unable to unregister ctrl + alt + s as global hotkey');
+  Unbind_Windows_Keys;
   {$else}
-  keybinder_unbind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0));
+  {$IFDEF LINUX_HOTKEYS}
+  Unbind_Linux_Keys;
+  {$ENDIF}
   {$endif}
 end;
 
