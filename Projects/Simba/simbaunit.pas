@@ -504,6 +504,7 @@ type
 
 const
   WindowTitle = 'Simba - %s';//Title, where %s = the place of the filename.
+
   Panel_State = 0;
   Panel_Coords = 1;
   Panel_ScriptName = 2;
@@ -553,7 +554,7 @@ end;
 
 {Global Hotkey Binding }
 
-{$ifdef mswindows}
+{$IFDEF MSWINDOWS}
 
 { Used for global callbacks on WINDOWS }
 function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam;
@@ -912,6 +913,7 @@ end;
 
 procedure TSimbaForm.TrayPopupPopup(Sender: TObject);
 begin
+  { XXX: What's up with this? }
   MenuItemHide.enabled:= SimbaForm.Visible;
   {$ifdef MSWindows}
   MenuItemShow.Enabled:= not SimbaForm.Visible;
@@ -963,11 +965,13 @@ begin
     ShowMessage('No Updates Available!');
 end;
 
+{ Clear te debug memo }
 procedure ClearDebug;
 begin
-  {$IFNDEF MSWINDOWS}
+  {$IFNDEF MSWINDOWS} { First write everything we can, then clear }
   SimbaForm.ProcessDebugStream(nil);
   {$ENDIF}
+
   TThread.Synchronize(nil,@SimbaForm.Memo1.Clear);
 end;
 
@@ -1028,7 +1032,7 @@ begin
       ScriptThread.Suspended:= True;
       ScriptState:= ss_Paused;
       {$else}
-      mDebugLn('Linux users are screwed, no pause button for u!');
+      mDebugLn('Linux does not yet support suspending threads.');
       {$endif}
     end else if ScriptState = ss_Paused then
     begin;
@@ -1065,6 +1069,8 @@ begin
     end;
   end;
 end;
+
+{ Tab management }
 
 procedure TSimbaForm.AddTab;
 var
@@ -1142,6 +1148,8 @@ begin
       if not DeleteTab(i,false,silent) then
         exit;
 end;
+
+
 
 procedure TSimbaForm.SetEditActions;
 procedure EditActions(Undo,Redo,Cut,Copy,Paste,Delete : boolean);
@@ -1294,6 +1302,9 @@ begin
   RefreshTab;
 end;
 
+{ Settings related code }
+
+{ Creates default settings }
 procedure TSimbaForm.CreateDefaultEnvironment;
 var
   PluginsPath,extensionsPath : string;
@@ -1351,6 +1362,7 @@ begin
   UpdateTimer.Interval:=25;
 end;
 
+{ Load settings }
 procedure TSimbaForm.LoadFormSettings;
 var
   str,str2 : string;
@@ -1407,6 +1419,7 @@ begin
   self.EndFormUpdate;
 end;
 
+{ Save Settings }
 procedure TSimbaForm.SaveFormSettings;
 var
   Data : TStringArray;
@@ -1418,7 +1431,7 @@ begin
     if Self.WindowState = wsMaximized then
       SetSetting('LastConfig/MainForm/State','maximized')
     else
-    begin; //Only save the form position if its non maximized.
+    begin; //Only save the form position if its not maximized.
       SetSetting('LastConfig/MainForm/State','normal');
       Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
       SetSetting('LastConfig/MainForm/Position', Implode(':',Data ));
@@ -1527,6 +1540,9 @@ begin
     RecentFileItems[len - 1-i].Caption:= ExtractFileName(RecentFiles[i]);
 end;
 
+
+{ Loads/Creates the required stuff for a script thread. }
+
 procedure TSimbaForm.InitializeTMThread(out Thread: TMThread);
 var
   AppPath : string;
@@ -1558,6 +1574,9 @@ begin
   try
     case Interpreter of
       interp_PS : Thread := TPSThread.Create(true,@CurrentSyncInfo,PluginPath);
+
+      // XXX: Rutis needs to be completely removed from Simba if it's not defined.
+      // XXX: Not just print a message that it's not supported now.
       interp_RT : {$IFDEF USE_RUTIS}Thread := TRTThread.Create(true,@CurrentSyncInfo,PluginPath){$ELSE}formWriteln('RUTIS NOT SUPPORTED') {$ENDIF};
       interp_CP : Thread := TCPThread.Create(true,@CurrentSyncInfo,PluginPath);
     end;
