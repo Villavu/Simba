@@ -32,3 +32,5 @@
 //{$DEFINE USE_LAPE} // TODO
 //{$DEFINE USE_EXTENSIONS} // TODO
 //{$DEFINE USE_CODECOMPLETION} // TODO
+
+//{$DEFINE TERMINALWRITELN} // Only used once. Remove from SimbaUnit?
