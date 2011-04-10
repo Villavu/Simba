@@ -1539,13 +1539,9 @@ begin
   dY := dY - bmpH;
   //Compiler hints
   HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
+
   CCTS := Self.CTS;
-  //We wont want HSL comparison with BMPs, right? Not for now atleast.
-  if CCTS > 1 then
-  begin
-    mDebugLn('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
-    CCTS := 1;
-  end;
+
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for yy := 0 to dY do
@@ -1676,13 +1672,8 @@ begin
   HiSpiral := (dx+1) * (dy+1) - 1;
   //Compiler hints
   HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
-  //NO HSL.
   CCTS := Self.CTS;
-  if CCTS > 1 then
-  begin
-    mDebugLn('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
-    CCTS := 1;
-  end;
+
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for i := 0 to HiSpiral do
@@ -1751,13 +1742,7 @@ begin
   HiSpiral := (dx+1) * (dy+1) - 1;
   //Compiler hints
   HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
-  //NO HSL.
   CCTS := Self.CTS;
-  if CCTS > 1 then
-  begin
-    mDebugLn('CTS > 1, putting it temporary back to 1. For this (bitmap)search');
-    CCTS := 1;
-  end;
   FoundC := 0;
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
