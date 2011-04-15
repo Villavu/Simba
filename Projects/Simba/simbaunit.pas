@@ -50,11 +50,11 @@ uses
   lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,
-  mmisc, stringutil,mufasatypesutil, mufasabase,  v_ideCodeParser,
+  mmisc, stringutil,mufasatypesutil, mufasabase,
   about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
   extensionmanager, settingssandbox,
 
-  v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
+  v_ideCodeParser, v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
   PSDump,
 
@@ -68,7 +68,13 @@ const
   interp_CP = 2; //CPascal
 
   { Place the shortcuts here }
-  shortcut_StopScript = '<Ctrl><Alt>S';
+  {$IFDEF LINUX}
+  shortcut_StartScript = '<Ctrl><Alt>R';
+  shortcut_StopScript =  '<Ctrl><Alt>S';
+  shortcut_PickColour = '<Ctrl><Alt>P';
+  {$ELSE}
+  // Windows shortcuts here
+  {$ENDIF}
 
 type
 
@@ -591,7 +597,15 @@ end;
 { Used for global callbacks on LINUX }
 procedure keybinder_callback(keystring: PChar; user_data: PtrUInt); cdecl;
 begin
-  SimbaForm.ActionStopScript.Execute;
+  writeln('Keystring: ' + keystring);
+  if keystring = shortcut_StartScript then
+    SimbaForm.ActionRunScript.Execute
+  else if keystring = shortcut_StopScript then
+    SimbaForm.ActionStopScript.Execute
+  else if keystring = shortcut_PickColour then
+    SimbaForm.ButtonPickClick(nil)
+  else
+    writeln('Unknown keystring: ', keystring)
 end;
 
 { XXX, TODO: Pressing the stop shortcut twice (quickly) may crash Simba. }
@@ -600,13 +614,19 @@ begin
   keybinder_init(); { Initialise keybinder }
 
   { Bind keys }
+  if not keybinder_bind(PChar(shortcut_StartScript), @keybinder_callback, PtrUInt(0)) then
+    mDebugLn('Unable to register '+ shortcut_StartScript + ' as global hotkey');
   if not keybinder_bind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0)) then
-    mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
+    mDebugLn('Unable to register '+ shortcut_StopScript + ' as global hotkey');
+  if not keybinder_bind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0)) then
+    mDebugLn('Unable to register '+ shortcut_PickColour + ' as global hotkey');
 end;
 
 procedure Unbind_Linux_Keys;
 begin
+  keybinder_unbind(PChar(shortcut_StartScript), @keybinder_callback, PtrUInt(0));
   keybinder_unbind(PChar(shortcut_StopScript), @keybinder_callback, PtrUInt(0));
+  keybinder_unbind(PChar(shortcut_PickColour), @keybinder_callback, PtrUInt(0));
 end;
   {$ENDIF}
 
