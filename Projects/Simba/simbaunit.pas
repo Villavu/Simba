@@ -71,15 +71,14 @@ const
   {$IFDEF LINUX}
   shortcut_StartScript = '<Ctrl><Alt>R';
   shortcut_StopScript =  '<Ctrl><Alt>S';
-  shortcut_PickColour = '<Ctrl><Alt>P';
+  shortcut_PickColour =  '<Ctrl><Alt>P';
   {$ELSE}
   shortcut_StartScriptMod = MOD_CONTROL or MOD_ALT;
   shortcut_StartScriptKey = VK_R;
-  shortcut_StopScriptMod = MOD_CONTROL or MOD_ALT;
-  shortcut_StopScriptKey = VK_S;
-  shortcut_PickColourMod = MOD_CONTROL or MOD_ALT;
-  shortcut_PickColourKey = VK_P;
-  // Windows shortcuts here
+  shortcut_StopScriptMod  = MOD_CONTROL or MOD_ALT;
+  shortcut_StopScriptKey  = VK_S;
+  shortcut_PickColourMod  = MOD_CONTROL or MOD_ALT;
+  shortcut_PickColourKey  = VK_P;
   {$ENDIF}
 
 type
