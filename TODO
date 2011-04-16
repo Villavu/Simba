@@ -1,3 +1,10 @@
-- DTM Features
-- Test scripts
-- Documentation + wiki
+-   Make Simba more ``modular'':
+    -   Fonts
+    -   Interpreters
+    -   Code completion/hints
+    -   Extensions
+    -   Interpreter system overhaul?
+
+-   Make an TAction for the Colour Picker.
+-   Portable install (needs fiddling with settings and such)
+-   --no-extensions flag for Simba.
