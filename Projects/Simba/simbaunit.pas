@@ -73,6 +73,12 @@ const
   shortcut_StopScript =  '<Ctrl><Alt>S';
   shortcut_PickColour = '<Ctrl><Alt>P';
   {$ELSE}
+  shortcut_StartScriptMod = MOD_CONTROL or MOD_ALT;
+  shortcut_StartScriptKey = VK_R;
+  shortcut_StopScriptMod = MOD_CONTROL or MOD_ALT;
+  shortcut_StopScriptKey = VK_S;
+  shortcut_PickColourMod = MOD_CONTROL or MOD_ALT;
+  shortcut_PickColourKey = VK_P;
   // Windows shortcuts here
   {$ENDIF}
 
@@ -566,9 +572,14 @@ end;
 function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam;
   lParam: LParam): LRESULT stdcall;
 begin
-  if uMsg = WM_HOTKEY then
+  if uMsg = WM_HOTKEY then //Found an hotkey!
   begin
-    SimbaForm.ActionStopScript.Execute;
+    if (lo(lParam) = shortcut_StartScriptMod) and (hi(lParam) =shortcut_StartScriptKey) then
+      SimbaForm.ActionRunScript.Execute;
+    if (lo(lParam) = shortcut_StopScriptMod) and (hi(lParam) =shortcut_StopScriptKey) then
+      SimbaForm.ActionStopScript.Execute;
+    if (lo(lParam) = shortcut_PickColourMod) and (hi(lParam) =shortcut_PickColourKey) then
+      SimbaForm.ButtonPickClick(nil);
     Result := 0;
   end else
     Result := Windows.CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
@@ -577,16 +588,23 @@ end;
 procedure Bind_Windows_Keys;
 
 begin
-  PrevWndProc := Windows.WNDPROC(GetWindowLong(self.handle,GWL_WNDPROC));
-  SetWindowLong(Self.Handle,GWL_WNDPROC,PtrInt(@WndCallback));
-  if not RegisterHotkey(Self.Handle,0,MOD_CONTROL or MOD_ALT,VK_S) then
-    mDebugLn('Unable to register Ctrl + Alt + S as global hotkey');
+  PrevWndProc := Windows.WNDPROC(GetWindowLong(SimbaForm.handle,GWL_WNDPROC));
+  SetWindowLong(SimbaForm.Handle,GWL_WNDPROC,PtrInt(@WndCallback));
+  if not RegisterHotkey(SimbaForm.Handle,0,shortcut_StartScriptMod,shortcut_StartScriptKey) then
+    mDebugLn('Unable to register start script global hotkey');
+  if not RegisterHotkey(SimbaForm.Handle,1,shortcut_StopScriptMod,shortcut_StopScriptKey) then
+    mDebugLn('Unable to register stop script global hotkey');
+  if not RegisterHotkey(SimbaForm.Handle,2,shortcut_PickColourMod,shortcut_PickColourKey) then
+    mDebugLn('Unable to register pick colour global hotkey');
 end;
 
 procedure Unbind_Windows_Keys;
+var
+  i : integer;
 begin
-  if not UnRegisterHotkey(Self.Handle,0) then
-    mDebugLn('Unable to unregister ctrl + alt + s as global hotkey');
+  for i := 0 to 2 do
+    if not UnRegisterHotkey(SimbaForm.Handle,i) then
+      mDebugLn('Unable to unregister '+ inttostr(i) + ' global hotkey');
 end;
 
 
