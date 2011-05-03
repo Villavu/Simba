@@ -236,6 +236,8 @@ type
 
    { TLPThread }
    TLPThread = class(TMThread)
+   protected
+     procedure LoadPlugin(plugidx: integer); override;
    public
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
@@ -245,6 +247,7 @@ type
      procedure Execute; override;
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+     function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
    end;
 
 
@@ -1254,6 +1257,7 @@ begin
   Parser := TLapeTokenizerString.Create('');
   Compiler := TLapeCompiler.Create(Parser);
   Compiler.OnFindFile := @OnFindFile;
+  Compiler.OnHandleDirective := @OnHandleDirective;
   Fonts := Client.MOCR.Fonts;
   with Compiler do
   begin
@@ -1278,8 +1282,6 @@ begin
     
     if (Parser <> nil) then
       Parser.Free;
-
-    psWriteLn(BoolToStr(Compiler = nil));
   except
     on E: Exception do
       psWriteln('Exception TLPThread.Destroy: ' + e.message);
@@ -1297,6 +1299,42 @@ function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TL
 begin
   Result := nil;
   FileName := IncludePath + FileName;
+end;
+
+function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+var
+  plugin_idx: integer;
+begin
+  if (Directive = 'loadlib') then
+  begin
+    if (Argument <> '') then
+    begin
+      plugin_idx := PluginsGlob.LoadPlugin(Argument);
+      if (plugin_idx >= 0) then
+      begin
+        LoadPlugin(plugin_idx);
+        Result := True;
+      end else
+        psWriteln(Format('Your DLL %s has not been found', [Argument]))
+    end else
+      psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
+  end;
+end;
+
+procedure TLPThread.LoadPlugin(plugidx: integer);
+var
+  I: integer;
+begin
+  with PluginsGlob.MPlugins[plugidx] do
+  begin
+    for i := 0 to TypesLen -1 do
+      with Types[I] do
+        Compiler.addGlobalType(TypeDef, TypeName);
+
+    for i := 0 to MethodLen - 1 do
+      with Methods[i] do
+        Compiler.addGlobalFunc(FuncStr, FuncPtr);
+  end;
 end;
 
 procedure TLPThread.Execute;
