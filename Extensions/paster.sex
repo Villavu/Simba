@@ -10,17 +10,17 @@ end;
 
 function GetVersion: string;
 begin;
-  Result := '0.4a';
+  Result := '0.5';
 end;
 
 {$IFDEF EXTENSION}
 
 var
   Paster_Menu, GetPaste_MenuItem, Private_MenuItem,
-  Browser_MenuItem, Paster_MenuItem, AltHost_Menu: TMenuItem;
-  Divider_MenuItems: array[1..2] of TMenuItem;
+  Browser_MenuItem, AltHost_Menu: TMenuItem;
+  Paster_MenuItems, Divider_MenuItems: array[1..2] of TMenuItem;
   AltHost_Menus: array[1..5] of TMenuItem;
-  AltHost_MenuItems: array[1..5] of array[1..5] of TMenuItem;
+  AltHost_MenuItems: array[1..5] of array[1..6] of TMenuItem;
 
 function EncodeString(Data: string): string;
 var
@@ -97,13 +97,13 @@ begin
   end;
 end;
 
-function PasteIt(out Data: string; HOST: string): boolean;
+function PasteIt(out Data: string; HOST, S: string): boolean;
 var
   ScriptTextEx: string;
 begin
   if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Upload this script to ' + HOST + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
   begin
-    ScriptTextEx := ScriptText;
+    ScriptTextEx := S;
 
     if (ExecRegExpr('([N|n][A|a][M|m][E|e]|[P|p][A|a][S|s]{2}|[P|p][I|i][N|n])', ScriptTextEx)) then
       if (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Would you like to mask sensitive data?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
@@ -120,13 +120,20 @@ begin
   end;
 end;
 
-procedure Paste(Host: string);
+procedure Paste(Host, S: string);
 var
   Data: string;
 begin
   if (HOST = '') then
     HOST := HOSTDef;
-  if PasteIt(Data, Host) then
+
+  if (S = '') then
+  begin
+    WriteLn('[Paster]Error: Ether your script is empty or you didn''t select any text.');
+    Exit;
+  end;
+
+  if PasteIt(Data, Host, S) then
   begin
     if (Browser_MenuItem.Checked) then
     begin
@@ -145,9 +152,9 @@ begin
   Settings.setKeyValue('DefaultHost', IntToStr(I));
   for J := 1 to 5 do
     if (J = I) then
-      AltHost_MenuItems[J][4].Checked := True
+      AltHost_MenuItems[J][5].Checked := True
     else
-      AltHost_MenuItems[J][4].Checked := False;
+      AltHost_MenuItems[J][5].Checked := False;
 end;
 
 procedure UpdateHost(I: integer);
@@ -167,7 +174,8 @@ begin
         AltHost_Menus[I].Caption := 'Host ' + IntToStr(I);
         AltHost_MenuItems[I][1].Enabled := False;
         AltHost_MenuItems[I][2].Enabled := False;
-        AltHost_MenuItems[I][4].Enabled := False;
+        AltHost_MenuItems[I][3].Enabled := False;
+        AltHost_MenuItems[I][5].Enabled := False;
         Settings.setKeyValue('Host' + IntToStr(I), 'Host ' + IntToStr(I));
         if (Settings.getKeyValueDef('DefaultHost', '1') = IntToStr(I)) then
           UpdateDefault(1);
@@ -176,7 +184,8 @@ begin
     AltHost_Menus[I].Caption := Data;
     AltHost_MenuItems[I][1].Enabled := True;
     AltHost_MenuItems[I][2].Enabled := True;
-    AltHost_MenuItems[I][4].Enabled := True;
+    AltHost_MenuItems[I][3].Enabled := True;
+    AltHost_MenuItems[I][5].Enabled := True;
     Settings.setKeyValue('Host' + IntToStr(I), Data);
   end;
 end;
@@ -190,8 +199,11 @@ begin;
     WriteLn('Sender is '#39 + TMenuItem(Sender).Name + #39'.'); //(Sender as TMenuItem).Name
   {$ENDIF}
   case Sender of
-    Paster_MenuItem: Paste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')));
+    Paster_MenuItems[1]: Paste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')), ScriptText);
+    Paster_MenuItems[2]: Paste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')), GetSelectedText);
+
     GetPaste_MenuItem: GetPaste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')));
+
     Private_MenuItem: begin
         Private_MenuItem.Checked := (not (Private_MenuItem.Checked));
         Settings.setKeyValue('Private', Lowercase(BoolToStr(Private_MenuItem.Checked)));
@@ -203,15 +215,17 @@ begin;
         {$IFDEF DEV}WriteLn('OpenBrowser = ' + Lowercase(BoolToStr(Browser_MenuItem.Checked)));{$ENDIF}
       end;
   end;
+
   for I := 1 to 5 do
-    for K := 1 to 5 do
+    for K := 1 to 6 do
       if (Sender = AltHost_MenuItems[I][K]) then
       begin
         case K of
-          1: Paste(Settings.getKeyValue('Host' + IntToStr(I)));
-          2: GetPaste(Settings.getKeyValue('Host' + IntToStr(I)));
-          4: UpdateDefault(I);
-          5: UpdateHost(I);
+          1: Paste(Settings.getKeyValue('Host' + IntToStr(I)), ScriptText);
+          2: Paste(Settings.getKeyValue('Host' + IntToStr(I)), GetSelectedText);
+          3: GetPaste(Settings.getKeyValue('Host' + IntToStr(I)));
+          5: UpdateDefault(I);
+          6: UpdateHost(I);
         end;
         Break;
       end;
@@ -228,24 +242,6 @@ begin
   Paster_Menu.Visible := False;
 end;
 
-procedure Free;
-{var
-  I, K: integer;}
-begin
-  {for I := 5 downto 1 do
-  begin
-    for K := 5 downto 1 do
-      AltHost_MenuItems[I][K].Free;
-    AltHost_Menus[I].Free;
-  end;
-  AltHost_Menu.Free;
-  Private_MenuItem.Free;
-  for I := 2 downto 1 do
-    Divider_MenuItems[I].Free;
-  Paster_MenuItem.Free;
-  Paster_Menu.Free;}
-end;
-
 procedure init;
 var
   I, K: integer;
@@ -254,14 +250,23 @@ begin;
   Paster_Menu.Caption := GetName;
   Simba_MainMenu.Items.Add(Paster_Menu);
   
-  Paster_MenuItem := TMenuItem.Create(Paster_Menu);
-  with Paster_MenuItem do
+  Paster_MenuItems[1] := TMenuItem.Create(Paster_Menu);
+  with Paster_MenuItems[1] do
   begin
     Name := 'Default_Paste';
     Caption := 'Paste It!';
     OnClick := @OnClick;
   end;
-  Paster_Menu.Add(Paster_MenuItem);
+  Paster_Menu.Add(Paster_MenuItems[1]);
+
+  Paster_MenuItems[2] := TMenuItem.Create(Paster_Menu);
+  with Paster_MenuItems[2] do
+  begin
+    Name := 'Default_PasteS';
+    Caption := 'Paste Selection!';
+    OnClick := @OnClick;
+  end;
+  Paster_Menu.Add(Paster_MenuItems[2]);
 
   GetPaste_MenuItem := TMenuItem.Create(Paster_Menu);
   with GetPaste_MenuItem do
@@ -315,7 +320,7 @@ begin;
       AltHost_Menus[I].Caption := Settings.getKeyValueDef('Host' + IntToStr(I), 'Host ' + IntToStr(I));
     AltHost_Menu.Add(AltHost_Menus[I]);
 	
-    for K := 1 to 5 do
+    for K := 1 to 6 do
     begin
       AltHost_MenuItems[I][K] := TMenuItem.Create(AltHost_Menus[I]);
       case K of
@@ -324,24 +329,30 @@ begin;
             AltHost_MenuItems[I][1].Caption := 'Paste It!';
           end;
         2: begin
-            AltHost_MenuItems[I][2].Name := 'Host' + IntToStr(I) + '_GetPaste';
-            AltHost_MenuItems[I][2].Caption := 'Get Paste!';
+            AltHost_MenuItems[I][2].Name := 'Host' + IntToStr(I) + '_PasteS';
+            AltHost_MenuItems[I][2].Caption := 'Paste Selection!';
           end;
-        3: AltHost_MenuItems[I][3].Caption := '-';
-        4: begin
-            AltHost_MenuItems[I][4].Name := 'Host' + IntToStr(I) + '_Default';
-            AltHost_MenuItems[I][4].Caption := 'Default';
-            AltHost_MenuItems[I][4].Checked := (Settings.getKeyValueDef('DefaultHost', '1') = IntToStr(I));
+        3: begin
+            AltHost_MenuItems[I][3].Name := 'Host' + IntToStr(I) + '_GetPaste';
+            AltHost_MenuItems[I][3].Caption := 'Get Paste!';
           end;
+        4: AltHost_MenuItems[I][4].Caption := '-';
         5: begin
-            AltHost_MenuItems[I][5].Name := 'Host' + IntToStr(I) + '_Update';
-            AltHost_MenuItems[I][5].Caption := 'Update Host';
+            AltHost_MenuItems[I][5].Name := 'Host' + IntToStr(I) + '_Default';
+            AltHost_MenuItems[I][5].Caption := 'Default';
+            AltHost_MenuItems[I][5].Checked := (Settings.getKeyValueDef('DefaultHost', '1') = IntToStr(I));
+          end;
+        6: begin
+            AltHost_MenuItems[I][6].Name := 'Host' + IntToStr(I) + '_Update';
+            AltHost_MenuItems[I][6].Caption := 'Update Host';
           end;
       end;
       AltHost_MenuItems[I][K].OnClick := @OnClick;
-      if ((not ((K = 3) or (K = 5))) and (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I))) then
+
+      if ((not ((K = 4) or (K = 6))) and (AltHost_Menus[I].Caption = 'Host ' + IntToStr(I))) then
         AltHost_MenuItems[I][K].Enabled := False;
-      if ((I = 1) and (K = 5)) then
+
+      if ((I = 1) and (K = 6)) then
         AltHost_MenuItems[I][K].Visible := False;
       AltHost_Menus[I].Add(AltHost_MenuItems[I][K]);
     end;
