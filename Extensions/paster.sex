@@ -317,10 +317,47 @@ begin
   Paster_Menu.Visible := False;
 end;
 
+procedure UpdateCheck;
+var
+  V, S: string;
+  I: integer;
+  SA: TStringArray;
+begin
+  if (not (Settings.isKey('Version'))) then
+    Settings.setKeyValue('Version', '-1');
+
+  V := Settings.getKeyValue('Version');
+  if (V = GetVersion) then
+    Exit;
+
+  case V of
+    '-1', '0.4a': begin
+        SetLength(SA, 2);
+        SA[1] := HOSTDef;
+        for I := 2 to 5 do
+        begin
+          S := Settings.getKeyValueDef('Host' + IntToStr(I), 'Host' + IntToStr(I));
+          if (S <> 'Host' + IntToStr(I)) then
+          begin
+            SetLength(SA, Length(SA) + 1);
+            SA[High(SA)] := S;
+          end;
+          Settings.DeleteKey('Host' + IntToStr(I));
+        end;
+        for I := 1 to High(SA) do
+          Settings.setKeyValue('Host' + IntToStr(I), SA[I]);
+      end;
+  end;
+
+  Settings.setKeyValue('Version', GetVersion);
+end;
+
 procedure Init;
 var
   I, K: integer;
 begin;
+  UpdateCheck;
+
   Paster_Menu := TMenuItem.Create(Simba_MainMenu);
   Paster_Menu.Caption := GetName;
   Simba_MainMenu.Items.Add(Paster_Menu);
