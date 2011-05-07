@@ -35,6 +35,7 @@ var
   Paster_MenuItems: array[1..2] of TMenuItem;
   Divider_MenuItems: array[1..3] of TMenuItem;
   AltHost_Menus: TAltHost_Menus;
+  AltHost_Top: integer;
 
 function EncodeString(Data: string): string;
 var
@@ -172,8 +173,11 @@ var
 begin
   Settings.setKeyValue('DefaultHost', IntToStr(Index));
   for I := 0 to High(AltHost_Menus) do
-    AltHost_Menus[I].Default_MenuItem.Checked := False;
-  AltHost_Menus[Index].Default_MenuItem.Checked := True
+    AltHost_Menus[I].Default_MenuItem.Checked := (Index = AltHost_Menus[I].Index);
+    
+  Paster_MenuItems[1].Enabled := (Settings.getKeyValueDef('DefaultHost', '-1') <> '-1');
+  Paster_MenuItems[2].Enabled := (Settings.getKeyValueDef('DefaultHost', '-1') <> '-1');
+  GetPaste_MenuItem.Enabled := (Settings.getKeyValueDef('DefaultHost', '-1') <> '-1');
 end;
 
 procedure UpdateHost(I: integer);
@@ -206,8 +210,6 @@ begin
   begin
     Index := I;
 
-    Divider_MenuItems[3].Visible := (Divider_MenuItems[3].MenuIndex > 0);
-
     Menu := TMenuItem.Create(AltHost_Menu);
     Menu.Name := 'Host_' + IntToStr(I) + '_Menu'
     Menu.Caption := Settings.getKeyValueDef('Host' + IntToStr(I), '');
@@ -215,7 +217,7 @@ begin
 
     Paste_MenuItem := TMenuItem.Create(Menu);
     Paste_MenuItem.Name := Menu.Name + '_Paste';
-    Paste_MenuItem.Caption := 'Paste';
+    Paste_MenuItem.Caption := 'Paste Script';
     Paste_MenuItem.OnClick := @OnClick;
     Menu.Add(Paste_MenuItem);
 
@@ -248,11 +250,11 @@ begin
     Update_MenuItem.OnClick := @OnClick;
     Menu.Add(Update_MenuItem);
 
-    { Delete_MenuItem := TMenuItem.Create(Menu);
+    Delete_MenuItem := TMenuItem.Create(Menu);
     Delete_MenuItem.Name := Menu.Name + '_Delete';
     Delete_MenuItem.Caption := 'Delete Host';
     Delete_MenuItem.OnClick := @OnClick;
-    Menu.Add(Delete_MenuItem); }  // This is annoying to do so lets just leave it out for now...
+    Menu.Add(Delete_MenuItem);
   end;
 end;
 
@@ -266,10 +268,10 @@ begin;
     WriteLn('Sender is '#39 + TMenuItem(Sender).Name + #39'.'); //(Sender as TMenuItem).Name
   {$ENDIF}
   case Sender of
-    Paster_MenuItems[1]: Paste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')), ScriptText);
-    Paster_MenuItems[2]: Paste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')), GetSelectedText);
+    Paster_MenuItems[1]: Paste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '-1')), ScriptText);
+    Paster_MenuItems[2]: Paste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '-1')), GetSelectedText);
 
-    GetPaste_MenuItem: GetPaste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '1')));
+    GetPaste_MenuItem: GetPaste(Settings.getKeyValue('Host' + Settings.getKeyValueDef('DefaultHost', '-1')));
 
     AltHostAdd_MenuItem: begin
       I := 1;
@@ -287,6 +289,11 @@ begin;
 
         Settings.setKeyValue('Host' + IntToStr(I), Data);
         CreateAltMenu(I);
+        Inc(AltHost_Top);
+        Divider_MenuItems[3].Visible := (Divider_MenuItems[3].MenuIndex > 0);
+        
+        if (I = 1) then
+          UpdateDefault(I);
       end;
     end;
 
@@ -308,8 +315,35 @@ begin;
         Paste_MenuItem: Paste(Settings.getKeyValue('Host' + IntToStr(Index)), ScriptText);
         PasteS_MenuItem: Paste(Settings.getKeyValue('Host' + IntToStr(Index)), GetSelectedText);
         GetPaste_MenuItem: GetPaste(Settings.getKeyValue('Host' + IntToStr(Index)));
-        Default_MenuItem: UpdateDefault(I);
+        Default_MenuItem: UpdateDefault(Index);
         Update_MenuItem: UpdateHost(I);
+        Delete_MenuItem: begin
+            if (not (MessageDlg(GetName + ' ' + GetVersion + ' Extension', 'Are you sure you would like to delete the "' + Settings.getKeyValue('Host' + IntToStr(Index)) + '" host?', mtConfirmation, [mbYes, mbCancel], 0) = mrYes)) then
+              Exit;
+              
+            if (Settings.getKeyValueDef('DefaultHost', '-1') = IntToStr(Index)) then
+              UpdateDefault(-1);
+        
+            Menu.Free;
+            
+            if (not (Index = AltHost_Top)) then
+            begin
+              for K := I to High(AltHost_Menus) - 1 do
+              begin
+                AltHost_Menus[K] := AltHost_Menus[K + 1];
+                Dec(AltHost_Menus[K].Index);
+              end;
+            
+              for K := Index to AltHost_Top - 1 do
+                Settings.setKeyValue('Host' + IntToStr(K), Settings.getKeyValue('Host' + IntToStr(K + 1)));
+              Settings.deleteKey('Host' + IntToStr(AltHost_Top));
+            end else
+              Settings.deleteKey('Host' + IntToStr(Index));
+            SetLength(AltHost_Menus, Length(AltHost_Menus) - 1);
+            Dec(AltHost_Top);
+            Divider_MenuItems[3].Visible := (Divider_MenuItems[3].MenuIndex > 0);
+            Exit;
+          end;
       end;
 end;
 
@@ -339,20 +373,23 @@ begin
 
   case V of
     '-1', '0.4a': begin
-        SetLength(SA, 2);
-        SA[1] := HOSTDef;
-        for I := 2 to 5 do
+        SetLength(SA, 1);
+        SA[0] := HOSTDef;
+        for I := 1 to 5 do
         begin
-          S := Settings.getKeyValueDef('Host' + IntToStr(I), 'Host' + IntToStr(I));
-          if (S <> 'Host' + IntToStr(I)) then
+          if (Settings.isKey('Host' + IntToStr(I))) then
           begin
-            SetLength(SA, Length(SA) + 1);
-            SA[High(SA)] := S;
+            S := Settings.getKeyValueDef('Host' + IntToStr(I), 'Host' + IntToStr(I));
+            if (S <> 'Host' + IntToStr(I)) then
+            begin
+              SetLength(SA, Length(SA) + 1);
+              SA[High(SA)] := S;
+            end;
+            Settings.DeleteKey('Host' + IntToStr(I));
           end;
-          Settings.DeleteKey('Host' + IntToStr(I));
         end;
-        for I := 1 to High(SA) do
-          Settings.setKeyValue('Host' + IntToStr(I), SA[I]);
+        for I := 0 to High(SA) do
+          Settings.setKeyValue('Host' + IntToStr(I + 1), SA[I]);
       end;
   end;
 
@@ -373,7 +410,7 @@ begin;
   with Paster_MenuItems[1] do
   begin
     Name := 'Default_Paste';
-    Caption := 'Paste It!';
+    Caption := 'Paste Script';
     OnClick := @OnClick;
   end;
   Paster_Menu.Add(Paster_MenuItems[1]);
@@ -382,7 +419,7 @@ begin;
   with Paster_MenuItems[2] do
   begin
     Name := 'Default_PasteS';
-    Caption := 'Paste Selection!';
+    Caption := 'Paste Selection';
     OnClick := @OnClick;
   end;
   Paster_Menu.Add(Paster_MenuItems[2]);
@@ -391,7 +428,7 @@ begin;
   with GetPaste_MenuItem do
   begin
     Name := 'Default_GetPaste';
-    Caption := 'Get Paste!';
+    Caption := 'Get Paste';
     OnClick := @OnClick;
   end;
   Paster_Menu.Add(GetPaste_MenuItem);
@@ -442,16 +479,24 @@ begin;
   AltHost_Menu.Add(AltHostAdd_MenuItem);
 
   if (not (Settings.IsKey('Host1'))) then
-    Settings.setKeyValue('Host1', HOSTDef);
-
-  I := 1;
-  while (Settings.IsKey('Host' + IntToStr(I))) do
   begin
-    if (Settings.GetKeyValue('Host' + IntToStr(I)) = 'Host ' + IntToStr(I)) then
-      Continue;
-    CreateAltMenu(I);
-    Inc(I);
+    if (Settings.getKeyValueDef('DefaultHost', '-1') = '-1') then
+      Settings.setKeyValue('DefaultHost', '1');
+    Settings.setKeyValue('Host1', HOSTDef);
   end;
+  
+  AltHost_Top := 1;
+  while (Settings.IsKey('Host' + IntToStr(AltHost_Top))) do
+  begin
+    if (Settings.GetKeyValue('Host' + IntToStr(AltHost_Top)) = 'Host ' + IntToStr(AltHost_Top)) then
+      Continue;
+    CreateAltMenu(AltHost_Top);
+    Inc(AltHost_Top);
+  end;
+  Dec(AltHost_Top);
+  
+  Divider_MenuItems[3].Visible := (Divider_MenuItems[3].MenuIndex > 0);
+  UpdateDefault(StrToInt(Settings.getKeyValueDef('DefaultHost', '-1')));
 end;
 {$ENDIF}
 
