@@ -10,7 +10,7 @@ end;
 
 function GetVersion: string;
 begin;
-  Result := '1.0';
+  Result := '1.0a';
 end;
 
 {$IFDEF EXTENSION}
@@ -164,7 +164,8 @@ begin
     end else
       WriteLn('Script pasted at id "' + Data + '"');
   end else
-    WriteLn(Data);
+    if (Data <> '') then
+      WriteLn(Data);
 end;
 
 procedure UpdateDefault(Index: integer);
