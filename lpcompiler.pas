@@ -105,6 +105,7 @@ type
     function ParseRepeat: TLapeTree_Repeat; virtual;
     function ParseTry: TLapeTree_Try; virtual;
     function ParseWhile: TLapeTree_While; virtual;
+    function ParseWith: TLapeTree_With; virtual;
   public
     FreeTokenizer: Boolean;
     FreeTree: Boolean;
@@ -123,6 +124,11 @@ type
     procedure CheckAfterCompile; virtual;
 
     function getDeclaration(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration; override;
+    function getDeclarationNoWith(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration; overload; virtual;
+    function getDeclarationNoWith(Name: lpString; LocalOnly: Boolean = False): TLapeDeclaration; overload; virtual;
+    function getExpression(AName: lpString; AStackInfo: TLapeStackInfo; Pos: PDocPos = nil; LocalOnly: Boolean = False): TLapeTree_ExprBase; overload; virtual;
+    function getExpression(AName: lpString; Pos: PDocPos = nil; LocalOnly: Boolean = False): TLapeTree_ExprBase; overload; virtual;
+
     function addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration; override;
     function addLocalVar(v: TLapeType; Name: lpString = ''): TLapeVar; virtual;
 
@@ -330,7 +336,7 @@ begin
 
   if (Result.Lo <> nil) and (Result.Hi <> nil) then
     VarType := Result.Hi.resType();
-  if (VarType = nil) or (not (VarType.CompatibleWith(Result.Lo.resType()))) then
+  if (VarType = nil) or (not VarType.CompatibleWith(Result.Lo.resType())) then
     LapeException(lpeInvalidRange, Node.DocPos);
 end;
 
@@ -753,7 +759,7 @@ begin
     Expect(tk_sym_SemiColon, True, False);
     isNext([tk_kw_Forward, tk_kw_Overload, tk_kw_Override]);
 
-    decl := getDeclaration(n, FStackInfo.Owner);
+    decl := getDeclarationNoWith(n, FStackInfo.Owner);
     if isExternal then
       Result := TLapeTree_Method.Create(TLapeGlobalVar(addLocalDecl(t.NewGlobalVar(nil), FStackInfo.Owner)), FStackInfo, Self, @d)
     else
@@ -808,7 +814,7 @@ begin
       end
       else
       begin
-        decl := getDeclaration(n, FStackInfo.Owner, True);
+        decl := getDeclarationNoWith(n, FStackInfo.Owner, True);
         if (decl <> nil) and (decl is TLapeGlobalVar) and (TLapeGlobalVar(decl).VarType is TLapeType_OverloadedMethod) then
         begin
           decl := TLapeType_OverloadedMethod(TLapeGlobalVar(decl).VarType).getMethod(t);
@@ -957,7 +963,7 @@ function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
     d := Tokenizer.DocPos;
 
     Expect(tk_Identifier, True, False);
-    x := TLapeType(getDeclaration(Tokenizer.TokString));
+    x := TLapeType(getDeclarationNoWith(Tokenizer.TokString));
     if ((x = nil) and (TypeForwards = nil)) or ((x <> nil) and (not (x is TLapeType))) then
       LapeException(lpeTypeExpected, Tokenizer.DocPos);
 
@@ -1147,7 +1153,7 @@ begin
     while (f.Count > 0) do
       with __LapeType_Pointer(f.ItemsI[0]) do
       begin
-        FPType := TLapeType(getDeclaration(f.Index[0]));
+        FPType := TLapeType(getDeclarationNoWith(f.Index[0]));
         if (PType = nil) then
           LapeException(lpeInvalidForward, [f.Index[0]], DocPos);
         f.Delete(0);
@@ -1274,7 +1280,7 @@ var
   VarStack: TLapeTree_NodeStack;
   OpStack: TLapeTree_OpStack;
   Precedence: Byte;
-  v: TLapeDeclaration;
+  v: TLapeTree_ExprBase;
   f: TLapeTree_Invoke;
   _LastNode: (_None, _Var, _Op);
   InExpr: Integer;
@@ -1513,14 +1519,9 @@ begin
 
         tk_Identifier:
           begin
-            v := getDeclaration(Tokenizer.TokString);
-
-            if (v <> nil) and (v is TLapeGlobalVar) then
-              PushVarStack(TLapeTree_GlobalVar.Create(TLapeGlobalVar(v), Self, getPDocPos()))
-            else if (v <> nil) and (v is TLapeVar) then
-              PushVarStack(TlapeTree_ResVar.Create(getResVar(TLapeVar(v)), Self, getPDocPos()))
-            else if (v <> nil) and (v is TLapeType) then
-              PushVarStack(TLapeTree_VarType.Create(TLapeType(v), Self, getPDocPos()))
+            v := getExpression(Tokenizer.TokString, getPDocPos());
+            if (v <> nil) then
+              PushVarStack(v)
             else if (FInternalMethodMap[Tokenizer.TokString] <> nil) then
             begin
               f := FInternalMethodMap[Tokenizer.TokString].Create(Self, getPDocPos());
@@ -1632,7 +1633,7 @@ begin
 
     if (r <> nil) and (TLapeTree_Range(Result).Hi <> nil) then
       v := TLapeTree_Range(Result).Hi.resType();
-    if (v = nil) or (not (v.CompatibleWith(r.resType()))) then
+    if (v = nil) or (not v.CompatibleWith(r.resType())) then
       LapeException(lpeInvalidRange, Tokenizer.DocPos);
   except
     if (Result <> nil) then
@@ -1647,7 +1648,7 @@ var
 begin
   Result := nil;
 
-  if isNext([tk_NULL, tk_Identifier, tk_kw_Begin, tk_kw_Case {$IFNDEF Lape_ForceBlock}, tk_kw_Const, tk_kw_Var {$ENDIF}, tk_kw_For, tk_kw_If, tk_kw_Repeat, tk_kw_While, tk_kw_Try, tk_sym_SemiColon, tk_kw_Else], t) then
+  if isNext([tk_NULL, tk_Identifier, tk_kw_Begin, tk_kw_Case {$IFNDEF Lape_ForceBlock}, tk_kw_Const, tk_kw_Var {$ENDIF}, tk_kw_For, tk_kw_If, tk_kw_Repeat, tk_kw_While, tk_kw_With, tk_kw_Try, tk_sym_SemiColon, tk_kw_Else], t) then
     case t of
       tk_Identifier: Result := ParseExpression([], False);
       tk_kw_Begin: Result := ParseBeginEnd();
@@ -1657,6 +1658,7 @@ begin
       tk_kw_If: Result := ParseIf();
       tk_kw_Repeat: Result := ParseRepeat();
       tk_kw_While: Result := ParseWhile();
+      tk_kw_With: Result := ParseWith();
       tk_kw_Try: Result := ParseTry();
     end
   else if (not (t in [tk_kw_End, tk_kw_Finally, tk_kw_Except, tk_kw_Until])) then
@@ -1894,6 +1896,38 @@ begin
   end;
 end;
 
+function TLapeCompiler.ParseWith: TLapeTree_With;
+var
+  Count: Integer;
+begin
+  //Expect(tk_kw_With, True, False);
+  Result := TLapeTree_With.Create(Self, getPDocPos());
+  Count := 0;
+
+  try
+
+    repeat
+      if (Tokenizer.Tok in [tk_kw_With, tk_sym_Comma]) then
+      begin
+        FStackInfo.addWith(Result.addWith(ParseExpression([tk_sym_Comma])));
+        Inc(Count);
+      end
+      else
+      begin
+        Expect(tk_kw_Do, False, False);
+        Break;
+      end;
+    until False;
+
+    Result.Body := ParseStatement();
+    FStackInfo.delWith(Count);
+
+  except
+    Result.Free();
+    raise;
+  end;
+end;
+
 constructor TLapeCompiler.Create(
   ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean = True;
   AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True);
@@ -2082,6 +2116,57 @@ begin
   Result := inherited;
   if (Result = nil) and LocalOnly and (AStackInfo <> nil) and (AStackInfo.Owner = nil) then
     Result := inherited getDeclaration(Name, nil, Localonly);
+end;
+
+function TLapeCompiler.getDeclarationNoWith(Name: lpString; AStackInfo: TLapeStackInfo; LocalOnly: Boolean = False): TLapeDeclaration;
+begin
+  Result := getDeclaration(Name, AStackInfo, LocalOnly);
+  if (Result is TLapeWithDeclaration) then
+    with TLapeWithDeclaration(Result).WithDeclRec do
+      try
+        if (WithVar <> nil) and (WithVar^ <> nil) and (WithVar^ is TLapeGlobalVar) and TLapeGlobalVar(WithVar^).isConstant then
+          Result := WithVar^ as TLapeGlobalVar
+        else
+          Result := nil;
+      finally
+        Free();
+      end;
+end;
+
+function TLapeCompiler.getDeclarationNoWith(Name: lpString; LocalOnly: Boolean = False): TLapeDeclaration;
+begin
+  Result := getDeclarationNoWith(Name, FStackInfo, LocalOnly);
+end;
+
+function TLapeCompiler.getExpression(AName: lpString; AStackInfo: TLapeStackInfo; Pos: PDocPos = nil; LocalOnly: Boolean = False): TLapeTree_ExprBase;
+var
+  d: TLapeDeclaration;
+begin
+  Result := nil;
+  d := getDeclaration(AName, AStackInfo, LocalOnly);
+
+  if (d <> nil) then
+    if (d is TLapeWithDeclaration) then
+      with TLapeWithDeclaration(d) do
+      try
+        Result := TLapeTree_Operator.Create(op_Dot, Self, Pos);
+        TLapeTree_Operator(Result).Left := TLapeTree_WithVar.Create(WithDeclRec, Self, Pos);
+        TLapeTree_Operator(Result).Right := TLapeTree_Field.Create(AName, Self, Pos);
+        Result := FoldConstants(Result) as TLapeTree_ExprBase;
+      finally
+        Free();
+      end
+    else if (d is TLapeGlobalVar) then
+      Result := TLapeTree_GlobalVar.Create(TLapeGlobalVar(d), Self, Pos)
+    else if (d is TLapeVar) then
+      Result := TlapeTree_ResVar.Create(getResVar(TLapeVar(d)), Self, Pos)
+    else if (d is TLapeType) then
+      Result := TLapeTree_VarType.Create(TLapeType(d), Self, Pos);
+end;
+
+function TLapeCompiler.getExpression(AName: lpString; Pos: PDocPos = nil; LocalOnly: Boolean = False): TLapeTree_ExprBase;
+begin
+  Result := getExpression(AName, FStackInfo, Pos, LocalOnly);
 end;
 
 function TLapeCompiler.addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration;

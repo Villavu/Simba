@@ -275,6 +275,20 @@ type
     property VarAsString: lpString read getVarAsString;
   end;
 
+  TLapeTree_WithVar = class(TLapeTree_ExprBase)
+  protected
+    FWithDeclRec: TLapeWithDeclRec;
+  public
+    constructor Create(AWithDeclRec: TLapeWithDeclRec; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); reintroduce; virtual;
+
+    function isConstant: Boolean; override;
+    function resType: TLapeType; override;
+    function Evaluate: TLapeGlobalVar; override;
+    function Compile(var Offset: Integer): TResVar; override;
+
+    property WithDeclRec: TLapeWithDeclRec read FWithDeclRec;
+  end;
+
   TLapeTree_VarType  = class(TLapeTree_GlobalVar)
   protected
     FVarType: TLapeType;
@@ -371,11 +385,11 @@ type
     VarDecl: TLapeVar;
     Default: TLapeTree_ExprBase;
   end;
-  TLapeVarList = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeVarDecl>;
+  TLapeVarDeclList = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeVarDecl>;
 
   TLapeTree_VarList = class(TLapeTree_Base)
   protected
-    FVars: TLapeVarList;
+    FVars: TLapeVarDeclList;
     procedure DeleteChild(Node: TLapeTree_Base); override;
   public
     constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); override;
@@ -384,7 +398,24 @@ type
     function addVar(AVar: TLapeVarDecl): Integer; virtual;
     function Compile(var Offset: Integer): TResVar; override;
 
-    property Vars: TLapeVarList read FVars;
+    property Vars: TLapeVarDeclList read FVars;
+  end;
+
+  TLapeTree_With = class(TLapeTree_Base)
+  protected
+    FWithList: TLapeExpressionList;
+    FVarList: array of TLapeVar;
+    FBody: TLapeTree_Base;
+    procedure setBody(Node: TLapeTree_Base); virtual;
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); override;
+    destructor Destroy; override;
+
+    function addWith(AWith: TLapeTree_ExprBase): TLapeWithDeclRec; virtual;
+    function Compile(var Offset: Integer): TResVar; override;
+
+    property WithList: TLapeExpressionList read FWithList;
+    property Body: TLapeTree_Base read FBody write setBody;
   end;
 
   TLapeTree_If = class(TLapeTree_Base)
@@ -526,7 +557,7 @@ type
 
 function FoldConstants(Root: TLapeTree_Base): TLapeTree_Base;
 procedure PrintTree(Root: TLapeTree_Base; Indent: Integer = 0);
-function getTempVar(Node: TLapeTree_Base; var Offset: Integer; out v: TresVar; Lock: Integer = 1): Boolean; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function getTempVar(Node: TLapeTree_Base; var Offset: Integer; out v: TResVar; Lock: Integer = 1): Boolean; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function getFlowStatement(Offset: Integer; Pos: PDocPos = nil; JumpSafe: Boolean = False): TLapeFlowStatement; {$IFDEF Lape_Inline}inline;{$ENDIF}
 
 const
@@ -603,7 +634,7 @@ begin
   end;
 end;
 
-function getTempVar(Node: TLapeTree_Base; var Offset: Integer; out v: TresVar; Lock: Integer = 1): Boolean;
+function getTempVar(Node: TLapeTree_Base; var Offset: Integer; out v: TResVar; Lock: Integer = 1): Boolean;
 begin
   if (Node is TLapeTree_DestExprBase) then
     TLapeTree_DestExprBase(Node).Dest := VarResVar;
@@ -1028,7 +1059,6 @@ begin
           Compile(Offset);
         finally
           Free();
-          c.isConstant := True;
           SetNullResVar(v, 2);
         end;
       end
@@ -2470,7 +2500,7 @@ end;
 
 function TLapeTree_Operator.isConstant: Boolean;
 begin
-  Result := ((FLeft = nil) or (not (TLapeTree_Base(FLeft) is TLapeTree_MultiIf))) and (
+  Result := ((FLeft = nil) or (not (TLapeTree_Base(FLeft) is TLapeTree_If))) and (
     ((FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and (
         ((FOperatorType = op_Dot)   and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltRecord, ltUnion])) or
         ((FOperatorType = op_Index) and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltShortString, ltStaticArray]))
@@ -2482,11 +2512,12 @@ end;
 function TLapeTree_Operator.resType: TLapeType;
 var
   l, r: TLapeType;
+  f: TLapeTree_ExprBase;
   v: TResVar;
 begin
   Result := nil;
   if (FLeft <> nil) then
-    if (TLapeTree_Base(FLeft) is TLapeTree_MultiIf) then
+    if (TLapeTree_Base(FLeft) is TLapeTree_If) then
       Exit(FCompiler.getBaseType(ltEvalBool))
     else
       l := FLeft.resType()
@@ -2513,50 +2544,82 @@ begin
   else
     Result := l.EvalRes(FOperatorType, r);
 
-  if (Result = nil) and (FOperatorType = op_IN) and (FRight <> nil) and (FRight is TLapeTree_OpenArray) then
+  if (l <> nil) and (FRight <> nil) and
+     ((Result = nil)  and ((FOperatorType = op_IN) and (FRight is TLapeTree_OpenArray)) or
+     ((Result <> nil) and (Result.BaseType in LapeBoolTypes) and (FOperatorType in [op_AND, op_OR]) and (l.BaseType in LapeBoolTypes) and (r <> nil) and (r.BaseType in LapeBoolTypes)))
+  then
   begin
-    TLapeTree_Base(FLeft) := TLapeTree_MultiIf.Create(FLeft, FRight as TLapeTree_OpenArray);
-    with TLapeTree_MultiIf(TLapeTree_Base(FLeft)) do
+    f := FLeft;
+    if (FOperatorType = op_IN) then
+      TLapeTree_Base(FLeft) := TLapeTree_MultiIf.Create(FLeft, FRight as TLapeTree_OpenArray)
+    else
+      TLapeTree_Base(FLeft) := TLapeTree_If.Create(FCompiler, @DocPos);
+
+    with TLapeTree_If(TLapeTree_Base(FLeft)) do
     begin
-      v := NullResVar;
-      v.VarType := FCompiler.getBaseType(ltEvalBool);
-      Result := v.VarType;
+      if (FOperatorType <> op_IN) then
+        Condition := f;
+
+      if (Result = nil) then
+        Result := FCompiler.getBaseType(ltEvalBool);
+      v := FCompiler.getTempStackVar(Result);
+      v.VarPos.ForceVariable := True;
 
       if (FDest.VarType <> nil) and (FDest.VarPos.MemPos <> NullResVar.VarPos.MemPos) and v.VarType.Equals(FDest.VarType) then
-        v := FDest
+      begin
+        setNullResVar(v, 1);
+        v := FDest;
+      end
       else
       begin
         FDest := NullResVar;
-        v := getResVar(FCompiler.getTempVar(ltEvalBool));
         if (v.VarPos.MemPos = mpVar) then
           v.VarPos.StackVar.isConstant := False;
       end;
 
-      Body := TLapeTree_Operator.Create(op_Assign, FCompiler, @DocPos);
-      with TLapeTree_Operator(Body) do
+      if (FOperatorType = op_AND) then
+        Body := FRight
+      else
       begin
-        Left := TLapeTree_ResVar.Create(v, FCompiler, @DocPos);
-        Right := TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(v.VarType.NewGlobalVarStr('1'))), FCompiler, @DocPos);
+        Body := TLapeTree_Operator.Create(op_Assign, FCompiler, @DocPos);
+        with TLapeTree_Operator(Body) do
+        begin
+          Left := TLapeTree_ResVar.Create(v, FCompiler, @DocPos);
+          Right := TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(v.VarType.NewGlobalVarStr('1'))), FCompiler, @DocPos);
+        end;
       end;
 
-      ElseBody := TLapeTree_Operator.Create(op_Assign, FCompiler, @DocPos);
-      with TLapeTree_Operator(ElseBody) do
+      if (FOperatorType = op_OR) then
+        ElseBody := FRight
+      else
       begin
-        Left := TLapeTree_ResVar.Create(v, FCompiler, @DocPos);
-        Right := TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(v.VarType.NewGlobalVarStr('0'))), FCompiler, @DocPos);
-     end;
+        ElseBody := TLapeTree_Operator.Create(op_Assign, FCompiler, @DocPos);
+        with TLapeTree_Operator(ElseBody) do
+        begin
+          Left := TLapeTree_ResVar.Create(v, FCompiler, @DocPos);
+          Right := TLapeTree_GlobalVar.Create(TLapeGlobalVar(FCompiler.addManagedVar(v.VarType.NewGlobalVarStr('0'))), FCompiler, @DocPos);
+        end;
+      end;
     end;
+    setRight(nil);
   end;
 end;
 
 function TLapeTree_Operator.Evaluate: TLapeGlobalVar;
 var
   l, r: TLapeGlobalVar;
+  Short: Boolean;
+
+  function canShort(t: TLapeType): Boolean;
+  begin
+    Result := (t <> nil) and (t.BaseType in LapeBoolTypes);
+  end;
+
 begin
   Result := nil;
 
   if (FLeft <> nil) then
-    if (TLapeTree_Base(FLeft) is TLapeTree_MultiIf) then
+    if (TLapeTree_Base(FLeft) is TLapeTree_If) then
       LapeException(lpeInvalidEvaluation, DocPos)
     else
       l := FLeft.Evaluate()
@@ -2566,10 +2629,17 @@ begin
   if (l <> nil) and (l.VarType <> nil) and (FRight is TLapeTree_OpenArray) then
     TLapeTree_OpenArray(FRight).ToType := l.VarType;
 
+  Short := (FOperatorType in [op_AND, op_OR]) and (l <> nil) and (FRight <> nil) and canShort(l.VarType) and canShort(FRight.resType());
+  if Short and ((FOperatorType = op_AND) xor (l.AsInteger <> 0)) then
+    Exit(l);
+
   if (FRight <> nil) then
     r := FRight.Evaluate()
   else
     r := nil;
+
+  if Short and (r <> nil) then
+    Exit(r);
 
   if (l = nil) and (r = nil) then
     LapeException(lpeInvalidEvaluation, DocPos)
@@ -2593,11 +2663,11 @@ var
   l, r: TResVar;
   DoneAssignment: Boolean;
 
-  function doMultiIf: TResVar;
+  function doIf: TResVar;
   begin
-    with TLapeTree_MultiIf(TLapeTree_Base(FLeft)) do
+    with TLapeTree_If(TLapeTree_Base(FLeft)) do
     begin
-      if (FDest.VarType <> nil) and (FDest.VarPos.MemPos <> NullResVar.VarPos.MemPos) and TLapeTree_Operator(Body).Left.resType().Equals(FDest.VarType) then
+      if (FDest.VarType <> nil) and (FDest.VarPos.MemPos <> NullResVar.VarPos.MemPos) and TLapeTree_Operator(Body).Left.resType().CompatibleWith(FDest.VarType) then
       begin
         TLapeTree_Operator(Body).Left.Free();
         TLapeTree_Operator(Body).Left := TLapeTree_ResVar.Create(FDest, FCompiler, @DocPos);
@@ -2616,14 +2686,16 @@ begin
   DoneAssignment := False;
 
   if (FLeft <> nil) then
-    if (resType() <> nil) and (TLapeTree_Base(FLeft) is TLapeTree_MultiIf) then
-      Exit(doMultiIf())
+    if (resType() <> nil) and (TLapeTree_Base(FLeft) is TLapeTree_If) then
+      Exit(doIf())
     else
     begin
       l := FLeft.Compile(Offset);
       if (FOperatorType = op_Assign) and (not isVariable(l)) then
         LapeException(lpeCannotAssign, FLeft.DocPos);
-    end;
+    end
+  else
+    l := NullResVar;
 
   if (FRight <> nil) then
   begin
@@ -2741,6 +2813,40 @@ end;
 function TLapeTree_GlobalVar.Compile(var Offset: Integer): TResVar;
 begin
   Result := getResVar(FGlobalVar);
+end;
+
+constructor TLapeTree_WithVar.Create(AWithDeclRec: TLapeWithDeclRec; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil);
+begin
+  inherited Create(ACompiler, ADocPos);
+  FWithDeclRec := AWithDeclRec;
+end;
+
+function TLapeTree_WithVar.isConstant: Boolean;
+begin
+  Result := (FWithDeclRec.WithVar <> nil) and
+    (FWithDeclRec.WithVar^ <> nil) and
+    (FWithDeclRec.WithVar^ is TLapeGlobalVar) and
+    TLapeGlobalVar(FWithDeclRec.WithVar^).isConstant;
+end;
+
+function TLapeTree_WithVar.resType: TLapeType;
+begin
+  Result := FWithDeclRec.WithType;
+end;
+
+function TLapeTree_WithVar.Evaluate: TLapeGlobalVar;
+begin
+  if isConstant then
+    Result := TLapeGlobalVar(FWithDeclRec.WithVar^)
+  else
+    Result := nil;
+end;
+
+function TLapeTree_WithVar.Compile(var Offset: Integer): TResVar;
+begin
+  if (FWithDeclRec.WithVar = nil) or (FWithDeclRec.WithVar^ = nil) then
+    LapeException(lpeInvalidWithReference, DocPos);
+  Result := getResVar(FWithDeclRec.WithVar^);
 end;
 
 constructor TLapeTree_VarType.Create(AVarType: TLapeType; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil);
@@ -2970,7 +3076,7 @@ const
   NullVar: TLapeVarDecl = (VarDecl: nil; Default: nil);
 begin
   inherited;
-  FVars := TLapeVarList.Create(NullVar);
+  FVars := TLapeVarDeclList.Create(NullVar);
 end;
 
 destructor TLapeTree_VarList.Destroy;
@@ -3018,6 +3124,97 @@ begin
       end
     else
       Inc(i);
+end;
+
+procedure TLapeTree_With.setBody(Node: TLapeTree_Base);
+begin
+  if (FBody <> nil) and (FBody <> Node) then
+    FBody.Free();
+  FBody := Node;
+  if (Node <> nil) then
+    Node.Parent := Self;
+end;
+
+constructor TLapeTree_With.Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil);
+begin
+  inherited;
+  FBody := nil;
+  FWithList := TLapeExpressionList.Create(nil);
+end;
+
+destructor TLapeTree_With.Destroy;
+var
+  i: Integer;
+begin
+  for i := FWithList.Count - 1 downto 0 do
+    if (FWithList[i] <> nil) and (FWithList[i].Parent = Self) then
+      FWithList[i].Free();
+  FreeAndNil(FWithList);
+
+  setBody(nil);
+  inherited;
+end;
+
+function TLapeTree_With.addWith(AWith: TLapeTree_ExprBase): TLapeWithDeclRec;
+var
+  i: Integer;
+begin
+  Result := NullWithDecl;
+  i := FWithList.add(AWith);
+
+  if (AWith <> nil) and (i > -1) then
+  begin
+    AWith.Parent := Self;
+    SetLength(FVarList, FWithList.Count);
+
+    if (AWith is TLapeTree_GlobalVar) and TLapeTree_GlobalVar(AWith).isConstant then
+      FVarList[i] := TLapeTree_GlobalVar(AWith).GlobalVar
+    else
+      FVarList[i] := nil;
+
+    Result.WithVar := @FVarList[i];
+    Result.WithType := AWith.resType();
+  end;
+
+  if (Result.WithType = nil) or (not (Result.WithType.BaseType in LapeStructTypes)) then
+    if (AWith <> nil) then
+      LapeException(lpeInvalidWithReference, AWith.DocPos)
+    else
+      LapeException(lpeInvalidWithReference, DocPos);
+end;
+
+function TLapeTree_With.Compile(var Offset: Integer): TResVar;
+var
+  NewStack: Boolean;
+  i: Integer;
+  c: array of TResVar;
+begin
+  Result := NullResVar;
+  Assert(FCompiler <> nil);
+
+  SetLength(c, Length(FVarList));
+  NewStack := (FCompiler.StackInfo = nil);
+  if NewStack then
+    FCompiler.IncStackInfo(True);
+
+  for i := 0 to FWithList.Count - 1 do
+    if (FVarList[i] = nil) then
+    begin
+      if (not getTempVar(FWithList[i], Offset, c[i], 2)) or (c[i].VarPos.MemPos in [mpNone, mpStack]) then
+        LapeException(lpeInvalidCondition, FWithList[i].DocPos);
+
+      FVarList[i] := c[i].VarPos.StackVar;
+      FVarList[i].isConstant := FWithList[i].isConstant();
+    end;
+
+  if (FBody <> nil) then
+    Result := FBody.Compile(Offset);
+
+  for i := 0 to High(c) do
+    setNullResVar(c[i], 2);
+
+  if NewStack then
+    FCompiler.DecStackInfo(False, True, True);
 end;
 
 procedure TLapeTree_If.setCondition(Node: TLapeTree_ExprBase);
@@ -3184,7 +3381,7 @@ var
   t: TLapeTree_ExprBase;
 begin
   Result := NullResVar;
-  Assert(FValues.Count > 0);
+  Assert((FValues.Count > 0) or (FElse <> nil));
   Assert(FCondition <> nil);
 
   a := nil;
@@ -3237,7 +3434,10 @@ begin
     t := FCondition;
     FCondition := b;
     try
-      Result := inherited;
+      if (FCondition <> nil) then
+        Result := inherited
+      else
+        Result := FElse.Compile(Offset);
     finally
       FCondition := t;
       FreeAndnil(b);
@@ -3578,10 +3778,7 @@ begin
   finally
     setCondition(nil);
     if (v <> nil) then
-    begin
-      v.isConstant := True;
-      setNullResVar(cnt, 2);
-    end
+      setNullResVar(cnt, 2)
     else
       setNullResVar(cnt, 1);
     setNullResVar(lim, 2);

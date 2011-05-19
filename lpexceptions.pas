@@ -55,6 +55,7 @@ resourcestring
   lpeInvalidJump = 'Invalid jump';
   lpeInvalidRange = 'Expression is not a valid range';
   lpeInvalidValueForType = 'Invalid value for type "%s"';
+  lpeInvalidWithReference = 'Invalid with reference';
   lpeLostClosingParenthesis = 'Found closing parenthesis without matching opening parenthesis';
   lpeLostConditional = 'Found conditional without matching opening statement';
   lpeNoDefaultForParam = 'No default value for parameter %d found';

@@ -62,6 +62,7 @@ type
     tk_kw_Until,
     tk_kw_Var,
     tk_kw_While,
+    tk_kw_With,
 
     //Operators
     //Same order as lptypes.EOperator
@@ -228,11 +229,11 @@ const
   ParserToken_FirstOperator = tk_cmp_Equal;
   ParserToken_LastOperator = tk_op_XOR;
   ParserToken_Operators = [ParserToken_FirstOperator..ParserToken_LastOperator];
-  ParserToken_Keywords = [tk_kw_Array..tk_kw_While];
+  ParserToken_Keywords = [tk_kw_Array..tk_kw_With];
   ParserToken_Symbols = [tk_sym_BracketClose..tk_sym_SemiColon];
   ParserToken_Types = [tk_typ_Float..tk_typ_Char];
 
-  Lape_Keywords: array[0..43] of TLapeKeyword = (
+  Lape_Keywords: array[0..44] of TLapeKeyword = (
       (Keyword: 'AND';          Token: tk_op_AND),
       (Keyword: 'DIV';          Token: tk_op_DIV),
       (Keyword: 'IN';           Token: tk_op_IN),
@@ -277,7 +278,8 @@ const
       (Keyword: 'UNION';        Token: tk_kw_Union),
       (Keyword: 'UNTIL';        Token: tk_kw_Until),
       (Keyword: 'VAR';          Token: tk_kw_Var),
-      (Keyword: 'WHILE';        Token: tk_kw_While)
+      (Keyword: 'WHILE';        Token: tk_kw_While),
+      (Keyword: 'WITH';         Token: tk_kw_With)
     );
 
 var

@@ -50,6 +50,7 @@ type
   end;
   TLapeParameterList = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeParameter>;
 
+  PLapeVar = ^TLapeVar;
   TLapeVar = class(TLapeDeclaration)
   protected
     FVarType: TLapeType;
@@ -521,11 +522,25 @@ type
     property Methods: TLapeDeclarationList read FMethods;
   end;
 
-  TLapeWithList = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeType>;
+  TLapeWithDeclRec = record
+    WithVar: PLapeVar;
+    WithType: TLapeType;
+  end;
+  TLapeWithDeclarationList = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeWithDeclRec>;
+
+  TLapeWithDeclaration = class(TLapeDeclaration)
+  protected
+    FWithDeclRec: TLapeWithDeclRec;
+  public
+    constructor Create(AWithDeclRec: TLapeWithDeclRec); reintroduce; virtual;
+    property WithDeclRec: TLapeWithDeclRec read FWithDeclRec;
+  end;
+
   TLapeStackInfo = class(TLapeBaseClass)
   protected
     FDeclarations: TLapeDeclCollection;
     FVarStack: TLapeVarStack;
+    FWithStack: TLapeWithDeclarationList;
 
     function getVar(Index: Integer): TLapeStackVar; virtual;
     function getCount: Integer; virtual;
@@ -549,9 +564,12 @@ type
     function addVar(StackVar: TLapeStackVar): TLapeStackVar; overload; virtual;
     function addVar(VarType: TLapeType; Name: lpString = ''): TLapeStackVar; overload; virtual;
     function addVar(ParType: ELapeParameterType; VarType: TLapeType; Name: lpString = ''): TLapeStackVar; overload; virtual;
+    function addWith(AWith: TLapeWithDeclRec): Integer; virtual;
+    procedure delWith(Count: Integer); virtual;
 
     property Declarations: TLapeDeclCollection read FDeclarations;
     property VarStack: TLapeVarStack read FVarStack;
+    property WithStack: TLapeWithDeclarationList read FWithStack;
     property Vars[Index: Integer]: TLapeStackVar read getVar; default;
     property Count: Integer read getCount;
     property TotalSize: Integer read getTotalSize;
@@ -619,6 +637,7 @@ type
     function addManagedVar(v: TLapeVar): TLapeVar; virtual;
     function addManagedType(v: TLapeType): TLapeType; virtual;
     function addStackVar(VarType: TLapeType; Name: lpString): TLapeStackVar; virtual;
+
     function getTempVar(VarType: ELapeBaseType; Lock: Integer = 1): TLapeStackTempVar; overload; virtual;
     function getTempVar(VarType: TLapeType; Lock: Integer = 1): TLapeStackTempVar; overload; virtual;
     function getTempStackVar(VarType: ELapeBaseType): TResVar; overload; virtual;
@@ -651,6 +670,8 @@ const
   NullResVar: TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpNone;  GlobalVar: nil));
   VarResVar:  TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpVar;   StackVar : nil));
   StackResVar:TResVar = (VarType: nil; VarPos: (isPointer: False; Offset: 0; MemPos: mpStack; ForceVariable: False));
+
+  NullWithDecl: TLapeWithDeclRec = (WithVar: nil; WithType: nil);
 
   Lape_RefParams = [lptOut, lptVar];
 
@@ -3547,6 +3568,12 @@ begin
     end;
 end;
 
+constructor TLapeWithDeclaration.Create(AWithDeclRec: TLapeWithDeclRec);
+begin
+  inherited Create();
+  FWithDeclRec := AWithDeclRec;
+end;
+
 function TLapeStackInfo.getVar(Index: Integer): TLapeStackVar;
 begin
   Result := FVarStack[Index];
@@ -3617,6 +3644,7 @@ begin
   Owner := AOwner;
   FDeclarations := TLapeDeclCollection.Create(nil);
   FVarStack := TLapeVarStack.Create(nil);
+  FWithStack := TLapeWithDeclarationList.Create(NullWithDecl);
   FreeVars := ManageVars;
   CodePos := -1;
 end;
@@ -3632,6 +3660,7 @@ begin
     else
       FVarStack[i].Stack := nil;
   FVarStack.Free();
+  FWithStack.Free();
 
   inherited;
 end;
@@ -3640,16 +3669,32 @@ function TLapeStackInfo.getDeclaration(Name: lpString): TLapeDeclaration;
 var
   i: Integer;
 begin
+  for i := FWithStack.Count - 1 downto 0 do
+    if (FWithStack[i].WithType <> nil) and FWithStack[i].WithType.hasChild(Name) then
+      Exit(TLapeWithDeclaration.Create(FWithStack[i]));
+
   Name := LapeCase(Name);
   for i := 0 to FDeclarations.Count - 1 do
     if (LapeCase(FDeclarations[i].Name) = Name) then
       Exit(FDeclarations[i]);
+
   Result := nil;
 end;
 
 function TLapeStackInfo.hasDeclaration(Name: lpString): Boolean;
+var
+  i: Integer;
 begin
-  Result := getDeclaration(Name) <> nil;
+  for i := FWithStack.Count - 1 downto 0 do
+    if (FWithStack[i].WithType <> nil) and FWithStack[i].WithType.hasChild(Name) then
+      Exit(True);
+
+  Name := LapeCase(Name);
+  for i := 0 to FDeclarations.Count - 1 do
+    if (LapeCase(FDeclarations[i].Name) = Name) then
+      Exit(True);
+
+  Result := False;
 end;
 
 function TLapeStackInfo.getTempVar(VarType: TLapeType; Lock: Integer = 1): TLapeStackTempVar;
@@ -3665,6 +3710,7 @@ begin
       begin
         Result := TLapeStackTempVar(FVarStack[i]);
         Result.FVarType := VarType;
+        Result.isConstant := True;
         Exit;
       end;
     Result := TLapeStackTempVar(addVar(VarType));
@@ -3700,6 +3746,19 @@ end;
 function TLapeStackInfo.addVar(ParType: ELapeParameterType; VarType: TLapeType; Name: lpString = ''): TLapeStackVar;
 begin
   Result := addVar(TLapeParameterVar.Create(ParType, VarType, nil, Name));
+end;
+
+function TLapeStackInfo.addWith(AWith: TLapeWithDeclRec): Integer;
+begin
+  Result := FWithStack.add(AWith);
+end;
+
+procedure TLapeStackInfo.delWith(Count: Integer);
+var
+  i: Integer;
+begin
+  for i := FWithStack.Count - 1 downto FWithStack.Count - Count do
+    FWithStack.Delete(i);
 end;
 
 function TLapeCodeEmitter._IncCall(ACodePos: TResVar; AParamSize: UInt16; var Offset: Integer; Pos: PDocPos = nil): Integer;
