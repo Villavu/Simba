@@ -61,12 +61,12 @@ end;
 procedure ClearEvalArr(var Arr: TLapeEvalArr);
 var
   op: EOperator;
-  t1, t2: ELapeBaseType;
+  BaseTypeLeft, BaseTypeRight: ELapeBaseType;
 begin
   for op := Low(EOperator) to High(EOperator) do
-    for t1 := Low(ELapeBaseType) to High(ELapeBaseType) do
-      for t2 := Low(ELapeBaseType) to High(ELapeBaseType) do
-        Arr[op][t1][t2] := @LapeEval_Error;
+    for BaseTypeLeft := Low(ELapeBaseType) to High(ELapeBaseType) do
+      for BaseTypeRight := Low(ELapeBaseType) to High(ELapeBaseType) do
+        Arr[op][BaseTypeLeft][BaseTypeRight] := @LapeEval_Error;
 end;
 
 procedure LoadEvalRes(var Arr: TLapeEvalRes);

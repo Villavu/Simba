@@ -236,27 +236,27 @@ var
 
   procedure DoInitStack; {$IFDEF Lape_Inline}inline;{$ENDIF}
   var
-    o: TStackOffset;
+    InitStackSize: TStackOffset;
   begin
-    o := PStackOffset(PtrUInt(Code) + ocSize)^;
+    InitStackSize := PStackOffset(PtrUInt(Code) + ocSize)^;
     {$IFDEF Lape_UnlimitedStackSize}
-    if (StackPos + o > Length(VarStack)) then
-      SetLength(Stack, StackPos + o + (StackSize div 2));
+    if (StackPos + InitStackSize > Length(VarStack)) then
+      SetLength(Stack, StackPos + InitStackSize + (StackSize div 2));
     {$ENDIF}
-    FillChar(Stack[StackPos], o, 0);
+    FillChar(Stack[StackPos], InitStackSize, 0);
     Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoGrowStack; {$IFDEF Lape_Inline}inline;{$ENDIF}
   var
-    o: TStackOffset;
+    GrowSize: TStackOffset;
   begin
-    o := PStackOffset(PtrUInt(Code) + ocSize)^;
+    GrowSize := PStackOffset(PtrUInt(Code) + ocSize)^;
     {$IFDEF Lape_UnlimitedStackSize}
-    if (StackPos + o > Length(VarStack)) then
-      SetLength(Stack, StackPos + o + (StackSize div 2));
+    if (StackPos + GrowSize > Length(VarStack)) then
+      SetLength(Stack, StackPos + GrowSize + (StackSize div 2));
     {$ENDIF}
-    Inc(StackPos, o);
+    Inc(StackPos, GrowSize);
     Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
@@ -273,16 +273,16 @@ var
 
   procedure DoExpandVarAndInit; {$IFDEF Lape_Inline}inline;{$ENDIF}
   var
-    a: Integer;
+    ExpandSize: Integer;
   begin
-    a := PStackOffset(PtrUInt(Code) + ocSize)^;
+    ExpandSize := PStackOffset(PtrUInt(Code) + ocSize)^;
     VarStackPos := VarStackLen;
-    Inc(VarStackLen, a);
+    Inc(VarStackLen, ExpandSize);
     {$IFDEF Lape_UnlimitedVarStackSize}
     if (VarStackLen > Length(VarStack)) then
       SetLength(VarStack, VarStackLen + (VarStackSize div 2));
     {$ENDIF}
-    FillChar(VarStack[VarStackPos], a, 0);
+    FillChar(VarStack[VarStackPos], ExpandSize, 0);
     Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
@@ -298,26 +298,26 @@ var
 
   procedure DoGrowVarAndInit; {$IFDEF Lape_Inline}inline;{$ENDIF}
   var
-    a, b: UInt32;
+    GrowSize, OldLen: UInt32;
   begin
-    a := PStackOffset(PtrUInt(Code) + ocSize)^;
-    b := VarStackLen;
-    Inc(VarStackLen, a);
+    GrowSize := PStackOffset(PtrUInt(Code) + ocSize)^;
+    OldLen := VarStackLen;
+    Inc(VarStackLen, GrowSize);
     {$IFDEF Lape_UnlimitedVarStackSize}
     if (VarStackLen > Length(VarStack)) then
       SetLength(VarStack, VarStackLen + (VarStackSize div 2));
     {$ENDIF}
-    FillChar(VarStack[b], a, 0);
+    FillChar(VarStack[OldLen], GrowSize, 0);
     Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
   procedure DoPopVar; {$IFDEF Lape_Inline}inline;{$ENDIF}
   var
-    a: Integer;
+    PopSize: Integer;
   begin
-    a := PStackOffset(PtrUInt(Code) + ocSize)^;
-    Dec(VarStackPos, a);
-    Dec(VarStackLen, a);
+    PopSize := PStackOffset(PtrUInt(Code) + ocSize)^;
+    Dec(VarStackPos, PopSize);
+    Dec(VarStackLen, PopSize);
     Inc(Code, SizeOf(TStackOffset) + ocSize);
   end;
 
@@ -470,7 +470,7 @@ begin
     DaLoop();
   except
     on E: Exception do
-      LapeException(lpeRuntime, [E.Message] {$IFDEF Lape_EmitPos}, PDocPos(PtrUInt(Code) + SizeOf(opCodeType))^ {$ENDIF});
+      LapeExceptionFmt(lpeRuntime, [E.Message] {$IFDEF Lape_EmitPos}, PDocPos(PtrUInt(Code) + SizeOf(opCodeType))^ {$ENDIF});
   end;
 end;
 

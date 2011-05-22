@@ -127,7 +127,7 @@ type
   TLapeParseDirective = function(Sender: TLapeTokenizerBase): Boolean of object;
   TLapeHandleDirective = function(Sender: TLapeTokenizerBase; Directive, Argument: lpString): Boolean of object;
 
-  TLapeTokenizerBase = class(TLapeBaseClass)
+  TLapeTokenizerBase = class(TLapeBaseDeclClass)
   protected
     FFileName: lpString;
     FLastTok: EParserToken;
@@ -154,7 +154,7 @@ type
     function getTokLen: Integer; virtual;
     function getCurChar: lpChar; virtual;
     procedure setPos(APos: Integer); virtual;
-    function getDocPos: TDocPos;
+    function getDocPos: TDocPos; override;
   public
     constructor Create(AFileName: lpString = ''); reintroduce; virtual;
     procedure Reset(ClearDoc: Boolean = False); virtual;
@@ -185,7 +185,6 @@ type
     property TokLen: Integer read getTokLen;
     property CurChar: lpChar read getCurChar;
     property Pos: Integer read FPos write setPos;
-    property DocPos: TDocPos read getDocPos;
     property Len: Integer read FLen;
     property InPeek: Boolean read FInPeek;
   published
@@ -282,6 +281,74 @@ const
       (Keyword: 'WITH';         Token: tk_kw_With)
     );
 
+  OperatorAssociative: array[EOperator] of EOperatorAssociative = (
+    assocNone,                          //op_Unkown
+
+    assocRight,                         //op_cmp_Equal
+    assocRight,                         //op_cmp_GreaterThan
+    assocRight,                         //op_cmp_GreaterThanOrEqual
+    assocRight,                         //op_cmp_LessThan
+    assocRight,                         //op_cmp_LessThanOrEqual
+    assocRight,                         //op_cmp_NotEqual
+
+    assocRight,                         //op_Addr
+    assocRight,                         //op_AND
+    assocRight,                         //op_Assign
+    assocLeft,                          //op_Deref
+    assocLeft,                          //op_DIV
+    assocLeft,                          //op_Divide
+    assocLeft,                          //op_Dot
+    assocRight,                         //op_IN
+    assocLeft,                          //op_Index
+    assocLeft,                          //op_Minus
+    assocLeft,                          //op_MOD
+    assocLeft,                          //op_Multiply
+    assocRight,                         //op_NOT
+    assocRight,                         //op_OR
+    assocLeft,                          //op_Plus
+    assocRight,                         //op_Power
+    assocRight,                         //op_SHL
+    assocRight,                         //op_SHR
+    assocRight,                         //op_XOR
+
+    assocRight,                         //op_UnaryMinus
+    assocRight                          //op_UnaryPlus
+  );
+
+  OperatorPrecedence: array[EOperator] of Byte = (
+    0,                                  //op_Unkown
+
+    9,                                  //op_cmp_Equal
+    8,                                  //op_cmp_GreaterThan
+    8,                                  //op_cmp_GreaterThanOrEqual
+    8,                                  //op_cmp_LessThan
+    8,                                  //op_cmp_LessThanOrEqual
+    9,                                  //op_cmp_NotEqual
+
+    2,                                  //op_Addr
+    5,                                  //op_AND
+    10,                                 //op_Assign
+    1,                                  //op_Deref
+    5,                                  //op_DIV
+    5,                                  //op_Divide
+    1,                                  //op_Dot
+    8,                                  //op_IN
+    1,                                  //op_Index
+    6,                                  //op_Minus
+    5,                                  //op_MOD
+    5,                                  //op_Multiply
+    3,                                  //op_NOT
+    6,                                  //op_OR
+    6,                                  //op_Plus
+    4,                                  //op_Power
+    7,                                  //op_SHL
+    7,                                  //op_SHR
+    5,                                  //op_XOR
+
+    3,                                  //op_UnaryMinus
+    3                                   //op_UnaryPlus
+  );
+
 var
   {$IFDEF Lape_DoubleKeywordsCache}
   Lape_KeywordsCache: array[2..10, Byte] of array of TLapeKeyword;
@@ -291,9 +358,9 @@ var
 
 function LapeTokenToString(Token: EParserToken): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function ParserTokenToOperator(Token: EParserToken): EOperator; {$IFDEF Lape_Inline}inline;{$ENDIF}
-function StrToFloatDot(s: lpString): Extended; {$IFDEF Lape_Inline}inline;{$ENDIF}
-function StrToFloatDotDef(s: lpString; Default: Extended): Extended; {$IFDEF Lape_Inline}inline;{$ENDIF}
-function DetermineIntType(s: lpString): ELapeBaseType; overload;
+function StrToFloatDot(Str: lpString): Extended; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function StrToFloatDotDef(Str: lpString; Default: Extended): Extended; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function DetermineIntType(Str: lpString): ELapeBaseType; overload;
 function DetermineIntType(i: Int64): ELapeBaseType; overload;
 
 implementation
@@ -321,76 +388,76 @@ begin
     Result := EOperator(Integer(Token) - Integer(ParserToken_FirstOperator) + 1);
 end;
 
-function StrToFloatDot(s: lpString): Extended;
+function StrToFloatDot(Str: lpString): Extended;
 begin
-  Result := StrToFloat(StringReplace(s, '.', DecimalSeparator, []));
+  Result := StrToFloat(StringReplace(Str, '.', DecimalSeparator, []));
 end;
 
-function StrToFloatDotDef(s: lpString; Default: Extended): Extended;
+function StrToFloatDotDef(Str: lpString; Default: Extended): Extended;
 begin
-  Result := StrToFloatDef(StringReplace(s, '.', DecimalSeparator, []), Default);
+  Result := StrToFloatDef(StringReplace(Str, '.', DecimalSeparator, []), Default);
 end;
 
-function DetermineIntType(s: lpString): ELapeBaseType;
+function DetermineIntType(Str: lpString): ELapeBaseType;
 
-  function PadZ(s: lpString; Len: Integer): lpString;
+  function PadZ(Str: lpString; Len: Integer): lpString;
   begin
-    if (Length(s) >= Len) then
-      Result := s
+    if (Length(Str) >= Len) then
+      Result := Str
     else
-      Result := StringOfChar('0', Len - Length(s));
+      Result := StringOfChar('0', Len - Length(Str));
   end;
 
-  function PadComp(s1, s2: lpString): Integer;
+  function PadComp(Str1, Str2: lpString): Integer;
   var
-    l1, l2: Integer;
+    Len1, Len2: Integer;
   begin
-    l1 := Length(s1);
-    if (l1 > 0) and (s1[1] = '-') then
+    Len1 := Length(Str1);
+    if (Len1 > 0) and (Str1[1] = '-') then
     begin
-      Delete(s1, 1, 1);
-      Dec(l1);
+      Delete(Str1, 1, 1);
+      Dec(Len1);
     end;
 
-    l2 := Length(s2);
-    if (l2 > 0) and (s2[1] = '-') then
+    Len2 := Length(Str2);
+    if (Len2 > 0) and (Str2[1] = '-') then
     begin
-      Delete(s2, 1, 1);
-      Dec(l2);
+      Delete(Str2, 1, 1);
+      Dec(Len2);
     end;
-    if (l2 > l1) then
-      l1 := l2;
+    if (Len2 > Len1) then
+      Len1 := Len2;
 
-    Result := CompareStr(PadZ(s1, l1), PadZ(s2, l1));
+    Result := CompareStr(PadZ(Str1, Len1), PadZ(Str2, Len1));
   end;
 
 var
   Negative: Boolean;
 begin
-  s := StringReplace(s, ' ', '', [rfReplaceAll]);
-  if (Length(s) < 1) then
+  Str := StringReplace(Str, ' ', '', [rfReplaceAll]);
+  if (Length(Str) < 1) then
     Exit(ltUnknown);
-  Negative := (s[1] = '-');
+  Negative := (Str[1] = '-');
   if Negative then
-    Delete(s, 1, 1);
-  if (Length(s) < 1) then
+    Delete(Str, 1, 1);
+  if (Length(Str) < 1) then
     Exit(ltUnknown);
 
-  if (s[1] = '0') or (((not Negative) and (PadComp(s, IntToStr(High(Int8))) <= 0)) or (Negative and (PadComp(s, IntToStr(Low(Int8))) <= 0))) then
+  if (Str[1] = '0') or (((not Negative) and (PadComp(Str, IntToStr(High(Int8))) <= 0)) or (Negative and (PadComp(Str, IntToStr(Low(Int8))) <= 0))) then
     Result := ltInt8
-  else if (not Negative) and (PadComp(s, IntToStr(High(UInt8))) <= 0) then
+  else if (not Negative) and (PadComp(Str, IntToStr(High(UInt8))) <= 0) then
     Result := ltUInt8
-  else if ((not Negative) and (PadComp(s, IntToStr(High(Int16))) <= 0)) or (Negative and (PadComp(s, IntToStr(Low(Int16))) <= 0)) then
+  else if ((not Negative) and (PadComp(Str, IntToStr(High(Int16))) <= 0)) or (Negative and (PadComp(Str, IntToStr(Low(Int16))) <= 0)) then
     Result := ltInt16
-  else if (not Negative) and (PadComp(s, IntToStr(High(UInt16))) <= 0) then
+  else if (not Negative) and (PadComp(Str, IntToStr(High(UInt16))) <= 0) then
     Result := ltUInt16
-  else if ((not Negative) and (PadComp(s, IntToStr(High(Int32))) <= 0)) or (Negative and (PadComp(s, IntToStr(Low(Int32))) <= 0)) then
+  else if ((not Negative) and (PadComp(Str, IntToStr(High(Int32))) <= 0)) or (Negative and (PadComp(Str, IntToStr(Low(Int32))) <= 0)) then
       Result := ltInt32
-  else if (not Negative) and (PadComp(s, IntToStr(High(UInt32))) <= 0) then
+  else if (not Negative) and (PadComp(Str, IntToStr(High(UInt32))) <= 0) then
     Result := ltUInt32
-  else if ((not Negative) and (PadComp(s, IntToStr(High(Int64))) <= 0)) or (Negative {and (PadComp(s, IntToStr(Low(Int64))) <= 0)}) then
+  else if ((not Negative) and (PadComp(Str, IntToStr(High(Int64))) <= 0)) or (Negative {and (PadComp(Str, IntToStr(Low(Int64))) <= 0)}) then
     Result := ltInt64
-  else {if (not Negative) and (PadComp(s, IntToStr(High(UInt64))) <= 0) then}
+  else {if (not Negative) and (PadComp(Str, IntToStr(High(UInt64))) <= 0) then}
     Result := ltUInt64
 end;
 
@@ -399,38 +466,38 @@ begin
   Result := DetermineIntType(IntToStr(i));
 end;
 
-function Lape_HashKeyword(const b: lpString): Byte;
+function Lape_HashKeyword(const Str: lpString): Byte;
 var
   i: Integer;
 begin
-  //b := UpperCase(b);
-  Result := Length(b);
-  for i := 1 to Length(b) do
-    Result := Byte(Result - 128) xor Byte((Ord(b[i]) - 65) shl ((i + 2) mod 8));
+  //Str := UpperCase(Str);
+  Result := Length(Str);
+  for i := 1 to Length(Str) do
+    Result := Byte(Result - 128) xor Byte((Ord(Str[i]) - 65) shl ((i + 2) mod 8));
 end;
 
-function Lape_IsKeyword(b: lpString; out Token: EParserToken): Boolean;
+function Lape_IsKeyword(Str: lpString; out Token: EParserToken): Boolean;
 var
   Hash: Byte;
   i: Integer;
   {$IFDEF Lape_DoubleKeywordsCache}
-  l: Integer;
+  StrLen: Integer;
   {$ENDIF}
 begin
   {$IFDEF Lape_DoubleKeywordsCache}
-  l := Length(b);
-  if (l < Low(Lape_KeywordsCache)) or (l > High(Lape_KeywordsCache)) then
+  StrLen := Length(Str);
+  if (StrLen < Low(Lape_KeywordsCache)) or (StrLen > High(Lape_KeywordsCache)) then
     Exit(False);
   {$ENDIF}
 
-  b := UpperCase(b);
-  Hash := Lape_HashKeyword(b);
+  Str := UpperCase(Str);
+  Hash := Lape_HashKeyword(Str);
 
   {$IFDEF Lape_DoubleKeywordsCache}
-  for i := High(Lape_KeywordsCache[l][Hash]) downto 0 do
-    if (AnsiCompareStr(Lape_KeywordsCache[l][Hash][i].Keyword, b) = 0) then
+  for i := High(Lape_KeywordsCache[StrLen][Hash]) downto 0 do
+    if (AnsiCompareStr(Lape_KeywordsCache[StrLen][Hash][i].Keyword, Str) = 0) then
     begin
-      Token := Lape_KeywordsCache[l][Hash][i].Token;
+      Token := Lape_KeywordsCache[StrLen][Hash][i].Token;
       Exit(True);
     end;
   {$ELSE}
@@ -449,7 +516,7 @@ var
   Hash: Byte;
   i: Integer;
   {$IFDEF Lape_DoubleKeywordsCache}
-  ii, Len: Integer;
+  ii, StrLen: Integer;
   {$ENDIF}
 begin
   {$IFDEF Lape_DoubleKeywordsCache}
@@ -460,9 +527,9 @@ begin
   for i := Low(Lape_Keywords) to High(Lape_Keywords) do
   begin
     Hash := Lape_HashKeyword(UpperCase(Lape_Keywords[i].Keyword));
-    Len := Length(Lape_Keywords[i].Keyword);
-    SetLength(Lape_KeywordsCache[Len][Hash], Length(Lape_KeywordsCache[Len][Hash]) + 1);
-    Lape_KeywordsCache[Len][Hash][High(Lape_KeywordsCache[Len][Hash])] := Lape_Keywords[i];
+    StrLen := Length(Lape_Keywords[i].Keyword);
+    SetLength(Lape_KeywordsCache[StrLen][Hash], Length(Lape_KeywordsCache[StrLen][Hash]) + 1);
+    Lape_KeywordsCache[StrLen][Hash][High(Lape_KeywordsCache[StrLen][Hash])] := Lape_Keywords[i];
   end;
   {$ELSE}
   for i := Low(Lape_KeywordsCache) to High(Lape_KeywordsCache) do
@@ -479,14 +546,14 @@ end;
 
 function TLapeTokenizerBase.Identify: EParserToken;
 var
-  c: lpChar;
-  s: lpString;
+  Char: lpChar;
+  Str: lpString;
   Token: EParserToken;
 begin
   FTokStart := FPos;
-  c := CurChar;
+  Char := CurChar;
 
-  case c of
+  case Char of
     #0: Result := setTok(tk_NULL);
     #9, #32:
       begin
@@ -614,13 +681,13 @@ begin
     //Integer and Float
     '0'..'9':
       begin
-        c := getChar(1);
-        while (c in ['0'..'9']) do
+        Char := getChar(1);
+        while (Char in ['0'..'9']) do
         begin
           Inc(FPos);
-          c := getChar(1);
+          Char := getChar(1);
         end;
-        if (c <> '.') or (not (getChar(2) in ['0'..'9'])) then
+        if (Char <> '.') or (not (getChar(2) in ['0'..'9'])) then
           Result := setTok(tk_typ_Integer)
         else
         begin
@@ -654,16 +721,16 @@ begin
       end;
     'A'..'Z', '_', 'a'..'z':
       begin
-        s := c;
-        c := getChar(1);
-        while (c in ['0'..'9', 'A'..'Z', '_', 'a'..'z']) do
+        Str := Char;
+        Char := getChar(1);
+        while (Char in ['0'..'9', 'A'..'Z', '_', 'a'..'z']) do
         begin
           Inc(FPos);
-          s := s + c;
-          c := getChar(1);
+          Str := Str + Char;
+          Char := getChar(1);
         end;
 
-        if Lape_IsKeyword(s, Token) then
+        if Lape_IsKeyword(Str, Token) then
           Result := setTok(Token)
         else
           Result := setTok(tk_Identifier);
@@ -707,7 +774,7 @@ end;
 
 function TLapeTokenizerBase.HandleDirective: Boolean;
 var
-  d, a: lpString;
+  Directive, Argument: lpString;
 begin
   try
     if ({$IFNDEF FPC}@{$ENDIF}FOnParseDirective <> nil) then
@@ -718,19 +785,19 @@ begin
     begin
       Next();
       Expect([tk_Identifier] + ParserToken_Keywords, False, False);
-      d := TokString;
+      Directive := TokString;
 
       NextNoWhiteSpace();
       if (CurChar = '}') then
-        a := ''
+        Argument := ''
       else
       begin
         while (not (getChar(1) in ['}', #0])) do Inc(FPos);
-        a := TokString;
+        Argument := TokString;
         Inc(FPos);
       end;
 
-      if FOnHandleDirective(Self, d, a) then
+      if FOnHandleDirective(Self, Directive, Argument) then
         Exit(True);
     end
     else
@@ -739,7 +806,7 @@ begin
     Result := False;
   finally
     if (CurChar <> '}') then
-      LapeException(lpeExpectedOther, [LapeTokenToString(FTok), '}'], DocPos);
+      LapeExceptionFmt(lpeExpectedOther, [LapeTokenToString(FTok), '}'], DocPos);
   end;
 end;
 
@@ -782,11 +849,11 @@ end;
 
 function TLapeTokenizerBase.getTokChar: WideChar;
 var
-  s: lpString;
+  Str: lpString;
 begin
-  s := getTokString();
-  Delete(s, 1, 1);
-  Result := Chr(StrToIntDef(s, 0));
+  Str := getTokString();
+  Delete(Str, 1, 1);
+  Result := Chr(StrToIntDef(Str, 0));
 end;
 
 function TLapeTokenizerBase.getTokLen: Integer;
@@ -907,62 +974,62 @@ end;
 
 function TLapeTokenizerBase.NextNoWhiteSpace: EParserToken;
 var
-  lTok: EParserToken;
+  PrevTok: EParserToken;
 begin
-  lTok := FTok;
+  PrevTok := FTok;
   repeat
     Result := Next();
   until (not (Result in TokWhiteSpace));
-  FLastTok := lTok;
+  FLastTok := PrevTok;
 end;
 
 function TLapeTokenizerBase.NextNoJunk: EParserToken;
 var
-  lTok: EParserToken;
+  PrevTok: EParserToken;
 begin
-  lTok := FTok;
+  PrevTok := FTok;
   repeat
     Result := Next();
   until (not (Result in TokJunk));
-  FLastTok := lTok;
+  FLastTok := PrevTok;
 end;
 
 function TLapeTokenizerBase.Peek: EParserToken;
 var
-  p: Pointer;
+  OldSate: Pointer;
 begin
-  p := getState();
+  OldSate := getState();
   try
     FInPeek := True;
     Result := Next();
   finally
-    setState(p);
+    setState(OldSate);
   end;
 end;
 
 function TLapeTokenizerBase.PeekNoWhiteSpace: EParserToken;
 var
-  p: Pointer;
+  OldState: Pointer;
 begin
-  p := getState();
+  OldState := getState();
   try
     FInPeek := True;
     Result := NextNoWhiteSpace();
   finally
-    setState(p);
+    setState(OldState);
   end;
 end;
 
 function TLapeTokenizerBase.PeekNoJunk: EParserToken;
 var
-  p: Pointer;
+  OldState: Pointer;
 begin
-  p := getState();
+  OldState := getState();
   try
     FInPeek := True;
     Result := NextNoJunk();
   finally
-    setState(p);
+    setState(OldState);
   end;
 end;
 
@@ -972,7 +1039,7 @@ begin
     NextNoJunk();
   Result := FTok;
   if (FTok <> Token) then
-    LapeException(lpeExpectedOther, [TokString, LapeTokenToString(Token)], DocPos);
+    LapeExceptionFmt(lpeExpectedOther, [TokString, LapeTokenToString(Token)], DocPos);
   if NextAfter then
     NextNoJunk();
 end;
@@ -983,7 +1050,7 @@ begin
     NextNoJunk();
   Result := FTok;
   if (not (FTok in Tokens)) then
-    LapeException(lpeUnexpectedToken, [LapeTokenToString(FTok)], DocPos);
+    LapeExceptionFmt(lpeUnexpectedToken, [LapeTokenToString(FTok)], DocPos);
   if NextAfter then
     NextNoJunk();
 end;
@@ -1042,14 +1109,14 @@ end;
 
 constructor TLapeTokenizerFile.Create(AFileName: lpString = '');
 var
-  s: TStringList;
+  StrList: TStringList;
 begin
-  s := TStringList.Create();
+  StrList := TStringList.Create();
   try
-    s.LoadFromFile(AFileName);
-    inherited Create(s.Text, AFileName);
+    StrList.LoadFromFile(AFileName);
+    inherited Create(StrList.Text, AFileName);
   finally
-    s.Free();
+    StrList.Free();
   end;
 end;
 

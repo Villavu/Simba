@@ -46,7 +46,7 @@ var
     else
     begin
       s := IntToStr(PtrUInt(p));
-      if (pMap <> nil) and (pMap.ExistsItemI(s)) then
+      if (pMap <> nil) and (pMap.ExistsKey(s)) then
         Result := pMap[s]
       else
         Result := '$' + s;
@@ -230,7 +230,7 @@ begin
     end;
   except
     on E: Exception do
-      LapeException(lpeRuntime, [E.Message] {$IFDEF Lape_EmitPos}, PDocPos(PtrUInt(Code) + SizeOf(opCodeType))^ {$ENDIF});
+      LapeExceptionFmt(lpeRuntime, [E.Message] {$IFDEF Lape_EmitPos}, PDocPos(PtrUInt(Code) + SizeOf(opCodeType))^ {$ENDIF});
   end;
   pMap.Free();
 end;
