@@ -194,7 +194,7 @@ begin
         for t2 := Low(ELapeBaseType) to High(ELapeBaseType) do
         begin
           proc := getEvalProc(op, t1, t2);
-          if ({$IFNDEF FPC}@{$ENDIF}proc <> nil) and ({$IFNDEF FPC}@{$ENDIF}proc <>{$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) then
+          if ValidEvalFunction(proc) then
             if (t2 = ltUnknown) then
               pMap[IntToStr(PtrUInt({$IFNDEF FPC}@{$ENDIF}proc))] := 'lpe'+LapeTypeToString(t1)+'_'+op_name[op]
             else

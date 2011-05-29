@@ -48,7 +48,7 @@ type
     function getPDocPos: PDocPos; inline;
     function hasTokenizer: Boolean; inline;
     function hasMoreTokenizers: Boolean; inline;
-    procedure setTokenizersPeek(Peek: Boolean); inline;
+    procedure setTokenizersPeek(Peek: Boolean);
   protected
     FTokenizers: TLapeTokenizerArray;
     FTokenizer: Integer;
