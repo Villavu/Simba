@@ -21,4 +21,5 @@ default (Pascal) engine.
     scriptref/bitmaps.rst
     scriptref/string.rst
     scriptref/tpa.rst
+    scriptref/sound.rst
 
