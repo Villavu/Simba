@@ -268,7 +268,7 @@ end;
 
 procedure TMFinder.SetToleranceSpeed(nCTS: Integer);
 begin
-  if (nCTS < 0) or (nCTS > 2) then
+  if (nCTS < 0) or (nCTS > 3) then
     raise Exception.CreateFmt('The given CTS ([%d]) is invalid.',[nCTS]);
   Self.CTS := nCTS;
 end;
@@ -294,6 +294,7 @@ function TMFinder.SimilarColors(Color1, Color2,Tolerance: Integer) : boolean;
 var
   R1,G1,B1,R2,G2,B2 : Byte;
   H1,S1,L1,H2,S2,L2 : extended;
+  L_1, a_1, b_1, L_2, a_2 ,b_2, X, Y, Z: extended;
 begin
   Result := False;
   ColorToRGB(Color1,R1,G1,B1);
@@ -309,13 +310,30 @@ begin
        RGBToHSL(R2,g2,b2,H2,S2,L2);
        Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
      end;
+  3:
+    begin
+       RGBToXYZ(R1, G1, B1, X, Y, Z);
+       XYZtoCIELab(X, Y, Z, L_1, a_1, b_1);
+       RGBToXYZ(R2, G2, B2, X, Y, Z);
+       XYZtoCIELab(X, Y, Z, L_2, a_2, b_2);
+       Result := (abs(L_1 - L_2) < Tolerance)
+                 and (abs(a_1 - a_2) < Tolerance)
+                 and (abs(b_1 - b_2) < Tolerance);
+    end;
   end;
 end;
 
 
+{
+   XXX: We should really rewrite this. Once we're adding more colour space we'll
+   only be adding more and more parameters. It's really silly to push all those
+   args if we aren't going to use them. We need to make sure the function is
+   actually inlined. Because if it's not, we should go for a different design.
+}
 function ColorSame(var CTS,Tolerance : Integer; var R1,G1,B1,R2,G2,B2 : byte; var H1,S1,L1,huemod,satmod : extended) : boolean; inline;
 var
   H2,S2,L2 : extended;
+  L_1, a_1, b_1, L_2, a_2 ,b_2, X, Y, Z: extended;
 begin
   Result := False;
   case CTS of
@@ -324,6 +342,15 @@ begin
   2: begin
        RGBToHSL(R2,g2,b2,H2,S2,L2);
        Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
+     end;
+  3: begin
+       RGBToXYZ(R1, G1, B1, X, Y, Z);
+       XYZtoCIELab(X, Y, Z, L_1, a_1, b_1);
+       RGBToXYZ(R2, G2, B2, X, Y, Z);
+       XYZtoCIELab(X, Y, Z, L_2, a_2, b_2);
+       Result := (abs(L_1 - L_2) < Tolerance)
+                 and (abs(a_1 - a_2) < Tolerance)
+                 and (abs(b_1 - b_2) < Tolerance);
      end;
   end;
 end;
