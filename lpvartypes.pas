@@ -501,12 +501,10 @@ type
 
     procedure addParam(Param: TLapeParameter); virtual;
     procedure setImported(AVar: TLapeGlobalVar; isImported: Boolean); virtual;
+
     function NewGlobalVar(Ptr: Pointer = nil; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
     function NewGlobalVar(CodePos: TCodePos; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; overload; virtual;
-
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
-    function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
-    function Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar; override;
 
     property Params: TLapeParameterList read FParams;
     property ParamSize: Integer read getParamSize;
@@ -3487,44 +3485,6 @@ function TLapeType_Method.EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeT
 begin
   if (FBaseType = ltPointer) and (Op = op_Assign) and (Right <> nil) and ((Right.BaseType = ltPointer) or Equals(Right)) then
     Result := Self
-  else
-    Result := inherited;
-end;
-
-function TLapeType_Method.EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar;
-var
-  tmpType: TLapeType;
-begin
-  if (FBaseType = ltPointer) and (Op = op_Assign) and (Right <> nil) and (Right.VarType <> nil) and ((Right.VarType.BaseType = ltPointer) or Equals(Right.VarType)) then
-    try
-      FBaseType := ltImportedMethod;
-      tmpType := Right.FVarType;
-      if (tmpType.BaseType = ltPointer) then
-        Right.FVarType := Self;
-      Result := inherited;
-    finally
-      FBaseType := ltPointer;
-      Right.FVarType := tmpType;
-    end
-  else
-    Result := inherited;
-end;
-
-function TLapeType_Method.Eval(Op: EOperator; var Dest: TResVar; Left, Right: TResVar; var Offset: Integer; Pos: PDocPos = nil): TResVar;
-var
-  tmpType: TLapeType;
-begin
-  if (FBaseType = ltPointer) and (Op = op_Assign) and (Right.VarType <> nil) and ((Right.VarType.BaseType = ltPointer) or Equals(Right.VarType)) then
-    try
-      FBaseType := ltImportedMethod;
-      tmpType := Right.VarType;
-      if (tmpType.BaseType = ltPointer) then
-        Right.VarType := Self;
-      Result := inherited;
-    finally
-      FBaseType := ltPointer;
-      Right.VarType := tmpType;
-    end
   else
     Result := inherited;
 end;

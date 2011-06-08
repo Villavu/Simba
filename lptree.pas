@@ -1035,7 +1035,7 @@ function TLapeTree_OpenArray.Evaluate: TLapeGlobalVar;
         if (tmpVar <> nil) then
           FreeAndNil(tmpVar);
       end
-      else if isEmptyNode(FValues[i]) then
+      else if (not isEmptyNode(FValues[i])) then
         LapeException(lpeInvalidCast, FValues[i].DocPos);
   end;
 
@@ -1491,7 +1491,7 @@ var
 
   begin
     Assert(IdentVar.VarType is TLapeType_Method);
-    Assert(IdentVar.VarType.BaseType in [ltUnknown, ltScriptMethod]);
+    Assert(IdentVar.VarType.BaseType in [ltPointer, ltScriptMethod]);
     Assert(Length(ParamVars) = TLapeType_Method(IdentVar.VarType).Params.Count);
     Result := NullResVar;
     tmpVar := NullResVar;
@@ -1569,7 +1569,7 @@ var
     Par, tmpVar, tmpRes: TResVar;
   begin
     Assert(IdentVar.VarType is TLapeType_Method);
-    Assert(IdentVar.VarType.BaseType in [ltUnknown, ltImportedMethod]);
+    Assert(IdentVar.VarType.BaseType in [ltPointer, ltImportedMethod]);
     Assert(Length(ParamVars) = TLapeType_Method(IdentVar.VarType).Params.Count);
     Result := NullResVar;
     tmpVar := NullResVar;
