@@ -2435,7 +2435,7 @@ begin
 
     try
       if (Method.Method = nil) or (Method.Method.VarType = nil) or
-         (not (Method.Method.VarType.BaseType = ltImportedMethod))
+         (Method.Method.VarType.BaseType <> ltImportedMethod)
       then
         LapeException(lpeInvalidEvaluation);
 
