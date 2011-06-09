@@ -380,6 +380,7 @@ begin
         begin
           if (Settings.isKey('Host' + IntToStr(I))) then
           begin
+            SetLength(SA, Length(SA) + 1);
             SA[High(SA)] := Settings.getKeyValue('Host' + IntToStr(I));
             Settings.DeleteKey('Host' + IntToStr(I));
           end;
