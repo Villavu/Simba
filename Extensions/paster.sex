@@ -10,7 +10,7 @@ end;
 
 function GetVersion: string;
 begin;
-  Result := '1.0a';
+  Result := '1.0b';
 end;
 
 {$IFDEF EXTENSION}
@@ -361,7 +361,7 @@ end;
 
 procedure UpdateCheck;
 var
-  V, S: string;
+  V: string;
   I: integer;
   SA: TStringArray;
 begin
@@ -380,15 +380,11 @@ begin
         begin
           if (Settings.isKey('Host' + IntToStr(I))) then
           begin
-            S := Settings.getKeyValueDef('Host' + IntToStr(I), 'Host' + IntToStr(I));
-            if (S <> 'Host' + IntToStr(I)) then
-            begin
-              SetLength(SA, Length(SA) + 1);
-              SA[High(SA)] := S;
-            end;
+            SA[High(SA)] := Settings.getKeyValue('Host' + IntToStr(I));
             Settings.DeleteKey('Host' + IntToStr(I));
           end;
         end;
+        
         for I := 0 to High(SA) do
           Settings.setKeyValue('Host' + IntToStr(I + 1), SA[I]);
       end;
