@@ -21,6 +21,9 @@ type
   TGetEvalRes = function(Op: EOperator; Left, Right: ELapeBaseType): ELapeBaseType;
   TGetEvalProc = function(Op: EOperator; Left, Right: ELapeBaseType): TLapeEvalProc;
 
+function ValidEvalFunction(p: Pointer): Boolean; overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function ValidEvalFunction(p: TLapeEvalProc): Boolean; overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
+
 procedure LapeEval_Error(const Dest, Left, Right: Pointer);
 procedure ClearEvalRes(var Arr: TLapeEvalRes);
 procedure ClearEvalArr(var Arr: TLapeEvalArr);
@@ -42,6 +45,16 @@ implementation
 uses
   lpexceptions;
 
+function ValidEvalFunction(p: Pointer): Boolean;
+begin
+   Result := (p <> nil) and (p <> @LapeEvalErrorProc);
+end;
+
+function ValidEvalFunction(p: TLapeEvalProc): Boolean;
+begin
+   Result := ValidEvalFunction(@p);
+end;
+
 procedure LapeEval_Error(const Dest, Left, Right: Pointer);
 begin
   LapeException(lpeInvalidEvaluation);
@@ -61,12 +74,12 @@ end;
 procedure ClearEvalArr(var Arr: TLapeEvalArr);
 var
   op: EOperator;
-  t1, t2: ELapeBaseType;
+  BaseTypeLeft, BaseTypeRight: ELapeBaseType;
 begin
   for op := Low(EOperator) to High(EOperator) do
-    for t1 := Low(ELapeBaseType) to High(ELapeBaseType) do
-      for t2 := Low(ELapeBaseType) to High(ELapeBaseType) do
-        Arr[op][t1][t2] := @LapeEval_Error;
+    for BaseTypeLeft := Low(ELapeBaseType) to High(ELapeBaseType) do
+      for BaseTypeRight := Low(ELapeBaseType) to High(ELapeBaseType) do
+        Arr[op][BaseTypeLeft][BaseTypeRight] := @LapeEval_Error;
 end;
 
 procedure LoadEvalRes(var Arr: TLapeEvalRes);

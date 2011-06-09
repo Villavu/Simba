@@ -46,7 +46,7 @@ var
     else
     begin
       s := IntToStr(PtrUInt(p));
-      if (pMap <> nil) and (pMap.ExistsItemI(s)) then
+      if (pMap <> nil) and (pMap.ExistsKey(s)) then
         Result := pMap[s]
       else
         Result := '$' + s;
@@ -194,7 +194,7 @@ begin
         for t2 := Low(ELapeBaseType) to High(ELapeBaseType) do
         begin
           proc := getEvalProc(op, t1, t2);
-          if ({$IFNDEF FPC}@{$ENDIF}proc <> nil) and ({$IFNDEF FPC}@{$ENDIF}proc <>{$IFNDEF FPC}@{$ENDIF}LapeEvalErrorProc) then
+          if ValidEvalFunction(proc) then
             if (t2 = ltUnknown) then
               pMap[IntToStr(PtrUInt({$IFNDEF FPC}@{$ENDIF}proc))] := 'lpe'+LapeTypeToString(t1)+'_'+op_name[op]
             else
@@ -230,7 +230,7 @@ begin
     end;
   except
     on E: Exception do
-      LapeException(lpeRuntime, [E.Message] {$IFDEF Lape_EmitPos}, PDocPos(PtrUInt(Code) + SizeOf(opCodeType))^ {$ENDIF});
+      LapeExceptionFmt(lpeRuntime, [E.Message] {$IFDEF Lape_EmitPos}, PDocPos(PtrUInt(Code) + SizeOf(opCodeType))^ {$ENDIF});
   end;
   pMap.Free();
 end;

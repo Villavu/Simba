@@ -184,6 +184,13 @@ type
     function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
   end;
 
+  TLapeBaseDeclClass = class(TLapeBaseClass)
+  protected
+    function getDocPos: TDocPos; virtual; abstract;
+  public
+    property DocPos: TDocPos read getDocPos;
+  end;
+
   {$IFDEF FPC}generic{$ENDIF} TLapeStack<_T> = class(TLapeBaseClass)
   public type
     TTArray = array of _T;
@@ -206,7 +213,7 @@ type
     function Pop: _T; virtual;
     function Push(Item: _T): Integer; virtual;
 
-    procedure ImportFromArray(a: TTArray); virtual;
+    procedure ImportFromArray(Arr: TTArray); virtual;
     function ExportToArray: TTArray; virtual;
 
     property Items[Index: Integer]: _T read getItem; default;
@@ -238,7 +245,7 @@ type
     function IndexOf(Item: _T): Integer; overload; virtual;
     function ExistsItem(Item: _T): Boolean; overload;
 
-    procedure ImportFromArray(a: TTArray); virtual;
+    procedure ImportFromArray(Arr: TTArray); virtual;
     function ExportToArray: TTArray; virtual;
 
     property Items[Index: Integer]: _T read getItem write setItem; default;
@@ -252,8 +259,8 @@ type
     FItems: array of _T;
     FLen: Integer;
 
-    function getItem(Index: lpString): _T; virtual;
-    procedure setItem(Index: lpString; Item: _T); virtual;
+    function getItem(Key: lpString): _T; virtual;
+    procedure setItem(Key: lpString; Item: _T); virtual;
     function getItemI(Index: Integer): _T; virtual;
     procedure setItemI(Index: Integer; Item: _T); virtual;
     function getIndex(Index: Integer): lpString; virtual;
@@ -264,18 +271,18 @@ type
     destructor Destroy; override;
 
     procedure Clear; virtual;
-    procedure add(Index: lpString; Item: _T); virtual;
-    function Delete(Index: lpString): _T; overload; virtual;
+    procedure add(Key: lpString; Item: _T); virtual;
+    function Delete(Key: lpString): _T; overload; virtual;
     function Delete(Index: Integer): _T; overload; virtual;
     function DeleteItem(Item: _T): _T; overload; virtual;
     function IndexOf(Item: _T): lpString; overload; virtual;
-    function IndexOf(Index: lpString): Integer; overload; virtual;
+    function IndexOf(Key: lpString): Integer; overload; virtual;
     function ExistsItem(Item: _T): Boolean; overload;
-    function ExistsItemI(Index: lpString): Boolean; overload;
+    function ExistsKey(Key: lpString): Boolean; overload;
 
     property Items[Index: lpString]: _T read getItem write setItem; default;
     property ItemsI[Index: Integer]: _T read getItemI write setItemI;
-    property Index[Index: Integer]: lpString read getIndex;
+    property Key[Index: Integer]: lpString read getIndex;
     property Count: Integer read FLen;
   end;
 
@@ -303,12 +310,13 @@ type
     property Items: TLapeDeclCollection read FList;
   end;
 
-  TLapeDeclaration = class(TLapeBaseClass)
+  TLapeDeclaration = class(TLapeBaseDeclClass)
   protected
     FList: TLapeDeclarationList;
+    function getDocPos: TDocPos; override;
     procedure setList(AList: TLapeDeclarationList); virtual;
   public
-    DocPos: TDocPos;
+    _DocPos: TDocPos;
     Name: lpString;
     Used: Boolean;
     constructor Create(AName: lpString = ''; ADocPos: PDocPos = nil; AList: TLapeDeclarationList = nil); reintroduce; virtual;
@@ -379,74 +387,6 @@ const
   CompareOperators = [op_cmp_Equal, op_cmp_GreaterThan, op_cmp_GreaterThanOrEqual, op_cmp_LessThan, op_cmp_LessThanOrEqual, op_cmp_NotEqual];
   EnumOperators = [op_Plus, op_Minus, op_Assign] + CompareOperators;
 
-  OperatorAssociative: array[EOperator] of EOperatorAssociative = (
-    assocNone,                          //op_Unkown
-
-    assocRight,                         //op_cmp_Equal
-    assocRight,                         //op_cmp_GreaterThan
-    assocRight,                         //op_cmp_GreaterThanOrEqual
-    assocRight,                         //op_cmp_LessThan
-    assocRight,                         //op_cmp_LessThanOrEqual
-    assocRight,                         //op_cmp_NotEqual
-
-    assocRight,                         //op_Addr
-    assocRight,                         //op_AND
-    assocRight,                         //op_Assign
-    assocLeft,                          //op_Deref
-    assocLeft,                          //op_DIV
-    assocLeft,                          //op_Divide
-    assocLeft,                          //op_Dot
-    assocRight,                         //op_IN
-    assocLeft,                          //op_Index
-    assocLeft,                          //op_Minus
-    assocLeft,                          //op_MOD
-    assocLeft,                          //op_Multiply
-    assocRight,                         //op_NOT
-    assocRight,                         //op_OR
-    assocLeft,                          //op_Plus
-    assocRight,                         //op_Power
-    assocRight,                         //op_SHL
-    assocRight,                         //op_SHR
-    assocRight,                         //op_XOR
-
-    assocRight,                         //op_UnaryMinus
-    assocRight                          //op_UnaryPlus
-  );
-
-  OperatorPrecedence: array[EOperator] of Byte = (
-    0,                                  //op_Unkown
-
-    9,                                  //op_cmp_Equal
-    8,                                  //op_cmp_GreaterThan
-    8,                                  //op_cmp_GreaterThanOrEqual
-    8,                                  //op_cmp_LessThan
-    8,                                  //op_cmp_LessThanOrEqual
-    9,                                  //op_cmp_NotEqual
-
-    2,                                  //op_Addr
-    5,                                  //op_AND
-    10,                                 //op_Assign
-    1,                                  //op_Deref
-    5,                                  //op_DIV
-    5,                                  //op_Divide
-    1,                                  //op_Dot
-    8,                                  //op_IN
-    1,                                  //op_Index
-    6,                                  //op_Minus
-    5,                                  //op_MOD
-    5,                                  //op_Multiply
-    3,                                  //op_NOT
-    6,                                  //op_OR
-    6,                                  //op_Plus
-    4,                                  //op_Power
-    7,                                  //op_SHL
-    7,                                  //op_SHR
-    5,                                  //op_XOR
-
-    3,                                  //op_UnaryMinus
-    3                                   //op_UnaryPlus
-  );
-
   op_str: array[EOperator] of string = ('',
     '=', '>', '>=', '<', '<=', '<>', '@', 'and', ':=', '^', 'div', '/', '.' , 'in',
     '[', '-', 'mod', '*', 'not', 'or', '+', '**', 'shl', 'shr', 'xor', '-', '+');
@@ -472,7 +412,7 @@ var
     @highUInt8, @highInt8, @highUInt16, @highInt16, @highUInt32, @highInt32, @highUInt64, @highInt64
   );
 
-function LapeCase(const s: lpString): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function LapeCase(const Str: lpString): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function LapeTypeToString(Token: ELapeBaseType): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function LapeOperatorToString(Token: EOperator): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 
@@ -488,12 +428,12 @@ uses
   typinfo,
   lpexceptions;
 
-function LapeCase(const s: lpString): lpString;
+function LapeCase(const Str: lpString): lpString;
 begin
   {$IFDEF Lape_CaseSensitive}
-  Result := s;
+  Result := Str;
   {$ELSE}
-  Result := LowerCase(s);
+  Result := LowerCase(Str);
   {$ENDIF}
 end;
 
@@ -563,12 +503,12 @@ end;
 
 procedure TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.CheckIndex(Index: Integer; GrowIfNeeded: Boolean = False);
 var
-  b: Boolean;
+  NeedGrow: Boolean;
 begin
-  b := (Index >= FLen);
-  if (b and (not GrowIfNeeded)) or (Index < 0) then
+  NeedGrow := (Index >= FLen);
+  if (NeedGrow and (not GrowIfNeeded)) or (Index < 0) then
     LapeException(lpeOutOfStackRange)
-  else if b then
+  else if NeedGrow then
     Grow(GrowSize);
 end;
 
@@ -635,10 +575,10 @@ begin
   Result := FCur;
 end;
 
-procedure TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(a: TTArray);
+procedure TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(Arr: TTArray);
 begin
-  FArr := a;
-  FLen := Length(a);
+  FArr := Arr;
+  FLen := Length(Arr);
   FCur := FLen - 1;
 end;
 
@@ -646,7 +586,6 @@ function TLapeStack{$IFNDEF FPC}<_T>{$ENDIF}.ExportToArray: TTArray;
 var
   i: Integer;
 begin
-  //Result := Copy(FArr, 0, FCur + 1);
   SetLength(Result, FCur + 1);
   for i := 0 to FCur do
     Result[i] := FArr[i];
@@ -665,7 +604,7 @@ begin
   if (Index > -1) and (Index < FLen) then
     FItems[Index] := Item
   else
-    LapeException(lpeInvalidIndex, [IntToStr(Index)]);
+    LapeExceptionFmt(lpeInvalidIndex, [IntToStr(Index)]);
 end;
 
 constructor TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.Create(InvalidValue: _T; Duplicates: TDuplicates = dupError);
@@ -687,7 +626,7 @@ function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.add(Item: _T): Integer;
 begin
   if (FDuplicates in [dupIgnore, dupError]) and ExistsItem(Item) then
     if (FDuplicates = dupError) then
-      LapeException(lpeDuplicateDeclaration, ['_T'])
+      LapeExceptionFmt(lpeDuplicateDeclaration, ['_T'])
     else
       Exit(-1);
 
@@ -716,16 +655,16 @@ begin
     SetLength(FItems, FLen);
   end
   else
-    LapeException(lpeInvalidIndex, [IntToStr(Index)]);
+    LapeExceptionFmt(lpeInvalidIndex, [IntToStr(Index)]);
 end;
 
 function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.DeleteItem(Item: _T): _T;
 var
-  i: Integer;
+  Index: Integer;
 begin
-  i := IndexOf(Item);
-  if (i > -1) then
-    Result := Delete(i)
+  Index := IndexOf(Item);
+  if (Index > -1) then
+    Result := Delete(Index)
   else
     Result := InvalidVal;
 end;
@@ -733,16 +672,16 @@ end;
 function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.IndexOf(Item: _T): Integer;
 var
   i, ii: Integer;
-  a, b: PByteArray;
+  ItemA, ItemB: PByteArray;
   Match: Boolean;
 begin
-  b := PByteArray(@Item);
+  ItemB := PByteArray(@Item);
   for i := High(FItems) downto 0 do
   begin
-    a := PByteArray(@FItems[i]);
+    ItemA := PByteArray(@FItems[i]);
     Match := True;
     for ii := 0 to SizeOf(_T) - 1 do
-      if (a^[ii] <> b^[ii]) then
+      if (ItemA^[ii] <> ItemB^[ii]) then
       begin
         Match := False;
         Break;
@@ -758,53 +697,52 @@ begin
   Result := (IndexOf(Item) > -1);
 end;
 
-procedure TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(a: TTArray);
+procedure TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ImportFromArray(Arr: TTArray);
 begin
-  FItems := a;
-  FLen := Length(a);
+  FItems := Arr;
+  FLen := Length(Arr);
 end;
 
 function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ExportToArray: TTArray;
 var
   i: Integer;
 begin
-  //Result := Copy(FItems);
   SetLength(Result, FLen);
   for i := 0 to FLen - 1 do
     Result[i] := FItems[i];
 end;
 
-function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.getItem(Index: lpString): _T;
+function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.getItem(Key: lpString): _T;
 var
-  i: Integer;
+  Index: Integer;
 begin
   if (not FStringList.CaseSensitive) then
-    Index := UpperCase(Index);
+    Key := UpperCase(Key);
 
-  i := FStringList.IndexOf(Index);
-  if (i > -1) and (i < FLen) then
-    Result := FItems[i]
+  Index := FStringList.IndexOf(Key);
+  if (Index > -1) and (Index < FLen) then
+    Result := FItems[Index]
   else
     Result := InvalidVal;
 end;
 
-procedure TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.setItem(Index: lpString; Item: _T);
+procedure TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.setItem(Key: lpString; Item: _T);
 var
-  i: Integer;
+  Index: Integer;
 begin
-  if (Index <> '') then
+  if (Key <> '') then
   begin
     if (not FStringList.CaseSensitive) then
-      Index := UpperCase(Index);
+      Key := UpperCase(Key);
 
-    i := FStringList.IndexOf(Index);
-    if (i > -1) and (i < FLen) then
-      FItems[i] := Item
+    Index := FStringList.IndexOf(Key);
+    if (Index > -1) and (Index < FLen) then
+      FItems[Index] := Item
     else
-      add(Index, Item);
+      add(Key, Item);
   end
   else
-    LapeException(lpeInvalidIndex, [Index]);
+    LapeExceptionFmt(lpeInvalidIndex, [Key]);
 end;
 
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.getItemI(Index: Integer): _T;
@@ -820,7 +758,7 @@ begin
   if (Index > -1) and (Index < FLen) then
     FItems[Index] := Item
   else
-    LapeException(lpeInvalidIndex, [IntToStr(Index)]);
+    LapeExceptionFmt(lpeInvalidIndex, [IntToStr(Index)]);
 end;
 
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.getIndex(Index: Integer): lpString;
@@ -858,17 +796,17 @@ begin
   FLen := 0;
 end;
 
-procedure TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.add(Index: lpString; Item: _T);
+procedure TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.add(Key: lpString; Item: _T);
 var
-  i: Integer;
+  Index: Integer;
 begin
-  if (Index <> '') then
+  if (Key <> '') then
   begin
     if (not FStringList.CaseSensitive) then
-      Index := UpperCase(Index);
+      Key := UpperCase(Key);
 
-    i := FStringList.add(Index);
-    if (i > -1) then
+    Index := FStringList.add(Key);
+    if (Index > -1) then
     begin
       SetLength(FItems, FLen + 1);
       FItems[FLen] := Item;
@@ -876,23 +814,23 @@ begin
     end;
   end
   else
-    LapeException(lpeInvalidIndex, [Index]);
+    LapeExceptionFmt(lpeInvalidIndex, [Key]);
 end;
 
-function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.Delete(Index: lpString): _T;
+function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.Delete(Key: lpString): _T;
 var
-  i: Integer;
+  Index: Integer;
 begin
   if (not FStringList.CaseSensitive) then
-    Index := UpperCase(Index);
+    Key := UpperCase(Key);
 
-  i := FStringList.IndexOf(Index);
-  if (i > -1) then
-    Result := Delete(i)
+  Index := FStringList.IndexOf(Key);
+  if (Index > -1) then
+    Result := Delete(Index)
   else
   begin
     Result := InvalidVal;
-    LapeException(lpeInvalidIndex, [Index]);
+    LapeExceptionFmt(lpeInvalidIndex, [Key]);
   end;
 end;
 
@@ -917,17 +855,17 @@ begin
   else
   begin
     Result := InvalidVal;
-    LapeException(lpeInvalidIndex, [IntToStr(Index)]);
+    LapeExceptionFmt(lpeInvalidIndex, [IntToStr(Index)]);
   end;
 end;
 
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.DeleteItem(Item: _T): _T;
 var
-  i: lpString;
+  Index: lpString;
 begin
-  i := IndexOf(Item);
-  if (i <> '') then
-    Result := Delete(i)
+  Index := IndexOf(Item);
+  if (Index <> '') then
+    Result := Delete(Index)
   else
     Result := InvalidVal;
 end;
@@ -935,16 +873,16 @@ end;
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.IndexOf(Item: _T): lpString;
 var
   i, ii: Integer;
-  a, b: PByteArray;
+  ItemA, ItemB: PByteArray;
   Match: Boolean;
 begin
-  b := PByteArray(@Item);
+  ItemB := PByteArray(@Item);
   for i := High(FItems) downto 0 do
   begin
-    a := PByteArray(@FItems[i]);
+    ItemA := PByteArray(@FItems[i]);
     Match := True;
     for ii := 0 to SizeOf(_T) - 1 do
-      if (a^[ii] <> b^[ii]) then
+      if (ItemA^[ii] <> ItemB^[ii]) then
       begin
         Match := False;
         Break;
@@ -955,11 +893,11 @@ begin
   Result := '';
 end;
 
-function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.IndexOf(Index: lpString): Integer;
+function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.IndexOf(Key: lpString): Integer;
 begin
   if (not FStringList.CaseSensitive) then
-    Index := UpperCase(Index);
-  Result := FStringList.IndexOf(Index);
+    Key := UpperCase(Key);
+  Result := FStringList.IndexOf(Key);
 end;
 
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.ExistsItem(Item: _T): Boolean;
@@ -967,11 +905,11 @@ begin
   Result := (IndexOf(Item) <> '');
 end;
 
-function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.ExistsItemI(Index: lpString): Boolean;
+function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.ExistsKey(Key: lpString): Boolean;
 begin
   if (not FStringList.CaseSensitive) then
-    Index := UpperCase(Index);
-  Result := (FStringList.IndexOf(Index) > -1);
+    Key := UpperCase(Key);
+  Result := (FStringList.IndexOf(Key) > -1);
 end;
 
 constructor TLapeDeclarationList.Create(AList: TLapeDeclCollection; ManageDeclarations: Boolean = True);
@@ -1056,12 +994,17 @@ end;
 
 procedure TLapeDeclarationList.Delete(AClass: TLapeDeclarationClass; DoFree: Boolean = False);
 var
-  a: TLapeDeclArray;
+  ClassItems: TLapeDeclArray;
   i: Integer;
 begin
-  a := getByClass(AClass);
-  for i := High(a) downto 0 do
-    Delete(a[i], DoFree);
+  ClassItems := getByClass(AClass);
+  for i := High(ClassItems) downto 0 do
+    Delete(ClassItems[i], DoFree);
+end;
+
+function TLapeDeclaration.getDocPos: TDocPos;
+begin
+  Result := _DocPos;
 end;
 
 procedure TLapeDeclaration.setList(AList: TLapeDeclarationList);
@@ -1082,9 +1025,9 @@ begin
   Name := AName;
   Used := False;
   if (ADocPos <> nil) then
-    DocPos := ADocPos^
+    _DocPos := ADocPos^
   else
-    DocPos := NullDocPos;
+    _DocPos := NullDocPos;
   setList(AList);
 end;
 

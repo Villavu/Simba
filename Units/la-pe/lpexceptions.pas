@@ -55,6 +55,7 @@ resourcestring
   lpeInvalidJump = 'Invalid jump';
   lpeInvalidRange = 'Expression is not a valid range';
   lpeInvalidValueForType = 'Invalid value for type "%s"';
+  lpeInvalidWithReference = 'Invalid with reference';
   lpeLostClosingParenthesis = 'Found closing parenthesis without matching opening parenthesis';
   lpeLostConditional = 'Found conditional without matching opening statement';
   lpeNoDefaultForParam = 'No default value for parameter %d found';
@@ -77,8 +78,10 @@ resourcestring
 
 procedure LapeException(Msg: string); overload;
 procedure LapeException(Msg: string; DocPos: TDocPos); overload;
-procedure LapeException(Msg: string; Args: array of const); overload;
-procedure LapeException(Msg: string; Args: array of const; DocPos: TDocPos); overload;
+procedure LapeException(Msg: string; DocPos: array of TLapeBaseDeclClass); overload;
+procedure LapeExceptionFmt(Msg: string; Args: array of const); overload;
+procedure LapeExceptionFmt(Msg: string; Args: array of const; DocPos: TDocPos); overload;
+procedure LapeExceptionFmt(Msg: string; Args: array of const; DocPos: array of TLapeBaseDeclClass); overload;
 
 implementation
 
@@ -96,12 +99,28 @@ begin
   LapeException(Msg);
 end;
 
-procedure LapeException(Msg: string; Args: array of const);
+procedure LapeException(Msg: string; DocPos: array of TLapeBaseDeclClass);
+var
+  i: Integer;
+begin
+  for i := 0 to High(DocPos) do
+    if (DocPos[i] <> nil) and
+       (DocPos[i].DocPos.Col <> NullDocPos.Col) and
+       (DocPos[i].DocPos.Line <> NullDocPos.Line)
+    then
+    begin
+      LapeException(Msg, DocPos[i].DocPos);
+      Exit;
+    end;
+  LapeException(Msg);
+end;
+
+procedure LapeExceptionFmt(Msg: string; Args: array of const);
 begin
   LapeException(Format(Msg, Args));
 end;
 
-procedure LapeException(Msg: string; Args: array of const; DocPos: TDocPos);
+procedure LapeExceptionFmt(Msg: string; Args: array of const; DocPos: TDocPos);
 begin
   Msg := Format(Msg, Args);
   if (DocPos.Line > 0) and (DocPos.Col > 0) then
@@ -109,6 +128,22 @@ begin
   if (DocPos.FileName <> '') then
     Msg := Format(lpeExceptionIn, [Msg, DocPos.FileName]);
   LapeException(Msg);
+end;
+
+procedure LapeExceptionFmt(Msg: string; Args: array of const; DocPos: array of TLapeBaseDeclClass);
+var
+  i: Integer;
+begin
+  for i := 0 to High(DocPos) do
+    if (DocPos[i] <> nil) and
+       (DocPos[i].DocPos.Col <> NullDocPos.Col) and
+       (DocPos[i].DocPos.Line <> NullDocPos.Line)
+    then
+    begin
+      LapeExceptionFmt(Msg, Args, DocPos[i].DocPos);
+      Exit;
+    end;
+  LapeExceptionFmt(Msg, Args);
 end;
 
 end.
