@@ -322,6 +322,16 @@ begin
   Result := True;
 end;
 
+{ procedure Free; //Doesn't Work
+var
+  I: integer;
+begin
+  for I := 0 to High(UpdaterArr) do
+    with UpdaterArr[I] do
+      if (Timer <> nil) then
+        Timer.Free;
+end; }
+
 procedure Attach;
 var
   I: integer;
