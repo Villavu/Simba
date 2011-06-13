@@ -87,22 +87,22 @@ begin
   Form1.d.Lines.Add(IntToStr(PInt32(Params^[0])^));
 end;
 
-procedure MyRandom(Params: PParamArray; Result: Pointer);
+procedure MyRandom(const Params: PParamArray; const Result: Pointer);
 begin
   PInt32(Result)^ := PInt32(Params^[0])^ + Random(PInt32(Params^[1])^ - PInt32(Params^[0])^ + 1);
 end;
 
-procedure MyIntToString(Params: PParamArray; Result: Pointer);
+procedure MyIntToString(const Params: PParamArray; const Result: Pointer);
 begin
   PlpString(Result)^ := IntToStr(PInt32(Params^[0])^);
 end;
 
-procedure MyInt64ToString(Params: PParamArray; Result: Pointer);
+procedure MyInt64ToString(const Params: PParamArray; const Result: Pointer);
 begin
   PlpString(Result)^ := IntToStr(PInt64(Params^[0])^);
 end;
 
-procedure MyStringToInt(Params: PParamArray; Result: Pointer);
+procedure MyStringToInt(const Params: PParamArray; const Result: Pointer);
 begin
   PInt32(Result)^ := StrToInt(PlpString(Params^[0])^);
 end;

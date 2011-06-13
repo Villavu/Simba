@@ -195,7 +195,6 @@ type
   protected type
     PType = ^_Type;
   var public
-    function VarToString(AVar: Pointer): lpString; override;
     function NewGlobalVar(Val: _Type; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
   end;
@@ -204,7 +203,6 @@ type
   protected type
     PType = ^_Type;
   var public
-    function VarToString(AVar: Pointer): lpString; override;
     function NewGlobalVar(Val: _Type; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
   end;
@@ -213,7 +211,6 @@ type
   protected type
     PType = ^_Type;
   var public
-    function VarToString(AVar: Pointer): lpString; override;
     function NewGlobalVar(Val: _Type; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
   end;
@@ -252,8 +249,6 @@ type
   TLapeType_Variant = class(TLapeType)
   public
     constructor Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
-    function VarToString(AVar: Pointer): lpString; override;
-
     function NewGlobalVar(Val: Variant; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; virtual;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
   end;
@@ -436,7 +431,6 @@ type
   public
     constructor Create(ACompiler: TLapeCompilerBase; ASize: UInt8 = High(UInt8); AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
 
-    function VarToString(AVar: Pointer): lpString; override;
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
     function NewGlobalVar(Str: ShortString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; reintroduce; overload; virtual;
 
@@ -514,11 +508,17 @@ type
     property ParamInitialization: Boolean read getParamInitialization;
   end;
 
+  TLapeType_OverloadedMethod = class;
+  TLapeGetOverloadedMethod = function(Sender: TLapeType_OverloadedMethod; AType: TLapeType_Method;
+    AParams: TLapeTypeArray = nil; AResult: TLapeType = nil): TLapeGlobalVar of object;
+
   TLapeType_OverloadedMethod = class(TLapeType)
   protected
     FMethods: TLapeDeclarationList;
   public
+    OnFunctionNotFound: TLapeGetOverloadedMethod;
     FreeMethods: Boolean;
+
     constructor Create(ACompiler: TLapeCompilerBase; AMethods: TLapeDeclarationList; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
     function CreateCopy: TLapeType; override;
     destructor Destroy; override;
@@ -1056,7 +1056,10 @@ end;
 
 function TLapeType.VarToString(AVar: Pointer): lpString;
 begin
-  Result := AsString;
+  if (AVar <> nil) and ({$IFNDEF FPC}@{$ENDIF}LapeToStrArr[BaseType] <> nil) then
+    LapeToStrArr[BaseType](@AVar, @Result)
+  else
+    Result := AsString;
 end;
 
 function TLapeType.VarToInt(AVar: Pointer): Int64;
@@ -1493,15 +1496,6 @@ begin
   Result := TLapeClassType(Self.ClassType).Create(FTType, FCompiler, Name, @_DocPos);
 end;
 
-function TLapeType_Integer{$IFNDEF FPC}<_Type>{$ENDIF}.VarToString(AVar: Pointer): lpString;
-begin
-  {$IFDEF FPC}
-  Result := IntToStr(Int64(PType(AVar)^));
-  {$ELSE}
-  Result := 'Not implemented yet';
-  {$ENDIF}
-end;
-
 function TLapeType_Integer{$IFNDEF FPC}<_Type>{$ENDIF}.NewGlobalVar(Val: _Type; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
 begin
   Result := NewGlobalVarP(nil, AName, ADocPos);
@@ -1519,15 +1513,6 @@ begin
   {$ENDIF}
 end;
 
-function TLapeType_Float{$IFNDEF FPC}<_Type>{$ENDIF}.VarToString(AVar: Pointer): lpString;
-begin
-  {$IFDEF FPC}
-  Result := FloatToStr(Extended(PType(AVar)^));
-  {$ELSE}
-  Result := 'Not implemented yet';
-  {$ENDIF}
-end;
-
 function TLapeType_Float{$IFNDEF FPC}<_Type>{$ENDIF}.NewGlobalVar(Val: _Type; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
 begin
   Result := NewGlobalVarP(nil, AName, ADocPos);
@@ -1542,15 +1527,6 @@ begin
   {$ELSE}
   a := StrToFloatDot(Str); b := @a;
   Result := NewGlobalVar(b^ , AName, ADocPos);
-  {$ENDIF}
-end;
-
-function TLapeType_Char{$IFNDEF FPC}<_Type>{$ENDIF}.VarToString(AVar: Pointer): lpString;
-begin
-  {$IFDEF FPC}
-  Result := '#'+IntToStr(Integer(PType(AVar)^));
-  {$ELSE}
-  Result := 'Not implemented yet';
   {$ENDIF}
 end;
 
@@ -1662,18 +1638,6 @@ end;
 constructor TLapeType_Variant.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
 begin
   inherited Create(ltVariant, ACompiler, AName, ADocPos);
-end;
-
-function TLapeType_Variant.VarToString(AVar: Pointer): lpString;
-begin
-  if (AVar <> nil) then
-  try
-    Result := VarTypeAsText(VarType(PVariant(AVar)^));
-    Result := Result + '(' + PVariant(AVar)^ + ')';
-  except
-  end
-  else
-    Result := inherited;
 end;
 
 function TLapeType_Variant.NewGlobalVar(Val: Variant; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -1855,6 +1819,8 @@ begin
     if (FBaseType in LapeBoolTypes) then
       if (i = 0) then
         Result := 'False'
+      else if (i > 1) then
+        Result := 'True('+IntToStr(i)+')'
       else
         Result := 'True'
     else
@@ -2768,14 +2734,8 @@ end;
 
 function TLapeType_String.VarToString(AVar: Pointer): lpString;
 begin
-  if (FBaseType = ltAnsiString) then
-    Result := '`'+PAnsiString(AVar)^+'`'
-  else if (FBaseType = ltWideString) then
-    Result := '`'+PWideString(AVar)^+'`'
-  else if (FBaseType = ltUnicodeString) then
-    Result := '`'+PUnicodeString(AVar)^+'`'
-  else
-    Result := '`'+PlpString(AVar)^+'`';
+  Result := inherited;
+  Result := '''' + Result + '''';
 end;
 
 function TLapeType_String.NewGlobalVarStr(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -2881,7 +2841,7 @@ constructor TLapeType_WideString.Create(ACompiler: TLapeCompilerBase; AName: lpS
 begin
   Assert(ACompiler <> nil);
   inherited Create(ACompiler.getBaseType(ltWideChar), ACompiler, AName, ADocPos);
-  FBaseType := ltWideChar;
+  FBaseType := ltWideString;
 end;
 
 constructor TLapeType_UnicodeString.Create(ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil);
@@ -2910,11 +2870,6 @@ begin
   Assert(ACompiler <> nil);
   inherited Create(StrRange, ACompiler.getBaseType(ltAnsiChar), ACompiler, AName, ADocPos);
   FBaseType := ltShortString;
-end;
-
-function TLapeType_ShortString.VarToString(AVar: Pointer): lpString;
-begin
-  Result := '`'+PShortString(AVar)^+'`';
 end;
 
 function TLapeType_ShortString.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -3537,6 +3492,7 @@ constructor TLapeType_OverloadedMethod.Create(ACompiler: TLapeCompilerBase; AMet
 begin
   inherited Create(ltUnknown, ACompiler, AName, ADocPos);
 
+  OnFunctionNotFound := nil;
   FreeMethods := (AMethods = nil);
   if (AMethods = nil) then
     AMethods := TLapeDeclarationList.Create(nil);
@@ -3576,7 +3532,10 @@ begin
   for i := 0 to FMethods.Items.Count - 1 do
     if TLapeGlobalVar(FMethods.Items[i]).VarType.Equals(AType) then
       Exit(TLapeGlobalVar(FMethods.Items[i]));
-  Result := nil;
+  if ({$IFNDEF FPC}@{$ENDIF}OnFunctionNotFound <> nil) then
+    Result := OnFunctionNotFound(Self, AType, nil, nil)
+  else
+    Result := nil;
 end;
 
 function TLapeType_OverloadedMethod.getMethod(AParams: TLapeTypeArray; AResult: TLapeType = nil): TLapeGlobalVar;
@@ -3586,9 +3545,13 @@ var
 
   function SizeWeight(a, b: TLapeType): Integer; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    Result := Abs(a.Size - b.Size);
-    if (a.Size > b.Size) then
-      Result := Result * 8;
+    Result := Abs(a.Size - b.Size) * 2;
+    if (a.Size < b.Size) then
+      Result := Result * 8
+    else if (a.BaseIntType in LapeIntegerTypes) and (b.BaseIntType in LapeIntegerTypes) and
+       ((a.VarLo().AsInteger <= b.VarLo().AsInteger) and (UInt64(a.VarHi().AsInteger) >= UInt64(b.VarHi().AsInteger)))
+    then
+      Result := Result - 1;
   end;
 
 begin
@@ -3602,11 +3565,11 @@ begin
         Continue;
 
       if (AResult = nil) or AResult.Equals(Res) then
-        Weight := Params.Count
+        Weight := Params.Count * 2
       else if (not AResult.CompatibleWith(Res)) then
         Continue
       else
-        Weight := SizeWeight(AResult, Res) + Params.Count + 1;
+        Weight := SizeWeight(Res, AResult) + (Params.Count + 1) * 2;
 
       Match := True;
       for i := 0 to Params.Count - 1 do
@@ -3615,7 +3578,7 @@ begin
         if ((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default = nil) then
           Break
         else if (((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default <> nil)) or ((Params[i].VarType <> nil) and Params[i].VarType.Equals(AParams[i])) then
-          Weight := Weight - 1
+          Weight := Weight - 2
         else if (Params[i].ParType in Lape_RefParams) then
           Break
         else if (Params[i].VarType <> nil) and (not Params[i].VarType.CompatibleWith(AParams[i])) then
@@ -3634,6 +3597,9 @@ begin
           MinWeight := Weight;
         end;
     end;
+
+  if (Result = nil) and ({$IFNDEF FPC}@{$ENDIF}OnFunctionNotFound <> nil) then
+    Result := OnFunctionNotFound(Self, nil, AParams, AResult);
 end;
 
 function TLapeType_OverloadedMethod.NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;

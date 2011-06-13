@@ -133,10 +133,10 @@ type
     function getExpression(AName: lpString; AStackInfo: TLapeStackInfo; Pos: PDocPos = nil; LocalOnly: Boolean = False): TLapeTree_ExprBase; overload; virtual;
     function getExpression(AName: lpString; Pos: PDocPos = nil; LocalOnly: Boolean = False): TLapeTree_ExprBase; overload; virtual;
 
-    function addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration; override;
-    function addLocalVar(v: TLapeType; Name: lpString = ''): TLapeVar; virtual;
+    function addLocalDecl(Decl: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration; override;
+    function addLocalVar(AVar: TLapeType; Name: lpString = ''): TLapeVar; virtual;
 
-    function addGlobalVar(v: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; overload; virtual;
+    function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Typ: TLapeType; AName: lpString; Value: lpString = ''): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Typ: ELapeBaseType; AName: lpString; Value: lpString = ''): TLapeGlobalVar; overload; virtual;
@@ -161,10 +161,10 @@ type
     function addGlobalVar(Value: Variant; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalVar(Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
 
-    function addGlobalType(t: TLapeType; AName: lpString = ''): TLapeType; overload; virtual;
-    function addGlobalType(s: lpString; AName: lpString): TLapeType; overload; virtual;
+    function addGlobalType(Typ: TLapeType; AName: lpString = ''): TLapeType; overload; virtual;
+    function addGlobalType(Str: lpString; AName: lpString): TLapeType; overload; virtual;
 
-    function addGlobalFunc(s: lpString; Value: Pointer): TLapeGlobalVar; overload; virtual;
+    function addGlobalFunc(Str: lpString; Value: Pointer): TLapeGlobalVar; overload; virtual;
     function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
 
@@ -181,7 +181,7 @@ implementation
 
 uses
   Variants,
-  lpexceptions, lpinterpreter;
+  lpexceptions, lpinterpreter, lpeval;
 
 function TLapeCompiler.getPDocPos: PDocPos;
 begin
@@ -1943,6 +1943,34 @@ end;
 constructor TLapeCompiler.Create(
   ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean = True;
   AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True);
+
+  procedure AddToString;
+  var
+    OLMethod: TLapeType_OverloadedMethod;
+    BaseType: ELapeBaseType;
+  begin
+    OLMethod := TLapeType_OverloadedMethod.Create(Self, nil);
+    addManagedDecl(OLMethod);
+
+    for BaseType := Low(ELapeBaseType) to High(ELapeBaseType) do
+      if ({$IFNDEF FPC}@{$ENDIF}LapeToStrArr[BaseType] <> nil) then
+        OLMethod.addMethod(
+          TLapeType_Method(addManagedType(
+            TLapeType_Method.Create(
+              Self,
+              [getBaseType(BaseType)],
+              [lptConst],
+              [TLapeGlobalVar(nil)],
+              getBaseType(ltString)
+            )
+          )).NewGlobalVar(
+            {$IFNDEF FPC}@{$ENDIF}LapeToStrArr[BaseType]
+          )
+        );
+
+    addGlobalVar(OLMethod.NewGlobalVar('ToString'));
+  end;
+
 begin
   inherited Create(AEmitter, ManageEmitter);
 
@@ -1992,6 +2020,7 @@ begin
   FInternalMethodMap['Pred'] := TLapeTree_InternalMethod_Pred;
   FInternalMethodMap['Inc'] := TLapeTree_InternalMethod_Inc;
   FInternalMethodMap['Dec'] := TLapeTree_InternalMethod_Dec;
+  AddToString();
 
   addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high');
   addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length');
@@ -2181,45 +2210,45 @@ begin
   Result := getExpression(AName, FStackInfo, Pos, LocalOnly);
 end;
 
-function TLapeCompiler.addLocalDecl(v: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration;
+function TLapeCompiler.addLocalDecl(Decl: TLapeDeclaration; AStackInfo: TLapeStackInfo): TLapeDeclaration;
 begin
-  if (v = nil) then
+  if (Decl = nil) then
     Exit(nil);
-  if (v.Name <> '') and hasDeclaration(v.Name, AStackInfo, True) then
-    LapeExceptionFmt(lpeDuplicateDeclaration, [v.Name]);
+  if (Decl.Name <> '') and hasDeclaration(Decl.Name, AStackInfo, True) then
+    LapeExceptionFmt(lpeDuplicateDeclaration, [Decl.Name]);
 
-  Result := v;
+  Result := Decl;
   if (AStackInfo = nil) or (AStackInfo.Owner = nil) then
-    FGlobalDeclarations.addDeclaration(v)
+    FGlobalDeclarations.addDeclaration(Decl)
   else
-    AStackInfo.addDeclaration(addManagedDecl(v));
+    AStackInfo.addDeclaration(addManagedDecl(Decl));
 end;
 
-function TLapeCompiler.addLocalVar(v: TLapeType; Name: lpString = ''): TLapeVar;
+function TLapeCompiler.addLocalVar(AVar: TLapeType; Name: lpString = ''): TLapeVar;
 begin
-  if (v = nil) then
+  if (AVar = nil) then
     Exit(nil);
   if (Name <> '') and hasDeclaration(Name, True) then
     LapeExceptionFmt(lpeDuplicateDeclaration, [Name]);
 
   if (FStackInfo = nil) or (FStackInfo.Owner = nil) then
-    Result := addGlobalVar(v.NewGlobalVarP(), Name)
+    Result := addGlobalVar(AVar.NewGlobalVarP(), Name)
   else
-    Result := addStackVar(v, Name);
+    Result := addStackVar(AVar, Name);
 end;
 
-function TLapeCompiler.addGlobalVar(v: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar;
+function TLapeCompiler.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar;
 begin
-  if (v <> nil) then
+  if (AVar <> nil) then
   begin
     if (AName <> '') then
-      v.Name := AName;
-    if (Length(FGlobalDeclarations.getByName(v.Name)) > 0) then
-      LapeExceptionFmt(lpeDuplicateDeclaration, [v.Name]);
-    v.isConstant := False;
-    FGlobalDeclarations.addDeclaration(v);
+      AVar.Name := AName;
+    if (Length(FGlobalDeclarations.getByName(AVar.Name)) > 0) then
+      LapeExceptionFmt(lpeDuplicateDeclaration, [AVar.Name]);
+    AVar.isConstant := False;
+    FGlobalDeclarations.addDeclaration(AVar);
   end;
-  Result := v;
+  Result := AVar;
 end;
 
 function TLapeCompiler.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
@@ -2365,20 +2394,20 @@ begin
   Result := addGlobalVar(TLapeType_Pointer(FBaseTypes[ltPointer]).NewGlobalVar(Value), AName);
 end;
 
-function TLapeCompiler.addGlobalType(t: TLapeType; AName: lpString = ''): TLapeType;
+function TLapeCompiler.addGlobalType(Typ: TLapeType; AName: lpString = ''): TLapeType;
 begin
-  if (t <> nil) then
+  if (Typ <> nil) then
   begin
     if (AName <> '') then
-      t.Name := AName;
-    if (Length(FGlobalDeclarations.getByName(t.Name)) > 0) then
-      LapeExceptionFmt(lpeDuplicateDeclaration, [t.Name]);
-    FGlobalDeclarations.addDeclaration(t);
+      Typ.Name := AName;
+    if (Length(FGlobalDeclarations.getByName(Typ.Name)) > 0) then
+      LapeExceptionFmt(lpeDuplicateDeclaration, [Typ.Name]);
+    FGlobalDeclarations.addDeclaration(Typ);
   end;
-  Result := t;
+  Result := Typ;
 end;
 
-function TLapeCompiler.addGlobalType(s: lpString; AName: lpString): TLapeType;
+function TLapeCompiler.addGlobalType(Str: lpString; AName: lpString): TLapeType;
 var
   OldStackInfo: TLapeStackInfo;
   OldTokenizer: TLapeTokenizerBase;
@@ -2394,7 +2423,7 @@ begin
   OldState := getState();
 
   FTokenizer := 0;
-  FTokenizers[0] := TLapeTokenizerString.Create(AName + ' = ' + s + ';');
+  FTokenizers[0] := TLapeTokenizerString.Create(AName + ' = ' + Str + ';');
   try
     FStackInfo := nil;
     ParseTypeBlock();
@@ -2409,7 +2438,7 @@ begin
   end;
 end;
 
-function TLapeCompiler.addGlobalFunc(s: lpString; Value: Pointer): TLapeGlobalVar;
+function TLapeCompiler.addGlobalFunc(Str: lpString; Value: Pointer): TLapeGlobalVar;
 var
   Method: TLapeTree_Method;
   OldStackInfo: TLapeStackInfo;
@@ -2426,7 +2455,7 @@ begin
   OldState := getState();
 
   FTokenizer := 0;
-  FTokenizers[0] := TLapeTokenizerString.Create(s + ';');
+  FTokenizers[0] := TLapeTokenizerString.Create(Str + ';');
   try
     FStackInfo := nil;
     Expect([tk_kw_Function, tk_kw_Procedure]);

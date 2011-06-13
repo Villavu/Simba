@@ -16,10 +16,45 @@ uses
   lptypes;
 
 type
+  TLapeToStrArr = array[ELapeBaseType] of TLapeImportedFunc;
   TLapeEvalArr = array[EOperator, ELapeBaseType, ELapeBaseType] of TLapeEvalProc;
   TLapeEvalRes = array[EOperator, ELapeBaseType, ELapeBaseType] of ELapeBaseType;
   TGetEvalRes = function(Op: EOperator; Left, Right: ELapeBaseType): ELapeBaseType;
   TGetEvalProc = function(Op: EOperator; Left, Right: ELapeBaseType): TLapeEvalProc;
+
+procedure _LapeHigh(const Params: PParamArray; const Result: Pointer);
+procedure _LapeLength(const Params: PParamArray; const Result: Pointer);
+procedure _LapeAStrLen(const Params: PParamArray; const Result: Pointer);
+procedure _LapeWStrLen(const Params: PParamArray; const Result: Pointer);
+procedure _LapeUStrLen(const Params: PParamArray; const Result: Pointer);
+
+procedure _LapeToString_UInt8(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Int8(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_UInt16(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Int16(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_UInt32(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Int32(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_UInt64(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Int64(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Single(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Double(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Currency(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Extended(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Boolean(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_ByteBool(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_WordBool(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_LongBool(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_AnsiChar(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_WideChar(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_ShortString(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_AnsiString(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_WideString(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_UnicodeString(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Variant(const Params: PParamArray; const Result: Pointer);
+procedure _LapeToString_Pointer(const Params: PParamArray; const Result: Pointer);
+
+procedure ClearToStrArr(var Arr: TLapeToStrArr);
+procedure LoadToStrArr(var Arr: TLapeToStrArr);
 
 function ValidEvalFunction(p: Pointer): Boolean; overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function ValidEvalFunction(p: TLapeEvalProc): Boolean; overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -37,13 +72,203 @@ var
   getEvalRes: TGetEvalRes = {$IFDEF FPC}@{$ENDIF}LapeEval_GetRes;
   getEvalProc: TGetEvalProc = {$IFDEF FPC}@{$ENDIF}LapeEval_GetProc;
 
+  LapeToStrArr: TLapeToStrArr;
   LapeEvalRes: TLapeEvalRes;
   LapeEvalArr: TLapeEvalArr;
 
 implementation
 
 uses
+  Variants,
   lpexceptions;
+
+procedure _LapeHigh(const Params: PParamArray; const Result: Pointer);
+begin
+  PInt32(Result)^ := High(PCodeArray(Params^[0])^);
+end;
+
+procedure _LapeLength(const Params: PParamArray; const Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PCodeArray(Params^[0])^);
+end;
+
+procedure _LapeAStrLen(const Params: PParamArray; const Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PAnsiString(Params^[0])^);
+end;
+
+procedure _LapeWStrLen(const Params: PParamArray; const Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PWideString(Params^[0])^);
+end;
+
+procedure _LapeUStrLen(const Params: PParamArray; const Result: Pointer);
+begin
+  PInt32(Result)^ := Length(PUnicodeString(Params^[0])^);
+end;
+
+procedure _LapeToString_UInt8(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PUInt8(Params^[0])^);
+end;
+
+procedure _LapeToString_Int8(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PInt8(Params^[0])^);
+end;
+
+procedure _LapeToString_UInt16(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PUInt16(Params^[0])^);
+end;
+
+procedure _LapeToString_Int16(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PInt16(Params^[0])^);
+end;
+
+procedure _LapeToString_UInt32(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PUInt32(Params^[0])^);
+end;
+
+procedure _LapeToString_Int32(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PInt32(Params^[0])^);
+end;
+
+procedure _LapeToString_UInt64(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PUInt64(Params^[0])^);
+end;
+
+procedure _LapeToString_Int64(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := IntToStr(PInt64(Params^[0])^);
+end;
+
+procedure _LapeToString_Single(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := FloatToStr(PSingle(Params^[0])^);
+end;
+
+procedure _LapeToString_Double(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := FloatToStr(PDouble(Params^[0])^);
+end;
+
+procedure _LapeToString_Currency(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := FloatToStr(PCurrency(Params^[0])^);
+end;
+
+procedure _LapeToString_Extended(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := FloatToStr(PExtended(Params^[0])^);
+end;
+
+procedure _LapeToString_Boolean(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := BoolToStr(PBoolean(Params^[0])^, True);
+end;
+
+procedure _LapeToString_ByteBool(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := BoolToStr(PBoolean(Params^[0])^, True);
+end;
+
+procedure _LapeToString_WordBool(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := BoolToStr(PWordBool(Params^[0])^, True);
+end;
+
+procedure _LapeToString_LongBool(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := BoolToStr(PLongBool(Params^[0])^, True);
+end;
+
+procedure _LapeToString_AnsiChar(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := PAnsiChar(Params^[0])^;
+end;
+
+procedure _LapeToString_WideChar(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := PWideChar(Params^[0])^;
+end;
+
+procedure _LapeToString_ShortString(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := PShortString(Params^[0])^;
+end;
+
+procedure _LapeToString_AnsiString(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := PAnsiString(Params^[0])^;
+end;
+
+procedure _LapeToString_WideString(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := PWideString(Params^[0])^;
+end;
+
+procedure _LapeToString_UnicodeString(const Params: PParamArray; const Result: Pointer);
+begin
+  PlpString(Result)^ := PUnicodeString(Params^[0])^;
+end;
+
+procedure _LapeToString_Variant(const Params: PParamArray; const Result: Pointer);
+begin
+  try
+    PlpString(Result)^ := VarToStr(PVariant(Params^[0])^);
+  except
+    PlpString(Result)^ := VarTypeAsText(VarType(PVariant(Params^[0])^));
+  end;
+end;
+
+procedure _LapeToString_Pointer(const Params: PParamArray; const Result: Pointer);
+begin
+  if (PPointer(Params^[0])^ = nil) then
+    PlpString(Result)^ := 'nil'
+  else
+    PlpString(Result)^ := '0x'+IntToHex(PtrUInt(PPointer(Params^[0])^), 1);
+end;
+
+procedure ClearToStrArr(var Arr: TLapeToStrArr);
+var
+  BaseType: ELapeBaseType;
+begin
+  for BaseType := Low(BaseType) to High(BaseType) do
+    Arr[BaseType] := nil;
+end;
+
+procedure LoadToStrArr(var Arr: TLapeToStrArr);
+begin
+  Arr[ltUInt8] := @_LapeToString_UInt8;
+  Arr[ltInt8] := @_LapeToString_Int8;
+  Arr[ltUInt16] := @_LapeToString_UInt16;
+  Arr[ltInt16] := @_LapeToString_Int16;
+  Arr[ltUInt32] := @_LapeToString_UInt32;
+  Arr[ltInt32] := @_LapeToString_Int32;
+  Arr[ltUInt64] := @_LapeToString_UInt64;
+  Arr[ltInt64] := @_LapeToString_Int64;
+  Arr[ltSingle] := @_LapeToString_Single;
+  Arr[ltDouble] := @_LapeToString_Double;
+  Arr[ltCurrency] := @_LapeToString_Currency;
+  Arr[ltExtended] := @_LapeToString_Extended;
+  Arr[ltBoolean] := @_LapeToString_Boolean;
+  Arr[ltByteBool] := @_LapeToString_ByteBool;
+  Arr[ltWordBool] := @_LapeToString_WordBool;
+  Arr[ltLongBool] := @_LapeToString_LongBool;
+  Arr[ltAnsiChar] := @_LapeToString_AnsiChar;
+  Arr[ltWideChar] := @_LapeToString_WideChar;
+  Arr[ltShortString] := @_LapeToString_ShortString;
+  Arr[ltAnsiString] := @_LapeToString_AnsiString;
+  Arr[ltWideString] := @_LapeToString_WideString;
+  Arr[ltUnicodeString] := @_LapeToString_UnicodeString;
+  Arr[ltVariant] := @_LapeToString_Variant;
+  Arr[ltPointer] := @_LapeToString_Pointer;
+end;
 
 function ValidEvalFunction(p: Pointer): Boolean;
 begin
@@ -123,6 +348,9 @@ begin
 end;
 
 initialization
+  ClearToStrArr(LapeToStrArr);
+  LoadToStrArr(LapeToStrArr);
+
   ClearEvalRes(LapeEvalRes);
   ClearEvalArr(LapeEvalArr);
   LoadEvalRes(LapeEvalRes);
