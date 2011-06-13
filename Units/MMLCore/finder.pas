@@ -333,6 +333,14 @@ begin
   end;
 end;
 
+function ColorSameCTS2(Tolerance: Integer; H1,S1,L1,H2,S2,L2, hueMod, satMod: extended):
+ boolean; inline;
+begin
+  result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and
+            (abs(S2-S1) <= (satMod * Tolerance))
+            and (abs(L1-L2) <= Tolerance));
+end;
+
 procedure TMFinder.UpdateCachedValues(NewWidth, NewHeight: integer);
 begin
   CachedWidth := NewWidth;
@@ -575,7 +583,6 @@ var
    PtrData: TRetData;
    RowData : TPRGB32Array;
    dX, dY, clR, clG, clB,i,Hispiral: Integer;
-   label Hit;
 
    function cts0: integer;
      var j: integer;
@@ -638,25 +645,22 @@ begin
   LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
   HiSpiral := (dy+1) * (dx + 1) -1;
   case CTS of
-    0:
-      i := cts0();
-    1:
-      i := cts1();
-    2:
-      i := cts2();
+    0: i := cts0();
+    1: i := cts1();
+    2: i := cts2();
   end;
-  if i <> -1 then
-    goto Hit;
-
-  Result := False;
-  TClient(Client).IOManager.FreeReturnData;
-  Exit;
-
-  Hit:
+  if i = -1 then
+  begin
+    Result := False;
+    TClient(Client).IOManager.FreeReturnData;
+    Exit;
+  end else
+  begin
     Result := True;
     x := ClientTPA[i].x + xs;
     y := ClientTPA[i].y + ys;
     TClient(Client).IOManager.FreeReturnData;
+  end;
 end;
 
 function TMFinder.FindColoredArea(var x, y: Integer; Color, xs, ys, xe, ye, MinArea: Integer): Boolean;
@@ -1038,8 +1042,69 @@ var
    PtrData: TRetData;
    Ptr: PRGB32;
    PtrInc,C: Integer;
-   dX, dY, clR, clG, clB, xx, yy: Integer;
+   dX, dY, clR, clG, clB: Integer;
    H1, S1, L1, H2, S2, L2, hueXTol, satXTol: Extended;
+
+   procedure cts0;
+     var xx, yy: integer;
+   begin
+     for yy := ys to ye do
+     begin
+       for xx := xs to xe do
+       begin
+          if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
+          begin;
+            ClientTPA[c].x := xx;
+            ClientTPA[c].y := yy;
+            inc(c);
+          end;
+         inc(Ptr);
+       end;
+       Inc(Ptr, PtrInc);
+     end;
+   end;
+
+
+   procedure cts1;
+     var xx, yy: integer;
+   begin
+     for yy := ys to ye do
+     begin
+       for xx := xs to xe do
+       begin
+          if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
+          begin;
+            ClientTPA[c].x := xx;
+            ClientTPA[c].y := yy;
+            inc(c);
+          end;
+         inc(ptr);
+       end;
+       Inc(Ptr, PtrInc);
+     end;
+   end;
+
+   procedure cts2;
+     var xx, yy: integer;
+   begin
+     HueXTol := hueMod * Tol;
+     SatXTol := satMod * Tol;
+     for yy := ys to ye do
+     begin
+       for xx := xs to xe do
+       begin
+         RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
+         if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
+         begin;
+           ClientTPA[c].x := xx;
+           ClientTPA[c].y := yy;
+           Inc(c);
+         end;
+         Inc(Ptr)
+       end;
+       Inc(Ptr, PtrInc);
+     end;
+   end;
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
@@ -1059,64 +1124,16 @@ begin
   PtrInc := PtrData.IncPtrWith;
   c := 0;
   case CTS of
-    0:
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-         if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
-         begin;
-           ClientTPA[c].x := xx;
-           ClientTPA[c].y := yy;
-           inc(c);
-         end;
-        inc(Ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
-
-    1:
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-         if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
-         begin;
-           ClientTPA[c].x := xx;
-           ClientTPA[c].y := yy;
-           inc(c);
-         end;
-        inc(ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
-
-    2:
-    begin
-      HueXTol := hueMod * Tol;
-      SatXTol := satMod * Tol;
-      for yy := ys to ye do
-      begin
-        for xx := xs to xe do
-        begin
-          RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
-          if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-          begin;
-            ClientTPA[c].x := xx;
-            ClientTPA[c].y := yy;
-            Inc(c);
-          end;
-          Inc(Ptr)
-        end;
-        Inc(Ptr, PtrInc);
-      end;
-    end;
+    0: cts0();
+    1: cts1();
+    2: cts2();
   end;
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
   TClient(Client).IOManager.FreeReturnData;
 end;
+
 function TMFinder.FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys,
   xe, ye, Tol: Integer): Boolean;
 var
