@@ -870,10 +870,68 @@ var
    PtrData: TRetData;
    Ptr: PRGB32;
    PtrInc: Integer;
-   dX, dY, clR, clG, clB, xx, yy: Integer;
-   H1, S1, L1, H2, S2, L2: Extended;
-   HueXTol, SatXTol: Extended;
-   label Hit;
+   dX, dY, clR, clG, clB: Integer;
+   xy: TPoint;
+
+  function cts0: tpoint;
+  var xx, yy: integer;
+  begin
+     for yy := ys to ye do
+     begin
+       for xx := xs to xe do
+       begin
+          if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and
+             (Abs(clR-Ptr^.R) <= Tol)) then
+            exit(Point(xx, yy));
+         inc(Ptr);
+       end;
+       Inc(Ptr, PtrInc);
+     end;
+
+    result.x := -1; result.y := -1;
+  end;
+
+  function cts1: tpoint;
+  var xx, yy: integer;
+  begin
+    Tol := Sqr(Tol);
+
+    for yy := ys to ye do
+    begin
+      for xx := xs to xe do
+      begin
+         if (sqr(clB - Ptr^.B) + sqr(clG - Ptr^.G) + sqr(clR-Ptr^.R)) <= Tol then
+             exit(Point(xx, yy));
+        inc(ptr);
+      end;
+      Inc(Ptr, PtrInc);
+    end;
+
+    result.x := -1; result.y := -1;
+  end;
+
+  function cts2: tpoint;
+  var xx, yy: integer;
+      H1, S1, L1, H2, S2, L2: Extended;
+      HueXTol, SatXTol: Extended;
+  begin
+    RGBToHSL(clR,clG,clB,H1,S1,L1);
+    HueXTol := hueMod * Tol;
+    SatXTol := satMod * Tol;
+    for yy := ys to ye do
+    begin
+      for xx := xs to xe do
+      begin
+        RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
+        if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
+          exit(Point(xx, yy));
+       inc(Ptr);
+      end;
+      Inc(Ptr, PtrInc);
+    end;
+
+    result.x := -1; result.y := -1;
+  end;
 
 begin
   Result := false;
@@ -885,8 +943,6 @@ begin
   dY := ye - ys;
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
-  if Cts = 2 then
-    RGBToHSL(clR,clG,clB,H1,S1,L1);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
 
@@ -896,61 +952,22 @@ begin
   PtrInc := PtrData.IncPtrWith;
 
   case CTS of
-    0:
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-         if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
-            goto Hit;
-        inc(Ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
-
-    1:
-    begin
-      Tol := Sqr(Tol);
-
-      for yy := ys to ye do
-      begin
-        for xx := xs to xe do
-        begin
-           if (sqr(clB - Ptr^.B) + sqr(clG - Ptr^.G) + sqr(clR-Ptr^.R)) <= Tol then
-              goto Hit;
-          inc(ptr);
-        end;
-        Inc(Ptr, PtrInc);
-      end;
-
-    end;
-    2:
-    { Can be optimized a lot... RGBToHSL isn't really inline, }
-    begin
-      HueXTol := hueMod * Tol;
-      SatXTol := satMod * Tol;
-      for yy := ys to ye do
-      begin
-        for xx := xs to xe do
-        begin
-          RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
-          if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-            goto Hit;
-         inc(Ptr);
-        end;
-        Inc(Ptr, PtrInc);
-      end;
-    end;
+    0: xy := cts0();
+    1: xy := cts1();
+    2: xy := cts2();
   end;
-  Result := False;
-  TClient(Client).IOManager.FreeReturnData;
-  Exit;
-
-  Hit:
-    Result := True;
-    x := xx;
-    y := yy;
+  if (xy.x = -1) and (xy.y = -1) then
+  begin
+    Result := False;
     TClient(Client).IOManager.FreeReturnData;
+    Exit;
+  end else
+  begin
+    Result := True;
+    x := xy.x;
+    y := xy.y;
+    TClient(Client).IOManager.FreeReturnData;
+  end;
 end;
 
 function TMFinder.FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean;
