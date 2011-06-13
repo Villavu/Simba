@@ -124,7 +124,7 @@ begin;
   if (startx >= x1) and (startx <= x2) and (starty >= y1) and (starty <= y2) then
   begin;
     ClientTPA[c] := Point(Startx, StartY);
-    inc(c);
+    Inc(c);
   end;
   Repeat
     if (CurrBox.x2 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y1 >= y1) and (Currbox.y1 <= y2)  then
@@ -132,35 +132,36 @@ begin;
         if (I >= x1) and ( I <= x2) then
         begin;
           ClientTPA[c] := Point(i,CurrBox.y1);
-          inc(c);
+          Inc(c);
         end;
     if (CurrBox.x2 >= x1) and (CurrBox.x2 <= x2) and (Currbox.y2 >= y1) and (Currbox.y1 <= y2)  then
       for i := CurrBox.y1 + 1 to CurrBox.y2 do
         if (I >= y1) and ( I <= y2) then
         begin;
           ClientTPA[c] := Point(Currbox.x2, I);
-          inc(c);
+          Inc(c);
         end;
     if (CurrBox.x2 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y2 >= y1) and (Currbox.y2 <= y2)  then
       for i := CurrBox.x2 - 1 downto CurrBox.x1 do
         if (I >= x1) and ( I <= x2) then
         begin;
           ClientTPA[c] := Point(i,CurrBox.y2);
-          inc(c);
+          Inc(c);
         end;
     if (CurrBox.x1 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y2 >= y1) and (Currbox.y1 <= y2)  then
       for i := CurrBox.y2 - 1 downto CurrBox.y1 do
         if (I >= y1) and ( I <= y2) then
         begin;
           ClientTPA[c] := Point(Currbox.x1, I);
-          inc(c);
+          Inc(c);
         end;
-    inc(ring);
+    Inc(ring);
     CurrBox.x1 := Startx-ring;
     CurrBox.y1 := Starty-Ring;
     CurrBox.x2 := Startx+Ring;
     CurrBox.y2 := Starty+Ring;
-  until (Currbox.x1 < x1) and (Currbox.x2 > x2) and (currbox.y1 < y1) and (currbox.y2 > y2);
+  until (Currbox.x1 < x1) and (Currbox.x2 > x2) and (currbox.y1 < y1)
+        and (currbox.y2 > y2);
 end;
 
 function CalculateRowPtrs(ReturnData : TRetData; RowCount : integer) : TPRGB32Array;overload;
@@ -176,6 +177,7 @@ function CalculateRowPtrs(Bitmap : TMufasaBitmap) : TPRGB32Array;overload;
 begin
   Result := Bitmap.RowPtrs;
 end;
+
 //SkipCoords[y][x] = False/True; True means its "transparent" and therefore not needed to be checked.
 procedure CalculateBitmapSkipCoords(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray);
 var
@@ -200,7 +202,9 @@ begin;
       inc(ptr);
     end;
 end;
-//Points left holds the amount of points that are "left" to be checked (Including the point itself.. So for example Pointsleft[0][0] would hold the total amount of pixels that are to be checked.
+{ Points left holds the amount of points that are "left" to be checked
+   (Including the point itself.. So for example Pointsleft[0][0] would
+    hold the total amount of pixels that are to be checked. }
 procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray;out TotalPoints : integer; out PointsLeft : T2DIntArray);
 var
   x,y : integer;
@@ -239,6 +243,7 @@ begin;
     end;
 end;
 
+{ Initialise the variables for TMFinder }
 constructor TMFinder.Create(aClient: TObject);
 var
   I : integer;
@@ -570,9 +575,50 @@ var
    PtrData: TRetData;
    RowData : TPRGB32Array;
    dX, dY, clR, clG, clB,i,Hispiral: Integer;
-   H1, S1, L1, H2, S2, L2: Extended;
-   HueXTol, SatXTol: Extended;
    label Hit;
+
+   function cts0: integer;
+     var j: integer;
+   begin
+     for j := 0 to HiSpiral do
+       if ((abs(clB-RowData[ClientTPA[j].y][ClientTPA[j].x].B) <= Tol) and
+          (abs(clG-RowData[ClientTPA[j].y][ClientTPA[j].x].G) <= Tol) and
+          (Abs(clR-RowData[ClientTPA[j].y][ClientTPA[j].x].R) <= Tol)) then
+            exit(j);
+     exit(-1);
+   end;
+
+   function cts1: integer;
+     var j: integer;
+   begin
+     Tol := Sqr(Tol);
+     for j := 0 to HiSpiral do
+          if (sqr(clB - RowData[ClientTPA[j].y][ClientTPA[j].x].B) +
+              sqr(clG - RowData[ClientTPA[j].y][ClientTPA[j].x].G) +
+              sqr(clR-RowData[ClientTPA[j].y][ClientTPA[j].x].R)) <= Tol then
+             exit(j);
+     exit(-1);
+   end;
+
+  function cts2: integer;
+    var j: integer;
+        HueXTol, SatXTol: Extended;
+        H1, S1, L1, H2, S2, L2: Extended;
+  begin
+    RGBToHSL(clR,clG,clB,H1,S1,L1);
+    HueXTol := hueMod * Tol;
+    SatXTol := satMod * Tol;
+    for j := 0 to HiSpiral do
+    begin
+      RGBToHSL(RowData[ClientTPA[j].y][ClientTPA[j].x].R,
+               RowData[ClientTPA[j].y][ClientTPA[j].x].G,
+               RowData[ClientTPA[j].y][ClientTPA[j].x].B,H2,S2,L2);
+      if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
+        exit(j);
+    end;
+
+    exit(-1);
+  end;
 
 begin
   Result := false;
@@ -584,8 +630,6 @@ begin
   dY := ye - ys;
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
-  if Cts = 2 then
-    RGBToHSL(clR,clG,clB,H1,S1,L1);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
   //Load rowdata
@@ -595,34 +639,22 @@ begin
   HiSpiral := (dy+1) * (dx + 1) -1;
   case CTS of
     0:
-      for i := 0 to HiSpiral do
-        if ((abs(clB-RowData[ClientTPA[i].y][ClientTPA[i].x].B) <= Tol) and
-            (abs(clG-RowData[ClientTPA[i].y][ClientTPA[i].x].G) <= Tol) and
-            (Abs(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R) <= Tol)) then
-              goto Hit;
+    begin
+      i := cts0();
+      if i <> -1 then
+        goto Hit;
+    end;
 
     1:
     begin
-      Tol := Sqr(Tol);
-      for i := 0 to HiSpiral do
-           if (sqr(clB - RowData[ClientTPA[i].y][ClientTPA[i].x].B) +
-               sqr(clG - RowData[ClientTPA[i].y][ClientTPA[i].x].G) +
-               sqr(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R)) <= Tol then
-                 goto Hit;
+      i := cts1();
+      if i <> -1 then
+        goto Hit;
     end;
+
     2:
     { Can be optimized a lot... RGBToHSL isn't really inline, }
     begin
-      HueXTol := hueMod * Tol;
-      SatXTol := satMod * Tol;
-      for i := 0 to HiSpiral do
-      begin
-        RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
-                 RowData[ClientTPA[i].y][ClientTPA[i].x].G,
-                 RowData[ClientTPA[i].y][ClientTPA[i].x].B,H2,S2,L2);
-        if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-          goto Hit;
-      end;
     end;
   end;
   Result := False;
