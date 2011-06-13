@@ -639,24 +639,15 @@ begin
   HiSpiral := (dy+1) * (dx + 1) -1;
   case CTS of
     0:
-    begin
       i := cts0();
-      if i <> -1 then
-        goto Hit;
-    end;
-
     1:
-    begin
       i := cts1();
-      if i <> -1 then
-        goto Hit;
-    end;
-
     2:
-    { Can be optimized a lot... RGBToHSL isn't really inline, }
-    begin
-    end;
+      i := cts2();
   end;
+  if i <> -1 then
+    goto Hit;
+
   Result := False;
   TClient(Client).IOManager.FreeReturnData;
   Exit;
