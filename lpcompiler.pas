@@ -1950,6 +1950,7 @@ constructor TLapeCompiler.Create(
     BaseType: ELapeBaseType;
   begin
     OLMethod := TLapeType_OverloadedMethod.Create(Self, nil);
+    //OLMethod.OnFunctionNotFound := ;
     addManagedDecl(OLMethod);
 
     for BaseType := Low(ELapeBaseType) to High(ELapeBaseType) do
@@ -2022,11 +2023,11 @@ begin
   FInternalMethodMap['Dec'] := TLapeTree_InternalMethod_Dec;
   AddToString();
 
-  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high');
-  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length');
-  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeAStrLen, '!astrlen');
-  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeWStrLen, '!wstrlen');
-  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeUStrLen, '!ustrlen');
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high');
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length');
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeAStrLen, '!astrlen');
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeWStrLen, '!wstrlen');
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeUStrLen, '!ustrlen');
 
   setTokenizer(ATokenizer);
   Reset();

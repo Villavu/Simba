@@ -430,6 +430,7 @@ type
     function getAsString: lpString; override;
   public
     constructor Create(ACompiler: TLapeCompilerBase; ASize: UInt8 = High(UInt8); AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
+    function VarToString(AVar: Pointer): lpString; override;
 
     function NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; override;
     function NewGlobalVar(Str: ShortString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; reintroduce; overload; virtual;
@@ -612,7 +613,13 @@ type
     function _Eval(AProc: TLapeEvalProc; Dest, Left, Right: TResVar; Pos: PDocPos = nil): Integer; overload; virtual;
   end;
 
-  ECompilerOption = (lcoAssertions, lcoShortCircuit);
+  ECompilerOption = (
+    lcoAssertions,                     // {$C} {$ASSERTIONS}
+    lcoRangeCheck,                     // {$R} {$RANGECHECKS}
+    lcoShortCircuit,                   // {$B} {$BOOLEVAL}
+    lcoAlwaysInitialize,               // {$M},{$MEMORYINIT}
+    lcoForceBlock                      // {$X} {$EXTENDEDSYNTAX}
+  );
   ECompilerOptionsSet = set of ECompilerOption;
 
   TLapeCompilerBase = class(TLapeBaseDeclClass)
@@ -1810,7 +1817,7 @@ end;
 
 function TLapeType_Enum.VarToString(AVar: Pointer): lpString;
 var
-  i: Integer;
+  i: Int64;
 begin
   try
     Result := '';
@@ -1819,7 +1826,7 @@ begin
     if (FBaseType in LapeBoolTypes) then
       if (i = 0) then
         Result := 'False'
-      else if (i > 1) then
+      else if (Abs(i) > 1) then
         Result := 'True('+IntToStr(i)+')'
       else
         Result := 'True'
@@ -2734,8 +2741,14 @@ end;
 
 function TLapeType_String.VarToString(AVar: Pointer): lpString;
 begin
-  Result := inherited;
-  Result := '''' + Result + '''';
+  if (FBaseType = ltAnsiString) then
+ 	  Result := '"'+PAnsiString(AVar)^+'"'
+ 	else if (FBaseType = ltWideString) then
+ 	  Result := '" '+PWideString(AVar)^+'"'
+ 	else if (FBaseType = ltUnicodeString) then
+ 	  Result := '"'+PUnicodeString(AVar)^+'"'
+ 	else
+ 	  Result := '"'+PlpString(AVar)^+'"';
 end;
 
 function TLapeType_String.NewGlobalVarStr(Str: AnsiString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -2870,6 +2883,11 @@ begin
   Assert(ACompiler <> nil);
   inherited Create(StrRange, ACompiler.getBaseType(ltAnsiChar), ACompiler, AName, ADocPos);
   FBaseType := ltShortString;
+end;
+
+function TLapeType_ShortString.VarToString(AVar: Pointer): lpString;
+begin
+  Result := '"'+PShortString(AVar)^+'"';
 end;
 
 function TLapeType_ShortString.NewGlobalVarStr(Str: UnicodeString; AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar;
@@ -3545,12 +3563,14 @@ var
 
   function SizeWeight(a, b: TLapeType): Integer; {$IFDEF Lape_Inline}inline;{$ENDIF}
   begin
-    Result := Abs(a.Size - b.Size) * 2;
+    Result := Abs(a.Size - b.Size) * 4;
     if (a.Size < b.Size) then
-      Result := Result * 8
-    else if (a.BaseIntType in LapeIntegerTypes) and (b.BaseIntType in LapeIntegerTypes) and
+      Result := Result * 4
+    else if (a.BaseType in LapeIntegerTypes) and (b.BaseType in LapeIntegerTypes) and
        ((a.VarLo().AsInteger <= b.VarLo().AsInteger) and (UInt64(a.VarHi().AsInteger) >= UInt64(b.VarHi().AsInteger)))
-    then
+    then if ((a.VarLo().AsInteger < 0) xor (b.VarLo().AsInteger >= 0)) then
+      Result := Result - 2
+    else
       Result := Result - 1;
   end;
 
@@ -3565,11 +3585,11 @@ begin
         Continue;
 
       if (AResult = nil) or AResult.Equals(Res) then
-        Weight := Params.Count * 2
+        Weight := Params.Count * 4
       else if (not AResult.CompatibleWith(Res)) then
         Continue
       else
-        Weight := SizeWeight(Res, AResult) + (Params.Count + 1) * 2;
+        Weight := SizeWeight(Res, AResult) + (Params.Count + 1) * 4;
 
       Match := True;
       for i := 0 to Params.Count - 1 do
@@ -3578,7 +3598,10 @@ begin
         if ((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default = nil) then
           Break
         else if (((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default <> nil)) or ((Params[i].VarType <> nil) and Params[i].VarType.Equals(AParams[i])) then
-          Weight := Weight - 2
+          if Params[i].VarType.Equals(AParams[i], False) then
+            Weight := Weight - 4
+          else
+            Weight := Weight - 3
         else if (Params[i].ParType in Lape_RefParams) then
           Break
         else if (Params[i].VarType <> nil) and (not Params[i].VarType.CompatibleWith(AParams[i])) then
