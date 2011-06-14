@@ -74,6 +74,8 @@ type
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); virtual;
     function popConditional: TDocPos; virtual;
 
+    function GetToStringMethod(Sender: TLapeType_OverloadedMethod; AType: TLapeType_Method; AParams: TLapeTypeArray = nil; AResult: TLapeType = nil): TLapeGlobalVar; virtual;
+
     function EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase; virtual;
     function EnsureTypeExpression(Node: TLapeTree_Base): TLapeTree_Base; virtual;
     function EnsureRange(Node: TLapeTree_Base; out VarType: TLapeType): TLapeTree_Range; overload; virtual;
@@ -318,6 +320,19 @@ begin
     Result := FConditionalStack.Pop().Pos
   else
     LapeException(lpeLostConditional, Tokenizer.DocPos);
+end;
+
+function TLapeCompiler.GetToStringMethod(Sender: TLapeType_OverloadedMethod; AType: TLapeType_Method; AParams: TLapeTypeArray = nil; AResult: TLapeType = nil): TLapeGlobalVar;
+begin
+  Result := nil;
+  if (Sender <> nil) and (AType <> nil) and (AType.Params.Count = 1) and (AType.Params[0].VarType <> nil) then
+  begin
+    SetLength(AParams, 1);
+    AParams[0] := AType.Params[0].VarType;
+    AResult := AType.Res;
+  end;
+  if (Sender = nil) or (Length(AParams) <> 1) or (AParams[0] = nil) or (AResult = nil) or (not (AResult.BaseType in LapeStringTypes)) then
+    Exit;
 end;
 
 function TLapeCompiler.EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase;
@@ -1214,9 +1229,9 @@ begin
       if (Tokenizer.Tok = tk_sym_Equals) then
       begin
         Default := ParseExpression([], True, False);
+        setExpectedType(Default, VarType);
         if (Default <> nil) and (not Default.isConstant()) then
           LapeException(lpeConstantExpected, Default.DocPos);
-        setExpectedType(Default, VarType);
 
         try
           Expect(ValidEnd, False, False);
@@ -1950,7 +1965,7 @@ constructor TLapeCompiler.Create(
     BaseType: ELapeBaseType;
   begin
     OLMethod := TLapeType_OverloadedMethod.Create(Self, nil);
-    //OLMethod.OnFunctionNotFound := ;
+    OLMethod.OnFunctionNotFound := {$IFDEF FPC}@{$ENDIF}GetToStringMethod;
     addManagedDecl(OLMethod);
 
     for BaseType := Low(ELapeBaseType) to High(ELapeBaseType) do

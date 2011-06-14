@@ -880,15 +880,9 @@ var
   function determineArrType(Typ: TLapeType): TLapeType;
   begin
     if (Typ = nil) then
-      Exit(nil)
+      Result := nil
     else if (Typ.BaseType in LapeIntegerTypes - [ltUInt64, ltInt64]) then
       Result := FCompiler.getBaseType(ltInt32)
-    //else if (Typ.BaseType in LapeRealTypes) then
-    //  Result := FCompiler.getBaseType(ltExtended)
-    //else if (Typ.BaseType in LapeBoolTypes) then
-    //  Result := FCompiler.getBaseType(ltBoolean)
-    //else if (Typ.BaseType in LapeStringTypes) then
-    //  Result := FCompiler.getBaseType(ltString)
     else
       Result := Typ;
   end;
@@ -2066,12 +2060,6 @@ begin
   if (ParamType = nil) or (not (ParamType.BaseType in LapeOrdinalTypes + LapeArrayTypes  - LapeStringTypes + [ltShortString])) then
     LapeException(lpeInvalidEvaluation, DocPos);
 
-  {if (ParamType is TLapeType_StaticArray) then
-    with TLapeType_StaticArray(ParamType) do
-      Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(Range.Lo))))
-  else if (ParamType is TLapeType_DynArray) then
-    Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr('0')))
-  else}
   Result := ParamType.VarLo();
 end;
 
@@ -2128,14 +2116,7 @@ begin
   if (ParamType = nil) or (not (ParamType.BaseType in LapeOrdinalTypes + LapeArrayTypes - LapeStringTypes + [ltShortString])) then
     LapeException(lpeInvalidEvaluation, DocPos);
 
-  {if (ParamType is TLapeType_StaticArray) then
-    with TLapeType_StaticArray(ParamType) do
-      Result := TLapeGlobalVar(FCompiler.addManagedVar(FCompiler.getBaseType(ltInt32).NewGlobalVarStr(IntToStr(Range.Hi))))
-  else}
-  if (ParamType is TLapeType_DynArray) then
-    LapeException(lpeCannotEvalConst, DocPos)
-  else
-    Result := ParamType.VarHi();
+  Result := ParamType.VarHi();
   if (Result = nil) then
     LapeException(lpeCannotEvalConst, DocPos)
 end;

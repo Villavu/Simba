@@ -373,7 +373,10 @@ type
   public
     constructor Create(ArrayType: TLapeType; ACompiler: TLapeCompilerBase; AName: lpString = ''; ADocPos: PDocPos = nil); reintroduce; virtual;
     function CreateCopy: TLapeType; override;
+
     function VarToString(AVar: Pointer): lpString; override;
+    function VarLo(AVar: Pointer = nil): TLapeGlobalVar; override;
+    function VarHi(AVar: Pointer = nil): TLapeGlobalVar; override;
 
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
     function EvalConst(Op: EOperator; Left, Right: TLapeGlobalVar): TLapeGlobalVar; override;
@@ -392,6 +395,8 @@ type
     function CreateCopy: TLapeType; override;
 
     function VarToString(AVar: Pointer): lpString; override;
+    function VarLo(AVar: Pointer = nil): TLapeGlobalVar; override;
+    function VarHi(AVar: Pointer = nil): TLapeGlobalVar; override;
     function NewGlobalVar(AName: lpString = ''; ADocPos: PDocPos = nil): TLapeGlobalVar; reintroduce; virtual;
 
     function EvalRes(Op: EOperator; Right: TLapeType = nil): TLapeType; override;
@@ -2345,6 +2350,22 @@ begin
   Result := Result + ']';
 end;
 
+function TLapeType_DynArray.VarLo(AVar: Pointer = nil): TLapeGlobalVar;
+begin
+  if (FCompiler = nil) then
+    Result := nil
+  else with FCompiler, getBaseType(ltInt32) do
+    Result := addManagedVar(NewGlobalVarStr('0')) as TLapeGlobalVar;
+end;
+
+function TLapeType_DynArray.VarHi(AVar: Pointer = nil): TLapeGlobalVar;
+begin
+  if (FCompiler = nil) or (AVar = nil) then
+    Result := nil
+  else with FCompiler, getBaseType(ltInt32) do
+    Result := addManagedVar(NewGlobalVarStr(IntToStr(High(PCodeArray(AVar)^)))) as TLapeGlobalVar;
+end;
+
 function TLapeType_DynArray.CreateCopy: TLapeType;
 type
   TLapeClassType = class of TLapeType_DynArray;
@@ -2484,6 +2505,22 @@ begin
       Result := Result + FPType.VarToString(Pointer(PtrInt(AVar) + (FPType.Size * i)));
     end;
   Result := Result + ']';
+end;
+
+function TLapeType_StaticArray.VarLo(AVar: Pointer = nil): TLapeGlobalVar;
+begin
+  if (FCompiler = nil) then
+    Result := nil
+  else with FCompiler, getBaseType(ltInt32) do
+    Result := addManagedVar(NewGlobalVarStr(IntToStr(FRange.Lo))) as TLapeGlobalVar;
+end;
+
+function TLapeType_StaticArray.VarHi(AVar: Pointer = nil): TLapeGlobalVar;
+begin
+  if (FCompiler = nil) then
+    Result := nil
+  else with FCompiler, getBaseType(ltInt32) do
+    Result := addManagedVar(NewGlobalVarStr(IntToStr(FRange.Hi))) as TLapeGlobalVar;
 end;
 
 function TLapeType_StaticArray.CreateCopy: TLapeType;
