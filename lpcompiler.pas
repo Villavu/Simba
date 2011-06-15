@@ -63,6 +63,7 @@ type
     FTreeMethodMap: TLapeTreeMethodMap;
     FInternalMethodMap: TLapeInternalMethodMap;
     FTree: TLapeTree_Base;
+    FDelayedTree: TLapeTree_DelayedStatementList;
     FImporting: Pointer;
 
     FIncludes: TStringList;
@@ -86,6 +87,7 @@ type
     function popConditional: TDocPos; virtual;
 
     function GetToStringMethod(Sender: TLapeType_OverloadedMethod; AType: TLapeType_Method; AParams: TLapeTypeArray = nil; AResult: TLapeType = nil): TLapeGlobalVar; virtual;
+    procedure InitBaseDefinitions; virtual;
 
     function EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase; virtual;
     function EnsureTypeExpression(Node: TLapeTree_Base): TLapeTree_Base; virtual;
@@ -147,6 +149,7 @@ type
     procedure StartImporting; virtual;
     procedure EndImporting; virtual;
 
+    function addDelayedExpression(Node: TLapeTree_Base; AfterCompilation: Boolean = True; IsGlobal: Boolean = False): TLapeTree_Base; virtual;
     function ParseFile: TLapeTree_Base; virtual;
     function Compile: Boolean; virtual;
     procedure CheckAfterCompile; virtual;
@@ -188,12 +191,16 @@ type
     function addGlobalType(Typ: TLapeType; AName: lpString = ''): TLapeType; overload; virtual;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; overload; virtual;
 
-    function addGlobalFunc(Str: lpString; Value: Pointer): TLapeGlobalVar; overload; virtual;
+    function addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar; overload; virtual;
+    function addGlobalFunc(AHeader: TLapeType_Method; AName, Body: lpString): TLapeTree_Method; overload; virtual;
     function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
     function addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar; overload; virtual;
 
+    function addDelayedCode(ACode: lpString; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; virtual;
+
     property InternalMethodMap: TLapeInternalMethodMap read FInternalMethodMap;
     property Tree: TLapeTree_Base read FTree;
+    property DelayedTree: TLapeTree_DelayedStatementList read FDelayedTree;
     property Importing: Boolean read getImporting write setImporting;
   published
     property Tokenizer: TLapeTokenizerBase read getTokenizer write setTokenizer;
@@ -259,6 +266,8 @@ begin
     FTree.Free();
   FTree := nil;
 
+  if (FDelayedTree <> nil) then
+    FDelayedTree.Clean();
   if (FTreeMethodMap <> nil) then
     FTreeMethodMap.Clear();
 
@@ -370,6 +379,63 @@ begin
   end;
   if (Sender = nil) or (Length(AParams) <> 1) or (AParams[0] = nil) or (AResult = nil) or (not (AResult.BaseType in LapeStringTypes)) then
     Exit;
+end;
+
+procedure TLapeCompiler.InitBaseDefinitions;
+  procedure addToString;
+  var
+    OLMethod: TLapeType_OverloadedMethod;
+    BaseType: ELapeBaseType;
+  begin
+    OLMethod := TLapeType_OverloadedMethod.Create(Self, nil);
+    OLMethod.OnFunctionNotFound := {$IFDEF FPC}@{$ENDIF}GetToStringMethod;
+    addManagedDecl(OLMethod);
+
+    for BaseType := Low(ELapeBaseType) to High(ELapeBaseType) do
+      if ({$IFNDEF FPC}@{$ENDIF}LapeToStrArr[BaseType] <> nil) then
+        OLMethod.addMethod(
+          TLapeType_Method(addManagedType(
+            TLapeType_Method.Create(
+              Self,
+              [getBaseType(BaseType)],
+              [lptConst],
+              [TLapeGlobalVar(nil)],
+              getBaseType(ltString)
+            )
+          )).NewGlobalVar(
+            {$IFNDEF FPC}@{$ENDIF}LapeToStrArr[BaseType]
+          )
+        );
+
+    addGlobalVar(OLMethod.NewGlobalVar('ToString'));
+  end;
+begin
+  with FBaseDefines do
+  begin
+    add('Lape');
+    add('Sesquipedalian');
+  end;
+
+  addGlobalType(getBaseType(ltString).createCopy(), 'String');
+  addGlobalType(getBaseType(ltChar).createCopy(), 'Char');
+  addGlobalType(getBaseType(ltEvalBool).createCopy(), 'EvalBool');
+  addGlobalVar(True, 'True').isConstant := True;
+  addGlobalVar(False, 'False').isConstant := True;
+  addGlobalVar(nil, 'nil').isConstant := True;
+  addGlobalVar(Null, 'Null').isConstant := True;
+
+  addToString();
+  addDelayedCode(
+    'function _EnumToString(const s: ^string; const Index, Lo, Hi: Int32): string;' +
+    'begin'                                                                         +
+    '  if (Index >= Lo) and (Index <= Hi) then'                                     +
+    '    Result := s[Index]^'                                                       +
+    '  else '                                                                       +
+    '    Result := '#39#39';'                                                       +
+    '  if (Result = '#39#39') then'                                                 +
+    '    Result := '#39'InvalidEnum('#39'+ToString(Index)+'#39')'#39';'             +
+    'end;'
+  );
 end;
 
 function TLapeCompiler.EnsureExpression(Node: TLapeTree_ExprBase): TLapeTree_ExprBase;
@@ -661,7 +727,7 @@ begin
                 DoBreak := (Tokenizer.Tok = tk_sym_Dot) or StopAfterBeginEnd;
               end;
             tk_kw_Const, tk_kw_Var: Statement := ParseVarBlock();
-            tk_kw_Function, tk_kw_Procedure: Statement := ParseMethod(FuncForwards);
+            tk_kw_Function, tk_kw_Procedure: addDelayedExpression(ParseMethod(FuncForwards));
             tk_kw_Type: ParseTypeBlock();
           end
         {$IFNDEF Lape_ForceBlock}
@@ -755,7 +821,7 @@ begin
         for i := 0 to High(Identifiers) do
         begin
           if addToScope then
-            if (FStackInfo = nil) or (FStackInfo.Owner = nil) then
+            if (FStackInfo = nil) then
               LapeException(lpeImpossible, Tokenizer.DocPos)
             else if (LapeCase(Identifiers[i]) = LapeCase(Name)) or hasDeclaration(Identifiers[i], True) then
               LapeExceptionFmt(lpeDuplicateDeclaration, [Identifiers[i]], Tokenizer.DocPos)
@@ -774,7 +840,7 @@ begin
         LapeException(lpeTypeExpected, Tokenizer.DocPos);
 
       if addToScope then
-        if (FStackInfo = nil) or (FStackInfo.Owner = nil) then
+        if (FStackInfo = nil) then
           LapeException(lpeImpossible, Tokenizer.DocPos)
         else if (LapeCase(Name) = LapeCase('Result')) or hasDeclaration('Result', True) then
           LapeExceptionFmt(lpeDuplicateDeclaration, ['Result'], Tokenizer.DocPos)
@@ -2024,40 +2090,12 @@ end;
 constructor TLapeCompiler.Create(
   ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean = True;
   AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True);
-
-  procedure AddToString;
-  var
-    OLMethod: TLapeType_OverloadedMethod;
-    BaseType: ELapeBaseType;
-  begin
-    OLMethod := TLapeType_OverloadedMethod.Create(Self, nil);
-    OLMethod.OnFunctionNotFound := {$IFDEF FPC}@{$ENDIF}GetToStringMethod;
-    addManagedDecl(OLMethod);
-
-    for BaseType := Low(ELapeBaseType) to High(ELapeBaseType) do
-      if ({$IFNDEF FPC}@{$ENDIF}LapeToStrArr[BaseType] <> nil) then
-        OLMethod.addMethod(
-          TLapeType_Method(addManagedType(
-            TLapeType_Method.Create(
-              Self,
-              [getBaseType(BaseType)],
-              [lptConst],
-              [TLapeGlobalVar(nil)],
-              getBaseType(ltString)
-            )
-          )).NewGlobalVar(
-            {$IFNDEF FPC}@{$ENDIF}LapeToStrArr[BaseType]
-          )
-        );
-
-    addGlobalVar(OLMethod.NewGlobalVar('ToString'));
-  end;
-
 begin
   inherited Create(AEmitter, ManageEmitter);
 
   FTokenizer := -1;
   FImporting := nil;
+  FDelayedTree := TLapeTree_DelayedStatementList.Create(Self);
   FreeTokenizer := ManageTokenizer;
   FreeTree := True;
 
@@ -2074,19 +2112,6 @@ begin
 
   FBaseDefines := TStringList.Create();
   FBaseDefines.CaseSensitive := {$IFDEF Lape_CaseSensitive}True{$ELSE}False{$ENDIF};
-  with FBaseDefines do
-  begin
-    add('Lape');
-    add('Sesquipedalian');
-  end;
-
-  addGlobalType(getBaseType(ltString).createCopy(), 'String');
-  addGlobalType(getBaseType(ltChar).createCopy(), 'Char');
-  addGlobalType(getBaseType(ltEvalBool).createCopy(), 'EvalBool');
-  addGlobalVar(True, 'True').isConstant := True;
-  addGlobalVar(False, 'False').isConstant := True;
-  addGlobalVar(nil, 'nil').isConstant := True;
-  addGlobalVar(Null, 'Null').isConstant := True;
 
   FTreeMethodMap := TLapeTreeMethodMap.Create(nil);
   FInternalMethodMap := TLapeInternalMethodMap.Create(nil);
@@ -2103,7 +2128,6 @@ begin
   FInternalMethodMap['Pred'] := TLapeTree_InternalMethod_Pred;
   FInternalMethodMap['Inc'] := TLapeTree_InternalMethod_Inc;
   FInternalMethodMap['Dec'] := TLapeTree_InternalMethod_Dec;
-  AddToString();
 
   addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high');
   addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length');
@@ -2113,13 +2137,17 @@ begin
 
   setTokenizer(ATokenizer);
   Reset();
+
   StartImporting();
+  InitBaseDefinitions();
 end;
 
 destructor TLapeCompiler.Destroy;
 begin
   setTokenizer(nil);
   EndImporting();
+  if FreeTree and (FDelayedTree <> nil) then
+    FreeAndNil(FDelayedTree);
   FreeAndNil(FIncludes);
   FreeAndNil(FDefines);
   FreeAndNil(FBaseDefines);
@@ -2202,7 +2230,8 @@ begin
 
   FTokenizer := 0;
   FTokenizers[0] := ATokenizer;
-  FStackInfo := nil;
+  while (FStackInfo <> nil) and (FStackInfo.Owner <> nil) do
+    FStackInfo := FStackInfo.Owner;
 end;
 
 function TLapeCompiler.getTempTokenizerState(const AStr: lpString; const AFileName: lpString = ''): Pointer;
@@ -2215,7 +2244,7 @@ begin
   if (State <> nil) then
     with PTempTokenizerState(State)^ do
     begin
-      SwapClass(FTokenizers[0], OldTokenizer);
+      Swap(Pointer(FTokenizers[0]), Pointer(OldTokenizer));
       FTokenizer := OldTokenizerIndex;
       FStackInfo := OldStackInfo;
       setState(OldState, False);
@@ -2257,6 +2286,14 @@ begin
   end;
 end;
 
+function TLapeCompiler.addDelayedExpression(Node: TLapeTree_Base; AfterCompilation: Boolean = True; IsGlobal: Boolean = False): TLapeTree_Base;
+begin
+  Result := Node;
+  if (Node = nil) or (FDelayedTree = nil) then
+    Exit;
+  FDelayedTree.addStatement(Node, AfterCompilation, IsGlobal);
+end;
+
 function TLapeCompiler.ParseFile: TLapeTree_Base;
 begin
   Result := nil;
@@ -2291,12 +2328,13 @@ begin
     Reset();
     IncStackInfo(True);
     FTree := ParseFile();
-    if (FTree = nil) then
+    if (FTree = nil) and (FDelayedTree.GlobalCount(False) <= 0) then
       LapeException(lpeExpressionExpected);
+    FDelayedTree.Compile(False);
     FTree.Compile();
+    FDelayedTree.Compile(True);
     DecStackInfo(False, True, True);
     FEmitter._op(ocNone);
-    FreeAndNil(FTree);
     Result := True;
 
   except
@@ -2567,13 +2605,13 @@ begin
   end;
 end;
 
-function TLapeCompiler.addGlobalFunc(Str: lpString; Value: Pointer): TLapeGlobalVar;
+function TLapeCompiler.addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar;
 var
   Method: TLapeTree_Method;
   OldState: Pointer;
 begin
   Result := nil;
-  OldState := getTempTokenizerState(Str + ';', '!import');
+  OldState := getTempTokenizerState(AHeader + ';', '!import');
 
   try
     Expect([tk_kw_Function, tk_kw_Procedure]);
@@ -2596,6 +2634,20 @@ begin
   end;
 end;
 
+function TLapeCompiler.addGlobalFunc(AHeader: TLapeType_Method; AName, Body: lpString): TLapeTree_Method;
+var
+  OldState: Pointer;
+begin
+  OldState := getTempTokenizerState(Body);
+  try
+    Result := ParseMethod(nil, AHeader, AName);
+    CheckAfterCompile();
+    addDelayedExpression(Result, True, True);
+  finally
+    resetTokenizerState(OldState);
+  end;
+end;
+
 function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; ARes: TLapeType; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
   Result := addGlobalVar(TLapeType_Method(addManagedType(TLapeType_Method.Create(Self, AParams, AParTypes, AParDefaults, ARes))).NewGlobalVar(Value), AName);
@@ -2604,6 +2656,25 @@ end;
 function TLapeCompiler.addGlobalFunc(AParams: array of TLapeType; AParTypes: array of ELapeParameterType; AParDefaults: array of TLapeGlobalVar; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
   Result := addGlobalFunc(AParams, AParTypes, AParDefaults, nil, Value, AName);
+end;
+
+function TLapeCompiler.addDelayedCode(ACode: lpString; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base;
+var
+  Index: Integer;
+  OldState: Pointer;
+begin
+  Index := FDelayedTree.Statements.Count;
+  OldState := getTempTokenizerState(ACode);
+
+  try
+    Result := ParseFile();
+    CheckAfterCompile();
+
+    addDelayedExpression(Result);
+    FDelayedTree.OverrideDelayGlobal(AfterCompilation, IsGlobal, Index, -1);
+  finally
+    resetTokenizerState(OldState);
+  end;
 end;
 
 end.

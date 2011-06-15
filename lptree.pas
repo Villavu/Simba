@@ -360,6 +360,22 @@ type
     property Statements: TLapeStatementList read FStatements;
   end;
 
+  TLapeTree_DelayedStatementList = class(TLapeTree_StatementList)
+  protected
+    FDelay: array of Boolean;
+    FGlobal: array of Boolean;
+    procedure DeleteChild(Node: TLapeTree_Base); override;
+  public
+    procedure Clean; virtual;
+    function GlobalCount(Global: Boolean = True): Integer; virtual;
+    procedure OverrideDelayGlobal(AfterCompilation, IsGlobal: Boolean; StartIndex: Integer; Count: Integer = 1); virtual;
+
+    function addStatement(Statement: TLapeTree_Base): Integer; overload; override;
+    function addStatement(Statement: TLapeTree_Base; AfterCompilation, IsGlobal: Boolean): Integer; overload; virtual;
+    function Compile(var Offset: Integer; AfterCompilation: Boolean): TResVar; overload; virtual;
+    function Compile(AfterCompilation: Boolean): TResVar; overload; virtual;
+  end;
+
   TLapeTree_Method = class(TLapeTree_Base, ILapeTree_CanExit)
   protected
     FMethod: TLapeGlobalVar;
@@ -2708,6 +2724,8 @@ begin
   else
     LeftVar := nil;
 
+  if (FOperatorType = op_Assign) and ((LeftVar <> nil) or LeftVar.isConstant) then
+    LapeException(lpeCannotAssign, [FLeft, Self]);
   setExpectedType(FRight, LeftVar.VarType);
 
   Short := (FOperatorType in [op_AND, op_OR]) and (LeftVar <> nil) and (FRight <> nil) and canShort(LeftVar.VarType) and canShort(FRight.resType());
@@ -2770,13 +2788,12 @@ begin
     if (resType() <> nil) and (TLapeTree_Base(FLeft) is TLapeTree_If) then
       Exit(doIf())
     else
-    begin
-      LeftVar := FLeft.Compile(Offset);
-      if (FOperatorType = op_Assign) and (not isVariable(LeftVar)) then
-        LapeException(lpeCannotAssign, FLeft.DocPos);
-    end
+      LeftVar := FLeft.Compile(Offset)
   else
     LeftVar := NullResVar;
+
+  if (FOperatorType = op_Assign) and (not isVariable(LeftVar)) then
+    LapeException(lpeCannotAssign, [FLeft, Self]);
 
   if (FRight <> nil) then
   begin
@@ -3082,7 +3099,94 @@ var
 begin
   Result := NullResVar;
   for i := 0 to FStatements.Count - 1 do
-    Result := FStatements[i].Compile(Offset);
+    if (FStatements[i] <> nil) then
+      Result := FStatements[i].Compile(Offset);
+end;
+
+procedure TLapeTree_DelayedStatementList.DeleteChild(Node: TLapeTree_Base);
+var
+  i, Len: Integer;
+begin
+  i := FStatements.IndexOf(Node);
+  if (i > -1) then
+  begin
+    FStatements.Delete(i);
+    Len := FStatements.Count;
+    for i := i to Len - 1 do
+    begin
+      Swap(FDelay[i], FDelay[i + 1]);
+      Swap(FGlobal[i], FGlobal[i + 1]);
+    end;
+    SetLength(FDelay, Len);
+    SetLength(FGlobal, Len);
+  end;
+end;
+
+procedure TLapeTree_DelayedStatementList.Clean;
+var
+  i: Integer;
+begin
+  for i := FStatements.Count - 1 downto 0 do
+    if (not FGlobal[i]) and (FStatements[i] <> nil) and (FStatements[i].Parent = Self) then
+      FStatements[i].Free();
+end;
+
+function TLapeTree_DelayedStatementList.GlobalCount(Global: Boolean = True): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := FStatements.Count - 1 downto 0 do
+    if (FGlobal[i] = Global) and (FStatements[i] <> nil) then
+      Inc(Result);
+end;
+
+procedure TLapeTree_DelayedStatementList.OverrideDelayGlobal(AfterCompilation, IsGlobal: Boolean; StartIndex: Integer; Count: Integer = 1);
+var
+  i: Integer;
+begin
+  if (StartIndex + Count >= FStatements.Count) or (Count <= 0) then
+    Count := FStatements.Count - StartIndex - 1;
+  for i := StartIndex to StartIndex + Count do
+  begin
+    FDelay[i] := AfterCompilation;
+    FGlobal[i] := IsGlobal;
+  end;
+end;
+
+function TLapeTree_DelayedStatementList.addStatement(Statement: TLapeTree_Base): Integer;
+begin
+  Result := inherited;
+  SetLength(FDelay, FStatements.Count);
+  SetLength(FGlobal, FStatements.Count);
+end;
+
+function TLapeTree_DelayedStatementList.addStatement(Statement: TLapeTree_Base; AfterCompilation, IsGlobal: Boolean): Integer;
+begin
+  Result := addStatement(Statement);
+  if (Result > -1) then
+  begin
+    FDelay[Result] := AfterCompilation;
+    FGlobal[Result] := IsGlobal;
+  end;
+end;
+
+function TLapeTree_DelayedStatementList.Compile(var Offset: Integer; AfterCompilation: Boolean): TResVar;
+var
+  i: Integer;
+begin
+  Result := NullResVar;
+  for i := 0 to FStatements.Count - 1 do
+    if (AfterCompilation = FDelay[i]) and (FStatements[i] <> nil) then
+      Result := FStatements[i].Compile(Offset);
+end;
+
+function TLapeTree_DelayedStatementList.Compile(AfterCompilation: Boolean): TResVar;
+var
+  Offset: Integer;
+begin
+  Offset := -1;
+  Result := Compile(Offset, AfterCompilation);
 end;
 
 procedure TLapeTree_Method.setStatements(Node: TLapeTree_StatementList);

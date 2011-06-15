@@ -412,7 +412,8 @@ var
     @highUInt8, @highInt8, @highUInt16, @highInt16, @highUInt32, @highInt32, @highUInt64, @highInt64
   );
 
-procedure SwapClass(var A, B: TObject); {$IFDEF Lape_Inline}inline;{$ENDIF}
+procedure Swap(var A, B: Pointer); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
+procedure Swap(var A, B: Boolean); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function LapeCase(const Str: lpString): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function LapeTypeToString(Token: ELapeBaseType): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function LapeOperatorToString(Token: EOperator): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -429,9 +430,18 @@ uses
   typinfo,
   lpexceptions;
 
-procedure SwapClass(var A, B: TObject);
+procedure Swap(var A, B: Pointer);
 var
-  C: TObject;
+  C: Pointer;
+begin
+  C := A;
+  A := B;
+  B := C;
+end;
+
+procedure Swap(var A, B: Boolean);
+var
+  C: Boolean;
 begin
   C := A;
   A := B;

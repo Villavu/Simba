@@ -1249,7 +1249,10 @@ begin
     begin
       ResType := EvalRes(Op);
       if (op = op_Addr) then
-        Exit(ResType.NewGlobalVarP(@Left.Ptr))
+        {if Left.isConstant then
+          LapeException(lpeVariableExpected)
+        else}
+          Exit(ResType.NewGlobalVarP(@Left.Ptr))
       else if (op = op_Deref) then
         Exit(ResType.NewGlobalVarP(PPointer(Left.Ptr)^));
 
@@ -1398,8 +1401,8 @@ begin
   end
   else
   begin
-    if (op = op_Addr) and (not isVariable(Left)) then
-      LapeException(lpeVariableExpected);
+    //if (op = op_Addr) and (not isVariable(Left)) then
+    //  LapeException(lpeVariableExpected);
     FCompiler.Emitter._Eval(EvalProc, Result, Left, Right, Offset, Pos);
   end;
 
@@ -1699,16 +1702,16 @@ function TLapeType_SubRange.VarLo(AVar: Pointer = nil): TLapeGlobalVar;
 begin
   if (FCompiler = nil) or (BaseIntType = ltUnknown) then
     Result := nil
-  else with FCompiler, getBaseType(BaseIntType) do
-    Result := addManagedVar(NewGlobalVarStr(IntToStr(Range.Lo))) as TLapeGlobalVar;
+  else
+    Result := FCompiler.addManagedVar(NewGlobalVarStr(IntToStr(Range.Lo))) as TLapeGlobalVar;
 end;
 
 function TLapeType_SubRange.VarHi(AVar: Pointer = nil): TLapeGlobalVar;
 begin
   if (FCompiler = nil) or (BaseIntType = ltUnknown) then
     Result := nil
-  else with FCompiler, getBaseType(BaseIntType) do
-    Result := addManagedVar(NewGlobalVarStr(IntToStr(Range.Hi))) as TLapeGlobalVar;
+  else
+    Result := FCompiler.addManagedVar(NewGlobalVarStr(IntToStr(Range.Hi))) as TLapeGlobalVar;
 end;
 
 function TLapeType_SubRange.CreateCopy: TLapeType;
@@ -1780,6 +1783,7 @@ begin
   end;
   FMemberMap := AMemberMap;
 
+  while (FRange.Lo < FMemberMap.Count) and (FMemberMap[FRange.Lo] = '') do Inc(FRange.Lo);
   FRange.Hi := FMemberMap.Count - 1;
   FSmall := (FRange.Hi <= Ord(High(ELapeSmallEnum)));
   if FSmall then
@@ -1803,13 +1807,15 @@ begin
     LapeException(lpeDuplicateDeclaration);
 
   FAsString := '';
-  Result:= FMemberMap.Count;
-
   for i := FMemberMap.Count to Value - 1 do
     FMemberMap.add('');
   FMemberMap.add(AName);
 
-  FRange.Hi := Result;
+  FRange.Hi := FMemberMap.Count;
+  if (FMemberMap.Count = 0) then
+    FRange.Lo := FRange.Hi;
+  Result:= FRange.Hi;
+
   FSmall := (FRange.Hi <= Ord(High(ELapeSmallEnum)));
   if (not FSmall) then
     FBaseType := ltLargeEnum;
