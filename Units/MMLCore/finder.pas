@@ -1115,7 +1115,7 @@ var
       for xx := xs to xe do
       begin
          if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
-         begin;
+         begin
            ClientTPA[c].x := xx;
            ClientTPA[c].y := yy;
            inc(c);
@@ -1135,7 +1135,7 @@ var
       for xx := xs to xe do
       begin
          if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
-         begin;
+         begin
            ClientTPA[c].x := xx;
            ClientTPA[c].y := yy;
            inc(c);
@@ -1159,7 +1159,32 @@ var
       begin
         RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
         if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-        begin;
+        begin
+          ClientTPA[c].x := xx;
+          ClientTPA[c].y := yy;
+          Inc(c);
+        end;
+        Inc(Ptr)
+      end;
+      Inc(Ptr, PtrInc);
+    end;
+  end;
+
+  procedure cts3;
+    var xx, yy: integer;
+        L1, A1, B1, L2, A2, B2, X, Y, Z: extended;
+  begin
+    RGBToXYZ(clR, clG, clB, X, Y, Z);
+    XYZToCieLab(X, Y, Z, L1, A1, B1);
+    for yy := ys to ye do
+    begin
+      for xx := xs to xe do
+      begin
+        RGBToXYZ(Ptr^.R, Ptr^.G, Ptr^.B, X, Y, Z);
+        XYZtoCIELab(X, Y, Z, L2, A2, B2);
+        if Sqrt(sqr(L1 - L2) + sqr(A1 - A2) +
+                 sqr(B1 - B2)) <= Tol then
+        begin
           ClientTPA[c].x := xx;
           ClientTPA[c].y := yy;
           Inc(c);
@@ -1190,6 +1215,7 @@ begin
     0: cts0();
     1: cts1();
     2: cts2();
+    3: cts3();
   end;
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
