@@ -1,0 +1,19 @@
+Upward for
+1
+3
+5
+7
+Downward for
+9
+7
+5
+While
+1
+3
+5
+7
+Repeat
+1
+3
+5
+7

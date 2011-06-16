@@ -1,0 +1,17 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+const 
+  ar: array [1..4] of Int32 = [11, 22, 33, 44];
+
+var 
+  i: Int32;
+begin
+  WriteLn(ar[1]);
+  WriteLn(ar[2]);
+  WriteLn(ar[3]);
+  WriteLn(ar[4]);
+  
+  for i := Low(ar) to High(ar) do
+    WriteLn(ar[i]);
+end;

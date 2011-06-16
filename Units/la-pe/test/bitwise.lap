@@ -1,0 +1,18 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var i: Int32;
+begin
+  i:=0;
+  WriteLn(i and 15);
+  WriteLn(i or 15);
+  WriteLn(i xor 15);
+
+  i:=i or 4;
+  WriteLn(i and 15);
+  WriteLn(i or 15);
+  WriteLn(i xor 15);
+
+  i:=255;
+  WriteLn(i and not 7);
+end;

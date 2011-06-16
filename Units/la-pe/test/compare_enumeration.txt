@@ -1,0 +1,6 @@
+1 = 1 is True
+1 <> 1 is False
+1 = 2 is False
+1 <> 2 is True
+1 in [2, 3] is False
+2 in [2, 3] is True

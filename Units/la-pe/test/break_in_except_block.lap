@@ -1,0 +1,36 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var 
+  i: Int32;
+begin
+  while True do 
+  try
+    MyStupidProc();
+  except
+    Break;
+  end;
+
+  repeat
+    try
+      MyStupidProc();
+    except
+      Break;
+    end;
+  until False;
+
+  
+  for i := 1 to 10 do
+  begin
+    try
+      try
+        MyStupidProc();
+      except
+        Break;
+      end;
+    finally
+      WriteLn('finally');
+    end;
+     WriteLn(i);
+  end;
+end;

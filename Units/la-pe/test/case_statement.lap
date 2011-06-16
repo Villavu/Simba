@@ -1,0 +1,17 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var
+  str: AnsiString = 'hello';
+  bool: Boolean;
+begin
+  case str of
+    'hello': WriteLn('Hello!');
+    'goodbye': WriteLn('Goodbye!');
+  end;
+
+  case bool of
+    true: WriteLn('Default value of boolean is TRUE');
+    false: WriteLn('Default value of boolean is FALSE');
+  end;
+end;

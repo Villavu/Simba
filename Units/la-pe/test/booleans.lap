@@ -1,0 +1,26 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+procedure PrintOut(bool: Boolean);
+begin
+   if bool then
+     WriteLn('True')
+   else
+     WriteLn('False');
+end;
+
+var
+  tr: Boolean = True;
+  fa: Boolean = False or False;
+begin
+  PrintOut(tr and fa);
+  PrintOut(tr or fa);
+  PrintOut(tr xor fa);
+  PrintOut(tr xor tr);
+  PrintOut(not tr);
+  PrintOut(t and (fa or tr or fa) and (tr xor fa) and not fa);
+
+  WriteLn('');
+  WriteLn('True = '+IntToStr(Int32(tr))+' = '+IntToStr(Int32(True)));
+  WriteLn('False = '+IntToStr(Int32(fa))+' = '+IntToStr(Int32(False)));
+end;

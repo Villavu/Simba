@@ -1,0 +1,55 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+function Chr(c: Int32): Char;
+begin
+  UInt8(Result) := c;
+end;   
+
+const
+  NumDigits = 50;
+var
+  ar: array [0..10*NumDigits div 3] of Int32;
+  I, J, K, P, X, Y, Nines, Predigit: Int32;
+  Result: String;
+begin
+  for I := Low(ar) to High(ar) do
+    ar[I] := 2;
+
+  Nines := 0;
+  Predigit := 0;
+
+  for J := 0 to NumDigits-1 do
+  begin
+    Y := 0;
+    P := 2 * High(ar) + 1;
+    for I := High(ar) downto Low(ar) do
+    begin
+      X := 10*ar[I] + Y*(I+1);
+      ar[I] := X mod P;
+      Y := X div P;
+      P := P - 2;
+    end;
+    ar[Low(ar)] := Y mod 10;
+    Y := Y div 10;
+    if Y = 9 then
+      Inc(Nines)
+    else if Y = 10 then
+    begin
+      Result := Result + Chr(Predigit + 1 + Ord('0'));
+      for K := 1 to Nines do
+        Result := Result + '0';
+      Predigit := 0;
+      Nines := 0;
+    end else
+    begin
+      Result := Result + Chr(Predigit + Ord('0'));
+      Predigit := Y;
+      for K := 1 to Nines do
+        Result := Result + '9';
+      Nines := 0;
+    end;
+  end;
+  Result := Result + Chr(Predigit + Ord('0'));
+  WriteLn(Result);
+end;

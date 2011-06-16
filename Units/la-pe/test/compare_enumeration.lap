@@ -1,0 +1,24 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+type
+   TEnum = (enOne, enTwo, enThree);
+
+procedure PrintBool(msg : AnsiString; b : Boolean);
+begin
+  if b then
+    WriteLn(msg + 'True')
+  else 
+    WriteLn(msg + 'False');
+end;
+
+begin
+  PrintBool('1 = 1 is ', enOne=enOne);
+  PrintBool('1 <> 1 is ', enOne<>enOne);
+
+  PrintBool('1 = 2 is ', enOne=enTwo);
+  PrintBool('1 <> 2 is ', enOne<>enTwo);
+
+  PrintBool('1 in [2, 3] is ', enOne in [enTwo, enThree]);
+  PrintBool('2 in [2, 3] is ', enTwo in [enTwo, enThree]);
+end;

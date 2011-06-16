@@ -1,0 +1,33 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var
+  n, i: Int32;
+begin
+  n:=10;
+  n:=n*10;
+
+  for i:=1 to n do 
+  begin
+     if (i mod 3)=0 then continue;
+     if (i mod 5)=1 then continue;
+     if (i mod 7)=0 then continue;
+
+     if i>n div 2 then break;
+
+     WriteLn(i);
+  end;
+
+  n := 142;
+  WriteLn('142 div 10 = '+IntToStr(142 div 10));
+  WriteLn('142 mod 10 = '+IntToStr(142 mod 10));
+
+  i:=10;
+  WriteLn(n+i);
+  WriteLn(n-i);
+  WriteLn(n+n*i-i);
+  WriteLn((n+n)*(i-i));
+  WriteLn((n+i)*(n-i));
+  WriteLn(n+n div i);
+  WriteLn(n div i+n);
+end;

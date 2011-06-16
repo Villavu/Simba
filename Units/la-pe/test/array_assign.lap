@@ -1,0 +1,29 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var
+  aa, bb: array [0..2] of Int32;
+begin
+  bb:=[1, 2, 3];
+  aa:=bb;
+
+  WriteLn(Length(aa));
+  WriteLn(aa[0]);
+  WriteLn(aa[1]);
+  WriteLn(aa[2]);
+
+  bb[1]:=0;
+
+  WriteLn(aa[0]);
+  WriteLn(aa[1]);
+  WriteLn(aa[2]);
+
+  aa:=[4, 5, 6];
+
+  WriteLn(aa[0]);
+  WriteLn(aa[1]);
+  WriteLn(aa[2]);
+  WriteLn(bb[0]);
+  WriteLn(bb[1]);
+  WriteLn(bb[2]);
+end;

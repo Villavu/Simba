@@ -1,0 +1,27 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+procedure PrintIntRange(const value: Int32);
+begin
+  case value of
+    -2..-1     : WriteLn('negative');
+    0          : WriteLn('zero');
+    5, 10      : WriteLn('multiple of five');
+    1..4, 6..9 : WriteLn('between 1 and 9 but 5');
+   else
+      WriteLn('elsewhere');
+  end;
+end;
+
+var i: Int32;
+begin
+  for i := -3 to 11 do
+    PrintIntRange(i);
+
+  case 'Hello' of
+    'Bonjour'..'Icare' : WriteLn('Hello!');
+    'Alpha'..'Omega'   : WriteLn('oopsie!');
+    else
+      WriteLn('oopsie!');
+  end;
+end;

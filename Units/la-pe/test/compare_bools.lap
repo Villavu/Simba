@@ -1,0 +1,17 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var
+  aa = True;
+  bb = False;
+begin
+  if (aa=bb) then WriteLn('True = False');
+  if (aa<>bb) then WriteLn('True <> False');
+  if (bb=aa) then WriteLn('False = True');
+  if (bb<>aa) then WriteLn('False <> True');
+
+  aa := bb;
+
+  if (aa=bb) then WriteLn('False = False');
+  if (aa<>bb) then WriteLn('False <> False');
+end;

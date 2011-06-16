@@ -1,0 +1,17 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+var i: Int32;
+begin
+  WriteLn(1 shl 1);
+  WriteLn(2 shr 1);
+
+  i := 1 shl 8;
+  WriteLn(i shr 2);
+  WriteLn(i shl 2);
+  WriteLn(i shr 10);
+
+  i := 1;
+  WriteLn(8 shr i);
+  WriteLn(8 shl i);
+end;

@@ -1,0 +1,27 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+function Test1: Int32;
+begin
+  Result:=1;
+  Exit;
+  Result:=2;
+end;
+
+function Test2: Int32;
+var
+  i: Int32;
+begin
+  for i:=1 to 10 do
+  begin
+    Result:=i;
+    if i=2 then Exit;
+  end;
+end;
+
+begin
+  WriteLn(Test1());
+  WriteLn(Test2());
+  Exit;
+  WriteLn('Not printed');
+end;
