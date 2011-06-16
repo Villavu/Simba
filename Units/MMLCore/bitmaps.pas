@@ -64,6 +64,7 @@ type
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(Points : TPointArray) : TIntegerArray;
     function GetAreaColors(xs,ys,xe,ye : integer) : T2DIntArray;
+    function GetHSLValues(xs, ys, xe, ye: integer): T2DHSLArray;
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
@@ -876,6 +877,23 @@ begin
       result[x-xs][y-ys] := BGRToRGB(FData[y*w+x]);
 end;
 
+function TMufasaBitmap.GetHSLValues(xs, ys, xe, ye: integer): T2DHSLArray;
+var
+  x, y: integer;
+  R, G, B, C: integer;
+begin
+  ValidatePoint(xs,ys);
+  ValidatePoint(xe,ye);
+  setlength(result,xe-xs+1,ye-ys+1);
+  for y := ys to ye do
+    for x := xs to xe do
+    begin
+      RGBToHSL(FData[y*w+x].R, FData[y*w+x].G, FData[y*w+x].B,
+               Result[x-xs][y-ys].H, Result[x-xs][y-ys].S,
+               Result[x-xs][y-ys].L);
+    end;
+end;
+
 procedure TMufasaBitmap.SetTransparentColor(Col: TColor);
 begin
   self.FTransparentSet:= True;
@@ -1406,7 +1424,7 @@ var
   i,minw,minh : integer;
 begin
   if (AWidth <> w) or (AHeight <> h) then
-  begin;
+  begin
     if AWidth*AHeight <> 0 then
     begin;
       NewData := GetMem(AWidth * AHeight * SizeOf(TRGB32));

@@ -37,6 +37,9 @@ uses
 {
   Should be 100% OS independant, as all OS dependant code is in the IO Manager.
   Let's try not to use any OS-specific defines here? ;)
+
+
+  Benchmarks with FindBitmapToleranceIn on _very_ high tolerance!
 }
 
 type
@@ -336,7 +339,21 @@ end;
     stack.
 }
 
-function ColorSameCTS2(Tolerance: Integer; H1,S1,L1,H2,S2,L2, hueMod, satMod: extended):
+{ Not using var for each arg now, as it should be inlined }
+function ColorSame_cts0(Tolerance : Integer; R1,G1,B1,R2,G2,B2 : byte) : boolean; inline;
+
+begin
+  Result := ((Abs(R1-R2) <= Tolerance) and (Abs(G1-G2) <= Tolerance) and (Abs(B1-B2) <= Tolerance));
+end;
+
+{ Not using var for each arg now, as it should be inlined }
+function ColorSame_cts1(Tolerance : Integer; R1,G1,B1,R2,G2,B2 : byte) : boolean; inline;
+
+begin
+  Result := (Sqrt(sqr(R1-R2) + sqr(G1-G2) + sqr(B1-B2)) <= Tolerance);
+end;
+
+function ColorSame_cts2(Tolerance: Integer; H1,S1,L1,H2,S2,L2, hueMod, satMod: extended):
  boolean; inline;
 begin
   result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and
@@ -896,7 +913,7 @@ var
        Inc(Ptr, PtrInc);
      end;
 
-    result.x := -1; result.y := -1;
+    Result := Point(-1, -1);
   end;
 
   function cts1: tpoint;
@@ -915,7 +932,7 @@ var
       Inc(Ptr, PtrInc);
     end;
 
-    result.x := -1; result.y := -1;
+    Result := Point(-1, -1);
   end;
 
   function cts2: tpoint;
@@ -938,7 +955,7 @@ var
       Inc(Ptr, PtrInc);
     end;
 
-    result.x := -1; result.y := -1;
+    Result := Point(-1, -1);
   end;
 
 begin
@@ -1291,7 +1308,7 @@ var
   PtrData: TRetData;
   c : integer;
   RowData : TPRGB32Array;
-  dX, dY, clR, clG, clB, i,SpiralHi: Integer;
+  dX, dY, clR, clG, clB, SpiralHi: Integer;
 
   procedure cts0;
     var i: integer;
@@ -1575,21 +1592,106 @@ end;
 function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs,
   ys, xe, ye: Integer; tolerance: Integer): Boolean;
 var
-   MainRowdata : TPRGB32Array;
-   BmpRowData : TPRGB32Array;
-   PtrData : TRetData;
-   BmpW,BmpH : integer;
-   xBmp,yBmp : integer;
-   tmpY : integer;
-   dX, dY,  xx, yy: Integer;
-   CCTS : integer;
-   H,S,L,HMod,SMod : extended;
-   SkipCoords : T2DBoolArray;
-label NotFoundBmp;
+  MainRowdata : TPRGB32Array;
+  PtrData : TRetData;
+  BmpW,BmpH : integer;
+  dX, dY: Integer;
+  SkipCoords : T2DBoolArray;
+  foundP: TPoint;
+
+  function cts0: tpoint;
+    var xx, yy, xBmp, yBmp, tmpY: integer;
+        BmpRowData : TPRGB32Array;
+    label NotFoundBmp;
+  begin
+    BmpRowData:= CalculateRowPtrs(bitmap);
+
+    for yy := 0 to dY do
+      for xx := 0 to dX do
+      begin
+        for yBmp:= 0 to BmpH do
+        begin
+          tmpY := yBmp + yy;
+          for xBmp := 0 to BmpW do
+            if not SkipCoords[yBmp][xBmp] then
+              if not ColorSame_cts0(Tolerance,
+                               BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                               MainRowdata[tmpY][xBmp +  xx].R,
+                               MainRowdata[tmpY][xBmp +  xx].G,MainRowdata[tmpY][xBmp +  xx].B) then
+                 goto NotFoundBmp;
+        end;
+        exit(Point(xx + xs, yy + ys));
+        NotFoundBmp: // double break
+     end;
+
+    Result := Point(-1, -1);
+  end;
   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. } 
 
+  function cts1: tpoint;
+    var xx, yy, xBmp, yBmp, tmpY: integer;
+        BmpRowData : TPRGB32Array;
+    label NotFoundBmp;
+  begin
+    BmpRowData:= CalculateRowPtrs(bitmap);
+
+    for yy := 0 to dY do
+      for xx := 0 to dX do
+      begin
+        for yBmp:= 0 to BmpH do
+        begin
+          tmpY := yBmp + yy;
+          for xBmp := 0 to BmpW do
+            if not SkipCoords[yBmp][xBmp] then
+              if not ColorSame_cts1(Tolerance,
+                               BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
+                               MainRowdata[tmpY][xBmp +  xx].R,
+                               MainRowdata[tmpY][xBmp +  xx].G,MainRowdata[tmpY][xBmp +  xx].B) then
+                 goto NotFoundBmp;
+        end;
+        exit(Point(xx + xs, yy + ys));
+        NotFoundBmp: // double break
+      end;
+
+    Result := Point(-1, -1);
+  end;
+
+  function cts2: tpoint;
+    var H1, S1, L1, H2, S2, L2, HMod, SMod: extended;
+        xx, yy, xBmp, yBmp, tmpY: integer;
+
+        HSLRows: T2DHSLArray;
+
+    label NotFoundBmp;
+  begin
+    HSLRows := bitmap.GetHSLValues(0, 0, BmpW - 1, BmpH - 1);
+
+    for yy := 0 to dY do
+      for xx := 0 to dX do
+      begin
+        for yBmp:= 0 to BmpH do
+        begin
+          tmpY := yBmp + yy;
+          for xBmp := 0 to BmpW do
+            if not SkipCoords[yBmp][xBmp] then
+            begin
+              RGBToHSL(MainRowdata[tmpY][xBmp +  xx].R, MainRowdata[tmpY][xBmp +  xx].G,
+                       MainRowdata[tmpY][xBmp +  xx].B, H2, S2, L2);
+
+              if not ColorSame_cts2(Tolerance, HSLRows[yBmp][xBmp].H, HSLRows[yBmp][xBmp].S, HSLRows[yBmp][xBmp].L,
+                                   H2, S2, L2, hueMod, satMod) then
+                 goto NotFoundBmp;
+            end;
+        end;
+        exit(Point(xx + xs, yy + ys));
+        NotFoundBmp: // double break
+      end;
+
+    Result := Point(-1, -1);
+  end;
+
 begin
-  Result := false;
+  Result := False;
   // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
   DefaultOperations(xs,ys,xe,ye);
 
@@ -1600,43 +1702,31 @@ begin
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
   //Caculate the row ptrs
   MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
-  BmpRowData:= CalculateRowPtrs(bitmap);
+
+
   //Get the 'fixed' bmp size
   BmpW := bitmap.Width - 1;
   BmpH := bitmap.Height - 1;
   //Heck our bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
-  //Compiler hints
-  HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
-
-  CCTS := Self.CTS;
 
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
-  for yy := 0 to dY do
-    for xx := 0 to dX do
-    begin;
-      for yBmp:= 0 to BmpH do
-      begin;
-        tmpY := yBmp + yy;
-        for xBmp := 0 to BmpW do
-          if not SkipCoords[yBmp][xBmp] then
-            if not ColorSame(CCTS,tolerance,
-                             BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
-                             MainRowdata[tmpY][xBmp +  xx].R,MainRowdata[tmpY][xBmp +  xx].G,MainRowdata[tmpY][xBmp +  xx].B,
-                             H,S,L,HMod,SMod) then
-               goto NotFoundBmp;
 
-      end;
-      //We did find the Bmp, otherwise we would be at the part below
-      TClient(Client).IOManager.FreeReturnData;
-      x := xx + xs;
-      y := yy + ys;
-      result := true;
-      exit;
-      NotFoundBmp:
-    end;
+  case Self.CTS of
+    0: foundP := cts0();
+    1: foundP := cts1();
+    2: foundP := cts2();
+  end;
+
+  if (foundP.x = -1) and (foundP.y = -1)  then
+    result := False
+  else begin
+    x := foundP.x;
+    y := foundP.y;
+    Result := True;
+  end;
   TClient(Client).IOManager.FreeReturnData;
 end;
 
