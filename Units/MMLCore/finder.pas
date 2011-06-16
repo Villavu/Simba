@@ -328,6 +328,14 @@ begin
   end;
 end;
 
+{
+ TODO: See if this is actually inlined. If it is, we can shorten the
+ subprocedures; if it is not, either:
+   - Paste a lot of code.
+   - Pass a record of the required data to prevent pushing arguments on the
+    stack.
+}
+
 function ColorSameCTS2(Tolerance: Integer; H1,S1,L1,H2,S2,L2, hueMod, satMod: extended):
  boolean; inline;
 begin
@@ -1280,11 +1288,60 @@ function TMFinder.FindColorsSpiralTolerance(x, y: Integer;
   out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer
   ): boolean;
 var
-   PtrData: TRetData;
-   c : integer;
-   RowData : TPRGB32Array;
-   dX, dY, clR, clG, clB, i,SpiralHi: Integer;
-   H1, S1, L1, H2, S2, L2, HueXTol, SatXTol: Extended;
+  PtrData: TRetData;
+  c : integer;
+  RowData : TPRGB32Array;
+  dX, dY, clR, clG, clB, i,SpiralHi: Integer;
+
+  procedure cts0;
+    var i: integer;
+  begin
+    for i := 0 to SpiralHi do
+      if ((abs(clB-RowData[ClientTPA[i].y][ClientTPA[i].x].B) <= Tolerance) and
+         (abs(clG-RowData[ClientTPA[i].y][ClientTPA[i].x].G) <= Tolerance) and
+         (Abs(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R) <= Tolerance)) then
+      begin;
+        ClientTPA[c].x := ClientTPA[i].x + xs;
+        ClientTPA[c].y := ClientTPA[i].y + ys;
+        inc(c);
+      end;
+  end;
+
+  procedure cts1;
+    var i: integer;
+  begin
+    for i := 0 to SpiralHi do
+      if (Sqrt(sqr(clR - RowData[ClientTPA[i].y][ClientTPA[i].x].R) +
+               sqr(clG - RowData[ClientTPA[i].y][ClientTPA[i].x].G) +
+               sqr(clB - RowData[ClientTPA[i].y][ClientTPA[i].x].B)) <= Tolerance) then
+      begin;
+        ClientTPA[c].x := ClientTPA[i].x + xs;
+        ClientTPA[c].y := ClientTPA[i].y + ys;
+        inc(c);
+      end;
+  end;
+
+  procedure cts2;
+    var i: integer;
+        H1, S1, L1, H2, S2, L2, HueXTol, SatXTol: Extended;
+  begin
+    ColorToHSL(Color, H1, S1, L1);
+    HueXTol := hueMod * Tolerance;
+    SatXTol := satMod * Tolerance;
+    for i := 0 to SpiralHi do
+    begin;
+      RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
+               RowData[ClientTPA[i].y][ClientTPA[i].x].G,
+               RowData[ClientTPA[i].y][ClientTPA[i].x].B,
+               H2,S2,L2);
+      if ((abs(H1 - H2) <= (HueXTol)) and (abs(S1 - S2) <= (satXTol)) and (abs(L1 - L2) <= Tolerance)) then
+      begin;
+        ClientTPA[c].x := ClientTPA[i].x + xs;
+        ClientTPA[c].y := ClientTPA[i].y + ys;
+        inc(c);
+      end;
+    end;
+  end;
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
@@ -1293,7 +1350,6 @@ begin
   dY := ye - ys;
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
-  ColorToHSL(Color, H1, S1, L1);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
 
@@ -1305,47 +1361,9 @@ begin
   LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
   SpiralHi := (dx + 1) * (dy + 1) - 1;
   case CTS of
-    0:
-    for i := 0 to SpiralHi do
-      if ((abs(clB-RowData[ClientTPA[i].y][ClientTPA[i].x].B) <= Tolerance) and
-         (abs(clG-RowData[ClientTPA[i].y][ClientTPA[i].x].G) <= Tolerance) and
-         (Abs(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R) <= Tolerance)) then
-      begin;
-        ClientTPA[c].x := ClientTPA[i].x + xs;
-        ClientTPA[c].y := ClientTPA[i].y + ys;
-        inc(c);
-      end;
-
-
-    1:
-    for i := 0 to SpiralHi do
-      if (Sqrt(sqr(clR - RowData[ClientTPA[i].y][ClientTPA[i].x].R) +
-               sqr(clG - RowData[ClientTPA[i].y][ClientTPA[i].x].G) +
-               sqr(clB - RowData[ClientTPA[i].y][ClientTPA[i].x].B)) <= Tolerance) then
-      begin;
-        ClientTPA[c].x := ClientTPA[i].x + xs;
-        ClientTPA[c].y := ClientTPA[i].y + ys;
-        inc(c);
-      end;
-
-    2:
-    begin;
-      HueXTol := hueMod * Tolerance;
-      SatXTol := satMod * Tolerance;
-      for i := 0 to SpiralHi do
-      begin;
-        RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
-                 RowData[ClientTPA[i].y][ClientTPA[i].x].G,
-                 RowData[ClientTPA[i].y][ClientTPA[i].x].B,
-                 H2,S2,L2);
-        if ((abs(H1 - H2) <= (HueXTol)) and (abs(S1 - S2) <= (satXTol)) and (abs(L1 - L2) <= Tolerance)) then
-        begin;
-          ClientTPA[c].x := ClientTPA[i].x + xs;
-          ClientTPA[c].y := ClientTPA[i].y + ys;
-          inc(c);
-        end;
-      end;
-    end;
+    0: cts0();
+    1: cts1();
+    2: cts2();
   end;
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
