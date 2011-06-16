@@ -353,12 +353,12 @@ begin
   Result := (Sqrt(sqr(R1-R2) + sqr(G1-G2) + sqr(B1-B2)) <= Tolerance);
 end;
 
-function ColorSame_cts2(Tolerance: Integer; H1,S1,L1,H2,S2,L2, hueMod, satMod: extended):
+function ColorSame_cts2(Tolerance: Integer; H1, S1, L1, H2,S2,L2, hueMod, satMod: extended):
  boolean; inline;
 begin
   result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and
-            (abs(S2-S1) <= (satMod * Tolerance))
-            and (abs(L1-L2) <= Tolerance));
+            (abs(S1 - S2) <= (satMod * Tolerance))
+            and (abs(L1 - L2) <= Tolerance));
 end;
 
 procedure TMFinder.UpdateCachedValues(NewWidth, NewHeight: integer);
@@ -1657,14 +1657,14 @@ var
   end;
 
   function cts2: tpoint;
-    var H1, S1, L1, H2, S2, L2, HMod, SMod: extended;
+    var H2, S2, L2, HMod, SMod: extended;
         xx, yy, xBmp, yBmp, tmpY: integer;
 
         HSLRows: T2DHSLArray;
 
     label NotFoundBmp;
   begin
-    HSLRows := bitmap.GetHSLValues(0, 0, BmpW - 1, BmpH - 1);
+    HSLRows := bitmap.GetHSLValues(0, 0, BmpW, BmpH);
 
     for yy := 0 to dY do
       for xx := 0 to dX do
@@ -1678,7 +1678,9 @@ var
               RGBToHSL(MainRowdata[tmpY][xBmp +  xx].R, MainRowdata[tmpY][xBmp +  xx].G,
                        MainRowdata[tmpY][xBmp +  xx].B, H2, S2, L2);
 
-              if not ColorSame_cts2(Tolerance, HSLRows[yBmp][xBmp].H, HSLRows[yBmp][xBmp].S, HSLRows[yBmp][xBmp].L,
+              if not ColorSame_cts2(Tolerance, HSLRows[yBmp][xBmp].H,
+                      HSLRows[yBmp][xBmp].S, HSLRows[yBmp][xBmp].L, 
+              //if not ColorSame_cts2(Tolerance, HSLRows[yBmp][xBmp].H, HSLRows[yBmp][xBmp].S, HSLRows[yBmp][xBmp].L,
                                    H2, S2, L2, hueMod, satMod) then
                  goto NotFoundBmp;
             end;

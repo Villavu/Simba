@@ -884,13 +884,13 @@ var
 begin
   ValidatePoint(xs,ys);
   ValidatePoint(xe,ye);
-  setlength(result,xe-xs+1,ye-ys+1);
+  setlength(result,ye-ys+1,xe-xs+1);
   for y := ys to ye do
     for x := xs to xe do
-    begin
+    begin                                                   { REWRITE THIS }
       RGBToHSL(FData[y*w+x].R, FData[y*w+x].G, FData[y*w+x].B,
-               Result[x-xs][y-ys].H, Result[x-xs][y-ys].S,
-               Result[x-xs][y-ys].L);
+               Result[y-ys][x-xs].H, Result[y-ys][x-xs].S,
+               Result[y-ys][x-xs].L);
     end;
 end;
 
