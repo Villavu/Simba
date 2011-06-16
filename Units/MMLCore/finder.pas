@@ -352,7 +352,7 @@ begin
        RGBToXYZ(R2, G2, B2, X, Y, Z);
        XYZtoCIELab(X, Y, Z, L_2, a_2, b_2);
        Result := Sqrt(sqr(L_1 - L_2) + sqr(a_1 - a_2) +
-                   sqr(bb_1 - b_2)) <= Tolerance;
+                   sqr(b_1 - b_2)) <= Tolerance;
      end;
   end;
 end;
