@@ -18,19 +18,7 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    Simba.inc: File with directives for SimbaUnit.
+    lpexportedmethods.inc for the Mufasa Macro Library
 }
 
-{$IFDEF LINUX}
-    {$DEFINE LINUX_HOTKEYS} // For global hotkeys, requires libkeybinder.
-                            // See Units/Linux/keybinder.pas
-{$ENDIF}
-
-//{$DEFINE USE_RUTIS}
-//{$DEFINE USE_LAPE}
-
-//{$DEFINE USE_CPASCAL} // TODO
-//{$DEFINE USE_EXTENSIONS} // TODO
-//{$DEFINE USE_CODECOMPLETION} // TODO
-
-//{$DEFINE TERMINALWRITELN} // Only used once. Remove from SimbaUnit?
+//These will be added from Generator...
