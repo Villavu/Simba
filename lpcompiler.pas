@@ -816,7 +816,7 @@ begin
         begin
           Default := ParseExpression([tk_sym_ParenthesisClose], True, False);
           try
-            setExpectedType(Default, Param.VarType);
+            Default := setExpectedType(Default, Param.VarType) as TLapeTree_ExprBase;
             Param.Default := Default.Evaluate();
             if (Param.ParType in [lptVar, lptOut]) and ((Param.Default = nil) or Param.Default.isConstant) then
               LapeException(lpeVariableExpected, Default.DocPos);
@@ -1370,8 +1370,7 @@ begin
 
       if (Tokenizer.Tok = tk_sym_Equals) then
       begin
-        Default := ParseExpression([], True, False);
-        setExpectedType(Default, VarType);
+        Default := setExpectedType(ParseExpression([], True, False), VarType) as TLapeTree_ExprBase;
         if (Default <> nil) and (not Default.isConstant()) then
           LapeException(lpeConstantExpected, Default.DocPos);
 
@@ -1458,6 +1457,7 @@ var
   procedure PopOpNode;
   var
     OpNode: TLapeTree_Operator;
+    DocPos: TDocPos;
   begin
     OpNode := OpStack.Pop();
     try
@@ -1469,8 +1469,9 @@ var
       end;
       VarStack.Push(OpNode);
     except
+      DocPos := OpNode._DocPos;
       OpNode.Free();
-      LapeException(lpeInvalidEvaluation, OpNode.DocPos);
+      LapeException(lpeInvalidEvaluation, DocPos);
     end;
   end;
 

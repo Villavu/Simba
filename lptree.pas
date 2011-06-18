@@ -574,7 +574,7 @@ type
 
 function FoldConstants(Root: TLapeTree_Base): TLapeTree_Base;
 procedure PrintTree(Root: TLapeTree_Base; Indent: Integer = 0);
-procedure setExpectedType(Node: TLapeTree_Base; ToType: TLapeType); {$IFDEF Lape_Inline}inline;{$ENDIF}
+function setExpectedType(Node: TLapeTree_Base; ToType: TLapeType): TLapeTree_Base; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function isEmptyNode(Node: TLapeTree_Base): Boolean; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function getTempVar(Node: TLapeTree_Base; var Offset: Integer; out v: TResVar; Lock: Integer = 1): Boolean; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function getBoolVar(Node: TLapeTree_ExprBase; var Offset: Integer; out ConditionVar: TResVar): Boolean;   {$IFDEF Lape_Inline}inline;{$ENDIF}
@@ -601,8 +601,7 @@ begin
       with TLapeTree_Operator(Root) do
       begin
         FLeft := TLapeTree_ExprBase(FoldConstants(FLeft));
-        setExpectedType(FRight, FLeft.resType());
-        FRight := TLapeTree_ExprBase(FoldConstants(FRight));
+        FRight := TLapeTree_ExprBase(FoldConstants(setExpectedType(FRight, FLeft.resType())));
       end;
 
     if (not (Root is TLapeTree_ResVar)) and (not (Root is TLapeTree_GlobalVar)) and TLapeTree_ExprBase(Root).isConstant() then
@@ -620,7 +619,9 @@ begin
           Replacement := TLapeTree_Integer.Create(t.AsString, Root.Compiler)
         else
           Replacement := TLapeTree_GlobalVar.Create(t, Root.Compiler);
+
         Replacement.Parent := Root.FParent;
+        Root.FParent := nil;
         Root.Free();
         Result := Replacement;
       end;
@@ -653,13 +654,15 @@ begin
   end;
 end;
 
-procedure setExpectedType(Node: TLapeTree_Base; ToType: TLapeType);
+function setExpectedType(Node: TLapeTree_Base; ToType: TLapeType): TLapeTree_Base;
 var
   Typ: TLapeType;
   Cast: TLapeTree_Invoke;
 begin
-  if (Node <> nil) and (Node.Compiler <> nil) then
-    if (Node is TLapeTree_OpenArray) then
+  Result := Node;
+  if (Node = nil) or (Node.Compiler = nil) then
+    Exit
+  else if (Node is TLapeTree_OpenArray) then
       if (ToType <> nil) then
         TLapeTree_OpenArray(Node).ToType := ToType
       else
@@ -675,7 +678,10 @@ begin
             Cast.addParam(Left);
             Left := Cast;
           end;
-        end;
+        end
+    else
+      Exit;
+  Result := FoldConstants(Node);
 end;
 
 function isEmptyNode(Node: TLapeTree_Base): Boolean;
@@ -870,7 +876,7 @@ begin
     if (CastTo = nil) then
       Exit(False)
     else
-      setExpectedType(FValues[i], CastTo);
+      FValues[i] := setExpectedType(FValues[i], CastTo);
 
     if (FValues[i] is TLapeTree_ExprBase) and CastTo.CompatibleWith(TLapeTree_ExprBase(FValues[i]).resType()) then
       {nothing}
@@ -1241,7 +1247,6 @@ begin
     begin
       FDest := NullResVar;
       Result := getResVar(FCompiler.getTempVar(ToType));
-      Result.VarPos.StackVar.isConstant := False;
     end
     else
     begin
@@ -1249,7 +1254,10 @@ begin
       getDestVar(FDest, Result, op_Unknown, FCompiler);
     end;
 
-    if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) and (not isVariable(Result)) then
+    if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) and
+       (not isVariable(Result)) and
+       (not (ToType is TLapeType_Set))
+    then
       if (Result.VarPos.MemPos = mpVar) then
         Result.VarPos.StackVar.isConstant := False
       else if (Result.VarPos.MemPos = mpStack) then
@@ -1402,7 +1410,7 @@ var
     try
       if (FParams.Count <> 1) or (VarType = nil) or isEmptyNode(FParams[0]) then
         LapeException(lpeInvalidCast);
-      setExpectedType(FParams[0], VarType);
+      FParams[0] := setExpectedType(FParams[0], VarType) as TLapeTree_ExprBase;
 
       Result := FParams[0].Evaluate();
       if VarType.Equals(Result.VarType) or ((Result.VarType <> nil) and (VarType.Size = Result.VarType.Size)) then
@@ -1448,7 +1456,7 @@ var
             LapeExceptionFmt(lpeNoDefaultForParam, [i + 1], Self.DocPos)
         else
         begin
-          setExpectedType(FParams[i], Params[i].VarType);
+          FParams[i] := setExpectedType(FParams[i], Params[i].VarType) as TLapeTree_ExprBase;
           Par := FParams[i].Evaluate();
         end;
 
@@ -1521,7 +1529,7 @@ var
       if (FParams.Count <> 1) or (VarType = nil) or isEmptyNode(FParams[0]) then
         LapeException(lpeInvalidCast);
 
-      setExpectedType(FParams[0], VarType);
+      FParams[0] := setExpectedType(FParams[0], VarType) as TLapeTree_ExprBase;
       Result := FParams[0].Compile(Offset);
       if VarType.Equals(Result.VarType) or ((Result.VarType <> nil) and (VarType.Size = Result.VarType.Size)) then
       begin
@@ -1775,7 +1783,7 @@ begin
             LapeExceptionFmt(lpeNoDefaultForParam, [i + 1], [FParams[i], Self])
         else
         begin
-          setExpectedType(FParams[i], Params[i].VarType);
+          FParams[i] := setExpectedType(FParams[i], Params[i].VarType) as TLapeTree_ExprBase;
           ParamVars[i] := NullResVar;
         end;
 
@@ -2646,7 +2654,7 @@ begin
   else
     LeftType := nil;
 
-  setExpectedType(FRight, LeftType);
+  FRight := setExpectedType(FRight, LeftType) as TLapeTree_ExprBase;
   if (FRight <> nil) then
     RightType := FRight.resType()
   else
@@ -2751,7 +2759,7 @@ begin
 
   if (FOperatorType = op_Assign) and ((LeftVar <> nil) or LeftVar.isConstant) then
     LapeException(lpeCannotAssign, [FLeft, Self]);
-  setExpectedType(FRight, LeftVar.VarType);
+  FRight := setExpectedType(FRight, LeftVar.VarType) as TLapeTree_ExprBase;
 
   Short := (FOperatorType in [op_AND, op_OR]) and (LeftVar <> nil) and (FRight <> nil) and canShort(LeftVar.VarType) and canShort(FRight.resType());
   if Short and ((FOperatorType = op_AND) xor (LeftVar.AsInteger <> 0)) then
@@ -2822,7 +2830,7 @@ begin
 
   if (FRight <> nil) then
   begin
-    setExpectedType(FRight, LeftVar.VarType);
+    FRight := setExpectedType(FRight, LeftVar.VarType) as TLapeTree_ExprBase;
 
     if (FOperatorType = op_Assign) and
       (FLeft <> nil) and isVariable(LeftVar) and
