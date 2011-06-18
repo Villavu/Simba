@@ -72,19 +72,14 @@ begin
   {$ENDIF}
 end;
 
-procedure MyWriteLn_String(Params: PParamArray);
+procedure MyWrite(Params: PParamArray);
 begin
-  Form1.d.Lines.Add(PlpString(Params^[0])^);
+  Form1.d.Text := Form1.d.Text + PlpString(Params^[0])^;
 end;
 
-procedure MyWriteLn_Int64(Params: PParamArray);
+procedure MyWriteLn(Params: PParamArray);
 begin
-  Form1.d.Lines.Add(IntToStr(PInt64(Params^[0])^));
-end;
-
-procedure MyWriteLn_Int32(Params: PParamArray);
-begin
-  Form1.d.Lines.Add(IntToStr(PInt32(Params^[0])^));
+  Form1.d.Text := Form1.d.Text + LineEnding;
 end;
 
 procedure MyRandom(const Params: PParamArray; const Result: Pointer);
@@ -137,8 +132,7 @@ var
   rec, rec2, tp: TLapeType_Record;
   ttpa, t2dpa: TLapeType_DynArray;
   q: _rec;
-  proc1, proc2, proc3, func1, func2, func3: TLapeType_Method;
-  overloaded_proc: TLapeType_OverloadedMethod;
+  func1, func2, func3: TLapeType_Method;
   tpa: TPointArray;
   atpa: T2DPointArray;
   a: TLapeGlobalVar;
@@ -166,18 +160,9 @@ begin
 
     a := Compiler.addGlobalVar(123, 'a');
 
-    proc1 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)]);
-    proc2 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltInt64)], [lptNormal], [TLapeGlobalVar(nil)]);
-    proc3 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)]);
-
     func1 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltInt32), Compiler.getBaseType(ltInt32)], [lptNormal, lptNormal], [nil, a], Compiler.getBaseType(ltInt32));
     func2 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltInt32)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltString));
     func3 := TLapeType_Method.Create(Compiler, [Compiler.getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)], Compiler.getBaseType(ltInt32));
-
-    overloaded_proc := TLapeType_OverloadedMethod.Create(Compiler, nil);
-    overloaded_proc.addMethod(proc1.NewGlobalVar(@MyWriteLn_String));
-    overloaded_proc.addMethod(proc2.NewGlobalVar(@MyWriteLn_Int64));
-    overloaded_proc.addMethod(proc3.NewGlobalVar(@MyWriteLn_Int32));
 
     New(q.z);
     New(q.z^.test);
@@ -188,9 +173,9 @@ begin
     q.arr := tpa;
 
     //Compiler.addGlobalVar(proc1.NewGlobalVar(@MyWriteLn, 'WriteLn'));
-    Compiler.addGlobalVar(overloaded_proc.NewGlobalVar('WriteLn'));
     Compiler.addGlobalVar(func1.NewGlobalVar(@MyRandom, 'Random'));
-    //Compiler.addGlobalVar(func2.NewGlobalVar(@MyIntToString, 'IntToStr'));
+    Compiler.addGlobalFunc('procedure _write(const s: string); override;', @MyWrite);
+    Compiler.addGlobalFunc('procedure _writeln; override;', @MyWriteLn);
     Compiler.addGlobalFunc('function IntToStr(x: Int32): AnsiString; overload;', @MyIntToString);
     Compiler.addGlobalFunc('function IntToStr(x: Int64 = 123): AnsiString; overload;', @MyInt64ToString);
     Compiler.addGlobalFunc('procedure MyStupidProc', @MyStupidProc);
@@ -232,16 +217,12 @@ begin
     Dispose(q.z^.test);
     Dispose(q.z);
 
-    overloaded_proc.Free();
     Compiler.Free();
     rec2.Free();
     rec.Free();
     tp.Free();
     ttpa.Free();
     t2dpa.Free();
-    proc1.Free();
-    proc2.Free();
-    proc3.Free();
     func1.Free();
     func2.Free();
     func3.Free();

@@ -929,7 +929,7 @@ begin
 
       if (OldDeclaration <> nil) and (OldDeclaration is TLapeGlobalVar) and (TLapeGlobalVar(OldDeclaration).VarType is TLapeType_OverloadedMethod) then
         OldDeclaration := TLapeType_OverloadedMethod(TLapeGlobalVar(OldDeclaration).VarType).getMethod(FuncHeader);
-      if (OldDeclaration = nil) or (not (OldDeclaration is TLapeGlobalVar))or (not TLapeGlobalVar(OldDeclaration).isConstant) or (not (TLapeGlobalVar(OldDeclaration).VarType is TLapeType_Method)) then
+      if (OldDeclaration = nil) or (not (OldDeclaration is TLapeGlobalVar)) or (not TLapeGlobalVar(OldDeclaration).isConstant) or (not (TLapeGlobalVar(OldDeclaration).VarType is TLapeType_Method)) then
         LapeException(lpeUnknownParent, Tokenizer.DocPos);
       if (not TLapeType_Method(TLapeGlobalVar(OldDeclaration).VarType).EqualParams(FuncHeader, False)) then
         LapeException(lpeNoForwardMatch, Tokenizer.DocPos);
@@ -945,7 +945,7 @@ begin
       addLocalDecl(Result.Method, FStackInfo);
 
       __LapeTree_Method(Result).FMethod := TLapeGlobalVar(OldDeclaration);
-      TLapeType_Method(Result.Method.VarType).setImported(Result.Method, False);
+      TLapeType_Method(Result.Method.VarType).setImported(Result.Method, isExternal);
     end
     else
     begin
@@ -2126,6 +2126,8 @@ begin
 
   FTreeMethodMap := TLapeTreeMethodMap.Create(nil);
   FInternalMethodMap := TLapeInternalMethodMap.Create(nil);
+  FInternalMethodMap['Write'] := TLapeTree_InternalMethod_Write;
+  FInternalMethodMap['WriteLn'] := TLapeTree_InternalMethod_WriteLn;
   FInternalMethodMap['IsScriptMethod'] := TLapeTree_InternalMethod_IsScriptMethod;
   FInternalMethodMap['Break'] := TLapeTree_InternalMethod_Break;
   FInternalMethodMap['Continue'] := TLapeTree_InternalMethod_Continue;
@@ -2140,11 +2142,19 @@ begin
   FInternalMethodMap['Inc'] := TLapeTree_InternalMethod_Inc;
   FInternalMethodMap['Dec'] := TLapeTree_InternalMethod_Dec;
 
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high');
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length');
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeAStrLen, '!astrlen');
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeWStrLen, '!wstrlen');
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeUStrLen, '!ustrlen');
+  addGlobalFunc([getBaseType(ltString)], [lptConst], [TLapeGlobalVar(nil)], @_LapeWrite, '_write').isConstant := True;
+  addGlobalFunc([], [], [], @_LapeWriteLn, '_writeln').isConstant := True;
+
+  addGlobalFunc([getBaseType(ltInt32)],   [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltPointer), @_LapeGetMem, 'GetMem').isConstant := True;
+  addGlobalFunc([getBaseType(ltPointer)], [lptConst], [TLapeGlobalVar(nil)], @_LapeFreeMem, 'FreeMem').isConstant := True;
+  addGlobalFunc([getBaseType(ltPointer), getBaseType(ltInt32)], [lptConst, lptConst], [TLapeGlobalVar(nil), TLapeGlobalVar(nil)], @_LapeFreeMemSize, 'FreeMemSize').isConstant := True;
+  addGlobalFunc([getBaseType(ltPointer), getBaseType(ltInt32)], [lptVar,   lptConst], [TLapeGlobalVar(nil), TLapeGlobalVar(nil)], @_LapeReallocMem, 'ReallocMem').isConstant := True;
+
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeAStrLen, '!astrlen').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeWStrLen, '!wstrlen').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeUStrLen, '!ustrlen').isConstant := True;
 
   setTokenizer(ATokenizer);
   Reset();

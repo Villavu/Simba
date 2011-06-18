@@ -22,6 +22,14 @@ type
   TGetEvalRes = function(Op: EOperator; Left, Right: ELapeBaseType): ELapeBaseType;
   TGetEvalProc = function(Op: EOperator; Left, Right: ELapeBaseType): TLapeEvalProc;
 
+procedure _LapeWrite(const Params: PParamArray);
+procedure _LapeWriteLn(const Params: PParamArray);
+
+procedure _LapeGetMem(const Params: PParamArray; const Result: Pointer);
+procedure _LapeFreeMem(const Params: PParamArray);
+procedure _LapeFreeMemSize(const Params: PParamArray);
+procedure _LapeReallocMem(const Params: PParamArray);
+
 procedure _LapeHigh(const Params: PParamArray; const Result: Pointer);
 procedure _LapeLength(const Params: PParamArray; const Result: Pointer);
 procedure _LapeAStrLen(const Params: PParamArray; const Result: Pointer);
@@ -129,6 +137,36 @@ implementation
 uses
   Variants,
   lpexceptions;
+
+procedure _LapeWrite(const Params: PParamArray);
+begin
+  Write(PlpString(Params^[0])^);
+end;
+
+procedure _LapeWriteLn(const Params: PParamArray);
+begin
+  WriteLn();
+end;
+
+procedure _LapeGetMem(const Params: PParamArray; const Result: Pointer);
+begin
+  PPointer(Result)^ := GetMem(PInt32(Params^[0])^);
+end;
+
+procedure _LapeFreeMem(const Params: PParamArray);
+begin
+  FreeMem(PPointer(Params^[0])^);
+end;
+
+procedure _LapeFreeMemSize(const Params: PParamArray);
+begin
+  FreeMem(PPointer(Params^[0])^, PInt32(Params^[1])^);
+end;
+
+procedure _LapeReallocMem(const Params: PParamArray);
+begin
+  ReallocMem(PPointer(Params^[0])^, PInt32(Params^[1])^);
+end;
 
 procedure _LapeHigh(const Params: PParamArray; const Result: Pointer);
 begin

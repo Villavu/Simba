@@ -129,8 +129,18 @@ type
     function isConstant: Boolean; override;
   end;
 
+  TLapeTree_InternalMethod_Write = class(TLapeTree_InternalMethod)
+  public
+    constructor Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil); override;
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
+  TLapeTree_InternalMethod_WriteLn = class(TLapeTree_InternalMethod_Write)
+  public
+    function Compile(var Offset: Integer): TResVar; override;
+  end;
+
   TLapeTree_InternalMethod_IsScriptMethod = class(TLapeTree_InternalMethod)
-    function isConstant: Boolean; override;
     function resType: TLapeType; override;
     function Evaluate: TLapeGlobalVar; override;
     function Compile(var Offset: Integer): TResVar; override;
@@ -138,7 +148,6 @@ type
 
   TLapeTree_InternalMethod_FlowStatement = class(TLapeTree_InternalMethod)
   public
-    function isConstant: Boolean; override;
     function Evaluate: TLapeGlobalVar; override;
   end;
 
@@ -167,6 +176,7 @@ type
 
   TLapeTree_InternalMethod_Ord = class(TLapeTree_InternalMethod)
   public
+    function isConstant: Boolean; override;
     function resType: TLapeType; override;
     function Evaluate: TLapeGlobalVar; override;
     function Compile(var Offset: Integer): TResVar; override;
@@ -198,6 +208,7 @@ type
 
   TLapeTree_InternalMethod_Succ = class(TLapeTree_InternalMethod)
   public
+    function isConstant: Boolean; override;
     function resType: TLapeType; override;
     function Evaluate: TLapeGlobalVar; override;
     function Compile(var Offset: Integer): TResVar; override;
@@ -211,14 +222,12 @@ type
 
   TLapeTree_InternalMethod_Inc = class(TLapeTree_InternalMethod)
   public
-    function isConstant: Boolean; override;
     function Evaluate: TLapeGlobalVar; override;
     function Compile(var Offset: Integer): TResVar; override;
   end;
 
   TLapeTree_InternalMethod_Dec = class(TLapeTree_InternalMethod)
   public
-    function isConstant: Boolean; override;
     function Evaluate: TLapeGlobalVar; override;
     function Compile(var Offset: Integer): TResVar; override;
   end;
@@ -660,7 +669,7 @@ var
   Cast: TLapeTree_Invoke;
 begin
   Result := Node;
-  if (Node = nil) or (Node.Compiler = nil) then
+  if isEmptyNode(Node) or (Node.Compiler = nil) then
     Exit
   else if (Node is TLapeTree_OpenArray) then
       if (ToType <> nil) then
@@ -1808,12 +1817,74 @@ end;
 
 function TLapeTree_InternalMethod.isConstant: Boolean;
 begin
-  Result := (FParams.Count = 1) and (not isEmptyNode(FParams[0])) and FParams[0].isConstant();
+  Result := False;
 end;
 
-function TLapeTree_InternalMethod_IsScriptMethod.isConstant: Boolean;
+constructor TLapeTree_InternalMethod_Write.Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil);
+var
+  _Write: TLapeGlobalVar;
 begin
-  Result := False;
+  inherited;
+  _Write := ACompiler.getDeclaration('_write') as TLapeGlobalVar;
+  if (_Write.VarType is TLapeType_OverloadedMethod) then
+    _Write := TLapeType_OverloadedMethod(_Write.VarType).Methods.Items[0] as TLapeGlobalVar;
+  setIdent(TLapeTree_GlobalVar.Create(_Write, ACompiler, ADocPos));
+end;
+
+function TLapeTree_InternalMethod_Write.Compile(var Offset: Integer): TResVar;
+var
+  i: Integer;
+  TempParams: TLapeExpressionList;
+begin
+  Assert(FIdent <> nil);
+  if (FParams.Count < 1) then
+    LapeExceptionFmt(lpeWrongNumberParams, [1], DocPos);
+
+  TempParams := FParams;
+  FParams := TLapeExpressionList.Create(nil);
+  FParams.add(TempParams[0]);
+  try
+    for i := 0 to TempParams.Count - 1 do
+    begin
+      TempParams[i] := setExpectedType(TempParams[i], FCompiler.getBaseType(ltString)) as TLapeTree_ExprBase;
+      FParams[0] := TempParams[i];
+
+      if (not isEmptyNode(TempParams[i])) and (TempParams[i].resType() <> nil) and (not (TempParams[i].resType().BaseType in LapeStringTypes)) then
+      begin
+        TempParams[i] := TLapeTree_Invoke.Create(TLapeTree_GlobalVar.Create(FCompiler.getDeclaration('ToString') as TLapeGlobalVar, FCompiler, @_DocPos), FCompiler, @_DocPos);
+        TempParams[i].Parent := Self;
+        TLapeTree_Invoke(TempParams[i]).addParam(FParams[0]);
+        FParams.add(TempParams[i]);
+      end;
+
+      Result := inherited;
+    end;
+  finally
+    FParams.Free();
+    FParams := TempParams;
+  end;
+end;
+
+function TLapeTree_InternalMethod_WriteLn.Compile(var Offset: Integer): TResVar;
+var
+  _WriteLn: TLapeGlobalVar;
+begin
+  if (FParams.Count > 0) then
+    Result := inherited
+  else
+    Result := NullResvar;
+
+  _WriteLn := FCompiler.getDeclaration('_writeln') as TLapeGlobalVar;
+  if (_WriteLn.VarType is TLapeType_OverloadedMethod) then
+    _WriteLn := TLapeType_OverloadedMethod(_WriteLn.VarType).Methods.Items[0] as TLapeGlobalVar;
+  Assert(_WriteLn <> nil);
+
+  with TLapeTree_Invoke.Create(TLapeTree_GlobalVar.Create(_WriteLn, FCompiler, @_DocPos), FCompiler, @_DocPos) do
+  try
+    Compile(Offset);
+  finally
+    Free();
+  end;
 end;
 
 function TLapeTree_InternalMethod_IsScriptMethod.resType: TLapeType;
@@ -1849,11 +1920,6 @@ begin
   FCompiler.Emitter._IsInternal(Offset, @_DocPos);
   Result.VarPos.MemPos := mpStack;
   Result.VarType := resType();
-end;
-
-function TLapeTree_InternalMethod_FlowStatement.isConstant: Boolean;
-begin
-  Result := False;
 end;
 
 function TLapeTree_InternalMethod_FlowStatement.Evaluate: TLapeGlobalVar;
@@ -2035,6 +2101,11 @@ function TLapeTree_InternalMethod_SizeOf.Compile(var Offset: Integer): TResVar;
 begin
   Result := NullResVar;
   LapeException(lpeCannotEvalRunTime, DocPos);
+end;
+
+function TLapeTree_InternalMethod_Ord.isConstant: Boolean;
+begin
+  Result := (FParams.Count = 1) and (not isEmptyNode(FParams[0])) and FParams[0].isConstant();
 end;
 
 function TLapeTree_InternalMethod_Ord.resType: TLapeType;
@@ -2282,6 +2353,11 @@ begin
   end;
 end;
 
+function TLapeTree_InternalMethod_Succ.isConstant: Boolean;
+begin
+  Result := (FParams.Count = 1) and (not isEmptyNode(FParams[0])) and FParams[0].isConstant();
+end;
+
 function TLapeTree_InternalMethod_Succ.resType: TLapeType;
 begin
   Result := nil;
@@ -2499,11 +2575,6 @@ begin
   end;
 end;
 
-function TLapeTree_InternalMethod_Inc.isConstant: Boolean;
-begin
-  Result := False;
-end;
-
 function TLapeTree_InternalMethod_Inc.Evaluate: TLapeGlobalVar;
 begin
   Result := nil;
@@ -2540,11 +2611,6 @@ begin
     if (Succ <> nil) then
       Succ.Free();
   end;
-end;
-
-function TLapeTree_InternalMethod_Dec.isConstant: Boolean;
-begin
-  Result := False;
 end;
 
 function TLapeTree_InternalMethod_Dec.Evaluate: TLapeGlobalVar;
@@ -2986,6 +3052,14 @@ begin
   if (FWithDeclRec.WithVar = nil) or (FWithDeclRec.WithVar^ = nil) then
     LapeException(lpeInvalidWithReference, DocPos);
   Result := getResVar(FWithDeclRec.WithVar^);
+  if (Result.VarType <> FWithDeclRec.WithType) and
+     (Result.VarType <> nil) and (Result.VarType.BaseType = ltPointer) and
+     (not Result.VarType.Equals(FWithDeclRec.WithType))
+  then
+  begin
+    Result.VarType := FWithDeclRec.WithType;
+    Result.VarPos.isPointer := True;
+  end;
 end;
 
 constructor TLapeTree_VarType.Create(AVarType: TLapeType; ACompiler: TLapeCompilerBase; ADocPos: PDocPos = nil);
