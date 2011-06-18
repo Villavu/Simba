@@ -369,6 +369,8 @@ begin
 end;
 
 function TLapeCompiler.GetToStringMethod(Sender: TLapeType_OverloadedMethod; AType: TLapeType_Method; AParams: TLapeTypeArray = nil; AResult: TLapeType = nil): TLapeGlobalVar;
+var
+  Body: lpString;
 begin
   Result := nil;
   if (Sender <> nil) and (AType <> nil) and (AType.Params.Count = 1) and (AType.Params[0].VarType <> nil) then
@@ -377,8 +379,20 @@ begin
     AParams[0] := AType.Params[0].VarType;
     AResult := AType.Res;
   end;
-  if (Sender = nil) or (Length(AParams) <> 1) or (AParams[0] = nil) or (AResult = nil) or (not (AResult.BaseType in LapeStringTypes)) then
+  if (Sender = nil) or (Length(AParams) <> 1) or (AParams[0] = nil) or ((AResult <> nil) and (AResult.BaseType <> ltString)) then
     Exit;
+
+  Body := AParams[0].VarToStringBody(Sender);
+  if (Body <> '') then
+  begin
+    if (AResult = nil) and (AType = nil) then
+      AResult := getBaseType(ltString);
+    if (AType = nil) then
+      AType := addManagedType(TLapeType_Method.Create(Self, [AParams[0]], [lptConst], [TLapeGlobalVar(nil)], AResult)) as TLapeType_Method;
+
+    Sender.addMethod(AType.NewGlobalVarP());
+    Result := addGlobalFunc(AType, 'ToString', 'override;' + Body).Method;
+  end;
 end;
 
 procedure TLapeCompiler.InitBaseDefinitions;
@@ -389,6 +403,7 @@ procedure TLapeCompiler.InitBaseDefinitions;
   begin
     OLMethod := TLapeType_OverloadedMethod.Create(Self, nil);
     OLMethod.OnFunctionNotFound := {$IFDEF FPC}@{$ENDIF}GetToStringMethod;
+    OLMethod.NeedFullMatch := True;
     addManagedDecl(OLMethod);
 
     for BaseType := Low(ELapeBaseType) to High(ELapeBaseType) do
@@ -426,15 +441,10 @@ begin
 
   addToString();
   addDelayedCode(
-    'function _EnumToString(const s: ^string; const Index, Lo, Hi: Int32): string;' +
-    'begin'                                                                         +
-    '  if (Index >= Lo) and (Index <= Hi) then'                                     +
-    '    Result := s[Index]^'                                                       +
-    '  else '                                                                       +
-    '    Result := '#39#39';'                                                       +
-    '  if (Result = '#39#39') then'                                                 +
-    '    Result := '#39'InvalidEnum('#39'+ToString(Index)+'#39')'#39';'             +
-    'end;'
+    _LapeToString_Enum +
+    Format(_LapeToString_Set, ['Small', Ord(High(ELapeSmallEnum))]) +
+    Format(_LapeToString_Set, ['Large', Ord(High(ELapeLargeEnum))]) +
+    _LapeToString_Array
   );
 end;
 
@@ -921,7 +931,7 @@ begin
         OldDeclaration := TLapeType_OverloadedMethod(TLapeGlobalVar(OldDeclaration).VarType).getMethod(FuncHeader);
       if (OldDeclaration = nil) or (not (OldDeclaration is TLapeGlobalVar))or (not TLapeGlobalVar(OldDeclaration).isConstant) or (not (TLapeGlobalVar(OldDeclaration).VarType is TLapeType_Method)) then
         LapeException(lpeUnknownParent, Tokenizer.DocPos);
-      if (not TLapeGlobalVar(OldDeclaration).VarType.Equals(FuncHeader)) then
+      if (not TLapeType_Method(TLapeGlobalVar(OldDeclaration).VarType).EqualParams(FuncHeader, False)) then
         LapeException(lpeNoForwardMatch, Tokenizer.DocPos);
       if hasDeclaration('inherited', FStackInfo, True) then
         LapeExceptionFmt(lpeDuplicateDeclaration, ['inherited'], Tokenizer.DocPos);
@@ -1703,7 +1713,7 @@ begin
             begin
               PopOpStack(op_Invoke);
               if (Method = nil) then
-                Method := TLapeTree_Invoke.Create(VarStack.Pop(), Self, getPDocPos());
+                Method := TLapeTree_Invoke.Create(FoldConstants(VarStack.Pop()) as TLapeTree_ExprBase, Self, getPDocPos());
               if (Next() <> tk_sym_ParenthesisClose) then
               begin
                 Method.addParam(EnsureExpression(ParseExpression([tk_sym_ParenthesisClose, tk_sym_Comma], False)));
@@ -2230,8 +2240,11 @@ begin
 
   FTokenizer := 0;
   FTokenizers[0] := ATokenizer;
+
   while (FStackInfo <> nil) and (FStackInfo.Owner <> nil) do
     FStackInfo := FStackInfo.Owner;
+  if (FStackInfo = nil) then
+    FStackInfo := EmptyStackInfo;
 end;
 
 function TLapeCompiler.getTempTokenizerState(const AStr: lpString; const AFileName: lpString = ''): Pointer;

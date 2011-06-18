@@ -76,6 +76,54 @@ var
   LapeEvalRes: TLapeEvalRes;
   LapeEvalArr: TLapeEvalArr;
 
+  _LapeToString_Enum: lpString =
+    'function _EnumToString(const s: ^string; const Index, Lo, Hi: Int32): string;'      +
+    'begin'                                                                              +
+    '  if (Index >= Lo) and (Index <= Hi) then'                                          +
+    '    Result := s[Index]^'                                                            +
+    '  else '                                                                            +
+    '    Result := '#39#39';'                                                            +
+    '  if (Result = '#39#39') then'                                                      +
+    '    Result := '#39'InvalidEnum('#39'+ToString(Index)+'#39')'#39';'                  +
+    'end;';
+
+  _LapeToString_Set: lpString =
+    'function _%sSetToString(const ASet, AToString: Pointer; const Lo, Hi: Int32): string;' +
+    'type'                                                                               +
+    '  TEnum = (se0, se1 = %d);'                                                         +
+    '  TSet = set of TEnum;'                                                             +
+    '  PSet = ^TSet;'                                                                    +
+    '  TToString = function(const Enum: TEnum): string;'                                 +
+    'var'                                                                                +
+    '  i: Int32;'                                                                        +
+    'begin'                                                                              +
+    '  Result := '#39#39';'                                                              +
+    '  for i := Lo to Hi do'                                                             +
+    '    if (TEnum(i) in PSet(ASet)^) then'                                              +
+    '    begin'                                                                          +
+    '      if (Result <> '#39#39') then'                                                 +
+    '        Result := Result + '#39', '#39';'                                           +
+    '      Result := Result + TToString(AToString)(TEnum(i));'                           +
+    '    end;'                                                                           +
+    '  Result := '#39'['#39'+Result+'#39']'#39';'                                        +
+    'end;';
+
+  _LapeToString_Array: lpString =
+    'function _ArrayToString(Arr: Pointer; const AToString: function(const p: Pointer): string; const Len, Size: Int32): string;' +
+    'var'                                                                                +
+    '  i: Int32;'                                                                        +
+    'begin'                                                                              +
+    '  Result := '#39#39';'                                                              +
+    '  for i := 1 to Len do'                                                             +
+    '  begin'                                                                            +
+    '    if (i > 1) then'                                                                +
+    '      Result := Result + '#39', '#39';'                                             +
+    '    Result := Result + AToString(Arr);'                                             +
+    '    Inc(Arr, Size);'                                                                +
+    '  end;'                                                                             +
+    '  Result := '#39'['#39'+Result+'#39']'#39';'                                        +
+    'end;';
+
 implementation
 
 uses

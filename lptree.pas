@@ -654,9 +654,28 @@ begin
 end;
 
 procedure setExpectedType(Node: TLapeTree_Base; ToType: TLapeType);
+var
+  Typ: TLapeType;
+  Cast: TLapeTree_Invoke;
 begin
-  if (Node <> nil) and (Node is TLapeTree_OpenArray) and (ToType <> nil) then
-    TLapeTree_OpenArray(Node).ToType := ToType;
+  if (Node <> nil) and (Node.Compiler <> nil) then
+    if (Node is TLapeTree_OpenArray) then
+      if (ToType <> nil) then
+        TLapeTree_OpenArray(Node).ToType := ToType
+      else
+        TLapeTree_OpenArray(Node).ToType := TLapeTree_OpenArray(Node).resType()
+    else if (Node is TLapeTree_Operator) and (ToType <> nil) then
+      with TLapeTree_Operator(Node) do
+        if (OperatorType = op_Deref) and (Left <> nil) then
+        begin
+          Typ := Left.resType();
+          if (Typ <> nil) and (Typ is TLapeType_Pointer) and (not TLapeType_Pointer(Typ).HasType()) then
+          begin
+            Cast := TLapeTree_Invoke.Create(TLapeTree_VarType.Create(ToType.Compiler.getPointerType(ToType), Node.Compiler, @Node._DocPos), Node.Compiler, @Node._DocPos);
+            Cast.addParam(Left);
+            Left := Cast;
+          end;
+        end;
 end;
 
 function isEmptyNode(Node: TLapeTree_Base): Boolean;
@@ -870,7 +889,7 @@ function TLapeTree_OpenArray.isConstant: Boolean;
 var
   i: Integer;
 begin
-  if (not canCast()) then
+  if (ToType = nil) or (not canCast()) then
     Exit(False);
   for i := 0 to FValues.Count - 1 do
     if isEmptyNode(FValues[i]) then
@@ -1210,6 +1229,7 @@ function TLapeTree_OpenArray.Compile(var Offset: Integer): TResVar;
   end;
 
 begin
+  Result := NullResVar;
   if (not canCast()) then
     LapeException(lpeInvalidEvaluation, DocPos);
 
@@ -1217,14 +1237,23 @@ begin
     Result := FDest
   else
   begin
-    FDest := NullResVar;
     if (ToType is TLapeType_DynArray) then
     begin
+      FDest := NullResVar;
       Result := getResVar(FCompiler.getTempVar(ToType));
       Result.VarPos.StackVar.isConstant := False;
     end
     else
-      Result := FCompiler.getTempStackVar(ToType)
+    begin
+      Result.VarType := ToType;
+      getDestVar(FDest, Result, op_Unknown, FCompiler);
+    end;
+
+    if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) and (not isVariable(Result)) then
+      if (Result.VarPos.MemPos = mpVar) then
+        Result.VarPos.StackVar.isConstant := False
+      else if (Result.VarPos.MemPos = mpStack) then
+        Result.VarPos.ForceVariable := True;
   end;
 
   if (ToType is TLapeType_Set) then
@@ -1236,8 +1265,11 @@ begin
   else
     LapeException(lpeInvalidCast, DocPos);
 
-  if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) and (Result.VarPos.MemPos = mpVar) then
-    Result.VarPos.StackVar.isConstant := (Result.VarPos.StackVar is TLapeStackTempVar);
+  if (FDest.VarPos.MemPos = NullResVar.VarPos.MemPos) then
+    if (Result.VarPos.MemPos = mpVar) then
+      Result.VarPos.StackVar.isConstant := True
+    else if (Result.VarPos.MemPos = mpStack) then
+      Result.VarPos.ForceVariable := False;
 end;
 
 procedure TLapeTree_Invoke.setIdent(Node: TLapeTree_ExprBase);
@@ -1343,10 +1375,10 @@ begin
     Result := TLapeTree_VarType(FIdent).VarType
   else
   begin
-    if (FIdent is TLapeTree_ResVar) or (FIdent is TLapeTree_GlobalVar) then
-      t := FIdent.Compile().VarType
+    if isEmptyNode(FIdent) then
+      t := nil
     else
-      t := nil;
+      t := FIdent.resType();
 
     if (t <> nil) and (t is TLapeType_OverloadedMethod) then
       t := getVarType(TLapeType_OverloadedMethod(t).getMethod(getParamTypes()));
@@ -1545,6 +1577,8 @@ var
         Par := NullResVar;
         if (ParamVars[i].VarPos.MemPos = NullResVar.VarPos.MemPos) then
           ParamVars[i] := getStackVar(FParams[i], Offset);
+        if (ParamVars[i].VarPos.MemPos = NullResVar.VarPos.MemPos) or (ParamVars[i].VarType = nil) then
+          LapeException(lpeCannotInvoke);
 
         if (Params[i].ParType in Lape_RefParams) then
           if (not isVariable(ParamVars[i])) then
@@ -1735,15 +1769,10 @@ begin
           begin
             ParamVars[i] := getResVar(Params[i].Default);
             if (Params[i].ParType in Lape_RefParams) and (not isVariable(ParamVars[i])) then
-              if (FParams[i] <> nil) then
-                LapeException(lpeVariableExpected, FParams[i].DocPos)
-              else
-                LapeException(lpeVariableExpected, Self.DocPos);
+              LapeException(lpeVariableExpected, [FParams[i], Self]);
           end
-          else if (i < FParams.Count) and (FParams[i] <> nil) then
-            LapeExceptionFmt(lpeNoDefaultForParam, [i + 1], FParams[i].DocPos)
           else
-            LapeExceptionFmt(lpeNoDefaultForParam, [i + 1], Self.DocPos)
+            LapeExceptionFmt(lpeNoDefaultForParam, [i + 1], [FParams[i], Self])
         else
         begin
           setExpectedType(FParams[i], Params[i].VarType);
@@ -1985,11 +2014,7 @@ begin
   if (FParams.Count <> 1) or isEmptyNode(FParams[0]) then
     LapeExceptionFmt(lpeWrongNumberParams, [1], DocPos);
 
-  if (FParams[0] is TLapeTree_ResVar) or (FParams[0] is TLapeTree_GlobalVar) then
-    ParamType := FParams[0].Compile().VarType
-  else
-    ParamType := nil;
-
+  ParamType := FParams[0].resType();
   if (ParamType <> nil) and (ParamType is TLapeType_Type) then
     ParamType := TLapeType_Type(ParamType).TType;
   if (ParamType = nil) then
@@ -2067,7 +2092,7 @@ begin
     LapeExceptionFmt(lpeWrongNumberParams, [1], DocPos);
 
   if (FParams[0] is TLapeTree_ResVar) or (FParams[0] is TLapeTree_GlobalVar) then
-    ParamType := FParams[0].Compile().VarType
+    ParamType := FParams[0].resType()
   else
     ParamType := nil;
 
@@ -2123,7 +2148,7 @@ begin
     LapeExceptionFmt(lpeWrongNumberParams, [1], DocPos);
 
   if (FParams[0] is TLapeTree_ResVar) or (FParams[0] is TLapeTree_GlobalVar) then
-    ParamType := FParams[0].Compile().VarType
+    ParamType := FParams[0].resType()
   else
     ParamType := nil;
 
@@ -2197,7 +2222,7 @@ begin
     LapeExceptionFmt(lpeWrongNumberParams, [1], DocPos);
 
   if (FParams[0] is TLapeTree_ResVar) or (FParams[0] is TLapeTree_GlobalVar) then
-    ParamType := FParams[0].Compile().VarType
+    ParamType := FParams[0].resType()
   else
     ParamType := nil;
 
@@ -3176,9 +3201,14 @@ var
   i: Integer;
 begin
   Result := NullResVar;
-  for i := 0 to FStatements.Count - 1 do
+  i := 0;
+
+  while (i < FStatements.Count) do
+  begin
     if (AfterCompilation = FDelay[i]) and (FStatements[i] <> nil) then
       Result := FStatements[i].Compile(Offset);
+    Inc(i);
+  end;
 end;
 
 function TLapeTree_DelayedStatementList.Compile(AfterCompilation: Boolean): TResVar;
