@@ -791,10 +791,10 @@ end;
 
 function TLapeTree_Base.Compile: TResVar;
 var
-  o: Integer;
+  Offset: Integer;
 begin
-  o := -1;
-  Result := Compile(o);
+  Offset := -1;
+  Result := Compile(Offset);
 end;
 
 function TLapeTree_ExprBase.isConstant: Boolean;
@@ -1377,14 +1377,14 @@ end;
 
 function TLapeTree_Invoke.resType: TLapeType;
 var
-  t: TLapeType;
+  Typ: TLapeType;
 
-  function getVarType(v: TLapeGlobalVar): TLapeType;
+  function getVarType(AVar: TLapeGlobalVar): TLapeType;
   begin
-    if (v = nil) then
+    if (AVar = nil) then
       Result := nil
     else
-      Result := v.VarType;
+      Result := AVar.VarType;
   end;
 
 begin
@@ -1393,16 +1393,16 @@ begin
   else
   begin
     if isEmptyNode(FIdent) then
-      t := nil
+      Typ := nil
     else
-      t := FIdent.resType();
+      Typ := FIdent.resType();
 
-    if (t <> nil) and (t is TLapeType_OverloadedMethod) then
-      t := getVarType(TLapeType_OverloadedMethod(t).getMethod(getParamTypes()));
-    if (t = nil) or (not (t is TLapeType_Method)) then
+    if (Typ <> nil) and (Typ is TLapeType_OverloadedMethod) then
+      Typ := getVarType(TLapeType_OverloadedMethod(Typ).getMethod(getParamTypes()));
+    if (Typ = nil) or (not (Typ is TLapeType_Method)) then
       Result := nil
     else
-      Result := TLapeType_Method(t).Res;
+      Result := TLapeType_Method(Typ).Res;
   end;
 end;
 
@@ -1422,7 +1422,7 @@ var
       FParams[0] := setExpectedType(FParams[0], VarType) as TLapeTree_ExprBase;
 
       Result := FParams[0].Evaluate();
-      if VarType.Equals(Result.VarType) or ((Result.VarType <> nil) and (VarType.Size = Result.VarType.Size)) then
+      if VarType.Equals(Result.VarType) or (Result.VarType = nil) or (VarType.Size = Result.VarType.Size) then
         Result := TLapeGlobalVar(FCompiler.addManagedVar(VarType.NewGlobalVarP(Result.Ptr)))
       else if VarType.CompatibleWith(Result.VarType) then
         Result := TLapeGlobalVar(FCompiler.addManagedVar(VarType.EvalConst(op_Assign, VarType.NewGlobalVarP(), Result)))
@@ -1538,7 +1538,7 @@ var
 
       FParams[0] := setExpectedType(FParams[0], VarType) as TLapeTree_ExprBase;
       Result := FParams[0].Compile(Offset);
-      if VarType.Equals(Result.VarType) or ((Result.VarType <> nil) and (VarType.Size = Result.VarType.Size)) then
+      if VarType.Equals(Result.VarType) or (Result.VarType = nil) or (VarType.Size = Result.VarType.Size) then
       begin
         setNullResVar(FDest);
         Result.VarType := VarType;
@@ -2695,7 +2695,7 @@ end;
 function TLapeTree_Operator.isConstant: Boolean;
 begin
   Result := ((FLeft = nil) or (not (TLapeTree_Base(FLeft) is TLapeTree_If))) and (
-    ((FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and (
+    ((FLeft <> nil) and (FLeft is TLapeTree_GlobalVar) and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType <> nil) and (
         ((FOperatorType = op_Dot)   and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltRecord, ltUnion])) or
         ((FOperatorType = op_Index) and (TLapeTree_GlobalVar(FLeft).GlobalVar.VarType.BaseType in [ltUnknown{overloaded method}, ltShortString, ltStaticArray]))
       ) and (FRight <> nil) and FRight.isConstant()) or
@@ -2723,17 +2723,19 @@ begin
     RightType := FRight.resType()
   else
     RightType := nil;
-  if (LeftType = nil) and (RightType = nil) then
+  {if (LeftType = nil) and (RightType = nil) then
     Exit
   else if (LeftType = nil) then
   begin
     LeftType := RightType;
     RightType := nil;
-  end;
+  end;}
 
+  if (LeftType = nil) then
+    LeftType := FCompiler.addManagedType(TLapeType.Create(ltUnknown, FCompiler));
   if (FRight <> nil) and (FRight is TLapeTree_GlobalVar) then
     Result := LeftType.EvalRes(FOperatorType, TLapeTree_GlobalVar(FRight).GlobalVar)
-  else
+  else if (LeftType <> nil) then
     Result := LeftType.EvalRes(FOperatorType, RightType);
 
   if (LeftType <> nil) and (FRight <> nil) and
@@ -2805,9 +2807,9 @@ var
   LeftVar, RightVar: TLapeGlobalVar;
   Short: Boolean;
 
-  function canShort(t: TLapeType): Boolean;
+  function canShort(Typ: TLapeType): Boolean;
   begin
-    Result := (t <> nil) and (t.BaseType in LapeBoolTypes);
+    Result := (Typ <> nil) and (Typ.BaseType in LapeBoolTypes);
   end;
 
 begin
@@ -2821,7 +2823,7 @@ begin
   else
     LeftVar := nil;
 
-  if (FOperatorType = op_Assign) and ((LeftVar <> nil) or LeftVar.isConstant) then
+  if (FOperatorType = op_Assign) and ((LeftVar = nil) or LeftVar.isConstant) then
     LapeException(lpeCannotAssign, [FLeft, Self]);
   FRight := setExpectedType(FRight, LeftVar.VarType) as TLapeTree_ExprBase;
 
@@ -2837,18 +2839,25 @@ begin
   if Short and (RightVar <> nil) then
     Exit(RightVar);
 
-  if (LeftVar = nil) and (RightVar = nil) then
+  {if (LeftVar = nil) and (RightVar = nil) then
     LapeException(lpeInvalidEvaluation, DocPos)
   else if (LeftVar = nil) then
   begin
     LeftVar := RightVar;
     RightVar := nil;
-  end;
-  if (LeftVar.VarType = nil) then
-    LapeException(lpeInvalidEvaluation, DocPos);
+  end;}
 
   try
-    Result := TLapeGlobalVar(FCompiler.addManagedVar(LeftVar.VarType.EvalConst(FOperatorType, LeftVar, RightVar)));
+    if (LeftVar.VarType <> nil) then
+      Result := LeftVar.VarType.EvalConst(FOperatorType, LeftVar, RightVar)
+    else with TLapeType.Create(ltUnknown, FCompiler) do
+    try
+      Result := EvalConst(FOperatorType, LeftVar, RightVar);
+    finally
+      Free();
+    end;
+
+    Result := FCompiler.addManagedVar(Result) as TLapeGlobalVar;
   except on E: lpException do
     LapeException(E.Message, DocPos);
   end;
@@ -2919,18 +2928,23 @@ begin
   try
     if (not DoneAssignment) then
     begin
-      if (LeftVar.VarType = nil) and (RightVar.VarType = nil) then
+      {if (LeftVar.VarType = nil) and (RightVar.VarType = nil) then
         LapeException(lpeInvalidEvaluation, DocPos)
       else if (LeftVar.VarType = nil) then
       begin
         LeftVar := RightVar;
         RightVar := NullResVar;
-      end;
-      if (LeftVar.VarType = nil) then
-        LapeException(lpeInvalidEvaluation, DocPos);
+      end;}
 
       try
-        Result := LeftVar.VarType.Eval(FOperatorType, FDest, LeftVar, RightVar, Offset, @_DocPos);
+        if (LeftVar.VarType <> nil) then
+          Result := LeftVar.VarType.Eval(FOperatorType, FDest, LeftVar, RightVar, Offset, @_DocPos)
+        else with TLapeType.Create(ltUnknown, FCompiler) do
+        try
+          Result := Eval(OperatorType, FDest, LeftVar, RightVar, Offset, @_DocPos);
+        finally
+          Free();
+        end;
       except on E: lpException do
         LapeException(E.Message, DocPos);
       end;
