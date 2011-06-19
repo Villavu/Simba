@@ -1457,19 +1457,17 @@ var
       for i := 0 to FParams.Count - 1 do
       begin
         if (i > FParams.Count) or isEmptyNode(FParams[i]) then
-          if (Params[i].Default <> nil) then
-            Par := Params[i].Default
-          else if (FParams[i] <> nil) then
-            LapeExceptionFmt(lpeNoDefaultForParam, [i + 1], FParams[i].DocPos)
+          if (Params[i].Default <> nil) and (Params[i].Default is TLapeGlobalVar) then
+            Par := Params[i].Default as TLapeGlobalVar
           else
-            LapeExceptionFmt(lpeNoDefaultForParam, [i + 1], Self.DocPos)
+            LapeExceptionFmt(lpeNoDefaultForParam, [i + 1], [FParams[i], Self])
         else
         begin
           FParams[i] := setExpectedType(FParams[i], Params[i].VarType) as TLapeTree_ExprBase;
           Par := FParams[i].Evaluate();
         end;
 
-        if (Par = nil) or (Params[i].ParType in Lape_RefParams) then
+        if (Par = nil) or (not (Params[i].ParType in Lape_ValParams)) then
           LapeException(lpeCannotInvoke, FParams[i].DocPos);
 
         if (Params[i].VarType <> nil) and (not Params[i].VarType.Equals(Par.VarType)) then
@@ -1566,6 +1564,30 @@ var
     end;
   end;
 
+  procedure AssignToTempVar(var ParamVar: TResVar; Param: TLapeParameter; MemPos: EMemoryPos; DocPos: TDocPos);
+  var
+    Par, tmpVar, tmpRes: TResVar;
+  begin
+    if (Param.ParType in Lape_ValParams) and (Param.VarType <> nil) and Param.VarType.CompatibleWith(ParamVar.VarType) then
+    try
+      tmpVar := NullResVar;
+      Par := NullResVar;
+
+      Par.VarPos.MemPos := MemPos;
+      Par.VarType := Param.VarType;
+      if (MemPos = mpVar) then
+        Par.VarPos.StackVar := Compiler.getTempVar(Par.VarType);
+
+      tmpRes := ParamVars[i];
+      ParamVar := Param.VarType.Eval(op_Assign, tmpVar, Par, ParamVar, Offset, @Self._DocPos);
+      setNullResVar(tmpRes, 1);
+    except on tmpVar: lpException do
+      LapeException(tmpVar.Message, DocPos);
+    end
+    else
+      LapeExceptionFmt(lpeVariableOfTypeExpected, [Param.VarType.AsString, ParamVar.VarType.AsString], DocPos);
+  end;
+
   function DoScriptMethod(IdentVar: TResVar; ParamVars: TResVarArray): TResVar;
   var
     i: Integer;
@@ -1593,14 +1615,21 @@ var
       try
         Par := NullResVar;
         if (ParamVars[i].VarPos.MemPos = NullResVar.VarPos.MemPos) then
-          ParamVars[i] := getStackVar(FParams[i], Offset);
+          if (Params[i].ParType in Lape_RefParams) then
+            getTempVar(FParams[i], Offset, ParamVars[i], 0)
+          else
+            ParamVars[i] := getStackVar(FParams[i], Offset);
         if (ParamVars[i].VarPos.MemPos = NullResVar.VarPos.MemPos) or (ParamVars[i].VarType = nil) then
           LapeException(lpeCannotInvoke);
 
         if (Params[i].ParType in Lape_RefParams) then
-          if (not isVariable(ParamVars[i])) then
+        begin
+          if (not (Params[i].ParType in Lape_ValParams)) and (not isVariable(ParamVars[i])) then
             LapeException(lpeVariableExpected)
-          else if ParamVars[i].VarPos.isPointer then
+          else if (Params[i].VarType <> nil) and (not Params[i].VarType.Equals(ParamVars[i].VarType)) then
+            AssignToTempVar(ParamVars[i], Params[i], mpVar, FParams[i].DocPos);
+
+          if ParamVars[i].VarPos.isPointer then
           begin
             Par.VarPos.MemPos := mpStack;
             Par.VarType := FCompiler.getBaseType(ltPointer);
@@ -1617,19 +1646,10 @@ var
             Par.VarPos.MemPos := mpStack;
             Par.VarType := FCompiler.getBaseType(ltPointer);
             ParamVars[i] := ParamVars[i].VarType.Eval(op_Addr, Par, ParamVars[i], tmpVar, Offset, @Self._DocPos);
-          end
-        else if (ParamVars[i].VarPos.MemPos <> mpStack) or ((Params[i].VarType <> nil) and (not Params[i].VarType.Equals(ParamVars[i].VarType))) then
-          if Params[i].VarType.CompatibleWith(ParamVars[i].VarType) then
-          begin
-            Par.VarPos.MemPos := mpStack;
-            Par.VarType := Params[i].VarType;
-
-            tmpRes := ParamVars[i];
-            ParamVars[i] := Params[i].VarType.Eval(op_Assign, tmpVar, Par, ParamVars[i], Offset, @Self._DocPos);
-            setNullResVar(tmpRes, 1);
-          end
-          else
-            LapeExceptionFmt(lpeVariableOfTypeExpected, [Params[i].VarType.AsString, ParamVars[i].VarType.AsString]);
+          end;
+        end
+        else if (Params[i].VarType <> nil) and ((ParamVars[i].VarPos.MemPos <> mpStack) or (not Params[i].VarType.Equals(ParamVars[i].VarType))) then
+          AssignToTempVar(ParamVars[i], Params[i], mpStack, FParams[i].DocPos);
 
         if (ParamVars[i].VarPos.MemPos <> mpStack) or (ParamVars[i].VarType = nil) then
           LapeException(lpeCannotInvoke);
@@ -1657,13 +1677,12 @@ var
   function DoImportedMethod(IdentVar: TResVar; ParamVars: TResVarArray): TResVar;
   var
     i: Integer;
-    Par, tmpVar, tmpRes: TResVar;
+    Par: TResVar;
   begin
     Assert(IdentVar.VarType is TLapeType_Method);
     Assert(IdentVar.VarType.BaseType in [ltPointer, ltImportedMethod]);
     Assert(Length(ParamVars) = TLapeType_Method(IdentVar.VarType).Params.Count);
     Result := NullResVar;
-    tmpVar := NullResVar;
 
     with TLapeType_Method(IdentVar.VarType) do
     begin
@@ -1675,36 +1694,15 @@ var
 
         if (ParamVars[i].VarPos.MemPos = mpStack) or (ParamVars[i].VarType = nil) then
           LapeException(lpeCannotInvoke, FParams[i].DocPos)
-        else if (Params[i].ParType in Lape_RefParams) and (not isVariable(ParamVars[i])) then
+        else if (not (Params[i].ParType in Lape_ValParams)) and (not isVariable(ParamVars[i])) then
           LapeException(lpeVariableExpected, FParams[i].DocPos);
 
         if (Params[i].VarType <> nil) and (not Params[i].VarType.Equals(ParamVars[i].VarType)) then
-          if (not (Params[i].ParType in Lape_RefParams)) and Params[i].VarType.CompatibleWith(ParamVars[i].VarType) then
-          try
-            Par.VarPos.MemPos := mpVar;
-            Par.VarType := Params[i].VarType;
-            Par.VarPos.StackVar := Compiler.getTempVar(Par.VarType);
-
-            tmpRes := ParamVars[i];
-            ParamVars[i] := Params[i].VarType.Eval(op_Assign, tmpVar, Par, ParamVars[i], Offset, @Self._DocPos);
-            setNullResVar(tmpRes, 1);
-          except on tmpVar: lpException do
-            LapeException(tmpVar.Message, FParams[i].DocPos);
-          end
-          else
-            LapeExceptionFmt(lpeVariableOfTypeExpected, [Params[i].VarType.AsString, ParamVars[i].VarType.AsString], FParams[i].DocPos);
+          AssignToTempVar(ParamVars[i], Params[i], mpVar, FParams[i].DocPos);
 
         Par.VarPos.MemPos := mpStack;
         Par.VarType := Compiler.getBaseType(ltPointer);
-        {if ParamVars[i].VarPos.isPointer then
-        begin
-          ParamVars[i].VarType := Par.VarType;
-          ParamVars[i].VarPos.isPointer := False;
-          Par.VarType.Eval(op_Assign, tmpVar, Par, ParamVars[i], Offset, @Self.DocPos);
-          ParamVars[i].VarPos.isPointer := True;
-        end
-        else}
-          FCompiler.Emitter._Eval(getEvalProc(op_Addr, ltUnknown, ltUnknown), Par, ParamVars[i], NullResVar, Offset, @Self._DocPos);
+        FCompiler.Emitter._Eval(getEvalProc(op_Addr, ltUnknown, ltUnknown), Par, ParamVars[i], NullResVar, Offset, @Self._DocPos);
       end;
 
       if (Res = nil) then
@@ -1785,7 +1783,7 @@ begin
           if (Params[i].Default <> nil) then
           begin
             ParamVars[i] := getResVar(Params[i].Default);
-            if (Params[i].ParType in Lape_RefParams) and (not isVariable(ParamVars[i])) then
+            if (not (Params[i].ParType in Lape_ValParams)) and (not isVariable(ParamVars[i])) then
               LapeException(lpeVariableExpected, [FParams[i], Self]);
           end
           else

@@ -174,7 +174,7 @@ begin
 
     //Compiler.addGlobalVar(proc1.NewGlobalVar(@MyWriteLn, 'WriteLn'));
     Compiler.addGlobalVar(func1.NewGlobalVar(@MyRandom, 'Random'));
-    Compiler.addGlobalFunc('procedure _write(const s: string); override;', @MyWrite);
+    Compiler.addGlobalFunc('procedure _write(s: string); override;', @MyWrite);
     Compiler.addGlobalFunc('procedure _writeln; override;', @MyWriteLn);
     Compiler.addGlobalFunc('function IntToStr(x: Int32): AnsiString; overload;', @MyIntToString);
     Compiler.addGlobalFunc('function IntToStr(x: Int64 = 123): AnsiString; overload;', @MyInt64ToString);

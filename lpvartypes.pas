@@ -21,6 +21,7 @@ const
 
 type
   TLapeType = class;
+  TLapeVar = class;
   TLapeStackVar = class;
   TLapeGlobalVar = class;
   TLapeType_OverloadedMethod = class;
@@ -47,7 +48,7 @@ type
   TLapeParameter = record
     ParType: ELapeParameterType;
     VarType: TLapeType;
-    Default: TLapeGlobalVar;
+    Default: TLapeVar;
   end;
   TLapeParameterList = {$IFDEF FPC}specialize{$ENDIF} TLapeList<TLapeParameter>;
 
@@ -720,7 +721,8 @@ const
 
   NullWithDecl: TLapeWithDeclRec = (WithVar: nil; WithType: nil);
 
-  Lape_RefParams = [lptOut, lptVar];
+  Lape_RefParams = [lptConst, lptOut, lptVar];
+  Lape_ValParams = [lptConst, lptNormal];
 
 implementation
 
@@ -3512,7 +3514,7 @@ begin
     begin
       if (i > 0) then
         FAsString := FAsString + ',';
-      if (FParams[i].ParType in Lape_RefParams) then
+      if (FParams[i].ParType in Lape_RefParams) and (not (FParams[i].ParType in Lape_ValParams)) then
         FAsString := FAsString + '<';
       if (FParams[i].Default <> nil) then
         FAsString := FAsString + '[';
@@ -3522,7 +3524,7 @@ begin
         FAsString := FAsString + FParams[i].VarType.AsString;
       if (FParams[i].Default <> nil) then
         FAsString := FAsString + ']';
-      if (FParams[i].ParType in Lape_RefParams) then
+      if (FParams[i].ParType in Lape_RefParams) and (not (FParams[i].ParType in Lape_ValParams)) then
         FAsString := FAsString + '>';
     end;
 
@@ -3541,7 +3543,7 @@ begin
   for i := 0 to FParams.Count - 1 do
     if (FParams[i].ParType in Lape_RefParams) then
       Result := Result + SizeOf(Pointer)
-    else
+    else if (FParams[i].VarType <> nil) then
       Result := Result + FParams[i].VarType.Size;
   if (Res <> nil) then
     Result := Result + SizeOf(Pointer);
@@ -3620,6 +3622,7 @@ function TLapeType_Method.EqualParams(Other: TLapeType_Method; ContextOnly: Bool
   function _EqualParams(const Left, Right: TLapeParameter): Boolean;
   begin
     Result := ((Left.ParType in Lape_RefParams) = (Right.ParType in Lape_RefParams)) and
+      ((Left.ParType in Lape_ValParams) = (Right.ParType in Lape_ValParams)) and
       ((Left.Default <> nil) = (Right.Default <> nil)) and
       _EqualTypes(Left.VarType, Right.VarType);
   end;
@@ -3813,13 +3816,13 @@ begin
         if ((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default = nil) then
           Break
         else if (((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default <> nil)) or ((Params[i].VarType <> nil) and Params[i].VarType.Equals(AParams[i])) then
-          if Params[i].VarType.Equals(AParams[i], False) then
+          if (Params[i].Default <> nil) or Params[i].VarType.Equals(AParams[i], False) then
             Weight := Weight - 4
           else if NeedFullMatch then
             Break
           else
             Weight := Weight - 3
-        else if (Params[i].ParType in Lape_RefParams) or NeedFullMatch then
+        else if (not (Params[i].ParType in Lape_ValParams)) or NeedFullMatch then
           Break
         else if (Params[i].VarType <> nil) and (not Params[i].VarType.CompatibleWith(AParams[i])) then
           Break

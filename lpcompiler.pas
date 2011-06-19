@@ -868,6 +868,8 @@ end;
 
 type
   __LapeTree_Method = class(TLapeTree_Method);
+  __LapeType = class(TLapeType);
+  __LapeVar = class(TLapeVar);
 function TLapeCompiler.ParseMethod(FuncForwards: TLapeFuncForwards; FuncHeader: TLapeType_Method; FuncName: lpString; isExternal: Boolean): TLapeTree_Method;
 var
   Pos: TDocPos;
@@ -884,6 +886,41 @@ var
       __LapeTree_Method(Method).FMethod := varTo;
       FTreeMethodMap[IntToStr(PtrUInt(varTo))] := Method;
     end;
+  end;
+
+  procedure setMethodDefaults(AVar: TLapeGlobalVar; AMethod: TLapeType_Method);
+  type
+    TLapeClassType = class of TLapeType_Method;
+  var
+    i, ii: Integer;
+    Params: array of TLapeParameter;
+    NewMethod: TLapeType_Method;
+  begin
+    if (AMethod = nil) or (FStackInfo = nil) or (AMethod.Params.Count <= 0) or (FStackInfo.TotalParamSize <> AMethod.ParamSize) then
+      Exit;
+
+    NewMethod := TLapeClassType(AMethod.ClassType).Create(Self, nil, AMethod.Res, AMethod.Name, @AMethod._DocPos);
+    __LapeType(NewMethod).FBaseType := AMethod.BaseType;
+
+    ii := 0;
+    Params := AMethod.Params.ExportToArray();
+    for i := 0 to High(Params) do
+    begin
+      while (ii < FStackInfo.Declarations.Count) do
+      begin
+        if (FStackInfo.Declarations[ii] is TLapeParameterVar) then
+          Break;
+        Inc(ii);
+      end;
+      if (ii >= FStackInfo.Declarations.Count) then
+        LapeException(lpeImpossible);
+
+      Params[i].Default := FStackInfo.Declarations[ii] as TLapeVar;
+      NewMethod.addParam(Params[i]);
+      Inc(ii);
+    end;
+
+    __LapeVar(AVar).FVarType := addManagedType(NewMethod);
   end;
 
 begin
@@ -942,6 +979,7 @@ begin
       Result.Method.Name := 'inherited';
       TLapeType_Method(Result.Method.VarType).setImported(Result.Method, TLapeType_Method(TLapeGlobalVar(OldDeclaration).VarType).BaseType = ltImportedMethod);
       Move(TLapeGlobalVar(OldDeclaration).Ptr^, Result.Method.Ptr^, FuncHeader.Size);
+      setMethodDefaults(Result.Method, Result.Method.VarType as TLapeType_Method);
       addLocalDecl(Result.Method, FStackInfo);
 
       __LapeTree_Method(Result).FMethod := TLapeGlobalVar(OldDeclaration);
@@ -1046,8 +1084,6 @@ begin
   end;
 end;
 
-type
-  __LapeType = class(TLapeType);
 function TLapeCompiler.ParseType(TypeForwards: TLapeTypeForwards): TLapeType;
   procedure ParseArray;
   var
@@ -1343,7 +1379,7 @@ var
   VarType: TLapeType;
   Default: TLapeTree_ExprBase;
   DefVal: TLapeVar;
-  DefConstval: TLapeGlobalVar;
+  DefConstVal: TLapeGlobalVar;
   VarDecl: TLapeVarDecl;
 begin
   Result := TLapeTree_VarList.Create(Self, getPDocPos());
@@ -1354,7 +1390,7 @@ begin
     repeat
       VarType := nil;
       Default := nil;
-      DefConstval := nil;
+      DefConstVal := nil;
 
       Identifiers := ParseIdentifierList();
       Expect([tk_sym_Colon, tk_op_Assign, tk_sym_Equals], False, False);
@@ -1376,7 +1412,7 @@ begin
 
         try
           Expect(ValidEnd, False, False);
-          DefConstval := Default.Evaluate();
+          DefConstVal := Default.Evaluate();
         finally
           if (Default <> nil) then
             FreeAndNil(Default);
@@ -1392,8 +1428,8 @@ begin
       end;
 
       if (VarType = nil) then
-        if (DefConstval <> nil) then
-          VarType := DefConstval.VarType
+        if (DefConstVal <> nil) then
+          VarType := DefConstVal.VarType
         else if (Default <> nil) then
           VarType := Default.resType()
         else
@@ -1411,15 +1447,15 @@ begin
         else
           DefVal := addLocalVar(VarType, Identifiers[i]);
 
-        if (DefConstval <> nil) then
+        if (DefConstVal <> nil) then
           if (not (DefVal is TLapeGlobalVar)) then
           begin
             VarDecl.VarDecl := DefVal;
-            VarDecl.Default := TLapeTree_GlobalVar.Create(DefConstval, Self, GetPDocPos());
+            VarDecl.Default := TLapeTree_GlobalVar.Create(DefConstVal, Self, GetPDocPos());
             Result.addVar(VarDecl);
           end
           else
-            DefVal.VarType.EvalConst(op_Assign, TLapeGlobalVar(DefVal), DefConstval)
+            DefVal.VarType.EvalConst(op_Assign, TLapeGlobalVar(DefVal), DefConstVal)
         else if (Default <> nil) then
         begin
           VarDecl.VarDecl := DefVal;
@@ -2142,19 +2178,19 @@ begin
   FInternalMethodMap['Inc'] := TLapeTree_InternalMethod_Inc;
   FInternalMethodMap['Dec'] := TLapeTree_InternalMethod_Dec;
 
-  addGlobalFunc([getBaseType(ltString)], [lptConst], [TLapeGlobalVar(nil)], @_LapeWrite, '_write').isConstant := True;
+  addGlobalFunc([getBaseType(ltString)], [lptNormal], [TLapeGlobalVar(nil)], @_LapeWrite, '_write').isConstant := True;
   addGlobalFunc([], [], [], @_LapeWriteLn, '_writeln').isConstant := True;
 
-  addGlobalFunc([getBaseType(ltInt32)],   [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltPointer), @_LapeGetMem, 'GetMem').isConstant := True;
-  addGlobalFunc([getBaseType(ltPointer)], [lptConst], [TLapeGlobalVar(nil)], @_LapeFreeMem, 'FreeMem').isConstant := True;
-  addGlobalFunc([getBaseType(ltPointer), getBaseType(ltInt32)], [lptConst, lptConst], [TLapeGlobalVar(nil), TLapeGlobalVar(nil)], @_LapeFreeMemSize, 'FreeMemSize').isConstant := True;
-  addGlobalFunc([getBaseType(ltPointer), getBaseType(ltInt32)], [lptVar,   lptConst], [TLapeGlobalVar(nil), TLapeGlobalVar(nil)], @_LapeReallocMem, 'ReallocMem').isConstant := True;
+  addGlobalFunc([getBaseType(ltInt32)],   [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltPointer), @_LapeGetMem, 'GetMem').isConstant := True;
+  addGlobalFunc([getBaseType(ltPointer)], [lptNormal], [TLapeGlobalVar(nil)], @_LapeFreeMem, 'FreeMem').isConstant := True;
+  addGlobalFunc([getBaseType(ltPointer), getBaseType(ltInt32)], [lptNormal, lptNormal], [TLapeGlobalVar(nil), TLapeGlobalVar(nil)], @_LapeFreeMemSize, 'FreeMemSize').isConstant := True;
+  addGlobalFunc([getBaseType(ltPointer), getBaseType(ltInt32)], [lptVar,    lptNormal], [TLapeGlobalVar(nil), TLapeGlobalVar(nil)], @_LapeReallocMem, 'ReallocMem').isConstant := True;
 
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high').isConstant := True;
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length').isConstant := True;
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeAStrLen, '!astrlen').isConstant := True;
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeWStrLen, '!wstrlen').isConstant := True;
-  addGlobalFunc([TLapeType(nil)], [lptConst], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeUStrLen, '!ustrlen').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeHigh, '!high').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeLength, '!length').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeAStrLen, '!astrlen').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeWStrLen, '!wstrlen').isConstant := True;
+  addGlobalFunc([TLapeType(nil)], [lptNormal], [TLapeGlobalVar(nil)], getBaseType(ltInt32), @_LapeUStrLen, '!ustrlen').isConstant := True;
 
   setTokenizer(ATokenizer);
   Reset();

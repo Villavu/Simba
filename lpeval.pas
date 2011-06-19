@@ -145,12 +145,12 @@ end;
 
 procedure _LapeWriteLn(const Params: PParamArray);
 begin
-  WriteLn();
+  WriteLn('');
 end;
 
 procedure _LapeGetMem(const Params: PParamArray; const Result: Pointer);
 begin
-  PPointer(Result)^ := GetMem(PInt32(Params^[0])^);
+  GetMem(PPointer(Result)^, PInt32(Params^[0])^);
 end;
 
 procedure _LapeFreeMem(const Params: PParamArray);
