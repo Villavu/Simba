@@ -896,7 +896,7 @@ var
     TLapeClassType = class of TLapeType_Method;
   var
     i, ii: Integer;
-    Params: array of TLapeParameter;
+    Params: TLapeParameterList.TTArray;
     NewMethod: TLapeType_Method;
   begin
     if (AMethod = nil) or (FStackInfo = nil) or (AMethod.Params.Count <= 0) or (FStackInfo.TotalParamSize <> AMethod.ParamSize) then
@@ -2043,7 +2043,7 @@ end;
 
 function TLapeCompiler.ParseRepeat: TLapeTree_Repeat;
 begin
-  Expect(tk_kw_Repeat, True, False);
+  //Expect(tk_kw_Repeat, True, False);
   Result := TLapeTree_Repeat.Create(Self, getPDocPos());
 
   try

@@ -704,7 +704,7 @@ type
     property Options_PackRecords: UInt8 read FOptions_PackRecords write FOptions_PackRecords default Lape_PackRecordsDef;
   end;
 
-function getTypeArray(Arr: array of TLapeType): TLapeTypeArray; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function getTypeArray(Arr: array of TLapeType): TLapeTypeArray;
 procedure ClearBaseTypes(var Arr: TLapeBaseTypes);
 procedure LoadBaseTypes(var Arr: TLapeBaseTypes; Compiler: TLapeCompilerBase);
 
@@ -2292,7 +2292,7 @@ end;
 function TLapeType_Pointer.VarToStringBody(ToStr: TLapeType_OverloadedMethod = nil): lpString;
 begin
   Result := 'begin Result := ToString(Pointer(Param0));';
-  if HasType() and (ToStr.getMethod(getTypeArray([PType])) <> nil) then
+  if HasType() and (ToStr <> nil) and (ToStr.getMethod(getTypeArray([PType])) <> nil) then
     Result := Result + 'if (Param0 <> nil) then ' +
       'try Result := Result + '#39' ('#39' + ToString(Param0^) + '#39')'#39'; except end;';
   Result := Result + 'end;';

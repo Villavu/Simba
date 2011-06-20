@@ -8,6 +8,9 @@
 unit lpinterpreter;
 
 {$I lape.inc}
+{$IFNDEF FPC}
+  {$UNDEF Lape_Inline}
+{$ENDIF}
 
 interface
 

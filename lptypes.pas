@@ -387,10 +387,10 @@ const
   CompareOperators = [op_cmp_Equal, op_cmp_GreaterThan, op_cmp_GreaterThanOrEqual, op_cmp_LessThan, op_cmp_LessThanOrEqual, op_cmp_NotEqual];
   EnumOperators = [op_Plus, op_Minus, op_Assign] + CompareOperators;
 
-  op_str: array[EOperator] of string = ('',
+  op_str: array[EOperator] of lpString = ('',
     '=', '>', '>=', '<', '<=', '<>', '@', 'and', ':=', '^', 'div', '/', '.' , 'in',
     '[', '-', 'mod', '*', 'not', 'or', '+', '**', 'shl', 'shr', 'xor', '-', '+');
-  op_name: array[EOperator] of string = ('',
+  op_name: array[EOperator] of lpString = ('',
     'EQ', 'GT', 'GTEQ', 'LT', 'LTEQ', 'NEQ', {'ADDR'}'', 'AND', 'ASGN', {'DREF'}'', 'IDIV', 'DIV', {'dot'}'', 'IN',
     {'index'}'', 'SUB', 'MOD', 'MUL', 'NOT', 'OR', 'ADD', {'power'}'', 'SHL', 'SHR', 'XOR', 'UMIN', {'UPOS'}'');
 
@@ -412,11 +412,16 @@ var
     @highUInt8, @highInt8, @highUInt16, @highInt16, @highUInt32, @highInt32, @highUInt64, @highInt64
   );
 
-procedure Swap(var A, B: Pointer); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
-procedure Swap(var A, B: Boolean); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function LapeCase(const Str: lpString): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function LapeTypeToString(Token: ELapeBaseType): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
 function LapeOperatorToString(Token: EOperator): lpString; {$IFDEF Lape_Inline}inline;{$ENDIF}
+
+procedure Swap(var A, B: Pointer); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
+procedure Swap(var A, B: Boolean); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
+function _Compare8(Arr: PUInt8; Item: UInt8; Hi: Integer): Integer;
+function _Compare16(Arr: PUInt16; Item: UInt16; Hi: Integer): Integer;
+function _Compare32(Arr: PUInt32; Item: UInt32; Hi: Integer): Integer;
+function _Compare64(Arr: PUInt64; Item: UInt64; Hi: Integer): Integer;
 
 {$IFDEF Lape_TrackObjects}
 var
@@ -429,24 +434,6 @@ implementation
 uses
   typinfo,
   lpexceptions;
-
-procedure Swap(var A, B: Pointer);
-var
-  C: Pointer;
-begin
-  C := A;
-  A := B;
-  B := C;
-end;
-
-procedure Swap(var A, B: Boolean);
-var
-  C: Boolean;
-begin
-  C := A;
-  A := B;
-  B := C;
-end;
 
 function LapeCase(const Str: lpString): lpString;
 begin
@@ -467,6 +454,72 @@ function LapeOperatorToString(Token: EOperator): lpString;
 begin
   Result := getEnumName(TypeInfo(EOperator), Ord(Token));
   Delete(Result, 1, 3);
+end;
+
+procedure Swap(var A, B: Pointer);
+var
+  C: Pointer;
+begin
+  C := A;
+  A := B;
+  B := C;
+end;
+
+procedure Swap(var A, B: Boolean);
+var
+  C: Boolean;
+begin
+  C := A;
+  A := B;
+  B := C;
+end;
+
+function _Compare8(Arr: PUInt8; Item: UInt8; Hi: Integer): Integer;
+var
+  i: Integer;
+begin
+  for i := 0 to Hi do
+    if (Arr^ = Item) then
+      Exit(i)
+    else
+      Inc(Arr);
+  Result := -1;
+end;
+
+function _Compare16(Arr: PUInt16; Item: UInt16; Hi: Integer): Integer;
+var
+  i: Integer;
+begin
+  for i := 0 to Hi do
+    if (Arr^ = Item) then
+      Exit(i)
+    else
+      Inc(Arr);
+  Result := -1;
+end;
+
+function _Compare32(Arr: PUInt32; Item: UInt32; Hi: Integer): Integer;
+var
+  i: Integer;
+begin
+  for i := 0 to Hi do
+    if (Arr^ = Item) then
+      Exit(i)
+    else
+      Inc(Arr);
+  Result := -1;
+end;
+
+function _Compare64(Arr: PUInt64; Item: UInt64; Hi: Integer): Integer;
+var
+  i: Integer;
+begin
+  for i := 0 to Hi do
+    if (Arr^ = Item) then
+      Exit(i)
+    else
+      Inc(Arr);
+  Result := -1;
 end;
 
 function TLapeBaseClass._AddRef: Integer; stdcall;
@@ -695,21 +748,30 @@ var
   ItemA, ItemB: PByteArray;
   Match: Boolean;
 begin
-  ItemB := PByteArray(@Item);
-  for i := High(FItems) downto 0 do
-  begin
-    ItemA := PByteArray(@FItems[i]);
-    Match := True;
-    for ii := 0 to SizeOf(_T) - 1 do
-      if (ItemA^[ii] <> ItemB^[ii]) then
+  case SizeOf(_T) of
+    SizeOf(UInt8) : Result := _Compare8 (@FItems[0], PUInt8 (@Item)^, High(FItems));
+    SizeOf(UInt16): Result := _Compare16(@FItems[0], PUInt16(@Item)^, High(FItems));
+    SizeOf(UInt32): Result := _Compare32(@FItems[0], PUInt32(@Item)^, High(FItems));
+    SizeOf(UInt64): Result := _Compare64(@FItems[0], PUInt64(@Item)^, High(FItems));
+    else
+    begin
+      ItemB := PByteArray(@Item);
+      for i := High(FItems) downto 0 do
       begin
-        Match := False;
-        Break;
+        ItemA := PByteArray(@FItems[i]);
+        Match := True;
+        for ii := 0 to SizeOf(_T) - 1 do
+          if (ItemA^[ii] <> ItemB^[ii]) then
+          begin
+            Match := False;
+            Break;
+          end;
+        if Match then
+          Exit(i);
       end;
-    if Match then
-      Exit(i);
+      Result := -1;
+    end;
   end;
-  Result := -1;
 end;
 
 function TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.ExistsItem(Item: _T): Boolean;
@@ -892,25 +954,38 @@ end;
 
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.IndexOf(Item: _T): lpString;
 var
-  i, ii: Integer;
+  i, ii, Index: Integer;
   ItemA, ItemB: PByteArray;
   Match: Boolean;
 begin
-  ItemB := PByteArray(@Item);
-  for i := High(FItems) downto 0 do
-  begin
-    ItemA := PByteArray(@FItems[i]);
-    Match := True;
-    for ii := 0 to SizeOf(_T) - 1 do
-      if (ItemA^[ii] <> ItemB^[ii]) then
+  case SizeOf(_T) of
+    SizeOf(UInt8) : Index := _Compare8 (@FItems[0], PUInt8 (@Item)^, High(FItems));
+    SizeOf(UInt16): Index := _Compare16(@FItems[0], PUInt16(@Item)^, High(FItems));
+    SizeOf(UInt32): Index := _Compare32(@FItems[0], PUInt32(@Item)^, High(FItems));
+    SizeOf(UInt64): Index := _Compare64(@FItems[0], PUInt64(@Item)^, High(FItems));
+    else
+    begin
+      ItemB := PByteArray(@Item);
+      for i := High(FItems) downto 0 do
       begin
-        Match := False;
-        Break;
+        ItemA := PByteArray(@FItems[i]);
+        Match := True;
+        for ii := 0 to SizeOf(_T) - 1 do
+          if (ItemA^[ii] <> ItemB^[ii]) then
+          begin
+            Match := False;
+            Break;
+          end;
+        if Match then
+          Exit(FStringList[i]);
       end;
-    if Match then
-      Exit(FStringList[i]);
+      Index := -1;;
+    end;
   end;
-  Result := '';
+  if (Index > -1) then
+    Result := FStringList[i]
+  else
+    Result := '';
 end;
 
 function TLapeStringMap{$IFNDEF FPC}<_T>{$ENDIF}.IndexOf(Key: lpString): Integer;
