@@ -55,7 +55,7 @@ resourcestring
   lpeInvalidJump = 'Invalid jump';
   lpeInvalidRange = 'Expression is not a valid range';
   lpeInvalidValueForType = 'Invalid value for type "%s"';
-  lpeInvalidWithReference = 'Invalid with reference';
+  lpeInvalidWithReference = 'Invalid with-reference';
   lpeLostClosingParenthesis = 'Found closing parenthesis without matching opening parenthesis';
   lpeLostConditional = 'Found conditional without matching opening statement';
   lpeNoDefaultForParam = 'No default value for parameter %d found';
@@ -76,21 +76,21 @@ resourcestring
   lpeVariableOfTypeExpected = 'Expected variable of type "%s", got "%s"';
   lpeWrongNumberParams = 'Wrong number of parameters found, expected %d';
 
-procedure LapeException(Msg: string); overload;
-procedure LapeException(Msg: string; DocPos: TDocPos); overload;
-procedure LapeException(Msg: string; DocPos: array of TLapeBaseDeclClass); overload;
-procedure LapeExceptionFmt(Msg: string; Args: array of const); overload;
-procedure LapeExceptionFmt(Msg: string; Args: array of const; DocPos: TDocPos); overload;
-procedure LapeExceptionFmt(Msg: string; Args: array of const; DocPos: array of TLapeBaseDeclClass); overload;
+procedure LapeException(Msg: lpString); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
+procedure LapeException(Msg: lpString; DocPos: TDocPos); overload; {$IFDEF Lape_Inline}inline;{$ENDIF}
+procedure LapeException(Msg: lpString; DocPos: array of TLapeBaseDeclClass); overload;
+procedure LapeExceptionFmt(Msg: lpString; Args: array of const); overload;
+procedure LapeExceptionFmt(Msg: lpString; Args: array of const; DocPos: TDocPos); overload;
+procedure LapeExceptionFmt(Msg: lpString; Args: array of const; DocPos: array of TLapeBaseDeclClass); overload;
 
 implementation
 
-procedure LapeException(Msg: string);
+procedure LapeException(Msg: lpString);
 begin
   raise lpException.Create(Msg);
 end;
 
-procedure LapeException(Msg: string; DocPos: TDocPos);
+procedure LapeException(Msg: lpString; DocPos: TDocPos);
 begin
   if (DocPos.Line > 0) and (DocPos.Col > 0) then
     Msg := Format(lpeExceptionAt, [Msg, DocPos.Line, DocPos.Col]);
@@ -99,7 +99,7 @@ begin
   LapeException(Msg);
 end;
 
-procedure LapeException(Msg: string; DocPos: array of TLapeBaseDeclClass);
+procedure LapeException(Msg: lpString; DocPos: array of TLapeBaseDeclClass);
 var
   i: Integer;
 begin
@@ -115,12 +115,12 @@ begin
   LapeException(Msg);
 end;
 
-procedure LapeExceptionFmt(Msg: string; Args: array of const);
+procedure LapeExceptionFmt(Msg: lpString; Args: array of const);
 begin
   LapeException(Format(Msg, Args));
 end;
 
-procedure LapeExceptionFmt(Msg: string; Args: array of const; DocPos: TDocPos);
+procedure LapeExceptionFmt(Msg: lpString; Args: array of const; DocPos: TDocPos);
 begin
   Msg := Format(Msg, Args);
   if (DocPos.Line > 0) and (DocPos.Col > 0) then
@@ -130,7 +130,7 @@ begin
   LapeException(Msg);
 end;
 
-procedure LapeExceptionFmt(Msg: string; Args: array of const; DocPos: array of TLapeBaseDeclClass);
+procedure LapeExceptionFmt(Msg: lpString; Args: array of const; DocPos: array of TLapeBaseDeclClass);
 var
   i: Integer;
 begin
