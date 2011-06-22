@@ -921,7 +921,7 @@ begin
     if (FStack <> nil) then
       FStack.DeleteItem(Self);
     FStack := Stack;
-    if (FStack <> nil) and (FStack.IndexOf(Self) < 0) then
+    if (FStack <> nil) then
       FStack.add(Self);
   end;
 end;
@@ -3972,9 +3972,9 @@ begin
   inherited Create();
 
   Owner := AOwner;
-  FDeclarations := TLapeDeclCollection.Create(nil);
-  FVarStack := TLapeVarStack.Create(nil);
-  FWithStack := TLapeWithDeclarationList.Create(NullWithDecl);
+  FDeclarations := TLapeDeclCollection.Create(nil, dupAccept);
+  FVarStack := TLapeVarStack.Create(nil, dupIgnore);
+  FWithStack := TLapeWithDeclarationList.Create(NullWithDecl, dupIgnore);
   FreeVars := ManageVars;
   CodePos := -1;
 end;
@@ -4031,8 +4031,9 @@ function TLapeStackInfo.getTempVar(VarType: TLapeType; Lock: Integer = 1): TLape
 var
   i: Integer;
 begin
+  Result := nil;
   if (VarType = nil) then
-    Exit(nil);
+    Exit;
 
   try
     for i := 0 to FVarStack.Count - 1 do
@@ -4045,13 +4046,16 @@ begin
       end;
     Result := TLapeStackTempVar(addVar(VarType));
   finally
-    TLapeStackTempVar(Result).IncLock(Lock);
+    if (Result <> nil) then
+      TLapeStackTempVar(Result).IncLock(Lock);
   end;
 end;
 
 function TLapeStackInfo.addDeclaration(Decl: TLapeDeclaration): Integer;
 begin
-  if FDeclarations.ExistsItem(Decl) or ((Decl.Name <> '') and hasDeclaration(Decl.Name)) then
+  if (Decl = nil) then
+    Result := -1
+  else if FDeclarations.ExistsItem(Decl) or ((Decl.Name <> '') and hasDeclaration(Decl.Name)) then
     LapeExceptionFmt(lpeDuplicateDeclaration, [Decl.Name]);
   Result := FDeclarations.add(Decl);
 end;
