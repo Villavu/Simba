@@ -1844,7 +1844,7 @@ begin
   try
     for i := 0 to TempParams.Count - 1 do
     begin
-      TempParams[i] := setExpectedType(TempParams[i], FCompiler.getBaseType(ltString)) as TLapeTree_ExprBase;
+      //TempParams[i] := setExpectedType(TempParams[i], FCompiler.getBaseType(ltString)) as TLapeTree_ExprBase;
       FParams[0] := TempParams[i];
 
       if (not isEmptyNode(TempParams[i])) and (TempParams[i].resType() <> nil) and (not (TempParams[i].resType().BaseType in LapeStringTypes)) then

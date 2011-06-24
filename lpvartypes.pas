@@ -3837,8 +3837,8 @@ begin
         Match := False;
         if ((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default = nil) then
           Break
-        else if (((i >= Length(AParams)) or (AParams[i] = nil)) and (Params[i].Default <> nil)) or (Params[i].VarType = nil) or Params[i].VarType.Equals(AParams[i]) then
-          if (Params[i].Default <> nil) or ((Params[i].VarType <> nil) and Params[i].VarType.Equals(AParams[i], False)) then
+        else if (i >= Length(AParams)) or (AParams[i] = nil) or (Params[i].VarType = nil) or Params[i].VarType.Equals(AParams[i]) then
+          if (i >= Length(AParams)) or (AParams[i] = nil) or ((Params[i].VarType <> nil) and Params[i].VarType.Equals(AParams[i], False)) then
             Weight := Weight - 4
           else if NeedFullMatch then
             if (Params[i].VarType = nil) then
@@ -4688,24 +4688,27 @@ var
 begin
   if (AVar = nil) or (AVar.DeclarationList <> nil) then
     Exit(AVar);
-  if (AVar is TLapeGlobalVar) and AVar.isConstant and (AVar.Name = '') then
+  if (AVar is TLapeGlobalVar) and (AVar.VarType <> nil) and AVar.isConstant and (AVar.Name = '') then
   begin
-    GlobalVars := FManagedDeclarations.getByClass(TLapeGlobalVar);
-    for i := 0 to High(GlobalVars) do
-      if (AVar = GlobalVars[i]) then
-        Exit(AVar)
-      else if TLapeGlobalVar(GlobalVars[i]).isConstant and (GlobalVars[i].Name = '') and (TLapeGlobalVar(GlobalVars[i]).VarType <> nil) and TLapeGlobalVar(GlobalVars[i]).VarType.Equals(AVar.VarType, False) then
-      begin
-        EvalProc := getEvalProc(op_cmp_Equal, TLapeGlobalVar(GlobalVars[i]).VarType.BaseType, AVar.VarType.BaseType);
-        if (not ValidEvalFunction(EvalProc)) or (getEvalRes(op_cmp_Equal, TLapeGlobalVar(GlobalVars[i]).VarType.BaseType, AVar.VarType.BaseType) <> ltEvalBool) then
-          Continue;
-        EvalProc(@Equal, TLapeGlobalVar(GlobalVars[i]).Ptr, TLapeGlobalVar(AVar).Ptr);
-        if Equal then
+    EvalProc := getEvalProc(op_cmp_Equal, AVar.VarType.BaseType, AVar.VarType.BaseType);
+    if ValidEvalFunction(EvalProc) and (getEvalRes(op_cmp_Equal, AVar.VarType.BaseType, AVar.VarType.BaseType) = ltEvalBool) then
+    begin
+
+      GlobalVars := FManagedDeclarations.getByClass(TLapeGlobalVar);
+      for i := 0 to High(GlobalVars) do
+        if (AVar = GlobalVars[i]) then
+          Exit(AVar)
+        else if TLapeGlobalVar(GlobalVars[i]).isConstant and (GlobalVars[i].Name = '') and (TLapeGlobalVar(GlobalVars[i]).VarType <> nil) and TLapeGlobalVar(GlobalVars[i]).VarType.Equals(AVar.VarType, False) then
         begin
-          AVar.Free();
-          Exit(TLapeGlobalVar(GlobalVars[i]));
+          EvalProc(@Equal, TLapeGlobalVar(GlobalVars[i]).Ptr, TLapeGlobalVar(AVar).Ptr);
+          if Equal then
+          begin
+            AVar.Free();
+            Exit(TLapeGlobalVar(GlobalVars[i]));
+          end;
         end;
-      end;
+
+    end;
   end;
   Result := TLapeVar(addManagedDecl(AVar));
 end;

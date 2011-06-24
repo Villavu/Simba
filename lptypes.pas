@@ -1071,16 +1071,30 @@ end;
 
 function TLapeDeclarationList.getByClass(AClass: TLapeDeclarationClass): TLapeDeclArray;
 var
-  i: Integer;
+  i, Current, GrowSize, Len: Integer;
 begin
   Result := nil;
-  if (FList <> nil) then
+  if (FList <> nil) and (FList.Count > 0) then
+  begin
+    GrowSize := FList.Count shl 2;
+    Len := GrowSize;
+
+    SetLength(Result, Len);
+    Current := 0;
     for i := 0 to FList.Count - 1 do
       if (FList[i] <> nil) and (FList[i] is AClass) then
       begin
-        SetLength(Result, Length(Result) + 1);
-        Result[High(Result)] := FList[i];
+        if (Current = Len) then
+        begin
+          Inc(Len, GrowSize);
+          SetLength(Result, Len);
+        end;
+
+        Result[Current] := FList[i];
+        Inc(Current);
       end;
+    SetLength(Result, Current);
+  end;
 end;
 
 procedure TLapeDeclarationList.Delete(d: TLapeDeclaration; DoFree: Boolean = False);
