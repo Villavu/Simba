@@ -5,7 +5,7 @@ unit internets;
 interface
 
 uses
-  Classes, SysUtils, httpsend, blcksock, MufasaTypes, math;
+  Classes, SysUtils, httpsend, blcksock, MufasaTypes, math, ssl_openssl;
 
 function GetPage(URL: String): String;
 
