@@ -5,7 +5,7 @@ object SimbaForm: TSimbaForm
   Width = 660
   AllowDropFiles = True
   Caption = 'THA FUKING Simba'
-  ClientHeight = 598
+  ClientHeight = 603
   ClientWidth = 660
   KeyPreview = True
   Menu = MainMenu
@@ -207,8 +207,8 @@ object SimbaForm: TSimbaForm
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 21
-    Top = 577
+    Height = 23
+    Top = 580
     Width = 660
     Panels = <    
       item
@@ -230,7 +230,7 @@ object SimbaForm: TSimbaForm
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 423
+    Top = 426
     Width = 660
     Align = alBottom
     ClientHeight = 154
@@ -253,19 +253,19 @@ object SimbaForm: TSimbaForm
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 418
+    Top = 421
     Width = 660
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 394
+    Height = 397
     Top = 24
     Width = 660
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 394
+    ClientHeight = 397
     ClientWidth = 660
     DockSite = True
     TabOrder = 4
@@ -273,7 +273,7 @@ object SimbaForm: TSimbaForm
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
       Left = 155
-      Height = 359
+      Height = 362
       Top = 0
       Width = 505
       Align = alClient
@@ -292,7 +292,7 @@ object SimbaForm: TSimbaForm
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 359
+      Top = 362
       Width = 660
       Align = alBottom
       BevelOuter = bvSpace
@@ -387,7 +387,7 @@ object SimbaForm: TSimbaForm
       end
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 27
+        Height = 23
         Top = 6
         Width = 80
         EditLabel.AnchorSideLeft.Control = LabeledEditSearch
@@ -395,10 +395,10 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 66
-        EditLabel.Height = 18
-        EditLabel.Top = 10
-        EditLabel.Width = 35
+        EditLabel.Left = 71
+        EditLabel.Height = 16
+        EditLabel.Top = 9
+        EditLabel.Width = 30
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -413,7 +413,7 @@ object SimbaForm: TSimbaForm
         Left = 320
         Height = 19
         Top = 7
-        Width = 93
+        Width = 80
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -421,38 +421,38 @@ object SimbaForm: TSimbaForm
     end
     object SplitterFunctionList: TSplitter
       Left = 150
-      Height = 359
+      Height = 362
       Top = 0
       Width = 5
       OnCanResize = SplitterFunctionListCanResize
       Visible = False
     end
     inline frmFunctionList: TFunctionListFrame
-      Height = 359
+      Height = 362
       Width = 150
-      ClientHeight = 359
+      ClientHeight = 362
       ClientWidth = 150
       OnEndDock = nil
       TabOrder = 3
       inherited FunctionList: TTreeView
-        Height = 310
-        Top = 22
+        Height = 319
+        Top = 20
         Width = 150
-        DefaultItemHeight = 19
+        DefaultItemHeight = 17
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Height = 27
-        Top = 332
+        Height = 23
+        Top = 339
         Width = 150
         OnExit = editSearchListExit
         OnKeyDown = editSearchListKeyDown
         OnKeyPress = editSearchListKeyPress
       end
       inherited FunctionListLabel: TLabel
-        Height = 18
+        Height = 16
         Width = 146
       end
     end
@@ -1263,10 +1263,16 @@ object SimbaForm: TSimbaForm
         end
         object MenuItemRUTIS: TMenuItem
           Action = ActionRUTIS
+          Enabled = False
           RadioItem = True
         end
         object MenuItemCPascal: TMenuItem
           Action = ActionCPascal
+          RadioItem = True
+        end
+        object MenuItemLape: TMenuItem
+          Action = ActionLape
+          Enabled = False
           RadioItem = True
         end
       end
@@ -3024,6 +3030,10 @@ object SimbaForm: TSimbaForm
       Caption = 'Goto line'
       OnExecute = ActionGotoExecute
       ShortCut = 16455
+    end
+    object ActionLape: TAction
+      Caption = 'Lape'
+      OnExecute = ActionLapeExecute
     end
   end
   object DebugTimer: TTimer
