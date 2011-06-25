@@ -1359,7 +1359,7 @@ begin
     Starttime := lclintf.GetTickCount;
     if Compiler.Compile() then
     begin
-      DisassembleCode(Compiler.Emitter.Code, CombineDeclArray(Compiler.ManagedDeclarations.getByClass(TLapeGlobalVar), Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar)));
+      //DisassembleCode(Compiler.Emitter.Code, CombineDeclArray(Compiler.ManagedDeclarations.getByClass(TLapeGlobalVar), Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar)));
       psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
       if CompileOnly then
         Exit;
