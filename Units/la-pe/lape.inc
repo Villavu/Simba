@@ -15,7 +15,7 @@
 {.$DEFINE Lape_CaseSensitive}            //Case sentive in script
 {$DEFINE Lape_DoubleKeywordsCache}      //Create a double cache for keywords to speed up parsing (more memory, faster)
 {$DEFINE Lape_EmitPos}                  //Emit source position when compiling (more memory)
-{.$DEFINE Lape_ForceBlock}         {*}   //Only allow declarations in the blocks where they belong (vars in var block, expressions in begin-end, etc.)
+{$DEFINE Lape_ForceBlock}         {*}   //Only allow declarations in the blocks where they belong (vars in var block, expressions in begin-end, etc.)
 {$DEFINE Lape_Inline}                   //Compile with function inlining where it could be benefitial (faster, harder debugging)
 {$DEFINE Lape_NoWideString}             //Compile without widestrings (only unicodestrings)
 {.$DEFINE Lape_PStkD}                    //Support operations to a pointer located on the stack
