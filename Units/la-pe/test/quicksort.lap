@@ -1,0 +1,78 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+const
+  size = 100;
+var
+  swaps: Int32 = 0;
+type
+  TData = array [0 ..size - 1] of Int32;
+
+procedure ShowData(d: TData);
+var
+  x: Int32;
+begin
+  WriteLn('Data:');
+  for x := 0 to size - 1 do
+    WriteLn(d[x]);
+end;
+
+procedure ShuffleData(var d: TData);
+var
+  x, tmp, idxa, idxb: Int32;
+begin
+  for x := 0 to size - 1 do
+    d[x] := x;
+
+  for x := 1 to size do
+  begin
+    idxa := Random(0, size - 1);
+    idxb := Random(0, size - 1);
+    tmp := d[idxa];
+    d[idxa] := d[idxb];
+    d[idxb] := tmp;
+  end;
+end;
+
+function partition(var d: TData; i, j: Int32): Int32;
+var 
+  m, tmp: Int32;
+begin
+  m := d[(i + j) div 2];
+  while i < j do
+  begin
+    while d[i] < m do i := i + 1;
+    while d[j] > m do j := j - 1;
+    if d[i] > d[j] then
+    begin
+      tmp := d[j];
+      d[j] := d[i];
+      d[i] := tmp;
+      Swaps := Swaps + 1;
+    end
+    else 
+      i := j;
+  end;
+  Result := i;
+end;
+
+procedure QuickSort(var d: TData; i, j: Int32);
+var
+  m: Int32;
+begin
+  if i < j then
+  begin 
+    m := partition(d, i, j);
+    quicksort(d, i, m);
+    quicksort(d, m + 1, j);
+  end;
+end;
+
+var 
+  data: TData;
+begin
+  ShuffleData(data);
+  QuickSort(data, 0, size - 1);
+  //PrintLn('Swaps: ' + IntToStr(swaps));
+  ShowData(data);
+end;

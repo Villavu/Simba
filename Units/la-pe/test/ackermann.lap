@@ -1,0 +1,29 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+function Ackermann(n, x, y: Int32): Int32;
+begin
+  if n = 0 then
+    Result := x+1
+  else if y = 0 then
+  begin
+    if n = 1 then Result := x
+    else if n = 2 then Result := 0
+    else if n = 3 then Result := 1
+    else if n >= 4 then Result := 2;
+  end
+  else
+    Result := Ackermann(n - 1, Ackermann(n, x, y - 1), x);
+end;
+
+function F(Input: Int32): Int32;
+begin
+  Result := Ackermann(Input, Input, Input);
+end;
+
+begin
+  WriteLn(F(0));
+  WriteLn(F(1));
+  WriteLn(F(2));
+  WriteLn(F(3));
+end;

@@ -1,0 +1,112 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+const
+  size = 100;
+var
+  swaps: Int32 = 0;
+type
+  TData = array [0 ..size - 1] of Int32;
+
+procedure ShowData(d: TData);
+var
+  x: Int32;
+begin
+  WriteLn('Data:');
+  for x := 0 to size - 1 do
+    WriteLn(d[x]);
+end;
+
+procedure ShuffleData(var d: TData);
+var
+  x, tmp, idxa, idxb: Int32;
+begin
+  for x := 0 to size - 1 do
+    d[x] := x;
+
+  for x := 1 to size do
+  begin
+    idxa := Random(0, size - 1);
+    idxb := Random(0, size - 1);
+    tmp := d[idxa];
+    d[idxa] := d[idxb];
+    d[idxb] := tmp;
+  end;
+end;
+
+procedure QuickSortIterative(var dat: TData);
+type
+  TStack = record
+    L, R: Int32;
+  end;
+var
+  stack: array [0..32] of TStack;
+  i, j, s,
+  L, R, tmp: Int32;
+
+  procedure part(var L, R, tmp, i, j: Int32; var dat: TData);
+  var
+    m, n: Int32;
+  begin
+    n := (L + R) div 2;
+    m := dat[n];
+    i := L;
+    j := R;
+    repeat
+      while dat[i] < m do i := i + 1;
+      while dat[j] > m do j := j - 1;
+      if i <= j then
+      begin
+        tmp := dat[i];
+        dat[i] := dat[j];
+        dat[j] := tmp;
+        i := i + 1;
+        j := j - 1;
+        swaps := swaps + 1;
+      end;
+    until (i > j);
+  end;
+begin
+  s := 1;
+  stack[1].L := 0;
+  stack[1].R := size - 1;
+
+  repeat
+    L := stack[s].L;
+    R := stack[s].R;
+    s := s - 1;
+
+    repeat
+      part(L, R, tmp, i, j, dat);
+      if (j - L) < (R - i) then
+      begin
+        if i < r then
+        begin
+          s := s + 1;
+          stack[s].L := i;
+          stack[s].R := R;
+        end;
+        R := j;
+      end
+      else
+      begin
+        if l < j then
+        begin
+          s := s + 1;
+          stack[s].L := L;
+          stack[s].R := j;
+        end;
+        L := i;
+      end;
+    until L >= R;
+  until (s = 0);
+end;
+
+var
+  data: TData;
+begin
+  ShuffleData(data);
+  QuickSortIterative(data);
+  //PrintLn('Swaps: ' + IntToStr(swaps));
+  ShowData(data);
+end;

@@ -1,0 +1,18 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+procedure Hanoi(n: Int32; x, y, z: string);
+begin
+  if (n = 1) then
+    WriteLn('put disc from '+x+' to '+y)
+  else
+  begin
+    Hanoi(n-1 ,x ,z, y);
+    Hanoi(1, x, y, z);
+    Hanoi(n-1, z, y, x);
+  end;
+end;
+
+begin
+  Hanoi(10, 'A' ,'B', 'C'); // 2^10 -1 iterations!
+end;

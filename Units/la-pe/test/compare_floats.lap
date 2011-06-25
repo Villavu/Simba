@@ -1,0 +1,40 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+procedure PrintOut(bool: Boolean);
+begin
+  case bool of
+    False: WriteLn('False');
+    True: WriteLn('True');
+  end;
+end;
+
+var
+  one: Extended = 1.5;
+  two: Extended = 2.5;
+begin
+  PrintOut(one<two);
+  PrintOut(one<=two);
+  PrintOut(one=two);
+  PrintOut(one>=two);
+  PrintOut(one>two);
+  PrintOut(one<>two);
+
+  WriteLn('');
+
+  PrintOut(one<one);
+  PrintOut(one<=one);
+  PrintOut(one=one);
+  PrintOut(one>=one);
+  PrintOut(one>one);
+  PrintOut(one<>one);
+
+  WriteLn('');
+
+  PrintOut(two<one);
+  PrintOut(two<=one);
+  PrintOut(two=one);
+  PrintOut(two>=one);
+  PrintOut(two>one);
+  PrintOut(two<>one);
+end;

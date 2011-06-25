@@ -1,0 +1,20 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+type
+  TWeekdays = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
+var 
+  weekDay: TWeekdays = Wednesday;
+begin
+  case weekDay of
+    Monday: WriteLn('Monday');
+    Tuesday: WriteLn('Tuesday');
+    Wednesday: WriteLn('Wednesday');
+    Thursday: WriteLn('Thursday');
+    Friday: WriteLn('Friday');
+    Saturday: WriteLn('Saturday');
+    Sunday: WriteLn('Sunday');
+  end;
+
+  WriteLn(Int32(Saturday));
+end;

@@ -1,0 +1,23 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+function MyFunc(i: Int32): Int32;
+begin
+  if i<=0 then
+    Exit(-1)
+  else 
+  begin
+    Result:=i;
+    if i=10 then
+      Exit(i+1)
+    else if i>10 then
+      Exit(Result+2);
+   end;
+end;
+
+begin
+  WriteLn(MyFunc(0));
+  WriteLn(MyFunc(5));
+  WriteLn(MyFunc(10));
+  WriteLn(MyFunc(11));
+end;

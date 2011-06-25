@@ -1,0 +1,19 @@
+//Taken from the DWScript project (http://code.google.com/p/dwscript/)
+//Adjusted to compile with Lape
+
+const ONE = 1;
+const TWO = ONE + ONE;
+const MINUS_ONE = -ONE;
+
+procedure PrintOut(value: Int32 = MINUS_ONE);
+begin
+  WriteLn(value);
+end;
+
+begin
+  PrintOut();
+  PrintOut(TWO+MINUS_ONE-ONE);
+  PrintOut(ONE);
+  PrintOut(TWO);
+  PrintOut($100);
+end;

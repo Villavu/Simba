@@ -1,0 +1,86 @@
+program New;
+const
+  typ_prefix = 'lt';
+  ctypes = //'Boolean,ByteBool,WordBool,LongBool,' +
+    'UInt8,Int8,UInt16,Int16,UInt32,Int32,UInt64,Int64,' +
+    'Variant,' +
+    'Single,Double,Currency,Extended';
+  cops = 'op_cmp_Equal==,op_cmp_GreaterThan=>,op_cmp_GreaterThanOrEqual=>=,' +
+    'op_cmp_LessThan=<,op_cmp_LessThanOrEqual=<=,op_cmp_NotEqual=<>,op_Plus=+,' +
+    'op_Minus=-,op_Multiply=*,op_Divide=/,op_AND=and,op_OR=or,op_XOR=xor,'+
+    'op_DIV=div,op_MOD=mod,op_SHL=shl,op_SHR=shr,'+
+    'op_UnaryMinus=-,op_NOT=not,op_Assign=:=';
+  proc_test = 'Test';
+  proc_write = 'DoWrite';
+  resarr = 'Arr';
+    
+procedure SplitWord(wIn: string; out w1, w2: string);
+var
+  p: Integer;
+begin
+  p := Pos('=', wIn);
+  if (p > -1) then
+  begin
+    w1 := Copy(wIn, 1, p - 1);
+    w2 := Copy(wIn, p + 1, Length(wIn) - p);
+  end
+  else
+  begin
+    w1 := wIn;
+    w2 := wIn;
+  end;
+end;
+    
+var
+  types, ops: TStringArray;
+  i, ii, iii: Integer;
+  op_Name, op: string;
+begin
+  ClearDebug;
+  
+  types := Explode(',', ctypes);
+  ops := Explode(',', cops);
+  
+  for i := Low(types) to High(types) do
+  begin
+    WriteLn('  function get' + types[i] + '(a: Integer): '+types[i]+'; begin Result := '+types[i]+'(a); end;');
+    WriteLn('  function ' + proc_test + '(a: ' + types[i] + '): string; overload; begin Result := '#39 + typ_prefix + types[i] + #39+'; end;');
+  end;
+  
+  WriteLn('');
+  WriteLn('begin');
+  
+  for i := Low(ops) to High(ops) do
+  begin
+    SplitWord(ops[i], op_Name, op);
+    
+    for ii := Low(types) to High(types) do
+      for iii := Low(types) to High(types) do
+      begin
+        //if (ii <= 3) xor (iii <= 3) then
+        //  Continue;
+        if (ii > 8) or (iii > 8) then
+          if InRange(Ord(op[1]), Ord('a'), Ord('z')) then
+            Continue;
+            
+        if (i = High(ops)) then
+        begin
+          if (ii < 8) and (iii > 8) then
+            Continue;
+          WriteLn('  ' + proc_write + '('#39 + resarr + '[' + op_Name + '][' + typ_prefix + types[ii] + '][' + typ_prefix + types[iii] + '] := '+typ_prefix + types[ii]+';'#39');')
+        end
+        else if (i < Length(ops) - 3) then
+          WriteLn('  ' + proc_write + '('#39 + resarr + '[' + op_Name + '][' + typ_prefix + types[ii] + '][' + typ_prefix + types[iii] + '] := '#39'+' + proc_test + '(get' + types[ii] + '(123)' + ' ' + op + ' get' + types[iii] + '(123))+'#39';'#39');')
+        else
+        begin
+          if (op = '-') then
+            WriteLn('  ' + proc_write + '('#39 + resarr + '[' + op_Name + '][' + typ_prefix + types[ii] + '][' + typ_prefix + 'Unknown] := '#39'+' + proc_test + '(get' + types[ii] + '(123)' + ' - get' + types[iii] + '(123))+'#39';'#39');')
+          else
+            WriteLn('  ' + proc_write + '('#39 + resarr + '[' + op_Name + '][' + typ_prefix + types[ii] + '][' + typ_prefix + 'Unknown] := '+typ_prefix + types[ii]+';'#39');');
+          Break;
+        end;
+      end;
+  end;
+  
+  WriteLn('end;');
+end.
