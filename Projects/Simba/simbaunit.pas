@@ -66,6 +66,7 @@ const
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
   interp_CP = 2; //CPascal
+  interp_LP = 3; //Lape
 
   { Place the shortcuts here }
   {$IFDEF LINUX}
@@ -100,6 +101,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionLape: TAction;
     ActionGoto: TAction;
     ActionCPascal: TAction;
     ActionRUTIS: TAction;
@@ -145,6 +147,7 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    MenuItemLape: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
     MenuItemGoto: TMenuItem;
     MenuItemDivider50: TMenuItem;
@@ -285,6 +288,7 @@ type
     procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionGotoExecute(Sender: TObject);
+    procedure ActionLapeExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionNormalSizeExecute(Sender: TObject);
@@ -733,13 +737,15 @@ end;
 
 procedure TSimbaForm.UpdateInterpreter;
 begin
-  ActionPascalScript.Checked:= false;
-  ActionRUTIS.Checked:= false;
-  ActionCPascal.Checked:= false;
+  ActionPascalScript.Checked := False;
+  ActionRUTIS.Checked := False;
+  ActionCPascal.Checked := False;
+  ActionLape.Checked := False;
   case Interpreter of
     interp_PS: ActionPascalScript.Checked:= True;
     interp_CP: ActionCPascal.Checked:= True;
-    interp_RT: ActionRUTIS.Checked:= true;
+    interp_RT: ActionRUTIS.Checked := True;
+    interp_LP: ActionLape.Checked := True;
   end;
 end;
 
@@ -762,11 +768,11 @@ end;
 
 function TSimbaForm.GetInterpreter: Integer;
 begin
-  result := StrToIntDef(LoadSettingDef('Settings/Interpreter/Type','0'),0);
-  if (result < 0) or (result > 2) then
+  Result := StrToIntDef(LoadSettingDef('Settings/Interpreter/Type', '0'), 0);
+  if ((Result < 0) or (Result > 3)) then
   begin
     SetInterpreter(0);
-    result := 0;
+    Result := 0;
   end;
 end;
 
@@ -972,7 +978,7 @@ var
    time:integer;
   LatestVersion : integer;
 begin
-  UpdateTimer.Interval:= MaxInt;
+  UpdateTimer.Interval := MaxInt;
   FontUpdate;
   chk := LowerCase(LoadSettingDef('Settings/Updater/CheckForUpdates','True'));
 
@@ -991,7 +997,7 @@ begin
     mDebugLn('Latest Simba Version: ' + IntToStr(LatestVersion));
   end;
   time := StrToIntDef(LoadSettingDef('Settings/Updater/CheckEveryXMinutes','30'),30);
-  UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
+  UpdateTimer.Interval := time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
 
 procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
@@ -1396,7 +1402,7 @@ begin
   SettingsForm.SettingsTreeView.Items.GetFirstNode.Expand(false);
   SettingsForm.SaveCurrent;
   LoadFormSettings;
-  UpdateTimer.Interval:=25;
+  UpdateTimer.Interval :=25;
 end;
 
 { Load settings }
@@ -1608,19 +1614,21 @@ begin
   AppPath:= MainDir + DS;
   CurrScript.ScriptErrorLine:= -1;
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
+
   try
     case Interpreter of
-      interp_PS : Thread := TPSThread.Create(true,@CurrentSyncInfo,PluginPath);
-
-      // XXX: Rutis needs to be completely removed from Simba if it's not defined.
-      // XXX: Not just print a message that it's not supported now.
-      interp_RT : {$IFDEF USE_RUTIS}Thread := TRTThread.Create(true,@CurrentSyncInfo,PluginPath){$ELSE}formWriteln('RUTIS NOT SUPPORTED') {$ENDIF};
-      interp_CP : Thread := TCPThread.Create(true,@CurrentSyncInfo,PluginPath);
+      interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, PluginPath);
+      {$IFDEF USE_RUTIS}interp_RT: Thread := TRTThread.Create(True, @CurrentSyncInfo, PluginPath);{$ENDIF}
+      interp_CP: Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginPath);
+      {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, PluginPath);{$ENDIF}
+      else
+        raise Exception.CreateFmt('Unknown Interpreter %d!', [Interpreter]);
     end;
   except
     mDebugLn('Failed to initialise the interpreter');
     Exit;
   end;
+
   {$IFNDEF TERMINALWRITELN}
   Thread.SetDebug(@formWriteln);
   {$ENDIF}
@@ -1729,26 +1737,29 @@ begin
 end;
 
 function TSimbaForm.DefaultScript: string;
-var
-  x : TStringList;
 begin
-  result := '';
+  Result := '';
+
   case Interpreter of
-    interp_PS : begin
+    interp_PS, interp_LP: begin
+                  Result := 'program new;' + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
                   if FileExistsUTF8(SimbaForm.DefScriptPath) then
                   begin
-                    x := TStringList.Create;
                     try
-                      x.LoadFromFile(SimbaForm.DefScriptPath);
+                      with TStringList.Create do
+                        try
+                          LoadFromFile(SimbaForm.DefScriptPath);
+                          Result := Text;
+                        finally
+                          Free;
+                        end;
                     except
                       mDebugLn('Couldn''t load default script file.');
                     end;
-                    Result := x.Text;
-                  end else
-                    result := 'program new;'+LineEnding + 'begin'+LineEnding+'end.' + LineEnding;
+                  end;
                 end;
-    interp_RT : result := 'program untitled;' + LineEnding + lineEnding + 'interface' + LineEnding + LineEnding +
-                          'implementation' + LineEnding + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
+    interp_RT: Result := 'program untitled;' + LineEnding + lineEnding + 'interface' + LineEnding + LineEnding +
+                         'implementation' + LineEnding + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
   end;
 end;
 
@@ -1804,7 +1815,7 @@ end;
 
 procedure TSimbaForm.ActionCPascalExecute(Sender: TObject);
 begin
-  Interpreter:= interp_CP;
+  Interpreter := interp_CP;
 end;
 
 procedure TSimbaForm.ActionCutExecute(Sender: TObject);
@@ -1876,6 +1887,11 @@ begin
   end;
 end;
 
+procedure TSimbaForm.ActionLapeExecute(Sender: TObject);
+begin
+  {$IFDEF USE_LAPE}Interpreter := interp_LP;{$ENDIF}
+end;
+
 procedure TSimbaForm.ActionClearDebugExecute(Sender: TObject);
 begin
   Memo1.Clear;
@@ -1917,7 +1933,7 @@ end;
 
 procedure TSimbaForm.ActionPascalScriptExecute(Sender: TObject);
 begin
-  Interpreter:= interp_PS;
+  Interpreter := interp_PS;
 end;
 
 procedure TSimbaForm.ActionPasteExecute(Sender: TObject);
@@ -2468,9 +2484,8 @@ begin
 
   UpdateTitle;
 
-  {$IFNDEF USE_RUTIS}
-  MenuItemRUTIS.Enabled:=False;
-  {$ENDIF}
+  {$IFDEF USE_RUTIS}MenuItemRUTIS.Enabled := True;{$ENDIF}
+  {$IFDEF USE_LAPE}MenuItemLape.Enabled := True;{$ENDIF}
   self.EndFormUpdate;
 
   if SettingsForm.Oops then
@@ -3005,9 +3020,11 @@ begin
   if (CurrScript <> nil) then
     with CurrScript.Synedit do
       if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
-        UpdateCurrScript := true;
-  SetSetting('Settings/Interpreter/Type',Inttostr(AValue),true);
+        UpdateCurrScript := True;
+
+  SetSetting('Settings/Interpreter/Type', IntToStr(AValue), True);
   UpdateInterpreter;
+
   if UpdateCurrScript then
     CurrScript.SynEdit.Lines.text := DefaultScript;
 end;
