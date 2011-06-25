@@ -236,7 +236,7 @@ type
   public
     InvalidVal: _T;
 
-    constructor Create(InvalidValue: _T; Duplicates: TDuplicates = dupError); reintroduce; virtual;
+    constructor Create(InvalidValue: _T; Duplicates: TDuplicates); reintroduce; virtual;
     procedure Clear; virtual;
 
     function add(Item: _T): Integer; virtual;
@@ -680,7 +680,7 @@ begin
     LapeExceptionFmt(lpeInvalidIndex, [IntToStr(Index)]);
 end;
 
-constructor TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.Create(InvalidValue: _T; Duplicates: TDuplicates = dupError);
+constructor TLapeList{$IFNDEF FPC}<_T>{$ENDIF}.Create(InvalidValue: _T; Duplicates: TDuplicates);
 begin
   inherited Create();
 
@@ -1011,7 +1011,7 @@ constructor TLapeDeclarationList.Create(AList: TLapeDeclCollection; ManageDeclar
 begin
   inherited Create();
   if (AList = nil) then
-    AList := TLapeDeclCollection.Create(nil, dupIgnore);
+    AList := TLapeDeclCollection.Create(nil, dupAccept);
   FList := AList;
   FreeDecls := ManageDeclarations;
 end;
@@ -1038,11 +1038,17 @@ end;
 
 function TLapeDeclarationList.addDeclaration(d: TLapeDeclaration): Integer;
 begin
-  if (FList <> nil) and ((not FList.ExistsItem(d)) or (d.DeclarationList <> Self)) then
+  if (FList <> nil) and (((d <> nil) and
+     ((d.DeclarationList = nil) or (d.DeclarationList <> Self))) or
+     (not FList.ExistsItem(d)))
+  then
   begin
     Result := FList.add(d);
     if (d <> nil) then
-      d.DeclarationList := Self;
+      if (d.DeclarationList <> nil) then
+        d.DeclarationList := Self
+      else
+        d.FList := Self;
   end
   else
     Result := -1;
@@ -1065,26 +1071,37 @@ end;
 
 function TLapeDeclarationList.getByClass(AClass: TLapeDeclarationClass): TLapeDeclArray;
 var
-  i: Integer;
+  i, Current, GrowSize, Len: Integer;
 begin
   Result := nil;
-  if (FList <> nil) then
+  if (FList <> nil) and (FList.Count > 0) then
+  begin
+    GrowSize := FList.Count shl 2;
+    Len := GrowSize;
+
+    SetLength(Result, Len);
+    Current := 0;
     for i := 0 to FList.Count - 1 do
       if (FList[i] <> nil) and (FList[i] is AClass) then
       begin
-        SetLength(Result, Length(Result) + 1);
-        Result[High(Result)] := FList[i];
+        if (Current = Len) then
+        begin
+          Inc(Len, GrowSize);
+          SetLength(Result, Len);
+        end;
+
+        Result[Current] := FList[i];
+        Inc(Current);
       end;
+    SetLength(Result, Current);
+  end;
 end;
 
 procedure TLapeDeclarationList.Delete(d: TLapeDeclaration; DoFree: Boolean = False);
 begin
-  if (FList <> nil) then
-  begin
-    if DoFree and FList.ExistsItem(d) then
+  if (FList <> nil) and (FList.DeleteItem(d) <> nil) then
+    if DoFree then
       d.Free();
-    FList.DeleteItem(d);
-  end;
 end;
 
 procedure TLapeDeclarationList.Delete(AClass: TLapeDeclarationClass; DoFree: Boolean = False);
@@ -1108,9 +1125,9 @@ begin
   begin
     if (FList <> nil) then
       FList.Delete(Self);
-    FList := AList;
-    if (FList <> nil) then
+    if (AList <> nil) then
       FList.addDeclaration(Self);
+    FList := AList;
   end;
 end;
 

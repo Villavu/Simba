@@ -1654,6 +1654,7 @@ var
     if (op in [op_Minus, op_Plus]) then
       if (_LastNode = _None) or
            ((Tokenizer.LastTok in ParserToken_Operators) and
+           (not (ParserTokenToOperator(Tokenizer.LastTok) in UnaryOperators)) and
            (OperatorPrecedence[ParserTokenToOperator(Tokenizer.LastTok)] <> OperatorPrecedence[op]))
       then
         if (op = op_Minus) then
