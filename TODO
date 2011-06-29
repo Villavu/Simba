@@ -1,10 +1,22 @@
--   Make Simba more ``modular'':
-    -   Fonts
-    -   Interpreters
-    -   Code completion/hints
-    -   Extensions
-    -   Interpreter system overhaul?
+Simple stuff, not required, may not be possible/useful:
+    -   Compiler arguments in the about form                        [ ]
+    -   Coloured writeln                                            [ ]
+    -   Make an TAction for the Colour Picker.                      [ ]
+    -   Portable install (needs fiddling with settings and such)    [ ]
+    -   --no-extensions flag for Simba.                             [ ]
 
--   Make an TAction for the Colour Picker.
--   Portable install (needs fiddling with settings and such)
--   --no-extensions flag for Simba.
+
+-   CTS rewrite to add CTS 3 and others.                            [ ]
+-   CTS/finder speedups.                                            [ ]
+
+-   New interpreters
+    -   DWSScript ?                                                 [ ]
+    -   Lape!                                                       [ ]
+
+-   Make Simba more ``modular'':
+    -   Fonts                                                       [ ]
+    -   Interpreters                                                [ ]
+    -   Code completion/hints                                       [ ]
+    -   Extensions                                                  [ ]
+    -   Interpreter system overhaul?                                [ ]
+
