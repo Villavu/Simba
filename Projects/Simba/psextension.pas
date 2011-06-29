@@ -329,6 +329,7 @@ begin
   FreeScript;
   if Assigned(PSInstance) then
     FreeAndNil(PSInstance);
+  Script.Free;
   inherited;
 end;
 

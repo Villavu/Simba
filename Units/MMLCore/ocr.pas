@@ -176,12 +176,15 @@ end;
 { Get the current pointer to our list of Fonts }
 function TMOCR.GetFonts:TMFonts;
 begin
-  Exit(Self.FFonts);
+  Result := Self.FFonts;
 end;
 
 { Set new Fonts. We set it to a Copy of NewFonts }
 procedure TMOCR.SetFonts(const NewFonts: TMFonts);
 begin
+  if (Self.FFonts <> nil) then
+    Self.FFonts.Free;
+
   Self.FFonts := NewFonts.Copy(Self.Client);
 end;
 
