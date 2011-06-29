@@ -1648,26 +1648,30 @@ begin
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
   loadFontsOnScriptStart := (lowercase(LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True')) = 'true');
-  // Copy our current fonts
-  if not assigned(Self.OCR_Fonts) and loadFontsOnScriptStart and DirectoryExists(fontPath) then
+
+  if (loadFontsOnScriptStart) then
   begin
-    Self.OCR_Fonts := TMOCR.Create(Thread.Client);
-    OCR_Fonts.InitTOCR(fontPath);
-    Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts
-  end else
-    if assigned(Self.OCR_Fonts) and loadFontsOnScriptStart then
+    if ((not (Assigned(OCR_Fonts))) and DirectoryExists(fontPath)) then
+    begin
+      OCR_Fonts := TMOCR.Create(Thread.Client);
+      OCR_Fonts.InitTOCR(fontPath);
+    end;
+
+    if (Assigned(OCR_Fonts)) then
       Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts;
+  end;
 
   {
     We pass the entire settings to the script; it will then create a Sandbox
     for settings that are exported to the script. This way we can access all
-    the settings from the PSTHread, and scripts can only access limited
+    the settings from the PSThread, and scripts can only access limited
     resources. Hopefully this won't cause any form / thread related problems?
     (Settings doesn't use the Settings form, iirc)
     Well, it was like this previously as well, we just passed a sandbox to it
     directly, but the sandbox still called Settings.
   }
   Thread.SetSettings(SettingsForm.Settings, SimbaSettingsFile);
+
   Thread.OpenConnectionEvent:=@ThreadOpenConnectionEvent;
   Thread.WriteFileEvent:=@ThreadWriteFileEvent;
   Thread.OpenFileEvent:=@ThreadOpenFileEvent;
@@ -2501,6 +2505,10 @@ begin
   { Free the plugins }
   PluginsGlob.Free;
 
+  { Free Fonts }
+  if (Assigned(OCR_Fonts)) then
+    OCR_Fonts.Free;
+
   SetLength(DebugStream, 0);
   DebugCriticalSection.Free;
 
@@ -3122,7 +3130,6 @@ begin
           if Assigned(self.OCR_Fonts) then
             self.OCR_Fonts.Free;
           FormWriteln('Freeing the current fonts. Creating new ones now');
-          // XXX: Can this cause problems when running scripts?
           Self.OCR_Fonts := TMOCR.Create(nil);
           OCR_Fonts.InitTOCR(fontPath);
         end;
