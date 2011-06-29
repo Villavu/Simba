@@ -58,10 +58,15 @@ end;
 
 destructor TExtensionManager.Destroy;
 var
-  i: Integer;
+  I, C: Integer;
 begin
-  for i := 0 to Extensions.Count - 1 do
-    TExtension(Extensions.Items[i]).Free;
+  C := Extensions.Count - 1;
+  for I := 0 to C do
+  begin
+    TExtension(Extensions.Items[I]).Settings.Free;
+    TExtension(Extensions.Items[I]).Free;
+  end;
+
   Extensions.Free;
   inherited Destroy;
 end;
