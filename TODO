@@ -6,8 +6,14 @@ Simple stuff, not required, may not be possible/useful:
     -   --no-extensions flag for Simba.                             [ ]
 
 
--   CTS rewrite to add CTS 3 and others.                            [ ]
--   CTS/finder speedups.                                            [ ]
+-   CTS/finder speedups and changes                                 [ ]
+    -   JIT (Generate comparison functions)                         [ ]
+    -   Pass color information in struct                            [ ]
+    -   Precalculate screen bitmap in current cts / keep a cache
+        to save comparisons                                         [ ]
+    -   Add CTS 3                                                   [ ]
+    -   Add a direct RGB -> CIE L*a*b conversion                    [ ]
+    -   Make sure colour conversions are inline                     [ ]
 
 -   More documentation:
     -   Cover all functions by at least mentioning the definition   [ ]
