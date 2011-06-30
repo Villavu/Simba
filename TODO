@@ -9,6 +9,11 @@ Simple stuff, not required, may not be possible/useful:
 -   CTS rewrite to add CTS 3 and others.                            [ ]
 -   CTS/finder speedups.                                            [ ]
 
+-   More documentation:
+    -   Cover all functions by at least mentioning the definition   [ ]
+    -   Write tutorial                                              [ ]
+    -   In depth documentation per function                         [ ]
+
 -   New interpreters
     -   DWSScript ?                                                 [ ]
     -   Lape!                                                       [ ]
