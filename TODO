@@ -18,6 +18,14 @@ Simple stuff, not required, may not be possible/useful:
     -   DWSScript ?                                                 [ ]
     -   Lape!                                                       [ ]
 
+-   Integrate script manager                                        [ ]
+    -   Basic support. (Install scripts)                            [ ]
+    -   Update functionality                                        [ ]
+    -   Uninstall scripts                                           [ ]
+    -   Better storage / more stable storage                        [ ]
+    -   Pretty GUI                                                  [ ]
+    -   Merging / storing usernames when updating                   [ ]
+
 -   Make Simba more ``modular'':
     -   Fonts                                                       [ ]
     -   Interpreters                                                [ ]
