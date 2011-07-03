@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Simba'
-copyright = u'2010, Merlijn Wajer'
+copyright = u'2010, Merlijn Wajer, Raymond van Venetie'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -176,7 +176,7 @@ htmlhelp_basename = 'Simbadoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'Simba.tex', u'Simba Documentation',
-   u'Merlijn Wajer', 'manual'),
+   u'Merlijn Wajer, Raymond van Venetie', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
