@@ -391,7 +391,7 @@ begin
   g := g * g;
   r := C1.R - C2^.R;
   r := r * r;
-  Result := (b + g + r) < ToleranceSqr;
+  Result := (b + g + r) <= ToleranceSqr;
 end;
 
 function ColorSame_cts2(Tolerance: Integer; ctsInfo: Pointer; C2: PRGB32): boolean;
@@ -425,7 +425,7 @@ begin
       end;
       2:
       begin
-          Result := AllocMem(SizeOf(TRGB32));
+          Result := AllocMem(SizeOf(TCTS2Info));
           ColorToRGB(Color, R, G, B);
           RGBToHSL(R, G, B, PCTS2Info(Result)^.H, PCTS2Info(Result)^.S,
                       PCTS2Info(Result)^.L);
@@ -1279,8 +1279,8 @@ begin
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
+  Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
-  Free_CTSInfo(ctsinfo)
 end;
 
 function TMFinder.FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys,
