@@ -386,12 +386,9 @@ var
 begin
   C1 := PRGB32(ctsInfo)^;
   b := C1.B - C2^.B;
-  b := b * b;
   g := C1.G - C2^.G;
-  g := g * g;
   r := C1.R - C2^.R;
-  r := r * r;
-  Result := (b + g + r) <= ToleranceSqr;
+  Result := (b*b + g*g + r*r) <= ToleranceSqr;
 end;
 
 function ColorSame_cts2(Tolerance: Integer; ctsInfo: Pointer; C2: PRGB32): boolean;
@@ -403,8 +400,8 @@ begin
   i := PCTS2Info(ctsInfo)^;
   RGBToHSL(C2^.R, C2^.G, C2^.B, h, s, l); // Inline this later.
 
-  Result := (abs(h - i.H) <= (i.hueMod * Tolerance))
-        and (abs(s - i.S) <= (i.satMod * Tolerance))
+  Result := (abs(h - i.H) <= (i.hueMod))
+        and (abs(s - i.S) <= (i.satMod))
         and (abs(l - i.L) <= Tolerance);
 end;
 
@@ -838,7 +835,6 @@ begin
             Ptr := Before;
             Break;
           end;
-          Inc(Ptr, PtrInc);
         end;
       end;
       Inc(Ptr);
@@ -1177,49 +1173,6 @@ var
   compare: TCTSCompareFunction;
   ctsinfo: Pointer;
 
-  procedure cts1;
-    var xx, yy: integer;
-  begin
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-         if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
-         begin
-           ClientTPA[c].x := xx;
-           ClientTPA[c].y := yy;
-           inc(c);
-         end;
-        inc(ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
-  end;
-
-  procedure cts2;
-    var xx, yy: integer;
-        H1, S1, L1, H2, S2, L2, hueXTol, satXTol: Extended;
-  begin
-    ColorToHSL(color,H1,S1,L1);
-    HueXTol := hueMod * Tol;
-    SatXTol := satMod * Tol;
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-        RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
-        if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-        begin
-          ClientTPA[c].x := xx;
-          ClientTPA[c].y := yy;
-          Inc(c);
-        end;
-        Inc(Ptr)
-      end;
-      Inc(Ptr, PtrInc);
-    end;
-  end;
-
   {  procedure cts3;
   begin
     RGBToXYZ(clR, clG, clB, X, Y, Z);
@@ -1260,6 +1213,9 @@ begin
 
   ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
   compare := Get_CTSCompare(Self.CTS);
+
+  if cts = 1 then
+   tol := tol * tol;
 
   for yy := ys to ye do
   begin
