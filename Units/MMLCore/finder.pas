@@ -449,6 +449,7 @@ begin
                       PCTS2Info(Result)^.L);
           PCTS2Info(Result)^.hueMod := Tol * hueMod;
           PCTS2Info(Result)^.satMod := Tol * satMod;
+          PCTS2Info(Result)^.Tol := Tol;
       end;
   end;
 end;
