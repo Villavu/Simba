@@ -109,13 +109,26 @@ uses
 
 
 type
+  TCTS0Info = record
+      B, G, R, A: byte;
+      Tol: Integer;
+  end;
+  PCTS0Info = ^TCTS0Info;
+
+  TCTS1Info = record
+      B, G, R, A: byte;
+      Tol: Integer; { Squared }
+  end;
+  PCTS1Info = ^TCTS1Info;
+
   TCTS2Info = record
       H, S, L: extended;
       hueMod, satMod: extended;
+      Tol: Integer;
   end;
   PCTS2Info = ^TCTS2Info;
 
-  TCTSCompareFunction = function (Tolerance: Integer; ctsInfo: Pointer; C2: PRGB32): boolean;
+  TCTSCompareFunction = function (ctsInfo: Pointer; C2: PRGB32): boolean;
 
 
 procedure TMFinder.LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
@@ -367,31 +380,31 @@ end;
 
 
 { Colour Same functions }
-function ColorSame_cts0(Tolerance: Integer; ctsInfo: Pointer; C2: PRGB32): boolean;
+function ColorSame_cts0(ctsInfo: Pointer; C2: PRGB32): boolean;
 
 var
-    C1: TRGB32;
+    C1: TCTS0Info;
 begin
-  C1 := PRGB32(ctsInfo)^;
-  Result := (Abs(C1.B - C2^.B) <= Tolerance)
-        and (Abs(C1.G - C2^.G) <= Tolerance)
-        and (Abs(C1.R - C2^.R) <= Tolerance);
+  C1 := PCTS0Info(ctsInfo)^;
+  Result := (Abs(C1.B - C2^.B) <= C1.Tol)
+        and (Abs(C1.G - C2^.G) <= C1.Tol)
+        and (Abs(C1.R - C2^.R) <= C1.Tol);
 end;
 
-function ColorSame_cts1(ToleranceSqr: Integer; ctsInfo: Pointer; C2: PRGB32): boolean;
+function ColorSame_cts1(ctsInfo: Pointer; C2: PRGB32): boolean;
 
 var
-    C1: TRGB32;
+    C1: TCTS1Info;
     r,g,b: integer;
 begin
-  C1 := PRGB32(ctsInfo)^;
+  C1 := PCTS1Info(ctsInfo)^;
   b := C1.B - C2^.B;
   g := C1.G - C2^.G;
   r := C1.R - C2^.R;
-  Result := (b*b + g*g + r*r) <= ToleranceSqr;
+  Result := (b*b + g*g + r*r) <= C1.Tol;
 end;
 
-function ColorSame_cts2(Tolerance: Integer; ctsInfo: Pointer; C2: PRGB32): boolean;
+function ColorSame_cts2(ctsInfo: Pointer; C2: PRGB32): boolean;
 
 var
     h, s, l: extended;
@@ -402,7 +415,7 @@ begin
 
   Result := (abs(h - i.H) <= (i.hueMod))
         and (abs(s - i.S) <= (i.satMod))
-        and (abs(l - i.L) <= Tolerance);
+        and (abs(l - i.L) <= i.Tol);
 end;
 
 { }
@@ -414,11 +427,19 @@ var
     H, S, L: Integer;
 begin
   case cts of
-      0, 1:
+      0:
       begin
-          Result := AllocMem(SizeOf(TRGB32));
-          ColorToRGB(Color, PRGB32(Result)^.R, PRGB32(Result)^.G,
-                      PRGB32(Result)^.B);
+          Result := AllocMem(SizeOf(TCTS0Info));
+          ColorToRGB(Color, PCTS0Info(Result)^.R, PCTS0Info(Result)^.G,
+                      PCTS0Info(Result)^.B);
+          PCTS0Info(Result)^.Tol := Tol;
+      end;
+      1:
+      begin
+          Result := AllocMem(SizeOf(TCTS1Info));
+          ColorToRGB(Color, PCTS1Info(Result)^.R, PCTS1Info(Result)^.G,
+                      PCTS1Info(Result)^.B);
+          PCTS1Info(Result)^.Tol := Tol*Tol;
       end;
       2:
       begin
@@ -984,67 +1005,11 @@ var
    Ptr: PRGB32;
    PtrInc: Integer;
    dX, dY, clR, clG, clB: Integer;
-   xy: TPoint;
+   xx, yy: integer;
+   compare: TCTSCompareFunction;
+   ctsinfo: Pointer;
+   label Hit;
 
-  function cts0: tpoint;
-  var xx, yy: integer;
-  begin
-     for yy := ys to ye do
-     begin
-       for xx := xs to xe do
-       begin
-          if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and
-             (Abs(clR-Ptr^.R) <= Tol)) then
-            exit(Point(xx, yy));
-         inc(Ptr);
-       end;
-       Inc(Ptr, PtrInc);
-     end;
-
-    Result := Point(-1, -1);
-  end;
-
-  function cts1: tpoint;
-  var xx, yy: integer;
-  begin
-    Tol := Sqr(Tol);
-
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-         if (sqr(clB - Ptr^.B) + sqr(clG - Ptr^.G) + sqr(clR-Ptr^.R)) <= Tol then
-             exit(Point(xx, yy));
-        inc(ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
-
-    Result := Point(-1, -1);
-  end;
-
-  function cts2: tpoint;
-  var xx, yy: integer;
-      H1, S1, L1, H2, S2, L2: Extended;
-      HueXTol, SatXTol: Extended;
-  begin
-    RGBToHSL(clR,clG,clB,H1,S1,L1);
-    HueXTol := hueMod * Tol;
-    SatXTol := satMod * Tol;
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-        RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
-        if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-          exit(Point(xx, yy));
-       inc(Ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
-
-    Result := Point(-1, -1);
-  end;
 
 begin
   Result := false;
@@ -1054,8 +1019,6 @@ begin
   // calculate delta x and y
   dX := xe - xs;
   dY := ye - ys;
-  //next, convert the color to r,g,b
-  ColorToRGB(Color, clR, clG, clB);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
 
@@ -1064,23 +1027,29 @@ begin
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
 
-  case CTS of
-    0: xy := cts0();
-    1: xy := cts1();
-    2: xy := cts2();
+  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  compare := Get_CTSCompare(Self.CTS);
+
+  for yy := ys to ye do
+  begin
+    for xx := xs to xe do
+    begin
+      if compare(ctsinfo, Ptr) then
+        goto Hit;
+      inc(Ptr);
+    end;
+    Inc(Ptr, PtrInc);
   end;
-  if (xy.x = -1) and (xy.y = -1) then
-  begin
-    Result := False;
-    TClient(Client).IOManager.FreeReturnData;
-    Exit;
-  end else
-  begin
+
+  Result := False;
+  TClient(Client).IOManager.FreeReturnData;
+  Exit;
+
+  Hit:
     Result := True;
-    x := xy.x;
-    y := xy.y;
+    x := xx;
+    y := yy;
     TClient(Client).IOManager.FreeReturnData;
-  end;
 end;
 
 function TMFinder.FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean;
@@ -1221,7 +1190,7 @@ begin
   begin
     for xx := xs to xe do
     begin
-      if compare(Tol, ctsinfo, Ptr) then
+      if compare(ctsinfo, Ptr) then
       begin
         ClientTPA[c].x := xx;
         ClientTPA[c].y := yy;
