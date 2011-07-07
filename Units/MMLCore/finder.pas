@@ -69,7 +69,7 @@ type
     function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye,Tol: Integer): Boolean;
     function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
     function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
-    function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
+    function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tol: Integer) : boolean;
     function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
     function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
     function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
@@ -1205,6 +1205,7 @@ begin
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
+
   Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
 end;
@@ -1340,63 +1341,17 @@ begin
 end;
 
 function TMFinder.FindColorsSpiralTolerance(x, y: Integer;
-  out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer
+  out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tol: Integer
   ): boolean;
 var
   PtrData: TRetData;
   c : integer;
   RowData : TPRGB32Array;
-  dX, dY, clR, clG, clB, SpiralHi: Integer;
+  dX, dY, SpiralHi, i: Integer;
 
-  procedure cts0;
-    var i: integer;
-  begin
-    for i := 0 to SpiralHi do
-      if ((abs(clB-RowData[ClientTPA[i].y][ClientTPA[i].x].B) <= Tolerance) and
-         (abs(clG-RowData[ClientTPA[i].y][ClientTPA[i].x].G) <= Tolerance) and
-         (Abs(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R) <= Tolerance)) then
-      begin;
-        ClientTPA[c].x := ClientTPA[i].x + xs;
-        ClientTPA[c].y := ClientTPA[i].y + ys;
-        inc(c);
-      end;
-  end;
+  compare: TCTSCompareFunction;
+  ctsinfo: Pointer;
 
-  procedure cts1;
-    var i: integer;
-  begin
-    for i := 0 to SpiralHi do
-      if (Sqrt(sqr(clR - RowData[ClientTPA[i].y][ClientTPA[i].x].R) +
-               sqr(clG - RowData[ClientTPA[i].y][ClientTPA[i].x].G) +
-               sqr(clB - RowData[ClientTPA[i].y][ClientTPA[i].x].B)) <= Tolerance) then
-      begin;
-        ClientTPA[c].x := ClientTPA[i].x + xs;
-        ClientTPA[c].y := ClientTPA[i].y + ys;
-        inc(c);
-      end;
-  end;
-
-  procedure cts2;
-    var i: integer;
-        H1, S1, L1, H2, S2, L2, HueXTol, SatXTol: Extended;
-  begin
-    ColorToHSL(Color, H1, S1, L1);
-    HueXTol := hueMod * Tolerance;
-    SatXTol := satMod * Tolerance;
-    for i := 0 to SpiralHi do
-    begin;
-      RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
-               RowData[ClientTPA[i].y][ClientTPA[i].x].G,
-               RowData[ClientTPA[i].y][ClientTPA[i].x].B,
-               H2,S2,L2);
-      if ((abs(H1 - H2) <= (HueXTol)) and (abs(S1 - S2) <= (satXTol)) and (abs(L1 - L2) <= Tolerance)) then
-      begin;
-        ClientTPA[c].x := ClientTPA[i].x + xs;
-        ClientTPA[c].y := ClientTPA[i].y + ys;
-        inc(c);
-      end;
-    end;
-  end;
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
@@ -1404,25 +1359,34 @@ begin
   dX := xe - xs;
   dY := ye - ys;
   //next, convert the color to r,g,b
-  ColorToRGB(Color, clR, clG, clB);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
 
   c := 0;
 
+  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  compare := Get_CTSCompare(Self.CTS);
+
   //Load rowdata
   RowData:= CalculateRowPtrs(ptrdata,dy+1);
   //Load the spiral path
-  LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
+  LoadSpiralPath(x-xs,y-ys,0,0,dx,dy); { Fills ClientTPA with Spiral path }
+
   SpiralHi := (dx + 1) * (dy + 1) - 1;
-  case CTS of
-    0: cts0();
-    1: cts1();
-    2: cts2();
-  end;
+  for i := 0 to SpiralHi do
+    if compare(ctsinfo, @RowData[ClientTPA[i].y][ClientTPA[i].x]) then
+    begin;
+      { We can re-use the ClientTPA to store results. }
+      ClientTPA[c].x := ClientTPA[i].x + xs;
+      ClientTPA[c].y := ClientTPA[i].y + ys;
+      inc(c);
+    end;
+
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
+
+  Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
 end;
 
