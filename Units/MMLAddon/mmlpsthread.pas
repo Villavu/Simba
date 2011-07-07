@@ -1234,6 +1234,11 @@ type
   PMDTMPoint = ^TMDTMPoint;
   PSDTM = ^TSDTM;
 
+procedure lp_writeLn(Params: PParamArray);
+begin
+  psWriteln(PlpString(Params^[0])^);
+end;
+
 //Generate these wrappers with a script -Dg
 //{$I LPInc/Wrappers/other.inc}
 //{$I LPInc/Wrappers/settings.inc}
@@ -1266,6 +1271,8 @@ begin
   Fonts := Client.MOCR.Fonts;
   with Compiler do
   begin
+    addGlobalFunc('procedure _writeln; override;', @lp_writeLn);
+
     for I := Fonts.Count - 1 downto 0 do
       addGlobalVar(Fonts[I].Name, Fonts[I].Name);
 
@@ -1310,6 +1317,7 @@ function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument:
 var
   plugin_idx: integer;
 begin
+  Result := False;
   if (Directive = 'loadlib') then
   begin
     if (Argument <> '') then
