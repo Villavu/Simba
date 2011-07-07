@@ -6,8 +6,25 @@ Simple stuff, not required, may not be possible/useful:
     -   --no-extensions flag for Simba.                             [ ]
 
 
--   CTS rewrite to add CTS 3 and others.                            [ ]
--   CTS/finder speedups.                                            [ ]
+-   CTS/finder speedups and changes                                 [ ]
+    General ideas:
+        -   everything subprocedure (lots of code)
+
+        -   jit + comparison function (per cts)  generated, call in loop
+
+        -   comparison function (per cts), not generated, call in loop
+
+    -   JIT (Generate comparison functions)                         [ ]
+    -   Comparison functions for HSL/XYZ/L*a*b should check for
+        match on each component before calculating the next.
+        (see FindColorsToleranceOptimised)
+
+    -   Pass color information in struct                            [ ]
+    -   Precalculate screen bitmap in current cts / keep a cache
+        to save comparisons                                         [ ]
+    -   Add CTS 3                                                   [ ]
+    -   Add a direct RGB -> CIE L*a*b conversion                    [ ]
+    -   Make sure colour conversions are inline                     [ ]
 
 -   More documentation:
     -   Cover all functions by at least mentioning the definition   [ ]
