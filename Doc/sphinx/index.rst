@@ -31,6 +31,7 @@ Contents:
     referencesimba.rst
     docdoc.rst
     todo.rst
+    libmml.rst
     pymml.rst
 
 
