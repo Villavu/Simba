@@ -54,7 +54,7 @@ MoveMouse moves the mouse pointer to the specified x and y coordinates.
 The following example will move the mouse to position *(10, 10)*; relative
 to the selected client. (To get to point (10, 10) visually, recall that (0, 0)
 is the *top left* part and to get to (10, 10) we move 10 pixels to the right,
-and ten pixels down.
+and ten pixels down.)
 
 .. code-block:: pascal
 
