@@ -23,9 +23,10 @@ Simba crashes on start complaining about settings.xml
 
 This means your settings.xml has become corrupt somehow, or Simba may not be
 able to create it. If a settings.xml exists in your Simba directory, you can
-delete it. (All your settings will be lost, but this shouldn't be a bug deal)
+delete it. (All your settings will be lost, but this shouldn't be a big deal)
 
 Note that this should no longer happen with Simba 750 and up.
 
-..  
+..
+    TODO
     Anything else?
