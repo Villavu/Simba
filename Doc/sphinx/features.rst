@@ -1,7 +1,11 @@
-Feature Overview
-================
+Detailed Feature Overview
+=========================
+
+Simba has some fancy features; the most basic operations as well as detailed
+information about settings will be explained here.
 
 .. toctree::
+    :maxdepth: 2
 
     features/scriptmanager.rst
     features/autoupdate.rst
@@ -10,5 +14,3 @@ Feature Overview
     features/ui.rst
     features/notwellknown.rst
 
-
-Most stuff here is probably misplaced anyway.

@@ -19,7 +19,6 @@ Contents:
     :maxdepth: 2
 
     whatis.rst
-    whatsnew.rst
     whysimba.rst
     gettingstarted.rst
     troubleshooting.rst
