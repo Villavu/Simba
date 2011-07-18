@@ -6,7 +6,7 @@ Multimedia Functions
 
 
 Sound Functions
---------------
+---------------
 
 PlaySound
 ~~~~~~~~~
