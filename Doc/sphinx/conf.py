@@ -94,7 +94,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'default'
+html_theme = 'nature'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -176,7 +176,7 @@ htmlhelp_basename = 'Simbadoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'Simba.tex', u'Simba Documentation',
-   u'Merlijn Wajer, Raymond van Venetie', 'manual'),
+   u'Merlijn Wajer, Raymond van Venetië, Nielsie95', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
