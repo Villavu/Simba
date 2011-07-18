@@ -152,7 +152,7 @@ FindColorTolerance returns true if a colour within the given tolerance range
 *x2*, *y2*.
 Only the first point is returned in *x* and *y*.
 Whether or not a colour is within the tolerance range is determined by the 
-:ref:`scriptref_CTS` mode. It searches from the top left to the bottom right
+:ref:`scriptref-CTS` mode. It searches from the top left to the bottom right
 and will stop after matching a point.
 
 .. _scriptref-findcolors:
@@ -182,7 +182,7 @@ FindColorsTolerance returns true if at least one point was found.
 A point is found if it is within the given tolerance range *tol* 
 of the given colour *col* and inside the box defined by *x1*, *y1*, *x2*, *y2*.
 Whether or not a color is within the tolerance range is determined by the 
-:ref:`scriptref_CTS` mode.
+:ref:`scriptref-CTS` mode.
 It searches from the top left to the bottom right and will find all
 matching points in the area.
 

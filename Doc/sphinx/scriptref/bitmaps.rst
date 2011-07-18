@@ -300,7 +300,7 @@ FindBitmapToleranceIn
 
 Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
 Tolerance defines the tolerance per pixel when matching bitmaps. See
-:ref:`scriptref_CTS` for more information on tolerance.
+:ref:`scriptref-CTS` for more information on tolerance.
 Returns true if found. If found, *x, y* specifies the position where the bitmap
 was found.
 
@@ -326,7 +326,7 @@ FindBitmapsSpiralTolerance
 
 Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
 Tolerance defines the tolerance per pixel when matching bitmaps. See
-:ref:`scriptref_CTS` for more information on tolerance.
+:ref:`scriptref-CTS` for more information on tolerance.
 Search starts from a point defined by *x, y*.
 Returns true if found. If found, each point in *TPA* specifies a match.
 
@@ -339,7 +339,7 @@ FindBitmapSpiralTolerance
 
 Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
 Tolerance defines the tolerance per pixel when matching bitmaps. See
-:ref:`scriptref_CTS` for more information on tolerance.
+:ref:`scriptref-CTS` for more information on tolerance.
 Search starts from a point defined by *x, y*.
 Returns true if found. If found, *x, y* specifies the position where the bitmap
 was found.
