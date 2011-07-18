@@ -66,6 +66,28 @@ The titles of all major sections have all words capitalized. (The ones with
 The minor sections and subsections (---) and (~~~) have only the first word and
 Simba specific words (like Simba itself) capitalized.
 
-Try to stick to the Python documentation standards. 
+Try to stick to the Python documentation standards.
 ( http://docs.python.org/using/index.html )
+
+References
+----------
+
+Sphinx has references, most of the .rst files contain labels and references.
+
+A label looks something like this:
+
+.. code-block:: python
+
+    .. _<X>-<Y>:
+
+Where X is either the name of file or folder; and Y is the name of the
+file/function if X is a folder. For referring to specific functions for example,
+use:
+
+.. code-block:: python
+
+    .. _scriptref-movemouse:
+
+To define a label for the MoveMouse function. Labels are always placed right
+above section/chapter declarations.
 
