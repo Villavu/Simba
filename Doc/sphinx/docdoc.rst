@@ -1,7 +1,9 @@
+.. _docdoc:
+
 Documentation Documentation
 ===========================
 
-This page is the documentation for the documentation. 
+This page is the documentation for the documentation.
 
 It is very important to know this by heart when you are writing documentation
 for Simba.
@@ -18,12 +20,13 @@ be found at the bottom of the page.
 
 Building the documentation
 --------------------------
+
 In the future, the online documentation will be refreshed every hour. However,
 if you want to build the documentation yourself, you should install
-``python-sphinx``. 
+``python-sphinx``.
 
-Move to the ``Simba/doc/sphinx`` directory and run ``make all``. 
-This will place an HTML version of the documentation in ``_build/html``. 
+Move to the ``Simba/doc/sphinx`` directory and run ``make all``.
+This will place an HTML version of the documentation in ``_build/html``.
 
 .. note::
     The build instructions are for Linux only. If you want to build the doc on
