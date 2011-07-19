@@ -1,3 +1,5 @@
+.. _whatis:
+
 What Is Simba?
 ==============
 
