@@ -411,6 +411,7 @@ type
     OpenFileData : TOpenFileData;
     WriteFileData : TWriteFileData;
     ScriptStartData : TScriptStartData;
+
     procedure UpdateInterpreter;
     procedure HandleConnectionData;
     procedure HandleOpenFileData;
@@ -2871,6 +2872,11 @@ var
    c, x, y: Integer;
    cobj: TColourPickerObject;
 begin
+  if Picker.Picking then
+  begin
+    formWriteln('Error: Already picking a colour');
+    exit;
+  end;
   Picker.Pick(c, x, y);
   cobj := TColourPickerObject.Create(c, Classes.Point(x,y), '');
 
