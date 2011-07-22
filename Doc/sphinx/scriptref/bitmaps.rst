@@ -4,12 +4,43 @@
 Bitmaps
 =======
 
+A bitmap in Simba is simply a two dimensional *field of colours*. These colours
+can all be the same, or they can be of different colours. Simba features
+functions to create, manipulate and search for bitmaps.
+
+.. INSERT BITMAP EXAMPLE HERE (Picture, etc)
+
+The bitmaps are - just as files - represented as integer in Simba (they point to
+a list of bitmaps, and the value of the integer is the position in the list).
+So typically, when referring to bitmaps in Simba, you simply represent them as
+an integer:
+
+.. code-block:: pascal
+
+    var bmp, x, y: integer;
+    bmp := CreateBitmap(10, 10); // Create a bitmap of size (10, 10)
+    if FindBitmapIn(bmp, x, y, 0, 0, 300, 300) then
+      writeln('Found it!');
+
+Note that the previous example doesn't make a lot of sense as the bitmap has
+only been created and not filled with any colours, they are as of yet,
+undefined. You can also create bitmaps from screenshots and load them when your
+script starts using the :ref:`scriptref-bitmapfromstring` function, or
+simple store them as files and load them using the :ref:`scriptref-loadbitmap`
+function.
+
+Word of caution on bitmap creation
+----------------------------------
+
 Bitmaps in Simba are internally all instances of *TMufasBitmap*. Scripts should
 generally access bitmaps using their *handle*: an integer. All functions
 referenced here either require a bitmap *handle* or return one.
 
 If you want to gain more access over a specific bitmap, see the
-*GetMufasaBitmap* function. It is highly unrecommended to create bitmaps with:
+*GetMufasaBitmap* function. It is highly unrecommended to create bitmaps like
+this, because Simba will not free them automatically for you. (There's no
+problem doing it like this if you only want to perform operations on it and then
+free it again)
 
 .. code-block:: pascal
 
@@ -89,6 +120,9 @@ SaveBitmap
 
 Save the given bitmap to the specified path.
 
+
+.. _scriptref-bitmapfromstring:
+
 BitmapFromString
 ----------------
 
@@ -99,6 +133,8 @@ BitmapFromString
 Load a bitmap from the given string. This command is usually generated with the
 Bitmap to String feature in Simba.
 
+
+.. _scriptref-loadbitmap:
 
 LoadBitmap
 ----------
