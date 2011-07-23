@@ -51,7 +51,12 @@ type
 
       procedure ImageMainMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
       procedure ImageInfoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-     Procedure ColorPickUp(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer);
+      procedure ColorPickUp(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer);
+
+  private
+    { Are we currently picking? }
+    FPicking: Boolean;
+
   public
     manager: TIOManager;
     { Form components }
@@ -68,7 +73,9 @@ type
 
     { Handles }
     InfoHandle, ImageHandle : HDC;
+
   public
+    property Picking: Boolean read FPicking;
     property OnPick: TColourPickEvent read FPickEvent write FPickEvent;
   end;
 
@@ -80,7 +87,8 @@ constructor TMColorPicker.Create(manager: TIOManager);
 begin
   inherited Create;
 
-  self.manager := manager;
+  Self.manager := manager;
+  Self.FPicking := False;
 end;
 
 destructor TMColorPicker.Destroy;
@@ -103,12 +111,17 @@ var
 
 
 begin
+  if self.FPicking then
+    raise Exception.Create('Pick() has not yet returned, but has been called'
+        + 'again');
+
+  Self.FPicking := True;
   { Disable both of the color pick buttons }
   w := 0;
   h := 0;
   { If the target window isn't valid (closed etc), make the destkop the new window}
   if not Self.Manager.TargetValid then
-    self.Manager.SetDesktop;
+    Self.Manager.SetDesktop;
 
   {Desktop is needed for the whole picture}
   Desktop := TIOManager.Create;
@@ -213,6 +226,8 @@ begin
   ScreenForm.Free;
 
   Desktop.free;
+
+  self.FPicking := False;
 
   { Re-enable the color pick buttons }
 //  Application.MainForm.Enabled := True;
