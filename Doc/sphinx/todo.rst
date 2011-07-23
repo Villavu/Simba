@@ -3,7 +3,6 @@
 Documentation TODO
 ==================
 
-*   **WIP** - What's New. Changelog template added, fill it with stuff.
 *   *Wizzup* - Script manager (non technical).
 *   *Wizzup* - Script manager (technical).
 *   Extend "Getting Started". Include downloading scripts from the manager.

@@ -1,3 +1,5 @@
+.. _scriptref:
+
 Scripting Reference
 ===================
 
