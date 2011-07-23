@@ -366,34 +366,41 @@ begin
   end;
 end;
 
-  procedure TWindow.SendString(str: string);
-  var
-    i: integer;
-    key: byte;
-    HoldShift : boolean;
+procedure TWindow.SendString(str: string);
+var
+  I, L: Integer;
+  K: Byte;
+  HoldShift: Boolean;
+begin
+  HoldShift := False;
+  L := Length(str);
+  for I := 1 to L do
   begin
-    HoldShift := false;
-    for i := 1 to length(str) do
+    if (((str[I] >= 'A') and (str[I] <= 'Z')) or 
+        ((str[I] >= '!') and (str[I] <= '&')) or
+        ((str[I] >= '(') and (str[I] <= '+')) or
+        (str[I] = ':') or
+        ((str[I] >= '<') and (str[I] <= '@')) or
+        ((str[I] >= '^') and (str[I] <= '_')) or
+        ((str[I] >= '{') and (str[I] <= '~'))) then
     begin
-      if((str[i] >= 'A') and (str[i] <= 'Z')) then
-      begin
-        HoldKey(VK_SHIFT);
-        HoldShift:= True;
-        str[i] := lowerCase(str[i]);
-      end else
-        if HoldShift then
-        begin
-          HoldShift:= false;
-          ReleaseKey(VK_SHIFT);
-        end;
-      key:= GetKeyCode(str[i]);
-      HoldKey(key);
-      //BenLand100 note: probably should wait here
-      ReleaseKey(key);
+      HoldKey(VK_SHIFT);
+      HoldShift := True;
     end;
-    if HoldShift then
+    
+    K := GetKeyCode(str[I]);
+    HoldKey(K);
+    Sleep(20);
+    ReleaseKey(K);
+    
+    if (HoldShift) then
+    begin
+      HoldShift := False;
       ReleaseKey(VK_SHIFT);
+    end;
   end;
+end;
+  
   procedure TWindow.HoldKey(key: integer);
   begin
     keyinput.Down(key);
