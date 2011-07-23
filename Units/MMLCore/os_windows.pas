@@ -380,8 +380,8 @@ begin
     Shift := (Hi(VK) > 0);
     C := LoByte(VK);
     ScanCode := MapVirtualKey(C, 0);
-
-    WriteLn(ScanCode);
+    if (ScanCode = 0) then
+      Continue;
 
     if (Shift) then
       Keybd_Event(VK_SHIFT, $2A, 0, 0);
