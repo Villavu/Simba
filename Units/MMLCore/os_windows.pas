@@ -366,34 +366,34 @@ begin
   end;
 end;
 
-  procedure TWindow.SendString(str: string);
-  var
-    i: integer;
-    key: byte;
-    HoldShift : boolean;
+procedure TWindow.SendString(str: string);
+var
+  I, L: integer;
+  C: Byte;
+  ScanCode, VK: Word;
+  Shift: boolean;
+begin
+  L := Length(str);
+  for I := 1 to L do
   begin
-    HoldShift := false;
-    for i := 1 to length(str) do
-    begin
-      if((str[i] >= 'A') and (str[i] <= 'Z')) then
-      begin
-        HoldKey(VK_SHIFT);
-        HoldShift:= True;
-        str[i] := lowerCase(str[i]);
-      end else
-        if HoldShift then
-        begin
-          HoldShift:= false;
-          ReleaseKey(VK_SHIFT);
-        end;
-      key:= GetKeyCode(str[i]);
-      HoldKey(key);
-      //BenLand100 note: probably should wait here
-      ReleaseKey(key);
-    end;
-    if HoldShift then
-      ReleaseKey(VK_SHIFT);
+    VK := VkKeyScan(str[I]);
+    Shift := (Hi(VK) > 0);
+    C := LoByte(VK);
+    ScanCode := MapVirtualKey(C, 0);
+    if (ScanCode = 0) then
+      Continue;
+
+    if (Shift) then
+      Keybd_Event(VK_SHIFT, $2A, 0, 0);
+
+    Keybd_Event(C, ScanCode, 0, 0);
+    Keybd_Event(C, ScanCode, KEYEVENTF_KEYUP, 0);
+
+    if (Shift) then
+      Keybd_Event(VK_SHIFT, $2A, KEYEVENTF_KEYUP, 0);
   end;
+end;
+  
   procedure TWindow.HoldKey(key: integer);
   begin
     keyinput.Down(key);
