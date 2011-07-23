@@ -3012,6 +3012,7 @@ object SimbaForm: TSimbaForm
       Caption = '&Extensions'
       OnExecute = ActionExtensionsExecute
       OnUpdate = ActionExtensionsUpdate
+      Visible = False
     end
     object ActionPascalScript: TAction
       Caption = 'PascalScript'

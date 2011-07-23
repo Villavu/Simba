@@ -11,15 +11,15 @@ the open-mindedness of the Simba developers.
 Free
 ~~~~
 
-Simba is, and always will be free. 
+Simba is, and always will be free.
 It is free as in Free Beer **and** Freedom.
 
-Simba is 100% free to use. In fact, we welcome you to share it with the 
+Simba is 100% free to use. In fact, we welcome you to share it with the
 rest of the world.
 
-The source code to the program is freely available, under the GPL (v3) license. 
+The source code to the program is freely available, under the GPL (v3) license.
 
-.. note:: 
+.. note::
       The source code allows everyone to see how the program actually
       works. Most developers choose not to share their source code and therefore
       decide to withhold knowledge. The Simba developers highly disagree with
@@ -39,19 +39,19 @@ This way one can easily extend Simba. See :ref:`writing-simba-extensions`
 Reliable
 ~~~~~~~~
 
-Simba is actively maintained by a team of knowledgeable programmers. 
+Simba is actively maintained by a team of knowledgeable programmers.
 
-We as a team do our best to make Simba into a quality product. 
+We as a team do our best to make Simba into a quality product.
 However this does not guarantee a bug free program.
 (Bug free programs don't exist)
 
 Should you encounter a bug, please consider sending a bug report so we can
-resolve the issue: :ref:`bugreport`.
+try to resolve the issue: :ref:`bugreport`.
 
 Cross Platform
 ~~~~~~~~~~~~~~
 
-Simba has been written with freedom in mind and believes Simba 
+Simba has been written with freedom in mind and believes Simba
 should not be limited to one platform, as that limits its users
 to one platform as well.
 
@@ -59,7 +59,7 @@ Currently the supported platforms are Windows and Linux with attempts
 being made to port it to OSX (it may run on OSX if you install X11).
 
 Even though we try hard to make Simba bug-free on all platforms,
-some issues remain. The biggest issue is the interpreter that 
+some issues remain. The biggest issue is the interpreter that
 executes your program. It is an external component and does not
 play too well on Linux. Hopefully this will be improved upon soon.
 
@@ -94,5 +94,4 @@ Well Documented
 ~~~~~~~~~~~~~~~
 
 Simba is well documented. (You're looking the documentation right now...)
-There is still a lot left to document but overall the documentation is pretty
-good.
+There is still a lot left to document though.

@@ -51,8 +51,9 @@ uses
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil, mufasabase,
-  about, framefunctionlist, ocr, updateform, Simbasettings, psextension, virtualextension,
-  extensionmanager, settingssandbox,
+  about, framefunctionlist, ocr, updateform, Simbasettings, 
+  {$IFDEF USE_EXTENSIONS}psextension, virtualextension, extensionmanager,{$ENDIF}
+  settingssandbox,
 
   v_ideCodeParser, v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
@@ -61,7 +62,7 @@ uses
   settings, updater;
 
 const
-  SimbaVersion = 830;
+  SimbaVersion = 970;
 
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
@@ -414,6 +415,7 @@ type
     OpenFileData : TOpenFileData;
     WriteFileData : TWriteFileData;
     ScriptStartData : TScriptStartData;
+
     procedure UpdateInterpreter;
     procedure HandleConnectionData;
     procedure HandleOpenFileData;
@@ -422,7 +424,7 @@ type
     function GetInterpreter: Integer;
     function GetDefScriptPath: string;
     function GetScriptPath : string;
-    function GetExtPath: string;
+    {$IFDEF USE_EXTENSIONS}function GetExtPath: string;{$ENDIF}
     function GetFontPath: String;
     function GetHighlighter: TSynCustomHighlighter;
     function GetIncludePath: String;
@@ -432,7 +434,7 @@ type
     function GetShowCodeCompletionAuto: Boolean;
     function GetSimbaNews: String;
     procedure SetDefScriptPath(const AValue: string);
-    procedure SetExtPath(const AValue: string);
+    {$IFDEF USE_EXTENSIONS}procedure SetExtPath(const AValue: string);{$ENDIF}
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
     procedure SetInterpreter(const AValue: Integer);
@@ -505,7 +507,7 @@ type
     property IncludePath : String read GetIncludePath write SetIncludePath;
     property FontPath : String read GetFontPath write SetFontPath;
     property PluginPath : string read GetPluginPath write SetPluginPath;
-    property ExtPath : string read GetExtPath write SetExtPath;
+    {$IFDEF USE_EXTENSIONS}property ExtPath : string read GetExtPath write SetExtPath;{$ENDIF}
     property ScriptDir : string read GetScriptPath write SetScriptPath;
     property DefScriptPath : string read GetDefScriptPath write SetDefScriptPath;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
@@ -549,7 +551,7 @@ uses
    InterfaceBase,
    bitmapconv,
    bitmaps,
-   extensionmanagergui,
+   {$IFDEF USE_EXTENSIONS}extensionmanagergui,{$ENDIF}
    colourhistory,
    math
 
@@ -750,6 +752,7 @@ begin
 end;
 
 procedure TSimbaForm.HandleConnectionData;
+{$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
 begin
@@ -764,6 +767,9 @@ begin
     on e : Exception do
       mDebugLn('ERROR in HandleConnectiondata: ' + e.message);
   end;
+{$ELSE}
+begin
+{$ENDIF}
 end;
 
 function TSimbaForm.GetInterpreter: Integer;
@@ -787,6 +793,7 @@ begin
 end;
 
 procedure TSimbaForm.HandleOpenFileData;
+{$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
 begin
@@ -801,9 +808,13 @@ begin
     on e : Exception do
       mDebugLn('ERROR in HandleOpenFileData: ' + e.message);
   end;
+{$ELSE}
+begin
+{$ENDIF}
 end;
 
 procedure TSimbaForm.HandleWriteFileData;
+{$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
 begin
@@ -818,9 +829,13 @@ begin
     on e : Exception do
       mDebugLn('ERROR in HandleWriteFileData: ' + e.message);
   end;
+{$ELSE}
+begin
+{$ENDIF}
 end;
 
 procedure TSimbaForm.HandleScriptStartData;
+{$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
 begin
@@ -835,6 +850,9 @@ begin
     on e : Exception do
       mDebugLn('ERROR in HandleScriptStartData: ' + e.message);
   end;
+{$ELSE}
+begin
+{$ENDIF}
 end;
 
 procedure TSimbaForm.ProcessDebugStream(Sender: TObject);
@@ -1367,7 +1385,7 @@ begin
   CreateSetting('Settings/CodeHints/ShowAutomatically','True');
   CreateSetting('Settings/CodeCompletion/ShowAutomatically','True');
   CreateSetting('Settings/SourceEditor/LazColors','True');
-  CreateSetting('Settings/Extensions/FileExtension','sex');
+  {$IFDEF USE_EXTENSIONS}CreateSetting('Settings/Extensions/FileExtension','sex');{$ENDIF}
 
   CreateSetting('Settings/Updater/RemoteLink',SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
   CreateSetting('Settings/Updater/RemoteVersionLink',SimbaURL + 'Version');
@@ -1378,8 +1396,10 @@ begin
 
   {Creates the paths and returns the path}
   PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
+  {$IFDEF USE_EXTENSIONS}
   extensionsPath := CreateSetting('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
   CreateSetting('Extensions/ExtensionCount','0');
+  {$ENDIF}
   CreateSetting('LastConfig/MainForm/Position','');
   CreateSetting('LastConfig/MainForm/State','Normal');
   {$ifdef MSWindows}
@@ -1393,10 +1413,12 @@ begin
     CreateDir(FontPath);
   if not DirectoryExists(PluginsPath) then
     CreateDir(PluginsPath);
+  {$IFDEF USE_EXTENSIONS}
   if not DirectoryExists(extensionsPath) then
     CreateDir(extensionsPath);
   if not DirectoryExists(ExtPath) then
     CreateDir(ExtPath);
+  {$ENDIF}
   if not DirectoryExists(ScriptDir) then
     CreateDir(ScriptDir);
   SettingsForm.SettingsTreeView.Items.GetFirstNode.Expand(false);
@@ -1497,19 +1519,21 @@ begin
     else
       SetSetting('LastConfig/Console/Visible','False');
     {$endif}
+    {$IFDEF USE_EXTENSIONS}
     SetSetting('Extensions/ExtensionCount',inttostr(ExtManager.Extensions.Count));
     for i := 0 to ExtManager.Extensions.Count-1 do
     begin;
-
       path :='Extensions/Extension' + inttostr(I);
       SetSetting(Path + '/Path',TVirtualSimbaExtension(ExtManager.Extensions[i]).Filename);
       SetSetting(Path + '/Enabled',BoolToStr(TVirtualSimbaExtension(ExtManager.Extensions[i]).Enabled,True));
     end;
+    {$ENDIF}
     SaveToXML(SimbaSettingsFile);
   end;
 end;
 
 procedure TSimbaForm.LoadExtensions;
+{$IFDEF USE_EXTENSIONS}
 var
   extCount : integer;
   function LoadExtension(Number : integer) : boolean;
@@ -1557,6 +1581,9 @@ begin
   str := LoadSettingDef('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
   str2 := LoadSettingDef('Settings/Extensions/FileExtension','sex');
   ExtManager.LoadPSExtensionsDir(str,str2);
+{$ELSE}
+begin
+{$ENDIF}
 end;
 
 procedure TSimbaForm.AddRecentFile(const filename: string);
@@ -1656,26 +1683,30 @@ begin
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
   loadFontsOnScriptStart := (lowercase(LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True')) = 'true');
-  // Copy our current fonts
-  if not assigned(Self.OCR_Fonts) and loadFontsOnScriptStart and DirectoryExists(fontPath) then
+
+  if (loadFontsOnScriptStart) then
   begin
-    Self.OCR_Fonts := TMOCR.Create(Thread.Client);
-    OCR_Fonts.InitTOCR(fontPath);
-    Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts
-  end else
-    if assigned(Self.OCR_Fonts) and loadFontsOnScriptStart then
+    if ((not (Assigned(OCR_Fonts))) and DirectoryExists(fontPath)) then
+    begin
+      OCR_Fonts := TMOCR.Create(Thread.Client);
+      OCR_Fonts.InitTOCR(fontPath);
+    end;
+
+    if (Assigned(OCR_Fonts)) then
       Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts;
+  end;
 
   {
     We pass the entire settings to the script; it will then create a Sandbox
     for settings that are exported to the script. This way we can access all
-    the settings from the PSTHread, and scripts can only access limited
+    the settings from the PSThread, and scripts can only access limited
     resources. Hopefully this won't cause any form / thread related problems?
     (Settings doesn't use the Settings form, iirc)
     Well, it was like this previously as well, we just passed a sandbox to it
     directly, but the sandbox still called Settings.
   }
   Thread.SetSettings(SettingsForm.Settings, SimbaSettingsFile);
+
   Thread.OpenConnectionEvent:=@ThreadOpenConnectionEvent;
   Thread.WriteFileEvent:=@ThreadWriteFileEvent;
   Thread.OpenFileEvent:=@ThreadOpenFileEvent;
@@ -1841,15 +1872,17 @@ end;
 
 procedure TSimbaForm.ActionExtensionsExecute(Sender: TObject);
 begin
+  {$IFDEF USE_EXTENSIONS}
   if not ExtensionsForm.Showing then
     ExtensionsForm.Show
   else
     ExtensionsForm.Hide;
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.ActionExtensionsUpdate(Sender: TObject);
 begin
-  TAction(Sender).Checked := ExtensionsForm.Showing;
+  {$IFDEF USE_EXTENSIONS}TAction(Sender).Checked := ExtensionsForm.Showing;{$ENDIF}
 end;
 
 procedure TSimbaForm.ActionFindNextExecute(Sender: TObject);
@@ -2324,7 +2357,7 @@ begin
     end;
   FunctionListTimer.Enabled:= false;
   CloseAction := caFree;
-  FreeAndNil(ExtManager);
+  {$IFDEF USE_EXTENSIONS}FreeAndNil(ExtManager);{$ENDIF}
 end;
 
 procedure CCFillCore;
@@ -2426,6 +2459,7 @@ begin
   UpdateTimer.OnTimer:= @UpdateTimerCheck;
 
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
+  {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
 
   if FileExistsUTF8(SimbaSettingsFile) then
   begin
@@ -2480,12 +2514,13 @@ begin
   FillThread.Resume;
 
   //Load the extensions
-  LoadExtensions;
+  {$IFDEF USE_EXTENSIONS}LoadExtensions;{$ENDIF}
 
   UpdateTitle;
 
   {$IFDEF USE_RUTIS}MenuItemRUTIS.Enabled := True;{$ENDIF}
   {$IFDEF USE_LAPE}MenuItemLape.Enabled := True;{$ENDIF}
+  {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
   self.EndFormUpdate;
 
   if SettingsForm.Oops then
@@ -2503,8 +2538,10 @@ begin
   for i := 0 to high(RecentFileItems) do
     RecentFileItems[i].Free;
 
-  if ExtManager <> nil then
-    FreeAndNil(extmanager);
+  {$IFDEF USE_EXTENSIONS}
+   if ExtManager <> nil then
+     FreeAndNil(extmanager);
+  {$ENDIF}
 
   Tabs.Free;
 
@@ -2515,6 +2552,10 @@ begin
 
   { Free the plugins }
   PluginsGlob.Free;
+
+  { Free Fonts }
+  if (Assigned(OCR_Fonts)) then
+    OCR_Fonts.Free;
 
   SetLength(DebugStream, 0);
   DebugCriticalSection.Free;
@@ -2810,10 +2851,12 @@ begin
   SetSetting('Settings/SourceEditor/DefScriptPath',AValue,True);
 end;
 
+{$IFDEF USE_EXTENSIONS}
 procedure TSimbaForm.SetExtPath(const AValue: string);
 begin
   SetSetting('Settings/Extensions/Path',AValue,true);
 end;
+{$ENDIF}
 
 procedure TSimbaForm.NewsTimerTimer(Sender: TObject);
 var
@@ -2843,6 +2886,11 @@ var
    c, x, y: Integer;
    cobj: TColourPickerObject;
 begin
+  if Picker.Picking then
+  begin
+    formWriteln('Error: Already picking a colour');
+    exit;
+  end;
   Picker.Pick(c, x, y);
   cobj := TColourPickerObject.Create(c, Classes.Point(x,y), '');
 
@@ -2943,6 +2991,7 @@ end;
 
 procedure TSimbaForm.PickerPick(Sender: TObject; const Colour, colourx,
   coloury: integer);
+{$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
 begin
@@ -2951,6 +3000,9 @@ begin
   Args[1] := Colourx;
   Args[2] := Coloury;
   ExtManager.HandleHook(EventHooks[SExt_OnColourPick].HookName,Args);
+{$ELSE}
+begin
+{$ENDIF}
 end;
 
 procedure TSimbaForm.PopupItemFindClick(Sender: TObject);
@@ -2984,10 +3036,12 @@ begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+'Fonts' + DS)));
 end;
 
+{$IFDEF USE_EXTENSIONS}
 function TSimbaForm.GetExtPath: string;
 begin
-  result :=IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Extensions/Path', ExpandFileName(MainDir+DS+'Extensions' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Extensions/Path', ExpandFileName(MainDir+DS+'Extensions' + DS)));
 end;
+{$ENDIF}
 
 function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
 begin
@@ -3139,7 +3193,6 @@ begin
           if Assigned(self.OCR_Fonts) then
             self.OCR_Fonts.Free;
           FormWriteln('Freeing the current fonts. Creating new ones now');
-          // XXX: Can this cause problems when running scripts?
           Self.OCR_Fonts := TMOCR.Create(nil);
           OCR_Fonts.InitTOCR(fontPath);
         end;
@@ -3309,7 +3362,8 @@ begin
     else
       InitialDir := ScriptDir;
     Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
-    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +LoadSettingDef('Settings/Extensions/FileExtension','sex')+
+    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt' +
+    {$IFDEF USE_EXTENSIONS}';*.' + LoadSettingDef('Settings/Extensions/FileExtension', 'sex') + {$ENDIF}
              '|Any files|*.*';
     if Execute then
     begin
@@ -3416,8 +3470,8 @@ begin
       InitialDir := ExtractFileDir(CurrScript.ScriptFile)
     else
       InitialDir := ScriptDir;
-    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.' +
-              LoadSettingDef('Settings/Extensions/FileExtension','sex')+
+    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt' +
+    {$IFDEF USE_EXTENSIONS}';*.' + LoadSettingDef('Settings/Extensions/FileExtension','sex') + {$ENDIF}
               '|Any files|*.*';
     if Execute then
     begin;

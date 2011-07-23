@@ -265,7 +265,7 @@ begin
   begin
     {$I ../../Units/MMLAddon/PSInc/pscompile.inc}
     AddTypes('TStringArray','Array of String');
-    AddConstantN('ExtPath','string').SetString(ExtPath);
+    AddConstantN('ExtPath', 'string').SetString({$IFDEF USE_EXTENSIONS}ExtPath{$ELSE}''{$ENDIF});
     for i := 0 to high(VirtualKeys) do
       AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
   end;
@@ -329,6 +329,7 @@ begin
   FreeScript;
   if Assigned(PSInstance) then
     FreeAndNil(PSInstance);
+  Script.Free;
   inherited;
 end;
 
