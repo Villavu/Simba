@@ -368,36 +368,29 @@ end;
 
 procedure TWindow.SendString(str: string);
 var
-  I, L: Integer;
-  K: Byte;
-  HoldShift: Boolean;
+  I, L: integer;
+  C: Byte;
+  ScanCode, VK: Word;
+  Shift: boolean;
 begin
-  HoldShift := False;
   L := Length(str);
   for I := 1 to L do
   begin
-    if (((str[I] >= 'A') and (str[I] <= 'Z')) or 
-        ((str[I] >= '!') and (str[I] <= '&')) or
-        ((str[I] >= '(') and (str[I] <= '+')) or
-        (str[I] = ':') or
-        ((str[I] >= '<') and (str[I] <= '@')) or
-        ((str[I] >= '^') and (str[I] <= '_')) or
-        ((str[I] >= '{') and (str[I] <= '~'))) then
-    begin
-      HoldKey(VK_SHIFT);
-      HoldShift := True;
-    end;
-    
-    K := GetKeyCode(str[I]);
-    HoldKey(K);
-    Sleep(20);
-    ReleaseKey(K);
-    
-    if (HoldShift) then
-    begin
-      HoldShift := False;
-      ReleaseKey(VK_SHIFT);
-    end;
+    VK := VkKeyScan(str[I]);
+    Shift := (Hi(VK) > 0);
+    C := LoByte(VK);
+    ScanCode := MapVirtualKey(C, 0);
+
+    WriteLn(ScanCode);
+
+    if (Shift) then
+      Keybd_Event(VK_SHIFT, $2A, 0, 0);
+
+    Keybd_Event(C, ScanCode, 0, 0);
+    Keybd_Event(C, ScanCode, KEYEVENTF_KEYUP, 0);
+
+    if (Shift) then
+      Keybd_Event(VK_SHIFT, $2A, KEYEVENTF_KEYUP, 0);
   end;
 end;
   
