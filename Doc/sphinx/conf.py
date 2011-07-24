@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Simba documentation build configuration file, created by
-# sphinx-quickstart on Wed Jun  9 23:55:23 2010.
+# sphinx-quickstart on Sun Jul 24 18:24:27 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -16,16 +16,19 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.append(os.path.abspath('.'))
-
+#sys.path.insert(0, os.path.abspath('.'))
 sys.path.append(os.path.abspath('../../Projects/libmml/pymml/mml'))
 sys.path.append(os.path.abspath('../../Projects/libmml/pymml'))
 
+
 # -- General configuration -----------------------------------------------------
+
+# If your documentation needs a minimal Sphinx version, state it here.
+#needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -34,14 +37,14 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The encoding of source files.
-#source_encoding = 'utf-8'
+#source_encoding = 'utf-8-sig'
 
 # The master toctree document.
 master_doc = 'index'
 
 # General information about the project.
 project = u'Simba'
-copyright = u'2010, Merlijn Wajer, Raymond van Venetie'
+copyright = u'2011, Merlijn Wajer, Raymond van Venetie'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -62,12 +65,9 @@ release = '0.97'
 # Else, today_fmt is used as the format for a strftime call.
 #today_fmt = '%B %d, %Y'
 
-# List of documents that shouldn't be included in the build.
-#unused_docs = []
-
-# List of directories, relative to source directory, that shouldn't be searched
-# for source files.
-exclude_trees = ['_build']
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -92,8 +92,8 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ---------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  Major themes that come with
-# Sphinx are currently 'default' and 'sphinxdoc'.
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
 html_theme = 'nature'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -141,7 +141,7 @@ html_static_path = ['_static']
 #html_additional_pages = {}
 
 # If false, no module index is generated.
-#html_use_modindex = True
+#html_domain_indices = True
 
 # If false, no index is generated.
 #html_use_index = True
@@ -152,13 +152,19 @@ html_static_path = ['_static']
 # If true, links to the reST sources are added to the pages.
 #html_show_sourcelink = True
 
+# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+#html_show_sphinx = True
+
+# If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
+#html_show_copyright = True
+
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
 # base URL from which the finished HTML is served.
 #html_use_opensearch = ''
 
-# If nonempty, this is the file name suffix for HTML files (e.g. ".xhtml").
-#html_file_suffix = ''
+# This is the file name suffix for HTML files (e.g. ".xhtml").
+#html_file_suffix = None
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Simbadoc'
@@ -176,7 +182,7 @@ htmlhelp_basename = 'Simbadoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'Simba.tex', u'Simba Documentation',
-   u'Merlijn Wajer, Raymond van Venetië, Nielsie95', 'manual'),
+   u'Merlijn Wajer, Raymond van Venetie', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -187,6 +193,12 @@ latex_documents = [
 # not chapters.
 #latex_use_parts = False
 
+# If true, show page references after internal links.
+#latex_show_pagerefs = False
+
+# If true, show URL addresses after external links.
+#latex_show_urls = False
+
 # Additional stuff for the LaTeX preamble.
 #latex_preamble = ''
 
@@ -194,4 +206,54 @@ latex_documents = [
 #latex_appendices = []
 
 # If false, no module index is generated.
-#latex_use_modindex = True
+#latex_domain_indices = True
+
+
+# -- Options for manual page output --------------------------------------------
+
+# One entry per manual page. List of tuples
+# (source start file, name, description, authors, manual section).
+man_pages = [
+    ('index', 'simba', u'Simba Documentation',
+     [u'Merlijn Wajer, Raymond van Venetie'], 1)
+]
+
+
+# -- Options for Epub output ---------------------------------------------------
+
+# Bibliographic Dublin Core info.
+epub_title = u'Simba'
+epub_author = u'Merlijn Wajer, Raymond van Venetie'
+epub_publisher = u'Merlijn Wajer, Raymond van Venetie'
+epub_copyright = u'2011, Merlijn Wajer, Raymond van Venetie'
+
+# The language of the text. It defaults to the language option
+# or en if the language is not set.
+#epub_language = ''
+
+# The scheme of the identifier. Typical schemes are ISBN or URL.
+#epub_scheme = ''
+
+# The unique identifier of the text. This can be a ISBN number
+# or the project homepage.
+#epub_identifier = ''
+
+# A unique identification for the text.
+#epub_uid = ''
+
+# HTML files that should be inserted before the pages created by sphinx.
+# The format is a list of tuples containing the path and title.
+#epub_pre_files = []
+
+# HTML files shat should be inserted after the pages created by sphinx.
+# The format is a list of tuples containing the path and title.
+#epub_post_files = []
+
+# A list of files that should not be packed into the epub file.
+#epub_exclude_files = []
+
+# The depth of the table of contents in toc.ncx.
+#epub_tocdepth = 3
+
+# Allow duplicate toc entries.
+#epub_tocdup = True
