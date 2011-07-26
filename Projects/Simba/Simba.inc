@@ -26,6 +26,8 @@
                             // See Units/Linux/keybinder.pas
 {$ENDIF}
 
+//{$DEFINE SIMBA_VERBOSE} // For more verbosity.
+
 //{$DEFINE USE_RUTIS}
 
 //{$DEFINE USE_CPASCAL} // TODO
