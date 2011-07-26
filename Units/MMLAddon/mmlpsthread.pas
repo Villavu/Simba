@@ -746,11 +746,15 @@ begin
   if (path <> '') then
     if Includes.Find(path,i) then
     begin
-      psWriteln('Include_Once file already included');
-      Result := False;
+      {$IFDEF SIMBA_VERBOSE}
+      psWriteln('Include_Once file already included:' + Path);
+      {$ENDIF}
+      Result := True;
+      Exit;
     end;
+
   Includes.Add(path);
-  Result := True;
+  Result := False;
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
