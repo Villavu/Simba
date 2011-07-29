@@ -51,7 +51,7 @@ uses
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil, mufasabase,
-  about, framefunctionlist, ocr, updateform, Simbasettings, 
+  about, framefunctionlist, ocr, updateform, Simbasettings, SimbaSettingsSimple,
   {$IFDEF USE_EXTENSIONS}psextension, virtualextension, extensionmanager,{$ENDIF}
   settingssandbox,
 
@@ -146,6 +146,7 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    MenuItemSettingsSimpleButton: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
     MenuItemGoto: TMenuItem;
     MenuItemDivider50: TMenuItem;
@@ -347,6 +348,7 @@ type
     procedure MenuItemOpenScriptsFolderClick(Sender: TObject);
     procedure MenuItemReportBugClick(Sender: TObject);
     procedure MenuItemSettingsButtonClick(Sender: TObject);
+    procedure MenuItemSettingsSimpleButtonClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
@@ -2448,10 +2450,13 @@ begin
   if FileExistsUTF8(SimbaSettingsFile) then
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
+    Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
+
     Self.LoadFormSettings;
   end else
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
+    Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
 
     Self.CreateDefaultEnvironment;
     FillThread.StartWait:= 250;
@@ -2776,6 +2781,11 @@ end;
 procedure TSimbaForm.MenuItemSettingsButtonClick(Sender: TObject);
 begin
   SettingsForm.ShowModal;
+end;
+
+procedure TSimbaForm.MenuItemSettingsSimpleButtonClick(Sender: TObject);
+begin
+ SettingsSimpleForm.ShowModal;
 end;
 
 procedure TSimbaForm.MenuItemShowClick(Sender: TObject);
