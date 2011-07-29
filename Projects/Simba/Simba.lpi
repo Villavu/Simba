@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="48">
+    <Units Count="50">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -304,6 +304,15 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="os_linux"/>
       </Unit47>
+      <Unit48>
+        <Filename Value="../../Units/MMLCore/tpa.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="tpa"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit49>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
