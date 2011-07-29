@@ -1,0 +1,8 @@
+object SettingsSimpleForm: TSettingsSimpleForm
+  Left = 1459
+  Height = 240
+  Top = 127
+  Width = 320
+  Caption = 'SettingsSimpleForm'
+  LCLVersion = '0.9.30.1'
+end

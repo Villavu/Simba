@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="48">
+    <Units Count="49">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -304,6 +304,13 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="os_linux"/>
       </Unit47>
+      <Unit48>
+        <Filename Value="simbasettingssimple.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SettingsSimpleForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="SimbaSettingsSimple"/>
+      </Unit48>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
