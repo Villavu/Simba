@@ -67,6 +67,7 @@ function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
+procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
 function RemoveDistTPointArray(x, y, dist: Integer;const ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;
 function GetATPABounds(const ATPA: T2DPointArray): TBox;
 function GetTPABounds(const TPA: TPointArray): TBox;
@@ -1166,6 +1167,55 @@ begin
   end;
   SetLength(P, Ind);
   Points:= P;
+end;
+
+{/\
+  Removes points in the TPA that are within maxDist of each other.
+/\}
+procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
+var
+  c, i, j, l, h, maxDistSq: integer;
+  newTPA: TPointArray;
+  inBadElements: TBooleanArray;
+begin
+  h := high(TPA);
+  l := (h + 1);
+  maxDistSq := (maxDist * maxDist);
+
+  setLength(inBadElements, l);
+  setLength(newTPA, l);
+
+  for i := 0 to h do
+    inBadElements[i] := false;
+
+  for i := 0 to (h - 1) do
+  begin
+    if (inBadElements[i]) then
+      continue;
+
+    for j := (i + 1) to h do
+    begin
+      if (inBadElements[j]) then
+        continue;
+
+     // simplified -> a^2 + b^2 <= c^2
+     if (((TPA[i].x - TPA[j].x) * (TPA[i].x - TPA[j].x)) + ((TPA[i].y - TPA[j].y) * (TPA[i].y - TPA[j].y)) <= maxDistSq) then
+       inBadElements[j] := true;
+    end;
+  end;
+
+  c := 0;
+
+  // set the new TPA
+  for i := 0 to h do
+    if (not inBadElements[i]) then
+    begin
+      newTPA[c] := TPA[i];
+      inc(c);
+    end;
+
+  setLength(newTPA, c);
+  TPA := newTPA;
 end;
 
 {/\
