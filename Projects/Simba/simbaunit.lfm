@@ -1,11 +1,11 @@
 object SimbaForm: TSimbaForm
-  Left = 531
+  Left = 527
   Height = 623
-  Top = 290
+  Top = 243
   Width = 660
   AllowDropFiles = True
   Caption = 'THA FUKING Simba'
-  ClientHeight = 603
+  ClientHeight = 598
   ClientWidth = 660
   KeyPreview = True
   Menu = MainMenu
@@ -15,7 +15,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '0.9.31'
+  LCLVersion = '0.9.30.1'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -207,8 +207,8 @@ object SimbaForm: TSimbaForm
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 23
-    Top = 580
+    Height = 21
+    Top = 577
     Width = 660
     Panels = <    
       item
@@ -230,7 +230,7 @@ object SimbaForm: TSimbaForm
   object PanelMemo: TPanel
     Left = 0
     Height = 154
-    Top = 426
+    Top = 423
     Width = 660
     Align = alBottom
     ClientHeight = 154
@@ -253,19 +253,19 @@ object SimbaForm: TSimbaForm
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 421
+    Top = 418
     Width = 660
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object ScriptPanel: TPanel
     Left = 0
-    Height = 397
+    Height = 394
     Top = 24
     Width = 660
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 397
+    ClientHeight = 394
     ClientWidth = 660
     DockSite = True
     TabOrder = 4
@@ -273,7 +273,7 @@ object SimbaForm: TSimbaForm
     OnDockOver = ScriptPanelDockOver
     object PageControl1: TPageControl
       Left = 155
-      Height = 362
+      Height = 359
       Top = 0
       Width = 505
       Align = alClient
@@ -292,7 +292,7 @@ object SimbaForm: TSimbaForm
     object SearchPanel: TPanel
       Left = 0
       Height = 35
-      Top = 362
+      Top = 359
       Width = 660
       Align = alBottom
       BevelOuter = bvSpace
@@ -387,7 +387,7 @@ object SimbaForm: TSimbaForm
       end
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 23
+        Height = 27
         Top = 6
         Width = 80
         EditLabel.AnchorSideLeft.Control = LabeledEditSearch
@@ -395,10 +395,10 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 71
-        EditLabel.Height = 16
-        EditLabel.Top = 9
-        EditLabel.Width = 30
+        EditLabel.Left = 67
+        EditLabel.Height = 18
+        EditLabel.Top = 10
+        EditLabel.Width = 34
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -411,9 +411,9 @@ object SimbaForm: TSimbaForm
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 19
+        Height = 22
         Top = 7
-        Width = 80
+        Width = 97
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -421,38 +421,38 @@ object SimbaForm: TSimbaForm
     end
     object SplitterFunctionList: TSplitter
       Left = 150
-      Height = 362
+      Height = 359
       Top = 0
       Width = 5
       OnCanResize = SplitterFunctionListCanResize
       Visible = False
     end
     inline frmFunctionList: TFunctionListFrame
-      Height = 362
+      Height = 359
       Width = 150
-      ClientHeight = 362
+      ClientHeight = 359
       ClientWidth = 150
       OnEndDock = nil
       TabOrder = 3
       inherited FunctionList: TTreeView
-        Height = 319
-        Top = 20
+        Height = 310
+        Top = 22
         Width = 150
-        DefaultItemHeight = 17
+        DefaultItemHeight = 19
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Height = 23
-        Top = 339
+        Height = 27
+        Top = 332
         Width = 150
         OnExit = editSearchListExit
         OnKeyDown = editSearchListKeyDown
         OnKeyPress = editSearchListKeyPress
       end
       inherited FunctionListLabel: TLabel
-        Height = 16
+        Height = 18
         Width = 146
       end
     end
@@ -1414,6 +1414,46 @@ object SimbaForm: TSimbaForm
           A502A5A29F4DA7A6A471A6A5A53C9E9D9D009E9D9D009F9F9F00
         }
         OnClick = MenuItemSettingsButtonClick
+      end
+      object MenuItemSettingsSimpleButton: TMenuItem
+        Caption = 'Settings (Simple)'
+        Bitmap.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          2000000000000004000064000000640000000000000000000000AEA9A800BAB3
+          B300B0A9A91F979494729B979756807D7D05ADA9A400B4B0AB00B3AFAA00B3AF
+          AA00B3AFAA00B4B0AB00B1ADA800928F8D008C8A880087858300ADA8A700ADA8
+          A700A6A1A044AFADADFFC0BFBFE99796957EA8A49F05B2AEAA00B1ADA800B1AD
+          A800B1ADA800B2AEA900AFABA600928F8D008C8A880087858300ABA6A4239898
+          97129C9895029E9B9AA2B5B5B5FFC6C6C6FFA9A8A67B9F9F9F00A1A0A000A1A0
+          A000A1A0A000A2A2A2009C9B9A008F8C8A008C8B890087858300A5A19FB5B3B3
+          B2D08D8B8A2B807D7C549A9999FEB9B9B9FFAEADADC59B9B9B009D9D9D009D9D
+          9D009E9E9E009A9A9A008F8D8C00908D8B008C8B8900878583009C9998C8D2D2
+          D1FFABAAA9F88B8989FBB7B6B6FFB7B7B7FFA7A6A6E88987852B8C8987008D8B
+          89008D8C8A00888684008B888700908E8C008C8B8900878583009F9D9D8BAEAE
+          AEFFBABABAFFBCBCBCFFBABBBBFFB6B7B7FFC8C9C9FFB9B7B6E1858280298B88
+          86008C8A8800888583008C898800908E8C008C8B8900878583009F9E9E0EA1A0
+          A1A1B0B0AFFAB3B2B2FFB9B9B9FFB5B6B6FFB7B7B8FFD9D9D9FFBAB7B6DE8582
+          80278C898700888583008C898800908E8C008C8B890087858300A19F9F009D9D
+          9D009B9A9A2F94929151979694ABB2B2B2FFABABACFFB7B7B7FFDCDDDCFFB9B7
+          B5DD86838127878482008C898800908E8C008C8B890087858300A19F9F009E9E
+          9E009B9A9A0092908F0082807E049C9A99A6BCBCBCFFB0B0B0FFB7B8B7FFE0E0
+          DFFFB9B7B6DD8481805D8B8987428D8B89008C8B890087858300A19F9F009E9E
+          9E009B9A9A00939190008684820085838204A19F9FA6C0C0C0FFAFAFAFFFB6B6
+          B6FFE0E0DFFFB9B8B8FFB7B6B6FFA2A1A0A88A88860986848200A19F9F009E9E
+          9E009B9A9A0093908F00858380008887850088868505A1A09FA8BCBDBCFFABAB
+          ABFFBCBCBCFFC8C7C7FFC7C6C7FFC9C8C8FF9C9B9A898886840FA19F9F009E9E
+          9E009B9A9900969493008F8E8C0091908F009493920091909006ABAAAAC3C2C2
+          C2FFC9C8C9FFC8C8C8FFBEBEBEFFCFCFCFFFB3B3B2E19B9B9A45A19F9F009E9E
+          9E009A9998009B9A99009D9D9D009D9D9C009D9C9C009B9B9B00A3A2A190C7C6
+          C6FFC4C4C4FFA6A0A1889D989953B2B1B0BBBEBEBDF49F9E9E509F9D9D009C9C
+          9C009B9B9B009A9A9A009A9A9A009A9A9A009A9A9A00999999009D9D9C61C2C2
+          C1FFC7C8C8FFA3A1A0958D8A89008D8B8A0E9C9B9B6EA09F9F28ABA9A800AAA9
+          A800ABA9A900ABA9A900ABA9A900ABA9A900ABA9A900ABA9A900A9A8A709AEAC
+          ACB2C4C4C4FFD6D7D6FF9B9A98828583820099999800A0A0A000C3BEBD00C3BE
+          BD00C3BEBD00C3BEBD00C3BEBD00C3BEBD00C3BEBD00C3BEBD00C5C0BF00A9A6
+          A502A5A29F4DA7A6A471A6A5A53C9E9D9D009E9D9D009F9F9F00
+        }
+        OnClick = MenuItemSettingsSimpleButtonClick
       end
       object MenuItemBitmapConv: TMenuItem
         Caption = '&Bitmap conversion'
