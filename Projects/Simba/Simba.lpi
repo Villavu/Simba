@@ -35,20 +35,16 @@
         <LaunchingApplication PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="3">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="LCLBase"/>
-        <MinVersion Major="1" Release="1" Valid="True"/>
-      </Item1>
-      <Item2>
         <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item2>
-      <Item3>
+      </Item1>
+      <Item2>
         <PackageName Value="LCL"/>
-      </Item3>
+      </Item2>
     </RequiredPackages>
-    <Units Count="48">
+    <Units Count="50">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -308,10 +304,19 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="os_linux"/>
       </Unit47>
+      <Unit48>
+        <Filename Value="../../Units/MMLCore/tpa.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="tpa"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit49>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="10"/>
+    <Version Value="9"/>
     <Target>
       <Filename Value="../../Simba"/>
     </Target>
