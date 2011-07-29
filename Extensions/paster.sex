@@ -87,7 +87,7 @@ begin
     HOST := HOSTDef;
   if (InputQuery(GetName + ' ' + GetVersion + ' Extension', 'Which ID would you like to grab?', Data)) then
   begin
-    if IntToStr(StrToInt(Data)) = Data then
+    if IntToStr(StrToIntDef(Data, -1)) = Data then
       Data := '{"paste_id": ' + Data + '}'
     else
       Data := '{"paste_id": "' + Data + '"}';
