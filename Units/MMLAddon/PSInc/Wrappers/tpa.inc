@@ -143,6 +143,21 @@ begin
   FilterPointsLine(points,radial,radius,mx,my);
 end;
 
+procedure ps_FilterTPACustom(TPA: TPointArray; compare: function(a, b: integer): boolean);
+begin
+  FilterTPACustom(TPA, @compare);
+end;
+
+procedure ps_FilterTPADistEx(var TPA: TPointArray; maxL, maxW: integer);
+begin
+  FilterTPADistEx(TPA, maxL, maxW);
+end;
+
+procedure ps_FilterTPADist(var TPA: TPointArray; maxDist: integer);
+begin
+  FilterTPADist(TPA, maxDist);
+end;
+
 function ps_GetATPABounds(const ATPA: T2DPointArray): TBox;extdecl;
 begin
   result := GetATPABounds(ATPA);
