@@ -67,8 +67,6 @@ function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
-procedure FilterTPACustom(var TPA: TPointArray; compare: function(a, b: integer): boolean);
-procedure FilterTPADistEx(var TPA: TPointArray; maxL, maxW: integer);
 procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
 function RemoveDistTPointArray(x, y, dist: Integer;const ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;
 function GetATPABounds(const ATPA: T2DPointArray): TBox;
@@ -1172,36 +1170,37 @@ begin
 end;
 
 {/\
-  Removes points in the TPA using the funciton 'compare'.  If 'compare' returns
-  true, point b is removed from the TPA.
+  Removes points in the TPA that are within maxDist of each other.
 /\}
-procedure FilterTPACustom(TPA: TPointArray; compare: function(a, b: integer): boolean);
+procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
 var
-  c, i, j, l, h: integer;
+  c, i, j, l, h, maxDistSq: integer;
   newTPA: TPointArray;
   inBadElements: TBooleanArray;
 begin
   h := high(TPA);
-  l := (h + 1); // i.e. length(TPA);
+  l := (h + 1);
+  maxDistSq := (maxDist * maxDist);
 
   setLength(inBadElements, l);
   setLength(newTPA, l);
 
   for i := 0 to h do
-    inBadElements[i] := false; // just in case..
+    inBadElements[i] := false;
 
   for i := 0 to (h - 1) do
   begin
-    if (inBadElements[i]) then // increases speed significantly
+    if (inBadElements[i]) then
       continue;
 
     for j := (i + 1) to h do
     begin
-      if (inBadElements[j]) then // increases speed significantly
+      if (inBadElements[j]) then
         continue;
 
-      if (compare(TPA[i], TPA[j])) then
-        inBadElements[j] := true;
+     // simplified -> a^2 + b^2 <= c^2
+     if (((TPA[i].x - TPA[j].x) * (TPA[i].x - TPA[j].x)) + ((TPA[i].y - TPA[j].y) * (TPA[i].y - TPA[j].y)) <= maxDistSq) then
+       inBadElements[j] := true;
     end;
   end;
 
@@ -1217,30 +1216,6 @@ begin
 
   setLength(newTPA, c);
   TPA := newTPA;
-end;
-
-{/\
-  Removes points in the TPA that are within maxL or maxW of each other.
-/\}
-procedure FilterTPADistEx(var TPA: TPointArray; maxL, maxW: integer);
-function lwComp(a,b: TPoint): Boolean;
-begin
-  result := (abs(a.x-b.x) <= maxW) or (abs(a.y-b.y) <= maxL); // lambda would be nice..
-end;
-begin
-  FilterTPACustom(TPA, @lwComp);
-end;
-
-{/\
-  Removes points in the TPA that are within 'maxDist' of each other.
-/\}
-procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
-function distComp(a, b: TPoint): boolean;
-begin
-  result := (((a.x-b.x)*(a.x-b.x)) + ((a.y-b.y)*(a.y-b.y)) <= (maxDist*maxDist));
-end;
-begin
-  FilterTPACustom(TPA, @distComp);
 end;
 
 {/\
