@@ -107,7 +107,6 @@ uses
   tpa,              //TPABounds
   dtmutil;
 
-
 type
   TCTS0Info = record
       B, G, R, A: byte;
@@ -466,21 +465,24 @@ begin
 end;
 
 
-function Create_CTSInfo2DArray(cts, xs, ys, xe, ye: integer; bmp: TMufasaBitmap;
+function Create_CTSInfo2DArray(cts, w, h: integer; bmp: TMufasaBitmap;
     Tolerance: Integer; hueMod, satMod: Extended): TCTSInfo2DArray;
 var
-   x, y, w: integer;
+   x, y: integer;
+   data: PRGB32;
 begin
-  setlength(result,ye-ys+1,xe-xs+1);
-  w := bmp.width;
-  for y := ys to ye do
-    for x := xs to xe do
+  setlength(result,h+1,w+1);
+
+  data := bmp.fdata;
+
+  for y := 0 to h do
+    for x := 0 to w do
     begin
       { This is kinda ugly. We call RGBToColor() here only to call ColorToRGB()
         later again in Create_CTSInfo) }
-      result[y-ys][x-xs] := Create_CTSInfo(cts,
-          rgbtocolor(bmp.fdata[y*w+x].R, bmp.fdata[y*w+x].G,
-                     bmp.fdata[y*w+x].B),
+      result[y][x] := Create_CTSInfo(cts,
+          rgbtocolor(data[y*w+x].R, data[y*w+x].G,
+                     data[y*w+x].B),
           Tolerance, hueMod, satMod);
     end;
 end;
@@ -1670,7 +1672,7 @@ begin
   dX := dX - bmpW;
   dY := dY - bmpH;
 
-  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, xs, ys, xe, ye, bitmap,
+  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, bitmap,
       Tolerance, self.hueMod, self.satMod);
   compare := Get_CTSCompare(Self.CTS);
 
