@@ -20,15 +20,21 @@
 
       Linux OS specific implementation for Mufasa Macro Library
 }
-{$mode objfpc}{$H+} 
+{$mode objfpc}{$H+}
 unit os_linux;
+
+{
+  TODO's:
+  - Allow selecting a different X display
+  - Fix keyboard layout / SendString
+}
 
 interface
 
   uses
     Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest,
     syncobjs, mufasabase;
-  
+
   type
 
     TNativeWindow = x.TWindow;
@@ -43,7 +49,7 @@ interface
 
     TWindow = class(TWindow_Abstract)
       public
-        constructor Create(display: PDisplay; screennum: integer; window: x.TWindow); 
+        constructor Create(display: PDisplay; screennum: integer; window: x.TWindow);
         destructor Destroy; override;
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
@@ -89,7 +95,7 @@ interface
         { X Error Handler }
         oldXHandler: TXErrorHandler;
     end;
-    
+
     TIOManager = class(TIOManager_Abstract)
       public
         constructor Create;
@@ -109,7 +115,7 @@ interface
     end;
 
   function MufasaXErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint; cdecl;
-    
+
 implementation
 
   uses GraphType, interfacebase, lcltype;
@@ -126,7 +132,7 @@ implementation
  {
     This is extremely hacky, but also very useful.
     We have to install a X error handler, because otherwise X
-    will terminate out entire app on error.
+    will terminate our entire app on error.
 
     Since we want the right thread to recieve the right error, we have to
     fiddle a bit with threadvars, mutexes / semaphores.
@@ -207,8 +213,8 @@ implementation
   end;
 
   { See if the semaphores / CS are initialised }
-  constructor TWindow.Create(display: PDisplay; screennum: integer; window: x.TWindow); 
-  begin 
+  constructor TWindow.Create(display: PDisplay; screennum: integer; window: x.TWindow);
+  begin
     inherited Create;
     self.display:= display;
     self.screennum:= screennum;
@@ -227,8 +233,8 @@ implementation
     finally
       ErrorCS.Leave;
     end;
-  end; 
-  
+  end;
+
   destructor TWindow.Destroy;
     var
       erh: TXErrorHandler;
@@ -304,8 +310,8 @@ implementation
     if ReceivedError then
       raise Exception.Create('Error: ActivateClient: ' + GetError);
   end;
-  
-  function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;  
+
+  function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
   var
     w,h: integer;
   begin
@@ -334,8 +340,8 @@ implementation
     dirty:= true;
     //XSetErrorHandler(Old_Handler);
   end;
-  
-  procedure TWindow.FreeReturnData; 
+
+  procedure TWindow.FreeReturnData;
   begin
     if dirty then
     begin
@@ -413,40 +419,41 @@ implementation
     result := xmask and ButtonP > 0;
   end;
 
-procedure TWindow.SendString(str: string);
-var
-  I, L: Integer;
-  K: Byte;
-  HoldShift: Boolean;
-begin
-  HoldShift := False;
-  L := Length(str);
-  for I := 1 to L do
+  { TODO: Check if this supports multiple keyboard layouts, probably not }
+  procedure TWindow.SendString(str: string);
+  var
+    I, L: Integer;
+    K: Byte;
+    HoldShift: Boolean;
   begin
-    if (((str[I] >= 'A') and (str[I] <= 'Z')) or 
-        ((str[I] >= '!') and (str[I] <= '&')) or
-        ((str[I] >= '(') and (str[I] <= '+')) or
-        (str[I] = ':') or
-        ((str[I] >= '<') and (str[I] <= '@')) or
-        ((str[I] >= '^') and (str[I] <= '_')) or
-        ((str[I] >= '{') and (str[I] <= '~'))) then
+    HoldShift := False;
+    L := Length(str);
+    for I := 1 to L do
     begin
-      HoldKey(VK_SHIFT);
-      HoldShift := True;
-    end;
-    
-    K := GetKeyCode(str[I]);
-    HoldKey(K);
-    Sleep(20);
-    ReleaseKey(K);
-    
-    if (HoldShift) then
-    begin
-      HoldShift := False;
-      ReleaseKey(VK_SHIFT);
+      if (((str[I] >= 'A') and (str[I] <= 'Z')) or
+          ((str[I] >= '!') and (str[I] <= '&')) or
+          ((str[I] >= '(') and (str[I] <= '+')) or
+          (str[I] = ':') or
+          ((str[I] >= '<') and (str[I] <= '@')) or
+          ((str[I] >= '^') and (str[I] <= '_')) or
+          ((str[I] >= '{') and (str[I] <= '~'))) then
+      begin
+        HoldKey(VK_SHIFT);
+        HoldShift := True;
+      end;
+
+      K := GetKeyCode(str[I]);
+      HoldKey(K);
+      Sleep(20);
+      ReleaseKey(K);
+
+      if (HoldShift) then
+      begin
+        HoldShift := False;
+        ReleaseKey(VK_SHIFT);
+      end;
     end;
   end;
-end;
 
   procedure TWindow.HoldKey(key: integer);
   begin
@@ -474,7 +481,7 @@ end;
       Raise Exception.CreateFMT('GetSimpleKeyCode - char (%s) is not in A..z',[c]);
     end
   end;
-  
+
   { ***implementation*** IOManager }
 
   constructor TIOManager.Create;
@@ -499,17 +506,17 @@ end;
     { Get the Desktop Window }
     desktop:= RootWindow(display,screennum)
   end;
-  
-  procedure TIOManager.NativeFree; 
+
+  procedure TIOManager.NativeFree;
   begin
     XCloseDisplay(display);
   end;
-  
+
   procedure TIOManager.SetDesktop;
   begin
     SetBothTargets(TWindow.Create(display, screennum, desktop));
   end;
-  
+
   function TIOManager.SetTarget(target: x.TWindow): integer;
   begin
     result := SetBothTargets(TWindow.Create(display, screennum, target))
