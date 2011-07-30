@@ -1648,7 +1648,6 @@ var
    tmpY : integer;
    dX, dY,  xx, yy: Integer;
    SkipCoords : T2DBoolArray;
-   a: TRGB32;
 
    ctsinfoarray: TCTSInfo2DArray;
    compare: TCTSCompareFunction;
