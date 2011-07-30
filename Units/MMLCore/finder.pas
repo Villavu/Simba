@@ -423,7 +423,7 @@ end;
 { }
 
 function Create_CTSInfo(cts: integer; Color, Tol: Integer;
-                        hueMod, satMod: extended): Pointer;
+                        hueMod, satMod: extended): Pointer; overload;
 var
     R, G, B: Integer;
     H, S, L: Integer;
@@ -456,6 +456,16 @@ begin
   end;
 end;
 
+
+function Create_CTSInfo(cts: integer; R, G, B, Tol: Integer;
+                        hueMod, satMod: extended): Pointer; overload;
+
+var Color: Integer;
+
+begin
+  Color := RGBToColor(R, G, B);
+  Result := Create_CTSInfo(cts, Color, Tol, hueMod, satMod);
+end;
 procedure Free_CTSInfo(i: Pointer);
 begin
   if assigned(i) then
@@ -473,16 +483,14 @@ var
 begin
   setlength(result,h+1,w+1);
 
+  w := bmp.width;
   data := bmp.fdata;
 
   for y := 0 to h do
     for x := 0 to w do
     begin
-      { This is kinda ugly. We call RGBToColor() here only to call ColorToRGB()
-        later again in Create_CTSInfo) }
       result[y][x] := Create_CTSInfo(cts,
-          rgbtocolor(data[y*w+x].R, data[y*w+x].G,
-                     data[y*w+x].B),
+          data[y*w+x].R, data[y*w+x].G, data[y*w+x].B,
           Tolerance, hueMod, satMod);
     end;
 end;
@@ -1675,6 +1683,25 @@ begin
   ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, bitmap,
       Tolerance, self.hueMod, self.satMod);
   compare := Get_CTSCompare(Self.CTS);
+
+//  for yBmp := 0 to BmpH do
+//  begin
+//    tmpY := yBmp + yy;
+//    for xBmp := 0 to BmpW do
+//    begin
+//      writeln('BmpRowData: ' + IntToStr(BmpRowData[yBmp][xBmp].R) + ', ' +
+//            IntToStr(BmpRowData[yBmp][xBmp].G)
+//            + ', ' + IntToStr(BmpRowData[yBmp][xBmp].B));
+//
+//      case self.cts of
+//      0, 1:  writeln('ctsinfo: ' +
+//          IntToStr(TCTS1Info(ctsinfoarray[yBmp][xBmp]).R) + ', ' +
+//          IntToStr(TCTS1Info(ctsinfoarray[yBmp][xBmp]).G) + ', ' +
+//          IntToStr(TCTS1Info(ctsinfoarray[yBmp][xBmp]).B));
+//      end;
+//
+//    end;
+//  end;
 
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
