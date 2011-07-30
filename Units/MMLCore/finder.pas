@@ -441,7 +441,8 @@ begin
           Result := AllocMem(SizeOf(TCTS1Info));
           ColorToRGB(Color, PCTS1Info(Result)^.R, PCTS1Info(Result)^.G,
                       PCTS1Info(Result)^.B);
-          PCTS1Info(Result)^.Tol := Tol*Tol;
+
+          PCTS1Info(Result)^.Tol := Tol * Tol;
       end;
       2:
       begin
@@ -466,6 +467,7 @@ begin
   Color := RGBToColor(R, G, B);
   Result := Create_CTSInfo(cts, Color, Tol, hueMod, satMod);
 end;
+
 procedure Free_CTSInfo(i: Pointer);
 begin
   if assigned(i) then
@@ -475,22 +477,18 @@ begin
 end;
 
 
-function Create_CTSInfo2DArray(cts, w, h: integer; bmp: TMufasaBitmap;
+function Create_CTSInfo2DArray(cts, w, h: integer; data: TPRGB32Array;
     Tolerance: Integer; hueMod, satMod: Extended): TCTSInfo2DArray;
 var
    x, y: integer;
-   data: PRGB32;
 begin
-  setlength(result,h+1,w+1);
-
-  w := bmp.width;
-  data := bmp.fdata;
+  SetLength(Result,h+1,w+1);
 
   for y := 0 to h do
     for x := 0 to w do
     begin
-      result[y][x] := Create_CTSInfo(cts,
-          data[y*w+x].R, data[y*w+x].G, data[y*w+x].B,
+      Result[y][x] := Create_CTSInfo(cts,
+          data[y][x].R, data[y][x].G, data[y][x].B,
           Tolerance, hueMod, satMod);
     end;
 end;
@@ -1639,9 +1637,6 @@ begin
   TClient(Client).IOManager.FreeReturnData;
 end;
 
-{
-  TODO: Implement HSLRows?
-}
 function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs,
   ys, xe, ye: Integer; tolerance: Integer): Boolean;
 var
@@ -1653,12 +1648,13 @@ var
    tmpY : integer;
    dX, dY,  xx, yy: Integer;
    SkipCoords : T2DBoolArray;
+   a: TRGB32;
 
    ctsinfoarray: TCTSInfo2DArray;
    compare: TCTSCompareFunction;
 
 label NotFoundBmp;
-  { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. } 
+  { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
 begin
   Result := false;
@@ -1680,28 +1676,9 @@ begin
   dX := dX - bmpW;
   dY := dY - bmpH;
 
-  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, bitmap,
+  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
       Tolerance, self.hueMod, self.satMod);
   compare := Get_CTSCompare(Self.CTS);
-
-//  for yBmp := 0 to BmpH do
-//  begin
-//    tmpY := yBmp + yy;
-//    for xBmp := 0 to BmpW do
-//    begin
-//      writeln('BmpRowData: ' + IntToStr(BmpRowData[yBmp][xBmp].R) + ', ' +
-//            IntToStr(BmpRowData[yBmp][xBmp].G)
-//            + ', ' + IntToStr(BmpRowData[yBmp][xBmp].B));
-//
-//      case self.cts of
-//      0, 1:  writeln('ctsinfo: ' +
-//          IntToStr(TCTS1Info(ctsinfoarray[yBmp][xBmp]).R) + ', ' +
-//          IntToStr(TCTS1Info(ctsinfoarray[yBmp][xBmp]).G) + ', ' +
-//          IntToStr(TCTS1Info(ctsinfoarray[yBmp][xBmp]).B));
-//      end;
-//
-//    end;
-//  end;
 
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
@@ -1720,7 +1697,6 @@ begin
                              MainRowdata[tmpY][xBmp +  xx].R,MainRowdata[tmpY][xBmp +  xx].G,MainRowdata[tmpY][xBmp +  xx].B,
                              H,S,L,HMod,SMod) then }
                goto NotFoundBmp;
-
       end;
 
       //We did find the Bmp, otherwise we would be at the part below
