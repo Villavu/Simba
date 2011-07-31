@@ -185,6 +185,7 @@ type
         function RequireFile(Sender: TObject; const OriginFileName: String;
                             var FileName, OutPut: string): Boolean;
         function FileAlreadyIncluded(Sender: TObject; FileName: string): Boolean;
+        function OnIncludingFile(Sender: TObject; FileName: string): Boolean;
 
         procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
         procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
@@ -425,7 +426,9 @@ begin
     Exit;
   end;
   filename := path;//Yeah!
-  Includes.Add(path);
+
+  if Includes.IndexOf(path) = -1 then
+    Includes.Add(path);
 
   try
     f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
@@ -615,6 +618,7 @@ begin
   PSScript.UsePreProcessor:= True;
   PSScript.CompilerOptions := PSScript.CompilerOptions + [icBooleanShortCircuit];
   PSScript.OnNeedFile := @RequireFile;
+  PSScript.OnIncludingFile := @OnIncludingFile;
   PSScript.OnFileAlreadyIncluded := @FileAlreadyIncluded;
   PSScript.OnProcessDirective:=@OnProcessDirective;
   PSScript.OnProcessUnknowDirective:=@PSScriptProcessUnknownDirective;
@@ -742,9 +746,12 @@ var
   path: string;
   i: integer;
 begin
+  { XXX/TODO: Why not just use path := ExpandFileNameUTF8(FileName); }
   path := FindFile(Filename,[ScriptPath,IncludePath]);
+  path := ExpandFileNameUTF8(path);
+
   if (path <> '') then
-    if Includes.Find(path,i) then
+    if Includes.IndexOf(path) <> -1 then
     begin
       {$IFDEF SIMBA_VERBOSE}
       psWriteln('Include_Once file already included:' + Path);
@@ -753,8 +760,29 @@ begin
       Exit;
     end;
 
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('OnFileAlreadyIncluded, Adding: ' + path);
+  {$ENDIF}
   Includes.Add(path);
   Result := False;
+end;
+
+function TPSThread.OnIncludingFile(Sender: TObject; FileName: string): Boolean;
+var
+  path: string;
+begin
+  path := FindFile(Filename,[ScriptPath,IncludePath]);
+  path := ExpandFileNameUTF8(path);
+
+  if Includes.IndexOf(path) = -1 then
+  begin
+    {$IFDEF SIMBA_VERBOSE}
+    writeln('OnIncludingFile, Adding: ' + path);
+    {$ENDIF}
+    Includes.Add(path);
+  end;
+
+  Result := True; // Not used
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);

@@ -95,6 +95,7 @@ type
 
   { Added by Wizzup }
   TPSOnFileAlreadyIncluded = function (Sender: TObject; FileName: tbtstring): Boolean of object;
+  TPSOnIncludingFile = function (Sender: TObject; FileName: tbtstring): Boolean of object;
   { Wizzup out }
 
   TPSOnProcessDirective = procedure (
@@ -127,6 +128,7 @@ type
     FOnNeedFile: TPSOnNeedFile;
     { Added by Wizzup }
     FOnFileAlreadyIncluded: TPSOnFileAlreadyIncluded;
+    FOnIncludingFile: TPSOnIncludingFile;
     { Wizzup out }
     FUsePreProcessor: Boolean;
     FDefines: TStrings;
@@ -162,6 +164,7 @@ type
     function  DoOnNeedFile (Sender: TObject; const OrginFileName: tbtstring; var FileName, Output: tbtstring): Boolean; virtual;
     { Added by Wizzup }
     function  DoOnFileAlreadyIncluded (Sender: TObject; FileName: tbtstring): Boolean; virtual;
+    function  DoOnIncludingFile (Sender: TObject; FileName: tbtstring): Boolean; virtual;
     { Wizzup out }
     function  DoOnUnknowUses (Sender: TPSPascalCompiler; const Name: tbtstring): Boolean; virtual; // return true if processed
     procedure DoOnCompImport; virtual;
@@ -300,6 +303,7 @@ type
 
     { Added by Wizzup }
     property OnFileAlreadyIncluded: TPSOnFileAlreadyIncluded read FOnFileAlreadyIncluded write FOnFileAlreadyIncluded;
+    property OnIncludingFile: TPSOnIncludingFile read FOnIncludingFile write FOnIncludingFile;
     { Wizzup out }
 
     property Defines: TStrings read FDefines write SetDefines;
@@ -557,6 +561,11 @@ function CEOnFileAlreadyIncluded(Sender: TPSPreProcessor; FileName: tbtstring): 
 begin
   Result := TPSScript (Sender.ID).DoOnFileAlreadyIncluded(Sender.ID, Filename);
 end;
+
+function CEOnIncludingFile(Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
+begin
+  Result := TPSScript (Sender.ID).DoOnIncludingFile(Sender.ID, Filename);
+end;
 { Wizzup out }
 
 procedure CompTranslateLineInfo(Sender: TPSPascalCompiler; var Pos, Row, Col: Cardinal; var Name: tbtstring);
@@ -675,6 +684,7 @@ begin
 
   { Added by Wizzup }
   FPP.OnFileAlreadyIncluded:= CEOnFileAlreadyIncluded;
+  FPP.OnIncludingFile:= CEOnIncludingFile;
   { Wizzup out }
 
   FDefines := TStringList.Create;
@@ -1085,6 +1095,15 @@ function TPSScript.DoOnFileAlreadyIncluded(Sender: TObject;
 begin
   If Assigned (OnFileAlreadyIncluded) then
     Result := OnFileAlreadyIncluded(Sender, FileName)
+  else
+    Result := False;
+end;
+
+function TPSScript.DoOnIncludingFile(Sender: TObject;
+  FileName: tbtstring): Boolean;
+begin
+  If Assigned (OnIncludingFile) then
+    Result := OnIncludingFile(Sender, FileName)
   else
     Result := False;
 end;

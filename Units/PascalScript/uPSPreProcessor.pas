@@ -17,6 +17,7 @@ type
 
   { Added by Wizzup }
   TPSOnFileAlreadyIncluded = function (Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
+  TPSOnIncludingFile = function (Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
   { Wizzup out }
 
   TPSOnProcessDirective = procedure (
@@ -99,6 +100,7 @@ type
     FOnNeedFile: TPSOnNeedFile;
     { Added by Wizzup }
     FOnFileAlreadyIncluded: TPSOnFileAlreadyIncluded;
+    FOnIncludingFile: TPSOnIncludingFile;
     { Wizzup out }
     FAddedPosition: Cardinal;
     FDefineState: TPSDefineStates;
@@ -120,6 +122,7 @@ type
 
     { Added by Wizzup }
     property OnFileAlreadyIncluded: TPSOnFileAlreadyIncluded read FOnFileAlreadyIncluded write FOnFileAlreadyIncluded;
+    property OnIncludingFile: TPSOnIncludingFile read FOnIncludingFile write FOnIncludingFile;
     { Wizzup out }
 
     property Defines: TStringList read FDefines write FDefines;
@@ -633,6 +636,8 @@ begin
           begin
             if FDefineState.DoWrite then
             begin
+              if assigned(@OnIncludingFile) then
+                OnIncludingFile(self, s);
               FAddedPosition := 0;
               IntPreProcess(Level +1, FileName, s, Dest);
               FCurrentLineInfo.Current := current;
@@ -646,7 +651,7 @@ begin
                  raise EPSPreProcessor.CreateFmt(RPS_IncludeOnceNotFound, [FileName, OrgFileName])
               else
               begin
-                if not OnFileAlreadyIncluded(Self, FileName) then
+                if not OnFileAlreadyIncluded(Self, s) then
                 begin
                   FAddedPosition := 0;
                   IntPreProcess(Level +1, FileName, s, Dest);
