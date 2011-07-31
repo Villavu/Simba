@@ -184,8 +184,8 @@ type
         procedure OnCompile(Sender: TPSScript);
         function RequireFile(Sender: TObject; const OriginFileName: String;
                             var FileName, OutPut: string): Boolean;
-        function FileAlreadyIncluded(Sender: TObject; FileName: string): Boolean;
-        function OnIncludingFile(Sender: TObject; FileName: string): Boolean;
+        function FileAlreadyIncluded(Sender: TObject; OrgFileName, FileName: string): Boolean;
+        function OnIncludingFile(Sender: TObject; OrgFileName, FileName: string): Boolean;
 
         procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
         procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
@@ -741,20 +741,24 @@ begin
       '{$IFDEF __REMOVE_IS_INCLUDE}{$UNDEF IS_INCLUDE}{$ENDIF}';
 end;
 
-function TPSThread.FileAlreadyIncluded(Sender: TObject; FileName: string): Boolean;
+function TPSThread.FileAlreadyIncluded(Sender: TObject; OrgFileName, FileName: string): Boolean;
 var
   path: string;
   i: integer;
 begin
-  { XXX/TODO: Why not just use path := ExpandFileNameUTF8(FileName); }
-  path := FindFile(Filename,[ScriptPath,IncludePath]);
+  path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName))]);
+  if path = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
   path := ExpandFileNameUTF8(path);
 
   if (path <> '') then
     if Includes.IndexOf(path) <> -1 then
     begin
       {$IFDEF SIMBA_VERBOSE}
-      psWriteln('Include_Once file already included:' + Path);
+      writeln('Include_Once file already included:' + Path);
       {$ENDIF}
       Result := True;
       Exit;
@@ -767,11 +771,16 @@ begin
   Result := False;
 end;
 
-function TPSThread.OnIncludingFile(Sender: TObject; FileName: string): Boolean;
+function TPSThread.OnIncludingFile(Sender: TObject; OrgFileName, FileName: string): Boolean;
 var
   path: string;
 begin
-  path := FindFile(Filename,[ScriptPath,IncludePath]);
+  path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName))]);
+  if path = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
   path := ExpandFileNameUTF8(path);
 
   if Includes.IndexOf(path) = -1 then

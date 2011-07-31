@@ -16,8 +16,8 @@ type
   TPSOnNeedFile = function (Sender: TPSPreProcessor; const callingfilename: tbtstring; var FileName, Output: tbtstring): Boolean;
 
   { Added by Wizzup }
-  TPSOnFileAlreadyIncluded = function (Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
-  TPSOnIncludingFile = function (Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
+  TPSOnFileAlreadyIncluded = function (Sender: TPSPreProcessor; OrgFileName, FileName: tbtstring): Boolean;
+  TPSOnIncludingFile = function (Sender: TPSPreProcessor; OrgFileName, FileName: tbtstring): Boolean;
   { Wizzup out }
 
   TPSOnProcessDirective = procedure (
@@ -637,7 +637,7 @@ begin
             if FDefineState.DoWrite then
             begin
               if assigned(@OnIncludingFile) then
-                OnIncludingFile(self, s);
+                OnIncludingFile(self , Filename, s);
               FAddedPosition := 0;
               IntPreProcess(Level +1, FileName, s, Dest);
               FCurrentLineInfo.Current := current;
@@ -651,7 +651,7 @@ begin
                  raise EPSPreProcessor.CreateFmt(RPS_IncludeOnceNotFound, [FileName, OrgFileName])
               else
               begin
-                if not OnFileAlreadyIncluded(Self, s) then
+                if not OnFileAlreadyIncluded(Self, FileName, s) then
                 begin
                   FAddedPosition := 0;
                   IntPreProcess(Level +1, FileName, s, Dest);
