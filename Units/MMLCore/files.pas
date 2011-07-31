@@ -128,6 +128,7 @@ begin;
           exit;
         end;
   end;
+  result := '';
 end;
 
 constructor TMFiles.Create(Owner : TObject);
