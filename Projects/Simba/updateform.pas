@@ -251,7 +251,8 @@ begin
     end;
   end;
   FDone := True;
-  Self.UpdateButton.Caption := 'Update!';
+  Self.UpdateButton.Caption := 'Updated!';
+  Self.UpdateButton.Enabled := False;
   Self.CloseButton.Enabled := true;
   FUpdating:= false;
 end;
