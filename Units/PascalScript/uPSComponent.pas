@@ -94,8 +94,8 @@ type
   TPSOnNeedFile = function (Sender: TObject; const OrginFileName: tbtstring; var FileName, Output: tbtstring): Boolean of object;
 
   { Added by Wizzup }
-  TPSOnFileAlreadyIncluded = function (Sender: TObject; FileName: tbtstring): Boolean of object;
-  TPSOnIncludingFile = function (Sender: TObject; FileName: tbtstring): Boolean of object;
+  TPSOnFileAlreadyIncluded = function (Sender: TObject; OrgFileName, FileName: tbtstring): Boolean of object;
+  TPSOnIncludingFile = function (Sender: TObject; OrgFileName, FileName: tbtstring): Boolean of object;
   { Wizzup out }
 
   TPSOnProcessDirective = procedure (
@@ -163,8 +163,8 @@ type
     //--jgv new
     function  DoOnNeedFile (Sender: TObject; const OrginFileName: tbtstring; var FileName, Output: tbtstring): Boolean; virtual;
     { Added by Wizzup }
-    function  DoOnFileAlreadyIncluded (Sender: TObject; FileName: tbtstring): Boolean; virtual;
-    function  DoOnIncludingFile (Sender: TObject; FileName: tbtstring): Boolean; virtual;
+    function  DoOnFileAlreadyIncluded (Sender: TObject; OrgFileName, FileName: tbtstring): Boolean; virtual;
+    function  DoOnIncludingFile (Sender: TObject; OrgFileName, FileName: tbtstring): Boolean; virtual;
     { Wizzup out }
     function  DoOnUnknowUses (Sender: TPSPascalCompiler; const Name: tbtstring): Boolean; virtual; // return true if processed
     procedure DoOnCompImport; virtual;
@@ -557,14 +557,14 @@ begin
 end;
 
 { Added by Wizzup }
-function CEOnFileAlreadyIncluded(Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
+function CEOnFileAlreadyIncluded(Sender: TPSPreProcessor; OrgFileName, FileName: tbtstring): Boolean;
 begin
-  Result := TPSScript (Sender.ID).DoOnFileAlreadyIncluded(Sender.ID, Filename);
+  Result := TPSScript (Sender.ID).DoOnFileAlreadyIncluded(Sender.ID, OrgFileName, Filename);
 end;
 
-function CEOnIncludingFile(Sender: TPSPreProcessor; FileName: tbtstring): Boolean;
+function CEOnIncludingFile(Sender: TPSPreProcessor; OrgFileName, FileName: tbtstring): Boolean;
 begin
-  Result := TPSScript (Sender.ID).DoOnIncludingFile(Sender.ID, Filename);
+  Result := TPSScript (Sender.ID).DoOnIncludingFile(Sender.ID, OrgFileName, Filename);
 end;
 { Wizzup out }
 
@@ -1091,19 +1091,19 @@ end;
 
 { Added by Wizzup }
 function TPSScript.DoOnFileAlreadyIncluded(Sender: TObject;
-  FileName: tbtstring): Boolean;
+  OrgFileName, FileName: tbtstring): Boolean;
 begin
   If Assigned (OnFileAlreadyIncluded) then
-    Result := OnFileAlreadyIncluded(Sender, FileName)
+    Result := OnFileAlreadyIncluded(Sender, OrgFileName, FileName)
   else
     Result := False;
 end;
 
 function TPSScript.DoOnIncludingFile(Sender: TObject;
-  FileName: tbtstring): Boolean;
+  OrgFileName, FileName: tbtstring): Boolean;
 begin
   If Assigned (OnIncludingFile) then
-    Result := OnIncludingFile(Sender, FileName)
+    Result := OnIncludingFile(Sender, OrgFileName, FileName)
   else
     Result := False;
 end;
