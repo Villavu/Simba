@@ -30,11 +30,12 @@ Name: "{app}\Extensions"
 Name: "{app}\Includes"
 Name: "{app}\Plugins"
 Name: "{app}\Scripts"
-Name: "{app}\Scripts\Tests"
+; Name: "{app}\Scripts\Tests"
 
 [Files]
 Source: "C:\Simba\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\extension.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\msi.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
