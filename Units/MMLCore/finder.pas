@@ -431,28 +431,28 @@ begin
   case cts of
       0:
       begin
-          Result := AllocMem(SizeOf(TCTS0Info));
-          ColorToRGB(Color, PCTS0Info(Result)^.R, PCTS0Info(Result)^.G,
-                      PCTS0Info(Result)^.B);
-          PCTS0Info(Result)^.Tol := Tol;
+        Result := AllocMem(SizeOf(TCTS0Info));
+        ColorToRGB(Color, PCTS0Info(Result)^.R, PCTS0Info(Result)^.G,
+                    PCTS0Info(Result)^.B);
+        PCTS0Info(Result)^.Tol := Tol;
       end;
       1:
       begin
-          Result := AllocMem(SizeOf(TCTS1Info));
-          ColorToRGB(Color, PCTS1Info(Result)^.R, PCTS1Info(Result)^.G,
-                      PCTS1Info(Result)^.B);
+        Result := AllocMem(SizeOf(TCTS1Info));
+        ColorToRGB(Color, PCTS1Info(Result)^.R, PCTS1Info(Result)^.G,
+                    PCTS1Info(Result)^.B);
 
-          PCTS1Info(Result)^.Tol := Tol * Tol;
+        PCTS1Info(Result)^.Tol := Tol * Tol;
       end;
       2:
       begin
-          Result := AllocMem(SizeOf(TCTS2Info));
-          ColorToRGB(Color, R, G, B);
-          RGBToHSL(R, G, B, PCTS2Info(Result)^.H, PCTS2Info(Result)^.S,
-                      PCTS2Info(Result)^.L);
-          PCTS2Info(Result)^.hueMod := Tol * hueMod;
-          PCTS2Info(Result)^.satMod := Tol * satMod;
-          PCTS2Info(Result)^.Tol := Tol;
+        Result := AllocMem(SizeOf(TCTS2Info));
+        ColorToRGB(Color, R, G, B);
+        RGBToHSL(R, G, B, PCTS2Info(Result)^.H, PCTS2Info(Result)^.S,
+                    PCTS2Info(Result)^.L);
+        PCTS2Info(Result)^.hueMod := Tol * hueMod;
+        PCTS2Info(Result)^.satMod := Tol * satMod;
+        PCTS2Info(Result)^.Tol := Tol;
       end;
   end;
 end;
@@ -1191,29 +1191,6 @@ var
   xx, yy: integer;
   compare: TCTSCompareFunction;
   ctsinfo: TCTSInfo;
-
-  {  procedure cts3;
-  begin
-    RGBToXYZ(clR, clG, clB, X, Y, Z);
-    XYZToCieLab(X, Y, Z, L1, A1, B1);
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-        RGBToXYZ(Ptr^.R, Ptr^.G, Ptr^.B, X, Y, Z);
-        XYZtoCIELab(X, Y, Z, L2, A2, B2);
-        if Sqrt(sqr(L1 - L2) + sqr(A1 - A2) +
-                 sqr(B1 - B2)) <= Tol then
-        begin
-          ClientTPA[c].x := xx;
-          ClientTPA[c].y := yy;
-          Inc(c);
-        end;
-        Inc(Ptr)
-      end;
-      Inc(Ptr, PtrInc);
-    end;
-  end; }
 
 begin
   Result := false;
