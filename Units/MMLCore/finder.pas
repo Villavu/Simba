@@ -2122,6 +2122,9 @@ begin
     FillChar(b[i][0], SizeOf(Integer) * (H+1), 0);
   end;
 
+  // Retreive Client Data.
+  PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
+
   // C = DTM.C
   for i := 0 to Len - 1 do
   begin
@@ -2132,9 +2135,6 @@ begin
   ctsinfoarray := Create_CTSInfoArray(Self.CTS,
     col_arr, tol_arr, self.hueMod, self.satMod);
   compare := Get_CTSCompare(Self.CTS);
-
-  // Retreive Client Data.
-  PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
   //CD starts at 0,0.. We must adjust the MA, since this is still based on the xs,ys,xe,ye box.
@@ -2216,14 +2216,15 @@ var
 begin
   FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F,Alternating,1);
   if Length(P) = 0 then
-    exit(false);
+    exit(False);
   aFound := F[0][0];
   x := P[0].x;
   y := P[0].y;
   Exit(True);
 end;
 
-procedure RotPoints_DTM(const P: TPointArray;var RotTPA : TPointArray; const A: Extended);
+procedure RotPoints_DTM(const P: TPointArray;var RotTPA : TPointArray; const A:
+    Extended); inline;
 var
    I, L: Integer;
 begin
@@ -2237,18 +2238,11 @@ end;
 
 function TMFinder.FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer): Boolean;
 var
-  //Cached variables
-  Len : integer;
-  DPoints : PMDTMPoint;
-  DTPA : TPointArray;
-  RotTPA: TPointArray;
-   // Colours of DTMs
-   clR,clG,clB : array of byte;
-
-   //Similar colors stuff
-   hh,ss,ll: array of extended;
-   hmod,smod: extended;
-   Ccts : integer;
+   //Cached variables
+   Len : integer;
+   DPoints : PMDTMPoint;
+   DTPA : TPointArray;
+   RotTPA: TPointArray;
 
    // Bitwise
    b: Array of Array of Integer;
@@ -2282,6 +2276,10 @@ var
 
    goodPoints: Array of Boolean;
    s: extended;
+
+   col_arr, tol_arr: Array of Integer;
+   ctsinfoarray: TCTSInfoArray;
+   compare: TCTSCompareFunction;
 
    label theEnd;
    label AnotherLoopEnd;
@@ -2318,20 +2316,6 @@ begin
     FillChar(ch[i][0], SizeOf(Integer) * (H+1), 0);
   end;
 
-  // Convert colors to there components
-  SetLength(clR,Len);
-  SetLength(clG,Len);
-  SetLength(clB,Len);
-  for i := 0 to Len - 1 do
-    ColorToRGB(DPoints[i].c,clR[i],clG[i],clB[i]);
-  //Compiler hints
-
-  SetLength(hh,Len);
-  SetLength(ss,Len);
-  SetLength(ll,Len);
-  for i := 0 to Len - 1 do
-    ColorToHSL(DPoints[i].c,hh[i],ss[i],ll[i]);
-
   {
   When we search for a rotated DTM, everything is the same, except the coordinates..
   Therefore we create a TPA of the 'original' DTM, containing all the Points.
@@ -2341,11 +2325,19 @@ begin
   for i := 0 to len-1 do
     DTPA[i] := Point(DPoints[i].x,DPoints[i].y);
 
-  GetToleranceSpeed2Modifiers(hMod, sMod);
-  ccts := CTS;
-
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
+
+  // C = DTM.C
+  for i := 0 to Len - 1 do
+  begin
+    col_arr[i] := DPoints[i].c;
+    tol_arr[i] := DPoints[i].t;
+  end;
+
+  ctsinfoarray := Create_CTSInfoArray(Self.CTS,
+    col_arr, tol_arr, self.hueMod, self.satMod);
+  compare := Get_CTSCompare(Self.CTS);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
   SetLength(aFound, 0);
@@ -2392,7 +2384,7 @@ begin
                 // Checking point i now. (Store that we matched it)
                 ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-                if ColorSame(ccts,DPoints[i].t,clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
+                if compare(ctsinfoarray[i], cd[yyy][xxx]) then
                   b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
               end;
 
@@ -2436,7 +2428,10 @@ begin
       s := s + aStep;
   end;
   TheEnd:
-    TClient(Client).IOManager.FreeReturnData;
+
+  Free_CTSInfoArray(ctsinfoarray);
+  TClient(Client).IOManager.FreeReturnData;
+
   Result := (pc > 0);
   { Don't forget to pre calculate the rotated points at the start.
    Saves a lot of rotatepoint() calls. }
