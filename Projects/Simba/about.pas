@@ -65,7 +65,7 @@ begin
   AboutMemo.Lines.Add(format('You are currently using version: %d',[SimbaUnit.SimbaVersion]));
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Please report bugs at: http://bugs.villavu.com/');
-  AboutMemo.Enabled := False;
+  AboutMemo.ReadOnly:= True;
 end;
 
 procedure TAboutForm.OkButtonClick(Sender: TObject);
