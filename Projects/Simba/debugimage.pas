@@ -110,6 +110,7 @@ begin
     Width := DispSize.x;
     Height := DispSize.y;
   end;
+  FormStyle := fsStayOnTop;
 end;
 
 initialization
