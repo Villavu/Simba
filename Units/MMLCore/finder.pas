@@ -2384,7 +2384,7 @@ begin
                 // Checking point i now. (Store that we matched it)
                 ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-                if compare(ctsinfoarray[i], cd[yyy][xxx]) then
+                if compare(ctsinfoarray[i], @cd[yyy][xxx]) then
                   b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
               end;
 
