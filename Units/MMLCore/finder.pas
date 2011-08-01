@@ -426,7 +426,6 @@ function Create_CTSInfo(cts: integer; Color, Tol: Integer;
                         hueMod, satMod: extended): Pointer; overload;
 var
     R, G, B: Integer;
-    H, S, L: Integer;
 begin
   case cts of
       0:
@@ -609,7 +608,6 @@ var
    PtrData: TRetData;
    Ptr: PRGB32;
    PtrInc: Integer;
-   clR, clG, clB : byte;
    dX, dY, xx, yy: Integer;
 
   compare: TCTSCompareFunction;
@@ -1044,7 +1042,7 @@ var
    PtrData: TRetData;
    Ptr: PRGB32;
    PtrInc: Integer;
-   dX, dY, clR, clG, clB: Integer;
+   dX, dY: Integer;
    xx, yy: integer;
    compare: TCTSCompareFunction;
    ctsinfo: TCTSInfo;
@@ -1189,7 +1187,7 @@ var
   PtrData: TRetData;
   Ptr: PRGB32;
   PtrInc,C: Integer;
-  dX, dY, clR, clG, clB: Integer;
+  dX, dY: Integer;
 
   xx, yy: integer;
   compare: TCTSCompareFunction;
@@ -1762,8 +1760,6 @@ var
    xBmp,yBmp : integer;
    tmpY : integer;
    dX, dY,  i,HiSpiral: Integer;
-   CCTS : integer;
-   H,S,L,HMod,SMod : extended;
    SkipCoords : T2DBoolArray;
 
    ctsinfoarray: TCTSInfo2DArray;
@@ -1840,8 +1836,6 @@ var
    tmpY : integer;
    dX, dY,  i,HiSpiral: Integer;
    FoundC : integer;
-   CCTS : integer;
-   H,S,L,HMod,SMod : extended;
    SkipCoords : T2DBoolArray;
 
    ctsinfoarray: TCTSInfo2DArray;
@@ -2125,6 +2119,8 @@ begin
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
 
+  SetLength(col_arr, Len);
+  SetLength(tol_arr, Len);
   // C = DTM.C
   for i := 0 to Len - 1 do
   begin
@@ -2272,7 +2268,6 @@ var
 
    // point count
    pc: Integer = 0;
-   ac: Integer = 0;
 
    goodPoints: Array of Boolean;
    s: extended;
@@ -2328,6 +2323,8 @@ begin
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
 
+  SetLength(col_arr, Len);
+  SetLength(tol_arr, Len);
   // C = DTM.C
   for i := 0 to Len - 1 do
   begin
@@ -2416,7 +2413,6 @@ begin
           goto theEnd;
         AnotherLoopEnd:
       end;
-    ac := 0;
     if Alternating then
     begin
       if AngleSteps mod 2 = 0 then   //This means it's an even number, thus we must add a positive step
