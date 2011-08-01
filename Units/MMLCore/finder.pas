@@ -476,7 +476,24 @@ begin
       raise Exception.Create('Free_CTSInfo: Invalid TCTSInfo passed');
 end;
 
+{ TODO: Not universal, mainly for DTM }
+function Create_CTSInfoArray(cts: integer; color, tolerance: array of integer;
+    hueMod, satMod: extended): TCTSInfoArray;
 
+var
+   i: integer;
+begin
+  if length(color) <> length(tolerance) then
+    raise Exception.Create('Create_CTSInfoArray: Length(Color) <>'
+                          +' Length(Tolerance');
+  SetLength(Result, Length(color));
+
+  for i := High(result) downto 0 do
+    result := Create_CTSInfo(cts, color[i], tolerance[i], hueMod, satMod);
+end;
+
+
+{ TODO: Not universal, mainly for Bitmap }
 function Create_CTSInfo2DArray(cts, w, h: integer; data: TPRGB32Array;
     Tolerance: Integer; hueMod, satMod: Extended): TCTSInfo2DArray;
 var
@@ -486,11 +503,9 @@ begin
 
   for y := 0 to h do
     for x := 0 to w do
-    begin
       Result[y][x] := Create_CTSInfo(cts,
           data[y][x].R, data[y][x].G, data[y][x].B,
           Tolerance, hueMod, satMod);
-    end;
 end;
 
 procedure Free_CTSInfoArray(i: TCTSInfoArray);
@@ -498,7 +513,7 @@ var
    c: integer;
 begin
   for c := high(i) downto 0 do
-      Free_CTSInfo(i[c]);
+    Free_CTSInfo(i[c]);
   SetLength(i, 0);
 end;
 
@@ -2040,16 +2055,9 @@ end;
 //MaxToFind, if it's < 1 it won't stop looking
 function TMFinder.FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
 var
-  //Cache DTM stuff
-  Len : integer;       //Len of the points
-  DPoints : PMDTMPoint; //DTM Points
-   // Colours of DTMs
-   clR,clG,clB : array of byte;
-
-   //Similar colors stuff
-   hh,ss,ll: array of extended;
-   hmod,smod: extended;
-   Ccts : integer;
+   //Cache DTM stuff
+   Len : integer;       //Len of the points
+   DPoints : PMDTMPoint; //DTM Points
 
    // Bitwise
    b: Array of Array of Integer;
@@ -2077,10 +2085,12 @@ var
 
    goodPoints: Array of Boolean;
 
+   col_arr, tol_arr: Array of Integer;
+   ctsinfoarray: TCTSInfoArray;
+   compare: TCTSCompareFunction;
+
    label theEnd;
    label AnotherLoopEnd;
-
-
 
 begin
   // Is the area valid?
@@ -2113,21 +2123,15 @@ begin
   end;
 
   // C = DTM.C
-  SetLength(clR,Len);
-  SetLength(clG,Len);
-  SetLength(clB,Len);
   for i := 0 to Len - 1 do
-    ColorToRGB(DPoints[i].c,clR[i],clG[i],clB[i]);
+  begin
+    col_arr[i] := DPoints[i].c;
+    tol_arr[i] := DPoints[i].t;
+  end;
 
-  SetLength(hh,Len);
-  SetLength(ss,Len);
-  SetLength(ll,Len);
-  for i := 0 to Len - 1 do
-    ColorToHSL(DPoints[i].c,hh[i],ss[i],ll[i]);
-
-  GetToleranceSpeed2Modifiers(hMod, sMod);
-
-  ccts := CTS;
+  ctsinfoarray := Create_CTSInfoArray(Self.CTS,
+    col_arr, tol_arr, self.hueMod, self.satMod);
+  compare := Get_CTSCompare(Self.CTS);
 
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
@@ -2165,7 +2169,7 @@ begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 //              if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), DPoints[i].t) then
-              if ColorSame(ccts,DPoints[i].t,clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
+              if compare(ctsinfoarray[i], @cd[yyy][xxx]) then
                 b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
 
@@ -2194,6 +2198,8 @@ begin
       AnotherLoopEnd:
     end;
   TheEnd:
+
+  Free_CTSInfoArray(ctsinfoarray);
   TClient(Client).IOManager.FreeReturnData;
 
   SetLength(Points, pc);
