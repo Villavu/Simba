@@ -21,4 +21,5 @@
     lpexportedmethods.inc for the Mufasa Macro Library
 }
 
+{$I lpexportedmethodsinc.inc}
 //These will be added from Generator...
