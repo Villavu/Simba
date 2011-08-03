@@ -158,9 +158,9 @@ begin
 
           for iii := 0 to High(c) do
           begin
-            if (iii> 0) then
+            if (iii+ii> 0) then
               s := s+', ';
-            s := s+PtrName(d.ShortText)+'(Params^['+IntToStr(iii)+'])^';
+            s := s+PtrName(d.ShortText)+'(Params^['+IntToStr(iii+ii)+'])^';
           end;
         end;
 
