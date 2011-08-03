@@ -1652,8 +1652,12 @@ begin
         raise Exception.CreateFmt('Unknown Interpreter %d!', [Interpreter]);
     end;
   except
-    mDebugLn('Failed to initialise the interpreter');
-    Exit;
+    on E: Exception do
+    begin
+      mDebugLn('Failed to initialise the interpreter: ' + E.Message);
+      Thread := nil;
+      Exit;
+    end;
   end;
 
   {$IFNDEF TERMINALWRITELN}
@@ -2379,6 +2383,9 @@ begin
     end;
   end;
   SimbaForm.InitializeTMThread(t);
+  if (t = nil) then
+    Exit;
+
   KillThread(t.ThreadID); { XXX: Why do we kill the thread again ? }
   if (t is TPSThread) then
   try
