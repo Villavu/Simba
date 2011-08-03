@@ -30,7 +30,7 @@ end;
 
 procedure Lape_NearbyPointInArrayEx(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_NearbyPointInArrayEx(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[2])^);
+  PBoolean(Result)^ := ps_NearbyPointInArrayEx(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^);
 end;
 
 procedure Lape_NearbyPointInArray(const Params: PParamArray; const Result: Pointer);
@@ -40,12 +40,12 @@ end;
 
 procedure Lape_QuickTPASort(const Params: PParamArray);
 begin
-  ps_QuickTPASort(PIntegerArray(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[3])^);
+  ps_QuickTPASort(PIntegerArray(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 procedure Lape_QuickATPASort(const Params: PParamArray);
 begin
-  ps_QuickATPASort(PIntegerArray(Params^[0])^, P2DPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[3])^);
+  ps_QuickATPASort(PIntegerArray(Params^[0])^, P2DPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 procedure Lape_SortTPAFrom(const Params: PParamArray);
@@ -130,12 +130,12 @@ end;
 
 procedure Lape_FilterPointsPie(const Params: PParamArray);
 begin
-  ps_FilterPointsPie(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  ps_FilterPointsPie(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
 procedure Lape_FilterPointsDist(const Params: PParamArray);
 begin
-  ps_FilterPointsDist(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  ps_FilterPointsDist(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 procedure Lape_FilterPointsLine(const Params: PParamArray);
@@ -160,7 +160,7 @@ end;
 
 procedure Lape_FindTPAinTPA(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindTPAinTPA(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[1])^);
+  PBoolean(Result)^ := ps_FindTPAinTPA(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[2])^);
 end;
 
 procedure Lape_GetSamePointsATPA(const Params: PParamArray; const Result: Pointer);
@@ -170,17 +170,17 @@ end;
 
 procedure Lape_FindTextTPAinTPA(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindTextTPAinTPA(Pinteger(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[2])^, PPointArray(Params^[2])^);
+  PBoolean(Result)^ := ps_FindTextTPAinTPA(Pinteger(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[2])^, PPointArray(Params^[3])^);
 end;
 
 procedure Lape_SortCircleWise(const Params: PParamArray);
 begin
-  ps_SortCircleWise(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+  ps_SortCircleWise(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[4])^, PBoolean(Params^[5])^);
 end;
 
 procedure Lape_LinearSort(const Params: PParamArray);
 begin
-  ps_LinearSort(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[2])^);
+  ps_LinearSort(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 procedure Lape_RotatePoint(const Params: PParamArray; const Result: Pointer);
@@ -190,12 +190,12 @@ end;
 
 procedure Lape_ChangeDistPT(const Params: PParamArray; const Result: Pointer);
 begin
-  PPoint(Result)^ := ps_ChangeDistPT(PPoint(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pextended(Params^[2])^);
+  PPoint(Result)^ := ps_ChangeDistPT(PPoint(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pextended(Params^[3])^);
 end;
 
 procedure Lape_ChangeDistTPA(const Params: PParamArray; const Result: Pointer);
 begin
-  Pboolean(Result)^ := ps_ChangeDistTPA(PPointArray(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pextended(Params^[2])^);
+  Pboolean(Result)^ := ps_ChangeDistTPA(PPointArray(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pextended(Params^[3])^);
 end;
 
 procedure Lape_FindGapsTPA(const Params: PParamArray; const Result: Pointer);
@@ -205,7 +205,7 @@ end;
 
 procedure Lape_RemoveDistTPointArray(const Params: PParamArray; const Result: Pointer);
 begin
-  PPointArray(Result)^ := ps_RemoveDistTPointArray(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[1])^, PBoolean(Params^[2])^);
+  PPointArray(Result)^ := ps_RemoveDistTPointArray(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 procedure Lape_CombineTPA(const Params: PParamArray; const Result: Pointer);
@@ -290,7 +290,7 @@ end;
 
 procedure Lape_TPACountSortBase(const Params: PParamArray);
 begin
-  ps_TPACountSortBase(PPointArray(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^, PBoolean(Params^[2])^);
+  ps_TPACountSortBase(PPointArray(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure Lape_InvertTIA(const Params: PParamArray);
@@ -315,7 +315,7 @@ end;
 
 procedure Lape_SplitTPAExWrap(const Params: PParamArray);
 begin
-  ps_SplitTPAExWrap(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, P2DPointArray(Params^[2])^);
+  ps_SplitTPAExWrap(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, P2DPointArray(Params^[3])^);
 end;
 
 procedure Lape_SplitTPAWrap(const Params: PParamArray);
@@ -330,17 +330,17 @@ end;
 
 procedure Lape_RemoveDistTPointArrayWrap(const Params: PParamArray);
 begin
-  ps_RemoveDistTPointArrayWrap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[1])^, PBoolean(Params^[2])^, PPointArray(Params^[3])^);
+  ps_RemoveDistTPointArrayWrap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^, PBoolean(Params^[4])^, PPointArray(Params^[5])^);
 end;
 
 procedure Lape_CombineTPAWrap(const Params: PParamArray);
 begin
-  ps_CombineTPAWrap(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[1])^);
+  ps_CombineTPAWrap(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[2])^);
 end;
 
 procedure Lape_ReArrangeandShortenArrayExWrap(const Params: PParamArray);
 begin
-  ps_ReArrangeandShortenArrayExWrap(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[2])^);
+  ps_ReArrangeandShortenArrayExWrap(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^);
 end;
 
 procedure Lape_ReArrangeandShortenArrayWrap(const Params: PParamArray);
@@ -350,7 +350,7 @@ end;
 
 procedure Lape_TPAtoATPAExWrap(const Params: PParamArray);
 begin
-  ps_TPAtoATPAExWrap(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, P2DPointArray(Params^[2])^);
+  ps_TPAtoATPAExWrap(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, P2DPointArray(Params^[3])^);
 end;
 
 procedure Lape_TPAtoATPAWrap(const Params: PParamArray);
@@ -360,7 +360,7 @@ end;
 
 procedure Lape_CombineIntArrayWrap(const Params: PParamArray);
 begin
-  ps_CombineIntArrayWrap(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^, PIntegerArray(Params^[1])^);
+  ps_CombineIntArrayWrap(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^, PIntegerArray(Params^[2])^);
 end;
 
 procedure Lape_MergeATPAWrap(const Params: PParamArray);
@@ -375,7 +375,7 @@ end;
 
 procedure Lape_RotatePointsWrap(const Params: PParamArray);
 begin
-  ps_RotatePointsWrap(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PPointArray(Params^[2])^);
+  ps_RotatePointsWrap(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PPointArray(Params^[4])^);
 end;
 
 procedure Lape_FindTPAEdgesWrap(const Params: PParamArray);
@@ -385,7 +385,7 @@ end;
 
 procedure Lape_ClearTPAFromTPAWrap(const Params: PParamArray);
 begin
-  ps_ClearTPAFromTPAWrap(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[1])^);
+  ps_ClearTPAFromTPAWrap(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PPointArray(Params^[2])^);
 end;
 
 procedure Lape_ReturnPointsNotInTPAWrap(const Params: PParamArray);
