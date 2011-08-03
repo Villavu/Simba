@@ -7,13 +7,16 @@ Simple stuff, not required, may not be possible/useful:
 
 
 -   CTS/finder speedups and changes                                 [ ]
-    General ideas:
+    -   Table displaying all the different performance gains and
+        penalties.                                                  [ ]
+    -   General ideas:
         -   everything subprocedure (lots of code)
 
         -   jit + comparison function (per cts)  generated, call in loop
 
         -   comparison function (per cts), not generated, call in loop
 
+    -   Investigate SIMD probable speedups                          [ ]
     -   JIT (Generate comparison functions)                         [ ]
     -   Comparison functions for HSL/XYZ/L*a*b should check for
         match on each component before calculating the next.
