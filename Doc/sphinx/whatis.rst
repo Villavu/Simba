@@ -1,3 +1,5 @@
+.. _whatis:
+
 What Is Simba?
 ==============
 
@@ -21,5 +23,12 @@ Simba can:
         of fun stuff with Simba, you could even make a game in it!
 
 and more. Start now by :ref:`installingsimba`.
+
+Currently Simba is still in its beta stages; this includes the documentation.
+You will probably notice some parts of the documentation aren't finished or are just
+plain missing.
+
+Simba is being updated almost every day. To see changes as they are added, view
+https://github.com/MerlijnWajer/Simba.
 
 If you want to know more about Simba, see :ref:`whysimba`

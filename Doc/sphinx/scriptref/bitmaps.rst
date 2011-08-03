@@ -4,12 +4,44 @@
 Bitmaps
 =======
 
+A bitmap in Simba is simply a two dimensional *field of colours*. These colours
+can all be the same, or they can be of different colours. Simba features
+functions to create, manipulate and search for bitmaps.
+
+.. INSERT BITMAP EXAMPLE HERE (Picture, etc)
+
+The bitmaps are - just as files - represented as integer in Simba (they point to
+a list of bitmaps, and the value of the integer is the position in the list).
+So typically, when referring to bitmaps in Simba, you simply represent them as
+an integer:
+
+.. code-block:: pascal
+
+    var bmp, x, y: integer;
+    bmp := CreateBitmap(10, 10); // Create a bitmap of size (10, 10)
+    if FindBitmapIn(bmp, x, y, 0, 0, 300, 300) then
+      writeln('Found it!');
+    FreeBitmap(bmp); // Don't forget to free it when we are done.
+
+Note that the previous example doesn't make a lot of sense as the bitmap has
+only been created and not filled with any colours, they are as of yet,
+undefined. You can also create bitmaps from screenshots and load them when your
+script starts using the :ref:`scriptref-bitmapfromstring` function, or
+simple store them as files and load them using the :ref:`scriptref-loadbitmap`
+function.
+
+Word of caution on bitmap creation
+----------------------------------
+
 Bitmaps in Simba are internally all instances of *TMufasBitmap*. Scripts should
 generally access bitmaps using their *handle*: an integer. All functions
 referenced here either require a bitmap *handle* or return one.
 
 If you want to gain more access over a specific bitmap, see the
-*GetMufasaBitmap* function. It is highly unrecommended to create bitmaps with:
+*GetMufasaBitmap* function. It is highly unrecommended to create bitmaps like
+this, because Simba will not free them automatically for you. (There's no
+problem doing it like this if you only want to perform operations on it and then
+free it again)
 
 .. code-block:: pascal
 
@@ -48,6 +80,7 @@ then call this function to get the class reference.
 
     bmp.SetSize(150,150); // also changes bmph, as they are the same bitmap.
 
+.. _scriptref-createbitmapstring:
 
 CreateBitmapString
 ------------------
@@ -56,7 +89,11 @@ CreateBitmapString
 
     function CreateBitmapString(bmp : integer) : string;
 
-Creates a string for the given bitmap.
+Creates a string for the given bitmap, you can use this to save a bitmap for
+later us, for example loading it again using :ref:`scriptref-bitmapfromstring`.
+
+
+.. _scriptref-createbitmap:
 
 CreateBitmap
 ------------
@@ -65,8 +102,10 @@ CreateBitmap
 
     function CreateBitmap(w,h :integer) : integer;
 
-Create a bitmap with width *h* and height *h*. Returns the bitmap reference.
+Create a bitmap with width *h* and height *h*.
+Returns the reference to the created bitmap.
 
+.. _scriptref-freebitmap:
 
 FreeBitmap
 ----------
@@ -80,6 +119,8 @@ Be careful when working with bitmaps: not freeing it when you no longer need it
 leads to memory leaks, which will eventually make your script crash. (Unless you
 stop it in time, in which case Simba will free the bitmaps for you)
 
+.. _scriptref-savebitmap:
+
 SaveBitmap
 ----------
 
@@ -88,6 +129,8 @@ SaveBitmap
     procedure SaveBitmap(Bmp : integer; path : string);
 
 Save the given bitmap to the specified path.
+
+.. _scriptref-bitmapfromstring:
 
 BitmapFromString
 ----------------
@@ -99,6 +142,7 @@ BitmapFromString
 Load a bitmap from the given string. This command is usually generated with the
 Bitmap to String feature in Simba.
 
+.. _scriptref-loadbitmap:
 
 LoadBitmap
 ----------
@@ -107,8 +151,10 @@ LoadBitmap
 
     function LoadBitmap(Path : string) : integer;
 
-Load a bitmap from a path to a file. Known formats are .bmp and .png. (Possibly
-others, don't know for sure)
+Load a bitmap from a path to a file. Formats known to work are BMP and PNG
+images.
+
+.. _scriptref-setbitmapsize:
 
 SetBitmapSize
 -------------
@@ -117,7 +163,12 @@ SetBitmapSize
 
     procedure SetBitmapSize(Bmp,NewW,NewH : integer);
 
-Change the size of the bitmap. Previous data will be preserved (if possible).
+Change the size of the bitmap.
+Previous data will be preserved (if possible), so enlarging the bitmap won't
+destroy the old data, but shrinking it will inevitably destroy some data.
+(Everything that falls out of the new bounds)
+
+.. _scriptref-getbitmapsize:
 
 GetBitmapSize
 -------------
@@ -128,6 +179,8 @@ GetBitmapSize
 
 Returns the size of the bitmap in *BmpW*, *BmpH*.
 
+.. _scriptref-stretchbitmapresize:
+
 StretchBitmapResize
 -------------------
 
@@ -135,6 +188,8 @@ StretchBitmapResize
 
     procedure StretchBitmapResize(Bmp,NewW,NewH : integer);
 
+
+.. _scriptref-createmirroredbitmap:
 
 CreateMirroredBitmap
 --------------------
@@ -144,6 +199,8 @@ CreateMirroredBitmap
     function CreateMirroredBitmap(Bmp : integer) : integer;
 
 
+.. _scriptref-createmirroredbitmapex:
+
 CreateMirroredBitmapEx
 ----------------------
 
@@ -151,6 +208,8 @@ CreateMirroredBitmapEx
 
     function CreateMirroredBitmapEx(Bmp : integer; MirrorStyle : TBmpMirrorStyle) : integer;
 
+
+.. _scriptref-fastsetpixel:
 
 FastSetPixel
 ------------
@@ -161,6 +220,8 @@ FastSetPixel
 
 Set the pixel on the bitmap at position x, y to *color*.
 
+.. _scriptref-fastsetpixels:
+
 FastSetPixels
 -------------
 
@@ -170,6 +231,7 @@ FastSetPixels
 
 Set the pixels on the bitmap at position TPA[index] to Colors[index].
 
+.. _scriptref-fastgetpixel:
 
 FastGetPixel
 ------------
@@ -180,6 +242,8 @@ FastGetPixel
 
 Return the colour of pixel on the bitmap, position specified by x, y.
 
+.. _scriptref-fastgetpixels:
+
 FastGetPixels
 -------------
 
@@ -189,6 +253,7 @@ FastGetPixels
 
 Return an array of the colours on the bitmap; positions specified by *TPA*.
 
+.. _scriptref-getbitmapareacolors:
 
 GetBitmapAreaColors
 -------------------
@@ -200,6 +265,8 @@ GetBitmapAreaColors
 Returns all the colours in the area defined by (*xs*, *xy*, *xe*, *ye*) on the
 bitmap in a two dimensions integer array.
 
+.. _scriptref-fastdrawclear:
+
 FastDrawClear
 -------------
 
@@ -209,6 +276,8 @@ FastDrawClear
 
 Draw *Color* on every pixel on the bitmap.
 
+.. _scriptref-fastdrawtransparent:
+
 FastDrawTransparent
 -------------------
 
@@ -217,6 +286,8 @@ FastDrawTransparent
     procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer);
 
 
+.. _scriptref-setransparentcolor:
+
 SetTransparentColor
 -------------------
 
@@ -224,6 +295,7 @@ SetTransparentColor
 
     procedure SetTransparentColor(bmp : integer; Color : TColor);
 
+.. _scriptref-getransparentcolor:
 
 GetTransparentColor
 -------------------
@@ -232,6 +304,7 @@ GetTransparentColor
 
     function GetTransparentColor(bmp: integer) : TColor;
 
+.. _scriptref-fastreplacecolor:
 
 FastReplaceColor
 ----------------
@@ -240,6 +313,7 @@ FastReplaceColor
 
     procedure FastReplaceColor(Bmp : integer; OldColor,NewColor : TColor);
 
+.. _scriptref-copyclienttobitmap:
 
 CopyClientToBitmap
 ------------------
@@ -250,6 +324,8 @@ CopyClientToBitmap
 
 Copy client area *xs, ys, xe, ye* to specified bitmap.
 
+.. _scriptref-bitmapfromclient:
+
 BitmapFromClient
 ----------------
 
@@ -258,6 +334,8 @@ BitmapFromClient
     function BitmapFromClient(const xs, ys, xe, ye: Integer): Integer;
 
 Create a bitmap from the client. Area specified by *xs, ye, xe, ye*.
+
+.. _scriptref-setbitmapname:
 
 SetBitmapName
 -------------
@@ -269,6 +347,20 @@ SetBitmapName
 Assign a name to the bitmap. Mainly for debugging purposes. (It will write the
 name of the bitmap if it hasn't been freed.)
 
+.. code-block:: pascal
+
+    program new;
+
+    var bmp: integer;
+    begin
+      bmp := CreateBitmap(10, 10);
+      SetBitmapName(bmp, 'We will not free this bitmap');
+    end.
+    // Simba will print what bitmap has not been freed (along with his long
+    // name)
+
+.. _scriptref-findbitmap:
+
 FindBitmap
 ----------
 
@@ -278,6 +370,8 @@ FindBitmap
 
 Searches for the Bitmap *bmp* on the entire client. Returns true if found.
 If found, *x, y* specifies the position where the bitmap was found.
+
+.. _scriptref-findbitmapin:
 
 FindBitmapIn
 ------------
@@ -291,6 +385,8 @@ Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*
 Returns true if found. If found, *x, y* specifies the position where the bitmap
 was found.
 
+.. _scriptref-findbitmaptolerancein:
+
 FindBitmapToleranceIn
 ---------------------
 
@@ -300,9 +396,11 @@ FindBitmapToleranceIn
 
 Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
 Tolerance defines the tolerance per pixel when matching bitmaps. See
-:ref:`scriptref_CTS` for more information on tolerance.
+:ref:`scriptref-CTS` for more information on tolerance.
 Returns true if found. If found, *x, y* specifies the position where the bitmap
 was found.
+
+.. _scriptref-findbitmapspiral:
 
 FindBitmapSpiral
 ----------------
@@ -316,6 +414,8 @@ Returns true if found. If found, *x, y* specifies the position where the bitmap
 was found. Search starts from a point defined by *x, y*.
 
 
+.. _scriptref-findbitmapsspiraltolerance:
+
 FindBitmapsSpiralTolerance
 --------------------------
 
@@ -326,9 +426,11 @@ FindBitmapsSpiralTolerance
 
 Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
 Tolerance defines the tolerance per pixel when matching bitmaps. See
-:ref:`scriptref_CTS` for more information on tolerance.
+:ref:`scriptref-CTS` for more information on tolerance.
 Search starts from a point defined by *x, y*.
 Returns true if found. If found, each point in *TPA* specifies a match.
+
+.. _scriptref-findbitmapspiraltolerance:
 
 FindBitmapSpiralTolerance
 -------------------------
@@ -339,10 +441,12 @@ FindBitmapSpiralTolerance
 
 Searches for the Bitmap *bmp* on the client in the area defined by *xs,ys,xe,ye*.
 Tolerance defines the tolerance per pixel when matching bitmaps. See
-:ref:`scriptref_CTS` for more information on tolerance.
+:ref:`scriptref-CTS` for more information on tolerance.
 Search starts from a point defined by *x, y*.
 Returns true if found. If found, *x, y* specifies the position where the bitmap
 was found.
+
+.. _scriptref-rotatebitmap:
 
 RotateBitmap
 ------------
@@ -352,6 +456,8 @@ RotateBitmap
     function RotateBitmap(bitmap: Integer; angle: Extended): Integer;
 
 
+.. _scriptref-desaturatebitmap:
+
 DesaturateBitmap
 ----------------
 
@@ -360,6 +466,8 @@ DesaturateBitmap
     function DesaturateBitmap(Bitmap : integer) : integer;
 
 
+.. _scriptref-invertbitmap:
+
 InvertBitmap
 ------------
 
@@ -367,6 +475,8 @@ InvertBitmap
 
     procedure InvertBitmap(Bitmap : integer);
 
+
+.. _scriptref-copybitmap:
 
 CopyBitmap
 ----------
@@ -377,6 +487,8 @@ CopyBitmap
 
 Creates a copy of the *Bitmap*. Returns the bitmap copy.
 
+.. _scriptref-greyscalebitmap:
+
 GreyScaleBitmap
 ---------------
 
@@ -386,6 +498,7 @@ GreyScaleBitmap
 
 Creates a copy of the bitmap, greyscaled.
 
+.. _scriptref-brightnessbitmap:
 
 BrightnessBitmap
 ----------------
@@ -400,6 +513,8 @@ Returns a new bitmap with the brightness applied.
 If you instead want to apply brightness to the current bitmap, see
 :ref:`filter_apply_bitmap`
 
+.. _scriptref-contrastbitmap:
+
 ContrastBitmap
 --------------
 
@@ -410,6 +525,7 @@ ContrastBitmap
 Changes the constrast of a bitmap, returns a new bitmap with the contrast
 applied.
 
+.. _scriptref-posterizebitmap:
 
 PosterizeBitmap
 ---------------
@@ -441,6 +557,8 @@ Applying a filter on the current bitmap
         FreeBitmap(b);
     end.
 
+.. _scriptref-createmaskfrombitmap:
+
 CreateMaskFromBitmap
 --------------------
 
@@ -448,6 +566,8 @@ CreateMaskFromBitmap
 
     function CreateMaskFromBitmap(Bitmap : integer) : TMask;
 
+
+.. _scriptref-findmasktolerance:
 
 FindMaskTolerance
 -----------------
@@ -457,6 +577,8 @@ FindMaskTolerance
     function FindMaskTolerance(const mask: TMask; var x, y: Integer; xs,ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
 
 
+.. _scriptref-findbitmapmasktolerance:
+
 FindBitmapMaskTolerance
 -----------------------
 
@@ -465,6 +587,8 @@ FindBitmapMaskTolerance
     function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
 
 
+.. _scriptref-finddeformedbitmaptolerancein:
+
 FindDeformedBitmapToleranceIn
 -----------------------------
 
@@ -472,6 +596,8 @@ FindDeformedBitmapToleranceIn
 
     function FindDeformedBitmapToleranceIn(bitmap: integer; var x,y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;
 
+
+.. _scriptref-drawtpabitmap:
 
 DrawTPABitmap
 -------------
@@ -484,6 +610,7 @@ DrawTPABitmap
 on the bitmap by setting the pixel on the bitmap (position defined by tpa point)
 to *color*.
 
+.. _scriptref-drawatpabitmap:
 
 DrawATPABitmap
 --------------
@@ -497,6 +624,8 @@ Each point in the TPointArray is *painted* on the bitmap by setting
 the pixel on the bitmap (position defined by tpa point)
 to a color. Colors differ per TPointArray (group).
 
+.. _scriptref-drawatpabitmapex:
+
 DrawATPABitmapEx
 ----------------
 
@@ -509,6 +638,7 @@ Each point in the TPointArray is *painted* on the bitmap by setting
 the pixel on the bitmap (position defined by tpa point)
 to a color. Colors are defined by *Colors*.
 
+.. _scriptref-drawbitmap:
 
 DrawBitmap
 ----------
@@ -519,6 +649,8 @@ DrawBitmap
 
 Draw the bitmap to a TCanvas.
 
+.. _scriptref-rectanglebitmap:
+
 RectangleBitmap
 ---------------
 
@@ -526,6 +658,8 @@ RectangleBitmap
 
     procedure RectangleBitmap(bitmap : integer; const box : TBox; Color : TColor);
 
+
+.. _scriptref-floodfillbitmap:
 
 FloodFillBitmap
 ---------------
@@ -535,6 +669,8 @@ FloodFillBitmap
     procedure FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor);
 
 
+.. _scriptref-calculatepixelshift:
+
 CalculatePixelShift
 -------------------
 
@@ -543,11 +679,12 @@ CalculatePixelShift
     function CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;
 
 
+.. _scriptref-calculatepixeltolerance:
+
 CalculatePixelTolerance
 -----------------------
 
 .. code-block:: pascal
 
     function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;')
-
 
