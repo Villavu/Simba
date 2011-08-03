@@ -60,6 +60,14 @@ type
   TRGB32Array = array of TRGB32;
   TPRGB32Array = array of PRGB32; //Array of Pointers
 
+  THSL = record
+    H, S, L: extended;
+  end;
+  PHSL = ^THSL;
+
+  THSLArray = array of THSL;
+  T2DHSLArray = array of array of THSL;
+
   TRetData = record
     Ptr : PRGB32;
     IncPtrWith : integer;
