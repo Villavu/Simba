@@ -1280,7 +1280,7 @@ type
    psWriteLn(PlpString(Params^[0])^);
  end;
 
-//Generate these wrappers with a script -Dg
+
 {$I LPInc/Wrappers/other.inc}
 {$I LPInc/Wrappers/settings.inc}
 {$I LPInc/Wrappers/bitmap.inc}
