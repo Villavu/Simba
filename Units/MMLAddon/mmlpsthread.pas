@@ -1295,6 +1295,7 @@ type
 {$I LPInc/Wrappers/file.inc}
 {$I LPInc/Wrappers/keyboard.inc}
 {$I LPInc/Wrappers/dtm.inc}
+{.$I LPInc/Wrappers/extensions.inc} //Doesn't work for me!
 {$I LPInc/Wrappers/ocr.inc}
 {$I LPInc/Wrappers/internets.inc}
 
