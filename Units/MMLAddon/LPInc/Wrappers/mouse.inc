@@ -13,7 +13,7 @@ begin
   ps_GetMousePos(Pinteger(Params^[0])^, Pinteger(Params^[1])^);
 end;
 
-procedure Lape_(const Params: PParamArray; const Result: Pointer);
+procedure Lape_ConvIntClickType(const Params: PParamArray; const Result: Pointer);
 begin
   PClickType(Result)^ := ConvIntClickType(PInteger(Params^[0])^);
 end;

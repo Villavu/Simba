@@ -72,7 +72,9 @@ procedure ConvertRT(Input, Dbg, Output : TStrings; procnames : TStrings = nil);
   function FixName( str : string) : string;
   begin
     if (length(str) > 3) and (str[1] = 'p') and (str[2] = 's') and (str[3] = '_') then
-      result := Copy(str,4,length(str)-3);
+      result := Copy(str,4,length(str)-3)
+    else
+      result := str;
   end;
 
   function PtrName ( str : string) : String;
@@ -91,7 +93,6 @@ var
   a, b, c: TDeclarationArray;
   i, ii, iii, pc: Integer;
   s: string;
-  rutiss,tmp : string;
   d: TDeclaration;
   Fail: Boolean;
 begin
