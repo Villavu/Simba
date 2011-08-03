@@ -20,7 +20,7 @@ end;
 
 procedure Lape_(const Params: PParamArray; const Result: Pointer);
 begin
-  PInteger(Result)^ := ext_MessageDlg(Pstring(Params^[0])^, Pstring(Params^[1])^, PMsgDlgType(Params^[1])^, PMsgDlgButtons(Params^[2])^, PLongint(Params^[3])^);
+  PInteger(Result)^ := ext_MessageDlg(Pstring(Params^[0])^, Pstring(Params^[1])^, PMsgDlgType(Params^[2])^, PMsgDlgButtons(Params^[3])^, PLongint(Params^[4])^);
 end;
 
 procedure Lape_(const Params: PParamArray; const Result: Pointer);
@@ -30,7 +30,7 @@ end;
 
 procedure Lape_(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ext_InputQuery(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[1])^);
+  PBoolean(Result)^ := ext_InputQuery(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure Lape_(const Params: PParamArray; const Result: Pointer);
@@ -45,7 +45,7 @@ end;
 
 procedure Lape_(const Params: PParamArray);
 begin
-  ext_OpenScript(Pstring(Params^[0])^, Pstring(Params^[1])^, Pboolean(Params^[1])^);
+  ext_OpenScript(Pstring(Params^[0])^, Pstring(Params^[1])^, Pboolean(Params^[2])^);
 end;
 
 procedure Lape_(const Params: PParamArray);

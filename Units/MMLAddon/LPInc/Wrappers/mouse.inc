@@ -5,7 +5,7 @@ end;
 
 procedure Lape_ScrollMouse(const Params: PParamArray);
 begin
-  ps_ScrollMouse(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[1])^);
+  ps_ScrollMouse(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
 procedure Lape_GetMousePos(const Params: PParamArray);
@@ -20,17 +20,17 @@ end;
 
 procedure Lape_HoldMouse(const Params: PParamArray);
 begin
-  ps_HoldMouse(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[1])^);
+  ps_HoldMouse(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
 procedure Lape_ReleaseMouse(const Params: PParamArray);
 begin
-  ps_ReleaseMouse(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[1])^);
+  ps_ReleaseMouse(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
 procedure Lape_ClickMouse(const Params: PParamArray);
 begin
-  ps_ClickMouse(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[1])^);
+  ps_ClickMouse(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
 procedure Lape_IsMouseButtonDown(const Params: PParamArray; const Result: Pointer);

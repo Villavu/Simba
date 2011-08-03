@@ -35,7 +35,7 @@ end;
 
 procedure Lape_Replace(const Params: PParamArray; const Result: Pointer);
 begin
-  Pstring(Result)^ := ps_Replace(Pstring(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^, PReplaceFlags(Params^[1])^);
+  Pstring(Result)^ := ps_Replace(Pstring(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^, PReplaceFlags(Params^[3])^);
 end;
 
 procedure Lape_IntToStr(const Params: PParamArray; const Result: Pointer);
