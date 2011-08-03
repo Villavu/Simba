@@ -1,7 +1,9 @@
+.. _docdoc:
+
 Documentation Documentation
 ===========================
 
-This page is the documentation for the documentation. 
+This page is the documentation for the documentation.
 
 It is very important to know this by heart when you are writing documentation
 for Simba.
@@ -18,12 +20,13 @@ be found at the bottom of the page.
 
 Building the documentation
 --------------------------
+
 In the future, the online documentation will be refreshed every hour. However,
 if you want to build the documentation yourself, you should install
-``python-sphinx``. 
+``python-sphinx``.
 
-Move to the ``Simba/doc/sphinx`` directory and run ``make all``. 
-This will place an HTML version of the documentation in ``_build/html``. 
+Move to the ``Simba/doc/sphinx`` directory and run ``make all``.
+This will place an HTML version of the documentation in ``_build/html``.
 
 .. note::
     The build instructions are for Linux only. If you want to build the doc on
@@ -66,6 +69,28 @@ The titles of all major sections have all words capitalized. (The ones with
 The minor sections and subsections (---) and (~~~) have only the first word and
 Simba specific words (like Simba itself) capitalized.
 
-Try to stick to the Python documentation standards. 
+Try to stick to the Python documentation standards.
 ( http://docs.python.org/using/index.html )
+
+References
+----------
+
+Sphinx has references, most of the .rst files contain labels and references.
+
+A label looks something like this:
+
+.. code-block:: python
+
+    .. _<X>-<Y>:
+
+Where X is either the name of file or folder; and Y is the name of the
+file/function if X is a folder. For referring to specific functions for example,
+use:
+
+.. code-block:: python
+
+    .. _scriptref-movemouse:
+
+To define a label for the MoveMouse function. Labels are always placed right
+above section/chapter declarations.
 

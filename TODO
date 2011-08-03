@@ -1,10 +1,52 @@
--   Make Simba more ``modular'':
-    -   Fonts
-    -   Interpreters
-    -   Code completion/hints
-    -   Extensions
-    -   Interpreter system overhaul?
+Simple stuff, not required, may not be possible/useful:
+    -   Compiler arguments in the about form                        [ ]
+    -   Coloured writeln                                            [ ]
+    -   Make an TAction for the Colour Picker.                      [ ]
+    -   Portable install (needs fiddling with settings and such)    [ ]
+    -   --no-extensions flag for Simba.                             [ ]
 
--   Make an TAction for the Colour Picker.
--   Portable install (needs fiddling with settings and such)
--   --no-extensions flag for Simba.
+
+-   CTS/finder speedups and changes                                 [ ]
+    General ideas:
+        -   everything subprocedure (lots of code)
+
+        -   jit + comparison function (per cts)  generated, call in loop
+
+        -   comparison function (per cts), not generated, call in loop
+
+    -   JIT (Generate comparison functions)                         [ ]
+    -   Comparison functions for HSL/XYZ/L*a*b should check for
+        match on each component before calculating the next.
+        (see FindColorsToleranceOptimised)
+
+    -   Pass color information in struct                            [ ]
+    -   Precalculate screen bitmap in current cts / keep a cache
+        to save comparisons                                         [ ]
+    -   Add CTS 3                                                   [ ]
+    -   Add a direct RGB -> CIE L*a*b conversion                    [ ]
+    -   Make sure colour conversions are inline                     [ ]
+
+-   More documentation:
+    -   Cover all functions by at least mentioning the definition   [ ]
+    -   Write tutorial                                              [ ]
+    -   In depth documentation per function                         [ ]
+
+-   New interpreters
+    -   DWSScript ?                                                 [ ]
+    -   Lape!                                                       [ ]
+
+-   Integrate script manager                                        [ ]
+    -   Basic support. (Install scripts)                            [ ]
+    -   Update functionality                                        [ ]
+    -   Uninstall scripts                                           [ ]
+    -   Better storage / more stable storage                        [ ]
+    -   Pretty GUI                                                  [ ]
+    -   Merging / storing usernames when updating                   [ ]
+
+-   Make Simba more ``modular'':
+    -   Fonts                                                       [ ]
+    -   Interpreters                                                [ ]
+    -   Code completion/hints                                       [ ]
+    -   Extensions                                                  [ ]
+    -   Interpreter system overhaul?                                [ ]
+

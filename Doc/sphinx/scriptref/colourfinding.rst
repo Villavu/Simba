@@ -37,6 +37,7 @@ components:
         a *TPointArray*.
 
 .. note::
+
     Other techniques exist, which involve relative point distance from one point
     to another; these are found in the :ref:`scriptref-dtm` section.
 
@@ -51,6 +52,8 @@ Colour Finding Methods
 
 A list of all colour finding methods in Simba.
 
+.. _scriptref-similarcolors:
+
 SimilarColors
 ~~~~~~~~~~~~~
 
@@ -61,6 +64,8 @@ SimilarColors
 SimilarColors returns true if the two passed colours are *similar* given the
 passed *Tolerance*. 
 
+.. _scriptref-getcolor:
+
 GetColor
 ~~~~~~~~
 
@@ -68,13 +73,19 @@ GetColor
 
     function GetColor(x, y: Integer): Integer;
 
-GetColor returns the color on the coordinate (*x*, *y*).
+GetColor returns the color on the coordinate *(x, y)*.
 
-*Example: Printing the colour on coordinate (25, 25)*
+Example printing the colour on coordinate (25, 25).
 
 .. code-block:: pascal
 
-    Writeln('Colour is ' + IntToStr(GetColor(25, 25)))
+    program printcolour;
+
+    begin
+      Writeln('Colour is ' + IntToStr(GetColor(25, 25)))
+    end.
+
+.. _scriptref-getcolors:
 
 GetColors
 ~~~~~~~~~
@@ -85,6 +96,7 @@ GetColors
 
 GetColors returns an array of the colours at the given *Coords*.
 
+.. _scriptref-countcolor:
 
 CountColor
 ~~~~~~~~~~
@@ -96,6 +108,8 @@ CountColor
 Returns how many times *Color* occurs in the area defined by (*xs*, *ys*), 
 (*xe*, *ye*)
 
+.. _scriptref-countcolortolerance:
+
 CountColorTolerance
 ~~~~~~~~~~~~~~~~~~~
 
@@ -105,6 +119,8 @@ CountColorTolerance
 
 Returns how many times *Color* occurs (within *Tolerance*)
 in the area defined by (*xs*, *ys*), (*xe*, *ye*)
+
+.. _scriptref-findcolor:
 
 FindColor
 ~~~~~~~~~
@@ -121,6 +137,8 @@ The point is returned in *x* and *y*.
 It searches from the top left to the bottom right and will stop
 after matching a point.
 
+.. _scriptref-findcolortolerance:
+
 FindColorTolerance
 ~~~~~~~~~~~~~~~~~~
 
@@ -134,8 +152,10 @@ FindColorTolerance returns true if a colour within the given tolerance range
 *x2*, *y2*.
 Only the first point is returned in *x* and *y*.
 Whether or not a colour is within the tolerance range is determined by the 
-:ref:`scriptref_CTS` mode. It searches from the top left to the bottom right
+:ref:`scriptref-CTS` mode. It searches from the top left to the bottom right
 and will stop after matching a point.
+
+.. _scriptref-findcolors:
 
 FindColors
 ~~~~~~~~~~
@@ -147,6 +167,8 @@ FindColors
 FindColors returns a list of all points that match the colour *col* in an area
 defined by *x1*, *y1*, *x2*, *y2*. It returns true if one or more points have
 been found.
+
+.. _scriptref-findcolorstolerance:
 
 FindColorsTolerance
 ~~~~~~~~~~~~~~~~~~~
@@ -160,9 +182,11 @@ FindColorsTolerance returns true if at least one point was found.
 A point is found if it is within the given tolerance range *tol* 
 of the given colour *col* and inside the box defined by *x1*, *y1*, *x2*, *y2*.
 Whether or not a color is within the tolerance range is determined by the 
-:ref:`scriptref_CTS` mode.
+:ref:`scriptref-CTS` mode.
 It searches from the top left to the bottom right and will find all
 matching points in the area.
+
+.. _scriptref-findcolorspiral:
 
 FindColorSpiral
 ~~~~~~~~~~~~~~~
@@ -174,6 +198,8 @@ FindColorSpiral
 
 Same as FindColor, but starts searching from *x*, *y*.
 
+.. _scriptref-findcolorspiraltolerance:
+
 FindColorSpiralTolerance
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -184,6 +210,8 @@ FindColorSpiralTolerance
 
 Same as FindColorTolerance, but starts searching from *x*, *y*.
 
+.. _scriptref-findcolorsspiraltolerance:
+
 FindColorsSpiralTolerance
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -193,6 +221,9 @@ FindColorsSpiralTolerance
     var pts: TPointArray; col, x1, y1, x2, y2, tol: Integer): Boolean; 
 
 Same as FindColorsTolerance, but starts searching from *x*, *y*.
+
+.. _scriptref-findcoloredarea:
+.. _scriptref-findcoloredareatolerance:
 
 Find areas of colours
 ~~~~~~~~~~~~~~~~~~~~~
@@ -215,7 +246,7 @@ FindColoredArea finds an area that consists out of Colours that match *Color* wi
 the given *Tolerance* and has a minimal size of *MinArea*.
 If you want minimal area of 5x5 pixels (25), then set MinArea to 25.
 
-.. _scriptref_CTS:
+.. _scriptref-CTS:
 
 Colour tolerance
 ----------------
@@ -236,6 +267,11 @@ given a tolerance. There are three algorithms, from fastest to slowest:
         very little in hue. Luminance is assigned a somewhat static function, and
         has no modifier.
 
+..
+    TODO: CIE-Lab
+
+.. _scriptref-gettolerancespeed:
+.. _scriptref-setcolortolerancespeed:
 
 Get and Set Colour Tolerance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -258,11 +294,14 @@ function, which returns the current colour tolerance speed:
 
     function GetToleranceSpeed: Integer;
 
-*Example: Printing the Color Tolerance*
+Example printing the Color Tolerance
 
 .. code-block:: pascal
 
     Writeln(Format('Tolerance Speed = %d', [GetToleranceSpeed]))
+
+.. _scriptref-settolerancespeed2modifiers:
+.. _scriptref-gettolerancespeed2modifiers:
 
 Get And Set Colour Modifiers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -280,14 +319,14 @@ Set colour speed 2 modifiers.
     SetToleranceSpeed2Modifiers(42.0, 0.4)
 
 The following function
-    
+
 .. code-block:: pascal
 
     procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended);
 
 returns colour speed 2 modifiers.
 
-*Example: Getting the modifiers*
+Example getting the modifiers:
 
 .. code-block:: pascal
 

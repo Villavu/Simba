@@ -15,6 +15,11 @@ Const
   MOUSE_UP = 0;
   MOUSE_DOWN = 1;
 
+{
+    Global variables.
+    To actually read the last_error, make sure you copy it to a safe place
+    directly after the function call.
+}
 var
   last_error: String;
   debug: boolean;
@@ -23,28 +28,28 @@ var
 
 function init: integer;  cdecl;
 begin
-    last_error := '';
-    debug := true;
-    result := RESULT_OK;
+  last_error := '';
+  debug := true;
+  result := RESULT_OK;
 end;
 
 procedure set_last_error(s: string);
 begin
-    last_error := s;
-    if debug then
-        writeln('ERROR: ' + s);
+  last_error := s;
+  if debug then
+      writeln('ERROR: ' + s);
 end;
 
 { Validate the TClient. If it is NULL, set last error and return false }
 function validate_client(C: TClient): boolean; inline;
 begin
-    result := Assigned(C);
-    if not result then
-    begin
-        last_error := 'PClient is NULL';
-        if debug then
-          writeln(last_error);
-    end;
+  result := Assigned(C);
+  if not result then
+  begin
+    last_error := 'PClient is NULL';
+    if debug then
+      writeln(last_error);
+  end;
 end;
 
 {
@@ -55,42 +60,42 @@ function create_client: PtrUInt; cdecl;
 var
   C: TClient;
 begin
-    try
-        C := TClient.Create('');
-        Result := PtrUInt(C);
-    except on e : Exception do
-    begin
-        // FIXME UINT negative
-        result := PtrUInt(RESULT_ERROR);
-        set_last_error(e.message);
-    end;
-    end;
-    writeln(format('C: %d, IOManager: %d', [PtrUInt(C), PtrUInt(C.IOManager)]));
+  try
+    C := TClient.Create('');
+    Result := PtrUInt(C);
+  except on e : Exception do
+  begin
+    // FIXME UINT negative
+    result := PtrUInt(RESULT_ERROR);
+    set_last_error(e.message);
+  end;
+  end;
+  writeln(format('C: %d, IOManager: %d', [PtrUInt(C), PtrUInt(C.IOManager)]));
 end;
 
 { Destroy a TClient }
 function destroy_client(C: TClient): integer; cdecl;
 begin
-    try
-        C.Free;
-    except on e : Exception do
-    begin
-        result := RESULT_ERROR;
-        set_last_error(e.message);
-    end;
-    end;
+  try
+    C.Free;
+  except on e : Exception do
+  begin
+    result := RESULT_ERROR;
+    set_last_error(e.message);
+  end;
+  end;
 end;
 
 { Set (verbose) debug on/off }
 procedure set_debug(v: Boolean); cdecl;
 begin
-    debug := v;
+  debug := v;
 end;
 
 { Get debug }
 function get_debug: boolean; cdecl;
 begin
-    exit(debug);
+  exit(debug);
 end;
 
 {
@@ -101,40 +106,40 @@ end;
 }
 function get_last_error: pchar; cdecl;
 begin
-    exit(@last_error[1]);
+  exit(@last_error[1]);
 end;
 
 { Turn an array into a pointer. The pointer memory is not managed by FPC, so we can pass
   it along happily. It'll have to be freed by the external control though }
 function array_to_ptr(ptr: Pointer; size: PtrUInt; objsize: PtrUInt): Pointer; cdecl;
 begin
-    result := GetMem(objsize * size);
-    Move(ptr^, result^, objsize * size);
+  result := GetMem(objsize * size);
+  Move(ptr^, result^, objsize * size);
 end;
 
 { Free memory previously allocated by libMML }
 function free_ptr(ptr: pointer): boolean; cdecl;
 begin
-    result := Assigned(ptr);
-    if not result then
-    begin
-      set_last_error('TClient is NULL');
-      if debug then
-        writeln(last_error);
-    end else
-      FreeMem(ptr);
+  result := Assigned(ptr);
+  if not result then
+  begin
+    set_last_error('TClient is NULL');
+    if debug then
+      writeln(last_error);
+  end else
+    FreeMem(ptr);
 end;
 
 { Allocate memory with libMML }
 function alloc_mem(size, objsize: PtrUInt): Pointer; cdecl;
 begin
-    result := GetMem(size * objsize);
+  result := GetMem(size * objsize);
 end;
 
 { Reallocate memory with libMML }
 function realloc_mem(ptr: Pointer; size, objsize: PtrUInt): Pointer; cdecl;
 begin
-    result := ReAllocMem(ptr, size*objsize);
+  result := ReAllocMem(ptr, size*objsize);
 end;
 
 { Mouse }
@@ -143,34 +148,32 @@ end;
 function get_mouse_pos(C: TClient; var t: tpoint): integer; cdecl;
 
 begin
-    if not validate_client(C) then
+  if not validate_client(C) then
+    exit(RESULT_ERROR);
+
+  try
+    C.IOManager.GetMousePos(t.x,t.y);
+    result := RESULT_OK;
+  except on e : Exception do
     begin
-        exit(RESULT_ERROR);
+      result := RESULT_ERROR;
+      set_last_error(e.Message);
     end;
-    
-    try
-        C.IOManager.GetMousePos(t.x,t.y);
-        result := RESULT_OK;
-    except on e : Exception do
-    begin
-        result := RESULT_ERROR;
-        set_last_error(e.Message);
-    end;
-    end;
+  end;
 end;
 
 { Set mouse position of client C to point t }
 function set_mouse_pos(C: TClient; var t: tpoint): integer; cdecl;
 begin
-    try
-        C.IOManager.MoveMouse(t.x,t.y);
-        result := RESULT_OK;
-    except on e : Exception do
+  try
+    C.IOManager.MoveMouse(t.x,t.y);
+    result := RESULT_OK;
+  except on e : Exception do
     begin
         result := RESULT_ERROR;
         set_last_error(e.Message);
     end;
-    end;
+  end;
 end;
 
 
@@ -187,38 +190,38 @@ end;
 { Return the state of a mouse button given client C }
 function get_mouse_button_state(C: TClient; But: Integer): Integer;  cdecl;
 begin
-    try
-        if C.IOManager.IsMouseButtonDown(ConvIntClickType(But)) then
-            result := MOUSE_DOWN
-        else
-            result := MOUSE_UP;
-    except on e : Exception do
+  try
+    if C.IOManager.IsMouseButtonDown(ConvIntClickType(But)) then
+      result := MOUSE_DOWN
+    else
+      result := MOUSE_UP;
+  except on e : Exception do
     begin
-        result := RESULT_ERROR;
-        set_last_error(e.Message);
+      result := RESULT_ERROR;
+      set_last_error(e.Message);
     end;
-    end;
+  end;
 end;
 
 { Set the state of a mouse button given client C }
 function set_mouse_button_state(C: TClient; But, State, X, Y: Integer): Integer;  cdecl;
 begin
-    try
-        if State = MOUSE_UP then
-        begin
-            C.IOManager.ReleaseMouse(X, Y, ConvIntClickType(But));
-            result := RESULT_OK;
-        end else if state = MOUSE_DOWN then
-        begin
-            C.IOManager.HoldMouse(X, Y, ConvIntClickType(But));
-            result := RESULT_OK;
-        end;
-    except on e : Exception do
+  try
+    if State = MOUSE_UP then
     begin
-        result := RESULT_ERROR;
-        set_last_error(e.Message);
+      C.IOManager.ReleaseMouse(X, Y, ConvIntClickType(But));
+      result := RESULT_OK;
+    end else if state = MOUSE_DOWN then
+    begin
+      C.IOManager.HoldMouse(X, Y, ConvIntClickType(But));
+      result := RESULT_OK;
     end;
+  except on e : Exception do
+    begin
+      result := RESULT_ERROR;
+      set_last_error(e.Message);
     end;
+  end;
 end;
 
 
@@ -227,52 +230,52 @@ end;
 function get_color(C: TClient; x, y: Integer;
                    out color: Integer): Integer; cdecl;
 begin
-    try
-        color := C.IOManager.GetColor(x, y);
-        if color > -1 then
-            result := RESULT_OK
-        else
-            result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    color := C.IOManager.GetColor(x, y);
+    if color > -1 then
+        result := RESULT_OK
+    else
+        result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 { Find color on client C in area (x1,y1,x2,y2) and return coordinate (if any) in x, y }
 function find_color(C: TClient; var x, y: Integer;
                     color, x1, y1, x2, y2: Integer): Integer; cdecl;
 begin
-    try
-        if C.MFinder.FindColor(x, y, color, x1, y1, x2, y2) then
-            result := RESULT_OK
-        else
-            result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    if C.MFinder.FindColor(x, y, color, x1, y1, x2, y2) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.Message);
-        result := RESULT_ERROR;
+      set_last_error(e.Message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function find_color_tolerance(C: TClient; var x, y: Integer; color: Integer;
                               tol, x1, y1, x2, y2: Integer): Integer;  cdecl;
 
 begin
-    try
-        if C.MFinder.FindColorTolerance(x, y, color, x1, y1, x2, y2, tol) then
-            result := RESULT_OK
-        else
-            result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    if C.MFinder.FindColorTolerance(x, y, color, x1, y1, x2, y2, tol) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.Message);
-        result := RESULT_ERROR;
+      set_last_error(e.Message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function find_color_tolerance_optimised(C: TClient; var x, y: Integer;
@@ -280,18 +283,18 @@ function find_color_tolerance_optimised(C: TClient; var x, y: Integer;
                                         x1, y1, x2, y2: Integer;
                                         tol: Integer): Integer; cdecl;
 begin
-    try
-        if C.MFinder.FindColorToleranceOptimised(x, y, col, x1, y1, x2, y2,
-                                                 tol) then
-            result := RESULT_OK
-        else
-            result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    if C.MFinder.FindColorToleranceOptimised(x, y, col, x1, y1, x2, y2,
+                                            tol) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function find_colors(C: TClient; var ptr: PPoint; var len: Integer;
@@ -299,27 +302,27 @@ function find_colors(C: TClient; var ptr: PPoint; var len: Integer;
 var
   TPA: TPointArray;
 begin
-    setlength(TPA, 0);
-    try
-        C.MFinder.FindColors(TPA, color, x1, y1, x2, y2);
-    except on e : Exception do
+  setlength(TPA, 0);
+  try
+    C.MFinder.FindColors(TPA, color, x1, y1, x2, y2);
+  except on e : Exception do
     begin
-        set_last_error(e.Message);
-        result := RESULT_ERROR;
+      set_last_error(e.Message);
+      result := RESULT_ERROR;
     end;
-    end;
-    
-    len := Length(TPA);
-    if len > 0 then
-        result := RESULT_OK
-    else
-    begin
-        setlength(tpa, 0);
-        exit(RESULT_FALSE);
-    end;
-    
-    ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
+  end;
+
+  len := Length(TPA);
+  if len > 0 then
+    result := RESULT_OK
+  else
+  begin
     setlength(tpa, 0);
+    exit(RESULT_FALSE);
+  end;
+
+  ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
+  setlength(tpa, 0);
 end;
 
 function find_colors_tolerance(C: TClient; var ptr: PPoint; var len: Integer;
@@ -327,26 +330,26 @@ function find_colors_tolerance(C: TClient; var ptr: PPoint; var len: Integer;
 var
   TPA: TPointArray;
 begin
-    try
-        C.MFinder.FindColorsTolerance(TPA, color, x1, y1, x2, y2, tol);
-    except on e : Exception do
+  try
+    C.MFinder.FindColorsTolerance(TPA, color, x1, y1, x2, y2, tol);
+  except on e : Exception do
     begin
-        set_last_error(e.Message);
-        result := RESULT_ERROR;
+      set_last_error(e.Message);
+      result := RESULT_ERROR;
     end;
-    end;
-    
-    len := Length(TPA);
-    if len > 0 then
-      result := RESULT_OK
-    else
-    begin
-        setlength(tpa, 0);
-        exit(RESULT_FALSE);
-    end;
+  end;
 
-    ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
-    setlength(TPA, 0);
+  len := Length(TPA);
+  if len > 0 then
+    result := RESULT_OK
+  else
+  begin
+    setlength(tpa, 0);
+    exit(RESULT_FALSE);
+  end;
+
+  ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
+  setlength(TPA, 0);
 end;
 
 function find_colors_tolerance_optimised(C: TClient; var ptr: PPoint;
@@ -356,184 +359,184 @@ function find_colors_tolerance_optimised(C: TClient; var ptr: PPoint;
 var
   TPA: TPointArray;
 begin
-    try
-        C.MFinder.FindColorsToleranceOptimised(TPA, col, x1, y1, x2, y2, tol);
-    except on e : Exception do
+  try
+      C.MFinder.FindColorsToleranceOptimised(TPA, col, x1, y1, x2, y2, tol);
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
-    
-    len := Length(TPA);
-    if len > 0 then
-        result := RESULT_OK
-    else
-    begin
-        setlength(tpa, 0);
-        exit(RESULT_FALSE);
-    end;
-    
-    ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
-    setlength(TPA, 0);
+  end;
+
+  len := Length(TPA);
+  if len > 0 then
+    result := RESULT_OK
+  else
+  begin
+    setlength(tpa, 0);
+    exit(RESULT_FALSE);
+  end;
+
+  ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
+  setlength(TPA, 0);
 end;
 
 function similar_colors(C: TClient; col1, col2, tol: Integer): Integer; cdecl;
 begin
-    try
-        if C.MFinder.SimilarColors(col1, col2, tol) then
-            result := RESULT_OK
-        else
-            result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    if C.MFinder.SimilarColors(col1, col2, tol) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_FALSE;
+      set_last_error(e.message);
+      result := RESULT_FALSE;
     end;
-    end;
+  end;
 end;
 
 function count_color(C: TClient; out count: Integer;
                      Color, xs, ys, xe, ye: Integer): Integer; cdecl;
 begin
-    try
-        count := C.MFinder.CountColor(Color, xs, ys, xe, ye);
-        if count > 0 then
-            result := RESULT_OK
-        else
-            result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    count := C.MFinder.CountColor(Color, xs, ys, xe, ye);
+    if count > 0 then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function count_color_tolerance(C: TClient; out count: Integer; col: Integer;
                                xs, ys, xe, ye, tol: Integer): Integer; cdecl;
 begin
-    try
-        count := C.MFinder.CountColorTolerance(col, xs, ys, xe, ye, tol);
-    except on e : Exception do
+  try
+    count := C.MFinder.CountColorTolerance(col, xs, ys, xe, ye, tol);
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 
-    if count > 0 then
-        result := RESULT_OK
-    else
-        result := RESULT_FALSE;
+  if count > 0 then
+    result := RESULT_OK
+  else
+    result := RESULT_FALSE;
 end;
 
 function find_color_spiral(C: TClient; var x, y: Integer;
                            col, xs, ys, xe, ye: Integer): Integer; cdecl;
 begin
-    try
-      if C.MFinder.FindColorSpiral(x, y, col, xs, ys, xe, ye) then
-        result := RESULT_OK
-      else
-        result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    if C.MFinder.FindColorSpiral(x, y, col, xs, ys, xe, ye) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function find_color_spiral_tolerance(C: TClient; var x, y: Integer;
                                      col, xs, ys, xe, ye: Integer;
                                      tol: Integer): Integer; cdecl;
 begin
-    try
-        if C.MFinder.FindColorSpiralTolerance(x, y, col, xs, ys, xe, ye,
-            tol) then
-          result := RESULT_OK
-        else
-          result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    if C.MFinder.FindColorSpiralTolerance(x, y, col, xs, ys, xe, ye,
+      tol) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function find_colored_area(C: TClient; var x, y: Integer;
                            col, xs, ys, xe, ye, minA: Integer): Integer; cdecl;
 begin
-    try
-        if C.MFinder.FindColoredArea(x, y, col, xs, ys, xe, ye, minA) then
-            result := RESULT_OK
-        else
-            result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    if C.MFinder.FindColoredArea(x, y, col, xs, ys, xe, ye, minA) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function find_colored_area_tolerance(C: TClient; var x, y: Integer;
                                      col, xs, ys, xe, ye, minA: Integer;
                                      tol: Integer): Integer; cdecl;
 begin
-    try
-        if C.MFinder.FindColoredAreaTolerance(x, y, col,
-                                              xs, ys, xe, ye, minA, tol) then
-            result := RESULT_OK
-        else
-            result := RESULT_FALSE;
-    except on e : Exception do
+  try
+    if C.MFinder.FindColoredAreaTolerance(x, y, col,
+                                          xs, ys, xe, ye, minA, tol) then
+      result := RESULT_OK
+    else
+      result := RESULT_FALSE;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function set_tolerance_speed(C: TClient; nCTS: Integer): Integer; cdecl;
 begin
-    try
-        C.MFinder.SetToleranceSpeed(nCTS);
-        result := RESULT_OK;
-    except on e : Exception do
+  try
+    C.MFinder.SetToleranceSpeed(nCTS);
+    result := RESULT_OK;
+  except on e : Exception do
     begin
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function get_tolerance_speed(C: TClient; out cts: Integer): Integer; cdecl;
 begin
-    try
-        cts := C.MFinder.GetToleranceSpeed;
-        result := RESULT_OK;
-    except on e: Exception do
-    begin;
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+  try
+    cts := C.MFinder.GetToleranceSpeed;
+    result := RESULT_OK;
+  except on e: Exception do
+    begin
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end
-    end;
+  end;
 end;
 
 function set_tolerance_speed_2_modifiers(C: TClient;
                                          nHue, nSat: Extended): Integer; cdecl;
 begin
-    try
-        C.MFinder.SetToleranceSpeed2Modifiers(nHue, nSat);
-        result := RESULT_OK;
-    except on e : Exception do
-    begin;
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+  try
+    C.MFinder.SetToleranceSpeed2Modifiers(nHue, nSat);
+    result := RESULT_OK;
+  except on e : Exception do
+    begin
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 function get_tolerance_speed_2_modifiers(C: TClient; out hueMod: Extended;
@@ -541,17 +544,17 @@ function get_tolerance_speed_2_modifiers(C: TClient; out hueMod: Extended;
 var
   h, s: Extended;
 begin
-    try
-        C.MFinder.GetToleranceSpeed2Modifiers(h, s);
-        hueMod := h;
-        satMod := s;
-        result := RESULT_OK;
-    except on e : Exception do
-    begin;
-        set_last_error(e.message);
-        result := RESULT_ERROR;
+  try
+    C.MFinder.GetToleranceSpeed2Modifiers(h, s);
+    hueMod := h;
+    satMod := s;
+    result := RESULT_OK;
+  except on e : Exception do
+    begin
+      set_last_error(e.message);
+      result := RESULT_ERROR;
     end;
-    end;
+  end;
 end;
 
 { DTM }
@@ -564,53 +567,53 @@ function create_dtm(PointLen: integer; Points: PMDTMPoint; DTM: TMDTM): integer;
 var
   i: integer;
 begin
-    DTM := TMDTM.Create;
-    for i := 0 to PointLen - 1 do
-        DTM.AddPoint(Points[i]);
-    
-    if DTM.Valid then
-        exit(RESULT_OK);
-    
-    DTM.Free;
-    set_last_error('Invalid DTM');
-    result := RESULT_ERROR;
+  DTM := TMDTM.Create;
+  for i := 0 to PointLen - 1 do
+    DTM.AddPoint(Points[i]);
+
+  if DTM.Valid then
+    exit(RESULT_OK);
+
+  DTM.Free;
+  set_last_error('Invalid DTM');
+  result := RESULT_ERROR;
 end;
 
 { Delete a MDTM. Don't delete it if it is managed! use remove_dtm instead }
 function delete_dtm(C: TClient; DTM: TMDTM): integer; cdecl;
 begin
-    if not assigned(DTM) then
-    begin
-        set_last_error('DTM is NULL');
-        exit(RESULT_ERROR);
-    end;
-    
-    DTM.Free;
-    
-    result := RESULT_OK;
+  if not assigned(DTM) then
+  begin
+    set_last_error('DTM is NULL');
+    exit(RESULT_ERROR);
+  end;
+
+  DTM.Free;
+
+  result := RESULT_OK;
 end;
 
 { Add a previously created DTM to the DTM Manager }
 function add_dtm(C: TClient; DTM: TMDTM; var index: integer): integer; cdecl;
 begin
-    if not assigned(DTM) then
-    begin
-        set_last_error('DTM is NULL');
-        exit(RESULT_ERROR);
-    end;
-    
-    try
-        index := C.MDTMs.AddDTM(DTM);
-        exit(RESULT_OK);
-    except on e : Exception do
-        result := RESULT_ERROR;
-    end;
+  if not assigned(DTM) then
+  begin
+    set_last_error('DTM is NULL');
+    exit(RESULT_ERROR);
+  end;
+
+  try
+    index := C.MDTMs.AddDTM(DTM);
+    exit(RESULT_OK);
+  except on e : Exception do
+    result := RESULT_ERROR;
+  end;
 end;
 
 { Remove a previously added DTM from the DTM manager. This also frees the DTM }
 function remove_dtm(C: TClient; DTMi: integer): integer; cdecl;
 begin
-    C.MDTMs.FreeDTM(DTMi);
+  C.MDTMs.FreeDTM(DTMi);
 end;
 
 { Find a DTM given DTM index i, client C in area x1,y1,x2,y2. Return coord at x, y. }
@@ -619,19 +622,19 @@ function find_dtm(C: TClient; DTMi: integer; var x, y: integer; x1, y1, x2,
 var
   res: boolean;
 begin
-    try
-        res := C.MFinder.FindDTM(C.MDTMs.DTM[DTMi], x, y, x1, y1, x2, y2);
-    except on e : Exception do
+  try
+    res := C.MFinder.FindDTM(C.MDTMs.DTM[DTMi], x, y, x1, y1, x2, y2);
+  except on e : Exception do
     begin;
-        result := RESULT_ERROR;
-        set_last_error(e.Message);
+      result := RESULT_ERROR;
+      set_last_error(e.Message);
     end;
-    end;
-    
-    if res then
-        result := RESULT_OK
-    else
-        result := RESULT_FALSE;
+  end;
+
+  if res then
+    result := RESULT_OK
+  else
+    result := RESULT_FALSE;
 end;
 
 { Find a DTM given DTM index i, client C in area x1,y1,x2,y2. Return coord at x, y. }
@@ -642,46 +645,46 @@ var
   len: integer;
   TPA: TPointArray;
 begin
-    try
-        res := C.MFinder.FindDTMs(C.MDTMs.DTM[DTMi], TPA, x1, y1, x2, y2);
-    except on e : Exception do
-    begin;
-        result := RESULT_ERROR;
-        set_last_error(e.Message);
-    end;
-    end;
-    
-    len := Length(TPA);
-    if len > 0 then
-        result := RESULT_OK
-    else
-    begin
-        setlength(tpa, 0);
-        exit(RESULT_FALSE);
-    end;
-      
-    ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
-    setlength(TPA, 0);
+  try
+    res := C.MFinder.FindDTMs(C.MDTMs.DTM[DTMi], TPA, x1, y1, x2, y2);
+  except on e : Exception do
+  begin;
+    result := RESULT_ERROR;
+    set_last_error(e.Message);
+  end;
+  end;
+
+  len := Length(TPA);
+  if len > 0 then
+    result := RESULT_OK
+  else
+  begin
+    setlength(tpa, 0);
+    exit(RESULT_FALSE);
+  end;
+
+  ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
+  setlength(TPA, 0);
 end;
 
 function set_array_target(C: TClient; Arr: PRGB32; Size: TPoint): integer; 
     cdecl;
 begin
-    if not assigned(Arr) then
+  if not assigned(Arr) then
+  begin
+    set_last_error('Arr is not assigned');
+    exit(RESULT_FALSE);
+  end;
+
+  try
+    C.IOManager.SetTarget(Arr, Size);
+    result := RESULT_OK;
+  except on e : Exception do
     begin
-      set_last_error('Arr is not assigned');
-      exit(RESULT_FALSE);
+      set_last_error(e.message);
+      result := RESULT_FALSE;
     end;
-    
-    try
-        C.IOManager.SetTarget(Arr, Size);
-        result := RESULT_OK;
-    except on e : Exception do
-    begin;
-        set_last_error(e.message);
-        result := RESULT_FALSE;
-    end;
-    end;
+  end;
 end;
 
 exports

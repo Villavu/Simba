@@ -33,11 +33,11 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, Forms, SimbaUnit, colourhistory, About, internets, debugimage,
   framefunctionlist, simpleanalyzer, updater, updateform, Simbasettings,
-  libloader, mufasabase, v_ideCodeInsight,
+  libloader, mufasabase, tpa, v_ideCodeInsight,
   PSDump, v_ideCodeParser,
   v_AutoCompleteForm, CastaliaPasLex, CastaliaPasLexTypes, CastaliaSimplePasPar,
   CastaliaSimplePasParTypes, dcpbase64, mPasLex, v_Constants, v_MiscFunctions,
-  extensionmanagergui, mmisc, bitmapconv;
+  mmisc, bitmapconv;
 
 {$R Simba.res}
 
@@ -48,7 +48,7 @@ begin
   Application.CreateForm(TColourHistoryForm, ColourHistoryForm);
   Application.CreateForm(TAboutForm, AboutForm);
   Application.CreateForm(TDebugImgForm, DebugImgForm);
-  Application.CreateForm(TExtensionsForm, ExtensionsForm);
+//  Application.CreateForm(TExtensionsForm, ExtensionsForm);
   Application.CreateForm(TBitmapConvForm, BitmapConvForm);
 //  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
 //  Application.CreateForm(TSettingsForm, SettingsForm); Done in FormCreate of MainForm
