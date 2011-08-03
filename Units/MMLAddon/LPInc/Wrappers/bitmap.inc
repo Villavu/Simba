@@ -25,7 +25,7 @@ end;
 
 procedure Lape_BitmapFromString(const Params: PParamArray; const Result: Pointer);
 begin
-  Pinteger(Result)^ := ps_BitmapFromString(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pstring(Params^[1])^);
+  Pinteger(Result)^ := ps_BitmapFromString(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pstring(Params^[2])^);
 end;
 
 procedure Lape_LoadBitmap(const Params: PParamArray; const Result: Pointer);
@@ -80,7 +80,7 @@ end;
 
 procedure Lape_FastSetPixel(const Params: PParamArray);
 begin
-  ps_FastSetPixel(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, PColor(Params^[1])^);
+  ps_FastSetPixel(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, PColor(Params^[3])^);
 end;
 
 procedure Lape_FastSetPixels(const Params: PParamArray);
@@ -115,7 +115,7 @@ end;
 
 procedure Lape_FastDrawTransparent(const Params: PParamArray);
 begin
-  ps_FastDrawTransparent(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  ps_FastDrawTransparent(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure Lape_SetTransparentColor(const Params: PParamArray);
@@ -150,27 +150,27 @@ end;
 
 procedure Lape_FindBitmapIn(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindBitmapIn(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
+  PBoolean(Result)^ := ps_FindBitmapIn(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
 procedure Lape_FindBitmapToleranceIn(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindBitmapToleranceIn(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[3])^);
+  PBoolean(Result)^ := ps_FindBitmapToleranceIn(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
 procedure Lape_FindBitmapSpiral(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindBitmapSpiral(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
+  PBoolean(Result)^ := ps_FindBitmapSpiral(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
 procedure Lape_FindBitmapsSpiralTolerance(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindBitmapsSpiralTolerance(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
+  PBoolean(Result)^ := ps_FindBitmapsSpiralTolerance(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
 end;
 
 procedure Lape_FindBitmapSpiralTolerance(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindBitmapSpiralTolerance(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^);
+  PBoolean(Result)^ := ps_FindBitmapSpiralTolerance(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, Pinteger(Params^[7])^);
 end;
 
 procedure Lape_RotateBitmap(const Params: PParamArray; const Result: Pointer);
@@ -220,17 +220,17 @@ end;
 
 procedure Lape_FindMaskTolerance(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindMaskTolerance(PMask(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  PBoolean(Result)^ := ps_FindMaskTolerance(PMask(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
 end;
 
 procedure Lape_FindBitmapMaskTolerance(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindBitmapMaskTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  PBoolean(Result)^ := ps_FindBitmapMaskTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^);
 end;
 
 procedure Lape_FindDeformedBitmapToleranceIn(const Params: PParamArray; const Result: Pointer);
 begin
-  PBoolean(Result)^ := ps_FindDeformedBitmapToleranceIn(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PBoolean(Params^[5])^, PExtended(Params^[6])^);
+  PBoolean(Result)^ := ps_FindDeformedBitmapToleranceIn(Pinteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^, PBoolean(Params^[9])^, PExtended(Params^[10])^);
 end;
 
 procedure Lape_RectangleBitmap(const Params: PParamArray);
@@ -250,10 +250,10 @@ end;
 
 procedure Lape_CalculatePixelShift(const Params: PParamArray; const Result: Pointer);
 begin
-  Pinteger(Result)^ := ps_CalculatePixelShift(PInteger(Params^[0])^, PInteger(Params^[1])^, PBox(Params^[1])^);
+  Pinteger(Result)^ := ps_CalculatePixelShift(PInteger(Params^[0])^, PInteger(Params^[1])^, PBox(Params^[2])^);
 end;
 
 procedure Lape_CalculatePixelTolerance(const Params: PParamArray; const Result: Pointer);
 begin
-  Pextended(Result)^ := ps_CalculatePixelTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PBox(Params^[1])^, Pinteger(Params^[2])^);
+  Pextended(Result)^ := ps_CalculatePixelTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PBox(Params^[2])^, Pinteger(Params^[3])^);
 end;

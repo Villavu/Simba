@@ -20,12 +20,12 @@ end;
 
 procedure Lape_RiemannGauss(const Params: PParamArray; const Result: Pointer);
 begin
-  Pextended(Result)^ := ps_RiemannGauss(Pextended(Params^[0])^, Pextended(Params^[1])^, Pextended(Params^[2])^, Pinteger(Params^[1])^);
+  Pextended(Result)^ := ps_RiemannGauss(Pextended(Params^[0])^, Pextended(Params^[1])^, Pextended(Params^[2])^, Pinteger(Params^[3])^);
 end;
 
 procedure Lape_DiscreteGauss(const Params: PParamArray; const Result: Pointer);
 begin
-  PExtendedArray(Result)^ := ps_DiscreteGauss(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pextended(Params^[1])^);
+  PExtendedArray(Result)^ := ps_DiscreteGauss(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pextended(Params^[2])^);
 end;
 
 procedure Lape_GaussMatrix(const Params: PParamArray; const Result: Pointer);
