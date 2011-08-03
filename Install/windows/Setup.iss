@@ -8,9 +8,9 @@
 AppId={{524C9B9A-B57F-4FEC-89BE-292202EBA44D}
 AppName=Simba
 AppVerName=Simba 0.97
-AppPublisherURL=http://simba.villavu.com/
-AppSupportURL=http://simba.villavu.com/
-AppUpdatesURL=http://simba.villavu.com/
+AppPublisherURL=http://wizzup.org/simba
+AppSupportURL=http://wizzup.org/simba
+AppUpdatesURL=http://wizzup.org/simba
 DefaultDirName={sd}\Simba
 DefaultGroupName=Simba
 OutputDir=C:\simba\Install\windows\
@@ -30,11 +30,12 @@ Name: "{app}\Extensions"
 Name: "{app}\Includes"
 Name: "{app}\Plugins"
 Name: "{app}\Scripts"
-Name: "{app}\Scripts\Tests"
+; Name: "{app}\Scripts\Tests"
 
 [Files]
 Source: "C:\Simba\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\extension.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\msi.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
@@ -43,8 +44,11 @@ Source: "C:\Simba\Extensions\paster.sex"; DestDir: "{app}\Extensions"; Flags: ig
 Source: "C:\Simba\Extensions\CRov.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\Updater.sei"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
-Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
+Source: "C:\Simba\settings.xml"; DestDir: "{app}\"; Flags: ignoreversion
+; XXX Make sure to use a MINIMAL settings.xml XXX
+
+; Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

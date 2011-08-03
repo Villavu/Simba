@@ -1,3 +1,4 @@
+.. _gettingstarted:
 
 Getting Started with Simba
 ==========================
@@ -18,10 +19,12 @@ minutes.
 Simba installer
 ~~~~~~~~~~~~~~~
 
-Everyone can download Simba at http://wizzup.org/simba/
-Go to download and download the Simba installer.
+Everyone can get Simba at http://wizzup.org/simba/
 
-Once it is done downloading, simply run the installer and follow the steps.
+Go to *Download* and download the Simba installer.
+
+Once it is done downloading, simply run the installer, follow the steps and
+please make notice of the following note:
 
 .. note::
     Simba will install to C:/ by default; if you want to install it
@@ -35,18 +38,20 @@ Once it is done downloading, simply run the installer and follow the steps.
 
 Simba will probably tell you there is an update available. In this case, an
 update button will appear. Click it and the Simba Updater will show up.
-Alternatively you can update Simba using Tools -> Update.
+Alternatively you can update Simba using Tools -> Update which will update Simba
+if there is a new update available.
 
 .. note::
-    Updating Simba regularly is recommended.
+    Updating Simba as soon as an update is released is recommended.
 
-Downloading Simba binary
-~~~~~~~~~~~~~~~~~~~~~~~~
+Portable Simba Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is harder and not recommended. Steps on how to do this will follow later.
+..
+    TODO
 
-For now, simply stick to the installer and update Simba after the install has 
-completed.
+To get a portable installation at this time is not supported but will follow
+sooner or later.
 
 Setting up SRL 4 with Simba
 ---------------------------
@@ -54,7 +59,7 @@ Setting up SRL 4 with Simba
 If you were using the :ref:`simba-installer` then you can simply enable the
 ``SRL Updater`` extension. (Go to View -> Extensions and enable ``srl.sex``)
 
-See :ref:`simbaext` for more information on Extensions.
+See :ref:`simbaext` for more information on (other) Simba extensions.
 
 This is the only supported way. You can simply do a svn checkout on the srl
 repository, but if you can do that, then you should be able to set up SRL
@@ -67,6 +72,9 @@ This will follow later, upon SRL 5 release.
 
 Installing scripts
 ------------------
+
+..
+    TODO
 
 Scripts can be downloaded with the Script Manager, in Tools -> Script Manager.
 

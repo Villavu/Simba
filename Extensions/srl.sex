@@ -22,20 +22,29 @@ procedure OpenDefScript(Sender: TObject);
 var
   Script: TStringArray;
 begin
-  SetLength(Script, 6);
+  SetLength(Script, 7);
   Script[0] := 'program Untitled;';
-  Script[1] := '//{$DEFINE SMART}  //Uncomment for SMART';
-  Script[2] := '{.include SRL/SRL.scar}';
+  Script[1] := '{$DEFINE SMART}';
+  Script[2] := '{$I SRL/SRL.scar}';
+
   if (TMenuItem(Sender).Parent.Caption = 'Reflection') then
   begin
-    SetLength(Script, 7);
-    Script[1] := '{$DEFINE SMART}';
-    Script[3] := '{.include Reflection/Reflection.scar}';
+    SetLength(Script, Length(Script) + 1);
+    Script[High(Script) - 4] := '{$I Reflection/Reflection.simba}';
   end;
-  Script[Length(Script) - 3] := '';
-  Script[Length(Script) - 2] := 'begin';
-  Script[Length(Script) - 1] := 'end.';
 
+  Script[High(Script) - 3] := '';
+  Script[High(Script) - 2] := 'begin';
+  Script[High(Script) - 1] := '  SetupSRL;';
+
+  if (TMenuItem(Sender).Parent.Caption = 'Reflection') then
+  begin
+    SetLength(Script, Length(Script) + 1);
+    Script[High(Script) - 1] := '  SetupReflection;';
+  end;
+
+  Script[High(Script)] := 'end.';    
+  
   WriteLn('Opening ' + TMenuItem(Sender).Parent.Caption + ' Default Script...');
   OpenScript('', Implode({$IFDEF WIN}#13+{$ENDIF}#10, Script), False);
 end;

@@ -26,11 +26,13 @@
                             // See Units/Linux/keybinder.pas
 {$ENDIF}
 
+//{$DEFINE SIMBA_VERBOSE} // For more verbosity.
+
 //{$DEFINE USE_RUTIS}
 
 //{$DEFINE USE_CPASCAL} // TODO
 //{$DEFINE USE_LAPE} // TODO
-//{$DEFINE USE_EXTENSIONS} // TODO
+{$DEFINE USE_EXTENSIONS}
 //{$DEFINE USE_CODECOMPLETION} // TODO
 
 //{$DEFINE TERMINALWRITELN} // Only used once. Remove from SimbaUnit?
