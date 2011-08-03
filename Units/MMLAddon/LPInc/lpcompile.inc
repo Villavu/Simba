@@ -33,11 +33,16 @@ addGlobalVar(ps_mouse_right, 'mouse_Right');//0
 addGlobalVar(ps_mouse_left, 'mouse_Left');//1
 addGlobalVar(ps_mouse_middle, 'mouse_Middle');//2
 
+addGlobalType('UInt32', 'TClickType');
+
 addGlobalType('UInt8', 'Byte');
 addGlobalType('Int8', 'ShortInt');
 addGlobalType('UInt16', 'Word');
 addGlobalType('Int16', 'SmallInt');
 addGlobalType('UInt32', 'LongWord');
+addGlobalType('UInt32', 'DWord');
+addGlobalType('UInt32', 'Cardinal');
+
 addGlobalType('Int32', 'LongInt');
 addGlobalType('UInt64', 'QWord');
 addGlobalType('LongInt', 'Integer');
@@ -56,6 +61,7 @@ addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
 addGlobalType('array of string', 'TStringArray');
 addGlobalType('array of Integer', 'TIntegerArray');
 addGlobalType('array of TIntegerArray', 'T2DIntegerArray');
+addGlobalType('array of TIntegerArray', 'T2DIntArray');
 addGlobalType('array of T2DIntegerArray', 'T3DIntegerArray');
 addGlobalType('array of byte', 'TByteArray');
 addGlobalType('array of extended', 'TExtendedArray');
@@ -87,3 +93,4 @@ addGlobalType('array of TMDTMPoint', 'TMDTMPointArray');
 
 addGlobalType('record Title: string; Handle: integer; Pid: integer; Width, Height: integer; end', 'TSysProc');
 addGlobalType('array of TSysProc', 'TSysProcArr');
+
