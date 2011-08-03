@@ -30,15 +30,16 @@ interface
 
 {$define CheckAllBackground}//Undefine this to only check the first white point against the background (in masks).
 uses
-  colour_conv, Classes, SysUtils,bitmaps,MufasaBase,DTM,  MufasaTypes; // Types
+  colour_conv, Classes, SysUtils, bitmaps, DTM, MufasaTypes; // Types
 
 { TMFinder Class }
 
 {
-  Should be 100% OS independant, 
-  as all OS dependant code is in the IO Manager
-
+  Should be 100% OS independant, as all OS dependant code is in the IO Manager.
   Let's try not to use any OS-specific defines here? ;)
+
+  TODO: Check that each procedure calling Create_CTSInfo also calls
+  Free_CTSInfo().
 }
 
 type
@@ -68,7 +69,7 @@ type
     function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye,Tol: Integer): Boolean;
     function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
     function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
-    function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer) : boolean;
+    function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tol: Integer) : boolean;
     function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
     function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
     function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
@@ -101,19 +102,42 @@ type
 
 implementation
 uses
-//    colour_conv,// For RGBToColor, etc.
-    Client, // For the Client Casts.
-    math, //min/max
-    mmath,
-    tpa, //TPABounds
-    dtmutil
-    ;
+  Client,           // For the Client casting.
+  math,             // min/max
+  tpa,              //TPABounds
+  dtmutil;
+
+type
+  TCTS0Info = record
+      B, G, R, A: byte;
+      Tol: Integer;
+  end;
+  PCTS0Info = ^TCTS0Info;
+
+  TCTS1Info = record
+      B, G, R, A: byte;
+      Tol: Integer; { Squared }
+  end;
+  PCTS1Info = ^TCTS1Info;
+
+  TCTS2Info = record
+      H, S, L: extended;
+      hueMod, satMod: extended;
+      Tol: Integer;
+  end;
+  PCTS2Info = ^TCTS2Info;
+
+  TCTSInfo = Pointer;
+  TCTSInfoArray = Array of TCTSInfo;
+  TCTSInfo2DArray = Array of TCTSInfoArray;
+  TCTSCompareFunction = function (ctsInfo: Pointer; C2: PRGB32): boolean;
+
 
 procedure TMFinder.LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
 var
   i,c,Ring : integer;
   CurrBox : TBox;
-begin;
+begin
   i := 0;
   Ring := 1;
   c := 0;
@@ -124,58 +148,60 @@ begin;
   if (startx >= x1) and (startx <= x2) and (starty >= y1) and (starty <= y2) then
   begin;
     ClientTPA[c] := Point(Startx, StartY);
-    inc(c);
+    Inc(c);
   end;
-  Repeat
+  repeat
     if (CurrBox.x2 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y1 >= y1) and (Currbox.y1 <= y2)  then
       for i := CurrBox.x1 + 1 to CurrBox.x2 do
         if (I >= x1) and ( I <= x2) then
         begin;
           ClientTPA[c] := Point(i,CurrBox.y1);
-          inc(c);
+          Inc(c);
         end;
     if (CurrBox.x2 >= x1) and (CurrBox.x2 <= x2) and (Currbox.y2 >= y1) and (Currbox.y1 <= y2)  then
       for i := CurrBox.y1 + 1 to CurrBox.y2 do
         if (I >= y1) and ( I <= y2) then
         begin;
           ClientTPA[c] := Point(Currbox.x2, I);
-          inc(c);
+          Inc(c);
         end;
     if (CurrBox.x2 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y2 >= y1) and (Currbox.y2 <= y2)  then
       for i := CurrBox.x2 - 1 downto CurrBox.x1 do
         if (I >= x1) and ( I <= x2) then
         begin;
           ClientTPA[c] := Point(i,CurrBox.y2);
-          inc(c);
+          Inc(c);
         end;
     if (CurrBox.x1 >= x1) and (CurrBox.x1 <= x2) and (Currbox.y2 >= y1) and (Currbox.y1 <= y2)  then
       for i := CurrBox.y2 - 1 downto CurrBox.y1 do
         if (I >= y1) and ( I <= y2) then
         begin;
           ClientTPA[c] := Point(Currbox.x1, I);
-          inc(c);
+          Inc(c);
         end;
-    inc(ring);
+    Inc(ring);
     CurrBox.x1 := Startx-ring;
     CurrBox.y1 := Starty-Ring;
     CurrBox.x2 := Startx+Ring;
     CurrBox.y2 := Starty+Ring;
-  until (Currbox.x1 < x1) and (Currbox.x2 > x2) and (currbox.y1 < y1) and (currbox.y2 > y2);
+  until (Currbox.x1 < x1) and (Currbox.x2 > x2) and (currbox.y1 < y1)
+        and (currbox.y2 > y2);
 end;
 
-function CalculateRowPtrs(ReturnData : TRetData; RowCount : integer) : TPRGB32Array;overload;
+function CalculateRowPtrs(ReturnData: TRetData; RowCount: integer) : TPRGB32Array; overload;
 var
   I : integer;
 begin;
-  setlength(result,RowCount);
+  SetLength(result,RowCount);
   for i := 0 to RowCount - 1 do
     result[i] := ReturnData.Ptr + ReturnData.RowLen * i;
 end;
 
-function CalculateRowPtrs(Bitmap : TMufasaBitmap) : TPRGB32Array;overload;
+function CalculateRowPtrs(Bitmap : TMufasaBitmap) : TPRGB32Array; overload;
 begin
   Result := Bitmap.RowPtrs;
 end;
+
 //SkipCoords[y][x] = False/True; True means its "transparent" and therefore not needed to be checked.
 procedure CalculateBitmapSkipCoords(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray);
 var
@@ -200,7 +226,9 @@ begin;
       inc(ptr);
     end;
 end;
-//Points left holds the amount of points that are "left" to be checked (Including the point itself.. So for example Pointsleft[0][0] would hold the total amount of pixels that are to be checked.
+{ Points left holds the amount of points that are "left" to be checked
+   (Including the point itself.. So for example Pointsleft[0][0] would
+    hold the total amount of pixels that are to be checked. }
 procedure CalculateBitmapSkipCoordsEx(Bitmap : TMufasaBitmap; out SkipCoords : T2DBoolArray;out TotalPoints : integer; out PointsLeft : T2DIntArray);
 var
   x,y : integer;
@@ -239,6 +267,7 @@ begin;
     end;
 end;
 
+{ Initialise the variables for TMFinder }
 constructor TMFinder.Create(aClient: TObject);
 var
   I : integer;
@@ -268,7 +297,7 @@ end;
 
 procedure TMFinder.SetToleranceSpeed(nCTS: Integer);
 begin
-  if (nCTS < 0) or (nCTS > 2) then
+  if (nCTS < 0) or (nCTS > 3) then
     raise Exception.CreateFmt('The given CTS ([%d]) is invalid.',[nCTS]);
   Self.CTS := nCTS;
 end;
@@ -294,6 +323,7 @@ function TMFinder.SimilarColors(Color1, Color2,Tolerance: Integer) : boolean;
 var
   R1,G1,B1,R2,G2,B2 : Byte;
   H1,S1,L1,H2,S2,L2 : extended;
+  L_1, a_1, b_1, L_2, a_2 ,b_2, X, Y, Z: extended;
 begin
   Result := False;
   ColorToRGB(Color1,R1,G1,B1);
@@ -309,13 +339,27 @@ begin
        RGBToHSL(R2,g2,b2,H2,S2,L2);
        Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
      end;
+  3:
+    begin
+       RGBToXYZ(R1, G1, B1, X, Y, Z);
+       XYZtoCIELab(X, Y, Z, L_1, a_1, b_1);
+       RGBToXYZ(R2, G2, B2, X, Y, Z);
+       XYZtoCIELab(X, Y, Z, L_2, a_2, b_2);
+       Result := (abs(L_1 - L_2) < Tolerance)
+                 and (abs(a_1 - a_2) < Tolerance)
+                 and (abs(b_1 - b_2) < Tolerance);
+    end;
   end;
 end;
 
 
+{
+  TODO: Remove this
+}
 function ColorSame(var CTS,Tolerance : Integer; var R1,G1,B1,R2,G2,B2 : byte; var H1,S1,L1,huemod,satmod : extended) : boolean; inline;
 var
   H2,S2,L2 : extended;
+  L_1, a_1, b_1, L_2, a_2 ,b_2, X, Y, Z: extended;
 begin
   Result := False;
   case CTS of
@@ -325,6 +369,170 @@ begin
        RGBToHSL(R2,g2,b2,H2,S2,L2);
        Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
      end;
+  3: begin
+       RGBToXYZ(R1, G1, B1, X, Y, Z);
+       XYZtoCIELab(X, Y, Z, L_1, a_1, b_1);
+       RGBToXYZ(R2, G2, B2, X, Y, Z);
+       XYZtoCIELab(X, Y, Z, L_2, a_2, b_2);
+       Result := Sqrt(sqr(L_1 - L_2) + sqr(a_1 - a_2) +
+                   sqr(b_1 - b_2)) <= Tolerance;
+     end;
+  end;
+end;
+
+
+{ Colour Same functions }
+function ColorSame_cts0(ctsInfo: Pointer; C2: PRGB32): boolean;
+
+var
+    C1: TCTS0Info;
+begin
+  C1 := PCTS0Info(ctsInfo)^;
+  Result := (Abs(C1.B - C2^.B) <= C1.Tol)
+        and (Abs(C1.G - C2^.G) <= C1.Tol)
+        and (Abs(C1.R - C2^.R) <= C1.Tol);
+end;
+
+function ColorSame_cts1(ctsInfo: Pointer; C2: PRGB32): boolean;
+
+var
+    C1: TCTS1Info;
+    r,g,b: integer;
+begin
+  C1 := PCTS1Info(ctsInfo)^;
+  b := C1.B - C2^.B;
+  g := C1.G - C2^.G;
+  r := C1.R - C2^.R;
+  Result := (b*b + g*g + r*r) <= C1.Tol;
+end;
+
+function ColorSame_cts2(ctsInfo: Pointer; C2: PRGB32): boolean;
+
+var
+    h, s, l: extended;
+    i: TCTS2Info;
+begin
+  i := PCTS2Info(ctsInfo)^;
+  RGBToHSL(C2^.R, C2^.G, C2^.B, h, s, l); // Inline this later.
+
+  Result := (abs(h - i.H) <= (i.hueMod))
+        and (abs(s - i.S) <= (i.satMod))
+        and (abs(l - i.L) <= i.Tol);
+end;
+
+{ }
+
+function Create_CTSInfo(cts: integer; Color, Tol: Integer;
+                        hueMod, satMod: extended): Pointer; overload;
+var
+    R, G, B: Integer;
+begin
+  case cts of
+      0:
+      begin
+        Result := AllocMem(SizeOf(TCTS0Info));
+        ColorToRGB(Color, PCTS0Info(Result)^.R, PCTS0Info(Result)^.G,
+                    PCTS0Info(Result)^.B);
+        PCTS0Info(Result)^.Tol := Tol;
+      end;
+      1:
+      begin
+        Result := AllocMem(SizeOf(TCTS1Info));
+        ColorToRGB(Color, PCTS1Info(Result)^.R, PCTS1Info(Result)^.G,
+                    PCTS1Info(Result)^.B);
+
+        PCTS1Info(Result)^.Tol := Tol * Tol;
+      end;
+      2:
+      begin
+        Result := AllocMem(SizeOf(TCTS2Info));
+        ColorToRGB(Color, R, G, B);
+        RGBToHSL(R, G, B, PCTS2Info(Result)^.H, PCTS2Info(Result)^.S,
+                    PCTS2Info(Result)^.L);
+        PCTS2Info(Result)^.hueMod := Tol * hueMod;
+        PCTS2Info(Result)^.satMod := Tol * satMod;
+        PCTS2Info(Result)^.Tol := Tol;
+      end;
+  end;
+end;
+
+
+function Create_CTSInfo(cts: integer; R, G, B, Tol: Integer;
+                        hueMod, satMod: extended): Pointer; overload;
+
+var Color: Integer;
+
+begin
+  Color := RGBToColor(R, G, B);
+  Result := Create_CTSInfo(cts, Color, Tol, hueMod, satMod);
+end;
+
+procedure Free_CTSInfo(i: Pointer);
+begin
+  if assigned(i) then
+      FreeMem(i)
+  else
+      raise Exception.Create('Free_CTSInfo: Invalid TCTSInfo passed');
+end;
+
+{ TODO: Not universal, mainly for DTM }
+function Create_CTSInfoArray(cts: integer; color, tolerance: array of integer;
+    hueMod, satMod: extended): TCTSInfoArray;
+
+var
+   i: integer;
+begin
+  if length(color) <> length(tolerance) then
+    raise Exception.Create('Create_CTSInfoArray: Length(Color) <>'
+                          +' Length(Tolerance');
+  SetLength(Result, Length(color));
+
+  for i := High(result) downto 0 do
+    result := Create_CTSInfo(cts, color[i], tolerance[i], hueMod, satMod);
+end;
+
+
+{ TODO: Not universal, mainly for Bitmap }
+function Create_CTSInfo2DArray(cts, w, h: integer; data: TPRGB32Array;
+    Tolerance: Integer; hueMod, satMod: Extended): TCTSInfo2DArray;
+var
+   x, y: integer;
+begin
+  SetLength(Result,h+1,w+1);
+
+  for y := 0 to h do
+    for x := 0 to w do
+      Result[y][x] := Create_CTSInfo(cts,
+          data[y][x].R, data[y][x].G, data[y][x].B,
+          Tolerance, hueMod, satMod);
+end;
+
+procedure Free_CTSInfoArray(i: TCTSInfoArray);
+var
+   c: integer;
+begin
+  for c := high(i) downto 0 do
+    Free_CTSInfo(i[c]);
+  SetLength(i, 0);
+end;
+
+procedure Free_CTSInfo2DArray(i: TCTSInfo2DArray);
+var
+   x, y: integer;
+begin
+  for y := high(i) downto 0 do
+    for x := high(i[y]) downto 0 do
+      Free_CTSInfo(i[y][x]);
+  SetLength(i, 0);
+end;
+
+function Get_CTSCompare(cts: Integer): TCTSCompareFunction;
+
+begin
+  case cts of
+      0: Result := @ColorSame_cts0;
+      1: Result := @ColorSame_cts1;
+      2: Result := @ColorSame_cts2;
   end;
 end;
 
@@ -400,37 +608,37 @@ var
    PtrData: TRetData;
    Ptr: PRGB32;
    PtrInc: Integer;
-   clR, clG, clB : byte;
    dX, dY, xx, yy: Integer;
-   h,s,l,hmod,smod : extended;
-   Ccts : integer;
+
+  compare: TCTSCompareFunction;
+  ctsinfo: TCTSInfo;
 begin
   Result := 0;
   DefaultOperations(xs, ys, xe, ye);
+
   dX := xe - xs;
   dY := ye - ys;
-  ColorToRGB(Color, clR, clG, clB);
+
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
-  CCts := Self.CTS;
   result := 0;
-  if cts = 2 then
-  begin;
-    RGBToHSL(clR,clG,clB,h,s,l);
-    hmod := Self.hueMod;
-    smod := Self.satMod;
-  end;
+
+  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tolerance, hueMod, satMod);
+  compare := Get_CTSCompare(Self.CTS);
+
   for yy := ys to ye do
   begin;
     for xx := xs to xe do
-    begin;
-      if ColorSame(CCts,Tolerance,clR,clG,clB,Ptr^.r,Ptr^.g,Ptr^.b,H,S,L,hmod,smod) then
+    begin
+      if compare(ctsinfo, Ptr) then
         inc(result);
       Inc(Ptr);
     end;
     Inc(Ptr, PtrInc)
   end;
+
+  Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
 end;
 
@@ -570,9 +778,11 @@ var
    PtrData: TRetData;
    RowData : TPRGB32Array;
    dX, dY, clR, clG, clB,i,Hispiral: Integer;
-   H1, S1, L1, H2, S2, L2: Extended;
-   HueXTol, SatXTol: Extended;
-   label Hit;
+
+var
+   j: integer;
+   compare: TCTSCompareFunction;
+   ctsinfo: TCTSInfo;
 
 begin
   Result := false;
@@ -584,8 +794,6 @@ begin
   dY := ye - ys;
   //next, convert the color to r,g,b
   ColorToRGB(Color, clR, clG, clB);
-  if Cts = 2 then
-    RGBToHSL(clR,clG,clB,H1,S1,L1);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
   //Load rowdata
@@ -593,47 +801,34 @@ begin
   //Load the spiral path
   LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
   HiSpiral := (dy+1) * (dx + 1) -1;
-  case CTS of
-    0:
-      for i := 0 to HiSpiral do
-        if ((abs(clB-RowData[ClientTPA[i].y][ClientTPA[i].x].B) <= Tol) and
-            (abs(clG-RowData[ClientTPA[i].y][ClientTPA[i].x].G) <= Tol) and
-            (Abs(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R) <= Tol)) then
-              goto Hit;
 
-    1:
+  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  compare := Get_CTSCompare(Self.CTS);
+
+  i := -1;
+  for j := 0 to HiSpiral do
+  begin
+    if compare(ctsinfo, @RowData[ClientTPA[j].y][ClientTPA[j].x]) then
     begin
-      Tol := Sqr(Tol);
-      for i := 0 to HiSpiral do
-           if (sqr(clB - RowData[ClientTPA[i].y][ClientTPA[i].x].B) +
-               sqr(clG - RowData[ClientTPA[i].y][ClientTPA[i].x].G) +
-               sqr(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R)) <= Tol then
-                 goto Hit;
-    end;
-    2:
-    { Can be optimized a lot... RGBToHSL isn't really inline, }
-    begin
-      HueXTol := hueMod * Tol;
-      SatXTol := satMod * Tol;
-      for i := 0 to HiSpiral do
-      begin
-        RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
-                 RowData[ClientTPA[i].y][ClientTPA[i].x].G,
-                 RowData[ClientTPA[i].y][ClientTPA[i].x].B,H2,S2,L2);
-        if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-          goto Hit;
-      end;
+      i := j;
+      break;
     end;
   end;
-  Result := False;
-  TClient(Client).IOManager.FreeReturnData;
-  Exit;
 
-  Hit:
+  Free_CTSInfo(ctsinfo);
+
+  if i = -1 then
+  begin
+    Result := False;
+    TClient(Client).IOManager.FreeReturnData;
+    Exit;
+  end else
+  begin
     Result := True;
     x := ClientTPA[i].x + xs;
     y := ClientTPA[i].y + ys;
     TClient(Client).IOManager.FreeReturnData;
+  end;
 end;
 
 function TMFinder.FindColoredArea(var x, y: Integer; Color, xs, ys, xe, ye, MinArea: Integer): Boolean;
@@ -699,7 +894,6 @@ begin
             Ptr := Before;
             Break;
           end;
-          Inc(Ptr, PtrInc);
         end;
       end;
       Inc(Ptr);
@@ -848,10 +1042,12 @@ var
    PtrData: TRetData;
    Ptr: PRGB32;
    PtrInc: Integer;
-   dX, dY, clR, clG, clB, xx, yy: Integer;
-   H1, S1, L1, H2, S2, L2: Extended;
-   HueXTol, SatXTol: Extended;
+   dX, dY: Integer;
+   xx, yy: integer;
+   compare: TCTSCompareFunction;
+   ctsinfo: TCTSInfo;
    label Hit;
+
 
 begin
   Result := false;
@@ -861,10 +1057,6 @@ begin
   // calculate delta x and y
   dX := xe - xs;
   dY := ye - ys;
-  //next, convert the color to r,g,b
-  ColorToRGB(Color, clR, clG, clB);
-  if Cts = 2 then
-    RGBToHSL(clR,clG,clB,H1,S1,L1);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
 
@@ -873,54 +1065,22 @@ begin
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
 
-  case CTS of
-    0:
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-         if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
-            goto Hit;
-        inc(Ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
+  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  compare := Get_CTSCompare(Self.CTS);
 
-    1:
+  for yy := ys to ye do
+  begin
+    for xx := xs to xe do
     begin
-      Tol := Sqr(Tol);
-
-      for yy := ys to ye do
-      begin
-        for xx := xs to xe do
-        begin
-           if (sqr(clB - Ptr^.B) + sqr(clG - Ptr^.G) + sqr(clR-Ptr^.R)) <= Tol then
-              goto Hit;
-          inc(ptr);
-        end;
-        Inc(Ptr, PtrInc);
-      end;
-
+      if compare(ctsinfo, Ptr) then
+        goto Hit;
+      inc(Ptr);
     end;
-    2:
-    { Can be optimized a lot... RGBToHSL isn't really inline, }
-    begin
-      HueXTol := hueMod * Tol;
-      SatXTol := satMod * Tol;
-      for yy := ys to ye do
-      begin
-        for xx := xs to xe do
-        begin
-          RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
-          if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-            goto Hit;
-         inc(Ptr);
-        end;
-        Inc(Ptr, PtrInc);
-      end;
-    end;
+    Inc(Ptr, PtrInc);
   end;
+
   Result := False;
+  Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
   Exit;
 
@@ -928,6 +1088,7 @@ begin
     Result := True;
     x := xx;
     y := yy;
+    Free_CTSInfo(ctsinfo);
     TClient(Client).IOManager.FreeReturnData;
 end;
 
@@ -940,7 +1101,12 @@ var
    clR, clG, clB : Byte;
    H1, S1, L1: Extended;
    NotFound : Boolean;
+
+   compare: TCTSCompareFunction;
+   ctsinfo: TCTSInfo;
+
    label Hit;
+
 
 begin
   Result := false;
@@ -961,13 +1127,17 @@ begin
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
   Count := 0;
+
+  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  compare := Get_CTSCompare(Self.CTS);
+
   for yy := ys to ye do
   begin;
     for xx := xs to xe do
     begin;
       NotFound := False;
       // Colour comparison here.
-      if ColorSame(CTS, Tol, Ptr^.R, Ptr^.G, Ptr^.B, clR, clG, clB, H1, S1, L1, huemod, satmod) then
+      if compare(ctsinfo, Ptr) then
       begin
         Before := Ptr;
         for fy := yy to ye do
@@ -975,7 +1145,7 @@ begin
           for fx := xx to xe do
           begin
             Inc(Ptr);
-            if not ColorSame(CTS, Tol, Ptr^.R, Ptr^.G, Ptr^.B, clR, clG, clB, H1, S1, L1, huemod, satmod) then
+            if compare(ctsinfo, Ptr) then
             begin
               NotFound := True;
               Break;
@@ -999,6 +1169,7 @@ begin
   end;
 
   Result := False;
+  Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
   Exit;
 
@@ -1006,27 +1177,28 @@ begin
     Result := True;
     x := xx;
     y := yy;
+    Free_CTSInfo(ctsinfo);
     TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.FindColorsTolerance(out Points: TPointArray; Color, xs, ys,
   xe, ye, Tol: Integer): Boolean;
 var
-   PtrData: TRetData;
-   Ptr: PRGB32;
-   PtrInc,C: Integer;
-   dX, dY, clR, clG, clB, xx, yy: Integer;
-   H1, S1, L1, H2, S2, L2, hueXTol, satXTol: Extended;
+  PtrData: TRetData;
+  Ptr: PRGB32;
+  PtrInc,C: Integer;
+  dX, dY: Integer;
+
+  xx, yy: integer;
+  compare: TCTSCompareFunction;
+  ctsinfo: TCTSInfo;
+
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
 
   dX := xe - xs;
   dY := ye - ys;
-  //next, convert the color to r,g,b
-  ColorToRGB(Color, clR, clG, clB);
-  if CTS = 2 then
-    ColorToHSL(color,H1,S1,L1);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
 
@@ -1035,65 +1207,33 @@ begin
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
   c := 0;
-  case CTS of
-    0:
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-         if ((abs(clB-Ptr^.B) <= Tol) and (abs(clG-Ptr^.G) <= Tol) and (Abs(clR-Ptr^.R) <= Tol)) then
-         begin;
-           ClientTPA[c].x := xx;
-           ClientTPA[c].y := yy;
-           inc(c);
-         end;
-        inc(Ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
 
-    1:
-    for yy := ys to ye do
-    begin
-      for xx := xs to xe do
-      begin
-         if (Sqrt(sqr(clR-Ptr^.R) + sqr(clG - Ptr^.G) + sqr(clB - Ptr^.B)) <= Tol) then
-         begin;
-           ClientTPA[c].x := xx;
-           ClientTPA[c].y := yy;
-           inc(c);
-         end;
-        inc(ptr);
-      end;
-      Inc(Ptr, PtrInc);
-    end;
+  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  compare := Get_CTSCompare(Self.CTS);
 
-    2:
+  for yy := ys to ye do
+  begin
+    for xx := xs to xe do
     begin
-      HueXTol := hueMod * Tol;
-      SatXTol := satMod * Tol;
-      for yy := ys to ye do
+      if compare(ctsinfo, Ptr) then
       begin
-        for xx := xs to xe do
-        begin
-          RGBToHSL(Ptr^.R,Ptr^.G,Ptr^.B,H2,S2,L2);
-          if ((abs(H1 - H2) <= HueXTol) and (abs(S1 - S2) <= SatXTol) and (abs(L1 - L2) <= Tol)) then
-          begin;
-            ClientTPA[c].x := xx;
-            ClientTPA[c].y := yy;
-            Inc(c);
-          end;
-          Inc(Ptr)
-        end;
-        Inc(Ptr, PtrInc);
+        ClientTPA[c].x := xx;
+        ClientTPA[c].y := yy;
+        inc(c);
       end;
+      inc(Ptr);
     end;
+    Inc(Ptr, PtrInc);
   end;
+
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
+
+  Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
 end;
+
 function TMFinder.FindColorsToleranceOptimised(out Points: TPointArray; Color, xs, ys,
   xe, ye, Tol: Integer): Boolean;
 var
@@ -1225,14 +1365,17 @@ begin
 end;
 
 function TMFinder.FindColorsSpiralTolerance(x, y: Integer;
-  out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tolerance: Integer
+  out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tol: Integer
   ): boolean;
 var
-   PtrData: TRetData;
-   c : integer;
-   RowData : TPRGB32Array;
-   dX, dY, clR, clG, clB, i,SpiralHi: Integer;
-   H1, S1, L1, H2, S2, L2, HueXTol, SatXTol: Extended;
+  PtrData: TRetData;
+  c : integer;
+  RowData : TPRGB32Array;
+  dX, dY, SpiralHi, i: Integer;
+
+  compare: TCTSCompareFunction;
+  ctsinfo: TCTSInfo;
+
 begin
   Result := false;
   DefaultOperations(xs,ys,xe,ye);
@@ -1240,64 +1383,34 @@ begin
   dX := xe - xs;
   dY := ye - ys;
   //next, convert the color to r,g,b
-  ColorToRGB(Color, clR, clG, clB);
-  ColorToHSL(Color, H1, S1, L1);
 
   PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
 
   c := 0;
 
+  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  compare := Get_CTSCompare(Self.CTS);
+
   //Load rowdata
   RowData:= CalculateRowPtrs(ptrdata,dy+1);
   //Load the spiral path
-  LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
+  LoadSpiralPath(x-xs,y-ys,0,0,dx,dy); { Fills ClientTPA with Spiral path }
+
   SpiralHi := (dx + 1) * (dy + 1) - 1;
-  case CTS of
-    0:
-    for i := 0 to SpiralHi do
-      if ((abs(clB-RowData[ClientTPA[i].y][ClientTPA[i].x].B) <= Tolerance) and
-         (abs(clG-RowData[ClientTPA[i].y][ClientTPA[i].x].G) <= Tolerance) and
-         (Abs(clR-RowData[ClientTPA[i].y][ClientTPA[i].x].R) <= Tolerance)) then
-      begin;
-        ClientTPA[c].x := ClientTPA[i].x + xs;
-        ClientTPA[c].y := ClientTPA[i].y + ys;
-        inc(c);
-      end;
-
-
-    1:
-    for i := 0 to SpiralHi do
-      if (Sqrt(sqr(clR - RowData[ClientTPA[i].y][ClientTPA[i].x].R) +
-               sqr(clG - RowData[ClientTPA[i].y][ClientTPA[i].x].G) +
-               sqr(clB - RowData[ClientTPA[i].y][ClientTPA[i].x].B)) <= Tolerance) then
-      begin;
-        ClientTPA[c].x := ClientTPA[i].x + xs;
-        ClientTPA[c].y := ClientTPA[i].y + ys;
-        inc(c);
-      end;
-
-    2:
+  for i := 0 to SpiralHi do
+    if compare(ctsinfo, @RowData[ClientTPA[i].y][ClientTPA[i].x]) then
     begin;
-      HueXTol := hueMod * Tolerance;
-      SatXTol := satMod * Tolerance;
-      for i := 0 to SpiralHi do
-      begin;
-        RGBToHSL(RowData[ClientTPA[i].y][ClientTPA[i].x].R,
-                 RowData[ClientTPA[i].y][ClientTPA[i].x].G,
-                 RowData[ClientTPA[i].y][ClientTPA[i].x].B,
-                 H2,S2,L2);
-        if ((abs(H1 - H2) <= (HueXTol)) and (abs(S1 - S2) <= (satXTol)) and (abs(L1 - L2) <= Tolerance)) then
-        begin;
-          ClientTPA[c].x := ClientTPA[i].x + xs;
-          ClientTPA[c].y := ClientTPA[i].y + ys;
-          inc(c);
-        end;
-      end;
+      { We can re-use the ClientTPA to store results. }
+      ClientTPA[c].x := ClientTPA[i].x + xs;
+      ClientTPA[c].y := ClientTPA[i].y + ys;
+      inc(c);
     end;
-  end;
+
   SetLength(Points, C);
   Move(ClientTPA[0], Points[0], C * SizeOf(TPoint));
   Result := C > 0;
+
+  Free_CTSInfo(ctsinfo);
   TClient(Client).IOManager.FreeReturnData;
 end;
 
@@ -1512,11 +1625,13 @@ var
    xBmp,yBmp : integer;
    tmpY : integer;
    dX, dY,  xx, yy: Integer;
-   CCTS : integer;
-   H,S,L,HMod,SMod : extended;
    SkipCoords : T2DBoolArray;
+
+   ctsinfoarray: TCTSInfo2DArray;
+   compare: TCTSCompareFunction;
+
 label NotFoundBmp;
-  { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. } 
+  { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
 begin
   Result := false;
@@ -1537,10 +1652,10 @@ begin
   //Heck our bitmap cannot be outside the search area
   dX := dX - bmpW;
   dY := dY - bmpH;
-  //Compiler hints
-  HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
 
-  CCTS := Self.CTS;
+  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
+      Tolerance, self.hueMod, self.satMod);
+  compare := Get_CTSCompare(Self.CTS);
 
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
@@ -1552,21 +1667,24 @@ begin
         tmpY := yBmp + yy;
         for xBmp := 0 to BmpW do
           if not SkipCoords[yBmp][xBmp] then
-            if not ColorSame(CCTS,tolerance,
-                             BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
-                             MainRowdata[tmpY][xBmp +  xx].R,MainRowdata[tmpY][xBmp +  xx].G,MainRowdata[tmpY][xBmp +  xx].B,
-                             H,S,L,HMod,SMod) then
+            if not compare(ctsinfoarray[yBmp][xBmp],
+                           @MainRowData[tmpY][xBmp + xx]) then
                goto NotFoundBmp;
-
       end;
+
       //We did find the Bmp, otherwise we would be at the part below
+
+      Free_CTSInfo2DArray(ctsinfoarray);
       TClient(Client).IOManager.FreeReturnData;
+
       x := xx + xs;
       y := yy + ys;
       result := true;
-      exit;
+      Exit;
       NotFoundBmp:
     end;
+
+  Free_CTSInfo2DArray(ctsinfoarray);
   TClient(Client).IOManager.FreeReturnData;
 end;
 
@@ -1642,9 +1760,11 @@ var
    xBmp,yBmp : integer;
    tmpY : integer;
    dX, dY,  i,HiSpiral: Integer;
-   CCTS : integer;
-   H,S,L,HMod,SMod : extended;
    SkipCoords : T2DBoolArray;
+
+   ctsinfoarray: TCTSInfo2DArray;
+   compare: TCTSCompareFunction;
+
 label NotFoundBmp;
   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. } 
 
@@ -1670,9 +1790,11 @@ begin
   //Load the spiral into memory
   LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
   HiSpiral := (dx+1) * (dy+1) - 1;
-  //Compiler hints
-  HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
-  CCTS := Self.CTS;
+
+
+  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
+      Tolerance, self.hueMod, self.satMod);
+  compare := Get_CTSCompare(Self.CTS);
 
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
@@ -1683,15 +1805,14 @@ begin
         tmpY := yBmp + ClientTPA[i].y;
         for xBmp := 0 to BmpW do
           if not SkipCoords[yBmp][xBmp] then
-            if not ColorSame(CCTS,tolerance,
-                             BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
-                             MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R,MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G,
-                             MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B,
-                             H,S,L,HMod,SMod) then
+            if not compare(ctsinfoarray[yBmp][xBmp],
+                           @MainRowData[tmpY][xBmp + ClientTPA[i].x]) then
               goto NotFoundBmp;
 
     end;
     //We did find the Bmp, otherwise we would be at the part below
+
+    Free_CTSInfo2DArray(ctsinfoarray);
     TClient(Client).IOManager.FreeReturnData;
 
     x := ClientTPA[i].x + xs;
@@ -1700,6 +1821,7 @@ begin
     exit;
     NotFoundBmp:
   end;
+  Free_CTSInfo2DArray(ctsinfoarray);
   TClient(Client).IOManager.FreeReturnData;
 end;
 
@@ -1714,9 +1836,11 @@ var
    tmpY : integer;
    dX, dY,  i,HiSpiral: Integer;
    FoundC : integer;
-   CCTS : integer;
-   H,S,L,HMod,SMod : extended;
    SkipCoords : T2DBoolArray;
+
+   ctsinfoarray: TCTSInfo2DArray;
+   compare: TCTSCompareFunction;
+
 label NotFoundBmp;
    { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
@@ -1742,10 +1866,12 @@ begin
   //Load the spiral into memory
   LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
   HiSpiral := (dx+1) * (dy+1) - 1;
-  //Compiler hints
-  HMod := 0;SMod := 0;H := 0.0;S := 0.0; L := 0.0;
-  CCTS := Self.CTS;
   FoundC := 0;
+
+  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
+      Tolerance, self.hueMod, self.satMod);
+  compare := Get_CTSCompare(Self.CTS);
+
   //Get the "skip coords".
   CalculateBitmapSkipCoords(Bitmap,SkipCoords);
   for i := 0 to HiSpiral do
@@ -1755,11 +1881,8 @@ begin
         tmpY := yBmp + ClientTPA[i].y;
         for xBmp := 0 to BmpW do
           if not SkipCoords[yBmp][xBmp] then
-            if not ColorSame(CCTS,tolerance,
-                             BmpRowData[yBmp][xBmp].R,BmpRowData[yBmp][xBmp].G,BmpRowData[yBmp][xBmp].B,
-                             MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R,MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G,
-                             MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B,
-                             H,S,L,HMod,SMod) then
+            if not compare(ctsinfoarray[yBmp][xBmp],
+                           @MainRowData[tmpY][xBmp + ClientTPA[i].x]) then
               goto NotFoundBmp;
 
     end;
@@ -1775,6 +1898,8 @@ begin
     SetLength(Points,FoundC);
     Move(ClientTPA[0], Points[0], FoundC * SizeOf(TPoint));
   end;
+
+  Free_CTSInfo2DArray(ctsinfoarray);
   TClient(Client).IOManager.FreeReturnData;
 end;
 
@@ -1797,6 +1922,10 @@ var
    TotalC : integer;
    SkipCoords : T2DBoolArray;
    PointsLeft : T2DIntArray;
+
+   ctsinfoarray: TCTSInfo2DArray;
+   compare: TCTSCompareFunction;
+
 label FoundBMPPoint, Madness;
   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
@@ -1824,6 +1953,11 @@ begin
   Accuracy := 0;
   BestCount := -1;
   BestPT := Point(-1,-1);
+
+  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
+      Tolerance, self.hueMod, self.satMod);
+  compare := Get_CTSCompare(Self.CTS);
+
   //Get the "skip coords". and PointsLeft (so we can calc whether we should stop searching or not ;-).
   CalculateBitmapSkipCoordsEx(Bitmap,SkipCoords,TotalC,PointsLeft);
 
@@ -1850,8 +1984,8 @@ begin
             xEnd := Min(xx+range + xBmp,SearchdX);
             for RangeX := xStart to xEnd do
             begin;
-              if Sqrt(sqr(BmpRowData[yBmp][xBmp].R - MainRowdata[RangeY][RangeX].R) + sqr(BmpRowData[yBmp][xBmp].G - MainRowdata[RangeY][RangeX].G)
-                          +sqr(BmpRowData[yBmp][xBmp].B - MainRowdata[RangeY][RangeX].B)) <= tolerance then
+            if not compare(ctsinfoarray[yBmp][xBmp],
+                           @MainRowData[rangeY][rangeX]) then
                 goto FoundBMPPoint;
             end;
           end;
@@ -1869,7 +2003,8 @@ begin
         BestCount := GoodCount;
         BestPT := Point(xx+xs,yy+ys);
         if GoodCount = TotalC then
-        begin;
+        begin
+          Free_CTSInfo2DArray(ctsinfoarray);
           TClient(Client).IOManager.FreeReturnData;
           x := BestPT.x;
           y := BestPT.y;
@@ -1878,6 +2013,8 @@ begin
         end;
       end;
     end;
+
+  Free_CTSInfo2DArray(ctsinfoarray);
   TClient(Client).IOManager.FreeReturnData;
   if BestCount = 0 then
     Exit;
@@ -1912,16 +2049,9 @@ end;
 //MaxToFind, if it's < 1 it won't stop looking
 function TMFinder.FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2, maxToFind: Integer): Boolean;
 var
-  //Cache DTM stuff
-  Len : integer;       //Len of the points
-  DPoints : PMDTMPoint; //DTM Points
-   // Colours of DTMs
-   clR,clG,clB : array of byte;
-
-   //Similar colors stuff
-   hh,ss,ll: array of extended;
-   hmod,smod: extended;
-   Ccts : integer;
+   //Cache DTM stuff
+   Len : integer;       //Len of the points
+   DPoints : PMDTMPoint; //DTM Points
 
    // Bitwise
    b: Array of Array of Integer;
@@ -1949,10 +2079,12 @@ var
 
    goodPoints: Array of Boolean;
 
+   col_arr, tol_arr: Array of Integer;
+   ctsinfoarray: TCTSInfoArray;
+   compare: TCTSCompareFunction;
+
    label theEnd;
    label AnotherLoopEnd;
-
-
 
 begin
   // Is the area valid?
@@ -1984,25 +2116,21 @@ begin
     FillChar(b[i][0], SizeOf(Integer) * (H+1), 0);
   end;
 
-  // C = DTM.C
-  SetLength(clR,Len);
-  SetLength(clG,Len);
-  SetLength(clB,Len);
-  for i := 0 to Len - 1 do
-    ColorToRGB(DPoints[i].c,clR[i],clG[i],clB[i]);
-
-  SetLength(hh,Len);
-  SetLength(ss,Len);
-  SetLength(ll,Len);
-  for i := 0 to Len - 1 do
-    ColorToHSL(DPoints[i].c,hh[i],ss[i],ll[i]);
-
-  GetToleranceSpeed2Modifiers(hMod, sMod);
-
-  ccts := CTS;
-
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
+
+  SetLength(col_arr, Len);
+  SetLength(tol_arr, Len);
+  // C = DTM.C
+  for i := 0 to Len - 1 do
+  begin
+    col_arr[i] := DPoints[i].c;
+    tol_arr[i] := DPoints[i].t;
+  end;
+
+  ctsinfoarray := Create_CTSInfoArray(Self.CTS,
+    col_arr, tol_arr, self.hueMod, self.satMod);
+  compare := Get_CTSCompare(Self.CTS);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
   //CD starts at 0,0.. We must adjust the MA, since this is still based on the xs,ys,xe,ye box.
@@ -2037,7 +2165,7 @@ begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 //              if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), DPoints[i].t) then
-              if ColorSame(ccts,DPoints[i].t,clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
+              if compare(ctsinfoarray[i], @cd[yyy][xxx]) then
                 b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
 
@@ -2066,6 +2194,8 @@ begin
       AnotherLoopEnd:
     end;
   TheEnd:
+
+  Free_CTSInfoArray(ctsinfoarray);
   TClient(Client).IOManager.FreeReturnData;
 
   SetLength(Points, pc);
@@ -2082,14 +2212,15 @@ var
 begin
   FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F,Alternating,1);
   if Length(P) = 0 then
-    exit(false);
+    exit(False);
   aFound := F[0][0];
   x := P[0].x;
   y := P[0].y;
   Exit(True);
 end;
 
-procedure RotPoints_DTM(const P: TPointArray;var RotTPA : TPointArray; const A: Extended);
+procedure RotPoints_DTM(const P: TPointArray;var RotTPA : TPointArray; const A:
+    Extended); inline;
 var
    I, L: Integer;
 begin
@@ -2103,18 +2234,11 @@ end;
 
 function TMFinder.FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer): Boolean;
 var
-  //Cached variables
-  Len : integer;
-  DPoints : PMDTMPoint;
-  DTPA : TPointArray;
-  RotTPA: TPointArray;
-   // Colours of DTMs
-   clR,clG,clB : array of byte;
-
-   //Similar colors stuff
-   hh,ss,ll: array of extended;
-   hmod,smod: extended;
-   Ccts : integer;
+   //Cached variables
+   Len : integer;
+   DPoints : PMDTMPoint;
+   DTPA : TPointArray;
+   RotTPA: TPointArray;
 
    // Bitwise
    b: Array of Array of Integer;
@@ -2144,10 +2268,13 @@ var
 
    // point count
    pc: Integer = 0;
-   ac: Integer = 0;
 
    goodPoints: Array of Boolean;
    s: extended;
+
+   col_arr, tol_arr: Array of Integer;
+   ctsinfoarray: TCTSInfoArray;
+   compare: TCTSCompareFunction;
 
    label theEnd;
    label AnotherLoopEnd;
@@ -2184,20 +2311,6 @@ begin
     FillChar(ch[i][0], SizeOf(Integer) * (H+1), 0);
   end;
 
-  // Convert colors to there components
-  SetLength(clR,Len);
-  SetLength(clG,Len);
-  SetLength(clB,Len);
-  for i := 0 to Len - 1 do
-    ColorToRGB(DPoints[i].c,clR[i],clG[i],clB[i]);
-  //Compiler hints
-
-  SetLength(hh,Len);
-  SetLength(ss,Len);
-  SetLength(ll,Len);
-  for i := 0 to Len - 1 do
-    ColorToHSL(DPoints[i].c,hh[i],ss[i],ll[i]);
-
   {
   When we search for a rotated DTM, everything is the same, except the coordinates..
   Therefore we create a TPA of the 'original' DTM, containing all the Points.
@@ -2207,11 +2320,21 @@ begin
   for i := 0 to len-1 do
     DTPA[i] := Point(DPoints[i].x,DPoints[i].y);
 
-  GetToleranceSpeed2Modifiers(hMod, sMod);
-  ccts := CTS;
-
   // Retreive Client Data.
   PtrData := TClient(Client).IOManager.ReturnData(x1, y1, W + 1, H + 1);
+
+  SetLength(col_arr, Len);
+  SetLength(tol_arr, Len);
+  // C = DTM.C
+  for i := 0 to Len - 1 do
+  begin
+    col_arr[i] := DPoints[i].c;
+    tol_arr[i] := DPoints[i].t;
+  end;
+
+  ctsinfoarray := Create_CTSInfoArray(Self.CTS,
+    col_arr, tol_arr, self.hueMod, self.satMod);
+  compare := Get_CTSCompare(Self.CTS);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
   SetLength(aFound, 0);
@@ -2258,7 +2381,7 @@ begin
                 // Checking point i now. (Store that we matched it)
                 ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
 
-                if ColorSame(ccts,DPoints[i].t,clR[i],clG[i],clB[i],cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B,hh[i],ss[i],ll[i],hmod,smod) then
+                if compare(ctsinfoarray[i], @cd[yyy][xxx]) then
                   b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
               end;
 
@@ -2290,7 +2413,6 @@ begin
           goto theEnd;
         AnotherLoopEnd:
       end;
-    ac := 0;
     if Alternating then
     begin
       if AngleSteps mod 2 = 0 then   //This means it's an even number, thus we must add a positive step
@@ -2302,7 +2424,10 @@ begin
       s := s + aStep;
   end;
   TheEnd:
-    TClient(Client).IOManager.FreeReturnData;
+
+  Free_CTSInfoArray(ctsinfoarray);
+  TClient(Client).IOManager.FreeReturnData;
+
   Result := (pc > 0);
   { Don't forget to pre calculate the rotated points at the start.
    Saves a lot of rotatepoint() calls. }
