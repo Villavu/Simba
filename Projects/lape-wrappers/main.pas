@@ -89,7 +89,7 @@ var
   p: TCodeParser;
   m: TMemoryStream;
   a, b, c: TDeclarationArray;
-  i, ii, iii: Integer;
+  i, ii, iii, pc: Integer;
   s: string;
   rutiss,tmp : string;
   d: TDeclaration;
@@ -138,6 +138,7 @@ begin
         s := s+Name.ShortText+'(';
 
         Fail := False;
+        pc := 0;
         b := GetParamDeclarations();
         for ii := 0 to High(b) do
         begin
@@ -158,9 +159,10 @@ begin
 
           for iii := 0 to High(c) do
           begin
-            if (iii+ii> 0) then
+            if (pc > 0) then
               s := s+', ';
-            s := s+PtrName(d.ShortText)+'(Params^['+IntToStr(iii+ii)+'])^';
+            s := s+PtrName(d.ShortText)+'(Params^['+IntToStr(pc)+'])^';
+            Inc(pc);
           end;
         end;
 
