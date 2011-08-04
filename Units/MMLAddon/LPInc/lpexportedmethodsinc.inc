@@ -190,7 +190,7 @@ AddGlobalFunc('function rs_GetUpText: String', @Lape_rs_GetUpText);
 AddGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string', @Lape_rs_GetUpTextAtEx);
 AddGlobalFunc('function rs_GetUpTextAt(x, y: integer): string', @Lape_rs_GetUpTextAt);
 AddGlobalFunc('function BitmapFromText(const text, font: String): integer', @Lape_BitmapFromText);
-AddGlobalFunc('procedure _writeln(const str: string); override', @Lape_Writeln);
+AddGlobalFunc('procedure Writeln(const str: string);', @Lape_Writeln);
 AddGlobalFunc('function SetScriptProp(prop: TSP_Property; Value: TVariantArray): boolean', @Lape_SetScriptProp);
 AddGlobalFunc('function GetScriptProp(prop: TSP_Property; var Value: TVariantArray): boolean', @Lape_GetScriptProp);
 AddGlobalFunc('procedure Wait(t: DWord);', @Lape_Wait);
