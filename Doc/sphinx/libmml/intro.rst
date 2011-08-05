@@ -59,6 +59,8 @@ write - again - their own wrapper around libMML. This is what is being done with
 *pyMML*, the python libMML wrapper. It is still as much in development as libMML
 is, but the functionality exposed by libMML is succesfully used.
 
+<<<<<<< HEAD
+=======
 As of writing the pyMML usage looks like this, the passing around of a client
 may be removed in a later stage, or at least have it's behaviour changed.
 
@@ -98,3 +100,4 @@ may be removed in a later stage, or at least have it's behaviour changed.
     print m.getPos()
 
     del DLL
+>>>>>>> master
