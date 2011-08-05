@@ -18,21 +18,22 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    Simba.inc: File with directives for SimbaUnit.
+    lpdefines.inc for the Mufasa Macro Library
 }
 
-{$IFDEF LINUX}
-    {$DEFINE LINUX_HOTKEYS} // For global hotkeys, requires libkeybinder.
-                            // See Units/Linux/keybinder.pas
-{$ENDIF}
-
-//{$DEFINE SIMBA_VERBOSE} // For more verbosity.
-
-//{$DEFINE USE_RUTIS}
-{$DEFINE USE_LAPE}
-
-//{$DEFINE USE_CPASCAL} // TODO
-{$DEFINE USE_EXTENSIONS}
-//{$DEFINE USE_CODECOMPLETION} // TODO
-
-//{$DEFINE TERMINALWRITELN} // Only used once. Remove from SimbaUnit?
+BaseDefines.Add('LAPE');
+{$IFDEF CPU386 }
+BaseDefines.Add('CPU386');
+{$ENDIF }
+BaseDefines.Add('MUFASA');
+BaseDefines.Add('COGAT');
+BaseDefines.Add('SIMBA');
+BaseDefines.Add('DGROCKS');
+{$IFDEF MSWINDOWS }
+BaseDefines.Add('MSWINDOWS');
+BaseDefines.Add('WIN32');
+BaseDefines.Add('WINDOWS');
+{$ENDIF }
+{$IFDEF LINUX }
+BaseDefines.Add('LINUX');
+{$ENDIF }
