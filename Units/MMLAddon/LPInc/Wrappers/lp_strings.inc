@@ -82,3 +82,53 @@ procedure Lape_Between(const Params: PParamArray; const Result: Pointer);
 begin
   Pstring(Result)^ := ps_Between(Pstring(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^);
 end;
+
+procedure Lape_Implode(const Params: PParamArray; const Result: Pointer);
+begin
+  Pstring(Result)^ := ps_Implode(Pstring(Params^[0])^, PStringArray(Params^[1])^);
+end;
+
+procedure Lape_Explode(const Params: PParamArray; const Result: Pointer);
+begin
+  PStringArray(Result)^ := ps_Explode(Pstring(Params^[0])^, Pstring(Params^[1])^);
+end;
+
+procedure Lape_ExplodeWrap(const Params: PParamArray);
+begin
+  ps_ExplodeWrap(Pstring(Params^[0])^, Pstring(Params^[1])^, PStringArray(Params^[2])^);
+end;
+
+procedure Lape_Padl(const Params: PParamArray; const Result: Pointer);
+begin
+  PString(Result)^ := ps_Padl(PString(Params^[0])^, PlongInt(Params^[1])^);
+end;
+
+procedure Lape_Padz(const Params: PParamArray; const Result: Pointer);
+begin
+  PString(Result)^ := ps_Padz(PString(Params^[0])^, PlongInt(Params^[1])^);
+end;
+
+procedure Lape_Padr(const Params: PParamArray; const Result: Pointer);
+begin
+  PString(Result)^ := ps_Padr(PString(Params^[0])^, PlongInt(Params^[1])^);
+end;
+
+procedure Lape_ExecRegExpr(const Params: PParamArray; const Result: Pointer);
+begin
+  Pboolean(Result)^ := ps_ExecRegExpr(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+//procedure Lape_SplitRegExpr(const Params: PParamArray);
+//begin
+//  ps_SplitRegExpr(PString(Params^[0])^, PString(Params^[1])^, PStrings(Params^[2])^);
+//end;
+
+procedure Lape_ReplaceRegExpr(const Params: PParamArray; const Result: Pointer);
+begin
+  PString(Result)^ := ps_ReplaceRegExpr(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, Pboolean(Params^[3])^);
+end;
+
+procedure Lape_posex(const Params: PParamArray; const Result: Pointer);
+begin
+  Pinteger(Result)^ := ps_posex(PString(Params^[0])^, PString(Params^[1])^, Pinteger(Params^[2])^);
+end;
