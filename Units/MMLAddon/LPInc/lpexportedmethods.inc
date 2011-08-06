@@ -95,7 +95,6 @@ AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArra
 AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
 
-
 { Math }
 
 AddGlobalFunc('function round(e: extended): integer', @Lape_round);
@@ -121,6 +120,43 @@ AddGlobalFunc('function ArcTan2(y,x: extended): extended', @Lape_ArcTan2);
 AddGlobalFunc('procedure IncEx(var x: integer; increase: integer);', @Lape_IncEx);
 AddGlobalFunc('procedure DecEx(var x: integer; Decrease: integer);', @Lape_DecEx);
 AddGlobalFunc('function Factorial(number: longword): Int64', @Lape_Factorial);
+AddGlobalFunc('function BinCoe(a, b: LongInt): Extended', @Lape_BinCoe);
+AddGlobalFunc('function FixD(Degrees: extended): Extended', @Lape_FixD);
+AddGlobalFunc('function InRange(const value,min,max: integer): boolean', @Lape_InRange);
+AddGlobalFunc('function IntToBox(x1,y1,x2,y2: integer): TBox', @Lape_IntToBox);
+AddGlobalFunc('function IntInBox(x, y: Integer; Box: TBox): Boolean', @Lape_IntInBox);
+AddGlobalFunc('function PointToBox(PT1,PT2: TPoint): TBox', @Lape_PointToBox);
+AddGlobalFunc('function PointInBox(PT: TPoint; Box: TBox): Boolean', @Lape_PointInBox);
+AddGlobalFunc('function floor(e: extended): integer', @Lape_floor);
+AddGlobalFunc('function logn(base, x: extended): extended', @Lape_logn);
+AddGlobalFunc('function ln(x: extended): extended', @Lape_ln);
+AddGlobalFunc('function inttohex(value: integer): string', @Lape_inttohex);
+AddGlobalFunc('function hextoint(hex: string): integer', @Lape_hextoint);
+AddGlobalFunc('function sar(AValue: longint; shift: byte): longint', @Lape_sar);
+AddGlobalFunc('function ror(num: longword; shift: byte): LongWord', @Lape_ror);
+AddGlobalFunc('function rol(num: longword; shift: byte): LongWord', @Lape_rol);
+AddGlobalFunc('function tan(e: extended): extended', @Lape_tan);
+AddGlobalFunc('function radians(e: extended): extended', @Lape_radians);
+AddGlobalFunc('function degrees(e: extended): extended', @Lape_degrees);
+AddGlobalFunc('function ArcSin(e: extended): extended', @Lape_ArcSin);
+AddGlobalFunc('function ArcCos(e: extended): extended', @Lape_ArcCos);
+AddGlobalFunc('function ArcTan(e: extended): extended', @Lape_ArcTan);
+AddGlobalFunc('function Cotan(e: extended): extended', @Lape_Cotan);
+AddGlobalFunc('function Secant(e: extended): extended', @Lape_Secant);
+AddGlobalFunc('function Cosecant(e: extended): extended', @Lape_Cosecant);
+AddGlobalFunc('function Cot(e: extended): extended', @Lape_Cot);
+AddGlobalFunc('function Sec(e: extended): extended', @Lape_Sec);
+AddGlobalFunc('function Csc(e: extended): extended', @Lape_Csc);
+AddGlobalFunc('function Cosh(e: extended): extended', @Lape_Cosh);
+AddGlobalFunc('function Sinh(e: extended): extended', @Lape_Sinh);
+AddGlobalFunc('function Tanh(e: extended): extended', @Lape_Tanh);
+AddGlobalFunc('function CotH(e: extended): extended', @Lape_CotH);
+AddGlobalFunc('function SecH(e: extended): extended', @Lape_SecH);
+AddGlobalFunc('function CscH(e: extended): extended', @Lape_CscH);
+AddGlobalFunc('function ArcCosh(e: extended): extended', @Lape_ArcCosh);
+AddGlobalFunc('function ArcSinh(e: extended): extended', @Lape_ArcSinh);
+AddGlobalFunc('function DecRet(e: Extended): Extended', @Lape_DecRet);
+AddGlobalFunc('function log10(f: Extended): Extended', @Lape_log10);
 
 { Color }
 
@@ -149,46 +185,28 @@ AddGlobalFunc('function FindColoredAreaTolerance(var x, y: Integer; Color, xs, y
 { Color Conversions }
 
 AddGlobalFunc('procedure ColorToRGB(Color: integer; var r, g, b: Integer);', @Lape_ColorToRGB);
-//ps_RGBToColor
-//ps_ColorToHSL
-//ps_HSLToColor
-//ps_ColorToXYZ
-//ps_XYZToColor
-//ps_RGBToHSL
-//ps_HSLToRGB
-//ps_RGBToXYZ
-//ps_XYZToRGB
-
+AddGlobalFunc('function RGBtoColor(r, g, b: Integer): TColor', @Lape_RGBtoColor);
+AddGlobalFunc('procedure ColorToHSL(Color: Integer; var h, s, l: Extended);', @Lape_ColorToHSL);
+AddGlobalFunc('function HSLToColor(H, S, L: Extended): TColor', @Lape_HSLToColor);
+AddGlobalFunc('procedure ColorToXYZ(Color: Integer; var x, y, z: Extended);', @Lape_ColorToXYZ);
+AddGlobalFunc('function XYZToColor(X, Y, Z: Extended): TColor', @Lape_XYZToColor);
+AddGlobalFunc('procedure RGBToHSL(R, G, B: Integer; var h, s, l: Extended);', @Lape_RGBToHSL);
+AddGlobalFunc('procedure HSLtoRGB(H, S, L: extended; var R, G,B: Integer);', @Lape_HSLtoRGB);
+AddGlobalFunc('procedure RGBToXYZ(R, G, B: Integer; var x, y,z: Extended);', @Lape_RGBToXYZ);
+AddGlobalFunc('procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Integer);', @Lape_XYZToRGB);
 
 { Crypto }
+
 AddGlobalFunc('function haval(Data: string): string', @Lape_haval);
-
-//ps_md4
-//ps_md5
-//ps_ripemd128
-//ps_ripemd160
-//ps_sha1
-//ps_sha256
-//ps_sha384
-//ps_sha512
-//ps_tiger
-
-(* File isn't included!
-AddGlobalFunc('function ext_UnTar(const Input: string; var Content: TStringArray): boolean', @Lape_ext_UnTar);
-AddGlobalFunc('function ext_UnTarEx(const Input: string; const outputdir: string; overwrite: boolean): boolean', @Lape_ext_UnTarEx);
-AddGlobalFunc('function ext_DecompressBZip2(const input: string; var output: string; const BlockSize: Cardinal): boolean', @Lape_ext_DecompressBZip2);
-AddGlobalFunc('function ext_GetPage(const url: string): string', @Lape_ext_GetPage);
-//AddGlobalFunc('function ext_MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer', @Lape_ext_MessageDlg);
-//AddGlobalFunc('function ext_SDTMToMDTM(Const DTM: TSDTM): TMDTM', @Lape_ext_SDTMToMDTM);
-AddGlobalFunc('function ext_InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_ext_InputQuery);
-AddGlobalFunc('function ext_ScriptText: string', @Lape_ext_ScriptText);
-AddGlobalFunc('function ext_GetSelectedText: string', @Lape_ext_GetSelectedText);
-AddGlobalFunc('procedure ext_OpenScript(vName, Data: string; Run: boolean);', @Lape_ext_OpenScript);
-AddGlobalFunc('procedure ext_OpenScriptEx(FileName: string; Run: boolean);', @Lape_ext_OpenScriptEx);
-AddGlobalFunc('function ext_GetPageEx(const URL, PostData, MimeType: string): string', @Lape_ext_GetPageEx);
-AddGlobalFunc('function ext_GetJSONValue(const Data, Value: string): string', @Lape_ext_GetJSONValue);
-*)
-
+AddGlobalFunc('function md4(Data: string): string', @Lape_md4);
+AddGlobalFunc('function md5(Data: string): string', @Lape_md5);
+AddGlobalFunc('function ripemd128(Data: string): string', @Lape_ripemd128);
+AddGlobalFunc('function ripemd160(Data: string): string', @Lape_ripemd160);
+AddGlobalFunc('function sha1(Data: string): string', @Lape_sha1);
+AddGlobalFunc('function sha256(Data: string): string', @Lape_sha256);
+AddGlobalFunc('function sha384(Data: string): string', @Lape_sha384);
+AddGlobalFunc('function sha512(Data: string): string', @Lape_sha512);
+AddGlobalFunc('function tiger(Data: string): string', @Lape_tiger);
 
 { Files }
 
@@ -210,8 +228,11 @@ AddGlobalFunc('function ForceDirectores(const dir: string): boolean', @Lape_Forc
 AddGlobalFunc('function GetFiles(const Path, Ext: string): TStringArray', @Lape_GetFiles);
 AddGlobalFunc('function GetDirectories(const path: string): TStringArray', @Lape_GetDirectories);
 AddGlobalFunc('procedure WriteINI(const Section, KeyName, NewString, FileName: string);', @Lape_WriteINI);
+AddGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): string', @Lape_ReadINI);
+AddGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @Lape_DeleteINI);
 
 { Web }
+
 AddGlobalFunc('procedure OpenWebPage(const url: string);', @Lape_OpenWebPage);
 AddGlobalFunc('function GetPage(const S: String): String', @Lape_GetPage);
 AddGlobalFunc('function InitializeHTTPClient(HandleCookies: Boolean): Integer', @Lape_InitializeHTTPClient);
@@ -226,6 +247,7 @@ AddGlobalFunc('function GetRawHeaders(Client: Integer): string', @Lape_GetRawHea
 AddGlobalFunc('procedure SetProxy(Client: Integer; pHost, pPort: String);', @Lape_SetProxy);
 
 { Socket }
+
 AddGlobalFunc('function RecvSocketStr(Client: integer): string', @Lape_RecvSocketStr);
 AddGlobalFunc('function RecvSocket(Client: integer): string', @Lape_RecvSocket);
 AddGlobalFunc('function RecvSocketEx(Client, Length: integer): string', @Lape_RecvSocketEx);
@@ -252,6 +274,7 @@ AddGlobalFunc('procedure ClickMouse(x, y: integer; clickType: integer);', @Lape_
 AddGlobalFunc('function IsMouseButtonDown(button: integer): boolean', @Lape_IsMouseButtonDown);
 
 { Keyboard }
+
 AddGlobalFunc('procedure KeyDown(key: Word);', @Lape_KeyDown);
 AddGlobalFunc('procedure KeyUp(key: Word);', @Lape_KeyUp);
 AddGlobalFunc('procedure SendKeys(const s: string);', @Lape_SendKeys);
@@ -265,14 +288,15 @@ AddGlobalFunc('function rs_GetUpText: String', @Lape_rs_GetUpText);
 AddGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string', @Lape_rs_GetUpTextAtEx);
 AddGlobalFunc('function rs_GetUpTextAt(x, y: integer): string', @Lape_rs_GetUpTextAt);
 AddGlobalFunc('function BitmapFromText(const text, font: String): integer', @Lape_BitmapFromText);
-// ps_TPAFromText?
-// ps_MaskFromText?
-// ps_GetTextAt
-// ps_GetTextAtEx
-// ps_GetTextATPA
-// ps_LoadSystemFont
-// ps_LoadFont
-// ps_FreeFont
+AddGlobalFunc('function MaskFromText(const text, font: String): TMask', @Lape_MaskFromText);
+AddGlobalFunc('procedure TPAFromTextWrap(const text, font: String; var w,h: integer; out TPA: TPointArray);', @Lape_TPAFromTextWrap);
+AddGlobalFunc('function TPAFromText(const text, font: String; var w,h: integer): TPointArray', @Lape_TPAFromText);
+AddGlobalFunc('function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; const font: string): string', @Lape_GetTextATPA);
+AddGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; const font: string): string', @Lape_GetTextAt);
+AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing, color, tol: integer; const font: string): string', @Lape_GetTextAtEx);
+//AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
+AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
+AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
 
 { Other }
 
@@ -281,7 +305,42 @@ AddGlobalFunc('function SetScriptProp(prop: TSP_Property; Value: TVariantArray):
 AddGlobalFunc('function GetScriptProp(prop: TSP_Property; var Value: TVariantArray): boolean', @Lape_GetScriptProp);
 AddGlobalFunc('procedure Wait(t: DWord);', @Lape_Wait);
 
+AddGlobalFunc('procedure PlaySound(Sound: string);', @Lape_PlaySound);
+AddGlobalFunc('Procedure StopSound;', @Lape_StopSound);
+AddGlobalFunc('procedure ClearDebug;', @Lape_ClearDebug);
+AddGlobalFunc('procedure SetSupressExceptions(Supress: boolean);', @Lape_SetSupressExceptions);
+AddGlobalFunc('procedure SaveScreenshot(FileName: string);', @Lape_SaveScreenshot);
+AddGlobalFunc('procedure DisplayDebugImgWindow(w,h: integer);', @Lape_DisplayDebugImgWindow);
+AddGlobalFunc('procedure DrawBitmapDebugImg(bmp: integer);', @Lape_DrawBitmapDebugImg);
+AddGlobalFunc('function GetDebugBitmap: integer', @Lape_GetDebugBitmap);
+AddGlobalFunc('procedure ClearDebugImg;', @Lape_ClearDebugImg);
+AddGlobalFunc('procedure Status(Status: string);', @Lape_Status);
+AddGlobalFunc('procedure Disguise(Caption: string);', @Lape_Disguise);
+AddGlobalFunc('procedure ShowMessage(msg: string);', @Lape_ShowMessage);
+AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integer', @Lape_MessageBox);
+//AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer', @Lape_MessageDlg);
+
+
+AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
+AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
+AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
+//AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
+AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
+AddGlobalFunc('procedure DecodeDate(const SourceDate: TDateTime; var Year, Month, Day: Word);', @Lape_DecodeDate);
+AddGlobalFunc('procedure DecodeTime(DateTime: TDateTime; var Hour,Min,Sec,MSec: word);', @Lape_DecodeTime);
+AddGlobalFunc('function Now: TDateTime', @Lape_Now);
+AddGlobalFunc('function Date: TDateTime', @Lape_Date);
+AddGlobalFunc('function GetTickCount: Longword', @Lape_GetTickCount);
+AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
+AddGlobalFunc('procedure Simba;', @Lape_Simba);
+AddGlobalFunc('procedure SetClipBoard(const Data: string);', @Lape_SetClipBoard);
+AddGlobalFunc('function GetClipBoard: string', @Lape_GetClipBoard);
+//AddGlobalFunc('function GetProcesses: TSysProcArr', @Lape_GetProcesses);
+//AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
+AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_ExtractFileExt);
+
 { Settings }
+
 AddGlobalFunc('function SetSettingValue(const KeyName,value: string): boolean', @Lape_SetSettingValue);
 AddGlobalFunc('function KeyIsSetting(const KeyName: String): Boolean', @Lape_KeyIsSetting);
 AddGlobalFunc('function KeyIsDirectory(const KeyName: String): Boolean', @Lape_KeyIsDirectory);
@@ -292,6 +351,7 @@ AddGlobalFunc('function DeleteSetting(const KeyName: String): Boolean', @Lape_De
 AddGlobalFunc('function DeleteSubSettings(const KeyName: String): Boolean', @Lape_DeleteSubSettings);
 
 { String }
+
 AddGlobalFunc('function Capitalize(str: string): string', @Lape_Capitalize);
 AddGlobalFunc('function CompressString(const Str: string): string', @Lape_CompressString);
 AddGlobalFunc('function DecompressString(const Compressed: string): string', @Lape_DecompressString);
@@ -309,8 +369,19 @@ AddGlobalFunc('function StrToFloatDef(value: String; default: Extended): Extende
 AddGlobalFunc('function StrToBool(value: String): Boolean', @Lape_StrToBool);
 AddGlobalFunc('function StrToBoolDef(value: String; default: Boolean): Boolean', @Lape_StrToBoolDef);
 AddGlobalFunc('function Between(s1, s2, str: string): string', @Lape_Between);
+AddGlobalFunc('function Implode(Glue: string; Pieces: TStringArray): string', @Lape_Implode);
+AddGlobalFunc('function Explode(del, str: string): TStringArray', @Lape_Explode);
+AddGlobalFunc('procedure ExplodeWrap(del, str: string; var res: TStringArray);', @Lape_ExplodeWrap);
+AddGlobalFunc('function Padl(s: String; i: longInt): String', @Lape_Padl);
+AddGlobalFunc('function Padz(s: String; i: longInt): String', @Lape_Padz);
+AddGlobalFunc('function Padr(s: String; i: longInt): String', @Lape_Padr);
+AddGlobalFunc('function ExecRegExpr(const RegExpr, InputStr: String): boolean', @Lape_ExecRegExpr);
+//AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
+AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: String; UseSubstitution: boolean): String', @Lape_ReplaceRegExpr);
+AddGlobalFunc('function posex(needle, haystack: String; offset: integer): integer', @Lape_posex);
 
 { TPA }
+
 AddGlobalFunc('procedure Quicksort(var Arr: TIntegerArray);', @Lape_Quicksort);
 AddGlobalFunc('procedure tSwap(var a, b: TPoint);', @Lape_tSwap);
 AddGlobalFunc('procedure tpaSwap(var a, b: TPointArray);', @Lape_tpaSwap);
@@ -416,3 +487,19 @@ AddGlobalFunc('function Freeze: boolean', @Lape_Freeze);
 AddGlobalFunc('function Unfreeze: boolean', @Lape_Unfreeze);
 AddGlobalFunc('procedure ActivateClient;', @Lape_ActivateClient);
 AddGlobalFunc('function IsTargetValid: boolean', @Lape_IsTargetValid);
+
+
+{ Extensions }
+//AddGlobalFunc('function ext_UnTar(const Input: string; var Content: TStringArray): boolean', @Lape_ext_UnTar);
+//AddGlobalFunc('function ext_UnTarEx(const Input: string; const outputdir: string; overwrite: boolean): boolean', @Lape_ext_UnTarEx);
+//AddGlobalFunc('function ext_DecompressBZip2(const input: string; var output: string; const BlockSize: Cardinal): boolean', @Lape_ext_DecompressBZip2);
+//AddGlobalFunc('function ext_GetPage(const url: string): string', @Lape_ext_GetPage);
+////AddGlobalFunc('function ext_MessageDlg(const aCaption, aMsg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons; HelpCtx: Longint): Integer', @Lape_ext_MessageDlg);
+////AddGlobalFunc('function ext_SDTMToMDTM(Const DTM: TSDTM): TMDTM', @Lape_ext_SDTMToMDTM);
+//AddGlobalFunc('function ext_InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_ext_InputQuery);
+//AddGlobalFunc('function ext_ScriptText: string', @Lape_ext_ScriptText);
+//AddGlobalFunc('function ext_GetSelectedText: string', @Lape_ext_GetSelectedText);
+//AddGlobalFunc('procedure ext_OpenScript(vName, Data: string; Run: boolean);', @Lape_ext_OpenScript);
+//AddGlobalFunc('procedure ext_OpenScriptEx(FileName: string; Run: boolean);', @Lape_ext_OpenScriptEx);
+//AddGlobalFunc('function ext_GetPageEx(const URL, PostData, MimeType: string): string', @Lape_ext_GetPageEx);
+//AddGlobalFunc('function ext_GetJSONValue(const Data, Value: string): string', @Lape_ext_GetJSONValue);
