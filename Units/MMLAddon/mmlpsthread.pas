@@ -1281,23 +1281,23 @@ type
  end;
 
 
-{$I LPInc/Wrappers/other.inc}
-{$I LPInc/Wrappers/settings.inc}
-{$I LPInc/Wrappers/bitmap.inc}
-{$I LPInc/Wrappers/window.inc}
-{$I LPInc/Wrappers/tpa.inc}
-{$I LPInc/Wrappers/strings.inc}
-{$I LPInc/Wrappers/colour.inc}
-{$I LPInc/Wrappers/colourconv.inc}
-{$I LPInc/Wrappers/crypto.inc}
-{$I LPInc/Wrappers/math.inc}
-{$I LPInc/Wrappers/mouse.inc}
-{$I LPInc/Wrappers/file.inc}
-{$I LPInc/Wrappers/keyboard.inc}
-{$I LPInc/Wrappers/dtm.inc}
+{$I LPInc/Wrappers/lp_other.inc}
+{$I LPInc/Wrappers/lp_settings.inc}
+{$I LPInc/Wrappers/lp_bitmap.inc}
+{$I LPInc/Wrappers/lp_window.inc}
+{$I LPInc/Wrappers/lp_tpa.inc}
+{$I LPInc/Wrappers/lp_strings.inc}
+{$I LPInc/Wrappers/lp_colour.inc}
+{$I LPInc/Wrappers/lp_colourconv.inc}
+{$I LPInc/Wrappers/lp_crypto.inc}
+{$I LPInc/Wrappers/lp_math.inc}
+{$I LPInc/Wrappers/lp_mouse.inc}
+{$I LPInc/Wrappers/lp_file.inc}
+{$I LPInc/Wrappers/lp_keyboard.inc}
+{$I LPInc/Wrappers/lp_dtm.inc}
 {.$I LPInc/Wrappers/extensions.inc} //Doesn't work for me!
-{$I LPInc/Wrappers/ocr.inc}
-{$I LPInc/Wrappers/internets.inc}
+{$I LPInc/Wrappers/lp_ocr.inc}
+{$I LPInc/Wrappers/lp_internets.inc}
 
 constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 var

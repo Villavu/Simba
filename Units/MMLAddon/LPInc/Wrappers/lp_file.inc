@@ -87,3 +87,18 @@ procedure Lape_WriteINI(const Params: PParamArray);
 begin
   ps_WriteINI(Pstring(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^, Pstring(Params^[3])^);
 end;
+
+procedure Lape_ReadINI(const Params: PParamArray; const Result: Pointer);
+begin
+  Pstring(Result)^ := ps_ReadINI(Pstring(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^);
+end;
+
+procedure Lape_DeleteINI(const Params: PParamArray);
+begin
+  ps_DeleteINI(Pstring(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^);
+end;
+
+procedure Lape_ExtractFileExt(const Params: PParamArray; const Result: Pointer);
+begin
+  Pstring(Result)^ := ps_ExtractFileExt(Pstring(Params^[0])^);
+end;
