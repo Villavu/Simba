@@ -544,7 +544,7 @@ begin
   if ErrorData.Module <> '' then
   begin;
     if not FileExists(ErrorData.Module) then
-      formWriteln(Format('ERROR comes from a non-existing file (%s)',[ErrorData.Module]))
+      SimbaForm._WriteLn(Format('ERROR comes from a non-existing file (%s)',[ErrorData.Module]))
     else
     begin
       ErrorData.Module:= SetDirSeparators(ErrorData.Module);// Set it right ;-)
@@ -563,9 +563,9 @@ begin
   else
     SynEdit.LogicalCaretXY := Point(ErrorData.Col,ErrorData.Row);
   if pos('error',lowercase(ErrorData.Error)) > 0 then
-    formWriteln(Format('%s at line %d',[ErrorData.Error,ErrorData.Row]))
+    SimbaForm._WriteLn(Format('%s at line %d',[ErrorData.Error,ErrorData.Row]))
   else
-    formWriteln(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Row]));
+    SimbaForm._WriteLn(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Row]));
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;
@@ -675,7 +675,7 @@ begin
   except
     on EFOpenError do
     begin
-      formWriteln('Could not open extern script :' + ScriptFile);
+      SimbaForm._WriteLn('Could not open extern script :' + ScriptFile);
       exit;
     end;
   end;

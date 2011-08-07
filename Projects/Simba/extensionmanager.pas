@@ -102,7 +102,7 @@ begin
     Result := True;
   except
     on e : exception do
-      formWritelnex(format('Error in LoadPSExtension(%s): %s',[FileName, e.message]));
+      SimbaForm._WriteLn(format('Error in LoadPSExtension(%s): %s',[FileName, e.message]));
   end;
 end;
 

@@ -55,7 +55,7 @@ begin
         dispPic.Free;
       dispPic := x;
     except
-      formWritelnEx('ERROR loading the file: ' + OpenPictureDialog.FileName);
+      SimbaForm._WriteLn('ERROR loading the file: ' + OpenPictureDialog.FileName);
       ImagePreview.Picture := nil;
       if dispPic <> nil then
         FreeAndNil(dispPic);
@@ -78,12 +78,12 @@ begin
     if PadOutput.Checked then
       while Len > 65 do
       begin
-        formWritelnEx(Copy(str,1,62) + #39 + ' +');
+        SimbaForm._WriteLn(Copy(str,1,62) + #39 + ' +');
         delete(str,1,62);
         str := StringOfChar(' ',8) + #39 + str;
         len := length(str);
       end;
-    formWritelnEx(str + strend);
+    SimbaForm._WriteLn(str + strend);
   end;
 end;
 

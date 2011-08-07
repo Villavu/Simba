@@ -140,7 +140,9 @@ type
     SubPoints: TSDTMPointDefArray;
   end;
 
-  TWritelnProc = procedure(s: string);
+  TWriteLnProc = procedure(const s: string) of object;
+  TWriteProc = TWriteLnProc;
+
   {events}
   TOpenFileEvent = procedure(Sender : TObject;var Filename : string; var Continue : boolean) of object;
   TWriteFileEvent = TOpenFileEvent;

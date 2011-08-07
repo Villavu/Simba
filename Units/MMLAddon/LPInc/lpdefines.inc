@@ -21,7 +21,6 @@
     lpdefines.inc for the Mufasa Macro Library
 }
 
-BaseDefines.Add('LAPE');
 {$IFDEF CPU386 }
 BaseDefines.Add('CPU386');
 {$ENDIF }

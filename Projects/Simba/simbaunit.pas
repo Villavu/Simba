@@ -59,7 +59,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
   PSDump,
 
-  settings, updater;
+  settings, updater, syncobjs;
 
 const
   SimbaVersion = 970;
@@ -232,7 +232,6 @@ type
     SplitterFunctionList: TSplitter;
     TabPopup: TPopupMenu;
     TB_SaveAll: TToolButton;
-    DebugTimer: TTimer;
     TrayDivider: TMenuItem;
     TrayPlay: TMenuItem;
     TrayStop: TMenuItem;
@@ -376,7 +375,6 @@ type
     procedure PickerPick(Sender: TObject; const Colour, colourx,
       coloury: integer);
     procedure PopupItemFindClick(Sender: TObject);
-    procedure ProcessDebugStream(Sender: TObject);
     procedure RecentFileItemsClick(Sender: TObject);
     procedure ScriptPanelDockDrop(Sender: TObject; Source: TDragDockObject; X,
       Y: Integer);
@@ -448,20 +446,23 @@ type
     function SettingExists(const key : string) : boolean;
     procedure FontUpdate;
   public
-    DebugStream: String;
-    SearchString : string;
-    CurrScript : TScriptFrame; //The current scriptframe
-    CurrTab    : TMufasaTab; //The current TMufasaTab
+    SearchString: string;
+    CurrScript: TScriptFrame; //The current scriptframe
+    CurrTab: TMufasaTab; //The current TMufasaTab
     CodeCompletionForm: TAutoCompletePopup;
     CodeCompletionStart: TPoint;
     ParamHint : TParamHint;
-    Tabs : TList;
+    Tabs: TList;
     Manager: TIOManager;
     OCR_Fonts: TMOCR;
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
     OnScriptStart : TScriptStartEvent;
     FormCallBackData : TCallBackData;
+    
+    _WriteLnBuffer: string;
+    _WriteLnSection: TCriticalSection;
+    
     {$ifdef mswindows}
     ConsoleVisible : boolean;
     procedure ShowConsole( ShowIt : boolean);
@@ -512,11 +513,17 @@ type
     property DefScriptPath : string read GetDefScriptPath write SetDefScriptPath;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
     function DefaultScript : string;
+
+    { These are used to write from other threads. }
+    procedure _Write;
+    procedure _WriteT(const s: string);
+    procedure _WriteLn;
+    procedure _WriteLnT(const s: string);
+
+    procedure _WriteLn(const s: string); overload;
   end;
 
   procedure ClearDebug;
-  procedure formWriteln( S : String);
-  procedure formWritelnEx( S : String);
   function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
 
 const
@@ -527,8 +534,7 @@ const
   Panel_ScriptName = 2;
   Panel_ScriptPath = 3;
   Panel_General = 3;
-
-
+  
   Image_Stop = 7;
   Image_Terminate = 19;
 var
@@ -538,14 +544,10 @@ var
   PrevWndProc : WNDPROC;
   {$endif}
   CurrentSyncInfo : TSyncInfo;//We need this for SafeCallThread
-
-
-
-
+  
 implementation
 uses
    lclintf,
-   syncobjs, // for the critical sections / mutexes
    debugimage,
    files,
    InterfaceBase,
@@ -654,9 +656,6 @@ end;
   {$ENDIF}
 
 {$ENDIF}
-
-var
-   DebugCriticalSection: syncobjs.TCriticalSection;
 
 procedure TSimbaForm.OnCCMessage(Sender: TObject; const Typ: TMessageEventType; const Msg: string; X, Y: Integer);
 begin
@@ -855,24 +854,6 @@ begin
 {$ENDIF}
 end;
 
-procedure TSimbaForm.ProcessDebugStream(Sender: TObject);
-begin
-  if length(DebugStream) = 0 then
-    Exit;
-
-  // cut off 1 newline char
-
-  DebugCriticalSection.Enter;
-
-  try
-    setlength(DebugStream, length(DebugStream) - 1);
-    Memo1.Lines.Add(DebugStream);
-    SetLength(DebugStream, 0);
-  finally
-    DebugCriticalSection.Leave;
-  end;
-end;
-
 procedure TSimbaForm.RecentFileItemsClick(Sender: TObject);
 var
   i : integer;
@@ -1007,8 +988,8 @@ begin
   if LatestVersion > SimbaVersion then
   begin;
     TT_Update.Visible:=True;
-    formWritelnEx('A new update of Simba is available!');
-    formWritelnEx(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+    _WriteLn('A new update of Simba is available!');
+    _WriteLn(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
   end else
   begin
     mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
@@ -1036,23 +1017,6 @@ begin
   TThread.Synchronize(nil,@SimbaForm.Memo1.Clear);
 end;
 
-procedure formWriteln( S : String);
-begin
-  mDebugLn('formWriteln: ' + s);
-  {$ifdef MSWindows}
-  //Ha, we cán acces the debugmemo
-  SimbaForm.Memo1.Lines.Add(s);
-  {$else}
-  DebugCriticalSection.Enter;
-  try
-    s := s + MEOL;
-    SimbaForm.DebugStream:= SimbaForm.DebugStream + s;
-  finally
-    DebugCriticalSection.Leave;
-  end;
-  {$endif}
-end;
-
 //{$ENDIF}
 
 procedure TSimbaForm.RunScript;
@@ -1070,7 +1034,7 @@ begin
     end else
     if ScriptState <> ss_None then
     begin;
-      FormWritelnEx('The script hasn''t stopped yet, so we cannot start a new one.');
+      _WriteLn('The script hasn''t stopped yet, so we cannot start a new one.');
       exit;
     end;
     InitializeTMThread(scriptthread);
@@ -1625,7 +1589,7 @@ var
 begin
   if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
   begin
-    formWriteln('Reloading read only script');
+    _WriteLn('Reloading read only script');
     CurrScript.ReloadScript;
   end;
 
@@ -1661,7 +1625,7 @@ begin
   end;
 
   {$IFNDEF TERMINALWRITELN}
-  Thread.SetDebug(@formWriteln);
+  Thread.SetDebug(@_WriteT, @_WriteLnT);
   {$ENDIF}
   Thread.SetScript(Script);
 
@@ -1677,10 +1641,10 @@ begin
      PluginsGlob.AddPath(PluginPath);
   if not DirectoryExists(IncludePath) then
     if FirstRun then
-      FormWritelnEx('Warning: The include directory specified in the Settings isn''t valid.');
+      _WriteLn('Warning: The include directory specified in the Settings isn''t valid.');
   if not DirectoryExists(fontPath) then
     if FirstRun then
-      FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
+      _WriteLn('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
   Thread.SetPaths(ScriptPath,AppPath,Includepath,PluginPath,fontPath);
 
   if selector.haspicked then
@@ -1761,7 +1725,7 @@ begin
     ScriptFile:= SetDirSeparators(Filename);
     ScriptName:= ExtractFileNameOnly(ScriptFile);
     mDebugLn('Script name will be: ' + ScriptName);
-    FormWritelnEx('Successfully saved: ' + ScriptFile);
+    _WriteLn('Successfully saved: ' + ScriptFile);
     StartText:= SynEdit.Lines.Text;
     ScriptChanged := false;
     SynEdit.MarkTextAsSaved;
@@ -2092,7 +2056,7 @@ begin
   Self.Manager.GetMousePos(x, y);
   if self.Manager.ReceivedError() then
   begin
-    FormWritelnEx('Our window no longer exists -> Resetting to desktop');
+    _WriteLn('Our window no longer exists -> Resetting to desktop');
     self.Manager.SetDesktop;
     self.Manager.ResetError;
   end;
@@ -2457,6 +2421,7 @@ begin
   {$ENDIF}
 
   InitmDebug; { Perhaps we need to place this before our mDebugLines?? }
+  _WriteLnSection := TCriticalSection.Create;
 
   Self.OnScriptStart:= @ScriptStartEvent;
 
@@ -2489,14 +2454,6 @@ begin
   Picker := TMColorPicker.Create(Manager);
   Picker.OnPick:=@PickerPick;
   Selector := TMWindowSelector.Create(Manager);
-
-  { For writeln }
-  SetLength(DebugStream, 0);
-  DebugCriticalSection := syncobjs.TCriticalSection.Create;
-
-  {$ifdef mswindows}  { The Debug timer checks for new stuff to print }
-  DebugTimer.Enabled:= false;
-  {$endif}
 
   Application.QueueAsyncCall(@RefreshTabSender,0);
 
@@ -2531,7 +2488,7 @@ begin
   self.EndFormUpdate;
 
   if SettingsForm.Oops then
-    formWriteln('WARNING: No permissions to write to settings.xml!');
+    _WriteLn('WARNING: No permissions to write to settings.xml!');
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -2564,9 +2521,6 @@ begin
   if (Assigned(OCR_Fonts)) then
     OCR_Fonts.Free;
 
-  SetLength(DebugStream, 0);
-  DebugCriticalSection.Free;
-
   RecentFiles.Free;
   ParamHint.Free;
 
@@ -2577,6 +2531,8 @@ begin
   Unbind_Linux_Keys;
   {$ENDIF}
   {$endif}
+
+  _WriteLnSection.Free;
 end;
 
 procedure TSimbaForm.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
@@ -2677,11 +2633,6 @@ begin;
       free;
       SynExporterHTML.Free;
     end;
-end;
-
-procedure formWritelnEx(S: String);
-begin
-  SimbaForm.Memo1.Lines.Add(s);
 end;
 
 function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
@@ -2895,7 +2846,7 @@ var
 begin
   if Picker.Picking then
   begin
-    formWriteln('Error: Already picking a colour');
+    _WriteLn('Error: Already picking a colour');
     exit;
   end;
   Picker.Pick(c, x, y);
@@ -2908,7 +2859,7 @@ begin
   if lowercase(LoadSettingDef('Settings/ColourPicker/ShowHistoryOnPick', 'True')) = 'true' then
     ColourHistoryForm.Show;
 
-  FormWritelnEx('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
+  _WriteLn('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
 end;
 
 
@@ -2916,7 +2867,7 @@ procedure TSimbaForm.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   Manager.SetTarget(Selector.Drag);
-  FormWritelnEx('New window: ' + IntToStr(Selector.LastPick));
+  _WriteLn('New window: ' + IntToStr(Selector.LastPick));
 end;
 
 procedure TSimbaForm.PageControl1Change(Sender: TObject);
@@ -3174,7 +3125,7 @@ begin
   LatestVersion := SimbaUpdateForm.GetLatestFontVersion;
   if LatestVersion > CurrVersion then
   begin;
-    formWriteln(format('New fonts available. Current version: %d. Latest version: %d',[CurrVersion,LatestVersion]));
+    _WriteLn(format('New fonts available. Current version: %d. Latest version: %d',[CurrVersion,LatestVersion]));
     FontDownload := TDownloadThread.Create(LoadSettingDef('Settings/Fonts/UpdateLink',FontURL + 'Fonts.tar.bz2'),
                                            @Fonts);
     FontDownload.resume;
@@ -3195,11 +3146,11 @@ begin
           Idler;
         if UnTarrer.Result then
         begin;
-          FormWriteln('Succesfully installed the new fonts!');
+          _WriteLn('Succesfully installed the new fonts!');
           SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion),true);
           if Assigned(self.OCR_Fonts) then
             self.OCR_Fonts.Free;
-          FormWriteln('Freeing the current fonts. Creating new ones now');
+          _WriteLn('Freeing the current fonts. Creating new ones now');
           Self.OCR_Fonts := TMOCR.Create(nil);
           OCR_Fonts.InitTOCR(fontPath);
         end;
@@ -3439,7 +3390,7 @@ function TSimbaForm.SaveCurrentScript: boolean;
 begin
   if CurrScript.GetReadOnly() then
   begin
-    formWriteln('Script is in read-only/external editor mode. Not saving!');
+    _WriteLn('Script is in read-only/external editor mode. Not saving!');
     exit(false);
   end;
   if not CurrScript.ScriptChanged then
@@ -3554,6 +3505,49 @@ begin
   end;
 end;
 
+procedure TSimbaForm._WriteLn(const s: string);
+begin
+  with Memo1.Lines do
+  begin
+    Strings[Count - 1] := Strings[Count - 1] + s;
+    Add('');
+  end;
+end;
+
+procedure TSimbaForm._Write;
+begin
+  with Memo1.Lines do
+    Strings[Count - 1] := Strings[Count - 1] + _WriteLnBuffer;
+end;
+
+procedure TSimbaForm._WriteT(const s: string);
+begin
+  _WriteLnSection.Acquire;
+  try
+    _WriteLnBuffer := s;
+    TThread.Synchronize(nil, @_Write);
+    _WriteLnBuffer := '';
+  finally
+    _WriteLnSection.Release;
+  end;
+end;
+
+procedure TSimbaForm._WriteLn;
+begin
+  _WriteLn(_WriteLnBuffer);
+end;
+
+procedure TSimbaForm._WriteLnT(const s: string);
+begin
+  _WriteLnSection.Acquire;
+  try
+    _WriteLnBuffer := s;
+    TThread.Synchronize(nil, @_WriteLn);
+    _WriteLnBuffer := '';
+  finally
+    _WriteLnSection.Release;
+  end;
+end;
 
 { TMufasaTab }
 

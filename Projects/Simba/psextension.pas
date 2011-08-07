@@ -91,7 +91,7 @@ uses
 
 procedure psWriteLn(s: string);
 begin
-  formWritelnEx(s);
+  SimbaForm._WriteLn(s);
 end;
 
 function TSimbaPSExtension.HookExists(const HookName: String): Boolean;
@@ -383,18 +383,18 @@ begin
   PSInstance.OnNeedFile:=@OnNeedFile;
   PSInstance.UsePreProcessor:= True;
 
-  formWritelnEx(Format('Loading extension %s', [FileName]));
+  psWriteLn(Format('Loading extension %s', [FileName]));
   try
     FWorking := PSInstance.Compile;
   except
     on e : exception do
-      FormWritelnEx(format('Error in Simba extension (%s) : %s',[FileName,e.message]));
+      psWriteLn(format('Error in Simba extension (%s) : %s',[FileName,e.message]));
   end;
   if FWorking then
-    formWritelnEx('Extension Enabled')
+    psWriteLn('Extension Enabled')
   else
   begin
-    formWritelnEx('Extension Disabled - Did not compile');
+    psWriteLn('Extension Disabled - Did not compile');
     OutputMessages;
   end;
 
@@ -410,7 +410,7 @@ var
   l: Longint;
 begin
   for l := 0 to PSInstance.CompilerMessageCount - 1 do
-    formWritelnEx(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
+    psWriteLn(PSInstance.CompilerErrorToStr(l) + ' at line ' + inttostr(PSInstance.CompilerMessages[l].Row));
 end;
 
 

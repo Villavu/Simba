@@ -115,7 +115,8 @@ type
       procedure SetWriteFileEvent(const AValue: TWriteFileEvent);
     protected
       ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
-      DebugTo: TWritelnProc;
+      WriteTo: TWriteProc;
+      WriteLnTo: TWriteLnProc;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
       FOpenConnectionEvent : TOpenConnectionEvent;
@@ -149,7 +150,7 @@ type
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
       procedure AddMethod(meth: TExpMethod); virtual;
 
-      procedure SetDebug( writelnProc : TWritelnProc );
+      procedure SetDebug(const WriteProc: TWriteProc; const WriteLnProc: TWriteLnProc);
       procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
       procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
 
@@ -321,8 +322,8 @@ procedure psWriteln(str : string); extdecl;
 begin
   if Assigned(CurrThread) and CurrThread.Prop.WriteTimeStamp then
     str := format('[%s]: %s', [TimeToStr(TimeStampToDateTime(MSecsToTimeStamp(GetTickCount - CurrThread.StartTime))), str]);
-  if Assigned(CurrThread) and Assigned(CurrThread.DebugTo) then
-    CurrThread.DebugTo(str)
+  if Assigned(CurrThread) and Assigned(CurrThread.WriteLnTo) then
+    CurrThread.WriteLnTo(str)
   else
     mDebugLn(str);
 end;
@@ -536,10 +537,11 @@ begin
                     // will be false.
 end;
 
-procedure TMThread.SetDebug(writelnProc: TWritelnProc);
+procedure TMThread.SetDebug(const WriteProc: TWriteProc; const WriteLnProc: TWriteLnProc);
 begin
-  DebugTo := writelnProc;
-  Client.WritelnProc:= writelnProc;
+  WriteTo := WriteProc;
+  WriteLnTo := WriteLnProc;
+  Client.WriteLnProc := WriteLnProc;
 end;
 
 procedure TMThread.SetSettings(S: TMMLSettings; SimbaSetFile: String);
@@ -1274,11 +1276,22 @@ type
   PMDTM = ^TMDTM;
   PMDTMPoint = ^TMDTMPoint;
   PSDTM = ^TSDTM;
-  
- procedure lp_WriteLn(Params: PParamArray);
- begin
-   psWriteLn(PlpString(Params^[0])^);
- end;
+
+procedure lp_Write(Params: PParamArray);
+begin
+  if (CurrThread.WriteTo <> nil) then
+    CurrThread.WriteTo(PlpString(Params^[0])^)
+  else
+    Write(PlpString(Params^[0])^);
+end;
+
+procedure lp_WriteLn(Params: PParamArray);
+begin
+  if (CurrThread.WriteTo <> nil) then
+    CurrThread.WriteTo(#13#10)
+  else
+    Write(#13#10);
+end;
 
 
 {$I LPInc/Wrappers/other.inc}
@@ -1313,6 +1326,7 @@ begin
   Fonts := Client.MOCR.Fonts;
   with Compiler do
   begin
+    addGlobalFunc('procedure _write(s: string); override;', @lp_Write);
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     
     for I := Fonts.Count - 1 downto 0 do
