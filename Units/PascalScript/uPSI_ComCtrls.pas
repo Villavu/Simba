@@ -311,7 +311,7 @@ begin T := Self.TabIndex; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TTabControlNoteBookStringsNoteBook_R(Self: TTabControlNoteBookStrings; var T: TNoteBook);
-begin T := TNoteBook(Self.NoteBook); end;
+begin T := Self.NoteBook; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TTabControlStringsTabWidth_W(Self: TTabControlStrings; const T: Smallint);
