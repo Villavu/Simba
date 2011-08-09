@@ -39,6 +39,7 @@ uses
   CastaliaSimplePasParTypes, dcpbase64, mPasLex, v_Constants, v_MiscFunctions,
   mmisc, bitmapconv;
 
+{$R Simba2.rc}
 {$R Simba.res}
 
 begin
