@@ -1308,6 +1308,8 @@ begin
 
   Parser := TLapeTokenizerString.Create('');
   Compiler := TLapeCompiler.Create(Parser);
+
+  InitializePascalScriptBasics(Compiler);
   Compiler.OnFindFile := @OnFindFile;
   Compiler.OnHandleDirective := @OnHandleDirective;
   Fonts := Client.MOCR.Fonts;
