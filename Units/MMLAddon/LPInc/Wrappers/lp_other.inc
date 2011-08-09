@@ -113,31 +113,6 @@ begin
   ps_ConvertTime(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^);
 end;
 
-procedure Lape_DecodeDate(const Params: PParamArray);
-begin
-  ps_DecodeDate(PDateTime(Params^[0])^, PWord(Params^[1])^, PWord(Params^[2])^, PWord(Params^[3])^);
-end;
-
-procedure Lape_DecodeTime(const Params: PParamArray);
-begin
-  ps_DecodeTime(PDateTime(Params^[0])^, Pword(Params^[1])^, Pword(Params^[2])^, Pword(Params^[3])^, Pword(Params^[4])^);
-end;
-
-procedure Lape_Now(const Params: PParamArray; const Result: Pointer);
-begin
-  PDateTime(Result)^ := ps_Now();
-end;
-
-procedure Lape_Date(const Params: PParamArray; const Result: Pointer);
-begin
-  PDateTime(Result)^ := ps_Date();
-end;
-
-procedure Lape_GetTickCount(const Params: PParamArray; const Result: Pointer);
-begin
-  PLongword(Result)^ := ps_GetTickCount();
-end;
-
 procedure Lape_HakunaMatata(const Params: PParamArray);
 begin
   ps_HakunaMatata();

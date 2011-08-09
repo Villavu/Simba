@@ -1,18 +1,3 @@
-procedure Lape_round(const Params: PParamArray; const Result: Pointer);
-begin
-  Pinteger(Result)^ := ps_round(Pextended(Params^[0])^);
-end;
-
-procedure Lape_iAbs(const Params: PParamArray; const Result: Pointer);
-begin
-  Pinteger(Result)^ := ps_iAbs(Pinteger(Params^[0])^);
-end;
-
-procedure Lape_ceil(const Params: PParamArray; const Result: Pointer);
-begin
-  Pinteger(Result)^ := ps_ceil(Pextended(Params^[0])^);
-end;
-
 procedure Lape_pow(const Params: PParamArray; const Result: Pointer);
 begin
   Pextended(Result)^ := ps_pow(Pextended(Params^[0])^, Pextended(Params^[1])^);
@@ -31,11 +16,6 @@ end;
 procedure Lape_GaussMatrix(const Params: PParamArray; const Result: Pointer);
 begin
   P2DExtendedArray(Result)^ := ps_GaussMatrix(Pinteger(Params^[0])^, Pextended(Params^[1])^);
-end;
-
-procedure Lape_exp(const Params: PParamArray; const Result: Pointer);
-begin
-  Pextended(Result)^ := ps_exp(Pextended(Params^[0])^);
 end;
 
 procedure Lape_Max(const Params: PParamArray; const Result: Pointer);
@@ -58,11 +38,6 @@ begin
   Pextended(Result)^ := ps_MaxE(Pextended(Params^[0])^, Pextended(Params^[1])^);
 end;
 
-procedure Lape_Sqr(const Params: PParamArray; const Result: Pointer);
-begin
-  Pextended(Result)^ := ps_Sqr(Pextended(Params^[0])^);
-end;
-
 procedure Lape_Point(const Params: PParamArray; const Result: Pointer);
 begin
   PPoint(Result)^ := ps_Point(Pinteger(Params^[0])^, Pinteger(Params^[1])^);
@@ -81,11 +56,6 @@ end;
 procedure Lape_RandomRange(const Params: PParamArray; const Result: Pointer);
 begin
   PInteger(Result)^ := ps_RandomRange(PInteger(Params^[0])^, PInteger(Params^[1])^);
-end;
-
-procedure Lape_Random(const Params: PParamArray; const Result: Pointer);
-begin
-  Pinteger(Result)^ := ps_Random(Pinteger(Params^[0])^);
 end;
 
 procedure Lape_RandomE(const Params: PParamArray; const Result: Pointer);
@@ -148,29 +118,9 @@ begin
   PBoolean(Result)^ := ps_PointInBox(PPoint(Params^[0])^, PBox(Params^[1])^);
 end;
 
-procedure Lape_floor(const Params: PParamArray; const Result: Pointer);
-begin
-  Pinteger(Result)^ := ps_floor(Pextended(Params^[0])^);
-end;
-
 procedure Lape_logn(const Params: PParamArray; const Result: Pointer);
 begin
   Pextended(Result)^ := ps_logn(Pextended(Params^[0])^, Pextended(Params^[1])^);
-end;
-
-procedure Lape_ln(const Params: PParamArray; const Result: Pointer);
-begin
-  Pextended(Result)^ := ps_ln(Pextended(Params^[0])^);
-end;
-
-procedure Lape_inttohex(const Params: PParamArray; const Result: Pointer);
-begin
-  Pstring(Result)^ := ps_inttohex(Pinteger(Params^[0])^);
-end;
-
-procedure Lape_hextoint(const Params: PParamArray; const Result: Pointer);
-begin
-  Pinteger(Result)^ := ps_hextoint(Pstring(Params^[0])^);
 end;
 
 procedure Lape_sar(const Params: PParamArray; const Result: Pointer);
@@ -211,11 +161,6 @@ end;
 procedure Lape_ArcCos(const Params: PParamArray; const Result: Pointer);
 begin
   Pextended(Result)^ := ps_ArcCos(Pextended(Params^[0])^);
-end;
-
-procedure Lape_ArcTan(const Params: PParamArray; const Result: Pointer);
-begin
-  Pextended(Result)^ := ps_ArcTan(Pextended(Params^[0])^);
 end;
 
 procedure Lape_Cotan(const Params: PParamArray; const Result: Pointer);
