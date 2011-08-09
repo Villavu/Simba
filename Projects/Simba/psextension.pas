@@ -245,7 +245,7 @@ end;
 
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 var
-  AppPath, ScriptPath: string;
+  ScriptPath: string;
   i: Integer;
 begin
   SIRegister_Std(x);
@@ -259,7 +259,6 @@ begin
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
 
-  AppPath := MainDir + DirectorySeparator;
   ScriptPath := ExtractFileDir(Filename);
   with SimbaForm,x do
   begin
