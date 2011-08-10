@@ -683,17 +683,14 @@ begin
   end;
 end;
 
-function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
+function TSimbaForm.OnCCFindInclude(Sender: TObject; var Filename: string): Boolean;
 var
   Temp : string;
 begin
-  Temp := FindFile(filename,[AppPath, IncludePath]);
-  if temp <> '' then
-  begin;
-    filename := temp;
-    result := true;
-  end else
-    result := false;
+  Result := False;
+  Filename := FindFile(Filename, [AppPath, IncludePath, ExtPath]);
+  if (Filename <> '') then
+    Result := True;
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
@@ -2426,7 +2423,7 @@ begin
   SimbaSettingsFile := GetAppConfigDir(False) + DS;
   if (not (DirectoryExists(SimbaSettingsFile))) then
     if (not (CreateDir(SimbaSettingsFile))) then
-      SimbaSettingsFile := AppPath + DS;
+      SimbaSettingsFile := DocPath; // =)
   SimbaSettingsFile := SimbaSettingsFile + 'settings.xml';
 
   RecentFiles := TStringList.Create;
