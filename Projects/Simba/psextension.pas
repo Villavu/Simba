@@ -339,23 +339,25 @@ var
   f: TFileStream;
 begin
   with SimbaForm do
-    path := FindFile(FilePath,[includepath,  ExtractFileDir(Filename),ExtractFileDir(OrginFileName)]);
-  if path = '' then
+    Path := FindFile(FilePath, [IncludePath, ExtPath, ExtractFileDir(Filename), ExtractFileDir(OrginFileName)]);
+
+  if (Path = '') then
   begin
     psWriteln(Path + ' doesn''t exist');
     Result := false;
     Exit;
   end;
-  FilePath := path;//Yeah!
+
+  FilePath := Path;
 
   try
-    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
+    f := TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
     SetLength(Output, f.Size);
     f.Read(Output[1], Length(Output));
-    result:= true;
+    Result := True;
     f.free;
   except
-    Result := false;
+    Result := False;
     psWriteln('TSimbaPSExtension.OnNeedFile');
   end;
 end;
