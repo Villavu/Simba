@@ -320,6 +320,10 @@ FilterPointsLine
 
     procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
 
+.. note::
+
+    Returns the result in the TPointArray Points. Returns the points from the TPointArray Points that are on the line Radial from the center mx, my that is with the radius Radius
+
 
 FilterPointsDist
 ----------------
@@ -448,6 +452,10 @@ ChangeDistTPA
 .. code-block:: pascal
 
     function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extended) : boolean;
+
+.. note::
+
+    Returns the result in the TPointArray TPA with the distance newdist from mx, my based on the current position TPA
 
 
 FindGapsTPA
@@ -601,6 +609,10 @@ FindTPAEdges
 
     function FindTPAEdges(const p: TPointArray): TPointArray;
 
+.. note::
+
+    Returns a TPointArray of the edge points of the TPointArray p
+
 
 ClearTPAFromTPA
 ---------------
@@ -609,6 +621,10 @@ ClearTPAFromTPA
 
     function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 
+.. note::
+
+    Removes the points in TPointArray ClearPoints from arP
+
 
 ReturnPointsNotInTPA
 --------------------
@@ -616,6 +632,10 @@ ReturnPointsNotInTPA
 .. code-block:: pascal
 
     function ReturnPointsNotInTPA(Const TotalTPA: TPointArray; const Box: TBox): TPointArray;
+
+.. note::
+
+    All the points from the TPointArray TotalTPA that are not in the TBox Box are returned in the TPointArray Res
 
 
 PointInTPA
@@ -713,6 +733,10 @@ SplitTPAExWrap
 
     procedure SplitTPAExWrap(const arr: TPointArray; w, h: Integer; var res : T2DPointArray);
 
+.. note::
+
+    Splits the points with max X and Y distances W and H to their and returns the result in the T2DPointArray Res
+
 
 SplitTPAWrap
 ------------
@@ -720,6 +744,10 @@ SplitTPAWrap
 .. code-block:: pascal
 
     procedure SplitTPAWrap(const arr: TPointArray; Dist: Integer; var res: T2DPointArray);
+
+.. note::
+
+    Splits the points with max distance Dist to their own TPointArrays and returns the result in the T2DPointArray Res
 
 
 FindGapsTPAWrap
@@ -729,6 +757,10 @@ FindGapsTPAWrap
 
     procedure FindGapsTPAWrap(const TPA: TPointArray; MinPixels: Integer; var Res : T2DPointArray);
 
+.. note::
+
+    Finds the possible gaps in the TPointArray TPA and the result is returned in the T2DPointArray Res. Considers as a gap if the gap length is >= MinPixels
+
 
 RemoveDistTPointArrayWrap
 -------------------------
@@ -736,6 +768,10 @@ RemoveDistTPointArrayWrap
 .. code-block:: pascal
 
     procedure RemoveDistTPointArrayWrap(x, y, dist: Integer;const  ThePoints: TPointArray; RemoveHigher: Boolean; var Res :  TPointArray);
+
+.. note::
+
+    Finds the possible gaps in the TPointArray TPA and removes the gaps. Considers as a gap if the gap length is >= MinPixels and returns the result in the TPointArray Res
 
 
 CombineTPAWrap
@@ -745,6 +781,10 @@ CombineTPAWrap
 
     procedure CombineTPAWrap(const Ar1, Ar2: TPointArray; var Res :  TPointArray);
 
+.. note::
+
+    Attaches the TPointArray Ar2 onto the end of Ar1 and returns the result in the TPointArray Res
+
 
 ReArrangeandShortenArrayExWrap
 ------------------------------
@@ -752,6 +792,10 @@ ReArrangeandShortenArrayExWrap
 .. code-block:: pascal
 
     procedure ReArrangeandShortenArrayExWrap(const a: TPointArray; w, h: Integer; var Res :  TPointArray);
+
+.. note::
+
+    Results the TPointArray a with one point per box with side lengths W and H left and puts the result in Res
 
 
 ReArrangeandShortenArrayWrap
@@ -761,6 +805,10 @@ ReArrangeandShortenArrayWrap
 
     procedure ReArrangeandShortenArrayWrap(const a: TPointArray; Dist: Integer; var Res :  TPointArray);
 
+.. note::
+   
+    Results the TPointArray a with one point per box with side length Dist left and puts the result in Res
+
 
 TPAtoATPAExWrap
 ---------------
@@ -768,6 +816,10 @@ TPAtoATPAExWrap
 .. code-block:: pascal
 
     procedure TPAtoATPAExWrap(const TPA: TPointArray; w, h: Integer; var Res :  T2DPointArray);
+
+.. note::
+
+    Splits the TPA to boxes with sidelengths W and H and results them as a T2DPointArray in Res
 
 
 TPAtoATPAWrap
@@ -777,6 +829,10 @@ TPAtoATPAWrap
 
     procedure TPAtoATPAWrap(const TPA: TPointArray; Dist: Integer; var Res :  T2DPointArray);
 
+.. note::
+
+    Splits the TPA to boxes with sidelength Dist and results them as a T2DPointArray in Res
+
 
 CombineIntArrayWrap
 -------------------
@@ -784,6 +840,10 @@ CombineIntArrayWrap
 .. code-block:: pascal
 
     procedure CombineIntArrayWrap(const Ar1, Ar2: TIntegerArray; var Res :  TIntegerArray);
+
+.. note::
+
+    Attaches the TIntegerArray Ar2 onto the end of Ar1 and returns it in the TIntegerArray Res
 
 
 ReturnPointsNotInTPAWrap
@@ -793,6 +853,10 @@ ReturnPointsNotInTPAWrap
 
     procedure ReturnPointsNotInTPAWrap(Const TotalTPA: TPointArray; const Box: TBox; var Res :  TPointArray);
 
+.. note::
+
+    All the points from the TPointArray TotalTPA that are not in the TBox Box are returned in the TPointArray Res
+
 
 MergeATPAWrap
 -------------
@@ -800,6 +864,10 @@ MergeATPAWrap
 .. code-block:: pascal
 
     procedure MergeATPAWrap(const ATPA : T2DPointArray; var Res: TPointArray);
+
+.. note::
+
+    Combines all the TPointArrays from the T2DPointArray ATPA into the TPointArray Res
 
 
 TPAFromBoxWrap
@@ -809,6 +877,10 @@ TPAFromBoxWrap
 
     procedure TPAFromBoxWrap(const Box : TBox; var Res : TPointArray);
 
+.. note::
+
+    Create a TPointArray from the top left and the bottom right of the TBox Box and returns the result in Res
+
 
 RotatePointsWrap
 ----------------
@@ -816,6 +888,10 @@ RotatePointsWrap
 .. code-block:: pascal
 
     procedure RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; var Res :  TPointArray);
+
+.. note::
+
+    Rotates the TPointArray P around the center cx, cy with the angle a and returns the result in Res
 
 
 FindTPAEdgesWrap
@@ -825,6 +901,10 @@ FindTPAEdgesWrap
 
     procedure FindTPAEdgesWrap(const p: TPointArray; var Res :  TPointArray);
 
+.. note::
+
+    Returns a TPointArray of the edge points of the TPointArray p and returns the result in the TPointArray Res
+
 
 ClearTPAFromTPAWrap
 -------------------
@@ -832,6 +912,10 @@ ClearTPAFromTPAWrap
 .. code-block:: pascal
 
     procedure ClearTPAFromTPAWrap(const arP, ClearPoints: TPointArray;  var Res :  TPointArray);
+
+.. note::
+
+    Removes the points in TPointArray ClearPoints from arP and returns the results in Res
 
 
 SameTPA
