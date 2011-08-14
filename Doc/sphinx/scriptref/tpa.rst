@@ -625,6 +625,10 @@ PointInTPA
 
     function PointInTPA(p: TPoint;const  arP: TPointArray): Boolean;
 
+.. note::
+
+    Returns true if the TPoint p is found in the TPointArray arP
+
 
 ClearDoubleTPA
 --------------
@@ -632,6 +636,10 @@ ClearDoubleTPA
 .. code-block:: pascal
 
     procedure ClearDoubleTPA(var TPA: TPointArray);
+
+.. note::
+
+    Deletes duplicate TPAs int he TPointArray TPA
 
 
 TPACountSort
@@ -657,6 +665,10 @@ InvertTIA
 
     procedure InvertTIA(var tI: TIntegerArray);
 
+.. note::
+
+    Reverses the TIntegerArray tI
+
 
 SumIntegerArray
 ---------------
@@ -664,6 +676,10 @@ SumIntegerArray
 .. code-block:: pascal
 
     function SumIntegerArray(const Ints : TIntegerArray): Integer;
+
+.. note::
+
+    Retuns the sum of all the integers in the TIntegerArray Ints
 
 
 AverageTIA
@@ -673,6 +689,10 @@ AverageTIA
 
     function AverageTIA(const tI: TIntegerArray): Integer;
 
+.. note::
+
+    Gives an average of the sum of the integers in the TIntegerArray tI
+
 
 AverageExtended
 ---------------
@@ -680,6 +700,10 @@ AverageExtended
 .. code-block:: pascal
 
     function AverageExtended(const tE: TExtendedArray): Extended;
+
+.. note::
+
+    Gives an average of the sum of the extendeds in the TExtendedArray tI
 
 
 SplitTPAExWrap
@@ -817,6 +841,10 @@ SameTPA
 
     function SameTPA(const aTPA, bTPA: TPointArray): Boolean;
 
+.. note::
+
+    Returns true if the TPointArray aTPA is the same as bTPA 
+
 
 TPAInATPA
 ---------
@@ -824,6 +852,10 @@ TPAInATPA
 .. code-block:: pascal
 
     function TPAInATPA(const TPA: TPointArray;const  InATPA: T2DPointArray; var Index: LongInt): Boolean;
+
+.. note::
+
+    Returns true if the TPointArray TPA is found in the T2DPointArray InATPA and stores the index in Index
 
 
 OffsetTPA
@@ -833,6 +865,10 @@ OffsetTPA
 
     procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
 
+.. note::
+
+    Offsets all the TPAs int the TPointArray TPA but the TPoint Offset
+
 
 OffsetATPA
 ----------
@@ -840,6 +876,10 @@ OffsetATPA
 .. code-block:: pascal
 
     procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
+
+.. note::
+
+    Offsets all the TPAs int the T2DPointArray ATPA but the TPoint Offset
 
 
 CopyTPA
@@ -849,6 +889,10 @@ CopyTPA
 
     function CopyTPA(const TPA : TPointArray) : TPointArray;
 
+.. note::
+    
+    Returns the TPointArray TPA
+
 
 CopyATPA
 --------
@@ -856,5 +900,9 @@ CopyATPA
 .. code-block:: pascal
 
     function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;
+
+.. note::
+    
+    Returns the T2DPointArray ATPA
 
 
