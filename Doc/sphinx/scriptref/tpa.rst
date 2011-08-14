@@ -11,6 +11,10 @@ Quicksort
 
     procedure Quicksort(var Arr : TIntegerArray);
 
+.. note::
+
+    Sorts a TIntegerArray using the Quicksort algorithm
+
 
 tSwap
 -----
@@ -18,6 +22,10 @@ tSwap
 .. code-block:: pascal
 
     procedure tSwap(var a, b: TPoint);
+
+.. note::
+
+    Swaps the values of a and b around
 
 
 tpaSwap
@@ -27,6 +35,10 @@ tpaSwap
 
     procedure tpaSwap(var a, b: TPointArray);
 
+.. note::
+
+    Swaps the values of a and b around
+
 
 SwapE
 -----
@@ -34,6 +46,10 @@ SwapE
 .. code-block:: pascal
 
     procedure SwapE(var a, b: Extended);
+
+.. note::
+
+    Swaps the values of a and b around
 
 
 RAaSTPAEx
@@ -43,6 +59,10 @@ RAaSTPAEx
 
     procedure RAaSTPAEx(var a: TPointArray; const w, h: Integer);
 
+.. note::
+
+    Leaves one point per box with side lengths W and H to the TPA
+    
 
 RAaSTPA
 -------
@@ -50,6 +70,10 @@ RAaSTPA
 .. code-block:: pascal
 
     procedure RAaSTPA(var a: TPointArray; const Dist: Integer);
+
+.. note::
+
+    Leaves one point per box with the side length Dist
 
 
 NearbyPointInArrayEx
@@ -59,6 +83,10 @@ NearbyPointInArrayEx
 
     function NearbyPointInArrayEx(const P: TPoint; w, h:Integer;const  a: TPointArray): Boolean;
 
+.. note::
+
+    Returns true if the point P is near a point in the TPA a with the
+
 
 NearbyPointInArray
 ------------------
@@ -66,6 +94,10 @@ NearbyPointInArray
 .. code-block:: pascal
 
     function NearbyPointInArray(const P: TPoint; Dist:Integer;const  a: TPointArray): Boolean;
+
+.. note::
+
+    Returns true if the point P is near a point in the TPA a with the
 
 
 QuickTPASort
@@ -91,6 +123,10 @@ SortTPAFrom
 
     procedure SortTPAFrom(var a: TPointArray; const From: TPoint);
 
+.. note::
+
+    Sorts the TPA a from the TPoint From
+
 
 SortATPAFrom
 ------------
@@ -98,6 +134,10 @@ SortATPAFrom
 .. code-block:: pascal
 
     procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);
+
+.. note::
+
+    Sorts the T2DPointArray a from the TPoint From
 
 
 SortATPAFromFirstPoint
@@ -115,6 +155,10 @@ InvertTPA
 
     procedure InvertTPA(var a: TPointArray);
 
+.. note::
+
+    Reverses the TPA
+
 
 InvertATPA
 ----------
@@ -122,6 +166,10 @@ InvertATPA
 .. code-block:: pascal
 
     procedure InvertATPA(var a: T2DPointArray);
+
+.. note::
+
+    Reverses the T2dPointArray
 
 
 MiddleTPAEx
@@ -131,6 +179,10 @@ MiddleTPAEx
 
     function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
 
+.. note::
+
+    Stores the middle point from the TPA in x and y 
+
 
 MiddleTPA
 ---------
@@ -138,6 +190,10 @@ MiddleTPA
 .. code-block:: pascal
 
     function MiddleTPA(const tpa: TPointArray): TPoint;
+
+.. note::
+
+    Returns the middle TPA in the result
 
 
 SortATPASize
@@ -147,6 +203,10 @@ SortATPASize
 
     procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);
 
+.. note::
+
+    Sorts the T2dPointArray from largest to smallest if BigFirst is true or smallest to largest if BigFirst is false
+
 
 SortATPAFromSize
 ----------------
@@ -154,6 +214,10 @@ SortATPAFromSize
 .. code-block:: pascal
 
     procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
+
+.. note::
+
+    Sorts the T2DPointArray from Size by the closest first if CloseFirst is true
 
 
 InIntArrayEx
@@ -163,6 +227,10 @@ InIntArrayEx
 
     function InIntArrayEx(const a: TIntegerArray; var Where: Integer; const Number: Integer): Boolean;
 
+.. note::
+
+    Returns true if Number was found in the TIntegerArray a and returns its location in Where
+
 
 InIntArray
 ----------
@@ -170,6 +238,10 @@ InIntArray
 .. code-block:: pascal
 
     function InIntArray(const a: TIntegerArray; Number: Integer): Boolean;
+
+.. note::
+
+    Returns true if Number is found in the TintegerArray a
 
 
 ClearSameIntegers
@@ -179,6 +251,10 @@ ClearSameIntegers
 
     procedure ClearSameIntegers(var a: TIntegerArray);
 
+.. note::
+
+    Deletes the indexes in the TintegerArray a which are duplicated
+
 
 ClearSameIntegersAndTPA
 -----------------------
@@ -186,6 +262,10 @@ ClearSameIntegersAndTPA
 .. code-block:: pascal
 
     procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
+
+.. note::
+
+    Deletes the indexes in the TIntegerArray a and TPointArray p which are duplicated
 
 
 SplitTPAEx
@@ -195,6 +275,10 @@ SplitTPAEx
 
     function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 
+.. note::
+
+    Splits the points with max X and Y distances W and H to their 
+
 
 SplitTPA
 --------
@@ -202,6 +286,10 @@ SplitTPA
 .. code-block:: pascal
 
     function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
+
+.. note::
+
+    Splits the points with max distance Dist to their own TPointArrays
 
 
 FloodFillTPA
@@ -219,6 +307,11 @@ FilterPointsPie
 
     procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 
+.. note::
+
+    Removes the points that are in the TPointArray Points that are not within the the degrees SD (Strat Degrees) and 
+    ED (End Degrees) and the radius' MinR (Min Radius) and MaxR (Max Radius) from the origin Mx and My
+
 
 FilterPointsLine
 ----------------
@@ -235,6 +328,11 @@ FilterPointsDist
 
     procedure FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Integer);
 
+.. note::
+
+    Removes the points from the TPointArray Points that are not within the radius MinDist (Min Distance) and MaxDist
+    from the origin Mx and My
+
 
 GetATPABounds
 -------------
@@ -242,6 +340,10 @@ GetATPABounds
 .. code-block:: pascal
 
     function GetATPABounds(const ATPA: T2DPointArray): TBox;
+
+.. note::
+
+    Returns the boundaries of the T2DPointArray ATPA as a TBox
 
 
 GetTPABounds
@@ -251,6 +353,10 @@ GetTPABounds
 
     function GetTPABounds(const TPA: TPointArray): TBox;
 
+.. note::
+
+    Returns the boundaries of the TPointArray TPA as a TBox
+
 
 FindTPAinTPA
 ------------
@@ -258,6 +364,10 @@ FindTPAinTPA
 .. code-block:: pascal
 
     function FindTPAinTPA(const SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;
+
+.. note::
+
+    Looks for the TPoints from SearchTPA inside TotalTPA and stores the matches inside the TPointArray Matches
 
 
 GetSamePointsATPA
@@ -267,6 +377,10 @@ GetSamePointsATPA
 
     function GetSamePointsATPA(const  ATPA : T2DPointArray; var Matches : TPointArray) : boolean;
 
+.. note::
+
+    Finds duplicate Points inside the T2DPointArray ATPA and stores the results inside the TPointArray Matches
+
 
 FindTextTPAinTPA
 ----------------
@@ -274,6 +388,10 @@ FindTextTPAinTPA
 .. code-block:: pascal
 
     function FindTextTPAinTPA(Height : integer;const  SearchTPA, TotalTPA: TPointArray; var Matches: TPointArray): Boolean;
+
+.. note::
+
+    Looks for the TPoints from SearchTPA inside TotalTPA with a maximum y distance of Height and stores the matches inside the TPointArray Matches
 
 
 SortCircleWise
@@ -283,6 +401,10 @@ SortCircleWise
 
     procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Integer; SortUp, ClockWise: Boolean);
 
+.. note::
+
+    Sorts the TPointArray tpa from the point cx, cy if Sortup is true. Starting at StartDegree going clockwise if Clockwise is True 
+
 
 LinearSort
 ----------
@@ -290,6 +412,10 @@ LinearSort
 .. code-block:: pascal
 
     procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean);
+
+.. note::
+
+    Sorts the TPointArray tpa from cx, cy if Sortup is true on the degree angle sd
 
 
 RotatePoint
@@ -299,6 +425,10 @@ RotatePoint
 
     function RotatePoint(Const p: TPoint; angle, mx, my: Extended): TPoint;
 
+.. note::
+
+    Rotates the TPoint p around the center mx, my with the angle
+
 
 ChangeDistPT
 ------------
@@ -306,6 +436,10 @@ ChangeDistPT
 .. code-block:: pascal
 
     function ChangeDistPT(const PT : TPoint; mx,my : integer; newdist : extended) : TPoint;
+
+.. note::
+
+    Returns a TPoint with the distance newdist from the point mx, my based on the position of the TPoint TP
 
 
 ChangeDistTPA
@@ -323,6 +457,10 @@ FindGapsTPA
 
     function FindGapsTPA(const TPA: TPointArray; MinPixels: Integer): T2DPointArray;
 
+.. note::
+
+    Finds the possible gaps in the TPointArray TPA and results the gaps as a T2DPointArray. Considers as a gap if the gap length is >= MinPixels
+
 
 RemoveDistTPointArray
 ---------------------
@@ -330,6 +468,10 @@ RemoveDistTPointArray
 .. code-block:: pascal
 
     function RemoveDistTPointArray(x, y, dist: Integer;const  ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;
+
+.. note::
+
+    Finds the possible gaps in the TPointArray TPA and removes the gaps. Considers as a gap if the gap length is >= MinPixels
 
 
 CombineTPA
@@ -339,6 +481,10 @@ CombineTPA
 
     function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray;
 
+.. note::
+
+    Attaches the TPointArray Ar2 onto the end of Ar1 and returns it as the result
+
 
 ReArrangeandShortenArrayEx
 --------------------------
@@ -346,6 +492,10 @@ ReArrangeandShortenArrayEx
 .. code-block:: pascal
 
     function ReArrangeandShortenArrayEx(const a: TPointArray; w, h: Integer): TPointArray;
+
+.. note::
+
+    Results the TPointArray a with one point per box with side lengths W and H left
 
 
 ReArrangeandShortenArray
@@ -355,6 +505,10 @@ ReArrangeandShortenArray
 
     function ReArrangeandShortenArray(const a: TPointArray; Dist: Integer): TPointArray;
 
+.. note::
+   
+    Results the TPointArray a with one point per box with side length Dist left
+
 
 TPAtoATPAEx
 -----------
@@ -362,6 +516,10 @@ TPAtoATPAEx
 .. code-block:: pascal
 
     function TPAtoATPAEx(const TPA: TPointArray; w, h: Integer): T2DPointArray;
+
+.. note::
+
+    Splits the TPA to boxes with sidelengths W and H and results them as a T2DPointArray
 
 
 TPAtoATPA
@@ -371,6 +529,10 @@ TPAtoATPA
 
     function TPAtoATPA(const TPA: TPointArray; Dist: Integer): T2DPointArray;
 
+.. note::
+
+    Splits the TPA to boxes with sidelength Dist and results them as a T2DPointArray
+
 
 CombineIntArray
 ---------------
@@ -378,6 +540,10 @@ CombineIntArray
 .. code-block:: pascal
 
     function CombineIntArray(const Ar1, Ar2: TIntegerArray): TIntegerArray;
+
+.. note::
+
+    Attaches the TIntegerArray Ar2 onto the end of Ar1 and returns it as the result
 
 
 MergeATPA
@@ -387,6 +553,10 @@ MergeATPA
 
     function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;
 
+.. note::
+
+    Combines all the TPointArrays from the T2DPointArray ATPA into the result
+
 
 AppendTPA
 ---------
@@ -394,6 +564,10 @@ AppendTPA
 .. code-block:: pascal
 
     procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);
+
+.. note::
+
+    Attaches the TPointArray ToAppend onto the end of TPA
 
 
 TPAFromBox
@@ -403,6 +577,10 @@ TPAFromBox
 
     function TPAFromBox(const Box : TBox) : TPointArray;
 
+.. note::
+
+    Create a TPointArray from the top left and the bottom right of the TBox Box
+
 
 RotatePoints
 ------------
@@ -410,6 +588,10 @@ RotatePoints
 .. code-block:: pascal
 
     function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;
+
+.. note::
+
+    Rotates the TPointArray P around the center cx, cy with the angle a
 
 
 FindTPAEdges
