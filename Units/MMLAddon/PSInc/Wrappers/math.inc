@@ -172,12 +172,12 @@ begin;
   result := (((x >= Box.x1) and(x <= Box.x2)) and ((y >= box.y1) and (y <= box.y2)));
 end;
 
-function ps_PointToBox(PT1,PT2 : TPoint) : TBox; extdecl;
+function ps_PointToBox(topLeft,bottomRight: TPoint): TBox; extdecl;
 begin;
-  result.x1 := PT1.x;
-  result.y1 := PT1.y;
-  result.x2 := PT2.x;
-  result.y2 := PT2.y;
+  result.x1 := topLeft.x;
+  result.y1 := topLeft.y;
+  result.x2 := bottomRight.x;
+  result.y2 := bottomRight.y;
 end;
 
 function ps_PointInBox(PT : TPoint; Box: TBox): Boolean; extdecl;
