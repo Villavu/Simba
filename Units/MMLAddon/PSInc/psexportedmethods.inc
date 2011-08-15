@@ -69,7 +69,7 @@ AddFunction(@ps_iAbs,'function iAbs(a : integer) : integer;');
 AddFunction(@ps_ArcTan2,'function ArcTan2(y,x : extended) : extended;');
 AddFunction(@ps_IntToBox,'function IntToBox(xs,ys,xe,ye : integer) : TBox;');
 AddFunction(@ps_IntInBox,'function IntInBox(x, y: Integer; Box: TBox): Boolean;');
-AddFunction(@ps_PointToBox,'function PointToBox(PT1,PT2 : TPoint): TBox;');
+AddFunction(@ps_PointToBox,'function PointToBox(topLeft,bottomRight: TPoint): TBox;');
 AddFunction(@ps_PointInBox,'function PointInBox(PT : TPoint; Box: TBox): Boolean;');
 AddFunction(@ps_sqr,'function Sqr(e : extended) : extended;');
 AddFunction(@ps_point,'function Point(x,y:integer) : TPoint;');
