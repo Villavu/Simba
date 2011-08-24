@@ -1,0 +1,783 @@
+(**
+ * This extension was developed by Shuttleu. If you have any questions
+ * concerning this extension, please post in the MSI Forums here:
+ * http://villavu.com/forum/showthread.php?t=66074
+ *
+ *   - Shuttleu
+ *
+ * - This extension was last updated 16 August 2011 by Shuttleu
+ *)
+
+program New;
+
+const
+  Extension = '.ini';
+
+type
+  ThePlayer = record
+    User, Pass, Nick, Loc, Pin: string;
+    Strings: array of string;
+    Integers: TIntegerArray;
+    Booleans: array of Boolean;
+    Active: Boolean;
+end;
+
+var
+  MyMenu, SRLRemoteMenuItem: TMenuItem;
+  ThePlayers: Array of ThePlayer;
+  Remote : TForm;
+  UserLabel, PassLabel, NickLabel, PinLabel, ActiveLabel, PlayerLabel : TLabel;
+  Active : TCheckBox;
+  User, Pass, Nick, Pin : TEdit;
+  SetButton1, SetButton2, CloseButton2, PreviousButton : TButton;
+  AddButton, DeleteButton, NextButton : TButton;
+  IntegersLabel, StringsLabel, BooleansLabel : array of TLabel;
+  Strings : array of TComboBox;
+  Booleans : array of TCheckBox;
+  Integers : array of TEdit;
+  HowManyPlayerss, PlayerNumber: Integer;
+  INIPath, TheScriptName: string;
+  IntegerNames, BooleanNames, StringNames: TStringArray;
+  TheStrings: Array of Array of string;
+  InstanceArray: TIntegerArray;
+    OpenInstance : TForm;
+  Label1 : TLabel;
+  InstanceNumber : TComboBox;
+  SetButton : TButton;
+  CloseButton : TButton;
+  OpenMain: Boolean;
+  ScriptNames: array of string;
+
+procedure LoadVars;
+var
+  i, j: Integer;
+begin
+  HowManyPlayerss:= StrToInt(ReadINI('Players', 'HowMany', INIPath));
+  SetArrayLength(IntegerNames, StrToInt(ReadINI('Players', 'Integers', INIPath)));
+  SetArrayLength(StringNames, StrToInt(ReadINI('Players', 'Strings', INIPath)));
+  SetArrayLength(BooleanNames, StrToInt(ReadINI('Players', 'Booleans', INIPath)));
+  SetArrayLength(TheStrings, Length(StringNames));
+  for i:=0 to High(TheStrings) do
+    SetArrayLength(TheStrings[i], StrToInt(ReadINI('Strings', '('+IntToStr(i)+')HowMany', INIPath)));
+  for i:=0 to High(TheStrings) do
+    for j:=0 to High(TheStrings[i]) do
+      TheStrings[i][j]:= ReadINI('Strings', '('+IntToStr(i)+')('+IntToStr(j)+')', INIPath);
+  for i:=0 to High(IntegerNames) do
+    IntegerNames[i]:= ReadINI('Integers', IntToStr(i), INIPath);
+  for i:=0 to High(StringNames) do
+    StringNames[i]:= ReadINI('Strings', IntToStr(i), INIPath);
+  for i:=0 to High(BooleanNames) do
+    BooleanNames[i]:= ReadINI('Booleans', IntToStr(i), INIPath);
+  SetArrayLength(ThePlayers, HowManyPlayerss);
+  for i:=0 to HowManyPlayerss-1 do
+  begin
+    SetArrayLength(ThePlayers[i].Integers, StrToInt(ReadINI('Players', 'Integers', INIPath)));
+    SetArrayLength(ThePlayers[i].Strings, StrToInt(ReadINI('Players', 'Strings', INIPath)));
+    SetArrayLength(ThePlayers[i].Booleans, StrToInt(ReadINI('Players', 'Booleans', INIPath)));
+    ThePlayers[i].User:= ReadINI(IntToStr(i), 'User', INIPath);
+    ThePlayers[i].Pass:= ReadINI(IntToStr(i), 'Pass', INIPath);
+    ThePlayers[i].Nick:= ReadINI(IntToStr(i), 'Nick', INIPath);
+    ThePlayers[i].Pin:= ReadINI(IntToStr(i), 'Pin', INIPath);
+    for j:=0 to High(ThePlayers[i].Integers) do
+      ThePlayers[i].Integers[j]:= StrToInt(ReadINI(IntToStr(i), 'Integer'+IntToStr(j), INIPath));
+    for j:=0 to High(ThePlayers[i].Strings) do
+      ThePlayers[i].Strings[j]:= ReadINI(IntToStr(i), 'String'+IntToStr(j), INIPath);
+    for j:=0 to High(ThePlayers[i].Booleans) do
+      ThePlayers[i].Booleans[j]:= StrToBool(ReadINI(IntToStr(i), 'Boolean'+IntToStr(j), INIPath));
+    ThePlayers[i].Active:= StrToBool(ReadINI(IntToStr(i), 'Active', INIPath));
+  end;
+end;
+
+procedure SaveVars;
+var
+  i, j: Integer;
+begin
+  ThePlayers[PlayerNumber].User:= User.Text;
+  ThePlayers[PlayerNumber].Pass:= Pass.Text;
+  ThePlayers[PlayerNumber].Nick:= Nick.Text;
+  ThePlayers[PlayerNumber].Pin:= Pin.Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    ThePlayers[PlayerNumber].Integers[j]:= StrToInt(Integers[j].Text);
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    ThePlayers[PlayerNumber].Strings[j]:= Strings[j].Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    ThePlayers[PlayerNumber].Booleans[j]:= Booleans[j].Checked;
+  ThePlayers[PlayerNumber].Active:= Active.Checked;
+
+  WriteINI('Main', 'Changed', 'True', INIPath);
+  WriteINI('Players', 'HowMany', IntToStr(Length(ThePlayers)), INIPath);
+  WriteINI('Players', 'Integers', IntToStr(Length(ThePlayers[0].Integers)), INIPath);
+  WriteINI('Players', 'Strings', IntToStr(Length(ThePlayers[0].Strings)), INIPath);
+  WriteINI('Players', 'Booleans', IntToStr(Length(ThePlayers[0].Booleans)), INIPath);
+
+
+  for i:=0 to High(ThePlayers) do
+  begin
+    WriteINI(IntToStr(i), 'User', ThePlayers[i].User, INIPath);
+    WriteINI(IntToStr(i), 'Pass', ThePlayers[i].Pass, INIPath);
+    WriteINI(IntToStr(i), 'Nick', ThePlayers[i].Nick, INIPath);
+    WriteINI(IntToStr(i), 'Pin', ThePlayers[i].Pin, INIPath);
+    for j:=0 to High(ThePlayers[i].Integers) do
+      WriteINI(IntToStr(i), 'Integer'+IntToStr(j), IntToStr(ThePlayers[i].Integers[j]), INIPath);
+    for j:=0 to High(ThePlayers[i].Strings) do
+      WriteINI(IntToStr(i), 'String'+IntToStr(j), ThePlayers[i].Strings[j], INIPath);
+    for j:=0 to High(ThePlayers[i].Booleans) do
+      WriteINI(IntToStr(i), 'Boolean'+IntToStr(j), BoolToStr(ThePlayers[i].Booleans[j]), INIPath);
+    WriteINI(IntToStr(i), 'Active', BoolToStr(ThePlayers[i].Active), INIPath);
+  end;
+end;
+
+Procedure Click(Sender: TObject);
+Begin
+  if ((Sender = SetButton1) or (Sender = SetButton2)) then
+    SaveVars;
+  Remote.ModalResult:= mrOk;
+End;
+
+Procedure PreviousPlayer(Sender: TObject);
+var
+  j: Integer;
+Begin
+  if (PlayerNumber = 0) then Exit;
+
+  ThePlayers[PlayerNumber].User:= User.Text;
+  ThePlayers[PlayerNumber].Pass:= Pass.Text;
+  ThePlayers[PlayerNumber].Nick:= Nick.Text;
+  ThePlayers[PlayerNumber].Pin:= Pin.Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    ThePlayers[PlayerNumber].Integers[j]:= StrToInt(Integers[j].Text);
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    ThePlayers[PlayerNumber].Strings[j]:= Strings[j].Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    ThePlayers[PlayerNumber].Booleans[j]:= Booleans[j].Checked;
+  ThePlayers[PlayerNumber].Active:= Active.Checked;
+
+  Dec(PlayerNumber);
+
+  User.Text:= ThePlayers[PlayerNumber].User;
+  Pass.Text:= ThePlayers[PlayerNumber].Pass;
+  Nick.Text:= ThePlayers[PlayerNumber].Nick;
+  Pin.Text:= ThePlayers[PlayerNumber].Pin;
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    Integers[j].Text:= IntToStr(ThePlayers[PlayerNumber].Integers[j]);
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    Strings[j].Text:= ThePlayers[PlayerNumber].Strings[j];
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    Booleans[j].Checked:= ThePlayers[PlayerNumber].Booleans[j];
+  Active.Checked:= ThePlayers[PlayerNumber].Active;
+
+  PlayerLabel.Caption:= 'User '+IntToStr(PlayerNumber+1)+' of '+IntToStr(HowManyPlayerss);
+End;
+
+Procedure AddPlayer(Sender: TObject);
+var
+  j: Integer;
+Begin
+  ThePlayers[PlayerNumber].User:= User.Text;
+  ThePlayers[PlayerNumber].Pass:= Pass.Text;
+  ThePlayers[PlayerNumber].Nick:= Nick.Text;
+  ThePlayers[PlayerNumber].Pin:= Pin.Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    ThePlayers[PlayerNumber].Integers[j]:= StrToInt(Integers[j].Text);
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    ThePlayers[PlayerNumber].Strings[j]:= Strings[j].Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    ThePlayers[PlayerNumber].Booleans[j]:= Booleans[j].Checked;
+  ThePlayers[PlayerNumber].Active:= Active.Checked;
+
+  Inc(HowManyPlayerss)
+
+  SetArrayLength(ThePlayers, HowManyPlayerss);
+  SetArrayLength(ThePlayers[HowManyPlayerss-1].Integers, Length(ThePlayers[HowManyPlayerss-2].Integers));
+  SetArrayLength(ThePlayers[HowManyPlayerss-1].Strings, Length(ThePlayers[HowManyPlayerss-2].Strings));
+  SetArrayLength(ThePlayers[HowManyPlayerss-1].Booleans, Length(ThePlayers[HowManyPlayerss-2].Booleans));
+
+  PlayerNumber:= HowManyPlayerss-1;
+
+  User.Text:= 'User';
+  Pass.Text:= 'Pass';
+  Nick.Text:= 'Nick';
+  Pin.Text:= '0000';
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    Integers[j].Text:= '0';
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    Strings[j].Text:= ReadINI('Strings', '('+IntToStr(j)+')(0)', INIPath);
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    Booleans[j].Checked:= True;
+  Active.Checked:= True;
+
+  PlayerLabel.Caption:= 'User '+IntToStr(PlayerNumber+1)+' of '+IntToStr(HowManyPlayerss);
+End;
+
+Procedure DeletePlayer(Sender: TObject);
+var
+  i, j: Integer;
+  TempPlayers: Array of ThePlayer;
+Begin
+  if (HowManyPlayerss = 1) then Exit;
+
+  ThePlayers[PlayerNumber].User:= User.Text;
+  ThePlayers[PlayerNumber].Pass:= Pass.Text;
+  ThePlayers[PlayerNumber].Nick:= Nick.Text;
+  ThePlayers[PlayerNumber].Pin:= Pin.Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    ThePlayers[PlayerNumber].Integers[j]:= StrToInt(Integers[j].Text);
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    ThePlayers[PlayerNumber].Strings[j]:= Strings[j].Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    ThePlayers[PlayerNumber].Booleans[j]:= Booleans[j].Checked;
+  ThePlayers[PlayerNumber].Active:= Active.Checked;
+
+  SetArrayLength(TempPlayers, HowManyPlayerss);
+
+  for i:=0 to (HowManyPlayerss-1) do
+    TempPlayers[i]:= ThePlayers[i];
+
+  SetArrayLength(ThePlayers, HowManyPlayerss-1);
+
+  for i:=0 to (PlayerNumber-1) do
+    ThePlayers[i]:= TempPlayers[i];
+
+  for i:=(PlayerNumber+1) to (High(TempPlayers)) do
+    ThePlayers[i-1]:= TempPlayers[i];
+
+  Dec(HowManyPlayerss);
+  if (PlayerNumber = HowManyPlayerss) then
+    Dec(PlayerNumber);
+
+  User.Text:= ThePlayers[PlayerNumber].User;
+  Pass.Text:= ThePlayers[PlayerNumber].Pass;
+  Nick.Text:= ThePlayers[PlayerNumber].Nick;
+  Pin.Text:= ThePlayers[PlayerNumber].Pin;
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    Integers[j].Text:= IntToStr(ThePlayers[PlayerNumber].Integers[j]);
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    Strings[j].Text:= ThePlayers[PlayerNumber].Strings[j];
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    Booleans[j].Checked:= ThePlayers[PlayerNumber].Booleans[j];
+  Active.Checked:= ThePlayers[PlayerNumber].Active;
+
+  PlayerLabel.Caption:= 'User '+IntToStr(PlayerNumber+1)+' of '+IntToStr(HowManyPlayerss);
+End;
+
+Procedure NextPlayerButton(Sender: TObject);
+var
+  j: Integer;
+Begin
+  if (PlayerNumber = (HowManyPlayerss-1)) then Exit;
+
+  ThePlayers[PlayerNumber].User:= User.Text;
+  ThePlayers[PlayerNumber].Pass:= Pass.Text;
+  ThePlayers[PlayerNumber].Nick:= Nick.Text;
+  ThePlayers[PlayerNumber].Pin:= Pin.Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    ThePlayers[PlayerNumber].Integers[j]:= StrToInt(Integers[j].Text);
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    ThePlayers[PlayerNumber].Strings[j]:= Strings[j].Text;
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    ThePlayers[PlayerNumber].Booleans[j]:= Booleans[j].Checked;
+  ThePlayers[PlayerNumber].Active:= Active.Checked;
+
+  Inc(PlayerNumber);
+
+  User.Text:= ThePlayers[PlayerNumber].User;
+  Pass.Text:= ThePlayers[PlayerNumber].Pass;
+  Nick.Text:= ThePlayers[PlayerNumber].Nick;
+  Pin.Text:= ThePlayers[PlayerNumber].Pin;
+  for j:=0 to High(ThePlayers[PlayerNumber].Integers) do
+    Integers[j].Text:= IntToStr(ThePlayers[PlayerNumber].Integers[j]);
+  for j:=0 to High(ThePlayers[PlayerNumber].Strings) do
+    Strings[j].Text:= ThePlayers[PlayerNumber].Strings[j];
+  for j:=0 to High(ThePlayers[PlayerNumber].Booleans) do
+    Booleans[j].Checked:= ThePlayers[PlayerNumber].Booleans[j];
+  Active.Checked:= ThePlayers[PlayerNumber].Active;
+
+  PlayerLabel.Caption:= 'User '+IntToStr(PlayerNumber+1)+' of '+IntToStr(HowManyPlayerss);
+End;
+
+
+procedure RemoteForm;
+var
+  i, j: Integer;
+begin
+  LoadVars;
+  PlayerNumber:= 0;
+  Remote := TForm.Create(nil);
+  with Remote do
+  begin
+    BorderStyle := bsSingle;
+    BorderIcons := [];
+    FormStyle := fsStayOnTop;
+    Left := 376;
+    Top := 438;
+    Width := 192;
+    Height := (236+((Length(BooleanNames)+Length(IntegerNames)+Length(StringNames))*24));
+    Caption := 'Players Remote for '+TheScriptName;
+    Color := clBtnFace;
+    Font.Color := clWindowText;
+    Font.Height := -11;
+    Font.Name := 'MS Sans Serif';
+    Font.Style := [];
+    PixelsPerInch := 96;
+  end;
+
+  PlayerLabel := TLabel.Create(Remote);
+  with PlayerLabel do
+  begin
+    Parent := Remote;
+    Left := 60;
+    Top := 16;
+    Width := 22;
+    Height := 13;
+    Caption := 'User '+IntToStr(PlayerNumber+1)+' of '+IntToStr(HowManyPlayerss);
+  end;
+  UserLabel := TLabel.Create(Remote);
+  with UserLabel do
+  begin
+    Parent := Remote;
+    Left := 16;
+    Top := 16+24;
+    Width := 22;
+    Height := 13;
+    Caption := 'User';
+  end;
+  PassLabel := TLabel.Create(Remote);
+  with PassLabel do
+  begin
+    Parent := Remote;
+    Left := 16;
+    Top := 40+24;
+    Width := 23;
+    Height := 13;
+    Caption := 'Pass';
+  end;
+  NickLabel := TLabel.Create(Remote);
+  with NickLabel do
+  begin
+    Parent := Remote;
+    Left := 16;
+    Top := 64+24;
+    Width := 22;
+    Height := 13;
+    Caption := 'Nick';
+  end;
+  PinLabel := TLabel.Create(Remote);
+  with PinLabel do
+  begin
+    Parent := Remote;
+    Left := 16;
+    Top := 88+24;
+    Width := 15;
+    Height := 13;
+    Caption := 'Pin';
+  end;
+  SetArrayLength(IntegersLabel, Length(IntegerNames));
+  for i:=0 to High(IntegersLabel) do
+  begin
+    IntegersLabel[i] := TLabel.Create(Remote);
+    with IntegersLabel[i] do
+    begin
+      Parent := Remote;
+      Left := 16;
+      Top := 112+24+(i*24);
+      Width := 38;
+      Height := 13;
+      Caption := IntegerNames[i];
+    end;
+  end;
+  SetArrayLength(StringsLabel, Length(StringNames));
+  for i:=0 to High(StringsLabel) do
+  begin
+    StringsLabel[i] := TLabel.Create(Remote);
+    with StringsLabel[i] do
+    begin
+      Parent := Remote;
+      Left := 16;
+      Top := 112+24+((Length(IntegerNames)+i)*24);
+      Width := 32;
+      Height := 13;
+      Caption := StringNames[i];
+    end;
+  end;
+  SetArrayLength(BooleansLabel, Length(BooleanNames));
+  for i:=0 to High(BooleansLabel) do
+  begin
+    BooleansLabel[i] := TLabel.Create(Remote);
+    with BooleansLabel[i] do
+    begin
+      Parent := Remote;
+      Left := 16;
+      Top := 112+24+(((Length(IntegerNames)+(Length(StringNames))+i)*24));
+      Width := 44;
+      Height := 13;
+      Caption := BooleanNames[i];
+    end;
+  end;
+  ActiveLabel := TLabel.Create(Remote);
+  with ActiveLabel do
+  begin
+    Parent := Remote;
+    Left := 16;
+    Top := (136+(Length(IntegerNames)+Length(StringNames)+i)*24);
+    Width := 30;
+    Height := 13;
+    Caption := 'Active';
+  end;
+  SetArrayLength(Strings, Length(ThePlayers[0].Strings));
+  for i:=0 to High(Strings) do
+  begin
+    Strings[i] := TComboBox.Create(Remote);
+    with Strings[i] do
+    begin
+      Parent := Remote;
+      Left := 112;
+      Top := 112+24+((Length(IntegerNames)+i)*24);
+      Width := 70;
+      Height := 21;
+      ItemHeight := 13;
+      TabOrder := 8;
+      Text := ThePlayers[0].Strings[i];
+      with Items do
+      for j:=0 to High(TheStrings[i]) do
+        Add(TheStrings[i][j]);
+    end;
+  end;
+  SetArrayLength(Booleans, Length(ThePlayers[0].Booleans));
+  for i:=0 to High(Booleans) do
+  begin
+    Booleans[i] := TCheckBox.Create(Remote);
+    with Booleans[i] do
+    begin
+      Parent := Remote;
+      Left := 112;
+      Top := 112+24+(((Length(IntegerNames)+(Length(StringNames))+i)*24));
+      Width := 16;
+      Height := 16;
+      Checked := ThePlayers[0].Booleans[i];
+      TabOrder := 9;
+    end;
+  end;
+  User := TEdit.Create(Remote);
+  with User do
+  begin
+    Parent := Remote;
+    Left := 112;
+    Top := 16+24;
+    Width := 70;
+    Height := 21;
+    TabOrder := 10;
+    Text := ThePlayers[0].User;
+  end;
+  Pass := TEdit.Create(Remote);
+  with Pass do
+  begin
+    Parent := Remote;
+    Left := 112;
+    Top := 40+24;
+    Width := 70;
+    Height := 21;
+    PasswordChar := '*';
+    TabOrder := 11;
+    Text := ThePlayers[0].Pass;
+  end;
+  Nick := TEdit.Create(Remote);
+  with Nick do
+  begin
+    Parent := Remote;
+    Left := 112;
+    Top := 64+24;
+    Width := 70;
+    Height := 21;
+    TabOrder := 12;
+    Text := ThePlayers[0].Nick;
+  end;
+  Pin := TEdit.Create(Remote);
+  with Pin do
+  begin
+    Parent := Remote;
+    Left := 112;
+    Top := 88+24;
+    Width := 70;
+    Height := 21;
+    TabOrder := 13;
+    Text := ThePlayers[0].Pin;
+  end;
+  Active := TCheckBox.Create(Remote);
+  with Active do
+  begin
+    Parent := Remote;
+    Left := 112;
+    Top := (136+(Length(IntegerNames)+Length(StringNames)+i)*24);
+    Width := 16;
+    Height := 16;
+    Checked := ThePlayers[0].Active;
+    TabOrder := 14;
+  end;
+  SetArrayLength(Integers, Length(ThePlayers[0].Integers));
+  for i:=0 to High(Integers) do
+  begin
+    Integers[i] := TEdit.Create(Remote);
+    with Integers[i] do
+    begin
+      Parent := Remote;
+      Left := 112;
+      Top := 112+24+(i*24);;
+      Width := 70;
+      Height := 21;
+      TabOrder := 15;
+      Text := IntToStr(ThePlayers[0].Integers[i]);
+    end;
+  end;
+  SetButton2 := TButton.Create(Remote);
+  with SetButton2 do
+  begin
+    Parent := Remote;
+    Left := 15;
+    Top := 197+(((Length(BooleanNames)+Length(IntegerNames)+Length(StringNames))*24));
+    Width := 60;
+    Height := 25;
+    Caption := 'Set';
+    TabOrder := 9;
+    OnClick := @Click;
+  end;
+  CloseButton2 := TButton.Create(Remote);
+  with CloseButton2 do
+  begin
+    Parent := Remote;
+    Left := 100;
+    Top := 197+(((Length(BooleanNames)+Length(IntegerNames)+Length(StringNames))*24));
+    Width := 60;
+    Height := 24;
+    Caption := 'Close';
+    TabOrder := 10;
+    OnClick := @Click;
+  end;
+  PreviousButton := TButton.Create(Remote);
+  with PreviousButton do
+  begin
+    Parent := Remote;
+    Left := 7;
+    Top := 165+(((Length(BooleanNames)+Length(IntegerNames)+Length(StringNames))*24));
+    Width := 35;
+    Height := 25;
+    Caption := '<--';
+    TabOrder := 9;
+    OnClick := @PreviousPlayer;
+  end;
+  AddButton := TButton.Create(Remote);
+  with AddButton do
+  begin
+    Parent := Remote;
+    Left := 52;
+    Top := 165+(((Length(BooleanNames)+Length(IntegerNames)+Length(StringNames))*24));
+    Width := 35;
+    Height := 24;
+    Caption := 'Add';
+    TabOrder := 10;
+    OnClick := @AddPlayer;
+  end;
+  DeleteButton := TButton.Create(Remote);
+  with DeleteButton do
+  begin
+    Parent := Remote;
+    Left := 97;
+    Top := 165+(((Length(BooleanNames)+Length(IntegerNames)+Length(StringNames))*24));
+    Width := 35;
+    Height := 25;
+    Caption := 'Del';
+    TabOrder := 9;
+    OnClick := @DeletePlayer;
+  end;
+  NextButton := TButton.Create(Remote);
+  with NextButton do
+  begin
+    Parent := Remote;
+    Left := 142;
+    Top := 165+(((Length(BooleanNames)+Length(IntegerNames)+Length(StringNames))*24));
+    Width := 35;
+    Height := 24;
+    Caption := '-->';
+    TabOrder := 10;
+    OnClick := @NextPlayerButton;
+  end;
+end;
+
+procedure MainRemote;
+begin
+  RemoteForm;
+  Remote.ShowModal;
+end;
+
+Procedure ClickButton(Sender: TObject);
+Begin
+  if (Sender = CloseButton) then
+    OpenInstance.ModalResult:= mrOk;
+  if (Sender = SetButton) then
+  begin
+    INIPath:= INIPath+between('Instance ', '.', InstanceNumber.TEXT)+Extension;
+    OpenInstance.ModalResult:= mrOk;
+    OpenMain:= True;
+  end;
+End;
+
+procedure OpenInstanceForm;
+var
+  i : Integer;
+begin
+  OpenInstance := TForm.Create(nil);
+  with OpenInstance do
+  begin
+    BorderStyle := bsSingle;
+    BorderIcons := [];
+    FormStyle := fsStayOnTop;
+    Left := 483;
+    Top := 281;
+    Width := 305;
+    Height := 90;
+    Caption := 'Open Instance';
+    Color := clBtnFace;
+    Font.Color := clWindowText;
+    Font.Height := -11;
+    Font.Name := 'MS Sans Serif';
+    Font.Style := [];
+    PixelsPerInch := 96;
+  end;
+  Label1 := TLabel.Create(OpenInstance);
+  with Label1 do
+  begin
+    Parent := OpenInstance;
+    Left := 12;
+    Top := 16;
+    Width := 119;
+    Height := 17;
+    Caption := 'Open remote for instance';
+  end;
+  InstanceNumber := TComboBox.Create(OpenInstance);
+  with InstanceNumber do
+  begin
+    Parent := OpenInstance;
+    Left := 140;
+    Top := 16;
+    Width := 160;
+    Height := 21;
+    ItemHeight := 13;
+    TabOrder := 8;
+    Text := ScriptNames[0]+': Instance '+IntToStr(InstanceArray[0])+'.';
+    with Items do
+    for i:=0 to High(InstanceArray) do Add(ScriptNames[i]+': Instance '+IntToStr(InstanceArray[i])+'.');
+  end;
+  SetButton := TButton.Create(OpenInstance);
+  with SetButton do
+  begin
+    Parent := OpenInstance;
+    Left := 40;
+    Top := 48;
+    Width := 81;
+    Height := 25;
+    Caption := 'Open';
+    TabOrder := 9;
+    OnClick := @ClickButton;
+  end;
+  CloseButton := TButton.Create(OpenInstance);
+  with CloseButton do
+  begin
+    Parent := OpenInstance;
+    Left := 168;
+    Top := 48;
+    Width := 80;
+    Height := 24;
+    Caption := 'Close';
+    TabOrder := 10;
+    OnClick := @ClickButton;
+  end;
+end;
+
+procedure MainOpenInstance;
+begin
+  OpenInstanceForm;
+  OpenInstance.ShowModal;
+end;
+
+function FileNotEmpty(FilePath: string): Boolean;
+begin
+  Result:= False;
+  if (FileExists(FilePath)) then
+    Result:= StrToBool(ReadINI('Main', 'Running', FilePath));
+end;
+
+function HowManyInstances: TIntegerArray;
+var
+  i: Integer;
+begin
+  InstanceArray:= [];
+  ScriptNames:= [];
+  for i:=0 to 50 do
+    if FileNotEmpty(INIPath+InttoStr(i)+Extension) then
+    begin
+      SetArrayLength(Result, Length(Result)+1);
+      Result[High(Result)]:= i;
+      SetArrayLength(ScriptNames, Length(ScriptNames)+1);
+      ScriptNames[High(ScriptNames)]:= ReadINI('Main', 'Name', INIPath+InttoStr(i)+Extension);
+    end;
+end;
+
+procedure LoadForm;
+begin
+  InstanceArray:= HowManyInstances;
+  If (Length(InstanceArray) > 0) then
+    if (Length(InstanceArray) > 1) then
+    begin
+      MainOpenInstance
+      if OpenMain then
+        MainRemote;
+    end else
+    begin
+      INIPath:= INIPath+IntToStr(InstanceArray[0])+Extension;
+      MainRemote;
+    end;
+end;
+
+procedure SRLRemote(Sender: TObject);
+begin
+  if (not(Sender = SRLRemoteMenuItem)) then Exit;
+  INIPath:= AppPath+'Scripts/SRLRemote';
+  TheScriptName:= 'SRL Player';
+  Loadform;
+end;
+
+procedure Init;
+begin
+  MyMenu := TMenuItem.Create(Simba_MainMenu);
+  MyMenu.Caption := 'SRL Remote';
+  MyMenu.Visible := False;
+  Simba_MainMenu.Items.Add(MyMenu);
+
+  SRLRemoteMenuItem := TMenuItem.Create(MyMenu);
+  SRLRemoteMenuItem.Caption := 'Player Remote';
+  SRLRemoteMenuItem.OnClick := @SRLRemote;
+  MyMenu.Add(SRLRemoteMenuItem);
+end;
+
+procedure Attach;
+begin;
+  MyMenu.Visible := True;
+end;
+
+Procedure Detach;
+begin
+  MyMenu.Visible := False;
+end;
+
+function GetName : string;
+begin;
+  result := 'Shuttleu  Remote';
+end;
+
+function GetVersion : string;
+begin;
+  result := '1.0';
+end;
+
+begin
+
+end.
