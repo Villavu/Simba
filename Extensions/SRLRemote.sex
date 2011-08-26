@@ -767,7 +767,7 @@ end;
 
 function GetName : string;
 begin;
-  result := 'Shuttleu  Remote';
+  result := 'SRL Remote';
 end;
 
 function GetVersion : string;
