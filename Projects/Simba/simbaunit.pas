@@ -3172,7 +3172,7 @@ begin
           Idler;
         if UnTarrer.Result then
         begin;
-          FormWriteln('Succesfully installed the new fonts!');
+          FormWriteln('Successfully installed the new fonts!');
           SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion),true);
           if Assigned(self.OCR_Fonts) then
             self.OCR_Fonts.Free;
