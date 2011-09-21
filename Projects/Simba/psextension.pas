@@ -399,7 +399,7 @@ begin
   end;
 
   if InitScript then
-    mDebugLn('Init procedure succesfully called')
+    mDebugLn('Init procedure successfully called')
   else
     mDebugLn('Init procedure didn''t execute right, or couldn''t be found');
   Enabled:= FWorking;
