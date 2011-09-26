@@ -985,7 +985,7 @@ begin
     if PSScript.Compile then
     begin
       OutputMessages;
-      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
       if CompileOnly then
         exit;
 //      if not (ScriptState = SCompiling) then
@@ -1229,7 +1229,7 @@ begin
     RUTIS.Compile;
     if not RUTIS.CompilerError then
     begin
-      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
       if CompileOnly then
         exit;
       RUTIS.Run;
