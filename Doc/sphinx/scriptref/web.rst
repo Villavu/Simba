@@ -142,6 +142,8 @@ GetRawHeaders returns a string of headers from the specified client.
 Socket Functions
 ----------------
 
+Simba's Socket Functions. Examples required; if you have one, please let u know.
+
 CreateSocket
 ~~~~~~~~~~~~
 
@@ -189,7 +191,6 @@ ListenSocket
     procedure ListenSocket(Client: integer);
 
 ListenSocket allows for a client socket to accept connections.
-
 
 AcceptSocket
 ~~~~~~~~~~~~
@@ -249,15 +250,15 @@ SendSocket
 
 SendSocket sends a string of data to a bound client socket.
 
-SetTimeout
+SetSocketTimeout
 ~~~~~~~~~~
 
 .. code-block:: pascal
 
-    procedure SetTimeout(Client, Time: integer);
+    procedure SetSocketTimeout(Client, Time: integer);
 
 SetTimeout sets a maximum amount of time for a bound client socket to wait for
-data from another socket.
+data from another socket. Time is in *milliseconds*.
 
 SocketInfo
 ~~~~~~~~~~

@@ -3,31 +3,24 @@ Simple stuff, not required, may not be possible/useful:
     -   Coloured writeln                                            [ ]
     -   Make an TAction for the Colour Picker.                      [ ]
     -   Portable install (needs fiddling with settings and such)    [ ]
+        -   Settings rewrite                                        [ ]
     -   --no-extensions flag for Simba.                             [ ]
 
+-   CTS/finder speedups and changes                                 [X]
 
--   CTS/finder speedups and changes                                 [ ]
-    General ideas:
-        -   everything subprocedure (lots of code)
-
-        -   jit + comparison function (per cts)  generated, call in loop
-
-        -   comparison function (per cts), not generated, call in loop
-
-    -   JIT (Generate comparison functions)                         [ ]
     -   Comparison functions for HSL/XYZ/L*a*b should check for
         match on each component before calculating the next.
         (see FindColorsToleranceOptimised)
 
-    -   Pass color information in struct                            [ ]
+    -   Pass color information in struct                            [X]
     -   Precalculate screen bitmap in current cts / keep a cache
-        to save comparisons                                         [ ]
-    -   Add CTS 3                                                   [ ]
-    -   Add a direct RGB -> CIE L*a*b conversion                    [ ]
-    -   Make sure colour conversions are inline                     [ ]
+        to save comparisons                                         [X]
+    -   Add CTS 3                                                   [/]
+    -   Add a direct RGB -> CIE L*a*b conversion                    [/]
 
 -   More documentation:
-    -   Cover all functions by at least mentioning the definition   [ ]
+    -   Cover all functions by at least mentioning the definition   [/]
+        -   Imported functions as well?
     -   Write tutorial                                              [ ]
     -   In depth documentation per function                         [ ]
 
@@ -36,17 +29,17 @@ Simple stuff, not required, may not be possible/useful:
     -   Lape!                                                       [ ]
 
 -   Integrate script manager                                        [ ]
-    -   Basic support. (Install scripts)                            [ ]
-    -   Update functionality                                        [ ]
-    -   Uninstall scripts                                           [ ]
-    -   Better storage / more stable storage                        [ ]
-    -   Pretty GUI                                                  [ ]
-    -   Merging / storing usernames when updating                   [ ]
+    -   Basic support. (Install scripts)                            [X]
+    -   Update functionality                                        [X]
+    -   Uninstall scripts                                           [X]
+    -   Better storage / more stable storage                        [?]
+    -   Pretty GUI                                                  [/]
+    -   Merging / storing usernames when updating                   [?]
 
 -   Make Simba more ``modular'':
     -   Fonts                                                       [ ]
-    -   Interpreters                                                [ ]
+    -   Interpreters                                                [/]
     -   Code completion/hints                                       [ ]
-    -   Extensions                                                  [ ]
+    -   Extensions                                                  [X]
     -   Interpreter system overhaul?                                [ ]
 
