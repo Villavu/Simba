@@ -83,6 +83,8 @@ const
   shortcut_PickColourKey  = VK_P;
   {$ENDIF}
 
+  {$I settings_const.inc}
+
 type
 
   { TMufasaTab }
@@ -774,8 +776,8 @@ end;
 
 function TSimbaForm.GetInterpreter: Integer;
 begin
-  Result := StrToIntDef(LoadSettingDef('Settings/Interpreter/Type', '0'), 0);
-  if ((Result < 0) or (Result > 3)) then
+  result := StrToIntDef(LoadSettingDef(ssInterpreterType, '0'),0);
+  if (result < 0) or (result > 3) then
   begin
     SetInterpreter(0);
     Result := 0;
@@ -784,12 +786,12 @@ end;
 
 function TSimbaForm.GetDefScriptPath: string;
 begin
-  result :=LoadSettingDef('Settings/SourceEditor/DefScriptPath', ExpandFileName(MainDir+DS+'default.simba'));
+  result :=LoadSettingDef(ssSourceEditorDefScriptPath, ExpandFileName(MainDir+DS+'default.simba'));
 end;
 
 function TSimbaForm.GetScriptPath: string;
 begin
-  result :=IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Scripts/Path', ExpandFileName(MainDir+DS+'Scripts' + DS)));
+  result :=IncludeTrailingPathDelimiter(LoadSettingDef(ssScriptsPath, ExpandFileName(MainDir+DS+'Scripts' + DS)));
 end;
 
 procedure TSimbaForm.HandleOpenFileData;
@@ -998,7 +1000,7 @@ var
 begin
   UpdateTimer.Interval := MaxInt;
   FontUpdate;
-  chk := LowerCase(LoadSettingDef('Settings/Updater/CheckForUpdates','True'));
+  chk := LowerCase(LoadSettingDef(ssCheckUpdate, 'True'));
 
   if chk <> 'true' then
     Exit;
@@ -1014,8 +1016,13 @@ begin
     mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
     mDebugLn('Latest Simba Version: ' + IntToStr(LatestVersion));
   end;
+<<<<<<< HEAD
   time := StrToIntDef(LoadSettingDef('Settings/Updater/CheckEveryXMinutes','30'),30);
   UpdateTimer.Interval := time {mins} * 60 {secs} * 1000 {ms};//Every half hour
+=======
+  time := StrToIntDef(LoadSettingDef(ssCheckUpdateMinutes, '30'),30);
+  UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
+>>>>>>> master
 end;
 
 procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
@@ -1160,7 +1167,7 @@ begin
     OldIndex := PageControl1.TabIndex;
     if TabIndex = OldIndex then
     begin;
-      if lowercase(LoadSettingDef('Settings/Tabs/OpenNextOnClose','False')) = 'false' then
+      if lowercase(LoadSettingDef(ssTabsOpenNextOnClose, 'False')) = 'false' then
         OldIndex := LastTab //We are closing the 'current'  tab, lets go back in history
       else
         OldIndex := Min(Tabs.Count - 1,OldIndex + 1);
@@ -1370,43 +1377,52 @@ procedure TSimbaForm.CreateDefaultEnvironment;
 var
   PluginsPath,extensionsPath : string;
 begin
-  CreateSetting('Settings/Updater/CheckForUpdates','True');
-  CreateSetting('Settings/Updater/CheckEveryXMinutes','30');
-  CreateSetting('Settings/Interpreter/Type', '0');
-  CreateSetting('Settings/Fonts/LoadOnStartUp', 'True');
-  CreateSetting('Settings/Fonts/Version','-1');
-  CreateSetting('Settings/Tabs/OpenNextOnClose','False');
-  CreateSetting('Settings/Tabs/OpenScriptInNewTab','True');
-  CreateSetting('Settings/Tabs/CheckTabsBeforeOpen','True');
-  CreateSetting('Settings/ColourPicker/ShowHistoryOnPick', 'True');
-  CreateSetting('Settings/General/MaxRecentFiles','10');
-  CreateSetting('Settings/MainForm/NormalSize','739:555');
-  CreateSetting('Settings/FunctionList/ShowOnStart','True');
-  CreateSetting('Settings/CodeHints/ShowAutomatically','True');
-  CreateSetting('Settings/CodeCompletion/ShowAutomatically','True');
-  CreateSetting('Settings/SourceEditor/LazColors','True');
-  {$IFDEF USE_EXTENSIONS}CreateSetting('Settings/Extensions/FileExtension','sex');{$ENDIF}
+  CreateSetting(ssCheckUpdate, 'True');
+  CreateSetting(ssCheckUpdateMinutes, '30');
+  CreateSetting(ssInterpreterType, '0');
+  CreateSetting(ssLoadFontsOnStart, 'True');
+  CreateSetting(ssFontsVersion, '-1');
+  CreateSetting(ssTabsOpenNextOnClose, 'False');
+  CreateSetting(ssTabsOpenScriptInNewTab, 'True');
+  CreateSetting(ssTabsCheckBeforeOpen, 'True');
+  CreateSetting(ssColourPickerShowHistoryOnPick, 'True');
+  CreateSetting(ssMaxRecentFiles, '10');
+  CreateSetting(ssMainFormNormalSize, '739:555');
+  CreateSetting(ssFunctionListShowOnStart, 'True');
+  CreateSetting(ssCodeHintsShowAutomatically, 'True');
+  CreateSetting(ssCodeCompletionShowAutomatically, 'True');
+  CreateSetting(ssSourceEditorLazColors, 'True');
 
-  CreateSetting('Settings/Updater/RemoteLink',SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
-  CreateSetting('Settings/Updater/RemoteVersionLink',SimbaURL + 'Version');
-  CreateSetting('Settings/Fonts/VersionLink', FontURL + 'Version');
-  CreateSetting('Settings/Fonts/UpdateLink', FontURL + 'Fonts.tar.bz2');
+  {$IFDEF USE_EXTENSIONS}
+  CreateSetting(ssExtensionsFileExtension, 'sex');
+  {$ENDIF}
 
-  CreateSetting('Settings/News/URL', 'http://simba.villavu.com/bin/news');
+  CreateSetting(ssUpdaterLink, SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
+  CreateSetting(ssUpdaterVersionLink, SimbaURL + 'Version');
+  CreateSetting(ssFontsVersionLink, FontURL + 'Version');
+  CreateSetting(ssFontsLink, FontURL + 'Fonts.tar.bz2');
+
+  CreateSetting(ssNewsLink, 'http://simba.villavu.com/bin/news');
 
   {Creates the paths and returns the path}
-  PluginsPath := CreateSetting('Settings/Plugins/Path', ExpandFileName(MainDir+ DS+ 'Plugins' + DS));
+  PluginsPath := CreateSetting(ssPluginsPath, ExpandFileName(MainDir + DS + 'Plugins' + DS));
+
   {$IFDEF USE_EXTENSIONS}
-  extensionsPath := CreateSetting('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
-  CreateSetting('Extensions/ExtensionCount','0');
+  extensionsPath := CreateSetting(ssExtensionsPath,
+      ExpandFileName(MainDir +DS + 'Extensions' + DS));
+  CreateSetting(ssExtensionsCount, '0');
   {$ENDIF}
-  CreateSetting('LastConfig/MainForm/Position','');
-  CreateSetting('LastConfig/MainForm/State','Normal');
+
+  CreateSetting(ssMainFormPosition, '');
+  CreateSetting(ssMainFormState, 'Normal');
+
   {$ifdef MSWindows}
-  CreateSetting('LastConfig/Console/Visible','False');
+  CreateSetting(ssConsoleVisible, 'False');
   ShowConsole(False);
   {$endif}
-  CreateSetting('Settings/Tray/AlwaysVisible', 'True');
+
+  CreateSetting(ssTrayAlwaysVisible, 'True');
+
   if not DirectoryExists(IncludePath) then
     CreateDir(IncludePath);
   if not DirectoryExists(FontPath) then
@@ -1435,7 +1451,7 @@ var
   i,ii : integer;
 begin
   self.BeginFormUpdate;
-  str := LoadSettingDef('LastConfig/MainForm/Position','');
+  str := LoadSettingDef(ssMainFormPosition, '');
   if str <> '' then
   begin;
     Data := Explode(':',str);
@@ -1446,36 +1462,38 @@ begin
     Self.Width:= StrToIntDef(Data[2],self.width);
     Self.Height:= StrToIntDef(Data[3],self.height);
   end;
-  str := lowercase(LoadSettingDef('LastConfig/MainForm/State','Normal'));
+  str := lowercase(LoadSettingDef(ssMainFormState, 'Normal'));
   if str = 'maximized' then
     self.windowstate := wsMaximized
   else
 //  if str = 'normal' then
     Self.WindowState := wsNormal;
-  if SettingExists('LastConfig/MainForm/RecentFiles/Count') then
+  if SettingExists(ssRecentFilesCount) then
   begin;
-    ii := StrToIntDef(LoadSettingDef('LastConfig/MainForm/RecentFiles/Count','-1'),-1);
+    ii := StrToIntDef(LoadSettingDef(ssRecentFilesCount, '-1'), -1);
     for i := 0 to ii do
     begin
-      str := LoadSettingDef('LastConfig/MainForm/RecentFiles/File' + inttostr(I),'');
+      str := LoadSettingDef(ssRecentFileN + inttostr(I),'');
       if str <> '' then
         AddRecentFile(str);
     end;
   end;
-  str := LowerCase(LoadSettingDef('Settings/FunctionList/ShowOnStart','True'));
-  str2 := lowercase(LoadSettingDef('LastConfig/MainForm/FunctionListShown',''));
+  str := LowerCase(LoadSettingDef(ssFunctionListShowOnStart, 'True'));
+  str2 := lowercase(LoadSettingDef(ssFunctionListShown, ''));
   if (str = 'true') or (str2 = 'true') then
     FunctionListShown(True)
   else
     FunctionListShown(false);
+
   {$ifdef MSWindows}
-  str := LowerCase(LoadSettingDef('LastConfig/Console/Visible','True'));
+  str := LowerCase(LoadSettingDef(ssConsoleVisible, 'True'));
   if str = 'true' then
     ShowConsole(True)
   else
     ShowConsole(false);
   {$endif}
-  if Lowercase(LoadSettingDef('Settings/Tray/AlwaysVisible', 'True')) <> 'true' then
+
+  if Lowercase(LoadSettingDef(ssTrayAlwaysVisible, 'True')) <> 'true' then
   begin
     MTrayIcon.Hide;
     writeln('Hiding tray.');
@@ -1494,36 +1512,36 @@ begin
   with SettingsForm.Settings do
   begin
     if Self.WindowState = wsMaximized then
-      SetSetting('LastConfig/MainForm/State','maximized')
+      SetSetting(ssMainFormState, 'maximized')
     else
     begin; //Only save the form position if its not maximized.
-      SetSetting('LastConfig/MainForm/State','normal');
+      SetSetting(ssMainFormState, 'normal');
       Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
-      SetSetting('LastConfig/MainForm/Position', Implode(':',Data ));
+      SetSetting(ssMainFormPosition, Implode(':',Data ));
     end;
-    DeleteKey('LastConfig/MainForm/RecentFiles');
+    DeleteKey(ssRecentFiles);
     if RecentFiles.Count > 0 then
     begin
-      SetSetting('LastConfig/MainForm/RecentFiles/Count',inttostr(RecentFiles.Count));
+      SetSetting(ssRecentFiles + '/Count', inttostr(RecentFiles.Count));
       SetLength(data,RecentFiles.Count);
       for i := 0 to RecentFiles.Count - 1 do
-        SetSetting('LastConfig/MainForm/RecentFiles/File'+inttostr(i),RecentFiles[i]);
+        SetSetting(ssRecentFileN + inttostr(i),RecentFiles[i]);
     end;
     if MenuItemFunctionList.Checked then
-      SetSetting('LastConfig/MainForm/FunctionListShown','True')
+      SetSetting(ssFunctionListShown, 'True')
     else
-      SetSetting('LastConfig/MainForm/FunctionListShown','False');
+      SetSetting(ssFunctionListShown, 'False');
     {$ifdef MSWindows}
     if ConsoleVisible then
-      SetSetting('LastConfig/Console/Visible','True')
+      SetSetting(ssConsoleVisible, 'True')
     else
-      SetSetting('LastConfig/Console/Visible','False');
+      SetSetting(ssConsoleVisible, 'False');
     {$endif}
     {$IFDEF USE_EXTENSIONS}
-    SetSetting('Extensions/ExtensionCount',inttostr(ExtManager.Extensions.Count));
+    SetSetting(ssExtensionsCount, inttostr(ExtManager.Extensions.Count));
     for i := 0 to ExtManager.Extensions.Count-1 do
     begin;
-      path :='Extensions/Extension' + inttostr(I);
+      path := ssExtensionsExtensionN + inttostr(I);
       SetSetting(Path + '/Path',TVirtualSimbaExtension(ExtManager.Extensions[i]).Filename);
       SetSetting(Path + '/Enabled',BoolToStr(TVirtualSimbaExtension(ExtManager.Extensions[i]).Enabled,True));
     end;
@@ -1545,7 +1563,7 @@ var
     result := false;
     if (number < 0) or (number >= extCount) then
       exit;
-    path := 'Extensions/Extension' + inttostr(number);
+    path := ssExtensionsExtensionN + inttostr(number);
     if SettingExists(Path) = false then
       exit;
     ExtPath := LoadSettingDef(Path + '/Path','');
@@ -1561,11 +1579,11 @@ var
     i : integer;
     path : string;
   begin;
-    path := 'Extensions/Extension';
+    path := ssExtensionsExtensionN;
     SettingsForm.Settings.DeleteKey(path + inttostr(number));
     for i := number + 1 to extCount - 1 do
       SettingsForm.Settings.RenameKey(path + inttostr(i),'Extension' + inttostr(i-1));
-    SetSetting('Extensions/ExtensionCount',inttostr(extCount - 1),true);
+    SetSetting(ssExtensionsCount, inttostr(extCount - 1),true);
     dec(extCount);
   end;
 
@@ -1573,13 +1591,13 @@ var
   str,str2 : string;
   i : integer;
 begin
-  extCount := StrToIntDef(LoadSettingDef('Extensions/ExtensionCount/','0'),0);
+  extCount := StrToIntDef(LoadSettingDef(ssExtensionsCount, '0'),0);
   for i := 0 to extCount - 1 do
     while (i < extCount) and not LoadExtension(i) do
       DeleteExtension(i);
-  SetSetting('Extensions/ExtensionCount',inttostr(extCount));
-  str := LoadSettingDef('Settings/Extensions/Path',ExpandFileName(MainDir +DS + 'Extensions' + DS));
-  str2 := LoadSettingDef('Settings/Extensions/FileExtension','sex');
+  SetSetting(ssExtensionsCount, inttostr(extCount));
+  str := LoadSettingDef(ssExtensionsPath, ExpandFileName(MainDir +DS + 'Extensions' + DS));
+  str2 := LoadSettingDef(ssExtensionsFileExtension, 'sex');
   ExtManager.LoadPSExtensionsDir(str,str2);
 {$ELSE}
 begin
@@ -1591,7 +1609,7 @@ var
   MaxRecentFiles : integer;
   Len,i : integer;
 begin
-  MaxRecentFiles:= StrToIntDef(LoadSettingDef('Settings/General/MaxRecentFiles','10'),10);
+  MaxRecentFiles:= StrToIntDef(LoadSettingDef(ssMaxRecentFiles, '10'), 10);
   i := RecentFiles.IndexOf(filename);
   if i <> -1 then
     RecentFiles.Delete(i);
@@ -1686,7 +1704,7 @@ begin
   if selector.haspicked then
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-  loadFontsOnScriptStart := (lowercase(LoadSettingDef('Settings/Fonts/LoadOnStartUp', 'True')) = 'true');
+  loadFontsOnScriptStart := (lowercase(LoadSettingDef(ssLoadFontsOnStart, 'True')) = 'true');
 
   if (loadFontsOnScriptStart) then
   begin
@@ -1950,12 +1968,12 @@ var
   SizeStr : string;
   Data : TStringArray;
 begin
-  SizeStr := LoadSettingDef('Settings/MainForm/NormalSize','739:555');
+  SizeStr := LoadSettingDef(ssMainFormNormalSize, '739:555');
   Data := Explode(':',SizeStr);
   if length(Data) = 2 then
   begin
-    Self.Width:= StrToIntDef(Data[0],739);
-    Self.Height:= StrToIntDef(Data[1],555);
+    Self.Width:= StrToIntDef(Data[0], 739);
+    Self.Height:= StrToIntDef(Data[1], 555);
   end else
   begin;
     self.width := 739;
@@ -2833,7 +2851,7 @@ end;
 procedure TSimbaForm.MTrayIconClick(Sender: TObject);
 begin
   self.Show;
-  if Lowercase(LoadSettingDef('Settings/Tray/AlwaysVisible', 'True')) <> 'true' then
+  if Lowercase(LoadSettingDef(ssTrayAlwaysVisible, 'True')) <> 'true' then
     MTrayIcon.Hide;
   if Self.CanFocus then
     self.SetFocus;
@@ -2843,7 +2861,7 @@ function TSimbaForm.GetSimbaNews: String;
 var
   t: TDownloadThread;
 begin
-  t := TDownloadThread.Create(LoadSettingDef('Settings/News/URL', 'http://Simba.villavu.com/bin/news'),
+  t := TDownloadThread.Create(LoadSettingDef(ssNewsLink, 'http://Simba.villavu.com/bin/news'),
                               @Result);
   t.Resume;
   while not t.done do
@@ -2855,13 +2873,13 @@ end;
 
 procedure TSimbaForm.SetDefScriptPath(const AValue: string);
 begin
-  SetSetting('Settings/SourceEditor/DefScriptPath',AValue,True);
+  SetSetting(ssSourceEditorDefScriptPath, AValue,True);
 end;
 
 {$IFDEF USE_EXTENSIONS}
 procedure TSimbaForm.SetExtPath(const AValue: string);
 begin
-  SetSetting('Settings/Extensions/Path',AValue,true);
+  SetSetting(ssExtensionsPath, AValue,true);
 end;
 {$ENDIF}
 
@@ -2902,10 +2920,10 @@ begin
   cobj := TColourPickerObject.Create(c, Classes.Point(x,y), '');
 
   { TODO: This should be no problem if the form is hidden? }
-  if lowercase(LoadSettingDef('Settings/ColourPicker/AddToHistoryOnPick', 'True')) = 'true' then
+  if lowercase(LoadSettingDef(ssColourPickerAddToHistoryOnPick, 'True')) = 'true' then
     ColourHistoryForm.AddColObj(cobj, true);
 
-  if lowercase(LoadSettingDef('Settings/ColourPicker/ShowHistoryOnPick', 'True')) = 'true' then
+  if lowercase(LoadSettingDef(ssColourPickerShowHistoryOnPick, 'True')) = 'true' then
     ColourHistoryForm.Show;
 
   FormWritelnEx('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
@@ -3025,34 +3043,34 @@ end;
 
 function TSimbaForm.GetShowParamHintAuto: boolean;
 begin
-  Result := LowerCase(LoadSettingDef('Settings/CodeHints/ShowAutomatically','True')) = 'true';
+  Result := LowerCase(LoadSettingDef(ssCodeHintsShowAutomatically, 'True')) = 'true';
 end;
 
 function TSimbaForm.GetShowCodeCompletionAuto: boolean;
 begin
-  Result := LowerCase(LoadSettingDef('Settings/CodeCompletion/ShowAutomatically','True')) = 'true';
+  Result := LowerCase(LoadSettingDef(ssCodeCompletionShowAutomatically, 'True')) = 'true';
 end;
 
 procedure TSimbaForm.SetFontPath(const AValue: String);
 begin
-  SetSetting('Settings/Fonts/Path',AValue,true);
+  SetSetting(ssFontsPath, AValue,true);
 end;
 
 function TSimbaForm.GetFontPath: String;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Fonts/Path', ExpandFileName(MainDir+DS+'Fonts' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssFontsPath, ExpandFileName(MainDir+DS+'Fonts' + DS)));
 end;
 
 {$IFDEF USE_EXTENSIONS}
 function TSimbaForm.GetExtPath: string;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Extensions/Path', ExpandFileName(MainDir+DS+'Extensions' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssExtensionsPath, ExpandFileName(MainDir+DS+'Extensions' + DS)));
 end;
 {$ENDIF}
 
 function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
 begin
-  if lowercase(LoadSettingDef('Settings/SourceEditor/LazColors','True')) = 'true' then
+  if lowercase(LoadSettingDef(ssSourceEditorLazColors, 'True')) = 'true' then
     result := LazHighlighter
   else
     result := SCARHighlighter;
@@ -3060,17 +3078,17 @@ end;
 
 function TSimbaForm.GetIncludePath: String;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Includes/Path', ExpandFileName(MainDir+DS+'Includes' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssIncludesPath, ExpandFileName(MainDir+DS+'Includes' + DS)));
 end;
 
 function TSimbaForm.GetPluginPath: string;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef('Settings/Plugins/Path', ExpandFileName(MainDir+DS+'Plugins' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssPluginsPath, ExpandFileName(MainDir+DS+'Plugins' + DS)));
 end;
 
 procedure TSimbaForm.SetIncludePath(const AValue: String);
 begin
-  SetSetting('Settings/Includes/Path',AValue,true);
+  SetSetting(ssIncludesPath, AValue,true);
 end;
 
 procedure TSimbaForm.SetInterpreter(const AValue: Integer);
@@ -3081,9 +3099,14 @@ begin
   if (CurrScript <> nil) then
     with CurrScript.Synedit do
       if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
+<<<<<<< HEAD
         UpdateCurrScript := True;
 
   SetSetting('Settings/Interpreter/Type', IntToStr(AValue), True);
+=======
+        UpdateCurrScript := true;
+  SetSetting(ssInterpreterType, Inttostr(AValue),true);
+>>>>>>> master
   UpdateInterpreter;
 
   if UpdateCurrScript then
@@ -3092,12 +3115,12 @@ end;
 
 procedure TSimbaForm.SetPluginPath(const AValue: string);
 begin
-  SetSetting('Settings/Plugins/Path',AValue,true);
+  SetSetting(ssPluginsPath, AValue,true);
 end;
 
 procedure TSimbaForm.SetScriptPath(const AValue: string);
 begin
-  SetSetting('Settings/Scripts/Path',AValue,True);
+  SetSetting(ssScriptsPath, AValue,True);
 end;
 
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
@@ -3170,12 +3193,12 @@ begin
   if UpdatingFonts then
     exit;
   UpdatingFonts := True;
-  CurrVersion := StrToIntDef(LoadSettingDef('Settings/Fonts/Version','-1'),-1);
+  CurrVersion := StrToIntDef(LoadSettingDef(ssFontsVersion, '-1'), -1);
   LatestVersion := SimbaUpdateForm.GetLatestFontVersion;
   if LatestVersion > CurrVersion then
   begin;
     formWriteln(format('New fonts available. Current version: %d. Latest version: %d',[CurrVersion,LatestVersion]));
-    FontDownload := TDownloadThread.Create(LoadSettingDef('Settings/Fonts/UpdateLink',FontURL + 'Fonts.tar.bz2'),
+    FontDownload := TDownloadThread.Create(LoadSettingDef(ssFontsLink, FontURL + 'Fonts.tar.bz2'),
                                            @Fonts);
     FontDownload.resume;
     while FontDownload.Done = false do
@@ -3196,7 +3219,7 @@ begin
         if UnTarrer.Result then
         begin;
           FormWriteln('Successfully installed the new fonts!');
-          SetSetting('Settings/Fonts/Version',IntToStr(LatestVersion),true);
+          SetSetting(ssFontsVersion, IntToStr(LatestVersion),true);
           if Assigned(self.OCR_Fonts) then
             self.OCR_Fonts.Free;
           FormWriteln('Freeing the current fonts. Creating new ones now');
@@ -3225,12 +3248,12 @@ end;
 
 procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
 begin
-  SetSetting('Settings/CodeHints/ShowAutomatically', Booltostr(AValue,true));
+  SetSetting(ssCodeHintsShowAutomatically, Booltostr(AValue,true));
 end;
 
 procedure TSimbaForm.SetShowCodeCompletionAuto(const AValue: boolean);
 begin
-  SetSetting('Settings/CodeCompletion/ShowAutomatically', Booltostr(AValue,true));
+  SetSetting(ssCodeCompletionShowAutomatically, Booltostr(AValue,true));
 end;
 
 {$ifdef mswindows}
@@ -3358,7 +3381,7 @@ var
   OpenInNewTab : boolean;
 begin
   Result := False;
-  OpenInNewTab:= (LowerCase(LoadSettingDef('Settings/Tabs/OpenScriptInNewTab','True')) = 'true');
+  OpenInNewTab:= (LowerCase(LoadSettingDef(ssTabsOpenScriptInNewTab, 'True')) = 'true');
   if not OpenInNewTab then
     if CanExitOrOpen = false then
       Exit;
@@ -3370,7 +3393,7 @@ begin
       InitialDir := ScriptDir;
     Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
     Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt' +
-    {$IFDEF USE_EXTENSIONS}';*.' + LoadSettingDef('Settings/Extensions/FileExtension', 'sex') + {$ENDIF}
+    {$IFDEF USE_EXTENSIONS}';*.' + LoadSettingDef(ssExtensionsFileExtension, 'sex') + {$ENDIF}
              '|Any files|*.*';
     if Execute then
     begin
@@ -3399,11 +3422,11 @@ begin
   if AlwaysOpenInNewTab then
     OpenInNewTab := true
   else
-    OpenInNewTab:= (LowerCase(LoadSettingDef('Settings/Tabs/OpenScriptInNewTab','True')) = 'true');
+    OpenInNewTab:= (LowerCase(LoadSettingDef(ssTabsOpenScriptInNewTab,'True')) = 'true');
   if CheckOtherTabs then
     CheckTabsFirst := True
   else
-    CheckTabsFirst := (Lowercase(LoadSettingDef('Settings/Tabs/CheckTabsBeforeOpen','True')) = 'true');
+    CheckTabsFirst := (Lowercase(LoadSettingDef(ssTabsCheckBeforeOpen, 'True')) = 'true');
   if FileExistsUTF8(FileName) then
   begin;
     if CheckTabsFirst then
@@ -3478,7 +3501,7 @@ begin
     else
       InitialDir := ScriptDir;
     filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt' +
-    {$IFDEF USE_EXTENSIONS}';*.' + LoadSettingDef('Settings/Extensions/FileExtension','sex') + {$ENDIF}
+    {$IFDEF USE_EXTENSIONS}';*.' + LoadSettingDef(ssExtensionsFileExtension, 'sex') + {$ENDIF}
               '|Any files|*.*';
     if Execute then
     begin;
