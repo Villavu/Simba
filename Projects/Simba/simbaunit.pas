@@ -1016,13 +1016,8 @@ begin
     mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
     mDebugLn('Latest Simba Version: ' + IntToStr(LatestVersion));
   end;
-<<<<<<< HEAD
-  time := StrToIntDef(LoadSettingDef('Settings/Updater/CheckEveryXMinutes','30'),30);
-  UpdateTimer.Interval := time {mins} * 60 {secs} * 1000 {ms};//Every half hour
-=======
   time := StrToIntDef(LoadSettingDef(ssCheckUpdateMinutes, '30'),30);
   UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
->>>>>>> master
 end;
 
 procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
@@ -3099,14 +3094,8 @@ begin
   if (CurrScript <> nil) then
     with CurrScript.Synedit do
       if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
-<<<<<<< HEAD
-        UpdateCurrScript := True;
-
-  SetSetting('Settings/Interpreter/Type', IntToStr(AValue), True);
-=======
         UpdateCurrScript := true;
-  SetSetting(ssInterpreterType, Inttostr(AValue),true);
->>>>>>> master
+  SetSetting(ssInterpreterType, IntToStr(AValue),true);
   UpdateInterpreter;
 
   if UpdateCurrScript then
