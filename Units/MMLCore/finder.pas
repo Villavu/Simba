@@ -1692,6 +1692,8 @@ begin
 
     end;
     //We did find the Bmp, otherwise we would be at the part below
+    TClient(Client).IOManager.FreeReturnData;
+
     x := ClientTPA[i].x + xs;
     y := ClientTPA[i].y + ys;
     result := true;
