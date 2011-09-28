@@ -33,7 +33,7 @@ function.
 Word of caution on bitmap creation
 ----------------------------------
 
-Bitmaps in Simba are internally all instances of *TMufasBitmap*. Scripts should
+Bitmaps in Simba are internally all instances of *TMufasaBitmap*. Scripts should
 generally access bitmaps using their *handle*: an integer. All functions
 referenced here either require a bitmap *handle* or return one.
 
