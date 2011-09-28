@@ -241,7 +241,8 @@ begin
     FCancelling := False;
     FCancelled := True;
     DownloadSpeed.Visible := false;
-    Self.UpdateLog.Lines.Add('Download stopped at '+inttostr(DownloadProgress.Position)+'%... Simba did not succesfully update.');
+    Self.UpdateLog.Lines.Add('Download stopped at '+inttostr(DownloadProgress.Position)+
+      '%... Simba did not successfully update.');
     // more detailed info
     mDebugLn('EXCEPTION IN UPDATEFORM: We either hit Cancel, or something went wrong with files');
     if FileExists(Updater.BasePath + Updater.ReplacementFile + '_') then
@@ -251,7 +252,8 @@ begin
     end;
   end;
   FDone := True;
-  Self.UpdateButton.Caption := 'Update!';
+  Self.UpdateButton.Caption := 'Updated!';
+  Self.UpdateButton.Enabled := False;
   Self.CloseButton.Enabled := true;
   FUpdating:= false;
 end;

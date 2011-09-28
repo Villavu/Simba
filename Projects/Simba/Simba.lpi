@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="49">
+    <Units Count="51">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -311,6 +311,15 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="SimbaSettingsSimple"/>
       </Unit48>
+      <Unit49>
+        <Filename Value="../../Units/MMLCore/tpa.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="tpa"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit50>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
