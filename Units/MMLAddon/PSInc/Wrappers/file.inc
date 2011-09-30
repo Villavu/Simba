@@ -101,6 +101,11 @@ begin
   result := GetDirectories(path);
 end;
 
+function ps_DeleteFile(const Filename: string): Boolean; extdecl;
+begin
+  Result := DeleteFileUTF8(Filename);
+end;
+
 procedure ps_WriteINI(const Section, KeyName, NewString, FileName: string);extdecl;
 var
   tempini : TIniFile;
