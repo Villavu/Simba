@@ -83,6 +83,11 @@ begin
   PStringArray(Result)^ := ps_GetDirectories(Pstring(Params^[0])^);
 end;
 
+procedure Lape_DeleteFile(const Params: PParamArray; const Result: Pointer);
+begin
+  PBoolean(Result)^ := ps_DeleteFile(Pstring(Params^[0])^);
+end;
+
 procedure Lape_WriteINI(const Params: PParamArray);
 begin
   ps_WriteINI(Pstring(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^, Pstring(Params^[3])^);
