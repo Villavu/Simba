@@ -156,6 +156,7 @@ AddFunction(@ps_FileExists,'function FileExists (const FileName : string ) : Boo
 AddFunction(@ps_ForceDirectores,'function ForceDirectories(const dir : string) : boolean;');
 AddFunction(@ps_GetFiles,'function GetFiles(const Path, Ext : string) : TStringArray;');
 AddFunction(@ps_GetDirectories,'function GetDirectories(const path : string) : TStringArray;');
+AddFunction(@ps_DeleteFile, 'function DeleteFile(const Filename: string): Boolean;');
 AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, FileName: string);');
 AddFunction(@ps_ReadINI,'function ReadINI(const Section, KeyName, FileName: string): string;');
 AddFunction(@ps_DeleteINI,'procedure DeleteINI(const Section, KeyName, FileName: string);');
