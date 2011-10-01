@@ -45,6 +45,7 @@ type
     function OpenFile(Path: string; Shared: Boolean): Integer;
     function RewriteFile(Path: string; Shared: Boolean): Integer;
     function AppendFile(Path: string): Integer;
+    function DeleteFile(Filename: string): Boolean;
     procedure CloseFile(FileNum: Integer);
     function EndOfFile(FileNum: Integer): Boolean;
     function FileSizeMuf(FileNum: Integer): LongInt;
@@ -332,6 +333,21 @@ begin
     Result := File_AccesError;
     TClient(Client).Writeln(Format('ReWriteFile - Exception. Could not create file: %s',[path]));
   end;
+end;
+
+
+function TMFiles.DeleteFile(Filename: string): Boolean;
+var
+  Continue : Boolean;
+begin
+  if Assigned(WriteFileEvent) then
+  begin;
+    Continue := true;
+    WriteFileEvent(Self, Filename, continue);
+    if not Continue then
+      exit(False);
+  end;
+  Result := DeleteFileUTF8(Filename);
 end;
 
 {/\
