@@ -127,6 +127,12 @@ type
   end;
   PCTS2Info = ^TCTS2Info;
 
+  TCTS3Info = record
+      L, A, B: extended;
+      Tol: Integer; { Squared }
+  end;
+  PCTS3Info = ^TCTS3Info;
+
   TCTSInfo = Pointer;
   TCTSInfoArray = Array of TCTSInfo;
   TCTSInfo2DArray = Array of TCTSInfoArray;
@@ -420,12 +426,30 @@ begin
         and (abs(l - i.L) <= i.Tol);
 end;
 
+function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
+
+var
+    i: TCTS3Info;
+    X, Y, Z, L, A, B: Extended;
+begin
+  i := PCTS3Info(ctsInfo)^;
+
+  RGBToXYZ(C2^.R, C2^.G, C2^.B, X, Y, Z); // inline this
+  XYZToCIELab(X, Y, Z, L, A, B);
+
+  L := L - i.L;
+  A := A - i.A;
+  B := B - i.B;
+  Result := (L*L + A*A + B*B) < i.Tol;
+end;
+
 { }
 
 function Create_CTSInfo(cts: integer; Color, Tol: Integer;
                         hueMod, satMod: extended): Pointer; overload;
 var
     R, G, B: Integer;
+    X, Y, Z: Extended;
 begin
   case cts of
       0:
@@ -452,6 +476,15 @@ begin
         PCTS2Info(Result)^.hueMod := Tol * hueMod;
         PCTS2Info(Result)^.satMod := Tol * satMod;
         PCTS2Info(Result)^.Tol := Tol;
+      end;
+      3:
+      begin
+        Result := AllocMem(SizeOf(TCTS3Info));
+        ColorToRGB(Color, R, G, B);
+        RGBToXYZ(R, G, B, X, Y, Z);
+        XYZToCIELab(X, Y, Z, PCTS3Info(Result)^.L, PCTS3Info(Result)^.A,
+                  PCTS3Info(Result)^.B);
+        PCTS3Info(Result)^.Tol := Tol*Tol;
       end;
   end;
 end;
@@ -533,6 +566,7 @@ begin
       0: Result := @ColorSame_cts0;
       1: Result := @ColorSame_cts1;
       2: Result := @ColorSame_cts2;
+      3: Result := @ColorSame_cts3;
   end;
 end;
 
