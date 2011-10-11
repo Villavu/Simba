@@ -1,19 +1,19 @@
 object Form1: TForm1
-  Left = 314
-  Height = 428
-  Top = 197
+  Left = 515
+  Height = 434
+  Top = 179
   Width = 702
-  Anchors = [akTop, akLeft, akRight]
+  ActiveControl = ListView1
   Caption = 'Form1'
-  ClientHeight = 428
+  ClientHeight = 434
   ClientWidth = 702
   OnCreate = FormCreate
-  LCLVersion = '0.9.29'
+  LCLVersion = '0.9.30.1'
   object Button1: TButton
-    Left = 16
-    Height = 33
+    Left = 280
+    Height = 38
     Top = 384
-    Width = 680
+    Width = 416
     Anchors = [akLeft, akBottom]
     Caption = 'Refresh'
     OnClick = Button1Click
@@ -21,20 +21,20 @@ object Form1: TForm1
   end
   object GroupBox1: TGroupBox
     Left = 280
-    Height = 333
+    Height = 339
     Top = 0
     Width = 418
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'GroupBox1'
-    ClientHeight = 315
+    ClientHeight = 320
     ClientWidth = 414
     TabOrder = 1
     object Memo1: TMemo
       Left = 14
-      Height = 280
-      Top = 8
-      Width = 376
+      Height = 288
+      Top = 15
+      Width = 384
       BorderStyle = bsNone
       Color = clBtnFace
       ReadOnly = True
@@ -42,21 +42,33 @@ object Form1: TForm1
     end
   end
   object ListView1: TListView
+    AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 333
+    Height = 434
     Top = 0
     Width = 274
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
-    Columns = <>
+    BorderWidth = 2
+    Columns = <    
+      item
+        AutoSize = True
+        Caption = 'Script Name'
+        Width = 0
+      end    
+      item
+        AutoSize = True
+        Caption = 'Author'
+        Width = 272
+      end>
     TabOrder = 2
     OnChange = ListView1Change
   end
   object Button2: TButton
-    Left = 21
+    Left = 280
     Height = 38
-    Top = 338
-    Width = 672
+    Top = 344
+    Width = 416
     Caption = 'Install'
     OnClick = Button2Click
     TabOrder = 3

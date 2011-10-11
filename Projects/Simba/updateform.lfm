@@ -1,5 +1,5 @@
 object SimbaUpdateForm: TSimbaUpdateForm
-  Left = 262
+  Left = 276
   Height = 331
   Top = 219
   Width = 473
@@ -9,7 +9,7 @@ object SimbaUpdateForm: TSimbaUpdateForm
   ClientWidth = 473
   OnCreate = FormCreate
   OnShow = CleanUpdateForm
-  LCLVersion = '0.9.29'
+  LCLVersion = '0.9.30.1'
   object DownloadProgress: TProgressBar
     Left = 8
     Height = 29
@@ -49,9 +49,9 @@ object SimbaUpdateForm: TSimbaUpdateForm
   end
   object DownloadSpeed: TLabel
     Left = 96
-    Height = 14
-    Top = 306
-    Width = 78
+    Height = 18
+    Top = 302
+    Width = 111
     Anchors = [akLeft, akBottom]
     Caption = 'DownloadSpeed'
     ParentColor = False
