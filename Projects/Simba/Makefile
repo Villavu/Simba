@@ -8,7 +8,7 @@
 
 # Set these
 #lazaruspath := /usr/lib/lazarus/0.9.28.2
-lazaruspath := ../../../lazarus
+lazaruspath := ../../../lazarus_fixes
 # set this correctly only if you want to apply and reverse the patch automatically
 rutis_x64_patch := ../../../0-rutis-x64.patch
 
@@ -69,7 +69,7 @@ build := $(CC)
 
 # -Xd doesn't seem to cause problems when not cross-compiling, and is needed when cross-compiling, so I'm leaving it here
 common_flags := -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu. -dM_MEMORY_DEBUG -dLCL
-units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/
+units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/ -Fu../../Units/lape
 
 binary := Simba.$(platform)
 # windows wants executables to end in .exe
