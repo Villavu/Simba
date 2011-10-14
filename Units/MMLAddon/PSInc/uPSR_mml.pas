@@ -142,6 +142,7 @@ begin
     RegisterMethod(@TMufasaBitmap.free,'FREE');
     RegisterMethod(@TMufasaBitmap.SaveToFile, 'SAVETOFILE');
     RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LOADFROMFILE');
+    RegisterMethod(@TMufasaBitmap.LoadFromTBitmap, 'LOADFROMTBITMAP');
   end;
 end;
 

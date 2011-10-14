@@ -44,6 +44,7 @@ begin
     RegisterMethod('procedure Free');
     RegisterMethod('function SaveToFile(const FileName : string) :boolean;');
     RegisterMethod('procedure LoadFromFile(const FileName : string);');
+    RegisterMethod('procedure LoadFromTBitmap(bmp: TBitmap);');
     RegisterProperty('Width','Integer',iptR);
     RegisterProperty('Height','Integer',iptR);
     RegisterProperty('Index','Integer',iptR);
