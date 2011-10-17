@@ -408,7 +408,7 @@ AddFunction(@ps_FindBitmapSpiralTolerance,'function FindBitmapSpiralTolerance(bi
 AddFunction(@ps_RotateBitmap,'function RotateBitmap(bitmap: Integer; angle: Extended): Integer;');
 AddFunction(@ps_Desaturate,'function DesaturateBitmap(Bitmap : integer) : integer;');
 AddFunction(@ps_InvertBitmap,'procedure InvertBitmap(Bitmap : integer);');
-AddFunction(@ps_CopyBitmap,'function CopyBitmap(Bitmap:  integer) : integer)');
+AddFunction(@ps_CopyBitmap,'function CopyBitmap(Bitmap:  integer) : integer');
 AddFunction(@ps_GreyScaleBitmap,'function GreyScaleBitmap(bitmap : integer) : integer');
 AddFunction(@ps_BrightnessBitmap,'function BrightnessBitmap(Bitmap,br : integer) : integer;');
 AddFunction(@ps_ContrastBitmap,'function ContrastBitmap(bitmap : integer; co : extended) : integer;');
