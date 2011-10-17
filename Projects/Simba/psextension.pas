@@ -10,6 +10,8 @@ uses
   bitmaps, plugins, libloader, dynlibs,internets,scriptproperties, settingssandbox, updater;
 
 
+{$I Simba.inc}
+
 
 type
 
