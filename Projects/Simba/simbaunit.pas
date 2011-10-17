@@ -62,7 +62,7 @@ uses
   settings, updater;
 
 const
-  SimbaVersion = 972;
+  SimbaVersion = 973;
 
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
@@ -708,6 +708,10 @@ var
   b: TStringList;
   ms: TMemoryStream;
 begin
+  { XXX: This is a weird workaround for an even weirder bug }
+  Index := -1;
+  Exit(False);
+  { XXX: End workaround}
   try
     Index := PluginsGlob.LoadPlugin(LibName);
   except
