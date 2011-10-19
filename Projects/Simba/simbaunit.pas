@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ uses
   settings, updater;
 
 const
-  SimbaVersion = 972;
+  SimbaVersion = 973;
 
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
@@ -706,6 +706,10 @@ var
   b: TStringList;
   ms: TMemoryStream;
 begin
+  { XXX: This is a weird workaround for an even weirder bug }
+  Index := -1;
+  Exit(False);
+  { XXX: End workaround}
   try
     Index := PluginsGlob.LoadPlugin(LibName);
   except
