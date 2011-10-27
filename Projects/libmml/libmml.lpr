@@ -1,11 +1,46 @@
 library libmml;
 
+{
+libMML - the C-like interface to MML.
+
+Will (eventually) support the following functionality:
+    -   Bitmap creation and find functions.
+    -   DTM creation and find functions
+    -   Color find, get (and convert?) functions.
+    -   Mouse/Keyboard functions.
+    -   OCR Engine + functions. (font loader?)
+
+It should not include:
+    -   Simba file functions (the stdlib of other languages should suffice)
+    -   Simba web functions (the stdlib of other languages should suffice)
+
+Debatable:
+    -   TPointArray functions, the languages themselves should probably handle
+        this.
+}
+
 {$mode objfpc}{$H+}
 
 uses
   cmem,Classes,interfaces,graphics,client,sysutils,MufasaTypes,dtmutil, dtm;
 
 //{$R *.res}
+
+(*
+Constants
+=========
+
+Constants defined by libMML:
+
+.. code-block:: c
+
+    #define RESULT_OK       0
+    #define RESULT_FALSE    1
+    #define RESULT_ERROR    -1
+
+    #define MOUSE_UP        0
+    #define MOUSE_DOWN      1
+*)
 
 Const
   RESULT_OK = 0;
@@ -15,22 +50,52 @@ Const
   MOUSE_UP = 0;
   MOUSE_DOWN = 1;
 
-{
-    Global variables.
-    To actually read the last_error, make sure you copy it to a safe place
-    directly after the function call.
-}
 var
-  last_error: String;
-  debug: boolean;
+  last_error: String; // TODO: make it default to ''
+  debug: boolean; // TODO: make it default to false
 
- { This must be called on Library load }
 
+(*
+
+libMLL Specific Functions
+=========================
+
+
+*)
+
+(*
+init
+----
+
+This function must be called immediately after loading the library.
+*)
 function init: integer;  cdecl;
 begin
   last_error := '';
-  debug := true;
+  debug := true; // TODO: Change this to false
   result := RESULT_OK;
+end;
+
+(*
+get_last_error
+--------------
+
+Returns a char pointer.
+
+.. DANGER::
+
+    VERY IMPORTANT: If you use get_last_error, you must immediately store the
+    resulting string somewhere else. As soon as you do other calls, the last
+    error may be reset or assigned a different memory position, making your old
+    pointer invalid.
+
+    TODO: Perhaps copy it to another pchar and return that? Just let the program
+    using the library free it?
+
+*)
+function get_last_error: pchar; cdecl;
+begin
+  exit(@last_error[1]);
 end;
 
 procedure set_last_error(s: string);
@@ -46,14 +111,14 @@ begin
   result := Assigned(C);
   if not result then
   begin
-    last_error := 'PClient is NULL';
+    last_error := 'TClient is NULL';
     if debug then
       writeln(last_error);
   end;
 end;
 
 {
-  Create a TClient.
+  Create a TClient. A TClient contains all the functions.
   You can use multiple, but you'll have to manage them yourself.
 }
 function create_client: PtrUInt; cdecl;
@@ -98,17 +163,6 @@ begin
   exit(debug);
 end;
 
-{
-  VERY IMPORTANT: If you use get_last_error, you must immediately store the
-  resulting string somewhere else. As soon as you do other calls, the last error
-  may be reset or assigned a different memory position, making your old
-  pointer invalid.
-}
-function get_last_error: pchar; cdecl;
-begin
-  exit(@last_error[1]);
-end;
-
 { Turn an array into a pointer. The pointer memory is not managed by FPC, so we can pass
   it along happily. It'll have to be freed by the external control though }
 function array_to_ptr(ptr: Pointer; size: PtrUInt; objsize: PtrUInt): Pointer; cdecl;
@@ -142,9 +196,22 @@ begin
   result := ReAllocMem(ptr, size*objsize);
 end;
 
-{ Mouse }
+(*
+Mouse
+=====
 
-{ Returns mouse position of client C to point t }
+Mouse functions in libMML.
+
+*)
+
+(*
+get_mouse_pos
+-------------
+
+
+Returns mouse position of client C to point t
+*)
+
 function get_mouse_pos(C: TClient; var t: tpoint): integer; cdecl;
 
 begin
@@ -162,7 +229,12 @@ begin
   end;
 end;
 
-{ Set mouse position of client C to point t }
+(*
+set_mouse_pos
+-------------
+
+Set mouse position of client C to point t
+*)
 function set_mouse_pos(C: TClient; var t: tpoint): integer; cdecl;
 begin
   try
@@ -170,8 +242,8 @@ begin
     result := RESULT_OK;
   except on e : Exception do
     begin
-        result := RESULT_ERROR;
-        set_last_error(e.Message);
+      result := RESULT_ERROR;
+      set_last_error(e.Message);
     end;
   end;
 end;
@@ -225,8 +297,22 @@ begin
 end;
 
 
-{ Colour }
+(*
+Color Functions
+===============
 
+
+
+
+
+*)
+
+(*
+get_color
+---------
+
+
+*)
 function get_color(C: TClient; x, y: Integer;
                    out color: Integer): Integer; cdecl;
 begin
@@ -278,25 +364,6 @@ begin
   end;
 end;
 
-function find_color_tolerance_optimised(C: TClient; var x, y: Integer;
-                                        var len: Integer; col: Integer;
-                                        x1, y1, x2, y2: Integer;
-                                        tol: Integer): Integer; cdecl;
-begin
-  try
-    if C.MFinder.FindColorToleranceOptimised(x, y, col, x1, y1, x2, y2,
-                                            tol) then
-      result := RESULT_OK
-    else
-      result := RESULT_FALSE;
-  except on e : Exception do
-    begin
-      set_last_error(e.message);
-      result := RESULT_ERROR;
-    end;
-  end;
-end;
-
 function find_colors(C: TClient; var ptr: PPoint; var len: Integer;
                      color, x1, y1, x2, y2: Integer): Integer;  cdecl;
 var
@@ -335,35 +402,6 @@ begin
   except on e : Exception do
     begin
       set_last_error(e.Message);
-      result := RESULT_ERROR;
-    end;
-  end;
-
-  len := Length(TPA);
-  if len > 0 then
-    result := RESULT_OK
-  else
-  begin
-    setlength(tpa, 0);
-    exit(RESULT_FALSE);
-  end;
-
-  ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
-  setlength(TPA, 0);
-end;
-
-function find_colors_tolerance_optimised(C: TClient; var ptr: PPoint;
-                                         var len: Integer; col: Integer;
-                                         x1, y1, x2, y2: Integer;
-                                         tol: Integer): Integer; cdecl;
-var
-  TPA: TPointArray;
-begin
-  try
-      C.MFinder.FindColorsToleranceOptimised(TPA, col, x1, y1, x2, y2, tol);
-  except on e : Exception do
-    begin
-      set_last_error(e.message);
       result := RESULT_ERROR;
     end;
   end;
@@ -557,9 +595,12 @@ begin
   end;
 end;
 
-{ DTM }
+(*
+DTM Functions
+=============
 
-{ FIXME: DTM has not been tested yet! }
+
+*)
 
 { Create a MDTM}
 function create_dtm(PointLen: integer; Points: PMDTMPoint; DTM: TMDTM): integer;
@@ -666,6 +707,14 @@ begin
   ptr := array_to_ptr(Pointer(@TPA[0]), len, sizeof(TPoint));
   setlength(TPA, 0);
 end;
+
+(*
+Client Functions
+================
+
+
+
+*)
 
 function set_array_target(C: TClient; Arr: PRGB32; Size: TPoint): integer; 
     cdecl;
