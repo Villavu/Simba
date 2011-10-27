@@ -4,11 +4,11 @@ library libmml;
 libMML - the C-like interface to MML.
 
 Will (eventually) support the following functionality:
-    -   Bitmap creation and find functions.
-    -   DTM creation and find functions
-    -   Color find, get (and convert?) functions.
-    -   Mouse/Keyboard functions.
-    -   OCR Engine + functions. (font loader?)
+    [ ] -   Bitmap creation and find functions.
+    [ ] -   DTM creation and find functions
+    [/] -   Color find, get (and convert?) functions.
+    [/] -   Mouse/Keyboard functions.
+    [ ] -   OCR Engine + functions. (font loader?)
 
 It should not include:
     -   Simba file functions (the stdlib of other languages should suffice)
@@ -17,6 +17,7 @@ It should not include:
 Debatable:
     -   TPointArray functions, the languages themselves should probably handle
         this.
+    [ ] -   TMufasaBitmap class?
 }
 
 {$mode objfpc}{$H+}
