@@ -371,9 +371,10 @@ var
   X : integer;
 begin
   Databs := TStringList.Create;
-  Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman/scripts.xml');
-  Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman2/scripts.xml');
-  Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/secretrepo/scripts.cgi?user=user&pass=pass');
+  //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman/scripts.xml');
+  //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman2/scripts.xml');
+  //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/secretrepo/scripts.cgi?user=user&pass=pass');
+  Databs.Add('http://old.villavu.com/sm');
 
   //TODO: Load list of repositories
 
@@ -578,8 +579,8 @@ begin
     Description:= Scrpt.Description;
     Tags.Assign(Scrpt.Tags);
     Files.Assign(Scrpt.Files);
-//    URL := 'http://old.villavu.com/sm/scripts/'+name+ '.tar.bz2';
-    URL := 'http://tootoot222.hopto.org:8080/~mcteo/scriptman/'+name+'.tar.bz2';
+    URL := 'http://old.villavu.com/sm/scripts/'+name+ '.tar.bz2';
+//    URL := 'http://tootoot222.hopto.org:8080/~mcteo/scriptman/'+name+'.tar.bz2';
   end;
   LScrpt.Save(MainDir);      //Saves the setting file, now we only need to update the files
   DownloadThread := TDownloadDecompressThread.Create(LScrpt.URL,MainDir + LScrpt.Name + DS,true);
