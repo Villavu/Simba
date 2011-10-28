@@ -1,0 +1,8 @@
+TODO:
+
+    -   Think of a nice way to create and modify DTMs.
+        Creating a DTM everytime we search for one is hardly overhead either.
+
+    -   Change get_last_error to return a fresh pchar?
+
+    -   Add Bitmap functions.

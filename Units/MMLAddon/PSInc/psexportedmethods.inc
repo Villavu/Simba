@@ -69,7 +69,7 @@ AddFunction(@ps_iAbs,'function iAbs(a : integer) : integer;');
 AddFunction(@ps_ArcTan2,'function ArcTan2(y,x : extended) : extended;');
 AddFunction(@ps_IntToBox,'function IntToBox(xs,ys,xe,ye : integer) : TBox;');
 AddFunction(@ps_IntInBox,'function IntInBox(x, y: Integer; Box: TBox): Boolean;');
-AddFunction(@ps_PointToBox,'function PointToBox(PT1,PT2 : TPoint): TBox;');
+AddFunction(@ps_PointToBox,'function PointToBox(topLeft,bottomRight: TPoint): TBox;');
 AddFunction(@ps_PointInBox,'function PointInBox(PT : TPoint; Box: TBox): Boolean;');
 AddFunction(@ps_sqr,'function Sqr(e : extended) : extended;');
 AddFunction(@ps_point,'function Point(x,y:integer) : TPoint;');
@@ -156,6 +156,7 @@ AddFunction(@ps_FileExists,'function FileExists (const FileName : string ) : Boo
 AddFunction(@ps_ForceDirectores,'function ForceDirectories(const dir : string) : boolean;');
 AddFunction(@ps_GetFiles,'function GetFiles(const Path, Ext : string) : TStringArray;');
 AddFunction(@ps_GetDirectories,'function GetDirectories(const path : string) : TStringArray;');
+AddFunction(@ps_DeleteFile, 'function DeleteFile(const Filename: string): Boolean;');
 AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, FileName: string);');
 AddFunction(@ps_ReadINI,'function ReadINI(const Section, KeyName, FileName: string): string;');
 AddFunction(@ps_DeleteINI,'procedure DeleteINI(const Section, KeyName, FileName: string);');
@@ -407,7 +408,7 @@ AddFunction(@ps_FindBitmapSpiralTolerance,'function FindBitmapSpiralTolerance(bi
 AddFunction(@ps_RotateBitmap,'function RotateBitmap(bitmap: Integer; angle: Extended): Integer;');
 AddFunction(@ps_Desaturate,'function DesaturateBitmap(Bitmap : integer) : integer;');
 AddFunction(@ps_InvertBitmap,'procedure InvertBitmap(Bitmap : integer);');
-AddFunction(@ps_CopyBitmap,'function CopyBitmap(Bitmap:  integer) : integer)');
+AddFunction(@ps_CopyBitmap,'function CopyBitmap(Bitmap:  integer) : integer');
 AddFunction(@ps_GreyScaleBitmap,'function GreyScaleBitmap(bitmap : integer) : integer');
 AddFunction(@ps_BrightnessBitmap,'function BrightnessBitmap(Bitmap,br : integer) : integer;');
 AddFunction(@ps_ContrastBitmap,'function ContrastBitmap(bitmap : integer; co : extended) : integer;');
