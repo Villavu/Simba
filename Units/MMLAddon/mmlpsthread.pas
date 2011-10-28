@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -964,7 +964,7 @@ begin
     if PSScript.Compile then
     begin
       OutputMessages;
-      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
       if CompileOnly then
         exit;
 //      if not (ScriptState = SCompiling) then
@@ -1208,7 +1208,7 @@ begin
     RUTIS.Compile;
     if not RUTIS.CompilerError then
     begin
-      psWriteln('Compiled succesfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
       if CompileOnly then
         exit;
       RUTIS.Run;
