@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,10 +34,31 @@ uses
   {$IFDEF MSWINDOWS} os_windows {$ENDIF}
   {$IFDEF LINUX} os_linux {$ENDIF};
 
-{
-TClient is a full-blown instance of the MML.
-It binds all the components together.
-}
+(*
+
+Client Class
+============
+
+The ``TClient`` class is the class that glues all other MML classes together
+into one usable class. Internally, quite some MML classes require other MML
+classes, and they access these other classes through their "parent"
+``TClient``
+class.
+
+An image tells more than a thousands words:
+
+    .. image:: ../../Pics/Client_Classes.png
+
+
+    And the class dependency graph: (An arrow indicates a dependency)
+
+    .. image:: ../../Pics/client_classes_dependencies.png
+
+    The client class does not do much else except creating the classes when it
+    is
+    created and destroying the classes when it is being destroyed. 
+
+*)
 
 type
 
@@ -57,9 +78,31 @@ type
     destructor Destroy; override;
   end;
 
+(*
+  Properties:
+
+      - IOManager
+      - MFiles
+      - MFinder
+      - MBitmaps
+      - MDTMs
+      - MOCR
+      - WriteLnProc
+*)
+
 implementation
 
 
+(*
+
+TClient.WriteLn
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TClient.WriteLn(s: string);
+
+*)
 
 procedure TClient.WriteLn(s: string);
 begin
@@ -68,6 +111,17 @@ begin
   else
     mDebugLn(s);
 end;
+
+(*
+
+TClient.Create
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+  constructor TClient.Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
+
+*)
 
 // Possibly pass arguments to a default window.
 constructor TClient.Create(const plugin_dir: string = ''; const UseIOManager : TIOManager = nil);
@@ -85,6 +139,17 @@ begin
   MDTMs := TMDTMS.Create(self);
   MOCR := TMOCR.Create(self);
 end;
+
+(*
+
+TClient.Destroy
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    destructor TClient.Destroy;
+
+*)
 
 destructor TClient.Destroy;
 begin

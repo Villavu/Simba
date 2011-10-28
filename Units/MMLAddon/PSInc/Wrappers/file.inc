@@ -101,6 +101,11 @@ begin
   result := GetDirectories(path);
 end;
 
+function ps_DeleteFile(const Filename: string): Boolean; extdecl;
+begin
+  Result := CurrThread.Client.MFiles.DeleteFile(Filename);
+end;
+
 procedure ps_WriteINI(const Section, KeyName, NewString, FileName: string);extdecl;
 var
   tempini : TIniFile;
