@@ -2,4 +2,4 @@
 .PHONY: default
 
 default:
-	/home/merlijn/lazarus/lazbuild libmml.lpi
+	/home/merlijn/Programs/lazarus_fixes/lazbuild --pcp=/home/merlijn/.lazarus-fixes libmml.lpi
