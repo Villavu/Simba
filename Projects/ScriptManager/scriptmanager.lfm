@@ -1,74 +1,113 @@
 object Form1: TForm1
-  Left = 515
-  Height = 434
-  Top = 179
-  Width = 702
-  ActiveControl = ListView1
-  Caption = 'Form1'
-  ClientHeight = 434
-  ClientWidth = 702
+  Left = 431
+  Height = 407
+  Top = 137
+  Width = 672
+  Caption = 'Add Script'
+  ClientHeight = 407
+  ClientWidth = 672
   OnCreate = FormCreate
+  OnShow = FormShow
   LCLVersion = '0.9.30.1'
-  object Button1: TButton
-    Left = 280
-    Height = 38
-    Top = 384
-    Width = 416
-    Anchors = [akLeft, akBottom]
-    Caption = 'Refresh'
-    OnClick = Button1Click
+  object Label1: TLabel
+    Left = 696
+    Height = 14
+    Top = 40
+    Width = 34
+    Caption = 'Search'
+    Enabled = False
+    ParentColor = False
+  end
+  object Edit1: TEdit
+    Left = 447
+    Height = 21
+    Top = 32
+    Width = 208
+    OnChange = Edit1Change
+    OnEnter = Edit1Enter
+    OnExit = Edit1Exit
     TabOrder = 0
+    Text = 'Search'
   end
-  object GroupBox1: TGroupBox
-    Left = 280
-    Height = 339
-    Top = 0
-    Width = 418
-    Align = alCustom
-    Anchors = [akTop, akLeft, akBottom]
-    Caption = 'GroupBox1'
-    ClientHeight = 320
-    ClientWidth = 414
+  object StringGrid1: TStringGrid
+    Left = 8
+    Height = 302
+    Top = 56
+    Width = 657
+    AlternateColor = 16315891
+    ColCount = 4
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goSmoothScroll, goScrollKeepVisible]
+    RowCount = 4
+    ScrollBars = ssVertical
     TabOrder = 1
-    object Memo1: TMemo
-      Left = 14
-      Height = 288
-      Top = 15
-      Width = 384
-      BorderStyle = bsNone
-      Color = clBtnFace
-      ReadOnly = True
-      TabOrder = 0
-    end
+    TitleFont.Color = clBlack
+    TitleStyle = tsNative
+    ColWidths = (
+      154
+      51
+      123
+      301
+    )
+    Cells = (
+      4
+      0
+      0
+      'Name'
+      1
+      0
+      'Version'
+      2
+      0
+      'Author'
+      3
+      0
+      'Description'
+    )
   end
-  object ListView1: TListView
-    AnchorSideBottom.Side = asrBottom
-    Left = 0
-    Height = 434
-    Top = 0
-    Width = 274
-    Align = alCustom
-    Anchors = [akTop, akLeft, akBottom]
-    BorderWidth = 2
-    Columns = <    
-      item
-        AutoSize = True
-        Caption = 'Script Name'
-        Width = 0
-      end    
-      item
-        AutoSize = True
-        Caption = 'Author'
-        Width = 272
-      end>
+  object ComboBox1: TComboBox
+    Left = 16
+    Height = 21
+    Top = 375
+    Width = 213
+    ItemHeight = 13
+    ItemIndex = 0
+    Items.Strings = (
+      'All'
+      'Agility'
+      'Combat'
+      'Construction'
+      'Cooking'
+      'Crafting'
+      'Dungeoneering'
+      'Farming'
+      'Firemaking'
+      'Fishing'
+      'Fletching'
+      'Herblore'
+      'Hunter'
+      'Magic'
+      'Mini Games'
+      'Mining'
+      'Misc'
+      'Money Making'
+      'Prayer'
+      'Range'
+      'Runecrafting'
+      'Slayer'
+      'Smithing'
+      'Summoning'
+      'Thieving'
+      'Woodcutting'
+    )
     TabOrder = 2
-    OnChange = ListView1Change
+    Text = 'All'
   end
-  object Button2: TButton
-    Left = 280
-    Height = 38
-    Top = 344
-    Width = 416
+  object Button4: TButton
+    Left = 520
+    Height = 28
+    Top = 368
+    Width = 135
     Caption = 'Install'
     OnClick = Button2Click
     TabOrder = 3
