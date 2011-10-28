@@ -31,15 +31,17 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="34">
+    <Units Count="35">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
+        <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="2" Y="2"/>
-        <UsageCount Value="83"/>
+        <UsageCount Value="92"/>
+        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="scriptmanager.pas"/>
@@ -50,9 +52,9 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="110"/>
-        <CursorPos X="1" Y="123"/>
-        <UsageCount Value="83"/>
+        <TopLine Value="163"/>
+        <CursorPos X="9" Y="169"/>
+        <UsageCount Value="92"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -60,23 +62,23 @@
         <Filename Value="../../../lazarus/lcl/interfaces/gtk/gtkwidgetset.inc"/>
         <TopLine Value="1276"/>
         <CursorPos X="1" Y="1294"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="2"/>
       </Unit2>
       <Unit3>
         <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
         <UnitName Value="bitmaps"/>
         <TopLine Value="112"/>
         <CursorPos X="79" Y="138"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit3>
       <Unit4>
         <Filename Value="../../Units/MMLAddon/settings.pas"/>
         <UnitName Value="settings"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
         <TopLine Value="564"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
@@ -84,40 +86,40 @@
         <UnitName Value="os_linux"/>
         <TopLine Value="11"/>
         <CursorPos X="64" Y="29"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit5>
       <Unit6>
         <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
         <UnitName Value="MufasaTypes"/>
         <TopLine Value="1"/>
         <CursorPos X="17" Y="15"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
       </Unit6>
       <Unit7>
         <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
         <UnitName Value="mufasabase"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
       </Unit7>
       <Unit8>
         <Filename Value="../../../lazarus/lcl/include/treeview.inc"/>
         <TopLine Value="2214"/>
         <CursorPos X="1" Y="2232"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit8>
       <Unit9>
         <Filename Value="../../../fpc/rtl/inc/objpash.inc"/>
         <TopLine Value="183"/>
         <CursorPos X="21" Y="201"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit9>
       <Unit10>
         <Filename Value="../../../FPC/FPCCheckout/packages/fcl-xml/src/xmlread.pp"/>
         <UnitName Value="XMLRead"/>
         <TopLine Value="21"/>
         <CursorPos X="11" Y="47"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit10>
       <Unit11>
         <Filename Value="../../Units/MMLAddon/updater.pas"/>
@@ -125,7 +127,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="97"/>
         <CursorPos X="1" Y="105"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="24"/>
       </Unit11>
       <Unit12>
         <Filename Value="../Simba/psextension.pas"/>
@@ -133,14 +135,14 @@
         <WindowIndex Value="0"/>
         <TopLine Value="168"/>
         <CursorPos X="29" Y="178"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="21"/>
       </Unit12>
       <Unit13>
         <Filename Value="../../Units/MMLAddon/internets.pas"/>
         <UnitName Value="internets"/>
         <TopLine Value="56"/>
         <CursorPos X="6" Y="61"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit13>
       <Unit14>
         <Filename Value="../Simba/updateform.pas"/>
@@ -152,7 +154,7 @@
         <TopLine Value="69"/>
         <CursorPos X="24" Y="72"/>
         <ComponentState Value="1"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="21"/>
       </Unit14>
       <Unit15>
         <Filename Value="../Simba/simbaunit.pas"/>
@@ -163,51 +165,51 @@
         <WindowIndex Value="0"/>
         <TopLine Value="65"/>
         <CursorPos X="52" Y="78"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit15>
       <Unit16>
         <Filename Value="../../../FPC/FPCCheckout/packages/fcl-xml/src/dom.pp"/>
         <UnitName Value="DOM"/>
         <TopLine Value="178"/>
         <CursorPos X="15" Y="204"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit16>
       <Unit17>
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/sysutils/syswideh.inc"/>
         <TopLine Value="1"/>
         <CursorPos X="10" Y="21"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit17>
       <Unit18>
         <Filename Value="../../Units/MMLAddon/stringutil.pas"/>
         <UnitName Value="stringutil"/>
         <TopLine Value="131"/>
         <CursorPos X="6" Y="156"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit18>
       <Unit19>
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/sysutils/sysstrh.inc"/>
         <TopLine Value="77"/>
         <CursorPos X="10" Y="103"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit19>
       <Unit20>
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/sysutils/sysstr.inc"/>
         <TopLine Value="501"/>
         <CursorPos X="7" Y="527"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit20>
       <Unit21>
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/sysutils/sysutilh.inc"/>
         <TopLine Value="223"/>
         <CursorPos X="13" Y="249"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit21>
       <Unit22>
         <Filename Value="../../../FPC/FPCCheckout/rtl/objpas/sysutils/sysutils.inc"/>
         <TopLine Value="122"/>
         <CursorPos X="9" Y="126"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit22>
       <Unit23>
         <Filename Value="../../Units/Misc/bzip2stream.pp"/>
@@ -215,49 +217,49 @@
         <WindowIndex Value="0"/>
         <TopLine Value="125"/>
         <CursorPos X="1" Y="138"/>
-        <UsageCount Value="14"/>
+        <UsageCount Value="13"/>
       </Unit23>
       <Unit24>
         <Filename Value="/usr/lib/lazarus/0.9.28.2/lcl/include/messagedialogs.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="217"/>
         <CursorPos X="1" Y="230"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit24>
       <Unit25>
         <Filename Value="/usr/lib/lazarus/0.9.28.2/lcl/include/lclintf.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="504"/>
         <CursorPos X="15" Y="514"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit25>
       <Unit26>
         <Filename Value="/usr/lib/lazarus/0.9.28.2/lcl/include/listitems.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="77"/>
         <CursorPos X="1" Y="90"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit26>
       <Unit27>
         <Filename Value="/usr/lib/lazarus/0.9.28.2/lcl/include/control.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="2215"/>
         <CursorPos X="1" Y="2228"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit27>
       <Unit28>
         <Filename Value="/usr/lib/lazarus/0.9.28.2/lcl/include/buttoncontrol.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="60"/>
         <CursorPos X="1" Y="73"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit28>
       <Unit29>
         <Filename Value="/usr/lib/lazarus/0.9.28.2/lcl/include/buttons.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="215"/>
         <CursorPos X="15" Y="163"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit29>
       <Unit30>
         <Filename Value="../../Units/MMLAddon/mmisc.pas"/>
@@ -265,7 +267,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="171"/>
         <CursorPos X="1" Y="184"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit30>
       <Unit31>
         <Filename Value="../Simba/about.pas"/>
@@ -276,14 +278,14 @@
         <WindowIndex Value="0"/>
         <TopLine Value="28"/>
         <CursorPos X="30" Y="58"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit31>
       <Unit32>
         <Filename Value="project1.lpi"/>
         <WindowIndex Value="0"/>
         <TopLine Value="154"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="XML"/>
       </Unit32>
       <Unit33>
@@ -291,39 +293,145 @@
         <IsPartOfProject Value="True"/>
         <HasResources Value="True"/>
         <UnitName Value="Simbasettings"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
+        <TopLine Value="13"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit33>
+      <Unit34>
+        <Filename Value="../../../../../../lazarus/lcl/grids.pas"/>
+        <UnitName Value="Grids"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="8204"/>
+        <CursorPos X="1" Y="8216"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit34>
     </Units>
-    <JumpHistory Count="6" HistoryIndex="5">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="377" Column="3" TopLine="363"/>
+        <Caret Line="212" Column="52" TopLine="206"/>
       </Position1>
       <Position2>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="40" Column="15" TopLine="37"/>
+        <Caret Line="198" Column="14" TopLine="182"/>
       </Position2>
       <Position3>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="376" Column="135" TopLine="363"/>
+        <Caret Line="210" Column="67" TopLine="194"/>
       </Position3>
       <Position4>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="40" Column="13" TopLine="616"/>
+        <Caret Line="207" Column="34" TopLine="197"/>
       </Position4>
       <Position5>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="384" Column="21" TopLine="371"/>
+        <Caret Line="219" Column="23" TopLine="217"/>
       </Position5>
       <Position6>
         <Filename Value="scriptmanager.pas"/>
-        <Caret Line="392" Column="36" TopLine="381"/>
+        <Caret Line="226" Column="30" TopLine="222"/>
       </Position6>
+      <Position7>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="208" Column="59" TopLine="239"/>
+      </Position7>
+      <Position8>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="205" Column="150" TopLine="188"/>
+      </Position8>
+      <Position9>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="204" Column="150" TopLine="187"/>
+      </Position9>
+      <Position10>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="203" Column="150" TopLine="186"/>
+      </Position10>
+      <Position11>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="202" Column="150" TopLine="185"/>
+      </Position11>
+      <Position12>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="201" Column="150" TopLine="184"/>
+      </Position12>
+      <Position13>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="200" Column="150" TopLine="183"/>
+      </Position13>
+      <Position14>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="145" Column="33" TopLine="129"/>
+      </Position14>
+      <Position15>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="148" Column="1" TopLine="138"/>
+      </Position15>
+      <Position16>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="151" Column="1" TopLine="137"/>
+      </Position16>
+      <Position17>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="194" Column="67" TopLine="171"/>
+      </Position17>
+      <Position18>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="209" Column="80" TopLine="185"/>
+      </Position18>
+      <Position19>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="382" Column="62" TopLine="357"/>
+      </Position19>
+      <Position20>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="117" Column="61" TopLine="101"/>
+      </Position20>
+      <Position21>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="118" Column="29" TopLine="105"/>
+      </Position21>
+      <Position22>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="162" Column="27" TopLine="145"/>
+      </Position22>
+      <Position23>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="184" Column="1" TopLine="183"/>
+      </Position23>
+      <Position24>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="155" Column="57" TopLine="148"/>
+      </Position24>
+      <Position25>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="195" Column="1" TopLine="195"/>
+      </Position25>
+      <Position26>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="194" Column="1" TopLine="194"/>
+      </Position26>
+      <Position27>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="114" Column="31" TopLine="131"/>
+      </Position27>
+      <Position28>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="155" Column="22" TopLine="137"/>
+      </Position28>
+      <Position29>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="169" Column="145" TopLine="295"/>
+      </Position29>
+      <Position30>
+        <Filename Value="scriptmanager.pas"/>
+        <Caret Line="175" Column="7" TopLine="163"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

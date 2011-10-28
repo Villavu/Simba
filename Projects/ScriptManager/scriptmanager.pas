@@ -34,10 +34,9 @@ unit scriptmanager;
 interface
 
 uses
-  {$IFDEF UNIX}cthreads,cmem,{$ENDIF} Classes, SysUtils, FileUtil, Forms,
-  Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls, ActnList, Menus, settings, updater,strutils, MufasaTypes,
-  dom, mmisc;
+  {$IFDEF UNIX}cthreads,cmem,{$ENDIF} Classes, SysUtils, FileUtil, Forms, Controls, Graphics,
+  Dialogs, StdCtrls, ExtCtrls, ComCtrls, ActnList, Menus, Grids, settings,
+  updater, strutils, MufasaTypes, dom, mmisc;
 
 type
 
@@ -108,18 +107,17 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    Button1: TButton;
-    Button2: TButton;
-    GroupBox1: TGroupBox;
-    ListView1: TListView;
-    Memo1: TMemo;
-    procedure Button1Click(Sender: TObject);
+    Button4: TButton;
+    ComboBox1: TComboBox;
+    Edit1: TEdit;
+    Label1: TLabel;
+    StringGrid1: TStringGrid;
     procedure Button2Click(Sender: TObject);
-    procedure ClickItem(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure Edit1Change(Sender: TObject);
+    procedure Edit1Enter(Sender: TObject);
+    procedure Edit1Exit(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure ListView1Change(Sender: TObject; Item: TListItem;
-      Change: TItemChange);
+    procedure FormShow(Sender: TObject);
   private
     Mng : TScriptManager;
   public
@@ -140,75 +138,68 @@ uses
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Mng := TScriptManager.Create;
-  ListView1.Columns.Add.Width:= ClientWidth;
 end;
 
-procedure TForm1.ListView1Change(Sender: TObject; Item: TListItem;
-  Change: TItemChange);
-var
-  Script : TSimbaScript;
-begin
-  if Item.Data <> nil then
-  begin
-    Memo1.Clear;
-    Script := TSimbaScript(Item.data);
-    Memo1.Lines.add('Name: ' + Script.Name);
-    Memo1.lines.add('Author: ' + Script.Author);
-    Memo1.Lines.add('Version: ' + Script.Version);
-    Memo1.Lines.add('Installed: '+ BoolToStr(Script.IsInstalled, true));
-    Memo1.Lines.add('Description: ' + Script.Description);
-  end;
-end;
-
-procedure TForm1.ClickItem(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-var
-  item: TListItem;
-begin
-  item := Form1.ListView1.GetItemAt(x, y);
-  if item = nil then
-    exit;
-  if item.data = nil then
-    exit;
-
-  { Any selection causes the description to change }
-{  form1.Memo1.Lines.Clear();
-  form1.Memo1.Lines.Append(TSimbaScript(item.data).Description);
-
-  if Button = mbLeft then
-  begin
-
-  end else if Button = mbRight then
-  begin
-    { Popup Actions }
-    Form1.ScriptPopup.Items[0].Caption:= 'Install ' +  TSimbaScript(item.data).Name;
-    Form1.ScriptPopup.PopUp();
-  end;
-  //form1.Memo1.Text := TSimbaScript(item.data).Description; }
-end;
-
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.FormShow(Sender: TObject);
 var
   i, l: integer;
-  Item : TListItem;
 begin
   Mng.LUpdate;
   Mng.RUpdate;
-  ListView1.Items.Clear;
+  StringGrid1.RowCount := 1;
   for i := 0 to Mng.RScriptCount - 1 do
   begin
-    Item := ListView1.Items.Add;
-    Item.Data := Mng.SimbaScript[i];
-    Item.Caption := Mng.SimbaScript[i].Name;
-    Item.SubItems.Add(Mng.SimbaScript[i].Author);
+    StringGrid1.RowCount := i + 2;
+    StringGrid1.Cells[0, i + 1] := Mng.SimbaScript[i].Name;
+    StringGrid1.Cells[1, i + 1] := Mng.SimbaScript[i].Version;
+    StringGrid1.Cells[2, i + 1] := Mng.SimbaScript[i].Author;
+    StringGrid1.Cells[3, i + 1] := Mng.SimbaScript[i].Description;
   end;
 end;
+
+
+
+
+
+procedure TForm1.Edit1Change(Sender: TObject);
+var
+  i, c: Integer;
+begin
+  StringGrid1.RowCount := 1;
+  c := 0;
+  for i := 0 to Mng.RScriptCount - 1 do
+  begin
+    if AnsiContainsText(Mng.SimbaScript[i].Name, Edit1.Caption) or AnsiContainsText(Mng.SimbaScript[i].Author, Edit1.Caption) or (Edit1.Caption = '') or (Edit1.Caption = 'Search') then
+    begin
+      StringGrid1.RowCount := c + 2;
+
+      StringGrid1.Cells[0, c + 1] := Mng.SimbaScript[i].Name;
+      StringGrid1.Cells[1, c + 1] := Mng.SimbaScript[i].Version;
+      StringGrid1.Cells[2, c + 1] := Mng.SimbaScript[i].Author;
+      StringGrid1.Cells[3, c + 1] := Mng.SimbaScript[i].Description;
+      c := c + 1;
+    end;
+  end;
+end;
+
+procedure TForm1.Edit1Enter(Sender: TObject);
+begin
+  Edit1.Caption := '';
+end;
+
+procedure TForm1.Edit1Exit(Sender: TObject);
+begin
+  if Edit1.Caption = '' then
+    Edit1.Caption := 'Search'
+end;
+
+
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
   Script : TSimbaScript;
 begin
-  if (ListView1.Selected <> nil) and (ListView1.Selected.Data <> nil) then
+  {if (ListView1.Selected <> nil) and (ListView1.Selected.Data <> nil) then
   begin
     Script := TSimbaScript(ListView1.Selected.Data);
     if Script.IsInstalled then
@@ -222,7 +213,7 @@ begin
       Mng.InstallNewRScript(mng.FindRScriptByName(Script.Name));
       ShowMessage('Finished Installing Script "' + Script.Name + '"');
     end;
-  end;
+  end;       }
 end;
 
 { TSimbaScript }
@@ -381,16 +372,16 @@ begin
 //  ShowMessage(SettingsForm.Settings.GetKeyValueDefLoad('Settings/SourceEditor/DefScriptPath', ,SimbaSettingsFile));
 //  ShowMessage(LoadSettingDef('Settings/SourceEditor/DefScriptPath', ExpandFileName(MainDir+DS+'default.simba')));
   FRScripts.Clear();
-  Form1.Memo1.Clear;
-  Form1.Memo1.Lines.Add('Updating from Repos');
+  Form1.Label1.Caption := 'Updating from Repository';
   for X := 0 to Databs.Count-1 do
   begin
-    Form1.Memo1.Lines.Add('Updating from Repos ' + inttostr(X+1) +
-                                    '/' + inttostr(Databs.Count));
+    Form1.Label1.Caption := 'Updating from Repository ' + inttostr(X+1) +
+                                    '/' + inttostr(Databs.Count);
     AppendRemoteDB(Databs[X]);
   end;
   Databs.Free;
-  Form1.Memo1.Lines.Add('Finished updating from Repos');
+
+  Form1.Label1.Caption := 'Finished updating from Repository';
 end;
 
 { Downloads online scripts.xml and parses it, populating FRScripts }
@@ -409,8 +400,8 @@ begin
   if FUpdating then
     exit;
   FUpdating := True;
-//  Down := TDownloadThread.Create('http://old.villavu.com/sm',@XMLFile);
-  Down := TDownloadThread.Create(url, @XMLFile);
+  Down := TDownloadThread.Create('http://old.villavu.com/sm',@XMLFile);
+//  Down := TDownloadThread.Create(url, @XMLFile);
 //  Down := TDownloadThread.Create('http://tootoot222.hopto.org:8080/~mcteo/scriptman/scripts.xml',@XMLFile);
   down.Execute;
   while down.Done = false do
@@ -580,7 +571,7 @@ begin
     Tags.Assign(Scrpt.Tags);
     Files.Assign(Scrpt.Files);
     URL := 'http://old.villavu.com/sm/scripts/'+name+ '.tar.bz2';
-//    URL := 'http://tootoot222.hopto.org:8080/~mcteo/scriptman/'+name+'.tar.bz2';
+ //   URL := 'http://tootoot222.hopto.org:8080/~mcteo/scriptman/'+name+'.tar.bz2';
   end;
   LScrpt.Save(MainDir);      //Saves the setting file, now we only need to update the files
   DownloadThread := TDownloadDecompressThread.Create(LScrpt.URL,MainDir + LScrpt.Name + DS,true);
