@@ -18,10 +18,12 @@ an integer:
 .. code-block:: pascal
 
     var bmp, x, y: integer;
-    bmp := CreateBitmap(10, 10); // Create a bitmap of size (10, 10)
-    if FindBitmapIn(bmp, x, y, 0, 0, 300, 300) then
-      writeln('Found it!');
-    FreeBitmap(bmp); // Don't forget to free it when we are done.
+    begin
+        bmp := CreateBitmap(10, 10); // Create a bitmap of size (10, 10)
+        if FindBitmapIn(bmp, x, y, 0, 0, 300, 300) then
+          writeln('Found it!');
+        FreeBitmap(bmp); // Don't forget to free it when we are done.
+    end;
 
 Note that the previous example doesn't make a lot of sense as the bitmap has
 only been created and not filled with any colours, they are as of yet,
@@ -33,7 +35,7 @@ function.
 Word of caution on bitmap creation
 ----------------------------------
 
-Bitmaps in Simba are internally all instances of *TMufasBitmap*. Scripts should
+Bitmaps in Simba are internally all instances of *TMufasaBitmap*. Scripts should
 generally access bitmaps using their *handle*: an integer. All functions
 referenced here either require a bitmap *handle* or return one.
 
@@ -46,7 +48,9 @@ free it again)
 .. code-block:: pascal
 
     var bmp: TMufasaBitmap;
-    bmp := TMufasBitmap.Create;
+    begin
+        bmp := TMufasBitmap.Create;
+    end;
 
 Because there is no way to get a *handle* to this bitmap; as it will not be
 managed by Simba internally. (All Bitmaps created by *CreateBitmap* are managed
@@ -75,10 +79,12 @@ then call this function to get the class reference.
 
     var bmp: TMufasaBitmap;
         bmph: integer;
-    bmph := CreateBitmap(100, 100);
-    bmp := GetMufasaBitmap(bmph);
+    begin;
+        bmph := CreateBitmap(100, 100);
+        bmp := GetMufasaBitmap(bmph);
 
-    bmp.SetSize(150,150); // also changes bmph, as they are the same bitmap.
+        bmp.SetSize(150,150); // also changes bmph, as they are the same bitmap.
+    end;
 
 .. _scriptref-createbitmapstring:
 

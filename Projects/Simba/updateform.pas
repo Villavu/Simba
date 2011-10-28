@@ -1,3 +1,25 @@
+{
+	This file is part of the Mufasa Macro Library (MML)
+	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+
+    MML is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    MML is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with MML.  If not, see <http://www.gnu.org/licenses/>.
+
+	See the file COPYING, included in this distribution,
+	for details about the copyright.
+
+    update form for the Mufasa Macro Library
+}
 unit updateform;
 
 {$mode objfpc}{$H+}
@@ -241,7 +263,8 @@ begin
     FCancelling := False;
     FCancelled := True;
     DownloadSpeed.Visible := false;
-    Self.UpdateLog.Lines.Add('Download stopped at '+inttostr(DownloadProgress.Position)+'%... Simba did not succesfully update.');
+    Self.UpdateLog.Lines.Add('Download stopped at '+inttostr(DownloadProgress.Position)+
+      '%... Simba did not successfully update.');
     // more detailed info
     mDebugLn('EXCEPTION IN UPDATEFORM: We either hit Cancel, or something went wrong with files');
     if FileExists(Updater.BasePath + Updater.ReplacementFile + '_') then

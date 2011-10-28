@@ -85,14 +85,14 @@ procedure RIRegisterTPANEL(Cl: TPSRuntimeClassImporter);
 begin
   Cl.Add(TPANEL);
 end;
-procedure TPagePageIndex_R(Self: TCustomPage; var T: INTEGER); begin T := Self.PageIndex; end;
-procedure TPagePageIndex_W(Self: TCustomPage; T: INTEGER); begin Self.PageIndex := T; end;
-procedure TPageOnShow_R(Self: TCustomPage; var T: TNotifyEvent); begin T := Self.OnShow; end;
-procedure TPageOnShow_W(Self: TCustomPage; T: TNotifyEvent); begin Self.OnShow := T; end;
+procedure TPagePageIndex_R(Self: TPAGE; var T: INTEGER); begin T := Self.PageIndex; end;
+procedure TPagePageIndex_W(Self: TPAGE; T: INTEGER); begin Self.PageIndex := T; end;
+procedure TPageOnShow_R(Self: TPAGE; var T: TNotifyEvent); begin T := Self.OnShow; end;
+procedure TPageOnShow_W(Self: TPAGE; T: TNotifyEvent); begin Self.OnShow := T; end;
 {$IFNDEF CLX}
 procedure RIRegisterTPAGE(Cl: TPSRuntimeClassImporter);
 begin
-  with Cl.Add(TCustomPage) do
+  with Cl.Add(TPAGE) do
   begin
     RegisterPropertyHelper(@TPagePageIndex_R,@TPagePageIndex_W,'PageIndex');
     RegisterEventPropertyHelper(@TPageOnShow_R,@TPageOnShow_W,'OnShow');
@@ -106,7 +106,7 @@ begin
   with Cl.Add(TNOTEBOOK) do
   begin
     {$IFDEF FPC}
-//    RegisterMethod(@TNoteBook.TabIndexAtClientPos,'TABINDEXATCLIENTPOS');
+    RegisterMethod(@TNoteBook.TabIndexAtClientPos,'TABINDEXATCLIENTPOS');
     {$ENDIF}
     RegisterPropertyHelper(@TNoteBookPageCount_R,nil,'PAGECOUNT');
   end;
