@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 423
+  Left = 624
   Height = 623
-  Top = 179
+  Top = 154
   Width = 660
   ActiveControl = ScriptPanel
   AllowDropFiles = True
@@ -16,7 +16,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '0.9.28.2'
+  LCLVersion = '0.9.30.1'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -29,14 +29,14 @@ object SimbaForm: TSimbaForm
     ShowHint = True
     TabOrder = 0
     object TB_Run: TToolButton
-      Left = 170
+      Left = 201
       Hint = 'Run'
       Top = 2
       Action = ActionRunScript
       ImageIndex = 6
     end
     object TB_Pause: TToolButton
-      Left = 193
+      Left = 224
       Hint = 'Pause'
       Top = 2
       Action = ActionPauseScript
@@ -44,7 +44,7 @@ object SimbaForm: TSimbaForm
       ImageIndex = 5
     end
     object TB_Stop: TToolButton
-      Left = 216
+      Left = 247
       Hint = 'Stop'
       Top = 2
       Action = ActionStopScript
@@ -52,39 +52,39 @@ object SimbaForm: TSimbaForm
       ImageIndex = 7
     end
     object ToolButton1: TToolButton
-      Left = 239
+      Left = 270
       Top = 2
       Width = 4
       Caption = 'ToolButton1'
       Style = tbsDivider
     end
     object TB_NewTab: TToolButton
-      Left = 243
+      Left = 274
       Hint = 'Add tab'
       Top = 2
       Action = ActionNewTab
     end
     object TB_CloseTab: TToolButton
-      Left = 266
+      Left = 297
       Hint = 'Close tab'
       Top = 2
       Action = ActionCloseTab
     end
     object ToolButton4: TToolButton
-      Left = 289
+      Left = 320
       Top = 2
       Width = 4
       Caption = 'ToolButton4'
       Style = tbsDivider
     end
     object TB_ClearDebug: TToolButton
-      Left = 293
+      Left = 324
       Hint = 'Clear debug box'
       Top = 2
       Action = ActionClearDebug
     end
     object TB_PickColour: TToolButton
-      Left = 316
+      Left = 347
       Hint = 'Pick a colour'
       Top = 2
       Caption = 'TB_PickColour'
@@ -92,7 +92,7 @@ object SimbaForm: TSimbaForm
       OnClick = ButtonPickClick
     end
     object TB_SelectClient: TToolButton
-      Left = 339
+      Left = 370
       Hint = 'Select a client'
       Top = 2
       Caption = 'TB_SelectClient'
@@ -100,14 +100,14 @@ object SimbaForm: TSimbaForm
       OnMouseDown = ButtonSelectorDown
     end
     object ToolButton8: TToolButton
-      Left = 362
+      Left = 393
       Top = 2
       Width = 4
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
     object TB_ReloadPlugins: TToolButton
-      Left = 366
+      Left = 397
       Hint = 'Reload plugins'
       Top = 2
       Caption = 'TB_ReloadPlugins'
@@ -115,7 +115,7 @@ object SimbaForm: TSimbaForm
       ImageIndex = 13
     end
     object TB_Tray: TToolButton
-      Left = 389
+      Left = 420
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -123,7 +123,7 @@ object SimbaForm: TSimbaForm
       OnClick = ButtonTrayClick
     end
     object TB_New: TToolButton
-      Left = 1
+      Left = 32
       Hint = 'New'
       Top = 2
       Action = ActionNewScript
@@ -131,14 +131,14 @@ object SimbaForm: TSimbaForm
       ShowHint = True
     end
     object ToolButton2: TToolButton
-      Left = 93
+      Left = 124
       Top = 2
       Width = 4
       Caption = 'ToolButton2'
       Style = tbsDivider
     end
     object TB_Open: TToolButton
-      Left = 24
+      Left = 55
       Hint = 'Open'
       Top = 2
       Action = ActionOpenScript
@@ -146,27 +146,27 @@ object SimbaForm: TSimbaForm
       ShowHint = True
     end
     object TB_Save: TToolButton
-      Left = 47
+      Left = 78
       Hint = 'Save'
       Top = 2
       Action = ActionSaveScript
     end
     object TB_SaveAll: TToolButton
-      Left = 70
+      Left = 101
       Hint = 'Save all'
       Top = 2
       Action = ActionSaveAll
       Enabled = False
     end
     object ToolButton3: TToolButton
-      Left = 435
+      Left = 466
       Top = 2
       Width = 4
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object TT_Update: TToolButton
-      Left = 439
+      Left = 470
       Hint = 'A new update is available'
       Top = 2
       Caption = 'TT_Update'
@@ -174,36 +174,50 @@ object SimbaForm: TSimbaForm
       OnClick = TT_UpdateClick
     end
     object TT_Cut: TToolButton
-      Left = 97
+      Left = 128
       Top = 2
       Caption = 'Cu&t'
       ImageIndex = 3
       OnClick = ActionCutExecute
     end
     object TT_Copy: TToolButton
-      Left = 120
+      Left = 151
       Top = 2
       Caption = '&Copy'
       ImageIndex = 22
       OnClick = ActionCopyExecute
     end
     object TT_Paste: TToolButton
-      Left = 143
+      Left = 174
       Top = 2
       Action = ActionPaste
     end
     object ToolButton9: TToolButton
-      Left = 166
+      Left = 197
       Top = 2
       Width = 4
       Caption = 'ToolButton9'
       Style = tbsDivider
     end
     object TT_Console: TToolButton
-      Left = 412
+      Left = 443
       Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
+    end
+    object TT_ScriptManager: TToolButton
+      Left = 1
+      Top = 2
+      Caption = 'TT_ScriptManager'
+      ImageIndex = 30
+      OnClick = TT_ScriptManagerClick
+    end
+    object ToolButton6: TToolButton
+      Left = 24
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton6'
+      Style = tbsSeparator
     end
   end
   object StatusBar: TStatusBar
@@ -306,7 +320,6 @@ object SimbaForm: TSimbaForm
         Height = 19
         Top = 7
         Width = 16
-        Color = clBtnFace
         Flat = True
         Glyph.Data = {
           36090000424D3609000000000000360000002800000018000000180000000100
@@ -389,7 +402,7 @@ object SimbaForm: TSimbaForm
       end
       object LabeledEditSearch: TLabeledEdit
         Left = 104
-        Height = 23
+        Height = 21
         Top = 6
         Width = 80
         EditLabel.AnchorSideLeft.Control = LabeledEditSearch
@@ -397,10 +410,10 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
-        EditLabel.Left = 64
-        EditLabel.Height = 18
-        EditLabel.Top = 10
-        EditLabel.Width = 37
+        EditLabel.Left = 73
+        EditLabel.Height = 14
+        EditLabel.Top = 9
+        EditLabel.Width = 28
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -413,9 +426,9 @@ object SimbaForm: TSimbaForm
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 320
-        Height = 24
+        Height = 17
         Top = 7
-        Width = 101
+        Width = 72
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -436,29 +449,25 @@ object SimbaForm: TSimbaForm
       ClientWidth = 150
       OnEndDock = nil
       TabOrder = 3
-      inherited FunctionListLabel: TLabel
-        Height = 18
-        Width = 146
-      end
       inherited FunctionList: TTreeView
-        Height = 319
-        Top = 20
+        Height = 323
+        Top = 18
         Width = 150
-        DefaultItemHeight = 17
+        DefaultItemHeight = 15
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Height = 23
-        Top = 339
+        Height = 21
+        Top = 341
         Width = 150
         OnExit = editSearchListExit
         OnKeyDown = editSearchListKeyDown
         OnKeyPress = editSearchListKeyPress
       end
       inherited FunctionListLabel: TLabel
-        Height = 16
+        Height = 14
         Width = 146
       end
     end
@@ -1638,7 +1647,7 @@ object SimbaForm: TSimbaForm
     left = 448
     top = 144
     Bitmap = {
-      4C691E0000001000000010000000424242004242420042424200424242004242
+      4C691F0000001000000010000000424242004242420042424200424242004242
       420042424200424242004242420042424200424242004242420042424200A155
       42FFA15542FFA15542FF4242420E424242004242420042424200424242004242
       4200424242004242420042424200424242004242420042424200A15542FFFFDA
@@ -2598,7 +2607,39 @@ object SimbaForm: TSimbaForm
       BBFFC8C8C8FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00F8F8F8FFFFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00
+      FF00FFFFFF00FFFFFF00FFFFFF00000000000000000000000000000000000000
+      0003000000260000000600000000000000000000000500000026000000040000
+      0000000000000000000000000000000000000000000000000002000000000000
+      004E000000D10000006B000000000000000000000068000000D1000000510000
+      00000000000200000000000000000000000000000003000000000000000A0000
+      00B0000000C4000000C20000001A00000018000000C1000000C4000000B20000
+      000B0000000000000003000000000000000000000002000000000000002D0000
+      00C4000000B7000000CC0000004800000044000000CC000000B7000000C50000
+      002F000000000000000200000000000000000000003F0000003D0000002B0000
+      00BE000000B0000000CB0000005900000054000000CB000000B0000000BF0000
+      002E0000003B000000400000000000000016000000B7000000C7000000430000
+      008F000000BC000000C60000002A00000027000000C5000000BC000000910000
+      0041000000C5000000BA000000190000004E000000BB000000AA0000008B0000
+      00270000008C0000005F0000000D0000000D0000005D0000008D000000280000
+      0089000000AB000000BA0000005100000063000000B0000000960000009B0000
+      002C0000000000000058000000A2000000A20000005A00000000000000290000
+      009B00000096000000B00000006700000031000000A70000009A0000009C0000
+      001D00000043000000AD0000009B0000009C000000AD000000450000001A0000
+      009B0000009A000000A8000000330000000000000043000000880000002E0000
+      0025000000940000008F0000008C0000008C0000008F00000095000000270000
+      002C000000880000004600000000000000010000000000000002000000330000
+      0080000000850000008200000081000000810000008100000085000000810000
+      003500000003000000000000000100000000000000050000005E000000850000
+      0077000000720000007400000072000000720000007400000072000000770000
+      00850000005F0000000600000000000000000000002D0000007E000000640000
+      006B0000006900000067000000660000006700000067000000690000006B0000
+      00640000007E0000002F00000000000000000000001B000000790000005A0000
+      00580000005A000000590000005D0000005D000000590000005A000000580000
+      005A000000790000001C00000000000000010000000000000043000000740000
+      0060000000660000006900000060000000600000006800000066000000600000
+      0074000000440000000000000001000000000000000000000000000000250000
+      0042000000300000001B00000008000000080000001B00000030000000420000
+      0026000000000000000000000000
     }
   end
   object MTrayIcon: TTrayIcon
@@ -3343,10 +3384,21 @@ object SimbaForm: TSimbaForm
   end
   object SCARHighlighter: TSynPasSyn
     Enabled = False
+    AsmAttri.FrameEdges = sfeAround
     CommentAttri.Foreground = clGreen
+    CommentAttri.FrameEdges = sfeAround
     CommentAttri.Style = []
+    IDEDirectiveAttri.FrameEdges = sfeAround
+    IdentifierAttri.FrameEdges = sfeAround
+    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clNavy
+    NumberAttri.FrameEdges = sfeAround
+    SpaceAttri.FrameEdges = sfeAround
     StringAttri.Foreground = clFuchsia
+    StringAttri.FrameEdges = sfeAround
+    SymbolAttri.FrameEdges = sfeAround
+    CaseLabelAttri.FrameEdges = sfeAround
+    DirectiveAttri.FrameEdges = sfeAround
     CompilerMode = pcmObjFPC
     NestedComments = False
     left = 568
@@ -3354,13 +3406,24 @@ object SimbaForm: TSimbaForm
   end
   object LazHighlighter: TSynPasSyn
     Enabled = False
+    AsmAttri.FrameEdges = sfeAround
     CommentAttri.Foreground = clBlue
+    CommentAttri.FrameEdges = sfeAround
     CommentAttri.Style = [fsBold]
+    IDEDirectiveAttri.FrameEdges = sfeAround
     IdentifierAttri.Foreground = clDefault
+    IdentifierAttri.FrameEdges = sfeAround
+    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clNavy
+    NumberAttri.FrameEdges = sfeAround
+    SpaceAttri.FrameEdges = sfeAround
     StringAttri.Foreground = clBlue
+    StringAttri.FrameEdges = sfeAround
     SymbolAttri.Foreground = clRed
+    SymbolAttri.FrameEdges = sfeAround
+    CaseLabelAttri.FrameEdges = sfeAround
     DirectiveAttri.Foreground = clRed
+    DirectiveAttri.FrameEdges = sfeAround
     DirectiveAttri.Style = [fsBold]
     CompilerMode = pcmObjFPC
     NestedComments = False

@@ -53,7 +53,7 @@ uses
   mmisc, stringutil,mufasatypesutil, mufasabase,
   about, framefunctionlist, ocr, updateform, Simbasettings, 
   {$IFDEF USE_EXTENSIONS}psextension, virtualextension, extensionmanager,{$ENDIF}
-  settingssandbox,
+  settingssandbox, ScriptManager,
 
   v_ideCodeParser, v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
@@ -175,6 +175,8 @@ type
     NewsTimer: TTimer;
     FunctionListTimer: TTimer;
     SCARHighlighter: TSynPasSyn;
+    TT_ScriptManager: TToolButton;
+    ToolButton6: TToolButton;
     TT_Console: TToolButton;
     TT_Cut: TToolButton;
     TT_Copy: TToolButton;
@@ -392,6 +394,7 @@ type
     procedure ThreadWriteFileEvent(Sender: TObject; var Filename: string;
       var Continue: boolean);
     procedure ScriptStartEvent(Sender: TObject; var Script : string; var Continue : boolean);
+    procedure TT_ScriptManagerClick(Sender: TObject);
     procedure TrayPopupPopup(Sender: TObject);
     procedure TT_UpdateClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
@@ -3211,6 +3214,11 @@ begin
   ScriptStartData.Script:= @Script;
   ScriptStartData.Continue:= @Continue;
   TThread.Synchronize(nil,@HandleScriptStartData);
+end;
+
+procedure TSimbaForm.TT_ScriptManagerClick(Sender: TObject);
+begin
+  ScriptManagerForm.ShowModal;
 end;
 
 procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
