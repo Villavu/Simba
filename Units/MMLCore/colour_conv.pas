@@ -48,7 +48,8 @@ procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended); inline;
 function XYZToColor(X, Y, Z: Extended): TColor; inline;
 function HSLToColor(H, S, L: Extended): TColor; inline;
 function BGRToRGB(BGR : TRGB32) : TColor;inline;
-
+procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);
+procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended);
 
 
 implementation
@@ -334,6 +335,55 @@ var
 begin
   XYZToRGB(X, Y, Z, r, g, b);
   Result := RGBToColor(r, g, b);
+end;
+
+procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);
+begin
+  X := X / 95.047;
+  Y := Y / 100.000;
+  Z := Z / 108.883;
+
+  if ( X > 0.008856 ) then
+    X := Power(X, 1.0/3.0)
+  else
+    X := ( 7.787 * X ) + ( 16.0 / 116.0 );
+  if ( Y > 0.008856 ) then
+    Y := Power(Y, 1.0/3.0)
+  else
+    Y := ( 7.787 * Y ) + ( 16.0 / 116.0 );
+  if ( Z > 0.008856 ) then
+    Z := Power(Z, 1.0/3.0)
+  else
+    Z := ( 7.787 * Z ) + ( 16.0 / 116.0 );
+
+  L := (116.0 * Y ) - 16.0;
+  a := 500.0 * ( X - Y );
+  b := 200.0 * ( Y - Z );
+end;
+
+procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended);
+begin
+  Y := ( L + 16 ) / 116.0;
+  X := ( a / 500.0 )+ Y;
+  Z := Y - ( b / 200.0 );
+
+  if ( Power(Y, 3) > 0.008856 ) then
+    Y := Power(Y, 3)
+  else
+    Y := ( Y - (16.0 / 116.0 )) / 7.787;
+  if ( Power(X, 3) > 0.008856 ) then
+    X := Power(X, 3)
+  else
+    X := ( X - (16.0 / 116.0) ) / 7.787;
+  if ( Power(Z, 3) > 0.008856 ) then
+    Z := Power(Z, 3)
+  else
+    Z := ( Z - (16.0 / 116.0) ) / 7.787;
+
+
+  X := 95.047 * X;
+  Y := 100.000 * Y;
+  Z := 108.883 * Z;
 end;
 
 end.
