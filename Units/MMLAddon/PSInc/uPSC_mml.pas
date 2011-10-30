@@ -227,7 +227,7 @@ begin
     RegisterMethod('Procedure HoldMouse( x, y : integer; button : TClickType)');
     RegisterMethod('Procedure ReleaseMouse( x, y : integer; button : TClickType)');
     RegisterMethod('Function IsMouseButtonHeld( button : TClickType) : boolean');
-    RegisterMethod('Procedure SendString( str : string)');
+    RegisterMethod('Procedure SendString( str : string; keywait: integer)');
     RegisterMethod('Procedure HoldKey( key : integer)');
     RegisterMethod('Procedure ReleaseKey( key : integer)');
     RegisterMethod('Function IsKeyHeld( key : integer) : boolean');
@@ -307,7 +307,7 @@ begin
     RegisterMethod('Procedure KeyUp( key : Word)');
     RegisterMethod('Procedure KeyDown( key : Word)');
     RegisterMethod('Procedure PressKey( key : Word)');
-    RegisterMethod('Procedure SendText( text : string)');
+    RegisterMethod('Procedure SendText( text : string; keywait: integer)');
     RegisterMethod('Function isKeyDown( key : Word) : Boolean');
     RegisterMethod('Function GetKeyCode( c : char) : integer');
     RegisterMethod('Function GetImageTarget : TTarget;');
