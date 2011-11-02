@@ -10,7 +10,7 @@ end;
 
 procedure Lape_SendKeys(const Params: PParamArray);
 begin
-  ps_SendKeys(Pstring(Params^[0])^);
+  ps_SendKeys(Pstring(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure Lape_PressKey(const Params: PParamArray);
