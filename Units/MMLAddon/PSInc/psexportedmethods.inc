@@ -347,7 +347,7 @@ SetCurrSection('Keyboard');
 AddFunction(@ps_KeyDown, 'procedure KeyDown(key: Word);');
 AddFunction(@ps_KeyUp, 'procedure KeyUp(key: Word);');
 AddFunction(@ps_PressKey, 'procedure PressKey(key: Word);');
-AddFunction(@ps_SendKeys, 'procedure SendKeys(const s: string);');
+AddFunction(@ps_SendKeys, 'procedure SendKeys(const s: string; keywait: integer);');
 AddFunction(@ps_isKeyDown, 'function IsKeyDown(key: Word): Boolean;');
 AddFunction(@ps_GetKeyCode,'function GetKeyCode(c : char) : integer;');
 {$ENDIF}

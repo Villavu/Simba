@@ -49,6 +49,7 @@ type
     procedure StretchResize(AWidth,AHeight : integer);
     property Width : Integer read w;
     property Height : Integer read h;
+    function PointInBitmap(x,y : integer) : boolean;
     procedure ValidatePoint(x,y : integer);
     function SaveToFile(const FileName : string) :boolean;
     procedure LoadFromFile(const FileName : string);
@@ -1475,9 +1476,14 @@ begin
   end;
 end;
 
+function TMufasaBitmap.PointInBitmap(x, y: integer): boolean;
+begin
+  result := ((x >= 0) and (x < w) and (y >= 0) and (y < h));
+end;
+
 procedure TMufasaBitmap.ValidatePoint(x, y: integer);
 begin
-  if (x <0) or (x >= w) or (y < 0) or (y >= h) then
+  if not(PointInBitmap(x,y)) then
     raise Exception.CreateFmt('You are accessing an invalid point, (%d,%d) at bitmap[%d]',[x,y,index]);
 end;
 
