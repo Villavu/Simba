@@ -267,7 +267,7 @@ AddGlobalFunc('function IsMouseButtonDown(button: integer): boolean', @Lape_IsMo
 
 AddGlobalFunc('procedure KeyDown(key: Word);', @Lape_KeyDown);
 AddGlobalFunc('procedure KeyUp(key: Word);', @Lape_KeyUp);
-AddGlobalFunc('procedure SendKeys(const s: string);', @Lape_SendKeys);
+AddGlobalFunc('procedure SendKeys(const s: string; keywait: integer);', @Lape_SendKeys);
 AddGlobalFunc('procedure PressKey(key: Word);', @Lape_PressKey);
 AddGlobalFunc('function isKeyDown(key: Word): boolean', @Lape_isKeyDown);
 AddGlobalFunc('function GetKeyCode(c: char): integer', @Lape_GetKeyCode);
