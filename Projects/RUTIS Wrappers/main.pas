@@ -99,6 +99,8 @@ begin
   m := TMemoryStream.Create;
 
   try
+    Input.Text := StringReplace(Input.Text, 'extdecl;', '', [rfReplaceAll, rfIgnoreCase]);
+
     Output.BeginUpdate;
     Output.Clear;
     Dbg.BeginUpdate;

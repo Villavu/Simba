@@ -34,24 +34,9 @@ addGlobalVar(ps_mouse_left, 'mouse_Left');//1
 addGlobalVar(ps_mouse_middle, 'mouse_Middle');//2
 
 addGlobalType('UInt32', 'TClickType');
-
-addGlobalType('UInt8', 'Byte');
-addGlobalType('Int8', 'ShortInt');
-addGlobalType('UInt16', 'Word');
-addGlobalType('Int16', 'SmallInt');
-addGlobalType('UInt32', 'LongWord');
 addGlobalType('UInt32', 'DWord');
-addGlobalType('UInt32', 'Cardinal');
-
-addGlobalType('Int32', 'LongInt');
-addGlobalType('UInt64', 'QWord');
-addGlobalType('LongInt', 'Integer');
 
 addGlobalType('Integer', 'TColor');
-addGlobalType('Double', 'TDateTime');
-
-addGlobalType('(rfReplaceAll, rfIgnoreCase)', 'TReplaceFlag');
-addGlobalType('set of TReplaceFlag', 'TReplaceFlags');
 
 addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
 addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
