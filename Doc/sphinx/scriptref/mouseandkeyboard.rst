@@ -172,6 +172,33 @@ causes the ``key`` to be "up".
 ..
     TODO: Example
 
+PressKey
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure PressKey(key: Word);
+
+KeyDown sends a request to the Operating System to "fake" a key event.
+
+IsKeyDown
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function isKeyDown(key: Word): boolean;
+
+Returns *True* if *key* is currently being held.
+
+GetKeyCode
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetKeyCode(c: char) : integer;
+
+Returns the keycode of character *c*.
+
 SendKeys
 ~~~~~~~~
 
