@@ -54,7 +54,6 @@ AddGlobalFunc('function GetColor(x,y: integer): TColor', @Lape_GetColor);
 AddGlobalFunc('procedure GetColorsWrap(Coords: TPointArray; var Colors: TIntegerArray);', @Lape_GetColorsWrap);
 AddGlobalFunc('function GetColors(const Coords: TPointArray): TIntegerArray', @Lape_GetColors);
 AddGlobalFunc('function findcolor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean', @Lape_findcolor);
-AddGlobalFunc('function findcolortoleranceOptimised(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean', @Lape_findcolortoleranceOptimised);
 AddGlobalFunc('function findcolortolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean', @Lape_findcolortolerance);
 AddGlobalFunc('function FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean', @Lape_FindColors);
 AddGlobalFunc('procedure SetColorToleranceSpeed(cts: Integer);', @Lape_SetColorToleranceSpeed);
@@ -64,7 +63,6 @@ AddGlobalFunc('procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended);'
 AddGlobalFunc('function SimilarColors(Col1,Col2,Tol: integer): boolean', @Lape_SimilarColors);
 AddGlobalFunc('function CountColor(Color, xs, ys, xe, ye: Integer): Integer', @Lape_CountColor);
 AddGlobalFunc('function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer', @Lape_CountColorTolerance);
-AddGlobalFunc('function FindColorsToleranceOptimised(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean', @Lape_FindColorsToleranceOptimised);
 AddGlobalFunc('function FindColorsTolerance(var Points: TPointArray; Color, xs, ys, xe, ye, Tolerance: Integer): Boolean', @Lape_FindColorsTolerance);
 AddGlobalFunc('function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean', @Lape_FindColorSpiral);
 AddGlobalFunc('function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye,Tol: Integer): Boolean', @Lape_FindColorSpiralTolerance);
