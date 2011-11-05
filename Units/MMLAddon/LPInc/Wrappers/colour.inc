@@ -18,11 +18,6 @@ begin
   Pboolean(Result)^ := ps_findcolor(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^);
 end;
 
-procedure Lape_findcolortoleranceOptimised(const Params: PParamArray; const Result: Pointer);
-begin
-  Pboolean(Result)^ := ps_findcolortoleranceOptimised(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, Pinteger(Params^[7])^);
-end;
-
 procedure Lape_findcolortolerance(const Params: PParamArray; const Result: Pointer);
 begin
   Pboolean(Result)^ := ps_findcolortolerance(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, Pinteger(Params^[7])^);
@@ -66,11 +61,6 @@ end;
 procedure Lape_CountColorTolerance(const Params: PParamArray; const Result: Pointer);
 begin
   PInteger(Result)^ := ps_CountColorTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
-end;
-
-procedure Lape_FindColorsToleranceOptimised(const Params: PParamArray; const Result: Pointer);
-begin
-  PBoolean(Result)^ := ps_FindColorsToleranceOptimised(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^);
 end;
 
 procedure Lape_FindColorsTolerance(const Params: PParamArray; const Result: Pointer);
