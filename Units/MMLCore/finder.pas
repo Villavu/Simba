@@ -521,7 +521,7 @@ begin
   SetLength(Result, Length(color));
 
   for i := High(result) downto 0 do
-    result := Create_CTSInfo(cts, color[i], tolerance[i], hueMod, satMod);
+    result[i] := Create_CTSInfo(cts, color[i], tolerance[i], hueMod, satMod);
 end;
 
 
