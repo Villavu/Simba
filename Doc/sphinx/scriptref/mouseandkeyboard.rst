@@ -172,6 +172,60 @@ causes the ``key`` to be "up".
 ..
     TODO: Example
 
+PressKey
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure PressKey(key: Word);
+
+KeyDown sends a request to the Operating System to "fake" a key event.
+
+IsKeyDown
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function isKeyDown(key: Word): boolean;
+
+Returns *True* if *key* is currently being held.
+
+GetKeyCode
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetKeyCode(c: char) : integer;
+
+Returns the keycode of character *c*.
+
+SendKeys
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SendKeys(const s: string; keywait: integer);
+
+Type the contents of the string *s*. While typing, hold the keys for *keywait*.
+SendKeys should work with any keyboard layout on Windows.
+
+Example:
+
+.. code-block:: pascal
+
+    SendKeys('Hello, World', 100);
+
+.. note::
+
+    If your goal is to randomly wait a small time per key, you should consider
+    something like this:
+
+    .. code-block:: pascal
+
+        s := 'Hello, World';
+        for i := 0 to length(s) do
+          SendKeys(s[i], 50+Random(51));
+
 .. _scriptref-virtualkeys:
 
 Keyboard Virtual Keys
