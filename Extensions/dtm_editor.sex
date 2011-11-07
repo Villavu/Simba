@@ -426,6 +426,34 @@ begin
   UpdateBitmap(True, False);
 end;
 
+procedure LoadDTM(dtm: Integer);
+var
+  i: Integer;
+  m: TPoint;
+  mdtm: TMDTM;
+  sdtm: TSDTM;
+begin
+  mdtm := GetDTM(dtm);
+  sdtm := MDTMToSDTM(mdtm);
+
+  if (mdtm.Count > 0) then
+    with sdtm do
+    begin
+      m := Point(0, 0);
+      for i := High(SubPoints) downto 0 do
+        m := Point(Min(SubPoints[i].x, m.x), Min(SubPoints[i].y, m.y));
+
+      with MainPoint do
+        AddPoint(x - m.x, y - m.y, AreaSize, AreaShape, Color, Tolerance);
+      for i := High(SubPoints) downto 0 do
+        with SubPoints[i] do
+          AddPoint(x - m.x, y - m.y, AreaSize, AreaShape, Color, Tolerance);
+      setActivePoint(0);
+    end;
+
+  UpdateBitmap(True, False);
+end;
+
 procedure frmResize(Sender: TObject);
 begin
   ResizeTimer.Enabled := False;
@@ -531,11 +559,62 @@ begin
 end;
 
 procedure mnuOpen(Sender: TObject);
+var
+  dtm: Integer;
 begin
+  with TOpenDialog.Create(frm) do
+  begin
+    Filter := 'Simba DTM (*.dtm;*.ddtm)|*.dtm;*.ddtm|All files (*.*)|*.*|';
+    Options := Options + [ofFileMustExist];
+
+    if Execute then
+      try
+        with TStringList.Create do
+        try
+          LoadFromFile(FileName);
+          dtm := DTMFromString(Text);
+        finally
+          Free;
+        end;
+
+        mnuNew(nil);
+        LoadDTM(dtm);
+        FreeDTM(dtm);
+      except
+        if (MessageDlg('Invalid DTM', 'Invalid DTM file! Press OK to try loading another file.', mtError, [mbOk, mbCancel] {$ifdef PS_EXTENSION}, 0{$endif}) = 1) then
+          mnuOpen(Sender);
+      end;
+
+    Free;
+  end;
 end;
 
 procedure mnuSave(Sender: TObject);
 begin
+  with TSaveDialog.Create(frm) do
+  begin
+    Filter := 'Simba DTM (*.dtm;*.ddtm)|*.dtm;*.ddtm|All files (*.*)|*.*|';
+    Options := Options + [ofHideReadOnly, ofPathMustExist, ofCreatePrompt, ofOverwritePrompt];
+
+    if Execute then
+      with TStringList.Create do
+      try
+        with SDTMToMDTM(toSDTM) do
+        begin
+          Text := ToString;
+          Free;
+        end;
+
+        if (Pos('.dtm', FileName) < Length(FileName) - 4) then
+          SaveToFile(FileName+'.dtm')
+        else
+          SaveToFile(FileName);
+      finally
+        Free;
+      end;
+
+    Free;
+  end;
 end;
 
 procedure mnuExit(Sender: TObject);
@@ -549,7 +628,7 @@ begin
   with TOpenDialog.Create(frm) do
   begin
     Filter := 'Graphic (*.bmp;*.xpm;*.png;*.pbm;*.pgm;*.ppm;*.ico;*.icns;*.cur;*.jpg;*.jpeg;*.jpe;*.jfif)|*.bmp;*.xpm;*.png;*.pbm;*.pgm;*.ppm;*.ico;*.icns;*.cur;*.jpg;*.jpeg;*.jpe;*.jfif|Bitmaps (*.bmp)|*.bmp|Pixmap (*.xpm)|*.xpm|Portable Network Graphic (*.png)|*.png|Portable PixMap (*.pbm;*.pgm;*.ppm)|*.pbm;*.pgm;*.ppm|Icon (*.ico)|*.ico|OSX Icon Resource (*.icns)|*.icns|Cursor (*.cur)|*.cur|Joint Picture Expert Group (*.jpg;*.jpeg;*.jpe;*.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|All files (*.*)|*.*|';
-    Options := Options + [ofFileMustExist, ofOverwritePrompt];
+    Options := Options + [ofFileMustExist];
     if Execute then
     begin
       bmp.LoadFromFile(FileName);
@@ -672,35 +751,18 @@ end;
 procedure mnuDTMfromString(Sender: TObject);
 var
   s: string;
-  dtm, i: Integer;
-  mdtm: TMDTM;
-  sdtm: TSDTM;
+  dtm: Integer;
 begin
   if InputQuery('DTM From String', 'Enter DTM string:', s) and (s <> '') then
-  begin
     try
       dtm := DTMFromString(Trim(s));
+      mnuNew(nil);
+      LoadDTM(dtm);
+      FreeDTM(dtm);
     except
       if (MessageDlg('Invalid DTM', 'Invalid string! Make sure you only enter the string (without quotes), not stuff like "DTM := DTMFromString("!', mtError, [mbOk, mbCancel] {$ifdef PS_EXTENSION}, 0{$endif}) = 1) then
         mnuDTMfromString(Sender);
-      Exit;
     end;
-
-    mnuNew(nil);
-    mdtm := GetDTM(dtm);
-    sdtm := MDTMToSDTM(mdtm);
-
-    SetLength(p, mdtm.Count);
-    if (mdtm.Count > 0) then
-    begin
-      p[0] := sdtm.MainPoint;
-      for i := mdtm.Count - 1 downto 1 do
-        p[i] := sdtm.SubPoints[i - 1];
-    end;
-
-    mdtm.Free;
-    UpdateBitmap(True, False);
-  end;
 end;
 
 procedure mnuPrintDTM(Sender: TObject);
@@ -1285,33 +1347,31 @@ begin
   end;
 
   LoadClientBitmap;
-  mnuNew(nil); //Initialize
 end;
 
-function ShowForm: Integer;
+procedure ShowForm;
 begin
-  frm := TForm.Create(nil);
-  bmp := TMufasaBitmap.Create;
+  if (bmp = nil) then
+    bmp := TMufasaBitmap.Create;
 
-  try
+  if (frm = nil) then
+  begin
+    frm := TForm.Create(nil);
     CreateForm;
-    Result := frm.ShowModal;
-  finally
-    FreeAndNil(bmpOverlay);
-    FreeAndNil(bmpBuffer);
-    bmp.Free;
-    frm.Free;
+  end;
+
+  if frm.Showing then
+    frm.BringToFront
+  else
+  begin
+    mnuNew(nil); //Initialize
+    {$ifdef PS_EXTENSION}
+    frm.Show;
+    {$else}
+    frm.ShowModal;
+    {$endif}
   end;
 end;
-
-{$ifndef PS_EXTENSION}
-procedure ThreadSafe_ShowForm;
-var
-  v: TVariantArray;
-begin
-  ThreadSafeCall('ShowForm', v);
-end;
-{$ENDIF}
 
 {
   Simba integration
@@ -1332,6 +1392,14 @@ end;
 
 procedure Free;
 begin
+  FreeAndNil(bmpOverlay);
+  FreeAndNil(bmpBuffer);
+  FreeAndNil(bmp);
+  if (frm <> nil) then
+  begin
+    frm.Free;
+    frm := nil;
+  end;
 end;
 
 procedure Attach;
@@ -1354,10 +1422,30 @@ begin;
   Result := Version;
 end;
 
+{$ifndef PS_EXTENSION}
+procedure ThreadSafe_ShowForm;
+var
+  v: TVariantArray;
 begin
+  ThreadSafeCall('ShowForm', v);
+end;
+
+procedure ThreadSafe_FreeForm;
+var
+  v: TVariantArray;
+begin
+  ThreadSafeCall('Free', v);
+end;
+{$ENDIF}
+
+begin
+  frm := nil;
+  bmp := nil;
+
   {$ifndef PS_EXTENSION}
   Client := GetTClient;
   ThreadSafe_ShowForm;
+  ThreadSafe_FreeForm;
   {$endif}
 end.
 
