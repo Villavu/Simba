@@ -1,7 +1,7 @@
 object ScriptManagerForm: TScriptManagerForm
-  Left = 322
+  Left = 500
   Height = 526
-  Top = 140
+  Top = 114
   Width = 711
   Caption = 'Script Manager'
   ClientHeight = 526
@@ -47,7 +47,6 @@ object ScriptManagerForm: TScriptManagerForm
             Width = 200
           end        
           item
-            Width = 22
           end>
         RowSelect = True
         TabOrder = 0
@@ -65,10 +64,8 @@ object ScriptManagerForm: TScriptManagerForm
         Height = 402
         Top = -1
         Width = 712
+        Checkboxes = True
         Columns = <        
-          item
-            Width = 22
-          end        
           item
             Caption = 'Name'
             MinWidth = 40
@@ -87,9 +84,12 @@ object ScriptManagerForm: TScriptManagerForm
             Width = 351
           end>
         RowSelect = True
+        SortType = stText
         TabOrder = 0
         ViewStyle = vsReport
         OnAdvancedCustomDrawItem = ListViewRepositoryAdvancedCustomDrawItem
+        OnColumnClick = ListViewRepositoryColumnClick
+        OnSelectItem = ListViewRepositorySelectItem
       end
     end
   end
@@ -98,6 +98,9 @@ object ScriptManagerForm: TScriptManagerForm
     Height = 21
     Top = 8
     Width = 172
+    OnChange = edSearchChange
+    OnEnter = edSearchEnter
+    OnExit = edSearchExit
     TabOrder = 1
     Text = 'Search...'
   end
