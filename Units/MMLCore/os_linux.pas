@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ interface
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-        procedure SendString(str: string); override;
+        procedure SendString(str: string; keywait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
@@ -420,7 +420,7 @@ implementation
   end;
 
   { TODO: Check if this supports multiple keyboard layouts, probably not }
-  procedure TWindow.SendString(str: string);
+  procedure TWindow.SendString(str: string; keywait: integer);
   var
     I, L: Integer;
     K: Byte;
@@ -444,7 +444,10 @@ implementation
 
       K := GetKeyCode(str[I]);
       HoldKey(K);
-      Sleep(20);
+
+      if keywait <> 0 then
+        Sleep(keywait);
+
       ReleaseKey(K);
 
       if (HoldShift) then

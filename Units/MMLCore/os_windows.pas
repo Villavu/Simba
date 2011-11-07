@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ interface
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-        procedure SendString(str: string); override;
+        procedure SendString(str: string; keywait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
@@ -267,7 +267,7 @@ implementation
   begin
     result := Windows.GetWindowRect(self.handle,rect);
   end;
-  
+
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
   var
     temp: PRGB32;
@@ -366,7 +366,7 @@ begin
   end;
 end;
 
-procedure TWindow.SendString(str: string);
+procedure TWindow.SendString(str: string; keywait: integer);
 var
   I, L: integer;
   C: Byte;
@@ -381,103 +381,108 @@ begin
     C := LoByte(VK);
     ScanCode := MapVirtualKey(C, 0);
     if (ScanCode = 0) then
-      Continue;
+      Continue; // TODO/XXX: Perhaps raise an exception?
 
+    // TODO/XXX: Do we wait when/after pressing shift as well?
     if (Shift) then
       Keybd_Event(VK_SHIFT, $2A, 0, 0);
 
     Keybd_Event(C, ScanCode, 0, 0);
+
+    if keywait <> 0 then
+        sleep(keywait); // TODO/XXX: We needed a special wait IIRC?
+
     Keybd_Event(C, ScanCode, KEYEVENTF_KEYUP, 0);
 
     if (Shift) then
       Keybd_Event(VK_SHIFT, $2A, KEYEVENTF_KEYUP, 0);
   end;
 end;
-  
-  procedure TWindow.HoldKey(key: integer);
-  begin
-    keyinput.Down(key);
-  end;
-  procedure TWindow.ReleaseKey(key: integer);
-  begin
-    keyinput.Up(key);
-  end;
-  function TWindow.IsKeyHeld(key: integer): boolean;
-  begin
-    Result := (GetAsyncKeyState(key)  <> 0);
-  end;
 
-  function TWindow.GetKeyCode(c: char): integer;
-  begin
-    result := VkKeyScan(c) and $FF;
-  end;
-  
-  
+procedure TWindow.HoldKey(key: integer);
+begin
+  keyinput.Down(key);
+end;
+procedure TWindow.ReleaseKey(key: integer);
+begin
+  keyinput.Up(key);
+end;
+function TWindow.IsKeyHeld(key: integer): boolean;
+begin
+  Result := (GetAsyncKeyState(key)  <> 0);
+end;
+
+function TWindow.GetKeyCode(c: char): integer;
+begin
+  result := VkKeyScan(c) and $FF;
+end;
+
+
 //***implementation*** IOManager
 
-  constructor TIOManager.Create;
-  begin
-    inherited Create;
-  end;
+constructor TIOManager.Create;
+begin
+  inherited Create;
+end;
 
-  constructor TIOManager.Create(plugin_dir: string);
-  begin
-    inherited Create(plugin_dir);
-  end;
+constructor TIOManager.Create(plugin_dir: string);
+begin
+  inherited Create(plugin_dir);
+end;
 
-  procedure TIOManager.NativeInit;
-  begin
-    self.DesktopHWND:= GetDesktopWindow;
-  end;
-  
-  procedure TIOManager.NativeFree; 
-  begin
-  end;
-  
-  procedure TIOManager.SetDesktop;
-  begin
-    SetBothTargets(TDesktopWindow.Create(DesktopHWND));
-  end;
-  
-  function TIOManager.SetTarget(target: TNativeWindow): integer;
-  begin
-    SetBothTargets(TWindow.Create(target));
-  end;
+procedure TIOManager.NativeInit;
+begin
+  self.DesktopHWND:= GetDesktopWindow;
+end;
 
-  threadvar
-    ProcArr: TSysProcArr;
+procedure TIOManager.NativeFree;
+begin
+end;
 
-  function EnumProcess(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
-  var
-    Proc: TSysProc;
-    I: integer;
-    pPid: DWORD;
-  begin
-    Result := (not ((Handle = 0) or (Handle = null)));
-    if ((Result) and (IsWindowVisible(Handle))) then
-    begin
-      I := Length(ProcArr);
-      SetLength(ProcArr, I + 1);
-      ProcArr[I].Handle := Handle;
-      SetLength(ProcArr[I].Title, 255);
-      SetLength(ProcArr[I].Title, GetWindowText(Handle, PChar(ProcArr[I].Title), Length(ProcArr[I].Title)));
-      GetWindowSize(Handle, ProcArr[I].Width, ProcArr[I].Height);
-      GetWindowThreadProcessId(Handle, pPid);
-      ProcArr[I].Pid := pPid;
-    end;
-  end;
+procedure TIOManager.SetDesktop;
+begin
+  SetBothTargets(TDesktopWindow.Create(DesktopHWND));
+end;
 
-  function TIOManager.GetProcesses: TSysProcArr;
-  begin
-    SetLength(ProcArr, 0);
-    EnumWindows(@EnumProcess, 0);
-    Result := ProcArr;
-  end;
+function TIOManager.SetTarget(target: TNativeWindow): integer;
+begin
+  SetBothTargets(TWindow.Create(target));
+end;
 
-  procedure TIOManager.SetTargetEx(Proc: TSysProc);
+threadvar
+  ProcArr: TSysProcArr;
+
+function EnumProcess(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
+var
+  Proc: TSysProc;
+  I: integer;
+  pPid: DWORD;
+begin
+  Result := (not ((Handle = 0) or (Handle = null)));
+  if ((Result) and (IsWindowVisible(Handle))) then
   begin
-    SetTarget(Proc.Handle);
+    I := Length(ProcArr);
+    SetLength(ProcArr, I + 1);
+    ProcArr[I].Handle := Handle;
+    SetLength(ProcArr[I].Title, 255);
+    SetLength(ProcArr[I].Title, GetWindowText(Handle, PChar(ProcArr[I].Title), Length(ProcArr[I].Title)));
+    GetWindowSize(Handle, ProcArr[I].Width, ProcArr[I].Height);
+    GetWindowThreadProcessId(Handle, pPid);
+    ProcArr[I].Pid := pPid;
   end;
+end;
+
+function TIOManager.GetProcesses: TSysProcArr;
+begin
+  SetLength(ProcArr, 0);
+  EnumWindows(@EnumProcess, 0);
+  Result := ProcArr;
+end;
+
+procedure TIOManager.SetTargetEx(Proc: TSysProc);
+begin
+  SetTarget(Proc.Handle);
+end;
 
 { TDesktopWindow }
 
