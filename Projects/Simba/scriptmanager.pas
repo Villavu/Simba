@@ -103,6 +103,9 @@ Type
     procedure btnInstallScriptClick(Sender: TObject);
     procedure btnLoadScriptClick(Sender: TObject);
     procedure btnUpdateClick(Sender: TObject);
+    procedure edSearchChange(Sender: TObject);
+    procedure edSearchEnter(Sender: TObject);
+    procedure edSearchExit(Sender: TObject);
     {procedure edSearchChange(Sender: TObject);
     procedure edSearchEnter(Sender: TObject);
     procedure edSearchExit(Sender: TObject);}
@@ -113,6 +116,10 @@ Type
     procedure ListViewRepositoryAdvancedCustomDrawItem(Sender: TCustomListView;
       Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
       var DefaultDraw: Boolean);
+    procedure ListViewRepositoryColumnClick(Sender: TObject; Column: TListColumn
+      );
+    procedure ListViewRepositorySelectItem(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
     procedure MenuItemRemoveClick(Sender: TObject);
     procedure PageControlTabsChange(Sender: TObject);
     procedure Refresh;
@@ -125,6 +132,9 @@ Type
 
 var
   ScriptManagerForm: TScriptManagerForm;
+  PopulatingListViews: Boolean;
+
+
 
 implementation
 
@@ -139,7 +149,9 @@ implementation
 procedure TScriptManagerForm.FormCreate(Sender: TObject);
 begin
   Mng := TScriptManager.Create;
+  PageControlTabs.ActivePage := TabSheetLibrary;
 end;
+
 
 
 procedure TScriptManagerForm.btnUpdateClick(Sender: TObject);
@@ -170,67 +182,25 @@ var
   i, j, SkillImg: integer;
   ListItem: TListItem;
 begin
+  PopulatingListViews := True;
+
   Mng.LUpdate;
   Mng.RUpdate;
 
 
   ListViewRepository.Items.Clear;
 
+
   for i := 0 to Mng.RScriptCount -1 do
   begin
     ListItem := ListViewRepository.Items.Add;
     ListItem.Data := Mng.SimbaScript[i];
 
-    SetLength(btnSkill, i+1);
-    btnSkill[i] := TSpeedButton.Create(nil);
-    btnSkill[i].Caption := '';
-    btnSkill[i].Parent := ListViewRepository;
-    btnSkill[i].Flat:= True;
-    //btnSkill.enabled := false;
-    //btnSkill.hint := 'You have the lastest version';
-    btnSkill[i].ShowHint:= true;
-
-    SkillImg := -1;    // change all this to arrays
-
-    if Mng.SimbaScript[i].Tags[0] =  'combat' then SkillImg := 1;
-    if Mng.SimbaScript[i].Tags[0] = 'agility' then SkillImg := 0;
-    if Mng.SimbaScript[i].Tags[0] =  'construction' then SkillImg := 2;
-    if Mng.SimbaScript[i].Tags[0] =  'cooking' then SkillImg := 3;
-    if Mng.SimbaScript[i].Tags[0] =  'crafting' then SkillImg := 4;
-    if Mng.SimbaScript[i].Tags[0] =  'dungeoneering' then SkillImg := 5;
-    if Mng.SimbaScript[i].Tags[0] =  'farming' then SkillImg := 6;
-    if Mng.SimbaScript[i].Tags[0] =  'firemaking' then SkillImg := 7;
-    if Mng.SimbaScript[i].Tags[0] =  'fishing' then SkillImg := 8;
-    if Mng.SimbaScript[i].Tags[0] =  'fletching' then SkillImg := 9;
-    if Mng.SimbaScript[i].Tags[0] =  'herblore' then SkillImg := 10;
-    if Mng.SimbaScript[i].Tags[0] =  'hunter' then SkillImg := 11;
-    if Mng.SimbaScript[i].Tags[0] =  'magic' then SkillImg := 12;
-    if Mng.SimbaScript[i].Tags[0] =  'mining' then SkillImg := 13;
-    if Mng.SimbaScript[i].Tags[0] =  'prayer' then SkillImg := 14;
-    if Mng.SimbaScript[i].Tags[0] =  'ranged' then SkillImg := 15;
-    if Mng.SimbaScript[i].Tags[0] =  'runecrafting' then SkillImg := 16;
-    if Mng.SimbaScript[i].Tags[0] =  'slayer' then SkillImg := 17;
-    if Mng.SimbaScript[i].Tags[0] =  'smithing' then SkillImg := 18;
-    if Mng.SimbaScript[i].Tags[0] =  'summoning' then SkillImg := 19;
-    if Mng.SimbaScript[i].Tags[0] =  'thieving' then SkillImg := 20;
-    if Mng.SimbaScript[i].Tags[0] =  'woodcutting' then SkillImg := 21;
-
-    if not (SkillImg = -1) then
-      ImageListSkills.GetBitmap(SkillImg, btnSkill[i].Glyph);
-
-    pbRect := ListItem.DisplayRect(drBounds);
-
-    for j := 0 to btnSkillColumnIndex - 1 do
-      pbRect.Left := pbRect.Left + ListViewRepository.Columns[j].Width;
-
-    pbRect.Right := pbRect.Left +
-                    ListViewRepository.Columns[btnSkillColumnIndex].Width;
-    btnSkill[i].BoundsRect := pbRect;
-
-    ListItem.SubItems.Add(Mng.SimbaScript[i].Name);
+    ListItem.Caption := Mng.SimbaScript[i].Name;
     ListItem.SubItems.Add(Mng.SimbaScript[i].Version);
     ListItem.SubItems.Add(Mng.SimbaScript[i].Author);
     ListItem.SubItems.Add(Mng.SimbaScript[i].Description);
+
   end;
 
   ListViewLibrary.Items.Clear;
@@ -280,10 +250,12 @@ begin
                     ListViewLibrary.Columns[btnUpdateColumnIndex].Width;
     btnUpdate[i].BoundsRect := pbRect;
   end;
+  PopulatingListViews := False;
 end;
 
 procedure TScriptManagerForm.FormShow(Sender: TObject);
 begin
+
   Refresh;
 end;
 
@@ -309,17 +281,67 @@ end;
 procedure TScriptManagerForm.ListViewRepositoryAdvancedCustomDrawItem(
   Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
   Stage: TCustomDrawStage; var DefaultDraw: Boolean);
+var
+  i: boolean;
+begin
+  if not PopulatingListViews then
+    if Mng.SimbaScript[Mng.FindRScriptByName(Item.Caption)].Installed then
+      Sender.Canvas.Font.Color := clGrayText
+    else
+      Sender.Canvas.Font.Color := clDefault;
+end;
+
+procedure TScriptManagerForm.ListViewRepositoryColumnClick(Sender: TObject;
+  Column: TListColumn);
 begin
 
+  ListViewRepository.SortColumn := Column.Index;
+end;
+
+
+procedure TScriptManagerForm.ListViewRepositorySelectItem(Sender: TObject;
+  Item: TListItem; Selected: Boolean);
+begin
+   if Mng.SimbaScript[Mng.FindRScriptByName(Item.Caption)].Installed then
+   begin
+      btnInstallScript.Enabled := False;
+      btnInstallScript.Caption := 'Installed'
+   end else
+   begin
+      btnInstallScript.Enabled := True;
+      btnInstallScript.Caption := 'Install';
+   end;
 end;
 
 //Remove Script
 procedure TScriptManagerForm.MenuItemRemoveClick(Sender: TObject);
-var Script: TLSimbaScript;
+var
+  Script: TLSimbaScript;
+  ToRemove: Array of TLSimbaScript;
+  i: Integer;
+  RemoveSelected: Boolean;
 begin
+
+  RemoveSelected := True;
+
   Script := TLSimbaScript(ListViewLibrary.Selected.Data);
+
+  SetLength(ToRemove, 0);
+
+  for i := 0 to ListViewLibrary.Items.Count - 1 do
+    if ListViewLibrary.Items[i].Checked then
+    begin
+      RemoveSelected := False;
+      SetLength(ToRemove, Length(ToRemove) + 1);
+      ToRemove[High(ToRemove)] := TLSimbaScript(ListViewLibrary.Items[i].Data);
+    end;
+
   Writeln('Deleted' + Script.Name);
-  Mng.DeleteLScript(mng.FindLScriptByName(Script.Name));
+  if RemoveSelected then
+    Mng.DeleteLScript(mng.FindLScriptByName(Script.Name))
+  else
+    for i := 0 to High(ToRemove) do
+      Mng.DeleteLScript(mng.FindLScriptByName(ToRemove[i].Name));
   Refresh;
 end;
 
@@ -343,22 +365,34 @@ end;
 
 
 //Search
-{procedure TScriptManagerForm.edSearchChange(Sender: TObject);
+procedure TScriptManagerForm.edSearchChange(Sender: TObject);
 var
-  i: integer;
+  i, j: Integer;
+  S: String;
   ListItem: TListItem;
+  found: Boolean;
 begin
-  Mng.LUpdate;
-  Mng.RUpdate;
-  ListViewRepository.Items.Clear;
-  for i := 0 to Mng.RScriptCount -1 do
+
+  S := edSearch.Caption;
+
+  for i := 0 to ListViewRepository.Items.Count - 1 do
   begin
-    ListItem := ListViewRepository.Items.Add;
-    ListItem.Data := Mng.SimbaScript[i];
-    ListItem.Caption := Mng.SimbaScript[i].Name;
-    ListItem.SubItems.Add(Mng.SimbaScript[i].Version);
-    ListItem.SubItems.Add(Mng.SimbaScript[i].Author);
-    ListItem.SubItems.Add(Mng.SimbaScript[i].Description);
+    ListItem := ListViewRepository.Items[i];
+
+    found := AnsiCompareText(ListItem.Caption, S) = 0;
+
+    if not found then
+      for j := 0 to ListViewRepository.ColumnCount - 2 do
+      begin
+        found := AnsiCompareText(ListItem.SubItems[j], S) = 0;
+        if found then
+          Break;
+      end;
+
+    {if found then
+      ListItem. := True
+    else
+      ListItem.Visible := False;}
   end;
 end;
 
@@ -372,8 +406,8 @@ end;
 procedure TScriptManagerForm.edSearchExit(Sender: TObject);
 begin
   if edSearch.Caption = '' then
-    edSearch.Caption := 'Search'
-end;                      }
+    edSearch.Caption := 'Search';
+end;
 
 
 
@@ -381,23 +415,39 @@ end;                      }
 procedure TScriptManagerForm.btnInstallScriptClick(Sender: TObject);
 var
   Script : TSimbaScript;
+  ToInstall: Array of TSimbaScript;
+  i: Integer;
+  InstallSelected: Boolean;
 begin
+  InstallSelected := True;
 
-  if (ListViewRepository.Selected <> nil) and (ListViewRepository.Selected.Data <> nil) then
+  SetLength(ToInstall, 0);
+
+  for i := 0 to ListViewRepository.Items.Count - 1 do
+    if ListViewRepository.Items[i].Checked then
+    begin
+      Writeln('woooo');
+      InstallSelected := False;
+      SetLength(ToInstall, Length(ToInstall) + 1);
+      ToInstall[High(ToInstall)] := TSimbaScript(ListViewRepository.Items[i].Data);
+    end;
+
+
+  if InstallSelected then
   begin
-    Script := TSimbaScript(ListViewRepository.Selected.Data);
-    if Script.IsInstalled then
+    if (ListViewRepository.Selected <> nil) and (ListViewRepository.Selected.Data <> nil) then
     begin
-//      ShowMessage('Updating Script "' + Script.Name + '"');
-      Mng.UpdateLScript(mng.FindRScriptByName(Script.Name));
-      ShowMessage('Finished Updating Script "' + Script.Name + '"');
-    end else
-    begin
-//      ShowMessage('Installing Script "' + Script.Name + '"');
+      Script := TSimbaScript(ListViewRepository.Selected.Data);
       Mng.InstallNewRScript(mng.FindRScriptByName(Script.Name));
       ShowMessage('Finished Installing Script "' + Script.Name + '"');
-    end;
+    end
+  end else
+  begin
+    for i := 0 to High(ToInstall) do
+      Mng.InstallNewRScript(mng.FindRScriptByName(ToInstall[i].Name));
+    ShowMessage('Finished Installing Scripts');
   end;
+
   Refresh;
 end;
 
