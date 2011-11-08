@@ -97,6 +97,7 @@ begin
   Pointer(SetPluginMemManager) := GetProcAddress(Plugin, PChar('SetPluginMemManager'));
   if (SetPluginMemManager <> nil) then
   begin
+    Writeln('Setting Memory Manager.');
     GetMemoryManager(MemMgr);
     SetPluginMemManager(MemMgr);
   end;
