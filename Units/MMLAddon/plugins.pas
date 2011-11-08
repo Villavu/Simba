@@ -88,10 +88,19 @@ var
   GetFuncConv: function(x: integer): integer; stdcall;
   GetTypeCount: function: integer; stdcall;
   GetTypeInfo: function(x: Integer; var sType, sTypeDef: string): integer; stdcall;
+  SetPluginMemManager: procedure(MemMgr : TMemoryManager); stdcall;
   PD: PChar;
   pntr: Pointer;
   ArrC, I: integer;
+  MemMgr : TMemoryManager;
 begin
+  Pointer(SetPluginMemManager) := GetProcAddress(Plugin, PChar('SetPluginMemManager'));
+  if (SetPluginMemManager <> nil) then
+  begin
+    Writeln('Setting Memory Manager.');
+    GetMemoryManager(MemMgr);
+    SetPluginMemManager(MemMgr);
+  end;
   Pointer(GetFuncCount) := GetProcAddress(Plugin, PChar('GetFunctionCount'));
   if (GetFuncCount = nil) then
   begin
