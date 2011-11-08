@@ -62,7 +62,7 @@ uses
   settings, updater;
 
 const
-  SimbaVersion = 973;
+  SimbaVersion = 974;
 
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
