@@ -1355,76 +1355,24 @@ end;
 function TMFinder.FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x,
   y: Integer; xs, ys, xe, ye, tolerance: integer): Boolean;
 var
-   MainRowdata : TPRGB32Array;
-   BmpRowData : TPRGB32Array;
-   PtrData : TRetData;
-   BmpW,BmpH : integer;
-   xBmp,yBmp : integer;
-   tmpY : integer;
-   dX, dY, i, HiSpiral: Integer;
-   SkipCoords : T2DBoolArray;
-
-   ctsinfoarray: TCTSInfo2DArray;
-   compare: TCTSCompareFunction;
-
-label NotFoundBmp;
-  { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. } 
+  temp: integer;
+  p: TPointArray;
 
 begin
-  Result := false;
-  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
-  DefaultOperations(xs,ys,xe,ye);
+  temp := Self.CTS;
+  Self.CTS := -1;
 
-  // calculate delta x and y
-  dX := xe - xs;
-  dY := ye - ys;
+  try
+      Result := FindBitmapsSpiralTolerance(bitmap, x, y, p, xs, ye, xe, ye, 0, 1);
+      if Result then
+      begin
+          x := p[0].x;
+          y := p[0].y;
+      end;
 
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
-  //Caculate the row ptrs
-  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
-  BmpRowData:= CalculateRowPtrs(bitmap);
-  //Get the 'fixed' bmp size
-  BmpW := bitmap.Width - 1;
-  BmpH := bitmap.Height - 1;
-  //Heck, our bitmap cannot be outside the search area
-  dX := dX - bmpW;
-  dY := dY - bmpH;
-  //Load the spiral into memory
-  LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
-  HiSpiral := (dx+1) * (dy+1) - 1;
-
-
-  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
-      Tolerance, self.hueMod, self.satMod);
-  compare := Get_CTSCompare(Self.CTS);
-
-  //Get the "skip coords".
-  CalculateBitmapSkipCoords(Bitmap,SkipCoords);
-  for i := 0 to HiSpiral do
-  begin;
-    for yBmp:= 0 to BmpH do
-      begin;
-        tmpY := yBmp + ClientTPA[i].y;
-        for xBmp := 0 to BmpW do
-          if not SkipCoords[yBmp][xBmp] then
-            if not compare(ctsinfoarray[yBmp][xBmp],
-                           @MainRowData[tmpY][xBmp + ClientTPA[i].x]) then
-              goto NotFoundBmp;
-
-    end;
-    //We did find the Bmp, otherwise we would be at the part below
-
-    Free_CTSInfo2DArray(ctsinfoarray);
-    TClient(Client).IOManager.FreeReturnData;
-
-    x := ClientTPA[i].x + xs;
-    y := ClientTPA[i].y + ys;
-    result := true;
-    exit;
-    NotFoundBmp:
+  finally
+      Self.CTS := temp;
   end;
-  Free_CTSInfo2DArray(ctsinfoarray);
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x,
