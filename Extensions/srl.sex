@@ -27,21 +27,21 @@ begin
   Script[1] := '{$DEFINE SMART}';
   Script[2] := '{$I SRL/SRL.scar}';
 
-  if (TMenuItem(Sender).Parent.Caption = 'Reflection') then
-  begin
-    SetLength(Script, Length(Script) + 1);
-    Script[High(Script) - 4] := '{$I Reflection/Reflection.simba}';
-  end;
+  //if (TMenuItem(Sender).Parent.Caption = 'Reflection') then
+  //begin
+  //  SetLength(Script, Length(Script) + 1);
+  //  Script[High(Script) - 4] := '{$I Reflection/Reflection.simba}';
+  //end;
 
   Script[High(Script) - 3] := '';
   Script[High(Script) - 2] := 'begin';
   Script[High(Script) - 1] := '  SetupSRL;';
 
-  if (TMenuItem(Sender).Parent.Caption = 'Reflection') then
-  begin
-    SetLength(Script, Length(Script) + 1);
-    Script[High(Script) - 1] := '  SetupReflection;';
-  end;
+  //if (TMenuItem(Sender).Parent.Caption = 'Reflection') then
+  //begin
+  //  SetLength(Script, Length(Script) + 1);
+  //  Script[High(Script) - 1] := '  SetupReflection;';
+  //end;
 
   Script[High(Script)] := 'end.';    
   
@@ -53,7 +53,13 @@ function OpenDefMenu(const Blank: string; const ID: integer): boolean;
 var
   OpenMenuItem: TMenuItem;
 begin
-  OpenMenuItem := MoveMenuItem(UpdaterArr[ID].MainMenu, GetIndex(UpdaterArr[ID].MainMenu, GetMenuByName('Open', UpdaterArr[ID].MainMenu)), GetIndex(UpdaterArr[ID].MainMenu, GetMenuByName('Update', UpdaterArr[ID].MainMenu)));
+  OpenMenuItem := MoveMenuItem(
+    UpdaterArr[ID].MainMenu,
+    GetIndex(UpdaterArr[ID].MainMenu,
+      GetMenuByName('Open', UpdaterArr[ID].MainMenu)),
+    GetIndex(UpdaterArr[ID].MainMenu,
+      GetMenuByName('Update', UpdaterArr[ID].MainMenu))
+    );
   OpenMenuItem.OnClick := @OpenDefScript;
   OpenMenuItem.Visible := True;
 end;
@@ -97,10 +103,10 @@ begin
     UpdaterArr[Plugins].Hooks[SUCCESS_UPDATE] := @SuccessPlugins;
   end;
 
-  if (AddUpdater('Reflection', 'http://wizzup.org/static/srl/srlref.tar.bz2', 'http://wizzup.org/static/srl/srl_refl_version', IncludePath, True, True, Refl)) then
+{  if (AddUpdater('Reflection', 'http://wizzup.org/static/srl/srlref.tar.bz2', 'http://wizzup.org/static/srl/srl_refl_version', IncludePath, True, True, Refl)) then
   begin
     UpdaterArr[Refl].Hooks[ATTACH_HOOK] := @OpenDefMenu;
-  end;
+  end;   }
 end;
 
 function GetName: string;
