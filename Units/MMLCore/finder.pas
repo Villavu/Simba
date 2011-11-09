@@ -79,7 +79,9 @@ type
     function FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
     function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
     function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
-    function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+    function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer;
+        out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer; maxToFind:
+            Integer = 0): Boolean;
     function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
 
     function FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
@@ -785,8 +787,11 @@ var
 begin
    temp := Self.CTS;
    Self.CTS := -1;
-   result := CountColorTolerance(color,xs,ys,xe,ye,0);
-   Self.CTS := temp;
+   try
+       Result := CountColorTolerance(color,xs,ys,xe,ye,0);
+   finally
+       Self.CTS := temp;
+   end;
 end;
 
 function TMFinder.FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
@@ -795,8 +800,11 @@ var
 begin
    temp := Self.CTS;
    Self.CTS := -1;
-   result := FindColorTolerance(x,y,color,xs,ys,xe,ye,0);
-   Self.CTS := temp;
+   try
+       result := FindColorTolerance(x,y,color,xs,ys,xe,ye,0);
+   finally
+       Self.CTS := temp;
+   end;
 end;
 
 function TMFinder.FindColorSpiral(var x, y: Integer; color, xs, ys, xe,
@@ -806,8 +814,11 @@ var
 begin
    temp := Self.CTS;
    Self.CTS := -1;
-   result := FindColorSpiralTolerance(x,y,color,xs,ys,xe,ye,0);
-   Self.CTS := temp;
+   try
+       result := FindColorSpiralTolerance(x,y,color,xs,ys,xe,ye,0);
+   finally
+       Self.CTS := temp;
+   end;
 end;
 
 function TMFinder.FindColorSpiralTolerance(var x, y: Integer; color, xs, ys,
@@ -875,8 +886,11 @@ var
 begin
    temp := Self.CTS;
    Self.CTS := -1;
-   result := FindColoredAreaTolerance(x,y,color,xs,ys,xe,ye,MinArea,0);
-   Self.CTS := temp;
+   try
+       result := FindColoredAreaTolerance(x,y,color,xs,ys,xe,ye,MinArea,0);
+   finally
+       Self.CTS := temp;
+   end;
 end;
 
 function TMFinder.FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
@@ -1132,8 +1146,11 @@ var
 begin
    temp := Self.CTS;
    Self.CTS := -1;
-   result := FindColorsTolerance(TPA,color,xs,ys,xe,ye,0);
-   Self.CTS := temp;
+   try
+       result := FindColorsTolerance(TPA,color,xs,ys,xe,ye,0);
+   finally
+       Self.CTS := temp;
+   end;
 end;
 
  { Only works with CTS 1 for now.. Since Colorsame doesn't return a boolean :-( }
@@ -1232,62 +1249,18 @@ end;
 
 function TMFinder.FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer; xs,
   ys, xe, ye: Integer): Boolean;
+
 var
-   MainRowdata : TPRGB32Array;
-   BmpRowData : TPRGB32Array;
-   PtrData : TRetData;
-   BmpW,BmpH : integer;
-   xBmp,yBmp : integer;
-   tmpY : integer;
-   dX, dY,  xx, yy: Integer;
-   SkipCoords : T2DBoolArray;
-label NotFoundBmp;
-   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
+  temp: integer;
 
 begin
-  Result := false;
-  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
-  DefaultOperations(xs,ys,xe,ye);
-
-  // calculate delta x and y
-  dX := xe - xs;
-  dY := ye - ys;
-
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
-  //Caculate the row ptrs
-  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
-  BmpRowData:= CalculateRowPtrs(bitmap);
-  //Get the 'fixed' bmp size
-  BmpW := bitmap.Width - 1;
-  BmpH := bitmap.Height - 1;
-  //Heck our bitmap cannot be outside the search area
-  dX := dX - bmpW;
-  dY := dY - bmpH;
-  //Get the "skip coords".
-  CalculateBitmapSkipCoords(Bitmap,SkipCoords);
-  for yy := 0 to dY do
-    for xx := 0 to dX do
-    begin;
-      for yBmp:= 0 to BmpH do
-      begin;
-        tmpY := yBmp + yy;
-        for xBmp := 0 to BmpW do
-          if not SkipCoords[yBmp][xBmp] then
-            if (BmpRowData[yBmp][xBmp].R <> MainRowdata[tmpY][xBmp +  xx].R) or
-               (BmpRowData[yBmp][xBmp].G <> MainRowdata[tmpY][xBmp +  xx].G) or
-               (BmpRowData[yBmp][xBmp].B <> MainRowdata[tmpY][xBmp +  xx].B) then
-               goto NotFoundBmp;
-
-      end;
-      //We did find the Bmp, otherwise we would be at the part below
-      TClient(Client).IOManager.FreeReturnData;
-      x := xx + xs;
-      y := yy + ys;
-      result := true;
-      exit;
-      NotFoundBmp:
-    end;
-  TClient(Client).IOManager.FreeReturnData;
+  temp := Self.CTS;
+  Self.CTS := -1;
+  try
+      Result := FindBitmapToleranceIn(bitmap, x, y, xs, ys, xe, ye, 0);
+  finally
+      Self.CTS := temp;
+  end;
 end;
 
 function TMFinder.FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs,
@@ -1365,64 +1338,18 @@ end;
 
 function TMFinder.FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer;
   xs, ys, xe, ye: Integer): Boolean;
+
 var
-   MainRowdata : TPRGB32Array;
-   BmpRowData : TPRGB32Array;
-   PtrData : TRetData;
-   BmpW,BmpH : integer;
-   xBmp,yBmp : integer;
-   tmpY : integer;
-   dX, dY,  i,HiSpiral: Integer;
-   SkipCoords : T2DBoolArray;
-label NotFoundBmp;
-   { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops } 
+  temp: integer;
 
 begin
-  Result := false;
-  // checks for valid xs,ys,xe,ye? (may involve GetDimensions)
-  DefaultOperations(xs,ys,xe,ye);
-
-  // calculate delta x and y
-  dX := xe - xs;
-  dY := ye - ys;
-
-  PtrData := TClient(Client).IOManager.ReturnData(xs, ys, dX + 1, dY + 1);
-  //Caculate the row ptrs
-  MainRowdata:= CalculateRowPtrs(PtrData,dy+1);
-  BmpRowData:= CalculateRowPtrs(bitmap);
-  //Get the 'fixed' bmp size
-  BmpW := bitmap.Width - 1;
-  BmpH := bitmap.Height - 1;
-  //Heck, our bitmap cannot be outside the search area
-  dX := dX - bmpW;
-  dY := dY - bmpH;
-  //Load the spiral into memory
-  LoadSpiralPath(x-xs,y-ys,0,0,dX,dY);
-  HiSpiral := (dx+1) * (dy+1) - 1;
-  //Get the "skip coords".
-  CalculateBitmapSkipCoords(Bitmap,SkipCoords);
-  for i := 0 to HiSpiral do
-  begin;
-    for yBmp:= 0 to BmpH do
-      begin;
-        tmpY := yBmp + ClientTPA[i].y;
-        for xBmp := 0 to BmpW do
-          if not SkipCoords[yBmp][xBmp] then
-            if (BmpRowData[yBmp][xBmp].R <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].R) or
-               (BmpRowData[yBmp][xBmp].G <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].G) or
-               (BmpRowData[yBmp][xBmp].B <> MainRowdata[tmpY][xBmp +  ClientTPA[i].x].B) then
-               goto NotFoundBmp;
-
-    end;
-    //We did find the Bmp, otherwise we would be at the part below
-    TClient(Client).IOManager.FreeReturnData;
-    x := ClientTPA[i].x + xs;
-    y := ClientTPA[i].y + ys;
-    result := true;
-    exit;
-    NotFoundBmp:
+  temp := Self.CTS;
+  Self.CTS := -1;
+  try
+      Result := FindBitmapSpiralTolerance(bitmap, x, y, xs, ys, xe, ye, 0);
+  finally
+      Self.CTS := temp;
   end;
-  TClient(Client).IOManager.FreeReturnData;
 end;
 
 function TMFinder.FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x,
@@ -1434,7 +1361,7 @@ var
    BmpW,BmpH : integer;
    xBmp,yBmp : integer;
    tmpY : integer;
-   dX, dY,  i,HiSpiral: Integer;
+   dX, dY, i, HiSpiral: Integer;
    SkipCoords : T2DBoolArray;
 
    ctsinfoarray: TCTSInfo2DArray;
@@ -1501,7 +1428,7 @@ begin
 end;
 
 function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x,
-  y: Integer; out Points: TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+  y: Integer; out Points: TPointArray; xs, ys, xe, ye, tolerance, maxToFind: Integer): Boolean;
 var
    MainRowdata : TPRGB32Array;
    BmpRowData : TPRGB32Array;
@@ -1516,6 +1443,7 @@ var
    ctsinfoarray: TCTSInfo2DArray;
    compare: TCTSCompareFunction;
 
+label theEnd;
 label NotFoundBmp;
    { Don't know if the compiler has any speed-troubles with goto jumping in nested for loops. }
 
@@ -1565,8 +1493,13 @@ begin
     ClientTPA[FoundC].x := ClientTPA[i].x + xs;
     ClientTPA[FoundC].y := ClientTPA[i].y + ys;
     inc(FoundC);
+    if FoundC = maxToFind then
+        goto TheEnd;
+
     NotFoundBmp:
   end;
+
+  TheEnd:
   if FoundC > 0 then
   begin;
     result := true;
@@ -1711,14 +1644,12 @@ function TMFinder.FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer
 var
    P: TPointArray;
 begin
-  Self.FindDTMs(DTM, P, x1, y1, x2, y2, 1);
-  if(Length(p) > 0) then
+  Result := Self.FindDTMs(DTM, P, x1, y1, x2, y2, 1);
+  if Result then
   begin
     x := p[0].x;
     y := p[0].y;
-    Exit(True);
   end;
-  Exit(False);
 end;
 
 //MaxToFind, if it's < 1 it won't stop looking
@@ -1839,7 +1770,6 @@ begin
             begin
               // Checking point i now. (Store that we matched it)
               ch[xxx][yyy]:= ch[xxx][yyy] or (1 shl i);
-//              if SimilarColors(dtm.c[i], rgbtocolor(cd[yyy][xxx].R, cd[yyy][xxx].G, cd[yyy][xxx].B), DPoints[i].t) then
               if compare(ctsinfoarray[i], @cd[yyy][xxx]) then
                 b[xxx][yyy] := b[xxx][yyy] or (1 shl i);
             end;
@@ -1885,9 +1815,10 @@ var
    P: TPointArray;
    F: T2DExtendedArray;
 begin
-  FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F,Alternating,1);
-  if Length(P) = 0 then
-    exit(False);
+  Result := FindDTMsRotated(dtm, P, x1, y1, x2, y2, sAngle, eAngle, aStep, F,Alternating,1);
+  if not result then
+      exit;
+
   aFound := F[0][0];
   x := P[0].x;
   y := P[0].y;
