@@ -86,7 +86,7 @@ begin
   result := CreateDirUTF8(directoryName);
 end;
 
-function ps_ForceDirectores(const dir : string) : boolean; extdecl;
+function ps_ForceDirectories(const dir : string) : boolean; extdecl;
 begin
   result := ForceDirectoriesUTF8(dir);
 end;
