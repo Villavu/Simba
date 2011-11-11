@@ -153,7 +153,7 @@ AddFunction(@ps_FilePointerPos, 'function FilePointerPos(FileNum: Integer): Inte
 AddFunction(@ps_DirectoryExists,'function DirectoryExists(const DirectoryName : string ) : Boolean;');
 AddFunction(@ps_CreateDirectory,'function CreateDirectory(const DirectoryName : string) : boolean;');
 AddFunction(@ps_FileExists,'function FileExists (const FileName : string ) : Boolean;');
-AddFunction(@ps_ForceDirectores,'function ForceDirectories(const dir : string) : boolean;');
+AddFunction(@ps_ForceDirectories,'function ForceDirectories(const dir : string) : boolean;');
 AddFunction(@ps_GetFiles,'function GetFiles(const Path, Ext : string) : TStringArray;');
 AddFunction(@ps_GetDirectories,'function GetDirectories(const path : string) : TStringArray;');
 AddFunction(@ps_DeleteFile, 'function DeleteFile(const Filename: string): Boolean;');
