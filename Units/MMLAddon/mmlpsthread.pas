@@ -1362,7 +1362,7 @@ var
   plugin_idx: integer;
 begin
   Result := False;
-  if (Directive = 'loadlib') then
+  if (not InPeek) and (Directive = 'loadlib') then
   begin
     if (Argument <> '') then
     begin
