@@ -68,9 +68,9 @@ begin
   Pboolean(Result)^ := ps_CreateDirectory(Pstring(Params^[0])^);
 end;
 
-procedure Lape_ForceDirectores(const Params: PParamArray; const Result: Pointer);
+procedure Lape_ForceDirectories(const Params: PParamArray; const Result: Pointer);
 begin
-  Pboolean(Result)^ := ps_ForceDirectores(Pstring(Params^[0])^);
+  Pboolean(Result)^ := ps_ForceDirectories(Pstring(Params^[0])^);
 end;
 
 procedure Lape_GetFiles(const Params: PParamArray; const Result: Pointer);
