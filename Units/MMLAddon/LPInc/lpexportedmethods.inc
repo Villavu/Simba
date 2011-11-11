@@ -211,7 +211,7 @@ AddGlobalFunc('function FilePointerPos(FileNum: Integer): Integer', @Lape_FilePo
 AddGlobalFunc('function FileExists(const FileName: string): Boolean', @Lape_FileExists);
 AddGlobalFunc('function DirectoryExists(const DirectoryName: string): Boolean', @Lape_DirectoryExists);
 AddGlobalFunc('function CreateDirectory(const DirectoryName: string): boolean', @Lape_CreateDirectory);
-AddGlobalFunc('function ForceDirectores(const dir: string): boolean', @Lape_ForceDirectores);
+AddGlobalFunc('function ForceDirectories(const dir: string): boolean', @Lape_ForceDirectories);
 AddGlobalFunc('function GetFiles(const Path, Ext: string): TStringArray', @Lape_GetFiles);
 AddGlobalFunc('function GetDirectories(const path: string): TStringArray', @Lape_GetDirectories);
 AddGlobalFunc('function DeleteFile(const Filename: string): Boolean',  @Lape_DeleteFile);
