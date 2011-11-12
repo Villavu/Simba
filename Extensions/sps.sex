@@ -1,0 +1,31 @@
+program SPSUpdater;
+
+{$INCLUDE ..\Extensions\Updater.sei}
+
+function BeforeSPS(NotNeeded: string; I: integer): boolean;
+begin
+  Result := ForceDirectories(IncludePath+'/SPS/');
+end;
+
+procedure Init;
+var
+  SPS: integer;
+begin
+  if (AddUpdater('SPS', 'http://wizzup.org/static/srl/sps.tar.bz2', 'http://wizzup.org/static/srl/sps_version', IncludePath, True, True, SPS)) then
+  begin
+    UpdaterArr[SPS].Hooks[BEFORE_UPDATE] := @BeforeSPS;
+  end;
+end;
+
+function GetName: string;
+begin
+  Result := 'SPS Updater';
+end;
+
+function GetVersion: string;
+begin
+  Result := '0.1';
+end;
+
+begin
+end.
