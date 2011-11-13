@@ -103,8 +103,20 @@ HoldMouse holds the given mouse button specified by clickType down at the
 specified *(x, y)* coordinate. If the mouse if not at the given
 (*x, y)* yet, the mouse position will be set to *(x, y)*.
 
-..
-    TODO: Example
+The following example holds the left mouse button and moves it one pixel
+to the right relative to its current position.
+
+.. code-block:: pascal
+
+    program HoldMouse;
+
+    var x, y: integer;
+
+    begin
+      GetMousePos(x, y);
+      HoldMouse(x, y, true);
+      MoveMouse(x + 1, y);
+    end.
 
 .. _scriptref-releasemouse:
 
