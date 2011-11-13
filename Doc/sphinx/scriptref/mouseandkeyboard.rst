@@ -114,7 +114,7 @@ to the right relative to its current position.
 
     begin
       GetMousePos(x, y);
-      HoldMouse(x, y, true);
+      HoldMouse(x, y, mouse_Left);
       MoveMouse(x + 1, y);
     end.
 
@@ -142,10 +142,10 @@ to the right and releases it to simulate a drag and drop motion.
 
     begin
       GetMousePos(x, y);
-      HoldMouse(x, y, true);
+      HoldMouse(x, y, mouse_Left);
       MoveMouse(x + 1, y);
       GetMousePos(x, y);
-      ReleaseMouse(x, y, true);
+      ReleaseMouse(x, y, mouse_Left);
     end.
 
 .. _scriptref-clickmouse:
@@ -171,7 +171,7 @@ The following example clicks the right mouse button at a specified point.
     var x, y: integer;
 
     begin
-      ClickMouse(x, y, false);
+      ClickMouse(x, y, mouse_Right);
     end.
 
 Keyboard Functions
@@ -192,14 +192,15 @@ KeyDown
 KeyDown sends a request to the Operating System to "fake" an event that
 causes the keyboard ``key`` to be "down".
 
-The following example holds down the enter key.
+The following example holds down the "Enter" key. (Note that if you call
+KeyDown you must call key up afterwards to release the key.)
 
 .. code-block:: pascal
 
     program KeyDown;
 
     begin
-      keydown(13);
+      KeyDown(13);
     end.
 
 .. _scriptref-keyup:
@@ -214,8 +215,18 @@ KeyUp
 KeyDown sends a request to the Operating System to "fake" an event that
 causes the ``key`` to be "up".
 
-..
-    TODO: Example
+The following example holds down the "Enter" key and release after pausing to
+simulate a human action.
+
+.. code-block:: pascal
+
+    program KeyDownRelative;
+
+    begin
+      KeyDown(13);
+      wait(RandomRange(50, 100));
+      KeyUp(13);
+    end.
 
 PressKey
 ~~~~~~~~
@@ -224,7 +235,17 @@ PressKey
 
     procedure PressKey(key: Word);
 
-KeyDown sends a request to the Operating System to "fake" a key event.
+PressKey sends a request to the Operating System to "fake" a key event.
+
+The following example simulates pressing the "Enter" key.
+
+.. code-block:: pascal
+
+    program PressKey;
+
+    begin
+      PressKey(13);
+    end.
 
 IsKeyDown
 ~~~~~~~~~
@@ -234,6 +255,18 @@ IsKeyDown
     function isKeyDown(key: Word): boolean;
 
 Returns *True* if *key* is currently being held.
+
+The following example says "Hello World" if the "F5" key is held down.
+
+.. code-block:: pascal
+
+    program PressKey;
+
+    begin
+      while not(isKeyDown(116)) do
+        Wait(50);
+      writeln('Hello World');
+    end.
 
 GetKeyCode
 ~~~~~~~~~~
