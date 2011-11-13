@@ -103,8 +103,20 @@ HoldMouse holds the given mouse button specified by clickType down at the
 specified *(x, y)* coordinate. If the mouse if not at the given
 (*x, y)* yet, the mouse position will be set to *(x, y)*.
 
-..
-    TODO: Example
+The following example holds the left mouse button and moves it one pixel
+to the right relative to its current position.
+
+.. code-block:: pascal
+
+    program HoldMouse;
+
+    var x, y: integer;
+
+    begin
+      GetMousePos(x, y);
+      HoldMouse(x, y, true);
+      MoveMouse(x + 1, y);
+    end.
 
 .. _scriptref-releasemouse:
 
@@ -119,8 +131,22 @@ HoldMouse holds the given mouse button (clickType) down at the specified
 x, y coordinate. If the mouse if not at the given x, y yet, the
 mouse position will be set to x, y.
 
-..
-    TODO: Example
+The following example holds the left mouse button and moves it one pixel
+to the right and releases it to simulate a drag and drop motion.
+
+.. code-block:: pascal
+
+    program HoldMouseRelative;
+
+    var x, y: integer;
+
+    begin
+      GetMousePos(x, y);
+      HoldMouse(x, y, true);
+      MoveMouse(x + 1, y);
+      GetMousePos(x, y);
+      ReleaseMouse(x, y, true);
+    end.
 
 .. _scriptref-clickmouse:
 
@@ -135,6 +161,18 @@ ClickMouse performs a click with the given mouse button (clickType) at the
 specified *(x, y)* coordinate. This ``click`` equals an immediate click, with no
 wait between holding down and releasing the mouse button. To create a more
 human-like effect, use the HoldMouse and ReleaseMouse functions.
+
+The following example clicks the right mouse button at a specified point.
+
+.. code-block:: pascal
+
+    program ClickMouse;
+
+    var x, y: integer;
+
+    begin
+      ClickMouse(x, y, false);
+    end.
 
 Keyboard Functions
 ------------------
@@ -154,8 +192,15 @@ KeyDown
 KeyDown sends a request to the Operating System to "fake" an event that
 causes the keyboard ``key`` to be "down".
 
-..
-    TODO: Example
+The following example holds down the enter key.
+
+.. code-block:: pascal
+
+    program KeyDown;
+
+    begin
+      keydown(13);
+    end.
 
 .. _scriptref-keyup:
 
