@@ -17,6 +17,11 @@ begin
   OpenScriptEx(IncludePath + 'msi\RunMe.simba', (TMenuItem(Sender).Caption = 'Run'));
 end;
 
+function BeforeMSI(NotNeeded: string; I: integer): boolean;
+begin
+  Result := ForceDirectories(IncludePath+'/MSI/');
+end;
+
 procedure Init;
 var
   MSI, I: integer;
@@ -25,6 +30,7 @@ var
 begin
   if (AddUpdater('MSI', 'http://wizzup.org/static/srl/msi.tar.bz2', 'http://wizzup.org/static/srl/msi_version', IncludePath, True, True, MSI)) then
   begin
+    UpdaterArr[MSI].Hooks[BEFORE_UPDATE] := @BeforeMSI;
     Names := ['Run', 'Open'];
     for I := 0 to 1 do
     begin
