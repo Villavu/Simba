@@ -224,7 +224,10 @@ Example:
 
         s := 'Hello, World';
         for i := 0 to length(s) do
+        begin
           SendKeys(s[i], 50+Random(51));
+          Wait(20+Random(30));
+        end;
 
 .. _scriptref-virtualkeys:
 
