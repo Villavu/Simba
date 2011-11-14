@@ -42,6 +42,7 @@ type
     xoff,yoff: integer;
     width,height: integer;
     index: integer; //stores the internal TocrData index for this char
+    inited : boolean; //This c har has been loaded.
   end;
   TocrData = record
     ascii: array[0..255] of TocrGlyphMetric;
@@ -220,6 +221,8 @@ begin
   SetLength(result.neg,len,size);
   SetLength(result.neg_adj,len);
   SetLength(result.map,len);
+  for i := 0 to 255 do
+    Result.ascii[i].inited:= false;
   for i:= 0 to len - 1 do
   begin
     ascii:= masks[i].ascii;
@@ -252,6 +255,7 @@ begin
     result.ascii[ord(ascii)].yoff:= masks[i].t;
     result.ascii[ord(ascii)].width:= masks[i].width;
     result.ascii[ord(ascii)].height:= masks[i].height;
+    result.ascii[ord(ascii)].inited:= true;
   end;
   result.inputs:= size;
   result.outputs:= len;
