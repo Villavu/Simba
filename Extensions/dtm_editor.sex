@@ -1058,6 +1058,7 @@ begin
     Width := 800;
     Height := 600;
     Caption := 'Simba DDTM Editor - Nielsie95';
+    Position := poScreenCenter;
 
     OnResize := @frmResize;
     OnKeyDown := @frmKeyDown;
@@ -1376,7 +1377,7 @@ end;
 {
   Simba integration
 }
- 
+
 procedure OnClick(sender : TObject);
 begin;
   ShowForm;

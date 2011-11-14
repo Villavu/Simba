@@ -7,6 +7,7 @@ var
   X: integer;
 begin
   Result := True;
+
   for X := 0 to Length(UpdaterArr) do
     if (UpdaterArr[X].Name = 'Plugins') then
     begin
@@ -14,59 +15,14 @@ begin
         Tick(UpdaterArr[X].CheckMenuItem)
       else
         Tick(UpdaterArr[X].Timer);
+
       Exit;
     end;
 end;
 
-procedure OpenDefScript(Sender: TObject);
-var
-  Script: TStringArray;
+function BeforeUpdate(NotNeeded: string; I: integer): boolean;
 begin
-  SetLength(Script, 7);
-  Script[0] := 'program Untitled;';
-  Script[1] := '{$DEFINE SMART}';
-  Script[2] := '{$I SRL/SRL.scar}';
-
-  //if (TMenuItem(Sender).Parent.Caption = 'Reflection') then
-  //begin
-  //  SetLength(Script, Length(Script) + 1);
-  //  Script[High(Script) - 4] := '{$I Reflection/Reflection.simba}';
-  //end;
-
-  Script[High(Script) - 3] := '';
-  Script[High(Script) - 2] := 'begin';
-  Script[High(Script) - 1] := '  SetupSRL;';
-
-  //if (TMenuItem(Sender).Parent.Caption = 'Reflection') then
-  //begin
-  //  SetLength(Script, Length(Script) + 1);
-  //  Script[High(Script) - 1] := '  SetupReflection;';
-  //end;
-
-  Script[High(Script)] := 'end.';    
-  
-  WriteLn('Opening ' + TMenuItem(Sender).Parent.Caption + ' Default Script...');
-  OpenScript('', Implode({$IFDEF WIN}#13+{$ENDIF}#10, Script), False);
-end;
-
-function OpenDefMenu(const Blank: string; const ID: integer): boolean;
-var
-  OpenMenuItem: TMenuItem;
-begin
-  OpenMenuItem := MoveMenuItem(
-    UpdaterArr[ID].MainMenu,
-    GetIndex(UpdaterArr[ID].MainMenu,
-      GetMenuByName('Open', UpdaterArr[ID].MainMenu)),
-    GetIndex(UpdaterArr[ID].MainMenu,
-      GetMenuByName('Update', UpdaterArr[ID].MainMenu))
-    );
-  OpenMenuItem.OnClick := @OpenDefScript;
-  OpenMenuItem.Visible := True;
-end;
-
-function BeforePlugins(NotNeeded: string; I: integer): boolean;
-begin
-  Result := ForceDirectories(UpdaterArr[I].Folder);
+  Result := ForceDirectories(IncludePath+UpdaterArr[I].Name);
 end;
 
 function SuccessPlugins(Cont: string; I: integer): boolean;
@@ -77,6 +33,7 @@ var
 begin
   Files := GetFiles(UpdaterArr[I].Folder, {$IFDEF WIN}'dll'{$ELSE}'so'{$ENDIF});
   Overwrite := True;
+
   for X := 0 to High(Files) do
     if (FileExists(PluginPath + Files[X])) then
     begin
@@ -87,36 +44,69 @@ begin
   Result := UnTarEx(Cont, PluginPath, Overwrite);
 end;
 
+procedure ClickMSI(Sender: TObject);
+begin
+  if (not (FileExists(IncludePath + 'msi\RunMe.simba'))) then
+  begin
+    WriteLn('MSI: Couldn''t find MSI!');
+    Exit;
+  end;
+
+  if (TMenuItem(Sender).Caption = 'Run') then
+    WriteLn('Running MSI...')
+  else
+    WriteLn('Opening MSI...');
+
+  OpenScriptEx(IncludePath + 'msi\RunMe.simba', (TMenuItem(Sender).Caption = 'Run'));
+end;
+
 procedure Init;
 var
-  SRL, Plugins, Refl: integer;
+  SRL, SPS, MSI, Plugins, i: integer;
+  MenuItems: array[0..1] of TMenuItem;
+  Names: array of string;
 begin
   if (AddUpdater('SRL', 'http://wizzup.org/static/srl/srl.tar.bz2', 'http://wizzup.org/static/srl/srl_version', IncludePath, True, True, SRL)) then
   begin
     UpdaterArr[SRL].Hooks[CHECK_FOR_UPDATE] := @CheckSRL;
-    UpdaterArr[SRL].Hooks[ATTACH_HOOK] := @OpenDefMenu;
+    UpdaterArr[SRL].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
   end;
 
   if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', IncludePath + 'SRL/SimbaPlugins/', False, False, Plugins)) then
   begin
-    UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforePlugins;
+    UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
     UpdaterArr[Plugins].Hooks[SUCCESS_UPDATE] := @SuccessPlugins;
   end;
 
-{  if (AddUpdater('Reflection', 'http://wizzup.org/static/srl/srlref.tar.bz2', 'http://wizzup.org/static/srl/srl_refl_version', IncludePath, True, True, Refl)) then
+  if (AddUpdater('SPS', 'http://wizzup.org/static/srl/sps.tar.bz2', 'http://wizzup.org/static/srl/sps_version', IncludePath, True, True, SPS)) then
   begin
-    UpdaterArr[Refl].Hooks[ATTACH_HOOK] := @OpenDefMenu;
-  end;   }
+    UpdaterArr[SPS].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
+  end;
+
+  if (AddUpdater('MSI', 'http://wizzup.org/static/srl/msi.tar.bz2', 'http://wizzup.org/static/srl/msi_version', IncludePath, True, True, MSI)) then
+  begin
+    Names := ['Run', 'Open'];
+
+    for I := 0 to 1 do
+    begin
+      MenuItems[I] := TMenuItem.Create(UpdaterArr[MSI].MainMenu);
+      MenuItems[I].OnClick := @ClickMSI;
+      MenuItems[I].Caption := Names[I];
+      UpdaterArr[MSI].MainMenu.Insert(I, MenuItems[I]);
+    end;
+
+    UpdaterArr[MSI].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
+  end;
 end;
 
 function GetName: string;
 begin
-  Result := 'SRL Updater';
+  Result := 'SRL/SPS/MSI/Plugins Updater';
 end;
 
 function GetVersion: string;
 begin
-  Result := '0.1';
+  Result := '1.0';
 end;
 
 begin
