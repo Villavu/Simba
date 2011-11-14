@@ -1,10 +1,81 @@
 Simple stuff, not required, may not be possible/useful:
-    -   Compiler arguments in the about form                        [ ]
-    -   Coloured writeln                                            [ ]
     -   Make an TAction for the Colour Picker.                      [ ]
     -   Portable install (needs fiddling with settings and such)    [ ]
         -   Settings rewrite                                        [ ]
     -   --no-extensions flag for Simba.                             [ ]
+
+
+-   Integrate script manager                                        [ ]
+    -   Basic support. (Install scripts)                            [X]
+    -   Update functionality                                        [X]
+    -   Uninstall scripts                                           [X]
+    -   Better storage / more stable storage                        [?]
+    -   Pretty GUI                                                  [X]
+    -   Merging / storing usernames when updating                   [?]
+
+-   Make Simba more ``modular'' / easier to read/disable things:
+
+    -   Fonts                                                       [ ]
+    -   Interpreters                                                [/]
+    -   Code completion/hints                                       [ ]
+    -   Extensions                                                  [X]
+    -   Interpreter system overhaul?                                [ ]
+        -   Lape!                                                   [/]
+            -   Extensions with Lape                                [ ]
+
+
+0.98:
+
+    -   CTS/Finder rework (needs testing)                           [X]
+    -   Script Manager (basics)                                     [/]
+    -   Initial Lape                                                [X]
+
+
+0.99:
+
+    -   Settings Rewrite                                            [/]
+    -   Pretty settings form. (ReadySteadyGo has a proof of concept
+        on his github)                                              [ ]
+    -   UAC for updater(s)?
+
+
+1.00:
+
+
+1.xx:
+    -   Out of Process plugins.
+
+Moving targets:
+
+    -   Code clean up + modularity.
+
+
+
+
+
+
+
+
+Far fetched / Ponies:
+
+    -   Use lazarus' form editor
+    -   Shortcut to jump to documentation of a function? (search online?)
+    -   libMML
+    -   pyMML
+
+    -   Coloured writeln                                            [ ]
+    -   Compiler arguments in the about form                        [ ]
+    -   DWSScript ?                                                 [ ]
+
+Documentation far fetched:
+    -   Write tutorial                                              [ ]
+
+    -   Cover all functions by at least mentioning the definition   [/]
+        -   Imported functions as well?                             [ ]
+    -   In depth documentation per function                         [ ]
+
+
+DONE:
 
 -   CTS/finder speedups and changes                                 [X]
 
@@ -17,29 +88,3 @@ Simple stuff, not required, may not be possible/useful:
         to save comparisons                                         [X]
     -   Add CTS 3                                                   [/]
     -   Add a direct RGB -> CIE L*a*b conversion                    [/]
-
--   More documentation:
-    -   Cover all functions by at least mentioning the definition   [/]
-        -   Imported functions as well?
-    -   Write tutorial                                              [ ]
-    -   In depth documentation per function                         [ ]
-
--   New interpreters
-    -   DWSScript ?                                                 [ ]
-    -   Lape!                                                       [ ]
-
--   Integrate script manager                                        [ ]
-    -   Basic support. (Install scripts)                            [X]
-    -   Update functionality                                        [X]
-    -   Uninstall scripts                                           [X]
-    -   Better storage / more stable storage                        [?]
-    -   Pretty GUI                                                  [/]
-    -   Merging / storing usernames when updating                   [?]
-
--   Make Simba more ``modular'':
-    -   Fonts                                                       [ ]
-    -   Interpreters                                                [/]
-    -   Code completion/hints                                       [ ]
-    -   Extensions                                                  [X]
-    -   Interpreter system overhaul?                                [ ]
-
