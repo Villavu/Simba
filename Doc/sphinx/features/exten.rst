@@ -26,9 +26,5 @@ For developers:
     *   Paster Extension
     *   CRov, Crash Recovery.
 
-.. note::
-    You can also use the Reflection Updater (and Downloader) for updating
-    Reflection.
-
 ..  Not listed as directly recommended but still worth noting.
 
