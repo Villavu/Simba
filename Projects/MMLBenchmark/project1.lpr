@@ -65,7 +65,7 @@ begin
 
   col := 16777215; tol := 30;
 
-  for c := 0 to 2 do // benchmark all CTS'es
+  for c := 0 to 3 do // benchmark all CTS'es
   begin
     MMLClient.MFinder.SetToleranceSpeed(c);
     t2 := gettickcount;

@@ -114,6 +114,7 @@ begin
     RegisterProperty('BRUSH', 'TBRUSH', iptr);
     RegisterProperty('HELPCONTEXT', 'LONGINT', iptrw);
     {$ENDIF}
+    RegisterProperty('DoubleBuffered', 'Boolean', iptrw);
   end;
 end;
 procedure SIRegisterTGraphicControl(cl: TPSPascalCompiler); // requires TControl
