@@ -1019,7 +1019,6 @@ begin
   c := 0;
   off := 0;
   setlength(result, 0);
-
   for i := 1 to length(text)  do
   begin
     an := Ord(text[i]);
@@ -1029,14 +1028,19 @@ begin
       continue;
     end;
     d := fontD.ascii[an];
-    {writeln(format('xoff, yoff: %d, %d', [d.xoff, d.yoff]));
+    if not d.inited then
+    begin
+      mDebugLn('WARNING: Character does not exist in font');
+      continue;
+    end;
+{    writeln(format('xoff, yoff: %d, %d', [d.xoff, d.yoff]));
     writeln(format('bmp w,h: %d, %d', [d.width, d.height]));
-    writeln(format('font w,h: %d, %d', [fontD.width, fontD.height])); }
+    writeln(format('font w,h: %d, %d', [fontD.width, fontD.height]));}
     setlength(result, c+d.width*d.height);
     for y := 0 to fontD.height - 1 do
       for x := 0 to fontD.width - 1 do
       begin
-        if fontD.pos[fontD.ascii[an].index][x + y * fontD.width] = 1 then
+        if fontD.pos[d.index][x + y * fontD.width] = 1 then
        // if fontD.pos[an][x + y * fontD.width] = 1 then
         begin
           result[c] := Point(x + off +d.xoff, y+d.yoff);
