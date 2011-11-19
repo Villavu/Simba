@@ -155,8 +155,6 @@ begin
   begin
     RegisterProperty('WarnOnly', 'boolean', iptrw);
     RegisterMethod('Procedure DefaultOperations( var xs, ys, xe, ye : integer)');
-    RegisterMethod('Function FindColorsToleranceOptimised( out Points : TPointArray; Color, xs, ys, xe, ye, Tol : Integer) : Boolean');
-    RegisterMethod('Function FindColorToleranceOptimised( out x, y : Integer; Color, xs, ys, xe, ye, tol : Integer) : Boolean');
     RegisterMethod('Function CountColorTolerance( Color, xs, ys, xe, ye, Tolerance : Integer) : Integer');
     RegisterMethod('Function CountColor( Color, xs, ys, xe, ye : Integer) : Integer');
     RegisterMethod('Function SimilarColors( Color1, Color2, Tolerance : Integer) : boolean');

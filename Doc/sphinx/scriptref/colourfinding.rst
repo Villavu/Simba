@@ -267,8 +267,9 @@ given a tolerance. There are three algorithms, from fastest to slowest:
         very little in hue. Luminance is assigned a somewhat static function, and
         has no modifier.
 
-..
-    TODO: CIE-Lab
+    *   CTS 3: Comparison using CIE L*a*b colour space, uses Pythagorean
+        distance.
+
 
 .. _scriptref-gettolerancespeed:
 .. _scriptref-setcolortolerancespeed:

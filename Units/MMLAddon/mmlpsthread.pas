@@ -23,8 +23,9 @@
 
 unit mmlpsthread;
 
-{$Define PS_USESSUPPORT}
+{$define PS_USESSUPPORT}
 //{$define USE_RUTIS}
+{$define USE_LAPE}
 {$mode objfpc}{$H+}
 
 interface
@@ -35,9 +36,12 @@ uses
   bitmaps, plugins, dynlibs,internets,scriptproperties,
   settings,settingssandbox, lcltype, dialogs
   {$IFDEF USE_RUTIS}
-  ,Rutis_Engine,Rutis_Defs
+  , Rutis_Engine, Rutis_Defs
   {$ENDIF}
-  ;
+  {$IFDEF USE_LAPE}
+  , lpparser, lpcompiler, lptypes, lpvartypes,
+    lpeval, lpinterpreter, lpdisassembler
+  {$ENDIF};
 
 const
   m_Status = 0; //Data = PChar to new status
@@ -231,6 +235,24 @@ type
       procedure Execute; override;
       procedure Terminate; override;
     end;
+   {$ENDIF}
+
+   {$IFDEF USE_LAPE}
+   { TLPThread }
+   TLPThread = class(TMThread)
+   protected
+     procedure LoadPlugin(plugidx: integer); override;
+   public
+     Parser: TLapeTokenizerString;
+     Compiler: TLapeCompiler;
+     constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+     destructor Destroy; override;
+     procedure SetScript(Script: string); override;
+     procedure Execute; override;
+     procedure Terminate; override;
+     function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+     function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+   end;
    {$ENDIF}
 
 
@@ -684,7 +706,6 @@ begin
     raise exception.createfmt('Unknown Calling Convention[%d]',[conv]);
   end;
 end;
-
 
 procedure TPSThread.LoadPlugin(plugidx: integer);
 var
@@ -1226,6 +1247,185 @@ end;
 procedure TRTThread.Terminate;
 begin
   RUTIS.Stop;
+end;
+{$ENDIF}
+
+{$IFDEF USE_LAPE}
+{ TLPThread }
+
+type
+  PBoolean = ^Boolean;
+  PStringArray = ^TStringArray;
+  PBmpMirrorStyle = ^TBmpMirrorStyle;
+  PPointArray = ^TPointArray;
+  P2DIntArray = ^T2DIntArray;
+  PCanvas = ^TCanvas;
+  P2DPointArray = ^T2DPointArray;
+  PMask = ^TMask;
+  PBox = ^TBox;
+  PTarget_Exported = ^TTarget_Exported;
+  PIntegerArray = ^TIntegerArray;
+  PExtendedArray = ^TExtendedArray;
+  PFont = ^TFont;
+//  PStrExtr = ^TStrExtr;
+  PReplaceFlags = ^TReplaceFlags;
+  PClickType = ^TClickType;
+  P2DExtendedArray = ^T2DExtendedArray;
+  PMDTM = ^TMDTM;
+  PMDTMPoint = ^TMDTMPoint;
+  PSDTM = ^TSDTM;
+  
+ procedure lp_WriteLn(Params: PParamArray);
+ begin
+   psWriteLn(PlpString(Params^[0])^);
+ end;
+
+
+{$I LPInc/Wrappers/lp_other.inc}
+{$I LPInc/Wrappers/lp_settings.inc}
+{$I LPInc/Wrappers/lp_bitmap.inc}
+{$I LPInc/Wrappers/lp_window.inc}
+{$I LPInc/Wrappers/lp_tpa.inc}
+{$I LPInc/Wrappers/lp_strings.inc}
+{$I LPInc/Wrappers/lp_colour.inc}
+{$I LPInc/Wrappers/lp_colourconv.inc}
+{$I LPInc/Wrappers/lp_crypto.inc}
+{$I LPInc/Wrappers/lp_math.inc}
+{$I LPInc/Wrappers/lp_mouse.inc}
+{$I LPInc/Wrappers/lp_file.inc}
+{$I LPInc/Wrappers/lp_keyboard.inc}
+{$I LPInc/Wrappers/lp_dtm.inc}
+{.$I LPInc/Wrappers/extensions.inc} //Doesn't work for me!
+{$I LPInc/Wrappers/lp_ocr.inc}
+{$I LPInc/Wrappers/lp_internets.inc}
+
+constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
+var
+  I: integer;
+  Fonts: TMFonts;
+begin
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
+
+  Parser := TLapeTokenizerString.Create('');
+  Compiler := TLapeCompiler.Create(Parser);
+
+  InitializePascalScriptBasics(Compiler);
+  Compiler.OnFindFile := @OnFindFile;
+  Compiler.OnHandleDirective := @OnHandleDirective;
+  Fonts := Client.MOCR.Fonts;
+  with Compiler do
+  begin
+    addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
+    
+    for I := Fonts.Count - 1 downto 0 do
+      addGlobalVar(Fonts[I].Name, Fonts[I].Name);
+
+    for I := 0 to High(VirtualKeys) do
+      addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
+
+    {$I LPInc/lpdefines.inc}
+    {$I LPInc/lpcompile.inc}
+
+    {$I LPInc/lpexportedmethods.inc}
+  end;
+end;
+
+destructor TLPThread.Destroy;
+begin
+  try
+    {if (Compiler <> nil) then
+      Compiler.Free;}
+
+    if (Parser <> nil) then
+      Parser.Free;
+  except
+    on E: Exception do
+      psWriteln('Exception TLPThread.Destroy: ' + e.message);
+  end;
+
+  inherited Destroy;
+end;
+
+procedure TLPThread.SetScript(Script: string);
+begin
+  Parser.Doc := Script;
+end;
+
+function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+begin
+  Result := nil;
+  FileName := IncludePath + FileName;
+end;
+
+function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+var
+  plugin_idx: integer;
+begin
+  Result := False;
+  if (Directive = 'loadlib') then
+  begin
+    if (Argument <> '') then
+    begin
+      plugin_idx := PluginsGlob.LoadPlugin(Argument);
+      if (plugin_idx >= 0) then
+      begin
+        LoadPlugin(plugin_idx);
+        Result := True;
+      end else
+        psWriteln(Format('Your DLL %s has not been found', [Argument]))
+    end else
+      psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
+  end;
+end;
+
+procedure TLPThread.LoadPlugin(plugidx: integer);
+var
+  I: integer;
+begin
+  with PluginsGlob.MPlugins[plugidx] do
+  begin
+    for i := 0 to TypesLen -1 do
+      with Types[I] do
+        Compiler.addGlobalType(TypeDef, TypeName);
+
+    for i := 0 to MethodLen - 1 do
+      with Methods[i] do
+        Compiler.addGlobalFunc(FuncStr, FuncPtr);
+  end;
+end;
+
+procedure TLPThread.Execute;
+  function CombineDeclArray(a, b: TLapeDeclArray): TLapeDeclArray;
+  var
+    i, l: Integer;
+  begin
+    Result := a;
+    l := Length(a);
+    SetLength(Result, l + Length(b));
+    for i := High(b) downto 0 do
+      Result[l + i] := b[i];
+  end;
+begin
+  CurrThread := self;
+  try
+    Starttime := lclintf.GetTickCount;
+    if Compiler.Compile() then
+    begin
+      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      if CompileOnly then
+        Exit;
+      RunCode(Compiler.Emitter.Code);
+      psWriteln('Successfully executed.');
+    end else
+      psWriteln('Compiling failed.');
+  except
+     on E : Exception do
+       psWriteln('Exception in Script: ' + e.message);
+  end;
+end;
+
+procedure TLPThread.Terminate;
+begin
 end;
 {$ENDIF}
 
