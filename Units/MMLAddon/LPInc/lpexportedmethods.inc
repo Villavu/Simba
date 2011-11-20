@@ -288,7 +288,7 @@ AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFo
 
 { Other }
 
-AddGlobalFunc('procedure Writeln(const str: string);', @Lape_Writeln);
+//AddGlobalFunc('procedure Writeln(const str: string);', @Lape_Writeln);
 AddGlobalFunc('function SetScriptProp(prop: TSP_Property; Value: TVariantArray): boolean', @Lape_SetScriptProp);
 AddGlobalFunc('function GetScriptProp(prop: TSP_Property; var Value: TVariantArray): boolean', @Lape_GetScriptProp);
 AddGlobalFunc('procedure Wait(t: DWord);', @Lape_Wait);
