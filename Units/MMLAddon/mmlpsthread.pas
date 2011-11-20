@@ -1310,6 +1310,7 @@ begin
   Compiler := TLapeCompiler.Create(Parser);
 
   InitializePascalScriptBasics(Compiler);
+  Compiler['Move'].Name := 'MemMove';
   Compiler.OnFindFile := @OnFindFile;
   Compiler.OnHandleDirective := @OnHandleDirective;
   Fonts := Client.MOCR.Fonts;
