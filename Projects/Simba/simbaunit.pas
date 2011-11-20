@@ -492,7 +492,7 @@ type
     procedure ClearTab( TabIndex : integer);
     procedure CloseTabs(Exclude: integer = -1; Silent : boolean = false); //-1 for no exclusion
     procedure SetEditActions;
-    procedure DoSearch(Next : boolean; HighlightAll : boolean);
+    procedure DoSearch(ANext : boolean; HighlightAll : boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
     procedure RefreshTabSender(sender : PtrInt);
     procedure CreateDefaultEnvironment;
@@ -1266,7 +1266,7 @@ begin
     EditActions(false,false,false,false,false,false);
 end;
 
-procedure TSimbaForm.DoSearch(Next: boolean; HighlightAll : boolean);
+procedure TSimbaForm.DoSearch(ANext: boolean; HighlightAll : boolean);
 var
   Res : integer;
   CurrPos : TPoint;
@@ -1286,7 +1286,7 @@ begin
   else
   begin
     mDebugLn('Searching: ' + SearchString);
-    if next then
+    if ANext then
       CurrPos := CurrScript.SynEdit.LogicalCaretXY
     else
       CurrPos := SearchStart;
