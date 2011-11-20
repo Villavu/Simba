@@ -1310,6 +1310,7 @@ begin
   Compiler := TLapeCompiler.Create(Parser);
 
   InitializePascalScriptBasics(Compiler);
+  Compiler['Move'].Name := 'MemMove';
   Compiler.OnFindFile := @OnFindFile;
   Compiler.OnHandleDirective := @OnHandleDirective;
   Fonts := Client.MOCR.Fonts;
@@ -1362,7 +1363,7 @@ var
   plugin_idx: integer;
 begin
   Result := False;
-  if (Directive = 'loadlib') then
+  if (not InPeek) and (Directive = 'loadlib') then
   begin
     if (Argument <> '') then
     begin
