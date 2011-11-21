@@ -91,7 +91,7 @@ AddFunction(@ps_hextoint,'function HexToInt(Hex : string) : integer');
 AddFunction(@ps_sar,'function sar(AValue : longint; shift : byte) : longint;');
 AddFunction(@ps_ror,'function ror(num : longword; shift : byte) : LongWord;');
 AddFunction(@ps_rol,'function rol(num : longword; shift : byte) : LongWord;');
-AddFunction(@ps_tan, 'function ps_tan(e: extended): extended;');
+AddFunction(@ps_tan, 'function tan(e: extended): extended;');
 AddFunction(@ps_radians, 'function radians(e: extended): extended;');
 AddFunction(@ps_degrees, 'function degrees(e: extended): extended;');
 AddFunction(@ps_ArcSin, 'function ArcSin(e: extended): extended;');
