@@ -54,7 +54,7 @@ procedure TForm1.OCRButtonClick(Sender: TObject);
 Var
    C: TClient;
    bmp: TMufasaBitmap;
-   x,y: integer;
+   x,y, ii: integer;
    s: string;
    Shadow: boolean;
    t: dword;
@@ -101,9 +101,12 @@ begin
 
   t:=gettickcount;
 
-  s := C.MOCR.GetUpTextAtEx(7, 7, Shadow);
+  s := C.MOCR.GetUpTextAtEx(8, 10, Shadow);
 
   writeln(inttostr(gettickcount-t));
+
+  for  ii := 1 to length(s) do
+    writeln('Text found: ' + s[ii]);
 
 
   // write to debugbmp
