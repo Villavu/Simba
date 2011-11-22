@@ -627,7 +627,9 @@ begin
     DebugToBmp(bmp,0,h);
   {$ENDIF}
 
-  // Filter 1
+  {
+    Filter 1, remove most colours we don't want.
+  }
   FilterUpTextByColour(bmp);
   {$IFDEF OCRSAVEBITMAP}
   bmp.SaveToFile(OCRDebugPath + 'ocrcol.bmp');
@@ -637,6 +639,10 @@ begin
     DebugToBmp(bmp,1,h);
   {$ENDIF}
 
+  {
+    Filter 2, remove all false shadow points and points that have no shadow
+    after false shadow is removed.
+  }
   // Filter 2
   FilterUpTextByCharacteristics(bmp,w,h);
 
@@ -647,44 +653,59 @@ begin
     DebugToBmp(bmp,2,h);
   {$ENDIF}
 
-  // create a bitmap with only the shadows on it
+  {
+    We've now passed the two filters.
+    We need to extract the characters and return a TPA of each character
+  }
+
+  { Create a bitmap with only the shadows on it }
   shadowsbmp := bmp.copy;
   FilterShadowBitmap(shadowsbmp);
   {$IFDEF OCRDEBUG}
   DebugToBmp(shadowsbmp,3,h);
   {$ENDIF}
 
-  // create a bitmap with only the chars on it
+  { create a bitmap with only the chars on it }
   charsbmp := bmp.copy;
   FilterCharsBitmap(charsbmp);
   {$IFDEF OCRDEBUG}
     DebugToBmp(charsbmp,4,h);
   {$ENDIF}
 
-  // this gets the chars from the bitmap.
+  { Now actually extract the characters }
 
-  // TODO:
+  // TODO XXX FIXME:
   // We should make a different TPA
   // for each colour, rather than put them all in one. Noise can be of a
   // different colour.
-  setlength(chars, charsbmp.height * charsbmp.width);
-  charscount:=0;
+
+  SetLength(chars, charsbmp.height * charsbmp.width);
+  charscount := 0;
+
   for y := 0 to charsbmp.height - 1 do
     for x := 0 to charsbmp.width - 1 do
     begin
+      { If the colour > 0, it is a valid point of a character }
       if charsbmp.fastgetpixel(x,y) > 0 then
       begin
-        chars[charscount]:=point(x,y);
+        { Add the point }
+        chars[charscount] := point(x,y);
         inc(charscount);
       end;
     end;
   setlength(chars,charscount);
+  { Limit to charpoint amount of points }
 
-  // split chars
+  { Now that the points of all the characters are in array ``chars'', split }
   chars_2d := SplitTPAEx(chars,1,charsbmp.height);
 
-  { FIXME: This only sorts the points in every TPA }
+  { Each char now has its own TPA in chars_2d[n] }
+
+  { TODO: This only sorts the points in every TPA }
   SortATPAFrom(chars_2d, point(0,0));
+
+
+  { TODO: Should this loop not be in the OCRDEBUG define ? }
   for x := 0 to high(chars_2d) do
   begin
     pc := random(clWhite);
@@ -697,33 +718,53 @@ begin
 
   for y := 0 to high(chars_2d) do
   begin
+    { bb is the bounding box of one character }
     bb:=gettpabounds(chars_2d[y]);
+
+    { Character is way too large }
     if (bb.x2 - bb.x1 > 10) or (length(chars_2d[y]) > 70) then
     begin // more than one char
+
       {$IFDEF OCRDEBUG}
       if length(chars_2d[y]) > 70 then
         mDebugLn('more than one char at y: ' + inttostr(y));
       if (bb.x2 - bb.x1 > 10) then
         mDebugLn('too wide at y: ' + inttostr(y));
       {$ENDIF}
+
+      { TODO: Remove all the stuff below? }
+
+      { Store the shadow of each char in helpershadow }
       helpershadow:=getshadows(shadowsbmp,chars_2d[y]);
+
+      { Split helpershadow as well }
       chars_2d_b := splittpaex(helpershadow,2,shadowsbmp.height);
+
       //writeln('chars_2d_b length: ' + inttostr(length(chars_2d_b)));
+
+      { Draw on shadowsbmp }
       shadowsbmp.DrawATPA(chars_2d_b);
       for x := 0 to high(chars_2d_b) do
       begin
         setlength(shadows,length(shadows)+1);
         shadows[high(shadows)] :=  ConvTPAArr(chars_2d_b[x]);
       end;
-    end else
-    if length(chars_2d[y]) < 70 then
+
+    end else if length(chars_2d[y]) < 70 then
     begin
+      { Character fits, get the shadow and store it in shadows }
       setlength(shadows,length(shadows)+1);
       shadows[high(shadows)] := getshadows(shadowsbmp, chars_2d[y]);
     end;
   end;
 
-  // sort, split messes with the order of chars
+  {
+    Put the characters back in proper order,
+    SplitTPA messes with the order of them.
+    Perform some more length checks as well. (TODO: WHY?)
+
+    Store the resulting tpa in ``finalchars''.
+  }
   SortATPAFromFirstPoint(chars_2d, point(0,0));
   for y := 0 to high(chars_2d) do
   begin
@@ -733,12 +774,14 @@ begin
     finalchars[high(finalchars)] := chars_2d[y];
   end;
 
+  { Sort the shadows as well because splitTPA messes with the order }
   SortATPAFromFirstPoint(shadows, point(0,0));
   for x := 0 to high(shadows) do
   begin
     pc:=0;
+
+    { Draw some stuff? TODO WHY }
     pc := random(clWhite);
-    //pc := rgbtocolor(integer(round((x+1)*255/length(shadows))), round((x+1)*255/length(shadows)), round((x+1)*255/length(shadows)));
     for y := 0 to high(shadows[x]) do
       shadowsbmp.FastSetPixel(shadows[x][y].x, shadows[x][y].y, pc);
   end;
@@ -746,6 +789,10 @@ begin
     DebugToBmp(shadowsbmp,6,h);
   {$ENDIF}
 
+  {
+    Return finalized characters.
+    They are not yet trimmed. They will be trimmed later on.
+  }
   _chars := finalchars;
   _shadows := shadows;
 
@@ -785,6 +832,7 @@ begin
   ww := 400;
   hh := 20;
 
+  { Return all the character points to chars & shadow }
   getTextPointsIn(atX, atY, ww, hh, shadow, chars, shadows);
 
   // Get font data for analysis.
@@ -803,6 +851,7 @@ begin
   lbset:=false;
   setlength(n, (font.width+1) * (font.height+1));
   nl := high(n);
+
   for j := 0 to high(thachars) do
   begin
     for i := 0 to nl do
@@ -810,24 +859,28 @@ begin
 
     t:= thachars[j];
     b:=gettpabounds(t);
+
     if not lbset then
     begin
       lb:=b;
       lbset:=true;
     end else
     begin
-      // spacing
+      { This is a space }
       if b.x1 - lb.x2 > 5 then
         result:=result+' ';
+
+      { TODO: Don't we need a continue; here ? }
+
       lb:=b;
     end;
 
-
+    { ``Normalize'' the Character. THIS IS IMPORTANT }
     for i := 0 to high(t) do
       t[i] := t[i] - point(b.x1,b.y1);
 
     {
-      FIXME: If the TPA is too large, we can still go beyond n's bounds.
+      TODO: If the TPA is too large, we can still go beyond n's bounds.
       We should check the bounds in GetTextPointsIn
     }
     for i := 0 to high(thachars[j]) do
@@ -835,6 +888,8 @@ begin
       if (thachars[j][i].x) + ((thachars[j][i].y) * font.width) <= nl then
         n[(thachars[j][i].x) + ((thachars[j][i].y) * font.width)] := 1;
     end;
+
+    { Analyze the final glyph }
     result := result + GuessGlyph(n, font);
   end;
 end;
