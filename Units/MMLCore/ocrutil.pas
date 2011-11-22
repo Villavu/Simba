@@ -160,18 +160,25 @@ begin
     shadow_i := 0
   else
     shadow_i := 255;
-  size:= bmp.Width * bmp.Height;
-  SetLength(result.mask,size);
+
+  size := bmp.Width * bmp.Height;
+  SetLength(result.mask, size);
+
   for j := 0 to size-1 do
   begin
     color := bmp.FData[j];
-   { if (color.r = 255) and (color.g = 255 and not shadow_i) and
-    (color.b = 255 and not shadow_i) then}
+    {
+    The character colour is white (255,255,255) if it is a character, red if it
+    is a shadow.
+    r should always be 255, g and b either 0 or 255, depending wether it is a
+    colour.
+    }
     if (color.r = 255) and (color.g = shadow_i) and (color.b = shadow_i) then
       result.mask[j]:= 1
     else
-      result.mask[j]:= 0;
+      result.mask[j]:= 0; { Not part of shadow or character }
   end;
+
   result.width:= bmp.width;
   result.height:= bmp.height;
   result.ascii:= ascii;

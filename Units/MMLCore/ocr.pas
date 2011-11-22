@@ -189,6 +189,7 @@ begin
     TClient(Self.Client).WriteLn('Loaded fonts: ' + fonts_loaded);
   end;
   {$ENDIF}
+  { TODO FIXME CHANGE TO NEW CHARS? }
   If DirectoryExists(path + 'UpChars') then
     FFonts.LoadFont('UpChars', true); // shadow
 end;
@@ -790,12 +791,12 @@ begin
 
   if shadow then
   begin
-    font := FFonts.GetFont('UpChars_s');
+    font := FFonts.GetFont('NewChars_s');
     thachars := shadows;
   end
   else
   begin
-    font := FFonts.GetFont('UpChars');
+    font := FFonts.GetFont('NewChars');
     thachars := chars;
   end;
 
