@@ -30,33 +30,45 @@ uses
   Classes, SysUtils, MufasaTypes,bitmaps;
 
 type
-  TNormArray = array of integer;
+  TNormArray = array of integer; { Can we please call this TIntegerArray?}
   TocrGlyphMask = record
-    ascii: char;
-    width,height: integer;
-    l,r,t,b: integer;
-    mask: TNormArray;
+    ascii: char; { ASCII value - TODO: If we want unicode or something it
+                   shouldn't be a char}
+    width,height: integer; { Width, Height }
+    l,r,t,b: integer; {Left, Right, Top, Bottom }
+    mask: TNormArray; { 1D TPA. '0' is not part of char, 1 is part of char }
   end;
+
   TocrGlyphMaskArray = array of TocrGlyphMask;
+
   TocrGlyphMetric = record
-    xoff,yoff: integer;
+    xoff,yoff: integer; { xoff and yoff (only on the left side, afaik
+                          correspond to l and t (see InitOCR) }
     width,height: integer;
     index: integer; //stores the internal TocrData index for this char
-    inited : boolean; //This c har has been loaded.
+    { Index is never used }
+
+    inited : boolean; //This char has been loaded.
   end;
+
   TocrData = record
-    ascii: array[0..255] of TocrGlyphMetric;
+    ascii: array[0..255] of TocrGlyphMetric; {Why is this also named ascii? :(}
     pos: array of array of integer;
-    pos_adj: array of real;
+    pos_adj: array of real; { pixels / pixels that are 1 }
     neg: array of array of integer;
-    neg_adj: array of real;
-    map: array of char;
+    neg_adj: array of real; { pixels / pixels that are 0 }
+    map: array of char; { Ascii value - maps back to the char }
     width,height, max_width, max_height: integer;
     inputs,outputs: integer;
+    {
+      Inputs = bitfield
+      Outputs = amount of masks
+    }
   end;
 
   TocrDataArray = array of TocrData;
 
+  { TODO: We can remove this and Extract Text as well }
   tLab = record
     L,a,b: real;
   end;
@@ -79,6 +91,19 @@ uses
   {End To-Remove unit}
 
 {initalizes the remaining fields from a TocrGlyphMask and finds the global bounds}
+
+{
+  Function initialises the following fields:
+      l,r,t,b (Left, Right, Top, Bottom)
+      returns maxwidth and maxheight of the font.
+
+
+  TODO: out width,height seem to be dead variables? Fields seem to be used, but
+  I have idea what for yet. Isn't it exactly the same as maxwidth and maxheight?
+
+  TODO: It does not seem to normalize the characters.
+
+}
 procedure findBounds(glyphs: TocrGlyphMaskArray; out width,height,maxwidth,maxheight: integer);
 var
   i,x,y,c,w,h: integer;
@@ -99,14 +124,15 @@ begin
     dat:= glyphs[c].mask;
     w:= glyphs[c].width;
     h:= glyphs[c].height;
-    l:= w;
-    r:= 0;
-    t:= h;
-    b:= 0;
+    l:= w; {left}
+    r:= 0; {right}
+    t:= h; {top}
+    b:= 0; {bottom}
     for i:= 0 to w*h-1 do
     begin
       if dat[i] = 1 then
       begin
+        { Get position in x, y }
         x:= i mod w;
         y:= i div w;
         if x > maxx then maxx := x;
@@ -150,6 +176,11 @@ begin
   end;
 end;
 
+{
+  Load one bitmap and return the accompanying TOCRGlyphMask.
+
+  TODO: We should probably just calculate the shadow rather than use the red pixels.
+}
 function LoadGlyphMask(const bmp: TMufasaBitmap; shadow: boolean; const ascii : char): TocrGlyphMask;
 var
   size,j: integer;
@@ -184,7 +215,10 @@ begin
   result.ascii:= ascii;
 end;
 
-{This Loads the actual data from the .bmp, but does not init all fields}
+{
+  This Loads the actual data from the .bmp, but does not init all fields and
+  doesn't normalize the characters.
+}
 function LoadGlyphMasks(const path: string; shadow: boolean): TocrGlyphMaskArray;
 var
   strs: array of string;
@@ -205,6 +239,9 @@ begin
 end;
 
 {Fully initalizes a TocrData structure, this is LoadFont or whatever, call it first}
+{
+  InitOCR initialises each character. 
+}
 function InitOCR(const masks : TocrGlyphMaskArray): TocrData;
 var
   t,b,l,r,w,h,mw: integer;
@@ -216,23 +253,39 @@ var
 begin
   w:= 0;
   h:= 0;
+
+  { Find the maxw and maxh, initialise the l,r,b,h fields }
   findBounds(masks,w,h,maxw,maxh);
+
   len:= Length(masks);
+
   result.width:= w;
   result.height:= h;
   result.max_width := maxw;
   result.max_height := maxh;
+
+  { What are w and h even? They are reset the loop in findBounds every time }
+  { Perhaps you want max_width and max_height? }
   size:= w * h;
+
   SetLength(result.pos,len,size);
   SetLength(result.pos_adj,len);
   SetLength(result.neg,len,size);
   SetLength(result.neg_adj,len);
+
+  { Maps back to value of char }
   SetLength(result.map,len);
+
   for i := 0 to 255 do
     Result.ascii[i].inited:= false;
+
+  {
+    This loop seems to normalize the values (store them in pos and neg).
+  }
   for i:= 0 to len - 1 do
   begin
     ascii:= masks[i].ascii;
+
     pos:= 0;
     l:= masks[i].l;
     r:= masks[i].r;
@@ -252,19 +305,38 @@ begin
           result.pos[i][c] := 0;
       end;
     end;
+
+    { Inverted of pos, 1 if pos is 0, 0 if neg was 1 }
     for c:= 0 to size-1 do
       result.neg[i][c]:= 1 - result.pos[i][c];
+
+    {
+        local var pos = the amount of pixels with the value 1.
+        So pos_adj and neg_adj is the percentage of pixels that are 1 and 0,
+        respectively.
+    }
     if pos = 0 then result.neg_adj[i]:= 1 else result.neg_adj[i]:= 1 / pos;
     if pos = 0 then result.pos_adj[i]:= 0 else result.pos_adj[i]:= 1 / pos;
+
+    { Map back to ascii value. }
     result.map[i]:= ascii;
-    result.ascii[ord(ascii)].index:= i;
+    result.ascii[ord(ascii)].index:= i; { Reference back to masks, I think.
+                                          TODO: NEVER USED }
     result.ascii[ord(ascii)].xoff:= masks[i].l;
     result.ascii[ord(ascii)].yoff:= masks[i].t;
+
+    { These are not changed by the loop }
     result.ascii[ord(ascii)].width:= masks[i].width;
     result.ascii[ord(ascii)].height:= masks[i].height;
+
+    { Done }
     result.ascii[ord(ascii)].inited:= true;
   end;
+
+  { What is size ?? w * h, but those are just maxwidth and maxheight? }
   result.inputs:= size;
+
+  { Amount of masks }
   result.outputs:= len;
 end;
 
@@ -280,18 +352,38 @@ begin
   SetLength(neg_weights,ocrdata.outputs);
   inputs:= ocrdata.inputs - 1;
   outputs:= ocrdata.outputs - 1;
-  for i:= 0 to inputs do
+
+  {
+    This loop calculates the ``weights'' for each mask/character compared to the
+    glyph passed.
+
+    pos_weights contains (after the loop) the amount of correct fields that
+    should be 1. 
+    neg_weights contains (after the loop) the amount of correct fields that
+    should be 0.
+  }
+  for i:= 0 to inputs do { every entry of the bitfield }
   begin
-    val:= glyph[i];
-    for c:= 0 to outputs do
+    val:= glyph[i]; { Value of the glyph at that point - 1 or 0. }
+    for c:= 0 to outputs do { amount of masks }
     begin
       pos_weights[c]:= pos_weights[c] + ocrdata.pos[c][i] * val;
       neg_weights[c]:= neg_weights[c] + ocrdata.neg[c][i] * val;
     end
   end;
+
   max:= 0;
   for i:= 0 to outputs do
   begin
+    {
+      Weight = the amount of correct POS matches * the percentage of `1' pixels
+      in the orig char, minus the amount of negative weights * the percentage of
+      `0' pixels in the orig char.
+
+      The first part (POS part) is high if there are a lot of good matches (if
+      they share a lot of `1's at the same spot, the second is LOW (you want
+      this) if the amount of matches of `0's matches the orig char.
+    }
     weight:= pos_weights[i] * ocrdata.pos_adj[i] - neg_weights[i] * ocrdata.neg_adj[i];
     if (weight > max) then
     begin
