@@ -328,7 +328,13 @@ end;
 function TMBitmaps.CreateBMPFromFile(const Path: string): integer;
 begin
   Result := CreateBMP(0,0);
-  BmpArray[result].LoadFromFile(Path);
+  try
+    BmpArray[result].LoadFromFile(Path);
+  except
+    FreeBMP(Result);
+    Result := -1; // meh
+    raise;
+  end;
 end;
 
 function HexToInt(HexNum: string): LongInt;inline;
@@ -504,8 +510,7 @@ var
   LazIntf : TLazIntfImage;
   RawImageDesc : TRawImageDescription;
 begin
-  if FileExistsUTF8(FileName) then
-  begin;
+  try
     LazIntf := TLazIntfImage.Create(0,0);
     RawImageDesc.Init_BPP32_B8G8R8_BIO_TTB(LazIntf.Width,LazIntf.Height);
     LazIntf.DataDescription := RawImageDesc;
@@ -516,6 +521,7 @@ begin
     Self.H := LazIntf.Height;
     FData := GetMem(Self.W*Self.H*SizeOf(TRGB32));
     Move(LazIntf.PixelData[0],FData[0],w*h*sizeOf(TRGB32));
+  finally
     LazIntf.Free;
   end;
 end;
