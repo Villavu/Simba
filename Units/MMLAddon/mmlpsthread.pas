@@ -443,7 +443,7 @@ begin
   path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(parentfile))]);
   if path = '' then
   begin
-    psWriteln(Path + ' doesn''t exist');
+    psWriteln('File ''' + Filename + ''' doesn''t exist');
     Result := false;
     Exit;
   end;
