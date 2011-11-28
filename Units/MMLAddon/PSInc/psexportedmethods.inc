@@ -112,6 +112,8 @@ AddFunction(@ps_CscH, 'function CscH(e: extended): extended;');
 AddFunction(@ps_ArcCosh, 'function ArcCosh(e: extended): extended;');
 AddFunction(@ps_ArcSinh, 'function ArcSinh(e: extended): extended;');
 AddFunction(@DecRet, 'function DecRet(e: Extended): Extended;');
+AddFunction(@ps_MinA, 'function MinA(a: TIntegerArray): Integer;');
+AddFunction(@ps_MaxA, 'function MaxA(a: TIntegerArray): Integer;');
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 {window}
