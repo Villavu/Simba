@@ -28,11 +28,12 @@ unit stringutil;
 interface
 
 uses
-  Classes, SysUtils,mufasatypes;
+  Classes, SysUtils, mufasatypes;
 
 type
   StrExtr =(Numbers, Letters, Others);
   PStrExtr = ^StrExtr;
+
 function ExtractFromStr( Str : string; Extract : StrExtr) : string;
 function Capitalize(str : string) : string;
 function Implode(Glue : string; Pieces: TStringArray): string;
@@ -41,10 +42,12 @@ function CompressString(const Str : string) : string;
 function DecompressString(const Compressed : string) : string;
 function Base64Encode(const str : string) : string;
 function Base64Decode(const str : string) : string;
+function LevDistance(src, target: string): Integer;
+function NormLevDistance(src, target: string): Extended;
 
 implementation
 uses
-  paszlib,  DCPbase64;
+  paszlib,  DCPbase64, math;
 
 function Implode(Glue: string;Pieces: TStringArray): string;
 var
@@ -186,6 +189,75 @@ begin;
   for i := length(str) downto 1 do
     if str[i] in Range then
       result := str[i] + result;
+end;
+
+(*
+LevDistance
+===========
+
+Number of deletions, insertions, or substitutions to transform src into target.
+
+Uses Levenshtein, original code taken from:
+www.merriampark.com/lddelphi.htm
+*)
+function LevDistance(src, target: string): Integer;
+
+  function min3(a, b, c: Integer): Integer;
+  begin
+    Result := a;
+    if (Result > b) then
+      Result := b;
+    if (Result > c) then
+      Result := c;
+  end;
+
+var
+  d: array of array of Integer;
+  n, m, i, j, cost: Integer;
+  s_i, t_j: char;
+begin
+  n := Length(src);
+  m := Length(target);
+  if (n = 0) then
+  begin
+    Result := m;
+    Exit;
+  end;
+  if (m = 0) then
+  begin
+    Result := n;
+    Exit;
+  end;
+
+  setLength(d, n+1, m+1);
+
+  for i := 0 to n do
+    d[i, 0] := i;
+  for j := 0 to m do
+    d[0, j] := j;
+
+  for i := 1 to n do
+  begin
+    s_i := src[i];
+    for j := 1 to m do
+    begin
+      t_j := target[j];
+      if (s_i = t_j) then
+        cost := 0
+      else
+        cost := 1;
+
+      d[i, j] := min3(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i -1][j - 1] + cost);
+    end;
+  end;
+
+  Result := d[n, m];
+end;
+
+function NormLevDistance(src, target: String): Extended;
+begin
+  Result := Max(Length(src), Length(target)) * 1.0;
+  Result := LevDistance(src, target) / Result;
 end;
 
 end.
