@@ -38,6 +38,9 @@ function ChangeDistTPA(var TPA : TPointArray; mx,my : integer; newdist : extende
 function RiemannGauss(Xstart,StepSize,Sigma : extended; AmountSteps : integer) : extended;
 function DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray;
 function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;
+function MinA(a: TIntegerArray): Integer;
+function MaxA(a: TIntegerArray): Integer;
+
 implementation
 uses
   math;
@@ -148,6 +151,36 @@ begin
   except
     result := false;
   end;
+end;
+
+function MinA(a: TIntegerArray): Integer;
+var
+  L, i: Integer;
+begin
+  L := High(a);
+  if (L < 0) then
+    Exit(0);
+
+  Result := a[0];
+
+  for i := 1 to L do
+    if (a[i] < Result) then
+      Result := a[i];
+end;
+
+function MaxA(a: TIntegerArray): Integer;
+var
+  L, i: Integer;
+begin
+  L := High(a);
+  if (L < 0) then
+    exit(0);
+
+  Result := a[0];
+
+  for i := 1 to L do
+    if (a[i] > Result) then
+      Result := a[i];
 end;
 
 end.
