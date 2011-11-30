@@ -36,7 +36,7 @@ uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas,
 
-  MufasaTypes,
+  mufasabase, MufasaTypes,
   mmlpsthread, // Code to use the interpreters in threads.
   synedittypes,
 
@@ -50,7 +50,7 @@ uses
   lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
   SynEditMarkupHighAll, LMessages, Buttons,
-  mmisc, stringutil,mufasatypesutil, mufasabase,
+  mmisc, stringutil,mufasatypesutil,
   about, framefunctionlist, ocr, updateform, Simbasettings, 
   {$IFDEF USE_EXTENSIONS}psextension, virtualextension, extensionmanager,{$ENDIF}
   settingssandbox,
@@ -62,8 +62,6 @@ uses
   settings, updater;
 
 const
-  SimbaVersion = 974;
-
   interp_PS = 0; //PascalScript
   interp_RT = 1; //RUTIS
   interp_CP = 2; //CPascal
