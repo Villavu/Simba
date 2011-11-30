@@ -96,9 +96,9 @@ uses
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
   GetLatestSimbaVersion;
-  mDebugLn(format('Current Simba version: %d',[SimbaUnit.SimbaVersion]));
+  mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
   mDebugLn('Latest Simba Version: ' + IntToStr(FSimbaVersion));
-  Exit(SimbaUnit.SimbaVersion < FSimbaVersion);
+  Exit(SimbaVersion < FSimbaVersion);
 end;
 
 function TSimbaUpdateForm.GetLatestFontVersion: integer;
