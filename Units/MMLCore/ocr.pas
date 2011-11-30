@@ -65,7 +65,7 @@ type
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
     procedure FilterUpTextByColour(bmp: TMufasaBitmap);
-    procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
+    procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
     procedure FilterShadowBitmap(bmp: TMufasaBitmap);
     procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
@@ -392,7 +392,7 @@ FilterUpTextByCharacteristics
     procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
 *)
 
-procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
+procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
 var
    x,y: Integer;
 begin
@@ -637,7 +637,7 @@ begin
   {$ENDIF}
 
   // Filter 2
-  FilterUpTextByCharacteristics(bmp,w,h);
+  FilterUpTextByCharacteristics(bmp);
 
   {$IFDEF OCRSAVEBITMAP}
   bmp.SaveToFile(OCRDebugPath + 'ocrdebug.bmp');
