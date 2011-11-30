@@ -68,4 +68,7 @@ begin
   result := CurrThread.Client.MOCR.Fonts.FreeFont(FontName);
 end;
 
-
+procedure ps_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
+begin
+  CurrThread.Client.MOCR.FilterUpTextByCharacteristics(bmp);
+end;
