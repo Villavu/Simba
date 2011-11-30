@@ -34,6 +34,7 @@ uses
 
 const
     SimbaVersion = 990;
+    SimbaMajor = 990; // this should be 980 even if SimbaVersion is 981, etc
 
 procedure mDebugLn( s : string);overload;
 procedure mDebugLn( s : string; f : array of const);overload;
