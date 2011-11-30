@@ -367,6 +367,7 @@ AddFunction(@ps_gettextATPA,'function GetTextATPA(const ATPA : T2DPointArray; co
 AddFunction(@ps_LoadSystemFont,'function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;');
 AddFunction(@ps_LoadFont, 'function LoadFont(const FontName: string; shadow: boolean): boolean;');
 AddFunction(@ps_FreeFont, 'function FreeFont(const FontName: string): boolean;');
+AddFunction(@ps_FilterUpTextByCharacteristics, 'procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);');
 {$ENDIF}
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
