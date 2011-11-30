@@ -31,6 +31,10 @@ interface
 uses
   Classes, SysUtils{$ifdef MSWindows},windows{$endif};
 
+
+const
+    SimbaVersion = 980;
+
 procedure mDebugLn( s : string);overload;
 procedure mDebugLn( s : string; f : array of const);overload;
 procedure InitmDebug;
