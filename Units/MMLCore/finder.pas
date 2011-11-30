@@ -1355,24 +1355,15 @@ end;
 function TMFinder.FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x,
   y: Integer; xs, ys, xe, ye, tolerance: integer): Boolean;
 var
-  temp: integer;
   p: TPointArray;
 
 begin
-  temp := Self.CTS;
-  Self.CTS := -1;
-
-  try
-      Result := FindBitmapsSpiralTolerance(bitmap, x, y, p, xs, ye, xe, ye, 0, 1);
-      if Result then
-      begin
-          x := p[0].x;
-          y := p[0].y;
-      end;
-
-  finally
-      Self.CTS := temp;
-  end;
+    Result := FindBitmapsSpiralTolerance(bitmap, x, y, p, xs, ys, xe, ye, tolerance, 1);
+    if Result then
+    begin
+        x := p[0].x;
+        y := p[0].y;
+    end;
 end;
 
 function TMFinder.FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x,
