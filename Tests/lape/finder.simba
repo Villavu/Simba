@@ -1,0 +1,368 @@
+program FinderTest;
+
+{
+    Use different CTS'es:
+        CTS 0, 1, 2. (And 3, later on)
+
+    SetToleranceSpeed, GetToleranceSpeed
+
+
+    Color
+
+    [X] function CountColor(Color, xs, ys, xe, ye: Integer): Integer;
+    [X] function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
+    [X] function FindColor(out x, y: Integer; Color, xs, ys, xe, ye: Integer): Boolean;
+    [X] function FindColorSpiral(var x, y: Integer; color, xs, ys, xe, ye: Integer): Boolean;
+    [X] function FindColorSpiralTolerance(var x, y: Integer; color, xs, ys, xe, ye,Tol: Integer): Boolean;
+    [X] function FindColorTolerance(out x, y: Integer; Color, xs, ys, xe, ye, tol: Integer): Boolean;
+    [X] function FindColorsTolerance(out Points: TPointArray; Color, xs, ys, xe, ye, Tol: Integer): Boolean;
+    [X] function FindColorsSpiralTolerance(x, y: Integer; out Points: TPointArray; color, xs, ys, xe, ye: Integer; Tol: Integer) : boolean;
+    [X] function FindColors(var TPA: TPointArray; Color, xs, ys, xe, ye: Integer): Boolean;
+    [ ] function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
+    [ ] function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
+
+    Mask
+
+    [ ] function FindMaskTolerance(const mask: TMask; out x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean;
+
+    Bitmap
+
+    [X] function FindBitmap(bitmap: TMufasaBitmap; out x, y: Integer): Boolean;
+    [X] function FindBitmapIn(bitmap: TMufasaBitmap; out x, y: Integer;  xs, ys, xe, ye: Integer): Boolean;
+    [X] function FindBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer): Boolean;
+    [X] function FindBitmapSpiral(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean;
+    [X] function FindBitmapSpiralTolerance(bitmap: TMufasaBitmap; var x, y: Integer; xs, ys, xe, ye,tolerance : integer): Boolean;
+    [X] function FindBitmapsSpiralTolerance(bitmap: TMufasaBitmap; x, y: Integer; out Points : TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean;
+    [ ] function FindDeformedBitmapToleranceIn(bitmap: TMufasaBitmap; out x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; out accuracy: Extended): Boolean;
+
+    DTM
+
+    [ ] function FindDTM(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer): Boolean;
+    [ ] function FindDTMs(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2 : integer; maxToFind: Integer = 0): Boolean;
+    [ ] function FindDTMRotated(DTM: TMDTM; out x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended; Alternating : boolean): Boolean;
+    [ ] function FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer = 0): Boolean;
+}
+
+const
+    bench_times = 10;
+    out_file = 'test.out';
+    test_bmp = 'wall.bmp';
+    search_bmp = 'wall_sample.bmp';
+
+    col = 7698820;
+    tol = 50;
+
+var f: integer;
+    bmp: integer;
+    t: integer;
+    w,h: integer;
+    searchbmp: integer;
+    searchdtm: integer;
+    cts: integer;
+    cts_s: string;
+
+
+const LE =
+{$IFDEF LINUX}
+#10;
+{$ELSE}
+#10#13;
+{$ENDIF}
+
+type
+    PInteger = ^Integer;
+
+procedure write_str(s: string);
+begin
+  writefilestring(f, s + LE);
+  //writeln(s);
+end;
+
+procedure write_int(int: integer);
+begin
+  write_str(inttostr(Pinteger(@int)^));
+end;
+
+procedure test_findcolor;
+var i: integer;
+var foo, bar: integer;
+begin
+{  write_str('------------------------------------------------');
+  cts_t := gettickcount();
+  for i := 0 to bench_times do
+    findcolor(foo, foo, col, 0, 0, w - 1, h - 1);
+}
+  if findcolor(foo, bar, col, 0, 0, w - 1, h - 1) then
+    write_str(cts_s + 'FindColor: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindColor: Not Found');
+
+ // write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
+procedure test_findcolorspiral;
+var i: integer;
+var foo, bar: integer;
+begin
+{
+  write_str('------------------------------------------------');
+  t := gettickcount();
+  for i := 0 to bench_times do
+  begin
+    foo := 42;
+    bar := 500;
+    findcolorspiral(foo, bar, col, 0, 0, w - 1, h - 1);
+  end;
+  }
+
+  foo := 42;
+  bar := 500;
+  if findcolorspiral(foo, bar, col, 0, 0, w - 1, h - 1) then
+    write_str(cts_s + 'FindColorSpiral: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindColorSpiral: Not Found');
+
+//  write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
+procedure test_findcolorspiraltolerance;
+var i: integer;
+var foo, bar: integer;
+begin
+  {
+  write_str('------------------------------------------------');
+  t := gettickcount();
+  for i := 0 to bench_times do
+  begin
+    foo := 42;
+    bar := 500;
+    findcolorspiraltolerance(foo, bar, col, 0, 0, w - 1, h - 1, tol);
+  end;
+  }
+
+  foo := 42;
+  bar := 500;
+  if findcolorspiraltolerance(foo, bar, col, 0, 0, w - 1, h - 1, tol) then
+    write_str(cts_s + 'FindColorSpiralTolerance: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindColorSpiralTolerance: Not Found');
+
+//  write_str(tostring((gettickcount() - t) / bench_times));  
+end;
+
+procedure test_findcolors;
+var i: integer;
+tpa: array of tpoint;
+begin
+  {
+  write_str('------------------------------------------------');
+  t := gettickcount();
+  for i := 0 to bench_times do
+  begin
+    findcolors(tpa, col, 0, 0, w - 1, h - 1);
+  end;
+  }
+  if findcolors(tpa, col, 0, 0, w - 1, h - 1) then
+    write_str(cts_s + 'FindColors: Found (' + IntToStr(Length(TPA)) + '):
+        ' + tostring(tpa))
+  else
+    write_str(cts_s + 'FindColors: Not Found');
+
+//  write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
+procedure test_findcolorstolerance;
+var i: integer;
+tpa: array of tpoint;
+begin
+  {
+  write_str('------------------------------------------------');
+  t := gettickcount();
+  for i := 0 to bench_times do
+  begin
+    findcolorstolerance(tpa, col, 0, 0, w - 1, h - 1, tol);
+  end;
+  }
+
+  if findcolorstolerance(tpa, col, 0, 0, w - 1, h - 1, tol) then
+    write_str(cts_s + 'FindColorsTolerance: Found (' + IntToStr(Length(TPA)) + '):
+        ' + tostring(tpa))
+  else
+    write_str(cts_s + 'FindColorsTolerance: Not Found');
+
+//  write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
+procedure test_findcolorsspiraltolerance;
+var i: integer;
+foo,bar: integer;
+tpa: array of tpoint;
+begin
+    {
+  write_str('------------------------------------------------');
+  t := gettickcount();
+  for i := 0 to bench_times do
+  begin
+    foo := 42; bar := 500;
+    findcolorsspiraltolerance(foo, bar, tpa, col, 0, 0, w - 1, h - 1, tol);
+  end;
+  }
+  foo := 42; bar := 500;
+  if findcolorsspiraltolerance(foo, bar, tpa, col, 0, 0, w - 1, h - 1, tol) then
+    write_str(cts_s + 'FindColorsSpiralTolerance: Found (' + IntToStr(Length(TPA)) + '):
+        ' + tostring(tpa))
+  else
+    write_str(cts_s + 'FindColorsSpiralTolerance: Not Found');
+
+//  write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
+procedure test_countcolor;
+var i: integer;
+count: integer;
+begin
+{
+  write_str('------------------------------------------------');
+  t := gettickcount();
+  for i := 0 to bench_times do
+  begin
+    countcolor(col, 0, 0, w-1,h-1);
+  end;
+  }
+  count := countcolor(col,0,0,w-1,h-1);
+  write_str(cts_s + 'CountColor: ' + IntToStr(Count));
+
+//  write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
+procedure test_countcolortolerance;
+var i: integer;
+count: integer;
+begin
+  {
+  write_str('------------------------------------------------');
+  t := gettickcount();
+  for i := 0 to bench_times do
+  begin
+    countcolortolerance(col, 0, 0, w-1,h-1,tol);
+  end;
+  }
+
+  count := countcolortolerance(col,0,0,w-1,h-1,tol);
+  write_str(cts_s + 'CountColorTolerance: ' + IntToStr(Count));
+
+//  write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
+procedure test_findbitmap;
+
+var i: integer;
+var foo, bar: integer;
+begin
+  if FindBitmap(searchbmp, foo, bar) then
+    write_str(cts_s + 'FindBitmap: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindBitmap: Not Found');
+end;
+
+procedure test_findbitmapin;
+
+var i: integer;
+var foo, bar: integer;
+begin
+  if FindBitmapIn(searchbmp, foo, bar, 0, 0, w - 1, h - 1) then
+    write_str(cts_s + 'FindBitmapIn: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindBitmapIn: Not Found');
+end;
+
+procedure test_findbitmaptolerance;
+
+var i: integer;
+var foo, bar: integer;
+begin
+  if FindBitmapToleranceIn(searchbmp, foo, bar, 0, 0, w - 1, h - 1, tol) then
+    write_str(cts_s + 'FindBitmapToleranceIn: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindBitmapToleranceIn: Not Found');
+end;
+
+procedure test_findbitmapspiral;
+
+var i: integer;
+var foo, bar: integer;
+begin
+  foo := 42;
+  bar := 500;
+  if FindBitmapSpiral(searchbmp, foo, bar, 0, 0, w - 1, h - 1) then
+    write_str(cts_s + 'FindBitmapSpiral: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindBitmapSpiral: Not Found');
+end;
+
+procedure test_findbitmapspiraltolerance;
+
+var i: integer;
+var foo, bar: integer;
+begin
+  foo := 42;
+  bar := 500;
+  if FindBitmapSpiralTolerance(searchbmp, foo, bar, 0, 0, w - 1, h - 1, tol) then
+    write_str(cts_s + 'FindBitmapSpiralTolerance: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindBitmapSpiralTolerance: Not Found');
+end;
+
+procedure test_findbitmapsspiraltolerance;
+var i: integer;
+foo,bar: integer;
+tpa: array of tpoint;
+begin
+  foo := 42;
+  bar := 500;
+  if FindBitmapsSpiralTolerance(searchbmp, foo, bar, tpa, 0, 0, w - 1, h - 1, tol) then
+    write_str(cts_s + 'FindBitmapsSpiralTolerance: Found (' + IntToStr(Length(TPA)) + '):
+        ' + tostring(tpa))
+  else
+    write_str(cts_s + 'FindBitmapsSpiralTolerance: Not Found');
+end;
+
+begin
+  f := rewritefile('/home/merlijn/Programs/simba/Tests/lape/' + out_file, false);
+  bmp := loadbitmap(test_bmp);
+  settargetbitmap(bmp);
+  getbitmapsize(bmp,w,h);
+
+  searchbmp := LoadBitmap(search_bmp);
+
+  for cts := 0 to 2 do
+  begin
+    SetColorToleranceSpeed(cts);
+    cts_s := 'CTS(' + IntToStr(cts) + '): ';
+
+    test_findcolor();
+    test_findcolorspiral();
+    test_findcolorspiraltolerance();
+
+    test_findcolors();
+    test_findcolorstolerance();
+    test_findcolorsspiraltolerance();
+
+    test_countcolor();
+    test_countcolortolerance();
+
+    test_findbitmap();
+    test_findbitmapin();
+    test_findbitmaptolerance();
+    test_findbitmapspiral();
+    test_findbitmapspiraltolerance();
+    test_findbitmapsspiraltolerance();
+
+
+
+  end;
+
+  setdesktopasclient();
+  closefile(f);
+  freebitmap(bmp);
+end.
