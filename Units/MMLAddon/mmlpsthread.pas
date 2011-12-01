@@ -597,6 +597,7 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
+
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
 {$I PSInc/Wrappers/keyboard.inc}
@@ -1298,6 +1299,7 @@ type
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
 {$I LPInc/Wrappers/lp_math.inc}
+
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}
 {$I LPInc/Wrappers/lp_keyboard.inc}
