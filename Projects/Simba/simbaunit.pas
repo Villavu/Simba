@@ -706,10 +706,6 @@ var
   b: TStringList;
   ms: TMemoryStream;
 begin
-  { XXX: This is a weird workaround for an even weirder bug }
-  Index := -1;
-  Exit(False);
-  { XXX: End workaround}
   try
     Index := PluginsGlob.LoadPlugin(LibName);
   except
