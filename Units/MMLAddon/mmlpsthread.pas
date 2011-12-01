@@ -145,6 +145,7 @@ type
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(Sender: TPSPreProcessor;
                     Parser: TPSPascalPreProcessorParser;
+                    Active: Boolean;
                     DirectiveName, DirectiveArgs: string; Filename:String): boolean;
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
       procedure AddMethod(meth: TExpMethod); virtual;
@@ -464,6 +465,7 @@ end;
 
 function TMThread.ProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser;
+        Active: Boolean;
         DirectiveName, DirectiveArgs: string; FileName: string): boolean;
 var
   plugin_idx: integer;
@@ -472,6 +474,8 @@ begin
   Result := False;
   if CompareText(DirectiveName,'LOADLIB') = 0 then
   begin
+    if not active then
+      exit(true);
     if DirectiveArgs <> '' then
     begin;
       plugin_idx:= PluginsGlob.LoadPlugin(DirectiveArgs);
@@ -488,6 +492,8 @@ begin
   end
   else if CompareText(DirectiveName,'WARNING') = 0 then
   begin
+    if not active then
+      exit(true);
     if (sender = nil) or (parser = nil) then
     begin
       psWriteln('ERROR: WARNING directive not supported for this interpreter');
@@ -509,6 +515,8 @@ begin
     end;
   end else if CompareText(DirectiveName,'ERROR') = 0 then
   begin
+    if not active then
+      exit(true);
     if (sender = nil) or (parser = nil) then
     begin
       psWriteln('ERROR: ERROR directive not supported for this interpreter');
@@ -675,7 +683,7 @@ begin
   if (CompareText(DirectiveName, 'LOADLIB') = 0)
   or (CompareText(DirectiveName, 'WARNING') = 0)
   or (CompareText(DirectiveName, 'ERROR') = 0)  then
-    Continue := not ProcessDirective(Sender, Parser, DirectiveName,DirectiveParam,
+    Continue := not ProcessDirective(Sender, Parser, Active, DirectiveName,DirectiveParam,
              FileName);
 end;
 
@@ -691,8 +699,8 @@ procedure TPSThread.PSScriptProcessUnknownDirective(Sender: TPSPreProcessor;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean;
   Filename: string);
 begin
-  Continue:= not ProcessDirective(Sender, Parser, DirectiveName, DirectiveParam,
-               FileName);
+  Continue:= not ProcessDirective(Sender, Parser, Active, DirectiveName,
+             DirectiveParam, FileName);
 end;
 
 function Muf_Conv_to_PS_Conv( conv : integer) : TDelphiCallingConvention;
@@ -1035,7 +1043,8 @@ end;
 function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
 
 begin
-  result:= CurrThread.ProcessDirective(nil, nil, name, args, '');
+  { XXX: The 'True' below for Active is perhaps wrong }
+  result:= CurrThread.ProcessDirective(nil, nil, True, name, args, '');
 end;
 
 procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar; runtime: boolean); stdcall;
