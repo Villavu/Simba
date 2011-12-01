@@ -242,3 +242,13 @@ procedure Lape_log10(const Params: PParamArray; const Result: Pointer);
 begin
   PExtended(Result)^ := ps_log10(PExtended(Params^[0])^);
 end;
+
+procedure Lape_MaxA(const Params: PParamArray; const Result: Pointer);
+begin
+  PInteger(Result)^ := ps_MaxA(PIntegerArray(Params^[0]^));
+end;
+
+procedure Lape_MinA(const Params: PParamArray; const Result: Pointer);
+begin
+  PInteger(Result)^ := ps_MinA(PIntegerArray(Params^[0]^));
+end;
