@@ -146,6 +146,8 @@ AddGlobalFunc('function ArcCosh(e: extended): extended', @Lape_ArcCosh);
 AddGlobalFunc('function ArcSinh(e: extended): extended', @Lape_ArcSinh);
 AddGlobalFunc('function DecRet(e: Extended): Extended', @Lape_DecRet);
 AddGlobalFunc('function log10(f: Extended): Extended', @Lape_log10);
+AddGlobalFunc('function MinA(a: TIntegerArray): Integer', @Lape_MinA);
+AddGlobalFunc('function MaxA(a: TIntegerArray): Integer', @Lape_MaxA);
 
 { Color }
 
