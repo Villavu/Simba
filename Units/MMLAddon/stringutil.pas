@@ -28,11 +28,12 @@ unit stringutil;
 interface
 
 uses
-  Classes, SysUtils,mufasatypes;
+  Classes, SysUtils, mufasatypes;
 
 type
   StrExtr =(Numbers, Letters, Others);
   PStrExtr = ^StrExtr;
+
 function ExtractFromStr( Str : string; Extract : StrExtr) : string;
 function Capitalize(str : string) : string;
 function Implode(Glue : string; Pieces: TStringArray): string;
@@ -44,7 +45,7 @@ function Base64Decode(const str : string) : string;
 
 implementation
 uses
-  paszlib,  DCPbase64;
+  paszlib,  DCPbase64, math;
 
 function Implode(Glue: string;Pieces: TStringArray): string;
 var
