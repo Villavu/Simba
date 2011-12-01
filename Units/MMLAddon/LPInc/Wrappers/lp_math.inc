@@ -245,10 +245,10 @@ end;
 
 procedure Lape_MaxA(const Params: PParamArray; const Result: Pointer);
 begin
-  PInteger(Result)^ := ps_MaxA(PIntegerArray(Params^[0]^));
+  PInteger(Result)^ := ps_MaxA(TIntegerArray(Params^[0]^));
 end;
 
 procedure Lape_MinA(const Params: PParamArray; const Result: Pointer);
 begin
-  PInteger(Result)^ := ps_MinA(PIntegerArray(Params^[0]^));
+  PInteger(Result)^ := ps_MinA(TIntegerArray(Params^[0]^));
 end;
