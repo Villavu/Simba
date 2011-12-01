@@ -1294,10 +1294,12 @@ type
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}
+
 {$I LPInc/Wrappers/lp_colour.inc}
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
-{$I LPInc/Wrappers/lp_math.inc}
+{$I LPInc/Wrappers/lp_math.inc}end;
+
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}
 {$I LPInc/Wrappers/lp_keyboard.inc}
