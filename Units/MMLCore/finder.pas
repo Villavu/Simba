@@ -1001,7 +1001,7 @@ begin
           for fx := xx to xe do
           begin
             Inc(Ptr);
-            if compare(ctsinfo, Ptr) then
+            if not compare(ctsinfo, Ptr) then
             begin
               NotFound := True;
               Break;
