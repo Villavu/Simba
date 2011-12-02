@@ -254,6 +254,33 @@ begin
 //  write_str(tostring((gettickcount() - t) / bench_times));
 end;
 
+//    [ ] function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean;
+//    [ ] function FindColoredAreaTolerance(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea, tol: Integer): Boolean;
+
+procedure test_findcoloredarea;
+var i: integer;
+var foo, bar: integer;
+begin
+  if findcoloredarea(foo, bar, col, 0, 0, w - 1, h - 1, 4*4) then
+    write_str(cts_s + 'FindColoredArea: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindColoredArea: Not Found');
+
+//  write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
+procedure test_findcoloredareatolerance;
+var i: integer;
+var foo, bar: integer;
+begin
+  if findcoloredareatolerance(foo, bar, col, 0, 0, w - 1, h - 1, 4*4, tol) then
+    write_str(cts_s + 'FindColoredArea: Found at (' + inttostr(foo) + ', ' + inttostr(bar) + ')')
+  else
+    write_str(cts_s + 'FindColoredArea: Not Found');
+
+//  write_str(tostring((gettickcount() - t) / bench_times));
+end;
+
 procedure test_findbitmap;
 
 var i: integer;
@@ -329,6 +356,7 @@ end;
 
 begin
   f := rewritefile('/home/merlijn/Programs/simba/Tests/lape/' + out_file, false);
+//  f := rewritefile(out_file, false);
   bmp := loadbitmap(test_bmp);
   settargetbitmap(bmp);
   getbitmapsize(bmp,w,h);
@@ -358,8 +386,8 @@ begin
     test_findbitmapspiraltolerance();
     test_findbitmapsspiraltolerance();
 
-
-
+    test_findcoloredarea();
+    test_findcoloredareatolerance();
   end;
 
   setdesktopasclient();
