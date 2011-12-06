@@ -22,10 +22,12 @@
 }
 
 AddConstantN('AppPath','string').SetString(AppPath);
+AddConstantN('DocPath', 'string').SetString(DocPath);
 AddConstantN('ScriptPath','string').SetString(ScriptPath);
 AddConstantN('IncludePath','string').SetString(IncludePath);
 AddConstantN('PluginPath','string').SetString(PluginPath);
 AddConstantN('FontPath','string').SetString(FontPath);
+
 AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
 AddConstantN('MaxInt','integer').SetInt(maxLongint);
 AddTypeS('TReplaceFlag', '(rfReplaceAll, rfIgnoreCase)');
