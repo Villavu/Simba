@@ -114,7 +114,7 @@ type
       procedure SetOpenFileEvent(const AValue: TOpenFileEvent);
       procedure SetWriteFileEvent(const AValue: TWriteFileEvent);
     protected
-      ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
+      AppPath, DocPath, ScriptPath, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
@@ -151,7 +151,7 @@ type
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
-      procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
+      procedure SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
       procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
 
       procedure OnThreadTerminate(Sender: TObject);
@@ -556,13 +556,14 @@ begin
   Self.Sett.prefix := 'Scripts/';
 end;
 
-procedure TMThread.SetPaths(ScriptP, AppP,IncludeP,PluginP,FontP: string);
+procedure TMThread.SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
 begin
-  AppPath:= AppP;
-  ScriptPath:= ScriptP;
-  IncludePath:= IncludeP;
-  PluginPath:= PluginP;
-  FontPath:= FontP;
+  AppPath := AppP;
+  DocPath := DocP;
+  ScriptPath := ScriptP;
+  IncludePath := IncludeP;
+  PluginPath := PluginP;
+  FontPath := FontP;
 end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
