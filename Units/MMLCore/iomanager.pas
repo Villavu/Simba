@@ -528,9 +528,14 @@ begin
     frozen.FreeReturnData;
   end else
   begin
-    image.Free();
-    image:= frozen;
-    frozen:= nil;
+    if not IsFrozen() then
+      raise Exception.Create('Unfreeze called when the window is not frozen.')
+    else
+    begin
+      image.Free();
+      image:= frozen;
+      frozen:= nil;
+    end;
   end;
 end;
 
