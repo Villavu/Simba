@@ -529,7 +529,7 @@ begin
   end else
   begin
     if not IsFrozen() then
-      raise Exception.Create('The window is already frozen')
+      raise Exception.Create('Unfreeze called when the window is not frozen.')
     else
     begin
       image.Free();
