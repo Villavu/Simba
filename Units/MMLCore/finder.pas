@@ -43,12 +43,49 @@ uses
 }
 
 type
+  TCTSNoInfo = record    //No tolerance
+      B, G, R, A:byte;
+  end;
+  PCTSNoInfo = ^TCTSNoInfo;
+
+  TCTS0Info = record
+      B, G, R, A: byte;
+      Tol: Integer;
+  end;
+  PCTS0Info = ^TCTS0Info;
+
+  TCTS1Info = record
+      B, G, R, A: byte;
+      Tol: Integer; { Squared }
+  end;
+  PCTS1Info = ^TCTS1Info;
+
+  TCTS2Info = record
+      H, S, L: extended;
+      hueMod, satMod: extended;
+      Tol: Integer;
+  end;
+  PCTS2Info = ^TCTS2Info;
+
+  TCTS3Info = record
+      L, A, B: extended;
+      Tol: Integer; { Squared * CTS3Modifier}
+  end;
+  PCTS3Info = ^TCTS3Info;
+
+  TCTSInfo = Pointer;
+  TCTSInfoArray = Array of TCTSInfo;
+  TCTSInfo2DArray = Array of TCTSInfoArray;
+  TCTSCompareFunction = function (ctsInfo: Pointer; C2: PRGB32): boolean;
+
+type
   TMFinder = class(TObject)
   private
     Client: TObject;
     CachedWidth, CachedHeight : integer;
     ClientTPA : TPointArray;
     hueMod, satMod: Extended;
+    CTS3Modifier: Extended;
     CTS: Integer;
 
     Procedure UpdateCachedValues(NewWidth,NewHeight : integer);
@@ -90,11 +127,21 @@ type
     function FindDTMsRotated(DTM: TMDTM; out Points: TPointArray; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: T2DExtendedArray;Alternating : boolean; maxToFind: Integer = 0): Boolean;
     //Donno
     function GetColors(const Coords: TPointArray): TIntegerArray;
+
     // tol speeds
     procedure SetToleranceSpeed(nCTS: Integer);
     function GetToleranceSpeed: Integer;
     procedure SetToleranceSpeed2Modifiers(const nHue, nSat: Extended);
     procedure GetToleranceSpeed2Modifiers(out hMod, sMod: Extended);
+    procedure SetToleranceSpeed3Modifier(modifier: Extended);
+    function GetToleranceSpeed3Modifier: Extended;
+
+    { }
+    function Create_CTSInfo(Color, Tolerance: Integer): Pointer; overload;
+    function Create_CTSInfo(R, G, B, Tolerance: Integer): Pointer; overload;
+    function Create_CTSInfoArray(color, tolerance: array of integer): TCTSInfoArray;
+    function Create_CTSInfo2DArray(w, h: integer; data: TPRGB32Array; Tolerance: Integer): TCTSInfo2DArray;
+
     constructor Create(aClient: TObject);
     destructor Destroy; override;
   end;
@@ -106,44 +153,300 @@ uses
   tpa,              //TPABounds
   dtmutil;
 
-type
-  TCTSNoInfo = record    //No tolerance
-      B, G, R, A:byte;
-  end;
-  PCTSNoInfo = ^TCTSNoInfo;
-
-  TCTS0Info = record
-      B, G, R, A: byte;
-      Tol: Integer;
-  end;
-  PCTS0Info = ^TCTS0Info;
-
-  TCTS1Info = record
-      B, G, R, A: byte;
-      Tol: Integer; { Squared }
-  end;
-  PCTS1Info = ^TCTS1Info;
-
-  TCTS2Info = record
-      H, S, L: extended;
-      hueMod, satMod: extended;
-      Tol: Integer;
-  end;
-  PCTS2Info = ^TCTS2Info;
-
-  TCTS3Info = record
-      L, A, B: extended;
-      Tol: Integer; { Squared }
-  end;
-  PCTS3Info = ^TCTS3Info;
-
-  TCTSInfo = Pointer;
-  TCTSInfoArray = Array of TCTSInfo;
-  TCTSInfo2DArray = Array of TCTSInfoArray;
-  TCTSCompareFunction = function (ctsInfo: Pointer; C2: PRGB32): boolean;
 
 var
   Percentage : array[0..255] of Extended;
+
+{ Colour Same functions }
+function ColorSame_ctsNo(ctsInfo: Pointer; C2: PRGB32): boolean;
+var
+    C1: TCTSNoInfo;
+begin
+  C1 := PCTSNoInfo(ctsInfo)^;
+  Result := (C1.B = C2^.B)
+        and (C1.G = C2^.G)
+        and (C1.R = C2^.R);
+end;
+
+function ColorSame_cts0(ctsInfo: Pointer; C2: PRGB32): boolean;
+
+var
+    C1: TCTS0Info;
+begin
+  C1 := PCTS0Info(ctsInfo)^;
+  Result := (Abs(C1.B - C2^.B) <= C1.Tol)
+        and (Abs(C1.G - C2^.G) <= C1.Tol)
+        and (Abs(C1.R - C2^.R) <= C1.Tol);
+end;
+
+function ColorSame_cts1(ctsInfo: Pointer; C2: PRGB32): boolean;
+
+var
+    C1: TCTS1Info;
+    r,g,b: integer;
+begin
+  C1 := PCTS1Info(ctsInfo)^;
+  b := C1.B - C2^.B;
+  g := C1.G - C2^.G;
+  r := C1.R - C2^.R;
+  Result := (b*b + g*g + r*r) <= C1.Tol;
+end;
+
+function ColorSame_cts2(ctsInfo: Pointer; C2: PRGB32): boolean;
+
+var
+    r,g ,b: extended;
+    CMin, CMax,D : extended;
+    h,s,l : extended;
+    i: TCTS2Info;
+begin
+  i := PCTS2Info(ctsInfo)^;
+
+  R := Percentage[C2^.r];
+  G := Percentage[C2^.g];
+  B := Percentage[C2^.b];
+
+  CMin := R;
+  CMax := R;
+  if G  < Cmin then CMin := G;
+  if B  < Cmin then CMin := B;
+  if G  > Cmax then CMax := G;
+  if B  > Cmax then CMax := B;
+  l := 0.5 * (Cmax + Cmin);
+  //The L-value is already calculated, lets see if the current point meats the requirements!
+  if abs(l*100 - i.L) > i.Tol then
+    exit(false);
+  if Cmax = Cmin then
+  begin
+    //S and H are both zero, lets check if it mathces the tol
+    if (i.H <= (i.hueMod)) and
+       (i.S <= (i.satMod)) then
+      exit(true)
+    else
+      exit(false);
+  end;
+  D := Cmax - Cmin;
+  if l < 0.5 then
+    s := D / (Cmax + Cmin)
+  else
+    s := D / (2 - Cmax - Cmin);
+  // We've Calculated the S, check match
+  if abs(S*100 - i.S) > i.satMod then
+    exit(false);
+  if R = Cmax then
+    h := (G - B) / D
+  else
+    if G = Cmax then
+      h  := 2 + (B - R) / D
+    else
+      h := 4 +  (R - G) / D;
+  h := h / 6;
+  if h < 0 then
+    h := h + 1;
+  //Finally lets test H2
+  if abs(H*100 - i.H) > i.hueMod then
+    result := false
+  else
+    result := true;
+end;
+
+function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
+
+var
+    i: TCTS3Info;
+    r, g, b : extended;
+    x, y, z, L, A, bb: Extended;
+begin
+  i := PCTS3Info(ctsInfo)^;
+  { RGBToXYZ(C2^.R, C2^.G, C2^.B, X, Y, Z); }
+  { XYZToCIELab(X, Y, Z, L, A, B); }
+  R := Percentage[C2^.r];
+  G := Percentage[C2^.g];
+  B := Percentage[C2^.b];
+  if r > 0.04045  then
+    r := Power( ( r + 0.055 ) / 1.055  , 2.4)
+  else
+    r := r / 12.92;
+  if g > 0.04045  then
+    g := Power( ( g + 0.055 ) / 1.055 , 2.4)
+  else
+    g := g / 12.92;
+  if  b > 0.04045 then
+    b := Power(  ( b + 0.055 ) / 1.055  , 2.4)
+  else
+    b := b / 12.92;
+
+  y := (r * 0.2126 + g * 0.7152 + b * 0.0722)/100.000;
+  if ( Y > 0.008856 ) then
+    Y := Power(Y, 1.0/3.0)
+  else
+    Y := ( 7.787 * Y ) + ( 16.0 / 116.0 );
+
+  x := (r * 0.4124 + g * 0.3576 + b * 0.1805)/95.047;
+  if ( X > 0.008856 ) then
+    X := Power(X, 1.0/3.0)
+  else
+    X := ( 7.787 * X ) + ( 16.0 / 116.0 );
+
+  z := (r * 0.0193 + g * 0.1192 + b * 0.9505)/108.883;
+  if ( Z > 0.008856 ) then
+    Z := Power(Z, 1.0/3.0)
+  else
+    Z := ( 7.787 * Z ) + ( 16.0 / 116.0 );
+
+  l := (116.0 * Y ) - 16.0;
+  a := 500.0 * ( X - Y );
+  bb := 200.0 * ( Y - Z );
+
+  L := L - i.L;
+  A := A - i.A;
+  Bb := Bb - i.B;
+
+  // XXX: optimise this
+  // values < 1 do not increase if multiplied by themself, obviously
+  L := L * 100;
+  A := A * 100;
+  bB := bB * 100;
+
+  Result := (L*L + A*A + bB*Bb) < i.Tol;
+end;
+
+{ }
+
+function Create_CTSInfo_helper(cts: integer; Color, Tol: Integer;
+                        hueMod, satMod, CTS3Modifier: extended): Pointer; overload;
+var
+    R, G, B: Integer;
+    X, Y, Z: Extended;
+begin
+  case cts of
+      -1:
+      begin
+        Result :=  AllocMem(SizeOf(TCTSNoInfo));
+        ColorToRGB(Color, PCTSNoInfo(Result)^.R, PCTSNoInfo(Result)^.G,
+                    PCTSNoInfo(Result)^.B);
+      end;
+      0:
+      begin
+        Result := AllocMem(SizeOf(TCTS0Info));
+        ColorToRGB(Color, PCTS0Info(Result)^.R, PCTS0Info(Result)^.G,
+                    PCTS0Info(Result)^.B);
+        PCTS0Info(Result)^.Tol := Tol;
+      end;
+      1:
+      begin
+        Result := AllocMem(SizeOf(TCTS1Info));
+        ColorToRGB(Color, PCTS1Info(Result)^.R, PCTS1Info(Result)^.G,
+                    PCTS1Info(Result)^.B);
+
+        PCTS1Info(Result)^.Tol := Tol * Tol;
+      end;
+      2:
+      begin
+        Result := AllocMem(SizeOf(TCTS2Info));
+        ColorToRGB(Color, R, G, B);
+        RGBToHSL(R, G, B, PCTS2Info(Result)^.H, PCTS2Info(Result)^.S,
+                    PCTS2Info(Result)^.L);
+        PCTS2Info(Result)^.hueMod := Tol * hueMod;
+        PCTS2Info(Result)^.satMod := Tol * satMod;
+        PCTS2Info(Result)^.Tol := Tol;
+      end;
+      3:
+      begin
+        Result := AllocMem(SizeOf(TCTS3Info));
+        ColorToRGB(Color, R, G, B);
+        RGBToXYZ(R, G, B, X, Y, Z);
+        XYZToCIELab(X, Y, Z, PCTS3Info(Result)^.L, PCTS3Info(Result)^.A,
+                  PCTS3Info(Result)^.B);
+        { XXX: TODO: Make all Tolerance extended }
+        PCTS3Info(Result)^.Tol := Round(Tol*Tol*CTS3Modifier);
+      end;
+  end;
+end;
+
+function Create_CTSInfo_helper(cts: integer; R, G, B, Tol: Integer;
+                        hueMod, satMod, CTS3Modifier: extended): Pointer; overload;
+
+var Color: Integer;
+
+begin
+  Color := RGBToColor(R, G, B);
+  Result := Create_CTSInfo_helper(cts, Color, Tol, hueMod, satMod, CTS3Modifier);
+end;
+
+procedure Free_CTSInfo(i: Pointer);
+begin
+  if assigned(i) then
+      FreeMem(i)
+  else
+      raise Exception.Create('Free_CTSInfo: Invalid TCTSInfo passed');
+end;
+
+
+{ TODO: Not universal, mainly for DTM }
+function Create_CTSInfoArray_helper(cts: integer; color, tolerance: array of integer;
+    hueMod, satMod, CTS3Modifier: extended): TCTSInfoArray;
+
+var
+   i: integer;
+begin
+  if length(color) <> length(tolerance) then
+    raise Exception.Create('Create_CTSInfoArray: Length(Color) <>'
+                          +' Length(Tolerance');
+  SetLength(Result, Length(color));
+
+  for i := High(result) downto 0 do
+    result[i] := Create_CTSInfo_helper(cts, color[i], tolerance[i], hueMod, satMod,
+        CTS3Modifier);
+end;
+
+
+{ TODO: Not universal, mainly for Bitmap }
+function Create_CTSInfo2DArray_helper(cts, w, h: integer; data: TPRGB32Array;
+    Tolerance: Integer; hueMod, satMod, CTS3Modifier: Extended): TCTSInfo2DArray;
+var
+   x, y: integer;
+begin
+  SetLength(Result,h+1,w+1);
+
+  for y := 0 to h do
+    for x := 0 to w do
+      Result[y][x] := Create_CTSInfo_helper(cts,
+          data[y][x].R, data[y][x].G, data[y][x].B,
+          Tolerance, hueMod, satMod, CTS3Modifier);
+end;
+
+procedure Free_CTSInfoArray(i: TCTSInfoArray);
+var
+   c: integer;
+begin
+  for c := high(i) downto 0 do
+    Free_CTSInfo(i[c]);
+  SetLength(i, 0);
+end;
+
+procedure Free_CTSInfo2DArray(i: TCTSInfo2DArray);
+var
+   x, y: integer;
+begin
+  for y := high(i) downto 0 do
+    for x := high(i[y]) downto 0 do
+      Free_CTSInfo(i[y][x]);
+  SetLength(i, 0);
+end;
+
+function Get_CTSCompare(cts: Integer): TCTSCompareFunction;
+
+begin
+  case cts of
+      -1: Result := @ColorSame_ctsNo;
+      0: Result := @ColorSame_cts0;
+      1: Result := @ColorSame_cts1;
+      2: Result := @ColorSame_cts2;
+      3: Result := @ColorSame_cts3;
+  end;
+end;
+
 
 procedure TMFinder.LoadSpiralPath(startX, startY, x1, y1, x2, y2: Integer);
 var
@@ -332,347 +635,39 @@ begin
   sMod := Self.satMod;
 end;
 
-function TMFinder.SimilarColors(Color1, Color2,Tolerance: Integer) : boolean;
-var
-  R1,G1,B1,R2,G2,B2 : Byte;
-  H1,S1,L1,H2,S2,L2 : extended;
-  L_1, a_1, b_1, L_2, a_2 ,b_2, X, Y, Z: extended;
+procedure TMFinder.SetToleranceSpeed3Modifier(modifier: Extended);
 begin
-  Result := False;
-  ColorToRGB(Color1,R1,G1,B1);
-  ColorToRGB(Color2,R2,G2,B2);
-  if Color1 = Color2 then
-    Result := true
-  else
-  case CTS of
-  0: Result := ((Abs(R1-R2) <= Tolerance) and (Abs(G1-G2) <= Tolerance) and (Abs(B1-B2) <= Tolerance));
-  1: Result := (Sqrt(sqr(R1-R2) + sqr(G1-G2) + sqr(B1-B2)) <= Tolerance);
-  2: begin
-       RGBToHSL(R1,g1,b1,H1,S1,L1);
-       RGBToHSL(R2,g2,b2,H2,S2,L2);
-       Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
-     end;
-  3:
-    begin
-       RGBToXYZ(R1, G1, B1, X, Y, Z);
-       XYZtoCIELab(X, Y, Z, L_1, a_1, b_1);
-       RGBToXYZ(R2, G2, B2, X, Y, Z);
-       XYZtoCIELab(X, Y, Z, L_2, a_2, b_2);
-       Result := (abs(L_1 - L_2) < Tolerance)
-                 and (abs(a_1 - a_2) < Tolerance)
-                 and (abs(b_1 - b_2) < Tolerance);
-    end;
-  end;
+  CTS3Modifier := modifier;
 end;
 
-
-{
-  TODO: Remove this
-}
-function ColorSame(var CTS,Tolerance : Integer; var R1,G1,B1,R2,G2,B2 : byte; var H1,S1,L1,huemod,satmod : extended) : boolean; inline;
-var
-  H2,S2,L2 : extended;
-  L_1, a_1, b_1, L_2, a_2 ,b_2, X, Y, Z: extended;
+function TMFinder.GetToleranceSpeed3Modifier: Extended;
 begin
-  Result := False;
-  case CTS of
-  0: Result := ((Abs(R1-R2) <= Tolerance) and (Abs(G1-G2) <= Tolerance) and (Abs(B1-B2) <= Tolerance));
-  1: Result := (Sqrt(sqr(R1-R2) + sqr(G1-G2) + sqr(B1-B2)) <= Tolerance);
-  2: begin
-       RGBToHSL(R2,g2,b2,H2,S2,L2);
-       Result := ((abs(H1 - H2) <= (hueMod * Tolerance)) and (abs(S2-S1) <= (satMod * Tolerance)) and (abs(L1-L2) <= Tolerance));
-     end;
-  3: begin
-       RGBToXYZ(R1, G1, B1, X, Y, Z);
-       XYZtoCIELab(X, Y, Z, L_1, a_1, b_1);
-       RGBToXYZ(R2, G2, B2, X, Y, Z);
-       XYZtoCIELab(X, Y, Z, L_2, a_2, b_2);
-       Result := Sqrt(sqr(L_1 - L_2) + sqr(a_1 - a_2) +
-                   sqr(b_1 - b_2)) <= Tolerance;
-     end;
-  end;
+  Result := CTS3Modifier;
 end;
 
-
-{ Colour Same functions }
-function ColorSame_ctsNo(ctsInfo: Pointer; C2: PRGB32): boolean;
-var
-    C1: TCTSNoInfo;
+function TMFinder.Create_CTSInfo(Color, Tolerance: Integer): Pointer; overload;
 begin
-  C1 := PCTSNoInfo(ctsInfo)^;
-  Result := (C1.B = C2^.B)
-        and (C1.G = C2^.G)
-        and (C1.R = C2^.R);
+  Result := Create_CTSInfo_helper(Self.cts, Color, Tolerance, Self.hueMod,
+              Self.satMod, Self.CTS3Modifier);
 end;
 
-function ColorSame_cts0(ctsInfo: Pointer; C2: PRGB32): boolean;
-
-var
-    C1: TCTS0Info;
+function TMFinder.Create_CTSInfo(R, G, B, Tolerance: Integer): Pointer; overload;
 begin
-  C1 := PCTS0Info(ctsInfo)^;
-  Result := (Abs(C1.B - C2^.B) <= C1.Tol)
-        and (Abs(C1.G - C2^.G) <= C1.Tol)
-        and (Abs(C1.R - C2^.R) <= C1.Tol);
+  Result := Create_CTSInfo_helper(Self.cts, R, G, B, Tolerance, Self.hueMod,
+              Self.satMod, Self.CTS3Modifier);
 end;
 
-function ColorSame_cts1(ctsInfo: Pointer; C2: PRGB32): boolean;
-
-var
-    C1: TCTS1Info;
-    r,g,b: integer;
+function TMFinder.Create_CTSInfoArray(color, tolerance: array of integer): TCTSInfoArray;
 begin
-  C1 := PCTS1Info(ctsInfo)^;
-  b := C1.B - C2^.B;
-  g := C1.G - C2^.G;
-  r := C1.R - C2^.R;
-  Result := (b*b + g*g + r*r) <= C1.Tol;
+  Result := Create_CTSInfoArray_helper(Self.cts, color, tolerance, Self.hueMod,
+      Self.satMod, Self.CTS3Modifier);
 end;
 
-function ColorSame_cts2(ctsInfo: Pointer; C2: PRGB32): boolean;
-
-var
-    r,g ,b: extended;
-    CMin, CMax,D : extended;
-    h,s,l : extended;
-    i: TCTS2Info;
+function TMFinder.Create_CTSInfo2DArray(w, h: integer; data: TPRGB32Array;
+    Tolerance: Integer): TCTSInfo2DArray;
 begin
-  i := PCTS2Info(ctsInfo)^;
-
-  R := Percentage[C2^.r];
-  G := Percentage[C2^.g];
-  B := Percentage[C2^.b];
-
-  CMin := R;
-  CMax := R;
-  if G  < Cmin then CMin := G;
-  if B  < Cmin then CMin := B;
-  if G  > Cmax then CMax := G;
-  if B  > Cmax then CMax := B;
-  l := 0.5 * (Cmax + Cmin);
-  //The L-value is already calculated, lets see if the current point meats the requirements!
-  if abs(l*100 - i.L) > i.Tol then
-    exit(false);
-  if Cmax = Cmin then
-  begin
-    //S and H are both zero, lets check if it mathces the tol
-    if (i.H <= (i.hueMod)) and
-       (i.S <= (i.satMod)) then
-      exit(true)
-    else
-      exit(false);
-  end;
-  D := Cmax - Cmin;
-  if l < 0.5 then
-    s := D / (Cmax + Cmin)
-  else
-    s := D / (2 - Cmax - Cmin);
-  // We've Calculated the S, check match
-  if abs(S*100 - i.S) > i.satMod then
-    exit(false);
-  if R = Cmax then
-    h := (G - B) / D
-  else
-    if G = Cmax then
-      h  := 2 + (B - R) / D
-    else
-      h := 4 +  (R - G) / D;
-  h := h / 6;
-  if h < 0 then
-    h := h + 1;
-  //Finally lets test H2
-  if abs(H*100 - i.H) > i.hueMod then
-    result := false
-  else
-    result := true;
-end;
-
-function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
-
-var
-    i: TCTS3Info;
-    r, g, b : extended;
-    x, y, z, L, A, bb: Extended;
-begin
-  i := PCTS3Info(ctsInfo)^;
-  { RGBToXYZ(C2^.R, C2^.G, C2^.B, X, Y, Z); }
-  { XYZToCIELab(X, Y, Z, L, A, B); }
-  R := Percentage[C2^.r];
-  G := Percentage[C2^.g];
-  B := Percentage[C2^.b];
-  if r > 0.04045  then
-    r := Power( ( r + 0.055 ) / 1.055  , 2.4)
-  else
-    r := r / 12.92;
-  if g > 0.04045  then
-    g := Power( ( g + 0.055 ) / 1.055 , 2.4)
-  else
-    g := g / 12.92;
-  if  b > 0.04045 then
-    b := Power(  ( b + 0.055 ) / 1.055  , 2.4)
-  else
-    b := b / 12.92;
-
-  y := (r * 0.2126 + g * 0.7152 + b * 0.0722)/100.000;
-  if ( Y > 0.008856 ) then
-    Y := Power(Y, 1.0/3.0)
-  else
-    Y := ( 7.787 * Y ) + ( 16.0 / 116.0 );
-
-  x := (r * 0.4124 + g * 0.3576 + b * 0.1805)/95.047;
-  if ( X > 0.008856 ) then
-    X := Power(X, 1.0/3.0)
-  else
-    X := ( 7.787 * X ) + ( 16.0 / 116.0 );
-
-  z := (r * 0.0193 + g * 0.1192 + b * 0.9505)/108.883;
-  if ( Z > 0.008856 ) then
-    Z := Power(Z, 1.0/3.0)
-  else
-    Z := ( 7.787 * Z ) + ( 16.0 / 116.0 );
-
-  l := (116.0 * Y ) - 16.0;
-  a := 500.0 * ( X - Y );
-  bb := 200.0 * ( Y - Z );
-
-  L := L - i.L;
-  A := A - i.A;
-  Bb := Bb - i.B;
-  Result := (L*L + A*A + bB*Bb) < i.Tol;
-end;
-
-{ }
-
-function Create_CTSInfo(cts: integer; Color, Tol: Integer;
-                        hueMod, satMod: extended): Pointer; overload;
-var
-    R, G, B: Integer;
-    X, Y, Z: Extended;
-begin
-  case cts of
-      -1:
-      begin
-        Result :=  AllocMem(SizeOf(TCTSNoInfo));
-        ColorToRGB(Color, PCTSNoInfo(Result)^.R, PCTSNoInfo(Result)^.G,
-                    PCTSNoInfo(Result)^.B);
-      end;
-      0:
-      begin
-        Result := AllocMem(SizeOf(TCTS0Info));
-        ColorToRGB(Color, PCTS0Info(Result)^.R, PCTS0Info(Result)^.G,
-                    PCTS0Info(Result)^.B);
-        PCTS0Info(Result)^.Tol := Tol;
-      end;
-      1:
-      begin
-        Result := AllocMem(SizeOf(TCTS1Info));
-        ColorToRGB(Color, PCTS1Info(Result)^.R, PCTS1Info(Result)^.G,
-                    PCTS1Info(Result)^.B);
-
-        PCTS1Info(Result)^.Tol := Tol * Tol;
-      end;
-      2:
-      begin
-        Result := AllocMem(SizeOf(TCTS2Info));
-        ColorToRGB(Color, R, G, B);
-        RGBToHSL(R, G, B, PCTS2Info(Result)^.H, PCTS2Info(Result)^.S,
-                    PCTS2Info(Result)^.L);
-        PCTS2Info(Result)^.hueMod := Tol * hueMod;
-        PCTS2Info(Result)^.satMod := Tol * satMod;
-        PCTS2Info(Result)^.Tol := Tol;
-      end;
-      3:
-      begin
-        Result := AllocMem(SizeOf(TCTS3Info));
-        ColorToRGB(Color, R, G, B);
-        RGBToXYZ(R, G, B, X, Y, Z);
-        XYZToCIELab(X, Y, Z, PCTS3Info(Result)^.L, PCTS3Info(Result)^.A,
-                  PCTS3Info(Result)^.B);
-        PCTS3Info(Result)^.Tol := Tol*Tol;
-      end;
-  end;
-end;
-
-
-function Create_CTSInfo(cts: integer; R, G, B, Tol: Integer;
-                        hueMod, satMod: extended): Pointer; overload;
-
-var Color: Integer;
-
-begin
-  Color := RGBToColor(R, G, B);
-  Result := Create_CTSInfo(cts, Color, Tol, hueMod, satMod);
-end;
-
-procedure Free_CTSInfo(i: Pointer);
-begin
-  if assigned(i) then
-      FreeMem(i)
-  else
-      raise Exception.Create('Free_CTSInfo: Invalid TCTSInfo passed');
-end;
-
-{ TODO: Not universal, mainly for DTM }
-function Create_CTSInfoArray(cts: integer; color, tolerance: array of integer;
-    hueMod, satMod: extended): TCTSInfoArray;
-
-var
-   i: integer;
-begin
-  if length(color) <> length(tolerance) then
-    raise Exception.Create('Create_CTSInfoArray: Length(Color) <>'
-                          +' Length(Tolerance');
-  SetLength(Result, Length(color));
-
-  for i := High(result) downto 0 do
-    result[i] := Create_CTSInfo(cts, color[i], tolerance[i], hueMod, satMod);
-end;
-
-
-{ TODO: Not universal, mainly for Bitmap }
-function Create_CTSInfo2DArray(cts, w, h: integer; data: TPRGB32Array;
-    Tolerance: Integer; hueMod, satMod: Extended): TCTSInfo2DArray;
-var
-   x, y: integer;
-begin
-  SetLength(Result,h+1,w+1);
-
-  for y := 0 to h do
-    for x := 0 to w do
-      Result[y][x] := Create_CTSInfo(cts,
-          data[y][x].R, data[y][x].G, data[y][x].B,
-          Tolerance, hueMod, satMod);
-end;
-
-procedure Free_CTSInfoArray(i: TCTSInfoArray);
-var
-   c: integer;
-begin
-  for c := high(i) downto 0 do
-    Free_CTSInfo(i[c]);
-  SetLength(i, 0);
-end;
-
-procedure Free_CTSInfo2DArray(i: TCTSInfo2DArray);
-var
-   x, y: integer;
-begin
-  for y := high(i) downto 0 do
-    for x := high(i[y]) downto 0 do
-      Free_CTSInfo(i[y][x]);
-  SetLength(i, 0);
-end;
-
-function Get_CTSCompare(cts: Integer): TCTSCompareFunction;
-
-begin
-  case cts of
-      -1: Result := @ColorSame_ctsNo;
-      0: Result := @ColorSame_cts0;
-      1: Result := @ColorSame_cts1;
-      2: Result := @ColorSame_cts2;
-      3: Result := @ColorSame_cts3;
-  end;
+  Result := Create_CTSInfo2DArray_helper(Self.cts, w, h, data, tolerance, Self.hueMod,
+              Self.satMod, Self.CTS3Modifier);
 end;
 
 procedure TMFinder.UpdateCachedValues(NewWidth, NewHeight: integer);
@@ -742,6 +737,22 @@ begin
       raise Exception.createFMT('You passed a wrong ye to a finder function: %d. The client has a height of %d, thus the ye is out of bounds.',[ye,h]);
 end;
 
+function TMFinder.SimilarColors(Color1, Color2, Tolerance: Integer) : boolean;
+var
+   compare: TCTSCompareFunction;
+   ctsinfo: TCTSInfo;
+   Col2: TRGB32;
+
+begin
+  ctsinfo := Create_CTSInfo(Color1, Tolerance);
+  compare := Get_CTSCompare(Self.CTS);
+  ColorToRGB(Color2, Col2.R, Col2.G, Col2.B);
+
+  Result := compare(ctsinfo, @Col2);
+
+  Free_CTSInfo(ctsinfo);
+end;
+
 function TMFinder.CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;
 var
    PtrData: TRetData;
@@ -763,7 +774,7 @@ begin
   PtrInc := PtrData.IncPtrWith;
   result := 0;
 
-  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tolerance, hueMod, satMod);
+  ctsinfo := Create_CTSInfo(Color, Tolerance);
   compare := Get_CTSCompare(Self.CTS);
 
   for yy := ys to ye do
@@ -851,7 +862,7 @@ begin
   LoadSpiralPath(x-xs,y-ys,0,0,dx,dy);
   HiSpiral := (dy+1) * (dx + 1) -1;
 
-  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  ctsinfo := Create_CTSInfo(Color, Tol);
   compare := Get_CTSCompare(Self.CTS);
 
   i := -1;
@@ -921,7 +932,7 @@ begin
   Ptr := PtrData.Ptr;
   PtrInc := PtrData.IncPtrWith;
 
-  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  ctsinfo := Create_CTSInfo(Color, Tol);
   compare := Get_CTSCompare(Self.CTS);
 
   for yy := ys to ye do
@@ -984,7 +995,7 @@ begin
   PtrInc := PtrData.IncPtrWith;
   Count := 0;
 
-  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  ctsinfo := Create_CTSInfo(Color, Tol);
   compare := Get_CTSCompare(Self.CTS);
 
   for yy := ys to ye do
@@ -1064,7 +1075,7 @@ begin
   PtrInc := PtrData.IncPtrWith;
   c := 0;
 
-  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  ctsinfo := Create_CTSInfo(Color, Tol);
   compare := Get_CTSCompare(Self.CTS);
 
   for yy := ys to ye do
@@ -1114,7 +1125,7 @@ begin
 
   c := 0;
 
-  ctsinfo := Create_CTSInfo(Self.CTS, Color, Tol, hueMod, satMod);
+  ctsinfo := Create_CTSInfo(Color, Tol);
   compare := Get_CTSCompare(Self.CTS);
 
   //Load rowdata
@@ -1301,8 +1312,7 @@ begin
   dX := dX - bmpW;
   dY := dY - bmpH;
 
-  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
-      Tolerance, self.hueMod, self.satMod);
+  ctsinfoarray := Create_CTSInfo2DArray(bmpW, bmpH, BmpRowData, Tolerance);
   compare := Get_CTSCompare(Self.CTS);
 
   //Get the "skip coords".
@@ -1410,8 +1420,7 @@ begin
   HiSpiral := (dx+1) * (dy+1) - 1;
   FoundC := 0;
 
-  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
-      Tolerance, self.hueMod, self.satMod);
+  ctsinfoarray := Create_CTSInfo2DArray(bmpW, bmpH, BmpRowData, Tolerance);
   compare := Get_CTSCompare(Self.CTS);
 
   //Get the "skip coords".
@@ -1501,8 +1510,7 @@ begin
   BestCount := -1;
   BestPT := Point(-1,-1);
 
-  ctsinfoarray := Create_CTSInfo2DArray(Self.CTS, bmpW, bmpH, BmpRowData,
-      Tolerance, self.hueMod, self.satMod);
+  ctsinfoarray := Create_CTSInfo2DArray(bmpW, bmpH, BmpRowData, Tolerance);
   compare := Get_CTSCompare(Self.CTS);
 
   //Get the "skip coords". and PointsLeft (so we can calc whether we should stop searching or not ;-).
@@ -1673,8 +1681,7 @@ begin
     tol_arr[i] := DPoints[i].t;
   end;
 
-  ctsinfoarray := Create_CTSInfoArray(Self.CTS,
-    col_arr, tol_arr, self.hueMod, self.satMod);
+  ctsinfoarray := Create_CTSInfoArray(col_arr, tol_arr);
   compare := Get_CTSCompare(Self.CTS);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
@@ -1877,8 +1884,7 @@ begin
     tol_arr[i] := DPoints[i].t;
   end;
 
-  ctsinfoarray := Create_CTSInfoArray(Self.CTS,
-    col_arr, tol_arr, self.hueMod, self.satMod);
+  ctsinfoarray := Create_CTSInfoArray(col_arr, tol_arr);
   compare := Get_CTSCompare(Self.CTS);
 
   cd := CalculateRowPtrs(PtrData, h + 1);
