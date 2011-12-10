@@ -595,6 +595,7 @@ begin
   Self.CTS := 1;
   Self.hueMod := 0.2;
   Self.satMod := 0.2;
+  Self.CTS3Modifier := 1;
   if (Percentage[255] <> 1) then
     for i := 0 to 255 do
       Percentage[i] := i / 255;
