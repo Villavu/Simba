@@ -174,7 +174,23 @@ MiddleTPAEx
 
     function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
 
-Stores the middle point from the TPA in x and y 
+Stores the middle point from the TPA in x and y
+
+The following example will find the Colors and make a TPA then give you the x and y coordinates for the middle of the TPA.
+
+.. code-block:: pascal
+
+    program MiddleTPAExExample;
+
+    var
+      TPA: TPointArray;
+      x, y: Integer;
+
+    begin
+      findcolors(TPA, 205, 0, 0, 100, 100);
+      MiddleTPAEx(TPA, x, y);
+      Mouse(x, y, 0, 0, 1);
+    end.
 
 
 MiddleTPA
@@ -186,6 +202,22 @@ MiddleTPA
 
 Returns the middle TPA in the result
 
+The following example like the previous one gives you the coordinates for the Middle of the TPA, but it returns it with the result being a TPoint.
+
+.. code-block:: pascal
+
+    program MiddleTPAExExample;
+
+    var
+      TPA: TPointArray;
+      P: TPoint;
+
+    begin
+      findcolors(TPA, 205, 0, 0, 100, 100);
+      P := MiddleTPAEx(TPA);
+      Mouse(P.x, P.y, 0, 0, 1);
+    end.
+
 
 SortATPASize
 ------------
@@ -196,6 +228,21 @@ SortATPASize
 
 Sorts the T2dPointArray from largest to smallest if BigFirst is true or smallest to largest if BigFirst is false
 
+The following Example Sorts the ATPA from largest to smallest.
+
+.. code-block:: pascal
+
+    program MiddleTPAExExample;
+
+    var
+      TPA: TPointArray;
+      P: TPoint;
+
+    begin
+      findcolors(TPA, 205, 0, 0, 100, 100);
+      ATPA := TPAtoATPA(TPA, 10);
+      SortATPASize(ATPA, true);
+    end.
 
 SortATPAFromSize
 ----------------
