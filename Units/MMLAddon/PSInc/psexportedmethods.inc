@@ -312,6 +312,8 @@ AddFunction(@ps_SetColorToleranceSpeed, 'procedure SetColorToleranceSpeed(cts: i
 AddFunction(@ps_GetToleranceSpeed, 'function GetToleranceSpeed: Integer;');
 AddFunction(@ps_SetToleranceSpeed2Modifiers, 'procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);');
 AddFunction(@ps_GetToleranceSpeed2Modifiers, 'procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended);');
+AddFunction(@ps_SetToleranceSpeed3Modifier, 'procedure SetToleranceSpeed3Modifier(Modifier: Extended);');
+AddFunction(@ps_GetToleranceSpeed3Modifier, 'function GetToleranceSpeed3Modifier: Extended;');
 AddFunction(@ps_GetColor,'function GetColor(x, y: Integer): Integer;');
 AddFunction(@ps_GetColors,'function GetColors(const Coords : TPointArray) : TIntegerArray;');
 AddFunction(@ps_GetColorsWrap,'procedure GetColorsWrap(Coords : TPointArray; var Colors :TIntegerArray);');

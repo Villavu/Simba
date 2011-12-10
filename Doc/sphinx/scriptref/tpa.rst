@@ -23,6 +23,26 @@ tSwap
 
 Swaps the values of a and b around
 
+The following example switches point P with point P2. You can run the example
+for a demonstration. It will print before the swap and after the swap to
+illustrate the change.
+
+.. code-block:: pascal
+
+    program tSwapExample;
+
+    var P, P2: Tpoint;
+
+    begin
+      P := Point(111, 111);
+      P2 := Point(222, 222);
+      writeln('P := ' + tostr(P));
+      writeln('P2 := ' + tostr(P2));
+      tSwap(P, P2);
+      writeln('P := ' + tostr(P));
+      writeln('P2 := ' + tostr(P2));
+    end.
+
 
 tpaSwap
 -------
