@@ -206,7 +206,7 @@ The following example like the previous one gives you the coordinates for the Mi
 
 .. code-block:: pascal
 
-    program MiddleTPAExExample;
+    program MiddleTPAExample;
 
     var
       TPA: TPointArray;
@@ -232,7 +232,7 @@ The following Example Sorts the ATPA from largest to smallest.
 
 .. code-block:: pascal
 
-    program MiddleTPAExExample;
+    program SortATPASizeExample;
 
     var
       TPA: TPointArray;
