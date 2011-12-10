@@ -161,6 +161,8 @@ AddGlobalFunc('procedure SetColorToleranceSpeed(cts: Integer);', @Lape_SetColorT
 AddGlobalFunc('function GetToleranceSpeed: Integer', @Lape_GetToleranceSpeed);
 AddGlobalFunc('procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);', @Lape_SetToleranceSpeed2Modifiers);
 AddGlobalFunc('procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended);', @Lape_GetToleranceSpeed2Modifiers);
+AddGlobalFunc('procedure SetToleranceSpeed3Modifier(Modifier: Extended);', @Lape_SetToleranceSpeed3Modifier);
+AddGlobalFunc('function GetToleranceSpeed3Modifier: Extended;', @Lape_GetToleranceSpeed3Modifier);
 AddGlobalFunc('function SimilarColors(Col1,Col2,Tol: integer): boolean', @Lape_SimilarColors);
 AddGlobalFunc('function CountColor(Color, xs, ys, xe, ye: Integer): Integer', @Lape_CountColor);
 AddGlobalFunc('function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer', @Lape_CountColorTolerance);
