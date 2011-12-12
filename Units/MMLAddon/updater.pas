@@ -206,6 +206,10 @@ var
 begin
   Result := False;
   HTTPSend := THTTPSend.Create;
+
+  HTTPSend.UserAgent := 'Mozilla 4.0/ (compatible; Simba/' +
+      IntToStr(SimbaVersion) + '; Synapse)';
+
   HTTPSend.Sock.OnMonitor:=@Self.OnMonitor;
   HTTPSend.Sock.OnStatus:=@Self.OnStatus;
   HTTPSend.Sock.OnHeartbeat:=@Self.OnHeartBeat;
