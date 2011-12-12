@@ -27,7 +27,8 @@ unit internets;
 interface
 
 uses
-  Classes, SysUtils, httpsend, blcksock, MufasaTypes, math, ssl_openssl;
+  Classes, SysUtils, httpsend, blcksock, MufasaTypes, math, ssl_openssl,
+  mufasabase;
 
 function GetPage(URL: String): String;
 
@@ -117,6 +118,10 @@ var
   HTTP : THTTPSend;
 begin;
   HTTP := THTTPSend.Create;
+
+  HTTP.UserAgent := 'Mozilla 4.0/ (compatible; Simba/' +
+      IntToStr(SimbaVersion) + '; Synapse)';
+
   Result := '';
   try
     if HTTP.HTTPMethod('GET', URL) then
