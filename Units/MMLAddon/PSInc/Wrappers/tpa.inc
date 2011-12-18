@@ -48,6 +48,27 @@ begin
   QuickATPASort(a,b,ilo,ihi,sortup);
 end;
 
+procedure ps_SortTPAByX(var a: TPointArray; const LowToHi: Boolean);
+begin
+  SortTPAByX(a, LowToHi);
+end;
+
+procedure ps_SortTPAByY(var a: TPointArray; const LowToHi: Boolean);
+begin
+  SortTPAByY(a, LowToHi);
+end;
+
+function ps_FindTPARows(a: TPointArray): T2DPointArray;
+begin
+  Result := FindTPARows(a);
+end;
+
+function ps_FindTPAColumns(a: TPointArray): T2DPointArray;
+begin
+  Result := FindTPAColumns(a);
+end;
+
+
 procedure ps_SortTPAFrom(var a: TPointArray; const From: TPoint); extdecl;
 begin
   SortTPAFrom(a,from);
@@ -266,6 +287,11 @@ end;
 function ps_TPAFromCircle(const CX, CY, Radius: Integer) : TPointArray;  extdecl;
 begin
   result := TPAFromCircle(CX, CY, Radius);
+end;
+
+procedure ps_FillEllipse(var a: TPointArray);
+begin
+  FillEllipse(a);
 end;
 
 function ps_RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray; extdecl;
