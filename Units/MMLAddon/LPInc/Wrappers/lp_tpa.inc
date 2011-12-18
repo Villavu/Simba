@@ -63,6 +63,11 @@ begin
   ps_SortATPAFromFirstPoint(P2DPointArray(Params^[0])^, PPoint(Params^[1])^);
 end;
 
+procedure Lape_SortATPAFromMidPoint(const Params: PParamArray);
+begin
+  ps_SortATPAFromMidPoint(P2DPointArray(Params^[0])^, PPoint(Params^[1])^);
+end;
+
 procedure Lape_InvertTPA(const Params: PParamArray);
 begin
   ps_InvertTPA(PPointArray(Params^[0])^);
@@ -253,6 +258,16 @@ begin
   PPointArray(Result)^ := ps_TPAFromBox(PBox(Params^[0])^);
 end;
 
+procedure Lape_TPAFromEllipse(const Params: PParamArray; const Result: Pointer);
+begin
+  PPointArray(Result)^ := ps_TPAFromEllipse(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure Lape_TPAFromCircle(const Params: PParamArray; const Result: Pointer);
+begin
+  PPointArray(Result)^ := ps_TPAFromCircle(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 procedure Lape_RotatePoints(const Params: PParamArray; const Result: Pointer);
 begin
   PPointArray(Result)^ := ps_RotatePoints(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
@@ -371,6 +386,16 @@ end;
 procedure Lape_TPAFromBoxWrap(const Params: PParamArray);
 begin
   ps_TPAFromBoxWrap(PBox(Params^[0])^, PPointArray(Params^[1])^);
+end;
+
+procedure Lape_TPAFromEllipseWrap(const Params: PParamArray);
+begin
+  ps_TPAFromEllipseWrap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PPointArray(Params^[4])^);
+end;
+
+procedure Lape_TPAFromCircleWrap(const Params: PParamArray);
+begin
+  ps_TPAFromCircleWrap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PPointArray(Params^[3])^);
 end;
 
 procedure Lape_RotatePointsWrap(const Params: PParamArray);
