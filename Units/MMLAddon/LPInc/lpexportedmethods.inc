@@ -371,6 +371,7 @@ AddGlobalFunc('procedure QuickATPASort(var A: TIntegerArray; var B: T2DPointArra
 AddGlobalFunc('procedure SortTPAFrom(var a: TPointArray; const From: TPoint);', @Lape_SortTPAFrom);
 AddGlobalFunc('procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFrom);
 AddGlobalFunc('procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPoint);
+AddGlobalFunc('procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromMidPoint);
 AddGlobalFunc('procedure InvertTPA(var a: TPointArray);', @Lape_InvertTPA);
 AddGlobalFunc('procedure InvertATPA(var a: T2DPointArray);', @Lape_InvertATPA);
 AddGlobalFunc('function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean', @Lape_MiddleTPAEx);
@@ -409,6 +410,8 @@ AddGlobalFunc('function CombineIntArray(const Ar1, Ar2: TIntegerArray): TInteger
 AddGlobalFunc('function MergeATPA(const ATPA: T2DPointArray): TPointArray', @Lape_MergeATPA);
 AddGlobalFunc('procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);', @Lape_AppendTPA);
 AddGlobalFunc('function TPAFromBox(const Box: TBox): TPointArray', @Lape_TPAFromBox);
+AddGlobalFunc('function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray', @Lape_TPAFromEllipse);
+AddGlobalFunc('function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray', @Lape_TPAFromCircle);
 AddGlobalFunc('function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray', @Lape_RotatePoints);
 AddGlobalFunc('function FindTPAEdges(const p: TPointArray): TPointArray', @Lape_FindTPAEdges);
 AddGlobalFunc('function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray', @Lape_ClearTPAFromTPA);
@@ -433,6 +436,8 @@ AddGlobalFunc('procedure TPAtoATPAWrap(const TPA: TPointArray; Dist: Integer; va
 AddGlobalFunc('procedure CombineIntArrayWrap(const Ar1, Ar2: TIntegerArray; var Res: TIntegerArray);', @Lape_CombineIntArrayWrap);
 AddGlobalFunc('procedure MergeATPAWrap(const ATPA: T2DPointArray; var Res: TPointArray);', @Lape_MergeATPAWrap);
 AddGlobalFunc('procedure TPAFromBoxWrap(const Box: TBox; var Res: TPointArray);', @Lape_TPAFromBoxWrap);
+AddGlobalFunc('procedure TPAFromEllipseWrap(const CX, CY, XRadius, YRadius : Integer; var Res: TPointArray);', @Lape_TPAFromEllipseWrap);
+AddGlobalFunc('procedure TPAFromCircleWrap(const CX, CY, Radius : Integer; var Res: TPointArray);', @Lape_TPAFromCircleWrap);
 AddGlobalFunc('procedure RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; var Res: TPointArray);', @Lape_RotatePointsWrap);
 AddGlobalFunc('procedure FindTPAEdgesWrap(const p: TPointArray; var Res: TPointArray);', @Lape_FindTPAEdgesWrap);
 AddGlobalFunc('procedure ClearTPAFromTPAWrap(const arP, ClearPoints: TPointArray; var Res: TPointArray);', @Lape_ClearTPAFromTPAWrap);

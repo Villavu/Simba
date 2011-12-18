@@ -63,6 +63,11 @@ begin
   SortATPAFromFirstPoint(a,from);
 end;
 
+procedure ps_SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint); extdecl;
+begin
+  SortATPAFromMidPoint(a,from);
+end;
+
 procedure ps_InvertTPA(var a: TPointArray); extdecl;
 begin
   InvertTPA(a);
@@ -253,6 +258,16 @@ begin
   result := TPAFromBox(box);
 end;
 
+function ps_TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray;  extdecl;
+begin
+  result := TPAFromEllipse(CX, CY, XRadius, YRadius);
+end;
+
+function ps_TPAFromCircle(const CX, CY, Radius: Integer) : TPointArray;  extdecl;
+begin
+  result := TPAFromCircle(CX, CY, Radius);
+end;
+
 function ps_RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray; extdecl;
 begin
   Result := RotatePoints(p,a,cx,cy);
@@ -362,6 +377,14 @@ end;
 procedure ps_TPAFromBoxWrap(const Box : TBox; var Res : TPointArray);extdecl;
 begin
   Res := TPAFromBox(Box);
+end;
+procedure ps_TPAFromEllipseWrap(const CX, CY, XRadius, YRadius : Integer; var Res : TPointArray);extdecl;
+begin
+  Res := TPAFromEllipse(CX, CY, XRadius, YRadius);
+end;
+procedure ps_TPAFromCircleWrap(const CX, CY, Radius: Integer; var Res : TPointArray);extdecl;
+begin
+  Res := TPAFromCircle(CX, CY, Radius);
 end;
 procedure ps_RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; var Res :  TPointArray);extdecl;
 begin
