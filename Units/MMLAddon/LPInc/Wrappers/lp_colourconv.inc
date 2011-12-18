@@ -47,3 +47,53 @@ procedure Lape_XYZToRGB(const Params: PParamArray);
 begin
   ps_XYZToRGB(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
 end;
+
+procedure Lape_XYZToHSL(const Params: PParamArray);
+begin
+  ps_HSLToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
+
+procedure Lape_HSLToXYZ(const Params: PParamArray);
+begin
+  ps_HSLToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
+
+procedure Lape_XYZtoCIELab(const Params: PParamArray);
+begin
+  ps_XYZtoCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
+
+procedure Lape_CIELabtoXYZ(const Params: PParamArray);
+begin
+  ps_CIELabToXYZ(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
+
+procedure Lape_CIELabToRGB(const Params: PParamArray);
+begin
+  ps_CIELabToRGB(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure Lape_RGBToCIELab(const Params: PParamArray);
+begin
+  ps_RGBToCIELab(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
+
+procedure Lape_CIELabToColor(const Params: PParamArray; out Result : Pointer);
+begin
+  PColor(Result)^ := ps_CIELabToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
+end;
+
+procedure Lape_ColorToCIELab(const Params: PParamArray);
+begin
+  ps_ColorToCIELab(PInteger(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^);
+end;
+
+procedure Lape_CIELabToHSL(const Params: PParamArray);
+begin
+  ps_CIELabToHSL(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
+
+procedure Lape_HSLToCIELab(const Params: PParamArray);
+begin
+  ps_HSLToCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
