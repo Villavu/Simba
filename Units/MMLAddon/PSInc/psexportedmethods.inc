@@ -453,6 +453,10 @@ AddFunction(@ps_NearbyPointInArrayEx,'function NearbyPointInArrayEx(const P: TPo
 AddFunction(@ps_NearbyPointInArray,'function NearbyPointInArray(const P: TPoint; Dist:Integer;const  a: TPointArray): Boolean;');
 AddFunction(@ps_QuickTPASort,'procedure QuickTPASort(var A: TIntegerArray; var B: TPointArray; iLo, iHi: Integer; SortUp: Boolean);');
 AddFunction(@ps_QuickATPASort,'procedure QuickATPASort(var A: TIntegerArray; var B: T2DPointArray; iLo, iHi: Integer; SortUp: Boolean);');
+AddFunction(@ps_SortTPAByX,'procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean);');
+AddFunction(@ps_SortTPAByY,'procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean);');
+AddFunction(@ps_FindTPARows,'function FindTPARows(a: TPointArray): T2DPointArray;');
+AddFunction(@ps_FindTPAColumns,'function FindTPAColumns(a: TPointArray): T2DPointArray;');
 AddFunction(@ps_SortTPAFrom,'procedure SortTPAFrom(var a: TPointArray; const From: TPoint);');
 AddFunction(@ps_SortATPAFrom,'procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_SortATPAFromFirstPoint,'procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);');
@@ -497,6 +501,7 @@ AddFunction(@ps_AppendTPA,'procedure AppendTPA(var TPA: TPointArray; const ToApp
 AddFunction(@ps_TPAFromBox,'function TPAFromBox(const Box : TBox) : TPointArray;');
 AddFunction(@ps_TPAFromEllipse,'function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray;');
 AddFunction(@ps_TPAFromCircle,'function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray;');
+AddFunction(@ps_FillEllipse,'procedure FillEllipse(var a: TPointArray);');
 AddFunction(@ps_RotatePoints,'function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;');
 AddFunction(@ps_FindTPAEdges,'function FindTPAEdges(const p: TPointArray): TPointArray;');
 AddFunction(@ps_ClearTPAFromTPA,'function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;');
