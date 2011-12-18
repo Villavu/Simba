@@ -304,6 +304,16 @@ AddFunction(@ps_RGBToHSL, 'procedure RGBToHSL(R, G, B: Integer; var h, s, l: Ext
 AddFunction(@ps_HSLToRGB, 'procedure HSLtoRGB(H, S, L: extended; var R, G ,B: Integer);');
 AddFunction(@ps_RGBToXYZ, 'procedure RGBToXYZ(R, G, B: Integer;var x, y ,z: Extended);');
 AddFunction(@ps_XYZToRGB, 'procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Integer);');
+AddFunction(@ps_XYZToHSL, 'procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended);');
+AddFunction(@ps_HSLToXYZ, 'procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended);');
+AddFunction(@ps_XYZtoCIELab, 'procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);');
+AddFunction(@ps_CIELabtoXYZ, 'procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended);');
+AddFunction(@ps_CIELabToRGB, 'procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: Integer);');
+AddFunction(@ps_RGBToCIELab, 'procedure RGBToCIELab(rr, gg, bb: integer; out L, a, b: Extended);');
+AddFunction(@ps_CIELabToColor, 'function CIELabToColor(L, a, b: Extended): TColor;');
+AddFunction(@ps_ColorToCIELab, 'procedure ColorToCIELab(Color: integer; out L, a, b: Extended);');
+AddFunction(@ps_CIELabToHSL, 'procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);');
+AddFunction(@ps_HSLToCIELab, 'procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);');
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 { Color Finding }
