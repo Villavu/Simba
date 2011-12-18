@@ -185,6 +185,16 @@ AddGlobalFunc('procedure RGBToHSL(R, G, B: Integer; var h, s, l: Extended);', @L
 AddGlobalFunc('procedure HSLtoRGB(H, S, L: extended; var R, G,B: Integer);', @Lape_HSLtoRGB);
 AddGlobalFunc('procedure RGBToXYZ(R, G, B: Integer; var x, y,z: Extended);', @Lape_RGBToXYZ);
 AddGlobalFunc('procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Integer);', @Lape_XYZToRGB);
+AddGlobalFunc('procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended);', @Lape_XYZToHSL);
+AddGlobalFunc('procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended);', @Lape_HSLToXYZ);
+AddGlobalFunc('procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);', @Lape_XYZtoCIELab);
+AddGlobalFunc('procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended);', @Lape_CIELabtoXYZ);
+AddGlobalFunc('procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: Integer);', @Lape_CIELabToRGB);
+AddGlobalFunc('procedure RGBToCIELab(rr, gg, bb: integer; out L, a, b: Extended);', @Lape_RGBToCIELab);
+AddGlobalFunc('function CIELabToColor(L, a, b: Extended): TColor;', @Lape_CIELabToColor);
+AddGlobalFunc('procedure ColorToCIELab(Color: integer; out L, a, b: Extended);', @Lape_ColorToCIELab);
+AddGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);', @Lape_CIELabToHSL);
+AddGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);', @Lape_HSLToCIELab);
 
 { Crypto }
 
