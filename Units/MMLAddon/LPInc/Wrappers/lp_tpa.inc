@@ -48,6 +48,26 @@ begin
   ps_QuickATPASort(PIntegerArray(Params^[0])^, P2DPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
+procedure Lape_SortTPAByX(const Params: PParamArray);
+begin
+  ps_SortTPAByX(PPointArray(Params^[0])^, PBoolean(Params^[1])^);
+end;
+
+procedure Lape_SortTPAByY(const Params: PParamArray);
+begin
+  ps_SortTPAByY(PPointArray(Params^[0])^, PBoolean(Params^[1])^);
+end;
+
+procedure Lape_FindTPARows(const Params: PParamArray; const Result: Pointer);
+begin
+  P2DPointArray(Result)^ := ps_FindTPARows(PPointArray(Params^[0])^);
+end;
+
+procedure Lape_FindTPAColumns(const Params: PParamArray; const Result: Pointer);
+begin
+  P2DPointArray(Result)^ := ps_FindTPAColumns(PPointArray(Params^[0])^);
+end;
+
 procedure Lape_SortTPAFrom(const Params: PParamArray);
 begin
   ps_SortTPAFrom(PPointArray(Params^[0])^, PPoint(Params^[1])^);
@@ -266,6 +286,11 @@ end;
 procedure Lape_TPAFromCircle(const Params: PParamArray; const Result: Pointer);
 begin
   PPointArray(Result)^ := ps_TPAFromCircle(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_FillEllipse(const Params: PParamArray);
+begin
+  ps_FillEllipse(PPointArray(Params^[0])^);
 end;
 
 procedure Lape_RotatePoints(const Params: PParamArray; const Result: Pointer);

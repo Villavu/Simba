@@ -246,6 +246,10 @@ AddGlobalFunc('function NearbyPointInArrayEx(const P: TPoint; w, h: Integer; con
 AddGlobalFunc('function NearbyPointInArray(const P: TPoint; Dist: Integer; const a: TPointArray): Boolean', @Lape_NearbyPointInArray);
 AddGlobalFunc('procedure QuickTPASort(var A: TIntegerArray; var B: TPointArray; iLo, iHi: Integer; SortUp: Boolean);', @Lape_QuickTPASort);
 AddGlobalFunc('procedure QuickATPASort(var A: TIntegerArray; var B: T2DPointArray; iLo, iHi: Integer; SortUp: Boolean);', @Lape_QuickATPASort);
+AddGlobalFunc('procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean);', @Lape_SortTPAByX);
+AddGlobalFunc('procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean);', @Lape_SortTPAByY);
+AddGlobalFunc('function FindTPARows(a: TPointArray): T2DPointArray;', @Lape_FindTPARows);
+AddGlobalFunc('function FindTPAColumns(a: TPointArray): T2DPointArray;', @Lape_FindTPAColumns);
 AddGlobalFunc('procedure SortTPAFrom(var a: TPointArray; const From: TPoint);', @Lape_SortTPAFrom);
 AddGlobalFunc('procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFrom);
 AddGlobalFunc('procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPoint);
@@ -290,6 +294,7 @@ AddGlobalFunc('procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointA
 AddGlobalFunc('function TPAFromBox(const Box: TBox): TPointArray', @Lape_TPAFromBox);
 AddGlobalFunc('function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray', @Lape_TPAFromEllipse);
 AddGlobalFunc('function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray', @Lape_TPAFromCircle);
+AddGlobalFunc('procedure FillEllipse(var a: TPointArray);', @Lape_FillEllipse);
 AddGlobalFunc('function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray', @Lape_RotatePoints);
 AddGlobalFunc('function FindTPAEdges(const p: TPointArray): TPointArray', @Lape_FindTPAEdges);
 AddGlobalFunc('function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray', @Lape_ClearTPAFromTPA);
