@@ -304,6 +304,16 @@ AddFunction(@ps_RGBToHSL, 'procedure RGBToHSL(R, G, B: Integer; var h, s, l: Ext
 AddFunction(@ps_HSLToRGB, 'procedure HSLtoRGB(H, S, L: extended; var R, G ,B: Integer);');
 AddFunction(@ps_RGBToXYZ, 'procedure RGBToXYZ(R, G, B: Integer;var x, y ,z: Extended);');
 AddFunction(@ps_XYZToRGB, 'procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Integer);');
+AddFunction(@ps_XYZToHSL, 'procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended);');
+AddFunction(@ps_HSLToXYZ, 'procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended);');
+AddFunction(@ps_XYZtoCIELab, 'procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);');
+AddFunction(@ps_CIELabtoXYZ, 'procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended);');
+AddFunction(@ps_CIELabToRGB, 'procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: Integer);');
+AddFunction(@ps_RGBToCIELab, 'procedure RGBToCIELab(rr, gg, bb: integer; out L, a, b: Extended);');
+AddFunction(@ps_CIELabToColor, 'function CIELabToColor(L, a, b: Extended): TColor;');
+AddFunction(@ps_ColorToCIELab, 'procedure ColorToCIELab(Color: integer; out L, a, b: Extended);');
+AddFunction(@ps_CIELabToHSL, 'procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);');
+AddFunction(@ps_HSLToCIELab, 'procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);');
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 { Color Finding }
@@ -443,9 +453,14 @@ AddFunction(@ps_NearbyPointInArrayEx,'function NearbyPointInArrayEx(const P: TPo
 AddFunction(@ps_NearbyPointInArray,'function NearbyPointInArray(const P: TPoint; Dist:Integer;const  a: TPointArray): Boolean;');
 AddFunction(@ps_QuickTPASort,'procedure QuickTPASort(var A: TIntegerArray; var B: TPointArray; iLo, iHi: Integer; SortUp: Boolean);');
 AddFunction(@ps_QuickATPASort,'procedure QuickATPASort(var A: TIntegerArray; var B: T2DPointArray; iLo, iHi: Integer; SortUp: Boolean);');
+AddFunction(@ps_SortTPAByX,'procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean);');
+AddFunction(@ps_SortTPAByY,'procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean);');
+AddFunction(@ps_FindTPARows,'function FindTPARows(a: TPointArray): T2DPointArray;');
+AddFunction(@ps_FindTPAColumns,'function FindTPAColumns(a: TPointArray): T2DPointArray;');
 AddFunction(@ps_SortTPAFrom,'procedure SortTPAFrom(var a: TPointArray; const From: TPoint);');
 AddFunction(@ps_SortATPAFrom,'procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_SortATPAFromFirstPoint,'procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);');
+AddFunction(@ps_SortATPAFromMidPoint,'procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_InvertTPA,'procedure InvertTPA(var a: TPointArray);');
 AddFunction(@ps_InvertATPA,'procedure InvertATPA(var a: T2DPointArray);');
 AddFunction(@ps_MiddleTPAEx,'function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;');
@@ -484,6 +499,9 @@ AddFunction(@ps_CombineIntArray,'function CombineIntArray(const Ar1, Ar2: TInteg
 AddFunction(@ps_MergeATPA,'function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;');
 AddFunction(@ps_AppendTPA,'procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);');
 AddFunction(@ps_TPAFromBox,'function TPAFromBox(const Box : TBox) : TPointArray;');
+AddFunction(@ps_TPAFromEllipse,'function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray;');
+AddFunction(@ps_TPAFromCircle,'function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray;');
+AddFunction(@ps_FillEllipse,'procedure FillEllipse(var a: TPointArray);');
 AddFunction(@ps_RotatePoints,'function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray ;');
 AddFunction(@ps_FindTPAEdges,'function FindTPAEdges(const p: TPointArray): TPointArray;');
 AddFunction(@ps_ClearTPAFromTPA,'function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;');
@@ -509,6 +527,8 @@ AddFunction(@ps_CombineIntArrayWrap, 'procedure CombineIntArrayWrap(const Ar1, A
 AddFunction(@ps_ReturnPointsNotInTPAWrap,'procedure ReturnPointsNotInTPAWrap(Const TotalTPA: TPointArray; const Box: TBox; var Res :  TPointArray);');
 AddFunction(@ps_MergeATPAWrap,'procedure MergeATPAWrap(const ATPA : T2DPointArray; var Res: TPointArray);');
 AddFunction(@ps_TPAFromBoxWrap,'procedure TPAFromBoxWrap(const Box : TBox; var Res : TPointArray);');
+AddFunction(@ps_TPAFromEllipseWrap,'procedure TPAFromEllipseWrap(const CX, CY, XRadius, YRadius : Integer; var Res : TPointArray);');
+AddFunction(@ps_TPAFromCircleWrap,'procedure TPAFromCircleWrap(const CX, CY, Radius : Integer; var Res : TPointArray);');
 AddFunction(@ps_RotatePointsWrap,'procedure RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; var Res :  TPointArray);');
 AddFunction(@ps_FindTPAEdgesWrap,'procedure FindTPAEdgesWrap(const p: TPointArray; var Res :  TPointArray);');
 AddFunction(@ps_ClearTPAFromTPAWrap,'procedure ClearTPAFromTPAWrap(const arP, ClearPoints: TPointArray;  var Res :  TPointArray);');
