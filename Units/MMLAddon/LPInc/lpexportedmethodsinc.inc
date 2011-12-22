@@ -51,6 +51,7 @@ AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArra
 AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
 AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
+AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 AddGlobalFunc('function GetColor(x,y: integer): TColor', @Lape_GetColor);
 AddGlobalFunc('procedure GetColorsWrap(Coords: TPointArray; var Colors: TIntegerArray);', @Lape_GetColorsWrap);
 AddGlobalFunc('function GetColors(const Coords: TPointArray): TIntegerArray', @Lape_GetColors);
