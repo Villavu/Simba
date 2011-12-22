@@ -330,3 +330,9 @@ begin
   with CurrThread.Client.MBitmaps do
     result := CalculatePixelTolerance(GetBMP(bmp1),GetBMP(bmp2),comparebox,cts);
 end;
+
+function ps_CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+    result := CalculatePixelToleranceTPA(GetBMP(bmp1),GetBMP(bmp2),CPoints,cts);
+end;

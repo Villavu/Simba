@@ -440,6 +440,7 @@ AddFunction(@ps_ConvoluteBitmap,'function ConvoluteBitmap(bitmap : integer; matr
 AddFunction(@ps_CalculatePixelShift,'function CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;');
 AddFunction(@ps_CalculatePixelShiftTPA,'function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;');
 AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
+AddFunction(@ps_CalculatePixelToleranceTPA,'function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;');
 {$ENDIF}
 
 {tpa}
