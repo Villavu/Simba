@@ -127,6 +127,7 @@ type
 
   Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
   function CalculatePixelShift(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox) : integer;
+  function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
   function CalculatePixelTolerance(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox; CTS : integer) : extended;
 implementation
 
@@ -188,6 +189,29 @@ begin
       if LongWord(Bmp1.FData[y * w1 + x]) <> LongWord(Bmp2.Fdata[y * w2 + x]) then
         inc(result);
 end;
+
+function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
+var
+  i : integer;
+  bounds: TBox;
+  w1,w2 : integer;
+begin
+  bounds := GetTPABounds(CPoints);
+  Bmp1.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp1.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp2.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp2.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp1.SetAlphaValue(0);
+  Bmp2.SetAlphaValue(0);
+  w1 := bmp1.width;
+  w2 := bmp2.width;
+  result := 0;
+  for i := 0 to High(CPoints) do
+    if LongWord(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x]) <>
+        LongWord(Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x]) then
+      inc(result);
+end;
+
 //CTS 0 counts the average difference in R,G,B per pixel
 //CTS 1 counts the average difference using SQRT(Sqr(r) + sqr(g)+sqr(b));
 function CalculatePixelTolerance(Bmp1, Bmp2: TMufasaBitmap; CompareBox: TBox;
