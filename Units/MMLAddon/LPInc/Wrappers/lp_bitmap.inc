@@ -262,3 +262,8 @@ procedure Lape_CalculatePixelTolerance(const Params: PParamArray; const Result: 
 begin
   Pextended(Result)^ := ps_CalculatePixelTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PBox(Params^[2])^, Pinteger(Params^[3])^);
 end;
+
+procedure Lape_CalculatePixelToleranceTPA(const Params: PParamArray; const Result: Pointer);
+begin
+  Pextended(Result)^ := ps_CalculatePixelToleranceTPA(PInteger(Params^[0])^, PInteger(Params^[1])^, PPointArray(Params^[2])^, Pinteger(Params^[3])^);
+end;
