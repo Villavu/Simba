@@ -49,6 +49,7 @@ AddGlobalFunc('procedure RectangleBitmap(bitmap: integer; const box: TBox; Color
 AddGlobalFunc('procedure FloodFillBitmap(bitmap: integer; const StartPoint: TPoint; const SearchCol,ReplaceCol: TColor);', @Lape_FloodFillBitmap);
 AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArray): integer', @Lape_ConvoluteBitmap);
 AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
+AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
 AddGlobalFunc('function GetColor(x,y: integer): TColor', @Lape_GetColor);
 AddGlobalFunc('procedure GetColorsWrap(Coords: TPointArray; var Colors: TIntegerArray);', @Lape_GetColorsWrap);
