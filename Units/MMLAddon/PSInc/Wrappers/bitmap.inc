@@ -319,6 +319,12 @@ begin
     result := CalculatePixelShift(GetBMP(bmp1),GetBMP(bmp2),comparebox);
 end;
 
+function ps_CalculatePixelShiftTPA(Bmp1, Bmp2: Integer; CPoints: TPointArray): integer;extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+    result := CalculatePixelShiftTPA(GetBMP(bmp1),GetBMP(bmp2),CPoints);
+end;
+
 function ps_CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;extdecl;
 begin
   with CurrThread.Client.MBitmaps do

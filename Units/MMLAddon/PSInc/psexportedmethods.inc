@@ -438,6 +438,7 @@ AddFunction(@ps_RectangleBitmap,'procedure RectangleBitmap(bitmap : integer; con
 AddFunction(@ps_FloodfillBitmap,'procedure FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor);');
 AddFunction(@ps_ConvoluteBitmap,'function ConvoluteBitmap(bitmap : integer; matrix : T2DExtendedArray) : integer;');
 AddFunction(@ps_CalculatePixelShift,'function CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;');
+AddFunction(@ps_CalculatePixelShiftTPA,'function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;');
 AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
 {$ENDIF}
 

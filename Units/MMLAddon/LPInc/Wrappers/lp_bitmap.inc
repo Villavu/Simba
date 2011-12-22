@@ -253,6 +253,11 @@ begin
   Pinteger(Result)^ := ps_CalculatePixelShift(PInteger(Params^[0])^, PInteger(Params^[1])^, PBox(Params^[2])^);
 end;
 
+procedure Lape_CalculatePixelShiftTPA(const Params: PParamArray; const Result: Pointer);
+begin
+  Pinteger(Result)^ := ps_CalculatePixelShiftTPA(PInteger(Params^[0])^, PInteger(Params^[1])^, PPointArray(Params^[2])^);
+end;
+
 procedure Lape_CalculatePixelTolerance(const Params: PParamArray; const Result: Pointer);
 begin
   Pextended(Result)^ := ps_CalculatePixelTolerance(PInteger(Params^[0])^, PInteger(Params^[1])^, PBox(Params^[2])^, Pinteger(Params^[3])^);
