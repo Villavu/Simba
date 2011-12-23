@@ -6,12 +6,12 @@ var
 begin
   with HashType.Create(nil) do
   try
+    Init();
+    UpdateStr(Data);
+
     Size := (GetHashSize() div 8);
     Digest := GetMem(Size);
     FillChar(Digest^, Size, $00);
-
-    Init();
-    UpdateStr(Data);
     Final(Digest^);
   finally
     Free;
@@ -21,6 +21,8 @@ begin
   Result := '';
   for I := 0 to Size do
     Result := Result + IntToHex(PByte(Digest)[I], 2);
+
+  FreeMem(Digest, Size + 1);
 end;
 
 function ps_haval(Data: string): string; begin Result := _Hash(TDCP_Haval, Data); end;
