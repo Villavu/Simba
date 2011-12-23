@@ -1,200 +1,35 @@
 
-function ps_haval(Data: string): string;  extdecl;
+function _Hash(HashType: TDCP_hashclass; Data: string): string; inline;
 var
-  HASH: TDCP_haval;
-  Digest: array[0..31] of byte;
-  I: integer;
+  Digest: Pointer;
+  I, Size: LongInt;
 begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_haval.Create(nil);
+  with HashType.Create(nil) do
   try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 31 do
-      Result := Result + IntToHex(Digest[I], 2);
+    Size := (GetHashSize() div 8);
+    Digest := GetMem(Size);
+    FillChar(Digest^, Size, $00);
+
+    Init();
+    UpdateStr(Data);
+    Final(Digest^);
   finally
-    Hash.Free;
+    Free;
   end;
+
+  Dec(Size);
+  Result := '';
+  for I := 0 to Size do
+    Result := Result + IntToHex(PByte(Digest)[I], 2);
 end;
 
-function ps_md4(Data: string): string;  extdecl;
-var
-  HASH: TDCP_md4;
-  Digest: array[0..15] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_md4.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 15 do
-      Result := Result + IntToHex(Digest[I], 2);
-  finally
-    Hash.Free;
-  end;
-end; 
-
-function ps_md5(Data: string): string;  extdecl;
-var
-  HASH: TDCP_md5;
-  Digest: array[0..15] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_md5.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 15 do
-      Result := Result + IntToHex(Digest[I], 2);
-  finally
-    Hash.Free;
-  end;
-end;
-
-function ps_ripemd128(Data: string): string;  extdecl;
-var
-  HASH: TDCP_ripemd128;
-  Digest: array[0..15] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_ripemd128.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 15 do
-      Result := Result + IntToHex(Digest[I], 2);
-  finally
-    Hash.Free;
-  end;
-end;
-
-function ps_ripemd160(Data: string): string;  extdecl;
-var
-  HASH: TDCP_ripemd160;
-  Digest: array[0..19] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_ripemd160.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 19 do
-      Result := Result + IntToHex(Digest[I], 2);
-  finally
-    Hash.Free;
-  end;
-end;
-
-function ps_sha1(Data: string): string;   extdecl;
-var
-  HASH: TDCP_sha1;
-  Digest: array[0..19] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_sha1.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 19 do
-      Result := Result + IntToHex(Digest[I], 2);
-  finally
-    Hash.Free;
-  end;
-end;
-
-function ps_sha256(Data: string): string;  extdecl;
-var
-  HASH: TDCP_sha256;
-  Digest: array[0..31] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_sha256.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 31 do
-      Result := Result + IntToHex(Digest[I], 2);
-  finally
-    Hash.Free;
-  end;
-end;
-
-function ps_sha384(Data: string): string;  extdecl;
-var
-  HASH: TDCP_sha384;
-  Digest: array[0..47] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_sha384.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 47 do
-      Result := Result + IntToHex(Digest[I], 2);
-  finally
-    Hash.Free;
-  end;
-end;
-
-function ps_sha512(Data: string): string;  extdecl;
-var
-  HASH: TDCP_sha512;
-  Digest: array[0..63] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_sha512.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 63 do
-      Result := Result + IntToHex(Digest[I], 2);
-  finally
-    Hash.Free;
-  end;
-end;
-
-function ps_tiger(Data: string): string;  extdecl;
-var
-  HASH: TDCP_tiger;
-  Digest: array[0..23] of byte;
-  I: integer;
-begin
-  dcpFillChar(Digest, SizeOf(Digest), 0);
-  Hash := TDCP_tiger.Create(nil);
-  try
-    Hash.Init;
-    Hash.UpdateStr(Data);
-    Hash.Final(Digest);
-    Result := '';
-    for I := 0 to 23 do
-      Result := Result + string(IntToHex(Digest[I], 2));
-  finally
-    Hash.Free;
-  end;
-end;
+function ps_haval(Data: string): string; begin Result := _Hash(TDCP_Haval, Data); end;
+function ps_md4(Data: string): string; begin Result := _Hash(TDCP_MD4, Data); end;
+function ps_md5(Data: string): string; begin Result := _Hash(TDCP_MD5, Data); end;
+function ps_ripemd128(Data: string): string; begin Result := _Hash(TDCP_RipeMD128, Data); end;
+function ps_ripemd160(Data: string): string; begin Result := _Hash(TDCP_RipeMD160, Data); end;
+function ps_sha1(Data: string): string; begin Result := _Hash(TDCP_SHA1, Data); end;
+function ps_sha256(Data: string): string; begin Result := _Hash(TDCP_SHA256, Data); end;
+function ps_sha384(Data: string): string; begin Result := _Hash(TDCP_SHA384, Data); end;
+function ps_sha512(Data: string): string; begin Result := _Hash(TDCP_SHA512, Data); end;
+function ps_tiger(Data: string): string; begin Result := _Hash(TDCP_Tiger, Data); end;
