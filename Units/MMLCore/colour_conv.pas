@@ -39,7 +39,8 @@ Function RGBtoColor(r,g,b : integer) : TColor; overload; inline;
 Procedure ColorToRGB(Color : integer;out r,g,b : byte); overload; inline;
 Procedure ColorToRGB(Color : integer;out r,g,b : integer); overload; inline;
 Procedure RGBToXYZ(R,G,B : byte;out x,y,z : Extended); inline;
-Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: byte); inline;
+Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: byte); overload; inline;
+Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: integer); overload; inline;
 Procedure RGBToHSL(RR,GG,BB : byte;out H,S,L : Extended); inline;
 Procedure RGBToHSLNonFixed(RR,GG,BB : byte;out H,S,L : Extended); inline;
 Procedure HSLtoRGB(H,S,L : extended;out R,G,B : Byte); inline;
@@ -47,9 +48,19 @@ Procedure ColorToHSL(Col: Integer; out h, s, l: Extended); inline;
 procedure ColorToXYZ(color: Integer; out X, Y, Z: Extended); inline;
 function XYZToColor(X, Y, Z: Extended): TColor; inline;
 function HSLToColor(H, S, L: Extended): TColor; inline;
-function BGRToRGB(BGR : TRGB32) : TColor;inline;
+function BGRToRGB(BGR : TRGB32) : TColor; inline;
+procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended); inline;
+procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended); inline;
 procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);
 procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended);
+procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: byte); overload;  inline;
+procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: integer); overload; inline;
+procedure RGBToCIELab(rr, gg, bb: byte; out L, a, b: Extended); overload; inline;
+procedure RGBToCIELab(rr, gg, bb: integer; out L, a, b: Extended); overload; inline;
+function CIELabToColor(L, a, b: Extended): TColor; inline;
+procedure ColorToCIELab(Color: integer; out L, a, b: Extended); inline;
+procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended); inline;
+procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended); inline;
 
 
 implementation
@@ -136,7 +147,31 @@ end;
    Red (R), Green (G) and Blue (B) components.
 /\}
 
-Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: byte); inline;
+Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: byte); overload; inline;
+var
+  TempR,TempG,TempB: Extended;
+begin;
+  TempR := x *  3.2406 + y * -1.5372 + z * -0.4986;
+  TempG := x * -0.9689 + y *  1.8758 + z *  0.0415;
+  TempB := x *  0.0557 + y * -0.2040 + z *  1.0570;
+  if TempR > 0.0031308  then
+    TempR := 1.055 * ( Power(TempR, (OneDivTwoPointFour)) ) - 0.055
+  else
+    TempR := 12.92 * TempR;
+  if TempG > 0.0031308 then
+    TempG := 1.055 * ( Power(TempG, ( OneDivTwoPointFour)) ) - 0.055
+  else
+    TempG := 12.92 * TempG;
+  if  TempB > 0.0031308 then
+    TempB := 1.055 * ( Power(TempB , ( OneDivTwoPointFour )) ) - 0.055
+  else
+    TempB := 12.92 * TempB;
+  R := Round(TempR * 255);
+  G := Round(TempG * 255);
+  B := Round(TempB * 255);
+end;
+
+Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: integer); overload; inline;
 var
   TempR,TempG,TempB: Extended;
 begin;
@@ -334,6 +369,22 @@ begin
   Result := RGBToColor(r, g, b);
 end;
 
+procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended); inline;
+var
+  r, g, b: byte;
+begin
+  XYZToRGB(X, Y, Z, r, g, b);
+  RGBToHSL(r, g, b, H, S, L);
+end;
+
+procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended); inline;
+var
+  r, g, b: byte;
+begin
+  HSLToRGB(H, S, L, r, g, b);
+  RGBToXYZ(r, g, b, X, Y, Z);
+end;
+
 procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);
 begin
   X := X / 95.047;
@@ -381,6 +432,70 @@ begin
   X := 95.047 * X;
   Y := 100.000 * Y;
   Z := 108.883 * Z;
+end;
+
+procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: byte); overload; inline;
+var
+  X, Y, Z: Extended;
+begin
+  CIELabToXYZ(L, a, b, X, Y, Z);
+  XYZToRGB(X, Y, Z, rr, gg, bb);
+end;
+
+procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: integer); overload; inline;
+var
+  X, Y, Z: Extended;
+begin
+  CIELabToXYZ(L, a, b, X, Y, Z);
+  XYZToRGB(X, Y, Z, rr, gg, bb);
+end;
+
+procedure RGBToCIELab(rr, gg, bb: byte; out L, a, b: Extended); overload; inline;
+var
+  X, Y, Z: Extended;
+begin
+  RGBToXYZ(rr, gg, bb, X, Y, Z);
+  XYZtoCIELab(X, Y, Z, L, a, b);
+end;
+
+procedure RGBToCIELab(rr, gg, bb: integer; out L, a, b: Extended); overload; inline;
+var
+  X, Y, Z: Extended;
+begin
+  RGBToXYZ(rr, gg, bb, X, Y, Z);
+  XYZtoCIELab(X, Y, Z, L, a, b);
+end;
+
+function CIELabToColor(L, a, b: Extended): TColor; inline;
+var
+  X, Y, Z: Extended;
+begin
+  CIELabToXYZ(L, a, b, X, Y, Z);
+  Result := XYZToColor(X, Y, Z);
+end;
+
+procedure ColorToCIELab(Color: integer; out L, a, b: Extended); inline;
+var
+  X, Y, Z: Extended;
+begin
+  ColorToXYZ(Color, X, Y, Z);
+  XYZtoCIELab(X, Y, Z, L, a, b);
+end;
+
+procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended); inline;
+var
+  rr, gg, bb: byte;
+begin
+  CIELabToRGB(L, a, b, rr, gg, bb);
+  RGBToHSL(rr, gg, bb, HH, SS, LL);
+end;
+
+procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended); inline;
+var
+  rr, gg, bb: byte;
+begin
+  HSLtoRGB(HH, SS, LL, rr, gg, bb);
+  RGBToCIELab(rr, gg, bb, L, a, b);
 end;
 
 end.
