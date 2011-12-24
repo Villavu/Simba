@@ -355,6 +355,8 @@ AddGlobalFunc('function ExecRegExpr(const RegExpr, InputStr: String): boolean', 
 //AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
 AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: String; UseSubstitution: boolean): String', @Lape_ReplaceRegExpr);
 AddGlobalFunc('function posex(needle, haystack: String; offset: integer): integer', @Lape_posex);
+AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);
+AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_NormLevDist);
 
 { TPA }
 
