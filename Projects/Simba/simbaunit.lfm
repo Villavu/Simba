@@ -244,6 +244,7 @@ object SimbaForm: TSimbaForm
       Align = alClient
       Font.Height = -13
       Font.Name = 'Courier New'
+      OnKeyDown = Memo1KeyDown
       ParentFont = False
       ScrollBars = ssAutoBoth
       TabOrder = 0
@@ -436,15 +437,12 @@ object SimbaForm: TSimbaForm
       TabOrder = 3
       inherited FunctionList: TTreeView
         Height = 319
-        Top = 20
         Width = 150
-        DefaultItemHeight = 17
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
       inherited editSearchList: TEdit
-        Height = 23
         Top = 339
         Width = 150
         OnExit = editSearchListExit
@@ -452,7 +450,6 @@ object SimbaForm: TSimbaForm
         OnKeyPress = editSearchListKeyPress
       end
       inherited FunctionListLabel: TLabel
-        Height = 16
         Width = 146
       end
     end
