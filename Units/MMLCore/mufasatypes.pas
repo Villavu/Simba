@@ -91,6 +91,11 @@ type
   T2DBoolArray = Array of TBoolArray;
   TExtendedArray = Array of Extended;
   T2DExtendedArray = Array of Array of Extended;
+
+  { Crypto }
+  THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
+               htSHA1, htSHA256, htSHA384, htSHA512, htTiger);
+
   { Mask Types }
   TMask = record
     White, Black : TPointArray;
