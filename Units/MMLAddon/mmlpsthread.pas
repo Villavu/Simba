@@ -1296,6 +1296,7 @@ type
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}
+
 {$I LPInc/Wrappers/lp_colour.inc}
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}

@@ -72,3 +72,13 @@ procedure Lape_posex(const Params: PParamArray; const Result: Pointer);
 begin
   Pinteger(Result)^ := ps_posex(PString(Params^[0])^, PString(Params^[1])^, Pinteger(Params^[2])^);
 end;
+
+procedure Lape_LevDist(const Params: PParamArray; const Result: Pointer);
+begin
+  PInteger(Result)^ := ps_LevDist(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure Lape_NormLevDist(const Params: PParamArray; const Result: Pointer);
+begin
+  PExtended(Result)^ := ps_NormLevDist(PString(Params^[0])^, PString(Params^[1])^);
+end;
