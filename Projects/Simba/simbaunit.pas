@@ -534,7 +534,7 @@ const
   Image_Terminate = 19;
 var
   SimbaForm: TSimbaForm;
-  MainDir : string;
+  AppPath, DocPath: string;
   {$ifdef MSWindows}
   PrevWndProc : WNDPROC;
   {$endif}
@@ -688,17 +688,14 @@ begin
   end;
 end;
 
-function TSimbaForm.OnCCFindInclude(Sender: TObject; var FileName: string): Boolean;
+function TSimbaForm.OnCCFindInclude(Sender: TObject; var Filename: string): Boolean;
 var
   Temp : string;
 begin
-  Temp := FindFile(filename,[MainDir+DS,IncludePath]);
-  if temp <> '' then
-  begin;
-    filename := temp;
-    result := true;
-  end else
-    result := false;
+  Result := False;
+  Filename := FindFile(Filename, [AppPath, IncludePath, ExtPath]);
+  if (Filename <> '') then
+    Result := True;
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
@@ -785,12 +782,12 @@ end;
 
 function TSimbaForm.GetDefScriptPath: string;
 begin
-  result :=LoadSettingDef(ssSourceEditorDefScriptPath, ExpandFileName(MainDir+DS+'default.simba'));
+  result :=LoadSettingDef(ssSourceEditorDefScriptPath, ExpandFileName(DocPath+'default.simba'));
 end;
 
 function TSimbaForm.GetScriptPath: string;
 begin
-  result :=IncludeTrailingPathDelimiter(LoadSettingDef(ssScriptsPath, ExpandFileName(MainDir+DS+'Scripts' + DS)));
+  result :=IncludeTrailingPathDelimiter(LoadSettingDef(ssScriptsPath, ExpandFileName(DocPath+'Scripts' + DS)));
 end;
 
 procedure TSimbaForm.HandleOpenFileData;
@@ -1399,11 +1396,11 @@ begin
   CreateSetting(ssNewsLink, 'http://simba.villavu.com/bin/news');
 
   {Creates the paths and returns the path}
-  PluginsPath := CreateSetting(ssPluginsPath, ExpandFileName(MainDir + DS + 'Plugins' + DS));
+  PluginsPath := CreateSetting(ssPluginsPath, ExpandFileName(DocPath + 'Plugins' + DS));
 
   {$IFDEF USE_EXTENSIONS}
   extensionsPath := CreateSetting(ssExtensionsPath,
-      ExpandFileName(MainDir +DS + 'Extensions' + DS));
+      ExpandFileName(DocPath + 'Extensions' + DS));
   CreateSetting(ssExtensionsCount, '0');
   {$ENDIF}
 
@@ -1590,7 +1587,7 @@ begin
     while (i < extCount) and not LoadExtension(i) do
       DeleteExtension(i);
   SetSetting(ssExtensionsCount, inttostr(extCount));
-  str := LoadSettingDef(ssExtensionsPath, ExpandFileName(MainDir +DS + 'Extensions' + DS));
+  str := LoadSettingDef(ssExtensionsPath, ExpandFileName(DocPath + 'Extensions' + DS));
   str2 := LoadSettingDef(ssExtensionsFileExtension, 'sex');
   ExtManager.LoadPSExtensionsDir(str,str2);
 {$ELSE}
@@ -1627,13 +1624,11 @@ end;
 
 procedure TSimbaForm.InitializeTMThread(out Thread: TMThread);
 var
-  AppPath : string;
-  ScriptPath : string;
-  Script : string;
+  ScriptPath: string;
+  Script: string;
   Se: TMMLSettingsSandbox;
   loadFontsOnScriptStart: boolean;
-  Continue : boolean;
-
+  Continue: boolean;
 begin
   if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
   begin
@@ -1650,7 +1645,6 @@ begin
     if not Continue then
       exit;
   end;
-  AppPath:= MainDir + DS;
   CurrScript.ScriptErrorLine:= -1;
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
 
@@ -1693,7 +1687,8 @@ begin
   if not DirectoryExists(fontPath) then
     if FirstRun then
       FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
-  Thread.SetPaths(ScriptPath,AppPath,Includepath,PluginPath,fontPath);
+
+  Thread.SetPaths(AppPath, DocPath, ScriptPath, Includepath, PluginPath, FontPath);
 
   if selector.haspicked then
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
@@ -1742,26 +1737,32 @@ begin
     if FileExistsUTF8(ParamStrUTF8(1)) then
       LoadScriptFile(ParamStrUTF8(1));
   end else
-  // we have more parameters. Check for specific options. (-r -o, --run --open)
+  // we have more parameters. Check for specific options. (-r -o -c, --run --open --config)
   begin
-    ErrorMsg:=Application.CheckOptions('ro:',['run', 'open:']);
-    if ErrorMsg <> '' then
+    ErrorMsg := Application.CheckOptions('c:o:r', ['config:', 'open:', 'run']);
+    if (ErrorMsg = '') then
     begin
-      mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMSG)
-    end else
-    begin
-      if Application.HasOption('o','open') then
+      if Application.HasOption('c', 'config') then
       begin
-        writeln('Opening file: ' + Application.GetOptionValue('o','open'));
-        LoadScriptFile(Application.GetOptionValue('o','open'));
-        DoRun:= Application.HasOption('r','run');
-      end else
-      // no valid options
-      begin
-        writeln('No valid command line args are passed');
+        WriteLn('Using alternative config file: ' + Application.GetOptionValue('c', 'config') + '.');
+        SimbaSettingsFile := Application.GetOptionValue('c', 'config');
+
+        if (FileExists(SimbaSettingsFile)) then
+          LoadFormSettings
+        else
+          CreateDefaultEnvironment;
       end;
-    end;
+
+      if Application.HasOption('o', 'open') then
+      begin
+        writeln('Opening file: ' + Application.GetOptionValue('o', 'open'));
+        LoadScriptFile(Application.GetOptionValue('o', 'open'));
+        DoRun:= Application.HasOption('r', 'run');
+      end;
+    end else
+      mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMsg)
   end;
+
   if DoRun then
     Self.RunScript;
 end;
@@ -2454,9 +2455,23 @@ begin
   self.BeginFormUpdate;
   Randomize;
   DecimalSeparator := '.';
-  MainDir:= ExtractFileDir(Application.ExeName);
+
+  AppPath := ExtractFileDir(Application.ExeName); //Where Simba.exe is (Should Already Exist)
+
+  //DocPath = ~/.simba or ~/My Documents/Simba or AppPath
+  DocPath := sysutils.GetEnvironmentVariable('HOME') + DS {$IFDEF Windows} + 'My Documents' + DS + 'Simba' {$ElSE} + '.simba'{$ENDIF} + DS;
+  if (not (DirectoryExists(DocPath))) then
+    if (not (CreateDir(DocPath))) then
+      DocPath := AppPath + DS;
+
+  //SimbaSettingsFile = ~/.config/simba or ~/AppData/Roaming/Simba as settings.xml
+  SimbaSettingsFile := GetAppConfigDir(False) + DS;
+  if (not (DirectoryExists(SimbaSettingsFile))) then
+    if (not (CreateDir(SimbaSettingsFile))) then
+      SimbaSettingsFile := DocPath; // =)
+  SimbaSettingsFile := SimbaSettingsFile + 'settings.xml';
+
   RecentFiles := TStringList.Create;
-  SimbaSettingsFile := MainDir + DS + 'settings.xml';
 
   //AutoCompletionStart := Point(-1, -1);
   CodeCompletionForm := TAutoCompletePopup.Create(Self);
@@ -3062,13 +3077,15 @@ end;
 
 function TSimbaForm.GetFontPath: String;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssFontsPath, ExpandFileName(MainDir+DS+'Fonts' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssFontsPath,
+      ExpandFileName(DocPath + 'Fonts' + DS)));
 end;
 
 {$IFDEF USE_EXTENSIONS}
 function TSimbaForm.GetExtPath: string;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssExtensionsPath, ExpandFileName(MainDir+DS+'Extensions' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssExtensionsPath,
+      ExpandFileName(DocPath + 'Extensions' + DS)));
 end;
 {$ENDIF}
 
@@ -3082,12 +3099,14 @@ end;
 
 function TSimbaForm.GetIncludePath: String;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssIncludesPath, ExpandFileName(MainDir+DS+'Includes' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssIncludesPath,
+      ExpandFileName(DocPath + 'Includes' + DS)));
 end;
 
 function TSimbaForm.GetPluginPath: string;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssPluginsPath, ExpandFileName(MainDir+DS+'Plugins' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssPluginsPath,
+      ExpandFileName(DocPath + 'Plugins' + DS)));
 end;
 
 procedure TSimbaForm.SetIncludePath(const AValue: String);

@@ -269,7 +269,7 @@ end;
 
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 var
-  AppPath, ScriptPath: string;
+  ScriptPath: string;
   i: Integer;
 begin
   SIRegister_Std(x);
@@ -283,7 +283,6 @@ begin
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
 
-  AppPath := MainDir + DirectorySeparator;
   ScriptPath := ExtractFileDir(Filename);
   with SimbaForm,x do
   begin
@@ -364,23 +363,25 @@ var
   f: TFileStream;
 begin
   with SimbaForm do
-    path := FindFile(FilePath,[includepath,  ExtractFileDir(Filename),ExtractFileDir(OrginFileName)]);
-  if path = '' then
+    Path := FindFile(FilePath, [IncludePath, ExtPath, ExtractFileDir(Filename), ExtractFileDir(OrginFileName)]);
+
+  if (Path = '') then
   begin
     psWriteln(Path + ' doesn''t exist');
     Result := false;
     Exit;
   end;
-  FilePath := path;//Yeah!
+
+  FilePath := Path;
 
   try
-    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
+    f := TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
     SetLength(Output, f.Size);
     f.Read(Output[1], Length(Output));
-    result:= true;
+    Result := True;
     f.free;
   except
-    Result := false;
+    Result := False;
     psWriteln('TSimbaPSExtension.OnNeedFile');
   end;
 end;
