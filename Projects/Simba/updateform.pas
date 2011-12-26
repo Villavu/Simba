@@ -73,18 +73,18 @@ const
   DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
   SimbaURL =     {$IFDEF WINDOWS}
                   {$IFDEF CPUI386}
-                  'http://Simba.villavu.com/bin/Windows/x86/Stable/'
+                  'http://simba.villavu.com/bin/Windows/x86/Stable/'
                   {$ELSE}
-                  'http://Simba.villavu.com/bin/Windows/x86_64/Stable/'
+                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
                   {$ENDIF}
                 {$ELSE}
                   {$IFDEF CPUI386}
-                  'http://Simba.villavu.com/bin/Linux/x86/Stable/'
+                  'http://simba.villavu.com/bin/Linux/x86/Stable/'
                   {$ELSE}
-                  'http://Simba.villavu.com/bin/Linux/x86_64/Stable/'
+                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
                   {$ENDIF}
                 {$ENDIF};
-  FontURL = 'http://Simba.villavu.com/bin/Fonts/';
+  FontURL = 'http://simba.villavu.com/bin/Fonts/';
 
 var
   SimbaUpdateForm: TSimbaUpdateForm;

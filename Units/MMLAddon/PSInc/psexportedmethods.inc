@@ -216,6 +216,8 @@ AddFunction(@ps_DecompressString,'function DecompressString(const Compressed : s
 AddFunction(@ps_Base64Encode,'function Base64Encode(const str : string) : string;');
 AddFunction(@ps_Base64Decode,'function Base64Decode(const str : string) : string;');
 AddFunction(@ps_Format,'function Format(const fmt : string;const args : array of const) : string;');
+AddFunction(@ps_LevDist, 'function LevDistance(src, target: string): Integer;');
+AddFunction(@ps_NormLevDist, 'function NormLevDistance(src, target: string): Extended;');
 {$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(nil,'function ToStr(x) : string;');
 {$ENDIF}
@@ -438,7 +440,9 @@ AddFunction(@ps_RectangleBitmap,'procedure RectangleBitmap(bitmap : integer; con
 AddFunction(@ps_FloodfillBitmap,'procedure FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor);');
 AddFunction(@ps_ConvoluteBitmap,'function ConvoluteBitmap(bitmap : integer; matrix : T2DExtendedArray) : integer;');
 AddFunction(@ps_CalculatePixelShift,'function CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;');
+AddFunction(@ps_CalculatePixelShiftTPA,'function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;');
 AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
+AddFunction(@ps_CalculatePixelToleranceTPA,'function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;');
 {$ENDIF}
 
 {tpa}
