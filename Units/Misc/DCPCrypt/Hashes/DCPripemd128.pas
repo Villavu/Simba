@@ -24,8 +24,6 @@
 {******************************************************************************}
 unit DCPripemd128;
 
-{$MODE Delphi}
-
 interface
 uses
   Classes, Sysutils, DCPcrypt2, DCPconst;
@@ -61,7 +59,6 @@ var
   X: array[0..15] of DWord;
   a, aa, b, bb, c, cc, d, dd, t: dword;
 begin
-  dcpFillChar(X, SizeOf(X), 0);
   Move(HashBuffer,X,Sizeof(X));
   a:= CurrentHash[0]; aa:= a;
   b:= CurrentHash[1]; bb:= b;
@@ -240,7 +237,6 @@ var
   TestHash: TDCP_ripemd128;
   TestOut: array[0..15] of byte;
 begin
-  dcpFillChar(TestOut, SizeOf(TestOut), 0);
   TestHash:= TDCP_ripemd128.Create(nil);
   TestHash.Init;
   TestHash.UpdateStr('a');

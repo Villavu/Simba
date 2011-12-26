@@ -245,16 +245,25 @@ AddFunction(@ps_posex, 'function PosEx(needle, haystack: String; offset: integer
 
 {crypto}
 SetCurrSection('Crypto');
-AddFunction(@ps_haval, 'function haval(Data: string): string;');
-AddFunction(@ps_md4, 'function md4(Data: string): string;');
-AddFunction(@ps_md5, 'function md5(Data: string): string;');
-AddFunction(@ps_ripemd128, 'function ripemd128(Data: string): string;');
-AddFunction(@ps_ripemd160, 'function ripemd160(Data: string): string;');
-AddFunction(@ps_sha1, 'function sha1(Data: string): string;');
-AddFunction(@ps_sha256, 'function sha256(Data: string): string;');
-AddFunction(@ps_sha384, 'function sha384(Data: string): string;');
-AddFunction(@ps_sha512, 'function sha512(Data: string): string;');
-AddFunction(@ps_tiger, 'function tiger(Data: string): string;');
+AddFunction(@ps_hash, 'function hash(const HashType: THashType; const Data: string): string;');
+AddFunction(@ps_haval, 'function haval(const Data: string): string;');
+AddFunction(@ps_md4, 'function md4(const Data: string): string;');
+AddFunction(@ps_md5, 'function md5(const Data: string): string;');
+AddFunction(@ps_ripemd128, 'function ripemd128(const Data: string): string;');
+AddFunction(@ps_ripemd160, 'function ripemd160(const Data: string): string;');
+AddFunction(@ps_sha1, 'function sha1(const Data: string): string;');
+AddFunction(@ps_sha256, 'function sha256(const Data: string): string;');
+AddFunction(@ps_sha384, 'function sha384(const Data: string): string;');
+AddFunction(@ps_sha512, 'function sha512(const Data: string): string;');
+AddFunction(@ps_tiger, 'function tiger(const Data: string): string;');
+AddFunction(@ps_rc2_encrypt, 'procedure rc2_encrypt(const Key: string; const HashType: THashType; var Data: string);');
+AddFunction(@ps_rc2_decrypt, 'procedure rc2_decrypt(const Key: string; const HashType: THashType; var Data: string);');
+AddFunction(@ps_rc4_encrypt, 'procedure rc4_encrypt(const Key: string; const HashType: THashType; var Data: string);');
+AddFunction(@ps_rc4_decrypt, 'procedure rc4_decrypt(const Key: string; const HashType: THashType; var Data: string);');
+AddFunction(@ps_rc5_encrypt, 'procedure rc5_encrypt(const Key: string; const HashType: THashType; var Data: string);');
+AddFunction(@ps_rc5_decrypt, 'procedure rc5_decrypt(const Key: string; const HashType: THashType; var Data: string);');
+AddFunction(@ps_rc6_encrypt, 'procedure rc6_encrypt(const Key: string; const HashType: THashType; var Data: string);');
+AddFunction(@ps_rc6_decrypt, 'procedure rc6_decrypt(const Key: string; const HashType: THashType; var Data: string);');
 
 {web}
 SetCurrSection('Web');
