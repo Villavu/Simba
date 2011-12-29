@@ -93,7 +93,9 @@ AddGlobalFunc('procedure RectangleBitmap(bitmap: integer; const box: TBox; Color
 AddGlobalFunc('procedure FloodFillBitmap(bitmap: integer; const StartPoint: TPoint; const SearchCol,ReplaceCol: TColor);', @Lape_FloodFillBitmap);
 AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArray): integer', @Lape_ConvoluteBitmap);
 AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
+AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
+AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 
 { Math }
 
@@ -365,6 +367,8 @@ AddGlobalFunc('function ExecRegExpr(const RegExpr, InputStr: String): boolean', 
 //AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
 AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: String; UseSubstitution: boolean): String', @Lape_ReplaceRegExpr);
 AddGlobalFunc('function posex(needle, haystack: String; offset: integer): integer', @Lape_posex);
+AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);
+AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_NormLevDist);
 
 { TPA }
 
