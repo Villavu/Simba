@@ -24,8 +24,6 @@
 {******************************************************************************}
 unit DCPhaval;
 
-{$MODE Delphi}
-
 interface
 uses
   Classes, Sysutils, DCPcrypt2, DCPconst;
@@ -75,7 +73,6 @@ var
   W: array[0..31] of DWord;
   Temp: dword;
 begin
-  dcpFillChar(W, SizeOf(W), 0);
   t0:= CurrentHash[0];
   t1:= CurrentHash[1];
   t2:= CurrentHash[2];
@@ -254,7 +251,6 @@ class function TDCP_haval.SelfTest: boolean;
         TestHash: TDCP_haval;
         TestOut: array[0..31] of byte;
       begin
-        dcpFillChar(TestOut, SizeOf(TestOut), 0);
         TestHash:= TDCP_haval.Create(nil);
         TestHash.Init;
         TestHash.UpdateStr('abcdefghijklmnopqrstuvwxyz');

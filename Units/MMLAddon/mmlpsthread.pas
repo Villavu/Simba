@@ -299,12 +299,14 @@ uses
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
   Clipbrd,
+
   DCPcrypt2,
-  DCPhaval,  
-  DCPmd4, DCPmd5,
+  DCPrc2, DCPrc4, DCPrc5, DCPrc6,
+  DCPhaval, DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger;
+
 {$ifdef Linux}
   {$define PS_SafeCall}
 {$else}
