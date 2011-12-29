@@ -24,8 +24,6 @@
 {******************************************************************************}
 unit DCPtiger;
 
-{$MODE Delphi}
-
 interface
 uses
   Classes, Sysutils, DCPcrypt2, DCPconst;
@@ -61,7 +59,6 @@ var
   a, b, c, aa, bb, cc: int64;
   x: array[0..7] of int64;
 begin
-  dcpFillChar(x, SizeOf(x), 0);
   a:= CurrentHash[0]; aa:= a;
   b:= CurrentHash[1]; bb:= b;
   c:= CurrentHash[2]; cc:= c;
@@ -229,7 +226,6 @@ var
   TestHash: TDCP_tiger;
   TestOut: array[0..2] of int64;
 begin
-  dcpFillChar(TestOut, SizeOf(TestOut), 0);
   TestHash:= TDCP_tiger.Create(nil);
   TestHash.Init;
   TestHash.UpdateStr('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-');
