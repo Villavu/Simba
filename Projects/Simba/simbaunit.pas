@@ -323,6 +323,7 @@ type
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
     procedure FunctionListTimerTimer(Sender: TObject);
+    procedure Memo1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure MenuItemReadOnlyTabClick(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
@@ -2288,6 +2289,16 @@ procedure TSimbaForm.FunctionListTimerTimer(Sender: TObject);
 begin
   if Self.Visible and (CurrScript <> nil) then
     frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
+end;
+
+procedure TSimbaForm.Memo1KeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if ((ssCtrl in Shift) and (not ((ssShift in Shift) or (ssAlt in Shift)))) then
+  begin
+    if (Key = VK_A) then Memo1.SelectAll;
+  end;
+  //Are there any more?
 end;
 
 procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
