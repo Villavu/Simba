@@ -1,6 +1,6 @@
 program SRLUpdater;
 
-{.INCLUDE ..\Extensions\Updater.sei}
+{$I ./Updater.sei}
 
 function CheckSRL(Name: string; I: integer): boolean;
 var
@@ -22,7 +22,12 @@ end;
 
 function BeforeUpdate(NotNeeded: string; I: integer): boolean;
 begin
-  Result := ForceDirectories(IncludePath+UpdaterArr[I].Name);
+  Result := ForceDirectories(UpdaterArr[I].Folder + UpdaterArr[I].Name);
+end;
+
+function BeforeUpdateEx(NotNeeded: string; I: integer): boolean;
+begin
+  Result := ForceDirectories(UpdaterArr[I].Folder);
 end;
 
 function SuccessPlugins(Cont: string; I: integer): boolean;
@@ -31,7 +36,7 @@ var
   Files: TStringArray;
   Overwrite: boolean;
 begin
-  Files := GetFiles(UpdaterArr[I].Folder, {$IFDEF WIN}'dll'{$ELSE}'so'{$ENDIF});
+  Files := GetFiles(UpdaterArr[I].Folder, {$IFDEF WIN32}'dll'{$ELSE}'so'{$ENDIF});
   Overwrite := True;
 
   for X := 0 to High(Files) do
@@ -72,9 +77,9 @@ begin
     UpdaterArr[SRL].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
   end;
 
-  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', IncludePath + 'SRL/SimbaPlugins/', False, False, Plugins)) then
+  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', PluginPath + '.temp\', False, False, Plugins)) then
   begin
-    UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
+    UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforeUpdateEx;
     UpdaterArr[Plugins].Hooks[SUCCESS_UPDATE] := @SuccessPlugins;
   end;
 
