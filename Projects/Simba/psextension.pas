@@ -93,12 +93,15 @@ uses
   httpsend,
   superobject,
   Clipbrd,
+
   DCPcrypt2,
+  DCPrc2, DCPrc4, DCPrc5, DCPrc6,
   DCPhaval,
   DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger,
+
   SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}

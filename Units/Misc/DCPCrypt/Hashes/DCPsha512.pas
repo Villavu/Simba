@@ -24,8 +24,6 @@
 {******************************************************************************}
 unit DCPsha512;
 
-{$MODE Delphi}
-
 interface
 uses
   Classes, Sysutils, DCPcrypt2, DCPconst;
@@ -81,7 +79,6 @@ var
   i: longword;
 begin
   Index:= 0;
-  dcpFillChar(W, SizeOf(W), 0);
   a:= CurrentHash[0]; b:= CurrentHash[1]; c:= CurrentHash[2]; d:= CurrentHash[3];
   e:= CurrentHash[4]; f:= CurrentHash[5]; g:= CurrentHash[6]; h:= CurrentHash[7];
   Move(HashBuffer,W,Sizeof(HashBuffer));
@@ -266,7 +263,6 @@ var
   TestHash: TDCP_sha384;
   TestOut: array[0..47] of byte;
 begin
-  dcpFillChar(TestOut, SizeOf(TestOut), 0);
   TestHash:= TDCP_sha384.Create(nil);
   TestHash.Init;
   TestHash.UpdateStr('abc');
@@ -345,7 +341,6 @@ var
   TestHash: TDCP_sha512;
   TestOut: array[0..63] of byte;
 begin
-  dcpFillChar(TestOut, SizeOf(TestOut), 0);
   TestHash:= TDCP_sha512.Create(nil);
   TestHash.Init;
   TestHash.UpdateStr('abc');
