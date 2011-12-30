@@ -2458,8 +2458,15 @@ begin
 
   AppPath := ExtractFileDir(Application.ExeName); //Where Simba.exe is (Should Already Exist)
 
-  //DocPath = ~/.simba or ~/My Documents/Simba or AppPath
-  DocPath := sysutils.GetEnvironmentVariable('HOME') + DS {$IFDEF Windows} + 'My Documents' + DS + 'Simba' {$ElSE} + '.simba'{$ENDIF} + DS;
+  //DocPath = ~/.local/share/Simba or ~/My Documents/Simba or AppPath
+  {$IFDEF WINDOWS}
+  DocPath := sysutils.GetEnvironmentVariable('HOME') + DS  + 'My Documents' + DS + 'Simba' + DS;
+  {$ELSE}
+  DocPath := sysutils.GetEnvironmentVariable('XDG_DATA_HOME');
+  if (DocPath = '') then
+    DocPath := sysutils.GetEnvironmentVariable('HOME') + '/.local/share'
+  DocPath := DocPath + DS + 'Simba' + DS;
+  {$ENDIF}
   if (not (DirectoryExists(DocPath))) then
     if (not (CreateDir(DocPath))) then
       DocPath := AppPath + DS;
