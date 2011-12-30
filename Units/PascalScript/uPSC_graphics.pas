@@ -195,7 +195,7 @@ begin
   cl.AddConstantN('clNone', 'Integer').Value.ts32 := $1FFFFFFF;
   cl.AddConstantN('clDefault', 'Integer').Value.ts32 := $20000000;
 
-  Cl.addTypeS('TFONTSTYLE', '(FSBOLD, FSITALIC, FSUNDERLINE, FSSTRIKEOUT)');
+  Cl.addTypeS('TFONTSTYLE', '(FSBOLD, FSITALIC, FSSTRIKEOUT, FSUNDERLINE)');
   Cl.addTypeS('TFONTSTYLES', 'set of TFONTSTYLE');
 
   cl.AddTypeS('TFontPitch', '(fpDefault, fpVariable, fpFixed)');
