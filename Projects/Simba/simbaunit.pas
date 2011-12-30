@@ -2460,7 +2460,7 @@ begin
 
   //DocPath = ~/.local/share/Simba or ~/My Documents/Simba or AppPath
   {$IFDEF WINDOWS}
-  DocPath := sysutils.GetEnvironmentVariable('HOME') + DS  + 'My Documents' + DS + 'Simba' + DS;
+  DocPath := GetUserDir() + 'My Documents' + DS + 'Simba' + DS;
   {$ELSE}
   DocPath := sysutils.GetEnvironmentVariable('XDG_DATA_HOME');
   if (DocPath = '') then
