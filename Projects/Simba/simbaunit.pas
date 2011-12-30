@@ -2464,7 +2464,7 @@ begin
   {$ELSE}
   DocPath := sysutils.GetEnvironmentVariable('XDG_DATA_HOME');
   if (DocPath = '') then
-    DocPath := sysutils.GetEnvironmentVariable('HOME') + '/.local/share'
+    DocPath := sysutils.GetEnvironmentVariable('HOME') + DS + '.local' + DS + 'share';
   DocPath := DocPath + DS + 'Simba' + DS;
   {$ENDIF}
   if (not (DirectoryExists(DocPath))) then
