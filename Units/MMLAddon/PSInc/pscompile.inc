@@ -22,10 +22,12 @@
 }
 
 AddConstantN('AppPath','string').SetString(AppPath);
+AddConstantN('DocPath', 'string').SetString(DocPath);
 AddConstantN('ScriptPath','string').SetString(ScriptPath);
 AddConstantN('IncludePath','string').SetString(IncludePath);
 AddConstantN('PluginPath','string').SetString(PluginPath);
 AddConstantN('FontPath','string').SetString(FontPath);
+
 AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
 AddConstantN('MaxInt','integer').SetInt(maxLongint);
 AddTypeS('TReplaceFlag', '(rfReplaceAll, rfIgnoreCase)');
@@ -67,3 +69,5 @@ AddConstantN('mouse_Middle','integer').SetInt(ps_mouse_middle);//2
 
 AddTypes('TSysProc', 'record Title: string; Handle: integer; Pid: integer; Width, Height: integer; end;');
 AddTypes('TSysProcArr', 'array of TSysProc;');
+
+AddTypes('THashType', '(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger);');
