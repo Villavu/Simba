@@ -1,0 +1,23 @@
+program WhileLoop_Example;
+
+var
+  Counter: Integer;
+
+begin
+  Counter := 1;  // First we have to tell Simba what Counter equals :-)
+
+  // Let's conver this to English:
+    // - While the Counter variable is less than or equal to 10, do the following...
+  while (Counter <= 10) do
+  begin
+    Writeln('Counter = ' + IntToStr(Counter));
+
+    Counter := Counter + 1;  // This needs to be in place to tell Simba to
+                               // - increase the variable 'Counter' by 1 (one).
+                               // Because if we don't, then 'Counter' will
+                               // - always equal 1, and it will always be
+                               // - less than 10. So this while loop will keep
+                               // - going forever, and ever, and ever, and ever...
+
+  end;
+end.
