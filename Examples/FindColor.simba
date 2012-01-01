@@ -1,0 +1,28 @@
+program FindColor_Example;
+
+var
+  Bounds: TBox;
+  x, y, Colour: Integer;
+
+begin
+  Colour := clWhite;  // The colour to search for (e.g clBlack OR 0)
+
+  Bounds.X1 := 0;   // The top left corner
+  Bounds.Y1 := 0;   //  - of the client.
+  Bounds.X2 := 400;  // The bottom right corner
+  Bounds.Y2 := 400;  //  - of the client.
+
+  // If the colour was found, do what?
+  if(FindColor(x, y, Colour, Bounds.X1, Bounds.Y1, Bounds.X2, Bounds.Y2)) then
+  begin
+    Writeln('The colour, ' + IntToStr(Colour) + ', was found :-)');
+
+    // FindColor stores the location of the colour in variables 'x' and 'y'.
+    Writeln('It was found at:');
+    Writeln('  X = ' + IntToStr(X));
+    Writeln('  Y = ' + IntToStr(Y));
+  end else
+  begin
+    Writeln('The colour was not found :-(');
+  end;
+end.
