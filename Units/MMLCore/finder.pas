@@ -1540,7 +1540,7 @@ begin
             xEnd := Min(xx+range + xBmp,SearchdX);
             for RangeX := xStart to xEnd do
             begin;
-            if not compare(ctsinfoarray[yBmp][xBmp],
+            if compare(ctsinfoarray[yBmp][xBmp],
                            @MainRowData[rangeY][rangeX]) then
                 goto FoundBMPPoint;
             end;
