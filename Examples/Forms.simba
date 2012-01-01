@@ -1,0 +1,59 @@
+program Form_Example;
+
+var
+  Form: TForm;  // Form's must be of the TForm data type.
+  { Form's, by themselves, are rather boxing rectangles. The things on a form,
+    for example: text, buttons, pictures, etc, are called 'form components'.
+    Generally, their variable data type starts with a 'T' (for Type). }
+  A_Button: TButton;  // A button, which is a form component.
+
+// Form's must have a separate procedure to declare and initialise all of their
+//   variables in. You can not do everything in the main loop. This is due to
+//   limitations in the compiler (that is, Pascal Script) that Simba uses.
+procedure InitialiseForm;
+begin
+  Form := TForm.Create(nil);  { With this, we are assigning it to memory.
+                                 What this does is that it sets up our form and give
+                                 it its basic properties. }
+
+  { A form's basic properties are:
+      * Default size is 300x300 pixels.
+      * To show the minimise, maximise and close buttons.
+      * To allow for resizing by the edges/corners.
+      * To have a }
+
+  Form.ShowModal;  // This is what we call to show/display the form.
+end;
+
+var
+  Params: TVariantArray;
+  { This is a set of parametres to use with ThreadSafeCall (explanation below).
+
+    For example, if you had the function:
+      FindColor(x, y, 16777215, 0, 0, 5, 5)
+    the parameters would be:
+      (x, y, 16777215, 0, 0, 5, 5).
+    To put this in a TVariantArray, it would be:
+      [x, y, 16777215, 0, 0, 5, 5]  (<- Notice the square brackets, for array). }
+
+begin
+  ThreadSafeCall('InitialiseForm', Params);
+  { The parametres for this method are as follow:
+      (Procedure Name, Procedure Parametres)
+
+    ThreadSafeCall does exactly the same job as if you wanted to call a procedure
+     by its name regulalry (like DeclarePlayers;). However, we need it specifically
+     for forms because a form creates its own, separate process (so to speak).
+     Once it does this, Simba has no control over it, so it and the form will crash.
+     ThreadSafeCall creates a bigger link between Simba and that new process,
+     allowing for more control by Simba.
+
+    As you can see, our procedure to load the form is called InitialiseForm,
+     so that's what we want to call. There are no brackets/parenthesis in that
+     procedure, so there are no parametres, so we don't set the variable Params
+     to anything. }
+end.
+
+// SEE "Forms FURTHEr.simba" to see how to customise forms more and actually
+//   show buttons, etc, on them.
+// AT THE TIME OF WRITING, THE ABOVE FILE DOES NOT EXIST.
