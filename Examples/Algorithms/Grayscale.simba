@@ -1,0 +1,27 @@
+// Converts a colour to grayscale.
+function Grayscale(Colour: Integer): Integer;
+var
+  R, G, B, Avg: Integer;
+begin
+  ColorToRGB(Colour, R, G, B);
+  Avg := AverageTIA([R, G, B]);
+
+  R := Avg;  // In order to be grey, all RGB
+  G := Avg;  //  values must be the same.
+  B := Avg;
+
+  Result := RGBtoColor(R, G, B);
+end;
+
+var
+  outR, outG, outB, Colour: Integer;
+
+begin
+  Colour := Grayscale(RGBToColor({R}0, {G}255, {B}0))
+  Writeln('Grey Colour = ' + IntToStr(Colour));
+
+  ColorToRGB(Colour, outR, outG, outB);
+  Writeln('outR = ' + IntTostr(outR));
+  Writeln('outG = ' + IntToStr(outG));
+  Writeln('outB = ' + IntToStr(outB));
+end.
