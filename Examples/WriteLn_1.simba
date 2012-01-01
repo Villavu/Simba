@@ -1,0 +1,5 @@
+program WriteLn_ExampleOne;
+
+begin
+  Writeln('Hello!');
+end.
