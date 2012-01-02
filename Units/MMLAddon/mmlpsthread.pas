@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ type
       procedure SetOpenFileEvent(const AValue: TOpenFileEvent);
       procedure SetWriteFileEvent(const AValue: TWriteFileEvent);
     protected
-      ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
+      AppPath, DocPath, ScriptPath, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
@@ -145,12 +145,13 @@ type
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(Sender: TPSPreProcessor;
                     Parser: TPSPascalPreProcessorParser;
+                    Active: Boolean;
                     DirectiveName, DirectiveArgs: string; Filename:String): boolean;
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
-      procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
+      procedure SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
       procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
 
       procedure OnThreadTerminate(Sender: TObject);
@@ -298,12 +299,14 @@ uses
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
   Clipbrd,
+
   DCPcrypt2,
-  DCPhaval,  
-  DCPmd4, DCPmd5,
+  DCPrc2, DCPrc4, DCPrc5, DCPrc6,
+  DCPhaval, DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger;
+
 {$ifdef Linux}
   {$define PS_SafeCall}
 {$else}
@@ -443,9 +446,7 @@ begin
   path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(parentfile))]);
   if path = '' then
   begin
-    psWriteln(Path + ' doesn''t exist');
-    Result := false;
-    Exit;
+    Exit(False);
   end;
   filename := path;//Yeah!
 
@@ -466,6 +467,7 @@ end;
 
 function TMThread.ProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser;
+        Active: Boolean;
         DirectiveName, DirectiveArgs: string; FileName: string): boolean;
 var
   plugin_idx: integer;
@@ -474,6 +476,8 @@ begin
   Result := False;
   if CompareText(DirectiveName,'LOADLIB') = 0 then
   begin
+    if not active then
+      exit(true);
     if DirectiveArgs <> '' then
     begin;
       plugin_idx:= PluginsGlob.LoadPlugin(DirectiveArgs);
@@ -490,6 +494,8 @@ begin
   end
   else if CompareText(DirectiveName,'WARNING') = 0 then
   begin
+    if not active then
+      exit(true);
     if (sender = nil) or (parser = nil) then
     begin
       psWriteln('ERROR: WARNING directive not supported for this interpreter');
@@ -511,6 +517,8 @@ begin
     end;
   end else if CompareText(DirectiveName,'ERROR') = 0 then
   begin
+    if not active then
+      exit(true);
     if (sender = nil) or (parser = nil) then
     begin
       psWriteln('ERROR: ERROR directive not supported for this interpreter');
@@ -550,13 +558,14 @@ begin
   Self.Sett.prefix := 'Scripts/';
 end;
 
-procedure TMThread.SetPaths(ScriptP, AppP,IncludeP,PluginP,FontP: string);
+procedure TMThread.SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
 begin
-  AppPath:= AppP;
-  ScriptPath:= ScriptP;
-  IncludePath:= IncludeP;
-  PluginPath:= PluginP;
-  FontPath:= FontP;
+  AppPath := AppP;
+  DocPath := DocP;
+  ScriptPath := ScriptP;
+  IncludePath := IncludeP;
+  PluginPath := PluginP;
+  FontPath := FontP;
 end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
@@ -591,6 +600,7 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
+
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
 {$I PSInc/Wrappers/keyboard.inc}
@@ -677,7 +687,7 @@ begin
   if (CompareText(DirectiveName, 'LOADLIB') = 0)
   or (CompareText(DirectiveName, 'WARNING') = 0)
   or (CompareText(DirectiveName, 'ERROR') = 0)  then
-    Continue := not ProcessDirective(Sender, Parser, DirectiveName,DirectiveParam,
+    Continue := not ProcessDirective(Sender, Parser, Active, DirectiveName,DirectiveParam,
              FileName);
 end;
 
@@ -693,8 +703,8 @@ procedure TPSThread.PSScriptProcessUnknownDirective(Sender: TPSPreProcessor;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean;
   Filename: string);
 begin
-  Continue:= not ProcessDirective(Sender, Parser, DirectiveName, DirectiveParam,
-               FileName);
+  Continue:= not ProcessDirective(Sender, Parser, Active, DirectiveName,
+             DirectiveParam, FileName);
 end;
 
 function Muf_Conv_to_PS_Conv( conv : integer) : TDelphiCallingConvention;
@@ -1037,7 +1047,8 @@ end;
 function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
 
 begin
-  result:= CurrThread.ProcessDirective(nil, nil, name, args, '');
+  { XXX: The 'True' below for Active is perhaps wrong }
+  result:= CurrThread.ProcessDirective(nil, nil, True, name, args, '');
 end;
 
 procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar; runtime: boolean); stdcall;
@@ -1287,10 +1298,12 @@ type
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}
+
 {$I LPInc/Wrappers/lp_colour.inc}
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
 {$I LPInc/Wrappers/lp_math.inc}
+
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}
 {$I LPInc/Wrappers/lp_keyboard.inc}

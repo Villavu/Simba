@@ -71,6 +71,16 @@ begin
   CurrThread.Client.MFinder.GetToleranceSpeed2Modifiers(hMod, sMod);
 end;
 
+procedure ps_SetToleranceSpeed3Modifier(Modifier: Extended); extdecl;
+begin
+  CurrThread.Client.MFinder.SetToleranceSpeed3Modifier(Modifier);
+end;
+
+function ps_GetToleranceSpeed3Modifier: extended; extdecl;
+begin
+  Result := CurrThread.Client.MFinder.GetToleranceSpeed3Modifier();
+end;
+
 function ps_SimilarColors(Col1,Col2,Tol : integer) : boolean; extdecl;
 begin;
   Result := CurrThread.Client.MFinder.SimilarColors(Col1,Col2,Tol);

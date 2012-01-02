@@ -93,7 +93,9 @@ AddGlobalFunc('procedure RectangleBitmap(bitmap: integer; const box: TBox; Color
 AddGlobalFunc('procedure FloodFillBitmap(bitmap: integer; const StartPoint: TPoint; const SearchCol,ReplaceCol: TColor);', @Lape_FloodFillBitmap);
 AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArray): integer', @Lape_ConvoluteBitmap);
 AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
+AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
+AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 
 { Math }
 
@@ -146,6 +148,8 @@ AddGlobalFunc('function ArcCosh(e: extended): extended', @Lape_ArcCosh);
 AddGlobalFunc('function ArcSinh(e: extended): extended', @Lape_ArcSinh);
 AddGlobalFunc('function DecRet(e: Extended): Extended', @Lape_DecRet);
 AddGlobalFunc('function log10(f: Extended): Extended', @Lape_log10);
+AddGlobalFunc('function MinA(a: TIntegerArray): Integer', @Lape_MinA);
+AddGlobalFunc('function MaxA(a: TIntegerArray): Integer', @Lape_MaxA);
 
 { Color }
 
@@ -159,6 +163,8 @@ AddGlobalFunc('procedure SetColorToleranceSpeed(cts: Integer);', @Lape_SetColorT
 AddGlobalFunc('function GetToleranceSpeed: Integer', @Lape_GetToleranceSpeed);
 AddGlobalFunc('procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);', @Lape_SetToleranceSpeed2Modifiers);
 AddGlobalFunc('procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended);', @Lape_GetToleranceSpeed2Modifiers);
+AddGlobalFunc('procedure SetToleranceSpeed3Modifier(Modifier: Extended);', @Lape_SetToleranceSpeed3Modifier);
+AddGlobalFunc('function GetToleranceSpeed3Modifier: Extended;', @Lape_GetToleranceSpeed3Modifier);
 AddGlobalFunc('function SimilarColors(Col1,Col2,Tol: integer): boolean', @Lape_SimilarColors);
 AddGlobalFunc('function CountColor(Color, xs, ys, xe, ye: Integer): Integer', @Lape_CountColor);
 AddGlobalFunc('function CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer', @Lape_CountColorTolerance);
@@ -181,6 +187,16 @@ AddGlobalFunc('procedure RGBToHSL(R, G, B: Integer; var h, s, l: Extended);', @L
 AddGlobalFunc('procedure HSLtoRGB(H, S, L: extended; var R, G,B: Integer);', @Lape_HSLtoRGB);
 AddGlobalFunc('procedure RGBToXYZ(R, G, B: Integer; var x, y,z: Extended);', @Lape_RGBToXYZ);
 AddGlobalFunc('procedure XYZToRGB(X, Y, Z: Extended; var R, G, B: Integer);', @Lape_XYZToRGB);
+AddGlobalFunc('procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended);', @Lape_XYZToHSL);
+AddGlobalFunc('procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended);', @Lape_HSLToXYZ);
+AddGlobalFunc('procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended);', @Lape_XYZtoCIELab);
+AddGlobalFunc('procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended);', @Lape_CIELabtoXYZ);
+AddGlobalFunc('procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: Integer);', @Lape_CIELabToRGB);
+AddGlobalFunc('procedure RGBToCIELab(rr, gg, bb: integer; out L, a, b: Extended);', @Lape_RGBToCIELab);
+AddGlobalFunc('function CIELabToColor(L, a, b: Extended): TColor;', @Lape_CIELabToColor);
+AddGlobalFunc('procedure ColorToCIELab(Color: integer; out L, a, b: Extended);', @Lape_ColorToCIELab);
+AddGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);', @Lape_CIELabToHSL);
+AddGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);', @Lape_HSLToCIELab);
 
 { Crypto }
 
@@ -351,6 +367,8 @@ AddGlobalFunc('function ExecRegExpr(const RegExpr, InputStr: String): boolean', 
 //AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
 AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: String; UseSubstitution: boolean): String', @Lape_ReplaceRegExpr);
 AddGlobalFunc('function posex(needle, haystack: String; offset: integer): integer', @Lape_posex);
+AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);
+AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_NormLevDist);
 
 { TPA }
 
@@ -364,9 +382,14 @@ AddGlobalFunc('function NearbyPointInArrayEx(const P: TPoint; w, h: Integer; con
 AddGlobalFunc('function NearbyPointInArray(const P: TPoint; Dist: Integer; const a: TPointArray): Boolean', @Lape_NearbyPointInArray);
 AddGlobalFunc('procedure QuickTPASort(var A: TIntegerArray; var B: TPointArray; iLo, iHi: Integer; SortUp: Boolean);', @Lape_QuickTPASort);
 AddGlobalFunc('procedure QuickATPASort(var A: TIntegerArray; var B: T2DPointArray; iLo, iHi: Integer; SortUp: Boolean);', @Lape_QuickATPASort);
+AddGlobalFunc('procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean);', @Lape_SortTPAByX);
+AddGlobalFunc('procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean);', @Lape_SortTPAByY);
+AddGlobalFunc('function FindTPARows(a: TPointArray): T2DPointArray;', @Lape_FindTPARows);
+AddGlobalFunc('function FindTPAColumns(a: TPointArray): T2DPointArray;', @Lape_FindTPAColumns);
 AddGlobalFunc('procedure SortTPAFrom(var a: TPointArray; const From: TPoint);', @Lape_SortTPAFrom);
 AddGlobalFunc('procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFrom);
 AddGlobalFunc('procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPoint);
+AddGlobalFunc('procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromMidPoint);
 AddGlobalFunc('procedure InvertTPA(var a: TPointArray);', @Lape_InvertTPA);
 AddGlobalFunc('procedure InvertATPA(var a: T2DPointArray);', @Lape_InvertATPA);
 AddGlobalFunc('function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean', @Lape_MiddleTPAEx);
@@ -405,6 +428,9 @@ AddGlobalFunc('function CombineIntArray(const Ar1, Ar2: TIntegerArray): TInteger
 AddGlobalFunc('function MergeATPA(const ATPA: T2DPointArray): TPointArray', @Lape_MergeATPA);
 AddGlobalFunc('procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);', @Lape_AppendTPA);
 AddGlobalFunc('function TPAFromBox(const Box: TBox): TPointArray', @Lape_TPAFromBox);
+AddGlobalFunc('function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray', @Lape_TPAFromEllipse);
+AddGlobalFunc('function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray', @Lape_TPAFromCircle);
+AddGlobalFunc('procedure FillEllipse(var a: TPointArray);', @Lape_FillEllipse);
 AddGlobalFunc('function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray', @Lape_RotatePoints);
 AddGlobalFunc('function FindTPAEdges(const p: TPointArray): TPointArray', @Lape_FindTPAEdges);
 AddGlobalFunc('function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray', @Lape_ClearTPAFromTPA);
@@ -429,6 +455,8 @@ AddGlobalFunc('procedure TPAtoATPAWrap(const TPA: TPointArray; Dist: Integer; va
 AddGlobalFunc('procedure CombineIntArrayWrap(const Ar1, Ar2: TIntegerArray; var Res: TIntegerArray);', @Lape_CombineIntArrayWrap);
 AddGlobalFunc('procedure MergeATPAWrap(const ATPA: T2DPointArray; var Res: TPointArray);', @Lape_MergeATPAWrap);
 AddGlobalFunc('procedure TPAFromBoxWrap(const Box: TBox; var Res: TPointArray);', @Lape_TPAFromBoxWrap);
+AddGlobalFunc('procedure TPAFromEllipseWrap(const CX, CY, XRadius, YRadius : Integer; var Res: TPointArray);', @Lape_TPAFromEllipseWrap);
+AddGlobalFunc('procedure TPAFromCircleWrap(const CX, CY, Radius : Integer; var Res: TPointArray);', @Lape_TPAFromCircleWrap);
 AddGlobalFunc('procedure RotatePointsWrap(Const P: TPointArray; A, cx, cy: Extended; var Res: TPointArray);', @Lape_RotatePointsWrap);
 AddGlobalFunc('procedure FindTPAEdgesWrap(const p: TPointArray; var Res: TPointArray);', @Lape_FindTPAEdgesWrap);
 AddGlobalFunc('procedure ClearTPAFromTPAWrap(const arP, ClearPoints: TPointArray; var Res: TPointArray);', @Lape_ClearTPAFromTPAWrap);
