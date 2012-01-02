@@ -113,23 +113,25 @@ begin
   end;
 end;
 
-function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
+function FindFile(const Filename: string; Dirs: array of string): string; //Results '' if not found
 var
-  i : integer;
+  I, H: LongInt;
 begin;
-  if FileExistsUTF8(filename) then
-    result := filename
-  else
+  Result := '';
+  if FileExistsUTF8(Filename) then
+    Result := Filename;
+	
+  if (Result = '') then
   begin
-    for i := 0 to high(Dirs) do
-      if (Dirs[i] <> '') and DirectoryExists(dirs[i]) then
-        if fileexistsUTF8(dirs[i] + filename) then
+    H := High(Dirs);
+    for I := 0 to H do
+      if ((Dirs[I] <> '') and DirectoryExists(Dirs[I])) then
+        if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
         begin
-          result := dirs[i] + filename;
-          exit;
+          Result := IncludeTrailingPathDelimiter(Dirs[I]) + Filename;
+          Exit;
         end;
   end;
-  result := '';
 end;
 
 constructor TMFiles.Create(Owner : TObject);
