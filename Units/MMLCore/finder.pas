@@ -247,7 +247,10 @@ begin
 
   h := h * 100;
 
-  Result := min (abs(h - i.H), abs(max(h, i.H) - ( min(h, i.H) + 100 ))) > i.hueMod;
+  if h > i.H then
+    Result := min(h - i.H, abs(h - (i.H + 100) )) > i.hueMod
+  else
+    Result := min(i.H - h, abs(i.H - (h + 100) )) > i.hueMod;
 end;
 
 function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
