@@ -39,3 +39,5 @@ Defines.Add('LINUX');
 Defines.Add('UNIX');
 Defines.Add('POSIX');
 {$ENDIF }
+Defines.Add('SIMBA' + IntToStr(SimbaVersion));
+Defines.Add('SIMBAMAJOR' + IntToStr(SimbaMajor));
