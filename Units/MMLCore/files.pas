@@ -67,7 +67,7 @@ type
     // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
-  function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
+  function FindFile(const Filename: string; const Dirs: array of string): string; //Results '' if not found
 
 implementation
 uses
@@ -113,7 +113,7 @@ begin
   end;
 end;
 
-function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
+function FindFile(const Filename: string; const Dirs: array of string): string; //Results '' if not found
 var
   i : integer;
 begin;
