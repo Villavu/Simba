@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -73,18 +73,18 @@ const
   DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
   SimbaURL =     {$IFDEF WINDOWS}
                   {$IFDEF CPUI386}
-                  'http://Simba.villavu.com/bin/Windows/x86/Stable/'
+                  'http://simba.villavu.com/bin/Windows/x86/Stable/'
                   {$ELSE}
-                  'http://Simba.villavu.com/bin/Windows/x86_64/Stable/'
+                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
                   {$ENDIF}
                 {$ELSE}
                   {$IFDEF CPUI386}
-                  'http://Simba.villavu.com/bin/Linux/x86/Stable/'
+                  'http://simba.villavu.com/bin/Linux/x86/Stable/'
                   {$ELSE}
-                  'http://Simba.villavu.com/bin/Linux/x86_64/Stable/'
+                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
                   {$ENDIF}
                 {$ENDIF};
-  FontURL = 'http://Simba.villavu.com/bin/Fonts/';
+  FontURL = 'http://simba.villavu.com/bin/Fonts/';
 
 var
   SimbaUpdateForm: TSimbaUpdateForm;
@@ -96,9 +96,9 @@ uses
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
   GetLatestSimbaVersion;
-  mDebugLn(format('Current Simba version: %d',[SimbaUnit.SimbaVersion]));
+  mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
   mDebugLn('Latest Simba Version: ' + IntToStr(FSimbaVersion));
-  Exit(SimbaUnit.SimbaVersion < FSimbaVersion);
+  Exit(SimbaVersion < FSimbaVersion);
 end;
 
 function TSimbaUpdateForm.GetLatestFontVersion: integer;

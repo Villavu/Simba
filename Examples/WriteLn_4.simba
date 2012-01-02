@@ -1,0 +1,14 @@
+program WriteLn_ExampleFour;
+
+var
+  S: String;
+  I: Integer;
+
+begin
+  S := 'This is an example!';
+  I := 100;
+
+  Writeln(S + ' ' + IntToStr(I));
+  // Since S is already a String type, we don't need to convert it.
+    //  with an integer however, we must convert it to a String.
+end.

@@ -1,6 +1,6 @@
 {
   This file is part of the Mufasa Macro Library (MML)
-  Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+  Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,11 @@ interface
 
 uses
   Classes, SysUtils{$ifdef MSWindows},windows{$endif};
+
+
+const
+    SimbaVersion = 990;
+    SimbaMajor = 990; // this should be 980 even if SimbaVersion is 981, etc
 
 procedure mDebugLn( s : string);overload;
 procedure mDebugLn( s : string; f : array of const);overload;

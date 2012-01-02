@@ -48,6 +48,16 @@ begin
   ps_GetToleranceSpeed2Modifiers(PExtended(Params^[0])^, PExtended(Params^[1])^);
 end;
 
+procedure Lape_SetToleranceSpeed3Modifier(const Params: PParamArray);
+begin
+  ps_SetToleranceSpeed3Modifier(PExtended(Params^[0])^);
+end;
+
+function Lape_GetToleranceSpeed3Modifier(const Params: PParamArray): Extended;
+begin
+  Result := ps_GetToleranceSpeed3Modifier();
+end;
+
 procedure Lape_SimilarColors(const Params: PParamArray; const Result: Pointer);
 begin
   Pboolean(Result)^ := ps_SimilarColors(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^);

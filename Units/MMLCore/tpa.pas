@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,9 +46,14 @@ function TPAtoATPAEx(const TPA: TPointArray; w, h: Integer): T2DPointArray;
 function TPAtoATPA(const TPA: TPointArray; Dist: Integer): T2DPointArray;
 procedure QuickTPASort(var A: TIntegerArray; var B: TPointArray; iLo, iHi: Integer; SortUp: Boolean);
 procedure QuickATPASort(var A: TIntegerArray; var B: T2DPointArray; iLo, iHi: Integer; SortUp: Boolean);
+procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean);
+procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean);
+function FindTPARows(a: TPointArray): T2DPointArray;
+function FindTPAColumns(a: TPointArray): T2DPointArray;
 procedure SortTPAFrom(var a: TPointArray; const From: TPoint);
 procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);
 procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);
 procedure InvertTPA(var a: TPointArray);
 procedure InvertATPA(var a: T2DPointArray);
 function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
@@ -80,6 +85,9 @@ procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean)
 function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;
 procedure AppendTPA(var TPA : TPointArray; const ToAppend : TPointArray);
 function TPAFromBox(const Box : TBox) : TPointArray;
+function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer): TPointArray;
+function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
+procedure FillEllipse(var a: TPointArray);
 function FindTPAEdges(const p: TPointArray): TPointArray;
 function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
@@ -370,7 +378,7 @@ begin
     Found := False;
     for t := 0 to c -1 do
       if (Abs(Result[t].x - a[i].x) <= w) and (Abs(Result[t].y - a[i].y) <= h) then
-      begin;
+      begin
         Found := True;
         Break;
       end;
@@ -565,6 +573,70 @@ begin
   if (Lo < iHi) then QuickATPASort(A, B, Lo, iHi, SortUp);
 end;
 
+procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean);
+var
+   i, l: Integer;
+   Arr: TIntegerArray;
+begin
+  l := High(a);
+  if (l < 0) then Exit;
+  SetLength(Arr, l + 1);
+  for i := 0 to l do
+    Arr[i] := a[i].x;
+  QuickTPASort(arr, a, 0, l, LowToHi);
+end;
+
+procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean);
+var
+   i, l: Integer;
+   Arr: TIntegerArray;
+begin
+  l := High(a);
+  if (l < 0) then Exit;
+  SetLength(Arr, l + 1);
+  for i := 0 to l do
+    Arr[i] := a[i].y;
+  QuickTPASort(arr, a, 0, l, LowToHi);
+end;
+
+function FindTPARows(a: TPointArray): T2DPointArray;
+var
+  bounds: TBox;
+  i, l, c, h, low: Integer;
+begin
+  l := High(a);
+  if (l < 1) then
+    if l = 0 then
+    begin
+      SetLength(Result, 1);
+      Result[0] := a;
+      Exit;
+    end else
+      Exit;
+  bounds := GetTPABounds(a);
+  SortTPAByX(a, True);
+  Result := TPAtoATPAEx(a, bounds.x2 - bounds.x1, 0);
+end;
+
+function FindTPAColumns(a: TPointArray): T2DPointArray;
+var
+  bounds: TBox;
+  i, l, c, h, low: Integer;
+begin
+  l := High(a);
+  if (l < 1) then
+    if l = 0 then
+    begin
+      SetLength(Result, 1);
+      Result[0] := a;
+      Exit;
+    end else
+      Exit;
+  bounds := GetTPABounds(a);
+  SortTPAByY(a, True);
+  Result := TPAtoATPAEx(a, 0, bounds.y2 - bounds.y1);
+end;
+
 {/\
   Sorts the TPointArray a from the point From.
   Closest one to the point is [0], second closest is [1] etc.
@@ -611,6 +683,27 @@ begin
   SetLength(DistArr, l + 1);
   for i := 0 to l do
     DistArr[i] := Round(Sqr(From.x - a[i][0].x) + Sqr(From.y - a[i][0].y));
+  QuickATPASort(DistArr, a, 0, l, True);
+end;
+
+{/\
+  Sorts the T2DPointArray a from the midpoint of each TPA by From.
+/\}
+
+procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);
+var
+   i, l: Integer;
+   DistArr: TIntegerArray;
+   MidPt: TPoint;
+begin
+  l := High(a);
+  if (l < 0) then Exit;
+  SetLength(DistArr, l + 1);
+  for i := 0 to l do
+  begin
+    MidPt := MiddleTPA(a[i]);
+    DistArr[i] := Round(Sqr(From.x - MidPt.x) + Sqr(From.y - MidPt.y));
+  end;
   QuickATPASort(DistArr, a, 0, l, True);
 end;
 
@@ -1775,6 +1868,115 @@ begin;
       Result[l].y := y;
       inc(l);
     end;
+end;
+
+{/\
+  Returns a TPointArray of the outline of a ellipse.
+/\}
+function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer): TPointArray;
+var
+  x, y, a2, b2, h,
+  d1, d2, sn, sd,
+  a2t8, b2t8, Len : Integer;
+begin
+  SetLength(Result, 9999);
+  Len := 0;
+  Result[Len] := Point(CX + XRadius, CY);
+  Inc(Len);
+  Result[Len] := Point(CX, CY - YRadius);
+  Inc(Len);
+  Result[Len] := Point(CX - XRadius, CY);
+  Inc(Len);
+  Result[Len] := Point(CX, CY + YRadius);
+  Inc(Len);
+  x := 0;
+  y := YRadius;
+  a2 := XRadius * XRadius;
+  b2 := y * y;
+  a2t8 := a2 * 8;
+  b2t8 := b2 * 8;
+  h := b2 * 4 + a2 * (1 - 4 * y);
+  d1 := 12 * b2;
+  d2 := -a2t8 * (y - 1);
+  sn := b2;
+  sd := (a2 * y) - (a2 shr 1);
+
+  while (sn < sd) do
+  begin
+    if (h > 0) then
+    begin
+      Dec(y);
+      h := h + d2;
+      sd := sd - a2;
+      d2 := d2 + a2t8;
+    end;
+    Inc(x);
+    h := h + d1;
+    sn := sn + b2;
+    d1 := d1 + b2t8;
+    Result[Len] := Point(CX + X, CY + Y);
+    Inc(Len);
+    Result[Len] := Point(CX + X, CY - Y);
+    Inc(Len);
+    Result[Len] := Point(CX - X, CY + Y);
+    Inc(Len);
+    Result[Len] := Point(CX - X, CY - Y);
+    Inc(Len);
+  end;
+
+  h := b2 * (4 * x * x + 4 * x + 1) + 4 * a2 * (y - 1) * (y - 1) - 4 * a2 * b2;
+  d1 := b2t8 * (x + 1);
+  d2 := -4 * a2 * (2 * y - 3);
+  while (y > 1) do
+  begin
+    if (h < 0) then
+    begin
+      Inc(x);
+      h := h + d1;
+      d1 := d1 + b2t8;
+    end;
+    Dec(y);
+    h := h + d2;
+    d2 := d2 + a2t8;
+    Result[Len] := Point(CX + X, CY + Y);
+    Inc(Len);
+    Result[Len] := Point(CX + X, CY - Y);
+    Inc(Len);
+    Result[Len] := Point(CX - X, CY + Y);
+    Inc(Len);
+    Result[Len] := Point(CX - X, CY - Y);
+    Inc(Len);
+  end;
+
+  SetLength(Result, Len);
+end;
+
+{/\
+  Returns a TPointArray of the outline of a ellipse.
+/\}
+function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
+begin
+  Result := TPAFromEllipse(CX, CY, Radius, Radius);
+end;
+
+{/\
+  Fills a Ellipse generated by TPAFromEllipse or TPAFromCircle.
+/\}
+procedure FillEllipse(var a: TPointArray);
+var
+  i, h, Hi: Integer;
+  b, c: T2DPointArray;
+begin
+  b := FindTPARows(a);
+  Hi := High(b);
+  SetLength(c, Hi + 1);
+  h := 0;
+  for i := 0 to Hi do
+  begin
+    c[h] := TPAFromBox(GetTPABounds(b[i]));
+    inc(h);
+  end;
+  a := MergeATPA(c);
 end;
 
 {/\

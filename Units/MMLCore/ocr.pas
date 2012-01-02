@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ type
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
     procedure FilterUpTextByColour(bmp: TMufasaBitmap);
-    procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
+    procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
     procedure FilterShadowBitmap(bmp: TMufasaBitmap);
     procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
@@ -393,7 +393,7 @@ FilterUpTextByCharacteristics
     procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
 *)
 
-procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
+procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
 var
    x,y: Integer;
 begin
@@ -644,7 +644,7 @@ begin
     after false shadow is removed.
   }
   // Filter 2
-  FilterUpTextByCharacteristics(bmp,w,h);
+  FilterUpTextByCharacteristics(bmp);
 
   {$IFDEF OCRSAVEBITMAP}
   bmp.SaveToFile(OCRDebugPath + 'ocrdebug.bmp');

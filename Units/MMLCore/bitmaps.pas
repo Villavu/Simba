@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -127,7 +127,9 @@ type
 
   Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
   function CalculatePixelShift(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox) : integer;
+  function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
   function CalculatePixelTolerance(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox; CTS : integer) : extended;
+  function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray; CTS: integer): extended;
 implementation
 
 uses
@@ -188,6 +190,29 @@ begin
       if LongWord(Bmp1.FData[y * w1 + x]) <> LongWord(Bmp2.Fdata[y * w2 + x]) then
         inc(result);
 end;
+
+function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
+var
+  i : integer;
+  bounds: TBox;
+  w1,w2 : integer;
+begin
+  bounds := GetTPABounds(CPoints);
+  Bmp1.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp1.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp2.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp2.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp1.SetAlphaValue(0);
+  Bmp2.SetAlphaValue(0);
+  w1 := bmp1.width;
+  w2 := bmp2.width;
+  result := 0;
+  for i := 0 to High(CPoints) do
+    if LongWord(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x]) <>
+        LongWord(Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x]) then
+      inc(result);
+end;
+
 //CTS 0 counts the average difference in R,G,B per pixel
 //CTS 1 counts the average difference using SQRT(Sqr(r) + sqr(g)+sqr(b));
 function CalculatePixelTolerance(Bmp1, Bmp2: TMufasaBitmap; CompareBox: TBox;
@@ -227,6 +252,48 @@ begin
                                       Sqr(Bmp1.FData[y * w1 + x].g-Bmp2.Fdata[y * w2 + x].g) +
                                       Sqr(Bmp1.FData[y * w1 + x].b-Bmp2.Fdata[y * w2 + x].b));
           Result := Result / ((CompareBox.x2 - CompareBox.x1 + 1) * (CompareBox.y2-CompareBox.y1 + 1)); //We want the value for the whole Pixel;
+        end;
+  end;
+end;
+
+function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray;
+  CTS: integer): extended;
+var
+  i : integer;
+  bounds: TBox;
+  w1,w2 : integer;
+  Diff : int64;
+begin
+  bounds := GetTPABounds(CPoints);
+  Bmp1.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp1.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp2.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp2.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp1.SetAlphaValue(0);
+  Bmp2.SetAlphaValue(0);
+  w1 := bmp1.Width;
+  w2 := bmp2.width;
+  result := 0;
+  if not InRange(CTS,0,1) then
+    raise exception.CreateFmt('CTS Passed to CalculateTolerance must be in [0..1], it currently is %d',[CTS]);
+  case CTS of
+    0 : begin
+          Diff := 0;
+          for i := 0 to High(CPoints) do
+            begin
+              Diff := Diff + abs(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].r-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].r) +
+                             abs(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].g-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].g) +
+                             abs(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].b-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].b);
+            end;
+          Result := Diff / (3 * (bounds.x2 - bounds.x1 + 1) * (bounds.y2-bounds.y1 + 1)); //We want the value for the whole Pixel; so divide by 3 (RGB)
+        end;
+    1 : begin
+
+          for i := 0 to High(CPoints) do
+            Result := Result + Sqrt(Sqr(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].r-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].r) +
+                                    Sqr(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].g-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].g) +
+                                    Sqr(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].b-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].b));
+          Result := Result / ((bounds.x2 - bounds.x1 + 1) * (bounds.y2-bounds.y1 + 1)); //We want the value for the whole Pixel;
         end;
   end;
 end;
@@ -328,7 +395,13 @@ end;
 function TMBitmaps.CreateBMPFromFile(const Path: string): integer;
 begin
   Result := CreateBMP(0,0);
-  BmpArray[result].LoadFromFile(Path);
+  try
+    BmpArray[result].LoadFromFile(Path);
+  except
+    FreeBMP(Result);
+    Result := -1; // meh
+    raise;
+  end;
 end;
 
 function HexToInt(HexNum: string): LongInt;inline;
@@ -504,8 +577,7 @@ var
   LazIntf : TLazIntfImage;
   RawImageDesc : TRawImageDescription;
 begin
-  if FileExistsUTF8(FileName) then
-  begin;
+  try
     LazIntf := TLazIntfImage.Create(0,0);
     RawImageDesc.Init_BPP32_B8G8R8_BIO_TTB(LazIntf.Width,LazIntf.Height);
     LazIntf.DataDescription := RawImageDesc;
@@ -516,6 +588,7 @@ begin
     Self.H := LazIntf.Height;
     FData := GetMem(Self.W*Self.H*SizeOf(TRGB32));
     Move(LazIntf.PixelData[0],FData[0],w*h*sizeOf(TRGB32));
+  finally
     LazIntf.Free;
   end;
 end;
