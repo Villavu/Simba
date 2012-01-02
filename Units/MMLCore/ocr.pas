@@ -839,12 +839,12 @@ begin
 
   if shadow then
   begin
-    font := FFonts.GetFont('NewChars_s');
+    font := FFonts.GetFont('UpChars_s');
     thachars := shadows;
   end
   else
   begin
-    font := FFonts.GetFont('NewChars');
+    font := FFonts.GetFont('UpChars');
     thachars := chars;
   end;
 
