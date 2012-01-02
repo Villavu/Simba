@@ -244,10 +244,13 @@ begin
   if h < 0 then
     h := h + 1;
   //Finally lets test H2
-  if abs(H*100 - i.H) > i.hueMod then
-    result := false
+
+  h := h * 100;
+
+  if h > i.H then
+    Result := min(h - i.H, abs(h - (i.H + 100) )) > i.hueMod
   else
-    result := true;
+    Result := min(i.H - h, abs(i.H - (h + 100) )) > i.hueMod;
 end;
 
 function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
