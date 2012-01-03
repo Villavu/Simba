@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -244,10 +244,13 @@ begin
   if h < 0 then
     h := h + 1;
   //Finally lets test H2
-  if abs(H*100 - i.H) > i.hueMod then
-    result := false
+
+  h := h * 100;
+
+  if h > i.H then
+    Result := min(h - i.H, abs(h - (i.H + 100) )) < i.hueMod
   else
-    result := true;
+    Result := min(i.H - h, abs(i.H - (h + 100) )) < i.hueMod;
 end;
 
 function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
@@ -1540,7 +1543,7 @@ begin
             xEnd := Min(xx+range + xBmp,SearchdX);
             for RangeX := xStart to xEnd do
             begin;
-            if not compare(ctsinfoarray[yBmp][xBmp],
+            if compare(ctsinfoarray[yBmp][xBmp],
                            @MainRowData[rangeY][rangeX]) then
                 goto FoundBMPPoint;
             end;
