@@ -7,8 +7,12 @@
 .PHONY: default build rebuild unknown recursive_build clean i386-linux x86_64-linux i386-win32 x86_64-win64 all
 
 # Set these
-#lazaruspath := /usr/lib/lazarus/0.9.28.2
-lazaruspath := ../../../lazarus_fixes
+ifdef LAZARUS_PATH
+lazaruspath := $(LAZARUS_PATH)
+else
+lazaruspath := /usr/lib/lazarus/0.9.28.2
+endif
+
 # set this correctly only if you want to apply and reverse the patch automatically
 rutis_x64_patch := ../../../0-rutis-x64.patch
 
