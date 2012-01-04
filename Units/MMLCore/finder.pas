@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -248,9 +248,9 @@ begin
   h := h * 100;
 
   if h > i.H then
-    Result := min(h - i.H, abs(h - (i.H + 100) )) > i.hueMod
+    Result := min(h - i.H, abs(h - (i.H + 100) )) < i.hueMod
   else
-    Result := min(i.H - h, abs(i.H - (h + 100) )) > i.hueMod;
+    Result := min(i.H - h, abs(i.H - (h + 100) )) < i.hueMod;
 end;
 
 function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
