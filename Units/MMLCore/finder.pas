@@ -301,13 +301,6 @@ begin
   a := 500.0 * ( X - Y );
   bb := 200.0 * ( Y - Z );
 
-  writeln('L: ' + FloatToStr(l));
-  writeln('A: ' + FloatToStr(a));
-  writeln('B: ' + FloatToStr(bb));
-  writeln('L2: ' + FloatToStr(i.L));
-  writeln('A2: ' + FloatToStr(i.A));
-  writeln('B2: ' + FloatToStr(i.B));
-
   L := L - i.L;
   A := A - i.A;
   Bb := Bb - i.B;
