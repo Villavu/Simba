@@ -126,22 +126,21 @@ begin;
   Green := G / 255;
   Blue := B / 255;
   if Red > 0.04045  then
-    Red := Power( ( Red + 0.055 ) / 1.055  , 2.4)
+    Red := Power( ( Red + 0.055 ) / 1.055  , 2.4) * 100
   else
-    Red := Red  / 12.92;
+    Red := Red * 7.73993808;
   if Green > 0.04045  then
-    Green := Power( ( Green + 0.055 ) / 1.055 , 2.4)
+    Green := Power( ( Green + 0.055 ) / 1.055 , 2.4) *  100
   else
-    Green := Green  / 12.92;
+    Green := Green * 7.73993808;
   if  Blue > 0.04045 then
-    Blue := Power(  ( Blue + 0.055 ) / 1.055  , 2.4)
+    Blue := Power(  ( Blue + 0.055 ) / 1.055  , 2.4) * 100
   else
-    Blue := Blue / 12.92;
+    Blue := Blue * 7.73993808;
   X := Red * 0.4124 + Green * 0.3576 + Blue * 0.1805;
   Y := Red * 0.2126 + Green * 0.7152 + Blue * 0.0722;
   Z := Red * 0.0193 + Green * 0.1192 + Blue * 0.9505;
 end;
-
 {/\
    Translates the given X, Y and Z components to
    Red (R), Green (G) and Blue (B) components.
@@ -149,11 +148,14 @@ end;
 
 Procedure XYZToRGB(X,Y,Z : Extended;out R,G,B: byte); overload; inline;
 var
-  TempR,TempG,TempB: Extended;
+   TempR,TempG,TempB,Tempx,tempy,tempz : Extended;
 begin;
-  TempR := x *  3.2406 + y * -1.5372 + z * -0.4986;
-  TempG := x * -0.9689 + y *  1.8758 + z *  0.0415;
-  TempB := x *  0.0557 + y * -0.2040 + z *  1.0570;
+  Tempx := X / 100;
+  tempy := Y / 100;
+  tempz := Z / 100;
+  TempR := tempx *  3.2406 + tempy * -1.5372 + tempz * -0.4986;
+  TempG := tempx * -0.9689 + tempy *  1.8758 + tempz *  0.0415;
+  TempB := tempx *  0.0557 + tempy * -0.2040 + tempz *  1.0570;
   if TempR > 0.0031308  then
     TempR := 1.055 * ( Power(TempR, (OneDivTwoPointFour)) ) - 0.055
   else
