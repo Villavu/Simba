@@ -248,9 +248,9 @@ begin
   h := h * 100;
 
   if h > i.H then
-    Result := min(h - i.H, abs(h - (i.H + 100) )) < i.hueMod
+    Result := min(h - i.H, abs(h - (i.H + 100) )) <= i.hueMod
   else
-    Result := min(i.H - h, abs(i.H - (h + 100) )) < i.hueMod;
+    Result := min(i.H - h, abs(i.H - (h + 100) )) <= i.hueMod;
 end;
 
 function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
@@ -267,17 +267,17 @@ begin
   G := Percentage[C2^.g];
   B := Percentage[C2^.b];
   if r > 0.04045  then
-    r := Power( ( r + 0.055 ) / 1.055  , 2.4)
+    r := Power( ( r + 0.055 ) / 1.055  , 2.4) * 100
   else
-    r := r / 12.92;
+    r := r * 7.73993808;
   if g > 0.04045  then
-    g := Power( ( g + 0.055 ) / 1.055 , 2.4)
+    g := Power( ( g + 0.055 ) / 1.055 , 2.4) * 100
   else
-    g := g / 12.92;
+    g := g * 7.73993808;
   if  b > 0.04045 then
-    b := Power(  ( b + 0.055 ) / 1.055  , 2.4)
+    b := Power(  ( b + 0.055 ) / 1.055  , 2.4) * 100
   else
-    b := b / 12.92;
+    b := b * 7.73993808;
 
   y := (r * 0.2126 + g * 0.7152 + b * 0.0722)/100.000;
   if ( Y > 0.008856 ) then
@@ -301,17 +301,18 @@ begin
   a := 500.0 * ( X - Y );
   bb := 200.0 * ( Y - Z );
 
+  writeln('L: ' + FloatToStr(l));
+  writeln('A: ' + FloatToStr(a));
+  writeln('B: ' + FloatToStr(bb));
+  writeln('L2: ' + FloatToStr(i.L));
+  writeln('A2: ' + FloatToStr(i.A));
+  writeln('B2: ' + FloatToStr(i.B));
+
   L := L - i.L;
   A := A - i.A;
   Bb := Bb - i.B;
 
-  // XXX: optimise this
-  // values < 1 do not increase if multiplied by themself, obviously
-  L := L * 100;
-  A := A * 100;
-  bB := bB * 100;
-
-  Result := (L*L + A*A + bB*Bb) < i.Tol;
+  Result := (L*L + A*A + bB*Bb) <= i.Tol;
 end;
 
 { }
