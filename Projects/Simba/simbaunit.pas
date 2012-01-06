@@ -534,7 +534,7 @@ const
   Image_Terminate = 19;
 var
   SimbaForm: TSimbaForm;
-  AppPath, DocPath: string;
+  AppPath, DocPath, DataPath: string;
   {$ifdef MSWindows}
   PrevWndProc : WNDPROC;
   {$endif}
@@ -782,12 +782,12 @@ end;
 
 function TSimbaForm.GetDefScriptPath: string;
 begin
-  result :=LoadSettingDef(ssSourceEditorDefScriptPath, ExpandFileName(DocPath+'default.simba'));
+  result :=LoadSettingDef(ssSourceEditorDefScriptPath, ExpandFileName(DataPath + 'default.simba'));
 end;
 
 function TSimbaForm.GetScriptPath: string;
 begin
-  result :=IncludeTrailingPathDelimiter(LoadSettingDef(ssScriptsPath, ExpandFileName(DocPath+'Scripts' + DS)));
+  result :=IncludeTrailingPathDelimiter(LoadSettingDef(ssScriptsPath, ExpandFileName(DocPath + 'Scripts' + DS)));
 end;
 
 procedure TSimbaForm.HandleOpenFileData;
@@ -1396,11 +1396,11 @@ begin
   CreateSetting(ssNewsLink, 'http://simba.villavu.com/bin/news');
 
   {Creates the paths and returns the path}
-  PluginsPath := CreateSetting(ssPluginsPath, ExpandFileName(DocPath + 'Plugins' + DS));
+  PluginsPath := CreateSetting(ssPluginsPath, ExpandFileName(DataPath + 'Plugins' + DS));
 
   {$IFDEF USE_EXTENSIONS}
   extensionsPath := CreateSetting(ssExtensionsPath,
-      ExpandFileName(DocPath + 'Extensions' + DS));
+      ExpandFileName(DataPath + 'Extensions' + DS));
   CreateSetting(ssExtensionsCount, '0');
   {$ENDIF}
 
@@ -1587,7 +1587,7 @@ begin
     while (i < extCount) and not LoadExtension(i) do
       DeleteExtension(i);
   SetSetting(ssExtensionsCount, inttostr(extCount));
-  str := LoadSettingDef(ssExtensionsPath, ExpandFileName(DocPath + 'Extensions' + DS));
+  str := LoadSettingDef(ssExtensionsPath, ExpandFileName(DataPath + 'Extensions' + DS));
   str2 := LoadSettingDef(ssExtensionsFileExtension, 'sex');
   ExtManager.LoadPSExtensionsDir(str,str2);
 {$ELSE}
@@ -2449,6 +2449,35 @@ begin
 end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
+  function GetDocPath(): string;
+  begin
+    {$IFNDEF PORTABLE}
+      {$IFDEF WINDOWS}
+        Result := IncludeTrailingPathDelimiter(GetUserDir()) + 'My Documents' + DS + 'Simba' + DS;
+      {$ELSE}
+        Result := IncludeTrailingPathDelimiter(GetEnvironmentVariable('XDG_DATA_HOME'));
+        if (Result = '') then
+          Result := IncludeTrailingPathDelimiter(GetEnvironmentVariable('HOME')) + '.local' + DS + 'share' + DS;
+        Result := Result + 'Simba' + DS;
+      {$ENDIF}
+      if (not (DirectoryExists(Result))) then
+        if (not (CreateDir(Result))) then
+          Result := IncludeTrailingPathDelimiter(AppPath);
+    {$ELSE}
+      Result := IncludeTrailingPathDelimiter(AppPath);
+    {$ENDIF}
+  end;
+  function GetDataPath(): string;
+  begin
+    {$IFNDEF PORTABLE}
+      Result := IncludeTrailingPathDelimiter(GetAppConfigDir(False));
+      if (not (DirectoryExists(Result))) then
+        if (not (CreateDir(Result))) then
+          Result := GetDocPath();
+    {$ELSE}
+      Result := IncludeTrailingPathDelimiter(AppPath);
+    {$ENDIF}
+  end;
 var
   FillThread : TProcThread;
 begin
@@ -2456,27 +2485,10 @@ begin
   Randomize;
   DecimalSeparator := '.';
 
-  AppPath := ExtractFileDir(Application.ExeName); //Where Simba.exe is (Should Already Exist)
-
-  //DocPath = ~/.local/share/Simba or ~/My Documents/Simba or AppPath
-  {$IFDEF WINDOWS}
-  DocPath := GetUserDir() + 'My Documents' + DS + 'Simba' + DS;
-  {$ELSE}
-  DocPath := sysutils.GetEnvironmentVariable('XDG_DATA_HOME');
-  if (DocPath = '') then
-    DocPath := sysutils.GetEnvironmentVariable('HOME') + DS + '.local' + DS + 'share';
-  DocPath := DocPath + DS + 'Simba' + DS;
-  {$ENDIF}
-  if (not (DirectoryExists(DocPath))) then
-    if (not (CreateDir(DocPath))) then
-      DocPath := AppPath + DS;
-
-  //SimbaSettingsFile = ~/.config/simba or ~/AppData/Roaming/Simba as settings.xml
-  SimbaSettingsFile := GetAppConfigDir(False) + DS;
-  if (not (DirectoryExists(SimbaSettingsFile))) then
-    if (not (CreateDir(SimbaSettingsFile))) then
-      SimbaSettingsFile := DocPath; // =)
-  SimbaSettingsFile := SimbaSettingsFile + 'settings.xml';
+  AppPath := IncludeTrailingPathDelimiter(Application.Location);
+  DocPath := GetDocPath();
+  DataPath := {$IFDEF LINUX}DocPath{$ELSE}GetDataPath(){$ENDIF};
+  SimbaSettingsFile := {$IFDEF LINUX}GetDataPath(){$ELSE}DataPath{$ENDIF} + 'settings.xml';
 
   RecentFiles := TStringList.Create;
 
@@ -3085,14 +3097,14 @@ end;
 function TSimbaForm.GetFontPath: String;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssFontsPath,
-      ExpandFileName(DocPath + 'Fonts' + DS)));
+      ExpandFileName(DataPath + 'Fonts' + DS)));
 end;
 
 {$IFDEF USE_EXTENSIONS}
 function TSimbaForm.GetExtPath: string;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssExtensionsPath,
-      ExpandFileName(DocPath + 'Extensions' + DS)));
+      ExpandFileName(DataPath + 'Extensions' + DS)));
 end;
 {$ENDIF}
 
@@ -3107,13 +3119,13 @@ end;
 function TSimbaForm.GetIncludePath: String;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssIncludesPath,
-      ExpandFileName(DocPath + 'Includes' + DS)));
+      ExpandFileName(DataPath + 'Includes' + DS)));
 end;
 
 function TSimbaForm.GetPluginPath: string;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssPluginsPath,
-      ExpandFileName(DocPath + 'Plugins' + DS)));
+      ExpandFileName(DataPath + 'Plugins' + DS)));
 end;
 
 procedure TSimbaForm.SetIncludePath(const AValue: String);
