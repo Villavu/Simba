@@ -455,10 +455,8 @@ procedure TScriptManagerForm.btnLoadScriptClick(Sender: TObject);
 var
   Script : TSimbaScript;
 begin
-  writeln('wooo');
   if (ListViewLibrary.Selected <> nil) and (ListViewLibrary.Selected.Data <> nil) then
   begin
-    writeln('wooo');
     Script := TSimbaScript(ListViewLibrary.Selected.Data);
     if FileExistsUTF8('general' + DirectorySeparator + Script.Name + DirectorySeparator + Script.Files[0]) then
       SimbaForm.LoadScriptFile('general' + DirectorySeparator + Script.Name + DirectorySeparator + Script.Files[0]);
@@ -831,8 +829,8 @@ begin
     Description:= Scrpt.Description;
     Tags.Assign(Scrpt.Tags);
     Files.Assign(Scrpt.Files);
-    URL := 'http://rsg.frement.net/script_manager/scripts/'+name+ '.tar.bz2';
-    //URL := 'http://old.villavu.com/sm/scripts/'+name+ '.tar.bz2';
+    //URL := 'http://rsg.frement.net/script_manager/scripts/'+name+ '.tar.bz2';
+    URL := 'http://old.villavu.com/sm/scripts/'+name+ '.tar.bz2';
  //   URL := 'http://tootoot222.hopto.org:8080/~mcteo/scriptman/'+name+'.tar.bz2';
   end;
   LScrpt.Save(MainDir);      //Saves the setting file, now we only need to update the files
