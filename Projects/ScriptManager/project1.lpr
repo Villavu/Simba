@@ -7,8 +7,7 @@ uses
   cthreads, cmem,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, scriptmanager
-  { you can add units after this };
+  Forms, scriptmanager;
 
 {$R *.res}
 
