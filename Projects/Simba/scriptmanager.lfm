@@ -8,7 +8,7 @@ object ScriptManagerForm: TScriptManagerForm
   ClientWidth = 711
   OnCreate = FormCreate
   OnShow = FormShow
-  LCLVersion = '0.9.30.1'
+  LCLVersion = '0.9.30'
   object PageControlTabs: TPageControl
     Left = 0
     Height = 442
@@ -81,7 +81,7 @@ object ScriptManagerForm: TScriptManagerForm
           item
             AutoSize = True
             Caption = 'Description'
-            Width = 351
+            Width = 373
           end>
         RowSelect = True
         SortType = stText
