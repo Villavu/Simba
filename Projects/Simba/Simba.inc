@@ -28,6 +28,8 @@
 
 //{$DEFINE SIMBA_VERBOSE} // For more verbosity.
 
+//{$DEFINE PORTABLE}
+
 //{$DEFINE USE_RUTIS}
 {$DEFINE USE_LAPE}
 
