@@ -614,7 +614,7 @@ var
 begin
   Databs := TStringList.Create;
 
-  Databs.Add('http://rsg.frement.net/script_manager/sm.xml');
+  Databs.Add('http://old.villavu.com/sm');
   //Databs.Add('http://old.villavu.com/sm');
   //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman2/scripts.xml');
   //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/secretrepo/scripts.cgi?user=user&pass=pass');
@@ -652,7 +652,7 @@ begin
   if FUpdating then
     exit;
   FUpdating := True;
-  Down := TDownloadThread.Create('http://rsg.frement.net/script_manager/sm.xml',@XMLFile);
+  Down := TDownloadThread.Create('http://old.villavu.com/sm',@XMLFile);
  // Down := TDownloadThread.Create('http://old.villavu.com/sm',@XMLFile);
 //  Down := TDownloadThread.Create(url, @XMLFile);
 //  Down := TDownloadThread.Create('http://tootoot222.hopto.org:8080/~mcteo/scriptman/scripts.xml',@XMLFile);
