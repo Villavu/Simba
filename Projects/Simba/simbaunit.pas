@@ -793,14 +793,15 @@ end;
 
 function TSimbaForm.GetDefScriptPath: string;
 begin
-  Result := LoadSettingDef(ssSourceEditorDefScriptPath, {$IFDEF PORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'default.simba'));
+  Result := LoadSettingDef(ssSourceEditorDefScriptPath, {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'default.simba'));
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
 
 function TSimbaForm.GetScriptPath: string;
 begin
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssScriptsPath, {$IFDEF PORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DocPath + 'Scripts' + DS)));
+  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssScriptsPath, {$IFNDEF
+      NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DocPath + 'Scripts' + DS)));
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -2466,7 +2467,7 @@ end;
 procedure TSimbaForm.FormCreate(Sender: TObject);
   function GetDocPath(): string;
   begin
-    {$IFNDEF PORTABLE}
+    {$IFDEF NOTPORTABLE}
       {$IFDEF WINDOWS}
         Result := IncludeTrailingPathDelimiter(GetUserDir()) + 'My Documents' + DS + 'Simba' + DS;
       {$ELSE}
@@ -2484,7 +2485,7 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
   end;
   function GetDataPath(): string;
   begin
-    {$IFNDEF PORTABLE}
+    {$IFDEF NOTPORTABLE}
       Result := IncludeTrailingPathDelimiter(GetAppConfigDir(False));
       if (not (DirectoryExists(Result))) then
         if (not (CreateDir(Result))) then
@@ -3112,7 +3113,7 @@ end;
 function TSimbaForm.GetFontPath: String;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssFontsPath,
-      {$IFDEF PORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Fonts' + DS)));
+      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Fonts' + DS)));
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -3121,7 +3122,7 @@ end;
 function TSimbaForm.GetExtPath: string;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssExtensionsPath,
-      {$IFDEF PORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Extensions' + DS)));
+      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Extensions' + DS)));
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -3138,7 +3139,7 @@ end;
 function TSimbaForm.GetIncludePath: String;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssIncludesPath,
-      {$IFDEF PORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Includes' + DS)));
+      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Includes' + DS)));
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -3146,7 +3147,7 @@ end;
 function TSimbaForm.GetPluginPath: string;
 begin
   Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssPluginsPath,
-      {$IFDEF PORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Plugins' + DS)));
+      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Plugins' + DS)));
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
