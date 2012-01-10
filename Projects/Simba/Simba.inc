@@ -28,6 +28,10 @@
 
 //{$DEFINE SIMBA_VERBOSE} // For more verbosity.
 
+//{$DEFINE NOTPORTABLE} // NOTPORTABLE makes it easier to build portable by
+                        // default, yet keep it possible to disable it with
+                        // command line flags.
+
 //{$DEFINE USE_RUTIS}
 {$DEFINE USE_LAPE}
 
