@@ -97,7 +97,7 @@ type
 
 implementation
 uses
-  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF, StrUtils,framefunctionlist;
+  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF, framefunctionlist;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 var
