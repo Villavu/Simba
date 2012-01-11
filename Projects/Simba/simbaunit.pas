@@ -52,14 +52,13 @@ uses
   SynEditMarkupHighAll, LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil,
   about, framefunctionlist, ocr, updateform, Simbasettings, 
-  {$IFDEF USE_EXTENSIONS}psextension, virtualextension, extensionmanager,{$ENDIF}
-  settingssandbox,
+  {$IFDEF USE_EXTENSIONS}virtualextension, extensionmanager,{$ENDIF}
 
-  v_ideCodeParser, v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
+  v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
   PSDump,
 
-  settings, updater;
+  updater;
 
 const
   interp_PS = 0; //PascalScript
@@ -416,6 +415,7 @@ type
     OpenFileData : TOpenFileData;
     WriteFileData : TWriteFileData;
     ScriptStartData : TScriptStartData;
+    FillThread: TProcThread;
 
     procedure UpdateInterpreter;
     procedure HandleConnectionData;
@@ -448,6 +448,7 @@ type
     procedure SetSetting(const key,Value : string; save : boolean = false);
     function SettingExists(const key : string) : boolean;
     procedure FontUpdate;
+    procedure CCFillCore;
   public
     DebugStream: String;
     SearchString : string;
@@ -563,10 +564,10 @@ uses
 
 { Console handler }
 {$IFDEF MSWINDOWS}
-function ConsoleHandler( eventType : DWord) : WINBOOL;stdcall;
+function ConsoleHandler(eventType: DWord): WINBOOL; stdcall;
 begin
-  TThread.Synchronize(nil,@SimbaForm.Close);
-  Result := true;
+  TThread.Synchronize(nil, @SimbaForm.Close);
+  Result := True;
 end;
 {$ENDIF}
 
@@ -674,6 +675,9 @@ var
   sp, ep: Integer;
   s: string;
 begin
+  sp := -1;
+  ep := -1;
+
   if (Str <> '') then
   begin
     s := WordAtCaret(CurrScript.SynEdit, sp, ep);
@@ -689,11 +693,9 @@ begin
 end;
 
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var Filename: string): Boolean;
-var
-  Temp : string;
 begin
   Result := False;
-  Filename := FindFile(Filename, [AppPath, IncludePath, ExtPath]);
+  Filename := FindFile(Filename, [AppPath, IncludePath{$IFDEF USE_EXTENSIONS}, ExtPath{$ENDIF}]);
   if (Filename <> '') then
     Result := True;
 end;
@@ -742,8 +744,8 @@ begin
   ActionCPascal.Checked := False;
   ActionLape.Checked := False;
   case Interpreter of
-    interp_PS: ActionPascalScript.Checked:= True;
-    interp_CP: ActionCPascal.Checked:= True;
+    interp_PS: ActionPascalScript.Checked := True;
+    interp_CP: ActionCPascal.Checked := True;
     interp_RT: ActionRUTIS.Checked := True;
     interp_LP: ActionLape.Checked := True;
   end;
@@ -772,7 +774,7 @@ end;
 
 function TSimbaForm.GetInterpreter: Integer;
 begin
-  result := StrToIntDef(LoadSettingDef(ssInterpreterType, '0'),0);
+  result := StrToIntDef(LoadSettingDef(ssInterpreterType, '0'), 0);
   if (result < 0) or (result > 3) then
   begin
     SetInterpreter(0);
@@ -1078,7 +1080,7 @@ begin
   begin
     if ScriptState = ss_Paused then
     begin;
-      ScriptThread.Resume;
+      ScriptThread.Start;
       ScriptState := ss_Running;
       Exit;
     end else
@@ -1093,7 +1095,7 @@ begin
     ScriptState:= ss_Running;
     FirstRun := false;
     //Lets run it!
-    ScriptThread.Resume;
+    ScriptThread.Start;
   end;
 end;
 
@@ -1111,7 +1113,7 @@ begin
       {$endif}
     end else if ScriptState = ss_Paused then
     begin;
-      ScriptThread.Resume;
+      ScriptThread.Start;
       ScriptState := ss_Running;
     end;
   end;
@@ -1137,7 +1139,7 @@ begin
         end;
       ss_Paused:
         begin
-          ScriptThread.Resume;
+          ScriptThread.Start;
           ScriptThread.Terminate;
           ScriptState:= ss_Stopping;
         end;
@@ -1382,7 +1384,7 @@ end;
 { Creates default settings }
 procedure TSimbaForm.CreateDefaultEnvironment;
 var
-  PluginsPath,extensionsPath : string;
+  PluginsPath{$IFDEF USE_EXTENSIONS}, ExtensionsPath{$ENDIF}: string;
 begin
   CreateSetting(ssCheckUpdate, 'True');
   CreateSetting(ssCheckUpdateMinutes, '30');
@@ -1415,7 +1417,7 @@ begin
   PluginsPath := CreateSetting(ssPluginsPath, ExpandFileName(DataPath + 'Plugins' + DS));
 
   {$IFDEF USE_EXTENSIONS}
-  extensionsPath := CreateSetting(ssExtensionsPath,
+  ExtensionsPath := CreateSetting(ssExtensionsPath,
       ExpandFileName(DataPath + 'Extensions' + DS));
   CreateSetting(ssExtensionsCount, '0');
   {$ENDIF}
@@ -1437,8 +1439,8 @@ begin
   if not DirectoryExists(PluginsPath) then
     CreateDir(PluginsPath);
   {$IFDEF USE_EXTENSIONS}
-  if not DirectoryExists(extensionsPath) then
-    CreateDir(extensionsPath);
+  if not DirectoryExists(ExtensionsPath) then
+    CreateDir(ExtensionsPath);
   if not DirectoryExists(ExtPath) then
     CreateDir(ExtPath);
   {$ENDIF}
@@ -1512,9 +1514,9 @@ end;
 { Save Settings }
 procedure TSimbaForm.SaveFormSettings;
 var
-  Data : TStringArray;
-  path : string;
-  i : integer;
+  Data: TStringArray;
+  {$IFDEF USE_EXTENSIONS}Path: string;{$ENDIF}
+  i: integer;
 begin
   with SettingsForm.Settings do
   begin
@@ -1548,7 +1550,7 @@ begin
     SetSetting(ssExtensionsCount, inttostr(ExtManager.Extensions.Count));
     for i := 0 to ExtManager.Extensions.Count-1 do
     begin;
-      path := ssExtensionsExtensionN + inttostr(I);
+      Path := ssExtensionsExtensionN + inttostr(I);
       SetSetting(Path + '/Path',TVirtualSimbaExtension(ExtManager.Extensions[i]).Filename);
       SetSetting(Path + '/Enabled',BoolToStr(TVirtualSimbaExtension(ExtManager.Extensions[i]).Enabled,True));
     end;
@@ -1642,7 +1644,6 @@ procedure TSimbaForm.InitializeTMThread(out Thread: TMThread);
 var
   ScriptPath: string;
   Script: string;
-  Se: TMMLSettingsSandbox;
   loadFontsOnScriptStart: boolean;
   Continue: boolean;
 begin
@@ -1668,7 +1669,7 @@ begin
     case Interpreter of
       interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, PluginPath);
       {$IFDEF USE_RUTIS}interp_RT: Thread := TRTThread.Create(True, @CurrentSyncInfo, PluginPath);{$ENDIF}
-      interp_CP: Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginPath);
+      {$IFDEF USE_CPASCAL}interp_CP: Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginPath);{$ENDIF}
       {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, PluginPath);{$ENDIF}
       else
         raise Exception.CreateFmt('Unknown Interpreter %d!', [Interpreter]);
@@ -1859,7 +1860,7 @@ var
 begin
   InitializeTMThread(TempThread);
   TempThread.CompileOnly:= true;
-  TempThread.Resume;
+  TempThread.Start;
 end;
 
 procedure TSimbaForm.ActionConsoleExecute(Sender: TObject);
@@ -1879,7 +1880,9 @@ end;
 
 procedure TSimbaForm.ActionCPascalExecute(Sender: TObject);
 begin
+  {$IFDEF USE_CPASCAL}
   Interpreter := interp_CP;
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.ActionCutExecute(Sender: TObject);
@@ -2043,7 +2046,7 @@ end;
 procedure TSimbaForm.ActionRUTISExecute(Sender: TObject);
 begin
   {$IFDEF USE_RUTIS}
-  Interpreter:= interp_RT;
+  Interpreter := interp_RT;
   {$ENDIF}
 end;
 
@@ -2114,7 +2117,8 @@ end;
 
 procedure TSimbaForm.ChangeMouseStatus(Sender: TObject);
 var
-  x, y: Integer;
+  x: integer = -1;
+  y: integer = -1;
 begin
   if Self.Manager.TargetValid = false then
     self.Manager.SetDesktop;
@@ -2403,64 +2407,66 @@ begin
   {$IFDEF USE_EXTENSIONS}FreeAndNil(ExtManager);{$ENDIF}
 end;
 
-procedure CCFillCore;
+procedure TSimbaForm.CCFillCore;
 var
-  t: TMThread;
-  a: TPSScriptExtension;
-  b: TStringList;
-  ms: TMemoryStream;
-  buf : TCodeInsight;
+  Thread: TPSThread;
+  ValueDefs: TStringList;
+  Stream: TMemoryStream;
+  Buffer: TCodeInsight;
 begin
-  if SimbaForm.UpdatingFonts then
-  begin
-    mDebugLn('Updating the fonts, thus waiting a bit till we init the OCR.');
-    while SimbaForm.UpdatingFonts do
-    begin
-      if GetCurrentThreadId = MainThreadID then
-        Application.ProcessMessages;
-      sleep(25);
-    end;
-  end;
-  SimbaForm.InitializeTMThread(t);
-  if (t = nil) then
+  if (Interpreter <> interp_PS) then
     Exit;
 
-  KillThread(t.ThreadID); { XXX: Why do we kill the thread again ? }
-  if (t is TPSThread) then
-  try
-    a := TPSScriptExtension.Create(SimbaForm);
-    b := TStringList.Create;
-    ms := TMemoryStream.Create;
-
-    try
-      with TPSThread(t).PSScript do
-      begin
-        a.OnCompile := OnCompile;
-        a.OnCompImport := OnCompImport;
-        a.OnExecImport := OnExecImport;
-        a.Defines.Assign(Defines);
-      end;
-      a.GetValueDefs(b);
-
-      CoreDefines.AddStrings(a.Defines);
-
-      buf := TCodeInsight.Create;
-      with buf do
-      begin
-        OnMessage := @SimbaForm.OnCCMessage;
-        b.SaveToStream(ms);
-        Run(ms, nil, -1, True);
-        FileName := '"PSCORE"';
-      end;
-      SetLength(CoreBuffer, 1);
-      CoreBuffer[0] := buf;
-    finally
-      b.Free;
-      a.Free;
+  if UpdatingFonts then
+  begin
+    mDebugLn('Updating the fonts, thus waiting a bit till we init the OCR.');
+    while UpdatingFonts do
+    begin
+      if (GetCurrentThreadId = MainThreadID) then
+        Application.ProcessMessages;
+      Sleep(25);
     end;
+  end;
+
+  InitializeTMThread(Thread);
+  if (not Assigned(Thread)) then
+    Exit;
+
+  try
+    ValueDefs := TStringList.Create;
+    try
+      with TPSScriptExtension.Create(SimbaForm) do
+      try
+        OnCompile := Thread.PSScript.OnCompile;
+        OnCompImport := Thread.PSScript.OnCompImport;
+        OnExecImport := Thread.PSScript.OnExecImport;
+        Defines.Assign(Thread.PSScript.Defines);
+
+        GetValueDefs(ValueDefs);
+        CoreDefines.AddStrings(Defines);
+      finally
+        Free;
+      end;
+
+      Stream := TMemoryStream.Create;
+      ValueDefs.SaveToStream(Stream);
+    finally
+      ValueDefs.Free;
+    end;
+
+    Buffer := TCodeInsight.Create;
+    with Buffer do
+    begin
+      OnMessage := @OnCCMessage;
+      Run(Stream, nil, -1, True);
+      FileName := '"PSCORE"';
+    end;
+
+    SetLength(CoreBuffer, 1);
+    CoreBuffer[0] := Buffer;
   finally
-    //KillThread(t.ThreadID);
-    t.Free;
+    if (Assigned(Thread)) then
+      Thread.Free;
   end;
 end;
 
@@ -2494,8 +2500,6 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
       Result := IncludeTrailingPathDelimiter(AppPath);
     {$ENDIF}
   end;
-var
-  FillThread : TProcThread;
 begin
   self.BeginFormUpdate;
   Randomize;
@@ -2533,9 +2537,9 @@ begin
   Self.OnScriptStart:= @ScriptStartEvent;
 
   FillThread := TProcThread.Create;
-  FillThread.FreeOnTerminate:= True;
-  FillThread.NormalProc:= @CCFillCore;
-  UpdateTimer.OnTimer:= @UpdateTimerCheck;
+  FillThread.ClassProc := @CCFillCore;
+
+  UpdateTimer.OnTimer := @UpdateTimerCheck;
 
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
@@ -2547,9 +2551,8 @@ begin
   end else
   begin
     Application.CreateForm(TSettingsForm,SettingsForm);
-
     Self.CreateDefaultEnvironment;
-    FillThread.StartWait:= 250;
+    FillThread.StartWait := 250;
   end;
 
   //Show close buttons @ tabs
@@ -2589,21 +2592,24 @@ begin
 
   TT_Update.Visible:= false;
 
-  //Fill the codeinsight buffer
-  FillThread.Resume;
-
   //Load the extensions
   {$IFDEF USE_EXTENSIONS}LoadExtensions;{$ENDIF}
 
   UpdateTitle;
 
-  {$IFDEF USE_RUTIS}MenuItemRUTIS.Enabled := True;{$ENDIF}
-  {$IFDEF USE_LAPE}MenuItemLape.Enabled := True;{$ENDIF}
+  {$IFDEF USE_RUTIS}ActionRUTIS.Visible := True;{$ENDIF}
+  {$IFDEF USE_CPASCAL}ActionCPascal.Visible := True;{$ENDIF}
+  {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
+
   {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
-  self.EndFormUpdate;
 
   if SettingsForm.Oops then
     formWriteln('WARNING: No permissions to write to settings.xml!');
+  
+  //Fill the codeinsight buffer
+  FillThread.Start;
+  
+  self.EndFormUpdate;
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -2917,7 +2923,7 @@ var
 begin
   t := TDownloadThread.Create(LoadSettingDef(ssNewsLink, 'http://Simba.villavu.com/bin/news'),
                               @Result);
-  t.Resume;
+  t.Start;
   while not t.done do
   begin
     Application.ProcessMessages;
@@ -3260,20 +3266,20 @@ begin
     formWriteln(format('New fonts available. Current version: %d. Latest version: %d',[CurrVersion,LatestVersion]));
     FontDownload := TDownloadThread.Create(LoadSettingDef(ssFontsLink, FontURL + 'Fonts.tar.bz2'),
                                            @Fonts);
-    FontDownload.resume;
+    FontDownload.Start;
     while FontDownload.Done = false do
       Idler;
     //Fontdownload is freed now
     Stream := TStringStream.Create(Fonts);
     try
       Decompress := TDecompressThread.Create(Stream);
-      Decompress.Resume;
+      Decompress.Start;
       while Decompress.Finished = false do
         Idler;
       if Decompress.Result <> nil then
       begin;
         UnTarrer := TUntarThread.Create(Decompress.Result,FontPath,True);
-        UnTarrer.Resume;
+        UnTarrer.Start;
         while UnTarrer.Finished = false do
           Idler;
         if UnTarrer.Result then
@@ -3321,12 +3327,13 @@ function GetConsoleWindow: HWND; stdcall; external kernel32 name 'GetConsoleWind
 
 procedure TSimbaForm.ShowConsole(ShowIt: boolean);
 var
-  ProcessId : DWOrd;
+  ProcessId: DWord;
 begin
   if ShowIt = ConsoleVisible then
     Exit;
+  ProcessId := 0;
   //Check if the console is ours (if it's not, do not hide it!!
-  GetWindowThreadProcessId(GetConsoleWindow,ProcessId);
+  GetWindowThreadProcessId(GetConsoleWindow, ProcessId);
   if ProcessId = GetCurrentProcessId then
   begin
     if showit then
