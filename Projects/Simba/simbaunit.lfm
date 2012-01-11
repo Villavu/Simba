@@ -28,14 +28,14 @@ object SimbaForm: TSimbaForm
     ShowHint = True
     TabOrder = 0
     object TB_Run: TToolButton
-      Left = 170
+      Left = 172
       Hint = 'Run'
       Top = 2
       Action = ActionRunScript
       ImageIndex = 6
     end
     object TB_Pause: TToolButton
-      Left = 193
+      Left = 195
       Hint = 'Pause'
       Top = 2
       Action = ActionPauseScript
@@ -43,7 +43,7 @@ object SimbaForm: TSimbaForm
       ImageIndex = 5
     end
     object TB_Stop: TToolButton
-      Left = 216
+      Left = 218
       Hint = 'Stop'
       Top = 2
       Action = ActionStopScript
@@ -51,39 +51,39 @@ object SimbaForm: TSimbaForm
       ImageIndex = 7
     end
     object ToolButton1: TToolButton
-      Left = 239
+      Left = 241
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton1'
       Style = tbsDivider
     end
     object TB_NewTab: TToolButton
-      Left = 243
+      Left = 246
       Hint = 'Add tab'
       Top = 2
       Action = ActionNewTab
     end
     object TB_CloseTab: TToolButton
-      Left = 266
+      Left = 269
       Hint = 'Close tab'
       Top = 2
       Action = ActionCloseTab
     end
     object ToolButton4: TToolButton
-      Left = 289
+      Left = 292
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton4'
       Style = tbsDivider
     end
     object TB_ClearDebug: TToolButton
-      Left = 293
+      Left = 297
       Hint = 'Clear debug box'
       Top = 2
       Action = ActionClearDebug
     end
     object TB_PickColour: TToolButton
-      Left = 316
+      Left = 320
       Hint = 'Pick a colour'
       Top = 2
       Caption = 'TB_PickColour'
@@ -91,7 +91,7 @@ object SimbaForm: TSimbaForm
       OnClick = ButtonPickClick
     end
     object TB_SelectClient: TToolButton
-      Left = 339
+      Left = 343
       Hint = 'Select a client'
       Top = 2
       Caption = 'TB_SelectClient'
@@ -99,14 +99,14 @@ object SimbaForm: TSimbaForm
       OnMouseDown = ButtonSelectorDown
     end
     object ToolButton8: TToolButton
-      Left = 362
+      Left = 366
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
     object TB_ReloadPlugins: TToolButton
-      Left = 366
+      Left = 371
       Hint = 'Reload plugins'
       Top = 2
       Caption = 'TB_ReloadPlugins'
@@ -114,7 +114,7 @@ object SimbaForm: TSimbaForm
       ImageIndex = 13
     end
     object TB_Tray: TToolButton
-      Left = 389
+      Left = 394
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -132,7 +132,7 @@ object SimbaForm: TSimbaForm
     object ToolButton2: TToolButton
       Left = 93
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton2'
       Style = tbsDivider
     end
@@ -158,14 +158,14 @@ object SimbaForm: TSimbaForm
       Enabled = False
     end
     object ToolButton3: TToolButton
-      Left = 435
+      Left = 440
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object TT_Update: TToolButton
-      Left = 439
+      Left = 445
       Hint = 'A new update is available'
       Top = 2
       Caption = 'TT_Update'
@@ -173,33 +173,33 @@ object SimbaForm: TSimbaForm
       OnClick = TT_UpdateClick
     end
     object TT_Cut: TToolButton
-      Left = 97
+      Left = 98
       Top = 2
       Caption = 'Cu&t'
       ImageIndex = 3
       OnClick = ActionCutExecute
     end
     object TT_Copy: TToolButton
-      Left = 120
+      Left = 121
       Top = 2
       Caption = '&Copy'
       ImageIndex = 22
       OnClick = ActionCopyExecute
     end
     object TT_Paste: TToolButton
-      Left = 143
+      Left = 144
       Top = 2
       Action = ActionPaste
     end
     object ToolButton9: TToolButton
-      Left = 166
+      Left = 167
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton9'
       Style = tbsDivider
     end
     object TT_Console: TToolButton
-      Left = 412
+      Left = 417
       Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
@@ -288,7 +288,6 @@ object SimbaForm: TSimbaForm
       OnDragOver = PageControl1DragOver
       OnMouseDown = PageControl1MouseDown
       OnMouseUp = PageControl1MouseUp
-      OnPageChanged = PageControl1Change
     end
     object SearchPanel: TPanel
       Left = 0
@@ -391,11 +390,11 @@ object SimbaForm: TSimbaForm
         Height = 23
         Top = 6
         Width = 80
-        EditLabel.AnchorSideLeft.Control = LabeledEditSearch
         EditLabel.AnchorSideTop.Control = LabeledEditSearch
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
+        EditLabel.AnchorSideBottom.Side = asrBottom
         EditLabel.Left = 71
         EditLabel.Height = 16
         EditLabel.Top = 9
@@ -438,6 +437,7 @@ object SimbaForm: TSimbaForm
       inherited FunctionList: TTreeView
         Height = 319
         Width = 150
+        DefaultItemHeight = 18
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
@@ -1260,7 +1260,6 @@ object SimbaForm: TSimbaForm
         end
         object MenuItemRUTIS: TMenuItem
           Action = ActionRUTIS
-          Enabled = False
           RadioItem = True
         end
         object MenuItemCPascal: TMenuItem
@@ -1269,7 +1268,6 @@ object SimbaForm: TSimbaForm
         end
         object MenuItemLape: TMenuItem
           Action = ActionLape
-          Enabled = False
           RadioItem = True
         end
       end
@@ -3018,11 +3016,13 @@ object SimbaForm: TSimbaForm
     object ActionRUTIS: TAction
       Caption = 'RUTIS'
       OnExecute = ActionRUTISExecute
+      Visible = False
     end
     object ActionCPascal: TAction
       Caption = 'CPascal'
       Enabled = False
       OnExecute = ActionCPascalExecute
+      Visible = False
     end
     object ActionGoto: TAction
       Caption = 'Goto line'
@@ -3032,6 +3032,7 @@ object SimbaForm: TSimbaForm
     object ActionLape: TAction
       Caption = 'Lape'
       OnExecute = ActionLapeExecute
+      Visible = False
     end
   end
   object DebugTimer: TTimer
