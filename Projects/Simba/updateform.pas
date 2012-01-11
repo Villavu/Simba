@@ -24,6 +24,8 @@ unit updateform;
 
 {$mode objfpc}{$H+}
 
+{$I Simba.inc}
+
 interface
 
 uses
@@ -86,6 +88,8 @@ const
                 {$ENDIF};
   FontURL = 'http://simba.villavu.com/bin/Fonts/';
 
+  {$I settings_const.inc}
+
 var
   SimbaUpdateForm: TSimbaUpdateForm;
 
@@ -107,9 +111,10 @@ var
 begin
   if FontVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    FontVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
-                                                'Settings/Fonts/VersionLink',FontURL  + 'Version',SimbaSettingsFile),
-                                                @Vers);
+    FontVersionThread :=
+    TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(ssFontsVersionLink,
+          FontURL + 'Version', SimbaSettingsFile), @Vers);
+
     FontVersionThread.Resume;
     while FontVersionThread.Done = false do//Wait till thread is done
     begin
@@ -138,8 +143,7 @@ begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
     SimbaVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
-                                                 'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version'
-                                                 ,SimbaSettingsFile),@Vers);
+           ssUpdaterVersionLink ,SimbaURL + 'Version', SimbaSettingsFile), @Vers);
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
@@ -230,7 +234,7 @@ begin
   FCancelled := False;
 
   Updater.FileURL := SettingsForm.Settings.GetKeyValueDefLoad(
-        'Settings/Updater/RemoteLink',
+        ssUpdaterLink,
         SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
         SimbaSettingsFile
   );

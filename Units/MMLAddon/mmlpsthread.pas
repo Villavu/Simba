@@ -26,6 +26,7 @@ unit mmlpsthread;
 {$define PS_USESSUPPORT}
 //{$define USE_RUTIS}
 {$define USE_LAPE}
+{$define USE_CPASCAL}
 {$mode objfpc}{$H+}
 
 interface
@@ -40,7 +41,7 @@ uses
   {$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
-    lpeval, lpinterpreter, lpdisassembler
+    lpeval, lpinterpreter
   {$ENDIF};
 
 const
@@ -208,6 +209,7 @@ type
     TPrecompiler_Callback = function(name, args: PChar): boolean; stdcall;
     TErrorHandeler_Callback = procedure(line, pos: integer; err: PChar; runtime: boolean); stdcall;
 
+    {$IFDEF USE_CPASCAL}
     TCPThread = class(TMThread)
       protected
         instance: pointer;
@@ -221,6 +223,7 @@ type
         procedure Terminate; override;
         procedure AddMethod(meth: TExpMethod); override;
     end;
+    {$ENDIF}
 
     { TRTThread }
     {$IFDEF USE_RUTIS}
@@ -1029,7 +1032,7 @@ begin
 end;
 
 {***implementation TCPThread***}
-
+{$IFDEF USE_CPASCAL}
 procedure LoadCPascal(plugin_dir: string);
 begin
   libcpascal:= LoadLibrary(PChar(plugin_dir + 'libcpascal' + {$ifdef LINUX} '.so' {$else} '.dll' {$endif}));
@@ -1153,6 +1156,7 @@ procedure TCPThread.Terminate;
 begin
   raise Exception.Create('Stopping Interpreter not yet implemented');
 end;
+{$ENDIF}
 
 { TRTThread }
 {$IFDEF USE_RUTIS}
@@ -1347,10 +1351,9 @@ end;
 destructor TLPThread.Destroy;
 begin
   try
-    {if (Compiler <> nil) then
-      Compiler.Free;}
-
-    if (Parser <> nil) then
+    if (Assigned(Compiler)) then
+      Compiler.Free
+    else if (Assigned(Parser)) then
       Parser.Free;
   except
     on E: Exception do
@@ -1440,6 +1443,7 @@ end;
 
 procedure TLPThread.Terminate;
 begin
+  psWriteLn('Lape doesn''t support stoping scripts yet... Please hit stop again to terminate!');
 end;
 {$ENDIF}
 
