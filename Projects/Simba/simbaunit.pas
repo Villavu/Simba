@@ -58,7 +58,7 @@ uses
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
   PSDump,
 
-  updater;
+  updater, scriptmanager;
 
 const
   interp_PS = 0; //PascalScript
