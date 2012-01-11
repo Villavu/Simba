@@ -228,7 +228,7 @@ end;
 constructor TProcThread.Create;
 begin
   inherited Create(true);
-  FreeOnTerminate:= True;
+  FreeOnTerminate := True;
 end;
 
 
