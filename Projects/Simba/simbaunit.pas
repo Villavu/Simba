@@ -2899,6 +2899,13 @@ var
 
 begin
   Tab := TMufasaTab(Tabs[PopupTab]);
+  if Tab.ScriptFrame.ScriptFile = '' then
+  begin
+    MessageDlg('Script needs to be saved before it can be put in Read Only mode',
+                       mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
   Tab.ScriptFrame.SetReadOnly(not Tab.ScriptFrame.GetReadOnly());
   MenuItemReadOnlyTab.Checked := not Tab.ScriptFrame.GetReadOnly();
 end;
