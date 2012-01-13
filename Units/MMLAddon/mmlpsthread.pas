@@ -1290,11 +1290,19 @@ type
   PMDTMPoint = ^TMDTMPoint;
   PSDTM = ^TSDTM;
   
- procedure lp_WriteLn(Params: PParamArray);
- begin
-   psWriteLn(PlpString(Params^[0])^);
- end;
-
+threadvar
+  WriteLnStr: string;
+  
+procedure lp_Write(Params: PParamArray);
+begin
+  WriteLnStr += PlpString(Params^[0])^;
+end;
+  
+procedure lp_WriteLn(Params: PParamArray);
+begin
+  psWriteLn(WriteLnStr);
+  WriteLnStr := '';
+end;
 
 {$I LPInc/Wrappers/lp_other.inc}
 {$I LPInc/Wrappers/lp_settings.inc}
@@ -1333,6 +1341,9 @@ begin
   Fonts := Client.MOCR.Fonts;
   with Compiler do
   begin
+    WriteLnStr := '';
+
+    addGlobalFunc('procedure _write(s: string); override;', @lp_Write);
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     
     for I := Fonts.Count - 1 downto 0 do
