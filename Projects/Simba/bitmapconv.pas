@@ -57,7 +57,7 @@ var
 
 implementation
 uses
-  SimbaUnit, clipbrd;
+  SimbaUnit, clipbrd, LCLIntf, LCLType;
 const
   BmpSizeTxt = '(%dx%d)';
 {$R *.lfm}
@@ -88,34 +88,25 @@ begin
 end;
 
 procedure TBitmapConvForm.ClipboardButtonClick(Sender: TObject);
-
-var
-  clip: TClipboard;
-  x : TMufasaBitmap;
-
 begin
-  clip := Clipboard();
+  if (Clipboard.HasPictureFormat()) then
+  try
+    ImagePreview.Picture.Bitmap.LoadFromClipboardFormat(CF_Bitmap);
+    GroupBox.Caption := Format(BmpSizeTxt, [ImagePreview.Picture.Width, ImagePreview.Picture.Height]);
 
-  if clip.HasFormat(CF_Picture) then
-  begin
-    try
-      ImagePreview.Picture.Assign(clip);
-      GroupBox.Caption:= Format(BmpSizeTxt,[ImagePreview.Picture.Width,ImagePreview.Picture.Height]);
+    if Assigned(dispPic) then
+      FreeAndNil(dispPic);
 
-      x := TMufasaBitmap.Create();
-      x.LoadFromTBitmap(ImagePreview.Picture.Bitmap);
-      if dispPic <> nil then
-        dispPic.Free;
-      dispPic := x;
-    except
-      MessageDlg('Error Loading', 'Cannot load bitmap from clipboard.', mtError, [mbOK], 0);
-      ImagePreview.Picture := nil;
-      if dispPic <> nil then
-        FreeAndNil(dispPic);
+    dispPic := TMufasaBitmap.Create();
+    dispPic.LoadFromTBitmap(ImagePreview.Picture.Bitmap);
+  except
+    on E: Exception do
+    begin
+      MessageDlg('Error Loading', 'Cannot load bitmap from clipboard. ' + LineEnding + E.Message, mtError, [mbOK], 0);
+      ImagePreview.Picture.Assign(nil);
     end;
-  end else begin
+  end else
     MessageDlg('Invalid Clipboard?', 'Cannot create bitmap from clipboard.', mtError, [mbOK], 0);
-  end;
 end;
 
 procedure TBitmapConvForm.ToStringButtonClick(Sender: TObject);
