@@ -35,12 +35,14 @@ type
   { TBitmapConvForm }
 
   TBitmapConvForm = class(TForm)
+    ClipboardButton: TButton;
     GroupBox: TGroupBox;
     ToStringButton: TButton;
     OpenButton: TButton;
     PadOutput: TCheckBox;
     ImagePreview: TImage;
     OpenPictureDialog: TOpenPictureDialog;
+    procedure ClipboardButtonClick(Sender: TObject);
     procedure OpenButtonClick(Sender: TObject);
     procedure ToStringButtonClick(Sender: TObject);
   private
@@ -55,7 +57,7 @@ var
 
 implementation
 uses
-  SimbaUnit;
+  SimbaUnit, clipbrd;
 const
   BmpSizeTxt = '(%dx%d)';
 {$R *.lfm}
@@ -82,6 +84,40 @@ begin
       if dispPic <> nil then
         FreeAndNil(dispPic);
     end;
+  end;
+end;
+
+procedure TBitmapConvForm.ClipboardButtonClick(Sender: TObject);
+
+var
+  clip: TClipboard;
+  x : TMufasaBitmap;
+  b: TBitmap;
+
+begin
+  clip := Clipboard();
+
+  if clip.HasFormat(CF_Picture) then
+  begin
+    try
+      ImagePreview.Picture.Assign(clip);
+      GroupBox.Caption:= Format(BmpSizeTxt,[ImagePreview.Picture.Width,ImagePreview.Picture.Height]);
+
+      x := TMufasaBitmap.Create();
+      x.LoadFromTBitmap(ImagePreview.Picture.Bitmap);
+      if dispPic <> nil then
+        dispPic.Free;
+      dispPic := x;
+    except
+      MessageDlg('Error Loading', 'Cannot load bitmap from clipboard.', mtError, [mbOK], 0);
+      ImagePreview.Picture := nil;
+      if dispPic <> nil then
+        FreeAndNil(dispPic);
+      if x <> nil then
+        FreeAndNil(x);
+    end;
+  end else begin
+    MessageDlg('Invalid Clipboard?', 'Cannot create bitmap from clipboard.', mtError, [mbOK], 0);
   end;
 end;
 

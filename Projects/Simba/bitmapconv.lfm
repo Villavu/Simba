@@ -1,29 +1,29 @@
 object BitmapConvForm: TBitmapConvForm
-  Left = 726
+  Left = 800
   Height = 240
-  Top = 192
+  Top = 426
   Width = 320
   Caption = 'Bitmap conversion'
   ClientHeight = 240
   ClientWidth = 320
   Constraints.MinHeight = 240
   Constraints.MinWidth = 320
-  LCLVersion = '0.9.29'
+  LCLVersion = '0.9.30.1'
   object ToStringButton: TButton
-    Left = 192
+    Left = 216
     Height = 36
     Top = 184
-    Width = 113
+    Width = 89
     Anchors = [akRight, akBottom]
     Caption = 'To string'
     OnClick = ToStringButtonClick
     TabOrder = 0
   end
   object PadOutput: TCheckBox
-    Left = 192
-    Height = 17
-    Top = 160
-    Width = 71
+    Left = 170
+    Height = 22
+    Top = 155
+    Width = 93
     Anchors = [akRight, akBottom]
     Caption = 'Pad output'
     Checked = True
@@ -34,7 +34,7 @@ object BitmapConvForm: TBitmapConvForm
     Left = 12
     Height = 36
     Top = 184
-    Width = 90
+    Width = 76
     Anchors = [akRight, akBottom]
     Caption = 'Open'
     OnClick = OpenButtonClick
@@ -47,22 +47,32 @@ object BitmapConvForm: TBitmapConvForm
     Width = 284
     Anchors = [akTop, akLeft, akRight, akBottom]
     Caption = 'Image'
-    ClientHeight = 127
+    ClientHeight = 128
     ClientWidth = 280
     TabOrder = 3
     object ImagePreview: TImage
       Left = 0
-      Height = 127
+      Height = 128
       Top = 0
       Width = 280
       Align = alClient
       Center = True
     end
   end
+  object ClipboardButton: TButton
+    Left = 88
+    Height = 36
+    Top = 184
+    Width = 128
+    Anchors = [akRight, akBottom]
+    Caption = 'From Clipboard'
+    OnClick = ClipboardButtonClick
+    TabOrder = 4
+  end
   object OpenPictureDialog: TOpenPictureDialog
     FilterIndex = 2
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    left = 128
-    top = 184
+    left = 120
+    top = 64
   end
 end
