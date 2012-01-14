@@ -15,10 +15,10 @@
     <LazDoc Paths="../../LazDoc"/>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="96"/>
+      <MinorVersionNr Value="99"/>
       <Language Value="0809"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="0.97"/>
+      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="0.99"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="50">
+    <Units Count="51">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -313,10 +313,17 @@
         <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit49>
+      <Unit50>
+        <Filename Value="scriptmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ScriptManager"/>
+      </Unit50>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="10"/>
+    <Version Value="9"/>
     <Target>
       <Filename Value="../../Simba"/>
     </Target>
