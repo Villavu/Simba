@@ -92,7 +92,6 @@ procedure TBitmapConvForm.ClipboardButtonClick(Sender: TObject);
 var
   clip: TClipboard;
   x : TMufasaBitmap;
-  b: TBitmap;
 
 begin
   clip := Clipboard();
@@ -113,8 +112,6 @@ begin
       ImagePreview.Picture := nil;
       if dispPic <> nil then
         FreeAndNil(dispPic);
-      if x <> nil then
-        FreeAndNil(x);
     end;
   end else begin
     MessageDlg('Invalid Clipboard?', 'Cannot create bitmap from clipboard.', mtError, [mbOK], 0);
