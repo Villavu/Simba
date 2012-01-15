@@ -24,10 +24,10 @@
 unit mmlpsthread;
 
 {$define PS_USESSUPPORT}
-//{$define USE_RUTIS}
-{$define USE_LAPE}
-{$define USE_CPASCAL}
+
 {$mode objfpc}{$H+}
+
+{$I Simba.inc}
 
 interface
 
