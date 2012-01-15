@@ -15,10 +15,10 @@
     <LazDoc Paths="../../LazDoc"/>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="96"/>
+      <MinorVersionNr Value="99"/>
       <Language Value="0809"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="0.97"/>
+      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="0.99"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
@@ -330,7 +330,7 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="10"/>
+    <Version Value="9"/>
     <Target>
       <Filename Value="../../Simba"/>
     </Target>

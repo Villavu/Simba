@@ -452,6 +452,7 @@ type
     function SettingExists(const key : string) : boolean;
     procedure FontUpdate;
     procedure CCFillCore;
+    procedure CustomExceptionHandler(Sender: TObject; E: Exception);
   public
     DebugStream: String;
     SearchString : string;
@@ -564,6 +565,77 @@ uses
    ,keybinder
    {$ENDIF}
    ;
+
+
+{ Exception handler }
+
+procedure TSimbaForm.CustomExceptionHandler(Sender: TObject; E: Exception);
+
+  function DumpExceptionCallStack(E: Exception): string;
+  var
+    I: Integer;
+    Frames: PPointer;
+    Report: string;
+  begin
+    Report := 'Program exception! ' + LineEnding +
+      'Stacktrace:' + LineEnding + LineEnding;
+    if E <> nil then begin
+      Report := Report + 'Exception class: ' + E.ClassName + LineEnding +
+      'Message: ' + E.Message + LineEnding;
+    end;
+    Report := Report + BackTraceStrFunc(ExceptAddr);
+    Frames := ExceptFrames;
+    for I := 0 to ExceptFrameCount - 1 do
+      Report := Report + LineEnding + BackTraceStrFunc(Frames[I]);
+
+    result := report;
+  end;
+
+var
+  trace, logname: string;
+  LogFile: TFileStream;
+  MsgDlgRet: Integer;
+
+begin
+  writeln('');
+  Writeln('Something went wrong...');
+  writeln('');
+  trace := DumpExceptionCallStack(E);
+  trace := trace + LineEnding;
+  trace := trace + 'Simba Version: ' + IntToStr(SimbaVersion) + LineEnding;
+
+  logname := DataPath + 'log-' + DateTimeToStr(Now) + '.txt';
+
+  LogFile := TFileStream.Create(UTF8ToSys(logname), fmOpenReadWrite or
+          fmShareDenyWrite or fmShareDenyRead or fmCreate);
+
+  LogFile.Write(trace[1], Length(trace));
+  LogFile.Free;
+
+  MsgDlgRet := mrOk;
+  Application.DisableIdleHandler;
+  try
+     MsgDlgRet := MessageDlg('Something went wrong in Simba. ' +
+     'If you press OK, Simba will try to save your scripts and then close. (Recommended) ' +
+     'See ' + logname + ' for more information.' , mtError, mbOKCancel, 0);
+  finally
+    Application.EnableIdleHandler;
+  end;
+  Writeln('Something went horribly wrong. See ' + logname + ' for more information');
+
+  if MsgDlgRet = mrOK then
+  begin
+    try
+      Self.CloseTabs; // Save scripts
+      SimbaForm.Free;
+    finally
+      Writeln('Finally Free...');
+    end;
+
+    { Stop Simba }
+    Halt(1); // Error code 1
+  end;
+end;
 
 { Console handler }
 {$IFDEF MSWINDOWS}
@@ -2018,7 +2090,6 @@ begin
     LabeledEditSearch.PasteFromClipboard
   else if frmFunctionList.editSearchList.Focused then
     frmFunctionList.editSearchList.PasteFromClipboard;
-
 end;
 
 procedure TSimbaForm.ActionPauseExecute(Sender: TObject);
@@ -2504,6 +2575,9 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
     {$ENDIF}
   end;
 begin
+  // Set our own exception handler.
+  Application.OnException:= @CustomExceptionHandler;
+
   self.BeginFormUpdate;
   Randomize;
   DecimalSeparator := '.';

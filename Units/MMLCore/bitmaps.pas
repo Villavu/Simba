@@ -550,23 +550,40 @@ begin
 end;
 
 {
-
- Implementation TMufasaBitmap
-
+  Saves a bitmap to a file.
+  If Filename ends with 'png' it will save as a PNG file,
+  if Filename ends with 'jpg' or 'jpeg' it will save as JPG,
+  otherwise BMP is assumed.
 }
 
 function TMufasaBitmap.SaveToFile(const FileName: string): boolean;
 var
   rawImage : TRawImage;
   Bmp : TLazIntfImage;
+  png: TPortableNetworkGraphic;
+  jpg: TJPEGImage;
 begin
   ArrDataToRawImage(FData,Point(w,h),RawImage);
   result := true;
-//  Bmp := Graphics.TBitmap.Create;
   try
-    Bmp := TLazIntfImage.Create(RawImage,false);
-    Bmp.SaveToFile(UTF8ToSys(FileName));
-    Bmp.Free;
+    if RightStr(Filename, 3) = 'png' then
+    begin
+      png := TPortableNetworkGraphic.Create;
+      png.LoadFromRawImage(RawImage, False);
+      png.SaveToFile(UTF8ToSys(Filename));
+      png.Free;
+    end else if (RightStr(Filename, 3) = 'jpg') or (RightStr(Filename, 4) = 'jpeg') then
+    begin
+      jpg := TJPEGImage.Create;
+      jpg.LoadFromRawImage(RawImage, False);
+      jpg.SaveToFile(UTF8ToSys(Filename));
+      jpg.Free;
+    end else // Assume .bmp
+    begin
+      Bmp := TLazIntfImage.Create(RawImage,false);
+      Bmp.SaveToFile(UTF8ToSys(FileName));
+      Bmp.Free;
+    end;
   except
     result := false;
   end;
