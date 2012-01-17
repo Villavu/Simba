@@ -1,4 +1,12 @@
 program Parser;
+
+{
+    Original Code Thread: http://villavu.com/forum/showthread.php?t=35513
+    by Nielsie95
+
+    Modified by Dgby714.
+
+}
 //{$DEFINE DEV}
 
 function GetName: string;
