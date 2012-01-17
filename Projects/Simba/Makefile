@@ -95,8 +95,8 @@ ifdef distrib
 # you may not want this down below here, just don't define distrib (it makes a distribution .7z file in the top-level directory)
 
 # setup the Scripts directory correctly
-	#mkdir -p ../../Scripts
-	#mv ../../Tests ../../Scripts
+	mkdir -p ../../Scripts
+	mv ../../Tests ../../Scripts
 # no#w setup the Plugins directory
 	#mv ../../Plugins ../../Plugins_bak
 	#mkdir -p ../../Plugins
@@ -105,8 +105,8 @@ ifdef distrib
 # now undo everything we did above
 	#rm -rf ../../Plugins
 	#mv ../../Plugins_bak ../../Plugins
-	#mv ../../Scripts/Tests ../../Tests
-	#rm -rf ../../Scripts
+	mv ../../Scripts/Tests ../../Tests
+	rm -rf ../../Scripts
 endif
 
 i386-linux:
@@ -125,8 +125,8 @@ all: i386-linux x86_64-linux i386-win32 x86_64-win64
 
 all-in-one-distrib: all
 # setup the Scripts directory correctly
-	#mkdir -p ../../Scripts
-	#mv ../../Tests ../../Scripts
+	mkdir -p ../../Scripts
+	mv ../../Tests ../../Scripts
 # no#w setup the Plugins directory
 	#mv ../../Plugins ../../Plugins_bak
 	#mkdir -p ../../Plugins
@@ -135,5 +135,5 @@ all-in-one-distrib: all
 # now undo everything we did above
 	#rm -rf ../../Plugins
 	#mv ../../Plugins_bak ../../Plugins
-	#mv ../../Scripts/Tests ../../Tests
-	#rm -rf ../../Scripts
+	mv ../../Scripts/Tests ../../Tests
+	rm -rf ../../Scripts
