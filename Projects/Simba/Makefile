@@ -13,9 +13,6 @@ else
 lazaruspath := /usr/lib/lazarus/0.9.28.2
 endif
 
-# set this correctly only if you want to apply and reverse the patch automatically
-rutis_x64_patch := ../../../0-rutis-x64.patch
-
 # uncomment this or send distrib=1 via command line to build the distributable archive as well
 # if you set distrib, be sure to set the next option as well
 #distrib := 1
@@ -57,15 +54,6 @@ ifeq ($(uname_S),Linux)
 	endif
 else
 	our_target := unknown
-endif
-
-# now we need to see if we have the rutis_x64_patch or not
-# we define 'have_rutis_x64_patch' if we have it
-# we don't want to try to apply it or reverse it if it 
-# doesn't exist or the make will error out
-ifneq ($(strip $(wildcard $(rutis_x64_patch))),)
-	# the patch file exists
-	have_rutis_x64_patch := 1
 endif
 
 CC := fpc
@@ -122,40 +110,16 @@ ifdef distrib
 endif
 
 i386-linux:
-# reverse it if it has been applied
-ifdef have_rutis_x64_patch
-	-patch -R -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
 	$(MAKE) recursive_build platform="i386-linux" widgetset="gtk2" platform_flags="-Tlinux -Pi386 -dUseCThreads"
 
 x86_64-linux:
-# apply the patch
-ifdef have_rutis_x64_patch
-	-patch -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
 	$(MAKE) recursive_build platform="x86_64-linux" widgetset="gtk2" platform_flags="-Tlinux -Px86_64 -dUseCThreads"
-# reverse it
-ifdef have_rutis_x64_patch
-	-patch -R -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
 
 i386-win32:
-# reverse it if it has been applied
-ifdef have_rutis_x64_patch
-	-patch -R -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
 	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" platform_flags="-Twin32 -Pi386"
 
 x86_64-win64:
-# apply the patch
-ifdef have_rutis_x64_patch
-	-patch -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
 	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" platform_flags="-Twin64 -Px86_64"
-# reverse it
-ifdef have_rutis_x64_patch
-	-patch -R -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
 
 all: i386-linux x86_64-linux i386-win32 x86_64-win64
 
