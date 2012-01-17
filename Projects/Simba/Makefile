@@ -95,18 +95,18 @@ ifdef distrib
 # you may not want this down below here, just don't define distrib (it makes a distribution .7z file in the top-level directory)
 
 # setup the Scripts directory correctly
-	mkdir -p ../../Scripts
-	mv ../../Tests ../../Scripts
-# now setup the Plugins directory
-	mv ../../Plugins ../../Plugins_bak
-	mkdir -p ../../Plugins
-	cp $(plugins_dir)/$(platform)/* ../../Plugins/
+	#mkdir -p ../../Scripts
+	#mv ../../Tests ../../Scripts
+# no#w setup the Plugins directory
+	#mv ../../Plugins ../../Plugins_bak
+	#mkdir -p ../../Plugins
+	#cp $(plugins_dir)/$(platform)/* ../../Plugins/
 	7z a ../../$(binary).7z $(binary)$(binary_extension) ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts
 # now undo everything we did above
-	rm -rf ../../Plugins
-	mv ../../Plugins_bak ../../Plugins
-	mv ../../Scripts/Tests ../../Tests
-	rm -rf ../../Scripts
+	#rm -rf ../../Plugins
+	#mv ../../Plugins_bak ../../Plugins
+	#mv ../../Scripts/Tests ../../Tests
+	#rm -rf ../../Scripts
 endif
 
 i386-linux:
@@ -125,15 +125,15 @@ all: i386-linux x86_64-linux i386-win32 x86_64-win64
 
 all-in-one-distrib: all
 # setup the Scripts directory correctly
-	mkdir -p ../../Scripts
-	mv ../../Tests ../../Scripts
-# now setup the Plugins directory
-	mv ../../Plugins ../../Plugins_bak
-	mkdir -p ../../Plugins
-	cp $(plugins_dir)/all-in-one/* ../../Plugins/
+	#mkdir -p ../../Scripts
+	#mv ../../Tests ../../Scripts
+# no#w setup the Plugins directory
+	#mv ../../Plugins ../../Plugins_bak
+	#mkdir -p ../../Plugins
+	#cp $(plugins_dir)/all-in-one/* ../../Plugins/
 	7z a ../../Simba.all-in-one.7z Simba.i386-* Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts
 # now undo everything we did above
-	rm -rf ../../Plugins
-	mv ../../Plugins_bak ../../Plugins
-	mv ../../Scripts/Tests ../../Tests
-	rm -rf ../../Scripts
+	#rm -rf ../../Plugins
+	#mv ../../Plugins_bak ../../Plugins
+	#mv ../../Scripts/Tests ../../Tests
+	#rm -rf ../../Scripts
