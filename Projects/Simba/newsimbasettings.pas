@@ -176,6 +176,18 @@ type
       ShowAutomatically: TBooleanSetting;
     end;
 
+    TMainForm = class(TSection)
+      Position: TStringSetting;
+      NormalSize: TStringSetting;
+      State: TStringSetting;
+      FunctionListShown: TBooleanSetting;
+      ConsoleVisible: TBooleanSetting;
+    end;
+
+    TLastConfig = class(TSection)
+      MainForm: TMainForm;
+    end;
+
     TSimbaSettings = class(TSection)
       constructor Create;
 
@@ -198,6 +210,8 @@ type
       ColourPicker: TColourPickerSection;
       CodeHints: TCodeHintsSection;
       CodeCompletion: TCodeCompletionSection;
+
+      LastConfig: TLastConfig;
 
       MMLSettings: TMMLSettings;
       Oops: Boolean;
@@ -360,6 +374,15 @@ begin
 
   CodeCompletion := AddChild(TCodeCompletionSection.Create()) as TCodeCompletionSection;
   CodeCompletion.ShowAutomatically := CodeCompletion.AddChild(TBooleanSetting.Create(ssCodeCompletionShowAutomatically)) as TBooleanSetting;
+
+  LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
+  LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;
+  LastConfig.MainForm.Position := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormPosition)) as TStringSetting;
+  LastConfig.MainForm.NormalSize := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormNormalSize)) as TStringSetting;
+  LastConfig.MainForm.State := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormState)) as TStringSetting;
+  LastConfig.MainForm.FunctionListShown := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
+  LastConfig.MainForm.ConsoleVisible := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
+
 end;
 
 procedure TSimbaSettings.Save(SettingsFileName: String);

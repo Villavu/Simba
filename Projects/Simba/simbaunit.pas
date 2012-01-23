@@ -878,7 +878,6 @@ begin
        {$ELSE}ExpandFileName({$ENDIF}
        DataPath + 'default.simba');
   Result := SimbaSettings.SourceEditor.DefScriptPath.GetDefValue(s);
-  //Result := LoadSettingDef(ssSourceEditorDefScriptPath, {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'default.simba'));
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -887,8 +886,6 @@ function TSimbaForm.GetScriptPath: string;
 begin
   Result := SimbaSettings.Scripts.Path.GetDefValue({$IFNDEF
       NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DocPath + 'Scripts' + DS));
-  {Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssScriptsPath, {$IFNDEF
-      NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DocPath + 'Scripts' + DS))); }
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -1100,7 +1097,6 @@ begin
   UpdateTimer.Interval := MaxInt;
   FontUpdate;
   chk := SimbaSettings.Updater.CheckForUpdates.GetDefValue(True);
-//  chk := LowerCase(LoadSettingDef(ssCheckUpdate, 'True'));
 
   if not chk then
     Exit;
@@ -1117,7 +1113,6 @@ begin
     mDebugLn('Latest Simba Version: ' + IntToStr(LatestVersion));
   end;
   time := SimbaSettings.Updater.CheckEveryXMinutes.GetDefValue(30);
-  //time := StrToIntDef(LoadSettingDef(ssCheckUpdateMinutes, '30'),30);
 
   UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
@@ -1265,7 +1260,6 @@ begin
     if TabIndex = OldIndex then
     begin;
       if SimbaSettings.Tab.OpenNextOnClose.GetDefValue(False) = False then
-//      if lowercase(LoadSettingDef(ssTabsOpenNextOnClose, 'False')) = 'false' then
         OldIndex := LastTab //We are closing the 'current'  tab, lets go back in history
       else
         OldIndex := Min(Tabs.Count - 1,OldIndex + 1);
@@ -1476,95 +1470,67 @@ var
   PluginsPath{$IFDEF USE_EXTENSIONS}, ExtensionsPath{$ENDIF}: string;
 begin
   SimbaSettings.Updater.CheckForUpdates.Value := True;
-  //CreateSetting(ssCheckUpdate, 'True');
 
   SimbaSettings.Updater.CheckEveryXMinutes.Value := 30;
-  //CreateSetting(ssCheckUpdateMinutes, '30');
 
   SimbaSettings.Interpreter._Type.Value := interp_PS;
-  //CreateSetting(ssInterpreterType, '0');
 
   SimbaSettings.Fonts.LoadOnStartUp.Value := True;
-  //CreateSetting(ssLoadFontsOnStart, 'True');
   SimbaSettings.Fonts.Version.Value := -1;
-  //CreateSetting(ssFontsVersion, '-1');
 
   SimbaSettings.Tab.OpenNextOnClose.Value := False;
-  //CreateSetting(ssTabsOpenNextOnClose, 'False');
 
   SimbaSettings.Tab.OpenScriptInNewTab.Value := True;
-  //CreateSetting(ssTabsOpenScriptInNewTab, 'True');
 
   SimbaSettings.Tab.CheckBeforeOpen.Value := True;
-  //CreateSetting(ssTabsCheckBeforeOpen, 'True');
 
   SimbaSettings.ColourPicker.ShowHistoryOnPick.Value := True;
-  //CreateSetting(ssColourPickerShowHistoryOnPick, 'True');
 
   SimbaSettings.General.MaxRecentFiles.Value := 10;
-  //CreateSetting(ssMaxRecentFiles, '10');
 
-  // TODO
-  CreateSetting(ssMainFormNormalSize, '739:555');
+  SimbaSettings.LastConfig.MainForm.NormalSize.Value := '739:555';
 
   SimbaSettings.FunctionList.ShowOnStart.Value := True;
-  //CreateSetting(ssFunctionListShowOnStart, 'True');
 
   SimbaSettings.CodeHints.ShowAutomatically.Value := True;
-  //CreateSetting(ssCodeHintsShowAutomatically, 'True');
 
   SimbaSettings.CodeCompletion.ShowAutomatically.Value := True;
-  //CreateSetting(ssCodeCompletionShowAutomatically, 'True');
 
   SimbaSettings.SourceEditor.LazColors.Value := True;
-  //CreateSetting(ssSourceEditorLazColors, 'True');
 
   {$IFDEF USE_EXTENSIONS}
   SimbaSettings.Extensions.FileExtension.Value := 'sex';
-  //CreateSetting(ssExtensionsFileExtension, 'sex');
   {$ENDIF}
 
   SimbaSettings.Updater.RemoteLink.Value := SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};
-  //CreateSetting(ssUpdaterLink, SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF});
 
   SimbaSettings.Updater.RemoteVersionLink.Value := SimbaURL + 'Version';
-  //CreateSetting(ssUpdaterVersionLink, SimbaURL + 'Version');
 
   SimbaSettings.Fonts.VersionLink.Value := FontURL + 'Version';
-  //CreateSetting(ssFontsVersionLink, FontURL + 'Version');
 
   SimbaSettings.Fonts.UpdateLink.Value := FontURL + 'Fonts.tar.bz2';
-  //CreateSetting(ssFontsLink, FontURL + 'Fonts.tar.bz2');
 
   SimbaSettings.News.URL.Value := 'http://simba.villavu.com/bin/news';
-  //CreateSetting(ssNewsLink, 'http://simba.villavu.com/bin/news');
 
   {Creates the paths and returns the path}
   SimbaSettings.Plugins.Path.Value := ExpandFileName(DataPath + 'Plugins' + DS);
-  //PluginsPath := CreateSetting(ssPluginsPath, ExpandFileName(DataPath + 'Plugins' + DS));
 
   {$IFDEF USE_EXTENSIONS}
   SimbaSettings.Extensions.Path.Value := ExpandFileName(DataPath + 'Extensions' + DS);
-  {ExtensionsPath := CreateSetting(ssExtensionsPath,
-      ExpandFileName(DataPath + 'Extensions' + DS)); }
 
   // TODO
   CreateSetting(ssExtensionsCount, '0');
   {$ENDIF}
-  // TODO
-  CreateSetting(ssMainFormPosition, '');
 
-  // TODO
-  CreateSetting(ssMainFormState, 'Normal');
+  SimbaSettings.LastConfig.MainForm.Position.Value := '';
+  SimbaSettings.LastConfig.MainForm.State.Value := 'normal';
 
   {$ifdef MSWindows}
-  // TODO
-  CreateSetting(ssConsoleVisible, 'False');
+  SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value := False;
   ShowConsole(False);
   {$endif}
 
   SimbaSettings.Tray.AlwaysVisible.Value := True;
-  //CreateSetting(ssTrayAlwaysVisible, 'True');
 
   if not DirectoryExists(IncludePath) then
     CreateDir(IncludePath);
@@ -1599,7 +1565,7 @@ var
   i,ii : integer;
 begin
   self.BeginFormUpdate;
-  str := LoadSettingDef(ssMainFormPosition, '');
+  str := SimbaSettings.LastConfig.MainForm.Position.GetDefValue('');
   if str <> '' then
   begin;
     Data := Explode(':',str);
@@ -1610,7 +1576,7 @@ begin
     Self.Width:= StrToIntDef(Data[2],self.width);
     Self.Height:= StrToIntDef(Data[3],self.height);
   end;
-  str := lowercase(LoadSettingDef(ssMainFormState, 'Normal'));
+  str := lowercase(SimbaSettings.LastConfig.MainForm.State.GetDefValue('normal'));
   if str = 'maximized' then
     self.windowstate := wsMaximized
   else
@@ -1626,23 +1592,19 @@ begin
         AddRecentFile(str);
     end;
   end;
-  str := LowerCase(LoadSettingDef(ssFunctionListShowOnStart, 'True'));
-  str2 := lowercase(LoadSettingDef(ssFunctionListShown, ''));
-  if (str = 'true') or (str2 = 'true') then
+{  str := LowerCase(LoadSettingDef(ssFunctionListShowOnStart, 'True'));
+  str2 := lowercase(LoadSettingDef(ssFunctionListShown, '')); }
+  if SimbaSettings.FunctionList.ShowOnStart.GetDefValue(True) or SimbaSettings.LastConfig.MainForm.FunctionListShown.GetDefValue(True) then
+  { if (str = 'true') or (str2 = 'true') then }
     FunctionListShown(True)
   else
     FunctionListShown(false);
 
   {$ifdef MSWindows}
-  str := LowerCase(LoadSettingDef(ssConsoleVisible, 'True'));
-  if str = 'true' then
-    ShowConsole(True)
-  else
-    ShowConsole(false);
+  ShowConsole(SimbaSettings.LastConfig.MainForm.ConsoleVisible.GetDefValue(True));
   {$endif}
 
-  if SimbaSettings.Tray.AlwaysVisible.GetDefValue(True) <> True then
-  //if Lowercase(LoadSettingDef(ssTrayAlwaysVisible, 'True')) <> 'true' then
+  if not SimbaSettings.Tray.AlwaysVisible.GetDefValue(True) then
   begin
     MTrayIcon.Hide;
     Writeln('Hiding tray.'); // TODO REMOVE?
@@ -1661,12 +1623,12 @@ begin
   with SimbaSettings.MMLSettings do
   begin
     if Self.WindowState = wsMaximized then
-      SetSetting(ssMainFormState, 'maximized')
+      SimbaSettings.LastConfig.MainForm.State.Value := 'maximized'
     else
     begin; //Only save the form position if its not maximized.
-      SetSetting(ssMainFormState, 'normal');
+      SimbaSettings.LastConfig.MainForm.State.Value := 'normal';
       Data := ConvArr([inttostr(Self.left),inttostr(self.top),inttostr(self.width),inttostr(self.height)]);
-      SetSetting(ssMainFormPosition, Implode(':',Data ));
+      SimbaSettings.LastConfig.MainForm.Position.Value := Implode(':', Data);
     end;
     DeleteKey(ssRecentFiles);
     if RecentFiles.Count > 0 then
@@ -1676,15 +1638,9 @@ begin
       for i := 0 to RecentFiles.Count - 1 do
         SetSetting(ssRecentFileN + inttostr(i),RecentFiles[i]);
     end;
-    if MenuItemFunctionList.Checked then
-      SetSetting(ssFunctionListShown, 'True')
-    else
-      SetSetting(ssFunctionListShown, 'False');
+    SimbaSettings.LastConfig.MainForm.FunctionListShown.Value := MenuItemFunctionList.Checked;
     {$ifdef MSWindows}
-    if ConsoleVisible then
-      SetSetting(ssConsoleVisible, 'True')
-    else
-      SetSetting(ssConsoleVisible, 'False');
+    SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value := ConsoleVisible;
     {$endif}
     {$IFDEF USE_EXTENSIONS}
     SetSetting(ssExtensionsCount, inttostr(ExtManager.Extensions.Count));
@@ -1747,10 +1703,8 @@ begin
   SetSetting(ssExtensionsCount, inttostr(extCount));
 
   str := SimbaSettings.Extensions.Path.GetDefValue(ExpandFileName(DataPath + 'Extensions' + DS));
-  //str := LoadSettingDef(ssExtensionsPath, ExpandFileName(DataPath + 'Extensions' + DS));
 
   str2 := SimbaSettings.Extensions.FileExtension.GetDefValue('sex');
-  //str2 := LoadSettingDef(ssExtensionsFileExtension, 'sex');
 
   ExtManager.LoadPSExtensionsDir(str,str2);
 {$ELSE}
@@ -1764,7 +1718,6 @@ var
   Len,i : integer;
 begin
   MaxRecentFiles := SimbaSettings.General.MaxRecentFiles.GetDefValue(10);
-  //MaxRecentFiles:= StrToIntDef(LoadSettingDef(ssMaxRecentFiles, '10'), 10);
   i := RecentFiles.IndexOf(filename);
   if i <> -1 then
     RecentFiles.Delete(i);
@@ -1857,7 +1810,6 @@ begin
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
   loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnStartUp.GetDefValue(True);
-  //loadFontsOnScriptStart := (lowercase(LoadSettingDef(ssLoadFontsOnStart, 'True')) = 'true');
 
   if (loadFontsOnScriptStart) then
   begin
@@ -2137,7 +2089,7 @@ var
   SizeStr : string;
   Data : TStringArray;
 begin
-  SizeStr := LoadSettingDef(ssMainFormNormalSize, '739:555');
+  SizeStr := SimbaSettings.LastConfig.MainForm.NormalSize.GetDefValue('739:555');
   Data := Explode(':',SizeStr);
   if length(Data) = 2 then
   begin
@@ -3092,7 +3044,6 @@ procedure TSimbaForm.MTrayIconClick(Sender: TObject);
 begin
   self.Show;
   if not SimbaSettings.Tray.AlwaysVisible.GetDefValue(True) then
-  //if Lowercase(LoadSettingDef(ssTrayAlwaysVisible, 'True')) <> 'true' then
     MTrayIcon.Hide;
   if Self.CanFocus then
     self.SetFocus;
@@ -3102,9 +3053,7 @@ function TSimbaForm.GetSimbaNews: String;
 var
   t: TDownloadThread;
 begin
-  t := TDownloadThread.Create(SimbaSettings.News.URL.GetDefValue('http://Simba.villavu.com/bin/news'), @Result);
-  {t := TDownloadThread.Create(LoadSettingDef(ssNewsLink, 'http://Simba.villavu.com/bin/news'),
-                              @Result);}
+  t := TDownloadThread.Create(SimbaSettings.News.URL.GetDefValue('http://simba.villavu.com/bin/news'), @Result);
   t.Start;
   while not t.done do
   begin
@@ -3163,10 +3112,8 @@ begin
 
   { TODO: This should be no problem if the form is hidden? }
   if SimbaSettings.ColourPicker.AddToHistoryOnPick.GetDefValue(True) then
-//  if lowercase(LoadSettingDef(ssColourPickerAddToHistoryOnPick, 'True')) = 'true' then
     ColourHistoryForm.AddColObj(cobj, true);
 
-  //if lowercase(LoadSettingDef(ssColourPickerShowHistoryOnPick, 'True')) = 'true' then
   if SimbaSettings.ColourPicker.ShowHistoryOnPick.GetDefValue(True) then
     ColourHistoryForm.Show;
 
@@ -3288,13 +3235,11 @@ end;
 function TSimbaForm.GetShowParamHintAuto: boolean;
 begin
   Result := SimbaSettings.CodeHints.ShowAutomatically.GetDefValue(True);
-//  Result := LowerCase(LoadSettingDef(ssCodeHintsShowAutomatically, 'True')) = 'true';
 end;
 
 function TSimbaForm.GetShowCodeCompletionAuto: boolean;
 begin
   Result := SimbaSettings.CodeHints.ShowAutomatically.GetDefValue(True);
-//  Result := LowerCase(LoadSettingDef(ssCodeCompletionShowAutomatically, 'True')) = 'true';
 end;
 
 procedure TSimbaForm.SetFontPath(const AValue: String);
@@ -3307,9 +3252,6 @@ begin
   Result := IncludeTrailingPathDelimiter(SimbaSettings.Fonts.Path.GetDefValue(
       {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Fonts' + DS)));
 
-{  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssFontsPath,
-      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Fonts' + DS)));
-      }
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -3319,10 +3261,7 @@ function TSimbaForm.GetExtPath: string;
 begin
   Result := IncludeTrailingPathDelimiter(SimbaSettings.Extensions.Path.GetDefValue(
   {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Extensions' + DS)));
-  {
-  Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssExtensionsPath,
-      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Extensions' + DS)));
-  }
+
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -3331,7 +3270,6 @@ end;
 function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
 begin
   if SimbaSettings.SourceEditor.LazColors.GetDefValue(True) then
-//  if lowercase(LoadSettingDef(ssSourceEditorLazColors, 'True')) = 'true' then
     result := LazHighlighter
   else
     result := SCARHighlighter;
@@ -3341,8 +3279,6 @@ function TSimbaForm.GetIncludePath: String;
 begin
   Result := IncludeTrailingPathDelimiter(SimbaSettings.Includes.Path.GetDefValue(
         {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Includes' + DS)));
-  {Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssIncludesPath,
-      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Includes' + DS)));}
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -3351,8 +3287,6 @@ function TSimbaForm.GetPluginPath: string;
 begin
   Result := IncludeTrailingPathDelimiter(SimbaSettings.Plugins.Path.GetDefValue(
       {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Plugins' + DS)));
-  {Result := IncludeTrailingPathDelimiter(LoadSettingDef(ssPluginsPath,
-      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Plugins' + DS)));}
   if (not (IsAbsolute(Result))) then
     Result := AppPath + Result;
 end;
@@ -3473,15 +3407,12 @@ begin
   UpdatingFonts := True;
 
   CurrVersion := SimbaSettings.Fonts.Version.GetDefValue(-1);
-  //CurrVersion := StrToIntDef(LoadSettingDef(ssFontsVersion, '-1'), -1);
   LatestVersion := SimbaUpdateForm.GetLatestFontVersion;
   if LatestVersion > CurrVersion then
   begin;
     formWriteln(format('New fonts available. Current version: %d. Latest version: %d',[CurrVersion,LatestVersion]));
     FontDownload := TDownloadThread.Create(SimbaSettings.Fonts.UpdateLink.GetDefValue(FontURL + 'Fonts.tar.bz2'),
                                            @Fonts);
-   { FontDownload := TDownloadThread.Create(LoadSettingDef(ssFontsLink, FontURL + 'Fonts.tar.bz2'),
-                                           @Fonts); }
     FontDownload.Start;
     while FontDownload.Done = false do
       Idler;
@@ -3670,7 +3601,6 @@ var
 begin
   Result := False;
   OpenInNewTab := SimbaSettings.Tab.OpenScriptInNewTab.GetDefValue(True);
-//  OpenInNewTab:= (LowerCase(LoadSettingDef(ssTabsOpenScriptInNewTab, 'True')) = 'true');
   if not OpenInNewTab then
     if CanExitOrOpen = false then
       Exit;
@@ -3712,12 +3642,10 @@ begin
     OpenInNewTab := true
   else
     OpenInNewTab := SimbaSettings.Tab.OpenScriptInNewTab.GetDefValue(True);
-//    OpenInNewTab:= (LowerCase(LoadSettingDef(ssTabsOpenScriptInNewTab,'True')) = 'true');
   if CheckOtherTabs then
     CheckTabsFirst := True
   else
     CheckTabsFirst := SimbaSettings.Tab.CheckBeforeOpen.GetDefValue(True);
-//    CheckTabsFirst := (Lowercase(LoadSettingDef(ssTabsCheckBeforeOpen, 'True')) = 'true');
   if FileExistsUTF8(FileName) then
   begin;
     if CheckTabsFirst then
