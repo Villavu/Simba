@@ -423,7 +423,6 @@ type
     procedure HandleOpenFileData;
     procedure HandleWriteFileData;
     procedure HandleScriptStartData;
-    function GetInterpreter: Integer;
     function GetDefScriptPath: string;
     function GetScriptPath : string;
     {$IFDEF USE_EXTENSIONS}function GetExtPath: string;{$ENDIF}
@@ -439,7 +438,7 @@ type
     {$IFDEF USE_EXTENSIONS}procedure SetExtPath(const AValue: string);{$ENDIF}
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
-    procedure SetInterpreter(const AValue: Integer);
+    function SetInterpreter(obj: TObject): Boolean;
     procedure SetPluginPath(const AValue: string);
     procedure SetScriptPath(const AValue: string);
     procedure SetShowParamHintAuto(const AValue: boolean);
@@ -451,6 +450,7 @@ type
     procedure FontUpdate;
     procedure CCFillCore;
     procedure CustomExceptionHandler(Sender: TObject; E: Exception);
+    procedure RegisterSettingsOnChanges;
   public
     DebugStream: String;
     SearchString : string;
@@ -506,7 +506,6 @@ type
     procedure HandleParameters;
     procedure HandleConfigParameter;
     procedure OnSaveScript(const Filename : string);
-    property Interpreter : Integer read GetInterpreter  write SetInterpreter;
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
     property IncludePath : String read GetIncludePath write SetIncludePath;
@@ -815,7 +814,7 @@ begin
   ActionRUTIS.Checked := False;
   ActionCPascal.Checked := False;
   ActionLape.Checked := False;
-  case Interpreter of
+  case SimbaSettings.Interpreter._Type.Value of
     interp_PS: ActionPascalScript.Checked := True;
     interp_CP: ActionCPascal.Checked := True;
     interp_RT: ActionRUTIS.Checked := True;
@@ -842,18 +841,6 @@ begin
 {$ELSE}
 begin
 {$ENDIF}
-end;
-
-function TSimbaForm.GetInterpreter: Integer;
-begin
-  Result := SimbaSettings.Interpreter._Type.GetDefValue(0);
-
-  if (result < 0) or (result > 3) then
-  begin
-    writeln('Resetting to valid value');
-    SetInterpreter(0);
-    Result := 0;
-  end;
 end;
 
 function IsAbsolute(const filename: string): boolean;
@@ -1761,13 +1748,13 @@ begin
   CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
 
   try
-    case Interpreter of
+    case SimbaSettings.Interpreter._Type.Value of
       interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, PluginPath);
       {$IFDEF USE_RUTIS}interp_RT: Thread := TRTThread.Create(True, @CurrentSyncInfo, PluginPath);{$ENDIF}
       {$IFDEF USE_CPASCAL}interp_CP: Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginPath);{$ENDIF}
       {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, PluginPath);{$ENDIF}
       else
-        raise Exception.CreateFmt('Unknown Interpreter %d!', [Interpreter]);
+        raise Exception.CreateFmt('Unknown Interpreter %d!', [SimbaSettings.Interpreter._Type.Value]);
     end;
   except
     on E: Exception do
@@ -1908,7 +1895,7 @@ function TSimbaForm.DefaultScript: string;
 begin
   Result := '';
 
-  case Interpreter of
+  case SimbaSettings.Interpreter._Type.Value of
     interp_PS, interp_LP: begin
                   Result := 'program new;' + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
                   if FileExistsUTF8(SimbaForm.DefScriptPath) then
@@ -1984,7 +1971,7 @@ end;
 procedure TSimbaForm.ActionCPascalExecute(Sender: TObject);
 begin
   {$IFDEF USE_CPASCAL}
-  Interpreter := interp_CP;
+  SimbaSettings.Interpreter._Type.Value := interp_CP;
   {$ENDIF}
 end;
 
@@ -2061,7 +2048,7 @@ end;
 
 procedure TSimbaForm.ActionLapeExecute(Sender: TObject);
 begin
-  {$IFDEF USE_LAPE}Interpreter := interp_LP;{$ENDIF}
+  {$IFDEF USE_LAPE}SimbaSettings.Interpreter._Type.Value := interp_LP;{$ENDIF}
 end;
 
 procedure TSimbaForm.ActionClearDebugExecute(Sender: TObject);
@@ -2105,7 +2092,7 @@ end;
 
 procedure TSimbaForm.ActionPascalScriptExecute(Sender: TObject);
 begin
-  Interpreter := interp_PS;
+  SimbaSettings.Interpreter._Type.Value := interp_PS;
 end;
 
 procedure TSimbaForm.ActionPasteExecute(Sender: TObject);
@@ -2148,7 +2135,7 @@ end;
 procedure TSimbaForm.ActionRUTISExecute(Sender: TObject);
 begin
   {$IFDEF USE_RUTIS}
-  Interpreter := interp_RT;
+  SimbaSettings.Interpreter._Type.Value := interp_RT;
   {$ENDIF}
 end;
 
@@ -2516,7 +2503,7 @@ var
   Stream: TMemoryStream;
   Buffer: TCodeInsight;
 begin
-  if (Interpreter <> interp_PS) then
+  if (SimbaSettings.Interpreter._Type.Value <> interp_PS) then
     Exit;
 
   if UpdatingFonts then
@@ -2667,6 +2654,7 @@ begin
     Self.CreateDefaultEnvironment;
     FillThread.StartWait := 250;
   end;
+  RegisterSettingsOnChanges;
 
   //Show close buttons @ tabs
   PageControl1.Options:=PageControl1.Options+[nboShowCloseButtons];
@@ -3292,17 +3280,27 @@ begin
   SimbaSettings.Includes.Path.Value := AValue;
 end;
 
-procedure TSimbaForm.SetInterpreter(const AValue: Integer);
+function TSimbaForm.SetInterpreter(obj: TObject): Boolean;
 var
   UpdateCurrScript: Boolean;
+  Interpreter: Integer;
+
 begin
+  writeln('Interpreter onChange');
   UpdateCurrScript := false;
   if (CurrScript <> nil) then
     with CurrScript.Synedit do
       if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
         UpdateCurrScript := true;
 
-  SimbaSettings.Interpreter._Type.Value := AVAlue;
+  Interpreter := TIntegerSetting(obj).Value;
+  SimbaSettings.Interpreter._Type.Value;
+
+  if (Interpreter < 0) or (Interpreter> 3) then
+  begin
+    writeln('Resetting interpreter to valid value');
+    SimbaSettings.Interpreter._Type.Value := 0;
+  end;
 
   UpdateInterpreter;
 
@@ -3379,6 +3377,11 @@ function TSimbaForm.SettingExists(const key: string): boolean;
 begin
   writeln('DEPRECATED SettingExists call for: ' + key);
   result := SimbaSettings.MMLSettings.KeyExists(key);
+end;
+
+procedure TSimbaForm.RegisterSettingsOnChanges;
+begin
+  SimbaSettings.Interpreter._Type.OnChange := @SetInterpreter;
 end;
 
 

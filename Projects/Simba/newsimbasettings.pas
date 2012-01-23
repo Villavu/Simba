@@ -6,11 +6,10 @@ interface
 
 {
   TODO:
-       - onChange is not yet used.
+       - Add value constraints to each setting. Integer would have: min, max.
+       String would have: regex to match?
        - Figure out how to support some dynamic extensions. (Perhaps just make
            those functions use the MMLSettings API? they are already, kinda)
-       - Rename the simbasettings unit to something else, remove some of the
-       loading code from it and move it to a more suitable place
 }
 
 uses
@@ -20,7 +19,7 @@ uses
   ;
 
 type
-    TOnChangeSettings = function (obj: TObject): Boolean;
+    TOnChangeSettings = function (obj: TObject): Boolean of object;
 
     TSetting = class(TObject)
       procedure Save(MMLSettings: TMMLSettings); virtual; abstract;
@@ -435,7 +434,7 @@ end;
 procedure TIntegerSetting.SetValue(val: Integer);
 begin
   set_value := True;
-  FValue := val
+  FValue := val;
   if Assigned(OnChange) then
     OnChange(Self);
 end;
@@ -508,7 +507,7 @@ end;
 procedure TStringSetting.SetValue(val: String);
 begin
   set_value := True;
-  FValue := val
+  FValue := val;
   if Assigned(OnChange) then
     OnChange(Self);
 end;
@@ -574,7 +573,7 @@ procedure TBooleanSetting.SetValue(val: Boolean);
 begin
   //writeln('Setting ' + APath + ' to ' + BoolToStr(val));
   set_value := True;
-  FValue := val
+  FValue := val;
   if Assigned(OnChange) then
     OnChange(Self);
 end;
