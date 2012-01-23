@@ -1519,7 +1519,7 @@ begin
   {$ENDIF}
 
   SimbaSettings.LastConfig.MainForm.Position.Value := '';
-  SimbaSettings.LastConfig.MainForm.State.Value := 'Normal';
+  SimbaSettings.LastConfig.MainForm.State.Value := 'normal';
 
   {$ifdef MSWindows}
   SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value := False;
@@ -1619,7 +1619,7 @@ begin
   with SimbaSettings.MMLSettings do
   begin
     if Self.WindowState = wsMaximized then
-      SimbaSettings.LastConfig.MainForm.State.Value := 'maximized';
+      SimbaSettings.LastConfig.MainForm.State.Value := 'maximized'
     else
     begin; //Only save the form position if its not maximized.
       SimbaSettings.LastConfig.MainForm.State.Value := 'normal';
