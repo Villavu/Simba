@@ -6,9 +6,10 @@ interface
 
 {
   TODO:
-       - Add value constraints to each setting. Integer would have: min, max.
+       -  Add value constraints to each setting. Integer would have: min, max.
        String would have: regex to match?
-       - Figure out how to support some dynamic extensions. (Perhaps just make
+       -  Use onChange return value?
+       -  Figure out how to support some dynamic extensions. (Perhaps just make
            those functions use the MMLSettings API? they are already, kinda)
 }
 
