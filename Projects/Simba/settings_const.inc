@@ -30,6 +30,7 @@ ssFontsPath = ssSettings + ssFonts + 'Path';
 
 ssIncludesPath = ssSettings + ssIncludes + 'Path';
 ssInterpreterType = ssSettings + ssInterpreter + 'Type';
+ssInterpreterAllowSysCalls = ssSettings + ssInterpreter + 'AllowSysCalls';
 
 ssTabsOpenNextOnClose = ssSettings + ssTabs + 'OpenNextOnClose';
 ssTabsOpenScriptInNewTab = ssSettings + ssTabs + 'OpenScriptInNewTab';
