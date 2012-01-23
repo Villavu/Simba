@@ -504,6 +504,7 @@ type
     procedure AddRecentFile(const filename : string);
     procedure InitializeTMThread(out Thread : TMThread);
     procedure HandleParameters;
+    procedure HandleConfigParameter;
     procedure OnSaveScript(const Filename : string);
     property Interpreter : Integer read GetInterpreter  write SetInterpreter;
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
@@ -1882,6 +1883,22 @@ begin
   Thread.OpenFileEvent:=@ThreadOpenFileEvent;
 end;
 
+procedure TSimbaForm.HandleConfigParameter;
+var
+  ErrorMsg : string;
+begin
+  ErrorMsg := Application.CheckOptions('c:o:r', ['config:', 'open:', 'run']);
+  if (ErrorMsg = '') then
+  begin
+    if Application.HasOption('c', 'config') then
+    begin
+      WriteLn('Using alternative config file: ' + Application.GetOptionValue('c', 'config') + '.');
+      SimbaSettingsFile := Application.GetOptionValue('c', 'config');
+    end;
+  end else
+    mDebugLn('ERROR IN COMMAND LINE ARGS: ' + ErrorMsg)
+end;
+
 procedure TSimbaForm.HandleParameters;
 var
   DoRun : Boolean;
@@ -1901,16 +1918,8 @@ begin
     ErrorMsg := Application.CheckOptions('c:o:r', ['config:', 'open:', 'run']);
     if (ErrorMsg = '') then
     begin
-      if Application.HasOption('c', 'config') then
-      begin
-        WriteLn('Using alternative config file: ' + Application.GetOptionValue('c', 'config') + '.');
-        SimbaSettingsFile := Application.GetOptionValue('c', 'config');
-
-        if (FileExists(SimbaSettingsFile)) then
-          LoadFormSettings
-        else
-          CreateDefaultEnvironment;
-      end;
+      { Config Params are handled in HandleConfigParameter, as we need to check
+        those earlier }
 
       if Application.HasOption('o', 'open') then
       begin
@@ -2689,6 +2698,7 @@ begin
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
 
+  HandleConfigParameter;
   if FileExistsUTF8(SimbaSettingsFile) then
   begin
     CreateSimbaSettings(SimbaSettingsFile);
@@ -2740,7 +2750,6 @@ begin
   FirstRun := True;//Our next run is the first run.
 
   HandleParameters; { Handle command line parameters }
-
   TT_Update.Visible:= false;
 
   //Load the extensions
@@ -2756,7 +2765,7 @@ begin
 
   // TODO TEST
   if SimbaSettings.Oops then
-    formWriteln('WARNING: No permissions to write to settings.xml!');
+    formWriteln('WARNING: No permissions to write to ' + SimbaSettingsFile);
   
   //Fill the codeinsight buffer
   FillThread.Start;
