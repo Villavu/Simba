@@ -56,6 +56,10 @@ const
   m_ShowMessage = 8; //Data = PChar
   m_MessageBox = 9; //Data =  PMessageBoxData
   m_MessageDlg = 10; //Data = PMessageDlg
+
+  {$I settings_const.inc}
+  {$WARNING REMOVEME}
+
 type
     { TMMLPSThread }
     TCallBackData = record
@@ -847,7 +851,7 @@ begin
   SIRegister_Dialogs(x);
   if self.settings <> nil then
   begin
-    if lowercase(self.settings.GetKeyValueDefLoad('Settings/Interpreter/AllowSysCalls',
+    if lowercase(self.settings.GetKeyValueDefLoad(ssInterpreterAllowSysCalls,
       'False', Self.SimbaSettingsFile)) = 'true' then
     begin
       { Can remove later }

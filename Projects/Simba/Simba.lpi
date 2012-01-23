@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="51">
+    <Units Count="52">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -205,11 +205,11 @@
         <UnitName Value="updateform"/>
       </Unit28>
       <Unit29>
-        <Filename Value="simbasettings.pas"/>
+        <Filename Value="simbasettingsold.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsForm"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="Simbasettings"/>
+        <UnitName Value="Simbasettingsold"/>
       </Unit29>
       <Unit30>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/tpa.inc"/>
@@ -320,6 +320,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ScriptManager"/>
       </Unit50>
+      <Unit51>
+        <Filename Value="newsimbasettings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="newsimbasettings"/>
+      </Unit51>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

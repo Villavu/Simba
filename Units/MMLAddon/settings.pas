@@ -23,7 +23,7 @@
 
 unit settings;
 
-{$mode objfpc}{$M+}
+{$mode objfpc}{$M+}{$H+}
 
 interface
 
@@ -583,7 +583,9 @@ begin
        TSettingData(N.Data).Free;
      N.Data := TSettingData.Create;
      TSettingData(N.Data).Val := KeyValue;
+
      mDebugLn('Setting ' + KeyName + ' to ' + KeyValue);
+
      N := N.GetNextSibling;
    end;
    result := true;
