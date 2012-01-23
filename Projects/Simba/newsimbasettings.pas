@@ -27,8 +27,6 @@ type
       procedure Load(MMLSettings: TMMLSettings); virtual; abstract;
 
       destructor Destroy; virtual; abstract;
-    public
-      onChange: TOnChangeSettings;
     end;
 
     TSettingsArray = Array of TSetting;
@@ -40,6 +38,8 @@ type
     public
       APath: String;
       set_value: Boolean;
+
+      onChange: TOnChangeSettings;
     end;
 
     TIntegerSetting = class(TValueSetting)
@@ -436,6 +436,8 @@ procedure TIntegerSetting.SetValue(val: Integer);
 begin
   set_value := True;
   FValue := val
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 procedure TIntegerSetting.Load(MMLSettings: TMMLSettings);
@@ -505,9 +507,10 @@ end;
 
 procedure TStringSetting.SetValue(val: String);
 begin
-  //writeln('Setting ' + APath + ' to ' + val);
   set_value := True;
   FValue := val
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 procedure TStringSetting.Save(MMLSettings: TMMLSettings);
@@ -572,6 +575,8 @@ begin
   //writeln('Setting ' + APath + ' to ' + BoolToStr(val));
   set_value := True;
   FValue := val
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 procedure TBooleanSetting.Save(MMLSettings: TMMLSettings);
