@@ -3294,7 +3294,6 @@ begin
         UpdateCurrScript := true;
 
   Interpreter := TIntegerSetting(obj).Value;
-  SimbaSettings.Interpreter._Type.Value;
 
   if (Interpreter < 0) or (Interpreter> 3) then
   begin
