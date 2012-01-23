@@ -20,7 +20,7 @@
 
     Settings form for Simba
 }
-unit Simbasettings;
+unit Simbasettingsold;
 
 {$mode objfpc}{$H+}
 
@@ -43,8 +43,9 @@ type
     SettingsFormButtonCancel: TButton;
     SettingsFormButtonOK: TButton;
     SettingsTreeView: TTreeView;
-    Settings: TMMLSettings;
     procedure DeleteSelected(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormShow(Sender: TObject);
     procedure MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure OnKeyPress(Sender: TObject; var Key: char);
@@ -57,7 +58,9 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure SettingsTreeViewDblClick(Sender: TObject);
-    function FixSettingsFile: Boolean;
+  private
+    Settings: TMMLSettings;
+
     { private declarations }
   public
     procedure SaveCurrent;
@@ -69,81 +72,22 @@ type
 
 var
   SettingsForm: TSettingsForm;
-  SimbaSettingsFile : string;
 
 implementation
 
-uses LCLtype;
+uses LCLtype, newsimbasettings;
 
 { TSettingsForm }
 
-function TSettingsForm.FixSettingsFile: Boolean;
-begin
-  result := true;
-  mDebugLn('Could not load settings.xml!');
-  if renamefileUTF8('settings.xml', 'settings.bak') then
-  begin
-    mDebugLn('Moved settings.xml to settings.bak');
-  end else
-  begin
-    mDebugLn('Could not move settings.xml to settings.bak');
-    if not deletefileUTF8('settings.xml') then
-    begin
-      mDebugLn('Couldnt delete the file either.');
-      exit(false);
-    end;
-  end;
-
-  SettingsTreeView.Items.Clear;
-  Settings.SaveToXML(SimbaSettingsFile);
-end;
-
-procedure TSettingsForm.FormCreate(Sender: TObject);
-var
-  FirstNode : TTreeNode;
-
-begin
-  Oops := False;
-  Settings := TMMLSettings.Create(SettingsTreeView.Items);
-  if not FileExists(SimbaSettingsFile) then
-  begin
-    SettingsTreeView.Items.Clear;
-    Settings.SaveToXML(SimbaSettingsFile);
-  end;
-  SettingsTreeView.Items.Clear;
-
-  if not Settings.LoadFromXML(SimbaSettingsFile) then
-  begin
-    if not FixSettingsFile() then
-    begin
-      mDebugLn('Could not create, move or delete settings.xml.');
-      mDebugLn('***************** Giving up... ********************');
-      Oops := True;
-    end;
-  end;
-
-  FirstNode := SettingsTreeView.Items.GetFirstNode;
-  if FirstNode <> nil then
-    if FirstNode.Text = 'Settings' then
-      FirstNode.Expand(false);
-end;
-
 procedure TSettingsForm.SettingsFormButtonOKClick(Sender: TObject);
 begin
-  Self.Settings.SaveToXML(SimbaSettingsFile);
+  Settings.SaveToXML(SimbaSettingsFile);
   Self.ModalResult:=mrOK;
 end;
 
 procedure TSettingsForm.SettingsFormButtonCancelClick(Sender: TObject);
 begin
-  if not FileExists(SimbaSettingsFile) then
-  begin
-    Self.SettingsTreeView.Items.Clear;
-    Self.Settings.SaveToXML(SimbaSettingsFile);
-    Self.SettingsTreeView.Items.Clear;
-    Self.Settings.LoadFromXML(SimbaSettingsFile);
-  end;
-  Self.ModalResult:=mrOK;
+  Self.ModalResult:=mrCancel;
 end;
 
 procedure TSettingsForm.MouseUp(Sender: TObject; Button: TMouseButton;
@@ -201,9 +145,13 @@ begin
 end;
 
 
+procedure TSettingsForm.FormCreate(Sender: TObject);
+
+begin
+end;
+
 procedure TSettingsForm.FormDestroy(Sender: TObject);
 begin
-  Settings.Free;
 end;
 
 procedure TSettingsForm.PopupDeleteClick(Sender: TObject);
@@ -238,6 +186,21 @@ begin
   if N = nil then
     exit;
   DeleteANode(N);
+end;
+
+procedure TSettingsForm.FormClose(Sender: TObject; var CloseAction: TCloseAction
+  );
+begin
+  SettingsTreeView.Items.Clear;
+  Settings.Free;
+end;
+
+procedure TSettingsForm.FormShow(Sender: TObject);
+
+begin
+  SettingsTreeView.Items.Clear;
+  Settings := TMMLSettings.Create(SettingsTreeView.Items);
+  Settings.LoadFromXML(SimbaSettingsFile);
 end;
 
 procedure TSettingsForm.DeleteANode(N: TTreeNode);

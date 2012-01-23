@@ -95,7 +95,7 @@ var
 
 implementation
 uses
-  internets,  SimbaUnit, Simbasettings,lclintf;
+  internets,  SimbaUnit, newsimbasettings,lclintf;
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
@@ -112,8 +112,7 @@ begin
   if FontVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
     FontVersionThread :=
-    TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(ssFontsVersionLink,
-          FontURL + 'Version', SimbaSettingsFile), @Vers);
+    TDownloadThread.Create(SimbaSettings.Fonts.VersionLink.GetDefValue(FontURL + 'Version'), @Vers);
 
     FontVersionThread.Resume;
     while FontVersionThread.Done = false do//Wait till thread is done
@@ -142,8 +141,7 @@ var
 begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    SimbaVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
-           ssUpdaterVersionLink ,SimbaURL + 'Version', SimbaSettingsFile), @Vers);
+    SimbaVersionThread := TDownloadThread.Create(SimbaSettings.Updater.RemoteVersionLink.GetDefValue(SimbaURL + 'Version'), @Vers);
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
@@ -233,10 +231,8 @@ begin
   FCancelling := False;
   FCancelled := False;
 
-  Updater.FileURL := SettingsForm.Settings.GetKeyValueDefLoad(
-        ssUpdaterLink,
-        SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
-        SimbaSettingsFile
+  Updater.FileURL := SimbaSettings.Updater.RemoteLink.GetDefValue(
+        SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF}
   );
 
   //ApplicationName{$IFDEF WINDOWS} +'.exe'{$ENDIF};
