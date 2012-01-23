@@ -227,13 +227,13 @@ procedure CreateSimbaSettings(SettingsFileName: String);
   begin
     result := true;
     mDebugLn('Could not load settings.xml!');
-    if renamefileUTF8('settings.xml', 'settings.bak') then
+    if renamefileUTF8(SettingsFileName, 'settings.bak') then
     begin
-      mDebugLn('Moved settings.xml to settings.bak');
+      mDebugLn('Moved ' + SettingsFileName + ' to settings.bak');
     end else
     begin
-      mDebugLn('Could not move settings.xml to settings.bak');
-      if not deletefileUTF8('settings.xml') then
+      mDebugLn('Could not move ' + SettingsFileName + ' to settings.bak');
+      if not deletefileUTF8(SettingsFileName) then
       begin
         mDebugLn('Couldnt delete the file either.');
         exit(false);
@@ -263,7 +263,7 @@ begin
   begin
     if not FixSettingsFile() then
     begin
-      mDebugLn('Could not create, move or delete settings.xml.');
+      mDebugLn('Could not create, move or delete ' + SimbaSettingsFile);
       mDebugLn('***************** Giving up... ********************');
       SimbaSettings.Oops := True;
     end;
