@@ -411,20 +411,25 @@ end;
 
 procedure TIntegerSetting.SetValue(val: Integer);
 begin
-  //writeln('Setting ' + APath + ' to ' + IntToStr(val));
   set_value := True;
   FValue := val
 end;
 
 procedure TIntegerSetting.Load(MMLSettings: TMMLSettings);
 begin
-  if MMLSettings.KeyExists(APath) then
-  begin
-    value := StrToInt(MMLSettings.GetKeyValue(APath));
-    //writeln('Loaded: ' + IntToStr(value) + ' for ' + APath);
-  end
-  {else
-    writeln('Nothing to load for: ' + APath);}
+  try
+    if MMLSettings.KeyExists(APath) then
+    begin
+      value := StrToInt(MMLSettings.GetKeyValue(APath));
+      //writeln('Loaded: ' + IntToStr(value) + ' for ' + APath);
+    end
+  except
+    On E : EConvertError do
+    begin
+      set_value := False;
+      Writeln ('Invalid number encountered');
+    end;
+  end;
 end;
 
 procedure TIntegerSetting.Save(MMLSettings: TMMLSettings);
@@ -508,8 +513,6 @@ begin
     value := MMLSettings.GetKeyValue(APath);
     //writeln('Loaded: ' + value + ' for ' + APath);
   end
-  {else
-    writeln('Nothing to load for: ' + APath);}
 end;
 
 constructor TBooleanSetting.Create(Path: String);
@@ -557,11 +560,11 @@ begin
   end;
 
   if MMLSettings.KeyExists(APath) then
-    MMLSettings.SetKeyValue(APath, BoolToStr(value))
+    MMLSettings.SetKeyValue(APath, BoolToStr(value, True))
   else
   begin
     if MMLSettings.CreateKey(APath, True) then
-      MMLSettings.SetKeyValue(APath, BoolToStr(value))
+      MMLSettings.SetKeyValue(APath, BoolToStr(value, True))
     {else
       writeln('Could not create key: ' + APath);}
   end;
@@ -569,13 +572,19 @@ end;
 
 procedure TBooleanSetting.Load(MMLSettings: TMMLSettings);
 begin
-  if MMLSettings.KeyExists(APath) then
-  begin
-    value := StrToBool(MMLSettings.GetKeyValue(APath));
-    //writeln('Loaded: ' + BoolToStr(value) + ' for ' + APath);
-  end
-  {else
-    writeln('Nothing to load for: ' + APath);}
+  try
+    if MMLSettings.KeyExists(APath) then
+    begin
+      value := StrToBool(MMLSettings.GetKeyValue(APath));
+      //writeln('Loaded: ' + BoolToStr(value) + ' for ' + APath);
+    end
+  except
+    On E : EConvertError do
+    begin
+      set_value := False;
+      Writeln ('Invalid boolean encountered');
+    end;
+  end;
 end;
 
 { }

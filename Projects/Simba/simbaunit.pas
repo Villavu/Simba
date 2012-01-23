@@ -846,9 +846,10 @@ end;
 function TSimbaForm.GetInterpreter: Integer;
 begin
   Result := SimbaSettings.Interpreter._Type.GetDefValue(0);
-  //result := StrToIntDef(LoadSettingDef(ssInterpreterType, '0'), 0);
+
   if (result < 0) or (result > 3) then
   begin
+    writeln('Resetting to valid value');
     SetInterpreter(0);
     Result := 0;
   end;
@@ -3101,13 +3102,13 @@ end;
 
 procedure TSimbaForm.SetDefScriptPath(const AValue: string);
 begin
-  SetSetting(ssSourceEditorDefScriptPath, AValue,True);
+  SimbaSettings.SourceEditor.DefScriptPath.Value := AValue;
 end;
 
 {$IFDEF USE_EXTENSIONS}
 procedure TSimbaForm.SetExtPath(const AValue: string);
 begin
-  SetSetting(ssExtensionsPath, AValue,true);
+  SimbaSettings.Extensions.Path.Value := AValue;
 end;
 {$ENDIF}
 
@@ -3285,7 +3286,7 @@ end;
 
 procedure TSimbaForm.SetFontPath(const AValue: String);
 begin
-  SetSetting(ssFontsPath, AValue,true);
+  SimbaSettings.Fonts.Path.Value := AValue;
 end;
 
 function TSimbaForm.GetFontPath: String;
@@ -3345,7 +3346,7 @@ end;
 
 procedure TSimbaForm.SetIncludePath(const AValue: String);
 begin
-  SetSetting(ssIncludesPath, AValue,true);
+  SimbaSettings.Includes.Path.Value := AValue;
 end;
 
 procedure TSimbaForm.SetInterpreter(const AValue: Integer);
@@ -3357,7 +3358,9 @@ begin
     with CurrScript.Synedit do
       if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
         UpdateCurrScript := true;
-  SetSetting(ssInterpreterType, IntToStr(AValue),true);
+
+  SimbaSettings.Interpreter._Type.Value := AVAlue;
+
   UpdateInterpreter;
 
   if UpdateCurrScript then
@@ -3366,12 +3369,12 @@ end;
 
 procedure TSimbaForm.SetPluginPath(const AValue: string);
 begin
-  SetSetting(ssPluginsPath, AValue,true);
+  SimbaSettings.Plugins.Path.Value := AValue;
 end;
 
 procedure TSimbaForm.SetScriptPath(const AValue: string);
 begin
-  SetSetting(ssScriptsPath, AValue,True);
+  SimbaSettings.Scripts.Path.Value := AValue;
 end;
 
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
@@ -3405,24 +3408,33 @@ end;
 
 function TSimbaForm.LoadSettingDef(const Key,Def: string): string;
 begin
+  writeln('DEPRECATED LoadSettingDef call for: ' + key);
   result := SimbaSettings.MMLSettings.GetKeyValueDefLoad(Key,def,SimbaSettingsFile);
 end;
 
 function TSimbaForm.CreateSetting(const Key,Value: string): string;
 begin
+  writeln('DEPRECATED CreateSetting call for: ' + key);
   result := SimbaSettings.MMLSettings.GetKeyValueDef(Key,value);
 end;
 
 procedure TSimbaForm.SetSetting(const key,Value: string; save : boolean);
 begin
   //Creates the setting if needed
-  SimbaSettings.MMLSettings.SetKeyValue(key,value);
+  writeln('DEPRECATED SetSetting call for: ' + key);
+  SimbaSettings.MMLSettings.SetKeyValue(key, value);
+
   if save then
-    SimbaSettings.MMLSettings.SaveToXML(SimbaSettingsFile);
+  begin
+    SimbaSettings.Load(SimbaSettings.MMLSettings);
+    SimbaSettings.Save(SimbaSettingsFile);
+    ReloadSimbaSettings(SimbaSettingsFile);
+  end;
 end;
 
 function TSimbaForm.SettingExists(const key: string): boolean;
 begin
+  writeln('DEPRECATED SettingExists call for: ' + key);
   result := SimbaSettings.MMLSettings.KeyExists(key);
 end;
 
@@ -3476,7 +3488,7 @@ begin
         if UnTarrer.Result then
         begin;
           FormWriteln('Successfully installed the new fonts!');
-          SetSetting(ssFontsVersion, IntToStr(LatestVersion),true);
+          SimbaSettings.Fonts.Version.Value := LatestVersion;
           if Assigned(self.OCR_Fonts) then
             self.OCR_Fonts.Free;
           FormWriteln('Freeing the current fonts. Creating new ones now');
@@ -3505,12 +3517,12 @@ end;
 
 procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
 begin
-  SetSetting(ssCodeHintsShowAutomatically, Booltostr(AValue,true));
+  SimbaSettings.CodeHints.ShowAutomatically.Value := AValue;
 end;
 
 procedure TSimbaForm.SetShowCodeCompletionAuto(const AValue: boolean);
 begin
-  SetSetting(ssCodeCompletionShowAutomatically, Booltostr(AValue,true));
+  SimbaSettings.CodeCompletion.ShowAutomatically.Value := AValue;
 end;
 
 {$ifdef mswindows}
