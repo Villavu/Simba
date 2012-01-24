@@ -1793,7 +1793,6 @@ begin
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
   loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnStartUp.GetDefValue(True);
-
   if (loadFontsOnScriptStart) then
   begin
     if ((not (Assigned(OCR_Fonts))) and DirectoryExists(fontPath)) then
@@ -1801,9 +1800,7 @@ begin
       OCR_Fonts := TMOCR.Create(Thread.Client);
       OCR_Fonts.InitTOCR(fontPath);
     end;
-
-    if (Assigned(OCR_Fonts)) then
-      Thread.Client.MOCR.Fonts := OCR_Fonts.Fonts;
+    Thread.SetFonts(OCR_Fonts.Fonts);
   end;
 
   {
