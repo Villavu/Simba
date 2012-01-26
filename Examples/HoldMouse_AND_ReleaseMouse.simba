@@ -1,0 +1,15 @@
+program HoldAndReleaseMouse_Example;
+
+const
+  FromX = 100;  // The screen pixel coordinates to start the mouse drag.
+  FromY = 100;
+  ToX = 500;  // The screen pixel coordinates to where the mouse should end up
+  ToY = 500;    // - (and stop the drag)
+
+begin
+  HoldMouse(FromX, FromY);
+  ReleaseMouse(ToX, ToY);
+end.
+
+// NOTE: It is generally advised against using Hold/Release Mouse for games like
+  // - RuneScape, as it is bannable.

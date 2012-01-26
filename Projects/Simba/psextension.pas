@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,12 +93,15 @@ uses
   httpsend,
   superobject,
   Clipbrd,
+
   DCPcrypt2,
+  DCPrc2, DCPrc4, DCPrc5, DCPrc6,
   DCPhaval,
   DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger,
+
   SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}
@@ -269,7 +272,7 @@ end;
 
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 var
-  AppPath, ScriptPath: string;
+  ScriptPath: string;
   i: Integer;
 begin
   SIRegister_Std(x);
@@ -283,7 +286,6 @@ begin
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
 
-  AppPath := MainDir + DirectorySeparator;
   ScriptPath := ExtractFileDir(Filename);
   with SimbaForm,x do
   begin
@@ -364,23 +366,25 @@ var
   f: TFileStream;
 begin
   with SimbaForm do
-    path := FindFile(FilePath,[includepath,  ExtractFileDir(Filename),ExtractFileDir(OrginFileName)]);
-  if path = '' then
+    Path := FindFile(FilePath, [IncludePath, ExtPath, ExtractFileDir(Filename), ExtractFileDir(OrginFileName)]);
+
+  if (Path = '') then
   begin
     psWriteln(Path + ' doesn''t exist');
     Result := false;
     Exit;
   end;
-  FilePath := path;//Yeah!
+
+  FilePath := Path;
 
   try
-    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
+    f := TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
     SetLength(Output, f.Size);
     f.Read(Output[1], Length(Output));
-    result:= true;
+    Result := True;
     f.free;
   except
-    Result := false;
+    Result := False;
     psWriteln('TSimbaPSExtension.OnNeedFile');
   end;
 end;

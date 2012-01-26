@@ -177,3 +177,45 @@ IsTargetValid
 
 Returns true if the current target is valid.
 
+GetProcesses
+------------
+
+.. code-block:: pascal
+
+    function GetProcesses: TSysProcArr;
+
+Returns processes with the title of their window, the handle of the window, the
+process id and their width and height.
+
+With TSysProc being defined as:
+
+.. code-block:: pascal
+
+    TSysProc = record
+        Title: string;
+        Handle: integer;
+        Pid: integer;
+        Width, Height: integer;
+    end;
+
+Example usage:
+
+.. code-block:: pascal
+
+    function FindAndSetTarget(TitlePrefix: String; SetAsTarget: Boolean): Boolean;
+    var
+      T: TSysProcArr;
+      I: Integer;
+    begin
+      T:= GetProcesses();
+      for I := 0 to high(T) do
+        if StartsWith(TitlePrefix, T[i].Title) then
+        begin
+          Result := True;
+          if SetAsTarget then
+          begin
+            SetTarget(T[i]);
+            ActivateClient;
+          end;
+        end;
+    end;

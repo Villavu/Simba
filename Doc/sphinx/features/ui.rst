@@ -113,8 +113,8 @@ Help
 
 *   About, Opens about form
 
-*   Handbook, (404 at the moment) Opens up the online
-    information resource for Simba in default browser.
+*   Handbook, Opens up the online information resource for Simba in default
+    browser.
 
 *   Report a bug, Opens up the online bugtracker for Simba in default browser
 
@@ -233,11 +233,7 @@ The file extensions .sex is short for Simba EXtension.
 Extensions focus more on the Simba form or similar, general area where as 
 plugins focus more on the scripting aspect.
 
-For a list of all Simba extensions, have a look here.
-
-.. note::
-    The above sentence will link to a list of Simba extensions, but that list
-    stills needs to be created.
+For a list of all Simba extensions, have a look here at the :ref:`simbaext`.
 
 Colour Picker History
 ---------------------
@@ -259,6 +255,10 @@ The update form is launched from Tools menu via the Update item.
 Informs user if no update is currently available; else it will 
 displaying the form. Gives the option of updating when the current
 version is not the latest.
+
+.. WARNING::
+
+    Include a picture?
 
 Settings Form
 -------------

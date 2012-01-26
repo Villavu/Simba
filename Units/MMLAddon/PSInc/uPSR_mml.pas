@@ -142,6 +142,7 @@ begin
     RegisterMethod(@TMufasaBitmap.free,'FREE');
     RegisterMethod(@TMufasaBitmap.SaveToFile, 'SAVETOFILE');
     RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LOADFROMFILE');
+    RegisterMethod(@TMufasaBitmap.LoadFromTBitmap, 'LOADFROMTBITMAP');
   end;
 end;
 
@@ -244,8 +245,6 @@ begin
   begin
     RegisterPropertyHelper(@TMFinderWarnOnly_R,@TMFinderWarnOnly_W,'WarnOnly');
     RegisterMethod(@TMFinder.DefaultOperations, 'DefaultOperations');
-    RegisterMethod(@TMFinder.FindColorsToleranceOptimised, 'FindColorsToleranceOptimised');
-    RegisterMethod(@TMFinder.FindColorToleranceOptimised, 'FindColorToleranceOptimised');
     RegisterMethod(@TMFinder.CountColorTolerance, 'CountColorTolerance');
     RegisterMethod(@TMFinder.CountColor, 'CountColor');
     RegisterMethod(@TMFinder.SimilarColors, 'SimilarColors');

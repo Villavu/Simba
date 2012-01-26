@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -88,10 +88,19 @@ var
   GetFuncConv: function(x: integer): integer; stdcall;
   GetTypeCount: function: integer; stdcall;
   GetTypeInfo: function(x: Integer; var sType, sTypeDef: string): integer; stdcall;
+  SetPluginMemManager: procedure(MemMgr : TMemoryManager); stdcall;
   PD: PChar;
   pntr: Pointer;
   ArrC, I: integer;
+  MemMgr : TMemoryManager;
 begin
+  Pointer(SetPluginMemManager) := GetProcAddress(Plugin, PChar('SetPluginMemManager'));
+  if (SetPluginMemManager <> nil) then
+  begin
+    Writeln('Setting Memory Manager.');
+    GetMemoryManager(MemMgr);
+    SetPluginMemManager(MemMgr);
+  end;
   Pointer(GetFuncCount) := GetProcAddress(Plugin, PChar('GetFunctionCount'));
   if (GetFuncCount = nil) then
   begin
