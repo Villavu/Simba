@@ -224,7 +224,7 @@ type
 
     procedure CreateSimbaSettings(SettingsFileName: String);
     procedure ReloadSimbaSettings(SettingsFileName: String);
-    procedure FreeSimbaSettings(Save: Boolean);
+    procedure FreeSimbaSettings(Save: Boolean; SettingsFileName: String);
 
 implementation
 
@@ -298,10 +298,10 @@ begin
   SimbaSettings.Load(SimbaSettings.MMLSettings);
 end;
 
-procedure FreeSimbaSettings(Save: Boolean);
+procedure FreeSimbaSettings(Save: Boolean; SettingsFileName: String);
 begin
   if Save then
-    SimbaSettings.Save(SimbaSettings.MMLSettings);
+    SimbaSettings.Save(SettingsFileName);
 
   SimbaSettings.MMLSettings.Free;
   SimbaSettings.Free;
