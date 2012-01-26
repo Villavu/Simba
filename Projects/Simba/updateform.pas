@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 unit updateform;
 
 {$mode objfpc}{$H+}
+
+{$I Simba.inc}
 
 interface
 
@@ -73,32 +75,34 @@ const
   DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
   SimbaURL =     {$IFDEF WINDOWS}
                   {$IFDEF CPUI386}
-                  'http://Simba.villavu.com/bin/Windows/x86/Stable/'
+                  'http://simba.villavu.com/bin/Windows/x86/Stable/'
                   {$ELSE}
-                  'http://Simba.villavu.com/bin/Windows/x86_64/Stable/'
+                  'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
                   {$ENDIF}
                 {$ELSE}
                   {$IFDEF CPUI386}
-                  'http://Simba.villavu.com/bin/Linux/x86/Stable/'
+                  'http://simba.villavu.com/bin/Linux/x86/Stable/'
                   {$ELSE}
-                  'http://Simba.villavu.com/bin/Linux/x86_64/Stable/'
+                  'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
                   {$ENDIF}
                 {$ENDIF};
-  FontURL = 'http://Simba.villavu.com/bin/Fonts/';
+  FontURL = 'http://simba.villavu.com/bin/Fonts/';
+
+  {$I settings_const.inc}
 
 var
   SimbaUpdateForm: TSimbaUpdateForm;
 
 implementation
 uses
-  internets,  SimbaUnit, Simbasettings,lclintf;
+  internets,  SimbaUnit, newsimbasettings,lclintf;
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
   GetLatestSimbaVersion;
-  mDebugLn(format('Current Simba version: %d',[SimbaUnit.SimbaVersion]));
+  mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
   mDebugLn('Latest Simba Version: ' + IntToStr(FSimbaVersion));
-  Exit(SimbaUnit.SimbaVersion < FSimbaVersion);
+  Exit(SimbaVersion < FSimbaVersion);
 end;
 
 function TSimbaUpdateForm.GetLatestFontVersion: integer;
@@ -107,9 +111,9 @@ var
 begin
   if FontVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    FontVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
-                                                'Settings/Fonts/VersionLink',FontURL  + 'Version',SimbaSettingsFile),
-                                                @Vers);
+    FontVersionThread :=
+    TDownloadThread.Create(SimbaSettings.Fonts.VersionLink.GetDefValue(FontURL + 'Version'), @Vers);
+
     FontVersionThread.Resume;
     while FontVersionThread.Done = false do//Wait till thread is done
     begin
@@ -137,9 +141,7 @@ var
 begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    SimbaVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
-                                                 'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version'
-                                                 ,SimbaSettingsFile),@Vers);
+    SimbaVersionThread := TDownloadThread.Create(SimbaSettings.Updater.RemoteVersionLink.GetDefValue(SimbaURL + 'Version'), @Vers);
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
@@ -229,10 +231,8 @@ begin
   FCancelling := False;
   FCancelled := False;
 
-  Updater.FileURL := SettingsForm.Settings.GetKeyValueDefLoad(
-        'Settings/Updater/RemoteLink',
-        SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
-        SimbaSettingsFile
+  Updater.FileURL := SimbaSettings.Updater.RemoteLink.GetDefValue(
+        SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF}
   );
 
   //ApplicationName{$IFDEF WINDOWS} +'.exe'{$ENDIF};

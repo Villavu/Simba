@@ -1,3 +1,5 @@
+.. _updater:
+
 Updater in Simba
 ================
 

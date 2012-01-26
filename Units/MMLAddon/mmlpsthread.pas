@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,21 +23,26 @@
 
 unit mmlpsthread;
 
-{$Define PS_USESSUPPORT}
-//{$define USE_RUTIS}
+{$define PS_USESSUPPORT}
+
 {$mode objfpc}{$H+}
+
+{$I Simba.inc}
 
 interface
 
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
-  uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web,
+  uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs,internets,scriptproperties,
   settings,settingssandbox, lcltype, dialogs
   {$IFDEF USE_RUTIS}
-  ,Rutis_Engine,Rutis_Defs
+  , Rutis_Engine, Rutis_Defs
   {$ENDIF}
-  ;
+  {$IFDEF USE_LAPE}
+  , lpparser, lpcompiler, lptypes, lpvartypes,
+    lpeval, lpinterpreter
+  {$ENDIF};
 
 const
   m_Status = 0; //Data = PChar to new status
@@ -51,6 +56,10 @@ const
   m_ShowMessage = 8; //Data = PChar
   m_MessageBox = 9; //Data =  PMessageBoxData
   m_MessageDlg = 10; //Data = PMessageDlg
+
+  {$I settings_const.inc}
+  {$WARNING REMOVEME}
+
 type
     { TMMLPSThread }
     TCallBackData = record
@@ -110,7 +119,7 @@ type
       procedure SetOpenFileEvent(const AValue: TOpenFileEvent);
       procedure SetWriteFileEvent(const AValue: TWriteFileEvent);
     protected
-      ScriptPath, AppPath, IncludePath, PluginPath, FontPath: string;
+      AppPath, DocPath, ScriptPath, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
@@ -141,13 +150,15 @@ type
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
       function ProcessDirective(Sender: TPSPreProcessor;
                     Parser: TPSPascalPreProcessorParser;
+                    Active: Boolean;
                     DirectiveName, DirectiveArgs: string; Filename:String): boolean;
       function LoadFile(ParentFile : string; var filename, contents: string): boolean;
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
-      procedure SetPaths(ScriptP,AppP,IncludeP,PluginP,FontP : string);
+      procedure SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
       procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
+      procedure SetFonts(Fonts: TMFonts); virtual;
 
       procedure OnThreadTerminate(Sender: TObject);
       procedure SetScript(script: string); virtual; abstract;
@@ -203,6 +214,7 @@ type
     TPrecompiler_Callback = function(name, args: PChar): boolean; stdcall;
     TErrorHandeler_Callback = procedure(line, pos: integer; err: PChar; runtime: boolean); stdcall;
 
+    {$IFDEF USE_CPASCAL}
     TCPThread = class(TMThread)
       protected
         instance: pointer;
@@ -216,6 +228,7 @@ type
         procedure Terminate; override;
         procedure AddMethod(meth: TExpMethod); override;
     end;
+    {$ENDIF}
 
     { TRTThread }
     {$IFDEF USE_RUTIS}
@@ -231,6 +244,25 @@ type
       procedure Execute; override;
       procedure Terminate; override;
     end;
+   {$ENDIF}
+
+   {$IFDEF USE_LAPE}
+   { TLPThread }
+   TLPThread = class(TMThread)
+   protected
+     procedure LoadPlugin(plugidx: integer); override;
+   public
+     Parser: TLapeTokenizerString;
+     Compiler: TLapeCompiler;
+     constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
+     destructor Destroy; override;
+     procedure SetScript(Script: string); override;
+     procedure SetFonts(Fonts: TMFonts); override;
+     procedure Execute; override;
+     procedure Terminate; override;
+     function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+     function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+   end;
    {$ENDIF}
 
 
@@ -256,7 +288,6 @@ uses
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
   uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
   uPSUtils,
-  fontloader,
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
@@ -276,12 +307,14 @@ uses
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
   Clipbrd,
+
   DCPcrypt2,
-  DCPhaval,  
-  DCPmd4, DCPmd5,
+  DCPrc2, DCPrc4, DCPrc5, DCPrc6,
+  DCPhaval, DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger;
+
 {$ifdef Linux}
   {$define PS_SafeCall}
 {$else}
@@ -421,9 +454,7 @@ begin
   path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(parentfile))]);
   if path = '' then
   begin
-    psWriteln(Path + ' doesn''t exist');
-    Result := false;
-    Exit;
+    Exit(False);
   end;
   filename := path;//Yeah!
 
@@ -444,6 +475,7 @@ end;
 
 function TMThread.ProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser;
+        Active: Boolean;
         DirectiveName, DirectiveArgs: string; FileName: string): boolean;
 var
   plugin_idx: integer;
@@ -452,6 +484,8 @@ begin
   Result := False;
   if CompareText(DirectiveName,'LOADLIB') = 0 then
   begin
+    if not active then
+      exit(true);
     if DirectiveArgs <> '' then
     begin;
       plugin_idx:= PluginsGlob.LoadPlugin(DirectiveArgs);
@@ -468,6 +502,8 @@ begin
   end
   else if CompareText(DirectiveName,'WARNING') = 0 then
   begin
+    if not active then
+      exit(true);
     if (sender = nil) or (parser = nil) then
     begin
       psWriteln('ERROR: WARNING directive not supported for this interpreter');
@@ -489,6 +525,8 @@ begin
     end;
   end else if CompareText(DirectiveName,'ERROR') = 0 then
   begin
+    if not active then
+      exit(true);
     if (sender = nil) or (parser = nil) then
     begin
       psWriteln('ERROR: ERROR directive not supported for this interpreter');
@@ -528,13 +566,20 @@ begin
   Self.Sett.prefix := 'Scripts/';
 end;
 
-procedure TMThread.SetPaths(ScriptP, AppP,IncludeP,PluginP,FontP: string);
+procedure TMThread.SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
 begin
-  AppPath:= AppP;
-  ScriptPath:= ScriptP;
-  IncludePath:= IncludeP;
-  PluginPath:= PluginP;
-  FontPath:= FontP;
+  AppPath := AppP;
+  DocPath := DocP;
+  ScriptPath := ScriptP;
+  IncludePath := IncludeP;
+  PluginPath := PluginP;
+  FontPath := FontP;
+end;
+
+procedure TMThread.SetFonts(Fonts: TMFonts);
+begin
+  if Assigned(Fonts) then
+    Client.MOCR.Fonts := Fonts;
 end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
@@ -569,6 +614,7 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
+
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
 {$I PSInc/Wrappers/keyboard.inc}
@@ -655,7 +701,7 @@ begin
   if (CompareText(DirectiveName, 'LOADLIB') = 0)
   or (CompareText(DirectiveName, 'WARNING') = 0)
   or (CompareText(DirectiveName, 'ERROR') = 0)  then
-    Continue := not ProcessDirective(Sender, Parser, DirectiveName,DirectiveParam,
+    Continue := not ProcessDirective(Sender, Parser, Active, DirectiveName,DirectiveParam,
              FileName);
 end;
 
@@ -671,8 +717,8 @@ procedure TPSThread.PSScriptProcessUnknownDirective(Sender: TPSPreProcessor;
   const DirectiveName, DirectiveParam: string; var Continue: Boolean;
   Filename: string);
 begin
-  Continue:= not ProcessDirective(Sender, Parser, DirectiveName, DirectiveParam,
-               FileName);
+  Continue:= not ProcessDirective(Sender, Parser, Active, DirectiveName,
+             DirectiveParam, FileName);
 end;
 
 function Muf_Conv_to_PS_Conv( conv : integer) : TDelphiCallingConvention;
@@ -684,7 +730,6 @@ begin
     raise exception.createfmt('Unknown Calling Convention[%d]',[conv]);
   end;
 end;
-
 
 procedure TPSThread.LoadPlugin(plugidx: integer);
 var
@@ -813,7 +858,7 @@ begin
   SIRegister_Dialogs(x);
   if self.settings <> nil then
   begin
-    if lowercase(self.settings.GetKeyValueDefLoad('Settings/Interpreter/AllowSysCalls',
+    if lowercase(self.settings.GetKeyValueDefLoad(ssInterpreterAllowSysCalls,
       'False', Self.SimbaSettingsFile)) = 'true' then
     begin
       { Can remove later }
@@ -998,7 +1043,7 @@ begin
 end;
 
 {***implementation TCPThread***}
-
+{$IFDEF USE_CPASCAL}
 procedure LoadCPascal(plugin_dir: string);
 begin
   libcpascal:= LoadLibrary(PChar(plugin_dir + 'libcpascal' + {$ifdef LINUX} '.so' {$else} '.dll' {$endif}));
@@ -1016,7 +1061,8 @@ end;
 function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
 
 begin
-  result:= CurrThread.ProcessDirective(nil, nil, name, args, '');
+  { XXX: The 'True' below for Active is perhaps wrong }
+  result:= CurrThread.ProcessDirective(nil, nil, True, name, args, '');
 end;
 
 procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar; runtime: boolean); stdcall;
@@ -1121,6 +1167,7 @@ procedure TCPThread.Terminate;
 begin
   raise Exception.Create('Stopping Interpreter not yet implemented');
 end;
+{$ENDIF}
 
 { TRTThread }
 {$IFDEF USE_RUTIS}
@@ -1226,6 +1273,212 @@ end;
 procedure TRTThread.Terminate;
 begin
   RUTIS.Stop;
+end;
+{$ENDIF}
+
+{$IFDEF USE_LAPE}
+{ TLPThread }
+
+type
+  PBoolean = ^Boolean;
+  PStringArray = ^TStringArray;
+  PBmpMirrorStyle = ^TBmpMirrorStyle;
+  PPointArray = ^TPointArray;
+  P2DIntArray = ^T2DIntArray;
+  PCanvas = ^TCanvas;
+  P2DPointArray = ^T2DPointArray;
+  PMask = ^TMask;
+  PBox = ^TBox;
+  PTarget_Exported = ^TTarget_Exported;
+  PIntegerArray = ^TIntegerArray;
+  PExtendedArray = ^TExtendedArray;
+  PFont = ^TFont;
+//  PStrExtr = ^TStrExtr;
+  PReplaceFlags = ^TReplaceFlags;
+  PClickType = ^TClickType;
+  P2DExtendedArray = ^T2DExtendedArray;
+  PMDTM = ^TMDTM;
+  PMDTMPoint = ^TMDTMPoint;
+  PSDTM = ^TSDTM;
+  
+threadvar
+  WriteLnStr: string;
+  
+procedure lp_Write(Params: PParamArray);
+begin
+  WriteLnStr += PlpString(Params^[0])^;
+end;
+  
+procedure lp_WriteLn(Params: PParamArray);
+begin
+  psWriteLn(WriteLnStr);
+  WriteLnStr := '';
+end;
+
+procedure lp_DebugLn(Params: PParamArray);
+begin
+  ps_debugln(PlpString(Params^[0])^);
+end;
+
+{$I LPInc/Wrappers/lp_other.inc}
+{$I LPInc/Wrappers/lp_settings.inc}
+{$I LPInc/Wrappers/lp_bitmap.inc}
+{$I LPInc/Wrappers/lp_window.inc}
+{$I LPInc/Wrappers/lp_tpa.inc}
+{$I LPInc/Wrappers/lp_strings.inc}
+
+{$I LPInc/Wrappers/lp_colour.inc}
+{$I LPInc/Wrappers/lp_colourconv.inc}
+{$I LPInc/Wrappers/lp_crypto.inc}
+{$I LPInc/Wrappers/lp_math.inc}
+
+{$I LPInc/Wrappers/lp_mouse.inc}
+{$I LPInc/Wrappers/lp_file.inc}
+{$I LPInc/Wrappers/lp_keyboard.inc}
+{$I LPInc/Wrappers/lp_dtm.inc}
+{.$I LPInc/Wrappers/extensions.inc} //Doesn't work for me!
+{$I LPInc/Wrappers/lp_ocr.inc}
+{$I LPInc/Wrappers/lp_internets.inc}
+
+constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
+var
+  I: integer;
+begin
+  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
+
+  Parser := TLapeTokenizerString.Create('');
+  Compiler := TLapeCompiler.Create(Parser);
+
+  InitializePascalScriptBasics(Compiler);
+  Compiler['Move'].Name := 'MemMove';
+  Compiler.OnFindFile := @OnFindFile;
+  Compiler.OnHandleDirective := @OnHandleDirective;
+
+  with Compiler do
+  begin
+    WriteLnStr := '';
+
+    addGlobalFunc('procedure _write(s: string); override;', @lp_Write);
+    addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
+    addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
+
+    for I := 0 to High(VirtualKeys) do
+      addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
+
+    {$I LPInc/lpdefines.inc}
+    {$I LPInc/lpcompile.inc}
+
+    {$I LPInc/lpexportedmethods.inc}
+  end;
+end;
+
+destructor TLPThread.Destroy;
+begin
+  try
+    if (Assigned(Compiler)) then
+      Compiler.Free
+    else if (Assigned(Parser)) then
+      Parser.Free;
+  except
+    on E: Exception do
+      psWriteln('Exception TLPThread.Destroy: ' + e.message);
+  end;
+
+  inherited Destroy;
+end;
+
+procedure TLPThread.SetScript(Script: string);
+begin
+  Parser.Doc := Script;
+end;
+
+procedure TLPThread.SetFonts(Fonts: TMFonts);
+var
+  i: Integer;
+begin
+  inherited;
+
+  if Assigned(Fonts) then
+    for I := Fonts.Count - 1 downto 0 do
+      Compiler.addGlobalVar(Fonts[I].Name, Fonts[I].Name).isConstant := True;
+end;
+
+function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
+begin
+  Result := nil;
+  FileName := IncludePath + FileName;
+end;
+
+function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+var
+  plugin_idx: integer;
+begin
+  Result := False;
+  if (not InPeek) and (Directive = 'loadlib') then
+  begin
+    if (Argument <> '') then
+    begin
+      plugin_idx := PluginsGlob.LoadPlugin(Argument);
+      if (plugin_idx >= 0) then
+      begin
+        LoadPlugin(plugin_idx);
+        Result := True;
+      end else
+        psWriteln(Format('Your DLL %s has not been found', [Argument]))
+    end else
+      psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
+  end;
+end;
+
+procedure TLPThread.LoadPlugin(plugidx: integer);
+var
+  I: integer;
+begin
+  with PluginsGlob.MPlugins[plugidx] do
+  begin
+    for i := 0 to TypesLen -1 do
+      with Types[I] do
+        Compiler.addGlobalType(TypeDef, TypeName);
+
+    for i := 0 to MethodLen - 1 do
+      with Methods[i] do
+        Compiler.addGlobalFunc(FuncStr, FuncPtr);
+  end;
+end;
+
+procedure TLPThread.Execute;
+  function CombineDeclArray(a, b: TLapeDeclArray): TLapeDeclArray;
+  var
+    i, l: Integer;
+  begin
+    Result := a;
+    l := Length(a);
+    SetLength(Result, l + Length(b));
+    for i := High(b) downto 0 do
+      Result[l + i] := b[i];
+  end;
+begin
+  CurrThread := self;
+  try
+    Starttime := lclintf.GetTickCount;
+    if Compiler.Compile() then
+    begin
+      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+      if CompileOnly then
+        Exit;
+      RunCode(Compiler.Emitter.Code);
+      psWriteln('Successfully executed.');
+    end else
+      psWriteln('Compiling failed.');
+  except
+     on E : Exception do
+       psWriteln('Exception in Script: ' + e.message);
+  end;
+end;
+
+procedure TLPThread.Terminate;
+begin
+  psWriteLn('Lape doesn''t support stoping scripts yet... Please hit stop again to terminate!');
 end;
 {$ENDIF}
 

@@ -1,0 +1,25 @@
+program new;
+//http://farm4.static.flickr.com/3067/2612399892_7df428d482.jpg
+{Make the above bitmap your target}
+var
+  Bmp : integer;
+  x,y : integer;
+  w,h : integer;
+  t, i: integer;
+begin
+  Bmp := createBitmap(15, 10);
+  FastDrawClear(bmp, clwhite);
+  GetClientDimensions(w,h);
+
+  setcolortolerancespeed(2);
+  t:=getsystemtime;
+  for i := 0 to 10 do
+    FindBitmapToleranceIn(bmp,x,y,0,0,w-1,h-1,500);
+  writeln((getsystemtime-t) / 10.0);
+
+  if FindBitmapToleranceIn(bmp,x,y,0,0,w-1,h-1,500) then
+  begin
+    writeln('found');
+    MoveMouse(x,y);
+  end;
+end.

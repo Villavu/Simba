@@ -4,7 +4,8 @@ Troubleshooting
 ===============
 
 This is a general troubleshooting page and will hopefully cover all potential
-problems you may encounter.
+problems you may encounter. Before you read any further, make sure your Simba is
+up to date. See :ref:`updater`.
 
 Where is the DTM Editor?
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -16,16 +17,10 @@ Where are my Extensions?
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 All extensions are in the *Extensions* folder. If this folder is empty, you may
-need to manually download the Extensions or reinstall Simba.
-
-Simba crashes on start complaining about settings.xml
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This means your settings.xml has become corrupt somehow, or Simba may not be
-able to create it. If a settings.xml exists in your Simba directory, you can
-delete it. (All your settings will be lost, but this shouldn't be a big deal)
-
-Note that this should no longer happen with Simba 750 and up.
+need to manually download the Extensions or reinstall Simba. If you have
+downloaded a recent Simba (0.97.3 or higher), you will also have an Extension
+Updater Extension (you read that right!), make sure to enable this extension as
+well.
 
 ..
     TODO

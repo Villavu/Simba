@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ type
     procedure StretchResize(AWidth,AHeight : integer);
     property Width : Integer read w;
     property Height : Integer read h;
+    function PointInBitmap(x,y : integer) : boolean;
     procedure ValidatePoint(x,y : integer);
     function SaveToFile(const FileName : string) :boolean;
     procedure LoadFromFile(const FileName : string);
@@ -64,6 +65,7 @@ type
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(Points : TPointArray) : TIntegerArray;
     function GetAreaColors(xs,ys,xe,ye : integer) : T2DIntArray;
+    function GetHSLValues(xs, ys, xe, ye: integer): T2DHSLArray;
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
     procedure FastReplaceColor(OldColor, NewColor: TColor);
@@ -125,7 +127,9 @@ type
 
   Procedure ArrDataToRawImage(Ptr: PRGB32; Size: TPoint; out RawImage: TRawImage);
   function CalculatePixelShift(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox) : integer;
+  function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
   function CalculatePixelTolerance(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox; CTS : integer) : extended;
+  function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray; CTS: integer): extended;
 implementation
 
 uses
@@ -186,6 +190,29 @@ begin
       if LongWord(Bmp1.FData[y * w1 + x]) <> LongWord(Bmp2.Fdata[y * w2 + x]) then
         inc(result);
 end;
+
+function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
+var
+  i : integer;
+  bounds: TBox;
+  w1,w2 : integer;
+begin
+  bounds := GetTPABounds(CPoints);
+  Bmp1.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp1.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp2.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp2.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp1.SetAlphaValue(0);
+  Bmp2.SetAlphaValue(0);
+  w1 := bmp1.width;
+  w2 := bmp2.width;
+  result := 0;
+  for i := 0 to High(CPoints) do
+    if LongWord(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x]) <>
+        LongWord(Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x]) then
+      inc(result);
+end;
+
 //CTS 0 counts the average difference in R,G,B per pixel
 //CTS 1 counts the average difference using SQRT(Sqr(r) + sqr(g)+sqr(b));
 function CalculatePixelTolerance(Bmp1, Bmp2: TMufasaBitmap; CompareBox: TBox;
@@ -225,6 +252,48 @@ begin
                                       Sqr(Bmp1.FData[y * w1 + x].g-Bmp2.Fdata[y * w2 + x].g) +
                                       Sqr(Bmp1.FData[y * w1 + x].b-Bmp2.Fdata[y * w2 + x].b));
           Result := Result / ((CompareBox.x2 - CompareBox.x1 + 1) * (CompareBox.y2-CompareBox.y1 + 1)); //We want the value for the whole Pixel;
+        end;
+  end;
+end;
+
+function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray;
+  CTS: integer): extended;
+var
+  i : integer;
+  bounds: TBox;
+  w1,w2 : integer;
+  Diff : int64;
+begin
+  bounds := GetTPABounds(CPoints);
+  Bmp1.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp1.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp2.ValidatePoint(bounds.x1,bounds.y1);
+  Bmp2.ValidatePoint(bounds.x2,bounds.y2);
+  Bmp1.SetAlphaValue(0);
+  Bmp2.SetAlphaValue(0);
+  w1 := bmp1.Width;
+  w2 := bmp2.width;
+  result := 0;
+  if not InRange(CTS,0,1) then
+    raise exception.CreateFmt('CTS Passed to CalculateTolerance must be in [0..1], it currently is %d',[CTS]);
+  case CTS of
+    0 : begin
+          Diff := 0;
+          for i := 0 to High(CPoints) do
+            begin
+              Diff := Diff + abs(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].r-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].r) +
+                             abs(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].g-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].g) +
+                             abs(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].b-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].b);
+            end;
+          Result := Diff / (3 * (bounds.x2 - bounds.x1 + 1) * (bounds.y2-bounds.y1 + 1)); //We want the value for the whole Pixel; so divide by 3 (RGB)
+        end;
+    1 : begin
+
+          for i := 0 to High(CPoints) do
+            Result := Result + Sqrt(Sqr(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].r-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].r) +
+                                    Sqr(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].g-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].g) +
+                                    Sqr(Bmp1.FData[CPoints[i].y * w1 + CPoints[i].x].b-Bmp2.Fdata[CPoints[i].y * w2 + CPoints[i].x].b));
+          Result := Result / ((bounds.x2 - bounds.x1 + 1) * (bounds.y2-bounds.y1 + 1)); //We want the value for the whole Pixel;
         end;
   end;
 end;
@@ -326,7 +395,13 @@ end;
 function TMBitmaps.CreateBMPFromFile(const Path: string): integer;
 begin
   Result := CreateBMP(0,0);
-  BmpArray[result].LoadFromFile(Path);
+  try
+    BmpArray[result].LoadFromFile(Path);
+  except
+    FreeBMP(Result);
+    Result := -1; // meh
+    raise;
+  end;
 end;
 
 function HexToInt(HexNum: string): LongInt;inline;
@@ -475,23 +550,40 @@ begin
 end;
 
 {
-
- Implementation TMufasaBitmap
-
+  Saves a bitmap to a file.
+  If Filename ends with 'png' it will save as a PNG file,
+  if Filename ends with 'jpg' or 'jpeg' it will save as JPG,
+  otherwise BMP is assumed.
 }
 
 function TMufasaBitmap.SaveToFile(const FileName: string): boolean;
 var
   rawImage : TRawImage;
   Bmp : TLazIntfImage;
+  png: TPortableNetworkGraphic;
+  jpg: TJPEGImage;
 begin
   ArrDataToRawImage(FData,Point(w,h),RawImage);
   result := true;
-//  Bmp := Graphics.TBitmap.Create;
   try
-    Bmp := TLazIntfImage.Create(RawImage,false);
-    Bmp.SaveToFile(UTF8ToSys(FileName));
-    Bmp.Free;
+    if RightStr(Filename, 3) = 'png' then
+    begin
+      png := TPortableNetworkGraphic.Create;
+      png.LoadFromRawImage(RawImage, False);
+      png.SaveToFile(UTF8ToSys(Filename));
+      png.Free;
+    end else if (RightStr(Filename, 3) = 'jpg') or (RightStr(Filename, 4) = 'jpeg') then
+    begin
+      jpg := TJPEGImage.Create;
+      jpg.LoadFromRawImage(RawImage, False);
+      jpg.SaveToFile(UTF8ToSys(Filename));
+      jpg.Free;
+    end else // Assume .bmp
+    begin
+      Bmp := TLazIntfImage.Create(RawImage,false);
+      Bmp.SaveToFile(UTF8ToSys(FileName));
+      Bmp.Free;
+    end;
   except
     result := false;
   end;
@@ -502,8 +594,7 @@ var
   LazIntf : TLazIntfImage;
   RawImageDesc : TRawImageDescription;
 begin
-  if FileExistsUTF8(FileName) then
-  begin;
+  try
     LazIntf := TLazIntfImage.Create(0,0);
     RawImageDesc.Init_BPP32_B8G8R8_BIO_TTB(LazIntf.Width,LazIntf.Height);
     LazIntf.DataDescription := RawImageDesc;
@@ -514,6 +605,7 @@ begin
     Self.H := LazIntf.Height;
     FData := GetMem(Self.W*Self.H*SizeOf(TRGB32));
     Move(LazIntf.PixelData[0],FData[0],w*h*sizeOf(TRGB32));
+  finally
     LazIntf.Free;
   end;
 end;
@@ -874,6 +966,23 @@ begin
   for x := xs to xe do
     for y := ys to ye do
       result[x-xs][y-ys] := BGRToRGB(FData[y*w+x]);
+end;
+
+function TMufasaBitmap.GetHSLValues(xs, ys, xe, ye: integer): T2DHSLArray;
+var
+  x, y: integer;
+  R, G, B, C: integer;
+begin
+  ValidatePoint(xs,ys);
+  ValidatePoint(xe,ye);
+  setlength(result,ye-ys+1,xe-xs+1);
+  for y := ys to ye do
+    for x := xs to xe do
+    begin                                                   { REWRITE THIS }
+      RGBToHSL(FData[y*w+x].R, FData[y*w+x].G, FData[y*w+x].B,
+               Result[y-ys][x-xs].H, Result[y-ys][x-xs].S,
+               Result[y-ys][x-xs].L);
+    end;
 end;
 
 procedure TMufasaBitmap.SetTransparentColor(Col: TColor);
@@ -1406,7 +1515,7 @@ var
   i,minw,minh : integer;
 begin
   if (AWidth <> w) or (AHeight <> h) then
-  begin;
+  begin
     if AWidth*AHeight <> 0 then
     begin;
       NewData := GetMem(AWidth * AHeight * SizeOf(TRGB32));
@@ -1457,9 +1566,14 @@ begin
   end;
 end;
 
+function TMufasaBitmap.PointInBitmap(x, y: integer): boolean;
+begin
+  result := ((x >= 0) and (x < w) and (y >= 0) and (y < h));
+end;
+
 procedure TMufasaBitmap.ValidatePoint(x, y: integer);
 begin
-  if (x <0) or (x >= w) or (y < 0) or (y >= h) then
+  if not(PointInBitmap(x,y)) then
     raise Exception.CreateFmt('You are accessing an invalid point, (%d,%d) at bitmap[%d]',[x,y,index]);
 end;
 

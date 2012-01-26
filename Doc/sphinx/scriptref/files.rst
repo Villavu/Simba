@@ -188,6 +188,29 @@ WriteINI
 
     procedure WriteINI(const Section, KeyName, NewString, FileName: string);
 
+The following example writes to a specific Line in a Specified INI File.
+
+.. code-block:: pascal
+
+    program WriteINIExample;
+
+    Var Section, Keyname, NewString, FileName: String;
+
+    begin
+      Section := 'What subsection in the INI it is being Writen.';
+      KeyName := 'Space in the specified Subsection in which you string is writen.';
+      NewString := 'What your Writing into the INI file.';
+      FileName := 'The Name of the INI File you are writing too.';
+      WriteINI(Section, KeyName, NewString, ScriptPath + FileName);
+    end.
+
+.. note::
+
+    ScriptPath will Automatically point the file finding to the same folder the script is saved in.
+
+.. note::
+
+    This procedure can be used in conjunction with ReadINI to saved Player Data for the next time a script is run.
 
 ReadINI
 -------
@@ -196,6 +219,22 @@ ReadINI
 
     function ReadINI(const Section, KeyName, FileName: string): string;
 
+The following example writes to a specific Line in a Specified INI File then Reads that line and prints it's findings.
+
+.. code-block:: pascal
+
+    program WriteINIReference;
+
+    Var Section, Keyname, NewString, FileName: String;
+
+    begin
+      Section := 'What subsection in the INI it is being Writen.';
+      KeyName := 'Space in the specified Subsection in which you string is writen.';
+      NewString := 'What your Writing into the INI file.';
+      FileName := 'The Name of the INI File you are writing too.';
+      WriteINI(Section, KeyName, NewString, ScriptPath + FileName);
+      Writeln(ReadINI(Section, KeyName, ScriptPath + FileName);
+    end.
 
 DeleteINI
 ---------
@@ -204,6 +243,15 @@ DeleteINI
 
     procedure DeleteINI(const Section, KeyName, FileName: string);
 
+The following example deletes the specific line inside the specified INI file.
+
+.. code-block:: pascal
+
+    program DeleteINIExample;
+
+    begin
+      DeleteINI('Section', Key, File);
+    end;
 
 ExtractFileExt
 --------------

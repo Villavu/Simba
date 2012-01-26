@@ -53,7 +53,6 @@ RutisEngine.RegExtMethod('GetColor',@RUTIS_ps_GetColor, ['integer','integer'], '
 RutisEngine.RegExtMethod('GetColorsWrap',@RUTIS_ps_GetColorsWrap, ['TPointArray','var TIntegerArray'], '');
 RutisEngine.RegExtMethod('GetColors',@RUTIS_ps_GetColors, ['TPointArray'], 'TIntegerArray');
 RutisEngine.RegExtMethod('findcolor',@RUTIS_ps_findcolor, ['var integer','var integer','integer','integer','integer','integer','integer'], 'boolean');
-RutisEngine.RegExtMethod('findcolortoleranceOptimised',@RUTIS_ps_findcolortoleranceOptimised, ['var integer','var integer','integer','integer','integer','integer','integer','integer'], 'boolean');
 RutisEngine.RegExtMethod('findcolortolerance',@RUTIS_ps_findcolortolerance, ['var integer','var integer','integer','integer','integer','integer','integer','integer'], 'boolean');
 RutisEngine.RegExtMethod('FindColors',@RUTIS_ps_FindColors, ['var TPointArray','Integer','Integer','Integer','Integer','Integer'], 'Boolean');
 RutisEngine.RegExtMethod('SetColorToleranceSpeed',@RUTIS_ps_SetColorToleranceSpeed, ['Integer'], '');
@@ -63,7 +62,6 @@ RutisEngine.RegExtMethod('GetToleranceSpeed2Modifiers',@RUTIS_ps_GetToleranceSpe
 RutisEngine.RegExtMethod('SimilarColors',@RUTIS_ps_SimilarColors, ['integer','integer','integer'], 'boolean');
 RutisEngine.RegExtMethod('CountColor',@RUTIS_ps_CountColor, ['Integer','Integer','Integer','Integer','Integer'], 'Integer');
 RutisEngine.RegExtMethod('CountColorTolerance',@RUTIS_ps_CountColorTolerance, ['Integer','Integer','Integer','Integer','Integer','Integer'], 'Integer');
-RutisEngine.RegExtMethod('FindColorsToleranceOptimised',@RUTIS_ps_FindColorsToleranceOptimised, ['var TPointArray','Integer','Integer','Integer','Integer','Integer','Integer'], 'Boolean');
 RutisEngine.RegExtMethod('FindColorsTolerance',@RUTIS_ps_FindColorsTolerance, ['var TPointArray','Integer','Integer','Integer','Integer','Integer','Integer'], 'Boolean');
 RutisEngine.RegExtMethod('FindColorSpiral',@RUTIS_ps_FindColorSpiral, ['var Integer','var Integer','Integer','Integer','Integer','Integer','Integer'], 'Boolean');
 RutisEngine.RegExtMethod('FindColorSpiralTolerance',@RUTIS_ps_FindColorSpiralTolerance, ['var Integer','var Integer','Integer','Integer','Integer','Integer','Integer','Integer'], 'Boolean');
