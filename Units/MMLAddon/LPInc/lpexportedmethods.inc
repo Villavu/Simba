@@ -301,6 +301,7 @@ AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing,
 //AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
+AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: Integer);', @Lape_FilterUpTextByCharacteristics);
 
 { Other }
 
@@ -329,6 +330,7 @@ AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integ
 AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
 AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
 AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
+AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^);
 //AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
 AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
 AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);

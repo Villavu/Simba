@@ -33,7 +33,7 @@ interface
 
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
-  uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web,
+  uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs,internets,scriptproperties,
   settings,settingssandbox, lcltype, dialogs
   {$IFDEF USE_RUTIS}
@@ -158,6 +158,7 @@ type
       procedure SetDebug( writelnProc : TWritelnProc );
       procedure SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
       procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
+      procedure SetFonts(Fonts: TMFonts); virtual;
 
       procedure OnThreadTerminate(Sender: TObject);
       procedure SetScript(script: string); virtual; abstract;
@@ -256,6 +257,7 @@ type
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
      procedure SetScript(Script: string); override;
+     procedure SetFonts(Fonts: TMFonts); override;
      procedure Execute; override;
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
@@ -286,7 +288,6 @@ uses
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
   uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
   uPSUtils,
-  fontloader,
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
@@ -573,6 +574,12 @@ begin
   IncludePath := IncludeP;
   PluginPath := PluginP;
   FontPath := FontP;
+end;
+
+procedure TMThread.SetFonts(Fonts: TMFonts);
+begin
+  if Assigned(Fonts) then
+    Client.MOCR.Fonts := Fonts;
 end;
 
 function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
@@ -1308,6 +1315,11 @@ begin
   WriteLnStr := '';
 end;
 
+procedure lp_DebugLn(Params: PParamArray);
+begin
+  ps_debugln(PlpString(Params^[0])^);
+end;
+
 {$I LPInc/Wrappers/lp_other.inc}
 {$I LPInc/Wrappers/lp_settings.inc}
 {$I LPInc/Wrappers/lp_bitmap.inc}
@@ -1331,7 +1343,6 @@ end;
 constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 var
   I: integer;
-  Fonts: TMFonts;
 begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 
@@ -1342,16 +1353,14 @@ begin
   Compiler['Move'].Name := 'MemMove';
   Compiler.OnFindFile := @OnFindFile;
   Compiler.OnHandleDirective := @OnHandleDirective;
-  Fonts := Client.MOCR.Fonts;
+
   with Compiler do
   begin
     WriteLnStr := '';
 
     addGlobalFunc('procedure _write(s: string); override;', @lp_Write);
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
-    
-    for I := Fonts.Count - 1 downto 0 do
-      addGlobalVar(Fonts[I].Name, Fonts[I].Name);
+    addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
 
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
@@ -1381,6 +1390,17 @@ end;
 procedure TLPThread.SetScript(Script: string);
 begin
   Parser.Doc := Script;
+end;
+
+procedure TLPThread.SetFonts(Fonts: TMFonts);
+var
+  i: Integer;
+begin
+  inherited;
+
+  if Assigned(Fonts) then
+    for I := Fonts.Count - 1 downto 0 do
+      Compiler.addGlobalVar(Fonts[I].Name, Fonts[I].Name).isConstant := True;
 end;
 
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
