@@ -309,7 +309,7 @@
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsSimpleForm"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="SimbaSettingsSimple"/>
+        <UnitName Value="simbasettingssimple"/>
       </Unit48>
       <Unit49>
         <Filename Value="../../Units/MMLCore/tpa.pas"/>
