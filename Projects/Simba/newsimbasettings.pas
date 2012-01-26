@@ -6,11 +6,11 @@ interface
 
 {
   TODO:
-       - onChange is not yet used.
-       - Figure out how to support some dynamic extensions. (Perhaps just make
+       -  Add value constraints to each setting. Integer would have: min, max.
+       String would have: regex to match?
+       -  Use onChange return value?
+       -  Figure out how to support some dynamic extensions. (Perhaps just make
            those functions use the MMLSettings API? they are already, kinda)
-       - Rename the simbasettings unit to something else, remove some of the
-       loading code from it and move it to a more suitable place
 }
 
 uses
@@ -20,15 +20,13 @@ uses
   ;
 
 type
-    TOnChangeSettings = function (obj: TObject): Boolean;
+    TOnChangeSettings = function (obj: TObject): Boolean of object;
 
     TSetting = class(TObject)
       procedure Save(MMLSettings: TMMLSettings); virtual; abstract;
       procedure Load(MMLSettings: TMMLSettings); virtual; abstract;
 
       destructor Destroy; virtual; abstract;
-    public
-      onChange: TOnChangeSettings;
     end;
 
     TSettingsArray = Array of TSetting;
@@ -40,6 +38,8 @@ type
     public
       APath: String;
       set_value: Boolean;
+
+      onChange: TOnChangeSettings;
     end;
 
     TIntegerSetting = class(TValueSetting)
@@ -224,7 +224,7 @@ type
 
     procedure CreateSimbaSettings(SettingsFileName: String);
     procedure ReloadSimbaSettings(SettingsFileName: String);
-    procedure FreeSimbaSettings(Save: Boolean);
+    procedure FreeSimbaSettings(Save: Boolean; SettingsFileName: String);
 
 implementation
 
@@ -298,10 +298,10 @@ begin
   SimbaSettings.Load(SimbaSettings.MMLSettings);
 end;
 
-procedure FreeSimbaSettings(Save: Boolean);
+procedure FreeSimbaSettings(Save: Boolean; SettingsFileName: String);
 begin
   if Save then
-    SimbaSettings.Save(SimbaSettings.MMLSettings);
+    SimbaSettings.Save(SettingsFileName);
 
   SimbaSettings.MMLSettings.Free;
   SimbaSettings.Free;
@@ -435,7 +435,9 @@ end;
 procedure TIntegerSetting.SetValue(val: Integer);
 begin
   set_value := True;
-  FValue := val
+  FValue := val;
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 procedure TIntegerSetting.Load(MMLSettings: TMMLSettings);
@@ -505,9 +507,10 @@ end;
 
 procedure TStringSetting.SetValue(val: String);
 begin
-  //writeln('Setting ' + APath + ' to ' + val);
   set_value := True;
-  FValue := val
+  FValue := val;
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 procedure TStringSetting.Save(MMLSettings: TMMLSettings);
@@ -571,7 +574,9 @@ procedure TBooleanSetting.SetValue(val: Boolean);
 begin
   //writeln('Setting ' + APath + ' to ' + BoolToStr(val));
   set_value := True;
-  FValue := val
+  FValue := val;
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 procedure TBooleanSetting.Save(MMLSettings: TMMLSettings);
