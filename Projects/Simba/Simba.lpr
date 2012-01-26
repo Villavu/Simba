@@ -28,16 +28,8 @@ program Simba;
 {$DEFINE Simba}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads, cmem, {heaptrc, }
-  {$ENDIF}{$ENDIF}
-  Interfaces, Forms, SimbaUnit, colourhistory, About, internets, debugimage,
-  framefunctionlist, simpleanalyzer, updater, updateform, Simbasettings,
-  libloader, mufasabase, tpa, v_ideCodeInsight,
-  PSDump, v_ideCodeParser,
-  v_AutoCompleteForm, CastaliaPasLex, CastaliaPasLexTypes, CastaliaSimplePasPar,
-  CastaliaSimplePasParTypes, dcpbase64, mPasLex, v_Constants, v_MiscFunctions,
-  mmisc, bitmapconv, SimbaSettingsSimple;
+  {$IFDEF UNIX}{$IFDEF UseCThreads}cthreads, cmem,{$ENDIF}{$ENDIF}
+  Interfaces, Forms, SimbaUnit, colourhistory, About, debugimage, bitmapconv;
 
 {$R Simba.res}
 

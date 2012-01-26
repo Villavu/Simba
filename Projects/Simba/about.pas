@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 unit about;
 
 {$mode objfpc}{$H+}
+{$MACRO ON}
 
 interface
 
@@ -54,15 +55,18 @@ var
 
 implementation
 uses
+  mufasabase,
   SimbaUnit;
 { TAboutForm }
 
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin
-  Self.Caption := format('About Simba r%d', [SimbaUnit.SimbaVersion]);
-  Self.LabelRevision.Caption := format('Revision %d', [SimbaUnit.SimbaVersion]);
+  Self.Caption := format('About Simba r%d', [SimbaVersion]);
+  Self.LabelRevision.Caption := format('Revision %d', [SimbaVersion]);
   AboutMemo.Lines.Add('Simba is released under the GPL license.');
-  AboutMemo.Lines.Add(format('You are currently using version: %d',[SimbaUnit.SimbaVersion]));
+  AboutMemo.Lines.Add(format('You are currently using version: %d',[SimbaVersion]));
+  AboutMemo.Lines.Add(format('Compiled with FPC version %d.%d.%d', [FPC_VERSION,
+      FPC_RELEASE, FPC_PATCH]));
   AboutMemo.Lines.Add('');
   AboutMemo.Lines.Add('Please report bugs at: http://bugs.villavu.com/');
   AboutMemo.ReadOnly:= True;

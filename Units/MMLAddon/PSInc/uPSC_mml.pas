@@ -44,6 +44,7 @@ begin
     RegisterMethod('procedure Free');
     RegisterMethod('function SaveToFile(const FileName : string) :boolean;');
     RegisterMethod('procedure LoadFromFile(const FileName : string);');
+    RegisterMethod('procedure LoadFromTBitmap(bmp: TBitmap);');
     RegisterProperty('Width','Integer',iptR);
     RegisterProperty('Height','Integer',iptR);
     RegisterProperty('Index','Integer',iptR);
@@ -154,8 +155,6 @@ begin
   begin
     RegisterProperty('WarnOnly', 'boolean', iptrw);
     RegisterMethod('Procedure DefaultOperations( var xs, ys, xe, ye : integer)');
-    RegisterMethod('Function FindColorsToleranceOptimised( out Points : TPointArray; Color, xs, ys, xe, ye, Tol : Integer) : Boolean');
-    RegisterMethod('Function FindColorToleranceOptimised( out x, y : Integer; Color, xs, ys, xe, ye, tol : Integer) : Boolean');
     RegisterMethod('Function CountColorTolerance( Color, xs, ys, xe, ye, Tolerance : Integer) : Integer');
     RegisterMethod('Function CountColor( Color, xs, ys, xe, ye : Integer) : Integer');
     RegisterMethod('Function SimilarColors( Color1, Color2, Tolerance : Integer) : boolean');
@@ -227,7 +226,7 @@ begin
     RegisterMethod('Procedure HoldMouse( x, y : integer; button : TClickType)');
     RegisterMethod('Procedure ReleaseMouse( x, y : integer; button : TClickType)');
     RegisterMethod('Function IsMouseButtonHeld( button : TClickType) : boolean');
-    RegisterMethod('Procedure SendString( str : string)');
+    RegisterMethod('Procedure SendString( str : string; keywait: integer)');
     RegisterMethod('Procedure HoldKey( key : integer)');
     RegisterMethod('Procedure ReleaseKey( key : integer)');
     RegisterMethod('Function IsKeyHeld( key : integer) : boolean');
@@ -307,7 +306,7 @@ begin
     RegisterMethod('Procedure KeyUp( key : Word)');
     RegisterMethod('Procedure KeyDown( key : Word)');
     RegisterMethod('Procedure PressKey( key : Word)');
-    RegisterMethod('Procedure SendText( text : string)');
+    RegisterMethod('Procedure SendText( text : string; keywait: integer)');
     RegisterMethod('Function isKeyDown( key : Word) : Boolean');
     RegisterMethod('Function GetKeyCode( c : char) : integer');
     RegisterMethod('Function GetImageTarget : TTarget;');

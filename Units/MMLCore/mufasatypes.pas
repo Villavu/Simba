@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -60,6 +60,14 @@ type
   TRGB32Array = array of TRGB32;
   TPRGB32Array = array of PRGB32; //Array of Pointers
 
+  THSL = record
+    H, S, L: extended;
+  end;
+  PHSL = ^THSL;
+
+  THSLArray = array of THSL;
+  T2DHSLArray = array of array of THSL;
+
   TRetData = record
     Ptr : PRGB32;
     IncPtrWith : integer;
@@ -83,6 +91,11 @@ type
   T2DBoolArray = Array of TBoolArray;
   TExtendedArray = Array of Extended;
   T2DExtendedArray = Array of Array of Extended;
+
+  { Crypto }
+  THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
+               htSHA1, htSHA256, htSHA384, htSHA512, htTiger);
+
   { Mask Types }
   TMask = record
     White, Black : TPointArray;

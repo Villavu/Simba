@@ -1,0 +1,14 @@
+program ForLoop_Example;
+
+var
+  I: Integer;
+  // This is your counter variable.
+
+begin
+  // Let's convert this to English:
+    // - For variable I, which first equals 0, until I is equal to 10, do the following...
+  for I := 0 to 10 do
+  begin
+    Writeln('I = ' + IntToStr(I));
+  end;
+end.
