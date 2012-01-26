@@ -2759,7 +2759,7 @@ begin
   {$ENDIF}
   {$endif}
 
-  FreeSimbaSettings(True);
+  FreeSimbaSettings(True, SimbaSettingsFile);
 end;
 
 procedure TSimbaForm.FormShortCuts(var Msg: TLMKey; var Handled: Boolean);
