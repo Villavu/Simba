@@ -2,6 +2,53 @@ unit simbasettingssimple;
 
 {$mode objfpc}{$H+}
 
+{
+
+Settings:
+    -   Paths:
+        Includes
+        Plugins
+        Fonts
+        Extensions
+        Scripts
+
+    -   Code Tools:
+        -   Automatically show hints
+        -   Automatically show completion
+
+    -   Updater:
+        -   Check for updates
+        -   Check every X minutes
+        -   URLs
+
+    -   Tab options:
+        -   Open Next on Close
+        -   Open Script in new Tab
+        -   Check tabs for open script before opening
+
+    -   Colour Picker:
+        -   Show history on pick
+        -   Add to history on pick
+
+    -   Source Editor
+        -   LazColors (boolean)
+        -   Default Script (Path)
+
+    -   Interpreter
+        -   Lape / PS / others
+
+    -   Tray:
+        -   Always Visible
+
+    -   Function List:
+        -   ShowOnStart
+
+    -   Show Command Prompt (Windows only)
+}
+
+{$I Simba.inc}
+
+
 interface
 
 uses
