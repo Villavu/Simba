@@ -1567,7 +1567,6 @@ begin
   if str = 'maximized' then
     self.windowstate := wsMaximized
   else
-//  if str = 'normal' then
     Self.WindowState := wsNormal;
   if SettingExists(ssRecentFilesCount) then
   begin;
@@ -1579,10 +1578,7 @@ begin
         AddRecentFile(str);
     end;
   end;
-{  str := LowerCase(LoadSettingDef(ssFunctionListShowOnStart, 'True'));
-  str2 := lowercase(LoadSettingDef(ssFunctionListShown, '')); }
   if SimbaSettings.FunctionList.ShowOnStart.GetDefValue(True) or SimbaSettings.LastConfig.MainForm.FunctionListShown.GetDefValue(True) then
-  { if (str = 'true') or (str2 = 'true') then }
     FunctionListShown(True)
   else
     FunctionListShown(false);
