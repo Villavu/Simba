@@ -69,15 +69,15 @@ type
   TSettingsSimpleForm = class(TForm)
     ButtonOK: TButton;
     ButtonCancel: TButton;
-    CheckBox1: TCheckBox;
-    CheckBox2: TCheckBox;
-    CheckGroup1: TCheckGroup;
-    CheckGroup2: TCheckGroup;
-    CheckGroup5: TCheckGroup;
-    CheckGroup6: TCheckGroup;
-    Edit1: TEdit;
-    Edit2: TEdit;
-    GroupBox1: TGroupBox;
+    CheckForUpdatesBox: TCheckBox;
+    HighlightLazColours: TCheckBox;
+    CodeToolsCheckBoxes: TCheckGroup;
+    TabSettingsCheckBoxes: TCheckGroup;
+    ColourPickerCheckGroup: TCheckGroup;
+    EnvOther: TCheckGroup;
+    UpdateMinutesEdit: TEdit;
+    DefaultScriptedit: TEdit;
+    UpdaterGroup: TGroupBox;
     GroupBox2: TGroupBox;
     ImageList1: TImageList;
     Label1: TLabel;
@@ -85,11 +85,11 @@ type
     ListView1: TListView;
     PgControlEnvironment: TPageControl;
     PgControlAdvanced: TPageControl;
-    RadioGroup1: TRadioGroup;
+    InterpreterGroup: TRadioGroup;
     SettingsTabsList: TListView;
     PgControlGeneral: TPageControl;
     SettingsTabsPanel: TPanel;
-    TreeView1: TTreeView;
+    PathsTreeView: TTreeView;
     tsEditor: TTabSheet;
     tsOther: TTabSheet;
     tsUpdater: TTabSheet;
@@ -98,9 +98,9 @@ type
     tsAdvanced: TTabSheet;
     procedure ButtonCancelClick(Sender: TObject);
     procedure ButtonOKClick(Sender: TObject);
+    procedure EnvOtherItemClick(Sender: TObject; Index: integer);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure RadioGroup1Click(Sender: TObject);
     procedure SettingsTabsListAdvancedCustomDrawItem(Sender: TCustomListView;
       Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
       var DefaultDraw: Boolean);
@@ -136,37 +136,45 @@ end;
 procedure TSettingsSimpleForm.ButtonOKClick(Sender: TObject);
 begin
   // Updater
-  SimbaSettings.Updater.CheckForUpdates.SetValue(CheckBox1.Checked);
-  SimbaSettings.Updater.CheckEveryXMinutes.SetValue(StrToInt(Edit1.Text));
+  SimbaSettings.Updater.CheckForUpdates.Value := CheckForUpdatesBox.Checked;
+  SimbaSettings.Updater.CheckEveryXMinutes.Value := StrToIntDef(UpdateMinutesEdit.Text, 30);
 
   // Interpreter
 
   // Tabs
-  SimbaSettings.Tab.OpenNextOnClose.SetValue(CheckGroup2.Checked[0]);
-  SimbaSettings.Tab.OpenScriptInNewTab.SetValue(CheckGroup2.Checked[1]);
-  SimbaSettings.Tab.CheckBeforeOpen.SetValue(CheckGroup2.Checked[2]);
+  SimbaSettings.Tab.OpenNextOnClose.Value := TabSettingsCheckBoxes.Checked[0];
+  SimbaSettings.Tab.OpenScriptInNewTab.Value := TabSettingsCheckBoxes.Checked[1];
+  SimbaSettings.Tab.CheckBeforeOpen.Value := TabSettingsCheckBoxes.Checked[2];
 
   // Code Tools
-  SimbaSettings.CodeHints.ShowAutomatically.SetValue(CheckGroup1.Checked[0]);
-  SimbaSettings.CodeCompletion.ShowAutomatically.SetValue(CheckGroup1.Checked[1]);
+  SimbaSettings.CodeHints.ShowAutomatically.Value := CodeToolsCheckBoxes.Checked[0];
+  SimbaSettings.CodeCompletion.ShowAutomatically.Value := CodeToolsCheckBoxes.Checked[1];
 
   // Colour Picker
-  SimbaSettings.ColourPicker.ShowHistoryOnPick.SetValue(CheckGroup5.Checked[0]);
-  //SimbaSettings.ColourPicker.AddToHistoryOnPick.SetValue(CheckGroup5.Checked[1]);
+  SimbaSettings.ColourPicker.ShowHistoryOnPick.Value := ColourPickerCheckGroup.Checked[0];
+  //SimbaSettings.ColourPicker.AddToHistoryOnPick.SetValue(ColourPickerCheckGroup.Checked[1]);
 
   // Source Editor
-  SimbaSettings.SourceEditor.LazColors.SetValue(CheckBox2.Checked);
-  SimbaSettings.SourceEditor.DefScriptPath.SetValue(Edit2.Text);
+  SimbaSettings.SourceEditor.LazColors.Value := HighlightLazColours.Checked;
+  SimbaSettings.SourceEditor.DefScriptPath.Value := DefaultScriptedit.Text;
 
   // Other
-  SimbaSettings.Tray.AlwaysVisible.SetValue(CheckGroup2.Checked[0]);
-  SimbaSettings.FunctionList.ShowOnStart.SetValue(CheckGroup2.Checked[1]);
+  SimbaSettings.Tray.AlwaysVisible.Value := TabSettingsCheckBoxes.Checked[0];
+  SimbaSettings.FunctionList.ShowOnStart.Value := TabSettingsCheckBoxes.Checked[1];
   // Add 'Show Command prompt'
 
   // Paths
 
   //SettingsSimpleForm.Destroy;
   SettingsSimpleForm.Close;
+end;
+
+{ For live changes }
+procedure TSettingsSimpleForm.EnvOtherItemClick(Sender: TObject;
+  Index: integer);
+begin
+  if Index = 0 then
+    SimbaSettings.Tray.AlwaysVisible.Value:= EnvOther.Checked[index];
 end;
 
 procedure TSettingsSimpleForm.ButtonCancelClick(Sender: TObject);
@@ -177,39 +185,39 @@ end;
 procedure TSettingsSimpleForm.FormShow(Sender: TObject);
 begin
   // Updater
-  CheckBox1.Checked := SimbaSettings.Updater.CheckForUpdates.GetValue;
-  Edit1.Text := IntToStr(SimbaSettings.Updater.CheckEveryXMinutes.GetValue);
+  CheckForUpdatesBox.Checked := SimbaSettings.Updater.CheckForUpdates.Value;
+  UpdateMinutesEdit.Text := IntToStr(SimbaSettings.Updater.CheckEveryXMinutes.Value);
 
   // Interpreter
 
   // Tabs
-  CheckGroup2.Checked[0] := SimbaSettings.Tab.OpenNextOnClose.GetValue;
-  CheckGroup2.Checked[1] := SimbaSettings.Tab.OpenScriptInNewTab.GetValue;
-  CheckGroup2.Checked[2] := SimbaSettings.Tab.CheckBeforeOpen.GetValue;
+  TabSettingsCheckBoxes.Checked[0] := SimbaSettings.Tab.OpenNextOnClose.Value;
+  TabSettingsCheckBoxes.Checked[1] := SimbaSettings.Tab.OpenScriptInNewTab.Value;
+  TabSettingsCheckBoxes.Checked[2] := SimbaSettings.Tab.CheckBeforeOpen.Value;
 
   // Code Tools
-  CheckGroup1.Checked[0] := SimbaSettings.CodeHints.ShowAutomatically.GetValue;
-  CheckGroup1.Checked[1] := SimbaSettings.CodeCompletion.ShowAutomatically.GetValue;
+  CodeToolsCheckBoxes.Checked[0] := SimbaSettings.CodeHints.ShowAutomatically.Value;
+  CodeToolsCheckBoxes.Checked[1] := SimbaSettings.CodeCompletion.ShowAutomatically.Value;
 
   // Colour Picker
-  CheckGroup5.Checked[0] := SimbaSettings.ColourPicker.ShowHistoryOnPick.GetValue;
-  //CheckGroup5.Checked[1] := SimbaSettings.ColourPicker.AddToHistoryOnPick.GetValue; // Wizzup: This doesn't actually get set?
+  ColourPickerCheckGroup.Checked[0] := SimbaSettings.ColourPicker.ShowHistoryOnPick.Value;
+  //ColourPickerCheckGroup.Checked[1] := SimbaSettings.ColourPicker.AddToHistoryOnPick.GetValue; // Wizzup: This doesn't actually get set?
 
   // Source Editor
-  CheckBox2.Checked := SimbaSettings.SourceEditor.LazColors.GetValue;
-  Edit2.Text := SimbaSettings.SourceEditor.DefScriptPath.GetValue;
+  HighlightLazColours.Checked := SimbaSettings.SourceEditor.LazColors.Value;
+  DefaultScriptedit.Text := SimbaSettings.SourceEditor.DefScriptPath.Value;
 
   // Other
-  CheckGroup2.Checked[0] := SimbaSettings.Tray.AlwaysVisible.GetValue;
-  CheckGroup2.Checked[1] := SimbaSettings.FunctionList.ShowOnStart.GetValue;
+  Writeln('Always Checked: ' + BoolToStr(SimbaSettings.Tray.AlwaysVisible.Value, True));
+  EnvOther.Checked[0] := SimbaSettings.Tray.AlwaysVisible.Value;
+  Writeln('FOO Always Checked: ' + BoolToStr(EnvOther.Checked[0], True));
+
+  EnvOther.Checked[1] := SimbaSettings.FunctionList.ShowOnStart.Value;
+
+
   // Add 'Show Command prompt', not set in SimbaSettings?
 
   // Paths
-
-end;
-
-procedure TSettingsSimpleForm.RadioGroup1Click(Sender: TObject);
-begin
 
 end;
 
@@ -307,28 +315,25 @@ end;
 // Part of Faux Tabs - OnClick
 procedure TSettingsSimpleForm.SettingsTabsListClick(Sender: TObject);
 var
-  x, y, i: Integer;
-  tmpRect: TRect;
+  x, y: Integer;
+  f: TListItem;
+
 begin
   x := ScreenToClient(Mouse.CursorPos).x;
   y := ScreenToClient(Mouse.CursorPos).y;
-  for i := 0 to (SettingsTabsList.Items.Count - 1) do
-    begin
-      tmpRect := SettingsTabsList.Items.Item[i].DisplayRect(drBounds);
-      if (tmpRect.Left <= x) and (x <= tmpRect.Right) and (tmpRect.Top <= y) and (y <= tmpRect.Bottom) then
-      begin
-        SwitchSettingsTab(i);
 
+  f := SettingsTabsList.GetItemAt(x, y);
 
-        Break;
-      end;
+  if f = nil then
+    exit;
 
-    end;
+  SwitchSettingsTab(f.Index);
 end;
 
 // Part of Faux Tabs - On mouse leave
 procedure TSettingsSimpleForm.SettingsTabsListMouseLeave(Sender: TObject);
 var i: integer;
+
 begin
   for i := 0 to High(SettingsTabState) do
   begin
@@ -344,18 +349,15 @@ end;
 procedure TSettingsSimpleForm.SettingsTabsListMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
 var
-  tmpRect: TRect;
-  i: Integer;
+  f: TListItem;
+
 begin
-  for i := 0 to (SettingsTabsList.Items.Count - 1) do
-    begin
-      tmpRect := SettingsTabsList.Items.Item[i].DisplayRect(drBounds);
-      if (tmpRect.Left <= x) and (x <= tmpRect.Right) and (tmpRect.Top <= y) and (y <= tmpRect.Bottom) then
-      begin
-        HighlightSettingsTab(i);
-        Break;
-      end;
-    end;
+  f := SettingsTabsList.GetItemAt(x, y);
+
+  if f = nil then
+    exit;
+  HighlightSettingsTab(f.Index);
+  writeln('Highlighting: ' + Inttostr(f.index));
 end;
 
 

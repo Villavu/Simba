@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 1260
+  Left = 385
   Height = 623
-  Top = 214
+  Top = 199
   Width = 660
   AllowDropFiles = True
   Caption = 'THA FUKING Simba'
@@ -396,10 +396,10 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Side = asrBottom
-        EditLabel.Left = 67
+        EditLabel.Left = 66
         EditLabel.Height = 16
         EditLabel.Top = 10
-        EditLabel.Width = 34
+        EditLabel.Width = 35
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft

@@ -1,8 +1,9 @@
 object SettingsSimpleForm: TSettingsSimpleForm
-  Left = 956
+  Left = 477
   Height = 416
-  Top = 138
+  Top = 327
   Width = 457
+  ActiveControl = SettingsTabsPanel
   Caption = 'Settings'
   ClientHeight = 416
   ClientWidth = 457
@@ -13,11 +14,11 @@ object SettingsSimpleForm: TSettingsSimpleForm
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '0.9.30.2'
+  LCLVersion = '0.9.30.1'
   object PgControlAdvanced: TPageControl
     Left = 8
-    Height = 297
-    Top = 64
+    Height = 304
+    Top = 72
     Width = 440
     ActivePage = tsAdvanced
     TabIndex = 0
@@ -27,9 +28,9 @@ object SettingsSimpleForm: TSettingsSimpleForm
       Caption = 'Paths'
       ChildSizing.TopBottomSpacing = 10
       ChildSizing.VerticalSpacing = 10
-      ClientHeight = 269
-      ClientWidth = 432
-      object TreeView1: TTreeView
+      ClientHeight = 271
+      ClientWidth = 434
+      object PathsTreeView: TTreeView
         Left = 13
         Height = 239
         Top = 13
@@ -59,7 +60,6 @@ object SettingsSimpleForm: TSettingsSimpleForm
     Top = 384
     Width = 75
     Caption = 'OK'
-    OnClick = ButtonOKClick
     TabOrder = 0
   end
   object ButtonCancel: TButton
@@ -73,20 +73,20 @@ object SettingsSimpleForm: TSettingsSimpleForm
   end
   object SettingsTabsPanel: TPanel
     Left = 0
-    Height = 54
+    Height = 72
     Top = 0
     Width = 457
     Alignment = taLeftJustify
     Caption = 'SettingsTabsPanel'
-    ClientHeight = 54
+    ClientHeight = 72
     ClientWidth = 457
     Color = clWhite
     ParentColor = False
     TabOrder = 2
     object SettingsTabsList: TListView
       Left = 0
-      Height = 53
-      Top = 0
+      Height = 72
+      Top = 8
       Width = 473
       BorderSpacing.Top = 5
       BorderSpacing.Around = 5
@@ -129,31 +129,31 @@ object SettingsSimpleForm: TSettingsSimpleForm
   end
   object PgControlGeneral: TPageControl
     Left = 8
-    Height = 297
-    Top = 64
+    Height = 304
+    Top = 72
     Width = 440
-    ActivePage = tsUpdater
-    TabIndex = 0
+    ActivePage = tsInterpreter
+    TabIndex = 1
     TabOrder = 5
     object tsUpdater: TTabSheet
       Caption = 'Updater'
       ChildSizing.TopBottomSpacing = 10
       ChildSizing.VerticalSpacing = 10
-      ClientHeight = 269
-      ClientWidth = 432
-      object GroupBox1: TGroupBox
+      ClientHeight = 271
+      ClientWidth = 434
+      object UpdaterGroup: TGroupBox
         Left = 12
         Height = 232
         Top = 8
         Width = 409
-        ClientHeight = 214
+        ClientHeight = 228
         ClientWidth = 405
         TabOrder = 0
-        object CheckBox1: TCheckBox
+        object CheckForUpdatesBox: TCheckBox
           Left = 16
-          Height = 19
+          Height = 22
           Top = 13
-          Width = 116
+          Width = 140
           Caption = 'Check for updates'
           TabOrder = 0
         end
@@ -161,13 +161,13 @@ object SettingsSimpleForm: TSettingsSimpleForm
           Left = 16
           Height = 16
           Top = 50
-          Width = 122
+          Width = 149
           Caption = 'Check every (minutes):'
           ParentColor = False
         end
-        object Edit1: TEdit
+        object UpdateMinutesEdit: TEdit
           Left = 158
-          Height = 23
+          Height = 25
           Top = 47
           Width = 80
           TabOrder = 1
@@ -188,9 +188,9 @@ object SettingsSimpleForm: TSettingsSimpleForm
     end
     object tsInterpreter: TTabSheet
       Caption = 'Interpreter'
-      ClientHeight = 269
-      ClientWidth = 432
-      object RadioGroup1: TRadioGroup
+      ClientHeight = 271
+      ClientWidth = 434
+      object InterpreterGroup: TRadioGroup
         Left = 12
         Height = 92
         Top = 8
@@ -204,31 +204,30 @@ object SettingsSimpleForm: TSettingsSimpleForm
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 74
+        ClientHeight = 88
         ClientWidth = 404
         Items.Strings = (
           'FreePascal'
           'Lape'
         )
-        OnClick = RadioGroup1Click
         TabOrder = 0
       end
     end
   end
   object PgControlEnvironment: TPageControl
     Left = 8
-    Height = 297
-    Top = 64
+    Height = 304
+    Top = 72
     Width = 440
-    ActivePage = tsTabs
-    TabIndex = 0
+    ActivePage = tsOther
+    TabIndex = 2
     TabOrder = 3
     Visible = False
     object tsTabs: TTabSheet
       Caption = 'Tabs'
-      ClientHeight = 269
-      ClientWidth = 432
-      object CheckGroup2: TCheckGroup
+      ClientHeight = 271
+      ClientWidth = 434
+      object TabSettingsCheckBoxes: TCheckGroup
         Left = 12
         Height = 167
         Top = 17
@@ -256,12 +255,12 @@ object SettingsSimpleForm: TSettingsSimpleForm
     end
     object tsEditor: TTabSheet
       Caption = 'Editor'
-      ClientHeight = 269
-      ClientWidth = 432
-      object CheckGroup1: TCheckGroup
-        Left = 12
+      ClientHeight = 271
+      ClientWidth = 434
+      object CodeToolsCheckBoxes: TCheckGroup
+        Left = 13
         Height = 71
-        Top = 13
+        Top = 16
         Width = 403
         AutoFill = True
         Caption = 'Code Tools'
@@ -282,7 +281,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
           020000000202
         }
       end
-      object CheckGroup5: TCheckGroup
+      object ColourPickerCheckGroup: TCheckGroup
         Left = 12
         Height = 71
         Top = 96
@@ -312,14 +311,14 @@ object SettingsSimpleForm: TSettingsSimpleForm
         Top = 180
         Width = 403
         Caption = 'Source Editor'
-        ClientHeight = 66
+        ClientHeight = 67
         ClientWidth = 399
         TabOrder = 2
-        object CheckBox2: TCheckBox
+        object HighlightLazColours: TCheckBox
           Left = 14
-          Height = 19
+          Height = 22
           Top = 8
-          Width = 116
+          Width = 145
           Caption = 'Use Lazarus colors'
           TabOrder = 0
         end
@@ -327,13 +326,13 @@ object SettingsSimpleForm: TSettingsSimpleForm
           Left = 14
           Height = 16
           Top = 32
-          Width = 74
+          Width = 90
           Caption = 'Default script:'
           ParentColor = False
         end
-        object Edit2: TEdit
+        object DefaultScriptedit: TEdit
           Left = 110
-          Height = 23
+          Height = 25
           Top = 28
           Width = 184
           TabOrder = 1
@@ -343,9 +342,9 @@ object SettingsSimpleForm: TSettingsSimpleForm
     end
     object tsOther: TTabSheet
       Caption = 'Other'
-      ClientHeight = 269
-      ClientWidth = 432
-      object CheckGroup6: TCheckGroup
+      ClientHeight = 271
+      ClientWidth = 434
+      object EnvOther: TCheckGroup
         Left = 13
         Height = 166
         Top = 18
@@ -364,6 +363,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
           'Show Function List on Start'
           'Show Command Prompt (Windows only)'
         )
+        OnItemClick = EnvOtherItemClick
         TabOrder = 0
         Data = {
           03000000020202
