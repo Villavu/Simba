@@ -1,7 +1,7 @@
 object SettingsSimpleForm: TSettingsSimpleForm
-  Left = 1463
+  Left = 669
   Height = 416
-  Top = 337
+  Top = 326
   Width = 457
   ActiveControl = SettingsTabsPanel
   Caption = 'Settings'
