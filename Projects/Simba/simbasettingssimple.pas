@@ -5,45 +5,52 @@ unit simbasettingssimple;
 {
 
 Settings:
-    -   Paths:
-        Includes
-        Plugins
-        Fonts
-        Extensions
-        Scripts
+    - General
 
-    -   Code Tools:
-        -   Automatically show hints
-        -   Automatically show completion
+        -   Updater:
+            -   Check for updates
+            -   Check every X minutes
+            -   URLs
 
-    -   Updater:
-        -   Check for updates
-        -   Check every X minutes
-        -   URLs
+        -   Interpreter
+            -   Lape / PS / others
 
-    -   Tab options:
-        -   Open Next on Close
-        -   Open Script in new Tab
-        -   Check tabs for open script before opening
+    - Environment
 
-    -   Colour Picker:
-        -   Show history on pick
-        -   Add to history on pick
+        -   Code Tools:
+            -   Automatically show hints
+            -   Automatically show completion
 
-    -   Source Editor
-        -   LazColors (boolean)
-        -   Default Script (Path)
+        -   Tab options:
+            -   Open Next on Close
+            -   Open Script in new Tab
+            -   Check tabs for open script before opening
 
-    -   Interpreter
-        -   Lape / PS / others
+        -   Colour Picker:
+            -   Show history on pick
+            -   Add to history on pick
 
-    -   Tray:
-        -   Always Visible
+        -   Source Editor
+            -   LazColors (boolean)
+            -   Default Script (Path)
 
-    -   Function List:
-        -   ShowOnStart
+        -   Tray:
+            -   Always Visible
 
-    -   Show Command Prompt (Windows only)
+        -   Function List:
+            -   ShowOnStart
+
+        -   Show Command Prompt (Windows only)
+
+    - Advanced
+
+        -   Paths:
+            Includes
+            Plugins
+            Fonts
+            Extensions
+            Scripts
+
 }
 
 {$I Simba.inc}
@@ -53,28 +60,47 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  StdCtrls, ExtCtrls;
+  StdCtrls, ExtCtrls, CheckLst, NewSimbaSettings, types;
 
 type
 
   { TSettingsSimpleForm }
 
   TSettingsSimpleForm = class(TForm)
-    Button1: TButton;
-    Button2: TButton;
+    ButtonOK: TButton;
+    ButtonCancel: TButton;
+    CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
     CheckGroup1: TCheckGroup;
     CheckGroup2: TCheckGroup;
+    CheckGroup5: TCheckGroup;
+    CheckGroup6: TCheckGroup;
+    Edit1: TEdit;
+    Edit2: TEdit;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
     ImageList1: TImageList;
+    Label1: TLabel;
+    Label2: TLabel;
+    ListView1: TListView;
+    PgControlEnvironment: TPageControl;
+    PgControlAdvanced: TPageControl;
+    RadioGroup1: TRadioGroup;
     SettingsTabsList: TListView;
-    PageControl1: TPageControl;
+    PgControlGeneral: TPageControl;
     SettingsTabsPanel: TPanel;
-    TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
-    procedure Button1Click(Sender: TObject);
-    procedure CheckGroup1Click(Sender: TObject);
+    TreeView1: TTreeView;
+    tsEditor: TTabSheet;
+    tsOther: TTabSheet;
+    tsUpdater: TTabSheet;
+    tsInterpreter: TTabSheet;
+    tsTabs: TTabSheet;
+    tsAdvanced: TTabSheet;
+    procedure ButtonCancelClick(Sender: TObject);
+    procedure ButtonOKClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure SettingsTabsListAdvancedCustomDraw(Sender: TCustomListView;
-      const ARect: TRect; Stage: TCustomDrawStage; var DefaultDraw: Boolean);
+    procedure FormShow(Sender: TObject);
+    procedure RadioGroup1Click(Sender: TObject);
     procedure SettingsTabsListAdvancedCustomDrawItem(Sender: TCustomListView;
       Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
       var DefaultDraw: Boolean);
@@ -101,31 +127,124 @@ implementation
 
 { TSettingsSimpleForm }
 
-procedure TSettingsSimpleForm.CheckGroup1Click(Sender: TObject);
-begin
-
-end;
-
 procedure TSettingsSimpleForm.FormCreate(Sender: TObject);
 begin
   SetLength(SettingsTabState, SettingsTabsList.Items.Count);
   SettingsTabState[0] := 1;
 end;
 
+procedure TSettingsSimpleForm.ButtonOKClick(Sender: TObject);
+begin
+  // Updater
+  SimbaSettings.Updater.CheckForUpdates.SetValue(CheckBox1.Checked);
+  SimbaSettings.Updater.CheckEveryXMinutes.SetValue(StrToInt(Edit1.Text));
+
+  // Interpreter
+
+  // Tabs
+  SimbaSettings.Tab.OpenNextOnClose.SetValue(CheckGroup2.Checked[0]);
+  SimbaSettings.Tab.OpenScriptInNewTab.SetValue(CheckGroup2.Checked[1]);
+  SimbaSettings.Tab.CheckBeforeOpen.SetValue(CheckGroup2.Checked[2]);
+
+  // Code Tools
+  SimbaSettings.CodeHints.ShowAutomatically.SetValue(CheckGroup1.Checked[0]);
+  SimbaSettings.CodeCompletion.ShowAutomatically.SetValue(CheckGroup1.Checked[1]);
+
+  // Colour Picker
+  SimbaSettings.ColourPicker.ShowHistoryOnPick.SetValue(CheckGroup5.Checked[0]);
+  //SimbaSettings.ColourPicker.AddToHistoryOnPick.SetValue(CheckGroup5.Checked[1]);
+
+  // Source Editor
+  SimbaSettings.SourceEditor.LazColors.SetValue(CheckBox2.Checked);
+  SimbaSettings.SourceEditor.DefScriptPath.SetValue(Edit2.Text);
+
+  // Other
+  SimbaSettings.Tray.AlwaysVisible.SetValue(CheckGroup2.Checked[0]);
+  SimbaSettings.FunctionList.ShowOnStart.SetValue(CheckGroup2.Checked[1]);
+  // Add 'Show Command prompt'
+
+  // Paths
+
+  //SettingsSimpleForm.Destroy;
+  SettingsSimpleForm.Close;
+end;
+
+procedure TSettingsSimpleForm.ButtonCancelClick(Sender: TObject);
+begin
+  SettingsSimpleForm.Close;
+end;
+
+procedure TSettingsSimpleForm.FormShow(Sender: TObject);
+begin
+  // Updater
+  CheckBox1.Checked := SimbaSettings.Updater.CheckForUpdates.GetValue;
+  Edit1.Text := IntToStr(SimbaSettings.Updater.CheckEveryXMinutes.GetValue);
+
+  // Interpreter
+
+  // Tabs
+  CheckGroup2.Checked[0] := SimbaSettings.Tab.OpenNextOnClose.GetValue;
+  CheckGroup2.Checked[1] := SimbaSettings.Tab.OpenScriptInNewTab.GetValue;
+  CheckGroup2.Checked[2] := SimbaSettings.Tab.CheckBeforeOpen.GetValue;
+
+  // Code Tools
+  CheckGroup1.Checked[0] := SimbaSettings.CodeHints.ShowAutomatically.GetValue;
+  CheckGroup1.Checked[1] := SimbaSettings.CodeCompletion.ShowAutomatically.GetValue;
+
+  // Colour Picker
+  CheckGroup5.Checked[0] := SimbaSettings.ColourPicker.ShowHistoryOnPick.GetValue;
+  //CheckGroup5.Checked[1] := SimbaSettings.ColourPicker.AddToHistoryOnPick.GetValue; // Wizzup: This doesn't actually get set?
+
+  // Source Editor
+  CheckBox2.Checked := SimbaSettings.SourceEditor.LazColors.GetValue;
+  Edit2.Text := SimbaSettings.SourceEditor.DefScriptPath.GetValue;
+
+  // Other
+  CheckGroup2.Checked[0] := SimbaSettings.Tray.AlwaysVisible.GetValue;
+  CheckGroup2.Checked[1] := SimbaSettings.FunctionList.ShowOnStart.GetValue;
+  // Add 'Show Command prompt', not set in SimbaSettings?
+
+  // Paths
+
+end;
+
+procedure TSettingsSimpleForm.RadioGroup1Click(Sender: TObject);
+begin
+
+end;
+
+
+// Part of Faux Tabs - Controls switching of tabs
 procedure TSettingsSimpleForm.SwitchSettingsTab(NewTab: Integer);
 var i: Integer;
 begin
   for i := 0 to High(SettingsTabState) do
+  begin
     if i = NewTab then
       SettingsTabState[i] := 1
     else
     begin
       SettingsTabState[i] := 0;
     end;
+  end;
+
+  PgControlGeneral.Visible := False;
+  PgControlEnvironment.Visible := False;
+  PgControlAdvanced.Visible := False;
+
+  if NewTab = 0 then
+    PgControlGeneral.Visible := True
+  else
+    if NewTab = 1 then
+      PgControlEnvironment.Visible := True
+    else
+      if NewTab = 2 then
+        PgControlAdvanced.Visible := True;
 
   SettingsTabsList.Refresh;
 end;
 
+// Part of Faux Tabs - Controls the highlight state
 procedure TSettingsSimpleForm.HighlightSettingsTab(NewTab: Integer);
 var i: Integer;
 begin
@@ -146,19 +265,7 @@ end;
 
 
 
-procedure TSettingsSimpleForm.Button1Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSettingsSimpleForm.SettingsTabsListAdvancedCustomDraw(Sender: TCustomListView;
-  const ARect: TRect; Stage: TCustomDrawStage; var DefaultDraw: Boolean);
-begin
-   {Sender.Canvas.Rectangle(ARect);
-   Sender.Canvas.Brush.Color := clBlack;
-   Sender.Canvas.FillRect(ARect);  }
-end;
-
+// Part of Faux Tabs - Custom draws tabs
 procedure TSettingsSimpleForm.SettingsTabsListAdvancedCustomDrawItem(
   Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
   Stage: TCustomDrawStage; var DefaultDraw: Boolean);
@@ -193,12 +300,11 @@ begin
     ImageList1.Draw(Sender.Canvas, ItemBoundsRect.Left + (((ItemBoundsRect.Right - ItemBoundsRect.Left) div 2) - 16), IconRect.Top+3, Item.ImageIndex);
     Sender.Canvas.TextOut(LabelRect.Left+2, LabelRect.Top, Item.Caption);
 
-
-  //drbounds, dricon, drlabel, dr
   end;
 
 end;
 
+// Part of Faux Tabs - OnClick
 procedure TSettingsSimpleForm.SettingsTabsListClick(Sender: TObject);
 var
   x, y, i: Integer;
@@ -220,6 +326,7 @@ begin
     end;
 end;
 
+// Part of Faux Tabs - On mouse leave
 procedure TSettingsSimpleForm.SettingsTabsListMouseLeave(Sender: TObject);
 var i: integer;
 begin
@@ -233,6 +340,7 @@ begin
   SettingsTabsList.Repaint;
 end;
 
+// Part of Faux Tabs - On mouse move
 procedure TSettingsSimpleForm.SettingsTabsListMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
 var
@@ -245,10 +353,8 @@ begin
       if (tmpRect.Left <= x) and (x <= tmpRect.Right) and (tmpRect.Top <= y) and (y <= tmpRect.Bottom) then
       begin
         HighlightSettingsTab(i);
-
         Break;
       end;
-
     end;
 end;
 
