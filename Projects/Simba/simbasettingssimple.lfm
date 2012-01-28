@@ -1,7 +1,7 @@
 object SettingsSimpleForm: TSettingsSimpleForm
-  Left = 477
+  Left = 1463
   Height = 416
-  Top = 327
+  Top = 337
   Width = 457
   ActiveControl = SettingsTabsPanel
   Caption = 'Settings'
@@ -60,6 +60,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
     Top = 384
     Width = 75
     Caption = 'OK'
+    OnClick = ButtonOKClick
     TabOrder = 0
   end
   object ButtonCancel: TButton
@@ -207,7 +208,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
         ClientHeight = 88
         ClientWidth = 404
         Items.Strings = (
-          'FreePascal'
+          'PascalScript'
           'Lape'
         )
         TabOrder = 0
@@ -219,8 +220,8 @@ object SettingsSimpleForm: TSettingsSimpleForm
     Height = 304
     Top = 72
     Width = 440
-    ActivePage = tsOther
-    TabIndex = 2
+    ActivePage = tsTabs
+    TabIndex = 0
     TabOrder = 3
     Visible = False
     object tsTabs: TTabSheet
