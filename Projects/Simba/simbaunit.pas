@@ -52,6 +52,7 @@ uses
   SynEditMarkupHighAll, LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil,
   about, framefunctionlist, ocr, updateform, Simbasettingsold,
+  Simbasettingssimple,
   {$IFDEF USE_EXTENSIONS}virtualextension, extensionmanager,{$ENDIF}
 
   v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
@@ -148,6 +149,7 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    MenuItemSettingsSimpleButton: TMenuItem;
     MenuItemLape: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
     MenuItemGoto: TMenuItem;
@@ -352,6 +354,7 @@ type
     procedure MenuItemOpenScriptsFolderClick(Sender: TObject);
     procedure MenuItemReportBugClick(Sender: TObject);
     procedure MenuItemSettingsButtonClick(Sender: TObject);
+    procedure MenuItemSettingsSimpleButtonClick(Sender: TObject);
     procedure MenuItemShowClick(Sender: TObject);
     procedure MenuItemTabCloseClick(Sender: TObject);
     procedure MenuItemTabCloseOthersClick(Sender: TObject);
@@ -2640,13 +2643,15 @@ begin
     CreateSimbaSettings(SimbaSettingsFile);
 
     Application.CreateForm(TSettingsForm,SettingsForm);
+    Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
 
     Self.LoadFormSettings;
   end else
   begin
     CreateSimbaSettings(SimbaSettingsFile);
 
-   Application.CreateForm(TSettingsForm,SettingsForm);
+    Application.CreateForm(TSettingsForm,SettingsForm);
+    Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
 
     Self.CreateDefaultEnvironment;
     FillThread.StartWait := 250;
@@ -2981,6 +2986,11 @@ begin
   res := SettingsForm.ShowModal;
   if res = mrOK then
     ReloadSimbaSettings(SimbaSettingsFile);
+end;
+
+procedure TSimbaForm.MenuItemSettingsSimpleButtonClick(Sender: TObject);
+begin
+ SettingsSimpleForm.ShowModal;
 end;
 
 procedure TSimbaForm.MenuItemShowClick(Sender: TObject);

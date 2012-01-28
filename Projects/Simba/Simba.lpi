@@ -305,13 +305,16 @@
         <UnitName Value="os_linux"/>
       </Unit47>
       <Unit48>
+        <Filename Value="simbasettingssimple.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SettingsSimpleForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="simbasettingssimple"/>
+      </Unit48>
+      <Unit49>
         <Filename Value="../../Units/MMLCore/tpa.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="tpa"/>
-      </Unit48>
-      <Unit49>
-        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
-        <IsPartOfProject Value="True"/>
       </Unit49>
       <Unit50>
         <Filename Value="scriptmanager.pas"/>
