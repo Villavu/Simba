@@ -8,37 +8,38 @@ Settings:
     - General
 
         -   Updater:
-            -   Check for updates
-            -   Check every X minutes
+            X   Check for updates
+            X   Check every X minutes
             -   URLs
 
         -   Interpreter
-            -   Lape / PS / others
+            X   Lape / PS / others
+            -   Allow SysCalls
 
     - Environment
 
-        -   Code Tools:
-            -   Automatically show hints
-            -   Automatically show completion
+        X   Code Tools:
+            X   Automatically show hints
+            X   Automatically show completion
 
-        -   Tab options:
-            -   Open Next on Close
-            -   Open Script in new Tab
-            -   Check tabs for open script before opening
+        X   Tab options:
+            X   Open Next on Close
+            X   Open Script in new Tab
+            X   Check tabs for open script before opening
 
-        -   Colour Picker:
-            -   Show history on pick
-            -   Add to history on pick
+        X   Colour Picker:
+            X   Show history on pick
+            X   Add to history on pick
 
-        -   Source Editor
-            -   LazColors (boolean)
-            -   Default Script (Path)
+        X   Source Editor
+            X   LazColors (boolean)
+            X   Default Script (Path)
 
-        -   Tray:
-            -   Always Visible
+        X   Tray:
+            X   Always Visible
 
-        -   Function List:
-            -   ShowOnStart
+        X   Function List:
+            X   ShowOnStart
 
         -   Show Command Prompt (Windows only)
 
@@ -135,11 +136,16 @@ end;
 
 procedure TSettingsSimpleForm.ButtonOKClick(Sender: TObject);
 begin
+  writeln('OK Click');
   // Updater
   SimbaSettings.Updater.CheckForUpdates.Value := CheckForUpdatesBox.Checked;
   SimbaSettings.Updater.CheckEveryXMinutes.Value := StrToIntDef(UpdateMinutesEdit.Text, 30);
 
   // Interpreter
+  if InterpreterGroup.ItemIndex = 0 then
+    SimbaSettings.Interpreter._Type.Value := 0
+  else
+    SimbaSettings.Interpreter._Type.Value := 3; // 3 is lape
 
   // Tabs
   SimbaSettings.Tab.OpenNextOnClose.Value := TabSettingsCheckBoxes.Checked[0];
@@ -165,8 +171,7 @@ begin
 
   // Paths
 
-  //SettingsSimpleForm.Destroy;
-  SettingsSimpleForm.Close;
+  ModalResult := mrOK;
 end;
 
 { For live changes }
@@ -179,7 +184,7 @@ end;
 
 procedure TSettingsSimpleForm.ButtonCancelClick(Sender: TObject);
 begin
-  SettingsSimpleForm.Close;
+  ModalResult := mrCancel;
 end;
 
 procedure TSettingsSimpleForm.FormShow(Sender: TObject);
@@ -189,6 +194,10 @@ begin
   UpdateMinutesEdit.Text := IntToStr(SimbaSettings.Updater.CheckEveryXMinutes.Value);
 
   // Interpreter
+  if SimbaSettings.Interpreter._Type.Value = 0 then
+    InterpreterGroup.ItemIndex := 0
+  else
+    InterpreterGroup.ItemIndex := 1;
 
   // Tabs
   TabSettingsCheckBoxes.Checked[0] := SimbaSettings.Tab.OpenNextOnClose.Value;
@@ -208,9 +217,7 @@ begin
   DefaultScriptedit.Text := SimbaSettings.SourceEditor.DefScriptPath.Value;
 
   // Other
-  Writeln('Always Checked: ' + BoolToStr(SimbaSettings.Tray.AlwaysVisible.Value, True));
   EnvOther.Checked[0] := SimbaSettings.Tray.AlwaysVisible.Value;
-  Writeln('FOO Always Checked: ' + BoolToStr(EnvOther.Checked[0], True));
 
   EnvOther.Checked[1] := SimbaSettings.FunctionList.ShowOnStart.Value;
 
@@ -357,7 +364,6 @@ begin
   if f = nil then
     exit;
   HighlightSettingsTab(f.Index);
-  writeln('Highlighting: ' + Inttostr(f.index));
 end;
 
 
