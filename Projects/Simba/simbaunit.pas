@@ -442,6 +442,7 @@ type
     procedure SetFontPath(const AValue: String);
     procedure SetIncludePath(const AValue: String);
     function SetInterpreter(obj: TObject): Boolean;
+    function SetTrayVisiblity(obj: TObject): Boolean;
     procedure SetPluginPath(const AValue: string);
     procedure SetScriptPath(const AValue: string);
     procedure SetShowParamHintAuto(const AValue: boolean);
@@ -3314,6 +3315,11 @@ begin
     CurrScript.SynEdit.Lines.text := DefaultScript;
 end;
 
+function TSimbaForm.SetTrayVisiblity(obj: TObject): Boolean;
+begin
+  MTrayIcon.Visible := TBooleanSetting(obj).Value;
+end;
+
 procedure TSimbaForm.SetPluginPath(const AValue: string);
 begin
   SimbaSettings.Plugins.Path.Value := AValue;
@@ -3388,6 +3394,7 @@ end;
 procedure TSimbaForm.RegisterSettingsOnChanges;
 begin
   SimbaSettings.Interpreter._Type.OnChange := @SetInterpreter;
+  SimbaSettings.Tray.AlwaysVisible.onChange:= @SetTrayVisiblity;
 end;
 
 
