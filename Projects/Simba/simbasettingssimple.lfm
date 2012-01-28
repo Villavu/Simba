@@ -1,7 +1,7 @@
 object SettingsSimpleForm: TSettingsSimpleForm
-  Left = 669
+  Left = 585
   Height = 416
-  Top = 326
+  Top = 266
   Width = 457
   ActiveControl = SettingsTabsPanel
   Caption = 'Settings'
@@ -133,8 +133,8 @@ object SettingsSimpleForm: TSettingsSimpleForm
     Height = 304
     Top = 72
     Width = 440
-    ActivePage = tsInterpreter
-    TabIndex = 1
+    ActivePage = tsUpdater
+    TabIndex = 0
     TabOrder = 5
     object tsUpdater: TTabSheet
       Caption = 'Updater'
