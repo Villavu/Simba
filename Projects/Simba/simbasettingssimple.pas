@@ -131,7 +131,6 @@ implementation
 procedure TSettingsSimpleForm.FormCreate(Sender: TObject);
 begin
   SetLength(SettingsTabState, SettingsTabsList.Items.Count);
-  SettingsTabState[0] := 1;
 end;
 
 procedure TSettingsSimpleForm.ButtonOKClick(Sender: TObject);
@@ -165,8 +164,8 @@ begin
   SimbaSettings.SourceEditor.DefScriptPath.Value := DefaultScriptedit.Text;
 
   // Other
-  SimbaSettings.Tray.AlwaysVisible.Value := TabSettingsCheckBoxes.Checked[0];
-  SimbaSettings.FunctionList.ShowOnStart.Value := TabSettingsCheckBoxes.Checked[1];
+  SimbaSettings.Tray.AlwaysVisible.Value := EnvOther.Checked[0];
+  SimbaSettings.FunctionList.ShowOnStart.Value := EnvOther.Checked[1];
   // Add 'Show Command prompt'
 
   // Paths
@@ -218,7 +217,6 @@ begin
 
   // Other
   EnvOther.Checked[0] := SimbaSettings.Tray.AlwaysVisible.Value;
-
   EnvOther.Checked[1] := SimbaSettings.FunctionList.ShowOnStart.Value;
 
 
@@ -226,6 +224,11 @@ begin
 
   // Paths
 
+
+  // Form stuff
+  SettingsTabState[0] := 1;
+  SettingsTabState[1] := 0;
+  SettingsTabState[2] := 0;
 end;
 
 
@@ -287,7 +290,6 @@ procedure TSettingsSimpleForm.SettingsTabsListAdvancedCustomDrawItem(
 var
   ItemBoundsRect, IconRect, LabelRect: TRect;
 begin
-
   if stage = cdPostPaint then
   begin
 
