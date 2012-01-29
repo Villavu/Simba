@@ -75,6 +75,7 @@ uses
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
+  newsimbasettings, // SimbaSettings
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
@@ -291,7 +292,7 @@ begin
   begin
     {$I ../../Units/MMLAddon/PSInc/pscompile.inc}
     AddTypes('TStringArray','Array of String');
-    AddConstantN('ExtPath', 'string').SetString({$IFDEF USE_EXTENSIONS}ExtPath{$ELSE}''{$ENDIF});
+    AddConstantN('ExtPath', 'string').SetString({$IFDEF USE_EXTENSIONS}SimbaSettings.Extensions.Path.Value{$ELSE}''{$ENDIF});
     for i := 0 to high(VirtualKeys) do
       AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
   end;
@@ -366,7 +367,8 @@ var
   f: TFileStream;
 begin
   with SimbaForm do
-    Path := FindFile(FilePath, [IncludePath, ExtPath, ExtractFileDir(Filename), ExtractFileDir(OrginFileName)]);
+    Path := FindFile(FilePath, [SimbaSettings.Includes.Path.Value,
+    SimbaSettings.Extensions.Path.Value, ExtractFileDir(Filename), ExtractFileDir(OrginFileName)]);
 
   if (Path = '') then
   begin
