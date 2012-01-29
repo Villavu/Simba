@@ -683,6 +683,48 @@ begin
   TStringSetting(obj).Value := s;
 end;
 
+procedure GetUpdaterGetCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetUpdaterCheckEveryXminutes(obj: TObject); begin TIntegerSetting(obj).Value := 30; end;
+procedure GetUpdaterLink(obj: TObject); begin TStringSetting(obj).Value := SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};; end;
+procedure GetUpdaterVersionLink(obj: TObject); begin TStringSetting(obj).Value := SimbaURL + 'Version'; end;
+
+procedure GetInterpreterType(obj: TObject); begin TIntegerSetting(obj).Value := 0; end; // 0 is PS
+procedure GetInterpreterAllowSysCalls(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+
+procedure GetFontsLoadOnStartUp(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFontsVersion(obj: TObject); begin TIntegerSetting(obj).Value := -1; end;
+procedure GetFontsVersionLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Version'; end;
+procedure GetFontsUpdateLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Fonts.tar.bz2'; end;
+
+
+procedure GetTabOpenNextOnClose(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetOpenScriptInNewTab(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetTabCheckBeforeOpen(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetGeneralMaxRecentFiles(obj: TObject); begin TIntegerSetting(obj).Value := 10; end;
+
+procedure GetColourPickerShowHistoryonPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetColourPickerAddToHistoryOnPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetFunctionListShowOnStart(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetSourceEditorLazColors(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetExtensionsFileExtension(obj: TObject); begin TStringSetting(obj).Value := 'sex'; end;
+
+
+procedure GetMainFormNormalSize(obj: TObject); begin TStringSetting(obj).Value := '739:555'; end;
+procedure GetMainFormPosition(obj: TObject); begin TStringSetting(obj).Value := ''; end;
+procedure GetMainFormState(obj: TObject); begin TStringSetting(obj).Value := 'normal'; end;
+
+procedure GetMainFormConsoleVisible(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+
+procedure GetTrayAlwaysVisible(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetSimbaNewsURL(obj: TObject); begin TStringSetting(obj).Value := 'http://simba.villavu.com/bin/news'; end;
+
 
 constructor TSimbaSettings.Create;
 begin
@@ -697,14 +739,19 @@ begin
   Fonts.Path.onDefault := @GetFontPath;
 
   Fonts.LoadOnStartUp := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnStart)) as TBooleanSetting;
+  Fonts.LoadOnStartUp.onDefault := @GetFontsLoadOnStartUp;
   Fonts.Version := Fonts.AddChild(TIntegerSetting.Create(ssFontsVersion)) as TIntegerSetting;
+  Fonts.Version.onDefault := @GetFontsVersion;
   Fonts.VersionLink := Fonts.AddChild(TStringSetting.Create(ssFontsVersionLink)) as TStringSetting;
+  Fonts.VersionLink.onDefault := @GetFontsVersionLink;
   Fonts.UpdateLink := Fonts.AddChild(TStringSetting.Create(ssFontsLink)) as TStringSetting;
+  Fonts.UpdateLink.onDefault := @GetFontsUpdateLink;
 
   Extensions := AddChild(TExtensionsSection.Create()) as TExtensionsSection;
   Extensions.Path := Extensions.AddChild(TStringSetting.Create(ssExtensionsPath)) as TStringSetting;
   Extensions.Path.onDefault := @GetExtPath;
   Extensions.FileExtension := Extensions.AddChild(TStringSetting.Create(ssExtensionsFileExtension)) as TStringSetting;
+  Extensions.FileExtension.onDefault := @GetExtensionsFileExtension;
 
   Scripts := AddChild(TScriptsSection.Create()) as TScriptsSection;
   Scripts.Path := Scripts.AddChild(TStringSetting.Create(ssScriptsPath)) as TStringSetting;
@@ -712,21 +759,27 @@ begin
 
   FunctionList := AddChild(TFunctionListSection.Create()) as TFunctionListSection;
   FunctionList.ShowOnStart := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowOnStart)) as TBooleanSetting;
+  FunctionList.ShowOnStart.onDefault := @GetFunctionListShowOnStart;
 
   Tray := AddChild(TTraySection.Create()) as TTraySection;
   Tray.AlwaysVisible := Tray.AddChild(TBooleanSetting.Create(ssTrayAlwaysVisible)) as TBooleanSetting;
+  Tray.AlwaysVisible.onDefault := @GetTrayAlwaysVisible;
 
   Interpreter := AddChild(TInterpreterSection.Create()) as TInterpreterSection;
   Interpreter._Type := Interpreter.AddChild(TIntegerSetting.Create(ssInterpreterType)) as TIntegerSetting;
+  Interpreter._Type.onDefault := @GetInterpreterType;
   Interpreter.AllowSysCalls := Interpreter.AddChild(TBooleanSetting.Create(ssInterpreterAllowSysCalls)) as TBooleanSetting;
+  Interpreter.AllowSysCalls.onDefault := @GetInterpreterAllowSysCalls;
 
   SourceEditor := AddChild(TSourceEditorSection.Create()) as TSourceEditorSection;
   SourceEditor.DefScriptPath := SourceEditor.AddChild(TStringSetting.Create(ssSourceEditorDefScriptPath)) as TStringSetting;
   SourceEditor.DefScriptPath.onDefault := @GetDefScriptPath;
   SourceEditor.LazColors := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorLazColors)) as TBooleanSetting;
+  SourceEditor.LazColors.onDefault := @GetSourceEditorLazColors;
 
   News := AddChild(TNewsSection.Create()) as TNewsSection;
   News.URL := News.AddChild(TStringSetting.Create(ssNewsLink)) as TStringSetting;
+  News.URL.onDefault := @GetSimbaNewsURL;
 
   Plugins := AddChild(TPluginsSection.Create()) as TPluginsSection;
   Plugins.Path := Plugins.AddChild(TStringSetting.Create(ssPluginsPath)) as TStringSetting;
@@ -734,36 +787,52 @@ begin
 
   Tab := AddChild(TTabsSection.Create()) as TTabsSection;
   Tab.OpenNextOnClose := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenNextOnClose)) as TBooleanSetting;
+  Tab.OpenNextOnClose.onDefault := @GetTabOpenNextOnClose;
   Tab.OpenScriptInNewTab := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenScriptInNewTab)) as TBooleanSetting;
-  Tab.OpenScriptInNewTab := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenScriptInNewTab)) as TBooleanSetting;
+  Tab.OpenScriptInNewTab.onDefault := @GetOpenScriptInNewTab;
   Tab.CheckBeforeOpen := Tab.AddChild(TBooleanSetting.Create(ssTabsCheckBeforeOpen)) as TBooleanSetting;
+  Tab.CheckBeforeOpen.onDefault := @GetTabCheckBeforeOpen;
 
   General := AddChild(TGeneralSection.Create()) as TGeneralSection;
   General.MaxRecentFiles := General.AddChild(TIntegerSetting.Create(ssMaxRecentFiles)) as TIntegerSetting;
+  General.MaxRecentFiles.onDefault := @GetGeneralMaxRecentFiles;
 
   Updater := AddChild(TUpdaterSection.Create()) as TUpdaterSection;
   Updater.CheckForUpdates := Updater.AddChild(TBooleanSetting.Create(ssCheckUpdate)) as TBooleanSetting;
+  Updater.CheckForUpdates.onDefault := @GetUpdaterGetCheckForUpdates;
   Updater.RemoteVersionLink := Updater.AddChild(TStringSetting.Create(ssUpdaterVersionLink)) as TStringSetting;
+  Updater.RemoteversionLink.onDefault := @GetUpdaterVersionLink;
   Updater.RemoteLink := Updater.AddChild(TStringSetting.Create(ssUpdaterLink)) as TStringSetting;
+  Updater.RemoteLink.onDefault := @GetUpdaterLink;
   Updater.CheckEveryXMinutes := Updater.AddChild(TIntegerSetting.Create(ssCheckUpdateMinutes)) as TIntegerSetting;
+  Updater.CheckEveryXMinutes.onDefault := @GetUpdaterCheckEveryXminutes;
 
   ColourPicker := AddChild(TColourPickerSection.Create()) as TColourPickerSection;
   ColourPicker.AddToHistoryOnPick := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerAddToHistoryOnPick)) as TBooleanSetting;
+  ColourPicker.AddToHistoryOnPick.onDefault := @GetColourPickerAddToHistoryOnPick;
   ColourPicker.ShowHistoryOnPick := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerShowHistoryOnPick)) as TBooleanSetting;
+  ColourPicker.ShowHistoryOnPick.onDefault := @GetColourPickerShowHistoryonPick;
 
   CodeHints := AddChild(TCodeHintsSection.Create()) as TCodeHintsSection;
   CodeHints.ShowAutomatically := CodeHints.AddChild(TBooleanSetting.Create(ssCodeHintsShowAutomatically)) as TBooleanSetting;
+  CodeHints.ShowAutomatically.onDefault := @GetCodeHintsShowAutomatically;
 
   CodeCompletion := AddChild(TCodeCompletionSection.Create()) as TCodeCompletionSection;
   CodeCompletion.ShowAutomatically := CodeCompletion.AddChild(TBooleanSetting.Create(ssCodeCompletionShowAutomatically)) as TBooleanSetting;
+  CodeCompletion.ShowAutomatically.onDefault := @GetCodeCompletionShowAutomatically;
 
   LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
   LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;
   LastConfig.MainForm.Position := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormPosition)) as TStringSetting;
+  LastConfig.MainForm.Position.onDefault := @GetMainFormPosition;
   LastConfig.MainForm.NormalSize := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormNormalSize)) as TStringSetting;
+  LastConfig.MainForm.NormalSize.onDefault := @GetMainFormNormalSize;
   LastConfig.MainForm.State := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormState)) as TStringSetting;
+  LastConfig.MainForm.State.onDefault := @GetMainFormState;
   LastConfig.MainForm.FunctionListShown := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
+  LastConfig.MainForm.FunctionListShown.onDefault := @GetFunctionListShowOnStart;
   LastConfig.MainForm.ConsoleVisible := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
+  LastConfig.MainForm.ConsoleVisible.onDefault := @GetMainFormConsoleVisible;
 
 end;
 
