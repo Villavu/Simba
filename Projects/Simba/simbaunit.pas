@@ -1490,73 +1490,14 @@ end;
 procedure TSimbaForm.CreateDefaultEnvironment;
 
 begin
-  SimbaSettings.Updater.CheckForUpdates.Value := True;
-
-  SimbaSettings.Updater.CheckEveryXMinutes.Value := 30;
-
-  SimbaSettings.Interpreter._Type.Value := interp_PS;
-
-  SimbaSettings.Fonts.LoadOnStartUp.Value := True;
-  SimbaSettings.Fonts.Version.Value := -1;
-
-  SimbaSettings.Tab.OpenNextOnClose.Value := False;
-
-  SimbaSettings.Tab.OpenScriptInNewTab.Value := True;
-
-  SimbaSettings.Tab.CheckBeforeOpen.Value := True;
-
-  SimbaSettings.ColourPicker.ShowHistoryOnPick.Value := True;
-
-  SimbaSettings.General.MaxRecentFiles.Value := 10;
-
-  SimbaSettings.LastConfig.MainForm.NormalSize.Value := '739:555';
-
-  SimbaSettings.FunctionList.ShowOnStart.Value := True;
-
-  SimbaSettings.CodeHints.ShowAutomatically.Value := True;
-
-  SimbaSettings.CodeCompletion.ShowAutomatically.Value := True;
-
-  SimbaSettings.SourceEditor.LazColors.Value := True;
-
   {$IFDEF USE_EXTENSIONS}
-  SimbaSettings.Extensions.FileExtension.Value := 'sex';
-  {$ENDIF}
-
-  SimbaSettings.Updater.RemoteLink.Value := SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};
-
-  SimbaSettings.Updater.RemoteVersionLink.Value := SimbaURL + 'Version';
-
-  SimbaSettings.Fonts.VersionLink.Value := FontURL + 'Version';
-
-  SimbaSettings.Fonts.UpdateLink.Value := FontURL + 'Fonts.tar.bz2';
-
-  SimbaSettings.News.URL.Value := 'http://simba.villavu.com/bin/news';
-
-  {Creates the paths and returns the path}
-{
-  SimbaSettings.Plugins.Path.Value := GetPluginPath;
-  SimbaSettings.Includes.Path.Value := GetIncludePath;
-  SimbaSettings.Fonts.Path.Value := GetFontPath;
-  SimbaSettings.Scripts.Path.Value := GetScriptPath;
-}
-
-  {$IFDEF USE_EXTENSIONS}
-//  SimbaSettings.Extensions.Path.Value := GetExtPath;
-
   // TODO
   CreateSetting(ssExtensionsCount, '0');
   {$ENDIF}
 
-  SimbaSettings.LastConfig.MainForm.Position.Value := '';
-  SimbaSettings.LastConfig.MainForm.State.Value := 'normal';
-
   {$ifdef MSWindows}
-  SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value := False;
-  ShowConsole(False);
+  ShowConsole(SimbaSettings.LastConfig.MainForm.ConsoleVisible.Value);
   {$endif}
-
-  SimbaSettings.Tray.AlwaysVisible.Value := True;
 
   if not DirectoryExists(SimbaSettings.Includes.Path.Value) then
     CreateDir(SimbaSettings.Includes.Path.Value);
@@ -1577,12 +1518,8 @@ begin
 
   SimbaSettings.Save(SimbaSettingsFile);
 
-  // TODO
-  //SettingsForm.SettingsTreeView.Items.GetFirstNode.Expand(false);
-
-
   LoadFormSettings;
-  UpdateTimer.Interval :=25;
+  UpdateTimer.Interval := SimbaSettings.Updater.CheckEveryXMinutes.Value;
 end;
 
 { Load settings }
@@ -3083,7 +3020,7 @@ function TSimbaForm.GetSimbaNews: String;
 var
   t: TDownloadThread;
 begin
-  t := TDownloadThread.Create(SimbaSettings.News.URL.GetDefValue('http://simba.villavu.com/bin/news'), @Result);
+  t := TDownloadThread.Create(SimbaSettings.News.URL.Value, @Result);
   t.Start;
   while not t.done do
   begin
