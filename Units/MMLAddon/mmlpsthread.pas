@@ -35,7 +35,7 @@ uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs,internets,scriptproperties,
-  settings,settingssandbox, lcltype, dialogs
+  settings, settingssandbox, lcltype, dialogs
   {$IFDEF USE_RUTIS}
   , Rutis_Engine, Rutis_Defs
   {$ENDIF}
@@ -291,6 +291,7 @@ uses
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
+  newsimbasettings, // SimbaSettings
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
@@ -789,7 +790,7 @@ end;
 function TPSThread.FileAlreadyIncluded(Sender: TObject; OrgFileName, FileName: string): Boolean;
 var
   path: string;
-  i: integer;
+
 begin
   path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName))]);
   if path = '' then
