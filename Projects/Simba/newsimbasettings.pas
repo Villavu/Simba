@@ -2,6 +2,8 @@ unit newsimbasettings;
 
 {$mode objfpc}{$H+}
 
+{$I Simba.inc}
+
 interface
 
 {
@@ -21,6 +23,7 @@ uses
 
 type
     TOnChangeSettings = function (obj: TObject): Boolean of object;
+    TOnDefaultSetting = procedure (obj: TObject);
 
     TSetting = class(TObject)
       procedure Save(MMLSettings: TMMLSettings); virtual; abstract;
@@ -40,6 +43,7 @@ type
       set_value: Boolean;
 
       onChange: TOnChangeSettings;
+      onDefault: TOnDefaultSetting;
     end;
 
     TIntegerSetting = class(TValueSetting)
@@ -230,7 +234,9 @@ implementation
 
 uses
    mufasabase,
-   fileutil; // mDebugLn
+   mufasatypes,
+   fileutil,
+   simbaunit; // mDebugLn
 
 const
 {$I settings_const.inc}
@@ -309,94 +315,14 @@ begin
   SimbaSettingsTreeView.Free;
 end;
 
-constructor TSimbaSettings.Create;
-begin
-  inherited;
-
-  Includes := AddChild(TIncludesSection.Create()) as TIncludesSection;
-  Includes.Path := Includes.AddChild(TStringSetting.Create(ssIncludesPath)) as TStringSetting;
-
-  Fonts := AddChild(TFontsSection.Create()) as TFontsSection;
-  Fonts.Path := Fonts.AddChild(TStringSetting.Create(ssFontsPath)) as TStringSetting;
-  Fonts.LoadOnStartUp := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnStart)) as TBooleanSetting;
-  Fonts.Version := Fonts.AddChild(TIntegerSetting.Create(ssFontsVersion)) as TIntegerSetting;
-  Fonts.VersionLink := Fonts.AddChild(TStringSetting.Create(ssFontsVersionLink)) as TStringSetting;
-  Fonts.UpdateLink := Fonts.AddChild(TStringSetting.Create(ssFontsLink)) as TStringSetting;
-
-  Extensions := AddChild(TExtensionsSection.Create()) as TExtensionsSection;
-  Extensions.Path := Extensions.AddChild(TStringSetting.Create(ssExtensionsPath)) as TStringSetting;
-  Extensions.FileExtension := Extensions.AddChild(TStringSetting.Create(ssExtensionsFileExtension)) as TStringSetting;
-
-  Scripts := AddChild(TScriptsSection.Create()) as TScriptsSection;
-  Scripts.Path := Scripts.AddChild(TStringSetting.Create(ssScriptsPath)) as TStringSetting;
-
-  FunctionList := AddChild(TFunctionListSection.Create()) as TFunctionListSection;
-  FunctionList.ShowOnStart := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowOnStart)) as TBooleanSetting;
-
-  Tray := AddChild(TTraySection.Create()) as TTraySection;
-  Tray.AlwaysVisible := Tray.AddChild(TBooleanSetting.Create(ssTrayAlwaysVisible)) as TBooleanSetting;
-
-  Interpreter := AddChild(TInterpreterSection.Create()) as TInterpreterSection;
-  Interpreter._Type := Interpreter.AddChild(TIntegerSetting.Create(ssInterpreterType)) as TIntegerSetting;
-  Interpreter.AllowSysCalls := Interpreter.AddChild(TBooleanSetting.Create(ssInterpreterAllowSysCalls)) as TBooleanSetting;
-
-  SourceEditor := AddChild(TSourceEditorSection.Create()) as TSourceEditorSection;
-  SourceEditor.DefScriptPath := SourceEditor.AddChild(TStringSetting.Create(ssSourceEditorDefScriptPath)) as TStringSetting;
-  SourceEditor.LazColors := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorLazColors)) as TBooleanSetting;
-
-  News := AddChild(TNewsSection.Create()) as TNewsSection;
-  News.URL := News.AddChild(TStringSetting.Create(ssNewsLink)) as TStringSetting;
-
-  Plugins := AddChild(TPluginsSection.Create()) as TPluginsSection;
-  Plugins.Path := Plugins.AddChild(TStringSetting.Create(ssPluginsPath)) as TStringSetting;
-
-  Tab := AddChild(TTabsSection.Create()) as TTabsSection;
-  Tab.OpenNextOnClose := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenNextOnClose)) as TBooleanSetting;
-  Tab.OpenScriptInNewTab := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenScriptInNewTab)) as TBooleanSetting;
-  Tab.OpenScriptInNewTab := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenScriptInNewTab)) as TBooleanSetting;
-  Tab.CheckBeforeOpen := Tab.AddChild(TBooleanSetting.Create(ssTabsCheckBeforeOpen)) as TBooleanSetting;
-
-  General := AddChild(TGeneralSection.Create()) as TGeneralSection;
-  General.MaxRecentFiles := General.AddChild(TIntegerSetting.Create(ssMaxRecentFiles)) as TIntegerSetting;
-
-  Updater := AddChild(TUpdaterSection.Create()) as TUpdaterSection;
-  Updater.CheckForUpdates := Updater.AddChild(TBooleanSetting.Create(ssCheckUpdate)) as TBooleanSetting;
-  Updater.RemoteVersionLink := Updater.AddChild(TStringSetting.Create(ssUpdaterVersionLink)) as TStringSetting;
-  Updater.RemoteLink := Updater.AddChild(TStringSetting.Create(ssUpdaterLink)) as TStringSetting;
-  Updater.CheckEveryXMinutes := Updater.AddChild(TIntegerSetting.Create(ssCheckUpdateMinutes)) as TIntegerSetting;
-
-  ColourPicker := AddChild(TColourPickerSection.Create()) as TColourPickerSection;
-  ColourPicker.AddToHistoryOnPick := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerAddToHistoryOnPick)) as TBooleanSetting;
-  ColourPicker.ShowHistoryOnPick := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerShowHistoryOnPick)) as TBooleanSetting;
-
-  CodeHints := AddChild(TCodeHintsSection.Create()) as TCodeHintsSection;
-  CodeHints.ShowAutomatically := CodeHints.AddChild(TBooleanSetting.Create(ssCodeHintsShowAutomatically)) as TBooleanSetting;
-
-  CodeCompletion := AddChild(TCodeCompletionSection.Create()) as TCodeCompletionSection;
-  CodeCompletion.ShowAutomatically := CodeCompletion.AddChild(TBooleanSetting.Create(ssCodeCompletionShowAutomatically)) as TBooleanSetting;
-
-  LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
-  LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;
-  LastConfig.MainForm.Position := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormPosition)) as TStringSetting;
-  LastConfig.MainForm.NormalSize := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormNormalSize)) as TStringSetting;
-  LastConfig.MainForm.State := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormState)) as TStringSetting;
-  LastConfig.MainForm.FunctionListShown := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
-  LastConfig.MainForm.ConsoleVisible := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
-
-end;
-
-procedure TSimbaSettings.Save(SettingsFileName: String);
-begin
-  Save(MMLSettings);
-  MMLSettings.SaveToXML(SettingsFileName);
-end;
-
 { Values }
 
 constructor TValueSetting.Create(Path: String);
 begin
   APath := Path;
   set_value := False;
+  onChange := nil;
+  onDefault := nil;
 end;
 
 destructor TValueSetting.Destroy;
@@ -447,7 +373,9 @@ begin
     begin
       value := StrToInt(MMLSettings.GetKeyValue(APath));
       //writeln('Loaded: ' + IntToStr(value) + ' for ' + APath);
-    end
+    end else
+      if assigned(onDefault) then
+        onDefault(Self);
   except
     On E : EConvertError do
     begin
@@ -538,7 +466,9 @@ begin
   begin
     value := MMLSettings.GetKeyValue(APath);
     //writeln('Loaded: ' + value + ' for ' + APath);
-  end
+  end else
+    if assigned(onDefault) then
+      onDefault(Self);
 end;
 
 constructor TBooleanSetting.Create(Path: String);
@@ -605,7 +535,9 @@ begin
     begin
       value := StrToBool(MMLSettings.GetKeyValue(APath));
       //writeln('Loaded: ' + BoolToStr(value) + ' for ' + APath);
-    end
+    end else
+      if assigned(onDefault) then
+        onDefault(Self);
   except
     On E : EConvertError do
     begin
@@ -654,6 +586,193 @@ begin
   for i := 0 to Length(Nodes) - 1 do
     nodes[i].Load(MMLSettings)
 end;
+
+function IsAbsolute(const filename: string): boolean;
+begin
+  {$IFDEF WINDOWS}
+    Result := False;
+    if (Length(filename) > 2) then
+      Result := (filename[2] = ':');
+  {$ELSE}
+    Result := (filename[1] = DS);
+  {$ENDIF}
+end;
+
+procedure GetIncludePath(obj: TObject);
+var s: String;
+begin
+  s := IncludeTrailingPathDelimiter({$IFNDEF
+      NOTPORTABLE}ExtractRelativepath(AppPath,
+{$ELSE}ExpandFileName({$ENDIF}DataPath + 'Includes' + DS));
+
+  {$IFDEF NOTPORTABLE}
+  if (not (IsAbsolute(s))) then
+    s := AppPath + s;
+  {$ENDIF}
+  TStringSetting(obj).Value := s;
+end;
+
+procedure GetPluginPath(obj: TObject);
+var s: String;
+begin
+  s := IncludeTrailingPathDelimiter({$IFNDEF
+      NOTPORTABLE}ExtractRelativepath(AppPath,
+{$ELSE}ExpandFileName({$ENDIF}DataPath + 'Plugins' + DS));
+
+  {$IFDEF NOTPORTABLE}
+  if (not (IsAbsolute(s))) then
+    s := AppPath + s;
+  {$ENDIF}
+  TStringSetting(obj).Value := s;
+end;
+
+{$IFDEF USE_EXTENSIONS}
+procedure GetExtPath(obj: TObject);
+var s: String;
+begin
+  s := IncludeTrailingPathDelimiter({$IFNDEF
+      NOTPORTABLE}ExtractRelativepath(AppPath,
+{$ELSE}ExpandFileName({$ENDIF}DataPath + 'Extensions' + DS));
+
+  {$IFDEF NOTPORTABLE}
+  if (not (IsAbsolute(s))) then
+    s := AppPath + s;
+  {$ENDIF}
+  TStringSetting(obj).Value := s;
+end;
+{$ENDIF}
+
+procedure GetScriptPath(obj: TObject);
+var s: String;
+begin { XXX TODO: no IncludeTrailingPathDelimeter ? }
+  s := {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath,
+        {$ELSE}ExpandFileName(
+        {$ENDIF}DocPath + 'Scripts' + DS);
+
+  {$IFDEF NOTPORTABLE}
+  if (not (IsAbsolute(s))) then
+    s := AppPath + s;
+  {$ENDIF}
+  TStringSetting(obj).Value := s;
+end;
+
+procedure GetFontPath(obj: TObject);
+var s: String;
+begin
+  s := IncludeTrailingPathDelimiter({$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath,
+      {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Fonts' + DS));
+
+  {$IFDEF NOTPORTABLE}
+  if (not (IsAbsolute(s))) then
+    s := AppPath + s;
+  {$ENDIF}
+  TStringSetting(obj).Value := s;
+end;
+
+procedure GetDefScriptPath(obj: TObject);
+var s: String;
+begin
+  s := {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath,
+       {$ELSE}ExpandFileName({$ENDIF}
+       DataPath + 'default.simba');
+
+  {$IFDEF NOTPORTABLE}
+  if (not (IsAbsolute(s))) then
+    s := AppPath + s;
+  {$ENDIF}
+  TStringSetting(obj).Value := s;
+end;
+
+
+constructor TSimbaSettings.Create;
+begin
+  inherited;
+
+  Includes := AddChild(TIncludesSection.Create()) as TIncludesSection;
+  Includes.Path := Includes.AddChild(TStringSetting.Create(ssIncludesPath)) as TStringSetting;
+  Includes.Path.onDefault := @GetIncludePath;
+
+  Fonts := AddChild(TFontsSection.Create()) as TFontsSection;
+  Fonts.Path := Fonts.AddChild(TStringSetting.Create(ssFontsPath)) as TStringSetting;
+  Fonts.Path.onDefault := @GetFontPath;
+
+  Fonts.LoadOnStartUp := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnStart)) as TBooleanSetting;
+  Fonts.Version := Fonts.AddChild(TIntegerSetting.Create(ssFontsVersion)) as TIntegerSetting;
+  Fonts.VersionLink := Fonts.AddChild(TStringSetting.Create(ssFontsVersionLink)) as TStringSetting;
+  Fonts.UpdateLink := Fonts.AddChild(TStringSetting.Create(ssFontsLink)) as TStringSetting;
+
+  Extensions := AddChild(TExtensionsSection.Create()) as TExtensionsSection;
+  Extensions.Path := Extensions.AddChild(TStringSetting.Create(ssExtensionsPath)) as TStringSetting;
+  Extensions.Path.onDefault := @GetExtPath;
+  Extensions.FileExtension := Extensions.AddChild(TStringSetting.Create(ssExtensionsFileExtension)) as TStringSetting;
+
+  Scripts := AddChild(TScriptsSection.Create()) as TScriptsSection;
+  Scripts.Path := Scripts.AddChild(TStringSetting.Create(ssScriptsPath)) as TStringSetting;
+  Scripts.Path.onDefault := @GetScriptPath;
+
+  FunctionList := AddChild(TFunctionListSection.Create()) as TFunctionListSection;
+  FunctionList.ShowOnStart := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowOnStart)) as TBooleanSetting;
+
+  Tray := AddChild(TTraySection.Create()) as TTraySection;
+  Tray.AlwaysVisible := Tray.AddChild(TBooleanSetting.Create(ssTrayAlwaysVisible)) as TBooleanSetting;
+
+  Interpreter := AddChild(TInterpreterSection.Create()) as TInterpreterSection;
+  Interpreter._Type := Interpreter.AddChild(TIntegerSetting.Create(ssInterpreterType)) as TIntegerSetting;
+  Interpreter.AllowSysCalls := Interpreter.AddChild(TBooleanSetting.Create(ssInterpreterAllowSysCalls)) as TBooleanSetting;
+
+  SourceEditor := AddChild(TSourceEditorSection.Create()) as TSourceEditorSection;
+  SourceEditor.DefScriptPath := SourceEditor.AddChild(TStringSetting.Create(ssSourceEditorDefScriptPath)) as TStringSetting;
+  SourceEditor.DefScriptPath.onDefault := @GetDefScriptPath;
+  SourceEditor.LazColors := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorLazColors)) as TBooleanSetting;
+
+  News := AddChild(TNewsSection.Create()) as TNewsSection;
+  News.URL := News.AddChild(TStringSetting.Create(ssNewsLink)) as TStringSetting;
+
+  Plugins := AddChild(TPluginsSection.Create()) as TPluginsSection;
+  Plugins.Path := Plugins.AddChild(TStringSetting.Create(ssPluginsPath)) as TStringSetting;
+  Plugins.Path.onDefault := @GetPluginPath;
+
+  Tab := AddChild(TTabsSection.Create()) as TTabsSection;
+  Tab.OpenNextOnClose := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenNextOnClose)) as TBooleanSetting;
+  Tab.OpenScriptInNewTab := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenScriptInNewTab)) as TBooleanSetting;
+  Tab.OpenScriptInNewTab := Tab.AddChild(TBooleanSetting.Create(ssTabsOpenScriptInNewTab)) as TBooleanSetting;
+  Tab.CheckBeforeOpen := Tab.AddChild(TBooleanSetting.Create(ssTabsCheckBeforeOpen)) as TBooleanSetting;
+
+  General := AddChild(TGeneralSection.Create()) as TGeneralSection;
+  General.MaxRecentFiles := General.AddChild(TIntegerSetting.Create(ssMaxRecentFiles)) as TIntegerSetting;
+
+  Updater := AddChild(TUpdaterSection.Create()) as TUpdaterSection;
+  Updater.CheckForUpdates := Updater.AddChild(TBooleanSetting.Create(ssCheckUpdate)) as TBooleanSetting;
+  Updater.RemoteVersionLink := Updater.AddChild(TStringSetting.Create(ssUpdaterVersionLink)) as TStringSetting;
+  Updater.RemoteLink := Updater.AddChild(TStringSetting.Create(ssUpdaterLink)) as TStringSetting;
+  Updater.CheckEveryXMinutes := Updater.AddChild(TIntegerSetting.Create(ssCheckUpdateMinutes)) as TIntegerSetting;
+
+  ColourPicker := AddChild(TColourPickerSection.Create()) as TColourPickerSection;
+  ColourPicker.AddToHistoryOnPick := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerAddToHistoryOnPick)) as TBooleanSetting;
+  ColourPicker.ShowHistoryOnPick := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerShowHistoryOnPick)) as TBooleanSetting;
+
+  CodeHints := AddChild(TCodeHintsSection.Create()) as TCodeHintsSection;
+  CodeHints.ShowAutomatically := CodeHints.AddChild(TBooleanSetting.Create(ssCodeHintsShowAutomatically)) as TBooleanSetting;
+
+  CodeCompletion := AddChild(TCodeCompletionSection.Create()) as TCodeCompletionSection;
+  CodeCompletion.ShowAutomatically := CodeCompletion.AddChild(TBooleanSetting.Create(ssCodeCompletionShowAutomatically)) as TBooleanSetting;
+
+  LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
+  LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;
+  LastConfig.MainForm.Position := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormPosition)) as TStringSetting;
+  LastConfig.MainForm.NormalSize := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormNormalSize)) as TStringSetting;
+  LastConfig.MainForm.State := LastConfig.MainForm.AddChild(TStringSetting.Create(ssMainFormState)) as TStringSetting;
+  LastConfig.MainForm.FunctionListShown := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
+  LastConfig.MainForm.ConsoleVisible := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
+
+end;
+
+procedure TSimbaSettings.Save(SettingsFileName: String);
+begin
+  Save(MMLSettings);
+  MMLSettings.SaveToXML(SettingsFileName);
+end;
+
 
 end.
 

@@ -426,25 +426,22 @@ type
     procedure HandleOpenFileData;
     procedure HandleWriteFileData;
     procedure HandleScriptStartData;
-    function GetDefScriptPath: string;
-    function GetScriptPath : string;
-    {$IFDEF USE_EXTENSIONS}function GetExtPath: string;{$ENDIF}
-    function GetFontPath: String;
     function GetHighlighter: TSynCustomHighlighter;
-    function GetIncludePath: String;
-    function GetPluginPath: string;
     function GetScriptState: TScriptState;
     function GetShowParamHintAuto: boolean;
     function GetShowCodeCompletionAuto: Boolean;
     function GetSimbaNews: String;
-    procedure SetDefScriptPath(const AValue: string);
-    {$IFDEF USE_EXTENSIONS}procedure SetExtPath(const AValue: string);{$ENDIF}
-    procedure SetFontPath(const AValue: String);
-    procedure SetIncludePath(const AValue: String);
+
+    { Settings Hooks }
     function SetInterpreter(obj: TObject): Boolean;
+    function SetPluginsPath(obj: Tobject): Boolean;
+    function SetScriptsPath(obj: Tobject): Boolean;
+    function SetExtensionsPath(obj: Tobject): Boolean;
+    function SetIncludesPath(obj: Tobject): Boolean;
+    function SetFontsPath(obj: Tobject): Boolean;
+    function SetDefaultScriptPath(obj: Tobject): Boolean;
     function SetTrayVisiblity(obj: TObject): Boolean;
-    procedure SetPluginPath(const AValue: string);
-    procedure SetScriptPath(const AValue: string);
+
     procedure SetShowParamHintAuto(const AValue: boolean);
     procedure SetShowCodeCompletionAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
@@ -512,12 +509,6 @@ type
     procedure OnSaveScript(const Filename : string);
     property ShowParamHintAuto : boolean read GetShowParamHintAuto write SetShowParamHintAuto;
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
-    property IncludePath : String read GetIncludePath write SetIncludePath;
-    property FontPath : String read GetFontPath write SetFontPath;
-    property PluginPath : string read GetPluginPath write SetPluginPath;
-    {$IFDEF USE_EXTENSIONS}property ExtPath : string read GetExtPath write SetExtPath;{$ENDIF}
-    property ScriptDir : string read GetScriptPath write SetScriptPath;
-    property DefScriptPath : string read GetDefScriptPath write SetDefScriptPath;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
     function DefaultScript : string;
   end;
@@ -770,7 +761,8 @@ end;
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var Filename: string): Boolean;
 begin
   Result := False;
-  Filename := FindFile(Filename, [AppPath, IncludePath{$IFDEF USE_EXTENSIONS}, ExtPath{$ENDIF}]);
+  Filename := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value
+          {$IFDEF USE_EXTENSIONS}, SimbaSettings.Extensions.Path.Value{$ENDIF}]);
   if (Filename <> '') then
     Result := True;
 end;
@@ -847,34 +839,77 @@ begin
 {$ENDIF}
 end;
 
-function IsAbsolute(const filename: string): boolean;
+function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
 begin
-  {$IFDEF WINDOWS}
-    Result := False;
-    if (Length(filename) > 2) then
-      Result := (filename[2] = ':');
-  {$ELSE}
-    Result := (filename[1] = DS);
-  {$ENDIF}
+  if SimbaSettings.SourceEditor.LazColors.GetDefValue(True) then
+    result := LazHighlighter
+  else
+    result := SCARHighlighter;
 end;
 
-function TSimbaForm.GetDefScriptPath: string;
-var s: String;
+function TSimbaForm.SetIncludesPath(obj: TObject): Boolean;
 begin
-  s := {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath,
-       {$ELSE}ExpandFileName({$ENDIF}
-       DataPath + 'default.simba');
-  Result := SimbaSettings.SourceEditor.DefScriptPath.GetDefValue(s);
-  if (not (IsAbsolute(Result))) then
-    Result := AppPath + Result;
+  writeln('--- SetIncludesPath with value: ' + TStringSetting(obj).Value);
 end;
 
-function TSimbaForm.GetScriptPath: string;
+function TSimbaForm.SetPluginsPath(obj: TObject): Boolean;
 begin
-  Result := SimbaSettings.Scripts.Path.GetDefValue({$IFNDEF
-      NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DocPath + 'Scripts' + DS));
-  if (not (IsAbsolute(Result))) then
-    Result := AppPath + Result;
+  writeln('--- SetPluginsPath with value: ' + TStringSetting(obj).Value);
+end;
+
+function TSimbaForm.SetFontsPath(obj: TObject): Boolean;
+begin
+  writeln('--- SetFontsPath with value: ' + TStringSetting(obj).Value);
+end;
+
+function TSimbaForm.SetScriptsPath(obj: TObject): Boolean;
+begin
+  writeln('--- SetScriptPath with value: ' + TStringSetting(obj).Value);
+end;
+
+function TSimbaForm.SetDefaultScriptPath(obj: TObject): Boolean;
+begin
+  writeln('--- SetDefaultScriptPath with value: ' + TStringSetting(obj).Value);
+end;
+
+{$IFDEF USE_EXTENSIONS}
+function TSimbaForm.SetExtensionsPath(obj: TObject): Boolean;
+begin
+  writeln('--- SetExtensionPath with value: ' + TStringSetting(obj).Value);
+end;
+{$ENDIF}
+
+
+function TSimbaForm.SetInterpreter(obj: TObject): Boolean;
+var
+  UpdateCurrScript: Boolean;
+  Interpreter: Integer;
+
+begin
+  writeln('Interpreter onChange');
+  UpdateCurrScript := false;
+  if (CurrScript <> nil) then
+    with CurrScript.Synedit do
+      if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
+        UpdateCurrScript := true;
+
+  Interpreter := TIntegerSetting(obj).Value;
+
+  if (Interpreter < 0) or (Interpreter> 3) then
+  begin
+    writeln('Resetting interpreter to valid value');
+    SimbaSettings.Interpreter._Type.Value := 0;
+  end;
+
+  UpdateInterpreter;
+
+  if UpdateCurrScript then
+    CurrScript.SynEdit.Lines.text := DefaultScript;
+end;
+
+function TSimbaForm.SetTrayVisiblity(obj: TObject): Boolean;
+begin
+  MTrayIcon.Visible := TBooleanSetting(obj).Value;
 end;
 
 procedure TSimbaForm.HandleOpenFileData;
@@ -1453,8 +1488,7 @@ end;
 
 { Creates default settings }
 procedure TSimbaForm.CreateDefaultEnvironment;
-var
-  PluginsPath{$IFDEF USE_EXTENSIONS}, ExtensionsPath{$ENDIF}: string;
+
 begin
   SimbaSettings.Updater.CheckForUpdates.Value := True;
 
@@ -1500,10 +1534,15 @@ begin
   SimbaSettings.News.URL.Value := 'http://simba.villavu.com/bin/news';
 
   {Creates the paths and returns the path}
-  SimbaSettings.Plugins.Path.Value := ExpandFileName(DataPath + 'Plugins' + DS);
+{
+  SimbaSettings.Plugins.Path.Value := GetPluginPath;
+  SimbaSettings.Includes.Path.Value := GetIncludePath;
+  SimbaSettings.Fonts.Path.Value := GetFontPath;
+  SimbaSettings.Scripts.Path.Value := GetScriptPath;
+}
 
   {$IFDEF USE_EXTENSIONS}
-  SimbaSettings.Extensions.Path.Value := ExpandFileName(DataPath + 'Extensions' + DS);
+//  SimbaSettings.Extensions.Path.Value := GetExtPath;
 
   // TODO
   CreateSetting(ssExtensionsCount, '0');
@@ -1519,20 +1558,22 @@ begin
 
   SimbaSettings.Tray.AlwaysVisible.Value := True;
 
-  if not DirectoryExists(IncludePath) then
-    CreateDir(IncludePath);
-  if not DirectoryExists(FontPath) then
-    CreateDir(FontPath);
-  if not DirectoryExists(PluginsPath) then
-    CreateDir(PluginsPath);
+  if not DirectoryExists(SimbaSettings.Includes.Path.Value) then
+    CreateDir(SimbaSettings.Includes.Path.Value);
+  if not DirectoryExists(SimbaSettings.Fonts.Path.Value) then
+    CreateDir(SimbaSettings.Fonts.Path.Value);
+  if not DirectoryExists(SimbaSettings.Plugins.Path.Value) then
+    CreateDir(SimbaSettings.Plugins.Path.Value);
   {$IFDEF USE_EXTENSIONS}
-  if not DirectoryExists(ExtensionsPath) then
-    CreateDir(ExtensionsPath);
+  if not DirectoryExists(SimbaSettings.Extensions.Path.Value) then
+    CreateDir(SimbaSettings.Extensions.Path.Value);
+{
   if not DirectoryExists(ExtPath) then
     CreateDir(ExtPath);
+}
   {$ENDIF}
-  if not DirectoryExists(ScriptDir) then
-    CreateDir(ScriptDir);
+  if not DirectoryExists(SimbaSettings.Scripts.Path.Value) then
+    CreateDir(SimbaSettings.Scripts.Path.Value);
 
   SimbaSettings.Save(SimbaSettingsFile);
 
@@ -1749,10 +1790,10 @@ begin
 
   try
     case SimbaSettings.Interpreter._Type.Value of
-      interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, PluginPath);
-      {$IFDEF USE_RUTIS}interp_RT: Thread := TRTThread.Create(True, @CurrentSyncInfo, PluginPath);{$ENDIF}
-      {$IFDEF USE_CPASCAL}interp_CP: Thread := TCPThread.Create(True,@CurrentSyncInfo,PluginPath);{$ENDIF}
-      {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, PluginPath);{$ENDIF}
+      interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);
+      {$IFDEF USE_RUTIS}interp_RT: Thread := TRTThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
+      {$IFDEF USE_CPASCAL}interp_CP: Thread := TCPThread.Create(True,@CurrentSyncInfo,SimbaSettings.Plugins.Path.Value);{$ENDIF}
+      {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
       else
         raise Exception.CreateFmt('Unknown Interpreter %d!', [SimbaSettings.Interpreter._Type.Value]);
     end;
@@ -1778,16 +1819,17 @@ begin
   if CurrScript.ScriptFile <> '' then
     ScriptPath := IncludeTrailingPathDelimiter(ExtractFileDir(CurrScript.ScriptFile));
 
-  if DirectoryExists(PluginPath) then
-     PluginsGlob.AddPath(PluginPath);
-  if not DirectoryExists(IncludePath) then
+  if DirectoryExists(SimbaSettings.Plugins.Path.Value) then
+     PluginsGlob.AddPath(SimbaSettings.Plugins.Path.Value);
+  if not DirectoryExists(SimbaSettings.Includes.Path.Value) then
     if FirstRun then
       FormWritelnEx('Warning: The include directory specified in the Settings isn''t valid.');
-  if not DirectoryExists(fontPath) then
+  if not DirectoryExists(SimbaSettings.Fonts.Path.Value) then
     if FirstRun then
       FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
 
-  Thread.SetPaths(AppPath, DocPath, ScriptPath, Includepath, PluginPath, FontPath);
+  Thread.SetPaths(AppPath, DocPath, SimbaSettings.Scripts.Path.Value, SimbaSettings.Includes.Path.Value,
+      SimbaSettings.Plugins.Path.Value, SimbaSettings.Fonts.Path.Value);
 
   if selector.haspicked then
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
@@ -1795,10 +1837,10 @@ begin
   loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnStartUp.GetDefValue(True);
   if (loadFontsOnScriptStart) then
   begin
-    if ((not (Assigned(OCR_Fonts))) and DirectoryExists(fontPath)) then
+    if ((not (Assigned(OCR_Fonts))) and DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
     begin
       OCR_Fonts := TMOCR.Create(Thread.Client);
-      OCR_Fonts.InitTOCR(fontPath);
+      OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
     end;
     Thread.SetFonts(OCR_Fonts.Fonts);
   end;
@@ -1895,12 +1937,12 @@ begin
   case SimbaSettings.Interpreter._Type.Value of
     interp_PS, interp_LP: begin
                   Result := 'program new;' + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
-                  if FileExistsUTF8(SimbaForm.DefScriptPath) then
+                  if FileExistsUTF8(SimbaSettings.SourceEditor.DefScriptPath.Value) then
                   begin
                     try
                       with TStringList.Create do
                         try
-                          LoadFromFile(SimbaForm.DefScriptPath);
+                          LoadFromFile(SimbaSettings.SourceEditor.DefScriptPath.Value);
                           Result := Text;
                         finally
                           Free;
@@ -2956,17 +2998,17 @@ end;
 
 procedure TSimbaForm.MenuItemOpenIncludesFolderClick(Sender: TObject);
 begin
-  OpenDocument(Self.IncludePath);
+  OpenDocument(SimbaSettings.Includes.Path.Value);
 end;
 
 procedure TSimbaForm.MenuItemOpenPluginsFolderClick(Sender: TObject);
 begin
-  OpenDocument(Self.PluginPath);
+  OpenDocument(SimbaSettings.Plugins.Path.Value);
 end;
 
 procedure TSimbaForm.MenuItemOpenScriptsFolderClick(Sender: TObject);
 begin
-  OpenDocument(Self.ScriptDir);
+  OpenDocument(SimbaSettings.Scripts.Path.Value);
 end;
 
 procedure TSimbaForm.MenuItemReportBugClick(Sender: TObject);
@@ -3049,18 +3091,6 @@ begin
     Sleep(50);
   end;
 end;
-
-procedure TSimbaForm.SetDefScriptPath(const AValue: string);
-begin
-  SimbaSettings.SourceEditor.DefScriptPath.Value := AValue;
-end;
-
-{$IFDEF USE_EXTENSIONS}
-procedure TSimbaForm.SetExtPath(const AValue: string);
-begin
-  SimbaSettings.Extensions.Path.Value := AValue;
-end;
-{$ENDIF}
 
 procedure TSimbaForm.NewsTimerTimer(Sender: TObject);
 var
@@ -3230,102 +3260,6 @@ begin
   Result := SimbaSettings.CodeHints.ShowAutomatically.GetDefValue(True);
 end;
 
-procedure TSimbaForm.SetFontPath(const AValue: String);
-begin
-  SimbaSettings.Fonts.Path.Value := AValue;
-end;
-
-function TSimbaForm.GetFontPath: String;
-begin
-  Result := IncludeTrailingPathDelimiter(SimbaSettings.Fonts.Path.GetDefValue(
-      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Fonts' + DS)));
-
-  if (not (IsAbsolute(Result))) then
-    Result := AppPath + Result;
-end;
-
-{$IFDEF USE_EXTENSIONS}
-function TSimbaForm.GetExtPath: string;
-begin
-  Result := IncludeTrailingPathDelimiter(SimbaSettings.Extensions.Path.GetDefValue(
-  {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Extensions' + DS)));
-
-  if (not (IsAbsolute(Result))) then
-    Result := AppPath + Result;
-end;
-{$ENDIF}
-
-function TSimbaForm.GetHighlighter: TSynCustomHighlighter;
-begin
-  if SimbaSettings.SourceEditor.LazColors.GetDefValue(True) then
-    result := LazHighlighter
-  else
-    result := SCARHighlighter;
-end;
-
-function TSimbaForm.GetIncludePath: String;
-begin
-  Result := IncludeTrailingPathDelimiter(SimbaSettings.Includes.Path.GetDefValue(
-        {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Includes' + DS)));
-  if (not (IsAbsolute(Result))) then
-    Result := AppPath + Result;
-end;
-
-function TSimbaForm.GetPluginPath: string;
-begin
-  Result := IncludeTrailingPathDelimiter(SimbaSettings.Plugins.Path.GetDefValue(
-      {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath, {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Plugins' + DS)));
-  if (not (IsAbsolute(Result))) then
-    Result := AppPath + Result;
-end;
-
-procedure TSimbaForm.SetIncludePath(const AValue: String);
-begin
-  SimbaSettings.Includes.Path.Value := AValue;
-end;
-
-function TSimbaForm.SetInterpreter(obj: TObject): Boolean;
-var
-  UpdateCurrScript: Boolean;
-  Interpreter: Integer;
-
-begin
-  writeln('Interpreter onChange');
-  UpdateCurrScript := false;
-  if (CurrScript <> nil) then
-    with CurrScript.Synedit do
-      if (Lines.text = DefaultScript) and not(CanUndo or CanRedo) then
-        UpdateCurrScript := true;
-
-  Interpreter := TIntegerSetting(obj).Value;
-
-  if (Interpreter < 0) or (Interpreter> 3) then
-  begin
-    writeln('Resetting interpreter to valid value');
-    SimbaSettings.Interpreter._Type.Value := 0;
-  end;
-
-  UpdateInterpreter;
-
-  if UpdateCurrScript then
-    CurrScript.SynEdit.Lines.text := DefaultScript;
-end;
-
-function TSimbaForm.SetTrayVisiblity(obj: TObject): Boolean;
-begin
-  MTrayIcon.Visible := TBooleanSetting(obj).Value;
-end;
-
-procedure TSimbaForm.SetPluginPath(const AValue: string);
-begin
-  SimbaSettings.Plugins.Path.Value := AValue;
-end;
-
-procedure TSimbaForm.SetScriptPath(const AValue: string);
-begin
-  SimbaSettings.Scripts.Path.Value := AValue;
-end;
-
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
 begin
   CurrScript.FScriptState:= State;
@@ -3391,6 +3325,14 @@ procedure TSimbaForm.RegisterSettingsOnChanges;
 begin
   SimbaSettings.Interpreter._Type.OnChange := @SetInterpreter;
   SimbaSettings.Tray.AlwaysVisible.onChange:= @SetTrayVisiblity;
+
+  SimbaSettings.Plugins.Path.onChange:= @SetPluginsPath;
+  SimbaSettings.Fonts.Path.onChange:= @SetFontsPath;
+  SimbaSettings.Includes.Path.onChange:= @SetIncludesPath;
+  SimbaSettings.Scripts.Path.onChange:= @SetScriptsPath;
+  SimbaSettings.Extensions.Path.onChange:= @SetExtensionsPath;
+
+  SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;
 end;
 
 
@@ -3433,7 +3375,8 @@ begin
         Idler;
       if Decompress.Result <> nil then
       begin;
-        UnTarrer := TUntarThread.Create(Decompress.Result,FontPath,True);
+        UnTarrer := TUntarThread.Create(Decompress.Result,
+            SimbaSettings.Fonts.Path.Value, True);
         UnTarrer.Start;
         while UnTarrer.Finished = false do
           Idler;
@@ -3445,7 +3388,7 @@ begin
             self.OCR_Fonts.Free;
           FormWriteln('Freeing the current fonts. Creating new ones now');
           Self.OCR_Fonts := TMOCR.Create(nil);
-          OCR_Fonts.InitTOCR(fontPath);
+          OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
         end;
         UnTarrer.Free;
         Decompress.Result.Free;
@@ -3612,7 +3555,7 @@ begin
     if (CurrScript.ScriptFile <> '') then
       InitialDir := ExtractFileDir(CurrScript.ScriptFile)
     else
-      InitialDir := ScriptDir;
+      InitialDir := SimbaSettings.Scripts.Path.Value;
     Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
     Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt' +
     {$IFDEF USE_EXTENSIONS}';*.' + SimbaSettings.Extensions.FileExtension.GetDefValue('sex') + {$ENDIF}
@@ -3721,7 +3664,7 @@ begin
     if (CurrScript.ScriptFile <> '') then
       InitialDir := ExtractFileDir(CurrScript.ScriptFile)
     else
-      InitialDir := ScriptDir;
+      InitialDir := SimbaSettings.Scripts.Path.Value;
     filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt' +
     {$IFDEF USE_EXTENSIONS}';*.' + SimbaSettings.Extensions.FileExtension.GetDefValue('sex') + {$ENDIF}
               '|Any files|*.*';
@@ -3745,7 +3688,7 @@ begin
   with CurrScript do
   begin
     try
-      SynEdit.Lines.SaveToFile(DefScriptPath);
+      SynEdit.Lines.SaveToFile(SimbaSettings.SourceEditor.DefScriptPath.Value);
       mDebugLn('Script saved as default.');
       Result := True;
     except
