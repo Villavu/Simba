@@ -398,6 +398,7 @@ type
     procedure ThreadWriteFileEvent(Sender: TObject; var Filename: string;
       var Continue: boolean);
     procedure ScriptStartEvent(Sender: TObject; var Script : string; var Continue : boolean);
+    procedure ScriptOpenEvent(Sender: TObject; var Script : string);
     procedure TrayPopupPopup(Sender: TObject);
     procedure TT_UpdateClick(Sender: TObject);
     procedure UpdateMenuButtonClick(Sender: TObject);
@@ -419,6 +420,7 @@ type
     OpenFileData : TOpenFileData;
     WriteFileData : TWriteFileData;
     ScriptStartData : TScriptStartData;
+    ScriptOpenData : TScriptOpenData;
     FillThread: TProcThread;
 
     procedure UpdateInterpreter;
@@ -426,6 +428,8 @@ type
     procedure HandleOpenFileData;
     procedure HandleWriteFileData;
     procedure HandleScriptStartData;
+    procedure HandleScriptOpenData;
+
     function GetHighlighter: TSynCustomHighlighter;
     function GetScriptState: TScriptState;
     function GetShowParamHintAuto: boolean;
@@ -466,6 +470,8 @@ type
     Picker: TMColorPicker;
     Selector: TMWindowSelector;
     OnScriptStart : TScriptStartEvent;
+    OnScriptOpen : TScriptOpenEvent;
+
     FormCallBackData : TCallBackData;
     {$ifdef mswindows}
     ConsoleVisible : boolean;
@@ -974,6 +980,27 @@ begin
 begin
 {$ENDIF}
 end;
+
+  procedure TSimbaForm.HandleScriptOpenData;
+  {$IFDEF USE_EXTENSIONS}
+  var
+    Args : TVariantArray;
+  begin
+    SetLength(Args,1);
+    Args[0] := ScriptOpenData.Script^;
+    writeln('ARGS[0] before: '  + Args[0]);
+    try
+      ExtManager.HandleHook(EventHooks[SExt_onScriptOpen].HookName,Args);
+      writeln('ARGS[0] after: '  + Args[0]);
+      ScriptOpenData.Script^ := Args[0];
+    except
+      on e : Exception do
+        mDebugLn('ERROR in HandleScriptOpenData: ' + e.message);
+    end;
+  {$ELSE}
+  begin
+  {$ENDIF}
+  end;
 
 procedure TSimbaForm.ProcessDebugStream(Sender: TObject);
 begin
@@ -2604,6 +2631,7 @@ begin
   InitmDebug; { Perhaps we need to place this before our mDebugLines?? }
 
   Self.OnScriptStart:= @ScriptStartEvent;
+  Self.onScriptOpen := @ScriptOpenEvent;
 
   FillThread := TProcThread.Create;
   FillThread.ClassProc := @CCFillCore;
@@ -3347,6 +3375,13 @@ begin
   TThread.Synchronize(nil,@HandleScriptStartData);
 end;
 
+procedure TSimbaForm.ScriptOpenEvent(Sender: TObject; var Script: string);
+begin
+  ScriptOpenData.Sender:=Sender;
+  ScriptOpenData.Script:= @Script;
+  TThread.Synchronize(nil,@HandleScriptOpenData);
+end;
+
 procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
 begin
   SimbaSettings.CodeHints.ShowAutomatically.Value := AValue;
@@ -3520,6 +3555,9 @@ var
   OpenInNewTab : boolean;
   CheckTabsFirst : boolean;
   Tab : integer;
+
+  script: String;
+
 begin
   if AlwaysOpenInNewTab then
     OpenInNewTab := true
@@ -3546,7 +3584,18 @@ begin
     begin
       filename := SetDirSeparators(filename);
       SynEdit.Lines.LoadFromFile(filename);
+
+      script := SynEdit.Lines.text;
+
+      if assigned(onScriptOpen) then
+      begin
+        onScriptOpen(Self, script);
+        writeln('onScriptOpen');
+      end;
+
+      SynEdit.Lines.Text := script;
       StartText := SynEdit.Lines.text;
+
       ScriptName:= ExtractFileNameOnly(filename);
       mDebugLn('Script name will be: ' + ScriptName);
       ScriptFile:= FileName;
