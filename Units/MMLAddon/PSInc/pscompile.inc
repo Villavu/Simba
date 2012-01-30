@@ -24,9 +24,9 @@
 AddConstantN('AppPath','string').SetString(AppPath);
 AddConstantN('DocPath', 'string').SetString(DocPath);
 AddConstantN('ScriptPath','string').SetString(ScriptPath);
-AddConstantN('IncludePath','string').SetString(IncludePath);
-AddConstantN('PluginPath','string').SetString(PluginPath);
-AddConstantN('FontPath','string').SetString(FontPath);
+AddConstantN('IncludePath','string').SetString(SimbaSettings.Includes.Path.Value);
+AddConstantN('PluginPath','string').SetString(SimbaSettings.Plugins.Path.Value);
+AddConstantN('FontPath','string').SetString(SimbaSettings.Fonts.Path.Value);
 
 AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
 AddConstantN('MaxInt','integer').SetInt(maxLongint);

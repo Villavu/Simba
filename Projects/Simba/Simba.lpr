@@ -45,6 +45,7 @@ begin
   Application.CreateForm(TBitmapConvForm, BitmapConvForm);
   Application.CreateForm(TScriptManagerForm, ScriptManagerForm);
 //  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
+//  Application.CreateForm(TSettingsSimpleForm, SettingsSimpleForm); Done in FormCreate of MainForm
 //  Application.CreateForm(TSettingsForm, SettingsForm); Done in FormCreate of MainForm
   Application.Run;
 end.

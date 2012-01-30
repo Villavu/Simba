@@ -212,8 +212,8 @@ FindDTMRotatedAlternating
 FindDTMRotatedAlternating behaves like FindDTM. Only, it will rotate the DTM
 between sAngle and eAngle by aStep each time. It will also return the angle
 which the DTM was found at.
-Starts at 0 degrees and alternatives between - and + aStep to search for the
-DTM.
+Starts at (sAngle + eAngle) / 2 degrees and alternates between - and + aStep
+to search for the DTM. It finds the *closest* math to (aAngle+eAngle) / 2.
 
 
 FindDTMsRotatedSE

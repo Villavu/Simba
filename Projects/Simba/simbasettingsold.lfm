@@ -1,5 +1,5 @@
 object SettingsForm: TSettingsForm
-  Left = 1367
+  Left = 500
   Height = 558
   Top = 240
   Width = 360
