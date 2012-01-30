@@ -52,7 +52,8 @@ type
       function GetExtensionIndex(Filename : string) : integer;
       function LoadPSExtension(Filename : string; enabled : boolean=false) : boolean;
       function LoadPSExtensionsDir(Directory,ext : string) : boolean;
-      function HandleHook(const HookName: String; var Args: TVariantArray): Variant;
+      function HandleHook(const HookName: String; var Args: TVariantArray; var
+          Called: Boolean): Variant;
     end;
 
 var
@@ -166,19 +167,25 @@ begin
 end;
 
 // How do we return more than one result?
-function TExtensionManager.HandleHook(const HookName: String; var Args: TVariantArray): Variant;
+function TExtensionManager.HandleHook(const HookName: String; var Args:
+    TVariantArray; var Called: Boolean): Variant;
 var
-  i: Integer;
+  i, res: Integer;
 begin
+  Called := False;
   for i := 0 to Extensions.Count -1 do
     with TExtension(Extensions[i]) do
       if Enabled then
         if HookExists(HookName) then
-          if ExecuteHook(HookName, Args, Result) <> 0 then
-          begin
-            mDebugLn('Execute hook failed: Hookname: %s',[hookname]);
+        begin
+          res := ExecuteHook(HookName, Args, Result);
+          if res <> 0 then
+            mDebugLn('Execute hook failed: Hookname: %s',[hookname])
             // Not succesfull.
-          end;
+          else
+            Called := True;
+
+        end;
 end;
 
 initialization
