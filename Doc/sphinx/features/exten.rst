@@ -15,7 +15,7 @@ Recommended Simba Extensions
 
 Recommended:
 
-    *   Extension Updater (highly recommended)
+    *   Extension Updater (Highly recommended)
     *   SRL Updater (and Installer/Download)
     *   Associate Files
     *   Security extension. (Implements a File and Fire wall)
@@ -25,6 +25,7 @@ For developers:
     *   DTM Editor
     *   Paster Extension
     *   CRov, Crash Recovery.
+    *   Code Formatter extension.
 
 ..  Not listed as directly recommended but still worth noting.
 
