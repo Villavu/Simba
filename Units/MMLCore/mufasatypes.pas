@@ -164,7 +164,7 @@ type
   TScriptExecuteEvent = procedure(Sender : TObject; const Script : string; var Continue : boolean);
   TScriptPauseEvent = TScriptExecuteEvent;
   TScriptStopEvent = TScriptExecuteEvent;
-  TScriptOpenEvent = procedure(Sender: TObject; var Script : string) of object;
+  TScriptOpenEvent = procedure(Sender: TObject; var Script : String) of object;
 
   TOpenConnectionData = record
     Sender : TObject;

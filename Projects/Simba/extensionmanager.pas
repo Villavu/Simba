@@ -166,7 +166,7 @@ begin
 end;
 
 // How do we return more than one result?
-function TExtensionManager.HandleHook(const HookName: String;var Args: TVariantArray): Variant;
+function TExtensionManager.HandleHook(const HookName: String; var Args: TVariantArray): Variant;
 var
   i: Integer;
 begin
