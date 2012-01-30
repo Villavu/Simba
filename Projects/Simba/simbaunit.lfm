@@ -1378,7 +1378,7 @@ object SimbaForm: TSimbaForm
         Caption = '-'
       end
       object MenuItemSettingsButton: TMenuItem
-        Caption = 'Settings'
+        Caption = 'Settings (Expert)'
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000AEA9A800BAB3
@@ -1418,7 +1418,7 @@ object SimbaForm: TSimbaForm
         OnClick = MenuItemSettingsButtonClick
       end
       object MenuItemSettingsSimpleButton: TMenuItem
-        Caption = 'Settings (Simple)'
+        Caption = 'Settings'
         Bitmap.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
           2000000000000004000064000000640000000000000000000000AEA9A800BAB3
