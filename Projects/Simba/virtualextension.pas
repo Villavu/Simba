@@ -69,22 +69,38 @@ type
 const
     SExt_ok = 0;
     SExt_error = 1;
+
     SExt_OnColourPick = 0;
     SExt_onOpenFile = 1;
     SExt_onWriteFile = 2;
     SExt_onOpenConnection = 3;
     SExt_onScriptStart = 4;
+    SExt_onScriptCompile = 5;
+    SExt_onScriptExecute = 6;
+    SExt_onScriptPause = 7;
+    SExt_onScriptStop = 8;
+    SExt_onScriptOpen = 9;
 
-    EventHooks: Array [0..8] of TEventHook =
-    (	   (HookName : 'onColourPick'    ; ArgumentCount : 3), //const colour,colourx,coloury : integer;
-	   (HookName : 'onOpenFile'      ; ArgumentCount : 2), //var filename : string; var Continue : boolean
-	   (HookName : 'onWriteFile'     ; ArgumentCount : 2), //var filename : string; var Continue : boolean
-           (HookName : 'onOpenConnection'; ArgumentCount : 2), //var url : string; var Continue : boolean
-           (HookName : 'onScriptStart'   ; ArgumentCount : 2), //var Script : string; var Continue : boolean;   This is called BEFORE it compiles/executes
+    EventHooks: Array [0..9] of TEventHook =
+    (
+           //const colour,colourx,coloury : integer;
+    	   (HookName : 'onColourPick'    ; ArgumentCount : 3),
+           //var filename : string; var Continue : boolean
+	   (HookName : 'onOpenFile'      ; ArgumentCount : 2),
+           //var filename : string; var Continue : boolean
+	   (HookName : 'onWriteFile'     ; ArgumentCount : 2),
+           //var url : string; var Continue : boolean
+           (HookName : 'onOpenConnection'; ArgumentCount : 2),
+            //var Script : string; var Continue : boolean;   This is called BEFORE it compiles/executes
+           (HookName : 'onScriptStart'   ; ArgumentCount : 2),
            (HookName : 'onScriptCompile' ; ArgumentCount : 1),
 	   (HookName : 'onScriptExecute' ; ArgumentCount : 1),
 	   (HookName : 'onScriptPause'   ; ArgumentCount : 1),
-	   (HookName : 'onScriptStop'    ; ArgumentCount : 1));
+	   (HookName : 'onScriptStop'    ; ArgumentCount : 1),
+
+           //var Script : string;
+           // Called just before opening a tab with contents _Script_
+           (HookName : 'onScriptOpen'    ; ArgumentCount : 1));
 
 
 implementation
