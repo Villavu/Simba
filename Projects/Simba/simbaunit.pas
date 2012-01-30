@@ -828,12 +828,14 @@ procedure TSimbaForm.HandleConnectionData;
 {$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
+  Called: Boolean;
 begin
   SetLength(Args,2);
   Args[0] := OpenConnectionData.URL^;
   Args[1] := OpenConnectionData.Continue^;
   try
-    ExtManager.HandleHook(EventHooks[SExt_onOpenConnection].HookName,Args);
+    ExtManager.HandleHook(EventHooks[SExt_onOpenConnection].HookName, Args,
+        Called);
     OpenConnectionData.URL^ := Args[0];
     OpenConnectionData.Continue^ := Args[1];
   except
@@ -922,12 +924,13 @@ procedure TSimbaForm.HandleOpenFileData;
 {$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
+  Called: Boolean;
 begin
   SetLength(Args,2);
   Args[0] := OpenFileData.FileName^;
   Args[1] := OpenFileData.Continue^;
   try
-    ExtManager.HandleHook(EventHooks[SExt_onOpenFile].HookName,Args);
+    ExtManager.HandleHook(EventHooks[SExt_onOpenFile].HookName, Args, Called);
     OpenFileData.FileName^ := Args[0];
     OpenFileData.Continue^ := Args[1];
   except
@@ -943,12 +946,13 @@ procedure TSimbaForm.HandleWriteFileData;
 {$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
+  Called: Boolean;
 begin
   SetLength(Args,2);
   Args[0] := WriteFileData.FileName^;
   Args[1] := WriteFileData.Continue^;
   try
-    ExtManager.HandleHook(EventHooks[SExt_onWriteFile].HookName,Args);
+    ExtManager.HandleHook(EventHooks[SExt_onWriteFile].HookName, Args, Called);
     WriteFileData.FileName^ := Args[0];
     WriteFileData.Continue^ := Args[1];
   except
@@ -965,14 +969,18 @@ procedure TSimbaForm.HandleScriptStartData;
 var
   Args : TVariantArray;
   s: String;
+  Called: Boolean;
 begin
   SetLength(Args,2);
   Args[0] := ScriptStartData.Script^;
   Args[1] := ScriptStartData.Continue^;
   try
-    s := ExtManager.HandleHook(EventHooks[SExt_onScriptStart].HookName,Args);
-    ScriptStartData.Script^ := s;
-    ScriptStartData.Continue^ := Args[1];
+    s := ExtManager.HandleHook(EventHooks[SExt_onScriptStart].HookName, Args, Called);
+    if Called then
+    begin
+      ScriptStartData.Script^ := s;
+      ScriptStartData.Continue^ := Args[1];
+    end;
   except
     on e : Exception do
       mDebugLn('ERROR in HandleScriptStartData: ' + e.message);
@@ -982,25 +990,27 @@ begin
 {$ENDIF}
 end;
 
-  procedure TSimbaForm.HandleScriptOpenData;
-  {$IFDEF USE_EXTENSIONS}
-  var
-    Args : TVariantArray;
-    s: String;
-  begin
-    SetLength(Args,1);
-    Args[0] := ScriptOpenData.Script^;
-    try
-      s := ExtManager.HandleHook(EventHooks[SExt_onScriptOpen].HookName,Args);
+procedure TSimbaForm.HandleScriptOpenData;
+{$IFDEF USE_EXTENSIONS}
+var
+  Args : TVariantArray;
+  s: String;
+  Called: Boolean;
+begin
+  SetLength(Args,1);
+  Args[0] := ScriptOpenData.Script^;
+  try
+    s := ExtManager.HandleHook(EventHooks[SExt_onScriptOpen].HookName, Args, Called);
+    if Called then
       ScriptOpenData.Script^ := s;
-    except
-      on e : Exception do
-        mDebugLn('ERROR in HandleScriptOpenData: ' + e.message);
-    end;
-  {$ELSE}
-  begin
-  {$ENDIF}
+  except
+    on e : Exception do
+      mDebugLn('ERROR in HandleScriptOpenData: ' + e.message);
   end;
+{$ELSE}
+begin
+{$ENDIF}
+end;
 
 procedure TSimbaForm.ProcessDebugStream(Sender: TObject);
 begin
@@ -3193,12 +3203,13 @@ procedure TSimbaForm.PickerPick(Sender: TObject; const Colour, colourx,
 {$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
+  Called: Boolean;
 begin
   SetLength(args,3);
   Args[0] := Colour;
   Args[1] := Colourx;
   Args[2] := Coloury;
-  ExtManager.HandleHook(EventHooks[SExt_OnColourPick].HookName,Args);
+  ExtManager.HandleHook(EventHooks[SExt_OnColourPick].HookName, Args, Called);
 {$ELSE}
 begin
 {$ENDIF}
@@ -3584,7 +3595,6 @@ begin
     begin
       filename := SetDirSeparators(filename);
       SynEdit.Lines.LoadFromFile(filename);
-
 
       if assigned(onScriptOpen) then
       begin
