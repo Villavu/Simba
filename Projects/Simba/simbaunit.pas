@@ -964,13 +964,14 @@ procedure TSimbaForm.HandleScriptStartData;
 {$IFDEF USE_EXTENSIONS}
 var
   Args : TVariantArray;
+  s: String;
 begin
   SetLength(Args,2);
   Args[0] := ScriptStartData.Script^;
   Args[1] := ScriptStartData.Continue^;
   try
-    ExtManager.HandleHook(EventHooks[SExt_onScriptStart].HookName,Args);
-    ScriptStartData.Script^ := Args[0];
+    s := ExtManager.HandleHook(EventHooks[SExt_onScriptStart].HookName,Args);
+    ScriptStartData.Script^ := s;
     ScriptStartData.Continue^ := Args[1];
   except
     on e : Exception do
@@ -985,14 +986,13 @@ end;
   {$IFDEF USE_EXTENSIONS}
   var
     Args : TVariantArray;
+    s: String;
   begin
     SetLength(Args,1);
     Args[0] := ScriptOpenData.Script^;
-    writeln('ARGS[0] before: '  + Args[0]);
     try
-      ExtManager.HandleHook(EventHooks[SExt_onScriptOpen].HookName,Args);
-      writeln('ARGS[0] after: '  + Args[0]);
-      ScriptOpenData.Script^ := Args[0];
+      s := ExtManager.HandleHook(EventHooks[SExt_onScriptOpen].HookName,Args);
+      ScriptOpenData.Script^ := s;
     except
       on e : Exception do
         mDebugLn('ERROR in HandleScriptOpenData: ' + e.message);
@@ -3585,15 +3585,14 @@ begin
       filename := SetDirSeparators(filename);
       SynEdit.Lines.LoadFromFile(filename);
 
-      script := SynEdit.Lines.text;
 
       if assigned(onScriptOpen) then
       begin
+        script := SynEdit.Lines.text;
         onScriptOpen(Self, script);
-        writeln('onScriptOpen');
+        SynEdit.Lines.Text := script;
       end;
 
-      SynEdit.Lines.Text := script;
       StartText := SynEdit.Lines.text;
 
       ScriptName:= ExtractFileNameOnly(filename);

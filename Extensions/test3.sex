@@ -37,6 +37,12 @@ begin
   Writeln('lets allow that for now ;)');
   Cont := True;
 end;
+
+function onScriptOpen(var Script: String): String;
+begin
+  Result := Script + 'THIS IS AFTER THE .END, HOPEFULLY');
+end;
+
 procedure free;
 begin
   Writeln('Free your extension here');
