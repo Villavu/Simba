@@ -164,6 +164,8 @@ type
   TScriptExecuteEvent = procedure(Sender : TObject; const Script : string; var Continue : boolean);
   TScriptPauseEvent = TScriptExecuteEvent;
   TScriptStopEvent = TScriptExecuteEvent;
+  TScriptOpenEvent = procedure(Sender: TObject; var Script : string) of object;
+
   TOpenConnectionData = record
     Sender : TObject;
     URL : PString;
@@ -175,10 +177,16 @@ type
     Continue : PBoolean;
   end;
   TWriteFileData = TOpenFileData;
+
   TScriptStartData = record
     Sender : TObject;
     Script : PString;
     Continue : PBoolean;
+  end;
+
+  TScriptOpenData = record
+    Sender : TObject;
+    Script : PString;
   end;
 
 
