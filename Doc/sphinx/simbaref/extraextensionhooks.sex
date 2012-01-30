@@ -30,12 +30,13 @@ begin
   Writeln(inttostr(colour) + ' attuh (' + inttostr(x) +',' + inttostr(y) + ')');
 end;
  
-procedure onScriptStart(var Script : string; var Cont : boolean);
+function onScriptStart(var Script : string; var Cont : boolean): String;
 begin
   Writeln('So you want to compile the following script!!');
   Writeln(script);
   Writeln('lets allow that for now ;)');
   Cont := True;
+  Result := Script;
 end;
 
 function onScriptOpen(var Script: String): String;
