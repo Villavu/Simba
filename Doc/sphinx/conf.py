@@ -225,7 +225,7 @@ man_pages = [
 epub_title = u'Simba'
 epub_author = u'Merlijn Wajer, Raymond van Venetie'
 epub_publisher = u'Merlijn Wajer, Raymond van Venetie'
-epub_copyright = u'2011, Merlijn Wajer, Raymond van Venetie'
+epub_copyright = u'2009-2012, Merlijn Wajer, Raymond van Venetie'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
