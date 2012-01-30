@@ -857,33 +857,45 @@ end;
 
 function TSimbaForm.SetIncludesPath(obj: TObject): Boolean;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('--- SetIncludesPath with value: ' + TStringSetting(obj).Value);
+  {$ENDIF}
 end;
 
 function TSimbaForm.SetPluginsPath(obj: TObject): Boolean;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('--- SetPluginsPath with value: ' + TStringSetting(obj).Value);
+  {$ENDIF}
 end;
 
 function TSimbaForm.SetFontsPath(obj: TObject): Boolean;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('--- SetFontsPath with value: ' + TStringSetting(obj).Value);
+  {$ENDIF}
 end;
 
 function TSimbaForm.SetScriptsPath(obj: TObject): Boolean;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('--- SetScriptPath with value: ' + TStringSetting(obj).Value);
+  {$ENDIF}
 end;
 
 function TSimbaForm.SetDefaultScriptPath(obj: TObject): Boolean;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('--- SetDefaultScriptPath with value: ' + TStringSetting(obj).Value);
+  {$ENDIF}
 end;
 
 {$IFDEF USE_EXTENSIONS}
 function TSimbaForm.SetExtensionsPath(obj: TObject): Boolean;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('--- SetExtensionPath with value: ' + TStringSetting(obj).Value);
+  {$ENDIF}
 end;
 {$ENDIF}
 
@@ -3267,20 +3279,26 @@ end;
 
 function TSimbaForm.LoadSettingDef(const Key,Def: string): string;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('DEPRECATED LoadSettingDef call for: ' + key);
+  {$ENDIF}
   result := SimbaSettings.MMLSettings.GetKeyValueDefLoad(Key,def,SimbaSettingsFile);
 end;
 
 function TSimbaForm.CreateSetting(const Key,Value: string): string;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('DEPRECATED CreateSetting call for: ' + key);
+  {$ENDIF}
   result := SimbaSettings.MMLSettings.GetKeyValueDef(Key,value);
 end;
 
 procedure TSimbaForm.SetSetting(const key,Value: string; save : boolean);
 begin
   //Creates the setting if needed
+  {$IFDEF SIMBADEBUG}
   writeln('DEPRECATED SetSetting call for: ' + key);
+  {$ENDIF}
   SimbaSettings.MMLSettings.SetKeyValue(key, value);
 
   if save then
@@ -3293,7 +3311,9 @@ end;
 
 function TSimbaForm.SettingExists(const key: string): boolean;
 begin
+  {$IFDEF SIMBADEBUG}
   writeln('DEPRECATED SettingExists call for: ' + key);
+  {$ENDIF}
   result := SimbaSettings.MMLSettings.KeyExists(key);
 end;
 
