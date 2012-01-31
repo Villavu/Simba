@@ -10,7 +10,7 @@ uses
   Forms, Unit1, LResources, fontloader
   { you can add units after this };
 
-{$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
+//{$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
 begin
   {$I project1.lrs}
