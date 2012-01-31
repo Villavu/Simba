@@ -31,7 +31,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="23">
+    <Units Count="24">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -44,10 +44,12 @@
         <ComponentName Value="Form1"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
-        <CursorPos X="25" Y="165"/>
-        <TopLine Value="146"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="69"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="134"/>
+        <CursorPos X="60" Y="153"/>
+        <UsageCount Value="74"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
@@ -91,6 +93,12 @@
       <Unit6>
         <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
         <UnitName Value="bitmaps"/>
+<<<<<<< HEAD
+=======
+        <EditorIndex Value="7"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="47"/>
+>>>>>>> 75ecf08... Ready OCRBench for autobuild.
         <CursorPos X="18" Y="81"/>
         <TopLine Value="47"/>
         <EditorIndex Value="14"/>
@@ -100,10 +108,18 @@
       <Unit7>
         <Filename Value="../../Units/MMLCore/ocrutil.pas"/>
         <UnitName Value="ocrutil"/>
+<<<<<<< HEAD
         <CursorPos X="39" Y="208"/>
         <TopLine Value="1"/>
         <EditorIndex Value="6"/>
         <UsageCount Value="34"/>
+=======
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="156"/>
+        <CursorPos X="79" Y="165"/>
+        <UsageCount Value="36"/>
+>>>>>>> 75ecf08... Ready OCRBench for autobuild.
         <Loaded Value="True"/>
       </Unit7>
       <Unit8>
@@ -170,6 +186,12 @@
       <Unit16>
         <Filename Value="../../Units/MMLAddon/windowselector.pas"/>
         <UnitName Value="windowselector"/>
+<<<<<<< HEAD
+=======
+        <EditorIndex Value="6"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="12"/>
+>>>>>>> 75ecf08... Ready OCRBench for autobuild.
         <CursorPos X="1" Y="33"/>
         <TopLine Value="12"/>
         <EditorIndex Value="13"/>
@@ -229,8 +251,22 @@
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit22>
+      <Unit23>
+        <Filename Value="../../Units/MMLCore/libloader.pas"/>
+        <UnitName Value="libloader"/>
+        <EditorIndex Value="5"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="6"/>
+        <CursorPos X="16" Y="11"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit23>
     </Units>
+<<<<<<< HEAD
     <JumpHistory Count="30" HistoryIndex="29">
+=======
+    <JumpHistory Count="22" HistoryIndex="21">
+>>>>>>> 75ecf08... Ready OCRBench for autobuild.
       <Position1>
         <Filename Value="unit1.pas"/>
         <Caret Line="87" Column="22" TopLine="69"/>
@@ -316,6 +352,7 @@
         <Caret Line="36" Column="18" TopLine="18"/>
       </Position21>
       <Position22>
+<<<<<<< HEAD
         <Filename Value="unit1.pas"/>
         <Caret Line="87" Column="47" TopLine="70"/>
       </Position22>
@@ -351,16 +388,26 @@
         <Filename Value="unit1.pas"/>
         <Caret Line="10" Column="32" TopLine="1"/>
       </Position30>
+=======
+        <Filename Value="../../Units/MMLCore/libloader.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position22>
+>>>>>>> 75ecf08... Ready OCRBench for autobuild.
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
     <Target>
-      <Filename Value="project1"/>
+      <Filename Value="OCRBench"/>
     </Target>
     <SearchPaths>
+<<<<<<< HEAD
       <IncludeFiles Value="$(ProjOutDir)/;$(ProjPath)../../Units/MMLAddon/PSInc/"/>
       <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/MMLAddon/;$(ProjPath)../../Units/PascalScript/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/MMLAddon/PSInc/;$(ProjPath)../../Units/Linux/;$(LazarusDir)/components/mouseandkeyinput/"/>
+=======
+      <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;../Simba"/>
+      <OtherUnitFiles Value="$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(LazarusDir)/components/mouseandkeyinput"/>
+>>>>>>> 75ecf08... Ready OCRBench for autobuild.
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
