@@ -170,7 +170,8 @@ begin
 end;
 
 initialization
-  {$I unit1.lrs}
+
+//{$I unit1.lrs}
 
 end.
 
