@@ -10,10 +10,10 @@ uses
   Forms, Unit1, LResources, fontloader
   { you can add units after this };
 
-{$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
+//{$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
 
 begin
-  {$I project1.lrs}
+//  {$I project1.lrs}
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
   Application.Run;
