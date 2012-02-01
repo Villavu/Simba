@@ -33,7 +33,7 @@ uses
 
 
 const
-    SimbaVersion = 982;
+    SimbaVersion = 983;
     SimbaMajor = 980; // this should be 980 even if SimbaVersion is 981, etc
 
 procedure mDebugLn( s : string);overload;
