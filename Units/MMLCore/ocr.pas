@@ -65,6 +65,7 @@ type
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
     procedure FilterUpTextByColour(bmp: TMufasaBitmap);
+    procedure FilterUpTextByColour_new(bmp: TMufasaBitmap);
     procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
     procedure FilterShadowBitmap(bmp: TMufasaBitmap);
     procedure FilterCharsBitmap(bmp: TMufasaBitmap);
@@ -229,6 +230,108 @@ end;
   We will match shadow as well; we need it later on.
 }
 
+type
+    tocrfilterdata = record
+        _type: integer;
+
+        r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer;
+
+        ref_color,tol,cts: integer
+    end;
+
+    tocrfilterdataarray = array of tocrfilterdata;
+
+
+procedure TMOCR.FilterUpTextByColour_new(bmp: TMufasaBitmap);
+
+  function load0(r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer): tocrfilterdata;
+  begin
+    result.r_low := r_low;
+    result.r_high := r_high;
+    result.g_low := g_low;
+    result.g_high := g_high;
+    result.b_low := b_low;
+    result.b_high := b_high;
+    result.set_col := set_col;
+    result._type := 0;
+  end;
+
+var
+   x, y,r, g, b, i: Integer;
+   fd: tocrfilterdataarray;
+   found: Boolean;
+
+const
+    OF_LN = 256;
+    OF_HN = -1;
+begin
+  setlength(fd, 9);
+
+  fd[0] := load0(65, OF_HN, OF_LN, 190, OF_LN, 190, ocr_Blue); // blue
+  fd[1] := load0(65, OF_HN, OF_LN, 190, 65, OF_HN, ocr_Green); // green
+  fd[2] := load0(OF_LN, 190, 220, 100, 127, 40, ocr_ItemC); // itemC
+  fd[3] := load0(OF_LN, 190, OF_LN, 190, 65, OF_HN, ocr_Yellow); // yellow
+  fd[4] := load0(OF_LN, 190, 65, OF_HN, 65, OF_HN, ocr_Red); // red
+  fd[5] := load0(OF_LN, 190, OF_LN, 65, 65, OF_HN, ocr_Red); // red 2
+  fd[6] := load0(190 + 10, 130, OF_LN, 65 - 10, 20, OF_HN, ocr_Green); // green 2
+  fd[7] := load0(190, 140, 210, 150, 200, 160, ocr_ItemC); // item2, temp item_c
+  fd[8] := load0(65, OF_HN, 65, OF_HN, 65, OF_HN, ocr_Purple); // shadow
+
+
+
+  for y := 0 to bmp.Height - 1 do
+    for x := 0 to bmp.Width - 1 do
+    begin
+      colortorgb(bmp.fastgetpixel(x,y),r,g,b);
+
+      { white, need this for now since it cannot be expressed in filterocrdata  }
+      if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High)
+         and (abs(r-g) + abs(r-b) + abs(g-b) < 55) then
+      begin
+        bmp.fastsetpixel(x,y,ocr_White);
+        continue;
+      end;
+
+
+      found := False;
+      for i := 0 to high(fd) do
+      begin
+        if fd[i]._type = 0 then
+            if (r < fd[i].r_low) and (r > fd[i].r_high) and (g < fd[i].g_low)
+            and (g > fd[i].g_high) and (b < fd[i].b_low) and (b > fd[i].b_high) then
+            begin
+              bmp.fastsetpixel(x, y, fd[i].set_col);
+              found := True;
+              break;
+            end;
+        { else if type = 1 }
+      end;
+      if found then
+        continue;
+
+      // Black if no match
+      bmp.fastsetpixel(x, y ,0);
+
+    end;
+
+    {
+      Make outline black for shadow characteristics filter
+      First and last horiz line = 0. This makes using the shadow algo easier.
+      We don't really throw away information either since we already took the
+      bitmap a bit larger than required.
+    }
+    for x := 0 to bmp.width -1 do
+      bmp.fastsetpixel(x,0,0);
+    for x := 0 to bmp.width -1 do
+      bmp.fastsetpixel(x,bmp.height-1,0);
+
+    // Same for vertical lines
+    for y := 0 to bmp.Height -1 do
+      bmp.fastsetpixel(0, y, 0);
+    for y := 0 to bmp.Height -1 do
+      bmp.fastsetpixel(bmp.Width-1, y, 0);
+end;
+
 (*
 FilterUpTextByColour
 ~~~~~~~~~~~~~~~~~~~~
@@ -238,6 +341,7 @@ FilterUpTextByColour
     procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
 
 *)
+
 
 procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
 var
@@ -626,8 +730,10 @@ begin
     DebugToBmp(bmp,0,h);
   {$ENDIF}
 
-  // Filter 1
-  FilterUpTextByColour(bmp);
+  {
+    Filter 1, remove most colours we don't want.
+  }
+  FilterUpTextByColour_new(bmp);
   {$IFDEF OCRSAVEBITMAP}
   bmp.SaveToFile(OCRDebugPath + 'ocrcol.bmp');
   {$ENDIF}
