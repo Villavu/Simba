@@ -251,7 +251,7 @@ SendSocket
 SendSocket sends a string of data to a bound client socket.
 
 SetSocketTimeout
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 

@@ -53,6 +53,7 @@ type
   private
     Client: TObject;
     FFonts: TMFonts;
+    filterdata: TOCRFilterDataArray;
     function  GetFonts:TMFonts;
     procedure SetFonts(const NewFonts: TMFonts);
   public
@@ -64,8 +65,12 @@ type
     function GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
+    procedure CreateDefaultFilter;
+    procedure SetFilter(filter: TOCRFilterDataArray);
+    procedure ResetFilter;
     procedure FilterUpTextByColour(bmp: TMufasaBitmap);
     procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
+    procedure FilterUpTextByColourMatches(bmp: TMufasaBitmap);
     procedure FilterShadowBitmap(bmp: TMufasaBitmap);
     procedure FilterCharsBitmap(bmp: TMufasaBitmap);
 
@@ -92,10 +97,11 @@ type
       const OCRDebugPath = '';
     {$ENDIF}
   {$ENDIF}
+
 implementation
 
 uses
-  colour_conv, client,  files, tpa, mufasatypesutil;
+  colour_conv, client,  files, tpa, mufasatypesutil, iomanager;
 
 const
     { Very rough limits for R, G, B }
@@ -124,8 +130,15 @@ const
     { Item }
     ocr_ItemC = 16744447;
 
+    { Item }
+    ocr_ItemC2 = clRed or clGreen;
+
     { Shadow }
     ocr_Purple = 8388736;
+
+const
+    OF_LN = 256;
+    OF_HN = -1;
 
 
 { Constructor }
@@ -134,11 +147,15 @@ begin
   inherited Create;
   Self.Client := Owner;
   Self.FFonts := TMFonts.Create(Owner);
+
+  CreateDefaultFilter;
 end;
 
 { Destructor }
 destructor TMOCR.Destroy;
 begin
+  SetLength(filterdata, 0);
+
   Self.FFonts.Free;
   inherited Destroy;
 end;
@@ -230,21 +247,7 @@ end;
   We will match shadow as well; we need it later on.
 }
 
-(*
-FilterUpTextByColour
-~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: pascal
-
-    procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
-
-*)
-
-procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
-var
-   x, y,r, g, b: Integer;
-begin
-  {
+      {
     We're going to filter the bitmap solely on colours first.
     If we found one, we set it to it's `normal' colour.
 
@@ -262,15 +265,73 @@ begin
     not remove *all* invalid points either; but that is simply not possible
     based purely on the colour. (If someone has a good idea, let me know)
   }
+
+  (*
+  FilterUpTextByColour
+  ~~~~~~~~~~~~~~~~~~~~
+
+  .. code-block:: pascal
+
+      procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
+
+  *)
+
+procedure TMOCR.CreateDefaultFilter;
+  function load0(r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer;
+      is_text_color: boolean): tocrfilterdata;
+  begin
+    result.r_low := r_low;
+    result.r_high := r_high;
+    result.g_low := g_low;
+    result.g_high := g_high;
+    result.b_low := b_low;
+    result.b_high := b_high;
+    result.set_col := set_col;
+    result._type := 0;
+    result.is_text_color:= is_text_color;
+  end;
+
+begin
+  setlength(filterdata, 9);
+
+  filterdata[0] := load0(65, OF_HN, OF_LN, 190, OF_LN, 190, ocr_Blue, True); // blue
+  filterdata[1] := load0(65, OF_HN, OF_LN, 190, 65, OF_HN, ocr_Green, True); // green
+  filterdata[2] := load0(OF_LN, 190, 220, 100, 127, 40, ocr_ItemC, True); // itemC
+  filterdata[3] := load0(OF_LN, 190, OF_LN, 190, 65, OF_HN, ocr_Yellow, True); // yellow
+  filterdata[4] := load0(OF_LN, 190, 65, OF_HN, 65, OF_HN, ocr_Red, True); // red
+  filterdata[5] := load0(OF_LN, 190, OF_LN, 65, 65, OF_HN, ocr_Red, True); // red 2
+  filterdata[6] := load0(190 + 10, 130, OF_LN, 65 - 10, 20, OF_HN, ocr_Green, True); // green 2
+  filterdata[7] := load0(190, 140, 210, 150, 200, 160, ocr_ItemC2, True); // item2, temp item_c
+  filterdata[8] := load0(65, OF_HN, 65, OF_HN, 65, OF_HN, ocr_Purple, False); // shadow
+end;
+
+procedure TMOCR.SetFilter(filter: TOCRFilterDataArray);
+
+begin
+  SetLength(filterdata, 0);
+  filterdata := copy(filter);
+end;
+
+procedure TMOCR.ResetFilter;
+
+begin
+  SetLength(filterdata, 0);
+  CreateDefaultFilter;
+end;
+
+procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
+
+var
+   x, y,r, g, b, i: Integer;
+   found: Boolean;
+
+begin
   for y := 0 to bmp.Height - 1 do
     for x := 0 to bmp.Width - 1 do
     begin
       colortorgb(bmp.fastgetpixel(x,y),r,g,b);
-      {
-        abs(g-b) < 15 seems to help heaps when taking out invalid (white) points
-        obviously if a colour is ``white'' R, G B should all be approx the
-        same value. That is what the last part of the if statement checks.
-      }
+
+      { white, need this for now since it cannot be expressed in filterocrdata  }
       if (r > ocr_Limit_High) and (g > ocr_Limit_High) and (b > ocr_Limit_High)
          and (abs(r-g) + abs(r-b) + abs(g-b) < 55) then
       begin
@@ -278,64 +339,26 @@ begin
         continue;
       end;
 
-      { Quite straightforward and works quite well, afaik }
-      if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b > ocr_Limit_High) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Blue);
-        continue;
-      end;
 
-      { Ditto }
-      if (r < ocr_Limit_Low) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
+      found := False;
+      for i := 0 to high(filterdata) do
       begin
-        bmp.fastsetpixel(x,y,ocr_Green);
-        continue;
+        if filterdata[i]._type = 0 then
+            if (r < filterdata[i].r_low) and (r > filterdata[i].r_high) and (g < filterdata[i].g_low)
+            and (g > filterdata[i].g_high) and (b < filterdata[i].b_low) and (b > filterdata[i].b_high) then
+            begin
+              bmp.fastsetpixel(x, y, filterdata[i].set_col);
+              found := True;
+              break;
+            end;
+        { else if type = 1 }
+        { XXX TODO ^ }
       end;
-
-      { False results with fire }
-      if(r > ocr_Limit_High) and (g > 100) and (g < ocr_Limit_High) and (b > 40) and (b < 127) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_ItemC);
+      if found then
         continue;
-      end;
-
-      { Works fine afaik }
-      if(r > ocr_Limit_High) and (g > ocr_Limit_High) and (b < ocr_Limit_Low) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Yellow);
-        continue;
-      end;
-
-      // better use g < 40 than ocr_Limit_Low imo (TODO)
-      if (r > ocr_Limit_High) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Red);
-        continue;
-      end;
-
-      { Red as well }
-      if (r > ocr_Limit_High) and (g > ocr_Limit_Low) and (b < ocr_Limit_Low) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Red);
-        continue;
-      end;
-
-      if (r > ocr_Limit_Med) and (r < (ocr_Limit_High + 10)) and (g > ocr_Limit_Low - 10) and
-          (b < 20) then
-      begin
-        bmp.fastsetpixel(x,y,ocr_Green);
-        continue;
-      end;
-
-      // Match Shadow as well. We will need it later.
-      if (r < ocr_Limit_Low) and (g < ocr_Limit_Low) and (b < ocr_Limit_Low) then
-      begin
-        bmp.FastSetPixel(x,y, ocr_Purple);
-        continue;
-      end;
 
       // Black if no match
-      bmp.fastsetpixel(x,y,0);
+      bmp.fastsetpixel(x, y ,0);
     end;
 
     {
@@ -381,7 +404,6 @@ end;
     If this is not true, then UpTextChar[x,y] cannot be part of uptext - it
     has no shadow, and it doesn't have a `friend' (at x+1,y+1) either.
     We don't need to do this from the right bottom to left top.
-
 }
 
 (*
@@ -499,6 +521,44 @@ begin
   setlength(result,c);
 end;
 
+
+procedure TMOCR.FilterUpTextByColourMatches(bmp: TMufasaBitmap);
+
+var
+   TPA: TPointArray;
+   ATPA: T2DPointArray;
+   OldTarget: Integer;
+   c, i, j, k: Integer;
+begin
+  TClient(Client).IOManager.GetImageTarget(OldTarget);
+  TClient(Client).IOManager.SetTarget(bmp);
+
+  for i := 0 to high(filterdata) do
+  begin
+    if not filterdata[i].is_text_color then
+      continue;
+    c := filterdata[i].set_col;
+
+    TClient(Client).MFinder.FindColors(TPA, c, 0, 0, bmp.width - 1, bmp.height - 1);
+
+    ATPA := SplitTPAEx(TPA, 2, 6);
+
+    for j := 0 to high(atpa) do
+    begin
+      if length(ATPA[j]) > 70 then
+        for k := 0 to high(ATPA[j]) do
+          bmp.FastSetPixel(ATPA[j][k].x, ATPA[j][k].y, 0);
+
+      if length(ATPA[j]) < 4 then
+        for k := 0 to high(ATPA[j]) do
+          bmp.FastSetPixel(ATPA[j][k].x, ATPA[j][k].y, 0);
+    end;
+
+  end;
+
+
+  TClient(Client).IOManager.SetImageTarget(OldTarget);
+end;
 
 (*
 FilterShadowBitmap
@@ -621,7 +681,8 @@ begin
 
   {$IFDEF OCRDEBUG}
     debugbmp := TMufasaBitmap.Create;
-    debugbmp.SetSize(w + 2, (h + 2) * 7);
+    debugbmp.SetSize(w + 2, (h + 2) * 8);
+    debugbmp.FastDrawClear(clBlack);
   {$ENDIF}
   {$IFDEF OCRDEBUG}
     DebugToBmp(bmp,0,h);
@@ -639,6 +700,15 @@ begin
     DebugToBmp(bmp,1,h);
   {$ENDIF}
 
+  // new filter
+  FilterUpTextByColourMatches(bmp);
+  {$IFDEF OCRSAVEBITMAP}
+  bmp.SaveToFile(OCRDebugPath + 'ocrcolourmatches.bmp');
+  {$ENDIF}
+  {$IFDEF OCRDEBUG}
+    DebugToBmp(bmp,2,h);
+  {$ENDIF}
+
   {
     Filter 2, remove all false shadow points and points that have no shadow
     after false shadow is removed.
@@ -650,7 +720,7 @@ begin
   bmp.SaveToFile(OCRDebugPath + 'ocrdebug.bmp');
   {$ENDIF}
   {$IFDEF OCRDEBUG}
-    DebugToBmp(bmp,2,h);
+    DebugToBmp(bmp,3,h);
   {$ENDIF}
 
   {
@@ -662,14 +732,14 @@ begin
   shadowsbmp := bmp.copy;
   FilterShadowBitmap(shadowsbmp);
   {$IFDEF OCRDEBUG}
-  DebugToBmp(shadowsbmp,3,h);
+  DebugToBmp(shadowsbmp,4,h);
   {$ENDIF}
 
   { create a bitmap with only the chars on it }
   charsbmp := bmp.copy;
   FilterCharsBitmap(charsbmp);
   {$IFDEF OCRDEBUG}
-    DebugToBmp(charsbmp,4,h);
+    DebugToBmp(charsbmp,5,h);
   {$ENDIF}
 
   { Now actually extract the characters }
@@ -713,7 +783,7 @@ begin
       charsbmp.FastSetPixel(chars_2d[x][y].x, chars_2d[x][y].y, pc);
   end;
   {$IFDEF OCRDEBUG}
-    DebugToBmp(charsbmp,5,h);
+    DebugToBmp(charsbmp,6,h);
   {$ENDIF}
 
   for y := 0 to high(chars_2d) do
@@ -786,7 +856,7 @@ begin
       shadowsbmp.FastSetPixel(shadows[x][y].x, shadows[x][y].y, pc);
   end;
   {$IFDEF OCRDEBUG}
-    DebugToBmp(shadowsbmp,6,h);
+    DebugToBmp(shadowsbmp,7,h);
   {$ENDIF}
 
   {
