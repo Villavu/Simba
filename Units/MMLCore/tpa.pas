@@ -682,7 +682,10 @@ begin
   if (l < 0) then Exit;
   SetLength(DistArr, l + 1);
   for i := 0 to l do
+  begin
+    if length(a[i]) = 0 then continue;
     DistArr[i] := Round(Sqr(From.x - a[i][0].x) + Sqr(From.y - a[i][0].y));
+  end;
   QuickATPASort(DistArr, a, 0, l, True);
 end;
 
