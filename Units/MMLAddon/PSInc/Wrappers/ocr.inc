@@ -72,3 +72,13 @@ procedure ps_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
 begin
   CurrThread.Client.MOCR.FilterUpTextByCharacteristics(bmp);
 end;
+
+procedure ps_SetUpTextFilter(filterdata: TOcrFilterDataArray);
+begin
+  CurrThread.Client.MOcr.SetFilter(filterdata);
+end;
+
+procedure ps_ResetUpTextFilter;
+begin
+  CurrThread.Client.MOCR.ResetFilter();
+end;

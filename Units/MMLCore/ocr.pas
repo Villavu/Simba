@@ -78,6 +78,8 @@ type
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
     procedure CreateDefaultFilter;
+    procedure SetFilter(filter: TOCRFilterDataArray);
+    procedure ResetFilter;
     procedure FilterUpTextByColour(bmp: TMufasaBitmap);
     procedure FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
     procedure FilterUpTextByColourMatches(bmp: TMufasaBitmap);
@@ -286,7 +288,8 @@ end;
   *)
 
 procedure TMOCR.CreateDefaultFilter;
-  function load0(r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer): tocrfilterdata;
+  function load0(r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer;
+      is_text_color: boolean): tocrfilterdata;
   begin
     result.r_low := r_low;
     result.r_high := r_high;
@@ -296,21 +299,35 @@ procedure TMOCR.CreateDefaultFilter;
     result.b_high := b_high;
     result.set_col := set_col;
     result._type := 0;
+    result.is_text_color:= is_text_color;
   end;
 
 begin
   setlength(filterdata, 9);
 
-  filterdata[0] := load0(65, OF_HN, OF_LN, 190, OF_LN, 190, ocr_Blue); // blue
-  filterdata[1] := load0(65, OF_HN, OF_LN, 190, 65, OF_HN, ocr_Green); // green
-  filterdata[2] := load0(OF_LN, 190, 220, 100, 127, 40, ocr_ItemC); // itemC
-  filterdata[3] := load0(OF_LN, 190, OF_LN, 190, 65, OF_HN, ocr_Yellow); // yellow
-  filterdata[4] := load0(OF_LN, 190, 65, OF_HN, 65, OF_HN, ocr_Red); // red
-  filterdata[5] := load0(OF_LN, 190, OF_LN, 65, 65, OF_HN, ocr_Red); // red 2
-  filterdata[6] := load0(190 + 10, 130, OF_LN, 65 - 10, 20, OF_HN, ocr_Green); // green 2
-  filterdata[7] := load0(190, 140, 210, 150, 200, 160, ocr_ItemC2); // item2, temp item_c
-  filterdata[8] := load0(65, OF_HN, 65, OF_HN, 65, OF_HN, ocr_Purple); // shadow
+  filterdata[0] := load0(65, OF_HN, OF_LN, 190, OF_LN, 190, ocr_Blue, True); // blue
+  filterdata[1] := load0(65, OF_HN, OF_LN, 190, 65, OF_HN, ocr_Green, True); // green
+  filterdata[2] := load0(OF_LN, 190, 220, 100, 127, 40, ocr_ItemC, True); // itemC
+  filterdata[3] := load0(OF_LN, 190, OF_LN, 190, 65, OF_HN, ocr_Yellow, True); // yellow
+  filterdata[4] := load0(OF_LN, 190, 65, OF_HN, 65, OF_HN, ocr_Red, True); // red
+  filterdata[5] := load0(OF_LN, 190, OF_LN, 65, 65, OF_HN, ocr_Red, True); // red 2
+  filterdata[6] := load0(190 + 10, 130, OF_LN, 65 - 10, 20, OF_HN, ocr_Green, True); // green 2
+  filterdata[7] := load0(190, 140, 210, 150, 200, 160, ocr_ItemC2, True); // item2, temp item_c
+  filterdata[8] := load0(65, OF_HN, 65, OF_HN, 65, OF_HN, ocr_Purple, False); // shadow
+end;
 
+procedure TMOCR.SetFilter(filter: TOCRFilterDataArray);
+
+begin
+  SetLength(filterdata, 0);
+  filterdata := copy(filter);
+end;
+
+procedure TMOCR.ResetFilter;
+
+begin
+  SetLength(filterdata, 0);
+  CreateDefaultFilter;
 end;
 
 procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
@@ -529,28 +546,23 @@ begin
 
   for i := 0 to high(filterdata) do
   begin
+    if not filterdata[i].is_text_color then
+      continue;
     c := filterdata[i].set_col;
 
-    // TODO ONLY DO COLOUR TYPE, NOT SHADOW
-    // XXX TODO ADD COLOUR TYPE TO STRUCT
-    if c = ocr_Purple then continue;
-
-    TClient(Client).MFinder.FindColors(TPA, c, 0, 0, bmp.width - 1, bmp.height -1);
+    TClient(Client).MFinder.FindColors(TPA, c, 0, 0, bmp.width - 1, bmp.height - 1);
 
     ATPA := SplitTPAEx(TPA, 2, 6);
 
     for j := 0 to high(atpa) do
     begin
       if length(ATPA[j]) > 70 then
-      begin
         for k := 0 to high(ATPA[j]) do
           bmp.FastSetPixel(ATPA[j][k].x, ATPA[j][k].y, 0);
-      end;
+
       if length(ATPA[j]) < 4 then
-      begin
         for k := 0 to high(ATPA[j]) do
           bmp.FastSetPixel(ATPA[j][k].x, ATPA[j][k].y, 0);
-      end;
     end;
 
   end;

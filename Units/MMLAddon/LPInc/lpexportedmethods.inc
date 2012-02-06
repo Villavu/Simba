@@ -301,6 +301,11 @@ AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing,
 //AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
+AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: Integer);', @Lape_FilterUpTextByCharacteristics);
+AddGlobalFunc('procedure Lape_SetUpTextFilter(filterdata: TOcrFilterDataArray);',
+    @Lape_SetUpTextFilter);
+AddGlobalFunc('procedure Lape_ResetUpTextFilter(const: Params: PParamArray);',
+    @Lape_ResetUpTextFilter);
 
 { Other }
 

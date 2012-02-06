@@ -143,8 +143,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   UseClient := False;
-  {BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext4.bmp'; }
-  FontPath := '/home/merlijn/Programs/mufasa/Fonts/';
+  BitmapPath := '/home/merlijn/Programs/simba/uptext9.png';
+  FontPath := '/home/merlijn/Programs/simba/Fonts/';
 end;
 
 procedure TForm1.PathButtonClick(Sender: TObject);
@@ -168,7 +168,7 @@ end;
 
 initialization
 
-//{$I unit1.lrs}
+{$I unit1.lrs}
 
 end.
 

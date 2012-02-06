@@ -62,3 +62,18 @@ procedure Lape_FreeFont(const Params: PParamArray; const Result: Pointer);
 begin
   Pboolean(Result)^ := ps_FreeFont(Pstring(Params^[0])^);
 end;
+
+procedure Lape_FilterUpTextByCharacteristics(const Params: PParamArray);
+begin
+  ps_FilterUpTextByCharacteristics(ps_GetMufasaBitmap(PInteger(Params^[0])^));
+end;
+
+procedure Lape_SetUpTextFilter(const Params: PParamArray);
+begin
+  ps_SetUpTextFilter(POcrFilterDataArray(Params^[0])^);
+end;
+
+procedure Lape_ResetUpTextFilter(const Params: PParamArray);
+begin
+  ps_ResetUpTextFilter;
+end;
