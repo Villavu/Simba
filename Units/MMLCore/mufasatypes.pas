@@ -189,7 +189,7 @@ type
 
    PPoint = ^TPoint;
 
-  TOCRFilterData = record
+  TOCRFilterData = packed record
       _type: integer;
       is_text_color: boolean;
 
