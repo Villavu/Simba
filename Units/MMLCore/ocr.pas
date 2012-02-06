@@ -307,9 +307,17 @@ end;
 
 procedure TMOCR.SetFilter(filter: TOCRFilterDataArray);
 
+var i: integer;
+
 begin
   SetLength(filterdata, 0);
-  filterdata := copy(filter);
+  SetLength(filterdata, length(filter));
+  for i := 0 to length(filter) - 1 do
+  begin
+    writeln('Old: ' + inttostr(filterdata[0].r_low));
+    filterdata[i] := filter[i];
+    writeln('New: ' + inttostr(filterdata[0].r_low));
+  end;
 end;
 
 procedure TMOCR.ResetFilter;
