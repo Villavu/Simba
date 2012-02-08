@@ -61,7 +61,8 @@ uses
 
   updater,
   scriptmanager,
-  newsimbasettings;
+  newsimbasettings
+  {$IFDEF USE_DEBUGGER}, debugger{$ENDIF};
 
 const
   interp_PS = 0; //PascalScript
@@ -104,6 +105,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionDebugger: TAction;
     ActionLape: TAction;
     ActionGoto: TAction;
     ActionCPascal: TAction;
@@ -179,6 +181,7 @@ type
     NewsTimer: TTimer;
     FunctionListTimer: TTimer;
     SCARHighlighter: TSynPasSyn;
+    ToolButton5: TToolButton;
     TT_ScriptManager: TToolButton;
     ToolButton6: TToolButton;
     TT_Console: TToolButton;
@@ -287,6 +290,7 @@ type
     procedure ActionCopyExecute(Sender: TObject);
     procedure ActionCPascalExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
+    procedure ActionDebuggerExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
     procedure ActionExitExecute(Sender: TObject);
     procedure ActionExtensionsExecute(Sender: TObject);
@@ -1846,9 +1850,9 @@ begin
   }
   Thread.SetSettings(SimbaSettings.MMLSettings, SimbaSettingsFile);
 
-  Thread.OpenConnectionEvent:=@ThreadOpenConnectionEvent;
-  Thread.WriteFileEvent:=@ThreadWriteFileEvent;
-  Thread.OpenFileEvent:=@ThreadOpenFileEvent;
+  Thread.OpenConnectionEvent := @ThreadOpenConnectionEvent;
+  Thread.WriteFileEvent := @ThreadWriteFileEvent;
+  Thread.OpenFileEvent := @ThreadOpenFileEvent;
 end;
 
 procedure TSimbaForm.HandleConfigParameter;
@@ -2010,6 +2014,15 @@ begin
     CurrScript.SynEdit.CutToClipboard
   else if Memo1.Focused then
     Memo1.CutToClipboard;
+end;
+
+procedure TSimbaForm.ActionDebuggerExecute(Sender: TObject);
+begin
+  {$IFDEF USE_DEBUGGER}
+  DebuggerForm.DebugThread := CurrScript.ScriptThread;
+  DebuggerForm.Show;
+  DebuggerForm.UpdateInfo();
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.ActionDeleteExecute(Sender: TObject);
@@ -2656,7 +2669,7 @@ begin
 
   InitmDebug; { Perhaps we need to place this before our mDebugLines?? }
 
-  Self.OnScriptStart:= @ScriptStartEvent;
+  Self.OnScriptStart := @ScriptStartEvent;
   Self.onScriptOpen := @ScriptOpenEvent;
 
   FillThread := TProcThread.Create;
@@ -2666,6 +2679,10 @@ begin
 
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
+  {$IFDEF USE_DEBUGGER}
+  Application.CreateForm(TDebuggerForm, DebuggerForm);
+  ActionDebugger.Visible := True;
+  {$ENDIF}
 
   HandleConfigParameter;
   if FileExistsUTF8(SimbaSettingsFile) then
@@ -3261,6 +3278,7 @@ begin
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
                          TrayPlay.Checked := True; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := True;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= False;
+                         ActionDebugger.Enabled := True;
                    end;
       ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
@@ -3271,11 +3289,17 @@ begin
                          TB_Stop.ImageIndex := Image_Terminate;
                          TrayPlay.Checked := False; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= True;
+
                    end;
       ss_None    : begin Text := 'Done'; TB_Run.Enabled:= True; TB_Pause.Enabled:= False; TB_Stop.Enabled:= False;
                          TB_Stop.ImageIndex := Image_Stop;
                          TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= false; TrayStop.Checked:= False;
+                         ActionDebugger.Enabled := False;
+                         {$IFDEF USE_DEBUGGER}
+                         if (DebuggerForm.Showing) then
+                           DebuggerForm.Hide;
+                         {$ENDIF}
                    end;
     end;
 end;
