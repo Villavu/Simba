@@ -324,16 +324,16 @@
         <UnitName Value="ScriptManager"/>
       </Unit50>
       <Unit51>
-        <Filename Value="scriptmanager.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="ScriptManagerForm"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="ScriptManager"/>
-      </Unit51>
-      <Unit52>
         <Filename Value="newsimbasettings.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="newsimbasettings"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="debugger.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DebuggerForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="debugger"/>
       </Unit52>
     </Units>
   </ProjectOptions>
