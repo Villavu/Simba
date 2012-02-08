@@ -356,7 +356,7 @@ begin
         XYZToCIELab(X, Y, Z, PCTS3Info(Result)^.L, PCTS3Info(Result)^.A,
                   PCTS3Info(Result)^.B);
         { XXX: TODO: Make all Tolerance extended }
-        PCTS3Info(Result)^.Tol := Round(Tol*Tol*CTS3Modifier);
+        PCTS3Info(Result)^.Tol := Ceil(Sqr(Tol*CTS3Modifier));
       end;
   end;
 end;
