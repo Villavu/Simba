@@ -120,7 +120,7 @@ type
     end;
 
     TIncludesSection = class(TSection)
-      Path: TStringSetting;
+      Path: TPathSetting;
     end;
 
     TFontsSection = class(TSection)
@@ -694,7 +694,7 @@ begin
   inherited;
 
   Includes := AddChild(TIncludesSection.Create()) as TIncludesSection;
-  Includes.Path := Includes.AddChild(TStringSetting.Create(ssIncludesPath)) as TStringSetting;
+  Includes.Path := Includes.AddChild(TPathSetting.Create(ssIncludesPath)) as TPathSetting;
   Includes.Path.onDefault := @GetIncludePath;
 
   Fonts := AddChild(TFontsSection.Create()) as TFontsSection;
