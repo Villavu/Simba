@@ -857,44 +857,44 @@ end;
 
 function TSimbaForm.SetIncludesPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetIncludesPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetIncludesPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 function TSimbaForm.SetPluginsPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetPluginsPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetPluginsPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 function TSimbaForm.SetFontsPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetFontsPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetFontsPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 function TSimbaForm.SetScriptsPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetScriptPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetScriptPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 function TSimbaForm.SetDefaultScriptPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetDefaultScriptPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetDefaultScriptPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 {$IFDEF USE_EXTENSIONS}
 function TSimbaForm.SetExtensionsPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetExtensionPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetExtensionPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 {$ENDIF}
