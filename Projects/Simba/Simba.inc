@@ -26,7 +26,7 @@
                             // See Units/Linux/keybinder.pas
 {$ENDIF}
 
-//{$DEFINE SIMBA_VERBOSE} // For more verbosity.
+{$DEFINE SIMBA_VERBOSE} // For more verbosity.
 
 //{$DEFINE NOTPORTABLE} // NOTPORTABLE makes it easier to build portable by
                         // default, yet keep it possible to disable it with
