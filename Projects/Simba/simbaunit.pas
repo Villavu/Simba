@@ -1291,7 +1291,7 @@ begin
           mDebugLn('Terminating the Scriptthread');
           mDebugLn('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
           WaitForThreadTerminate(ScriptThread.Handle, 0);
-          ScriptThread.Free;
+          FreeAndNil(ScriptThread);
           ScriptState := ss_None;
         end;
       ss_Running:
@@ -1763,6 +1763,7 @@ var
   Script: string;
   loadFontsOnScriptStart: boolean;
   Continue: boolean;
+  H, I: LongInt;
 begin
   if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
   begin
@@ -1853,6 +1854,13 @@ begin
   Thread.OpenConnectionEvent := @ThreadOpenConnectionEvent;
   Thread.WriteFileEvent := @ThreadWriteFileEvent;
   Thread.OpenFileEvent := @ThreadOpenFileEvent;
+
+  if (Thread is TPSThread) then
+  begin
+    H := CurrScript.SynEdit.Marks.Count - 1;
+    for I := 0 to H do
+      TPSThread(Thread).PSScript.SetBreakPoint('', CurrScript.SynEdit.Marks.Items[I].Line);
+  end;
 end;
 
 procedure TSimbaForm.HandleConfigParameter;
