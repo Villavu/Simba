@@ -71,6 +71,10 @@ type
     ButtonOK: TButton;
     ButtonCancel: TButton;
     CheckForUpdatesBox: TCheckBox;
+    UpdaterURLLabel: TLabel;
+    UpdaterURLVersionLabel: TLabel;
+    UpdaterURLVersion: TEdit;
+    UpdaterURL: TEdit;
     HighlightLazColours: TCheckBox;
     CodeToolsCheckBoxes: TCheckGroup;
     TabSettingsCheckBoxes: TCheckGroup;
@@ -83,7 +87,6 @@ type
     ImageList1: TImageList;
     Label1: TLabel;
     Label2: TLabel;
-    ListView1: TListView;
     PgControlEnvironment: TPageControl;
     PgControlAdvanced: TPageControl;
     InterpreterGroup: TRadioGroup;
@@ -134,11 +137,14 @@ begin
 end;
 
 procedure TSettingsSimpleForm.ButtonOKClick(Sender: TObject);
+var N: TTreeNode;
 begin
-  writeln('OK Click');
   // Updater
+
   SimbaSettings.Updater.CheckForUpdates.Value := CheckForUpdatesBox.Checked;
   SimbaSettings.Updater.CheckEveryXMinutes.Value := StrToIntDef(UpdateMinutesEdit.Text, 30);
+  SimbaSettings.Updater.RemoteLink.Value := UpdaterURL.Text;
+  SimbaSettings.Updater.RemoteVersionLink.Value := UpdaterURLVersion.Text;
 
   // Interpreter
   if InterpreterGroup.ItemIndex = 0 then
@@ -169,6 +175,26 @@ begin
   // Add 'Show Command prompt'
 
   // Paths
+  // Paths
+  N := PathsTreeView.Items.FindNodeWithText('Includes');
+  if (N <> nil) and (N.HasChildren) then
+    SimbaSettings.Includes.Path.Value := N.GetLastChild.Text;
+
+  N := PathsTreeView.Items.FindNodeWithText('Extensions');
+  if (N <> nil) and (N.HasChildren) then
+    SimbaSettings.Plugins.Path.Value := N.GetLastChild.Text;
+
+  N := PathsTreeView.Items.FindNodeWithText('Plugins');
+  if (N <> nil) and (N.HasChildren) then
+    SimbaSettings.Plugins.Path.Value := N.GetLastChild.Text;
+
+  N := PathsTreeView.Items.FindNodeWithText('Fonts');
+  if (N <> nil) and (N.HasChildren) then
+    SimbaSettings.Fonts.Path.Value := N.GetLastChild.Text;
+
+  N := PathsTreeView.Items.FindNodeWithText('Scripts');
+  if (N <> nil) and (N.HasChildren) then
+    SimbaSettings.Scripts.Path.Value := N.GetLastChild.Text;
 
   ModalResult := mrOK;
 end;
@@ -187,11 +213,13 @@ begin
 end;
 
 procedure TSettingsSimpleForm.FormShow(Sender: TObject);
+var N: TTreeNode;
 begin
   // Updater
   CheckForUpdatesBox.Checked := SimbaSettings.Updater.CheckForUpdates.Value;
   UpdateMinutesEdit.Text := IntToStr(SimbaSettings.Updater.CheckEveryXMinutes.Value);
-
+  UpdaterURL.Text := SimbaSettings.Updater.RemoteLink.Value;
+  UpdaterURLVersion.Text := SimbaSettings.Updater.RemoteVersionLink.Value;
   // Interpreter
   if SimbaSettings.Interpreter._Type.Value = 0 then
     InterpreterGroup.ItemIndex := 0
@@ -223,7 +251,26 @@ begin
   // Add 'Show Command prompt', not set in SimbaSettings?
 
   // Paths
+  N := PathsTreeView.Items.FindNodeWithText('Includes');
+  if (N <> nil) and (N.HasChildren) then
+    N.GetLastChild.Text:= SimbaSettings.Includes.Path.Value;
 
+
+  N := PathsTreeView.Items.FindNodeWithText('Extensions');
+  if (N <> nil) and (N.HasChildren) then
+    N.GetLastChild.Text:= SimbaSettings.Extensions.Path.Value;
+
+  N := PathsTreeView.Items.FindNodeWithText('Plugins');
+  if (N <> nil) and (N.HasChildren) then
+    N.GetLastChild.Text:= SimbaSettings.Plugins.Path.Value;
+
+  N := PathsTreeView.Items.FindNodeWithText('Fonts');
+  if (N <> nil) and (N.HasChildren) then
+    N.GetLastChild.Text:= SimbaSettings.Fonts.Path.Value;
+
+  N := PathsTreeView.Items.FindNodeWithText('Scripts');
+  if (N <> nil) and (N.HasChildren) then
+    N.GetLastChild.Text:= SimbaSettings.Scripts.Path.Value;
 
   // Form stuff
   SettingsTabState[0] := 1;
