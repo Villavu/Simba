@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 385
+  Left = 411
   Height = 623
-  Top = 199
+  Top = 77
   Width = 660
   ActiveControl = ScriptPanel
   AllowDropFiles = True
@@ -455,6 +455,7 @@ object SimbaForm: TSimbaForm
       ClientWidth = 150
       OnEndDock = nil
       TabOrder = 3
+      DesignTop = 200
       inherited FunctionList: TTreeView
         Height = 319
         Width = 150
