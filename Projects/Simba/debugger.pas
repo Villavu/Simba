@@ -1,16 +1,12 @@
 unit debugger;
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ComCtrls, ActnList,
-
-  mmlpsthread,
-
-  uPSUtils, uPSRuntime;
+  ComCtrls, ActnList, uPSUtils, uPSRuntime, uPSDebugger, mmlpsthread;
 
 type
 
@@ -47,6 +43,8 @@ type
     procedure StopActionExecute(Sender: TObject);
   private
     FRunning: Boolean;
+    FActiveLine: LongInt;
+
     CurPos: Cardinal;
     ProcNo: Cardinal;
     Exec: string;
@@ -63,15 +61,18 @@ type
     procedure _UpdateInfo();
     procedure _FillInfo();
     procedure FillInfo();
-    procedure BreakHandler(Sender: TObject; const FileName: ansistring; Po, Row, Col: Cardinal);
+    procedure LineInfo(Sender: TObject; const FileName: string; Pos, Row, Col: Cardinal);
     procedure Idle(Sender: TObject);
+    procedure BreakHandler(Sender: TObject; const FileName: ansistring; Po, Row, Col: Cardinal);
     procedure Load();
     procedure Unload();
-    procedure SetRunning(Value: boolean);
+    procedure UpdateActiveLine();
   public
     DebugThread: TMThread;
     procedure UpdateInfo();
-    property Running: boolean read FRunning write SetRunning;
+    procedure ToggleRunning();
+    procedure ShowForm();
+    property Running: Boolean read FRunning;
   end; 
 
 var
@@ -79,14 +80,17 @@ var
 
 implementation
 
-procedure TDebuggerForm.SetRunning(Value: boolean);
-begin
-  FRunning := Value;
+uses
+  SimbaUnit;
 
-  PlayAction.Enabled := (not (Value));
-  PauseAction.Enabled := Value;
-  StepIntoAction.Enabled := (not (Value));
-  StepOverAction.Enabled := (not (Value));
+procedure TDebuggerForm.ToggleRunning;
+begin
+  FRunning := (not (FRunning));
+
+  PlayAction.Enabled := (not (FRunning));
+  PauseAction.Enabled := FRunning;
+  StepIntoAction.Enabled := (not (FRunning));
+  StepOverAction.Enabled := (not (FRunning));
 end;
 
 procedure TDebuggerForm.PlayActionExecute(Sender: TObject);
@@ -94,7 +98,7 @@ begin
   with TPSThread(DebugThread).PSScript do
     TThread.Synchronize(DebugThread, @Resume);
 
-  Running := True;
+  ToggleRunning;
 end;
 
 procedure TDebuggerForm.RefreshActionExecute(Sender: TObject);
@@ -107,13 +111,16 @@ begin
   with TPSThread(DebugThread).PSScript do
     TThread.Synchronize(DebugThread, @Pause);
 
-  Running := False;
+  ToggleRunning;
 end;
 
 procedure TDebuggerForm.Load();
+var
+  H, I: LongInt;
 begin
   with TPSThread(DebugThread).PSScript do
   begin
+    OnLineInfo := @LineInfo;
     OnIdle := @Idle;
     OnBreakPoint := @BreakHandler;
   end;
@@ -121,7 +128,13 @@ end;
 
 procedure TDebuggerForm.FormShow(Sender: TObject);
 begin
-  Running := True;
+  if (not (Assigned(DebugThread))) then
+    DebugThread := SimbaForm.CurrScript.ScriptThread;
+
+  FRunning := False;
+  ToggleRunning();
+
+  SimbaForm.CurrScript.ActiveLine := 0;
 
   TThread.Synchronize(DebugThread, @Load);
 end;
@@ -132,12 +145,17 @@ begin
   begin
     OnIdle := nil;
     OnBreakPoint := nil;
+    OnLineInfo := nil;
   end;
 end;
 
 procedure TDebuggerForm.FormHide(Sender: TObject);
 begin
+  SimbaForm.CurrScript.ActiveLine := 0;
+
   TThread.Synchronize(DebugThread, @Unload);
+
+  DebugThread := nil;
 end;
 
 procedure TDebuggerForm.FormCreate(Sender: TObject);
@@ -343,14 +361,39 @@ begin
     TThread.Synchronize(DebugThread, @_FillInfo);
 end;
 
-procedure TDebuggerForm.BreakHandler(Sender: TObject; const FileName: ansistring; Po, Row, Col: Cardinal);
+procedure TDebuggerForm.ShowForm();
 begin
-  UpdateInfo();
+  if (not (DebuggerForm.Showing)) then
+    DebuggerForm.Show;
+end;
+
+procedure TDebuggerForm.UpdateActiveLine();
+begin
+  SimbaForm.CurrScript.ActiveLine := FActiveLine;
+end;
+
+procedure TDebuggerForm.LineInfo(Sender: TObject; const FileName: string; Pos, Row, Col: Cardinal);
+begin
+  with TPSThread(DebugThread).PSScript.Exec do
+    if ((DebugMode <> dmRun) and (DebugMode <> dmStepOver)) then
+    begin
+      FActiveLine := Row;
+      TThread.Synchronize(nil, @UpdateActiveLine);
+      FActiveLine := 0;
+    end;
 end;
 
 procedure TDebuggerForm.Idle(Sender: TObject);
 begin
   //Idle handler... Needed to Pause.
+end;
+
+procedure TDebuggerForm.BreakHandler(Sender: TObject; const FileName: ansistring; Po, Row, Col: Cardinal);
+begin
+  if (FRunning) then
+    TThread.Synchronize(nil, @ToggleRunning);
+  TThread.Synchronize(nil, @ShowForm);
+  UpdateInfo();
 end;
 
 initialization
