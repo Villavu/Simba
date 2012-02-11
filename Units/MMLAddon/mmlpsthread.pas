@@ -32,7 +32,7 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler,
+  Classes, SysUtils, client, uPSComponent,uPSCompiler, uPSComponentExt,
   uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs,internets,scriptproperties,
   settings, settingssandbox, lcltype, dialogs
@@ -203,7 +203,8 @@ type
         procedure OutputMessages;
         procedure HandleScriptTerminates;
       public
-        PSScript : TPSScript;
+        PSScript: TPSScriptExtension;
+        Breakpoints: TIntegerArray;
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
         procedure SetScript(script: string); override;
@@ -283,7 +284,8 @@ var
 implementation
 
 uses
-  colour_conv,dtmutil,
+  SimbaUnit,
+  colour_conv, dtmutil,
   {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
   uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
@@ -292,6 +294,7 @@ uses
   IniFiles,//Silly INI files
   stringutil, //String st00f
   newsimbasettings, // SimbaSettings
+  debugger,
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
@@ -583,15 +586,15 @@ begin
     Client.MOCR.Fonts := Fonts;
 end;
 
-function ThreadSafeCall(ProcName: string; var V: TVariantArray): Variant; extdecl;
+function ThreadSafeCall(aProcName: string; var V: TVariantArray): Variant; extdecl;
 begin
   if GetCurrentThreadId = MainThreadID then
   begin
     with TPSThread(currthread).PSScript do
-      Result := Exec.RunProcPVar(V,Exec.GetProc(Procname));
+      Result := Exec.RunProcPVar(V,Exec.GetProc(aProcName));
   end else
   begin
-    CurrThread.SyncInfo^.MethodName:= ProcName;
+    CurrThread.SyncInfo^.MethodName:= aProcName;
     CurrThread.SyncInfo^.V:= @V;
     CurrThread.SyncInfo^.OldThread := CurrThread;
     CurrThread.SyncInfo^.Res := @Result;
@@ -599,10 +602,10 @@ begin
   end;
 end;
 
-function CallProc(ProcName: string; var V: TVariantArray): Variant; extdecl;
+function CallProc(aProcName: string; var V: TVariantArray): Variant; extdecl;
 begin
   with TPSThread(currthread).PSScript do
-    Result := Exec.RunProcPVar(V,Exec.GetProc(Procname));
+    Result := Exec.RunProcPVar(V,Exec.GetProc(aProcName));
 end;
 
 {$I PSInc/Wrappers/other.inc}
@@ -658,21 +661,22 @@ end;
 
 constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
 var
-  I : integer;
+  I, H: LongInt;
 begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
-  PSScript := TPSScript.Create(nil);
-  PSScript.UsePreProcessor:= True;
+  PSScript := TPSScriptExtension.Create(nil);
+  PSScript.UsePreProcessor := True;
+  PSScript.UseDebugInfo := True;
   PSScript.CompilerOptions := PSScript.CompilerOptions + [icBooleanShortCircuit];
   PSScript.OnNeedFile := @RequireFile;
   PSScript.OnIncludingFile := @OnIncludingFile;
   PSScript.OnFileAlreadyIncluded := @FileAlreadyIncluded;
-  PSScript.OnProcessDirective:=@OnProcessDirective;
-  PSScript.OnProcessUnknowDirective:=@PSScriptProcessUnknownDirective;
-  PSScript.OnCompile:= @OnCompile;
-  PSScript.OnCompImport:= @OnCompImport;
-  PSScript.OnExecImport:= @OnExecImport;
-  PSScript.OnFindUnknownFile:= @PSScriptFindUnknownFile;
+  PSScript.OnProcessDirective := @OnProcessDirective;
+  PSScript.OnProcessUnknowDirective := @PSScriptProcessUnknownDirective;
+  PSScript.OnCompile := @OnCompile;
+  PSScript.OnCompImport := @OnCompImport;
+  PSScript.OnExecImport := @OnExecImport;
+  PSScript.OnFindUnknownFile := @PSScriptFindUnknownFile;
 
   with PSScript do
   begin
@@ -680,11 +684,12 @@ begin
     {$I PSInc/psdefines.inc}
   end;
 
-  for i := 0 to high(ExportedMethods) do
-    if pos('Writeln',exportedmethods[i].FuncDecl) > 0 then
+  H := High(ExportedMethods);
+  for I := 0 to H do
+    if (Pos('Writeln', ExportedMethods[i].FuncDecl) > 0) then
     begin
       ExportedMethods[i].FuncPtr := nil;
-      break;
+      Break;
     end;
 end;
 
@@ -1004,6 +1009,10 @@ end;
 procedure TPSThread.Execute;
 begin
   CurrThread := Self;
+
+  if (PSScript.BreakPointCount > 0) then
+    TThread.Synchronize(nil, @DebuggerForm.ShowForm);
+
   Starttime := lclintf.GetTickCount;
 
   try
@@ -1040,7 +1049,7 @@ end;
 
 procedure TPSThread.SetScript(script: string);
 begin
-   PSScript.Script.Text:= LineEnding+Script; //A LineEnding to create space for future extra's in first line (defines?)
+   PSScript.Script.Text := Script; //A LineEnding to create space for future extra's in first line (defines?)
 end;
 
 {***implementation TCPThread***}
