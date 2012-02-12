@@ -1860,7 +1860,7 @@ begin
   begin
     H := CurrScript.SynEdit.Marks.Count - 1;
     for I := 0 to H do
-      TPSThread(Thread).PSScript.SetBreakPoint('', CurrScript.SynEdit.Marks.Items[I].Line);
+      TPSThread(Thread).PSScript.SetBreakPoint('', CurrScript.SynEdit.Marks.Items[I].Line - 1);
   end;
   {$ENDIF}
 end;
