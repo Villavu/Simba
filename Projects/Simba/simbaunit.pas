@@ -61,7 +61,8 @@ uses
 
   updater,
   scriptmanager,
-  newsimbasettings;
+  newsimbasettings
+  {$IFDEF USE_DEBUGGER}, debugger{$ENDIF};
 
 const
   interp_PS = 0; //PascalScript
@@ -104,6 +105,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionDebugger: TAction;
     ActionLape: TAction;
     ActionGoto: TAction;
     ActionCPascal: TAction;
@@ -179,6 +181,7 @@ type
     NewsTimer: TTimer;
     FunctionListTimer: TTimer;
     SCARHighlighter: TSynPasSyn;
+    ToolButton5: TToolButton;
     TT_ScriptManager: TToolButton;
     ToolButton6: TToolButton;
     TT_Console: TToolButton;
@@ -287,6 +290,7 @@ type
     procedure ActionCopyExecute(Sender: TObject);
     procedure ActionCPascalExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
+    procedure ActionDebuggerExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
     procedure ActionExitExecute(Sender: TObject);
     procedure ActionExtensionsExecute(Sender: TObject);
@@ -861,44 +865,44 @@ end;
 
 function TSimbaForm.SetIncludesPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetIncludesPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetIncludesPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 function TSimbaForm.SetPluginsPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetPluginsPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetPluginsPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 function TSimbaForm.SetFontsPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetFontsPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetFontsPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 function TSimbaForm.SetScriptsPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetScriptPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetScriptPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 function TSimbaForm.SetDefaultScriptPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetDefaultScriptPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetDefaultScriptPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
 {$IFDEF USE_EXTENSIONS}
 function TSimbaForm.SetExtensionsPath(obj: TObject): Boolean;
 begin
-  {$IFDEF SIMBADEBUG}
-  writeln('--- SetExtensionPath with value: ' + TStringSetting(obj).Value);
+  {$IFDEF SIMBA_VERBOSE}
+  writeln('--- SetExtensionPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 {$ENDIF}
@@ -1287,7 +1291,7 @@ begin
           mDebugLn('Terminating the Scriptthread');
           mDebugLn('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
           WaitForThreadTerminate(ScriptThread.Handle, 0);
-          ScriptThread.Free;
+          FreeAndNil(ScriptThread);
           ScriptState := ss_None;
         end;
       ss_Running:
@@ -1759,6 +1763,7 @@ var
   Script: string;
   loadFontsOnScriptStart: boolean;
   Continue: boolean;
+  H, I: LongInt;
 begin
   if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
   begin
@@ -1846,9 +1851,18 @@ begin
   }
   Thread.SetSettings(SimbaSettings.MMLSettings, SimbaSettingsFile);
 
-  Thread.OpenConnectionEvent:=@ThreadOpenConnectionEvent;
-  Thread.WriteFileEvent:=@ThreadWriteFileEvent;
-  Thread.OpenFileEvent:=@ThreadOpenFileEvent;
+  Thread.OpenConnectionEvent := @ThreadOpenConnectionEvent;
+  Thread.WriteFileEvent := @ThreadWriteFileEvent;
+  Thread.OpenFileEvent := @ThreadOpenFileEvent;
+
+  {$IFDEF USE_DEBUGGER}
+  if (Thread is TPSThread) then
+  begin
+    H := CurrScript.SynEdit.Marks.Count - 1;
+    for I := 0 to H do
+      TPSThread(Thread).PSScript.SetBreakPoint('', CurrScript.SynEdit.Marks.Items[I].Line - 1);
+  end;
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.HandleConfigParameter;
@@ -2010,6 +2024,15 @@ begin
     CurrScript.SynEdit.CutToClipboard
   else if Memo1.Focused then
     Memo1.CutToClipboard;
+end;
+
+procedure TSimbaForm.ActionDebuggerExecute(Sender: TObject);
+begin
+  {$IFDEF USE_DEBUGGER}
+  DebuggerForm.DebugThread := CurrScript.ScriptThread;
+  DebuggerForm.Show;
+  DebuggerForm.UpdateInfo();
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.ActionDeleteExecute(Sender: TObject);
@@ -2656,7 +2679,7 @@ begin
 
   InitmDebug; { Perhaps we need to place this before our mDebugLines?? }
 
-  Self.OnScriptStart:= @ScriptStartEvent;
+  Self.OnScriptStart := @ScriptStartEvent;
   Self.onScriptOpen := @ScriptOpenEvent;
 
   FillThread := TProcThread.Create;
@@ -2666,6 +2689,10 @@ begin
 
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
+  {$IFDEF USE_DEBUGGER}
+  Application.CreateForm(TDebuggerForm, DebuggerForm);
+  ActionDebugger.Visible := True;
+  {$ENDIF}
 
   HandleConfigParameter;
   if FileExistsUTF8(SimbaSettingsFile) then
@@ -3261,6 +3288,7 @@ begin
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
                          TrayPlay.Checked := True; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := True;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= False;
+                         ActionDebugger.Enabled := True;
                    end;
       ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
@@ -3271,11 +3299,17 @@ begin
                          TB_Stop.ImageIndex := Image_Terminate;
                          TrayPlay.Checked := False; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= True;
+
                    end;
       ss_None    : begin Text := 'Done'; TB_Run.Enabled:= True; TB_Pause.Enabled:= False; TB_Stop.Enabled:= False;
                          TB_Stop.ImageIndex := Image_Stop;
                          TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= false; TrayStop.Checked:= False;
+                         ActionDebugger.Enabled := False;
+                         {$IFDEF USE_DEBUGGER}
+                         if (DebuggerForm.Showing) then
+                           DebuggerForm.Hide;
+                         {$ENDIF}
                    end;
     end;
 end;

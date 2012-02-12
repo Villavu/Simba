@@ -26,89 +26,105 @@ type
     TOnDefaultSetting = procedure (obj: TObject);
 
     TSetting = class(TObject)
+    public
       procedure Save(MMLSettings: TMMLSettings); virtual; abstract;
       procedure Load(MMLSettings: TMMLSettings); virtual; abstract;
 
       destructor Destroy; virtual; abstract;
     end;
 
-    TSettingsArray = Array of TSetting;
+    TSettingsArray = array of TSetting;
 
     TValueSetting = class(TSetting)
-      constructor Create(Path: String);
+    private
+      FPath: string;
+      FValueSet: boolean;
+      FonChange: TOnChangeSettings;
+      FonDefault: TOnDefaultSetting;
+    public
+      constructor Create(APath: String);
       destructor Destroy; override;
 
-    public
-      APath: String;
-      set_value: Boolean;
-
-      onChange: TOnChangeSettings;
-      onDefault: TOnDefaultSetting;
+      property Path: string read FPath;
+      property ValueSet: boolean read FValueSet;
+      property onChange: TOnChangeSettings read FonChange write FonChange;
+      property onDefault: TOnDefaultSetting read FonDefault write FonDefault;
     end;
 
     TIntegerSetting = class(TValueSetting)
-      constructor Create(Path: String); overload;
-      constructor Create(Path: String; val: Integer); overload;
+    private
+      FValue: Integer;
+      function GetValue: Integer;
+      procedure SetValue(val: Integer);
+    public
+      constructor Create(APath: String; val: Integer); overload;
+
       procedure Save(MMLSettings: TMMLSettings); override;
       procedure Load(MMLSettings: TMMLSettings); override;
 
-      function GetValue: Integer;
-      procedure SetValue(val: Integer);
       function GetDefValue(val: Integer): Integer;
-    public
+
       property Value: Integer read GetValue write SetValue;
-    private
-      FValue: Integer;
     end;
 
     TStringSetting = class(TValueSetting)
-      constructor Create(Path: String); overload;
-      constructor Create(Path: String; val: String); overload;
+    private
+      FValue: string;
+      function GetValue: string;
+      procedure SetValue(val: string);
+    public
+      constructor Create(APath: string; val: string); overload;
+
       procedure Save(MMLSettings: TMMLSettings); override;
       procedure Load(MMLSettings: TMMLSettings); override;
 
-      function GetValue: String;
-      procedure SetValue(val: String);
-      function GetDefValue(val: String): String;
-    public
-      property Value: String read GetValue write SetValue;
-    private
-      FValue: String;
+      function GetDefValue(val: string): string;
+
+      property Value: string read GetValue write SetValue;
     end;
 
     TBooleanSetting = class(TValueSetting)
-      constructor Create(Path: String); overload;
-      constructor Create(Path: String; val: Boolean); overload;
+    private
+      FValue: boolean;
+      function GetValue: Boolean;
+      procedure SetValue(val: Boolean);
+    public
+      constructor Create(APath: String; val: Boolean); overload;
+
       procedure Save(MMLSettings: TMMLSettings); override;
       procedure Load(MMLSettings: TMMLSettings); override;
 
-      function GetValue: Boolean;
-      procedure SetValue(val: Boolean);
       function GetDefValue(val: Boolean): Boolean;
-    public
+
       property Value: Boolean read GetValue write SetValue;
+    end;
+
+    TPathSetting = class(TStringSetting)
     private
-      FValue: Boolean;
+      function GetValue: string;
+      procedure SetValue(val: string);
+    public
+      property Value: string read GetValue write SetValue;
     end;
 
     TSection = class(TSetting)
+    public
+      Nodes: TSettingsArray;
+
       constructor Create();
       destructor Destroy; override;
 
       procedure Save(MMLSettings: TMMLSettings); override;
       procedure Load(MMLSettings: TMMLSettings); override;
       function AddChild(Child: TSetting): TSetting;
-
-      public
-        Nodes: TSettingsArray;
     end;
 
     TIncludesSection = class(TSection)
-      Path: TStringSetting;
+      Path: TPathSetting;
     end;
 
     TFontsSection = class(TSection)
-      Path: TStringSetting;
+      Path: TPathSetting;
       LoadOnStartUp: TBooleanSetting;
       Version: TIntegerSetting;
       VersionLink: TStringSetting;
@@ -116,12 +132,12 @@ type
     end;
 
     TExtensionsSection = class(TSection)
-      Path: TStringSetting;
+      Path: TPathSetting;
       FileExtension: TStringSetting;
     end;
 
     TScriptsSection = class(TSection)
-      Path: TStringSetting;
+      Path: TPathSetting;
     end;
 
     TFunctionListSection = class(TSection)
@@ -138,7 +154,7 @@ type
     end;
 
     TSourceEditorSection = class(TSection)
-      DefScriptPath: TStringSetting;
+      DefScriptPath: TPathSetting;
       LazColors: TBooleanSetting;
     end;
 
@@ -147,7 +163,7 @@ type
     end;
 
     TPluginsSection = class(TSection)
-      Path: TStringSetting;
+      Path: TPathSetting;
     end;
 
     TTabsSection = class(TSection)
@@ -193,10 +209,6 @@ type
     end;
 
     TSimbaSettings = class(TSection)
-      constructor Create;
-
-      procedure Save(SettingsFileName: String); overload;
-
     public
       Includes: TIncludesSection;
       Fonts: TFontsSection;
@@ -219,6 +231,10 @@ type
 
       MMLSettings: TMMLSettings;
       Oops: Boolean;
+
+      constructor Create;
+
+      procedure Save(SettingsFileName: String); overload;
     end;
 
     var
@@ -317,33 +333,26 @@ end;
 
 { Values }
 
-constructor TValueSetting.Create(Path: String);
+constructor TValueSetting.Create(APath: String);
 begin
-  APath := Path;
-  set_value := False;
-  onChange := nil;
-  onDefault := nil;
+  FPath := APath;
+  FonChange := nil;
+  FonDefault := nil;
 end;
 
 destructor TValueSetting.Destroy;
 begin
 end;
 
-constructor TIntegerSetting.Create(Path: String);
-begin
-  inherited Create(Path);
-end;
-
-constructor TIntegerSetting.Create(Path: String; val: Integer);
+constructor TIntegerSetting.Create(APath: String; val: Integer);
 begin
   Create(Path);
-  value := val;
+  Value := val;
 end;
 
 function TIntegerSetting.GetValue: Integer;
 begin
-  //writeln('Get Value: ' + APath);
-  if not set_value then
+  if (not (FValueSet)) then
     raise Exception.Create('Value is not set yet.')
   else
     Result := FValue;
@@ -351,16 +360,15 @@ end;
 
 function TIntegerSetting.GetDefValue(val: Integer): Integer;
 begin
-  if set_value then
-    Exit(FValue)
-  else
+  if (not (FValueSet)) then
     Value := val;
+
   Exit(FValue);
 end;
 
 procedure TIntegerSetting.SetValue(val: Integer);
 begin
-  set_value := True;
+  FValueSet := True;
   FValue := val;
   if Assigned(OnChange) then
     OnChange(Self);
@@ -369,17 +377,15 @@ end;
 procedure TIntegerSetting.Load(MMLSettings: TMMLSettings);
 begin
   try
-    if MMLSettings.KeyExists(APath) then
-    begin
-      value := StrToInt(MMLSettings.GetKeyValue(APath));
-      //writeln('Loaded: ' + IntToStr(value) + ' for ' + APath);
-    end else
+    if MMLSettings.KeyExists(FPath) then
+      Value := StrToInt(MMLSettings.GetKeyValue(FPath))
+    else
       if assigned(onDefault) then
         onDefault(Self);
   except
     On E : EConvertError do
     begin
-      set_value := False;
+      FValueSet := False;
       Writeln ('Invalid number encountered');
     end;
   end;
@@ -387,38 +393,33 @@ end;
 
 procedure TIntegerSetting.Save(MMLSettings: TMMLSettings);
 begin
-  if not set_value then
+  if (not (FValueSet)) then
   begin
     //writeln(APath + ': Not setting anything, set_value = False');
-    exit;
+    Exit;
   end;
 
-  if MMLSettings.KeyExists(APath) then
-    MMLSettings.SetKeyValue(APath, IntToStr(value))
+  if MMLSettings.KeyExists(FPath) then
+    MMLSettings.SetKeyValue(FPath, IntToStr(value))
   else
   begin
-    if MMLSettings.CreateKey(APath, True) then
-      MMLSettings.SetKeyValue(APath, IntToStr(value))
+    if MMLSettings.CreateKey(FPath, True) then
+      MMLSettings.SetKeyValue(FPath, IntToStr(value))
     {else
       writeln('Could not create key: ' + APath);}
   end;
 end;
 
-constructor TStringSetting.Create(Path: String);
-begin
-  inherited Create(Path);
-end;
-
-constructor TStringSetting.Create(Path: String; val: String);
+constructor TStringSetting.Create(APath: String; val: String);
 begin
   Create(Path);
-  value := val;
+  Value := val;
 end;
 
 function TStringSetting.GetValue: String;
 begin
   //writeln('Get Value: ' + APath);
-  if not set_value then
+  if (not (FValueSet)) then
     raise Exception.Create('Value is not set yet.')
   else
     Result := FValue;
@@ -426,16 +427,15 @@ end;
 
 function TStringSetting.GetDefValue(val: String): String;
 begin
-  if set_value then
-    Exit(FValue)
-  else
+  if (not (FValueSet)) then
     Value := val;
+
   Exit(FValue);
 end;
 
 procedure TStringSetting.SetValue(val: String);
 begin
-  set_value := True;
+  FValueSet := True;
   FValue := val;
   if Assigned(OnChange) then
     OnChange(Self);
@@ -443,18 +443,18 @@ end;
 
 procedure TStringSetting.Save(MMLSettings: TMMLSettings);
 begin
-  if not set_value then
+  if (not (FValueSet)) then
   begin
     //writeln(APath + ': Not setting anything, set_value = False');
-    exit;
+    Exit;
   end;
 
-  if MMLSettings.KeyExists(APath) then
-    MMLSettings.SetKeyValue(APath, value)
+  if MMLSettings.KeyExists(FPath) then
+    MMLSettings.SetKeyValue(FPath, Value)
   else
   begin
-    if MMLSettings.CreateKey(APath, True) then
-      MMLSettings.SetKeyValue(APath, value)
+    if MMLSettings.CreateKey(FPath, True) then
+      MMLSettings.SetKeyValue(FPath, Value)
     {else
       writeln('Could not create key: ' + APath);}
   end;
@@ -462,30 +462,23 @@ end;
 
 procedure TStringSetting.Load(MMLSettings: TMMLSettings);
 begin
-  if MMLSettings.KeyExists(APath) then
-  begin
-    value := MMLSettings.GetKeyValue(APath);
-    //writeln('Loaded: ' + value + ' for ' + APath);
-  end else
-    if assigned(onDefault) then
+  if MMLSettings.KeyExists(FPath) then
+    Value := MMLSettings.GetKeyValue(FPath)
+  else
+    if Assigned(onDefault) then
       onDefault(Self);
 end;
 
-constructor TBooleanSetting.Create(Path: String);
-begin
-  inherited Create(Path);
-end;
-
-constructor TBooleanSetting.Create(Path: String; val: Boolean);
+constructor TBooleanSetting.Create(APath: String; val: Boolean);
 begin
   Create(Path);
-  value := val;
+  Value := val;
 end;
 
 function TBooleanSetting.GetValue: Boolean;
 begin
   //writeln('Get Value: ' + APath);
-  if not set_value then
+  if (not (FValueSet)) then
     raise Exception.Create('Value is not set yet.')
   else
     Result := FValue;
@@ -493,17 +486,16 @@ end;
 
 function TBooleanSetting.GetDefValue(val: Boolean): Boolean;
 begin
-  if set_value then
-    Exit(FValue)
-  else
+  if (not (FValueSet)) then
     Value := val;
+
   Exit(FValue);
 end;
 
 procedure TBooleanSetting.SetValue(val: Boolean);
 begin
   //writeln('Setting ' + APath + ' to ' + BoolToStr(val));
-  set_value := True;
+  FValueSet := True;
   FValue := val;
   if Assigned(OnChange) then
     OnChange(Self);
@@ -511,18 +503,18 @@ end;
 
 procedure TBooleanSetting.Save(MMLSettings: TMMLSettings);
 begin
-  if not set_value then
+  if (not (FValueSet)) then
   begin
     //writeln(APath + ': Not setting anything, set_value = False');
-    exit;
+    Exit;
   end;
 
-  if MMLSettings.KeyExists(APath) then
-    MMLSettings.SetKeyValue(APath, BoolToStr(value, True))
+  if MMLSettings.KeyExists(FPath) then
+    MMLSettings.SetKeyValue(FPath, BoolToStr(Value, True))
   else
   begin
-    if MMLSettings.CreateKey(APath, True) then
-      MMLSettings.SetKeyValue(APath, BoolToStr(value, True))
+    if MMLSettings.CreateKey(FPath, True) then
+      MMLSettings.SetKeyValue(FPath, BoolToStr(Value, True))
     {else
       writeln('Could not create key: ' + APath);}
   end;
@@ -531,9 +523,9 @@ end;
 procedure TBooleanSetting.Load(MMLSettings: TMMLSettings);
 begin
   try
-    if MMLSettings.KeyExists(APath) then
+    if MMLSettings.KeyExists(FPath) then
     begin
-      value := StrToBool(MMLSettings.GetKeyValue(APath));
+      Value := StrToBool(MMLSettings.GetKeyValue(FPath));
       //writeln('Loaded: ' + BoolToStr(value) + ' for ' + APath);
     end else
       if assigned(onDefault) then
@@ -541,10 +533,47 @@ begin
   except
     On E : EConvertError do
     begin
-      set_value := False;
+      FValueSet := False;
       Writeln ('Invalid boolean encountered');
     end;
   end;
+end;
+
+function IsAbsolute(const filename: string): boolean;
+begin
+  {$IFDEF WINDOWS}
+    Result := False;
+    if (Length(filename) > 2) then
+      Result := (filename[2] = ':');
+  {$ELSE}
+    Result := (filename[1] = DS);
+  {$ENDIF}
+end;
+
+function TPathSetting.GetValue: string;
+begin
+  if (FValueSet) then
+  begin
+    Result := FValue;
+    if (not (IsAbsolute(Result))) then
+      Result := AppPath + Result;
+  end else
+    raise Exception.Create('Value is not set yet.');
+
+  WriteLn(Format('-- PathSetting %s is %s', [FPath, Result]));
+end;
+
+procedure TPathSetting.SetValue(val: string);
+begin
+  {$IFNDEF NOTPORTABLE}
+  if (IsAbsolute(val)) then
+    val := ExtractRelativepath(AppPath, val);
+  {$ENDIF}
+
+  FValue := IncludeTrailingPathDelimiter(val);
+  FValueSet := True;
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 { }
@@ -587,100 +616,36 @@ begin
     nodes[i].Load(MMLSettings)
 end;
 
-function IsAbsolute(const filename: string): boolean;
-begin
-  {$IFDEF WINDOWS}
-    Result := False;
-    if (Length(filename) > 2) then
-      Result := (filename[2] = ':');
-  {$ELSE}
-    Result := (filename[1] = DS);
-  {$ENDIF}
-end;
-
 procedure GetIncludePath(obj: TObject);
-var s: String;
 begin
-  s := IncludeTrailingPathDelimiter({$IFNDEF
-      NOTPORTABLE}ExtractRelativepath(AppPath,
-{$ELSE}ExpandFileName({$ENDIF}DataPath + 'Includes' + DS));
-
-  {$IFDEF NOTPORTABLE}
-  if (not (IsAbsolute(s))) then
-    s := AppPath + s;
-  {$ENDIF}
-  TStringSetting(obj).Value := s;
+  TPathSetting(obj).Value := DataPath + 'Includes';
 end;
 
 procedure GetPluginPath(obj: TObject);
-var s: String;
 begin
-  s := IncludeTrailingPathDelimiter({$IFNDEF
-      NOTPORTABLE}ExtractRelativepath(AppPath,
-{$ELSE}ExpandFileName({$ENDIF}DataPath + 'Plugins' + DS));
-
-  {$IFDEF NOTPORTABLE}
-  if (not (IsAbsolute(s))) then
-    s := AppPath + s;
-  {$ENDIF}
-  TStringSetting(obj).Value := s;
+  TPathSetting(obj).Value := DataPath + 'Plugins';
 end;
 
 {$IFDEF USE_EXTENSIONS}
 procedure GetExtPath(obj: TObject);
-var s: String;
 begin
-  s := IncludeTrailingPathDelimiter({$IFNDEF
-      NOTPORTABLE}ExtractRelativepath(AppPath,
-{$ELSE}ExpandFileName({$ENDIF}DataPath + 'Extensions' + DS));
-
-  {$IFDEF NOTPORTABLE}
-  if (not (IsAbsolute(s))) then
-    s := AppPath + s;
-  {$ENDIF}
-  TStringSetting(obj).Value := s;
+  TPathSetting(obj).Value := DataPath + 'Extensions';
 end;
 {$ENDIF}
 
 procedure GetScriptPath(obj: TObject);
-var s: String;
-begin { XXX TODO: no IncludeTrailingPathDelimeter ? }
-  s := {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath,
-        {$ELSE}ExpandFileName(
-        {$ENDIF}DocPath + 'Scripts' + DS);
-
-  {$IFDEF NOTPORTABLE}
-  if (not (IsAbsolute(s))) then
-    s := AppPath + s;
-  {$ENDIF}
-  TStringSetting(obj).Value := s;
+begin
+  TPathSetting(obj).Value := DocPath + 'Scripts';
 end;
 
 procedure GetFontPath(obj: TObject);
-var s: String;
 begin
-  s := IncludeTrailingPathDelimiter({$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath,
-      {$ELSE}ExpandFileName({$ENDIF}DataPath + 'Fonts' + DS));
-
-  {$IFDEF NOTPORTABLE}
-  if (not (IsAbsolute(s))) then
-    s := AppPath + s;
-  {$ENDIF}
-  TStringSetting(obj).Value := s;
+  TPathSetting(obj).Value := DataPath + 'Fonts';
 end;
 
 procedure GetDefScriptPath(obj: TObject);
-var s: String;
 begin
-  s := {$IFNDEF NOTPORTABLE}ExtractRelativepath(AppPath,
-       {$ELSE}ExpandFileName({$ENDIF}
-       DataPath + 'default.simba');
-
-  {$IFDEF NOTPORTABLE}
-  if (not (IsAbsolute(s))) then
-    s := AppPath + s;
-  {$ENDIF}
-  TStringSetting(obj).Value := s;
+  TPathSetting(obj).Value := DataPath + 'default.simba';
 end;
 
 procedure GetUpdaterGetCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
@@ -731,11 +696,11 @@ begin
   inherited;
 
   Includes := AddChild(TIncludesSection.Create()) as TIncludesSection;
-  Includes.Path := Includes.AddChild(TStringSetting.Create(ssIncludesPath)) as TStringSetting;
+  Includes.Path := Includes.AddChild(TPathSetting.Create(ssIncludesPath)) as TPathSetting;
   Includes.Path.onDefault := @GetIncludePath;
 
   Fonts := AddChild(TFontsSection.Create()) as TFontsSection;
-  Fonts.Path := Fonts.AddChild(TStringSetting.Create(ssFontsPath)) as TStringSetting;
+  Fonts.Path := Fonts.AddChild(TPathSetting.Create(ssFontsPath)) as TPathSetting;
   Fonts.Path.onDefault := @GetFontPath;
 
   Fonts.LoadOnStartUp := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnStart)) as TBooleanSetting;
@@ -748,13 +713,13 @@ begin
   Fonts.UpdateLink.onDefault := @GetFontsUpdateLink;
 
   Extensions := AddChild(TExtensionsSection.Create()) as TExtensionsSection;
-  Extensions.Path := Extensions.AddChild(TStringSetting.Create(ssExtensionsPath)) as TStringSetting;
+  Extensions.Path := Extensions.AddChild(TPathSetting.Create(ssExtensionsPath)) as TPathSetting;
   Extensions.Path.onDefault := @GetExtPath;
   Extensions.FileExtension := Extensions.AddChild(TStringSetting.Create(ssExtensionsFileExtension)) as TStringSetting;
   Extensions.FileExtension.onDefault := @GetExtensionsFileExtension;
 
   Scripts := AddChild(TScriptsSection.Create()) as TScriptsSection;
-  Scripts.Path := Scripts.AddChild(TStringSetting.Create(ssScriptsPath)) as TStringSetting;
+  Scripts.Path := Scripts.AddChild(TPathSetting.Create(ssScriptsPath)) as TPathSetting;
   Scripts.Path.onDefault := @GetScriptPath;
 
   FunctionList := AddChild(TFunctionListSection.Create()) as TFunctionListSection;
@@ -772,7 +737,7 @@ begin
   Interpreter.AllowSysCalls.onDefault := @GetInterpreterAllowSysCalls;
 
   SourceEditor := AddChild(TSourceEditorSection.Create()) as TSourceEditorSection;
-  SourceEditor.DefScriptPath := SourceEditor.AddChild(TStringSetting.Create(ssSourceEditorDefScriptPath)) as TStringSetting;
+  SourceEditor.DefScriptPath := SourceEditor.AddChild(TPathSetting.Create(ssSourceEditorDefScriptPath)) as TPathSetting;
   SourceEditor.DefScriptPath.onDefault := @GetDefScriptPath;
   SourceEditor.LazColors := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorLazColors)) as TBooleanSetting;
   SourceEditor.LazColors.onDefault := @GetSourceEditorLazColors;
@@ -782,7 +747,7 @@ begin
   News.URL.onDefault := @GetSimbaNewsURL;
 
   Plugins := AddChild(TPluginsSection.Create()) as TPluginsSection;
-  Plugins.Path := Plugins.AddChild(TStringSetting.Create(ssPluginsPath)) as TStringSetting;
+  Plugins.Path := Plugins.AddChild(TPathSetting.Create(ssPluginsPath)) as TPathSetting;
   Plugins.Path.onDefault := @GetPluginPath;
 
   Tab := AddChild(TTabsSection.Create()) as TTabsSection;
