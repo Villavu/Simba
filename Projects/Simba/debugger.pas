@@ -377,7 +377,7 @@ begin
   if (TPSThread(DebugThread).PSScript.Exec.DebugMode = dmStepOver) then
     Exit;
 
-  FActiveLine := Row;
+  FActiveLine := Row - 1;
   TThread.Synchronize(nil, @UpdateActiveLine);
   FActiveLine := 0;
 end;

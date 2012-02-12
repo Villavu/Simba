@@ -431,7 +431,7 @@ procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorS
 begin
   if OnError = nil then
     exit;
-  ErrorData^.Row:= ErrorRow;
+  ErrorData^.Row:= ErrorRow - 1;
   ErrorData^.Col := ErrorCol;
   ErrorData^.Position:= ErrorPosition;
   ErrorData^.Error:= ErrorStr;
@@ -519,11 +519,11 @@ begin
       Result := True;
       if FileName = '' then
         psWriteln(format('Warning: In %s: at row: %d, col: %d, pos %d: %s',
-                               ['Main script', Parser.row, Parser.col,
+                               ['Main script', Parser.row - 1, Parser.col,
                                Parser.pos, DirectiveArgs]))
       else
         psWriteln(format('Warning: In file %s: at row: %d, col: %d, pos %d: %s',
-                             [FileName, Parser.row, Parser.col,
+                             [FileName, Parser.row - 1, Parser.col,
                              Parser.pos, DirectiveArgs]));
       //HandleError(Parser.Row + 1, Parser.Col, Parser.Pos, 'Warning at ' + DirectiveArgs, errCompile, FileName);
     end;
@@ -548,7 +548,7 @@ begin
         psWriteln(format('Error: In file %s: at row: %d, col: %d, pos %d: %s',
                              [FileName, Parser.row, Parser.col,
                              Parser.pos, DirectiveArgs])); }
-      HandleError(Parser.Row, Parser.Col, Parser.Pos, 'Error: ' + DirectiveArgs, errCompile, FileName);
+      HandleError(Parser.Row - 1, Parser.Col, Parser.Pos, 'Error: ' + DirectiveArgs, errCompile, FileName);
       raise EPSPreProcessor.Create('ERROR directive found');
     end;
   end else
@@ -982,11 +982,11 @@ begin
       b := True;
       if OnError <> nil then
         with PSScript.CompilerMessages[l] do
-          HandleError(Row, Col, Pos, MessageToString,errCompile, ModuleName)
+          HandleError(Row + 1, Col, Pos, MessageToString,errCompile, ModuleName)
       else
-        psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row));
+        psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
     end else
-      psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row));
+      psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
   end;
 end;
 
@@ -1051,7 +1051,7 @@ end;
 
 procedure TPSThread.SetScript(script: string);
 begin
-   PSScript.Script.Text := Script; //A LineEnding to create space for future extra's in first line (defines?)
+   PSScript.Script.Text := LineEnding + Script; //A LineEnding to conform with the info we add to includes
 end;
 
 {***implementation TCPThread***}
