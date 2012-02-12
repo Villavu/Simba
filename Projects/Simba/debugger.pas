@@ -374,13 +374,12 @@ end;
 
 procedure TDebuggerForm.LineInfo(Sender: TObject; const FileName: string; Pos, Row, Col: Cardinal);
 begin
-  with TPSThread(DebugThread).PSScript.Exec do
-    if ((DebugMode <> dmRun) and (DebugMode <> dmStepOver)) then
-    begin
-      FActiveLine := Row;
-      TThread.Synchronize(nil, @UpdateActiveLine);
-      FActiveLine := 0;
-    end;
+  if (TPSThread(DebugThread).PSScript.Exec.DebugMode = dmStepOver) then
+    Exit;
+
+  FActiveLine := Row;
+  TThread.Synchronize(nil, @UpdateActiveLine);
+  FActiveLine := 0;
 end;
 
 procedure TDebuggerForm.Idle(Sender: TObject);

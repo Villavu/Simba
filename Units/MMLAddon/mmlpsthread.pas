@@ -294,7 +294,7 @@ uses
   IniFiles,//Silly INI files
   stringutil, //String st00f
   newsimbasettings, // SimbaSettings
-  debugger,
+  {$IFDEF USE_DEBUGGER}debugger,{$ENDIF}
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
@@ -431,7 +431,7 @@ procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorS
 begin
   if OnError = nil then
     exit;
-  ErrorData^.Row:= ErrorRow - 1;
+  ErrorData^.Row:= ErrorRow;
   ErrorData^.Col := ErrorCol;
   ErrorData^.Position:= ErrorPosition;
   ErrorData^.Error:= ErrorStr;
@@ -548,7 +548,7 @@ begin
         psWriteln(format('Error: In file %s: at row: %d, col: %d, pos %d: %s',
                              [FileName, Parser.row, Parser.col,
                              Parser.pos, DirectiveArgs])); }
-      HandleError(Parser.Row + 1, Parser.Col, Parser.Pos, 'Error: ' + DirectiveArgs, errCompile, FileName);
+      HandleError(Parser.Row, Parser.Col, Parser.Pos, 'Error: ' + DirectiveArgs, errCompile, FileName);
       raise EPSPreProcessor.Create('ERROR directive found');
     end;
   end else
@@ -984,9 +984,9 @@ begin
         with PSScript.CompilerMessages[l] do
           HandleError(Row, Col, Pos, MessageToString,errCompile, ModuleName)
       else
-        psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
+        psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row));
     end else
-      psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
+      psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row));
   end;
 end;
 
@@ -1010,8 +1010,10 @@ procedure TPSThread.Execute;
 begin
   CurrThread := Self;
 
+  {$IFDEF USE_DEBUGGER}
   if (PSScript.BreakPointCount > 0) then
     TThread.Synchronize(nil, @DebuggerForm.ShowForm);
+  {$ENDIF}
 
   Starttime := lclintf.GetTickCount;
 
