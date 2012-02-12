@@ -23,6 +23,7 @@
 unit framescript;
 
 {$mode objfpc}{$H+}
+{$I Simba.inc}
 
 interface
 
@@ -626,6 +627,7 @@ procedure TScriptFrame.SynEditGutterClick(Sender: TObject; X, Y, Line: integer; 
 var
   I, H: LongInt;
 begin
+  {$IFDEF USE_DEBUGGER}
   H := SynEdit.Marks.Count - 1;
   for I := 0 to H do
     if (SynEdit.Marks.Items[I].Line = Line) then
@@ -650,6 +652,7 @@ begin
     if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
       TPSThread(ScriptThread).PSScript.SetBreakPoint('', Line);
   except end;
+  {$ENDIF}
 end;
 
 constructor TScriptFrame.Create(TheOwner: TComponent);
