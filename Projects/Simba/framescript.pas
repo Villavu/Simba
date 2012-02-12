@@ -31,7 +31,7 @@ uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, SynEditMarkupHighAll,
   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, Graphics, Controls, SynEditStrConst,
   v_ideCodeInsight, v_ideCodeParser,  SynEditHighlighter, SynPluginSyncroEdit, SynGutterBase,
-  SynEditMarks;
+  SynEditMarks, newsimbasettings;
 const
    ecCodeCompletion = ecUserFirst;
    ecCodeHints = ecUserFirst + 1;
@@ -628,6 +628,9 @@ var
   I, H: LongInt;
 begin
   {$IFDEF USE_DEBUGGER}
+  if (SimbaSettings.Interpreter._Type.Value <> interp_PS) then
+    Exit;
+
   H := SynEdit.Marks.Count - 1;
   for I := 0 to H do
     if (SynEdit.Marks.Items[I].Line = Line) then
