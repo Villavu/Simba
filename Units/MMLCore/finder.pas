@@ -1986,25 +1986,28 @@ end;
 function TMFinder.GetColors(const Coords: TPointArray): TIntegerArray;
 var
   Box : TBox;
-  Len, I,w,h : integer;
+  Len, I, w, h: integer;
   PtrRet : TRetData;
-  Ptr : PRGB32;
+  cd: TPRGB32Array;
+
 begin
   len := high(Coords);
   setlength(result,len+1);
   Box := GetTPABounds(coords);
-  w := 0;
-  h := 0;
-  DefaultOperations(Box.x1, Box.y1, Box.x2, Box.y2);
-  //TClient(Self.Client).IOManager.GetDimensions(w, h);
-  w := Box.x2 - Box.x1 + 1;
 
-  PtrRet := TClient(Client).IOManager.ReturnData(Box.x1, Box.y1, Box.x2 + 1, Box.y2 + 1);//Otherwise lotsashit.
-  ptr := PtrRet.Ptr;
+  DefaultOperations(Box.x1, Box.y1, Box.x2, Box.y2);
+  w := Box.x2 - Box.x1;
+  h := Box.y2 - Box.y1;
+  //TClient(Self.Client).IOManager.GetDimensions(w, h);
+
+  PtrRet := TClient(Client).IOManager.ReturnData(Box.x1, Box.y1, w + 1, h + 1);//Otherwise lotsashit.
+
+  cd := CalculateRowPtrs(PtrRet, h + 1);
 
   for i := 0 to len do
     //Result[i] := TClient(Client).IOManager.GetColor(coords[i].x, coords[i].y);
-    Result[i] := BGRToRGB(Ptr[(Coords[i].y - Box.y1)*w + (Coords[i].x - Box.x1)]);
+    //Result[i] := BGRToRGB(Ptr[(Coords[i].y - Box.y1)*w + (Coords[i].x - Box.x1)]);
+    Result[i] := BGRToRGB(cd[Coords[i].y][Coords[i].x]);
 
   TClient(Client).IOManager.FreeReturnData;
 end;
