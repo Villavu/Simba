@@ -367,8 +367,14 @@ implementation
     w,h: integer;
   begin
     GetTargetDimensions(w, h);
-    if (x < 0) or (y < 0) or (x > w) or (y > h) then
-      raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid (0,0,%d,%d)', [x, y, w, h]);
+
+    {
+      Don't error - XWarpPointer will happily move us outside of the window
+      which is fine.
+    }
+    {if (x < 0) or (y < 0) or (x > w) or (y > h) then
+      raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid (0,0,%d,%d)', [x, y, w, h]);     }
+
     XWarpPointer(display, 0, window, 0, 0, 0, 0, X, Y);
     XFlush(display);
   end;
