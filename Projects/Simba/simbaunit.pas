@@ -3279,7 +3279,11 @@ begin
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
                          TrayPlay.Checked := True; TrayPlay.Enabled := False; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := True;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= False;
-                         ActionDebugger.Enabled := True;
+
+                         {$IFDEF USE_DEBUGGER}
+                         if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
+                           ActionDebugger.Enabled := True;
+                         {$ENDIF}
                    end;
       ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
@@ -3296,10 +3300,14 @@ begin
                          TB_Stop.ImageIndex := Image_Stop;
                          TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := false; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= false; TrayStop.Checked:= False;
-                         ActionDebugger.Enabled := False;
+
                          {$IFDEF USE_DEBUGGER}
-                         if (DebuggerForm.Showing) then
-                           DebuggerForm.Hide;
+                         if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
+                         begin
+                           ActionDebugger.Enabled := False;
+                           if  (DebuggerForm.Showing) then
+                             DebuggerForm.Hide;
+                         end;
                          {$ENDIF}
                    end;
     end;
