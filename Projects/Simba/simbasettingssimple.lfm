@@ -1,7 +1,7 @@
 object SettingsSimpleForm: TSettingsSimpleForm
-  Left = 585
+  Left = 696
   Height = 416
-  Top = 266
+  Top = 270
   Width = 457
   ActiveControl = SettingsTabsPanel
   Caption = 'Settings'
@@ -45,7 +45,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
           FFFFFFFF0000000000000000000400000070617468FFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFF01000000000000000105000000466F6E7473FFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFF0000000000000000000400000070617468FFFFFFFFFFFFFFFF
-          FFFFFFFFFFFFFFFF0100000000000000010A000000457874656E74696F6E73FF
+          FFFFFFFFFFFFFFFF0100000000000000010A000000457874656E73696F6E73FF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000400000070617468
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF01000000000000000107000000536372
           69707473FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000040000
@@ -167,23 +167,42 @@ object SettingsSimpleForm: TSettingsSimpleForm
           ParentColor = False
         end
         object UpdateMinutesEdit: TEdit
-          Left = 158
+          Left = 160
           Height = 25
           Top = 47
           Width = 80
           TabOrder = 1
         end
-        object ListView1: TListView
-          Left = 16
-          Height = 104
-          Top = 87
-          Width = 333
-          Columns = <>
-          Items.LazData = {
-            3800000002000000FFFFFFFFFFFFFFFFFFFFFFFF000000000400000075726C31
-            FFFFFFFFFFFFFFFFFFFFFFFF000000000400000075726C32
-          }
+        object UpdaterURL: TEdit
+          Left = 160
+          Height = 25
+          Top = 80
+          Width = 240
           TabOrder = 2
+        end
+        object UpdaterURLVersion: TEdit
+          Left = 160
+          Height = 25
+          Top = 110
+          Width = 240
+          TabOrder = 3
+          Text = 'UpdaterURLVersion'
+        end
+        object UpdaterURLLabel: TLabel
+          Left = 16
+          Height = 16
+          Top = 85
+          Width = 82
+          Caption = 'Updater URL'
+          ParentColor = False
+        end
+        object UpdaterURLVersionLabel: TLabel
+          Left = 16
+          Height = 16
+          Top = 115
+          Width = 133
+          Caption = 'Updater Version URL'
+          ParentColor = False
         end
       end
     end

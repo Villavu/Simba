@@ -559,8 +559,6 @@ begin
       Result := AppPath + Result;
   end else
     raise Exception.Create('Value is not set yet.');
-
-  WriteLn(Format('-- PathSetting %s is %s', [FPath, Result]));
 end;
 
 procedure TPathSetting.SetValue(val: string);
