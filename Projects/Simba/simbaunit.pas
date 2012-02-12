@@ -1854,15 +1854,6 @@ begin
   Thread.OpenConnectionEvent := @ThreadOpenConnectionEvent;
   Thread.WriteFileEvent := @ThreadWriteFileEvent;
   Thread.OpenFileEvent := @ThreadOpenFileEvent;
-
-  {$IFDEF USE_DEBUGGER}
-  if (Thread is TPSThread) then
-  begin
-    H := CurrScript.SynEdit.Marks.Count - 1;
-    for I := 0 to H do
-      TPSThread(Thread).PSScript.SetBreakPoint('', CurrScript.SynEdit.Marks.Items[I].Line - 1);
-  end;
-  {$ENDIF}
 end;
 
 procedure TSimbaForm.HandleConfigParameter;

@@ -123,14 +123,15 @@ begin
     OnLineInfo := @LineInfo;
     OnIdle := @Idle;
     OnBreakPoint := @BreakHandler;
+
+    H := SimbaForm.CurrScript.SynEdit.Marks.Count - 1;
+    for I := 0 to H do
+      SetBreakPoint('', SimbaForm.CurrScript.SynEdit.Marks.Items[I].Line + 1);
   end;
 end;
 
 procedure TDebuggerForm.FormShow(Sender: TObject);
 begin
-  if (not (Assigned(DebugThread))) then
-    DebugThread := SimbaForm.CurrScript.ScriptThread;
-
   FRunning := False;
   ToggleRunning();
 
@@ -198,9 +199,6 @@ var
   General, Local, Global, Temp: TTreeNode;
   I, H: LongInt;
 begin
-  if (not (Showing)) then
-    Show;
-
   Info.Items.Clear;
   General := Info.Items.AddChildFirst(nil, 'General');
     Info.Items.AddChild(General, 'Current Position: ' + IntToStr(CurPos));
@@ -379,7 +377,6 @@ begin
 
   FActiveLine := Row - 1;
   TThread.Synchronize(nil, @UpdateActiveLine);
-  FActiveLine := 0;
 end;
 
 procedure TDebuggerForm.Idle(Sender: TObject);
@@ -389,9 +386,12 @@ end;
 
 procedure TDebuggerForm.BreakHandler(Sender: TObject; const FileName: ansistring; Po, Row, Col: Cardinal);
 begin
+  {$IFDEF SIMBA_VERBOSE}
+  mDebugLn(Format('BreakHandler(%d, "%s", %d, %d, %d);', [LongInt(Sender), FileName, Po, Row, Col]));
+  {$ENDIF}
+
   if (FRunning) then
     TThread.Synchronize(nil, @ToggleRunning);
-  TThread.Synchronize(nil, @ShowForm);
   UpdateInfo();
 end;
 

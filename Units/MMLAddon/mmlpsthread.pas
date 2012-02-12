@@ -204,7 +204,6 @@ type
         procedure HandleScriptTerminates;
       public
         PSScript: TPSScriptExtension;
-        Breakpoints: TIntegerArray;
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
         procedure SetScript(script: string); override;
@@ -678,6 +677,12 @@ begin
   PSScript.OnExecImport := @OnExecImport;
   PSScript.OnFindUnknownFile := @PSScriptFindUnknownFile;
 
+  {$IFDEF USE_DEBUGGER}
+  DebuggerForm.DebugThread := Self;
+  if (SimbaForm.CurrScript.SynEdit.Marks.Count > 0) then
+    TThread.Synchronize(nil, @DebuggerForm.ShowForm);
+  {$ENDIF}
+
   with PSScript do
   begin
     // Set some defines
@@ -1009,12 +1014,6 @@ end;
 procedure TPSThread.Execute;
 begin
   CurrThread := Self;
-
-  {$IFDEF USE_DEBUGGER}
-  if (PSScript.BreakPointCount > 0) then
-    TThread.Synchronize(nil, @DebuggerForm.ShowForm);
-  {$ENDIF}
-
   Starttime := lclintf.GetTickCount;
 
   try
