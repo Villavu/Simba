@@ -8,9 +8,6 @@ object DebuggerForm: TDebuggerForm
   Caption = 'Debugger'
   ClientHeight = 378
   ClientWidth = 183
-  DefaultMonitor = dmMainForm
-  DragKind = dkDock
-  DragMode = dmAutomatic
   FormStyle = fsStayOnTop
   Icon.Data = {
     7E04000000000100010010100000010020006804000016000000280000001000
@@ -56,7 +53,6 @@ object DebuggerForm: TDebuggerForm
   OnHide = FormHide
   OnShow = FormShow
   ShowInTaskBar = stNever
-  UseDockManager = True
   LCLVersion = '0.9.30.3'
   object Info: TTreeView
     Left = 0
