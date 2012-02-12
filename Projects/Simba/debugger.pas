@@ -126,7 +126,7 @@ begin
 
     H := SimbaForm.CurrScript.SynEdit.Marks.Count - 1;
     for I := 0 to H do
-      SetBreakPoint('', SimbaForm.CurrScript.SynEdit.Marks.Items[I].Line + 1);
+      SetBreakPoint(TPSThread(DebugThread).PSScript.MainFileName, SimbaForm.CurrScript.SynEdit.Marks.Items[I].Line + 1);
   end;
 end;
 
@@ -374,6 +374,12 @@ procedure TDebuggerForm.LineInfo(Sender: TObject; const FileName: string; Pos, R
 begin
   if (TPSThread(DebugThread).PSScript.Exec.DebugMode = dmStepOver) then
     Exit;
+
+  if (TPSThread(DebugThread).PSScript.MainFileName <> FileName) then
+  begin
+    StepOverAction.Execute; //Hehe hack to skip functions inside includes =P
+    Exit;
+  end;
 
   FActiveLine := Row - 1;
   TThread.Synchronize(nil, @UpdateActiveLine);

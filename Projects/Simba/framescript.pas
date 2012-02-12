@@ -636,7 +636,8 @@ begin
 
       try
         if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
-          TPSThread(ScriptThread).PSScript.ClearBreakPoint('', Line - 1);
+          with TPSThread(ScriptThread).PSScript do
+            ClearBreakPoint(MainFileName, Line - 1);
       except end;
 
       Exit;
@@ -650,7 +651,8 @@ begin
 
   try
     if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
-      TPSThread(ScriptThread).PSScript.SetBreakPoint('', Line - 1);
+      with TPSThread(ScriptThread).PSScript do
+        SetBreakPoint(MainFileName, Line - 1);
   except end;
   {$ENDIF}
 end;
