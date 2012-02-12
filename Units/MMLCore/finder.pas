@@ -1992,15 +1992,21 @@ var
 begin
   len := high(Coords);
   setlength(result,len+1);
-  box := GetTPABounds(coords);
+  Box := GetTPABounds(coords);
   w := 0;
   h := 0;
-  DefaultOperations(w,h,box.x2,box.y2);
-  TClient(Self.Client).IOManager.GetDimensions(w,h);
-  PtrRet := TClient(Client).IOManager.ReturnData(0,0,Box.x2 + 1,box.y2+ 1);//Otherwise lotsashit.
+  DefaultOperations(Box.x1, Box.y1, Box.x2, Box.y2);
+  //TClient(Self.Client).IOManager.GetDimensions(w, h);
+  w := Box.x2 - Box.x1 + 1;
+
+  PtrRet := TClient(Client).IOManager.ReturnData(Box.x1, Box.y1, Box.x2 + 1, Box.y2 + 1);//Otherwise lotsashit.
   ptr := PtrRet.Ptr;
+
   for i := 0 to len do
-    Result[i] := BGRToRGB(Ptr[Coords[i].y*w + Coords[i].x]);
+    //Result[i] := TClient(Client).IOManager.GetColor(coords[i].x, coords[i].y);
+    Result[i] := BGRToRGB(Ptr[(Coords[i].y - Box.y1)*w + (Coords[i].x - Box.x1)]);
+
+  TClient(Client).IOManager.FreeReturnData;
 end;
 
 end.
