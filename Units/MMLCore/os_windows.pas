@@ -64,7 +64,7 @@ interface
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-        procedure SendString(str: string; keywait: integer); override;
+        procedure SendString(str: string; keywait, keymodwait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
@@ -366,7 +366,7 @@ begin
   end;
 end;
 
-procedure TWindow.SendString(str: string; keywait: integer);
+procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
 var
   I, L: integer;
   C: Byte;
@@ -385,17 +385,23 @@ begin
 
     // TODO/XXX: Do we wait when/after pressing shift as well?
     if (Shift) then
+    begin
       Keybd_Event(VK_SHIFT, $2A, 0, 0);
+      sleep(keymodwait shr 1) ;
+    end;
 
     Keybd_Event(C, ScanCode, 0, 0);
 
     if keywait <> 0 then
-        sleep(keywait); // TODO/XXX: We needed a special wait IIRC?
+        sleep(keywait);
 
     Keybd_Event(C, ScanCode, KEYEVENTF_KEYUP, 0);
 
     if (Shift) then
+    begin
+      sleep(keymodwait shr 1);
       Keybd_Event(VK_SHIFT, $2A, KEYEVENTF_KEYUP, 0);
+    end;
   end;
 end;
 
