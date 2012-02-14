@@ -36,7 +36,6 @@ Name: "{app}\Scripts"
 Source: "C:\Simba\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\extension.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "C:\Simba\Extensions\msi.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\security.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
@@ -44,8 +43,6 @@ Source: "C:\Simba\Extensions\paster.sex"; DestDir: "{app}\Extensions"; Flags: ig
 Source: "C:\Simba\Extensions\CRov.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\Updater.sei"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
-; Source: "C:\Simba\settings.xml"; DestDir: "{app}\"; Flags: ignoreversion
-; XXX Make sure to use a MINIMAL settings.xml XXX
 
 ; Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
