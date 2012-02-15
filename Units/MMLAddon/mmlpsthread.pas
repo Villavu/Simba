@@ -777,13 +777,14 @@ end;
 
 function TPSThread.RequireFile(Sender: TObject; const OriginFileName: string; var FileName, OutPut: string): Boolean;
 var
-  File_MD5: string;
+  File_MD5{$IFDEF SIMBA_VERBOSE}, OriginalFileName{$ENDIF}: string;
 begin
+  {$IFDEF SIMBA_VERBOSE}OriginalFileName := FileName;{$ENDIF}
   Result := LoadFile(OriginFileName, FileName, OutPut);
 
   if Result then
   begin
-    {$IFDEF SIMBA_VERBOSE}mDebugLn('RequireFile(%d, %s) = %d;', [LongInt(Sender), OriginFileName, LongInt(Result)]);{$ENDIF}
+    {$IFDEF SIMBA_VERBOSE}mDebugLn('RequireFile(0x%P, ''%S'', ''%S'' => ''%S'') = %S;', [Pointer(Sender), OriginFileName, OriginalFileName, FileName, BoolToStr(Result, True)]);{$ENDIF}
     File_MD5 := UpperCase(_Hash(TDCP_md5, Output));
 
     Output := '{$IFNDEF IS_INCLUDE}' +
