@@ -766,11 +766,8 @@ end;
 
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var Filename: string): Boolean;
 begin
-  Result := False;
-  Filename := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value
+  Result := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value
           {$IFDEF USE_EXTENSIONS}, SimbaSettings.Extensions.Path.Value{$ENDIF}]);
-  if (Filename <> '') then
-    Result := True;
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;

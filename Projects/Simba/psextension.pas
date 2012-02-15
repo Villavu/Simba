@@ -363,28 +363,31 @@ end;
 function TSimbaPSExtension.OnNeedFile(Sender: TObject;
   const OrginFileName: string; var FilePath, Output: string): Boolean;
 var
-  path: string;
-  f: TFileStream;
+  Path: string;
 begin
+  Path := FilePath;
   with SimbaForm do
-    Path := FindFile(FilePath, [SimbaSettings.Includes.Path.Value,
-    SimbaSettings.Extensions.Path.Value, ExtractFileDir(Filename), ExtractFileDir(OrginFileName)]);
+    Result := FindFile(Path, [SimbaSettings.Includes.Path.Value,
+                              SimbaSettings.Extensions.Path.Value,
+                              ExtractFileDir(Filename),
+                              ExtractFileDir(OrginFileName)]);
 
-  if (Path = '') then
+  if (not (Result)) then
   begin
-    psWriteln(Path + ' doesn''t exist');
-    Result := false;
+    psWriteln(FilePath + ' doesn''t exist');
     Exit;
   end;
 
   FilePath := Path;
 
   try
-    f := TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
-    SetLength(Output, f.Size);
-    f.Read(Output[1], Length(Output));
-    Result := True;
-    f.free;
+    with TFileStream.Create(UTF8ToSys(FilePath), fmOpenRead) do
+    try
+      SetLength(Output, Size);
+      Read(Output[1], Size);
+    finally
+      Free;
+    end;
   except
     Result := False;
     psWriteln('TSimbaPSExtension.OnNeedFile');
