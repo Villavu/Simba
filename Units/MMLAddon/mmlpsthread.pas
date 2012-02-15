@@ -152,7 +152,7 @@ type
                     Parser: TPSPascalPreProcessorParser;
                     Active: Boolean;
                     DirectiveName, DirectiveArgs: string; Filename:String): boolean;
-      function LoadFile(ParentFile : string; var filename, contents: string): boolean;
+      function LoadFile(ParentFile: string; var FileName, Content: string): boolean;
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
@@ -449,29 +449,25 @@ procedure TMThread.AddMethod(meth: TExpMethod);
 begin
 end;
 
-function TMThread.LoadFile(ParentFile : string; var filename, contents: string): boolean;
-var
-  path: string;
-  f: TFileStream;
+function TMThread.LoadFile(ParentFile: string; var FileName, Content: string): boolean;
 begin
-  path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(parentfile))]);
-  if path = '' then
-  begin
-    Exit(False);
-  end;
-  filename := path;//Yeah!
+  Result := FindFile(FileName, [IncludeTrailingPathDelimiter(ExtractFileDir(ParentFile)), IncludePath, ScriptPath]);
+  if (not (Result)) then
+    Exit;
 
-  if Includes.IndexOf(path) = -1 then
-    Includes.Add(path);
+  if (Includes.IndexOf(FileName) = -1) then
+    Includes.Add(FileName);
 
   try
-    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
-    SetLength(contents, f.Size);
-    f.Read(contents[1], Length(contents));
-    result:= true;
-    f.free;
+    with TFileStream.Create(UTF8ToSys(FileName), fmOpenRead) do
+    try
+      SetLength(Content, Size);
+      Read(Content[1], Length(Content));
+    finally
+      Free;
+    end;
   except
-    Result := false;
+    Result := False;
     psWriteln('ERROR in TMThread.LoadFile');
   end;
 end;
@@ -799,55 +795,50 @@ end;
 
 function TPSThread.FileAlreadyIncluded(Sender: TObject; OrgFileName, FileName: string): Boolean;
 var
-  path: string;
-
+  Path: string;
 begin
-  path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName))]);
-  if path = '' then
+  Result := True;
+
+  Path := FileName;
+  if (not (FindFile(Path, [IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName)), ScriptPath, IncludePath]))) then
+    Exit;
+
+  Path := ExpandFileNameUTF8(Path);
+
+  if ((Path <> '') and (Includes.IndexOf(Path) <> -1)) then
   begin
-    Result := True;
+    {$IFDEF SIMBA_VERBOSE}
+    mDebugLn('Include_Once file already included:' + Path);
+    {$ENDIF}
     Exit;
   end;
-  path := ExpandFileNameUTF8(path);
-
-  if (path <> '') then
-    if Includes.IndexOf(path) <> -1 then
-    begin
-      {$IFDEF SIMBA_VERBOSE}
-      writeln('Include_Once file already included:' + Path);
-      {$ENDIF}
-      Result := True;
-      Exit;
-    end;
 
   {$IFDEF SIMBA_VERBOSE}
-  writeln('OnFileAlreadyIncluded, Adding: ' + path);
+  mDebugLn('OnFileAlreadyIncluded, Adding: ' + path);
   {$ENDIF}
-  Includes.Add(path);
+  Includes.Add(Path);
   Result := False;
 end;
 
 function TPSThread.OnIncludingFile(Sender: TObject; OrgFileName, FileName: string): Boolean;
 var
-  path: string;
+  Path: string;
 begin
-  path := FindFile(filename,[includepath,ScriptPath,IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName))]);
-  if path = '' then
-  begin
-    Result := True;
-    Exit;
-  end;
-  path := ExpandFileNameUTF8(path);
+  Result := True;
 
-  if Includes.IndexOf(path) = -1 then
+  Path := FileName;
+  if (not (FindFile(Path, [IncludeTrailingPathDelimiter(ExtractFileDir(OrgFileName)), ScriptPath, IncludePath]))) then
+    Exit;
+
+  Path := ExpandFileNameUTF8(Path);
+
+  if (Includes.IndexOf(Path) = -1) then
   begin
     {$IFDEF SIMBA_VERBOSE}
-    writeln('OnIncludingFile, Adding: ' + path);
+    mDebugLn('OnIncludingFile, Adding: ' + Path);
     {$ENDIF}
-    Includes.Add(path);
+    Includes.Add(Path);
   end;
-
-  Result := True; // Not used
 end;
 
 procedure SIRegister_Mufasa(cl: TPSPascalCompiler);
