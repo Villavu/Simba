@@ -775,16 +775,29 @@ begin
                              {$ifdef PS_SafeCall}cdSafeCall{$else}cdRegister{$endif});
 end;
 
-function TPSThread.RequireFile(Sender: TObject;
-  const OriginFileName: String; var FileName, OutPut: string): Boolean;
+function TPSThread.RequireFile(Sender: TObject; const OriginFileName: string; var FileName, OutPut: string): Boolean;
+var
+  File_MD5: string;
 begin
-  Result := LoadFile(OriginFileName,FileName,OutPut);
+  Result := LoadFile(OriginFileName, FileName, OutPut);
 
   if Result then
-    Output :=
-      '{$IFNDEF IS_INCLUDE}{$DEFINE IS_INCLUDE}{$DEFINE __REMOVE_IS_INCLUDE}{$ENDIF}' + LineEnding +
-      Output + LineEnding +
-      '{$IFDEF __REMOVE_IS_INCLUDE}{$UNDEF IS_INCLUDE}{$ENDIF}';
+  begin
+    {$IFDEF SIMBA_VERBOSE}mDebugLn('RequireFile(%d, %s) = %d;', [LongInt(Sender), OriginFileName, LongInt(Result)]);{$ENDIF}
+    File_MD5 := UpperCase(_Hash(TDCP_md5, Output));
+
+    Output := '{$IFNDEF IS_INCLUDE}' +
+              '{$DEFINE __REMOVE_IS_INCLUDE_' + File_MD5 + '_}' +
+              '{$DEFINE IS_INCLUDE}' +
+              '{$ENDIF}' +
+
+              LineEnding + Output + LineEnding +
+
+              '{$IFDEF __REMOVE_IS_INCLUDE_' + File_MD5 + '_}' +
+              '{$UNDEF IS_INCLUDE}' +
+              '{$UNDEF __REMOVE_IS_INCLUDE_' + File_MD5 + '_}' +
+              '{$ENDIF}';
+  end;
 end;
 
 function TPSThread.FileAlreadyIncluded(Sender: TObject; OrgFileName, FileName: string): Boolean;
@@ -1359,6 +1372,8 @@ begin
   begin
     WriteLnStr := '';
 
+    StartImporting;
+
     addGlobalFunc('procedure _write(s: string); override;', @lp_Write);
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
@@ -1370,6 +1385,8 @@ begin
     {$I LPInc/lpcompile.inc}
 
     {$I LPInc/lpexportedmethods.inc}
+
+    EndImporting;
   end;
 end;
 
@@ -1399,9 +1416,13 @@ var
 begin
   inherited;
 
+  Compiler.StartImporting;
+
   if Assigned(Fonts) then
     for I := Fonts.Count - 1 downto 0 do
       Compiler.addGlobalVar(Fonts[I].Name, Fonts[I].Name).isConstant := True;
+
+  Compiler.EndImporting;
 end;
 
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
@@ -1437,6 +1458,8 @@ var
 begin
   with PluginsGlob.MPlugins[plugidx] do
   begin
+    Compiler.StartImporting;
+
     for i := 0 to TypesLen -1 do
       with Types[I] do
         Compiler.addGlobalType(TypeDef, TypeName);
@@ -1444,30 +1467,26 @@ begin
     for i := 0 to MethodLen - 1 do
       with Methods[i] do
         Compiler.addGlobalFunc(FuncStr, FuncPtr);
+
+    Compiler.EndImporting;
   end;
 end;
 
 procedure TLPThread.Execute;
-  function CombineDeclArray(a, b: TLapeDeclArray): TLapeDeclArray;
-  var
-    i, l: Integer;
-  begin
-    Result := a;
-    l := Length(a);
-    SetLength(Result, l + Length(b));
-    for i := High(b) downto 0 do
-      Result[l + i] := b[i];
-  end;
 begin
-  CurrThread := self;
+  CurrThread := Self;
   try
-    Starttime := lclintf.GetTickCount;
+    Starttime := GetTickCount;
+
     if Compiler.Compile() then
     begin
       psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+
       if CompileOnly then
         Exit;
+
       RunCode(Compiler.Emitter.Code);
+
       psWriteln('Successfully executed.');
     end else
       psWriteln('Compiling failed.');
