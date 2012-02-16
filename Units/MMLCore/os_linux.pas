@@ -68,7 +68,7 @@ interface
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-        procedure SendString(str: string; keywait: integer); override;
+        procedure SendString(str: string; keywait, keymodwait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
@@ -426,7 +426,7 @@ implementation
   end;
 
   { TODO: Check if this supports multiple keyboard layouts, probably not }
-  procedure TWindow.SendString(str: string; keywait: integer);
+  procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
   var
     I, L: Integer;
     K: Byte;
@@ -446,6 +446,7 @@ implementation
       begin
         HoldKey(VK_SHIFT);
         HoldShift := True;
+        sleep(keymodwait shr 1);
       end;
 
       K := GetKeyCode(str[I]);
@@ -459,6 +460,7 @@ implementation
       if (HoldShift) then
       begin
         HoldShift := False;
+        sleep(keymodwait shr 1);
         ReleaseKey(VK_SHIFT);
       end;
     end;

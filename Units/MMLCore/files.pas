@@ -67,7 +67,7 @@ type
     // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
-  function FindFile(const Filename: string; const Dirs: array of string): string; //Results '' if not found
+  function FindFile(var Filename: string; const Dirs: array of string): boolean;
 
 implementation
 uses
@@ -113,25 +113,20 @@ begin
   end;
 end;
 
-function FindFile(const Filename: string; const Dirs: array of string): string; //Results '' if not found
+function FindFile(var Filename: string; const Dirs: array of string): boolean;
 var
   I, H: LongInt;
 begin;
-  Result := '';
-  if FileExistsUTF8(Filename) then
-    Result := Filename;
-	
-  if (Result = '') then
-  begin
-    H := High(Dirs);
-    for I := 0 to H do
-      if ((Dirs[I] <> '') and DirectoryExists(Dirs[I])) then
-        if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
-        begin
-          Result := IncludeTrailingPathDelimiter(Dirs[I]) + Filename;
-          Exit;
-        end;
-  end;
+  Result := False;
+
+  H := High(Dirs);
+  for I := 0 to H do
+    if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
+    begin
+      Filename := IncludeTrailingPathDelimiter(Dirs[I]) + Filename;
+      Result := True;
+      Exit;
+    end;
 end;
 
 constructor TMFiles.Create(Owner : TObject);

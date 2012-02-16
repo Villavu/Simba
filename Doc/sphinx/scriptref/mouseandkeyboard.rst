@@ -282,7 +282,7 @@ SendKeys
 
 .. code-block:: pascal
 
-    procedure SendKeys(const s: string; keywait: integer);
+    procedure SendKeys(const s: string; keywait, keymodwait: integer);
 
 Type the contents of the string *s*. While typing, hold the keys for *keywait*.
 SendKeys should work with any keyboard layout on Windows.
@@ -291,7 +291,7 @@ Example:
 
 .. code-block:: pascal
 
-    SendKeys('Hello, World', 100);
+    SendKeys('Hello, World', 100, 30);
 
 .. note::
 
@@ -303,7 +303,7 @@ Example:
         s := 'Hello, World';
         for i := 0 to length(s) do
         begin
-          SendKeys(s[i], 50+Random(51));
+          SendKeys(s[i], 50+Random(51), 30+Random(30));
           Wait(20+Random(30));
         end;
 
