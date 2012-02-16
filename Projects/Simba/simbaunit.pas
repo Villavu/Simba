@@ -1797,6 +1797,9 @@ begin
       Exit;
     end;
   end;
+  
+  if ((Thread is TPSThread) and (CurrScript.ScriptFile <> '')) then
+    TPSThread(Thread).PSScript.MainFileName := CurrScript.ScriptFile;
 
   {$IFNDEF TERMINALWRITELN}
   Thread.SetDebug(@formWriteln);
