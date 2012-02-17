@@ -2569,7 +2569,7 @@ begin
 
     with Thread do
     try
-      TPSScriptExtension(PSScript).GetValueDefs(ValueDefs);
+      PSScript.GetValueDefs(ValueDefs);
       CoreDefines.AddStrings(PSScript.Defines);
     finally
       Free;
