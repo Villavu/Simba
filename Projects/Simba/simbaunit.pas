@@ -2560,33 +2560,29 @@ begin
     end;
   end;
 
-  InitializeTMThread(Thread);
-  if (not Assigned(Thread)) then
-    Exit;
-
+  ValueDefs := TStringList.Create;
   try
-    ValueDefs := TStringList.Create;
+    InitializeTMThread(Thread);
+
+    if (not ((Assigned(Thread)) and (Thread is TPSThread))) then
+      Exit;
+
+    with Thread do
     try
-      with TPSScriptExtension.Create(SimbaForm) do
-      try
-        UsePreProcessor := True;
-        OnCompile := Thread.PSScript.OnCompile;
-        OnCompImport := Thread.PSScript.OnCompImport;
-        OnExecImport := Thread.PSScript.OnExecImport;
-        Defines.Assign(Thread.PSScript.Defines);
-
-        GetValueDefs(ValueDefs);
-        CoreDefines.AddStrings(Defines);
-      finally
-        Free;
-      end;
-
-      Stream := TMemoryStream.Create;
-      ValueDefs.SaveToStream(Stream);
+      TPSScriptExtension(PSScript).GetValueDefs(ValueDefs);
+      CoreDefines.AddStrings(PSScript.Defines);
     finally
-      ValueDefs.Free;
+      Free;
     end;
 
+    Stream := TMemoryStream.Create;
+    ValueDefs.SaveToStream(Stream);
+  finally
+    ValueDefs.Free;
+  end;
+
+  if (Assigned(Stream)) then
+  begin
     Buffer := TCodeInsight.Create;
     with Buffer do
     begin
@@ -2597,9 +2593,8 @@ begin
 
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
-  finally
-    if (Assigned(Thread)) then
-      Thread.Free;
+
+    Stream.Free;
   end;
 end;
 
