@@ -2569,6 +2569,7 @@ begin
     try
       with TPSScriptExtension.Create(SimbaForm) do
       try
+        UsePreProcessor := True;
         OnCompile := Thread.PSScript.OnCompile;
         OnCompImport := Thread.PSScript.OnCompImport;
         OnExecImport := Thread.PSScript.OnExecImport;
