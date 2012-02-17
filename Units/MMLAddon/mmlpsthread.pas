@@ -32,7 +32,7 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent,uPSCompiler, uPSComponentExt,
+  Classes, SysUtils, client, uPSComponent, uPSCompiler, PSDump,
   uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs,internets,scriptproperties,
   settings, settingssandbox, lcltype, dialogs
