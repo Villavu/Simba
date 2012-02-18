@@ -44,6 +44,9 @@ Source: "C:\Simba\Extensions\CRov.sex"; DestDir: "{app}\Extensions"; Flags: igno
 Source: "C:\Simba\Extensions\Updater.sei"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
 
+; Source: "C:\Simba\Doc\sphinx/_build/latex/Simba.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion
+Source: "C:\Simba\Doc\sphinx/_build/singlehtml/index.html"; DestDir: "{app}\Documentation"; Flags: ignoreversion
+
 ; Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
