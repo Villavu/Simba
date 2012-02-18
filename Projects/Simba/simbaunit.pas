@@ -766,11 +766,8 @@ end;
 
 function TSimbaForm.OnCCFindInclude(Sender: TObject; var Filename: string): Boolean;
 begin
-  Result := False;
-  Filename := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value
+  Result := FindFile(Filename, [AppPath, SimbaSettings.Includes.Path.Value
           {$IFDEF USE_EXTENSIONS}, SimbaSettings.Extensions.Path.Value{$ENDIF}]);
-  if (Filename <> '') then
-    Result := True;
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
@@ -1791,6 +1788,9 @@ begin
       Exit;
     end;
   end;
+  
+  if ((Thread is TPSThread) and (CurrScript.ScriptFile <> '')) then
+    TPSThread(Thread).PSScript.MainFileName := CurrScript.ScriptFile;
 
   {$IFNDEF TERMINALWRITELN}
   Thread.SetDebug(@formWriteln);
@@ -2551,6 +2551,7 @@ begin
     try
       with TPSScriptExtension.Create(SimbaForm) do
       try
+        UsePreProcessor := True;
         OnCompile := Thread.PSScript.OnCompile;
         OnCompImport := Thread.PSScript.OnCompImport;
         OnExecImport := Thread.PSScript.OnExecImport;
