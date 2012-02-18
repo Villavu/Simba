@@ -2,3 +2,7 @@ TODO:
     -   Implement IsKeyDown properly.
     -   Implement KeyDown / KeyUp to work with multiple keyboard layouts.
         Perhaps XTest already does this?
+
+    -   Use XTest for input, not the lazarus TKeyInput.
+    -   Use XShmGetImage?
+    -   Implement support for XDAMAGE?
