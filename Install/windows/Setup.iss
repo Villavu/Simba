@@ -30,6 +30,8 @@ Name: "{app}\Extensions"
 Name: "{app}\Includes"
 Name: "{app}\Plugins"
 Name: "{app}\Scripts"
+Name: "{app}\Documentation"
+Name: "{app}\Documentation\_static"
 ; Name: "{app}\Scripts\Tests"
 
 [Files]
@@ -45,8 +47,7 @@ Source: "C:\Simba\Extensions\Updater.sei"; DestDir: "{app}\Extensions"; Flags: i
 Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
 
 ; Source: "C:\Simba\Doc\sphinx/_build/latex/Simba.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion
-Source: "C:\Simba\Documentation/README.txt"; DestDir: "{app}\Documentation"; Flags: ignoreversion
-Source: "C:\Simba\Documentation/index.html"; DestDir: "{app}\Documentation"; Flags: ignoreversion
+Source: "C:\Simba\Documentation\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion
 
 ; Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
