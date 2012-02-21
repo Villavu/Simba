@@ -600,7 +600,7 @@ begin
   Trace := DumpExceptionCallStack(E);
   Trace += LineEnding + 'Simba Version: ' + IntToStr(SimbaVersion) + LineEnding;
 
-  LogName := DataPath + 'ErrorLog_' + DateTimeToStr('dd-mm-yy_hh-nn-ss', Now) + '.txt';
+  LogName := DataPath + 'ErrorLog_' + FormatDateTime('dd-mm-yy_hh-nn-ss', Now) + '.txt';
   WriteLn(Format('Gonna try to save the error information to "%s".', [LogName]));
 
   try
