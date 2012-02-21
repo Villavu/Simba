@@ -120,13 +120,11 @@ x86_64-linux:
 
 i386-win32:
 	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" platform_flags="-Twin32 -Pi386"
-	ls Simba.*
-	mv Simba.dbg Simba.i386-win32.dbg
+	# Windows already names the .dbg properly...
 
 x86_64-win64:
 	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" platform_flags="-Twin64 -Px86_64"
-	ls Simba.*
-	mv Simba.dbg Simba.x86_64-win64.dbg
+	# Windows already names the .dbg properly...
 
 all: i386-linux x86_64-linux i386-win32 x86_64-win64
 
