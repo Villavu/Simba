@@ -33,7 +33,7 @@ AddGlobalFunc('procedure SetDTMName(DTM: integer; const name: string);', @Lape_S
 AddGlobalFunc('function DTMFromString(const DTMString: String): Integer', @Lape_DTMFromString);
 AddGlobalFunc('procedure FreeDTM(DTM: Integer);', @Lape_FreeDTM);
 //AddGlobalFunc('function GetDTM(index: Integer): TMDTM', @Lape_GetDTM);
-AddGlobalFunc('function AddTSDTM(const d: TSDTM): Integer', @Lape_AddTSDTM);
+AddGlobalFunc('function AddSDTM(const d: TSDTM): Integer', @Lape_AddTSDTM);
 //AddGlobalFunc('function AddDTM(const d: TMDTM): Integer', @Lape_AddDTM);
 //AddGlobalFunc('procedure PrintDTM(const aDTM: TMDTM);', @Lape_PrintDTM);
 //AddGlobalFunc('function MDTMToSDTM(Const DTM: TMDTM): TSDTM', @Lape_MDTMToSDTM);
