@@ -2007,7 +2007,7 @@ begin
   for i := 0 to len do
     //Result[i] := TClient(Client).IOManager.GetColor(coords[i].x, coords[i].y);
     //Result[i] := BGRToRGB(Ptr[(Coords[i].y - Box.y1)*w + (Coords[i].x - Box.x1)]);
-    Result[i] := BGRToRGB(cd[Coords[i].y][Coords[i].x]);
+    Result[i] := BGRToRGB(cd[Coords[i].y - Box.y1][Coords[i].x - Box.x1]);
 
   TClient(Client).IOManager.FreeReturnData;
 end;
