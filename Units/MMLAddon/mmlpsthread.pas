@@ -1420,7 +1420,8 @@ end;
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
 begin
   Result := nil;
-  FileName := IncludePath + FileName;
+  if (not FindFile(FileName, [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), IncludePath, ScriptPath])) then
+    FileName := '';
 end;
 
 function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
