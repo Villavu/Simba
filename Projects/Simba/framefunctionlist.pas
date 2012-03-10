@@ -49,6 +49,8 @@ type
     FunctionList: TTreeView;
     FunctionListLabel: TLabel;
     CloseButton: TSpeedButton;
+    ClearSearch: TSpeedButton;
+    procedure ClearSearchClick(Sender: TObject);
     procedure editSearchListChange(Sender: TObject);
     procedure FillThreadTerminate(Sender: TObject);
     procedure FrameEndDock(Sender, Target: TObject; X, Y: Integer);
@@ -100,6 +102,12 @@ uses
 
 procedure TFunctionListFrame.editSearchListChange(Sender: TObject);
 begin
+  Find(false);
+end;
+
+procedure TFunctionListFrame.ClearSearchClick(Sender: TObject);
+begin
+  editSearchList.Text := '';
   Find(false);
 end;
 

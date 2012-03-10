@@ -12,7 +12,7 @@ object FunctionListFrame: TFunctionListFrame
   DesignTop = 200
   object FunctionList: TTreeView
     Left = 0
-    Height = 479
+    Height = 457
     Top = 20
     Width = 182
     Align = alClient
@@ -137,5 +137,15 @@ object FunctionListFrame: TFunctionListFrame
     }
     NumGlyphs = 0
     OnClick = CloseButtonClick
+  end
+  object ClearSearch: TSpeedButton
+    Left = 0
+    Height = 22
+    Top = 477
+    Width = 182
+    Align = alBottom
+    Caption = 'Clear Search'
+    NumGlyphs = 0
+    OnClick = ClearSearchClick
   end
 end
