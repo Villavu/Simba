@@ -50,6 +50,7 @@ type
     FunctionListLabel: TLabel;
     CloseButton: TSpeedButton;
     ClearSearch: TSpeedButton;
+    Panel1: TPanel;
     procedure ClearSearchClick(Sender: TObject);
     procedure editSearchListChange(Sender: TObject);
     procedure FillThreadTerminate(Sender: TObject);
