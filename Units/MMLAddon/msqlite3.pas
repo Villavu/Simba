@@ -60,14 +60,20 @@ uses
 
 // http://sqlite.org/c3ref/errcode.html
 function TMSQLite3.errcode(index : integer) : integer;
+var
+  p : ppsqlite3;
 begin
-  result := sqlite3_errcode(getHandle(index)^);
+  p := getHandle(index);
+  result := sqlite3_errcode(p^);
 end;
 
 // http://sqlite.org/c3ref/errcode.html
 function TMSQLite3.errmsg(index : integer) : string;
+var
+  p : ppsqlite3;
 begin
-  result := sqlite3_errmsg(getHandle(index)^);
+  p := getHandle(index);
+  result := sqlite3_errmsg(p^);
 end;
 
 function msqlite3_callback(sender : Pointer; Columns : Integer; ColumnValues, ColumnNames: PPChar) : integer; cdecl;
@@ -122,8 +128,8 @@ begin
     ecode := errcode(result);
     emsg := errmsg(result);
     closeHandle(result);
+    TClient(Client).Writeln(Format('sqlite_open - Exception. Error opening database %s : SQLite error (%d): %s',[filename, ecode, emsg]));
     result := -1;
-    raise exception.CreateFmt('TMSQLite3.open_db: Error opening database ''%s'' : SQLite error (%d): %s' , [filename, ecode, emsg]);
   end;
   StrDispose(filenameC);
 end;
@@ -132,18 +138,22 @@ end;
 function TMSQLite3.query(index : integer; sql : string) : boolean;
 var
   sqlC : PChar;
+  p : ppsqlite3;
 begin
+  p := getHandle(index);
   sqlC := StrPCopy(StrAlloc(length(sql) + 1), sql);
-  result := sqlite3_exec(getHandle(index)^, sqlC, nil, nil, nil) = SQLITE_OK;
+  result := sqlite3_exec(p^, sqlC, nil, nil, nil) = SQLITE_OK;
   StrDispose(sqlC);
 end;
 
 function TMSQLite3.queryValue(index : integer; sql : string; out data : T2DStringArray) : boolean;
 var
   sqlC : PChar;
+  p : ppsqlite3;
 begin
+  p := getHandle(index);
   sqlC := StrPCopy(StrAlloc(length(sql) + 1), sql);
-  result := sqlite3_exec(getHandle(index)^, sqlC, @msqlite3_callback, @data, nil) = SQLITE_OK;
+  result := sqlite3_exec(p^, sqlC, @msqlite3_callback, @data, nil) = SQLITE_OK;
   StrDispose(sqlC);
 end;
 
