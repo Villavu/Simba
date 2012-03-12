@@ -554,6 +554,19 @@ AddFunction(@ps_offsetATPA,'procedure OffsetATPA(var ATPA : T2DPointArray; const
 AddFunction(@ps_copyTPA,'function CopyTPA(const TPA : TPointArray) : TPointArray;');
 AddFunction(@ps_CopyATPA,'function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;');
 
+{SQLite3}
+SetCurrSection('SQLite3');
+AddFunction(@ps_sqlite_version, 'function sqlite_version() : string;');
+AddFunction(@ps_sqlite_version_num, 'function sqlite_version_num() : integer;');
+AddFunction(@ps_sqlite_escape, 'function sqlite_escape(s : string) : string;');
+AddFunction(@ps_sqlite_close, 'procedure sqlite_close(index : integer);');
+AddFunction(@ps_sqlite_open, 'function sqlite_open(filename : string) : integer;');
+AddFunction(@ps_sqlite_open_v2, 'function sqlite_open_v2(filename : string; flags : integer) : integer;');
+AddFunction(@ps_sqlite_errmsg, 'function sqlite_errmsg(index : integer) : string;');
+AddFunction(@ps_sqlite_errcode, 'function sqlite_errcode(index : integer) : integer;');
+AddFunction(@ps_sqlite_query, 'function sqlite_query(index : integer; sql : string) : boolean;');
+AddFunction(@ps_sqlite_queryvalue, 'function sqlite_queryvalue(index : integer; sql : string; out Data : T2DStringArray) : boolean;');
+
 {$IFNDEF MML_EXPORT_THREADSAFE}
 SetCurrSection('Settings');
 AddFunction(@ps_KeyIsSetting, 'function KeyIsSetting(const KeyName: String): Boolean;');

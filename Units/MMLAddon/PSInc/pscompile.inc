@@ -58,6 +58,7 @@ AddTypeS('T2DExtendedArray', 'array of array of extended;');
 AddTypeS('T3DExtendedArray','array of array of array of extended;');
 AddTypeS('T2DIntegerArray','array of array of integer;');
 AddTypeS('TStringArray','Array of string;');
+AddTypeS('T2DStringArray','array of TStringArray');
 AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
 AddTypeS('Pointer', 'Integer');
 
@@ -66,6 +67,9 @@ AddTypeS('TSP_Property','(SP_WriteTimeStamp,SP_OnTerminate)');
 AddConstantN('mouse_Right','integer').SetInt(ps_mouse_right); //0
 AddConstantN('mouse_Left','integer').SetInt(ps_mouse_left);//1
 AddConstantN('mouse_Middle','integer').SetInt(ps_mouse_middle);//2
+AddConstantN('SQLITE_OPEN_READONLY','integer').SetInt(1); //1
+AddConstantN('SQLITE_OPEN_READWRITE','integer').SetInt(2);//2
+AddConstantN('SQLITE_OPEN_CREATE','integer').SetInt(4);//4
 
 AddTypes('TSysProc', 'record Title: string; Handle: integer; Pid: integer; Width, Height: integer; end;');
 AddTypes('TSysProcArr', 'array of TSysProc;');

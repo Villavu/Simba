@@ -195,6 +195,7 @@ end;
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colour.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colourconv.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/math.inc}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/ps_sqlite3.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/mouse.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/file.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/keyboard.inc}

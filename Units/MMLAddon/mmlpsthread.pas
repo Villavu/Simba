@@ -35,7 +35,7 @@ uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs,internets,scriptproperties,
-  settings, settingssandbox, lcltype, dialogs
+  settings, settingssandbox, lcltype, dialogs,msqlite3
   {$IFDEF USE_RUTIS}
   , Rutis_Engine, Rutis_Defs
   {$ENDIF}
@@ -133,6 +133,7 @@ type
       Client : TClient;
       MInternet : TMInternet;
       Socks: TSocks;
+      SQLite3 : TMSQLite3;
       StartTime : LongWord;
       Settings: TMMLSettings;
       SimbaSettingsFile: String;
@@ -357,6 +358,7 @@ begin
     Client.MFiles.OpenFileEvent := OpenFileEvent;
   MInternet := TMInternet.Create(Client);
   Socks := TSocks.Create(Client);
+  SQLite3 := TMSQLite3.Create(Client);
   if Assigned(OpenConnectionEvent) then
     MInternet.OpenConnectionEvent := Self.OpenConnectionEvent;
   SyncInfo:= TheSyncInfo;
@@ -376,6 +378,7 @@ destructor TMThread.Destroy;
 begin
   MInternet.Free;
   Socks.Free;
+  SQLite3.Free;
   Client.Free;
   Includes.free;
   Prop.Free;
@@ -611,6 +614,7 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
+{$I PSInc/Wrappers/ps_sqlite3.inc}
 
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
@@ -1337,6 +1341,7 @@ end;
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
 {$I LPInc/Wrappers/lp_math.inc}
+{$I LPInc/Wrappers/lp_sqlite3.inc}
 
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}

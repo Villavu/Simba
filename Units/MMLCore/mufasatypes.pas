@@ -37,6 +37,7 @@ const
   ps_mouse_left = 1;
   ps_mouse_middle = 2;
 
+
 { Overloaded Operators}
 
 { TPoint add }
@@ -79,6 +80,7 @@ type
   TMousePress = (mouse_Down, mouse_Up);
 
   TStringArray = array of String;
+  T2DStringArray= array of TStringArray;
   TPointArray = array of TPoint;
   T2DPointArray = array of TPointArray;
   TVariantArray = Array of Variant;
