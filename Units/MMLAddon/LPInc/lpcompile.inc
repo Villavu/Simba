@@ -28,6 +28,9 @@ addGlobalVar(PluginPath, 'PluginPath');
 addGlobalVar(FontPath, 'FontPath');
 addGlobalVar(maxLongint, 'MaxLongInt');
 addGlobalVar(maxLongint, 'MaxInt');
+addGlobalVar(1, 'SQLITE_OPEN_READONLY');
+addGlobalVar(2, 'SQLITE_OPEN_READWRITE');
+addGlobalVar(4, 'SQLITE_OPEN_CREATE');
 
 addGlobalVar(ps_mouse_right, 'mouse_Right');//0
 addGlobalVar(ps_mouse_left, 'mouse_Left');//1
@@ -44,6 +47,7 @@ addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
 addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
 
 addGlobalType('array of string', 'TStringArray');
+addGlobalType('array of TStringArray', 'T2DStringArray');
 addGlobalType('array of Integer', 'TIntegerArray');
 addGlobalType('array of TIntegerArray', 'T2DIntegerArray');
 addGlobalType('array of TIntegerArray', 'T2DIntArray');
