@@ -1341,7 +1341,7 @@ end;
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
 {$I LPInc/Wrappers/lp_math.inc}
-{$I LPinc/Wrappers/lp_sqlite3.inc}
+{$I LPInc/Wrappers/lp_sqlite3.inc}
 
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}
