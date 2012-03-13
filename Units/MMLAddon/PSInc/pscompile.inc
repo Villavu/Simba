@@ -27,6 +27,9 @@ AddConstantN('ScriptPath','string').SetString(ScriptPath);
 AddConstantN('IncludePath','string').SetString(SimbaSettings.Includes.Path.Value);
 AddConstantN('PluginPath','string').SetString(SimbaSettings.Plugins.Path.Value);
 AddConstantN('FontPath','string').SetString(SimbaSettings.Fonts.Path.Value);
+AddConstantN('SQLITE_OPEN_READONLY','integer').SetInt(1);
+AddConstantN('SQLITE_OPEN_READWRITE','integer').SetInt(2);
+AddConstantN('SQLITE_OPEN_CREATE','integer').SetInt(4);
 
 AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
 AddConstantN('MaxInt','integer').SetInt(maxLongint);
@@ -58,6 +61,7 @@ AddTypeS('T2DExtendedArray', 'array of array of extended;');
 AddTypeS('T3DExtendedArray','array of array of array of extended;');
 AddTypeS('T2DIntegerArray','array of array of integer;');
 AddTypeS('TStringArray','Array of string;');
+AddTypeS('T2DStringArray','array of TStringArray');
 AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
 AddTypeS('Pointer', 'Integer');
 
