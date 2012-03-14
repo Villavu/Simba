@@ -21,20 +21,23 @@
     lpcompile.inc for the Mufasa Macro Library
 }
 
-addGlobalVar(AppPath, 'AppPath');
-addGlobalVar(ScriptPath, 'ScriptPath');
-addGlobalVar(IncludePath, 'IncludePath');
-addGlobalVar(PluginPath, 'PluginPath');
-addGlobalVar(FontPath, 'FontPath');
-addGlobalVar(maxLongint, 'MaxLongInt');
-addGlobalVar(maxLongint, 'MaxInt');
+addGlobalVar(ltString, @AppPath, 'AppPath').isConstant := True;
+addGlobalVar(ltString, @ScriptPath, 'ScriptPath').isConstant := True;
+addGlobalVar(ltString, @ScriptFile, 'ScriptFile').isConstant := True;
+addGlobalVar(ltString, @IncludePath, 'IncludePath').isConstant := True;
+addGlobalVar(ltString, @PluginPath, 'PluginPath').isConstant := True;
+addGlobalVar(ltString, @FontPath, 'FontPath').isConstant := True;
+
 addGlobalVar(1, 'SQLITE_OPEN_READONLY');
 addGlobalVar(2, 'SQLITE_OPEN_READWRITE');
 addGlobalVar(4, 'SQLITE_OPEN_CREATE');
 
-addGlobalVar(ps_mouse_right, 'mouse_Right');//0
-addGlobalVar(ps_mouse_left, 'mouse_Left');//1
-addGlobalVar(ps_mouse_middle, 'mouse_Middle');//2
+//addGlobalVar(maxLongint, 'MaxLongInt').isConstant := True;  //Don't need these...
+//addGlobalVar(maxLongint, 'MaxInt').isConstant := True;      //High works here....
+
+addGlobalVar(ps_mouse_right, 'mouse_Right').isConstant := True;   //0
+addGlobalVar(ps_mouse_left, 'mouse_Left').isConstant := True;     //1
+addGlobalVar(ps_mouse_middle, 'mouse_Middle').isConstant := True; //2
 
 addGlobalType('UInt32', 'TClickType');
 addGlobalType('UInt32', 'DWord');
