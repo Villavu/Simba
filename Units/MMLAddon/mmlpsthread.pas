@@ -33,9 +33,9 @@ interface
 
 uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
-  uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web, fontloader,
-  bitmaps, plugins, dynlibs,internets,scriptproperties,
-  settings, settingssandbox, lcltype, dialogs,msqlite3
+  uPSRuntime, uPSPreProcessor, MufasaTypes, MufasaBase, web, fontloader,
+  bitmaps, plugins, dynlibs, internets, scriptproperties,
+  settings, settingssandbox, lcltype, dialogs, msqlite3
   {$IFDEF USE_RUTIS}
   , Rutis_Engine, Rutis_Defs
   {$ENDIF}
@@ -119,7 +119,7 @@ type
       procedure SetOpenFileEvent(const AValue: TOpenFileEvent);
       procedure SetWriteFileEvent(const AValue: TWriteFileEvent);
     protected
-      AppPath, DocPath, ScriptPath, IncludePath, PluginPath, FontPath: string;
+      AppPath, DocPath, ScriptPath, ScriptFile, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
@@ -130,11 +130,11 @@ type
 
     public
       Prop: TScriptProperties;
-      Client : TClient;
-      MInternet : TMInternet;
+      Client: TClient;
+      MInternet: TMInternet;
       Socks: TSocks;
-	  SQLite3 : TMSQLite3;
-      StartTime : LongWord;
+      SQLite3: TMSQLite3;
+      StartTime: LongWord;
       Settings: TMMLSettings;
       SimbaSettingsFile: String;
       Sett: TMMLSettingsSandbox;
@@ -157,7 +157,7 @@ type
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
-      procedure SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
+      procedure SetPath(ScriptP: string);
       procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
       procedure SetFonts(Fonts: TMFonts); virtual;
 
@@ -351,6 +351,7 @@ end;
 constructor TMThread.Create(CreateSuspended: boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 begin
   inherited Create(CreateSuspended);
+
   Client := TClient.Create(plugin_dir);
   if Assigned(WriteFileEvent) then
     Client.MFiles.WriteFileEvent := WriteFileEvent;
@@ -368,17 +369,22 @@ begin
   OnTerminate := @OnThreadTerminate;
   OnError:= nil;
   Includes := TStringList.Create;
-  Includes.CaseSensitive:= {$ifdef linux}true{$else}false{$endif};
+  Includes.CaseSensitive := {$ifdef linux}true{$else}false{$endif};
   Sett := nil;
 
   Prop := TScriptProperties.Create;
+
+  AppPath := Application.Location;
+  DocPath := SimbaSettings.Scripts.Path.Value;
+  IncludePath := SimbaSettings.Includes.Path.Value;
+  PluginPath := SimbaSettings.Plugins.Path.Value;
+  FontPath := SimbaSettings.Fonts.Path.Value;
 end;
 
 destructor TMThread.Destroy;
 begin
   MInternet.Free;
   Socks.Free;
-  SQLite3.Free;
   Client.Free;
   Includes.free;
   Prop.Free;
@@ -566,14 +572,10 @@ begin
   Self.Sett.prefix := 'Scripts/';
 end;
 
-procedure TMThread.SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
+procedure TMThread.SetPath(ScriptP: string);
 begin
-  AppPath := AppP;
-  DocPath := DocP;
-  ScriptPath := ScriptP;
-  IncludePath := IncludeP;
-  PluginPath := PluginP;
-  FontPath := FontP;
+  ScriptPath := IncludeTrailingPathDelimiter(ExtractFileDir(ScriptP));
+  ScriptFile := ExtractFileName(ScriptP);
 end;
 
 procedure TMThread.SetFonts(Fonts: TMFonts);
@@ -615,7 +617,6 @@ end;
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
 {$I PSInc/Wrappers/ps_sqlite3.inc}
-
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
 {$I PSInc/Wrappers/keyboard.inc}
@@ -1336,18 +1337,15 @@ end;
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}
-
 {$I LPInc/Wrappers/lp_colour.inc}
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
 {$I LPInc/Wrappers/lp_math.inc}
 {$I LPInc/Wrappers/lp_sqlite3.inc}
-
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}
 {$I LPInc/Wrappers/lp_keyboard.inc}
 {$I LPInc/Wrappers/lp_dtm.inc}
-{.$I LPInc/Wrappers/extensions.inc} //Doesn't work for me!
 {$I LPInc/Wrappers/lp_ocr.inc}
 {$I LPInc/Wrappers/lp_internets.inc}
 
@@ -1371,15 +1369,15 @@ begin
 
     StartImporting;
 
+    {$I LPInc/lpdefines.inc}
+    {$I LPInc/lpcompile.inc}
+
     addGlobalFunc('procedure _write(s: string); override;', @lp_Write);
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
 
     for I := 0 to High(VirtualKeys) do
-      addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
-
-    {$I LPInc/lpdefines.inc}
-    {$I LPInc/lpcompile.inc}
+      addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
 
