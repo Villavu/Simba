@@ -27,7 +27,7 @@ unit msqlite3;
 interface
 
 uses
-  Classes, SysUtils, sqlite3, math;
+  Classes, SysUtils, sqlite3dyn, math, Forms, Zipper, httpsend;
 
 type
   TStringArray = array of string;
@@ -197,4 +197,64 @@ begin
   inherited Destroy;
 end;
 
+var
+  Loaded: boolean = False;
+  TempFile, TempDir: string;
+
+function DownloadSQLite(): boolean;
+var
+  TempFile, TempDir, Filename: string;
+  FileStream: TFileStream;
+begin
+  Result := False;
+  TempFile := GetTempFileName();
+  TempDir := IncludeTrailingPathDelimiter(GetTempDir());
+
+  FileStream := TFileStream.Create(TempFile, fmCreate or fmOpenReadWrite);
+  try
+    Result := HttpGetBinary('http://www.sqlite.org/sqlite-dll-win32-x86-3071000.zip', FileStream);
+    if (not (Result)) then
+      Exit;
+  finally
+    FileStream.Free;
+  end;
+
+  with TUnZipper.Create() do
+  try
+    FileName := TempFile;
+    OutputPath := TempDir;
+    Examine;
+    UnZipAllFiles();
+  finally
+    Free;
+  end;
+
+  Filename := 'sqlite3.' + {$IFDEF WINDOWS}'dll'{$ELSE}'so'{$ENDIF};
+  TempFile := TempDir + Filename;
+  TempDir := IncludeTrailingPathDelimiter(Application.Location) + Filename;
+
+  Result := FileExists(TempFile) and RenameFile(TempFile, TempDir);
+end;
+
+initialization
+  try
+    InitialiseSQLite();
+    Loaded := True;
+  except
+    on e: exception do
+    begin
+      WriteLn(e.Message);
+      WriteLn('Gonna try downloading SQLite...');
+      if (DownloadSQLite()) then
+      try
+        InitialiseSQLite();
+        Loaded := True;
+      except
+        WriteLn('Unable to download sqlite3.dll!');
+      end;
+    end;
+  end;
+finalization
+  if (Loaded) then
+    ReleaseSQLite();
 end.
