@@ -27,7 +27,7 @@ unit msqlite3;
 interface
 
 uses
-  Classes, SysUtils, sqlite3dyn, math, Forms, Zipper, httpsend;
+  Classes, SysUtils, sqlite3dyn, math, Forms, Zipper, httpsend, newsimbasettings;
 
 type
   TStringArray = array of string;
@@ -199,7 +199,6 @@ end;
 
 var
   Loaded: boolean = False;
-  TempFile, TempDir: string;
 
 function DownloadSQLite(): boolean;
 var
