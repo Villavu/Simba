@@ -1801,13 +1801,12 @@ begin
   {$ENDIF}
   Thread.SetScript(Script);
 
-  Thread.ErrorData:= @CurrScript.ErrorData;
-  Thread.OnError:= @CurrScript.HandleErrorData;
-  FormCallBackData.FormCallBack:= @self.FormCallBack;
-  Thread.CallBackData:=@FormCallBackData;
+  Thread.ErrorData := @CurrScript.ErrorData;
+  Thread.OnError := @CurrScript.HandleErrorData;
+  FormCallBackData.FormCallBack := @self.FormCallBack;
+  Thread.CallBackData := @FormCallBackData;
 
-  if CurrScript.ScriptFile <> '' then
-    ScriptPath := IncludeTrailingPathDelimiter(ExtractFileDir(CurrScript.ScriptFile));
+  ScriptPath := CurrScript.ScriptFile;
 
   if DirectoryExists(SimbaSettings.Plugins.Path.Value) then
      PluginsGlob.AddPath(SimbaSettings.Plugins.Path.Value);
@@ -1818,8 +1817,7 @@ begin
     if FirstRun then
       FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
 
-  Thread.SetPaths(AppPath, DocPath, SimbaSettings.Scripts.Path.Value, SimbaSettings.Includes.Path.Value,
-      SimbaSettings.Plugins.Path.Value, SimbaSettings.Fonts.Path.Value);
+  Thread.SetPath(ScriptPath);
 
   if selector.haspicked then
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
