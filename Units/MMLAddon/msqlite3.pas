@@ -82,17 +82,25 @@ end;
 function msqlite3_callback(sender : Pointer; Columns : Integer; ColumnValues, ColumnNames: PPChar) : integer; cdecl;
 var
   i, l : integer;
+  first : boolean;
 begin
   result := SQLITE_OK;
-  l := Length(P2DStringArray(sender)^) + 1;
-  SetLength(P2DStringArray(sender)^, l);
+  l := Length(P2DStringArray(sender)^);
+  first := (l = 0);
+  SetLength(P2DStringArray(sender)^, l + (Integer(first) + 1));
   if Columns > 0 then
   begin
-    SetLength(P2DStringArray(sender)^[l - 1], Columns);
+    SetLength(P2DStringArray(sender)^[l], Columns);
+	if first then SetLength(P2DStringArray(sender)^[l + 1], Columns);
     for i := 0 to Columns - 1 do
     begin
-      P2DStringArray(sender)^[l - 1][i] := ColumnValues^;
-      Inc(ColumnValues);
+	  if first then
+	  begin
+		P2DStringArray(sender)^[0][i] := ColumnNames^;
+		Inc(ColumnNames);
+      end;
+	  P2DStringArray(sender)^[l + Integer(first)][i] := ColumnValues^;
+	  Inc(ColumnValues);
     end;
   end;
 end;
@@ -123,7 +131,7 @@ var
   emsg : string;
 begin
   if (not (SQLite3Loaded)) then
-    raise EInOutError.Create('SQLite library not loaded.');
+    raise EInOutError.Create('SQLite library not loaded (find it at www.sqlite.org)');
 
   l := length(ConnList);
   SetLength(ConnList, l + 1);
@@ -165,6 +173,8 @@ end;
 
 function TMSQLite3.getHandle(index : integer) : ppsqlite3;
 begin
+  if (not (SQLite3Loaded)) then
+    raise EInOutError.Create('SQLite library not loaded (find it at www.sqlite.org)');
   if not InRange(Index, 0, Length(ConnList)) then
     raise exception.CreateFmt('TMSQLite3.getHandle: Trying to access a database handle (%d) that is out of range', [index]);
   if (ConnList[index] = nil) then
