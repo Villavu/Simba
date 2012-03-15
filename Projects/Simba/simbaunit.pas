@@ -440,7 +440,7 @@ type
     function SetInterpreter(obj: TObject): Boolean;
     function SetPluginsPath(obj: Tobject): Boolean;
     function SetScriptsPath(obj: Tobject): Boolean;
-    function SetExtensionsPath(obj: Tobject): Boolean;
+    {$IFDEF USE_EXTENSIONS}function SetExtensionsPath(obj: Tobject): Boolean;{$ENDIF}
     function SetIncludesPath(obj: Tobject): Boolean;
     function SetFontsPath(obj: Tobject): Boolean;
     function SetDefaultScriptPath(obj: Tobject): Boolean;
@@ -3329,7 +3329,7 @@ begin
   SimbaSettings.Fonts.Path.onChange:= @SetFontsPath;
   SimbaSettings.Includes.Path.onChange:= @SetIncludesPath;
   SimbaSettings.Scripts.Path.onChange:= @SetScriptsPath;
-  SimbaSettings.Extensions.Path.onChange:= @SetExtensionsPath;
+  {$IFDEF USE_EXTENSIONS}SimbaSettings.Extensions.Path.onChange:= @SetExtensionsPath;{$ENDIF}
 
   SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;
 end;

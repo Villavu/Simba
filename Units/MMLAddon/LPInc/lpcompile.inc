@@ -22,6 +22,7 @@
 }
 
 addGlobalVar(ltString, @AppPath, 'AppPath').isConstant := True;
+addGlobalVar(ltString, @DocPath, 'DocPath').isConstant := True;
 addGlobalVar(ltString, @ScriptPath, 'ScriptPath').isConstant := True;
 addGlobalVar(ltString, @ScriptFile, 'ScriptFile').isConstant := True;
 addGlobalVar(ltString, @IncludePath, 'IncludePath').isConstant := True;
