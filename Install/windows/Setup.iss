@@ -13,7 +13,7 @@ AppSupportURL=http://wizzup.org/simba
 AppUpdatesURL=http://wizzup.org/simba
 DefaultDirName={sd}\Simba
 DefaultGroupName=Simba
-OutputDir=..\..\Install\windows\
+OutputDir=C:\simba\Install\windows\
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
@@ -36,25 +36,24 @@ Name: "{app}\Documentation\html"
 ; Name: "{app}\Scripts\Tests"
 
 [Files]
-Source: "..\..\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\..\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "..\..\Extensions\extension.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "..\..\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "..\..\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "..\..\Extensions\security.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "..\..\Extensions\paster.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "..\..\Extensions\CRov.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "..\..\Extensions\Updater.sei"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "..\..\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
-Source: "..\..\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Simba\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\extension.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\security.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\paster.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\CRov.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\Updater.sei"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
 
-; Source: "..\..\Doc\sphinx/_build/latex/Simba.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion
-Source: "..\..\Documentation\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion
-Source: "..\..\Documentation\html\*"; DestDir: "{app}\Documentation\html"; Flags: ignoreversion
-Source: "..\..\Documentation\html\_static\*"; DestDir: "{app}\Documentation\html\_static"; Flags: ignoreversion
+; Source: "C:\Simba\Doc\sphinx/_build/latex/Simba.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion
+Source: "C:\Simba\Documentation\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion
+Source: "C:\Simba\Documentation\html\*"; DestDir: "{app}\Documentation\html"; Flags: ignoreversion
+Source: "C:\Simba\Documentation\html\_static\*"; DestDir: "{app}\Documentation\html\_static"; Flags: ignoreversion
 
-; Source: "..\..\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
-; Source: "..\..\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
+; Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
