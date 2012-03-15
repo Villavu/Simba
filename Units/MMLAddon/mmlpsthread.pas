@@ -575,7 +575,7 @@ end;
 
 procedure TMThread.SetPath(ScriptP: string);
 begin
-  ScriptPath := IncludeTrailingPathDelimiter(ExtractFileDir(ScriptP));
+  ScriptPath := IncludeTrailingPathDelimiter(ExpandFileName(ExtractFileDir(ScriptP)));
   ScriptFile := ExtractFileName(ScriptP);
 end;
 
