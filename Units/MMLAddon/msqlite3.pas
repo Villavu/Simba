@@ -190,7 +190,6 @@ begin
     if ConnList[i] <> nil then
     begin
       closeHandle(i);
-      ConnList[i] := nil;
       TClient(Client).Writeln(Format('Database handle [%d] has not been freed in the script, freeing it now.', [i]));
     end;
   SetLength(ConnList, 0);
