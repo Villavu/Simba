@@ -123,7 +123,7 @@ var
   emsg : string;
 begin
   if (not (SQLite3Loaded)) then
-    raise EInOutError.Create('SQLite library not loaded.');
+    raise EInOutError.Create('SQLite library not loaded (find it at www.sqlite.org).');
 
   l := length(ConnList);
   SetLength(ConnList, l + 1);
@@ -165,6 +165,8 @@ end;
 
 function TMSQLite3.getHandle(index : integer) : ppsqlite3;
 begin
+  if (not (SQLite3Loaded)) then
+    raise EInOutError.Create('SQLite library not loaded (find it at www.sqlite.org).');
   if not InRange(Index, 0, Length(ConnList)) then
     raise exception.CreateFmt('TMSQLite3.getHandle: Trying to access a database handle (%d) that is out of range', [index]);
   if (ConnList[index] = nil) then
