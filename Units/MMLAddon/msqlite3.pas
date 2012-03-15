@@ -27,7 +27,7 @@ unit msqlite3;
 interface
 
 uses
-  Classes, SysUtils, sqlite3, math;
+  Classes, SysUtils, sqlite3dyn, math;
 
 type
   TStringArray = array of string;
@@ -57,6 +57,9 @@ implementation
 
 uses
   Client;
+
+var
+  SQLite3Loaded: boolean = False;
 
 // http://sqlite.org/c3ref/errcode.html
 function TMSQLite3.errcode(index : integer) : integer;
@@ -119,6 +122,9 @@ var
   l, ecode : integer;
   emsg : string;
 begin
+  if (not (SQLite3Loaded)) then
+    raise EInOutError.Create('SQLite library not loaded.');
+
   l := length(ConnList);
   SetLength(ConnList, l + 1);
   result := l;
@@ -197,4 +203,17 @@ begin
   inherited Destroy;
 end;
 
+initialization
+  try
+    InitialiseSQLite();
+    SQLite3Loaded := True;
+  except
+    on e: EInOutError do
+    begin
+      WriteLn(e.Message);
+      WriteLn('You can find the library at "http://www.sqlite.org/".');
+    end;
+  end;
+finalization
+  ReleaseSQLite();
 end.
