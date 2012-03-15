@@ -385,6 +385,7 @@ destructor TMThread.Destroy;
 begin
   MInternet.Free;
   Socks.Free;
+  SQLite3.Free;
   Client.Free;
   Includes.free;
   Prop.Free;
