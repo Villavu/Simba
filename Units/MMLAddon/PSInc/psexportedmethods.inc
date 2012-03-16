@@ -555,6 +555,8 @@ AddFunction(@ps_copyTPA,'function CopyTPA(const TPA : TPointArray) : TPointArray
 AddFunction(@ps_CopyATPA,'function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;');
 
 {SQLite3}
+
+{$IFDEF USE_SQLITE}
 SetCurrSection('SQLite3');
 AddFunction(@ps_sqlite_version, 'function sqlite_version() : string;');
 AddFunction(@ps_sqlite_version_num, 'function sqlite_version_num() : integer;');
@@ -566,6 +568,7 @@ AddFunction(@ps_sqlite_errmsg, 'function sqlite_errmsg(index : integer) : string
 AddFunction(@ps_sqlite_errcode, 'function sqlite_errcode(index : integer) : integer;');
 AddFunction(@ps_sqlite_query, 'function sqlite_query(index : integer; sql : string) : boolean;');
 AddFunction(@ps_sqlite_queryvalue, 'function sqlite_queryvalue(index : integer; sql : string; out Data : T2DStringArray) : boolean;');
+{$ENDIF}
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 SetCurrSection('Settings');
