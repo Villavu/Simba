@@ -29,9 +29,46 @@ addGlobalVar(ltString, @PluginPath, 'PluginPath').isConstant := True;
 addGlobalVar(ltString, @FontPath, 'FontPath').isConstant := True;
 
 {$IFDEF USE_SQLITE}
-addGlobalVar(1, 'SQLITE_OPEN_READONLY');
-addGlobalVar(2, 'SQLITE_OPEN_READWRITE');
-addGlobalVar(4, 'SQLITE_OPEN_CREATE');
+// SQLite result codes returned by sqlite_errcode
+addGlobalVar(0, 'SQLITE_OK').isConstant := true; // Successful result
+addGlobalVar(1, 'SQLITE_ERROR').isConstant := true; // SQL error or missing database
+addGlobalVar(2, 'SQLITE_INTERNAL').isConstant := true; // Internal logic error in SQLite
+addGlobalVar(3, 'SQLITE_PERM').isConstant := true; // Access permission denied
+addGlobalVar(4, 'SQLITE_ABORT').isConstant := true; // Callback routine requested an abort
+addGlobalVar(5, 'SQLITE_BUSY').isConstant := true; // The database file is locked
+addGlobalVar(6, 'SQLITE_LOCKED').isConstant := true; // A table in the database is locked
+addGlobalVar(7, 'SQLITE_NOMEM').isConstant := true; // A malloc() failed
+addGlobalVar(8, 'SQLITE_READONLY').isConstant := true; // Attempt to write a readonly database
+addGlobalVar(9, 'SQLITE_INTERRUPT').isConstant := true; // Operation terminated by sqlite3_interrupt()
+addGlobalVar(10, 'SQLITE_IOERR').isConstant := true; // Some kind of disk I/O error occurred
+addGlobalVar(11, 'SQLITE_CORRUPT').isConstant := true; // The database disk image is malformed
+addGlobalVar(12,('SQLITE_NOTFOUND').isConstant := true; // Unknown opcode in sqlite3_file_control()
+addGlobalVar(13, 'SQLITE_FULL').isConstant := true; // Insertion failed because database is full
+addGlobalVar(14, 'SQLITE_CANTOPEN').isConstant := true; // Unable to open the database file
+addGlobalVar(15, 'SQLITE_PROTOCOL').isConstant := true; // Database lock protocol error
+addGlobalVar(16, 'SQLITE_EMPTY').isConstant := true; // Database is empty
+addGlobalVar(17, 'SQLITE_SCHEMA').isConstant := true; // The database schema changed
+addGlobalVar(18, 'SQLITE_TOOBIG').isConstant := true; // String or BLOB exceeds size limit
+addGlobalVar(19, 'SQLITE_CONSTRAINT').isConstant := true; // Abort due to constraint violation
+addGlobalVar(20, 'SQLITE_MISMATCH').isConstant := true; // Data type mismatch
+addGlobalVar(21, 'SQLITE_MISUSE').isConstant := true; // Library used incorrectly
+addGlobalVar(22, 'SQLITE_NOLFS').isConstant := true; // Uses OS features not supported on host
+addGlobalVar(23, 'SQLITE_AUTH').isConstant := true; // Authorization denied
+addGlobalVar(24, 'SQLITE_FORMAT').isConstant := true; // Auxiliary database format error
+addGlobalVar(25, 'SQLITE_RANGE').isConstant := true; // 2nd parameter to sqlite3_bind out of range
+addGlobalVar(26, 'SQLITE_NOTADB').isConstant := true; // File opened that is not a database file
+addGlobalVar(27, 'SQLITE_ROW').isConstant := true; // sqlite3_step() has another row ready
+addGlobalVar(28, 'SQLITE_DONE').isConstant := true; // sqlite3_step() has finished executing
+
+// SQLite open flags for sqlite_open_v2
+addGlobalVar(1, 'SQLITE_OPEN_READONLY').isConstant := true;
+addGlobalVar(2, 'SQLITE_OPEN_READWRITE').isConstant := true;
+addGlobalVar(4, 'SQLITE_OPEN_CREATE').isConstant := true;
+addGlobalVar(40, 'SQLITE_OPEN_URI').isConstant := true;
+addGlobalVar(8000, 'SQLITE_OPEN_NOMUTEX').isConstant := true;
+addGlobalVar(10000, 'SQLITE_OPEN_FULLMUTEX').isConstant := true;
+addGlobalVar(20000, 'SQLITE_OPEN_SHAREDCACHE').isConstant := true;
+addGlobalVar(40000, 'SQLITE_OPEN_PRIVATECACHE').isConstant := true;
 {$ENDIF}
 
 //addGlobalVar(maxLongint, 'MaxLongInt').isConstant := True;  //Don't need these...
