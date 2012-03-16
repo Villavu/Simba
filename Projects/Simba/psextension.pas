@@ -195,7 +195,9 @@ end;
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colour.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colourconv.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/math.inc}
+{$IFDEF USE_SQLITE}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/ps_sqlite3.inc}
+{$ENDIF}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/mouse.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/file.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/keyboard.inc}

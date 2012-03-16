@@ -27,9 +27,12 @@ AddConstantN('ScriptPath','string').SetString(ScriptPath);
 AddConstantN('IncludePath','string').SetString(SimbaSettings.Includes.Path.Value);
 AddConstantN('PluginPath','string').SetString(SimbaSettings.Plugins.Path.Value);
 AddConstantN('FontPath','string').SetString(SimbaSettings.Fonts.Path.Value);
+
+{$IFDEF USE_SQLITE}
 AddConstantN('SQLITE_OPEN_READONLY','integer').SetInt(1);
 AddConstantN('SQLITE_OPEN_READWRITE','integer').SetInt(2);
 AddConstantN('SQLITE_OPEN_CREATE','integer').SetInt(4);
+{$ENDIF}
 
 AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
 AddConstantN('MaxInt','integer').SetInt(maxLongint);
