@@ -28,9 +28,11 @@ addGlobalVar(ltString, @IncludePath, 'IncludePath').isConstant := True;
 addGlobalVar(ltString, @PluginPath, 'PluginPath').isConstant := True;
 addGlobalVar(ltString, @FontPath, 'FontPath').isConstant := True;
 
+{$IFDEF USE_SQLITE}
 addGlobalVar(1, 'SQLITE_OPEN_READONLY');
 addGlobalVar(2, 'SQLITE_OPEN_READWRITE');
 addGlobalVar(4, 'SQLITE_OPEN_CREATE');
+{$ENDIF}
 
 //addGlobalVar(maxLongint, 'MaxLongInt').isConstant := True;  //Don't need these...
 //addGlobalVar(maxLongint, 'MaxInt').isConstant := True;      //High works here....

@@ -35,7 +35,8 @@ uses
   Classes, SysUtils, client, uPSComponent,uPSCompiler,
   uPSRuntime, uPSPreProcessor, MufasaTypes, MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs, internets, scriptproperties,
-  settings, settingssandbox, lcltype, dialogs, msqlite3
+  settings, settingssandbox, lcltype, dialogs
+  {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_RUTIS}
   , Rutis_Engine, Rutis_Defs
   {$ENDIF}
@@ -133,7 +134,7 @@ type
       Client: TClient;
       MInternet: TMInternet;
       Socks: TSocks;
-      SQLite3: TMSQLite3;
+      {$IFDEF USE_SQLITE}SQLite3: TMSQLite3;{$ENDIF}
       StartTime: LongWord;
       Settings: TMMLSettings;
       SimbaSettingsFile: String;
@@ -359,7 +360,9 @@ begin
     Client.MFiles.OpenFileEvent := OpenFileEvent;
   MInternet := TMInternet.Create(Client);
   Socks := TSocks.Create(Client);
+  {$IFDEF USE_SQLITE}
   SQLite3 := TMSQLite3.Create(Client);
+  {$ENDIF}
   if Assigned(OpenConnectionEvent) then
     MInternet.OpenConnectionEvent := Self.OpenConnectionEvent;
   SyncInfo:= TheSyncInfo;
@@ -385,7 +388,7 @@ destructor TMThread.Destroy;
 begin
   MInternet.Free;
   Socks.Free;
-  SQLite3.Free;
+  {$IFDEF USE_SQLITE}SQLite3.Free;{$ENDIF}
   Client.Free;
   Includes.free;
   Prop.Free;
@@ -617,7 +620,9 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
+{$IFDEF USE_SQLITE}
 {$I PSInc/Wrappers/ps_sqlite3.inc}
+{$ENDIF}
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
 {$I PSInc/Wrappers/keyboard.inc}
@@ -1342,7 +1347,9 @@ end;
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
 {$I LPInc/Wrappers/lp_math.inc}
+{$IFDEF USE_SQLITE}
 {$I LPInc/Wrappers/lp_sqlite3.inc}
+{$ENDIF}
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}
 {$I LPInc/Wrappers/lp_keyboard.inc}
