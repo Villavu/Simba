@@ -29,9 +29,46 @@ AddConstantN('PluginPath','string').SetString(SimbaSettings.Plugins.Path.Value);
 AddConstantN('FontPath','string').SetString(SimbaSettings.Fonts.Path.Value);
 
 {$IFDEF USE_SQLITE}
-AddConstantN('SQLITE_OPEN_READONLY','integer').SetInt(1);
-AddConstantN('SQLITE_OPEN_READWRITE','integer').SetInt(2);
-AddConstantN('SQLITE_OPEN_CREATE','integer').SetInt(4);
+// SQLite result codes returned by sqlite_errcode
+AddConstantN('SQLITE_OK', 'integer').SetInt(0); // Successful result
+AddConstantN('SQLITE_ERROR', 'integer').SetInt(1); // SQL error or missing database
+AddConstantN('SQLITE_INTERNAL', 'integer').SetInt(2); // Internal logic error in SQLite
+AddConstantN('SQLITE_PERM', 'integer').SetInt(3); // Access permission denied
+AddConstantN('SQLITE_ABORT', 'integer').SetInt(4); // Callback routine requested an abort
+AddConstantN('SQLITE_BUSY', 'integer').SetInt(5); // The database file is locked
+AddConstantN('SQLITE_LOCKED', 'integer').SetInt(6); // A table in the database is locked
+AddConstantN('SQLITE_NOMEM', 'integer').SetInt(7); // A malloc() failed
+AddConstantN('SQLITE_READONLY', 'integer').SetInt(8); // Attempt to write a readonly database
+AddConstantN('SQLITE_INTERRUPT', 'integer').SetInt(9); // Operation terminated by sqlite3_interrupt()
+AddConstantN('SQLITE_IOERR', 'integer').SetInt(10); // Some kind of disk I/O error occurred
+AddConstantN('SQLITE_CORRUPT', 'integer').SetInt(11); // The database disk image is malformed
+AddConstantN('SQLITE_NOTFOUND', 'integer').SetInt(12); // Unknown opcode in sqlite3_file_control()
+AddConstantN('SQLITE_FULL', 'integer').SetInt(13); // Insertion failed because database is full
+AddConstantN('SQLITE_CANTOPEN', 'integer').SetInt(14); // Unable to open the database file
+AddConstantN('SQLITE_PROTOCOL', 'integer').SetInt(15); // Database lock protocol error
+AddConstantN('SQLITE_EMPTY', 'integer').SetInt(16); // Database is empty
+AddConstantN('SQLITE_SCHEMA', 'integer').SetInt(17); // The database schema changed
+AddConstantN('SQLITE_TOOBIG', 'integer').SetInt(18); // String or BLOB exceeds size limit
+AddConstantN('SQLITE_CONSTRAINT', 'integer').SetInt(19); // Abort due to constraint violation
+AddConstantN('SQLITE_MISMATCH', 'integer').SetInt(20); // Data type mismatch
+AddConstantN('SQLITE_MISUSE', 'integer').SetInt(21); // Library used incorrectly
+AddConstantN('SQLITE_NOLFS', 'integer').SetInt(22); // Uses OS features not supported on host
+AddConstantN('SQLITE_AUTH', 'integer').SetInt(23); // Authorization denied
+AddConstantN('SQLITE_FORMAT', 'integer').SetInt(24); // Auxiliary database format error
+AddConstantN('SQLITE_RANGE', 'integer').SetInt(25); // 2nd parameter to sqlite3_bind out of range
+AddConstantN('SQLITE_NOTADB', 'integer').SetInt(26); // File opened that is not a database file
+AddConstantN('SQLITE_ROW', 'integer').SetInt(27); // sqlite3_step() has another row ready
+AddConstantN('SQLITE_DONE', 'integer').SetInt(28); // sqlite3_step() has finished executing
+
+// SQLite open flags for sqlite_open_v2
+AddConstantN('SQLITE_OPEN_READONLY', 'integer').SetInt(1);
+AddConstantN('SQLITE_OPEN_READWRITE', 'integer').SetInt(2);
+AddConstantN('SQLITE_OPEN_CREATE', 'integer').SetInt(4);
+AddConstantN('SQLITE_OPEN_URI', 'integer').SetInt(40);
+AddConstantN('SQLITE_OPEN_NOMUTEX', 'integer').SetInt(8000);
+AddConstantN('SQLITE_OPEN_FULLMUTEX', 'integer').SetInt(10000);
+AddConstantN('SQLITE_OPEN_SHAREDCACHE', 'integer').SetInt(20000);
+AddConstantN('SQLITE_OPEN_PRIVATECACHE', 'integer').SetInt(40000);
 {$ENDIF}
 
 AddConstantN('MaxLongInt','integer').SetInt(maxLongint);
