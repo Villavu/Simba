@@ -15,7 +15,7 @@ sqlite_open
 
     function sqlite_open(filename : string) : integer;
 
-This will try to open a connection to the database file specified and returns an index to the internal array.
+Will try to open a connection to the database file specified and returns an index to the internal array.
 If the database file does not exist, it will attempt to create it.
 This will return -1 if no connection could be established.
 
@@ -32,7 +32,7 @@ sqlite_open_v2
 
     function sqlite_open_v2(filename : string; flags : integer) : integer;
 
-This will do the same as sqlite_open however you can provide flags to use when opening.
+Does the same as sqlite_open however you can provide flags to use when opening.
 
 *Open flags:*
 
@@ -62,7 +62,7 @@ sqlite_version
 
     function sqlite_version() : string;
 
-This function returns the version of the loaded SQLite library expressed as a string (x.y.z).
+Returns the version of the loaded SQLite library expressed as a string (x.y.z).
 
 .. code-block:: pascal
 
@@ -75,7 +75,7 @@ sqlite_version_num
 
     function sqlite_version_num() : integer;
 
-This function returns the version of the loaded SQLite library expressed as an integer (x * 1000000 + y * 1000 + x). 
+Returns the version of the loaded SQLite library expressed as an integer (x * 1000000 + y * 1000 + x). 
 
 *Example:*
 
@@ -90,7 +90,7 @@ sqlite_query
 
     function sqlite_query(index : integer; sql : string) : boolean;
 
-This function attempts to execute a query on the database handle specified by index. Will return true if SQLITE_OK is returned by SQLite.
+Attempts to execute a query on the database handle specified by index. Returns true if SQLITE_OK is returned by SQLite.
 If it returns false, it is useful to see what sqlite_errmsg outputs.
 
 *Example:*
@@ -107,8 +107,8 @@ sqlite_queryValue
 
     function sqlite_queryValue(index : integer; sql : string; out results : T2DStringArray) : boolean;
 
-This function attempts to execute a query on the database handle specified by index. Will return true if SQLITE_OK is returned by SQLite.
-This will also output the result rowset in the Results variable provided. The first array will be an array containing column names.
+Attempts to execute a query on the database handle specified by index. Return true if SQLITE_OK is returned by SQLite.
+This will also output the resulting rows in the Results variable provided. The first array will be an array containing column names.
 If it returns false, it is useful to see what sqlite_errmsg outputs.
 
 *Example:*
@@ -125,7 +125,7 @@ sqlite_escape
 
     function sqlite_escape(s : string): string;
 
-This function sanitizes a string for input into the database by replacing apostrophes with anothe apostrophe. It will return the escaped string.
+Sanitizes a string for input into the database by replacing apostrophes with anothe apostrophe. It will return the escaped string.
 
 *Example:*
 
@@ -158,7 +158,7 @@ sqlite_errmsg
     function sqlite_errmsg(index : integer) : string;
 
 Returns the error message returned by the last SQLite library call. You must provide an index to a database handle.
-If not error has occurred, this will return 'not an error'.
+If no error has occurred, this will return 'not an error'.
 
 *Example:*
 
