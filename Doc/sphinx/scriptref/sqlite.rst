@@ -132,7 +132,9 @@ If an error occurred during the query, the error boolean will be set to true. Ot
 
 .. code-block:: pascal
 
-	sqlite_queryValue(DB, 'SELECT * FROM test;', Results);
+	Results := sqlite_queryResult(DB, 'SELECT * FROM test;', error);
+	if error then
+	  [...] // do your error handling here...
 	Writeln(Results); // Should output [['id', 'name'], ['1', 'Sex']]	
 
 sqlite_escape
