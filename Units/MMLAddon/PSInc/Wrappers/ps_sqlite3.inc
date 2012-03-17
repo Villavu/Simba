@@ -47,3 +47,8 @@ function ps_sqlite_queryvalue(index : integer; sql : string; out data : T2DStrin
 begin;
   result := CurrThread.SQLite3.queryvalue(index, sql, data);
 end;
+
+function ps_sqlite_queryresult(index : integer; sql : string; var error : boolean) : T2DStringArray; extdecl;
+begin;
+  result := CurrThread.SQLite3.queryresult(index, sql, error);
+end;

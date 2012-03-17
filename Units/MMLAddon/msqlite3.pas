@@ -44,10 +44,11 @@ type
     function escape(s : string) : string;
     function open_db(filename : string; flags : integer) : integer;
     function query(index : integer; sql : string) : boolean;
-    function queryvalue(index : integer; sql : string; out data : T2DStringArray) : boolean;
+    function queryValue(index : integer; sql : string; out data : T2DStringArray) : boolean;
+	function queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;
     function getHandle(index : integer) : ppsqlite3;
-    function errcode(index : integer) : integer;
-    function errmsg(index : integer) : string;
+    function errCode(index : integer) : integer;
+    function errMsg(index : integer) : string;
     procedure closeHandle(index : integer);
     constructor Create(Owner : TObject);
     destructor Destroy; override;
@@ -62,7 +63,7 @@ var
   SQLite3Loaded: boolean = False;
 
 // http://sqlite.org/c3ref/errcode.html
-function TMSQLite3.errcode(index : integer) : integer;
+function TMSQLite3.errCode(index : integer) : integer;
 var
   p : ppsqlite3;
 begin
@@ -71,7 +72,7 @@ begin
 end;
 
 // http://sqlite.org/c3ref/errcode.html
-function TMSQLite3.errmsg(index : integer) : string;
+function TMSQLite3.errMsg(index : integer) : string;
 var
   p : ppsqlite3;
 begin
@@ -169,6 +170,11 @@ begin
   sqlC := StrPCopy(StrAlloc(length(sql) + 1), sql);
   result := sqlite3_exec(p^, sqlC, @msqlite3_callback, @data, nil) = SQLITE_OK;
   StrDispose(sqlC);
+end;
+
+function TMSQLite3.queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;
+begin
+  error := not queryValue(index, sql, Result);
 end;
 
 function TMSQLite3.getHandle(index : integer) : ppsqlite3;

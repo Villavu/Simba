@@ -47,3 +47,9 @@ procedure lp_sqlite_queryvalue(Params : PParamArray; Result : Pointer);
 begin
   PBoolean(Result)^ := ps_sqlite_queryvalue(PLongInt(Params^[0])^, PString(Params^[1])^, P2DStringArray(Params^[2])^);
 end;
+
+procedure lp_sqlite_queryresult(Params : PParamArray; Result : Pointer);
+begin
+  P2DStringArray(Result)^ := ps_sqlite_queryresult(PLongInt(Params^[0])^, PString(Params^[1])^, PBoolean(Params^[2])^);
+end;
+

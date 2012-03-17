@@ -5,7 +5,7 @@ SQLite Functions
 
 Simba has support for reading and manipulating SQLite databases. 
 Open connections are all represented by integers in scripts. The integers point to an index in an internal array of pointers which is managed by Simba.
-sqlite_open and function sqlite_open_v2 return the integer that you use for most other functions. This page documents only the functions, and not `SQLite <http://www.sqlite.org>`_ or the `SQL <http://en.wikipedia.org/wiki/SQL>`_ language.
+sqlite_open and function sqlite_open_v2 return an integer that you use for most other functions. This page documents only the functions, and not `SQLite <http://www.sqlite.org>`_ or the `SQL <http://en.wikipedia.org/wiki/SQL>`_ language.
 After opening a connection, you should use sqlite_close on it when you are no longer using it. If, however, for some reason you forget, Simba will free all unfreed connections automatically.
 
 sqlite_open
@@ -91,7 +91,7 @@ sqlite_query
     function sqlite_query(index : integer; sql : string) : boolean;
 
 Attempts to execute a query on the database handle specified by index. Returns true if SQLITE_OK is returned by SQLite.
-If it returns false, it is useful to see what sqlite_errmsg outputs.
+If it returns false, it is useful to see what sqlite_errMsg outputs.
 
 *Example:*
 
@@ -108,8 +108,8 @@ sqlite_queryValue
     function sqlite_queryValue(index : integer; sql : string; out results : T2DStringArray) : boolean;
 
 Attempts to execute a query on the database handle specified by index. Return true if SQLITE_OK is returned by SQLite.
-This will also output the resulting rows in the Results variable provided. The first array will be an array containing column names.
-If it returns false, it is useful to see what sqlite_errmsg outputs.
+This will also save the resulting rows in the Results variable provided. The first array will be an array containing column names.
+If it returns false, it is useful to see what sqlite_errMsg outputs.
 
 *Example:*
 
@@ -117,6 +117,25 @@ If it returns false, it is useful to see what sqlite_errmsg outputs.
 
 	sqlite_queryValue(DB, 'SELECT * FROM test;', Results);
 	Writeln(Results); // Should output [['id', 'name'], ['1', 'Sex']]
+
+sqlite_queryResult
+---------
+
+.. code-block:: pascal
+
+    function sqlite_queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;
+
+Attempts to execute a query on the database handle specified by index. The resulting rows are returned.
+If an error occurred during the query, the error boolean will be set to true. Otherwise, it will be false.
+
+*Example:*
+
+.. code-block:: pascal
+
+	Results := sqlite_queryResult(DB, 'SELECT * FROM test;', error);
+	if error then
+	  [...] // do your error handling here...
+	Writeln(Results); // Should output [['id', 'name'], ['1', 'Sex']]	
 
 sqlite_escape
 --------
@@ -147,15 +166,15 @@ Closes the database handle specified by index (removing file locks, etc.). Don't
 .. code-block:: pascal
 
 	DB := sqlite_open('test.db');
-	[...]
+	// [...]
 	sqlite_close(DB);
 
-sqlite_errmsg
+sqlite_errMsg
 --------------
 
 .. code-block:: pascal
 
-    function sqlite_errmsg(index : integer) : string;
+    function sqlite_errMsg(index : integer) : string;
 
 Returns the error message returned by the last SQLite library call. You must provide an index to a database handle.
 If no error has occurred, this will return 'not an error'.
@@ -167,12 +186,12 @@ If no error has occurred, this will return 'not an error'.
 	sqlite_query(DB, 'asdfghjkl');
 	Writeln(sqlite_errmsg(DB)); // near "asdfghjkl": syntax error
   
-sqlite_errcode
+sqlite_errCode
 --------------
 
 .. code-block:: pascal
 
-    function sqlite_errcode(index : integer) : integer;
+    function sqlite_errCode(index : integer) : integer;
 
 Returns the result code returned by the last SQLite library call. You must provide an index to a database handle.
 If no error has occurred, this will return SQLITE_OK.
@@ -217,4 +236,4 @@ If no error has occurred, this will return SQLITE_OK.
 .. code-block:: pascal
 
 	sqlite_query(DB, 'asdfghjkl');
-	Writeln(sqlite_errmsg(DB)); // Outputs 1, because it is an error in the SQL syntax (in otherwords, an SQL error).
+	Writeln(sqlite_errmsg(DB)); // 1 (SQLITE_ERROR)
