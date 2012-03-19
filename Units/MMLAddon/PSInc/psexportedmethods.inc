@@ -405,6 +405,7 @@ AddFunction(@ps_GetMufasaBitmap,'function GetMufasaBitmap(bmp : integer) : TMufa
 AddFunction(@ps_CreateBitmap,'function CreateBitmap(w,h :integer) : integer;');
 AddFunction(@ps_FreeBitmap,'procedure FreeBitmap(Bmp : integer);');
 AddFunction(@ps_SaveBitmap,'procedure SaveBitmap(Bmp : integer; path : string);');
+AddFunction(@ps_BitmapExists, 'function BitmapExists(Index : integer) : boolean;');
 AddFunction(@ps_BitmapFromString,'function BitmapFromString(Width,Height : integer; Data : string): integer;');
 AddFunction(@ps_LoadBitmap,'function LoadBitmap(Path : string) : integer;');
 AddFunction(@ps_SetBitmapSize,'procedure SetBitmapSize(Bmp,NewW,NewH : integer);');
