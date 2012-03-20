@@ -15,7 +15,7 @@ end;
 
 procedure Lape_SetEIOSTarget(const Params: PParamArray; const Result: Pointer);
 begin
-  Pinteger(Result)^ := ps_SetEIOSTarget(Pstring(Params^[0])^, PVariant(Params^[1])^);
+  Pinteger(Result)^:= CurrThread.Client.IOManager.SetTarget(Pstring(Params^[0])^, Pstring(Params^[1])^);
 end;
 
 procedure Lape_SetImageTarget(const Params: PParamArray);
