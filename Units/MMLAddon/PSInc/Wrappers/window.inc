@@ -36,9 +36,9 @@ begin;
   result:= CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[Bitmap]);
 end;
 
-function ps_SetEIOSTarget(name: string; args: Variant): integer; extdecl;
+function ps_SetEIOSTarget(name, args: String): integer; extdecl;
 begin
-  result:= CurrThread.Client.IOManager.SetTarget(name, @args);
+  result:= CurrThread.Client.IOManager.SetTarget(name, args);
 end;
 
 procedure ps_SetImageTarget(idx: integer); extdecl;

@@ -477,7 +477,7 @@ AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @La
 AddGlobalFunc('procedure SetDesktopAsClient;', @Lape_SetDesktopAsClient);
 AddGlobalFunc('function SetTargetArray(P: Integer; w, h: integer): integer', @Lape_SetTargetArray);
 AddGlobalFunc('function SetTargetBitmap(bitmap: Integer): integer', @Lape_SetTargetBitmap);
-AddGlobalFunc('function SetEIOSTarget(name: string; args: Variant): integer', @Lape_SetEIOSTarget);
+AddGlobalFunc('function SetEIOSTarget(name, args: String): integer', @Lape_SetEIOSTarget);
 AddGlobalFunc('procedure SetImageTarget(idx: integer);', @Lape_SetImageTarget);
 AddGlobalFunc('procedure SetKeyMouseTarget(idx: integer);', @Lape_SetKeyMouseTarget);
 AddGlobalFunc('function GetImageTarget: integer', @Lape_GetImageTarget);
