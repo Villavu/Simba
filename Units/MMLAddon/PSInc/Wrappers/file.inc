@@ -106,34 +106,19 @@ begin
   Result := CurrThread.Client.MFiles.DeleteFile(Filename);
 end;
 
-procedure ps_WriteINI(const Section, KeyName, NewString, FileName: string);extdecl;
-var
-  tempini : TIniFile;
+procedure ps_WriteINI(const Section, KeyName, NewString : string; FileName: string);extdecl;
 begin;
-  tempini := TIniFile.Create(UTF8ToSys(FileName),True);
-  tempini.WriteString(Section,keyname,newstring);
-  tempini.free;
+  CurrThread.Client.MFiles.WriteINI(Section, KeyName, NewString, FileName);
 end;
 
-function ps_ReadINI(const Section, KeyName, FileName: string): string;extdecl;
-var
-  tempini : TIniFile;
+function ps_ReadINI(const Section, KeyName : string; FileName: string): string;extdecl;
 begin;
-  tempini := TIniFile.Create(UTF8ToSys(FileName),True);
-  Result := tempini.ReadString(section,keyname,'');
-  tempini.free;
+  result := CurrThread.Client.MFiles.ReadINI(Section, KeyName, FileName);
 end;
 
-procedure ps_DeleteINI(const Section, KeyName, FileName: string); extdecl;
-var
-  tempini : TIniFile;
+procedure ps_DeleteINI(const Section, KeyName : string; FileName: string); extdecl;
 begin;
-  tempini := TIniFile.Create(utf8tosys(FileName),True);
-  if KeyName = '' then
-    tempini.EraseSection(Section)
-  else
-    Tempini.DeleteKey(section,keyname);
-  tempini.free;
+  CurrThread.Client.MFiles.DeleteINI(Section, KeyName, FileName);
 end;
 
 function ps_ExtractFileExt(const FileName: string): string; extdecl;
