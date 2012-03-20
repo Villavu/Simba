@@ -77,3 +77,8 @@ procedure Lape_CreateDTMPoint(const Params: PParamArray; const Result: Pointer);
 begin
   PMDTMPoint(Result)^ := ps_CreateDTMPoint(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pboolean(Params^[5])^);
 end;
+
+procedure Lape_DTMExists(const Params : PParamArray; const Result : Pointer);
+begin
+  PBoolean(Result)^ := ps_DTMExists(PLongInt(Params^[0])^);
+end;

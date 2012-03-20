@@ -35,6 +35,7 @@ AddGlobalFunc('procedure FreeDTM(DTM: Integer);', @Lape_FreeDTM);
 //AddGlobalFunc('function GetDTM(index: Integer): TMDTM', @Lape_GetDTM);
 AddGlobalFunc('function AddSDTM(const d: TSDTM): Integer', @Lape_AddTSDTM);
 //AddGlobalFunc('function AddDTM(const d: TMDTM): Integer', @Lape_AddDTM);
+AddGlobalFunc('function DTMExists(index : integer) : boolean', @Lape_DTMExists);
 //AddGlobalFunc('procedure PrintDTM(const aDTM: TMDTM);', @Lape_PrintDTM);
 //AddGlobalFunc('function MDTMToSDTM(Const DTM: TMDTM): TSDTM', @Lape_MDTMToSDTM);
 //AddGlobalFunc('function SDTMToMDTM(Const DTM: TSDTM): TMDTM', @Lape_SDTMToMDTM);
