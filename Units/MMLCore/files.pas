@@ -47,6 +47,9 @@ type
     function AppendFile(Path: string): Integer;
     function DeleteFile(Filename: string): Boolean;
     procedure CloseFile(FileNum: Integer);
+	procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
+    function ReadINI(const Section, KeyName : string; FileName : string) : string;
+    procedure DeleteINI(const Section, KeyName : string; FileName : string);
     function EndOfFile(FileNum: Integer): Boolean;
     function FileSizeMuf(FileNum: Integer): LongInt;
     function ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
@@ -296,6 +299,84 @@ begin
   except
     Result := File_AccesError;
     TClient(Client).Writeln(Format('AppendFile - Exception. Could not create file: %s',[path]));
+  end;
+end;
+
+{/\
+  Reads key from INI file
+/\}
+
+function TMFiles.ReadINI(const Section, KeyName: string; FileName: string): string;
+var
+  Continue : boolean;
+begin
+  FileName := ExpandFileNameUTF8(FileName);
+  
+  if Assigned(OpenFileEvent) then
+  begin
+    Continue := True;
+    OpenFileEvent(Self, FileName, Continue);
+    if not Continue then
+	  exit('');
+  end;
+  with TINIFile.Create(FileName, True) do
+    try
+      Result := ReadString(Section, KeyName, '');
+    finally
+      Free;
+  end;
+end;
+
+{/\
+  Deletes a key from INI file
+/\}
+
+procedure TMFiles.DeleteINI(const Section, KeyName : string; FileName : string);
+var	
+  Continue : boolean;
+begin; 
+  FileName := ExpandFileNameUTF8(FileName);
+  
+  if Assigned(WriteFileEvent) then
+  begin
+    Continue := True;
+    WriteFileEvent(Self, FileName, Continue);
+    if not Continue then
+      exit;
+  end;
+  with TIniFile.Create(FileName, True) do
+    try
+      if KeyName = '' then
+	    EraseSection(Section)
+	  else
+		DeleteKey(Section, KeyName);
+    finally
+      Free;
+  end;
+end;
+
+{/\
+  Writes a key to INI file
+/\}
+
+procedure TMFiles.WriteINI(const Section, KeyName, NewString : string; FileName : string);
+var
+  Continue : boolean;
+begin;
+  FileName := ExpandFileNameUTF8(FileName);
+  
+  if Assigned(WriteFileEvent) then
+  begin
+    Continue := True;
+    WriteFileEvent(Self, FileName, Continue);
+    if not Continue then
+      exit;
+  end;
+  with TINIFile.Create(FileName, True) do
+    try
+	  WriteString(Section, KeyName, NewString);
+    finally
+	  Free;
   end;
 end;
 

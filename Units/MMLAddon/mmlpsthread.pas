@@ -415,7 +415,7 @@ procedure TMThread.SetWriteFileEvent(const AValue: TWriteFileEvent);
 begin
   FWriteFileEvent:= AValue;
   if Assigned(Client) then
-    self.Client.MFiles.WriteFileEvent := AValue;;
+    self.Client.MFiles.WriteFileEvent := AValue;
 end;
 
 procedure TMThread.FormCallBackEx(cmd: integer; var data: pointer);
