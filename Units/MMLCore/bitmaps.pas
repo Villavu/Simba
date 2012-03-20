@@ -114,6 +114,7 @@ type
     function GetBMP(Index : integer) : TMufasaBitmap;
     property Bmp[Index : integer]: TMufasaBitmap read GetBMP; default;
     function CreateBMP(w, h: integer): Integer;
+	function ExistsBMP(Index : integer) : boolean;
     function AddBMP(_bmp: TMufasaBitmap): Integer;
     function CopyBMP( Bitmap : integer) : Integer;
     function CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer;
@@ -407,6 +408,13 @@ end;
 function HexToInt(HexNum: string): LongInt;inline;
 begin
    Result:=StrToInt('$' + HexNum);
+end;
+
+function TMBitmaps.ExistsBMP(Index : integer) : boolean;
+begin
+  result := false;
+  if (Index >= 0) and (Index <= BmpsCurr) then
+      result := Assigned(BmpArray[Index]);
 end;
 
 function TMBitmaps.CreateBMPFromString(width, height: integer; Data: string): integer;

@@ -267,3 +267,8 @@ procedure Lape_CalculatePixelToleranceTPA(const Params: PParamArray; const Resul
 begin
   Pextended(Result)^ := ps_CalculatePixelToleranceTPA(PInteger(Params^[0])^, PInteger(Params^[1])^, PPointArray(Params^[2])^, Pinteger(Params^[3])^);
 end;
+
+procedure Lape_BitmapExists(const Params : PParamArray; const Result : Pointer);
+begin
+  PBoolean(Result)^ := ps_BitmapExists(PLongInt(Params^[0])^);
+end;
