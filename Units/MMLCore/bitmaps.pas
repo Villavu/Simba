@@ -414,7 +414,7 @@ function TMBitmaps.ExistsBMP(Index : integer) : boolean;
 begin
   result := false;
   if (Index >= 0) and (Index <= BmpsCurr) then
-      result := BmpArray[Index] <> nil;
+      result := Assigned(BmpArray[Index]);
 end;
 
 function TMBitmaps.CreateBMPFromString(width, height: integer; Data: string): integer;
