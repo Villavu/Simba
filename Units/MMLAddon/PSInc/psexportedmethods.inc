@@ -43,6 +43,7 @@ AddFunction(@ps_FindDTMsRotatedSE, 'function FindDTMsRotatedSE(DTM: Integer; var
 AddFunction(@ps_FindDTMsRotatedAlternating, 'function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
 AddFunction(@ps_addDTM, 'function AddMDTM(const d: TMDTM): Integer;');
 AddFunction(@ps_addDTM, 'function AddDTM(const d: TMDTM): Integer;');
+AddFunction(@ps_DTMExists, 'function DTMExists(index : integer) : boolean;');
 AddFunction(@ps_addTSDTM, 'function AddSDTM(const d: TSDTM): Integer;');
 AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer) : TMDTM');
 AddFunction(@ps_SDTMToMDTM, 'function SDTMToMDTM(Const DTM: TSDTM): TMDTM;');
