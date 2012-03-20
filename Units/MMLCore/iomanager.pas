@@ -147,9 +147,9 @@ interface
       GetMousePosition: procedure(target: pointer; var x,y: integer); stdcall;
       MoveMouse: procedure(target: pointer; x,y: integer); stdcall;
       ScrollMouse: procedure(target : pointer; x,y : integer; lines : integer); stdcall;
-      HoldMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
-      ReleaseMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
-      IsMouseButtonHeld : function  (target : pointer; left : Boolean) : boolean; stdcall;
+      HoldMouse: procedure(target: pointer; x,y: integer; button: integer); stdcall;
+      ReleaseMouse: procedure(target: pointer; x,y: integer; button: integer); stdcall;
+      IsMouseButtonHeld : function  (target : pointer; button: integer): boolean; stdcall;
 
       SendString: procedure(target: pointer; str: PChar; keywait, keymodwait: integer); stdcall;
       HoldKey: procedure(target: pointer; key: integer); stdcall;
@@ -882,9 +882,9 @@ begin
   if Pointer(client.HoldMouse) <> nil then
   begin
     case button of
-      mouse_Left:   client.HoldMouse(target,x,y,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right:  client.HoldMouse(target,x,y,false);
+      mouse_Left:   client.HoldMouse(target,x,y,1);
+      mouse_Middle: client.HoldMouse(target,x,y,2);
+      mouse_Right:  client.HoldMouse(target,x,y,3);
     end;
   end else
     inherited HoldMouse(x,y,button);
@@ -894,9 +894,9 @@ begin
   if Pointer(client.ReleaseMouse) <> nil then
   begin
     case button of
-      mouse_Left:   client.ReleaseMouse(target,x,y,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right:  client.ReleaseMouse(target,x,y,false);
+      mouse_Left:   client.ReleaseMouse(target,x,y,1);
+      mouse_Middle: client.ReleaseMouse(target,x,y,2);
+      mouse_Right:  client.ReleaseMouse(target,x,y,3);
     end;
   end else
     inherited ReleaseMouse(x,y,button);
@@ -907,9 +907,9 @@ begin
   if Pointer(client.IsMouseButtonHeld) <> nil then
   begin
     case button of
-      mouse_Left:  result := client.IsMouseButtonHeld(target,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right: result := client.IsMouseButtonHeld(target,false);
+      mouse_Left:  result := client.IsMouseButtonHeld(target,1);
+      mouse_Middle: result := client.IsMouseButtonHeld(target,2);
+      mouse_Right: result := client.IsMouseButtonHeld(target,3);
     end;
   end else
     result := inherited IsMouseButtonHeld(button);
