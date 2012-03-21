@@ -138,12 +138,12 @@ begin
   PLongInt(Result)^ := ps_GetProcessID();
 end;
 
-//procedure Lape_GetProcesses(const Params: PParamArray; const Result: Pointer);
-//begin
-//  PSysProcArr(Result)^ := ps_GetProcesses();
-//end;
-//
-//procedure Lape_SetTarget(const Params: PParamArray);
-//begin
-//  ps_SetTarget(PSysProc(Params^[0])^);
-//end;
+procedure Lape_GetProcesses(const Params: PParamArray; const Result: Pointer);
+begin
+  PSysProcArr(Result)^ := ps_GetProcesses();
+end;
+
+procedure Lape_SetTarget(const Params: PParamArray);
+begin
+  ps_SetTarget(PSysProc(Params^[0])^);
+end;
