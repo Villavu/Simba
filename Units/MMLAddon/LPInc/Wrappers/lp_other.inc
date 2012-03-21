@@ -133,6 +133,11 @@ begin
   Pstring(Result)^ := ps_GetClipBoard();
 end;
 
+procedure Lape_GetProcessID(const Params : PParamArray; const Result : Pointer);
+begin
+  PLongInt(Result)^ := ps_GetProcessID();
+end;
+
 //procedure Lape_GetProcesses(const Params: PParamArray; const Result: Pointer);
 //begin
 //  PSysProcArr(Result)^ := ps_GetProcesses();
