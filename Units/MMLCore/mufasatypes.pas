@@ -128,6 +128,8 @@ type
     Width, Height: integer;
   end;
   TSysProcArr = array of TSysProc;
+  PSysProcArr = ^TSysProcArr;
+  PSysProc = ^TSysProc;
 
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
