@@ -8,7 +8,7 @@ procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 
 implementation
 uses
-  SynRegExpr,bitmaps,dtm,mufasatypes,client,ocr,lcltype,classes,finder,files,iomanager,settingssandbox,
+  SynRegExpr,bitmaps,dtm,mufasatypes,client,ocr,lcltype,classes,finder,files,iomanager,settingssandbox,mayatimer,
   {$IFDEF MSWINDOWS} os_windows {$ENDIF}
   {$IFDEF LINUX} os_linux {$ENDIF};
 
@@ -101,6 +101,15 @@ function TIOManagerCreate(plugin_dir : string) : TIOManager; begin result := TIO
 function TIOManager_AbstractCreate(plugin_dir : string) : TIOManager_Abstract; begin result := TIOManager_Abstract.Create(plugin_dir); end;
 Function TIOManagerSetTarget_P(Self: TIOManager;  target : TNativeWindow) : integer;Begin Result := Self.SetTarget(target); END;
 procedure TMufasaBitmapCopyClientToBitmap(Self : TMufasaBitmap; MWindow : TObject; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);begin self.CopyClientToBitmap(MWindow,Resize,x,y,xs,ys,xe,ye); end;
+{ TMayaTimer }
+procedure TMayaTimer_ReadEnabled(Self: TMayaTimer; var Enabled: Boolean); begin Enabled := Self.Enabled; end;
+procedure TMayaTimer_SetEnabled(Self: TMayaTimer; const Enabled: Boolean); begin Self.Enabled := Enabled; end;
+procedure TMayaTimer_ReadInterval(Self: TMayaTimer; var Interval: Integer); begin Interval := Self.Interval; end;
+procedure TMayaTimer_SetInterval(Self: TMayaTimer; const Interval: Integer); begin Self.Interval := Interval; end;
+procedure TMayaTimer_ReadThreadPriority(Self: TMayaTimer; var ThreadPriority: TThreadPriority); begin ThreadPriority := Self.ThreadPriority; end;
+procedure TMayaTimer_SetThreadPriority(Self: TMayaTimer; const ThreadPriority: TThreadPriority); begin Self.ThreadPriority := ThreadPriority; end;
+procedure TMayaTimer_ReadOnTimer(Self: TMayaTimer; var OnTimer: TNotifyEvent); begin OnTimer := Self.OnTimer; end;
+procedure TMayaTimer_SetOnTimer(Self: TMayaTimer; const OnTimer: TNotifyEvent); begin Self.OnTimer := OnTimer; end;
 
 procedure RIRegister_TMufasaBitmap(cl : TPSRuntimeClassImporter);
 begin
@@ -449,6 +458,22 @@ begin
   end;
 end;
 
+procedure RIRegister_TMayaTimer(CL: TPSRuntimeClassImporter);
+begin
+  with cl.Add(TMayaTimer) do
+  begin
+    RegisterConstructor(@TMayaTimer.Create, 'Create');
+  end;
+ { with CL.Add(TMayaTimer) do
+  begin
+    RegisterPropertyHelper(@TMayaTimer_ReadEnabled, @TMayaTimer_SetEnabled, 'Enabled');
+    RegisterPropertyHelper(@TMayaTimer_ReadInterval, @TMayaTimer_SetInterval, 'Interval');
+    RegisterPropertyHelper(@TMayaTimer_ReadOnTimer, @TMayaTimer_SetOnTimer, 'OnTimer');
+    RegisterPropertyHelper(@TMayaTimer_ReadThreadPriority, @TMayaTimer_SetThreadPriority, 'ThreadPriority');
+    RegisterConstructor(@TMayaTimer.Create, 'Create');
+  end;      }
+end;
+
 procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 begin;
   RIRegister_TMufasaBitmap(cl);
@@ -460,6 +485,7 @@ begin;
   RIRegister_TMBitmaps(cl);
   RIRegister_IOManager(cl);
   RIRegister_TClient(cl);
+  RIRegister_TMayaTimer(cl);
 end;
 
 end.
