@@ -42,7 +42,7 @@ uses
   {$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
-    lpeval, lpinterpreter
+    lpeval, lpinterpreter, lputils
   {$ENDIF};
 
 const
