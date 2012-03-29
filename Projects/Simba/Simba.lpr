@@ -29,7 +29,8 @@ program Simba;
 
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}cthreads, cmem,{$ENDIF}{$ENDIF}
-  Interfaces, Forms, SimbaUnit, colourhistory, About, debugimage, bitmapconv;
+  Interfaces, Forms, SimbaUnit, colourhistory, About, debugimage, bitmapconv,
+  dcpbase64;
 
 {$R Simba.res}
 
