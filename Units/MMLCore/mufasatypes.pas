@@ -79,6 +79,7 @@ type
   TMousePress = (mouse_Down, mouse_Up);
 
   TStringArray = array of String;
+  T2DStringArray = array of TStringArray;
   TPointArray = array of TPoint;
   T2DPointArray = array of TPointArray;
   TVariantArray = Array of Variant;
@@ -127,6 +128,8 @@ type
     Width, Height: integer;
   end;
   TSysProcArr = array of TSysProc;
+  PSysProcArr = ^TSysProcArr;
+  PSysProc = ^TSysProc;
 
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);

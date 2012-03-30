@@ -597,36 +597,40 @@ procedure TSimbaForm.CustomExceptionHandler(Sender: TObject; E: Exception);
   end;
 
 var
-  trace, logname: string;
-  LogFile: TFileStream;
+  Trace, LogName: string;
   MsgDlgRet: Integer;
 
 begin
-  writeln('');
-  Writeln('Something went wrong...');
-  writeln('');
-  trace := DumpExceptionCallStack(E);
-  trace := trace + LineEnding;
-  trace := trace + 'Simba Version: ' + IntToStr(SimbaVersion) + LineEnding;
+  WriteLn('');
+  WriteLn('Something went wrong...');
+  WriteLn('');
+  
+  Trace := DumpExceptionCallStack(E);
+  Trace += LineEnding + 'Simba Version: ' + IntToStr(SimbaVersion) + LineEnding;
 
-  logname := DataPath + 'log-' + DateTimeToStr(Now) + '.txt';
+  LogName := DataPath + 'ErrorLog_' + FormatDateTime('dd-mm-yy_hh-nn-ss', Now) + '.txt';
+  WriteLn(Format('Gonna try to save the error information to "%s".', [LogName]));
 
-  LogFile := TFileStream.Create(UTF8ToSys(logname), fmOpenReadWrite or
-          fmShareDenyWrite or fmShareDenyRead or fmCreate);
-
-  LogFile.Write(trace[1], Length(trace));
-  LogFile.Free;
-
+  try
+    with TFileStream.Create(UTF8ToSys(logname), fmOpenWrite or fmOpenReadWrite or fmCreate) do
+    try
+      Write(Trace[1], Length(Trace));
+    finally
+      Free;
+    end;
+  except
+    WriteLn(Format('Unable to save log file! [%s]', [LogName]));
+  end;
+  
   MsgDlgRet := mrOk;
   Application.DisableIdleHandler;
   try
      MsgDlgRet := MessageDlg('Something went wrong in Simba. ' +
      'If you press OK, Simba will try to save your scripts and then close. (Recommended) ' +
-     'See ' + logname + ' for more information.' , mtError, mbOKCancel, 0);
+     'See ' + LogName + ' for more information.' , mtError, mbOKCancel, 0);
   finally
     Application.EnableIdleHandler;
   end;
-  Writeln('Something went horribly wrong. See ' + logname + ' for more information');
 
   if MsgDlgRet = mrOK then
   begin
@@ -1806,13 +1810,12 @@ begin
   {$ENDIF}
   Thread.SetScript(Script);
 
-  Thread.ErrorData:= @CurrScript.ErrorData;
-  Thread.OnError:= @CurrScript.HandleErrorData;
-  FormCallBackData.FormCallBack:= @self.FormCallBack;
-  Thread.CallBackData:=@FormCallBackData;
+  Thread.ErrorData := @CurrScript.ErrorData;
+  Thread.OnError := @CurrScript.HandleErrorData;
+  FormCallBackData.FormCallBack := @self.FormCallBack;
+  Thread.CallBackData := @FormCallBackData;
 
-  if CurrScript.ScriptFile <> '' then
-    ScriptPath := IncludeTrailingPathDelimiter(ExtractFileDir(CurrScript.ScriptFile));
+  ScriptPath := CurrScript.ScriptFile;
 
   if DirectoryExists(SimbaSettings.Plugins.Path.Value) then
      PluginsGlob.AddPath(SimbaSettings.Plugins.Path.Value);
@@ -1823,8 +1826,7 @@ begin
     if FirstRun then
       FormWritelnEx('Warning: The font directory specified in the Settings isn''t valid. Can''t load fonts now');
 
-  Thread.SetPaths(AppPath, DocPath, SimbaSettings.Scripts.Path.Value, SimbaSettings.Includes.Path.Value,
-      SimbaSettings.Plugins.Path.Value, SimbaSettings.Fonts.Path.Value);
+  Thread.SetPath(ScriptPath);
 
   if selector.haspicked then
     Thread.Client.IOManager.SetTarget(Selector.LastPick);

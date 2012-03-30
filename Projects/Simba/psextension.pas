@@ -195,6 +195,9 @@ end;
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colour.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colourconv.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/math.inc}
+{$IFDEF USE_SQLITE}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/ps_sqlite3.inc}
+{$ENDIF}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/mouse.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/file.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/keyboard.inc}
@@ -273,7 +276,7 @@ end;
 
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 var
-  ScriptPath: string;
+  ScriptPath, ScriptFile: string;
   i: Integer;
 begin
   SIRegister_Std(x);
@@ -287,7 +290,8 @@ begin
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
 
-  ScriptPath := ExtractFileDir(Filename);
+  ScriptPath := IncludeTrailingPathDelimiter(ExpandFileName(ExtractFileDir(Filename)));
+  ScriptFile := ExtractFileName(Filename);
   with SimbaForm,x do
   begin
     {$I ../../Units/MMLAddon/PSInc/pscompile.inc}

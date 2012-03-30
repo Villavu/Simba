@@ -15,7 +15,7 @@ end;
 
 procedure RUTIS_ps_SetEIOSTarget(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
-  Pinteger(Result^.Data)^ := ps_SetEIOSTarget(Pstring(Params^[0].Data)^, PVariant(Params^[1].Data)^);
+  Pinteger(Result^.Data)^ := ps_SetEIOSTarget(Pstring(Params^[0].Data)^, Pstring(Params^[1].Data)^);
 end;
 
 procedure RUTIS_ps_SetImageTarget(Params: PRutisParamInfoArray; Result: PRutisParamInfo);

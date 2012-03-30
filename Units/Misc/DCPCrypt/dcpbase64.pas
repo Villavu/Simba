@@ -24,6 +24,12 @@
 {******************************************************************************}
 unit DCPbase64;
 
+{$mode delphi}
+//{$mode objfpc}{$H+}
+// mode objfpc works fine too, as far as I can see.
+// But let's keep it at delphi for now?
+// Wizz: March 30, 2012. After fixing a silly bug. Commit msg: BAZINGA
+
 interface
 uses
   Sysutils;
@@ -41,7 +47,6 @@ function Base64Decode(pInput: pointer; pOutput: pointer; Size: longint): longint
 {******************************************************************************}
 {******************************************************************************}
 implementation
-{$Q-}{$R-}
 
 const
   B64: array[0..63] of byte= (65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,

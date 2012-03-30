@@ -43,6 +43,7 @@ AddFunction(@ps_FindDTMsRotatedSE, 'function FindDTMsRotatedSE(DTM: Integer; var
 AddFunction(@ps_FindDTMsRotatedAlternating, 'function FindDTMsRotatedAlternating(DTM: Integer; var Points: TPointArray; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray) : Boolean;');
 AddFunction(@ps_addDTM, 'function AddMDTM(const d: TMDTM): Integer;');
 AddFunction(@ps_addDTM, 'function AddDTM(const d: TMDTM): Integer;');
+AddFunction(@ps_DTMExists, 'function DTMExists(index : integer) : boolean;');
 AddFunction(@ps_addTSDTM, 'function AddSDTM(const d: TSDTM): Integer;');
 AddFunction(@ps_GetDTM ,'function GetDTM(index: Integer) : TMDTM');
 AddFunction(@ps_SDTMToMDTM, 'function SDTMToMDTM(Const DTM: TSDTM): TMDTM;');
@@ -124,7 +125,7 @@ AddFunction(@ps_GetClientDimensions, 'procedure GetClientDimensions(var w, h:int
 AddFunction(@ps_GetClientPosition, 'procedure GetClientPosition(var left, top:integer);');
 AddFunction(@ps_SetTargetBitmap,'function SetTargetBitmap(Bitmap : integer): integer;');
 AddFunction(@ps_SetTargetArray, 'function SetTargetArray(P: Integer; w, h: integer): integer;');
-AddFunction(@ps_SetEIOSTarget, 'function SetEIOSTarget(name: string; initargs: Variant): integer;');
+AddFunction(@ps_SetEIOSTarget, 'function SetEIOSTarget(name, initargs: String): integer;');
 AddFunction(@ps_SetImageTarget,'procedure SetImageTarget(idx: integer);');
 AddFunction(@ps_SetKeyMouseTarget,'procedure SetKeyMouseTarget(idx: integer);');
 AddFunction(@ps_GetImageTarget,'function GetImageTarget: integer;');
@@ -205,6 +206,7 @@ AddFunction(@ps_MessageDlg,'function MessageDlg(const Caption, Msg: string; DlgT
 AddFunction(@ps_SetClipBoard, 'procedure SetClipBoard(const Data: string);');
 AddFunction(@ps_GetClipBoard, 'function GetClipBoard: string;');
 AddFunction(@ps_GetProcesses, 'function GetProcesses: TSysProcArr;');
+AddFunction(@ps_GetProcessID, 'function GetProcessID : LongInt;');
 AddFunction(@ps_SetTarget, 'procedure SetTarget(Proc: TSysProc);');
 {$ENDIF}
 
@@ -405,6 +407,7 @@ AddFunction(@ps_GetMufasaBitmap,'function GetMufasaBitmap(bmp : integer) : TMufa
 AddFunction(@ps_CreateBitmap,'function CreateBitmap(w,h :integer) : integer;');
 AddFunction(@ps_FreeBitmap,'procedure FreeBitmap(Bmp : integer);');
 AddFunction(@ps_SaveBitmap,'procedure SaveBitmap(Bmp : integer; path : string);');
+AddFunction(@ps_BitmapExists, 'function BitmapExists(Index : integer) : boolean;');
 AddFunction(@ps_BitmapFromString,'function BitmapFromString(Width,Height : integer; Data : string): integer;');
 AddFunction(@ps_LoadBitmap,'function LoadBitmap(Path : string) : integer;');
 AddFunction(@ps_SetBitmapSize,'procedure SetBitmapSize(Bmp,NewW,NewH : integer);');
@@ -553,6 +556,23 @@ AddFunction(@ps_offsetTPA,'procedure OffsetTPA(var TPA : TPointArray; const Offs
 AddFunction(@ps_offsetATPA,'procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);');
 AddFunction(@ps_copyTPA,'function CopyTPA(const TPA : TPointArray) : TPointArray;');
 AddFunction(@ps_CopyATPA,'function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;');
+
+{SQLite3}
+
+{$IFDEF USE_SQLITE}
+SetCurrSection('SQLite3');
+AddFunction(@ps_sqlite_version, 'function sqlite_version() : string;');
+AddFunction(@ps_sqlite_version_num, 'function sqlite_version_num() : integer;');
+AddFunction(@ps_sqlite_escape, 'function sqlite_escape(s : string) : string;');
+AddFunction(@ps_sqlite_close, 'procedure sqlite_close(index : integer);');
+AddFunction(@ps_sqlite_open, 'function sqlite_open(filename : string) : integer;');
+AddFunction(@ps_sqlite_open_v2, 'function sqlite_open_v2(filename : string; flags : integer) : integer;');
+AddFunction(@ps_sqlite_errmsg, 'function sqlite_errMsg(index : integer) : string;');
+AddFunction(@ps_sqlite_errcode, 'function sqlite_errCode(index : integer) : integer;');
+AddFunction(@ps_sqlite_query, 'function sqlite_query(index : integer; sql : string) : boolean;');
+AddFunction(@ps_sqlite_queryvalue, 'function sqlite_queryValue(index : integer; sql : string; out Data : T2DStringArray) : boolean;');
+AddFunction(@ps_sqlite_queryresult, 'function sqlite_queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;');
+{$ENDIF}
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 SetCurrSection('Settings');

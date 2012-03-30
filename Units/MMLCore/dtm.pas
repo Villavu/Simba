@@ -67,6 +67,7 @@ type
     public
       function AddDTM(const d: TSDTM): Integer;overload;
       function AddDTM(const d: TMDTM): Integer;overload;
+	  function ExistsDTM(index : integer) : boolean;
       function GetDTM(index: Integer) :TMDTM;
       procedure FreeDTM(DTM: Integer);
       function StringToDTM(const S: String): Integer;
@@ -188,6 +189,13 @@ begin
   DTMList[Result] := d;
   DTMList[Result].Index:= Result;
   DTMList[result].Normalize;
+end;
+
+function TMDTMS.ExistsDTM(index : integer) : boolean;
+begin
+  result := false;
+  if (index >= 0) and (index <= High(DTMList)) then
+    result := Assigned(DTMList[index]);
 end;
 
 {/\

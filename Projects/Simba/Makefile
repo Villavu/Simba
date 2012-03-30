@@ -60,7 +60,8 @@ CC := fpc
 build := $(CC)
 
 # -Xd doesn't seem to cause problems when not cross-compiling, and is needed when cross-compiling, so I'm leaving it here
-common_flags := -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu. -dM_MEMORY_DEBUG -dLCL
+# -Xg = External debug file (Simba.dbg)
+common_flags := -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu. -dM_MEMORY_DEBUG -dLCL -Xg
 units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/ -Fu../../Units/lape -Fu../../Units/Misc/DCPCrypt -Fu../../Units/Misc/DCPCrypt/Ciphers -Fu../../Units/Misc/DCPCrypt/Hashes
 
 binary := Simba.$(platform)
@@ -101,7 +102,7 @@ ifdef distrib
 	#mv ../../Plugins ../../Plugins_bak
 	#mkdir -p ../../Plugins
 	#cp $(plugins_dir)/$(platform)/* ../../Plugins/
-	7z a ../../$(binary).7z $(binary)$(binary_extension) ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts
+	7z a ../../$(binary).7z $(binary)$(binary_extension) ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
 # now undo everything we did above
 	#rm -rf ../../Plugins
 	#mv ../../Plugins_bak ../../Plugins
@@ -111,15 +112,19 @@ endif
 
 i386-linux:
 	$(MAKE) recursive_build platform="i386-linux" widgetset="gtk2" platform_flags="-Tlinux -Pi386 -dUseCThreads"
+	mv Simba.dbg Simba.i386-linux.dbg
 
 x86_64-linux:
 	$(MAKE) recursive_build platform="x86_64-linux" widgetset="gtk2" platform_flags="-Tlinux -Px86_64 -dUseCThreads"
+	mv Simba.dbg Simba.x86_64-linux.dbg
 
 i386-win32:
 	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" platform_flags="-Twin32 -Pi386"
+	# Windows already names the .dbg properly...
 
 x86_64-win64:
 	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" platform_flags="-Twin64 -Px86_64"
+	# Windows already names the .dbg properly...
 
 all: i386-linux x86_64-linux i386-win32 x86_64-win64
 
@@ -131,7 +136,7 @@ all-in-one-distrib: all
 	#mv ../../Plugins ../../Plugins_bak
 	#mkdir -p ../../Plugins
 	#cp $(plugins_dir)/all-in-one/* ../../Plugins/
-	7z a ../../Simba.all-in-one.7z Simba.i386-* Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts
+	7z a ../../Simba.all-in-one.7z Simba.i386-* Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
 # now undo everything we did above
 	#rm -rf ../../Plugins
 	#mv ../../Plugins_bak ../../Plugins
