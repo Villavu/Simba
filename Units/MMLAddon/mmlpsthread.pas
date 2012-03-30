@@ -33,15 +33,16 @@ interface
 
 uses
   Classes, SysUtils, client, uPSComponent, uPSCompiler, PSDump,
-  uPSRuntime, uPSPreProcessor,MufasaTypes,MufasaBase, web, fontloader,
-  bitmaps, plugins, dynlibs,internets,scriptproperties,
+  uPSRuntime, uPSPreProcessor, MufasaTypes, MufasaBase, web, fontloader,
+  bitmaps, plugins, dynlibs, internets,scriptproperties,
   settings, settingssandbox, lcltype, dialogs
+  {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_RUTIS}
   , Rutis_Engine, Rutis_Defs
   {$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
-    lpeval, lpinterpreter
+    lpeval, lpinterpreter, lputils
   {$ENDIF};
 
 const
@@ -119,7 +120,7 @@ type
       procedure SetOpenFileEvent(const AValue: TOpenFileEvent);
       procedure SetWriteFileEvent(const AValue: TWriteFileEvent);
     protected
-      AppPath, DocPath, ScriptPath, IncludePath, PluginPath, FontPath: string;
+      AppPath, DocPath, ScriptPath, ScriptFile, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
       ExportedMethods : TExpMethodArr;
       Includes : TStringList;
@@ -130,10 +131,11 @@ type
 
     public
       Prop: TScriptProperties;
-      Client : TClient;
-      MInternet : TMInternet;
+      Client: TClient;
+      MInternet: TMInternet;
       Socks: TSocks;
-      StartTime : LongWord;
+      {$IFDEF USE_SQLITE}SQLite3: TMSQLite3;{$ENDIF}
+      StartTime: LongWord;
       Settings: TMMLSettings;
       SimbaSettingsFile: String;
       Sett: TMMLSettingsSandbox;
@@ -156,7 +158,7 @@ type
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
-      procedure SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
+      procedure SetPath(ScriptP: string);
       procedure SetSettings(S: TMMLSettings; SimbaSetFile: String);
       procedure SetFonts(Fonts: TMFonts); virtual;
 
@@ -352,6 +354,7 @@ end;
 constructor TMThread.Create(CreateSuspended: boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 begin
   inherited Create(CreateSuspended);
+
   Client := TClient.Create(plugin_dir);
   if Assigned(WriteFileEvent) then
     Client.MFiles.WriteFileEvent := WriteFileEvent;
@@ -359,6 +362,9 @@ begin
     Client.MFiles.OpenFileEvent := OpenFileEvent;
   MInternet := TMInternet.Create(Client);
   Socks := TSocks.Create(Client);
+  {$IFDEF USE_SQLITE}
+  SQLite3 := TMSQLite3.Create(Client);
+  {$ENDIF}
   if Assigned(OpenConnectionEvent) then
     MInternet.OpenConnectionEvent := Self.OpenConnectionEvent;
   SyncInfo:= TheSyncInfo;
@@ -368,16 +374,23 @@ begin
   OnTerminate := @OnThreadTerminate;
   OnError:= nil;
   Includes := TStringList.Create;
-  Includes.CaseSensitive:= {$ifdef linux}true{$else}false{$endif};
+  Includes.CaseSensitive := {$ifdef linux}true{$else}false{$endif};
   Sett := nil;
 
   Prop := TScriptProperties.Create;
+
+  AppPath := Application.Location;
+  DocPath := SimbaSettings.Scripts.Path.Value;
+  IncludePath := SimbaSettings.Includes.Path.Value;
+  PluginPath := SimbaSettings.Plugins.Path.Value;
+  FontPath := SimbaSettings.Fonts.Path.Value;
 end;
 
 destructor TMThread.Destroy;
 begin
   MInternet.Free;
   Socks.Free;
+  {$IFDEF USE_SQLITE}SQLite3.Free;{$ENDIF}
   Client.Free;
   Includes.free;
   Prop.Free;
@@ -404,7 +417,7 @@ procedure TMThread.SetWriteFileEvent(const AValue: TWriteFileEvent);
 begin
   FWriteFileEvent:= AValue;
   if Assigned(Client) then
-    self.Client.MFiles.WriteFileEvent := AValue;;
+    self.Client.MFiles.WriteFileEvent := AValue;
 end;
 
 procedure TMThread.FormCallBackEx(cmd: integer; var data: pointer);
@@ -565,14 +578,10 @@ begin
   Self.Sett.prefix := 'Scripts/';
 end;
 
-procedure TMThread.SetPaths(AppP, DocP, ScriptP, IncludeP, PluginP, FontP: string);
+procedure TMThread.SetPath(ScriptP: string);
 begin
-  AppPath := AppP;
-  DocPath := DocP;
-  ScriptPath := ScriptP;
-  IncludePath := IncludeP;
-  PluginPath := PluginP;
-  FontPath := FontP;
+  ScriptPath := IncludeTrailingPathDelimiter(ExpandFileName(ExtractFileDir(ScriptP)));
+  ScriptFile := ExtractFileName(ScriptP);
 end;
 
 procedure TMThread.SetFonts(Fonts: TMFonts);
@@ -613,7 +622,9 @@ end;
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
 {$I PSInc/Wrappers/math.inc}
-
+{$IFDEF USE_SQLITE}
+{$I PSInc/Wrappers/ps_sqlite3.inc}
+{$ENDIF}
 {$I PSInc/Wrappers/mouse.inc}
 {$I PSInc/Wrappers/file.inc}
 {$I PSInc/Wrappers/keyboard.inc}
@@ -1342,17 +1353,17 @@ end;
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}
-
 {$I LPInc/Wrappers/lp_colour.inc}
 {$I LPInc/Wrappers/lp_colourconv.inc}
 {$I LPInc/Wrappers/lp_crypto.inc}
 {$I LPInc/Wrappers/lp_math.inc}
-
+{$IFDEF USE_SQLITE}
+{$I LPInc/Wrappers/lp_sqlite3.inc}
+{$ENDIF}
 {$I LPInc/Wrappers/lp_mouse.inc}
 {$I LPInc/Wrappers/lp_file.inc}
 {$I LPInc/Wrappers/lp_keyboard.inc}
 {$I LPInc/Wrappers/lp_dtm.inc}
-{.$I LPInc/Wrappers/extensions.inc} //Doesn't work for me!
 {$I LPInc/Wrappers/lp_ocr.inc}
 {$I LPInc/Wrappers/lp_internets.inc}
 
@@ -1376,15 +1387,15 @@ begin
 
     StartImporting;
 
+    {$I LPInc/lpdefines.inc}
+    {$I LPInc/lpcompile.inc}
+
     addGlobalFunc('procedure _write(s: string); override;', @lp_Write);
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
 
     for I := 0 to High(VirtualKeys) do
-      addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str]));
-
-    {$I LPInc/lpdefines.inc}
-    {$I LPInc/lpcompile.inc}
+      addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
 
@@ -1430,7 +1441,8 @@ end;
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
 begin
   Result := nil;
-  FileName := IncludePath + FileName;
+  if (not FindFile(FileName, [IncludeTrailingPathDelimiter(ExtractFileDir(Sender.Tokenizer.FileName)), IncludePath, ScriptPath])) then
+    FileName := '';
 end;
 
 function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
