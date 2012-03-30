@@ -25,6 +25,10 @@
 unit DCPbase64;
 
 {$mode delphi}
+//{$mode objfpc}{$H+}
+// mode objfpc works fine too, as far as I can see.
+// But let's keep it at delphi for now?
+// Wizz: March 30, 2012. After fixing a silly bug. Commit msg: BAZINGA
 
 interface
 uses
