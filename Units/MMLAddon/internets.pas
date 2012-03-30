@@ -224,6 +224,8 @@ begin
   end;
   if not fHandleCookies then
     HTTPSend.Cookies.Clear;
+  HTTPSend.Headers.Clear;
+  HTTPSend.Document.Clear;
   if (ProxyHost <> '') and (ProxyPort <> '') then
   begin
     HTTPSend.ProxyHost := ProxyHost;
@@ -250,6 +252,7 @@ begin
     HTTPSend.ProxyHost := ProxyHost;
     HTTPSend.ProxyPort := ProxyPort;
   end;
+  HTTPSend.Headers.Clear;
   HTTPSend.MimeType := 'application/x-www-form-urlencoded';
   HTTPSend.Document.Clear;
   HTTPSend.Document.Write(Postdata[1],length(postdata));

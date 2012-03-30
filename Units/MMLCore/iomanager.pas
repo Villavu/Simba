@@ -135,7 +135,7 @@ interface
     | finalized that is. Trust me, its >9000 times easier to use a buffer across the language
     | barrier. And the internal target implementation of EIOS will make that verry efficient. }
     TEIOS_Client = record
-      RequestTarget: function(initdata: pointer): pointer; stdcall;
+      RequestTarget: function(initdata: PChar): pointer; stdcall;
       ReleaseTarget: procedure(target: pointer); stdcall;
 
       GetTargetDimensions: procedure(target: pointer; var w, h: integer); stdcall;
@@ -147,9 +147,9 @@ interface
       GetMousePosition: procedure(target: pointer; var x,y: integer); stdcall;
       MoveMouse: procedure(target: pointer; x,y: integer); stdcall;
       ScrollMouse: procedure(target : pointer; x,y : integer; lines : integer); stdcall;
-      HoldMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
-      ReleaseMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
-      IsMouseButtonHeld : function  (target : pointer; left : Boolean) : boolean; stdcall;
+      HoldMouse: procedure(target: pointer; x,y: integer; button: integer); stdcall;
+      ReleaseMouse: procedure(target: pointer; x,y: integer; button: integer); stdcall;
+      IsMouseButtonHeld : function  (target : pointer; button: integer): boolean; stdcall;
 
       SendString: procedure(target: pointer; str: PChar; keywait, keymodwait: integer); stdcall;
       HoldKey: procedure(target: pointer; key: integer); stdcall;
@@ -169,7 +169,7 @@ interface
 
     TEIOS_Target = class(TTarget)
       public
-        constructor Create(client: TEIOS_Client; initval: pointer);
+        constructor Create(client: TEIOS_Client; initval: String);
         destructor Destroy; override;
         
         procedure GetTargetDimensions(out w, h: integer); override;
@@ -195,13 +195,6 @@ interface
         buffer: prgb32;
         width,height: integer;
     end;
-      
-    { EIOS Clients will give an exported name, have a loaded library associated, and have
-    | a TEIOS_Client with the method pointers set. }
-    type TEIOS_LoadedPlugin = record
-      name: string;
-      client: TEIOS_Client;
-    end;
 
     { This is just a class that loads EIOS clients (like SMART) and sets them up to be used
     | as targets. I hope to have a method like... 
@@ -222,8 +215,8 @@ interface
       protected
         function InitPlugin(plugin: TLibHandle): boolean; override;
       private
-        plugs: array of TEIOS_LoadedPlugin;
-        function FindClient(name:string): integer;
+        clients: array of TEIOS_Client;
+        function FindClient(name: string): integer;
     end;
 
     {Basically like TEIOS_Client, only this is exported to some plugin, whilst TEIOS_Client is Imported
@@ -275,7 +268,7 @@ interface
         procedure SetDesktop; virtual; abstract;
         function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
         function SetTarget(bmp : TMufasaBitmap) : integer; overload;
-        function SetTarget(name: string; initargs: pointer): integer; overload;
+        function SetTarget(name, initargs: string): integer; overload;
         function TargetValid: Boolean;
         procedure BitmapDestroyed(Bitmap : TMufasaBitmap);
 
@@ -578,7 +571,7 @@ begin
   bmp.OnDestroy:= @BitmapDestroyed;
 end;
 
-function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer;
+function TIOManager_Abstract.SetTarget(name, initargs: String): integer;
 var
   client: TEIOS_Client;
 begin
@@ -811,11 +804,14 @@ end;
 
 //***implementation*** TEIOS_Target
 
-constructor TEIOS_Target.Create(client: TEIOS_Client; initval: pointer); begin
+constructor TEIOS_Target.Create(client: TEIOS_Client; initval: String); begin
   inherited Create;
   self.client:= client;
+  self.target:= nil;
   if Pointer(client.RequestTarget) <> nil then
-    self.target:= client.RequestTarget(initval);
+     self.target:= client.RequestTarget(PChar(initval));
+  if (self.target = nil) then
+    raise Exception.Create('Setting EIOS target failed.');
   if Pointer(client.GetImageBuffer) <> nil then
      self.buffer:= client.GetImageBuffer(target)
   else
@@ -886,9 +882,9 @@ begin
   if Pointer(client.HoldMouse) <> nil then
   begin
     case button of
-      mouse_Left:   client.HoldMouse(target,x,y,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right:  client.HoldMouse(target,x,y,false);
+      mouse_Left:   client.HoldMouse(target,x,y,1);
+      mouse_Middle: client.HoldMouse(target,x,y,2);
+      mouse_Right:  client.HoldMouse(target,x,y,3);
     end;
   end else
     inherited HoldMouse(x,y,button);
@@ -898,9 +894,9 @@ begin
   if Pointer(client.ReleaseMouse) <> nil then
   begin
     case button of
-      mouse_Left:   client.ReleaseMouse(target,x,y,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right:  client.ReleaseMouse(target,x,y,false);
+      mouse_Left:   client.ReleaseMouse(target,x,y,1);
+      mouse_Middle: client.ReleaseMouse(target,x,y,2);
+      mouse_Right:  client.ReleaseMouse(target,x,y,3);
     end;
   end else
     inherited ReleaseMouse(x,y,button);
@@ -911,9 +907,9 @@ begin
   if Pointer(client.IsMouseButtonHeld) <> nil then
   begin
     case button of
-      mouse_Left:  result := client.IsMouseButtonHeld(target,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right: result := client.IsMouseButtonHeld(target,false);
+      mouse_Left:  result := client.IsMouseButtonHeld(target,1);
+      mouse_Middle: result := client.IsMouseButtonHeld(target,2);
+      mouse_Right: result := client.IsMouseButtonHeld(target,3);
     end;
   end else
     result := inherited IsMouseButtonHeld(button);
@@ -1036,26 +1032,18 @@ end;
 
 destructor TEIOS_Controller.Destroy;
 begin
-  SetLength(plugs,0);
+  SetLength(clients,0);
   inherited Destroy;
 end;
 
 function TEIOS_Controller.InitPlugin(plugin: TLibHandle): boolean;
 var
-  GetName: procedure(name: pchar); stdcall;
-  buffer: pchar;
   idx: integer;
 begin
-  Pointer(GetName) := GetProcAddress(plugin, PChar('EIOS_GetName'));
-  if Pointer(GetName) = nil then begin result:= false; exit; end;
-  idx:= Length(plugs);
-  SetLength(plugs,idx+1);
-  buffer:= stralloc(255);
-  GetName(buffer);
-  plugs[idx].name:= buffer;
-  strdispose(buffer);
+  idx:= Length(clients);
+  SetLength(clients,idx+1);
   {link in all eios methods that *might* exist}
-  with plugs[idx].client do
+  with clients[idx] do
   begin
     Pointer(RequestTarget):= GetProcAddress(plugin, PChar('EIOS_RequestTarget'));
     Pointer(ReleaseTarget):= GetProcAddress(plugin, PChar('EIOS_ReleaseTarget'));
@@ -1084,8 +1072,7 @@ function TEIOS_Controller.FindClient(name: string): integer;
 var
   i: integer;
 begin
-  i:= LoadPlugin(name);
-  result:= -1;
+  result:= LoadPlugin(name);
 end;
 
 function TEIOS_Controller.ClientExists(name: string): boolean;
@@ -1099,7 +1086,7 @@ var
 begin
   i:= FindClient(name);
   if i >= 0 then
-    result:= plugs[i].client
+    result:= clients[i]
 end;
 
 //***implementation*** TEIS_Exported wrappers
