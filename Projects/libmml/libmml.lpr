@@ -23,7 +23,7 @@ Debatable:
 {$mode objfpc}{$H+}
 
 uses
-  cmem,Classes,interfaces,graphics,client,sysutils,MufasaTypes,dtmutil, dtm;
+  cmem,Classes,interfaces,graphics,client,sysutils,MufasaTypes, dtmutil, dtm;
 
 //{$R *.res}
 
@@ -199,7 +199,7 @@ end;
 
 {$I input.pas}
 {$I colour.pas}
-{$I dtm.pas}
+{$I dtmi.pas}
 
 
 (*
