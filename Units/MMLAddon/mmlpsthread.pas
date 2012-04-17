@@ -492,25 +492,29 @@ var
 
 begin
   Result := False;
-  if CompareText(DirectiveName,'LOADLIB') = 0 then
+
+  if (CompareText(DirectiveName,'LOADLIB') = 0) then
   begin
-    if not active then
-      exit(true);
-    if DirectiveArgs <> '' then
-    begin;
-      plugin_idx:= PluginsGlob.LoadPlugin(DirectiveArgs);
-      if plugin_idx < 0 then
-        psWriteln(Format('Your DLL %s has not been found',[DirectiveArgs]))
-      else
+    if (not (Active)) then
+      Exit(True);
+
+    if (DirectiveArgs <> '') then
+    begin
+      plugin_idx := PluginsGlob.LoadPlugin(DirectiveArgs);
+
+      if (plugin_idx >= 0) then
       begin
         LoadPlugin(plugin_idx);
-        Result:= True;
-      end;
-    end
-    else
+
+        if (not (PluginsGlob.MPlugins[plugin_idx].MemMgrSet)) then
+          psWriteLn(Format('The DLL "%s" doesn''t set a memory manager.', [DirectiveArgs]));
+
+        Result := True;
+      end else
+        psWriteln(Format('Your DLL %s has not been found.', [DirectiveArgs]))
+    end else
       psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
-  end
-  else if CompareText(DirectiveName,'WARNING') = 0 then
+  end else if CompareText(DirectiveName,'WARNING') = 0 then
   begin
     if not active then
       exit(true);
