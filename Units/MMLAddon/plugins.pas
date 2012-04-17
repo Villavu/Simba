@@ -56,10 +56,9 @@ type
     MethodLen: integer;
     Types: array of TPasScriptType;
     TypesLen: integer;
+    MemMgrSet: boolean;
   end;
   TMPluginArray = array of TMPlugin;
-
-
 
   { TMPlugins }
 
@@ -77,10 +76,9 @@ type
 implementation
 
 uses
-  MufasaTypes,FileUtil;
+  MufasaTypes, FileUtil;
 
 { TMPlugins }
-
 function TMPlugins.InitPlugin(Plugin: TLibHandle): boolean;
 var
   GetFuncCount: function: integer; stdcall;
@@ -94,40 +92,27 @@ var
   ArrC, I: integer;
   MemMgr : TMemoryManager;
 begin
+  SetLength(Plugins, NumPlugins + 1);
+
   Pointer(SetPluginMemManager) := GetProcAddress(Plugin, PChar('SetPluginMemManager'));
-  if (SetPluginMemManager <> nil) then
+  if (Assigned(SetPluginMemManager)) then
   begin
-    Writeln('Setting Memory Manager.');
+    Plugins[NumPlugins].MemMgrSet := True;
     GetMemoryManager(MemMgr);
     SetPluginMemManager(MemMgr);
   end;
-  Pointer(GetFuncCount) := GetProcAddress(Plugin, PChar('GetFunctionCount'));
-  if (GetFuncCount = nil) then
-  begin
-    Result := False;
-    Exit;
-  end;
-  
-  Pointer(GetFuncInfo) := GetProcAddress(Plugin, PChar('GetFunctionInfo'));
-  if (GetFuncInfo = nil) then
-  begin
-    Result := False;
-    Exit;
-  end;
-  
-  Pointer(GetFuncConv) := GetProcAddress(Plugin, PChar('GetFunctionCallingConv'));
-  
-  SetLength(Plugins, NumPlugins + 1);
   
   Pointer(GetTypeCount) := GetProcAddress(Plugin, PChar('GetTypeCount'));
-  if (not (GetTypeCount = nil)) then
+  if (Assigned(GetTypeCount)) then
   begin
     Pointer(GetTypeInfo) := GetProcAddress(Plugin, PChar('GetTypeInfo'));
-    if (not (GetTypeInfo = nil)) then
+    if (Assigned(GetTypeInfo)) then
     begin
       ArrC := GetTypeCount();
+
       Plugins[NumPlugins].TypesLen := ArrC;
       SetLength(Plugins[NumPlugins].Types, ArrC);
+
       for I := 0 to ArrC - 1 do
       begin
         if (GetTypeInfo(I, Plugins[NumPlugins].Types[I].TypeName, Plugins[NumPlugins].Types[I].TypeDef) < 0) then
@@ -139,24 +124,37 @@ begin
     end;
   end;
 
-  ArrC := GetFuncCount();
-  Plugins[NumPlugins].MethodLen := ArrC;
-  SetLength(Plugins[NumPlugins].Methods, ArrC);
-  
-  PD := StrAlloc(255);
-  for I := 0 to ArrC - 1 do
-  begin;
-    if (GetFuncInfo(I, pntr, PD) < 0) then
-      Continue;
-    Plugins[NumPlugins].Methods[I].FuncPtr := pntr;
-    Plugins[NumPlugins].Methods[I].FuncStr := PD;
+  Pointer(GetFuncCount) := GetProcAddress(Plugin, PChar('GetFunctionCount'));
+  if (Assigned(GetFuncCount)) then
+  begin
+    Pointer(GetFuncInfo) := GetProcAddress(Plugin, PChar('GetFunctionInfo'));
 
-    if (GetFuncConv <> nil) then
-      Plugins[NumPlugins].Methods[I].FuncConv := GetFuncConv(I)
-    else
-      Plugins[NumPlugins].Methods[I].FuncConv := cv_stdcall;
+    if (Assigned(GetFuncInfo)) then
+    begin
+      Pointer(GetFuncConv) := GetProcAddress(Plugin, PChar('GetFunctionCallingConv'));
+
+      ArrC := GetFuncCount();
+      Plugins[NumPlugins].MethodLen := ArrC;
+      SetLength(Plugins[NumPlugins].Methods, ArrC);
+  
+      PD := StrAlloc(255);
+      for I := 0 to ArrC - 1 do
+      begin;
+        if (GetFuncInfo(I, pntr, PD) < 0) then
+          Continue;
+
+        Plugins[NumPlugins].Methods[I].FuncPtr := pntr;
+        Plugins[NumPlugins].Methods[I].FuncStr := PD;
+        Plugins[NumPlugins].Methods[I].FuncConv := cv_stdcall;
+
+        if (Assigned(GetFuncCount)) then
+          Plugins[NumPlugins].Methods[I].FuncConv := GetFuncConv(I);
+      end;
+
+      StrDispose(PD);
+    end;
   end;
-  StrDispose(PD);  
+
   Inc(NumPlugins);
   Result := True;
 end;
