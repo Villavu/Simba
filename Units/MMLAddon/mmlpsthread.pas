@@ -256,6 +256,8 @@ type
    public
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
+     Running: TInitBool;
+
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
      procedure SetScript(Script: string); override;
@@ -1369,6 +1371,7 @@ begin
 
   Parser := TLapeTokenizerString.Create('');
   Compiler := TLapeCompiler.Create(Parser);
+  Running := bFalse;
 
   InitializePascalScriptBasics(Compiler);
   Compiler['Move'].Name := 'MemMove';
@@ -1493,7 +1496,8 @@ begin
       if CompileOnly then
         Exit;
 
-      RunCode(Compiler.Emitter.Code);
+      Running := bTrue;
+      RunCode(Compiler.Emitter.Code, Running);
 
       psWriteln('Successfully executed.');
     end else
@@ -1506,7 +1510,7 @@ end;
 
 procedure TLPThread.Terminate;
 begin
-  psWriteLn('Lape doesn''t support stoping scripts yet... Please hit stop again to terminate!');
+  Running := bFalse;
 end;
 {$ENDIF}
 
