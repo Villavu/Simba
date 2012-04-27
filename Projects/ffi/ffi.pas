@@ -8,6 +8,11 @@ interface
 uses
     Classes, SysUtils, ctypes;
 
+(*
+TODO:
+  -  Add ARM compat. Replace cpu32 ifdef's with better ifdefs.
+*)
+
 type
   TFFIStatus = (
       FFI_OK := 0,
@@ -74,14 +79,101 @@ type
     {$IFDEF FFI_EXTRA_FIELDS}
     // TODO
     {$ENDIF}
-
   end;
   PFFICif = ^TFFICif;
+
+
+  TPointerArray = Array of Pointer;
+  TClosureBindingFunction = procedure(var cif: TFFICif; var ret: cuint;
+    args: TPointerArray; userdata: Pointer); cdecl;
+
+  (*
+  #if defined (X86_64) || (defined (__x86_64__) && defined (X86_DARWIN))
+  #define FFI_TRAMPOLINE_SIZE 24
+  #define FFI_NATIVE_RAW_API 0
+  #else
+  #ifdef X86_WIN32
+  #define FFI_TRAMPOLINE_SIZE 52
+  #else
+  #ifdef X86_WIN64
+  #define FFI_TRAMPOLINE_SIZE 29
+  #define FFI_NATIVE_RAW_API 0
+  #define FFI_NO_RAW_API 1
+  #else
+  #define FFI_TRAMPOLINE_SIZE 10
+  #endif
+  #endif
+  *)
+
+const
+  FFI_TRAMPOLINE_SIZE =
+  {$IFDEF WINDOWS}
+  {$IFDEF CPU32}
+  52
+  {$ELSE}
+  29
+  {$ENDIF}
+  {$ENDIF}
+  {$IFDEF LINUX}
+  {$IFDEF CPU32}
+  10
+  {$ELSE}
+  24
+  {$ENDIF}
+  {$ENDIF}
+  ;
+
+  (*
+  #if FFI_CLOSURES
+
+  #ifdef _MSC_VER
+  __declspec(align(8))
+  #endif
+  typedef struct {
+  #if @FFI_EXEC_TRAMPOLINE_TABLE@
+    void *trampoline_table;
+    void *trampoline_table_entry;
+  #else
+    char tramp[FFI_TRAMPOLINE_SIZE];
+  #endif
+    ffi_cif   *cif;
+    void     (*fun)(ffi_cif*,void*,void**,void*);
+    void      *user_data;
+  #ifdef __GNUC__
+  } ffi_closure __attribute__((aligned (8)));
+  #else
+  } ffi_closure;
+  # ifdef __sgi
+  #  pragma pack 0
+  # endif
+  #endif
+  *)
+
+type
+  TFFIClosure = record
+    tramp: array [0..FFI_TRAMPOLINE_SIZE] of cchar; // Let's hope FFI_EXEC_TRAMPOLINE_TABLE is not defined/true
+    cif: PFFICif;
+    fun: TClosureBindingFunction;
+    user_data: Pointer;
+  end;
+  PFFIClosure = ^TFFIClosure;
 
 function ffi_prep_cif(out cif: TFFICif; abi: TFFIABI; nargs: cuint; rtype: PFFIType;
     atypes: PPFFIType): TFFIStatus;  cdecl; external;
 procedure ffi_call(var cif: TFFICif; fn: Pointer; rvalue: Pointer; avalue: Pointer);
   cdecl; external;
+
+function ffi_closure_alloc(size: csize_t; code: Pointer): Pointer;  cdecl; external;
+procedure ffi_closure_free(closure: Pointer); cdecl; external;
+
+{ I don't think we need this one }
+{
+function ffi_prep_closure(closure: PFFIClosure; var CIF: TFFICif;
+    fun: TClosureBindingFunction; user_data: Pointer): TFFIStatus;  cdecl; external;
+}
+
+function ffi_prep_closure_loc(closure: PFFIClosure; var CIF: TFFICif;
+    fun: TClosureBindingFunction; user_data: Pointer; codeloc: Pointer): TFFIStatus;  cdecl; external;
 
 var
   ffi_type_void: TFFIType; cvar; external;
