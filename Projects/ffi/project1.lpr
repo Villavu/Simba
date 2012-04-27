@@ -80,7 +80,6 @@ var
   bound_puts: function (s: pchar): PtrUInt;
   rc: integer;
 begin
-  writeln('Size:', sizeof(bound_puts));
   closure := ffi_closure_alloc(sizeof(TFFIClosure), @bound_puts);
 
   if assigned(closure) then
@@ -105,12 +104,6 @@ end;
 procedure Tffi.DoRun;
 var
   ErrorMsg: String;
-  Cif: TFFICif;
-  s: TFFIStatus;
-  ret: ptruint;
-  ff: integer;
-  args: PPFFIType;
-  values: ^Pointer;
 
 begin
   // quick check parameters
@@ -128,7 +121,7 @@ begin
     Exit;
   end;
 
-  testcall;
+  //testcall;
   testclosure;
 
   // stop program loop
