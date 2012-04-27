@@ -11,6 +11,9 @@ uses
 (*
 TODO:
   -  Add ARM compat. Replace cpu32 ifdef's with better ifdefs.
+  -  Mac compat.
+  -  Test architectures.
+  -  Clean up some parameters (I think we can use more arrays and less pointers)
 *)
 
 type
