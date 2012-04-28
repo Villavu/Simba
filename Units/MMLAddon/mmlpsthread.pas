@@ -42,7 +42,7 @@ uses
   {$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
-    lpeval, lpinterpreter, lputils
+    lpeval, lpinterpreter, lputils, ffi
   {$ENDIF};
 
 const
@@ -249,6 +249,18 @@ type
    {$ENDIF}
 
    {$IFDEF USE_LAPE}
+   
+   TClosureData = record
+     native_func: Pointer;
+     closure: PFFIClosure;
+     closure_cif, native_cif: TFFICif;
+     closure_args, native_args: PPFFIType;
+     n_native_args: integer;
+     restype: PFFIType;
+   end;
+
+   PClosureData = ^TClosureData;
+
    { TLPThread }
    TLPThread = class(TMThread)
    protected
@@ -1463,10 +1475,26 @@ begin
   end;
 end;
 
+procedure LPBridge(var cif: TFFICif; ret: Pointer; args: TPointerArray; data: PClosureData); cdecl;
+type
+    PPPPointer = ^PPPointer;
+var 
+    params: Pointer;
+    res: Pointer;
+begin
+    params:= (PPPPointer(args[0]))^^; //Dear god, what the fuck
+    res:= (PPointer(args[1]))^;
+    ffi_call(data^.native_cif,data^.native_func,res,params);
+end;
+
 procedure TLPThread.LoadPlugin(plugidx: integer);
 var
   I: integer;
+  s: TFFIStatus;
+  data: PClosureData;
+  func: Pointer;
 begin
+  writeln('Loading plugin...');
   with PluginsGlob.MPlugins[plugidx] do
   begin
     Compiler.StartImporting;
@@ -1477,8 +1505,40 @@ begin
 
     for i := 0 to MethodLen - 1 do
       with Methods[i] do
-        Compiler.addGlobalFunc(FuncStr, FuncPtr);
-
+      begin
+        data:= GetMem(sizeof(TClosureData));
+        data^.native_func:= FuncPtr;
+        //parse arguments, bullshit follows
+        writeln('Parsing Arguments');
+        data^.restype:= @ffi_type_void;
+        data^.n_native_args:= 1;
+        data^.native_args:= GetMem(sizeof(PFFIType)*data^.n_native_args);
+        (data^.native_args)[0]:= @ffi_type_uint32;
+        //set data^.restype,data^.native_args,data^.n_native_args
+        writeln('Making native CIF');
+        s:= ffi_prep_cif(data^.native_cif, FFI_DEFAULT_ABI, data^.n_native_args, data^.restype, data^.native_args); //convention should be whatever the plugin uses
+        if s = FFI_OK then
+        begin
+          writeln('Alloc closure');
+          data^.closure:= ffi_closure_alloc(sizeof(TFFIClosure), @func);
+          data^.closure_args:= GetMem(sizeof(PFFIType)*2);
+          (data^.closure_args)[0]:= @ffi_type_pointer;
+          (data^.closure_args)[1]:= @ffi_type_pointer;
+          writeln('Making closure CIF');
+          s:= ffi_prep_cif(data^.closure_cif, FFI_DEFAULT_ABI, 1, @ffi_type_void, data^.closure_args); //convention should be cdecl as declared above
+          if s = FFI_OK then
+          begin
+            writeln('Init closure structure');
+            s := ffi_prep_closure_loc(data^.closure, data^.closure_cif, TClosureBindingFunction(@LPBridge), data, func);
+            if s = FFI_OK then
+            begin
+              writeln('Importing');
+              Compiler.addGlobalFunc(FuncStr, func);
+            end;
+          end;
+        end;
+        //store data somewhere to be freed after it's no longer needed
+      end;
     Compiler.EndImporting;
   end;
 end;
