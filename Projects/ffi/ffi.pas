@@ -201,6 +201,7 @@ var
   ffi_type_sint64: TFFIType; cvar; external;
   ffi_type_float: TFFIType; cvar; external;
   ffi_type_double: TFFIType; cvar; external;
+  ffi_type_longdouble: TFFIType; cvar; external;
   ffi_type_pointer: TFFIType; cvar; external;
 
 implementation
