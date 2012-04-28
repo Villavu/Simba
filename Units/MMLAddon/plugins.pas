@@ -147,7 +147,7 @@ begin
         Plugins[NumPlugins].Methods[I].FuncStr := PD;
         Plugins[NumPlugins].Methods[I].FuncConv := cv_stdcall;
 
-        if (Assigned(GetFuncCount)) then
+        if (Assigned(GetFuncConv)) then
           Plugins[NumPlugins].Methods[I].FuncConv := GetFuncConv(I);
       end;
 
