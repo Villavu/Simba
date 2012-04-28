@@ -609,7 +609,7 @@ begin
   Trace += LineEnding + 'Simba Version: ' + IntToStr(SimbaVersion) + LineEnding;
 
   LogName := DataPath + 'ErrorLog_' + FormatDateTime('dd-mm-yy_hh-nn-ss', Now) + '.txt';
-  WriteLn(Format('Gonna try to save the error information to "%s".', [LogName]));
+  WriteLn(Format('Going to try to save the error information to "%s".', [LogName]));
 
   try
     with TFileStream.Create(UTF8ToSys(logname), fmOpenWrite or fmOpenReadWrite or fmCreate) do
