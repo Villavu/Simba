@@ -1,3 +1,32 @@
+(*
+	Copyright (c) 2009-2012 by Merlijn Wajer
+
+    MML is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as
+    published by the Free Software Foundation, either version 3 of
+    the License, or (at your option) any later version.
+
+    ffi.pas is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with ffi.pas.  If not, see <http://www.gnu.org/licenses/>.
+
+  ffi.pas unit, Free Pascal interface to the great libffi library.
+
+  The license may become even less restrictive (most likely public domain)
+*)
+
+(*
+  Features:
+      - Experimental support for ffi_call, ffi_prep_cif, ffi_prep_closure,
+      ffi_prep_closure_loc.
+      - All the requires types have been ported to their FPC equivalent;
+      TFFIClosure however requires some extra additions per architecture.
+      Currently only tested on x64 GNU/Linux.
+*)
 unit ffi;
 
 {$mode objfpc}{$H+}
@@ -89,24 +118,6 @@ type
   TPointerArray = Array of Pointer;
   TClosureBindingFunction = procedure(var cif: TFFICif; var ret: cuint;
     args: TPointerArray; userdata: Pointer); cdecl;
-
-  (*
-  #if defined (X86_64) || (defined (__x86_64__) && defined (X86_DARWIN))
-  #define FFI_TRAMPOLINE_SIZE 24
-  #define FFI_NATIVE_RAW_API 0
-  #else
-  #ifdef X86_WIN32
-  #define FFI_TRAMPOLINE_SIZE 52
-  #else
-  #ifdef X86_WIN64
-  #define FFI_TRAMPOLINE_SIZE 29
-  #define FFI_NATIVE_RAW_API 0
-  #define FFI_NO_RAW_API 1
-  #else
-  #define FFI_TRAMPOLINE_SIZE 10
-  #endif
-  #endif
-  *)
 
 const
   FFI_TRAMPOLINE_SIZE =
