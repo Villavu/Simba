@@ -1,3 +1,7 @@
+// THIS FILE 
+{$WARNING Get the new file here: https://code.google.com/p/la-pe/}
+{$ERROR This file is deprecated and no longer updated; see the file in la-pe.}
+
 (*
 	Copyright (c) 2009-2012 by Merlijn Wajer
 
@@ -117,7 +121,7 @@ type
 
   TPointerArray = Array of Pointer;
   TClosureBindingFunction = procedure(var cif: TFFICif; var ret: cuint;
-    args: TPointerArray; userdata: Pointer); cdecl;
+    var args: TPointerArray; userdata: Pointer); cdecl;
 
 const
   FFI_TRAMPOLINE_SIZE =
