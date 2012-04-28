@@ -62,10 +62,11 @@ begin
   end;
 end;
 
-procedure puts(var cif: TFFICif; var ret: cuint; args: TPointerArray; userdata: Pointer) cdecl;
+procedure puts(var cif: TFFICif; var ret: cuint; var args: TPointerArray; userdata: Pointer) cdecl;
 var
   s: PChar;
 begin
+  writeln('Userdata:', QWord(userdata));
   s := PChar(args[0]);
   writeln(s);
   ret := strlen(s);
@@ -89,7 +90,7 @@ begin
     s := ffi_prep_cif(cif, FFI_DEFAULT_ABI, 1, @ffi_type_uint32, args);
     if s = FFI_OK then
     begin
-      s := ffi_prep_closure_loc(closure, &cif, @puts, nil, bound_puts);
+      s := ffi_prep_closure_loc(closure, &cif, @puts, Pointer(42), bound_puts);
       if s = FFI_OK then
       begin
         rc := bound_puts('Hello World!');
