@@ -820,7 +820,8 @@ constructor TEIOS_Target.Create(client: TEIOS_Client; initval: String); begin
 end;
 
 destructor TEIOS_Target.Destroy; begin
-  client.ReleaseTarget(self.target);
+  if (client.ReleaseTarget <> nil) and (self.target <> nil) then
+    client.ReleaseTarget(self.target);
   inherited Destroy;
 end;
 
