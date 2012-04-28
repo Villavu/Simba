@@ -1237,6 +1237,8 @@ var
   B: T2DBoolArray;
   SinAngle,CosAngle : Extended;
 begin
+  if Length(Points) < 1 then
+    Exit;
   Ind := 0;
   Box:= GetTPABounds(Points);
   SinAngle := sin(Radial);

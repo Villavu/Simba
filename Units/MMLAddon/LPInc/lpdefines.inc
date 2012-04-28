@@ -21,23 +21,23 @@
     lpdefines.inc for the Mufasa Macro Library
 }
 
-Defines.Add('LAPE');
+addBaseDefine('LAPE');
 {$IFDEF CPU386 }
-Defines.Add('CPU386');
+addBaseDefine('CPU386');
 {$ENDIF }
-Defines.Add('MUFASA');
-Defines.Add('COGAT');
-Defines.Add('SIMBA');
-Defines.Add('DGROCKS');
+addBaseDefine('MUFASA');
+addBaseDefine('COGAT');
+addBaseDefine('SIMBA');
+addBaseDefine('DGROCKS');
 {$IFDEF MSWINDOWS }
-Defines.Add('MSWINDOWS');
-Defines.Add('WIN32');
-Defines.Add('WINDOWS');
+addBaseDefine('MSWINDOWS');
+addBaseDefine('WIN32');
+addBaseDefine('WINDOWS');
 {$ENDIF }
 {$IFDEF LINUX }
-Defines.Add('LINUX');
-Defines.Add('UNIX');
-Defines.Add('POSIX');
+addBaseDefine('LINUX');
+addBaseDefine('UNIX');
+addBaseDefine('POSIX');
 {$ENDIF }
-Defines.Add('SIMBA' + IntToStr(SimbaVersion));
-Defines.Add('SIMBAMAJOR' + IntToStr(SimbaMajor));
+addBaseDefine('SIMBA' + IntToStr(SimbaVersion));
+addBaseDefine('SIMBAMAJOR' + IntToStr(SimbaMajor));
