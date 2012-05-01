@@ -360,6 +360,21 @@ begin
   end;
 end;
 
+procedure SIRegister_TMayaTimer(CL: TPSPascalCompiler);
+begin
+  CL.AddTypeS('TThreadPriority', '(tpIdle, tpLowest, tpLower, tpNormal, tpHigher, tpHighest, tpTimeCritical)');
+
+  with Cl.AddClassN(cl.FindClass('TCOMPONENT'), 'TMayaTimer') do
+  begin
+    RegisterProperty('Enabled', 'Boolean', iptrw);
+    RegisterProperty('Interval', 'Cardinal', iptrw);
+    RegisterProperty('OnTimer', 'TNotifyEvent', iptrw);
+    RegisterProperty('ThreadPriority', 'TThreadPriority', iptrw);
+    RegisterMethod('constructor Create(AOWner: TComponent)');
+    RegisterMethod('destructor Destroy');
+  end;
+end;
+
 procedure SIRegister_MML(cl: TPSPascalCompiler);
 begin
   SIRegister_TMufasaBitmap(cl);
@@ -371,6 +386,7 @@ begin
   SIRegister_TMBitmaps(cl);
   SIRegister_IOManager(cl);
   SIRegister_TClient(cl);
+  SIRegister_TMayaTimer(cl);
 end;
 
 end.
