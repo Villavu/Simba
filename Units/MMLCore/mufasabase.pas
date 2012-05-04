@@ -31,6 +31,7 @@ interface
 uses
   Classes, SysUtils{$ifdef MSWindows},windows{$endif};
 
+{$I Simba.inc}
 
 const
     SimbaVersion = 990;
@@ -39,14 +40,18 @@ const
     SimbaURL =     {$IFDEF WINDOWS}
                     {$IFDEF CPUI386}
                     'http://simba.villavu.com/bin/Windows/x86/Stable/'
+                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
                     {$ELSE}
                     'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
+                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
                     {$ENDIF}
                   {$ELSE}
                     {$IFDEF CPUI386}
                     'http://simba.villavu.com/bin/Linux/x86/Stable/'
+                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
                     {$ELSE}
                     'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
+                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
                     {$ENDIF}
                   {$ENDIF};
     FontURL = 'http://simba.villavu.com/bin/Fonts/';
