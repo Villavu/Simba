@@ -87,6 +87,7 @@ var
   GetTypeCount: function: integer; stdcall;
   GetTypeInfo: function(x: Integer; var sType, sTypeDef: string): integer; stdcall;
   SetPluginMemManager: procedure(MemMgr : TMemoryManager); stdcall;
+  OnAttach: procedure(info: Pointer); stdcall;
   PD: PChar;
   pntr: Pointer;
   ArrC, I: integer;
@@ -100,6 +101,12 @@ begin
     Plugins[NumPlugins].MemMgrSet := True;
     GetMemoryManager(MemMgr);
     SetPluginMemManager(MemMgr);
+  end;
+
+  Pointer(OnAttach) := GetProcAddress(Plugin, PChar('OnAttach'));
+  if Assigned(OnAttach) then
+  begin
+    OnAttach(nil);
   end;
   
   Pointer(GetTypeCount) := GetProcAddress(Plugin, PChar('GetTypeCount'));

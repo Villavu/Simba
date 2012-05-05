@@ -78,11 +78,20 @@ implementation
   procedure TGenericLoader.FreePlugins;
   var
     I : integer;
+    OnDetach: procedure(); stdcall;
   begin
     for i := 0 to PluginLen - 1 do
     begin;
       if (Loaded[i].handle > 0) then
       try
+        Pointer(OnDetach) := GetProcAddress(
+            Loaded[i].handle, 'OnDetach');
+        if Assigned(OnDetach) then
+        begin
+          mDebugLn('Calling OnDetach');
+          OnDetach();
+        end;
+
         mDebugLn('Freeing plugin[%d]',[i]);
         FreeLibrary(Loaded[i].handle);
       except
