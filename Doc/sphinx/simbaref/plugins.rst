@@ -9,7 +9,8 @@ Writing Simba Plugins
 Plugin overview
 ---------------
 
-
+Plugins for Simba can be written in virtually every language. (Make sure to read
+`Caveats`_ though)
 
 Calling Conventions
 -------------------
@@ -122,3 +123,32 @@ Simba Plugin Functions
   SetPluginMemManager: procedure(MemMgr : TMemoryManager); stdcall;
   OnAttach: procedure(info: Pointer); stdcall;
   OnDetach: procedure(); stdcall;
+
+Caveats
+-------
+
+If you're writing a plugin in a language other than Free Pascal, you'll not be
+able to share arrays and strings with Simba in an easy manner. (It is possible
+to "craft" pascal-type strings and arrays)
+
+Pascal Strings
+**************
+
+
+Pascal Arrays
+*************
+
+Say we have an array of *foo* called *bar*. *bar[0]* holds the first element of
+the array. *bar* - Sizeof(Pointer) contains the length of the array, and *bar* -
+Sizeof(Pointer) * 2 contains the reference count of the array. If you want to
+share an array with Simba, make sure the reference is count is high enough so
+that Simba/Free Pascal won't try to free it for you.
+
+Sharing Arrays and String with a FPC Plugin
+*******************************************
+
+To share arrays and strings in a nice way with a FPC plugin, you need to create
+a function called SetPluginMemManager as shown above and make sure it is
+exported properly. Simba will try to call this function when loading the plugin
+and will pass the plugin its own memory manager. Use FPC's *SetMemoryManager* to
+change your own memory manager to Simba's memory manager.
