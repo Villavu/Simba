@@ -8,4 +8,5 @@ All Simba documentation should be in here.
 
     simbaref/scriptmanager.rst
     simbaref/extensions.rst
+    simbaref/plugins.rst
 
