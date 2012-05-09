@@ -97,17 +97,11 @@ the script in a safe manner. Doing so will require some hacks (it is possible),
 but might also lead to memory leaks if implemented wrong or used wrong in
 scripts.
 
-TTargetExported
----------------
+TTarget_Exported
+----------------
 
 .. warning::
     TODO
-
-Overview of all functions
--------------------------
-
-.. warning::
-    Remove this section
 
 
 Simba Plugin Functions
@@ -131,10 +125,6 @@ If you're writing a plugin in a language other than Free Pascal, you'll not be
 able to share arrays and strings with Simba in an easy manner. (It is possible
 to "craft" pascal-type strings and arrays)
 
-Pascal Strings
-**************
-
-
 Pascal Arrays
 *************
 
@@ -144,8 +134,15 @@ Sizeof(Pointer) * 2 contains the reference count of the array. If you want to
 share an array with Simba, make sure the reference is count is high enough so
 that Simba/Free Pascal won't try to free it for you.
 
-Sharing Arrays and String with a FPC Plugin
-*******************************************
+Pascal Strings
+**************
+
+.. warning::
+    I believe pascal strings are very similar to pascal arrays, but I am not
+    completely sure.
+
+Sharing Arrays and Strings with a FPC Plugin
+********************************************
 
 To share arrays and strings in a nice way with a FPC plugin, you need to create
 a function called SetPluginMemManager as shown above and make sure it is
