@@ -509,7 +509,7 @@ begin
         LoadPlugin(plugin_idx);
 
         if (not (PluginsGlob.MPlugins[plugin_idx].MemMgrSet)) then
-          psWriteLn(Format('The DLL "%s" doesn''t set a memory manager.', [DirectiveArgs]));
+          mDebugLn(Format('The DLL "%s" doesn''t set a memory manager.', [DirectiveArgs]));
 
         Result := True;
       end else
