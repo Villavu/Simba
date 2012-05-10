@@ -740,6 +740,13 @@ begin
   case conv of
     cv_StdCall : result := cdStdCall;
     cv_Register: result := cdRegister;
+
+    cv_Default: result :=
+    {$IFDEF CPU32}
+    cdCdecl;
+    {$ELSE}
+    cdCdecl; // this shouldn't matter at all
+    {$ENDIF}
   else
     raise exception.createfmt('Unknown Calling Convention[%d]',[conv]);
   end;
