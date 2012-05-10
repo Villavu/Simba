@@ -42,7 +42,6 @@ interface
         PluginLen : integer;
         Loaded: TGenericLibArray;
         PluginDirs : TStringList;
-        procedure FreePlugins;
         procedure LoadPluginsDir(DirIndex : integer);
         function VerifyPath(Path : string) : string;
         function LoadPluginNoFallback(PluginName : string) : integer;
@@ -53,6 +52,7 @@ interface
         destructor Destroy; override;
         procedure ValidateDirs;
         procedure AddPath(path: string);
+        procedure FreePlugins; virtual;
         function LoadPlugin(PluginName : string) : integer;
     end;
 
@@ -73,32 +73,6 @@ implementation
       mDebugLn('Adding Plugin Path: ' + verified);
       PluginDirs.Add(verified);
     end;
-  end;
-
-  procedure TGenericLoader.FreePlugins;
-  var
-    I : integer;
-    OnDetach: procedure(); stdcall;
-  begin
-    for i := 0 to PluginLen - 1 do
-    begin;
-      if (Loaded[i].handle > 0) then
-      try
-        Pointer(OnDetach) := GetProcAddress(
-            Loaded[i].handle, 'OnDetach');
-        if Assigned(OnDetach) then
-        begin
-          mDebugLn('Calling OnDetach');
-          OnDetach();
-        end;
-
-        mDebugLn('Freeing plugin[%d]',[i]);
-        FreeLibrary(Loaded[i].handle);
-      except
-      end;
-    end;
-    SetLength(Loaded,0);
-    PluginLen:= 0;
   end;
 
   procedure TGenericLoader.ValidateDirs;
@@ -194,6 +168,22 @@ implementation
 
   end;
 
+  procedure TGenericLoader.FreePlugins;
+  var
+    I : integer;
+  begin
+    for i := 0 to PluginLen - 1 do
+    begin;
+      if (Loaded[i].handle > 0) then
+      try
+        mDebugLn('Freeing plugin[%d]',[i]);
+        FreeLibrary(Loaded[i].handle);
+      except
+      end;
+    end;
+    SetLength(Loaded,0);
+    PluginLen:= 0;
+  end;
 
   constructor TGenericLoader.Create;
   begin
