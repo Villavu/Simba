@@ -1469,6 +1469,11 @@ var
 begin
   with PluginsGlob.MPlugins[plugidx] do
   begin
+    if ABI < 2 then
+    begin
+      psWriteln('Skipping plugin due to ABI <= 2');
+      exit; // Can't set result?
+    end;
     Compiler.StartImporting;
 
     for i := 0 to TypesLen -1 do
