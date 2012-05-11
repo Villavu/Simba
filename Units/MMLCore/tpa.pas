@@ -1170,16 +1170,12 @@ begin
   L := 0;
   StartD := SD;
   EndD := ED;
+  StartD := (Floor(StartD) mod 360)  + (StartD - Floor(StartD));
+  StartD := StartD + (Ord(StartD < 0.0) * 360);
+  EndD := (Floor(EndD) mod 360)  + (EndD - Floor(EndD));
+  EndD := EndD + (Ord(EndD < 0.0) * 360);
   cWise := StartD > EndD;
-  while StartD > 360.0 do
-    StartD := StartD - 360.0;
-  while EndD > 360.0 do
-    EndD := EndD - 360.0;
-  while StartD < 0.0 do
-    StartD := StartD + 360.0;
-  while EndD < 0.0 do
-    EndD := EndD + 360.0;
-  if StartD > EndD then
+  if cWise then
     SwapE(StartD, EndD);
   for I := 0 to T do
   begin
