@@ -42,3 +42,6 @@
 //{$DEFINE USE_CODECOMPLETION} // TODO
 
 //{$DEFINE TERMINALWRITELN} // Only used once. Remove from SimbaUnit?
+
+{$MACRO ON}
+{$define lape_extdecl:=cdecl;}
