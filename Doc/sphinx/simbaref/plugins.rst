@@ -206,7 +206,7 @@ Sample FPC Plugin
 .. code-block:: pascal
 
     { Example based upon the SPS Plugin }
-    library mylibrary;
+    library project1;
 
     {$mode objfpc}{$H+}
 
@@ -217,16 +217,15 @@ Sample FPC Plugin
     }
 
     uses
-      classes, sysutils, fileutil, math, interfaces, mufasatypes, bitmaps,
-      colour_conv
+      classes, sysutils, math
       { you can add units after this };
-
-    type
-      T3DIntegerArray = array of T2DIntegerArray;
 
     var
       OldMemoryManager: TMemoryManager;
       memisset: Boolean = False;
+
+
+      type T3DIntegerArray = array of array of array of integer;
 
     function HelloPlugin(s: String): String; callconv
     begin
@@ -262,7 +261,7 @@ Sample FPC Plugin
       case x of
         0: begin
             StrPCopy(sType, 'T3DIntegerArray');
-            StrPCopy(sTypeDef, 'array of T2DIntegerArray;');
+            StrPCopy(sTypeDef, 'array of array of array of integer;');
            end;
 
         else
@@ -299,9 +298,7 @@ Sample FPC Plugin
     exports GetTypeInfo;
     exports GetFunctionCount;
     exports GetFunctionInfo;
-    exports GetFunctionCallingConv;
     exports OnDetach;
 
     begin
     end.
-
