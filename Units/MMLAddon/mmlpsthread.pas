@@ -1421,6 +1421,7 @@ begin
         TImportClosure(Wrappers.First).Free;
         Wrappers.Delete(0)
       end;
+      Wrappers.Free;
     end;
 
     if (Assigned(Compiler)) then
