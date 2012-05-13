@@ -1509,10 +1509,6 @@ begin
       Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
       Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
       Wrappers.Add(Wrapper);
-      {
-      with Methods[i] do
-        Compiler.addGlobalFunc(FuncStr, FuncPtr);
-      }
     end;
 
     Compiler.EndImporting;
