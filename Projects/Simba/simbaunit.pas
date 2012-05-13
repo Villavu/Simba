@@ -423,6 +423,9 @@ type
     ScriptOpenData : TScriptOpenData;
     FillThread: TProcThread;
 
+    { Required to work around using freed resources on quit }
+    Exiting: Boolean;
+
     procedure UpdateInterpreter;
     procedure HandleConnectionData;
     procedure HandleOpenFileData;
@@ -1403,6 +1406,11 @@ var
   S: String;
   B: Boolean;
 begin
+  if not assigned(currscript) then
+    exit;
+  if not assigned(currscript.synedit) then
+    exit;
+
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
   begin
     with CurrScript.SynEdit do
@@ -2511,6 +2519,7 @@ procedure TSimbaForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i : integer;
 begin
+  exiting := True;
   Self.SaveFormSettings;
   for i := Tabs.Count - 1 downto 0 do
     if not DeleteTab(i,true) then
@@ -2541,6 +2550,10 @@ begin
       if (GetCurrentThreadId = MainThreadID) then
         Application.ProcessMessages;
       Sleep(25);
+      if exiting then
+      begin
+        writeln('Updating font: Exiting=True; breaking...');
+      end;
     end;
   end;
 
@@ -2621,6 +2634,7 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
 begin
   // Set our own exception handler.
   Application.OnException:= @CustomExceptionHandler;
+  exiting := False;
 
   self.BeginFormUpdate;
   Randomize;
@@ -3079,6 +3093,11 @@ begin
   begin
     Application.ProcessMessages;
     Sleep(50);
+    if exiting then
+    begin
+      writeln('Getting news: Exiting=True; breaking...');
+      break;
+    end
   end;
 end;
 
@@ -3340,6 +3359,10 @@ procedure TSimbaForm.FontUpdate;
   begin
     Application.ProcessMessages;
     Sleep(25);
+    if exiting then
+    begin
+      writeln('FontUpdate, exiting=True; breaking...');
+    end;
   end;
 
 var
