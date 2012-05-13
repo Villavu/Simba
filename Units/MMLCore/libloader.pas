@@ -27,7 +27,7 @@ unit libloader;
 interface
 
   uses
-    Classes, SysUtils, dynlibs;
+    Classes, SysUtils, dynlibs, syncobjs;
   type
     TGenericLib = record
       filename: string;
@@ -42,6 +42,7 @@ interface
         PluginLen : integer;
         Loaded: TGenericLibArray;
         PluginDirs : TStringList;
+        LoadCriticalSection: syncobjs.TCriticalSection;
         procedure LoadPluginsDir(DirIndex : integer);
         function VerifyPath(Path : string) : string;
         function LoadPluginNoFallback(PluginName : string) : integer;
@@ -89,7 +90,7 @@ implementation
 
   procedure TGenericLoader.LoadPluginsDir(DirIndex: integer);
   var
-    PlugExt: String = {$IFDEF LINUX}'*.so';{$ELSE}'*.dll';{$ENDIF}
+    PlugExt: String = '*.' + SharedSuffix;
     FileSearcher : TSearchRec;
   begin
     if (DirIndex < 0) or (DirIndex >= PluginDirs.Count) then
@@ -122,7 +123,7 @@ implementation
   function TGenericLoader.LoadPluginNoFallback(PluginName: string): Integer;
   var
     i, ii : integer;
-    PlugExt: String = {$IFDEF LINUX}'.so';{$ELSE}'.dll';{$ENDIF}
+    PlugExt: String = '.' + SharedSuffix;
   begin
     ii := -1;
     result := -1;
@@ -139,9 +140,14 @@ implementation
       end;
     if ii = -1 then
       raise Exception.CreateFMT('Plugin(%s) has not been found',[PluginName]);
+
+    { Plugin already loaded }
     for i := 0 to PluginLen - 1 do
       if Loaded[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
+      begin
+        Writeln(Format('Plugin %s already loaded: %d', [PluginName, i]));
         Exit(i);
+      end;
     SetLength(Loaded,PluginLen + 1);
     mDebugLn(Format('Loading plugin %s at %s',[PluginName,PluginDirs.Strings[ii]]));
     Loaded[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
@@ -161,9 +167,16 @@ implementation
     CpuBits: String = {$IFDEF CPU32}'32';{$ELSE}'64';{$ENDIF}
   begin
     try
-      Result := LoadPluginNoFallback(PluginName);
-    except
-      on exception do Result:= LoadPluginNoFallback(PluginName+CpuBits);
+      LoadCriticalSection.Acquire;
+
+        try
+          Result := LoadPluginNoFallback(PluginName);
+        except
+          on exception do Result:= LoadPluginNoFallback(PluginName+CpuBits);
+        end;
+
+    finally
+      LoadCriticalSection.Release;
     end;
 
   end;
@@ -190,14 +203,16 @@ implementation
     inherited Create;
     PluginLen := 0;
     PluginDirs := TStringList.Create;
-    PluginDirs.CaseSensitive:= {$IFDEF LINUX}true{$ELSE}false{$ENDIF};
+    PluginDirs.CaseSensitive:= {$IFDEF MSWINDOWS}False{$ELSE}True{$ENDIF};
     PluginDirs.Duplicates:= dupIgnore;
+    LoadCriticalSection := syncobjs.TCriticalSection.Create;
   end;
 
   destructor TGenericLoader.Destroy;
   begin
     FreePlugins;
     PluginDirs.Free;
+    LoadCriticalSection.Free;
     inherited Destroy;
   end;
 
