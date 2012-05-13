@@ -78,7 +78,7 @@ type
       procedure Save(MMLSettings: TMMLSettings); override;
       procedure Load(MMLSettings: TMMLSettings); override;
 
-      function GetDefValue(val: string): string;
+      function GetDefValue(val: string): string; virtual;
 
       property Value: string read GetValue write SetValue;
     end;
@@ -104,6 +104,8 @@ type
       function GetValue: string;
       procedure SetValue(val: string);
     public
+      function GetDefValue(val: string): string; overload;
+
       property Value: string read GetValue write SetValue;
     end;
 
@@ -568,10 +570,21 @@ begin
     val := ExtractRelativepath(AppPath, val);
   {$ENDIF}
 
-  FValue := IncludeTrailingPathDelimiter(val);
+  FValue := val;
+  if (not (FileExists(FValue))) then
+    FValue := IncludeTrailingPathDelimiter(FValue);
+
   FValueSet := True;
   if Assigned(OnChange) then
     OnChange(Self);
+end;
+
+function TPathSetting.GetDefValue(val: string): string;
+begin
+  if (not (FValueSet)) then
+    Value := val;
+
+  Result := Value;
 end;
 
 { }
