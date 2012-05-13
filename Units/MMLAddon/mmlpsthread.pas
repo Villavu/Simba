@@ -257,6 +257,7 @@ type
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
      Running: TInitBool;
+     Wrappers: TList;
 
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
@@ -312,6 +313,7 @@ uses
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
   Clipbrd,
+  lpffi, // For lape FFI
 
   DCPcrypt2,
   DCPrc2, DCPrc4, DCPrc5, DCPrc6,
@@ -1405,11 +1407,22 @@ begin
 
     EndImporting;
   end;
+
+  Wrappers := TList.Create;
 end;
 
 destructor TLPThread.Destroy;
 begin
   try
+    if Assigned(Wrappers) then
+    begin
+      while Wrappers.Count <> 0 Do
+      begin
+        TImportClosure(Wrappers.First).Free;
+        Wrappers.Delete(0)
+      end;
+    end;
+
     if (Assigned(Compiler)) then
       Compiler.Free
     else if (Assigned(Parser)) then
@@ -1473,14 +1486,17 @@ end;
 procedure TLPThread.LoadPlugin(plugidx: integer);
 var
   I: integer;
+  Wrapper: TImportClosure;
 begin
   with PluginsGlob.MPlugins[plugidx] do
   begin
+    {$IFDEF CPU32}
     if ABI < 2 then
     begin
       psWriteln('Skipping plugin due to ABI <= 2');
       exit; // Can't set result?
     end;
+    {$ENDIF}
     Compiler.StartImporting;
 
     for i := 0 to TypesLen -1 do
@@ -1488,8 +1504,15 @@ begin
         Compiler.addGlobalType(TypeDef, TypeName);
 
     for i := 0 to MethodLen - 1 do
+    begin
+      Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
+      Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
+      Wrappers.Add(Wrapper);
+      {
       with Methods[i] do
         Compiler.addGlobalFunc(FuncStr, FuncPtr);
+      }
+    end;
 
     Compiler.EndImporting;
   end;
