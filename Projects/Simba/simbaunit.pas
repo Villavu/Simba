@@ -314,6 +314,7 @@ type
     procedure ActionUndoExecute(Sender: TObject);
     procedure ChangeMouseStatus(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
+    procedure ClearSearchClick(Sender: TObject);
     procedure CloseFindPanel;
     procedure doOnHide(Sender: TObject);
     procedure editSearchListExit(Sender: TObject);
@@ -2265,6 +2266,13 @@ begin
   DoSearch(false, true);
   CurrScript.SynEdit.UseIncrementalColor:= true;
   LabeledEditSearch.SetFocus;
+end;
+
+procedure TSimbaForm.ClearSearchClick(Sender: TObject);
+begin
+  frmFunctionList.ClearSearchClick(Sender);
+  if frmFunctionList.editSearchList.CanFocus then
+    frmFunctionList.editSearchList.SetFocus;
 end;
 
 
