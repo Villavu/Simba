@@ -1406,10 +1406,11 @@ var
   S: String;
   B: Boolean;
 begin
-  if not assigned(currscript) then
-    exit;
-  if not assigned(currscript.synedit) then
-    exit;
+  {
+    TODO: This causes segfaults in EditActions(...) in certain cases.
+    Simply checking if CurrScript and CurrScript.SynEdit is assigned is not
+    enough.)
+  }
 
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
   begin
