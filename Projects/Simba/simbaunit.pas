@@ -423,9 +423,6 @@ type
     ScriptOpenData : TScriptOpenData;
     FillThread: TProcThread;
 
-    { Required to work around using freed resources on quit }
-    Exiting: Boolean;
-
     procedure UpdateInterpreter;
     procedure HandleConnectionData;
     procedure HandleOpenFileData;
@@ -460,6 +457,9 @@ type
     procedure CustomExceptionHandler(Sender: TObject; E: Exception);
     procedure RegisterSettingsOnChanges;
   public
+    { Required to work around using freed resources on quit }
+    Exiting: Boolean;
+
     DebugStream: String;
     SearchString : string;
     CurrScript : TScriptFrame; //The current scriptframe
@@ -2552,8 +2552,8 @@ begin
       Sleep(25);
       if exiting then
       begin
-        writeln('Updating font: Exiting=True; breaking...');
-        break;
+        writeln('Updating font: Exiting=True; exiting...');
+        exit;
       end;
     end;
   end;
@@ -3356,13 +3356,15 @@ end;
 
 
 procedure TSimbaForm.FontUpdate;
-  procedure Idler;
+  function Idler: boolean;
   begin
+    result := false;
     Application.ProcessMessages;
     Sleep(25);
     if exiting then
     begin
       writeln('FontUpdate, exiting=True; breaking...');
+      result := true;
     end;
   end;
 
@@ -3388,7 +3390,11 @@ begin
                                            @Fonts);
     FontDownload.Start;
     while FontDownload.Done = false do
-      Idler;
+      if Idler then
+      begin
+        writeln('FontUpdate: Pre-mature exit due to exiting=true');
+        exit;
+      end;
     //Fontdownload is freed now
     Stream := TStringStream.Create(Fonts);
     try
