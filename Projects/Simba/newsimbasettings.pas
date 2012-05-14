@@ -99,14 +99,15 @@ type
       property Value: Boolean read GetValue write SetValue;
     end;
 
-    TPathSetting = class(TStringSetting)
+    TFileSetting = class(TStringSetting)
     private
       function GetValue: string;
       procedure SetValue(val: string);
-    public
-      function GetDefValue(val: string): string; overload;
+    end;
 
-      property Value: string read GetValue write SetValue;
+    TPathSetting = class(TFileSetting)
+    private
+      procedure SetValue(val: string);
     end;
 
     TSection = class(TSetting)
@@ -156,7 +157,7 @@ type
     end;
 
     TSourceEditorSection = class(TSection)
-      DefScriptPath: TPathSetting;
+      DefScriptPath: TFileSetting;
       LazColors: TBooleanSetting;
     end;
 
@@ -432,7 +433,7 @@ begin
   if (not (FValueSet)) then
     Value := val;
 
-  Exit(FValue);
+  Result := Value;
 end;
 
 procedure TStringSetting.SetValue(val: String);
@@ -552,7 +553,7 @@ begin
   {$ENDIF}
 end;
 
-function TPathSetting.GetValue: string;
+function TFileSetting.GetValue: string;
 begin
   if (FValueSet) then
   begin
@@ -563,7 +564,7 @@ begin
     raise Exception.Create('Value is not set yet.');
 end;
 
-procedure TPathSetting.SetValue(val: string);
+procedure TFileSetting.SetValue(val: string);
 begin
   {$IFNDEF NOTPORTABLE}
   if (IsAbsolute(val)) then
@@ -571,20 +572,22 @@ begin
   {$ENDIF}
 
   FValue := val;
-  if (not (FileExists(FValue))) then
-    FValue := IncludeTrailingPathDelimiter(FValue);
-
   FValueSet := True;
   if Assigned(OnChange) then
     OnChange(Self);
 end;
 
-function TPathSetting.GetDefValue(val: string): string;
+procedure TPathSetting.SetValue(val: string);
 begin
-  if (not (FValueSet)) then
-    Value := val;
+  {$IFNDEF NOTPORTABLE}
+  if (IsAbsolute(val)) then
+    val := ExtractRelativepath(AppPath, val);
+  {$ENDIF}
 
-  Result := Value;
+  FValue := IncludeLeadingPathDelimiter(val);
+  FValueSet := True;
+  if Assigned(OnChange) then
+    OnChange(Self);
 end;
 
 { }
@@ -656,7 +659,7 @@ end;
 
 procedure GetDefScriptPath(obj: TObject);
 begin
-  TPathSetting(obj).Value := DataPath + 'default.simba';
+  TFileSetting(obj).Value := DataPath + 'default.simba';
 end;
 
 procedure GetUpdaterGetCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
@@ -748,7 +751,7 @@ begin
   Interpreter.AllowSysCalls.onDefault := @GetInterpreterAllowSysCalls;
 
   SourceEditor := AddChild(TSourceEditorSection.Create()) as TSourceEditorSection;
-  SourceEditor.DefScriptPath := SourceEditor.AddChild(TPathSetting.Create(ssSourceEditorDefScriptPath)) as TPathSetting;
+  SourceEditor.DefScriptPath := SourceEditor.AddChild(TFileSetting.Create(ssSourceEditorDefScriptPath)) as TFileSetting;
   SourceEditor.DefScriptPath.onDefault := @GetDefScriptPath;
   SourceEditor.LazColors := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorLazColors)) as TBooleanSetting;
   SourceEditor.LazColors.onDefault := @GetSourceEditorLazColors;
