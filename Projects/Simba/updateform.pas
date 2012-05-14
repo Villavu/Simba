@@ -104,6 +104,11 @@ begin
     while FontVersionThread.Done = false do//Wait till thread is done
     begin
       Application.ProcessMessages;
+      if SimbaForm.exiting then
+      begin
+        writeln('GetLatestFontVersion: Exiting due to exiting=True...');
+        exit(-1);
+      end;
       Sleep(25);
     end;
     FFontVersion := StrToIntDef(Trim(Vers), -1);//Read output
@@ -115,6 +120,12 @@ begin
     begin;
       Application.ProcessMessages;
       Sleep(50);
+
+      if SimbaForm.exiting then
+      begin
+        writeln('GetLatestFontVersion(2): Exiting due to exiting=True...');
+        exit(-1);
+      end;
     end;
   end;
   Exit(FFontVersion);
@@ -133,6 +144,12 @@ begin
     begin
       Application.ProcessMessages;
       Sleep(25);
+
+      if SimbaForm.exiting then
+      begin
+        writeln('GetLatestSimbaVersion: Exiting due to exiting=True...');
+        exit(-1);
+      end;
     end;
     FSimbaVersion := StrToIntDef(Trim(Vers), -1);//Read output
     SimbaVersionThread := nil;//It's automatically freed
@@ -143,6 +160,12 @@ begin
     begin;
       Application.ProcessMessages;
       Sleep(50);
+
+      if SimbaForm.exiting then
+      begin
+        writeln('GetLatestSimbaVersion(2): Exiting due to exiting=True...');
+        exit(-1);
+      end;
     end;
   end;
   Exit(FSimbaVersion);
