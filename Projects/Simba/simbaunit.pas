@@ -2553,6 +2553,7 @@ begin
       if exiting then
       begin
         writeln('Updating font: Exiting=True; breaking...');
+        break;
       end;
     end;
   end;
