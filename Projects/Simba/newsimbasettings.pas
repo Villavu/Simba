@@ -632,29 +632,29 @@ end;
 
 procedure GetIncludePath(obj: TObject);
 begin
-  TPathSetting(obj).Value := DataPath + 'Includes';
+  TPathSetting(obj).Value := DataPath + 'Includes' + DS;
 end;
 
 procedure GetPluginPath(obj: TObject);
 begin
-  TPathSetting(obj).Value := DataPath + 'Plugins';
+  TPathSetting(obj).Value := DataPath + 'Plugins' + DS;
 end;
 
 {$IFDEF USE_EXTENSIONS}
 procedure GetExtPath(obj: TObject);
 begin
-  TPathSetting(obj).Value := DataPath + 'Extensions';
+  TPathSetting(obj).Value := DataPath + 'Extensions' + DS;
 end;
 {$ENDIF}
 
 procedure GetScriptPath(obj: TObject);
 begin
-  TPathSetting(obj).Value := DocPath + 'Scripts';
+  TPathSetting(obj).Value := DocPath + 'Scripts' + DS;
 end;
 
 procedure GetFontPath(obj: TObject);
 begin
-  TPathSetting(obj).Value := DataPath + 'Fonts';
+  TPathSetting(obj).Value := DataPath + 'Fonts' + DS;
 end;
 
 procedure GetDefScriptPath(obj: TObject);
