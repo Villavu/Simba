@@ -313,7 +313,7 @@ uses
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
   Clipbrd,
-  lpffi, // For lape FFI
+  lpffi, ffi, // For lape FFI
 
   DCPcrypt2,
   DCPrc2, DCPrc4, DCPrc5, DCPrc6,
@@ -1498,6 +1498,11 @@ begin
       exit; // Can't set result?
     end;
     {$ENDIF}
+    if not FFILoaded() then
+    begin
+      writeln('Not loading plugin for lape - libffi not found');
+      raise EAssertionFailed.Create('libffi is not loaded');
+    end;
     Compiler.StartImporting;
 
     for i := 0 to TypesLen -1 do
