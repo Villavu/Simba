@@ -362,7 +362,8 @@
       <CustomOptions Value="-dUseCThreads
 -dM_MEMORY_DEBUG
 -dFONTDEBUG
--dLape_CDECL"/>
+-dLape_CDECL
+-dDynamicFFI"/>
       <CompilerPath Value="$(CompPath)"/>
       <CreateMakefileOnBuild Value="True"/>
     </Other>
