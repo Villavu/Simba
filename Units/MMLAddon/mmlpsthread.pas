@@ -1332,22 +1332,22 @@ type
   PMDTM = ^TMDTM;
   PMDTMPoint = ^TMDTMPoint;
   PSDTM = ^TSDTM;
-  
+
 threadvar
   WriteLnStr: string;
-  
-procedure lp_Write(Params: PParamArray);
+
+procedure lp_Write(Params: PParamArray); lape_extdecl
 begin
   WriteLnStr += PlpString(Params^[0])^;
 end;
-  
-procedure lp_WriteLn(Params: PParamArray);
+
+procedure lp_WriteLn(Params: PParamArray); lape_extdecl
 begin
   psWriteLn(WriteLnStr);
   WriteLnStr := '';
 end;
 
-procedure lp_DebugLn(Params: PParamArray);
+procedure lp_DebugLn(Params: PParamArray); lape_extdecl
 begin
   ps_debugln(PlpString(Params^[0])^);
 end;
