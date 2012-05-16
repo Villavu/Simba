@@ -747,7 +747,7 @@ begin
   if (Sender is TmwSimplePasPar) then
     if (TmwSimplePasPar(Sender).Lexer.TokenID = tok_DONE) then
       Exit;
-  mDebugLn('ERROR: '+Format('%d:%d %s', [Y + 1, X, Msg])+' in '+TCodeInsight(Sender).FileName);
+  mDebugLn('CC ERROR: '+Format('%d:%d %s', [Y + 1, X, Msg])+' in '+TCodeInsight(Sender).FileName);
 end;
 
 procedure TSimbaForm.OnCompleteCode(Str: string);
@@ -779,6 +779,22 @@ begin
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
+
+  function AddTrailingSemiColon(const s: string): string;
+  var
+    l: Integer;
+  begin
+    l := Length(s);
+    while (l >= 1) and (s[l] = ';') do
+      Dec(l);
+    Result := Copy(s, 1, l) + ';';
+  end;
+
+  function AddTrailingForward(const s: string): string;
+  begin
+    Result := AddTrailingSemiColon(s) + 'forward;';
+  end;
+
 var
   i, Index: Integer;
   b: TStringList;
@@ -796,18 +812,24 @@ begin
   begin
     b := TStringList.Create;
     try
-      ms := TMemoryStream.Create;
-
       with PluginsGlob.MPlugins[Index] do
+      begin
+        for i := 0 to TypesLen - 1 do
+          b.Add('type ' + Types[i].TypeName + ' = ' + AddTrailingSemiColon(Types[i].TypeDef));
         for i := 0 to MethodLen - 1 do
-          b.Add(Methods[i].FuncStr + 'forward;');
+          b.Add(AddTrailingForward(Methods[i].FuncStr));
+      end;
+
+      ms := TMemoryStream.Create;
       ci := TCodeInsight.Create;
       with ci do
-      begin
+      try
         OnMessage := @SimbaForm.OnCCMessage;
         b.SaveToStream(ms);
         FileName := LibName;
         Run(ms, nil, -1, True);
+      except
+        mDebugLn('CC ERROR: Could not parse imports for plugin: ' + LibName);
       end;
     finally
       b.Free;
@@ -2596,12 +2618,13 @@ begin
 
     Buffer := TCodeInsight.Create;
     with Buffer do
-    begin
+    try
       OnMessage := @OnCCMessage;
       Run(Stream, nil, -1, True);
       FileName := '"PSCORE"';
+    except
+      mDebugLn('CC ERROR: Could not parse imports');
     end;
-
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
   finally
