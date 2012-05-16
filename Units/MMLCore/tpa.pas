@@ -1172,7 +1172,7 @@ begin
   EndD := ED;
   StartD := (Floor(StartD) mod 360)  + (StartD - Floor(StartD));
   StartD := StartD + (Ord(StartD < 0.0) * 360);
-  EndD := (Floor(EndD) mod 360)  + (EndD - Floor(EndD));
+  EndD := (Floor(EndD) mod 360)  + (EndD - Floor(EndD)) + Ord(EndD = 360)*360;
   EndD := EndD + (Ord(EndD < 0.0) * 360);
   cWise := StartD > EndD;
   if cWise then
