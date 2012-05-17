@@ -1154,7 +1154,6 @@ end;
   \\ SD (StartDegree) and ED (EndDegree) and the distances MinR (MinRadius) and
   \\ MaxR (MaxRadius) from the origin (Mx, My).
 /\}
-
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 const
   i180Pi = 57.29577951;
@@ -1170,10 +1169,14 @@ begin
   L := 0;
   StartD := SD;
   EndD := ED;
-  StartD := (Floor(StartD) mod 360)  + (StartD - Floor(StartD));
-  StartD := StartD + (Ord(StartD < 0.0) * 360);
-  EndD := (Floor(EndD) mod 360)  + (EndD - Floor(EndD));
-  EndD := EndD + (Ord(EndD < 0.0) * 360);
+  while StartD > 360.0 do
+    StartD := StartD - 360.0;
+  while EndD > 360.0 do
+    EndD := EndD - 360.0;
+  while StartD < 0.0 do
+    StartD := StartD + 360.0;
+  while EndD < 0.0 do
+    EndD := EndD + 360.0;
   cWise := StartD > EndD;
   if cWise then
     SwapE(StartD, EndD);
