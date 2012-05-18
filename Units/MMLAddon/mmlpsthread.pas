@@ -1383,6 +1383,8 @@ begin
   Running := bFalse;
 
   InitializePascalScriptBasics(Compiler);
+  ExposeGlobals(Compiler);
+
   Compiler['Move'].Name := 'MemMove';
   Compiler.OnFindFile := @OnFindFile;
   Compiler.OnHandleDirective := @OnHandleDirective;
