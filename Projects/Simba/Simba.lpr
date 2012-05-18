@@ -18,8 +18,8 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    SAMufasaGUI for the Mufasa Macro Library
-}                 
+    Simba for the Mufasa Macro Library
+}
 
 program Simba;
 
@@ -30,7 +30,11 @@ program Simba;
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}cthreads, cmem,{$ENDIF}{$ENDIF}
   Interfaces, Forms, SimbaUnit, colourhistory, About, debugimage, bitmapconv,
+<<<<<<< HEAD
   dcpbase64;
+=======
+  scriptmanager, debugger;
+>>>>>>> Forkje/debugger
 
 {$R Simba.res}
 
@@ -43,6 +47,8 @@ begin
   Application.CreateForm(TDebugImgForm, DebugImgForm);
 //  Application.CreateForm(TExtensionsForm, ExtensionsForm);
   Application.CreateForm(TBitmapConvForm, BitmapConvForm);
+  Application.CreateForm(TScriptManagerForm, ScriptManagerForm);
+//  Application.CreateForm(TDebuggerForm, DebuggerForm);
 //  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
 //  Application.CreateForm(TSettingsSimpleForm, SettingsSimpleForm); Done in FormCreate of MainForm
 //  Application.CreateForm(TSettingsForm, SettingsForm); Done in FormCreate of MainForm

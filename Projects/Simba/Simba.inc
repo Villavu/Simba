@@ -32,6 +32,8 @@
                         // default, yet keep it possible to disable it with
                         // command line flags.
 
+{$DEFINE USE_DEBUGGER}
+
 //{$DEFINE USE_RUTIS}
 {$DEFINE USE_LAPE}
 
