@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="52">
+    <Units Count="53">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -328,6 +328,13 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="newsimbasettings"/>
       </Unit51>
+      <Unit52>
+        <Filename Value="debugger.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DebuggerForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="debugger"/>
+      </Unit52>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

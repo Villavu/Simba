@@ -1,46 +1,20 @@
-{
-    This file is part of the Simba Project
-    Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
-
-    Simba is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Simba is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with MML.  If not, see <http://www.gnu.org/licenses/>.
-
-    See the file COPYING, included in this distribution,
-    for details about the copyright.
-
-    Script Manager for the Simba project.
-}
-
-{
-Raymond`, 11-9-2010 20:26:27:
-ScriptManager/General/Settings.xml (Lijst van alle geinstaleerde scripts)
-ScriptManager/General/<Scriptname>/Info.xml (Informatie over het script)
-ScriptManager/<ScriptName>/<Files> (Alle files die het script nodig heeft)
-}
-unit scriptmanager;
+unit ScriptManager;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  {$IFDEF UNIX}cthreads,cmem,{$ENDIF} Classes, SysUtils, FileUtil, Forms, Controls, Graphics,
-  Dialogs, StdCtrls, ExtCtrls, ComCtrls, ActnList, Menus, Grids, settings,
-  updater, strutils, MufasaTypes, dom, mmisc;
+  Classes,  LResources, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
+  ButtonPanel, Menus, Buttons, StdCtrls, Grids,
 
-type
+  {$IFDEF UNIX}cthreads,cmem,{$ENDIF} ExtCtrls, ActnList, settings,
+  updater, strutils, MufasaTypes, dom, mmisc, files;
 
-  { TSimbaScript }
+
+Type
+
+{ TSimbaScript }
 
   TSimbaScript = class(TObject)
   private
@@ -96,6 +70,7 @@ type
     function NewVersion(Script : integer) : boolean; //Checks for updates for Script
     procedure InstallNewRScript(Script : integer); //Installs Script (Online -> Local)
     function UpdateLScript(Script : integer; ignoreupdating : boolean = false) : boolean; //Updates all the info/files of local script
+    function DeleteLScript(Script: integer) : boolean;
     procedure LSave; //Saves the local scripts, uses MainDir
     property LScriptCount : integer read GetLScriptCount; //LScript = Local Script = Installed Script
     property RScriptCount : integer read GetRScriptCount; //Online script
@@ -104,116 +79,390 @@ type
     destructor Destroy; override;
   end;
 
-  { TForm1 }
 
-  TForm1 = class(TForm)
-    Button4: TButton;
-    ComboBox1: TComboBox;
-    Edit1: TEdit;
-    Label1: TLabel;
-    StringGrid1: TStringGrid;
-    procedure Button2Click(Sender: TObject);
-    procedure Edit1Change(Sender: TObject);
-    procedure Edit1Enter(Sender: TObject);
-    procedure Edit1Exit(Sender: TObject);
+  { TScriptManagerForm }
+
+  TScriptManagerForm = class(TForm)
+    btnInstallScript: TBitBtn;
+    btnLoadScript: TBitBtn;
+    edSearch: TEdit;
+    ImageListTabs: TImageList;
+    ImageListLibrary: TImageList;
+    ImageListSkills: TImageList;
+    ListViewRepository: TListView;
+    ListViewLibrary: TListView;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuItemRemove: TMenuItem;
+    PageControlTabs: TPageControl;
+    pMenuRepo: TPopupMenu;
+    pMenuLibrary: TPopupMenu;
+    StringGrid2: TStringGrid;
+    TabSheetLibrary: TTabSheet;
+    TabSheetRepo: TTabSheet;
+    procedure btnInstallScriptClick(Sender: TObject);
+    procedure btnLoadScriptClick(Sender: TObject);
+    procedure btnUpdateClick(Sender: TObject);
+    procedure edSearchChange(Sender: TObject);
+    procedure edSearchEnter(Sender: TObject);
+    procedure edSearchExit(Sender: TObject);
+    {procedure edSearchChange(Sender: TObject);
+    procedure edSearchEnter(Sender: TObject);
+    procedure edSearchExit(Sender: TObject);}
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure ListViewLibraryMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure ListViewRepositoryAdvancedCustomDrawItem(Sender: TCustomListView;
+      Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
+      var DefaultDraw: Boolean);
+    procedure ListViewRepositoryColumnClick(Sender: TObject; Column: TListColumn
+      );
+    procedure ListViewRepositorySelectItem(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
+    procedure MenuItemRemoveClick(Sender: TObject);
+    procedure PageControlTabsChange(Sender: TObject);
+    procedure Refresh;
   private
+    { private declarations }
     Mng : TScriptManager;
   public
     { public declarations }
-  end;
-
+  end; 
 
 var
-  Form1: TForm1; 
+  ScriptManagerForm: TScriptManagerForm;
+  PopulatingListViews: Boolean;
+
+
 
 implementation
 
-uses
-  XMLRead,XMLWrite;
-{$R *.lfm}
+  uses
+    XMLRead,XMLWrite, simbaunit;
 
-{ TForm1 }
-procedure TForm1.FormCreate(Sender: TObject);
+
+  {$R *.lfm}
+
+  { TScriptManagerForm }
+
+procedure TScriptManagerForm.FormCreate(Sender: TObject);
 begin
   Mng := TScriptManager.Create;
+  PageControlTabs.ActivePage := TabSheetLibrary;
 end;
 
-procedure TForm1.FormShow(Sender: TObject);
-var
-  i, l: integer;
+
+
+procedure TScriptManagerForm.btnUpdateClick(Sender: TObject);
+var Script: TLSimbaScript;
 begin
+  Script := TLSimbaScript(ListViewLibrary.Selected.Data);
+
+
+  if (ListViewLibrary.Selected <> nil) and (ListViewLibrary.Selected.Data <> nil) then
+    Mng.UpdateLScript(Mng.FindLScriptByName(Script.Name));
+
+
+  Refresh;
+end;
+
+
+var
+  BtnUpdate: Array of TSpeedButton;
+{ Refreshes the TListViews }
+
+procedure TScriptManagerForm.Refresh;
+const
+  btnUpdateColumnIndex = 4;
+  btnSkillColumnIndex = 0;
+var
+  BtnSkill: Array of TSpeedButton;
+  pbRect : TRect;
+  i, j, SkillImg: integer;
+  ListItem: TListItem;
+begin
+  PopulatingListViews := True;
+
   Mng.LUpdate;
   Mng.RUpdate;
-  StringGrid1.RowCount := 1;
-  for i := 0 to Mng.RScriptCount - 1 do
+
+
+  ListViewRepository.Items.Clear;
+
+
+  for i := 0 to Mng.RScriptCount -1 do
   begin
-    StringGrid1.RowCount := i + 2;
-    StringGrid1.Cells[0, i + 1] := Mng.SimbaScript[i].Name;
-    StringGrid1.Cells[1, i + 1] := Mng.SimbaScript[i].Version;
-    StringGrid1.Cells[2, i + 1] := Mng.SimbaScript[i].Author;
-    StringGrid1.Cells[3, i + 1] := Mng.SimbaScript[i].Description;
+    ListItem := ListViewRepository.Items.Add;
+    ListItem.Data := Mng.SimbaScript[i];
+
+    ListItem.Caption := Mng.SimbaScript[i].Name;
+    ListItem.SubItems.Add(Mng.SimbaScript[i].Version);
+    ListItem.SubItems.Add(Mng.SimbaScript[i].Author);
+    ListItem.SubItems.Add(Mng.SimbaScript[i].Description);
+
   end;
+
+  ListViewLibrary.Items.Clear;
+  for i := 0 to High(btnUpdate) do
+    btnUpdate[i].Destroy;
+  SetLength(btnUpdate, 0);
+  if Mng.LScriptCount = 0 then
+    Exit;
+  for i := 0 to Mng.LScriptCount -1 do
+  begin
+    ListItem := ListViewLibrary.Items.Add;
+    ListItem.Data := TLSimbaScript(mng.FLScripts[i]);
+    ListItem.Caption := TLSimbaScript(mng.FLScripts[i]).Name;
+    ListItem.SubItems.Add(TLSimbaScript(mng.FLScripts[i]).Version);
+    ListItem.SubItems.Add(TLSimbaScript(mng.FLScripts[i]).Author);
+    ListItem.SubItems.Add(TLSimbaScript(mng.FLScripts[i]).Description);
+
+    SetLength(btnUpdate, Length(btnUpdate) + 1);
+    btnUpdate[i] := TSpeedButton.Create(nil);
+    btnUpdate[i].Caption := '';
+    btnUpdate[i].Parent := ListViewLibrary;
+    btnUpdate[i].Flat:= True;
+
+    TLSimbaScript(mng.FLScripts[i]).OnlineScript := Mng.SimbaScript[mng.FindRScriptByName(TLSimbaScript(mng.FLScripts[i]).Name)];
+
+    if not mng.NewVersion(i) then
+      begin
+        btnUpdate[i].enabled := False;
+        btnUpdate[i].hint := 'You have the lastest version';
+      end else
+      begin
+        btnUpdate[i].enabled := True;
+        btnUpdate[i].hint := 'Click to Update'
+      end;
+
+    btnUpdate[i].ShowHint:= true;
+    btnUpDate[i].OnClick := @btnUpdateClick;
+    ImageListLibrary.GetBitmap(0, btnUpdate[i].Glyph);
+
+
+    pbRect := ListItem.DisplayRect(drBounds);
+
+    for j := 0 to btnUpdateColumnIndex - 1 do
+      pbRect.Left := pbRect.Left + ListViewLibrary.Columns[j].Width;
+
+    pbRect.Right := pbRect.Left +
+                    ListViewLibrary.Columns[btnUpdateColumnIndex].Width;
+    btnUpdate[i].BoundsRect := pbRect;
+  end;
+  PopulatingListViews := False;
+end;
+
+procedure TScriptManagerForm.FormShow(Sender: TObject);
+begin
+
+  Refresh;
 end;
 
 
-
-
-
-procedure TForm1.Edit1Change(Sender: TObject);
+procedure TScriptManagerForm.ListViewLibraryMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  i, c: Integer;
+  Rect: TRect;
+  i: integer;
 begin
-  StringGrid1.RowCount := 1;
-  c := 0;
-  for i := 0 to Mng.RScriptCount - 1 do
-  begin
-    if AnsiContainsText(Mng.SimbaScript[i].Name, Edit1.Caption) or AnsiContainsText(Mng.SimbaScript[i].Author, Edit1.Caption) or (Edit1.Caption = '') or (Edit1.Caption = 'Search') then
+  if Button = mbRight then
+    if (ListViewLibrary.Selected <> nil) and (ListViewLibrary.Selected.Data <> nil) then
     begin
-      StringGrid1.RowCount := c + 2;
+      Rect := ListViewLibrary.Selected.DisplayRect(drSelectBounds);
 
-      StringGrid1.Cells[0, c + 1] := Mng.SimbaScript[i].Name;
-      StringGrid1.Cells[1, c + 1] := Mng.SimbaScript[i].Version;
-      StringGrid1.Cells[2, c + 1] := Mng.SimbaScript[i].Author;
-      StringGrid1.Cells[3, c + 1] := Mng.SimbaScript[i].Description;
-      c := c + 1;
+      if (Rect.Left < x) and (x < Rect.Right) and (Rect.Top < y) and (y < Rect.Bottom) then
+        pMenuLibrary.PopUp;
     end;
+
+
+end;
+
+procedure TScriptManagerForm.ListViewRepositoryAdvancedCustomDrawItem(
+  Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
+  Stage: TCustomDrawStage; var DefaultDraw: Boolean);
+var
+  i: boolean;
+begin
+  if not PopulatingListViews then
+    if Mng.SimbaScript[Mng.FindRScriptByName(Item.Caption)].Installed then
+      Sender.Canvas.Font.Color := clGrayText
+    else
+      Sender.Canvas.Font.Color := clDefault;
+end;
+
+procedure TScriptManagerForm.ListViewRepositoryColumnClick(Sender: TObject;
+  Column: TListColumn);
+begin
+
+  ListViewRepository.SortColumn := Column.Index;
+end;
+
+
+procedure TScriptManagerForm.ListViewRepositorySelectItem(Sender: TObject;
+  Item: TListItem; Selected: Boolean);
+begin
+   if Mng.SimbaScript[Mng.FindRScriptByName(Item.Caption)].Installed then
+   begin
+      btnInstallScript.Enabled := False;
+      btnInstallScript.Caption := 'Installed'
+   end else
+   begin
+      btnInstallScript.Enabled := True;
+      btnInstallScript.Caption := 'Install';
+   end;
+end;
+
+//Remove Script
+procedure TScriptManagerForm.MenuItemRemoveClick(Sender: TObject);
+var
+  Script: TLSimbaScript;
+  ToRemove: Array of TLSimbaScript;
+  i: Integer;
+  RemoveSelected: Boolean;
+begin
+
+  RemoveSelected := True;
+
+  Script := TLSimbaScript(ListViewLibrary.Selected.Data);
+
+  SetLength(ToRemove, 0);
+
+  for i := 0 to ListViewLibrary.Items.Count - 1 do
+    if ListViewLibrary.Items[i].Checked then
+    begin
+      RemoveSelected := False;
+      SetLength(ToRemove, Length(ToRemove) + 1);
+      ToRemove[High(ToRemove)] := TLSimbaScript(ListViewLibrary.Items[i].Data);
+    end;
+
+  Writeln('Deleted' + Script.Name);
+  if RemoveSelected then
+    Mng.DeleteLScript(mng.FindLScriptByName(Script.Name))
+  else
+    for i := 0 to High(ToRemove) do
+      Mng.DeleteLScript(mng.FindLScriptByName(ToRemove[i].Name));
+  Refresh;
+end;
+
+
+
+
+procedure TScriptManagerForm.PageControlTabsChange(Sender: TObject);
+begin
+  if PageControlTabs.ActivePage = TabSheetLibrary then
+  begin
+                  btnInstallScript.Visible := False;
+                  btnLoadScript.Visible := True;
+                end;
+   if PageControlTabs.ActivePage = TabSheetRepo then
+   begin
+                  btnLoadScript.Visible := False;
+                  btnInstallScript.Visible := True;
+                end;
+end;
+
+
+
+//Search
+procedure TScriptManagerForm.edSearchChange(Sender: TObject);
+var
+  i, j: Integer;
+  S: String;
+  ListItem: TListItem;
+  found: Boolean;
+begin
+
+  S := edSearch.Caption;
+
+  for i := 0 to ListViewRepository.Items.Count - 1 do
+  begin
+    ListItem := ListViewRepository.Items[i];
+
+    found := AnsiCompareText(ListItem.Caption, S) = 0;
+
+    if not found then
+      for j := 0 to ListViewRepository.ColumnCount - 2 do
+      begin
+        found := AnsiCompareText(ListItem.SubItems[j], S) = 0;
+        if found then
+          Break;
+      end;
+
+    {if found then
+      ListItem. := True
+    else
+      ListItem.Visible := False;}
   end;
 end;
 
-procedure TForm1.Edit1Enter(Sender: TObject);
+
+
+procedure TScriptManagerForm.edSearchEnter(Sender: TObject);
 begin
-  Edit1.Caption := '';
+  edSearch.Caption := '';
 end;
 
-procedure TForm1.Edit1Exit(Sender: TObject);
+procedure TScriptManagerForm.edSearchExit(Sender: TObject);
 begin
-  if Edit1.Caption = '' then
-    Edit1.Caption := 'Search'
+  if edSearch.Caption = '' then
+    edSearch.Caption := 'Search';
 end;
 
 
 
-procedure TForm1.Button2Click(Sender: TObject);
+ // Install Script
+procedure TScriptManagerForm.btnInstallScriptClick(Sender: TObject);
+var
+  Script : TSimbaScript;
+  ToInstall: Array of TSimbaScript;
+  i: Integer;
+  InstallSelected: Boolean;
+begin
+  InstallSelected := True;
+
+  SetLength(ToInstall, 0);
+
+  for i := 0 to ListViewRepository.Items.Count - 1 do
+    if ListViewRepository.Items[i].Checked then
+    begin
+      Writeln('woooo');
+      InstallSelected := False;
+      SetLength(ToInstall, Length(ToInstall) + 1);
+      ToInstall[High(ToInstall)] := TSimbaScript(ListViewRepository.Items[i].Data);
+    end;
+
+
+  if InstallSelected then
+  begin
+    if (ListViewRepository.Selected <> nil) and (ListViewRepository.Selected.Data <> nil) then
+    begin
+      Script := TSimbaScript(ListViewRepository.Selected.Data);
+      Mng.InstallNewRScript(mng.FindRScriptByName(Script.Name));
+      ShowMessage('Finished Installing Script "' + Script.Name + '"');
+    end
+  end else
+  begin
+    for i := 0 to High(ToInstall) do
+      Mng.InstallNewRScript(mng.FindRScriptByName(ToInstall[i].Name));
+    ShowMessage('Finished Installing Scripts');
+  end;
+
+  Refresh;
+end;
+
+procedure TScriptManagerForm.btnLoadScriptClick(Sender: TObject);
 var
   Script : TSimbaScript;
 begin
-  {if (ListView1.Selected <> nil) and (ListView1.Selected.Data <> nil) then
+  if (ListViewLibrary.Selected <> nil) and (ListViewLibrary.Selected.Data <> nil) then
   begin
-    Script := TSimbaScript(ListView1.Selected.Data);
-    if Script.IsInstalled then
-    begin
-//      ShowMessage('Updating Script "' + Script.Name + '"');
-      Mng.UpdateLScript(mng.FindRScriptByName(Script.Name));
-      ShowMessage('Finished Updating Script "' + Script.Name + '"');
-    end else
-    begin
-//      ShowMessage('Installing Script "' + Script.Name + '"');
-      Mng.InstallNewRScript(mng.FindRScriptByName(Script.Name));
-      ShowMessage('Finished Installing Script "' + Script.Name + '"');
-    end;
-  end;       }
+    Script := TSimbaScript(ListViewLibrary.Selected.Data);
+    if FileExistsUTF8('general' + DirectorySeparator + Script.Name + DirectorySeparator + Script.Files[0]) then
+      SimbaForm.LoadScriptFile('general' + DirectorySeparator + Script.Name + DirectorySeparator + Script.Files[0]);
+
+    ScriptManagerForm.Close;
+  end;
 end;
 
 { TSimbaScript }
@@ -362,26 +611,27 @@ var
   X : integer;
 begin
   Databs := TStringList.Create;
-  //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman/scripts.xml');
+
+  Databs.Add('http://old.villavu.com/sm');
+  //Databs.Add('http://old.villavu.com/sm');
   //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman2/scripts.xml');
   //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/secretrepo/scripts.cgi?user=user&pass=pass');
-  Databs.Add('http://old.villavu.com/sm');
 
   //TODO: Load list of repositories
 
 //  ShowMessage(SettingsForm.Settings.GetKeyValueDefLoad('Settings/SourceEditor/DefScriptPath', ,SimbaSettingsFile));
 //  ShowMessage(LoadSettingDef('Settings/SourceEditor/DefScriptPath', ExpandFileName(MainDir+DS+'default.simba')));
   FRScripts.Clear();
-  Form1.Label1.Caption := 'Updating from Repository';
+  //Form1.Label1.Caption := 'Updating from Repository';
   for X := 0 to Databs.Count-1 do
   begin
-    Form1.Label1.Caption := 'Updating from Repository ' + inttostr(X+1) +
-                                    '/' + inttostr(Databs.Count);
+    //Form1.Label1.Caption := 'Updating from Repository ' + inttostr(X+1) +
+    //                                '/' + inttostr(Databs.Count);
     AppendRemoteDB(Databs[X]);
   end;
   Databs.Free;
 
-  Form1.Label1.Caption := 'Finished updating from Repository';
+  //Form1.Label1.Caption := 'Finished updating from Repository';
 end;
 
 { Downloads online scripts.xml and parses it, populating FRScripts }
@@ -401,6 +651,7 @@ begin
     exit;
   FUpdating := True;
   Down := TDownloadThread.Create('http://old.villavu.com/sm',@XMLFile);
+ // Down := TDownloadThread.Create('http://old.villavu.com/sm',@XMLFile);
 //  Down := TDownloadThread.Create(url, @XMLFile);
 //  Down := TDownloadThread.Create('http://tootoot222.hopto.org:8080/~mcteo/scriptman/scripts.xml',@XMLFile);
   down.Execute;
@@ -434,6 +685,13 @@ begin
         end else  // there is a local script with same name
         begin
           LScr := GetLScriptByName(SScript.Name);
+
+          //LScr.OnlineScript := SScript;
+
+          SScript.Installed := True;
+          FRScripts.Add(SScript);
+
+         { LScr := GetLScriptByName(SScript.Name);
           if (LScr <> nil) then
           begin
             if isNewerVersion(SScript.Version, LScr.Version) then // if local script is older
@@ -441,7 +699,7 @@ begin
               SScript.Installed := True;
               FRScripts.Add(SScript); // add newer version of script
             end;
-          end;
+          end;}
         end;
       end else
       begin
@@ -496,6 +754,7 @@ begin
           begin
             SScript.free;
             TLSimbaScript(FLScripts[i]).LoadFromName(Node.TextContent,maindir);
+
           end;
         end;
         script := script.NextSibling;
@@ -537,7 +796,7 @@ begin
   LScrpt := TLSimbaScript.create;
   LScrpt.Name:= Scrpt.Name;
   LScrpt.OnlineScript := Scrpt;
-  Dir := MainDir + LScrpt.Name + DirectorySeparator;
+  Dir := MainDir + 'General' + DirectorySeparator + LScrpt.Name + DirectorySeparator;
   if DirectoryExists(dir) then
     Writeln('Directory already exists, yet continue?');
   if not CreateDir(Dir) then
@@ -570,11 +829,12 @@ begin
     Description:= Scrpt.Description;
     Tags.Assign(Scrpt.Tags);
     Files.Assign(Scrpt.Files);
+    //URL := 'http://rsg.frement.net/script_manager/scripts/'+name+ '.tar.bz2';
     URL := 'http://old.villavu.com/sm/scripts/'+name+ '.tar.bz2';
  //   URL := 'http://tootoot222.hopto.org:8080/~mcteo/scriptman/'+name+'.tar.bz2';
   end;
   LScrpt.Save(MainDir);      //Saves the setting file, now we only need to update the files
-  DownloadThread := TDownloadDecompressThread.Create(LScrpt.URL,MainDir + LScrpt.Name + DS,true);
+  DownloadThread := TDownloadDecompressThread.Create(LScrpt.URL,MainDir + 'General' + DS,true);
   DownloadThread.execute;
   while DownloadThread.Done = false do
   begin
@@ -585,6 +845,36 @@ begin
   DownloadThread.Free;
   LSave; //Update the scripts XML file
   FUPdating := false;
+end;
+
+{ Deletes script files,
+ then triggers updating of local scripts.xml to match FLScripts }
+function TScriptManager.DeleteLScript(Script: integer) : boolean;
+var
+  LScrpt : TLSimbaScript;
+  XMLDoc  : TXMLDocument;
+  Node,ScriptNode,tmpNode : TDOMNode;
+  i, h: Integer;
+begin
+  Result := False;
+
+  //h := FLScripts.Count - 1;
+  //for i := Script to h do
+    //FLScripts[i] := FLScripts[i] + 1;
+
+
+  //FLScripts.Count := FLScripts.Count - 1;
+
+  LSave;
+
+  LScrpt := TLSimbaScript(FLScripts[Script]);
+
+  if DeleteDirectory(maindir + 'General' + DirectorySeparator + LScrpt.Name, false) then
+    Result := True;
+
+  FLScripts.Remove(FLScripts[Script]);
+
+  LSave;
 end;
 
 { Updates local scripts.xml to match FLScripts }
@@ -720,4 +1010,8 @@ begin
   AutoCheckUpdates:= true;
 end;
 
+initialization
+  {$I scriptmanager.lrs}
+
 end.
+
