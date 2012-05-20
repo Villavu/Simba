@@ -107,11 +107,11 @@ begin
     RegisterMethod('function ToString : string');
     RegisterMethod('function LoadFromString(const s : string) : boolean;');
     RegisterMethod('procedure Normalize;');
-    RegisterMethod('function Valid:boolean');
-    RegisterMethod('procedure DeletePoint( Point : integer);');
-    RegisterMethod('procedure SwapPoint(p1,p2 : integer);');
+    RegisterMethod('function Valid: boolean');
+    RegisterMethod('procedure DeletePoint(Point: integer);');
+    RegisterMethod('procedure SwapPoint(p1, p2: integer);');
     RegisterMethod('procedure MovePoint(fromIndex,toIndex : integer);');
-    RegisterMethod('procedure AddPoint( Point : TMDTMPoint);');
+    RegisterMethod('function AddPoint(Point : TMDTMPoint): integer;');
     RegisterProperty('Count','Integer',iptrw);
     RegisterProperty('Index','Integer',iptr);
     RegisterProperty('Points','TMDTMPointArray',iptr);
