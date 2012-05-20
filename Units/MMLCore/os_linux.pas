@@ -32,8 +32,8 @@ unit os_linux;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest,
-    syncobjs, mufasabase;
+    Classes, SysUtils, mufasatypes, mufasabase, IOManager,
+    xlib, x, xutil, XKeyInput, ctypes, syncobjs;
 
   type
 
@@ -354,18 +354,18 @@ implementation
 
   procedure TWindow.GetMousePosition(out x,y: integer);
   var
-    event: TXEvent;
+    event: TXButtonEvent;
   begin
     FillChar(event, SizeOf(event), 0);
 
     XQueryPointer(display, window,
-                     @event.xbutton.root, @event.xbutton.window,
-                     @event.xbutton.x_root, @event.xbutton.y_root,
-                     @event.xbutton.x, @event.xbutton.y,
-                     @event.xbutton.state);
+                     @event.root, @event.window,
+                     @event.x_root, @event.y_root,
+                     @event.x, @event.y,
+                     @event.state);
 
-    x := event.xbutton.x;
-    y := event.xbutton.y;
+    x := event.x;
+    y := event.y;
   end;
 
   procedure TWindow.MoveMouse(x,y: integer);
