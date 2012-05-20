@@ -354,75 +354,105 @@ implementation
 
   procedure TWindow.GetMousePosition(out x,y: integer);
   var
-    b:integer;
-    root, child: twindow;
-    xmask: Cardinal;
-
+    event: TXEvent;
   begin
-    XQueryPointer(display,window,@root,@child,@b,@b,@x,@y,@xmask);
+    FillChar(event, SizeOf(event), 0);
+
+    XQueryPointer(display, window,
+                     @event.xbutton.root, @event.xbutton.window,
+                     @event.xbutton.x_root, @event.xbutton.y_root,
+                     @event.xbutton.x, @event.xbutton.y,
+                     @event.xbutton.state);
+
+    x := event.xbutton.x;
+    y := event.xbutton.y;
   end;
 
   procedure TWindow.MoveMouse(x,y: integer);
-  var
-    w,h: integer;
   begin
-    GetTargetDimensions(w, h);
-
-    {
-      Don't error - XWarpPointer will happily move us outside of the window
-      which is fine.
-    }
-    {if (x < 0) or (y < 0) or (x > w) or (y > h) then
-      raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid (0,0,%d,%d)', [x, y, w, h]);     }
-
-    XWarpPointer(display, 0, window, 0, 0, 0, 0, X, Y);
+    XWarpPointer(display, None, window, 0, 0, 0, 0, X, Y);
     XFlush(display);
   end;
 
   procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
   var
-    ButtonP: cuint;
-    _isPress: cbool;
-
+    event: TXButtonPressedEvent;
   begin
-    _isPress := cbool(1);
+    FillChar(event, SizeOf(event), 0);
+
     case button of
-      mouse_Left:   ButtonP:= Button1;
-      mouse_Middle: ButtonP:= Button2;
-      mouse_Right:  ButtonP:= Button3;
+      mouse_Left:   event.button := Button1;
+      mouse_Middle: event.button := Button2;
+      mouse_Right:  event.button := Button3;
     end;
-    XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);;
+    event.same_screen := cint(0);
+    event.subwindow := window;
+
+    while (event.subwindow <> None) do
+    begin
+      event.window := event.subwindow;
+
+      XQueryPointer(display, event.window,
+                       @event.root, @event.subwindow,
+                       @event.x_root, @event.y_root,
+                       @event.x, @event.y,
+                       @event.state);
+    end;
+
+    event._type := ButtonPress;
+    XSendEvent(display, PointerWindow, True, ButtonPressMask, @event);
+    XFlush(display);
   end;
 
   procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
   var
-    ButtonP: cuint;
-    _isPress: cbool;
+    event: TXButtonReleasedEvent;
   begin
-    _isPress := cbool(0);
+    FillChar(event, SizeOf(event), 0);
+
     case button of
-      mouse_Left:   ButtonP:= Button1;
-      mouse_Middle: ButtonP:= Button2;
-      mouse_Right:  ButtonP:= Button3;
+      mouse_Left:   event.button := Button1;
+      mouse_Middle: event.button := Button2;
+      mouse_Right:  event.button := Button3;
     end;
-    XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
+    event.same_screen := cint(0);
+    event.subwindow := window;
+
+    while (event.subwindow <> None) do
+    begin
+      event.window := event.subwindow;
+
+      XQueryPointer(display, event.window,
+                       @event.root, @event.subwindow,
+                       @event.x_root, @event.y_root,
+                       @event.x, @event.y,
+                       @event.state);
+    end;
+
+    event._type := ButtonRelease;
+    XSendEvent(display, PointerWindow, True, ButtonReleaseMask, @event);
+    XFlush(display);
   end;
 
   function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
-    var
-     b:integer;
-     root, child: twindow;
-     xmask: Cardinal;
-     ButtonP: cuint;
-
+  var
+    event: TXEvent;
   begin
-    XQueryPointer(display,window,@root,@child,@b,@b,@b,@b,@xmask);
+    FillChar(event, SizeOf(event), 0);
+
+    XQueryPointer(display, event.xbutton.window,
+                     @event.xbutton.root, @event.xbutton.window,
+                     @event.xbutton.x_root, @event.xbutton.y_root,
+                     @event.xbutton.x, @event.xbutton.y,
+                     @event.xbutton.state);
+
     case button of
-      mouse_Left:   ButtonP:= Button1Mask;
-      mouse_Middle: ButtonP:= Button2Mask;
-      mouse_Right:  ButtonP:= Button3Mask;
+      mouse_Left:   Result := ((event.xbutton.state and Button1Mask) > 0);
+      mouse_Middle: Result := ((event.xbutton.state and Button2Mask) > 0);
+      mouse_Right:  Result := ((event.xbutton.state and Button3Mask) > 0);
+      else
+        Result := False;
     end;
-    result := xmask and ButtonP > 0;
   end;
 
   { TODO: Check if this supports multiple keyboard layouts, probably not }
