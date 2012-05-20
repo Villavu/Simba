@@ -252,3 +252,8 @@ procedure Lape_MinA(const Params: PParamArray; const Result: Pointer); lape_extd
 begin
   PInteger(Result)^ := ps_MinA(TIntegerArray(Params^[0]^));
 end;
+
+procedure Lape_Sum64IntArr(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInt64(Result)^ := ps_Sum64IntArr(PIntegerArray(Params^[0])^);
+end;
