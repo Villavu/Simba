@@ -879,15 +879,16 @@ end;
 procedure TPSThread.OnCompImport(Sender: TObject; x: TPSPascalCompiler);
 begin
   SIRegister_Std(x);
+  SIRegister_Classes(x, True);
   SIRegister_Controls(x);
-  SIRegister_Classes(x, true);
-  SIRegister_Graphics(x, true);
-  SIRegister_stdctrls(x);
+  SIRegister_Graphics(x, True);
   SIRegister_Forms(x);
+  SIRegister_stdctrls(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
+  
   if self.settings <> nil then
   begin
     if lowercase(self.settings.GetKeyValueDefLoad(ssInterpreterAllowSysCalls,
@@ -982,8 +983,8 @@ begin
   RIRegister_Classes(x, True);
   RIRegister_Controls(x);
   RIRegister_Graphics(x, True);
-  RIRegister_stdctrls(x);
   RIRegister_Forms(x);
+  RIRegister_stdctrls(x);
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
   RIRegister_Mufasa(x);
