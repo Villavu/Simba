@@ -321,6 +321,7 @@ type
     procedure ActionUndoExecute(Sender: TObject);
     procedure ChangeMouseStatus(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
+    procedure ClearSearchClick(Sender: TObject);
     procedure CloseFindPanel;
     procedure doOnHide(Sender: TObject);
     procedure editSearchListExit(Sender: TObject);
@@ -465,6 +466,9 @@ type
     procedure CustomExceptionHandler(Sender: TObject; E: Exception);
     procedure RegisterSettingsOnChanges;
   public
+    { Required to work around using freed resources on quit }
+    Exiting: Boolean;
+
     DebugStream: String;
     SearchString : string;
     CurrScript : TScriptFrame; //The current scriptframe
@@ -751,7 +755,7 @@ begin
   if (Sender is TmwSimplePasPar) then
     if (TmwSimplePasPar(Sender).Lexer.TokenID = tok_DONE) then
       Exit;
-  mDebugLn('ERROR: '+Format('%d:%d %s', [Y + 1, X, Msg])+' in '+TCodeInsight(Sender).FileName);
+  mDebugLn('CC ERROR: '+Format('%d:%d %s', [Y + 1, X, Msg])+' in '+TCodeInsight(Sender).FileName);
 end;
 
 procedure TSimbaForm.OnCompleteCode(Str: string);
@@ -783,6 +787,22 @@ begin
 end;
 
 function TSimbaForm.OnCCLoadLibrary(Sender: TObject; var LibName: string; out ci: TCodeInsight): Boolean;
+
+  function AddTrailingSemiColon(const s: string): string;
+  var
+    l: Integer;
+  begin
+    l := Length(s);
+    while (l >= 1) and (s[l] = ';') do
+      Dec(l);
+    Result := Copy(s, 1, l) + ';';
+  end;
+
+  function AddTrailingForward(const s: string): string;
+  begin
+    Result := AddTrailingSemiColon(s) + 'forward;';
+  end;
+
 var
   i, Index: Integer;
   b: TStringList;
@@ -800,18 +820,24 @@ begin
   begin
     b := TStringList.Create;
     try
-      ms := TMemoryStream.Create;
-
       with PluginsGlob.MPlugins[Index] do
+      begin
+        for i := 0 to TypesLen - 1 do
+          b.Add('type ' + Types[i].TypeName + ' = ' + AddTrailingSemiColon(Types[i].TypeDef));
         for i := 0 to MethodLen - 1 do
-          b.Add(Methods[i].FuncStr + 'forward;');
+          b.Add(AddTrailingForward(Methods[i].FuncStr));
+      end;
+
+      ms := TMemoryStream.Create;
       ci := TCodeInsight.Create;
       with ci do
-      begin
+      try
         OnMessage := @SimbaForm.OnCCMessage;
         b.SaveToStream(ms);
         FileName := LibName;
         Run(ms, nil, -1, True);
+      except
+        mDebugLn('CC ERROR: Could not parse imports for plugin: ' + LibName);
       end;
     finally
       b.Free;
@@ -1411,6 +1437,12 @@ var
   S: String;
   B: Boolean;
 begin
+  {
+    TODO: This causes segfaults in EditActions(...) in certain cases.
+    Simply checking if CurrScript and CurrScript.SynEdit is assigned is not
+    enough.)
+  }
+
   if CurrScript.SynEdit.Focused or ScriptPopup.HandleAllocated then
   begin
     with CurrScript.SynEdit do
@@ -2276,6 +2308,13 @@ begin
   LabeledEditSearch.SetFocus;
 end;
 
+procedure TSimbaForm.ClearSearchClick(Sender: TObject);
+begin
+  frmFunctionList.ClearSearchClick(Sender);
+  if frmFunctionList.editSearchList.CanFocus then
+    frmFunctionList.editSearchList.SetFocus;
+end;
+
 
 
 procedure TSimbaForm.CloseFindPanel;
@@ -2529,6 +2568,7 @@ procedure TSimbaForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i : integer;
 begin
+  exiting := True;
   Self.SaveFormSettings;
   for i := Tabs.Count - 1 downto 0 do
     if not DeleteTab(i,true) then
@@ -2559,6 +2599,11 @@ begin
       if (GetCurrentThreadId = MainThreadID) then
         Application.ProcessMessages;
       Sleep(25);
+      if exiting then
+      begin
+        writeln('Updating font: Exiting=True; exiting...');
+        exit;
+      end;
     end;
   end;
 
@@ -2587,12 +2632,13 @@ begin
   begin
     Buffer := TCodeInsight.Create;
     with Buffer do
-    begin
+    try
       OnMessage := @OnCCMessage;
       Run(Stream, nil, -1, True);
       FileName := '"PSCORE"';
+    except
+      mDebugLn('CC ERROR: Could not parse imports');
     end;
-
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
 
@@ -2634,6 +2680,7 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
 begin
   // Set our own exception handler.
   Application.OnException:= @CustomExceptionHandler;
+  exiting := False;
 
   self.BeginFormUpdate;
   Randomize;
@@ -3096,6 +3143,11 @@ begin
   begin
     Application.ProcessMessages;
     Sleep(50);
+    if exiting then
+    begin
+      writeln('Getting news: Exiting=True; breaking...');
+      break;
+    end
   end;
 end;
 
@@ -3368,10 +3420,16 @@ end;
 
 
 procedure TSimbaForm.FontUpdate;
-  procedure Idler;
+  function Idler: boolean;
   begin
+    result := false;
     Application.ProcessMessages;
     Sleep(25);
+    if exiting then
+    begin
+      writeln('FontUpdate, exiting=True; breaking...');
+      result := true;
+    end;
   end;
 
 var
@@ -3396,7 +3454,11 @@ begin
                                            @Fonts);
     FontDownload.Start;
     while FontDownload.Done = false do
-      Idler;
+      if Idler then
+      begin
+        writeln('FontUpdate: Pre-mature exit due to exiting=true');
+        exit;
+      end;
     //Fontdownload is freed now
     Stream := TStringStream.Create(Fonts);
     try
