@@ -27,7 +27,7 @@ unit libloader;
 interface
 
   uses
-    Classes, SysUtils, dynlibs;
+    Classes, SysUtils, dynlibs, syncobjs;
   type
     TGenericLib = record
       filename: string;
@@ -42,7 +42,7 @@ interface
         PluginLen : integer;
         Loaded: TGenericLibArray;
         PluginDirs : TStringList;
-        procedure FreePlugins;
+        LoadCriticalSection: syncobjs.TCriticalSection;
         procedure LoadPluginsDir(DirIndex : integer);
         function VerifyPath(Path : string) : string;
         function LoadPluginNoFallback(PluginName : string) : integer;
@@ -53,6 +53,7 @@ interface
         destructor Destroy; override;
         procedure ValidateDirs;
         procedure AddPath(path: string);
+        procedure FreePlugins; virtual;
         function LoadPlugin(PluginName : string) : integer;
     end;
 
@@ -75,32 +76,6 @@ implementation
     end;
   end;
 
-  procedure TGenericLoader.FreePlugins;
-  var
-    I : integer;
-    OnDetach: procedure(); stdcall;
-  begin
-    for i := 0 to PluginLen - 1 do
-    begin;
-      if (Loaded[i].handle > 0) then
-      try
-        Pointer(OnDetach) := GetProcAddress(
-            Loaded[i].handle, 'OnDetach');
-        if Assigned(OnDetach) then
-        begin
-          mDebugLn('Calling OnDetach');
-          OnDetach();
-        end;
-
-        mDebugLn('Freeing plugin[%d]',[i]);
-        FreeLibrary(Loaded[i].handle);
-      except
-      end;
-    end;
-    SetLength(Loaded,0);
-    PluginLen:= 0;
-  end;
-
   procedure TGenericLoader.ValidateDirs;
   var
     i : integer;
@@ -115,7 +90,7 @@ implementation
 
   procedure TGenericLoader.LoadPluginsDir(DirIndex: integer);
   var
-    PlugExt: String = {$IFDEF LINUX}'*.so';{$ELSE}'*.dll';{$ENDIF}
+    PlugExt: String = '*.' + SharedSuffix;
     FileSearcher : TSearchRec;
   begin
     if (DirIndex < 0) or (DirIndex >= PluginDirs.Count) then
@@ -148,7 +123,7 @@ implementation
   function TGenericLoader.LoadPluginNoFallback(PluginName: string): Integer;
   var
     i, ii : integer;
-    PlugExt: String = {$IFDEF LINUX}'.so';{$ELSE}'.dll';{$ENDIF}
+    PlugExt: String = '.' + SharedSuffix;
   begin
     ii := -1;
     result := -1;
@@ -165,9 +140,14 @@ implementation
       end;
     if ii = -1 then
       raise Exception.CreateFMT('Plugin(%s) has not been found',[PluginName]);
+
+    { Plugin already loaded }
     for i := 0 to PluginLen - 1 do
       if Loaded[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
+      begin
+        Writeln(Format('Plugin %s already loaded: %d', [PluginName, i]));
         Exit(i);
+      end;
     SetLength(Loaded,PluginLen + 1);
     mDebugLn(Format('Loading plugin %s at %s',[PluginName,PluginDirs.Strings[ii]]));
     Loaded[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
@@ -187,27 +167,52 @@ implementation
     CpuBits: String = {$IFDEF CPU32}'32';{$ELSE}'64';{$ENDIF}
   begin
     try
-      Result := LoadPluginNoFallback(PluginName);
-    except
-      on exception do Result:= LoadPluginNoFallback(PluginName+CpuBits);
+      LoadCriticalSection.Acquire;
+
+        try
+          Result := LoadPluginNoFallback(PluginName);
+        except
+          on exception do Result:= LoadPluginNoFallback(PluginName+CpuBits);
+        end;
+
+    finally
+      LoadCriticalSection.Release;
     end;
 
   end;
 
+  procedure TGenericLoader.FreePlugins;
+  var
+    I : integer;
+  begin
+    for i := 0 to PluginLen - 1 do
+    begin;
+      if (Loaded[i].handle > 0) then
+      try
+        mDebugLn('Freeing plugin[%d]',[i]);
+        FreeLibrary(Loaded[i].handle);
+      except
+      end;
+    end;
+    SetLength(Loaded,0);
+    PluginLen:= 0;
+  end;
 
   constructor TGenericLoader.Create;
   begin
     inherited Create;
     PluginLen := 0;
     PluginDirs := TStringList.Create;
-    PluginDirs.CaseSensitive:= {$IFDEF LINUX}true{$ELSE}false{$ENDIF};
+    PluginDirs.CaseSensitive:= {$IFDEF MSWINDOWS}False{$ELSE}True{$ENDIF};
     PluginDirs.Duplicates:= dupIgnore;
+    LoadCriticalSection := syncobjs.TCriticalSection.Create;
   end;
 
   destructor TGenericLoader.Destroy;
   begin
     FreePlugins;
     PluginDirs.Free;
+    LoadCriticalSection.Free;
     inherited Destroy;
   end;
 

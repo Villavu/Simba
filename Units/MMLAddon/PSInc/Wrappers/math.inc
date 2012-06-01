@@ -341,3 +341,14 @@ function ps_MaxA(a: TIntegerArray): Integer; extdecl;
 begin
   Result := MaxA(a);
 end;
+
+function ps_Sum64IntArr(const Arr: TIntegerArray): Int64;
+var
+  H, I: LongInt;
+begin
+  Result := 0;
+
+  H := High(Arr);
+  for I := 0 to H do
+    Result += Arr[I];
+end;
