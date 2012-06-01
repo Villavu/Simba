@@ -48,10 +48,10 @@ type
       function LoadFromString(const s : string) : boolean;
       procedure Normalize;
       function Valid : boolean;
-      procedure DeletePoint( Point : integer);
-      procedure SwapPoint(p1,p2 : integer);
-      procedure MovePoint(fromIndex,toIndex : integer);
-      procedure AddPoint( Point : TMDTMPoint);
+      procedure DeletePoint(Point : integer);
+      procedure SwapPoint(p1, p2: integer);
+      procedure MovePoint(fromIndex, toIndex: integer);
+      function AddPoint(Point: TMDTMPoint): integer;
       property PPoints : PMDTMPoint read GetPointerPoints;
       property Count : integer read FLen write SetPointCount;
       property Points : TMDTMPointArray read FPoints;
@@ -416,36 +416,38 @@ end;
 
 procedure TMDTM.DeletePoint(Point: integer);
 begin
-  MovePoint(Point,FLen-1);
+  MovePoint(Point, FLen - 1);
   Count := Count - 1;
 end;
 
 procedure TMDTM.SwapPoint(p1, p2: integer);
 var
-  Temp : TMDTMPoint;
+  tempP: TMDTMPoint;
 begin
-  Temp := FPoints[p1];
+  tempP := FPoints[p1];
+
   FPoints[p1] := FPoints[p2];
-  FPoints[p2] := Temp;
+  FPoints[p2] := tempP;
 end;
 
 procedure TMDTM.MovePoint(fromIndex, toIndex: integer);
 var
-  i : integer;
+  i: integer;
 begin
   if fromIndex > toIndex then //We are going down
   begin
-    for i := fromindex downto Toindex+1 do
-      SwapPoint(i,i-1);
+    for i := fromindex downto Toindex + 1 do
+      SwapPoint(i, i - 1);
   end else if fromIndex < toIndex then
     for i := fromindex to toindex - 1 do
-      SwapPoint(i,i+1);
+      SwapPoint(i, i + 1);
 end;
 
-procedure TMDTM.AddPoint(Point: TMDTMPoint);
+function TMDTM.AddPoint(Point: TMDTMPoint): integer;
 begin
-  Count:= Count + 1;
-  FPoints[FLen-1] := Point;
+  Count := Count + 1;
+  Result := FLen - 1;
+  FPoints[Result] := Point;
 end;
 
 end.

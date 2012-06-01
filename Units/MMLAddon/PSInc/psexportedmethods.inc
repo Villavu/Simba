@@ -115,6 +115,7 @@ AddFunction(@ps_ArcSinh, 'function ArcSinh(e: extended): extended;');
 AddFunction(@DecRet, 'function DecRet(e: Extended): Extended;');
 AddFunction(@ps_MinA, 'function MinA(a: TIntegerArray): Integer;');
 AddFunction(@ps_MaxA, 'function MaxA(a: TIntegerArray): Integer;');
+AddFunction(@ps_Sum64IntArr, 'function Sum64IntArr(const Arr: TIntegerArray): Int64;');
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 {window}
