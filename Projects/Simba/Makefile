@@ -62,7 +62,7 @@ build := $(CC)
 # -Xd doesn't seem to cause problems when not cross-compiling, and is needed when cross-compiling, so I'm leaving it here
 # -Xg = External debug file (Simba.dbg)
 common_flags := -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu. -dM_MEMORY_DEBUG -dLCL -Xg
-units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/ -Fu../../Units/lape -Fu../../Units/Misc/DCPCrypt -Fu../../Units/Misc/DCPCrypt/Ciphers -Fu../../Units/Misc/DCPCrypt/Hashes -Fu../../Units/lape/extensions/ffi -Fi../../Units/lape -dLape_CDECL -dStaticFFI -Fl../../Units/lape/extensions/ffi/bin/win32 -Fl../../Units/lape/extensions/ffi/bin/win64
+units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/ -Fu../../Units/lape -Fu../../Units/Misc/DCPCrypt -Fu../../Units/Misc/DCPCrypt/Ciphers -Fu../../Units/Misc/DCPCrypt/Hashes -Fu../../Units/lape/extensions/ffi -Fi../../Units/lape -dLape_CDECL -dStaticFFI
 
 binary := Simba.$(platform)
 # windows wants executables to end in .exe
@@ -119,11 +119,11 @@ x86_64-linux:
 	mv Simba.dbg Simba.x86_64-linux.dbg
 
 i386-win32:
-	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" platform_flags="-Twin32 -Pi386"
+	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" platform_flags="-Twin32 -Pi386 -Fl../../Units/lape/extensions/ffi/bin/win32 "
 	# Windows already names the .dbg properly...
 
 x86_64-win64:
-	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" platform_flags="-Twin64 -Px86_64"
+	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" platform_flags="-Twin64 -Px86_64 -Fl../../Units/lape/extensions/ffi/bin/win64"
 	# Windows already names the .dbg properly...
 
 all: i386-linux x86_64-linux i386-win32 x86_64-win64
