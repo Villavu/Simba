@@ -1595,6 +1595,7 @@ begin
   FExternData := True;
   w := awidth;
   h := aheight;
+  FData := PRGB32(mem);
 end;
 
 procedure TMufasaBitmap.ResetPersistentMemory;
