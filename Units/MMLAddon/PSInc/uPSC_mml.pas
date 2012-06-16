@@ -51,6 +51,7 @@ begin
     RegisterProperty('Height','Integer',iptR);
     RegisterProperty('Index','Integer',iptR);
     RegisterProperty('Name','String',iptRW);
+    RegisterProperty('FData','PtrUInt',iptR);
   end;
 end;
 
