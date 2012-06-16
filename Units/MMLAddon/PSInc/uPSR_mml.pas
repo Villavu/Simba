@@ -17,6 +17,7 @@ type
 procedure MBmp_Index_r(self : TMufasaBitmap; var Index : integer);begin;  Index := self.Index; end;
 procedure MBmp_Width_r(self : TMufasaBitmap; var Width : integer);begin;  Width := self.Width; end;
 procedure MBmp_Height_r(self : TMufasaBitmap; var Height : integer);begin;  Height := self.Height; end;
+procedure MBmp_FData_r(self : TMufasaBitmap; var Data: PtrUInt);begin;  Data := PtrUInt(self.FData); end;
 procedure MBmp_Name_r(self : TMufasaBitmap; var Name : String);begin;  Name := self.Name; end;
 procedure MBmp_Name_w(self : TMufasaBitmap; const Name : String);begin; Self.name := name; end;
 procedure MBmp_TransColorSet_r(Self : TMufasaBitmap; var IsSet : boolean); begin IsSet := self.TransparentColorSet; end;
@@ -139,6 +140,7 @@ begin
     RegisterPropertyHelper(@MBmp_Index_r,nil,'INDEX');
     RegisterPropertyHelper(@MBmp_Width_r,nil,'WIDTH');
     RegisterPropertyHelper(@MBmp_Height_r,nil,'HEIGHT');
+    RegisterPropertyHelper(@MBmp_FData_r,nil,'FDATA');
     RegisterPropertyHelper(@MBmp_Name_r,@MBmp_Name_w,'NAME');
     RegisterConstructor(@TMufasaBitmap.Create,'CREATE');
     RegisterMethod(@TMufasaBitmap.free,'FREE');
