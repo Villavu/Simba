@@ -39,16 +39,25 @@ type
     FTransparentSet : boolean;
     FIndex : integer;
     FName : string;
+
+    { True if we do not own FData }
+    FExternData: boolean;
   public
     OnDestroy : procedure(Bitmap : TMufasaBitmap) of object;
     //FakeData : array of TRGB32;
     FData : PRGB32;
     property Name : string read FName write FName;
     property Index : integer read FIndex write FIndex;
+
     procedure SetSize(AWidth,AHeight : integer);
     procedure StretchResize(AWidth,AHeight : integer);
+
     property Width : Integer read w;
     property Height : Integer read h;
+
+    procedure SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);
+    procedure ResetPersistentMemory;
+
     function PointInBitmap(x,y : integer) : boolean;
     procedure ValidatePoint(x,y : integer);
     function SaveToFile(const FileName : string) :boolean;
@@ -114,7 +123,7 @@ type
     function GetBMP(Index : integer) : TMufasaBitmap;
     property Bmp[Index : integer]: TMufasaBitmap read GetBMP; default;
     function CreateBMP(w, h: integer): Integer;
-	function ExistsBMP(Index : integer) : boolean;
+    function ExistsBMP(Index : integer) : boolean;
     function AddBMP(_bmp: TMufasaBitmap): Integer;
     function CopyBMP( Bitmap : integer) : Integer;
     function CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer;
@@ -1522,6 +1531,9 @@ var
   NewData : PRGB32;
   i,minw,minh : integer;
 begin
+  if FExternData then
+    raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
+
   if (AWidth <> w) or (AHeight <> h) then
   begin
     if AWidth*AHeight <> 0 then
@@ -1551,6 +1563,9 @@ var
   NewData : PRGB32;
   x,y : integer;
 begin
+  if FExternData then
+    raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
+
   if (AWidth <> w) or (AHeight <> h) then
   begin;
     if AWidth*AHeight <> 0 then
@@ -1574,6 +1589,20 @@ begin
   end;
 end;
 
+procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);
+begin
+  SetSize(0, 0);
+  FExternData := True;
+  w := awidth;
+  h := aheight;
+end;
+
+procedure TMufasaBitmap.ResetPersistentMemory;
+begin
+  FExternData := False;
+  SetSize(0, 0);
+end;
+
 function TMufasaBitmap.PointInBitmap(x, y: integer): boolean;
 begin
   result := ((x >= 0) and (x < w) and (y >= 0) and (y < h));
@@ -1590,7 +1619,10 @@ begin
   inherited Create;
   Name:= '';
   FTransparentSet:= False;
-  setSize(0,0);
+  SetSize(0,0);
+
+  FExternData := False;
+
   {FData:= nil;
   w := 0;
   h := 0; }
