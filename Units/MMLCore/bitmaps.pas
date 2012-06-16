@@ -1599,6 +1599,8 @@ end;
 
 procedure TMufasaBitmap.ResetPersistentMemory;
 begin
+  if not FExternData then
+    raise Exception.Create('ResetPersistentMemory: Bitmap is not persistent (FExternData = False)');
   FExternData := False;
   SetSize(0, 0);
 end;
