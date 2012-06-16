@@ -13,6 +13,8 @@ begin
   begin;
     RegisterMethod('procedure SetSize(AWidth,AHeight : integer);');
     RegisterMethod('procedure StretchResize(AWidth,AHeight : integer);');
+    RegisterMethod('procedure SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);');
+    RegisterMethod('procedure ResetPersistentMemory;');
     RegisterMethod('procedure FastSetPixel(x,y : integer; Color : TColor);');
     RegisterMethod('procedure FastSetPixels(TPA : TPointArray; Colors : TIntegerArray);');
     RegisterMethod('procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);');
