@@ -1595,6 +1595,7 @@ begin
   FExternData := True;
   w := awidth;
   h := aheight;
+
   FData := PRGB32(mem);
 end;
 
@@ -1602,7 +1603,10 @@ procedure TMufasaBitmap.ResetPersistentMemory;
 begin
   if not FExternData then
     raise Exception.Create('ResetPersistentMemory: Bitmap is not persistent (FExternData = False)');
+
   FExternData := False;
+  FData := nil;
+
   SetSize(0, 0);
 end;
 
@@ -1635,8 +1639,10 @@ destructor TMufasaBitmap.Destroy;
 begin
   if Assigned(OnDestroy) then
     OnDestroy(Self);
-  if Assigned(FData) then
+
+  if Assigned(FData) and not FExternData then
     Freemem(FData);
+
   inherited Destroy;
 end;
 

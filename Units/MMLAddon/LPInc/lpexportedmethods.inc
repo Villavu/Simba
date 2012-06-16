@@ -54,6 +54,8 @@ AddGlobalFunc('function LoadBitmap(Path: String): integer', @Lape_LoadBitmap);
 AddGlobalFunc('procedure SetBitmapSize(Bmp,NewW,NewH: integer);', @Lape_SetBitmapSize);
 AddGlobalFunc('procedure StretchBitmapResize(Bmp,NewW,NewH: integer);', @Lape_StretchBitmapResize);
 AddGlobalFunc('procedure GetBitmapSize(Bmp: integer; var BmpW,BmpH: integer);', @Lape_GetBitmapSize);
+AddGlobalFunc('procedure SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);', @Lape_SetPersistentMemoryBitmap);
+AddGlobalFunc('procedure ResetPersistentMemoryBitmap(bmp: integer);', @Lape_ResetPersistentMemoryBitmap);
 AddGlobalFunc('procedure SetBitmapName(Bmp: integer; name: string);', @Lape_SetBitmapName);
 AddGlobalFunc('function CreateMirroredBitmap(Bmp: integer): integer', @Lape_CreateMirroredBitmap);
 AddGlobalFunc('function CreateMirroredBitmapEx(Bmp: integer; MirrorStyle: TBmpMirrorStyle): integer', @Lape_CreateMirroredBitmapEx);
