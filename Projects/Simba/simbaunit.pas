@@ -839,17 +839,31 @@ end;
 
 procedure TSimbaForm.UpdateInterpreter;
 begin
+{$IFDEF WINDOWS}
+  ActionPascalScript.Checked := False;
+  ActionRUTIS.Checked := False;
+  ActionCPascal.Checked := False;
+  ActionLape.Checked := False;
+
+  case SimbaSettings.Interpreter._Type.Value of
+    interp_PS: ActionPascalScript.Checked := True;
+    interp_CP: ActionCPascal.Checked := True;
+    interp_RT: ActionRUTIS.Checked := True;
+    interp_LP: ActionLape.Checked := True;
+  end;
+{$ELSE}
   MenuItemPascalScript.RadioItem := False;
   MenuItemLape.RadioItem := False;
   MenuItemCPascal.RadioItem := False;
   MenuItemRUTIS.RadioItem := False;
+
   case SimbaSettings.Interpreter._Type.Value of
     interp_PS: MenuItemPascalScript.RadioItem := True;
     interp_LP: MenuItemLape.RadioItem := True;
     interp_CP: MenuItemCPascal.RadioItem := True;
     interp_RT: MenuItemRUTIS.RadioItem := True;
-
   end;
+{$ENDIF}
 end;
 
 procedure TSimbaForm.HandleConnectionData;
