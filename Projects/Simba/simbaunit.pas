@@ -839,15 +839,16 @@ end;
 
 procedure TSimbaForm.UpdateInterpreter;
 begin
-  ActionPascalScript.Checked := False;
-  ActionRUTIS.Checked := False;
-  ActionCPascal.Checked := False;
-  ActionLape.Checked := False;
+  MenuItemPascalScript.RadioItem := False;
+  MenuItemLape.RadioItem := False;
+  MenuItemCPascal.RadioItem := False;
+  MenuItemRUTIS.RadioItem := False;
   case SimbaSettings.Interpreter._Type.Value of
-    interp_PS: ActionPascalScript.Checked := True;
-    interp_CP: ActionCPascal.Checked := True;
-    interp_RT: ActionRUTIS.Checked := True;
-    interp_LP: ActionLape.Checked := True;
+    interp_PS: MenuItemPascalScript.RadioItem := True;
+    interp_LP: MenuItemLape.RadioItem := True;
+    interp_CP: MenuItemCPascal.RadioItem := True;
+    interp_RT: MenuItemRUTIS.RadioItem := True;
+
   end;
 end;
 
@@ -2784,7 +2785,7 @@ begin
   // TODO TEST
   if SimbaSettings.Oops then
     formWriteln('WARNING: No permissions to write to ' + SimbaSettingsFile);
-  
+
   //Fill the codeinsight buffer
   FillThread.Start;
   
