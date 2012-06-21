@@ -47,6 +47,14 @@ begin
     end;
 
   Result := UnTarEx(Cont, PluginPath, Overwrite);
+  if not Result then
+  begin
+    writeln('********************************************************************************');
+    writeln('');
+    writeln('Failed to update plugins! Restart Simba and update before starting a script.');
+    writeln('');
+    writeln('********************************************************************************');
+  end;
 end;
 
 procedure ClickMSI(Sender: TObject);
