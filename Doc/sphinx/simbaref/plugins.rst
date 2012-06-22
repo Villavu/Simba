@@ -68,7 +68,7 @@ managed structures from the script to the plugin. It is however wise to also
 store the old memory manager of your plugin and restore it when *OnDetach* is
 called.
 
-For other languages, this functions doesn't really help - however you should
+For other languages, this function doesn't really help - however you should
 realise that it is not possible to pass pascal strings and arrays directly to
 the script in a safe manner. Doing so will require some hacks (it is possible),
 but might also lead to memory leaks if implemented wrong or used wrong in
