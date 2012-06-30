@@ -181,6 +181,7 @@ type
 
     TUpdaterSection = class(TSection)
       CheckForUpdates: TBooleanSetting;
+      AutomaticallyUpdate: TBooleanSetting;
       RemoteVersionLink: TStringSetting;
       RemoteLink: TStringSetting;
       CheckEveryXMinutes: TIntegerSetting;
@@ -663,6 +664,7 @@ begin
 end;
 
 procedure GetUpdaterGetCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetUpdaterGetAutomaticallyUpdate(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetUpdaterCheckEveryXminutes(obj: TObject); begin TIntegerSetting(obj).Value := 30; end;
 procedure GetUpdaterLink(obj: TObject); begin TStringSetting(obj).Value := SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};; end;
 procedure GetUpdaterVersionLink(obj: TObject); begin TStringSetting(obj).Value := SimbaURL + 'Version'; end;
@@ -779,6 +781,8 @@ begin
   Updater := AddChild(TUpdaterSection.Create()) as TUpdaterSection;
   Updater.CheckForUpdates := Updater.AddChild(TBooleanSetting.Create(ssCheckUpdate)) as TBooleanSetting;
   Updater.CheckForUpdates.onDefault := @GetUpdaterGetCheckForUpdates;
+  Updater.AutomaticallyUpdate := Updater.AddChild(TBooleanSetting.Create(ssAutomaticallyUpdate)) as TBooleanSetting;
+  Updater.AutomaticallyUpdate.onDefault := @GetUpdaterGetAutomaticallyUpdate;
   Updater.RemoteVersionLink := Updater.AddChild(TStringSetting.Create(ssUpdaterVersionLink)) as TStringSetting;
   Updater.RemoteversionLink.onDefault := @GetUpdaterVersionLink;
   Updater.RemoteLink := Updater.AddChild(TStringSetting.Create(ssUpdaterLink)) as TStringSetting;
