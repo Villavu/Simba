@@ -116,7 +116,7 @@ begin
   end else
   begin
     //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
-    while FontVersionThread = nil do
+    while FontVersionThread <> nil do
     begin;
       Application.ProcessMessages;
       Sleep(50);
@@ -156,7 +156,7 @@ begin
   end else
   begin
     //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
-    while SimbaVersionThread = nil do
+    while SimbaVersionThread <> nil do
     begin;
       Application.ProcessMessages;
       Sleep(50);
@@ -193,13 +193,19 @@ begin
   Self.UpdateLog.Clear;
   Self.UpdateLog.Lines.Add('---------- Update Session ----------');
   Self.DownloadSpeed.Visible := false;
+
+
+  (*
+  { Removed to allow forced updates }
+
   if not CanUpdate then
   begin
     //ShowMessage('No Updates Available!');
     Self.UpdateLog.Lines.Add('No Updates Available!');
     Self.UpdateButton.Enabled := False;
   end else
-    Self.UpdateButton.Enabled := true;
+  *)
+  Self.UpdateButton.Enabled := true;
 end;
 
 procedure TSimbaUpdateForm.FormCreate(Sender: TObject);
