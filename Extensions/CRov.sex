@@ -11,11 +11,6 @@ const
   ExtensionDef = 'crov';
   DefInterval = '300000';             //every 5 minutes
 
-type
-  TCharArray = array of Char;
-
-  function _DeleteFile(lpFileName: TCharArray{PChar}): Boolean; external 'DeleteFileA@kernel32.dll stdcall';
-
 var
   Simba_Menu: TMenuItem;
   Timer: TTimer;
@@ -26,22 +21,6 @@ var
 
   SettingsMenu, ForceSave, SaveOnRun: Boolean;
   Dir, Extension: string;
-
-function StringToCharArray(s: string): TCharArray;
-var
-  i, l: Integer;
-begin
-  l := Length(s);
-  SetLength(Result, l + 1);
-  for i := l downto 1 do
-    Result[i - 1] := s[i];
-  Result[l] := #0;
-end;
-
-function DeleteFile(FileName: string): Boolean;
-begin
-  Result := _DeleteFile(StringToCharArray(FileName));
-end;
 
 function FindPageControlWithName(c: TWinControl; Name: string): TPageControl;
 var
