@@ -207,9 +207,9 @@ object SettingsSimpleForm: TSettingsSimpleForm
         object AutomaticallyUpdateBox: TCheckBox
           Left = 16
           Height = 22
-          Top = 140
-          Width = 140
-          Caption = 'Check for updates'
+          Top = 144
+          Width = 167
+          Caption = 'Automatically update?'
           TabOrder = 4
         end
       end
