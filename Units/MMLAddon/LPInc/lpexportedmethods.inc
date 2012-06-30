@@ -54,6 +54,8 @@ AddGlobalFunc('function LoadBitmap(Path: String): integer', @Lape_LoadBitmap);
 AddGlobalFunc('procedure SetBitmapSize(Bmp,NewW,NewH: integer);', @Lape_SetBitmapSize);
 AddGlobalFunc('procedure StretchBitmapResize(Bmp,NewW,NewH: integer);', @Lape_StretchBitmapResize);
 AddGlobalFunc('procedure GetBitmapSize(Bmp: integer; var BmpW,BmpH: integer);', @Lape_GetBitmapSize);
+AddGlobalFunc('procedure SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);', @Lape_SetPersistentMemoryBitmap);
+AddGlobalFunc('procedure ResetPersistentMemoryBitmap(bmp: integer);', @Lape_ResetPersistentMemoryBitmap);
 AddGlobalFunc('procedure SetBitmapName(Bmp: integer; name: string);', @Lape_SetBitmapName);
 AddGlobalFunc('function CreateMirroredBitmap(Bmp: integer): integer', @Lape_CreateMirroredBitmap);
 AddGlobalFunc('function CreateMirroredBitmapEx(Bmp: integer; MirrorStyle: TBmpMirrorStyle): integer', @Lape_CreateMirroredBitmapEx);
@@ -234,6 +236,7 @@ AddGlobalFunc('function ForceDirectories(const dir: string): boolean', @Lape_For
 AddGlobalFunc('function GetFiles(const Path, Ext: string): TStringArray', @Lape_GetFiles);
 AddGlobalFunc('function GetDirectories(const path: string): TStringArray', @Lape_GetDirectories);
 AddGlobalFunc('function DeleteFile(const Filename: string): Boolean',  @Lape_DeleteFile);
+AddGlobalFunc('function RenameFile(const Oldname, NewName: string): Boolean;', @Lape_RenameFile);
 AddGlobalFunc('procedure WriteINI(const Section, KeyName, NewString, FileName: string);', @Lape_WriteINI);
 AddGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): string', @Lape_ReadINI);
 AddGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @Lape_DeleteINI);

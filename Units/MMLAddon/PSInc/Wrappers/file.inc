@@ -106,6 +106,11 @@ begin
   Result := CurrThread.Client.MFiles.DeleteFile(Filename);
 end;
 
+function ps_RenameFile(const OldName, Newname: string): Boolean; extdecl;
+begin
+  Result := CurrThread.Client.MFiles.RenameFile(OldName, NewName);
+end;
+
 procedure ps_WriteINI(const Section, KeyName, NewString : string; FileName: string);extdecl;
 begin;
   CurrThread.Client.MFiles.WriteINI(Section, KeyName, NewString, FileName);
