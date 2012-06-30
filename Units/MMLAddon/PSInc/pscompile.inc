@@ -106,6 +106,13 @@ AddTypeS('T2DStringArray','array of TStringArray');
 AddTypeS('TMousePress', '(mouse_Down, mouse_Up);');
 AddTypeS('Pointer', 'Integer');
 
+// XXX: THIS NEEDS FIXING, I THINK.
+{$IFDEF CPU32}
+AddTypeS('PtrUInt', 'LongInt');
+{$ELSE}
+AddTypeS('PtrUInt', 'Int64');
+{$ENDIF}
+
 AddTypeS('TSP_Property','(SP_WriteTimeStamp,SP_OnTerminate)');
 
 AddConstantN('mouse_Right','integer').SetInt(ps_mouse_right); //0

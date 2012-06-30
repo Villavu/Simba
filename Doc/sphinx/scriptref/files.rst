@@ -57,6 +57,14 @@ CloseFile
 
 Close the file defined by *FileNum*. Never forget to close your files!
 
+DeleteFile
+----------
+
+.. code-block:: pascal
+
+    function DeleteFile(const Filename: string): Boolean;
+
+Delete the file with name *Filename*. Returns true on success.
 
 EndOfFile
 ---------

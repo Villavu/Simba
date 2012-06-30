@@ -161,6 +161,7 @@ AddFunction(@ps_ForceDirectories,'function ForceDirectories(const dir : string) 
 AddFunction(@ps_GetFiles,'function GetFiles(const Path, Ext : string) : TStringArray;');
 AddFunction(@ps_GetDirectories,'function GetDirectories(const path : string) : TStringArray;');
 AddFunction(@ps_DeleteFile, 'function DeleteFile(const Filename: string): Boolean;');
+AddFunction(@ps_RenameFile, 'function RenameFile(const Oldname, NewName: string): Boolean;');
 AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, FileName: string);');
 AddFunction(@ps_ReadINI,'function ReadINI(const Section, KeyName, FileName: string): string;');
 AddFunction(@ps_DeleteINI,'procedure DeleteINI(const Section, KeyName, FileName: string);');
@@ -413,6 +414,8 @@ AddFunction(@ps_BitmapFromString,'function BitmapFromString(Width,Height : integ
 AddFunction(@ps_LoadBitmap,'function LoadBitmap(Path : string) : integer;');
 AddFunction(@ps_SetBitmapSize,'procedure SetBitmapSize(Bmp,NewW,NewH : integer);');
 AddFunction(@ps_GetBitmapSize,'procedure GetBitmapSize(Bmp : integer; var BmpW,BmpH : integer);');
+AddFunction(@ps_SetPersistentMemoryBitmap, 'procedure SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);');
+AddFunction(@ps_ResetPersistentMemoryBitmap, 'procedure ResetPersistentMemoryBitmap(bmp: Integer);');
 AddFunction(@ps_StretchBitmapResize,'procedure StretchBitmapResize(Bmp,NewW,NewH : integer);');
 AddFunction(@ps_CreateMirroredBitmap,'function CreateMirroredBitmap(Bmp : integer) : integer;');
 AddFunction(@ps_CreateMirroredBitmapEx,'function CreateMirroredBitmapEx(Bmp : integer; MirrorStyle : TBmpMirrorStyle) : integer;');

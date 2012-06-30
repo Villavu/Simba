@@ -432,6 +432,8 @@ type
     ScriptOpenData : TScriptOpenData;
     FillThread: TProcThread;
 
+    function SilentUpdateBeat: Boolean;
+
     procedure UpdateInterpreter;
     procedure HandleConnectionData;
     procedure HandleOpenFileData;
@@ -529,6 +531,8 @@ type
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
     function DefaultScript : string;
+
+    procedure UpdateSimbaSilent(Force: Boolean);
   end;
 
   procedure ClearDebug;
@@ -847,16 +851,31 @@ end;
 
 procedure TSimbaForm.UpdateInterpreter;
 begin
+{$IFDEF WINDOWS}
   ActionPascalScript.Checked := False;
   ActionRUTIS.Checked := False;
   ActionCPascal.Checked := False;
   ActionLape.Checked := False;
+
   case SimbaSettings.Interpreter._Type.Value of
     interp_PS: ActionPascalScript.Checked := True;
     interp_CP: ActionCPascal.Checked := True;
     interp_RT: ActionRUTIS.Checked := True;
     interp_LP: ActionLape.Checked := True;
   end;
+{$ELSE}
+  MenuItemPascalScript.RadioItem := False;
+  MenuItemLape.RadioItem := False;
+  MenuItemCPascal.RadioItem := False;
+  MenuItemRUTIS.RadioItem := False;
+
+  case SimbaSettings.Interpreter._Type.Value of
+    interp_PS: MenuItemPascalScript.RadioItem := True;
+    interp_LP: MenuItemLape.RadioItem := True;
+    interp_CP: MenuItemCPascal.RadioItem := True;
+    interp_RT: MenuItemRUTIS.RadioItem := True;
+  end;
+{$ENDIF}
 end;
 
 procedure TSimbaForm.HandleConnectionData;
@@ -1194,6 +1213,58 @@ begin
   TT_Update.Visible:=False;
 end;
 
+function TSimbaForm.SilentUpdateBeat: Boolean;
+begin
+  Application.ProcessMessages;
+  Result := False;
+
+  if exiting then
+  begin
+     writeln('SilentUpdateBeat: Exiting=true; stop update.');
+     result := true;
+  end;
+end;
+
+procedure TSimbaForm.UpdateSimbaSilent(Force: Boolean);
+
+var
+  Updater: TMMLFileDownloader;
+  LatestVersion: Integer;
+
+begin
+  if not Force then
+  begin
+    LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
+    if not (LatestVersion > SimbaVersion) then
+    begin
+      mDebugLn('Not updating; Force = False and LatestVersion <= SimbaVersion');
+      exit;
+    end;
+  end;
+
+  try
+    Updater := TMMLFileDownloader.Create;
+
+    Updater.FileURL := SimbaSettings.Updater.RemoteLink.GetDefValue(
+          SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF}
+    );
+
+    Updater.ReplacementFile := ExtractFileName(Application.ExeName);
+    Updater.BasePath := ExtractFilePath(Application.ExeName);
+    Updater.OnBeat:= @SimbaForm.SilentUpdateBeat;
+
+    try
+      Updater.DownloadAndSave;
+      Updater.Replace;
+      mDebugLn('Simba update succesfull!');
+    except
+      mDebugLn('Simba update failed!');
+    end;
+  finally
+    Updater.Free;
+  end;
+end;
+
 procedure TSimbaForm.UpdateTimerCheck(Sender: TObject);
 var
    chk: Boolean;
@@ -1209,10 +1280,21 @@ begin
 
   LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
   if LatestVersion > SimbaVersion then
-  begin;
-    TT_Update.Visible:=True;
-    formWritelnEx('A new update of Simba is available!');
-    formWritelnEx(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+  begin
+    if SimbaSettings.Updater.AutomaticallyUpdate.GetDefValue(True) then
+    begin
+      mDebugLn('Performing automatic background update.');
+      mDebugLn(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+
+      UpdateSimbaSilent(True); // Force can be true; we already checked versions.
+    end else
+    begin
+      TT_Update.Visible:=True;
+      formWritelnEx('A new update of Simba is available!');
+      formWritelnEx(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+    end;
+
+
   end else
   begin
     mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
@@ -1227,8 +1309,11 @@ procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
 begin
   if SimbaUpdateForm.CanUpdate then
     SimbaUpdateForm.ShowModal
-  else
-    ShowMessage('No Updates Available!');
+  else if MessageDlg('Your Simba seems to be up to date. ' +
+         'Do you want to force an update?', mtConfirmation, mbOKCancel, 0) = mrOk then
+  begin
+    SimbaUpdateForm.ShowModal;
+  end;
 end;
 
 { Clear te debug memo }
@@ -2801,7 +2886,7 @@ begin
   // TODO TEST
   if SimbaSettings.Oops then
     formWriteln('WARNING: No permissions to write to ' + SimbaSettingsFile);
-  
+
   //Fill the codeinsight buffer
   FillThread.Start;
   
@@ -3083,7 +3168,7 @@ end;
 
 procedure TSimbaForm.MenuItemSettingsSimpleButtonClick(Sender: TObject);
 begin
- SettingsSimpleForm.ShowModal;
+  SettingsSimpleForm.ShowModal;
 end;
 
 procedure TSimbaForm.MenuItemShowClick(Sender: TObject);

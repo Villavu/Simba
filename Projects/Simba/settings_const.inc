@@ -20,7 +20,8 @@ ssCheckUpdate = ssSettings + ssUpdater + 'CheckForUpdates';
 ssCheckUpdateMinutes = ssSettings + ssUpdater + 'CheckEveryXMinutes';
 ssUpdaterLink = ssSettings + ssUpdater + 'RemoteLink';
 ssUpdaterVersionLink = ssSettings + ssUpdater + 'RemoteVersionLink';
-
+ssAutomaticallyUpdate = ssSettings + ssUpdater + 'AutomaticallyUpdate';
+ssUpdaterReleaseChannel = ssSettings + ssUpdater + 'ReleaseChannel';
 
 ssLoadFontsOnStart = ssSettings + ssFonts + 'LoadOnStartUp';
 ssFontsVersion = ssSettings + ssFonts + 'Version';

@@ -185,6 +185,34 @@ GetBitmapSize
 
 Returns the size of the bitmap in *BmpW*, *BmpH*.
 
+.. _scriptref-setpersistentmemorybitmap:
+
+SetPersistentMemoryBitmap
+-------------------------
+
+.. code-block:: pascal
+
+    procedure SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);
+
+Set the internal bitmap *bmp* data pointer to *mem*. Size is described by
+*awidth* and *aheight*. *mem* should be a pointer of four bytes.
+
+Byte order: BGRA (Blue, Green, Red, Alpha).
+
+Previous data in the bitmap will be lost.
+
+.. _scriptref-resetpersistentmemorybitmap:
+
+ResetPersistentMemoryBitmap
+---------------------------
+
+.. code-block:: pascal
+
+    procedure ResetPersistentMemoryBitmap(bmp: Integer);
+
+Undo the effect of `SetPersistentMemoryBitmap`_.
+Data in the bitmap before the SetPersistentMemoryBitmap will not be restored.
+
 .. _scriptref-stretchbitmapresize:
 
 StretchBitmapResize

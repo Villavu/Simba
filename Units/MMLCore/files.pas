@@ -46,8 +46,9 @@ type
     function RewriteFile(Path: string; Shared: Boolean): Integer;
     function AppendFile(Path: string): Integer;
     function DeleteFile(Filename: string): Boolean;
+    function RenameFile(OldName, NewName: string): Boolean;
     procedure CloseFile(FileNum: Integer);
-	procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
+    procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
     function ReadINI(const Section, KeyName : string; FileName : string) : string;
     procedure DeleteINI(const Section, KeyName : string; FileName : string);
     function EndOfFile(FileNum: Integer): Boolean;
@@ -426,6 +427,23 @@ begin
       exit(False);
   end;
   Result := DeleteFileUTF8(Filename);
+end;
+
+function TMFiles.RenameFile(OldName, NewName: string): Boolean;
+var
+  Continue : Boolean;
+begin
+  if Assigned(WriteFileEvent) then
+  begin;
+    Continue := true;
+    WriteFileEvent(Self, OldName, continue);
+    if not Continue then
+      exit(False);
+    WriteFileEvent(Self, NewName, continue);
+    if not Continue then
+      exit(False);
+  end;
+  Result := RenameFileUTF8(OldName, NewName);
 end;
 
 {/\
