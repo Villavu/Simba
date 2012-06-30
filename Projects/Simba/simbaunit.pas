@@ -523,6 +523,8 @@ type
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
     function DefaultScript : string;
+
+    procedure UpdateSimbaSilent(Force: Boolean);
   end;
 
   procedure ClearDebug;
@@ -1215,11 +1217,23 @@ begin
   end;
 end;
 
-procedure UpdateSimbaSilent;
+procedure TSimbaForm.UpdateSimbaSilent(Force: Boolean);
 
 var
   Updater: TMMLFileDownloader;
+  LatestVersion: Integer;
+
 begin
+  if not Force then
+  begin
+    LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
+    if not (LatestVersion > SimbaVersion) then
+    begin
+      mDebugLn('Not updating; Force = False and LatestVersion <= SimbaVersion');
+      exit;
+    end;
+  end;
+
   try
     Updater := TMMLFileDownloader.Create;
 
@@ -1241,7 +1255,6 @@ begin
   finally
     Updater.Free;
   end;
-
 end;
 
 procedure TSimbaForm.UpdateTimerCheck(Sender: TObject);
@@ -1265,7 +1278,7 @@ begin
       mDebugLn('Performing automatic background update.');
       mDebugLn(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
 
-      UpdateSimbaSilent;
+      UpdateSimbaSilent(True); // Force can be true; we already checked versions.
     end else
     begin
       TT_Update.Visible:=True;
@@ -1288,8 +1301,11 @@ procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
 begin
   if SimbaUpdateForm.CanUpdate then
     SimbaUpdateForm.ShowModal
-  else
-    ShowMessage('No Updates Available!');
+  else if MessageDlg('Your Simba seems to be up to date. ' +
+         'Do you want to force an update?', mtConfirmation, mbOKCancel, 0) = mrOk then
+  begin
+    SimbaUpdateForm.ShowModal;
+  end;
 end;
 
 { Clear te debug memo }
@@ -3135,7 +3151,7 @@ end;
 
 procedure TSimbaForm.MenuItemSettingsSimpleButtonClick(Sender: TObject);
 begin
- SettingsSimpleForm.ShowModal;
+  SettingsSimpleForm.ShowModal;
 end;
 
 procedure TSimbaForm.MenuItemShowClick(Sender: TObject);
