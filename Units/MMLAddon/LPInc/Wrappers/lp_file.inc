@@ -88,6 +88,11 @@ begin
   PBoolean(Result)^ := ps_DeleteFile(Pstring(Params^[0])^);
 end;
 
+procedure Lape_RenameFile(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_RenameFile(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
 procedure Lape_WriteINI(const Params: PParamArray); lape_extdecl
 begin
   ps_WriteINI(Pstring(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^, Pstring(Params^[3])^);
