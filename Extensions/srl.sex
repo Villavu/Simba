@@ -46,6 +46,22 @@ begin
       Break;
     end;
 
+  if overwrite then
+  begin
+    for x := 0 to high(files) do
+      if FileExists(PluginPath + Files[X]) then
+      begin
+        if FileExists(PluginPath + Files[X] + '.bak') then
+          DeleteFile(PluginPath + Files[X] + '.bak');
+
+        if RenameFile(PluginPath + Files[X], PluginPath + Files[X] + '.bak') then
+          writeln('Renamed ' + PluginPath + Files[X] + ' to ' + PluginPath + Files[X] + '.bak')
+        else
+          writeln('Plugins Updater: failed to rename ' + PluginPath + Files[X] + ' to ' +
+              PluginPath + Files[X] + '.bak');
+      end;
+  end;
+
   Result := UnTarEx(Cont, PluginPath, Overwrite);
   if not Result then
   begin
