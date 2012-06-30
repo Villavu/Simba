@@ -236,6 +236,7 @@ AddGlobalFunc('function ForceDirectories(const dir: string): boolean', @Lape_For
 AddGlobalFunc('function GetFiles(const Path, Ext: string): TStringArray', @Lape_GetFiles);
 AddGlobalFunc('function GetDirectories(const path: string): TStringArray', @Lape_GetDirectories);
 AddGlobalFunc('function DeleteFile(const Filename: string): Boolean',  @Lape_DeleteFile);
+AddGlobalFunc('function RenameFile(const Oldname, NewName: string): Boolean;', @Lape_RenameFile);
 AddGlobalFunc('procedure WriteINI(const Section, KeyName, NewString, FileName: string);', @Lape_WriteINI);
 AddGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): string', @Lape_ReadINI);
 AddGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @Lape_DeleteINI);
