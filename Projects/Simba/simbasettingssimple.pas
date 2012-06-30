@@ -71,6 +71,7 @@ type
     ButtonOK: TButton;
     ButtonCancel: TButton;
     CheckForUpdatesBox: TCheckBox;
+    AutomaticallyUpdateBox: TCheckBox;
     UpdaterURLLabel: TLabel;
     UpdaterURLVersionLabel: TLabel;
     UpdaterURLVersion: TEdit;
@@ -142,6 +143,7 @@ begin
   // Updater
 
   SimbaSettings.Updater.CheckForUpdates.Value := CheckForUpdatesBox.Checked;
+  SimbaSettings.Updater.AutomaticallyUpdate.Value := AutomaticallyUpdateBox.Checked;
   SimbaSettings.Updater.CheckEveryXMinutes.Value := StrToIntDef(UpdateMinutesEdit.Text, 30);
   SimbaSettings.Updater.RemoteLink.Value := UpdaterURL.Text;
   SimbaSettings.Updater.RemoteVersionLink.Value := UpdaterURLVersion.Text;
@@ -217,9 +219,11 @@ var N: TTreeNode;
 begin
   // Updater
   CheckForUpdatesBox.Checked := SimbaSettings.Updater.CheckForUpdates.Value;
+  AutomaticallyUpdateBox.Checked := SimbaSettings.Updater.AutomaticallyUpdate.Value;
   UpdateMinutesEdit.Text := IntToStr(SimbaSettings.Updater.CheckEveryXMinutes.Value);
   UpdaterURL.Text := SimbaSettings.Updater.RemoteLink.Value;
   UpdaterURLVersion.Text := SimbaSettings.Updater.RemoteVersionLink.Value;
+
   // Interpreter
   if SimbaSettings.Interpreter._Type.Value = 0 then
     InterpreterGroup.ItemIndex := 0

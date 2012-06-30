@@ -14,7 +14,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '0.9.30.1'
+  LCLVersion = '0.9.30.4'
   object PgControlAdvanced: TPageControl
     Left = 8
     Height = 304
@@ -203,6 +203,14 @@ object SettingsSimpleForm: TSettingsSimpleForm
           Width = 133
           Caption = 'Updater Version URL'
           ParentColor = False
+        end
+        object AutomaticallyUpdateBox: TCheckBox
+          Left = 16
+          Height = 22
+          Top = 140
+          Width = 140
+          Caption = 'Check for updates'
+          TabOrder = 4
         end
       end
     end
