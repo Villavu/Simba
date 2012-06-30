@@ -53,6 +53,16 @@ begin
   ps_SetBitmapName(Pinteger(Params^[0])^, Pstring(Params^[1])^);
 end;
 
+procedure Lape_SetPersistentMemoryBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_SetPersistentMemoryBitmap(Pinteger(Params^[0])^, PPtrUInt(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^);
+end;
+
+procedure Lape_ResetPersistentMemoryBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_ResetPersistentMemoryBitmap(Pinteger(Params^[0])^);
+end;
+
 procedure Lape_CreateMirroredBitmap(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   Pinteger(Result)^ := ps_CreateMirroredBitmap(Pinteger(Params^[0])^);

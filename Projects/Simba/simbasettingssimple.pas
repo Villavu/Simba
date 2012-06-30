@@ -71,6 +71,7 @@ type
     ButtonOK: TButton;
     ButtonCancel: TButton;
     CheckForUpdatesBox: TCheckBox;
+    AutomaticallyUpdateBox: TCheckBox;
     UpdaterURLLabel: TLabel;
     UpdaterURLVersionLabel: TLabel;
     UpdaterURLVersion: TEdit;
@@ -126,6 +127,8 @@ var
   ClickSettingsTab: Boolean;
 
 implementation
+uses
+  simbaunit;
 
 {$R *.lfm}
 
@@ -137,12 +140,25 @@ begin
 end;
 
 procedure TSettingsSimpleForm.ButtonOKClick(Sender: TObject);
-var N: TTreeNode;
+var
+  N: TTreeNode;
+  PerformUpdate: Boolean;
+
 begin
+  PerformUpdate := False;
   // Updater
 
   SimbaSettings.Updater.CheckForUpdates.Value := CheckForUpdatesBox.Checked;
+  SimbaSettings.Updater.AutomaticallyUpdate.Value := AutomaticallyUpdateBox.Checked;
   SimbaSettings.Updater.CheckEveryXMinutes.Value := StrToIntDef(UpdateMinutesEdit.Text, 30);
+
+  if (SimbaSettings.Updater.RemoteLink.Value <> UpdaterURL.Text) or
+     (SimbaSettings.Updater.RemoteVersionLink.Value <> UpdaterURLVersion.Text) then
+  begin
+    MessageDlg('It appears you changed the Simba updater links. ' +
+     'If you went from a newer version to an older version (from Unstable to Stable) ' +
+     'You will have to force an update.', mtInformation, mbOKCancel, 0);
+  end;
   SimbaSettings.Updater.RemoteLink.Value := UpdaterURL.Text;
   SimbaSettings.Updater.RemoteVersionLink.Value := UpdaterURLVersion.Text;
 
@@ -197,6 +213,11 @@ begin
     SimbaSettings.Scripts.Path.Value := N.GetLastChild.Text;
 
   ModalResult := mrOK;
+
+  if PerformUpdate then
+  begin
+    SimbaForm.UpdateSimbaSilent(True);
+  end;
 end;
 
 { For live changes }
@@ -217,9 +238,11 @@ var N: TTreeNode;
 begin
   // Updater
   CheckForUpdatesBox.Checked := SimbaSettings.Updater.CheckForUpdates.Value;
+  AutomaticallyUpdateBox.Checked := SimbaSettings.Updater.AutomaticallyUpdate.Value;
   UpdateMinutesEdit.Text := IntToStr(SimbaSettings.Updater.CheckEveryXMinutes.Value);
   UpdaterURL.Text := SimbaSettings.Updater.RemoteLink.Value;
   UpdaterURLVersion.Text := SimbaSettings.Updater.RemoteVersionLink.Value;
+
   // Interpreter
   if SimbaSettings.Interpreter._Type.Value = 0 then
     InterpreterGroup.ItemIndex := 0
