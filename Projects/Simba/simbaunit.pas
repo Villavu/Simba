@@ -424,6 +424,8 @@ type
     ScriptOpenData : TScriptOpenData;
     FillThread: TProcThread;
 
+    function SilentUpdateBeat: Boolean;
+
     procedure UpdateInterpreter;
     procedure HandleConnectionData;
     procedure HandleOpenFileData;
@@ -1201,6 +1203,47 @@ begin
   TT_Update.Visible:=False;
 end;
 
+function TSimbaForm.SilentUpdateBeat: Boolean;
+begin
+  Application.ProcessMessages;
+  Result := False;
+
+  if exiting then
+  begin
+     writeln('SilentUpdateBeat: Exiting=true; stop update.');
+     result := true;
+  end;
+end;
+
+procedure UpdateSimbaSilent;
+
+var
+  Updater: TMMLFileDownloader;
+begin
+  try
+    Updater := TMMLFileDownloader.Create;
+
+    Updater.FileURL := SimbaSettings.Updater.RemoteLink.GetDefValue(
+          SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF}
+    );
+
+    Updater.ReplacementFile := ExtractFileName(Application.ExeName);
+    Updater.BasePath := ExtractFilePath(Application.ExeName);
+    Updater.OnBeat:= @SimbaForm.SilentUpdateBeat;
+
+    try
+      Updater.DownloadAndSave;
+      Updater.Replace;
+      mDebugLn('Simba update succesfull!');
+    except
+      mDebugLn('Simba update failed!');
+    end;
+  finally
+    Updater.Free;
+  end;
+
+end;
+
 procedure TSimbaForm.UpdateTimerCheck(Sender: TObject);
 var
    chk: Boolean;
@@ -1216,10 +1259,21 @@ begin
 
   LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
   if LatestVersion > SimbaVersion then
-  begin;
-    TT_Update.Visible:=True;
-    formWritelnEx('A new update of Simba is available!');
-    formWritelnEx(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+  begin
+    if SimbaSettings.Updater.AutomaticallyUpdate.GetDefValue(True) then
+    begin
+      mDebugLn('Performing automatic background update.');
+      mDebugLn(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+
+      UpdateSimbaSilent;
+    end else
+    begin
+      TT_Update.Visible:=True;
+      formWritelnEx('A new update of Simba is available!');
+      formWritelnEx(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
+    end;
+
+
   end else
   begin
     mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
