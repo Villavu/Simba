@@ -103,12 +103,18 @@ end;
 
 function ps_DeleteFile(const Filename: string): Boolean; extdecl;
 begin
-  Result := CurrThread.Client.MFiles.DeleteFile(Filename);
+  if Assigned(CurrThread) then
+    Result := CurrThread.Client.MFiles.DeleteFile(Filename)
+  else
+    Result := DeleteFileUTF8(Filename);
 end;
 
 function ps_RenameFile(const OldName, Newname: string): Boolean; extdecl;
 begin
-  Result := CurrThread.Client.MFiles.RenameFile(OldName, NewName);
+  if Assigned(CurrThread) then
+    Result := CurrThread.Client.MFiles.RenameFile(OldName, NewName)
+  else
+    Result := RenameFileUTF8(Oldname, Newname);
 end;
 
 procedure ps_WriteINI(const Section, KeyName, NewString : string; FileName: string);extdecl;
