@@ -16,7 +16,7 @@ First of all, it is important to know in what way you should represent your
 functions to Simba. Using the newest ABI is recommended. Currently, all three
 ABIs are supported; but older ones may be deprecated in subsequent releases.
 
-Plugins with ABI <= 2 are not exported to Lape.
+Plugins with ABI < 2 are not exported to Lape.
 
 Simba ABI Version 0
 *******************
