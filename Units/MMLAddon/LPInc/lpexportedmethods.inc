@@ -44,7 +44,11 @@ AddGlobalFunc('function CreateDTMPoint(x,y,c,t,asz: integer; bp: boolean): TMDTM
 { Bitmap }
 
 AddGlobalFunc('function CreateBitmapString(bmp: integer): string', @Lape_CreateBitmapString);
-//AddGlobalFunc('function GetMufasaBitmap(bmp: integer): TMufasaBitmap', @Lape_GetMufasaBitmap);
+
+{ This is a temporary workaround to allow Lape to pass TMufasaBitmaps to plugins.
+  Also see lpcompile.inc}
+AddGlobalFunc('function GetMufasaBitmap(bmp: integer): Pointer', @Lape_GetMufasaBitmap);
+
 AddGlobalFunc('function CreateBitmap(w,h: integer): integer', @Lape_CreateBitmap);
 AddGlobalFunc('procedure FreeBitmap(Number: integer);', @Lape_FreeBitmap);
 AddGlobalFunc('procedure SaveBitmap(Bmp: integer; path: string);', @Lape_SaveBitmap);
