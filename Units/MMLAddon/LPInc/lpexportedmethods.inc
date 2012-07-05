@@ -311,7 +311,7 @@ AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing,
 //AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
-AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: Integer);', @Lape_FilterUpTextByCharacteristics);
+AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);', @Lape_FilterUpTextByCharacteristics);
 AddGlobalFunc('procedure SetUpTextFilter(filterdata: TOcrFilterDataArray);', @Lape_SetUpTextFilter);
 AddGlobalFunc('procedure ResetUpTextFilter;', @Lape_ResetUpTextFilter);
 
