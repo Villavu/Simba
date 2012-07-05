@@ -129,3 +129,7 @@ addGlobalType('array of TSysProc', 'TSysProcArr');
 addGlobalType('packed record _type, is_text_color: integer; r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer; ref_color,tol,cts: integer; end;', 'TOCRFilterData');
 
 addGlobalType('array of TOCRFilterData', 'TOCRFilterDataArray');
+
+{ This is a workaround to allow Lape to export TMufasaBitmaps.
+  Also see lpexportedmethods.inc }
+addGlobalType('Pointer', 'TMufasaBitmap');
