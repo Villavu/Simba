@@ -250,12 +250,12 @@ SendSocket
 
 SendSocket sends a string of data to a bound client socket.
 
-SetSocketTimeout
-~~~~~~~~~~~~~~~~
+SetTimeout
+~~~~~~~~~~
 
 .. code-block:: pascal
 
-    procedure SetSocketTimeout(Client, Time: integer);
+    procedure SetTimeout(Client, Time: integer);
 
 SetTimeout sets a maximum amount of time for a bound client socket to wait for
 data from another socket. Time is in *milliseconds*.
