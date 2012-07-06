@@ -65,7 +65,7 @@ end;
 
 procedure Lape_FilterUpTextByCharacteristics(const Params: PParamArray); lape_extdecl
 begin
-  ps_FilterUpTextByCharacteristics(ps_GetMufasaBitmap(PInteger(Params^[0])^));
+  ps_FilterUpTextByCharacteristics(TMufasaBitmap(Params^[0]^));
 end;
 
 procedure Lape_SetUpTextFilter(const Params: PParamArray); lape_extdecl
