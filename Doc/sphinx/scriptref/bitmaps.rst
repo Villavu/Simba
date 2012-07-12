@@ -96,7 +96,7 @@ CreateBitmapString
     function CreateBitmapString(bmp : integer) : string;
 
 Creates a string for the given bitmap, you can use this to save a bitmap for
-later us, for example loading it again using :ref:`scriptref-bitmapfromstring`.
+later use, for example loading it again using :ref:`scriptref-bitmapfromstring`.
 
 
 .. _scriptref-createbitmap:
