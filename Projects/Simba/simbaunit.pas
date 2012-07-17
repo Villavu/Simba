@@ -2694,7 +2694,7 @@ begin
 
   ValueDefs := TStringList.Create;
   try
-    InitializeTMThread(Thread);
+    InitializeTMThread(TMThread(Thread));
 
     if (not ((Assigned(Thread)) and (Thread is TPSThread))) then
       Exit;

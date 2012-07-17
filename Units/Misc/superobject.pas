@@ -109,6 +109,7 @@ type
   PSOChar = PWideChar;
 {$IFDEF FPC}
   SOString = UnicodeString;
+  VUString= Pointer;
 {$ELSE}
   SOString = WideString;
 {$ENDIF}
@@ -125,7 +126,6 @@ const
 
   SUPER_AVL_MAX_DEPTH = sizeof(longint) * 8;
   SUPER_AVL_MASK_HIGH_BIT = not ((not longword(0)) shr 1);
-
 type
   // forward declarations
   TSuperObject = class;
@@ -619,9 +619,9 @@ type
     function GetDataPtr: Pointer;
     procedure SetDataPtr(const Value: Pointer);
   protected
-    function QueryInterface(const IID: TGUID; out Obj): HResult; virtual; stdcall;
-    function _AddRef: Integer; virtual; stdcall;
-    function _Release: Integer; virtual; stdcall;
+    function QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID; out Obj): HResult; virtual; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function _AddRef: Integer; virtual; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+    function _Release: Integer; virtual; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 
     function GetO(const path: SOString): ISuperObject;
     procedure PutO(const path: SOString; const Value: ISuperObject);
@@ -2003,7 +2003,7 @@ begin
     varInt64:    Result := TSuperObject.Create(VInt64);
     varString:   Result := TSuperObject.Create(SOString(AnsiString(VString)));
 {$if declared(varUString)}
-    varUString:  Result := TSuperObject.Create(SOString(string(VUString)));
+    varUString:  Result := TSuperObject.Create(SOString(string(VString)));
 {$ifend}
   else
     raise Exception.CreateFmt('Unsuported variant data type: %d', [VType]);
@@ -4092,7 +4092,7 @@ begin
   ParseString(PSOChar(path), true, False, self, [foCreatePath, foPutValue], TSuperObject.Create(Value));
 end;
 
-function TSuperObject.QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+function TSuperObject.QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} IID: TGUID; out Obj): HResult; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   if GetInterface(IID, Obj) then
     Result := 0

@@ -1,0 +1,60 @@
+object SimbaUpdateForm: TSimbaUpdateForm
+  Left = 276
+  Height = 331
+  Top = 219
+  Width = 473
+  BorderIcons = [biSystemMenu, biMinimize]
+  Caption = 'Update Simba'
+  ClientHeight = 331
+  ClientWidth = 473
+  OnCreate = FormCreate
+  OnShow = CleanUpdateForm
+  LCLVersion = '0.9.30.1'
+  object DownloadProgress: TProgressBar
+    Left = 8
+    Height = 29
+    Top = 268
+    Width = 454
+    Anchors = [akLeft, akRight, akBottom]
+    Smooth = True
+    TabOrder = 0
+  end
+  object UpdateButton: TButton
+    Left = 387
+    Height = 25
+    Top = 300
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Update!'
+    OnClick = UpdateButtonClick
+    TabOrder = 1
+  end
+  object CloseButton: TButton
+    Left = 8
+    Height = 25
+    Top = 300
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Caption = 'Close'
+    OnClick = CloseButtonClick
+    TabOrder = 2
+  end
+  object UpdateLog: TMemo
+    Left = 8
+    Height = 253
+    Top = 8
+    Width = 454
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    TabOrder = 3
+  end
+  object DownloadSpeed: TLabel
+    Left = 96
+    Height = 18
+    Top = 302
+    Width = 111
+    Anchors = [akLeft, akBottom]
+    Caption = 'DownloadSpeed'
+    ParentColor = False
+    Visible = False
+  end
+end
