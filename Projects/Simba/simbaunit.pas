@@ -105,6 +105,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActFrmDsgn: TAction;
     ActionDebugger: TAction;
     ActionLape: TAction;
     ActionGoto: TAction;
@@ -152,6 +153,7 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    ShowDsgnr: TMenuItem;
     MenuItemSettingsSimpleButton: TMenuItem;
     MenuItemLape: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
@@ -283,6 +285,7 @@ type
     TB_SelectClient: TToolButton;
     ToolButton8: TToolButton;
     MTrayIcon: TTrayIcon;
+    procedure ActFrmDsgnExecute(Sender: TObject);
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCompileScriptExecute(Sender: TObject);
@@ -572,7 +575,8 @@ uses
    bitmaps,
    {$IFDEF USE_EXTENSIONS}extensionmanagergui,{$ENDIF}
    colourhistory,
-   math
+   math ,
+   frmdesigner
 
    {$IFDEF LINUX_HOTKEYS}
    ,keybinder
@@ -612,7 +616,7 @@ begin
   WriteLn('');
   WriteLn('Something went wrong...');
   WriteLn('');
-  
+
   Trace := DumpExceptionCallStack(E);
   Trace += LineEnding + 'Simba Version: ' + IntToStr(SimbaVersion) + LineEnding;
 
@@ -629,7 +633,7 @@ begin
   except
     WriteLn(Format('Unable to save log file! [%s]', [LogName]));
   end;
-  
+
   MsgDlgRet := mrOk;
   Application.DisableIdleHandler;
   try
@@ -653,7 +657,23 @@ begin
     Halt(1); // Error code 1
   end;
 end;
-
+{Form finder by Cynic}
+function FindForm(frmName: string): TForm;
+var
+  i: integer;
+begin
+    Result := nil;
+    with Application do begin
+     for i:=0 to Screen.FormCount -1 do begin
+      if (Screen.Forms[i].Name = frmName)  then begin
+            //finded!
+            Result := Screen.Forms[i];
+      Break;
+     end;
+   end;
+    end;
+end;
+{end}
 { Console handler }
 {$IFDEF MSWINDOWS}
 function ConsoleHandler(eventType: DWord): WINBOOL; stdcall;
@@ -1918,7 +1938,7 @@ begin
       Exit;
     end;
   end;
-  
+
   if ((Thread is TPSThread) and (CurrScript.ScriptFile <> '')) then
     TPSThread(Thread).PSScript.MainFileName := CurrScript.ScriptFile;
 
@@ -2216,6 +2236,18 @@ end;
 procedure TSimbaForm.ActionClearDebugExecute(Sender: TObject);
 begin
   Memo1.Clear;
+end;
+
+procedure TSimbaForm.ActFrmDsgnExecute(Sender: TObject);
+var
+  f: TForm;
+begin
+  f:=FindForm('CompForm');
+  if not assigned(f) then
+   begin
+    f:= TCompForm.Create(self);
+    f.Show;
+   end else f.Show;
 end;
 
 procedure TSimbaForm.ActionNewExecute(Sender: TObject);
@@ -2889,7 +2921,7 @@ begin
 
   //Fill the codeinsight buffer
   FillThread.Start;
-  
+
   self.EndFormUpdate;
 end;
 
@@ -3978,4 +4010,5 @@ initialization
 
 
 end.
+
 

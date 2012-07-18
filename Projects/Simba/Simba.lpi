@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="53">
+    <Units Count="61">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -319,7 +319,7 @@
       <Unit50>
         <Filename Value="scriptmanager.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
+        <ComponentName Value="ScriptManagerForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ScriptManager"/>
       </Unit50>
@@ -335,6 +335,46 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="debugger"/>
       </Unit52>
+      <Unit53>
+        <Filename Value="../ScriptFormDsgnr/code.lfm"/>
+        <IsPartOfProject Value="True"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="../ScriptFormDsgnr/code.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="code"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="../ScriptFormDsgnr/cselectonruntime.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cselectonruntime"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="../ScriptFormDsgnr/design_frm.lfm"/>
+        <IsPartOfProject Value="True"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="../ScriptFormDsgnr/design_frm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="design_frm"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="../ScriptFormDsgnr/frmdesigner.lfm"/>
+        <IsPartOfProject Value="True"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="../ScriptFormDsgnr/frmdesigner.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="frmdesigner"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="../ScriptFormDsgnr/sclist.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sclist"/>
+      </Unit60>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -344,7 +384,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;$(ProjPath)../../Units/RUTIS;../../Units/lape/extensions/ffi"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;$(ProjPath)../../Units/RUTIS;../../Units/lape/extensions/ffi;../ScriptFormDsgnr"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

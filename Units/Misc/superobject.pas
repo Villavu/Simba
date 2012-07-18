@@ -109,7 +109,6 @@ type
   PSOChar = PWideChar;
 {$IFDEF FPC}
   SOString = UnicodeString;
-  VUString= Pointer;
 {$ELSE}
   SOString = WideString;
 {$ENDIF}
@@ -126,6 +125,7 @@ const
 
   SUPER_AVL_MAX_DEPTH = sizeof(longint) * 8;
   SUPER_AVL_MASK_HIGH_BIT = not ((not longword(0)) shr 1);
+
 type
   // forward declarations
   TSuperObject = class;
@@ -2003,7 +2003,7 @@ begin
     varInt64:    Result := TSuperObject.Create(VInt64);
     varString:   Result := TSuperObject.Create(SOString(AnsiString(VString)));
 {$if declared(varUString)}
-    varUString:  Result := TSuperObject.Create(SOString(string(VString)));
+    //varUString:  Result := TSuperObject.Create(SOString(string(VUString)));
 {$ifend}
   else
     raise Exception.CreateFmt('Unsuported variant data type: %d', [VType]);
@@ -5047,12 +5047,12 @@ begin
   end;
 end;
 
-function TSuperObject._AddRef: Integer; stdcall;
+function TSuperObject._AddRef: Integer; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   Result := InterlockedIncrement(FRefCount);
 end;
 
-function TSuperObject._Release: Integer; stdcall;
+function TSuperObject._Release: Integer; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
   Result := InterlockedDecrement(FRefCount);
   if Result = 0 then

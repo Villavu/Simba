@@ -716,7 +716,7 @@ end;
 
 destructor TPSThread.Destroy;
 begin
-  PSScript.Free;
+ if assigned(PSScript) then PSSCript.Free;
   inherited;
 end;
 

@@ -1,7 +1,63 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
 <Simba>
   <Extensions>
-    <ExtensionCount>0</ExtensionCount>
+    <ExtensionCount>14</ExtensionCount>
+    <Extension0>
+      <Path>E:\Coding\Simba\Extensions\associate.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension0>
+    <Extension1>
+      <Path>E:\Coding\Simba\Extensions\CRov.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension1>
+    <Extension2>
+      <Path>E:\Coding\Simba\Extensions\dtm_editor.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension2>
+    <Extension3>
+      <Path>E:\Coding\Simba\Extensions\extension.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension3>
+    <Extension4>
+      <Path>E:\Coding\Simba\Extensions\formatter.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension4>
+    <Extension5>
+      <Path>E:\Coding\Simba\Extensions\paster.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension5>
+    <Extension6>
+      <Path>E:\Coding\Simba\Extensions\security.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension6>
+    <Extension7>
+      <Path>E:\Coding\Simba\Extensions\sps.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension7>
+    <Extension8>
+      <Path>E:\Coding\Simba\Extensions\srl.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension8>
+    <Extension9>
+      <Path>E:\Coding\Simba\Extensions\SRLRemote.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension9>
+    <Extension10>
+      <Path>E:\Coding\Simba\Extensions\srl_player_remote.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension10>
+    <Extension11>
+      <Path>E:\Coding\Simba\Extensions\test.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension11>
+    <Extension12>
+      <Path>E:\Coding\Simba\Extensions\test2.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension12>
+    <Extension13>
+      <Path>E:\Coding\Simba\Extensions\test3.sex</Path>
+      <Enabled>False</Enabled>
+    </Extension13>
   </Extensions>
   <Settings>
     <Includes>
@@ -72,7 +128,7 @@
   </Settings>
   <LastConfig>
     <MainForm>
-      <Position></Position>
+      <Position>53:42:660:623</Position>
       <State>normal</State>
       <FunctionListShown>False</FunctionListShown>
     </MainForm>

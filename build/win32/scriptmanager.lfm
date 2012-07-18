@@ -8,7 +8,7 @@ object ScriptManagerForm: TScriptManagerForm
   ClientWidth = 711
   OnCreate = FormCreate
   OnShow = FormShow
-  LCLVersion = '0.9.30'
+  LCLVersion = '0.9.30.4'
   object PageControlTabs: TPageControl
     Left = 0
     Height = 442
@@ -95,7 +95,7 @@ object ScriptManagerForm: TScriptManagerForm
   end
   object edSearch: TEdit
     Left = 528
-    Height = 21
+    Height = 23
     Top = 8
     Width = 172
     OnChange = edSearchChange
