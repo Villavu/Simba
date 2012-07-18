@@ -1,6 +1,15 @@
 Tutorial
-=================
+========
 
-.. WARNING::
+.. toctree::
+    :maxdepth: 2
 
-    What should be in here in the first place?
+    tutorial/intro-prog.rst
+    tutorial/simba-basics.rst
+    tutorial/simba-mouse.rst
+    tutorial/simba-key.rst
+    tutorial/simba-colour-cts.rst
+    tutorial/simba-bitmap.rst
+    tutorial/simba-dtm.rst
+    tutorial/simba-tpa.rst
+    tutorial/simba-files.rst
