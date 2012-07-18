@@ -28,7 +28,7 @@ Use like:
     if findcolors(...) then
       ...
 
-    Unfreeze
+    Unfreeze;
 
 Make sure you never forget to call Unfreeze!
 
@@ -70,7 +70,9 @@ SetTargetBitmap
 
     function SetTargetBitmap(Bitmap : integer): integer;
 
-Set a bitmap as target / client. (It must be loaded by Simba)
+Set a bitmap as target / client. (The bitmap must be loaded by Simba)
+This can be combined with the SetPersistentMemoryBitmap feature to achieve
+the same effect as `SetTargetArray`_.
 
 
 SetTargetArray
@@ -100,6 +102,13 @@ SetImageTarget
 
     procedure SetImageTarget(idx: integer);
 
+Set the Image target defined by index *idx* as active target.
+An Image target controls what data Simba performs colour (and bitmap, dtm, etc)
+searches on.
+
+Both `SetTargetBitmap`_, and `SetTargetArray`_ return a target index.
+Alternatively you can get the index of the current target with `GetImageTarget`_.
+
 
 SetKeyMouseTarget
 -----------------
@@ -108,6 +117,9 @@ SetKeyMouseTarget
 
     procedure SetKeyMouseTarget(idx: integer);
 
+Set the KeyMouse target defined by index *idx* as active target.
+A KeyMouse target controls how Simba moves the mouse cursor and emulates the
+keyboard.
 
 GetImageTarget
 --------------
@@ -115,6 +127,8 @@ GetImageTarget
 .. code-block:: pascal
 
     function GetImageTarget: integer;
+
+Returns the current Image target.
 
 
 GetKeyMouseTarget
@@ -124,6 +138,7 @@ GetKeyMouseTarget
 
     function GetKeyMouseTarget: integer;
 
+Returns the current KeyMouse target.
 
 ExportImageTarget 
 ------------------
@@ -148,6 +163,10 @@ FreeTarget
 
     procedure FreeTarget(idx: integer);
 
+Free a previously loaded target.
+
+This procedure does not free the data associated with the target as in the
+case of `SetTargetBitmap`_ or `SetTargetArray`_.
 
 SetDesktopAsClient
 ------------------
