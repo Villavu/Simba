@@ -50,13 +50,14 @@ interface
         procedure ActivateClient; virtual;
         function TargetValid: boolean; virtual;
 
-        { Sucky implementation }
-        function  GetError: String; virtual; abstract;
-        function  ReceivedError: Boolean; virtual; abstract;
-        procedure ResetError; virtual; abstract;
+        function SetClientArea(x1, y1, x2, y2: integer): boolean; virtual;
+        procedure ResetClientArea; virtual;
 
-        { ONLY override the following methods if the target provides mouse functions, defaults to 
-        | raise exceptions }
+        { Sucky implementation }
+        function  GetError: String; virtual;
+        function  ReceivedError: Boolean; virtual;
+        procedure ResetError; virtual;
+
         procedure GetMousePosition(out x,y: integer); virtual;
         procedure MoveMouse(x,y: integer); virtual;
         procedure ScrollMouse(x,y : integer; Lines : integer); virtual;
@@ -115,6 +116,13 @@ interface
 
         function TargetValid: boolean; override; abstract;
 
+        function  GetError: String; override; abstract;
+        function  ReceivedError: Boolean; override; abstract;
+        procedure ResetError; override; abstract;
+
+        function SetClientArea(x1, y1, x2, y2: integer): boolean; override; abstract;
+        procedure ResetClientArea; override; abstract;
+
         procedure ActivateClient; override; abstract;
         procedure GetMousePosition(out x,y: integer); override; abstract;
         procedure MoveMouse(x,y: integer); override; abstract;
@@ -171,7 +179,10 @@ interface
       public
         constructor Create(client: TEIOS_Client; initval: String);
         destructor Destroy; override;
-        
+
+        function SetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ResetClientArea; override;
+
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
@@ -188,12 +199,16 @@ interface
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
         function GetKeyCode(C : char) : integer; override;
-      
+
       private
         client: TEIOS_Client;
         target: pointer;
         buffer: prgb32;
         width,height: integer;
+        ax1, ay1, ax2, ay2: integer;
+        caset: boolean;
+
+        procedure ApplyAreaOffset(var x, y: integer);
     end;
 
     { This is just a class that loads EIOS clients (like SMART) and sets them up to be used
@@ -282,7 +297,10 @@ interface
 
         function IsFrozen: boolean;
         procedure SetFrozen(makefrozen: boolean);
-        
+
+        function SetClientArea(x1, y1, x2, y2: integer): boolean;
+        procedure ResetClientArea;
+
         procedure GetMousePos(var X, Y: Integer);
         procedure MoveMouse(X, Y: Integer);
         procedure ScrollMouse(x,y : integer; Lines : integer);
@@ -626,6 +644,18 @@ begin
   {not sure if image needs activation or not, if its a native window keymouse == image so it should be good.}
 end;
 
+function TIOManager_Abstract.SetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  Result := image.SetClientArea(x1, y1, x2, y2);
+  if Result then
+    Result := keymouse.SetClientArea(x1, y1, x2, y2);
+end;
+procedure TIOManager_Abstract.ResetClientArea;
+begin
+  image.ResetClientArea;
+  keymouse.ResetClientArea;
+end;
+
 procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer);
 begin
   keymouse.GetMousePosition(x,y)
@@ -751,7 +781,26 @@ function TTarget.TargetValid: boolean;
 begin
   result:= true;
 end;
-
+function TTarget.SetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  raise Exception.Create('SetClientArea not available for this target');
+end;
+procedure TTarget.ResetClientArea;
+begin
+  raise Exception.Create('ResetClientArea not available for this target');
+end;
+function  TTarget.GetError: String;
+begin
+  raise Exception.Create('GetError not available for this target');
+end;
+function  TTarget.ReceivedError: Boolean;
+begin
+  raise Exception.Create('ReceivedError not available for this target');
+end;
+procedure TTarget.ResetError;
+begin
+  raise Exception.Create('ResetError not available for this target');
+end;
 procedure TTarget.GetMousePosition(out x,y: integer);
 begin
   raise Exception.Create('GetMousePosition not available for this target');
@@ -817,6 +866,12 @@ constructor TEIOS_Target.Create(client: TEIOS_Client; initval: String); begin
   else
      self.buffer:= nil;
   GetTargetDimensions(self.width,self.height);
+
+  self.ax1 := 0;
+  self.ay1 := 0;
+  self.ax2 := 0;
+  self.ay2 := 0;
+  self.caset := false;
 end;
 
 destructor TEIOS_Target.Destroy; begin
@@ -825,11 +880,44 @@ destructor TEIOS_Target.Destroy; begin
   inherited Destroy;
 end;
 
+function TEIOS_Target.SetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  if ((x2 - x1) > self.width) or ((y2 - y1) > self.height) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ax1 := x1; ay1 := y1; ax2 := x2; ay2 := y2;
+  caset := True;
+end;
+
+procedure TEIOS_Target.ResetClientArea;
+begin
+  ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
+  caset := False;
+end;
+
+procedure TEIOS_Target.ApplyAreaOffset(var x, y: integer);
+begin
+  if caset then
+  begin
+    x := x + ax1;
+    y := y + ay1;
+  end;
+end;
+
 procedure TEIOS_Target.GetTargetDimensions(out w, h: integer);
 begin
   if Pointer(client.GetTargetDimensions) <> nil then
+  begin
+    if caset then
+    begin
+      w := ax2 - ax1;
+      h := ay2 - ay1;
+      exit;
+    end;
     client.GetTargetDimensions(target,w,h)
-  else
+  end else
     inherited GetTargetDimensions(w,h);
 end;
 
@@ -859,22 +947,28 @@ end;
 procedure TEIOS_Target.GetMousePosition(out x,y: integer);
 begin
   if Pointer(client.GetMousePosition) <> nil then
-    client.GetMousePosition(target,x,y)
-  else
+  begin
+    client.GetMousePosition(target,x,y);
+    ApplyAreaOffset(x, y);
+  end else
     inherited GetMousePosition(x,y);
 end;
 procedure TEIOS_Target.MoveMouse(x,y: integer);
 begin
   if Pointer(client.MoveMouse) <> nil then
+  begin
+    ApplyAreaOffset(x, y);
     client.MoveMouse(target,x,y)
-  else
+  end else
     inherited MoveMouse(x,y);
 end;
 procedure TEIOS_Target.ScrollMouse(x,y : integer; Lines : integer);
 begin
   if Pointer(Client.ScrollMouse) <> nil then
+  begin
+    ApplyAreaOffset(x, y);
     client.ScrollMouse(target,x,y,lines)
-  else
+  end else
     inherited Scrollmouse(x,y,lines);
 end;
 
@@ -882,6 +976,7 @@ procedure TEIOS_Target.HoldMouse(x,y: integer; button: TClickType);
 begin
   if Pointer(client.HoldMouse) <> nil then
   begin
+    ApplyAreaOffset(x, y);
     case button of
       mouse_Left:   client.HoldMouse(target,x,y,1);
       mouse_Middle: client.HoldMouse(target,x,y,2);
@@ -894,6 +989,7 @@ procedure TEIOS_Target.ReleaseMouse(x,y: integer; button: TClickType);
 begin
   if Pointer(client.ReleaseMouse) <> nil then
   begin
+    ApplyAreaOffset(x, y);
     case button of
       mouse_Left:   client.ReleaseMouse(target,x,y,1);
       mouse_Middle: client.ReleaseMouse(target,x,y,2);
