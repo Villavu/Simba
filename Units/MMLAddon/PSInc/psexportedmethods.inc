@@ -127,6 +127,8 @@ AddFunction(@ps_GetClientPosition, 'procedure GetClientPosition(var left, top:in
 AddFunction(@ps_SetTargetBitmap,'function SetTargetBitmap(Bitmap : integer): integer;');
 AddFunction(@ps_SetTargetArray, 'function SetTargetArray(P: Integer; w, h: integer): integer;');
 AddFunction(@ps_SetEIOSTarget, 'function SetEIOSTarget(name, initargs: String): integer;');
+AddFunction(@ps_SetClientArea, 'function SetClientArea(x1, y1, x2, y2: integer): boolean;');
+AddFunction(@ps_ResetClientArea, 'procedure ResetClientArea;');
 AddFunction(@ps_SetImageTarget,'procedure SetImageTarget(idx: integer);');
 AddFunction(@ps_SetKeyMouseTarget,'procedure SetKeyMouseTarget(idx: integer);');
 AddFunction(@ps_GetImageTarget,'function GetImageTarget: integer;');
