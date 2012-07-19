@@ -56,6 +56,11 @@ interface
         procedure ResetError; override;
 
         function TargetValid: boolean; override;
+
+        function SetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ResetClientArea; override;
+
+
         procedure ActivateClient; override;
         procedure GetMousePosition(out x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
@@ -78,7 +83,11 @@ interface
         buffer_raw: prgb32;
         width,height: integer;
         keyinput: TKeyInput;
+
+        ax1, ay1, ax2, ay2: integer;
+        caset: boolean;
         procedure ValidateBuffer(w,h:integer);
+        procedure ApplyAreaOffset(var x, y: integer);
       protected
         function WindowRect(out Rect : TRect) : Boolean; virtual;
     end;
@@ -176,6 +185,12 @@ implementation
     self.buffer:= TBitmap.Create;
     self.buffer.PixelFormat:= pf32bit;
     keyinput:= TKeyInput.Create;
+
+    self.ax1 := 0;
+    self.ay1 := 0;
+    self.ax2 := 0;
+    self.ay2 := 0;
+    self.caset := false;
   end;
 
   constructor TWindow.Create(target: Hwnd);
@@ -186,6 +201,12 @@ implementation
     keyinput:= TKeyInput.Create;
     self.handle:= target;
     self.dc:= GetWindowDC(target);
+
+    self.ax1 := 0;
+    self.ay1 := 0;
+    self.ax2 := 0;
+    self.ay2 := 0;
+    self.caset := false;
   end;
   
   destructor TWindow.Destroy;
@@ -221,6 +242,26 @@ implementation
     result:= IsWindow(handle);
   end;
 
+  function TWindow.SetClientArea(x1, y1, x2, y2: integer): boolean;
+  var w, h: integer;
+  begin
+    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+    GetTargetDimensions(w, h);
+    if ((x2 - x1) > w) or ((y2 - y1) > h) then
+      exit(False);
+    if (x1 < 0) or (y1 < 0) then
+      exit(False);
+
+    ax1 := x1; ay1 := y1; ax2 := x2; ay2 := y2;
+    caset := True;
+  end;
+
+  procedure TWindow.ResetClientArea;
+  begin
+    ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
+    caset := False;
+  end;
+
   procedure TWindow.ActivateClient;
   begin
     SetForegroundWindow(handle);
@@ -228,8 +269,14 @@ implementation
 
   procedure TWindow.GetTargetDimensions(out w, h: integer);
   var
-    Rect : TRect; 
-  begin 
+    Rect : TRect;
+  begin
+    if caset then
+    begin
+      w := ax2 - ax1;
+      h := ay2 - ay1;
+      exit;
+    end;
     WindowRect(rect);
     w:= Rect.Right - Rect.Left;
     h:= Rect.Bottom - Rect.Top;
@@ -263,11 +310,25 @@ implementation
     end;
   end;
 
+  procedure TWindow.ApplyAreaOffset(var x, y: integer);
+  begin
+    if caset then
+    begin
+      x := x + ax1;
+      y := y + ay1;
+    end;
+  end;
+
   function TWindow.WindowRect(out Rect : TRect) : boolean;
   begin
     result := Windows.GetWindowRect(self.handle,rect);
   end;
 
+  { This functions return a struct of pointer data.
+    Data is blitted from the target window to the *start* of the buffer,
+    and not to the corresponding position.
+    So [xs,ys,xe,ye] is mapped to [0, 0, xe-xs, ye-ys].
+  }
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
   var
     temp: PRGB32;
@@ -277,6 +338,9 @@ implementation
     ValidateBuffer(w,h);
     if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
       raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
+
+    ApplyAreaOffset(xs, ys);
+
     Windows.BitBlt(self.buffer.Canvas.Handle,0,0, width, height, self.dc, xs,ys, SRCCOPY);
     Result.Ptr:= self.buffer_raw;
 
@@ -293,12 +357,14 @@ implementation
     WindowRect(rect);
     x := MousePoint.x - Rect.Left;
     y := MousePoint.y - Rect.Top;
+    ApplyAreaOffset(x, y);
   end;
   procedure TWindow.MoveMouse(x,y: integer);
   var
     rect : TRect;
     w,h: integer;
   begin
+    ApplyAreaOffset(x, y);
     WindowRect(rect);
     x := x + rect.left;
     y := y + rect.top;
@@ -312,6 +378,7 @@ var
   Input : TInput;
   Rect : TRect;
 begin
+  ApplyAreaOffset(x, y);
   WindowRect(rect);
   Input.Itype:= INPUT_MOUSE;
   FillChar(Input,Sizeof(Input),0);
@@ -327,6 +394,7 @@ end;
     Input : TInput;
     Rect : TRect;
   begin
+    ApplyAreaOffset(x, y);
     WindowRect(rect);
     Input.Itype:= INPUT_MOUSE;
     FillChar(Input,Sizeof(Input),0);
@@ -344,6 +412,7 @@ end;
     Input : TInput;
     Rect : TRect;
   begin
+    ApplyAreaOffset(x, y);
     WindowRect(rect);
     Input.Itype:= INPUT_MOUSE;
     FillChar(Input,Sizeof(Input),0);
