@@ -41,6 +41,16 @@ begin
   result:= CurrThread.Client.IOManager.SetTarget(name, args);
 end;
 
+function ps_SetClientArea(x1, y1, x2, y2: integer): boolean; extdecl;
+begin
+  result := CurrThread.Client.IOManager.SetClientArea(x1, y1, x2, y2);
+end;
+
+procedure ps_ResetClientArea; extdecl;
+begin
+  CurrThread.Client.IOManager.ResetClientArea;
+end;
+
 procedure ps_SetImageTarget(idx: integer); extdecl;
 begin
   CurrThread.Client.IOManager.SetImageTarget(idx);

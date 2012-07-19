@@ -489,6 +489,8 @@ AddGlobalFunc('procedure SetDesktopAsClient;', @Lape_SetDesktopAsClient);
 AddGlobalFunc('function SetTargetArray(P: Integer; w, h: integer): integer', @Lape_SetTargetArray);
 AddGlobalFunc('function SetTargetBitmap(bitmap: Integer): integer', @Lape_SetTargetBitmap);
 AddGlobalFunc('function SetEIOSTarget(name, args: String): integer', @Lape_SetEIOSTarget);
+AddGlobalFunc('function SetClientArea(x1, y1, x2, y2: integer): boolean;', @Lape_SetClientArea);
+AddGlobalFunc('procedure ResetClientArea;', @Lape_ResetClientArea);
 AddGlobalFunc('procedure SetImageTarget(idx: integer);', @Lape_SetImageTarget);
 AddGlobalFunc('procedure SetKeyMouseTarget(idx: integer);', @Lape_SetKeyMouseTarget);
 AddGlobalFunc('function GetImageTarget: integer', @Lape_GetImageTarget);
