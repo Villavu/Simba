@@ -164,6 +164,7 @@ object CompForm: TCompForm
       OnAdvancedCustomDrawSubItem = lvAdvancedCustomDrawSubItem
       OnClick = lvClick
       OnMouseDown = lvMouseDown
+      OnMouseLeave = lvMouseLeave
     end
     object ppEdit: TEdit
       Left = 62

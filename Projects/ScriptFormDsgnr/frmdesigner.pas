@@ -69,6 +69,7 @@ type
     procedure lvClick(Sender: TObject);
     procedure lvMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure lvMouseLeave(Sender: TObject);
     procedure lvSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure MenuItem10Click(Sender: TObject);
     procedure MenuItem2Click(Sender: TObject);
@@ -327,6 +328,10 @@ end
 end;
  end;
 
+procedure TCompForm.lvMouseLeave(Sender: TObject);
+begin
+end;
+
 
 
 
@@ -383,6 +388,7 @@ end;
 
 procedure TCompForm.OnExit(Sender: TObject);
 begin
+ if ppEdit.Text='' then exit;
  try
  lv.Items[ppEdit.Tag div 100].SubItems[ppEdit.Tag mod 100] := ppEdit.Text;
  SetPropValue( curitem, lv.Items[ppEdit.Tag div 100].Caption, lv.Items[ppEdit.Tag div 100].SubItems[ppEdit.Tag mod 100]);
