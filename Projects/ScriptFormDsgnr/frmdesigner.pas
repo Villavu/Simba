@@ -99,7 +99,6 @@ type
     procedure UpdateControlData();
     procedure SetControl(Sender: TObject);
     function MouseClickOnSubItem(rc: TRect; item: TListItem;x,y: integer): boolean;
-
   end;
 
 var
@@ -210,8 +209,8 @@ end;
 
 procedure TCompForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
- //if Assigned(f) then
-  //f.Free;
+ if Assigned(f) then
+  f.Free;
 end;
 
 procedure TCompForm.ApplyChClick(Sender: TObject);
@@ -222,14 +221,9 @@ end;
 
 procedure TCompForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
-var
-  cmp: TComponent;
 begin
   if (Key = VK_DELETE) then begin
-    cmp:=f.sor.SelectControl;
-    f.sor.Selected:=false;
-    f.sor.SelectControl:=nil;
-   cmp.Free;
+   f.DeleteComponent();
   end;
 end;
 
@@ -350,8 +344,6 @@ begin
   if Assigned(codefrm) then
   codefrm.Free;
   codefrm:=TCodeGen.Create(self);
-  //CompList.ChangeElement(ComponentToSimba(f),0);
-  //ShowMessage(IntToStr(CompList.Count));
   FormToSCList(f);
   codefrm.CreateScript(CompList);
   codefrm.Show;
@@ -613,6 +605,7 @@ function TCompForm.MouseClickOnSubItem(rc: TRect; item: TListItem; x, y: integer
 begin
 
 end;
+
 
 
 initialization

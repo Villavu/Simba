@@ -44,10 +44,9 @@ type
        _ControlsCreated:Integer;
     _comp:TControl;
     function CreateComponent(Sender: TObject; X, Y: Integer):TControl;
-    //procedure WMWindowPosChanging(var Message: TWMWindowPosChanging); message WM_WINDOWPOSCHANGING;
     procedure Paint; override;
   public
-
+        procedure DeleteComponent();
     { public declarations }
   end; 
 
@@ -271,6 +270,16 @@ begin
     sor.SelectControl := TControl(comp);
   end;
   Result := TControl(comp);
+end;
+
+procedure TDsgnForm.DeleteComponent();
+begin
+  if not assigned(CurComp) then exit else
+    begin
+      sor.Selected := False;
+      sor.SelectControl := nil;
+      FreeAndNil(CurComp);
+    end;
 end;
 
 procedure TDsgnForm.Paint;
