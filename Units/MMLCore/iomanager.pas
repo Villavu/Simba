@@ -85,10 +85,16 @@ interface
         procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
+        function SetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ResetClientArea; override;
+
       protected
         rgb: prgb32;
         freedata : boolean;
         w,h: integer;
+      private
+        ax1, ay1, ax2, ay2: integer;
+        caset: boolean;
     end;
 
     TBitmapTarget = class(TTarget)
@@ -99,8 +105,13 @@ interface
         procedure GetTargetDimensions(out w, h: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
+        function SetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ResetClientArea; override;
       protected
         bitmap: TMufasaBitmap;
+      private
+        ax1, ay1, ax2, ay2: integer;
+        caset: boolean;
     end;
       
    { Implements a target that is a Window in the operating system. This class is abstract, i.e.,
@@ -931,6 +942,7 @@ end;
 
 function TEIOS_Target.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
+  ApplyAreaOffset(xs, ys);
   if Pointer(client.UpdateImageBufferBounds) <> nil then
     client.UpdateImageBufferBounds(target,xs,ys,xs+width,ys+height)
   else if Pointer(client.UpdateImageBuffer) <> nil then
@@ -942,6 +954,12 @@ begin
   result.RowLen:= self.width;
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
+
+  if caset then
+  begin
+    Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
+    Inc(result.Ptr, ay1 * result.RowLen + ax1);
+  end;
 end;
 
 procedure TEIOS_Target.GetMousePosition(out x,y: integer);
@@ -1063,6 +1081,12 @@ begin
     Move(rgb[0],self.rgb[0],w*h*sizeof(TRGB32));
   end else
     self.rgb:= rgb;
+
+  self.ax1 := 0;
+  self.ay1 := 0;
+  self.ax2 := 0;
+  self.ay2 := 0;
+  self.caset := false;
 end;
 
 destructor TRawTarget.Destroy;
@@ -1074,6 +1098,12 @@ end;
 
 procedure TRawTarget.GetTargetDimensions(out w, h: integer);
 begin
+  if caset then
+  begin
+    w := ax2 - ax1;
+    h := ay2 - ay1;
+    exit;
+  end;
   w:= self.w;
   h:= self.h;
 end;
@@ -1091,6 +1121,29 @@ begin
   result.RowLen:= self.w;
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
+
+  if caset then
+  begin
+    Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
+    Inc(result.Ptr, ay1 * result.RowLen + ax1);
+  end;
+end;
+
+function TRawTarget.SetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  if ((x2 - x1) > self.w) or ((y2 - y1) > self.h) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ax1 := x1; ay1 := y1; ax2 := x2; ay2 := y2;
+  caset := True;
+end;
+
+procedure TRawTarget.ResetClientArea;
+begin
+  ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
+  caset := False;
 end;
 
 //***implementation*** TBitmapTarget
@@ -1108,6 +1161,12 @@ end;
 
 procedure TBitmapTarget.GetTargetDimensions(out w, h: integer);
 begin
+  if caset then
+  begin
+    w := ax2 - ax1;
+    h := ay2 - ay1;
+    exit;
+  end;
   h:= bitmap.Height;
   w:= bitmap.Width;
 end;
@@ -1118,6 +1177,29 @@ begin
   result.RowLen:= bitmap.Width;
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
+
+  if caset then
+  begin
+    Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
+    Inc(result.Ptr, ay1 * result.RowLen + ax1);
+  end;
+end;
+
+function TBitmapTarget.SetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  if ((x2 - x1) > bitmap.Width) or ((y2 - y1) > bitmap.Height) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ax1 := x1; ay1 := y1; ax2 := x2; ay2 := y2;
+  caset := True;
+end;
+
+procedure TBitmapTarget.ResetClientArea;
+begin
+  ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
+  caset := False;
 end;
 
 //***implementation*** TEIOS_Controller
