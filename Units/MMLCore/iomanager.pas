@@ -50,8 +50,10 @@ interface
         procedure ActivateClient; virtual;
         function TargetValid: boolean; virtual;
 
-        function SetClientArea(x1, y1, x2, y2: integer): boolean; virtual;
-        procedure ResetClientArea; virtual;
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; virtual;
+        procedure MouseResetClientArea; virtual;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; virtual;
+        procedure ImageResetClientArea; virtual;
 
         { Sucky implementation }
         function  GetError: String; virtual;
@@ -85,8 +87,8 @@ interface
         procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
-        function SetClientArea(x1, y1, x2, y2: integer): boolean; override;
-        procedure ResetClientArea; override;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
 
       protected
         rgb: prgb32;
@@ -105,8 +107,8 @@ interface
         procedure GetTargetDimensions(out w, h: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
-        function SetClientArea(x1, y1, x2, y2: integer): boolean; override;
-        procedure ResetClientArea; override;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
       protected
         bitmap: TMufasaBitmap;
       private
@@ -131,8 +133,10 @@ interface
         function  ReceivedError: Boolean; override; abstract;
         procedure ResetError; override; abstract;
 
-        function SetClientArea(x1, y1, x2, y2: integer): boolean; override; abstract;
-        procedure ResetClientArea; override; abstract;
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override; abstract;
+        procedure MouseResetClientArea; override; abstract;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override; abstract;
+        procedure ImageResetClientArea; override; abstract;
 
         procedure ActivateClient; override; abstract;
         procedure GetMousePosition(out x,y: integer); override; abstract;
@@ -191,8 +195,10 @@ interface
         constructor Create(client: TEIOS_Client; initval: String);
         destructor Destroy; override;
 
-        function SetClientArea(x1, y1, x2, y2: integer): boolean; override;
-        procedure ResetClientArea; override;
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure MouseResetClientArea; override;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
 
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
@@ -216,10 +222,14 @@ interface
         target: pointer;
         buffer: prgb32;
         width,height: integer;
-        ax1, ay1, ax2, ay2: integer;
-        caset: boolean;
 
-        procedure ApplyAreaOffset(var x, y: integer);
+        { (Forced) Client Area }
+        mx1, my1, mx2, my2: integer;
+        ix1, iy1, ix2, iy2: integer;
+        mcaset, icaset: Boolean;
+
+        procedure MouseApplyAreaOffset(var x, y: integer);
+        procedure ImageApplyAreaOffset(var x, y: integer);
     end;
 
     { This is just a class that loads EIOS clients (like SMART) and sets them up to be used
@@ -309,8 +319,10 @@ interface
         function IsFrozen: boolean;
         procedure SetFrozen(makefrozen: boolean);
 
-        function SetClientArea(x1, y1, x2, y2: integer): boolean;
-        procedure ResetClientArea;
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+        procedure MouseResetClientArea;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+        procedure ImageResetClientArea;
 
         procedure GetMousePos(var X, Y: Integer);
         procedure MoveMouse(X, Y: Integer);
@@ -655,16 +667,21 @@ begin
   {not sure if image needs activation or not, if its a native window keymouse == image so it should be good.}
 end;
 
-function TIOManager_Abstract.SetClientArea(x1, y1, x2, y2: integer): boolean;
+function TIOManager_Abstract.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
 begin
-  Result := image.SetClientArea(x1, y1, x2, y2);
-  if Result then
-    Result := keymouse.SetClientArea(x1, y1, x2, y2);
+  Result := keymouse.MouseSetClientArea(x1, y1, x2, y2);
 end;
-procedure TIOManager_Abstract.ResetClientArea;
+procedure TIOManager_Abstract.MouseResetClientArea;
 begin
-  image.ResetClientArea;
-  keymouse.ResetClientArea;
+  keymouse.MouseResetClientArea;
+end;
+function TIOManager_Abstract.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  Result := image.ImageSetClientArea(x1, y1, x2, y2);
+end;
+procedure TIOManager_Abstract.ImageResetClientArea;
+begin
+  image.ImageResetClientArea;
 end;
 
 procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer);
@@ -792,13 +809,21 @@ function TTarget.TargetValid: boolean;
 begin
   result:= true;
 end;
-function TTarget.SetClientArea(x1, y1, x2, y2: integer): boolean;
+function TTarget.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
 begin
-  raise Exception.Create('SetClientArea not available for this target');
+  raise Exception.Create('MouseSetClientArea not available for this target');
 end;
-procedure TTarget.ResetClientArea;
+procedure TTarget.MouseResetClientArea;
 begin
-  raise Exception.Create('ResetClientArea not available for this target');
+  raise Exception.Create('MouseResetClientArea not available for this target');
+end;
+function TTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  raise Exception.Create('ImageSetClientArea not available for this target');
+end;
+procedure TTarget.ImageResetClientArea;
+begin
+  raise Exception.Create('ImageResetClientArea not available for this target');
 end;
 function  TTarget.GetError: String;
 begin
@@ -878,11 +903,10 @@ constructor TEIOS_Target.Create(client: TEIOS_Client; initval: String); begin
      self.buffer:= nil;
   GetTargetDimensions(self.width,self.height);
 
-  self.ax1 := 0;
-  self.ay1 := 0;
-  self.ax2 := 0;
-  self.ay2 := 0;
-  self.caset := false;
+  self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
+  self.mcaset := false;
+  self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
+  self.icaset := false;
 end;
 
 destructor TEIOS_Target.Destroy; begin
@@ -891,29 +915,55 @@ destructor TEIOS_Target.Destroy; begin
   inherited Destroy;
 end;
 
-function TEIOS_Target.SetClientArea(x1, y1, x2, y2: integer): boolean;
+function TEIOS_Target.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
 begin
   if ((x2 - x1) > self.width) or ((y2 - y1) > self.height) then
     exit(False);
   if (x1 < 0) or (y1 < 0) then
     exit(False);
 
-  ax1 := x1; ay1 := y1; ax2 := x2; ay2 := y2;
-  caset := True;
+  mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
+  mcaset := True;
 end;
 
-procedure TEIOS_Target.ResetClientArea;
+procedure TEIOS_Target.MouseResetClientArea;
 begin
-  ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
-  caset := False;
+  mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
+  mcaset := False;
 end;
 
-procedure TEIOS_Target.ApplyAreaOffset(var x, y: integer);
+function TEIOS_Target.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
 begin
-  if caset then
+  if ((x2 - x1) > self.width) or ((y2 - y1) > self.height) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
+  icaset := True;
+end;
+
+procedure TEIOS_Target.ImageResetClientArea;
+begin
+  ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
+  icaset := False;
+end;
+
+procedure TEIOS_Target.MouseApplyAreaOffset(var x, y: integer);
+begin
+  if mcaset then
   begin
-    x := x + ax1;
-    y := y + ay1;
+    x := x + mx1;
+    y := y + my1;
+  end;
+end;
+
+procedure TEIOS_Target.ImageApplyAreaOffset(var x, y: integer);
+begin
+  if icaset then
+  begin
+    x := x + ix1;
+    y := y + iy1;
   end;
 end;
 
@@ -921,10 +971,10 @@ procedure TEIOS_Target.GetTargetDimensions(out w, h: integer);
 begin
   if Pointer(client.GetTargetDimensions) <> nil then
   begin
-    if caset then
+    if icaset then
     begin
-      w := ax2 - ax1;
-      h := ay2 - ay1;
+      w := ix2 - ix1;
+      h := iy2 - iy1;
       exit;
     end;
     client.GetTargetDimensions(target,w,h)
@@ -942,7 +992,7 @@ end;
 
 function TEIOS_Target.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
-  ApplyAreaOffset(xs, ys);
+  ImageApplyAreaOffset(xs, ys);
   if Pointer(client.UpdateImageBufferBounds) <> nil then
     client.UpdateImageBufferBounds(target,xs,ys,xs+width,ys+height)
   else if Pointer(client.UpdateImageBuffer) <> nil then
@@ -955,10 +1005,10 @@ begin
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
 
-  if caset then
+  if icaset then
   begin
-    Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
-    Inc(result.Ptr, ay1 * result.RowLen + ax1);
+    Inc(result.IncPtrWith, result.RowLen - (ix2 - ix1));
+    Inc(result.Ptr, iy1 * result.RowLen + ix1);
   end;
 end;
 
@@ -967,7 +1017,7 @@ begin
   if Pointer(client.GetMousePosition) <> nil then
   begin
     client.GetMousePosition(target,x,y);
-    ApplyAreaOffset(x, y);
+    MouseApplyAreaOffset(x, y);
   end else
     inherited GetMousePosition(x,y);
 end;
@@ -975,7 +1025,7 @@ procedure TEIOS_Target.MoveMouse(x,y: integer);
 begin
   if Pointer(client.MoveMouse) <> nil then
   begin
-    ApplyAreaOffset(x, y);
+    MouseApplyAreaOffset(x, y);
     client.MoveMouse(target,x,y)
   end else
     inherited MoveMouse(x,y);
@@ -984,7 +1034,7 @@ procedure TEIOS_Target.ScrollMouse(x,y : integer; Lines : integer);
 begin
   if Pointer(Client.ScrollMouse) <> nil then
   begin
-    ApplyAreaOffset(x, y);
+    MouseApplyAreaOffset(x, y);
     client.ScrollMouse(target,x,y,lines)
   end else
     inherited Scrollmouse(x,y,lines);
@@ -994,7 +1044,7 @@ procedure TEIOS_Target.HoldMouse(x,y: integer; button: TClickType);
 begin
   if Pointer(client.HoldMouse) <> nil then
   begin
-    ApplyAreaOffset(x, y);
+    MouseApplyAreaOffset(x, y);
     case button of
       mouse_Left:   client.HoldMouse(target,x,y,1);
       mouse_Middle: client.HoldMouse(target,x,y,2);
@@ -1007,7 +1057,7 @@ procedure TEIOS_Target.ReleaseMouse(x,y: integer; button: TClickType);
 begin
   if Pointer(client.ReleaseMouse) <> nil then
   begin
-    ApplyAreaOffset(x, y);
+    MouseApplyAreaOffset(x, y);
     case button of
       mouse_Left:   client.ReleaseMouse(target,x,y,1);
       mouse_Middle: client.ReleaseMouse(target,x,y,2);
@@ -1129,7 +1179,7 @@ begin
   end;
 end;
 
-function TRawTarget.SetClientArea(x1, y1, x2, y2: integer): boolean;
+function TRawTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
 begin
   if ((x2 - x1) > self.w) or ((y2 - y1) > self.h) then
     exit(False);
@@ -1140,7 +1190,7 @@ begin
   caset := True;
 end;
 
-procedure TRawTarget.ResetClientArea;
+procedure TRawTarget.ImageResetClientArea;
 begin
   ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
   caset := False;
@@ -1185,7 +1235,7 @@ begin
   end;
 end;
 
-function TBitmapTarget.SetClientArea(x1, y1, x2, y2: integer): boolean;
+function TBitmapTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
 begin
   if ((x2 - x1) > bitmap.Width) or ((y2 - y1) > bitmap.Height) then
     exit(False);
@@ -1196,7 +1246,7 @@ begin
   caset := True;
 end;
 
-procedure TBitmapTarget.ResetClientArea;
+procedure TBitmapTarget.ImageResetClientArea;
 begin
   ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
   caset := False;
