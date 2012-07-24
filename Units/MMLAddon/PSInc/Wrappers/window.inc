@@ -41,14 +41,24 @@ begin
   result:= CurrThread.Client.IOManager.SetTarget(name, args);
 end;
 
-function ps_SetClientArea(x1, y1, x2, y2: integer): boolean; extdecl;
+function ps_MouseSetClientArea(x1, y1, x2, y2: integer): boolean; extdecl;
 begin
-  result := CurrThread.Client.IOManager.SetClientArea(x1, y1, x2, y2);
+  result := CurrThread.Client.IOManager.MouseSetClientArea(x1, y1, x2, y2);
 end;
 
-procedure ps_ResetClientArea; extdecl;
+procedure ps_MouseResetClientArea; extdecl;
 begin
-  CurrThread.Client.IOManager.ResetClientArea;
+  CurrThread.Client.IOManager.MouseResetClientArea;
+end;
+
+function ps_ImageSetClientArea(x1, y1, x2, y2: integer): boolean; extdecl;
+begin
+  result := CurrThread.Client.IOManager.ImageSetClientArea(x1, y1, x2, y2);
+end;
+
+procedure ps_ImageResetClientArea; extdecl;
+begin
+  CurrThread.Client.IOManager.ImageResetClientArea;
 end;
 
 procedure ps_SetImageTarget(idx: integer); extdecl;
