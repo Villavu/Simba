@@ -18,15 +18,26 @@ begin
   Pinteger(Result)^:= CurrThread.Client.IOManager.SetTarget(Pstring(Params^[0])^, Pstring(Params^[1])^);
 end;
 
-procedure Lape_SetClientArea(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_MouseSetClientArea(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PBoolean(Result)^ := ps_SetClientArea(PInteger(Params^[0])^,
+  PBoolean(Result)^ := ps_MouseSetClientArea(PInteger(Params^[0])^,
       PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
-procedure Lape_ResetClientArea(const Params: PParamArray); lape_extdecl
+procedure Lape_MouseResetClientArea(const Params: PParamArray); lape_extdecl
 begin
-  ps_ResetClientArea;
+  ps_MouseResetClientArea;
+end;
+
+procedure Lape_ImageSetClientArea(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_ImageSetClientArea(PInteger(Params^[0])^,
+      PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure Lape_ImageResetClientArea(const Params: PParamArray); lape_extdecl
+begin
+  ps_ImageResetClientArea;
 end;
 
 procedure Lape_SetImageTarget(const Params: PParamArray); lape_extdecl

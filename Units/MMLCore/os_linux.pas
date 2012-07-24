@@ -62,8 +62,10 @@ interface
 
         function TargetValid: boolean; override;
 
-        function SetClientArea(x1, y1, x2, y2: integer): boolean; override;
-        procedure ResetClientArea; override;
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure MouseResetClientArea; override;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
 
         procedure ActivateClient; override;
         procedure GetMousePosition(out x,y: integer); override;
@@ -100,10 +102,12 @@ interface
         oldXHandler: TXErrorHandler;
 
         { (Forced) Client Area }
-        ax1, ay1, ax2, ay2: integer;
-        caset: Boolean;
+        mx1, my1, mx2, my2: integer;
+        ix1, iy1, ix2, iy2: integer;
+        mcaset, icaset: Boolean;
 
-        procedure ApplyAreaOffset(var x, y: integer);
+        procedure MouseApplyAreaOffset(var x, y: integer);
+        procedure ImageApplyAreaOffset(var x, y: integer);
     end;
 
     TIOManager = class(TIOManager_Abstract)
@@ -231,11 +235,10 @@ implementation
     self.window:= window;
     self.dirty:= false;
     self.keyinput:= TKeyInput.Create;
-    self.ax1 := 0;
-    self.ay1 := 0;
-    self.ax2 := 0;
-    self.ay2 := 0;
-    self.caset := false;
+    self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
+    self.mcaset := false;
+    self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
+    self.icaset := false;
 
     xerror := '';
 
@@ -281,10 +284,10 @@ implementation
   var
     Attrib: TXWindowAttributes;
   begin
-    if caset then
+    if icaset then
     begin
-      w := ax2 - ax1;
-      h := ay2 - ay1;
+      w := ix2 - ix1;
+      h := iy2 - iy1;
       exit;
     end;
     if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
@@ -332,7 +335,7 @@ implementation
     for caset (since they're 0 if it's not set), but I figured it would be more
     clear this way.
   }
-  function TWindow.SetClientArea(x1, y1, x2, y2: integer): boolean;
+  function TWindow.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
   var w, h: integer;
   begin
     { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
@@ -342,22 +345,51 @@ implementation
     if (x1 < 0) or (y1 < 0) then
       exit(False);
 
-    ax1 := x1; ay1 := y1; ax2 := x2; ay2 := y2;
-    caset := True;
+    mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
+    mcaset := True;
   end;
 
-  procedure TWindow.ResetClientArea;
+  procedure TWindow.MouseResetClientArea;
   begin
-    ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
-    caset := False;
+    mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
+    mcaset := False;
   end;
 
-  procedure TWindow.ApplyAreaOffset(var x, y: integer);
+  function TWindow.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+  var w, h: integer;
   begin
-    if caset then
+    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+    GetTargetDimensions(w, h);
+    if ((x2 - x1) > w) or ((y2 - y1) > h) then
+      exit(False);
+    if (x1 < 0) or (y1 < 0) then
+      exit(False);
+
+    ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
+    icaset := True;
+  end;
+
+  procedure TWindow.ImageResetClientArea;
+  begin
+    ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
+    icaset := False;
+  end;
+
+  procedure TWindow.MouseApplyAreaOffset(var x, y: integer);
+  begin
+    if mcaset then
     begin
-      x := x + ax1;
-      y := y + ay1;
+      x := x + mx1;
+      y := y + my1;
+    end;
+  end;
+
+  procedure TWindow.ImageApplyAreaOffset(var x, y: integer);
+  begin
+    if icaset then
+    begin
+      x := x + ix1;
+      y := y + iy1;
     end;
   end;
 
@@ -382,7 +414,7 @@ implementation
                                 ' the previously used data. Do not forget to'+
                                 ' call FreeReturnData', []);
 
-    ApplyAreaOffset(xs, ys);
+    ImageApplyAreaOffset(xs, ys);
 
     buffer := XGetImage(display, window, xs, ys, width, height, AllPlanes, ZPixmap);
     if buffer = nil then
@@ -428,12 +460,12 @@ implementation
     x := event.x;
     y := event.y;
 
-    ApplyAreaOffset(x, y);
+    MouseApplyAreaOffset(x, y);
   end;
 
   procedure TWindow.MoveMouse(x,y: integer);
   begin
-    ApplyAreaOffset(x, y);
+    MouseApplyAreaOffset(x, y);
     XWarpPointer(display, None, window, 0, 0, 0, 0, X, Y);
     XFlush(display);
   end;
