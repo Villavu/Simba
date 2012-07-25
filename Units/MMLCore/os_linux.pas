@@ -459,6 +459,9 @@ implementation
 
     x := event.x;
     y := event.y;
+
+    x := x - mx1;
+    y := y - my1;
   end;
 
   procedure TWindow.MoveMouse(x,y: integer);

@@ -1016,6 +1016,8 @@ begin
   if Pointer(client.GetMousePosition) <> nil then
   begin
     client.GetMousePosition(target,x,y);
+    x := x - mx1;
+    y := y - my1;
   end else
     inherited GetMousePosition(x,y);
 end;

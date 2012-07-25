@@ -392,6 +392,9 @@ implementation
     WindowRect(rect);
     x := MousePoint.x - Rect.Left;
     y := MousePoint.y - Rect.Top;
+
+    x := x - mx1;
+    y := y - my1;
   end;
   procedure TWindow.MoveMouse(x,y: integer);
   var
