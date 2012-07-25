@@ -1016,7 +1016,6 @@ begin
   if Pointer(client.GetMousePosition) <> nil then
   begin
     client.GetMousePosition(target,x,y);
-    MouseApplyAreaOffset(x, y);
   end else
     inherited GetMousePosition(x,y);
 end;
