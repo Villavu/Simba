@@ -95,6 +95,8 @@ SetEIOSTarget
     function SetEIOSTarget(name: string; initargs: Variant): integer;
 
 
+.. _image-target:
+
 SetImageTarget
 --------------
 
@@ -109,6 +111,8 @@ searches on.
 Both `SetTargetBitmap`_, and `SetTargetArray`_ return a target index.
 Alternatively you can get the index of the current target with `GetImageTarget`_.
 
+
+.. _mouse_target:
 
 SetKeyMouseTarget
 -----------------
@@ -196,6 +200,9 @@ IsTargetValid
 
 Returns true if the current target is valid.
 
+Finding a specific window
+=========================
+
 GetProcesses
 ------------
 
@@ -238,3 +245,58 @@ Example usage:
           end;
         end;
     end;
+
+Client Area
+===========
+
+Client Areas were introduced to cope with clients which have a normal
+coordinate system, but a variable base for this coordinate system.
+
+More specifically: client areas allow you to transparently add a certain X and Y
+to all the mouse and image (finding, dtm, etc) functions.
+
+Support for Mouse and Image targets have been separated. This is required for
+targets that only support say, an Image target.
+
+In this case you do not want to accidentally touch or reset the Mouse target
+area.
+
+Setting an area multiple times is the same as resetting it and then setting
+the area. Multiple calls to \*SetClientArea will not result in nested areas.
+
+MouseSetClientArea
+------------------
+
+.. code-block:: pascal
+
+    function MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+
+Define a new `Client Area`_ for all Mouse operations on this Mouse target.
+
+MouseResetClientArea
+--------------------
+
+.. code-block:: pascal
+
+    procedure MouseResetClientArea;
+
+Reset the `Client Area`_ for the Mouse Target.
+
+ImageSetClientArea
+------------------
+
+.. code-block:: pascal
+
+    function ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+
+Define a new `Client Area`_ for all Image operations on this Image Target.
+
+ImageResetClientArea
+--------------------
+
+.. code-block:: pascal
+
+    procedure ImageResetClientArea;
+
+Reset the `Client Area`_ for the Image Target.
+
