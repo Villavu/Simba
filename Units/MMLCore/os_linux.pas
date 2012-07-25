@@ -459,8 +459,6 @@ implementation
 
     x := event.x;
     y := event.y;
-
-    MouseApplyAreaOffset(x, y);
   end;
 
   procedure TWindow.MoveMouse(x,y: integer);
