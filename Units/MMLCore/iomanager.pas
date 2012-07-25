@@ -1008,7 +1008,6 @@ begin
   if icaset then
   begin
     Inc(result.IncPtrWith, result.RowLen - (ix2 - ix1));
-    Inc(result.Ptr, iy1 * result.RowLen + ix1);
   end;
 end;
 
