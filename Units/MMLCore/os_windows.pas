@@ -392,7 +392,6 @@ implementation
     WindowRect(rect);
     x := MousePoint.x - Rect.Left;
     y := MousePoint.y - Rect.Top;
-    MouseApplyAreaOffset(x, y);
   end;
   procedure TWindow.MoveMouse(x,y: integer);
   var
