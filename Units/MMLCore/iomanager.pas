@@ -1166,6 +1166,8 @@ end;
 
 function TRawTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
+  xs := xs + ax1;
+  ys := ys + ay1;
   result.Ptr := rgb;
   result.RowLen:= self.w;
   result.IncPtrWith:= result.RowLen - width;
@@ -1174,7 +1176,6 @@ begin
   if caset then
   begin
     Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
-    Inc(result.Ptr, ay1 * result.RowLen + ax1);
   end;
 end;
 
@@ -1222,6 +1223,8 @@ end;
 
 function TBitmapTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
+  xs := xs + ax1;
+  ys := ys + ay1;
   result.Ptr := bitmap.FData;
   result.RowLen:= bitmap.Width;
   result.IncPtrWith:= result.RowLen - width;
@@ -1230,7 +1233,6 @@ begin
   if caset then
   begin
     Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
-    Inc(result.Ptr, ay1 * result.RowLen + ax1);
   end;
 end;
 
