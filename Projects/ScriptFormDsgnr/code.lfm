@@ -8,7 +8,7 @@ object CodeGen: TCodeGen
   ClientWidth = 652
   OnClose = FormClose
   OnCreate = FormCreate
-  LCLVersion = '0.9.30.4'
+  LCLVersion = '1.1'
   inline memo1: TSynEdit
     Left = 0
     Height = 449
@@ -26,51 +26,26 @@ object CodeGen: TCodeGen
     Gutter.Width = 57
     Gutter.MouseActions = <    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccAny
         ClickDir = cdDown
-        Command = 13
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcOnMainGutterClick
       end    
       item
-        Shift = []
-        ShiftMask = []
         Button = mbRight
-        ClickCount = ccSingle
-        ClickDir = cdUp
-        Command = 12
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcContextMenu
       end>
     RightGutter.Width = 0
     RightGutter.MouseActions = <    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccAny
         ClickDir = cdDown
-        Command = 13
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcOnMainGutterClick
       end    
       item
-        Shift = []
-        ShiftMask = []
         Button = mbRight
-        ClickCount = ccSingle
-        ClickDir = cdUp
-        Command = 12
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcContextMenu
       end>
+    Highlighter = SynPasSyn1
     Keystrokes = <    
       item
         Command = ecUp
@@ -494,131 +469,88 @@ object CodeGen: TCodeGen
       end>
     MouseActions = <    
       item
-        Shift = []
         ShiftMask = [ssShift, ssAlt]
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 1
+        Command = emcStartSelections
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
         Shift = [ssShift]
         ShiftMask = [ssShift, ssAlt]
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 1
+        Command = emcStartSelections
         MoveCaret = True
         Option = 1
-        Priority = 0
       end    
       item
         Shift = [ssAlt]
         ShiftMask = [ssShift, ssAlt]
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 3
+        Command = emcStartColumnSelections
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
         Shift = [ssShift, ssAlt]
         ShiftMask = [ssShift, ssAlt]
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 3
+        Command = emcStartColumnSelections
         MoveCaret = True
         Option = 1
-        Priority = 0
       end    
       item
-        Shift = []
-        ShiftMask = []
         Button = mbRight
-        ClickCount = ccSingle
-        ClickDir = cdUp
-        Command = 12
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcContextMenu
       end    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccDouble
         ClickDir = cdDown
-        Command = 6
+        Command = emcSelectWord
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccTriple
         ClickDir = cdDown
-        Command = 7
+        Command = emcSelectLine
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
         ClickCount = ccQuad
         ClickDir = cdDown
-        Command = 8
+        Command = emcSelectPara
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
-        Shift = []
-        ShiftMask = []
         Button = mbMiddle
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 10
+        Command = emcPasteSelection
         MoveCaret = True
-        Option = 0
-        Priority = 0
       end    
       item
         Shift = [ssCtrl]
         ShiftMask = [ssShift, ssAlt, ssCtrl]
-        Button = mbLeft
-        ClickCount = ccSingle
-        ClickDir = cdUp
-        Command = 11
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcMouseLink
       end>
     MouseSelActions = <    
       item
-        Shift = []
-        ShiftMask = []
-        Button = mbLeft
-        ClickCount = ccSingle
         ClickDir = cdDown
-        Command = 9
-        MoveCaret = False
-        Option = 0
-        Priority = 0
+        Command = emcStartDragMove
       end>
+    VisibleSpecialChars = [vscSpace, vscTabAtLast]
     BracketHighlightStyle = sbhsBoth
+    BracketMatchColor.Background = clNone
+    BracketMatchColor.Foreground = clNone
+    BracketMatchColor.Style = [fsBold]
+    FoldedCodeColor.Background = clNone
+    FoldedCodeColor.Foreground = clGray
+    FoldedCodeColor.FrameColor = clGray
+    MouseLinkColor.Background = clNone
+    MouseLinkColor.Foreground = clBlue
+    LineHighlightColor.Background = clNone
+    LineHighlightColor.Foreground = clNone
     inline SynLeftGutterPartList1: TSynGutterPartList
       object SynGutterMarks1: TSynGutterMarks
         Width = 24
+        MouseActions = <>
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
         Width = 17
@@ -632,35 +564,26 @@ object CodeGen: TCodeGen
       end
       object SynGutterChanges1: TSynGutterChanges
         Width = 4
+        MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
       end
       object SynGutterSeparator1: TSynGutterSeparator
         Width = 2
+        MouseActions = <>
       end
       object SynGutterCodeFolding1: TSynGutterCodeFolding
         MouseActions = <        
           item
-            Shift = []
-            ShiftMask = []
             Button = mbRight
-            ClickCount = ccSingle
-            ClickDir = cdUp
-            Command = 16
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcCodeFoldContextMenu
           end        
           item
-            Shift = []
             ShiftMask = [ssShift]
             Button = mbMiddle
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 14
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcCodeFoldCollaps
           end        
           item
             Shift = [ssShift]
@@ -668,58 +591,36 @@ object CodeGen: TCodeGen
             Button = mbMiddle
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 14
-            MoveCaret = False
+            Command = emcCodeFoldCollaps
             Option = 1
-            Priority = 0
           end        
           item
-            Shift = []
-            ShiftMask = []
-            Button = mbLeft
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 0
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcNone
           end>
         MarkupInfo.Background = clNone
         MarkupInfo.Foreground = clGray
         MouseActionsExpanded = <        
           item
-            Shift = []
-            ShiftMask = []
-            Button = mbLeft
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 14
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcCodeFoldCollaps
           end>
         MouseActionsCollapsed = <        
           item
             Shift = [ssCtrl]
             ShiftMask = [ssCtrl]
-            Button = mbLeft
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 15
-            MoveCaret = False
-            Option = 0
-            Priority = 0
+            Command = emcCodeFoldExpand
           end        
           item
-            Shift = []
             ShiftMask = [ssCtrl]
-            Button = mbLeft
             ClickCount = ccAny
             ClickDir = cdDown
-            Command = 15
-            MoveCaret = False
+            Command = emcCodeFoldExpand
             Option = 1
-            Priority = 0
           end>
       end
     end
@@ -731,5 +632,23 @@ object CodeGen: TCodeGen
       Caption = 'Copy script'
       OnClick = MenuItem1Click
     end
+  end
+  object SynPasSyn1: TSynPasSyn
+    Enabled = False
+    AsmAttri.FrameEdges = sfeAround
+    CommentAttri.FrameEdges = sfeAround
+    IDEDirectiveAttri.FrameEdges = sfeAround
+    IdentifierAttri.FrameEdges = sfeAround
+    KeyAttri.FrameEdges = sfeAround
+    NumberAttri.FrameEdges = sfeAround
+    SpaceAttri.FrameEdges = sfeAround
+    StringAttri.FrameEdges = sfeAround
+    SymbolAttri.FrameEdges = sfeAround
+    CaseLabelAttri.FrameEdges = sfeAround
+    DirectiveAttri.FrameEdges = sfeAround
+    CompilerMode = pcmDelphi
+    NestedComments = False
+    left = 159
+    top = 95
   end
 end

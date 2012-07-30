@@ -16,6 +16,7 @@ type
     MenuItem1: TMenuItem;
     PopupMenu1: TPopupMenu;
     memo1: TSynEdit;
+    SynPasSyn1: TSynPasSyn;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
@@ -380,10 +381,10 @@ begin
        if smb.img.switcher = true then
          begin
          s:=smb.img.imgcode;
-         {s1:=#39;
+         s1:=#13#10+#39;
           for p:=0 to Length(s)-1 do begin
             SetLength(s1,Length(s1)+1);
-            s1[Length(s1)]:=s[p];
+            s1[Length(s1)]:=s[p+1];
             if p<>0 then begin
              if ((P/20)=trunc(P/20)) then
               begin
@@ -391,8 +392,8 @@ begin
               s1[Length(s1)]:=#39;
               SetLength(s1,Length(s1)+1);
               s1[Length(s1)]:='+';
-             // SetLength(s1,Length(s1)+1);
-             // s1[Length(s1)]:=#13;
+              SetLength(s1,Length(s1)+1);
+              s1[Length(s1)]:=#13;
               SetLength(s1,Length(s1)+1);
               s1[Length(s1)]:=#10;
               SetLength(s1,Length(s1)+1);
@@ -404,9 +405,9 @@ begin
               s1[Length(s1)]:=#39;
               end;
             end;
-          end;}
+          end;
           List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=TBitmap.Create;');
-          List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+':=GetMufasaBitmap(BitmapFromString('+IntToStr(smb.width)+','+IntToStr(smb.Heigth)+','+#39+s+#39+'));');
+          List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+':=GetMufasaBitmap(BitmapFromString('+IntToStr(smb.width)+','+IntToStr(smb.Heigth)+','+s1+#39+'));');
           List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=bmps'+IntToStr(img)+'.ToTBitmap;');
           List.Add(GenSpaces(6)+'Picture.Bitmap.handle:=bmp'+IntToStr(img)+'.handle;');
          // List.Add(GenSpaces(6)+'DrawBitmap(bmps'+IntToStr(img)+',Canvas,'+IntToStr(smb.width)+','+IntToStr(smb.Heigth)+');');
