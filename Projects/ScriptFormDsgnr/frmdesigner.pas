@@ -8,7 +8,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
   stdctrls, ExtCtrls, Menus, LCLIntf, LCLType, LCLProc, LResources, LMessages, Grids, design_frm,
-  types,sclist,StrUtils,code;
+  types,sclist,StrUtils,bitmaps,code;
 
 type
   TControlsClassStandard = array [0..9] of TComponentClass;
@@ -333,9 +333,6 @@ begin
 end;
 
 
-
-
-
 procedure TCompForm.lvSelectItem(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 begin
@@ -447,7 +444,10 @@ end;
 function TCompForm.ComponentToSimba(cmp: TControl): TSimbaComponent;
 var
    smb: TSimbaComponent;
+   mb: TMufasaBitmap;
 begin
+ mb:=TMufasaBitmap.Create;
+ try
    smb.caption:=cmp.Caption;
    smb.top:=cmp.Top;
    smb.width:=cmp.Width;
@@ -462,8 +462,12 @@ begin
    if (CompareText(cmp.ClassName,'TImage')) = 0 then
     begin
      smb.img.switcher:=true;
-     smb.img.path:=String(PString(cmp.Tag));
+     mb.LoadFromTBitmap(TImage(cmp).Picture.Bitmap);
+     smb.img.imgcode:=mb.ToString;
     end;
+   finally
+     mb.Free;
+     end;
    result:=smb;
 end;
 

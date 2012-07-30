@@ -187,7 +187,6 @@ begin
    pathtoimg:=imgdialog.FileName;
    TImage(CurComp).AutoSize:=true;
    TImage(CurComp).Picture.LoadFromFile(pathtoimg);
-   TImage(CurComp).Tag:=LongInt(PString(pathtoimg));
    end;
 end;
 

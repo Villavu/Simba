@@ -8,7 +8,7 @@ uses
   Classes, SysUtils,Graphics;
 type TBitmapContainer = record
     switcher: boolean;
-    path: string;
+    imgcode: string;
   end;
 type
   TSimbaComponent = record

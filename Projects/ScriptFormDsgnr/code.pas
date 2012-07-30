@@ -6,17 +6,19 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  SynEdit, SynHighlighterPas, sclist;
+  SynEdit, SynHighlighterPas, sclist,ClipBrd, Menus;
 
 type
 
   { TCodeGen }
 
   TCodeGen = class(TForm)
+    MenuItem1: TMenuItem;
+    PopupMenu1: TPopupMenu;
     memo1: TSynEdit;
-    SynPasSyn1: TSynPasSyn;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure MenuItem1Click(Sender: TObject);
   private
     CmpList: TSimbaComponentList;
     labels,edits,images,buttons,checkboxes,listboxes,comboboxes,RadBtns: TSimbaComponentList;
@@ -37,7 +39,7 @@ type
 var
   CodeGen: TCodeGen;
   Stream: TStringStream;
-  imageNo: integer;
+   img: integer;
 
 implementation
 
@@ -54,6 +56,7 @@ begin
     end;
   result:=s;
 end;
+
 
 { TCodeGen }
 
@@ -104,7 +107,12 @@ begin
   ComboBoxesCode:=TStringList.Create;
   RadBtnsCode:=TStringList.Create;
   FormCode:=TStringList.Create;
-  imageNo:=0;
+  img:=0;
+end;
+
+procedure TCodeGen.MenuItem1Click(Sender: TObject);
+begin
+  ClipBoard.AsText:=memo1.Text;
 end;
 
 procedure TCodeGen.CreateScript(list: TSimbaComponentList);
@@ -233,6 +241,32 @@ if RadBtns.count> 0 then
   i:=0;
   HeaderCode.Add(s+': TRadioButton;');
 end;
+if img > 0 then
+begin
+ s:=GenSpaces(2);
+  for i:=0 to img -1 do
+  begin
+   if i<img-1 then
+   s:=s+'bmps'+inttostr(i)+','
+    else
+   s:=s+'bmps'+inttostr(i);
+  end;
+  i:=0;
+  HeaderCode.Add(s+': TMufasaBitmap;');
+end;
+if img > 0 then
+begin
+ s:=GenSpaces(2);
+  for i:=0 to img -1 do
+  begin
+   if i<img-1 then
+   s:=s+'bmp'+inttostr(i)+','
+    else
+   s:=s+'bmp'+inttostr(i);
+  end;
+  i:=0;
+  HeaderCode.Add(s+': TBitmap;');
+end;
 HeaderCode.Add('const');
 HeaderCode.Add(GenSpaces(2)+'default = '+#39+'Comic Sans MS'+#39+';');
 HeaderCode.Add('');
@@ -292,7 +326,8 @@ end;
 
 procedure TCodeGen.SmbToCodeList(smb: TSimbaComponent; list: TStringList);
 var
-  i: integer;
+  i,p: integer;
+  s,s1: string;//strings for bitmap;
 begin
   i:=GetSimbaCtype(smb);
   Case i of
@@ -331,6 +366,7 @@ begin
        list.Add(GenSpaces(2)+'end;');
   end;
   3: begin
+       s:=''; s1:='';
        list.Add('//'+smb.compname+'\\');
        list.Add(GenSpaces(1)+ smb.compname+':='+smb.classname+'.Create('+cmpList.GetComponent(0).compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
@@ -343,10 +379,42 @@ begin
        list.Add(GenSpaces(6)+'Height:='+IntToStr(smb.heigth)+';');
        if smb.img.switcher = true then
          begin
-         list.Add(GenSpaces(6)+'Picture.Bitmap.LoadFromFile('+#39+smb.img.path+#39+');');
+         s:=smb.img.imgcode;
+         {s1:=#39;
+          for p:=0 to Length(s)-1 do begin
+            SetLength(s1,Length(s1)+1);
+            s1[Length(s1)]:=s[p];
+            if p<>0 then begin
+             if ((P/20)=trunc(P/20)) then
+              begin
+              SetLength(s1,Length(s1)+1);
+              s1[Length(s1)]:=#39;
+              SetLength(s1,Length(s1)+1);
+              s1[Length(s1)]:='+';
+             // SetLength(s1,Length(s1)+1);
+             // s1[Length(s1)]:=#13;
+              SetLength(s1,Length(s1)+1);
+              s1[Length(s1)]:=#10;
+              SetLength(s1,Length(s1)+1);
+              s1[Length(s1)]:=#39;
+              end;
+             if P = Length(s) then
+              begin
+              SetLength(s1,Length(s1)+1);
+              s1[Length(s1)]:=#39;
+              end;
+            end;
+          end;}
+          List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=TBitmap.Create;');
+          List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+':=GetMufasaBitmap(BitmapFromString('+IntToStr(smb.width)+','+IntToStr(smb.Heigth)+','+#39+s+#39+'));');
+          List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=bmps'+IntToStr(img)+'.ToTBitmap;');
+          List.Add(GenSpaces(6)+'Picture.Bitmap.handle:=bmp'+IntToStr(img)+'.handle;');
+         // List.Add(GenSpaces(6)+'DrawBitmap(bmps'+IntToStr(img)+',Canvas,'+IntToStr(smb.width)+','+IntToStr(smb.Heigth)+');');
+         //list.Add(GenSpaces(6)+'Picture.Bitmap.LoadFromFile('+#39+smb.img.path+#39+');');
          end else
        list.Add(GenSpaces(6)+'//'+'load bitmap to image here');
        list.Add(GenSpaces(2)+'end;');
+       img:=img+1;
   end;
   4: begin
        list.Add('//'+smb.compname+'\\');
