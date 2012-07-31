@@ -6,7 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  SynEdit, SynHighlighterPas, sclist,ClipBrd, Menus;
+  SynEdit, SynHighlighterPas, SynGutterBase, SynGutterMarks,
+  SynGutterLineNumber, SynGutterChanges, SynGutter, SynGutterCodeFolding,
+  sclist, ClipBrd, Menus;
 
 type
 
@@ -327,7 +329,7 @@ end;
 
 procedure TCodeGen.SmbToCodeList(smb: TSimbaComponent; list: TStringList);
 var
-  i,p: integer;
+  i,p,u: integer;
   s,s1: string;//strings for bitmap;
 begin
   i:=GetSimbaCtype(smb);
@@ -381,12 +383,12 @@ begin
        if smb.img.switcher = true then
          begin
          s:=smb.img.imgcode;
-         s1:=#13#10+#39;
+         s1:=#13#10+GenSpaces(6)+#39;
           for p:=0 to Length(s)-1 do begin
             SetLength(s1,Length(s1)+1);
             s1[Length(s1)]:=s[p+1];
             if p<>0 then begin
-             if ((P/20)=trunc(P/20)) then
+             if ((P/40)=trunc(P/40)) then
               begin
               SetLength(s1,Length(s1)+1);
               s1[Length(s1)]:=#39;
@@ -396,6 +398,11 @@ begin
               s1[Length(s1)]:=#13;
               SetLength(s1,Length(s1)+1);
               s1[Length(s1)]:=#10;
+              for u:=0 to 6 do
+                 begin
+                 SetLength(s1,Length(s1)+1);
+                 s1[Length(s1)]:=#32;
+                 end;
               SetLength(s1,Length(s1)+1);
               s1[Length(s1)]:=#39;
               end;

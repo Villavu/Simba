@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, LCLType, Dialogs,
-  TypInfo, Math, cselectonruntime, Messages, ComCtrls, ExtCtrls, Menus;
+  TypInfo, Math, cselectonruntime, Messages, ComCtrls, ExtCtrls, Menus,bitmaps;
 
 type
  THControl = Class(TControl);
@@ -44,6 +44,7 @@ type
        _ControlsCreated:Integer;
     _comp:TControl;
     function CreateComponent(Sender: TObject; X, Y: Integer):TControl;
+    function ResolveFileType(AStream: TStream): Integer;
     procedure Paint; override;
   public
         procedure DeleteComponent();
@@ -60,6 +61,42 @@ implementation
 
 {$R *.lfm}
 uses frmdesigner;
+{Image functions}
+function JpegToBitmap(jpeg: string):TBitmap;
+var
+ jpg:TJpegImage;
+ bmp:TBitmap;
+ begin
+   bmp := TBitmap.Create;
+   jpg:=TJpegImage.Create;
+   try
+   jpg.LoadFromFile(jpeg);
+   Bmp.Height      := jpg.Height;
+   Bmp.Width       := jpg.Width;
+   Bmp.PixelFormat := pf24bit;
+   Bmp.Canvas.Draw(0, 0, jpg);
+   bmp.Assign(jpg);
+   result:=bmp;
+   finally
+     jpg.Free;
+   end;
+ end;
+function PngToBitmap(png: string):TBitmap;
+var
+  bmp: TBitmap;
+  pic: TPortableNetworkGraphic;
+begin
+   pic:=TPortableNetworkGraphic.Create;
+   bmp := TBitmap.Create;
+   try
+   pic.LoadFromFile(png);
+   bmp.Assign(pic);
+   result:=bmp;
+   finally
+     pic.Free;
+   end;
+end;
+
 { TDsgnForm }
 
 procedure TDsgnForm.FormCreate(Sender: TObject);
@@ -161,11 +198,11 @@ begin
       popupmenu1.Items[1].Visible:=true;
       end;
       end;
-   if (CompareText(CurComp.ClassName,'TListBox'))=0 then
-    begin
+      if (CompareText(CurComp.ClassName,'TListBox'))=0 then
+      begin
       end;
       if (CompareText(CurComp.ClassName,'TComboBox'))=0 then
-    begin
+      begin
       end;
 end;
 
@@ -180,13 +217,24 @@ begin
 end;
 
 procedure TDsgnForm.ChooseImg(Sender: TObject);
+var
+  imgstream: TMemoryStream;
+  i: integer;
 begin
-  imgdialog.Filter:='Bitmap files only|*.bmp';
+  imgdialog.Filter:='Bitmap|*.bmp|Jpeg|*.jpg|png|*.png';
   if imgdialog.Execute then
    begin
+   imgstream:=TMemoryStream.Create();
+   imgstream.LoadFromFile(imgdialog.FileName);
    pathtoimg:=imgdialog.FileName;
-   TImage(CurComp).AutoSize:=true;
-   TImage(CurComp).Picture.LoadFromFile(pathtoimg);
+   //imgstream.Position:=0;
+   i:=ResolveFileType(imgstream);
+   case i of
+   1: begin TImage(CurComp).AutoSize:=true; TImage(CurComp).Picture.LoadFromFile(pathtoimg);end;
+   3: begin TImage(CurComp).AutoSize:=true; TImage(CurComp).Picture.Bitmap:=JpegToBitmap(pathtoimg);end;
+   4: begin TImage(CurComp).AutoSize:=true; TImage(CurComp).Picture.Bitmap:=PngToBitmap(pathtoimg);end;
+   end;
+   imgstream.Free;
    end;
 end;
 
@@ -269,6 +317,48 @@ begin
     sor.SelectControl := TControl(comp);
   end;
   Result := TControl(comp);
+end;
+
+function TDsgnForm.ResolveFileType(AStream: TStream): Integer;
+var
+  p: PChar;
+begin
+  Result := 0;
+  if not Assigned(AStream) then
+    Exit;
+  GetMem(p, 10);
+  try
+    AStream.Position := 0;
+    AStream.Read(p[0], 10);
+    {bitmap format}
+    if (p[0] = #66) and (p[1] = #77) then
+      Result := 1;
+    {tiff format}
+    if ((p[0] = #73) and (p[1] = #73) and (p[2] = #42) and (p[3] = #0)) or
+      ((p[0] = #77) and (p[1] = #77) and (p[2] = #42) and (p[3] = #0)) then
+      Result := 2;
+    {jpg format}
+    if (p[6] = #74) and (p[7] = #70) and (p[8] = #73) and (p[9] = #70) then
+      Result := 3;
+    {png format}
+    if (p[0] = #137) and (p[1] = #80) and (p[2] = #78) and (p[3] = #71) and
+      (p[4] = #13) and (p[5] = #10) and (p[6] = #26) and (p[7] = #10) then
+      Result := 4;
+    {dcx format}
+    if (p[0] = #177) and (p[1] = #104) and (p[2] = #222) and (p[3] = #58) then
+      Result := 5;
+    {pcx format}
+    if p[0] = #10 then
+      Result := 6;
+    {emf format}
+    if (p[0] = #215) and (p[1] = #205) and (p[2] = #198) and (p[3] = #154) then
+      Result := 7;
+    {emf format}
+    if (p[0] = #1) and (p[1] = #0) and (p[2] = #0) and (p[3] = #0) then
+      Result := 7;
+  finally
+    Freemem(p);
+  end;
 end;
 
 procedure TDsgnForm.DeleteComponent();
