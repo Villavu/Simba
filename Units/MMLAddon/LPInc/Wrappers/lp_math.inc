@@ -257,3 +257,8 @@ procedure Lape_Sum64IntArr(const Params: PParamArray; const Result: Pointer); la
 begin
   PInt64(Result)^ := ps_Sum64IntArr(PIntegerArray(Params^[0])^);
 end;
+
+procedure Lape_IntToHex(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PString(Result)^ := IntToHex(PInteger(Params^[0])^,0);
+end;
