@@ -114,6 +114,9 @@ procedure TWINCONTROLBRUSH_R(Self: TWINCONTROL; var T: TBRUSH); begin T := Self.
 procedure TWINCONTROLCONTROLS_R(Self: TWINCONTROL; var T: TCONTROL; t1: INTEGER); begin t := Self.CONTROLS[t1]; end;
 procedure TWINCONTROLCONTROLCOUNT_R(Self: TWINCONTROL; var T: INTEGER); begin t := Self.CONTROLCOUNT; end;
 
+procedure TWinControl_DoubleBuffered_R(Self: TWinControl; var T: Boolean); begin T := Self.DoubleBuffered; end;
+procedure TWinControl_DoubleBuffered_W(Self: TWinControl; T: Boolean); begin Self.DoubleBuffered := T; end;
+
 procedure RIRegisterTWinControl(Cl: TPSRuntimeClassImporter); // requires TControl
 begin
   with Cl.Add(TWinControl) do
@@ -148,6 +151,7 @@ begin
 		RegisterMethod(@TWINCONTROL.UPDATECONTROLSTATE, 'UPDATECONTROLSTATE');
     RegisterPropertyHelper(@TWINCONTROLBRUSH_R, nil, 'BRUSH');
     {$ENDIF}
+    RegisterPropertyHelper(@TWinControl_DoubleBuffered_R, @TWinControl_DoubleBuffered_W, 'DoubleBuffered');
   end;
 end;
 

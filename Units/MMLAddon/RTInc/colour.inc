@@ -18,11 +18,6 @@ begin
   Pboolean(Result^.Data)^ := ps_findcolor(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(PPointer(Params^[1].Data)^)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^);
 end;
 
-procedure RUTIS_ps_findcolortoleranceOptimised(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
-begin
-  Pboolean(Result^.Data)^ := ps_findcolortoleranceOptimised(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(PPointer(Params^[1].Data)^)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^, Pinteger(Params^[7].Data)^);
-end;
-
 procedure RUTIS_ps_findcolortolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
   Pboolean(Result^.Data)^ := ps_findcolortolerance(Pinteger(PPointer(Params^[0].Data)^)^, Pinteger(PPointer(Params^[1].Data)^)^, Pinteger(Params^[2].Data)^, Pinteger(Params^[3].Data)^, Pinteger(Params^[4].Data)^, Pinteger(Params^[5].Data)^, Pinteger(Params^[6].Data)^, Pinteger(Params^[7].Data)^);
@@ -66,11 +61,6 @@ end;
 procedure RUTIS_ps_CountColorTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
 begin
   PInteger(Result^.Data)^ := ps_CountColorTolerance(PInteger(Params^[0].Data)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^);
-end;
-
-procedure RUTIS_ps_FindColorsToleranceOptimised(Params: PRutisParamInfoArray; Result: PRutisParamInfo);
-begin
-  PBoolean(Result^.Data)^ := ps_FindColorsToleranceOptimised(PPointArray(PPointer(Params^[0].Data)^)^, PInteger(Params^[1].Data)^, PInteger(Params^[2].Data)^, PInteger(Params^[3].Data)^, PInteger(Params^[4].Data)^, PInteger(Params^[5].Data)^, PInteger(Params^[6].Data)^);
 end;
 
 procedure RUTIS_ps_FindColorsTolerance(Params: PRutisParamInfoArray; Result: PRutisParamInfo);

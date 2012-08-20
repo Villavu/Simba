@@ -1,6 +1,6 @@
 {
   This file is part of the Mufasa Macro Library (MML)
-  Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+  Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,31 @@ interface
 
 uses
   Classes, SysUtils{$ifdef MSWindows},windows{$endif};
+
+{$I Simba.inc}
+
+const
+    SimbaVersion = 1000;
+    SimbaMajor = 1000; // this should be 980 even if SimbaVersion is 981, etc
+
+    SimbaURL =     {$IFDEF WINDOWS}
+                    {$IFDEF CPUI386}
+                    'http://simba.villavu.com/bin/Windows/x86/Stable/'
+                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
+                    {$ELSE}
+                    'http://simba.villavu.com/bin/Windows/x86_64/Stable/'
+                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
+                    {$ENDIF}
+                  {$ELSE}
+                    {$IFDEF CPUI386}
+                    'http://simba.villavu.com/bin/Linux/x86/Stable/'
+                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
+                    {$ELSE}
+                    'http://simba.villavu.com/bin/Linux/x86_64/Stable/'
+                    {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
+                    {$ENDIF}
+                  {$ENDIF};
+    FontURL = 'http://simba.villavu.com/bin/Fonts/';
 
 procedure mDebugLn( s : string);overload;
 procedure mDebugLn( s : string; f : array of const);overload;

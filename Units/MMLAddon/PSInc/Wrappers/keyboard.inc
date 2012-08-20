@@ -31,9 +31,9 @@ begin
   CurrThread.Client.IOManager.KeyUp(key);
 end;
 
-procedure ps_SendKeys(const s: string; keywait: integer); extdecl;
+procedure ps_SendKeys(const s: string; keywait, keymodwait: integer); extdecl;
 begin
-  CurrThread.Client.IOManager.SendText(s, keywait);
+  CurrThread.Client.IOManager.SendText(s, keywait, keymodwait);
 end;
 
 procedure ps_PressKey(key: Word); extdecl;

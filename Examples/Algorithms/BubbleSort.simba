@@ -1,0 +1,38 @@
+{
+  NOTE: Things in the examples representing algorithms may contain the number
+        '2' appending the name. This is because this method is already offered
+        by Simba and is readily available. It is therefore recommended to not
+        recreate the created (for speed, etc).
+}
+
+//Sorts an array of Integers (TIA) using the bubble sorting algorithm in
+  //ascending order (Lowest to Highest).
+procedure BubbleSort2(var TIA: TIntegerArray);
+var
+  i, bI, TMP: Integer;
+  UnSorted: Boolean;
+begin
+  UnSorted := True;
+  bI := High(TIA);
+  while (UnSorted) do
+  begin
+    UnSorted := False;
+    for i := bI downto 1 do
+      if(TIA[i] < TIA[i - 1]) then
+      begin
+        TMP := TIA[i];
+        TIA[i] := TIA[i - 1];
+        TIA[i - 1] := TMP;
+        UnSorted := True;
+      end;
+  end;
+end;
+
+var
+  UnsortedArray: TIntegerArray;
+
+begin
+  UnsortedArray := [5, 1, 23, -3, 9, -7];
+  BubbleSort2(UnsortedArray);
+  Writeln(UnsortedArray);  // Well, now the SortedArray :-P
+end.

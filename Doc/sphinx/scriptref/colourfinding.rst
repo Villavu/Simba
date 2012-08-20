@@ -127,8 +127,7 @@ FindColor
 
 .. code-block:: pascal
 
-    function FindColor(var x, y: Integer; col, x1, y1, x2, y2: Integer): 
-    Boolean;
+    function FindColor(var x, y: Integer; col, x1, y1, x2, y2: Integer): Boolean;
 
 
 FindColor returns true if the exact colour given (col) is found in the box
@@ -144,14 +143,13 @@ FindColorTolerance
 
 .. code-block:: pascal
 
-    function FindColorTolerance(var x, y: Integer; col, x1, y1, x2, y2, tol: 
-    Integer): Boolean; 
+    function FindColorTolerance(var x, y: Integer; col, x1, y1, x2, y2, tol: Integer): Boolean;
 
-FindColorTolerance returns true if a colour within the given tolerance range 
+FindColorTolerance returns true if a colour within the given tolerance range
 *tol* of the given colour *col* is found in the box defined by *x1*, *y1*,
 *x2*, *y2*.
 Only the first point is returned in *x* and *y*.
-Whether or not a colour is within the tolerance range is determined by the 
+Whether or not a colour is within the tolerance range is determined by the
 :ref:`scriptref-CTS` mode. It searches from the top left to the bottom right
 and will stop after matching a point.
 
@@ -175,13 +173,12 @@ FindColorsTolerance
 
 .. code-block:: pascal
 
-    function FindColorsTolerance(var pts: TPointArray; col, x1, y1, x2, y2, 
-    tol: Integer): Boolean; 
+    function FindColorsTolerance(var pts: TPointArray; col, x1, y1, x2, y2, tol: Integer): Boolean;
 
 FindColorsTolerance returns true if at least one point was found.
-A point is found if it is within the given tolerance range *tol* 
+A point is found if it is within the given tolerance range *tol*
 of the given colour *col* and inside the box defined by *x1*, *y1*, *x2*, *y2*.
-Whether or not a color is within the tolerance range is determined by the 
+Whether or not a color is within the tolerance range is determined by the
 :ref:`scriptref-CTS` mode.
 It searches from the top left to the bottom right and will find all
 matching points in the area.
@@ -193,8 +190,7 @@ FindColorSpiral
 
 .. code-block:: pascal
 
-    function FindColorSpiral(var x, y: Integer; color, xs,ys,xe,ye:Integer):
-    Boolean;
+    function FindColorSpiral(var x, y: Integer; color, xs,ys,xe,ye:Integer): Boolean;
 
 Same as FindColor, but starts searching from *x*, *y*.
 
@@ -205,8 +201,7 @@ FindColorSpiralTolerance
 
 .. code-block:: pascal
 
-    function FindColorToleranceSpiral(var x, y: Integer; color,
-    xs,ys,xe,ye,tolerance:Integer): Boolean
+    function FindColorSpiralTolerance(var x, y: Integer; color, xs,ys,xe,ye,tolerance:Integer): Boolean
 
 Same as FindColorTolerance, but starts searching from *x*, *y*.
 
@@ -217,8 +212,7 @@ FindColorsSpiralTolerance
 
 .. code-block:: pascal
 
-    function FindColorsSpiralTolerance(x, y: Integer;
-    var pts: TPointArray; col, x1, y1, x2, y2, tol: Integer): Boolean; 
+    function FindColorsSpiralTolerance(x, y: Integer; var pts: TPointArray; col, x1, y1, x2, y2, tol: Integer): Boolean; 
 
 Same as FindColorsTolerance, but starts searching from *x*, *y*.
 
@@ -230,8 +224,7 @@ Find areas of colours
 
 .. code-block:: pascal
 
-    function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye,
-    MinArea: Integer): Boolean;
+    function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye, MinArea: Integer): Boolean;
 
 FindColoredArea finds an area that consists out of *Color* and has a minimal
 size of *MinArea*. If you want minimal area of 5x5 pixels (25), then set MinArea
@@ -239,8 +232,7 @@ to 25.
 
 .. code-block:: pascal
 
-    function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe,
-    ye, MinArea, Tolerance : Integer): Boolean;
+    function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe, ye, MinArea, Tolerance : Integer): Boolean;
 
 FindColoredArea finds an area that consists out of Colours that match *Color* with
 the given *Tolerance* and has a minimal size of *MinArea*.
@@ -254,7 +246,7 @@ Colour tolerance
 Simba contains several algorithms for determining if two colours are equal
 given a tolerance. There are three algorithms, from fastest to slowest:
 
-    *   CTS 0: Quick and dirty comparison. Matches if the differences between the 
+    *   CTS 0: Quick and dirty comparison. Matches if the differences between the
         three RGB values are <= Tolerance
 
     *   CTS 1: RGB comparison that uses the Pythagorean distance in the RGB cube
@@ -267,8 +259,9 @@ given a tolerance. There are three algorithms, from fastest to slowest:
         very little in hue. Luminance is assigned a somewhat static function, and
         has no modifier.
 
-..
-    TODO: CIE-Lab
+    *   CTS 3: Comparison using CIE L*a*b colour space, uses Pythagorean
+        distance.
+
 
 .. _scriptref-gettolerancespeed:
 .. _scriptref-setcolortolerancespeed:

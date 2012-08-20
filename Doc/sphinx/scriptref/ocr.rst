@@ -186,3 +186,138 @@ GetTextAtExWrap
 
 A wrapper function for the previously mentioned function. Required to
 work arounds bugs in the interpreter.
+
+
+Modifying the Uptext filter
+---------------------------
+
+rs_ResetUpTextFilter
+~~~~~~~~~~~~~~~~~~~~
+
+Reset the colours for the colour-filter to default.
+See `rs_SetUpTextFilter`_ for an example.
+
+rs_SetUpTextFilter
+~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure rs_SetUpTextFilter(filter: TOCRFilterDataArray);
+
+Defines the colours that the colour-filter will look for.
+
+
+Example:
+
+.. code-block:: pascal
+
+    program UpTextFilter;
+
+    { Some constants for the OCR - taken directly from Simba }
+    const
+        { Very rough limits for R, G, B }
+        ocr_Limit_High = 190;
+        ocr_Limit_Med = 130;
+        ocr_Limit_Low = 65;
+
+
+        { `base' Colours of the Uptext }
+
+        { White }
+        ocr_White = 16777215;
+
+        { Level < Your Level }
+        ocr_Green = 65280;
+
+        { Level > Your Level }
+        ocr_Red = 255;
+
+        { Interact or Level = Your Level }
+        ocr_Yellow = 65535;
+
+        { Object }
+        ocr_Blue = 16776960;
+
+        { Item }
+        ocr_ItemC = 16744447;
+
+        { Item }
+        ocr_ItemC2 = ocr_Red or ocr_Green;
+
+        { Shadow }
+        ocr_Purple = 8388736;
+
+    const
+        OF_LN = 256;
+        OF_HN = -1;
+
+
+    { Helper function to easily load a struct }
+    function load0(r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer;
+        is_text_color: boolean): tocrfilterdata;
+    begin
+      result.r_low := r_low;
+      result.r_high := r_high;
+      result.g_low := g_low;
+      result.g_high := g_high;
+      result.b_low := b_low;
+      result.b_high := b_high;
+      result.set_col := set_col;
+      result._type := 0;
+      result.is_text_color:= is_text_color;
+    end;
+
+    {
+    Load our own ``filter data''. This particular set doesn't contain the item
+    colours - those are replaced with extra (effectively nill as they already
+    exist) green colours.
+    }
+    rocedure foo;
+    var filterdata: TOCRFilterDataArray;
+    begin
+      setlength(filterdata, 9);
+
+      filterdata[0] := load0(65, OF_HN, OF_LN, 190, OF_LN, 190, ocr_Blue, True); // blue
+      filterdata[1] := load0(65, OF_HN, OF_LN, 190, 65, OF_HN, ocr_Green, True); // green
+
+      // ``False'' item
+      filterdata[2] := load0(65, OF_HN, OF_LN, 190, 65, OF_HN, ocr_Green, True); // green
+
+      { This is the real one }
+      //filterdata[2] := load0(OF_LN, 190, 220, 100, 127, 40, ocr_ItemC, True); // itemC
+
+      filterdata[3] := load0(OF_LN, 190, OF_LN, 190, 65, OF_HN, ocr_Yellow, True); // yellow
+      filterdata[4] := load0(OF_LN, 190, 65, OF_HN, 65, OF_HN, ocr_Red, True); // red
+      filterdata[5] := load0(OF_LN, 190, OF_LN, 65, 65, OF_HN, ocr_Red, True); // red 2
+      filterdata[6] := load0(190 + 10, 130, OF_LN, 65 - 10, 20, OF_HN, ocr_Green, True); // green 2
+
+      // ``False'' item 2
+      filterdata[7] := load0(65, OF_HN, OF_LN, 190, 65, OF_HN, ocr_Green, True);
+
+      { This is the real one }
+      //filterdata[7] := load0(190, 140, 210, 150, 200, 160, ocr_ItemC2, True); // item2, temp item_c
+      filterdata[8] := load0(65, OF_HN, 65, OF_HN, 65, OF_HN, ocr_Purple, False); // shadow
+
+      rs_SetUpTextFilter(filterdata);
+    end;
+
+
+    var
+      bmp: integer;
+    begin
+      bmp := LoadBitmap('uptext.png');
+      SetTargetBitmap(bmp);
+
+      writeln( rs_GetUpTextAt(0, 0) );
+
+      foo;
+
+      writeln( rs_GetUpTextAt(0, 0) );
+
+      rs_ResetUpTextFilter;
+
+      writeln( rs_GetUpTextAt(0, 0) );
+
+      SetDesktopAsClient;
+      FreeBitmap(bmp);
+    end.

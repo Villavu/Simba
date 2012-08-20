@@ -1,0 +1,34 @@
+program FindColorsTolerance_Example;
+
+var
+  Bounds: TBox;
+  I: Integer;
+  Colour, Tolerance: Integer;
+  Points: TPointArray; // TPointArray is the same as using 'array of TPoint'
+
+begin
+  Colour := clBlack;  // The colour to search for (e.g clBlack OR 0)
+  Tolerance := 16;    // The tolerance to search for.
+  // Tolerance is the amount of similarity it should search for colours with
+    // the highest tolerance you can use is 255.
+
+  Bounds.X1 := 0;   // The top left corner
+  Bounds.Y1 := 0;   //  - of the client.
+  Bounds.X2 := 25;  // The bottom right corner
+  Bounds.Y2 := 25;  //  - of the client.
+
+  // If the colour was found, do what?
+  if(FindColorsTolerance(Points, Colour, Bounds.X1, Bounds.Y1, Bounds.X2, Bounds.Y2, Tolerance)) then
+  begin
+    Writeln('The colour, ' + IntToStr(Colour) + ' and similar, were found :-)');
+
+    for I := 0 to High(Points) do
+    begin
+      Writeln('It is located at point (X = ' +
+        IntToStr(Points[I].x) + ', Y = ' + IntToStr(Points[I].y) + ') AND');
+    end;
+  end else
+  begin
+    Writeln('The colour was not found :-(');
+  end;
+end.

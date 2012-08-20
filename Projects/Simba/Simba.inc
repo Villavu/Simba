@@ -26,13 +26,24 @@
                             // See Units/Linux/keybinder.pas
 {$ENDIF}
 
-//{$DEFINE SIMBA_VERBOSE} // For more verbosity.
+{$DEFINE SIMBA_VERBOSE} // For more verbosity.
+
+//{$DEFINE NOTPORTABLE} // NOTPORTABLE makes it easier to build portable by
+                        // default, yet keep it possible to disable it with
+                        // command line flags.
+
+{$DEFINE USE_DEBUGGER}
 
 //{$DEFINE USE_RUTIS}
+{$DEFINE USE_LAPE}
 
-//{$DEFINE USE_CPASCAL} // TODO
-//{$DEFINE USE_LAPE} // TODO
+{$DEFINE USE_SQLITE} // TO build with SQLite3 support.
+
+//{$DEFINE USE_CPASCAL}
 {$DEFINE USE_EXTENSIONS}
 //{$DEFINE USE_CODECOMPLETION} // TODO
 
 //{$DEFINE TERMINALWRITELN} // Only used once. Remove from SimbaUnit?
+
+{$MACRO ON}
+{$define lape_extdecl:=cdecl;}

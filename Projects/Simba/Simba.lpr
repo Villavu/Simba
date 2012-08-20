@@ -18,8 +18,8 @@
 	See the file COPYING, included in this distribution,
 	for details about the copyright.
 
-    SAMufasaGUI for the Mufasa Macro Library
-}                 
+    Simba for the Mufasa Macro Library
+}
 
 program Simba;
 
@@ -28,16 +28,9 @@ program Simba;
 {$DEFINE Simba}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads, cmem, {heaptrc, }
-  {$ENDIF}{$ENDIF}
-  Interfaces, Forms, SimbaUnit, colourhistory, About, internets, debugimage,
-  framefunctionlist, simpleanalyzer, updater, updateform, Simbasettings,
-  libloader, mufasabase, tpa, v_ideCodeInsight,
-  PSDump, v_ideCodeParser,
-  v_AutoCompleteForm, CastaliaPasLex, CastaliaPasLexTypes, CastaliaSimplePasPar,
-  CastaliaSimplePasParTypes, dcpbase64, mPasLex, v_Constants, v_MiscFunctions,
-  mmisc, bitmapconv;
+  {$IFDEF UNIX}{$IFDEF UseCThreads}cthreads, cmem,{$ENDIF}{$ENDIF}
+  Interfaces, Forms, SimbaUnit, colourhistory, About, debugimage, bitmapconv,
+  scriptmanager, debugger, dcpbase64;
 
 {$R Simba.res}
 
@@ -50,7 +43,10 @@ begin
   Application.CreateForm(TDebugImgForm, DebugImgForm);
 //  Application.CreateForm(TExtensionsForm, ExtensionsForm);
   Application.CreateForm(TBitmapConvForm, BitmapConvForm);
+  Application.CreateForm(TScriptManagerForm, ScriptManagerForm);
+//  Application.CreateForm(TDebuggerForm, DebuggerForm);
 //  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
+//  Application.CreateForm(TSettingsSimpleForm, SettingsSimpleForm); Done in FormCreate of MainForm
 //  Application.CreateForm(TSettingsForm, SettingsForm); Done in FormCreate of MainForm
   Application.Run;
 end.
