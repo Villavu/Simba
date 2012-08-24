@@ -1,3 +1,10 @@
+Settings Form
+=============
+
+As of Simba 0.99, a decent settings manager has been implemented.
+If you still want to use the old settings manager, use the option *Settings
+(Expert)* from the menu.
+
 .. settings:
 
 Simba settings
@@ -14,7 +21,6 @@ If you at any time have serious problems with Simba not behaving it as you
 expect it should and you changed something in the settings, you could try
 closing Simba and deleting ``settings.xml``. Simba will create one with
 default settings if it does not exist.
-
 
 General Settings
 ----------------

@@ -6,8 +6,8 @@ object ScriptFrame: TScriptFrame
   ClientHeight = 328
   ClientWidth = 397
   TabOrder = 0
-  DesignLeft = 609
-  DesignTop = 169
+  DesignLeft = 546
+  DesignTop = 153
   inline SynEdit: TSynEdit
     Left = 0
     Height = 328
@@ -28,7 +28,8 @@ object ScriptFrame: TScriptFrame
     OnKeyPress = SynEditKeyPress
     OnClickLink = SynEditClickLink
     OnMouseLink = SynEditMouseLink
-    Gutter.Width = 59
+    BookMarkOptions.BookmarkImages = DebuggerForm.ImageList
+    Gutter.Width = 57
     Gutter.MouseActions = <    
       item
         Shift = []
@@ -618,6 +619,7 @@ object ScriptFrame: TScriptFrame
     BracketHighlightStyle = sbhsBoth
     OnChange = SynEditChange
     OnCommandProcessed = SynEditCommandProcessed
+    OnGutterClick = SynEditGutterClick
     OnProcessCommand = SynEditProcessCommand
     OnProcessUserCommand = SynEditProcessUserCommand
     OnSpecialLineColors = SynEditSpecialLineColors
@@ -627,7 +629,7 @@ object ScriptFrame: TScriptFrame
         Width = 24
       end
       object TSynGutterLineNumber
-        Width = 19
+        Width = 17
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -728,8 +730,6 @@ object ScriptFrame: TScriptFrame
             Priority = 0
           end>
       end
-    end
-    inline SynRightGutterPartList1: TSynRightGutterPartList
     end
   end
 end

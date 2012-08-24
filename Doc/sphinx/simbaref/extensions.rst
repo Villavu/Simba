@@ -163,16 +163,17 @@ happened.
 
 .. code-block:: pascal
 
-    EventHooks: Array [0..8] of TEventHook =
-    (      (HookName : 'onColourPick'    ; ArgumentCount : 3), 
-       (HookName : 'onOpenFile'      ; ArgumentCount : 2), 
+    EventHooks: Array [0..9] of TEventHook =
+    (      (HookName : 'onColourPick'    ; ArgumentCount : 3),
+       (HookName : 'onOpenFile'      ; ArgumentCount : 2),
        (HookName : 'onWriteFile'     ; ArgumentCount : 2),
-           (HookName : 'onOpenConnection'; ArgumentCount : 2), 
-           (HookName : 'onScriptStart'   ; ArgumentCount : 2), 
+           (HookName : 'onOpenConnection'; ArgumentCount : 2),
+           (HookName : 'onScriptStart'   ; ArgumentCount : 2),
            (HookName : 'onScriptCompile' ; ArgumentCount : 1),
        (HookName : 'onScriptExecute' ; ArgumentCount : 1),
        (HookName : 'onScriptPause'   ; ArgumentCount : 1),
-       (HookName : 'onScriptStop'    ; ArgumentCount : 1));       
+       (HookName : 'onScriptStop'    ; ArgumentCount : 1),
+       (HookName : 'onScriptOpen'    ; ArgumentCount : 1));
 
 For the exact arguments to all these functions, refer to
 :ref:`extension-example-code`.
@@ -191,6 +192,11 @@ onColourPick
 
 onScriptStart
 ~~~~~~~~~~~~~
+
+onScriptOpen
+~~~~~~~~~~~~
+
+This is a *function*, and should return the script, plus any modifications.
 
 
 Special Cases

@@ -13,6 +13,8 @@ begin
   begin;
     RegisterMethod('procedure SetSize(AWidth,AHeight : integer);');
     RegisterMethod('procedure StretchResize(AWidth,AHeight : integer);');
+    RegisterMethod('procedure SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);');
+    RegisterMethod('procedure ResetPersistentMemory;');
     RegisterMethod('procedure FastSetPixel(x,y : integer; Color : TColor);');
     RegisterMethod('procedure FastSetPixels(TPA : TPointArray; Colors : TIntegerArray);');
     RegisterMethod('procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);');
@@ -49,6 +51,7 @@ begin
     RegisterProperty('Height','Integer',iptR);
     RegisterProperty('Index','Integer',iptR);
     RegisterProperty('Name','String',iptRW);
+    RegisterProperty('FData','PtrUInt',iptR);
   end;
 end;
 
@@ -107,11 +110,11 @@ begin
     RegisterMethod('function ToString : string');
     RegisterMethod('function LoadFromString(const s : string) : boolean;');
     RegisterMethod('procedure Normalize;');
-    RegisterMethod('function Valid:boolean');
-    RegisterMethod('procedure DeletePoint( Point : integer);');
-    RegisterMethod('procedure SwapPoint(p1,p2 : integer);');
+    RegisterMethod('function Valid: boolean');
+    RegisterMethod('procedure DeletePoint(Point: integer);');
+    RegisterMethod('procedure SwapPoint(p1, p2: integer);');
     RegisterMethod('procedure MovePoint(fromIndex,toIndex : integer);');
-    RegisterMethod('procedure AddPoint( Point : TMDTMPoint);');
+    RegisterMethod('function AddPoint(Point : TMDTMPoint): integer;');
     RegisterProperty('Count','Integer',iptrw);
     RegisterProperty('Index','Integer',iptr);
     RegisterProperty('Points','TMDTMPointArray',iptr);

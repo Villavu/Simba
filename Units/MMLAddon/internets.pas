@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ unit internets;
 interface
 
 uses
-  Classes, SysUtils, httpsend, blcksock, MufasaTypes, math, ssl_openssl;
+  Classes, SysUtils, httpsend, blcksock, MufasaTypes, math, ssl_openssl,
+  mufasabase;
 
 function GetPage(URL: String): String;
 
@@ -117,6 +118,10 @@ var
   HTTP : THTTPSend;
 begin;
   HTTP := THTTPSend.Create;
+
+  HTTP.UserAgent := 'Mozilla 4.0/ (compatible; Simba/' +
+      IntToStr(SimbaVersion) + '; Synapse)';
+
   Result := '';
   try
     if HTTP.HTTPMethod('GET', URL) then
@@ -219,6 +224,8 @@ begin
   end;
   if not fHandleCookies then
     HTTPSend.Cookies.Clear;
+  HTTPSend.Headers.Clear;
+  HTTPSend.Document.Clear;
   if (ProxyHost <> '') and (ProxyPort <> '') then
   begin
     HTTPSend.ProxyHost := ProxyHost;
@@ -245,6 +252,7 @@ begin
     HTTPSend.ProxyHost := ProxyHost;
     HTTPSend.ProxyPort := ProxyPort;
   end;
+  HTTPSend.Headers.Clear;
   HTTPSend.MimeType := 'application/x-www-form-urlencoded';
   HTTPSend.Document.Clear;
   HTTPSend.Document.Write(Postdata[1],length(postdata));

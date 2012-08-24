@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,13 +50,16 @@ interface
         procedure ActivateClient; virtual;
         function TargetValid: boolean; virtual;
 
-        { Sucky implementation }
-        function  GetError: String; virtual; abstract;
-        function  ReceivedError: Boolean; virtual; abstract;
-        procedure ResetError; virtual; abstract;
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; virtual;
+        procedure MouseResetClientArea; virtual;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; virtual;
+        procedure ImageResetClientArea; virtual;
 
-        { ONLY override the following methods if the target provides mouse functions, defaults to 
-        | raise exceptions }
+        { Sucky implementation }
+        function  GetError: String; virtual;
+        function  ReceivedError: Boolean; virtual;
+        procedure ResetError; virtual;
+
         procedure GetMousePosition(out x,y: integer); virtual;
         procedure MoveMouse(x,y: integer); virtual;
         procedure ScrollMouse(x,y : integer; Lines : integer); virtual;
@@ -66,7 +69,7 @@ interface
 
         { ONLY override the following methods if the target provides key functions, defaults to 
         | raise exceptions }
-        procedure SendString(str: string; keywait: integer); virtual;
+        procedure SendString(str: string; keywait, keymodwait: integer); virtual;
         procedure HoldKey(key: integer); virtual;
         procedure ReleaseKey(key: integer); virtual;
         function IsKeyHeld(key: integer): boolean; virtual;
@@ -84,10 +87,16 @@ interface
         procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
+
       protected
         rgb: prgb32;
         freedata : boolean;
         w,h: integer;
+      private
+        ax1, ay1, ax2, ay2: integer;
+        caset: boolean;
     end;
 
     TBitmapTarget = class(TTarget)
@@ -98,8 +107,13 @@ interface
         procedure GetTargetDimensions(out w, h: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
 
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
       protected
         bitmap: TMufasaBitmap;
+      private
+        ax1, ay1, ax2, ay2: integer;
+        caset: boolean;
     end;
       
    { Implements a target that is a Window in the operating system. This class is abstract, i.e.,
@@ -115,6 +129,15 @@ interface
 
         function TargetValid: boolean; override; abstract;
 
+        function  GetError: String; override; abstract;
+        function  ReceivedError: Boolean; override; abstract;
+        procedure ResetError; override; abstract;
+
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override; abstract;
+        procedure MouseResetClientArea; override; abstract;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override; abstract;
+        procedure ImageResetClientArea; override; abstract;
+
         procedure ActivateClient; override; abstract;
         procedure GetMousePosition(out x,y: integer); override; abstract;
         procedure MoveMouse(x,y: integer); override; abstract;
@@ -123,7 +146,7 @@ interface
         procedure ReleaseMouse(x,y: integer; button: TClickType); override; abstract;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override; abstract;
 
-        procedure SendString(str: string; keywait: integer); override; abstract;
+        procedure SendString(str: string; keywait, keymodwait: integer); override; abstract;
         procedure HoldKey(key: integer); override; abstract;
         procedure ReleaseKey(key: integer); override; abstract;
         function IsKeyHeld(key: integer): boolean; override; abstract;
@@ -135,7 +158,7 @@ interface
     | finalized that is. Trust me, its >9000 times easier to use a buffer across the language
     | barrier. And the internal target implementation of EIOS will make that verry efficient. }
     TEIOS_Client = record
-      RequestTarget: function(initdata: pointer): pointer; stdcall;
+      RequestTarget: function(initdata: PChar): pointer; stdcall;
       ReleaseTarget: procedure(target: pointer); stdcall;
 
       GetTargetDimensions: procedure(target: pointer; var w, h: integer); stdcall;
@@ -147,11 +170,11 @@ interface
       GetMousePosition: procedure(target: pointer; var x,y: integer); stdcall;
       MoveMouse: procedure(target: pointer; x,y: integer); stdcall;
       ScrollMouse: procedure(target : pointer; x,y : integer; lines : integer); stdcall;
-      HoldMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
-      ReleaseMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
-      IsMouseButtonHeld : function  (target : pointer; left : Boolean) : boolean; stdcall;
+      HoldMouse: procedure(target: pointer; x,y: integer; button: integer); stdcall;
+      ReleaseMouse: procedure(target: pointer; x,y: integer; button: integer); stdcall;
+      IsMouseButtonHeld : function  (target : pointer; button: integer): boolean; stdcall;
 
-      SendString: procedure(target: pointer; str: PChar; keywait: integer); stdcall;
+      SendString: procedure(target: pointer; str: PChar; keywait, keymodwait: integer); stdcall;
       HoldKey: procedure(target: pointer; key: integer); stdcall;
       ReleaseKey: procedure(target: pointer; key: integer); stdcall;
       IsKeyHeld: function(target: pointer; key: integer): boolean; stdcall;
@@ -169,9 +192,14 @@ interface
 
     TEIOS_Target = class(TTarget)
       public
-        constructor Create(client: TEIOS_Client; initval: pointer);
+        constructor Create(client: TEIOS_Client; initval: String);
         destructor Destroy; override;
-        
+
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure MouseResetClientArea; override;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
+
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
@@ -183,24 +211,25 @@ interface
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-        procedure SendString(str: string; keywait: integer); override;
+        procedure SendString(str: string; keywait, keymodwait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
         function GetKeyCode(C : char) : integer; override;
-      
+
       private
         client: TEIOS_Client;
         target: pointer;
         buffer: prgb32;
         width,height: integer;
-    end;
-      
-    { EIOS Clients will give an exported name, have a loaded library associated, and have
-    | a TEIOS_Client with the method pointers set. }
-    type TEIOS_LoadedPlugin = record
-      name: string;
-      client: TEIOS_Client;
+
+        { (Forced) Client Area }
+        mx1, my1, mx2, my2: integer;
+        ix1, iy1, ix2, iy2: integer;
+        mcaset, icaset: Boolean;
+
+        procedure MouseApplyAreaOffset(var x, y: integer);
+        procedure ImageApplyAreaOffset(var x, y: integer);
     end;
 
     { This is just a class that loads EIOS clients (like SMART) and sets them up to be used
@@ -222,8 +251,8 @@ interface
       protected
         function InitPlugin(plugin: TLibHandle): boolean; override;
       private
-        plugs: array of TEIOS_LoadedPlugin;
-        function FindClient(name:string): integer;
+        clients: array of TEIOS_Client;
+        function FindClient(name: string): integer;
     end;
 
     {Basically like TEIOS_Client, only this is exported to some plugin, whilst TEIOS_Client is Imported
@@ -244,7 +273,7 @@ interface
       ReleaseMouse: procedure(target: pointer; x,y: integer; left: boolean); stdcall;
       IsMouseButtonHeld : function  (target : pointer; left : boolean) : boolean;stdcall;
 
-      SendString: procedure(target: pointer; str: PChar; keywait: integer); stdcall;
+      SendString: procedure(target: pointer; str: PChar; keywait, keymodwait: integer); stdcall;
       HoldKey: procedure(target: pointer; key: integer); stdcall;
       ReleaseKey: procedure(target: pointer; key: integer); stdcall;
       IsKeyHeld: function(target: pointer; key: integer): boolean; stdcall;
@@ -275,7 +304,7 @@ interface
         procedure SetDesktop; virtual; abstract;
         function SetTarget(ArrPtr: PRGB32; Size: TPoint): integer; overload;
         function SetTarget(bmp : TMufasaBitmap) : integer; overload;
-        function SetTarget(name: string; initargs: pointer): integer; overload;
+        function SetTarget(name, initargs: string): integer; overload;
         function TargetValid: Boolean;
         procedure BitmapDestroyed(Bitmap : TMufasaBitmap);
 
@@ -289,7 +318,12 @@ interface
 
         function IsFrozen: boolean;
         procedure SetFrozen(makefrozen: boolean);
-        
+
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+        procedure MouseResetClientArea;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+        procedure ImageResetClientArea;
+
         procedure GetMousePos(var X, Y: Integer);
         procedure MoveMouse(X, Y: Integer);
         procedure ScrollMouse(x,y : integer; Lines : integer);
@@ -301,7 +335,7 @@ interface
         procedure KeyUp(key: Word);
         procedure KeyDown(key: Word);
         procedure PressKey(key: Word);
-        procedure SendText(text: string; keywait: integer);
+        procedure SendText(text: string; keywait, keymodwait: integer);
         function isKeyDown(key: Word): Boolean;
         function GetKeyCode(c : char) : integer;
 
@@ -355,7 +389,7 @@ interface
     procedure TTarget_Exported_ReleaseMouse(target: pointer; x,y: integer; left: boolean); stdcall;
     function TTarget_Exported_IsMouseButtonHeld(target: pointer; left : boolean) : boolean;stdcall;
 
-    procedure TTarget_Exported_SendString(target: pointer; str: PChar; keywait: integer); stdcall;
+    procedure TTarget_Exported_SendString(target: pointer; str: PChar; keywait, keymodwait: integer); stdcall;
     procedure TTarget_Exported_HoldKey(target: pointer; key: integer); stdcall;
     procedure TTarget_Exported_ReleaseKey(target: pointer; key: integer); stdcall;
     function  TTarget_Exported_IsKeyHeld(target: pointer; key: integer): boolean; stdcall;
@@ -578,7 +612,7 @@ begin
   bmp.OnDestroy:= @BitmapDestroyed;
 end;
 
-function TIOManager_Abstract.SetTarget(name: string; initargs: pointer): integer;
+function TIOManager_Abstract.SetTarget(name, initargs: String): integer;
 var
   client: TEIOS_Client;
 begin
@@ -633,6 +667,23 @@ begin
   {not sure if image needs activation or not, if its a native window keymouse == image so it should be good.}
 end;
 
+function TIOManager_Abstract.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  Result := keymouse.MouseSetClientArea(x1, y1, x2, y2);
+end;
+procedure TIOManager_Abstract.MouseResetClientArea;
+begin
+  keymouse.MouseResetClientArea;
+end;
+function TIOManager_Abstract.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  Result := image.ImageSetClientArea(x1, y1, x2, y2);
+end;
+procedure TIOManager_Abstract.ImageResetClientArea;
+begin
+  image.ImageResetClientArea;
+end;
+
 procedure TIOManager_Abstract.GetMousePos(var X, Y: Integer);
 begin
   keymouse.GetMousePosition(x,y)
@@ -682,9 +733,9 @@ begin
   keyup(key);
   keydown(key);
 end;
-procedure TIOManager_Abstract.SendText(text: string; keywait: integer);
+procedure TIOManager_Abstract.SendText(text: string; keywait, keymodwait: integer);
 begin
-  keymouse.SendString(text, keywait);
+  keymouse.SendString(text, keywait, keymodwait);
 end;
 
 function TIOManager_Abstract.isKeyDown(key: Word): Boolean;
@@ -758,7 +809,34 @@ function TTarget.TargetValid: boolean;
 begin
   result:= true;
 end;
-
+function TTarget.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  raise Exception.Create('MouseSetClientArea not available for this target');
+end;
+procedure TTarget.MouseResetClientArea;
+begin
+  raise Exception.Create('MouseResetClientArea not available for this target');
+end;
+function TTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  raise Exception.Create('ImageSetClientArea not available for this target');
+end;
+procedure TTarget.ImageResetClientArea;
+begin
+  raise Exception.Create('ImageResetClientArea not available for this target');
+end;
+function  TTarget.GetError: String;
+begin
+  raise Exception.Create('GetError not available for this target');
+end;
+function  TTarget.ReceivedError: Boolean;
+begin
+  raise Exception.Create('ReceivedError not available for this target');
+end;
+procedure TTarget.ResetError;
+begin
+  raise Exception.Create('ResetError not available for this target');
+end;
 procedure TTarget.GetMousePosition(out x,y: integer);
 begin
   raise Exception.Create('GetMousePosition not available for this target');
@@ -784,7 +862,7 @@ begin
   raise Exception.Create('IsMouseButtonHeld not available for this target');
 end;
 
-procedure TTarget.SendString(str: string; keywait: integer);
+procedure TTarget.SendString(str: string; keywait, keymodwait: integer);
 begin
   raise Exception.Create('SendString not available for this target');
 end;
@@ -811,28 +889,96 @@ end;
 
 //***implementation*** TEIOS_Target
 
-constructor TEIOS_Target.Create(client: TEIOS_Client; initval: pointer); begin
+constructor TEIOS_Target.Create(client: TEIOS_Client; initval: String); begin
   inherited Create;
   self.client:= client;
+  self.target:= nil;
   if Pointer(client.RequestTarget) <> nil then
-    self.target:= client.RequestTarget(initval);
+     self.target:= client.RequestTarget(PChar(initval));
+  if (self.target = nil) then
+    raise Exception.Create('Setting EIOS target failed.');
   if Pointer(client.GetImageBuffer) <> nil then
      self.buffer:= client.GetImageBuffer(target)
   else
      self.buffer:= nil;
   GetTargetDimensions(self.width,self.height);
+
+  self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
+  self.mcaset := false;
+  self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
+  self.icaset := false;
 end;
 
 destructor TEIOS_Target.Destroy; begin
-  client.ReleaseTarget(self.target);
+  if (client.ReleaseTarget <> nil) and (self.target <> nil) then
+    client.ReleaseTarget(self.target);
   inherited Destroy;
+end;
+
+function TEIOS_Target.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  if ((x2 - x1) > self.width) or ((y2 - y1) > self.height) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
+  mcaset := True;
+end;
+
+procedure TEIOS_Target.MouseResetClientArea;
+begin
+  mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
+  mcaset := False;
+end;
+
+function TEIOS_Target.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  if ((x2 - x1) > self.width) or ((y2 - y1) > self.height) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
+  icaset := True;
+end;
+
+procedure TEIOS_Target.ImageResetClientArea;
+begin
+  ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
+  icaset := False;
+end;
+
+procedure TEIOS_Target.MouseApplyAreaOffset(var x, y: integer);
+begin
+  if mcaset then
+  begin
+    x := x + mx1;
+    y := y + my1;
+  end;
+end;
+
+procedure TEIOS_Target.ImageApplyAreaOffset(var x, y: integer);
+begin
+  if icaset then
+  begin
+    x := x + ix1;
+    y := y + iy1;
+  end;
 end;
 
 procedure TEIOS_Target.GetTargetDimensions(out w, h: integer);
 begin
   if Pointer(client.GetTargetDimensions) <> nil then
+  begin
+    if icaset then
+    begin
+      w := ix2 - ix1;
+      h := iy2 - iy1;
+      exit;
+    end;
     client.GetTargetDimensions(target,w,h)
-  else
+  end else
     inherited GetTargetDimensions(w,h);
 end;
 
@@ -846,6 +992,7 @@ end;
 
 function TEIOS_Target.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
+  ImageApplyAreaOffset(xs, ys);
   if Pointer(client.UpdateImageBufferBounds) <> nil then
     client.UpdateImageBufferBounds(target,xs,ys,xs+width,ys+height)
   else if Pointer(client.UpdateImageBuffer) <> nil then
@@ -857,27 +1004,39 @@ begin
   result.RowLen:= self.width;
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
+
+  if icaset then
+  begin
+    Inc(result.IncPtrWith, result.RowLen - (ix2 - ix1));
+  end;
 end;
 
 procedure TEIOS_Target.GetMousePosition(out x,y: integer);
 begin
   if Pointer(client.GetMousePosition) <> nil then
-    client.GetMousePosition(target,x,y)
-  else
+  begin
+    client.GetMousePosition(target,x,y);
+    x := x - mx1;
+    y := y - my1;
+  end else
     inherited GetMousePosition(x,y);
 end;
 procedure TEIOS_Target.MoveMouse(x,y: integer);
 begin
   if Pointer(client.MoveMouse) <> nil then
+  begin
+    MouseApplyAreaOffset(x, y);
     client.MoveMouse(target,x,y)
-  else
+  end else
     inherited MoveMouse(x,y);
 end;
 procedure TEIOS_Target.ScrollMouse(x,y : integer; Lines : integer);
 begin
   if Pointer(Client.ScrollMouse) <> nil then
+  begin
+    MouseApplyAreaOffset(x, y);
     client.ScrollMouse(target,x,y,lines)
-  else
+  end else
     inherited Scrollmouse(x,y,lines);
 end;
 
@@ -885,10 +1044,11 @@ procedure TEIOS_Target.HoldMouse(x,y: integer; button: TClickType);
 begin
   if Pointer(client.HoldMouse) <> nil then
   begin
+    MouseApplyAreaOffset(x, y);
     case button of
-      mouse_Left:   client.HoldMouse(target,x,y,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right:  client.HoldMouse(target,x,y,false);
+      mouse_Left:   client.HoldMouse(target,x,y,1);
+      mouse_Middle: client.HoldMouse(target,x,y,2);
+      mouse_Right:  client.HoldMouse(target,x,y,3);
     end;
   end else
     inherited HoldMouse(x,y,button);
@@ -897,10 +1057,11 @@ procedure TEIOS_Target.ReleaseMouse(x,y: integer; button: TClickType);
 begin
   if Pointer(client.ReleaseMouse) <> nil then
   begin
+    MouseApplyAreaOffset(x, y);
     case button of
-      mouse_Left:   client.ReleaseMouse(target,x,y,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right:  client.ReleaseMouse(target,x,y,false);
+      mouse_Left:   client.ReleaseMouse(target,x,y,1);
+      mouse_Middle: client.ReleaseMouse(target,x,y,2);
+      mouse_Right:  client.ReleaseMouse(target,x,y,3);
     end;
   end else
     inherited ReleaseMouse(x,y,button);
@@ -911,20 +1072,20 @@ begin
   if Pointer(client.IsMouseButtonHeld) <> nil then
   begin
     case button of
-      mouse_Left:  result := client.IsMouseButtonHeld(target,true);
-      mouse_Middle: raise Exception.Create('EIOS does not implement the middle mouse button.');
-      mouse_Right: result := client.IsMouseButtonHeld(target,false);
+      mouse_Left:  result := client.IsMouseButtonHeld(target,1);
+      mouse_Middle: result := client.IsMouseButtonHeld(target,2);
+      mouse_Right: result := client.IsMouseButtonHeld(target,3);
     end;
   end else
     result := inherited IsMouseButtonHeld(button);
 end;
 
-procedure TEIOS_Target.SendString(str: string; keywait: integer);
+procedure TEIOS_Target.SendString(str: string; keywait, keymodwait: integer);
 begin
   if Pointer(client.SendString) <> nil then
-    client.SendString(target,PChar(str), keywait)
+    client.SendString(target,PChar(str), keywait, keymodwait)
   else
-    inherited SendString(str, keywait);
+    inherited SendString(str, keywait, keymodwait);
 end;
 procedure TEIOS_Target.HoldKey(key: integer);
 begin
@@ -970,6 +1131,12 @@ begin
     Move(rgb[0],self.rgb[0],w*h*sizeof(TRGB32));
   end else
     self.rgb:= rgb;
+
+  self.ax1 := 0;
+  self.ay1 := 0;
+  self.ax2 := 0;
+  self.ay2 := 0;
+  self.caset := false;
 end;
 
 destructor TRawTarget.Destroy;
@@ -981,6 +1148,12 @@ end;
 
 procedure TRawTarget.GetTargetDimensions(out w, h: integer);
 begin
+  if caset then
+  begin
+    w := ax2 - ax1;
+    h := ay2 - ay1;
+    exit;
+  end;
   w:= self.w;
   h:= self.h;
 end;
@@ -994,10 +1167,34 @@ end;
 
 function TRawTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
+  xs := xs + ax1;
+  ys := ys + ay1;
   result.Ptr := rgb;
   result.RowLen:= self.w;
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
+
+  if caset then
+  begin
+    Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
+  end;
+end;
+
+function TRawTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  if ((x2 - x1) > self.w) or ((y2 - y1) > self.h) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ax1 := x1; ay1 := y1; ax2 := x2; ay2 := y2;
+  caset := True;
+end;
+
+procedure TRawTarget.ImageResetClientArea;
+begin
+  ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
+  caset := False;
 end;
 
 //***implementation*** TBitmapTarget
@@ -1015,16 +1212,46 @@ end;
 
 procedure TBitmapTarget.GetTargetDimensions(out w, h: integer);
 begin
+  if caset then
+  begin
+    w := ax2 - ax1;
+    h := ay2 - ay1;
+    exit;
+  end;
   h:= bitmap.Height;
   w:= bitmap.Width;
 end;
 
 function TBitmapTarget.ReturnData(xs, ys, width, height: Integer): TRetData;
 begin
+  xs := xs + ax1;
+  ys := ys + ay1;
   result.Ptr := bitmap.FData;
   result.RowLen:= bitmap.Width;
   result.IncPtrWith:= result.RowLen - width;
   Inc(result.Ptr, ys * result.RowLen + xs);
+
+  if caset then
+  begin
+    Inc(result.IncPtrWith, result.RowLen - (ax2 - ax1));
+  end;
+end;
+
+function TBitmapTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+begin
+  if ((x2 - x1) > bitmap.Width) or ((y2 - y1) > bitmap.Height) then
+    exit(False);
+  if (x1 < 0) or (y1 < 0) then
+    exit(False);
+
+  ax1 := x1; ay1 := y1; ax2 := x2; ay2 := y2;
+  caset := True;
+end;
+
+procedure TBitmapTarget.ImageResetClientArea;
+begin
+  ax1 := 0; ay1 := 0; ax2 := 0; ay2 := 0;
+  caset := False;
 end;
 
 //***implementation*** TEIOS_Controller
@@ -1036,26 +1263,18 @@ end;
 
 destructor TEIOS_Controller.Destroy;
 begin
-  SetLength(plugs,0);
+  SetLength(clients,0);
   inherited Destroy;
 end;
 
 function TEIOS_Controller.InitPlugin(plugin: TLibHandle): boolean;
 var
-  GetName: procedure(name: pchar); stdcall;
-  buffer: pchar;
   idx: integer;
 begin
-  Pointer(GetName) := GetProcAddress(plugin, PChar('EIOS_GetName'));
-  if Pointer(GetName) = nil then begin result:= false; exit; end;
-  idx:= Length(plugs);
-  SetLength(plugs,idx+1);
-  buffer:= stralloc(255);
-  GetName(buffer);
-  plugs[idx].name:= buffer;
-  strdispose(buffer);
+  idx:= Length(clients);
+  SetLength(clients,idx+1);
   {link in all eios methods that *might* exist}
-  with plugs[idx].client do
+  with clients[idx] do
   begin
     Pointer(RequestTarget):= GetProcAddress(plugin, PChar('EIOS_RequestTarget'));
     Pointer(ReleaseTarget):= GetProcAddress(plugin, PChar('EIOS_ReleaseTarget'));
@@ -1084,8 +1303,7 @@ function TEIOS_Controller.FindClient(name: string): integer;
 var
   i: integer;
 begin
-  i:= LoadPlugin(name);
-  result:= -1;
+  result:= LoadPlugin(name);
 end;
 
 function TEIOS_Controller.ClientExists(name: string): boolean;
@@ -1099,7 +1317,7 @@ var
 begin
   i:= FindClient(name);
   if i >= 0 then
-    result:= plugs[i].client
+    result:= clients[i]
 end;
 
 //***implementation*** TEIS_Exported wrappers
@@ -1176,9 +1394,9 @@ begin
     result := TTarget(Target).IsMouseButtonHeld(mouse_right);
 end;
 
-procedure TTarget_Exported_SendString(target: pointer; str: PChar; keywait: integer); stdcall;
+procedure TTarget_Exported_SendString(target: pointer; str: PChar; keywait, keymodwait: integer); stdcall;
 begin
-  TTarget(Target).SendString(str, keywait);
+  TTarget(Target).SendString(str, keywait, keymodwait);
 end;
 
 procedure TTarget_Exported_HoldKey(target: pointer; key: integer); stdcall;

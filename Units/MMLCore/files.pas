@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,7 +46,11 @@ type
     function RewriteFile(Path: string; Shared: Boolean): Integer;
     function AppendFile(Path: string): Integer;
     function DeleteFile(Filename: string): Boolean;
+    function RenameFile(OldName, NewName: string): Boolean;
     procedure CloseFile(FileNum: Integer);
+    procedure WriteINI(const Section, KeyName, NewString : string; FileName : string);
+    function ReadINI(const Section, KeyName : string; FileName : string) : string;
+    procedure DeleteINI(const Section, KeyName : string; FileName : string);
     function EndOfFile(FileNum: Integer): Boolean;
     function FileSizeMuf(FileNum: Integer): LongInt;
     function ReadFileString(FileNum: Integer; out s: string; x: Integer): Boolean;
@@ -67,7 +71,7 @@ type
     // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
-  function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
+  function FindFile(var Filename: string; const Dirs: array of string): boolean;
 
 implementation
 uses
@@ -113,23 +117,20 @@ begin
   end;
 end;
 
-function FindFile(filename : string; Dirs : array of string) : string; //Results '' if not found
+function FindFile(var Filename: string; const Dirs: array of string): boolean;
 var
-  i : integer;
+  I, H: LongInt;
 begin;
-  if FileExistsUTF8(filename) then
-    result := filename
-  else
-  begin
-    for i := 0 to high(Dirs) do
-      if (Dirs[i] <> '') and DirectoryExists(dirs[i]) then
-        if fileexistsUTF8(dirs[i] + filename) then
-        begin
-          result := dirs[i] + filename;
-          exit;
-        end;
-  end;
-  result := '';
+  Result := False;
+
+  H := High(Dirs);
+  for I := 0 to H do
+    if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
+    begin
+      Filename := IncludeTrailingPathDelimiter(Dirs[I]) + Filename;
+      Result := True;
+      Exit;
+    end;
 end;
 
 constructor TMFiles.Create(Owner : TObject);
@@ -303,6 +304,84 @@ begin
 end;
 
 {/\
+  Reads key from INI file
+/\}
+
+function TMFiles.ReadINI(const Section, KeyName: string; FileName: string): string;
+var
+  Continue : boolean;
+begin
+  FileName := ExpandFileNameUTF8(FileName);
+  
+  if Assigned(OpenFileEvent) then
+  begin
+    Continue := True;
+    OpenFileEvent(Self, FileName, Continue);
+    if not Continue then
+	  exit('');
+  end;
+  with TINIFile.Create(FileName, True) do
+    try
+      Result := ReadString(Section, KeyName, '');
+    finally
+      Free;
+  end;
+end;
+
+{/\
+  Deletes a key from INI file
+/\}
+
+procedure TMFiles.DeleteINI(const Section, KeyName : string; FileName : string);
+var	
+  Continue : boolean;
+begin; 
+  FileName := ExpandFileNameUTF8(FileName);
+  
+  if Assigned(WriteFileEvent) then
+  begin
+    Continue := True;
+    WriteFileEvent(Self, FileName, Continue);
+    if not Continue then
+      exit;
+  end;
+  with TIniFile.Create(FileName, True) do
+    try
+      if KeyName = '' then
+	    EraseSection(Section)
+	  else
+		DeleteKey(Section, KeyName);
+    finally
+      Free;
+  end;
+end;
+
+{/\
+  Writes a key to INI file
+/\}
+
+procedure TMFiles.WriteINI(const Section, KeyName, NewString : string; FileName : string);
+var
+  Continue : boolean;
+begin;
+  FileName := ExpandFileNameUTF8(FileName);
+  
+  if Assigned(WriteFileEvent) then
+  begin
+    Continue := True;
+    WriteFileEvent(Self, FileName, Continue);
+    if not Continue then
+      exit;
+  end;
+  with TINIFile.Create(FileName, True) do
+    try
+	  WriteString(Section, KeyName, NewString);
+    finally
+	  Free;
+  end;
+end;
+
+{/\
   Opens a file for writing. And deletes the contents.
   Returns the handle (index) to the File Array.
   Returns File_AccesError if unsuccesfull.
@@ -348,6 +427,23 @@ begin
       exit(False);
   end;
   Result := DeleteFileUTF8(Filename);
+end;
+
+function TMFiles.RenameFile(OldName, NewName: string): Boolean;
+var
+  Continue : Boolean;
+begin
+  if Assigned(WriteFileEvent) then
+  begin;
+    Continue := true;
+    WriteFileEvent(Self, OldName, continue);
+    if not Continue then
+      exit(False);
+    WriteFileEvent(Self, NewName, continue);
+    if not Continue then
+      exit(False);
+  end;
+  Result := RenameFileUTF8(OldName, NewName);
 end;
 
 {/\

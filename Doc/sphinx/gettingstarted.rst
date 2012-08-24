@@ -56,19 +56,19 @@ sooner or later.
 Setting up SRL 4 with Simba
 ---------------------------
 
+SRL has been deprecated starting January 2012.
+
+Setting up SRL 5 with Simba
+---------------------------
+
 If you were using the :ref:`simba-installer` then you can simply enable the
 ``SRL Updater`` extension. (Go to View -> Extensions and enable ``srl.sex``)
 
 See :ref:`simbaext` for more information on (other) Simba extensions.
 
-This is the only supported way. You can simply do a svn checkout on the srl
+This is the only supported way. You can simply do a git clone on the srl
 repository, but if you can do that, then you should be able to set up SRL
 yourself as well.
-
-Setting up SRL 5 with Simba
----------------------------
-
-This will follow later, upon SRL 5 release.
 
 Installing scripts
 ------------------

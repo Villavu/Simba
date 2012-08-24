@@ -15,10 +15,10 @@
     <LazDoc Paths="../../LazDoc"/>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="96"/>
+      <MinorVersionNr Value="99"/>
       <Language Value="0809"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="0.97"/>
+      <StringTable CompanyName="Villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="0.99"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="50">
+    <Units Count="53">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -205,11 +205,11 @@
         <UnitName Value="updateform"/>
       </Unit28>
       <Unit29>
-        <Filename Value="simbasettings.pas"/>
+        <Filename Value="simbasettingsold.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsForm"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="Simbasettings"/>
+        <UnitName Value="Simbasettingsold"/>
       </Unit29>
       <Unit30>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/tpa.inc"/>
@@ -305,14 +305,36 @@
         <UnitName Value="os_linux"/>
       </Unit47>
       <Unit48>
+        <Filename Value="simbasettingssimple.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SettingsSimpleForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="simbasettingssimple"/>
+      </Unit48>
+      <Unit49>
         <Filename Value="../../Units/MMLCore/tpa.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="tpa"/>
-      </Unit48>
-      <Unit49>
-        <Filename Value="../../Units/MMLAddon/PSInc/psexportedmethods.inc"/>
-        <IsPartOfProject Value="True"/>
       </Unit49>
+      <Unit50>
+        <Filename Value="scriptmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ScriptManager"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="newsimbasettings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="newsimbasettings"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="debugger.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DebuggerForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="debugger"/>
+      </Unit52>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -321,8 +343,8 @@
       <Filename Value="../../Simba"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;$(ProjPath)../../Units/RUTIS"/>
+      <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;$(ProjPath)../../Units/RUTIS;../../Units/lape/extensions/ffi"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -346,7 +368,8 @@
       </CompilerMessages>
       <CustomOptions Value="-dUseCThreads
 -dM_MEMORY_DEBUG
--dFONTDEBUG"/>
+-dFONTDEBUG
+-dLape_CDECL"/>
       <CompilerPath Value="$(CompPath)"/>
       <CreateMakefileOnBuild Value="True"/>
     </Other>

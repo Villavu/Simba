@@ -36,9 +36,29 @@ begin;
   result:= CurrThread.Client.IOManager.SetTarget(CurrThread.Client.MBitmaps[Bitmap]);
 end;
 
-function ps_SetEIOSTarget(name: string; args: Variant): integer; extdecl;
+function ps_SetEIOSTarget(name, args: String): integer; extdecl;
 begin
-  result:= CurrThread.Client.IOManager.SetTarget(name, @args);
+  result:= CurrThread.Client.IOManager.SetTarget(name, args);
+end;
+
+function ps_MouseSetClientArea(x1, y1, x2, y2: integer): boolean; extdecl;
+begin
+  result := CurrThread.Client.IOManager.MouseSetClientArea(x1, y1, x2, y2);
+end;
+
+procedure ps_MouseResetClientArea; extdecl;
+begin
+  CurrThread.Client.IOManager.MouseResetClientArea;
+end;
+
+function ps_ImageSetClientArea(x1, y1, x2, y2: integer): boolean; extdecl;
+begin
+  result := CurrThread.Client.IOManager.ImageSetClientArea(x1, y1, x2, y2);
+end;
+
+procedure ps_ImageResetClientArea; extdecl;
+begin
+  CurrThread.Client.IOManager.ImageResetClientArea;
 end;
 
 procedure ps_SetImageTarget(idx: integer); extdecl;

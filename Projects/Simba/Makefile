@@ -7,10 +7,11 @@
 .PHONY: default build rebuild unknown recursive_build clean i386-linux x86_64-linux i386-win32 x86_64-win64 all
 
 # Set these
-#lazaruspath := /usr/lib/lazarus/0.9.28.2
-lazaruspath := ../../../lazarus_fixes
-# set this correctly only if you want to apply and reverse the patch automatically
-rutis_x64_patch := ../../../0-rutis-x64.patch
+ifdef LAZARUS_PATH
+lazaruspath := $(LAZARUS_PATH)
+else
+lazaruspath := /usr/lib/lazarus/0.9.28.2
+endif
 
 # uncomment this or send distrib=1 via command line to build the distributable archive as well
 # if you set distrib, be sure to set the next option as well
@@ -55,21 +56,13 @@ else
 	our_target := unknown
 endif
 
-# now we need to see if we have the rutis_x64_patch or not
-# we define 'have_rutis_x64_patch' if we have it
-# we don't want to try to apply it or reverse it if it 
-# doesn't exist or the make will error out
-ifneq ($(strip $(wildcard $(rutis_x64_patch))),)
-	# the patch file exists
-	have_rutis_x64_patch := 1
-endif
-
 CC := fpc
 build := $(CC)
 
 # -Xd doesn't seem to cause problems when not cross-compiling, and is needed when cross-compiling, so I'm leaving it here
-common_flags := -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu. -dM_MEMORY_DEBUG -dLCL
-units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/ -Fu../../Units/lape
+# -Xg = External debug file (Simba.dbg)
+common_flags := -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu. -dM_MEMORY_DEBUG -dLCL -Xg
+units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/ -Fu../../Units/lape -Fu../../Units/Misc/DCPCrypt -Fu../../Units/Misc/DCPCrypt/Ciphers -Fu../../Units/Misc/DCPCrypt/Hashes -Fu../../Units/lape/extensions/ffi -Fi../../Units/lape -dLape_CDECL
 
 binary := Simba.$(platform)
 # windows wants executables to end in .exe
@@ -105,53 +98,33 @@ ifdef distrib
 # setup the Scripts directory correctly
 	mkdir -p ../../Scripts
 	mv ../../Tests ../../Scripts
-# now setup the Plugins directory
-	mv ../../Plugins ../../Plugins_bak
-	mkdir -p ../../Plugins
-	cp $(plugins_dir)/$(platform)/* ../../Plugins/
-	7z a ../../$(binary).7z $(binary)$(binary_extension) ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts
+# no#w setup the Plugins directory
+	#mv ../../Plugins ../../Plugins_bak
+	#mkdir -p ../../Plugins
+	#cp $(plugins_dir)/$(platform)/* ../../Plugins/
+	7z a ../../$(binary).7z $(binary)$(binary_extension) ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
 # now undo everything we did above
-	rm -rf ../../Plugins
-	mv ../../Plugins_bak ../../Plugins
+	#rm -rf ../../Plugins
+	#mv ../../Plugins_bak ../../Plugins
 	mv ../../Scripts/Tests ../../Tests
 	rm -rf ../../Scripts
 endif
 
 i386-linux:
-# reverse it if it has been applied
-ifdef have_rutis_x64_patch
-	-patch -R -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
-	$(MAKE) recursive_build platform="i386-linux" widgetset="gtk2" platform_flags="-Tlinux -Pi386 -dUseCThreads"
+	$(MAKE) recursive_build platform="i386-linux" widgetset="gtk2" platform_flags="-Tlinux -Pi386 -dUseCThreads -dStaticFFI"
+	mv Simba.dbg Simba.i386-linux.dbg
 
 x86_64-linux:
-# apply the patch
-ifdef have_rutis_x64_patch
-	-patch -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
-	$(MAKE) recursive_build platform="x86_64-linux" widgetset="gtk2" platform_flags="-Tlinux -Px86_64 -dUseCThreads"
-# reverse it
-ifdef have_rutis_x64_patch
-	-patch -R -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
+	$(MAKE) recursive_build platform="x86_64-linux" widgetset="gtk2" platform_flags="-Tlinux -Px86_64 -dUseCThreads -dStaticFFI"
+	mv Simba.dbg Simba.x86_64-linux.dbg
 
 i386-win32:
-# reverse it if it has been applied
-ifdef have_rutis_x64_patch
-	-patch -R -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
-	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" platform_flags="-Twin32 -Pi386"
+	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" platform_flags="-Twin32 -Pi386 -Fl../../Units/lape/extensions/ffi/bin/win32 -dStaticFFI"
+	# Windows already names the .dbg properly...
 
 x86_64-win64:
-# apply the patch
-ifdef have_rutis_x64_patch
-	-patch -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
-	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" platform_flags="-Twin64 -Px86_64"
-# reverse it
-ifdef have_rutis_x64_patch
-	-patch -R -N -r- -p1 -d../../ < $(rutis_x64_patch)
-endif
+	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" platform_flags="-Twin64 -Px86_64 -Fl../../Units/lape/extensions/ffi/bin/win64 -dDynamicFFI"
+	# Windows already names the .dbg properly...
 
 all: i386-linux x86_64-linux i386-win32 x86_64-win64
 
@@ -159,13 +132,13 @@ all-in-one-distrib: all
 # setup the Scripts directory correctly
 	mkdir -p ../../Scripts
 	mv ../../Tests ../../Scripts
-# now setup the Plugins directory
-	mv ../../Plugins ../../Plugins_bak
-	mkdir -p ../../Plugins
-	cp $(plugins_dir)/all-in-one/* ../../Plugins/
-	7z a ../../Simba.all-in-one.7z Simba.i386-* Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts
+# no#w setup the Plugins directory
+	#mv ../../Plugins ../../Plugins_bak
+	#mkdir -p ../../Plugins
+	#cp $(plugins_dir)/all-in-one/* ../../Plugins/
+	7z a ../../Simba.all-in-one.7z Simba.i386-* Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
 # now undo everything we did above
-	rm -rf ../../Plugins
-	mv ../../Plugins_bak ../../Plugins
+	#rm -rf ../../Plugins
+	#mv ../../Plugins_bak ../../Plugins
 	mv ../../Scripts/Tests ../../Tests
 	rm -rf ../../Scripts

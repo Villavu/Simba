@@ -1,0 +1,925 @@
+program Parser;
+
+{
+    Original Code Thread: http://villavu.com/forum/showthread.php?t=35513
+    by Nielsie95
+
+    Modified by Dgby714.
+
+}
+//{$DEFINE DEV}
+
+function GetName: string;
+begin;
+  Result := 'Parser';
+end;
+
+function GetVersion: string;
+begin;
+  Result := '0.1a';
+end;
+
+var
+  Parser_Menu: TMenuItem;
+  Format_MenuItem, Obfuscate_MenuItem: TMenuItem;
+  Script, NewScript: string;
+  
+{*
+ *
+ *  Formatter code starts here!!!
+ *
+ *}
+function StringToChars(s: string): string; //Idea from Ron
+var
+  i: Integer;
+begin
+  Result := '';
+  if (Length(s) <= 2) then
+    Result := #39#39
+  else
+    for i := 2 to Length(s) - 1 do
+      Result := Result + '#' + IntToStr(Ord(s[i]));
+end;
+
+function ExtendInteger(Int: Integer): string;
+var
+  i, c, q1, q2: Integer;
+begin
+  i := 0;
+  c := -1;
+  Result := '(';
+  while (i < 3) and (c <> Int) do
+  begin
+    q1 := 0;
+    q2 := 0;
+    while (q1 = 0) do
+      q1 := Random(Max(Int, 10));
+    while (q2 = 0) do
+      q2 := Random(Max(Int, 10));
+    if (Random(15) = 0) then
+      q1 := -q1;
+    if (Random(15) = 0) then
+      q2 := -q2;
+    if (Result = '(') then
+    begin
+      c := q1 + q2;
+      Result := Result + '('+IntToStr(q1)+'+'+IntToStr(q2)+')';
+    end
+    else
+      case Random(4) of
+        0:
+          begin
+            c := c + (q1 + q2);
+            Result := Result + '+('+IntToStr(q1)+'+'+IntToStr(q2)+')';
+          end;
+        1:
+          begin
+            c := c - (q1 - q2);
+            Result := Result + '-('+IntToStr(q1)+'-'+IntToStr(q2)+')';
+          end;
+        2:
+          begin
+            c := c + (q1 * q2);
+            Result := Result + '+('+IntToStr(q1)+'*'+IntToStr(q2)+')';
+          end;
+        3:
+          begin
+            c := c - (q1 / q2);
+            Result := Result + '-('+IntToStr(q1)+'/'+IntToStr(q2)+')';
+          end;
+      end;
+    Inc(i);
+  end;
+  if (c <> Int) then
+  begin
+    q1 := Int - c;
+    Result := Result + '+' + IntToStr(q1);
+  end;
+  Result := Result + ')';
+end;
+
+function RandomCase(s: string): string;
+var
+  i: Integer;
+begin
+  Result := s;
+  for i := 1 to Length(s) do
+    if (Random(3) = 1) then
+      case s[i] of
+        'a'..'z': Result[i] := Chr(Ord(s[i]) - 32);
+        'A'..'Z': Result[i] := Chr(Ord(s[i]) + 32);
+      end;
+end;
+
+function StringHash(const Value: string): Integer;
+var
+  i, x: Integer;
+begin
+  Result := 0;
+  Value := UpperCase(Value);
+  for i := 1 to Length(Value) do
+  begin
+    x := Ord(Value[i]);
+    Result := ((((Result + x) shl i) xor $ff) * x) shr 4;
+  end;
+end;
+
+const
+  tkConst        = 99194018;
+  tkType         = 33489835;
+  tkVar          = 302492;
+  tkBegin        = 206891307;
+  tkEnd          = 422887;
+  tkArray        = 241981220;
+  tkSet          = 408192;
+  tkRecord       = 154572379;
+  tkIf           = 9113;
+  tkThen         = 27389149;
+  tkElse         = 34909855;
+  tkWhile        = 246933539;
+  tkFor          = 516020;
+  tkTo           = 10916;
+  tkDownto       = 196948847;
+  tkDo           = 12477;
+  tkWith         = 31996795;
+  tkRepeat       = 117892746;
+  tkUntil        = 29229899;
+  tkCase         = 24377488;
+  tkOf           = 9445;
+  tkGoto         = 42051300;
+  tkLabel        = 81388075;
+  tkProcedure    = 91883435;
+  tkFunction     = 150673595;
+  tkNil          = 373079;
+  tkAnd          = 420541;
+  tkOr           = 10818;
+  tkNot          = 439860;
+  tkXor          = 469321;
+  tkDiv          = 504470;
+  tkMod          = 352779;
+  tkExternal     = 100911611;
+  tkStdcall      = 110854811;
+  tkCdecl        = 150234651;
+  tkRaise        = 68853785;
+  tkTry          = 504179;
+  tkExcept       = 71323914;
+  tkOn           = 10369;
+  tkFinally      = 252725930;
+  tkAs           = 12984;
+  tkIn           = 9998;
+  tkIs           = 13191;
+  tkOut          = 472998;
+  tkProgram      = 73755563;
+  tkShr          = 412495;
+  tkShl          = 382541;
+  tkForward      = 244372219;
+  tkString       = -12;
+  tkPlus         = -13;
+  tkBraceOpen    = -14;
+  tkBraceClose   = -15;
+  tkColon        = -16;
+  tkSemiColon    = -17;
+  tkDot          = -18;
+  tkComma        = -19;
+  tkBracketOpen  = -20;
+  tkBracketClose = -21;
+  tkEquation     = -22;
+  tkChar         = -23;
+  tkCompDir      = -24;
+  tkInclude      = -25;
+  tkAssignment   = -26;
+  tkInteger      = -27;
+  tkFloat        = -28;
+  tkHex          = -29;
+  tkLineComment  = -30;
+  tkComment      = -31;
+  tkDivide       = -32;
+  tkMultiply     = -33;
+  tkMinus        = -34;
+  tkNull         = -999;
+
+var
+  RunPos, TokenID: Integer;
+  Token: string;
+  AllowComments, ReturnComments: Boolean;
+
+procedure AddComment; forward;
+
+procedure NextToken;
+var
+  OldRun, t: Integer;
+begin
+  OldRun := RunPos;
+  Token := '';
+  TokenId := tkNull;
+  while (RunPos <= Length(Script)) do
+    case Script[RunPos] of
+      'a'..'z', 'A'..'Z', '0'..'9', '_': Inc(RunPos);
+      else Break;
+    end;
+  if (RunPos = OldRun) and (RunPos < Length(Script)) then
+  begin
+    case Script[RunPos] of
+      #9, #32, #13, #10:
+        begin
+          Inc(RunPos);
+          NextToken;
+          Exit;
+        end;
+      #39:
+        begin
+          Inc(RunPos);
+          t := PosEx(#39, Script, RunPos);
+          if (t > 0) then
+            TokenID := tkString
+          else
+            Exit;
+          RunPos := t + 1;
+        end;
+      '(':
+        begin
+          if (RunPos < Length(Script)) then
+            if (Script[RunPos + 1] <> '*') then
+              TokenID := tkBraceOpen
+            else
+            begin
+              t := PosEx('*)', Script, RunPos);
+              if (t <= 0) then
+                Exit;
+              RunPos := t + 2;
+              TokenID := tkComment;
+            end;
+        end;
+      '{':
+        begin
+          if (RunPos < Length(Script)) then
+            if (Script[RunPos + 1] = '$') then
+              TokenID := tkCompDir
+            else if (RunPos + 1 + Length('.include ') < Length(Script)) then
+              if (UpperCase(Copy(Script, RunPos + 1, Length('.include '))) = '.INCLUDE ') then
+                  TokenID := tkInclude;
+          t := PosEx('}', Script, RunPos);
+          if (t <= 0) then
+            Exit;
+          RunPos := t + 1;
+          if (TokenID = tkNull) then
+            TokenID := tkComment;
+        end;
+      '/':
+        begin
+          if (RunPos < Length(Script)) then
+            if (Script[RunPos + 1] = '/') then
+            begin
+              t := PosEx(#13, Script, RunPos);
+              if (t <= 0) then
+                Exit;
+              RunPos := t;
+              TokenID := tkLineComment;
+            end;
+          if (TokenID = tkNull) then
+            TokenID := tkDivide;
+        end;
+      ':':
+        begin
+          if (RunPos < Length(Script)) then
+             if (Script[RunPos + 1] <> '=') then
+               TokenID := tkColon
+             else
+             begin
+               IncEx(RunPos, 2);
+               TokenID := tkAssignment;
+             end;
+        end;
+      ')': TokenID := tkBraceClose;
+      ';': TokenID := tkSemiColon;
+      '+': TokenID := tkPlus;
+      '-': TokenID := tkMinus;
+      '*': TokenID := tkMultiply;
+      '.': TokenID := tkDot;
+      ',': TokenID := tkComma;
+      '[': TokenID := tkBracketOpen;
+      ']': TokenID := tkBracketClose;
+      '>', '<', '=':
+        begin
+          if (RunPos < Length(Script)) and (Script[RunPos] <> '=') then
+             if (Script[RunPos + 1] = '=') or ((Script[RunPos] = '<') and (Script[RunPos + 1] = '>')) then
+               IncEx(RunPos, 2);
+          TokenID := tkEquation;
+        end;
+      '#':
+        begin
+          Inc(RunPos);
+          while (RunPos <= Length(Script)) do
+            case Script[RunPos] of
+              '0'..'9': Inc(RunPos);
+              else Break;
+            end;
+          if (RunPos > (OldRun + 1)) then
+            TokenID := tkChar;
+        end;
+      '$':
+        begin
+          Inc(RunPos);
+          while (RunPos <= Length(Script)) do
+            case Script[RunPos] of
+              '0'..'9', 'a'..'f', 'A'..'F': Inc(RunPos);
+              else Break;
+            end;
+          TokenID := tkHex;
+        end;
+    end;
+    if (RunPos = OldRun) then
+      Inc(RunPos);
+  end
+  else if (RunPos > Length(Script)) then
+    Exit;
+  Token := Copy(Script, OldRun, RunPos - OldRun);
+  if ((TokenID = tkLineComment) or (TokenID = tkComment)) and (not ReturnComments) then
+  begin
+    if AllowComments then
+      AddComment;
+    NextToken;
+    Exit;
+  end;
+  if (ExtractFromStr(Token, Numbers) = Token) and (RunPos < Length(Script)) then
+  begin
+    TokenID := tkInteger;
+    if (Script[RunPos] = '.') then
+    begin
+      Inc(RunPos);
+      while (RunPos <= Length(Script)) do
+        case Script[RunPos] of
+          '0'..'9': Inc(RunPos);
+          else Break;
+        end;
+      TokenID := tkFloat;
+      Token := Copy(Script, OldRun, RunPos - OldRun);
+    end;
+  end;
+  if (TokenID = tkNull) and (Token <> '') then
+    TokenID := StringHash(Token);
+end;
+
+type
+  tInType = (None, InFunc, InFuncDecl, InVar);
+
+var
+  LastAsSpace, FirstInLine, LastWasKeyword, LastWasChar, LastWasComment: Boolean;
+  BeginCount: Integer;
+  InType: tInType;
+  
+  Keywords: TIntegerArray;
+  Indents: array [0..500] of Byte;
+  InDent, ElseIndent: ShortInt;
+
+procedure NewLine;
+begin
+  NewScript := NewScript + #13#10;
+  FirstInLine := True;
+end;
+
+procedure AddComment;
+begin
+  case TokenID of
+    tkComment:
+      begin
+        if (not LastWasComment) and (InType <> InFunc) and (not FirstInLine) then
+          NewLine;
+        if (InType <> InFunc) then
+          NewLine
+        else if (not FirstInLine) then
+          NewLine;
+        NewScript := NewScript + Token;
+      end;
+    tkLineComment:
+      begin
+        if (not FirstInLine) then
+          NewLine;
+        NewScript := NewScript + StringOfChar(' ', 2 * (Indents[InDent] + ElseIndent)) + Token;
+      end;
+  end;
+  
+  FirstInLine := False;
+  LastAsSpace := False;
+  LastWasKeyword := False;
+  LastWasChar := False;
+  LastWasComment := True;
+end;
+
+procedure Add;
+var
+  IsKeyword: Boolean;
+begin
+  IsKeyword := InIntArray(Keywords, TokenID) or (LowerCase(Token) = 'string');
+  if LastWasComment and (not FirstInLine) then
+    NewLine;
+  LastWasComment := False;
+  if FirstInLine then
+    if (TokenID = tkInclude) then
+      NewScript := NewScript + '  '
+    else if (TokenID = tkEnd) or (TokenID = tkUntil) then
+      NewScript := NewScript + StringOfChar(' ', 2 * (Indents[InDent] + ElseIndent - 1))
+    else
+      NewScript := NewScript + StringOfChar(' ', 2 * (Indents[InDent] + ElseIndent));
+  if IsKeyWord then
+  begin
+    if (FirstInLine or LastAsSpace) and (TokenID <> tkAssignment) then
+      NewScript := NewScript + LowerCase(Token)
+    else
+      NewScript := NewScript + ' ' + LowerCase(Token);
+    LastAsSpace := False;
+  end
+  else case TokenID of
+    tkBraceOpen, tkBracketOpen:
+      begin
+        if LastWasKeyword then
+          NewScript := NewScript + ' ' + Token
+        else
+          NewScript := NewScript + Token;
+        LastAsSpace := True;
+      end;
+    tkDot:
+      begin
+        NewScript := NewScript + Token;
+        LastAsSpace := True;
+      end;
+    tkChar:
+      begin
+        if LastWasChar or FirstInLine or LastAsSpace then
+          NewScript := NewScript + Token
+        else
+          NewScript := NewScript + ' ' + Token;
+        LastAsSpace := False;
+      end;
+    tkComma:
+      begin
+        NewScript := NewScript + Token;
+        FirstInLine := False;
+        LastAsSpace := False;
+        LastWasKeyword := True;
+        LastWasChar := False;
+        Exit;
+      end;
+    tkColon, tkSemiColon, tkBraceClose, tkBracketClose:
+      begin
+        NewScript := NewScript + Token;
+        LastAsSpace := False;
+      end;
+    tkEquation, tkDivide, tkMultiply, tkMinus, tkPlus:
+      begin
+        NewScript := NewScript + ' ' + Token;
+        FirstInLine := False;
+        LastAsSpace := False;
+        LastWasKeyword := True;
+        LastWasChar := False;
+        Exit;
+      end;
+    else
+    begin
+      if FirstInLine or LastAsSpace then
+        NewScript := NewScript + Token
+      else
+        NewScript := NewScript + ' ' + Token;
+      LastAsSpace := False;
+    end;
+  end;
+
+  FirstInLine := False;
+  LastWasKeyword := IsKeyword;
+  LastWasChar := (TokenID = tkChar);
+end;
+
+function CharsToString(a: array of ShortInt): string;
+var
+  i: Integer;
+  LastWasChar: Boolean;
+begin
+  Result := '';
+  LastWasChar := True;
+  for i := 0 to High(a) do
+    if (a[i] > -1) then
+    begin
+      if InRange(a[i], 32, 126) and (a[i] <> 39) then
+      begin
+        if LastWasChar then
+          Result := Result + #39 + Chr(a[i])
+        else
+          Result := Result + Chr(a[i]);
+        LastWasChar := False;
+      end
+      else
+      begin
+        if LastWasChar then
+          Result := Result + '#' + IntToStr(a[i])
+        else
+          Result := Result + #39 + '#' + IntToStr(a[i]);
+        LastWasChar := True;
+      end;
+    end;
+  if (not LastWasChar) then
+    Result := Result + #39;
+end;
+
+procedure ProcessChars;
+var
+  cChar: Integer;
+  Chars: array of ShortInt;
+  s: string;
+begin
+  SetLength(Chars, 1);
+  cChar := 0;
+  Chars[0] := StrToIntDef(Copy(Token, 2, Length(Token) - 1), -1);
+  NextToken;
+  while (TokenID = tkChar) do
+  begin
+    Inc(cChar);
+    SetLength(Chars, cChar + 1);
+    Chars[cChar] := StrToIntDef(Copy(Token, 2, Length(Token) - 1), -1);
+    NextToken;
+  end;
+  cChar := TokenID;
+  s := Token;
+  Token := CharsToString(Chars);
+  TokenID := tkString;
+  Add;
+  TokenID := cChar;
+  Token := s;
+end;
+
+procedure ProcessScript;
+var
+  BraceCount: Integer;
+begin
+  Keywords := [tkConst, tkType, tkVar, tkBegin, tkEnd, tkArray, tkSet, tkRecord,
+               tkIf, tkThen, tkElse, tkWhile, tkFor, tkTo, tkDownto, tkDo, tkWith,
+               tkRepeat, tkUntil, tkCase, tkOf, tkGoto, tkLabel, tkProcedure,
+               tkFunction, tkNil, tkAnd, tkOr, tkNot, tkXor, tkDiv, tkMod, {}tkAssignment{},
+               tkExternal, tkStdcall, tkCdecl, tkRaise, tkTry, tkExcept, tkOn,
+               tkFinally, tkAs, tkIn, tkIs, tkOut, tkProgram, tkShr, tkShl, tkForward];
+  RunPos := 1;
+  InDent := 0;
+  BeginCount := 0;
+  InType := None;
+  FirstInLine := True;
+  AllowComments := False;
+  ReturnComments := False;
+  NextToken;
+  while (TokenID <> tkNull) do
+  begin
+    case TokenID of
+      tkChar:
+        begin
+          ProcessChars;
+          Continue;
+        end;
+      tkInclude:
+        begin
+          if (not FirstInLine) then
+            NewLine;
+          Add;
+          NewLine;
+        end;
+      tkCompDir:
+        begin
+          Add;
+          NewLine;
+        end;
+      tkProcedure, tkFunction:
+        begin
+          InDent := 0;
+          ElseIndent := 0;
+          NewLine;
+          Add;
+          NextToken;
+          Writeln(Token);
+          Add;
+          InType := InFuncDecl;
+        end;
+      tkBraceOpen:
+        begin
+          if (InType = InVar) then
+            LastWasKeyword := True;
+          Add;
+          NextToken;
+          BraceCount := 1;
+          while (TokenID <> tkNull) and (BraceCount > 0) do
+          begin
+            if (TokenID = tkBraceOpen) then
+              Inc(BraceCount)
+            else if (TokenID = tkBraceClose) then
+              Dec(BraceCount)
+            else if (TokenID = tkChar) then
+            begin
+              ProcessChars;
+              Continue;
+            end;
+            Add;
+            NextToken;
+          end;
+          Continue;
+        end;
+      tkDo, tkThen:
+        begin
+          Add;
+          NextToken;
+          if (TokenID = tkBegin) then
+            Continue
+          else if (TokenID = tkTry) or (TokenID = tkRepeat) then
+          begin
+            Inc(ElseIndent);
+            Continue;
+          end
+          else
+          begin
+            Inc(ElseIndent);
+            NewLine;
+            Add;
+          end;
+        end;
+      tkElse:
+        begin
+          if (not FirstInLine) then
+            NewLine;
+          if (ElseIndent > 0) then
+            Dec(ElseIndent);
+          Add;
+          NextToken;
+          if (TokenID = tkBegin) or (TokenID = tkIf) then
+            Continue
+          else if (TokenID = tkTry) or (TokenID = tkRepeat) then
+          begin
+            Inc(ElseIndent);
+            Continue;
+          end
+          else
+          begin
+            Inc(ElseIndent);
+            NewLine;
+            Add;
+          end;
+        end;
+      tkColon:
+        begin
+          Add;
+          if (InType = InFunc) and (BeginCount > 1) then
+          begin
+            NextToken;
+            if InIntArray(Keywords, TokenID) then
+            begin
+              Inc(ElseIndent);
+              NewLine;
+            end;
+            Continue;
+          end;
+        end;
+      tkOf:
+        begin
+          if (InType = InVar) or (InType = InFuncDecl) then
+            LastAsSpace := False;
+          Add;
+          if (InType <> InVar) and (InType <> InFuncDecl) then
+          begin
+            Inc(BeginCount);
+            Inc(InDent);
+            Indents[InDent] := Indents[InDent - 1] + ElseIndent + 1;
+            NewLine;
+            ElseIndent := 0;
+          end;
+        end;
+      tkBegin, tkRepeat:
+        begin
+          if (InType <> InFunc) or (BeginCount = 0) then
+          begin
+            Indent := 0;
+            ElseIndent := 0;
+          end;
+          if (not FirstInLine) or (InType = None) then
+            NewLine;
+          Add;
+          Inc(BeginCount);
+          Inc(InDent);
+          Indents[InDent] := Indents[InDent - 1] + ElseIndent + 1;
+          NewLine;
+          ElseIndent := 0;
+          InType := InFunc;
+        end;
+      tkTry:
+        begin
+          if (not FirstInLine) then
+            NewLine;
+          Add;
+          Inc(BeginCount);
+          Inc(InDent);
+          Indents[InDent] := Indents[InDent - 1] + ElseIndent + 1;
+          NewLine;
+          ElseIndent := 0;
+        end;
+      tkExcept, tkFinally:
+        begin
+          if (not FirstInLine) then
+            NewLine;
+          ElseIndent := -1;
+          Add;
+          ElseIndent := 0;
+          NewLine;
+        end;
+      tkEnd, tkUntil:
+        begin
+          if (BeginCount > 0) then
+            Dec(BeginCount);
+          if (BeginCount = 0) and (InType = InFunc) then
+            InType := None;
+          if (not FirstInLine) then
+            NewLine;
+          ElseIndent := 0;
+          Add;
+          if (Indent > 0) then
+            Dec(Indent);
+          if (TokenID = tkEnd) then
+          begin
+            NextToken;
+            if (TokenID <> tkSemiColon) and (TokenID <> tkDot) then
+              NewLine;
+            Continue;
+          end;
+        end;
+      tkVar, tkType, tkLabel, tkConst:
+        begin
+          InDent := 0;
+          ElseIndent := 0;
+          if (InType <> InFuncDecl) then
+            NewLine
+          else if (not FirstInLine) then
+            NewLine;
+          InType := InVar;
+          Add;
+          Inc(InDent);
+          Indents[InDent] := Indents[InDent - 1] + ElseIndent + 1;
+          NewLine;
+        end;
+      tkRecord:
+        begin
+          ElseIndent := 0;
+          InType := InVar;
+          Add;
+          Inc(InDent);
+          Indents[InDent] := Indents[InDent - 1] + ElseIndent + 1;
+          NewLine;
+        end;
+      tkSemiColon:
+        begin
+          if (not FirstInLine) then
+          begin
+            Add;
+            NextToken;
+            if (TokenID = tkExternal) or (TokenID = tkForward) then
+              InType := None
+            else
+            begin
+              ElseIndent := 0;
+              NewLine;
+            end;
+            Continue;
+          end;
+        end;
+      else
+        Add;
+    end;
+    NextToken;
+  end;
+end;
+
+procedure AddObfuscate;
+begin
+  case TokenID of
+    tkString:
+      begin
+        Token := StringToChars(Token);
+        TokenID := tkChar;
+      end;
+    tkInteger: Token := ExtendInteger(StrToInt(Token));
+  end;
+  Add;
+end;
+
+procedure Obfuscate;
+var
+  BraceCount: Integer;
+begin
+  Keywords := [tkConst, tkType, tkVar, tkBegin, tkEnd, tkArray, tkSet, tkRecord,
+               tkIf, tkThen, tkElse, tkWhile, tkFor, tkTo, tkDownto, tkDo, tkWith,
+               tkRepeat, tkUntil, tkCase, tkOf, tkGoto, tkLabel, tkProcedure,
+               tkFunction, tkNil, tkAnd, tkOr, tkNot, tkXor, tkDiv, tkMod, {}tkAssignment{},
+               tkExternal, tkStdcall, tkCdecl, tkRaise, tkTry, tkExcept, tkOn,
+               tkFinally, tkAs, tkIn, tkIs, tkOut, tkProgram, tkShr, tkShl, tkForward];
+  RunPos := 1;
+  BeginCount := 0;
+  InType := None;
+  FirstInLine := True;
+  AllowComments := False;
+  ReturnComments := False;
+  NextToken;
+  while (TokenID <> tkNull) do
+  begin
+    case TokenID of
+      tkInclude:
+        begin
+          if (not FirstInLine) then
+            NewLine;
+          AddObfuscate;
+          NewLine;
+        end;
+      tkProcedure, tkFunction:
+        begin
+          AddObfuscate;
+          NextToken;
+          WriteLn(Token);
+          AddObfuscate;
+          InType := InFunc;
+        end;
+      tkBraceOpen:
+        begin
+          if (InType = InVar) then
+            LastWasKeyword := True;
+          AddObfuscate;
+          NextToken;
+          BraceCount := 1;
+          while (TokenID <> tkNull) and (BraceCount > 0) do
+          begin
+            if (TokenID = tkBraceOpen) then
+              Inc(BraceCount)
+            else if (TokenID = tkBraceClose) then
+              Dec(BraceCount);
+            AddObfuscate;
+            NextToken;
+          end;
+          Continue;
+        end;
+      else
+        AddObfuscate;
+    end;
+    NextToken;
+  end;
+end;
+{*
+ *
+ *  Formatter code ends here!!!
+ *
+ *}
+  
+procedure OnClick(Sender: TObject);
+begin
+  {$IFDEF DEV}
+    if (Sender is TMenuItem) then
+      WriteLn('OnCLick(Sender) = '#39 + TMenuItem(Sender).Name + #39'.');
+  {$ENDIF}
+  
+  Script := ScriptText;
+  
+  case (Sender) of
+    Format_MenuItem: ProcessScript;
+    Obfuscate_MenuItem: Obfuscate;
+  end;
+  
+  if (Sender = Obfuscate_MenuItem) then
+    NewScript := RandomCase(NewScript);
+  
+  OpenScript('Untitled', NewScript, False);
+  
+  Script := '';
+  NewScript := '';
+end;
+
+procedure Attach; begin Parser_Menu.Visible := True; end;
+procedure Detach; begin Parser_Menu.Visible := False; end;
+
+procedure Init;
+begin
+  Parser_Menu := TMenuItem.Create(Simba_MainMenu);
+  Parser_Menu.Caption := GetName;
+  Parser_Menu.Visible := False;
+  Simba_MainMenu.Items.Add(Parser_Menu);
+  
+  Format_MenuItem := TMenuItem.Create(Parser_Menu);
+  with Format_MenuItem do
+  begin
+    Name := 'Format_MenuItem';
+    Caption := 'Format Script';
+    OnClick := @OnClick;
+  end;
+  Parser_Menu.Add(Format_MenuItem);
+  
+  Obfuscate_MenuItem := TMenuItem.Create(Parser_Menu);
+  with Obfuscate_MenuItem do
+  begin
+    Name := 'Obfuscate_MenuItem';
+    Caption := 'Obfuscate Script';
+    OnClick := @OnClick;
+  end;
+  Parser_Menu.Add(Obfuscate_MenuItem);
+end;
+
+procedure Free; begin end;
+
+begin
+end.

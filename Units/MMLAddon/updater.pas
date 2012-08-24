@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -206,6 +206,10 @@ var
 begin
   Result := False;
   HTTPSend := THTTPSend.Create;
+
+  HTTPSend.UserAgent := 'Mozilla 4.0/ (compatible; Simba/' +
+      IntToStr(SimbaVersion) + '; Synapse)';
+
   HTTPSend.Sock.OnMonitor:=@Self.OnMonitor;
   HTTPSend.Sock.OnStatus:=@Self.OnStatus;
   HTTPSend.Sock.OnHeartbeat:=@Self.OnHeartBeat;

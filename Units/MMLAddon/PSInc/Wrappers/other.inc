@@ -285,6 +285,11 @@ begin
   Result := CurrThread.Client.IOManager.GetProcesses;
 end;
 
+function ps_GetProcessID : LongInt;
+begin
+  Result := GetProcessID;
+end;
+
 procedure ps_SetTarget(Proc: TSysProc);
 begin
   CurrThread.Client.IOManager.SetTargetEx(Proc);
