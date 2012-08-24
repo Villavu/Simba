@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -75,6 +75,7 @@ uses
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
+  newsimbasettings, // SimbaSettings
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
@@ -93,12 +94,15 @@ uses
   httpsend,
   superobject,
   Clipbrd,
+
   DCPcrypt2,
+  DCPrc2, DCPrc4, DCPrc5, DCPrc6,
   DCPhaval,
   DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger,
+
   SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}
@@ -191,6 +195,9 @@ end;
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colour.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/colourconv.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/math.inc}
+{$IFDEF USE_SQLITE}
+{$I ../../Units/MMLAddon/PSInc/Wrappers/ps_sqlite3.inc}
+{$ENDIF}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/mouse.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/file.inc}
 {$I ../../Units/MMLAddon/PSInc/Wrappers/keyboard.inc}
@@ -269,7 +276,7 @@ end;
 
 procedure TSimbaPSExtension.RegisterPSCComponents(Sender: TObject; x: TPSPascalCompiler);
 var
-  AppPath, ScriptPath: string;
+  ScriptPath, ScriptFile: string;
   i: Integer;
 begin
   SIRegister_Std(x);
@@ -283,13 +290,13 @@ begin
   SIRegister_ComCtrls(x);
   SIRegister_Dialogs(x);
 
-  AppPath := MainDir + DirectorySeparator;
-  ScriptPath := ExtractFileDir(Filename);
+  ScriptPath := IncludeTrailingPathDelimiter(ExpandFileName(ExtractFileDir(Filename)));
+  ScriptFile := ExtractFileName(Filename);
   with SimbaForm,x do
   begin
     {$I ../../Units/MMLAddon/PSInc/pscompile.inc}
     AddTypes('TStringArray','Array of String');
-    AddConstantN('ExtPath', 'string').SetString({$IFDEF USE_EXTENSIONS}ExtPath{$ELSE}''{$ENDIF});
+    AddConstantN('ExtPath', 'string').SetString({$IFDEF USE_EXTENSIONS}SimbaSettings.Extensions.Path.Value{$ELSE}''{$ENDIF});
     for i := 0 to high(VirtualKeys) do
       AddConstantN(Format('VK_%S',[VirtualKeys[i].Str]),'Byte').SetInt(VirtualKeys[i].Key);
   end;
@@ -360,27 +367,33 @@ end;
 function TSimbaPSExtension.OnNeedFile(Sender: TObject;
   const OrginFileName: string; var FilePath, Output: string): Boolean;
 var
-  path: string;
-  f: TFileStream;
+  Path: string;
 begin
+  Path := FilePath;
   with SimbaForm do
-    path := FindFile(FilePath,[includepath,  ExtractFileDir(Filename),ExtractFileDir(OrginFileName)]);
-  if path = '' then
+    Result := FindFile(Path, [SimbaSettings.Includes.Path.Value,
+                              SimbaSettings.Extensions.Path.Value,
+                              ExtractFileDir(Filename),
+                              ExtractFileDir(OrginFileName)]);
+
+  if (not (Result)) then
   begin
-    psWriteln(Path + ' doesn''t exist');
-    Result := false;
+    psWriteln(FilePath + ' doesn''t exist');
     Exit;
   end;
-  FilePath := path;//Yeah!
+
+  FilePath := Path;
 
   try
-    f:= TFileStream.Create(UTF8ToSys(Path), fmOpenRead);
-    SetLength(Output, f.Size);
-    f.Read(Output[1], Length(Output));
-    result:= true;
-    f.free;
+    with TFileStream.Create(UTF8ToSys(FilePath), fmOpenRead) do
+    try
+      SetLength(Output, Size);
+      Read(Output[1], Size);
+    finally
+      Free;
+    end;
   except
-    Result := false;
+    Result := False;
     psWriteln('TSimbaPSExtension.OnNeedFile');
   end;
 end;

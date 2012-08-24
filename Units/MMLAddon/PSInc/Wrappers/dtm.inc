@@ -113,3 +113,8 @@ function ps_CreateDTMPoint(x,y,c,t,asz : integer; bp : boolean) : TMDTMPoint;
 begin
   result := CreateDTMPoint(x,y,c,t,asz,bp);
 end;
+
+function ps_DTMExists(index : integer) : boolean;
+begin
+  result := CurrThread.Client.MDTMs.ExistsDTM(index);
+end;

@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -244,10 +244,13 @@ begin
   if h < 0 then
     h := h + 1;
   //Finally lets test H2
-  if abs(H*100 - i.H) > i.hueMod then
-    result := false
+
+  h := h * 100;
+
+  if h > i.H then
+    Result := min(h - i.H, abs(h - (i.H + 100) )) <= i.hueMod
   else
-    result := true;
+    Result := min(i.H - h, abs(i.H - (h + 100) )) <= i.hueMod;
 end;
 
 function ColorSame_cts3(ctsInfo: Pointer; C2: PRGB32): boolean;
@@ -264,17 +267,17 @@ begin
   G := Percentage[C2^.g];
   B := Percentage[C2^.b];
   if r > 0.04045  then
-    r := Power( ( r + 0.055 ) / 1.055  , 2.4)
+    r := Power( ( r + 0.055 ) / 1.055  , 2.4) * 100
   else
-    r := r / 12.92;
+    r := r * 7.73993808;
   if g > 0.04045  then
-    g := Power( ( g + 0.055 ) / 1.055 , 2.4)
+    g := Power( ( g + 0.055 ) / 1.055 , 2.4) * 100
   else
-    g := g / 12.92;
+    g := g * 7.73993808;
   if  b > 0.04045 then
-    b := Power(  ( b + 0.055 ) / 1.055  , 2.4)
+    b := Power(  ( b + 0.055 ) / 1.055  , 2.4) * 100
   else
-    b := b / 12.92;
+    b := b * 7.73993808;
 
   y := (r * 0.2126 + g * 0.7152 + b * 0.0722)/100.000;
   if ( Y > 0.008856 ) then
@@ -302,13 +305,7 @@ begin
   A := A - i.A;
   Bb := Bb - i.B;
 
-  // XXX: optimise this
-  // values < 1 do not increase if multiplied by themself, obviously
-  L := L * 100;
-  A := A * 100;
-  bB := bB * 100;
-
-  Result := (L*L + A*A + bB*Bb) < i.Tol;
+  Result := (L*L + A*A + bB*Bb) <= i.Tol;
 end;
 
 { }
@@ -359,7 +356,7 @@ begin
         XYZToCIELab(X, Y, Z, PCTS3Info(Result)^.L, PCTS3Info(Result)^.A,
                   PCTS3Info(Result)^.B);
         { XXX: TODO: Make all Tolerance extended }
-        PCTS3Info(Result)^.Tol := Round(Tol*Tol*CTS3Modifier);
+        PCTS3Info(Result)^.Tol := Ceil(Sqr(Tol*CTS3Modifier));
       end;
   end;
 end;
@@ -1540,7 +1537,7 @@ begin
             xEnd := Min(xx+range + xBmp,SearchdX);
             for RangeX := xStart to xEnd do
             begin;
-            if not compare(ctsinfoarray[yBmp][xBmp],
+            if compare(ctsinfoarray[yBmp][xBmp],
                            @MainRowData[rangeY][rangeX]) then
                 goto FoundBMPPoint;
             end;
@@ -1989,21 +1986,30 @@ end;
 function TMFinder.GetColors(const Coords: TPointArray): TIntegerArray;
 var
   Box : TBox;
-  Len, I,w,h : integer;
+  Len, I, w, h: integer;
   PtrRet : TRetData;
-  Ptr : PRGB32;
+  cd: TPRGB32Array;
+
 begin
   len := high(Coords);
   setlength(result,len+1);
-  box := GetTPABounds(coords);
-  w := 0;
-  h := 0;
-  DefaultOperations(w,h,box.x2,box.y2);
-  TClient(Self.Client).IOManager.GetDimensions(w,h);
-  PtrRet := TClient(Client).IOManager.ReturnData(0,0,Box.x2 + 1,box.y2+ 1);//Otherwise lotsashit.
-  ptr := PtrRet.Ptr;
+  Box := GetTPABounds(coords);
+
+  DefaultOperations(Box.x1, Box.y1, Box.x2, Box.y2);
+  w := Box.x2 - Box.x1;
+  h := Box.y2 - Box.y1;
+  //TClient(Self.Client).IOManager.GetDimensions(w, h);
+
+  PtrRet := TClient(Client).IOManager.ReturnData(Box.x1, Box.y1, w + 1, h + 1);//Otherwise lotsashit.
+
+  cd := CalculateRowPtrs(PtrRet, h + 1);
+
   for i := 0 to len do
-    Result[i] := BGRToRGB(Ptr[Coords[i].y*w + Coords[i].x]);
+    //Result[i] := TClient(Client).IOManager.GetColor(coords[i].x, coords[i].y);
+    //Result[i] := BGRToRGB(Ptr[(Coords[i].y - Box.y1)*w + (Coords[i].x - Box.x1)]);
+    Result[i] := BGRToRGB(cd[Coords[i].y - Box.y1][Coords[i].x - Box.x1]);
+
+  TClient(Client).IOManager.FreeReturnData;
 end;
 
 end.

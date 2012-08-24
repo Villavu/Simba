@@ -33,8 +33,9 @@ AddGlobalFunc('procedure SetDTMName(DTM: integer; const name: string);', @Lape_S
 AddGlobalFunc('function DTMFromString(const DTMString: String): Integer', @Lape_DTMFromString);
 AddGlobalFunc('procedure FreeDTM(DTM: Integer);', @Lape_FreeDTM);
 //AddGlobalFunc('function GetDTM(index: Integer): TMDTM', @Lape_GetDTM);
-AddGlobalFunc('function AddTSDTM(const d: TSDTM): Integer', @Lape_AddTSDTM);
+AddGlobalFunc('function AddSDTM(const d: TSDTM): Integer', @Lape_AddTSDTM);
 //AddGlobalFunc('function AddDTM(const d: TMDTM): Integer', @Lape_AddDTM);
+AddGlobalFunc('function DTMExists(index : integer) : boolean', @Lape_DTMExists);
 //AddGlobalFunc('procedure PrintDTM(const aDTM: TMDTM);', @Lape_PrintDTM);
 //AddGlobalFunc('function MDTMToSDTM(Const DTM: TMDTM): TSDTM', @Lape_MDTMToSDTM);
 //AddGlobalFunc('function SDTMToMDTM(Const DTM: TSDTM): TMDTM', @Lape_SDTMToMDTM);
@@ -43,15 +44,22 @@ AddGlobalFunc('function CreateDTMPoint(x,y,c,t,asz: integer; bp: boolean): TMDTM
 { Bitmap }
 
 AddGlobalFunc('function CreateBitmapString(bmp: integer): string', @Lape_CreateBitmapString);
-//AddGlobalFunc('function GetMufasaBitmap(bmp: integer): TMufasaBitmap', @Lape_GetMufasaBitmap);
+
+{ This is a temporary workaround to allow Lape to pass TMufasaBitmaps to plugins.
+  Also see lpcompile.inc}
+AddGlobalFunc('function GetMufasaBitmap(bmp: integer): Pointer', @Lape_GetMufasaBitmap);
+
 AddGlobalFunc('function CreateBitmap(w,h: integer): integer', @Lape_CreateBitmap);
 AddGlobalFunc('procedure FreeBitmap(Number: integer);', @Lape_FreeBitmap);
 AddGlobalFunc('procedure SaveBitmap(Bmp: integer; path: string);', @Lape_SaveBitmap);
+AddGlobalFunc('function BitmapExists(Index : integer) : boolean;', @Lape_BitmapExists);
 AddGlobalFunc('function BitmapFromString(Width,height: integer; Data: string): integer', @Lape_BitmapFromString);
 AddGlobalFunc('function LoadBitmap(Path: String): integer', @Lape_LoadBitmap);
 AddGlobalFunc('procedure SetBitmapSize(Bmp,NewW,NewH: integer);', @Lape_SetBitmapSize);
 AddGlobalFunc('procedure StretchBitmapResize(Bmp,NewW,NewH: integer);', @Lape_StretchBitmapResize);
 AddGlobalFunc('procedure GetBitmapSize(Bmp: integer; var BmpW,BmpH: integer);', @Lape_GetBitmapSize);
+AddGlobalFunc('procedure SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);', @Lape_SetPersistentMemoryBitmap);
+AddGlobalFunc('procedure ResetPersistentMemoryBitmap(bmp: integer);', @Lape_ResetPersistentMemoryBitmap);
 AddGlobalFunc('procedure SetBitmapName(Bmp: integer; name: string);', @Lape_SetBitmapName);
 AddGlobalFunc('function CreateMirroredBitmap(Bmp: integer): integer', @Lape_CreateMirroredBitmap);
 AddGlobalFunc('function CreateMirroredBitmapEx(Bmp: integer; MirrorStyle: TBmpMirrorStyle): integer', @Lape_CreateMirroredBitmapEx);
@@ -150,6 +158,8 @@ AddGlobalFunc('function DecRet(e: Extended): Extended', @Lape_DecRet);
 AddGlobalFunc('function log10(f: Extended): Extended', @Lape_log10);
 AddGlobalFunc('function MinA(a: TIntegerArray): Integer', @Lape_MinA);
 AddGlobalFunc('function MaxA(a: TIntegerArray): Integer', @Lape_MaxA);
+AddGlobalFunc('function Sum64IntArr(const Arr: TIntegerArray): Int64;', @Lape_Sum64IntArr);
+AddGlobalFunc('function IntToHex(number: Integer): String; overload;', @Lape_IntToHex);
 
 { Color }
 
@@ -231,6 +241,7 @@ AddGlobalFunc('function ForceDirectories(const dir: string): boolean', @Lape_For
 AddGlobalFunc('function GetFiles(const Path, Ext: string): TStringArray', @Lape_GetFiles);
 AddGlobalFunc('function GetDirectories(const path: string): TStringArray', @Lape_GetDirectories);
 AddGlobalFunc('function DeleteFile(const Filename: string): Boolean',  @Lape_DeleteFile);
+AddGlobalFunc('function RenameFile(const Oldname, NewName: string): Boolean;', @Lape_RenameFile);
 AddGlobalFunc('procedure WriteINI(const Section, KeyName, NewString, FileName: string);', @Lape_WriteINI);
 AddGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): string', @Lape_ReadINI);
 AddGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @Lape_DeleteINI);
@@ -281,7 +292,7 @@ AddGlobalFunc('function IsMouseButtonDown(button: integer): boolean', @Lape_IsMo
 
 AddGlobalFunc('procedure KeyDown(key: Word);', @Lape_KeyDown);
 AddGlobalFunc('procedure KeyUp(key: Word);', @Lape_KeyUp);
-AddGlobalFunc('procedure SendKeys(const s: string; keywait: integer);', @Lape_SendKeys);
+AddGlobalFunc('procedure SendKeys(const s: string; keywait, keymodwait: integer);', @Lape_SendKeys);
 AddGlobalFunc('procedure PressKey(key: Word);', @Lape_PressKey);
 AddGlobalFunc('function isKeyDown(key: Word): boolean', @Lape_isKeyDown);
 AddGlobalFunc('function GetKeyCode(c: char): integer', @Lape_GetKeyCode);
@@ -301,6 +312,9 @@ AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing,
 //AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
+AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);', @Lape_FilterUpTextByCharacteristics);
+AddGlobalFunc('procedure SetUpTextFilter(filterdata: TOcrFilterDataArray);', @Lape_SetUpTextFilter);
+AddGlobalFunc('procedure ResetUpTextFilter;', @Lape_ResetUpTextFilter);
 
 { Other }
 
@@ -329,14 +343,16 @@ AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integ
 AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
 AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
 AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
+AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^);
 //AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
 AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
 AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
 AddGlobalFunc('procedure Simba;', @Lape_Simba);
 AddGlobalFunc('procedure SetClipBoard(const Data: string);', @Lape_SetClipBoard);
 AddGlobalFunc('function GetClipBoard: string', @Lape_GetClipBoard);
-//AddGlobalFunc('function GetProcesses: TSysProcArr', @Lape_GetProcesses);
-//AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
+AddGlobalFunc('function GetProcesses: TSysProcArr', @Lape_GetProcesses);
+AddGlobalFunc('function GetProcessID : LongInt', @Lape_GetProcessID);
+AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
 AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_ExtractFileExt);
 
 { Settings }
@@ -367,6 +383,8 @@ AddGlobalFunc('function ExecRegExpr(const RegExpr, InputStr: String): boolean', 
 //AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
 AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: String; UseSubstitution: boolean): String', @Lape_ReplaceRegExpr);
 AddGlobalFunc('function posex(needle, haystack: String; offset: integer): integer', @Lape_posex);
+AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);
+AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_NormLevDist);
 
 { TPA }
 
@@ -471,7 +489,11 @@ AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @La
 AddGlobalFunc('procedure SetDesktopAsClient;', @Lape_SetDesktopAsClient);
 AddGlobalFunc('function SetTargetArray(P: Integer; w, h: integer): integer', @Lape_SetTargetArray);
 AddGlobalFunc('function SetTargetBitmap(bitmap: Integer): integer', @Lape_SetTargetBitmap);
-AddGlobalFunc('function SetEIOSTarget(name: string; args: Variant): integer', @Lape_SetEIOSTarget);
+AddGlobalFunc('function SetEIOSTarget(name, args: String): integer', @Lape_SetEIOSTarget);
+AddGlobalFunc('function MouseSetClientArea(x1, y1, x2, y2: integer): boolean;', @Lape_MouseSetClientArea);
+AddGlobalFunc('procedure MouseResetClientArea;', @Lape_MouseResetClientArea);
+AddGlobalFunc('function ImageSetClientArea(x1, y1, x2, y2: integer): boolean;', @Lape_ImageSetClientArea);
+AddGlobalFunc('procedure ImageResetClientArea;', @Lape_ImageResetClientArea);
 AddGlobalFunc('procedure SetImageTarget(idx: integer);', @Lape_SetImageTarget);
 AddGlobalFunc('procedure SetKeyMouseTarget(idx: integer);', @Lape_SetKeyMouseTarget);
 AddGlobalFunc('function GetImageTarget: integer', @Lape_GetImageTarget);
@@ -486,6 +508,24 @@ AddGlobalFunc('function Unfreeze: boolean', @Lape_Unfreeze);
 AddGlobalFunc('procedure ActivateClient;', @Lape_ActivateClient);
 AddGlobalFunc('function IsTargetValid: boolean', @Lape_IsTargetValid);
 
+{ SQLite3 }
+
+{$IFDEF USE_SQLITE}
+AddGlobalFunc('function sqlite_version() : string;', @lp_sqlite_version);
+AddGlobalFunc('function sqlite_version_num() : integer;', @lp_sqlite_version_num);
+AddGlobalFunc('function sqlite_escape(s : string) : string;', @lp_sqlite_escape);
+AddGlobalFunc('procedure sqlite_close(index : integer);', @lp_sqlite_close);
+AddGlobalFunc('function sqlite_open(filename : string) : integer;', @lp_sqlite_open);
+AddGlobalFunc('function sqlite_open(filename : string; flags : integer) : integer; overload;', @lp_sqlite_open_v2);
+AddGlobalFunc('function sqlite_open_v2(filename : string; flags : integer) : integer;', @lp_sqlite_open_v2);
+AddGlobalFunc('function sqlite_errMsg(index : integer) : string;', @lp_sqlite_errmsg);
+AddGlobalFunc('function sqlite_errCode(index : integer) : integer;', @lp_sqlite_errcode);
+AddGlobalFunc('function sqlite_query(index : integer; sql : string) : boolean;', @lp_sqlite_query);
+AddGlobalFunc('function sqlite_query(index : integer; sql : string; out data : T2DStringArray) : boolean; overload;', @lp_sqlite_queryvalue);
+AddGlobalFunc('function sqlite_queryValue(index : integer; sql : string; out data : T2DStringArray) : boolean;', @lp_sqlite_queryvalue);
+AddGlobalFunc('function sqlite_queryValue(index : integer; sql : string; var error : boolean) : T2DStringArray; overload;', @lp_sqlite_queryresult);
+AddGlobalFunc('function sqlite_queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;', @lp_sqlite_queryresult);
+{$ENDIF}
 
 { Extensions }
 //AddGlobalFunc('function ext_UnTar(const Input: string; var Content: TStringArray): boolean', @Lape_ext_UnTar);

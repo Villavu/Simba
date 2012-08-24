@@ -45,6 +45,16 @@ begin;
   CurrThread.Client.MBitmaps[Bmp].SaveToFile(Path);
 end;
 
+procedure ps_SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);
+begin
+  CurrThread.Client.MBitmaps[bmp].SetPersistentMemory(mem, awidth, aheight);
+end;
+
+procedure ps_ResetPersistentMemoryBitmap(bmp: Integer);
+begin
+  CurrThread.Client.MBitmaps[bmp].ResetPersistentMemory;
+end;
+
 function ps_BitmapFromString(Width,height : integer; Data : string) : integer; extdecl;
 begin;
   Result := CurrThread.Client.MBitmaps.CreateBMPFromString(Width,Height,Data);
@@ -335,4 +345,10 @@ function ps_CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray
 begin
   with CurrThread.Client.MBitmaps do
     result := CalculatePixelToleranceTPA(GetBMP(bmp1),GetBMP(bmp2),CPoints,cts);
+end;
+
+function ps_BitmapExists(Index : integer) : boolean; extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+    result := ExistsBMP(Index);
 end;

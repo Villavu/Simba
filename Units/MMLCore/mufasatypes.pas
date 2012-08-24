@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -79,6 +79,7 @@ type
   TMousePress = (mouse_Down, mouse_Up);
 
   TStringArray = array of String;
+  T2DStringArray = array of TStringArray;
   TPointArray = array of TPoint;
   T2DPointArray = array of TPointArray;
   TVariantArray = Array of Variant;
@@ -91,6 +92,11 @@ type
   T2DBoolArray = Array of TBoolArray;
   TExtendedArray = Array of Extended;
   T2DExtendedArray = Array of Array of Extended;
+
+  { Crypto }
+  THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
+               htSHA1, htSHA256, htSHA384, htSHA512, htTiger);
+
   { Mask Types }
   TMask = record
     White, Black : TPointArray;
@@ -122,6 +128,8 @@ type
     Width, Height: integer;
   end;
   TSysProcArr = array of TSysProc;
+  PSysProcArr = ^TSysProcArr;
+  PSysProc = ^TSysProc;
 
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
@@ -159,6 +167,8 @@ type
   TScriptExecuteEvent = procedure(Sender : TObject; const Script : string; var Continue : boolean);
   TScriptPauseEvent = TScriptExecuteEvent;
   TScriptStopEvent = TScriptExecuteEvent;
+  TScriptOpenEvent = procedure(Sender: TObject; var Script : String) of object;
+
   TOpenConnectionData = record
     Sender : TObject;
     URL : PString;
@@ -170,10 +180,16 @@ type
     Continue : PBoolean;
   end;
   TWriteFileData = TOpenFileData;
+
   TScriptStartData = record
     Sender : TObject;
     Script : PString;
     Continue : PBoolean;
+  end;
+
+  TScriptOpenData = record
+    Sender : TObject;
+    Script : PString;
   end;
 
 
@@ -188,6 +204,20 @@ type
    PBufferByteArray = ^TBufferByteArray;
 
    PPoint = ^TPoint;
+
+  TOCRFilterData = packed record
+      _type: integer;
+      is_text_color: boolean;
+
+      r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer;
+
+      ref_color,tol,cts: integer;
+  end;
+
+  POCRFilterData = ^TOCRFilterData;
+
+  TOcrFilterDataArray = array of TOCRFilterData;
+  POcrFilterDataArray = ^TOCRFilterDataArray;
 
 var
   BufferString : PChar;

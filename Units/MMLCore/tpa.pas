@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -682,7 +682,10 @@ begin
   if (l < 0) then Exit;
   SetLength(DistArr, l + 1);
   for i := 0 to l do
+  begin
+    if length(a[i]) = 0 then continue;
     DistArr[i] := Round(Sqr(From.x - a[i][0].x) + Sqr(From.y - a[i][0].y));
+  end;
   QuickATPASort(DistArr, a, 0, l, True);
 end;
 
@@ -1151,7 +1154,6 @@ end;
   \\ SD (StartDegree) and ED (EndDegree) and the distances MinR (MinRadius) and
   \\ MaxR (MaxRadius) from the origin (Mx, My).
 /\}
-
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 const
   i180Pi = 57.29577951;
@@ -1167,7 +1169,6 @@ begin
   L := 0;
   StartD := SD;
   EndD := ED;
-  cWise := StartD > EndD;
   while StartD > 360.0 do
     StartD := StartD - 360.0;
   while EndD > 360.0 do
@@ -1176,7 +1177,8 @@ begin
     StartD := StartD + 360.0;
   while EndD < 0.0 do
     EndD := EndD + 360.0;
-  if StartD > EndD then
+  cWise := StartD > EndD;
+  if cWise then
     SwapE(StartD, EndD);
   for I := 0 to T do
   begin
@@ -1234,6 +1236,8 @@ var
   B: T2DBoolArray;
   SinAngle,CosAngle : Extended;
 begin
+  if Length(Points) < 1 then
+    Exit;
   Ind := 0;
   Box:= GetTPABounds(Points);
   SinAngle := sin(Radial);

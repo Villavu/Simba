@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 unit settings;
 
-{$mode objfpc}{$M+}
+{$mode objfpc}{$M+}{$H+}
 
 interface
 
@@ -583,7 +583,9 @@ begin
        TSettingData(N.Data).Free;
      N.Data := TSettingData.Create;
      TSettingData(N.Data).Val := KeyValue;
+
      mDebugLn('Setting ' + KeyName + ' to ' + KeyValue);
+
      N := N.GetNextSibling;
    end;
    result := true;

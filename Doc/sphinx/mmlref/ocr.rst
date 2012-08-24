@@ -1,3 +1,4 @@
+
 .. _mmlref-ocr:
 
 TMOCR Class
@@ -8,10 +9,150 @@ useful functions that can be used to create and identify text. It also contains
 some functions used in special cases to filter noise. Specifically, these are
 all the ``Filter*`` functions.
 
+
+InitTOCR
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.InitTOCR(const path: string): boolean;
+
+InitTOCR loads all fonts in path
+We don't do this in the constructor because we may not yet have the path.
+
+
+FilterUpTextByColour
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TMOCR.FilterUpTextByColour(bmp: TMufasaBitmap);
+
+
+FilterUpTextByCharacteristics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TMOCR.FilterUpTextByCharacteristics(bmp: TMufasaBitmap; w,h: integer);
+
+FilterShadowBitmap
+~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TMOCR.FilterShadowBitmap(bmp: TMufasaBitmap);
+
+Remove anything but the shadows on the bitmap (Shadow = clPurple)
+
+
+FilterCharsBitmap
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TMOCR.FilterCharsBitmap(bmp: TMufasaBitmap);
+
+Remove all but uptext colours clWhite,clGreen, etc.
+
+This assumes that the bitmap only consists of colour 0, and the other
+constants founds above the functions
+
+getTextPointsIn
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
+                               var _chars, _shadows: T2DPointArray): Boolean;
+
+This uses the two filters, and performs a split on the bitmap.
+A split per character, that is. So we can more easily identify it.
+
+TODO:
+  *
+    Remove more noise after we have split, it should be possible to identify
+    noise; weird positions or boxes compared to the rest, etc.
+  *
+    Split each colours seperately, and combine only later, after removing noise.
+
+GetUpTextAtEx
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
+
+
+GetUpTextAtEx will identify each character, and also keep track of the previous
+chars' final *x* bounds. If the difference between the .x2 of the previous
+character and the .x1 of the current character is bigger than 5, then there
+was a space between them. (Add ' ' to result)
+
+GetUpTextAt
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.GetUpTextAt(atX, atY: integer; shadow: boolean): string;
+
+Retreives the (special) uptext.
+
+
+GetTextATPA
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.GetTextATPA(const ATPA : T2DPointArray;const maxvspacing : integer; font: string): string;
+
+Returns the text defined by the ATPA. Each TPA represents one character,
+approximately.
+
+GetTextAt
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.GetTextAt(xs, ys, xe,ye, minvspacing, maxvspacing, hspacing,
+                               color, tol: integer; font: string): string;
+
+General text-finding function.
+
+GetTextAt (2)
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing,
+                               color, tol, len: integer; font: string): string;
+
+General text-finding function. Different parameters than other GetTextAt.
+
+TextToFontTPA
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;
+
+Returns a TPA of a specific *Text* of the specified *Font*.
+
+
+TextToFontBitmap
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitmap;
+
+Returns a Bitmap of the specified *Text* of the specified *Font*.
+
+
 .. _uptext-filter:
 
 Uptext
-------
+======
 
 To read the UpText, the TMOCR class applies several filters on the client data
 before performing the actual OCR. We will take a look at the two filters first.
@@ -181,4 +322,3 @@ Normal OCR
     A large part is already explained above.
     Most of the other OCR functions are simply used for plain identifying
     and have no filtering tasks.
-

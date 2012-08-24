@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,6 +49,9 @@ type
     FunctionList: TTreeView;
     FunctionListLabel: TLabel;
     CloseButton: TSpeedButton;
+    ClearSearch: TSpeedButton;
+    Panel1: TPanel;
+    procedure ClearSearchClick(Sender: TObject);
     procedure editSearchListChange(Sender: TObject);
     procedure FillThreadTerminate(Sender: TObject);
     procedure FrameEndDock(Sender, Target: TObject; X, Y: Integer);
@@ -100,6 +103,12 @@ uses
 
 procedure TFunctionListFrame.editSearchListChange(Sender: TObject);
 begin
+  Find(false);
+end;
+
+procedure TFunctionListFrame.ClearSearchClick(Sender: TObject);
+begin
+  editSearchList.Text := '';
   Find(false);
 end;
 

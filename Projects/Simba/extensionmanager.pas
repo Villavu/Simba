@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,8 @@ type
       function GetExtensionIndex(Filename : string) : integer;
       function LoadPSExtension(Filename : string; enabled : boolean=false) : boolean;
       function LoadPSExtensionsDir(Directory,ext : string) : boolean;
-      function HandleHook(const HookName: String; var Args: TVariantArray): Variant;
+      function HandleHook(const HookName: String; var Args: TVariantArray; var
+          Called: Boolean): Variant;
     end;
 
 var
@@ -60,7 +61,7 @@ var
 
 implementation
 uses
-  SimbaUnit, settingssandbox,Simbasettings;
+  SimbaUnit, settingssandbox, newsimbasettings;
 
 procedure TExtensionManager.SetOnchange(const AValue: TNotifyEvent);
 var
@@ -114,7 +115,7 @@ begin
     Ext := TSimbaPSExtension.Create(filename,True);
 //    result := TSimbaPSExtension(ext).Working;
     Extensions.Add(ext);
-    ext.Settings := TMMLSettingsSandbox.Create(SettingsForm.Settings);
+    ext.Settings := TMMLSettingsSandbox.Create(SimbaSettings.MMLSettings);
     ext.Settings.Prefix := format('Extensions/Extension%d/Settings/',[Extensions.Count - 1]);
     if enabled then
       ext.Enabled := true;
@@ -166,19 +167,25 @@ begin
 end;
 
 // How do we return more than one result?
-function TExtensionManager.HandleHook(const HookName: String;var Args: TVariantArray): Variant;
+function TExtensionManager.HandleHook(const HookName: String; var Args:
+    TVariantArray; var Called: Boolean): Variant;
 var
-  i: Integer;
+  i, res: Integer;
 begin
+  Called := False;
   for i := 0 to Extensions.Count -1 do
     with TExtension(Extensions[i]) do
       if Enabled then
         if HookExists(HookName) then
-          if ExecuteHook(HookName, Args, Result) <> 0 then
-          begin
-            mDebugLn('Execute hook failed: Hookname: %s',[hookname]);
+        begin
+          res := ExecuteHook(HookName, Args, Result);
+          if res <> 0 then
+            mDebugLn('Execute hook failed: Hookname: %s',[hookname])
             // Not succesfull.
-          end;
+          else
+            Called := True;
+
+        end;
 end;
 
 initialization

@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ unit os_linux;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, xlib, x, xutil, IOManager, XKeyInput, ctypes, xtest,
-    syncobjs, mufasabase;
+    Classes, SysUtils, mufasatypes, mufasabase, IOManager,
+    xlib, x, xutil, XKeyInput, ctypes, syncobjs;
 
   type
 
@@ -61,6 +61,12 @@ interface
         procedure ResetError; override;
 
         function TargetValid: boolean; override;
+
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure MouseResetClientArea; override;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
+
         procedure ActivateClient; override;
         procedure GetMousePosition(out x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
@@ -68,7 +74,7 @@ interface
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-        procedure SendString(str: string; keywait: integer); override;
+        procedure SendString(str: string; keywait, keymodwait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
@@ -94,6 +100,14 @@ interface
 
         { X Error Handler }
         oldXHandler: TXErrorHandler;
+
+        { (Forced) Client Area }
+        mx1, my1, mx2, my2: integer;
+        ix1, iy1, ix2, iy2: integer;
+        mcaset, icaset: Boolean;
+
+        procedure MouseApplyAreaOffset(var x, y: integer);
+        procedure ImageApplyAreaOffset(var x, y: integer);
     end;
 
     TIOManager = class(TIOManager_Abstract)
@@ -221,6 +235,10 @@ implementation
     self.window:= window;
     self.dirty:= false;
     self.keyinput:= TKeyInput.Create;
+    self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
+    self.mcaset := false;
+    self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
+    self.icaset := false;
 
     xerror := '';
 
@@ -266,6 +284,12 @@ implementation
   var
     Attrib: TXWindowAttributes;
   begin
+    if icaset then
+    begin
+      w := ix2 - ix1;
+      h := iy2 - iy1;
+      exit;
+    end;
     if XGetWindowAttributes(display, window, @Attrib) <> 0 Then
     begin
       W := Attrib.Width;
@@ -302,6 +326,73 @@ implementation
     result := not ReceivedError;
   end;
 
+  { SetClientArea allows you to use a part of the actual client as a virtual
+    client. Im other words, all mouse,find functions will be relative to the
+    virtual client.
+
+    XXX:
+    I realise I can simply add a[x,y]1 to all of the functions rather than check
+    for caset (since they're 0 if it's not set), but I figured it would be more
+    clear this way.
+  }
+  function TWindow.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+  var w, h: integer;
+  begin
+    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+    GetTargetDimensions(w, h);
+    if ((x2 - x1) > w) or ((y2 - y1) > h) then
+      exit(False);
+    if (x1 < 0) or (y1 < 0) then
+      exit(False);
+
+    mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
+    mcaset := True;
+  end;
+
+  procedure TWindow.MouseResetClientArea;
+  begin
+    mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
+    mcaset := False;
+  end;
+
+  function TWindow.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+  var w, h: integer;
+  begin
+    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+    GetTargetDimensions(w, h);
+    if ((x2 - x1) > w) or ((y2 - y1) > h) then
+      exit(False);
+    if (x1 < 0) or (y1 < 0) then
+      exit(False);
+
+    ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
+    icaset := True;
+  end;
+
+  procedure TWindow.ImageResetClientArea;
+  begin
+    ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
+    icaset := False;
+  end;
+
+  procedure TWindow.MouseApplyAreaOffset(var x, y: integer);
+  begin
+    if mcaset then
+    begin
+      x := x + mx1;
+      y := y + my1;
+    end;
+  end;
+
+  procedure TWindow.ImageApplyAreaOffset(var x, y: integer);
+  begin
+    if icaset then
+    begin
+      x := x + ix1;
+      y := y + iy1;
+    end;
+  end;
+
   procedure TWindow.ActivateClient;
 
   begin
@@ -322,6 +413,8 @@ implementation
       raise Exception.CreateFmt('ReturnData was called again without freeing'+
                                 ' the previously used data. Do not forget to'+
                                 ' call FreeReturnData', []);
+
+    ImageApplyAreaOffset(xs, ys);
 
     buffer := XGetImage(display, window, xs, ys, width, height, AllPlanes, ZPixmap);
     if buffer = nil then
@@ -354,73 +447,113 @@ implementation
 
   procedure TWindow.GetMousePosition(out x,y: integer);
   var
-    b:integer;
-    root, child: twindow;
-    xmask: Cardinal;
-
+    event: TXButtonEvent;
   begin
-    XQueryPointer(display,window,@root,@child,@b,@b,@x,@y,@xmask);
+    FillChar(event, SizeOf(event), 0);
+
+    XQueryPointer(display, window,
+                     @event.root, @event.window,
+                     @event.x_root, @event.y_root,
+                     @event.x, @event.y,
+                     @event.state);
+
+    x := event.x;
+    y := event.y;
+
+    x := x - mx1;
+    y := y - my1;
   end;
 
   procedure TWindow.MoveMouse(x,y: integer);
-  var
-    w,h: integer;
   begin
-    GetTargetDimensions(w, h);
-    if (x < 0) or (y < 0) or (x > w) or (y > h) then
-      raise Exception.CreateFmt('SetMousePos: X, Y (%d, %d) is not valid (0,0,%d,%d)', [x, y, w, h]);
-    XWarpPointer(display, 0, window, 0, 0, 0, 0, X, Y);
+    MouseApplyAreaOffset(x, y);
+    XWarpPointer(display, None, window, 0, 0, 0, 0, X, Y);
     XFlush(display);
   end;
 
   procedure TWindow.HoldMouse(x,y: integer; button: TClickType);
   var
-    ButtonP: cuint;
-    _isPress: cbool;
-
+    event: TXButtonPressedEvent;
   begin
-    _isPress := cbool(1);
+    FillChar(event, SizeOf(event), 0);
+
     case button of
-      mouse_Left:   ButtonP:= Button1;
-      mouse_Middle: ButtonP:= Button2;
-      mouse_Right:  ButtonP:= Button3;
+      mouse_Left:   event.button := Button1;
+      mouse_Middle: event.button := Button2;
+      mouse_Right:  event.button := Button3;
     end;
-    XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);;
+    event.same_screen := cint(0);
+    event.subwindow := window;
+
+    while (event.subwindow <> None) do
+    begin
+      event.window := event.subwindow;
+
+      XQueryPointer(display, event.window,
+                       @event.root, @event.subwindow,
+                       @event.x_root, @event.y_root,
+                       @event.x, @event.y,
+                       @event.state);
+    end;
+
+    event._type := ButtonPress;
+    XSendEvent(display, PointerWindow, True, ButtonPressMask, @event);
+    XFlush(display);
   end;
 
   procedure TWindow.ReleaseMouse(x,y: integer; button: TClickType);
   var
-    ButtonP: cuint;
-    _isPress: cbool;
+    event: TXButtonReleasedEvent;
   begin
-    _isPress := cbool(0);
+    FillChar(event, SizeOf(event), 0);
+
     case button of
-      mouse_Left:   ButtonP:= Button1;
-      mouse_Middle: ButtonP:= Button2;
-      mouse_Right:  ButtonP:= Button3;
+      mouse_Left:   event.button := Button1;
+      mouse_Middle: event.button := Button2;
+      mouse_Right:  event.button := Button3;
     end;
-    XTestFakeButtonEvent(display, ButtonP, _isPress, CurrentTime);
+    event.same_screen := cint(0);
+    event.subwindow := window;
+
+    while (event.subwindow <> None) do
+    begin
+      event.window := event.subwindow;
+
+      XQueryPointer(display, event.window,
+                       @event.root, @event.subwindow,
+                       @event.x_root, @event.y_root,
+                       @event.x, @event.y,
+                       @event.state);
+    end;
+
+    event._type := ButtonRelease;
+    XSendEvent(display, PointerWindow, True, ButtonReleaseMask, @event);
+    XFlush(display);
   end;
 
   function TWindow.IsMouseButtonHeld(button: TClickType): boolean;
-    var
-     b:integer;
-     root, child: twindow;
-     xmask: Cardinal;
-     ButtonP: cuint;
-
+  var
+    event: TXEvent;
   begin
-    XQueryPointer(display,window,@root,@child,@b,@b,@b,@b,@xmask);
+    FillChar(event, SizeOf(event), 0);
+
+    XQueryPointer(display, event.xbutton.window,
+                     @event.xbutton.root, @event.xbutton.window,
+                     @event.xbutton.x_root, @event.xbutton.y_root,
+                     @event.xbutton.x, @event.xbutton.y,
+                     @event.xbutton.state);
+
     case button of
-      mouse_Left:   ButtonP:= Button1Mask;
-      mouse_Middle: ButtonP:= Button2Mask;
-      mouse_Right:  ButtonP:= Button3Mask;
+      mouse_Left:   Result := ((event.xbutton.state and Button1Mask) > 0);
+      mouse_Middle: Result := ((event.xbutton.state and Button2Mask) > 0);
+      mouse_Right:  Result := ((event.xbutton.state and Button3Mask) > 0);
+      else
+        Result := False;
     end;
-    result := xmask and ButtonP > 0;
   end;
 
   { TODO: Check if this supports multiple keyboard layouts, probably not }
-  procedure TWindow.SendString(str: string; keywait: integer);
+  procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
   var
     I, L: Integer;
     K: Byte;
@@ -440,6 +573,7 @@ implementation
       begin
         HoldKey(VK_SHIFT);
         HoldShift := True;
+        sleep(keymodwait shr 1);
       end;
 
       K := GetKeyCode(str[I]);
@@ -453,6 +587,7 @@ implementation
       if (HoldShift) then
       begin
         HoldShift := False;
+        sleep(keymodwait shr 1);
         ReleaseKey(VK_SHIFT);
       end;
     end;

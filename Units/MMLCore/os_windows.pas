@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,6 +56,13 @@ interface
         procedure ResetError; override;
 
         function TargetValid: boolean; override;
+
+        function MouseSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure MouseResetClientArea; override;
+        function ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;
+        procedure ImageResetClientArea; override;
+
+
         procedure ActivateClient; override;
         procedure GetMousePosition(out x,y: integer); override;
         procedure MoveMouse(x,y: integer); override;
@@ -64,7 +71,7 @@ interface
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
         function  IsMouseButtonHeld( button : TClickType) : boolean;override;
 
-        procedure SendString(str: string; keywait: integer); override;
+        procedure SendString(str: string; keywait, keymodwait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
@@ -78,7 +85,16 @@ interface
         buffer_raw: prgb32;
         width,height: integer;
         keyinput: TKeyInput;
+
+
+        { (Forced) Client Area }
+        mx1, my1, mx2, my2: integer;
+        ix1, iy1, ix2, iy2: integer;
+        mcaset, icaset: Boolean;
         procedure ValidateBuffer(w,h:integer);
+
+        procedure MouseApplyAreaOffset(var x, y: integer);
+        procedure ImageApplyAreaOffset(var x, y: integer);
       protected
         function WindowRect(out Rect : TRect) : Boolean; virtual;
     end;
@@ -176,6 +192,11 @@ implementation
     self.buffer:= TBitmap.Create;
     self.buffer.PixelFormat:= pf32bit;
     keyinput:= TKeyInput.Create;
+
+    self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
+    self.mcaset := false;
+    self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
+    self.icaset := false;
   end;
 
   constructor TWindow.Create(target: Hwnd);
@@ -186,6 +207,11 @@ implementation
     keyinput:= TKeyInput.Create;
     self.handle:= target;
     self.dc:= GetWindowDC(target);
+
+    self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
+    self.mcaset := false;
+    self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
+    self.icaset := false;
   end;
   
   destructor TWindow.Destroy;
@@ -221,6 +247,46 @@ implementation
     result:= IsWindow(handle);
   end;
 
+  function TWindow.MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+  var w, h: integer;
+  begin
+    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+    GetTargetDimensions(w, h);
+    if ((x2 - x1) > w) or ((y2 - y1) > h) then
+      exit(False);
+    if (x1 < 0) or (y1 < 0) then
+      exit(False);
+
+    mx1 := x1; my1 := y1; mx2 := x2; my2 := y2;
+    mcaset := True;
+  end;
+
+  procedure TWindow.MouseResetClientArea;
+  begin
+    mx1 := 0; my1 := 0; mx2 := 0; my2 := 0;
+    mcaset := False;
+  end;
+
+  function TWindow.ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+  var w, h: integer;
+  begin
+    { TODO: What if the client resizes (shrinks) and our ``area'' is too large? }
+    GetTargetDimensions(w, h);
+    if ((x2 - x1) > w) or ((y2 - y1) > h) then
+      exit(False);
+    if (x1 < 0) or (y1 < 0) then
+      exit(False);
+
+    ix1 := x1; iy1 := y1; ix2 := x2; iy2 := y2;
+    icaset := True;
+  end;
+
+  procedure TWindow.ImageResetClientArea;
+  begin
+    ix1 := 0; iy1 := 0; ix2 := 0; iy2 := 0;
+    icaset := False;
+  end;
+
   procedure TWindow.ActivateClient;
   begin
     SetForegroundWindow(handle);
@@ -228,8 +294,14 @@ implementation
 
   procedure TWindow.GetTargetDimensions(out w, h: integer);
   var
-    Rect : TRect; 
-  begin 
+    Rect : TRect;
+  begin
+    if icaset then
+    begin
+      w := ix2 - ix1;
+      h := iy2 - iy1;
+      exit;
+    end;
     WindowRect(rect);
     w:= Rect.Right - Rect.Left;
     h:= Rect.Bottom - Rect.Top;
@@ -246,6 +318,7 @@ implementation
   
   function TWindow.GetColor(x,y : integer) : TColor;
   begin
+    ImageApplyAreaOffset(x, y);
     result:= GetPixel(self.dc,x,y)
   end;
   
@@ -263,11 +336,34 @@ implementation
     end;
   end;
 
+  procedure TWindow.MouseApplyAreaOffset(var x, y: integer);
+  begin
+    if mcaset then
+    begin
+      x := x + mx1;
+      y := y + my1;
+    end;
+  end;
+
+  procedure TWindow.ImageApplyAreaOffset(var x, y: integer);
+  begin
+    if icaset then
+    begin
+      x := x + ix1;
+      y := y + iy1;
+    end;
+  end;
+
   function TWindow.WindowRect(out Rect : TRect) : boolean;
   begin
     result := Windows.GetWindowRect(self.handle,rect);
   end;
 
+  { This functions return a struct of pointer data.
+    Data is blitted from the target window to the *start* of the buffer,
+    and not to the corresponding position.
+    So [xs,ys,xe,ye] is mapped to [0, 0, xe-xs, ye-ys].
+  }
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
   var
     temp: PRGB32;
@@ -277,6 +373,9 @@ implementation
     ValidateBuffer(w,h);
     if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
       raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
+
+    ImageApplyAreaOffset(xs, ys);
+
     Windows.BitBlt(self.buffer.Canvas.Handle,0,0, width, height, self.dc, xs,ys, SRCCOPY);
     Result.Ptr:= self.buffer_raw;
 
@@ -293,12 +392,16 @@ implementation
     WindowRect(rect);
     x := MousePoint.x - Rect.Left;
     y := MousePoint.y - Rect.Top;
+
+    x := x - mx1;
+    y := y - my1;
   end;
   procedure TWindow.MoveMouse(x,y: integer);
   var
     rect : TRect;
     w,h: integer;
   begin
+    MouseApplyAreaOffset(x, y);
     WindowRect(rect);
     x := x + rect.left;
     y := y + rect.top;
@@ -312,6 +415,7 @@ var
   Input : TInput;
   Rect : TRect;
 begin
+  MouseApplyAreaOffset(x, y);
   WindowRect(rect);
   Input.Itype:= INPUT_MOUSE;
   FillChar(Input,Sizeof(Input),0);
@@ -327,6 +431,7 @@ end;
     Input : TInput;
     Rect : TRect;
   begin
+    MouseApplyAreaOffset(x, y);
     WindowRect(rect);
     Input.Itype:= INPUT_MOUSE;
     FillChar(Input,Sizeof(Input),0);
@@ -344,6 +449,7 @@ end;
     Input : TInput;
     Rect : TRect;
   begin
+    MouseApplyAreaOffset(x, y);
     WindowRect(rect);
     Input.Itype:= INPUT_MOUSE;
     FillChar(Input,Sizeof(Input),0);
@@ -366,7 +472,7 @@ begin
   end;
 end;
 
-procedure TWindow.SendString(str: string; keywait: integer);
+procedure TWindow.SendString(str: string; keywait, keymodwait: integer);
 var
   I, L: integer;
   C: Byte;
@@ -385,17 +491,23 @@ begin
 
     // TODO/XXX: Do we wait when/after pressing shift as well?
     if (Shift) then
+    begin
       Keybd_Event(VK_SHIFT, $2A, 0, 0);
+      sleep(keymodwait shr 1) ;
+    end;
 
     Keybd_Event(C, ScanCode, 0, 0);
 
     if keywait <> 0 then
-        sleep(keywait); // TODO/XXX: We needed a special wait IIRC?
+        sleep(keywait);
 
     Keybd_Event(C, ScanCode, KEYEVENTF_KEYUP, 0);
 
     if (Shift) then
+    begin
+      sleep(keymodwait shr 1);
       Keybd_Event(VK_SHIFT, $2A, KEYEVENTF_KEYUP, 0);
+    end;
   end;
 end;
 

@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 unit updateform;
 
 {$mode objfpc}{$H+}
+
+{$I Simba.inc}
 
 interface
 
@@ -71,27 +73,15 @@ type
 const
   DownloadSpeedTextRunning = 'Downloading at %d kB/s';
   DownloadSpeedTextEnded = 'Downloaded at %d kB/s';
-  SimbaURL =     {$IFDEF WINDOWS}
-                  {$IFDEF CPUI386}
-                  'http://Simba.villavu.com/bin/Windows/x86/Stable/'
-                  {$ELSE}
-                  'http://Simba.villavu.com/bin/Windows/x86_64/Stable/'
-                  {$ENDIF}
-                {$ELSE}
-                  {$IFDEF CPUI386}
-                  'http://Simba.villavu.com/bin/Linux/x86/Stable/'
-                  {$ELSE}
-                  'http://Simba.villavu.com/bin/Linux/x86_64/Stable/'
-                  {$ENDIF}
-                {$ENDIF};
-  FontURL = 'http://Simba.villavu.com/bin/Fonts/';
+
+  {$I settings_const.inc}
 
 var
   SimbaUpdateForm: TSimbaUpdateForm;
 
 implementation
 uses
-  internets,  SimbaUnit, Simbasettings,lclintf;
+  internets,  SimbaUnit, newsimbasettings,lclintf;
 
 function TSimbaUpdateForm.CanUpdate: Boolean;
 begin
@@ -107,13 +97,18 @@ var
 begin
   if FontVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    FontVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
-                                                'Settings/Fonts/VersionLink',FontURL  + 'Version',SimbaSettingsFile),
-                                                @Vers);
+    FontVersionThread :=
+    TDownloadThread.Create(SimbaSettings.Fonts.VersionLink.GetDefValue(FontURL + 'Version'), @Vers);
+
     FontVersionThread.Resume;
     while FontVersionThread.Done = false do//Wait till thread is done
     begin
       Application.ProcessMessages;
+      if SimbaForm.exiting then
+      begin
+        writeln('GetLatestFontVersion: Exiting due to exiting=True...');
+        exit(-1);
+      end;
       Sleep(25);
     end;
     FFontVersion := StrToIntDef(Trim(Vers), -1);//Read output
@@ -121,10 +116,16 @@ begin
   end else
   begin
     //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
-    while FontVersionThread = nil do
+    while FontVersionThread <> nil do
     begin;
       Application.ProcessMessages;
       Sleep(50);
+
+      if SimbaForm.exiting then
+      begin
+        writeln('GetLatestFontVersion(2): Exiting due to exiting=True...');
+        exit(-1);
+      end;
     end;
   end;
   Exit(FFontVersion);
@@ -137,24 +138,34 @@ var
 begin
   if SimbaVersionThread = nil then//Create thread (only if no-other one is already running)
   begin
-    SimbaVersionThread := TDownloadThread.Create(SettingsForm.Settings.GetKeyValueDefLoad(
-                                                 'Settings/Updater/RemoteVersionLink',SimbaURL + 'Version'
-                                                 ,SimbaSettingsFile),@Vers);
+    SimbaVersionThread := TDownloadThread.Create(SimbaSettings.Updater.RemoteVersionLink.GetDefValue(SimbaURL + 'Version'), @Vers);
     SimbaVersionThread.Resume;
     while SimbaVersionThread.Done = false do//Wait till thread is done
     begin
       Application.ProcessMessages;
       Sleep(25);
+
+      if SimbaForm.exiting then
+      begin
+        writeln('GetLatestSimbaVersion: Exiting due to exiting=True...');
+        exit(-1);
+      end;
     end;
     FSimbaVersion := StrToIntDef(Trim(Vers), -1);//Read output
     SimbaVersionThread := nil;//It's automatically freed
   end else
   begin
     //Another thread is already running, lets wait for it! (When it's nil, it means that the result is written!)
-    while SimbaVersionThread = nil do
+    while SimbaVersionThread <> nil do
     begin;
       Application.ProcessMessages;
       Sleep(50);
+
+      if SimbaForm.exiting then
+      begin
+        writeln('GetLatestSimbaVersion(2): Exiting due to exiting=True...');
+        exit(-1);
+      end;
     end;
   end;
   Exit(FSimbaVersion);
@@ -182,13 +193,19 @@ begin
   Self.UpdateLog.Clear;
   Self.UpdateLog.Lines.Add('---------- Update Session ----------');
   Self.DownloadSpeed.Visible := false;
+
+
+  (*
+  { Removed to allow forced updates }
+
   if not CanUpdate then
   begin
     //ShowMessage('No Updates Available!');
     Self.UpdateLog.Lines.Add('No Updates Available!');
     Self.UpdateButton.Enabled := False;
   end else
-    Self.UpdateButton.Enabled := true;
+  *)
+  Self.UpdateButton.Enabled := true;
 end;
 
 procedure TSimbaUpdateForm.FormCreate(Sender: TObject);
@@ -229,10 +246,8 @@ begin
   FCancelling := False;
   FCancelled := False;
 
-  Updater.FileURL := SettingsForm.Settings.GetKeyValueDefLoad(
-        'Settings/Updater/RemoteLink',
-        SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF},
-        SimbaSettingsFile
+  Updater.FileURL := SimbaSettings.Updater.RemoteLink.GetDefValue(
+        SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF}
   );
 
   //ApplicationName{$IFDEF WINDOWS} +'.exe'{$ENDIF};

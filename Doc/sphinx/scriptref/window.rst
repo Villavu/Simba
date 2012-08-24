@@ -28,7 +28,7 @@ Use like:
     if findcolors(...) then
       ...
 
-    Unfreeze
+    Unfreeze;
 
 Make sure you never forget to call Unfreeze!
 
@@ -70,7 +70,9 @@ SetTargetBitmap
 
     function SetTargetBitmap(Bitmap : integer): integer;
 
-Set a bitmap as target / client. (It must be loaded by Simba)
+Set a bitmap as target / client. (The bitmap must be loaded by Simba)
+This can be combined with the SetPersistentMemoryBitmap feature to achieve
+the same effect as `SetTargetArray`_.
 
 
 SetTargetArray
@@ -93,6 +95,8 @@ SetEIOSTarget
     function SetEIOSTarget(name: string; initargs: Variant): integer;
 
 
+.. _image-target:
+
 SetImageTarget
 --------------
 
@@ -100,6 +104,15 @@ SetImageTarget
 
     procedure SetImageTarget(idx: integer);
 
+Set the Image target defined by index *idx* as active target.
+An Image target controls what data Simba performs colour (and bitmap, dtm, etc)
+searches on.
+
+Both `SetTargetBitmap`_, and `SetTargetArray`_ return a target index.
+Alternatively you can get the index of the current target with `GetImageTarget`_.
+
+
+.. _mouse_target:
 
 SetKeyMouseTarget
 -----------------
@@ -108,6 +121,9 @@ SetKeyMouseTarget
 
     procedure SetKeyMouseTarget(idx: integer);
 
+Set the KeyMouse target defined by index *idx* as active target.
+A KeyMouse target controls how Simba moves the mouse cursor and emulates the
+keyboard.
 
 GetImageTarget
 --------------
@@ -115,6 +131,8 @@ GetImageTarget
 .. code-block:: pascal
 
     function GetImageTarget: integer;
+
+Returns the current Image target.
 
 
 GetKeyMouseTarget
@@ -124,6 +142,7 @@ GetKeyMouseTarget
 
     function GetKeyMouseTarget: integer;
 
+Returns the current KeyMouse target.
 
 ExportImageTarget 
 ------------------
@@ -148,6 +167,10 @@ FreeTarget
 
     procedure FreeTarget(idx: integer);
 
+Free a previously loaded target.
+
+This procedure does not free the data associated with the target as in the
+case of `SetTargetBitmap`_ or `SetTargetArray`_.
 
 SetDesktopAsClient
 ------------------
@@ -176,6 +199,9 @@ IsTargetValid
     function IsTargetValid: boolean;
 
 Returns true if the current target is valid.
+
+Finding a specific window
+=========================
 
 GetProcesses
 ------------
@@ -219,3 +245,58 @@ Example usage:
           end;
         end;
     end;
+
+Client Area
+===========
+
+Client Areas were introduced to cope with clients which have a normal
+coordinate system, but a variable base for this coordinate system.
+
+More specifically: client areas allow you to transparently add a certain X and Y
+to all the mouse and image (finding, dtm, etc) functions.
+
+Support for Mouse and Image targets have been separated. This is required for
+targets that only support say, an Image target.
+
+In this case you do not want to accidentally touch or reset the Mouse target
+area.
+
+Setting an area multiple times is the same as resetting it and then setting
+the area. Multiple calls to \*SetClientArea will not result in nested areas.
+
+MouseSetClientArea
+------------------
+
+.. code-block:: pascal
+
+    function MouseSetClientArea(x1, y1, x2, y2: integer): boolean;
+
+Define a new `Client Area`_ for all Mouse operations on this Mouse target.
+
+MouseResetClientArea
+--------------------
+
+.. code-block:: pascal
+
+    procedure MouseResetClientArea;
+
+Reset the `Client Area`_ for the Mouse Target.
+
+ImageSetClientArea
+------------------
+
+.. code-block:: pascal
+
+    function ImageSetClientArea(x1, y1, x2, y2: integer): boolean;
+
+Define a new `Client Area`_ for all Image operations on this Image Target.
+
+ImageResetClientArea
+--------------------
+
+.. code-block:: pascal
+
+    procedure ImageResetClientArea;
+
+Reset the `Client Area`_ for the Image Target.
+

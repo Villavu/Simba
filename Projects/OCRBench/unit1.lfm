@@ -8,7 +8,7 @@ object Form1: TForm1
   ClientHeight = 306
   ClientWidth = 609
   OnCreate = FormCreate
-  LCLVersion = '0.9.29'
+  LCLVersion = '0.9.30.1'
   object OCRButton: TButton
     Left = 512
     Height = 25
@@ -44,9 +44,9 @@ object Form1: TForm1
   end
   object FShadow: TCheckBox
     Left = 507
-    Height = 17
+    Height = 22
     Top = 112
-    Width = 63
+    Width = 81
     Caption = 'Shadow?'
     TabOrder = 3
   end
