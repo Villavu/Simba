@@ -549,6 +549,7 @@ AddFunction(@ps_ReArrangeandShortenArrayExWrap,'procedure ReArrangeandShortenArr
 AddFunction(@ps_ReArrangeandShortenArrayWrap,'procedure ReArrangeandShortenArrayWrap(const a: TPointArray; Dist: Integer; var Res :  TPointArray);');
 AddFunction(@ps_TPAtoATPAExWrap,'procedure TPAtoATPAExWrap(const TPA: TPointArray; w, h: Integer; var Res :  T2DPointArray);');
 AddFunction(@ps_TPAtoATPAWrap,'procedure TPAtoATPAWrap(const TPA: TPointArray; Dist: Integer; var Res :  T2DPointArray);');
+AddFunction(@ps_MiddleTPAWrap,'procedure MiddleTPAWrap(const TPA: TPointArray; var Res: TPoint);');
 AddFunction(@ps_CombineIntArrayWrap, 'procedure CombineIntArrayWrap(const Ar1, Ar2: TIntegerArray; var Res :  TIntegerArray);');
 AddFunction(@ps_ReturnPointsNotInTPAWrap,'procedure ReturnPointsNotInTPAWrap(Const TotalTPA: TPointArray; const Box: TBox; var Res :  TPointArray);');
 AddFunction(@ps_MergeATPAWrap,'procedure MergeATPAWrap(const ATPA : T2DPointArray; var Res: TPointArray);');
