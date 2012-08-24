@@ -392,7 +392,7 @@ procedure ps_TPAtoATPAWrap(const TPA: TPointArray; Dist: Integer; var Res :  T2D
 begin
   Res := TPAtoATPA(TPA,Dist);
 end;
-procedure ps_MiddleTPA(const TPA: TPointArray; var Res: TPoint);extdecl;
+procedure ps_MiddleTPAWrap(const TPA: TPointArray; var Res: TPoint);extdecl;
 begin
   Res := MiddleTPA(TPA);
 end;
