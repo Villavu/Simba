@@ -392,6 +392,10 @@ procedure ps_TPAtoATPAWrap(const TPA: TPointArray; Dist: Integer; var Res :  T2D
 begin
   Res := TPAtoATPA(TPA,Dist);
 end;
+procedure ps_MiddleTPA(const TPA: TPointArray; var Res: TPoint);extdecl;
+begin
+  Res := MiddleTPA(TPA);
+end;
 procedure ps_CombineIntArrayWrap(const Ar1, Ar2: TIntegerArray; var Res :  TIntegerArray);extdecl;
 begin
   Res := CombineIntArray(Ar1,Ar2);
