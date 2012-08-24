@@ -103,37 +103,33 @@ end;
 
 function ps_DeleteFile(const Filename: string): Boolean; extdecl;
 begin
-  Result := CurrThread.Client.MFiles.DeleteFile(Filename);
-end;
-
-procedure ps_WriteINI(const Section, KeyName, NewString, FileName: string);extdecl;
-var
-  tempini : TIniFile;
-begin;
-  tempini := TIniFile.Create(UTF8ToSys(FileName),True);
-  tempini.WriteString(Section,keyname,newstring);
-  tempini.free;
-end;
-
-function ps_ReadINI(const Section, KeyName, FileName: string): string;extdecl;
-var
-  tempini : TIniFile;
-begin;
-  tempini := TIniFile.Create(UTF8ToSys(FileName),True);
-  Result := tempini.ReadString(section,keyname,'');
-  tempini.free;
-end;
-
-procedure ps_DeleteINI(const Section, KeyName, FileName: string); extdecl;
-var
-  tempini : TIniFile;
-begin;
-  tempini := TIniFile.Create(utf8tosys(FileName),True);
-  if KeyName = '' then
-    tempini.EraseSection(Section)
+  if Assigned(CurrThread) then
+    Result := CurrThread.Client.MFiles.DeleteFile(Filename)
   else
-    Tempini.DeleteKey(section,keyname);
-  tempini.free;
+    Result := DeleteFileUTF8(Filename);
+end;
+
+function ps_RenameFile(const OldName, Newname: string): Boolean; extdecl;
+begin
+  if Assigned(CurrThread) then
+    Result := CurrThread.Client.MFiles.RenameFile(OldName, NewName)
+  else
+    Result := RenameFileUTF8(Oldname, Newname);
+end;
+
+procedure ps_WriteINI(const Section, KeyName, NewString : string; FileName: string);extdecl;
+begin;
+  CurrThread.Client.MFiles.WriteINI(Section, KeyName, NewString, FileName);
+end;
+
+function ps_ReadINI(const Section, KeyName : string; FileName: string): string;extdecl;
+begin;
+  result := CurrThread.Client.MFiles.ReadINI(Section, KeyName, FileName);
+end;
+
+procedure ps_DeleteINI(const Section, KeyName : string; FileName: string); extdecl;
+begin;
+  CurrThread.Client.MFiles.DeleteINI(Section, KeyName, FileName);
 end;
 
 function ps_ExtractFileExt(const FileName: string): string; extdecl;

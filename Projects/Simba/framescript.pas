@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,13 +23,15 @@
 unit framescript;
 
 {$mode objfpc}{$H+}
+{$I Simba.inc}
 
 interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, SynEditMarkupHighAll,
   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, Graphics, Controls, SynEditStrConst,
-  v_ideCodeInsight, v_ideCodeParser,  SynEditHighlighter,SynPluginSyncroEdit;
+  v_ideCodeInsight, v_ideCodeParser,  SynEditHighlighter, SynPluginSyncroEdit, SynGutterBase,
+  SynEditMarks, newsimbasettings;
 const
    ecCodeCompletion = ecUserFirst;
    ecCodeHints = ecUserFirst + 1;
@@ -67,19 +69,22 @@ type
     procedure SynEditSpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
     procedure SynEditStatusChange(Sender: TObject; Changes: TSynStatusChanges);
+    procedure SynEditGutterClick(Sender: TObject; X, Y, Line: integer; mark: TSynEditMark);
   private
     OwnerPage  : TPageControl;
     OwnerSheet : TTabSheet;//The owner TTabsheet -> For title setting
+    FActiveLine: LongInt; //Debugger Hilight
+    procedure SetActiveLine(Line: LongInt);
   public
     ErrorData : TErrorData;  //For threadsafestuff
-    ScriptErrorLine : integer; //Highlight the error line!
-    ScriptFile : string;//The path to the saved/opened file currently in the SynEdit
-    StartText : string;//The text synedit holds upon start/open/save
-    ScriptName : string;//The name of the currently opened/saved file.
-    ScriptDefault : string;//The default script e.g. program new; begin end.
-    ScriptChanged : boolean;//We need this for that little * (edited star).
-    ScriptThread : TMThread;//Just one thread for now..
-    FScriptState : TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
+    ScriptErrorLine: LongInt; //Error Hilight
+    ScriptFile: string;//The path to the saved/opened file currently in the SynEdit
+    StartText: string;//The text synedit holds upon start/open/save
+    ScriptName: string;//The name of the currently opened/saved file.
+    ScriptDefault: string;//The default script e.g. program new; begin end.
+    ScriptChanged: boolean;//We need this for that little * (edited star).
+    ScriptThread: TMThread;//Just one thread for now..
+    FScriptState: TScriptState;//Stores the ScriptState, if you want the Run/Pause/Start buttons to change accordingly, acces through Form1
     procedure undo;
     procedure redo;
     procedure HandleErrorData;
@@ -90,6 +95,7 @@ type
     constructor Create(TheOwner: TComponent); override;
 
     procedure ReloadScript;
+    property ActiveLine: LongInt read FActiveLine write SetActiveLine;
     { public declarations }
   end;
 
@@ -97,7 +103,7 @@ type
 
 implementation
 uses
-  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF, StrUtils,framefunctionlist;
+  SimbaUnit, MufasaTypes, SynEditTypes, SynEditHighlighterFoldBase, LCLIntF, framefunctionlist;
 
 function WordAtCaret(e: TSynEdit; var sp, ep: Integer; Start: Integer = -1; Offset: Integer = 0): string;
 var
@@ -159,6 +165,16 @@ begin
 end;
 
 { TScriptFrame }
+
+procedure TScriptFrame.SetActiveLine(Line: LongInt);
+begin
+  FActiveLine := Line;
+  if ((FActiveLine < SynEdit.TopLine + 2) or (FActiveLine > SynEdit.TopLine + SynEdit.LinesInWindow - 2)) then
+    SynEdit.TopLine := FActiveLine - (SynEdit.LinesInWindow div 2);
+  SynEdit.CaretY := FActiveLine;
+  SynEdit.CaretX := 1;
+  SynEdit.Refresh;
+end;
 
 procedure TScriptFrame.SynEditChange(Sender: TObject);
 begin
@@ -476,11 +492,18 @@ end;
 procedure TScriptFrame.SynEditSpecialLineColors(Sender: TObject;
   Line: integer; var Special: boolean; var FG, BG: TColor);
 begin
-  if line = ScriptErrorLine then
+  if (Line = ScriptErrorLine) then
   begin;
-    Special := true;
+    Special := True;
     BG := $50a0ff;
     FG := 0;
+  end;
+
+  if (Line = ActiveLine) then
+  begin
+    Special := True;
+    BG := clBlue;
+    FG := clWhite;
   end;
 end;
 
@@ -585,9 +608,11 @@ end;
 
 procedure TScriptFrame.ScriptThreadTerminate(Sender: TObject);
 begin
-  FScriptState:= ss_None;
+  FScriptState := ss_None;
+  ScriptThread := nil;
   SimbaForm.RefreshTab;
 end;
+
 procedure AddKey(const SynEdit : TSynEdit; const ACmd: TSynEditorCommand; const AKey: word;const AShift: TShiftState);
 begin
   with SynEdit.KeyStrokes.Add do
@@ -596,6 +621,43 @@ begin
     Shift := AShift;
     Command := ACmd;
   end;
+end;
+
+procedure TScriptFrame.SynEditGutterClick(Sender: TObject; X, Y, Line: integer; Mark: TSynEditMark);
+var
+  I, H: LongInt;
+begin
+  {$IFDEF USE_DEBUGGER}
+  if (SimbaSettings.Interpreter._Type.Value <> interp_PS) then
+    Exit;
+
+  H := SynEdit.Marks.Count - 1;
+  for I := 0 to H do
+    if (SynEdit.Marks.Items[I].Line = Line) then
+    begin
+      SynEdit.Marks.Line[Line].Clear(True);
+
+      try
+        if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
+          with TPSThread(ScriptThread).PSScript do
+            ClearBreakPoint(MainFileName, Line - 1);
+      except end;
+
+      Exit;
+    end;
+
+  Mark := TSynEditMark.Create(SynEdit);
+  Mark.Line := Line;
+  Mark.ImageIndex := 6;
+  Mark.Visible := True;
+  SynEdit.Marks.Add(Mark);
+
+  try
+    if (Assigned(ScriptThread)) and (ScriptThread is TPSThread) then
+      with TPSThread(ScriptThread).PSScript do
+        SetBreakPoint(MainFileName, Line - 1);
+  except end;
+  {$ENDIF}
 end;
 
 constructor TScriptFrame.Create(TheOwner: TComponent);

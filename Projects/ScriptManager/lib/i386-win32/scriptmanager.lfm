@@ -1,0 +1,115 @@
+object Form1: TForm1
+  Left = 237
+  Height = 407
+  Top = 213
+  Width = 672
+  Caption = 'Add Script'
+  ClientHeight = 407
+  ClientWidth = 672
+  OnCreate = FormCreate
+  OnShow = FormShow
+  LCLVersion = '0.9.30.1'
+  object Label1: TLabel
+    Left = 696
+    Height = 14
+    Top = 40
+    Width = 34
+    Caption = 'Search'
+    Enabled = False
+    ParentColor = False
+  end
+  object Edit1: TEdit
+    Left = 447
+    Height = 21
+    Top = 32
+    Width = 208
+    OnChange = Edit1Change
+    OnEnter = Edit1Enter
+    OnExit = Edit1Exit
+    TabOrder = 0
+    Text = 'Search'
+  end
+  object StringGrid1: TStringGrid
+    Left = 8
+    Height = 302
+    Top = 56
+    Width = 657
+    AlternateColor = 16315891
+    ColCount = 4
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goSmoothScroll, goScrollKeepVisible]
+    RowCount = 4
+    ScrollBars = ssVertical
+    TabOrder = 1
+    TitleFont.Color = clBlack
+    TitleStyle = tsNative
+    ColWidths = (
+      154
+      51
+      123
+      301
+    )
+    Cells = (
+      4
+      0
+      0
+      'Name'
+      1
+      0
+      'Version'
+      2
+      0
+      'Author'
+      3
+      0
+      'Description'
+    )
+  end
+  object ComboBox1: TComboBox
+    Left = 16
+    Height = 21
+    Top = 375
+    Width = 213
+    ItemHeight = 13
+    ItemIndex = 0
+    Items.Strings = (
+      'All'
+      'Agility'
+      'Combat'
+      'Construction'
+      'Cooking'
+      'Crafting'
+      'Dungeoneering'
+      'Farming'
+      'Firemaking'
+      'Fishing'
+      'Fletching'
+      'Herblore'
+      'Hunter'
+      'Magic'
+      'Mini Games'
+      'Mining'
+      'Misc'
+      'Money Making'
+      'Prayer'
+      'Range'
+      'Runecrafting'
+      'Slayer'
+      'Smithing'
+      'Summoning'
+      'Thieving'
+      'Woodcutting'
+    )
+    TabOrder = 2
+    Text = 'All'
+  end
+  object Button4: TButton
+    Left = 520
+    Height = 28
+    Top = 368
+    Width = 135
+    Caption = 'Install'
+    OnClick = Button2Click
+    TabOrder = 3
+  end
+end

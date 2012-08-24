@@ -34,10 +34,9 @@ unit scriptmanager;
 interface
 
 uses
-  {$IFDEF UNIX}cthreads,cmem,{$ENDIF} Classes, SysUtils, FileUtil, Forms,
-  Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ComCtrls, ActnList, Menus, settings, updater,strutils, MufasaTypes,
-  dom, mmisc;
+  {$IFDEF UNIX}cthreads,cmem,{$ENDIF} Classes, SysUtils, FileUtil, Forms, Controls, Graphics,
+  Dialogs, StdCtrls, ExtCtrls, ComCtrls, ActnList, Menus, Grids, settings,
+  updater, strutils, MufasaTypes, dom, mmisc;
 
 type
 
@@ -51,7 +50,8 @@ type
     Name, Version, Author, Description, URL: String;
     Tags, Files: TStringList;
     LocalScript : TSimbaScript;
-    property Installed : boolean read IsInstalled;
+//    property Installed : boolean read IsInstalled;
+    Installed : boolean;
     procedure Dbg;
     constructor Create;
     destructor Destroy; override;
@@ -75,29 +75,31 @@ type
   TScriptManager = class (TObject)
   private
     FMaindir: string;
-    FScripts : TList; //Array of the online scripts
-    FLScripts: TList; //Array of the local scripts
-    FVersion : String;
+    FRScripts : TList; //Array of the online scripts
+    FLScripts : TList; //Array of the local scripts
+    FRVersion : String;
     FUpdating : boolean;
     function GetLScriptCount: integer;
     function GetMainDir: string;
     function GetScript(index : integer): TSimbaScript;
-    function GetScriptCount: integer;
-    procedure MatchLocalOnline;
+    function GetRScriptCount: integer;
+    function GetLScriptByName(name: string): TLSimbaScript;
+    function isNewerVersion(ver1, ver2: string): boolean;
+    procedure AppendRemoteDB(url: string);
   public
-    function FindScriptByName(name : string) : Integer;
+    function FindRScriptByName(name : string) : Integer;
     function FindLScriptByName(name : string) : Integer;
     property MainDir : string read GetMainDir write FMaindir;
     property SimbaScript[index : integer] : TSimbaScript read GetScript;
-    procedure Update; //Gets the online scripts
+    procedure RUpdate; //Gets the online scripts
     procedure LUpdate; //Loads the local scripts, uses MainDir
     function NewVersion(Script : integer) : boolean; //Checks for updates for Script
-    procedure InstallNewScript(Script : integer); //Installs Script (Online -> Local)
-    function UpdateScript(Script : integer; ignoreupdating : boolean = false) : boolean; //Updates all the info/files of local script
+    procedure InstallNewRScript(Script : integer); //Installs Script (Online -> Local)
+    function UpdateLScript(Script : integer; ignoreupdating : boolean = false) : boolean; //Updates all the info/files of local script
     procedure LSave; //Saves the local scripts, uses MainDir
     property LScriptCount : integer read GetLScriptCount; //LScript = Local Script = Installed Script
-    property ScriptCount : integer read GetScriptCount; //Online script
-    property Version : string read FVersion;
+    property RScriptCount : integer read GetRScriptCount; //Online script
+    property Version : string read FRVersion;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -105,25 +107,22 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    Button1: TButton;
-    Button2: TButton;
-    GroupBox1: TGroupBox;
-    ListView1: TListView;
-    Memo1: TMemo;
-    procedure Button1Click(Sender: TObject);
+    Button4: TButton;
+    ComboBox1: TComboBox;
+    Edit1: TEdit;
+    Label1: TLabel;
+    StringGrid1: TStringGrid;
     procedure Button2Click(Sender: TObject);
-    procedure ClickItem(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+    procedure Edit1Change(Sender: TObject);
+    procedure Edit1Enter(Sender: TObject);
+    procedure Edit1Exit(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure ListView1Change(Sender: TObject; Item: TListItem;
-      Change: TItemChange);
+    procedure FormShow(Sender: TObject);
   private
     Mng : TScriptManager;
   public
     { public declarations }
   end;
-
-
 
 
 var
@@ -139,84 +138,89 @@ uses
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Mng := TScriptManager.Create;
-  ListView1.Columns.Add.Width:= ClientWidth;
 end;
 
-procedure TForm1.ListView1Change(Sender: TObject; Item: TListItem;
-  Change: TItemChange);
+procedure TForm1.FormShow(Sender: TObject);
 var
-  Script : TSimbaScript;
+  i, l: integer;
 begin
-  if Item.Data <> nil then
+  Mng.LUpdate;
+  Mng.RUpdate;
+  StringGrid1.RowCount := 1;
+  for i := 0 to Mng.RScriptCount - 1 do
   begin
-    Memo1.Clear;
-    Script := TSimbaScript(Item.data);
-    Memo1.Lines.add('Name: ' + Script.Name);
-    Memo1.lines.add('Author: ' + Script.Author);
-    Memo1.Lines.add('Version: ' + Script.Version);
-    Memo1.Lines.add('Installed: '+ BoolToStr(Script.Installed,true));
-    Memo1.Lines.add('Description: ' + Script.Description);
+    StringGrid1.RowCount := i + 2;
+    StringGrid1.Cells[0, i + 1] := Mng.SimbaScript[i].Name;
+    StringGrid1.Cells[1, i + 1] := Mng.SimbaScript[i].Version;
+    StringGrid1.Cells[2, i + 1] := Mng.SimbaScript[i].Author;
+    StringGrid1.Cells[3, i + 1] := Mng.SimbaScript[i].Description;
   end;
 end;
 
-procedure TForm1.ClickItem(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
+
+
+
+
+procedure TForm1.Edit1Change(Sender: TObject);
 var
-  item: TListItem;
+  i, c: Integer;
 begin
-  item := Form1.ListView1.GetItemAt(x, y);
-  if item = nil then
-    exit;
-  if item.data = nil then
-    exit;
-
-  { Any selection causes the description to change }
-{  form1.Memo1.Lines.Clear();
-  form1.Memo1.Lines.Append(TSimbaScript(item.data).Description);
-
-  if Button = mbLeft then
+  StringGrid1.RowCount := 1;
+  c := 0;
+  for i := 0 to Mng.RScriptCount - 1 do
   begin
+    if AnsiContainsText(Mng.SimbaScript[i].Name, Edit1.Caption) or AnsiContainsText(Mng.SimbaScript[i].Author, Edit1.Caption) or (Edit1.Caption = '') or (Edit1.Caption = 'Search') then
+    begin
+      StringGrid1.RowCount := c + 2;
 
-  end else if Button = mbRight then
-  begin
-    { Popup Actions }
-    Form1.ScriptPopup.Items[0].Caption:= 'Install ' +  TSimbaScript(item.data).Name;
-    Form1.ScriptPopup.PopUp();
-  end;
-  //form1.Memo1.Text := TSimbaScript(item.data).Description; }
-end;
-
-procedure TForm1.Button1Click(Sender: TObject);
-var
-  i : integer;
-  Item : TListItem;
-begin
-  Mng.Update;
-  ListView1.Items.Clear;
-  for i := 0 to Mng.ScriptCount - 1 do
-  begin
-    Item := ListView1.Items.Add;
-    Item.Data:= Mng.SimbaScript[i];
-    Item.Caption:= Mng.SimbaScript[i].Name;
+      StringGrid1.Cells[0, c + 1] := Mng.SimbaScript[i].Name;
+      StringGrid1.Cells[1, c + 1] := Mng.SimbaScript[i].Version;
+      StringGrid1.Cells[2, c + 1] := Mng.SimbaScript[i].Author;
+      StringGrid1.Cells[3, c + 1] := Mng.SimbaScript[i].Description;
+      c := c + 1;
+    end;
   end;
 end;
+
+procedure TForm1.Edit1Enter(Sender: TObject);
+begin
+  Edit1.Caption := '';
+end;
+
+procedure TForm1.Edit1Exit(Sender: TObject);
+begin
+  if Edit1.Caption = '' then
+    Edit1.Caption := 'Search'
+end;
+
+
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
   Script : TSimbaScript;
 begin
-  if (ListView1.Selected <> nil) and (ListView1.Selected.Data <> nil) then
+  {if (ListView1.Selected <> nil) and (ListView1.Selected.Data <> nil) then
   begin
     Script := TSimbaScript(ListView1.Selected.Data);
-    Mng.InstallNewScript(mng.FindScriptByName(Script.Name));
-  end;
+    if Script.IsInstalled then
+    begin
+//      ShowMessage('Updating Script "' + Script.Name + '"');
+      Mng.UpdateLScript(mng.FindRScriptByName(Script.Name));
+      ShowMessage('Finished Updating Script "' + Script.Name + '"');
+    end else
+    begin
+//      ShowMessage('Installing Script "' + Script.Name + '"');
+      Mng.InstallNewRScript(mng.FindRScriptByName(Script.Name));
+      ShowMessage('Finished Installing Script "' + Script.Name + '"');
+    end;
+  end;       }
 end;
 
 { TSimbaScript }
 
 function TSimbaScript.IsInstalled: boolean;
 begin
-  Result := (LocalScript <> nil);
+  Result := Self.Installed;
 end;
 
 procedure TSimbaScript.LoadFromNode(Script: TDOMNode);
@@ -237,7 +241,10 @@ procedure TSimbaScript.LoadFromNode(Script: TDOMNode);
   begin
     Result := TStringList.Create;
     if node = nil then
+    begin
+      Result.Free;
       exit;
+    end;
     tmpNode := node.FindNode(itemstr);
     if tmpNode <> nil then
     begin
@@ -279,6 +286,7 @@ end;
 constructor TSimbaScript.Create;
 begin
   inherited;
+  Installed := False;
   {stuff here}
 end;
 
@@ -295,12 +303,25 @@ end;
 
 { TScriptManager }
 
-function TScriptManager.FindScriptByName(name: string): Integer;
+function TScriptManager.GetLScriptByName(name: string): TLSimbaScript;
+var
+  I : integer;
+  Scr : TLSimbaScript;
+begin
+  result := nil;
+  for i := FLScripts.Count - 1 downto 0 do
+    scr := TLSimbaScript(FLScripts[i]);
+    if scr.Name = Name then
+      result := scr;
+      exit();
+end;
+
+function TScriptManager.FindRScriptByName(name: string): Integer;
 var
   I : integer;
 begin
-  for i := FScripts.Count - 1 downto 0 do
-    if TSimbaScript(FScripts[i]).Name = Name then
+  for i := FRScripts.Count - 1 downto 0 do
+    if TSimbaScript(FRScripts[i]).Name = Name then
       exit(i);
   result := -1;
 end;
@@ -309,7 +330,7 @@ function TScriptManager.FindLScriptByName(name: string): Integer;
 var
   I : integer;
 begin
-  for i := FScripts.Count - 1 downto 0 do
+  for i := FLScripts.Count - 1 downto 0 do
     if TLSimbaScript(FLScripts[i]).Name = Name then
       exit(i);
   result := -1;
@@ -327,34 +348,44 @@ end;
 
 function TScriptManager.GetScript(index : integer): TSimbaScript;
 begin
-  result := TSimbaScript(FScripts[index]);
+  result := TSimbaScript(FRScripts[index]);
 end;
 
-function TScriptManager.GetScriptCount: integer;
+function TScriptManager.GetRScriptCount: integer;
 begin
-  result := FScripts.Count;
+  result := FRScripts.Count;
 end;
 
-procedure TScriptManager.MatchLocalOnline;
+procedure TScriptManager.RUpdate;
 var
-  Scrpt : TLSimbaScript;
-  I,II : integer;
+  Databs : TStringList;
+  X : integer;
 begin
-  for ii := 0 to LScriptCount - 1 do
+  Databs := TStringList.Create;
+  //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman/scripts.xml');
+  //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/scriptman2/scripts.xml');
+  //Databs.Add('http://tootoot222.hopto.org:8080/~mcteo/secretrepo/scripts.cgi?user=user&pass=pass');
+  Databs.Add('http://old.villavu.com/sm');
+
+  //TODO: Load list of repositories
+
+//  ShowMessage(SettingsForm.Settings.GetKeyValueDefLoad('Settings/SourceEditor/DefScriptPath', ,SimbaSettingsFile));
+//  ShowMessage(LoadSettingDef('Settings/SourceEditor/DefScriptPath', ExpandFileName(MainDir+DS+'default.simba')));
+  FRScripts.Clear();
+  Form1.Label1.Caption := 'Updating from Repository';
+  for X := 0 to Databs.Count-1 do
   begin
-    Scrpt := TLSimbaScript(FLScripts[ii]);
-    if Scrpt.OnlineScript = nil then
-      for i := 0 to ScriptCount-1 do
-        if TSimbaScript(FScripts[i]).Name = Scrpt.Name then
-        begin
-          Scrpt.OnlineScript := TSimbaScript(FScripts[i]);
-          Break;
-        end;
-    Scrpt.OnlineScript.LocalScript := Scrpt;
+    Form1.Label1.Caption := 'Updating from Repository ' + inttostr(X+1) +
+                                    '/' + inttostr(Databs.Count);
+    AppendRemoteDB(Databs[X]);
   end;
+  Databs.Free;
+
+  Form1.Label1.Caption := 'Finished updating from Repository';
 end;
 
-procedure TScriptManager.Update;
+{ Downloads online scripts.xml and parses it, populating FRScripts }
+procedure TScriptManager.AppendRemoteDB(url: string);
 var
   XMLFile : string;
   Stream  : TStringStream;
@@ -363,12 +394,15 @@ var
   Subs : TStringList;
   Down : TDownloadThread;
   SScript : TSimbaScript;
+  LScr : TLSimbaScript;
   I : integer;
 begin
   if FUpdating then
     exit;
   FUpdating := True;
   Down := TDownloadThread.Create('http://old.villavu.com/sm',@XMLFile);
+//  Down := TDownloadThread.Create(url, @XMLFile);
+//  Down := TDownloadThread.Create('http://tootoot222.hopto.org:8080/~mcteo/scriptman/scripts.xml',@XMLFile);
   down.Execute;
   while down.Done = false do
   begin
@@ -380,36 +414,54 @@ begin
   Stream.Free;
   Node := XMLDoc.FirstChild.FindNode('Version');
   if node <> nil then
-    FVersion:= Node.TextContent;
+    FRVersion:= Node.TextContent;
   Node := XMLDoc.FirstChild.FindNode('ScriptList');
   if node <> nil then
   begin
     script := Node.FirstChild;
+    WriteLn('loading remote script from online db');
     while Script <> nil do
     begin
       SScript := TSimbaScript.Create;
       SScript.LoadFromNode(Script);
-      SScript.Dbg;
-      i := FindScriptByName(SScript.Name);
-      if (i = -1) then
-        FScripts.Add(SScript)
-      else
+      i := FindRScriptByName(SScript.Name);
+      if (i = -1) then  // if no remote scripts with same name
+      begin
+        i := FindLScriptByName(SScript.Name);
+        if (i = -1) then  // if no local scripts with same name
+        begin
+          FRScripts.Add(SScript);
+        end else  // there is a local script with same name
+        begin
+          LScr := GetLScriptByName(SScript.Name);
+          if (LScr <> nil) then
+          begin
+            if isNewerVersion(SScript.Version, LScr.Version) then // if local script is older
+            begin
+              SScript.Installed := True;
+              FRScripts.Add(SScript); // add newer version of script
+            end;
+          end;
+        end;
+      end else
       begin
         SScript.free;
-        TSimbaScript(FScripts[i]).LoadFromNode(Script);
+//        TSimbaScript(FScripts[i]).LoadFromNode(Script);
       end;
       Script := Script.NextSibling;
     end;
+    WriteLn('finished loading remote script from online db');
   end;
   XMLDoc.Free;
   FUpdating := false;
-  MatchLocalOnline;
+//  MatchLocalOnline;
 end;
 
+{ Opens local scripts.xml and parses it, populating FLScripts }
 procedure TScriptManager.LUpdate;
 var
   XMLDoc  : TXMLDocument;
-  Node,Script : TDOMNode;
+  Node,Script,tmpNode : TDOMNode;
   Subs : TStringList;
   Down : TDownloadThread;
   SScript : TLSimbaScript;
@@ -417,42 +469,62 @@ var
 begin
   if DirectoryExists(MainDir) = false then
     exit;
+  WriteLn('Reading XML Config file from "' + maindir + 'General' + DirectorySeparator+ 'scripts.xml"');
   if FileExists(maindir + 'General' + DirectorySeparator+  'scripts.xml') then
   begin
     ReadXMLFile(XMLDoc,maindir + 'General' + DirectorySeparator+ 'scripts.xml');
-    Node := XMLDoc.FirstChild.FindNode('Scripts');
+//    Node := XMLDoc.FirstChild.FindNode('ScriptList');
+    Node := XMLDoc.FindNode('ScriptList');
     if node <> nil then
     begin
+      FLScripts.Clear();
       script := Node.FirstChild;
-      while Script <> nil do
+      WriteLn('loading local script from local db');
+      while script <> nil do
       begin
         SScript := TLSimbaScript.Create;
-        SScript.LoadFromName(Node.TextContent,maindir);
-        i := FindLScriptByName(SScript.Name);
-        SScript.Dbg;
-        if (i = -1) then
-          FLScripts.Add(SScript)
-        else
+        tmpNode := script.FindNode('Name');
+        if tmpNode <> nil then
         begin
-          SScript.free;
-          TLSimbaScript(FLScripts[i]).LoadFromName(Node.TextContent,maindir);
+          SScript.LoadFromName(Trim(tmpNode.TextContent), maindir);
+          i := FindLScriptByName(SScript.Name);
+          if (i = -1) then
+          begin
+            FLScripts.Add(SScript);
+          end
+          else
+          begin
+            SScript.free;
+            TLSimbaScript(FLScripts[i]).LoadFromName(Node.TextContent,maindir);
+          end;
         end;
-        Script := Script.NextSibling;
+        script := script.NextSibling;
       end;
+      WriteLn('finished loading local scripts from local db');
     end;
     XMLDoc.Free;
   end;
-  MatchLocalOnline;
+end;
+
+{ Compares versions and returns true if ver1 > ver2 }
+function TScriptManager.isNewerVersion(ver1, ver2: string): boolean;
+var
+  v1, v2: Extended;
+begin
+  v1 := StrToFloat(ver1);
+  v2 := StrToFloat(ver2);
+  result := (v1 > v2);
 end;
 
 function TScriptManager.NewVersion(Script: integer): boolean;
 begin
-  MatchLocalOnline;
+//  MatchLocalOnline;
   with TLSimbaScript(FLScripts[Script]) do
     result := OnlineScript.Version <> Version;
 end;
 
-procedure TScriptManager.InstallNewScript(Script: integer);
+{ Sets up some vars/dirs and hands installation to update script func }
+procedure TScriptManager.InstallNewRScript(Script: integer);
 var
   Scrpt : TSimbaScript;
   LScrpt: TLSimbaScript;
@@ -461,9 +533,8 @@ begin
   if FUpdating then
     exit;
   FUpdating := true;
-  Scrpt := TSimbaScript(FScripts[Script]);
+  Scrpt := TSimbaScript(FRScripts[Script]);
   LScrpt := TLSimbaScript.create;
-  FLScripts.Add(LScrpt);
   LScrpt.Name:= Scrpt.Name;
   LScrpt.OnlineScript := Scrpt;
   Dir := MainDir + LScrpt.Name + DirectorySeparator;
@@ -471,10 +542,13 @@ begin
     Writeln('Directory already exists, yet continue?');
   if not CreateDir(Dir) then
     Writeln('Failed to create dir..');
-  UpdateScript(FLScripts.Count - 1,true);
+  FLScripts.Add(LScrpt);
+  UpdateLScript(FLScripts.Count - 1, true);
 end;
 
-function TScriptManager.UpdateScript(Script: integer; ignoreupdating : boolean = false) : boolean;
+{ Downloads script files and puts them in their own directory,
+ then triggers updating of local scripts.xml to match FLScripts }
+function TScriptManager.UpdateLScript(Script: integer; ignoreupdating : boolean = false) : boolean;
 var
   LScrpt : TLSimbaScript;
   Scrpt : TSimbaScript;
@@ -493,10 +567,11 @@ begin
     Version:= Scrpt.Version;
     Name:= Scrpt.Name;
     Author := Scrpt.Author;
-    Description:= Scrpt.Version;
+    Description:= Scrpt.Description;
     Tags.Assign(Scrpt.Tags);
     Files.Assign(Scrpt.Files);
     URL := 'http://old.villavu.com/sm/scripts/'+name+ '.tar.bz2';
+ //   URL := 'http://tootoot222.hopto.org:8080/~mcteo/scriptman/'+name+'.tar.bz2';
   end;
   LScrpt.Save(MainDir);      //Saves the setting file, now we only need to update the files
   DownloadThread := TDownloadDecompressThread.Create(LScrpt.URL,MainDir + LScrpt.Name + DS,true);
@@ -512,6 +587,7 @@ begin
   FUPdating := false;
 end;
 
+{ Updates local scripts.xml to match FLScripts }
 procedure TScriptManager.LSave;
 var
   XMLDoc : TXMLDocument;
@@ -524,16 +600,21 @@ begin
   node.TextContent:= Text;
 end;
 var
-  Node : TDOMNode;
+  Node, ChildNode : TDOMNode;
   i : integer;
 begin
   if DirectoryExists(MainDir) = false then
     exit;
   XMLDoc := TXMLDocument.Create;
-  Node := XMLDoc.CreateElement('Scripts');
+  Node := XMLDoc.CreateElement('ScriptList');
   XMLDoc.AppendChild(node);
   for i := 0 to FLScripts.Count - 1 do
-    AddTextElement(node,'Script', TLSimbaScript(FLScripts[i]).Name);
+  begin
+    TLSimbaScript(FLScripts[i]).Dbg;
+    ChildNode := XMLDoc.CreateElement('Script');
+    AddTextElement(childnode,'Name', TLSimbaScript(FLScripts[i]).Name);
+    Node.AppendChild(ChildNode);
+  end;
   WriteXMLFile(XMLDoc,maindir + 'General' + DirectorySeparator+  'scripts.xml');
   XMLDoc.Free;
 end;
@@ -542,8 +623,8 @@ constructor TScriptManager.Create;
 begin
   inherited;
   FLScripts := TList.Create;
-  FScripts := TList.Create;
-  FVersion := '';
+  FRScripts := TList.Create;
+  FRVersion := '';
   FUpdating:= False;
   FMainDir:= ExtractFileDir(Application.ExeName);
   CreateDir(MainDir + 'General');
@@ -551,10 +632,10 @@ end;
 
 destructor TScriptManager.Destroy;
 begin
-  while FScripts.Count > 0 do
+  while FRScripts.Count > 0 do
   begin
-    TSimbaScript(FScripts[0]).Free;
-    FScripts.Delete(0);
+    TSimbaScript(FRScripts[0]).Free;
+    FRScripts.Delete(0);
   end;
   while FLScripts.Count > 0 do
   begin
@@ -574,15 +655,15 @@ begin
   XMLDoc.Free;
 end;
 
-function TLSimbaScript.LoadFromName(const ScriptName,MainDir : string) : boolean;
+function TLSimbaScript.LoadFromName(const ScriptName, MainDir : string) : boolean;
 begin
   Result := false;
   if FileExists(MainDir + 'General' + DirectorySeparator + ScriptName +
-                'info.xml') then
+                        DirectorySeparator + 'info.xml') then
   begin
     Result := true;
     LoadFromFile(MainDir + 'General' + DirectorySeparator + ScriptName +
-                'info.xml');
+                         DirectorySeparator + 'info.xml');
 
   end;
 end;
@@ -609,7 +690,7 @@ begin
   AddTextElement(node,'Name',Name);
   AddTextElement(node,'Author',Author);
   AddTextElement(node,'Version',Version);
-  AddTextElement(node,'Description',description);
+  AddTextElement(node,'Description',Description);
   AddTextElement(node,'AutoCheckUpdates', BoolToStr(AutoCheckUpdates,true));
   SubNode := XMLDoc.CreateElement('Tags');
   Node.AppendChild(SubNode);

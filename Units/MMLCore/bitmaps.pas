@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2011 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,16 +39,25 @@ type
     FTransparentSet : boolean;
     FIndex : integer;
     FName : string;
+
+    { True if we do not own FData }
+    FExternData: boolean;
   public
     OnDestroy : procedure(Bitmap : TMufasaBitmap) of object;
     //FakeData : array of TRGB32;
     FData : PRGB32;
     property Name : string read FName write FName;
     property Index : integer read FIndex write FIndex;
+
     procedure SetSize(AWidth,AHeight : integer);
     procedure StretchResize(AWidth,AHeight : integer);
+
     property Width : Integer read w;
     property Height : Integer read h;
+
+    procedure SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);
+    procedure ResetPersistentMemory;
+
     function PointInBitmap(x,y : integer) : boolean;
     procedure ValidatePoint(x,y : integer);
     function SaveToFile(const FileName : string) :boolean;
@@ -114,6 +123,7 @@ type
     function GetBMP(Index : integer) : TMufasaBitmap;
     property Bmp[Index : integer]: TMufasaBitmap read GetBMP; default;
     function CreateBMP(w, h: integer): Integer;
+    function ExistsBMP(Index : integer) : boolean;
     function AddBMP(_bmp: TMufasaBitmap): Integer;
     function CopyBMP( Bitmap : integer) : Integer;
     function CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer;
@@ -409,6 +419,13 @@ begin
    Result:=StrToInt('$' + HexNum);
 end;
 
+function TMBitmaps.ExistsBMP(Index : integer) : boolean;
+begin
+  result := false;
+  if (Index >= 0) and (Index <= BmpsCurr) then
+      result := Assigned(BmpArray[Index]);
+end;
+
 function TMBitmaps.CreateBMPFromString(width, height: integer; Data: string): integer;
 var
   I,II: LongWord;
@@ -550,23 +567,40 @@ begin
 end;
 
 {
-
- Implementation TMufasaBitmap
-
+  Saves a bitmap to a file.
+  If Filename ends with 'png' it will save as a PNG file,
+  if Filename ends with 'jpg' or 'jpeg' it will save as JPG,
+  otherwise BMP is assumed.
 }
 
 function TMufasaBitmap.SaveToFile(const FileName: string): boolean;
 var
   rawImage : TRawImage;
   Bmp : TLazIntfImage;
+  png: TPortableNetworkGraphic;
+  jpg: TJPEGImage;
 begin
   ArrDataToRawImage(FData,Point(w,h),RawImage);
   result := true;
-//  Bmp := Graphics.TBitmap.Create;
   try
-    Bmp := TLazIntfImage.Create(RawImage,false);
-    Bmp.SaveToFile(UTF8ToSys(FileName));
-    Bmp.Free;
+    if RightStr(Filename, 3) = 'png' then
+    begin
+      png := TPortableNetworkGraphic.Create;
+      png.LoadFromRawImage(RawImage, False);
+      png.SaveToFile(UTF8ToSys(Filename));
+      png.Free;
+    end else if (RightStr(Filename, 3) = 'jpg') or (RightStr(Filename, 4) = 'jpeg') then
+    begin
+      jpg := TJPEGImage.Create;
+      jpg.LoadFromRawImage(RawImage, False);
+      jpg.SaveToFile(UTF8ToSys(Filename));
+      jpg.Free;
+    end else // Assume .bmp
+    begin
+      Bmp := TLazIntfImage.Create(RawImage,false);
+      Bmp.SaveToFile(UTF8ToSys(FileName));
+      Bmp.Free;
+    end;
   except
     result := false;
   end;
@@ -1497,6 +1531,9 @@ var
   NewData : PRGB32;
   i,minw,minh : integer;
 begin
+  if FExternData then
+    raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
+
   if (AWidth <> w) or (AHeight <> h) then
   begin
     if AWidth*AHeight <> 0 then
@@ -1526,6 +1563,9 @@ var
   NewData : PRGB32;
   x,y : integer;
 begin
+  if FExternData then
+    raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
+
   if (AWidth <> w) or (AHeight <> h) then
   begin;
     if AWidth*AHeight <> 0 then
@@ -1549,6 +1589,27 @@ begin
   end;
 end;
 
+procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);
+begin
+  SetSize(0, 0);
+  FExternData := True;
+  w := awidth;
+  h := aheight;
+
+  FData := PRGB32(mem);
+end;
+
+procedure TMufasaBitmap.ResetPersistentMemory;
+begin
+  if not FExternData then
+    raise Exception.Create('ResetPersistentMemory: Bitmap is not persistent (FExternData = False)');
+
+  FExternData := False;
+  FData := nil;
+
+  SetSize(0, 0);
+end;
+
 function TMufasaBitmap.PointInBitmap(x, y: integer): boolean;
 begin
   result := ((x >= 0) and (x < w) and (y >= 0) and (y < h));
@@ -1565,7 +1626,10 @@ begin
   inherited Create;
   Name:= '';
   FTransparentSet:= False;
-  setSize(0,0);
+  SetSize(0,0);
+
+  FExternData := False;
+
   {FData:= nil;
   w := 0;
   h := 0; }
@@ -1575,8 +1639,10 @@ destructor TMufasaBitmap.Destroy;
 begin
   if Assigned(OnDestroy) then
     OnDestroy(Self);
-  if Assigned(FData) then
+
+  if Assigned(FData) and not FExternData then
     Freemem(FData);
+
   inherited Destroy;
 end;
 

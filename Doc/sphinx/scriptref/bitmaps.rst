@@ -96,7 +96,7 @@ CreateBitmapString
     function CreateBitmapString(bmp : integer) : string;
 
 Creates a string for the given bitmap, you can use this to save a bitmap for
-later us, for example loading it again using :ref:`scriptref-bitmapfromstring`.
+later use, for example loading it again using :ref:`scriptref-bitmapfromstring`.
 
 
 .. _scriptref-createbitmap:
@@ -184,6 +184,34 @@ GetBitmapSize
     procedure GetBitmapSize(Bmp : integer; var BmpW,BmpH : integer);
 
 Returns the size of the bitmap in *BmpW*, *BmpH*.
+
+.. _scriptref-setpersistentmemorybitmap:
+
+SetPersistentMemoryBitmap
+-------------------------
+
+.. code-block:: pascal
+
+    procedure SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);
+
+Set the internal bitmap *bmp* data pointer to *mem*. Size is described by
+*awidth* and *aheight*. *mem* should be a pointer of four bytes.
+
+Byte order: BGRA (Blue, Green, Red, Alpha).
+
+Previous data in the bitmap will be lost.
+
+.. _scriptref-resetpersistentmemorybitmap:
+
+ResetPersistentMemoryBitmap
+---------------------------
+
+.. code-block:: pascal
+
+    procedure ResetPersistentMemoryBitmap(bmp: Integer);
+
+Undo the effect of `SetPersistentMemoryBitmap`_.
+Data in the bitmap before the SetPersistentMemoryBitmap will not be restored.
 
 .. _scriptref-stretchbitmapresize:
 

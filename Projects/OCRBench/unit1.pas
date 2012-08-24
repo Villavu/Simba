@@ -54,7 +54,7 @@ procedure TForm1.OCRButtonClick(Sender: TObject);
 Var
    C: TClient;
    bmp: TMufasaBitmap;
-   x,y: integer;
+   x,y, ii: integer;
    s: string;
    Shadow: boolean;
    t: dword;
@@ -101,9 +101,12 @@ begin
 
   t:=gettickcount;
 
-  s := C.MOCR.GetUpTextAtEx(7, 7, Shadow);
+  s := C.MOCR.GetUpTextAtEx(10, 30, Shadow);
 
   writeln(inttostr(gettickcount-t));
+
+  for  ii := 1 to length(s) do
+    writeln('Text found: ' + s[ii]);
 
 
   // write to debugbmp
@@ -143,8 +146,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   UseClient := False;
-  {BitmapPath := '/home/merlijn/Programs/mufasa/pics/uptext4.bmp'; }
-  FontPath := '/home/merlijn/Programs/mufasa/Fonts/';
+  BitmapPath := '/home/merlijn/Programs/simba/uptext9.png';
+  FontPath := '/home/merlijn/Programs/simba/Fonts/';
 end;
 
 procedure TForm1.PathButtonClick(Sender: TObject);
@@ -167,7 +170,8 @@ begin
 end;
 
 initialization
-  {$I unit1.lrs}
+
+{$I unit1.lrs}
 
 end.
 

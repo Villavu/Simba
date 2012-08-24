@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{524C9B9A-B57F-4FEC-89BE-292202EBA44D}
 AppName=Simba
-AppVerName=Simba 0.98
+AppVerName=Simba 1.00
 AppPublisherURL=http://wizzup.org/simba
 AppSupportURL=http://wizzup.org/simba
 AppUpdatesURL=http://wizzup.org/simba
@@ -30,22 +30,28 @@ Name: "{app}\Extensions"
 Name: "{app}\Includes"
 Name: "{app}\Plugins"
 Name: "{app}\Scripts"
+Name: "{app}\Documentation"
+Name: "{app}\Documentation\_static"
+Name: "{app}\Documentation\html"
 ; Name: "{app}\Scripts\Tests"
 
 [Files]
 Source: "C:\Simba\Simba.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\srl.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\extension.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
-Source: "C:\Simba\Extensions\msi.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\associate.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\formatter.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\dtm_editor.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\security.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\paster.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\CRov.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\Updater.sei"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
-; Source: "C:\Simba\settings.xml"; DestDir: "{app}\"; Flags: ignoreversion
-; XXX Make sure to use a MINIMAL settings.xml XXX
+
+; Source: "C:\Simba\Doc\sphinx/_build/latex/Simba.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion
+Source: "C:\Simba\Documentation\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion
+Source: "C:\Simba\Documentation\html\*"; DestDir: "{app}\Documentation\html"; Flags: ignoreversion
+Source: "C:\Simba\Documentation\html\_static\*"; DestDir: "{app}\Documentation\html\_static"; Flags: ignoreversion
 
 ; Source: "C:\Simba\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Source: "C:\Simba\Tests\PS\*"; DestDir:"{app}\Scripts\Tests"; Flags: ignoreversion

@@ -24,7 +24,6 @@ var
 
   sb: TScrollBox;
   img, imgZoom: TImage;
-  pnl: TPanel;
   rbMouseClick: array[0..2] of TRadioButton;
   lb: TListBox;
   btnAdd, btnDel, btnMark: TButton;
@@ -74,18 +73,29 @@ begin
   ClearDoubleTPA(Result);
 end;
 
-function InvertColor(Color: Integer): Integer;
+function InvertColour(Colour: Integer; ForeGround: Boolean): Integer;
 var
   h, s, l: Extended;
+  r, g, b: Integer;
 begin
-  ColorToHSL(Color, h, s, l);
+  ColorToHSL(Colour, h, s, l);
+  ColorToRGB(Colour, r, g, b);
+  {h := h + 50;
+  if (h > 100) then
+    h := h - 100;
+  l := l + (50 - l)/1.5;
+  Result := HSLToColor(h, 100, l);}
 
-  if (((h + s + l) < 120) and ((l < 75) or (h + s + l > 145))) or (l < 35) then
-    Result := (clWhite * 3 + HSLtoColor(100 - (h / 2.0), 100, 100 - l)) div 4
-  else if (h + s + l > 200) or (l > 75) then
-    Result := HSLtoColor(100 - (h / 2.0), 100, 100 - l) div 2
+  //http://www.nbdtech.com/Blog/archive/2008/04/27/Calculating-the-Perceived-Brightness-of-a-Color.aspx
+  b := Round(Sqrt(r*r*0.241 + g*g*0.691 + b*b*0.068));
+  s := Abs(l - 50);
+  if ((s <= 35) and (b >= 130)) or ((s > 35) and (l > 65))then
+    Result := clBlack
   else
-    Result := HSLtoColor(100 - (h / 2.0), 100, 100 - l) + clWhite div 3;
+    Result := clYellow;
+
+  if (not ForeGround) then
+    Result := clYellow - Result;
 end;
 
 function toSDTM: TSDTM;
@@ -106,13 +116,13 @@ begin
   end;
 end;
 
-function DTMPointDef(x, y, Area, Shape, Color, Tolerance: Integer): TSDTMPointDef;
+function DTMPointDef(x, y, Area, Shape, Colour, Tolerance: Integer): TSDTMPointDef;
 begin
   Result.x := x;
   Result.y := y;
   Result.AreaSize := Area;
   Result.AreaShape := Shape;
-  Result.Color := Color;
+  Result.Color := Colour;
   Result.Tolerance := Tolerance;
 end;
 
@@ -203,7 +213,7 @@ begin
   Result := getIntFromEdit(edTolerance);
 end;
 
-procedure DrawDot(p: TSDTMPointDef; Color: Integer; OnBuffer: Boolean);
+procedure DrawDot(p: TSDTMPointDef; Colour: Integer; OnBuffer: Boolean);
 var
   x, y, z, w, h: Integer;
 begin
@@ -231,9 +241,9 @@ begin
     for y := -z to z do
       if (p.x + x >= 0) and (p.x + x < w) and (p.y + y >= 0) and (p.y + y < h) then
         if OnBuffer then
-          bmpBuffer.FastSetPixel(p.x + x, p.y + y, Color)
+          bmpBuffer.FastSetPixel(p.x + x, p.y + y, Colour)
         else
-          img.Canvas.Pixels[p.x + x + sp.x, p.y + y + sp.y] := Color;
+          img.Canvas.Pixels[p.x + x + sp.x, p.y + y + sp.y] := Colour;
 end;
 
 procedure DrawDots(OnBuffer: Boolean);
@@ -285,11 +295,11 @@ begin
   DotTimer.Enabled := a;
 end;
 
-function AddPoint(x, y, Area, Shape, Color, Tolerance: Integer): Integer;
+function AddPoint(x, y, Area, Shape, Colour, Tolerance: Integer): Integer;
 begin
   Result := Length(p);
   SetLength(p, Result + 1);
-  p[Result] := DTMPointDef(x, y, Area, Shape, Color, Tolerance);
+  p[Result] := DTMPointDef(x, y, Area, Shape, Colour, Tolerance);
   lb.Items.Add(ToStr(p[Result]));
 end;
 
@@ -981,8 +991,13 @@ begin
 
       if (b > 0) then
         AvgColour := AvgColour div (b + 1);
+
       Font.Size := 8;
-      Font.Color := InvertColor(AvgColour);
+      Font.Color := InvertColour(AvgColour, False);
+      TextOut(3, 3, 'Colour: '+IntToStr(TheColour));
+
+      Font.Size := 8;
+      Font.Color := InvertColour(AvgColour, True);
       TextOut(2, 2, 'Colour: '+IntToStr(TheColour));
     end;
   end;
@@ -1052,6 +1067,7 @@ end;
 procedure CreateForm;
 var
   i: Integer;
+  pnl: TPanel;
 begin
   with frm do
   begin
