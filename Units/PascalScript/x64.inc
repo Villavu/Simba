@@ -125,7 +125,7 @@ asm
   mov rax, rdx
   jmp @compareitems
 @work:
-  push [rcx]
+  //push [rcx]
   dec r8
   sub rcx,8
 @compareitems:

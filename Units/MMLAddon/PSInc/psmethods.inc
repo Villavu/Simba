@@ -1,6 +1,6 @@
 
 
-function ps_Format(const fmt : string;const args : array of const) : string; extdecl;
+function ps_Format(const fmt : string; const args : array of const) : string;
 begin;
   Result := Format(fmt,Args);
 end;

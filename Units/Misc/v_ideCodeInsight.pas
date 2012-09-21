@@ -1022,7 +1022,7 @@ end;
 destructor TCodeInsight.Destroy;
 begin
   if fOwnStream then
-    FreeAndNil(fMemoryStream);
+    fMemoryStream:=nil;
 
   FreeAndNil(Proposal_InsertList);
   FreeAndNil(Proposal_ItemList);
