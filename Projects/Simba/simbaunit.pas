@@ -2843,8 +2843,6 @@ begin
 
   UpdateTitle;
 
-  {$IFDEF USE_RUTIS}ActionRUTIS.Visible := True;{$ENDIF}
-  {$IFDEF USE_CPASCAL}ActionCPascal.Visible := True;{$ENDIF}
   {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
 
   {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
