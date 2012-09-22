@@ -856,8 +856,6 @@ begin
 {$ELSE}
   MenuItemPascalScript.RadioItem := False;
   MenuItemLape.RadioItem := False;
-  MenuItemCPascal.RadioItem := False;
-  MenuItemRUTIS.RadioItem := False;
 
   case SimbaSettings.Interpreter._Type.Value of
     interp_PS: MenuItemPascalScript.RadioItem := True;
