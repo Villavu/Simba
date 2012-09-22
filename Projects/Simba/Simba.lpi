@@ -184,6 +184,7 @@
         <Filename Value="framefunctionlist.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FunctionListFrame"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <UnitName Value="framefunctionlist"/>
       </Unit25>
@@ -319,7 +320,8 @@
       <Unit50>
         <Filename Value="scriptmanager.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
+        <ComponentName Value="ScriptManagerForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ScriptManager"/>
       </Unit50>
@@ -338,13 +340,13 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
     <Target>
       <Filename Value="../../Simba"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;$(ProjPath)../../Units/RUTIS;../../Units/lape/extensions/ffi"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -359,7 +361,7 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <GenerateDebugInfo Value="True"/>
+        <DebugInfoType Value="dsStabs"/>
       </Debugging>
     </Linking>
     <Other>
