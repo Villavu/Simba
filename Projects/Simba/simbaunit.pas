@@ -282,7 +282,6 @@ type
     procedure ActionCompileScriptExecute(Sender: TObject);
     procedure ActionConsoleExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
-    procedure ActionCPascalExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
     procedure ActionDebuggerExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
@@ -303,7 +302,6 @@ type
     procedure ActionRedoExecute(Sender: TObject);
     procedure ActionReplaceExecute(Sender: TObject);
     procedure ActionRunExecute(Sender: TObject);
-    procedure ActionRUTISExecute(Sender: TObject);
     procedure ActionSaveAllExecute(Sender: TObject);
     procedure ActionSaveAsExecute(Sender: TObject);
     procedure ActionSaveDefExecute(Sender: TObject);
@@ -2662,7 +2660,7 @@ begin
 
   ValueDefs := TStringList.Create;
   try
-    InitializeTMThread(Thread);
+    InitializeTMThread(TMThread(Thread));
 
     if (not ((Assigned(Thread)) and (Thread is TPSThread))) then
       Exit;
