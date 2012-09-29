@@ -1,6 +1,5 @@
 
-
-function ps_Format(const fmt : string;const args : array of const) : string; extdecl;
+function ps_Format(const fmt: string; const args: array of const): string; {$IFNDEF CPUX86_64} extdecl; {$ENDIF}
 begin;
   Result := Format(fmt,Args);
 end;

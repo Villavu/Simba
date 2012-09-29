@@ -254,7 +254,7 @@ uses
   {$IFDEF USE_DEBUGGER}debugger,{$ENDIF}
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
-  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
+  uPSR_menus, uPSR_dll,
   files,
   dtm, //Dtms!
   uPSR_extctrls, //Runtime-libs
@@ -849,8 +849,8 @@ begin
   SIRegister_stdctrls(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
-  SIRegister_ComCtrls(x);
-  SIRegister_Dialogs(x);
+  //SIRegister_ComCtrls(x);
+  //SIRegister_Dialogs(x);
   
   if self.settings <> nil then
   begin
@@ -951,8 +951,8 @@ begin
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
   RIRegister_Mufasa(x);
-  RIRegister_ComCtrls(x);
-  RIRegister_Dialogs(x);
+  //RIRegister_ComCtrls(x);
+  //RIRegister_Dialogs(x);
   RegisterDLLRuntime(se);
   se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
   se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);

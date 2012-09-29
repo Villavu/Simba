@@ -223,7 +223,7 @@ AddFunction(@ps_CompressString,'function CompressString(const Str : string) : st
 AddFunction(@ps_DecompressString,'function DecompressString(const Compressed : string) : string;');
 AddFunction(@ps_Base64Encode,'function Base64Encode(const str : string) : string;');
 AddFunction(@ps_Base64Decode,'function Base64Decode(const str : string) : string;');
-AddFunction(@ps_Format,'function Format(const fmt : string;const args : array of const) : string;');
+AddFunction(@ps_Format, 'function Format(const fmt: string; const args: array of const): string;');
 AddFunction(@ps_LevDist, 'function LevDistance(src, target: string): Integer;');
 AddFunction(@ps_NormLevDist, 'function NormLevDistance(src, target: string): Extended;');
 {$IFNDEF MML_EXPORT_THREADSAFE}
