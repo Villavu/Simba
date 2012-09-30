@@ -2693,7 +2693,7 @@ begin
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
 
-    Stream.Free;
+    //Stream.Free; // TCodeInsight free's the stream!
   end;
 end;
 
