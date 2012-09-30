@@ -80,12 +80,10 @@ begin;
 end;
 
 function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
-
-Var
+var
    Temp: TSDTMPointDef;
    I, H: Integer;
-
-Begin
+begin
   with Result.MainPoint do
   begin
     X := DTM.Points[0].x;
@@ -111,7 +109,6 @@ Begin
       Color := DTM.Points[i].c;
       Tolerance := DTM.Points[i].t;
     end;
-  end;
   end;
 end;
 
