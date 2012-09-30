@@ -81,7 +81,6 @@ end;
 
 function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
 var
-   Temp: TSDTMPointDef;
    I, H: Integer;
 begin
   with Result.MainPoint do
