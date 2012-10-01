@@ -92,7 +92,7 @@ uses
   SynRegExpr,
   lclintf,
   httpsend,
-  superobject,
+  fpjson, jsonparser,
   Clipbrd,
 
   DCPcrypt2,
