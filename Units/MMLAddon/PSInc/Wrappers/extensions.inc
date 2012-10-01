@@ -201,9 +201,35 @@ begin
 end;
 
 function ext_GetJSONValue(const Data, Value: string): string;
+  function getChild(Parent: TJSONData; Name: string): TJSONData;
+  begin
+    Result := nil;
+    case Parent.JSONType of
+      jtArray: Result := TJSONArray(Parent).Items[StrToIntDef(Name, -1)];
+      jtObject: Result := TJSONObject(Parent).Elements[Name];
+    end;
+  end;
 var
-  SuperObject: ISuperObject;
+  Parser: TJSONParser;
+  Parent, Child: TJSONData;
+  Arr: TStringArray;
+  I, H: LongInt;
 begin
-  SuperObject := SO(Data);
-  Result := SuperObject.AsObject.S[Value];
+  WriteLn(Data);
+  Parser := TJSONParser.Create(Data);
+  try
+    Parent := Parser.Parse;
+    try
+      Arr := Explode('/', Value);
+      H := High(Arr);
+      Child := Parent;
+      for I := 0 to H do
+       Child := getChild(Child, Arr[I]);
+      Result := Child.AsString;
+    finally
+      FreeAndNil(Parent);
+    end;
+  finally
+    FreeAndNil(Parser);
+  end;
 end;
