@@ -78,7 +78,8 @@ uses
   newsimbasettings, // SimbaSettings
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
-  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
+  uPSR_menus, uPSR_dll,
+  // uPSI_ComCtrls, uPSI_Dialogs,  //Removed in Laz PascalScript
   files,
   dialogs,
   dtm, //Dtms!
@@ -287,8 +288,8 @@ begin
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
-  SIRegister_ComCtrls(x);
-  SIRegister_Dialogs(x);
+  //SIRegister_ComCtrls(x);
+  //SIRegister_Dialogs(x);
 
   ScriptPath := IncludeTrailingPathDelimiter(ExpandFileName(ExtractFileDir(Filename)));
   ScriptFile := ExtractFileName(Filename);
@@ -340,8 +341,8 @@ begin
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
-  RIRegister_ComCtrls(x);
-  RIRegister_Dialogs(x);
+  //RIRegister_ComCtrls(x);
+  //RIRegister_Dialogs(x);
   RegisterDLLRuntime(se);
   RIRegister_MML(x);
 {  with x.FindClass('TMufasaBitmap') do
