@@ -1156,17 +1156,24 @@ end;
 /\}
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 const
-  i180Pi = 57.29577951;
+  i180Pi = 57.29577951;  //angle * Pi / 180 == angle * i180Pi
 var
    G: TPointArray;
-   I, L, T: Integer;
-   D, StartD, EndD: Extended;
-   cWise: Boolean;
+   I, L, T, xc, yc: Integer;
+   D, StartD, EndD, MinRS, MaxRS: Extended;
+   TanStart, TanEnd, TanPoint: Extended;
+   TSTopHalf, TETopHalf, TopHalfAB: Boolean;
+   TSBotHalf, TEBotHalf, BotHalfAB: Boolean;
+   StartSmallest: Boolean;
 begin
   T := High(Points);
-  if (T < 0) then Exit;
-  SetLength(G, T + 1);
+  if (T < 0) then
+    Exit;        //Someone forgot to give me some points, how can I filter nothing..
+
+  SetLength(G, T + 1);  //Set length of the array of points we will return
   L := 0;
+
+  //making angle between the 0 - 360 degrees
   StartD := SD;
   EndD := ED;
   while StartD > 360.0 do
@@ -1177,25 +1184,102 @@ begin
     StartD := StartD + 360.0;
   while EndD < 0.0 do
     EndD := EndD + 360.0;
-  cWise := StartD > EndD;
-  if cWise then
-    SwapE(StartD, EndD);
+
+  TanStart := tan(StartD * i180Pi);
+  TanEnd := tan(EndD * i180Pi);
+
+  TSBotHalf := ((StartD > 90) and (StartD < 270));
+  TEBotHalf := ((EndD > 90) and (EndD < 270));
+
+  TSTopHalf := ((StartD > 270) or (StartD < 90));
+  TETopHalf := ((EndD > 270) or (EndD < 90));
+
+  StartSmallest := TanStart < TanEnd;
+
+  if not(TSBotHalf or TEBotHalf) then //both are angles are in the bot half
+    if StartSmallest then //the start angle is first
+      BotHalfAB := true; //all the points in the bot half don't matter
+
+  if not(TSTopHalf or TETopHalf) then //both are angles are in the top half
+    if StartSmallest then //the start angle is first
+      TopHalfAB := true; //all the points in the top half don't matter
+
+  if(((EndD = 90) and TSTopHalf) or ((StartD = 270) and TETopHalf)) then
+    BotHalfAB := true;
+
+  if(((StartD = 90) and TEBotHalf) or ((EndD = 270) and TSBotHalf)) then
+    TopHalfAB := true;
+
+  if ((StartD = 90) and (EndD = 270)) then
+    BotHalfAB := false;
+
+  if ((StartD = 270) and (EndD = 90)) then
+    TopHalfAB := false;
+
+  MinRS := MinR * MinR; //Minimal radius squared
+  MaxRS := MaxR * MaxR; //Maximal radius squared
+
   for I := 0 to T do
   begin
-    D := sqrt(Sqr(Points[I].X - Mx) + Sqr(Points[I].Y - My));
-    if( D <= MinR) or (D >= MaxR) then
+    xc := (Points[I].X - Mx);
+    yc := (Points[I].Y - My);
+
+    D := Sqr(xc) + Sqr(yc);
+    if( D <= MinRS) or (D >= MaxRS) then
       Continue;
-    D := (ArcTan2(Points[I].Y - My, Points[I].X - Mx) * i180Pi) + 90;
-    if D < 0.0 then
-      D := D + 360.0;
-    if (not ((StartD <= D) and (EndD >= D))) xor CWise then
+
+    if yc = 0 then
+    begin
+     // writeln('I still have to solve this');
       Continue;
+    end;
+
+    if (yc < 0) then
+    begin
+      if TopHalfAB then
+        Continue;
+
+      TanPoint := xc / (-1 * yc);
+      if TSTopHalf and TETopHalf and not(StartSmallest) then
+      begin
+        if(TanPoint < TanStart) then
+          if(TanPoint > TanEnd) then
+            Continue;
+      end else
+      begin
+        if (TSTopHalf and (TanPoint < TanStart)) then
+          Continue;
+
+        if(TETopHalf and (TanPoint > TanEnd)) then
+          Continue;
+      end;
+    end else
+    begin
+      if BotHalfAB then
+        Continue;
+
+      TanPoint := xc / (-1 * yc);
+      if TSBotHalf and TEBotHalf and not(StartSmallest) then
+      begin
+        if(TanPoint < TanStart) then
+          if(TanPoint > TanEnd) then
+            Continue;
+      end else
+      begin
+        if (TSBotHalf and (TanPoint < TanStart)) then
+          Continue;
+
+        if(TEBotHalf and (TanPoint > TanEnd)) then
+          Continue;
+      end;
+    end;
+
     G[L] := Points[I];
     Inc(L);
   end;
   SetLength(G, L);
   Points := G;
-end;
+end;           
 
 {/\
   Removes the points that don't have a dist between mindist/maxdist with (mx,my)
