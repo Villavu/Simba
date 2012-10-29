@@ -1,7 +1,0 @@
-Program exception! 
-Stacktrace:
-
-Exception class: EAccessViolation
-Message: Access violation
-  $00000000
-Simba Version: 1000
