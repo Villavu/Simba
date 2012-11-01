@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="53">
+    <Units Count="61">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -318,35 +318,72 @@
         <UnitName Value="tpa"/>
       </Unit49>
       <Unit50>
-        <Filename Value="scriptmanager.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="ScriptManagerForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="ScriptManager"/>
-      </Unit50>
-      <Unit51>
         <Filename Value="newsimbasettings.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="newsimbasettings"/>
-      </Unit51>
-      <Unit52>
+      </Unit50>
+      <Unit51>
         <Filename Value="debugger.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DebuggerForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="debugger"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="../ScriptManager/sm_web.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_web"/>
       </Unit52>
+      <Unit53>
+        <Filename Value="../ScriptManager/sm_client_base.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_client_base"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="../ScriptManager/sm_control.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_control"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="../ScriptManager/sm_main.lfm"/>
+        <IsPartOfProject Value="True"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="../ScriptManager/sm_main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="SM_Main"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="../ScriptManager/sm_settings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_settings"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="../ScriptManager/sm_srv_base.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_srv_base"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="../ScriptManager/sm_types.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_types"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="../ScriptManager/sm_utils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_utils"/>
+      </Unit60>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="11"/>
+    <Version Value="9"/>
     <Target>
       <Filename Value="../../Simba"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;../ScriptManager"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -359,11 +396,6 @@
         <OptimizationLevel Value="2"/>
       </Optimizations>
     </CodeGeneration>
-    <Linking>
-      <Debugging>
-        <DebugInfoType Value="dsStabs"/>
-      </Debugging>
-    </Linking>
     <Other>
       <CompilerMessages>
         <UseMsgFile Value="True"/>
