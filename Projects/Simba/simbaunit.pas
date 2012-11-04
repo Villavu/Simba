@@ -60,7 +60,7 @@ uses
   PSDump,
 
   updater,
-  scriptmanager,
+  SM_Main,
   newsimbasettings
   {$IFDEF USE_DEBUGGER}, debugger{$ENDIF};
 
@@ -3561,7 +3561,8 @@ end;
 
 procedure TSimbaForm.TT_ScriptManagerClick(Sender: TObject);
 begin
-  ScriptManagerForm.ShowModal;
+  SManager.SetOptions(AppPath,SimbaSettings.ScriptManager.ServerURL.Value,SimbaSettings.ScriptManager.StoragePath.Value,SimbaSettings.ScriptManager.FileName.Value,SimbaSettings.ScriptManager.FirstRun.Value);
+  if not (SManager.Visible = false) then Smanager.ShowModal else SManager.Hide;
 end;
 
 procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
