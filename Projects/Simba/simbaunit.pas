@@ -103,6 +103,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    CallFormDesigner: TAction;
     ActionDebugger: TAction;
     ActionLape: TAction;
     ActionGoto: TAction;
@@ -148,6 +149,7 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    MenuItemFormDesigner: TMenuItem;
     MenuItemSettingsSimpleButton: TMenuItem;
     MenuItemLape: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
@@ -176,6 +178,7 @@ type
     FunctionListTimer: TTimer;
     SCARHighlighter: TSynPasSyn;
     ToolButton5: TToolButton;
+    TB_FromDesigner: TToolButton;
     TT_ScriptManager: TToolButton;
     ToolButton6: TToolButton;
     TT_Console: TToolButton;
@@ -311,6 +314,7 @@ type
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
     procedure ActionUndoExecute(Sender: TObject);
+    procedure CallFormDesignerExecute(Sender: TObject);
     procedure ChangeMouseStatus(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure ClearSearchClick(Sender: TObject);
@@ -326,6 +330,7 @@ type
     procedure FunctionListExit(Sender: TObject);
     procedure FunctionListTimerTimer(Sender: TObject);
     procedure Memo1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure MenuItemFormDesignerClick(Sender: TObject);
     procedure MenuItemReadOnlyTabClick(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
@@ -390,6 +395,7 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
+    procedure TB_FromDesignerClick(Sender: TObject);
     procedure TB_ReloadPluginsClick(Sender: TObject);
     procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
       var Continue: boolean);
@@ -564,7 +570,8 @@ uses
    bitmaps,
    {$IFDEF USE_EXTENSIONS}extensionmanagergui,{$ENDIF}
    colourhistory,
-   math
+   math,
+   frmdesigner
 
    {$IFDEF LINUX_HOTKEYS}
    ,keybinder
@@ -1148,10 +1155,17 @@ begin
     NewSize := ScriptPanel.Width div 2;
 end;
 
+procedure TSimbaForm.TB_FromDesignerClick(Sender: TObject);
+begin
+  CallFormDesignerExecute(Sender);
+end;
+
 procedure TSimbaForm.TB_ReloadPluginsClick(Sender: TObject);
 begin
 //  PluginsGlob.FreePlugins;
 end;
+
+
 
 procedure TSimbaForm.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
 begin
@@ -2332,6 +2346,11 @@ begin
     Memo1.Undo;
 end;
 
+procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
+begin
+  if not Compform.visible then compform.show else compform.hide;
+end;
+
 procedure TSimbaForm.ChangeMouseStatus(Sender: TObject);
 var
   x: integer = -1;
@@ -2543,6 +2562,11 @@ begin
     if (Key = VK_A) then Memo1.SelectAll;
   end;
   //Are there any more?
+end;
+
+procedure TSimbaForm.MenuItemFormDesignerClick(Sender: TObject);
+begin
+  CallFormDesignerExecute(Sender);
 end;
 
 procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
@@ -3562,7 +3586,7 @@ end;
 procedure TSimbaForm.TT_ScriptManagerClick(Sender: TObject);
 begin
   SManager.SetOptions(AppPath,SimbaSettings.ScriptManager.ServerURL.Value,SimbaSettings.ScriptManager.StoragePath.Value,SimbaSettings.ScriptManager.FileName.Value,SimbaSettings.ScriptManager.FirstRun.Value);
-  if not (SManager.Visible = false) then Smanager.ShowModal else SManager.Hide;
+  if not (SManager.Visible = false) then Smanager.Show else SManager.Hide;
 end;
 
 procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
