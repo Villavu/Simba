@@ -1,4 +1,4 @@
-unit SM_Main;
+unit sm_main;
 
 {$mode objfpc}{$H+}
 
