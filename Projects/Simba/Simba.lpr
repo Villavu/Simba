@@ -30,7 +30,8 @@ program Simba;
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}cthreads, cmem,{$ENDIF}{$ENDIF}
   Interfaces, Forms, SimbaUnit, colourhistory, About, debugimage, bitmapconv,
-  scriptmanager, debugger, dcpbase64;
+   debugger, selectonruntime, code, cselectonruntime, cstruct,
+  design_frm, frmdesigner, sclist, dcpbase64,sm_main;
 
 {$R Simba.res}
 
@@ -43,7 +44,8 @@ begin
   Application.CreateForm(TDebugImgForm, DebugImgForm);
 //  Application.CreateForm(TExtensionsForm, ExtensionsForm);
   Application.CreateForm(TBitmapConvForm, BitmapConvForm);
-  Application.CreateForm(TScriptManagerForm, ScriptManagerForm);
+  Application.CreateForm(TSmanager, SManager);
+  Application.CreateForm(TCompForm,CompForm);
 //  Application.CreateForm(TDebuggerForm, DebuggerForm);
 //  Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
 //  Application.CreateForm(TSettingsSimpleForm, SettingsSimpleForm); Done in FormCreate of MainForm

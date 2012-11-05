@@ -1,0 +1,56 @@
+object DsgnForm: TDsgnForm
+  Left = 313
+  Height = 240
+  Top = 315
+  Width = 320
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'DsgnForm'
+  ClientHeight = 240
+  ClientWidth = 320
+  KeyPreview = True
+  OnChangeBounds = FormChangeBounds
+  OnCreate = FormCreate
+  OnKeyUp = FormKeyUp
+  OnMouseDown = FormMouseDown
+  OnMouseUp = FormMouseUp
+  OnPaint = FormPaint
+  OnShow = FormShow
+  LCLVersion = '0.9.30.4'
+  object sor: TSelectOnRunTime
+    Active = True
+    MarkColor = clBlack
+    Markers3D = False
+    SelectTag = 9999
+    OnBeforeSelect = sorBeforeSelect
+    OnCanMove = sorCanMove
+    left = 181
+    top = 13
+  end
+  object PopupMenu1: TPopupMenu
+    left = 85
+    top = 70
+    object MenuItem1: TMenuItem
+      Caption = 'Font'
+      OnClick = MenuItem1Click
+    end
+    object MenuItem2: TMenuItem
+      Caption = 'Set Image'
+      Visible = False
+    end
+    object MenuItem3: TMenuItem
+      Caption = 'Edit list items'
+      Visible = False
+    end
+    object MenuItem4: TMenuItem
+      Caption = 'Edit list items'
+      Visible = False
+    end
+  end
+  object FontDialog1: TFontDialog
+    MinFontSize = 0
+    MaxFontSize = 0
+    left = 184
+    top = 89
+  end
+end
