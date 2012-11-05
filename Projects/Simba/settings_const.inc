@@ -78,3 +78,5 @@ ssRecentFileN = ssLastConfig + ssMainForm + 'RecentFiles/File';
 ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';
 ssSMFile = ssScriptManager + 'File';
+ssFRun = ssScriptManager + 'First run';
+
