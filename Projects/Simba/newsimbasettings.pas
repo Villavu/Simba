@@ -828,7 +828,7 @@ begin
   ScriptManager.FileName := ScriptManager.AddChild(TStringSetting.Create(ssSMFile)) as TStringSetting;
   ScriptManager.FileName.onDefault := @GetScriptManagerFile;
   ScriptManager.FirstRun := ScriptManager.AddChild(TBooleanSetting.Create(ssSMFile)) as TBooleanSetting;
-  ScriptManager.FileName.onDefault := @GetScriptManagerFirstRun;
+  ScriptManager.FirstRun.onDefault := @GetScriptManagerFirstRun;
 
   LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
   LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;
