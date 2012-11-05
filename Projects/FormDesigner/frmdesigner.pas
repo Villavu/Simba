@@ -121,7 +121,7 @@ var
 implementation
 
 {$R *.lfm}
-uses typinfo,rttiutils,commctrl;
+uses typinfo,rttiutils{$IFDEF WINDOWS}commctrl{$ENDIF};
 
 function TrimCharLeft(const S: string; C: Char): string;
 var
