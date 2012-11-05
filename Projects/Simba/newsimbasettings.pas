@@ -701,7 +701,7 @@ procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj
 procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetScriptManagerURL(obj: TObject); begin TStringSetting(obj).Value := 'http://127.0.0.1/'; end;
-procedure GetScriptManagerPath(obj: TObject); begin TPathSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'/ScriptStorage.xml'; end;
+procedure GetScriptManagerPath(obj: TObject); begin TPathSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
 procedure GetScriptManagerFile(obj: TObject); begin TStringSetting(obj).Value := 'ScriptManager.xml'; end;
 procedure GetScriptManagerFirstRun(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
@@ -827,8 +827,8 @@ begin
   ScriptManager.StoragePath.onDefault := @GetScriptManagerPath;
   ScriptManager.FileName := ScriptManager.AddChild(TStringSetting.Create(ssSMFile)) as TStringSetting;
   ScriptManager.FileName.onDefault := @GetScriptManagerFile;
-  ScriptManager.FirstRun := ScriptManager.AddChild(TBooleanSetting.Create(ssSMFile)) as TBooleanSetting;
-  ScriptManager.FileName.onDefault := @GetScriptManagerFirstRun;
+  ScriptManager.FirstRun := ScriptManager.AddChild(TBooleanSetting.Create(ssFRun)) as TBooleanSetting;
+  ScriptManager.FirstRun.onDefault := @GetScriptManagerFirstRun;
 
   LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
   LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;
