@@ -382,7 +382,7 @@ end;
 procedure TDsgnForm.CreateWnd;
 begin
   inherited CreateWnd;
-  SendMessage(Self.Handle, WM_SETICON, 1, 0);
+  {$IFDEF WINDOWS}SendMessage(Self.Handle, WM_SETICON, 1, 0);{$ENDIF}
 end;
 
 procedure TDsgnForm.DeleteComponent();
