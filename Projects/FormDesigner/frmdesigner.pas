@@ -203,9 +203,9 @@ begin
   Self.FControlsClassPStd[6] := TListBox;
   Self.FControlsClassPStd[7] := TComboBox;
   Self.FControlsClassPStd[8] := TRadioButton;
-  Self.FControlsClassPStd[9] := TShape;
-  f:=TDsgnForm.Create(self);
-  f.Parent:=CompForm.Panel1;
+  Self.FControlsClassPStd[9] := TShape;            //untested
+  {$IFDEF WINDOWS}f:=TDsgnForm.Create(self);{$ELSE}f:=TDsgnForm.Create(nil);{$ENDIF}
+ {$IFDEF WINDOWS} f.Parent:=CompForm.Panel1;{$ENDIF}
   f.Left:=0;
   f.Top:=0;
   f.Show;
@@ -379,8 +379,8 @@ begin
   if assigned(complist) then
    complist.Free;
   complist:=TSimbaComponentList.Create;
-  f:=TDsgnForm.Create(self);
-  f.Parent:=CompForm.Panel1;
+  {$IFDEF WINDOWS}f:=TDsgnForm.Create(self);{$ELSE}f:=TDsgnForm.Create(nil);{$ENDIF}
+ {$IFDEF WINDOWS} f.Parent:=CompForm.Panel1;{$ENDIF}
   f.Left:=0;
   f.Top:=0;
   f.Show;
