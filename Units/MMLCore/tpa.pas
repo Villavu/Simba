@@ -602,7 +602,7 @@ end;
 function FindTPARows(a: TPointArray): T2DPointArray;
 var
   bounds: TBox;
-  i, l, c, h, low: Integer;
+  l: Integer;
 begin
   l := High(a);
   if (l < 1) then
@@ -621,7 +621,7 @@ end;
 function FindTPAColumns(a: TPointArray): T2DPointArray;
 var
   bounds: TBox;
-  i, l, c, h, low: Integer;
+  l: Integer;
 begin
   l := High(a);
   if (l < 1) then
@@ -1155,19 +1155,19 @@ end;
   \\ MaxR (MaxRadius) from the origin (Mx, My).
 /\}
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
-const
-  i180Pi = 57.29577951;
 var
-   G: TPointArray;
-   I, L, T: Integer;
-   D, StartD, EndD: Extended;
-   cWise: Boolean;
+  BminusAx, BminusAy, CminusAx, CminusAy: Extended; //don't let the type deceive you. They are vectors!
+  G: TPointArray;
+  I, L, T: Integer;
+  StartD, EndD: Extended;
+  Over180: Boolean;
 begin
   T := High(Points);
   if (T < 0) then Exit;
   SetLength(G, T + 1);
   L := 0;
-  StartD := SD;
+
+  StartD := SD;    //I still think this can be done more efficient, a while loop... Come on
   EndD := ED;
   while StartD > 360.0 do
     StartD := StartD - 360.0;
@@ -1177,26 +1177,33 @@ begin
     StartD := StartD + 360.0;
   while EndD < 0.0 do
     EndD := EndD + 360.0;
-  cWise := StartD > EndD;
-  if cWise then
+
+  if StartD > EndD then          //Calculate if the difference is more then 180 degrees
+    Over180 := (EndD + 360 - StartD) > 180
+  else
+    Over180 := (EndD - StartD) > 180;
+
+  if Over180 then
     SwapE(StartD, EndD);
+
+  //a is the midPoint, B is the left limit line, C is the right Limit Line, X the point we are checking
+  BminusAx := cos(degtorad(StartD - 90));      //creating the two unit vectors
+  BminusAy := sin(degtorad(StartD - 90));      //I use -90 or else it will start at the right side instead of top
+
+  CminusAx := cos(degtorad(EndD - 90));
+  CminusAy := sin(degtorad(EndD - 90));
+
   for I := 0 to T do
-  begin
-    D := sqrt(Sqr(Points[I].X - Mx) + Sqr(Points[I].Y - My));
-    if( D <= MinR) or (D >= MaxR) then
-      Continue;
-    D := (ArcTan2(Points[I].Y - My, Points[I].X - Mx) * i180Pi) + 90;
-    if D < 0.0 then
-      D := D + 360.0;
-    if (not ((StartD <= D) and (EndD >= D))) xor CWise then
-      Continue;
+    if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MY)) > 0) and
+    ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MY)) < 0)) xor Over180) then
+      continue;
     G[L] := Points[I];
     Inc(L);
-  end;
-  SetLength(G, L);
-  Points := G;
-end;
 
+  SetLength(G, L);
+  FilterPointsDist(G, MinR, MaxR, Mx, My);   //TODO: move this to the MMLAddon section, this doesn't belong in FilterPointsPie
+  Points := G;
+end;   
 {/\
   Removes the points that don't have a dist between mindist/maxdist with (mx,my)
 /\}
