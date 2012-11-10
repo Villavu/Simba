@@ -1194,11 +1194,13 @@ begin
   CminusAy := sin(degtorad(EndD - 90));
 
   for I := 0 to T do
+  begin
     if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MY)) > 0) and
     ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MY)) < 0)) xor Over180) then
       continue;
     G[L] := Points[I];
     Inc(L);
+  end;
 
   SetLength(G, L);
   FilterPointsDist(G, MinR, MaxR, Mx, My);   //TODO: move this to the MMLAddon section, this doesn't belong in FilterPointsPie
