@@ -2348,7 +2348,8 @@ end;
 
 procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
 begin
-  if not Compform.visible then compform.show else compform.hide;
+ {$IFDEF WINDOWS}if not Compform.visible then compform.show else compform.hide;{$ELSE}
+  if not Compform.visible then compform.Visible:=true else compform.Visible:=false;{$ENDIF}
 end;
 
 procedure TSimbaForm.ChangeMouseStatus(Sender: TObject);
