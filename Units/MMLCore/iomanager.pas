@@ -372,7 +372,7 @@ interface
 
         function GetTargetIdx(target: TTarget): integer;
         function GetIdxTarget(idx: integer): TTarget;
-      property Stopping: Boolean Read FStopping write SetState;
+        property Stopping: Boolean Read FStopping write SetState;
     end;
 
     {These wrappers are for an exported TTarget_Exported. This is done so a plugin can acces the current target and use its methodes}
