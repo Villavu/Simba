@@ -1,6 +1,6 @@
 program SPSUpdater;
 
-{$INCLUDE ..\Extensions\Updater.sei}
+{$INCLUDE Updater.sei}
 
 function BeforeSPS(NotNeeded: string; I: integer): boolean;
 begin

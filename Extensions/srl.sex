@@ -1,6 +1,6 @@
 program SRLUpdater;
 
-{$I ./Updater.sei}
+{$I Updater.sei}
 
 function CheckSRL(Name: string; I: integer): boolean;
 var
@@ -75,7 +75,7 @@ end;
 
 procedure ClickMSI(Sender: TObject);
 begin
-  if (not (FileExists(IncludePath + 'msi\RunMe.simba'))) then
+  if (not (FileExists(IncludePath + 'msi/RunMe.simba'))) then
   begin
     WriteLn('MSI: Couldn''t find MSI!');
     Exit;
@@ -86,7 +86,7 @@ begin
   else
     WriteLn('Opening MSI...');
 
-  OpenScriptEx(IncludePath + 'msi\RunMe.simba', (TMenuItem(Sender).Caption = 'Run'));
+  OpenScriptEx(IncludePath + 'msi/RunMe.simba', (TMenuItem(Sender).Caption = 'Run'));
 end;
 
 procedure Init;
@@ -101,7 +101,7 @@ begin
     UpdaterArr[SRL].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
   end;
 
-  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', PluginPath + '.temp\', False, False, Plugins)) then
+  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', PluginPath + '.temp/', False, False, Plugins)) then
   begin
     UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforeUpdateEx;
     UpdaterArr[Plugins].Hooks[SUCCESS_UPDATE] := @SuccessPlugins;
