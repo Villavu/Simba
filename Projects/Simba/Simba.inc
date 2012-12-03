@@ -45,3 +45,7 @@
 
 {$MACRO ON}
 {$define lape_extdecl:=cdecl;}
+
+{$IFDEF UNIX}
+	{$UNDEF USE_EXTENSIONS}
+{$ENDIF}
