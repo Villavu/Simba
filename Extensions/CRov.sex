@@ -7,7 +7,7 @@ const
   SettingsMenuDef = 'False';          //True if you want to be able to set the saving interval through the menu (otherwise it's accessible through plugin settings)
   ForceSaveDef = 'True';              //Force user to save the script, instead of opening it
   SaveOnRunDef = 'True';              //Make backup when user compiles/runs the script
-  DirDef = 'CRov\';                   //Appended to AppPath
+  DirDef = 'CRov/';                   //Appended to AppPath
   ExtensionDef = 'crov';
   DefInterval = '300000';             //every 5 minutes
 
