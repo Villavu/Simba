@@ -73,27 +73,9 @@ begin
   end;
 end;
 
-procedure ClickMSI(Sender: TObject);
-begin
-  if (not (FileExists(IncludePath + 'msi\RunMe.simba'))) then
-  begin
-    WriteLn('MSI: Couldn''t find MSI!');
-    Exit;
-  end;
-
-  if (TMenuItem(Sender).Caption = 'Run') then
-    WriteLn('Running MSI...')
-  else
-    WriteLn('Opening MSI...');
-
-  OpenScriptEx(IncludePath + 'msi\RunMe.simba', (TMenuItem(Sender).Caption = 'Run'));
-end;
-
 procedure Init;
 var
-  SRL, SPS, MSI, Plugins, i: integer;
-  MenuItems: array[0..1] of TMenuItem;
-  Names: array of string;
+  SRL, SPS, Plugins: integer;
 begin
   if (AddUpdater('SRL', 'http://wizzup.org/static/srl/srl.tar.bz2', 'http://wizzup.org/static/srl/srl_version', IncludePath, True, True, SRL)) then
   begin
@@ -110,21 +92,6 @@ begin
   if (AddUpdater('SPS', 'http://wizzup.org/static/srl/sps.tar.bz2', 'http://wizzup.org/static/srl/sps_version', IncludePath, True, True, SPS)) then
   begin
     UpdaterArr[SPS].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
-  end;
-
-  if (AddUpdater('MSI', 'http://wizzup.org/static/srl/msi.tar.bz2', 'http://wizzup.org/static/srl/msi_version', IncludePath, True, True, MSI)) then
-  begin
-    Names := ['Run', 'Open'];
-
-    for I := 0 to 1 do
-    begin
-      MenuItems[I] := TMenuItem.Create(UpdaterArr[MSI].MainMenu);
-      MenuItems[I].OnClick := @ClickMSI;
-      MenuItems[I].Caption := Names[I];
-      UpdaterArr[MSI].MainMenu.Insert(I, MenuItems[I]);
-    end;
-
-    UpdaterArr[MSI].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
   end;
 end;
 
