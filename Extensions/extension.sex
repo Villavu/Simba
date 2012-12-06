@@ -1,5 +1,5 @@
 program ExtUpdater;
-{$I ..\Extensions\Updater.sei}
+{$I Updater.sei}
 
 procedure Init;
 var
