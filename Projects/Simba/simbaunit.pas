@@ -2686,6 +2686,7 @@ begin
   ValueDefs := TStringList.Create;
   try
     InitializeTMThread(TMThread(Thread));
+    Thread.FreeOnTerminate := False;
 
     if (not ((Assigned(Thread)) and (Thread is TPSThread))) then
       Exit;
