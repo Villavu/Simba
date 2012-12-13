@@ -226,8 +226,8 @@ initialization
   except
     on e: EInOutError do
     begin
-      WriteLn(e.Message);
-      WriteLn('You can find the library at "http://www.sqlite.org/".');
+      WriteLn('Simba couldn''t find the sqlite library, so sqlite functionality is missing.');
+      WriteLn('Don''t worry you can find the library at "http://www.sqlite.org/".');
     end;
   end;
 finalization
