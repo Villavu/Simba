@@ -403,8 +403,9 @@ procedure TSimbaPSExtension.StartExtension;
 begin
   if assigned(PSInstance) then
     exit;//Already started..
-  { Create script, and see if the extension is valid. (If it compiles) }
+
   PSInstance := TPSScript.Create(nil);
+  PSInstance.CompilerOptions := PSInstance.CompilerOptions + [icAllowNoBegin, icAllowNoEnd];
 
   with PSInstance do
   begin
@@ -426,20 +427,23 @@ begin
     FWorking := PSInstance.Compile;
   except
     on e : exception do
-      FormWritelnEx(format('Error in Simba extension (%s) : %s',[FileName,e.message]));
+      FormWritelnEx(format('Error in Simba extension compilation (%s) : %s',[FileName,e.message]));
   end;
+
   if FWorking then
-    formWritelnEx('Extension Enabled')
-  else
+  begin
+    formWritelnEx('Extension Enabled');
+
+    if InitScript then
+      mDebugLn('Init procedure successfully called')
+    else
+      mDebugLn('Init procedure didn''t execute right, or couldn''t be found');
+  end else
   begin
     formWritelnEx('Extension Disabled - Did not compile');
     OutputMessages;
   end;
 
-  if InitScript then
-    mDebugLn('Init procedure successfully called')
-  else
-    mDebugLn('Init procedure didn''t execute right, or couldn''t be found');
   Enabled:= FWorking;
 end;
 
