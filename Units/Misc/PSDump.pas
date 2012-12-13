@@ -145,8 +145,8 @@ procedure TPSScriptExtension.GetCodeProps;
     else
       ListFree := False;
 
-    if (not c.Property_Find('', Def)) then
-      Def := 0;
+    if (not c.Property_Find('', TPSDelphiClassItem(Def))) then //FIXME: Fix this....
+      Def := 0;                                                //Changed to get to compile...
 
     for i := 0 to c.Count - 1 do
     begin
