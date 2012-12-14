@@ -37,9 +37,6 @@ uses
   bitmaps, plugins, dynlibs, internets,scriptproperties,
   settings, settingssandbox, lcltype, dialogs
   {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
-  {$IFDEF USE_RUTIS}
-  , Rutis_Engine, Rutis_Defs
-  {$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
     lpeval, lpinterpreter, lputils
@@ -213,41 +210,6 @@ type
         procedure Terminate; override;
     end;
 
-    TPrecompiler_Callback = function(name, args: PChar): boolean; stdcall;
-    TErrorHandeler_Callback = procedure(line, pos: integer; err: PChar; runtime: boolean); stdcall;
-
-    {$IFDEF USE_CPASCAL}
-    TCPThread = class(TMThread)
-      protected
-        instance: pointer;
-        added_methods: array of TExpMethod;
-        procedure LoadPlugin(plugidx: integer); override;
-      public
-        constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
-        destructor Destroy; override;
-        procedure SetScript(script: string); override;
-        procedure Execute; override;
-        procedure Terminate; override;
-        procedure AddMethod(meth: TExpMethod); override;
-    end;
-    {$ENDIF}
-
-    { TRTThread }
-    {$IFDEF USE_RUTIS}
-    TRTThread = class(TMThread)
-    private
-      procedure RTOnWrite(s : String);
-      procedure RTOnError(s : String; ErrorType : TRutisErrorType);
-    public
-      RUTIS : TRutisEngine;
-      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
-      destructor Destroy; override;
-      procedure SetScript(script: string); override;
-      procedure Execute; override;
-      procedure Terminate; override;
-    end;
-   {$ENDIF}
-
    {$IFDEF USE_LAPE}
    { TLPThread }
    TLPThread = class(TMThread)
@@ -276,15 +238,6 @@ threadvar
 var
   PluginsGlob: TMPlugins;
 
-  libcpascal: integer;
-  interp_init: function(precomp: TPrecompiler_Callback; err: TErrorHandeler_Callback): Pointer; cdecl;
-  interp_meth: procedure(interp: Pointer; addr: Pointer; def: PChar); cdecl;
-  interp_type: procedure(interp: Pointer; def: PChar); cdecl;
-  interp_set: procedure(interp: Pointer; ppg: PChar); cdecl;
-  interp_comp: function(interp: Pointer): boolean; cdecl;
-  interp_run: function(interp: Pointer): boolean; cdecl;
-  interp_free: procedure(interp: Pointer); cdecl;
-
 implementation
 
 uses
@@ -301,7 +254,8 @@ uses
   {$IFDEF USE_DEBUGGER}debugger,{$ENDIF}
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
-  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
+  uPSR_menus, uPSR_dll,
+  // uPSI_ComCtrls, uPSI_Dialogs, // Removed in Laz PS
   files,
   dtm, //Dtms!
   uPSR_extctrls, //Runtime-libs
@@ -896,8 +850,8 @@ begin
   SIRegister_stdctrls(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
-  SIRegister_ComCtrls(x);
-  SIRegister_Dialogs(x);
+  //SIRegister_ComCtrls(x);
+  //SIRegister_Dialogs(x);
   
   if self.settings <> nil then
   begin
@@ -998,8 +952,8 @@ begin
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
   RIRegister_Mufasa(x);
-  RIRegister_ComCtrls(x);
-  RIRegister_Dialogs(x);
+  //RIRegister_ComCtrls(x);
+  //RIRegister_Dialogs(x);
   RegisterDLLRuntime(se);
   se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
   se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
@@ -1084,240 +1038,6 @@ procedure TPSThread.SetScript(script: string);
 begin
    PSScript.Script.Text := LineEnding + Script; //A LineEnding to conform with the info we add to includes
 end;
-
-{***implementation TCPThread***}
-{$IFDEF USE_CPASCAL}
-procedure LoadCPascal(plugin_dir: string);
-begin
-  libcpascal:= LoadLibrary(PChar(plugin_dir + 'libcpascal' + {$ifdef LINUX} '.so' {$else} '.dll' {$endif}));
-  if libcpascal = 0 then
-    raise Exception.Create('CPascal library not found');
-  Pointer(interp_init):= GetProcAddress(libcpascal, PChar('interp_init'));
-  Pointer(interp_meth):= GetProcAddress(libcpascal, PChar('interp_meth'));
-  Pointer(interp_type):= GetProcAddress(libcpascal, PChar('interp_type'));
-  Pointer(interp_set):= GetProcAddress(libcpascal, PChar('interp_set'));
-  Pointer(interp_comp):= GetProcAddress(libcpascal, PChar('interp_comp'));
-  Pointer(interp_run):= GetProcAddress(libcpascal, PChar('interp_run'));
-  Pointer(interp_free):= GetProcAddress(libcpascal, PChar('interp_free'));
-end;
-
-function Interpreter_Precompiler(name, args: PChar): boolean; stdcall;
-
-begin
-  { XXX: The 'True' below for Active is perhaps wrong }
-  result:= CurrThread.ProcessDirective(nil, nil, True, name, args, '');
-end;
-
-procedure Interpreter_ErrorHandler(line, pos: integer; err: PChar; runtime: boolean); stdcall;
-begin
-  if runtime then
-    CurrThread.HandleError(line,-1,pos,err,errRuntime,'')
-  else
-    CurrThread.HandleError(line,-1,pos,err,errCompile,'')
-end;
-
-constructor TCPThread.Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
-
-begin
-  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
-  if libcpascal = 0 then
-    LoadCPascal(plugin_dir);
-  instance:= interp_init(@Interpreter_Precompiler, @Interpreter_ErrorHandler);
-end;
-
-destructor TCPThread.Destroy;
-begin
-  interp_free(instance);
-  inherited Destroy;
-end;
-
-procedure TCPThread.SetScript(script: string);
-begin
-  interp_set(instance,PChar(script));
-end;
-
-procedure TCPThread.AddMethod(meth: TExpMethod);
-begin
-  interp_meth(instance,meth.FuncPtr,PChar(meth.FuncDecl));
-end;
-
-procedure TCPThread.LoadPlugin(plugidx: integer);
-var
-  i: integer;
-begin
-  with PluginsGlob.MPlugins[plugidx] do
-    for i := 0 to MethodLen - 1 do
-      with Methods[i] do
-      begin
-        pswriteln(FuncStr);
-        interp_meth(self.instance,FuncPtr,PChar(FuncStr));
-      end;
-  pswriteln('done')
-end;
-
-procedure TCPThread.Execute;
-var
-  i: integer;
-begin
-  CurrThread := Self;
-  Starttime := GetTickCount;
-  psWriteln('Invoking CPascal Interpreter');
-  interp_type(self.instance,'type longword = integer;');
-  interp_type(self.instance,'type word = integer;');
-  interp_type(self.instance,'type longint = integer;');
-  interp_type(self.instance,'type pointer = integer;');
-  interp_type(self.instance,'type byte = integer;');
-  interp_type(self.instance,'type extended = real;');
-  interp_type(self.instance,'type tcolor = integer;');
-
-  interp_type(self.instance,'type TExtendedArray = array of extended;');
-  interp_type(self.instance,'type T2DExtendedArray = array of array of extended;');
-  interp_type(self.instance,'type TIntegerArray = array of integer;');
-
-  interp_type(self.instance,'type TBox = record X1,Y1,X2,Y2: integer; end;');
-  interp_type(self.instance,'type TPoint = record x,y: integer; end;');
-  interp_type(self.instance,'type TPointArray = array of TPoint;');   ;
-  interp_type(self.instance,'type T2DPointArray = array of array of TPoint;');   ;
-  interp_type(self.instance,'type TPointArrayArray = T2DPointArray;');
-
-  interp_type(self.instance,'type TTarget_Exported = record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14, int15:integer; end;');
-  interp_type(self.instance,'type TMask = record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
-  interp_type(self.instance,'type TDTMPointDef = record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end;');
-  interp_type(self.instance,'type TDTMPointDefArray = Array Of TDTMPointDef;');
-  interp_type(self.instance,'type TDTM = record MainPoint: TDTMPointDef; SubPoints: TDTMPointDefArray; end;');
-  interp_type(self.instance,'type pDTM = record l: Integer;p: TPointArray;c, t, asz, ash: TIntegerArray; bp: Array Of Boolean; n: String; end;');
-
-
-  for i := 0 to high(ExportedMethods) do
-    if ExportedMethods[i].FuncPtr <> nil then
-      with ExportedMethods[i] do
-        interp_meth(self.instance,FuncPtr,PChar(FuncDecl));
-  if interp_comp(instance) then
-  begin
-    psWriteln('Compiled Successfully in ' +  IntToStr(GetTickCount - Starttime) + 'ms');
-    if CompileOnly then
-      exit;
-    if interp_run(instance) then
-       psWriteln('Executed Successfully')
-    else
-       psWriteln('Execution Failed');
-  end else
-     psWriteln('Compile Failed');
-
-end;
-
-procedure TCPThread.Terminate;
-begin
-  raise Exception.Create('Stopping Interpreter not yet implemented');
-end;
-{$ENDIF}
-
-{ TRTThread }
-{$IFDEF USE_RUTIS}
-procedure TRTThread.RTOnWrite(s: String);
-begin
-  psWriteln(s);
-end;
-
-procedure TRTThread.RTOnError(s: String; ErrorType: TRutisErrorType);
-begin
-  if ErrorType in [etRuntimeError,etCompilerError] then
-    psWriteln(s)
-  else
-    writeln(s);
-end;
-
-type
-  PBoolean = ^Boolean;
-  PStringArray = ^TStringArray;
-  PBmpMirrorStyle = ^TBmpMirrorStyle;
-  PPointArray = ^TPointArray;
-  P2DIntArray = ^T2DIntArray;
-  PCanvas = ^TCanvas;
-  P2DPointArray = ^T2DPointArray;
-  PMask = ^Tmask;
-  PBox = ^TBox;
-  PTarget_Exported = ^TTarget_Exported;
-  PIntegerArray = ^TIntegerArray;
-  PExtendedArray = ^TExtendedArray;
-//  PStrExtr = ^TStrExtr;
-  PReplaceFlags = ^TReplaceFlags;
-  PClickType = ^TClickType;
-  P2DExtendedArray = ^T2DExtendedArray;
-  PMDTM = ^TMDTM;
-  PSDTM = ^TSDTM;
-
-{$I RTInc/other.inc}
-{$I RTInc/settings.inc}
-{$I RTInc/bitmap.inc}
-{$I RTInc/window.inc}
-{$I RTInc/tpa.inc}
-{$I RTInc/strings.inc}
-{$I RTInc/colour.inc}
-{$I RTInc/colourconv.inc}
-{$I RTInc/math.inc}
-{$I RTInc/mouse.inc}
-{$I RTInc/file.inc}
-{$I RTInc/keyboard.inc}
-{$I RTInc/dtm.inc}
-{$I RTInc/ocr.inc}
-{$I RTInc/internets.inc}
-
-
-constructor TRTThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo;
-  plugin_dir: string);
-var
-  RutisEngine  : TRutisEngine;
-begin
-  inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
-  RUTIS := TRutisEngine.Create;
-  RUTIS.OnWrite:= @RTOnWrite;
-  RUTIS.OnError:= @RTOnError;
-  RUTIS.OptProcessTimer:= false;
-  RUTIS.Compiler.optArrayRangeCheck:= true;
-  RutisEngine := RUTIS;
-  {$I RTInc/rtexportedmethods.inc}
-end;
-
-destructor TRTThread.Destroy;
-begin
-  RUTIS.Free;
-  inherited Destroy;
-end;
-
-procedure TRTThread.SetScript(script: string);
-begin
-  RUTIS.ScriptCode.Text:= Script;
-end;
-
-procedure TRTThread.Execute;
-begin
-  CurrThread := self;
-  Starttime := lclintf.GetTickCount;
-  try
-    RUTIS.Compile;
-    if not RUTIS.CompilerError then
-    begin
-      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
-      if CompileOnly then
-        exit;
-      RUTIS.Run;
-    end else
-    begin
-      CurrThread.HandleError(RUTIS.Error.ELine + 2,RUTIS.Error.EChrPos,-1,RUTIS.Error.Message,errCompile,'');
-      psWriteln('Compiling failed.');
-    end;
-  except
-     on E : Exception do
-       psWriteln('Exception in Script: ' + e.message);
-  end;
-end;
-
-procedure TRTThread.Terminate;
-begin
-  RUTIS.Stop;
-end;
-{$ENDIF}
 
 {$IFDEF USE_LAPE}
 { TLPThread }
@@ -1566,7 +1286,6 @@ end;
 
 initialization
   PluginsGlob := TMPlugins.Create;
-  libcpascal:= 0;
 finalization
   //PluginsGlob.Free;
   //Its a nice idea, but it will segfault... the program is closing anyway.

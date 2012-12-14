@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="53">
+    <Units Count="73">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -184,6 +184,7 @@
         <Filename Value="framefunctionlist.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FunctionListFrame"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <UnitName Value="framefunctionlist"/>
       </Unit25>
@@ -317,24 +318,122 @@
         <UnitName Value="tpa"/>
       </Unit49>
       <Unit50>
-        <Filename Value="scriptmanager.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="ScriptManager"/>
-      </Unit50>
-      <Unit51>
         <Filename Value="newsimbasettings.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="newsimbasettings"/>
-      </Unit51>
-      <Unit52>
+      </Unit50>
+      <Unit51>
         <Filename Value="debugger.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DebuggerForm"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="debugger"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="../ScriptManager/sm_web.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_web"/>
       </Unit52>
+      <Unit53>
+        <Filename Value="../ScriptManager/sm_client_base.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_client_base"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="../ScriptManager/sm_control.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_control"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="../ScriptManager/sm_main.lfm"/>
+        <IsPartOfProject Value="True"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="../ScriptManager/sm_main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="SM_Main"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="../ScriptManager/sm_settings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_settings"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="../ScriptManager/sm_srv_base.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_srv_base"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="../ScriptManager/sm_types.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_types"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="../ScriptManager/sm_utils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sm_utils"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="../FormDesigner/selectonruntime.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="selectonruntime"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="../FormDesigner/code.lfm"/>
+        <IsPartOfProject Value="True"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="../FormDesigner/code.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="code"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="../FormDesigner/cselectonruntime.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cselectonruntime"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="../FormDesigner/cstruct.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cstruct"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="../FormDesigner/design_frm.lfm"/>
+        <IsPartOfProject Value="True"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="../FormDesigner/design_frm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="design_frm"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="../FormDesigner/frmdesigner.lfm"/>
+        <IsPartOfProject Value="True"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="../FormDesigner/frmdesigner.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CompForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="frmdesigner"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="../FormDesigner/s_frm_dsgn.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="../FormDesigner/sclist.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="sclist"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="../FormDesigner/selectonruntime.lpk"/>
+        <IsPartOfProject Value="True"/>
+      </Unit72>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -344,7 +443,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
-      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;$(ProjPath)../../Units/RUTIS;../../Units/lape/extensions/ffi"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;../ScriptManager;../FormDesigner"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -357,11 +456,6 @@
         <OptimizationLevel Value="2"/>
       </Optimizations>
     </CodeGeneration>
-    <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="True"/>
-      </Debugging>
-    </Linking>
     <Other>
       <CompilerMessages>
         <UseMsgFile Value="True"/>

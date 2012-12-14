@@ -1,5 +1,6 @@
 ssSettings = 'Settings/';
 ssLastConfig = 'LastConfig/';
+ssScriptManager = 'ScriptManager/';
 
 ssUpdater = 'Updater/';
 ssFonts = 'Fonts/';
@@ -73,4 +74,9 @@ ssMaxRecentFiles = ssSettings + 'General/MaxRecentFiles';
 ssRecentFiles = ssLastConfig + ssMainForm + 'RecentFiles';
 ssRecentFilesCount = ssLastConfig + ssMainForm + 'RecentFiles/Count';
 ssRecentFileN = ssLastConfig + ssMainForm + 'RecentFiles/File';
+
+ssSMURL = ssScriptManager + 'URL';
+ssSMPath = ssScriptManager + 'Path';
+ssSMFile = ssScriptManager + 'File';
+ssFRun = ssScriptManager + 'FirstRun';
 

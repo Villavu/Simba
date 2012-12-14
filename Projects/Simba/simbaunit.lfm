@@ -16,7 +16,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '0.9.30.3'
+  LCLVersion = '0.9.30.4'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -100,14 +100,14 @@ object SimbaForm: TSimbaForm
       OnMouseDown = ButtonSelectorDown
     end
     object ToolButton8: TToolButton
-      Left = 416
+      Left = 439
       Top = 2
       Width = 4
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
     object TB_ReloadPlugins: TToolButton
-      Left = 420
+      Left = 443
       Hint = 'Reload plugins'
       Top = 2
       Caption = 'TB_ReloadPlugins'
@@ -115,7 +115,7 @@ object SimbaForm: TSimbaForm
       ImageIndex = 13
     end
     object TB_Tray: TToolButton
-      Left = 443
+      Left = 466
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -159,14 +159,14 @@ object SimbaForm: TSimbaForm
       Enabled = False
     end
     object ToolButton3: TToolButton
-      Left = 489
+      Left = 512
       Top = 2
       Width = 4
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object TT_Update: TToolButton
-      Left = 493
+      Left = 516
       Hint = 'A new update is available'
       Top = 2
       Caption = 'TT_Update'
@@ -200,7 +200,7 @@ object SimbaForm: TSimbaForm
       Style = tbsDivider
     end
     object TT_Console: TToolButton
-      Left = 466
+      Left = 489
       Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
@@ -223,6 +223,14 @@ object SimbaForm: TSimbaForm
       Left = 24
       Top = 2
       Action = ActionDebugger
+    end
+    object TB_FromDesigner: TToolButton
+      Left = 416
+      Hint = 'a form designer'
+      Top = 2
+      Caption = 'TB_FromDesigner'
+      ImageIndex = 32
+      OnClick = TB_FromDesignerClick
     end
   end
   object StatusBar: TStatusBar
@@ -455,23 +463,29 @@ object SimbaForm: TSimbaForm
       ClientWidth = 150
       OnEndDock = nil
       TabOrder = 3
-      DesignTop = 200
       inherited FunctionList: TTreeView
-        Height = 319
+        Height = 316
         Width = 150
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
       end
-      inherited editSearchList: TEdit
-        Top = 339
-        Width = 150
-        OnExit = editSearchListExit
-        OnKeyDown = editSearchListKeyDown
-        OnKeyPress = editSearchListKeyPress
-      end
       inherited FunctionListLabel: TLabel
         Width = 146
+      end
+      inherited Panel1: TPanel
+        Top = 336
+        Width = 150
+        ClientWidth = 150
+        inherited ClearSearch: TSpeedButton
+          Left = 120
+        end
+        inherited editSearchList: TEdit
+          Width = 119
+          OnExit = editSearchListExit
+          OnKeyDown = editSearchListKeyDown
+          OnKeyPress = editSearchListKeyPress
+        end
       end
     end
   end
@@ -1281,16 +1295,6 @@ object SimbaForm: TSimbaForm
           RadioItem = True
           OnClick = ActionPascalScriptExecute
         end
-        object MenuItemRUTIS: TMenuItem
-          Action = ActionRUTIS
-          RadioItem = True
-          OnClick = ActionRUTISExecute
-        end
-        object MenuItemCPascal: TMenuItem
-          Action = ActionCPascal
-          RadioItem = True
-          OnClick = ActionCPascalExecute
-        end
         object MenuItemLape: TMenuItem
           Action = ActionLape
           RadioItem = True
@@ -1522,6 +1526,10 @@ object SimbaForm: TSimbaForm
         }
         OnClick = MenuItemBitmapConvClick
       end
+      object MenuItemFormDesigner: TMenuItem
+        Caption = 'Form designer'
+        OnClick = MenuItemFormDesignerClick
+      end
       object MenuItemDivider10: TMenuItem
         Caption = '-'
       end
@@ -1694,7 +1702,7 @@ object SimbaForm: TSimbaForm
     left = 448
     top = 144
     Bitmap = {
-      4C69200000001000000010000000424242004242420042424200424242004242
+      4C69210000001000000010000000424242004242420042424200424242004242
       420042424200424242004242420042424200424242004242420042424200A155
       42FFA15542FFA15542FF4242420E424242004242420042424200424242004242
       4200424242004242420042424200424242004242420042424200A15542FFFFDA
@@ -2718,7 +2726,39 @@ object SimbaForm: TSimbaForm
       0021000C003300340077005000C700340077000C003400000023000000160015
       003D00000002FFFFFF00FFFFFF00FFFFFF0000000001000000050000000B0000
       0011000000160000001A0000001A0000001A00000017000000120000000B0000
-      000600000001FFFFFF00FFFFFF00
+      000600000001FFFFFF00FFFFFF0000000000000000114646462F4747472F4747
+      472F4747472F4747472F4747472F4747472F4747472F4747472F4747472F4747
+      472F4A4A4A2D04040405000000000000000000000036E4E3E3F5E4E3E2F6E5E5
+      E4F6E7E7E6F6E8E8E7F6E5E5E4F6DDDEDDF6EAEAEAF6EBEBEAF6EBEBEBF6EBEB
+      EBF6EDEDEDF51A1A1A11000000000000000000000037EAEAE9FDEAEAE9FFECEC
+      EBFFEDEDEDFFEFEFEEFFDDDDDDFFC9CAC9FFF2F2F1FFF2F2F2FFF3F3F2FFF3F3
+      F2FFF4F4F4FE1B1B1B12000000000000000000000037ECECECFDEDEDECFFEEEE
+      EDFFF0F0EFFFEEEEEEFFA9AAA9FFA6A7A6FFF1F1F1FFF5F5F5FFF5F5F5FFF5F5
+      F5FFF6F6F6FE1B1B1B12000000000000000000000037EEEEEDFDEEEEEEFFF0F0
+      F0FFF2F2F1FFEAEAEAFFCACCCBFFD0D1D0FFEDEDEDFFF7F7F7FFF8F8F8FFF8F8
+      F8FFF9F9F9FE1B1B1B12000000000000000000000037EFEFEFFDF0F0EFFFF2F2
+      F1FFF4F4F3FFF0F0F0FFC0C3C2FFBEC2C0FFF0F1F0FFF9F9F9FFFAFAFAFFFAFA
+      FAFFFAFAFAFE1B1B1B12000000000000000000000037F1F1F0FDF2F2F1FFF4F4
+      F3FFF6F6F5FFEBECECFFC5C8C6FFC6C8C7FFE7E8E7FFFBFBFBFFFBFBFBFFFBFB
+      FBFFFBFBFBFE1B1B1B12000000000000000000000037F2F2F2FDF3F3F3FFF1F1
+      F1FFCECFCEFFD0D1D0FFA9AAA9FFAAABABFFCBCCCCFFD0D1D0FFF7F7F7FFFCFC
+      FCFFFCFCFCFE1B1B1B12000000000000000000000037F3F3F3FDF5F5F4FFF1F1
+      F1FFC7C7C7FFCFCFCFFFBFBFBFFFC0C0C0FFCBCBCBFFC9C9C9FFF7F7F7FFFDFD
+      FDFFFDFDFDFE1B1B1B12000000000000000000000037F4F4F4FDF6F6F6FFF8F8
+      F8FFF2F2F2FFCED0CFFFF8F8F8FFFAFAFAFFDADADAFFEDEEEEFFFAFAFAFFF8F8
+      F8FFF9F9F9FE1B1B1B12000000000000000000000037F5F5F5FDF7F7F7FFF9F9
+      F9FFE7E7E7FFC5C6C6FFFCFCFCFFFDFDFDFFD4D5D4FFDDDEDEFFF0F0F0FFEDED
+      EDFFEFEFEFFD1C1C1C10000000000000000000000037F6F6F5FDF8F8F8FFF9F9
+      F9FFD0D2D1FFD4D4D4FFFDFDFDFFFBFBFBFFD7D8D7FFC1C3C2FFC5C4C4FFD0D0
+      D0FEBFBFBF8D09090902000000000000000000000037F6F6F6FDF8F8F8FFF4F4
+      F4FFB2B4B3FFF1F1F1FFFDFDFDFFF8F8F8FFE4E4E4FFB0B1B1FFEBEBEBFEBFBF
+      BFA44040400700000000000000000000000000000037F6F6F6FDF9F9F9FFF0F0
+      F0FFACAEADFFF9F9F9FFFDFDFDFFF6F6F6FFE0E0E0FFABABABFEC2C2C2A65757
+      570A0000000000000000000000000000000000000032F4F4F4F3F6F6F6F4F5F5
+      F5F4E5E5E5F4F9F9F9F4F9F9F9F4F3F3F3F4E8E8E8F4BFBFBF89414141060000
+      000000000000000000000000000000000000000000078888881B8888881B8888
+      881B8888881B8888881B8888881B8888881B8E8E8E1913131302000000000000
+      0000000000000000000000000000
     }
   end
   object MTrayIcon: TTrayIcon
@@ -3143,17 +3183,6 @@ object SimbaForm: TSimbaForm
       Caption = 'PascalScript'
       OnExecute = ActionPascalScriptExecute
     end
-    object ActionRUTIS: TAction
-      Caption = 'RUTIS'
-      OnExecute = ActionRUTISExecute
-      Visible = False
-    end
-    object ActionCPascal: TAction
-      Caption = 'CPascal'
-      Enabled = False
-      OnExecute = ActionCPascalExecute
-      Visible = False
-    end
     object ActionGoto: TAction
       Caption = 'Goto line'
       OnExecute = ActionGotoExecute
@@ -3170,6 +3199,10 @@ object SimbaForm: TSimbaForm
       ImageIndex = 31
       OnExecute = ActionDebuggerExecute
       Visible = False
+    end
+    object CallFormDesigner: TAction
+      Caption = 'CallFormDesigner'
+      OnExecute = CallFormDesignerExecute
     end
   end
   object DebugTimer: TTimer

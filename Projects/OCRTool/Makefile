@@ -44,7 +44,7 @@ build := $(CC)
 
 # -Xd doesn't seem to cause problems when not cross-compiling, and is needed when cross-compiling, so I'm leaving it here
 common_flags := -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu. -dM_MEMORY_DEBUG -dLCL -dFONTDEBUG -dOCRDEBUG
-units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/RUTIS/ -Fu../../Units/lape -Fu../../Units/Misc/DCPCrypt -Fu../../Units/Misc/DCPCrypt/Ciphers -Fu../../Units/Misc/DCPCrypt/Hashes
+units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/ -Fu../../Units/lape -Fu../../Units/Misc/DCPCrypt -Fu../../Units/Misc/DCPCrypt/Ciphers -Fu../../Units/Misc/DCPCrypt/Hashes
 
 binary := OCRTool.$(platform)
 # windows wants executables to end in .exe

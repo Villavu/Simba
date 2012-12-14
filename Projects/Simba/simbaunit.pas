@@ -60,15 +60,13 @@ uses
   PSDump,
 
   updater,
-  scriptmanager,
+  SM_Main,
   newsimbasettings
   {$IFDEF USE_DEBUGGER}, debugger{$ENDIF};
 
 const
   interp_PS = 0; //PascalScript
-  interp_RT = 1; //RUTIS
-  interp_CP = 2; //CPascal
-  interp_LP = 3; //Lape
+  interp_LP = 1; //Lape
 
   { Place the shortcuts here }
   {$IFDEF LINUX}
@@ -105,11 +103,10 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    CallFormDesigner: TAction;
     ActionDebugger: TAction;
     ActionLape: TAction;
     ActionGoto: TAction;
-    ActionCPascal: TAction;
-    ActionRUTIS: TAction;
     ActionPascalScript: TAction;
     ActionExtensions: TAction;
     ActionSaveDef: TAction;
@@ -152,14 +149,13 @@ type
     MenuHelp: TMenuItem;
     MenuDivider7: TMenuItem;
     MenuInterpreters: TMenuItem;
+    MenuItemFormDesigner: TMenuItem;
     MenuItemSettingsSimpleButton: TMenuItem;
     MenuItemLape: TMenuItem;
     MenuItemReadOnlyTab: TMenuItem;
     MenuItemGoto: TMenuItem;
     MenuItemDivider50: TMenuItem;
     MenuItemPascalScript: TMenuItem;
-    MenuItemCPascal: TMenuItem;
-    MenuItemRUTIS: TMenuItem;
     MenuItemOpenPluginsFolder: TMenuItem;
     MenuItemOpenIncludesFolder: TMenuItem;
     MenuItemOpenScriptsFolder: TMenuItem;
@@ -182,6 +178,7 @@ type
     FunctionListTimer: TTimer;
     SCARHighlighter: TSynPasSyn;
     ToolButton5: TToolButton;
+    TB_FromDesigner: TToolButton;
     TT_ScriptManager: TToolButton;
     ToolButton6: TToolButton;
     TT_Console: TToolButton;
@@ -288,7 +285,6 @@ type
     procedure ActionCompileScriptExecute(Sender: TObject);
     procedure ActionConsoleExecute(Sender: TObject);
     procedure ActionCopyExecute(Sender: TObject);
-    procedure ActionCPascalExecute(Sender: TObject);
     procedure ActionCutExecute(Sender: TObject);
     procedure ActionDebuggerExecute(Sender: TObject);
     procedure ActionDeleteExecute(Sender: TObject);
@@ -309,7 +305,6 @@ type
     procedure ActionRedoExecute(Sender: TObject);
     procedure ActionReplaceExecute(Sender: TObject);
     procedure ActionRunExecute(Sender: TObject);
-    procedure ActionRUTISExecute(Sender: TObject);
     procedure ActionSaveAllExecute(Sender: TObject);
     procedure ActionSaveAsExecute(Sender: TObject);
     procedure ActionSaveDefExecute(Sender: TObject);
@@ -319,6 +314,7 @@ type
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
     procedure ActionUndoExecute(Sender: TObject);
+    procedure CallFormDesignerExecute(Sender: TObject);
     procedure ChangeMouseStatus(Sender: TObject);
     procedure CheckBoxMatchCaseClick(Sender: TObject);
     procedure ClearSearchClick(Sender: TObject);
@@ -334,6 +330,7 @@ type
     procedure FunctionListExit(Sender: TObject);
     procedure FunctionListTimerTimer(Sender: TObject);
     procedure Memo1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure MenuItemFormDesignerClick(Sender: TObject);
     procedure MenuItemReadOnlyTabClick(Sender: TObject);
     procedure MenuItemBitmapConvClick(Sender: TObject);
     procedure MenuItemHandbookClick(Sender: TObject);
@@ -398,6 +395,7 @@ type
     procedure SpeedButtonSearchClick(Sender: TObject);
     procedure SplitterFunctionListCanResize(Sender: TObject; var NewSize: Integer;
       var Accept: Boolean);
+    procedure TB_FromDesignerClick(Sender: TObject);
     procedure TB_ReloadPluginsClick(Sender: TObject);
     procedure ThreadOpenConnectionEvent(Sender: TObject; var url: string;
       var Continue: boolean);
@@ -572,7 +570,8 @@ uses
    bitmaps,
    {$IFDEF USE_EXTENSIONS}extensionmanagergui,{$ENDIF}
    colourhistory,
-   math
+   math,
+   frmdesigner
 
    {$IFDEF LINUX_HOTKEYS}
    ,keybinder
@@ -853,27 +852,19 @@ procedure TSimbaForm.UpdateInterpreter;
 begin
 {$IFDEF WINDOWS}
   ActionPascalScript.Checked := False;
-  ActionRUTIS.Checked := False;
-  ActionCPascal.Checked := False;
   ActionLape.Checked := False;
 
   case SimbaSettings.Interpreter._Type.Value of
     interp_PS: ActionPascalScript.Checked := True;
-    interp_CP: ActionCPascal.Checked := True;
-    interp_RT: ActionRUTIS.Checked := True;
     interp_LP: ActionLape.Checked := True;
   end;
 {$ELSE}
   MenuItemPascalScript.RadioItem := False;
   MenuItemLape.RadioItem := False;
-  MenuItemCPascal.RadioItem := False;
-  MenuItemRUTIS.RadioItem := False;
 
   case SimbaSettings.Interpreter._Type.Value of
     interp_PS: MenuItemPascalScript.RadioItem := True;
     interp_LP: MenuItemLape.RadioItem := True;
-    interp_CP: MenuItemCPascal.RadioItem := True;
-    interp_RT: MenuItemRUTIS.RadioItem := True;
   end;
 {$ENDIF}
 end;
@@ -1164,10 +1155,17 @@ begin
     NewSize := ScriptPanel.Width div 2;
 end;
 
+procedure TSimbaForm.TB_FromDesignerClick(Sender: TObject);
+begin
+  CallFormDesignerExecute(Sender);
+end;
+
 procedure TSimbaForm.TB_ReloadPluginsClick(Sender: TObject);
 begin
 //  PluginsGlob.FreePlugins;
 end;
+
+
 
 procedure TSimbaForm.ThreadOpenConnectionEvent(Sender: TObject; var url: string;var Continue: boolean);
 begin
@@ -1904,8 +1902,6 @@ begin
   try
     case SimbaSettings.Interpreter._Type.Value of
       interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);
-      {$IFDEF USE_RUTIS}interp_RT: Thread := TRTThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
-      {$IFDEF USE_CPASCAL}interp_CP: Thread := TCPThread.Create(True,@CurrentSyncInfo,SimbaSettings.Plugins.Path.Value);{$ENDIF}
       {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
       else
         raise Exception.CreateFmt('Unknown Interpreter %d!', [SimbaSettings.Interpreter._Type.Value]);
@@ -2066,8 +2062,6 @@ begin
                     end;
                   end;
                 end;
-    interp_RT: Result := 'program untitled;' + LineEnding + lineEnding + 'interface' + LineEnding + LineEnding +
-                         'implementation' + LineEnding + LineEnding + 'begin' + LineEnding + 'end.' + LineEnding;
   end;
 end;
 
@@ -2119,13 +2113,6 @@ begin
     CurrScript.SynEdit.CopyToClipboard
   else if Memo1.Focused then
     Memo1.CopyToClipboard;
-end;
-
-procedure TSimbaForm.ActionCPascalExecute(Sender: TObject);
-begin
-  {$IFDEF USE_CPASCAL}
-  SimbaSettings.Interpreter._Type.Value := interp_CP;
-  {$ENDIF}
 end;
 
 procedure TSimbaForm.ActionCutExecute(Sender: TObject);
@@ -2294,13 +2281,6 @@ begin
   Self.RunScript;
 end;
 
-procedure TSimbaForm.ActionRUTISExecute(Sender: TObject);
-begin
-  {$IFDEF USE_RUTIS}
-  SimbaSettings.Interpreter._Type.Value := interp_RT;
-  {$ENDIF}
-end;
-
 procedure TSimbaForm.ActionSaveAllExecute(Sender: TObject);
 var
   i : integer;
@@ -2364,6 +2344,12 @@ begin
     CurrScript.Undo
   else if Memo1.Focused then
     Memo1.Undo;
+end;
+
+procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
+begin
+ {$IFDEF WINDOWS}if not Compform.visible then compform.show else compform.hide;{$ELSE}
+  if not Compform.visible then compform.Visible:=true else compform.Visible:=false;{$ENDIF}
 end;
 
 procedure TSimbaForm.ChangeMouseStatus(Sender: TObject);
@@ -2579,6 +2565,11 @@ begin
   //Are there any more?
 end;
 
+procedure TSimbaForm.MenuItemFormDesignerClick(Sender: TObject);
+begin
+  CallFormDesignerExecute(Sender);
+end;
+
 procedure TSimbaForm.MenuItemBitmapConvClick(Sender: TObject);
 begin
   BitmapConvForm.Show;
@@ -2694,7 +2685,8 @@ begin
 
   ValueDefs := TStringList.Create;
   try
-    InitializeTMThread(Thread);
+    InitializeTMThread(TMThread(Thread));
+    Thread.FreeOnTerminate := False;
 
     if (not ((Assigned(Thread)) and (Thread is TPSThread))) then
       Exit;
@@ -2727,7 +2719,7 @@ begin
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
 
-    Stream.Free;
+    //Stream.Free; // TCodeInsight free's the stream!
   end;
 end;
 
@@ -2877,8 +2869,6 @@ begin
 
   UpdateTitle;
 
-  {$IFDEF USE_RUTIS}ActionRUTIS.Visible := True;{$ENDIF}
-  {$IFDEF USE_CPASCAL}ActionCPascal.Visible := True;{$ENDIF}
   {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
 
   {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
@@ -3597,7 +3587,8 @@ end;
 
 procedure TSimbaForm.TT_ScriptManagerClick(Sender: TObject);
 begin
-  ScriptManagerForm.ShowModal;
+  SManager.SetOptions(AppPath,SimbaSettings.ScriptManager.ServerURL.Value,SimbaSettings.ScriptManager.StoragePath.Value,SimbaSettings.ScriptManager.FileName.Value,SimbaSettings.ScriptManager.FirstRun.Value);
+  if not (SManager.Visible = false) then Smanager.Show else SManager.Hide;
 end;
 
 procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);

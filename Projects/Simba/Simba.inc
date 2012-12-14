@@ -34,12 +34,10 @@
 
 {$DEFINE USE_DEBUGGER}
 
-//{$DEFINE USE_RUTIS}
 {$DEFINE USE_LAPE}
 
 {$DEFINE USE_SQLITE} // TO build with SQLite3 support.
 
-//{$DEFINE USE_CPASCAL}
 {$DEFINE USE_EXTENSIONS}
 //{$DEFINE USE_CODECOMPLETION} // TODO
 
@@ -47,3 +45,7 @@
 
 {$MACRO ON}
 {$define lape_extdecl:=cdecl;}
+
+{$IFDEF UNIX}
+	{$UNDEF USE_EXTENSIONS}
+{$ENDIF}

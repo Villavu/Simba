@@ -80,36 +80,36 @@ begin;
 end;
 
 function MDTMToSDTM(Const DTM: TMDTM): TSDTM;
+var
+   I, H: Integer;
+begin
+  with Result.MainPoint do
+  begin
+    X := DTM.Points[0].x;
+    Y := DTM.Points[0].y;
+    AreaSize := DTM.Points[0].asz;
+    AreaShape := 0;
+    Color := DTM.Points[0].c;
+    Tolerance := DTM.Points[0].t;
+  end;
+  H := DTM.Count - 1;
+  SetLength(Result.SubPoints, H);
 
-Var
-   Temp: TSDTMPointDef;
-   I: Integer;
+  for I := 1 to H do
+  begin
+    FillChar(Result.SubPoints[I - 1], SizeOf(Result.SubPoints[I - 1]), 0);
 
-Begin
-  For I := 0 To 0 Do
-  Begin
-    Temp.X := DTM.Points[i].x;
-    Temp.Y := DTM.Points[i].y;
-    Temp.AreaSize := DTM.Points[i].asz;
-    Temp.AreaShape := 0;
-    Temp.Color := DTM.Points[i].c;
-    Temp.Tolerance := DTM.Points[i].t;
-  End;
-  Result.MainPoint := Temp;
-  SetLength(Result.SubPoints, DTM.Count - 1);
-
-  For I := 1 To DTM.Count-1 Do
-  Begin
-    Temp.X := 0; Temp.Y := 0; Temp.AreaSize := 0; Temp.AreaShape := 0; Temp.Color := 0; Temp.Tolerance := 0;
-    Temp.X := DTM.Points[i].x;
-    Temp.Y := DTM.Points[i].y;
-    Temp.AreaSize := DTM.Points[i].asz;
-    Temp.AreaShape := 0;
-    Temp.Color := DTM.Points[i].c;
-    Temp.Tolerance := DTM.Points[i].t;
-    Result.SubPoints[I - 1] := Temp;
-  End;
-End;
+    with Result.SubPoints[I - 1] do
+    begin
+      X := DTM.Points[i].x;
+      Y := DTM.Points[i].y;
+      AreaSize := DTM.Points[i].asz;
+      AreaShape := 0;
+      Color := DTM.Points[i].c;
+      Tolerance := DTM.Points[i].t;
+    end;
+  end;
+end;
 
 {/\
   Converts a TSDTM to a TMDTM.

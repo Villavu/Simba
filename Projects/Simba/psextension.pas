@@ -78,7 +78,8 @@ uses
   newsimbasettings, // SimbaSettings
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
-  uPSR_menus, uPSI_ComCtrls, uPSI_Dialogs, uPSR_dll,
+  uPSR_menus, uPSR_dll,
+  // uPSI_ComCtrls, uPSI_Dialogs,  //Removed in Laz PascalScript
   files,
   dialogs,
   dtm, //Dtms!
@@ -92,7 +93,7 @@ uses
   SynRegExpr,
   lclintf,
   httpsend,
-  superobject,
+  fpjson, jsonparser,
   Clipbrd,
 
   DCPcrypt2,
@@ -287,8 +288,8 @@ begin
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
-  SIRegister_ComCtrls(x);
-  SIRegister_Dialogs(x);
+  //SIRegister_ComCtrls(x);
+  //SIRegister_Dialogs(x);
 
   ScriptPath := IncludeTrailingPathDelimiter(ExpandFileName(ExtractFileDir(Filename)));
   ScriptFile := ExtractFileName(Filename);
@@ -340,8 +341,8 @@ begin
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
-  RIRegister_ComCtrls(x);
-  RIRegister_Dialogs(x);
+  //RIRegister_ComCtrls(x);
+  //RIRegister_Dialogs(x);
   RegisterDLLRuntime(se);
   RIRegister_MML(x);
 {  with x.FindClass('TMufasaBitmap') do
@@ -402,8 +403,9 @@ procedure TSimbaPSExtension.StartExtension;
 begin
   if assigned(PSInstance) then
     exit;//Already started..
-  { Create script, and see if the extension is valid. (If it compiles) }
+
   PSInstance := TPSScript.Create(nil);
+  PSInstance.CompilerOptions := PSInstance.CompilerOptions + [icAllowNoBegin, icAllowNoEnd];
 
   with PSInstance do
   begin
@@ -425,20 +427,23 @@ begin
     FWorking := PSInstance.Compile;
   except
     on e : exception do
-      FormWritelnEx(format('Error in Simba extension (%s) : %s',[FileName,e.message]));
+      FormWritelnEx(format('Error in Simba extension compilation (%s) : %s',[FileName,e.message]));
   end;
+
   if FWorking then
-    formWritelnEx('Extension Enabled')
-  else
+  begin
+    formWritelnEx('Extension Enabled');
+
+    if InitScript then
+      mDebugLn('Init procedure successfully called')
+    else
+      mDebugLn('Init procedure didn''t execute right, or couldn''t be found');
+  end else
   begin
     formWritelnEx('Extension Disabled - Did not compile');
     OutputMessages;
   end;
 
-  if InitScript then
-    mDebugLn('Init procedure successfully called')
-  else
-    mDebugLn('Init procedure didn''t execute right, or couldn''t be found');
   Enabled:= FWorking;
 end;
 

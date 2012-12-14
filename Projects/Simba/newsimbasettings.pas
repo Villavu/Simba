@@ -200,6 +200,13 @@ type
       ShowAutomatically: TBooleanSetting;
     end;
 
+    TScriptManagerSection = class(TSection)
+      ServerURL: TStringSetting;
+      StoragePath: TPathSetting;
+      FileName: TStringSetting;
+      FirstRun: TBooleanSetting;
+    end;
+
     TMainForm = class(TSection)
       Position: TStringSetting;
       NormalSize: TStringSetting;
@@ -230,6 +237,8 @@ type
       ColourPicker: TColourPickerSection;
       CodeHints: TCodeHintsSection;
       CodeCompletion: TCodeCompletionSection;
+
+      ScriptManager: TScriptManagerSection;
 
       LastConfig: TLastConfig;
 
@@ -691,6 +700,11 @@ procedure GetFunctionListShowOnStart(obj: TObject); begin TBooleanSetting(obj).V
 procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
+procedure GetScriptManagerURL(obj: TObject); begin TStringSetting(obj).Value := 'http://127.0.0.1/'; end;
+procedure GetScriptManagerPath(obj: TObject); begin TPathSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
+procedure GetScriptManagerFile(obj: TObject); begin TStringSetting(obj).Value := 'ScriptManager.xml'; end;
+procedure GetScriptManagerFirstRun(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
 procedure GetSourceEditorLazColors(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetExtensionsFileExtension(obj: TObject); begin TStringSetting(obj).Value := 'sex'; end;
@@ -805,6 +819,16 @@ begin
   CodeCompletion := AddChild(TCodeCompletionSection.Create()) as TCodeCompletionSection;
   CodeCompletion.ShowAutomatically := CodeCompletion.AddChild(TBooleanSetting.Create(ssCodeCompletionShowAutomatically)) as TBooleanSetting;
   CodeCompletion.ShowAutomatically.onDefault := @GetCodeCompletionShowAutomatically;
+
+  ScriptManager := AddChild(TScriptManagerSection.Create()) as TScriptManagerSection;
+  ScriptManager.ServerURL := ScriptManager.AddChild(TStringSetting.Create(ssSMURL)) as TStringSetting;
+  ScriptManager.ServerURL.onDefault := @GetScriptManagerURL;
+  ScriptManager.StoragePath := ScriptManager.AddChild(TPathSetting.Create(ssSMPath)) as TPathSetting;
+  ScriptManager.StoragePath.onDefault := @GetScriptManagerPath;
+  ScriptManager.FileName := ScriptManager.AddChild(TStringSetting.Create(ssSMFile)) as TStringSetting;
+  ScriptManager.FileName.onDefault := @GetScriptManagerFile;
+  ScriptManager.FirstRun := ScriptManager.AddChild(TBooleanSetting.Create(ssFRun)) as TBooleanSetting;
+  ScriptManager.FirstRun.onDefault := @GetScriptManagerFirstRun;
 
   LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
   LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;
