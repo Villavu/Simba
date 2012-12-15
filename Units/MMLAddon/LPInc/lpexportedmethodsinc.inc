@@ -198,6 +198,7 @@ AddGlobalFunc('procedure IncEx(var x: integer; increase: integer);', @Lape_IncEx
 AddGlobalFunc('procedure DecEx(var x: integer; Decrease: integer);', @Lape_DecEx);
 AddGlobalFunc('function Factorial(number: longword): Int64', @Lape_Factorial);
 AddGlobalFunc('function FixRad(rad: extended): extended;', @Lape_FixRad);
+AddGlobalFunc('function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;', @Lape_InAbstractBox);
 AddGlobalFunc('procedure MoveMouse(x, y: integer);', @Lape_MoveMouse);
 AddGlobalFunc('procedure ScrollMouse(x,y: integer; Clicks: integer);', @Lape_ScrollMouse);
 AddGlobalFunc('procedure GetMousePos(var x, y: integer);', @Lape_GetMousePos);
