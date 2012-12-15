@@ -2394,6 +2394,11 @@ begin
     OffsetTPA(ATPA[i],Offset);
 end;
 
+function MiddleBox(b : TBox) : TPoint;
+begin
+  result := point((b.x2+b.x1) div 2,(b.y2+b.y1) div 2);
+end;
+
 
 end.
 
