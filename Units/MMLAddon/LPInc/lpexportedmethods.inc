@@ -483,6 +483,7 @@ AddGlobalFunc('procedure OffsetTPA(var TPA: TPointArray; const Offset: TPoint);'
 AddGlobalFunc('procedure OffsetATPA(var ATPA: T2DPointArray; const Offset: TPoint);', @Lape_OffsetATPA);
 AddGlobalFunc('function CopyTPA(const TPA: TPointArray): TPointArray', @Lape_CopyTPA);
 AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @Lape_CopyATPA);
+AddGlobalFunc('function MiddleBox(b: TBox): TPoint', @Lape_MiddleBox);
 
 { Window }
 
