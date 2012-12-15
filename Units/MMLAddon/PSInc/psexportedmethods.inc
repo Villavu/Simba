@@ -116,6 +116,7 @@ AddFunction(@DecRet, 'function DecRet(e: Extended): Extended;');
 AddFunction(@ps_MinA, 'function MinA(a: TIntegerArray): Integer;');
 AddFunction(@ps_MaxA, 'function MaxA(a: TIntegerArray): Integer;');
 AddFunction(@ps_Sum64IntArr, 'function Sum64IntArr(const Arr: TIntegerArray): Int64;');
+AddFunction(@ps_FixRad, 'function FixRad(rad: Extended): Extended;');
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 {window}
@@ -565,6 +566,8 @@ AddFunction(@ps_offsetTPA,'procedure OffsetTPA(var TPA : TPointArray; const Offs
 AddFunction(@ps_offsetATPA,'procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);');
 AddFunction(@ps_copyTPA,'function CopyTPA(const TPA : TPointArray) : TPointArray;');
 AddFunction(@ps_CopyATPA,'function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;');
+AddFunction(@ps_MiddleBox,'function MiddleBox(b : TBox) : TPoint;');
+AddFunction(@ps_InAbstractBox, 'function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;');
 
 {SQLite3}
 
