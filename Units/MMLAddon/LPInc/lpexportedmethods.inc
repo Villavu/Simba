@@ -161,6 +161,7 @@ AddGlobalFunc('function MaxA(a: TIntegerArray): Integer', @Lape_MaxA);
 AddGlobalFunc('function Sum64IntArr(const Arr: TIntegerArray): Int64;', @Lape_Sum64IntArr);
 AddGlobalFunc('function IntToHex(number: Integer): String; overload;', @Lape_IntToHex);
 AddGlobalFunc('function FixRad(rad: Extended): Extended;', @Lape_FixRad);
+AddGlobalFunc('function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;', @Lape_InAbstractBox);
 
 { Color }
 

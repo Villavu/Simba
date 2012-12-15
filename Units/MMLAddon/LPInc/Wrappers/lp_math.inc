@@ -263,7 +263,12 @@ begin
   PString(Result)^ := IntToHex(PInteger(Params^[0])^,0);
 end;
 
-procedure Lape_FixRad(const Params: PParamArray; const Result: Pointer); lape_extdecl;
+procedure Lape_FixRad(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   PExtended(Result)^ := FixRad(PExtended(Params^[0])^);
+end;
+
+procedure Lape_InAbstractBox(const Params : PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := InAbstractBox(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^, PInteger(Params^[9])^);
 end;
