@@ -472,3 +472,8 @@ procedure Lape_CopyATPA(const Params: PParamArray; const Result: Pointer); lape_
 begin
   P2DPointArray(Result)^ := ps_CopyATPA(P2DPointArray(Params^[0])^);
 end;
+
+procedure Lape_MiddleBox(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPoint(Result)^ := ps_MiddleBox(PBox(Params^[0])^);
+end;

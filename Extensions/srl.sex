@@ -95,11 +95,6 @@ begin
   end;
 end;
 
-function GetName: string;
-begin
-  Result := 'SRL/SPS/MSI/Plugins Updater';
-end;
-
 function GetVersion: string;
 begin
   Result := '1.0';

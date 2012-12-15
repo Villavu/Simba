@@ -465,3 +465,8 @@ begin
   for i := 0 to l do
     result[i] := copy(ATPA[i],0,Length(ATPA[i]));
 end;
+
+function ps_MiddleBox(b : TBox) : TPoint;
+begin
+  result := MiddleBox(b);
+end;
