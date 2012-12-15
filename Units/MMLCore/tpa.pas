@@ -103,6 +103,7 @@ function SameTPA(const aTPA, bTPA: TPointArray): Boolean;
 function TPAInATPA(const TPA: TPointArray;const InATPA: T2DPointArray; var Index: LongInt): Boolean;
 procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
 procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
+function MiddleBox(b : TBox) : TPoint;
 
 implementation
 
