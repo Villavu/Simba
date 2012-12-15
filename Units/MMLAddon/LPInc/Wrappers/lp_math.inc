@@ -262,3 +262,8 @@ procedure Lape_IntToHex(const Params: PParamArray; const Result: Pointer); lape_
 begin
   PString(Result)^ := IntToHex(PInteger(Params^[0])^,0);
 end;
+
+procedure Lape_FixRad(const Params: PParamArray; const Result: Pointer); lape_extdecl;
+begin
+  PExtended(Result)^ := FixRad(PExtended(Params^[0])^);
+end;

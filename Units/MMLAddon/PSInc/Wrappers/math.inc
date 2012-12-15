@@ -352,3 +352,8 @@ begin
   for I := 0 to H do
     Result += Arr[I];
 end;
+
+function ps_FixRad(rad: Extended): Extended;
+begin
+  result := FixRad(rad);
+end;

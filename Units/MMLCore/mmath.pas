@@ -40,6 +40,8 @@ function DiscreteGauss(Xstart,Xend : integer; sigma : extended) : TExtendedArray
 function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;
 function MinA(a: TIntegerArray): Integer;
 function MaxA(a: TIntegerArray): Integer;
+function fixRad(rad: Extended): Extended;  
+
 
 implementation
 uses
@@ -181,6 +183,17 @@ begin
   for i := 1 to L do
     if (a[i] > Result) then
       Result := a[i];
+end;
+
+function FixRad(rad: Extended): Extended;
+begin
+  result := rad;
+
+  while (result >= (3.14159265358979320 * 2.0)) do
+    result := result - (3.14159265358979320 * 2.0);
+
+  while (result < 0) do
+    result := result + (3.14159265358979320 * 2.0);
 end;
 
 end.
