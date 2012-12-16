@@ -54,13 +54,13 @@ type
     destructor Destroy; override;
   end;
 
+var
+  SQLite3Loaded: boolean;
+
 implementation
 
 uses
   Client;
-
-var
-  SQLite3Loaded: boolean = False;
 
 // http://sqlite.org/c3ref/errcode.html
 function TMSQLite3.errCode(index : integer) : integer;
@@ -220,6 +220,7 @@ begin
 end;
 
 initialization
+  SQLite3Loaded := False;
   try
     InitialiseSQLite();
     SQLite3Loaded := True;
@@ -231,5 +232,6 @@ initialization
     end;
   end;
 finalization
-  ReleaseSQLite();
+  if (SQLite3Loaded) then
+    ReleaseSQLite();
 end.
