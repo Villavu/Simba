@@ -160,6 +160,8 @@ AddGlobalFunc('function MinA(a: TIntegerArray): Integer', @Lape_MinA);
 AddGlobalFunc('function MaxA(a: TIntegerArray): Integer', @Lape_MaxA);
 AddGlobalFunc('function Sum64IntArr(const Arr: TIntegerArray): Int64;', @Lape_Sum64IntArr);
 AddGlobalFunc('function IntToHex(number: Integer): String; overload;', @Lape_IntToHex);
+AddGlobalFunc('function FixRad(rad: Extended): Extended;', @Lape_FixRad);
+AddGlobalFunc('function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;', @Lape_InAbstractBox);
 
 { Color }
 
@@ -483,6 +485,7 @@ AddGlobalFunc('procedure OffsetTPA(var TPA: TPointArray; const Offset: TPoint);'
 AddGlobalFunc('procedure OffsetATPA(var ATPA: T2DPointArray; const Offset: TPoint);', @Lape_OffsetATPA);
 AddGlobalFunc('function CopyTPA(const TPA: TPointArray): TPointArray', @Lape_CopyTPA);
 AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @Lape_CopyATPA);
+AddGlobalFunc('function MiddleBox(b: TBox): TPoint', @Lape_MiddleBox);
 
 { Window }
 
