@@ -62,6 +62,9 @@ uses
 procedure TDebugImgForm.FormCreate(Sender: TObject);
 begin
   BlackDebugImage;
+  {$IFDEF MSWINDOWS}
+    ShowInTaskBar:= stAlways; // Allows the Debug Img to show in Taskbar on windows system.
+  {$ENDIF}
 end;
 
 procedure TDebugImgForm.DrawImageResize(Sender: TObject);
