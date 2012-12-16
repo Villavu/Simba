@@ -21,6 +21,8 @@
     Simba.inc: File with directives for SimbaUnit.
 }
 
+{$DEFINE SIMBA}
+
 {$IFDEF LINUX}
     {$DEFINE LINUX_HOTKEYS} // For global hotkeys, requires libkeybinder.
                             // See Units/Linux/keybinder.pas
@@ -33,6 +35,8 @@
                         // command line flags.
 
 {$DEFINE USE_DEBUGGER}
+{$DEFINE USE_SCRIPTMANAGER} // TODO
+//{$DEFINE USE_FORMDESIGNER}
 
 {$DEFINE USE_LAPE}
 
@@ -46,6 +50,6 @@
 {$MACRO ON}
 {$define lape_extdecl:=cdecl;}
 
-{$IFDEF UNIX}
+{$if defined(UNIX) or defined(cpu64)}
 	{$UNDEF USE_EXTENSIONS}
-{$ENDIF}
+{$ifend}

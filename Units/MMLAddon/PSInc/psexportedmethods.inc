@@ -572,18 +572,21 @@ AddFunction(@ps_InAbstractBox, 'function InAbstractBox(x1, y1, x2, y2, x3, y3, x
 {SQLite3}
 
 {$IFDEF USE_SQLITE}
-SetCurrSection('SQLite3');
-AddFunction(@ps_sqlite_version, 'function sqlite_version() : string;');
-AddFunction(@ps_sqlite_version_num, 'function sqlite_version_num() : integer;');
-AddFunction(@ps_sqlite_escape, 'function sqlite_escape(s : string) : string;');
-AddFunction(@ps_sqlite_close, 'procedure sqlite_close(index : integer);');
-AddFunction(@ps_sqlite_open, 'function sqlite_open(filename : string) : integer;');
-AddFunction(@ps_sqlite_open_v2, 'function sqlite_open_v2(filename : string; flags : integer) : integer;');
-AddFunction(@ps_sqlite_errmsg, 'function sqlite_errMsg(index : integer) : string;');
-AddFunction(@ps_sqlite_errcode, 'function sqlite_errCode(index : integer) : integer;');
-AddFunction(@ps_sqlite_query, 'function sqlite_query(index : integer; sql : string) : boolean;');
-AddFunction(@ps_sqlite_queryvalue, 'function sqlite_queryValue(index : integer; sql : string; out Data : T2DStringArray) : boolean;');
-AddFunction(@ps_sqlite_queryresult, 'function sqlite_queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;');
+if (SQLite3Loaded) then
+begin
+  SetCurrSection('SQLite3');
+  AddFunction(@ps_sqlite_version, 'function sqlite_version() : string;');
+  AddFunction(@ps_sqlite_version_num, 'function sqlite_version_num() : integer;');
+  AddFunction(@ps_sqlite_escape, 'function sqlite_escape(s : string) : string;');
+  AddFunction(@ps_sqlite_close, 'procedure sqlite_close(index : integer);');
+  AddFunction(@ps_sqlite_open, 'function sqlite_open(filename : string) : integer;');
+  AddFunction(@ps_sqlite_open_v2, 'function sqlite_open_v2(filename : string; flags : integer) : integer;');
+  AddFunction(@ps_sqlite_errmsg, 'function sqlite_errMsg(index : integer) : string;');
+  AddFunction(@ps_sqlite_errcode, 'function sqlite_errCode(index : integer) : integer;');
+  AddFunction(@ps_sqlite_query, 'function sqlite_query(index : integer; sql : string) : boolean;');
+  AddFunction(@ps_sqlite_queryvalue, 'function sqlite_queryValue(index : integer; sql : string; out Data : T2DStringArray) : boolean;');
+  AddFunction(@ps_sqlite_queryresult, 'function sqlite_queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;');
+end;
 {$ENDIF}
 
 {$IFNDEF MML_EXPORT_THREADSAFE}

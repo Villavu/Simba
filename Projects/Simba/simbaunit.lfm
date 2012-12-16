@@ -16,7 +16,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '0.9.30.4'
+  LCLVersion = '0.9.30.2'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -304,7 +304,7 @@ object SimbaForm: TSimbaForm
       Left = 155
       Height = 362
       Top = 0
-      Width = 505
+      Width = 350
       Align = alClient
       Images = Mufasa_Image_List
       PopupMenu = TabPopup
@@ -487,6 +487,26 @@ object SimbaForm: TSimbaForm
           OnKeyPress = editSearchListKeyPress
         end
       end
+    end
+    object NotesMemo: TMemo
+      Left = 510
+      Height = 362
+      Top = 0
+      Width = 150
+      Align = alRight
+      ScrollBars = ssAutoBoth
+      TabOrder = 4
+      Visible = False
+      WordWrap = False
+    end
+    object NotesSplitter: TSplitter
+      Left = 505
+      Height = 362
+      Top = 0
+      Width = 5
+      Align = alRight
+      ResizeAnchor = akRight
+      Visible = False
     end
   end
   object MainMenu: TMainMenu
@@ -1314,6 +1334,9 @@ object SimbaForm: TSimbaForm
       object MenuItemFunctionList: TMenuItem
         Caption = '&Function List'
         OnClick = MenuItemFunctionListClick
+      end
+      object MenuItemNotes: TMenuItem
+        Action = ActionNotes
       end
       object MenuItemExtensions: TMenuItem
         Action = ActionExtensions
@@ -3199,6 +3222,10 @@ object SimbaForm: TSimbaForm
       ImageIndex = 31
       OnExecute = ActionDebuggerExecute
       Visible = False
+    end
+    object ActionNotes: TAction
+      Caption = '&Notes'
+      OnExecute = ActionNotesExecute
     end
     object CallFormDesigner: TAction
       Caption = 'CallFormDesigner'
