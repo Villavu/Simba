@@ -514,20 +514,23 @@ AddGlobalFunc('function IsTargetValid: boolean', @Lape_IsTargetValid);
 { SQLite3 }
 
 {$IFDEF USE_SQLITE}
-AddGlobalFunc('function sqlite_version() : string;', @lp_sqlite_version);
-AddGlobalFunc('function sqlite_version_num() : integer;', @lp_sqlite_version_num);
-AddGlobalFunc('function sqlite_escape(s : string) : string;', @lp_sqlite_escape);
-AddGlobalFunc('procedure sqlite_close(index : integer);', @lp_sqlite_close);
-AddGlobalFunc('function sqlite_open(filename : string) : integer;', @lp_sqlite_open);
-AddGlobalFunc('function sqlite_open(filename : string; flags : integer) : integer; overload;', @lp_sqlite_open_v2);
-AddGlobalFunc('function sqlite_open_v2(filename : string; flags : integer) : integer;', @lp_sqlite_open_v2);
-AddGlobalFunc('function sqlite_errMsg(index : integer) : string;', @lp_sqlite_errmsg);
-AddGlobalFunc('function sqlite_errCode(index : integer) : integer;', @lp_sqlite_errcode);
-AddGlobalFunc('function sqlite_query(index : integer; sql : string) : boolean;', @lp_sqlite_query);
-AddGlobalFunc('function sqlite_query(index : integer; sql : string; out data : T2DStringArray) : boolean; overload;', @lp_sqlite_queryvalue);
-AddGlobalFunc('function sqlite_queryValue(index : integer; sql : string; out data : T2DStringArray) : boolean;', @lp_sqlite_queryvalue);
-AddGlobalFunc('function sqlite_queryValue(index : integer; sql : string; var error : boolean) : T2DStringArray; overload;', @lp_sqlite_queryresult);
-AddGlobalFunc('function sqlite_queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;', @lp_sqlite_queryresult);
+if (SQLite3Loaded) then
+begin
+  AddGlobalFunc('function sqlite_version() : string;', @lp_sqlite_version);
+  AddGlobalFunc('function sqlite_version_num() : integer;', @lp_sqlite_version_num);
+  AddGlobalFunc('function sqlite_escape(s : string) : string;', @lp_sqlite_escape);
+  AddGlobalFunc('procedure sqlite_close(index : integer);', @lp_sqlite_close);
+  AddGlobalFunc('function sqlite_open(filename : string) : integer;', @lp_sqlite_open);
+  AddGlobalFunc('function sqlite_open(filename : string; flags : integer) : integer; overload;', @lp_sqlite_open_v2);
+  AddGlobalFunc('function sqlite_open_v2(filename : string; flags : integer) : integer;', @lp_sqlite_open_v2);
+  AddGlobalFunc('function sqlite_errMsg(index : integer) : string;', @lp_sqlite_errmsg);
+  AddGlobalFunc('function sqlite_errCode(index : integer) : integer;', @lp_sqlite_errcode);
+  AddGlobalFunc('function sqlite_query(index : integer; sql : string) : boolean;', @lp_sqlite_query);
+  AddGlobalFunc('function sqlite_query(index : integer; sql : string; out data : T2DStringArray) : boolean; overload;', @lp_sqlite_queryvalue);
+  AddGlobalFunc('function sqlite_queryValue(index : integer; sql : string; out data : T2DStringArray) : boolean;', @lp_sqlite_queryvalue);
+  AddGlobalFunc('function sqlite_queryValue(index : integer; sql : string; var error : boolean) : T2DStringArray; overload;', @lp_sqlite_queryresult);
+  AddGlobalFunc('function sqlite_queryResult(index : integer; sql : string; var error : boolean) : T2DStringArray;', @lp_sqlite_queryresult);
+end;
 {$ENDIF}
 
 { Extensions }
