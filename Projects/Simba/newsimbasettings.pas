@@ -219,6 +219,11 @@ type
       MainForm: TMainForm;
     end;
 
+    TNotesSetion = class(TSection)
+      Content: TStringSetting;
+      Visible: TBooleanSetting;
+    end;
+
     TSimbaSettings = class(TSection)
     public
       Includes: TIncludesSection;
@@ -237,6 +242,7 @@ type
       ColourPicker: TColourPickerSection;
       CodeHints: TCodeHintsSection;
       CodeCompletion: TCodeCompletionSection;
+      Notes: TNotesSetion;
 
       ScriptManager: TScriptManagerSection;
 
@@ -720,6 +726,8 @@ procedure GetTrayAlwaysVisible(obj: TObject); begin TBooleanSetting(obj).Value :
 
 procedure GetSimbaNewsURL(obj: TObject); begin TStringSetting(obj).Value := 'http://simba.villavu.com/bin/news'; end;
 
+procedure GetNotesContent(obj: TObject); begin TStringSetting(obj).Value := 'FQAAAHic88svSS1WCE5NLsnMz1PQVXAqSvRWBABR+Abt'; end;
+procedure GetNotesVisible(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
 constructor TSimbaSettings.Create;
 begin
@@ -819,6 +827,12 @@ begin
   CodeCompletion := AddChild(TCodeCompletionSection.Create()) as TCodeCompletionSection;
   CodeCompletion.ShowAutomatically := CodeCompletion.AddChild(TBooleanSetting.Create(ssCodeCompletionShowAutomatically)) as TBooleanSetting;
   CodeCompletion.ShowAutomatically.onDefault := @GetCodeCompletionShowAutomatically;
+
+  Notes := AddChild(TNotesSetion.Create()) as TNotesSetion;
+  Notes.Content := Notes.AddChild(TStringSetting.Create(ssNotesContent)) as TStringSetting;
+  Notes.Content.onDefault := @GetNotesContent;
+  Notes.Visible := Notes.AddChild(TBooleanSetting.Create(ssNotesVisible)) as TBooleanSetting;
+  Notes.Visible.onDefault := @GetNotesVisible;
 
   ScriptManager := AddChild(TScriptManagerSection.Create()) as TScriptManagerSection;
   ScriptManager.ServerURL := ScriptManager.AddChild(TStringSetting.Create(ssSMURL)) as TStringSetting;
