@@ -97,7 +97,7 @@ end;
 
 function GetName: string;
 begin
-  Result := 'SRL/SPS/MSI/Plugins Updater';
+  Result := 'SRL/SPS/Plugins Updater';
 end;
 
 function GetVersion: string;
