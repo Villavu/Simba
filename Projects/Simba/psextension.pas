@@ -102,9 +102,11 @@ uses
   DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
-  DCPtiger,
+  DCPtiger
 
-  SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
+  {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
+
+  , SimbaUnit, updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}
   {$define PS_SafeCall}
