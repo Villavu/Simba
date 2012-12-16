@@ -103,6 +103,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionNotes: TAction;
     CallFormDesigner: TAction;
     ActionDebugger: TAction;
     ActionLape: TAction;
@@ -144,6 +145,8 @@ type
     LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     Memo1: TMemo;
+    MenuItemNotes: TMenuItem;
+    NotesMemo: TMemo;
     MenuFile: TMenuItem;
     MenuEdit: TMenuItem;
     MenuHelp: TMenuItem;
@@ -177,6 +180,7 @@ type
     NewsTimer: TTimer;
     FunctionListTimer: TTimer;
     SCARHighlighter: TSynPasSyn;
+    NotesSplitter: TSplitter;
     ToolButton5: TToolButton;
     TB_FromDesigner: TToolButton;
     TT_ScriptManager: TToolButton;
@@ -298,6 +302,7 @@ type
     procedure ActionNewExecute(Sender: TObject);
     procedure ActionNewTabExecute(Sender: TObject);
     procedure ActionNormalSizeExecute(Sender: TObject);
+    procedure ActionNotesExecute(Sender: TObject);
     procedure ActionOpenExecute(Sender: TObject);
     procedure ActionPascalScriptExecute(Sender: TObject);
     procedure ActionPasteExecute(Sender: TObject);
@@ -2232,6 +2237,14 @@ begin
   end;
 end;
 
+procedure TSimbaForm.ActionNotesExecute(Sender: TObject);
+begin
+  NotesMemo.Visible := (not (SimbaSettings.Notes.Visible.Value));
+  NotesSplitter.Visible := (not (SimbaSettings.Notes.Visible.Value));
+  ActionNotes.Checked := (not (SimbaSettings.Notes.Visible.Value));
+  SimbaSettings.Notes.Visible.Value := (not (SimbaSettings.Notes.Visible.Value));
+end;
+
 procedure TSimbaForm.ActionOpenExecute(Sender: TObject);
 begin
   Self.OpenScript;
@@ -2879,6 +2892,11 @@ begin
   if SimbaSettings.Oops then
     formWriteln('WARNING: No permissions to write to ' + SimbaSettingsFile);
 
+  NotesMemo.Lines.Text := Base64Decode(SimbaSettings.Notes.Content.Value);
+  NotesMemo.Visible := SimbaSettings.Notes.Visible.Value;
+  NotesSplitter.Visible := SimbaSettings.Notes.Visible.Value;
+  ActionNotes.Checked := SimbaSettings.Notes.Visible.Value;
+
   //Fill the codeinsight buffer
   FillThread.Start;
   
@@ -2928,6 +2946,8 @@ begin
   Unbind_Linux_Keys;
   {$ENDIF}
   {$endif}
+
+  SimbaSettings.Notes.Content.Value := Base64Encode(NotesMemo.Lines.Text);
 
   FreeSimbaSettings(True, SimbaSettingsFile);
 end;
