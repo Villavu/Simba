@@ -726,7 +726,7 @@ procedure GetTrayAlwaysVisible(obj: TObject); begin TBooleanSetting(obj).Value :
 
 procedure GetSimbaNewsURL(obj: TObject); begin TStringSetting(obj).Value := 'http://simba.villavu.com/bin/news'; end;
 
-procedure GetNotesContent(obj: TObject); begin TStringSetting(obj).Value := 'Tm90ZXMgU2VjdGlvbiAtIEJyYUsh'; end;
+procedure GetNotesContent(obj: TObject); begin TStringSetting(obj).Value := 'FQAAAHic88svSS1WCE5NLsnMz1PQVXAqSvRWBABR+Abt'; end;
 procedure GetNotesVisible(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
 constructor TSimbaSettings.Create;

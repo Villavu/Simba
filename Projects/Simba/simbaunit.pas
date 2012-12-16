@@ -2892,7 +2892,7 @@ begin
   if SimbaSettings.Oops then
     formWriteln('WARNING: No permissions to write to ' + SimbaSettingsFile);
 
-  NotesMemo.Lines.Text := Base64Decode(SimbaSettings.Notes.Content.Value);
+  NotesMemo.Lines.Text := DecompressString(Base64Decode(SimbaSettings.Notes.Content.Value));
   NotesMemo.Visible := SimbaSettings.Notes.Visible.Value;
   NotesSplitter.Visible := SimbaSettings.Notes.Visible.Value;
   ActionNotes.Checked := SimbaSettings.Notes.Visible.Value;
@@ -2947,7 +2947,7 @@ begin
   {$ENDIF}
   {$endif}
 
-  SimbaSettings.Notes.Content.Value := Base64Encode(NotesMemo.Lines.Text);
+  SimbaSettings.Notes.Content.Value := Base64Encode(CompressString(NotesMemo.Lines.Text));
 
   FreeSimbaSettings(True, SimbaSettingsFile);
 end;
