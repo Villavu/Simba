@@ -50,6 +50,6 @@
 {$MACRO ON}
 {$define lape_extdecl:=cdecl;}
 
-{$IFDEF UNIX}
+{$if defined(UNIX) or defined(cpu64)}
 	{$UNDEF USE_EXTENSIONS}
-{$ENDIF}
+{$ifend}

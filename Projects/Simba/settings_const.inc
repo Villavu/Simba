@@ -16,6 +16,7 @@ ssTray = 'Tray/';
 ssConsole = 'Console/';
 ssNews = 'News/';
 ssPlugins = 'Plugins/';
+ssNotes = 'Notes/';
 
 ssCheckUpdate = ssSettings + ssUpdater + 'CheckForUpdates';
 ssCheckUpdateMinutes = ssSettings + ssUpdater + 'CheckEveryXMinutes';
@@ -74,6 +75,9 @@ ssMaxRecentFiles = ssSettings + 'General/MaxRecentFiles';
 ssRecentFiles = ssLastConfig + ssMainForm + 'RecentFiles';
 ssRecentFilesCount = ssLastConfig + ssMainForm + 'RecentFiles/Count';
 ssRecentFileN = ssLastConfig + ssMainForm + 'RecentFiles/File';
+
+ssNotesContent = ssSettings + ssNotes + 'Content';
+ssNotesVisible = ssSettings + ssNotes + 'Visible';
 
 ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';
