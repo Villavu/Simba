@@ -127,7 +127,3 @@ AddTypes('THashType', '(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1,
 
 AddTypes('TOCRFilterData', 'record _type, is_text_color: integer; r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer; ref_color,tol,cts: integer; end;');
 AddTypes('TOCRFilterDataArray', 'array of TOCRFilterData');
-
-AddTypes('TMsgDlgType', '( mtWarning, mtError, mtInformation, mtConfirmation, mtCustom )');
-AddTypes('TMsgDlgBtn', '( mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp )');
-AddTypes('TMsgDlgButtons', 'set of TMsgDlgBtn');
