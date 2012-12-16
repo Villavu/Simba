@@ -79,7 +79,7 @@ uses
 
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSR_dll,
-  // uPSI_ComCtrls, uPSI_Dialogs,  //Removed in Laz PascalScript
+  uPSI_ComCtrls, uPSI_Dialogs,
   files,
   dialogs,
   dtm, //Dtms!
@@ -102,9 +102,11 @@ uses
   DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
-  DCPtiger,
+  DCPtiger
 
-  SimbaUnit,updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
+  {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
+
+  , SimbaUnit, updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
 {$ifdef Linux}
   {$define PS_SafeCall}
@@ -288,8 +290,8 @@ begin
   SIRegister_Forms(x);
   SIRegister_ExtCtrls(x);
   SIRegister_Menus(x);
-  //SIRegister_ComCtrls(x);
-  //SIRegister_Dialogs(x);
+  SIRegister_ComCtrls(x);
+  SIRegister_Dialogs(x);
 
   ScriptPath := IncludeTrailingPathDelimiter(ExpandFileName(ExtractFileDir(Filename)));
   ScriptFile := ExtractFileName(Filename);
@@ -341,8 +343,8 @@ begin
   RIRegister_Forms(x);
   RIRegister_ExtCtrls(x);
   RIRegister_Menus(x);
-  //RIRegister_ComCtrls(x);
-  //RIRegister_Dialogs(x);
+  RIRegister_ComCtrls(x);
+  RIRegister_Dialogs(x);
   RegisterDLLRuntime(se);
   RIRegister_MML(x);
 {  with x.FindClass('TMufasaBitmap') do
