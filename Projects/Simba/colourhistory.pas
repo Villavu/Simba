@@ -501,7 +501,9 @@ end;
 constructor TColourHistoryForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
-
+  {$IFDEF MSWINDOWS}
+    ShowInTaskBar:= stAlways;
+  {$ENDIF}
   PickNewColourButton.OnClick:= @SimbaForm.ButtonPickClick;
 end;
 
