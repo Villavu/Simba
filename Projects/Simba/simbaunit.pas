@@ -570,12 +570,10 @@ uses
    bitmaps,
    {$IFDEF USE_EXTENSIONS}extensionmanagergui,{$ENDIF}
    colourhistory,
-   math,
-   frmdesigner
+   math
+   {$IFDEF USE_FORMDESIGNER}, frmdesigner{$ENDIF}
 
-   {$IFDEF LINUX_HOTKEYS}
-   ,keybinder
-   {$ENDIF}
+   {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF}
    ;
 
 
@@ -2348,8 +2346,12 @@ end;
 
 procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
 begin
- {$IFDEF WINDOWS}if not Compform.visible then compform.show else compform.hide;{$ELSE}
-  if not Compform.visible then compform.Visible:=true else compform.Visible:=false;{$ENDIF}
+  {$IFDEF USE_FORMDESIGNER}
+  if (CompForm.Visible) then
+    CompForm.{$IFDEF WINDOWS}Hide{$ELSE}Visible := False{$ENDIF}
+  else
+    CompForm.{$IFDEF WINDOWS}Show{$ELSE}Visible := True{$ENDIF};
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.ChangeMouseStatus(Sender: TObject);
