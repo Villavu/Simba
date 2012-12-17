@@ -221,8 +221,7 @@ end;
 
 procedure TCompForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-   CloseAction := caNone;
-   Self.Hide;
+   CloseAction := caHide;
 end;
 
 procedure TCompForm.ApplyChClick(Sender: TObject);
@@ -529,7 +528,7 @@ var
 begin
   if not assigned(f) then
   begin
-  f:=TDsgnForm.Create(panel1);
+  {$IFDEF WINDOWS}f:=TDsgnForm.Create(self);{$ELSE}f:=TDsgnForm.Create(nil);{$ENDIF}
   f.Left:=0;
   f.Top:=0;
   f.Show;
