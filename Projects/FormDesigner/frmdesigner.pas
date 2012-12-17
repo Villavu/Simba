@@ -222,7 +222,7 @@ end;
 procedure TCompForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
    CloseAction := caNone;
-   Application.Minimize;
+   Self.Hide;
 end;
 
 procedure TCompForm.ApplyChClick(Sender: TObject);
@@ -535,7 +535,7 @@ begin
   f.Show;
   end;
   //f:=nil;
-   for i:=f.ComponentCount-1 downto 0 do
+ for i:=f.ComponentCount-1 downto 0 do
     f.Components[i].Free;
   fs := TFileStream.Create(FileName, 0);
   ms := TMemoryStream.Create;
