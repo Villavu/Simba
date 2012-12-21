@@ -2116,25 +2116,44 @@ end;
 {/\
   Removes all the doubles point from a TPA.
 /\}
+{Fixed by Cynic}
 
 procedure ClearDoubleTPA(var TPA: TPointArray);
 var
-   I, II, L: Integer;
-   Swappie: TPoint;
-begin
-  L := High(TPA);
-  for I := 0 To L Do
-    for II := I + 1 To L Do
-      if ((TPA[I].X = TPA[II].X) And (TPA[I].Y = TPA[II].Y)) then
+  i,j,k : integer;
+  flag  : boolean;
+  tmp     : TPointArray;
+Begin
+  i:=0;
+  SetLength(tmp,0);
+  while i < Length(TPA) do
+  begin
+    flag:=false;
+    k:=0;
+    while (k < Length(tmp)) and (not flag) do
+    begin
+      flag:=tmp[k]=TPA[i];
+      Inc(k);
+    end;
+    if not flag then
+    begin
+      k:=Length(tmp);
+      SetLength(tmp,k+1);
+      tmp[k]:=TPA[i];
+      Inc(i);
+    end
+    else
+     begin
+      j:=i;
+      while j < length (TPA)-1 do
       begin
-        Swappie := TPA[L];
-        TPA[L] := TPA[II];
-        TPA[II] := Swappie;
-        L := L - 1;
+        TPA[j]:=TPA[j+1];
+        inc(j);
       end;
-  SetLength(TPA, L + 1);
+      SetLength(TPA,Length(TPA)-1);
+    end;
+  end;
 end;
-
 {/\
   Uses Box to define an area around TotalTPA.
   Every point that is not in TotalTPA, but is in Box, is added to the Result.
