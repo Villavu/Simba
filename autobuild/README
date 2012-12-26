@@ -1,0 +1,2 @@
+This directory contains scripts used on the Simba buildbot. They are not scripts
+to build Simba locally, use lazbuild or the Makefile for that.
