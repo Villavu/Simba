@@ -220,7 +220,7 @@ begin
     try
     GetFromServer();
     except
-      mDebugLn('SM server is not finded');
+      mDebugLn('Script Manager server was not found');
       exit;
     end;
     Local := TClientStorage.Create();
@@ -237,7 +237,7 @@ begin
     try
     GetFromServer();
     except
-      mDebugLn('SM server is not finded');
+      mDebugLn('Script Manager server was not found');
       exit;
     end;
     Repository.SaveLocalXMLRegistry(option.XMLStorage);
