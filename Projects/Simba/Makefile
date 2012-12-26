@@ -76,7 +76,7 @@ ifeq ($(widgetset),win32)
 	binary_extension := .exe
 endif
 lclplatpath := $(lazaruspath)/lcl/units/$(platform)/
-lazarusunits := -Fu$(lazaruspath)/components/synedit/units/$(platform)/ -Fu$(lazaruspath)ideintf/units/$(platform)/ -Fu$(lclplatpath) -Fu$(lclplatpath)$(widgetset)/ -Fu$(lazaruspath)/packager/units/$(platform)/ -Fu$(lazaruspath)/components/mouseandkeyinput/
+lazarusunits := -Fu$(lazaruspath)/components/synedit/units/$(platform)/ -Fu$(lazaruspath)ideintf/units/$(platform)/ -Fu$(lclplatpath) -Fu$(lclplatpath)$(widgetset)/ -Fu$(lazaruspath)/packager/units/$(platform)/ -Fu$(lazaruspath)/components/mouseandkeyinput/ -Fu$(lazaruspath)/components/lazutils/ -Fu$(lazaruspath)/components/synedit
 
 default: build
 
