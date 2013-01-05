@@ -8,6 +8,11 @@ Requirements
 Required
 ~~~~~~~~
 
+Simba 1.0 and newer:
+* FPC 2.6.0+ `Project Home <http://www.freepascal.org/>`_ `Download <http://sourceforge.net/projects/freepascal/files/>`_
+* Lazarus 1.0+ `Project Home <http://www.lazarus.freepascal.org/>`_ `Download <http://sourceforge.net/projects/lazarus/files/>`_
+
+Simba 0.99 and earlier:
 * FPC 2.4.4 `Project Home <http://www.freepascal.org/>`_ `Download <http://sourceforge.net/projects/freepascal/files/>`_
 * Lazarus 0.9.30 `Project Home <http://www.lazarus.freepascal.org/>`_ `Download <http://sourceforge.net/projects/lazarus/files/>`_
 
