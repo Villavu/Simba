@@ -185,7 +185,7 @@ var
   oFileItem: TFileItem;
 begin
   oXmlDocument:=TXmlDocument.Create;
-  oXmlDocument.Encoding:='UTF-8';
+  {oXmlDocument.Encoding:='UTF-8'; // No exists in FPC 2.6.x}
   vRoot:=oXmlDocument.CreateElement('Document');
   oXmlDocument.AppendChild(vroot);
   vRoot:=oXMLDocument.DocumentElement;

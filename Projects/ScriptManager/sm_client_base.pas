@@ -241,7 +241,7 @@ begin
   DeleteFile(aFileName);
  // CheckStorage(aScript);
   oXmlDocument:=TXmlDocument.Create;
-  oXmlDocument.Encoding:='UTF-8';
+  {oXmlDocument.Encoding:='UTF-8'; // No Encoding with FPC 2.6.x}
   vRoot:=oXmlDocument.CreateElement('Document');
   oXmlDocument.AppendChild(vroot);
   vRoot:=oXMLDocument.DocumentElement;
