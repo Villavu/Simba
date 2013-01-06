@@ -1,4 +1,4 @@
-﻿{
+{
 	This file is part of the Mufasa Macro Library (MML)
 	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
 
