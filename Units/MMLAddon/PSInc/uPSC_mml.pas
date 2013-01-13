@@ -6,7 +6,7 @@ uses
 procedure SIRegister_MML(cl: TPSPascalCompiler);
 
 implementation
-
+uses mmltimer;
 procedure SIRegister_TMufasaBitmap(cl : TPSPascalCompiler);
 begin
   with cl.AddClassN(cl.FindClass('TObject'),'TMufasaBitmap') do
@@ -335,6 +335,22 @@ begin
   end;
 end;
 
+procedure SIRegister_TMMLTimer(CL: TPSPascalCompiler);
+begin
+CL.AddTypeS('TThreadPriority', '(tpIdle, tpLowest, tpLower, tpNormal, tpHigher, tpHighest, tpTimeCritical)');
+  with CL.AddClassN(CL.FindClass('TObject'),'TMMLTimer') do
+  begin
+    RegisterProperty('Enabled', 'Boolean', iptrw);
+    RegisterProperty('Interval', 'Integer', iptrw);
+    RegisterProperty('OnTimer', 'TNotifyEvent', iptrw);
+    RegisterProperty('ThreadPriority', 'TThreadPriority', iptrw);
+    RegisterMethod('constructor Create');
+    RegisterMethod('destructor Destroy');
+    RegisterMethod('Procedure On');
+    RegisterMethod('Procedure Off');
+  end;
+end;
+
 procedure SIRegister_IOManager(CL: TPSPascalCompiler);
 begin
   SIRegister_TTarget(CL);
@@ -374,6 +390,7 @@ begin
   SIRegister_TMBitmaps(cl);
   SIRegister_IOManager(cl);
   SIRegister_TClient(cl);
+  SIRegister_TMMLTimer(cl);
 end;
 
 end.
