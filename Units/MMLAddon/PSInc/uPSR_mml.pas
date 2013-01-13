@@ -8,7 +8,7 @@ procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 
 implementation
 uses
-  SynRegExpr,bitmaps,dtm,mufasatypes,client,ocr,lcltype,classes,finder,files,iomanager,settingssandbox,
+  SynRegExpr,bitmaps,dtm,mufasatypes,client,ocr,lcltype,classes,finder,files,iomanager,settingssandbox,mmltimer,
   {$IFDEF MSWINDOWS} os_windows {$ENDIF}
   {$IFDEF LINUX} os_linux {$ENDIF};
 
@@ -453,6 +453,15 @@ begin
   end;
 end;
 
+procedure RIRegister_TMMLTimer(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TMMLTimer) do
+  begin
+    RegisterConstructor(@TMMLTimer.Create, 'Create');
+    RegisterMethod(@TMMLTimer.On, 'On');
+    RegisterMethod(@TMMLTimer.Off, 'Off');
+  end;
+end;
 procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 begin;
   RIRegister_TMufasaBitmap(cl);
@@ -464,6 +473,7 @@ begin;
   RIRegister_TMBitmaps(cl);
   RIRegister_IOManager(cl);
   RIRegister_TClient(cl);
+  RIRegister_TMMLTimer(cl);
 end;
 
 end.

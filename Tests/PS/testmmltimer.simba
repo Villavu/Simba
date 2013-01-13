@@ -1,0 +1,19 @@
+program new;
+var
+ mmltimer: TMMLTimer;
+ i: integer;
+procedure Display(Sender: TObject);
+begin
+ i:=i+1;
+end;
+
+begin
+mmltimer:=TMMLTimer.Create;
+mmltimer.OnTimer:=@Display;
+mmltimer.Enabled:=true;
+wait(10000);
+writeln(toStr(i));
+ if i>10 then mmltimer.Free;
+
+
+end.

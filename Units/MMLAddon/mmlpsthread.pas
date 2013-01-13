@@ -265,6 +265,7 @@ uses
   strutils,
   fileutil,
   tpa, //Tpa stuff
+  mmltimer,
   forms,//Forms
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
