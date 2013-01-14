@@ -102,6 +102,13 @@ function TIOManagerCreate(plugin_dir : string) : TIOManager; begin result := TIO
 function TIOManager_AbstractCreate(plugin_dir : string) : TIOManager_Abstract; begin result := TIOManager_Abstract.Create(plugin_dir); end;
 Function TIOManagerSetTarget_P(Self: TIOManager;  target : TNativeWindow) : integer;Begin Result := Self.SetTarget(target); END;
 procedure TMufasaBitmapCopyClientToBitmap(Self : TMufasaBitmap; MWindow : TObject; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);begin self.CopyClientToBitmap(MWindow,Resize,x,y,xs,ys,xe,ye); end;
+{TMMLTimer}
+procedure TMMLTimer_ReadEnabled(Self: TMMLTimer; var Enabled: Boolean); begin Enabled := Self.Enabled; end;
+procedure TMMLTimer_SetEnabled(Self: TMMLTimer; const Enabled: Boolean); begin Self.Enabled := Enabled; end;
+procedure TMMLTimer_ReadInterval(Self: TMMLTimer; var Interval: Integer); begin Interval := Self.Interval; end;
+procedure TMMLTimer_SetInterval(Self: TMMLTimer; const Interval: Integer); begin Self.Interval := Interval; end;
+procedure TMMLTimer_ReadThreadPriority(Self: TMMLTimer; var ThreadPriority: TThreadPriority); begin ThreadPriority := Self.ThreadPriority; end;
+procedure TMMLTimer_SetThreadPriority(Self: TMMLTimer; const ThreadPriority: TThreadPriority); begin Self.ThreadPriority := ThreadPriority; end;
 
 procedure RIRegister_TMufasaBitmap(cl : TPSRuntimeClassImporter);
 begin
@@ -458,6 +465,9 @@ begin
   with CL.Add(TMMLTimer) do
   begin
     RegisterConstructor(@TMMLTimer.Create, 'Create');
+    RegisterPropertyHelper(@TMMLTimer_ReadEnabled, @TMMLTimer_SetEnabled, 'Enabled');
+    RegisterPropertyHelper(@TMMLTimer_ReadInterval, @TMMLTimer_SetInterval, 'Interval');
+    RegisterPropertyHelper(@TMMLTimer_ReadThreadPriority, @TMMLTimer_SetThreadPriority, 'ThreadPriority');
     RegisterMethod(@TMMLTimer.On, 'On');
     RegisterMethod(@TMMLTimer.Off, 'Off');
   end;
