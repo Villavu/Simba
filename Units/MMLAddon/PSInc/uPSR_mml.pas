@@ -224,14 +224,14 @@ procedure RIRegister_TMMLSettingsSandbox(cl : TPSRuntimeClassImporter);
 begin
   with cl.Add(TMMLSettingsSandbox) do
   begin
-    RegisterMethod(@TMMLSettingsSandbox.IsKey,'ISKEY');
-    RegisterMethod(@TMMLSettingsSandbox.IsDirectory,'ISDIRECTORY');
-    RegisterMethod(@TMMLSettingsSandbox.SetKeyValue,'SETKEYVALUE');
-    RegisterMethod(@TMMLSettingsSandbox.GetKeyValue,'GETKEYVALUE');
-    RegisterMethod(@TMMLSettingsSandbox.GetKeyValueDef,'GETKEYVALUEDEF');
-    RegisterMethod(@TMMLSettingsSandbox.ListKeys,'LISTKEYS');
-    RegisterMethod(@TMMLSettingsSandbox.DeleteKey,'DELETEKEY');
-    RegisterMethod(@TMMLSettingsSandbox.DeleteSubKeys,'DELETESUBKEYS');
+    RegisterMethod(@TMMLSettingsSandbox.IsKey,'IsKey');
+    RegisterMethod(@TMMLSettingsSandbox.IsDirectory,'IsDirectory');
+    RegisterMethod(@TMMLSettingsSandbox.SetKeyValue,'SetKeyValue');
+    RegisterMethod(@TMMLSettingsSandbox.GetKeyValue,'GetKeyValue');
+    RegisterMethod(@TMMLSettingsSandbox.GetKeyValueDef,'GetKeyValueDef');
+    RegisterMethod(@TMMLSettingsSandbox.ListKeys,'ListKeys');
+    RegisterMethod(@TMMLSettingsSandbox.DeleteKey,'DeleteKey');
+    RegisterMethod(@TMMLSettingsSandbox.DeleteSubKeys,'DeleteSubKeys');
     RegisterPropertyHelper(@SettingsPrefix,nil,'Prefix');
   end;
 end;
