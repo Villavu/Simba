@@ -274,6 +274,16 @@ begin
   AppendTPA(tpa,ToAppend);
 end;
 
+function ps_TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;  extdecl;
+begin
+  Result := TPAFromLine(x1, y1, x2, y2);
+end;
+
+function ps_EdgeFromBox(const Box: TBox): TPointArray;  extdecl;
+begin
+  Result := EdgeFromBox(Box);
+end;
+
 function ps_TPAFromBox(const Box : TBox) : TPointArray;  extdecl;
 begin
   result := TPAFromBox(box);
@@ -403,6 +413,14 @@ end;
 procedure ps_MergeATPAWrap(const ATPA : T2DPointArray; var Res: TPointArray); extdecl;
 begin
   Res := MergeATPA(ATPA);
+end;
+procedure ps_TPAFromLineWrap(const x1, y1, x2, y2: Integer; var Res: TPointArray); extdecl;
+begin
+  Res := TPAFromLine(x1, y1, x2, y2);
+end;
+procedure ps_EdgeFromBoxWrap(const Box: TBox; var Res: TPointArray); extdecl;
+begin
+  Res := EdgeFromBox(Box);
 end;
 procedure ps_TPAFromBoxWrap(const Box : TBox; var Res : TPointArray);extdecl;
 begin
