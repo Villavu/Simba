@@ -42,8 +42,8 @@ begin
     RegisterMethod('function ToString : string;');
     RegisterMethod('function ToTBitmap : TBitmap;');
     RegisterMethod('function CreateTMask : TMask;');
-    RegisterMethod('constructor create');
-    RegisterMethod('procedure Free');
+    RegisterMethod('constructor Create;');
+    RegisterMethod('procedure Free;');
     RegisterMethod('function SaveToFile(const FileName : string) :boolean;');
     RegisterMethod('procedure LoadFromFile(const FileName : string);');
     RegisterMethod('procedure LoadFromTBitmap(bmp: TBitmap);');
@@ -104,15 +104,15 @@ procedure SIRegister_TMDTM(cl : TPSPascalCompiler);
 begin
   with cl.AddClassN(cl.FindClass('TObject'),'TMDTM') do
   begin
-    RegisterMethod('constructor create;');
-    RegisterMethod('procedure free;');
+    RegisterMethod('constructor Create;');
+    RegisterMethod('procedure Free;');
     RegisterProperty('Name','String',iptrw);
     RegisterMethod('function ToString : string');
     RegisterMethod('function LoadFromString(const s : string) : boolean;');
     RegisterMethod('procedure Normalize;');
     RegisterMethod('function Valid: boolean');
     RegisterMethod('procedure DeletePoint(Point: integer);');
-    RegisterMethod('procedure SwapPoint(p1, p2: integer);');
+    RegisterMethod('procedure SwapPoint(P1, P2: integer);');
     RegisterMethod('procedure MovePoint(fromIndex,toIndex : integer);');
     RegisterMethod('function AddPoint(Point : TMDTMPoint): integer;');
     RegisterProperty('Count','Integer',iptrw);
@@ -273,7 +273,7 @@ begin
   with CL.AddClassN(CL.FindClass('TWindow_Abstract'),'TWindow') do
   begin
     {$ifdef mswindows}
-    RegisterMethod('Constructor Create( target : Hwnd)');
+    RegisterMethod('Constructor Create(target : Hwnd)');
     {$endif}
     RegisterMethod('Function GetNativeWindow : TNativeWindow');
   end;
