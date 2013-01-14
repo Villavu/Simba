@@ -273,6 +273,16 @@ begin
   ps_AppendTPA(PPointArray(Params^[0])^, PPointArray(Params^[1])^);
 end;
 
+procedure Lape_TPAFromLine(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPointArray(Result)^ := ps_TPAFromLine(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure Lape_EdgeFromBox(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPointArray(Result)^ := ps_EdgeFromBox(PBox(Params^[0])^);
+end;
+
 procedure Lape_TPAFromBox(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   PPointArray(Result)^ := ps_TPAFromBox(PBox(Params^[0])^);
@@ -406,6 +416,16 @@ end;
 procedure Lape_MergeATPAWrap(const Params: PParamArray); lape_extdecl
 begin
   ps_MergeATPAWrap(P2DPointArray(Params^[0])^, PPointArray(Params^[1])^);
+end;
+
+procedure Lape_TPAFromLineWrap(const Params: PParamArray); lape_extdecl
+begin
+  ps_TPAFromLineWrap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PPointArray(Params^[4])^);
+end;
+
+procedure Lape_EdgeFromBoxWrap(const Params: PParamArray); lape_extdecl
+begin
+  ps_EdgeFromBoxWrap(PBox(Params^[0])^, PPointArray(Params^[1])^);
 end;
 
 procedure Lape_TPAFromBoxWrap(const Params: PParamArray); lape_extdecl
