@@ -470,3 +470,15 @@ function ps_MiddleBox(b : TBox) : TPoint;
 begin
   result := MiddleBox(b);
 end;
+
+function  ps_TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;
+          const IsSortedAscending: Boolean): Integer; extdecl;
+begin
+  result:=TPAPosNext(Find,V,PrevPos,IsSortedAscending);
+end;
+
+function ps_GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray; extdecl;
+begin
+  result:=GlueTPAs(V1,V2,IsSortedAscending,byDifference);
+end;
+
