@@ -84,6 +84,8 @@ procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Intege
 procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean);
 function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;
 procedure AppendTPA(var TPA : TPointArray; const ToAppend : TPointArray);
+function TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;
+function EdgeFromBox(const Box: TBox): TPointArray;
 function TPAFromBox(const Box : TBox) : TPointArray;
 function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer): TPointArray;
 function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
@@ -1853,7 +1855,9 @@ begin;
   SetLength(Result,CurrentL);
 end;
 
-
+{/\
+  Appends ToAppend array to the end of TPA.
+/\}
 procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);
 var
   l,lo,i : integer;
@@ -1863,6 +1867,101 @@ begin
   setlength(TPA,lo + l  + 1);
   for i := 0 to l do
     TPA[i + lo] := ToAppend[i];
+end;
+
+{/\
+  Returns a TPointArray of a line specified by the end points x1,y1 and x2,y2.
+/\}
+function TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;
+var
+  Dx, Dy, CurrentX, CurrentY, Len, TwoDx, TwoDy, Xinc, YInc: Integer;
+  TwoDxAccumulatedError, TwoDyAccumulatedError: Integer;
+begin
+  Len := 0;
+  Dx := (X2-X1);
+  Dy := (Y2-Y1);
+  TwoDx := Dx + Dx;
+  TwoDy := Dy + Dy;
+  CurrentX := X1;
+  CurrentY := Y1;
+  Xinc := 1;
+  Yinc := 1;
+  if (Dx < 0) then
+  begin
+    Xinc := -1;
+    Dx := - Dx;
+    TwoDx := - TwoDx;
+  end;
+  if (Dy < 0) then
+  begin
+    Yinc := -1;
+    Dy := -Dy;
+    TwoDy := - TwoDy;
+  end;
+  SetLength(Result, 1);
+  Result[0] := Point(X1,Y1);
+  if ((Dx <> 0) or (Dy <> 0)) then
+  begin
+    if (Dy <= Dx) then
+    begin
+      TwoDxAccumulatedError := 0;
+      repeat
+        Inc(CurrentX, Xinc);
+        Inc(TwoDxAccumulatedError, TwoDy);
+        if (TwoDxAccumulatedError > Dx) then
+        begin
+          Inc(CurrentY, Yinc);
+          Dec(TwoDxAccumulatedError, TwoDx);
+        end;
+        Inc(Len);
+        SetLength(Result, Len + 1);
+        Result[Len] := Point(CurrentX,CurrentY);
+      until (CurrentX = X2);
+    end else
+    begin
+      TwoDyAccumulatedError := 0;
+      repeat
+        Inc(CurrentY, Yinc);
+        Inc(TwoDyAccumulatedError, TwoDx);
+        if (TwoDyAccumulatedError > Dy) then
+        begin
+          Inc(CurrentX, Xinc);
+          Dec(TwoDyAccumulatedError, TwoDy);
+        end;
+        Inc(Len);
+        SetLength(Result, Len + 1);
+        Result[Len] := Point(CurrentX,CurrentY);
+      until (CurrentY = Y2);
+    end;
+  end
+end;
+
+{/\
+  Returns a TPointArray of the edge/border of the given Box.
+/\}
+function EdgeFromBox(const Box: TBox): TPointArray;
+var
+  Height, I, Len, WHM1, Width: Integer;
+begin
+  Width := (Box.x2 - Box.x1);
+  Height := (Box.y2 - Box.y1);
+  Len := ((Width * 2) + (Height * 2));
+  SetLength(Result, Len);
+  for I := 0 to Width do
+  begin
+    Result[i].x := Box.x1 + i;
+    Result[i].y := Box.y1;
+    Result[(Len - (Width - i)) - 1].x := Box.x1 + i;
+    Result[(Len - (Width - i)) - 1].y := Box.y2;
+  end;
+  WHM1 := Width + (Height - 1);
+  for I := 1 to (Height - 1) do
+  begin
+    Result[Width + I].x := Box.x1;
+    Result[Width + I].y := Box.y1 + I;
+    Result[WHM1 + I].x := Box.x2;
+    Result[WHM1 + I].y := Box.y1 + I;
+  end;
 end;
 
 {/\
