@@ -870,29 +870,82 @@ begin
   end;
 
   SIRegister_Mufasa(x);
-  with x.AddFunction('procedure writeln;').decl do
+
+  with x.AddFunction('procedure writeln;').Decl.AddParam do
+  begin
+    OrgName := 'x';
+    Mode := pmIn;
+  end;
+
+  with x.AddFunction('function ToStr:string').Decl.AddParam do
+  begin
+    OrgName := 'x';
+    Mode := pmIn;
+  end;
+
+  with x.AddFunction('procedure swap;').Decl do
+  begin
     with AddParam do
     begin
-      OrgName:= 'x';
-      Mode:= pmIn;
+      OrgName := 'x';
+      Mode := pmInOut;
     end;
-  with x.AddFunction('function ToStr:string').decl do
-    with addparam do
+
+    with AddParam do
     begin
-      OrgName:= 'x';
-      Mode:= pmIn;
+      OrgName := 'y';
+      Mode := pmInOut;
     end;
-  with x.AddFunction('procedure swap;').decl do
+  end;
+
+  with x.AddFunction('procedure Insert;').Decl do
   begin
-    with addparam do
+    with AddParam do
     begin
-      OrgName:= 'x';
-      Mode:= pmInOut;
+      OrgName := 'Arr';
+      Mode := pmInOut;
     end;
-    with addparam do
+
+    with AddParam do
     begin
-      OrgName:= 'y';
-      Mode:= pmInOut;
+      OrgName := 'Item';
+      Mode := pmIn;
+    end;
+
+    with AddParam do
+    begin
+      OrgName := 'Index';
+      Mode := pmIn;
+    end;
+  end;
+
+  with x.AddFunction('procedure Append;').Decl do
+  begin
+    with AddParam do
+    begin
+      OrgName := 'Arr';
+      Mode := pmInOut;
+    end;
+
+    with AddParam do
+    begin
+      OrgName := 'Item';
+      Mode := pmIn;
+    end;
+  end;
+
+  with x.AddFunction('procedure Delete;').Decl do
+  begin
+    with AddParam do
+    begin
+      OrgName := 'Arr';
+      Mode := pmInOut;
+    end;
+
+    with AddParam do
+    begin
+      OrgName := 'Index';
+      Mode := pmIn;
     end;
   end;
 end;
@@ -940,6 +993,75 @@ begin
   end;
 end;
 
+function Insert_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  Arr, Item: TPSVariantIFC;
+  ItemSize, Len, Index: Int32;
+  PArr: PByte;
+begin
+  Result := True;
+  if (Stack.Count > 3) then
+    raise Exception.Create('Too many parameters');
+  if (Stack.Count < 2) then
+    raise Exception.Create('Not enough parameters');
+
+  Arr := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
+
+  if ((Arr.Dta = nil) or (Arr.aType.BaseType <> btArray)) then
+    raise Exception.Create('Invalid array');
+
+  ItemSize := TPSTypeRec_Array(Arr.aType).ArrayType.RealSize;
+  Len := PSDynArrayGetLength(PPointer(Arr.Dta)^, Arr.aType);
+
+  Item := NewTPSVariantIFC(Stack[Stack.Count - 2], False);
+  if ((Arr.Dta = nil) or (Item.aType.RealSize <> ItemSize)) then
+    raise Exception.Create('Invalid parameter');
+
+  Index := Len;
+  if (Stack.Count = 3) then
+    Index := Stack.GetInt(-3);
+
+  if ((Index < 0) or (Index > Len)) then
+    raise Exception.Create('Out of range');
+
+  PSDynArraySetLength(PPointer(Arr.Dta)^, Arr.aType, Len + 1);
+
+  PArr := PByte(Arr.Dta^);
+  if (Index < Len) then
+    Move(PArr[Index * ItemSize], PArr[(Index + 1) * ItemSize], (Len - Index) * ItemSize);
+  Move(PByte(Item.Dta^), PArr[Index * ItemSize], ItemSize);
+end;
+
+function Delete_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  Arr: TPSVariantIFC;
+  ItemSize, Len, Index: Int32;
+  PArr: PByte;
+begin
+  Result := True;
+  if (Stack.Count > 2) then
+    raise Exception.Create('Too many parameters');
+  if (Stack.Count < 2) then
+    raise Exception.Create('Not enough parameters');
+
+  Arr := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
+  if ((Arr.Dta = nil) or (Arr.aType.BaseType <> btArray)) then
+    raise Exception.Create('Invalid array');
+
+  Index := Stack.GetInt(-2);
+
+  ItemSize := TPSTypeRec_Array(Arr.aType).ArrayType.RealSize;
+  Len := PSDynArrayGetLength(PPointer(Arr.Dta)^, Arr.aType);
+
+  if ((Index < 0) or (Index >= Len)) then
+    raise Exception.Create('Out of array range');
+
+  PArr := PByte(Arr.Dta^);
+  Move(PArr[(Index + 1) * ItemSize], PArr[Index * ItemSize], (Len - Index) * ItemSize);
+
+  PSDynArraySetLength(PPointer(Arr.Dta)^, Arr.aType, Len - 1);
+end;
+
 procedure TPSThread.OnExecImport(Sender: TObject; se: TPSExec;
   x: TPSRuntimeClassImporter);
 begin
@@ -955,9 +1077,14 @@ begin
   RIRegister_ComCtrls(x);
   RIRegister_Dialogs(x);
   RegisterDLLRuntime(se);
-  se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
-  se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
-  se.RegisterFunctionName('SWAP',@swap_,nil,nil);
+
+  se.RegisterFunctionName('WriteLn',@Writeln_,nil,nil);
+  se.RegisterFunctionName('ToStr',@ToStr_,nil,nil);
+  se.RegisterFunctionName('Swap',@swap_,nil,nil);
+
+  se.RegisterFunctionName('Append', @Insert_, nil, nil);
+  se.RegisterFunctionName('Insert', @Insert_, nil, nil);
+  se.RegisterFunctionName('Delete', @Delete_, nil, nil);
 end;
 
 procedure TPSThread.OutputMessages;
