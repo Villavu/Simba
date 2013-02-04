@@ -221,8 +221,8 @@ end;
 
 procedure TCompForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  { CloseAction := caNone;
-   Application.Minimize;}
+   CloseAction := caNone;
+   Application.Minimize;
 end;
 
 procedure TCompForm.ApplyChClick(Sender: TObject);
