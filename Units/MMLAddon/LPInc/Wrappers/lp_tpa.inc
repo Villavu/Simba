@@ -497,3 +497,13 @@ procedure Lape_MiddleBox(const Params: PParamArray; const Result: Pointer); lape
 begin
   PPoint(Result)^ := ps_MiddleBox(PBox(Params^[0])^);
 end;
+
+procedure Lape_TPAPosNext(const Params: PParamArray;const Result: pointer); lape_extdecl
+begin
+ PInteger(Result)^:= ps_TPAPosNext(PPoint(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
+end;
+
+procedure Lape_GlueTPAs(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+ PPointArray(Result)^:= ps_GlueTPAs(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+end;

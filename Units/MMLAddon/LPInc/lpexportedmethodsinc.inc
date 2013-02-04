@@ -336,6 +336,8 @@ AddGlobalFunc('procedure OffsetATPA(var ATPA: T2DPointArray; const Offset: TPoin
 AddGlobalFunc('function CopyTPA(const TPA: TPointArray): TPointArray', @Lape_CopyTPA);
 AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @Lape_CopyATPA);
 AddGlobalFunc('function MiddleBox(b: TBox): TPoint', @Lape_MiddleBox);
+AddGlobalFunc('function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;',@Lape_TPAPosNext);
+AddGlobalFunc('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;',@Lape_GlueTPAs);
 AddGlobalFunc('procedure SetDesktopAsClient;', @Lape_SetDesktopAsClient);
 AddGlobalFunc('function SetTargetArray(P: Integer; w, h: integer): integer', @Lape_SetTargetArray);
 AddGlobalFunc('function SetTargetBitmap(bitmap: Integer): integer', @Lape_SetTargetBitmap);
