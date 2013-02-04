@@ -3,8 +3,6 @@ object DsgnForm: TDsgnForm
   Height = 240
   Top = 315
   Width = 320
-  BorderIcons = [biSystemMenu]
-  BorderStyle = bsDialog
   Caption = 'DsgnForm'
   ClientHeight = 240
   ClientWidth = 320
@@ -53,4 +51,4 @@ object DsgnForm: TDsgnForm
     left = 184
     top = 89
   end
-end
+end
