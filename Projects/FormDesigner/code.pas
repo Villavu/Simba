@@ -54,7 +54,7 @@ var
   i: integer;
   s: string;
 begin
- s:=#32;
+ s:='';
  for i := 0 to c -1 do
   begin
      s:=s+#32;
@@ -67,7 +67,8 @@ end;
 
 procedure TCodeGen.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  Labels.Free;
+
+Labels.Free;
   Edits.Free;
   Images.Free;
   Buttons.Free;
@@ -114,6 +115,7 @@ begin
   FormCode:=TStringList.Create;
   img:=0;
 end;
+
 
 procedure TCodeGen.MenuItem1Click(Sender: TObject);
 begin
