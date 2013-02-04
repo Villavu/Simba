@@ -572,6 +572,8 @@ AddFunction(@ps_copyTPA,'function CopyTPA(const TPA : TPointArray) : TPointArray
 AddFunction(@ps_CopyATPA,'function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;');
 AddFunction(@ps_MiddleBox,'function MiddleBox(b : TBox) : TPoint;');
 AddFunction(@ps_InAbstractBox, 'function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;');
+AddFunction(@ps_TPAPosNext,'function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;');
+AddFunction(@ps_GlueTPAs, 'function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;');
 
 {SQLite3}
 

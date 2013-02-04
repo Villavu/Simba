@@ -8,7 +8,7 @@ procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 
 implementation
 uses
-  SynRegExpr,bitmaps,dtm,mufasatypes,client,ocr,lcltype,classes,finder,files,iomanager,settingssandbox,
+  SynRegExpr,bitmaps,dtm,mufasatypes,client,ocr,lcltype,classes,finder,files,iomanager,settingssandbox,mmltimer,
   {$IFDEF MSWINDOWS} os_windows {$ENDIF}
   {$IFDEF LINUX} os_linux {$ENDIF};
 
@@ -102,51 +102,58 @@ function TIOManagerCreate(plugin_dir : string) : TIOManager; begin result := TIO
 function TIOManager_AbstractCreate(plugin_dir : string) : TIOManager_Abstract; begin result := TIOManager_Abstract.Create(plugin_dir); end;
 Function TIOManagerSetTarget_P(Self: TIOManager;  target : TNativeWindow) : integer;Begin Result := Self.SetTarget(target); END;
 procedure TMufasaBitmapCopyClientToBitmap(Self : TMufasaBitmap; MWindow : TObject; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);begin self.CopyClientToBitmap(MWindow,Resize,x,y,xs,ys,xe,ye); end;
+{TMMLTimer}
+procedure TMMLTimer_ReadEnabled(Self: TMMLTimer; var Enabled: Boolean); begin Enabled := Self.Enabled; end;
+procedure TMMLTimer_SetEnabled(Self: TMMLTimer; const Enabled: Boolean); begin Self.Enabled := Enabled; end;
+procedure TMMLTimer_ReadInterval(Self: TMMLTimer; var Interval: Integer); begin Interval := Self.Interval; end;
+procedure TMMLTimer_SetInterval(Self: TMMLTimer; const Interval: Integer); begin Self.Interval := Interval; end;
+procedure TMMLTimer_ReadThreadPriority(Self: TMMLTimer; var ThreadPriority: TThreadPriority); begin ThreadPriority := Self.ThreadPriority; end;
+procedure TMMLTimer_SetThreadPriority(Self: TMMLTimer; const ThreadPriority: TThreadPriority); begin Self.ThreadPriority := ThreadPriority; end;
 
 procedure RIRegister_TMufasaBitmap(cl : TPSRuntimeClassImporter);
 begin
   with cl.Add(TMufasaBitmap) do
   begin
     RegisterMethod(@TMufasaBitmap.ToTBitmap,'ToTBitmap');
-    RegisterMethod(@TMufasaBitmap.SetSize,'SETSIZE');
-    RegisterMethod(@TMufasaBitmap.StretchResize,'STRETCHRESIZE');
-    RegisterMethod(@TMufasaBitmap.SetPersistentMemory, 'SETPERSISTENTMEMORY');
-    RegisterMethod(@TMufasaBitmap.ResetPersistentMemory, 'RESETPERSISTENTMEMORY');
-    RegisterMethod(@TMufasaBitmap.FastSetPixel,'FASTSETPIXEL');
-    RegisterMethod(@TMufasaBitmap.FastSetPixels,'FASTSETPIXELS');
-    RegisterMethod(@TMufasaBitmap.DrawATPA,'DRAWATPA');
-    RegisterMethod(@TMufasaBitmap.DrawTPA,'DRAWTPA');
-    RegisterMethod(@TMufasaBitmap.DrawToCanvas, 'DRAWTOCANVAS');
-    RegisterMethod(@TMufasaBitmap.FloodFill,'FLOODFILL');
-    RegisterMethod(@TMufasaBitmap.Rectangle,'RECTANGLE');
-    RegisterMethod(@TMufasaBitmap.FastGetPixel,'FASTGETPIXEL');
-    RegisterMethod(@TMufasaBitmapCopyClientToBitmap,'COPYCLIENTTOBITMAP');
-    RegisterMethod(@TMufasaBitmap.SetTransparentColor,'SETTRANSPARENTCOLOR');
-    RegisterMethod(@TMufasaBitmap.GetTransparentColor,'GETTRANSPARENTCOLOR');
-    RegisterMethod(@TMufasaBitmap.FastDrawClear,'FASTDRAWCLEAR');
-    RegisterMethod(@TMufasaBitmap.FastDrawTransparent,'FASTDRAWTRANSPARENT');
-    RegisterMethod(@TMufasaBitmap.FastReplaceColor,'FASTREPLACECOLOR');
-    RegisterMethod(@TMufasaBitmap.RotateBitmap,'ROTATEBITMAP');
-    RegisterMethod(@TMufasaBitmap.Desaturate,'DESATURATE');
-    RegisterMethod(@TMufasaBitmap.GreyScale,'GREYSCALE');
-    RegisterMethod(@TMufasaBitmap.Brightness,'BRIGHTNESS');
-    RegisterMethod(@TMufasaBitmap.Contrast,'CONTRAST');
-    RegisterMethod(@TMufasaBitmap.Invert,'INVERT');
-    RegisterMethod(@TMufasaBitmap.Posterize,'POSTERIZE');
-    RegisterMethod(@TMufasaBitmap.Copy, 'COPY');
-    RegisterMethod(@TMufasaBitmap.ToString,'TOSTRING');
-    RegisterMethod(@TMufasaBitmap.CreateTMask,'CREATETMASK');
-    RegisterPropertyHelper(@MBmp_TransColorSet_r,nil,'TRANSPARENTCOLORSET');
-    RegisterPropertyHelper(@MBmp_Index_r,nil,'INDEX');
-    RegisterPropertyHelper(@MBmp_Width_r,nil,'WIDTH');
-    RegisterPropertyHelper(@MBmp_Height_r,nil,'HEIGHT');
-    RegisterPropertyHelper(@MBmp_FData_r,nil,'FDATA');
-    RegisterPropertyHelper(@MBmp_Name_r,@MBmp_Name_w,'NAME');
-    RegisterConstructor(@TMufasaBitmap.Create,'CREATE');
-    RegisterMethod(@TMufasaBitmap.free,'FREE');
-    RegisterMethod(@TMufasaBitmap.SaveToFile, 'SAVETOFILE');
-    RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LOADFROMFILE');
-    RegisterMethod(@TMufasaBitmap.LoadFromTBitmap, 'LOADFROMTBITMAP');
+    RegisterMethod(@TMufasaBitmap.SetSize,'SetSize');
+    RegisterMethod(@TMufasaBitmap.StretchResize,'StretcRresize');
+    RegisterMethod(@TMufasaBitmap.SetPersistentMemory, 'SetPersistentMemory');
+    RegisterMethod(@TMufasaBitmap.ResetPersistentMemory, 'SetPersistentMemory');
+    RegisterMethod(@TMufasaBitmap.FastSetPixel,'FastSetPixel');
+    RegisterMethod(@TMufasaBitmap.FastSetPixels,'FastSetPixels');
+    RegisterMethod(@TMufasaBitmap.DrawATPA,'DrawATPA');
+    RegisterMethod(@TMufasaBitmap.DrawTPA,'DrawTPA');
+    RegisterMethod(@TMufasaBitmap.DrawToCanvas, 'DrawToCanvas');
+    RegisterMethod(@TMufasaBitmap.FloodFill,'FloodFill');
+    RegisterMethod(@TMufasaBitmap.Rectangle,'Rectangle');
+    RegisterMethod(@TMufasaBitmap.FastGetPixel,'FastGetPixel');
+    RegisterMethod(@TMufasaBitmapCopyClientToBitmap,'CopyClientToBitmap');
+    RegisterMethod(@TMufasaBitmap.SetTransparentColor,'SetTransparentColor');
+    RegisterMethod(@TMufasaBitmap.GetTransparentColor,'GetTransparentColor');
+    RegisterMethod(@TMufasaBitmap.FastDrawClear,'FastDrawClear');
+    RegisterMethod(@TMufasaBitmap.FastDrawTransparent,'FastDrawTransparent');
+    RegisterMethod(@TMufasaBitmap.FastReplaceColor,'FastReplaceColor');
+    RegisterMethod(@TMufasaBitmap.RotateBitmap,'RotateBitmap');
+    RegisterMethod(@TMufasaBitmap.Desaturate,'Desaturate');
+    RegisterMethod(@TMufasaBitmap.GreyScale,'GreyScale');
+    RegisterMethod(@TMufasaBitmap.Brightness,'Brightness');
+    RegisterMethod(@TMufasaBitmap.Contrast,'Contrast');
+    RegisterMethod(@TMufasaBitmap.Invert,'Invert');
+    RegisterMethod(@TMufasaBitmap.Posterize,'Posterize');
+    RegisterMethod(@TMufasaBitmap.Copy, 'Copy');
+    RegisterMethod(@TMufasaBitmap.ToString,'ToString');
+    RegisterMethod(@TMufasaBitmap.CreateTMask,'CreateTMask');
+    RegisterPropertyHelper(@MBmp_TransColorSet_r,nil,'TransparentColorSet');
+    RegisterPropertyHelper(@MBmp_Index_r,nil,'Index');
+    RegisterPropertyHelper(@MBmp_Width_r,nil,'Width');
+    RegisterPropertyHelper(@MBmp_Height_r,nil,'Height');
+    RegisterPropertyHelper(@MBmp_FData_r,nil,'FData');
+    RegisterPropertyHelper(@MBmp_Name_r,@MBmp_Name_w,'Name');
+    RegisterConstructor(@TMufasaBitmap.Create,'Create');
+    RegisterMethod(@TMufasaBitmap.free,'Free');
+    RegisterMethod(@TMufasaBitmap.SaveToFile, 'SaveToFile');
+    RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LoadFormFile');
+    RegisterMethod(@TMufasaBitmap.LoadFromTBitmap, 'LoadFromTBitmap');
   end;
 end;
 
@@ -217,14 +224,14 @@ procedure RIRegister_TMMLSettingsSandbox(cl : TPSRuntimeClassImporter);
 begin
   with cl.Add(TMMLSettingsSandbox) do
   begin
-    RegisterMethod(@TMMLSettingsSandbox.IsKey,'ISKEY');
-    RegisterMethod(@TMMLSettingsSandbox.IsDirectory,'ISDIRECTORY');
-    RegisterMethod(@TMMLSettingsSandbox.SetKeyValue,'SETKEYVALUE');
-    RegisterMethod(@TMMLSettingsSandbox.GetKeyValue,'GETKEYVALUE');
-    RegisterMethod(@TMMLSettingsSandbox.GetKeyValueDef,'GETKEYVALUEDEF');
-    RegisterMethod(@TMMLSettingsSandbox.ListKeys,'LISTKEYS');
-    RegisterMethod(@TMMLSettingsSandbox.DeleteKey,'DELETEKEY');
-    RegisterMethod(@TMMLSettingsSandbox.DeleteSubKeys,'DELETESUBKEYS');
+    RegisterMethod(@TMMLSettingsSandbox.IsKey,'IsKey');
+    RegisterMethod(@TMMLSettingsSandbox.IsDirectory,'IsDirectory');
+    RegisterMethod(@TMMLSettingsSandbox.SetKeyValue,'SetKeyValue');
+    RegisterMethod(@TMMLSettingsSandbox.GetKeyValue,'GetKeyValue');
+    RegisterMethod(@TMMLSettingsSandbox.GetKeyValueDef,'GetKeyValueDef');
+    RegisterMethod(@TMMLSettingsSandbox.ListKeys,'ListKeys');
+    RegisterMethod(@TMMLSettingsSandbox.DeleteKey,'DeleteKey');
+    RegisterMethod(@TMMLSettingsSandbox.DeleteSubKeys,'DeleteSubKeys');
     RegisterPropertyHelper(@SettingsPrefix,nil,'Prefix');
   end;
 end;
@@ -453,6 +460,18 @@ begin
   end;
 end;
 
+procedure RIRegister_TMMLTimer(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TMMLTimer) do
+  begin
+    RegisterConstructor(@TMMLTimer.Create, 'Create');
+    RegisterPropertyHelper(@TMMLTimer_ReadEnabled, @TMMLTimer_SetEnabled, 'Enabled');
+    RegisterPropertyHelper(@TMMLTimer_ReadInterval, @TMMLTimer_SetInterval, 'Interval');
+    RegisterPropertyHelper(@TMMLTimer_ReadThreadPriority, @TMMLTimer_SetThreadPriority, 'ThreadPriority');
+    RegisterMethod(@TMMLTimer.On, 'On');
+    RegisterMethod(@TMMLTimer.Off, 'Off');
+  end;
+end;
 procedure RIRegister_MML(cl: TPSRuntimeClassImporter);
 begin;
   RIRegister_TMufasaBitmap(cl);
@@ -464,6 +483,7 @@ begin;
   RIRegister_TMBitmaps(cl);
   RIRegister_IOManager(cl);
   RIRegister_TClient(cl);
+  RIRegister_TMMLTimer(cl);
 end;
 
 end.
