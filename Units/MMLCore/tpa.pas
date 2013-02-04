@@ -68,6 +68,9 @@ procedure ClearSameIntegers(var a: TIntegerArray);
 procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
 function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
+function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer = -1;
+          const IsSortedAscending: Boolean = False): Integer;
+function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
@@ -1051,6 +1054,124 @@ begin
     Inc(c);
   end;
   SetLength(Result, c);
+end;
+
+function TPAPosNext(const Find: TPoint; const V: TPointArray;
+  const PrevPos: Integer; const IsSortedAscending: Boolean): Integer;
+var I, L, H : Integer;
+    D       : Tpoint;
+begin
+  if IsSortedAscending then // binary search
+    begin
+      if Max(PrevPos + 1, 0) = 0 then // find first
+        begin
+          L := 0;
+          H := Length(V) - 1;
+          while L <= H do
+            begin
+              I := (L + H) div 2;
+              D := V[I];
+              if Find = D then
+                begin
+                  while (I > 0) and (V[I - 1] = Find) do
+                    Dec(I);
+                  Result := I;
+                  exit;
+                end else
+              if D > Find then
+                H := I - 1
+              else
+                L := I + 1;
+            end;
+          Result := -1;
+        end
+      else // find next
+        if PrevPos >= Length(V) - 1 then
+          Result := -1
+        else
+          if V[PrevPos + 1] = Find then
+            Result := PrevPos + 1
+          else
+            Result := -1;
+    end
+  else
+    begin // linear search
+      for I := Max(PrevPos + 1, 0) to Length(V) - 1 do
+        if V[I] = Find then
+          begin
+            Result := I;
+            exit;
+          end;
+      Result := -1;
+    end;
+end;
+procedure AppendToArray(var V: TPointArray; const R: TPoint);
+var
+  Len: integer;
+begin
+  Len := Length(V);
+  SetLength(V, Len + 1);
+  V[Len] := R;
+end;
+
+function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean): TPointArray;
+var
+  I, J, L, LV : Integer;
+begin
+  if not byDifference then
+    begin
+       SetLength(Result, 0);
+    if IsSortedAscending then
+    begin
+      I := 0;
+      J := 0;
+      L := Length(V1);
+      LV := Length(V2);
+      while (I < L) and (J < LV) do
+        begin
+          while (I < L) and (V1[I] < V2[J]) do
+            Inc(I);
+          if I < L then
+            begin
+              if V1[I] = V2[J] then
+                AppendToArray(Result,V1[I]);
+              while (J < LV) and ((V2[J] < V1[I]) or (V2[J] = V1[I])) do
+                Inc(J);
+            end;
+        end;
+    end
+  else
+    for I := 0 to Length(V1) - 1 do
+      if (TPAPosNext(V1[I], V2) >= 0) and (TPAPosNext(V1[I], Result) = -1) then
+       AppendToArray(Result,V1[I]);
+    end
+  else
+    begin
+      SetLength(Result, 0);
+  if IsSortedAscending then
+    begin
+      I := 0;
+      J := 0;
+      L := Length(V1);
+      LV := Length(V2);
+      while (I < L) and (J < LV) do
+        begin
+          while (I < L) and (V1[I] < V2[J]) do
+            Inc(I);
+          if I < L then
+            begin
+              if V1[I] <> V2[J] then
+                 AppendToArray(Result,V1[I]);
+              while (J < LV) and ((V2[J] < V1[I]) or (V2[J] = V1[I])) do
+                Inc(J);
+            end;
+        end;
+    end
+  else
+    for I := 0 to Length(V1) - 1 do
+      if (TPAPosNext(V1[I], V2) = -1) and (TPAPosNext(V1[I], Result) = -1) then
+        AppendToArray(Result,V1[I]);
+    end;
 end;
 
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
