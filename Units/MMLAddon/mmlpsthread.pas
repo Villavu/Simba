@@ -902,7 +902,7 @@ begin
   begin
     with AddParam do
     begin
-      OrgName := 'Arr';
+      OrgName := 'x';
       Mode := pmInOut;
     end;
 
@@ -923,7 +923,7 @@ begin
   begin
     with AddParam do
     begin
-      OrgName := 'Arr';
+      OrgName := 'x';
       Mode := pmInOut;
     end;
 
@@ -938,13 +938,19 @@ begin
   begin
     with AddParam do
     begin
-      OrgName := 'Arr';
+      OrgName := 'x';
       Mode := pmInOut;
     end;
 
     with AddParam do
     begin
       OrgName := 'Index';
+      Mode := pmIn;
+    end;
+
+    with AddParam do
+    begin
+      OrgName := 'Count';
       Mode := pmIn;
     end;
   end;
@@ -1034,32 +1040,41 @@ end;
 
 function Delete_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
 var
-  Arr: TPSVariantIFC;
-  ItemSize, Len, Index: Int32;
+  Param: TPSVariantIFC;
+  ItemSize, Len, Index, Count: Int32;
   PArr: PByte;
 begin
   Result := True;
-  if (Stack.Count > 2) then
+  if (Stack.Count > 3) then
     raise Exception.Create('Too many parameters');
-  if (Stack.Count < 2) then
+  if (Stack.Count < 3) then
     raise Exception.Create('Not enough parameters');
 
-  Arr := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
-  if ((Arr.Dta = nil) or (Arr.aType.BaseType <> btArray)) then
-    raise Exception.Create('Invalid array');
+  Param := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
+  if (Param.Dta = nil) then
+    raise Exception.Create('Invalid parameter');
 
   Index := Stack.GetInt(-2);
+  Count := Stack.GetInt(-3);
 
-  ItemSize := TPSTypeRec_Array(Arr.aType).ArrayType.RealSize;
-  Len := PSDynArrayGetLength(PPointer(Arr.Dta)^, Arr.aType);
+  case Param.aType.BaseType of
+    //FIXME: Detect string type! Currently will silently cause corruption on non ansistrings.
+    btString: Delete(PString(Param.Dta)^, Index, Count);
+    btArray: begin
+        ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
+        Len := PSDynArrayGetLength(PPointer(Param.Dta)^, Param.aType);
 
-  if ((Index < 0) or (Index >= Len)) then
-    raise Exception.Create('Out of array range');
+        if ((Index < 0) or (Index >= Len)) then
+          raise Exception.Create('Out of array range');
 
-  PArr := PByte(Arr.Dta^);
-  Move(PArr[(Index + 1) * ItemSize], PArr[Index * ItemSize], (Len - Index) * ItemSize);
+        PArr := PByte(Param.Dta^);
+        Move(PArr[(Index + Count) * ItemSize], PArr[Index * ItemSize], (Len - (Index + Count)) * ItemSize);
 
-  PSDynArraySetLength(PPointer(Arr.Dta)^, Arr.aType, Len - 1);
+        PSDynArraySetLength(PPointer(Param.Dta)^, Param.aType, Len - Count);
+      end;
+    else
+      raise Exception.Create('Invalid parameter type');
+  end;
 end;
 
 procedure TPSThread.OnExecImport(Sender: TObject; se: TPSExec;
