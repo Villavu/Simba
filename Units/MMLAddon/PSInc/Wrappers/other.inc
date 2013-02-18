@@ -35,6 +35,22 @@ function ps_GetScriptProp(prop : TSP_Property; var Value : TVariantArray) : bool
 begin;
   exit(CurrThread.Prop.GetProp(prop,value));
 end;
+
+function ps_AddOnTerminate(const proc : string) : boolean; extdecl;
+var
+  OldProcs : TVariantArray;
+  i : integer;
+begin
+  result := false;
+  ps_GetScriptProp(SP_OnTerminate,OldProcs);
+  for i := 0 to high(OldProcs) do
+    if lowercase(OldProcs[i]) = lowercase(proc) then
+      exit;
+  setlength(OldProcs,Length(OldProcs)+1);
+  OldProcs[high(OldProcs)] := proc;
+  ps_SetScriptProp(SP_OnTerminate,oldprocs);
+  result := True;
+end;
 {$ENDIF}
 
 procedure ps_Wait(t: DWord); extdecl;

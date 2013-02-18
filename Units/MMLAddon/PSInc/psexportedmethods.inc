@@ -206,6 +206,7 @@ AddFunction(@ps_Status,'procedure Status(Status : string);');
 AddFunction(@ps_Disguise,'procedure Disguise(Caption : string);');
 AddFunction(@ps_SetScriptProp, 'function SetScriptProp(Prop : TSP_Property; Value: TVariantArray): boolean;');
 AddFunction(@ps_GetScriptProp, 'function GetScriptProp(Prop : TSP_Property;var Value: TVariantArray): boolean;');
+AddFunction(@ps_AddOnTerminate, 'function AddOnTerminate(const proc : string) : boolean;');
 AddFunction(@ps_InputQuery,'function InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;');
 AddFunction(@ps_ShowMessage,'procedure ShowMessage(msg : string);');
 AddFunction(@ps_messageBox,'function MessageBox(Text, Caption: string; Flags: LongInt): Integer;');
@@ -253,6 +254,7 @@ AddFunction(@ps_ExecRegExpr,'function ExecRegExpr( const RegExpr, InputStr : Str
 AddFunction(@ps_SplitRegExpr,'procedure SplitRegExpr( const RegExpr, InputStr : String; Pieces : TStringList);');
 AddFunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
 AddFunction(@ps_posex, 'function PosEx(needle, haystack: String; offset: integer): integer;');
+addfunction(@ps_StringMatch, 'function StringMatch(FindStr, UpTxt: string; tol: Extended): boolean;');
 
 {crypto}
 SetCurrSection('Crypto');

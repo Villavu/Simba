@@ -44,6 +44,8 @@ function Base64Encode(const str : string) : string;
 function Base64Decode(const str : string) : string;
 function LevDistance(src, target: string): Integer;
 function NormLevDistance(src, target: string): Extended;
+function JaroWinkler(u, v: string): Double;
+function StringMatch(FindStr, UpTxt: string; tol: Extended): Boolean;
 
 implementation
 uses
@@ -260,5 +262,72 @@ begin
   Result := LevDistance(src, target) / Result;
 end;
 
-end.
+function JaroWinkler(u, v: String): Double;
+var
+  a, b, i, j, m, mr, l: Integer;
+  ut, vt: String;
+  uignore, vignore: Array of Integer;
+  t: Extended;
+begin
+  result := 0.0;
 
+  a := length(u);
+  b := length(v);
+  mr := ceil(max(a, b) / 2.0) - 1;
+  setLength(uignore, a);
+  setLength(vignore, b);
+
+  m := 0;
+  for i := 1 to a do
+  begin
+    for j := 1 to b do
+    begin
+      if((u[i] = v[j]) and (uignore[i-1] = 0) and (vignore[j-1] = 0))then
+        if(abs(i - j) <= mr)then
+        begin
+          Inc(m);
+          uignore[i-1] := 1;
+          vignore[j-1] := 1;
+          break;
+        end;
+    end;
+  end;
+
+  t := 0.0;
+  for i := 0 to a-1 do
+    if(uignore[i] = 1)then ut := ut + u[i+1];
+  for i := 0 to b-1 do
+    if(vignore[i] = 1)then vt := vt + v[i+1];
+
+  for i := 1 to length(ut) do
+    if(not(ut[i] = vt[i]))then t := t + 1.0;
+  t := t / 2.0;
+
+  l := 0;
+  for i := 1 to a do
+    if(u[i] = v[i])then Inc(l) else break;
+
+  try
+    result := (1.0/3)*(  Extended(m)/a  +  Extended(m)/b  +  Extended(m-t)/m  );
+    result := result + (l * 0.1 * (1.0 - result));
+  except
+  end;
+end;
+
+Function StringMatch(FindStr, UpTxt: string; tol: Extended): boolean;
+var
+  fL, uL, i: integer;
+  Hi, J: Extended;
+begin
+  fL := Length(FindStr);
+  uL := Length(UpTxt)+1;
+  for i := 1 to uL-fL do
+  begin
+    J := JaroWinkler(FindStr, Copy(UpTxt, i, fL));
+    if J > Hi then
+      Hi := J;
+  end;
+  Result := Hi >= tol;
+end;
+
+end.

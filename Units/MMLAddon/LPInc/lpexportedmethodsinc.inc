@@ -216,13 +216,14 @@ AddGlobalFunc('function SetScriptProp(prop: TSP_Property; Value: TVariantArray):
 AddGlobalFunc('function GetScriptProp(prop: TSP_Property; var Value: TVariantArray): boolean', @Lape_GetScriptProp);
 AddGlobalFunc('procedure Wait(t: DWord);', @Lape_Wait);
 AddGlobalFunc('function SetSettingValue(const KeyName,value: string): boolean', @Lape_SetSettingValue);
-AddGlobalFunc('function KeyIsSetting(const KeyName: String): Boolean', @Lape_KeyIsSetting);
-AddGlobalFunc('function KeyIsDirectory(const KeyName: String): Boolean', @Lape_KeyIsDirectory);
-AddGlobalFunc('function GetSettingValue(const KeyName: String): String', @Lape_GetSettingValue);
-AddGlobalFunc('function GetSettingValueDef(const KeyName, defVal: String): String', @Lape_GetSettingValueDef);
+AddGlobalFunc('function KeyIsSetting(const KeyName: String): boolean', @Lape_KeyIsSetting);
+AddGlobalFunc('function KeyIsDirectory(const KeyName: String): boolean', @Lape_KeyIsDirectory);
+AddGlobalFunc('function GetSettingValue(const KeyName: String): string', @Lape_GetSettingValue);
+AddGlobalFunc('function GetSettingValueDef(const KeyName, defVal: String): string', @Lape_GetSettingValueDef);
 AddGlobalFunc('function ListSettings(const KeyName: String; var KeyReturn: TStringArray): boolean', @Lape_ListSettings);
-AddGlobalFunc('function DeleteSetting(const KeyName: String): Boolean', @Lape_DeleteSetting);
-AddGlobalFunc('function DeleteSubSettings(const KeyName: String): Boolean', @Lape_DeleteSubSettings);
+AddGlobalFunc('function DeleteSetting(const KeyName: String): boolean', @Lape_DeleteSetting);
+AddGlobalFunc('function DeleteSubSettings(const KeyName: String): boolean', @Lape_DeleteSubSettings);
+AddGlobalFunc('function AddOnTerminate(const proc : string) : boolean', @Lape_AddOnTerminate);
 AddGlobalFunc('function Capitalize(str: string): string', @Lape_Capitalize);
 AddGlobalFunc('function CompressString(const Str: string): string', @Lape_CompressString);
 AddGlobalFunc('function DecompressString(const Compressed: string): string', @Lape_DecompressString);
@@ -240,6 +241,7 @@ AddGlobalFunc('function StrToFloatDef(value: String; default: Extended): Extende
 AddGlobalFunc('function StrToBool(value: String): Boolean', @Lape_StrToBool);
 AddGlobalFunc('function StrToBoolDef(value: String; default: Boolean): Boolean', @Lape_StrToBoolDef);
 AddGlobalFunc('function Between(s1, s2, str: string): string', @Lape_Between);
+AddGlobalFunc('function StringMatch(FindStr, UpTxt: string; tol: Extended): boolean', @Lape_StringMatch);
 AddGlobalFunc('procedure Quicksort(var Arr: TIntegerArray);', @Lape_Quicksort);
 AddGlobalFunc('procedure tSwap(var a, b: TPoint);', @Lape_tSwap);
 AddGlobalFunc('procedure tpaSwap(var a, b: TPointArray);', @Lape_tpaSwap);

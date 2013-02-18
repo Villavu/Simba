@@ -138,7 +138,7 @@ begin
   PLongInt(Result)^ := ps_GetProcessID();
 end;
 
-procedure Lape_GetProcesses(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_GetProcesses(const Result: Pointer); lape_extdecl
 begin
   PSysProcArr(Result)^ := ps_GetProcesses();
 end;
@@ -146,4 +146,9 @@ end;
 procedure Lape_SetTarget(const Params: PParamArray); lape_extdecl
 begin
   ps_SetTarget(PSysProc(Params^[0])^);
+end;
+
+procedure Lape_AddOnTerminate(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_AddOnTerminate(PString(Params^[0])^);
 end;
