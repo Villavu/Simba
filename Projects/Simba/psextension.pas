@@ -1,6 +1,6 @@
 {
-	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
+    This file is part of the Mufasa Macro Library (MML)
+    Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -87,6 +87,7 @@ uses
   Graphics, //For Graphics types
   math, //Maths!
   mmath, //Real maths!
+  mmltimer,
   strutils,
   fileutil,
   tpa, //Tpa stuff

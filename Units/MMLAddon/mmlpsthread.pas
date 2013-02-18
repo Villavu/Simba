@@ -265,6 +265,7 @@ uses
   strutils,
   fileutil,
   tpa, //Tpa stuff
+  mmltimer,
   forms,//Forms
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
@@ -870,29 +871,88 @@ begin
   end;
 
   SIRegister_Mufasa(x);
-  with x.AddFunction('procedure writeln;').decl do
+
+  with x.AddFunction('procedure writeln;').Decl.AddParam do
+  begin
+    OrgName := 'x';
+    Mode := pmIn;
+  end;
+
+  with x.AddFunction('function ToStr:string').Decl.AddParam do
+  begin
+    OrgName := 'x';
+    Mode := pmIn;
+  end;
+
+  with x.AddFunction('procedure swap;').Decl do
+  begin
     with AddParam do
     begin
-      OrgName:= 'x';
-      Mode:= pmIn;
+      OrgName := 'x';
+      Mode := pmInOut;
     end;
-  with x.AddFunction('function ToStr:string').decl do
-    with addparam do
+
+    with AddParam do
     begin
-      OrgName:= 'x';
-      Mode:= pmIn;
+      OrgName := 'y';
+      Mode := pmInOut;
     end;
-  with x.AddFunction('procedure swap;').decl do
+  end;
+
+  with x.AddFunction('procedure Insert;').Decl do
   begin
-    with addparam do
+    with AddParam do
     begin
-      OrgName:= 'x';
-      Mode:= pmInOut;
+      OrgName := 'x';
+      Mode := pmInOut;
     end;
-    with addparam do
+
+    with AddParam do
     begin
-      OrgName:= 'y';
-      Mode:= pmInOut;
+      OrgName := 'Item';
+      Mode := pmIn;
+    end;
+
+    with AddParam do
+    begin
+      OrgName := 'Index';
+      Mode := pmIn;
+    end;
+  end;
+
+  with x.AddFunction('procedure Append;').Decl do
+  begin
+    with AddParam do
+    begin
+      OrgName := 'x';
+      Mode := pmInOut;
+    end;
+
+    with AddParam do
+    begin
+      OrgName := 'Item';
+      Mode := pmIn;
+    end;
+  end;
+
+  with x.AddFunction('procedure Delete;').Decl do
+  begin
+    with AddParam do
+    begin
+      OrgName := 'x';
+      Mode := pmInOut;
+    end;
+
+    with AddParam do
+    begin
+      OrgName := 'Index';
+      Mode := pmIn;
+    end;
+
+    with AddParam do
+    begin
+      OrgName := 'Count';
+      Mode := pmIn;
     end;
   end;
 end;
@@ -940,6 +1000,105 @@ begin
   end;
 end;
 
+function Insert_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  Param, Item: TPSVariantIFC;
+  ItemSize, Len, Index: Int32;
+  PArr: PByte;
+begin
+  Result := True;
+  if (Stack.Count > 3) then
+    raise Exception.Create('Too many parameters');
+  if (Stack.Count < 2) then
+    raise Exception.Create('Not enough parameters');
+
+  Param := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
+
+  if (Param.Dta = nil) then
+    raise Exception.Create('Invalid parameter');
+
+  case Param.aType.BaseType of
+    btString: begin
+        ItemSize := TPSTypeRec(Param.aType).RealSize;
+        Len := Length(PString(Param.Dta)^);
+      end;
+    btArray: begin
+        ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
+        Len := PSDynArrayGetLength(PPointer(Param.Dta)^, Param.aType);
+      end;
+    else
+      raise Exception.Create('Invalid parameter type');
+  end;
+
+  Item := NewTPSVariantIFC(Stack[Stack.Count - 2], False);
+  if ((Item.Dta = nil) or (Item.aType.RealSize <> ItemSize)) then
+    raise Exception.Create('Invalid parameter');
+
+  Index := Len + Ord(Param.aType.BaseType = btString);
+  if (Stack.Count = 3) then
+    Index := Stack.GetInt(-3);
+
+  if ((Index < Ord(Param.aType.BaseType = btString)) or (Index > Len + Ord(Param.aType.BaseType = btString))) then
+    raise Exception.Create('Out of range');
+
+  case Param.aType.BaseType of
+    //FIXME: Add detection of string type.
+    btString: Insert(PString(Item.Dta)^, PString(Param.Dta)^, Index);
+    btArray: begin
+        if ((Index < 0) or (Index > Len)) then
+          raise Exception.Create('Out of range');
+
+        PSDynArraySetLength(PPointer(Param.Dta)^, Param.aType, Len + 1);
+
+        PArr := PByte(Param.Dta^);
+        if (Index < Len) then
+          Move(PArr[Index * ItemSize], PArr[(Index + 1) * ItemSize], (Len - Index) * ItemSize);
+        Move(PByte(Item.Dta^), PArr[Index * ItemSize], ItemSize);
+      end;
+    else
+      raise Exception.Create('Invalid parameter type');
+  end;
+end;
+
+function Delete_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  Param: TPSVariantIFC;
+  ItemSize, Len, Index, Count: Int32;
+  PArr: PByte;
+begin
+  Result := True;
+  if (Stack.Count > 3) then
+    raise Exception.Create('Too many parameters');
+  if (Stack.Count < 3) then
+    raise Exception.Create('Not enough parameters');
+
+  Param := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
+  if (Param.Dta = nil) then
+    raise Exception.Create('Invalid parameter');
+
+  Index := Stack.GetInt(-2);
+  Count := Stack.GetInt(-3);
+
+  case Param.aType.BaseType of
+    //FIXME: Detect string type! Currently will silently cause corruption on non ansistrings.
+    btString: Delete(PString(Param.Dta)^, Index, Count);
+    btArray: begin
+        ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
+        Len := PSDynArrayGetLength(PPointer(Param.Dta)^, Param.aType);
+
+        if ((Index < 0) or (Index >= Len)) then
+          raise Exception.Create('Out of array range');
+
+        PArr := PByte(Param.Dta^);
+        Move(PArr[(Index + Count) * ItemSize], PArr[Index * ItemSize], (Len - (Index + Count)) * ItemSize);
+
+        PSDynArraySetLength(PPointer(Param.Dta)^, Param.aType, Len - Count);
+      end;
+    else
+      raise Exception.Create('Invalid parameter type');
+  end;
+end;
+
 procedure TPSThread.OnExecImport(Sender: TObject; se: TPSExec;
   x: TPSRuntimeClassImporter);
 begin
@@ -955,9 +1114,14 @@ begin
   RIRegister_ComCtrls(x);
   RIRegister_Dialogs(x);
   RegisterDLLRuntime(se);
-  se.RegisterFunctionName('WRITELN',@Writeln_,nil,nil);
-  se.RegisterFunctionName('TOSTR',@ToStr_,nil,nil);
-  se.RegisterFunctionName('SWAP',@swap_,nil,nil);
+
+  se.RegisterFunctionName('WriteLn',@Writeln_,nil,nil);
+  se.RegisterFunctionName('ToStr',@ToStr_,nil,nil);
+  se.RegisterFunctionName('Swap',@swap_,nil,nil);
+
+  se.RegisterFunctionName('Append', @Insert_, nil, nil);
+  se.RegisterFunctionName('Insert', @Insert_, nil, nil);
+  se.RegisterFunctionName('Delete', @Delete_, nil, nil);
 end;
 
 procedure TPSThread.OutputMessages;

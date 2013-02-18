@@ -1,4 +1,4 @@
-﻿{
+{
 	This file is part of the Mufasa Macro Library (MML)
 	Copyright (c) 2009 by Raymond van Venetië and Merlijn Wajer
 
@@ -525,6 +525,8 @@ AddFunction(@ps_TPAtoATPA,'function TPAtoATPA(const TPA: TPointArray; Dist: Inte
 AddFunction(@ps_CombineIntArray,'function CombineIntArray(const Ar1, Ar2: TIntegerArray): TIntegerArray;');
 AddFunction(@ps_MergeATPA,'function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;');
 AddFunction(@ps_AppendTPA,'procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);');
+AddFunction(@ps_TPAFromLine, 'function TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;');
+AddFunction(@ps_EdgeFromBox, 'function EdgeFromBox(const Box: TBox): TPointArray;');
 AddFunction(@ps_TPAFromBox,'function TPAFromBox(const Box : TBox) : TPointArray;');
 AddFunction(@ps_TPAFromEllipse,'function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray;');
 AddFunction(@ps_TPAFromCircle,'function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray;');
@@ -554,6 +556,8 @@ AddFunction(@ps_MiddleTPAWrap,'procedure MiddleTPAWrap(const TPA: TPointArray; v
 AddFunction(@ps_CombineIntArrayWrap, 'procedure CombineIntArrayWrap(const Ar1, Ar2: TIntegerArray; var Res :  TIntegerArray);');
 AddFunction(@ps_ReturnPointsNotInTPAWrap,'procedure ReturnPointsNotInTPAWrap(Const TotalTPA: TPointArray; const Box: TBox; var Res :  TPointArray);');
 AddFunction(@ps_MergeATPAWrap,'procedure MergeATPAWrap(const ATPA : T2DPointArray; var Res: TPointArray);');
+AddFunction(@ps_TPAFromLineWrap, 'procedure TPAFromLineWrap(const x1, y1, x2, y2: Integer; var Res: TPointArray);');
+AddFunction(@ps_EdgeFromBoxWrap, 'procedure EdgeFromBoxWrap(const Box: TBox; var Res: TPointArray);');
 AddFunction(@ps_TPAFromBoxWrap,'procedure TPAFromBoxWrap(const Box : TBox; var Res : TPointArray);');
 AddFunction(@ps_TPAFromEllipseWrap,'procedure TPAFromEllipseWrap(const CX, CY, XRadius, YRadius : Integer; var Res : TPointArray);');
 AddFunction(@ps_TPAFromCircleWrap,'procedure TPAFromCircleWrap(const CX, CY, Radius : Integer; var Res : TPointArray);');
@@ -568,6 +572,8 @@ AddFunction(@ps_copyTPA,'function CopyTPA(const TPA : TPointArray) : TPointArray
 AddFunction(@ps_CopyATPA,'function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;');
 AddFunction(@ps_MiddleBox,'function MiddleBox(b : TBox) : TPoint;');
 AddFunction(@ps_InAbstractBox, 'function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;');
+AddFunction(@ps_TPAPosNext,'function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;');
+AddFunction(@ps_GlueTPAs, 'function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;');
 
 {SQLite3}
 

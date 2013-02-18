@@ -68,6 +68,9 @@ procedure ClearSameIntegers(var a: TIntegerArray);
 procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
 function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
+function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer = -1;
+          const IsSortedAscending: Boolean = False): Integer;
+function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
@@ -84,6 +87,8 @@ procedure SortCircleWise(var tpa: TPointArray; const cx, cy, StartDegree: Intege
 procedure LinearSort(var tpa: TPointArray; cx, cy, sd: Integer; SortUp: Boolean);
 function MergeATPA(const ATPA : T2DPointArray)  : TPointArray;
 procedure AppendTPA(var TPA : TPointArray; const ToAppend : TPointArray);
+function TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;
+function EdgeFromBox(const Box: TBox): TPointArray;
 function TPAFromBox(const Box : TBox) : TPointArray;
 function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer): TPointArray;
 function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
@@ -1051,6 +1056,124 @@ begin
   SetLength(Result, c);
 end;
 
+function TPAPosNext(const Find: TPoint; const V: TPointArray;
+  const PrevPos: Integer; const IsSortedAscending: Boolean): Integer;
+var I, L, H : Integer;
+    D       : Tpoint;
+begin
+  if IsSortedAscending then // binary search
+    begin
+      if Max(PrevPos + 1, 0) = 0 then // find first
+        begin
+          L := 0;
+          H := Length(V) - 1;
+          while L <= H do
+            begin
+              I := (L + H) div 2;
+              D := V[I];
+              if Find = D then
+                begin
+                  while (I > 0) and (V[I - 1] = Find) do
+                    Dec(I);
+                  Result := I;
+                  exit;
+                end else
+              if D > Find then
+                H := I - 1
+              else
+                L := I + 1;
+            end;
+          Result := -1;
+        end
+      else // find next
+        if PrevPos >= Length(V) - 1 then
+          Result := -1
+        else
+          if V[PrevPos + 1] = Find then
+            Result := PrevPos + 1
+          else
+            Result := -1;
+    end
+  else
+    begin // linear search
+      for I := Max(PrevPos + 1, 0) to Length(V) - 1 do
+        if V[I] = Find then
+          begin
+            Result := I;
+            exit;
+          end;
+      Result := -1;
+    end;
+end;
+procedure AppendToArray(var V: TPointArray; const R: TPoint);
+var
+  Len: integer;
+begin
+  Len := Length(V);
+  SetLength(V, Len + 1);
+  V[Len] := R;
+end;
+
+function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean): TPointArray;
+var
+  I, J, L, LV : Integer;
+begin
+  if not byDifference then
+    begin
+       SetLength(Result, 0);
+    if IsSortedAscending then
+    begin
+      I := 0;
+      J := 0;
+      L := Length(V1);
+      LV := Length(V2);
+      while (I < L) and (J < LV) do
+        begin
+          while (I < L) and (V1[I] < V2[J]) do
+            Inc(I);
+          if I < L then
+            begin
+              if V1[I] = V2[J] then
+                AppendToArray(Result,V1[I]);
+              while (J < LV) and ((V2[J] < V1[I]) or (V2[J] = V1[I])) do
+                Inc(J);
+            end;
+        end;
+    end
+  else
+    for I := 0 to Length(V1) - 1 do
+      if (TPAPosNext(V1[I], V2) >= 0) and (TPAPosNext(V1[I], Result) = -1) then
+       AppendToArray(Result,V1[I]);
+    end
+  else
+    begin
+      SetLength(Result, 0);
+  if IsSortedAscending then
+    begin
+      I := 0;
+      J := 0;
+      L := Length(V1);
+      LV := Length(V2);
+      while (I < L) and (J < LV) do
+        begin
+          while (I < L) and (V1[I] < V2[J]) do
+            Inc(I);
+          if I < L then
+            begin
+              if V1[I] <> V2[J] then
+                 AppendToArray(Result,V1[I]);
+              while (J < LV) and ((V2[J] < V1[I]) or (V2[J] = V1[I])) do
+                Inc(J);
+            end;
+        end;
+    end
+  else
+    for I := 0 to Length(V1) - 1 do
+      if (TPAPosNext(V1[I], V2) = -1) and (TPAPosNext(V1[I], Result) = -1) then
+        AppendToArray(Result,V1[I]);
+    end;
+end;
+
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 var
   x,y,i,CurrentArray, LengthTPA,CurrentStack : integer;
@@ -1853,7 +1976,9 @@ begin;
   SetLength(Result,CurrentL);
 end;
 
-
+{/\
+  Appends ToAppend array to the end of TPA.
+/\}
 procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);
 var
   l,lo,i : integer;
@@ -1863,6 +1988,101 @@ begin
   setlength(TPA,lo + l  + 1);
   for i := 0 to l do
     TPA[i + lo] := ToAppend[i];
+end;
+
+{/\
+  Returns a TPointArray of a line specified by the end points x1,y1 and x2,y2.
+/\}
+function TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;
+var
+  Dx, Dy, CurrentX, CurrentY, Len, TwoDx, TwoDy, Xinc, YInc: Integer;
+  TwoDxAccumulatedError, TwoDyAccumulatedError: Integer;
+begin
+  Len := 0;
+  Dx := (X2-X1);
+  Dy := (Y2-Y1);
+  TwoDx := Dx + Dx;
+  TwoDy := Dy + Dy;
+  CurrentX := X1;
+  CurrentY := Y1;
+  Xinc := 1;
+  Yinc := 1;
+  if (Dx < 0) then
+  begin
+    Xinc := -1;
+    Dx := - Dx;
+    TwoDx := - TwoDx;
+  end;
+  if (Dy < 0) then
+  begin
+    Yinc := -1;
+    Dy := -Dy;
+    TwoDy := - TwoDy;
+  end;
+  SetLength(Result, 1);
+  Result[0] := Point(X1,Y1);
+  if ((Dx <> 0) or (Dy <> 0)) then
+  begin
+    if (Dy <= Dx) then
+    begin
+      TwoDxAccumulatedError := 0;
+      repeat
+        Inc(CurrentX, Xinc);
+        Inc(TwoDxAccumulatedError, TwoDy);
+        if (TwoDxAccumulatedError > Dx) then
+        begin
+          Inc(CurrentY, Yinc);
+          Dec(TwoDxAccumulatedError, TwoDx);
+        end;
+        Inc(Len);
+        SetLength(Result, Len + 1);
+        Result[Len] := Point(CurrentX,CurrentY);
+      until (CurrentX = X2);
+    end else
+    begin
+      TwoDyAccumulatedError := 0;
+      repeat
+        Inc(CurrentY, Yinc);
+        Inc(TwoDyAccumulatedError, TwoDx);
+        if (TwoDyAccumulatedError > Dy) then
+        begin
+          Inc(CurrentX, Xinc);
+          Dec(TwoDyAccumulatedError, TwoDy);
+        end;
+        Inc(Len);
+        SetLength(Result, Len + 1);
+        Result[Len] := Point(CurrentX,CurrentY);
+      until (CurrentY = Y2);
+    end;
+  end
+end;
+
+{/\
+  Returns a TPointArray of the edge/border of the given Box.
+/\}
+function EdgeFromBox(const Box: TBox): TPointArray;
+var
+  Height, I, Len, WHM1, Width: Integer;
+begin
+  Width := (Box.x2 - Box.x1);
+  Height := (Box.y2 - Box.y1);
+  Len := ((Width * 2) + (Height * 2));
+  SetLength(Result, Len);
+  for I := 0 to Width do
+  begin
+    Result[i].x := Box.x1 + i;
+    Result[i].y := Box.y1;
+    Result[(Len - (Width - i)) - 1].x := Box.x1 + i;
+    Result[(Len - (Width - i)) - 1].y := Box.y2;
+  end;
+  WHM1 := Width + (Height - 1);
+  for I := 1 to (Height - 1) do
+  begin
+    Result[Width + I].x := Box.x1;
+    Result[Width + I].y := Box.y1 + I;
+    Result[WHM1 + I].x := Box.x2;
+    Result[WHM1 + I].y := Box.y1 + I;
+  end;
 end;
 
 {/\
@@ -2126,25 +2346,44 @@ end;
 {/\
   Removes all the doubles point from a TPA.
 /\}
+{Fixed by Cynic}
 
 procedure ClearDoubleTPA(var TPA: TPointArray);
 var
-   I, II, L: Integer;
-   Swappie: TPoint;
-begin
-  L := High(TPA);
-  for I := 0 To L Do
-    for II := I + 1 To L Do
-      if ((TPA[I].X = TPA[II].X) And (TPA[I].Y = TPA[II].Y)) then
+  i,j,k : integer;
+  flag  : boolean;
+  tmp     : TPointArray;
+Begin
+  i:=0;
+  SetLength(tmp,0);
+  while i < Length(TPA) do
+  begin
+    flag:=false;
+    k:=0;
+    while (k < Length(tmp)) and (not flag) do
+    begin
+      flag:=tmp[k]=TPA[i];
+      Inc(k);
+    end;
+    if not flag then
+    begin
+      k:=Length(tmp);
+      SetLength(tmp,k+1);
+      tmp[k]:=TPA[i];
+      Inc(i);
+    end
+    else
+     begin
+      j:=i;
+      while j < length (TPA)-1 do
       begin
-        Swappie := TPA[L];
-        TPA[L] := TPA[II];
-        TPA[II] := Swappie;
-        L := L - 1;
+        TPA[j]:=TPA[j+1];
+        inc(j);
       end;
-  SetLength(TPA, L + 1);
+      SetLength(TPA,Length(TPA)-1);
+    end;
+  end;
 end;
-
 {/\
   Uses Box to define an area around TotalTPA.
   Every point that is not in TotalTPA, but is in Box, is added to the Result.

@@ -13,6 +13,12 @@ else
 lazaruspath := /usr/lib/lazarus/0.9.28.2
 endif
 
+ifdef FPC_PATH
+fpcpath = $(FPC_PATH)
+else
+fpcpath = fpc
+endif
+
 # uncomment this or send distrib=1 via command line to build the distributable archive as well
 # if you set distrib, be sure to set the next option as well
 #distrib := 1
@@ -56,7 +62,7 @@ else
 	our_target := unknown
 endif
 
-CC := fpc
+CC := $(fpcpath)
 build := $(CC)
 
 # -Xd doesn't seem to cause problems when not cross-compiling, and is needed when cross-compiling, so I'm leaving it here
@@ -70,7 +76,7 @@ ifeq ($(widgetset),win32)
 	binary_extension := .exe
 endif
 lclplatpath := $(lazaruspath)/lcl/units/$(platform)/
-lazarusunits := -Fu$(lazaruspath)/components/synedit/units/$(platform)/ -Fu$(lazaruspath)ideintf/units/$(platform)/ -Fu$(lclplatpath) -Fu$(lclplatpath)$(widgetset)/ -Fu$(lazaruspath)/packager/units/$(platform)/ -Fu$(lazaruspath)/components/mouseandkeyinput/
+lazarusunits := -Fu$(lazaruspath)/components/synedit/units/$(platform)/ -Fu$(lazaruspath)ideintf/units/$(platform)/ -Fu$(lclplatpath) -Fu$(lclplatpath)$(widgetset)/ -Fu$(lazaruspath)/packager/units/$(platform)/ -Fu$(lazaruspath)/components/mouseandkeyinput/ -Fu$(lazaruspath)/components/lazutils/ -Fu$(lazaruspath)/components/synedit
 
 default: build
 
