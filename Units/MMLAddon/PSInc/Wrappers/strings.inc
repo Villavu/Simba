@@ -1,4 +1,5 @@
-function ps_Capitalize(str : string) : string;extdecl;begin
+function ps_Capitalize(str : string) : string; extdecl;
+begin
   result := Capitalize(str);
 end;
 
@@ -149,4 +150,9 @@ end;
 function ps_NormLevDist(src, target: String): Extended; extdecl;
 begin
   Result := NormLevDistance(src, target);
+end;
+
+function ps_StringMatch(FindStr, UpTxt: string; tol: Extended): boolean;
+begin
+  result := StringMatch(FindStr, UpTxt, tol);
 end;
