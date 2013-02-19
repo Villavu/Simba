@@ -1,9 +1,9 @@
-procedure lp_sqlite_version(Params : PParamArray; Result : Pointer); lape_extdecl
+procedure lp_sqlite_version(Result : Pointer); lape_extdecl
 begin
   PString(Result)^ := ps_sqlite_version();
 end;
 
-procedure lp_sqlite_version_num(Params : PParamArray; Result : Pointer); lape_extdecl
+procedure lp_sqlite_version_num(Result : Pointer); lape_extdecl
 begin
   PLongInt(Result)^ := ps_sqlite_version_num();
 end;
@@ -13,7 +13,7 @@ begin
   PString(Result)^ := ps_sqlite_escape(PString(Params^[0])^);
 end;
 
-procedure lp_sqlite_close(Params : PParamArray; Result : Pointer); lape_extdecl
+procedure lp_sqlite_close(Params : PParamArray); lape_extdecl
 begin
   ps_sqlite_close(PLongInt(Params^[0])^);
 end;

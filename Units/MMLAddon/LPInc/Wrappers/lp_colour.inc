@@ -33,7 +33,7 @@ begin
   ps_SetColorToleranceSpeed(PInteger(Params^[0])^);
 end;
 
-procedure Lape_GetToleranceSpeed(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_GetToleranceSpeed(const Result: Pointer); lape_extdecl
 begin
   PInteger(Result)^ := ps_GetToleranceSpeed();
 end;
@@ -53,7 +53,7 @@ begin
   ps_SetToleranceSpeed3Modifier(PExtended(Params^[0])^);
 end;
 
-function Lape_GetToleranceSpeed3Modifier(const Params: PParamArray): Extended;
+function Lape_GetToleranceSpeed3Modifier(): Extended;
 begin
   Result := ps_GetToleranceSpeed3Modifier();
 end;

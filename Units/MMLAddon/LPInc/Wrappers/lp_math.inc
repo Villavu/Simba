@@ -58,7 +58,7 @@ begin
   PInteger(Result)^ := ps_RandomRange(PInteger(Params^[0])^, PInteger(Params^[1])^);
 end;
 
-procedure Lape_RandomE(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_RandomE(const Result: Pointer); lape_extdecl
 begin
   Pextended(Result)^ := ps_RandomE();
 end;
