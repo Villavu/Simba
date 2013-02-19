@@ -23,12 +23,12 @@ begin
   ps_PlaySound(Pstring(Params^[0])^);
 end;
 
-procedure Lape_StopSound(const Params: PParamArray); lape_extdecl
+procedure Lape_StopSound(); lape_extdecl
 begin
   ps_StopSound();
 end;
 
-procedure Lape_ClearDebug(const Params: PParamArray); lape_extdecl
+procedure Lape_ClearDebug(); lape_extdecl
 begin
   ps_ClearDebug();
 end;
@@ -53,12 +53,12 @@ begin
   ps_DrawBitmapDebugImg(Pinteger(Params^[0])^);
 end;
 
-procedure Lape_GetDebugBitmap(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_GetDebugBitmap(const Result: Pointer); lape_extdecl
 begin
   Pinteger(Result)^ := ps_GetDebugBitmap();
 end;
 
-procedure Lape_ClearDebugImg(const Params: PParamArray); lape_extdecl
+procedure Lape_ClearDebugImg(); lape_extdecl
 begin
   ps_ClearDebugImg();
 end;
@@ -93,12 +93,12 @@ begin
   PBoolean(Result)^ := ps_InputQuery(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure Lape_TerminateScript(const Params: PParamArray); lape_extdecl
+procedure Lape_TerminateScript(); lape_extdecl
 begin
   ps_TerminateScript();
 end;
 
-procedure Lape_GetTimeRunning(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_GetTimeRunning(const Result: Pointer); lape_extdecl
 begin
   PLongWord(Result)^ := ps_GetTimeRunning();
 end;
@@ -113,12 +113,12 @@ begin
   ps_ConvertTime(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^);
 end;
 
-procedure Lape_HakunaMatata(const Params: PParamArray); lape_extdecl
+procedure Lape_HakunaMatata(); lape_extdecl
 begin
   ps_HakunaMatata();
 end;
 
-procedure Lape_Simba(const Params: PParamArray); lape_extdecl
+procedure Lape_Simba(); lape_extdecl
 begin
   ps_Simba();
 end;
@@ -128,17 +128,17 @@ begin
   ps_SetClipBoard(Pstring(Params^[0])^);
 end;
 
-procedure Lape_GetClipBoard(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_GetClipBoard(const Result: Pointer); lape_extdecl
 begin
   Pstring(Result)^ := ps_GetClipBoard();
 end;
 
-procedure Lape_GetProcessID(const Params : PParamArray; const Result : Pointer); lape_extdecl
+procedure Lape_GetProcessID(const Result : Pointer); lape_extdecl
 begin
   PLongInt(Result)^ := ps_GetProcessID();
 end;
 
-procedure Lape_GetProcesses(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_GetProcesses(const Result: Pointer); lape_extdecl
 begin
   PSysProcArr(Result)^ := ps_GetProcesses();
 end;
@@ -146,4 +146,9 @@ end;
 procedure Lape_SetTarget(const Params: PParamArray); lape_extdecl
 begin
   ps_SetTarget(PSysProc(Params^[0])^);
+end;
+
+procedure Lape_AddOnTerminate(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_AddOnTerminate(PString(Params^[0])^);
 end;

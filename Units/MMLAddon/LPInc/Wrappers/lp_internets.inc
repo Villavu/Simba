@@ -113,7 +113,7 @@ begin
   ps_SocketInfo(Pinteger(Params^[0])^, Pstring(Params^[1])^, Pstring(Params^[2])^);
 end;
 
-procedure Lape_CreateSocket(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_CreateSocket(const Result: Pointer); lape_extdecl
 begin
   Pinteger(Result)^ := ps_CreateSocket();
 end;

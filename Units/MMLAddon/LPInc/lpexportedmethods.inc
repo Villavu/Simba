@@ -340,6 +340,7 @@ AddGlobalFunc('procedure Disguise(Caption: string);', @Lape_Disguise);
 AddGlobalFunc('procedure ShowMessage(msg: string);', @Lape_ShowMessage);
 AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integer', @Lape_MessageBox);
 //AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer', @Lape_MessageDlg);
+AddGlobalFunc('function AddOnTerminate(const proc: string): boolean', @Lape_AddOnTerminate);
 
 
 AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
@@ -387,6 +388,7 @@ AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: Stri
 AddGlobalFunc('function posex(needle, haystack: String; offset: integer): integer', @Lape_posex);
 AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);
 AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_NormLevDist);
+AddGlobalFunc('function StringMatch(FindStr, UpTxt: string; tol: Extended): boolean', @Lape_StringMatch);
 
 { TPA }
 

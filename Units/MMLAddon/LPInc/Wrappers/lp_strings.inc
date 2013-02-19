@@ -82,3 +82,8 @@ procedure Lape_NormLevDist(const Params: PParamArray; const Result: Pointer); la
 begin
   PExtended(Result)^ := ps_NormLevDist(PString(Params^[0])^, PString(Params^[1])^);
 end;
+
+procedure Lape_StringMatch(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_Stringmatch(PString(Params^[0])^, PString(Params^[1])^, PExtended(Params^[2])^);
+end;

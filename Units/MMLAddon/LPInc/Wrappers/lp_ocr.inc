@@ -1,4 +1,4 @@
-procedure Lape_rs_GetUpText(const Params: PParamArray; const Result: Pointer); lape_extdecl
+procedure Lape_rs_GetUpText(const Result: Pointer); lape_extdecl
 begin
   PString(Result)^ := ps_rs_GetUpText();
 end;
@@ -73,7 +73,7 @@ begin
   ps_SetUpTextFilter(POcrFilterDataArray(Params^[0])^);
 end;
 
-procedure Lape_ResetUpTextFilter(const Params: PParamArray); lape_extdecl
+procedure Lape_ResetUpTextFilter(); lape_extdecl
 begin
   ps_ResetUpTextFilter;
 end;
