@@ -27,19 +27,21 @@ Simple stuff, not required, may not be possible/useful:
 0.98:
 
     -   CTS/Finder rework (needs testing)                           [X]
-    -   Script Manager (basics)                                     [/]
     -   Initial Lape                                                [X]
 
 
 0.99:
 
-    -   Settings Rewrite                                            [/]
+    -   Settings Rewrite                                            [X]
     -   Pretty settings form. (ReadySteadyGo has a proof of concept
-        on his github)                                              [ ]
+        on his github)                                              [X]
+    -   Background updates
     -   UAC for updater(s)?
 
 
 1.00:
+    -   Script Manager (basics)                                     [-]
+    -   Basic Form Designer                                         [X]
 
 
 1.xx:
@@ -58,10 +60,9 @@ Moving targets:
 
 Far fetched / Ponies:
 
-    -   Use lazarus' form editor
     -   Shortcut to jump to documentation of a function? (search online?)
-    -   libMML
-    -   pyMML
+    -   libMML                                                      [/]
+    -   pyMML                                                       [/]
 
     -   Coloured writeln                                            [ ]
     -   Compiler arguments in the about form                        [ ]
@@ -72,7 +73,7 @@ Documentation far fetched:
 
     -   Cover all functions by at least mentioning the definition   [/]
         -   Imported functions as well?                             [ ]
-    -   In depth documentation per function                         [ ]
+    -   In depth documentation per function                         [/]
 
 
 DONE:
