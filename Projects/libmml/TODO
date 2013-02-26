@@ -7,6 +7,8 @@ TODO:
 
     -   Add Bitmap functions.
 
+    -   Document C api
+
 Functions:
     -   KeyDown, KeyUp, SendKeys, KeyPress (PressKey?)
 
