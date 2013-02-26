@@ -445,6 +445,8 @@ AddGlobalFunc('function TPAtoATPA(const TPA: TPointArray; Dist: Integer): T2DPoi
 AddGlobalFunc('function CombineIntArray(const Ar1, Ar2: TIntegerArray): TIntegerArray', @Lape_CombineIntArray);
 AddGlobalFunc('function MergeATPA(const ATPA: T2DPointArray): TPointArray', @Lape_MergeATPA);
 AddGlobalFunc('procedure AppendTPA(var TPA: TPointArray; const ToAppend: TPointArray);', @Lape_AppendTPA);
+AddGlobalFunc('function TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray', @Lape_TPAFromLine);
+AddGlobalFunc('function EdgeFromBox(const Box: TBox): TPointArray', @Lape_EdgeFromBox);
 AddGlobalFunc('function TPAFromBox(const Box: TBox): TPointArray', @Lape_TPAFromBox);
 AddGlobalFunc('function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray', @Lape_TPAFromEllipse);
 AddGlobalFunc('function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray', @Lape_TPAFromCircle);
@@ -472,6 +474,8 @@ AddGlobalFunc('procedure TPAtoATPAExWrap(const TPA: TPointArray; w, h: Integer; 
 AddGlobalFunc('procedure TPAtoATPAWrap(const TPA: TPointArray; Dist: Integer; var Res: T2DPointArray);', @Lape_TPAtoATPAWrap);
 AddGlobalFunc('procedure CombineIntArrayWrap(const Ar1, Ar2: TIntegerArray; var Res: TIntegerArray);', @Lape_CombineIntArrayWrap);
 AddGlobalFunc('procedure MergeATPAWrap(const ATPA: T2DPointArray; var Res: TPointArray);', @Lape_MergeATPAWrap);
+AddGlobalFunc('procedure TPAFromLineWrap(const x1, y1, x2, y2: Integer; var Res: TPointArray);', @Lape_TPAFromLineWrap);
+AddGlobalFunc('procedure EdgeFromBoxWrap(const Box: TBox; var Res: TPointArray);', @Lape_EdgeFromBoxWrap);
 AddGlobalFunc('procedure TPAFromBoxWrap(const Box: TBox; var Res: TPointArray);', @Lape_TPAFromBoxWrap);
 AddGlobalFunc('procedure TPAFromEllipseWrap(const CX, CY, XRadius, YRadius : Integer; var Res: TPointArray);', @Lape_TPAFromEllipseWrap);
 AddGlobalFunc('procedure TPAFromCircleWrap(const CX, CY, Radius : Integer; var Res: TPointArray);', @Lape_TPAFromCircleWrap);
@@ -486,6 +490,8 @@ AddGlobalFunc('procedure OffsetATPA(var ATPA: T2DPointArray; const Offset: TPoin
 AddGlobalFunc('function CopyTPA(const TPA: TPointArray): TPointArray', @Lape_CopyTPA);
 AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @Lape_CopyATPA);
 AddGlobalFunc('function MiddleBox(b: TBox): TPoint', @Lape_MiddleBox);
+AddGlobalFunc('function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;',@Lape_TPAPosNext);
+AddGlobalFunc('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;',@Lape_GlueTPAs);
 
 { Window }
 

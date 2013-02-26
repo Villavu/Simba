@@ -274,6 +274,16 @@ begin
   AppendTPA(tpa,ToAppend);
 end;
 
+function ps_TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;  extdecl;
+begin
+  Result := TPAFromLine(x1, y1, x2, y2);
+end;
+
+function ps_EdgeFromBox(const Box: TBox): TPointArray;  extdecl;
+begin
+  Result := EdgeFromBox(Box);
+end;
+
 function ps_TPAFromBox(const Box : TBox) : TPointArray;  extdecl;
 begin
   result := TPAFromBox(box);
@@ -404,6 +414,14 @@ procedure ps_MergeATPAWrap(const ATPA : T2DPointArray; var Res: TPointArray); ex
 begin
   Res := MergeATPA(ATPA);
 end;
+procedure ps_TPAFromLineWrap(const x1, y1, x2, y2: Integer; var Res: TPointArray); extdecl;
+begin
+  Res := TPAFromLine(x1, y1, x2, y2);
+end;
+procedure ps_EdgeFromBoxWrap(const Box: TBox; var Res: TPointArray); extdecl;
+begin
+  Res := EdgeFromBox(Box);
+end;
 procedure ps_TPAFromBoxWrap(const Box : TBox; var Res : TPointArray);extdecl;
 begin
   Res := TPAFromBox(Box);
@@ -470,3 +488,15 @@ function ps_MiddleBox(b : TBox) : TPoint;
 begin
   result := MiddleBox(b);
 end;
+
+function  ps_TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;
+          const IsSortedAscending: Boolean): Integer; extdecl;
+begin
+  result:=TPAPosNext(Find,V,PrevPos,IsSortedAscending);
+end;
+
+function ps_GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray; extdecl;
+begin
+  result:=GlueTPAs(V1,V2,IsSortedAscending,byDifference);
+end;
+

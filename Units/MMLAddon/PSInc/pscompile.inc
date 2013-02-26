@@ -125,5 +125,5 @@ AddTypes('TSysProcArr', 'array of TSysProc;');
 
 AddTypes('THashType', '(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger);');
 
-AddTypes('TOCRFilterData', 'record _type, is_text_color: integer; r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer; ref_color,tol,cts: integer; end;');
+AddTypes('TOCRFilterData', 'record _type: integer; is_text_color: boolean; r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer; ref_color,tol,cts: integer; end;');
 AddTypes('TOCRFilterDataArray', 'array of TOCRFilterData');
