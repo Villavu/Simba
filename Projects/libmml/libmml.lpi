@@ -457,7 +457,8 @@
       <Filename Value="libmml"/>
     </Target>
     <SearchPaths>
-      <OtherUnitFiles Value="$(ProjPath)/;$(ProjPath)../../Units/MMLCore/;$(ProjPath)../../Units/Misc/;$(ProjPath)../../Units/Linux/;$(LazarusDir)/components/mouseandkeyinput/"/>
+      <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
+      <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;../ScriptManager;../FormDesigner"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       <LCLWidgetType Value="gtk2"/>
     </SearchPaths>
@@ -495,3 +496,4 @@
     </Exceptions>
   </Debugging>
 </CONFIG>
+
