@@ -311,12 +311,12 @@ AddGlobalFunc('function TPAFromText(const text, font: String; var w,h: integer):
 AddGlobalFunc('function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; const font: string): string', @Lape_GetTextATPA);
 AddGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; const font: string): string', @Lape_GetTextAt);
 AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing, color, tol: integer; const font: string): string', @Lape_GetTextAtEx);
+AddGlobalFunc('procedure rs_SetUpTextFilter(filterdata: TOcrFilterDataArray);', @Lape_SetUpTextFilter);
+AddGlobalFunc('procedure rs_ResetUpTextFilter;', @Lape_ResetUpTextFilter);
 //AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
 AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);', @Lape_FilterUpTextByCharacteristics);
-AddGlobalFunc('procedure SetUpTextFilter(filterdata: TOcrFilterDataArray);', @Lape_SetUpTextFilter);
-AddGlobalFunc('procedure ResetUpTextFilter;', @Lape_ResetUpTextFilter);
 
 { Other }
 
