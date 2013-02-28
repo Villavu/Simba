@@ -243,7 +243,7 @@ begin
     else
       Self.GetFontIndex(CanonicalName)
   except
-    raise Exception.Create('LoadFont: Font with same name is already loaded!');
+    raise Exception.Create('LoadFont: Font with same name ' + CanonicalName + 'is already loaded: ' + Name);
   end;
 
   f := TMFont.Create;
