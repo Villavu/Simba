@@ -227,7 +227,7 @@ begin
 
     // If we reached this place and CanonicalName is still '', then we found no
     // valid font path
-    if CanonicalName <> '' then
+    if CanonicalName = '' then
     begin
       raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exist.');
       Exit(False);
