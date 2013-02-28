@@ -215,7 +215,7 @@ begin
   begin
      if not DirectoryExists(Name) then
       begin
-        raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exist.');
+        raise Exception.Create('LoadFont: Directory ' + Name + ' does not exist (either absolute or in FontPath');
         Exit(False);
       end
       else
@@ -246,7 +246,7 @@ begin
 
   for i := 0 to Fonts.Count - 1 do
   begin
-    if n = lowercase(TMFont(Fonts.Items[i]).Name) then
+    if lowercase(n) = lowercase(TMFont(Fonts.Items[i]).Name) then
     begin
       FontFound := True;
       break;
