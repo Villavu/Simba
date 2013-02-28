@@ -71,7 +71,7 @@ type
 implementation
 
 uses
-  MufasaTypes,Client;
+  MufasaTypes, Client, strutils;
 
 
 constructor TMFont.Create;
@@ -132,6 +132,7 @@ end;
 
 function TMFonts.GetFontByIndex(Index : integer): TMfont;
 begin
+  // TODO: Check bounds?
   result := TMfont(Fonts.Items[index]);
 end;
 
@@ -201,23 +202,53 @@ end;
 function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
 var
   f: TMFont;
+  CanonicalName, fontPath: String;
 begin
   Result := True;
+  CanonicalName := '';
+  fontPath := '';
+
+  // TODO: Use UTF8 here?
   if not DirectoryExists(FPath + Name) then
   begin
-    raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exists.');
-    Exit(False);
+     if not DirectoryExists(Name) then
+      begin
+        raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exist.');
+        Exit(False);
+      end
+      else
+      begin
+        fontPath := Name;
+        CanonicalName := ExtractFileDir(Name);
+        CanonicalName := system.Copy(CanonicalName, 0, Length(CanonicalName) - rpos(DS, CanonicalName) + 1);
+      end;
+
+    // If we reached this place and CanonicalName is still '', then we found no
+    // valid font path
+    if CanonicalName <> '' then
+    begin
+      raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exist.');
+      Exit(False);
+    end;
+  end else
+  begin
+    CanonicalName := Name;
+    fontPath := FPath + Name;
   end;
 
-  f:=TMFont.Create;
-  f.Name := Name;
+  try
+    Self.GetFontIndex(CanonicalName)
+  except
+    raise Exception.Create('LoadFont: Font with same name is already loaded!');
+  end;
+
+  f := TMFont.Create;
+  f.Name := CanonicalName;
   if Shadow then
     F.Name := F.Name + '_s';
-  f.Data := InitOCR( LoadGlyphMasks(FPath + Name + DS, Shadow));
+  f.Data := InitOCR(LoadGlyphMasks(fontPath + DS, Shadow));
   Fonts.Add(f);
-  {{$IFDEF FONTDEBUG}
   TClient(Client).Writeln('Loaded Font ' + f.Name);
-  {$ENDIF} }
 end;
 
 function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: string): boolean;
