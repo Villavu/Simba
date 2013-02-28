@@ -237,7 +237,11 @@ begin
   end;
 
   try
-    Self.GetFontIndex(CanonicalName)
+    // Hackety-hack
+    if Shadow then
+      Self.GetFontIndex(CanonicalName + '_s')
+    else
+      Self.GetFontIndex(CanonicalName)
   except
     raise Exception.Create('LoadFont: Font with same name is already loaded!');
   end;
