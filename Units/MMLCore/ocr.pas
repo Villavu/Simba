@@ -774,16 +774,14 @@ begin
   { TODO: This only sorts the points in every TPA }
   SortATPAFrom(chars_2d, point(0,0));
 
-
-  { TODO: Should this loop not be in the OCRDEBUG define ? }
+  {$IFDEF OCRDEBUG}
   for x := 0 to high(chars_2d) do
   begin
     pc := random(clWhite);
     for y := 0 to high(chars_2d[x]) do
       charsbmp.FastSetPixel(chars_2d[x][y].x, chars_2d[x][y].y, pc);
   end;
-  {$IFDEF OCRDEBUG}
-    DebugToBmp(charsbmp,6,h);
+  DebugToBmp(charsbmp,6,h);
   {$ENDIF}
 
   for y := 0 to high(chars_2d) do
