@@ -202,7 +202,7 @@ end;
 function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
 var
   f: TMFont;
-  CanonicalName, fontPath: String;
+  CanonicalName, fontPath, n: String;
 begin
   Result := True;
   CanonicalName := '';
@@ -236,12 +236,13 @@ begin
     fontPath := FPath + Name;
   end;
 
+  n := CanonicalName;
+  if Shadow then
+    n := n + '_s';
+
   try
-    // Hackety-hack
-    if Shadow then
-      Self.GetFontIndex(CanonicalName + '_s')
-    else
-      Self.GetFontIndex(CanonicalName)
+    if not (Self.GetFontIndex(n) >= 0) then
+      raise Exception.Create('LoadFont: Font with same name ' + CanonicalName + 'is already loaded: ' + Name);
   except
     raise Exception.Create('LoadFont: Font with same name ' + CanonicalName + 'is already loaded: ' + Name);
   end;
