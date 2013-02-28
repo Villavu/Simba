@@ -210,6 +210,8 @@ begin
   CanonicalName := '';
   fontPath := '';
 
+  FontFound := False;
+
   // TODO: Use UTF8 here?
   if not DirectoryExists(FPath + Name) then
   begin
@@ -220,14 +222,14 @@ begin
       end
       else
       begin
+        FontFound := True;
         fontPath := Name;
         CanonicalName := ExtractFileDir(Name);
         CanonicalName := system.Copy(CanonicalName, 0, Length(CanonicalName) - rpos(DS, CanonicalName) + 1);
       end;
 
-    // If we reached this place and CanonicalName is still '', then we found no
-    // valid font path
-    if CanonicalName = '' then
+    Writeln('LoadFont debug, CanonicalName = ' + CanonicalName);
+    if FontFound then
     begin
       raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exist.');
       Exit(False);
