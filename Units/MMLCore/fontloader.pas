@@ -224,7 +224,7 @@ begin
       begin
         FontFound := True;
         fontPath := Name;
-        if Name[Length(Name) = DS then
+        if Name[Length(Name)] = DS then
           CanonicalName := ExtractFileDir(Name)
         else
           CanonicalName := ExtractFilePath(Name) + ExtractFileName(Name);
