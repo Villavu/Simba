@@ -224,8 +224,8 @@ begin
       begin
         FontFound := True;
         fontPath := Name;
-        CanonicalName := ExtractFileDir(Name);
-        CanonicalName := system.Copy(CanonicalName, 0, Length(CanonicalName) - rpos(DS, CanonicalName) + 1);
+        CanonicalName := ExtractFilePath(Name) + ExtractFileName(Name);
+        CanonicalName := system.Copy(CanonicalName, rpos(DS, CanonicalName) + 1, Length(CanonicalName) - rpos(DS, CanonicalName));
       end;
 
     Writeln('LoadFont debug, CanonicalName = ' + CanonicalName);
