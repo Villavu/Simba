@@ -229,7 +229,7 @@ begin
       end;
 
     Writeln('LoadFont debug, CanonicalName = ' + CanonicalName);
-    if FontFound then
+    if not FontFound then
     begin
       raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exist.');
       Exit(False);
