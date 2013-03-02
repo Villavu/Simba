@@ -115,7 +115,7 @@ end;
 
 procedure Lape_ConvertTime64(const Params: PParamArray); lape_extdecl
 begin
-  ps_ConvertTime(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, Pinteger(Params^[7])^);
+  ps_ConvertTime64(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, Pinteger(Params^[7])^);
 end;
 
 procedure Lape_HakunaMatata(const Params: PParamArray); lape_extdecl
