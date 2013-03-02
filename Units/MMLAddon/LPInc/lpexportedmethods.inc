@@ -555,4 +555,4 @@ end;
 //AddGlobalFunc('function ext_GetJSONValue(const Data, Value: string): string', @Lape_ext_GetJSONValue);
 
 
-AddGlobalFunc('function TMufasaBitmap.Foo: Integer', @Lape_TMufasaBitmap_Foo);
+AddGlobalFunc('function TMufasaBitmap.Foo(): PtrUInt', @Lape_TMufasaBitmap_Foo);
