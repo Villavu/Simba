@@ -47,7 +47,7 @@ AddGlobalFunc('function CreateBitmapString(bmp: integer): string', @Lape_CreateB
 
 { This is a temporary workaround to allow Lape to pass TMufasaBitmaps to plugins.
   Also see lpcompile.inc}
-AddGlobalFunc('function GetMufasaBitmap(bmp: integer): Pointer', @Lape_GetMufasaBitmap);
+AddGlobalFunc('function GetMufasaBitmap(bmp: integer): TMufasaBitmap', @Lape_GetMufasaBitmap);
 
 AddGlobalFunc('function CreateBitmap(w,h: integer): integer', @Lape_CreateBitmap);
 AddGlobalFunc('procedure FreeBitmap(Number: integer);', @Lape_FreeBitmap);
@@ -553,3 +553,6 @@ end;
 //AddGlobalFunc('procedure ext_OpenScriptEx(FileName: string; Run: boolean);', @Lape_ext_OpenScriptEx);
 //AddGlobalFunc('function ext_GetPageEx(const URL, PostData, MimeType: string): string', @Lape_ext_GetPageEx);
 //AddGlobalFunc('function ext_GetJSONValue(const Data, Value: string): string', @Lape_ext_GetJSONValue);
+
+
+AddGlobalFunc('function TMufasaBitmap.Foo: Integer', @Lape_TMufasaBitmap_Foo);
