@@ -219,12 +219,34 @@ var
   x : integer;
 begin;
   x := time;
-  h := x div(1000 * 60 * 60);
-  x := x mod (1000 * 60 * 60);
-  m := x div (1000 * 60);
-  x := x mod (1000 * 60);
+  h := x div (3600000);
+  x := x mod (3600000);
+  m := x div (60000);
+  x := x mod (60000);
   s := x div (1000);
 end;
+
+procedure ps_ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer); extdecl;
+var
+  x : int64;
+begin
+  x := time;
+  y := x div (31536000000); // 1000 * 60 * 60 * 24 * 365 (1 year or 365 days)
+  x := x mod (31536000000);
+  m := x div (2592000000); // 1000 * 60 * 60 * 24 * 30 (1 month or 30 days)
+  x := x mod (2592000000);
+  w := x div (604800000); // 1000 * 60 * 60 * 24 * 7 (1 week or 7 days)
+  x := x mod (604800000);
+  d := x div (86400000); // 1000 * 60 * 60 * 24 (1 day or 24 hours)
+  x := x mod (86400000);
+  h := x div (3600000); // 1000 * 60 * 60 (1 hour or 60 minutes)
+  x := x mod (3600000);
+  min := x div (60000); // 1000 * 60 (1 minute or 60 seconds)
+  x := x mod (60000);
+  s := x div (1000); // 1000 (1 second)
+  x := x mod (1000);
+end;
+
 procedure ps_DecodeDate ( const SourceDate  : TDateTime; var Year, Month, Day  : Word ); extdecl;
 begin
   decodedate(sourcedate,year,month,day);
