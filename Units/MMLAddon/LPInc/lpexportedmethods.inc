@@ -348,6 +348,7 @@ AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^);
 //AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
 AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
+AddGlobalFunc('procedure ConvertTime64(Time: int64; var y, m, w, d, h, min, s: integer);', @Lape_ConvertTime64);
 AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
 AddGlobalFunc('procedure Simba;', @Lape_Simba);
 AddGlobalFunc('procedure SetClipBoard(const Data: string);', @Lape_SetClipBoard);
