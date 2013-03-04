@@ -389,7 +389,7 @@ AddFunction(@ps_GetKeyCode,'function GetKeyCode(c : char) : integer;');
 SetCurrSection('OCR');
 AddFunction(@ps_rs_GetUpText, 'function rs_GetUpText: string;');
 AddFunction(@ps_rs_GetUpTextAt, 'function rs_GetUpTextAt(x, y : integer): string;');
-AddFunction(@ps_rs_GetUpTextAtEx, 'function rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string');
+AddFunction(@ps_rs_GetUpTextAtEx, 'function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string');
 AddFunction(@ps_SetUpTextFilter, 'procedure rs_SetUpTextFilter(filterdata: TOcrFilterDataArray);');
 AddFunction(@ps_ResetUpTextFilter, 'procedure rs_ResetUpTextFilter;');
 AddFunction(@ps_BitmapFromText, 'function BitmapFromText(const text, font: String): integer;');

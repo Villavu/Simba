@@ -302,7 +302,7 @@ AddGlobalFunc('function GetKeyCode(c: char): integer', @Lape_GetKeyCode);
 { OCR }
 
 AddGlobalFunc('function rs_GetUpText: String', @Lape_rs_GetUpText);
-AddGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string', @Lape_rs_GetUpTextAtEx);
+AddGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string', @Lape_rs_GetUpTextAtEx);
 AddGlobalFunc('function rs_GetUpTextAt(x, y: integer): string', @Lape_rs_GetUpTextAt);
 AddGlobalFunc('function BitmapFromText(const text, font: String): integer', @Lape_BitmapFromText);
 AddGlobalFunc('function MaskFromText(const text, font: String): TMask', @Lape_MaskFromText);

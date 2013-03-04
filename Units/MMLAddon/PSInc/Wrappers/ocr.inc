@@ -1,16 +1,16 @@
 function ps_rs_GetUpText: String; extdecl;
 begin
-  Result := CurrThread.Client.MOCR.GetUpTextAtEx(7, 7, true);
+  Result := CurrThread.Client.MOCR.GetUpTextAt(7, 7, true);
 end;
 
-function ps_rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string; extdecl;
+function ps_rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string; extdecl;
 begin
-  result := CurrThread.Client.MOCR.GetUpTextAtEx(x, y, shadow);
+  result := CurrThread.Client.MOCR.GetUpTextAtEx(x, y, shadow, fontname);
 end;
 
 function ps_rs_GetUpTextAt(x, y : integer): string; extdecl;
 begin
-  result := CurrThread.Client.MOCR.GetUpTextAtEx(x,y,true);
+  result := CurrThread.Client.MOCR.GetUpTextAt(x,y,true);
 end;
 
 function ps_BitmapFromText(const text, font: String): integer; extdecl;
