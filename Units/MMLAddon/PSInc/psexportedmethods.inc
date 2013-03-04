@@ -192,6 +192,7 @@ AddFunction(@ps_GetTimeRunning,'function GetTimeRunning: LongWord;');
 AddFunction(@ps_DecodeTime,'procedure DecodeTime(DateTime : TDateTime; var Hour,Min,Sec,MSec : word);');
 AddFunction(@ps_DecodeDate,'procedure DecodeDate ( const SourceDate  : TDateTime; var Year, Month, Day  : Word );');
 AddFunction(@ps_ConvertTime,'procedure ConvertTime(Time: integer; var h, m, s: integer);');
+AddFunction(@ps_ConvertTime,'procedure ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer);');
 AddFunction(@ps_HakunaMatata,'procedure HakunaMatata;');
 AddFunction(@ps_Simba,'procedure Simba;');
 AddFunction(@ps_PlaySound,'procedure PlaySound( Sound : string);');
