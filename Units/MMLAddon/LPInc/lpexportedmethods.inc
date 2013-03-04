@@ -555,4 +555,5 @@ end;
 //AddGlobalFunc('function ext_GetJSONValue(const Data, Value: string): string', @Lape_ext_GetJSONValue);
 
 
-AddGlobalFunc('function TMufasaBitmap.Foo(): PtrUInt', @Lape_TMufasaBitmap_Foo);
+AddGlobalFunc('procedure TMufasaBitmap.LoadFromFile(Filename: string)', @Lape_TMufasaBitmap_LoadFromFile);
+AddGlobalFunc('function TMufasaBitmap.SaveToFile(Filename: string): Boolean', @Lape_TMufasaBitmap_SaveToFile);

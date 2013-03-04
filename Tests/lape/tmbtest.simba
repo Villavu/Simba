@@ -1,0 +1,15 @@
+program new;
+var b: integer;
+bmp: TMufasaBitmap;
+begin
+b:=createbitmap(200, 200);
+
+bmp := GetMufasaBitmap(b);
+
+writeln(ptruint(bmp));
+//writeln(getmufasabitmap(b).foo());
+
+bmp.loadfromfile('/tmp/foo.png');
+bmp.savetofile('/tmp/foo_copy.png');
+freebitmap(b);
+end.
