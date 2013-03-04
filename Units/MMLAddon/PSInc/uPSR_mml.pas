@@ -152,7 +152,7 @@ begin
     RegisterConstructor(@TMufasaBitmap.Create,'Create');
     RegisterMethod(@TMufasaBitmap.free,'Free');
     RegisterMethod(@TMufasaBitmap.SaveToFile, 'SaveToFile');
-    RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LoadFormFile');
+    RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LoadFromFile');
     RegisterMethod(@TMufasaBitmap.LoadFromTBitmap, 'LoadFromTBitmap');
   end;
 end;
