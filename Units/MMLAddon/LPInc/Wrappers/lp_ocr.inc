@@ -5,7 +5,7 @@ end;
 
 procedure Lape_rs_GetUpTextAtEx(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  Pstring(Result)^ := ps_rs_GetUpTextAtEx(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pboolean(Params^[2])^);
+  Pstring(Result)^ := ps_rs_GetUpTextAtEx(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pboolean(Params^[2])^, PString(Params^[3])^);
 end;
 
 procedure Lape_rs_GetUpTextAt(const Params: PParamArray; const Result: Pointer); lape_extdecl
