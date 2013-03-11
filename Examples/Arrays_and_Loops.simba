@@ -9,7 +9,8 @@ begin
   //      ^  ^  ^  ^  ^
 // Index  0  1  2  3  4
 
-  // High(Arr) gives us the last element of the array. If we go over, we get an error.
+  // High(Arr) gives us the index of the last element of the array. 
+  // If we go over, we get an error.
   for Counter := 0 to High(Arr) do
   begin
     Writeln('Arr[' + IntToStr(Counter) + '] = ' + IntToStr(Arr[Counter]));
