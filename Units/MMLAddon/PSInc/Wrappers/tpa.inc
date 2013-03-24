@@ -154,6 +154,11 @@ begin
   result := FloodFillTPA(TPA);
 end;
 
+procedure ps_FilterPointsPieNatural(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);extdecl;
+begin
+  FilterPointsPieNatural(points,sd,ed,minr,maxr,mx,my);
+end;
+
 procedure ps_FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);extdecl;
 begin
   FilterPointsPie(points,sd,ed,minr,maxr,mx,my);
