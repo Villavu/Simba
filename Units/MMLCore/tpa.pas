@@ -1292,19 +1292,24 @@ begin
   SetLength(G, T + 1);
   L := 0;
 
-  Ccw := SD > ED; // check if we want counter clockwise pies
+  Ccw := SD > ED; // See if we want to go counterclockwise
 
-  // expontentially faster than while loops, 600% in practical cases.
   StartD := ((SD mod 360) + 360) mod 360;
-  EndD := ((ED mod 360) + 360) mod 360;
+  EndD   := ((ED mod 360) + 360) mod 360;
 
-  if StartD <> EndD then
+  if StartD <> EndD then // if StartD = EndD, then we have a circle...
   begin
     if Ccw then SwapE(StartD, EndD);
 
     if StartD > EndD then EndD := EndD + 360;
 
     Over180 := (Max(StartD, EndD) - Min(StartD, EndD)) > 180;
+
+    if Over180 then
+    begin
+      StartD := StartD + 180;
+      EndD   := EndD   + 180;
+    end;
 
     //a is the midPoint, B is the left limit line, C is the right Limit Line, X the point we are checking
     BminusAx := cos(degtorad(StartD - 90));      //creating the two unit vectors
