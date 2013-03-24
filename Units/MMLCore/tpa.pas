@@ -72,6 +72,7 @@ function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: In
           const IsSortedAscending: Boolean = False): Integer;
 function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
+procedure FilterPointsPieNatural(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
@@ -1272,6 +1273,60 @@ begin;
   SetLength(TempTPA,0);
   SetLength(Lengths,0);
 end;
+
+{/\
+  Removes the points in the TPointArray Points that are not within the degrees
+  \\ SD (StartDegree) and ED (EndDegree) and the distances MinR (MinRadius) and
+  \\ MaxR (MaxRadius) from the origin (Mx, My), naturally.
+/\}
+procedure FilterPointsPieNatural(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);
+var
+  BminusAx, BminusAy, CminusAx, CminusAy: Extended; //don't let the type deceive you. They are vectors!
+  G: TPointArray;
+  I, L, T: Integer;
+  StartD, EndD: Extended;
+  Over180, Ccw: Boolean;
+begin
+  T := High(Points);
+  if (T < 0) then Exit;
+  SetLength(G, T + 1);
+  L := 0;
+
+  Ccw := SD > ED; // check if we want counter clockwise pies
+
+  // expontentially faster than while loops, 600% in practical cases.
+  StartD := ((SD mod 360) + 360) mod 360;
+  EndD := ((ED mod 360) + 360) mod 360;
+
+  if StartD <> EndD then
+  begin
+    if Ccw then SwapE(StartD, EndD);
+
+    if StartD > EndD then EndD := EndD + 360;
+
+    Over180 := (Max(StartD, EndD) - Min(StartD, EndD)) > 180;
+
+    //a is the midPoint, B is the left limit line, C is the right Limit Line, X the point we are checking
+    BminusAx := cos(degtorad(StartD - 90));      //creating the two unit vectors
+    BminusAy := sin(degtorad(StartD - 90));      //I use -90 or else it will start at the right side instead of top
+
+    CminusAx := cos(degtorad(EndD - 90));
+    CminusAy := sin(degtorad(EndD - 90));
+
+    for I := 0 to T do
+    begin
+      if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MY)) > 0) and
+         ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MY)) < 0)) xor Over180) then
+        continue;
+      G[L] := Points[I];
+      Inc(L);
+    end;
+    SetLength(Points, L);
+    Points := G;
+  end;
+  FilterPointsDist(Points, MinR, MaxR, Mx, My);   //TODO: move this to the MMLAddon section, this doesn't belong in FilterPointsPie
+end;
+
 
 {/\
   Removes the points in the TPointArray Points that are not within the degrees
