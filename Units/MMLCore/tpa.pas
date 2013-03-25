@@ -72,7 +72,7 @@ function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: In
           const IsSortedAscending: Boolean = False): Integer;
 function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
-procedure FilterPointsPieNatural(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);
+procedure FilterPointsPie2(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
@@ -1279,7 +1279,7 @@ end;
   \\ SD (StartDegree) and ED (EndDegree) and the distances MinR (MinRadius) and
   \\ MaxR (MaxRadius) from the origin (Mx, My), naturally.
 /\}
-procedure FilterPointsPieNatural(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);
+procedure FilterPointsPie2(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);
 var
   BminusAx, BminusAy, CminusAx, CminusAy: Extended; //don't let the type deceive you. They are vectors!
   G: TPointArray;
