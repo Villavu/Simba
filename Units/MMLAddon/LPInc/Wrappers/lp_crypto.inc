@@ -47,3 +47,8 @@ procedure Lape_tiger(const Params: PParamArray; const Result: Pointer); lape_ext
 begin
   Pstring(Result)^ := ps_tiger(Pstring(Params^[0])^);
 end;
+
+procedure Lape_rc2_decrypt(const Params: PParamArray); lape_extdecl
+begin
+  ps_rc2_decrypt(PString(Params^[0])^, PHashType(Params^[1])^, PString(Params^[2])^);
+end;        
