@@ -1277,7 +1277,13 @@ end;
 {/\
   Removes the points in the TPointArray Points that are not within the degrees
   \\ SD (StartDegree) and ED (EndDegree) and the distances MinR (MinRadius) and
-  \\ MaxR (MaxRadius) from the origin (Mx, My), naturally.
+  \\ MaxR (MaxRadius) from the origin (Mx, My).
+  \\
+  This is a variation on FilterPointsPie that changes the behavior.
+  \\It allows specification of both clockwise and counterclockwise radials.
+  \\This means that -10, 10 will produce the same pie as 10, -10, -180, 90 will
+  \\produce the same pie as 180, 450, and 180, 90 will produce the same
+  \\pie as 90, 180, etc.
 /\}
 procedure FilterPointsPie2(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);
 var
