@@ -100,6 +100,7 @@ type
   { Crypto }
   THashType = (htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160,
                htSHA1, htSHA256, htSHA384, htSHA512, htTiger);
+  PHashType = ^THashType;
 
   { Mask Types }
   TMask = record
