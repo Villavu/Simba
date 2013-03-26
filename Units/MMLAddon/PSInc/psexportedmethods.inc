@@ -502,6 +502,7 @@ AddFunction(@ps_ClearSameIntegersAndTPA,'procedure ClearSameIntegersAndTPA(var a
 AddFunction(@ps_SplitTPAEx,'function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;');
 AddFunction(@ps_SplitTPA,'function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;');
 AddFunction(@ps_FloodFillTPA,'function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;');
+AddFunction(@ps_FilterPointsPie2,'procedure FilterPointsPie2(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);');
 AddFunction(@ps_FilterPointsPie,'procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);');
 AddFunction(@ps_FilterPointsLine,'procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);');
 AddFunction(@ps_filterpointsdist,'procedure FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Integer);');
