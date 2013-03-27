@@ -164,6 +164,11 @@ begin
   FilterPointsDist(points,mindist,maxdist,mx,my);
 end;
 
+procedure ps_FilterpointsBox(var points: TPointArray; x, y, x2, y2: Integer); extdecl;
+begin
+  FilterPointsBox(points, x, y, x2, y2);
+end;
+
 procedure ps_FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);extdecl;
 begin
   FilterPointsLine(points,radial,radius,mx,my);
