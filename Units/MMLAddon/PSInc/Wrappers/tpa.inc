@@ -154,14 +154,14 @@ begin
   result := FloodFillTPA(TPA);
 end;
 
-procedure ps_FilterPointsPie2(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);extdecl;
+procedure ps_FilterPointsPieEx(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer; Natural: Boolean);extdecl;
 begin
-  FilterPointsPie2(points,sd,ed,minr,maxr,mx,my);
+  FilterPointsPie(points,sd,ed,minr,maxr,mx,my,natural);
 end;
 
 procedure ps_FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);extdecl;
 begin
-  FilterPointsPie(points,sd,ed,minr,maxr,mx,my);
+  FilterPointsPie(points,sd,ed,minr,maxr,mx,my,false);
 end;
 
 procedure ps_FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Integer); extdecl;
