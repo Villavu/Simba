@@ -20,15 +20,36 @@ int destroy_client(void* c);
 int get_debug(void);
 void set_debug(int debug);
 
-void* mml_alloc_mem(long size, long objsize);
-void* mml_realloc_mem(void* ptr, long size, long objsize);
-int mml_free_ptr(void* ptr);
+void* alloc_mem(long size, long objsize);
+void* realloc_mem(void* ptr, long size, long objsize);
+int free_ptr(void* ptr);
 
 struct tpoint {
     int x, y;
 };
 
-int get_mouse_pos(void* c, struct tpoint* t);
+/* Mouse functions */
 
+int get_mouse_pos(void *c, struct tpoint* t);
+int set_mouse_pos(void *c, struct tpoint* t);
+
+int get_mouse_button_state(void *c, int but);
+
+/* XXX: why x, y here? Why not struct tpoint *t ?*/
+int set_mouse_button_state(void *c, int but, int x, int y);
+
+
+
+/* Colour functions */
+
+int get_color(void *c, int x, int y, int *col);
+int find_color(void *c, int *x, int *y, int col, int x1, int y1, int x2,
+        int y2);
+int find_color_tolerance(void *c, int *x, int *y, int col, int tol, int x1,
+        int y1, int x2, int y2);
+int find_colors(void *c, struct tpoint *tpa, int* len, int col, int x1,
+        int y1, int x2, int y2);
+int find_colors_tolerance(void *c, struct tpoint *tpa, int* len, int col,
+        int tol, int x1, int y1, int x2, int y2);
 
 #endif
