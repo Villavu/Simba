@@ -47,9 +47,9 @@ int find_color(void *c, int *x, int *y, int col, int x1, int y1, int x2,
         int y2);
 int find_color_tolerance(void *c, int *x, int *y, int col, int tol, int x1,
         int y1, int x2, int y2);
-int find_colors(void *c, struct tpoint *tpa, int* len, int col, int x1,
+int find_colors(void *c, struct tpoint **tpa, int* len, int col, int x1,
         int y1, int x2, int y2);
-int find_colors_tolerance(void *c, struct tpoint *tpa, int* len, int col,
+int find_colors_tolerance(void *c, struct tpoint **tpa, int* len, int col,
         int tol, int x1, int y1, int x2, int y2);
 
 #endif
