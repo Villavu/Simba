@@ -52,4 +52,9 @@ int find_colors(void *c, struct tpoint **tpa, int* len, int col, int x1,
 int find_colors_tolerance(void *c, struct tpoint **tpa, int* len, int col,
         int tol, int x1, int y1, int x2, int y2);
 
+
+/* Target functions */
+
+int set_array_target(void *c, void* arr, struct tpoint size);
+
 #endif
