@@ -208,7 +208,9 @@ begin
   //f.Parent:=CompForm.Panel1;
   f.Left:=Self.Panel1.Left;
   f.Top:=Self.Panel1.Top;
-  f.Show;
+  //f.Show;
+ // setParent(Self.Panel1);
+  LCLIntf.SetParent(f.Handle,self.Panel1.Handle);
   SetModeScript;
   ppEdit.OnExit:=OnExit;
   smbCmp:= CompList.AddItem;
@@ -222,7 +224,7 @@ end;
 procedure TCompForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
    CloseAction := caNone;
-   Application.Minimize;
+   self.Hide;
 end;
 
 procedure TCompForm.ApplyChClick(Sender: TObject);
@@ -275,6 +277,8 @@ procedure TCompForm.FormShow(Sender: TObject);
 begin
  // PageControl1.ActivePageIndex := 0;
  // DsgnForm.Show;
+  if Assigned(f) then
+   f.Show;
 end;
 
 procedure TCompForm.lvAdvancedCustomDrawItem(Sender: TCustomListView;
@@ -383,6 +387,7 @@ begin
  { f.Parent:=CompForm.Panel1;}
   f.Left:=0;
   f.Top:=0;
+  LCLIntf.SetParent(f.Handle,self.Panel1.Handle);
   f.Show;
 end;
 
@@ -532,6 +537,7 @@ begin
   f:=TDsgnForm.Create(panel1);
   f.Left:=0;
   f.Top:=0;
+  LCLIntf.SetParent(f.Handle,self.Panel1.Handle);
   f.Show;
   end;
   //f:=nil;
