@@ -425,6 +425,8 @@ AddGlobalFunc('function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPoin
 AddGlobalFunc('function FloodFillTPA(const TPA: TPointArray): T2DPointArray', @Lape_FloodFillTPA);
 AddGlobalFunc('procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);', @Lape_FilterPointsPie);
 AddGlobalFunc('procedure FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Integer);', @Lape_FilterPointsDist);
+AddGlobalFunc('procedure FilterPointsBox(var points: TPointArray; x, y, x2, y2: Integer);', @Lape_FilterPointsBox);
+
 AddGlobalFunc('procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);', @Lape_FilterPointsLine);
 AddGlobalFunc('procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);', @Lape_FilterTPADist);
 AddGlobalFunc('function GetATPABounds(const ATPA: T2DPointArray): TBox', @Lape_GetATPABounds);

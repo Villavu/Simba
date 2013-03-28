@@ -75,6 +75,7 @@ function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie2(var Points: TPointArray; const SD, ED: Integer; MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
+procedure FilterPointsBox(var points: TPointArray; x, y, x2, y2: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
 procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
 function RemoveDistTPointArray(x, y, dist: Integer;const ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;
@@ -1395,7 +1396,45 @@ begin
   SetLength(G, L);
   FilterPointsDist(G, MinR, MaxR, Mx, My);   //TODO: move this to the MMLAddon section, this doesn't belong in FilterPointsPie
   Points := G;
-end;   
+end;
+
+{/\
+  Removes the points that are not within the box
+/\}
+
+procedure FilterPointsBox(var points: TPointArray; x, y, x2, y2: Integer);
+var
+  h, c, i: Integer;
+begin
+  h := High(points);
+  c := 0;
+
+  if x > x2 then
+  begin
+    x := x xor x2;
+    x2 := x xor x2;
+    x := x xor x2;
+  end;
+
+  if y > y2 then
+  begin
+    y := y xor y2;
+    y2 := y xor y2;
+    y := y xor y2;
+  end;
+
+  for i := 0 to h do
+  begin
+    if (points[i].x > x) and (points[i].x < x2) and (points[i].y > y) and (points[i].y < y2) then
+    begin
+      points[c] := points[i];
+      inc(c);
+    end;
+  end;
+
+  setlength(points,c);
+end;
+
 {/\
   Removes the points that don't have a dist between mindist/maxdist with (mx,my)
 /\}

@@ -163,6 +163,11 @@ begin
   ps_FilterPointsDist(PPointArray(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
+procedure Lape_FilterPointsBox(const Params: PParamArray); lape_extdecl
+begin
+  ps_FilterPointsBox(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
 procedure Lape_FilterPointsLine(const Params: PParamArray); lape_extdecl
 begin
   ps_FilterPointsLine(PPointArray(Params^[0])^, PExtended(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
