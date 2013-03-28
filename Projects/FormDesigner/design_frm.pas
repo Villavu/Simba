@@ -275,14 +275,22 @@ var
         TWinControl(comp).ParentWindow := TWinControl(Self).Handle;
       //  if comparetext(TWinControl(comp).ClassName,'TForm') =0  then
         TWinControl(comp).Parent := TWinControl(Self); //else TWinControl(comp).Parent:=DsgnForm;
+        try
         TWinControl(comp).Name := cname + IntToStr(_ControlsCreated);
+        except
+        TWinControl(comp).Name := cname + IntToStr(_ControlsCreated+random(20));
+        end;
         TWinControl(comp).Left := X;
         TWinControl(comp).Top := Y;
       end
       else if (comp is TControl) then begin
        // if comparetext(TControl(Sender).ClassName,'TForm')=0 then
         Tcontrol(comp).Parent := TWinControl(Self);// else exit;
+        try
         TControl(comp).Name := cname + IntToStr(_ControlsCreated);
+        except
+        TControl(comp).Name := cname + IntToStr(_ControlsCreated+random(20));
+        end;
         TControl(comp).Left := X;
         TControl(comp).Top := Y;
       end;
