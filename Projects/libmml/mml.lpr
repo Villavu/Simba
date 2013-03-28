@@ -1,4 +1,4 @@
-library libmml;
+library mml;
 
 {
 libMML - the C-like interface to MML.
