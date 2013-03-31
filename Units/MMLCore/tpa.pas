@@ -72,7 +72,7 @@ function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: In
           const IsSortedAscending: Boolean = False): Integer;
 function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
 function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
-procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
+procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer; Natural: Boolean);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
 procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
@@ -1277,19 +1277,27 @@ end;
   Removes the points in the TPointArray Points that are not within the degrees
   \\ SD (StartDegree) and ED (EndDegree) and the distances MinR (MinRadius) and
   \\ MaxR (MaxRadius) from the origin (Mx, My).
+  \\
+  Setting Natural to true changes the behavior.
+  \\It allows specification of both clockwise and counterclockwise radials.
+  \\This means that -10, 10 will produce the same pie as 10, -10, -180, 90 will
+  \\produce the same pie as 180, 450, and 180, 90 will produce the same
+  \\pie as 90, 180, etc.
 /\}
-procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);
+procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer; Natural: Boolean);
 var
   BminusAx, BminusAy, CminusAx, CminusAy: Extended; //don't let the type deceive you. They are vectors!
   G: TPointArray;
   I, L, T: Integer;
   StartD, EndD: Extended;
-  Over180: Boolean;
+  Over180, Ccw: Boolean;
 begin
   T := High(Points);
   if (T < 0) then Exit;
   SetLength(G, T + 1);
   L := 0;
+
+  Ccw := SD > ED; // See if we want to go counterclockwise
 
   StartD := SD;    //I still think this can be done more efficient, a while loop... Come on
   EndD := ED;
@@ -1302,34 +1310,44 @@ begin
   while EndD < 0.0 do
     EndD := EndD + 360.0;
 
-  if StartD > EndD then          //Calculate if the difference is more then 180 degrees
-    Over180 := (EndD + 360 - StartD) > 180
-  else
-    Over180 := (EndD - StartD) > 180;
 
-  if Over180 then
-    SwapE(StartD, EndD);
-
-  //a is the midPoint, B is the left limit line, C is the right Limit Line, X the point we are checking
-  BminusAx := cos(degtorad(StartD - 90));      //creating the two unit vectors
-  BminusAy := sin(degtorad(StartD - 90));      //I use -90 or else it will start at the right side instead of top
-
-  CminusAx := cos(degtorad(EndD - 90));
-  CminusAy := sin(degtorad(EndD - 90));
-
-  for I := 0 to T do
+  if StartD <> EndD then // if StartD = EndD, then we have a circle...
   begin
-    if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MY)) > 0) and
-    ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MY)) < 0)) xor Over180) then
-      continue;
-    G[L] := Points[I];
-    Inc(L);
-  end;
+    if natural then
+    begin
+         if Ccw then SwapE(StartD, EndD);
+         if StartD > EndD then EndD := EndD + 360;
+    end;
 
-  SetLength(G, L);
-  FilterPointsDist(G, MinR, MaxR, Mx, My);   //TODO: move this to the MMLAddon section, this doesn't belong in FilterPointsPie
-  Points := G;
-end;   
+    Over180 := (Max(StartD, EndD) - Min(StartD, EndD)) > 180;
+
+    if Over180 then
+    begin
+      StartD := StartD + 180;
+      EndD   := EndD   + 180;
+    end;
+
+    //a is the midPoint, B is the left limit line, C is the right Limit Line, X the point we are checking
+    BminusAx := cos(degtorad(StartD - 90));      //creating the two unit vectors
+    BminusAy := sin(degtorad(StartD - 90));      //I use -90 or else it will start at the right side instead of top
+
+    CminusAx := cos(degtorad(EndD - 90));
+    CminusAy := sin(degtorad(EndD - 90));
+
+    for I := 0 to T do
+    begin
+      if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MY)) > 0) and
+         ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MY)) < 0)) xor Over180) then
+        continue;
+      G[L] := Points[I];
+      Inc(L);
+    end;
+    SetLength(Points, L);
+    Points := G;
+  end;
+  FilterPointsDist(Points, MinR, MaxR, Mx, My);   //TODO: move this to the MMLAddon section, this doesn't belong in FilterPointsPie
+end;
+
 {/\
   Removes the points that don't have a dist between mindist/maxdist with (mx,my)
 /\}
