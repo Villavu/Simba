@@ -9,3 +9,5 @@ libMML
 
     libmml/intro.rst
 
+    libmml/c.rst
+

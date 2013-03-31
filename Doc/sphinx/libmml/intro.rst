@@ -98,3 +98,8 @@ may be removed in a later stage, or at least have it's behaviour changed.
     print m.getPos()
 
     del DLL
+
+libMML API
+----------
+
+See `libmml/c`_.
