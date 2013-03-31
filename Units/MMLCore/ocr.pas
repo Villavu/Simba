@@ -62,7 +62,7 @@ type
     function InitTOCR(const path: string): boolean;
     function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
            var _chars, _shadows: T2DPointArray): Boolean;
-    function GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
+    function GetUpTextAtEx(atX, atY: integer; shadow: boolean; fontname: string): string;
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
     procedure CreateDefaultFilter;
@@ -885,7 +885,7 @@ character and the .x1 of the current character is bigger than 5, then there
 was a space between them. (Add ' ' to result)
 *)
 
-function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
+function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean; fontname: string): string;
 var
    n:Tnormarray;
    ww, hh,i,j,nl: integer;
@@ -904,15 +904,16 @@ begin
   getTextPointsIn(atX, atY, ww, hh, shadow, chars, shadows);
 
   // Get font data for analysis.
+  font := FFonts.GetFont(fontname);
 
   if shadow then
   begin
-    font := FFonts.GetFont('UpChars_s');
+    font := FFonts.GetFont(fontname + '_s');
     thachars := shadows;
   end
   else
   begin
-    font := FFonts.GetFont('UpChars');
+    font := FFonts.GetFont(fontname);
     thachars := chars;
   end;
 
@@ -976,10 +977,7 @@ Retreives the (special) uptext.
 function TMOCR.GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
 begin
-  if shadow then
-    result := GetUpTextAtEx(atX, atY, true)
-  else
-    result := GetUpTextAtEx(atX, atY, false);
+  result := GetUpTextAtEx(atX, atY, shadow, 'UpChars')
 end;
 
 (*
