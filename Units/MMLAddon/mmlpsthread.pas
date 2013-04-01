@@ -904,7 +904,7 @@ begin
     with AddParam do
     begin
       OrgName := 'Item';
-      Mode := pmIn;
+      Mode := pmInOut;  //NOTE: InOut because of DynamicArrays
     end;
 
     with AddParam do
@@ -925,7 +925,7 @@ begin
     with AddParam do
     begin
       OrgName := 'Item';
-      Mode := pmIn;
+      Mode := pmInOut;  //NOTE: InOut because of DynamicArrays
     end;
 
     with AddParam do
@@ -1003,7 +1003,7 @@ end;
 function Insert_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
 var
   Item, Obj: TPSVariantIFC;
-  Index, Len, ItemSize, ItemLen: Int32;
+  Index, Len, ItemSize, ItemLen, I: Int32;
   PArr, DArr: PByte;
 begin
   Result := True;
@@ -1045,7 +1045,7 @@ begin
         if (Index < Len) then
           Move(PArr[Index * ItemSize], PArr[(Index + ItemLen) * ItemSize], (Len - Index) * ItemSize);
 
-        if (Item.aType.BaseType = btArray) then
+        if (Item.aType.BaseType = btArray) then //FIXME: Only want DynArrays here....
           Move(DArr[0], PArr[Index * ItemSize], ItemSize * ItemLen)
         else
           Move(DArr, PArr[Index * ItemSize], ItemSize * ItemLen);
