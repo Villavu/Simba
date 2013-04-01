@@ -1219,6 +1219,7 @@ type
   PTarget_Exported = ^TTarget_Exported;
   PIntegerArray = ^TIntegerArray;
   PExtendedArray = ^TExtendedArray;
+  P2DIntegerArray = ^T2DIntegerArray;
   PFont = ^TFont;
 //  PStrExtr = ^TStrExtr;
   PReplaceFlags = ^TReplaceFlags;
@@ -1250,7 +1251,7 @@ end;
 {$I LPInc/Wrappers/lp_other.inc}
 {$I LPInc/Wrappers/lp_settings.inc}
 {$I LPInc/Wrappers/lp_bitmap.inc}
-{$I LPInc/Wrappers/lp_tmufasabitmap.inc}
+{$I LPInc/Wrappers/lp_mufasabitmap.inc}
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}
