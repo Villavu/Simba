@@ -1046,7 +1046,7 @@ begin
           Move(PArr[Index * ItemSize], PArr[(Index + ItemLen) * ItemSize], (Len - Index) * ItemSize);
 
         if (Item.aType.BaseType = btArray) then
-          Move(PByte(DArr)^, PArr[Index * ItemSize], ItemSize * ItemLen) //FIXME: Bleh....
+          Move(DArr[0], PArr[Index * ItemSize], ItemSize * ItemLen)
         else
           Move(DArr, PArr[Index * ItemSize], ItemSize * ItemLen);
       end;
@@ -1101,7 +1101,7 @@ begin
   Count := Stack.GetInt(-3);
 
   case Param.aType.BaseType of
-    //FIXME: Detect string type! Currently will silently cause corruption on non ansistrings.
+    btWideString, btUnicodeString: Delete(PWideString(Param.Dta)^, Index , Count);
     btString: Delete(PString(Param.Dta)^, Index, Count);
     btArray: begin
         ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
