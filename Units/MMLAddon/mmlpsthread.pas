@@ -219,7 +219,8 @@ type
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
      Running: TInitBool;
-     Wrappers: TList;
+     ImportWrappers: TList;
+     ExportWrappers: TList;
 
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
@@ -899,18 +900,21 @@ begin
     end;
   end;
 
+  with x.AddFunction('function ToBStr: string').Decl do
+    AddParam().OrgName := 'x';
+
   with x.AddFunction('procedure Insert;').Decl do
   begin
     with AddParam do
     begin
-      OrgName := 'x';
-      Mode := pmInOut;
+      OrgName := 'Item';
+      Mode := pmIn;
     end;
 
     with AddParam do
     begin
-      OrgName := 'Item';
-      Mode := pmIn;
+      OrgName := 'Obj';
+      Mode := pmInOut;
     end;
 
     with AddParam do
@@ -924,14 +928,14 @@ begin
   begin
     with AddParam do
     begin
-      OrgName := 'x';
-      Mode := pmInOut;
+      OrgName := 'Item';
+      Mode := pmIn;
     end;
 
     with AddParam do
     begin
-      OrgName := 'Item';
-      Mode := pmIn;
+      OrgName := 'Obj';
+      Mode := pmInOut;
     end;
   end;
 
@@ -1000,11 +1004,39 @@ begin
   end;
 end;
 
+function ToBStr_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
+var
+  Item: TPSVariantIFC;
+  Size: UInt32;
+  BArr: PByte;
+  Data: TStringStream;
+begin
+  Result := True;
+  Data := TStringStream.Create('');
+  try
+    Item := NewTPSVariantIFC(Stack[Stack.Count - 2], False);
+    Data.Write(Item.aType.BaseType, 1);
+
+    if (Item.Dta = nil) then
+      raise Exception.Create('Invalid parameter');
+
+    Size := Item.aType.RealSize;
+    Data.Write(Size, SizeOf(Size));
+    Data.Write(PByte(Item.Dta)^, Size);
+
+    WriteLn('Access Vioation?');
+
+    Stack.SetAnsiString(-1, Base64Encode(Data.DataString));
+  finally
+    Data.Free;
+  end;
+end;
+
 function Insert_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
 var
-  Param, Item: TPSVariantIFC;
-  ItemSize, Len, Index: Int32;
-  PArr: PByte;
+  Item, Obj: TPSVariantIFC;
+  Index, Len, ItemSize, ItemLen, I: Int32;
+  PArr, DArr: PByte;
 begin
   Result := True;
   if (Stack.Count > 3) then
@@ -1012,51 +1044,72 @@ begin
   if (Stack.Count < 2) then
     raise Exception.Create('Not enough parameters');
 
-  Param := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
+  Item := NewTPSVariantIFC(Stack[Stack.Count - 1], False);
+  Obj := NewTPSVariantIFC(Stack[Stack.Count - 2], True);
 
-  if (Param.Dta = nil) then
-    raise Exception.Create('Invalid parameter');
-
-  case Param.aType.BaseType of
-    btString: begin
-        ItemSize := TPSTypeRec(Param.aType).RealSize;
-        Len := Length(PString(Param.Dta)^);
-      end;
-    btArray: begin
-        ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
-        Len := PSDynArrayGetLength(PPointer(Param.Dta)^, Param.aType);
-      end;
-    else
-      raise Exception.Create('Invalid parameter type');
-  end;
-
-  Item := NewTPSVariantIFC(Stack[Stack.Count - 2], False);
-  if ((Item.Dta = nil) or (Item.aType.RealSize <> ItemSize)) then
-    raise Exception.Create('Invalid parameter');
-
-  Index := Len + Ord(Param.aType.BaseType = btString);
+  Index := -1;
   if (Stack.Count = 3) then
     Index := Stack.GetInt(-3);
 
-  if ((Index < Ord(Param.aType.BaseType = btString)) or (Index > Len + Ord(Param.aType.BaseType = btString))) then
-    raise Exception.Create('Out of range');
+  if ((Item.Dta = nil) or (Obj.Dta = nil)) then
+    raise Exception.Create('Invalid parameter');
 
-  case Param.aType.BaseType of
-    //FIXME: Add detection of string type.
-    btString: Insert(PString(Item.Dta)^, PString(Param.Dta)^, Index);
+  case Obj.aType.BaseType of
     btArray: begin
-        if ((Index < 0) or (Index > Len)) then
-          raise Exception.Create('Out of range');
+        Len := PSDynArrayGetLength(PPointer(Obj.Dta)^, Obj.aType);
+        if (Index = -1) or (Index > Len) then
+          Index := Len;
 
-        PSDynArraySetLength(PPointer(Param.Dta)^, Param.aType, Len + 1);
+        if (Obj.aType.RealSize <> Item.aType.RealSize) then
+            raise Exception.Create('Invalid parameter');
 
-        PArr := PByte(Param.Dta^);
+        ItemSize := Obj.aType.RealSize;
+        ItemLen := 1;
+
+        if (Item.aType.BaseType = btArray) then
+          ItemLen := PSDynArrayGetLength(PPointer(Item.Dta)^, Item.aType);
+
+        PSDynArraySetLength(PPointer(Obj.Dta)^, Obj.aType, Len + ItemLen);
+
+        PArr := PByte(Obj.Dta^);
+        DArr := PByte(Item.Dta^);
+
         if (Index < Len) then
-          Move(PArr[Index * ItemSize], PArr[(Index + 1) * ItemSize], (Len - Index) * ItemSize);
-        Move(PByte(Item.Dta^), PArr[Index * ItemSize], ItemSize);
+          Move(PArr[Index * ItemSize], PArr[(Index + ItemLen) * ItemSize], (Len - Index) * ItemSize);
+
+        if (Item.aType.BaseType = btArray) then
+          Move(DArr[0], PArr[Index * ItemSize], ItemSize * ItemLen)
+        else
+          Move(DArr, PArr[Index * ItemSize], ItemSize * ItemLen);
+      end;
+    btString: begin
+        if (Index = -1) then
+          Index := Length(PString(Obj.Dta)^) + 1;
+
+        case Item.aType.BaseType of
+          btString: Insert(PString(Item.Dta)^, PString(Obj.Dta)^, Index);
+          btChar: Insert(PChar(Item.Dta)^, PString(Obj.Dta)^, Index);
+          btWideString, btUnicodeString: Insert(PWideString(Item.Dta)^, PString(Obj.Dta)^, Index);
+          btWideChar: Insert(PWideChar(Item.Dta)^, PString(Obj.Dta)^, Index);
+          else
+            raise Exception.Create('Invalid parameter');
+        end;
+      end;
+    btWideString, btUnicodeString: begin
+        if (Index = -1) then
+          Index := Length(PWideString(Obj.Dta)^) + 1;
+
+        case Item.aType.BaseType of
+          btString: Insert(PString(Item.Dta)^, PWideString(Obj.Dta)^, Index);
+          btChar: Insert(PChar(Item.Dta)^, PWideString(Obj.Dta)^, Index);
+          btWideString, btUnicodeString: Insert(PWideString(Item.Dta)^, PWideString(Obj.Dta)^, Index);
+          btWideChar: Insert(PWideChar(Item.Dta)^, PWideString(Obj.Dta)^, Index);
+          else
+            raise Exception.Create('Invalid parameter');
+        end;
       end;
     else
-      raise Exception.Create('Invalid parameter type');
+      raise Exception.Create('Invalid parameter');
   end;
 end;
 
@@ -1080,7 +1133,7 @@ begin
   Count := Stack.GetInt(-3);
 
   case Param.aType.BaseType of
-    //FIXME: Detect string type! Currently will silently cause corruption on non ansistrings.
+    btWideString, btUnicodeString: Delete(PWideString(Param.Dta)^, Index , Count);
     btString: Delete(PString(Param.Dta)^, Index, Count);
     btArray: begin
         ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
@@ -1119,6 +1172,7 @@ begin
   se.RegisterFunctionName('ToStr',@ToStr_,nil,nil);
   se.RegisterFunctionName('Swap',@swap_,nil,nil);
 
+  se.RegisterFunctionName('ToBStr', @ToBStr_, nil, nil);
   se.RegisterFunctionName('Append', @Insert_, nil, nil);
   se.RegisterFunctionName('Insert', @Insert_, nil, nil);
   se.RegisterFunctionName('Delete', @Delete_, nil, nil);
@@ -1267,6 +1321,15 @@ end;
 {$I LPInc/Wrappers/lp_ocr.inc}
 {$I LPInc/Wrappers/lp_internets.inc}
 
+procedure lp_natifyS(Params: PParamArray; Result: Pointer); lape_extdecl
+var
+  Wrapper: TExportClosure;
+begin
+  Wrapper := LapeExportWrapper(TLPThread(CurrThread).Compiler.Globals[PlpString(Params^[0])^]);
+  PPointer(Result)^ := Wrapper.Func;
+  TLPThread(CurrThread).ExportWrappers.Add(Wrapper);
+end;
+
 constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
 var
   I: integer;
@@ -1297,6 +1360,9 @@ begin
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
 
+    addGlobalFunc('function natify(s: string): Pointer; overload;', @lp_natifyS);
+    //addGlobalFunc('function natify(p: Pointer): Pointer; overload;', @lp_natifyP);
+
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
 
@@ -1305,20 +1371,30 @@ begin
     EndImporting;
   end;
 
-  Wrappers := TList.Create;
+  ImportWrappers := TList.Create();
+  ExportWrappers := TList.Create();
 end;
 
 destructor TLPThread.Destroy;
 begin
   try
-    if Assigned(Wrappers) then
+    if Assigned(ImportWrappers) then
     begin
-      while Wrappers.Count <> 0 Do
+      while ImportWrappers.Count <> 0 Do
       begin
-        TImportClosure(Wrappers.First).Free;
-        Wrappers.Delete(0)
+        TImportClosure(ImportWrappers.First).Free;
+        ImportWrappers.Delete(0)
       end;
-      Wrappers.Free;
+      ImportWrappers.Free;
+    end;
+    if Assigned(ExportWrappers) then
+    begin
+      while ExportWrappers.Count <> 0 Do
+      begin
+        TExportClosure(ExportWrappers.First).Free;
+        ExportWrappers.Delete(0)
+      end;
+      ExportWrappers.Free;
     end;
 
     if (Assigned(Compiler)) then
@@ -1410,7 +1486,7 @@ begin
     begin
       Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
       Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
-      Wrappers.Add(Wrapper);
+      ImportWrappers.Add(Wrapper);
     end;
 
     Compiler.EndImporting;
