@@ -202,6 +202,32 @@ procedure ps_TerminateScript; extdecl;
 begin;
   CurrThread.Terminate;
 end;
+
+function ps_AddOnTerminate(const proc : string): Boolean; extdecl;
+var
+  oldProcs : TVariantArray;
+  oldProcsHigh : Integer;
+  lowerCaseProc : string;
+begin;
+  result := false;
+
+  if not CurrThread.Prop.GetProp(SP_OnTerminate, oldProcs) then
+     SetLength(oldProcs, 1);
+
+  oldProcsHigh  := High(oldProcs);
+  lowerCaseProc := LowerCase(proc);
+
+  for oldProcsHigh downto 0 do
+    if LowerCase(oldProcs[oldProcsHigh]) = lowerCaseProc then
+      exit;
+
+  SetLength(oldProcs, Length(oldProcs) + 1);
+  oldProcs[High(oldProcs)] := proc;
+  CurrThread.Prop.SetProp(SP_OnTerminate, oldProcs);
+
+  result := True;
+end;
+
 function ps_GetTimeRunning: LongWord; extdecl;
 begin;
   result := GetTickCount - CurrThread.StartTime;
