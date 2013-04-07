@@ -181,6 +181,7 @@ AddFunction(@ps_GetTClient,'function GetTClient : TClient;');
 AddFunction(@ps_SetSupressExceptions, 'procedure SetSupressExceptions(Supress : boolean);');
 AddFunction(@ps_SaveScreenshot,'procedure SaveScreenshot(FileName: string);');
 AddFunction(@ps_TerminateScript,'procedure TerminateScript;');
+AddFunction(@ps_AddOnTerminate,'function AddOnTerminate(const proc : string) : Boolean;');
 {$ENDIF}
 AddFunction(@ps_now,'function Now: TDateTime;');
 AddFunction(@ps_date,'function Date : TDateTime;');
