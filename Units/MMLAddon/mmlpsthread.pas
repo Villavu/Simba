@@ -219,7 +219,8 @@ type
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
      Running: TInitBool;
-     Wrappers: TList;
+     ImportWrappers: TList;
+     ExportWrappers: TList;
 
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
@@ -229,6 +230,8 @@ type
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
      function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+     function Natify(s: string): Pointer;
+     function Natify(c: TCodePos): Pointer; overload;
    end;
    {$ENDIF}
 
@@ -1247,6 +1250,16 @@ begin
   ps_debugln(PlpString(Params^[0])^);
 end;
 
+procedure lp_Natify(Params: PParamArray; Result: Pointer); lape_extdecl
+begin
+  PPointer(Result)^ := TLPThread(CurrThread).Natify(PlpString(Params^[0])^);
+end;
+
+procedure lp_NatifyP(Params: PParamArray; Result: Pointer); lape_extdecl
+begin
+  PPointer(Result)^ := TLPThread(CurrThread).Natify(PCodePos(Params^[0])^);
+end;
+
 {$I LPInc/Wrappers/lp_other.inc}
 {$I LPInc/Wrappers/lp_settings.inc}
 {$I LPInc/Wrappers/lp_bitmap.inc}
@@ -1297,6 +1310,9 @@ begin
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
 
+    addGlobalFunc('function natify(s: string): Pointer;', @lp_Natify);
+    addGlobalFunc('function natify(p: Pointer): Pointer; overload;', @lp_NatifyP);
+
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
 
@@ -1305,20 +1321,31 @@ begin
     EndImporting;
   end;
 
-  Wrappers := TList.Create;
+  ImportWrappers := TList.Create;
+  ExportWrappers := TList.Create;
 end;
 
 destructor TLPThread.Destroy;
 begin
   try
-    if Assigned(Wrappers) then
+    if Assigned(ImportWrappers) then
     begin
-      while Wrappers.Count <> 0 Do
+      while ImportWrappers.Count <> 0 Do
       begin
-        TImportClosure(Wrappers.First).Free;
-        Wrappers.Delete(0)
+        TImportClosure(ImportWrappers.First).Free;
+        ImportWrappers.Delete(0)
       end;
-      Wrappers.Free;
+      ImportWrappers.Free;
+    end;
+
+    if Assigned(ExportWrappers) then
+    begin
+      while ExportWrappers.Count <> 0 Do
+      begin
+        TExportClosure(ExportWrappers.First).Free;
+        ExportWrappers.Delete(0)
+      end;
+      ExportWrappers.Free;
     end;
 
     if (Assigned(Compiler)) then
@@ -1351,6 +1378,67 @@ begin
       Compiler.addGlobalVar(Fonts[I].Name, Fonts[I].Name).isConstant := True;
 
   Compiler.EndImporting;
+end;
+
+function TLPThread.Natify(s: string): Pointer;
+var
+  Wrapper: TExportClosure;
+begin
+  Result := nil;
+
+  Wrapper := LapeExportWrapper(Compiler.Globals[s]);
+  if (Wrapper <> nil) then
+  begin
+    Result := Wrapper.Func;
+    ExportWrappers.Add(Wrapper);
+  end;
+end;
+
+function TLPThread.Natify(c: TCodePos): Pointer;
+  function isCodePos(Decl: TLapeDeclaration; CodePos: TCodePos): boolean;
+  begin
+    Result := False;
+    if (Decl = nil) then
+      Exit;
+
+    if ((Decl as TLapeGlobalVar).Ptr = nil) then
+      Exit;
+
+    Result := TCodePos((Decl as TLapeGlobalVar).Ptr^) = CodePos;
+  end;
+
+  function getByCodePos(DeclarationList: TLapeDeclarationList; CodePos: TCodePos): TLapeDeclaration;
+  var
+    Declarations: TLapeDeclArray;
+    H, I: UInt32;
+  begin
+    Result := nil;
+    Declarations := DeclarationList.getByClass(TLapeGlobalVar, bTrue);
+
+    H := High(Declarations);
+    for I := 0 to H do
+      if (isCodePos(Declarations[I], CodePos)) then
+      begin
+        Result := Declarations[I];
+        Exit;
+      end;
+  end;
+var
+  Declaration: TLapeDeclaration;
+  Wrapper: TExportClosure;
+begin
+  Result := nil;
+  Declaration := getByCodePos(Compiler.GlobalDeclarations, c);
+
+  if (Declaration <> nil) then
+  begin
+    Wrapper := LapeExportWrapper(Declaration as TLapeGlobalVar);
+    if (Wrapper <> nil) then
+    begin
+      Result := Wrapper.Func;
+      ExportWrappers.Add(Wrapper);
+    end;
+  end;
 end;
 
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
@@ -1395,11 +1483,13 @@ begin
       exit; // Can't set result?
     end;
     {$ENDIF}
+
     if not FFILoaded() then
     begin
       writeln('Not loading plugin for lape - libffi not found');
       raise EAssertionFailed.Create('libffi is not loaded');
     end;
+
     Compiler.StartImporting;
 
     for i := 0 to TypesLen -1 do
@@ -1410,7 +1500,7 @@ begin
     begin
       Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
       Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
-      Wrappers.Add(Wrapper);
+      ImportWrappers.Add(Wrapper);
     end;
 
     Compiler.EndImporting;
