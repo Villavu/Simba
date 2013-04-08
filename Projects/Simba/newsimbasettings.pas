@@ -103,11 +103,15 @@ type
     private
       function GetValue: string;
       procedure SetValue(val: string);
+    public
+      property Value: string read GetValue write SetValue;
     end;
 
     TPathSetting = class(TFileSetting)
     private
       procedure SetValue(val: string);
+    public
+      property Value: string read GetValue write SetValue;
     end;
 
     TSection = class(TSetting)
@@ -202,7 +206,7 @@ type
 
     TScriptManagerSection = class(TSection)
       ServerURL: TStringSetting;
-      StoragePath: TPathSetting;
+      StoragePath: TFileSetting;
       FileName: TStringSetting;
       FirstRun: TBooleanSetting;
     end;
@@ -600,7 +604,7 @@ begin
     val := ExtractRelativepath(AppPath, val);
   {$ENDIF}
 
-  FValue := IncludeLeadingPathDelimiter(val);
+  FValue := IncludeTrailingPathDelimiter(val);
   FValueSet := True;
   if Assigned(OnChange) then
     OnChange(Self);
@@ -707,7 +711,7 @@ procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj
 procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetScriptManagerURL(obj: TObject); begin TStringSetting(obj).Value := 'http://127.0.0.1/'; end;
-procedure GetScriptManagerPath(obj: TObject); begin TPathSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
+procedure GetScriptManagerPath(obj: TObject); begin TFileSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
 procedure GetScriptManagerFile(obj: TObject); begin TStringSetting(obj).Value := 'ScriptManager.xml'; end;
 procedure GetScriptManagerFirstRun(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
@@ -837,7 +841,7 @@ begin
   ScriptManager := AddChild(TScriptManagerSection.Create()) as TScriptManagerSection;
   ScriptManager.ServerURL := ScriptManager.AddChild(TStringSetting.Create(ssSMURL)) as TStringSetting;
   ScriptManager.ServerURL.onDefault := @GetScriptManagerURL;
-  ScriptManager.StoragePath := ScriptManager.AddChild(TPathSetting.Create(ssSMPath)) as TPathSetting;
+  ScriptManager.StoragePath := ScriptManager.AddChild(TFileSetting.Create(ssSMPath)) as TFileSetting;
   ScriptManager.StoragePath.onDefault := @GetScriptManagerPath;
   ScriptManager.FileName := ScriptManager.AddChild(TStringSetting.Create(ssSMFile)) as TStringSetting;
   ScriptManager.FileName.onDefault := @GetScriptManagerFile;
