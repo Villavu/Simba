@@ -123,6 +123,7 @@ begin
     RegisterMethod(@TMufasaBitmap.FastSetPixels,'FastSetPixels');
     RegisterMethod(@TMufasaBitmap.DrawATPA,'DrawATPA');
     RegisterMethod(@TMufasaBitmap.DrawTPA,'DrawTPA');
+    RegisterMethod(@TMufasaBitmap.LineTo,'LineTo');
     RegisterMethod(@TMufasaBitmap.DrawToCanvas, 'DrawToCanvas');
     RegisterMethod(@TMufasaBitmap.FloodFill,'FloodFill');
     RegisterMethod(@TMufasaBitmap.Rectangle,'Rectangle');

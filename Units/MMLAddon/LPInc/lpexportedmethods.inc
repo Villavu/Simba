@@ -115,6 +115,7 @@ AddGlobalFunc('procedure TMufasaBitmap.FastSetPixel(x,y : integer; Color : TColo
 AddGlobalFunc('procedure TMufasaBitmap.FastSetPixels(Points : TPointArray; Colors : TIntegerArray)', @Lape_TMufasaBitmap_FastSetPixels);
 AddGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA : T2DPointArray)', @Lape_TMufasaBitmap_DrawATPA);
 AddGlobalFunc('procedure TMufasaBitmap.DrawTPA(Points : TPointArray; Color : TColor)', @Lape_TMufasaBitmap_DrawTPA);
+AddGlobalFunc('procedure TMufasaBitmap.LineTo(Src,Dest: TPoint; Color : TColor)', @Lape_TMufasaBitmap_LineTo);
 //AddGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas : TCanvas)', @Lape_TMufasaBitmap_DrawToCanvas);
 AddGlobalFunc('function TMufasaBitmap.CreateTPA(SearchCol : TColor) : TPointArray', @Lape_TMufasaBitmap_CreateTPA);
 AddGlobalFunc('function TMufasaBitmap.FastGetPixel(x,y : integer) : TColor', @Lape_TMufasaBitmap_FastGetPixel);
