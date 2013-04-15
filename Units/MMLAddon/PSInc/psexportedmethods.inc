@@ -458,6 +458,7 @@ AddFunction(@ps_FindBitmapMaskTolerance,'function FindBitmapMaskTolerance(mask: 
 AddFunction(@ps_FindDeformedBitmapToleranceIn,'function FindDeformedBitmapToleranceIn(bitmap: integer; var x,y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean;');
 AddFunction(@ps_DrawTPABitmap,'procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);');
 AddFunction(@ps_DrawATPABitmap,'procedure DrawATPABitmap(bitmap: integer; ATPA: T2DPointArray);');
+AddFunction(@ps_LineToBitmap,'procedure DrawLineBitmap(bitmap: integer; Src,Dest: TPoint;Color: integer);');
 AddFunction(@ps_DrawATPABitmapEx,'procedure DrawATPABitmapEx(bitmap: integer; ATPA: T2DPointArray; Colors: TIntegerArray);');
 AddFunction(@ps_DrawBitmap,'procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);');
 AddFunction(@ps_RectangleBitmap,'procedure RectangleBitmap(bitmap : integer; const box : TBox; Color : TColor);');
