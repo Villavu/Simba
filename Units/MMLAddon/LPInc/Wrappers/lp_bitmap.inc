@@ -113,6 +113,11 @@ begin
   ps_DrawATPABitmapEx(Pinteger(Params^[0])^, P2DPointArray(Params^[1])^, PIntegerArray(Params^[2])^);
 end;
 
+procedure Lape_LineToBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_LineToBitmap(Pinteger(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^,PInteger(Params^[2])^);
+end;
+
 procedure Lape_FastDrawClear(const Params: PParamArray); lape_extdecl
 begin
   ps_FastDrawClear(Pinteger(Params^[0])^, PColor(Params^[1])^);

@@ -144,6 +144,11 @@ begin
   CurrThread.Client.MBitmaps[bitmap].DrawATPA(ATPA,Colors);
 end;
 
+procedure ps_LineToBitmap(bitmap : integer; Src,Dest: TPoint; Color : integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[Bitmap].LineTo(Src,Dest,Color);
+end;
+
 procedure ps_FastDrawClear(bmp : integer; Color : TColor); extdecl;
 begin;
   CurrThread.Client.MBitmaps[bmp].FastDrawClear(Color);

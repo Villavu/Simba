@@ -54,6 +54,14 @@ begin
   Self.DrawTPA(PPointArray(Params^[1])^, Pinteger(Params^[2])^);
 end;
 
+procedure Lape_TMufasaBitmap_LineTo(const Params: PParamArray); lape_extdecl
+var
+  Self: TMufasaBitmap;
+begin
+  Self := PMufasaBitmap(Params^[0])^;
+  Self.LineTo(PPoint(Params^[1])^, PPoint(Params^[2])^,PInteger(Params^[3])^);
+end;
+
 procedure Lape_TMufasaBitmap_DrawATPA(const Params: PParamArray); lape_extdecl
 var
   Self: TMufasaBitmap;
