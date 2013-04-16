@@ -222,21 +222,18 @@ begin
   Pinteger(Result)^ := Self.GetTransparentColor;
 end;
 
-{procedure Lape_TMufasaBitmap_CreateBMP(const Params: PParamArray; const Result: Pointer); lape_extdecl
-var
-  Self: TMufasaBitmap;
+procedure Lape_TMufasaBitmap_Init(const Params: PParamArray); lape_extdecl
 begin
-  Self := PMufasaBitmap(Params^[0])^;
-  PMufasaBitmap(Result)^ := Self.Create;
+  PMufasaBitmap(Params^[0])^ := TMufasaBitmap.Create();
 end;
 
-procedure Lape_TMufasaBitmap_FreeBMP(const Params: PParamArray); lape_extdecl
+procedure Lape_TMufasaBitmap_Free(const Params: PParamArray); lape_extdecl
 var
   Self: TMufasaBitmap;
 begin
   Self := PMufasaBitmap(Params^[0])^;
-  Self.Free;
-end;}
+  FreeAndNil(Self);
+end;
 
 procedure Lape_TMufasaBitmap_SetAlphaValue(const Params: PParamArray); lape_extdecl
 var

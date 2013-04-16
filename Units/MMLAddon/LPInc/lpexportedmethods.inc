@@ -47,7 +47,7 @@ AddGlobalFunc('function CreateBitmapString(bmp: integer): string', @Lape_CreateB
 
 { This is a temporary workaround to allow Lape to pass TMufasaBitmaps to plugins.
   Also see lpcompile.inc}
-AddGlobalFunc('function GetMufasaBitmap(bmp: integer): TMufasaBitmap', @Lape_GetMufasaBitmap);
+AddGlobalFunc('function GetMufasaBitmap(bmp: integer): TMufasaBitmap;', @Lape_GetMufasaBitmap);
 
 AddGlobalFunc('function CreateBitmap(w,h: integer): integer', @Lape_CreateBitmap);
 AddGlobalFunc('procedure FreeBitmap(Number: integer);', @Lape_FreeBitmap);
@@ -105,8 +105,9 @@ AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPo
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
 AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 
-{TMufasaBitmap}
-
+{ TMufasaBitmap }
+addGlobalFunc('procedure TMufasaBitmap.Init();', @Lape_TMufasaBitmap_Init);
+addGlobalFunc('procedure TMufasaBitmap.Free();', @Lape_TMufasaBitmap_Free);
 AddGlobalFunc('procedure TMufasaBitmap.LoadFromFile(Filename: string)', @Lape_TMufasaBitmap_LoadFromFile);
 AddGlobalFunc('function TMufasaBitmap.SaveToFile(Filename: string): Boolean', @Lape_TMufasaBitmap_SaveToFile);
 AddGlobalFunc('procedure TMufasaBitmap.Rectangle(const Box : TBox;FillCol : TColor)', @Lape_TMufasaBitmap_Rectangle);
@@ -134,11 +135,6 @@ AddGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer) : TMufas
 AddGlobalFunc('function TMufasaBitmap.ToString : string', @Lape_TMufasaBitmap_ToString);
 AddGlobalFunc('procedure TMufasaBitmap.SetTransparentColor(Col : TColor)', @Lape_TMufasaBitmap_SetTransparentColor);
 AddGlobalFunc('function TMufasaBitmap.GetTransparentColor : TColor;', @Lape_TMufasaBitmap_GetTransparentColor);
-
-
-
-
-
 
 { Math }
 
@@ -591,6 +587,3 @@ end;
 //AddGlobalFunc('function ext_GetPageEx(const URL, PostData, MimeType: string): string', @Lape_ext_GetPageEx);
 //AddGlobalFunc('function ext_GetJSONValue(const Data, Value: string): string', @Lape_ext_GetJSONValue);
 
-
-AddGlobalFunc('procedure TMufasaBitmap.LoadFromFile(Filename: string)', @Lape_TMufasaBitmap_LoadFromFile);
-AddGlobalFunc('function TMufasaBitmap.SaveToFile(Filename: string): Boolean', @Lape_TMufasaBitmap_SaveToFile);

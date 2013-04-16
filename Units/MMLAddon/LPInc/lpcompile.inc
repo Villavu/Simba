@@ -130,8 +130,6 @@ addGlobalType('packed record _type: integer; is_text_color: boolean; r_low,r_hig
 
 addGlobalType('array of TOCRFilterData', 'TOCRFilterDataArray');
 
-addGlobalType('(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger)', 'THashType');    
+addGlobalType('(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger)', 'THashType');
 
-{ This is a workaround to allow Lape to export TMufasaBitmaps.
-  Also see lpexportedmethods.inc }
 addGlobalType('Pointer', 'TMufasaBitmap');
