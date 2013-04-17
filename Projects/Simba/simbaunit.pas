@@ -1365,12 +1365,16 @@ begin
       exit;
     end;
     InitializeTMThread(scriptthread);
-    ScriptThread.CompileOnly:= false;
-    ScriptThread.OnTerminate:=@ScriptThreadTerminate;
-    ScriptState:= ss_Running;
-    FirstRun := false;
-    //Lets run it!
-    ScriptThread.Start;
+    if (Assigned(ScriptThread)) then
+    begin
+      ScriptThread.CompileOnly:= false;
+      ScriptThread.OnTerminate:=@ScriptThreadTerminate;
+      ScriptState:= ss_Running;
+      FirstRun := false;
+      //Lets run it!
+      ScriptThread.Start;
+    end else
+      WriteLn('Something went wrong creating the ScriptThread....');
   end;
 end;
 
@@ -1912,7 +1916,7 @@ begin
   except
     on E: Exception do
     begin
-      mDebugLn('Failed to initialise the interpreter: ' + E.Message);
+      formWritelnEx('Failed to initialise the interpreter: ' + E.Message);
       Thread := nil;
       Exit;
     end;
