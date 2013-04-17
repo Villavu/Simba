@@ -105,41 +105,6 @@ AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPo
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
 AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 
-{TMufasaBitmap}
-
-AddGlobalFunc('procedure TMufasaBitmap.LoadFromFile(Filename: string)', @Lape_TMufasaBitmap_LoadFromFile);
-AddGlobalFunc('function TMufasaBitmap.SaveToFile(Filename: string): Boolean', @Lape_TMufasaBitmap_SaveToFile);
-AddGlobalFunc('procedure TMufasaBitmap.Rectangle(const Box : TBox;FillCol : TColor)', @Lape_TMufasaBitmap_Rectangle);
-AddGlobalFunc('procedure TMufasaBitmap.FloodFill(const StartPT : TPoint; const SearchCol, ReplaceCol : TColor)', @Lape_TMufasaBitmap_FloodFill);
-AddGlobalFunc('procedure TMufasaBitmap.FastSetPixel(x,y : integer; Color : TColor)', @Lape_TMufasaBitmap_FastSetPixel);
-AddGlobalFunc('procedure TMufasaBitmap.FastSetPixels(Points : TPointArray; Colors : TIntegerArray)', @Lape_TMufasaBitmap_FastSetPixels);
-AddGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA : T2DPointArray)', @Lape_TMufasaBitmap_DrawATPA);
-AddGlobalFunc('procedure TMufasaBitmap.DrawTPA(Points : TPointArray; Color : TColor)', @Lape_TMufasaBitmap_DrawTPA);
-AddGlobalFunc('procedure TMufasaBitmap.LineTo(Src,Dest: TPoint; Color : TColor)', @Lape_TMufasaBitmap_LineTo);
-//AddGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas : TCanvas)', @Lape_TMufasaBitmap_DrawToCanvas);
-AddGlobalFunc('function TMufasaBitmap.CreateTPA(SearchCol : TColor) : TPointArray', @Lape_TMufasaBitmap_CreateTPA);
-AddGlobalFunc('function TMufasaBitmap.FastGetPixel(x,y : integer) : TColor', @Lape_TMufasaBitmap_FastGetPixel);
-AddGlobalFunc('function TMufasaBitmap.FastGetPixels(Points : TPointArray) : TIntegerArray', @Lape_TMufasaBitmap_FastGetPixels);
-AddGlobalFunc('function TMufasaBitmap.GetAreaColors(xs,ys,xe,ye : integer) : T2DIntArray;', @Lape_TMufasaBitmap_GetAreaColors);
-AddGlobalFunc('procedure TMufasaBitmap.FastDrawClear(Color : TColor)', @Lape_TMufasaBitmap_FastDrawClear);
-AddGlobalFunc('procedure TMufasaBitmap.FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap)', @Lape_TMufasaBitmap_FastDrawTransparent);
-AddGlobalFunc('procedure TMufasaBitmap.FastReplaceColor(OldColor, NewColor: TColor)', @Lape_TMufasaBitmap_FastReplaceColor);
-AddGlobalFunc('procedure TMufasaBitmap.RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap )', @Lape_TMufasaBitmap_RotateBitmap);
-AddGlobalFunc('procedure TMufasaBitmap.Desaturate(TargetBitmap : TMufasaBitmap)', @Lape_TMufasaBitmap_Desaturate);
-AddGlobalFunc('procedure TMufasaBitmap.GreyScale(TargetBitmap : TMufasaBitmap)', @Lape_TMufasaBitmap_GreyScale);
-AddGlobalFunc('procedure TMufasaBitmap.Brightness(TargetBitmap : TMufasaBitmap; br : integer)', @Lape_TMufasaBitmap_Brightness);
-AddGlobalFunc('procedure TMufasaBitmap.Contrast(TargetBitmap : TMufasaBitmap; co : Extended)', @Lape_TMufasaBitmap_Contrast);
-AddGlobalFunc('procedure TMufasaBitmap.Posterize(TargetBitmap : TMufasaBitmap; Po : integer)', @Lape_TMufasaBitmap_Posterize);
-AddGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap', @Lape_TMufasaBitmap_Copy);
-AddGlobalFunc('function TMufasaBitmap.ToString : string', @Lape_TMufasaBitmap_ToString);
-AddGlobalFunc('procedure TMufasaBitmap.SetTransparentColor(Col : TColor)', @Lape_TMufasaBitmap_SetTransparentColor);
-AddGlobalFunc('function TMufasaBitmap.GetTransparentColor : TColor;', @Lape_TMufasaBitmap_GetTransparentColor);
-
-
-
-
-
-
 { Math }
 
 AddGlobalFunc('function pow(base,exponent: extended): extended', @Lape_pow);
@@ -590,7 +555,3 @@ end;
 //AddGlobalFunc('procedure ext_OpenScriptEx(FileName: string; Run: boolean);', @Lape_ext_OpenScriptEx);
 //AddGlobalFunc('function ext_GetPageEx(const URL, PostData, MimeType: string): string', @Lape_ext_GetPageEx);
 //AddGlobalFunc('function ext_GetJSONValue(const Data, Value: string): string', @Lape_ext_GetJSONValue);
-
-
-AddGlobalFunc('procedure TMufasaBitmap.LoadFromFile(Filename: string)', @Lape_TMufasaBitmap_LoadFromFile);
-AddGlobalFunc('function TMufasaBitmap.SaveToFile(Filename: string): Boolean', @Lape_TMufasaBitmap_SaveToFile);
