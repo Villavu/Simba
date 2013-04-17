@@ -32,6 +32,7 @@ uses
 type
 
   { TMufasaBitmap }
+  PMufasaBitmap = ^TMufasaBitmap;
   TMufasaBitmap = class(TObject)
   private
     w,h : integer;
@@ -110,7 +111,6 @@ type
     constructor Create;
     destructor Destroy;override;
   end;
-  PMufasaBitmap = ^TMufasaBitmap;
   TMufasaBmpArray = Array of TMufasaBitmap;
   { TMBitmaps }
   TMBitmaps = class(TObject)
