@@ -53,15 +53,21 @@ operator <(PT1, PT2: TPoint): boolean;
 
 
 type
+  PRGB24 = ^TRGB24;
   TRGB24 = packed record
     B, G, R : byte;
   end;
-  PRGB24 = ^TRGB24;
+
+  PPRGB32 = ^PRGB32;
+  PRGB32 = ^TRGB32;
   TRGB32 = packed record
     B, G, R, A: Byte;
   end;
-  PRGB32 = ^TRGB32;
+
+  PRGB32Array = ^TRGB32Array;
   TRGB32Array = array of TRGB32;
+
+  PPRGB32Array = ^TPRGB32Array;
   TPRGB32Array = array of PRGB32; //Array of Pointers
 
   THSL = record
@@ -69,7 +75,9 @@ type
   end;
   PHSL = ^THSL;
 
+  PHSLArray = ^THSLArray;
   THSLArray = array of THSL;
+  P2DHSLArray = ^T2DHSLArray;
   T2DHSLArray = array of array of THSL;
 
   TRetData = record
@@ -84,17 +92,29 @@ type
 
   TStringArray = array of String;
   T2DStringArray = array of TStringArray;
+
+  PPoint = ^TPoint;
+
+  PPointArray = ^TPointArray;
   TPointArray = array of TPoint;
+  P2DPointArray = ^T2DPointArray;
   T2DPointArray = array of TPointArray;
+
   TVariantArray = Array of Variant;
   PVariantArray = ^TVariantArray;
+
+  PIntegerArray = ^TIntegerArray;
   TIntegerArray = Array of Integer;
+  P2DIntArray = ^T2DIntArray;
   T2DIntArray = array of TIntegerArray;
   T2DIntegerArray = T2DIntArray;
+
   TBoolArray = array of boolean;
   TBooleanArray = TBoolArray;
   T2DBoolArray = Array of TBoolArray;
+
   TExtendedArray = Array of Extended;
+  P2DExtendedArray = ^T2DExtendedArray;
   T2DExtendedArray = Array of Array of Extended;
 
   { Crypto }
@@ -103,13 +123,14 @@ type
   PHashType = ^THashType;
 
   { Mask Types }
+  PMask = ^TMask;
   TMask = record
     White, Black : TPointArray;
     WhiteHi,BlackHi : integer;
     W,H : integer;
   end;
-  { File types }
 
+  { File types }
   TMufasaFile = record
     Path: String;
     FS: TFileStream;
@@ -122,6 +143,7 @@ type
     Possibly add .name too?
     Then one could give DTM names, which would be easy for debugging.
   }
+  PBox = ^TBox;
   TBox = record
     x1, y1, x2, y2: Integer;
   end;
@@ -207,8 +229,6 @@ type
 type
    TBufferByteArray = Array[0..524287] of Byte;
    PBufferByteArray = ^TBufferByteArray;
-
-   PPoint = ^TPoint;
 
   TOCRFilterData = packed record
       _type: integer;
