@@ -283,7 +283,7 @@ uses
   DCPtiger
 
   {$IFDEF USE_LAPE}
-  , lpTObject, lpTMufasaBitmap
+  , lpTObject, lpTMufasaBitmap,lpLCLClasses
   {$ENDIF};
 
 {$ifdef Linux}
@@ -1344,6 +1344,7 @@ begin
 
     Register_TObject(Compiler);
     Register_TMufasaBitmap(Compiler);
+    Register_Classes(Compiler);
 
     {$I LPInc/lpexportedmethods.inc}
 
