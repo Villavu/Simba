@@ -37,7 +37,7 @@ procedure Register_TPersistent(Compiler: TLapeCompiler);
 procedure Register_TCustomMemoryStream(Compiler: TLapeCompiler);
 
 
-procedure Register_Classes(Compiler: TLapeCompiler);
+procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 
 implementation
 uses lpTObject, MufasaTypes;
@@ -1082,7 +1082,7 @@ begin
   end;
 end;
 {Registration classes procedure}
-procedure Register_Classes(Compiler: TLapeCompiler);
+procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin

@@ -1344,7 +1344,7 @@ begin
 
     Register_TObject(Compiler);
     Register_TMufasaBitmap(Compiler);
-    Register_Classes(Compiler);
+    RegisterLCLClasses(Compiler);
 
     {$I LPInc/lpexportedmethods.inc}
 
