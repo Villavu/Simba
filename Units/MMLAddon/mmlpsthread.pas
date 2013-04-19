@@ -280,7 +280,11 @@ uses
   DCPhaval, DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
-  DCPtiger;
+  DCPtiger
+
+  {$IFDEF USE_LAPE}
+  , lpTObject, lpTMufasaBitmap,lpLCLClasses
+  {$ENDIF};
 
 {$ifdef Linux}
   {$define PS_SafeCall}
@@ -1285,7 +1289,6 @@ end;
 {$I LPInc/Wrappers/lp_other.inc}
 {$I LPInc/Wrappers/lp_settings.inc}
 {$I LPInc/Wrappers/lp_bitmap.inc}
-{$I LPInc/Wrappers/lp_mufasabitmap.inc}
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}
@@ -1338,6 +1341,10 @@ begin
 
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
+
+    Register_TObject(Compiler);
+    Register_TMufasaBitmap(Compiler);
+    RegisterLCLClasses(Compiler);
 
     {$I LPInc/lpexportedmethods.inc}
 
