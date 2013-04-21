@@ -1,0 +1,74 @@
+unit lpClasses;
+
+{$mode objfpc}{$H+}
+{$I Simba.inc}
+
+interface
+
+uses
+  Classes, SysUtils, lpcompiler;
+
+procedure RegisterMMLClasses(Compiler: TLapeCompiler);
+
+implementation
+
+uses
+  lpTObject,
+
+  lpTMDTM, lpTMDTMS,
+
+  lpTMufasaBitmap, lpTMBitmaps,
+
+  lpTMFiles,
+
+  lpTMFinder,
+  
+  lpTMFont, lpTMFonts,
+
+  lpTMOCR,
+
+  lpTTarget,
+
+  lpTIOManager_Abstract
+  {$IFDEF WINDOWS}, lpTIOManager_Windows{$ENDIF}
+  {$IFDEF LINUX}, lpTIOManager_Linux{$ENDIF}
+
+  , lpTClient;
+
+procedure RegisterMMLClasses(Compiler: TLapeCompiler);
+begin
+  Register_TObject(Compiler);
+  
+  { MML DTM }
+  Register_TMDTM(Compiler);
+  Register_TMDTMS(Compiler);
+
+  { MML Bitmap }
+  Register_TMufasaBitmap(Compiler);
+  Register_TMBitmaps(Compiler);
+
+  { MML File }
+  Register_TMFiles(Compiler);
+  
+  { MML Finder }
+  Register_TMFinder(Compiler);
+
+  { MML Font }
+  Register_TMFont(Compiler);
+  Register_TMFonts(Compiler);
+
+  { MML OCR }
+  Register_TMOCR(Compiler);
+
+  { MML Target }
+  Register_TTarget(Compiler);
+
+  { MML IOManager }
+  Register_TIOManager_Abstract(Compiler);
+  Register_TIOManager(Compiler);
+
+  { MML Client }
+  Register_TClient(Compiler);
+end;
+
+end.
