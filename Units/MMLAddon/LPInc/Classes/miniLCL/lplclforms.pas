@@ -2,11 +2,13 @@ unit lplclforms;
 
 {$mode objfpc}{$H+}
 {$I Simba.inc}
+{$ERROR FIXME: Incorrect...}
 
 interface
 
 uses
   Classes, SysUtils,StdCtrls,Forms,Controls,lpcompiler, lptypes, lpClassHelper;
+
 type
   PForm = ^TForm;
   PCloseAction = ^TCloseAction;
@@ -16,7 +18,7 @@ type
 procedure RegisterLCLForms(Compiler: TLapeCompiler);
 
 implementation
- uses lplclclasses,lplclgraphics;
+ uses lplclsystem,lplclgraphics;
 {TForm}
 //constructor Create(TheOwner: TComponent);
 procedure TForm_Init(const Params: PParamArray); lape_extdecl

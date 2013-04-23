@@ -5,8 +5,20 @@ unit lplclgraphics;
 interface
 
 uses
-  Classes, SysUtils,Graphics,LCLType,lpcompiler, lptypes, lpClassHelper;
+  Classes, SysUtils, lpcompiler, lptypes, lpClassHelper;
+
+procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
+
+implementation
+
+uses
+  MufasaTypes, Graphics, LCLType;
+
 type
+  PPersistent = ^TPersistent;
+  PStream = ^TStream;
+  PHandle = ^THandle;
+  PNotifyEvent = ^TNotifyEvent;
   PGraphicsObject = ^TGraphicsObject;
   //TFont
   PFontStyles = ^TFontStyles;
@@ -36,14 +48,8 @@ type
   //TPicture
   PPicture = ^TPicture;
 
-procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
-
-implementation
-
- uses lplclclasses,MufasaTypes;
-
- {TGraphicsObject}
- //Read: property OnChanging: TNotifyEvent read OnChanging write OnChanging;
+{TGraphicsObject}
+//Read: property OnChanging: TNotifyEvent read OnChanging write OnChanging;
 procedure TGraphicsObject_OnChanging_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   PNotifyEvent(Result)^ := PGraphicsObject(Params^[0])^.OnChanging;
@@ -654,12 +660,6 @@ begin
   PInteger(Result)^ := PCanvas(Params^[0])^.TextWidth(PlpString(Params^[1])^);
 end;
 
-//function TextFitInfo( Text: string; MaxWidth: Integer): Integer;
-procedure TCanvas_TextFitInfo(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PInteger(Result)^ := PCanvas(Params^[0])^.TextFitInfo(PlpString(Params^[1])^, PInteger(Params^[2])^);
-end;
-
 //function HandleAllocated: boolean; virtual;
 procedure TCanvas_HandleAllocated(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -813,7 +813,6 @@ begin
     addGlobalFunc('procedure TCanvas.TextRect( ARect: TRect; X, Y: integer;  Text: string);', @TCanvas_TextRect);
     addGlobalFunc('function TCanvas.TextHeight( Text: string): Integer;', @TCanvas_TextHeight);
     addGlobalFunc('function TCanvas.TextWidth( Text: string): Integer;', @TCanvas_TextWidth);
-    addGlobalFunc('function TCanvas.TextFitInfo( Text: string; MaxWidth: Integer): Integer;', @TCanvas_TextFitInfo);
     addGlobalFunc('function TCanvas.HandleAllocated(): boolean;', @TCanvas_HandleAllocated);
     addClassVar(Compiler, 'TCanvas', 'AutoRedraw', 'Boolean', @TCanvas_AutoRedraw_Read, @TCanvas_AutoRedraw_Write);
     addClassVar(Compiler, 'TCanvas', 'Brush', 'TBrush', @TCanvas_Brush_Read, @TCanvas_Brush_Write);

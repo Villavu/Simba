@@ -8,12 +8,17 @@ interface
 uses
   Classes, SysUtils, lpcompiler;
 
+procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 procedure RegisterMMLClasses(Compiler: TLapeCompiler);
 
 implementation
 
 uses
   lpTObject,
+
+  lplclsystem,
+  lplclgraphics,
+  //lplclforms,
 
   lpTMDTM, lpTMDTMS,
 
@@ -35,10 +40,17 @@ uses
 
   , lpTClient;
 
-procedure RegisterMMLClasses(Compiler: TLapeCompiler);
+procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 begin
   Register_TObject(Compiler);
-  
+
+  RegisterLCLSystem(Compiler);
+  RegisterLCLGraphics(Compiler);
+  //RegisterLCLForms(Compiler);
+end;
+
+procedure RegisterMMLClasses(Compiler: TLapeCompiler);
+begin
   { MML DTM }
   Register_TMDTM(Compiler);
   Register_TMDTMS(Compiler);
