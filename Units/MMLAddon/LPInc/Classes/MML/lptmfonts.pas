@@ -92,7 +92,7 @@ begin
     addGlobalFunc('function TMFonts.GetFont(const Name: String): TOcrData;', @TMFonts_GetFont);
     addGlobalFunc('function TMFonts.FreeFont(const Name: String): Boolean;', @TMFonts_FreeFont);
     addGlobalFunc('function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;', @TMFonts_LoadFont);
-    //addGlobalFunc('function TMFonts.LoadSystemFont(const SysFont : TFont; const FontName : string): boolean;', @TMFonts_LoadSystemFont);
+    addGlobalFunc('function TMFonts.LoadSystemFont(const SysFont : TFont; const FontName : string): boolean;', @TMFonts_LoadSystemFont);
     addGlobalFunc('function TMFonts.Copy(Owner : TObject): TMFonts;', @TMFonts_Copy);
     addGlobalFunc('function TMFonts.Count(): integer;', @TMFonts_Count);
     addClassVar(Compiler, 'TMFonts', 'Path', 'string', @TMFonts_Path_Read, @TMFonts_Path_Write);
