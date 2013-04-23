@@ -282,8 +282,8 @@ uses
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger
 
-  {$IFDEF USE_LAPE}, lpClasses{$ENDIF}
-  ;
+  {$IFDEF USE_LAPE}, lpClasses, lpTObject, lpTMufasaBitmap,lpLCLClasses
+  {$ENDIF};
 
 {$ifdef Linux}
   {$define PS_SafeCall}
@@ -1343,6 +1343,9 @@ begin
 
     RegisterMMLClasses(Compiler);
     addGlobalVar('TClient', @Client, 'Client');
+    Register_TObject(Compiler);
+    Register_TMufasaBitmap(Compiler);
+    RegisterLCLClasses(Compiler);
 
     {$I LPInc/lpexportedmethods.inc}
 
