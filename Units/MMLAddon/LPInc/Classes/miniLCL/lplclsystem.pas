@@ -1,4 +1,4 @@
-unit lplclclasses;
+unit lplclsystem;
 
 {$mode objfpc}{$H+}
 {$I Simba.inc}
@@ -7,6 +7,14 @@ interface
 
 uses
   Classes, SysUtils, lpcompiler, lptypes, lpClassHelper;
+
+procedure RegisterLCLSystem(Compiler: TLapeCompiler);
+
+implementation
+
+uses
+  lpTObject, MufasaTypes;
+
 type
   PComponent = ^TComponent;
   PComponentState = ^TComponentState;
@@ -26,22 +34,6 @@ type
   PStringList = ^TStringList;
   PNotifyEvent = ^TNotifyEvent;//register in Register Classes
   PStringListSortCompare = ^TStringListSortCompare;//register in Register Classes
-
-procedure Register_TStream(Compiler: TLapeCompiler);
-procedure Register_THandleStream(Compiler: TLapeCompiler);
-procedure Register_TFileStream(Compiler: TLapeCompiler);
-procedure Register_TStrings(Compiler: TLapeCompiler);
-procedure Register_TStringList(Compiler: TLapeCompiler);
-procedure Register_TComponent(Compiler: TLapeCompiler);
-procedure Register_TPersistent(Compiler: TLapeCompiler);
-procedure Register_TCustomMemoryStream(Compiler: TLapeCompiler);
-
-
-procedure RegisterLCLClasses(Compiler: TLapeCompiler);
-
-implementation
-uses lpTObject, MufasaTypes;
-
 
 {TPersistent}
 //procedure Assign(Source: TPersistent);
@@ -586,10 +578,10 @@ begin
   PStrings(Params^[0])^.Append(PlpString(Params^[1])^);
 end;
 
-//procedure AddStrings(const TheStrings: TStringArray);
+//procedure AddStrings(const TheStrings: TStrings);
 procedure TStrings_AddStrings(const Params: PParamArray); lape_extdecl
 begin
-  PStrings(Params^[0])^.AddStrings(PStringArray(Params^[1])^);
+  PStrings(Params^[0])^.AddStrings(PStrings(Params^[1])^);
 end;
 
 //procedure Assign(Source: TPersistent);
@@ -763,7 +755,7 @@ begin
     addGlobalFunc('function TStrings.Add(const S: string): Integer;', @TStrings_Add);
     addGlobalFunc('function TStrings.AddObject(const S: string; AObject: TObject): Integer;', @TStrings_AddObject);
     addGlobalFunc('procedure TStrings.Append(const S: string);', @TStrings_Append);
-    addGlobalFunc('procedure TStrings.AddStrings(const TheStrings: TStringArray);', @TStrings_AddStrings);
+    addGlobalFunc('procedure TStrings.AddStrings(const TheStrings: TStrings);', @TStrings_AddStrings);
     addGlobalFunc('procedure TStrings.Assign(Source: TPersistent);', @TStrings_Assign);
     addGlobalFunc('procedure TStrings.BeginUpdate();', @TStrings_BeginUpdate);
     addGlobalFunc('procedure TStrings.Clear();', @TStrings_Clear);
@@ -1082,16 +1074,16 @@ begin
   end;
 end;
 {Registration classes procedure}
-procedure RegisterLCLClasses(Compiler: TLapeCompiler);
+procedure RegisterLCLSystem(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    //TNotifyEvent = procedure(Sender: TObject)
     addGlobalType('Procedure(Sender:TObject)','TNotifyEvent');
     addGlobalType('^TNotifyEvent','PNotifyEvent');
     addGlobalType('dword','THandle');
     addGlobalType('string','TComponentName');
     addGlobalType('(soBeginning, soCurrent, soEnd)','TSeekOrigin');
+
     Register_TPersistent(Compiler);
     Register_TComponent(Compiler);
     Register_TStream(Compiler);

@@ -282,8 +282,7 @@ uses
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger
 
-  {$IFDEF USE_LAPE}, lpClasses, lpTObject, lpTMufasaBitmap,lpLCLClasses
-  {$ENDIF};
+  {$IFDEF USE_LAPE}, lpClasses{$ENDIF};
 
 {$ifdef Linux}
   {$define PS_SafeCall}
@@ -1341,11 +1340,9 @@ begin
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
 
-    RegisterMMLClasses(Compiler);
-    addGlobalVar('TClient', @Client, 'Client');
-    Register_TObject(Compiler);
-    Register_TMufasaBitmap(Compiler);
     RegisterLCLClasses(Compiler);
+    RegisterMMLClasses(Compiler);
+    addGlobalVar('TClient', @Client, 'Client').isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
 
