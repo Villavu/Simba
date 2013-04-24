@@ -2,24 +2,554 @@ unit lplclforms;
 
 {$mode objfpc}{$H+}
 {$I Simba.inc}
-{$ERROR FIXME: Incorrect...}
+
 
 interface
 
 uses
-  Classes, SysUtils,StdCtrls,Forms,Controls,lpcompiler, lptypes, lpClassHelper;
+  Classes, SysUtils,Forms,lpcompiler, lptypes, lpClassHelper;
 
 type
+  PCustomForm = ^TCustomForm;
   PForm = ^TForm;
   PCloseAction = ^TCloseAction;
   PCloseEvent = ^TCloseEvent;
-  PFormBorderStyle = ^TFormBorderStyle;
+
 
 procedure RegisterLCLForms(Compiler: TLapeCompiler);
 
 implementation
- uses lplclsystem,lplclgraphics;
-{TForm}
+ uses lplclsystem,lplclgraphics,lplclcontrols,controls;
+
+ type
+   PFormBorderStyle = ^TFormBorderStyle;
+   PCloseQueryEvent = ^TCloseQueryEvent;
+
+ {TCustomForm}
+ //constructor Create(AOwner: TComponent);
+procedure TCustomForm_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^ := TCustomForm.Create(PComponent(Params^[1])^);
+end;
+
+//constructor CreateNew(AOwner: TComponent; Num: Integer);
+procedure TCustomForm_CreateNew(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^ := TCustomForm.CreateNew(PComponent(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+//procedure AfterConstruction;
+procedure TCustomForm_AfterConstruction(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.AfterConstruction();
+end;
+
+//procedure BeforeDestruction;
+procedure TCustomForm_BeforeDestruction(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.BeforeDestruction();
+end;
+
+//procedure Close;
+procedure TCustomForm_Close(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.Close();
+end;
+
+//function CloseQuery: boolean;
+procedure TCustomForm_CloseQuery(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomForm(Params^[0])^.CloseQuery();
+end;
+
+//procedure DefocusControl(Control: TWinControl; Removing: Boolean);
+procedure TCustomForm_DefocusControl(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.DefocusControl(PWinControl(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+//procedure DestroyWnd;
+procedure TCustomForm_DestroyWnd(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.DestroyWnd();
+end;
+
+//procedure EnsureVisible(AMoveToTop: Boolean);
+procedure TCustomForm_EnsureVisible(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.EnsureVisible(PBoolean(Params^[1])^);
+end;
+
+//procedure FocusControl(WinControl: TWinControl);
+procedure TCustomForm_FocusControl(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.FocusControl(PWinControl(Params^[1])^);
+end;
+
+//function FormIsUpdating: boolean;
+procedure TCustomForm_FormIsUpdating(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomForm(Params^[0])^.FormIsUpdating();
+end;
+
+//function GetFormImage: TBitmap;
+procedure TCustomForm_GetFormImage(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBitmap(Result)^ := PCustomForm(Params^[0])^.GetFormImage();
+end;
+
+//procedure Hide;
+procedure TCustomForm_Hide(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.Hide();
+end;
+
+//procedure IntfDropFiles(const FileNames: TStringArray);
+procedure TCustomForm_IntfDropFiles(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.IntfDropFiles(PStringArray(Params^[1])^);
+end;
+
+//procedure IntfHelp(AComponent: TComponent);
+procedure TCustomForm_IntfHelp(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.IntfHelp(PComponent(Params^[1])^);
+end;
+
+//function AutoSizeDelayedHandle: Boolean;
+procedure TCustomForm_AutoSizeDelayedHandle(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomForm(Params^[0])^.AutoSizeDelayedHandle();
+end;
+
+//procedure GetPreferredSize(var PreferredWidth, PreferredHeight: integer;Raw,WithThemeSpace: boolean );
+procedure TCustomForm_GetPreferredSize(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.GetPreferredSize(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pboolean(Params^[3])^, Pboolean(Params^[4])^);
+end;
+
+//procedure Release;
+procedure TCustomForm_Release(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.Release();
+end;
+
+//function CanFocus: Boolean;
+procedure TCustomForm_CanFocus(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomForm(Params^[0])^.CanFocus();
+end;
+
+//procedure SetFocus;
+procedure TCustomForm_SetFocus(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.SetFocus();
+end;
+
+//function SetFocusedControl(Control: TWinControl): Boolean ;
+procedure TCustomForm_SetFocusedControl(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomForm(Params^[0])^.SetFocusedControl(PWinControl(Params^[1])^);
+end;
+
+//procedure SetRestoredBounds(ALeft, ATop, AWidth, AHeight: integer);
+procedure TCustomForm_SetRestoredBounds(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.SetRestoredBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
+end;
+
+//procedure Show;
+procedure TCustomForm_Show(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.Show();
+end;
+
+//function ShowModal: Integer;
+procedure TCustomForm_ShowModal(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomForm(Params^[0])^.ShowModal();
+end;
+
+//procedure ShowOnTop;
+procedure TCustomForm_ShowOnTop(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.ShowOnTop();
+end;
+
+//procedure RemoveAllHandlersOfObject(AnObject: TObject);
+procedure TCustomForm_RemoveAllHandlersOfObject(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.RemoveAllHandlersOfObject(PObject(Params^[1])^);
+end;
+
+//procedure AddHandlerFirstShow(OnFirstShowHandler: TNotifyEvent;AsFirst: Boolean);
+procedure TCustomForm_AddHandlerFirstShow(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.AddHandlerFirstShow(PNotifyEvent(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+//procedure RemoveHandlerFirstShow(OnFirstShowHandler: TNotifyEvent);
+procedure TCustomForm_RemoveHandlerFirstShow(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.RemoveHandlerFirstShow(PNotifyEvent(Params^[1])^);
+end;
+
+//procedure AddHandlerClose(OnCloseHandler: TCloseEvent; AsFirst: Boolean);
+procedure TCustomForm_AddHandlerClose(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.AddHandlerClose(PCloseEvent(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+//procedure RemoveHandlerClose(OnCloseHandler: TCloseEvent);
+procedure TCustomForm_RemoveHandlerClose(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.RemoveHandlerClose(PCloseEvent(Params^[1])^);
+end;
+
+//procedure AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean);
+procedure TCustomForm_AddHandlerCreate(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.AddHandlerCreate(PNotifyEvent(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+//procedure RemoveHandlerCreate(OnCreateHandler: TNotifyEvent);
+procedure TCustomForm_RemoveHandlerCreate(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.RemoveHandlerCreate(PNotifyEvent(Params^[1])^);
+end;
+
+//Read: property Active: Boolean read Active;
+procedure TCustomForm_Active_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomForm(Params^[0])^.Active;
+end;
+
+//Read: property ActiveControl: TWinControl read ActiveControl write ActiveControl;
+procedure TCustomForm_ActiveControl_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PWinControl(Result)^ := PCustomForm(Params^[0])^.ActiveControl;
+end;
+
+//Write: property ActiveControl: TWinControl read ActiveControl write ActiveControl;
+procedure TCustomForm_ActiveControl_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.ActiveControl := PWinControl(Params^[1])^;
+end;
+
+//Read: property ActiveDefaultControl: TControl read ActiveDefaultControl write ActiveDefaultControl;
+procedure TCustomForm_ActiveDefaultControl_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PControl(Result)^ := PCustomForm(Params^[0])^.ActiveDefaultControl;
+end;
+
+//Write: property ActiveDefaultControl: TControl read ActiveDefaultControl write ActiveDefaultControl;
+procedure TCustomForm_ActiveDefaultControl_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.ActiveDefaultControl := PControl(Params^[1])^;
+end;
+
+//Read: property AllowDropFiles: Boolean read AllowDropFiles write AllowDropFiles ;
+procedure TCustomForm_AllowDropFiles_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomForm(Params^[0])^.AllowDropFiles;
+end;
+
+//Write: property AllowDropFiles: Boolean read AllowDropFiles write AllowDropFiles ;
+procedure TCustomForm_AllowDropFiles_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.AllowDropFiles := PBoolean(Params^[1])^;
+end;
+
+//Read: property AlphaBlend: Boolean read AlphaBlend write AlphaBlend;
+procedure TCustomForm_AlphaBlend_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomForm(Params^[0])^.AlphaBlend;
+end;
+
+//Write: property AlphaBlend: Boolean read AlphaBlend write AlphaBlend;
+procedure TCustomForm_AlphaBlend_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.AlphaBlend := PBoolean(Params^[1])^;
+end;
+
+//Read: property AlphaBlendValue: Byte read AlphaBlendValue write AlphaBlendValue;
+procedure TCustomForm_AlphaBlendValue_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PByte(Result)^ := PCustomForm(Params^[0])^.AlphaBlendValue;
+end;
+
+//Write: property AlphaBlendValue: Byte read AlphaBlendValue write AlphaBlendValue;
+procedure TCustomForm_AlphaBlendValue_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.AlphaBlendValue := PByte(Params^[1])^;
+end;
+
+//Read: property CancelControl: TControl read CancelControl write CancelControl;
+procedure TCustomForm_CancelControl_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PControl(Result)^ := PCustomForm(Params^[0])^.CancelControl;
+end;
+
+//Write: property CancelControl: TControl read CancelControl write CancelControl;
+procedure TCustomForm_CancelControl_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.CancelControl := PControl(Params^[1])^;
+end;
+
+//Read: property DefaultControl: TControl read DefaultControl write DefaultControl;
+procedure TCustomForm_DefaultControl_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PControl(Result)^ := PCustomForm(Params^[0])^.DefaultControl;
+end;
+
+//Write: property DefaultControl: TControl read DefaultControl write DefaultControl;
+procedure TCustomForm_DefaultControl_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.DefaultControl := PControl(Params^[1])^;
+end;
+
+//Read: property KeyPreview: Boolean read KeyPreview write KeyPreview;
+procedure TCustomForm_KeyPreview_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomForm(Params^[0])^.KeyPreview;
+end;
+
+//Write: property KeyPreview: Boolean read KeyPreview write KeyPreview;
+procedure TCustomForm_KeyPreview_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.KeyPreview := PBoolean(Params^[1])^;
+end;
+
+//Read: property PopupParent: TCustomForm read PopupParent write PopupParent;
+procedure TCustomForm_PopupParent_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCustomForm(Result)^ := PCustomForm(Params^[0])^.PopupParent;
+end;
+
+//Write: property PopupParent: TCustomForm read PopupParent write PopupParent;
+procedure TCustomForm_PopupParent_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.PopupParent := PCustomForm(Params^[1])^;
+end;
+
+//Read: property OnActivate: TNotifyEvent read OnActivate write OnActivate;
+procedure TCustomForm_OnActivate_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnActivate;
+end;
+
+//Write: property OnActivate: TNotifyEvent read OnActivate write OnActivate;
+procedure TCustomForm_OnActivate_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnActivate := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property OnClose: TCloseEvent read FOnClose write FOnClose;
+procedure TCustomForm_OnClose_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCloseEvent(Result)^ := PCustomForm(Params^[0])^.OnClose;
+end;
+
+//Write: property OnClose: TCloseEvent read FOnClose write FOnClose;
+procedure TCustomForm_OnClose_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnClose := PCloseEvent(Params^[1])^;
+end;
+
+//Read: property OnCloseQuery : TCloseQueryEvent read OnCloseQuery write OnCloseQuery;
+procedure TCustomForm_OnCloseQuery_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCloseQueryEvent(Result)^ := PCustomForm(Params^[0])^.OnCloseQuery;
+end;
+
+//Write: property OnCloseQuery : TCloseQueryEvent read OnCloseQuery write OnCloseQuery;
+procedure TCustomForm_OnCloseQuery_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnCloseQuery := PCloseQueryEvent(Params^[1])^;
+end;
+
+//Read: property OnCreate: TNotifyEvent read OnCreate write OnCreate;
+procedure TCustomForm_OnCreate_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnCreate;
+end;
+
+//Write: property OnCreate: TNotifyEvent read OnCreate write OnCreate;
+procedure TCustomForm_OnCreate_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnCreate := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property OnDeactivate: TNotifyEvent read OnDeactivate write OnDeactivate;
+procedure TCustomForm_OnDeactivate_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnDeactivate;
+end;
+
+//Write: property OnDeactivate: TNotifyEvent read OnDeactivate write OnDeactivate;
+procedure TCustomForm_OnDeactivate_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnDeactivate := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property OnDestroy: TNotifyEvent read OnDestroy write OnDestroy;
+procedure TCustomForm_OnDestroy_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnDestroy;
+end;
+
+//Write: property OnDestroy: TNotifyEvent read OnDestroy write OnDestroy;
+procedure TCustomForm_OnDestroy_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnDestroy := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property OnHide: TNotifyEvent read OnHide write OnHide;
+procedure TCustomForm_OnHide_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnHide;
+end;
+
+//Write: property OnHide: TNotifyEvent read OnHide write OnHide;
+procedure TCustomForm_OnHide_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnHide := PNotifyEvent(Params^[1])^;
+end;
+
+
+
+//Read: property OnShow: TNotifyEvent read FOnShow write FOnShow;
+procedure TCustomForm_OnShow_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnShow;
+end;
+
+//Write: property OnShow: TNotifyEvent read FOnShow write FOnShow;
+procedure TCustomForm_OnShow_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnShow := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property OnWindowStateChange: TNotifyEvent read OnWindowStateChange write OnWindowStateChange;
+procedure TCustomForm_OnWindowStateChange_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomForm(Params^[0])^.OnWindowStateChange;
+end;
+
+//Write: property OnWindowStateChange: TNotifyEvent read OnWindowStateChange write OnWindowStateChange;
+procedure TCustomForm_OnWindowStateChange_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.OnWindowStateChange := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property PixelsPerInch: Longint read PixelsPerInch write PixelsPerInch;
+procedure TCustomForm_PixelsPerInch_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLongint(Result)^ := PCustomForm(Params^[0])^.PixelsPerInch;
+end;
+
+//Write: property PixelsPerInch: Longint read PixelsPerInch write PixelsPerInch;
+procedure TCustomForm_PixelsPerInch_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.PixelsPerInch := PLongint(Params^[1])^;
+end;
+
+//Read: property RestoredLeft: integer read RestoredLeft;
+procedure TCustomForm_RestoredLeft_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomForm(Params^[0])^.RestoredLeft;
+end;
+
+//Read: property RestoredTop: integer read RestoredTop;
+procedure TCustomForm_RestoredTop_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomForm(Params^[0])^.RestoredTop;
+end;
+
+//Read: property RestoredWidth: integer read RestoredWidth;
+procedure TCustomForm_RestoredWidth_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomForm(Params^[0])^.RestoredWidth;
+end;
+
+//Read: property RestoredHeight: integer read RestoredHeight;
+procedure TCustomForm_RestoredHeight_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomForm(Params^[0])^.RestoredHeight;
+end;
+
+//procedure Free();
+procedure TCustomForm_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.Free();
+end;
+
+procedure Register_TCustomForm(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass(Compiler, 'TCustomForm', 'TScrollingWinControl');
+
+    addGlobalFunc('procedure TCustomForm.Init(AOwner: TComponent);', @TCustomForm_Init);
+    addGlobalFunc('procedure TCustomForm.InitNew(AOwner: TComponent; Num: Integer);', @TCustomForm_CreateNew);
+    addGlobalFunc('procedure TCustomForm.AfterConstruction();', @TCustomForm_AfterConstruction);
+    addGlobalFunc('procedure TCustomForm.BeforeDestruction();', @TCustomForm_BeforeDestruction);
+    addGlobalFunc('procedure TCustomForm.Close();', @TCustomForm_Close);
+    addGlobalFunc('function TCustomForm.CloseQuery(): boolean;', @TCustomForm_CloseQuery);
+    addGlobalFunc('procedure TCustomForm.DefocusControl(Control: TWinControl; Removing: Boolean);', @TCustomForm_DefocusControl);
+    addGlobalFunc('procedure TCustomForm.DestroyWnd();', @TCustomForm_DestroyWnd);
+    addGlobalFunc('procedure TCustomForm.EnsureVisible(AMoveToTop: Boolean);', @TCustomForm_EnsureVisible);
+    addGlobalFunc('procedure TCustomForm.FocusControl(WinControl: TWinControl);', @TCustomForm_FocusControl);
+    addGlobalFunc('function TCustomForm.FormIsUpdating(): boolean;', @TCustomForm_FormIsUpdating);
+    addGlobalFunc('function TCustomForm.GetFormImage(): TBitmap;', @TCustomForm_GetFormImage);
+    addGlobalFunc('procedure TCustomForm.Hide();', @TCustomForm_Hide);
+    addGlobalFunc('procedure TCustomForm.IntfDropFiles(const FileNames: TStringArray);', @TCustomForm_IntfDropFiles);
+    addGlobalFunc('procedure TCustomForm.IntfHelp(AComponent: TComponent);', @TCustomForm_IntfHelp);
+    addGlobalFunc('function TCustomForm.AutoSizeDelayedHandle(): Boolean;', @TCustomForm_AutoSizeDelayedHandle);
+    addGlobalFunc('procedure TCustomForm.GetPreferredSize(var PreferredWidth, PreferredHeight: integer;Raw,WithThemeSpace: boolean );', @TCustomForm_GetPreferredSize);
+    addGlobalFunc('procedure TCustomForm.Release();', @TCustomForm_Release);
+    addGlobalFunc('function TCustomForm.CanFocus(): Boolean;', @TCustomForm_CanFocus);
+    addGlobalFunc('procedure TCustomForm.SetFocus();', @TCustomForm_SetFocus);
+    addGlobalFunc('function TCustomForm.SetFocusedControl(Control: TWinControl): Boolean;', @TCustomForm_SetFocusedControl);
+    addGlobalFunc('procedure TCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: integer);', @TCustomForm_SetRestoredBounds);
+    addGlobalFunc('procedure TCustomForm.Show();', @TCustomForm_Show);
+    addGlobalFunc('function TCustomForm.ShowModal(): Integer;', @TCustomForm_ShowModal);
+    addGlobalFunc('procedure TCustomForm.ShowOnTop();', @TCustomForm_ShowOnTop);
+    addGlobalFunc('procedure TCustomForm.RemoveAllHandlersOfObject(AnObject: TObject);', @TCustomForm_RemoveAllHandlersOfObject);
+    addGlobalFunc('procedure TCustomForm.AddHandlerFirstShow(OnFirstShowHandler: TNotifyEvent;AsFirst: Boolean);', @TCustomForm_AddHandlerFirstShow);
+    addGlobalFunc('procedure TCustomForm.RemoveHandlerFirstShow(OnFirstShowHandler: TNotifyEvent);', @TCustomForm_RemoveHandlerFirstShow);
+    addGlobalFunc('procedure TCustomForm.AddHandlerClose(OnCloseHandler: TCloseEvent; AsFirst: Boolean);', @TCustomForm_AddHandlerClose);
+    addGlobalFunc('procedure TCustomForm.RemoveHandlerClose(OnCloseHandler: TCloseEvent);', @TCustomForm_RemoveHandlerClose);
+    addGlobalFunc('procedure TCustomForm.AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean);', @TCustomForm_AddHandlerCreate);
+    addGlobalFunc('procedure TCustomForm.RemoveHandlerCreate(OnCreateHandler: TNotifyEvent);', @TCustomForm_RemoveHandlerCreate);
+    addClassVar(Compiler, 'TCustomForm', 'Active', 'Boolean', @TCustomForm_Active_Read, nil);
+    addClassVar(Compiler, 'TCustomForm', 'ActiveControl', 'TWinControl', @TCustomForm_ActiveControl_Read, @TCustomForm_ActiveControl_Write);
+    addClassVar(Compiler, 'TCustomForm', 'ActiveDefaultControl', 'TControl', @TCustomForm_ActiveDefaultControl_Read, @TCustomForm_ActiveDefaultControl_Write);
+    addClassVar(Compiler, 'TCustomForm', 'AllowDropFiles', 'Boolean', @TCustomForm_AllowDropFiles_Read, @TCustomForm_AllowDropFiles_Write);
+    addClassVar(Compiler, 'TCustomForm', 'AlphaBlend', 'Boolean', @TCustomForm_AlphaBlend_Read, @TCustomForm_AlphaBlend_Write);
+    addClassVar(Compiler, 'TCustomForm', 'AlphaBlendValue', 'Byte', @TCustomForm_AlphaBlendValue_Read, @TCustomForm_AlphaBlendValue_Write);
+    addClassVar(Compiler, 'TCustomForm', 'CancelControl', 'TControl', @TCustomForm_CancelControl_Read, @TCustomForm_CancelControl_Write);
+    addClassVar(Compiler, 'TCustomForm', 'DefaultControl', 'TControl', @TCustomForm_DefaultControl_Read, @TCustomForm_DefaultControl_Write);
+    addClassVar(Compiler, 'TCustomForm', 'KeyPreview', 'Boolean', @TCustomForm_KeyPreview_Read, @TCustomForm_KeyPreview_Write);
+    addClassVar(Compiler, 'TCustomForm', 'PopupParent', 'TCustomForm', @TCustomForm_PopupParent_Read, @TCustomForm_PopupParent_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnActivate', 'TNotifyEvent', @TCustomForm_OnActivate_Read, @TCustomForm_OnActivate_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnClose', 'TCloseEvent', @TCustomForm_OnClose_Read, @TCustomForm_OnClose_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnCloseQuery', 'TCloseQueryEvent', @TCustomForm_OnCloseQuery_Read, @TCustomForm_OnCloseQuery_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnCreate', 'TNotifyEvent', @TCustomForm_OnCreate_Read, @TCustomForm_OnCreate_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnDeactivate', 'TNotifyEvent', @TCustomForm_OnDeactivate_Read, @TCustomForm_OnDeactivate_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnDestroy', 'TNotifyEvent', @TCustomForm_OnDestroy_Read, @TCustomForm_OnDestroy_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnHide', 'TNotifyEvent', @TCustomForm_OnHide_Read, @TCustomForm_OnHide_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnShow', 'TNotifyEvent', @TCustomForm_OnShow_Read, @TCustomForm_OnShow_Write);
+    addClassVar(Compiler, 'TCustomForm', 'OnWindowStateChange', 'TNotifyEvent', @TCustomForm_OnWindowStateChange_Read, @TCustomForm_OnWindowStateChange_Write);
+    addClassVar(Compiler, 'TCustomForm', 'PixelsPerInch', 'Longint', @TCustomForm_PixelsPerInch_Read, @TCustomForm_PixelsPerInch_Write);
+    addClassVar(Compiler, 'TCustomForm', 'RestoredLeft', 'integer', @TCustomForm_RestoredLeft_Read, nil);
+    addClassVar(Compiler, 'TCustomForm', 'RestoredTop', 'integer', @TCustomForm_RestoredTop_Read, nil);
+    addClassVar(Compiler, 'TCustomForm', 'RestoredWidth', 'integer', @TCustomForm_RestoredWidth_Read, nil);
+    addClassVar(Compiler, 'TCustomForm', 'RestoredHeight', 'integer', @TCustomForm_RestoredHeight_Read, nil);
+    addGlobalFunc('procedure TCustomForm.Free();', @TCustomForm_Free);
+  end;
+end;
+ {TForm}
 //constructor Create(TheOwner: TComponent);
 procedure TForm_Init(const Params: PParamArray); lape_extdecl
 begin
@@ -343,7 +873,7 @@ procedure Register_TForm(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TForm', 'Pointer');
+    addClass(Compiler, 'TForm', 'TCustomForm');
 
     addGlobalFunc('procedure TForm.Init(TheOwner: TComponent);', @TForm_Init);
     addGlobalFunc('procedure TForm.Cascade();', @TForm_Cascade);
@@ -385,9 +915,11 @@ begin
     begin
       AddGlobalType('(caNone, caHide, caFree, caMinimize)','TCloseAction');
       AddGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction)','TCloseEvent');
+      AddGlobalType('procedure(Sender : TObject; var CanClose : boolean)','TCloseQueryEvent');
       AddGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow,bsSizeToolWin)','TFormBorderStyle');
-      Register_TForm(compiler);
     end;
+    Register_TCustomForm(compiler);
+    Register_TForm(compiler);
 end;
 
 end.
