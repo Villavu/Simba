@@ -18,7 +18,8 @@ uses
 
   lplclsystem,
   lplclgraphics,
-  //lplclforms,
+  lplclforms,
+  lplclcontrols,
 
   lpTMDTM, lpTMDTMS,
 
@@ -46,7 +47,8 @@ begin
 
   RegisterLCLSystem(Compiler);
   RegisterLCLGraphics(Compiler);
-  //RegisterLCLForms(Compiler);
+  RegisterLCLControls(Compiler);
+  RegisterLCLForms(Compiler);
 end;
 
 procedure RegisterMMLClasses(Compiler: TLapeCompiler);

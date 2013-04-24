@@ -5,17 +5,9 @@ unit lplclgraphics;
 interface
 
 uses
-  Classes, SysUtils, lpcompiler, lptypes, lpClassHelper;
-
-procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
-
-implementation
-
-uses
-  MufasaTypes, Graphics, LCLType;
+  Classes, SysUtils,Graphics, lpcompiler, lptypes, lpClassHelper;
 
 type
-  PPersistent = ^TPersistent;
   PStream = ^TStream;
   PHandle = ^THandle;
   PNotifyEvent = ^TNotifyEvent;
@@ -43,11 +35,18 @@ type
   //TBitmap
   PBitmap = ^Tbitmap;
   PTransparentMode =^TTransparentMode;
-  PHbitmap = ^HBitmap;
-  PHPalette = ^HPalette;
   //TPicture
   PPicture = ^TPicture;
 
+procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
+
+implementation
+
+uses
+  MufasaTypes,LCLType,lplclsystem;
+type
+  PHbitmap = ^HBitmap;
+  PHPalette = ^HPalette;
 {TGraphicsObject}
 //Read: property OnChanging: TNotifyEvent read OnChanging write OnChanging;
 procedure TGraphicsObject_OnChanging_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
@@ -762,6 +761,12 @@ begin
   PCanvas(Params^[0])^.OnChanging := PNotifyEvent(Params^[1])^;
 end;
 
+//procedure Draw(X,Y: Integer; SrcGraphic: TGraphic);
+procedure TCanvas_Draw(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Draw(PInteger(Params^[1])^, PInteger(Params^[2])^, PGraphic(Params^[3])^);
+end;
+
 //constructor Create();
 procedure TCanvas_Init(const Params: PParamArray); lape_extdecl
 begin
@@ -791,6 +796,7 @@ begin
     addGlobalFunc('procedure TCanvas.Arc(ALeft, ATop, ARight, ABottom, SX, SY, EX, EY: Integer);', @TCanvas_Arc);
     addGlobalFunc('procedure TCanvas.Chord(x1, y1, x2, y2, SX, SY, EX, EY: Integer);', @TCanvas_Chord);
     addGlobalFunc('procedure TCanvas.CopyRect(Dest: TRect; SrcCanvas: TCanvas;Source: TRect);', @TCanvas_CopyRect);
+    addGlobalFunc('procedure TCanvas.Draw(X,Y: Integer; SrcGraphic: TGraphic);', @TCanvas_Draw);
     addGlobalFunc('procedure TCanvas.DrawFocusRect(ARect: TRect);', @TCanvas_DrawFocusRect);
     addGlobalFunc('procedure TCanvas.Ellipse(x1, y1, x2, y2: Integer);', @TCanvas_Ellipse);
     addGlobalFunc('procedure TCanvas.FillRect(X1,Y1,X2,Y2: Integer);', @TCanvas_FillRect);
@@ -1327,8 +1333,8 @@ end;
        Register_TFont(Compiler);
        Register_TPen(Compiler);
        Register_TBrush(Compiler);
-       Register_TCanvas(Compiler);
        Register_TGraphic(Compiler);
+       Register_TCanvas(Compiler);
        Register_TBitmap(Compiler);
        Register_TPicture(Compiler);
      end;
