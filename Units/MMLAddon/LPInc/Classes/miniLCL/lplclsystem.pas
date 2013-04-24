@@ -8,13 +8,6 @@ interface
 uses
   Classes, SysUtils, lpcompiler, lptypes, lpClassHelper;
 
-procedure RegisterLCLSystem(Compiler: TLapeCompiler);
-
-implementation
-
-uses
-  lpTObject, MufasaTypes;
-
 type
   PComponent = ^TComponent;
   PComponentState = ^TComponentState;
@@ -34,6 +27,13 @@ type
   PStringList = ^TStringList;
   PNotifyEvent = ^TNotifyEvent;//register in Register Classes
   PStringListSortCompare = ^TStringListSortCompare;//register in Register Classes
+
+procedure RegisterLCLSystem(Compiler: TLapeCompiler);
+
+implementation
+
+uses
+  lpTObject, MufasaTypes;
 
 {TPersistent}
 //procedure Assign(Source: TPersistent);
