@@ -440,7 +440,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);', @TMufasaBitmap_DrawATPA);
     addGlobalFunc('procedure TMufasaBitmap.DrawATPA(ATPA : T2DPointArray); overload;', @TMufasaBitmap_DrawATPAEx);
     addGlobalFunc('procedure TMufasaBitmap.DrawTPA(Points : TPointArray; Color : TColor);', @TMufasaBitmap_DrawTPA);
-    //addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas : TCanvas);', @TMufasaBitmap_DrawToCanvas);
+    addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas : TCanvas);', @TMufasaBitmap_DrawToCanvas);
     addGlobalFunc('procedure TMufasaBitmap.LineTo(Src,Dst: TPoint;Color: TColor);', @TMufasaBitmap_LineTo);
     addGlobalFunc('function TMufasaBitmap.CreateTPA(SearchCol : TColor): TPointArray;', @TMufasaBitmap_CreateTPA);
     addGlobalFunc('function TMufasaBitmap.GetPixel(x,y : integer): TColor;', @TMufasaBitmap_FastGetPixel);
@@ -468,10 +468,10 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);', @TMufasaBitmap_Convolute);
     addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer): TMufasaBitmap;', @TMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy(): TMufasaBitmap; overload;', @TMufasaBitmap_CopyEx);
-    //addGlobalFunc('function TMufasaBitmap.ToTBitmap(): TBitmap;', @TMufasaBitmap_ToTBitmap);
+    addGlobalFunc('function TMufasaBitmap.ToTBitmap(): TBitmap;', @TMufasaBitmap_ToTBitmap);
     addGlobalFunc('function TMufasaBitmap.ToString(): string;', @TMufasaBitmap_ToString);
     addGlobalFunc('function TMufasaBitmap.RowPtrs(): TPRGB32Array;', @TMufasaBitmap_RowPtrs);
-    //addGlobalFunc('procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);', @TMufasaBitmap_LoadFromTBitmap);
+    addGlobalFunc('procedure TMufasaBitmap.LoadFromTBitmap(bmp: TBitmap);', @TMufasaBitmap_LoadFromTBitmap);
     //addGlobalFunc('procedure TMufasaBitmap.LoadFromRawImage(RawImage: TRawImage);', @TMufasaBitmap_LoadFromRawImage);
     addGlobalFunc('function TMufasaBitmap.CreateTMask(): TMask;', @TMufasaBitmap_CreateTMask);
     addGlobalFunc('procedure TMufasaBitmap.SetTransparentColor(Col : TColor);', @TMufasaBitmap_SetTransparentColor);
