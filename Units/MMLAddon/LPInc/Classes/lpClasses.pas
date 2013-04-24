@@ -20,6 +20,7 @@ uses
   lplclgraphics,
   lplclforms,
   lplclcontrols,
+  lplclstdctrls,
 
   lpTMDTM, lpTMDTMS,
 
@@ -49,6 +50,7 @@ begin
   RegisterLCLGraphics(Compiler);
   RegisterLCLControls(Compiler);
   RegisterLCLForms(Compiler);
+  RegisterLCLStdCtrls(Compiler);
 end;
 
 procedure RegisterMMLClasses(Compiler: TLapeCompiler);
