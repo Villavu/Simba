@@ -24,6 +24,12 @@ type
   PCustomComboBox = ^TCustomComboBox;
   PComboBoxStyle = ^TcomboBoxStyle;
   PComboBox = ^TComboBox;
+  //list box
+  PCustomListBox = ^TCustomListBox;
+  PListBox = ^TListBox;
+  //TEdit
+  PCustomEdit =^TCustomEdit;
+  PEdit = ^TEdit;
 
 {TCustomScrollBar}
 
@@ -506,6 +512,561 @@ begin
 end;
 
 {TListBox}
+//constructor Create(TheOwner: TComponent);
+procedure TCustomListBox_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^ := TCustomListBox.Create(PComponent(Params^[1])^);
+end;
+
+//procedure AddItem(const Item: String; AnObject: TObject);
+procedure TCustomListBox_AddItem(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.AddItem(PlpString(Params^[1])^, PObject(Params^[2])^);
+end;
+
+//procedure Click;
+procedure TCustomListBox_Click(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.Click();
+end;
+
+//procedure Clear;
+procedure TCustomListBox_Clear(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.Clear();
+end;
+
+//procedure ClearSelection;
+procedure TCustomListBox_ClearSelection(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.ClearSelection();
+end;
+
+//function GetIndexAtXY(X, Y: integer): integer;
+procedure TCustomListBox_GetIndexAtXY(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomListBox(Params^[0])^.GetIndexAtXY(Pinteger(Params^[1])^, Pinteger(Params^[2])^);
+end;
+
+//function GetIndexAtY(Y: integer): integer;
+procedure TCustomListBox_GetIndexAtY(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomListBox(Params^[0])^.GetIndexAtY(Pinteger(Params^[1])^);
+end;
+
+//function GetSelectedText: string;
+procedure TCustomListBox_GetSelectedText(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PlpString(Result)^ := PCustomListBox(Params^[0])^.GetSelectedText();
+end;
+
+//function ItemAtPos(const Pos: TPoint; Existing: Boolean): Integer;
+procedure TCustomListBox_ItemAtPos(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomListBox(Params^[0])^.ItemAtPos(PPoint(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+//function ItemRect(Index: Integer): TRect;
+procedure TCustomListBox_ItemRect(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PRect(Result)^ := PCustomListBox(Params^[0])^.ItemRect(PInteger(Params^[1])^);
+end;
+
+//function ItemVisible(Index: Integer): boolean;
+procedure TCustomListBox_ItemVisible(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomListBox(Params^[0])^.ItemVisible(PInteger(Params^[1])^);
+end;
+
+//function ItemFullyVisible(Index: Integer): boolean;
+procedure TCustomListBox_ItemFullyVisible(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomListBox(Params^[0])^.ItemFullyVisible(PInteger(Params^[1])^);
+end;
+
+//procedure LockSelectionChange;
+procedure TCustomListBox_LockSelectionChange(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.LockSelectionChange();
+end;
+
+//procedure MakeCurrentVisible;
+procedure TCustomListBox_MakeCurrentVisible(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.MakeCurrentVisible();
+end;
+
+//procedure MeasureItem(Index: Integer; var TheHeight: Integer); virtual;
+procedure TCustomListBox_MeasureItem(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.MeasureItem(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+//procedure SelectAll; virtual;
+procedure TCustomListBox_SelectAll(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.SelectAll();
+end;
+
+//procedure UnlockSelectionChange;
+procedure TCustomListBox_UnlockSelectionChange(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.UnlockSelectionChange();
+end;
+
+//Read: property Canvas: TCanvas read FCanvas;
+procedure TCustomListBox_Canvas_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCanvas(Result)^ := PCustomListBox(Params^[0])^.Canvas;
+end;
+
+//Read: property ClickOnSelChange: boolean read ClickOnSelChange write ClickOnSelChange;
+procedure TCustomListBox_ClickOnSelChange_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomListBox(Params^[0])^.ClickOnSelChange;
+end;
+
+//Write: property ClickOnSelChange: boolean read ClickOnSelChange write ClickOnSelChange;
+procedure TCustomListBox_ClickOnSelChange_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.ClickOnSelChange := Pboolean(Params^[1])^;
+end;
+
+//Read: property Columns: Integer read Columns write Columns ;
+procedure TCustomListBox_Columns_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomListBox(Params^[0])^.Columns;
+end;
+
+//Write: property Columns: Integer read Columns write Columns ;
+procedure TCustomListBox_Columns_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.Columns := PInteger(Params^[1])^;
+end;
+
+//Read: property Count: Integer read Count;
+procedure TCustomListBox_Count_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomListBox(Params^[0])^.Count;
+end;
+
+//Read: property ExtendedSelect: boolean read ExtendedSelect write ExtendedSelect;
+procedure TCustomListBox_ExtendedSelect_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomListBox(Params^[0])^.ExtendedSelect;
+end;
+
+//Write: property ExtendedSelect: boolean read ExtendedSelect write ExtendedSelect;
+procedure TCustomListBox_ExtendedSelect_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.ExtendedSelect := Pboolean(Params^[1])^;
+end;
+
+//Read: property ItemHeight: Integer read ItemHeight write ItemHeight;
+procedure TCustomListBox_ItemHeight_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomListBox(Params^[0])^.ItemHeight;
+end;
+
+//Write: property ItemHeight: Integer read ItemHeight write ItemHeight;
+procedure TCustomListBox_ItemHeight_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.ItemHeight := PInteger(Params^[1])^;
+end;
+
+//Read: property ItemIndex: integer read ItemIndex write ItemIndex;
+procedure TCustomListBox_ItemIndex_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomListBox(Params^[0])^.ItemIndex;
+end;
+
+//Write: property ItemIndex: integer read ItemIndex write ItemIndex;
+procedure TCustomListBox_ItemIndex_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.ItemIndex := Pinteger(Params^[1])^;
+end;
+
+//Read: property Items: TStrings read Items write Items;
+procedure TCustomListBox_Items_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStrings(Result)^ := PCustomListBox(Params^[0])^.Items;
+end;
+
+//Write: property Items: TStrings read Items write Items;
+procedure TCustomListBox_Items_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.Items := PStrings(Params^[1])^;
+end;
+
+//Read: property MultiSelect: boolean read MultiSelect write MultiSelect;
+procedure TCustomListBox_MultiSelect_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomListBox(Params^[0])^.MultiSelect;
+end;
+
+//Write: property MultiSelect: boolean read MultiSelect write MultiSelect;
+procedure TCustomListBox_MultiSelect_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.MultiSelect := Pboolean(Params^[1])^;
+end;
+
+//Read: property ScrollWidth: Integer read ScrollWidth write ScrollWidth;
+procedure TCustomListBox_ScrollWidth_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomListBox(Params^[0])^.ScrollWidth;
+end;
+
+//Write: property ScrollWidth: Integer read ScrollWidth write ScrollWidth;
+procedure TCustomListBox_ScrollWidth_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.ScrollWidth := PInteger(Params^[1])^;
+end;
+
+//Read: property SelCount: integer read SelCount;
+procedure TCustomListBox_SelCount_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomListBox(Params^[0])^.SelCount;
+end;
+
+//Read: property Sorted: boolean read Sorted write Sorted;
+procedure TCustomListBox_Sorted_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomListBox(Params^[0])^.Sorted;
+end;
+
+//Write: property Sorted: boolean read Sorted write Sorted;
+procedure TCustomListBox_Sorted_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.Sorted := Pboolean(Params^[1])^;
+end;
+
+//Read: property TopIndex: Integer read TopIndex write TopIndex;
+procedure TCustomListBox_TopIndex_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomListBox(Params^[0])^.TopIndex;
+end;
+
+//Write: property TopIndex: Integer read TopIndex write TopIndex;
+procedure TCustomListBox_TopIndex_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.TopIndex := PInteger(Params^[1])^;
+end;
+
+//procedure Free();
+procedure TCustomListBox_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.Free();
+end;
+
+procedure Register_TCustomListBox(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass(Compiler, 'TCustomListBox', 'TWinControl');
+
+    addGlobalFunc('procedure TCustomListBox.Init(TheOwner: TComponent);', @TCustomListBox_Init);
+    addGlobalFunc('procedure TCustomListBox.AddItem(const Item: String; AnObject: TObject);', @TCustomListBox_AddItem);
+    addGlobalFunc('procedure TCustomListBox.Click();', @TCustomListBox_Click);
+    addGlobalFunc('procedure TCustomListBox.Clear();', @TCustomListBox_Clear);
+    addGlobalFunc('procedure TCustomListBox.ClearSelection();', @TCustomListBox_ClearSelection);
+    addGlobalFunc('function TCustomListBox.GetIndexAtXY(X, Y: integer): integer;', @TCustomListBox_GetIndexAtXY);
+    addGlobalFunc('function TCustomListBox.GetIndexAtY(Y: integer): integer;', @TCustomListBox_GetIndexAtY);
+    addGlobalFunc('function TCustomListBox.GetSelectedText(): string;', @TCustomListBox_GetSelectedText);
+    addGlobalFunc('function TCustomListBox.ItemAtPos(const Pos: TPoint; Existing: Boolean): Integer;', @TCustomListBox_ItemAtPos);
+    addGlobalFunc('function TCustomListBox.ItemRect(Index: Integer): TRect;', @TCustomListBox_ItemRect);
+    addGlobalFunc('function TCustomListBox.ItemVisible(Index: Integer): boolean;', @TCustomListBox_ItemVisible);
+    addGlobalFunc('function TCustomListBox.ItemFullyVisible(Index: Integer): boolean;', @TCustomListBox_ItemFullyVisible);
+    addGlobalFunc('procedure TCustomListBox.LockSelectionChange();', @TCustomListBox_LockSelectionChange);
+    addGlobalFunc('procedure TCustomListBox.MakeCurrentVisible();', @TCustomListBox_MakeCurrentVisible);
+    addGlobalFunc('procedure TCustomListBox.MeasureItem(Index: Integer; var TheHeight: Integer);', @TCustomListBox_MeasureItem);
+    addGlobalFunc('procedure TCustomListBox.SelectAll();', @TCustomListBox_SelectAll);
+    addGlobalFunc('procedure TCustomListBox.UnlockSelectionChange();', @TCustomListBox_UnlockSelectionChange);
+    addClassVar(Compiler, 'TCustomListBox', 'Canvas', 'TCanvas', @TCustomListBox_Canvas_Read, nil);
+    addClassVar(Compiler, 'TCustomListBox', 'ClickOnSelChange', 'boolean', @TCustomListBox_ClickOnSelChange_Read, @TCustomListBox_ClickOnSelChange_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'Columns', 'Integer', @TCustomListBox_Columns_Read, @TCustomListBox_Columns_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'Count', 'Integer', @TCustomListBox_Count_Read, nil);
+    addClassVar(Compiler, 'TCustomListBox', 'ExtendedSelect', 'boolean', @TCustomListBox_ExtendedSelect_Read, @TCustomListBox_ExtendedSelect_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'ItemHeight', 'Integer', @TCustomListBox_ItemHeight_Read, @TCustomListBox_ItemHeight_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'ItemIndex', 'integer', @TCustomListBox_ItemIndex_Read, @TCustomListBox_ItemIndex_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'Items', 'TStrings', @TCustomListBox_Items_Read, @TCustomListBox_Items_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'MultiSelect', 'boolean', @TCustomListBox_MultiSelect_Read, @TCustomListBox_MultiSelect_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'ScrollWidth', 'Integer', @TCustomListBox_ScrollWidth_Read, @TCustomListBox_ScrollWidth_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'SelCount', 'integer', @TCustomListBox_SelCount_Read, nil);
+    addClassVar(Compiler, 'TCustomListBox', 'Sorted', 'boolean', @TCustomListBox_Sorted_Read, @TCustomListBox_Sorted_Write);
+    addClassVar(Compiler, 'TCustomListBox', 'TopIndex', 'Integer', @TCustomListBox_TopIndex_Read, @TCustomListBox_TopIndex_Write);
+    addGlobalFunc('procedure TCustomListBox.Free();', @TCustomListBox_Free);
+  end;
+end;
+
+//constructor Create(TheOwner: TComponent);
+procedure TListBox_Init(const Params: PParamArray); lape_extdecl
+begin
+  PListBox(Params^[0])^ := TListBox.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TListBox_Free(const Params: PParamArray); lape_extdecl
+begin
+  PListBox(Params^[0])^.Free();
+end;
+
+procedure Register_TListBox(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass(Compiler, 'TListBox', 'TCustomListBox');
+
+    addGlobalFunc('procedure TListBox.Init(TheOwner: TComponent);', @TListBox_Init);
+    addGlobalFunc('procedure TListBox.Free();', @TListBox_Free);
+  end;
+end;
+
+{TEdit}
+//constructor Create(AOwner: TComponent);
+procedure TCustomEdit_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^ := TCustomEdit.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Clear;
+procedure TCustomEdit_Clear(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.Clear();
+end;
+
+//procedure SelectAll;
+procedure TCustomEdit_SelectAll(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.SelectAll();
+end;
+
+//procedure ClearSelection;
+procedure TCustomEdit_ClearSelection(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.ClearSelection();
+end;
+
+//procedure CopyToClipboard;
+procedure TCustomEdit_CopyToClipboard(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.CopyToClipboard();
+end;
+
+//procedure CutToClipboard;
+procedure TCustomEdit_CutToClipboard(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.CutToClipboard();
+end;
+
+//procedure PasteFromClipboard;
+procedure TCustomEdit_PasteFromClipboard(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.PasteFromClipboard();
+end;
+
+//procedure Undo;
+procedure TCustomEdit_Undo(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.Undo();
+end;
+
+//Read: property CanUndo: Boolean read CanUndo;
+procedure TCustomEdit_CanUndo_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomEdit(Params^[0])^.CanUndo;
+end;
+
+//Read: property CaretPos: TPoint read CaretPos write CaretPos;
+procedure TCustomEdit_CaretPos_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPoint(Result)^ := PCustomEdit(Params^[0])^.CaretPos;
+end;
+
+//Write: property CaretPos: TPoint read CaretPos write CaretPos;
+procedure TCustomEdit_CaretPos_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.CaretPos := PPoint(Params^[1])^;
+end;
+
+//Read: property HideSelection: Boolean read HideSelection write HideSelection;
+procedure TCustomEdit_HideSelection_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomEdit(Params^[0])^.HideSelection;
+end;
+
+//Write: property HideSelection: Boolean read HideSelection write HideSelection;
+procedure TCustomEdit_HideSelection_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.HideSelection := PBoolean(Params^[1])^;
+end;
+
+//Read: property MaxLength: Integer read MaxLength write MaxLength;
+procedure TCustomEdit_MaxLength_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomEdit(Params^[0])^.MaxLength;
+end;
+
+//Write: property MaxLength: Integer read MaxLength write MaxLength;
+procedure TCustomEdit_MaxLength_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.MaxLength := PInteger(Params^[1])^;
+end;
+
+//Read: property Modified: Boolean read Modified write Modified;
+procedure TCustomEdit_Modified_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomEdit(Params^[0])^.Modified;
+end;
+
+//Write: property Modified: Boolean read Modified write Modified;
+procedure TCustomEdit_Modified_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.Modified := PBoolean(Params^[1])^;
+end;
+
+//Read: property OnChange: TNotifyEvent read OnChange write OnChange;
+procedure TCustomEdit_OnChange_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomEdit(Params^[0])^.OnChange;
+end;
+
+//Write: property OnChange: TNotifyEvent read OnChange write OnChange;
+procedure TCustomEdit_OnChange_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property PasswordChar: Char read PasswordChar write PasswordChar;
+procedure TCustomEdit_PasswordChar_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PChar(Result)^ := PCustomEdit(Params^[0])^.PasswordChar;
+end;
+
+//Write: property PasswordChar: Char read PasswordChar write PasswordChar;
+procedure TCustomEdit_PasswordChar_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.PasswordChar := PChar(Params^[1])^;
+end;
+
+//Read: property ReadOnly: Boolean read ReadOnly write ReadOnly;
+procedure TCustomEdit_ReadOnly_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomEdit(Params^[0])^.ReadOnly;
+end;
+
+//Write: property ReadOnly: Boolean read ReadOnly write ReadOnly;
+procedure TCustomEdit_ReadOnly_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.ReadOnly := PBoolean(Params^[1])^;
+end;
+
+//Read: property SelLength: integer read SelLength write SelLength;
+procedure TCustomEdit_SelLength_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomEdit(Params^[0])^.SelLength;
+end;
+
+//Write: property SelLength: integer read SelLength write SelLength;
+procedure TCustomEdit_SelLength_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.SelLength := Pinteger(Params^[1])^;
+end;
+
+//Read: property SelStart: integer read SelStart write SelStart;
+procedure TCustomEdit_SelStart_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomEdit(Params^[0])^.SelStart;
+end;
+
+//Write: property SelStart: integer read SelStart write SelStart;
+procedure TCustomEdit_SelStart_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.SelStart := Pinteger(Params^[1])^;
+end;
+
+//Read: property SelText: String read SelText write SelText;
+procedure TCustomEdit_SelText_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PlpString(Result)^ := PCustomEdit(Params^[0])^.SelText;
+end;
+
+//Write: property SelText: String read SelText write SelText;
+procedure TCustomEdit_SelText_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.SelText := PlpString(Params^[1])^;
+end;
+
+//Read: property Text: string read Text write Text;
+procedure TCustomEdit_Text_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PlpString(Result)^ := PCustomEdit(Params^[0])^.Text;
+end;
+
+//Write: property Text: string read Text write Text;
+procedure TCustomEdit_Text_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.Text := PlpString(Params^[1])^;
+end;
+
+//procedure Free();
+procedure TCustomEdit_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCustomEdit(Params^[0])^.Free();
+end;
+
+procedure Register_TCustomEdit(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass(Compiler, 'TCustomEdit', 'TWinControl');
+
+    addGlobalFunc('procedure TCustomEdit.Init(AOwner: TComponent);', @TCustomEdit_Init);
+    addGlobalFunc('procedure TCustomEdit.Clear();', @TCustomEdit_Clear);
+    addGlobalFunc('procedure TCustomEdit.SelectAll();', @TCustomEdit_SelectAll);
+    addGlobalFunc('procedure TCustomEdit.ClearSelection();', @TCustomEdit_ClearSelection);
+    addGlobalFunc('procedure TCustomEdit.CopyToClipboard();', @TCustomEdit_CopyToClipboard);
+    addGlobalFunc('procedure TCustomEdit.CutToClipboard();', @TCustomEdit_CutToClipboard);
+    addGlobalFunc('procedure TCustomEdit.PasteFromClipboard();', @TCustomEdit_PasteFromClipboard);
+    addGlobalFunc('procedure TCustomEdit.Undo();', @TCustomEdit_Undo);
+    addClassVar(Compiler, 'TCustomEdit', 'CanUndo', 'Boolean', @TCustomEdit_CanUndo_Read, nil);
+    addClassVar(Compiler, 'TCustomEdit', 'CaretPos', 'TPoint', @TCustomEdit_CaretPos_Read, @TCustomEdit_CaretPos_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'HideSelection', 'Boolean', @TCustomEdit_HideSelection_Read, @TCustomEdit_HideSelection_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'MaxLength', 'Integer', @TCustomEdit_MaxLength_Read, @TCustomEdit_MaxLength_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'Modified', 'Boolean', @TCustomEdit_Modified_Read, @TCustomEdit_Modified_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'OnChange', 'TNotifyEvent', @TCustomEdit_OnChange_Read, @TCustomEdit_OnChange_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'PasswordChar', 'Char', @TCustomEdit_PasswordChar_Read, @TCustomEdit_PasswordChar_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'ReadOnly', 'Boolean', @TCustomEdit_ReadOnly_Read, @TCustomEdit_ReadOnly_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'SelLength', 'integer', @TCustomEdit_SelLength_Read, @TCustomEdit_SelLength_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'SelStart', 'integer', @TCustomEdit_SelStart_Read, @TCustomEdit_SelStart_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'SelText', 'String', @TCustomEdit_SelText_Read, @TCustomEdit_SelText_Write);
+    addClassVar(Compiler, 'TCustomEdit', 'Text', 'string', @TCustomEdit_Text_Read, @TCustomEdit_Text_Write);
+    addGlobalFunc('procedure TCustomEdit.Free();', @TCustomEdit_Free);
+  end;
+end;
+
+//constructor Create(AOwner: TComponent);
+procedure TEdit_Init(const Params: PParamArray); lape_extdecl
+begin
+  PEdit(Params^[0])^ := TEdit.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TEdit_Free(const Params: PParamArray); lape_extdecl
+begin
+  PEdit(Params^[0])^.Free();
+end;
+
+procedure Register_TEdit(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass(Compiler, 'TEdit', 'TCustomEdit');
+
+    addGlobalFunc('procedure TEdit.Init(AOwner: TComponent);', @TEdit_Init);
+    addGlobalFunc('procedure TEdit.Free();', @TEdit_Free);
+  end;
+end;
+{}
 
 procedure RegisterLCLStdCtrls(Compiler: TLapeCompiler);
 begin
@@ -520,6 +1081,10 @@ begin
   Register_TScrollBar(Compiler);
   Register_TCustomComboBox(Compiler);
   Register_TComboBox(Compiler);
+  Register_TCustomListBox(Compiler);
+  Register_TListBox(Compiler);
+  Register_TCustomEdit(Compiler);
+  Register_TEdit(Compiler);
 end;
 
 end.
