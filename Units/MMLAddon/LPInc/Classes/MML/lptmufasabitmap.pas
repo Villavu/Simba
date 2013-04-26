@@ -20,6 +20,7 @@ type
   PObject = ^TObject;
   PBitmap = ^TBitmap;
   PCanvas = ^TCanvas;
+  PMBitmaps = ^TMBitmaps;
 
 //Read: FData : PRGB32;
 procedure TMufasaBitmap_FData_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
@@ -387,10 +388,25 @@ begin
   PMufasaBitmap(Params^[0])^.SetAlphaValue(Pbyte(Params^[1])^);
 end;
 
+//Read: List: TObject;
+procedure TMufasaBitmap_List_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PObject(Result)^ := PMufasaBitmap(Params^[0])^.List;
+end;
+
+//Write: List: TObject;
+procedure TMufasaBitmap_List_Write(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.List := PObject(Params^[1])^;
+end;
+
 //constructor Create;
 procedure TMufasaBitmap_Init(const Params: PParamArray); lape_extdecl
 begin
   PMufasaBitmap(Params^[0])^ := TMufasaBitmap.Create();
+  
+  if (PMBitmaps(Params^[1])^ <> nil) then
+    PMBitmaps(Params^[1])^.addBMP(PMufasaBitmap(Params^[0])^);
 end;
 
 //procedure Free();
@@ -478,7 +494,8 @@ begin
     addGlobalFunc('function TMufasaBitmap.GetTransparentColor(): TColor;', @TMufasaBitmap_GetTransparentColor);
     addClassVar(Compiler, 'TMufasaBitmap', 'TransparentColorSet', 'boolean', @TMufasaBitmap_TransparentColorSet_Read, nil);
     addGlobalFunc('procedure TMufasaBitmap.SetAlphaValue(const value : byte);', @TMufasaBitmap_SetAlphaValue);
-    addGlobalFunc('procedure TMufasaBitmap.Init();', @TMufasaBitmap_Init);
+	addClassVar(Compiler, 'TMufasaBitmap', 'List', 'TObject', @TMufasaBitmap_List_Read, @TMufasaBitmap_List_Write);
+    addGlobalFunc('procedure TMufasaBitmap.Init(List: TObject = nil);', @TMufasaBitmap_Init);
     addGlobalFunc('procedure TMufasaBitmap.Free();', @TMufasaBitmap_Free);
   end;
 end;
