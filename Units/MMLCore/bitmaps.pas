@@ -30,6 +30,7 @@ uses
   Classes, SysUtils, FPImage,IntfGraphics,graphtype,MufasaTypes,MufasaBase,graphics;
 
 type
+  TMBitmaps = class;
 
   { TMufasaBitmap }
   PMufasaBitmap = ^TMufasaBitmap;
@@ -40,6 +41,7 @@ type
     FTransparentSet : boolean;
     FIndex : integer;
     FName : string;
+    FList: TMBitmaps;
 
     { True if we do not own FData }
     FExternData: boolean;
@@ -107,6 +109,7 @@ type
     procedure SetTransparentColor(Col : TColor);
     function GetTransparentColor : TColor;
     property TransparentColorSet : boolean read FTransparentSet;
+    property List: TMBitmaps read FList write FList;
     procedure SetAlphaValue(const value : byte);
     constructor Create;
     destructor Destroy;override;
@@ -115,10 +118,10 @@ type
   { TMBitmaps }
   TMBitmaps = class(TObject)
   protected
-    Client : TObject;
-    FreeSpots : Array of integer;
-    BmpArray : TMufasaBmpArray;
-    BmpsCurr,BmpsHigh,FreeSpotsHigh,FreeSpotsLen : integer;
+    Client: TObject;
+    FreeSpots: Array of integer;
+    BmpArray: TMufasaBmpArray;
+    BmpsCurr, BmpsHigh, FreeSpotsHigh, FreeSpotsLen: integer;
     function GetNewIndex : integer;
   public
     function GetBMP(Index : integer) : TMufasaBitmap;
@@ -130,9 +133,10 @@ type
     function CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer;
     function CreateBMPFromFile(const Path : string) : integer;
     function CreateBMPFromString(width,height : integer; Data : string) : integer;overload;
-    function CreateBMPFromString(BmpName : string; width,height : integer; Data : string) : integer;overload;
-    procedure FreeBMP( Number : integer);
-    constructor Create(Owner : TObject);
+    function CreateBMPFromString(BmpName: string; width, height: integer; Data: string) : integer;overload;
+    function RemoveBMP(Number: Integer): TMufasaBitmap;
+    procedure FreeBMP(Number: integer);
+    constructor Create(Owner: TObject);
     destructor Destroy;override;
   end;
 
@@ -350,17 +354,20 @@ end;
 
 function TMBitmaps.CreateBMP(w,h : integer): Integer;
 begin
-  result := GetNewIndex;
+  Result := GetNewIndex;
   BmpArray[Result] := TMufasaBitmap.Create;
   BmpArray[Result].SetSize(w,h);
   BmpArray[Result].Index:= Result;
+  BmpArray[Result].List := Self;
 end;
 
 function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;
 begin
   Result := GetNewIndex;
+  
   BmpArray[Result] := _bmp;
-  BmpArray[result].Index:= Result;
+  BmpArray[Result].Index:= Result;
+  BmpArray[Result].List := Self;
 end;
 
 function TMBitmaps.CopyBMP(Bitmap: integer): Integer;
@@ -539,32 +546,30 @@ begin
 
 end;
 
-procedure TMBitmaps.FreeBMP(Number: integer);
-var
-  ToDestroy : TMufasaBitmap;
+function TMBitmaps.RemoveBMP(Number: Integer): TMufasaBitmap;
 begin
-  ToDestroy := GetBMP(Number);
-  if Number = BmpsCurr then
-    Dec(BmpsCurr)
-  else
-  begin;
-    inc(FreeSpotsHigh);
-    if FreeSpotsHigh = FreeSpotsLen then
-    begin;
-      inc(FreeSpotsLen);
-      SetLength(FreeSpots, FreeSpotsLen);
-    end;
-    FreeSpots[FreeSpotsHigh] := Number;
-  end;
-  //Just for testing purposes
-  {$ifdef mDebug}
-  if ToDestroy.BmpName = '' then
-    mDebug(Format('BMP[%d] has been freed.',[number]))
-  else
-    mDebug(Format('BMP[%s] has been freed.',[ToDestroy.BmpName]));
-  {$endif}
-  ToDestroy.Free;
-  BmpArray[number] := nil;
+  Result := GetBMP(Number);
+  if (Number < BmpsCurr) then
+  begin
+    Inc(FreeSpotsHigh);
+	if (FreeSpotsHigh = FreeSpotsLen) then
+	begin
+	  Inc(FreeSpotsLen);
+	  SetLength(FreeSpots, FreeSpotsLen);
+	end;
+	
+	FreeSpots[FreeSpotsHigh] := Number;
+  end else
+    Dec(BmpsCurr);
+  
+  BMPArray[Number] := nil;
+  Result.Index := -1;
+  Result.List := nil;
+end;
+
+procedure TMBitmaps.FreeBMP(Number: integer);
+begin
+  RemoveBMP(Number).Free;
 end;
 
 {
@@ -1640,6 +1645,7 @@ begin
 
   FExternData := False;
 
+  Index := -1;
   {FData:= nil;
   w := 0;
   h := 0; }
@@ -1652,6 +1658,9 @@ begin
 
   if Assigned(FData) and not FExternData then
     Freemem(FData);
+
+  if Assigned(List) then
+    List.removeBMP(Index);
 
   inherited Destroy;
 end;
