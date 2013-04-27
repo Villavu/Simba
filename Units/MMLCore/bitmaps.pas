@@ -135,7 +135,6 @@ type
     function CreateBMPFromString(width,height : integer; Data : string) : integer;overload;
     function CreateBMPFromString(BmpName: string; width, height: integer; Data: string) : integer;overload;
     function RemoveBMP(Number: Integer): TMufasaBitmap;
-    procedure FreeBMP(Number: integer);
     constructor Create(Owner: TObject);
     destructor Destroy;override;
   end;
@@ -353,12 +352,12 @@ begin
 end;
 
 function TMBitmaps.CreateBMP(w,h : integer): Integer;
+var
+  Bitmap: TMufasaBitmap;
 begin
-  Result := GetNewIndex;
-  BmpArray[Result] := TMufasaBitmap.Create;
-  BmpArray[Result].SetSize(w,h);
-  BmpArray[Result].Index:= Result;
-  BmpArray[Result].List := Self;
+  Bitmap := TMufasaBitmap.Create;
+  Bitmap.SetSize(w,h);
+  addBMP(Bitmap);
 end;
 
 function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;
@@ -366,7 +365,7 @@ begin
   Result := GetNewIndex;
   
   BmpArray[Result] := _bmp;
-  BmpArray[Result].Index:= Result;
+  BmpArray[Result].Index := Result;
   BmpArray[Result].List := Self;
 end;
 
@@ -414,9 +413,9 @@ function TMBitmaps.CreateBMPFromFile(const Path: string): integer;
 begin
   Result := CreateBMP(0,0);
   try
-    BmpArray[result].LoadFromFile(Path);
+    BmpArray[Result].LoadFromFile(Path);
   except
-    FreeBMP(Result);
+    BmpArray[Result].Free();
     Result := -1; // meh
     raise;
   end;
@@ -543,7 +542,6 @@ function TMBitmaps.CreateBMPFromString(BmpName: string; width, height: integer;
 begin
   Result := Self.CreateBMPFromString(width,height,data);
   Bmp[Result].Name:= BmpName;
-
 end;
 
 function TMBitmaps.RemoveBMP(Number: Integer): TMufasaBitmap;
@@ -552,24 +550,19 @@ begin
   if (Number < BmpsCurr) then
   begin
     Inc(FreeSpotsHigh);
-	if (FreeSpotsHigh = FreeSpotsLen) then
-	begin
-	  Inc(FreeSpotsLen);
-	  SetLength(FreeSpots, FreeSpotsLen);
-	end;
+    if (FreeSpotsHigh = FreeSpotsLen) then
+    begin
+      Inc(FreeSpotsLen);
+      SetLength(FreeSpots, FreeSpotsLen);
+    end;
 	
-	FreeSpots[FreeSpotsHigh] := Number;
+    FreeSpots[FreeSpotsHigh] := Number;
   end else
     Dec(BmpsCurr);
   
   BMPArray[Number] := nil;
   Result.Index := -1;
   Result.List := nil;
-end;
-
-procedure TMBitmaps.FreeBMP(Number: integer);
-begin
-  RemoveBMP(Number).Free;
 end;
 
 {
@@ -1519,23 +1512,27 @@ var
   WriteStr : string;
 begin
   WriteStr := '[';
-  for i := 0 to BmpsCurr do
-    if BmpArray[i] <> nil then
+  for I := 0 to BmpsCurr do
+    if Assigned(BmpArray[I]) then
     begin;
-      if BmpArray[i].Name = '' then
-        WriteStr := WriteStr + inttostr(i) + ', '
+      if BmpArray[I].Name = '' then
+        WriteStr := WriteStr + IntToStr(I) + ', '
       else
-        WriteStr := WriteStr + bmpArray[i].Name + ', ';
-      FreeAndNil(BmpArray[i]);
+        WriteStr := WriteStr + bmpArray[I].Name + ', ';
+
+      BmpArray[I].Free();
     end;
+
   if WriteStr <> '[' then  //Has unfreed bitmaps
   begin
-    SetLength(WriteStr,length(WriteStr)-1);
+    SetLength(WriteStr, Length(WriteStr) - 1);
     WriteStr[Length(writeStr)] := ']';
-    TClient(Client).Writeln(Format('The following bitmaps were not freed: %s',[WriteStr]));
+    TClient(Client).Writeln(Format('The following bitmaps were not freed: %s', [WriteStr]));
   end;
-  SetLength(BmpArray,0);
-  SetLength(FreeSpots,0);
+
+  SetLength(BmpArray, 0);
+  SetLength(FreeSpots, 0);
+
   inherited Destroy;
 end;
 
@@ -1646,6 +1643,7 @@ begin
   FExternData := False;
 
   Index := -1;
+  List := nil;
   {FData:= nil;
   w := 0;
   h := 0; }
@@ -1653,14 +1651,14 @@ end;
 
 destructor TMufasaBitmap.Destroy;
 begin
+  if Assigned(List) then
+    List.removeBMP(Index);
+
   if Assigned(OnDestroy) then
     OnDestroy(Self);
 
   if Assigned(FData) and not FExternData then
     Freemem(FData);
-
-  if Assigned(List) then
-    List.removeBMP(Index);
 
   inherited Destroy;
 end;
