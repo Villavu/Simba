@@ -81,12 +81,6 @@ begin
   PMBitmaps(Params^[0])^.RemoveBMP(Pinteger(Params^[1])^);
 end;
 
-//procedure FreeBMP( Number : integer);
-procedure TMBitmaps_FreeBMP(const Params: PParamArray); lape_extdecl
-begin
-  PMBitmaps(Params^[0])^.FreeBMP(Pinteger(Params^[1])^);
-end;
-
 //constructor Create(Owner : TObject);
 procedure TMBitmaps_Init(const Params: PParamArray); lape_extdecl
 begin
@@ -115,8 +109,7 @@ begin
     addGlobalFunc('function TMBitmaps.CreateBMPFromString(width,height : integer; Data : string): integer;', @TMBitmaps_CreateBMPFromString);
     addGlobalFunc('function TMBitmaps.CreateBMPFromString(BmpName : string; width,height : integer; Data : string): integer; overload;', @TMBitmaps_CreateBMPFromStringEx);
     addGlobalFunc('procedure TMBitmaps.RemoveBMP(Number: integer);', @TMBitmaps_RemoveBMP);
-    addGlobalFunc('procedure TMBitmaps.FreeBMP(Number: integer);', @TMBitmaps_FreeBMP);
-	addGlobalFunc('procedure TMBitmaps.Init(Owner : TObject);', @TMBitmaps_Init);
+    addGlobalFunc('procedure TMBitmaps.Init(Owner : TObject);', @TMBitmaps_Init);
     addGlobalFunc('procedure TMBitmaps.Free();', @TMBitmaps_Free);
   end;
 end;
