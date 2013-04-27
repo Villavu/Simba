@@ -37,7 +37,7 @@ end;
 
 procedure ps_FreeBitmap(Number : integer); extdecl;
 begin
-  CurrThread.Client.MBitmaps.FreeBMP(Number);
+  CurrThread.Client.MBitmaps.GetBMP(Number).Free();
 end;
 
 procedure ps_SaveBitmap(Bmp : integer; path : string); extdecl;
