@@ -303,7 +303,7 @@ begin
     RegisterMethod(@TMBitmaps.CreateMirroredBitmap, 'CreateMirroredBitmap');
     RegisterMethod(@TMBitmaps.CreateBMPFromFile, 'CreateBMPFromFile');
     RegisterMethod(@TMBitmapsCreateBMPFromString_P, 'CreateBMPFromString');
-    RegisterMethod(@TMBitmaps.FreeBMP, 'FreeBMP');
+    RegisterMethod(@TMBitmaps.RemoveBMP, 'RemoveBMP');
     RegisterConstructor(@TMBitmaps.Create, 'Create');
   end;
 end;
