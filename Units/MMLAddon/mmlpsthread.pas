@@ -962,15 +962,15 @@ begin
   end;
 end;
 
-function TMufasaBitmapCreate : TMufasaBitmap;
+function TMufasaBitmapCreate: TMufasaBitmap;
 begin
-  result := TMufasaBitmap.Create;
+  Result := TMufasaBitmap.Create;
   CurrThread.Client.MBitmaps.AddBMP(result);
 end;
 
-procedure TMufasaBitmapFree(Self : TMufasaBitmap);
+procedure TMufasaBitmapFree(Self: TMufasaBitmap);
 begin
-  CurrThread.Client.MBitmaps.FreeBMP(Self.Index);
+  Self.Free();
 end;
 
 function TMufasaBitmapCopy(Self : TMufasaBitmap;const xs,ys,xe,ye : integer) : TMufasaBitmap;
