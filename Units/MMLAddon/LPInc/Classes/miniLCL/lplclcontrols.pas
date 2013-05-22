@@ -18,6 +18,7 @@ type
   PMouseMoveEvent = ^TMouseMoveEvent;
   //
   PCustomControl = ^TCustomControl;
+  PGraphicControl = ^TGraphicControl;
 
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
 implementation
@@ -1569,7 +1570,29 @@ begin
   end;
 end;
 
-//
+//Read: property Canvas: TCanvas read Canvas
+procedure TGraphicControl_Canvas_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCanvas(Result)^ := PGraphicControl(Params^[0])^.Canvas;
+end;
+
+//procedure Update();
+procedure TGraphicControl_Update(const Params: PParamArray); lape_extdecl
+begin
+  PGraphicControl(Params^[0])^.Update();
+end;
+
+procedure Register_TGraphicControl(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass(Compiler, 'TGraphicControl', 'TControl');
+
+    addGlobalFunc('procedure TGraphicControl.Update();', @TGraphicControl_Update);
+    addClassVar(Compiler, 'TGraphicControl', 'Canvas', 'TCanvas', @TGraphicControl_Canvas_Read);
+  end;
+end;
+
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
 begin
   with compiler do
@@ -1587,7 +1610,7 @@ begin
   Register_TCustomControl(Compiler);
   Register_TControlScrollBar(Compiler);
   Register_TScrollingWinControl(Compiler);
-  //
+  Register_TGraphicControl(Compiler);
 end;
 
 end.
