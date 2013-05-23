@@ -304,7 +304,7 @@ procedure Register_TIOManager_Abstract(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TIOManager_Abstract', 'TObject');
+    addClass('TIOManager_Abstract');
 
     //addGlobalFunc('procedure TIOManager_Abstract.Init(); overload;', @TIOManager_Abstract_Init);
     //addGlobalFunc('procedure TIOManager_Abstract.Init(plugin_dir: string); overload;', @TIOManager_Abstract_InitEx);

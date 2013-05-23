@@ -86,7 +86,7 @@ procedure Register_TMFonts(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMFonts', 'TObject');
+    addClass('TMFonts');
 
     addGlobalFunc('procedure TMFonts.Init(Owner : TObject);', @TMFonts_Init);
     addGlobalFunc('function TMFonts.GetFont(const Name: String): TOcrData;', @TMFonts_GetFont);
@@ -95,7 +95,7 @@ begin
     addGlobalFunc('function TMFonts.LoadSystemFont(const SysFont : TFont; const FontName : string): boolean;', @TMFonts_LoadSystemFont);
     addGlobalFunc('function TMFonts.Copy(Owner : TObject): TMFonts;', @TMFonts_Copy);
     addGlobalFunc('function TMFonts.Count(): integer;', @TMFonts_Count);
-    addClassVar(Compiler, 'TMFonts', 'Path', 'string', @TMFonts_Path_Read, @TMFonts_Path_Write);
+    addClassVar('TMFonts', 'Path', 'string', @TMFonts_Path_Read, @TMFonts_Path_Write);
     addGlobalFunc('procedure TMFonts.Free();', @TMFonts_Free);
   end;
 end;

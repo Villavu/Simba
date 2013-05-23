@@ -64,7 +64,7 @@ procedure Register_TPersistent(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TPersistent', 'TObject');
+    addClass('TPersistent');
 
     addGlobalFunc('procedure TPersistent.Assign(Source: TPersistent);', @TPersistent_Assign);
     addGlobalFunc('function TPersistent.GetNamePath(): string;', @TPersistent_GetNamePath);
@@ -252,7 +252,7 @@ procedure Register_TStream(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TStream', 'TObject');
+    addClass('TStream');
 
     addGlobalFunc('function TStream.Read(var Buffer; Count: Longint): Longint;', @TStream_Read);
     addGlobalFunc('function TStream.Write(const Buffer; Count: Longint): Longint;', @TStream_Write);
@@ -277,8 +277,8 @@ begin
     addGlobalFunc('procedure TStream.WriteWord(w : Word);', @TStream_WriteWord);
     addGlobalFunc('procedure TStream.WriteDWord(d : Cardinal);', @TStream_WriteDWord);
     addGlobalFunc('procedure TStream.WriteAnsiString(const S : String);', @TStream_WriteAnsiString);
-    addClassVar(Compiler, 'TStream', 'Position', 'Integer', @TStream_Position_Read, @TStream_Position_Write);
-    addClassVar(Compiler, 'TStream', 'Size', 'Integer', @TStream_Size_Read, @TStream_Size_Write);
+    addClassVar('TStream', 'Position', 'Integer', @TStream_Position_Read, @TStream_Position_Write);
+    addClassVar('TStream', 'Size', 'Integer', @TStream_Size_Read, @TStream_Size_Write);
     addGlobalFunc('procedure TStream.Init();', @TStream_Init);
     addGlobalFunc('procedure TStream.Free();', @TStream_Free);
   end;
@@ -324,13 +324,13 @@ procedure Register_THandleStream(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'THandleStream', 'TStream');
+    addClass('THandleStream', 'TStream');
 
     addGlobalFunc('procedure THandleStream.Init(AHandle: THandle);', @THandleStream_Init);
     addGlobalFunc('function THandleStream.Read(var Buffer; Count: Longint): Longint;', @THandleStream_Read);
     addGlobalFunc('function THandleStream.Write(const Buffer; Count: Longint): Longint;', @THandleStream_Write);
     addGlobalFunc('function THandleStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;', @THandleStream_Seek);
-    addClassVar(Compiler, 'THandleStream', 'Handle', 'THandle', @THandleStream_Handle_Read, nil);
+    addClassVar('THandleStream', 'Handle', 'THandle', @THandleStream_Handle_Read);
     addGlobalFunc('procedure THandleStream.Free();', @THandleStream_Free);
   end;
 end;
@@ -365,11 +365,11 @@ procedure Register_TFileStream(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TFileStream', 'THandleStream');
+    addClass('TFileStream', 'THandleStream');
 
     addGlobalFunc('procedure TFileStream.Init(const AFileName: string; Mode: Word);', @TFileStream_Init);
   //  addGlobalFunc('procedure TFileStream.Init(const AFileName: string; Mode: Word; Rights: Cardinal); overload;', @TFileStream_InitEx);
-    addClassVar(Compiler, 'TFileStream', 'FileName', 'String', @TFileStream_FileName_Read, nil);
+    addClassVar('TFileStream', 'FileName', 'String', @TFileStream_FileName_Read);
     addGlobalFunc('procedure TFileStream.Free();', @TFileStream_Free);
   end;
 end;
@@ -422,13 +422,13 @@ procedure Register_TCustomMemoryStream(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomMemoryStream', 'TStream');
+    addClass('TCustomMemoryStream', 'TStream');
 
     addGlobalFunc('function TCustomMemoryStream.Read(var Buffer; Count: LongInt): LongInt;', @TCustomMemoryStream_Read);
     addGlobalFunc('function TCustomMemoryStream.Seek(const Offset: Integer; Origin: TSeekOrigin): Int64;', @TCustomMemoryStream_Seek);
     addGlobalFunc('procedure TCustomMemoryStream.SaveToStream(Stream: TStream);', @TCustomMemoryStream_SaveToStream);
     addGlobalFunc('procedure TCustomMemoryStream.SaveToFile(const FileName: string);', @TCustomMemoryStream_SaveToFile);
-    addClassVar(Compiler, 'TCustomMemoryStream', 'Memory', 'Pointer', @TCustomMemoryStream_Memory_Read, nil);
+    addClassVar('TCustomMemoryStream', 'Memory', 'Pointer', @TCustomMemoryStream_Memory_Read);
     addGlobalFunc('procedure TCustomMemoryStream.Init();', @TCustomMemoryStream_Init);
     addGlobalFunc('procedure TCustomMemoryStream.Free();', @TCustomMemoryStream_Free);
   end;
@@ -481,7 +481,7 @@ procedure Register_TMemoryStream(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMemoryStream', 'TCustomMemoryStream');
+    addClass('TMemoryStream', 'TCustomMemoryStream');
 
     addGlobalFunc('procedure TMemoryStream.Clear();', @TMemoryStream_Clear);
     addGlobalFunc('procedure TMemoryStream.LoadFromStream(Stream: TStream);', @TMemoryStream_LoadFromStream);
@@ -546,7 +546,7 @@ procedure Register_TStringStream(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TStringStream', 'TStream');
+    addClass('TStringStream', 'TStream');
 
     addGlobalFunc('procedure TStringStream.Init(const AString: string);', @TStringStream_Init);
     addGlobalFunc('function TStringStream.Read(var Buffer; Count: Longint): Longint;', @TStringStream_Read);
@@ -554,7 +554,7 @@ begin
     addGlobalFunc('function TStringStream.Seek(Offset: Longint; Origin: Word): Longint;', @TStringStream_Seek);
     addGlobalFunc('function TStringStream.Write(const Buffer; Count: Longint): Longint;', @TStringStream_Write);
     addGlobalFunc('procedure TStringStream.WriteString(const AString: string);', @TStringStream_WriteString);
-    addClassVar(Compiler, 'TStringStream', 'DataString', 'string', @TStringStream_DataString_Read, nil);
+    addClassVar('TStringStream', 'DataString', 'string', @TStringStream_DataString_Read);
     addGlobalFunc('procedure TStringStream.Free();', @TStringStream_Free);
   end;
 end;
@@ -750,7 +750,7 @@ procedure Register_TStrings(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TStrings', 'TPersistent');
+    addClass('TStrings', 'TPersistent');
 
     addGlobalFunc('function TStrings.Add(const S: string): Integer;', @TStrings_Add);
     addGlobalFunc('function TStrings.AddObject(const S: string; AObject: TObject): Integer;', @TStrings_AddObject);
@@ -779,11 +779,11 @@ begin
     addGlobalFunc('procedure TStrings.SetObjects(index: integer;obj: TObject);', @TStrings_Objects_Write);
     addGlobalFunc('procedure TStrings.SetStrings(index: integer; text: string);', @TStrings_Strings_Write);
 
-    addClassVar(Compiler, 'TStrings', 'Count', 'Integer', @TStrings_Count_Read, nil);
-   // addClassVar(Compiler, 'TStrings', 'Objects', 'TObject', @TStrings_Objects_Read, @TStrings_Objects_Write);
-   // addClassVar(Compiler, 'TStrings', 'Values', 'string', @TStrings_Values_Read, @TStrings_Values_Write);
-   // addClassVar(Compiler, 'TStrings', 'Strings', 'string', @TStrings_Strings_Read, @TStrings_Strings_Write);
-    addClassVar(Compiler, 'TStrings', 'Text', 'string', @TStrings_Text_Read, @TStrings_Text_Write);
+    addClassVar( 'TStrings', 'Count', 'Integer', @TStrings_Count_Read);
+   // addClassVar('TStrings', 'Objects', 'TObject', @TStrings_Objects_Read, @TStrings_Objects_Write);
+   // addClassVar('TStrings', 'Values', 'string', @TStrings_Values_Read, @TStrings_Values_Write);
+   // addClassVar('TStrings', 'Strings', 'string', @TStrings_Strings_Read, @TStrings_Strings_Write);
+    addClassVar('TStrings', 'Text', 'string', @TStrings_Text_Read, @TStrings_Text_Write);
     addGlobalFunc('procedure TStrings.Init();', @TStrings_Init);
     addGlobalFunc('procedure TStrings.Free();', @TStrings_Free);
   end;
@@ -921,7 +921,7 @@ procedure Register_TStringList(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TStringList', 'TStrings');
+    addClass('TStringList', 'TStrings');
     addGlobalType('function(List: TStringList; Index1, Index2: Integer): Integer','TStringListSortCompare');
     addGlobalFunc('function TStringList.Add(const S: string): Integer;', @TStringList_Add);
     addGlobalFunc('procedure TStringList.Clear();', @TStringList_Clear);
@@ -932,11 +932,11 @@ begin
     addGlobalFunc('procedure TStringList.Insert(Index: Integer; const S: string);', @TStringList_Insert);
     addGlobalFunc('procedure TStringList.Sort();', @TStringList_Sort);
     addGlobalFunc('procedure TStringList.CustomSort(CompareFn: TStringListSortCompare);', @TStringList_CustomSort);
-    addClassVar(Compiler, 'TStringList', 'Sorted', 'Boolean', @TStringList_Sorted_Read, @TStringList_Sorted_Write);
-    addClassVar(Compiler, 'TStringList', 'CaseSensitive', 'Boolean', @TStringList_CaseSensitive_Read, @TStringList_CaseSensitive_Write);
-    addClassVar(Compiler, 'TStringList', 'OnChange', 'TNotifyEvent', @TStringList_OnChange_Read, @TStringList_OnChange_Write);
-    addClassVar(Compiler, 'TStringList', 'OnChanging', 'TNotifyEvent', @TStringList_OnChanging_Read, @TStringList_OnChanging_Write);
-    addClassVar(Compiler, 'TStringList', 'OwnsObjects', 'boolean', @TStringList_OwnsObjects_Read, @TStringList_OwnsObjects_Write);
+    addClassVar('TStringList', 'Sorted', 'Boolean', @TStringList_Sorted_Read, @TStringList_Sorted_Write);
+    addClassVar('TStringList', 'CaseSensitive', 'Boolean', @TStringList_CaseSensitive_Read, @TStringList_CaseSensitive_Write);
+    addClassVar('TStringList', 'OnChange', 'TNotifyEvent', @TStringList_OnChange_Read, @TStringList_OnChange_Write);
+    addClassVar('TStringList', 'OnChanging', 'TNotifyEvent', @TStringList_OnChanging_Read, @TStringList_OnChanging_Write);
+    addClassVar('TStringList', 'OwnsObjects', 'boolean', @TStringList_OwnsObjects_Read, @TStringList_OwnsObjects_Write);
     addGlobalFunc('procedure TStringList.Init();', @TStringList_Init);
     addGlobalFunc('procedure TStringList.Free();', @TStringList_Free);
   end;
@@ -1052,7 +1052,7 @@ procedure Register_TComponent(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TComponent', 'TPersistent');
+    addClass('TComponent', 'TPersistent');
 
     addGlobalType('(csLoading, csReading, csWriting, csDestroying,csDesigning, csAncestor, csUpdating, csFixups, csFreeNotification,csInline, csDesignInstance)','TComponentState');
     addGlobalType('^TComponentState','PComponentState');
@@ -1064,12 +1064,12 @@ begin
     addGlobalFunc('procedure TComponent.InsertComponent(AComponent: TComponent);', @TComponent_InsertComponent);
     addGlobalFunc('procedure TComponent.RemoveComponent(AComponent: TComponent);', @TComponent_RemoveComponent);
     addGlobalFunc('procedure TComponent.GetComponent(index: integer);', @TComponent_Components);
-    addClassVar(Compiler, 'TComponent', 'ComponentCount', 'Integer', @TComponent_ComponentCount_Read, nil);
-    addClassVar(Compiler, 'TComponent', 'ComponentIndex', 'Integer', @TComponent_ComponentIndex_Read, @TComponent_ComponentIndex_Write);
-    addClassVar(Compiler, 'TComponent', 'ComponentState', 'TComponentState', @TComponent_ComponentState_Read, nil);
-    addClassVar(Compiler, 'TComponent', 'Owner', 'TComponent', @TComponent_Owner_Read, nil);
-    addClassVar(Compiler, 'TComponent', 'Name', 'TComponentName', @TComponent_Name_Read, @TComponent_Name_Write);
-    addClassVar(Compiler, 'TComponent', 'Tag', 'Integer', @TComponent_Tag_Read, @TComponent_Tag_Write);
+    addClassVar('TComponent', 'ComponentCount', 'Integer', @TComponent_ComponentCount_Read);
+    addClassVar('TComponent', 'ComponentIndex', 'Integer', @TComponent_ComponentIndex_Read, @TComponent_ComponentIndex_Write);
+    addClassVar('TComponent', 'ComponentState', 'TComponentState', @TComponent_ComponentState_Read);
+    addClassVar('TComponent', 'Owner', 'TComponent', @TComponent_Owner_Read);
+    addClassVar('TComponent', 'Name', 'TComponentName', @TComponent_Name_Read, @TComponent_Name_Write);
+    addClassVar('TComponent', 'Tag', 'Integer', @TComponent_Tag_Read, @TComponent_Tag_Write);
     addGlobalFunc('procedure TComponent.Free();', @TComponent_Free);
   end;
 end;

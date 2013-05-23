@@ -235,6 +235,13 @@ type
    end;
    {$ENDIF}
 
+   TSyncMethod = class
+   private
+     FMethod: Pointer;
+   public
+     constructor Create(Method: Pointer);
+     procedure Call;
+   end;
 
 threadvar
   CurrThread : TMThread;
@@ -1274,6 +1281,31 @@ begin
   ps_debugln(PlpString(Params^[0])^);
 end;
 
+procedure lp_Sync(Params: PParamArray); lape_extdecl
+var
+  Method: TSyncMethod;
+begin
+  Method := TSyncMethod.Create(TLPThread(CurrThread).Natify(PCodePos(Params^[0])^));
+  try
+    TThread.Synchronize(CurrThread, @Method.Call);
+  finally
+    Method.Free();
+  end;
+end;
+
+procedure lp_CurrThreadID(Params: PParamArray; Result: Pointer); lape_extdecl
+begin
+{$IFDEF WINDOWS}
+  PPtrUInt(Result)^ := GetCurrentThreadID();
+{$ELSE}
+  {$IFDEF LINUX}
+  PPtrUInt(Result)^ := TThreadID(pthread_self);
+  {$ELSE}
+  PPtrUInt(Result)^ := GetThreadID();
+  {$ENDIF}
+{$ENDIF}
+end;
+
 procedure lp_Natify(Params: PParamArray; Result: Pointer); lape_extdecl
 begin
   PPointer(Result)^ := TLPThread(CurrThread).Natify(PlpString(Params^[0])^);
@@ -1333,6 +1365,9 @@ begin
     addGlobalFunc('procedure _write(s: string); override;', @lp_Write);
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
+
+    addGlobalFunc('procedure Sync(proc: Pointer);', @lp_Sync);
+    addGlobalFunc('function GetCurrThreadID(): PtrUInt;', @lp_CurrThreadID);
 
     addGlobalFunc('function natify(s: string): Pointer;', @lp_Natify);
     addGlobalFunc('function natify(p: Pointer): Pointer; overload;', @lp_NatifyP);
@@ -1414,6 +1449,9 @@ var
 begin
   Result := nil;
 
+  if (not FFILoaded) then
+    raise Exception.Create('libffi seems to be missing!');
+
   Wrapper := LapeExportWrapper(Compiler.Globals[s]);
   if (Wrapper <> nil) then
   begin
@@ -1456,6 +1494,10 @@ var
   Wrapper: TExportClosure;
 begin
   Result := nil;
+
+  if (not FFILoaded) then
+    raise Exception.Create('libffi seems to be missing!');
+
   Declaration := getByCodePos(Compiler.GlobalDeclarations, c);
 
   if (Declaration <> nil) then
@@ -1565,6 +1607,18 @@ begin
   Running := bFalse;
 end;
 {$ENDIF}
+
+constructor TSyncMethod.Create(Method: Pointer);
+begin
+  FMethod := Method
+end;
+
+procedure TSyncMethod.Call();
+type
+  TProc = procedure; cdecl;
+begin
+  TProc(FMethod)();
+end;
 
 initialization
   PluginsGlob := TMPlugins.Create;

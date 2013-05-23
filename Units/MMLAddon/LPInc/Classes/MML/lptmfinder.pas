@@ -273,13 +273,13 @@ procedure Register_TMFinder(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMFinder', 'TObject');
+    addClass('TMFinder');
 
     addGlobalType('Pointer', 'TCTSInfo');
     addGlobalType('array of TCTSInfo', 'TCTSInfoArray');
     addGlobalType('array of TCTSInfoArray', 'TCTSInfo2DArray');
 
-    addClassVar(Compiler, 'TMFinder', 'WarnOnly', 'boolean', @TMFinder_WarnOnly_Read, @TMFinder_WarnOnly_Write);
+    addClassVar('TMFinder', 'WarnOnly', 'boolean', @TMFinder_WarnOnly_Read, @TMFinder_WarnOnly_Write);
     addGlobalFunc('procedure TMFinder.DefaultOperations(var xs,ys,xe,ye : integer);', @TMFinder_DefaultOperations);
     addGlobalFunc('function TMFinder.CountColorTolerance(Color, xs, ys, xe, ye, Tolerance: Integer): Integer;', @TMFinder_CountColorTolerance);
     addGlobalFunc('function TMFinder.CountColor(Color, xs, ys, xe, ye: Integer): Integer;', @TMFinder_CountColor);
