@@ -157,7 +157,7 @@ procedure Register_TMOCR(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMOCR', 'TObject');
+    addClass('TMOCR');
 
     addGlobalFunc('procedure TMOCR.Init(Owner: TObject);', @TMOCR_Init);
     addGlobalFunc('function TMOCR.InitTOCR(const path: string): boolean;', @TMOCR_InitTOCR);
@@ -178,7 +178,7 @@ begin
     addGlobalFunc('function TMOCR.TextToFontTPA(Text, font: String; out w, h: integer): TPointArray;', @TMOCR_TextToFontTPA);
     addGlobalFunc('function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitmap;', @TMOCR_TextToFontBitmap);
     addGlobalFunc('function TMOCR.TextToMask(Text, font: String): TMask;', @TMOCR_TextToMask);
-    addClassVar(Compiler, 'TMOCR', 'Fonts', 'TMFonts', @TMOCR_Fonts_Read, @TMOCR_Fonts_Write);
+    addClassVar('TMOCR', 'Fonts', 'TMFonts', @TMOCR_Fonts_Read, @TMOCR_Fonts_Write);
     addGlobalFunc('procedure TMOCR.Free();', @TMOCR_Free);
   end;
 end;

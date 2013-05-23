@@ -74,7 +74,7 @@ procedure Register_TMDTMS(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMDTMS', 'TObject');
+    addClass('TMDTMS');
 
     addGlobalType('record x, y, Color, Tolerance, AreaSize, AreaShape: UInt32; end;', 'TSDTMPointDef');
     addGlobalType('array of TSDTMPointDef;', 'TSDTMPointDefArray');

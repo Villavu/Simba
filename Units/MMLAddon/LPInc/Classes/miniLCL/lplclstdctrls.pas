@@ -188,20 +188,20 @@ procedure Register_TCustomScrollBar(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomScrollBar', 'TWinControl');
+    addClass('TCustomScrollBar', 'TWinControl');
 
     addGlobalFunc('procedure TCustomScrollBar.Init(AOwner: TComponent);', @TCustomScrollBar_Init);
     addGlobalFunc('procedure TCustomScrollBar.SetParams(APosition, AMin, AMax, APageSize: Integer);', @TCustomScrollBar_SetParams);
     addGlobalFunc('procedure TCustomScrollBar.SetParams(APosition, AMin, AMax: Integer); overload;', @TCustomScrollBar_SetParamsEx);
-    addClassVar(Compiler, 'TCustomScrollBar', 'Kind', 'TScrollBarKind', @TCustomScrollBar_Kind_Read, @TCustomScrollBar_Kind_Write);
-    addClassVar(Compiler, 'TCustomScrollBar', 'LargeChange', 'integer', @TCustomScrollBar_LargeChange_Read, @TCustomScrollBar_LargeChange_Write);
-    addClassVar(Compiler, 'TCustomScrollBar', 'Max', 'Integer', @TCustomScrollBar_Max_Read, @TCustomScrollBar_Max_Write);
-    addClassVar(Compiler, 'TCustomScrollBar', 'Min', 'Integer', @TCustomScrollBar_Min_Read, @TCustomScrollBar_Min_Write);
-    addClassVar(Compiler, 'TCustomScrollBar', 'PageSize', 'Integer', @TCustomScrollBar_PageSize_Read, @TCustomScrollBar_PageSize_Write);
-    addClassVar(Compiler, 'TCustomScrollBar', 'Position', 'Integer', @TCustomScrollBar_Position_Read, @TCustomScrollBar_Position_Write);
-    addClassVar(Compiler, 'TCustomScrollBar', 'SmallChange', 'integer', @TCustomScrollBar_SmallChange_Read, @TCustomScrollBar_SmallChange_Write);
-    addClassVar(Compiler, 'TCustomScrollBar', 'OnChange', 'TNotifyEvent', @TCustomScrollBar_OnChange_Read, @TCustomScrollBar_OnChange_Write);
-    addClassVar(Compiler, 'TCustomScrollBar', 'OnScroll', 'TScrollEvent', @TCustomScrollBar_OnScroll_Read, @TCustomScrollBar_OnScroll_Write);
+    addClassVar('TCustomScrollBar', 'Kind', 'TScrollBarKind', @TCustomScrollBar_Kind_Read, @TCustomScrollBar_Kind_Write);
+    addClassVar('TCustomScrollBar', 'LargeChange', 'integer', @TCustomScrollBar_LargeChange_Read, @TCustomScrollBar_LargeChange_Write);
+    addClassVar('TCustomScrollBar', 'Max', 'Integer', @TCustomScrollBar_Max_Read, @TCustomScrollBar_Max_Write);
+    addClassVar('TCustomScrollBar', 'Min', 'Integer', @TCustomScrollBar_Min_Read, @TCustomScrollBar_Min_Write);
+    addClassVar('TCustomScrollBar', 'PageSize', 'Integer', @TCustomScrollBar_PageSize_Read, @TCustomScrollBar_PageSize_Write);
+    addClassVar('TCustomScrollBar', 'Position', 'Integer', @TCustomScrollBar_Position_Read, @TCustomScrollBar_Position_Write);
+    addClassVar('TCustomScrollBar', 'SmallChange', 'integer', @TCustomScrollBar_SmallChange_Read, @TCustomScrollBar_SmallChange_Write);
+    addClassVar('TCustomScrollBar', 'OnChange', 'TNotifyEvent', @TCustomScrollBar_OnChange_Read, @TCustomScrollBar_OnChange_Write);
+    addClassVar('TCustomScrollBar', 'OnScroll', 'TScrollEvent', @TCustomScrollBar_OnScroll_Read, @TCustomScrollBar_OnScroll_Write);
     addGlobalFunc('procedure TCustomScrollBar.Free();', @TCustomScrollBar_Free);
   end;
 end;
@@ -224,7 +224,7 @@ procedure Register_TScrollBar(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TScrollBar', 'TCustomScrollBar');
+    addClass('TScrollBar', 'TCustomScrollBar');
 
     addGlobalFunc('procedure TScrollBar.Init(AOwner: TComponent);', @TScrollBar_Init);
     addGlobalFunc('procedure TScrollBar.Free();', @TScrollBar_Free);
@@ -477,7 +477,7 @@ procedure Register_TCustomComboBox(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomComboBox', 'TWinControl');
+    addClass('TCustomComboBox', 'TWinControl');
 
     addGlobalFunc('procedure TCustomComboBox.Init(TheOwner: TComponent);', @TCustomComboBox_Init);
     addGlobalFunc('procedure TCustomComboBox.IntfGetItems();', @TCustomComboBox_IntfGetItems);
@@ -486,23 +486,23 @@ begin
     addGlobalFunc('procedure TCustomComboBox.AddHistoryItem(const Item: string; AnObject: TObject;MaxHistoryCount: integer; SetAsText, CaseSensitive: boolean); overload;', @TCustomComboBox_AddHistoryItemEx);
     addGlobalFunc('procedure TCustomComboBox.Clear();', @TCustomComboBox_Clear);
     addGlobalFunc('procedure TCustomComboBox.ClearSelection();', @TCustomComboBox_ClearSelection);
-    addClassVar(Compiler, 'TCustomComboBox', 'DroppedDown', 'Boolean', @TCustomComboBox_DroppedDown_Read, @TCustomComboBox_DroppedDown_Write);
+    addClassVar('TCustomComboBox', 'DroppedDown', 'Boolean', @TCustomComboBox_DroppedDown_Read, @TCustomComboBox_DroppedDown_Write);
     addGlobalFunc('procedure TCustomComboBox.SelectAll();', @TCustomComboBox_SelectAll);
-    addClassVar(Compiler, 'TCustomComboBox', 'AutoComplete', 'boolean', @TCustomComboBox_AutoComplete_Read, @TCustomComboBox_AutoComplete_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'AutoDropDown', 'Boolean', @TCustomComboBox_AutoDropDown_Read, @TCustomComboBox_AutoDropDown_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'AutoSelect', 'Boolean', @TCustomComboBox_AutoSelect_Read, @TCustomComboBox_AutoSelect_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'AutoSelected', 'Boolean', @TCustomComboBox_AutoSelected_Read, @TCustomComboBox_AutoSelected_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'ArrowKeysTraverseList', 'Boolean', @TCustomComboBox_ArrowKeysTraverseList_Read, @TCustomComboBox_ArrowKeysTraverseList_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'Canvas', 'TCanvas', @TCustomComboBox_Canvas_Read, nil);
-    addClassVar(Compiler, 'TCustomComboBox', 'DropDownCount', 'Integer', @TCustomComboBox_DropDownCount_Read, @TCustomComboBox_DropDownCount_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'Items', 'TStrings', @TCustomComboBox_Items_Read, @TCustomComboBox_Items_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'ItemIndex', 'integer', @TCustomComboBox_ItemIndex_Read, @TCustomComboBox_ItemIndex_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'ReadOnly', 'Boolean', @TCustomComboBox_ReadOnly_Read, @TCustomComboBox_ReadOnly_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'SelLength', 'integer', @TCustomComboBox_SelLength_Read, @TCustomComboBox_SelLength_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'SelStart', 'integer', @TCustomComboBox_SelStart_Read, @TCustomComboBox_SelStart_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'SelText', 'String', @TCustomComboBox_SelText_Read, @TCustomComboBox_SelText_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'Style', 'TComboBoxStyle', @TCustomComboBox_Style_Read, @TCustomComboBox_Style_Write);
-    addClassVar(Compiler, 'TCustomComboBox', 'Text', 'string', @TCustomComboBox_Text_Read, @TCustomComboBox_Text_Write);
+    addClassVar('TCustomComboBox', 'AutoComplete', 'boolean', @TCustomComboBox_AutoComplete_Read, @TCustomComboBox_AutoComplete_Write);
+    addClassVar('TCustomComboBox', 'AutoDropDown', 'Boolean', @TCustomComboBox_AutoDropDown_Read, @TCustomComboBox_AutoDropDown_Write);
+    addClassVar('TCustomComboBox', 'AutoSelect', 'Boolean', @TCustomComboBox_AutoSelect_Read, @TCustomComboBox_AutoSelect_Write);
+    addClassVar('TCustomComboBox', 'AutoSelected', 'Boolean', @TCustomComboBox_AutoSelected_Read, @TCustomComboBox_AutoSelected_Write);
+    addClassVar('TCustomComboBox', 'ArrowKeysTraverseList', 'Boolean', @TCustomComboBox_ArrowKeysTraverseList_Read, @TCustomComboBox_ArrowKeysTraverseList_Write);
+    addClassVar('TCustomComboBox', 'Canvas', 'TCanvas', @TCustomComboBox_Canvas_Read);
+    addClassVar('TCustomComboBox', 'DropDownCount', 'Integer', @TCustomComboBox_DropDownCount_Read, @TCustomComboBox_DropDownCount_Write);
+    addClassVar('TCustomComboBox', 'Items', 'TStrings', @TCustomComboBox_Items_Read, @TCustomComboBox_Items_Write);
+    addClassVar('TCustomComboBox', 'ItemIndex', 'integer', @TCustomComboBox_ItemIndex_Read, @TCustomComboBox_ItemIndex_Write);
+    addClassVar('TCustomComboBox', 'ReadOnly', 'Boolean', @TCustomComboBox_ReadOnly_Read, @TCustomComboBox_ReadOnly_Write);
+    addClassVar('TCustomComboBox', 'SelLength', 'integer', @TCustomComboBox_SelLength_Read, @TCustomComboBox_SelLength_Write);
+    addClassVar('TCustomComboBox', 'SelStart', 'integer', @TCustomComboBox_SelStart_Read, @TCustomComboBox_SelStart_Write);
+    addClassVar('TCustomComboBox', 'SelText', 'String', @TCustomComboBox_SelText_Read, @TCustomComboBox_SelText_Write);
+    addClassVar('TCustomComboBox', 'Style', 'TComboBoxStyle', @TCustomComboBox_Style_Read, @TCustomComboBox_Style_Write);
+    addClassVar('TCustomComboBox', 'Text', 'string', @TCustomComboBox_Text_Read, @TCustomComboBox_Text_Write);
     addGlobalFunc('procedure TCustomComboBox.Free();', @TCustomComboBox_Free);
   end;
 end;
@@ -523,7 +523,7 @@ procedure Register_TComboBox(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TComboBox', 'TCustomComboBox');
+    addClass('TComboBox', 'TCustomComboBox');
 
     addGlobalFunc('procedure TComboBox.Init(TheOwner: TComponent);', @TComboBox_Init);
     addGlobalFunc('procedure TComboBox.Free();', @TComboBox_Free);
@@ -781,7 +781,7 @@ procedure Register_TCustomListBox(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomListBox', 'TWinControl');
+    addClass('TCustomListBox', 'TWinControl');
 
     addGlobalFunc('procedure TCustomListBox.Init(TheOwner: TComponent);', @TCustomListBox_Init);
     addGlobalFunc('procedure TCustomListBox.AddItem(const Item: String; AnObject: TObject);', @TCustomListBox_AddItem);
@@ -800,19 +800,19 @@ begin
     addGlobalFunc('procedure TCustomListBox.MeasureItem(Index: Integer; var TheHeight: Integer);', @TCustomListBox_MeasureItem);
     addGlobalFunc('procedure TCustomListBox.SelectAll();', @TCustomListBox_SelectAll);
     addGlobalFunc('procedure TCustomListBox.UnlockSelectionChange();', @TCustomListBox_UnlockSelectionChange);
-    addClassVar(Compiler, 'TCustomListBox', 'Canvas', 'TCanvas', @TCustomListBox_Canvas_Read, nil);
-    addClassVar(Compiler, 'TCustomListBox', 'ClickOnSelChange', 'boolean', @TCustomListBox_ClickOnSelChange_Read, @TCustomListBox_ClickOnSelChange_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'Columns', 'Integer', @TCustomListBox_Columns_Read, @TCustomListBox_Columns_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'Count', 'Integer', @TCustomListBox_Count_Read, nil);
-    addClassVar(Compiler, 'TCustomListBox', 'ExtendedSelect', 'boolean', @TCustomListBox_ExtendedSelect_Read, @TCustomListBox_ExtendedSelect_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'ItemHeight', 'Integer', @TCustomListBox_ItemHeight_Read, @TCustomListBox_ItemHeight_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'ItemIndex', 'integer', @TCustomListBox_ItemIndex_Read, @TCustomListBox_ItemIndex_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'Items', 'TStrings', @TCustomListBox_Items_Read, @TCustomListBox_Items_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'MultiSelect', 'boolean', @TCustomListBox_MultiSelect_Read, @TCustomListBox_MultiSelect_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'ScrollWidth', 'Integer', @TCustomListBox_ScrollWidth_Read, @TCustomListBox_ScrollWidth_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'SelCount', 'integer', @TCustomListBox_SelCount_Read, nil);
-    addClassVar(Compiler, 'TCustomListBox', 'Sorted', 'boolean', @TCustomListBox_Sorted_Read, @TCustomListBox_Sorted_Write);
-    addClassVar(Compiler, 'TCustomListBox', 'TopIndex', 'Integer', @TCustomListBox_TopIndex_Read, @TCustomListBox_TopIndex_Write);
+    addClassVar('TCustomListBox', 'Canvas', 'TCanvas', @TCustomListBox_Canvas_Read);
+    addClassVar('TCustomListBox', 'ClickOnSelChange', 'boolean', @TCustomListBox_ClickOnSelChange_Read, @TCustomListBox_ClickOnSelChange_Write);
+    addClassVar('TCustomListBox', 'Columns', 'Integer', @TCustomListBox_Columns_Read, @TCustomListBox_Columns_Write);
+    addClassVar('TCustomListBox', 'Count', 'Integer', @TCustomListBox_Count_Read);
+    addClassVar('TCustomListBox', 'ExtendedSelect', 'boolean', @TCustomListBox_ExtendedSelect_Read, @TCustomListBox_ExtendedSelect_Write);
+    addClassVar('TCustomListBox', 'ItemHeight', 'Integer', @TCustomListBox_ItemHeight_Read, @TCustomListBox_ItemHeight_Write);
+    addClassVar('TCustomListBox', 'ItemIndex', 'integer', @TCustomListBox_ItemIndex_Read, @TCustomListBox_ItemIndex_Write);
+    addClassVar('TCustomListBox', 'Items', 'TStrings', @TCustomListBox_Items_Read, @TCustomListBox_Items_Write);
+    addClassVar('TCustomListBox', 'MultiSelect', 'boolean', @TCustomListBox_MultiSelect_Read, @TCustomListBox_MultiSelect_Write);
+    addClassVar('TCustomListBox', 'ScrollWidth', 'Integer', @TCustomListBox_ScrollWidth_Read, @TCustomListBox_ScrollWidth_Write);
+    addClassVar('TCustomListBox', 'SelCount', 'integer', @TCustomListBox_SelCount_Read);
+    addClassVar('TCustomListBox', 'Sorted', 'boolean', @TCustomListBox_Sorted_Read, @TCustomListBox_Sorted_Write);
+    addClassVar('TCustomListBox', 'TopIndex', 'Integer', @TCustomListBox_TopIndex_Read, @TCustomListBox_TopIndex_Write);
     addGlobalFunc('procedure TCustomListBox.Free();', @TCustomListBox_Free);
   end;
 end;
@@ -833,7 +833,7 @@ procedure Register_TListBox(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TListBox', 'TCustomListBox');
+    addClass('TListBox', 'TCustomListBox');
 
     addGlobalFunc('procedure TListBox.Init(TheOwner: TComponent);', @TListBox_Init);
     addGlobalFunc('procedure TListBox.Free();', @TListBox_Free);
@@ -1037,7 +1037,7 @@ procedure Register_TCustomEdit(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomEdit', 'TWinControl');
+    addClass('TCustomEdit', 'TWinControl');
 
     addGlobalFunc('procedure TCustomEdit.Init(AOwner: TComponent);', @TCustomEdit_Init);
     addGlobalFunc('procedure TCustomEdit.Clear();', @TCustomEdit_Clear);
@@ -1047,18 +1047,18 @@ begin
     addGlobalFunc('procedure TCustomEdit.CutToClipboard();', @TCustomEdit_CutToClipboard);
     addGlobalFunc('procedure TCustomEdit.PasteFromClipboard();', @TCustomEdit_PasteFromClipboard);
     addGlobalFunc('procedure TCustomEdit.Undo();', @TCustomEdit_Undo);
-    addClassVar(Compiler, 'TCustomEdit', 'CanUndo', 'Boolean', @TCustomEdit_CanUndo_Read, nil);
-    addClassVar(Compiler, 'TCustomEdit', 'CaretPos', 'TPoint', @TCustomEdit_CaretPos_Read, @TCustomEdit_CaretPos_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'HideSelection', 'Boolean', @TCustomEdit_HideSelection_Read, @TCustomEdit_HideSelection_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'MaxLength', 'Integer', @TCustomEdit_MaxLength_Read, @TCustomEdit_MaxLength_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'Modified', 'Boolean', @TCustomEdit_Modified_Read, @TCustomEdit_Modified_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'OnChange', 'TNotifyEvent', @TCustomEdit_OnChange_Read, @TCustomEdit_OnChange_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'PasswordChar', 'Char', @TCustomEdit_PasswordChar_Read, @TCustomEdit_PasswordChar_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'ReadOnly', 'Boolean', @TCustomEdit_ReadOnly_Read, @TCustomEdit_ReadOnly_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'SelLength', 'integer', @TCustomEdit_SelLength_Read, @TCustomEdit_SelLength_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'SelStart', 'integer', @TCustomEdit_SelStart_Read, @TCustomEdit_SelStart_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'SelText', 'String', @TCustomEdit_SelText_Read, @TCustomEdit_SelText_Write);
-    addClassVar(Compiler, 'TCustomEdit', 'Text', 'string', @TCustomEdit_Text_Read, @TCustomEdit_Text_Write);
+    addClassVar('TCustomEdit', 'CanUndo', 'Boolean', @TCustomEdit_CanUndo_Read);
+    addClassVar('TCustomEdit', 'CaretPos', 'TPoint', @TCustomEdit_CaretPos_Read, @TCustomEdit_CaretPos_Write);
+    addClassVar('TCustomEdit', 'HideSelection', 'Boolean', @TCustomEdit_HideSelection_Read, @TCustomEdit_HideSelection_Write);
+    addClassVar('TCustomEdit', 'MaxLength', 'Integer', @TCustomEdit_MaxLength_Read, @TCustomEdit_MaxLength_Write);
+    addClassVar('TCustomEdit', 'Modified', 'Boolean', @TCustomEdit_Modified_Read, @TCustomEdit_Modified_Write);
+    addClassVar('TCustomEdit', 'OnChange', 'TNotifyEvent', @TCustomEdit_OnChange_Read, @TCustomEdit_OnChange_Write);
+    addClassVar('TCustomEdit', 'PasswordChar', 'Char', @TCustomEdit_PasswordChar_Read, @TCustomEdit_PasswordChar_Write);
+    addClassVar('TCustomEdit', 'ReadOnly', 'Boolean', @TCustomEdit_ReadOnly_Read, @TCustomEdit_ReadOnly_Write);
+    addClassVar('TCustomEdit', 'SelLength', 'integer', @TCustomEdit_SelLength_Read, @TCustomEdit_SelLength_Write);
+    addClassVar('TCustomEdit', 'SelStart', 'integer', @TCustomEdit_SelStart_Read, @TCustomEdit_SelStart_Write);
+    addClassVar('TCustomEdit', 'SelText', 'String', @TCustomEdit_SelText_Read, @TCustomEdit_SelText_Write);
+    addClassVar('TCustomEdit', 'Text', 'string', @TCustomEdit_Text_Read, @TCustomEdit_Text_Write);
     addGlobalFunc('procedure TCustomEdit.Free();', @TCustomEdit_Free);
   end;
 end;
@@ -1079,7 +1079,7 @@ procedure Register_TEdit(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TEdit', 'TCustomEdit');
+    addClass('TEdit', 'TCustomEdit');
 
     addGlobalFunc('procedure TEdit.Init(AOwner: TComponent);', @TEdit_Init);
     addGlobalFunc('procedure TEdit.Free();', @TEdit_Free);
@@ -1102,7 +1102,7 @@ procedure Register_TMemoScrollbar(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMemoScrollbar', 'TControlScrollBar');
+    addClass('TMemoScrollbar', 'TControlScrollBar');
 
     addGlobalFunc('procedure TMemoScrollbar.Init(AControl: TWinControl; AKind: TScrollBarKind);', @TMemoScrollbar_Init);
     addGlobalFunc('procedure TMemoScrollbar.Free();', @TMemoScrollbar_Free);
@@ -1215,17 +1215,17 @@ procedure Register_TCustomMemo(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomMemo', 'TCustomEdit');
+    addClass('TCustomMemo', 'TCustomEdit');
 
     addGlobalFunc('procedure TCustomMemo.Init(AOwner: TComponent);', @TCustomMemo_Init);
     addGlobalFunc('procedure TCustomMemo.Append(const Value: String);', @TCustomMemo_Append);
-    addClassVar(Compiler, 'TCustomMemo', 'Lines', 'TStrings', @TCustomMemo_Lines_Read, @TCustomMemo_Lines_Write);
-    addClassVar(Compiler, 'TCustomMemo', 'HorzScrollBar', 'TMemoScrollBar', @TCustomMemo_HorzScrollBar_Read, @TCustomMemo_HorzScrollBar_Write);
-    addClassVar(Compiler, 'TCustomMemo', 'VertScrollBar', 'TMemoScrollBar', @TCustomMemo_VertScrollBar_Read, @TCustomMemo_VertScrollBar_Write);
-    addClassVar(Compiler, 'TCustomMemo', 'ScrollBars', 'TScrollStyle', @TCustomMemo_ScrollBars_Read, @TCustomMemo_ScrollBars_Write);
-    addClassVar(Compiler, 'TCustomMemo', 'WantReturns', 'Boolean', @TCustomMemo_WantReturns_Read, @TCustomMemo_WantReturns_Write);
-    addClassVar(Compiler, 'TCustomMemo', 'WantTabs', 'Boolean', @TCustomMemo_WantTabs_Read, @TCustomMemo_WantTabs_Write);
-    addClassVar(Compiler, 'TCustomMemo', 'WordWrap', 'Boolean', @TCustomMemo_WordWrap_Read, @TCustomMemo_WordWrap_Write);
+    addClassVar('TCustomMemo', 'Lines', 'TStrings', @TCustomMemo_Lines_Read, @TCustomMemo_Lines_Write);
+    addClassVar('TCustomMemo', 'HorzScrollBar', 'TMemoScrollBar', @TCustomMemo_HorzScrollBar_Read, @TCustomMemo_HorzScrollBar_Write);
+    addClassVar('TCustomMemo', 'VertScrollBar', 'TMemoScrollBar', @TCustomMemo_VertScrollBar_Read, @TCustomMemo_VertScrollBar_Write);
+    addClassVar('TCustomMemo', 'ScrollBars', 'TScrollStyle', @TCustomMemo_ScrollBars_Read, @TCustomMemo_ScrollBars_Write);
+    addClassVar('TCustomMemo', 'WantReturns', 'Boolean', @TCustomMemo_WantReturns_Read, @TCustomMemo_WantReturns_Write);
+    addClassVar('TCustomMemo', 'WantTabs', 'Boolean', @TCustomMemo_WantTabs_Read, @TCustomMemo_WantTabs_Write);
+    addClassVar('TCustomMemo', 'WordWrap', 'Boolean', @TCustomMemo_WordWrap_Read, @TCustomMemo_WordWrap_Write);
     addGlobalFunc('procedure TCustomMemo.Free();', @TCustomMemo_Free);
   end;
 end;
@@ -1246,7 +1246,7 @@ procedure Register_TMemo(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMemo', 'TCustomMemo');
+    addClass('TMemo', 'TCustomMemo');
 
     addGlobalFunc('procedure TMemo.Init(AOwner: TComponent);', @TMemo_Init);
     addGlobalFunc('procedure TMemo.Free();', @TMemo_Free);
@@ -1331,14 +1331,14 @@ procedure Register_TCustomStaticText(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomStaticText', 'TWinControl');
+    addClass('TCustomStaticText', 'TWinControl');
 
     addGlobalFunc('procedure TCustomStaticText.Init(AOwner: TComponent);', @TCustomStaticText_Init);
-    addClassVar(Compiler, 'TCustomStaticText', 'Alignment', 'TAlignment', @TCustomStaticText_Alignment_Read, @TCustomStaticText_Alignment_Write);
-    addClassVar(Compiler, 'TCustomStaticText', 'BorderStyle', 'TStaticBorderStyle', @TCustomStaticText_BorderStyle_Read, @TCustomStaticText_BorderStyle_Write);
-    addClassVar(Compiler, 'TCustomStaticText', 'FocusControl', 'TWinControl', @TCustomStaticText_FocusControl_Read, @TCustomStaticText_FocusControl_Write);
-    addClassVar(Compiler, 'TCustomStaticText', 'ShowAccelChar', 'boolean', @TCustomStaticText_ShowAccelChar_Read, @TCustomStaticText_ShowAccelChar_Write);
-    addClassVar(Compiler, 'TCustomStaticText', 'Transparent', 'Boolean', @TCustomStaticText_Transparent_Read, @TCustomStaticText_Transparent_Write);
+    addClassVar('TCustomStaticText', 'Alignment', 'TAlignment', @TCustomStaticText_Alignment_Read, @TCustomStaticText_Alignment_Write);
+    addClassVar('TCustomStaticText', 'BorderStyle', 'TStaticBorderStyle', @TCustomStaticText_BorderStyle_Read, @TCustomStaticText_BorderStyle_Write);
+    addClassVar('TCustomStaticText', 'FocusControl', 'TWinControl', @TCustomStaticText_FocusControl_Read, @TCustomStaticText_FocusControl_Write);
+    addClassVar('TCustomStaticText', 'ShowAccelChar', 'boolean', @TCustomStaticText_ShowAccelChar_Read, @TCustomStaticText_ShowAccelChar_Write);
+    addClassVar('TCustomStaticText', 'Transparent', 'Boolean', @TCustomStaticText_Transparent_Read, @TCustomStaticText_Transparent_Write);
     addGlobalFunc('procedure TCustomStaticText.Free();', @TCustomStaticText_Free);
   end;
 end;
@@ -1359,7 +1359,7 @@ procedure Register_TStaticText(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TStaticText', 'TCustomStaticText');
+    addClass('TStaticText', 'TCustomStaticText');
 
     addGlobalFunc('procedure TStaticText.Init(AOwner: TComponent);', @TStaticText_Init);
     addGlobalFunc('procedure TStaticText.Free();', @TStaticText_Free);
@@ -1385,7 +1385,7 @@ procedure Register_TButtonControl(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TButtonControl', 'TWinControl');
+    addClass('TButtonControl', 'TWinControl');
 
     addGlobalFunc('procedure TButtonControl.Init(TheOwner: TComponent);', @TButtonControl_Init);
     addGlobalFunc('procedure TButtonControl.Free();', @TButtonControl_Free);
@@ -1468,7 +1468,7 @@ procedure Register_TCustomButton(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomButton', 'TButtonControl');
+    addClass('TCustomButton', 'TButtonControl');
 
     addGlobalFunc('procedure TCustomButton.Init(TheOwner: TComponent);', @TCustomButton_Init);
     addGlobalFunc('procedure TCustomButton.ExecuteDefaultAction();', @TCustomButton_ExecuteDefaultAction);
@@ -1476,9 +1476,9 @@ begin
     addGlobalFunc('procedure TCustomButton.ActiveDefaultControlChanged(NewControl: TControl);', @TCustomButton_ActiveDefaultControlChanged);
     addGlobalFunc('procedure TCustomButton.UpdateRolesForForm();', @TCustomButton_UpdateRolesForForm);
     addGlobalFunc('function TCustomButton.UseRightToLeftAlignment(): Boolean;', @TCustomButton_UseRightToLeftAlignment);
-    addClassVar(Compiler, 'TCustomButton', 'Active', 'boolean', @TCustomButton_Active_Read, nil);
-    addClassVar(Compiler, 'TCustomButton', 'Default', 'Boolean', @TCustomButton_Default_Read, @TCustomButton_Default_Write);
-    addClassVar(Compiler, 'TCustomButton', 'Cancel', 'Boolean', @TCustomButton_Cancel_Read, @TCustomButton_Cancel_Write);
+    addClassVar('TCustomButton', 'Active', 'boolean', @TCustomButton_Active_Read);
+    addClassVar('TCustomButton', 'Default', 'Boolean', @TCustomButton_Default_Read, @TCustomButton_Default_Write);
+    addClassVar('TCustomButton', 'Cancel', 'Boolean', @TCustomButton_Cancel_Read, @TCustomButton_Cancel_Write);
     addGlobalFunc('procedure TCustomButton.Free();', @TCustomButton_Free);
   end;
 end;
@@ -1499,7 +1499,7 @@ procedure Register_TButton(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TButton', 'TCustomButton');
+    addClass('TButton', 'TCustomButton');
 
     addGlobalFunc('procedure TButton.Init(TheOwner: TComponent);', @TButton_Init);
     addGlobalFunc('procedure TButton.Free();', @TButton_Free);
@@ -1559,12 +1559,12 @@ procedure Register_TCustomCheckBox(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomCheckBox', 'TButtonControl');
+    addClass('TCustomCheckBox', 'TButtonControl');
 
     addGlobalFunc('procedure TCustomCheckBox.Init(TheOwner: TComponent);', @TCustomCheckBox_Init);
-    addClassVar(Compiler, 'TCustomCheckBox', 'AllowGrayed', 'Boolean', @TCustomCheckBox_AllowGrayed_Read, @TCustomCheckBox_AllowGrayed_Write);
-    addClassVar(Compiler, 'TCustomCheckBox', 'State', 'TCheckBoxState', @TCustomCheckBox_State_Read, @TCustomCheckBox_State_Write);
-    addClassVar(Compiler, 'TCustomCheckBox', 'OnChange', 'TNotifyEvent', @TCustomCheckBox_OnChange_Read, @TCustomCheckBox_OnChange_Write);
+    addClassVar('TCustomCheckBox', 'AllowGrayed', 'Boolean', @TCustomCheckBox_AllowGrayed_Read, @TCustomCheckBox_AllowGrayed_Write);
+    addClassVar('TCustomCheckBox', 'State', 'TCheckBoxState', @TCustomCheckBox_State_Read, @TCustomCheckBox_State_Write);
+    addClassVar('TCustomCheckBox', 'OnChange', 'TNotifyEvent', @TCustomCheckBox_OnChange_Read, @TCustomCheckBox_OnChange_Write);
     addGlobalFunc('procedure TCustomCheckBox.Free();', @TCustomCheckBox_Free);
   end;
 end;
@@ -1586,7 +1586,7 @@ procedure Register_TCheckBox(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCheckBox', 'TCustomCheckBox');
+    addClass('TCheckBox', 'TCustomCheckBox');
 
     addGlobalFunc('procedure TCheckBox.Init(TheOwner: TComponent);', @TCheckBox_Init);
     addGlobalFunc('procedure TCheckBox.Free();', @TCheckBox_Free);
@@ -1634,7 +1634,7 @@ procedure Register_TCustomLabel(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomLabel', 'TGraphicControl');
+    addClass('TCustomLabel', 'TGraphicControl');
 
     addGlobalFunc('procedure TCustomLabel.Init(TheOwner: TComponent);', @TCustomLabel_Init);
     addGlobalFunc('function TCustomLabel.ColorIsStored(): boolean;', @TCustomLabel_ColorIsStored);
@@ -1660,7 +1660,7 @@ procedure Register_TLabel(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TLabel', 'TCustomLabel');
+    addClass('TLabel', 'TCustomLabel');
 
     addGlobalFunc('procedure TLabel.Init(TheOwner: TComponent);', @TLabel_Init);
     addGlobalFunc('procedure TLabel.Free();', @TLabel_Free);
@@ -1699,7 +1699,6 @@ begin
   Register_TCheckBox(Compiler);
   Register_TCustomLabel(Compiler);
   Register_TLabel(Compiler);
-
 end;
 
 end.

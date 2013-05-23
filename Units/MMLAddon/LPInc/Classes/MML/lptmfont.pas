@@ -66,14 +66,14 @@ procedure Register_TMFont(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMFont', 'TObject');
+    addClass('TMFont');
 
     addGlobalType('record xoff, yoff, width, height, index: Int32; inited: boolean; end;', 'TOCRGlyphMetric');
     addGlobalType('record ascii: array[0..255] of TOCRGlyphMetric; pos: T2DIntegerArray; pos_adj: array of Double; neg: T2DIntegerArray; neg_adj: array of Double; map: array of char; width, height, max_width, max_height, inputs, outputs: integer; end;', 'TOCRData');
     addGlobalType('array of TOCRData', 'TOCRDataArray');
 
-    addClassVar(Compiler, 'TMFont', 'Name', 'String', @TMFont_Name_Read, @TMFont_Name_Write);
-    addClassVar(Compiler, 'TMFont', 'Data', 'TOcrData', @TMFont_Data_Read, @TMFont_Data_Write);
+    addClassVar('TMFont', 'Name', 'String', @TMFont_Name_Read, @TMFont_Name_Write);
+    addClassVar('TMFont', 'Data', 'TOcrData', @TMFont_Data_Read, @TMFont_Data_Write);
     addGlobalFunc('procedure TMFont.Init();', @TMFont_Init);
     addGlobalFunc('function TMFont.Copy(): TMFont;', @TMFont_Copy);
     addGlobalFunc('procedure TMFont.Free();', @TMFont_Free);
