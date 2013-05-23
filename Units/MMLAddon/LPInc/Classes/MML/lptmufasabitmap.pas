@@ -419,7 +419,7 @@ procedure Register_TMufasaBitmap(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMufasaBitmap', 'TObject');
+    addClass('TMufasaBitmap');
 
     addGlobalType('packed record B, G, R: UInt32; end;', 'TRGB24');
     addGlobalType('^TRGB24', 'PRGB24');
@@ -436,13 +436,13 @@ begin
     addGlobalType('array of array of THSL', 'T2DHSLArray');
     addGlobalType('^T2DHSLArray', 'P2DHSLArray');
 
-    addClassVar(Compiler, 'TMufasaBitmap', 'Data', 'PRGB32', @TMufasaBitmap_FData_Read, @TMufasaBitmap_FData_Write);
-    addClassVar(Compiler, 'TMufasaBitmap', 'Name', 'string', @TMufasaBitmap_Name_Read, @TMufasaBitmap_Name_Write);
-    addClassVar(Compiler, 'TMufasaBitmap', 'Index', 'integer', @TMufasaBitmap_Index_Read, @TMufasaBitmap_Index_Write);
+    addClassVar('TMufasaBitmap', 'Data', 'PRGB32', @TMufasaBitmap_FData_Read, @TMufasaBitmap_FData_Write);
+    addClassVar('TMufasaBitmap', 'Name', 'string', @TMufasaBitmap_Name_Read, @TMufasaBitmap_Name_Write);
+    addClassVar('TMufasaBitmap', 'Index', 'integer', @TMufasaBitmap_Index_Read, @TMufasaBitmap_Index_Write);
     addGlobalFunc('procedure TMufasaBitmap.SetSize(AWidth,AHeight : integer);', @TMufasaBitmap_SetSize);
     addGlobalFunc('procedure TMufasaBitmap.StretchResize(AWidth,AHeight : integer);', @TMufasaBitmap_StretchResize);
-    addClassVar(Compiler, 'TMufasaBitmap', 'Width', 'Integer', @TMufasaBitmap_Width_Read, nil);
-    addClassVar(Compiler, 'TMufasaBitmap', 'Height', 'Integer', @TMufasaBitmap_Height_Read, nil);
+    addClassVar('TMufasaBitmap', 'Width', 'Integer', @TMufasaBitmap_Width_Read);
+    addClassVar('TMufasaBitmap', 'Height', 'Integer', @TMufasaBitmap_Height_Read);
     addGlobalFunc('procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);', @TMufasaBitmap_SetPersistentMemory);
     addGlobalFunc('procedure TMufasaBitmap.ResetPersistentMemory();', @TMufasaBitmap_ResetPersistentMemory);
     addGlobalFunc('function TMufasaBitmap.PointInBitmap(x,y : integer): boolean;', @TMufasaBitmap_PointInBitmap);
@@ -492,9 +492,9 @@ begin
     addGlobalFunc('function TMufasaBitmap.CreateTMask(): TMask;', @TMufasaBitmap_CreateTMask);
     addGlobalFunc('procedure TMufasaBitmap.SetTransparentColor(Col : TColor);', @TMufasaBitmap_SetTransparentColor);
     addGlobalFunc('function TMufasaBitmap.GetTransparentColor(): TColor;', @TMufasaBitmap_GetTransparentColor);
-    addClassVar(Compiler, 'TMufasaBitmap', 'TransparentColorSet', 'boolean', @TMufasaBitmap_TransparentColorSet_Read, nil);
+    addClassVar('TMufasaBitmap', 'TransparentColorSet', 'boolean', @TMufasaBitmap_TransparentColorSet_Read, nil);
     addGlobalFunc('procedure TMufasaBitmap.SetAlphaValue(const value : byte);', @TMufasaBitmap_SetAlphaValue);
-    addClassVar(Compiler, 'TMufasaBitmap', 'List', 'TObject', @TMufasaBitmap_List_Read, @TMufasaBitmap_List_Write);
+    addClassVar('TMufasaBitmap', 'List', 'TObject', @TMufasaBitmap_List_Read, @TMufasaBitmap_List_Write);
     addGlobalFunc('procedure TMufasaBitmap.Init(List: TObject = nil);', @TMufasaBitmap_Init);
     addGlobalFunc('procedure TMufasaBitmap.Free();', @TMufasaBitmap_Free);
   end;

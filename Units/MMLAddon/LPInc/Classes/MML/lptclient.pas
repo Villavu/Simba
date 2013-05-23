@@ -141,17 +141,17 @@ procedure Register_TClient(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TClient', 'TObject');
+    addClass('TClient');
 
     addGlobalType('procedure(s: string)', 'TWriteLnProc');
 
-    addClassVar(Compiler, 'TClient', 'IOManager', 'TIOManager', @TClient_IOManager_Read, @TClient_IOManager_Write);
-    addClassVar(Compiler, 'TClient', 'MFiles', 'TMFiles', @TClient_MFiles_Read, @TClient_MFiles_Write);
-    addClassVar(Compiler, 'TClient', 'MFinder', 'TMFinder', @TClient_MFinder_Read, @TClient_MFinder_Write);
-    addClassVar(Compiler, 'TClient', 'MBitmaps', 'TMBitmaps', @TClient_MBitmaps_Read, @TClient_MBitmaps_Write);
-    addClassVar(Compiler, 'TClient', 'MDTMs', 'TMDTMS', @TClient_MDTMs_Read, @TClient_MDTMs_Write);
-    addClassVar(Compiler, 'TClient', 'MOCR', 'TMOCR', @TClient_MOCR_Read, @TClient_MOCR_Write);
-    addClassVar(Compiler, 'TClient', 'WriteLnProc', 'TWriteLnProc', @TClient_WritelnProc_Read, @TClient_WritelnProc_Write);
+    addClassVar('TClient', 'IOManager', 'TIOManager', @TClient_IOManager_Read, @TClient_IOManager_Write);
+    addClassVar('TClient', 'MFiles', 'TMFiles', @TClient_MFiles_Read, @TClient_MFiles_Write);
+    addClassVar('TClient', 'MFinder', 'TMFinder', @TClient_MFinder_Read, @TClient_MFinder_Write);
+    addClassVar('TClient', 'MBitmaps', 'TMBitmaps', @TClient_MBitmaps_Read, @TClient_MBitmaps_Write);
+    addClassVar('TClient', 'MDTMs', 'TMDTMS', @TClient_MDTMs_Read, @TClient_MDTMs_Write);
+    addClassVar('TClient', 'MOCR', 'TMOCR', @TClient_MOCR_Read, @TClient_MOCR_Write);
+    addClassVar('TClient', 'WriteLnProc', 'TWriteLnProc', @TClient_WritelnProc_Read, @TClient_WritelnProc_Write);
     addGlobalFunc('procedure TClient.WriteLn(s : string);', @TClient_WriteLn);
     addGlobalFunc('procedure TClient.Init(const plugin_dir: string = ''''; const UseIOManager: TIOManager = nil);', @TClient_Init);
     addGlobalFunc('procedure TClient.Free();', @TClient_Free);

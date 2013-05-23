@@ -188,7 +188,7 @@ procedure Register_TTarget(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TTarget', 'TObject');
+    addClass('TTarget');
 
     addGlobalType('record Ptr: PRGB32; IncPtrWith: integer; RowLen: integer; end;', 'TRetData');
 

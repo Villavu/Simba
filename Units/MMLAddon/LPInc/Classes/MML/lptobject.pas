@@ -34,7 +34,7 @@ procedure Register_TObject(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TObject', 'Pointer');
+    addClass('TObject', 'Pointer');
 
     addGlobalFunc('procedure TObject.Init();', @TObject_Init);
     addGlobalFunc('procedure TObject.Free();', @TObject_Free);

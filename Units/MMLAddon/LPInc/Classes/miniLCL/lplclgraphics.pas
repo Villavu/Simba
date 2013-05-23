@@ -88,10 +88,10 @@ procedure Register_TGraphicsObject(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TGraphicsObject', 'TPersistent');
+    addClass('TGraphicsObject', 'TPersistent');
 
-    addClassVar(Compiler, 'TGraphicsObject', 'OnChanging', 'TNotifyEvent', @TGraphicsObject_OnChanging_Read, @TGraphicsObject_OnChanging_Write);
-    addClassVar(Compiler, 'TGraphicsObject', 'OnChange', 'TNotifyEvent', @TGraphicsObject_OnChange_Read, @TGraphicsObject_OnChange_Write);
+    addClassVar('TGraphicsObject', 'OnChanging', 'TNotifyEvent', @TGraphicsObject_OnChanging_Read, @TGraphicsObject_OnChanging_Write);
+    addClassVar('TGraphicsObject', 'OnChange', 'TNotifyEvent', @TGraphicsObject_OnChange_Read, @TGraphicsObject_OnChange_Write);
     addGlobalFunc('procedure TGraphicsObject.Init();', @TGraphicsObject_Init);
     addGlobalFunc('procedure TGraphicsObject.Free();', @TGraphicsObject_Free);
   end;
@@ -270,26 +270,26 @@ procedure Register_TFont(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TFont', 'TGraphicsObject');
+    addClass('TFont', 'TGraphicsObject');
 
     addGlobalFunc('procedure TFont.Init();', @TFont_Init);
     addGlobalFunc('procedure TFont.Assign(Source: TPersistent);', @TFont_Assign);
     addGlobalFunc('procedure TFont.BeginUpdate();', @TFont_BeginUpdate);
     addGlobalFunc('procedure TFont.EndUpdate();', @TFont_EndUpdate);
     addGlobalFunc('function TFont.HandleAllocated(): boolean;', @TFont_HandleAllocated);
-    addClassVar(Compiler, 'TFont', 'Handle', 'THandle', @TFont_Handle_Read, @TFont_Handle_Write);
+    addClassVar('TFont', 'Handle', 'THandle', @TFont_Handle_Read, @TFont_Handle_Write);
     addGlobalFunc('function TFont.IsDefault(): boolean;', @TFont_IsDefault);
     addGlobalFunc('function TFont.IsEqual(AFont: TFont): boolean;', @TFont_IsEqual);
-    addClassVar(Compiler, 'TFont', 'IsMonoSpace', 'boolean', @TFont_IsMonoSpace_Read, nil);
+    addClassVar('TFont', 'IsMonoSpace', 'boolean', @TFont_IsMonoSpace_Read);
     addGlobalFunc('procedure TFont.SetDefault();', @TFont_SetDefault);
-    addClassVar(Compiler, 'TFont', 'PixelsPerInch', 'Integer', @TFont_PixelsPerInch_Read, @TFont_PixelsPerInch_Write);
-    addClassVar(Compiler, 'TFont', 'Color', 'TColor', @TFont_Color_Read, @TFont_Color_Write);
-    addClassVar(Compiler, 'TFont', 'Height', 'Integer', @TFont_Height_Read, @TFont_Height_Write);
-    addClassVar(Compiler, 'TFont', 'Name', 'string', @TFont_Name_Read, @TFont_Name_Write);
-    addClassVar(Compiler, 'TFont', 'Orientation', 'Integer', @TFont_Orientation_Read, @TFont_Orientation_Write);
-    addClassVar(Compiler, 'TFont', 'Pitch', 'TFontPitch', @TFont_Pitch_Read, @TFont_Pitch_Write);
-    addClassVar(Compiler, 'TFont', 'Size', 'Integer', @TFont_Size_Read, @TFont_Size_Write);
-    addClassVar(Compiler, 'TFont', 'Style', 'TFontStyles', @TFont_Style_Read, @TFont_Style_Write);
+    addClassVar('TFont', 'PixelsPerInch', 'Integer', @TFont_PixelsPerInch_Read, @TFont_PixelsPerInch_Write);
+    addClassVar('TFont', 'Color', 'TColor', @TFont_Color_Read, @TFont_Color_Write);
+    addClassVar('TFont', 'Height', 'Integer', @TFont_Height_Read, @TFont_Height_Write);
+    addClassVar('TFont', 'Name', 'string', @TFont_Name_Read, @TFont_Name_Write);
+    addClassVar('TFont', 'Orientation', 'Integer', @TFont_Orientation_Read, @TFont_Orientation_Write);
+    addClassVar('TFont', 'Pitch', 'TFontPitch', @TFont_Pitch_Read, @TFont_Pitch_Write);
+    addClassVar('TFont', 'Size', 'Integer', @TFont_Size_Read, @TFont_Size_Write);
+    addClassVar('TFont', 'Style', 'TFontStyles', @TFont_Style_Read, @TFont_Style_Write);
     addGlobalFunc('procedure TFont.Free();', @TFont_Free);
   end;
 end;
@@ -389,16 +389,16 @@ procedure Register_TPen(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TPen', 'TGraphicsObject');
+    addClass('TPen', 'TGraphicsObject');
 
     addGlobalFunc('procedure TPen.Init();', @TPen_Init);
     addGlobalFunc('procedure TPen.Assign(Source: TPersistent);', @TPen_Assign);
-    addClassVar(Compiler, 'TPen', 'Handle', 'THandle', @TPen_Handle_Read, @TPen_Handle_Write);
-    addClassVar(Compiler, 'TPen', 'Color', 'Integer', @TPen_Color_Read, @TPen_Color_Write);
-    addClassVar(Compiler, 'TPen', 'Cosmetic', 'Boolean', @TPen_Cosmetic_Read, @TPen_Cosmetic_Write);
-    addClassVar(Compiler, 'TPen', 'Mode', 'TPenMode', @TPen_Mode_Read, @TPen_Mode_Write);
-    addClassVar(Compiler, 'TPen', 'Style', 'TPenStyle', @TPen_Style_Read, @TPen_Style_Write);
-    addClassVar(Compiler, 'TPen', 'Width', 'integer', @TPen_Width_Read, @TPen_Width_Write);
+    addClassVar('TPen', 'Handle', 'THandle', @TPen_Handle_Read, @TPen_Handle_Write);
+    addClassVar('TPen', 'Color', 'Integer', @TPen_Color_Read, @TPen_Color_Write);
+    addClassVar('TPen', 'Cosmetic', 'Boolean', @TPen_Cosmetic_Read, @TPen_Cosmetic_Write);
+    addClassVar('TPen', 'Mode', 'TPenMode', @TPen_Mode_Read, @TPen_Mode_Write);
+    addClassVar('TPen', 'Style', 'TPenStyle', @TPen_Style_Read, @TPen_Style_Write);
+    addClassVar('TPen', 'Width', 'integer', @TPen_Width_Read, @TPen_Width_Write);
     addGlobalFunc('procedure TPen.Free();', @TPen_Free);
   end;
 end;
@@ -450,12 +450,12 @@ procedure Register_TBrush(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TBrush', 'TGraphicsObject');
+    addClass('TBrush', 'TGraphicsObject');
 
     addGlobalFunc('procedure TBrush.Assign(Source: TPersistent);', @TBrush_Assign);
     addGlobalFunc('procedure TBrush.Init();', @TBrush_Init);
-    addClassVar(Compiler, 'TBrush', 'Color', 'Integer', @TBrush_Color_Read, @TBrush_Color_Write);
-    addClassVar(Compiler, 'TBrush', 'Style', 'TBrushStyle', @TBrush_Style_Read, @TBrush_Style_Write);
+    addClassVar('TBrush', 'Color', 'Integer', @TBrush_Color_Read, @TBrush_Color_Write);
+    addClassVar('TBrush', 'Style', 'TBrushStyle', @TBrush_Style_Read, @TBrush_Style_Write);
     addGlobalFunc('procedure TBrush.Free();', @TBrush_Free);
   end;
 end;
@@ -783,7 +783,7 @@ procedure Register_TCanvas(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCanvas', 'TPersistent');
+    addClass('TCanvas', 'TPersistent');
 
     addGlobalFunc('procedure TCanvas.Lock();', @TCanvas_Lock);
     addGlobalFunc('function TCanvas.TryLock(): Boolean;', @TCanvas_TryLock);
@@ -820,15 +820,15 @@ begin
     addGlobalFunc('function TCanvas.TextHeight( Text: string): Integer;', @TCanvas_TextHeight);
     addGlobalFunc('function TCanvas.TextWidth( Text: string): Integer;', @TCanvas_TextWidth);
     addGlobalFunc('function TCanvas.HandleAllocated(): boolean;', @TCanvas_HandleAllocated);
-    addClassVar(Compiler, 'TCanvas', 'AutoRedraw', 'Boolean', @TCanvas_AutoRedraw_Read, @TCanvas_AutoRedraw_Write);
-    addClassVar(Compiler, 'TCanvas', 'Brush', 'TBrush', @TCanvas_Brush_Read, @TCanvas_Brush_Write);
-    addClassVar(Compiler, 'TCanvas', 'CopyMode', 'TCopyMode', @TCanvas_CopyMode_Read, @TCanvas_CopyMode_Write);
-    addClassVar(Compiler, 'TCanvas', 'Font', 'TFont', @TCanvas_Font_Read, @TCanvas_Font_Write);
-    addClassVar(Compiler, 'TCanvas', 'Height', 'integer', @TCanvas_Height_Read, nil);
-    addClassVar(Compiler, 'TCanvas', 'Pen', 'TPen', @TCanvas_Pen_Read, @TCanvas_Pen_Write);
-    addClassVar(Compiler, 'TCanvas', 'Width', 'integer', @TCanvas_Width_Read, nil);
-    addClassVar(Compiler, 'TCanvas', 'OnChange', 'TNotifyEvent', @TCanvas_OnChange_Read, @TCanvas_OnChange_Write);
-    addClassVar(Compiler, 'TCanvas', 'OnChanging', 'TNotifyEvent', @TCanvas_OnChanging_Read, @TCanvas_OnChanging_Write);
+    addClassVar('TCanvas', 'AutoRedraw', 'Boolean', @TCanvas_AutoRedraw_Read, @TCanvas_AutoRedraw_Write);
+    addClassVar('TCanvas', 'Brush', 'TBrush', @TCanvas_Brush_Read, @TCanvas_Brush_Write);
+    addClassVar('TCanvas', 'CopyMode', 'TCopyMode', @TCanvas_CopyMode_Read, @TCanvas_CopyMode_Write);
+    addClassVar('TCanvas', 'Font', 'TFont', @TCanvas_Font_Read, @TCanvas_Font_Write);
+    addClassVar('TCanvas', 'Height', 'integer', @TCanvas_Height_Read);
+    addClassVar('TCanvas', 'Pen', 'TPen', @TCanvas_Pen_Read, @TCanvas_Pen_Write);
+    addClassVar('TCanvas', 'Width', 'integer', @TCanvas_Width_Read);
+    addClassVar('TCanvas', 'OnChange', 'TNotifyEvent', @TCanvas_OnChange_Read, @TCanvas_OnChange_Write);
+    addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @TCanvas_OnChanging_Read, @TCanvas_OnChanging_Write);
     addGlobalFunc('procedure TCanvas.Init();', @TCanvas_Init);
     addGlobalFunc('procedure TCanvas.Free();', @TCanvas_Free);
   end;
@@ -965,21 +965,21 @@ procedure Register_TGraphic(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TGraphic', 'TPersistent');
+    addClass('TGraphic', 'TPersistent');
 
     addGlobalFunc('procedure TGraphic.Assign(ASource: TPersistent);', @TGraphic_Assign);
     addGlobalFunc('procedure TGraphic.Init();', @TGraphic_Init);
     addGlobalFunc('procedure TGraphic.Clear();', @TGraphic_Clear);
     addGlobalFunc('procedure TGraphic.LoadFromFile(const Filename: string);', @TGraphic_LoadFromFile);
     addGlobalFunc('procedure TGraphic.SaveToFile(const Filename: string);', @TGraphic_SaveToFile);
-    addClassVar(Compiler, 'TGraphic', 'Empty', 'Boolean', @TGraphic_Empty_Read, nil);
-    addClassVar(Compiler, 'TGraphic', 'Height', 'Integer', @TGraphic_Height_Read, @TGraphic_Height_Write);
-    addClassVar(Compiler, 'TGraphic', 'Modified', 'Boolean', @TGraphic_Modified_Read, @TGraphic_Modified_Write);
-    addClassVar(Compiler, 'TGraphic', 'OnChange', 'TNotifyEvent', @TGraphic_OnChange_Read, @TGraphic_OnChange_Write);
-    addClassVar(Compiler, 'TGraphic', 'Palette', 'Integer', @TGraphic_Palette_Read, @TGraphic_Palette_Write);
-    addClassVar(Compiler, 'TGraphic', 'PaletteModified', 'Boolean', @TGraphic_PaletteModified_Read, @TGraphic_PaletteModified_Write);
-    addClassVar(Compiler, 'TGraphic', 'Transparent', 'Boolean', @TGraphic_Transparent_Read, @TGraphic_Transparent_Write);
-    addClassVar(Compiler, 'TGraphic', 'Width', 'Integer', @TGraphic_Width_Read, @TGraphic_Width_Write);
+    addClassVar('TGraphic', 'Empty', 'Boolean', @TGraphic_Empty_Read);
+    addClassVar('TGraphic', 'Height', 'Integer', @TGraphic_Height_Read, @TGraphic_Height_Write);
+    addClassVar('TGraphic', 'Modified', 'Boolean', @TGraphic_Modified_Read, @TGraphic_Modified_Write);
+    addClassVar('TGraphic', 'OnChange', 'TNotifyEvent', @TGraphic_OnChange_Read, @TGraphic_OnChange_Write);
+    addClassVar('TGraphic', 'Palette', 'Integer', @TGraphic_Palette_Read, @TGraphic_Palette_Write);
+    addClassVar('TGraphic', 'PaletteModified', 'Boolean', @TGraphic_PaletteModified_Read, @TGraphic_PaletteModified_Write);
+    addClassVar('TGraphic', 'Transparent', 'Boolean', @TGraphic_Transparent_Read, @TGraphic_Transparent_Write);
+    addClassVar('TGraphic', 'Width', 'Integer', @TGraphic_Width_Read, @TGraphic_Width_Write);
     addGlobalFunc('procedure TGraphic.Free();', @TGraphic_Free);
   end;
 end;
@@ -1156,7 +1156,7 @@ procedure Register_TBitmap(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TBitmap', 'TGraphic');
+    addClass('TBitmap', 'TGraphic');
 
     addGlobalFunc('procedure TBitmap.Init();', @TBitmap_Init);
     addGlobalFunc('procedure TBitmap.BeginUpdate(ACanvasOnly: Boolean);', @TBitmap_BeginUpdate);
@@ -1173,13 +1173,13 @@ begin
     addGlobalFunc('function TBitmap.ReleaseBitmapHandle(): HBITMAP;', @TBitmap_ReleaseBitmapHandle);
     addGlobalFunc('function TBitmap.ReleaseMaskHandle(): HBITMAP;', @TBitmap_ReleaseMaskHandle);
     addGlobalFunc('function TBitmap.ReleasePalette(): HPALETTE;', @TBitmap_ReleasePalette);
-    addClassVar(Compiler, 'TBitmap', 'Canvas', 'TCanvas', @TBitmap_Canvas_Read, nil);
+    addClassVar('TBitmap', 'Canvas', 'TCanvas', @TBitmap_Canvas_Read);
     addGlobalFunc('function TBitmap.HandleAllocated(): boolean;', @TBitmap_HandleAllocated);
-    addClassVar(Compiler, 'TBitmap', 'BitmapHandle', 'HBITMAP', @TBitmap_BitmapHandle_Read, @TBitmap_BitmapHandle_Write);
-    addClassVar(Compiler, 'TBitmap', 'Masked', 'Boolean', @TBitmap_Masked_Read, @TBitmap_Masked_Write);
-    addClassVar(Compiler, 'TBitmap', 'MaskHandle', 'HBITMAP', @TBitmap_MaskHandle_Read, @TBitmap_MaskHandle_Write);
-    addClassVar(Compiler, 'TBitmap', 'TransparentColor', 'TColor', @TBitmap_TransparentColor_Read, @TBitmap_TransparentColor_Write);
-    addClassVar(Compiler, 'TBitmap', 'TransparentMode', 'TTransparentMode', @TBitmap_TransparentMode_Read, @TBitmap_TransparentMode_Write);
+    addClassVar('TBitmap', 'BitmapHandle', 'HBITMAP', @TBitmap_BitmapHandle_Read, @TBitmap_BitmapHandle_Write);
+    addClassVar('TBitmap', 'Masked', 'Boolean', @TBitmap_Masked_Read, @TBitmap_Masked_Write);
+    addClassVar('TBitmap', 'MaskHandle', 'HBITMAP', @TBitmap_MaskHandle_Read, @TBitmap_MaskHandle_Write);
+    addClassVar('TBitmap', 'TransparentColor', 'TColor', @TBitmap_TransparentColor_Read, @TBitmap_TransparentColor_Write);
+    addClassVar('TBitmap', 'TransparentMode', 'TTransparentMode', @TBitmap_TransparentMode_Read, @TBitmap_TransparentMode_Write);
     addGlobalFunc('procedure TBitmap.Free();', @TBitmap_Free);
   end;
 end;
@@ -1290,7 +1290,7 @@ procedure Register_TPicture(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TPicture', 'TPersistent');
+    addClass('TPicture', 'TPersistent');
 
     addGlobalFunc('procedure TPicture.Init();', @TPicture_Init);
     addGlobalFunc('procedure TPicture.Clear();', @TPicture_Clear);
@@ -1300,11 +1300,11 @@ begin
     addGlobalFunc('procedure TPicture.SaveToFile(const Filename: string; const FileExt: string);', @TPicture_SaveToFile);
     addGlobalFunc('procedure TPicture.SaveToStream(Stream: TStream);', @TPicture_SaveToStream);
     addGlobalFunc('procedure TPicture.SaveToStreamWithFileExt(Stream: TStream; const FileExt: string);', @TPicture_SaveToStreamWithFileExt);
-    addClassVar(Compiler, 'TPicture', 'Bitmap', 'TBitmap', @TPicture_Bitmap_Read, @TPicture_Bitmap_Write);
-    addClassVar(Compiler, 'TPicture', 'Graphic', 'TGraphic', @TPicture_Graphic_Read, @TPicture_Graphic_Write);
-    addClassVar(Compiler, 'TPicture', 'Height', 'Integer', @TPicture_Height_Read, nil);
-    addClassVar(Compiler, 'TPicture', 'Width', 'Integer', @TPicture_Width_Read, nil);
-    addClassVar(Compiler, 'TPicture', 'OnChange', 'TNotifyEvent', @TPicture_OnChange_Read, @TPicture_OnChange_Write);
+    addClassVar('TPicture', 'Bitmap', 'TBitmap', @TPicture_Bitmap_Read, @TPicture_Bitmap_Write);
+    addClassVar('TPicture', 'Graphic', 'TGraphic', @TPicture_Graphic_Read, @TPicture_Graphic_Write);
+    addClassVar('TPicture', 'Height', 'Integer', @TPicture_Height_Read);
+    addClassVar('TPicture', 'Width', 'Integer', @TPicture_Width_Read);
+    addClassVar('TPicture', 'OnChange', 'TNotifyEvent', @TPicture_OnChange_Read, @TPicture_OnChange_Write);
     addGlobalFunc('procedure TPicture.Free();', @TPicture_Free);
   end;
 end;

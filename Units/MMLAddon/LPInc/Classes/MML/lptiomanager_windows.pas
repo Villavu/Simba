@@ -66,7 +66,7 @@ procedure Register_TIOManager(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TIOManager', 'TIOManager_Abstract');
+    addClass('TIOManager', 'TIOManager_Abstract');
 
     addGlobalType('UInt32', 'TNativeWindow');
 
