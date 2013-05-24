@@ -159,10 +159,10 @@ procedure Register_TMFiles(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMFiles', 'TObject');
+    addClass('TMFiles');
 
-    //addClassVar(Compiler, 'TMFiles', 'OpenFileEvent', 'TOpenFileEvent', @TMFiles_OpenFileEvent_Read, @TMFiles_OpenFileEvent_Write);
-    //addClassVar(Compiler, 'TMFiles', 'WriteFileEvent', 'TWriteFileEvent', @TMFiles_WriteFileEvent_Read, @TMFiles_WriteFileEvent_Write);
+    //addClassVar('TMFiles', 'OpenFileEvent', 'TOpenFileEvent', @TMFiles_OpenFileEvent_Read, @TMFiles_OpenFileEvent_Write);
+    //addClassVar('TMFiles', 'WriteFileEvent', 'TWriteFileEvent', @TMFiles_WriteFileEvent_Read, @TMFiles_WriteFileEvent_Write);
 
     addGlobalFunc('function TMFiles.CreateFile(Path: string): Integer;', @TMFiles_CreateFile);
     addGlobalFunc('function TMFiles.OpenFile(Path: string; Shared: Boolean): Integer;', @TMFiles_OpenFile);
