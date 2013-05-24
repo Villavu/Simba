@@ -18,6 +18,7 @@ type
   PMouseMoveEvent = ^TMouseMoveEvent;
   //
   PCustomControl = ^TCustomControl;
+  PGraphicControl = ^TGraphicControl;
 
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
 implementation
@@ -643,7 +644,7 @@ procedure Register_TControl(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TControl', 'TComponent');
+    addClass('TControl', 'TComponent');
 
     addGlobalFunc('procedure TControl.AdjustSize();', @TControl_AdjustSize);
     addGlobalFunc('function TControl.AutoSizeDelayed(): boolean;', @TControl_AutoSizeDelayed);
@@ -659,8 +660,8 @@ begin
     addGlobalFunc('function TControl.GetRGBColorResolvingParent(): Integer;', @TControl_GetRGBColorResolvingParent);
     addGlobalFunc('procedure TControl.InvalidatePreferredSize();', @TControl_InvalidatePreferredSize);
     addGlobalFunc('procedure TControl.UpdateBaseBounds(StoreBounds, StoreParentClientSize,UseLoadedValues: boolean);', @TControl_UpdateBaseBounds);
-    addClassVar(Compiler, 'TControl', 'BaseBounds', 'TRect', @TControl_BaseBounds_Read, nil);
-    addClassVar(Compiler, 'TControl', 'ReadBounds', 'TRect', @TControl_ReadBounds_Read, nil);
+    addClassVar('TControl', 'BaseBounds', 'TRect', @TControl_BaseBounds_Read);
+    addClassVar('TControl', 'ReadBounds', 'TRect', @TControl_ReadBounds_Read);
     addGlobalFunc('procedure TControl.WriteLayoutDebugReport(const Prefix: string);', @TControl_WriteLayoutDebugReport);
     addGlobalFunc('function TControl.ShouldAutoAdjustLeftAndTop(): Boolean;', @TControl_ShouldAutoAdjustLeftAndTop);
     addGlobalFunc('function TControl.ShouldAutoAdjustWidthAndHeight(): Boolean;', @TControl_ShouldAutoAdjustWidthAndHeight);
@@ -702,32 +703,32 @@ begin
     addGlobalFunc('function TControl.ParentDestroyingHandle(): boolean;', @TControl_ParentDestroyingHandle);
     addGlobalFunc('function TControl.ParentHandlesAllocated(): boolean;', @TControl_ParentHandlesAllocated);
     addGlobalFunc('procedure TControl.InitiateAction();', @TControl_InitiateAction);
-    addClassVar(Compiler, 'TControl', 'AutoSize', 'Boolean', @TControl_AutoSize_Read, @TControl_AutoSize_Write);
-    addClassVar(Compiler, 'TControl', 'BoundsRect', 'TRect', @TControl_BoundsRect_Read, @TControl_BoundsRect_Write);
-    addClassVar(Compiler, 'TControl', 'BoundsRectForNewParent', 'TRect', @TControl_BoundsRectForNewParent_Read, @TControl_BoundsRectForNewParent_Write);
-    addClassVar(Compiler, 'TControl', 'Caption', 'String', @TControl_Caption_Read, @TControl_Caption_Write);
-    addClassVar(Compiler, 'TControl', 'ClientHeight', 'Integer', @TControl_ClientHeight_Read, @TControl_ClientHeight_Write);
-    addClassVar(Compiler, 'TControl', 'ClientOrigin', 'TPoint', @TControl_ClientOrigin_Read, nil);
-    addClassVar(Compiler, 'TControl', 'ClientRect', 'TRect', @TControl_ClientRect_Read, nil);
-    addClassVar(Compiler, 'TControl', 'ClientWidth', 'Integer', @TControl_ClientWidth_Read, @TControl_ClientWidth_Write);
-    addClassVar(Compiler, 'TControl', 'Color', 'Integer', @TControl_Color_Read, @TControl_Color_Write);
-    addClassVar(Compiler, 'TControl', 'ControlOrigin', 'TPoint', @TControl_ControlOrigin_Read, nil);
-    addClassVar(Compiler, 'TControl', 'Enabled', 'Boolean', @TControl_Enabled_Read, @TControl_Enabled_Write);
-    addClassVar(Compiler, 'TControl', 'Font', 'TFont', @TControl_Font_Read, @TControl_Font_Write);
-    addClassVar(Compiler, 'TControl', 'IsControl', 'Boolean', @TControl_IsControl_Read, @TControl_IsControl_Write);
-    addClassVar(Compiler, 'TControl', 'MouseEntered', 'Boolean', @TControl_MouseEntered_Read, nil);
-    addClassVar(Compiler, 'TControl', 'OnChangeBounds', 'TNotifyEvent', @TControl_OnChangeBounds_Read, @TControl_OnChangeBounds_Write);
-    addClassVar(Compiler, 'TControl', 'OnClick', 'TNotifyEvent', @TControl_OnClick_Read, @TControl_OnClick_Write);
-    addClassVar(Compiler, 'TControl', 'OnResize', 'TNotifyEvent', @TControl_OnResize_Read, @TControl_OnResize_Write);
-    addClassVar(Compiler, 'TControl', 'Visible', 'Boolean', @TControl_Visible_Read, @TControl_Visible_Write);
+    addClassVar('TControl', 'AutoSize', 'Boolean', @TControl_AutoSize_Read, @TControl_AutoSize_Write);
+    addClassVar('TControl', 'BoundsRect', 'TRect', @TControl_BoundsRect_Read, @TControl_BoundsRect_Write);
+    addClassVar('TControl', 'BoundsRectForNewParent', 'TRect', @TControl_BoundsRectForNewParent_Read, @TControl_BoundsRectForNewParent_Write);
+    addClassVar('TControl', 'Caption', 'String', @TControl_Caption_Read, @TControl_Caption_Write);
+    addClassVar('TControl', 'ClientHeight', 'Integer', @TControl_ClientHeight_Read, @TControl_ClientHeight_Write);
+    addClassVar('TControl', 'ClientOrigin', 'TPoint', @TControl_ClientOrigin_Read);
+    addClassVar('TControl', 'ClientRect', 'TRect', @TControl_ClientRect_Read);
+    addClassVar('TControl', 'ClientWidth', 'Integer', @TControl_ClientWidth_Read, @TControl_ClientWidth_Write);
+    addClassVar('TControl', 'Color', 'Integer', @TControl_Color_Read, @TControl_Color_Write);
+    addClassVar('TControl', 'ControlOrigin', 'TPoint', @TControl_ControlOrigin_Read);
+    addClassVar('TControl', 'Enabled', 'Boolean', @TControl_Enabled_Read, @TControl_Enabled_Write);
+    addClassVar('TControl', 'Font', 'TFont', @TControl_Font_Read, @TControl_Font_Write);
+    addClassVar('TControl', 'IsControl', 'Boolean', @TControl_IsControl_Read, @TControl_IsControl_Write);
+    addClassVar('TControl', 'MouseEntered', 'Boolean', @TControl_MouseEntered_Read);
+    addClassVar('TControl', 'OnChangeBounds', 'TNotifyEvent', @TControl_OnChangeBounds_Read, @TControl_OnChangeBounds_Write);
+    addClassVar('TControl', 'OnClick', 'TNotifyEvent', @TControl_OnClick_Read, @TControl_OnClick_Write);
+    addClassVar('TControl', 'OnResize', 'TNotifyEvent', @TControl_OnResize_Read, @TControl_OnResize_Write);
+    addClassVar('TControl', 'Visible', 'Boolean', @TControl_Visible_Read, @TControl_Visible_Write);
     addGlobalFunc('function TControl.UseRightToLeftAlignment(): Boolean;', @TControl_UseRightToLeftAlignment);
     addGlobalFunc('function TControl.UseRightToLeftReading(): Boolean;', @TControl_UseRightToLeftReading);
     addGlobalFunc('function TControl.UseRightToLeftScrollBar(): Boolean;', @TControl_UseRightToLeftScrollBar);
     addGlobalFunc('function TControl.IsRightToLeft(): Boolean;', @TControl_IsRightToLeft);
-    addClassVar(Compiler, 'TControl', 'Left', 'Integer', @TControl_Left_Read, @TControl_Left_Write);
-    addClassVar(Compiler, 'TControl', 'Height', 'Integer', @TControl_Height_Read, @TControl_Height_Write);
-    addClassVar(Compiler, 'TControl', 'Top', 'Integer', @TControl_Top_Read, @TControl_Top_Write);
-    addClassVar(Compiler, 'TControl', 'Width', 'Integer', @TControl_Width_Read, @TControl_Width_Write);
+    addClassVar('TControl', 'Left', 'Integer', @TControl_Left_Read, @TControl_Left_Write);
+    addClassVar('TControl', 'Height', 'Integer', @TControl_Height_Read, @TControl_Height_Write);
+    addClassVar('TControl', 'Top', 'Integer', @TControl_Top_Read, @TControl_Top_Write);
+    addClassVar('TControl', 'Width', 'Integer', @TControl_Width_Read, @TControl_Width_Write);
     addGlobalFunc('procedure TControl.Free();', @TControl_Free);
   end;
 end;
@@ -1211,27 +1212,27 @@ procedure Register_TWinControl(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TWinControl', 'TControl');
+    addClass('TWinControl', 'TControl');
 
-    addClassVar(Compiler, 'TWinControl', 'BorderWidth', 'integer', @TWinControl_BorderWidth_Read, @TWinControl_BorderWidth_Write);
-    addClassVar(Compiler, 'TWinControl', 'BoundsLockCount', 'integer', @TWinControl_BoundsLockCount_Read, nil);
-    addClassVar(Compiler, 'TWinControl', 'Brush', 'TBrush', @TWinControl_Brush_Read, nil);
-    addClassVar(Compiler, 'TWinControl', 'CachedClientHeight', 'integer', @TWinControl_CachedClientHeight_Read, nil);
-    addClassVar(Compiler, 'TWinControl', 'CachedClientWidth', 'integer', @TWinControl_CachedClientWidth_Read, nil);
-    addClassVar(Compiler, 'TWinControl', 'ControlCount', 'Integer', @TWinControl_ControlCount_Read, nil);
-    addClassVar(Compiler, 'TWinControl', 'DoubleBuffered', 'Boolean', @TWinControl_DoubleBuffered_Read, @TWinControl_DoubleBuffered_Write);
-    addClassVar(Compiler, 'TWinControl', 'Handle', 'THandle', @TWinControl_Handle_Read, @TWinControl_Handle_Write);
-    addClassVar(Compiler, 'TWinControl', 'IsResizing', 'Boolean', @TWinControl_IsResizing_Read, nil);
-    addClassVar(Compiler, 'TWinControl', 'TabOrder', 'Integer', @TWinControl_TabOrder_Read, @TWinControl_TabOrder_Write);
-    addClassVar(Compiler, 'TWinControl', 'TabStop', 'Boolean', @TWinControl_TabStop_Read, @TWinControl_TabStop_Write);
-    addClassVar(Compiler, 'TWinControl', 'OnEnter', 'TNotifyEvent', @TWinControl_OnEnter_Read, @TWinControl_OnEnter_Write);
-    addClassVar(Compiler, 'TWinControl', 'OnExit', 'TNotifyEvent', @TWinControl_OnExit_Read, @TWinControl_OnExit_Write);
-    addClassVar(Compiler, 'TWinControl', 'OnKeyDown', 'TKeyEvent', @TWinControl_OnKeyDown_Read, @TWinControl_OnKeyDown_Write);
-    addClassVar(Compiler, 'TWinControl', 'OnKeyPress', 'TKeyPressEvent', @TWinControl_OnKeyPress_Read, @TWinControl_OnKeyPress_Write);
-    addClassVar(Compiler, 'TWinControl', 'OnKeyUp', 'TKeyEvent', @TWinControl_OnKeyUp_Read, @TWinControl_OnKeyUp_Write);
-    addClassVar(Compiler, 'TWinControl', 'ParentWindow', 'THandle', @TWinControl_ParentWindow_Read, @TWinControl_ParentWindow_Write);
-    addClassVar(Compiler, 'TWinControl', 'Showing', 'Boolean', @TWinControl_Showing_Read, nil);
-    addClassVar(Compiler, 'TWinControl', 'VisibleDockClientCount', 'Integer', @TWinControl_VisibleDockClientCount_Read, nil);
+    addClassVar('TWinControl', 'BorderWidth', 'integer', @TWinControl_BorderWidth_Read, @TWinControl_BorderWidth_Write);
+    addClassVar('TWinControl', 'BoundsLockCount', 'integer', @TWinControl_BoundsLockCount_Read);
+    addClassVar('TWinControl', 'Brush', 'TBrush', @TWinControl_Brush_Read);
+    addClassVar('TWinControl', 'CachedClientHeight', 'integer', @TWinControl_CachedClientHeight_Read);
+    addClassVar('TWinControl', 'CachedClientWidth', 'integer', @TWinControl_CachedClientWidth_Read);
+    addClassVar('TWinControl', 'ControlCount', 'Integer', @TWinControl_ControlCount_Read);
+    addClassVar('TWinControl', 'DoubleBuffered', 'Boolean', @TWinControl_DoubleBuffered_Read, @TWinControl_DoubleBuffered_Write);
+    addClassVar('TWinControl', 'Handle', 'THandle', @TWinControl_Handle_Read, @TWinControl_Handle_Write);
+    addClassVar('TWinControl', 'IsResizing', 'Boolean', @TWinControl_IsResizing_Read);
+    addClassVar('TWinControl', 'TabOrder', 'Integer', @TWinControl_TabOrder_Read, @TWinControl_TabOrder_Write);
+    addClassVar('TWinControl', 'TabStop', 'Boolean', @TWinControl_TabStop_Read, @TWinControl_TabStop_Write);
+    addClassVar('TWinControl', 'OnEnter', 'TNotifyEvent', @TWinControl_OnEnter_Read, @TWinControl_OnEnter_Write);
+    addClassVar('TWinControl', 'OnExit', 'TNotifyEvent', @TWinControl_OnExit_Read, @TWinControl_OnExit_Write);
+    addClassVar('TWinControl', 'OnKeyDown', 'TKeyEvent', @TWinControl_OnKeyDown_Read, @TWinControl_OnKeyDown_Write);
+    addClassVar('TWinControl', 'OnKeyPress', 'TKeyPressEvent', @TWinControl_OnKeyPress_Read, @TWinControl_OnKeyPress_Write);
+    addClassVar('TWinControl', 'OnKeyUp', 'TKeyEvent', @TWinControl_OnKeyUp_Read, @TWinControl_OnKeyUp_Write);
+    addClassVar('TWinControl', 'ParentWindow', 'THandle', @TWinControl_ParentWindow_Read, @TWinControl_ParentWindow_Write);
+    addClassVar('TWinControl', 'Showing', 'Boolean', @TWinControl_Showing_Read);
+    addClassVar('TWinControl', 'VisibleDockClientCount', 'Integer', @TWinControl_VisibleDockClientCount_Read, nil);
     addGlobalFunc('function TWinControl.AutoSizeDelayed(): boolean;', @TWinControl_AutoSizeDelayed);
     addGlobalFunc('function TWinControl.AutoSizeDelayedReport(): string;', @TWinControl_AutoSizeDelayedReport);
     addGlobalFunc('function TWinControl.AutoSizeDelayedHandle(): Boolean;', @TWinControl_AutoSizeDelayedHandle);
@@ -1326,11 +1327,11 @@ procedure Register_TCustomControl(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomControl', 'TWinControl');
+    addClass('TCustomControl', 'TWinControl');
 
     addGlobalFunc('procedure TCustomControl.Init(AOwner: TComponent);', @TCustomControl_Init);
-    addClassVar(Compiler, 'TCustomControl', 'Canvas', 'TCanvas', @TCustomControl_Canvas_Read, @TCustomControl_Canvas_Write);
-    addClassVar(Compiler, 'TCustomControl', 'OnPaint', 'TNotifyEvent', @TCustomControl_OnPaint_Read, @TCustomControl_OnPaint_Write);
+    addClassVar('TCustomControl', 'Canvas', 'TCanvas', @TCustomControl_Canvas_Read, @TCustomControl_Canvas_Write);
+    addClassVar('TCustomControl', 'OnPaint', 'TNotifyEvent', @TCustomControl_OnPaint_Read, @TCustomControl_OnPaint_Write);
     addGlobalFunc('procedure TCustomControl.Free();', @TCustomControl_Free);
   end;
 end;
@@ -1484,24 +1485,24 @@ procedure Register_TControlScrollBar(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TControlScrollBar', 'TPersistent');
+    addClass('TControlScrollBar', 'TPersistent');
 
     addGlobalFunc('procedure TControlScrollBar.Init(AControl: TWinControl; AKind: TScrollBarKind);', @TControlScrollBar_Init);
     addGlobalFunc('procedure TControlScrollBar.Assign(Source: TPersistent);', @TControlScrollBar_Assign);
     addGlobalFunc('function TControlScrollBar.IsScrollBarVisible(): Boolean;', @TControlScrollBar_IsScrollBarVisible);
     addGlobalFunc('function TControlScrollBar.ScrollPos(): Integer;', @TControlScrollBar_ScrollPos);
     addGlobalFunc('function TControlScrollBar.GetOtherScrollBar(): TControlScrollBar;', @TControlScrollBar_GetOtherScrollBar);
-    addClassVar(Compiler, 'TControlScrollBar', 'Size', 'integer', @TControlScrollBar_Size_Read, nil);
+    addClassVar('TControlScrollBar', 'Size', 'integer', @TControlScrollBar_Size_Read);
     addGlobalFunc('function TControlScrollBar.ClientSize(): integer;', @TControlScrollBar_ClientSize);
     addGlobalFunc('function TControlScrollBar.ClientSizeWithBar(): integer;', @TControlScrollBar_ClientSizeWithBar);
     addGlobalFunc('function TControlScrollBar.ClientSizeWithoutBar(): integer;', @TControlScrollBar_ClientSizeWithoutBar);
-    addClassVar(Compiler, 'TControlScrollBar', 'Increment', 'Integer', @TControlScrollBar_Increment_Read, @TControlScrollBar_Increment_Write);
-    addClassVar(Compiler, 'TControlScrollBar', 'Page', 'Integer', @TControlScrollBar_Page_Read, @TControlScrollBar_Page_Write);
-    addClassVar(Compiler, 'TControlScrollBar', 'Smooth', 'Boolean', @TControlScrollBar_Smooth_Read, @TControlScrollBar_Smooth_Write);
-    addClassVar(Compiler, 'TControlScrollBar', 'Position', 'Integer', @TControlScrollBar_Position_Read, @TControlScrollBar_Position_Write);
-    addClassVar(Compiler, 'TControlScrollBar', 'Range', 'Integer', @TControlScrollBar_Range_Read, @TControlScrollBar_Range_Write);
-    addClassVar(Compiler, 'TControlScrollBar', 'Tracking', 'Boolean', @TControlScrollBar_Tracking_Read, @TControlScrollBar_Tracking_Write);
-    addClassVar(Compiler, 'TControlScrollBar', 'Visible', 'Boolean', @TControlScrollBar_Visible_Read, @TControlScrollBar_Visible_Write);
+    addClassVar('TControlScrollBar', 'Increment', 'Integer', @TControlScrollBar_Increment_Read, @TControlScrollBar_Increment_Write);
+    addClassVar('TControlScrollBar', 'Page', 'Integer', @TControlScrollBar_Page_Read, @TControlScrollBar_Page_Write);
+    addClassVar('TControlScrollBar', 'Smooth', 'Boolean', @TControlScrollBar_Smooth_Read, @TControlScrollBar_Smooth_Write);
+    addClassVar('TControlScrollBar', 'Position', 'Integer', @TControlScrollBar_Position_Read, @TControlScrollBar_Position_Write);
+    addClassVar('TControlScrollBar', 'Range', 'Integer', @TControlScrollBar_Range_Read, @TControlScrollBar_Range_Write);
+    addClassVar('TControlScrollBar', 'Tracking', 'Boolean', @TControlScrollBar_Tracking_Read, @TControlScrollBar_Tracking_Write);
+    addClassVar('TControlScrollBar', 'Visible', 'Boolean', @TControlScrollBar_Visible_Read, @TControlScrollBar_Visible_Write);
     addGlobalFunc('procedure TControlScrollBar.Free();', @TControlScrollBar_Free);
   end;
 end;
@@ -1558,18 +1559,40 @@ procedure Register_TScrollingWinControl(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TScrollingWinControl', 'TCustomControl');
+    addClass('TScrollingWinControl', 'TCustomControl');
 
     addGlobalFunc('procedure TScrollingWinControl.Init(TheOwner : TComponent);', @TScrollingWinControl_Init);
     addGlobalFunc('procedure TScrollingWinControl.UpdateScrollbars();', @TScrollingWinControl_UpdateScrollbars);
     addGlobalFunc('procedure TScrollingWinControl.ScrollBy(DeltaX, DeltaY: Integer);', @TScrollingWinControl_ScrollBy);
-    addClassVar(Compiler, 'TScrollingWinControl', 'HorzScrollBar', 'TControlScrollBar', @TScrollingWinControl_HorzScrollBar_Read, @TScrollingWinControl_HorzScrollBar_Write);
-    addClassVar(Compiler, 'TScrollingWinControl', 'VertScrollBar', 'TControlScrollBar', @TScrollingWinControl_VertScrollBar_Read, @TScrollingWinControl_VertScrollBar_Write);
+    addClassVar('TScrollingWinControl', 'HorzScrollBar', 'TControlScrollBar', @TScrollingWinControl_HorzScrollBar_Read, @TScrollingWinControl_HorzScrollBar_Write);
+    addClassVar('TScrollingWinControl', 'VertScrollBar', 'TControlScrollBar', @TScrollingWinControl_VertScrollBar_Read, @TScrollingWinControl_VertScrollBar_Write);
     addGlobalFunc('procedure TScrollingWinControl.Free();', @TScrollingWinControl_Free);
   end;
 end;
 
-//
+//Read: property Canvas: TCanvas read Canvas
+procedure TGraphicControl_Canvas_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCanvas(Result)^ := PGraphicControl(Params^[0])^.Canvas;
+end;
+
+//procedure Update();
+procedure TGraphicControl_Update(const Params: PParamArray); lape_extdecl
+begin
+  PGraphicControl(Params^[0])^.Update();
+end;
+
+procedure Register_TGraphicControl(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TGraphicControl', 'TControl');
+
+    addGlobalFunc('procedure TGraphicControl.Update();', @TGraphicControl_Update);
+    addClassVar('TGraphicControl', 'Canvas', 'TCanvas', @TGraphicControl_Canvas_Read);
+  end;
+end;
+
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
 begin
   with compiler do
@@ -1587,7 +1610,7 @@ begin
   Register_TCustomControl(Compiler);
   Register_TControlScrollBar(Compiler);
   Register_TScrollingWinControl(Compiler);
-  //
+  Register_TGraphicControl(Compiler);
 end;
 
 end.

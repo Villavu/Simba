@@ -97,7 +97,7 @@ procedure Register_TMBitmaps(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMBitmaps', 'TObject');
+    addClass('TMBitmaps');
 
     addGlobalFunc('function TMBitmaps.GetBMP(Index : integer): TMufasaBitmap;', @TMBitmaps_GetBMP);
     addGlobalFunc('function TMBitmaps.CreateBMP(w, h: integer): Integer;', @TMBitmaps_CreateBMP);

@@ -139,14 +139,14 @@ procedure Register_TMDTM(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TMDTM', 'TObject');
+    addClass('TMDTM');
 
     addGlobalType('record x, y, c, t, asz: integer; bp: boolean; end;', 'TMDTMPoint');
     addGlobalType('^TMDTMPoint', 'PMDTMPoint');
     addGlobalType('array of TMDTMPoint;', 'TMDTMPointArray');
 
-    addClassVar(Compiler, 'TMDTM', 'Name', 'string', @TMDTM_Name_Read, @TMDTM_Name_Write);
-    addClassVar(Compiler, 'TMDTM', 'Index', 'integer', @TMDTM_Index_Read, @TMDTM_Index_Write);
+    addClassVar('TMDTM', 'Name', 'string', @TMDTM_Name_Read, @TMDTM_Name_Write);
+    addClassVar('TMDTM', 'Index', 'integer', @TMDTM_Index_Read, @TMDTM_Index_Write);
     addGlobalFunc('function TMDTM.ToString(): string;', @TMDTM_ToString);
     addGlobalFunc('function TMDTM.SaveToFile(const FileName : string): boolean;', @TMDTM_SaveToFile);
     addGlobalFunc('function TMDTM.LoadFromString(const s : string): boolean;', @TMDTM_LoadFromString);
@@ -156,9 +156,9 @@ begin
     addGlobalFunc('procedure TMDTM.SwapPoint(p1, p2: integer);', @TMDTM_SwapPoint);
     addGlobalFunc('procedure TMDTM.MovePoint(fromIndex, toIndex: integer);', @TMDTM_MovePoint);
     addGlobalFunc('function TMDTM.AddPoint(Point: TMDTMPoint): integer;', @TMDTM_AddPoint);
-    addClassVar(Compiler, 'TMDTM', 'PPoints', 'PMDTMPoint', @TMDTM_PPoints_Read, nil);
-    addClassVar(Compiler, 'TMDTM', 'Count', 'integer', @TMDTM_Count_Read, @TMDTM_Count_Write);
-    addClassVar(Compiler, 'TMDTM', 'Points', 'TMDTMPointArray', @TMDTM_Points_Read, nil);
+    addClassVar('TMDTM', 'PPoints', 'PMDTMPoint', @TMDTM_PPoints_Read);
+    addClassVar('TMDTM', 'Count', 'integer', @TMDTM_Count_Read, @TMDTM_Count_Write);
+    addClassVar('TMDTM', 'Points', 'TMDTMPointArray', @TMDTM_Points_Read);
     addGlobalFunc('procedure TMDTM.Init();', @TMDTM_Init);
     addGlobalFunc('procedure TMDTM.Free();', @TMDTM_Free);
   end;

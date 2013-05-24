@@ -97,14 +97,14 @@ procedure Register_TCustomTimer(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomTimer', 'TComponent');
+    addClass('TCustomTimer', 'TComponent');
 
     addGlobalFunc('procedure TCustomTimer.Init(AOwner: TComponent);', @TCustomTimer_Init);
-    addClassVar(Compiler, 'TCustomTimer', 'Enabled', 'Boolean', @TCustomTimer_Enabled_Read, @TCustomTimer_Enabled_Write);
-    addClassVar(Compiler, 'TCustomTimer', 'Interval', 'Cardinal', @TCustomTimer_Interval_Read, @TCustomTimer_Interval_Write);
-    addClassVar(Compiler, 'TCustomTimer', 'OnTimer', 'TNotifyEvent', @TCustomTimer_OnTimer_Read, @TCustomTimer_OnTimer_Write);
-    addClassVar(Compiler, 'TCustomTimer', 'OnStartTimer', 'TNotifyEvent', @TCustomTimer_OnStartTimer_Read, @TCustomTimer_OnStartTimer_Write);
-    addClassVar(Compiler, 'TCustomTimer', 'OnStopTimer', 'TNotifyEvent', @TCustomTimer_OnStopTimer_Read, @TCustomTimer_OnStopTimer_Write);
+    addClassVar('TCustomTimer', 'Enabled', 'Boolean', @TCustomTimer_Enabled_Read, @TCustomTimer_Enabled_Write);
+    addClassVar('TCustomTimer', 'Interval', 'Cardinal', @TCustomTimer_Interval_Read, @TCustomTimer_Interval_Write);
+    addClassVar('TCustomTimer', 'OnTimer', 'TNotifyEvent', @TCustomTimer_OnTimer_Read, @TCustomTimer_OnTimer_Write);
+    addClassVar('TCustomTimer', 'OnStartTimer', 'TNotifyEvent', @TCustomTimer_OnStartTimer_Read, @TCustomTimer_OnStartTimer_Write);
+    addClassVar('TCustomTimer', 'OnStopTimer', 'TNotifyEvent', @TCustomTimer_OnStopTimer_Read, @TCustomTimer_OnStopTimer_Write);
     addGlobalFunc('procedure TCustomTimer.Free();', @TCustomTimer_Free);
   end;
 end;
@@ -125,7 +125,7 @@ procedure Register_TTimer(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TTimer', 'TCustomTimer');
+    addClass('TTimer', 'TCustomTimer');
 
     addGlobalFunc('procedure TTimer.Init(AOwner: TComponent);', @TTimer_Init);
     addGlobalFunc('procedure TTimer.Free();', @TTimer_Free);
@@ -233,17 +233,17 @@ procedure Register_TCustomImage(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TCustomImage', 'TGraphicControl');
+    addClass('TCustomImage', 'TGraphicControl');
 
     addGlobalFunc('procedure TCustomImage.Init(AOwner: TComponent);', @TCustomImage_Init);
-    addClassVar(Compiler, 'TCustomImage', 'Canvas', 'TCanvas', @TCustomImage_Canvas_Read, nil);
+    addClassVar('TCustomImage', 'Canvas', 'TCanvas', @TCustomImage_Canvas_Read);
     addGlobalFunc('function TCustomImage.DestRect(): TRect;', @TCustomImage_DestRect);
-    addClassVar(Compiler, 'TCustomImage', 'Center', 'Boolean', @TCustomImage_Center_Read, @TCustomImage_Center_Write);
-    addClassVar(Compiler, 'TCustomImage', 'Picture', 'TPicture', @TCustomImage_Picture_Read, @TCustomImage_Picture_Write);
-    addClassVar(Compiler, 'TCustomImage', 'Stretch', 'Boolean', @TCustomImage_Stretch_Read, @TCustomImage_Stretch_Write);
-    addClassVar(Compiler, 'TCustomImage', 'Transparent', 'Boolean', @TCustomImage_Transparent_Read, @TCustomImage_Transparent_Write);
-    addClassVar(Compiler, 'TCustomImage', 'Proportional', 'Boolean', @TCustomImage_Proportional_Read, @TCustomImage_Proportional_Write);
-    addClassVar(Compiler, 'TCustomImage', 'OnPictureChanged', 'TNotifyEvent', @TCustomImage_OnPictureChanged_Read, @TCustomImage_OnPictureChanged_Write);
+    addClassVar('TCustomImage', 'Center', 'Boolean', @TCustomImage_Center_Read, @TCustomImage_Center_Write);
+    addClassVar('TCustomImage', 'Picture', 'TPicture', @TCustomImage_Picture_Read, @TCustomImage_Picture_Write);
+    addClassVar('TCustomImage', 'Stretch', 'Boolean', @TCustomImage_Stretch_Read, @TCustomImage_Stretch_Write);
+    addClassVar('TCustomImage', 'Transparent', 'Boolean', @TCustomImage_Transparent_Read, @TCustomImage_Transparent_Write);
+    addClassVar('TCustomImage', 'Proportional', 'Boolean', @TCustomImage_Proportional_Read, @TCustomImage_Proportional_Write);
+    addClassVar('TCustomImage', 'OnPictureChanged', 'TNotifyEvent', @TCustomImage_OnPictureChanged_Read, @TCustomImage_OnPictureChanged_Write);
     addGlobalFunc('procedure TCustomImage.Free();', @TCustomImage_Free);
   end;
 end;
@@ -264,7 +264,7 @@ procedure Register_TImage(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TImage', 'TCustomImage');
+    addClass('TImage', 'TCustomImage');
 
     addGlobalFunc('procedure TImage.Init(AOwner: TComponent);', @TImage_Init);
     addGlobalFunc('procedure TImage.Free();', @TImage_Free);
