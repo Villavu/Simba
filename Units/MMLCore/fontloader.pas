@@ -71,7 +71,7 @@ type
 implementation
 
 uses
-  MufasaTypes,Client;
+  MufasaTypes, Client, strutils;
 
 
 constructor TMFont.Create;
@@ -132,6 +132,7 @@ end;
 
 function TMFonts.GetFontByIndex(Index : integer): TMfont;
 begin
+  // TODO: Check bounds?
   result := TMfont(Fonts.Items[index]);
 end;
 
@@ -201,23 +202,76 @@ end;
 function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;
 var
   f: TMFont;
+  CanonicalName, fontPath, n: String;
+  i: Integer;
+  FontFound: Boolean;
 begin
   Result := True;
+  CanonicalName := '';
+  fontPath := '';
+
+  FontFound := False;
+
+  // TODO: Use UTF8 here?
   if not DirectoryExists(FPath + Name) then
   begin
-    raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exists.');
+     if not DirectoryExists(Name) then
+      begin
+        raise Exception.Create('LoadFont: Directory ' + Name + ' does not exist (either absolute or in FontPath');
+        Exit(False);
+      end
+      else
+      begin
+        FontFound := True;
+        fontPath := Name;
+        if Name[Length(Name)] = DS then
+          CanonicalName := ExtractFileDir(Name)
+        else
+          CanonicalName := ExtractFilePath(Name) + ExtractFileName(Name);
+
+        CanonicalName := system.Copy(CanonicalName, rpos(DS, CanonicalName) + 1, Length(CanonicalName) - rpos(DS, CanonicalName));
+      end;
+
+    Writeln('LoadFont debug, CanonicalName = ' + CanonicalName);
+    if not FontFound then
+    begin
+      raise Exception.Create('LoadFont: Directory ' + FPath + Name + ' does not exist.');
+      Exit(False);
+    end;
+  end else
+  begin
+    CanonicalName := Name;
+    fontPath := FPath + Name;
+  end;
+
+  n := CanonicalName;
+  if Shadow then
+    n := n + '_s';
+
+  FontFound := False;
+
+  for i := 0 to Fonts.Count - 1 do
+  begin
+    if lowercase(n) = lowercase(TMFont(Fonts.Items[i]).Name) then
+    begin
+      FontFound := True;
+      break;
+    end;
+  end;
+
+  if FontFound then
+  begin
+    TClient(Client).Writeln('Font ' + Name + ' already loaded as: ' + n);
     Exit(False);
   end;
 
-  f:=TMFont.Create;
-  f.Name := Name;
+  f := TMFont.Create;
+  f.Name := CanonicalName;
   if Shadow then
     F.Name := F.Name + '_s';
-  f.Data := InitOCR( LoadGlyphMasks(FPath + Name + DS, Shadow));
+  f.Data := InitOCR(LoadGlyphMasks(fontPath + DS, Shadow));
   Fonts.Add(f);
-  {{$IFDEF FONTDEBUG}
   TClient(Client).Writeln('Loaded Font ' + f.Name);
-  {$ENDIF} }
 end;
 
 function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: string): boolean;

@@ -47,7 +47,7 @@ AddGlobalFunc('function CreateBitmapString(bmp: integer): string', @Lape_CreateB
 
 { This is a temporary workaround to allow Lape to pass TMufasaBitmaps to plugins.
   Also see lpcompile.inc}
-AddGlobalFunc('function GetMufasaBitmap(bmp: integer): Pointer', @Lape_GetMufasaBitmap);
+AddGlobalFunc('function GetMufasaBitmap(bmp: integer): TMufasaBitmap', @Lape_GetMufasaBitmap);
 
 AddGlobalFunc('function CreateBitmap(w,h: integer): integer', @Lape_CreateBitmap);
 AddGlobalFunc('procedure FreeBitmap(Number: integer);', @Lape_FreeBitmap);
@@ -222,6 +222,7 @@ AddGlobalFunc('function sha256(Data: string): string', @Lape_sha256);
 AddGlobalFunc('function sha384(Data: string): string', @Lape_sha384);
 AddGlobalFunc('function sha512(Data: string): string', @Lape_sha512);
 AddGlobalFunc('function tiger(Data: string): string', @Lape_tiger);
+AddGlobalFunc('procedure rc2_decrypt(const Key: string; const HashType: THashType; var Data: string);', @Lape_rc2_decrypt);
 
 { Files }
 
@@ -302,7 +303,7 @@ AddGlobalFunc('function GetKeyCode(c: char): integer', @Lape_GetKeyCode);
 { OCR }
 
 AddGlobalFunc('function rs_GetUpText: String', @Lape_rs_GetUpText);
-AddGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean): string', @Lape_rs_GetUpTextAtEx);
+AddGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string', @Lape_rs_GetUpTextAtEx);
 AddGlobalFunc('function rs_GetUpTextAt(x, y: integer): string', @Lape_rs_GetUpTextAt);
 AddGlobalFunc('function BitmapFromText(const text, font: String): integer', @Lape_BitmapFromText);
 AddGlobalFunc('function MaskFromText(const text, font: String): TMask', @Lape_MaskFromText);
@@ -311,12 +312,12 @@ AddGlobalFunc('function TPAFromText(const text, font: String; var w,h: integer):
 AddGlobalFunc('function GetTextATPA(const ATPA: T2DPointArray; const maxvspacing: integer; const font: string): string', @Lape_GetTextATPA);
 AddGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: integer; const font: string): string', @Lape_GetTextAt);
 AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing, color, tol: integer; const font: string): string', @Lape_GetTextAtEx);
+AddGlobalFunc('procedure rs_SetUpTextFilter(filterdata: TOcrFilterDataArray);', @Lape_SetUpTextFilter);
+AddGlobalFunc('procedure rs_ResetUpTextFilter;', @Lape_ResetUpTextFilter);
 //AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
 AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);', @Lape_FilterUpTextByCharacteristics);
-AddGlobalFunc('procedure SetUpTextFilter(filterdata: TOcrFilterDataArray);', @Lape_SetUpTextFilter);
-AddGlobalFunc('procedure ResetUpTextFilter;', @Lape_ResetUpTextFilter);
 
 { Other }
 
@@ -348,6 +349,7 @@ AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^);
 //AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
 AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
+AddGlobalFunc('procedure ConvertTime64(Time: int64; var y, m, w, d, h, min, s: integer);', @Lape_ConvertTime64);
 AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
 AddGlobalFunc('procedure Simba;', @Lape_Simba);
 AddGlobalFunc('procedure SetClipBoard(const Data: string);', @Lape_SetClipBoard);

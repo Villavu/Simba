@@ -37,7 +37,7 @@ end;
 
 procedure ps_FreeBitmap(Number : integer); extdecl;
 begin
-  CurrThread.Client.MBitmaps.FreeBMP(Number);
+  CurrThread.Client.MBitmaps.GetBMP(Number).Free();
 end;
 
 procedure ps_SaveBitmap(Bmp : integer; path : string); extdecl;
@@ -142,6 +142,11 @@ end;
 procedure ps_DrawATPABitmapEx(bitmap : integer; ATPA : T2DPointArray; Colors : TIntegerArray); extdecl;
 begin
   CurrThread.Client.MBitmaps[bitmap].DrawATPA(ATPA,Colors);
+end;
+
+procedure ps_LineToBitmap(bitmap : integer; Src,Dest: TPoint; Color : integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[Bitmap].LineTo(Src,Dest,Color);
 end;
 
 procedure ps_FastDrawClear(bmp : integer; Color : TColor); extdecl;

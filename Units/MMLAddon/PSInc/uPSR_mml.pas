@@ -123,6 +123,7 @@ begin
     RegisterMethod(@TMufasaBitmap.FastSetPixels,'FastSetPixels');
     RegisterMethod(@TMufasaBitmap.DrawATPA,'DrawATPA');
     RegisterMethod(@TMufasaBitmap.DrawTPA,'DrawTPA');
+    RegisterMethod(@TMufasaBitmap.LineTo,'LineTo');
     RegisterMethod(@TMufasaBitmap.DrawToCanvas, 'DrawToCanvas');
     RegisterMethod(@TMufasaBitmap.FloodFill,'FloodFill');
     RegisterMethod(@TMufasaBitmap.Rectangle,'Rectangle');
@@ -152,7 +153,7 @@ begin
     RegisterConstructor(@TMufasaBitmap.Create,'Create');
     RegisterMethod(@TMufasaBitmap.free,'Free');
     RegisterMethod(@TMufasaBitmap.SaveToFile, 'SaveToFile');
-    RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LoadFormFile');
+    RegisterMethod(@TMufasaBitmap.LoadFromFile, 'LoadFromFile');
     RegisterMethod(@TMufasaBitmap.LoadFromTBitmap, 'LoadFromTBitmap');
   end;
 end;
@@ -302,7 +303,7 @@ begin
     RegisterMethod(@TMBitmaps.CreateMirroredBitmap, 'CreateMirroredBitmap');
     RegisterMethod(@TMBitmaps.CreateBMPFromFile, 'CreateBMPFromFile');
     RegisterMethod(@TMBitmapsCreateBMPFromString_P, 'CreateBMPFromString');
-    RegisterMethod(@TMBitmaps.FreeBMP, 'FreeBMP');
+    RegisterMethod(@TMBitmaps.RemoveBMP, 'RemoveBMP');
     RegisterConstructor(@TMBitmaps.Create, 'Create');
   end;
 end;

@@ -62,7 +62,7 @@ type
     function InitTOCR(const path: string): boolean;
     function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
            var _chars, _shadows: T2DPointArray): Boolean;
-    function GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
+    function GetUpTextAtEx(atX, atY: integer; shadow: boolean; fontname: string): string;
     function GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
     procedure CreateDefaultFilter;
@@ -774,16 +774,14 @@ begin
   { TODO: This only sorts the points in every TPA }
   SortATPAFrom(chars_2d, point(0,0));
 
-
-  { TODO: Should this loop not be in the OCRDEBUG define ? }
+  {$IFDEF OCRDEBUG}
   for x := 0 to high(chars_2d) do
   begin
     pc := random(clWhite);
     for y := 0 to high(chars_2d[x]) do
       charsbmp.FastSetPixel(chars_2d[x][y].x, chars_2d[x][y].y, pc);
   end;
-  {$IFDEF OCRDEBUG}
-    DebugToBmp(charsbmp,6,h);
+  DebugToBmp(charsbmp,6,h);
   {$ENDIF}
 
   for y := 0 to high(chars_2d) do
@@ -887,7 +885,7 @@ character and the .x1 of the current character is bigger than 5, then there
 was a space between them. (Add ' ' to result)
 *)
 
-function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean): string;
+function TMOCR.GetUpTextAtEx(atX, atY: integer; shadow: boolean; fontname: string): string;
 var
    n:Tnormarray;
    ww, hh,i,j,nl: integer;
@@ -906,15 +904,16 @@ begin
   getTextPointsIn(atX, atY, ww, hh, shadow, chars, shadows);
 
   // Get font data for analysis.
+  font := FFonts.GetFont(fontname);
 
   if shadow then
   begin
-    font := FFonts.GetFont('UpChars_s');
+    font := FFonts.GetFont(fontname + '_s');
     thachars := shadows;
   end
   else
   begin
-    font := FFonts.GetFont('UpChars');
+    font := FFonts.GetFont(fontname);
     thachars := chars;
   end;
 
@@ -978,10 +977,7 @@ Retreives the (special) uptext.
 function TMOCR.GetUpTextAt(atX, atY: integer; shadow: boolean): string;
 
 begin
-  if shadow then
-    result := GetUpTextAtEx(atX, atY, true)
-  else
-    result := GetUpTextAtEx(atX, atY, false);
+  result := GetUpTextAtEx(atX, atY, shadow, 'UpChars')
 end;
 
 (*

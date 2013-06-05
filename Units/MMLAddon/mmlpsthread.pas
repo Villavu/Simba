@@ -219,7 +219,8 @@ type
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
      Running: TInitBool;
-     Wrappers: TList;
+     ImportWrappers: TList;
+     ExportWrappers: TList;
 
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
@@ -229,9 +230,18 @@ type
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
      function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+     function Natify(s: string): Pointer;
+     function Natify(c: TCodePos): Pointer; overload;
    end;
    {$ENDIF}
 
+   TSyncMethod = class
+   private
+     FMethod: Pointer;
+   public
+     constructor Create(Method: Pointer);
+     procedure Call;
+   end;
 
 threadvar
   CurrThread : TMThread;
@@ -277,7 +287,9 @@ uses
   DCPhaval, DCPmd4, DCPmd5,
   DCPripemd128, DCPripemd160,
   DCPsha1, DCPsha256, DCPsha512,
-  DCPtiger;
+  DCPtiger
+
+  {$IFDEF USE_LAPE}, lpClasses{$ENDIF};
 
 {$ifdef Linux}
   {$define PS_SafeCall}
@@ -903,14 +915,14 @@ begin
   begin
     with AddParam do
     begin
-      OrgName := 'x';
-      Mode := pmInOut;
+      OrgName := 'Item';
+      Mode := pmInOut;  //NOTE: InOut because of DynamicArrays
     end;
 
     with AddParam do
     begin
-      OrgName := 'Item';
-      Mode := pmIn;
+      OrgName := 'Obj';
+      Mode := pmInOut;
     end;
 
     with AddParam do
@@ -924,14 +936,14 @@ begin
   begin
     with AddParam do
     begin
-      OrgName := 'x';
-      Mode := pmInOut;
+      OrgName := 'Item';
+      Mode := pmInOut;  //NOTE: InOut because of DynamicArrays
     end;
 
     with AddParam do
     begin
-      OrgName := 'Item';
-      Mode := pmIn;
+      OrgName := 'Obj';
+      Mode := pmInOut;
     end;
   end;
 
@@ -957,15 +969,15 @@ begin
   end;
 end;
 
-function TMufasaBitmapCreate : TMufasaBitmap;
+function TMufasaBitmapCreate: TMufasaBitmap;
 begin
-  result := TMufasaBitmap.Create;
+  Result := TMufasaBitmap.Create;
   CurrThread.Client.MBitmaps.AddBMP(result);
 end;
 
-procedure TMufasaBitmapFree(Self : TMufasaBitmap);
+procedure TMufasaBitmapFree(Self: TMufasaBitmap);
 begin
-  CurrThread.Client.MBitmaps.FreeBMP(Self.Index);
+  Self.Free();
 end;
 
 function TMufasaBitmapCopy(Self : TMufasaBitmap;const xs,ys,xe,ye : integer) : TMufasaBitmap;
@@ -1002,9 +1014,9 @@ end;
 
 function Insert_(Caller: TPSExec; p: TPSExternalProcRec; Global, Stack: TPSStack): Boolean;
 var
-  Param, Item: TPSVariantIFC;
-  ItemSize, Len, Index: Int32;
-  PArr: PByte;
+  Item, Obj: TPSVariantIFC;
+  Index, Len, ItemSize, ItemLen, I: Int32;
+  PArr, DArr: PByte;
 begin
   Result := True;
   if (Stack.Count > 3) then
@@ -1012,51 +1024,72 @@ begin
   if (Stack.Count < 2) then
     raise Exception.Create('Not enough parameters');
 
-  Param := NewTPSVariantIFC(Stack[Stack.Count - 1], True);
+  Item := NewTPSVariantIFC(Stack[Stack.Count - 1], False);
+  Obj := NewTPSVariantIFC(Stack[Stack.Count - 2], True);
 
-  if (Param.Dta = nil) then
-    raise Exception.Create('Invalid parameter');
-
-  case Param.aType.BaseType of
-    btString: begin
-        ItemSize := TPSTypeRec(Param.aType).RealSize;
-        Len := Length(PString(Param.Dta)^);
-      end;
-    btArray: begin
-        ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
-        Len := PSDynArrayGetLength(PPointer(Param.Dta)^, Param.aType);
-      end;
-    else
-      raise Exception.Create('Invalid parameter type');
-  end;
-
-  Item := NewTPSVariantIFC(Stack[Stack.Count - 2], False);
-  if ((Item.Dta = nil) or (Item.aType.RealSize <> ItemSize)) then
-    raise Exception.Create('Invalid parameter');
-
-  Index := Len + Ord(Param.aType.BaseType = btString);
+  Index := -1;
   if (Stack.Count = 3) then
     Index := Stack.GetInt(-3);
 
-  if ((Index < Ord(Param.aType.BaseType = btString)) or (Index > Len + Ord(Param.aType.BaseType = btString))) then
-    raise Exception.Create('Out of range');
+  if ((Item.Dta = nil) or (Obj.Dta = nil)) then
+    raise Exception.Create('Invalid parameter');
 
-  case Param.aType.BaseType of
-    //FIXME: Add detection of string type.
-    btString: Insert(PString(Item.Dta)^, PString(Param.Dta)^, Index);
+  case Obj.aType.BaseType of
     btArray: begin
-        if ((Index < 0) or (Index > Len)) then
-          raise Exception.Create('Out of range');
+        Len := PSDynArrayGetLength(PPointer(Obj.Dta)^, Obj.aType);
+        if (Index = -1) or (Index > Len) then
+          Index := Len;
 
-        PSDynArraySetLength(PPointer(Param.Dta)^, Param.aType, Len + 1);
+        if (Obj.aType.RealSize <> Item.aType.RealSize) then
+            raise Exception.Create('Invalid parameter');
 
-        PArr := PByte(Param.Dta^);
+        ItemSize := Obj.aType.RealSize;
+        ItemLen := 1;
+
+        if (Item.aType.BaseType = btArray) then
+          ItemLen := PSDynArrayGetLength(PPointer(Item.Dta)^, Item.aType);
+
+        PSDynArraySetLength(PPointer(Obj.Dta)^, Obj.aType, Len + ItemLen);
+
+        PArr := PByte(Obj.Dta^);
+        DArr := PByte(Item.Dta^);
+
         if (Index < Len) then
-          Move(PArr[Index * ItemSize], PArr[(Index + 1) * ItemSize], (Len - Index) * ItemSize);
-        Move(PByte(Item.Dta^), PArr[Index * ItemSize], ItemSize);
+          Move(PArr[Index * ItemSize], PArr[(Index + ItemLen) * ItemSize], (Len - Index) * ItemSize);
+
+        if (Item.aType.BaseType = btArray) then //FIXME: Only want DynArrays here....
+          Move(DArr[0], PArr[Index * ItemSize], ItemSize * ItemLen)
+        else
+          Move(DArr, PArr[Index * ItemSize], ItemSize * ItemLen);
+      end;
+    btString: begin
+        if (Index = -1) then
+          Index := Length(PString(Obj.Dta)^) + 1;
+
+        case Item.aType.BaseType of
+          btString: Insert(PString(Item.Dta)^, PString(Obj.Dta)^, Index);
+          btChar: Insert(PChar(Item.Dta)^, PString(Obj.Dta)^, Index);
+          btWideString, btUnicodeString: Insert(PWideString(Item.Dta)^, PString(Obj.Dta)^, Index);
+          btWideChar: Insert(PWideChar(Item.Dta)^, PString(Obj.Dta)^, Index);
+          else
+            raise Exception.Create('Invalid parameter');
+        end;
+      end;
+    btWideString, btUnicodeString: begin
+        if (Index = -1) then
+          Index := Length(PWideString(Obj.Dta)^) + 1;
+
+        case Item.aType.BaseType of
+          btString: Insert(PString(Item.Dta)^, PWideString(Obj.Dta)^, Index);
+          btChar: Insert(PChar(Item.Dta)^, PWideString(Obj.Dta)^, Index);
+          btWideString, btUnicodeString: Insert(PWideString(Item.Dta)^, PWideString(Obj.Dta)^, Index);
+          btWideChar: Insert(PWideChar(Item.Dta)^, PWideString(Obj.Dta)^, Index);
+          else
+            raise Exception.Create('Invalid parameter');
+        end;
       end;
     else
-      raise Exception.Create('Invalid parameter type');
+      raise Exception.Create('Invalid parameter');
   end;
 end;
 
@@ -1080,7 +1113,7 @@ begin
   Count := Stack.GetInt(-3);
 
   case Param.aType.BaseType of
-    //FIXME: Detect string type! Currently will silently cause corruption on non ansistrings.
+    btWideString, btUnicodeString: Delete(PWideString(Param.Dta)^, Index , Count);
     btString: Delete(PString(Param.Dta)^, Index, Count);
     btArray: begin
         ItemSize := TPSTypeRec_Array(Param.aType).ArrayType.RealSize;
@@ -1219,6 +1252,7 @@ type
   PTarget_Exported = ^TTarget_Exported;
   PIntegerArray = ^TIntegerArray;
   PExtendedArray = ^TExtendedArray;
+  P2DIntegerArray = ^T2DIntegerArray;
   PFont = ^TFont;
 //  PStrExtr = ^TStrExtr;
   PReplaceFlags = ^TReplaceFlags;
@@ -1245,6 +1279,41 @@ end;
 procedure lp_DebugLn(Params: PParamArray); lape_extdecl
 begin
   ps_debugln(PlpString(Params^[0])^);
+end;
+
+procedure lp_Sync(Params: PParamArray); lape_extdecl
+var
+  Method: TSyncMethod;
+begin
+  Method := TSyncMethod.Create(TLPThread(CurrThread).Natify(PCodePos(Params^[0])^));
+  try
+    TThread.Synchronize(CurrThread, @Method.Call);
+  finally
+    Method.Free();
+  end;
+end;
+
+procedure lp_CurrThreadID(Params: PParamArray; Result: Pointer); lape_extdecl
+begin
+{$IFDEF WINDOWS}
+  PPtrUInt(Result)^ := GetCurrentThreadID();
+{$ELSE}
+  {$IFDEF LINUX}
+  PPtrUInt(Result)^ := TThreadID(pthread_self);
+  {$ELSE}
+  PPtrUInt(Result)^ := GetThreadID();
+  {$ENDIF}
+{$ENDIF}
+end;
+
+procedure lp_Natify(Params: PParamArray; Result: Pointer); lape_extdecl
+begin
+  PPointer(Result)^ := TLPThread(CurrThread).Natify(PlpString(Params^[0])^);
+end;
+
+procedure lp_NatifyP(Params: PParamArray; Result: Pointer); lape_extdecl
+begin
+  PPointer(Result)^ := TLPThread(CurrThread).Natify(PCodePos(Params^[0])^);
 end;
 
 {$I LPInc/Wrappers/lp_other.inc}
@@ -1297,28 +1366,49 @@ begin
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
 
+    addGlobalFunc('procedure Sync(proc: Pointer);', @lp_Sync);
+    addGlobalFunc('function GetCurrThreadID(): PtrUInt;', @lp_CurrThreadID);
+
+    addGlobalFunc('function natify(s: string): Pointer;', @lp_Natify);
+    addGlobalFunc('function natify(p: Pointer): Pointer; overload;', @lp_NatifyP);
+
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
+
+    RegisterLCLClasses(Compiler);
+    RegisterMMLClasses(Compiler);
+    addGlobalVar('TClient', @Client, 'Client').isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
 
     EndImporting;
   end;
 
-  Wrappers := TList.Create;
+  ImportWrappers := TList.Create;
+  ExportWrappers := TList.Create;
 end;
 
 destructor TLPThread.Destroy;
 begin
   try
-    if Assigned(Wrappers) then
+    if Assigned(ImportWrappers) then
     begin
-      while Wrappers.Count <> 0 Do
+      while ImportWrappers.Count <> 0 Do
       begin
-        TImportClosure(Wrappers.First).Free;
-        Wrappers.Delete(0)
+        TImportClosure(ImportWrappers.First).Free;
+        ImportWrappers.Delete(0)
       end;
-      Wrappers.Free;
+      ImportWrappers.Free;
+    end;
+
+    if Assigned(ExportWrappers) then
+    begin
+      while ExportWrappers.Count <> 0 Do
+      begin
+        TExportClosure(ExportWrappers.First).Free;
+        ExportWrappers.Delete(0)
+      end;
+      ExportWrappers.Free;
     end;
 
     if (Assigned(Compiler)) then
@@ -1351,6 +1441,74 @@ begin
       Compiler.addGlobalVar(Fonts[I].Name, Fonts[I].Name).isConstant := True;
 
   Compiler.EndImporting;
+end;
+
+function TLPThread.Natify(s: string): Pointer;
+var
+  Wrapper: TExportClosure;
+begin
+  Result := nil;
+
+  if (not FFILoaded) then
+    raise Exception.Create('libffi seems to be missing!');
+
+  Wrapper := LapeExportWrapper(Compiler.Globals[s]);
+  if (Wrapper <> nil) then
+  begin
+    Result := Wrapper.Func;
+    ExportWrappers.Add(Wrapper);
+  end;
+end;
+
+function TLPThread.Natify(c: TCodePos): Pointer;
+  function isCodePos(Decl: TLapeDeclaration; CodePos: TCodePos): boolean;
+  begin
+    Result := False;
+    if (Decl = nil) then
+      Exit;
+
+    if ((Decl as TLapeGlobalVar).Ptr = nil) then
+      Exit;
+
+    Result := TCodePos((Decl as TLapeGlobalVar).Ptr^) = CodePos;
+  end;
+
+  function getByCodePos(DeclarationList: TLapeDeclarationList; CodePos: TCodePos): TLapeDeclaration;
+  var
+    Declarations: TLapeDeclArray;
+    H, I: UInt32;
+  begin
+    Result := nil;
+    Declarations := DeclarationList.getByClass(TLapeGlobalVar, bTrue);
+
+    H := High(Declarations);
+    for I := 0 to H do
+      if (isCodePos(Declarations[I], CodePos)) then
+      begin
+        Result := Declarations[I];
+        Exit;
+      end;
+  end;
+var
+  Declaration: TLapeDeclaration;
+  Wrapper: TExportClosure;
+begin
+  Result := nil;
+
+  if (not FFILoaded) then
+    raise Exception.Create('libffi seems to be missing!');
+
+  Declaration := getByCodePos(Compiler.GlobalDeclarations, c);
+
+  if (Declaration <> nil) then
+  begin
+    Wrapper := LapeExportWrapper(Declaration as TLapeGlobalVar);
+    if (Wrapper <> nil) then
+    begin
+      Result := Wrapper.Func;
+      ExportWrappers.Add(Wrapper);
+    end;
+  end;
 end;
 
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
@@ -1395,11 +1553,13 @@ begin
       exit; // Can't set result?
     end;
     {$ENDIF}
+
     if not FFILoaded() then
     begin
       writeln('Not loading plugin for lape - libffi not found');
       raise EAssertionFailed.Create('libffi is not loaded');
     end;
+
     Compiler.StartImporting;
 
     for i := 0 to TypesLen -1 do
@@ -1410,7 +1570,7 @@ begin
     begin
       Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
       Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
-      Wrappers.Add(Wrapper);
+      ImportWrappers.Add(Wrapper);
     end;
 
     Compiler.EndImporting;
@@ -1447,6 +1607,18 @@ begin
   Running := bFalse;
 end;
 {$ENDIF}
+
+constructor TSyncMethod.Create(Method: Pointer);
+begin
+  FMethod := Method
+end;
+
+procedure TSyncMethod.Call();
+type
+  TProc = procedure; cdecl;
+begin
+  TProc(FMethod)();
+end;
 
 initialization
   PluginsGlob := TMPlugins.Create;

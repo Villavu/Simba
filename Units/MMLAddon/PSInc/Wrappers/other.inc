@@ -202,6 +202,61 @@ procedure ps_TerminateScript; extdecl;
 begin;
   CurrThread.Terminate;
 end;
+
+{$DEFINE PS_ADDONTERMINATE}
+function ps_AddOnTerminate(const proc : string): Boolean; extdecl;
+var
+  oldProcs : TVariantArray;
+  oldProcsHigh, i : Integer;
+  lowerCaseProc : string;
+begin;
+  result := false;
+
+  if not CurrThread.Prop.GetProp(SP_OnTerminate, oldProcs) then
+     SetLength(oldProcs, 1);
+
+  oldProcsHigh  := High(oldProcs);
+  lowerCaseProc := LowerCase(proc);
+
+  for i := 0 to oldProcsHigh do
+    if LowerCase(oldProcs[i]) = lowerCaseProc then
+      exit;
+
+  SetLength(oldProcs, Length(oldProcs) + 1);
+  oldProcs[High(oldProcs)] := proc;
+  CurrThread.Prop.SetProp(SP_OnTerminate, oldProcs);
+
+  result := True;
+end;
+
+function ps_DeleteOnTerminate(const proc : string): Boolean; extdecl;
+var
+  oldProcs, newProcs : TVariantArray;
+  oldProcsHigh, i : Integer;
+  lowerCaseProc, lowerCaseOldProc : string;
+begin;
+  result := False;
+
+  if not CurrThread.Prop.GetProp(SP_OnTerminate, OldProcs) then
+     exit;
+
+  oldProcsHigh  := High(oldProcs);
+  lowerCaseProc := LowerCase(proc);
+
+  for i := 0 to oldProcsHigh do
+    lowerCaseOldProc := lowercase(OldProcs[i]);
+    if lowerCaseOldProc = lowerCaseProc then
+      result := true
+    else
+    begin
+      setlength(newProcs, Length(newProcs) + 1);
+      newProcs[High(newProcs)] := lowerCaseOldProc;
+    end;
+
+  CurrThread.Prop.SetProp(SP_OnTerminate, NewProcs);
+
+end;
+
 function ps_GetTimeRunning: LongWord; extdecl;
 begin;
   result := GetTickCount - CurrThread.StartTime;
@@ -219,12 +274,34 @@ var
   x : integer;
 begin;
   x := time;
-  h := x div(1000 * 60 * 60);
-  x := x mod (1000 * 60 * 60);
-  m := x div (1000 * 60);
-  x := x mod (1000 * 60);
+  h := x div (3600000);
+  x := x mod (3600000);
+  m := x div (60000);
+  x := x mod (60000);
   s := x div (1000);
 end;
+
+procedure ps_ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer); extdecl;
+var
+  x : int64;
+begin
+  x := time;
+  y := x div (31536000000); // 1000 * 60 * 60 * 24 * 365 (1 year or 365 days)
+  x := x mod (31536000000);
+  m := x div (2592000000); // 1000 * 60 * 60 * 24 * 30 (1 month or 30 days)
+  x := x mod (2592000000);
+  w := x div (604800000); // 1000 * 60 * 60 * 24 * 7 (1 week or 7 days)
+  x := x mod (604800000);
+  d := x div (86400000); // 1000 * 60 * 60 * 24 (1 day or 24 hours)
+  x := x mod (86400000);
+  h := x div (3600000); // 1000 * 60 * 60 (1 hour or 60 minutes)
+  x := x mod (3600000);
+  min := x div (60000); // 1000 * 60 (1 minute or 60 seconds)
+  x := x mod (60000);
+  s := x div (1000); // 1000 (1 second)
+  x := x mod (1000);
+end;
+
 procedure ps_DecodeDate ( const SourceDate  : TDateTime; var Year, Month, Day  : Word ); extdecl;
 begin
   decodedate(sourcedate,year,month,day);

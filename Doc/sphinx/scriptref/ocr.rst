@@ -60,6 +60,9 @@ LoadFont
 Load the font specific by the *FontName*. The font has to recide in the Fonts
 directory.
 
+As of Simba version 993 and up, LoadFont also accepts paths outside
+the Fonts directory. In this case *FontName* is thus an entire path; and the
+internal font name is simply the name of the last folder in the path.
 
 FreeFont
 ~~~~~~~~
@@ -138,6 +141,18 @@ rs_GetUpTextAt
 
 This function is a function specific to RuneScape(tm); it reads the text 
 at the specified position in (*x*, *y*) into a string.
+
+rs_GetUpTextAtEx
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function rs_GetUpTextAt(x, y : integer; shadow: boolean; fontname: string): string;
+
+This function is a function specific to RuneScape(tm); it reads the text 
+at the specified position in (*x*, *y*) into a string, optionally using the
+shadows of the font. Fontname specifies the name of the font to use; with the
+other functions this defaults to "UpChars".
 
 GetTextAt
 ~~~~~~~~~

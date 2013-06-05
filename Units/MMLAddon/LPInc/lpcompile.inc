@@ -116,13 +116,6 @@ addGlobalType('record R, T: extended; end', 'PPoint');
 
 addGlobalType('record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14,int15,int16: integer; end', 'TTarget_Exported');
 
-addGlobalType('record x, y, Color, Tolerance, AreaSize, AreaShape: integer; end', 'TSDTMPointDef');
-addGlobalType('array of TSDTMPointDef', 'TSDTMPointDefArray');
-addGlobalType('record MainPoint: TSDTMPointDef; SubPoints: TSDTMPointDefarray; end', 'TSDTM');
-
-addGlobalType('record x, y, c, t, asz: integer; bp: boolean; end', 'TMDTMPoint');
-addGlobalType('array of TMDTMPoint', 'TMDTMPointArray');
-
 addGlobalType('record Title: string; Handle: integer; Pid: integer; Width, Height: integer; end', 'TSysProc');
 addGlobalType('array of TSysProc', 'TSysProcArr');
 
@@ -130,6 +123,5 @@ addGlobalType('packed record _type: integer; is_text_color: boolean; r_low,r_hig
 
 addGlobalType('array of TOCRFilterData', 'TOCRFilterDataArray');
 
-{ This is a workaround to allow Lape to export TMufasaBitmaps.
-  Also see lpexportedmethods.inc }
-addGlobalType('Pointer', 'TMufasaBitmap');
+addGlobalType('(htHaval, htMD4, htMD5, htRIPEMD128, htRIPEMD160, htSHA1, htSHA256, htSHA384, htSHA512, htTiger)', 'THashType');
+
