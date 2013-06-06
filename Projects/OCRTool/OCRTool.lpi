@@ -45,13 +45,14 @@
         <Filename Value="ocrtoolunit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ocrtoolunit"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="193"/>
-        <CursorPos X="64" Y="208"/>
+        <TopLine Value="142"/>
+        <CursorPos X="56" Y="163"/>
         <UsageCount Value="27"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -98,8 +99,8 @@
         <UnitName Value="ocr"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="44" Y="31"/>
+        <TopLine Value="45"/>
+        <CursorPos X="14" Y="65"/>
         <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -120,7 +121,7 @@
         <UsageCount Value="10"/>
       </Unit8>
     </Units>
-    <JumpHistory Count="21" HistoryIndex="20">
+    <JumpHistory Count="23" HistoryIndex="22">
       <Position1>
         <Filename Value="../../Units/MMLCore/ocr.pas"/>
         <Caret Line="526" Column="53" TopLine="508"/>
@@ -205,15 +206,23 @@
         <Filename Value="ocrtoolunit.pas"/>
         <Caret Line="227" Column="38" TopLine="191"/>
       </Position21>
+      <Position22>
+        <Filename Value="ocrtoolunit.pas"/>
+        <Caret Line="221" Column="51" TopLine="191"/>
+      </Position22>
+      <Position23>
+        <Filename Value="ocrtoolunit.pas"/>
+        <Caret Line="163" Column="47" TopLine="142"/>
+      </Position23>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
     <Target>
       <Filename Value="OCRTool"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir)"/>
+      <IncludeFiles Value="$(ProjOutDir);../../Projects/Simba"/>
       <OtherUnitFiles Value="../../Units/MMLCore;../../Units/Misc/DCPCrypt;../../Units/MMLAddon;../../Units/Misc;../../Units/Linux;$(LazarusDir)/components/mouseandkeyinput"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
