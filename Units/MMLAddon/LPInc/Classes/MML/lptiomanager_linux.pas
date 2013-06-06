@@ -14,12 +14,13 @@ procedure Register_TIOManager(Compiler: TLapeCompiler);
 implementation
 
 uses
-  iomanager, os_linux, MufasaTypes, xlib;
+  iomanager, os_linux, MufasaTypes, xlib, x;
 
 type
   PIOManager = ^TIOManager;
   PNativeWindow = ^TNativeWindow;
   PPDisplay = ^PDisplay;
+  PWindow = ^x.TWindow;
 
 //constructor Create;
 procedure TIOManager_Init(const Params: PParamArray); lape_extdecl
@@ -84,7 +85,7 @@ end;
 //Read: desktop: x.TWindow;
 procedure TIOManager_desktop_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  Px.TWindow(Result)^ := PIOManager(Params^[0])^.desktop;
+  PWindow(Result)^ := PIOManager(Params^[0])^.desktop;
 end;
 
 //Write: desktop: x.TWindow;
@@ -103,7 +104,7 @@ procedure Register_TIOManager(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, 'TIOManager', 'TIOManager_Abstract');
+    addClass('TIOManager', 'TIOManager_Abstract');
 
     addGlobalType('UInt32', 'TNativeWindow');
     addGlobalType('Pointer', 'PDisplay'); //TODO: Export properly
@@ -111,12 +112,12 @@ begin
     addGlobalFunc('procedure TIOManager.Init();', @TIOManager_Init);
     addGlobalFunc('procedure TIOManager.Init(plugin_dir: string); overload;', @TIOManager_InitEx);
     addGlobalFunc('function TIOManager.SetTarget(target: TNativeWindow): integer;', @TIOManager_SetTarget);
-    addGlobalFunc('procedure TIOManager.SetDesktop; override();', @TIOManager_SetDesktop; override);
+    addGlobalFunc('procedure TIOManager.SetDesktop; override();', @TIOManager_SetDesktop);
     addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr; override;', @TIOManager_GetProcesses);
     addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc);', @TIOManager_SetTargetEx);
-    addClassVar(Compiler, 'TIOManager', 'display', 'PDisplay', @TIOManager_display_Read, @TIOManager_display_Write);
-    addClassVar(Compiler, 'TIOManager', 'screennum', 'integer', @TIOManager_screennum_Read, @TIOManager_screennum_Write);
-    addClassVar(Compiler, 'TIOManager', 'desktop', 'TNativeWindow', @TIOManager_desktop_Read, @TIOManager_desktop_Write);
+    addClassVar('TIOManager', 'display', 'PDisplay', @TIOManager_display_Read, @TIOManager_display_Write);
+    addClassVar('TIOManager', 'screennum', 'integer', @TIOManager_screennum_Read, @TIOManager_screennum_Write);
+    addClassVar('TIOManager', 'desktop', 'TNativeWindow', @TIOManager_desktop_Read, @TIOManager_desktop_Write);
     addGlobalFunc('procedure TIOManager.Free();', @TIOManager_Free);
   end;
 end;
