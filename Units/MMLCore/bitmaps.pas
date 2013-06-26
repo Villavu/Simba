@@ -74,7 +74,7 @@ type
     procedure DrawTPA(Points : TPointArray; Color : TColor);
     procedure DrawToCanvas(x,y : integer; Canvas : TCanvas);
     procedure LineTo(Src,Dst: TPoint;Color: TColor);
-    function CreateTPA(SearchCol : TColor) : TPointArray;
+    function FindColors(var points: TPointArray; const color: integer): boolean;
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(Points : TPointArray) : TIntegerArray;
     function GetAreaColors(xs,ys,xe,ye : integer) : T2DIntArray;
@@ -363,7 +363,7 @@ end;
 function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;
 begin
   Result := GetNewIndex;
-  
+
   BmpArray[Result] := _bmp;
   BmpArray[Result].Index := Result;
   BmpArray[Result].List := Self;
@@ -555,11 +555,11 @@ begin
       Inc(FreeSpotsLen);
       SetLength(FreeSpots, FreeSpotsLen);
     end;
-	
+
     FreeSpots[FreeSpotsHigh] := Number;
   end else
     Dec(BmpsCurr);
-  
+
   BMPArray[Number] := nil;
   Result.Index := -1;
   Result.List := nil;
@@ -934,32 +934,30 @@ begin
   Self.DrawTPA(TPA,Color);
 end;
 
-function TMufasaBitmap.CreateTPA(SearchCol: TColor): TPointArray;
+function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): boolean;
 var
-  x,y,L : Integer;
-  StartPtr : PRGB32;
-  Search : TRGB32;
+  x, y, i, bmpW, bmpH: integer;
 begin
-  SetLength(Result,self.Width * Self.Height);
-  L := 0;
-  Search := RGBToBGR(SearchCol);
-  StartPtr := Self.FData;
-  For y := 0 to Self.h - 1 do
-    For x := 0 to self.w - 1 do
-    begin
-      StartPtr^.A := 0;
-      if LongWord(StartPtr^) = LongWord(Search) then
-      begin;
-        L := L + 1;
-        Result[L].x := x;
-        Result[L].y := y;
+  bmpW := width;
+  bmpH := height;
+
+  i := 0;
+
+  SetLength(points, bmpW * bmpH);
+
+  for x := 0 to (bmpW - 1) do
+    for y := 0 to (bmpH - 1) do
+      if (fastGetPixel(x, y) = color) then
+      begin
+        points[i].x := x;
+        points[i].y := y;
+
+        inc(i);
       end;
-    end;
-  SetLength(Result,L + 1);
+
+  setLength(points, i);
+  result := length(points) > 0;
 end;
-
-
-
 
 function TMufasaBitmap.FastGetPixel(x, y: integer): TColor;
 begin

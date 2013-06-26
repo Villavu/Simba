@@ -432,6 +432,7 @@ AddFunction(@ps_FastSetPixels,'procedure FastSetPixels(bmp : integer; TPA : TPoi
 AddFunction(@ps_FastGetPixel,'function FastGetPixel(bmp, x,y : integer) : TColor;');
 AddFunction(@ps_FastGetPixels,'function FastGetPixels(Bmp : integer; TPA : TPointArray) : TIntegerArray;');
 AddFunction(@ps_GetBitmapAreaColors,'function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntegerArray;');
+AddFunction(@ps_FindColorsBitmap, 'function FindColorsBitmap(bmp: integer; var points: TPointArray; const color: integer): boolean;');
 AddFunction(@ps_FastDrawClear,'procedure FastDrawClear(bmp : integer; Color : TColor);');
 AddFunction(@ps_FastDrawTransparent,'procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer);');
 AddFunction(@ps_SetTransparentColor,'procedure SetTransparentColor(bmp : integer; Color : TColor);');
