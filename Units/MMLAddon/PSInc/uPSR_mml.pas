@@ -124,6 +124,7 @@ begin
     RegisterMethod(@TMufasaBitmap.DrawATPA,'DrawATPA');
     RegisterMethod(@TMufasaBitmap.DrawTPA,'DrawTPA');
     RegisterMethod(@TMufasaBitmap.LineTo,'LineTo');
+    RegisterMethod(@TMufasaBitmap.FindColors,'FindColors');
     RegisterMethod(@TMufasaBitmap.DrawToCanvas, 'DrawToCanvas');
     RegisterMethod(@TMufasaBitmap.FloodFill,'FloodFill');
     RegisterMethod(@TMufasaBitmap.Rectangle,'Rectangle');

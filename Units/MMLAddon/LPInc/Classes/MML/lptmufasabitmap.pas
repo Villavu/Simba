@@ -172,10 +172,10 @@ begin
   PMufasaBitmap(Params^[0])^.LineTo(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
 end;
 
-//function CreateTPA(SearchCol : TColor) : TPointArray;
-procedure TMufasaBitmap_CreateTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
+//function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): boolean;
+procedure TMufasaBitmap_FindColors(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.CreateTPA(PColor(Params^[1])^);
+  PBoolean(result)^ := PMufasaBitmap(Params^[0])^.FindColors(PPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
 //function FastGetPixel(x,y : integer) : TColor;
@@ -458,7 +458,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.DrawTPA(Points : TPointArray; Color : TColor);', @TMufasaBitmap_DrawTPA);
     addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas : TCanvas);', @TMufasaBitmap_DrawToCanvas);
     addGlobalFunc('procedure TMufasaBitmap.LineTo(Src,Dst: TPoint;Color: TColor);', @TMufasaBitmap_LineTo);
-    addGlobalFunc('function TMufasaBitmap.CreateTPA(SearchCol : TColor): TPointArray;', @TMufasaBitmap_CreateTPA);
+    addGlobalFunc('function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): Boolean;', @TMufasaBitmap_FindColors);
     addGlobalFunc('function TMufasaBitmap.GetPixel(x,y : integer): TColor;', @TMufasaBitmap_FastGetPixel);
     addGlobalFunc('function TMufasaBitmap.GetPixels(Points : TPointArray): TIntegerArray;', @TMufasaBitmap_FastGetPixels);
     addGlobalFunc('function TMufasaBitmap.GetAreaColors(xs,ys,xe,ye : integer): T2DIntArray;', @TMufasaBitmap_GetAreaColors);
