@@ -410,6 +410,8 @@ AddGlobalFunc('procedure SortTPAFrom(var a: TPointArray; const From: TPoint);', 
 AddGlobalFunc('procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFrom);
 AddGlobalFunc('procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPoint);
 AddGlobalFunc('procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromMidPoint);
+AddGlobalFunc('procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPointX);
+AddGlobalFunc('procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPointY);
 AddGlobalFunc('procedure InvertTPA(var a: TPointArray);', @Lape_InvertTPA);
 AddGlobalFunc('procedure InvertATPA(var a: T2DPointArray);', @Lape_InvertATPA);
 AddGlobalFunc('function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean', @Lape_MiddleTPAEx);

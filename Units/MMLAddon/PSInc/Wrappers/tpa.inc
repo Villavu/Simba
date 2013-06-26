@@ -89,6 +89,16 @@ begin
   SortATPAFromMidPoint(a,from);
 end;
 
+procedure ps_SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint); extdecl;
+begin
+  SortATPAFromFirstPointX(a, From);
+end;
+
+procedure ps_SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint); extdecl;
+begin
+  SortATPAFromFirstPointY(a, From);
+end;
+
 procedure ps_InvertTPA(var a: TPointArray); extdecl;
 begin
   InvertTPA(a);

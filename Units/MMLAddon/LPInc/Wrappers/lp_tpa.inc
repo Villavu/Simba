@@ -507,3 +507,13 @@ procedure Lape_GlueTPAs(const Params: PParamArray; const Result: Pointer); lape_
 begin
  PPointArray(Result)^:= ps_GlueTPAs(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
+
+procedure Lape_SortATPAFromFirstPointX(const Params: PParamArray); lape_extdecl
+begin
+  ps_SortATPAFromFirstPointX(P2DPointArray(Params^[0])^, PPoint(Params^[1])^);
+end;
+
+procedure Lape_SortATPAFromFirstPointY(const Params: PParamArray); lape_extdecl
+begin
+  ps_SortATPAFromFirstPointY(P2DPointArray(Params^[0])^, PPoint(Params^[1])^);
+end;

@@ -54,6 +54,8 @@ procedure SortTPAFrom(var a: TPointArray; const From: TPoint);
 procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);
 procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);
 procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);
 procedure InvertTPA(var a: TPointArray);
 procedure InvertATPA(var a: T2DPointArray);
 function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
@@ -713,6 +715,54 @@ begin
     MidPt := MiddleTPA(a[i]);
     DistArr[i] := Round(Sqr(From.x - MidPt.x) + Sqr(From.y - MidPt.y));
   end;
+  QuickATPASort(DistArr, a, 0, l, True);
+end;
+
+{/\
+  Sorts the T2DPointArray a from the first X point of each TPA by from.
+/\}
+procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);
+var
+   i, l: Integer;
+   DistArr: TIntegerArray;
+begin
+  l := High(a);
+  if (l < 0) then
+    Exit;
+
+  SetLength(DistArr, l + 1);
+  for i := 0 to l do
+  begin
+    if (length(a[i]) <= 0) then
+      continue;
+
+    DistArr[i] := Round(Sqr(From.x - a[i][0].x));
+  end;
+
+  QuickATPASort(DistArr, a, 0, l, True);
+end;
+
+{/\
+  Sorts the T2DPointArray a from the first Y point of each TPA by from.
+/\}
+procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);
+var
+   i, l: Integer;
+   DistArr: TIntegerArray;
+begin
+  l := high(a);
+  if (l < 0) then
+    Exit;
+
+  setLength(DistArr, l + 1);
+  for i := 0 to l do
+  begin
+    if (length(a[i]) <= 0) then
+      continue;
+
+    DistArr[i] := Round(Sqr(From.y - a[i][0].y));
+  end;
+
   QuickATPASort(DistArr, a, 0, l, True);
 end;
 

@@ -492,6 +492,8 @@ AddFunction(@ps_SortTPAFrom,'procedure SortTPAFrom(var a: TPointArray; const Fro
 AddFunction(@ps_SortATPAFrom,'procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_SortATPAFromFirstPoint,'procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_SortATPAFromMidPoint,'procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);');
+AddFunction(@ps_SortATPAFromFirstPointX,'procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);');
+AddFunction(@ps_SortATPAFromFirstPointY,'procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_InvertTPA,'procedure InvertTPA(var a: TPointArray);');
 AddFunction(@ps_InvertATPA,'procedure InvertATPA(var a: T2DPointArray);');
 AddFunction(@ps_MiddleTPAEx,'function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;');
