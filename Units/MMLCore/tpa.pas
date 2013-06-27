@@ -60,8 +60,11 @@ procedure InvertTPA(var a: TPointArray);
 procedure InvertATPA(var a: T2DPointArray);
 function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
 function MiddleTPA(const tpa: TPointArray): TPoint;
+procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);
+function MedianTPA(var tpa: TPointArray): TPoint;
 procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);
 procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
+procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
 function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray;
 function CombineIntArray(const Ar1, Ar2: TIntegerArray): TIntegerArray;
 function InIntArrayEx(const a: TIntegerArray; var Where: Integer; const Number: Integer): Boolean;
@@ -844,6 +847,34 @@ begin
 end;
 
 {/\
+  Returns the x and y coords of the point in the tpa which is closest to the middle of the tpa.
+/\}
+procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);
+var
+  p: TPoint;
+begin
+  x := -1;
+  y := -1;
+
+  if (length(tpa) < 1) then
+    exit;
+
+  p := middleTPA(tpa);
+  sortTPAFrom(tpa, p);
+
+  x := tpa[0].x;
+  y := tpa[0].y;
+end;
+
+{/\
+  Returns the *point in the tpa* closest to the middle of the tpa.
+/\}
+function MedianTPA(var tpa: TPointArray): TPoint;
+begin
+  MedianTPAEx(tpa, result.x, result.y);
+end;
+
+{/\
   Sorts the T2DPointArray a from either largest or smallest, by the amount of points in the TPAs.
 /\}
 
@@ -875,6 +906,38 @@ begin
   for i := 0 to l do
     SizeArr[i] := Abs(Length(a[i]) - Size);
   QuickATPASort(SizeArr, a, 0, l, CloseFirst);
+end;
+
+procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
+var
+  tmpATPA: T2DPointArray;
+  l, i, x, a: integer;
+begin
+  if (minLength > maxLength) then
+  begin
+    writeln('FilterTPAsBetween: Tour min length is greater than your max length');
+    exit;
+  end;
+
+  l := length(atpa);
+  a := 0;
+
+  if (l < 1) then
+    exit;
+
+  for i := 0 to (l - 1) do
+  begin
+    x := length(atpa[i]);
+
+    if (not inRange(x, minLength, maxLength)) then
+    begin
+      setLength(tmpATPA, a + 1);
+      tmpATPA[a] := atpa[i];
+      inc(a);
+    end;
+  end;
+
+  atpa := tmpATPA;
 end;
 
 {/\
