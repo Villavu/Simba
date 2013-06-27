@@ -517,3 +517,18 @@ procedure Lape_SortATPAFromFirstPointY(const Params: PParamArray); lape_extdecl
 begin
   ps_SortATPAFromFirstPointY(P2DPointArray(Params^[0])^, PPoint(Params^[1])^);
 end;
+
+procedure Lape_FilterTPAsBetween(const Params: PParamArray); lape_extdecl
+begin
+  ps_filterTPAsBetween(P2DPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_MedianTPAEx(const Params: PParamArray); lape_extdecl
+begin
+  ps_MedianTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_MedianTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPoint(Result)^ := ps_MedianTPA(PPointArray(Params^[0])^);
+end;

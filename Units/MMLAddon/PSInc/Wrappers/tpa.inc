@@ -515,3 +515,18 @@ begin
   result:=GlueTPAs(V1,V2,IsSortedAscending,byDifference);
 end;
 
+procedure ps_FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer); extdecl;
+begin
+  filterTPAsBetween(atpa, minLength, maxLength);
+end;
+
+procedure ps_MedianTPAEx(var tpa: TPointArray; out x, y: integer); extdecl;
+begin
+  MedianTPAEx(tpa, x, y);
+end;
+
+function ps_MedianTPA(var tpa: TPointArray): TPoint; extdecl;
+begin
+  result := MedianTPA(tpa);
+end;
+
