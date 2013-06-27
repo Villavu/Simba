@@ -432,6 +432,7 @@ AddFunction(@ps_FastSetPixels,'procedure FastSetPixels(bmp : integer; TPA : TPoi
 AddFunction(@ps_FastGetPixel,'function FastGetPixel(bmp, x,y : integer) : TColor;');
 AddFunction(@ps_FastGetPixels,'function FastGetPixels(Bmp : integer; TPA : TPointArray) : TIntegerArray;');
 AddFunction(@ps_GetBitmapAreaColors,'function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntegerArray;');
+AddFunction(@ps_FindColorsBitmap, 'function FindColorsBitmap(bmp: integer; var points: TPointArray; const color: integer): boolean;');
 AddFunction(@ps_FastDrawClear,'procedure FastDrawClear(bmp : integer; Color : TColor);');
 AddFunction(@ps_FastDrawTransparent,'procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer);');
 AddFunction(@ps_SetTransparentColor,'procedure SetTransparentColor(bmp : integer; Color : TColor);');
@@ -492,12 +493,17 @@ AddFunction(@ps_SortTPAFrom,'procedure SortTPAFrom(var a: TPointArray; const Fro
 AddFunction(@ps_SortATPAFrom,'procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_SortATPAFromFirstPoint,'procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_SortATPAFromMidPoint,'procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);');
+AddFunction(@ps_SortATPAFromFirstPointX,'procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);');
+AddFunction(@ps_SortATPAFromFirstPointY,'procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);');
 AddFunction(@ps_InvertTPA,'procedure InvertTPA(var a: TPointArray);');
 AddFunction(@ps_InvertATPA,'procedure InvertATPA(var a: T2DPointArray);');
 AddFunction(@ps_MiddleTPAEx,'function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;');
 AddFunction(@ps_MiddleTPA,'function MiddleTPA(const tpa: TPointArray): TPoint;');
+AddFunction(@ps_MedianTPAEx, 'procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);');
+AddFunction(@ps_MedianTPA, 'function MedianTPA(var tpa: TPointArray): TPoint;');
 AddFunction(@ps_SortATPASize,'procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);');
 AddFunction(@ps_SortATPAFromSize,'procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);');
+AddFunction(@ps_FilterTPAsBetween, 'procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);');
 AddFunction(@ps_InIntArrayEx,'function InIntArrayEx(const a: TIntegerArray; var Where: Integer; const Number: Integer): Boolean;');
 AddFunction(@ps_InIntArray,'function InIntArray(const a: TIntegerArray; Number: Integer): Boolean;');
 AddFunction(@ps_ClearSameIntegers,'procedure ClearSameIntegers(var a: TIntegerArray);');

@@ -410,12 +410,17 @@ AddGlobalFunc('procedure SortTPAFrom(var a: TPointArray; const From: TPoint);', 
 AddGlobalFunc('procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFrom);
 AddGlobalFunc('procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPoint);
 AddGlobalFunc('procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromMidPoint);
+AddGlobalFunc('procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPointX);
+AddGlobalFunc('procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);', @Lape_SortATPAFromFirstPointY);
 AddGlobalFunc('procedure InvertTPA(var a: TPointArray);', @Lape_InvertTPA);
 AddGlobalFunc('procedure InvertATPA(var a: T2DPointArray);', @Lape_InvertATPA);
 AddGlobalFunc('function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean', @Lape_MiddleTPAEx);
 AddGlobalFunc('function MiddleTPA(const tpa: TPointArray): TPoint', @Lape_MiddleTPA);
+AddGlobalFunc('procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);', @Lape_MedianTPAEx);
+AddGlobalFunc('function MedianTPA(var tpa: TPointArray): TPoint;', @Lape_MedianTPA);
 AddGlobalFunc('procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);', @Lape_SortATPASize);
 AddGlobalFunc('procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);', @Lape_SortATPAFromSize);
+AddGlobalFunc('procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);', @Lape_FilterTPAsBetween);
 AddGlobalFunc('function InIntArrayEx(const a: TIntegerArray; var Where: Integer; const Number: Integer): Boolean', @Lape_InIntArrayEx);
 AddGlobalFunc('function InIntArray(const a: TIntegerArray; Number: Integer): Boolean', @Lape_InIntArray);
 AddGlobalFunc('procedure ClearSameIntegers(var a: TIntegerArray);', @Lape_ClearSameIntegers);

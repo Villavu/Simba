@@ -89,6 +89,16 @@ begin
   SortATPAFromMidPoint(a,from);
 end;
 
+procedure ps_SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint); extdecl;
+begin
+  SortATPAFromFirstPointX(a, From);
+end;
+
+procedure ps_SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint); extdecl;
+begin
+  SortATPAFromFirstPointY(a, From);
+end;
+
 procedure ps_InvertTPA(var a: TPointArray); extdecl;
 begin
   InvertTPA(a);
@@ -503,5 +513,20 @@ end;
 function ps_GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray; extdecl;
 begin
   result:=GlueTPAs(V1,V2,IsSortedAscending,byDifference);
+end;
+
+procedure ps_FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer); extdecl;
+begin
+  filterTPAsBetween(atpa, minLength, maxLength);
+end;
+
+procedure ps_MedianTPAEx(var tpa: TPointArray; out x, y: integer); extdecl;
+begin
+  MedianTPAEx(tpa, x, y);
+end;
+
+function ps_MedianTPA(var tpa: TPointArray): TPoint; extdecl;
+begin
+  result := MedianTPA(tpa);
 end;
 
