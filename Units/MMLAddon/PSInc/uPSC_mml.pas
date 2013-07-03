@@ -20,6 +20,7 @@ begin
     RegisterMethod('procedure DrawATPA(ATPA : T2DPointArray; Colors : TIntegerArray);');
     RegisterMethod('procedure DrawTPA(TPA : TPointArray; Color : TColor);');
     RegisterMethod('procedure LineTo(Src,Dest: TPoint; Color : TColor);');
+    RegisterMethod('function FindColors(var points: TPointArray; const color: integer): boolean;');
     RegisterMethod('procedure DrawToCanvas(x, y: Integer; Canvas: TCanvas);');
     RegisterMethod('function FastGetPixel(x,y : integer) : TColor;');
     RegisterMethod('procedure CopyClientToBitmap(IOManager : TObject; Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);');
