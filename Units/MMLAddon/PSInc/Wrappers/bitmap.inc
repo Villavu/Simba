@@ -357,3 +357,8 @@ begin
   with CurrThread.Client.MBitmaps do
     result := ExistsBMP(Index);
 end;
+
+function ps_FindColorsBitmap(bmp: integer; var points: TPointArray; const color: integer): boolean; extdecl;
+begin;
+  result := CurrThread.Client.MBitmaps[bmp].findColors(points, color);
+end;
