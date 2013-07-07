@@ -93,3 +93,8 @@ begin
   PStringArray(Result)^ := ps_MultiBetween(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
+procedure Lape_IsArrInStr(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_IsArrInStr(PStringArray(Params^[0])^, PString(Params^[1])^);
+end;
+

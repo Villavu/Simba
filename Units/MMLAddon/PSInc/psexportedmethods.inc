@@ -117,6 +117,8 @@ AddFunction(@ps_MinA, 'function MinA(a: TIntegerArray): Integer;');
 AddFunction(@ps_MaxA, 'function MaxA(a: TIntegerArray): Integer;');
 AddFunction(@ps_Sum64IntArr, 'function Sum64IntArr(const Arr: TIntegerArray): Int64;');
 AddFunction(@ps_FixRad, 'function FixRad(rad: Extended): Extended;');
+AddFunction(@ps_MiddleBox,'function MiddleBox(b : TBox) : TPoint;');
+AddFunction(@ps_InAbstractBox, 'function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;');
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 {window}
@@ -258,6 +260,7 @@ AddFunction(@ps_ExecRegExpr,'function ExecRegExpr( const RegExpr, InputStr : Str
 AddFunction(@ps_SplitRegExpr,'procedure SplitRegExpr( const RegExpr, InputStr : String; Pieces : TStringList);');
 AddFunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
 AddFunction(@ps_posex, 'function PosEx(needle, haystack: String; offset: integer): integer;');
+AddFunction(@ps_IsArrInStr, 'function IsArrInStr(strArr: TStringArray; s: string): boolean;');
 
 {crypto}
 SetCurrSection('Crypto');
@@ -583,8 +586,6 @@ AddFunction(@ps_offsetTPA,'procedure OffsetTPA(var TPA : TPointArray; const Offs
 AddFunction(@ps_offsetATPA,'procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);');
 AddFunction(@ps_copyTPA,'function CopyTPA(const TPA : TPointArray) : TPointArray;');
 AddFunction(@ps_CopyATPA,'function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;');
-AddFunction(@ps_MiddleBox,'function MiddleBox(b : TBox) : TPoint;');
-AddFunction(@ps_InAbstractBox, 'function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;');
 AddFunction(@ps_TPAPosNext,'function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;');
 AddFunction(@ps_GlueTPAs, 'function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;');
 
