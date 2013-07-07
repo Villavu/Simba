@@ -389,6 +389,8 @@ AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: Stri
 AddGlobalFunc('function posex(needle, haystack: String; offset: integer): integer', @Lape_posex);
 AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);
 AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_NormLevDist);
+AddGlobalFunc('function StringMatch(checkCompare, goalCompare: string): extended;', @Lape_StringMatch);
+AddGlobalFunc('function MultiBetween(str, s1, s2: string): TStringArray;', @Lape_MultiBetween);
 
 { TPA }
 
