@@ -46,6 +46,7 @@ function LevDistance(src, target: string): Integer;
 function NormLevDistance(src, target: string): Extended;
 function StringMatch(checkCompare, goalCompare: string): extended;
 function MultiBetween(str, s1, s2: string): TStringArray;
+function IsArrInStr(strArr: TStringArray; s: string): boolean;
 
 implementation
 uses
@@ -336,6 +337,21 @@ begin
   until ((e < 1) or (n < 1));
 
   SetLength(Result, r);
+end;
+
+function IsArrInStr(strArr: TStringArray; s: string): boolean;
+var
+  i, h: integer;
+begin
+  result := true;
+  h := high(strArr);
+
+  for i := 0 to h do
+    if (pos(strArr[i], s) > 0) then
+      exit;
+
+  // if we're stil here, we didnt find a match
+  result := false;
 end;
 
 end.

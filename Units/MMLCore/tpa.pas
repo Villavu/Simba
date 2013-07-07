@@ -113,7 +113,6 @@ function SameTPA(const aTPA, bTPA: TPointArray): Boolean;
 function TPAInATPA(const TPA: TPointArray;const InATPA: T2DPointArray; var Index: LongInt): Boolean;
 procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
 procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
-function MiddleBox(b : TBox) : TPoint;
 
 implementation
 
@@ -2764,12 +2763,6 @@ begin
   for i := high(ATPA) downto 0 do
     OffsetTPA(ATPA[i],Offset);
 end;
-
-function MiddleBox(b : TBox) : TPoint;
-begin
-  result := point((b.x2+b.x1) div 2,(b.y2+b.y1) div 2);
-end;
-
 
 end.
 

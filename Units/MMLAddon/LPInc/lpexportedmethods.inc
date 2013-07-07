@@ -162,6 +162,7 @@ AddGlobalFunc('function Sum64IntArr(const Arr: TIntegerArray): Int64;', @Lape_Su
 AddGlobalFunc('function IntToHex(number: Integer): String; overload;', @Lape_IntToHex);
 AddGlobalFunc('function FixRad(rad: Extended): Extended;', @Lape_FixRad);
 AddGlobalFunc('function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;', @Lape_InAbstractBox);
+AddGlobalFunc('function MiddleBox(b: TBox): TPoint', @Lape_MiddleBox);
 
 { Color }
 
@@ -391,6 +392,7 @@ AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDis
 AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_NormLevDist);
 AddGlobalFunc('function StringMatch(checkCompare, goalCompare: string): extended;', @Lape_StringMatch);
 AddGlobalFunc('function MultiBetween(str, s1, s2: string): TStringArray;', @Lape_MultiBetween);
+AddGlobalFunc('function IsArrInStr(strArr: TStringArray; s: string): boolean;', @Lape_IsArrInStr);
 
 { TPA }
 
@@ -498,8 +500,7 @@ AddGlobalFunc('procedure OffsetTPA(var TPA: TPointArray; const Offset: TPoint);'
 AddGlobalFunc('procedure OffsetATPA(var ATPA: T2DPointArray; const Offset: TPoint);', @Lape_OffsetATPA);
 AddGlobalFunc('function CopyTPA(const TPA: TPointArray): TPointArray', @Lape_CopyTPA);
 AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @Lape_CopyATPA);
-AddGlobalFunc('function MiddleBox(b: TBox): TPoint', @Lape_MiddleBox);
-AddGlobalFunc('function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;',@Lape_TPAPosNext);
+AddGlobalFunc('function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;',@Lape_TPAPosNext);
 AddGlobalFunc('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;',@Lape_GlueTPAs);
 
 { Window }

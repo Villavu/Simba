@@ -41,7 +41,8 @@ function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;
 function MinA(a: TIntegerArray): Integer;
 function MaxA(a: TIntegerArray): Integer;
 function fixRad(rad: Extended): Extended; 
-function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean; 
+function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x, y: Integer): Boolean;
+function MiddleBox(b : TBox): TPoint;
 
 
 implementation
@@ -232,7 +233,12 @@ begin
   if (LM <> Pi) and (LM < 0) and (LM * x + LB <= -y) then L := True;
   if (LM = Pi) and (x > x1) then L := True;
   if U and D and L and R then Result := True;
-end;   
+end;
+
+function MiddleBox(b : TBox): TPoint;
+begin
+  result := point((b.x2+b.x1) div 2,(b.y2+b.y1) div 2);
+end;
 
 end.
 
