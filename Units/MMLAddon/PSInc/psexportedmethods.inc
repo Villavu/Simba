@@ -230,10 +230,12 @@ AddFunction(@ps_Base64Decode,'function Base64Decode(const str : string) : string
 AddFunction(@ps_Format,'function Format(const fmt : string;const args : array of const) : string;');
 AddFunction(@ps_LevDist, 'function LevDistance(src, target: string): Integer;');
 AddFunction(@ps_NormLevDist, 'function NormLevDistance(src, target: string): Extended;');
+AddFunction(@ps_StringMatch, 'function StringMatch(checkCompare, goalCompare: string): extended;');
 {$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(nil,'function ToStr(x) : string;');
 {$ENDIF}
 AddFunction(@ps_Between,'function Between(s1, s2, str: string): string;');
+AddFunction(@ps_MultiBetween, 'function MultiBetween(str, s1, s2: string): TStringArray;');
 AddFunction(@ps_IntToStr, 'function IntToStr(value: Integer): String;');
 AddFunction(@ps_FloatToStr, 'function FloatToStr(value: Extended): String;');
 AddFunction(@ps_BoolToStr, 'function BoolToStr(value: Boolean): String;');
