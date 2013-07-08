@@ -354,6 +354,16 @@ Removes the points from the TPointArray Points that are not within the radius Mi
     from the origin Mx and My
 
 
+FilterPointsBox
+---------------
+
+.. code-block:: pascal
+
+    procedure FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer);
+
+Removes the points from the TPointArray that are not within the bounds of the box.
+
+
 GetATPABounds
 -------------
 
