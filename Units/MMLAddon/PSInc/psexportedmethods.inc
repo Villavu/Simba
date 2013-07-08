@@ -520,6 +520,7 @@ AddFunction(@ps_FilterPointsPieEx,'procedure FilterPointsPieEx(var Points: TPoin
 AddFunction(@ps_FilterPointsPie,'procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);');
 AddFunction(@ps_FilterPointsLine,'procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);');
 AddFunction(@ps_filterpointsdist,'procedure FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Integer);');
+AddFunction(@ps_FilterPointsBox, 'procedure FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer);');
 AddFunction(@ps_filterTPADist, 'procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);');
 AddFunction(@ps_GetATPABounds,'function GetATPABounds(const ATPA: T2DPointArray): TBox;');
 AddFunction(@ps_GetTPABounds,'function GetTPABounds(const TPA: TPointArray): TBox;');
