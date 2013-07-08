@@ -80,6 +80,7 @@ function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer; Natural: Boolean);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
+procedure FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer);
 procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
 function RemoveDistTPointArray(x, y, dist: Integer;const ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;
 function GetATPABounds(const ATPA: T2DPointArray): TBox;
@@ -1527,6 +1528,42 @@ begin
   end;
   SetLength(P, Ind);
   Points:= P;
+end;
+
+{/\
+  Removes the points that are not within the box
+/\}
+procedure FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer);
+var
+  h, c, i, tmp: integer;
+begin
+  h := high(points);
+  c := 0;
+
+  if (x1 > x2) then
+  begin
+    tmp := x1;
+
+    x1 := x2;
+    x2 := tmp;
+  end;
+
+  if (y1 > y2) then
+  begin
+    tmp := y1;
+
+    y1 := y2;
+    y2 := tmp;
+  end;
+
+  for i := 0 to h do
+    if (points[i].x > x1) and (points[i].x < x2) and (points[i].y > y1) and (points[i].y < y2) then
+    begin
+      points[c] := points[i];
+      inc(c);
+    end;
+
+  setlength(points,c);
 end;
 
 {/\

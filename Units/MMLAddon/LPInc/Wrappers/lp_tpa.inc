@@ -527,3 +527,8 @@ procedure Lape_MedianTPA(const Params: PParamArray; const Result: Pointer); lape
 begin
   PPoint(Result)^ := ps_MedianTPA(PPointArray(Params^[0])^);
 end;
+
+procedure Lape_FilterPointsBox(const Params: PParamArray); lape_extdecl
+begin
+  ps_FilterPointsBox(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
