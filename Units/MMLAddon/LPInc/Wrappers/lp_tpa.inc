@@ -493,11 +493,6 @@ begin
   P2DPointArray(Result)^ := ps_CopyATPA(P2DPointArray(Params^[0])^);
 end;
 
-procedure Lape_MiddleBox(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PPoint(Result)^ := ps_MiddleBox(PBox(Params^[0])^);
-end;
-
 procedure Lape_TPAPosNext(const Params: PParamArray;const Result: pointer); lape_extdecl
 begin
  PInteger(Result)^:= ps_TPAPosNext(PPoint(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
@@ -531,4 +526,9 @@ end;
 procedure Lape_MedianTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   PPoint(Result)^ := ps_MedianTPA(PPointArray(Params^[0])^);
+end;
+
+procedure Lape_FilterPointsBox(const Params: PParamArray); lape_extdecl
+begin
+  ps_FilterPointsBox(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;

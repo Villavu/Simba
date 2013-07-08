@@ -60,12 +60,33 @@ ToStr
     function ToStr(x) : string;
 
 
+StringMatch
+-----------
+
+.. code-block:: pascal
+
+    function StringMatch(checkCompare, goalCompare: string): extended;
+
+Uses levenshtein distance to work out the match % of the two strings.   
+
+
 Between
 -------
 
 .. code-block:: pascal
 
     function Between(s1, s2, str: string): string;
+
+
+MultiBetween
+------------
+
+.. code-block:: pascal
+
+    function MultiBetween(str, s1, s2: string): TStringArray;
+
+Splits a string into an array of strings by giving it an begin and an end
+tag. Useful for data reading  
 
 
 IntToStr
@@ -241,7 +262,15 @@ PosEx
 
 .. code-block:: pascal
 
-    function PosEx(needle, haystack: String; offset: integer): integer;');  
+    function PosEx(needle, haystack: String; offset: integer): integer;
 
 
+IsArrInStr
+---------
+
+.. code-block:: pascal
+
+    function IsArrInStr(strArr: TStringArray; s: string): boolean;
+
+Returns true if any of the indexes in TStringArray StrArr is found in string s
 

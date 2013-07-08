@@ -82,3 +82,19 @@ procedure Lape_NormLevDist(const Params: PParamArray; const Result: Pointer); la
 begin
   PExtended(Result)^ := ps_NormLevDist(PString(Params^[0])^, PString(Params^[1])^);
 end;
+
+procedure Lape_StringMatch(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PExtended(Result)^ := ps_StringMatch(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure Lape_MultiBetween(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStringArray(Result)^ := ps_MultiBetween(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure Lape_IsArrInStr(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_IsArrInStr(PStringArray(Params^[0])^, PString(Params^[1])^);
+end;
+

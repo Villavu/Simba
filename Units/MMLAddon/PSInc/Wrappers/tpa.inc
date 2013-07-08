@@ -530,3 +530,7 @@ begin
   result := MedianTPA(tpa);
 end;
 
+procedure ps_FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer); extdecl;
+begin
+  FilterPointsBox(points, x1, y1, x2, y2);
+end;

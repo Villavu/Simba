@@ -28,7 +28,7 @@ unit stringutil;
 interface
 
 uses
-  Classes, SysUtils, mufasatypes;
+  Classes, SysUtils,  StrUtils, mufasatypes;
 
 type
   StrExtr =(Numbers, Letters, Others);
@@ -44,6 +44,9 @@ function Base64Encode(const str : string) : string;
 function Base64Decode(const str : string) : string;
 function LevDistance(src, target: string): Integer;
 function NormLevDistance(src, target: string): Extended;
+function StringMatch(checkCompare, goalCompare: string): extended;
+function MultiBetween(str, s1, s2: string): TStringArray;
+function IsArrInStr(strArr: TStringArray; s: string): boolean;
 
 implementation
 uses
@@ -258,6 +261,97 @@ function NormLevDistance(src, target: String): Extended;
 begin
   Result := Max(Length(src), Length(target)) * 1.0;
   Result := LevDistance(src, target) / Result;
+end;
+
+{/\
+  Uses Levenshtein to work out the match % between the two strings.
+/\}
+function StringMatch(checkCompare, goalCompare: string): extended;
+var
+  mismatch, len: extended;
+begin
+  result := 0.00;
+
+  if ((length(checkCompare)=0) or (length(goalCompare)=0)) then
+    exit;
+
+  mismatch := LevDistance(checkCompare, goalCompare);
+
+  len := max(length(checkCompare), length(goalCompare));
+  result := (len-mismatch) / len;
+end;
+
+{/\
+  Splits a string into an array of strings by giving it an begin and an end
+  tag. Useful for data reading.
+/\}
+function MultiBetween(str, s1, s2: string): TStringArray;
+
+  function Between(s1, s2, str: string): string;
+  var
+    I,J : integer;
+  begin;
+    Result := '';
+    I := pos(s1,str);
+    if I > 0 then
+    begin;
+      i := i + length(s1);
+      j := posex(s2,str,i);
+      if j > 0 then
+        Result := copy(str,i,j-i);
+    end;
+  end;
+
+var
+  strL, s1L, s2L, o, n, e, r: Integer;
+begin
+  s1L := Length(s1);
+  s2L := Length(s2);
+  strL := Length(str);
+
+  r := 0;
+  o := 0;
+  n := 0;
+  e := 0;
+
+  if ((s1 = '') or (s2 = '') or (strL <= (s1L + s2L))) then
+    exit;
+
+  SetLength(Result, (strL - (s1L + s2L)));
+
+  repeat
+    n := PosEx(s1, str, (n + 1));
+    if (n < 1) then
+      Break;
+    e := PosEx(s2, str, (n + 1));
+    if (e < 1) then
+      Break;
+    repeat
+      o := n;
+      n := PosEx(s1, str, (n + 1));
+    until ((n >= e) or (n < 1));
+    n := o;
+    Result[r] := Between(s1, s2, Copy(str, n, (s1L + (e + s2L))));
+    if (Result[r] <> '') then
+      Inc(r);
+  until ((e < 1) or (n < 1));
+
+  SetLength(Result, r);
+end;
+
+function IsArrInStr(strArr: TStringArray; s: string): boolean;
+var
+  i, h: integer;
+begin
+  result := true;
+  h := high(strArr);
+
+  for i := 0 to h do
+    if (pos(strArr[i], s) > 0) then
+      exit;
+
+  // if we're stil here, we didnt find a match
+  result := false;
 end;
 
 end.
