@@ -1129,45 +1129,63 @@ end;
 
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
 var
-  t1, t2, c, ec, tc, l: Integer;
+  Dist2, I, II, H, L: Integer;
+  ClusterStart, ClusterEnd: Integer;
+  Clusters, ClusterL: Integer;
+  swapPt: TPoint;
+  Xd, Yd: Integer;
   tpa: TPointArray;
 begin
   tpa := Copy(arr);
-  l := High(tpa);
-  if (l < 0) then Exit;
-  SetLength(Result, l + 1);
-  c := 0;
-  ec := 0;
-  while ((l - ec) >= 0) do
+
+  Dist2 := Dist * Dist;
+
+  H := High(tpa);
+  L := Length(tpa);
+
+  ClusterStart := 0;
+  ClusterEnd := 0;
+  Clusters := 0;
+
+  if (H < 0) then Exit;
+  SetLength(Result, L);
+
+  while (ClusterEnd < L) do
   begin
-    SetLength(Result[c], 1);
-    Result[c][0] := tpa[0];
-    tpa[0] := tpa[l - ec];
-    Inc(ec);
-    tc := 1;
-    t1 := 0;
-    while (t1 < tc) do
-    begin
-      t2 := 0;
-      while (t2 <= (l - ec)) do
+    SetLength(Result[Clusters], L - ClusterEnd);
+    ClusterL := 1;
+    Result[Clusters][0] := tpa[ClusterStart];
+
+    for I := ClusterStart to ClusterEnd do
+      for II := ClusterEnd + 1 to H do
       begin
-        if (Round(sqrt(Sqr(Result[c][t1].x - tpa[t2].x) + Sqr(Result[c][t1].y - tpa[t2].y))) <= Dist) then
+        Xd := tpa[I].x - tpa[II].x;    //x distance
+        if(abs(Xd) <= Dist) then
         begin
-          SetLength(Result[c], tc +1);
-          Result[c][tc] := tpa[t2];
-          tpa[t2] := tpa[l - ec];
-          Inc(ec);
-          Inc(tc);
-          Dec(t2);
+
+          Yd := tpa[I].y - tpa[II].y;    //y distance
+          if(abs(Yd)<= Dist) then
+            if((Xd * Xd) + (Yd * Yd) <= Dist2) then
+            begin
+              Result[Clusters][ClusterL] := tpa[II];
+              Inc(ClusterL);
+              Inc(ClusterEnd);
+
+              swapPt := tpa[II];
+              tpa[II] := tpa[ClusterEnd];
+              tpa[ClusterEnd] := swapPt;
+            end;
         end;
-        Inc(t2);
       end;
-      Inc(t1);
-    end;
-    Inc(c);
+
+    SetLength(Result[Clusters], ClusterL);
+    Inc(ClusterEnd);
+    ClusterStart := ClusterEnd;
+    Inc(Clusters); //add a new cluster
   end;
-  SetLength(Result, c);
-end;
+
+  SetLength(Result, Clusters);
+end;      
 
 function TPAPosNext(const Find: TPoint; const V: TPointArray;
   const PrevPos: Integer; const IsSortedAscending: Boolean): Integer;
