@@ -66,6 +66,7 @@ AddGlobalFunc('function CreateMirroredBitmapEx(Bmp: integer; MirrorStyle: TBmpMi
 AddGlobalFunc('function FastGetPixel(bmp,x,y: integer): LongWord', @Lape_FastGetPixel);
 AddGlobalFunc('function FastGetPixels(bmp: integer; TPA: TPointArray): TIntegerArray', @Lape_FastGetPixels);
 AddGlobalFunc('function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntArray', @Lape_GetBitmapAreaColors);
+AddGlobalFunc('function FindColorsBitmap(bmp: integer; var points: TPointArray; const color: integer): boolean;', @Lape_FindColorsBitmap);
 AddGlobalFunc('procedure FastSetPixel(Bmp,x,y: integer; Color: TColor);', @Lape_FastSetPixel);
 AddGlobalFunc('procedure FastSetPixels(Bmp: integer; TPA: TPointArray; Colors: TIntegerArray);', @Lape_FastSetPixels);
 AddGlobalFunc('procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);', @Lape_DrawTPABitmap);
@@ -315,7 +316,7 @@ AddGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspa
 AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing, color, tol: integer; const font: string): string', @Lape_GetTextAtEx);
 AddGlobalFunc('procedure rs_SetUpTextFilter(filterdata: TOcrFilterDataArray);', @Lape_SetUpTextFilter);
 AddGlobalFunc('procedure rs_ResetUpTextFilter;', @Lape_ResetUpTextFilter);
-//AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
+AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
 AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);', @Lape_FilterUpTextByCharacteristics);
