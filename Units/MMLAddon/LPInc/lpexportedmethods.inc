@@ -101,6 +101,7 @@ AddGlobalFunc('function CreateMirroredBitmapEx(Bmp: integer; MirrorStyle: TBmpMi
 AddGlobalFunc('function FastGetPixel(bmp,x,y: integer): LongWord', @Lape_FastGetPixel);
 AddGlobalFunc('function FastGetPixels(bmp: integer; TPA: TPointArray): TIntegerArray', @Lape_FastGetPixels);
 AddGlobalFunc('function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntArray', @Lape_GetBitmapAreaColors);
+AddGlobalFunc('function FindColorsBitmap(bmp: integer; var points: TPointArray; const color: integer): boolean;', @Lape_FindColorsBitmap);
 AddGlobalFunc('procedure FastSetPixel(Bmp,x,y: integer; Color: TColor);', @Lape_FastSetPixel);
 AddGlobalFunc('procedure FastSetPixels(Bmp: integer; TPA: TPointArray; Colors: TIntegerArray);', @Lape_FastSetPixels);
 AddGlobalFunc('procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);', @Lape_DrawTPABitmap);
