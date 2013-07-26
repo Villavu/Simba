@@ -634,6 +634,18 @@ begin
   PControl(Params^[0])^.Width := PInteger(Params^[1])^;
 end;
 
+//Read: property Parent: TWinControl;
+procedure TControl_Parent_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PWinControl(Result)^ := PControl(Params^[0])^.Parent;
+end;
+
+//Write: property Parent: TWinControl;
+procedure TControl_Parent_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Parent := PWinControl(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TControl_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -729,6 +741,7 @@ begin
     addClassVar('TControl', 'Height', 'Integer', @TControl_Height_Read, @TControl_Height_Write);
     addClassVar('TControl', 'Top', 'Integer', @TControl_Top_Read, @TControl_Top_Write);
     addClassVar('TControl', 'Width', 'Integer', @TControl_Width_Read, @TControl_Width_Write);
+    addClassVar('TControl', 'Parent', 'TControl', @TControl_Parent_Read, @TControl_Parent_Write); //FIXME: Should be OS-Depend TControl
     addGlobalFunc('procedure TControl.Free();', @TControl_Free);
   end;
 end;
