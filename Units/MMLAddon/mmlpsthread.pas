@@ -119,13 +119,11 @@ type
     protected
       AppPath, DocPath, ScriptPath, ScriptFile, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
-      ExportedMethods : TExpMethodArr;
       Includes : TStringList;
       FOpenConnectionEvent : TOpenConnectionEvent;
       FWriteFileEvent : TWriteFileEvent;
       FOpenFileEvent : TOpenFileEvent;
       procedure LoadPlugin(plugidx: integer); virtual; abstract;
-
     public
       Prop: TScriptProperties;
       Client: TClient;
@@ -143,6 +141,8 @@ type
       OnError  : TOnError; //Error handeler
 
       CompileOnly : boolean;
+
+      ExportedMethods: TExpMethodArr;
 
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
@@ -168,7 +168,7 @@ type
       constructor Create(CreateSuspended: boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
       destructor Destroy; override;
 
-      class function GetExportedMethods : TExpMethodArr;
+      class function GetExportedMethods: TExpMethodArr; virtual; abstract;
 
       property OpenConnectionEvent : TOpenConnectionEvent read FOpenConnectionEvent write SetOpenConnectionEvent;
       property WriteFileEvent : TWriteFileEvent read FWriteFileEvent write SetWriteFileEvent;
@@ -206,6 +206,9 @@ type
         PSScript: TPSScriptExtension;
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
+
+        class function GetExportedMethods: TExpMethodArr; override;
+
         procedure SetScript(script: string); override;
         procedure Execute; override;
         procedure Terminate; override;
@@ -225,6 +228,9 @@ type
 
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
+
+     class function GetExportedMethods: TExpMethodArr; override;
+
      procedure SetScript(Script: string); override;
      procedure SetFonts(Fonts: TMFonts); override;
      procedure Execute; override;
@@ -612,38 +618,6 @@ end;
 {$I PSInc/Wrappers/internets.inc}
 {$I PSInc/psmethods.inc}
 
-class function TMThread.GetExportedMethods: TExpMethodArr;
-var
-  c : integer;
-  CurrSection : string;
-
-procedure SetCurrSection(str : string);
-begin;
-  CurrSection := Str;
-end;
-
-procedure AddFunction( Ptr : Pointer; DeclStr : String);
-begin;
-  if c >= 600 then
-    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
-
-  Result[c].FuncDecl:= DeclStr;
-  Result[c].FuncPtr:= Ptr;
-  Result[c].Section:= CurrSection;
-
-  Inc(c);
-end;
-
-begin
-  c := 0;
-  CurrSection := 'Other';
-  SetLength(Result, 500);
-
-  {$i PSInc/psexportedmethods.inc}
-
-  SetLength(Result, c);
-end;
-
 {***implementation TPSThread***}
 
 constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
@@ -691,6 +665,38 @@ destructor TPSThread.Destroy;
 begin
   PSScript.Free;
   inherited;
+end;
+
+class function TPSThread.GetExportedMethods: TExpMethodArr;
+var
+  c : integer;
+  CurrSection : string;
+
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
+procedure AddFunction( Ptr : Pointer; DeclStr : String);
+begin;
+  if c >= 600 then
+    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
+
+  Result[c].FuncDecl:= DeclStr;
+  Result[c].FuncPtr:= Ptr;
+  Result[c].Section:= CurrSection;
+
+  Inc(c);
+end;
+
+begin
+  c := 0;
+  CurrSection := 'Other';
+  SetLength(Result, 500);
+
+  {$i PSInc/psexportedmethods.inc}
+
+  SetLength(Result, c);
 end;
 
 procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
@@ -1343,6 +1349,7 @@ end;
 {$I LPInc/Wrappers/lp_internets.inc}
 
 constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
+  procedure SetCurrSection(x: string); begin end;
 var
   I: integer;
 begin
@@ -1427,6 +1434,40 @@ begin
   end;
 
   inherited Destroy;
+end;
+
+class function TLPThread.GetExportedMethods: TExpMethodArr;
+var
+  c : integer;
+  CurrSection : string;
+
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
+procedure AddGlobalFunc(DeclStr: string; Ptr: Pointer);
+begin;
+  if c >= 600 then
+    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
+
+  Result[c].FuncDecl:= DeclStr;
+  Result[c].FuncPtr:= Ptr;
+  Result[c].Section:= CurrSection;
+
+  Inc(c);
+end;
+
+begin
+  c := 0;
+  CurrSection := 'Other';
+  SetLength(Result, 500);
+
+  {$DEFINE FUNC_LIST}
+  {$i LPInc/lpexportedmethods.inc}
+  {$UNDEF FUNC_LIST}
+
+  SetLength(Result, c);
 end;
 
 procedure TLPThread.SetScript(Script: string);
