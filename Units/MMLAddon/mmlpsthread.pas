@@ -152,6 +152,7 @@ type
                     Active: Boolean;
                     DirectiveName, DirectiveArgs: string; Filename:String): boolean;
       function LoadFile(ParentFile: string; var FileName, Content: string): boolean;
+
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
@@ -232,8 +233,8 @@ type
      function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
      function Natify(s: string): Pointer;
      function Natify(c: TCodePos): Pointer; overload;
+     procedure GetValueDefs(aItems: TStrings);
    end;
-   {$ENDIF}
 
    TSyncMethod = class
    private
@@ -242,6 +243,8 @@ type
      constructor Create(Method: Pointer);
      procedure Call;
    end;
+
+   {$ENDIF}
 
 threadvar
   CurrThread : TMThread;
@@ -431,6 +434,7 @@ end;
 
 procedure TMThread.AddMethod(meth: TExpMethod);
 begin
+  raise Exception.Create('AddMethod not Implememnted!');
 end;
 
 function TMThread.LoadFile(ParentFile: string; var FileName, Content: string): boolean;
@@ -620,12 +624,14 @@ end;
 
 procedure AddFunction( Ptr : Pointer; DeclStr : String);
 begin;
-  if c >= 500 then
-    raise exception.create('PSThread.LoadMethods: Exported more than 500 functions');
+  if c >= 600 then
+    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
+
   Result[c].FuncDecl:= DeclStr;
   Result[c].FuncPtr:= Ptr;
   Result[c].Section:= CurrSection;
-  inc(c);
+
+  Inc(c);
 end;
 
 begin
@@ -635,7 +641,7 @@ begin
 
   {$i PSInc/psexportedmethods.inc}
 
-  SetLength(Result,c);
+  SetLength(Result, c);
 end;
 
 {***implementation TPSThread***}
@@ -1606,7 +1612,76 @@ procedure TLPThread.Terminate;
 begin
   Running := bFalse;
 end;
-{$ENDIF}
+
+procedure TLPThread.GetValueDefs(aItems: TStrings);
+var
+  H, I, J, K: UInt32;
+  DeclArr: TLapeDeclArray;
+  Str: string;
+  DontAdd: Boolean;
+  TypesStr: array[ELapeBaseType] of string = ('', 'SmallInt', 'Byte', 'Word', 'ShortInt', 'LongWord', 'Integer', '', '',
+    'Single', 'Double', 'Currency', 'Extended', 'Boolean', '', '', '', 'Char', '', '', 'string', '', '', 'Variant', '', '', '', '', 'Pointer', '', '', '', '', '', '');
+begin
+  DeclArr := Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar, bTrue);
+  H := High(DeclArr);
+  for I := 0 to H do
+    with TLapeGlobalVar(DeclArr[I]) do
+      if (BaseType = ltImportedMethod) then
+        with TLapeType_Method(VarType) do
+        begin
+          if (TLapeGlobalVar(DeclArr[I]).Name[1] = '!') or (TLapeGlobalVar(DeclArr[I]).Name[1] = '_') then
+            Continue;
+
+          DontAdd := False;
+          Str := '';
+
+          if (Assigned(Res)) then
+            Str += 'function '
+          else
+            Str += 'procedure ';
+
+          Str += TLapeGlobalVar(DeclArr[I]).Name + '(';
+
+          J := ParamSize - 1;
+          if (J = 4294967295) then
+            Continue;
+
+          for K := 0 to J do
+          begin
+            if (not Assigned(Params[K].VarType)) and (Params[K].ParType = lptNormal) then
+              Continue;
+
+            if (K > 0) and (Str[Length(Str)] <> '(') then
+              Str += '; ';
+
+            case Params[K].ParType of
+              lptConst: Str += 'const ';
+              lptVar: Str += 'var ';
+              lptOut: Str += 'out ';
+            end;
+
+            Str += 'Param' + IntToStr(K);
+
+            if (Assigned(Params[K].VarType)) then
+            begin
+              Str += ': ' + TypesStr[Params[K].VarType.BaseType];
+              DontAdd := DontAdd or (TypesStr[Params[K].VarType.BaseType] = '');
+            end;
+          end;
+          Str += ')';
+
+          if (Assigned(Res)) then
+          begin
+            Str += ': ' + TypesStr[Res.BaseType];
+            DontAdd := DontAdd or (TypesStr[Res.BaseType] = '');
+          end;
+
+          Str += '; forward;';
+
+          if (not DontAdd) then
+            aItems.Add(Str);
+        end;
+end;
 
 constructor TSyncMethod.Create(Method: Pointer);
 begin
@@ -1619,6 +1694,8 @@ type
 begin
   TProc(FMethod)();
 end;
+
+{$ENDIF}
 
 initialization
   PluginsGlob := TMPlugins.Create;

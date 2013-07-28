@@ -2678,14 +2678,11 @@ end;
 
 procedure TSimbaForm.CCFillCore;
 var
-  Thread: TPSThread;
+  Thread: TMThread;
   ValueDefs: TStringList;
   Stream: TMemoryStream;
   Buffer: TCodeInsight;
 begin
-  if (SimbaSettings.Interpreter._Type.Value <> interp_PS) then
-    Exit;
-
   if UpdatingFonts then
   begin
     mDebugLn('Updating the fonts, thus waiting a bit till we init the OCR.');
@@ -2693,29 +2690,43 @@ begin
     begin
       if (GetCurrentThreadId = MainThreadID) then
         Application.ProcessMessages;
+
       Sleep(25);
-      if exiting then
+
+      if Exiting then
       begin
-        writeln('Updating font: Exiting=True; exiting...');
-        exit;
+        WriteLn('Updating font: Exiting=True; exiting...');
+        Exit();
       end;
     end;
   end;
 
-  ValueDefs := TStringList.Create;
+  InitializeTMThread(Thread);
+  Thread.FreeOnTerminate := False;
+
+  if (not (Assigned(Thread))) then
+    Exit();
+
+  ValueDefs := TStringList.Create();
   try
-    InitializeTMThread(TMThread(Thread));
-    Thread.FreeOnTerminate := False;
-
-    if (not ((Assigned(Thread)) and (Thread is TPSThread))) then
-      Exit;
-
-    with Thread do
-    try
-      PSScript.GetValueDefs(ValueDefs);
-      CoreDefines.AddStrings(PSScript.Defines);
-    finally
-      Free;
+    if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
+    begin
+      with TPSThread(Thread) do
+      try
+        PSScript.GetValueDefs(ValueDefs);
+        CoreDefines.AddStrings(PSScript.Defines);
+      finally
+        Free();
+      end;
+    end else if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
+    begin
+      with TLPThread(Thread) do
+      try
+        GetValueDefs(ValueDefs);
+        CoreDefines.AddStrings(Compiler.Defines);
+      finally
+        Free();
+      end;
     end;
 
     Stream := TMemoryStream.Create;
@@ -2731,7 +2742,7 @@ begin
     try
       OnMessage := @OnCCMessage;
       Run(Stream, nil, -1, True);
-      FileName := '"PSCORE"';
+      FileName := '"CCCORE"';
     except
       mDebugLn('CC ERROR: Could not parse imports');
     end;
