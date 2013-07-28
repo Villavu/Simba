@@ -44,6 +44,7 @@ begin
     RegisterMethod('function ToString : string;');
     RegisterMethod('function ToTBitmap : TBitmap;');
     RegisterMethod('function CreateTMask : TMask;');
+    RegisterMethod('function isPointIn(x, y: integer): boolean;');
     RegisterMethod('constructor Create;');
     RegisterMethod('procedure Free;');
     RegisterMethod('function SaveToFile(const FileName : string) :boolean;');
