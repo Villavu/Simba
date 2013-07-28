@@ -21,8 +21,47 @@
     lpexportedmethods.inc for the Mufasa Macro Library
 }
 
-{ DTM }
+{ Other }
+SetCurrSection('Other');
+//AddGlobalFunc('procedure Writeln(const str: string);', @Lape_Writeln);
+AddGlobalFunc('function SetScriptProp(prop: TSP_Property; Value: TVariantArray): boolean', @Lape_SetScriptProp);
+AddGlobalFunc('function GetScriptProp(prop: TSP_Property; var Value: TVariantArray): boolean', @Lape_GetScriptProp);
+AddGlobalFunc('procedure Wait(t: DWord);', @Lape_Wait);
+AddGlobalFunc('procedure Sleep(t: DWord); override', @Lape_Wait); // XXX: OVERRIDE THIS
+AddGlobalFunc('procedure PlaySound(Sound: string);', @Lape_PlaySound);
+AddGlobalFunc('Procedure StopSound;', @Lape_StopSound);
+AddGlobalFunc('procedure ClearDebug;', @Lape_ClearDebug);
+AddGlobalFunc('procedure SetSupressExceptions(Supress: boolean);', @Lape_SetSupressExceptions);
+AddGlobalFunc('procedure SaveScreenshot(FileName: string);', @Lape_SaveScreenshot);
+AddGlobalFunc('procedure DisplayDebugImgWindow(w,h: integer);', @Lape_DisplayDebugImgWindow);
+AddGlobalFunc('procedure DrawBitmapDebugImg(bmp: integer);', @Lape_DrawBitmapDebugImg);
+AddGlobalFunc('function GetDebugBitmap: integer', @Lape_GetDebugBitmap);
+AddGlobalFunc('procedure ClearDebugImg;', @Lape_ClearDebugImg);
+AddGlobalFunc('procedure Status(Status: string);', @Lape_Status);
+AddGlobalFunc('procedure Disguise(Caption: string);', @Lape_Disguise);
+AddGlobalFunc('procedure ShowMessage(msg: string);', @Lape_ShowMessage);
+AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integer', @Lape_MessageBox);
+//AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer', @Lape_MessageDlg);
+AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
+AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
+AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
+{$IFNDEF FUNC_LIST}
+AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^); //TODO: FIX!!
+{$ENDIF}
+//AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
+AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
+AddGlobalFunc('procedure ConvertTime64(Time: int64; var y, m, w, d, h, min, s: integer);', @Lape_ConvertTime64);
+AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
+AddGlobalFunc('procedure Simba;', @Lape_Simba);
+AddGlobalFunc('procedure SetClipBoard(const Data: string);', @Lape_SetClipBoard);
+AddGlobalFunc('function GetClipBoard: string', @Lape_GetClipBoard);
+AddGlobalFunc('function GetProcesses: TSysProcArr', @Lape_GetProcesses);
+AddGlobalFunc('function GetProcessID : LongInt', @Lape_GetProcessID);
+AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
+AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_ExtractFileExt);
 
+{ DTM }
+SetCurrSection('DTM');
 AddGlobalFunc('function FindDTM(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean', @Lape_FindDTM);
 AddGlobalFunc('function FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean', @Lape_FindDTMs);
 AddGlobalFunc('function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean', @Lape_FindDTMRotatedAlternating);
@@ -32,23 +71,19 @@ AddGlobalFunc('function FindDTMsRotatedSE(DTM: Integer; var Points: TPointArray;
 AddGlobalFunc('procedure SetDTMName(DTM: integer; const name: string);', @Lape_SetDTMName);
 AddGlobalFunc('function DTMFromString(const DTMString: String): Integer', @Lape_DTMFromString);
 AddGlobalFunc('procedure FreeDTM(DTM: Integer);', @Lape_FreeDTM);
-//AddGlobalFunc('function GetDTM(index: Integer): TMDTM', @Lape_GetDTM);
+AddGlobalFunc('function GetDTM(index: Integer): TMDTM', @Lape_GetDTM);
 AddGlobalFunc('function AddSDTM(const d: TSDTM): Integer', @Lape_AddTSDTM);
-//AddGlobalFunc('function AddDTM(const d: TMDTM): Integer', @Lape_AddDTM);
+AddGlobalFunc('function AddDTM(const d: TMDTM): Integer', @Lape_AddDTM);
 AddGlobalFunc('function DTMExists(index : integer) : boolean', @Lape_DTMExists);
-//AddGlobalFunc('procedure PrintDTM(const aDTM: TMDTM);', @Lape_PrintDTM);
-//AddGlobalFunc('function MDTMToSDTM(Const DTM: TMDTM): TSDTM', @Lape_MDTMToSDTM);
-//AddGlobalFunc('function SDTMToMDTM(Const DTM: TSDTM): TMDTM', @Lape_SDTMToMDTM);
+AddGlobalFunc('procedure PrintDTM(const aDTM: TMDTM);', @Lape_PrintDTM);
+AddGlobalFunc('function MDTMToSDTM(Const DTM: TMDTM): TSDTM', @Lape_MDTMToSDTM);
+AddGlobalFunc('function SDTMToMDTM(Const DTM: TSDTM): TMDTM', @Lape_SDTMToMDTM);
 AddGlobalFunc('function CreateDTMPoint(x,y,c,t,asz: integer; bp: boolean): TMDTMPoint', @Lape_CreateDTMPoint);
 
 { Bitmap }
-
+SetCurrSection('Bitmap');
 AddGlobalFunc('function CreateBitmapString(bmp: integer): string', @Lape_CreateBitmapString);
-
-{ This is a temporary workaround to allow Lape to pass TMufasaBitmaps to plugins.
-  Also see lpcompile.inc}
 AddGlobalFunc('function GetMufasaBitmap(bmp: integer): TMufasaBitmap', @Lape_GetMufasaBitmap);
-
 AddGlobalFunc('function CreateBitmap(w,h: integer): integer', @Lape_CreateBitmap);
 AddGlobalFunc('procedure FreeBitmap(Number: integer);', @Lape_FreeBitmap);
 AddGlobalFunc('procedure SaveBitmap(Bmp: integer; path: string);', @Lape_SaveBitmap);
@@ -72,7 +107,7 @@ AddGlobalFunc('procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color:
 AddGlobalFunc('procedure DrawATPABitmap(bitmap: integer; ATPA: T2DPointArray);', @Lape_DrawATPABitmap);
 AddGlobalFunc('procedure DrawATPABitmapEx(bitmap: integer; ATPA: T2DPointArray; Colors: TIntegerArray);', @Lape_DrawATPABitmapEx);
 AddGlobalFunc('procedure FastDrawClear(bmp: integer; Color: TColor);', @Lape_FastDrawClear);
-//AddGlobalFunc('procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);', @Lape_DrawBitmap);
+AddGlobalFunc('procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x, y: Integer);', @Lape_DrawBitmap);
 AddGlobalFunc('procedure FastDrawTransparent(x, y: Integer; SourceBitmap, TargetBitmap: Integer);', @Lape_FastDrawTransparent);
 AddGlobalFunc('procedure SetTransparentColor(Bmp: integer; Color: TColor);', @Lape_SetTransparentColor);
 AddGlobalFunc('function GetTransparentColor(Bmp: integer): TColor', @Lape_GetTransparentColor);
@@ -106,7 +141,7 @@ AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: 
 AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 
 { Math }
-
+SetCurrSection('Math');
 AddGlobalFunc('function pow(base,exponent: extended): extended', @Lape_pow);
 AddGlobalFunc('function RiemannGauss(Xstart,StepSize,Sigma: extended; AmountSteps: integer): extended', @Lape_RiemannGauss);
 AddGlobalFunc('function DiscreteGauss(Xstart,Xend: integer; sigma: extended): TExtendedArray', @Lape_DiscreteGauss);
@@ -165,7 +200,7 @@ AddGlobalFunc('function InAbstractBox(x1, y1, x2, y2, x3, y3, x4, y4: Integer; x
 AddGlobalFunc('function MiddleBox(b: TBox): TPoint', @Lape_MiddleBox);
 
 { Color }
-
+SetCurrSection('Color');
 AddGlobalFunc('function GetColor(x,y: integer): TColor', @Lape_GetColor);
 AddGlobalFunc('procedure GetColorsWrap(Coords: TPointArray; var Colors: TIntegerArray);', @Lape_GetColorsWrap);
 AddGlobalFunc('function GetColors(const Coords: TPointArray): TIntegerArray', @Lape_GetColors);
@@ -189,7 +224,7 @@ AddGlobalFunc('function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye
 AddGlobalFunc('function FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean', @Lape_FindColoredAreaTolerance);
 
 { Color Conversions }
-
+SetCurrSection('Color Conversions');
 AddGlobalFunc('procedure ColorToRGB(Color: integer; var r, g, b: Integer);', @Lape_ColorToRGB);
 AddGlobalFunc('function RGBtoColor(r, g, b: Integer): TColor', @Lape_RGBtoColor);
 AddGlobalFunc('procedure ColorToHSL(Color: Integer; var h, s, l: Extended);', @Lape_ColorToHSL);
@@ -212,7 +247,7 @@ AddGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended
 AddGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);', @Lape_HSLToCIELab);
 
 { Crypto }
-
+SetCurrSection('Crypto');
 AddGlobalFunc('function haval(Data: string): string', @Lape_haval);
 AddGlobalFunc('function md4(Data: string): string', @Lape_md4);
 AddGlobalFunc('function md5(Data: string): string', @Lape_md5);
@@ -226,7 +261,7 @@ AddGlobalFunc('function tiger(Data: string): string', @Lape_tiger);
 AddGlobalFunc('procedure rc2_decrypt(const Key: string; const HashType: THashType; var Data: string);', @Lape_rc2_decrypt);
 
 { Files }
-
+SetCurrSection('Files');
 AddGlobalFunc('function CreateFile(const Path: string): Integer', @Lape_CreateFile);
 AddGlobalFunc('function OpenFile(const Path: string; Shared: Boolean): Integer', @Lape_OpenFile);
 AddGlobalFunc('function RewriteFile(const Path: string; Shared: Boolean): Integer', @Lape_RewriteFile);
@@ -251,7 +286,7 @@ AddGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): strin
 AddGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @Lape_DeleteINI);
 
 { Web }
-
+SetCurrSection('Web');
 AddGlobalFunc('procedure OpenWebPage(const url: string);', @Lape_OpenWebPage);
 AddGlobalFunc('function GetPage(const S: String): String', @Lape_GetPage);
 AddGlobalFunc('function InitializeHTTPClient(HandleCookies: Boolean): Integer', @Lape_InitializeHTTPClient);
@@ -266,7 +301,7 @@ AddGlobalFunc('function GetRawHeaders(Client: Integer): string', @Lape_GetRawHea
 AddGlobalFunc('procedure SetProxy(Client: Integer; pHost, pPort: String);', @Lape_SetProxy);
 
 { Socket }
-
+SetCurrSection('Socket');
 AddGlobalFunc('function RecvSocketStr(Client: integer): string', @Lape_RecvSocketStr);
 AddGlobalFunc('function RecvSocket(Client: integer): string', @Lape_RecvSocket);
 AddGlobalFunc('function RecvSocketEx(Client, Length: integer): string', @Lape_RecvSocketEx);
@@ -282,7 +317,7 @@ AddGlobalFunc('function CreateSocket: integer', @Lape_CreateSocket);
 AddGlobalFunc('procedure FreeSocket(Client: integer);', @Lape_FreeSocket);
 
 { Mouse }
-
+SetCurrSection('Mouse');
 AddGlobalFunc('procedure MoveMouse(x, y: integer);', @Lape_MoveMouse);
 AddGlobalFunc('procedure ScrollMouse(x,y: integer; Clicks: integer);', @Lape_ScrollMouse);
 AddGlobalFunc('procedure GetMousePos(var x, y: integer);', @Lape_GetMousePos);
@@ -293,7 +328,7 @@ AddGlobalFunc('procedure ClickMouse(x, y: integer; clickType: integer);', @Lape_
 AddGlobalFunc('function IsMouseButtonDown(button: integer): boolean', @Lape_IsMouseButtonDown);
 
 { Keyboard }
-
+SetCurrSection('Keyboard');
 AddGlobalFunc('procedure KeyDown(key: Word);', @Lape_KeyDown);
 AddGlobalFunc('procedure KeyUp(key: Word);', @Lape_KeyUp);
 AddGlobalFunc('procedure SendKeys(const s: string; keywait, keymodwait: integer);', @Lape_SendKeys);
@@ -302,7 +337,7 @@ AddGlobalFunc('function isKeyDown(key: Word): boolean', @Lape_isKeyDown);
 AddGlobalFunc('function GetKeyCode(c: char): integer', @Lape_GetKeyCode);
 
 { OCR }
-
+SetCurrSection('OCR');
 AddGlobalFunc('function rs_GetUpText: String', @Lape_rs_GetUpText);
 AddGlobalFunc('function rs_GetUpTextAtEx(x, y: integer; shadow: boolean; fontname: string): string', @Lape_rs_GetUpTextAtEx);
 AddGlobalFunc('function rs_GetUpTextAt(x, y: integer): string', @Lape_rs_GetUpTextAt);
@@ -315,53 +350,13 @@ AddGlobalFunc('function GetTextAt(const atX, atY, minvspacing, maxvspacing, hspa
 AddGlobalFunc('function GetTextAtEx(const xs,ys,xe,ye, minvspacing, maxvspacing, hspacing, color, tol: integer; const font: string): string', @Lape_GetTextAtEx);
 AddGlobalFunc('procedure rs_SetUpTextFilter(filterdata: TOcrFilterDataArray);', @Lape_SetUpTextFilter);
 AddGlobalFunc('procedure rs_ResetUpTextFilter;', @Lape_ResetUpTextFilter);
-//AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
+AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
 AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);', @Lape_FilterUpTextByCharacteristics);
 
-{ Other }
-
-//AddGlobalFunc('procedure Writeln(const str: string);', @Lape_Writeln);
-AddGlobalFunc('function SetScriptProp(prop: TSP_Property; Value: TVariantArray): boolean', @Lape_SetScriptProp);
-AddGlobalFunc('function GetScriptProp(prop: TSP_Property; var Value: TVariantArray): boolean', @Lape_GetScriptProp);
-AddGlobalFunc('procedure Wait(t: DWord);', @Lape_Wait);
-AddGlobalFunc('procedure Sleep(t: DWord); override', @Lape_Wait); // XXX: OVERRIDE THIS
-
-AddGlobalFunc('procedure PlaySound(Sound: string);', @Lape_PlaySound);
-AddGlobalFunc('Procedure StopSound;', @Lape_StopSound);
-AddGlobalFunc('procedure ClearDebug;', @Lape_ClearDebug);
-AddGlobalFunc('procedure SetSupressExceptions(Supress: boolean);', @Lape_SetSupressExceptions);
-AddGlobalFunc('procedure SaveScreenshot(FileName: string);', @Lape_SaveScreenshot);
-AddGlobalFunc('procedure DisplayDebugImgWindow(w,h: integer);', @Lape_DisplayDebugImgWindow);
-AddGlobalFunc('procedure DrawBitmapDebugImg(bmp: integer);', @Lape_DrawBitmapDebugImg);
-AddGlobalFunc('function GetDebugBitmap: integer', @Lape_GetDebugBitmap);
-AddGlobalFunc('procedure ClearDebugImg;', @Lape_ClearDebugImg);
-AddGlobalFunc('procedure Status(Status: string);', @Lape_Status);
-AddGlobalFunc('procedure Disguise(Caption: string);', @Lape_Disguise);
-AddGlobalFunc('procedure ShowMessage(msg: string);', @Lape_ShowMessage);
-AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integer', @Lape_MessageBox);
-//AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer', @Lape_MessageDlg);
-
-
-AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
-AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
-AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
-AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^);
-//AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
-AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
-AddGlobalFunc('procedure ConvertTime64(Time: int64; var y, m, w, d, h, min, s: integer);', @Lape_ConvertTime64);
-AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
-AddGlobalFunc('procedure Simba;', @Lape_Simba);
-AddGlobalFunc('procedure SetClipBoard(const Data: string);', @Lape_SetClipBoard);
-AddGlobalFunc('function GetClipBoard: string', @Lape_GetClipBoard);
-AddGlobalFunc('function GetProcesses: TSysProcArr', @Lape_GetProcesses);
-AddGlobalFunc('function GetProcessID : LongInt', @Lape_GetProcessID);
-AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
-AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_ExtractFileExt);
-
 { Settings }
-
+SetCurrSection('Settings');
 AddGlobalFunc('function SetSettingValue(const KeyName,value: string): boolean', @Lape_SetSettingValue);
 AddGlobalFunc('function KeyIsSetting(const KeyName: String): Boolean', @Lape_KeyIsSetting);
 AddGlobalFunc('function KeyIsDirectory(const KeyName: String): Boolean', @Lape_KeyIsDirectory);
@@ -372,7 +367,7 @@ AddGlobalFunc('function DeleteSetting(const KeyName: String): Boolean', @Lape_De
 AddGlobalFunc('function DeleteSubSettings(const KeyName: String): Boolean', @Lape_DeleteSubSettings);
 
 { String }
-
+SetCurrSection('String');
 AddGlobalFunc('function Capitalize(str: string): string', @Lape_Capitalize);
 AddGlobalFunc('function CompressString(const Str: string): string', @Lape_CompressString);
 AddGlobalFunc('function DecompressString(const Compressed: string): string', @Lape_DecompressString);
@@ -395,7 +390,7 @@ AddGlobalFunc('function MultiBetween(str, s1, s2: string): TStringArray;', @Lape
 AddGlobalFunc('function IsArrInStr(strArr: TStringArray; s: string): boolean;', @Lape_IsArrInStr);
 
 { TPA }
-
+SetCurrSection('TPA');
 AddGlobalFunc('procedure Quicksort(var Arr: TIntegerArray);', @Lape_Quicksort);
 AddGlobalFunc('procedure tSwap(var a, b: TPoint);', @Lape_tSwap);
 AddGlobalFunc('procedure tpaSwap(var a, b: TPointArray);', @Lape_tpaSwap);
@@ -505,7 +500,7 @@ AddGlobalFunc('function TPAPosNext(const Find: TPoint; const V: TPointArray; con
 AddGlobalFunc('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;',@Lape_GlueTPAs);
 
 { Window }
-
+SetCurrSection('Window');
 AddGlobalFunc('procedure SetDesktopAsClient;', @Lape_SetDesktopAsClient);
 AddGlobalFunc('function SetTargetArray(P: Integer; w, h: integer): integer', @Lape_SetTargetArray);
 AddGlobalFunc('function SetTargetBitmap(bitmap: Integer): integer', @Lape_SetTargetBitmap);
@@ -533,6 +528,7 @@ AddGlobalFunc('function IsTargetValid: boolean', @Lape_IsTargetValid);
 {$IFDEF USE_SQLITE}
 if (SQLite3Loaded) then
 begin
+  SetCurrSection('SQLite');
   AddGlobalFunc('function sqlite_version() : string;', @lp_sqlite_version);
   AddGlobalFunc('function sqlite_version_num() : integer;', @lp_sqlite_version_num);
   AddGlobalFunc('function sqlite_escape(s : string) : string;', @lp_sqlite_escape);

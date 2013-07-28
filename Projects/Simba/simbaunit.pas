@@ -2,7 +2,7 @@
 	This file is part of the Mufasa Macro Library (MML)
 	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
 
-    MML is free software: you can redistribute it and/or modify
+    MML is free software: you can redistribute it and/or modify                                                    3
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
@@ -3115,7 +3115,13 @@ begin
   frmFunctionList.FunctionList.BeginUpdate;
   if frmFunctionList.FunctionList.Items.Count = 0 then
   begin;
-    Methods := TMThread.GetExportedMethods;
+    case SimbaSettings.Interpreter._Type.Value of
+      interp_PS: Methods := TPSThread.GetExportedMethods();
+      interp_LP: Methods := TLPThread.GetExportedMethods();
+      else
+        raise Exception.Create('Invalid Interpreter!');
+    end;
+
     Tree := frmFunctionList.FunctionList;
     Tree.Items.Clear;
     Sections := TStringList.Create;
