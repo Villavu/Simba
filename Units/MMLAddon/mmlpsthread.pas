@@ -1295,15 +1295,7 @@ end;
 
 procedure lp_CurrThreadID(Params: PParamArray; Result: Pointer); lape_extdecl
 begin
-{$IFDEF WINDOWS}
   PPtrUInt(Result)^ := GetCurrentThreadID();
-{$ELSE}
-  {$IFDEF LINUX}
-  PPtrUInt(Result)^ := TThreadID(pthread_self);
-  {$ELSE}
-  PPtrUInt(Result)^ := GetThreadID();
-  {$ENDIF}
-{$ENDIF}
 end;
 
 procedure lp_Natify(Params: PParamArray; Result: Pointer); lape_extdecl
