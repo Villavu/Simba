@@ -529,7 +529,6 @@ var
   begin;
     if (IncludesArr.IndexOf(ExpandFileName(Include.FileName)) < 0) then
     begin
-      WriteLn(Include.FileName);
       parentNode := FunctionList^.Items.AddChild(
                    IncludesNode,ExtractFileNameOnly(
                    Include.FileName));
