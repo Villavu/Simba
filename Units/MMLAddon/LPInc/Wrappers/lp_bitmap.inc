@@ -287,3 +287,13 @@ procedure Lape_BitmapExists(const Params : PParamArray; const Result : Pointer);
 begin
   PBoolean(Result)^ := ps_BitmapExists(PLongInt(Params^[0])^);
 end;
+
+procedure Lape_FindColorsBitmap(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_FindColorsBitmap(PInteger(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_PointInBitmap(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_PointInBitmap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;

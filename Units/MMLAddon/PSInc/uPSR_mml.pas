@@ -145,6 +145,7 @@ begin
     RegisterMethod(@TMufasaBitmap.Copy, 'Copy');
     RegisterMethod(@TMufasaBitmap.ToString,'ToString');
     RegisterMethod(@TMufasaBitmap.CreateTMask,'CreateTMask');
+    RegisterMethod(@TMufasaBitmap.PointInBitmap,'IsPointIn');
     RegisterPropertyHelper(@MBmp_TransColorSet_r,nil,'TransparentColorSet');
     RegisterPropertyHelper(@MBmp_Index_r,nil,'Index');
     RegisterPropertyHelper(@MBmp_Width_r,nil,'Width');

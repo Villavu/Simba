@@ -2531,44 +2531,50 @@ end;
 {/\
   Removes all the doubles point from a TPA.
 /\}
-{Fixed by Cynic}
-
 procedure ClearDoubleTPA(var TPA: TPointArray);
 var
-  i,j,k : integer;
-  flag  : boolean;
-  tmp     : TPointArray;
-Begin
-  i:=0;
-  SetLength(tmp,0);
-  while i < Length(TPA) do
+  v, h, r: Integer;
+  B: array of TBoolArray;
+  bx: TBox;
+begin;
+  h := high(TPA);
+  r := 0;
+
+  if (h > 0) then
   begin
-    flag:=false;
-    k:=0;
-    while (k < Length(tmp)) and (not flag) do
+    bx.x1 := TPA[0].x;
+    bx.y1 := TPA[0].Y;
+    bx.x2 := TPA[0].X;
+    bx.y2 := TPA[0].Y;
+
+    for v := 1 to h do
     begin
-      flag:=tmp[k]=TPA[i];
-      Inc(k);
+      if (TPA[v].X < bx.X1) then
+        bx.X1 := TPA[v].X
+      else
+        if (TPA[v].X > bx.X2) then
+          bx.X2 := TPA[v].X;
+      if (TPA[v].Y < bx.Y1) then
+        bx.Y1 := TPA[v].Y
+      else
+        if (TPA[v].Y > bx.Y2) then
+          bx.Y2 := TPA[v].Y;
     end;
-    if not flag then
-    begin
-      k:=Length(tmp);
-      SetLength(tmp,k+1);
-      tmp[k]:=TPA[i];
-      Inc(i);
-    end
-    else
-     begin
-      j:=i;
-      while j < length (TPA)-1 do
+    SetLength(B, ((bx.X2 - bx.X1) + 1));
+    for v := 0 to (bx.X2 - bx.X1) do
+      SetLength(B[v], ((bx.Y2 - bx.Y1) + 1));
+    for v := 0 to h do
+      if not B[(TPA[v].X - bx.X1)][(TPA[v].Y - bx.Y1)] then
       begin
-        TPA[j]:=TPA[j+1];
-        inc(j);
+        B[(TPA[v].X - bx.X1)][(TPA[v].Y - bx.Y1)] := True;
+        TPA[r] := TPA[v];
+        Inc(r);
       end;
-      SetLength(TPA,Length(TPA)-1);
-    end;
+    SetLength(TPA, r);
+    SetLength(B, 0);
   end;
 end;
+
 {/\
   Uses Box to define an area around TotalTPA.
   Every point that is not in TotalTPA, but is in Box, is added to the Result.

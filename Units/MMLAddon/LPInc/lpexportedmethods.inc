@@ -101,6 +101,7 @@ AddGlobalFunc('function CreateMirroredBitmapEx(Bmp: integer; MirrorStyle: TBmpMi
 AddGlobalFunc('function FastGetPixel(bmp,x,y: integer): LongWord', @Lape_FastGetPixel);
 AddGlobalFunc('function FastGetPixels(bmp: integer; TPA: TPointArray): TIntegerArray', @Lape_FastGetPixels);
 AddGlobalFunc('function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntArray', @Lape_GetBitmapAreaColors);
+AddGlobalFunc('function FindColorsBitmap(bmp: integer; var points: TPointArray; const color: integer): boolean;', @Lape_FindColorsBitmap);
 AddGlobalFunc('procedure FastSetPixel(Bmp,x,y: integer; Color: TColor);', @Lape_FastSetPixel);
 AddGlobalFunc('procedure FastSetPixels(Bmp: integer; TPA: TPointArray; Colors: TIntegerArray);', @Lape_FastSetPixels);
 AddGlobalFunc('procedure DrawTPABitmap(bitmap: integer; TPA: TPointArray; Color: integer);', @Lape_DrawTPABitmap);
@@ -139,7 +140,7 @@ AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox
 AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
 AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
-
+AddGlobalFunc('function PointInBitmap(bmp: integer; x, y: integer): boolean;', @Lape_PointInBitmap);
 { Math }
 SetCurrSection('Math');
 AddGlobalFunc('function pow(base,exponent: extended): extended', @Lape_pow);
