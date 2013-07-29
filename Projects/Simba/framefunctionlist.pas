@@ -28,7 +28,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, MufasaBase,Forms, ComCtrls, StdCtrls, Controls,
-  ExtCtrls, Buttons,mmisc,v_ideCodeInsight;
+  ExtCtrls, Buttons,mmisc,v_ideCodeInsight, newsimbasettings;
 
 type
 
@@ -66,10 +66,11 @@ type
     procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
   private
-    FFilterTree : TTreeView;
-    FLastScript : string;
-    Filtering : boolean;
-    FillThread : TFillThread;
+    FFilterTree: TTreeView;
+    FLastScript: string;
+    FLastInterp: Integer;
+    Filtering: boolean;
+    FillThread: TFillThread;
     procedure FilterTreeVis(Vis : boolean);
     function GetFilterTree: TTreeView;
     { private declarations }
@@ -260,11 +261,12 @@ begin
     exit;
   if FillThread <> nil then {Already busy filling!}
     exit;
-  if FLastScript = Script then
+  if ((FLastScript = Script) and (FLastInterp = SimbaSettings.Interpreter._Type.Value)) then
     exit;
   if SimbaForm.CurrScript = nil then
     exit;
-  FLastScript:= Script;
+  FLastScript := Script;
+  FLastInterp := SimbaSettings.Interpreter._Type.Value;
   Filtering := FilterTree.Visible;
   if FilterTree.Visible then
     FilterTreeVis(false);
@@ -494,6 +496,8 @@ end;
 { TFillThread }
 
 procedure TFillThread.execute;
+var
+   IncludesArr: TStringList;
   procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; Path : string);
   var
     i : integer;
@@ -523,18 +527,28 @@ procedure TFillThread.execute;
   var
     i : integer;
   begin;
-    parentNode := FunctionList^.Items.AddChild(
-                 IncludesNode,ExtractFileNameOnly(
-                 Include.FileName));
-    AddProcsTree(parentNode,Include.Items,Include.FileName);
-    for i := 0 to high(Include.Includes) do
-      AddIncludes(ParentNode,Include.Includes[i])
+    if (IncludesArr.IndexOf(ExpandFileName(Include.FileName)) < 0) then
+    begin
+      parentNode := FunctionList^.Items.AddChild(
+                   IncludesNode,ExtractFileNameOnly(
+                   Include.FileName));
+
+      AddProcsTree(parentNode,Include.Items,Include.FileName);
+
+      IncludesArr.Add(ExpandFileName(Include.FileName));
+    end;
+
+    for I := 0 to High(Include.Includes) do
+      AddIncludes(ParentNode, Include.Includes[I]);
   end;
 var
   i : integer;
 begin
   Analyzer.Run(MS,nil,-1,true);
   AddProcsTree(ScriptNode,Analyzer.Items,Analyzer.FileName); //Add the procedures of the script to the script tree
+
+  IncludesArr := TStringList.Create;
+  IncludesArr.CaseSensitive := False;
 
   //Lame condition.. We must check if nothing new has been included since
   //last generation of the tree.. However, this will do fine for now ;)
@@ -544,6 +558,8 @@ begin
     for i := 0 to high(Analyzer.Includes) do
       AddIncludes(IncludesNode, Analyzer.Includes[i]);
   end;
+
+  IncludesArr.Free;
 end;
 
 initialization
