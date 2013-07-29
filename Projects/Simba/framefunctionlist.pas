@@ -527,18 +527,20 @@ var
   var
     i : integer;
   begin;
-    if (IncludesArr.IndexOf(Include.FileName) < 0) then
+    if (IncludesArr.IndexOf(ExpandFileName(Include.FileName)) < 0) then
     begin
+      WriteLn(Include.FileName);
       parentNode := FunctionList^.Items.AddChild(
                    IncludesNode,ExtractFileNameOnly(
                    Include.FileName));
+
       AddProcsTree(parentNode,Include.Items,Include.FileName);
 
-      IncludesArr.Add(Include.FileName);
+      IncludesArr.Add(ExpandFileName(Include.FileName));
     end;
 
-    for i := 0 to high(Include.Includes) do
-      AddIncludes(ParentNode,Include.Includes[i])
+    for I := 0 to High(Include.Includes) do
+      AddIncludes(ParentNode, Include.Includes[I]);
   end;
 var
   i : integer;
@@ -547,6 +549,7 @@ begin
   AddProcsTree(ScriptNode,Analyzer.Items,Analyzer.FileName); //Add the procedures of the script to the script tree
 
   IncludesArr := TStringList.Create;
+  IncludesArr.CaseSensitive := False;
 
   //Lame condition.. We must check if nothing new has been included since
   //last generation of the tree.. However, this will do fine for now ;)
