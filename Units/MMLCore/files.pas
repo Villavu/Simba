@@ -127,7 +127,7 @@ begin;
   for I := 0 to H do
     if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
     begin
-      Filename := IncludeTrailingPathDelimiter(Dirs[I]) + Filename;
+      Filename := ExpandFileName(IncludeTrailingPathDelimiter(Dirs[I]) + Filename);
       Result := True;
       Exit;
     end;

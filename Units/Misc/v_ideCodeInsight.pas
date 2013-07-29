@@ -214,14 +214,14 @@ begin
   s := FileName;
   if Assigned(OnFindInclude) and OnFindInclude(Self, s) then
   begin
-    FileName := s;
+    FileName := ExpandFileName(s);
     Exit(True);
   end;
 
   s := ExtractFilePath(fFileName);
   if (s <> '') and FileExists(s + FileName) then
   begin
-    FileName := s + FileName;
+    FileName := ExpandFileName(s + FileName);
     Exit(True);
   end;
 
@@ -1423,6 +1423,7 @@ end;
 initialization
   {nothing}
   CoreDefines := TStringList.Create;
+  CoreDefines.Add('CODEINSIGHT');
 finalization
   ClearIncludeBuffer;
   ClearCoreBuffer;
