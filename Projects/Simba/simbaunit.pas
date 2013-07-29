@@ -963,7 +963,7 @@ begin
 
   Interpreter := TIntegerSetting(obj).Value;
 
-  if (Interpreter < 0) or (Interpreter> 3) then
+  if (Interpreter < 0) or (Interpreter > 1) then
   begin
     writeln('Resetting interpreter to valid value');
     SimbaSettings.Interpreter._Type.Value := 0;
@@ -973,6 +973,9 @@ begin
 
   if UpdateCurrScript then
     CurrScript.SynEdit.Lines.text := DefaultScript;
+
+  frmFunctionList.FunctionList.Items.Clear;
+  MenuitemFillFunctionList.Click;
 end;
 
 function TSimbaForm.SetTrayVisiblity(obj: TObject): Boolean;
