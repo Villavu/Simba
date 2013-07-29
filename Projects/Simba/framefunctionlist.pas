@@ -496,6 +496,8 @@ end;
 { TFillThread }
 
 procedure TFillThread.execute;
+var
+   IncludesArr: TStringList;
   procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; Path : string);
   var
     i : integer;
@@ -525,10 +527,16 @@ procedure TFillThread.execute;
   var
     i : integer;
   begin;
-    parentNode := FunctionList^.Items.AddChild(
-                 IncludesNode,ExtractFileNameOnly(
-                 Include.FileName));
-    AddProcsTree(parentNode,Include.Items,Include.FileName);
+    if (IncludesArr.IndexOf(Include.FileName) < 0) then
+    begin
+      parentNode := FunctionList^.Items.AddChild(
+                   IncludesNode,ExtractFileNameOnly(
+                   Include.FileName));
+      AddProcsTree(parentNode,Include.Items,Include.FileName);
+
+      IncludesArr.Add(Include.FileName);
+    end;
+
     for i := 0 to high(Include.Includes) do
       AddIncludes(ParentNode,Include.Includes[i])
   end;
@@ -538,6 +546,8 @@ begin
   Analyzer.Run(MS,nil,-1,true);
   AddProcsTree(ScriptNode,Analyzer.Items,Analyzer.FileName); //Add the procedures of the script to the script tree
 
+  IncludesArr := TStringList.Create;
+
   //Lame condition.. We must check if nothing new has been included since
   //last generation of the tree.. However, this will do fine for now ;)
   if IncludesNode.Count <> length(Analyzer.Includes) then
@@ -546,6 +556,8 @@ begin
     for i := 0 to high(Analyzer.Includes) do
       AddIncludes(IncludesNode, Analyzer.Includes[i]);
   end;
+
+  IncludesArr.Free;
 end;
 
 initialization
