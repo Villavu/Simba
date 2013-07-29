@@ -28,7 +28,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, MufasaBase,Forms, ComCtrls, StdCtrls, Controls,
-  ExtCtrls, Buttons,mmisc,v_ideCodeInsight;
+  ExtCtrls, Buttons,mmisc,v_ideCodeInsight, newsimbasettings;
 
 type
 
@@ -66,10 +66,11 @@ type
     procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
   private
-    FFilterTree : TTreeView;
-    FLastScript : string;
-    Filtering : boolean;
-    FillThread : TFillThread;
+    FFilterTree: TTreeView;
+    FLastScript: string;
+    FLastInterp: Integer;
+    Filtering: boolean;
+    FillThread: TFillThread;
     procedure FilterTreeVis(Vis : boolean);
     function GetFilterTree: TTreeView;
     { private declarations }
@@ -260,11 +261,12 @@ begin
     exit;
   if FillThread <> nil then {Already busy filling!}
     exit;
-  if FLastScript = Script then
+  if ((FLastScript = Script) and (FLastInterp = SimbaSettings.Interpreter._Type.Value)) then
     exit;
   if SimbaForm.CurrScript = nil then
     exit;
-  FLastScript:= Script;
+  FLastScript := Script;
+  FLastInterp := SimbaSettings.Interpreter._Type.Value;
   Filtering := FilterTree.Visible;
   if FilterTree.Visible then
     FilterTreeVis(false);
