@@ -1423,6 +1423,7 @@ end;
 initialization
   {nothing}
   CoreDefines := TStringList.Create;
+  CoreDefines.Add('CODEINSIGHT');
 finalization
   ClearIncludeBuffer;
   ClearCoreBuffer;
