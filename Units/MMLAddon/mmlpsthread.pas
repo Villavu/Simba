@@ -119,13 +119,11 @@ type
     protected
       AppPath, DocPath, ScriptPath, ScriptFile, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
-      ExportedMethods : TExpMethodArr;
       Includes : TStringList;
       FOpenConnectionEvent : TOpenConnectionEvent;
       FWriteFileEvent : TWriteFileEvent;
       FOpenFileEvent : TOpenFileEvent;
       procedure LoadPlugin(plugidx: integer); virtual; abstract;
-
     public
       Prop: TScriptProperties;
       Client: TClient;
@@ -144,6 +142,8 @@ type
 
       CompileOnly : boolean;
 
+      ExportedMethods: TExpMethodArr;
+
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
@@ -152,6 +152,7 @@ type
                     Active: Boolean;
                     DirectiveName, DirectiveArgs: string; Filename:String): boolean;
       function LoadFile(ParentFile: string; var FileName, Content: string): boolean;
+
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
@@ -167,7 +168,7 @@ type
       constructor Create(CreateSuspended: boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
       destructor Destroy; override;
 
-      class function GetExportedMethods : TExpMethodArr;
+      class function GetExportedMethods: TExpMethodArr; virtual; abstract;
 
       property OpenConnectionEvent : TOpenConnectionEvent read FOpenConnectionEvent write SetOpenConnectionEvent;
       property WriteFileEvent : TWriteFileEvent read FWriteFileEvent write SetWriteFileEvent;
@@ -205,6 +206,9 @@ type
         PSScript: TPSScriptExtension;
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
+
+        class function GetExportedMethods: TExpMethodArr; override;
+
         procedure SetScript(script: string); override;
         procedure Execute; override;
         procedure Terminate; override;
@@ -224,6 +228,9 @@ type
 
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
+
+     class function GetExportedMethods: TExpMethodArr; override;
+
      procedure SetScript(Script: string); override;
      procedure SetFonts(Fonts: TMFonts); override;
      procedure Execute; override;
@@ -232,8 +239,8 @@ type
      function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
      function Natify(s: string): Pointer;
      function Natify(c: TCodePos): Pointer; overload;
+     procedure GetValueDefs(aItems: TStrings);
    end;
-   {$ENDIF}
 
    TSyncMethod = class
    private
@@ -242,6 +249,8 @@ type
      constructor Create(Method: Pointer);
      procedure Call;
    end;
+
+   {$ENDIF}
 
 threadvar
   CurrThread : TMThread;
@@ -431,6 +440,7 @@ end;
 
 procedure TMThread.AddMethod(meth: TExpMethod);
 begin
+  raise Exception.Create('AddMethod not Implememnted!');
 end;
 
 function TMThread.LoadFile(ParentFile: string; var FileName, Content: string): boolean;
@@ -608,36 +618,6 @@ end;
 {$I PSInc/Wrappers/internets.inc}
 {$I PSInc/psmethods.inc}
 
-class function TMThread.GetExportedMethods: TExpMethodArr;
-var
-  c : integer;
-  CurrSection : string;
-
-procedure SetCurrSection(str : string);
-begin;
-  CurrSection := Str;
-end;
-
-procedure AddFunction( Ptr : Pointer; DeclStr : String);
-begin;
-  if c >= 500 then
-    raise exception.create('PSThread.LoadMethods: Exported more than 500 functions');
-  Result[c].FuncDecl:= DeclStr;
-  Result[c].FuncPtr:= Ptr;
-  Result[c].Section:= CurrSection;
-  inc(c);
-end;
-
-begin
-  c := 0;
-  CurrSection := 'Other';
-  SetLength(Result, 500);
-
-  {$i PSInc/psexportedmethods.inc}
-
-  SetLength(Result,c);
-end;
-
 {***implementation TPSThread***}
 
 constructor TPSThread.Create(CreateSuspended : boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
@@ -685,6 +665,38 @@ destructor TPSThread.Destroy;
 begin
   PSScript.Free;
   inherited;
+end;
+
+class function TPSThread.GetExportedMethods: TExpMethodArr;
+var
+  c : integer;
+  CurrSection : string;
+
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
+procedure AddFunction( Ptr : Pointer; DeclStr : String);
+begin;
+  if c >= 600 then
+    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
+
+  Result[c].FuncDecl:= DeclStr;
+  Result[c].FuncPtr:= Ptr;
+  Result[c].Section:= CurrSection;
+
+  Inc(c);
+end;
+
+begin
+  c := 0;
+  CurrSection := 'Other';
+  SetLength(Result, 500);
+
+  {$i PSInc/psexportedmethods.inc}
+
+  SetLength(Result, c);
 end;
 
 procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
@@ -1329,6 +1341,7 @@ end;
 {$I LPInc/Wrappers/lp_internets.inc}
 
 constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
+  procedure SetCurrSection(x: string); begin end;
 var
   I: integer;
 begin
@@ -1413,6 +1426,40 @@ begin
   end;
 
   inherited Destroy;
+end;
+
+class function TLPThread.GetExportedMethods: TExpMethodArr;
+var
+  c : integer;
+  CurrSection : string;
+
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
+procedure AddGlobalFunc(DeclStr: string; Ptr: Pointer);
+begin;
+  if c >= 600 then
+    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
+
+  Result[c].FuncDecl:= DeclStr;
+  Result[c].FuncPtr:= Ptr;
+  Result[c].Section:= CurrSection;
+
+  Inc(c);
+end;
+
+begin
+  c := 0;
+  CurrSection := 'Other';
+  SetLength(Result, 500);
+
+  {$DEFINE FUNC_LIST}
+  {$i LPInc/lpexportedmethods.inc}
+  {$UNDEF FUNC_LIST}
+
+  SetLength(Result, c);
 end;
 
 procedure TLPThread.SetScript(Script: string);
@@ -1598,7 +1645,76 @@ procedure TLPThread.Terminate;
 begin
   Running := bFalse;
 end;
-{$ENDIF}
+
+procedure TLPThread.GetValueDefs(aItems: TStrings);
+var
+  H, I, J, K: UInt32;
+  DeclArr: TLapeDeclArray;
+  Str: string;
+  DontAdd: Boolean;
+  TypesStr: array[ELapeBaseType] of string = ('', 'SmallInt', 'Byte', 'Word', 'ShortInt', 'LongWord', 'Integer', '', '',
+    'Single', 'Double', 'Currency', 'Extended', 'Boolean', '', '', '', 'Char', '', '', 'string', '', '', 'Variant', '', '', '', '', 'Pointer', '', '', '', '', '', '');
+begin
+  DeclArr := Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar, bTrue);
+  H := High(DeclArr);
+  for I := 0 to H do
+    with TLapeGlobalVar(DeclArr[I]) do
+      if (BaseType = ltImportedMethod) then
+        with TLapeType_Method(VarType) do
+        begin
+          if (TLapeGlobalVar(DeclArr[I]).Name[1] = '!') or (TLapeGlobalVar(DeclArr[I]).Name[1] = '_') then
+            Continue;
+
+          DontAdd := False;
+          Str := '';
+
+          if (Assigned(Res)) then
+            Str += 'function '
+          else
+            Str += 'procedure ';
+
+          Str += TLapeGlobalVar(DeclArr[I]).Name + '(';
+
+          J := ParamSize - 1;
+          if (J = 4294967295) then
+            Continue;
+
+          for K := 0 to J do
+          begin
+            if (not Assigned(Params[K].VarType)) and (Params[K].ParType = lptNormal) then
+              Continue;
+
+            if (K > 0) and (Str[Length(Str)] <> '(') then
+              Str += '; ';
+
+            case Params[K].ParType of
+              lptConst: Str += 'const ';
+              lptVar: Str += 'var ';
+              lptOut: Str += 'out ';
+            end;
+
+            Str += 'Param' + IntToStr(K);
+
+            if (Assigned(Params[K].VarType)) then
+            begin
+              Str += ': ' + TypesStr[Params[K].VarType.BaseType];
+              DontAdd := DontAdd or (TypesStr[Params[K].VarType.BaseType] = '');
+            end;
+          end;
+          Str += ')';
+
+          if (Assigned(Res)) then
+          begin
+            Str += ': ' + TypesStr[Res.BaseType];
+            DontAdd := DontAdd or (TypesStr[Res.BaseType] = '');
+          end;
+
+          Str += '; forward;';
+
+          if (not DontAdd) then
+            aItems.Add(Str);
+        end;
+end;
 
 constructor TSyncMethod.Create(Method: Pointer);
 begin
@@ -1611,6 +1727,8 @@ type
 begin
   TProc(FMethod)();
 end;
+
+{$ENDIF}
 
 initialization
   PluginsGlob := TMPlugins.Create;
