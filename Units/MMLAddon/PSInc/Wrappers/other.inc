@@ -281,7 +281,7 @@ begin;
   s := x div (1000);
 end;
 
-procedure ps_ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer); extdecl;
+procedure ps_ConvertTime64(time: int64; var y, m, w, d, h, min, s: int64); extdecl;
 var
   x : int64;
 begin
