@@ -1647,73 +1647,12 @@ begin
 end;
 
 procedure TLPThread.GetValueDefs(aItems: TStrings);
-var
-  H, I, J, K: UInt32;
-  DeclArr: TLapeDeclArray;
-  Str: string;
-  DontAdd: Boolean;
-  TypesStr: array[ELapeBaseType] of string = ('', 'SmallInt', 'Byte', 'Word', 'ShortInt', 'LongWord', 'Integer', '', '',
-    'Single', 'Double', 'Currency', 'Extended', 'Boolean', '', '', '', 'Char', '', '', 'string', '', '', 'Variant', '', '', '', '', 'Pointer', '', '', '', '', '', '');
 begin
-  DeclArr := Compiler.GlobalDeclarations.getByClass(TLapeGlobalVar, bTrue);
-  H := High(DeclArr);
-  for I := 0 to H do
-    with TLapeGlobalVar(DeclArr[I]) do
-      if (BaseType = ltImportedMethod) then
-        with TLapeType_Method(VarType) do
-        begin
-          if (TLapeGlobalVar(DeclArr[I]).Name[1] = '!') or (TLapeGlobalVar(DeclArr[I]).Name[1] = '_') then
-            Continue;
-
-          DontAdd := False;
-          Str := '';
-
-          if (Assigned(Res)) then
-            Str += 'function '
-          else
-            Str += 'procedure ';
-
-          Str += TLapeGlobalVar(DeclArr[I]).Name + '(';
-
-          J := ParamSize - 1;
-          if (J = 4294967295) then
-            Continue;
-
-          for K := 0 to J do
-          begin
-            if (not Assigned(Params[K].VarType)) and (Params[K].ParType = lptNormal) then
-              Continue;
-
-            if (K > 0) and (Str[Length(Str)] <> '(') then
-              Str += '; ';
-
-            case Params[K].ParType of
-              lptConst: Str += 'const ';
-              lptVar: Str += 'var ';
-              lptOut: Str += 'out ';
-            end;
-
-            Str += 'Param' + IntToStr(K);
-
-            if (Assigned(Params[K].VarType)) then
-            begin
-              Str += ': ' + TypesStr[Params[K].VarType.BaseType];
-              DontAdd := DontAdd or (TypesStr[Params[K].VarType.BaseType] = '');
-            end;
-          end;
-          Str += ')';
-
-          if (Assigned(Res)) then
-          begin
-            Str += ': ' + TypesStr[Res.BaseType];
-            DontAdd := DontAdd or (TypesStr[Res.BaseType] = '');
-          end;
-
-          Str += '; forward;';
-
-          if (not DontAdd) then
-            aItems.Add(Str);
-        end;
+  //Removed failed attempt caused bad lag when using code completion on Lape.
+  aItems.Clear();
+  //TODO: All of Lape's internal methods should be added to aItems.
+  //MML and Script methods get added later.
+  //NOTE: Should we create a child of TLapeCompiler and keep info on methods/types?
 end;
 
 constructor TSyncMethod.Create(Method: Pointer);
