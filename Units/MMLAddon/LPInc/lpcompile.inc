@@ -92,6 +92,8 @@ addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
 addGlobalType('array of string', 'TStringArray');
 addGlobalType('array of TStringArray', 'T2DStringArray');
 addGlobalType('array of Integer', 'TIntegerArray');
+addGlobalType('array of Cardinal', 'TCardinalArray');
+addGlobalType('array of TCardinalArray', T2DCardinalArray');
 addGlobalType('array of TIntegerArray', 'T2DIntegerArray');
 addGlobalType('array of TIntegerArray', 'T2DIntArray');
 addGlobalType('array of T2DIntegerArray', 'T3DIntegerArray');
