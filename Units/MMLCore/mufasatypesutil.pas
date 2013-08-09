@@ -28,12 +28,13 @@ unit mufasatypesutil;
 interface
 
 uses
-  Classes, SysUtils,mufasatypes;
+  Classes, SysUtils, mufasatypes;
 
 function ConvArr(Arr: array of TPoint): TPointArray; overload;
 function ConvArr(Arr: array of TPointArray): T2DPointArray; overload;
 function ConvArr(Arr: array of Integer): TIntegerArray; overload;
 function ConvArr(Arr: array of String): TStringArray; overload;
+function ConvArr(Arr: array of Cardinal): TCardinalArray; overload;
 
 function ConvTPAArr(Arr: array of TPoint): TPointArray; overload;
 
@@ -93,6 +94,15 @@ begin;
   for i := 0 to Len - 1 do
     result[i] := arr[i];
 end;
+
+function ConvArr(Arr: array of Cardinal): TCardinalArray; overload;
+var
+  Len : Integer;
+begin;
+  Len := Length(Arr);
+  SetLength(Result, Len);
+  Move(Arr[Low(Arr)], Result[0], Len*SizeOf(Integer));
+end; 
 
 end.
 
