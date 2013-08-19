@@ -2483,31 +2483,54 @@ end;
 {/\
   Removes the given ClearPoints from arP.
 /\}
-
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 var
-  i, j, l, l2: Integer;
-  Found: Boolean;
-begin
-  Setlength(result,0);
-  l := High(arP);
-  l2 := High(ClearPoints);
-  for i := 0 to l do
+  v, h, r, l, x, y: Integer;
+  B: array of TBoolArray;
+  bx, tmp: TBox;
+begin;
+  r := 0;
+  l := Length(arP);
+
+  if (l > 0) then
   begin
-    Found := false;
-    for j := 0 to l2 do
-      if (arP[i].x = ClearPoints[j].x) and (arP[i].y = ClearPoints[j].y) then
-      begin
-        Found := True;
-        Break;
-      end;
-    if not found then
-//    if (j = l2 + 1) then
+    SetLength(Result, l);
+    bx := GetTPABounds(arP);
+    h := High(ClearPoints);
+
+    if (h > -1) then
     begin
-      SetLength(Result, Length(Result) + 1);
-      Result[High(Result)] := arP[i];
+      tmp := GetTPABounds(clearPoints);
+      bx.X1 := Min(bx.X1, tmp.X1);
+      bx.Y1 := Min(bx.Y1, tmp.Y1);
+      bx.X2 := Max(bx.X2, tmp.X2);
+      bx.Y2 := Max(bx.Y2, tmp.Y2);
     end;
+
+    SetLength(B, ((bx.X2 - bx.X1) + 1));
+
+    for v := 0 to (bx.X2 - bx.X1) do
+    begin
+      SetLength(B[v], ((bx.Y2 - bx.Y1) + 1));
+      y := High(B[v]);
+      for x := 0 to y do
+        B[v][x] := False;
+    end;
+
+    for x := 0 to h do
+      B[(ClearPoints[x].X - bx.X1)][(ClearPoints[x].Y - bx.Y1)] := True;
+
+    for v := 0 to (l - 1) do
+      if not B[(arP[v].X - bx.X1)][(arP[v].Y - bx.Y1)] then
+      begin
+        Result[r] := arP[v];
+        Inc(r);
+      end;
+
+    SetLength(B, 0);
   end;
+
+  SetLength(Result, r);
 end;
 
 {/\
