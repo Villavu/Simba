@@ -3,6 +3,16 @@ begin
   ps_Writeln(Pstring(Params^[0])^);
 end;
 
+procedure Lape_AddOnTerm(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_AddOnTerminate(PlpString(Params^[0])^);
+end;
+
+procedure Lape_DelOnTerm(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_DeleteOnTerminate(PlpString(Params^[0])^);
+end;
+
 procedure Lape_SetScriptProp(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   Pboolean(Result)^ := ps_SetScriptProp(PSP_Property(Params^[0])^, PVariantArray(Params^[1])^);
