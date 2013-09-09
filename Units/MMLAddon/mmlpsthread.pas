@@ -1643,6 +1643,8 @@ begin
 end;
 
 procedure TLPThread.Execute;
+var
+  Failed: boolean;
 begin
   CurrThread := Self;
   try
@@ -1656,10 +1658,17 @@ begin
         Exit;
 
       Running := bTrue;
-      RunCode(Compiler.Emitter.Code, Running);
+      Failed := True;
+      try
+        RunCode(Compiler.Emitter.Code, Running);
 
-      HandleScriptTerminates();
-      psWriteln('Successfully executed.');
+        HandleScriptTerminates();
+        psWriteln('Successfully executed.');
+        Failed := False;
+      finally
+        if (Failed) then
+          WriteLn('Execution failed.');
+      end;
     end else
       psWriteln('Compiling failed.');
   except
