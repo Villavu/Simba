@@ -124,6 +124,8 @@ type
       FWriteFileEvent : TWriteFileEvent;
       FOpenFileEvent : TOpenFileEvent;
       procedure LoadPlugin(plugidx: integer); virtual; abstract;
+      function CallMethod(const Method: string; var Args: array of Variant): Variant; virtual; abstract;
+      procedure HandleScriptTerminates; virtual;
     public
       Prop: TScriptProperties;
       Client: TClient;
@@ -201,7 +203,8 @@ type
         procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
         procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
         procedure OutputMessages;
-        procedure HandleScriptTerminates;
+        function CallMethod(const Method: string; var Args: array of Variant): Variant; override;
+        procedure HandleScriptTerminates; override;
       public
         PSScript: TPSScriptExtension;
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
@@ -219,6 +222,7 @@ type
    TLPThread = class(TMThread)
    protected
      procedure LoadPlugin(plugidx: integer); override;
+     function CallMethod(const Method: string; var Args: array of Variant): Variant; override;
    public
      Parser: TLapeTokenizerString;
      Compiler: TLapeCompiler;
@@ -573,6 +577,17 @@ procedure TMThread.SetFonts(Fonts: TMFonts);
 begin
   if Assigned(Fonts) then
     Client.MOCR.Fonts := Fonts;
+end;
+
+procedure TMThread.HandleScriptTerminates;
+var
+  I: integer;
+  V: array of Variant;
+begin
+  SetLength(V, 0);
+  if (SP_OnTerminate in Prop.Properties) then
+    for I := 0 to Prop.OnTerminateProcs.Count - 1 do
+      CallMethod(Prop.OnTerminateProcs[I], V);
 end;
 
 function ThreadSafeCall(aProcName: string; var V: TVariantArray): Variant; extdecl;
@@ -1190,20 +1205,15 @@ begin
   end;
 end;
 
-procedure TPSThread.HandleScriptTerminates;
-var
-  I : integer;
+function TPSThread.CallMethod(const Method: string; var Args: array of Variant): Variant;
 begin
-  if (PSScript.Exec.ExceptionCode =ErNoError) and  (SP_OnTerminate in Prop.Properties) then
-  begin;
-    for i := 0 to Prop.OnTerminateProcs.Count - 1 do
-    begin
-      try
-        PSScript.ExecuteFunction([],Prop.OnTerminateProcs[i]);
-      finally
-      end;
-    end;
-  end;
+  Result := PSScript.ExecuteFunction(Args, Method);
+end;
+
+procedure TPSThread.HandleScriptTerminates;
+begin
+  if (PSScript.Exec.ExceptionCode = ErNoError) then
+    inherited;
 end;
 
 procedure TPSThread.Execute;
@@ -1616,6 +1626,22 @@ begin
   end;
 end;
 
+function TLPThread.CallMethod(const Method: string; var Args: array of Variant): Variant;
+begin
+  if (not FFILoaded) then
+    raise Exception.Create('libffi seems to be missing!');
+
+  if (Length(Args) > 0) then
+    raise Exception.Create('Lape''s CallMethod only supports procedures with no arguments.');
+
+  with LapeExportWrapper(Compiler.Globals[Method]) do
+  try
+    TProcedure(func)();
+  finally
+    Free;
+  end;
+end;
+
 procedure TLPThread.Execute;
 begin
   CurrThread := Self;
@@ -1632,6 +1658,7 @@ begin
       Running := bTrue;
       RunCode(Compiler.Emitter.Code, Running);
 
+      HandleScriptTerminates();
       psWriteln('Successfully executed.');
     end else
       psWriteln('Compiling failed.');
