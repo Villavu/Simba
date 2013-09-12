@@ -53,9 +53,9 @@ begin
   ps_SetToleranceSpeed3Modifier(PExtended(Params^[0])^);
 end;
 
-function Lape_GetToleranceSpeed3Modifier(const Params: PParamArray): Extended;
+procedure Lape_GetToleranceSpeed3Modifier(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  Result := ps_GetToleranceSpeed3Modifier();
+  PExtended(Result)^ := ps_GetToleranceSpeed3Modifier();
 end;
 
 procedure Lape_SimilarColors(const Params: PParamArray; const Result: Pointer); lape_extdecl
