@@ -151,6 +151,11 @@ type
       ShowOnStart: TBooleanSetting;
     end;
 
+    TCodeInsightSection = class(TSection)
+      FunctionList: TFunctionListSection;
+      ShowHidden: TBooleanSetting;
+    end;
+
     TTraySection = class(TSection)
       AlwaysVisible: TBooleanSetting;
     end;
@@ -234,7 +239,7 @@ type
       Fonts: TFontsSection;
       Extensions: TExtensionsSection;
       Scripts: TScriptsSection;
-      FunctionList: TFunctionListSection;
+      CodeInsight: TCodeInsightSection;
       Tray: TTraySection;
       Interpreter: TInterpreterSection;
       SourceEditor: TSourceEditorSection;
@@ -706,7 +711,9 @@ procedure GetGeneralMaxRecentFiles(obj: TObject); begin TIntegerSetting(obj).Val
 procedure GetColourPickerShowHistoryonPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetColourPickerAddToHistoryOnPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
+procedure GetCodeInsightShowHidden(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 procedure GetFunctionListShowOnStart(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
 procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
@@ -766,9 +773,16 @@ begin
   Scripts.Path := Scripts.AddChild(TPathSetting.Create(ssScriptsPath)) as TPathSetting;
   Scripts.Path.onDefault := @GetScriptPath;
 
-  FunctionList := AddChild(TFunctionListSection.Create()) as TFunctionListSection;
-  FunctionList.ShowOnStart := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowOnStart)) as TBooleanSetting;
-  FunctionList.ShowOnStart.onDefault := @GetFunctionListShowOnStart;
+  CodeInsight := AddChild(TCodeInsightSection.Create()) as TCodeInsightSection;
+  with CodeInsight do
+  begin
+    ShowHidden := AddChild(TBooleanSetting.Create(ssCodeInsightShowHidden)) as TBooleanSetting;
+    ShowHidden.onDefault := @GetCodeInsightShowHidden;
+
+    FunctionList := CodeInsight.AddChild(TFunctionListSection.Create()) as TFunctionListSection;
+    FunctionList.ShowOnStart := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowOnStart)) as TBooleanSetting;
+    FunctionList.ShowOnStart.onDefault := @GetFunctionListShowOnStart;
+  end;
 
   Tray := AddChild(TTraySection.Create()) as TTraySection;
   Tray.AlwaysVisible := Tray.AddChild(TBooleanSetting.Create(ssTrayAlwaysVisible)) as TBooleanSetting;

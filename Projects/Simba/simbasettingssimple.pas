@@ -187,7 +187,7 @@ begin
 
   // Other
   SimbaSettings.Tray.AlwaysVisible.Value := EnvOther.Checked[0];
-  SimbaSettings.FunctionList.ShowOnStart.Value := EnvOther.Checked[1];
+  SimbaSettings.CodeInsight.FunctionList.ShowOnStart.Value := EnvOther.Checked[1];
   // Add 'Show Command prompt'
 
   // Paths
@@ -268,7 +268,7 @@ begin
 
   // Other
   EnvOther.Checked[0] := SimbaSettings.Tray.AlwaysVisible.Value;
-  EnvOther.Checked[1] := SimbaSettings.FunctionList.ShowOnStart.Value;
+  EnvOther.Checked[1] := SimbaSettings.CodeInsight.FunctionList.ShowOnStart.Value;
 
 
   // Add 'Show Command prompt', not set in SimbaSettings?
