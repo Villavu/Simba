@@ -16,7 +16,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '0.9.30.2'
+  LCLVersion = '1.0.10.0'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -30,14 +30,14 @@ object SimbaForm: TSimbaForm
     ShowHint = True
     TabOrder = 0
     object TB_Run: TToolButton
-      Left = 226
+      Left = 228
       Hint = 'Run'
       Top = 2
       Action = ActionRunScript
       ImageIndex = 6
     end
     object TB_Pause: TToolButton
-      Left = 249
+      Left = 251
       Hint = 'Pause'
       Top = 2
       Action = ActionPauseScript
@@ -45,7 +45,7 @@ object SimbaForm: TSimbaForm
       ImageIndex = 5
     end
     object TB_Stop: TToolButton
-      Left = 272
+      Left = 274
       Hint = 'Stop'
       Top = 2
       Action = ActionStopScript
@@ -53,39 +53,39 @@ object SimbaForm: TSimbaForm
       ImageIndex = 7
     end
     object ToolButton1: TToolButton
-      Left = 295
+      Left = 297
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton1'
       Style = tbsDivider
     end
     object TB_NewTab: TToolButton
-      Left = 299
+      Left = 302
       Hint = 'Add tab'
       Top = 2
       Action = ActionNewTab
     end
     object TB_CloseTab: TToolButton
-      Left = 322
+      Left = 325
       Hint = 'Close tab'
       Top = 2
       Action = ActionCloseTab
     end
     object ToolButton4: TToolButton
-      Left = 345
+      Left = 348
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton4'
       Style = tbsDivider
     end
     object TB_ClearDebug: TToolButton
-      Left = 349
+      Left = 353
       Hint = 'Clear debug box'
       Top = 2
       Action = ActionClearDebug
     end
     object TB_PickColour: TToolButton
-      Left = 372
+      Left = 376
       Hint = 'Pick a colour'
       Top = 2
       Caption = 'TB_PickColour'
@@ -93,7 +93,7 @@ object SimbaForm: TSimbaForm
       OnClick = ButtonPickClick
     end
     object TB_SelectClient: TToolButton
-      Left = 395
+      Left = 399
       Hint = 'Select a client'
       Top = 2
       Caption = 'TB_SelectClient'
@@ -101,14 +101,14 @@ object SimbaForm: TSimbaForm
       OnMouseDown = ButtonSelectorDown
     end
     object ToolButton8: TToolButton
-      Left = 441
+      Left = 445
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton8'
       Style = tbsDivider
     end
     object TB_ReloadPlugins: TToolButton
-      Left = 445
+      Left = 450
       Hint = 'Reload plugins'
       Top = 2
       Caption = 'TB_ReloadPlugins'
@@ -116,7 +116,7 @@ object SimbaForm: TSimbaForm
       ImageIndex = 13
     end
     object TB_Tray: TToolButton
-      Left = 468
+      Left = 473
       Hint = 'Minimize to tray'
       Top = 2
       Caption = 'TB_Tray'
@@ -134,7 +134,7 @@ object SimbaForm: TSimbaForm
     object ToolButton2: TToolButton
       Left = 195
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton2'
       Style = tbsDivider
     end
@@ -160,14 +160,14 @@ object SimbaForm: TSimbaForm
       Enabled = False
     end
     object ToolButton3: TToolButton
-      Left = 514
+      Left = 519
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object TT_Update: TToolButton
-      Left = 518
+      Left = 524
       Hint = 'A new update is available'
       Top = 2
       Caption = 'TT_Update'
@@ -189,44 +189,44 @@ object SimbaForm: TSimbaForm
       OnClick = ActionCopyExecute
     end
     object TT_Paste: TToolButton
-      Left = 199
+      Left = 200
       Top = 2
       Action = ActionPaste
     end
     object ToolButton9: TToolButton
-      Left = 222
+      Left = 223
       Top = 2
-      Width = 4
+      Width = 5
       Caption = 'ToolButton9'
       Style = tbsDivider
     end
     object TT_Console: TToolButton
-      Left = 491
+      Left = 496
       Hint = 'Hide/Show Console'
       Top = 2
       Action = ActionConsole
     end
     object TT_ScriptManager: TToolButton
-      Left = 3
+      Left = 1
       Top = 2
       Caption = 'TT_ScriptManager'
       ImageIndex = 30
       OnClick = TT_ScriptManagerClick
     end
     object ToolButton6: TToolButton
-      Left = 49
+      Left = 47
       Top = 2
-      Width = 8
+      Width = 10
       Caption = 'ToolButton6'
       Style = tbsSeparator
     end
     object ToolButton5: TToolButton
-      Left = 26
+      Left = 24
       Top = 2
       Action = ActionDebugger
     end
     object TB_FromDesigner: TToolButton
-      Left = 418
+      Left = 422
       Hint = 'a form designer'
       Top = 2
       Caption = 'TB_FromDesigner'
@@ -419,7 +419,6 @@ object SimbaForm: TSimbaForm
         Height = 23
         Top = 6
         Width = 80
-        EditLabel.AnchorSideLeft.Control = LabeledEditSearch
         EditLabel.AnchorSideTop.Control = LabeledEditSearch
         EditLabel.AnchorSideTop.Side = asrCenter
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
@@ -467,6 +466,9 @@ object SimbaForm: TSimbaForm
       inherited FunctionList: TTreeView
         Height = 316
         Width = 150
+        DefaultItemHeight = 18
+        ShowLines = True
+        ShowRoot = True
         OnChange = FunctionListChange
         OnEnter = FunctionListEnter
         OnExit = FunctionListExit
@@ -1342,6 +1344,10 @@ object SimbaForm: TSimbaForm
       object MenuItemExtensions: TMenuItem
         Action = ActionExtensions
         OnClick = ActionExtensionsExecute
+      end
+      object MenuItemShowHidden: TMenuItem
+        Action = ActionShowHidden
+        Caption = '&Show Hidden'
       end
     end
     object MenuTools: TMenuItem
@@ -3231,6 +3237,10 @@ object SimbaForm: TSimbaForm
     object CallFormDesigner: TAction
       Caption = 'CallFormDesigner'
       OnExecute = CallFormDesignerExecute
+    end
+    object ActionShowHidden: TAction
+      Caption = 'Show Hidden'
+      OnExecute = ActionShowHiddenExecute
     end
   end
   object DebugTimer: TTimer

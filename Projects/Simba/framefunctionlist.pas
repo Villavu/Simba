@@ -83,9 +83,9 @@ type
     StartWordCompletion : TPoint;
     CompletionLine : string;
     CompletionStart : string;
-    property FilterTree : TTreeView read GetFilterTree;
-    procedure LoadScriptTree( Script : String);
-    function Find(Next : boolean; backwards : boolean = false) : boolean;
+    property FilterTree: TTreeView read GetFilterTree;
+    procedure LoadScriptTree(Script: String; Force: Boolean = False);
+    function Find(Next: boolean; backwards: boolean = false) : boolean;
     { public declarations }
   end; 
 
@@ -253,7 +253,7 @@ begin
 //  FilterTree.OnDeletion:= FunctionList.OnDeletion;
 end;
 
-procedure TFunctionListFrame.LoadScriptTree(Script: String);
+procedure TFunctionListFrame.LoadScriptTree(Script: String; Force: Boolean = False);
 begin
   if script = '' then
     exit;
@@ -261,7 +261,7 @@ begin
     exit;
   if FillThread <> nil then {Already busy filling!}
     exit;
-  if ((FLastScript = Script) and (FLastInterp = SimbaSettings.Interpreter._Type.Value)) then
+  if ((FLastScript = Script) and (FLastInterp = SimbaSettings.Interpreter._Type.Value)) and (not Force) then
     exit;
   if SimbaForm.CurrScript = nil then
     exit;

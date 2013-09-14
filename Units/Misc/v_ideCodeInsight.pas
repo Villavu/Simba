@@ -95,7 +95,7 @@ var
 implementation
 
 uses
-  v_Constants, v_MiscFunctions;
+  v_Constants, v_MiscFunctions, newsimbasettings;
 
 procedure ClearCoreBuffer;
 var
@@ -1003,6 +1003,8 @@ begin
   Reset;
 
   Lexer.Defines.AddStrings(CoreDefines);
+  if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
+    Lexer.Defines.Add('CODEINSIGHT');
 
   fOwnStream := (fFileName <> '');
   if fOwnStream then
@@ -1049,6 +1051,9 @@ begin
     Lexer.ClearDefines;
     Lexer.Defines.AddStrings(CoreDefines);
     Lexer.Defines.AddStrings(BaseDefines);
+
+    if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
+      Lexer.Defines.Add('CODEINSIGHT');
   end;
   SetLength(fIncludes, 0);
 
@@ -1423,7 +1428,6 @@ end;
 initialization
   {nothing}
   CoreDefines := TStringList.Create;
-  CoreDefines.Add('CODEINSIGHT');
 finalization
   ClearIncludeBuffer;
   ClearCoreBuffer;
