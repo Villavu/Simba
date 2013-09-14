@@ -1384,8 +1384,8 @@ begin
     addGlobalFunc('procedure Sync(proc: Pointer);', @lp_Sync);
     addGlobalFunc('function GetCurrThreadID(): PtrUInt;', @lp_CurrThreadID);
 
-    //addGlobalFunc('function natify(s: string): Pointer;', @lp_Natify);
-    //addGlobalFunc('function natify(p: Pointer): Pointer; overload;', @lp_NatifyP);
+    addGlobalFunc('function natify(s: string): Pointer;', @lp_Natify);
+    addGlobalFunc('function natify(p: Pointer): Pointer; overload;', @lp_NatifyP);
 
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
