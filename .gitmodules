@@ -1,6 +1,6 @@
-[submodule "Units/lape"]
+[submodule "Lape"]
 	path = Units/lape
-	url = https://code.google.com/p/la-pe/
-[submodule "Units/PascalScript"]
+	url = git://github.com/SRL/Lape.git
+[submodule "PascalScript"]
 	path = Units/PascalScript
 	url = git://github.com/SRL/PascalScript.git
