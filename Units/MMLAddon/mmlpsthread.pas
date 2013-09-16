@@ -241,8 +241,6 @@ type
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
      function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
-     function Natify(s: string): Pointer;
-     function Natify(c: TCodePos): Pointer; overload;
      procedure GetValueDefs(aItems: TStrings);
    end;
 
@@ -1307,7 +1305,7 @@ procedure lp_Sync(Params: PParamArray); lape_extdecl
 var
   Method: TSyncMethod;
 begin
-  Method := TSyncMethod.Create(TLPThread(CurrThread).Natify(PCodePos(Params^[0])^));
+  Method := TSyncMethod.Create(PPointer(Params^[0])^);
   try
     TThread.Synchronize(CurrThread, @Method.Call);
   finally
@@ -1318,16 +1316,6 @@ end;
 procedure lp_CurrThreadID(Params: PParamArray; Result: Pointer); lape_extdecl
 begin
   PPtrUInt(Result)^ := GetCurrentThreadID();
-end;
-
-procedure lp_Natify(Params: PParamArray; Result: Pointer); lape_extdecl
-begin
-  PPointer(Result)^ := TLPThread(CurrThread).Natify(PlpString(Params^[0])^);
-end;
-
-procedure lp_NatifyP(Params: PParamArray; Result: Pointer); lape_extdecl
-begin
-  PPointer(Result)^ := TLPThread(CurrThread).Natify(PCodePos(Params^[0])^);
 end;
 
 {$I LPInc/Wrappers/lp_other.inc}
@@ -1383,9 +1371,6 @@ begin
 
     addGlobalFunc('procedure Sync(proc: Pointer);', @lp_Sync);
     addGlobalFunc('function GetCurrThreadID(): PtrUInt;', @lp_CurrThreadID);
-
-    //addGlobalFunc('function natify(s: string): Pointer;', @lp_Natify);
-    //addGlobalFunc('function natify(p: Pointer): Pointer; overload;', @lp_NatifyP);
 
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
@@ -1490,74 +1475,6 @@ begin
       Compiler.addGlobalVar(Fonts[I].Name, Fonts[I].Name).isConstant := True;
 
   Compiler.EndImporting;
-end;
-
-function TLPThread.Natify(s: string): Pointer;
-var
-  Wrapper: TExportClosure;
-begin
-  Result := nil;
-
-  if (not FFILoaded) then
-    raise Exception.Create('libffi seems to be missing!');
-
-  Wrapper := LapeExportWrapper(Compiler.Globals[s]);
-  if (Wrapper <> nil) then
-  begin
-    Result := Wrapper.Func;
-    ExportWrappers.Add(Wrapper);
-  end;
-end;
-
-function TLPThread.Natify(c: TCodePos): Pointer;
-  function isCodePos(Decl: TLapeDeclaration; CodePos: TCodePos): boolean;
-  begin
-    Result := False;
-    if (Decl = nil) then
-      Exit;
-
-    if ((Decl as TLapeGlobalVar).Ptr = nil) then
-      Exit;
-
-    Result := TCodePos((Decl as TLapeGlobalVar).Ptr^) = CodePos;
-  end;
-
-  function getByCodePos(DeclarationList: TLapeDeclarationList; CodePos: TCodePos): TLapeDeclaration;
-  var
-    Declarations: TLapeDeclArray;
-    H, I: UInt32;
-  begin
-    Result := nil;
-    Declarations := DeclarationList.getByClass(TLapeGlobalVar, bTrue);
-
-    H := High(Declarations);
-    for I := 0 to H do
-      if (isCodePos(Declarations[I], CodePos)) then
-      begin
-        Result := Declarations[I];
-        Exit;
-      end;
-  end;
-var
-  Declaration: TLapeDeclaration;
-  Wrapper: TExportClosure;
-begin
-  Result := nil;
-
-  if (not FFILoaded) then
-    raise Exception.Create('libffi seems to be missing!');
-
-  Declaration := getByCodePos(Compiler.GlobalDeclarations, c);
-
-  if (Declaration <> nil) then
-  begin
-    Wrapper := LapeExportWrapper(Declaration as TLapeGlobalVar);
-    if (Wrapper <> nil) then
-    begin
-      Result := Wrapper.Func;
-      ExportWrappers.Add(Wrapper);
-    end;
-  end;
 end;
 
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
