@@ -3575,6 +3575,7 @@ object SimbaForm: TSimbaForm
     DirectiveAttri.FrameEdges = sfeAround
     CompilerMode = pcmObjFPC
     NestedComments = False
+    StringKeywordMode = spsmNone
     left = 568
     top = 200
   end
@@ -3601,6 +3602,7 @@ object SimbaForm: TSimbaForm
     DirectiveAttri.Style = [fsBold]
     CompilerMode = pcmObjFPC
     NestedComments = False
+    StringKeywordMode = spsmNone
     left = 528
     top = 200
   end
