@@ -52,6 +52,7 @@ ssCodeCompletionShowAutomatically = ssSettings + ssCodeInsight + 'CodeCompletion
 
 
 ssSourceEditorLazColors = ssSettings + ssSourceEditor + 'LazColors';
+ssSourceEditorFont = ssSettings + ssSourceEditor + 'Font/';
 ssSourceEditorDefScriptPath = ssSettings + ssSourceEditor + 'DefScriptPath';
 
 ssNewsLink = ssSettings + ssNews + 'URL';

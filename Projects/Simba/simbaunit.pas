@@ -103,6 +103,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionFont: TAction;
     ActionShowHidden: TAction;
     ActionNotes: TAction;
     CallFormDesigner: TAction;
@@ -146,6 +147,8 @@ type
     LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     Memo1: TMemo;
+    MenuItemFont: TMenuItem;
+    MenuItemDivider51: TMenuItem;
     MenuItemShowHidden: TMenuItem;
     MenuItemNotes: TMenuItem;
     NotesMemo: TMemo;
@@ -299,6 +302,7 @@ type
     procedure ActionExtensionsUpdate(Sender: TObject);
     procedure ActionFindNextExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
+    procedure ActionFontExecute(Sender: TObject);
     procedure ActionGotoExecute(Sender: TObject);
     procedure ActionLapeExecute(Sender: TObject);
     procedure ActionNewExecute(Sender: TObject);
@@ -460,7 +464,8 @@ type
     {$IFDEF USE_EXTENSIONS}function SetExtensionsPath(obj: Tobject): Boolean;{$ENDIF}
     function SetIncludesPath(obj: Tobject): Boolean;
     function SetFontsPath(obj: Tobject): Boolean;
-    function SetDefaultScriptPath(obj: Tobject): Boolean;
+    function SetDefaultScriptPath(obj: TObject): Boolean;
+    function SetSourceEditorFont(obj: TObject): Boolean;
     function SetTrayVisiblity(obj: TObject): Boolean;
 
     procedure SetShowParamHintAuto(const AValue: boolean);
@@ -939,6 +944,14 @@ begin
   {$IFDEF SIMBA_VERBOSE}
   writeln('--- SetDefaultScriptPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
+end;
+
+function TSimbaForm.SetSourceEditorFont(obj: TObject): Boolean;
+var
+  I: LongInt;
+begin
+  for I := 0 to Tabs.Count - 1 do
+    TMufasaTab(Tabs[I]).ScriptFrame.SynEdit.Font.Assign(SimbaSettings.SourceEditor.Font.Value);
 end;
 
 {$IFDEF USE_EXTENSIONS}
@@ -2192,6 +2205,25 @@ begin
     SearchPanel.Visible:= true;
     if LabeledEditSearch.CanFocus then
       LabeledEditSearch.SetFocus;
+  end;
+end;
+
+procedure TSimbaForm.ActionFontExecute(Sender: TObject);
+var
+  I: LongInt;
+  Dialog: TFontDialog;
+begin
+  Dialog := TFontDialog.Create(nil);
+  with Dialog do
+  try
+    Options := [fdEffects];
+    Title := 'Font Editor';
+    Font := SimbaSettings.SourceEditor.Font.Value;
+
+    if (Execute) then
+      SimbaSettings.SourceEditor.Font.Value := Font;
+  finally
+    Dialog.Free;
   end;
 end;
 
@@ -3551,6 +3583,7 @@ begin
   {$IFDEF USE_EXTENSIONS}SimbaSettings.Extensions.Path.onChange := @SetExtensionsPath;{$ENDIF}
 
   SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;
+  SimbaSettings.SourceEditor.Font.onChange := @SetSourceEditorFont;
 end;
 
 

@@ -18,8 +18,8 @@ interface
 uses
   Classes, SysUtils,
   settings, // TMMLSettings
-  comctrls // TTreeView
-  ;
+  comctrls, // TTreeView
+  Graphics;
 
 type
     TOnChangeSettings = function (obj: TObject): Boolean of object;
@@ -114,11 +114,38 @@ type
       property Value: string read GetValue write SetValue;
     end;
 
+    TFontSetting = class(TSetting)
+    private
+      FPath: string;
+      FFont: TFont;
+      FOnChange: TOnChangeSettings;
+      function getValue(): TFont;
+      procedure setValue(Font: TFont);
+    public
+      Name: TStringSetting;
+      Size: TIntegerSetting;
+      Color: TIntegerSetting;
+      Style: TStringSetting;
+      CharSet: TIntegerSetting;
+      Quality: TIntegerSetting;
+      Pitch: TIntegerSetting;
+
+      constructor Create(APath: string); virtual;
+      destructor Destroy; override;
+
+      procedure Save(MMLSettings: TMMLSettings); override;
+      procedure Load(MMLSettings: TMMLSettings); override;
+
+      property Path: string read FPath;
+      property OnChange: TOnChangeSettings write FOnChange;
+      property Value: TFont read getValue write setValue;
+    end;
+
     TSection = class(TSetting)
     public
       Nodes: TSettingsArray;
 
-      constructor Create();
+      constructor Create(); virtual;
       destructor Destroy; override;
 
       procedure Save(MMLSettings: TMMLSettings); override;
@@ -168,6 +195,7 @@ type
     TSourceEditorSection = class(TSection)
       DefScriptPath: TFileSetting;
       LazColors: TBooleanSetting;
+      Font: TFontSetting;
     end;
 
     TNewsSection = class(TSection)
@@ -279,7 +307,7 @@ implementation
 uses
    mufasabase,
    mufasatypes,
-   fileutil,
+   fileutil, stringutil,
    simbaunit; // mDebugLn
 
 const
@@ -615,6 +643,105 @@ begin
     OnChange(Self);
 end;
 
+function TFontSetting.getValue(): TFont;
+  function styleFromStr(Style: string): TFontStyles;
+  var
+    I: LongInt;
+  begin
+    Result := [];
+    for I := 1 to Length(Style) do
+      case StrToInt(Style[I]) of
+        0: Include(Result, fsBold);
+        1: Include(Result, fsItalic);
+        2: Include(Result, fsStrikeOut);
+        3: Include(Result, fsUnderline);
+      end;
+  end;
+begin
+  FFont.Name := Name.GetDefValue('Courier New');
+  FFont.Size := Size.GetDefValue(10);
+  FFont.Color := Color.GetDefValue(clDefault);
+  FFont.Style := styleFromStr(Style.GetDefValue(''));
+  FFont.CharSet := CharSet.GetDefValue(0);
+  FFont.Quality := TFontQuality(Quality.GetDefValue(Ord(fqProof)));
+  FFont.Pitch := TFontPitch(Pitch.GetDefValue(Ord(fpFixed)));
+
+  Result := FFont;
+end;
+
+procedure TFontSetting.setValue(Font: TFont);
+  function styleToStr(Style: TFontStyles): string;
+  begin
+    Result := '';
+    if (fsBold in Style) then Result += '0';
+    if (fsItalic in Style) then Result += '1';
+    if (fsStrikeOut in Style) then Result += '2';
+    if (fsUnderline in Style) then Result += '3';
+  end;
+begin
+  FFont.Assign(Font);
+
+  Name.Value := Font.Name;
+  Size.Value := Font.Size;
+  Color.Value := Font.Color;
+  Style.Value := styleToStr(Font.Style);
+  CharSet.Value := Font.CharSet;
+  Quality.Value := Ord(Font.Quality);
+  Pitch.Value := Ord(Font.Pitch);
+
+  if (Assigned(FOnChange)) then
+    FOnChange(Self);
+end;
+
+constructor TFontSetting.Create(APath: string);
+begin
+  FPath := APath;
+  FFont := TFont.Create();
+
+  Name := TStringSetting.Create(APath + 'Name');
+  Size := TIntegerSetting.Create(APath + 'Size');
+  Color := TIntegerSetting.Create(APath + 'Color');
+  Style := TStringSetting.Create(APath + 'Styles');
+  CharSet := TIntegerSetting.Create(APath + 'CharSet');
+  Quality := TIntegerSetting.Create(APath + 'Quality');
+  Pitch := TIntegerSetting.Create(APath + 'Pitch');
+end;
+
+destructor TFontSetting.Destroy();
+begin
+  Name.Free;
+  Size.Free;
+  Color.Free;
+  Style.Free;
+  CharSet.Free;
+  Quality.Free;
+  Pitch.Free;
+
+  FreeAndNil(FFont);
+end;
+
+procedure TFontSetting.Save(MMLSettings: TMMLSettings);
+begin
+  Name.Save(MMLSettings);
+  Size.Save(MMLSettings);
+  Color.Save(MMLSettings);
+  Style.Save(MMLSettings);
+  CharSet.Save(MMLSettings);
+  Quality.Save(MMLSettings);
+  Pitch.Save(MMLSettings);
+end;
+
+procedure TFontSetting.Load(MMLSettings: TMMLSettings);
+begin
+  Name.Load(MMLSettings);
+  Size.Load(MMLSettings);
+  Color.Load(MMLSettings);
+  Style.Load(MMLSettings);
+  CharSet.Load(MMLSettings);
+  Quality.Load(MMLSettings);
+  Pitch.Load(MMLSettings);
+end;
+
 { }
 constructor TSection.Create;
 begin
@@ -799,6 +926,7 @@ begin
   SourceEditor.DefScriptPath.onDefault := @GetDefScriptPath;
   SourceEditor.LazColors := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorLazColors)) as TBooleanSetting;
   SourceEditor.LazColors.onDefault := @GetSourceEditorLazColors;
+  SourceEditor.Font := SourceEditor.AddChild(TFontSetting.Create(ssSourceEditorFont)) as TFontSetting;
 
   News := AddChild(TNewsSection.Create()) as TNewsSection;
   News.URL := News.AddChild(TStringSetting.Create(ssNewsLink)) as TStringSetting;
