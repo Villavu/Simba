@@ -460,6 +460,7 @@ AddGlobalFunc('function EdgeFromBox(const Box: TBox): TPointArray', @Lape_EdgeFr
 AddGlobalFunc('function TPAFromBox(const Box: TBox): TPointArray', @Lape_TPAFromBox);
 AddGlobalFunc('function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray', @Lape_TPAFromEllipse);
 AddGlobalFunc('function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray', @Lape_TPAFromCircle);
+AddGlobalFunc('function TPAFromPolygon(const shape: TPointArray) : TPointArray', @Lape_TPAFromPolygon);
 AddGlobalFunc('procedure FillEllipse(var a: TPointArray);', @Lape_FillEllipse);
 AddGlobalFunc('function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray', @Lape_RotatePoints);
 AddGlobalFunc('function FindTPAEdges(const p: TPointArray): TPointArray', @Lape_FindTPAEdges);
