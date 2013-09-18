@@ -98,6 +98,7 @@ function EdgeFromBox(const Box: TBox): TPointArray;
 function TPAFromBox(const Box : TBox) : TPointArray;
 function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer): TPointArray;
 function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
+function TPAFromPolygon(const shape: TPointArray): TPointArray;
 procedure FillEllipse(var a: TPointArray);
 function FindTPAEdges(const p: TPointArray): TPointArray;
 function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
@@ -2358,6 +2359,100 @@ end;
 function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
 begin
   Result := TPAFromEllipse(CX, CY, Radius, Radius);
+end;
+
+{/\
+  Returns polygon as a TPointArray from a shape, which can be working either as
+  an array of main points OR border points. note: The order of the points are important.
+/\}
+function TPAFromPolygon(const shape: TPointArray): TPointArray;
+var
+  b: TBox;
+  x, y, h, i, l, r, z: Integer;
+  o: TPointArray;
+  f: Boolean;
+  t: array of TBoolArray;
+  e: Extended;
+  q, p, d: TPoint;
+begin
+  h := High(shape);
+  if (h > -1) then
+  begin
+    SetLength(o, 0);
+
+    b.x1 := shape[0].x;
+    b.y1 := shape[0].y;
+    b.x2 := shape[0].x;
+    b.y2 := shape[0].y;
+
+    for i := 0 to h do
+    begin
+      q := shape[i];
+      if (i < h) then
+        p := shape[(i + 1)]
+      else
+        p := shape[0];
+      r := Length(o);
+      if ((q.X <> p.X) or (q.Y <> p.Y)) then
+      begin
+        l := Max(Round(Abs(q.X - p.X)), Round(Abs(q.Y - p.Y)));
+        SetLength(o, ((r + l) + 1));
+        for z := 0 to l do
+          o[(r + z)] := Point((q.X + Round((p.X - q.X) * (z / Extended(l)))), (q.Y + Round((p.Y - q.Y) * (z / Extended(l)))));
+      end else
+      begin
+        SetLength(o, (r + 1));
+        o[r] := q;
+      end;
+      if (shape[i].X < b.X1) then
+        b.X1 := shape[i].X
+      else
+        if (shape[i].X > b.X2) then
+          b.X2 := shape[i].X;
+      if (shape[i].Y < b.Y1) then
+        b.Y1 := shape[i].Y
+      else
+        if (shape[i].Y > b.Y2) then
+          b.Y2 := shape[i].Y;
+    end;
+
+    SetLength(t, ((b.X2 - b.X1) + 1), ((b.Y2 - b.Y1) + 1));
+    l := Length(o);
+    for i := 0 to (l - 1) do
+      if not t[(o[i].X - b.X1)][(o[i].Y - b.Y1)] then
+        t[(o[i].X - b.X1)][(o[i].Y - b.Y1)] := True;
+    for y := 0 to (b.Y2 - b.Y1) do
+      for x := 0 to (b.X2 - b.X1) do
+      begin
+        f := t[x][y];
+        if not f then
+        begin
+          d := Point((x + b.X1), (y + b.Y1));
+          q := shape[0];
+          for i := 0 to (h + 1) do
+          begin
+            p := shape[(i mod (h + 1))];
+            if (d.Y > Min(q.Y, p.Y)) then
+              if (d.Y <= Max(q.Y, p.Y)) then
+                if (d.X <= Max(q.X, p.X)) then
+                begin
+                  if (q.y <> p.y) then
+                    e := ((d.Y - q.Y) * (p.X - q.X) / Extended((p.Y - q.Y)) + q.X);
+                  if ((q.X = p.X) or (d.X < e)) then
+                    f := not f;
+                end;
+            q := p;
+          end;
+        end;
+        if f then
+        begin
+          l := Length(Result);
+          SetLength(Result, (l + 1));
+          Result[l] := Point((x + b.X1), (y + b.Y1));
+        end;
+      end;
+  end else
+    SetLength(Result, 0);
 end;
 
 {/\
