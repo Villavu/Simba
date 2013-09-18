@@ -1169,6 +1169,12 @@ object SimbaForm: TSimbaForm
         Action = ActionReplace
         OnClick = ActionReplaceExecute
       end
+      object MenuItemDivider51: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemFont: TMenuItem
+        Action = ActionFont
+      end
       object MenuItemDivider50: TMenuItem
         Caption = '-'
       end
@@ -3241,6 +3247,10 @@ object SimbaForm: TSimbaForm
     object ActionShowHidden: TAction
       Caption = 'Show Hidden'
       OnExecute = ActionShowHiddenExecute
+    end
+    object ActionFont: TAction
+      Caption = 'Font'
+      OnExecute = ActionFontExecute
     end
   end
   object DebugTimer: TTimer
