@@ -949,9 +949,16 @@ end;
 function TSimbaForm.SetSourceEditorFont(obj: TObject): Boolean;
 var
   I: LongInt;
+  TempFont: TFont;
 begin
+  if (TFontSetting(obj).Color.Value <> clDefault) then
+  begin
+    formWritelnEx('Font color cannot be changed.');
+    TFontSetting(obj).Color.Value := clDefault;
+  end;
+
   for I := 0 to Tabs.Count - 1 do
-    TMufasaTab(Tabs[I]).ScriptFrame.SynEdit.Font.Assign(SimbaSettings.SourceEditor.Font.Value);
+    TMufasaTab(Tabs[I]).ScriptFrame.SynEdit.Font.Assign(TFontSetting(obj).Value);
 end;
 
 {$IFDEF USE_EXTENSIONS}
