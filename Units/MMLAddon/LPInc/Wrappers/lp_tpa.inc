@@ -532,3 +532,10 @@ procedure Lape_FilterPointsBox(const Params: PParamArray); lape_extdecl
 begin
   ps_FilterPointsBox(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
+
+procedure Lape_TPAFromPolygon(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPointArray(Result)^ := ps_TPAFromPolygon(PPointArray(Params^[0])^);
+end;
+
+
