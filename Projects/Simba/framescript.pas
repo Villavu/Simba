@@ -670,10 +670,13 @@ begin
   inherited Create(TheOwner);
   SyncEdit := TSynPluginSyncroEdit.Create(SynEdit);
   SimbaForm.Mufasa_Image_List.GetBitmap(28,SyncEdit.GutterGlyph);
+
+  SynEdit.Font.Assign(SimbaSettings.SourceEditor.Font.Value);
+
   OwnerSheet := TTabSheet(TheOwner);
   OwnerPage := TPageControl(OwnerSheet.Owner);
 
-  SynEdit.Lines.text := SimbaForm.DefaultScript;
+  SynEdit.Lines.Text := SimbaForm.DefaultScript;
   StartText:= SynEdit.Lines.text;
   ScriptDefault:= StartText;
   ScriptName:= 'Untitled';
