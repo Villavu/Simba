@@ -676,6 +676,38 @@ TPAFromCircle
 Creates and returns a TPointArray of a circle, around the center point (CX, CY), with the size determined by Radius
 
 
+TPAFromPolygon
+--------------
+
+.. code-block:: pascal
+
+    function TPAFromPolygon(const shape: TPointArray) : TPointArray;
+
+Returns polygon as a TPointArray from a shape, which can be working either as
+an array of main points OR border points. note: The order of the points are important.        
+
+.. code-block:: pascal
+
+  program TPAFromPolygonExample;
+
+  var
+    tpa, shape: TPointArray;
+    bmp: integer;
+
+  begin
+    tpa := [point(70,90), point(185,90), point(185,116), point(70,116),
+            point(70,140), point(35,105), point(70,70)];
+
+    shape := TPAFromPolygon(tpa);
+
+    bmp := createBitmap(230, 200);
+    drawTPABitmap(bmp, shape, 255);
+
+    displayDebugImgWindow(230, 200);
+    drawBitmapDebugImg(bmp);
+  end.  
+
+
 FillEllipse
 -----------
 

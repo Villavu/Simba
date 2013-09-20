@@ -314,6 +314,11 @@ begin
   result := TPAFromCircle(CX, CY, Radius);
 end;
 
+function ps_TPAFromPolygon(const shape: TPointArray): TPointArray; extdecl;
+begin
+  result := TPAFromPolygon(shape);
+end;
+
 procedure ps_FillEllipse(var a: TPointArray);
 begin
   FillEllipse(a);
