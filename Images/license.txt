@@ -1,4 +1,4 @@
-pause,stop: From Lazarus (http://lazarus.freepascal.org)
+pause,stop,procedure,unit,type,var,constant,script,includes,catagory,library: From Lazarus (http://lazarus.freepascal.org)
 exit,cut,page_new,new,open,paste,redo,run,save,undo,help,bug,arrow_refresh,html: Mark James http://www.famfamfam.com/lab/icons/silk/
 closetab,closetabs,addtab,eraser,terminate,terminal: Yusuke Kamiyamane http://www.pinvoke.com/
 pickcolor: From the Crystal Clear Project (http://www.everaldo.com/crystal/) licensed under LGPL
