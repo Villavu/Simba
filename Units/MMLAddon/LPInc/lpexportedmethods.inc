@@ -207,8 +207,8 @@ SetCurrSection('Color');
 AddGlobalFunc('function GetColor(x,y: integer): TColor', @Lape_GetColor);
 AddGlobalFunc('procedure GetColorsWrap(Coords: TPointArray; var Colors: TIntegerArray);', @Lape_GetColorsWrap);
 AddGlobalFunc('function GetColors(const Coords: TPointArray): TIntegerArray', @Lape_GetColors);
-AddGlobalFunc('function findcolor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean', @Lape_findcolor);
-AddGlobalFunc('function findcolortolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean', @Lape_findcolortolerance);
+AddGlobalFunc('function FindColor(var x, y: integer; color, x1, y1, x2, y2: integer): boolean', @Lape_FindColor);
+AddGlobalFunc('function FindColorTolerance(var x, y: integer; color, x1, y1, x2, y2, tol: integer): boolean', @Lape_FindColorTolerance);
 AddGlobalFunc('function FindColors(var TPA: TPointArray; Color, x1, y1, x2, y2: Integer): Boolean', @Lape_FindColors);
 AddGlobalFunc('procedure SetColorToleranceSpeed(cts: Integer);', @Lape_SetColorToleranceSpeed);
 AddGlobalFunc('function GetToleranceSpeed: Integer', @Lape_GetToleranceSpeed);
@@ -385,7 +385,7 @@ AddGlobalFunc('procedure ExplodeWrap(del, str: string; var res: TStringArray);',
 AddGlobalFunc('function ExecRegExpr(const RegExpr, InputStr: String): boolean', @Lape_ExecRegExpr);
 //AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
 AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: String; UseSubstitution: boolean): String', @Lape_ReplaceRegExpr);
-AddGlobalFunc('function posex(needle, haystack: String; offset: integer): integer', @Lape_posex);
+AddGlobalFunc('function PosEx(needle, haystack: String; offset: integer): integer', @Lape_PosEx);
 AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);
 AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_NormLevDist);
 AddGlobalFunc('function StringMatch(checkCompare, goalCompare: string): extended;', @Lape_StringMatch);
@@ -460,6 +460,7 @@ AddGlobalFunc('function EdgeFromBox(const Box: TBox): TPointArray', @Lape_EdgeFr
 AddGlobalFunc('function TPAFromBox(const Box: TBox): TPointArray', @Lape_TPAFromBox);
 AddGlobalFunc('function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray', @Lape_TPAFromEllipse);
 AddGlobalFunc('function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray', @Lape_TPAFromCircle);
+AddGlobalFunc('function TPAFromPolygon(const shape: TPointArray) : TPointArray', @Lape_TPAFromPolygon);
 AddGlobalFunc('procedure FillEllipse(var a: TPointArray);', @Lape_FillEllipse);
 AddGlobalFunc('function RotatePoints(Const P: TPointArray; A, cx, cy: Extended): TPointArray', @Lape_RotatePoints);
 AddGlobalFunc('function FindTPAEdges(const p: TPointArray): TPointArray', @Lape_FindTPAEdges);
