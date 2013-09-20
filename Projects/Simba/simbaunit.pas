@@ -1714,10 +1714,6 @@ begin
   {$IFDEF USE_EXTENSIONS}
   if not DirectoryExists(SimbaSettings.Extensions.Path.Value) then
     CreateDir(SimbaSettings.Extensions.Path.Value);
-{
-  if not DirectoryExists(ExtPath) then
-    CreateDir(ExtPath);
-}
   {$ENDIF}
   if not DirectoryExists(SimbaSettings.Scripts.Path.Value) then
     CreateDir(SimbaSettings.Scripts.Path.Value);
@@ -2879,7 +2875,7 @@ begin
   InitmDebug; { Perhaps we need to place this before our mDebugLines?? }
 
   Self.OnScriptStart := @ScriptStartEvent;
-  Self.onScriptOpen := @ScriptOpenEvent;
+  Self.OnScriptOpen := @ScriptOpenEvent;
 
   FillThread := TProcThread.Create;
   FillThread.ClassProc := @CCFillCore;
@@ -2894,24 +2890,19 @@ begin
   {$ENDIF}
 
   HandleConfigParameter;
-  if FileExistsUTF8(SimbaSettingsFile) then
+
+  CreateSimbaSettings(SimbaSettingsFile);
+
+  Application.CreateForm(TSettingsForm,SettingsForm);
+  Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
+
+  if not FileExistsUTF8(SimbaSettingsFile) then
   begin
-    CreateSimbaSettings(SimbaSettingsFile);
-
-    Application.CreateForm(TSettingsForm,SettingsForm);
-    Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
-
-    Self.LoadFormSettings;
-  end else
-  begin
-    CreateSimbaSettings(SimbaSettingsFile);
-
-    Application.CreateForm(TSettingsForm,SettingsForm);
-    Application.CreateForm(TSettingsSimpleForm,SettingsSimpleForm);
-
-    Self.CreateDefaultEnvironment;
+    CreateDefaultEnvironment;
     FillThread.StartWait := 250;
-  end;
+  end else
+    Self.LoadFormSettings;
+
   RegisterSettingsOnChanges;
 
   //Show close buttons @ tabs
@@ -2929,7 +2920,7 @@ begin
   DebugCriticalSection := syncobjs.TCriticalSection.Create;
 
   {$ifdef mswindows}  { The Debug timer checks for new stuff to print }
-  DebugTimer.Enabled:= false;
+  DebugTimer.Enabled := false;
   {$endif}
 
   Application.QueueAsyncCall(@RefreshTabSender,0);
@@ -2943,11 +2934,10 @@ begin
   SetConsoleCtrlHandler(@ConsoleHandler,true);
   {$endif}
 
-  frmFunctionList.OnEndDock:= @frmFunctionList.FrameEndDock;
+  frmFunctionList.OnEndDock := @frmFunctionList.FrameEndDock;
 
   FirstRun := True;//Our next run is the first run.
 
-  HandleParameters; { Handle command line parameters }
   TT_Update.Visible:= false;
 
   //Load the extensions
@@ -2956,7 +2946,6 @@ begin
   UpdateTitle;
 
   {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
-
   {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
 
   // TODO TEST
@@ -2968,9 +2957,9 @@ begin
   NotesSplitter.Visible := SimbaSettings.Notes.Visible.Value;
   ActionNotes.Checked := SimbaSettings.Notes.Visible.Value;
 
-  //Fill the codeinsight buffer
+  HandleParameters;
   FillThread.Start;
-  
+
   self.EndFormUpdate;
 end;
 
