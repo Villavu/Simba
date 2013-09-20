@@ -1449,8 +1449,8 @@ begin
 
     for I := 0 to T do
     begin
-      if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MY)) > 0) and
-         ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MY)) < 0)) xor Over180) then
+      if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MX)) > 0) and
+         ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MX)) < 0)) xor Over180) then
         continue;
       G[L] := Points[I];
       Inc(L);
