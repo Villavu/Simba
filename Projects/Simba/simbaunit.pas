@@ -822,40 +822,40 @@ var
   b: TStringList;
   ms: TMemoryStream;
 begin
+  ci := nil;
   try
     Index := PluginsGlob.LoadPlugin(LibName);
   except
-    Result := false;
-    Index := -1;
+    Exit(False);
   end;
-  if (Index < 0) then
-    Exit(False)
-  else
-  begin
-    b := TStringList.Create;
-    try
-      with PluginsGlob.MPlugins[Index] do
-      begin
-        for i := 0 to TypesLen - 1 do
-          b.Add('type ' + Types[i].TypeName + ' = ' + AddTrailingSemiColon(Types[i].TypeDef));
-        for i := 0 to MethodLen - 1 do
-          b.Add(AddTrailingForward(Methods[i].FuncStr));
-      end;
 
-      ms := TMemoryStream.Create;
-      ci := TCodeInsight.Create;
-      with ci do
-      try
-        OnMessage := @SimbaForm.OnCCMessage;
-        b.SaveToStream(ms);
-        FileName := LibName;
-        Run(ms, nil, -1, True);
-      except
-        mDebugLn('CC ERROR: Could not parse imports for plugin: ' + LibName);
-      end;
-    finally
-      b.Free;
+  if (Index < 0) then
+    Exit(False);
+
+  b := TStringList.Create;
+  try
+    with PluginsGlob.MPlugins[Index] do
+    begin
+      for i := 0 to TypesLen - 1 do
+        b.Add('type ' + Types[i].TypeName + ' = ' + AddTrailingSemiColon(Types[i].TypeDef));
+      for i := 0 to MethodLen - 1 do
+        b.Add(AddTrailingForward(Methods[i].FuncStr));
     end;
+
+    ms := TMemoryStream.Create;
+    ci := TCodeInsight.Create;
+    with ci do
+    try
+      OnMessage := @SimbaForm.OnCCMessage;
+      b.SaveToStream(ms);
+      WriteLn(LibName);
+      FileName := PluginsGlob.Loaded[Index].Filename;
+      Run(ms, nil, -1, True);
+    except
+      mDebugLn('CC ERROR: Could not parse imports for plugin: ' + LibName);
+    end;
+  finally
+    b.Free;
   end;
 end;
 
@@ -2715,15 +2715,19 @@ procedure TSimbaForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i : integer;
 begin
-  exiting := True;
+  Exiting := True;
   Self.SaveFormSettings;
+
   for i := Tabs.Count - 1 downto 0 do
     if not DeleteTab(i,true) then
     begin;
       CloseAction := caNone;
-      exit;
+      Exit;
     end;
-  FunctionListTimer.Enabled:= false;
+
+  FunctionListTimer.Enabled := False;
+  frmFunctionList.Terminate;
+
   CloseAction := caFree;
   {$IFDEF USE_EXTENSIONS}FreeAndNil(ExtManager);{$ENDIF}
 end;
@@ -3171,8 +3175,16 @@ begin
     Tree.Items.Clear;
     Sections := TStringList.Create;
     LastSection := '';
-    frmFunctionList.ScriptNode := Tree.Items.Add(nil,'Script');
-    frmFunctionList.IncludesNode := Tree.Items.Add(nil,'Includes');
+    frmFunctionList.ScriptNode := Tree.Items.Add(nil, 'Script');
+    frmFunctionList.ScriptNode.ImageIndex := 41;
+    frmFunctionList.ScriptNode.SelectedIndex := 41;
+    frmFunctionList.PluginsNode := Tree.Items.Add(nil, 'Plugins');
+    frmFunctionList.PluginsNode.ImageIndex := 40;
+    frmFunctionList.PluginsNode.SelectedIndex := 40;
+    frmFunctionList.IncludesNode := Tree.Items.Add(nil, 'Includes');
+    frmFunctionList.IncludesNode.ImageIndex := 40;
+    frmFunctionList.IncludesNode.SelectedIndex := 40;
+
     for i := 0 to high(Methods) do
     begin;
       if Methods[i].Section <> LastSection then
@@ -3184,6 +3196,8 @@ begin
         else
         begin
           TempNode := Tree.Items.Add(nil,LastSection);
+          TempNode.ImageIndex := 39;
+          TempNode.SelectedIndex := 39;
           Sections.Add(LastSection);
           setlength(nodes,length(nodes)+1);
           nodes[high(nodes)] := tempNode;
@@ -3191,6 +3205,12 @@ begin
       end;
       Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
       Temp2Node.Data := GetMem(SizeOf(TMethodInfo));
+
+      Temp2Node.ImageIndex := 34;
+      if (Copy(Lowercase(Methods[I].FuncDecl), 1, 4) = 'proc') then
+        Temp2Node.ImageIndex := 35;
+      Temp2Node.SelectedIndex := Temp2Node.ImageIndex;
+
       FillChar(PMethodInfo(Temp2Node.Data)^,SizeOf(TMethodInfo),0);
       with PMethodInfo(Temp2Node.Data)^ do
       begin
