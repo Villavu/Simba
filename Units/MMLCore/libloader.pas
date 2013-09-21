@@ -40,7 +40,7 @@ interface
     TGenericLoader = class(TObject)
       private
         PluginLen : integer;
-        Loaded: TGenericLibArray;
+        FLoaded: TGenericLibArray;
         PluginDirs : TStringList;
         LoadCriticalSection: syncobjs.TCriticalSection;
         procedure LoadPluginsDir(DirIndex : integer);
@@ -55,6 +55,7 @@ interface
         procedure AddPath(path: string);
         procedure FreePlugins; virtual;
         function LoadPlugin(PluginName : string) : integer;
+        property Loaded: TGenericLibArray read FLoaded;
     end;
 
 implementation
@@ -126,16 +127,18 @@ implementation
     PlugExt: String = '.' + SharedSuffix;
   begin
     ii := -1;
-    result := -1;
+    Result := -1;
+
     if PluginDirs.Count = 0 then
       Exit;
+
     ValidateDirs;
     PluginName := ExtractFileNameWithoutExt(PluginName);
     for i := 0 to PluginDirs.Count - 1 do
       if FileExistsUTF8(PluginDirs.Strings[i] + Pluginname + PlugExt) then
       begin;
         if ii <> -1 then
-          Raise Exception.CreateFmt('Plugin(%s) has been found multiple times',[PluginName]);
+          raise Exception.CreateFmt('Plugin(%s) has been found multiple times', [PluginName]);
         ii := i;
       end;
     if ii = -1 then
@@ -143,22 +146,28 @@ implementation
 
     { Plugin already loaded }
     for i := 0 to PluginLen - 1 do
-      if Loaded[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
+      if FLoaded[i].filename = (PluginDirs.Strings[ii] + PluginName + PlugExt) then
       begin
         Writeln(Format('Plugin %s already loaded: %d', [PluginName, i]));
         Exit(i);
       end;
-    SetLength(Loaded,PluginLen + 1);
+
+    SetLength(FLoaded, PluginLen + 1);
     mDebugLn(Format('Loading plugin %s at %s',[PluginName,PluginDirs.Strings[ii]]));
-    Loaded[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
-    Loaded[PluginLen].handle:= LoadLibrary(Loaded[PluginLen].filename);
-    if Loaded[PluginLen].handle = 0 then
-      Raise Exception.CreateFMT('Error loading plugin %s',[Loaded[PluginLen].filename]);
-    if InitPlugin(Loaded[PluginLen].handle) then
-      inc(PluginLen)
-    else
-      FreeLibrary(Loaded[PluginLen].handle);
-    Result:= PluginLen - 1;
+    FLoaded[PluginLen].filename:= PluginDirs.Strings[ii] + Pluginname + PlugExt;
+    FLoaded[PluginLen].handle := LoadLibrary(FLoaded[PluginLen].filename);
+
+    if FLoaded[PluginLen].handle = 0 then
+      raise Exception.CreateFMT('Error loading %s: %s', [Loaded[PluginLen].filename, GetLoadErrorStr]);
+
+    if not InitPlugin(FLoaded[PluginLen].Handle) then
+    begin
+      FreeLibrary(FLoaded[PluginLen].Handle);
+      Exit(-1);
+    end else
+      Inc(PluginLen);
+
+    Result := PluginLen - 1;
   end;
 
 
@@ -187,14 +196,14 @@ implementation
   begin
     for i := 0 to PluginLen - 1 do
     begin;
-      if (Loaded[i].handle > 0) then
+      if (FLoaded[i].handle > 0) then
       try
         mDebugLn('Freeing plugin[%d]',[i]);
-        FreeLibrary(Loaded[i].handle);
+        FreeLibrary(FLoaded[i].handle);
       except
       end;
     end;
-    SetLength(Loaded,0);
+    SetLength(FLoaded,0);
     PluginLen:= 0;
   end;
 
