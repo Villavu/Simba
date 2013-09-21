@@ -146,9 +146,17 @@ begin
 end;
 
 procedure TFunctionListFrame.FunctionListDblClick(Sender: TObject);
+  procedure OpenDocs(MethodInfo: TMethodInfo);
+  var
+    Arr: array of string;
+  begin
+    Arr := Explode('/', Copy(MethodInfo.Filename, 6, Length(MethodInfo.Filename) - 5));
+    if (Length(Arr) = 2) then
+      OpenURL(Format('http://docs.villavu.com/simba/scriptref/%s.html#%s', [Arr[0], Arr[1]]));
+  end;
 var
-  Node : TTreeNode;
-  MethodInfo : TMethodInfo;
+  Node: TTreeNode;
+  MethodInfo: TMethodInfo;
 begin
   if FilterTree.Visible then
     Node := FilterTree.Selected
@@ -165,17 +173,26 @@ begin
     begin
       MethodInfo := PMethodInfo(node.Data)^;
       if (DraggingNode = node) and (MethodInfo.BeginPos >= 0) then
-        if (MethodInfo.Filename = nil) or ((MethodInfo.Filename = '') xor FileExistsUTF8(MethodInfo.Filename)) then
+      begin
+        if (MethodInfo.Filename <> nil) and (MethodInfo.Filename <> '') then
         begin
-          if (MethodInfo.Filename <> nil) and (MethodInfo.Filename <> '') then
-            SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true);
-
-          if (MethodInfo.BeginPos > 0) then
-          begin
-            SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
-            SimbaForm.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
+          case Copy(MethodInfo.Filename, 1, 5) of
+            'docs:': OpenDocs(MethodInfo);
+            else
+              if (FileExistsUTF8(MethodInfo.Filename)) then
+                SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true)
+              else
+                Exit;
           end;
         end;
+
+
+        if (MethodInfo.BeginPos > 0) then
+        begin
+          SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
+          SimbaForm.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
+        end;
+      end;
     end;
 end;
 
@@ -531,10 +548,11 @@ end;
 
 procedure TFillThread.Update;
   procedure AddProcsTree(Node: TTreeNode; Procs: TDeclarationList; Path: string);
-    procedure ProcessProcedure(Proc: TciProcedureDeclaration);
+    procedure ProcessProcedure(Node: TTreeNode; Proc: TciProcedureDeclaration);
     var
       tmpNode: TTreeNode;
       Name, FirstLine: string;
+      Index: LongInt;
     begin
       if (Assigned(Proc.Name)) then
       begin
@@ -544,12 +562,20 @@ procedure TFillThread.Update;
         if (Pos(#10, FirstLine) > 0) then
           FirstLine := Copy(FirstLine, 1, Pos(#10, FirstLine) - 1);
 
+        Index := Node.IndexOfText(Trim(Name));
+        if (Index = -1)  then
+          Index := Node.IndexOfText(Name + 'override;');
+        if (Index = -1)  then
+          Index := Node.IndexOfText(Name + 'overload;');
+        if (Index > -1) then
+          Node := Node.Items[Index];
+
         if (Pos('override;', FirstLine) > 0) then
           Name += 'override; ';
         if (Pos('overload;', FirstLine) > 0) then
           Name += 'overload; ';
 
-        tmpNode := Node.TreeNodes.AddChild(Node, Name);
+        tmpNode := Node.TreeNodes.AddChild(Node, Trim(Name));
         tmpNode.Data := GetMem(SizeOf(TMethodInfo));
 
         tmpNode.ImageIndex := 34;
@@ -567,7 +593,7 @@ procedure TFillThread.Update;
         end;
       end;
     end;
-    procedure ProcessDecl(Decl: TDeclaration);
+    procedure ProcessDecl(Node: TTreeNode; Decl: TDeclaration);
     var
       tmpNode: TTreeNode;
     begin
@@ -582,12 +608,12 @@ procedure TFillThread.Update;
       FillChar(PMethodInfo(tmpNode.Data)^, SizeOf(TMethodInfo), 0);
 
        with PMethodInfo(tmpNode.Data)^ do
-        begin
-          MethodStr := strnew(Pchar(Decl.CleanText));
-          Filename := strnew(pchar(Path));
-          BeginPos := Decl.StartPos;
-          EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
-        end;
+       begin
+         MethodStr := strnew(Pchar(Decl.CleanText));
+         Filename := strnew(pchar(Path));
+         BeginPos := Decl.StartPos;
+         EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
+       end;
     end;
   var
     I: integer;
@@ -598,8 +624,8 @@ procedure TFillThread.Update;
     for I := 0 to Procs.Count - 1 do
       if (Assigned(Procs[I])) then
         case Procs[I].ClassName of
-          'TciProcedureDeclaration': ProcessProcedure(Procs[I] as TciProcedureDeclaration);
-          'TciVarDeclaration', 'TciTypeDeclaration', 'TciConstantDeclaration': ProcessDecl(Procs[I] as TDeclaration);
+          'TciProcedureDeclaration': ProcessProcedure(Node, Procs[I] as TciProcedureDeclaration);
+          'TciVarDeclaration', 'TciTypeDeclaration', 'TciConstantDeclaration': ProcessDecl(Node, Procs[I] as TDeclaration);
           'TciJunk', 'TciInclude', 'TciCompoundStatement': ;
           else
             WriteLn('Unknown Class: ', Procs[I].ClassName);

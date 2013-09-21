@@ -3121,31 +3121,34 @@ begin
   SimbaForm.Memo1.Lines.Add(s);
 end;
 
-function GetMethodName( Decl : string; PlusNextChar : boolean) : string;
+function GetMethodName(Decl: string; PlusNextChar: boolean) : string;
 var
-  I : integer;
-  ii : integer;
+  I, Index: LongInt;
 begin;
-  I := pos(' ',Decl) + 1;
-  for ii := i to Length(decl) do
-  begin;
-    if (Decl[ii] = '(') or (Decl[ii] = ';') then
-    begin;
-      if PlusNextChar then
-        result := result + decl[ii];
-      exit;
+  Result := '';
+  I := Pos(' ', Decl) + 1;
+
+  for Index := I to Length(decl) do
+    case Decl[Index] of
+      '(', ';': begin
+          if (PlusNextChar) then
+          begin
+            Result += '(';
+            if (Decl[Index] = ';') then
+              Result += ')';
+          end;
+          Exit;
+        end;
+      ' ', ':': begin
+          if (PlusNextChar) then Result += ' ';
+          Exit;
+        end;
+      else
+        Result += Decl[Index];
     end;
-    if (Decl[ii] = ' ') or (Decl[ii] = ':') then
-    begin;
-      if PlusNextChar then
-        result := result + ' ';
-      exit;
-    end;
-    result := result + decl[ii];
-  end;
-  //We made it out of the loop.. This is a method without ';' we might wanne add that!
-  if PlusNextChar then
-    result := result + ';';
+
+  if (PlusNextChar) then
+    Result += '(';
 end;
 
 procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
@@ -3203,7 +3206,7 @@ begin
           nodes[high(nodes)] := tempNode;
         end;
       end;
-      Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false));
+      Temp2Node := Tree.Items.AddChild(Tempnode,GetMethodName(Methods[i].FuncDecl,false) + ';');
       Temp2Node.Data := GetMem(SizeOf(TMethodInfo));
 
       Temp2Node.ImageIndex := 34;
@@ -3215,7 +3218,7 @@ begin
       with PMethodInfo(Temp2Node.Data)^ do
       begin
         MethodStr:= strnew(PChar(Methods[i].FuncDecl));
-        BeginPos:= -1;
+        Filename := strnew(PChar(Lowercase('docs:' + Methods[i].Section + '/' + GetMethodName(Methods[i].FuncDecl,false))));
       end;
     end;
     Sections.free;
