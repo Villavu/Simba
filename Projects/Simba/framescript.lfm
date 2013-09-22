@@ -616,7 +616,8 @@ object ScriptFrame: TScriptFrame
       'end.'
     )
     Options = [eoAutoIndent, eoGroupUndo, eoScrollPastEol, eoSmartTabs, eoTabIndent, eoTabsToSpaces, eoTrimTrailingSpaces, eoBracketHighlight]
-    BracketHighlightStyle = sbhsBoth
+    MouseOptions = [emShowCtrlMouseLinks]
+	BracketHighlightStyle = sbhsBoth
     OnChange = SynEditChange
     OnCommandProcessed = SynEditCommandProcessed
     OnGutterClick = SynEditGutterClick
