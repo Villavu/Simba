@@ -3141,19 +3141,17 @@ begin;
 
   for Index := I to Length(decl) do
     case Decl[Index] of
-      '(', ';': begin
+      '(', ';', ':': begin
           if (PlusNextChar) then
           begin
             Result += '(';
-            if (Decl[Index] = ';') then
+            if (Decl[Index] = ';') or (Decl[Index] = ':') then //There are no parameters..
               Result += ')';
           end;
           Exit;
         end;
-      ' ', ':': begin
-          if (PlusNextChar) then Result += ' ';
-          Exit;
-        end;
+      ' ': ; //Skip spaces....
+      #13, #10: Break; //We wont need anything after this...
       else
         Result += Decl[Index];
     end;
