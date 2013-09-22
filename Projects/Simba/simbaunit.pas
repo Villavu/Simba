@@ -2219,7 +2219,7 @@ begin
   Dialog := TFontDialog.Create(nil);
   with Dialog do
   try
-    Options := [fdEffects];
+    Options := [fdEffects, fdFixedPitchOnly];
     Title := 'Font Editor';
     Font := SimbaSettings.SourceEditor.Font.Value;
 
