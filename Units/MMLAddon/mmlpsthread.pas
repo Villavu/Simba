@@ -1377,8 +1377,7 @@ begin
 
     RegisterLCLClasses(Compiler);
     RegisterMMLClasses(Compiler);
-
-    addGlobalVar('TClient', @Client, 'Client');
+    addGlobalVar('TClient', @Client, 'Client').isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
 
