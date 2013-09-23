@@ -2779,7 +2779,7 @@ begin
       with TLPThread(Thread) do
       try
         GetValueDefs(ValueDefs);
-        CoreDefines.AddStrings(Compiler.Defines);
+        CoreDefines.AddStrings(Compiler.BaseDefines);
       finally
         Free();
       end;
