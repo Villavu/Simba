@@ -1,0 +1,901 @@
+{$ifndef PS_EXTENSION}
+Program RafikiPlayerManager;
+{$endif}
+
+type
+  TCustomButton = record     //A button with custom images
+    State: Integer;
+    StateImages: Array of TImage;
+    Box: TBox;               //Hit box
+  end;
+
+  TPlayer = record
+    DisplayName: String;      //Name as seen in game
+    LoginName: String;        //Name used to log char in
+    NickName: String;         //Name used to identify char (UNIQUE!)
+    Password: String;         //Password to login
+    BankPin: String;          //Bank pin (¿optional?)
+  end;
+
+  TArmy = Array of TPlayer;
+
+var
+  Army: TArmy;
+  ArmyName: String;
+
+  mainForm: TForm;
+  Btn_Save: TButton;
+  Btn_SavePlayerList: TButton;
+
+  PlayerBox: TGroupBox;
+  NewLabel: TLabel;
+  NicknameField, InlognameField, PasswordField, BankpinField, DisplaynameField: TEdit;
+
+  Lbl_ArmyName: TLabel;
+  ArmyNameField: TEdit;
+
+  Gb_Encryption: TGroupBox;
+  Cb_UseEnc: TCheckBox;
+  PassField, Pass2Field: TEdit;
+
+  Lbl_PlayerList: TLabel;
+  Lb_PlayerList: TListBox;
+
+  //Main menu(top)
+  Mm_MainMenu: TMainMenu;
+
+  Mi_Army: TMenuItem;
+  Mi_ArmyNew, Mi_ArmyOpen, Mi_ArmySave: TMenuItem;
+
+  Mi_Help: TMenuItem;
+  Mi_Forum: TMenuItem;
+  Mi_ForumTut: TMenuItem;
+  Mi_FeedBack: TMenuItem;
+
+  CButtons: Array of TCustomButton;
+  EditID: Integer; //the index of the player in the playerlist we are currently editing (-1 otherwise)    TODO: -1 is magic, something else!
+
+procedure DeleteFromList(var list: TListBox; element: integer);
+begin
+  if (list.items.count <> 1) then
+    if (element = 0) then
+      list.itemIndex := 1
+    else
+      list.itemIndex := list.itemIndex - 1;
+
+  list.items.delete(element);
+end;
+
+function GetPlayer(name: String): Integer;
+var
+  I: Integer;
+begin
+  for I := High(Army) downto 0 do
+    if Army[I].NickName = name then
+    begin
+      Result := I;
+      Exit;
+    end;
+
+  Result := -1;
+end;
+
+procedure EditPlayer(nick: String);
+begin
+  EditID := GetPlayer(nick);
+
+  PlayerBox.Enabled := true;
+  InlognameField.Caption := Army[EditId].LoginName;
+  NicknameField.Caption := Army[EditId].NickName;
+  DisplaynameField.Caption := Army[EditId].Displayname;
+  PasswordField.Caption := Army[EditId].Password;
+  BankpinField.Caption := Army[EditId].BankPin;
+end;
+
+procedure AddPlayer();
+var
+  HiA, I: Integer;
+begin
+  HiA := Length(Army);
+  SetLength(Army, HiA + 1);
+
+  repeat
+    I := I + 1;
+  until(GetPlayer('New Player ' + ToStr(i)) = -1);
+
+  Army[Hia].LoginName := 'New Player';
+  Army[Hia].DisplayName := 'New Player';
+  Army[Hia].NickName := 'New Player ' + ToStr(i);
+
+  Lb_PlayerList.ITEMS.Add(Army[Hia].NickName);
+  Lb_PlayerList.ItemIndex := High(Army);
+  EditPlayer(Lb_PlayerList.Items[Lb_PlayerList.ItemIndex]);
+end;
+
+procedure SavePlayer(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to Lb_PlayerList.ITEMS.Count-1 do
+    if Lb_PlayerList.ITEMS[i] = Army[EditId].NickName then
+    begin
+      Lb_PlayerList.ITEMS[i] := NicknameField.Caption;
+      break;
+    end;
+
+  Army[EditId].LoginName := InlognameField.Caption;
+  Army[EditId].NickName := NicknameField.Caption;
+  Army[EditId].Displayname := DisplaynameField.Caption;
+  Army[EditId].Password := PasswordField.Caption;
+  Army[EditId].BankPin := BankpinField.Caption;
+
+  PlayerBox.Enabled := false;
+  EditID := -1;
+end;
+
+procedure RemovePlayer(nick: String);
+var
+  index, i: Integer;
+begin
+  index := GetPlayer(nick);
+
+  if (index <> High(Army)) then
+    for i := index to (High(Army) - 1) do
+      Army[i] := Army[i + 1];
+
+  if (EditID = index) then
+    EditID := -1;
+
+  SetLength(Army, High(Army));
+end;
+
+procedure SetEncryption(Sender: TOBject);
+begin
+  if Cb_UseEnc.CHECKED then
+    Gb_Encryption.Enabled := true
+  else
+    Gb_Encryption.Enabled := false;
+end;
+
+procedure HoverMain(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var
+  HiCB, I: Integer;
+begin
+  HiCB := High(CButtons);
+
+  for I := 0 to HiCB do
+    if CButtons[I].State = 1 then
+    begin
+      //Returns the images to normal state
+      CButtons[I].StateImages[CButtons[I].State].Hide();
+      CButtons[I].StateImages[0].Show();
+      CButtons[I].State := 0;
+    end;
+end;
+
+procedure HoverCB(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var
+  HiCB, I, II: Integer;
+begin
+  HiCB := High(CButtons);
+
+  for I := 0 to HiCB do
+    for II := 0 to High(CButtons[I].StateImages) do
+      if not(CButtons[I].State = 1) then
+        if CButtons[I].StateImages[II] = Sender then
+        begin
+          CButtons[I].StateImages[II].Hide();
+          CButtons[I].StateImages[1].Show();
+          CButtons[I].State := 1;
+        end;
+end;
+
+procedure ClickCB(Sender: TObject);
+var
+  HiCB, I, II, iIndex: Integer;
+  Button: String;
+begin
+  HiCB := High(CButtons);
+
+  for I := 0 to HiCB do
+    for II := 0 to High(CButtons[I].StateImages) do
+      if CButtons[I].StateImages[II] = Sender then
+        Button := CButtons[I].stateimages[0].hint;
+
+  case Button of
+    'plus': //add a new user
+      AddPlayer();
+
+    'edit':
+      EditPlayer(Lb_PlayerList.Items[Lb_PlayerList.ItemIndex]);
+
+    'del': //remove selected user
+      begin
+        iIndex := Lb_PlayerList.ItemIndex;
+
+        RemovePlayer(Lb_PlayerList.Items[iIndex]);
+        DeleteFromList(Lb_PlayerList, iIndex);
+
+        if (Lb_PlayerList.Items.Count > 0) then
+        begin
+          iIndex := Lb_PlayerList.ItemIndex;
+          EditPlayer(Lb_PlayerList.Items[Lb_PlayerList.ItemIndex]);
+        end else begin
+          PlayerBox.Enabled := False;
+          InlognameField.Caption := '';
+          NicknameField.Caption := '';
+          DisplaynameField.Caption := '';
+          PasswordField.Caption := '';
+          BankpinField.Caption := '';
+        end;
+      end;
+  end;
+
+end;
+
+procedure ClickList(o: TObject);
+begin
+  EditPlayer(Lb_PlayerList.Items[Lb_PlayerList.ItemIndex]);
+end;
+
+function StringToBitmapTS(const w, h: Integer; str: String): TBitmap;
+var
+  x, y: Integer;
+  tmb: TMufasaBitmap;
+begin
+  tmb := TMufasaBitmap.create;
+  tmb.SetSize(w, h);
+
+  for x := w - 1 downto 0 do
+    for y := h -1 downto 0 do
+      tmb.FastSetPixel(x, y, HexToInt(Copy(str, y * 6 + x * h * 6 + 1, 6)));
+
+  Result := tmb.ToTBitmap;
+
+  tmb.Free;
+end;
+
+function GetBmp(bmp: String): TBitmap;
+begin
+  case bmp of
+    'plus': Result := StringToBitmapTS(12, 12, 'F0F0F0F0F0F0F0F0F0299114299114299114299114299114F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F029BA1437EA0237DA0237B702299114175B0BF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F029911437EA0237DA0237DA02299114175B0BF0F0F0F0F0F0F0F0F029911429911429911429911437DA0237DA0237DA02299114299114299114299114F0F0F029BA1437EA0237DA0237DA0237DA0237DA0237DA0237DA0237B70237B702299114175B0B29BA1478FD4D37EA0237DA0237DA0237DA0237DA0237DA0237DA0237DA02299114175B0B29BA1478FD4D78FD4D37EA0237DA0237DA0237DA0237DA0237DA0237DA02299114175B0B29BA1429BA1429BA1429BA1478FD4D37DA0237DA02299114299114299114299114175B0BF0F0F0175B0B175B0B29BA1478FD4D37EA0237DA02299114175B0B175B0B175B0B175B0BF0F0F0F0F0F0F0F0F029BA1478FD4D78FD4D37DA02299114175B0BF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F029BA1429BA1429BA1429BA14299114175B0BF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0175B0B175B0B175B0B175B0B175B0BF0F0F0F0F0F0F0F0F0');
+    'plus_hover': Result := StringToBitmapTS(12, 12, 'F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F029911429BA1429BA1429BA1429BA14F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F029911437DA0278FD4D78FD4D29BA14F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F029911437DA0237EA0278FD4D29BA14F0F0F0F0F0F0F0F0F0F0F0F029911429911429911429911437DA0237DA0278FD4D29BA1429BA1429BA1429BA14F0F0F029911437DA0237DA0237DA0237DA0237DA0237DA0237EA0278FD4D78FD4D29BA14F0F0F029911437DA0237DA0237DA0237DA0237DA0237DA0237DA0237EA0278FD4D29BA14F0F0F029911437B70237B70237DA0237DA0237DA0237DA0237DA0237DA0237EA0229BA14F0F0F029911429911429911429911437DA0237DA0237DA02299114299114299114299114F0F0F0F0F0F0F0F0F0F0F0F029911437DA0237DA0237EA02299114F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F029911437B70237DA0237EA0229BA14F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0299114299114299114299114299114F0F0F0F0F0F0F0F0F0');
+
+    'del': Result := StringToBitmapTS(11, 11, '0502C0050285050285ABB4B4F0F0F0F0F0F0F0F0F0050285050285050285ABB4B40502C00502FF0502FF050285ABB4B4F0F0F00502850502FF0502FF050285ABB4B40502C01A5BFF0502FF0502FF0502850502850502FF0502FF0502FF050285ABB4B4F0F0F00502C00502FF0502FF0502FF0502FF0502FF0502FF050285ABB4B4F0F0F0F0F0F0F0F0F00502C01A5BFF0502FF0502FF0502FF050285ABB4B4F0F0F0F0F0F0F0F0F0F0F0F00502C01A5BFF0502FF0502FF0502FF050285ABB4B4F0F0F0F0F0F0F0F0F00502C01A5BFF0502FF1A5BFF1A5BFF0502FF0502FF050285ABB4B4F0F0F00502C01A5BFF0502FF0502FF0502850502C01A5BFF0502FF0502FF050285ABB4B40502C01A5BFF0502FF050285ABB4B4F0F0F00502C01A5BFF0502FF050285ABB4B40502C00502C0050285ABB4B4F0F0F0F0F0F0F0F0F00502C0050285050285ABB4B4F0F0F0ABB4B4ABB4B4ABB4B4F0F0F0F0F0F0F0F0F0F0F0F0ABB4B4ABB4B4ABB4B4');
+    'del_hover': Result:= StringToBitmapTS(11, 11, 'F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00502850502850502C0F0F0F0F0F0F0F0F0F0F0F0F00502850502C00502C0F0F0F00502850502FF1A5BFF0502C0F0F0F0F0F0F00502850502FF1A5BFF0502C0F0F0F00502850502FF0502FF1A5BFF0502C00502850502FF0502FF1A5BFF0502C0F0F0F0F0F0F00502850502FF0502FF1A5BFF1A5BFF0502FF1A5BFF0502C0F0F0F0F0F0F0F0F0F0F0F0F00502850502FF0502FF0502FF1A5BFF0502C0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00502850502FF0502FF0502FF1A5BFF0502C0F0F0F0F0F0F0F0F0F0F0F0F00502850502FF0502FF0502FF0502FF0502FF0502FF0502C0F0F0F0F0F0F00502850502FF0502FF0502FF0502850502850502FF0502FF1A5BFF0502C0F0F0F00502850502FF0502FF050285F0F0F0F0F0F00502850502FF0502FF0502C0F0F0F0050285050285050285F0F0F0F0F0F0F0F0F0F0F0F00502850502850502C0');
+
+    'edit': Result:= StringToBitmapTS(11, 11, 'F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0999999BDBDBD000000F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00000ADBDBDBDBDBDBDC9C9C9F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00000AD0505FF0505FFC9C9C9BDBDBDF0F0F0F0F0F0F0F0F0F0F0F0F0F0F00000AD0505FF0505FF5C5CFF0505FF737373F0F0F0F0F0F0F0F0F0F0F0F00000AD0505FF0505FF5C5CFF0505FF737373F0F0F0F0F0F0F0F0F0F0F0F00000AD0505FF0505FF5C5CFF0505FF737373F0F0F0F0F0F0F0F0F0F0F0F00000AD0505FF0505FF5C5CFF0505FF737373F0F0F0F0F0F0F0F0F0F0F0F00000AD0505FF0505FF5C5CFF0505FF737373F0F0F0F0F0F0F0F0F0F0F0F00000AD0505FF0505FF5C5CFF0505FF737373F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00505FF5C5CFF0505FF737373F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00505FF737373F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0');
+    'edit_hover': Result := StringToBitmapTS(11, 11, 'F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0000066000066000066000000F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00000660000ADBDBDBDBDBDBD000066F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00000660000AD0505FF0505FFC9C9C9000066F0F0F0F0F0F0F0F0F0F0F0F00000660000AD0505FF0505FF5C5CFF0505FF000066F0F0F0F0F0F0F0F0F00000660000AD0505FF0505FF5C5CFF0505FF000066F0F0F0F0F0F0F0F0F00000660000AD0505FF0505FF5C5CFF0505FF000066F0F0F0F0F0F0F0F0F00000660000AD0505FF0505FF5C5CFF0505FF000066F0F0F0F0F0F0F0F0F00000660000AD0505FF0505FF5C5CFF0505FF000066F0F0F0F0F0F0F0F0F0F0F0F00000660505FF0505FF5C5CFF0505FF000066F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F00000665C5CFF0505FF000066F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0000066000066F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0');
+  end;
+end;
+
+{*
+*     Creates a custom button
+*
+*   These custom buttons work like regular buttons except that they have custom
+*   images. These images are set by mouse events and will reset when mousemovement
+*   in the mainform is detected.
+*}
+procedure CreateCustomButton(w, h, x, y: Integer; images: TStringArray; parent: TWinControl);
+var
+  Hi, Hii, I: Integer;
+  img: TImage;
+begin
+  Hi := Length(CButtons);
+  SetLength(CButtons, Hi+1);
+
+  Hii := High(images);
+  setLength(Cbuttons[Hi].StateImages, Hii+1);
+
+  for I := 0 to Hii do
+  begin
+    img := TImage.Create(parent);
+
+    img.Width := w;
+    img.Height := h;
+    img.Top := y;
+    img.Left := x;
+    img.Hint := images[I];
+    img.ONCLICK := @ClickCB;
+    img.ONMOUSEMOVE := @HoverCB;
+    img.PICTURE.Bitmap := GetBmp(images[i]);
+    img.Show();
+    img.Parent := mainForm;
+
+    if not(I = 0) then
+      img.Hide();
+
+    CButtons[Hi].State := 0;
+    CButtons[Hi].Box := IntToBox(x, y, x + w, y + h);
+    CButtons[Hi].StateImages[I] := img;
+  end;
+end;
+
+{*
+*   MultiBetween
+*     By Janilabo
+*
+*   Splits a string into an array of strings by giving it an begin and an end
+*   tag. Useful for XML reading. (Too lazy to write myself)
+*}
+function MultiBetween(str, s1, s2: string): array of string;
+var
+  strL, s1L, s2L, o, n, e, r: Integer;
+begin
+  s1L := Length(s1);
+  s2L := Length(s2);
+  strL := Length(str);
+  if ((s1 = '') or (s2 = '') or (strL <= (s1L + s2L))) then
+    Exit;
+  SetLength(Result, (strL - (s1L + s2L)));
+  repeat
+    n := PosEx(s1, str, (n + 1));
+    if (n < 1) then
+      Break;
+    e := PosEx(s2, str, (n + 1));
+    if (e < 1) then
+      Break;
+    repeat
+      o := n;
+      n := PosEx(s1, str, (n + 1));
+    until ((n >= e) or (n < 1));
+    n := o;
+    Result[r] := Between(s1, s2, Copy(str, n, (s1L + (e + s2L))));
+    if (Result[r] <> '') then
+      Inc(r);
+  until ((e < 1) or (n < 1));
+  SetLength(Result, r);
+end;
+
+procedure AddLineToString(var s: String; const addition: String; tabs: Integer);
+var
+  I: Integer;
+begin
+  s := s + #10#13;      //new line
+
+  for I := 1 to tabs do
+    s := s + #9;        //add a tab
+
+  s:= s + addition;
+end;
+
+procedure MasterEncrypt(var data: String; pass: String);
+var
+  I: Integer;
+  newString, mesh: String;
+begin
+  for I := 0 to Ceil(Length(data) / 128) do
+  begin
+    mesh := Copy(Data , (I * 128) + 1, 128);
+    rc2_encrypt(pass, htSHA256, mesh);
+    AddLineToString(newString, '<block_128_chars>' + mesh + '</block_128_chars>', 0 );
+  end;
+  Data := newString;
+end;
+
+procedure MasterDecrypt(var data: String; pass: String);
+var
+  I: Integer;
+  mesh: String;
+  dataParts: TStringArray;
+begin
+  dataParts := MultiBetween(data, '<block_128_chars>', '</block_128_chars>');
+
+  data := '';
+
+  for I := 0 to High(dataParts) do
+  begin
+    mesh := dataParts[I];
+    rc2_decrypt(pass, htSHA256, mesh);
+    data := data + mesh;
+  end;
+end;
+
+function ArmyToString(Army: TArmy): String;       //seems easier then exporting an entire xml handling thingy to simba still
+var
+  I: Integer;
+begin
+  Result := '<army>';
+  for I := 0 to High(Army) do
+  begin
+    AddLineToString(Result, '<player>', 1);
+
+    AddLineToString(Result, '<diplayName>' + Army[i].DisplayName + '</diplayName>', 2);
+    AddLineToString(Result, '<loginName>' + Army[i].LoginName + '</loginName>', 2);
+    AddLineToString(Result, '<nickName>' + Army[i].NickName + '</nickName>', 2);
+
+    AddLineToString(Result, '<password>' + Army[i].Password + '</password>', 2);
+    AddLineToString(Result, '<bankPin>' + Army[i].BankPin + '</bankPin>', 2);
+
+    AddLineToString(Result, '</player>', 1);
+  end;
+  AddLineToString(Result, '</army>', 0);
+end;
+
+function DecryptArmy(var data: String; pass: String): Boolean; //returns false when the pass is wrong or file corrupted
+begin
+  MasterDecrypt(data, pass);
+
+  Result := ExecRegExpr('<army>', data);
+end;
+
+function HandleData(var data: String; const path: String): Boolean;
+var
+  pass, ext: String;
+  pathParts, ArmiesTSA, PlayersTSA: TStringArray;
+  I: Integer;
+begin
+  Result := false;
+
+  ext := ExtractFileExt(path);
+
+  if ext = '.raf' then
+  begin
+    if InputQuery('Player Manager', 'Please enter your army password for decryption.', pass) then
+    begin
+      if DecryptArmy(data, pass) then
+      begin
+        writeln('Player Manager: Password accepted!');
+        Result := true;
+      end else
+        writeln('Player Manager: Couldn''t decrypt file. Possible wrong password?'); //wrong password?
+    end;
+  end else
+    if ExecRegExpr('<army>', data) then
+      Result := true
+    else
+      writeln('Player Manager: File doesn''t contain a valid army');
+
+  //Finally parse the data
+  if Result then
+  begin
+    pathParts := TStringArray(MultiBetween(path, '\', ext));
+    ArmyNameField.TEXT := pathParts[0];
+
+    ArmiesTSA := MultiBetween(data, '<army>', '</army>');
+
+  //  writeln(ArmiesTSA);
+
+    if Length(ArmiesTSA) = 0 then
+      Exit;
+
+    PlayersTSA := MultiBetween(ArmiesTSA[0], '<player>', '</player>');
+
+    setLength(Army, Length(PlayersTSA));
+    for I := 0 to High(PlayersTSA) do
+    begin
+      Army[I].DisplayName := Between('<diplayName>', '</diplayName>', PlayersTSA[I]);
+      Army[I].LoginName := Between('<loginName>', '</loginName>', PlayersTSA[I]);
+      Army[I].NickName := Between('<nickName>', '</nickName>', PlayersTSA[I]);
+      Army[I].Password := Between('<password>', '</password>', PlayersTSA[I]);
+      Army[I].BankPin := Between('<bankPin>', '</bankPin>', PlayersTSA[I]);
+      Lb_PlayerList.ITEMS.Add(Army[I].NickName);
+    end;
+  end;
+
+  MasterEncrypt(data, 'hello');
+  MasterDecrypt(data, 'hello');
+end;
+
+procedure LoadArmy(path: String);
+var
+  data: String;
+  fileTSL: TStringList;
+begin
+  fileTSL := TStringList.Create;
+  fileTSL.LoadFromFile(path);
+  Data := fileTSL.Text;
+  if (Data = '') then
+    writeln('Rafiki: couldn''t open file.')
+  else
+    handleData(Data, path);
+
+  fileTSL.Free();
+end;
+
+procedure NewArmy(Sender: TObject);
+begin
+  ArmyNameField.TEXT := '';
+  Lb_PlayerList.CLEAR;
+  InlognameField.clear();
+  DisplaynameField.clear();
+  NicknameField.clear();
+  PasswordField.clear();
+  BankpinField.clear();
+  PlayerBox.Enabled := false;
+
+  setLength(Army, 0);
+end;
+
+procedure OpenArmy(Sender: TObject);
+var
+  path: String;
+begin
+  with TOpenDialog.Create(mainForm) do
+  begin
+    //InitialDir := IncludePath + 'Rafiki\';
+    FileName := IncludePath + 'Rafiki\';      //Support for windows 7(since initial dir is no longer used)
+    //Note to myself: Filename is reset after Execute, even if no file was sellected.
+    Filter := '|Armies(*.xml; *.raf)|*.xml; *.raf|All files (*.*)|*.*|';
+    Options := Options + [ofPathMustExist, ofFileMustExist, ofHideReadOnly];
+    if Execute then
+    begin
+      NewArmy(nil);
+      path := FileName;
+      LoadArmy(path);
+    end;
+    Free;
+  end;
+
+  writeln(path);
+end;
+
+procedure SaveArmy(Sender: TObject);
+var
+  fileString, extension, path: String;
+  fileTSL: TStringList;
+  encryption: Boolean;
+begin
+  ArmyName := ArmyNameField.TEXT;
+  if ArmyName = '' then
+    ArmyName := 'default';
+
+  encryption := Cb_UseEnc.CHECKED;
+
+  if encryption then
+    extension := '.raf'
+  else
+    extension := '.xml';
+
+  if not(ForceDirectories(IncludePath + 'Players/')) then
+  begin
+    writeln('Player Manager: oh no!, couldn''t create or open the directory: ' + IncludePath + 'Rafiki/');
+    Exit;
+  end;
+  path := IncludePath + 'Players/' + ArmyName + extension;
+
+  fileTSL := TStringList.Create;
+  //writeln(FileExists(path));
+
+  fileString := ArmyToString(Army);
+
+  if (encryption) then
+  begin
+    if not(PassField.TEXT = Pass2Field.TEXT) or (PassField.TEXT = '') then
+    begin
+      writeln('Player Manager: Oh no!, something is wrong with encryption passwords!');
+      fileTSL.Free;
+      Exit;
+    end;
+
+    MasterEncrypt(FileString, passField.text);
+  end;
+
+  fileTSL.Text := fileString;
+  fileTSL.SaveToFile(path);
+
+  fileTSL.Free;
+end;
+
+procedure Help(Sender: TObject);
+var
+  addr: String;
+begin
+  case Sender of
+    Mi_Forum: addr := 'http://villavu.com/forum/showthread.php?t=47714';
+    Mi_ForumTut: addr := 'http://villavu.com/forum/showthread.php?p=851555';
+    Mi_FeedBack: addr := 'http://villavu.com/forum/project.php?projectid=10';
+  end;
+
+  OpenWebPage(addr);
+end;
+
+procedure FormClosed(Sender: TObject; var CloseAction:TCloseAction);
+begin
+  SaveArmy(nil);
+end;
+
+procedure InitForm;
+begin
+  EditID := -1;
+
+  mainForm := TForm.Create(nil);
+  with mainForm do
+  begin
+    Width := 392;
+    Height := 423;
+    Caption := 'Rafiki Player Manager';
+    Position := poScreenCenter;
+    onClose := @FormClosed;
+  end;
+
+  {*
+  *     Formatting the options from the main menu on top of the form.
+  *
+  *     Includes:
+  *       Armies
+  *         New army
+  *         Open army
+  *         Save army
+  *}
+  Mm_MainMenu := TMAINMENU.CREATE(mainForm);
+
+  Mi_Army := TMenuItem.Create(Mm_MainMenu);
+  Mi_Army.Caption := 'File';
+
+  Mm_MainMenu.Items.Add(Mi_Army);
+
+  Mi_ArmyNew := TMenuItem.Create(Mi_Army);
+  Mi_ArmyNew.Caption := 'New';
+  Mi_ArmyNew.ONCLICK := @NewArmy;
+
+  Mi_ArmyOpen := TMenuItem.Create(Mi_Army);
+  Mi_ArmyOpen.Caption := 'Open';
+  Mi_ArmyOpen.ONCLICK := @OpenArmy;
+
+  Mi_ArmySave := TMenuItem.Create(Mi_Army);
+  Mi_ArmySave.Caption := 'Save';
+  Mi_ArmySave.ONCLICK := @SaveArmy;
+
+  Mi_Army.Add(Mi_ArmyNew);
+  Mi_Army.Add(Mi_ArmyOpen);
+  Mi_Army.Add(Mi_ArmySave);
+
+  Mi_Help := TMenuItem.Create(Mm_MainMenu);
+  Mi_Help.Caption := 'Help';
+
+  Mm_MainMenu.Items.Add(Mi_Help);
+
+  Mi_Forum := TMenuItem.Create(Mi_Help);
+  Mi_Forum.Caption := 'How to use/setup';
+  Mi_Forum.ONCLICK := @Help;
+
+  Mi_ForumTut := TMenuItem.Create(Mi_Help);
+  Mi_ForumTut.Caption := 'How to fix common errors';
+  Mi_ForumTut.ONCLICK := @Help;
+
+  Mi_FeedBack := TMenuItem.Create(Mi_Help);
+  Mi_FeedBack.Caption := 'Bugs and suggestions';
+  Mi_FeedBack.ONCLICK := @Help;
+
+  Mi_Help.Add(Mi_Forum);
+  Mi_Help.Add(Mi_ForumTut);
+  Mi_Help.Add(Mi_FeedBack);
+
+  {*
+  *     Formatting the main components
+  *
+  *     Includes
+  *       Player list and label
+  *       New player
+  *       Edit player
+  *       Remove player
+  *}
+
+  Lb_PlayerList := TListBox.Create(mainForm);
+  Lb_PlayerList.Left := 10;
+  Lb_PlayerList.Top := 30;
+  Lb_PlayerList.Width := 160;
+  Lb_PlayerList.Height := 329;
+
+  //TODO: Remove this example
+  {Lb_PlayerList.Items.Add('Zezima');
+  Lb_PlayerList.Items.Add('MySup3rMa1n');
+  Lb_PlayerList.Items.Add('PKUURRR4LIf3');  }
+
+  Lb_PlayerList.Parent := mainForm;
+
+  Lbl_PlayerList := TLABEL.Create(mainForm);
+  Lbl_PlayerList.Top := 10;
+  Lbl_PlayerList.Left := 15;
+  Lbl_PlayerList.CAPTION := 'Player List';
+  Lb_PlayerList.ONCLICK := @ClickList;
+  Lbl_PlayerList.Parent := mainForm;
+
+  mainForm.ONMOUSEMOVE := @HoverMain;   //used to reset the buttons(Dirty fix)
+
+  CreateCustomButton(12, 12, 142, 11, ['plus', 'plus_hover'], mainForm);
+  CreateCustomButton(11, 11, 158, 12, ['del', 'del_hover'], mainForm);
+
+  {*
+  *     Formatting the army name thingy
+  *}
+  Lbl_ArmyName := TLABEL.Create(mainForm);
+  Lbl_ArmyName.top := Lbl_PlayerList.Top;
+  Lbl_ArmyName.left := 187;
+  Lbl_ArmyName.CAPTION := 'File Name';
+  Lbl_ArmyName.Parent := mainForm;
+
+  ArmyNameField := TEdit.Create(mainForm);
+  ArmyNameField.top := 7;
+  ArmyNameField.left := 272;
+  ArmyNameField.Width := 100;
+  ArmyNameField.TEXT := 'default';
+  ArmyNameField.parent := mainForm;
+
+
+  {*
+  *     Formatting the player setup box
+  *}
+  PlayerBox := TGROUPBOX.Create(mainForm);
+//  PlayerBox.Caption := 'Edit player';
+  PlayerBox.Width := 200;
+  PlayerBox.Height := 200;
+  PlayerBox.Top := 45;
+  PlayerBox.Left := 180;
+  PlayerBox.Parent := mainForm;
+  PlayerBox.Enabled := false;
+
+  NewLabel := TLABEL.Create(mainForm);
+  NewLabel.CAPTION := '* Login name';
+  NewLabel.Parent := PlayerBox;
+  NewLabel.Left := 5;
+  NewLabel.Top := 3;
+
+  NewLabel := TLABEL.Create(mainForm);
+  NewLabel.CAPTION := 'Display name';
+  NewLabel.Parent := PlayerBox;
+  NewLabel.Top := 33;
+  NewLabel.Left := 5;
+
+  NewLabel := TLABEL.Create(mainForm);
+  NewLabel.CAPTION := 'Nick name';
+  NewLabel.Parent := PlayerBox;
+  NewLabel.Top := 63;
+  NewLabel.Left := 5;
+
+  NewLabel := TLABEL.Create(mainForm);
+  NewLabel.CAPTION := '* Password';
+  NewLabel.Parent := PlayerBox;
+  NewLabel.Top := 93;
+  NewLabel.Left := 5;
+
+  NewLabel := TLABEL.Create(mainForm);
+  NewLabel.CAPTION := 'Bank pin';
+  NewLabel.Parent := PlayerBox;
+  NewLabel.Top := 123;
+  NewLabel.Left := 5;
+
+  InlognameField := TEdit.Create(mainForm);
+  InlognameField.Left := 90;
+  InlognameField.top := 0;
+  InlognameField.Width := 100;
+  InlognameField.Parent := PlayerBox;
+
+  DisplaynameField := TEdit.Create(mainForm);
+  DisplaynameField.Left := InlognameField.Left;
+  DisplaynameField.Top := 30;
+  DisplaynameField.Width := 100;
+  DisplaynameField.Parent := PlayerBox;
+
+  NicknameField := TEdit.Create(mainForm);
+  NicknameField.Left := InlognameField.Left;
+  NicknameField.top := 60;
+  NicknameField.Width := 100;
+  NicknameField.Parent := PlayerBox;
+
+  PasswordField := TEdit.Create(mainForm);
+  PasswordField.Left := InlognameField.Left;
+  PasswordField.top := 90;
+  PasswordField.Width := 100;
+  PasswordField.PASSWORDCHAR := '*';
+  PasswordField.Parent := PlayerBox;
+
+  BankpinField := TEdit.Create(mainForm);
+  BankpinField.Left := InlognameField.Left;
+  BankpinField.top := 120;
+  BankpinField.Width := 100;
+  BankpinField.PASSWORDCHAR := '*';
+  BankpinField.Parent := PlayerBox;
+
+  Btn_Save := TButton.Create(mainForm);
+  Btn_Save.CAPTION := 'Save';
+  Btn_Save.top := 150;
+  Btn_Save.Width := 196;
+  Btn_Save.ONCLICK := @SavePlayer;
+  Btn_Save.Parent := PlayerBox;
+
+  {*
+  *     Encrypt shit
+  *
+  *}
+  Cb_UseEnc := TCHECKBOX.Create(mainForm);
+  Cb_UseEnc.top := 260;
+  Cb_UseEnc.Left := 201;
+  Cb_UseEnc.CAPTION := ' Encrypt Player Infomation';
+  Cb_UseEnc.ONCLICK := @SetEncryption;
+  Cb_UseEnc.Parent := mainForm;
+
+  Gb_Encryption := TGROUPBOX.Create(mainForm);
+  Gb_Encryption.Width := 200;
+  Gb_Encryption.Height := 80;
+  Gb_Encryption.Top := 280;
+  Gb_Encryption.left := 180;
+  Gb_Encryption.Enabled := false;
+  Gb_Encryption.Parent := mainForm;
+
+  NewLabel := TLABEL.Create(mainForm);
+  NewLabel.CAPTION := 'Password';
+  NewLabel.Left := 7;
+  NewLabel.Top := 9;
+  NewLabel.Parent := Gb_Encryption;
+
+  NewLabel := TLABEL.Create(mainForm);
+  NewLabel.CAPTION := 'Repeat';
+  NewLabel.Left := 7;
+  NewLabel.Top := 38;
+  NewLabel.Parent := Gb_Encryption;
+
+  PassField := TEdit.Create(mainForm);
+  PassField.Top := 35;
+  PassField.Left := 85;
+  PassField.Width := 100;
+  PassField.Parent := Gb_Encryption;
+
+  Pass2Field := TEdit.Create(mainForm);
+  Pass2Field.Top := 5;
+  Pass2Field.Left := 85;
+  Pass2Field.Width := 100;
+  Pass2Field.Parent := Gb_Encryption;
+
+  Btn_SavePlayerList := TButton.Create(mainForm);
+  Btn_SavePlayerList.Caption := 'Save Player List';
+  Btn_SavePlayerList.Parent := mainForm;
+  Btn_SavePlayerList.top := Lb_PlayerList.Top + Lb_PlayerList.Height + 10;
+  Btn_SavePlayerList.Width := 150;
+  Btn_SavePlayerList.Left := (Btn_SavePlayerList.parent.width / 2) - (Btn_SavePlayerList.width / 2);
+  Btn_SavePlayerList.ONCLICK := @SaveArmy;
+
+  //done
+  mainForm.ShowModal;
+end;
+
+procedure ShowForm;
+begin
+  InitForm;
+end;
+
+procedure FreeStuff;
+begin
+  if not(mainForm = nil) then
+    mainForm.Free()
+  else
+    writeln('Playerform couldn''t be freed'); //probably no problem though
+end;
+
+{$ifndef PS_EXTENSION}
+procedure FormSafeCall(proc: string);
+var
+  v: TVariantArray;
+begin
+  setLength(v, 0);
+  threadSafeCall(proc, v);
+end;
+{$endif}
+
+procedure RunRafikiPlayerManager;
+begin
+  {$ifndef PS_EXTENSION}
+  clearDebug();
+
+  try
+    formSafeCall('ShowForm');
+  except
+    writeln(exceptionToString(exceptionType, exceptionParam));
+  finally
+    formSafeCall('FreeStuff');
+  end;
+  {$else}
+  writeln('Opening Rafiki');
+  ShowForm;
+  writeln('Closing Rafiki');
+  FreeStuff;
+  {$endif}
+end;
+
+{$ifndef PS_EXTENSION}
+begin
+  ClearDebug;
+  RunRafikiPlayerManager;
+end.
+{$endif}

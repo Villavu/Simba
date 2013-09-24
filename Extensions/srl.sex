@@ -1,6 +1,7 @@
 program SRLUpdater;
 
-{$I Updater.sei}
+{$I ./Updater.sei}
+{$I ./PlayerManager.sei}
 
 function CheckSRL(Name: string; I: integer): boolean;
 var
@@ -64,26 +65,51 @@ begin
 
   Result := UnTarEx(Cont, PluginPath, Overwrite);
   if not Result then
-  begin
-    writeln('********************************************************************************');
-    writeln('');
     writeln('Failed to update plugins! Restart Simba and update before starting a script.');
-    writeln('');
-    writeln('********************************************************************************');
-  end;
+end;
+
+procedure ClickRafiki(Sender: TObject);
+begin
+  RunRafikiPlayerManager;
+end;
+
+procedure ClickBugs(Sender: TObject);
+begin
+  OpenWebPage('http://villavu.com/forum/project.php?projectid=10');
+end;
+
+procedure ClickHelp(Sender: TObject);
+begin
+  OpenWebPage('http://villavu.com/forum/forumdisplay.php?f=486');
 end;
 
 procedure Init;
 var
-  SRL, SPS, Plugins: integer;
+  SRL, SPS, Plugins, i: integer;
+  MenuItems: array of TMenuItem;
+  Names: array of string;
 begin
-  if (AddUpdater('SRL', 'http://wizzup.org/static/srl/srl.tar.bz2', 'http://wizzup.org/static/srl/srl_version', IncludePath, True, True, SRL)) then
+  if (AddUpdater('SRL', 'http://wizzup.org/static/srl/srl-6.tar.bz2', 'http://wizzup.org/static/srl/srl-6_version', IncludePath, True, True, SRL)) then
   begin
     UpdaterArr[SRL].Hooks[CHECK_FOR_UPDATE] := @CheckSRL;
     UpdaterArr[SRL].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
+
+    Names := ['Player Manager', 'Bugs and Suggestions', 'Help'];
+    SetLength(MenuItems, Length(Names));
+
+    for I := 0 to High(MenuItems) do
+    begin
+      MenuItems[I] := TMenuItem.Create(UpdaterArr[SRL].MainMenu);
+      MenuItems[I].Caption := Names[I];
+      UpdaterArr[SRL].MainMenu.Insert(I, MenuItems[I]);
+    end;
+
+    MenuItems[0].OnClick := @ClickRafiki;
+    MenuItems[1].OnClick := @ClickBugs;
+    MenuItems[2].OnClick := @ClickHelp;
   end;
 
-  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', PluginPath + '.temp/', False, False, Plugins)) then
+  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', PluginPath + '.temp\', False, False, Plugins)) then
   begin
     UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforeUpdateEx;
     UpdaterArr[Plugins].Hooks[SUCCESS_UPDATE] := @SuccessPlugins;
