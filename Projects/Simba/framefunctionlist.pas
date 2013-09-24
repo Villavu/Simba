@@ -533,7 +533,7 @@ begin
     exit;
   end;
   Self.DragKind := dkDrag;
-  if(Button = mbLeft) and (N.Level > 0)then
+  if ((Button = mbLeft) and (N.Level > 0) and (N.Parent <> PluginsNode)) then
     Self.BeginDrag(False, 10);
   DraggingNode := N;
 end;
@@ -670,7 +670,15 @@ procedure TFillThread.Update;
     AddProcsTree(ParentNode, Include.Items, Include.FileName);
 
     for I := 0 to High(Include.Includes) do
-      AddInclude(ParentNode.Parent, Include.Includes[I]);
+      if (isLib(Include.Includes[I])) then
+        AddInclude(PluginsNode, Include.Includes[I])
+      else
+        AddInclude(ParentNode.Parent, Include.Includes[I]);
+  end;
+
+  function getCount(Analyzer: TCodeInsight): LongWord;
+  begin
+    Result := Length(Analyzer.Includes) + Analyzer.Lexer.Defines.Count;
   end;
 
 var
@@ -678,7 +686,7 @@ var
 begin
   AddProcsTree(ScriptNode, Analyzer.Items, Analyzer.FileName);
 
-  if (LastIncludeCount^ <> Length(Analyzer.Includes)) then
+  if (LastIncludeCount^ <> getCount(Analyzer)) then
   begin
     PluginsNode.DeleteChildren;
     IncludesNode.DeleteChildren;
@@ -689,7 +697,7 @@ begin
       else
         AddInclude(IncludesNode, Analyzer.Includes[I]);
 
-    LastIncludeCount^ := Length(Analyzer.Includes);
+    LastIncludeCount^ := getCount(Analyzer);
   end;
 end;
 
