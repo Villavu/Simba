@@ -164,7 +164,7 @@ begin
    result := ClusterTPAEx(tpa, width, height);
 end;
 
-function ps_ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;  extdecl;
+function ps_ClusterTPA(const TPA: TPointArray; dist: Integer): T2DPointArray;  extdecl;
 begin
    result := ClusterTPA(tpa, dist);
 end;

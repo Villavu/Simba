@@ -74,7 +74,7 @@ procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
 function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
 function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
-function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;
+function ClusterTPA(const TPA: TPointArray; dist: Integer): T2DPointArray;
 function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer = -1;
           const IsSortedAscending: Boolean = False): Integer;
 function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
@@ -1173,9 +1173,9 @@ begin
 end;
 
 {/\
- Splits TPA with dist. Alternative to SplitTPA.
+Splits TPA with dist (alternative method for SplitTPA)
 /\}
-function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;
+function ClusterTPA(const TPA: TPointArray; dist: Integer): T2DPointArray;
 type
   TPointScan = record
     skipRow: Boolean;
@@ -1223,9 +1223,10 @@ begin
           p[i][c].skipRow := False;
         end;
       end;
-      if (dist < 0.0) then
-        dist := 0.0;
-      d := Ceil(dist);
+      e := Extended(dist);
+      if (e < 0.0) then
+        e := 0.0;
+      d := Ceil(e);
       m := Max(((b.X2 - b.X1) + 1), ((b.Y2 - b.Y1) + 1));
       if (d > m) then
         d := m;
@@ -1282,9 +1283,7 @@ begin
                 if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
                 for x := a.X1 to a.X2 do
                   if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
-                  begin
-                    e := Sqrt(Sqr(z.X - x) + Sqr(z.Y - y));
-                    if (e <= dist) then
+                    if (Round(Sqrt(Sqr(z.X - x) + Sqr(z.Y - y))) <= dist) then
                     begin
                       l := Length(Result[c]);
                       SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
@@ -1301,7 +1300,6 @@ begin
                       q[s] := Result[c][l];
                       Inc(s);
                     end;
-                  end;
               False:
               for y := a.Y1 to a.Y2 do
                 if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
@@ -1309,9 +1307,7 @@ begin
                   v := True;
                   for x := a.X1 to a.X2 do
                     if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
-                    begin
-                      e := Sqrt(Sqr(z.X - x) + Sqr(z.Y - y));
-                      if (e <= dist) then
+                      if (Round(Sqrt(Sqr(z.X - x) + Sqr(z.Y - y))) <= dist) then
                       begin
                         l := Length(Result[c]);
                         SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
@@ -1329,7 +1325,6 @@ begin
                         Inc(s);
                       end else
                         v := False;
-                    end;
                   if v then
                     p[(a.X2 - b.X1)][(y - b.Y1)].skipRow := True;
                 end;
@@ -1345,7 +1340,7 @@ begin
 end;
 
 {/\
- Splits TPA with width, height (alternative for SplitTPAEx).
+ Splits TPA with width, height (alternative method for SplitTPAEx).
  /\}
 function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
 type
