@@ -429,6 +429,8 @@ AddGlobalFunc('procedure ClearSameIntegers(var a: TIntegerArray);', @Lape_ClearS
 AddGlobalFunc('procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);', @Lape_ClearSameIntegersAndTPA);
 AddGlobalFunc('function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray', @Lape_SplitTPAEx);
 AddGlobalFunc('function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray', @Lape_SplitTPA);
+AddGlobalFunc('function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;', @Lape_ClusterTPAEx);
+AddGlobalFunc('function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray', @Lape_ClusterTPA);
 AddGlobalFunc('function FloodFillTPA(const TPA: TPointArray): T2DPointArray', @Lape_FloodFillTPA);
 AddGlobalFunc('procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer);', @Lape_FilterPointsPie);
 AddGlobalFunc('procedure FilterPointsDist(var Points: TPointArray; const MinDist, MaxDist: Extended; Mx, My: Integer);', @Lape_FilterPointsDist);
