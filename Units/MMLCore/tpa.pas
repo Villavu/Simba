@@ -73,6 +73,8 @@ procedure ClearSameIntegers(var a: TIntegerArray);
 procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
 function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
+function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
+function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;
 function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer = -1;
           const IsSortedAscending: Boolean = False): Integer;
 function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
@@ -1168,6 +1170,337 @@ begin
     Inc(c);
   end;
   SetLength(Result, c);
+end;
+
+{/\
+ Splits TPA with dist. Alternative to SplitTPA.
+/\}
+function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;
+type
+  TPointScan = record
+    skipRow: Boolean;
+    count: Integer;
+  end;
+var
+  h, i, l, c, s, x, y, o, r, d, m: Integer;
+  p: array of array of TPointScan;
+  q: TPointArray;
+  a, b, t: TBox;
+  e: Extended;
+  z: TPoint;
+  v: Boolean;
+begin
+  SetLength(Result, 0);
+  h := High(TPA);
+  if (h > -1) then
+    if (h > 0) then
+    begin
+      b.X1 := TPA[0].X;
+      b.Y1 := TPA[0].Y;
+      b.X2 := TPA[0].X;
+      b.Y2 := TPA[0].Y;
+      r := 0;
+      for i := 1 to h do
+      begin
+        if (TPA[i].X < b.X1) then
+          b.X1 := TPA[i].X
+        else
+          if (TPA[i].X > b.X2) then
+            b.X2 := TPA[i].X;
+        if (TPA[i].Y < b.Y1) then
+          b.Y1 := TPA[i].Y
+        else
+          if (TPA[i].Y > b.Y2) then
+            b.Y2 := TPA[i].Y;
+      end;
+      SetLength(p, ((b.X2 - b.X1) + 1));
+      for i := 0 to (b.X2 - b.X1) do
+      begin
+        SetLength(p[i], ((b.Y2 - b.Y1) + 1));
+        for c := 0 to (b.Y2 - b.Y1) do
+        begin
+          p[i][c].count := 0;
+          p[i][c].skipRow := False;
+        end;
+      end;
+      if (dist < 0.0) then
+        dist := 0.0;
+      d := Ceil(dist);
+      m := Max(((b.X2 - b.X1) + 1), ((b.Y2 - b.Y1) + 1));
+      if (d > m) then
+        d := m;
+      for i := 0 to h do
+        Inc(p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+      for i := 0 to h do
+        if (p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count > 0) then
+        begin
+          c := Length(Result);
+          SetLength(Result, (c + 1));
+          SetLength(Result[c], p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+          for o := 0 to (p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count - 1) do
+            Result[c][o] := TPA[i];
+          r := (r + p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+          if (r > h) then
+            Exit;
+          SetLength(q, 1);
+          q[0] := TPA[i];
+          p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count := 0;
+          s := 1;
+          while (s > 0) do
+          begin
+            s := High(q);
+            z := q[s];
+            a.X1 := (z.X - d);
+            a.Y1 := (z.Y - d);
+            a.X2 := (z.X + d);
+            a.Y2 := (z.Y + d);
+            t := a;
+            SetLength(q, s);
+            if (a.X1 < b.X1) then
+              a.X1 := b.X1
+            else
+              if (a.X1 > b.X2) then
+                a.X1 := b.X2;
+            if (a.Y1 < b.Y1) then
+              a.Y1 := b.Y1
+            else
+              if (a.Y1 > b.Y2) then
+                a.Y1 := b.Y2;
+            if (a.X2 < b.X1) then
+              a.X2 := b.X1
+            else
+              if (a.X2 > b.X2) then
+                a.X2 := b.X2;
+            if (a.Y2 < b.Y1) then
+              a.Y2 := b.Y1
+            else
+              if (a.Y2 > b.Y2) then
+                a.Y2 := b.Y2;
+            case ((t.X1 <> a.X1) or (t.X2 <> a.X2)) of
+              True:
+              for y := a.Y1 to a.Y2 do
+                if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
+                for x := a.X1 to a.X2 do
+                  if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
+                  begin
+                    e := Sqrt(Sqr(z.X - x) + Sqr(z.Y - y));
+                    if (e <= dist) then
+                    begin
+                      l := Length(Result[c]);
+                      SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
+                      for o := 0 to (p[(x - b.X1)][(y - b.Y1)].count - 1) do
+                      begin
+                        Result[c][(l + o)].X := x;
+                        Result[c][(l + o)].Y := y;
+                      end;
+                      r := (r + p[(x - b.X1)][(y - b.Y1)].count);
+                      if (r > h) then
+                        Exit;
+                      p[(x - b.X1)][(y - b.Y1)].count := 0;
+                      SetLength(q, (s + 1));
+                      q[s] := Result[c][l];
+                      Inc(s);
+                    end;
+                  end;
+              False:
+              for y := a.Y1 to a.Y2 do
+                if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
+                begin
+                  v := True;
+                  for x := a.X1 to a.X2 do
+                    if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
+                    begin
+                      e := Sqrt(Sqr(z.X - x) + Sqr(z.Y - y));
+                      if (e <= dist) then
+                      begin
+                        l := Length(Result[c]);
+                        SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
+                        for o := 0 to (p[(x - b.X1)][(y - b.Y1)].count - 1) do
+                        begin
+                          Result[c][(l + o)].X := x;
+                          Result[c][(l + o)].Y := y;
+                        end;
+                        r := (r + p[(x - b.X1)][(y - b.Y1)].count);
+                        if (r > h) then
+                          Exit;
+                        p[(x - b.X1)][(y - b.Y1)].count := 0;
+                        SetLength(q, (s + 1));
+                        q[s] := Result[c][l];
+                        Inc(s);
+                      end else
+                        v := False;
+                    end;
+                  if v then
+                    p[(a.X2 - b.X1)][(y - b.Y1)].skipRow := True;
+                end;
+            end;
+          end;
+        end;
+    end else
+    begin
+      SetLength(Result, 1);
+      SetLength(Result[0], 1);
+      Result[0][0] := TPA[0];
+    end;
+end;
+
+{/\
+ Splits TPA with width, height (alternative for SplitTPAEx).
+ /\}
+function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
+type
+  TPointScan = record
+    skipRow: Boolean;
+    count: Integer;
+  end;
+var
+  h, i, l, c, s, x, y, o, r, dw, dh: Integer;
+  p: array of array of TPointScan;
+  q: TPointArray;
+  a, b, t: TBox;
+  z: TPoint;
+begin
+  SetLength(Result, 0);
+  h := High(TPA);
+  if (((width > 0) and (height > 0)) and (h > -1)) then
+    if (h > 0) then
+    begin
+      dw := width;
+      dh := height;
+      b.X1 := TPA[0].X;
+      b.Y1 := TPA[0].Y;
+      b.X2 := TPA[0].X;
+      b.Y2 := TPA[0].Y;
+      r := 0;
+      for i := 1 to h do
+      begin
+        if (TPA[i].X < b.X1) then
+          b.X1 := TPA[i].X
+        else
+          if (TPA[i].X > b.X2) then
+            b.X2 := TPA[i].X;
+        if (TPA[i].Y < b.Y1) then
+          b.Y1 := TPA[i].Y
+        else
+          if (TPA[i].Y > b.Y2) then
+            b.Y2 := TPA[i].Y;
+      end;
+      SetLength(p, ((b.X2 - b.X1) + 1));
+      for i := 0 to (b.X2 - b.X1) do
+      begin
+        SetLength(p[i], ((b.Y2 - b.Y1) + 1));
+        for c := 0 to (b.Y2 - b.Y1) do
+        begin
+          p[i][c].count := 0;
+          p[i][c].skipRow := False;
+        end;
+      end;
+      if (dw > ((b.X2 - b.X1) + 1)) then
+        dw := ((b.X2 - b.X1) + 1);
+      if (dh > ((b.Y2 - b.Y1) + 1)) then
+        dh := ((b.Y2 - b.Y1) + 1);
+      for i := 0 to h do
+        Inc(p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+      for i := 0 to h do
+        if (p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count > 0) then
+        begin
+          c := Length(Result);
+          SetLength(Result, (c + 1));
+          SetLength(Result[c], p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+          for o := 0 to (p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count - 1) do
+            Result[c][o] := TPA[i];
+          r := (r + p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+          if (r > h) then
+            Exit;
+          SetLength(q, 1);
+          q[0] := TPA[i];
+          p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count := 0;
+          s := 1;
+          while (s > 0) do
+          begin
+            s := High(q);
+            z := q[s];
+            a.X1 := (z.X - dw);
+            a.Y1 := (z.Y - dh);
+            a.X2 := (z.X + dw);
+            a.Y2 := (z.Y + dh);
+            t := a;
+            SetLength(q, s);
+            if (a.X1 < b.X1) then
+              a.X1 := b.X1
+            else
+              if (a.X1 > b.X2) then
+                a.X1 := b.X2;
+            if (a.Y1 < b.Y1) then
+              a.Y1 := b.Y1
+            else
+              if (a.Y1 > b.Y2) then
+                a.Y1 := b.Y2;
+            if (a.X2 < b.X1) then
+              a.X2 := b.X1
+            else
+              if (a.X2 > b.X2) then
+                a.X2 := b.X2;
+            if (a.Y2 < b.Y1) then
+              a.Y2 := b.Y1
+            else
+              if (a.Y2 > b.Y2) then
+                a.Y2 := b.Y2;
+            case ((t.X1 <> a.X1) or (t.X2 <> a.X2)) of
+              True:
+              for y := a.Y1 to a.Y2 do
+                if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
+                for x := a.X1 to a.X2 do
+                  if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
+                  begin
+                    l := Length(Result[c]);
+                    SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
+                    for o := 0 to (p[(x - b.X1)][(y - b.Y1)].count - 1) do
+                    begin
+                      Result[c][(l + o)].X := x;
+                      Result[c][(l + o)].Y := y;
+                    end;
+                    r := (r + p[(x - b.X1)][(y - b.Y1)].count);
+                    if (r > h) then
+                      Exit;
+                    p[(x - b.X1)][(y - b.Y1)].count := 0;
+                    SetLength(q, (s + 1));
+                    q[s] := Result[c][l];
+                    Inc(s);
+                  end;
+              False:
+              for y := a.Y1 to a.Y2 do
+                if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
+                begin
+                  for x := a.X1 to a.X2 do
+                    if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
+                    begin
+                      l := Length(Result[c]);
+                      SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
+                      for o := 0 to (p[(x - b.X1)][(y - b.Y1)].count - 1) do
+                      begin
+                        Result[c][(l + o)].X := x;
+                        Result[c][(l + o)].Y := y;
+                      end;
+                      r := (r + p[(x - b.X1)][(y - b.Y1)].count);
+                      if (r > h) then
+                        Exit;
+                      p[(x - b.X1)][(y - b.Y1)].count := 0;
+                      SetLength(q, (s + 1));
+                      q[s] := Result[c][l];
+                      Inc(s);
+                    end;
+                  p[(a.X2 - b.X1)][(y - b.Y1)].skipRow := True;
+                end;
+            end;
+          end;
+        end;
+    end else
+    begin
+      SetLength(Result, 1);
+      SetLength(Result[0], 1);
+      Result[0][0] := TPA[0];
+    end;
 end;
 
 function TPAPosNext(const Find: TPoint; const V: TPointArray;
