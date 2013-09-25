@@ -159,6 +159,16 @@ begin
   result := SplitTPA(arr,dist);
 end;
 
+function ps_ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;  extdecl;
+begin
+   result := ClusterTPAEx(tpa, width, height);
+end;
+
+function ps_ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;  extdecl;
+begin
+   result := ClusterTPA(tpa, dist);
+end;
+
 function ps_FloodFillTPA(const TPA : TPointArray) : T2DPointArray; extdecl;
 begin
   result := FloodFillTPA(TPA);
