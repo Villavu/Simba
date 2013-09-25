@@ -363,7 +363,7 @@ SplitTPAEx
 
     function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 
-Splits the points with max X and Y distances W and H to their 
+Splits the points with max X and Y distances W and H to their own TPointArrays;
 
 
 SplitTPA
@@ -374,6 +374,28 @@ SplitTPA
     function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
 
 Splits the points with max distance Dist to their own TPointArrays
+
+
+ClusterTPAEx
+------------
+
+.. code-block:: pascal
+
+    function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
+
+Splits the points to their own TPointArrays if they fall outside of 'width' and 'height' bounds.
+An alternative to SplitTPA, will be extremely fast compared to SplitTPA with a distance less than 100.
+
+
+ClusterTPA
+----------
+
+.. code-block:: pascal
+
+    function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;
+
+Splits the points with max distance 'dist' to their own TPointArrays.
+An alternative to SplitTPAEx, will be extremely fast compared to SplitTPAEx with a distance less than 100.
 
 
 FloodFillTPA
