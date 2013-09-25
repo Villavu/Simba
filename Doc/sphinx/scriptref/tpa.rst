@@ -1,4 +1,3 @@
-
 .. _scriptref_tpa:
 
 TPointArray Functions
@@ -384,7 +383,7 @@ ClusterTPAEx
     function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
 
 Splits the points to their own TPointArrays if they fall outside of 'width' and 'height' bounds.
-An alternative to SplitTPA, will be extremely fast compared to SplitTPA with a distance less than 100.
+An alternative to SplitTPAEx, will be extremely fast compared to SplitTPAEx with a width/height less than 100.
 
 
 ClusterTPA
@@ -395,7 +394,7 @@ ClusterTPA
     function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;
 
 Splits the points with max distance 'dist' to their own TPointArrays.
-An alternative to SplitTPAEx, will be extremely fast compared to SplitTPAEx with a distance less than 100.
+An alternative to SplitTPA, will be extremely fast compared to SplitTPA with a distance less than 100.
 
 
 FloodFillTPA
