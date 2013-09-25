@@ -538,4 +538,14 @@ begin
   PPointArray(Result)^ := ps_TPAFromPolygon(PPointArray(Params^[0])^);
 end;
 
+procedure Lape_ClusterTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DPointArray(Result)^ := ps_ClusterTPA(PPointArray(Params^[0])^, PExtended(Params^[1])^);
+end;
+
+procedure Lape_ClusterTPAEx(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DPointArray(Result)^ := ps_ClusterTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 
