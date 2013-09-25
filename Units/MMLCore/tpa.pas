@@ -74,7 +74,7 @@ procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
 function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
 function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
-function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;
+function ClusterTPA(const TPA: TPointArray; dist: Integer): T2DPointArray;
 function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer = -1;
           const IsSortedAscending: Boolean = False): Integer;
 function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
