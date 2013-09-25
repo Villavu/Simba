@@ -540,7 +540,7 @@ end;
 
 procedure Lape_ClusterTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  P2DPointArray(Result)^ := ps_ClusterTPA(PPointArray(Params^[0])^, PExtended(Params^[1])^);
+  P2DPointArray(Result)^ := ps_ClusterTPA(PPointArray(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure Lape_ClusterTPAEx(const Params: PParamArray; const Result: Pointer); lape_extdecl
