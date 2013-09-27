@@ -3131,7 +3131,7 @@ begin;
   for Index := I to Length(decl) do
     case Decl[Index] of
       '(', ';', ':': begin
-          if (PlusNextChar) then
+          if (PlusNextChar) and (I > 1) then
           begin
             Result += '(';
             if (Decl[Index] = ';') or (Decl[Index] = ':') then //There are no parameters..
@@ -3145,7 +3145,7 @@ begin;
         Result += Decl[Index];
     end;
 
-  if (PlusNextChar) then
+  if (PlusNextChar) and (I > 1) then
     Result += '(';
 end;
 
