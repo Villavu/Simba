@@ -34,7 +34,7 @@ uses
 {$I Simba.inc}
 
 const
-    SimbaVersion = 1000;
+    SimbaVersion = 1001;
     SimbaMajor = 1000; // this should be 980 even if SimbaVersion is 981, etc
 
     SimbaURL =     {$IFDEF WINDOWS}
@@ -54,7 +54,7 @@ const
                     {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
                     {$ENDIF}
                   {$ENDIF};
-    FontURL = 'http://simba.villavu.com/bin/Fonts/';
+    FontURL = 'http://simba.villavu.com/bin/Fonts1.0/';
 
 procedure mDebugLn( s : string);overload;
 procedure mDebugLn( s : string; f : array of const);overload;
