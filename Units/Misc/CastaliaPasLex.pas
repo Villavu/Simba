@@ -1015,6 +1015,7 @@ function TmwBasePasLex.Func73: TptTokenKind;
 begin
   Result := tokIdentifier;
   if KeyComp('Except') then Result := tokExcept;
+  if KeyComp('Union') then Result := tokUnion;
 end;
 
 function TmwBasePasLex.Func75: TptTokenKind;

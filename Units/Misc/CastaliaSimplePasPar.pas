@@ -391,6 +391,7 @@ type
     procedure RecordConstant; virtual;
     procedure RecordFieldConstant; virtual;
     procedure RecordType; virtual;
+    procedure UnionType; virtual;
     procedure RecordVariant; virtual;
     procedure RelativeOperator; virtual;
     procedure RepeatStatement; virtual;
@@ -452,6 +453,7 @@ type
     procedure UsesClause; virtual;
     procedure VarAbsolute; virtual;
     procedure VarEqual; virtual;
+    procedure VarAssign; virtual;
     procedure VarDeclaration; virtual;
     procedure Variable; virtual;
     procedure VariableList; virtual;
@@ -1606,10 +1608,10 @@ end;
 
 procedure TmwSimplePasPar.Constraint;
 begin
-  while TokenId in [tokConstructor, tokRecord, tokClass, tokIdentifier] do
+  while TokenId in [tokConstructor, tokRecord, tokUnion, tokClass, tokIdentifier] do
   begin
     case TokenId of
-      tokConstructor, tokRecord, tokClass: NextToken;
+      tokConstructor, tokRecord, tokUnion, tokClass: NextToken;
       tokIdentifier: TypeId;
     end;
     if TokenId = tokComma then
@@ -2777,7 +2779,7 @@ begin //mw 12/7/2000
             tokImplementation, tokIn, tokInherited, tokInitialization, tokInline,
             tokInterface, tokIs, tokLabel, tokLibrary, tokMod, tokNil, tokNot, tokObject,
             tokOf, tokOr, tokOut, tokPacked, tokProcedure, tokProgram, tokProperty,
-            tokRaise, tokRecord, tokRepeat, tokResourceString, tokSealed, tokSet,
+            tokRaise, tokRecord, tokUnion, tokRepeat, tokResourceString, tokSealed, tokSet,
             tokShl, tokShr, tokStatic, tokString, tokThen, tokThreadVar, tokTo, tokTry,
             tokType, tokUnit, tokUnsafe, tokUntil, tokUses, tokVar, tokWhile, tokWith,
             tokXor] then
@@ -3114,14 +3116,9 @@ begin
       tokPlatform: DirectivePlatform;
     end;
   case GenID of
-    tokAbsolute:
-      begin
-        VarAbsolute;
-      end;
-    tokEqual:
-      begin
-        VarEqual;
-      end;
+    tokAbsolute: VarAbsolute;
+    tokEqual: VarEqual;
+    tokAssign: VarAssign;
   end;
   while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2001-10-20
     case ExID of
@@ -3140,6 +3137,12 @@ end;
 procedure TmwSimplePasPar.VarEqual;
 begin
   Expected(tokEqual);
+  ConstantValueTyped;
+end;
+
+procedure TmwSimplePasPar.VarAssign;
+begin
+  Expected(tokAssign);
   ConstantValueTyped;
 end;
 
@@ -3289,9 +3292,10 @@ end;
 procedure TmwSimplePasPar.RecordType;
 begin
   Expected(tokRecord);
+
   if TokenID = tokSemicolon then
     Exit;
-  {$IFDEF D8_NEWER1}
+
   if TokenID = tokRoundOpen then
   begin
     ClassHeritage;
@@ -3299,9 +3303,19 @@ begin
       Exit;
   end;
   ClassMemberList;
-  {$ELSE}
+
+  Expected(tokEnd);
+end;
+
+procedure TmwSimplePasPar.UnionType;
+begin
+  Expected(tokUnion);
+
+  if TokenID = tokSemicolon then
+    Exit;
+
   FieldList;
-  {$ENDIF}
+
   Expected(tokEnd);
 end;
 
@@ -4313,30 +4327,16 @@ end;
 procedure TmwSimplePasPar.StructuredType;
 begin
   if TokenID = tokPacked then
-  begin
     NextToken;
-  end;
+
   case TokenID of
-    tokArray:
-      begin
-        ArrayType;
-      end;
-    tokFile:
-      begin
-        FileType;
-      end;
-    tokRecord:
-      begin
-        RecordType;
-      end;
-    tokSet:
-      begin
-        SetType;
-      end;
+    tokArray: ArrayType;
+    tokFile: FileType;
+    tokRecord: RecordType;
+    tokUnion: UnionType;
+    tokSet: SetType;
   else
-    begin
-      SynError(InvalidStructuredType);
-    end;
+    SynError(InvalidStructuredType);
   end;
 end;
 
@@ -4560,7 +4560,7 @@ begin
       begin
         SimpleType;
       end;
-    tokArray, tokFile, tokPacked, tokRecord, tokSet:
+    tokArray, tokFile, tokPacked, tokRecord, tokUnion, tokSet:
       begin
         StructuredType;
       end;
