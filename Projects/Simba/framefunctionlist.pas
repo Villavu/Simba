@@ -549,18 +549,48 @@ end;
 procedure TFillThread.Update;
   procedure AddProcsTree(Node: TTreeNode; Procs: TDeclarationList; Path: string);
     procedure ProcessProcedure(Node: TTreeNode; Proc: TciProcedureDeclaration);
+      function findNodeStartingWith(Node: TTreeNode; x: string): TTreeNode;
+      var
+        x_len: LongInt;
+      begin
+        x_len := Length(x);
+
+        Result := Node.GetFirstChild();
+        while (Result <> nil) and (Copy(Result.Text, 1, x_len) <> x) do
+          Result := Result.GetNextSibling();
+      end;
     var
       tmpNode: TTreeNode;
       Name, FirstLine: string;
       Index: LongInt;
+      ClassName: TDeclaration;
     begin
       if (Assigned(Proc.Name)) then
       begin
         Name := Proc.Name.ShortText + '; ';
 
+        ClassName := Proc.Items.GetFirstItemOfClass(TciProcedureClassName);
+        if (Assigned(ClassName)) then
+        begin
+          tmpNode := findNodeStartingWith(Node, ClassName.ShortText + ' =');
+          if (tmpNode = nil) then
+            tmpNode := findNodeStartingWith(Node, ClassName.ShortText);
+
+          if (tmpNode = nil) then
+          begin
+            tmpNode := Node.TreeNodes.AddChild(Node, ClassName.CleanText);
+            tmpNode.ImageIndex := 36;
+            tmpNode.SelectedIndex := 36;
+          end;
+
+          Node := tmpNode;
+        end;
+
         FirstLine := Lowercase(Proc.CleanText);
-        if (Pos(#10, FirstLine) > 0) then
-          FirstLine := Copy(FirstLine, 1, Pos(#10, FirstLine) - 1);
+
+        Index := Pos(#13, FirstLine);
+        if (Index > 0) then
+          FirstLine := Copy(FirstLine, 1, Index - 1);
 
         Index := Node.IndexOfText(Trim(Name));
         if (Index = -1)  then
@@ -594,27 +624,68 @@ procedure TFillThread.Update;
       end;
     end;
     procedure ProcessDecl(Node: TTreeNode; Decl: TDeclaration);
+      function getVarName(Decl: TDeclaration): string;
+      begin
+        case Decl.ClassName of
+          'TciVarDeclaration': Result := Decl.Items.GetFirstItemOfClass(TciVarName).ShortText;
+          'TciConstantDeclaration': Result := Decl.Items.GetFirstItemOfClass(TciConstantName).ShortText;
+          'TciClassField': Result := Decl.Items.GetFirstItemOfClass(TciFieldName).ShortText;
+        end;
+      end;
     var
       tmpNode: TTreeNode;
     begin
-      tmpNode := Node.TreeNodes.AddChild(Node, Decl.CleanText);
+      tmpNode := Node.TreeNodes.AddChild(Node, Trim(Decl.CleanText));
       tmpNode.Data := GetMem(SizeOf(TMethodInfo));
 
       if (Decl is TciConstantDeclaration) then tmpNode.ImageIndex := 33;
-      if (Decl is TciTypeDeclaration) then tmpNode.ImageIndex := 36;
-      if (Decl is TciVarDeclaration) then tmpNode.ImageIndex := 37;
+      if (Decl is TciVarDeclaration) or (Decl is TciClassField) then tmpNode.ImageIndex := 37;
       tmpNode.SelectedIndex := tmpNode.ImageIndex;
 
       FillChar(PMethodInfo(tmpNode.Data)^, SizeOf(TMethodInfo), 0);
 
-       with PMethodInfo(tmpNode.Data)^ do
-       begin
-         MethodStr := strnew(Pchar(Decl.CleanText));
-         Filename := strnew(pchar(Path));
-         BeginPos := Decl.StartPos;
-         EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
-       end;
+      with PMethodInfo(tmpNode.Data)^ do
+      begin
+        MethodStr := strnew(Pchar(getVarName(Decl)));
+        Filename := strnew(pchar(Path));
+        BeginPos := Decl.StartPos;
+        EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
+      end;
     end;
+    procedure ProcessType(Node: TTreeNode; Decl: TciTypeDeclaration);
+    var
+      tmpNode: TTreeNode;
+      TypeKind: TciTypeKind;
+      TypeName: TciTypeName;
+      Index: LongInt;
+    begin
+      TypeKind := TciTypeKind(Decl.Items.GetFirstItemOfClass(TciTypeKind));
+      TypeName := TciTypeName(Decl.Items.GetFirstItemOfClass(TciTypeName));
+
+      case TypeKind.ShortText of
+        'record', 'union': tmpNode := Node.TreeNodes.AddChild(Node, Trim(TypeName.CleanText) + ' = ' + TypeKind.GetRealType.ShortText);
+        else
+          tmpNode := Node.TreeNodes.AddChild(Node, Trim(Decl.CleanText));
+      end;
+
+      tmpNode.ImageIndex := 36;
+      tmpNode.SelectedIndex := 36;
+      tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+      FillChar(PMethodInfo(tmpNode.Data)^, SizeOf(TMethodInfo), 0);
+
+      with PMethodInfo(tmpNode.Data)^ do
+      begin
+        MethodStr := strnew(Pchar(Decl.CleanText));
+        Filename := strnew(pchar(Path));
+        BeginPos := Decl.StartPos;
+        EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
+      end;
+
+      if (TypeKind.ShortText = 'record') or (TypeKind.ShortText = 'union') then
+        for Index := 0 to TypeKind.GetRealType.Items.Count - 1 do
+          ProcessDecl(tmpNode, TypeKind.GetRealType.Items[Index]);
+    end;
+
   var
     I: integer;
   begin;
@@ -625,7 +696,8 @@ procedure TFillThread.Update;
       if (Assigned(Procs[I])) then
         case Procs[I].ClassName of
           'TciProcedureDeclaration': ProcessProcedure(Node, Procs[I] as TciProcedureDeclaration);
-          'TciVarDeclaration', 'TciTypeDeclaration', 'TciConstantDeclaration': ProcessDecl(Node, Procs[I] as TDeclaration);
+          'TciVarDeclaration', 'TciConstantDeclaration': ProcessDecl(Node, Procs[I] as TDeclaration);
+          'TciTypeDeclaration': ProcessType(Node, Procs[I] as TciTypeDeclaration);
           'TciJunk', 'TciInclude', 'TciCompoundStatement': ;
           else
             WriteLn('Unknown Class: ', Procs[I].ClassName);
