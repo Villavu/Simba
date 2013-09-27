@@ -116,7 +116,7 @@ begin
   begin
     RegisterMethod(@TMufasaBitmap.ToTBitmap,'ToTBitmap');
     RegisterMethod(@TMufasaBitmap.SetSize,'SetSize');
-    RegisterMethod(@TMufasaBitmap.StretchResize,'StretcRresize');
+    RegisterMethod(@TMufasaBitmap.StretchResize,'StretchResize');
     RegisterMethod(@TMufasaBitmap.SetPersistentMemory, 'SetPersistentMemory');
     RegisterMethod(@TMufasaBitmap.ResetPersistentMemory, 'SetPersistentMemory');
     RegisterMethod(@TMufasaBitmap.FastSetPixel,'FastSetPixel');
