@@ -97,6 +97,11 @@ type
     function GetDefault(Return: TVarBase = vbName): TDeclaration;
   end;
 
+  TciParentedStruct = class(TciStruct)
+  private
+    function GetShortText: string; override;
+  end;
+
   TciTypeKind = class(TDeclaration)
   private
     function GetShortText: string; override;
@@ -172,7 +177,8 @@ type
   TciArrayType = class(TDeclaration);                                       //Array
   TciArrayConstant = class(TDeclaration);                                   //Array
 
-  TciRecordType = class(TciStruct);                                         //Record
+  TciRecordType = class(TciParentedStruct);                                 //Record
+  TciUnionType = class(TciStruct);
   TciClassField = class(TDeclaration);                                      //Record
   TciFieldName = class(TDeclaration);                                       //Record
   TciRecordConstant = class(TDeclaration);                                  //Record
@@ -247,6 +253,7 @@ type
     procedure ArrayConstant; override;                                          //Array Const
 
     procedure RecordType; override;                                             //Record
+    procedure UnionType; override;                                              //Union
     procedure ClassField; override;                                             //Record + Class
     procedure FieldName; override;                                              //Record + Class
     procedure RecordConstant; override;                                         //Record Const
@@ -726,6 +733,22 @@ begin
       Result := d.Owner.Items.GetFirstItemOfClass(TciFieldName)
 end;
 
+function TciParentedStruct.GetShortText: string;
+var
+  P: LongInt;
+begin
+  if (fShortText = '') then
+  begin
+    fShortText := CleanText;
+    P := Pos(')', fShortText);
+    if (P > 0) then
+      fShortText := Copy(fShortText, 1, P)
+    else
+      fShortText := GetFirstWord(fShortText);
+  end;
+  Result := fShortText;
+end;
+
 function TciTypeKind.GetShortText: string;
 var
   d: TDeclaration;
@@ -835,19 +858,24 @@ var
   Return : TciReturnType;
 begin
   if (fCleanDecl <> '') then
-    result := fCleanDecl
+    Result := fCleanDecl
   else
   begin
-    result := proctype;
+    Result := ProcType;
+
     if (Name <> nil) then
-      result := result + ' ' + Name.ShortText;
+      Result := Result + ' ' + Name.ShortText + '(';
+
     if (Params <> '') then
-      result := result + '(' + params + ')';
+      Result := Result + Params;
+
+    Result := Result + ')';
+
     Return := fItems.GetFirstItemOfClass(TciReturnType) as TciReturnType;
     if (Return <> nil) then
-      result := result + ': ' + Return.ShortText
+      Result := Result + ': ' + Return.ShortText
     else
-      result := result + ';';
+      Result := Result + ';';
   end;
 end;
 
@@ -1478,9 +1506,16 @@ begin
   PopStack;
 end;
 
+procedure TCodeParser.UnionType;
+begin
+  PushStack(TciUnionType);
+  inherited;
+  PopStack;
+end;
+
 procedure TCodeParser.ClassField;
 begin
-  if (not InDeclarations([TciRecordType, TciClassType])) then
+  if (not InDeclarations([TciRecordType, TciUnionType, TciClassType])) then
   begin
     inherited;
     Exit;
@@ -1552,7 +1587,7 @@ end;
 
 procedure TCodeParser.ClassMethodHeading;
 begin
-  if (not InDeclarations([TciRecordType, TciClassType])) then
+  if (not InDeclarations([TciRecordType, TciUnionType, TciClassType])) then
   begin
     inherited;
     Exit;
@@ -1617,7 +1652,7 @@ end;
 
 procedure TCodeParser.ClassProperty;
 begin
-  if (not InDeclarations([TciRecordType, TciClassType])) then
+  if (not InDeclarations([TciRecordType, TciUnionType, TciClassType])) then
   begin
     inherited;
     Exit;

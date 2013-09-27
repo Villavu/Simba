@@ -200,6 +200,7 @@ type
     tokReal,
     tokReal48,
     tokRecord,
+    tokUnion,
   {$IFDEF D12_NEWER}
     tokReference, //JThurman 2008-25-07 (anonymous methods)
   {$ENDIF}
