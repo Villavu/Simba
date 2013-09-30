@@ -594,7 +594,7 @@ AddFunction(@ps_TPAPosNext,'function  TPAPosNext(const Find: TPoint; const V: TP
 AddFunction(@ps_GlueTPAs, 'function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;');
 
 {SQLite3}
-
+{$IFNDEF MML_EXPORT_THREADSAFE}
 {$IFDEF USE_SQLITE}
 if (SQLite3Loaded) then
 begin
@@ -613,7 +613,6 @@ begin
 end;
 {$ENDIF}
 
-{$IFNDEF MML_EXPORT_THREADSAFE}
 SetCurrSection('Settings');
 AddFunction(@ps_KeyIsSetting, 'function KeyIsSetting(const KeyName: String): Boolean;');
 AddFunction(@ps_KeyIsDirectory, 'function KeyIsDirectory(const KeyName: String): Boolean;');
