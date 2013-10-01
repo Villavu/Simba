@@ -780,10 +780,9 @@ begin
     addGlobalFunc('procedure TStrings.SetStrings(index: integer; text: string);', @TStrings_Strings_Write);
 
     addClassVar( 'TStrings', 'Count', 'Integer', @TStrings_Count_Read);
-    //addClassVar('TStrings', 'Objects', 'TObject', @TStrings_Objects_Read, @TStrings_Objects_Write);
-    //addClassVar('TStrings', 'Values', 'string', @TStrings_Values_Read, @TStrings_Values_Write);
-    addGlobalFunc('function TStrings.getString(Index: Int32): string', @TStrings_Strings_Read);
-    //addClassVar('TStrings', 'Strings', 'string', @TStrings_Strings_Read, @TStrings_Strings_Write);
+    addClassVar('TStrings', 'Objects', 'TObject', @TStrings_Objects_Read, @TStrings_Objects_Write, True);
+    //addClassVar('TStrings', 'Values', 'string', @TStrings_Values_Read, @TStrings_Values_Write, True);
+    addClassVar('TStrings', 'Strings', 'string', @TStrings_Strings_Read, @TStrings_Strings_Write, True);
     addClassVar('TStrings', 'Text', 'string', @TStrings_Text_Read, @TStrings_Text_Write);
     addGlobalFunc('procedure TStrings.Init();', @TStrings_Init);
     addGlobalFunc('procedure TStrings.Free();', @TStrings_Free);
