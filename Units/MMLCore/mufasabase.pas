@@ -54,7 +54,7 @@ const
                     {$IFDEF NOTPORTABLE}+ 'SystemWide/'{$ENDIF}
                     {$ENDIF}
                   {$ENDIF};
-    FontURL = 'http://simba.villavu.com/bin/Fonts1.0/';
+    FontURL = 'http://simba.villavu.com/bin/Fonts/';
 
 procedure mDebugLn( s : string);overload;
 procedure mDebugLn( s : string; f : array of const);overload;
