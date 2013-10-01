@@ -722,6 +722,18 @@ begin
   PStrings(Params^[0])^.Strings[PInteger(Params^[1])^] := PlpString(Params^[2])^;
 end;
 
+//Read: property Values[string]: string
+procedure TStrings_Values_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PlpString(Result)^ := PStrings(Params^[0])^.Values[PlpString(Params^[1])^];
+end;
+
+//Write: property Values[string]: string
+procedure TStrings_Values_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStrings(Params^[0])^.Values[PlpString(Params^[1])^] := PlpString(Params^[2])^;
+end;
+
 //Read: property Text: string read Text write Text;
 procedure TStrings_Text_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -774,15 +786,12 @@ begin
     addGlobalFunc('procedure TStrings.Move(CurIndex, NewIndex: Integer);', @TStrings_Move);
     addGlobalFunc('procedure TStrings.SaveToFile(const FileName: string);', @TStrings_SaveToFile);
     addGlobalFunc('procedure TStrings.SaveToStream(Stream: TStream);', @TStrings_SaveToStream);
-    addGlobalFunc('function TStrings.GetObjects(index: integer):TObject;', @TStrings_Objects_Read);
-    addGlobalFunc('function TStrings.GetStrings(index: integer):string;', @TStrings_Strings_Read);
-    addGlobalFunc('procedure TStrings.SetObjects(index: integer;obj: TObject);', @TStrings_Objects_Write);
-    addGlobalFunc('procedure TStrings.SetStrings(index: integer; text: string);', @TStrings_Strings_Write);
-
     addClassVar( 'TStrings', 'Count', 'Integer', @TStrings_Count_Read);
+
     addClassVar('TStrings', 'Objects', 'TObject', @TStrings_Objects_Read, @TStrings_Objects_Write, True);
-    //addClassVar('TStrings', 'Values', 'string', @TStrings_Values_Read, @TStrings_Values_Write, True);
+    addClassVar('TStrings', 'Values', 'string', @TStrings_Values_Read, @TStrings_Values_Write, True, 'string');
     addClassVar('TStrings', 'Strings', 'string', @TStrings_Strings_Read, @TStrings_Strings_Write, True);
+
     addClassVar('TStrings', 'Text', 'string', @TStrings_Text_Read, @TStrings_Text_Write);
     addGlobalFunc('procedure TStrings.Init();', @TStrings_Init);
     addGlobalFunc('procedure TStrings.Free();', @TStrings_Free);
