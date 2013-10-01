@@ -820,7 +820,7 @@ procedure GetUpdaterCheckEveryXminutes(obj: TObject); begin TIntegerSetting(obj)
 procedure GetUpdaterLink(obj: TObject); begin TStringSetting(obj).Value := SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};; end;
 procedure GetUpdaterVersionLink(obj: TObject); begin TStringSetting(obj).Value := SimbaURL + 'Version'; end;
 
-procedure GetInterpreterType(obj: TObject); begin TIntegerSetting(obj).Value := 0; end; // 0 is PS
+procedure GetInterpreterType(obj: TObject); begin TIntegerSetting(obj).Value := 1; end; // 1 is Lape
 procedure GetInterpreterAllowSysCalls(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
 procedure GetFontsLoadOnStartUp(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
