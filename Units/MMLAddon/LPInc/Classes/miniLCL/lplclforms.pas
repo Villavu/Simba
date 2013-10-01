@@ -7,13 +7,14 @@ unit lplclforms;
 interface
 
 uses
-  Classes, SysUtils,Forms,lpcompiler, lptypes, lpClassHelper;
+  Classes, SysUtils, Forms,lpcompiler, lptypes, lpClassHelper;
 
 type
   PCustomForm = ^TCustomForm;
   PForm = ^TForm;
   PCloseAction = ^TCloseAction;
   PCloseEvent = ^TCloseEvent;
+  PPosition = ^TPosition;
 
 
 procedure RegisterLCLForms(Compiler: TLapeCompiler);
@@ -863,6 +864,18 @@ begin
   PForm(Params^[0])^.Caption := PlpString(Params^[1])^;
 end;
 
+//Read: property Position: TPosition;
+procedure TForm_Position_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPosition(Result)^ := PForm(Params^[0])^.Position;
+end;
+
+//Write: property Position: TPosition
+procedure TForm_Position_Write(const Params: PParamArray); lape_extdecl
+begin
+  PForm(Params^[0])^.Position := PPosition(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TForm_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -905,6 +918,7 @@ begin
     addClassVar('TForm', 'Top', 'Integer', @TForm_Top_Read, @TForm_Top_Write);
     addClassVar('TForm', 'Width', 'Integer', @TForm_Width_Read, @TForm_Width_Write);
     addClassVar('TForm', 'Caption', 'string', @TForm_Caption_Read, @TForm_Caption_Write);
+    addClassVar('TForm', 'Position', 'TPosition', @TForm_Position_Read, @TForm_Position_Write);
     addGlobalFunc('procedure TForm.Free();', @TForm_Free);
   end;
 end;
@@ -917,6 +931,7 @@ begin
       AddGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction)','TCloseEvent');
       AddGlobalType('procedure(Sender : TObject; var CanClose : boolean)','TCloseQueryEvent');
       AddGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow,bsSizeToolWin)','TFormBorderStyle');
+      AddGlobaltype('(poDesigned, poDefault, poDefaultPosOnly, poDefaultSizeOnly, poScreenCenter, poMainFormCenter, poOwnerFormCenter)', 'TPosition');
     end;
     Register_TCustomForm(compiler);
     Register_TForm(compiler);
