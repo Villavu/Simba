@@ -975,9 +975,7 @@ function TSimbaForm.SetInterpreter(obj: TObject): Boolean;
 var
   UpdateCurrScript: Boolean;
   Interpreter: Integer;
-
 begin
-  writeln('Interpreter onChange');
   UpdateCurrScript := false;
   if (CurrScript <> nil) then
     with CurrScript.Synedit do
@@ -989,7 +987,7 @@ begin
   if (Interpreter < 0) or (Interpreter > 1) then
   begin
     writeln('Resetting interpreter to valid value');
-    SimbaSettings.Interpreter._Type.Value := 0;
+    SimbaSettings.Interpreter._Type.Value := 1; //Default Lape
   end;
 
   UpdateInterpreter;
