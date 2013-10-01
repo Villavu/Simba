@@ -223,7 +223,7 @@ begin
       Result := True;
 end;
 
-function AddUpdater(const IncludeName, UpdateURL, VerURL, ExFolder: string; const ShowMenu, TimerIfNoMenu: boolean; var ID: integer): boolean;
+function AddUpdater(const IncludeName, UpdateURL, VerURL, ExFolder: string; const ShowMenu, NoTimer: boolean; var ID: integer): boolean;
 var
   Seperator: array[0..1] of TMenuItem;
   ViewMenu: TMenuItem;
@@ -237,12 +237,12 @@ begin
     VersionURL := VerURL;
     Folder := ExFolder;
     CreateMenu := ShowMenu;
-    NoMenuTimer := TimerIfNoMenu;
+    NoMenuTimer := not NoTimer;
 
     if (CreateMenu) then
     begin
       ViewMenu := GetMenuByName('&View', Simba_MainMenu.Items);
-      if (ViewMenu.Count = 4) then
+      if (ViewMenu.Count = 6) then
       begin
         Seperator[0] := TMenuItem.Create(ViewMenu);
         Seperator[0].Caption := '-';
@@ -279,6 +279,7 @@ begin
 
       AutoMenu := TMenuItem.Create(MainMenu);
       AutoMenu.Caption := 'Automatically ...';
+      AutoMenu.Visible := NoMenuTimer;
       MainMenu.Add(AutoMenu);
 
       AUpdateMenuItem := TMenuItem.Create(AutoMenu);
@@ -300,6 +301,7 @@ begin
       TimerMenuItem := TMenuItem.Create(SettingsMenu);
       TimerMenuItem.Caption := 'Timer Interval: ' + IntToStr(StrToIntDef(ExtractFromStr(Settings.GetKeyValueDef(Name + '_TimerInterval', '3600000'), Numbers), 3600000) / 1000);
       TimerMenuItem.OnClick := @Click;
+      TimerMenuItem.Visible := NoMenuTimer;
       SettingsMenu.Add(TimerMenuItem);
 
       OverrideUpdateMenuItem := TMenuItem.Create(SettingsMenu);
