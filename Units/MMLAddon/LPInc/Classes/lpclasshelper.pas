@@ -28,13 +28,13 @@ var
 begin
   Param := '';
   if Arr then
-    Param := 'Index: UInt32; ';
+    Param := 'Index: UInt32';
 
   if (Assigned(Read)) then
     addGlobalFunc(Format('function %s.get%s(%s): %s;', [Obj, Item, Param, Typ]), Read);
 
   if (Assigned(Write)) then
-    addGlobalFunc(Format('procedure %s.set%s(%sconst value: %s);', [Obj, Item, Param, Typ]), Write);
+    addGlobalFunc(Format('procedure %s.set%s(%sconst value: %s);', [Obj, Item, Param + '; ', Typ]), Write);
 end;
 
 end.
