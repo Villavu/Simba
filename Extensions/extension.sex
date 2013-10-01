@@ -7,9 +7,15 @@ var
 begin
   Settings.GetKeyValueDef('Extensions_Visible', 'false'); //Default Menu to be hidden =)
   AddUpdater('Extensions', 'http://wizzup.org/static/srl/exten.tar.bz2',
-  'http://wizzup.org/static/srl/exten_version', ScriptPath + {$IFDEF WINDOWS}'\' {$ELSE}'/'{$ENDIF}, True, True, EXT);
+  'http://wizzup.org/static/srl/exten_version', ScriptPath + {$IFDEF WINDOWS}'\' {$ELSE}'/'{$ENDIF}, True, False, EXT);
 end;
 
-function GetName: string; begin Result := 'Extensions Updater'; end;
-function GetVersion: string; begin Result := '0.1'; end;
-begin end.
+function GetName: string;
+begin
+  Result := 'Extensions Updater';
+end;
+
+function GetVersion: string;
+begin
+  Result := '0.2';
+end;
