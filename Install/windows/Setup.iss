@@ -27,6 +27,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Dirs]
 Name: "{app}\Extensions"
+Name: "{app}\Fonts"
 Name: "{app}\Includes"
 Name: "{app}\Plugins"
 Name: "{app}\Scripts"
@@ -46,6 +47,7 @@ Source: "C:\Simba\Extensions\security.sex"; DestDir: "{app}\Extensions"; Flags: 
 Source: "C:\Simba\Extensions\paster.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\CRov.sex"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Extensions\Updater.sei"; DestDir: "{app}\Extensions"; Flags: ignoreversion
+Source: "C:\Simba\Extensions\PlayerManager.sei"; DestDir: "{app}\Extensions"; Flags: ignoreversion
 Source: "C:\Simba\Includes\mml.simba"; DestDir: "{app}\Includes"; Flags: ignoreversion
 
 ; Source: "C:\Simba\Doc\sphinx/_build/latex/Simba.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion
