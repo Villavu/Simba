@@ -40,7 +40,7 @@
 
 {$DEFINE USE_LAPE}
 
-{$DEFINE USE_SQLITE} // TO build with SQLite3 support.
+//{$DEFINE USE_SQLITE} // TO build with SQLite3 support. //Has issues currently
 
 {$DEFINE USE_EXTENSIONS}
 //{$DEFINE USE_CODECOMPLETION} // TODO
