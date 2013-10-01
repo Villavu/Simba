@@ -10,7 +10,9 @@ var
   Extensions: string;
 
 type
+  {$IFNDEF SIMBAMAJOR1000}
   TCharArray = array of Char;
+  {$ENDIF}
 
   function GetModuleFileName(
     Module: Cardinal; FileName: TCharArray; Size: Cardinal
