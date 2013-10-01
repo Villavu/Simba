@@ -273,6 +273,8 @@ type
     tokWriteonly,
     tokXor,
 
+    tokNative,
+
     tok_DONE);
 
 TmwPasLexStatus = record

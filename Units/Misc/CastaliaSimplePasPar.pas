@@ -2038,18 +2038,11 @@ begin
   begin
     FormalParameterList;
   end;
-  case TokenID of
-    tokSemiColon:
-      begin
-        FunctionProcedureBlock;
-      end;
-  else
-    begin
-      Expected(tokColon);
-      ReturnType;
-      FunctionProcedureBlock;
-    end;
-  end;
+
+  Expected(tokColon);
+  ReturnType;
+
+  FunctionProcedureBlock;
 end;
 
 procedure TmwSimplePasPar.ProcedureMethodDeclaration;
@@ -2083,6 +2076,7 @@ begin
   begin
     FormalParameterList;
   end;
+
   FunctionProcedureBlock;
 end;
 
@@ -2123,7 +2117,7 @@ begin
       tokReintroduce, tokSafeCall, tokStdCall, tokVirtual,
       tokDeprecated, tokLibrary, tokPlatform, // DR 2001-10-20
       tokLocal, tokVarargs,
-      tokAssembler //JT 2004-10-29
+      tokAssembler, tokNative //JT 2004-10-29
       {$IFDEF D8_NEWER}
       , tokStatic
       {$ENDIF}
@@ -4968,6 +4962,8 @@ begin
       DirectiveLocal; // DR 2001-11-14
     tokVarargs:
       DirectiveVarargs; // DR 2001-11-14
+    tokNative:
+      NextToken;
   else
     begin
       SynError(InvalidProceduralDirective);
