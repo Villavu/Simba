@@ -683,7 +683,8 @@ procedure TFillThread.Update;
 
       if (TypeKind.ShortText = 'record') or (TypeKind.ShortText = 'union') then
         for Index := 0 to TypeKind.GetRealType.Items.Count - 1 do
-          ProcessDecl(tmpNode, TypeKind.GetRealType.Items[Index]);
+          if (not (TypeKind.GetRealType.Items[Index] is TciJunk)) then
+            ProcessDecl(tmpNode, TypeKind.GetRealType.Items[Index]);
     end;
 
   var
