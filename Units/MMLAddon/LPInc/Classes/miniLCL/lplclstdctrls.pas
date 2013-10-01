@@ -30,6 +30,9 @@ type
   //TEdit
   PCustomEdit =^TCustomEdit;
   PEdit = ^TEdit;
+  //TGroupBox
+  PCustomGroupBox = ^TCustomGroupBox;
+  PGroupBox = ^TGroupBox;
   //TMemo
   PMemoScrollBar = ^TMemoScrollBar;
   PCustomMemo = ^TCustomMemo;
@@ -1085,6 +1088,50 @@ begin
     addGlobalFunc('procedure TEdit.Free();', @TEdit_Free);
   end;
 end;
+
+procedure TCustomGroupBox_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCustomGroupBox(Params^[0])^ := TCustomGroupBox.Create(PComponent(Params^[1])^);
+end;
+
+procedure TCustomGroupBox_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCustomGroupBox(Params^[0])^.Free();
+end;
+
+procedure Register_TCustomGroupBox(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TCustomGroupBox', 'TWinControl');
+
+    addGlobalFunc('procedure TCustomGroupBox.Init(AOwner: TComponent);', @TCustomGroupBox_Init);
+    addGlobalFunc('procedure TCustomGroupBox.Free();', @TCustomGroupBox_Free);
+  end;
+end;
+
+procedure TGroupBox_Init(const Params: PParamArray); lape_extdecl
+begin
+  PGroupBox(Params^[0])^ := TGroupBox.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TGroupBox_Free(const Params: PParamArray); lape_extdecl
+begin
+  PGroupBox(Params^[0])^.Free();
+end;
+
+procedure Register_TGroupBox(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TGroupBox', 'TCustomGroupBox');
+
+    addGlobalFunc('procedure TGroupBox.Init(AOwner: TComponent);', @TGroupBox_Init);
+    addGlobalFunc('procedure TGroupBox.Free();', @TGroupBox_Free);
+  end;
+end;
+
 {TMemo}
 //constructor Create(AOwner: TComponent);
 procedure TMemoScrollbar_Init(const Params: PParamArray); lape_extdecl
@@ -1687,6 +1734,8 @@ begin
   Register_TListBox(Compiler);
   Register_TCustomEdit(Compiler);
   Register_TEdit(Compiler);
+  Register_TCustomGroupBox(Compiler);
+  Register_TGroupBox(Compiler);
   Register_TMemoScrollbar(Compiler);
   Register_TCustomMemo(Compiler);
   Register_TMemo(Compiler);
@@ -1702,4 +1751,3 @@ begin
 end;
 
 end.
-
