@@ -34,7 +34,7 @@ uses
 {$I Simba.inc}
 
 const
-    SimbaVersion = 1001;
+    SimbaVersion = 1003;
     SimbaMajor = 1000; // this should be 980 even if SimbaVersion is 981, etc
 
     SimbaURL =     {$IFDEF WINDOWS}
