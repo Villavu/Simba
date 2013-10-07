@@ -261,6 +261,7 @@ AddGlobalFunc('function sha256(Data: string): string', @Lape_sha256);
 AddGlobalFunc('function sha384(Data: string): string', @Lape_sha384);
 AddGlobalFunc('function sha512(Data: string): string', @Lape_sha512);
 AddGlobalFunc('function tiger(Data: string): string', @Lape_tiger);
+AddGlobalFunc('procedure rc2_encrypt(const Key: string; const HashType: THashType; var Data: string);', @Lape_rc2_encrypt);
 AddGlobalFunc('procedure rc2_decrypt(const Key: string; const HashType: THashType; var Data: string);', @Lape_rc2_decrypt);
 
 { Files }
