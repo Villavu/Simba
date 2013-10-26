@@ -61,6 +61,7 @@ function CIELabToColor(L, a, b: Extended): TColor; inline;
 procedure ColorToCIELab(Color: integer; out L, a, b: Extended); inline;
 procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended); inline;
 procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended); inline;
+function ColorToGrayL(Color: Integer): Byte; Inline;
 
 
 implementation
@@ -498,6 +499,14 @@ var
 begin
   HSLtoRGB(HH, SS, LL, rr, gg, bb);
   RGBToCIELab(rr, gg, bb, L, a, b);
+end;
+
+//Grayscale - Calculated similarly to how XYZ calculates it's `Y`
+function ColorToGrayL(Color:Integer): Byte; Inline;
+begin
+  Result := Trunc((0.2126 * (Color and $FF)) +
+                  (0.7152 * ((Color shr 8) and $FF)) +
+                  (0.0722 * ((Color shr 16) and $FF)));
 end;
 
 end.

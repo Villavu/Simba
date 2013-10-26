@@ -248,6 +248,7 @@ AddGlobalFunc('function CIELabToColor(L, a, b: Extended): TColor;', @Lape_CIELab
 AddGlobalFunc('procedure ColorToCIELab(Color: integer; out L, a, b: Extended);', @Lape_ColorToCIELab);
 AddGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);', @Lape_CIELabToHSL);
 AddGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);', @Lape_HSLToCIELab);
+AddGlobalFunc('function ColorToGrayL(color: integer): byte;', @Lape_ColorToGrayL);
 
 { Crypto }
 SetCurrSection('Crypto');

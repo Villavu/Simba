@@ -97,3 +97,9 @@ procedure Lape_HSLToCIELab(const Params: PParamArray); lape_extdecl
 begin
   ps_HSLToCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
+
+procedure Lape_ColorToGrayL(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PByte(Result)^ := ps_ColorToGrayL(PInteger(Params^[0])^);
+end;
+

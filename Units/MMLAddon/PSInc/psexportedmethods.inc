@@ -342,6 +342,7 @@ AddFunction(@ps_CIELabToColor, 'function CIELabToColor(L, a, b: Extended): TColo
 AddFunction(@ps_ColorToCIELab, 'procedure ColorToCIELab(Color: integer; out L, a, b: Extended);');
 AddFunction(@ps_CIELabToHSL, 'procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);');
 AddFunction(@ps_HSLToCIELab, 'procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);');
+AddFunction(@ps_ColorToGrayL, 'function ColorToGrayL(Color: Integer): Byte;');
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 { Color Finding }
