@@ -21,6 +21,7 @@ type
   PBitmap = ^TBitmap;
   PCanvas = ^TCanvas;
   PMBitmaps = ^TMBitmaps;
+  PThreshMethod = ^TThreshMethod;
 
 //Read: FData : PRGB32;
 procedure TMufasaBitmap_FData_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
@@ -310,6 +311,18 @@ begin
   PMufasaBitmap(Params^[0])^.Posterize(Pinteger(Params^[1])^);
 end;
 
+//procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
+procedure TMufasaBitmap_Threshold(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Threshold(PMufasaBitmap(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, PThreshMethod(Params^[4])^, Pinteger(Params^[5])^);
+end;
+
+//procedure Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
+procedure TMufasaBitmap_ThresholdEx(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Threshold(Pinteger(Params^[1])^, Pinteger(Params^[2])^, PThreshMethod(Params^[3])^, Pinteger(Params^[4])^);
+end;
+
 //procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
 procedure TMufasaBitmap_Convolute(const Params: PParamArray); lape_extdecl
 begin
@@ -481,6 +494,8 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Invert(); overload;', @TMufasaBitmap_InvertEx);
     addGlobalFunc('procedure TMufasaBitmap.Posterize(TargetBitmap : TMufasaBitmap; Po : integer);', @TMufasaBitmap_Posterize);
     addGlobalFunc('procedure TMufasaBitmap.Posterize(Po : integer); overload;', @TMufasaBitmap_PosterizeEx);
+    addGlobalFunc('procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);', @TMufasaBitmap_Threshold);
+    addGlobalFunc('procedure TMufasaBitmap.Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;', @TMufasaBitmap_ThresholdEx);
     addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);', @TMufasaBitmap_Convolute);
     addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer): TMufasaBitmap;', @TMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy(): TMufasaBitmap; overload;', @TMufasaBitmap_CopyEx);

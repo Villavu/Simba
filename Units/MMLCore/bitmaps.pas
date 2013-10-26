@@ -97,6 +97,8 @@ type
     procedure Invert;overload;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
+    procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;
+    procedure Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;
     procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
@@ -1417,6 +1419,145 @@ begin
     ptr^.b := min(Round(ptr^.b / po) * Po, 255);
     inc(ptr);
   end;
+end;
+
+procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
+var
+  x, y, i, Color, IMin, IMax, ww, hh: Integer;
+  CurThreshold, Counter: Integer;
+  Temp: T2DByteArray;
+  Tab: array[0..256] of Byte;
+begin
+  TargetBitmap.SetSize(W, H);
+  SetLength(Temp, (H + 2), (W + 2));
+
+  ww := w;
+  hh := h;
+  Dec(ww);
+  Dec(hh);
+
+  CurThreshold := 0;
+
+  case Method of
+    TM_Mean:
+    begin
+      for y := 0 to hh do
+      begin
+        Counter := 0;
+        for x := 0 to ww do
+        begin
+          Color := ColorToGrayL(Self.FastGetPixel(x, y));
+          Temp[(y + 1)][(x + 1)] := Color;
+          Counter := (Counter + Color);
+        end;
+        CurThreshold := (CurThreshold + (Counter div W));
+      end;
+      if (C < 0) then
+        CurThreshold := ((CurThreshold div H) - Abs(C))
+      else
+        CurThreshold := ((CurThreshold div H) + C);
+    end;
+
+    TM_MinMax:
+    begin
+      IMin := ColorToGrayL(Self.FastGetPixel(0, 0));
+      IMax := IMin;
+      for y := 0 to hh do
+        for x := 0 to ww do
+        begin
+          Color := ColorToGrayL(Self.FastGetPixel(x, y));
+          Temp[(y + 1)][(x + 1)] := Color;
+          if (Color < IMin) then
+            IMin := Color
+          else
+            if (Color > IMax) then
+              IMax := Color;
+        end;
+      if (C < 0) then
+        CurThreshold := (((IMax + IMin) div 2) - Abs(C))
+      else
+        CurThreshold := (((IMax + IMin) div 2) + C);
+    end;
+  end;
+
+  CurThreshold := Max(0, Min(CurThreshold, 255));
+  for i := 0 to (CurThreshold - 1) do
+    Tab[i] := Alpha;
+  for i := CurThreshold to 255 do
+    Tab[i] := Beta;
+
+  for y := 1 to h do
+    for x := 1 to w do
+      TargetBitmap.FastSetPixel((x - 1), (y - 1), Tab[Temp[y][x]]);
+end;
+
+procedure TMufasaBitmap.Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
+var
+  x, y, i, Color, IMin, IMax, ww, hh: Integer;
+  CurThreshold, Counter: Integer;
+  Temp: T2DByteArray;
+  Tab: array[0..256] of Byte;
+begin
+  SetLength(Temp, (H + 2), (W + 2));
+
+  ww := w;
+  hh := h;
+  Dec(ww);
+  Dec(hh);
+
+  CurThreshold := 0;
+
+  case Method of
+    TM_Mean:
+    begin
+      for y := 0 to hh do
+      begin
+        Counter := 0;
+        for x := 0 to ww do
+        begin
+          Color := ColorToGrayL(Self.FastGetPixel(x, y));
+          Temp[(y + 1)][(x + 1)] := Color;
+          Counter := (Counter + Color);
+        end;
+        CurThreshold := (CurThreshold + (Counter div W));
+      end;
+      if (C < 0) then
+        CurThreshold := ((CurThreshold div H) - Abs(C))
+      else
+        CurThreshold := ((CurThreshold div H) + C);
+    end;
+
+    TM_MinMax:
+    begin
+      IMin := ColorToGrayL(Self.FastGetPixel(0, 0));
+      IMax := IMin;
+      for y := 0 to hh do
+        for x := 0 to ww do
+        begin
+          Color := ColorToGrayL(Self.FastGetPixel(x, y));
+          Temp[(y + 1)][(x + 1)] := Color;
+          if (Color < IMin) then
+            IMin := Color
+          else
+            if (Color > IMax) then
+              IMax := Color;
+        end;
+      if (C < 0) then
+        CurThreshold := (((IMax + IMin) div 2) - Abs(C))
+      else
+        CurThreshold := (((IMax + IMin) div 2) + C);
+    end;
+  end;
+
+  CurThreshold := Max(0, Min(CurThreshold, 255));
+  for i := 0 to (CurThreshold - 1) do
+    Tab[i] := Alpha;
+  for i := CurThreshold to 255 do
+    Tab[i] := Beta;
+
+  for y := 1 to h do
+    for x := 1 to w do
+      Self.FastSetPixel((x - 1), (y - 1), Tab[Temp[y][x]]);
 end;
 
 procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix: T2DExtendedArray);

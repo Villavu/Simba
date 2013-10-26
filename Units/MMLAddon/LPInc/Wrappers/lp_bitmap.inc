@@ -292,3 +292,8 @@ procedure Lape_FindColorsBitmap(const Params: PParamArray; const Result: Pointer
 begin
   PBoolean(Result)^ := ps_FindColorsBitmap(PInteger(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^);
 end;
+
+procedure Lape_ThresholdBitmap(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := ps_ThresholdBitmap(PInteger(Params^[0])^,Pinteger(Params^[1])^, Pinteger(Params^[2])^, PThreshMethod(Params^[3])^, Pinteger(Params^[4])^);
+end;

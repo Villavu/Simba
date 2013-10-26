@@ -86,6 +86,7 @@ addGlobalType('Integer', 'TColor');
 
 addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
 addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
+addGlobalType('(TM_Mean, TM_MinMax)', 'TThreshMethod');
 addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
 addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
 
@@ -100,6 +101,7 @@ addGlobalType('array of TCardinalArray', 'T2DCardinalArray');
 addGlobalType('array of Char', 'TCharArray');
 addGlobalType('array of TCharArray', 'T2DCharArray');
 addGlobalType('array of byte', 'TByteArray');
+addGlobalType('array of TByteArray', 'T2DByteArray');
 addGlobalType('array of extended', 'TExtendedArray');
 addGlobalType('array of TExtendedArray', 'T2DExtendedArray');
 addGlobalType('array of T2DExtendedArray', 'T3DExtendedArray');

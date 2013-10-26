@@ -285,6 +285,16 @@ begin;
     Bmp[bitmap].Posterize(Bmp[result],po);
   end;
 end;
+
+function ps_ThresholdBitmap(bitmap: integer; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer): integer; extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+  begin
+    result := CreateBMP(0, 0);
+    bmp[bitmap].Threshold(bmp[result], alpha, beta, method, c);
+  end;
+end;
+
 function ps_CreateMaskFromBitmap(Bitmap : integer) : TMask; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps[Bitmap].CreateTMask;
