@@ -478,6 +478,7 @@ AddFunction(@ps_CalculatePixelShiftTPA,'function CalculatePixelShiftTPA(Bmp1,Bmp
 AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
 AddFunction(@ps_CalculatePixelToleranceTPA,'function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;');
 AddFunction(@ps_ThresholdBitmap, 'function ThresholdBitmap(bitmap: integer; Alpha, Beta: Integer; Method: TThreshMethod; C: Integer): integer;');
+AddFunction(@ps_DebugBitmap, 'procedure DebugBitmap(bmp: integer);');
 {$ENDIF}
 
 {tpa}

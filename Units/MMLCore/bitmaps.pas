@@ -1421,6 +1421,18 @@ begin
   end;
 end;
 
+{*
+ This function first finds the Mean of the image, and set the threshold to it. Again: colors bellow the Threshold will be set to `Alpha`
+ the colors above or equal to the Mean/Threshold will be set to `Beta`.
+ @todo: Test to use a matrix filter to reduce noice of size: 3x3, 5x5, 7x7 etc..
+ @params:
+    Alpha: Minvalue for result
+    Beta: Maxvalue for result
+    Method: TM_Mean or TM_MinMax
+    C: Substract or add to the mean.
+
+  Copyright (c) 2013, Jarl K. Holta || http://github.com/WarPie All rights reserved
+*}
 procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
 var
   x, y, i, Color, IMin, IMax, ww, hh: Integer;
@@ -1491,6 +1503,7 @@ begin
       TargetBitmap.FastSetPixel((x - 1), (y - 1), Tab[Temp[y][x]]);
 end;
 
+{Same as above, but will draw the results onto the bitmap 'TargetBitmap'}
 procedure TMufasaBitmap.Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
 var
   x, y, i, Color, IMin, IMax, ww, hh: Integer;

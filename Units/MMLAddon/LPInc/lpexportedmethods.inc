@@ -143,6 +143,7 @@ AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPo
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
 AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 AddGlobalFunc('function ThresholdBitmap(bitmap: integer; Alpha, Beta: Integer; Method: TThreshMethod; C: Integer): integer;', @Lape_ThresholdBitmap);
+AddGlobalFunc('procedure DebugBitmap(bmp: integer);', @Lape_DebugBitmap);
 
 { Math }
 SetCurrSection('Math');

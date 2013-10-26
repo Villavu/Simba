@@ -162,3 +162,8 @@ procedure Lape_SetTarget(const Params: PParamArray); lape_extdecl
 begin
   ps_SetTarget(PSysProc(Params^[0])^);
 end;
+
+procedure Lape_DebugBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_DebugBitmap(PInteger(Params^[0])^);
+end;
