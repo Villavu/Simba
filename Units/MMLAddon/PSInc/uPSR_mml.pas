@@ -143,6 +143,7 @@ begin
     RegisterMethod(@TMufasaBitmap.Invert,'Invert');
     RegisterMethod(@TMufasaBitmap.Posterize,'Posterize');
     RegisterMethod(@TMufasaBitmap.Threshold,'Threshold');
+    RegisterMethod(@TMufasaBitmap.Trim,'Trim');
     RegisterMethod(@TMufasaBitmap.Copy, 'Copy');
     RegisterMethod(@TMufasaBitmap.ToString,'ToString');
     RegisterMethod(@TMufasaBitmap.CreateTMask,'CreateTMask');

@@ -372,3 +372,8 @@ function ps_FindColorsBitmap(bmp: integer; var points: TPointArray; const color:
 begin;
   result := CurrThread.Client.MBitmaps[bmp].findColors(points, color);
 end;
+
+procedure ps_TrimBitmap(bmp, x1, y1, x2, y2: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Trim(x1, y1, x2, y2);
+end;

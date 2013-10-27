@@ -100,6 +100,7 @@ type
     procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;
     procedure Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;
     procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
+    procedure Trim(x1, y1, x2, y2: integer);
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
     function ToTBitmap: TBitmap;
@@ -938,27 +939,34 @@ end;
 
 function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): boolean;
 var
-  x, y, i, bmpW, bmpH: integer;
+  SearchCol: TRGB32;
+  i, c, x, y, wid, hei: integer;
 begin
-  bmpW := width;
-  bmpH := height;
+  SearchCol := RGBToBGR(Color);
 
+  wid := width;
+  hei := height;
+
+  SetLength(points, wid * hei);
   i := 0;
 
-  SetLength(points, bmpW * bmpH);
+  dec(wid); dec(hei);
 
-  for x := 0 to (bmpW - 1) do
-    for y := 0 to (bmpH - 1) do
-      if (fastGetPixel(x, y) = color) then
-      begin
+  for y := 0 to hei do
+    for x := 0 to wid do
+    begin
+      c := y * w + x;
+      FData[c].a := 0;
+
+      if (LongWord(FData[c]) = LongWord(SearchCol)) then
+      begin;
         points[i].x := x;
         points[i].y := y;
-
         inc(i);
       end;
+   end;
 
-  setLength(points, i);
-  result := length(points) > 0;
+  SetLength(points, i);
 end;
 
 function TMufasaBitmap.FastGetPixel(x, y: integer): TColor;
@@ -1422,9 +1430,8 @@ begin
 end;
 
 {*
- This function first finds the Mean of the image, and set the threshold to it. Again: colors bellow the Threshold will be set to `Alpha`
+ This function first finds the Mean of the image, and set the threshold to it. Again: colors below the Threshold will be set to `Alpha`
  the colors above or equal to the Mean/Threshold will be set to `Beta`.
- @todo: Test to use a matrix filter to reduce noice of size: 3x3, 5x5, 7x7 etc..
  @params:
     Alpha: Minvalue for result
     Beta: Maxvalue for result
@@ -1503,7 +1510,7 @@ begin
       TargetBitmap.FastSetPixel((x - 1), (y - 1), Tab[Temp[y][x]]);
 end;
 
-{Same as above, but will draw the results onto the bitmap 'TargetBitmap'}
+{Same as above, but will draw the results onto it's self}
 procedure TMufasaBitmap.Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
 var
   x, y, i, Color, IMin, IMax, ww, hh: Integer;
@@ -1611,6 +1618,20 @@ begin
       RowT[y][x].g := round(g);
       RowT[y][x].b := round(b);
     end;
+end;
+
+procedure TMufasaBitmap.Trim(x1, y1, x2, y2: integer);
+var
+  tmp: TMufasaBitmap;
+begin
+  if (x1 < 0) or (y1 < 0) or (x2 >= self.w) or (y2 >= self.h) then
+    raise exception.Create('The Bounds you passed to Trim exceed the bitmap''s bounds');
+
+  tmp := Self.Copy(x1, y1, x2, y2);
+  Self.SetSize(tmp.width, tmp.height);
+
+  tmp.FastDrawTransparent(0, 0, Self);
+  tmp.Free;
 end;
 
 function TMufasaBitmap.CreateTMask: TMask;
