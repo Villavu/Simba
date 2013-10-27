@@ -479,7 +479,7 @@ AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,B
 AddFunction(@ps_CalculatePixelToleranceTPA,'function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;');
 AddFunction(@ps_ThresholdBitmap, 'function ThresholdBitmap(bitmap: integer; Alpha, Beta: Integer; Method: TThreshMethod; C: Integer): integer;');
 AddFunction(@ps_DebugBitmap, 'procedure DebugBitmap(bmp: integer);');
-AddFunction(@ps_TrimBitmap, 'procedure TrimBitmap(bmp, x1, y1, x2, y2: integer);');
+AddFunction(@ps_CropBitmap, 'procedure CropBitmap(bmp, x1, y1, x2, y2: integer);');
 {$ENDIF}
 
 {tpa}

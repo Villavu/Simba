@@ -341,10 +341,10 @@ begin
   PMufasaBitmap(Result)^ := PMufasaBitmap(Params^[0])^.Copy();
 end;
 
-//procedure Trim(x1, y1, x2, y2: integer);
-procedure TMufasaBitmap_Trim(const Params: PParamArray; const Result: Pointer); lape_extdecl
+//procedure Crop(x1, y1, x2, y2: integer);
+procedure TMufasaBitmap_Crop(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PMufasaBitmap(Params^[0])^.Trim(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
+  PMufasaBitmap(Params^[0])^.Crop(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
 //function ToTBitmap: TBitmap;
@@ -505,7 +505,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);', @TMufasaBitmap_Convolute);
     addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer): TMufasaBitmap;', @TMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy(): TMufasaBitmap; overload;', @TMufasaBitmap_CopyEx);
-    addGlobalFunc('procedure TMufasaBitmap.Trim(x1, y1, x2, y2: integer);', @TMufasaBitmap_Trim);
+    addGlobalFunc('procedure TMufasaBitmap.Crop(x1, y1, x2, y2: integer);', @TMufasaBitmap_Crop);
     addGlobalFunc('function TMufasaBitmap.ToTBitmap(): TBitmap;', @TMufasaBitmap_ToTBitmap);
     addGlobalFunc('function TMufasaBitmap.ToString(): string;', @TMufasaBitmap_ToString);
     addGlobalFunc('function TMufasaBitmap.RowPtrs(): TPRGB32Array;', @TMufasaBitmap_RowPtrs);

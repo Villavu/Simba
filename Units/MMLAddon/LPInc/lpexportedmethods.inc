@@ -144,7 +144,7 @@ AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: 
 AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 AddGlobalFunc('function ThresholdBitmap(bitmap: integer; Alpha, Beta: Integer; Method: TThreshMethod; C: Integer): integer;', @Lape_ThresholdBitmap);
 AddGlobalFunc('procedure DebugBitmap(bmp: integer);', @Lape_DebugBitmap);
-AddGlobalFunc('procedure TrimBitmap(bmp, x1, y1, x2, y2: integer);', @Lape_TrimBitmap);
+AddGlobalFunc('procedure CropBitmap(bmp, x1, y1, x2, y2: integer);', @Lape_CropBitmap);
 
 { Math }
 SetCurrSection('Math');

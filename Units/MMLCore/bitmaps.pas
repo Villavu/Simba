@@ -100,7 +100,7 @@ type
     procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;
     procedure Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;
     procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
-    procedure Trim(x1, y1, x2, y2: integer);
+    procedure Crop(x1, y1, x2, y2: integer);
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
     function ToTBitmap: TBitmap;
@@ -1621,12 +1621,12 @@ begin
     end;
 end;
 
-procedure TMufasaBitmap.Trim(x1, y1, x2, y2: integer);
+procedure TMufasaBitmap.Crop(x1, y1, x2, y2: integer);
 var
   tmp: TMufasaBitmap;
 begin
   if (x1 < 0) or (y1 < 0) or (x2 >= self.w) or (y2 >= self.h) then
-    raise exception.Create('The Bounds you passed to Trim exceed the bitmap''s bounds');
+    raise exception.Create('The Bounds you passed to crop exceed the bitmap''s bounds');
 
   tmp := Self.Copy(x1, y1, x2, y2);
   Self.SetSize(tmp.width, tmp.height);

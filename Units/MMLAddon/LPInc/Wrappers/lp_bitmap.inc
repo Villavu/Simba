@@ -298,7 +298,7 @@ begin
   Pinteger(Result)^ := ps_ThresholdBitmap(PInteger(Params^[0])^,Pinteger(Params^[1])^, Pinteger(Params^[2])^, PThreshMethod(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
-procedure Lape_TrimBitmap(const Params: PParamArray); lape_extdecl
+procedure Lape_CropBitmap(const Params: PParamArray); lape_extdecl
 begin
-  ps_TrimBitmap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+  ps_CropBitmap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
