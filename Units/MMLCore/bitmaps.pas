@@ -937,7 +937,7 @@ begin
   Self.DrawTPA(TPA,Color);
 end;
 
-function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): boolean;
+function TMufasaBitmap.FindColors(var Points: TPointArray; const Color: integer): boolean;
 var
   SearchCol: TRGB32;
   i, c, x, y, wid, hei: integer;
@@ -960,13 +960,14 @@ begin
 
       if (LongWord(FData[c]) = LongWord(SearchCol)) then
       begin;
-        points[i].x := x;
-        points[i].y := y;
+        Points[i].x := x;
+        Points[i].y := y;
         inc(i);
       end;
    end;
 
-  SetLength(points, i);
+  SetLength(Points, i);
+  Result := (Length(Points) > 0);
 end;
 
 function TMufasaBitmap.FastGetPixel(x, y: integer): TColor;
