@@ -97,8 +97,8 @@ type
     procedure Invert;overload;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
-    procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;
-    procedure Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;
+    procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Byte; Method: TThreshMethod; C:Integer); overload;
+    procedure Threshold(Alpha, Beta: Byte; Method: TThreshMethod; C:Integer); overload;
     procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
     procedure Crop(x1, y1, x2, y2: integer);
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
@@ -1439,7 +1439,7 @@ end;
     Method: TM_Mean or TM_MinMax
     C: Substract or add to the mean.
 *}
-procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
+procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Byte; Method: TThreshMethod; C:Integer);
 var
   x, y, i, Color, IMin, IMax, ww, hh: Integer;
   CurThreshold, Counter: Integer;
@@ -1510,7 +1510,7 @@ begin
 end;
 
 {Same as above, but will draw the results onto itself}
-procedure TMufasaBitmap.Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
+procedure TMufasaBitmap.Threshold(Alpha, Beta: Byte; Method: TThreshMethod; C:Integer);
 var
   x, y, i, Color, IMin, IMax, ww, hh: Integer;
   CurThreshold, Counter: Integer;

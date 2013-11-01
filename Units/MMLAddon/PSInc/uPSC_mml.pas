@@ -40,7 +40,7 @@ begin
     RegisterMethod('procedure Contrast(TargetBitmap : TMufasaBitmap; co : Extended);');
     RegisterMethod('procedure Invert(TargetBitmap : TMufasaBitmap);');
     RegisterMethod('procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);');
-    RegisterMethod('procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);');
+    RegisterMethod('procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Byte; Method: TThreshMethod; C:Integer);');
     RegisterMethod('procedure Crop(x1, y1, x2, y2: integer);');
     RegisterMethod('function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap;');
     RegisterMethod('function ToString : string;');

@@ -286,7 +286,7 @@ begin;
   end;
 end;
 
-function ps_ThresholdBitmap(bitmap: integer; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer): integer; extdecl;
+function ps_ThresholdBitmap(bitmap: integer; Alpha, Beta: Byte; Method: TThreshMethod; C:Integer): integer; extdecl;
 begin
   with CurrThread.Client.MBitmaps do
   begin

@@ -500,8 +500,8 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Invert(); overload;', @TMufasaBitmap_InvertEx);
     addGlobalFunc('procedure TMufasaBitmap.Posterize(TargetBitmap : TMufasaBitmap; Po : integer);', @TMufasaBitmap_Posterize);
     addGlobalFunc('procedure TMufasaBitmap.Posterize(Po : integer); overload;', @TMufasaBitmap_PosterizeEx);
-    addGlobalFunc('procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);', @TMufasaBitmap_Threshold);
-    addGlobalFunc('procedure TMufasaBitmap.Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer); overload;', @TMufasaBitmap_ThresholdEx);
+    addGlobalFunc('procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Byte; Method: TThreshMethod; C:Integer);', @TMufasaBitmap_Threshold);
+    addGlobalFunc('procedure TMufasaBitmap.Threshold(Alpha, Beta: Byte; Method: TThreshMethod; C:Integer); overload;', @TMufasaBitmap_ThresholdEx);
     addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);', @TMufasaBitmap_Convolute);
     addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer): TMufasaBitmap;', @TMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy(): TMufasaBitmap; overload;', @TMufasaBitmap_CopyEx);
