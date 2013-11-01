@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië, Merlijn Wajer and Jarl K. Holta.
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -956,7 +956,7 @@ begin
     for x := 0 to wid do
     begin
       c := y * w + x;
-      FData[c].a := 0;
+      SearchCol.a := FData[c].a;
 
       if (LongWord(FData[c]) = LongWord(SearchCol)) then
       begin;
@@ -1438,8 +1438,6 @@ end;
     Beta: Maxvalue for result
     Method: TM_Mean or TM_MinMax
     C: Substract or add to the mean.
-
-  Copyright (c) 2013, Jarl K. Holta || http://github.com/WarPie All rights reserved
 *}
 procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
 var
@@ -1511,7 +1509,7 @@ begin
       TargetBitmap.FastSetPixel((x - 1), (y - 1), Tab[Temp[y][x]]);
 end;
 
-{Same as above, but will draw the results onto it's self}
+{Same as above, but will draw the results onto itself}
 procedure TMufasaBitmap.Threshold(Alpha, Beta: Integer; Method: TThreshMethod; C:Integer);
 var
   x, y, i, Color, IMin, IMax, ww, hh: Integer;
