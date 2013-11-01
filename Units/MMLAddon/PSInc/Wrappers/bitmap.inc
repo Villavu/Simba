@@ -285,6 +285,16 @@ begin;
     Bmp[bitmap].Posterize(Bmp[result],po);
   end;
 end;
+
+function ps_ThresholdBitmap(bitmap: integer; Alpha, Beta: Byte; Method: TThreshMethod; C:Integer): integer; extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+  begin
+    result := CreateBMP(0, 0);
+    bmp[bitmap].Threshold(bmp[result], alpha, beta, method, c);
+  end;
+end;
+
 function ps_CreateMaskFromBitmap(Bitmap : integer) : TMask; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps[Bitmap].CreateTMask;
@@ -361,4 +371,9 @@ end;
 function ps_FindColorsBitmap(bmp: integer; var points: TPointArray; const color: integer): boolean; extdecl;
 begin;
   result := CurrThread.Client.MBitmaps[bmp].findColors(points, color);
+end;
+
+procedure ps_CropBitmap(bmp, x1, y1, x2, y2: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Crop(x1, y1, x2, y2);
 end;

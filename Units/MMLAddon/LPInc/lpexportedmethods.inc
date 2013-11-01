@@ -142,6 +142,9 @@ AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox
 AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
 AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
+AddGlobalFunc('function ThresholdBitmap(bitmap: integer; Alpha, Beta: Byte; Method: TThreshMethod; C: Integer): integer;', @Lape_ThresholdBitmap);
+AddGlobalFunc('procedure DebugBitmap(bmp: integer);', @Lape_DebugBitmap);
+AddGlobalFunc('procedure CropBitmap(bmp, x1, y1, x2, y2: integer);', @Lape_CropBitmap);
 
 { Math }
 SetCurrSection('Math');
@@ -248,6 +251,7 @@ AddGlobalFunc('function CIELabToColor(L, a, b: Extended): TColor;', @Lape_CIELab
 AddGlobalFunc('procedure ColorToCIELab(Color: integer; out L, a, b: Extended);', @Lape_ColorToCIELab);
 AddGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);', @Lape_CIELabToHSL);
 AddGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);', @Lape_HSLToCIELab);
+AddGlobalFunc('function ColorToGrayL(color: integer): byte;', @Lape_ColorToGrayL);
 
 { Crypto }
 SetCurrSection('Crypto');

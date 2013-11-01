@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië, Merlijn Wajer and Jarl K. Holta.
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -97,7 +97,10 @@ type
     procedure Invert;overload;
     procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);overload;
     procedure Posterize(Po : integer);overload;
+    procedure Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Byte; Method: TThreshMethod; C:Integer); overload;
+    procedure Threshold(Alpha, Beta: Byte; Method: TThreshMethod; C:Integer); overload;
     procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
+    procedure Crop(x1, y1, x2, y2: integer);
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
     function ToTBitmap: TBitmap;
@@ -934,29 +937,37 @@ begin
   Self.DrawTPA(TPA,Color);
 end;
 
-function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): boolean;
+function TMufasaBitmap.FindColors(var Points: TPointArray; const Color: integer): boolean;
 var
-  x, y, i, bmpW, bmpH: integer;
+  SearchCol: TRGB32;
+  i, c, x, y, wid, hei: integer;
 begin
-  bmpW := width;
-  bmpH := height;
+  SearchCol := RGBToBGR(Color);
 
+  wid := width;
+  hei := height;
+
+  SetLength(points, wid * hei);
   i := 0;
 
-  SetLength(points, bmpW * bmpH);
+  dec(wid); dec(hei);
 
-  for x := 0 to (bmpW - 1) do
-    for y := 0 to (bmpH - 1) do
-      if (fastGetPixel(x, y) = color) then
-      begin
-        points[i].x := x;
-        points[i].y := y;
+  for y := 0 to hei do
+    for x := 0 to wid do
+    begin
+      c := y * w + x;
+      SearchCol.a := FData[c].a;
 
+      if (LongWord(FData[c]) = LongWord(SearchCol)) then
+      begin;
+        Points[i].x := x;
+        Points[i].y := y;
         inc(i);
       end;
+   end;
 
-  setLength(points, i);
-  result := length(points) > 0;
+  SetLength(Points, i);
+  Result := (Length(Points) > 0);
 end;
 
 function TMufasaBitmap.FastGetPixel(x, y: integer): TColor;
@@ -1419,6 +1430,155 @@ begin
   end;
 end;
 
+{*
+ This function first finds the Mean of the image, and set the threshold to it. Again: colors below the Threshold will be set to `Alpha`
+ the colors above or equal to the Mean/Threshold will be set to `Beta`.
+ @params:
+    Alpha: Minvalue for result
+    Beta: Maxvalue for result
+    Method: TM_Mean or TM_MinMax
+    C: Substract or add to the mean.
+*}
+procedure TMufasaBitmap.Threshold(TargetBitmap: TMufasaBitmap; Alpha, Beta: Byte; Method: TThreshMethod; C:Integer);
+var
+  x, y, i, Color, IMin, IMax, ww, hh: Integer;
+  CurThreshold, Counter: Integer;
+  Temp: T2DByteArray;
+  Tab: array[0..256] of Byte;
+begin
+  TargetBitmap.SetSize(W, H);
+  SetLength(Temp, (H + 2), (W + 2));
+
+  ww := w;
+  hh := h;
+  Dec(ww);
+  Dec(hh);
+
+  CurThreshold := 0;
+
+  case Method of
+    TM_Mean:
+    begin
+      for y := 0 to hh do
+      begin
+        Counter := 0;
+        for x := 0 to ww do
+        begin
+          Color := ColorToGrayL(Self.FastGetPixel(x, y));
+          Temp[(y + 1)][(x + 1)] := Color;
+          Counter := (Counter + Color);
+        end;
+        CurThreshold := (CurThreshold + (Counter div W));
+      end;
+      if (C < 0) then
+        CurThreshold := ((CurThreshold div H) - Abs(C))
+      else
+        CurThreshold := ((CurThreshold div H) + C);
+    end;
+
+    TM_MinMax:
+    begin
+      IMin := ColorToGrayL(Self.FastGetPixel(0, 0));
+      IMax := IMin;
+      for y := 0 to hh do
+        for x := 0 to ww do
+        begin
+          Color := ColorToGrayL(Self.FastGetPixel(x, y));
+          Temp[(y + 1)][(x + 1)] := Color;
+          if (Color < IMin) then
+            IMin := Color
+          else
+            if (Color > IMax) then
+              IMax := Color;
+        end;
+      if (C < 0) then
+        CurThreshold := (((IMax + IMin) div 2) - Abs(C))
+      else
+        CurThreshold := (((IMax + IMin) div 2) + C);
+    end;
+  end;
+
+  CurThreshold := Max(0, Min(CurThreshold, 255));
+  for i := 0 to (CurThreshold - 1) do
+    Tab[i] := Alpha;
+  for i := CurThreshold to 255 do
+    Tab[i] := Beta;
+
+  for y := 1 to h do
+    for x := 1 to w do
+      TargetBitmap.FastSetPixel((x - 1), (y - 1), Tab[Temp[y][x]]);
+end;
+
+{Same as above, but will draw the results onto itself}
+procedure TMufasaBitmap.Threshold(Alpha, Beta: Byte; Method: TThreshMethod; C:Integer);
+var
+  x, y, i, Color, IMin, IMax, ww, hh: Integer;
+  CurThreshold, Counter: Integer;
+  Temp: T2DByteArray;
+  Tab: array[0..256] of Byte;
+begin
+  SetLength(Temp, (H + 2), (W + 2));
+
+  ww := w;
+  hh := h;
+  Dec(ww);
+  Dec(hh);
+
+  CurThreshold := 0;
+
+  case Method of
+    TM_Mean:
+    begin
+      for y := 0 to hh do
+      begin
+        Counter := 0;
+        for x := 0 to ww do
+        begin
+          Color := ColorToGrayL(Self.FastGetPixel(x, y));
+          Temp[(y + 1)][(x + 1)] := Color;
+          Counter := (Counter + Color);
+        end;
+        CurThreshold := (CurThreshold + (Counter div W));
+      end;
+      if (C < 0) then
+        CurThreshold := ((CurThreshold div H) - Abs(C))
+      else
+        CurThreshold := ((CurThreshold div H) + C);
+    end;
+
+    TM_MinMax:
+    begin
+      IMin := ColorToGrayL(Self.FastGetPixel(0, 0));
+      IMax := IMin;
+      for y := 0 to hh do
+        for x := 0 to ww do
+        begin
+          Color := ColorToGrayL(Self.FastGetPixel(x, y));
+          Temp[(y + 1)][(x + 1)] := Color;
+          if (Color < IMin) then
+            IMin := Color
+          else
+            if (Color > IMax) then
+              IMax := Color;
+        end;
+      if (C < 0) then
+        CurThreshold := (((IMax + IMin) div 2) - Abs(C))
+      else
+        CurThreshold := (((IMax + IMin) div 2) + C);
+    end;
+  end;
+
+  CurThreshold := Max(0, Min(CurThreshold, 255));
+  for i := 0 to (CurThreshold - 1) do
+    Tab[i] := Alpha;
+  for i := CurThreshold to 255 do
+    Tab[i] := Beta;
+
+  for y := 1 to h do
+    for x := 1 to w do
+      Self.FastSetPixel((x - 1), (y - 1), Tab[Temp[y][x]]);
+end;
+
 procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix: T2DExtendedArray);
 var
   x,y,xx,yy : integer;
@@ -1457,6 +1617,20 @@ begin
       RowT[y][x].g := round(g);
       RowT[y][x].b := round(b);
     end;
+end;
+
+procedure TMufasaBitmap.Crop(x1, y1, x2, y2: integer);
+var
+  tmp: TMufasaBitmap;
+begin
+  if (x1 < 0) or (y1 < 0) or (x2 >= self.w) or (y2 >= self.h) then
+    raise exception.Create('The Bounds you passed to crop exceed the bitmap''s bounds');
+
+  tmp := Self.Copy(x1, y1, x2, y2);
+  Self.SetSize(tmp.width, tmp.height);
+
+  tmp.FastDrawTransparent(0, 0, Self);
+  tmp.Free;
 end;
 
 function TMufasaBitmap.CreateTMask: TMask;

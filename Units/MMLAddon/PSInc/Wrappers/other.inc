@@ -99,8 +99,6 @@ begin;
   bmp.Free;
 end;
 
-
-
 procedure ps_DisplayDebugImgWindow(w,h : integer); extdecl;
 var
   DispSize : TPoint;
@@ -115,6 +113,14 @@ var
 begin;
   mbmp := CurrThread.Client.MBitmaps[bmp];
   CurrThread.FormCallBack(m_DrawBitmapDebugImg,Pointer(mbmp));
+end;
+
+procedure ps_DebugBitmap(bmp: integer); extdecl;
+begin
+  with CurrThread.Client.MBitmaps[bmp] do
+    ps_DisplayDebugImgWindow(width, height);
+
+  ps_DrawBitmapDebugImg(bmp);
 end;
 
 function ps_GetDebugBitmap : integer; extdecl;
