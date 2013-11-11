@@ -109,6 +109,9 @@ type
   T2DIntArray = array of TIntegerArray;
   T2DIntegerArray = T2DIntArray;
 
+  TByteArray = array of Byte;
+  T2DByteArray = array of TByteArray;
+
   TBoolArray = array of boolean;
   TBooleanArray = TBoolArray;
   T2DBoolArray = Array of TBoolArray;

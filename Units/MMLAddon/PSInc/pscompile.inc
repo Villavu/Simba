@@ -84,6 +84,7 @@ AddTypeS('T2DCardinalArray', 'Array of TCardinalArray');
 AddTypeS('TCharArray', 'Array of Char');
 AddTypeS('T2DCharArray', 'Array of TCharArray');
 AddTypeS('TByteArray','Array of byte');
+AddTypeS('T2DByteArray', 'array of TByteArray');
 AddTypeS('TExtendedArray','Array of extended');
 AddTypeS('TBoolArray', 'Array of Boolean');
 AddTypes('TBox', 'record X1,Y1,X2,Y2 : Integer; end;');
