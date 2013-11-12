@@ -705,7 +705,7 @@ end;
 begin
   c := 0;
   CurrSection := 'Other';
-  SetLength(Result, 500);
+  SetLength(Result, 550);
 
   {$i PSInc/psexportedmethods.inc}
 
@@ -1448,7 +1448,7 @@ end;
 begin
   c := 0;
   CurrSection := 'Other';
-  SetLength(Result, 500);
+  SetLength(Result, 550);
 
   {$DEFINE FUNC_LIST}
   {$i LPInc/lpexportedmethods.inc}
