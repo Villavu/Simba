@@ -142,6 +142,10 @@ AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox
 AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
 AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
+AddGlobalFunc('procedure CropBitmap(const bmp: integer; const xs, ys, xe, ye: integer);', @Lape_CropBitmap);
+AddGlobalFunc('function GetColorsBitmap(const bmp: integer): TIntegerArray;', @Lape_GetColorsBitmap);
+AddGlobalFunc('function BitmapToMatrix(const bmp: integer): T2DIntegerArray;',@Lape_BitmapToMatrix);
+AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
 
 { Math }
 SetCurrSection('Math');

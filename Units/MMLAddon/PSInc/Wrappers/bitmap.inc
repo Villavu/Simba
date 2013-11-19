@@ -362,3 +362,24 @@ function ps_FindColorsBitmap(bmp: integer; var points: TPointArray; const color:
 begin;
   result := CurrThread.Client.MBitmaps[bmp].findColors(points, color);
 end;
+
+procedure ps_CropBitmap(const bmp: integer; const xs, ys, xe, ye: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Crop(xs, ys, xe, ye);
+end;
+
+function ps_GetColorsBitmap(const bmp: integer): TIntegerArray; extdecl;
+begin
+  result := CurrThread.Client.MBitmaps[bmp].GetColors();
+end;
+
+function ps_BitmapToMatrix(const bmp: integer): T2DIntegerArray; extdecl;
+begin
+  result := CurrThread.Client.MBitmaps[bmp].ToMatrix();
+end;
+
+procedure ps_DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].DrawMatrix(matrix);
+end;
+

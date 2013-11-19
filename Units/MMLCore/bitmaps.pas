@@ -78,6 +78,7 @@ type
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(Points : TPointArray) : TIntegerArray;
     function GetAreaColors(xs,ys,xe,ye : integer) : T2DIntArray;
+    function GetColors: TIntegerArray;
     function GetHSLValues(xs, ys, xe, ye: integer): T2DHSLArray;
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
@@ -100,8 +101,11 @@ type
     procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
+    procedure Crop(const xs, ys, xe, ye: integer);
     function ToTBitmap: TBitmap;
     function ToString : string;
+    function ToMatrix: T2DIntegerArray;
+    procedure DrawMatrix(const matrix: T2DIntegerArray);
     function RowPtrs : TPRGB32Array;
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
@@ -714,6 +718,22 @@ begin
     Move(self.FData[i * self.w + xs], Result.FData[(i-ys) * result.w],result.Width * SizeOf(TRGB32));
 end;
 
+procedure TMufasaBitmap.Crop(const xs, ys, xe, ye: integer);
+var
+  i: integer;
+begin
+  if (xs < 0) or (ys < 0) or (ye >= self.width) or (ye >= self.height) then
+    raise exception.Create('TMufasaBitmap.Crop(): The bounds you pased exceed the bitmap bounds');
+
+  if (xs > xe) or (ys > ye) then
+    raise exception.CreateFmt('TMufasaBitmap.Crop(): the bounds you passed doesn''t have normal bounds (%d,%d) : (%d,%d)', [xs, ys, xe, ye]);
+
+  for i := ys to ye do
+    Move(self.FData[i * self.width + xs], self.FData[(i-ys) * self.width], self.width * SizeOf(TRGB32));
+
+  self.SetSize(xe-xs+1, ye-ys+1);
+end;
+
 function TMufasaBitmap.ToTBitmap: TBitmap;
 
 var
@@ -748,6 +768,37 @@ begin
     result := 'm' + Base64EncodeStr(datastr);
     SetLength(datastr,0);
   end;
+end;
+
+function TMufasaBitmap.ToMatrix(): T2DIntegerArray;
+var
+  wid, hei, x, y: integer;
+begin
+  SetLength(result, self.height, self.width);
+
+  wid := (self.width -1);
+  hei := (self.height -1);
+
+  for y := 0 to hei do
+    for x := 0 to wid do
+      result[y][x] := BGRToRGB(self.FData[y * w + x]);
+end;
+
+procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntegerArray);
+var
+  x, y, wid, hei: integer;
+begin
+  if (length(matrix) = 0) then
+    raise exception.CreateFmt('Matrix with length 0 has been passed to TMufasaBitmap.DrawMatrix', []);
+
+  self.SetSize(length(matrix[0]), length(matrix));
+
+  wid := (self.width -1);
+  hei := (self.height -1);
+
+  for y := 0 to hei do
+    for x := 0 to wid do
+      self.FData[y * w + x] := RGBToBGR(matrix[y][x]);
 end;
 
 function TMufasaBitmap.RowPtrs: TPRGB32Array;
@@ -1006,6 +1057,18 @@ begin
                Result[y-ys][x-xs].H, Result[y-ys][x-xs].S,
                Result[y-ys][x-xs].L);
     end;
+end;
+
+function TMufasaBitmap.GetColors: TIntegerArray;
+var
+  size, i: integer;
+begin
+  size := (self.height * self.width);
+  SetLength(result, size);
+  dec(size);
+
+  for i := 0 to size do
+    result[i] := BGRToRGB(self.FData[i]);
 end;
 
 procedure TMufasaBitmap.SetTransparentColor(Col: TColor);

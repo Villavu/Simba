@@ -41,6 +41,7 @@ begin
     RegisterMethod('procedure Invert(TargetBitmap : TMufasaBitmap);');
     RegisterMethod('procedure Posterize(TargetBitmap : TMufasaBitmap; Po : integer);');
     RegisterMethod('function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap;');
+    RegisterMethod('procedure Crop(const xs,ys,xe,ye : integer);');
     RegisterMethod('function ToString : string;');
     RegisterMethod('function ToTBitmap : TBitmap;');
     RegisterMethod('function CreateTMask : TMask;');
