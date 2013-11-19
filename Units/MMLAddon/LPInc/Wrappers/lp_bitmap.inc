@@ -292,3 +292,23 @@ procedure Lape_FindColorsBitmap(const Params: PParamArray; const Result: Pointer
 begin
   PBoolean(Result)^ := ps_FindColorsBitmap(PInteger(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^);
 end;
+
+procedure Lape_CropBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_CropBitmap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure Lape_GetColorsBitmap(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PIntegerArray(Result)^ := ps_GetColorsBitmap(PInteger(Params^[0])^);
+end;
+
+procedure Lape_BitmapToMatrix(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DIntegerArray(Result)^ := ps_BitmapToMatrix(PInteger(Params^[0])^);
+end;
+
+procedure Lape_DrawMatrixBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_DrawMatrixBitmap(PInteger(Params^[0])^, P2DIntegerArray(Params^[1])^);
+end;

@@ -476,6 +476,10 @@ AddFunction(@ps_CalculatePixelShift,'function CalculatePixelShift(Bmp1,Bmp2 : In
 AddFunction(@ps_CalculatePixelShiftTPA,'function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;');
 AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
 AddFunction(@ps_CalculatePixelToleranceTPA,'function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;');
+AddFunction(@ps_CropBitmap,'procedure CropBitmap(const bmp: integer; const xs, ys, xe, ye: integer);');
+AddFunction(@ps_GetColorsBitmap,'function GetColorsBitmap(const bmp: integer): TIntegerArray;');
+AddFunction(@ps_BitmapToMatrix,'function BitmapToMatrix(const bmp: integer): T2DIntegerArray;');
+AddFunction(@ps_DrawMatrixBitmap,'procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);');
 {$ENDIF}
 
 {tpa}
