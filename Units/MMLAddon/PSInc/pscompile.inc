@@ -93,6 +93,8 @@ AddTypeS('TPointArray','Array of TPoint');
 AddTypeS('T2DPointArray','Array of TPointArray');
 AddTypeS('TPointArrayArray','Array of TPointArray');
 AddTypeS('TBmpMirrorStyle','(MirrorWidth,MirrorHeight,MirrorLine)');
+AddTypeS('TBmpThreshMethod', '(TM_Mean, TM_MinMax)');
+AddTypeS('TBmpResizeMethod', '(RM_Nearest, RM_Bilinear)');
 AddTypeS('TMask','record  White, Black : TPointArray; WhiteHi,BlackHi : integer; W,H : integer;end;');
 addtypeS('PPoint','record R,T : extended; end;');
 AddTypeS('TTarget_Exported','record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,int12,int13,int14,int15,int16:integer; end;');
