@@ -312,3 +312,23 @@ procedure Lape_DrawMatrixBitmap(const Params: PParamArray); lape_extdecl
 begin
   ps_DrawMatrixBitmap(PInteger(Params^[0])^, P2DIntegerArray(Params^[1])^);
 end;
+
+procedure Lape_ThresholdAdaptiveMatrix(const Params: PParamArray); lape_extdecl
+begin
+  ps_ThresholdAdaptiveMatrix(P2DIntegerArray(Params^[0])^, PByte(Params^[1])^, PByte(Params^[2])^, PBoolean(Params^[3])^, PBmpThreshMethod(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure Lape_ResizeBilinearMatrix(const Params: PParamArray); lape_extdecl
+begin
+  ResizeBilinearMatrix(P2DIntegerArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_ResizeBitmapEx(const Params: PParamArray); lape_extdecl
+begin
+  ps_ResizeBitmapEx(PInteger(Params^[0])^, PBmpResizeMethod(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure Lape_ThresholdAdaptiveBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_ThresholdAdaptiveBitmap(PInteger(Params^[0])^, PByte(Params^[1])^, PByte(Params^[2])^, PBoolean(Params^[3])^, PBmpThreshMethod(Params^[4])^, PInteger(Params^[5])^);
+end;

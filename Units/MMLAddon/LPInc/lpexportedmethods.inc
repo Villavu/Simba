@@ -146,6 +146,10 @@ AddGlobalFunc('procedure CropBitmap(const bmp: integer; const xs, ys, xe, ye: in
 AddGlobalFunc('function GetColorsBitmap(const bmp: integer): TIntegerArray;', @Lape_GetColorsBitmap);
 AddGlobalFunc('function BitmapToMatrix(const bmp: integer): T2DIntegerArray;',@Lape_BitmapToMatrix);
 AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
+AddGlobalFunc('procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveBitmap);
+AddGlobalFunc('procedure ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer);', @Lape_ResizeBitmapEx);
+AddGlobalFunc('procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveMatrix);
+AddGlobalFunc('procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);', @Lape_ResizeBilinearMatrix);
 
 { Math }
 SetCurrSection('Math');

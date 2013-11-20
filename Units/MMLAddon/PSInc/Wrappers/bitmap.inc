@@ -383,3 +383,28 @@ begin
   CurrThread.Client.MBitmaps[bmp].DrawMatrix(matrix);
 end;
 
+procedure ps_ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); extdecl;
+begin
+  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, Invert, Method, C);
+end;
+
+procedure ps_ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer); extdecl;
+begin
+  ResizeBilinearMatrix(Matrix, NewW, NewH);
+end;
+
+procedure ps_ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].ResizeEx(Method, NewWidth, NewHeight);
+end;
+
+procedure ps_ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); extdecl;
+var
+  Matrix: T2DIntegerArray;
+begin
+  Matrix := CurrThread.Client.MBitmaps[bmp].ToMatrix();
+  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, Invert, Method, C);
+  CurrThread.Client.MBitmaps[bmp].DrawMatrix(Matrix);
+  SetLength(Matrix, 0);
+end;
+
