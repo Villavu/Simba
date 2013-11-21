@@ -94,6 +94,7 @@ AddGlobalFunc('function BitmapFromString(Width,height: integer; Data: string): i
 AddGlobalFunc('function LoadBitmap(Path: String): integer', @Lape_LoadBitmap);
 AddGlobalFunc('procedure SetBitmapSize(Bmp,NewW,NewH: integer);', @Lape_SetBitmapSize);
 AddGlobalFunc('procedure StretchBitmapResize(Bmp,NewW,NewH: integer);', @Lape_StretchBitmapResize);
+AddGlobalFunc('procedure ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer);', @Lape_ResizeBitmapEx);
 AddGlobalFunc('procedure GetBitmapSize(Bmp: integer; var BmpW,BmpH: integer);', @Lape_GetBitmapSize);
 AddGlobalFunc('procedure SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);', @Lape_SetPersistentMemoryBitmap);
 AddGlobalFunc('procedure ResetPersistentMemoryBitmap(bmp: integer);', @Lape_ResetPersistentMemoryBitmap);
@@ -147,7 +148,6 @@ AddGlobalFunc('function GetColorsBitmap(const bmp: integer): TIntegerArray;', @L
 AddGlobalFunc('function BitmapToMatrix(const bmp: integer): T2DIntegerArray;',@Lape_BitmapToMatrix);
 AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
 AddGlobalFunc('procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveBitmap);
-AddGlobalFunc('procedure ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer);', @Lape_ResizeBitmapEx);
 AddGlobalFunc('procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveMatrix);
 AddGlobalFunc('procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);', @Lape_ResizeBilinearMatrix);
 

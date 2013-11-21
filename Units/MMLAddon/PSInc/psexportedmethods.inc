@@ -430,7 +430,7 @@ AddFunction(@ps_GetBitmapSize,'procedure GetBitmapSize(Bmp : integer; var BmpW,B
 AddFunction(@ps_SetPersistentMemoryBitmap, 'procedure SetPersistentMemoryBitmap(bmp: integer; mem: PtrUInt; awidth, aheight: integer);');
 AddFunction(@ps_ResetPersistentMemoryBitmap, 'procedure ResetPersistentMemoryBitmap(bmp: Integer);');
 AddFunction(@ps_StretchBitmapResize,'procedure StretchBitmapResize(Bmp,NewW,NewH : integer);');
-AddFunction(@ps_ResizeBitmapEx,'procedure ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer)');
+AddFunction(@ps_ResizeBitmapEx,'procedure ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer);');
 AddFunction(@ps_CreateMirroredBitmap,'function CreateMirroredBitmap(Bmp : integer) : integer;');
 AddFunction(@ps_CreateMirroredBitmapEx,'function CreateMirroredBitmapEx(Bmp : integer; MirrorStyle : TBmpMirrorStyle) : integer;');
 AddFunction(@ps_FastSetPixel,'procedure FastSetPixel(bmp,x,y : integer; Color : TColor);');
@@ -482,7 +482,6 @@ AddFunction(@ps_GetColorsBitmap,'function GetColorsBitmap(const bmp: integer): T
 AddFunction(@ps_BitmapToMatrix,'function BitmapToMatrix(const bmp: integer): T2DIntegerArray;');
 AddFunction(@ps_DrawMatrixBitmap,'procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);');
 AddFunction(@ps_ThresholdAdaptiveBitmap,'procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);');
-AddFunction(@ps_ResizeBitmapEx, 'procedure ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer);');
 AddFunction(@ps_ThresholdAdaptiveMatrix,'procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);');
 AddFunction(@ps_ResizeBilinearMatrix,'procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);');
 {$ENDIF}

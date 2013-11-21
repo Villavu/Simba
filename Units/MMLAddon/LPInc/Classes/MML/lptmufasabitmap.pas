@@ -525,7 +525,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.ToMatrix(): T2DIntArray;', @TMufasaBitmap_ToMatrix);
     addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntArray);', @TMufasaBitmap_DrawMatrix);
     addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @TMufasaBitmap_ThresholdAdaptive);
-    addGlobalFunc('procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod, NewW, NewH: integer);', @TMufasaBitmap_ResizeEx);
+    addGlobalFunc('procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod; NewW, NewH: integer);', @TMufasaBitmap_ResizeEx);
     addGlobalFunc('function TMufasaBitmap.ToTBitmap(): TBitmap;', @TMufasaBitmap_ToTBitmap);
     addGlobalFunc('function TMufasaBitmap.ToString(): string;', @TMufasaBitmap_ToString);
     addGlobalFunc('function TMufasaBitmap.RowPtrs(): TPRGB32Array;', @TMufasaBitmap_RowPtrs);
