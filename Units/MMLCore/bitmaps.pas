@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië, Merlijn Wajer and Jarl K. Holta.
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -335,6 +335,16 @@ begin
   b := t;
 end;
 
+{*
+ This function first finds the Mean of the image, and set the threshold to it. Again: colors bellow the Threshold will be set to `Alpha`
+ the colors above or equal to the Mean/Threshold will be set to `Beta`.
+ @params:
+    Alpha: Minvalue for result
+    Beta: Maxvalue for result
+    Invert: Bellow Mean is set to Beta, rather then Alpha.
+    Method: TM_Mean or TM_MinMax
+    C: Substract or add to the mean.
+*}
 procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
 var
   W,H,x,y,i:Integer;
