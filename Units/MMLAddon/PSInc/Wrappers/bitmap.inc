@@ -362,3 +362,49 @@ function ps_FindColorsBitmap(bmp: integer; var points: TPointArray; const color:
 begin;
   result := CurrThread.Client.MBitmaps[bmp].findColors(points, color);
 end;
+
+procedure ps_CropBitmap(const bmp: integer; const xs, ys, xe, ye: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Crop(xs, ys, xe, ye);
+end;
+
+function ps_GetColorsBitmap(const bmp: integer): TIntegerArray; extdecl;
+begin
+  result := CurrThread.Client.MBitmaps[bmp].GetColors();
+end;
+
+function ps_BitmapToMatrix(const bmp: integer): T2DIntegerArray; extdecl;
+begin
+  result := CurrThread.Client.MBitmaps[bmp].ToMatrix();
+end;
+
+procedure ps_DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].DrawMatrix(matrix);
+end;
+
+procedure ps_ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); extdecl;
+begin
+  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, Invert, Method, C);
+end;
+
+procedure ps_ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer); extdecl;
+begin
+  ResizeBilinearMatrix(Matrix, NewW, NewH);
+end;
+
+procedure ps_ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].ResizeEx(Method, NewWidth, NewHeight);
+end;
+
+procedure ps_ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); extdecl;
+var
+  Matrix: T2DIntegerArray;
+begin
+  Matrix := CurrThread.Client.MBitmaps[bmp].ToMatrix();
+  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, Invert, Method, C);
+  CurrThread.Client.MBitmaps[bmp].DrawMatrix(Matrix);
+  SetLength(Matrix, 0);
+end;
+

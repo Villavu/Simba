@@ -86,6 +86,8 @@ addGlobalType('Integer', 'TColor');
 
 addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
 addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
+addGlobalType('(TM_Mean, TM_MinMax)', 'TBmpThreshMethod');
+addGlobalType('(RM_Nearest, RM_Bilinear)', 'TBmpResizeMethod');
 addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
 addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
 

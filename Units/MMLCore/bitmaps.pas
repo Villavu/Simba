@@ -1,6 +1,6 @@
 {
 	This file is part of the Mufasa Macro Library (MML)
-	Copyright (c) 2009-2012 by Raymond van Venetië and Merlijn Wajer
+	Copyright (c) 2009-2012 by Raymond van Venetië, Merlijn Wajer and Jarl K. Holta.
 
     MML is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ type
 
     procedure SetSize(AWidth,AHeight : integer);
     procedure StretchResize(AWidth,AHeight : integer);
+    procedure ResizeEx(Method: TBmpResizeMethod; NewWidth, NewHeight: integer);
 
     property Width : Integer read w;
     property Height : Integer read h;
@@ -78,6 +79,7 @@ type
     function FastGetPixel(x,y : integer) : TColor;
     function FastGetPixels(Points : TPointArray) : TIntegerArray;
     function GetAreaColors(xs,ys,xe,ye : integer) : T2DIntArray;
+    function GetColors: TIntegerArray;
     function GetHSLValues(xs, ys, xe, ye: integer): T2DHSLArray;
     procedure FastDrawClear(Color : TColor);
     procedure FastDrawTransparent(x, y: Integer; TargetBitmap: TMufasaBitmap);
@@ -100,8 +102,12 @@ type
     procedure Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
+    procedure Crop(const xs, ys, xe, ye: integer);
     function ToTBitmap: TBitmap;
     function ToString : string;
+    function ToMatrix: T2DIntegerArray;
+    procedure DrawMatrix(const matrix: T2DIntegerArray);
+    procedure ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
     function RowPtrs : TPRGB32Array;
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
@@ -144,6 +150,9 @@ type
   function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
   function CalculatePixelTolerance(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox; CTS : integer) : extended;
   function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray; CTS: integer): extended;
+  procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
+  procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);
+
 implementation
 
 uses
@@ -312,12 +321,167 @@ begin
   end;
 end;
 
-function Min(a,b:integer) : integer;
+function ColorToGray(Color:Integer): Byte; inline;
+begin
+  Result := ((Color and $FF) + ((Color shr 8) and $FF) + ((Color shr 16) and $FF)) div 3;
+end;
+
+procedure Swap(var a, b: byte); inline;
+var
+  t: byte;
+begin
+  t := a;
+  a := b;
+  b := t;
+end;
+
+{*
+ This function first finds the Mean of the image, and set the threshold to it. Again: colors bellow the Threshold will be set to `Alpha`
+ the colors above or equal to the Mean/Threshold will be set to `Beta`.
+ @params:
+    Alpha: Minvalue for result
+    Beta: Maxvalue for result
+    Invert: Bellow Mean is set to Beta, rather then Alpha.
+    Method: TM_Mean or TM_MinMax
+    C: Substract or add to the mean.
+*}
+procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
+var
+  W,H,x,y,i:Integer;
+  Color,IMin,IMax: Byte;
+  Threshold,Counter: Integer;
+  Temp: T2DByteArray;
+  Tab: Array [0..256] of Byte;
+begin
+  if (length(matrix) = 0) then
+      raise exception.Create('Matrix with length 0 has been passed to ThresholdAdaptiveMatrix');
+
+  W := Length(Matrix[0]);
+  H := Length(Matrix);
+  SetLength(Temp, H,W);
+  Dec(W);
+  Dec(H);
+
+  //Finding the threshold - While at it convert image to grayscale.
+  Threshold := 0;
+  Case Method of
+    //Find the Arithmetic Mean / Average.
+    TM_Mean:
+    begin
+      for y:=0 to H do
+      begin
+        Counter := 0;
+        for x:=0 to W do
+        begin
+          Color := ColorToGray(Matrix[y][x]);
+          Temp[y][x] := Color;
+          Counter := Counter + Color;
+        end;
+        Threshold := Threshold + (Counter div W);
+      end;
+      if (C < 0) then Threshold := (Threshold div H) - Abs(C)
+      else Threshold := (Threshold div H) + C;
+    end;
+
+    //Mean of Min and Max values
+    TM_MinMax:
+    begin
+      IMin := ColorToGray(Matrix[0][0]);
+      IMax := IMin;
+      for y:=0 to H do
+        for x:=0 to W do
+        begin
+          Color := ColorToGray(Matrix[y][x]);
+          Temp[y][x] := Color;
+          if Color < IMin then
+            IMin := Color
+          else if Color > IMax then
+            IMax := Color;
+        end;
+      if (C < 0) then Threshold := ((IMax+IMin) div 2) - Abs(C)
+      else Threshold := ((IMax+IMin) div 2) + C;
+    end;
+  end;
+
+  Threshold := Max(0, Min(Threshold, 255)); //In range 0..255
+  if Invert then Swap(Alpha, Beta);
+
+  for i:=0 to (Threshold-1) do Tab[i] := Alpha;
+  for i:=Threshold to 255 do Tab[i] := Beta;
+  for y:=0 to H do
+    for x:=0 to W do
+      Matrix[y][x] := Tab[Temp[y][x]];
+
+  SetLength(Temp, 0);
+end;
+
+procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);
+var
+  W,H,x,y,p0,p1,p2,p3,i,j: Integer;
+  ratioX,ratioY,dx,dy: Single;
+  R,G,B: Single;
+  Res: T2DIntegerArray;
+begin
+  if (length(matrix) = 0) then
+    raise exception.Create('Matrix with length 0 has been passed to ResizeBilinearMatrix');
+
+  W := Length(Matrix[0]);
+  H := Length(Matrix);
+  ratioX := (W-1) / NewW;
+  ratioY := (H-1) / NewH;
+  SetLength(Matrix, NewH, NewW);
+  SetLength(Res, NewH, NewW);
+  Dec(NewW);
+
+  for i:=0 to NewH-1 do
+  for j:=0 to NewW do
+  begin
+    x := Trunc(ratioX * j);
+    y := Trunc(ratioY * i);
+    dX := ratioX * j - x;
+    dY := ratioY * i - y;
+
+    p0 := Matrix[y][x];
+    p1 := Matrix[y][x+1];
+    p2 := Matrix[y+1][x];
+    p3 := Matrix[y+1][x+1];
+
+    R := (p0 and $FF) * (1-dX) * (1-dY) +
+         (p1 and $FF) * (dX * (1-dY)) +
+         (p2 and $FF) * (dY * (1-dX)) +
+         (p3 and $FF) * (dX * dY);
+
+    G := ((p0 shr 8) and $FF) * (1-dX) * (1-dY) +
+         ((p1 shr 8) and $FF) * (dX * (1-dY)) +
+         ((p2 shr 8) and $FF) * (dY * (1-dX)) +
+         ((p3 shr 8) and $FF) * (dX * dY);
+
+    B := ((p0 shr 16) and $FF) * (1-dX) * (1-dY) +
+         ((p1 shr 16) and $FF) * (dX * (1-dY)) +
+         ((p2 shr 16) and $FF) * (dY * (1-dX)) +
+         ((p3 shr 16) and $FF) * (dX * dY);
+
+    Res[i][j] := Trunc(R) or Trunc(G) shl 8 or Trunc(B) shl 16;
+  end;
+
+  Matrix := Res;
+  SetLength(Res, 0);
+end;
+
+function Min(a,b:integer) : integer; inline;
 begin
   if a < b then
     result := a
   else
     result := b;
+end;
+
+function Max(a,b:integer) : integer; inline;
+begin
+  if (a < b) then
+    result := b
+  else
+    result := a;
 end;
 
 { TMBitmaps }
@@ -714,6 +878,22 @@ begin
     Move(self.FData[i * self.w + xs], Result.FData[(i-ys) * result.w],result.Width * SizeOf(TRGB32));
 end;
 
+procedure TMufasaBitmap.Crop(const xs, ys, xe, ye: integer);
+var
+  i: integer;
+begin
+  if (xs < 0) or (ys < 0) or (ye >= self.width) or (ye >= self.height) then
+    raise exception.Create('TMufasaBitmap.Crop(): The bounds you pased exceed the bitmap bounds');
+
+  if (xs > xe) or (ys > ye) then
+    raise exception.CreateFmt('TMufasaBitmap.Crop(): the bounds you passed doesn''t have normal bounds (%d,%d) : (%d,%d)', [xs, ys, xe, ye]);
+
+  for i := ys to ye do
+    Move(self.FData[i * self.width + xs], self.FData[(i-ys) * self.width], self.width * SizeOf(TRGB32));
+
+  self.SetSize(xe-xs+1, ye-ys+1);
+end;
+
 function TMufasaBitmap.ToTBitmap: TBitmap;
 
 var
@@ -748,6 +928,37 @@ begin
     result := 'm' + Base64EncodeStr(datastr);
     SetLength(datastr,0);
   end;
+end;
+
+function TMufasaBitmap.ToMatrix(): T2DIntegerArray;
+var
+  wid, hei, x, y: integer;
+begin
+  SetLength(result, self.height, self.width);
+
+  wid := (self.width -1);
+  hei := (self.height -1);
+
+  for y := 0 to hei do
+    for x := 0 to wid do
+      result[y][x] := BGRToRGB(self.FData[y * w + x]);
+end;
+
+procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntegerArray);
+var
+  x, y, wid, hei: integer;
+begin
+  if (length(matrix) = 0) then
+    raise exception.CreateFmt('Matrix with length 0 has been passed to TMufasaBitmap.DrawMatrix', []);
+
+  self.SetSize(length(matrix[0]), length(matrix));
+
+  wid := (self.width -1);
+  hei := (self.height -1);
+
+  for y := 0 to hei do
+    for x := 0 to wid do
+      self.FData[y * w + x] := RGBToBGR(matrix[y][x]);
 end;
 
 function TMufasaBitmap.RowPtrs: TPRGB32Array;
@@ -1006,6 +1217,18 @@ begin
                Result[y-ys][x-xs].H, Result[y-ys][x-xs].S,
                Result[y-ys][x-xs].L);
     end;
+end;
+
+function TMufasaBitmap.GetColors: TIntegerArray;
+var
+  size, i: integer;
+begin
+  size := (self.height * self.width);
+  SetLength(result, size);
+  dec(size);
+
+  for i := 0 to size do
+    result[i] := BGRToRGB(self.FData[i]);
 end;
 
 procedure TMufasaBitmap.SetTransparentColor(Col: TColor);
@@ -1597,6 +1820,34 @@ begin
     w := AWidth;
     h := AHeight;
   end;
+end;
+
+procedure TMufasaBitmap.ResizeEx(method: TBmpResizeMethod; NewWidth, NewHeight: integer);
+var
+  Matrix: T2DIntegerArray;
+begin
+  if (Self.FExternData) then
+    raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
+
+  case (method) of
+    RM_Nearest: Self.StretchResize(NewWidth, NewHeight);
+    RM_Bilinear: begin
+                   Matrix := Self.ToMatrix();
+                   ResizeBilinearMatrix(Matrix, NewWidth, NewHeight);
+                   Self.DrawMatrix(Matrix);
+                   SetLength(Matrix, 0);
+                 end;
+  end;
+end;
+
+procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
+var
+  Matrix: T2DIntegerArray;
+begin
+  Matrix := Self.ToMatrix();
+  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, InvertIt, Method, C);
+  Self.DrawMatrix(Matrix);
+  SetLength(Matrix, 0);
 end;
 
 procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);

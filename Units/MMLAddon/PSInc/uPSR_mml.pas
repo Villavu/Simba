@@ -143,6 +143,7 @@ begin
     RegisterMethod(@TMufasaBitmap.Invert,'Invert');
     RegisterMethod(@TMufasaBitmap.Posterize,'Posterize');
     RegisterMethod(@TMufasaBitmap.Copy, 'Copy');
+    RegisterMethod(@TMufasaBitmap.Crop, 'Crop');
     RegisterMethod(@TMufasaBitmap.ToString,'ToString');
     RegisterMethod(@TMufasaBitmap.CreateTMask,'CreateTMask');
     RegisterPropertyHelper(@MBmp_TransColorSet_r,nil,'TransparentColorSet');
