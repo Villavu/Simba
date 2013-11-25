@@ -119,9 +119,7 @@ begin
     ext.Settings := TMMLSettingsSandbox.Create(SimbaSettings.MMLSettings);
     ext.Settings.Prefix := format('Extensions/Extension%d/Settings/', [Extensions.Count - 1]);
 
-    ext.Enabled := Enabled;
-
-    if ((Lowercase(ExtractFileName(Filename)) = 'extension.sex') and (not ext.Settings.IsDirectory(''))) then
+    if (Enabled) or ((Lowercase(ExtractFileName(Filename)) = 'extension.sex') and (not ext.Settings.IsDirectory(''))) then
       ext.Enabled := True;
 
     ext.OnChange := FOnChange;
