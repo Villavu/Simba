@@ -1145,7 +1145,7 @@ begin
   Self.DrawTPA(TPA,Color);
 end;
 
-//TODO - Best method would be using a mask to ignore the alpha, ie. (FDdata[c] and and $FFFFFF00).
+//TODO - Best method would be using a mask to ignore the alpha, ie. (FDdata[c] and $FFFFFF00).
 function TMufasaBitmap.FindColors(var Points: TPointArray; const Color: integer): boolean;
 var
   x, y, i, c,  wid, hei: integer;
