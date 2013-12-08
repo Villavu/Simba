@@ -1145,29 +1145,39 @@ begin
   Self.DrawTPA(TPA,Color);
 end;
 
-function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): boolean;
+//TODO - Best method would be using a mask to ignore the alpha, ie. (FDdata[c] and $FFFFFF00).
+function TMufasaBitmap.FindColors(var Points: TPointArray; const Color: integer): boolean;
 var
-  x, y, i, bmpW, bmpH: integer;
+  x, y, i, c,  wid, hei: integer;
+  SearchColor: TRGB32;
 begin
-  bmpW := width;
-  bmpH := height;
+  SearchColor := RGBToBGR(color);
+
+  wid := Self.Width;
+  hei := Self.Height;
+
+  SetLength(points, wid*hei);
+
+  dec(wid);
+  dec(hei);
 
   i := 0;
+  for y := 0 to hei do
+    for x := 0 to wid do
+    begin
+       c := (y * w + x);
+       SearchColor.a := Self.FData[c].a;
 
-  SetLength(points, bmpW * bmpH);
+       if (LongWord(Self.FData[c]) = LongWord(SearchColor)) then
+       begin
+         Points[i].x := x;
+         Points[i].y := y;
+         inc(i);
+       end;
+    end;
 
-  for x := 0 to (bmpW - 1) do
-    for y := 0 to (bmpH - 1) do
-      if (fastGetPixel(x, y) = color) then
-      begin
-        points[i].x := x;
-        points[i].y := y;
-
-        inc(i);
-      end;
-
-  setLength(points, i);
-  result := length(points) > 0;
+  SetLength(Points, i);
+  Result := (Length(Points) > 0);
 end;
 
 function TMufasaBitmap.FastGetPixel(x, y: integer): TColor;
