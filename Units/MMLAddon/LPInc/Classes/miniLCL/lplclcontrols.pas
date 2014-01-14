@@ -634,6 +634,24 @@ begin
   PControl(Params^[0])^.Width := PInteger(Params^[1])^;
 end;
 
+// Read Hint
+procedure TControl_Hint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PString(Result)^ := PControl(Params^[0])^.Hint;
+end;
+
+// Write Hint
+procedure TControl_Hint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Hint := PString(Params^[1])^;
+end;
+
+// Procedure ShowHint();
+procedure TControl_ShowHint(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.ShowHint := true;
+end;
+
 //Read: property Parent: TWinControl;
 procedure TControl_Parent_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -741,6 +759,8 @@ begin
     addClassVar('TControl', 'Height', 'Integer', @TControl_Height_Read, @TControl_Height_Write);
     addClassVar('TControl', 'Top', 'Integer', @TControl_Top_Read, @TControl_Top_Write);
     addClassVar('TControl', 'Width', 'Integer', @TControl_Width_Read, @TControl_Width_Write);
+    addGlobalFunc('procedure TControl.ShowHint();', @TControl_ShowHint);
+    addClassVar('TControl', 'Hint', 'String', @TControl_Hint_Read, @TControl_Hint_Write);
     addClassVar('TControl', 'Parent', 'TControl', @TControl_Parent_Read, @TControl_Parent_Write); //FIXME: Should be OS-Depend TControl
     addGlobalFunc('procedure TControl.Free();', @TControl_Free);
   end;
