@@ -112,3 +112,8 @@ procedure Lape_ExtractFileExt(const Params: PParamArray; const Result: Pointer);
 begin
   Pstring(Result)^ := ps_ExtractFileExt(Pstring(Params^[0])^);
 end;
+
+procedure Lape_DeleteDirectory(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_DeleteDirectory(PString(Params^[0])^);
+end;

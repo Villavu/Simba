@@ -136,3 +136,8 @@ function ps_ExtractFileExt(const FileName: string): string; extdecl;
 begin
   result := ExtractFileExt(filename);
 end;
+
+function ps_DeleteDirectory(const Dir: string): boolean; extdecl;
+begin
+  result := RemoveDirUTF8(Dir);
+end;

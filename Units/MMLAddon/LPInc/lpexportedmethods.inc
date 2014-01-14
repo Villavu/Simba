@@ -296,6 +296,7 @@ AddGlobalFunc('function RenameFile(const Oldname, NewName: string): Boolean;', @
 AddGlobalFunc('procedure WriteINI(const Section, KeyName, NewString, FileName: string);', @Lape_WriteINI);
 AddGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): string', @Lape_ReadINI);
 AddGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @Lape_DeleteINI);
+AddGlobalFunc('function DeleteDirectory(const Dir: String): Boolean;', @Lape_DeleteDirectory);
 
 { Web }
 SetCurrSection('Web');
@@ -400,6 +401,7 @@ AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_N
 AddGlobalFunc('function StringMatch(checkCompare, goalCompare: string): extended;', @Lape_StringMatch);
 AddGlobalFunc('function MultiBetween(str, s1, s2: string): TStringArray;', @Lape_MultiBetween);
 AddGlobalFunc('function IsArrInStr(strArr: TStringArray; s: string): boolean;', @Lape_IsArrInStr);
+AddGlobalFunc('function PosMulti(const SubStr: String; Text: string): TIntegerArray;', @Lape_PosMulti);
 
 { TPA }
 SetCurrSection('TPA');
