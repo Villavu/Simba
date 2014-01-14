@@ -271,7 +271,6 @@ begin
   end;
 end;
 
-
 procedure RegisterLCLExtCtrls(Compiler: TLapeCompiler);
 begin
    Register_TCustomTimer(Compiler);
