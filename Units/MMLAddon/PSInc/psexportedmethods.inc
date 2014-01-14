@@ -173,6 +173,7 @@ AddFunction(@ps_WriteINI,'procedure WriteINI(const Section, KeyName, NewString, 
 AddFunction(@ps_ReadINI,'function ReadINI(const Section, KeyName, FileName: string): string;');
 AddFunction(@ps_DeleteINI,'procedure DeleteINI(const Section, KeyName, FileName: string);');
 AddFunction(@ps_ExtractFileExt,'function ExtractFileExt(const FileName: string): string;');
+AddFunction(@ps_DeleteDirectory, 'function DeleteDirectory(const Dir: String): Boolean;');
 
 {other}
 SetCurrSection('Other');
@@ -199,7 +200,7 @@ AddFunction(@ps_ConvertTime,'procedure ConvertTime(Time: integer; var h, m, s: i
 AddFunction(@ps_ConvertTime64,'procedure ConvertTime64(time: int64; var y, m, w, d, h, min, s: integer);');
 AddFunction(@ps_HakunaMatata,'procedure HakunaMatata;');
 AddFunction(@ps_Simba,'procedure Simba;');
-AddFunction(@ps_PlaySound,'procedure PlaySound( Sound : string);');
+AddFunction(@ps_PlaySound,'procedure PlaySound(Sound : string);');
 AddFunction(@ps_StopSound,'procedure StopSound;');
 {$IFNDEF MML_EXPORT_THREADSAFE}
 AddFunction(@ps_DisplayDebugImgWindow,'procedure DisplayDebugImgWindow(w, h: integer);');
@@ -259,8 +260,9 @@ AddFunction(@ps_padR,'function Padr(s: String; i: longInt): String;');
 AddFunction(@ps_ExecRegExpr,'function ExecRegExpr( const RegExpr, InputStr : String) : boolean;');
 AddFunction(@ps_SplitRegExpr,'procedure SplitRegExpr( const RegExpr, InputStr : String; Pieces : TStringList);');
 AddFunction(@ps_ReplaceRegExpr,'function ReplaceRegExpr( const RegExpr, InputStr, ReplaceStr : String; UseSubstitution : boolean) : String;');
-AddFunction(@ps_posex, 'function PosEx(needle, haystack: String; offset: integer): integer;');
+AddFunction(@ps_PosEx, 'function PosEx(needle, haystack: String; offset: integer): integer;');
 AddFunction(@ps_IsArrInStr, 'function IsArrInStr(strArr: TStringArray; s: string): boolean;');
+AddFunction(@ps_PosMulti, 'function PosMulti(const SubStr: String; Text: string): TIntegerArray;');
 
 {crypto}
 SetCurrSection('Crypto');
@@ -378,7 +380,7 @@ AddFunction(@ps_GetMousePos, 'procedure GetMousePos(var x, y: integer);');
 AddFunction(@ps_HoldMouse, 'procedure HoldMouse(x, y: integer; clickType: integer);');
 AddFunction(@ps_ReleaseMouse, 'procedure ReleaseMouse(x, y: integer; clickType: integer);');
 AddFunction(@ps_ClickMouse, 'procedure ClickMouse(x, y: integer; clickType: integer);');
-AddFunction(@ps_IsMouseButtonDown,'function IsMouseButtonDown( button : integer) : boolean;');
+AddFunction(@ps_IsMouseButtonDown,'function IsMouseButtonDown(button : integer) : boolean;');
 {$ENDIF}
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
