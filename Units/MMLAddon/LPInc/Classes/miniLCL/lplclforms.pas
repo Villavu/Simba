@@ -479,6 +479,16 @@ begin
   Pinteger(Result)^ := PCustomForm(Params^[0])^.RestoredHeight;
 end;
 
+procedure TCustomForm_Write_BorderStyle(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.BorderStyle := PFormBorderStyle(Params^[1])^;
+end;
+
+procedure TCustomForm_Read_BorderStyle(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PFormBorderStyle(Result)^ := PCustomForm(Params^[0])^.BorderStyle;
+end;
+
 //procedure Free();
 procedure TCustomForm_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -523,6 +533,7 @@ begin
     addGlobalFunc('procedure TCustomForm.RemoveHandlerClose(OnCloseHandler: TCloseEvent);', @TCustomForm_RemoveHandlerClose);
     addGlobalFunc('procedure TCustomForm.AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean);', @TCustomForm_AddHandlerCreate);
     addGlobalFunc('procedure TCustomForm.RemoveHandlerCreate(OnCreateHandler: TNotifyEvent);', @TCustomForm_RemoveHandlerCreate);
+    addClassVar('TCustomForm', 'BorderStyle', 'TFormBorderStyle', @TCustomForm_Read_BorderStyle, @TCustomForm_Write_BorderStyle);
     addClassVar('TCustomForm', 'Active', 'Boolean', @TCustomForm_Active_Read);
     addClassVar('TCustomForm', 'ActiveControl', 'TWinControl', @TCustomForm_ActiveControl_Read, @TCustomForm_ActiveControl_Write);
     addClassVar('TCustomForm', 'ActiveDefaultControl', 'TControl', @TCustomForm_ActiveDefaultControl_Read, @TCustomForm_ActiveDefaultControl_Write);

@@ -260,6 +260,26 @@ begin
   PImage(Params^[0])^.Free();
 end;
 
+procedure TImage_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PImage(Params^[0])^.OnMouseEnter;
+end;
+
+procedure TImage_OnMouseEnter_Write(const Params: PParamArray); lape_extdecl
+begin
+  PImage(Params^[0])^.OnMouseEnter := PNotifyEvent(Params^[1])^;
+end;
+
+procedure TImage_OnMouseLeave_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PImage(Params^[0])^.OnMouseLeave;
+end;
+
+procedure TImage_OnMouseLeave_Write(const Params: PParamArray); lape_extdecl
+begin
+  PImage(Params^[0])^.OnMouseLeave := PNotifyEvent(Params^[1])^;
+end;
+
 procedure Register_TImage(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -268,6 +288,8 @@ begin
 
     addGlobalFunc('procedure TImage.Init(AOwner: TComponent);', @TImage_Init);
     addGlobalFunc('procedure TImage.Free();', @TImage_Free);
+    addClassVar('TImage', 'OnMouseEnter', 'TNotifyEvent', @TImage_OnMouseEnter_Read, @TImage_OnMouseEnter_Write);
+    addClassVar('TImage', 'OnMouseLeave', 'TNotifyEvent', @TImage_OnMouseLeave_Read, @TImage_OnMouseLeave_Write);
   end;
 end;
 

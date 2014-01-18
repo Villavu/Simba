@@ -22,6 +22,7 @@ uses
   lplclcontrols,
   lplclstdctrls,
   lplclextctrls,
+  lplclcomctrls,
 
   lpTMDTM, lpTMDTMS,
 
@@ -53,6 +54,7 @@ begin
   RegisterLCLForms(Compiler);
   RegisterLCLStdCtrls(Compiler);
   RegisterLCLExtCtrls(Compiler);
+  RegisterLCLComCtrls(Compiler);
 end;
 
 procedure RegisterMMLClasses(Compiler: TLapeCompiler);
