@@ -98,3 +98,7 @@ begin
   PBoolean(Result)^ := ps_IsArrInStr(PStringArray(Params^[0])^, PString(Params^[1])^);
 end;
 
+procedure Lape_PosMulti(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PIntegerArray(Result)^ := ps_PosMulti(PString(Params^[0])^, PString(Params^[1])^);
+end;

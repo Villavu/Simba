@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="55">
+    <Units Count="56">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -343,10 +343,15 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="lpTMufasaBitmap"/>
       </Unit54>
+      <Unit55>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclcomctrls.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="lplclcomctrls"/>
+      </Unit55>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="9"/>
+    <Version Value="11"/>
     <Target>
       <Filename Value="../../Simba"/>
     </Target>
@@ -373,10 +378,13 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="1">
+    <Exceptions Count="2">
       <Item1>
         <Name Value="ESyntaxError"/>
       </Item1>
+      <Item2>
+        <Name Value="lpException"/>
+      </Item2>
     </Exceptions>
   </Debugging>
 </CONFIG>

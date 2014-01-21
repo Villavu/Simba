@@ -414,7 +414,6 @@ begin
   end;
 end;
 
-
 function TMFiles.DeleteFile(Filename: string): Boolean;
 var
   Continue : Boolean;
