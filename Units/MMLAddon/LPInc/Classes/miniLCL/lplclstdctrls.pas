@@ -1616,7 +1616,6 @@ begin
   end;
 end;
 
-
 //constructor Create(TheOwner: TComponent);
 procedure TCheckBox_Init(const Params: PParamArray); lape_extdecl
 begin
