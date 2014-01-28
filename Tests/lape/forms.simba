@@ -1,0 +1,123 @@
+program new;
+
+const
+  PAGE_DIALOGS = 0;
+
+var
+  frm: TForm;
+  btnColorPicker, btnOpenDialog: TButton;
+  tabControl: TPageControl;
+  tabs: array [0..1] of TTabSheet;
+  colorDialog: TColorDialog;
+  openDialog: TOpenDialog;
+
+procedure onClick(sender: TObject); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
+var
+  i: integer;
+begin
+  case sender of
+    btnColorPicker:
+      with colorDialog do
+      begin
+        init(frm);
+        execute();
+
+        client.writeln('Color picked: ' +toStr(getColor()));
+        client.writeln('Custom Colors:');
+
+        for i := 0 to (getCustomColors().getCount() - 1) do
+          client.writeln(getCustomColors().getStrings(i));
+
+        free();
+      end;
+
+    btnOpenDialog:
+      with openDialog do
+      begin
+        init(frm);
+        execute();
+        client.writeln('File path picked: '+getFileName());
+        free();
+      end;
+  end;
+end;
+
+procedure init(); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
+var
+  i: integer;
+  tabCaptions: TStringArray = ['Dialogs', 'Other'];
+begin
+  frm.init(nil);
+
+  with frm do
+  begin
+    setWidth(500);
+    setHeight(500);
+    setPosition(poScreenCenter);
+    setCaption('Lape Form - Test');
+  end;
+
+  tabControl.init(frm);
+
+  with tabControl do
+  begin
+    setParent(frm);
+    setBounds(0, 0, 200, 200);
+
+    for i := 0 to high(tabs) do
+    begin
+      tabs[i] := addTabSheet();
+      tabs[i].setCaption(tabCaptions[i]);
+    end;
+  end;
+
+  btnColorPicker.init(frm);
+
+  with btnColorPicker do
+  begin
+    setParent(tabs[PAGE_DIALOGS]);
+    setLeft(10);
+    setTop(10);
+    setCaption('Color picker');
+    setOnClick(onClick);
+  end;
+
+  btnOpenDialog.init(frm);
+
+  with btnOpenDialog do
+  begin
+    setParent(tabs[PAGE_DIALOGS]);
+    setLeft(10);
+    setTop(40);
+    setCaption('File dialog');
+    setOnClick(onClick);
+  end;
+
+  client.writeln('Showing form...');
+  frm.showModal();
+end;
+
+procedure free(); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
+begin
+  if (frm = nil) then
+    exit();
+
+  client.writeln('Freeing form...');
+  frm.free();
+end;
+
+procedure showForm();
+begin
+  try
+    sync(init);
+  except
+    writeln('ERROR: Failed to initialize form');
+  finally
+    sync(free);
+  end;
+end;
+
+begin
+  clearDebug();
+  showForm();
+end.
