@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="56">
+    <Units Count="57">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -348,6 +348,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="lplclcomctrls"/>
       </Unit55>
+      <Unit56>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplcldialogs.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="lplcldialogs"/>
+      </Unit56>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
