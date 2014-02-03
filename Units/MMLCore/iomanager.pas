@@ -218,7 +218,8 @@ interface
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
         function GetKeyCode(C : char) : integer; override;
-
+        function GetHandle(): PtrUInt; override;    
+        
       private
         client: TEIOS_Client;
         target: pointer;
