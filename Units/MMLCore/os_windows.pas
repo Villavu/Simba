@@ -78,6 +78,7 @@ interface
         function GetKeyCode(c : char) : integer;override;
 
         function GetNativeWindow: TNativeWindow;
+        function GetHandle(): PtrUInt; override;
       private
         handle: Hwnd;
         dc: HDC;
@@ -240,6 +241,11 @@ implementation
   function TWindow.GetNativeWindow: TNativeWindow;
   begin
     result := handle;
+  end;
+
+  function TWindow.GetHandle(): PtrUInt;
+  begin
+    Result := PtrUInt(GetNativeWindow());
   end;
 
   function TWindow.TargetValid: boolean;

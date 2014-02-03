@@ -81,6 +81,7 @@ interface
         function GetKeyCode(c : char) : integer;override;
 
         function GetNativeWindow: TNativeWindow;
+        function GetHandle(): PtrUInt;
       private
         { display is the connection to the X server }
         display: PDisplay;
@@ -278,6 +279,11 @@ implementation
   function TWindow.GetNativeWindow: TNativeWindow;
   begin
     result := self.window;
+  end;
+
+  function TWindow.GetHandle(): PtrUInt;
+  begin
+    Result := PtrUInt(GetNativeWindow());
   end;
 
   procedure TWindow.GetTargetDimensions(out w, h: integer);
