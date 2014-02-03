@@ -172,6 +172,11 @@ begin
   Pinteger(Result)^ := PTarget(Params^[0])^.GetKeyCode(Pchar(Params^[1])^);
 end;
 
+procedure TTarget_GetHandle(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPtrUInt(Result)^ := PTarget(Params^[0])^.GetHandle();
+end;
+
 //constructor Create();
 procedure TTarget_Init(const Params: PParamArray); lape_extdecl
 begin
@@ -217,6 +222,7 @@ begin
     addGlobalFunc('procedure TTarget.ReleaseKey(key: integer);', @TTarget_ReleaseKey);
     addGlobalFunc('function TTarget.IsKeyHeld(key: integer): boolean;', @TTarget_IsKeyHeld);
     addGlobalFunc('function TTarget.GetKeyCode(C : char): integer;', @TTarget_GetKeyCode);
+    addGlobalFunc('function TTarget.GetHandle(): PtrUInt;', @TTarget_GetHandle);
     addGlobalFunc('procedure TTarget.Init();', @TTarget_Init);
     addGlobalFunc('procedure TTarget.Free();', @TTarget_Free);
   end;

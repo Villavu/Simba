@@ -74,6 +74,8 @@ interface
         procedure ReleaseKey(key: integer); virtual;
         function IsKeyHeld(key: integer): boolean; virtual;
         function GetKeyCode(C : char) : integer; virtual;
+
+        function GetHandle(): PtrUInt; virtual;
     end;
    
     { Implements a target that is a raw pixel array, e.g. stuff from a bitmap or a frozen state.
@@ -884,7 +886,13 @@ end;
 
 function TTarget.GetKeyCode(C: char): integer;
 begin
-  Exception.CreateFMT('GetKeyCode - char (%s) to key is not available for this target.',[c]);
+  raise Exception.CreateFMT('GetKeyCode - char (%s) to key is not available for this target.',[c]);
+end;
+
+function TTarget.GetHandle(): PtrUInt;
+begin
+  Result := 0;
+  raise Exception.Create('GetHandle not available for this target');
 end;
 
 //***implementation*** TEIOS_Target
@@ -1115,6 +1123,11 @@ begin
     result:= client.GetKeyCode(target,C)
   else
     result:= inherited GetKeyCode(C);
+end;
+
+function TEIOS_Target.GetHandle(): PtrUInt;
+begin
+  Result := PtrUInt(Target);
 end;
 
 //***implementation*** TRawTarget

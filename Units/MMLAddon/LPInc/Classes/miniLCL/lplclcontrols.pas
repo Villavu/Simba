@@ -1630,12 +1630,14 @@ procedure RegisterLCLControls(Compiler: TLapeCompiler);
 begin
   with compiler do
    begin
-     AddGlobalType('(ssShift, ssAlt, ssCtrl,ssLeft, ssRight, ssMiddle, ssDouble,ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum,ssScroll,ssTriple,ssQuad,ssExtra1,ssExtra2)','TShiftState');
+     addGlobalType('(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble, ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum, ssScroll, ssTriple, ssQuad, ssExtra1, ssExtra2)', 'TShiftStateEnum');
+     addGlobalType('set of TShiftStateEnum', 'TShiftState');
+
      AddGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState)','TKeyEvent');
      AddGlobalType('procedure(Sender: TObject; var Key: char)','TKeyPressEvent');
      AddGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)','TMouseButton');
      AddGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer)','TMouseEvent');
-     AddGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)','TMouseMoveEvent');
+     addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)', 'TMouseMoveEvent');
      AddGlobalType('(sbHorizontal, sbVertical)','TScrollBarKind');
    end;
   Register_TControl(Compiler);
