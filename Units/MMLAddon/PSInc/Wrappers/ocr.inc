@@ -68,6 +68,11 @@ begin
   result := CurrThread.Client.MOCR.Fonts.FreeFont(FontName);
 end;
 
+function ps_IsFontLoaded(const FontName: string): boolean; extdecl;
+begin
+  result := CurrThread.Client.MOCR.Fonts.IsFontLoaded(FontName);
+end;
+
 procedure ps_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);
 begin
   CurrThread.Client.MOCR.FilterUpTextByCharacteristics(bmp);

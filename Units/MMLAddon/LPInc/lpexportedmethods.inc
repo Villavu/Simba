@@ -366,6 +366,7 @@ AddGlobalFunc('procedure rs_ResetUpTextFilter;', @Lape_ResetUpTextFilter);
 AddGlobalFunc('function LoadSystemFont(const SysFont: TFont; const FontName: string): boolean', @Lape_LoadSystemFont);
 AddGlobalFunc('function LoadFont(const FontName: string; shadow: boolean): boolean', @Lape_LoadFont);
 AddGlobalFunc('function FreeFont(const FontName: string): boolean', @Lape_FreeFont);
+AddGlobalFunc('function IsFontLoaded(const FontName: string): boolean;', @Lape_IsFontLoaded);
 AddGlobalFunc('procedure ocr_FilterUpTextByCharacteristics(bmp: TMufasaBitmap);', @Lape_FilterUpTextByCharacteristics);
 
 { Settings }
