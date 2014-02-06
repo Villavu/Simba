@@ -2,14 +2,16 @@ program new;
 
 const
   PAGE_DIALOGS = 0;
+  PAGE_IMAGES = 1;
 
 var
   frm: TForm;
   btnColorPicker, btnOpenDialog: TButton;
   tabControl: TPageControl;
-  tabs: array [0..1] of TTabSheet;
+  tabs: array [0..2] of TTabSheet;
   colorDialog: TColorDialog;
   openDialog: TOpenDialog;
+  img, imgText: TImage;
 
 procedure onClick(sender: TObject); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
 var
@@ -45,7 +47,8 @@ end;
 procedure init(); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
 var
   i: integer;
-  tabCaptions: TStringArray = ['Dialogs', 'Other'];
+  tabCaptions: TStringArray = ['Dialogs', 'Images', 'Other'];
+  tpa: TPointArray;
 begin
   frm.init(nil);
 
@@ -62,7 +65,7 @@ begin
   with tabControl do
   begin
     setParent(frm);
-    setBounds(0, 0, 200, 200);
+    setBounds(0, 0, 400, 400);
 
     for i := 0 to high(tabs) do
     begin
@@ -91,6 +94,35 @@ begin
     setTop(40);
     setCaption('File dialog');
     setOnClick(onClick);
+  end;
+
+  img.init(frm);
+
+  with img do
+  begin
+    setParent(tabs[PAGE_IMAGES]);
+    setBounds(20, 20, 50, 50);
+    getCanvas().rectangle(0, 0, 50, 50);
+    getCanvas().setPixel(20, 20, 255);
+
+    setLength(tpa, 2000);
+
+    for i := 0 to high(tpa) do
+      tpa[i] := point(randomRange(1, 49), randomRange(1, 49));
+
+    getCanvas().setPixels(tpa, 255);
+  end;
+
+  imgText.init(frm);
+
+  with imgText do
+  begin
+    setParent(tabs[PAGE_IMAGES]);
+    setBounds(100, 100, 200, 120);
+    getCanvas().rectangle(0, 0, 200, 120);
+    getCanvas().getFont().setSize(60);
+    getCanvas().getFont().setQuality(fqCleartypeNatural);
+    getCanvas().textOut(5, 1, 'Hello');
   end;
 
   client.writeln('Showing form...');
