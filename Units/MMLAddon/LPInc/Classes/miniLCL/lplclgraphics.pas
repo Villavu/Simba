@@ -17,6 +17,7 @@ type
   PFont = ^TFont;
   PFontPitch = ^TFontPitch;
   PCopyMode = ^TCopyMode;
+  PFontQuality = ^TFontQuality;
   //TPen
   PPen = ^TPen;
   PPenStyle = ^TPenStyle;
@@ -260,6 +261,18 @@ begin
   PFont(Params^[0])^.Style := PFontStyles(Params^[1])^;
 end;
 
+//Read Quality: TFontQuality read FQuality write SetQuality default fqDefault;
+procedure TFont_Quality_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PFontQuality(Result)^ := PFont(Params^[0])^.Quality;
+end;
+
+//Write: property Quality: TFontQuality read FQuality write SetQuality default fqDefault;
+procedure TFont_Quality_Write(const Params: PParamArray); lape_extdecl
+begin
+  PFont(Params^[0])^.Quality := PFontQuality(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TFont_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -290,6 +303,7 @@ begin
     addClassVar('TFont', 'Pitch', 'TFontPitch', @TFont_Pitch_Read, @TFont_Pitch_Write);
     addClassVar('TFont', 'Size', 'Integer', @TFont_Size_Read, @TFont_Size_Write);
     addClassVar('TFont', 'Style', 'TFontStyles', @TFont_Style_Read, @TFont_Style_Write);
+    addClassVar('TFont', 'Quality', 'TFontQuality', @TFont_Quality_Read, @TFont_Quality_Write);
     addGlobalFunc('procedure TFont.Free();', @TFont_Free);
   end;
 end;
@@ -761,6 +775,26 @@ begin
   PCanvas(Params^[0])^.OnChanging := PNotifyEvent(Params^[1])^;
 end;
 
+procedure TCanvas_Get_Pixel(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PColor(Result)^ := PCanvas(Params^[0])^.Pixels[PInteger(Params^[1])^, PInteger(Params^[2])^];
+end;
+
+procedure TCanvas_Set_Pixel(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Pixels[PInteger(Params^[1])^, PInteger(Params^[2])^] := PColor(Params^[3])^;
+end;
+
+procedure TCanvas_Set_Pixels(const Params: PParamArray); lape_extdecl
+var
+  i, l: integer;
+begin
+  l := length(PPointArray(Params^[1])^);
+
+  for i := 0 to (l - 1) do
+    PCanvas(Params^[0])^.Pixels[PPointArray(Params^[1])^[i].x, PPointArray(Params^[1])^[i].y] := PColor(Params^[2])^;
+end;
+
 //procedure Draw(X,Y: Integer; SrcGraphic: TGraphic);
 procedure TCanvas_Draw(const Params: PParamArray); lape_extdecl
 begin
@@ -820,6 +854,9 @@ begin
     addGlobalFunc('function TCanvas.TextHeight( Text: string): Integer;', @TCanvas_TextHeight);
     addGlobalFunc('function TCanvas.TextWidth( Text: string): Integer;', @TCanvas_TextWidth);
     addGlobalFunc('function TCanvas.HandleAllocated(): boolean;', @TCanvas_HandleAllocated);
+    addGlobalFunc('function TCanvas.GetPixel(x, y: integer): TColor', @TCanvas_Set_Pixel);
+    addGlobalFunc('procedure TCanvas.SetPixel(x, y: integer; colour: TColor);', @TCanvas_Set_Pixel);
+    addGlobalFunc('procedure TCanvas.SetPixels(tpa: TPointArray; colour: TColor);', @TCanvas_Set_Pixels);
     addClassVar('TCanvas', 'AutoRedraw', 'Boolean', @TCanvas_AutoRedraw_Read, @TCanvas_AutoRedraw_Write);
     addClassVar('TCanvas', 'Brush', 'TBrush', @TCanvas_Brush_Read, @TCanvas_Brush_Write);
     addClassVar('TCanvas', 'CopyMode', 'TCopyMode', @TCanvas_CopyMode_Read, @TCanvas_CopyMode_Write);
@@ -1316,7 +1353,8 @@ end;
      begin
        AddGlobalType('record Left,Top,Right,Bottom : Longint;end;','TRect');
        AddGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)','TFontStyles');
-   //    AddGlobalType('set of TFontStyle','TFontStyles');
+       AddGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
+      // AddGlobalType('set of TFontStyle','TFontStyles');
        AddGlobalType('(fpDefault, fpVariable, fpFixed)','TFontPitch');
        AddGlobalType('integer','TCopyMode');
        AddGlobalType('(psSolid, psDash, psDot, psDashDot, psDashDotDot, psinsideFrame, psPattern,psClear)','TPenStyle');
