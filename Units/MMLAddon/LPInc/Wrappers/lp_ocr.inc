@@ -63,6 +63,11 @@ begin
   Pboolean(Result)^ := ps_FreeFont(Pstring(Params^[0])^);
 end;
 
+procedure Lape_IsFontLoaded(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_IsFontLoaded(Pstring(Params^[0])^);
+end;
+
 procedure Lape_FilterUpTextByCharacteristics(const Params: PParamArray); lape_extdecl
 begin
   ps_FilterUpTextByCharacteristics(TMufasaBitmap(Params^[0]^));

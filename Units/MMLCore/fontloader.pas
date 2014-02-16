@@ -62,6 +62,7 @@ type
     function FreeFont(const Name: String): Boolean;
     function LoadFont(const Name: String; Shadow: Boolean): boolean;
     function LoadSystemFont(const SysFont : TFont; const FontName : string) : boolean;
+    function IsFontLoaded(const Name: String): boolean;
     function Copy(Owner : TObject): TMFonts;
     function Count : integer;
     property Path : string read GetPath write SetPath;
@@ -318,6 +319,17 @@ begin
   bmp.free;
   MBmp.free;
 
+end;
+
+function TMFonts.IsFontLoaded(const Name: String): Boolean;
+var
+  i: integer;
+begin
+  result := false;
+
+  for i := 0 to (Fonts.Count - 1) do
+    if (lowercase(Name) = lowercase(TMFont(Fonts.Items[i]).Name)) then
+      exit(true);
 end;
 
 function TMFonts.Copy(Owner : TObject): TMFonts;
