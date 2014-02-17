@@ -93,10 +93,10 @@ begin
   PInteger(Result)^ := ps_MessageBox(Pstring(Params^[0])^, Pstring(Params^[1])^, PLongInt(Params^[2])^);
 end;
 
-//procedure Lape_MessageDlg(const Params: PParamArray; const Result: Pointer); lape_extdecl
-//begin
-//  Pinteger(Result)^ := ps_MessageDlg(Pstring(Params^[0])^, Pstring(Params^[1])^, PMsgDlgType(Params^[2])^, PMsgDlgButtons(Params^[3])^);
-//end;
+procedure Lape_MessageDlg(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := ps_MessageDlg(Pstring(Params^[0])^, Pstring(Params^[1])^, PMsgDlgType(Params^[2])^, PMsgDlgButtons(Params^[3])^);
+end;
 
 procedure Lape_InputQuery(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin

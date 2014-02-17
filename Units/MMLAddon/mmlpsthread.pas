@@ -1281,6 +1281,8 @@ type
   PMDTM = ^TMDTM;
   PMDTMPoint = ^TMDTMPoint;
   PSDTM = ^TSDTM;
+  PMsgDlgType = ^TMsgDlgType;
+  PMsgDlgButtons = ^TMsgDlgButtons;
 
 threadvar
   WriteLnStr: string;
