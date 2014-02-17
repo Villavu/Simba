@@ -104,3 +104,10 @@ procedure Lape_IsTargetValid(const Params: PParamArray; const Result: Pointer); 
 begin
   Pboolean(Result)^ := ps_IsTargetValid();
 end;
+
+procedure Lape_GetNativeWindow(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := ps_GetNativeWindow();
+end;
+
+

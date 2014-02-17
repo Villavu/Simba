@@ -144,6 +144,7 @@ AddFunction(@ps_FreeTarget,'procedure FreeTarget(idx: integer);');
 AddFunction(@ps_SetDesktopAsClient,'procedure SetDesktopAsClient;');
 AddFunction(@ps_ActivateClient, 'procedure ActivateClient;');
 AddFunction(@ps_IsTargetValid, 'function IsTargetValid: boolean;');
+AddFunction(@ps_GetNativeWindow, 'function GetNativeWindow: integer;');
 {$ENDIF}
 
 {files}
