@@ -540,6 +540,7 @@ AddGlobalFunc('function Freeze: boolean', @Lape_Freeze);
 AddGlobalFunc('function Unfreeze: boolean', @Lape_Unfreeze);
 AddGlobalFunc('procedure ActivateClient;', @Lape_ActivateClient);
 AddGlobalFunc('function IsTargetValid: boolean', @Lape_IsTargetValid);
+AddGlobalFunc('function GetNativeWindow: integer;', @Lape_GetNativeWindow);
 
 { SQLite3 }
 
