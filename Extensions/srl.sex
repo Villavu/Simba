@@ -31,41 +31,139 @@ begin
   Result := ForceDirectories(UpdaterArr[I].Folder);
 end;
 
-function SuccessPlugins(Cont: string; I: integer): boolean;
+(*
+** Adds a file extension 'bak' to all the files in path, used to we can add files that are currently loaded.
+*)
+procedure BackupFiles(path: string; files: TStringArray);
 var
-  X: integer;
-  Files: TStringArray;
-  Overwrite: boolean;
+  i, h: integer;
 begin
-  Files := GetFiles(UpdaterArr[I].Folder, {$IFDEF WIN32}'dll'{$ELSE}'so'{$ENDIF});
-  Overwrite := True;
+  h := high(files);
 
-  for X := 0 to High(Files) do
-    if (FileExists(PluginPath + Files[X])) then
-    begin
-      Overwrite := (MessageDlg('SRL Updater', 'Do you want to overwrite the plugins?', mtConfirmation, [mbNo, mbYes], 0) = mrYes);
-      Break;
+  if (h < 0) then
+    exit;
+
+  for i := 0 to h do
+  begin
+    if (fileExists(path + files[i] + '.bak')) then // previous backups?
+      deleteFile(path + files[i] + '.bak');
+
+    if (fileExists(path + files[i])) then
+      if (renameFile(path + files[i], path + files[i] + '.bak')) then
+        writeln('Plugins Updater: Renamed '+ path + files[i] +' to ' + path + files[i] + '.bak')
+      else
+        writeln('Plugins Updater: Failed to rename file ' + path + files[i]);
+  end;
+end;
+
+(*
+** Adds a file extension 'bak' to all the directorys in path, used to we can add files that are currently loaded.
+*** TO-DO replace rename hack with DeleteDirectory when added to (public) simba version.
+*)
+procedure BackupDirectorys(path: string; files: TStringArray);
+var
+  i, h, hack: integer;
+begin
+  h := high(files);
+
+  if (h < 0) then
+    exit;
+
+  for i := 0 to h do
+  begin
+    if (directoryExists(path + files[i] + '.bak')) then // previous backups?  //TO:DO: REPLACE WITH DELETE_DIRECTORY WHEN IN SIMBA!
+    begin // DIRTY FIX UNTIL DELETE DIRECTORY IS IN SIMBA!
+      hack := 0;
+
+      while (directoryExists(path + files[i] + '.bak' + toStr(hack))) do
+        inc(hack);
+
+      renameFile(path + files[i] + '.bak', path + files[i] + '.bak' + toStr(hack));
     end;
 
-  if overwrite then
-  begin
-    for x := 0 to high(files) do
-      if FileExists(PluginPath + Files[X]) then
-      begin
-        if FileExists(PluginPath + Files[X] + '.bak') then
-          DeleteFile(PluginPath + Files[X] + '.bak');
-
-        if RenameFile(PluginPath + Files[X], PluginPath + Files[X] + '.bak') then
-          writeln('Renamed ' + PluginPath + Files[X] + ' to ' + PluginPath + Files[X] + '.bak')
-        else
-          writeln('Plugins Updater: failed to rename ' + PluginPath + Files[X] + ' to ' +
-              PluginPath + Files[X] + '.bak');
-      end;
+    if (directoryExists(path + files[i])) then
+      if (renameFile(path + files[i], path + files[i] + '.bak')) then
+        writeln('Plugins Updater: Renamed '+ path + files[i] +' to ' + path + files[i] + '.bak')
+      else
+        writeln('Plugins Updater: Failed to rename directory ' + path + files[i]);
   end;
+end;
 
-  Result := UnTarEx(Cont, PluginPath, Overwrite);
-  if not Result then
-    writeln('Failed to update plugins! Restart Simba and update before starting a script.');
+(*
+** Gets file but with an array of extensions to find rather than a single one.
+*)
+function GetFilesEx(path: string; extensions: TStringArray): TStringArray;
+var
+  tmp: TStringArray;
+  i, h, l, j: integer;
+begin
+  h := high(extensions);
+
+  if (h < 0) then
+    exit;
+
+  for i := 0 to h do
+  begin
+    tmp := GetFiles(path, extensions[i]);
+    l := length(tmp);
+
+    if (l < 1) then
+      continue;
+
+    setLength(result, length(result) + l);
+
+    for j := high(tmp) downto 0 do
+      result[high(result) - j] := tmp[j];
+  end;
+end;
+
+(*
+** Moves files 'srcFiles' from 'srcPath' into 'targPath'.
+*)
+procedure MoveFiles(srcPath: string; srcFiles: TStringArray; targPath: string);
+var
+  i, h: integer;
+begin
+  h := high(srcfiles);
+
+  if (h < 0) then
+    exit;
+
+  for i := 0 to h do
+    if (RenameFile(srcPath + srcFiles[i], targPath + srcFiles[i])) then
+      writeln('Plugins Updater: Moved file '+srcFiles[i]+' into '+targPath)
+    else
+      writeln('Plugins Updater: Failed to move file '+srcPath+srcFiles[i]);
+end;
+
+function SuccessDownload(Cont: string; I: integer): boolean; // called if files are succesfully dl'd
+var
+  ExtensionPath, SavePath: string;
+  PluginFiles, ExtensionFiles, Folders: TStringArray;
+begin
+  SavePath := PluginPath + '.temp/'; // paths to save the tar.bz2 into
+  ExtensionPath := AppPath + 'Extensions\';  //dunno why Simba doesn't have this
+
+  WriteLn('Plugins Updater: Success Download entered');
+
+  // gather files
+  PluginFiles := GetFilesEx(SavePath + 'plugins/', ['dll', 'so', 'jar']);
+  ExtensionFiles := GetFilesEx(SavePath + 'extensions/', ['sex', 'sei']);
+  Folders := GetDirectories(SavePath + 'folders/');
+
+  // backup previous files (so we can keep the current running and update)
+  BackupFiles(PluginPath, PluginFiles);
+  BackupFiles(ExtensionPath, ExtensionFiles);
+  BackupDirectorys(AppPath, Folders);
+
+  // finally move our files into the target directories
+  MoveFiles(SavePath + 'plugins/', PluginFiles, PluginPath);
+  MoveFiles(SavePath + 'extensions/', ExtensionFiles, ExtensionPath);
+  MoveFiles(SavePath + 'folders/', Folders, AppPath);
+
+  Writeln('Plugins Updater: Updated plugins, restart Simba to load the new ones');
+
+  Result := true;
 end;
 
 procedure ClickRafiki(Sender: TObject);
@@ -108,17 +206,18 @@ begin
     MenuItems[1].OnClick := @ClickBugs;
     MenuItems[2].OnClick := @ClickHelp;
   end;
-  
-  Settings.GetKeyValueDef('Plugins_Visible', 'false');
-  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', PluginPath + '.temp\', True, True, Plugins)) then
-  begin
-    UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforeUpdateEx;
-    UpdaterArr[Plugins].Hooks[SUCCESS_UPDATE] := @SuccessPlugins;
-  end;
 
   if (AddUpdater('SPS', 'http://wizzup.org/static/srl/sps.tar.bz2', 'http://wizzup.org/static/srl/sps_version', IncludePath, True, False, SPS)) then
   begin
     UpdaterArr[SPS].Hooks[BEFORE_UPDATE] := @BeforeUpdate;
+  end;
+
+  Settings.SetKeyValue('Plugins_Visible', 'True');
+  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins_new.tar.bz2', 'http://wizzup.org/static/srl/plugins_new_version', PluginPath + '.temp\', True, True, Plugins)) then
+  begin
+    UpdaterArr[Plugins].MainMenu.Visible := true;
+    UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforeUpdateEx;
+    UpdaterArr[Plugins].Hooks[SUCCESS_UPDATE] := @SuccessDownload;
   end;
 end;
 
