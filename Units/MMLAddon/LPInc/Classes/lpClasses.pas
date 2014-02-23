@@ -41,10 +41,12 @@ uses
   lpTTarget,
 
   lpTIOManager_Abstract
-  {$IFDEF WINDOWS}, lpTIOManager_Windows{$ENDIF}
-  {$IFDEF LINUX}, lpTIOManager_Linux{$ENDIF}
 
-  , lpTClient;
+  {$IFDEF WINDOWS}, lpTIOManager_Windows {$ENDIF}
+  {$IFDEF LINUX}, lpTIOManager_Linux {$ENDIF}
+
+  , lpTClient,
+  lpTMMLSettingsSandbox;
 
 procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 begin
@@ -93,6 +95,8 @@ begin
 
   { MML Client }
   Register_TClient(Compiler);
+
+  Register_TMMLSettingsSandbox(Compiler);
 end;
 
 end.

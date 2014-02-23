@@ -1381,6 +1381,7 @@ begin
     RegisterMMLClasses(Compiler);
 
     addGlobalVar('TClient', @Client, 'Client').isConstant := True;
+    addGlobalVar('TMMLSettingsSandbox', @Sett, 'Settings').isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
 
