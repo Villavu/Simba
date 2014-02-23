@@ -44,11 +44,13 @@ procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
 implementation
 
 uses
-  MufasaTypes,LCLType,lplclsystem;
+  MufasaTypes,LCLType,lplclsystem, stringutil;
+
 type
   PHbitmap = ^HBitmap;
   PHPalette = ^HPalette;
-{TGraphicsObject}
+
+  {TGraphicsObject}
 //Read: property OnChanging: TNotifyEvent read OnChanging write OnChanging;
 procedure TGraphicsObject_OnChanging_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -1189,6 +1191,52 @@ begin
   PBitmap(Params^[0])^.Free();
 end;
 
+procedure TBitmap_Transparent_Write(const Params: PParamArray); lape_extdecl
+begin
+  PBitmap(Params^[0])^.Transparent := PBoolean(Params^[1])^;
+end;
+
+procedure TBitmap_Transparent_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PBitmap(Params^[0])^.Transparent;
+end;
+
+procedure TBitmap_ToString(const Params: PParamArray; const Result: Pointer); lape_extdecl
+var
+  b: TBitmap;
+  x, y, w, h: integer;
+  Addition, Data: string;
+begin
+  PBitmap(Params^[0])^.GetSize(w, h);
+  Data := '';
+
+  for x := 0 to (w - 1) do
+    for y := 0 to (h - 1) do
+    begin
+      Addition := IntToHex(PBitmap(Params^[0])^.Canvas.Pixels[x, y], 1);
+
+      while (length(Addition) < 6) do
+        Addition := '0' + Addition;
+
+      Data := (Data + Addition);
+    end;
+
+  PLPString(Result)^ := Format('%d, %d, ''', [w, h]) + Data + '''';
+end;
+
+procedure TBitmap_LoadFromString(const Params: PParamArray); lape_extdecl
+var
+  x, y, w, h: integer;
+begin
+  PBitmap(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
+
+  for x := (PInteger(Params^[1])^ - 1) downto 0 do
+    for y := (PInteger(Params^[2])^ -1) downto 0 do
+      PBitmap(Params^[0])^.Canvas.Pixels[x, y] := StrToInt('$' + Copy(PLPString(Params^[4])^, y * 6 + x * PInteger(Params^[2])^ * 6 + 1, 6));
+
+  PBitmap(Params^[0])^.Mask(PInteger(Params^[3])^);
+end;
+
 procedure Register_TBitmap(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1210,6 +1258,8 @@ begin
     addGlobalFunc('function TBitmap.ReleaseBitmapHandle(): HBITMAP;', @TBitmap_ReleaseBitmapHandle);
     addGlobalFunc('function TBitmap.ReleaseMaskHandle(): HBITMAP;', @TBitmap_ReleaseMaskHandle);
     addGlobalFunc('function TBitmap.ReleasePalette(): HPALETTE;', @TBitmap_ReleasePalette);
+    addGlobalFunc('function TBitmap.ToString(): string;', @TBitmap_ToString);
+    addGlobalFunc('procedure TBitmap.LoadFromString(w, h, TransparentColor: integer; data: string);', @TBitmap_LoadFromString);
     addClassVar('TBitmap', 'Canvas', 'TCanvas', @TBitmap_Canvas_Read);
     addGlobalFunc('function TBitmap.HandleAllocated(): boolean;', @TBitmap_HandleAllocated);
     addClassVar('TBitmap', 'BitmapHandle', 'HBITMAP', @TBitmap_BitmapHandle_Read, @TBitmap_BitmapHandle_Write);
@@ -1217,6 +1267,7 @@ begin
     addClassVar('TBitmap', 'MaskHandle', 'HBITMAP', @TBitmap_MaskHandle_Read, @TBitmap_MaskHandle_Write);
     addClassVar('TBitmap', 'TransparentColor', 'TColor', @TBitmap_TransparentColor_Read, @TBitmap_TransparentColor_Write);
     addClassVar('TBitmap', 'TransparentMode', 'TTransparentMode', @TBitmap_TransparentMode_Read, @TBitmap_TransparentMode_Write);
+    addClassVar('TBitmap', 'Transparent', 'Boolean', @TBitmap_TransparentMode_Read, @TBitmap_Transparent_Write);
     addGlobalFunc('procedure TBitmap.Free();', @TBitmap_Free);
   end;
 end;

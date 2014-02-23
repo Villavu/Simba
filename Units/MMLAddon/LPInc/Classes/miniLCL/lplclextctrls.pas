@@ -11,13 +11,14 @@ uses
 procedure RegisterLCLExtCtrls(Compiler: TLapeCompiler);
 
 implementation
-  uses MufasaTypes,CustomTimer,extctrls,forms,lplclsystem,lplclgraphics,lplclcontrols;
+  uses MufasaTypes,CustomTimer,extctrls,forms,lplclsystem,lplclgraphics,lplclcontrols,lclType;
 
   type
    PCustomTimer = ^TCustomTimer;
    PTimer = ^TTimer;
    PCustomImage = ^TCustomImage;
    PImage = ^TImage;
+   PTranslateString = ^TTranslateString;
 
    {TTimer}
 
@@ -222,11 +223,31 @@ procedure TCustomImage_OnPictureChanged_Write(const Params: PParamArray); lape_e
 begin
   PCustomImage(Params^[0])^.OnPictureChanged := PNotifyEvent(Params^[1])^;
 end;
-
+                                  //PTranslateString(Params^[1])^;
 //procedure Free();
 procedure TCustomImage_Free(const Params: PParamArray); lape_extdecl
 begin
   PCustomImage(Params^[0])^.Free();
+end;
+
+procedure TCustomImage_ShowHint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomImage(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
+end;
+
+procedure TCustomImage_ShowHint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomImage(Params^[0])^.ShowHint;
+end;
+
+procedure TCustomImage_Hint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomImage(Params^[0])^.Hint := PTranslateString(Params^[1])^;
+end;
+
+procedure TCustomImage_Hint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLPString(Result)^ := PCustomImage(Params^[0])^.Hint;
 end;
 
 procedure Register_TCustomImage(Compiler: TLapeCompiler);
@@ -244,6 +265,8 @@ begin
     addClassVar('TCustomImage', 'Transparent', 'Boolean', @TCustomImage_Transparent_Read, @TCustomImage_Transparent_Write);
     addClassVar('TCustomImage', 'Proportional', 'Boolean', @TCustomImage_Proportional_Read, @TCustomImage_Proportional_Write);
     addClassVar('TCustomImage', 'OnPictureChanged', 'TNotifyEvent', @TCustomImage_OnPictureChanged_Read, @TCustomImage_OnPictureChanged_Write);
+    addClassVar('TCustomImage', 'Hint', 'String', @TCustomImage_Hint_Read, @TCustomImage_Hint_Write);
+    addClassVar('TCustomimage', 'ShowHint', 'Boolean', @TCustomImage_ShowHint_Read, @TCustomImage_ShowHint_Write);
     addGlobalFunc('procedure TCustomImage.Free();', @TCustomImage_Free);
   end;
 end;

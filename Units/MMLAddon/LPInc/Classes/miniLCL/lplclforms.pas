@@ -16,7 +16,6 @@ type
   PCloseEvent = ^TCloseEvent;
   PPosition = ^TPosition;
 
-
 procedure RegisterLCLForms(Compiler: TLapeCompiler);
 
 implementation
@@ -25,6 +24,7 @@ implementation
  type
    PFormBorderStyle = ^TFormBorderStyle;
    PCloseQueryEvent = ^TCloseQueryEvent;
+   PFormBorderIcons = ^TBorderIcons;
 
  {TCustomForm}
  //constructor Create(AOwner: TComponent);
@@ -489,6 +489,16 @@ begin
   PFormBorderStyle(Result)^ := PCustomForm(Params^[0])^.BorderStyle;
 end;
 
+procedure TCustomForm_Write_BorderIcons(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.BorderIcons := PFormBorderIcons(Params^[1])^;
+end;
+
+procedure TCustomForm_Read_BorderIcons(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PFormBorderIcons(Result)^ := PCustomForm(Params^[0])^.BorderIcons;
+end;
+
 //procedure Free();
 procedure TCustomForm_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -534,6 +544,7 @@ begin
     addGlobalFunc('procedure TCustomForm.AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean);', @TCustomForm_AddHandlerCreate);
     addGlobalFunc('procedure TCustomForm.RemoveHandlerCreate(OnCreateHandler: TNotifyEvent);', @TCustomForm_RemoveHandlerCreate);
     addClassVar('TCustomForm', 'BorderStyle', 'TFormBorderStyle', @TCustomForm_Read_BorderStyle, @TCustomForm_Write_BorderStyle);
+    addClassVar('TCustomForm', 'BorderIcons', 'TBorderIcons', @TCustomForm_Read_BorderIcons, @TCustomForm_Write_BorderIcons);
     addClassVar('TCustomForm', 'Active', 'Boolean', @TCustomForm_Active_Read);
     addClassVar('TCustomForm', 'ActiveControl', 'TWinControl', @TCustomForm_ActiveControl_Read, @TCustomForm_ActiveControl_Write);
     addClassVar('TCustomForm', 'ActiveDefaultControl', 'TControl', @TCustomForm_ActiveDefaultControl_Read, @TCustomForm_ActiveDefaultControl_Write);
@@ -717,7 +728,6 @@ procedure TForm_OnDblClick_Write(const Params: PParamArray); lape_extdecl
 begin
   PForm(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
 end;
-
 
 //Read: property OnEnter: TNotifyEvent read OnEnter write OnEnter;
 procedure TForm_OnEnter_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
@@ -942,7 +952,9 @@ begin
       AddGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction)','TCloseEvent');
       AddGlobalType('procedure(Sender : TObject; var CanClose : boolean)','TCloseQueryEvent');
       AddGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow,bsSizeToolWin)','TFormBorderStyle');
-      AddGlobaltype('(poDesigned, poDefault, poDefaultPosOnly, poDefaultSizeOnly, poScreenCenter, poMainFormCenter, poOwnerFormCenter)', 'TPosition');
+      AddGlobalType('(poDesigned, poDefault, poDefaultPosOnly, poDefaultSizeOnly, poScreenCenter, poMainFormCenter, poOwnerFormCenter)', 'TPosition');
+      AddGlobalType('(biSystemMenu, biMinimize, biMaximize, biHelp)', 'TBorderIcon');
+      AddGlobalType('set of TBorderIcon', 'TBorderIcons');
     end;
     Register_TCustomForm(compiler);
     Register_TForm(compiler);
