@@ -6,6 +6,8 @@ const
 
 var
   frm: TForm;
+  mainMenu: TMainMenu;
+  menuHelp, subMenuHelp: TMenuItem;
   btnColorPicker, btnOpenDialog: TButton;
   tabControl: TPageControl;
   tabs: array [0..2] of TTabSheet;
@@ -44,11 +46,17 @@ begin
   end;
 end;
 
+procedure Help_OnClick(sender: TObject); native;
+begin
+  client.writeln('Click!');
+end;
+
 procedure init(); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
 var
   i: integer;
   tabCaptions: TStringArray = ['Dialogs', 'Images', 'Other'];
   tpa: TPointArray;
+  bmp: TBitmap;
 begin
   frm.init(nil);
 
@@ -59,6 +67,12 @@ begin
     setPosition(poScreenCenter);
     setCaption('Lape Form - Test');
   end;
+
+  mainMenu.init(frm);
+
+  menuHelp := mainMenu.addMenu('Help');
+  subMenuHelp := menuHelp.addMenu('What with');
+  subMenuHelp.setOnClick(Help_OnClick);
 
   tabControl.init(frm);
 
