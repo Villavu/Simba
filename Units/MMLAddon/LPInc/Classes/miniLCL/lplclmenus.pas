@@ -11,7 +11,7 @@ uses
 procedure RegisterLCLMenus(Compiler: TLapeCompiler);
 
 implementation
-   uses MufasaTypes, stdctrls, forms, lplclsystem, lplclgraphics, lplclcontrols, Menus, lclType, graphics;
+   uses MufasaTypes, forms, lplclsystem, lplclgraphics, Menus, lclType, graphics;
 
 type
   PMenuItem = ^TMenuItem;

@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="58">
+    <Units Count="59">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -358,6 +358,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="lplclmenus"/>
       </Unit57>
+      <Unit58>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/MML/lptmmlsettingssandbox.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="lpTMMLSettingsSandbox"/>
+      </Unit58>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -388,13 +393,16 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="2">
+    <Exceptions Count="3">
       <Item1>
         <Name Value="ESyntaxError"/>
       </Item1>
       <Item2>
         <Name Value="lpException"/>
       </Item2>
+      <Item3>
+        <Name Value="EDOMError"/>
+      </Item3>
     </Exceptions>
   </Debugging>
 </CONFIG>
