@@ -1281,6 +1281,8 @@ type
   PMDTM = ^TMDTM;
   PMDTMPoint = ^TMDTMPoint;
   PSDTM = ^TSDTM;
+  PMsgDlgType = ^TMsgDlgType;
+  PMsgDlgButtons = ^TMsgDlgButtons;
 
 threadvar
   WriteLnStr: string;
@@ -1377,7 +1379,9 @@ begin
 
     RegisterLCLClasses(Compiler);
     RegisterMMLClasses(Compiler);
+
     addGlobalVar('TClient', @Client, 'Client').isConstant := True;
+    addGlobalVar('TMMLSettingsSandbox', @Sett, 'Settings').isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
 

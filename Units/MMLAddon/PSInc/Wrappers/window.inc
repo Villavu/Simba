@@ -127,3 +127,8 @@ function ps_IsTargetValid: boolean; extdecl;
 begin
   result:= CurrThread.Client.IOManager.TargetValid;
 end;
+
+function ps_GetNativeWindow: integer; extdecl;
+begin
+  result := CurrThread.Client.IOManager.GetImageTarget.GetHandle();
+end;
