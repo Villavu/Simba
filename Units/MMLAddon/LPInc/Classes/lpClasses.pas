@@ -24,6 +24,7 @@ uses
   lplclextctrls,
   lplclcomctrls,
   lplcldialogs,
+  lplclmenus,
 
   lpTMDTM, lpTMDTMS,
 
@@ -40,10 +41,12 @@ uses
   lpTTarget,
 
   lpTIOManager_Abstract
-  {$IFDEF WINDOWS}, lpTIOManager_Windows{$ENDIF}
-  {$IFDEF LINUX}, lpTIOManager_Linux{$ENDIF}
 
-  , lpTClient;
+  {$IFDEF WINDOWS}, lpTIOManager_Windows {$ENDIF}
+  {$IFDEF LINUX}, lpTIOManager_Linux {$ENDIF}
+
+  , lpTClient,
+  lpTMMLSettingsSandbox;
 
 procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 begin
@@ -57,6 +60,7 @@ begin
   RegisterLCLExtCtrls(Compiler);
   RegisterLCLComCtrls(Compiler);
   RegisterLCLDialogs(Compiler);
+  RegisterLCLMenus(Compiler);
 end;
 
 procedure RegisterMMLClasses(Compiler: TLapeCompiler);
@@ -91,6 +95,8 @@ begin
 
   { MML Client }
   Register_TClient(Compiler);
+
+  Register_TMMLSettingsSandbox(Compiler);
 end;
 
 end.

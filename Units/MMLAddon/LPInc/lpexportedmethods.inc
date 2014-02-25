@@ -43,7 +43,7 @@ AddGlobalFunc('procedure Status(Status: string);', @Lape_Status);
 AddGlobalFunc('procedure Disguise(Caption: string);', @Lape_Disguise);
 AddGlobalFunc('procedure ShowMessage(msg: string);', @Lape_ShowMessage);
 AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integer', @Lape_MessageBox);
-//AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer', @Lape_MessageDlg);
+AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer', @Lape_MessageDlg);
 AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
 AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
 AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
@@ -540,6 +540,7 @@ AddGlobalFunc('function Freeze: boolean', @Lape_Freeze);
 AddGlobalFunc('function Unfreeze: boolean', @Lape_Unfreeze);
 AddGlobalFunc('procedure ActivateClient;', @Lape_ActivateClient);
 AddGlobalFunc('function IsTargetValid: boolean', @Lape_IsTargetValid);
+AddGlobalFunc('function GetNativeWindow: integer;', @Lape_GetNativeWindow);
 
 { SQLite3 }
 
