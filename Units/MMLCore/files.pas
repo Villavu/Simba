@@ -71,6 +71,7 @@ type
     // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
+  function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
   function FindFile(var Filename: string; const Dirs: array of string): boolean;
 
 implementation
@@ -96,6 +97,42 @@ begin
     until FindNext(SearchRec) <> 0;
     SysUtils.FindClose(SearchRec);
   end;
+end;
+
+function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
+var
+  FileInfo: TSearchRec;
+  CurSrcDir: String;
+  CurFilename: String;
+begin
+  if (not Empty) then
+    exit(RemoveDirUTF8(Directory));
+
+  Result := False;
+  CurSrcDir := CleanAndExpandDirectory(Directory);
+
+  if (FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile,FileInfo) = 0) then
+  begin
+    repeat
+      if (FileInfo.Name <> '.') and (FileInfo.Name <> '..') and (FileInfo.Name <> '') then
+      begin
+        CurFilename := CurSrcDir + FileInfo.Name;
+
+        if (FileInfo.Attr and faDirectory)>0 then
+        begin
+          if (not DeleteDirectory(CurFilename, False)) then
+            exit();
+        end else
+        begin
+          if (not DeleteFileUTF8(CurFilename)) then
+            exit();
+        end;
+      end;
+    until (FindNextUTF8(FileInfo) <> 0);
+  end;
+
+  FindCloseUTF8(FileInfo);
+  Result := RemoveDirUTF8(Directory); // remember to delete the directory we actually wanted to
 end;
 
 function GetDirectories(Path: string): TstringArray;
