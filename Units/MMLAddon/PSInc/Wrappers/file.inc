@@ -137,7 +137,7 @@ begin
   result := ExtractFileExt(filename);
 end;
 
-function ps_DeleteDirectory(const Dir: string): boolean; extdecl;
+function ps_DeleteDirectory(const Dir: string; const Empty: boolean): boolean; extdecl;
 begin
-  result := RemoveDirUTF8(Dir);
+  result := DeleteDirectoryEx(Dir, Empty);
 end;
