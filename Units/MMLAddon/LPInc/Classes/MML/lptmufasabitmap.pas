@@ -457,9 +457,9 @@ begin
   begin
     addClass('TMufasaBitmap');
 
-    addGlobalType('packed record B, G, R: UInt32; end;', 'TRGB24');
+    addGlobalType('packed record B, G, R: UInt8; end;', 'TRGB24');
     addGlobalType('^TRGB24', 'PRGB24');
-    addGlobalType('record B, G, R, A: UInt32; end;', 'TRGB32');
+    addGlobalType('record B, G, R, A: UInt8; end;', 'TRGB32');
     addGlobalType('^TRGB32', 'PRGB32');
     addGlobalType('array of TRGB32', 'TRGB32Array');
     addGlobalType('^TRGB32Array', 'PRGB32Array');
