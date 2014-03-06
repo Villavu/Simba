@@ -179,6 +179,7 @@ GetFiles
     function GetFiles(const Path, Ext : string) : TStringArray;
 
 Returns the files in the directory defined by *Path* with extension *Ext*.
+You can also set Ext as '*' to return all files in Path.
 
 GetDirectories
 --------------
@@ -269,3 +270,12 @@ ExtractFileExt
     function ExtractFileExt(const FileName: string): string;');   
 
 Returns the file extension from file *Filename*.
+
+DeleteDirectory
+---------------
+
+.. code-block:: pascal
+
+    function DeleteDirectory(const Dir: String; const Empty: Boolean): Boolean;   
+
+Deletes the directory *dir*, if Empty is true will delete the directorys contents else will not.

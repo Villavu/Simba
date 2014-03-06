@@ -720,5 +720,119 @@ CalculatePixelTolerance
 
 .. code-block:: pascal
 
-    function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;')
+    function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
 
+CropBitmap
+----------
+
+.. code-block:: pascal
+
+    procedure CropBitmap(const bmp: integer; const xs, ys, xe, ye: integer);
+
+Crops the bitmap, removes all points outside (xs, ys, xe, ye).
+
+.. code-block:: pascal
+
+    var 
+      bmp: integer;	
+    begin;
+      bmp := BitmapFromClient(0, 0, 50, 50);
+      CropBitmap(bmp, 10, 10, 40, 40);
+    end;
+
+GetColorsBitmap
+---------------
+
+.. code-block:: pascal
+
+    function GetColorsBitmap(const bmp: integer): TIntegerArray;
+
+Returns a TIntegerArray of all colours on the bitmap, the result will be sorted row by row.
+
+.. code-block:: pascal
+
+    var 
+      bmp, i: integer;	
+      arr: TIntegerArray;
+    begin;
+      bmp := BitmapFromClient(0, 0, 10, 10);
+      arr := GetColorsBitmap(bmp); 
+
+      for i := 0 to high(arr) do
+        writeln(intToStr(arr[i]));
+    end;
+
+BitmapToMatrix
+--------------
+
+.. code-block:: pascal
+
+    function BitmapToMatrix(const bmp: integer): T2DIntegerArray;
+
+Returns a two dimensions integer array of all the colors on the bitmap. 
+
+.. code-block:: pascal
+
+    var
+     bmp, x, y: integer;
+     matrix: T2DIntegerArray;
+    begin
+      bmp := BitmapFromClient(0, 0, 10, 10);
+      matrix := BitmapToMatrix(bmp);
+
+      for y := 0 to 10 do
+        for x := 0 to 10 do
+          writeln(matrix[y][x]);
+    end;  
+
+DrawMatrixBitmap
+----------------
+
+.. code-block:: pascal
+
+    procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);
+
+Draws a matrix onto the bitmap.
+
+.. code-block:: pascal
+
+    DrawMatrixBitmap(bmp, matrix); 
+
+ThresholdAdaptiveBitmap
+-----------------------
+
+.. code-block:: pascal
+
+    procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
+
+Applys a ThresholdAdaptive filter onto the bitmap. Vaild TBmpThreshMethods are (TM_Mean, TM_MinMax);
+
+.. code-block:: pascal
+
+    ThresholdAdaptiveBitmap(bmp, 0, 255, false, TM_Mean, 0);
+
+ThresholdAdaptiveMatrix
+-----------------------
+
+.. code-block:: pascal
+
+    procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
+
+Applys a ThresholdAdaptive filter onto a image matrix (created by BitmapToMatrix). Vaild TBmpThreshMethods are (TM_Mean, TM_MinMax);
+
+.. code-block:: pascal
+
+    ThresholdAdaptiveBitmap(matrix, 0, 255, false, TM_Mean, 0);
+
+ResizeBilinearMatrix
+--------------------
+
+.. code-block:: pascal
+
+    procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);
+
+Uses the Bilinear resize method to resize a image matrix (created by BitmapToMatrix) to width *newW* and height *newH*.
+
+.. code-block:: pascal
+
+    ResizeBilinearMatrix(matrix, 500, 500);
