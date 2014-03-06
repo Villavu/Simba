@@ -296,7 +296,7 @@ AddGlobalFunc('function RenameFile(const Oldname, NewName: string): Boolean;', @
 AddGlobalFunc('procedure WriteINI(const Section, KeyName, NewString, FileName: string);', @Lape_WriteINI);
 AddGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): string', @Lape_ReadINI);
 AddGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @Lape_DeleteINI);
-AddGlobalFunc('function DeleteDirectory(const Dir: String): Boolean;', @Lape_DeleteDirectory);
+AddGlobalFunc('function DeleteDirectory(const Dir: String; const Empty: Boolean): Boolean;', @Lape_DeleteDirectory);
 
 { Web }
 SetCurrSection('Web');

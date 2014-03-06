@@ -115,5 +115,5 @@ end;
 
 procedure Lape_DeleteDirectory(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PBoolean(Result)^ := ps_DeleteDirectory(PString(Params^[0])^);
+  PBoolean(Result)^ := ps_DeleteDirectory(PString(Params^[0])^, PBoolean(Params^[1])^);
 end;
