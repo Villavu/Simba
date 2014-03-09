@@ -882,8 +882,8 @@ procedure TMufasaBitmap.Crop(const xs, ys, xe, ye: integer);
 var
   i: integer;
 begin
-  if (xs < 0) or (ys < 0) or (ye >= self.width) or (ye >= self.height) then
-    raise exception.Create('TMufasaBitmap.Crop(): The bounds you pased exceed the bitmap bounds');
+  if (xs < 0) or (ys < 0) or (xe >= self.width) or (ye >= self.height) then
+    raise exception.Create('TMufasaBitmap.Crop(): The bounds you passed exceed the bitmap bounds');
 
   if (xs > xe) or (ys > ye) then
     raise exception.CreateFmt('TMufasaBitmap.Crop(): the bounds you passed doesn''t have normal bounds (%d,%d) : (%d,%d)', [xs, ys, xe, ye]);
