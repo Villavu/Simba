@@ -67,6 +67,7 @@ AddGlobalFunc('procedure Move(const InArr: TExtendedArray; var DestArr: TExtende
 AddGlobalFunc('procedure Move(const InArr: TPointArray; var DestArr: TPointArray; source, dest, size: Integer); overload;', @Lape_PtMove);
 AddGlobalFunc('procedure Move(const InArr: string; var DestArr: string; source, dest, size: Integer); overload;', @Lape_ChrMove);
 {$ENDIF}
+
 { DTM }
 SetCurrSection('DTM');
 AddGlobalFunc('function FindDTM(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean', @Lape_FindDTM);

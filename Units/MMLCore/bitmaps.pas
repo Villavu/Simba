@@ -931,7 +931,8 @@ begin
 end;
 
 function TMufasaBitmap.ToMatrix(): T2DIntegerArray;
-var y: integer;
+var
+  y: integer;
 begin
   SetLength(Result, Self.H, Self.W);
 
