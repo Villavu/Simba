@@ -931,34 +931,24 @@ begin
 end;
 
 function TMufasaBitmap.ToMatrix(): T2DIntegerArray;
-var
-  wid, hei, x, y: integer;
+var y: integer;
 begin
-  SetLength(result, self.height, self.width);
+  SetLength(Result, Self.H, Self.W);
 
-  wid := (self.width -1);
-  hei := (self.height -1);
-
-  for y := 0 to hei do
-    for x := 0 to wid do
-      result[y][x] := BGRToRGB(self.FData[y * w + x]);
+  for y := 0 to Self.H-1 do
+    Move(Self.FData[y * Self.W], Result[y][0], Self.W * SizeOf(TRGB32));
 end;
 
-procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntegerArray);
+procedure TMufasaBitmap.DrawMatrix(const Matrix: T2DIntegerArray);
 var
-  x, y, wid, hei: integer;
+  y: integer;
 begin
-  if (length(matrix) = 0) then
+  if (Length(Matrix) = 0) then
     raise exception.CreateFmt('Matrix with length 0 has been passed to TMufasaBitmap.DrawMatrix', []);
 
-  self.SetSize(length(matrix[0]), length(matrix));
-
-  wid := (self.width -1);
-  hei := (self.height -1);
-
-  for y := 0 to hei do
-    for x := 0 to wid do
-      self.FData[y * w + x] := RGBToBGR(matrix[y][x]);
+  Self.SetSize(Length(Matrix[0]), Length(Matrix));
+  for y := 0 to Self.H-1 do
+    Move(Matrix[y][0], self.FData[y * Self.W], Self.W * SizeOf(TRGB32));
 end;
 
 function TMufasaBitmap.RowPtrs: TPRGB32Array;
