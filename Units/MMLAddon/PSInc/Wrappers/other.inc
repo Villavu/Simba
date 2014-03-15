@@ -371,3 +371,46 @@ procedure ps_SetTarget(Proc: TSysProc);
 begin
   CurrThread.Client.IOManager.SetTargetEx(Proc);
 end;
+
+procedure ps_IntMove(const InArr: TIntegerArray; var DestArr: TIntegerArray; source, dest, size: Integer); extdecl;
+var L,bytes:Integer;
+begin
+  L := Length(InArr);
+  if (L = 0) or (source >= L) then Exit;
+  if ((dest + size) > High(DestArr)) then
+     size := (High(DestArr) - dest) + 1;
+  bytes := Size * SizeOf(Integer);
+  Move(InArr[source], DestArr[dest], bytes);
+end;
+
+procedure ps_ChrMove(const InArr:AnsiString; var DestArr:AnsiString; source, dest, size:Integer); extdecl;
+var L:Integer;
+begin
+  L := Length(InArr);
+  if (L = 0) or (source >= L) then Exit;
+  if ((dest + size) >= Length(DestArr)) then
+     size := (Length(DestArr) - dest) + 1;
+  Move(InArr[source], DestArr[dest], size);
+end;
+
+procedure ps_ExtMove(const InArr:TExtendedArray; var DestArr:TExtendedArray; source, dest, size:Integer); extdecl;
+var L,bytes:Integer;
+begin
+  L := Length(InArr);
+  if (L = 0) or (source >= L) then Exit;
+  if ((dest + size) > High(DestArr)) then
+     size := (High(DestArr) - dest) + 1;
+  bytes := Size * SizeOf(Extended);
+  Move(InArr[source], DestArr[dest], bytes);
+end;
+
+procedure ps_PtMove(const InArr:TPointArray; var DestArr:TPointArray; source, dest, size:Integer); extdecl;
+var L,bytes:Integer;
+begin
+  L := Length(InArr);
+  if (L = 0) or (source >= L) then Exit;
+  if ((dest + size) > High(DestArr)) then
+     size := (High(DestArr) - dest) + 1;
+  bytes := Size * SizeOf(TPoint);
+  Move(InArr[source], DestArr[dest], bytes);
+end;

@@ -162,3 +162,23 @@ procedure Lape_SetTarget(const Params: PParamArray); lape_extdecl
 begin
   ps_SetTarget(PSysProc(Params^[0])^);
 end;
+
+procedure Lape_IntMove(const Params: PParamArray); lape_extdecl
+begin
+  ps_IntMove(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure Lape_ChrMove(const Params: PParamArray); lape_extdecl
+begin
+  ps_ChrMove(PLPString(Params^[0])^, PLPString(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure Lape_ExtMove(const Params: PParamArray); lape_extdecl
+begin
+  ps_ExtMove(PExtendedArray(Params^[0])^, PExtendedArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure Lape_PtMove(const Params: PParamArray); lape_extdecl
+begin
+  ps_PtMove(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
