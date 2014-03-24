@@ -96,6 +96,26 @@ begin
   PRetData(Result)^ := PIOManager_Abstract(Params^[0])^.ReturnData(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
+procedure TIOManager_Abstract_ReturnDataEx(const Params: PParamArray; const Result: Pointer); lape_extdecl
+var
+  PtrRet: TRetData;
+  wi, hi, y: Integer;
+begin
+  wi := PInteger(Params^[3])^ + 1;
+  hi := PInteger(Params^[4])^ + 1;
+
+  PtrRet := PIOManager_Abstract(Params^[0])^.ReturnData(PInteger(Params^[1])^, PInteger(Params^[2])^, wi, hi);
+
+  try
+    SetLength(P2DIntArray(Result)^, hi, wi);
+
+    for y := 0 to Hi-1 do
+      Move(PtrRet.Ptr[y * PtrRet.RowLen], P2DIntArray(Result)^[y][0], Wi * SizeOf(TRGB32));
+  finally
+    PIOManager_Abstract(Params^[0])^.FreeReturnData();
+  end;
+end;
+
 //procedure FreeReturnData;
 procedure TIOManager_Abstract_FreeReturnData(const Params: PParamArray); lape_extdecl
 begin
@@ -318,6 +338,7 @@ begin
     addGlobalFunc('procedure TIOManager_Abstract.BitmapDestroyed(Bitmap : TMufasaBitmap);', @TIOManager_Abstract_BitmapDestroyed);
     addGlobalFunc('function TIOManager_Abstract.GetColor(x,y : integer): TColor;', @TIOManager_Abstract_GetColor);
     addGlobalFunc('function TIOManager_Abstract.ReturnData(xs, ys, width, height: Integer): TRetData;', @TIOManager_Abstract_ReturnData);
+    addGlobalFunc('function TIOManager_Abstract.ReturnDataEx(xs, ys, width, height: Integer): T2DIntegerArray;', @TIOManager_Abstract_ReturnDataEx);
     addGlobalFunc('procedure TIOManager_Abstract.FreeReturnData();', @TIOManager_Abstract_FreeReturnData);
     addGlobalFunc('procedure TIOManager_Abstract.GetDimensions(out W, H: Integer);', @TIOManager_Abstract_GetDimensions);
     addGlobalFunc('procedure TIOManager_Abstract.GetPosition(var Left, Top: Integer);', @TIOManager_Abstract_GetPosition);

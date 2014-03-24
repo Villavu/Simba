@@ -61,7 +61,6 @@ AddGlobalFunc('function GetProcesses: TSysProcArr', @Lape_GetProcesses);
 AddGlobalFunc('function GetProcessID : LongInt', @Lape_GetProcessID);
 AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
 AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_ExtractFileExt);
-
 { DTM }
 SetCurrSection('DTM');
 AddGlobalFunc('function FindDTM(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean', @Lape_FindDTM);
