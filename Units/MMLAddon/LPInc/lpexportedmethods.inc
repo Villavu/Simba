@@ -61,15 +61,7 @@ AddGlobalFunc('function GetProcesses: TSysProcArr', @Lape_GetProcesses);
 AddGlobalFunc('function GetProcessID : LongInt', @Lape_GetProcessID);
 AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
 AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_ExtractFileExt);
-AddGlobalFunc('procedure Move(const InArr: TIntegerArray; var DestArr: TIntegerArray; source, dest, size: Integer);', @Lape_IntMove);
-{$IFNDEF FUNC_LIST}
-AddGlobalFunc('procedure Move(const InArr: TExtendedArray; var DestArr: TExtendedArray; source, dest, size: Integer); overload;', @Lape_ExtMove);
-AddGlobalFunc('procedure Move(const InArr: TPointArray; var DestArr: TPointArray; source, dest, size: Integer); overload;', @Lape_PtMove);
-AddGlobalFunc('procedure Move(const InArr: string; var DestArr: string; source, dest, size: Integer); overload;', @Lape_ChrMove);
-{$ENDIF}
-
-{ DTM }
-SetCurrSection('DTM');
+{ DTM }SetCurrSection('DTM');
 AddGlobalFunc('function FindDTM(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer): Boolean', @Lape_FindDTM);
 AddGlobalFunc('function FindDTMs(DTM: Integer; var p: TPointArray; xs, ys, xe, ye: Integer): Boolean', @Lape_FindDTMs);
 AddGlobalFunc('function FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; sAngle, eAngle, aStep: Extended; var aFound: Extended): Boolean', @Lape_FindDTMRotatedAlternating);
