@@ -882,16 +882,16 @@ procedure TMufasaBitmap.Crop(const xs, ys, xe, ye: integer);
 var
   i: integer;
 begin
-  if (xs < 0) or (ys < 0) or (ye >= self.width) or (ye >= self.height) then
-    raise exception.Create('TMufasaBitmap.Crop(): The bounds you pased exceed the bitmap bounds');
+  if (not Self.PointInBitmap(xs, ys)) or (not Self.PointInBitmap(xe, ye)) then
+    raise exception.Create('TMufasaBitmap.Crop(): The bounds you pased to crop exceed the bitmap bounds');
 
   if (xs > xe) or (ys > ye) then
-    raise exception.CreateFmt('TMufasaBitmap.Crop(): the bounds you passed doesn''t have normal bounds (%d,%d) : (%d,%d)', [xs, ys, xe, ye]);
+    raise exception.CreateFmt('TMufasaBitmap.Crop(): The bounds you passed doesn''t have normal bounds (%d,%d) : (%d,%d)', [xs, ys, xe, ye]);
 
   for i := ys to ye do
-    Move(self.FData[i * self.width + xs], self.FData[(i-ys) * self.width], self.width * SizeOf(TRGB32));
+    Move(Self.FData[i * Self.Width + xs], Self.FData[(i-ys) * Self.Width], Self.Width * SizeOf(TRGB32));
 
-  self.SetSize(xe-xs+1, ye-ys+1);
+  Self.SetSize(xe-xs+1, ye-ys+1);
 end;
 
 function TMufasaBitmap.ToTBitmap: TBitmap;
