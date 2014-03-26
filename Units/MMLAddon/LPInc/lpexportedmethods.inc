@@ -139,6 +139,9 @@ AddGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: integer; var x, y:
 AddGlobalFunc('procedure RectangleBitmap(bitmap: integer; const box: TBox; Color: TColor);', @Lape_RectangleBitmap);
 AddGlobalFunc('procedure FloodFillBitmap(bitmap: integer; const StartPoint: TPoint; const SearchCol,ReplaceCol: TColor);', @Lape_FloodFillBitmap);
 AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArray): integer', @Lape_ConvoluteBitmap);
+AddGlobalFunc('procedure BlurBitmap(const bitmap, block: integer);', @Lape_BlurBitmap);
+AddGlobalFunc('procedure BlurBitmapEx(const bitmap, block, xs, ys, xe, ye: integer);', @Lape_BlurBitmapEx);
+AddGlobalFunc('procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveBitmap);
 AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
 AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
@@ -147,9 +150,9 @@ AddGlobalFunc('procedure CropBitmap(const bmp: integer; const xs, ys, xe, ye: in
 AddGlobalFunc('function GetColorsBitmap(const bmp: integer): TIntegerArray;', @Lape_GetColorsBitmap);
 AddGlobalFunc('function BitmapToMatrix(const bmp: integer): T2DIntegerArray;',@Lape_BitmapToMatrix);
 AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
-AddGlobalFunc('procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveBitmap);
 AddGlobalFunc('procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveMatrix);
 AddGlobalFunc('procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);', @Lape_ResizeBilinearMatrix);
+AddGlobalFunc('procedure BlurMatrix(var Matrix: T2DIntegerArray; const block: integer);', @Lape_BlurMatrix);
 
 { Math }
 SetCurrSection('Math');

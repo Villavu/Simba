@@ -408,3 +408,18 @@ begin
   SetLength(Matrix, 0);
 end;
 
+procedure ps_BlurMatrix(var Matrix: T2DIntegerArray; const Block: integer); extdecl;
+begin
+  BlurMatrix(Matrix, Block);
+end;
+
+procedure ps_BlurBitmap(const bmp, Block: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Blur(Block);
+end;
+
+procedure ps_BlurBitmapEx(const bmp, Block, xs, ys, xe, ye: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Blur(Block, xs, ys, xe, ye);
+end;
+

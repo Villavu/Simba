@@ -103,6 +103,8 @@ type
     function Copy(const xs,ys,xe,ye : integer) : TMufasaBitmap; overload;
     function Copy: TMufasaBitmap;overload;
     procedure Crop(const xs, ys, xe, ye: integer);
+    procedure Blur(const Block: Integer);
+    procedure Blur(const Block, xs, ys, xe, ye: integer); overload;
     function ToTBitmap: TBitmap;
     function ToString : string;
     function ToMatrix: T2DIntegerArray;
@@ -152,6 +154,7 @@ type
   function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray; CTS: integer): extended;
   procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
   procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);
+  procedure BlurMatrix(var Matrix: T2DIntegerArray; const Block: Integer);
 
 implementation
 
@@ -466,6 +469,54 @@ begin
 
   Matrix := Res;
   SetLength(Res, 0);
+end;
+
+procedure BlurMatrix(var Matrix: T2DIntegerArray; const Block: Integer);
+var
+  W,H,x,y,mid,fx,fy,size:Integer;
+  R,G,B,color,lx,ly,hx,hy:Integer;
+  BlurredMatrix: T2DIntegerArray;
+begin
+  Size := (Block*Block);
+
+  W := High(Matrix[0]);
+  H := High(Matrix);
+
+  if (Size<=1) or (Block mod 2 = 0) then
+    Exit;
+
+  if (W < 1) and (H < 1) then
+    raise exception.Create('BlurMatrix(): Matrix with length 0 has been passed to BlurMatrix');
+
+  SetLength(BlurredMatrix, H+1, W+1);
+  mid := Block div 2;
+
+  for y:=0 to H do
+  begin
+    ly := Max(0,y-mid);
+    hy := Min(H,y+mid);
+    for x:=0 to W do
+    begin
+      lx := Max(0,x-mid);
+      hx := Min(W,x+mid);
+      Size := 0;
+      R := 0; G := 0; B := 0;
+
+      for fy:=ly to hy do
+        for fx:=lx to hx do
+        begin
+          Color := Matrix[fy][fx];
+          R := R + (Color and $FF);
+          G := G + ((Color shr 8) and $FF);
+          B := B + ((Color shr 16) and $FF);
+          Inc(Size);
+        end;
+      BlurredMatrix[y][x] := (R div size) or ((G div size) shl 8) or ((B div size) shl 16);
+    end;
+  end;
+
+  Matrix := BlurredMatrix;
+  SetLength(BlurredMatrix, 0);
 end;
 
 function Min(a,b:integer) : integer; inline;
@@ -892,6 +943,106 @@ begin
     Move(Self.FData[i * Self.Width + xs], Self.FData[(i-ys) * Self.Width], Self.Width * SizeOf(TRGB32));
 
   Self.SetSize(xe-xs+1, ye-ys+1);
+end;
+
+procedure TMufasaBitmap.Blur(const Block: Integer);
+var
+  wid,hei,x,y,mid,fx,fy,size:Integer;
+  red,green,blue,lx,ly,hx,hy:Integer;
+  bmp: TMufasaBitmap;
+begin
+  Size := (Block*Block);
+  if (Size<=1) or (Block mod 2 = 0) then
+    Exit;
+
+  bmp := Self.Copy();
+  wid := (Self.Width - 1);
+  hei := (Self.Height - 1);
+  mid := (Block div 2);
+
+  try
+    for y:=0 to hei do
+    begin
+      ly := Max(0,y-mid);
+      hy := Min(hei,y+mid);
+      for x:=0 to wid do
+      begin
+        lx := Max(0,x-mid);
+        hx := Min(wid,x+mid);
+        Size := 0;
+        red := 0; green := 0; blue := 0;
+
+        for fy:=ly to hy do
+          for fx:=lx to hx do
+            with bmp.FData[fy*bmp.w+fx] do
+            begin
+              inc(red, R);
+              inc(green, G);
+              inc(blue, B);
+              inc(Size);
+            end;
+
+        with Self.FData[y*self.w+x] do
+        begin
+          R := (red div size);
+          G := (green div size);
+          B := (blue div size);
+        end;
+      end;
+    end;
+  finally
+    bmp.free();
+  end;
+end;
+
+procedure TMufasaBitmap.Blur(const Block, xs, ys, xe, ye: integer); overload;
+var
+  wid,hei,x,y,mid,fx,fy,size:Integer;
+  red,green,blue,lx,ly,hx,hy:Integer;
+  bmp: TMufasaBitmap;
+begin
+  Size := (Block*Block);
+  if (Size<=1) or (Block mod 2 = 0) then
+    Exit;
+
+  bmp := Self.Copy(xs, ys, xe, ye);
+  wid := (bmp.Width - 1);
+  hei := (bmp.Height - 1);
+  mid := (Block div 2);
+
+  try
+    for y:=0 to hei do
+    begin
+      ly := Max(0,y-mid);
+      hy := Min(hei,y+mid);
+      for x:=0 to wid do
+      begin
+        lx := Max(0,x-mid);
+        hx := Min(wid,x+mid);
+        Size := 0;
+        red := 0; green := 0; blue := 0;
+
+        for fy:=ly to hy do
+          for fx:=lx to hx do
+            with bmp.FData[fy*bmp.w+fx] do
+            begin
+              inc(red, R);
+              inc(green, G);
+              inc(blue, B);
+              inc(Size);
+            end;
+
+        with Self.FData[(y+xs)*self.w+(x+ys)] do
+        begin
+          R := (red div size);
+          G := (green div size);
+          B := (blue div size);
+        end;
+      end;
+    end;
+  finally
+    bmp.free();
+  end;
 end;
 
 function TMufasaBitmap.ToTBitmap: TBitmap;

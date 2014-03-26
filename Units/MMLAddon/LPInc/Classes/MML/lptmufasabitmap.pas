@@ -436,6 +436,16 @@ begin
   PMufasaBitmap(Params^[0])^.List := PMBitmaps(Params^[1])^;
 end;
 
+procedure TMufasaBitmap_Blur(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Blur(PInteger(Params^[1])^);
+end;
+
+procedure TMufasaBitmap_BlurEx(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Blur(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
+end;
+
 //constructor Create;
 procedure TMufasaBitmap_Init(const Params: PParamArray); lape_extdecl
 begin
@@ -526,6 +536,8 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntArray);', @TMufasaBitmap_DrawMatrix);
     addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @TMufasaBitmap_ThresholdAdaptive);
     addGlobalFunc('procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod; NewW, NewH: integer);', @TMufasaBitmap_ResizeEx);
+    addGlobalFunc('procedure TMufasaBitmap.BlurBitmap(const bitmap, block: integer);', @TMufasaBitmap_Blur);
+    addGlobalFunc('procedure TMufasaBitmap.Blur(const bitmap, block, xs, ys, xe, ye: integer); overload;', @TMufasaBitmap_Blur);
     addGlobalFunc('function TMufasaBitmap.ToTBitmap(): TBitmap;', @TMufasaBitmap_ToTBitmap);
     addGlobalFunc('function TMufasaBitmap.ToString(): string;', @TMufasaBitmap_ToString);
     addGlobalFunc('function TMufasaBitmap.RowPtrs(): TPRGB32Array;', @TMufasaBitmap_RowPtrs);

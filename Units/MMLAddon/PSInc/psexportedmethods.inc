@@ -476,6 +476,9 @@ AddFunction(@ps_DrawBitmap,'procedure DrawBitmap(Bmp: Integer; Dest: TCanvas; x,
 AddFunction(@ps_RectangleBitmap,'procedure RectangleBitmap(bitmap : integer; const box : TBox; Color : TColor);');
 AddFunction(@ps_FloodfillBitmap,'procedure FloodFillBitmap(bitmap : integer; const StartPoint : TPoint; const SearchCol,ReplaceCol : TColor);');
 AddFunction(@ps_ConvoluteBitmap,'function ConvoluteBitmap(bitmap : integer; matrix : T2DExtendedArray) : integer;');
+AddFunction(@ps_BlurBitmap, 'procedure BlurBitmap(const bitmap, block: integer);');
+AddFunction(@ps_BlurBitmapEx, 'procedure BlurBitmapEx(const bitmap, block, xs, ys, xe, ye: integer);');
+AddFunction(@ps_ThresholdAdaptiveBitmap,'procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);');
 AddFunction(@ps_CalculatePixelShift,'function CalculatePixelShift(Bmp1,Bmp2 : Integer; CompareBox : TBox) : integer;');
 AddFunction(@ps_CalculatePixelShiftTPA,'function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;');
 AddFunction(@ps_CalculatePixelTolerance,'function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
@@ -484,9 +487,10 @@ AddFunction(@ps_CropBitmap,'procedure CropBitmap(const bmp: integer; const xs, y
 AddFunction(@ps_GetColorsBitmap,'function GetColorsBitmap(const bmp: integer): TIntegerArray;');
 AddFunction(@ps_BitmapToMatrix,'function BitmapToMatrix(const bmp: integer): T2DIntegerArray;');
 AddFunction(@ps_DrawMatrixBitmap,'procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);');
-AddFunction(@ps_ThresholdAdaptiveBitmap,'procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);');
 AddFunction(@ps_ThresholdAdaptiveMatrix,'procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);');
 AddFunction(@ps_ResizeBilinearMatrix,'procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);');
+AddFunction(@ps_BlurMatrix, 'procedure BlurMatrix(var Matrix: T2DIntegerArray; const block: integer);');
+
 {$ENDIF}
 
 {tpa}

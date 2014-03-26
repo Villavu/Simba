@@ -332,3 +332,19 @@ procedure Lape_ThresholdAdaptiveBitmap(const Params: PParamArray); lape_extdecl
 begin
   ps_ThresholdAdaptiveBitmap(PInteger(Params^[0])^, PByte(Params^[1])^, PByte(Params^[2])^, PBoolean(Params^[3])^, PBmpThreshMethod(Params^[4])^, PInteger(Params^[5])^);
 end;
+
+procedure Lape_BlurMatrix(const Params: PParamArray); lape_extdecl
+begin
+  ps_BlurMatrix(P2DIntegerArray(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+procedure Lape_BlurBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_BlurBitmap(PInteger(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+procedure Lape_BlurBitmapEx(const Params: PParamArray); lape_extdecl
+begin
+  ps_BlurBitmapEx(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
+end;
+
