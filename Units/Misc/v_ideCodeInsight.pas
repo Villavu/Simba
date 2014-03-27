@@ -1386,6 +1386,7 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
 var
   i, ii: Integer;
   d: TDeclaration;
+  dType: String;
 begin
   ItemList.BeginUpdate;
   InsertList.BeginUpdate;
@@ -1396,9 +1397,17 @@ begin
     if (PrepareString(Prefix) <> '') then
     begin
       d := FindVarBase(Prefix, True, vbType);
-      if (d <> nil) then
+      dType := FindVarBase(Prefix, False, vbType).CleanText;
+      if (d <> nil) then begin
         for i := 0 to d.Items.Count - 1 do
           Proposal_AddDeclaration(d.Items[i], ItemList, InsertList);
+        if (d.ClassType = TciRecordType) then
+          for i := 0 to Items.Count - 1 do
+            if (Items[i].ClassType = TciProcedureDeclaration) then
+              for ii := 0 to Items[i].Items.Count - 1 do
+                if (Items[i].Items[ii].ClassType = TciProcedureClassName) and (Items[i].Items[ii].ShortText = dType) then
+                   Proposal_AddDeclaration(Items[i], ItemList, InsertList);
+      end;
     end
     else
     begin
