@@ -1281,6 +1281,8 @@ type
   PMDTM = ^TMDTM;
   PMDTMPoint = ^TMDTMPoint;
   PSDTM = ^TSDTM;
+  PClient = ^TClient;
+  PStrings = ^TStrings;
 
 threadvar
   WriteLnStr: string;

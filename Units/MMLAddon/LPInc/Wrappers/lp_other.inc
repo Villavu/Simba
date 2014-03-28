@@ -113,10 +113,10 @@ begin
   PLongWord(Result)^ := ps_GetTimeRunning();
 end;
 
-//procedure Lape_GetTClient(const Params: PParamArray; const Result: Pointer); lape_extdecl
-//begin
-//  PClient(Result)^ := ps_GetTClient();
-//end;
+procedure Lape_GetTClient(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PClient(Result)^ := ps_GetTClient();
+end;
 
 procedure Lape_ConvertTime(const Params: PParamArray); lape_extdecl
 begin

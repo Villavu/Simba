@@ -50,7 +50,7 @@ AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 {$IFNDEF FUNC_LIST}
 AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^); //TODO: FIX!!
 {$ENDIF}
-//AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
+AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
 AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
 AddGlobalFunc('procedure ConvertTime64(Time: int64; var y, m, w, d, h, min, s: integer);', @Lape_ConvertTime64);
 AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
@@ -397,7 +397,7 @@ AddGlobalFunc('function Implode(Glue: string; Pieces: TStringArray): string', @L
 AddGlobalFunc('function Explode(del, str: string): TStringArray', @Lape_Explode);
 AddGlobalFunc('procedure ExplodeWrap(del, str: string; var res: TStringArray);', @Lape_ExplodeWrap);
 AddGlobalFunc('function ExecRegExpr(const RegExpr, InputStr: String): boolean', @Lape_ExecRegExpr);
-//AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
+AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
 AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: String; UseSubstitution: boolean): String', @Lape_ReplaceRegExpr);
 AddGlobalFunc('function PosEx(needle, haystack: String; offset: integer): integer', @Lape_PosEx);
 AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);
