@@ -1904,17 +1904,19 @@ begin
 end;
 
 procedure TmwBasePasLex.PointerSymbolProc;
+var
+  Temp: LongInt;
 begin
-  inc(Run);
+  Inc(Run);
   fTokenID := tokPointerSymbol;
   
   //This is a wierd Pascal construct that rarely appears, but needs to be 
   //supported. ^M is a valid char reference (#13, in this case)
-  if FOrigin[Run] in ['a'..'z','A'..'Z'] then
+  {if (FOrigin[Run] in ['a'..'z','A'..'Z']) then
   begin
-    inc(Run);
+    Inc(Run);     //Not needed and conflicts with ^T2DType defines - Dgby
     fTokenID := tokAsciiChar;
-  end;
+  end;}
 end;
 
 procedure TmwBasePasLex.PointProc;

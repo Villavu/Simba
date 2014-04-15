@@ -30,9 +30,9 @@ program Simba;
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}cthreads, cmem,{$ENDIF}{$ENDIF}
   Interfaces, Forms, SimbaUnit, colourhistory, About, debugimage, bitmapconv,
-   debugger, selectonruntime, code, cselectonruntime, cstruct,
+  selectonruntime, code, cselectonruntime, cstruct,
   {$IFDEF USE_FORMDESIGNER}design_frm, frmdesigner,{$ENDIF}
-  sclist, dcpbase64,sm_main;
+  sclist, dcpbase64,sm_main, LPDump;
 
 {$R Simba.res}
 

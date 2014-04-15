@@ -32,14 +32,17 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent, uPSCompiler, PSDump,
-  uPSRuntime, uPSPreProcessor, MufasaTypes, MufasaBase, web, fontloader,
+  Classes, SysUtils, client,
+  {$IFDEF USE_PASCALSCRIPT}
+  uPSComponent, uPSCompiler, PSDump, uPSRuntime, uPSPreProcessor,
+  {$ENDIF}
+  MufasaTypes, MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs, internets,scriptproperties,
   settings, settingssandbox, lcltype, dialogs
   {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
-    lpeval, lpinterpreter, lputils
+    lpeval, lpinterpreter, lputils, LPDump
   {$ENDIF};
 
 const
@@ -149,10 +152,12 @@ type
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
       procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
+      {$IFDEF USE_PASCALSCRIPT}
       function ProcessDirective(Sender: TPSPreProcessor;
                     Parser: TPSPascalPreProcessorParser;
                     Active: Boolean;
                     DirectiveName, DirectiveArgs: string; Filename:String): boolean;
+      {$ENDIF}
       function LoadFile(ParentFile: string; var FileName, Content: string): boolean;
 
       procedure AddMethod(meth: TExpMethod); virtual;
@@ -178,7 +183,7 @@ type
     end;
 
     { TPSThread }
-
+    {$IFDEF USE_PASCALSCRIPT}
     TPSThread = class(TMThread)
       public
         procedure OnProcessDirective(Sender: TPSPreProcessor;
@@ -216,6 +221,7 @@ type
         procedure Execute; override;
         procedure Terminate; override;
     end;
+    {$ENDIF}
 
    {$IFDEF USE_LAPE}
    { TLPThread }
@@ -225,7 +231,7 @@ type
      function CallMethod(const Method: string; var Args: array of Variant): Variant; override;
    public
      Parser: TLapeTokenizerString;
-     Compiler: TLapeCompiler;
+     Compiler: TLPCompiler;
      Running: TInitBool;
      ImportWrappers: TList;
      ExportWrappers: TList;
@@ -241,7 +247,6 @@ type
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
      function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
-     procedure GetValueDefs(aItems: TStrings);
    end;
 
    TSyncMethod = class
@@ -265,21 +270,24 @@ uses
   SimbaUnit,
   colour_conv, dtmutil,
   {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
+  {$IFDEF USE_PASCALSCRIPT}
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
   uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
   uPSUtils,
+  {$ENDIF}
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
   newsimbasettings, // SimbaSettings
   {$IFDEF USE_DEBUGGER}debugger,{$ENDIF}
-
+  {$IFDEF USE_PASCALSCRIPT}
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSR_dll,
   uPSI_ComCtrls, uPSI_Dialogs,
+  uPSR_extctrls, //Runtime-libs
+  {$ENDIF}
   files,
   dtm, //Dtms!
-  uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
   mmath, //Real maths!
@@ -468,6 +476,7 @@ begin
   end;
 end;
 
+{$IFDEF USE_PASCALSCRIPT}
 function TMThread.ProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser;
         Active: Boolean;
@@ -550,6 +559,7 @@ begin
     Result := False; // If we do not know the directive; return true so Continue
                     // will be false.
 end;
+{$ENDIF}
 
 procedure TMThread.SetDebug(writelnProc: TWritelnProc);
 begin
@@ -588,6 +598,7 @@ begin
       CallMethod(Prop.OnTerminateProcs[I], V);
 end;
 
+{$IFDEF USE_PASCALSCRIPT}
 function ThreadSafeCall(aProcName: string; var V: TVariantArray): Variant; extdecl;
 begin
   if GetCurrentThreadId = MainThreadID then
@@ -609,6 +620,7 @@ begin
   with TPSThread(currthread).PSScript do
     Result := Exec.RunProcPVar(V,Exec.GetProc(aProcName));
 end;
+{$ENDIF}
 
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/settings.inc}
@@ -629,6 +641,7 @@ end;
 {$I PSInc/Wrappers/dtm.inc}
 {$I PSInc/Wrappers/ocr.inc}
 {$I PSInc/Wrappers/internets.inc}
+{$IFDEF USE_PASCALSCRIPT}
 {$I PSInc/psmethods.inc}
 
 {***implementation TPSThread***}
@@ -1255,6 +1268,7 @@ procedure TPSThread.SetScript(script: string);
 begin
    PSScript.Script.Text := LineEnding + Script; //A LineEnding to conform with the info we add to includes
 end;
+{$ENDIF}
 
 {$IFDEF USE_LAPE}
 { TLPThread }
@@ -1348,7 +1362,7 @@ begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 
   Parser := TLapeTokenizerString.Create('');
-  Compiler := TLapeCompiler.Create(Parser);
+  Compiler := TLPCompiler.Create(Parser);
   Running := bFalse;
 
   InitializePascalScriptBasics(Compiler);
@@ -1601,15 +1615,6 @@ end;
 procedure TLPThread.Terminate;
 begin
   Running := bFalse;
-end;
-
-procedure TLPThread.GetValueDefs(aItems: TStrings);
-begin
-  //Removed failed attempt caused bad lag when using code completion on Lape.
-  aItems.Clear();
-  //TODO: All of Lape's internal methods should be added to aItems.
-  //MML and Script methods get added later.
-  //NOTE: Should we create a child of TLapeCompiler and keep info on methods/types?
 end;
 
 constructor TSyncMethod.Create(Method: Pointer);
