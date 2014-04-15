@@ -57,7 +57,7 @@ uses
 
   v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
-  PSDump,
+  {$IFDEF USE_PASCALSCRIPT}PSDump, {$ENDIF}
 
   updater,
   SM_Main,
@@ -507,7 +507,7 @@ type
     function LoadSettingDef(const Key, Def : string) : string;
     procedure FunctionListShown( ShowIt : boolean);
     property ScriptState : TScriptState read GetScriptState write SetScriptState;
-    procedure SafeCallThread;
+    {$IFDEF USE_PASCALSCRIPT}procedure SafeCallThread;{$ENDIF}
     procedure UpdateTitle;
     function OpenScript : boolean;
     function LoadScriptFile(filename : string; AlwaysOpenInNewTab : boolean = false; CheckOtherTabs : boolean = true) : boolean;
@@ -1927,11 +1927,11 @@ begin
       exit;
   end;
   CurrScript.ScriptErrorLine:= -1;
-  CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;
+  {$IFDEF USE_PASCALSCRIPT}CurrentSyncInfo.SyncMethod:= @Self.SafeCallThread;{$ENDIF}
 
   try
     case SimbaSettings.Interpreter._Type.Value of
-      interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);
+      {$IFDEF USE_PASCALSCRIPT}interp_PS: Thread := TPSThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
       {$IFDEF USE_LAPE}interp_LP: Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);{$ENDIF}
       else
         raise Exception.CreateFmt('Unknown Interpreter %d!', [SimbaSettings.Interpreter._Type.Value]);
@@ -1944,9 +1944,11 @@ begin
       Exit;
     end;
   end;
-  
+
+  {$IFDEF USE_PASCALSCRIPT}
   if ((Thread is TPSThread) and (CurrScript.ScriptFile <> '')) then
     TPSThread(Thread).PSScript.MainFileName := CurrScript.ScriptFile;
+  {$ENDIF}
 
   {$IFNDEF TERMINALWRITELN}
   Thread.SetDebug(@formWriteln);
@@ -2765,6 +2767,7 @@ begin
   try
     if (SimbaSettings.Interpreter._Type.Value = interp_PS) then
     begin
+      {$IFDEF USE_PASCALSCRIPT}
       with TPSThread(Thread) do
       try
         PSScript.GetValueDefs(ValueDefs);
@@ -2772,11 +2775,12 @@ begin
       finally
         Free();
       end;
+      {$ENDIF}
     end else if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
     begin
       with TLPThread(Thread) do
       try
-        GetValueDefs(ValueDefs);
+        Compiler.getInfo(ValueDefs);
         CoreDefines.AddStrings(Compiler.BaseDefines);
       finally
         Free();
@@ -3164,7 +3168,7 @@ begin
   if frmFunctionList.FunctionList.Items.Count = 0 then
   begin;
     case SimbaSettings.Interpreter._Type.Value of
-      interp_PS: Methods := TPSThread.GetExportedMethods();
+      {$IFDEF USE_PASCALSCRIPT}interp_PS: Methods := TPSThread.GetExportedMethods(); {$ENDIF}
       interp_LP: Methods := TLPThread.GetExportedMethods();
       else
         raise Exception.Create('Invalid Interpreter!');
@@ -3783,7 +3787,7 @@ begin
   end;
 end;
 
-
+{$IFDEF USE_PASCALSCRIPT}
 procedure TSimbaForm.SafeCallThread;
 var
   thread: TMThread;
@@ -3810,6 +3814,7 @@ begin
     mmlpsthread.CurrThread:= nil;
   end;
 end;
+{$ENDIF}
 
 procedure TSimbaForm.UpdateTitle;
 begin
