@@ -1383,9 +1383,22 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
       AddFile(Item.Includes[i], ItemList, InsertList);
   end;
 
+  procedure checkInclude(_include: TCodeInsight; _dType: String);
+  var
+    i, ii: Integer;
+  begin
+    for i := 0 to _include.Items.Count - 1 do
+      for ii := 0 to _include.Items[i].Items.Count - 1 do
+        if (_include.Items[i].Items[ii].ClassType = TciProcedureClassName) and (lowercase(_include.Items[i].Items[ii].ShortText) = lowercase(_dType)) then
+          Proposal_AddDeclaration(_include.Items[i], ItemList, InsertList);
+    if (length(_include.Includes) > 0) then
+      for i := 0 to length(_include.Includes) - 1 do
+        checkInclude(_include.Includes[i], _dType);
+  end;
+
 var
-  i, ii: Integer;
-  d: TDeclaration;
+  i, ii, iii: Integer;
+  d, dDecl: TDeclaration;
   dType: String;
 begin
   ItemList.BeginUpdate;
@@ -1397,16 +1410,19 @@ begin
     if (PrepareString(Prefix) <> '') then
     begin
       d := FindVarBase(Prefix, True, vbType);
-      dType := FindVarBase(Prefix, False, vbType).CleanText;
-      if (d <> nil) then begin
+      if (d <> nil) then
         for i := 0 to d.Items.Count - 1 do
           Proposal_AddDeclaration(d.Items[i], ItemList, InsertList);
-        if (d.ClassType = TciRecordType) then
-          for i := 0 to Items.Count - 1 do
-            if (Items[i].ClassType = TciProcedureDeclaration) then
-              for ii := 0 to Items[i].Items.Count - 1 do
-                if (Items[i].Items[ii].ClassType = TciProcedureClassName) and (Items[i].Items[ii].ShortText = dType) then
-                   Proposal_AddDeclaration(Items[i], ItemList, InsertList);
+      dDecl := FindVarBase(Prefix, False, vbType);
+      if (dDecl <> nil) then begin
+        dType := dDecl.CleanText;
+        for i := 0 to Items.Count - 1 do
+          for ii := 0 to Items[i].Items.Count - 1 do
+            if (Items[i].Items[ii].ClassType = TciProcedureClassName) and (lowercase(Items[i].Items[ii].ShortText) = lowercase(dType)) then
+              Proposal_AddDeclaration(Items[i], ItemList, InsertList);
+        if (length(Includes) > 0) then
+          for i := 0 to length(Includes) - 1 do
+            checkInclude(Includes[i], dType);
       end;
     end
     else
