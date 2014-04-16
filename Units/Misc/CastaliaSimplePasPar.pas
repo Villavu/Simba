@@ -2219,55 +2219,30 @@ begin
 end;
 
 procedure TmwSimplePasPar.ForStatement;
+var
+  typ: TptTokenKind;
 begin
   Expected(tokFor);
-  QualifiedIdentifier;
-  {$IFDEF D8_NEWER}
-  if Lexer.TokenID = tokAssign then
+
+  if (Lexer.TokenID = tokIdentifier) then
   begin
-    Expected(tokAssign);
-    Expression;
+    QualifiedIdentifier;
+    typ := Lexer.TokenID;  //Should be tokIn or tokAssign =)
+    Expected(typ);
+  end;
+
+  Expression;
+
+  if (typ <> tokIn) then
+  begin
     case TokenID of
-      tokTo:
-        begin
-          NextToken;
-        end;
-      tokDownTo:
-        begin
-          NextToken;
-        end;
-    else
-      begin
+      tokTo, tokDownTo: NextToken;
+      else
         SynError(InvalidForStatement);
-      end;
     end;
     Expression;
-  end else
-  if Lexer.TokenID = tokIn then
-  begin
-    Expected(tokIn);
-    //QualifiedIdentifier;
-    Expression;
   end;
-  {$ELSE}
-  Expected(tokAssign);
-  Expression;
-  case TokenID of
-    tokTo:
-      begin
-        NextToken;
-      end;
-    tokDownTo:
-      begin
-        NextToken;
-      end;
-  else
-    begin
-      SynError(InvalidForStatement);
-    end;
-  end;
-  Expression;
-  {$ENDIF}
+
   Expected(tokDo);
   Statement;
 end;
