@@ -789,7 +789,7 @@ function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return:
 
   function DoGetVarType(s: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
 
-    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean = True): Boolean;
+    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean; var Checked: TCodeInsightArray): Boolean;
     var
       i: Integer;
     begin
@@ -797,9 +797,16 @@ function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return:
       if Result then
         Exit();
 
+      for i := High(Checked) downto 0 do
+        if (Checked[i] = Item) then
+          Exit;
+
+      SetLength(Checked, Length(Checked) + 1);
+      Checked[High(Checked)] := Item;
+
       for i := High(Item.Includes) downto Low(Item.Includes) do
       begin
-        Result := CheckIt(s, Item.Includes[i], Decl, Return);
+        Result := CheckIt(s, Item.Includes[i], Decl, Return, False, Checked);
         if Result then
           Exit();
       end;
@@ -809,65 +816,86 @@ function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return:
 
       for i := High(CoreBuffer) downto Low(CoreBuffer) do
       begin
-        Result := CheckIt(s, CoreBuffer[i], Decl, Return, False);
+        Result := CheckIt(s, CoreBuffer[i], Decl, Return, False, Checked);
         if Result then
           Exit();
       end;
     end;
-
+  var
+    CheckedArr: TCodeInsightArray;
   begin
-    Result := CheckIt(s, Self, Decl, Return);
+    Result := CheckIt(s, Self, Decl, Return, True, CheckedArr);
   end;
 
   function DoGetFuncType(FuncName, FuncClass: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
 
-    function CheckIt(FuncName, FuncClass: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean = True): Boolean;
+    function CheckIt(FuncName, FuncClass: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean; var Checked: TCodeInsightArray): Boolean;
     var
       i: Integer;
     begin
       Result := False;
+
+      for i := High(Checked) downto 0 do
+        if (Checked[i] = Item) then
+          Exit;
+
+      SetLength(Checked, Length(Checked) + 1);
+      Checked[High(Checked)] := Item;
+
       if Item.GetFuncType(FuncName, FuncClass, Decl, Return) then
         Exit(True);
 
       for i := High(Item.Includes) downto Low(Item.Includes) do
-        if CheckIt(FuncName, FuncClass, Item.Includes[i], Decl, Return) then
+        if CheckIt(FuncName, FuncClass, Item.Includes[i], Decl, Return, False, Checked) then
           Exit(True);
 
       if (not CheckCore) then
         Exit;
+
       for i := High(CoreBuffer) downto Low(CoreBuffer) do
-        if CheckIt(FuncName, FuncClass, CoreBuffer[i], Decl, Return, False) then
+        if CheckIt(FuncName, FuncClass, CoreBuffer[i], Decl, Return, False, Checked) then
           Exit(True);
     end;
-
+  var
+    CheckedArr: TCodeInsightArray;
   begin
-    Result := CheckIt(FuncName, FuncClass, Self, Decl, Return);
+    Result := CheckIt(FuncName, FuncClass, Self, Decl, Return, True, CheckedArr);
   end;
 
   function DoFindStruct(s: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
 
-    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer; const CheckCore: Boolean = True): Boolean;
+    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer; const CheckCore: Boolean; var Checked: TCodeInsightArray): Boolean;
     var
       i: Integer;
     begin
       Result := False;
+
+      for i := High(Checked) downto 0 do
+        if (Checked[i] = Item) then
+          Exit;
+
+      SetLength(Checked, Length(Checked) + 1);
+      Checked[High(Checked)] := Item;
+
       if Item.FindStruct(s, Decl, Return, ArrayCount) then
         Exit(True);
 
       for i := High(Item.Includes) downto Low(Item.Includes) do
-        if CheckIt(s, Item.Includes[i], Decl, Return, ArrayCount) then
+        if CheckIt(s, Item.Includes[i], Decl, Return, ArrayCount, False, Checked) then
           Exit(True);
 
       if (not CheckCore) then
         Exit;
 
       for i := High(CoreBuffer) downto Low(CoreBuffer) do
-        if CheckIt(s, CoreBuffer[i], Decl, Return, ArrayCount, False) then
+        if CheckIt(s, CoreBuffer[i], Decl, Return, ArrayCount, False, Checked) then
           Exit(True);
     end;
-
+  var
+    CheckedArr: TCodeInsightArray;
   begin
-    Result := CheckIt(s, Self, Decl, Return, ArrayCount);
+    SetLength(CheckedArr, 0);
+    Result := CheckIt(s, Self, Decl, Return, ArrayCount, True, CheckedArr);
   end;
 
 var
