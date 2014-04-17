@@ -64,7 +64,7 @@ type
     procedure Assign(From: TObject); override;
     procedure Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1; ManageStream: Boolean = False); reintroduce;
 
-    procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings);
+    procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
     procedure FillProposal;
     procedure FillSynCompletionProposal(ItemList, InsertList: TStrings; Prefix: string = '');
 
@@ -1122,7 +1122,7 @@ begin
     Position := MaxPos;
 end;
 
-procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings);
+procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
 
   function FormatFirstColumn(s: string): string; inline;
   begin
@@ -1280,12 +1280,13 @@ var
   b: array[1..2] of TDeclaration;
   c: array[0..2] of TDeclarationClass;
 begin
-  if item = nil then
-    exit;
+  if (Item = nil) then
+    Exit;
 
   if (Item is TciProcedureDeclaration) then
   begin
-    AddFuncDeclaration(TciProcedureDeclaration(Item), ItemList, InsertList);
+    if (ShowTypeMethods) or (Item.Items.GetFirstItemOfClass(TciProcedureClassName) = nil) then
+      AddFuncDeclaration(TciProcedureDeclaration(Item), ItemList, InsertList);
     Exit;
   end;
 
@@ -1408,7 +1409,8 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
     i: Integer;
   begin
     if (item = nil) or (ItemList = nil) or (InsertList = nil) or (Item.Proposal_InsertList = nil) or (Item.Proposal_ItemList = nil) then
-      exit;
+      Exit;
+
     if (not Item.Proposal_Filled) then
       Item.FillProposal;
 
@@ -1418,13 +1420,9 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
     {$ELSE}
     for i := 0 to Item.Proposal_InsertList.Count - 1 do
       if (InsertList.IndexOf(Item.Proposal_InsertList[i]) = -1) then
-      begin
         ItemList.Insert(InsertList.Add(Item.Proposal_InsertList[i]), Item.Proposal_ItemList[i]);
-        //ItemList.Add(Item.Proposal_ItemList[i]);
-      end;
     {$ENDIF}
 
-    //AddEnums(Item, ItemList, InsertList);
     for i := Low(Item.Includes) to High(Item.Includes) do
       AddFile(Item.Includes[i], ItemList, InsertList);
   end;
@@ -1436,7 +1434,7 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
     for i := 0 to _include.Items.Count - 1 do
       for ii := 0 to _include.Items[i].Items.Count - 1 do
         if (_include.Items[i].Items[ii].ClassType = TciProcedureClassName) and (lowercase(_include.Items[i].Items[ii].ShortText) = lowercase(_dType)) then
-          Proposal_AddDeclaration(_include.Items[i], ItemList, InsertList);
+          Proposal_AddDeclaration(_include.Items[i], ItemList, InsertList, True);
   
     if (length(_include.Includes) > 0) then
       for i := 0 to length(_include.Includes) - 1 do
@@ -1457,6 +1455,7 @@ begin
     if (PrepareString(Prefix) <> '') then
     begin
       d := FindVarBase(Prefix, True, vbType);
+
       if (d <> nil) then
         for i := 0 to d.Items.Count - 1 do
           Proposal_AddDeclaration(d.Items[i], ItemList, InsertList);
@@ -1465,14 +1464,10 @@ begin
       if (dDecl <> nil) then
       begin
         dType := dDecl.CleanText;
-        for i := 0 to Items.Count - 1 do
-          for ii := 0 to Items[i].Items.Count - 1 do
-            if (Items[i].Items[ii].ClassType = TciProcedureClassName) and (lowercase(Items[i].Items[ii].ShortText) = lowercase(dType)) then
-              Proposal_AddDeclaration(Items[i], ItemList, InsertList);
-          
-		  if (length(Includes) > 0) then
-            for i := 0 to length(Includes) - 1 do
-              checkInclude(Includes[i], dType);
+
+        checkInclude(Self, dType);
+        for i := High(CoreBuffer) downto Low(CoreBuffer) do
+          checkInclude(CoreBuffer[i], dType);
       end;
     end else
     begin
