@@ -1283,6 +1283,8 @@ type
   PSDTM = ^TSDTM;
   PMsgDlgType = ^TMsgDlgType;
   PMsgDlgButtons = ^TMsgDlgButtons;
+  PClient = ^TClient;
+  PStrings = ^TStrings;
 
 threadvar
   WriteLnStr: string;
