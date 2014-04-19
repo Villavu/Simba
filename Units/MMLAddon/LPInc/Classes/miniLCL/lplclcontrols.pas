@@ -634,18 +634,6 @@ begin
   PControl(Params^[0])^.Width := PInteger(Params^[1])^;
 end;
 
-// Read Hint
-procedure TControl_Hint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PString(Result)^ := PControl(Params^[0])^.Hint;
-end;
-
-// Write Hint
-procedure TControl_Hint_Write(const Params: PParamArray); lape_extdecl
-begin
-  PControl(Params^[0])^.Hint := PString(Params^[1])^;
-end;
-
 // Procedure ShowHint();
 procedure TControl_ShowHint(const Params: PParamArray); lape_extdecl
 begin
@@ -662,6 +650,18 @@ end;
 procedure TControl_Parent_Write(const Params: PParamArray); lape_extdecl
 begin
   PControl(Params^[0])^.Parent := PWinControl(Params^[1])^;
+end;
+
+//Read: property Width: Integer read Width write Width;
+procedure TControl_Hint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PControl(Params^[0])^.ShowHint;
+end;
+
+//Write: property Width: Integer read Width write Width;
+procedure TControl_Hint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
 end;
 
 //procedure Free();
@@ -751,6 +751,7 @@ begin
     addClassVar('TControl', 'OnClick', 'TNotifyEvent', @TControl_OnClick_Read, @TControl_OnClick_Write);
     addClassVar('TControl', 'OnResize', 'TNotifyEvent', @TControl_OnResize_Read, @TControl_OnResize_Write);
     addClassVar('TControl', 'Visible', 'Boolean', @TControl_Visible_Read, @TControl_Visible_Write);
+    addClassVar('TControl', 'ShowHint', 'Boolean', @TControl_Hint_Read, @TControl_Hint_Write);
     addGlobalFunc('function TControl.UseRightToLeftAlignment(): Boolean;', @TControl_UseRightToLeftAlignment);
     addGlobalFunc('function TControl.UseRightToLeftReading(): Boolean;', @TControl_UseRightToLeftReading);
     addGlobalFunc('function TControl.UseRightToLeftScrollBar(): Boolean;', @TControl_UseRightToLeftScrollBar);

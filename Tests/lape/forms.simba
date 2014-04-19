@@ -3,6 +3,7 @@ program new;
 const
   PAGE_DIALOGS = 0;
   PAGE_IMAGES = 1;
+  PAGE_OTHER = 2;
 
 var
   frm: TForm;
@@ -14,6 +15,9 @@ var
   colorDialog: TColorDialog;
   openDialog: TOpenDialog;
   img, imgText: TImage;
+  btnSpin: TSpinEdit;
+  statusBar: TStatusBar;
+  statusPanelTxt: TStatusPanel;
 
 procedure onClick(sender: TObject); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
 var
@@ -55,6 +59,7 @@ procedure init(); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
 var
   i: integer;
   tabCaptions: TStringArray = ['Dialogs', 'Images', 'Other'];
+  panelCaptions: TStringArray = ['Hello', 'Bart', 'How Are You', 'Today'];
   tpa: TPointArray;
   bmp: TBitmap;
 begin
@@ -63,11 +68,32 @@ begin
   with frm do
   begin
     setWidth(500);
-    setHeight(500);
+    setHeight(300);
     setPosition(poScreenCenter);
     setCaption('Lape Form - Test');
     setBorderIcons([biSystemMenu, biMinimize]);
   end;
+
+
+  statusBar.init(frm);
+
+  with (statusBar) do
+  begin
+    setParent(frm);
+    setSimplePanel(false);
+
+    with getPanels() do
+    begin
+      for i := 0 to 3 do
+      begin
+        add();
+        getItems(i).setWidth(length(panelCaptions[i]) * 8);
+        getItems(i).setText(panelCaptions[i]);
+      end;
+    end;
+
+  end;
+
 
   mainMenu.init(frm);
 
@@ -88,7 +114,7 @@ begin
   with tabControl do
   begin
     setParent(frm);
-    setBounds(0, 0, 400, 400);
+    setBounds(0, 0, 400, 254);
 
     for i := 0 to high(tabs) do
     begin
@@ -106,6 +132,8 @@ begin
     setTop(10);
     setCaption('Color picker');
     setOnClick(onClick);
+    setHint('This will open a color picker');
+    setShowHint(true);
   end;
 
   btnOpenDialog.init(frm);
@@ -151,6 +179,17 @@ begin
     getCanvas().textOut(5, 1, 'Hello');
   end;
 
+  btnSpin.init(frm);
+
+  with btnSpin do
+  begin
+    setParent(tabs[PAGE_OTHER]);
+    setBounds(10, 10, 50, 50);
+    setValue(25);
+    setMinValue(-50);
+  end;
+
+  client.writeln(toString(btnSpin.getValue()));
   client.writeln('Showing form...');
   frm.showModal();
 end;

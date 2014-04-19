@@ -25,6 +25,7 @@ uses
   lplclcomctrls,
   lplcldialogs,
   lplclmenus,
+  lplclspin,
 
   lpTMDTM, lpTMDTMS,
 
@@ -61,6 +62,7 @@ begin
   RegisterLCLComCtrls(Compiler);
   RegisterLCLDialogs(Compiler);
   RegisterLCLMenus(Compiler);
+  RegisterLCLSpinCtrls(Compiler);
 end;
 
 procedure RegisterMMLClasses(Compiler: TLapeCompiler);

@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="59">
+    <Units Count="60">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -363,6 +363,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="lpTMMLSettingsSandbox"/>
       </Unit58>
+      <Unit59>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclspin.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="lplclspin"/>
+      </Unit59>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -393,7 +398,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="4">
+    <Exceptions Count="5">
       <Item1>
         <Name Value="ESyntaxError"/>
       </Item1>
@@ -406,6 +411,9 @@
       <Item4>
         <Name Value="EConvertError"/>
       </Item4>
+      <Item5>
+        <Name Value="EInvalidOperation"/>
+      </Item5>
     </Exceptions>
   </Debugging>
 </CONFIG>
