@@ -1757,7 +1757,7 @@ end;
 
 procedure TMufasaBitmap.Blur(const Block: integer); overload;
 begin
-  Self.Blur(Block, 0, 0, self.width, self.height);
+  Self.Blur(Block, 0, 0, self.width -1, self.height -1);
 end;
 
 procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix: T2DExtendedArray);
