@@ -664,6 +664,15 @@ begin
   PControl(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
 end;
 
+procedure TControl_SetDimensions(const Params: PParamArray); lape_extdecl
+begin
+  with (PControl(Params^[0])^) do
+  begin
+    Width := PInteger(Params^[1])^;
+    Height := PInteger(Params^[2])^;
+  end;
+end;
+
 //procedure Free();
 procedure TControl_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -676,6 +685,7 @@ begin
   begin
     addClass('TControl', 'TComponent');
 
+    addGlobalFunc('procedure TControl.SetDimensions(const aWidth, aHeight: integer);', @TControl_SetDimensions);
     addGlobalFunc('procedure TControl.AdjustSize();', @TControl_AdjustSize);
     addGlobalFunc('function TControl.AutoSizeDelayed(): boolean;', @TControl_AutoSizeDelayed);
     addGlobalFunc('function TControl.AutoSizeDelayedReport(): string;', @TControl_AutoSizeDelayedReport);

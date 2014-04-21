@@ -51,20 +51,29 @@ uses
 {/\
   Returns a GaussianMatrix with size of X*X, where X is Nth odd-number.
 /\}
-function GaussMatrix(N : integer; sigma : extended) : T2DExtendedArray;
+function GaussMatrix(N:Integer; Sigma:Extended): T2DExtendedArray;
 var
-  x,y,mid : integer;
-  Val : TExtendedArray;
+  hkernel:Array of Extended;
+  Size,i,x,y:Integer;
+  sum:Extended;
 begin
-  N := N * 2-  1;
-  SetLength(Result,N);
-  for x := 0 to n-1 do
-    Setlength(result[x],N);
-  mid := n div 2;
-  Val := DiscreteGauss(-mid,mid,sigma);
-  for x := 0 to n-1 do
-    for y := 0 to n-1 do
-      Result[x][y] := Val[x] * Val[y];
+  Size := 2*N+1;
+  SetLength(hkernel, Size);
+  for i:=0 to Size-1 do
+    hkernel[i] := Exp(-(Sqr((i-N) / Sigma)) / 2.0);
+
+  SetLength(Result, Size, Size);
+  sum:=0;
+  for y:=0 to Size-1 do
+    for x:=0 to Size-1 do
+    begin
+      Result[y][x] := hkernel[x]*hkernel[y];
+      Sum := Sum + Result[y][x];
+    end;
+
+  for y := 0 to Size-1 do
+    for x := 0 to Size-1 do
+      Result[y][x] := Result[y][x] / sum;
 end;
 
 {/\
