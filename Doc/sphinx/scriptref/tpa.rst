@@ -1074,3 +1074,36 @@ CopyATPA
 
 Returns the T2DPointArray ATPA
 
+
+PartitionTPA
+------------
+
+.. code-block:: pascal
+
+    function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: integer): T2DPointArray;
+
+Partitions the TPA in boxes of BoxWidth and BoxHeight.
+
+The following example will partition a TPA in boxes of 10 width, 10 height and debug it.
+
+.. code-block:: pascal
+
+  program PartitionTPA_Test;
+   var
+     tpa: TPointArray;
+     atpa: T2DPointArray;
+     canvas: integer;
+  begin
+    tpa := TPAFromEllipse(50, 50, 33, 45);
+    FillEllipse(tpa);
+    atpa := PartitionTPA(tpa, 10, 10);
+
+    // debugging the result
+    canvas := CreateBitmap(100, 100);
+    DrawATPABitmap(canvas, atpa);
+    ClearDebugImg();
+    DisplayDebugImgWindow(100, 100);
+    DrawBitmapDebugImg(canvas);
+    FreeBitmap(canvas);
+  end.  
+
