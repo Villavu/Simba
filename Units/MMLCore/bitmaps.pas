@@ -1762,42 +1762,48 @@ end;
 
 procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix: T2DExtendedArray);
 var
-  x,y,xx,yy : integer;
-  mw,mh : integer; //Matrix-Width/Matrix-height;
+  x,y,yy,xx,cx,cy: Integer;
   Row,RowT : TPRGB32Array;
-  R,G,B : extended;
-  midX,midY : integer;
-  xmax,ymax : integer;
+  mW,mH,midx,midy:Integer;
+  valR,valG,valB: Extended;
+
+procedure ForceInBounds(x,y, Wid,Hig: Int32; out cx,cy: Int32); Inline;
 begin
-  mw := Length(Matrix);
-  mh := Length(Matrix[0]);
-  if ((mw mod 2) = 0) or ((mh mod 2) = 0) then
-    exit;
-  TargetBitmap.SetSize(w,h);
+  cx := x;
+  cy := y;
+  if cx >= Wid then   cx := Wid-1
+  else if cx < 0 then cx := 0;
+  if cy >= Hig then   cy := Hig-1
+  else if cy < 0 then cy := 0;
+end;
+
+begin
+  TargetBitmap.SetSize(Self.W,Self.H);
   Row := RowPtrs;
   RowT := TargetBitmap.RowPtrs; //Target
-  midX := mw div 2;
-  midY := mh div 2;
-  xmax := w-1-midX;
-  ymax := h-1-midY;
-  dec(mw); dec(mh); //Faster in loop.
-  for x := midx to xmax do
-    for y := midy to ymax do
+
+  mW := High(Matrix[0]);
+  mH := High(Matrix);
+  midx := (mW+1) div 2;
+  midy := (mH+1) div 2;
+  for y:=0 to Self.H-1 do
+    for x:=0 to Self.W-1 do
     begin
-      R := 0;
-      G := 0;
-      B := 0;
-      for xx := mw downto 0 do // for xx := x - midx to x + midx do
-        for yy := mh downto 0 do
+      valR := 0;
+      valG := 0;
+      valB := 0;
+      for yy:=0 to mH do
+        for xx:=0 to mW do
         begin
-          r := r + Row[y+yy-midy][x+xx-midx].r * Matrix[xx][yy];
-          g := g + Row[y+yy-midy][x+xx-midx].g * Matrix[xx][yy];
-          b := b + Row[y+yy-midy][x+xx-midx].b * Matrix[xx][yy];
+          ForceInBounds(x+xx-midx, y+yy-midy, Self.W, Self.H, cx, cy);
+          valR := valR + (Matrix[yy][xx] * Row[cy][cx].R);
+          valG := valG + (Matrix[yy][xx] * Row[cy][cx].G);
+          valB := valB + (Matrix[yy][xx] * Row[cy][cx].B);
         end;
-      RowT[y][x].r := round(r);
-      RowT[y][x].g := round(g);
-      RowT[y][x].b := round(b);
-    end;
+      RowT[y][x].R := round(valR);
+      RowT[y][x].G := round(valG);
+      RowT[y][x].B := round(valB);;
+  end;
 end;
 
 function TMufasaBitmap.CreateTMask: TMask;
