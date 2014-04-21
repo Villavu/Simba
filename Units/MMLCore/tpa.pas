@@ -117,6 +117,7 @@ function SameTPA(const aTPA, bTPA: TPointArray): Boolean;
 function TPAInATPA(const TPA: TPointArray;const InATPA: T2DPointArray; var Index: LongInt): Boolean;
 procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
 procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
+function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
 
 implementation
 
@@ -3251,6 +3252,30 @@ var
 begin
   for i := high(ATPA) downto 0 do
     OffsetTPA(ATPA[i],Offset);
+end;
+
+function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
+var
+  i,x,y,id,l,cols,rows,h:Integer;
+  Area:TBox;
+begin
+  H := High(TPA);
+  if (H < 0) then Exit;
+  Area := GetTPABounds(TPA);
+  Area.X2 := (Area.X2 - Area.X1) + 1;  //Width
+  Area.Y2 := (Area.Y2 - Area.Y1) + 1;  //Height
+  Cols := Ceil(Area.X2 / BoxWidth);
+  Rows := Ceil(Area.Y2 / BoxHeight);
+  SetLength(Result, (Cols+1)*(Rows+1));
+  for i:=0 to H do
+  begin
+    X := (TPA[i].x-Area.x1) div BoxWidth;
+    Y := (TPA[i].y-Area.y1) div BoxHeight;
+    ID := (Y*Cols)+X;
+    L := Length(Result[ID]);
+    SetLength(Result[ID], L+1);
+    Result[ID][L] := TPA[i];
+  end;
 end;
 
 end.

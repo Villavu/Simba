@@ -548,4 +548,9 @@ begin
   P2DPointArray(Result)^ := ps_ClusterTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+procedure Lape_PartitionTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DPointArray(Result)^ := ps_PartitionTPA(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
 
