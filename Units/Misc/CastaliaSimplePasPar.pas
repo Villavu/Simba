@@ -248,6 +248,7 @@ type
     procedure CompoundStatement; virtual;
     procedure ConstantColon; virtual;
     procedure ConstantDeclaration; virtual;
+    procedure ConstantAssign; virtual;
     procedure ConstantEqual; virtual;
     procedure ConstantExpression; virtual;
     procedure ConstantName; virtual;
@@ -2218,55 +2219,30 @@ begin
 end;
 
 procedure TmwSimplePasPar.ForStatement;
+var
+  typ: TptTokenKind;
 begin
   Expected(tokFor);
-  QualifiedIdentifier;
-  {$IFDEF D8_NEWER}
-  if Lexer.TokenID = tokAssign then
+
+  if (Lexer.TokenID = tokIdentifier) then
   begin
-    Expected(tokAssign);
-    Expression;
+    QualifiedIdentifier;
+    typ := Lexer.TokenID;  //Should be tokIn or tokAssign =)
+    Expected(typ);
+  end;
+
+  Expression;
+
+  if (typ <> tokIn) then
+  begin
     case TokenID of
-      tokTo:
-        begin
-          NextToken;
-        end;
-      tokDownTo:
-        begin
-          NextToken;
-        end;
-    else
-      begin
+      tokTo, tokDownTo: NextToken;
+      else
         SynError(InvalidForStatement);
-      end;
     end;
     Expression;
-  end else
-  if Lexer.TokenID = tokIn then
-  begin
-    Expected(tokIn);
-    //QualifiedIdentifier;
-    Expression;
   end;
-  {$ELSE}
-  Expected(tokAssign);
-  Expression;
-  case TokenID of
-    tokTo:
-      begin
-        NextToken;
-      end;
-    tokDownTo:
-      begin
-        NextToken;
-      end;
-  else
-    begin
-      SynError(InvalidForStatement);
-    end;
-  end;
-  Expression;
-  {$ENDIF}
+
   Expected(tokDo);
   Statement;
 end;
@@ -3101,8 +3077,12 @@ procedure TmwSimplePasPar.VarDeclaration;
 begin
   // !! Changed back to var name list from IdentifierList
   VarNameList;
-  Expected(tokColon);
-  TypeKind;
+  if (TokenID = tokColon) then
+  begin
+    Expected(tokColon);
+    TypeKind;
+  end;
+
   while ExID in [tokDeprecated, tokLibrary, tokPlatform] do // DR 2001-10-20
     case ExID of
       tokDeprecated: DirectiveDeprecated;
@@ -3131,7 +3111,7 @@ end;
 procedure TmwSimplePasPar.VarEqual;
 begin
   Expected(tokEqual);
-  ConstantValueTyped;
+  ConstantValue;
 end;
 
 procedure TmwSimplePasPar.VarAssign;
@@ -4787,6 +4767,10 @@ procedure TmwSimplePasPar.ConstantDeclaration;
 begin
   ConstantName;
   case TokenID of
+    tokAssign:
+      begin
+        ConstantAssign;
+      end;
     tokEqual:
       begin
         ConstantEqual;
@@ -4814,6 +4798,12 @@ begin
 //JR changed to constant Type
   ConstantType;
   Expected(tokEqual);
+  ConstantValueTyped;
+end;
+
+procedure TmwSimplePasPar.ConstantAssign;
+begin
+  Expected(tokAssign);
   ConstantValueTyped;
 end;
 

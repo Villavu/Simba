@@ -1011,15 +1011,15 @@ procedure TCodeParser.ParseFile;
 begin
   SkipJunk;
   case GenID of
-    TokLibrary:
+    tokLibrary:
       begin
         LibraryFile;
       end;
-    TokPackage:
+    tokPackage:
       begin
         PackageFile;
       end;
-    TokUnit:
+    tokUnit:
       begin
         UnitFile;
       end;
@@ -1050,7 +1050,11 @@ begin
       if (TokenID = TokBegin) then
       begin
         CompoundStatement;
-        Expected(TokPoint);
+
+        if (TokenID = tokSemiColon) then    //NOTE: Lape allows semicolon =)  (Used for Include initialization)
+          Expected(tokSemiColon)
+        else
+          Expected(tokPoint);
       end;
     end;
   end;

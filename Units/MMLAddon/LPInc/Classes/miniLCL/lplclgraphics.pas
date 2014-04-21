@@ -823,7 +823,7 @@ begin
 
     addGlobalFunc('procedure TCanvas.Lock();', @TCanvas_Lock);
     addGlobalFunc('function TCanvas.TryLock(): Boolean;', @TCanvas_TryLock);
-    addGlobalFunc('procedure TCanvas.Unlock;();', @TCanvas_Unlock);
+    addGlobalFunc('procedure TCanvas.Unlock();', @TCanvas_Unlock);
     addGlobalFunc('procedure TCanvas.Refresh();', @TCanvas_Refresh);
     addGlobalFunc('procedure TCanvas.Changing();', @TCanvas_Changing);
     addGlobalFunc('procedure TCanvas.Changed();', @TCanvas_Changed);
