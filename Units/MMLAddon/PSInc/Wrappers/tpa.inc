@@ -549,3 +549,8 @@ procedure ps_FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer); 
 begin
   FilterPointsBox(points, x1, y1, x2, y2);
 end;
+
+function ps_PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray; extdecl;
+begin
+  Result := PartitionTPA(TPA, BoxWidth, BoxHeight);
+end;
