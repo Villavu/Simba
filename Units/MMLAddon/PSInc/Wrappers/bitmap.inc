@@ -399,12 +399,16 @@ begin
 end;
 
 procedure ps_ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); extdecl;
-var
-  Matrix: T2DIntegerArray;
 begin
-  Matrix := CurrThread.Client.MBitmaps[bmp].ToMatrix();
-  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, Invert, Method, C);
-  CurrThread.Client.MBitmaps[bmp].DrawMatrix(Matrix);
-  SetLength(Matrix, 0);
+  CurrThread.Client.MBitmaps[bmp].ThresholdAdaptive(Alpha, Beta, Invert, Method, C);
 end;
 
+procedure ps_BlurBitmap(const bmp, block: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Blur(block);
+end;
+
+procedure ps_BlurMatrix(var Matrix: T2DIntegerArray; const Block: integer); extdecl;
+begin
+  BlurMatrix(Matrix, Block);
+end;

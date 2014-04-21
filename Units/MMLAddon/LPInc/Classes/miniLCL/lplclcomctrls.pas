@@ -11,7 +11,7 @@ uses
 procedure RegisterLCLComCtrls(Compiler: TLapeCompiler);
 
 implementation
-  uses MufasaTypes,stdctrls,forms,lplclsystem,lplclgraphics,lplclcontrols, ComCtrls, CheckLst;
+  uses MufasaTypes,stdctrls,forms,lplclsystem,lplclgraphics,lplclcontrols, ComCtrls, CheckLst, Controls;
 
 type
   PCustomProgressBar = ^TCustomProgressBar;
@@ -44,6 +44,16 @@ type
 
   PPageControl = ^TPageControl;
   PTabSheet = ^TTabSheet;
+
+  PStatusPanel = ^TStatusPanel;
+  PStatusBar = ^TStatusBar;
+  PAlignment = ^TAlignment;
+  PStatusPanelBevel = ^TStatusPanelBevel;
+  PStatusPanelStyle = ^TStatusPanelStyle;
+  PStatusPanels = ^TStatusPanels;
+  PPanelPart = ^TPanelPart;
+  PPanelParts = ^TPanelParts;
+  PCaption = ^TCaption;
 
 procedure TCustomProgressBar_Init(const Params: PParamArray); lape_extdecl
 begin
@@ -1021,6 +1031,306 @@ begin
   end;
 end;
 
+procedure Register_TStatusBar_Forward(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+    addClass('TStatusBar', 'TWinControl');
+end;
+
+//function StatusBar: TStatusBar;
+procedure TStatusPanel_StatusBar(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStatusBar(Result)^ := PStatusPanel(Params^[0])^.StatusBar();
+end;
+
+//Read: property Alignment: TAlignment read FAlignment write SetAlignment default taLeftJustify;
+procedure TStatusPanel_Alignment_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlignment(Result)^ := PStatusPanel(Params^[0])^.Alignment;
+end;
+
+//Write: property Alignment: TAlignment read FAlignment write SetAlignment default taLeftJustify;
+procedure TStatusPanel_Alignment_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanel(Params^[0])^.Alignment := PAlignment(Params^[1])^;
+end;
+
+//Read: property Bevel: TStatusPanelBevel read FBevel write SetBevel default pbLowered;
+procedure TStatusPanel_Bevel_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStatusPanelBevel(Result)^ := PStatusPanel(Params^[0])^.Bevel;
+end;
+
+//Write: property Bevel: TStatusPanelBevel read FBevel write SetBevel default pbLowered;
+procedure TStatusPanel_Bevel_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanel(Params^[0])^.Bevel := PStatusPanelBevel(Params^[1])^;
+end;
+
+//Read: property Style: TStatusPanelStyle read FStyle write SetStyle default psText;
+procedure TStatusPanel_Style_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStatusPanelStyle(Result)^ := PStatusPanel(Params^[0])^.Style;
+end;
+
+//Write: property Style: TStatusPanelStyle read FStyle write SetStyle default psText;
+procedure TStatusPanel_Style_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanel(Params^[0])^.Style := PStatusPanelStyle(Params^[1])^;
+end;
+
+//Read: property Text: TCaption read FText write SetText;
+procedure TStatusPanel_Text_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+ PLPString(Result)^ := PStatusPanel(Params^[0])^.Text;
+end;
+
+//Write: property Text: TCaption read FText write SetText;
+procedure TStatusPanel_Text_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanel(Params^[0])^.Text := PCaption(Params^[1])^;
+end;
+
+//Read: property Width: Integer read FWidth write SetWidth;
+procedure TStatusPanel_Width_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PStatusPanel(Params^[0])^.Width;
+end;
+
+//Write: property Width: Integer read FWidth write SetWidth;
+procedure TStatusPanel_Width_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanel(Params^[0])^.Width := PInteger(Params^[1])^;
+end;
+
+//constructor Create();
+procedure TStatusPanel_Init(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanel(Params^[0])^ := TStatusPanel.Create(PCollection(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TStatusPanel_Free(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanel(Params^[0])^.Free();
+end;
+
+procedure Register_TStatusPanel(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TStatusPanel', 'TCollectionItem');
+
+    addGlobalFunc('function TStatusPanel.StatusBar(): TStatusBar;', @TStatusPanel_StatusBar);
+    addClassVar('TStatusPanel', 'Alignment', 'TAlignment', @TStatusPanel_Alignment_Read, @TStatusPanel_Alignment_Write);
+    addClassVar('TStatusPanel', 'Bevel', 'TStatusPanelBevel', @TStatusPanel_Bevel_Read, @TStatusPanel_Bevel_Write);
+    addClassVar('TStatusPanel', 'Style', 'TStatusPanelStyle', @TStatusPanel_Style_Read, @TStatusPanel_Style_Write);
+    addClassVar('TStatusPanel', 'Text', 'TCaption', @TStatusPanel_Text_Read, @TStatusPanel_Text_Write);
+    addClassVar('TStatusPanel', 'Width', 'Integer', @TStatusPanel_Width_Read, @TStatusPanel_Width_Write);
+    addGlobalFunc('procedure TStatusPanel.Init(ACollection: TCollection);', @TStatusPanel_Init);
+    addGlobalFunc('procedure TStatusPanel.Free();', @TStatusPanel_Free);
+  end;
+end;
+
+//constructor Create(AStatusBar: TStatusBar);
+procedure TStatusPanels_Init(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanels(Params^[0])^ := TStatusPanels.Create(PStatusBar(Params^[1])^);
+end;
+
+//function Add: TStatusPanel;
+procedure TStatusPanels_Add(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStatusPanel(Result)^ := PStatusPanels(Params^[0])^.Add();
+end;
+
+//Read: property Items[Index: Integer]: TStatusPanel read GetItem write SetItem; default;
+procedure TStatusPanels_Items_Index_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStatusPanel(Result)^ := PStatusPanels(Params^[0])^.Items[PInteger(Params^[1])^];
+end;
+
+//Write: property Items[Index: Integer]: TStatusPanel read GetItem write SetItem; default;
+procedure TStatusPanels_Items_Index_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanels(Params^[0])^.Items[PInteger(Params^[1])^] := PStatusPanel(Params^[2])^;
+end;
+
+//Read: property StatusBar: TStatusBar read FStatusBar;
+procedure TStatusPanels_StatusBar_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStatusBar(Result)^ := PStatusPanels(Params^[0])^.StatusBar;
+end;
+
+//procedure Free();
+procedure TStatusPanels_Free(const Params: PParamArray); lape_extdecl
+begin
+  PStatusPanels(Params^[0])^.Free();
+end;
+
+procedure Register_TStatusPanels(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TStatusPanels', 'TCollection');
+
+    addGlobalFunc('procedure TStatusPanels.Init(AStatusBar: TStatusBar);', @TStatusPanels_Init);
+    addGlobalFunc('function TStatusPanels.Add(): TStatusPanel;', @TStatusPanels_Add);
+    addClassVar('TStatusPanels', 'Items', 'TStatusPanel', @TStatusPanels_Items_Index_Read, @TStatusPanels_Items_Index_Write, True); // array
+    addClassVar('TStatusPanels', 'StatusBar', 'TStatusBar', @TStatusPanels_StatusBar_Read, nil);
+    addGlobalFunc('procedure TStatusPanels.Free();', @TStatusPanels_Free);
+  end;
+end;
+
+//procedure InvalidatePanel(PanelIndex: integer; PanelParts: TPanelParts); virtual;
+procedure TStatusBar_InvalidatePanel(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.InvalidatePanel(Pinteger(Params^[1])^, PPanelParts(Params^[2])^);
+end;
+
+//procedure BeginUpdate;
+procedure TStatusBar_BeginUpdate(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.BeginUpdate();
+end;
+
+//procedure EndUpdate;
+procedure TStatusBar_EndUpdate(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.EndUpdate();
+end;
+
+//function GetPanelIndexAt(X, Y: Integer): Integer;
+procedure TStatusBar_GetPanelIndexAt(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PStatusBar(Params^[0])^.GetPanelIndexAt(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+//function SizeGripEnabled: Boolean;
+procedure TStatusBar_SizeGripEnabled(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PStatusBar(Params^[0])^.SizeGripEnabled();
+end;
+
+//function UpdatingStatusBar: boolean;
+procedure TStatusBar_UpdatingStatusBar(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PStatusBar(Params^[0])^.UpdatingStatusBar();
+end;
+
+//Read: property Canvas: TCanvas read FCanvas;
+procedure TStatusBar_Canvas_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCanvas(Result)^ := PStatusBar(Params^[0])^.Canvas;
+end;
+
+//Read: property AutoHint: Boolean read FAutoHint write FAutoHint default false;
+procedure TStatusBar_AutoHint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PStatusBar(Params^[0])^.AutoHint;
+end;
+
+//Write: property AutoHint: Boolean read FAutoHint write FAutoHint default false;
+procedure TStatusBar_AutoHint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.AutoHint := PBoolean(Params^[1])^;
+end;
+
+//Read: property Panels: TStatusPanels read FPanels write SetPanels;
+procedure TStatusBar_Panels_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStatusPanels(Result)^ := PStatusBar(Params^[0])^.Panels;
+end;
+
+//Write: property Panels: TStatusPanels read FPanels write SetPanels;
+procedure TStatusBar_Panels_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.Panels := PStatusPanels(Params^[1])^;
+end;
+
+//Read: property SimpleText: TCaption read FSimpleText write SetSimpleText;
+procedure TStatusBar_SimpleText_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCaption(Result)^ := PStatusBar(Params^[0])^.SimpleText;
+end;
+
+//Write: property SimpleText: TCaption read FSimpleText write SetSimpleText;
+procedure TStatusBar_SimpleText_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.SimpleText := PCaption(Params^[1])^;
+end;
+
+//Read: property SimplePanel: Boolean read FSimplePanel write SetSimplePanel default True;
+procedure TStatusBar_SimplePanel_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PStatusBar(Params^[0])^.SimplePanel;
+end;
+
+//Write: property SimplePanel: Boolean read FSimplePanel write SetSimplePanel default True;
+procedure TStatusBar_SimplePanel_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.SimplePanel := PBoolean(Params^[1])^;
+end;
+
+//Read: property SizeGrip: Boolean read FSizeGrip write SetSizeGrip default True;
+procedure TStatusBar_SizeGrip_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PStatusBar(Params^[0])^.SizeGrip;
+end;
+
+//Write: property SizeGrip: Boolean read FSizeGrip write SetSizeGrip default True;
+procedure TStatusBar_SizeGrip_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.SizeGrip := PBoolean(Params^[1])^;
+end;
+
+//Read: property OnHint: TNotifyEvent read FOnHint write FOnHint;
+procedure TStatusBar_OnHint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PStatusBar(Params^[0])^.OnHint;
+end;
+
+//Write: property OnHint: TNotifyEvent read FOnHint write FOnHint;
+procedure TStatusBar_OnHint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.OnHint := PNotifyEvent(Params^[1])^;
+end;
+
+//constructor Create();
+procedure TStatusBar_Init(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^ := TStatusBar.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TStatusBar_Free(const Params: PParamArray); lape_extdecl
+begin
+  PStatusBar(Params^[0])^.Free();
+end;
+
+procedure Register_TStatusBar(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addGlobalFunc('procedure TStatusBar.InvalidatePanel(PanelIndex: integer; PanelParts: TPanelParts);', @TStatusBar_InvalidatePanel);
+    addGlobalFunc('procedure TStatusBar.BeginUpdate();', @TStatusBar_BeginUpdate);
+    addGlobalFunc('procedure TStatusBar.EndUpdate();', @TStatusBar_EndUpdate);
+    addGlobalFunc('function TStatusBar.GetPanelIndexAt(X, Y: Integer): Integer;', @TStatusBar_GetPanelIndexAt);
+    addGlobalFunc('function TStatusBar.SizeGripEnabled(): Boolean;', @TStatusBar_SizeGripEnabled);
+    addGlobalFunc('function TStatusBar.UpdatingStatusBar(): boolean;', @TStatusBar_UpdatingStatusBar);
+    addClassVar('TStatusBar', 'Canvas', 'TCanvas', @TStatusBar_Canvas_Read, nil);
+    addClassVar('TStatusBar', 'AutoHint', 'Boolean', @TStatusBar_AutoHint_Read, @TStatusBar_AutoHint_Write);
+    addClassVar('TStatusBar', 'Panels', 'TStatusPanels', @TStatusBar_Panels_Read, @TStatusBar_Panels_Write);
+    addClassVar('TStatusBar', 'SimpleText', 'TCaption', @TStatusBar_SimpleText_Read, @TStatusBar_SimpleText_Write);
+    addClassVar('TStatusBar', 'SimplePanel', 'Boolean', @TStatusBar_SimplePanel_Read, @TStatusBar_SimplePanel_Write);
+    addClassVar('TStatusBar', 'SizeGrip', 'Boolean', @TStatusBar_SizeGrip_Read, @TStatusBar_SizeGrip_Write);
+    addClassVar('TStatusBar', 'OnHint', 'TNotifyEvent', @TStatusBar_OnHint_Read, @TStatusBar_OnHint_Write);
+    addGlobalFunc('procedure TStatusBar.Init(TheOwner: TComponent);', @TStatusBar_Init);
+    addGlobalFunc('procedure TStatusBar.Free();', @TStatusBar_Free);
+  end;
+end;
+
+
 procedure RegisterLCLComCtrls(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1032,13 +1342,17 @@ begin
      addGlobalType('(tsNone, tsAuto, tsManual)', 'TTickStyle');
      addGlobalType('(trLeft, trRight, trTop, trBottom)', 'TTrackBarScalePos');
      addGlobalType('procedure(Sender: TObject; Index: integer)', 'TCheckListClicked');
-
      addGlobalType('procedure(Sender: TObject; var AllowChange: Boolean)', 'TTabChangingEvent');
      addGlobalType('(tsTabs, tsButtons, tsFlatButtons)', 'TTabStyle');
      addGlobalType('(tpTop, tpBottom, tpLeft, tpRight)', 'TTabPosition');
      addGlobalType('(nboShowCloseButtons, nboMultiLine, nboHidePageListPopup, nboKeyboardTabSwitch, nboShowAddTabButton)', 'TCTabControlOption');
      addGlobalType('set of TCTabControlOption', 'TCTabControlOptions');
+     addGlobalType('(ppText, ppBorder, ppWidth)', 'TPanelPart');
+     addGlobalType('set of TPanelPart', 'TPanelParts');
+     addGlobalType('(psText, psOwnerDraw)', 'TStatusPanelStyle');
+     addGlobalType('(pbNone, pbLowered, pbRaised)', 'TStatusPanelBevel');
    end;
+
   Register_TCustomProgressBar(Compiler);
   Register_TProgressBar(Compiler);
   Register_TCustomTrackBar(Compiler);
@@ -1049,6 +1363,10 @@ begin
   Register_TCustomTabControl(Compiler);
   Register_TTabSheet(Compiler);
   Register_TPageControl(Compiler);
+  Register_TStatusBar_Forward(Compiler);
+  Register_TStatusPanel(Compiler);
+  Register_TStatusPanels(Compiler);
+  Register_TStatusBar(Compiler);
 end;
 
 end.

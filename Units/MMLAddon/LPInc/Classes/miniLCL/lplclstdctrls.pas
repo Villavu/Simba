@@ -11,7 +11,7 @@ uses
 procedure RegisterLCLStdCtrls(Compiler: TLapeCompiler);
 
 implementation
-  uses MufasaTypes,stdctrls,forms,lplclsystem,lplclgraphics,lplclcontrols;
+  uses MufasaTypes,stdctrls,forms,lplclsystem,lplclgraphics,lplclcontrols, Buttons;
 
 type
   PCustomScrollBar = ^TCustomScrollBar;
@@ -53,6 +53,11 @@ type
   //TLabel
   PCustomLabel = ^TCustomLabel;
   PLabel = ^TLabel;
+  //TSpeedButton
+  PCustomSpeedButton = ^TCustomSpeedButton;
+  PSpeedButton = ^TSpeedButton;
+  PButtonLayout = ^TButtonLayout;
+
 {TCustomScrollBar}
 
 //constructor Create(AOwner: TComponent);
@@ -1072,6 +1077,16 @@ begin
   PEdit(Params^[0])^ := TEdit.Create(PComponent(Params^[1])^);
 end;
 
+procedure TEdit_OnEditingDone_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PEdit(Params^[0])^.OnEditingDone;
+end;
+
+procedure TEdit_OnEditingDone_Write(const Params: PParamArray); lape_extdecl
+begin
+  PEdit(Params^[0])^.OnEditingDone := PNotifyEvent(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TEdit_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -1084,6 +1099,7 @@ begin
   begin
     addClass('TEdit', 'TCustomEdit');
 
+    addClassVar('TEdit', 'OnEditingDone', 'TNotifyEvent', @TEdit_OnEditingDone_Read, @TEdit_OnEditingDone_Write);
     addGlobalFunc('procedure TEdit.Init(AOwner: TComponent);', @TEdit_Init);
     addGlobalFunc('procedure TEdit.Free();', @TEdit_Free);
   end;
@@ -1712,6 +1728,224 @@ begin
     addGlobalFunc('procedure TLabel.Free();', @TLabel_Free);
   end;
 end;
+
+//function FindDownButton: TCustomSpeedButton;
+procedure TCustomSpeedButton_FindDownButton(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCustomSpeedButton(Result)^ := PCustomSpeedButton(Params^[0])^.FindDownButton();
+end;
+
+//procedure LoadGlyphFromLazarusResource(const AName: String);
+procedure TCustomSpeedButton_LoadGlyphFromLazarusResource(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.LoadGlyphFromLazarusResource(PlpString(Params^[1])^);
+end;
+
+//Read: property AllowAllUp: Boolean read FAllowAllUp write SetAllowAllUp default false;
+procedure TCustomSpeedButton_AllowAllUp_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.AllowAllUp;
+end;
+
+//Write: property AllowAllUp: Boolean read FAllowAllUp write SetAllowAllUp default false;
+procedure TCustomSpeedButton_AllowAllUp_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.AllowAllUp := PBoolean(Params^[1])^;
+end;
+
+//Read: property Down: Boolean read FDown write SetDown default false;
+procedure TCustomSpeedButton_Down_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Down;
+end;
+
+//Write: property Down: Boolean read FDown write SetDown default false;
+procedure TCustomSpeedButton_Down_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.Down := PBoolean(Params^[1])^;
+end;
+
+//Read: property Flat: Boolean read FFlat write SetFlat default false;
+procedure TCustomSpeedButton_Flat_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Flat;
+end;
+
+//Write: property Flat: Boolean read FFlat write SetFlat default false;
+procedure TCustomSpeedButton_Flat_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.Flat := PBoolean(Params^[1])^;
+end;
+
+//Read: property Glyph: TBitmap read GetGlyph write SetGlyph;
+procedure TCustomSpeedButton_Glyph_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBitmap(Result)^ := PCustomSpeedButton(Params^[0])^.Glyph;
+end;
+
+//Write: property Glyph: TBitmap read GetGlyph write SetGlyph;
+procedure TCustomSpeedButton_Glyph_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.Glyph := PBitmap(Params^[1])^;
+end;
+
+//Read: property GroupIndex: Integer read FGroupIndex write SetGroupIndex default 0;
+procedure TCustomSpeedButton_GroupIndex_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomSpeedButton(Params^[0])^.GroupIndex;
+end;
+
+//Write: property GroupIndex: Integer read FGroupIndex write SetGroupIndex default 0;
+procedure TCustomSpeedButton_GroupIndex_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.GroupIndex := PInteger(Params^[1])^;
+end;
+
+//Read: property Layout: TButtonLayout read FLayout write SetLayout default blGlyphLeft;
+procedure TCustomSpeedButton_Layout_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PButtonLayout(Result)^ := PCustomSpeedButton(Params^[0])^.Layout;
+end;
+
+//Write: property Layout: TButtonLayout read FLayout write SetLayout default blGlyphLeft;
+procedure TCustomSpeedButton_Layout_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.Layout := PButtonLayout(Params^[1])^;
+end;
+
+//Read: property Margin: integer read FMargin write SetMargin default -1;
+procedure TCustomSpeedButton_Margin_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomSpeedButton(Params^[0])^.Margin;
+end;
+
+//Write: property Margin: integer read FMargin write SetMargin default -1;
+procedure TCustomSpeedButton_Margin_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.Margin := Pinteger(Params^[1])^;
+end;
+
+//Read: property NumGlyphs: Integer read GetNumGlyphs write SetNumGlyphs default 1;
+procedure TCustomSpeedButton_NumGlyphs_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCustomSpeedButton(Params^[0])^.NumGlyphs;
+end;
+
+//Write: property NumGlyphs: Integer read GetNumGlyphs write SetNumGlyphs default 1;
+procedure TCustomSpeedButton_NumGlyphs_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.NumGlyphs := PInteger(Params^[1])^;
+end;
+
+//Read: property ShowAccelChar: boolean read FShowAccelChar write SetShowAccelChar default true;
+procedure TCustomSpeedButton_ShowAccelChar_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomSpeedButton(Params^[0])^.ShowAccelChar;
+end;
+
+//Write: property ShowAccelChar: boolean read FShowAccelChar write SetShowAccelChar default true;
+procedure TCustomSpeedButton_ShowAccelChar_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.ShowAccelChar := Pboolean(Params^[1])^;
+end;
+
+//Read: property ShowCaption: boolean read FShowCaption write SetShowCaption default true;
+procedure TCustomSpeedButton_ShowCaption_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomSpeedButton(Params^[0])^.ShowCaption;
+end;
+
+//Write: property ShowCaption: boolean read FShowCaption write SetShowCaption default true;
+procedure TCustomSpeedButton_ShowCaption_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.ShowCaption := Pboolean(Params^[1])^;
+end;
+
+//Read: property Spacing: integer read FSpacing write SetSpacing default 4;
+procedure TCustomSpeedButton_Spacing_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomSpeedButton(Params^[0])^.Spacing;
+end;
+
+//Write: property Spacing: integer read FSpacing write SetSpacing default 4;
+procedure TCustomSpeedButton_Spacing_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.Spacing := Pinteger(Params^[1])^;
+end;
+
+//Read: property Transparent: Boolean read GetTransparent write SetTransparent default true;
+procedure TCustomSpeedButton_Transparent_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Transparent;
+end;
+
+//Write: property Transparent: Boolean read GetTransparent write SetTransparent default true;
+procedure TCustomSpeedButton_Transparent_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.Transparent := PBoolean(Params^[1])^;
+end;
+
+//constructor Create();
+procedure TCustomSpeedButton_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^ := TCustomSpeedButton.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TCustomSpeedButton_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCustomSpeedButton(Params^[0])^.Free();
+end;
+
+procedure Register_TCustomSpeedButton(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TCustomSpeedButton', 'TGraphicControl');
+
+    addGlobalFunc('function TCustomSpeedButton.FindDownButton(): TCustomSpeedButton;', @TCustomSpeedButton_FindDownButton);
+    addGlobalFunc('procedure TCustomSpeedButton.LoadGlyphFromLazarusResource(const AName: String);', @TCustomSpeedButton_LoadGlyphFromLazarusResource);
+    addClassVar('TCustomSpeedButton', 'AllowAllUp', 'Boolean', @TCustomSpeedButton_AllowAllUp_Read, @TCustomSpeedButton_AllowAllUp_Write);
+    addClassVar('TCustomSpeedButton', 'Down', 'Boolean', @TCustomSpeedButton_Down_Read, @TCustomSpeedButton_Down_Write);
+    addClassVar('TCustomSpeedButton', 'Flat', 'Boolean', @TCustomSpeedButton_Flat_Read, @TCustomSpeedButton_Flat_Write);
+    addClassVar('TCustomSpeedButton', 'Glyph', 'TBitmap', @TCustomSpeedButton_Glyph_Read, @TCustomSpeedButton_Glyph_Write);
+    addClassVar('TCustomSpeedButton', 'GroupIndex', 'Integer', @TCustomSpeedButton_GroupIndex_Read, @TCustomSpeedButton_GroupIndex_Write);
+    addClassVar('TCustomSpeedButton', 'Layout', 'TButtonLayout', @TCustomSpeedButton_Layout_Read, @TCustomSpeedButton_Layout_Write);
+    addClassVar('TCustomSpeedButton', 'Margin', 'integer', @TCustomSpeedButton_Margin_Read, @TCustomSpeedButton_Margin_Write);
+    addClassVar('TCustomSpeedButton', 'NumGlyphs', 'Integer', @TCustomSpeedButton_NumGlyphs_Read, @TCustomSpeedButton_NumGlyphs_Write);
+    addClassVar('TCustomSpeedButton', 'ShowAccelChar', 'boolean', @TCustomSpeedButton_ShowAccelChar_Read, @TCustomSpeedButton_ShowAccelChar_Write);
+    addClassVar('TCustomSpeedButton', 'ShowCaption', 'boolean', @TCustomSpeedButton_ShowCaption_Read, @TCustomSpeedButton_ShowCaption_Write);
+    addClassVar('TCustomSpeedButton', 'Spacing', 'integer', @TCustomSpeedButton_Spacing_Read, @TCustomSpeedButton_Spacing_Write);
+    addClassVar('TCustomSpeedButton', 'Transparent', 'Boolean', @TCustomSpeedButton_Transparent_Read, @TCustomSpeedButton_Transparent_Write);
+    addGlobalFunc('procedure TCustomSpeedButton.Init(AOwner: TComponent);', @TCustomSpeedButton_Init);
+    addGlobalFunc('procedure TCustomSpeedButton.Free();', @TCustomSpeedButton_Free);
+  end;
+end;
+
+//constructor Create();
+procedure TSpeedButton_Init(const Params: PParamArray); lape_extdecl
+begin
+  PSpeedButton(Params^[0])^ := TSpeedButton.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TSpeedButton_Free(const Params: PParamArray); lape_extdecl
+begin
+  PSpeedButton(Params^[0])^.Free();
+end;
+
+procedure Register_TSpeedButton(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TSpeedButton', 'TCustomSpeedButton');
+
+    addGlobalFunc('procedure TSpeedButton.Init(AOwner: TComponent);', @TSpeedButton_Init);
+    addGlobalFunc('procedure TSpeedButton.Free();', @TSpeedButton_Free);
+  end;
+end;
+
+
 {}
 procedure RegisterLCLStdCtrls(Compiler: TLapeCompiler);
 begin
@@ -1724,6 +1958,7 @@ begin
      addGlobalType('(sbsNone, sbsSingle, sbsSunken)','TStaticBorderStyle');
      addGlobalType('(taLeftJustify, taRightJustify, taCenter)','TAlignment');
      addGlobalType('(cbUnchecked, cbChecked, cbGrayed)','TCheckBoxState');
+     addGlobalType('(blGlyphLeft, blGlyphRight, blGlyphTop, blGlyphBottom)', 'TButtonLayout');
    end;
   Register_TCustomScrollBar(Compiler);
   Register_TScrollBar(Compiler);
@@ -1747,6 +1982,8 @@ begin
   Register_TCheckBox(Compiler);
   Register_TCustomLabel(Compiler);
   Register_TLabel(Compiler);
+  Register_TCustomSpeedButton(Compiler);
+  Register_TSpeedButton(Compiler);
 end;
 
 end.
