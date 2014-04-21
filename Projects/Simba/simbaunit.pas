@@ -40,7 +40,7 @@ uses
   mmlpsthread, // Code to use the interpreters in threads.
   synedittypes,
 
-  {$IFDEF MSWINDOWS} os_windows, windows,{$ENDIF} //For ColorPicker etc.
+  {$IFDEF MSWINDOWS} os_windows, windows, shellapi,{$ENDIF} //For ColorPicker etc.
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
 
   colourpicker, windowselector, // We need these for the Colour Picker and Window Selector
@@ -589,6 +589,10 @@ uses
    {$IFDEF LINUX_HOTKEYS}, keybinder{$ENDIF}
    ;
 
+
+{$IFDEF WINDOWS}
+function CheckTokenMembership(TokenHandle: THandle; SidToCheck: PSID; var IsMember: BOOL): BOOL; stdcall; external advapi32;
+{$ENDIF}
 
 { Exception handler }
 
@@ -1784,6 +1788,9 @@ var
   {$IFDEF USE_EXTENSIONS}Path: string;{$ENDIF}
   i: integer;
 begin
+  if (not Assigned(SimbaSettings)) then
+    Exit;
+
   with SimbaSettings.MMLSettings do
   begin
     if Self.WindowState = wsMaximized then
@@ -2716,20 +2723,27 @@ var
   i : integer;
 begin
   Exiting := True;
-  Self.SaveFormSettings;
 
-  for i := Tabs.Count - 1 downto 0 do
-    if not DeleteTab(i,true) then
-    begin;
-      CloseAction := caNone;
-      Exit;
-    end;
+  SaveFormSettings;
 
-  FunctionListTimer.Enabled := False;
-  frmFunctionList.Terminate;
+  if (Assigned(Tabs)) then
+    for i := Tabs.Count - 1 downto 0 do
+      if not DeleteTab(i,true) then
+      begin;
+        CloseAction := caNone;
+        Exit;
+      end;
+
+  if (Assigned(FunctionListTimer)) then
+    FunctionListTimer.Enabled := False;
+  if (Assigned(frmFunctionList)) then
+    frmFunctionList.Terminate;
 
   CloseAction := caFree;
-  {$IFDEF USE_EXTENSIONS}FreeAndNil(ExtManager);{$ENDIF}
+  {$IFDEF USE_EXTENSIONS}
+  if (Assigned(ExtManager)) then
+    FreeAndNil(ExtManager);
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.CCFillCore;
@@ -2842,10 +2856,74 @@ procedure TSimbaForm.FormCreate(Sender: TObject);
     {$ENDIF}
   end;
 
+  {$IFDEF WINDOWS}
+const
+  SECURITY_NT_AUTHORITY: TSIDIdentifierAuthority = (Value: (0, 0, 0, 0, 0, 5));
+  SECURITY_BUILTIN_DOMAIN_RID = $00000020;
+  DOMAIN_ALIAS_RID_ADMINS     = $00000220;
+
+  function UserInGroup(Group: DWORD): Boolean;
+  var
+    pIdentifierAuthority: TSIDIdentifierAuthority;
+    pSid: Windows.PSID;
+    IsMember: BOOL;
+  begin
+    pIdentifierAuthority := SECURITY_NT_AUTHORITY;
+    Result := AllocateAndInitializeSid(pIdentifierAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, Group, 0, 0, 0, 0, 0, 0, pSid);
+    try
+      if ((Result) and (CheckTokenMembership(0, pSid, IsMember))) then
+        Result := IsMember;
+    finally
+      FreeSid(pSid);
+    end;
+  end;
+var
+  isElevated, isWritable: Boolean;
+  Params: string;
+  I: LongInt;
+  sei: TShellExecuteInfoA;
+  {$ENDIF}
 begin
   // Set our own exception handler.
   Application.OnException:= @CustomExceptionHandler;
   exiting := False;
+
+  {$IFDEF WINDOWS}
+  isElevated := UserInGroup(DOMAIN_ALIAS_RID_ADMINS);
+  isWritable := DirectoryIsWritable(Application.Location);
+
+  WriteLn('Elevated: ' + BoolToStr(isElevated, True));
+  WriteLn('Writable: ' + BoolToStr(isWritable, True));
+
+  if (not isWritable) and (not isElevated) then
+  begin
+    WriteLn('No write access, going to try elevating!');
+
+    FillChar(sei, SizeOf(sei), 0);
+    sei.cbSize := SizeOf(sei);
+    sei.Wnd := Handle;
+    sei.fMask := SEE_MASK_ASYNCOK or SEE_MASK_FLAG_NO_UI or SEE_MASK_NO_CONSOLE or SEE_MASK_UNICODE;
+    sei.lpVerb := 'runas';
+    sei.lpFile := PAnsiChar(Application.ExeName);
+
+    Params := '';
+    for I := 0 to Paramcount - 1 do
+      Params += ' ' + ParamStrUTF8(I + 1);
+
+    sei.lpParameters := PAnsiChar(Params);
+    sei.nShow := SW_SHOWNORMAL;
+
+    WriteLn(sei.lpVerb, ' ', sei.lpFile, ' ', sei.lpParameters);
+
+    if (ShellExecuteExA(@sei)) then
+    begin
+      WriteLn('Elevated Simba started properly... Halting this one.');
+      Halt;
+    end;
+
+    WriteLn('You have no write access to this directory, and elevation failed!');
+  end;
+  {$ENDIF}
 
   self.BeginFormUpdate;
   Randomize;
@@ -2974,36 +3052,45 @@ var
   i : integer;
 begin
   { Free the tabs }
-  for i := Tabs.Count - 1 downto 0 do
-    TMufasaTab(Tabs[i]).Free;
+  if (Assigned(Tabs)) then
+    for i := Tabs.Count - 1 downto 0 do
+      TMufasaTab(Tabs[i]).Free;
 
   for i := 0 to high(RecentFileItems) do
     RecentFileItems[i].Free;
 
   {$IFDEF USE_EXTENSIONS}
-   if ExtManager <> nil then
+   if Assigned(ExtManager) then
      FreeAndNil(extmanager);
   {$ENDIF}
 
-  Tabs.Free;
+  if (Assigned(Tabs)) then
+    FreeAndNil(Tabs);
 
   { Free MML Core stuff }
-  Selector.Free;
-  Picker.Free;
-  Manager.Free;
+  if (Assigned(Selector)) then
+    FreeAndNil(Selector);
+  if (Assigned(Picker)) then
+    FreeAndNil(Picker);
+  if (Assigned(Manager)) then
+    FreeAndNil(Manager);
 
   { Free the plugins }
-  PluginsGlob.Free;
+  if (Assigned(PluginsGlob)) then
+    FreeAndNil(PluginsGlob);
 
   { Free Fonts }
   if (Assigned(OCR_Fonts)) then
-    OCR_Fonts.Free;
+    FreeAndNil(OCR_Fonts);
 
   SetLength(DebugStream, 0);
-  DebugCriticalSection.Free;
+  if (Assigned(DebugCriticalSection)) then
+    FreeAndNil(DebugCriticalSection);
 
-  RecentFiles.Free;
-  ParamHint.Free;
+  if (Assigned(RecentFiles)) then
+    FreeAndNil(RecentFiles);
+  if (Assigned(ParamHint)) then
+    FreeAndNil(ParamHint);
 
   {$ifdef MSWindows}
   Unbind_Windows_Keys;
@@ -3013,7 +3100,8 @@ begin
   {$ENDIF}
   {$endif}
 
-  SimbaSettings.Notes.Content.Value := Base64Encode(CompressString(NotesMemo.Lines.Text));
+  if (Assigned(SimbaSettings)) then
+    SimbaSettings.Notes.Content.Value := Base64Encode(CompressString(NotesMemo.Lines.Text));
 
   FreeSimbaSettings(True, SimbaSettingsFile);
 end;

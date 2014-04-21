@@ -378,6 +378,9 @@ end;
 
 procedure FreeSimbaSettings(Save: Boolean; SettingsFileName: String);
 begin
+  if (not (Assigned(SimbaSettings))) then
+    Exit;
+
   if Save then
     SimbaSettings.Save(SettingsFileName);
 
