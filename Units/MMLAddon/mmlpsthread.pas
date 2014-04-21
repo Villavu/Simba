@@ -625,6 +625,7 @@ end;
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/settings.inc}
 {$I PSInc/Wrappers/bitmap.inc}
+
 {$I PSInc/Wrappers/window.inc}
 {$I PSInc/Wrappers/tpa.inc}
 {$I PSInc/Wrappers/strings.inc}
@@ -1297,6 +1298,8 @@ type
   PSDTM = ^TSDTM;
   PMsgDlgType = ^TMsgDlgType;
   PMsgDlgButtons = ^TMsgDlgButtons;
+  PClient = ^TClient;
+  PStrings = ^TStrings;
 
 threadvar
   WriteLnStr: string;
@@ -1337,6 +1340,7 @@ end;
 {$I LPInc/Wrappers/lp_other.inc}
 {$I LPInc/Wrappers/lp_settings.inc}
 {$I LPInc/Wrappers/lp_bitmap.inc}
+
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}

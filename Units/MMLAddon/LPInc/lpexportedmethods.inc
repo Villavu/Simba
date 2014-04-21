@@ -50,7 +50,7 @@ AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 {$IFNDEF FUNC_LIST}
 AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^); //TODO: FIX!!
 {$ENDIF}
-//AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
+AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
 AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);
 AddGlobalFunc('procedure ConvertTime64(Time: int64; var y, m, w, d, h, min, s: integer);', @Lape_ConvertTime64);
 AddGlobalFunc('procedure HakunaMatata;', @Lape_HakunaMatata);
@@ -129,7 +129,7 @@ AddGlobalFunc('function Desaturate(Bitmap: integer): integer', @Lape_Desaturate)
 AddGlobalFunc('procedure InvertBitmap(Bitmap: integer);', @Lape_InvertBitmap);
 AddGlobalFunc('function CopyBitmap(Bitmap: integer): integer', @Lape_CopyBitmap);
 AddGlobalFunc('function GreyScaleBitmap(Bitmap: integer): integer', @Lape_GreyScaleBitmap);
-AddGlobalFunc('function BrightnessBitmap(Bitmap,br: integer): integer', @Lape_BrightnessBitmap);
+AddGlobalFunc('function BrightnessBitmap(Bitmap, br: integer): integer', @Lape_BrightnessBitmap);
 AddGlobalFunc('function ContrastBitmap(bitmap: integer; co: extended): integer', @Lape_ContrastBitmap);
 AddGlobalFunc('function PosterizeBitmap(Bitmap: integer; po: integer): integer', @Lape_PosterizeBitmap);
 AddGlobalFunc('function CreateMaskFromBitmap(Bitmap: integer): TMask', @Lape_CreateMaskFromBitmap);
@@ -138,18 +138,20 @@ AddGlobalFunc('function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer
 AddGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean', @Lape_FindDeformedBitmapToleranceIn);
 AddGlobalFunc('procedure RectangleBitmap(bitmap: integer; const box: TBox; Color: TColor);', @Lape_RectangleBitmap);
 AddGlobalFunc('procedure FloodFillBitmap(bitmap: integer; const StartPoint: TPoint; const SearchCol,ReplaceCol: TColor);', @Lape_FloodFillBitmap);
-AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArray): integer', @Lape_ConvoluteBitmap);
-AddGlobalFunc('function CalculatePixelShift(Bmp1,Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
-AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
-AddGlobalFunc('function CalculatePixelTolerance(Bmp1,Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
-AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1,Bmp2 : Integer; CPoints: TPointArray; CTS : integer) : extended;', @Lape_CalculatePixelToleranceTPA);
+AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArray): integer;', @Lape_ConvoluteBitmap);
+AddGlobalFunc('procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveBitmap);
 AddGlobalFunc('procedure CropBitmap(const bmp: integer; const xs, ys, xe, ye: integer);', @Lape_CropBitmap);
+AddGlobalFunc('procedure BlurBitmap(const bmp, block: integer);', @Lape_BlurBitmap);
+AddGlobalFunc('function CalculatePixelShift(Bmp1, Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
+AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1, Bmp2: Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
+AddGlobalFunc('function CalculatePixelTolerance(Bmp1, Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
+AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1, Bmp2: Integer; CPoints: TPointArray; CTS: integer) : extended;', @Lape_CalculatePixelToleranceTPA);
 AddGlobalFunc('function GetColorsBitmap(const bmp: integer): TIntegerArray;', @Lape_GetColorsBitmap);
 AddGlobalFunc('function BitmapToMatrix(const bmp: integer): T2DIntegerArray;',@Lape_BitmapToMatrix);
-AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
-AddGlobalFunc('procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveBitmap);
+AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const Matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
 AddGlobalFunc('procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveMatrix);
 AddGlobalFunc('procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);', @Lape_ResizeBilinearMatrix);
+AddGlobalFunc('procedure BlurMatrix(var Matrix: T2DIntegerArray; const Block: integer);', @Lape_BlurMatrix);
 
 { Math }
 SetCurrSection('Math');
@@ -394,7 +396,7 @@ AddGlobalFunc('function Implode(Glue: string; Pieces: TStringArray): string', @L
 AddGlobalFunc('function Explode(del, str: string): TStringArray', @Lape_Explode);
 AddGlobalFunc('procedure ExplodeWrap(del, str: string; var res: TStringArray);', @Lape_ExplodeWrap);
 AddGlobalFunc('function ExecRegExpr(const RegExpr, InputStr: String): boolean', @Lape_ExecRegExpr);
-//AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
+AddGlobalFunc('procedure SplitRegExpr(const RegExpr, InputStr: String; Pieces: TStrings);', @Lape_SplitRegExpr);
 AddGlobalFunc('function ReplaceRegExpr(const RegExpr, InputStr, ReplaceStr: String; UseSubstitution: boolean): String', @Lape_ReplaceRegExpr);
 AddGlobalFunc('function PosEx(needle, haystack: String; offset: integer): integer', @Lape_PosEx);
 AddGlobalFunc('function LevDistance(src, target: string): Integer', @Lape_LevDist);

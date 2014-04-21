@@ -58,10 +58,10 @@ begin
   Pboolean(Result)^ := ps_ExecRegExpr(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-//procedure Lape_SplitRegExpr(const Params: PParamArray); lape_extdecl
-//begin
-//  ps_SplitRegExpr(PString(Params^[0])^, PString(Params^[1])^, PStrings(Params^[2])^);
-//end;
+procedure Lape_SplitRegExpr(const Params: PParamArray); lape_extdecl
+begin
+  ps_SplitRegExpr(PString(Params^[0])^, PString(Params^[1])^, PStrings(Params^[2])^);
+end;
 
 procedure Lape_ReplaceRegExpr(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
