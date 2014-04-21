@@ -675,7 +675,7 @@ begin
   with Compiler do
   begin
     addClass('TControl', 'TComponent');
-
+	
     addGlobalFunc('procedure TControl.AdjustSize();', @TControl_AdjustSize);
     addGlobalFunc('function TControl.AutoSizeDelayed(): boolean;', @TControl_AutoSizeDelayed);
     addGlobalFunc('function TControl.AutoSizeDelayedReport(): string;', @TControl_AutoSizeDelayedReport);
