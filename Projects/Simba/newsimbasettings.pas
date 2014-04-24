@@ -244,6 +244,12 @@ type
       FirstRun: TBooleanSetting;
     end;
 
+    {$ifdef MSWINDOWS}
+     TScreenGrabberSection = class(TSection)
+       TypeOfGrabber: TBooleanSetting;
+     end;
+    {$endif}
+
     TMainForm = class(TSection)
       Position: TStringSetting;
       NormalSize: TStringSetting;
@@ -283,6 +289,9 @@ type
 
       ScriptManager: TScriptManagerSection;
 
+      {$ifdef MSWINDOWS}
+      ScreenGrabber: TScreenGrabberSection;
+      {$endif}
       LastConfig: TLastConfig;
 
       MMLSettings: TMMLSettings;
@@ -852,6 +861,8 @@ procedure GetScriptManagerPath(obj: TObject); begin TFileSetting(obj).Value := S
 procedure GetScriptManagerFile(obj: TObject); begin TStringSetting(obj).Value := 'ScriptManager.xml'; end;
 procedure GetScriptManagerFirstRun(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
+{$ifdef mswindows} procedure GetScreenGrabber(obj: TObject); begin TBooleanSetting(obj).Value:= true; end;{$endif}
+
 procedure GetSourceEditorLazColors(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetExtensionsFileExtension(obj: TObject); begin TStringSetting(obj).Value := 'sex'; end;
@@ -992,6 +1003,12 @@ begin
   ScriptManager.FileName.onDefault := @GetScriptManagerFile;
   ScriptManager.FirstRun := ScriptManager.AddChild(TBooleanSetting.Create(ssFRun)) as TBooleanSetting;
   ScriptManager.FirstRun.onDefault := @GetScriptManagerFirstRun;
+
+  {$ifdef mswindows}
+  ScreenGrabber := AddChild(TScreenGrabberSection.Create()) as TScreenGrabberSection;
+  ScreenGrabber.TypeOfGrabber := ScreenGrabber.AddChild(TBooleanSetting.Create(ssActivateDx)) as TBooleanSetting;
+  ScreenGrabber.TypeOfGrabber.onDefault := @GetScriptManagerURL;
+  {$endif}
 
   LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
   LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;

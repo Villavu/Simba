@@ -116,16 +116,20 @@ interface
       function WindowRect(out Rect : TRect) : Boolean;override;
     end;
 
+    { TIOManager }
+
     TIOManager = class(TIOManager_Abstract)
       public
         constructor Create;
         constructor Create(plugin_dir: string);
+        procedure SetGrabberType(Grabber: integer); override;
         function SetTarget(target: TNativeWindow): integer; overload;
         procedure SetDesktop; override;
         
         function GetProcesses: TSysProcArr; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
       protected
+        GrabberType: TGRabberType;
         DesktopHWND : Hwnd;
         procedure NativeInit; override;
         procedure NativeFree; override;
@@ -206,7 +210,7 @@ implementation
     self.mcaset := false;
     self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
     self.icaset := false;
-    self.GrabberType:=gtDirectX;
+    //self.GrabberType:=gtWinapi;
   end;
 
   constructor TWindow.Create(target: Hwnd);
@@ -222,7 +226,7 @@ implementation
     self.mcaset := false;
     self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
     self.icaset := false;
-    self.GrabberType:=gtDirectX;
+   // self.GrabberType:=gtWinapi;
   end;
   
   destructor TWindow.Destroy;
@@ -423,7 +427,7 @@ begin
   GetTargetDimensions(w, h);
   ValidateBuffer(w, h);
   if (x < 0) or (x + width > w) or (y < 0) or (y + height > h) then
-    raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d', [x, y, width, height]);
+    raise Exception.CreateFMT('TMWindow.ReturnDatabyDX: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d', [x, y, width, height]);
   ImageApplyAreaOffset(x, y);
   BitsPerPixel := 32;
   try
@@ -636,6 +640,11 @@ begin
   inherited Create(plugin_dir);
 end;
 
+procedure TIOManager.SetGrabberType(Grabber: integer);
+begin
+  self.GrabberType:=TGrabberType(Grabber);
+end;
+
 procedure TIOManager.NativeInit;
 begin
   self.DesktopHWND:= GetDesktopWindow;
@@ -645,15 +654,24 @@ procedure TIOManager.NativeFree;
 begin
 end;
 
-procedure TIOManager.SetDesktop;
+procedure TIOManager.SetDesktop();
+var
+  wnd: TDesktopWindow;
 begin
-  SetBothTargets(TDesktopWindow.Create(DesktopHWND));
+  wnd:=TDesktopWindow.Create(DesktopHWND);
+  wnd.GrabberType:=self.GrabberType;
+  SetBothTargets(wnd);
 end;
 
 function TIOManager.SetTarget(target: TNativeWindow): integer;
+var
+  wnd: TWindow;
 begin
-  SetBothTargets(TWindow.Create(target));
+  wnd:=TWindow.Create(target);
+  wnd.GrabberType:=self.GrabberType;
+  SetBothTargets(wnd);
 end;
+
 
 threadvar
   ProcArr: TSysProcArr;
