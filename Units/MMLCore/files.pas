@@ -73,10 +73,12 @@ type
   function GetDirectories(Path: string): TstringArray;
   function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
   function FindFile(var Filename: string; const Dirs: array of string): boolean;
+  function GetEnvironmentVar(const VarName: string): string;
+  procedure UnZipFile(const FilePath, TargetPath: string);
 
 implementation
 uses
-  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client,FileUtil;
+  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client,FileUtil, Zipper, mmisc;
 
 { GetFiles in independant of the TMFiles class }
 
@@ -168,6 +170,29 @@ begin;
       Result := True;
       Exit;
     end;
+end;
+
+function GetEnvironmentVar(const VarName: string): string;
+begin
+  result := GetEnvironmentVariableUTF8(VarName);
+end;
+
+procedure UnZipFile(const FilePath, TargetPath: string);
+var
+  UnZipper: TUnZipper;
+begin
+  if (not FileExistsUTF8(FilePath)) then
+    Exit;
+
+  UnZipper := TUnZipper.Create;
+  try
+    UnZipper.FileName := FilePath;
+    UnZipper.OutputPath := TargetPath;
+    UnZipper.Examine;
+    UnZipper.UnZipAllFiles;
+  finally
+    UnZipper.Free;
+  end;
 end;
 
 constructor TMFiles.Create(Owner : TObject);
