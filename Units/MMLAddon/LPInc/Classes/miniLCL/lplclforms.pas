@@ -904,15 +904,29 @@ begin
 end;
 
 procedure TForm_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+var
+  Component: TComponent;
 begin
+  Component := PForm(Params^[0])^.FindComponent('MouseMove');
 
+  if (Assigned(Component)) then
+    PMouseMoveEventWrapper(Result)^ := TOnMouseMoveWrapper(Component).InternalMouseMove
+  else
+    PMouseMoveEvent(Result)^ := nil;
 end;
 
 procedure TForm_OnMouseMove_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  with TOnMouseMoveWrapper.Create(PControl(Params^[0])^) do
+  Component := PForm(Params^[0])^.FindComponent('MouseMove');
+  if (Assigned(Component)) then
+    Component.Free;
+
+  with TOnMouseMoveWrapper.Create(PForm(Params^[0])^) do
   begin
     InternalMouseMove := PMouseMoveEventWrapper(Params^[1])^;
+    Name := 'MouseMove';
     PForm(Params^[0])^.OnMouseMove := @MouseMove;
   end;
 end;
