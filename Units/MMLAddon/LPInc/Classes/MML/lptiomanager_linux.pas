@@ -109,11 +109,11 @@ begin
     addGlobalType('UInt32', 'TNativeWindow');
     addGlobalType('Pointer', 'PDisplay'); //TODO: Export properly
 
-    addGlobalFunc('procedure TIOManager.Init();', @TIOManager_Init);
+    addGlobalFunc('procedure TIOManager.Init(); overload;', @TIOManager_Init);
     addGlobalFunc('procedure TIOManager.Init(plugin_dir: string); overload;', @TIOManager_InitEx);
     addGlobalFunc('function TIOManager.SetTarget(target: TNativeWindow): integer;', @TIOManager_SetTarget);
-    addGlobalFunc('procedure TIOManager.SetDesktop; override();', @TIOManager_SetDesktop);
-    addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr; override;', @TIOManager_GetProcesses);
+    addGlobalFunc('procedure TIOManager.SetDesktopAsTarget();', @TIOManager_SetDesktop);
+    addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr;', @TIOManager_GetProcesses);
     addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc);', @TIOManager_SetTargetEx);
     addClassVar('TIOManager', 'display', 'PDisplay', @TIOManager_display_Read, @TIOManager_display_Write);
     addClassVar('TIOManager', 'screennum', 'integer', @TIOManager_screennum_Read, @TIOManager_screennum_Write);
