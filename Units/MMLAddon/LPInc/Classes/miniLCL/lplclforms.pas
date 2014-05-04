@@ -7,7 +7,7 @@ unit lplclforms;
 interface
 
 uses
-  Classes, SysUtils, Forms,lpcompiler, lptypes, lpClassHelper;
+  Classes, SysUtils, Forms, lpcompiler, lptypes, lpClassHelper;
 
 type
   PCustomForm = ^TCustomForm;
@@ -903,6 +903,20 @@ begin
   PForm(Params^[0])^.Free();
 end;
 
+procedure TForm_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+
+end;
+
+procedure TForm_OnMouseMove_Write(const Params: PParamArray); lape_extdecl
+begin
+  with TOnMouseMoveWrapper.Create(PControl(Params^[0])^) do
+  begin
+    InternalMouseMove := PMouseMoveEventWrapper(Params^[1])^;
+    PForm(Params^[0])^.OnMouseMove := @MouseMove;
+  end;
+end;
+
 procedure Register_TForm(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -941,6 +955,7 @@ begin
     addClassVar('TForm', 'Caption', 'string', @TForm_Caption_Read, @TForm_Caption_Write);
     addClassVar('TForm', 'Position', 'TPosition', @TForm_Position_Read, @TForm_Position_Write);
     addGlobalFunc('procedure TForm.Free();', @TForm_Free);
+    addClassVar('TForm', 'OnMouseMove', 'TMouseMoveEvent', @TForm_OnMouseMove_Read, @TForm_OnMouseMove_Write);
   end;
 end;
 
