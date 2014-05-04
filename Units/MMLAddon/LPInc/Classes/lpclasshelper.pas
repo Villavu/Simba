@@ -6,13 +6,24 @@ unit lpClassHelper;
 interface
 
 uses
-  Classes, SysUtils, lpcompiler, lptypes, lpvartypes;
+  Classes, SysUtils, lpcompiler, lptypes, lpvartypes, Controls;
 
 type
   TLapeCompilerHelper = class helper for TLapeCompiler
   public
     procedure addClass(const Name: string; const Parent: string = 'TObject');
     procedure addClassVar(const Obj, Item, Typ: string; const Read: Pointer; const Write: Pointer = nil; const Arr: boolean = False; const ArrType: string = 'UInt32');
+  end;
+
+  PMouseMoveEventWrapper = ^TMouseMoveEventWrapper;
+  TMouseMoveEventWrapper = procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer); cdecl;
+
+  TOnMouseMoveWrapper = class(TComponent)
+  private
+    FMouseMove: TMouseMoveEventWrapper;
+  public
+    procedure MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); register;
+    property InternalMouseMove: TMouseMoveEventWrapper read FMouseMove write FMouseMove;
   end;
 
 implementation
@@ -38,6 +49,12 @@ begin
 
   if (Assigned(Write)) then
     addGlobalFunc(Format('procedure %s.set%s(%sconst Value: %s);', [Obj, Item, Param, Typ]), Write);
+end;
+
+procedure TOnMouseMoveWrapper.MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); register;
+begin
+  if (Assigned(FMouseMove)) then
+    FMouseMove(Sender, Shift, X, Y);
 end;
 
 end.
