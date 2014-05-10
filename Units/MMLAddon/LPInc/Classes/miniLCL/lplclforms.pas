@@ -920,13 +920,15 @@ var
   Component: TComponent;
 begin
   Component := PForm(Params^[0])^.FindComponent('MouseMove');
-  if (Assigned(Component)) then
-    Component.Free;
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnMouseMoveWrapper.Create(PForm(Params^[0])^);
+    Component.Name := 'MouseMove';
+  end;
 
-  with TOnMouseMoveWrapper.Create(PForm(Params^[0])^) do
+  with TOnMouseMoveWrapper(Component) do
   begin
     InternalMouseMove := PMouseMoveEventWrapper(Params^[1])^;
-    Name := 'MouseMove';
     PForm(Params^[0])^.OnMouseMove := @MouseMove;
   end;
 end;

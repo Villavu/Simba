@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -369,11 +369,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="LPDump"/>
       </Unit59>
-      <Unit60>
-        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclspin.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="lplclspin"/>
-      </Unit60>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -383,7 +378,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/MMLAddon/LPInc;$(ProjPath)../../Units/MMLAddon/LPInc/Wrappers;../../Units/lape"/>
-      <Libraries Value="../../Units/lape/extensions/ffi/bin/win32"/>
+      <Libraries Value="../../Units/lape/extensions/ffi/bin/$(TargetOS)"/>
       <OtherUnitFiles Value="$(ProjPath);$(ProjPath)../../Units/MMLCore;$(ProjPath)../../Units/MMLAddon;$(ProjPath)../../Units/PascalScript;$(ProjPath)../../Units/lape;$(ProjPath)../../Units/Misc;$(ProjPath)../../Units/Misc/DCPCrypt;$(ProjPath)../../Units/Misc/DCPCrypt/Hashes;$(ProjPath)../../Units/Misc/DCPCrypt/Ciphers;$(ProjPath)../../Units/MMLAddon/PSInc;$(ProjPath)../../Units/Linux;$(ProjPath)../../Units/Synapse;$(LazarusDir)/components/mouseandkeyinput;../../Units/lape/extensions/ffi;$(ProjPath)../ScriptManager;$(ProjPath)../FormDesigner;../../Units/MMLAddon/LPInc/Classes;../../Units/MMLAddon/LPInc/Classes/MML;$(ProjPath)../../Units/MMLAddon/LPInc/Classes/miniLCL"/>
       <UnitOutputDirectory Value="$(ProjPath)../../build/$(TargetOS)"/>
     </SearchPaths>
