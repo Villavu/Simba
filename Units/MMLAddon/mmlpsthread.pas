@@ -42,7 +42,7 @@ uses
   {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
-    lpeval, lpinterpreter, lputils, LPDump
+    lpeval, lpinterpreter, lputils, lpexceptions, LPDump
   {$ENDIF};
 
 const
@@ -1593,9 +1593,9 @@ begin
   try
     Failed := not Compiler.Compile();
   except
-    on e: Exception do
+    on e: lpException do
     begin
-      HandleError(-1, 0, 0, e.message, errCompile, '');
+      HandleError(e.DocPos.Line, e.DocPos.Col, -1, e.OldMsg, errCompile, e.DocPos.FileName);
       Failed := True;
     end;
   end;
@@ -1612,9 +1612,9 @@ begin
       RunCode(Compiler.Emitter.Code, Running);
       HandleScriptTerminates();
     except
-      on e: Exception do
+      on e: lpException do
       begin
-        HandleError(-1, 0, 0, e.message, errRuntime, '');
+        HandleError(e.DocPos.Line, e.DocPos.Col, -1, e.OldMsg, errRuntime, e.DocPos.FileName);
         Failed := True;
       end;
     end;
@@ -1633,37 +1633,9 @@ begin
 end;
 
 procedure TLPThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
-var
-  RegExpr: TRegExpr;
-  I: LongInt;
 begin
-  RegExpr := TRegExpr.Create();
-  RegExpr.ModifierI := True;
-  RegExpr.ModifierX := True;
-  RegExpr.Expression := '([a-z]+)\serror\:\s"(.+)"\sat\sline\s(\d+),\scolumn\s(\d+)(\sin\sfile\s"(.+)")*';
-
-  {$IFDEF SIMBA_VERBOSE}WriteLn('LapeHandleError "', Error, '"');{$ENDIF}
-  if (RegExpr.Exec(Error)) then
-  begin
-    for I := 0 to RegExpr.SubExprMatchCount do
-      WriteLn(I, ': ', RegExpr.Match[I]);
-
-    if (RegExpr.SubExprMatchCount >= 4) then
-    begin
-      Typ := errCompile;
-      if (Lowercase(RegExpr.Match[1]) = 'runtime') then
-        Typ := errRuntime;
-
-      Row := StrToIntDef(RegExpr.Match[3], -1);
-      Col := StrToIntDef(RegExpr.Match[4], 0);
-      Error := RegExpr.Match[2];
-
-      Filename := '';
-      if (RegExpr.SubExprMatchCount >= 6) then
-        Filename := RegExpr.Match[6];
-    end;
-  end;
-  RegExpr.Free;
+  if (PosEx('Runtime error: "', Error, 0) = 0) then
+    Error := Copy(Error, 17, Length(Error) - 17);
 
   inherited HandleError(Row, Col, Pos, Error, Typ, Filename);
 end;
