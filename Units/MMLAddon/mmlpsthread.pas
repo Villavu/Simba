@@ -1634,7 +1634,7 @@ end;
 
 procedure TLPThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
 begin
-  if (PosEx('Runtime error: "', Error, 0) = 0) then
+  if (PosEx('Runtime error: "', Error, 1) = 1) then
     Error := Copy(Error, 17, Length(Error) - 17);
 
   inherited HandleError(Row, Col, Pos, Error, Typ, Filename);
