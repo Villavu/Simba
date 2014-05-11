@@ -586,10 +586,12 @@ begin
     SynEdit.SelStart:= ErrorData.Position
   else
     SynEdit.LogicalCaretXY := Point(ErrorData.Col,ErrorData.Row);
-  if pos('error',lowercase(ErrorData.Error)) > 0 then
-    formWriteln(Format('%s at line %d',[ErrorData.Error,ErrorData.Row]))
-  else
-    formWriteln(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Row]));
+
+  if (ErrorData.Error <> '') then
+    if (pos('error',lowercase(ErrorData.Error)) > 0) then
+      formWriteln(Format('%s at line %d',[ErrorData.Error,ErrorData.Row]))
+    else
+      formWriteln(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Row]));
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;

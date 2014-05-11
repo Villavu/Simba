@@ -162,3 +162,8 @@ procedure Lape_SetTarget(const Params: PParamArray); lape_extdecl
 begin
   ps_SetTarget(PSysProc(Params^[0])^);
 end;
+
+procedure Lape_GetEnvironmentVariable(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLPString(Result)^ := ps_GetEnvironmentVariable(PLPString(Params^[0])^);
+end;

@@ -1582,6 +1582,37 @@ begin
 end;
 
 procedure TLPThread.Execute;
+
+  procedure lpHandleError(const msg: string);
+    function Between(s1, s2, str: string): string;
+    var
+      I, J: integer;
+    begin;
+      Result := '';
+      I := pos(s1,str);
+      if I > 0 then
+      begin;
+        i := i + length(s1);
+        j := posex(s2,str,i);
+        if j > 0 then
+          Result := copy(str,i,j-i);
+      end;
+    end;
+  var
+    row, col: integer;
+    strFile: string;
+  begin
+    try
+      row := StrToIntDef(ExtractFromStr(Between('at line ', ',', msg), Numbers), 0);
+      col := StrToIntDef(ExtractFromStr(copy(msg, Pos(', column', msg), length(msg)), Numbers), 0);
+      strFile := Between('in file "', '"', msg);
+    except
+       psWriteln('lpHandleError: Failed to grab infomation');
+       exit();
+    end;
+    HandleError(row + 1, col, 0, '', errCompile, strFile);
+  end;
+
 var
   Failed: boolean;
 begin
@@ -1612,7 +1643,10 @@ begin
       psWriteln('Compiling failed.');
   except
      on E : Exception do
+     begin
        psWriteln('Exception in Script: ' + e.message);
+       lpHandleError(e.message);
+     end;
   end;
 end;
 
