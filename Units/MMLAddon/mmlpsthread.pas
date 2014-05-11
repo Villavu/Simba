@@ -1642,7 +1642,7 @@ begin
   RegExpr.ModifierX := True;
   RegExpr.Expression := '([a-z]+)\serror\:\s"(.+)"\sat\sline\s(\d+),\scolumn\s(\d+)(\sin\sfile\s"(.+)")*';
 
-  {$DEFINE SIMBA_VERBOSE}WriteLn('LapeHandleError "', Error, '"');{$ENDIF}
+  {$IFDEF SIMBA_VERBOSE}WriteLn('LapeHandleError "', Error, '"');{$ENDIF}
   if (RegExpr.Exec(Error)) then
   begin
     for I := 0 to RegExpr.SubExprMatchCount do
