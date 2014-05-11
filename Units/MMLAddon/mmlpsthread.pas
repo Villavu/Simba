@@ -151,7 +151,7 @@ type
 
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
-      procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
+      procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
       {$IFDEF USE_PASCALSCRIPT}
       function ProcessDirective(Sender: TPSPreProcessor;
                     Parser: TPSPascalPreProcessorParser;
@@ -215,6 +215,8 @@ type
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
 
+        procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+
         class function GetExportedMethods: TExpMethodArr; override;
 
         procedure SetScript(script: string); override;
@@ -238,6 +240,8 @@ type
 
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
+
+     procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
 
      class function GetExportedMethods: TExpMethodArr; override;
 
@@ -429,17 +433,19 @@ begin
   Synchronize(CallBackData^.FormCallBack);
 end;
 
-procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
+procedure TMThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
 begin
-  if OnError = nil then
-    exit;
-  ErrorData^.Row:= ErrorRow - 1;
-  ErrorData^.Col := ErrorCol;
-  ErrorData^.Position:= ErrorPosition;
-  ErrorData^.Error:= ErrorStr;
-  ErrorData^.ErrType:= ErrorType;
-  ErrorData^.Module:= ErrorModule;
-  ErrorData^.IncludePath:= IncludePath;
+  if (OnError = nil) then
+    Exit;
+
+  ErrorData^.Row := Row;
+  ErrorData^.Col := Col;
+  ErrorData^.Position := Pos;
+  ErrorData^.Error := Error;
+  ErrorData^.ErrType := Typ;
+  ErrorData^.Module := Filename;
+  ErrorData^.IncludePath := IncludePath;
+
   CurrThread.Synchronize(OnError);
 end;
 
@@ -544,20 +550,11 @@ begin
     if (DirectiveArgs <> '') then
     begin
       Result := True;
-      {if FileName = '' then
-        psWriteln(format('Error: In %s: at row: %d, col: %d, pos %d: %s',
-                               ['Main script', Parser.row, Parser.col,
-                               Parser.pos, DirectiveArgs]))
-      else
-        psWriteln(format('Error: In file %s: at row: %d, col: %d, pos %d: %s',
-                             [FileName, Parser.row, Parser.col,
-                             Parser.pos, DirectiveArgs])); }
-      HandleError(Parser.Row - 1, Parser.Col, Parser.Pos, 'Error: ' + DirectiveArgs, errCompile, FileName);
+      HandleError(Parser.Row, Parser.Col, Parser.Pos, DirectiveArgs, errCompile, FileName);
       raise EPSPreProcessor.Create('ERROR directive found');
     end;
   end else
-    Result := False; // If we do not know the directive; return true so Continue
-                    // will be false.
+    Result := False;
 end;
 {$ENDIF}
 
@@ -1209,7 +1206,7 @@ begin
       b := True;
       if OnError <> nil then
         with PSScript.CompilerMessages[l] do
-          HandleError(Row + 1, Col, Pos, MessageToString,errCompile, ModuleName)
+          HandleError(Row, Col, Pos, MessageToString, errCompile, ModuleName)
       else
         psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
     end else
@@ -1242,7 +1239,7 @@ begin
         exit;
 //      if not (ScriptState = SCompiling) then
         if not PSScript.Execute then
-          HandleError(PSScript.ExecErrorRow,PSScript.ExecErrorCol,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,
+          HandleError(PSScript.ExecErrorRow, PSScript.ExecErrorCol, PSScript.ExecErrorPosition, PSScript.ExecErrorToString,
                       errRuntime, PSScript.ExecErrorFileName)
         else
         begin
@@ -1268,6 +1265,11 @@ end;
 procedure TPSThread.SetScript(script: string);
 begin
    PSScript.Script.Text := LineEnding + Script; //A LineEnding to conform with the info we add to includes
+end;
+
+procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+begin
+  inherited HandleError(Row + 1, Col, Pos, Error, Typ, Filename);
 end;
 {$ENDIF}
 
@@ -1586,39 +1588,84 @@ var
   Failed: boolean;
 begin
   CurrThread := Self;
+  Starttime := GetTickCount;
+
   try
-    Starttime := GetTickCount;
-
-    if Compiler.Compile() then
-    begin
-      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
-
-      if CompileOnly then
-        Exit;
-
-      Running := bTrue;
-      Failed := True;
-      try
-        RunCode(Compiler.Emitter.Code, Running);
-
-        HandleScriptTerminates();
-        psWriteln('Successfully executed.');
-        Failed := False;
-      finally
-        if (Failed) then
-          WriteLn('Execution failed.');
-      end;
-    end else
-      psWriteln('Compiling failed.');
+    Failed := not Compiler.Compile();
   except
-     on E : Exception do
-       psWriteln('Exception in Script: ' + e.message);
+    on e: Exception do
+    begin
+      HandleError(-1, 0, 0, e.message, errCompile, '');
+      Failed := True;
+    end;
   end;
+
+  if (not (Failed)) then
+  begin
+    psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+
+    if CompileOnly then
+      Exit;
+
+    Running := bTrue;
+    try
+      RunCode(Compiler.Emitter.Code, Running);
+      HandleScriptTerminates();
+    except
+      on e: Exception do
+      begin
+        HandleError(-1, 0, 0, e.message, errRuntime, '');
+        Failed := True;
+      end;
+    end;
+
+    if (not (Failed)) then
+      psWriteln('Successfully executed.')
+    else
+      psWriteLn('Execution failed.');
+  end else
+    psWriteln('Compiling failed.');
 end;
 
 procedure TLPThread.Terminate;
 begin
   Running := bFalse;
+end;
+
+procedure TLPThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+var
+  RegExpr: TRegExpr;
+  I: LongInt;
+begin
+  RegExpr := TRegExpr.Create();
+  RegExpr.ModifierI := True;
+  RegExpr.ModifierX := True;
+  RegExpr.Expression := '([a-z]+)\serror\:\s"(.+)"\sat\sline\s(\d+),\scolumn\s(\d+)(\sin\sfile\s"(.+)")*';
+
+  {$DEFINE SIMBA_VERBOSE}WriteLn('LapeHandleError "', Error, '"');{$ENDIF}
+  if (RegExpr.Exec(Error)) then
+  begin
+    for I := 0 to RegExpr.SubExprMatchCount do
+      WriteLn(I, ': ', RegExpr.Match[I]);
+
+    if (RegExpr.SubExprMatchCount >= 4) then
+    begin
+      Typ := errCompile;
+      if (Lowercase(RegExpr.Match[1]) = 'runtime') then
+        Typ := errRuntime;
+
+      Row := StrToIntDef(RegExpr.Match[3], -1);
+      Col := StrToIntDef(RegExpr.Match[4], 0);
+      Error := RegExpr.Match[2];
+
+      Filename := '';
+      if (RegExpr.SubExprMatchCount >= 6) then
+        Filename := RegExpr.Match[6];
+    end;
+  end;
+  RegExpr.Free;
+
+  inherited HandleError(Row, Col, Pos, Error, Typ, Filename);
 end;
 
 constructor TSyncMethod.Create(Method: Pointer);
