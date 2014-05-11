@@ -1595,7 +1595,12 @@ begin
   except
     on e: lpException do
     begin
-      HandleError(e.DocPos.Line, e.DocPos.Col, -1, e.OldMsg, errCompile, e.DocPos.FileName);
+      HandleError(e.DocPos.Line, e.DocPos.Col, 0, e.OldMsg, errCompile, e.DocPos.FileName);
+      Failed := True;
+    end;
+    on e: Exception do
+    begin
+      HandleError(0, 0, 0, e.message, errCompile, '');
       Failed := True;
     end;
   end;
@@ -1614,7 +1619,12 @@ begin
     except
       on e: lpException do
       begin
-        HandleError(e.DocPos.Line, e.DocPos.Col, -1, e.OldMsg, errRuntime, e.DocPos.FileName);
+        HandleError(e.DocPos.Line, e.DocPos.Col, 0, e.OldMsg, errRuntime, e.DocPos.FileName);
+        Failed := True;
+      end;
+      on e: Exception do
+      begin
+        HandleError(0, 0, 0, e.message, errRuntime, '');
         Failed := True;
       end;
     end;
