@@ -3540,6 +3540,7 @@ object SimbaForm: TSimbaForm
     object ActionPascalScript: TAction
       Caption = 'PascalScript'
       OnExecute = ActionPascalScriptExecute
+      Visible = False
     end
     object ActionGoto: TAction
       Caption = 'Goto line'
