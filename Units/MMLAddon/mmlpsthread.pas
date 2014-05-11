@@ -1267,7 +1267,7 @@ begin
    PSScript.Script.Text := LineEnding + Script; //A LineEnding to conform with the info we add to includes
 end;
 
-procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+procedure TPSThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
 begin
   inherited HandleError(Row + 1, Col, Pos, Error, Typ, Filename);
 end;
