@@ -3029,6 +3029,7 @@ begin
 
   UpdateTitle;
 
+  {$IFDEF USE_PASCALSCRIPT}ActionPascalScript.Visible := True;{$ENDIF}
   {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
   {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
 
