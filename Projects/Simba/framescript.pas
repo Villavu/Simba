@@ -564,6 +564,8 @@ begin
 end;
 
 procedure TScriptFrame.HandleErrorData;
+var
+  RetStr: string;
 begin
   if ErrorData.Module <> '' then
   begin;
@@ -579,17 +581,29 @@ begin
       exit;
     end;
   end;
+
   MakeActiveScriptFrame;
-  ScriptErrorLine:= ErrorData.Row;
+  if (ErrorData.Row > 0) then
+    ScriptErrorLine := ErrorData.Row;
+
   SynEdit.Invalidate;
-  if ErrorData.Col = -1 then
-    SynEdit.SelStart:= ErrorData.Position
-  else
-    SynEdit.LogicalCaretXY := Point(ErrorData.Col,ErrorData.Row);
-  if pos('error',lowercase(ErrorData.Error)) > 0 then
-    formWriteln(Format('%s at line %d',[ErrorData.Error,ErrorData.Row]))
-  else
-    formWriteln(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Row]));
+
+  if (ErrorData.Row > 0) then
+    if ErrorData.Col = -1 then
+      SynEdit.SelStart := ErrorData.Position
+    else
+      SynEdit.LogicalCaretXY := Point(ErrorData.Col, ErrorData.Row);
+
+  RetStr := '';
+  if (Pos('error', Lowercase(ErrorData.Error)) = 0) then
+    RetStr += 'Error: ';
+
+  RetStr += ErrorData.Error;
+
+  if (ErrorData.Row > 0) then
+    RetStr += ' at line ' + IntToStr(ErrorData.Row);
+
+  formWriteln(RetStr);
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;
