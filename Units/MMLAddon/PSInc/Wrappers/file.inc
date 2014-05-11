@@ -141,3 +141,8 @@ function ps_DeleteDirectory(const Dir: string; const Empty: boolean): boolean; e
 begin
   result := DeleteDirectoryEx(Dir, Empty);
 end;
+
+procedure ps_UnZipFile(const FilePath, TargetPath: string); extdecl;
+begin
+  UnZipFile(FilePath, TargetPath);
+end;

@@ -47,6 +47,7 @@ function NormLevDistance(src, target: string): Extended;
 function StringMatch(checkCompare, goalCompare: string): extended;
 function MultiBetween(str, s1, s2: string): TStringArray;
 function IsArrInStr(strArr: TStringArray; s: string): boolean;
+function PosMulti(const SubStr, Text:String): TIntegerArray;
 
 implementation
 uses
@@ -352,6 +353,38 @@ begin
 
   // if we're stil here, we didnt find a match
   result := false;
+end;
+
+function PosMulti(const SubStr, Text:String): TIntegerArray;
+var
+  HitPos,LenSub,h,q,i: Integer;
+begin
+  LenSub := Length(SubStr);
+  if LenSub = 0 then Exit;
+  HitPos := 1;
+  h := 0;
+  q := 1;
+  SetLength(Result, q);
+  for i:=1 to Length(Text) do
+  begin
+    if Text[i] = SubStr[HitPos] then
+    begin
+      if (HitPos = LenSub) then
+      begin
+        if q <= h then
+        begin
+          q := q+q;
+          SetLength(Result, q);
+        end;
+        Result[h] := (i - HitPos) + 1;
+        Inc(h);
+        HitPos := 1;
+      end else
+        Inc(HitPos);
+    end else
+      HitPos := 1;
+  end;
+  SetLength(Result, h);
 end;
 
 end.
