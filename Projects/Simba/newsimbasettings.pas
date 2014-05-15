@@ -1007,7 +1007,7 @@ begin
   {$ifdef mswindows}
   ScreenGrabber := AddChild(TScreenGrabberSection.Create()) as TScreenGrabberSection;
   ScreenGrabber.TypeOfGrabber := ScreenGrabber.AddChild(TBooleanSetting.Create(ssActivateDx)) as TBooleanSetting;
-  ScreenGrabber.TypeOfGrabber.onDefault := @GetScriptManagerURL;
+  ScreenGrabber.TypeOfGrabber.onDefault := @GetScreenGrabber;
   {$endif}
 
   LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
