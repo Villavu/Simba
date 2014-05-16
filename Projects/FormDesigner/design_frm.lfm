@@ -51,4 +51,4 @@ object DsgnForm: TDsgnForm
     left = 184
     top = 89
   end
-end
+end
