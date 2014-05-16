@@ -122,3 +122,8 @@ procedure Lape_UnZipFile(const Params: PParamArray); lape_extdecl
 begin
   ps_UnZipFile(PString(Params^[0])^, PString(Params^[1])^);
 end;
+
+procedure Lape_ZipFiles(const Params: PParamArray); lape_extdecl
+begin
+  ps_ZipFiles(PString(Params^[0])^, PStringArray(Params^[1])^);
+end;
