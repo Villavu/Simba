@@ -2023,4 +2023,4 @@ begin
   Register_TSpeedButton(Compiler);
 end;
 
-end.
+end.
