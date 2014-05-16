@@ -371,3 +371,8 @@ procedure ps_SetTarget(Proc: TSysProc);
 begin
   CurrThread.Client.IOManager.SetTargetEx(Proc);
 end;
+
+function ps_GetEnvironmentVariable(const VarName: string): string; extdecl;
+begin
+  result := GetEnvironmentVariableUTF8(VarName);
+end;

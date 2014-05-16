@@ -68,15 +68,17 @@ type
     function AddFileToManagedList(Path: string; FS: TFileStream; Mode: Integer): Integer;
   end;
 
-    // We don't need one per object. :-)
+  // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
   function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
   function FindFile(var Filename: string; const Dirs: array of string): boolean;
+  procedure UnZipFile(const FilePath, TargetPath: string);
+  procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
 
 implementation
 uses
-  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client,FileUtil;
+  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client,FileUtil, Zipper;
 
 { GetFiles in independant of the TMFiles class }
 
@@ -168,6 +170,44 @@ begin;
       Result := True;
       Exit;
     end;
+end;
+
+procedure UnZipFile(const FilePath, TargetPath: string);
+var
+  UnZipper: TUnZipper;
+begin
+  if (not FileExistsUTF8(FilePath)) then
+    raise exception.createfmt('UnZipFile: FilePath "%s" Doesn''t exist', [FilePath]);
+
+  UnZipper := TUnZipper.Create;
+  try
+    UnZipper.FileName := FilePath;
+    UnZipper.OutputPath := TargetPath;
+    UnZipper.Examine;
+    UnZipper.UnZipAllFiles;
+  finally
+    UnZipper.Free;
+  end;
+end;
+
+procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
+var
+  OurZipper: TZipper;
+  I: Integer;
+begin
+  if (Length(Files) = 0) then
+    raise exception.create('ZipFiles: No Files to zip; Files length = 0');
+
+  OurZipper := TZipper.Create;
+  try
+    OurZipper.FileName := ToFolder;
+    for I := 0 to High(Files) do
+      OurZipper.Entries.AddFileEntry(Files[i], ExtractFileNameOnly(Files[i]) + ExtractFileExt(Files[i]));
+
+    OurZipper.ZipAllFiles();
+  finally
+    OurZipper.Free;
+  end;
 end;
 
 constructor TMFiles.Create(Owner : TObject);
