@@ -74,6 +74,7 @@ type
   function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
   function FindFile(var Filename: string; const Dirs: array of string): boolean;
   procedure UnZipFile(const FilePath, TargetPath: string);
+  procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
 
 implementation
 uses
@@ -186,6 +187,26 @@ begin
     UnZipper.UnZipAllFiles;
   finally
     UnZipper.Free;
+  end;
+end;
+
+procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
+var
+  OurZipper: TZipper;
+  I: Integer;
+begin
+  if (Length(Files) = 0) then
+    raise exception.create('ZipFiles: No Files to zip; Files length = 0');
+
+  OurZipper := TZipper.Create;
+  try
+    OurZipper.FileName := ToFolder;
+    for I := 0 to High(Files) do
+      OurZipper.Entries.AddFileEntry(Files[i], ExtractFileNameOnly(Files[i]) + ExtractFileExt(Files[i]));
+
+    OurZipper.ZipAllFiles();
+  finally
+    OurZipper.Free;
   end;
 end;
 

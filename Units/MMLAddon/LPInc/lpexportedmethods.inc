@@ -300,6 +300,7 @@ AddGlobalFunc('procedure WriteINI(const Section, KeyName, NewString, FileName: s
 AddGlobalFunc('function ReadINI(const Section, KeyName, FileName: string): string', @Lape_ReadINI);
 AddGlobalFunc('procedure DeleteINI(const Section, KeyName, FileName: string);', @Lape_DeleteINI);
 AddGlobalFunc('function DeleteDirectory(const Dir: String; const Empty: Boolean): Boolean;', @Lape_DeleteDirectory);
+AddGlobalFunc('procedure ZipFiles(const ToFolder: string; const Files: TStringArray);', @Lape_ZipFiles);
 AddGlobalFunc('procedure UnZipFile(const FilePath, TargetPath: string);', @Lape_UnZipFile);
 
 { Web }

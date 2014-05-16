@@ -146,3 +146,8 @@ procedure ps_UnZipFile(const FilePath, TargetPath: string); extdecl;
 begin
   UnZipFile(FilePath, TargetPath);
 end;
+
+procedure ps_ZipFiles(const ToFolder: string; const Files: TStringArray); extdecl;
+begin
+  ZipFiles(ToFolder, Files);
+end;
