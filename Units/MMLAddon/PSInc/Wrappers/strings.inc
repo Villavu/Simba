@@ -1,5 +1,4 @@
-function ps_Capitalize(str : string): string; extdecl;
-begin
+function ps_Capitalize(str : string) : string;extdecl;begin
   result := Capitalize(str);
 end;
 
@@ -168,16 +167,12 @@ begin
 end;
 
 function ps_PosMulti(const SubStr:String; text: string): TIntegerArray;
-begin
-  result := PosMulti(SubStr, Text);
-end;
-
-function PosMulti(const SubStr, Text:String): TIntegerArray;
 var
-  HitPos,LenSub,h,q,i: Integer;
+  HitPos, LenSub, h, q, i: Integer;
 begin
   LenSub := Length(SubStr);
-  if LenSub = 0 then Exit;
+  if (LenSub = 0) then
+    Exit;
   HitPos := 1;
   h := 0;
   q := 1;
@@ -188,7 +183,7 @@ begin
     begin
       if (HitPos = LenSub) then
       begin
-        if q <= h then
+        if q <= h  then
         begin
           q := q+q;
           SetLength(Result, q);
@@ -196,8 +191,8 @@ begin
         Result[h] := (i - HitPos) + 1;
         Inc(h);
         HitPos := 1;
-      end else
-        Inc(HitPos);
+      end;
+      Inc(HitPos);
     end else
       HitPos := 1;
   end;
