@@ -25,6 +25,7 @@ type
   PComboBoxStyle = ^TcomboBoxStyle;
   PComboBox = ^TComboBox;
   //list box
+  PListBoxStyle = ^TListBoxStyle;
   PCustomListBox = ^TCustomListBox;
   PListBox = ^TListBox;
   //TEdit
@@ -779,10 +780,40 @@ begin
   PCustomListBox(Params^[0])^.TopIndex := PInteger(Params^[1])^;
 end;
 
+//Read: property Style: TListBoxStyle;
+procedure TCustomListBox_Style_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PListBoxStyle(Result)^ := PCustomListBox(Params^[0])^.Style;
+end;
+
+//Write: property Style: TListBoxStyle;
+procedure TCustomListBox_Style_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomListBox(Params^[0])^.Style := PListBoxStyle(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TCustomListBox_Free(const Params: PParamArray); lape_extdecl
 begin
   PCustomListBox(Params^[0])^.Free();
+end;
+
+procedure TCustomListBox_OnDrawItem_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
+begin
+  Component := PCustomListBox(Params^[0])^.FindComponent('DrawItem');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnDrawItemWrapper.Create(PCustomListBox(Params^[0])^);
+    Component.Name := 'DrawItem';
+  end;
+
+  with TOnDrawItemWrapper(Component) do
+  begin
+    InternalMethod := PDrawItemEventWrapper(Params^[1])^;
+    PCustomListBox(Params^[0])^.OnDrawItem := @DrawItem;
+  end;
 end;
 
 procedure Register_TCustomListBox(Compiler: TLapeCompiler);
@@ -821,6 +852,8 @@ begin
     addClassVar('TCustomListBox', 'SelCount', 'integer', @TCustomListBox_SelCount_Read);
     addClassVar('TCustomListBox', 'Sorted', 'boolean', @TCustomListBox_Sorted_Read, @TCustomListBox_Sorted_Write);
     addClassVar('TCustomListBox', 'TopIndex', 'Integer', @TCustomListBox_TopIndex_Read, @TCustomListBox_TopIndex_Write);
+    addClassVar('TCustomListBox', 'OnDrawItem', 'TDrawItemEvent', nil, @TCustomListBox_OnDrawItem_Write);
+    addClassVar('TCustomListBox', 'Style', 'TListBoxStyle', @TCustomListBox_Style_Read, @TCustomListBox_Style_Write);
     addGlobalFunc('procedure TCustomListBox.Free();', @TCustomListBox_Free);
   end;
 end;
@@ -1954,7 +1987,11 @@ begin
      addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth,ssAutoHorizontal, ssAutoVertical, ssAutoBoth)','TScrollStyle');
      addGlobalType('(scLineUp,scLineDown, scPageUp,scPageDown,scPosition, scTrack,scTop,scBottom,scEndScroll)','TScrollCode');
      addGlobalType('procedure(Sender: TObject; ScrollCode: TScrollCode;var ScrollPos: Integer)','TScrollEvent');
+     addGlobalType('(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odPainted)' , 'TOwnerDrawStateType');
+     addGlobalType('set of TOwnerDrawStateType', 'TOwnerDrawState');
+     addGlobalType('procedure(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState)', 'TDrawItemEvent');
      addGlobalType('(csDropDown,csSimple,csDropDownList,csOwnerDrawFixed,csOwnerDrawVariable)','TComboBoxStyle');
+     addGlobalType('(lbStandard, lbOwnerDrawFixed, lbOwnerDrawVariable, lbVirtual)', 'TListBoxStyle');
      addGlobalType('(sbsNone, sbsSingle, sbsSunken)','TStaticBorderStyle');
      addGlobalType('(taLeftJustify, taRightJustify, taCenter)','TAlignment');
      addGlobalType('(cbUnchecked, cbChecked, cbGrayed)','TCheckBoxState');
@@ -1986,4 +2023,4 @@ begin
   Register_TSpeedButton(Compiler);
 end;
 
-end.
+end.

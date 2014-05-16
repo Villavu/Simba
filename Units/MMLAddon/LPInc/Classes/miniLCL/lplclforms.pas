@@ -910,7 +910,7 @@ begin
   Component := PForm(Params^[0])^.FindComponent('MouseMove');
 
   if (Assigned(Component)) then
-    PMouseMoveEventWrapper(Result)^ := TOnMouseMoveWrapper(Component).InternalMouseMove
+    PMouseMoveEventWrapper(Result)^ := TOnMouseMoveWrapper(Component).InternalMethod
   else
     PMouseMoveEvent(Result)^ := nil;
 end;
@@ -928,7 +928,7 @@ begin
 
   with TOnMouseMoveWrapper(Component) do
   begin
-    InternalMouseMove := PMouseMoveEventWrapper(Params^[1])^;
+    InternalMethod := PMouseMoveEventWrapper(Params^[1])^;
     PForm(Params^[0])^.OnMouseMove := @MouseMove;
   end;
 end;
