@@ -29,11 +29,39 @@ type
     procedure DrawItem(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState); register;
   end;
 
+  PCheckListClickedWrapper = ^TCheckListClickedWrapper;
+  TCheckListClickedWrapper = procedure(Sender: TObject; Index: integer); cdecl;
+  TOnCheckListClicked = class(specialize TRegisterWrapper<TCheckListClickedWrapper>)
+  public
+    procedure CheckListClicked(Sender: TObject; Index: integer); register;
+  end;
+
   PMouseMoveEventWrapper = ^TMouseMoveEventWrapper;
   TMouseMoveEventWrapper = procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer); cdecl;
   TOnMouseMoveWrapper = class(specialize TRegisterWrapper<TMouseMoveEventWrapper>)
   public
     procedure MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); register;
+  end;
+
+  PClickWrapper = ^TClickWrapper;
+  TClickWrapper = procedure(Sender: TObject); cdecl;
+  TOnClickWrapper = class(specialize TRegisterWrapper<TClickWrapper>)
+  public
+    procedure OnClick(Sender: TObject); register;
+  end;
+
+  PKeyEventWrapper = ^TKeyEventWrapper;
+  TKeyEventWrapper = procedure(Sender: TObject; var Key: Word; Shift: TShiftState); cdecl;
+  TOnKeyEventWrapper = class(specialize TRegisterWrapper<TKeyEventWrapper>)
+  public
+    procedure KeyEvent(Sender: TObject; var Key: Word; Shift: TShiftState); register;
+  end;
+
+  PKeyPressEventWrapper = ^TKeyPressEventWrapper;
+  TKeyPressEventWrapper = procedure(Sender: TObject; var Key: char); cdecl;
+  TOnKeyPressWrapper = class(specialize TRegisterWrapper<TKeyPressEventWrapper>)
+  public
+    procedure KeyPress(Sender: TObject; var Key: char); register;
   end;
 
 implementation
@@ -71,6 +99,30 @@ procedure TOnMouseMoveWrapper.MouseMove(Sender: TObject; Shift: TShiftState; X, 
 begin
   if (Assigned(FMethod)) then
     FMethod(Sender, Shift, X, Y);
+end;
+
+procedure TOnCheckListClicked.CheckListClicked(Sender: TObject; Index: integer); register;
+begin
+  if (Assigned(FMethod)) then
+    FMethod(Sender, Index);
+end;
+
+procedure TOnClickWrapper.OnClick(Sender: TObject); register;
+begin
+  if (Assigned(FMethod)) then
+    FMethod(Sender);
+end;
+
+procedure TOnKeyEventWrapper.KeyEvent(Sender: TObject; var Key: Word; Shift: TShiftState); register;
+begin
+  if (Assigned(FMethod)) then
+    FMethod(Sender, Key, Shift);
+end;
+
+procedure TOnKeyPressWrapper.KeyPress(Sender: TObject; var Key: char); register;
+begin
+  if (Assigned(FMethod)) then
+    FMethod(Sender, Key);
 end;
 
 end.

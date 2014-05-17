@@ -526,16 +526,34 @@ begin
   PControl(Params^[0])^.OnChangeBounds := PNotifyEvent(Params^[1])^;
 end;
 
-//Read: property OnClick: TNotifyEvent read OnClick write OnClick;
 procedure TControl_OnClick_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PNotifyEvent(Result)^ := PControl(Params^[0])^.OnClick;
+  Component := PControl(Params^[0])^.FindComponent('OnClickEvent');
+
+  if (Assigned(Component)) then
+    PClickWrapper(Result)^ := TOnClickWrapper(Component).InternalMethod
+  else
+    PClickWrapper(Result)^ := nil;
 end;
 
-//Write: property OnClick: TNotifyEvent read OnClick write OnClick;
 procedure TControl_OnClick_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PControl(Params^[0])^.OnClick := PNotifyEvent(Params^[1])^;
+  Component := PControl(Params^[0])^.FindComponent('OnClickEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnClickWrapper.Create(PControl(Params^[0])^);
+    Component.Name := 'OnClickEvent';
+  end;
+
+  with TOnClickWrapper(Component) do
+  begin
+    InternalMethod := PClickWrapper(Params^[1])^;
+    PControl(Params^[0])^.OnClick := @OnClick;
+  end;
 end;
 
 //Read: property OnResize: TNotifyEvent read OnResize write OnResize;
@@ -652,14 +670,22 @@ begin
   PControl(Params^[0])^.Parent := PWinControl(Params^[1])^;
 end;
 
-//Read: property Width: Integer read Width write Width;
 procedure TControl_Hint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLPString(Result)^ := PControl(Params^[0])^.Hint;
+end;
+
+procedure TControl_Hint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Hint := PLPString(Params^[1])^;
+end;
+
+procedure TControl_ShowHint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   PBoolean(Result)^ := PControl(Params^[0])^.ShowHint;
 end;
 
-//Write: property Width: Integer read Width write Width;
-procedure TControl_Hint_Write(const Params: PParamArray); lape_extdecl
+procedure TControl_ShowHint_Write(const Params: PParamArray); lape_extdecl
 begin
   PControl(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
 end;
@@ -751,7 +777,7 @@ begin
     addClassVar('TControl', 'OnClick', 'TNotifyEvent', @TControl_OnClick_Read, @TControl_OnClick_Write);
     addClassVar('TControl', 'OnResize', 'TNotifyEvent', @TControl_OnResize_Read, @TControl_OnResize_Write);
     addClassVar('TControl', 'Visible', 'Boolean', @TControl_Visible_Read, @TControl_Visible_Write);
-    addClassVar('TControl', 'ShowHint', 'Boolean', @TControl_Hint_Read, @TControl_Hint_Write);
+    addClassVar('TControl', 'ShowHint', 'Boolean', @TControl_ShowHint_Read, @TControl_ShowHint_Write);
     addGlobalFunc('function TControl.UseRightToLeftAlignment(): Boolean;', @TControl_UseRightToLeftAlignment);
     addGlobalFunc('function TControl.UseRightToLeftReading(): Boolean;', @TControl_UseRightToLeftReading);
     addGlobalFunc('function TControl.UseRightToLeftScrollBar(): Boolean;', @TControl_UseRightToLeftScrollBar);
@@ -888,40 +914,58 @@ begin
   PWinControl(Params^[0])^.OnExit := PNotifyEvent(Params^[1])^;
 end;
 
-//Read: property OnKeyDown: TKeyEvent read FOnKeyDown write FOnKeyDown;
-procedure TWinControl_OnKeyDown_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PKeyEvent(Result)^ := PWinControl(Params^[0])^.OnKeyDown;
-end;
-
-//Write: property OnKeyDown: TKeyEvent read FOnKeyDown write FOnKeyDown;
 procedure TWinControl_OnKeyDown_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PWinControl(Params^[0])^.OnKeyDown := PKeyEvent(Params^[1])^;
+  Component := PWinControl(Params^[0])^.FindComponent('OnKeyDownEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnKeyEventWrapper.Create(PWinControl(Params^[0])^);
+    Component.Name := 'OnKeyDownEvent';
+  end;
+
+  with TOnKeyEventWrapper(Component) do
+  begin
+    InternalMethod := PKeyEventWrapper(Params^[1])^;
+    PWinControl(Params^[0])^.OnKeyDown := @KeyEvent;
+  end;
 end;
 
-//Read: property OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
-procedure TWinControl_OnKeyPress_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PKeyPressEvent(Result)^ := PWinControl(Params^[0])^.OnKeyPress;
-end;
-
-//Write: property OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
 procedure TWinControl_OnKeyPress_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PWinControl(Params^[0])^.OnKeyPress := PKeyPressEvent(Params^[1])^;
+  Component := PWinControl(Params^[0])^.FindComponent('OnKeyPressEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnKeyPressWrapper.Create(PWinControl(Params^[0])^);
+    Component.Name := 'OnKeyPressEvent';
+  end;
+
+  with TOnKeyPressWrapper(Component) do
+  begin
+    InternalMethod := PKeyPressEventWrapper(Params^[1])^;
+    PWinControl(Params^[0])^.OnKeyPress := @KeyPress;
+  end;
 end;
 
-//Read: property OnKeyUp: TKeyEvent read FOnKeyUp write FOnKeyUp;
-procedure TWinControl_OnKeyUp_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PKeyEvent(Result)^ := PWinControl(Params^[0])^.OnKeyUp;
-end;
-
-//Write: property OnKeyUp: TKeyEvent read FOnKeyUp write FOnKeyUp;
 procedure TWinControl_OnKeyUp_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PWinControl(Params^[0])^.OnKeyUp := PKeyEvent(Params^[1])^;
+  Component := PWinControl(Params^[0])^.FindComponent('OnKeyUpEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnKeyEventWrapper.Create(PWinControl(Params^[0])^);
+    Component.Name := 'OnKeyUpEvent';
+  end;
+
+  with TOnKeyEventWrapper(Component) do
+  begin
+    InternalMethod := PKeyEventWrapper(Params^[1])^;
+    PWinControl(Params^[0])^.OnKeyUp := @KeyEvent;
+  end;
 end;
 
 //Read: property ParentWindow: THandle read FParentWindow write SetParentWindow;
@@ -1261,9 +1305,9 @@ begin
     addClassVar('TWinControl', 'TabStop', 'Boolean', @TWinControl_TabStop_Read, @TWinControl_TabStop_Write);
     addClassVar('TWinControl', 'OnEnter', 'TNotifyEvent', @TWinControl_OnEnter_Read, @TWinControl_OnEnter_Write);
     addClassVar('TWinControl', 'OnExit', 'TNotifyEvent', @TWinControl_OnExit_Read, @TWinControl_OnExit_Write);
-    addClassVar('TWinControl', 'OnKeyDown', 'TKeyEvent', @TWinControl_OnKeyDown_Read, @TWinControl_OnKeyDown_Write);
-    addClassVar('TWinControl', 'OnKeyPress', 'TKeyPressEvent', @TWinControl_OnKeyPress_Read, @TWinControl_OnKeyPress_Write);
-    addClassVar('TWinControl', 'OnKeyUp', 'TKeyEvent', @TWinControl_OnKeyUp_Read, @TWinControl_OnKeyUp_Write);
+    addClassVar('TWinControl', 'OnKeyDown', 'TKeyEvent', nil, @TWinControl_OnKeyDown_Write);
+    addClassVar('TWinControl', 'OnKeyPress', 'TKeyPressEvent', nil, @TWinControl_OnKeyPress_Write);
+    addClassVar('TWinControl', 'OnKeyUp', 'TKeyEvent', nil, @TWinControl_OnKeyUp_Write);
     addClassVar('TWinControl', 'ParentWindow', 'THandle', @TWinControl_ParentWindow_Read, @TWinControl_ParentWindow_Write);
     addClassVar('TWinControl', 'Showing', 'Boolean', @TWinControl_Showing_Read);
     addClassVar('TWinControl', 'VisibleDockClientCount', 'Integer', @TWinControl_VisibleDockClientCount_Read, nil);

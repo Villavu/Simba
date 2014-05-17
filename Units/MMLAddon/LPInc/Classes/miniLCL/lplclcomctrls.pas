@@ -549,18 +549,6 @@ begin
   PCustomCheckListBox(Params^[0])^.OnClickCheck := PNotifyEvent(Params^[1])^;
 end;
 
-//Read: property OnItemClick: TCheckListClicked read FOnItemClick write FOnItemClick;
-procedure TCustomCheckListBox_OnItemClick_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PCheckListClicked(Result)^ := PCustomCheckListBox(Params^[0])^.OnItemClick;
-end;
-
-//Write: property OnItemClick: TCheckListClicked read FOnItemClick write FOnItemClick;
-procedure TCustomCheckListBox_OnItemClick_Write(const Params: PParamArray); lape_extdecl
-begin
-  PCustomCheckListBox(Params^[0])^.OnItemClick := PCheckListClicked(Params^[1])^;
-end;
-
 //constructor Create();
 procedure TCustomCheckListBox_Init(const Params: PParamArray); lape_extdecl
 begin
@@ -571,6 +559,24 @@ end;
 procedure TCustomCheckListBox_Free(const Params: PParamArray); lape_extdecl
 begin
   PCustomCheckListBox(Params^[0])^.Free();
+end;
+
+procedure TCustomCheckListBox_OnCheckListClicked_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
+begin
+  Component := PCustomCheckListBox(Params^[0])^.FindComponent('CheckListClicked');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnCheckListClicked.Create(PCustomCheckListBox(Params^[0])^);
+    Component.Name := 'CheckListClicked';
+  end;
+
+  with TOnCheckListClicked(Component) do
+  begin
+    InternalMethod := PCheckListClickedWrapper(Params^[1])^;
+    PCustomCheckListBox(Params^[0])^.OnItemClick := @CheckListClicked;
+  end;
 end;
 
 procedure Register_TCustomCheckListBox(Compiler: TLapeCompiler);
@@ -587,7 +593,7 @@ begin
     addClassVar('TCustomCheckListBox', 'State', 'TCheckBoxState', @TCustomCheckListBox_State_Read, @TCustomCheckListBox_State_Write, true);
     addClassVar('TCustomCheckListBox', 'Count', 'integer', @TCustomCheckListBox_Count_Read, nil);
     addClassVar('TCustomCheckListBox', 'OnClickCheck', 'TNotifyEvent', @TCustomCheckListBox_OnClickCheck_Read, @TCustomCheckListBox_OnClickCheck_Write);
-    addClassVar('TCustomCheckListBox', 'OnItemClick', 'TCheckListClicked', @TCustomCheckListBox_OnItemClick_Read, @TCustomCheckListBox_OnItemClick_Write);
+    addClassVar('TCustomCheckListBox', 'OnItemClick', 'TCheckListClicked', nil, @TCustomCheckListBox_OnCheckListClicked_Write);
     addGlobalFunc('procedure TCustomCheckListBox.Init(AOwner: TComponent);', @TCustomCheckListBox_Init);
     addGlobalFunc('procedure TCustomCheckListBox.Free();', @TCustomCheckListBox_Free);
   end;
