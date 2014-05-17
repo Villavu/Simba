@@ -9,7 +9,7 @@ var
   frm: TForm;
   mainMenu: TMainMenu;
   menuHelp, subMenuHelp: TMenuItem;
-  btnColorPicker, btnOpenDialog: TButton;
+  btnColorPicker, btnOpenDialog, btnAddString: TButton;
   tabControl: TPageControl;
   tabs: array [0..2] of TTabSheet;
   colorDialog: TColorDialog;
@@ -19,11 +19,33 @@ var
   statusBar: TStatusBar;
   statusPanelTxt: TStatusPanel;
   speedButton: TSpeedButton;
+  checkList: TCheckListBox;
+
+procedure OnClickCheckList(sender: TObject; index: Integer); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
+begin
+  Client.Writeln(toString(index));
+end;
+
+procedure OnKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);  {$IFNDEF CODEINSIGHT} native; {$ENDIF}
+begin
+  Client.WriteLn('KeyUp - ' + toString(Key));
+end;
+
+procedure OnKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
+begin
+  Client.WriteLn('KeyDown - ' + toString(Key));
+end;
+
+procedure OnKeyPress(Sender: TObject; var Key: char); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
+begin
+  Client.WriteLn('KeyPress - ' + toString(Key));
+end;
 
 procedure onClick(sender: TObject); {$IFNDEF CODEINSIGHT} native; {$ENDIF}
 var
   i: integer;
 begin
+
   case sender of
     btnColorPicker:
       with colorDialog do
@@ -47,6 +69,11 @@ begin
         execute();
         client.writeln('File path picked: '+getFileName());
         free();
+      end;
+
+    btnAddString:
+      begin
+        checkList.getItems().add(format('This string(%d) was added', [checkList.getItems().getCount() + 1]));
       end;
   end;
 end;
@@ -121,6 +148,10 @@ begin
       tabs[i] := addTabSheet();
       tabs[i].setCaption(tabCaptions[i]);
     end;
+
+    setOnKeyPress(OnKeyPress);
+    setOnKeyDown(OnKeyDown);
+    setOnKeyUp(OnKeyUp);
   end;
 
   btnColorPicker.init(frm);
@@ -203,6 +234,25 @@ begin
   end;
 
   bmp.free();
+
+  checkList.Init(frm);
+  with (checkList) do
+  begin
+    setParent(tabs[PAGE_OTHER]);
+    setBounds(9, 90, 200, 100);
+    setOnItemClick(OnClickCheckList);
+  end;
+
+  btnAddString.Init(frm);
+  with (btnAddString) do
+  begin
+    setParent(tabs[PAGE_OTHER]);
+    setBounds(218, 100, 100, 25);
+    setCaption('Add a string');
+    setOnClick(onClick);
+  end;
+
+
 
   client.writeln('Showing form...');
   frm.showModal();
