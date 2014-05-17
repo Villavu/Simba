@@ -13,7 +13,7 @@ procedure RegisterLCLProcess(Compiler: TLapeCompiler);
 implementation
 
 uses
-  lplclcontrols, lplclsystem, Process;
+  lplclcontrols, lplclsystem, Process, Pipes;
 
 type
   PProcess = ^TProcess;
@@ -25,6 +25,99 @@ type
   PProcessOptions = ^TProcessOptions;
   PProcessPriority = ^TProcessPriority;
   PStartupOption = ^TStartupOption;
+  POutputPipeStream = ^TOutputPipeStream;
+  PInputPipeStream = ^TInputPipeStream;
+  PInt64 = ^Int64;
+  PLongInt = ^LongInt;
+
+
+//function Seek(const Offset: int64; Origin: TSeekOrigin): int64; override;
+procedure TOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pint64(Result)^ := POutputPipeStream(Params^[0])^.Seek(Pint64(Params^[1])^, PSeekOrigin(Params^[2])^);
+end;
+
+//Function Read (Var Buffer; Count : Longint) : longint; Override;
+procedure TOutputPipeStream_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Plongint(Result)^ := POutputPipeStream(Params^[0])^.Read(PLongint(Params^[1])^, PLongint(Params^[2])^);
+end;
+
+//constructor Create();
+procedure TOutputPipeStream_Init(const Params: PParamArray); lape_extdecl
+begin
+  POutputPipeStream(Params^[0])^ := TOutputPipeStream.Create(PHandle(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TOutputPipeStream_Free(const Params: PParamArray); lape_extdecl
+begin
+  POutputPipeStream(Params^[0])^.Free();
+end;
+
+procedure Register_TOutputPipeStream(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TOutputPipeStream', 'THandleStream');
+
+    addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64;', @TOutputPipeStream_Seek);
+    addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Longint): longint;', @TOutputPipeStream_Read);
+    addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle);', @TOutputPipeStream_Init);
+    addGlobalFunc('procedure TOutputPipeStream.Free();', @TOutputPipeStream_Free);
+  end;
+end;
+
+//Function Write (Const Buffer; Count : Longint) :Longint; Override;
+procedure TInputPipeStream_Write(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLongint(Result)^ := PInputPipeStream(Params^[0])^.Write(PLongint(Params^[1])^, PLongint(Params^[2])^);
+end;
+
+//function Seek(const Offset: int64; Origin: TSeekOrigin): int64; override;
+procedure TInputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pint64(Result)^ := PInputPipeStream(Params^[0])^.Seek(Pint64(Params^[1])^, PSeekOrigin(Params^[2])^);
+end;
+
+//Function Read (Var Buffer; Count : Longint) : longint; Override;
+procedure TInputPipeStream_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Plongint(Result)^ := PInputPipeStream(Params^[0])^.Read(PLongint(Params^[1])^, PLongint(Params^[2])^);
+end;
+
+//Read: property NumBytesAvailable: DWord read GetNumBytesAvailable;
+procedure TInputPipeStream_NumBytesAvailable_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PDWord(Result)^ := PInputPipeStream(Params^[0])^.NumBytesAvailable;
+end;
+
+//constructor Create();
+procedure TInputPipeStream_Init(const Params: PParamArray); lape_extdecl
+begin
+  PInputPipeStream(Params^[0])^ := TInputPipeStream.Create(PHandle(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TInputPipeStream_Free(const Params: PParamArray); lape_extdecl
+begin
+  PInputPipeStream(Params^[0])^.Free();
+end;
+
+procedure Register_TInputPipeStream(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TInputPipeStream', 'THandleStream');
+
+    addGlobalFunc('function TInputPipeStream.Write(Const Buffer; Count : Longint): Longint;', @TInputPipeStream_Write);
+    addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64;', @TInputPipeStream_Seek);
+    addGlobalFunc('function TInputPipeStream.Read(Var Buffer; Count : Longint): longint;', @TInputPipeStream_Read);
+    addClassVar('TInputPipeStream', 'NumBytesAvailable', 'DWord', @TInputPipeStream_NumBytesAvailable_Read, nil);
+    addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle);', @TInputPipeStream_Init);
+    addGlobalFunc('procedure TInputPipeStream.Free();', @TInputPipeStream_Free);
+  end;
+end;
 
 //Procedure Execute; virtual;
 procedure TProcess_Execute(const Params: PParamArray); lape_extdecl
@@ -416,6 +509,24 @@ begin
   PProcess(Params^[0])^.Free();
 end;
 
+//Read: Property Input  : TOutputPipeStream Read FInputStream;
+procedure TProcess_Input_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  POutputPipeStream(Result)^ := PProcess(Params^[0])^.Input;
+end;
+
+//Read: Property Output : TInputPipeStream  Read FOutputStream;
+procedure TProcess_Output_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInputPipeStream(Result)^ := PProcess(Params^[0])^.Output;
+end;
+
+//Read: Property Stderr : TinputPipeStream  Read FStderrStream;
+procedure TProcess_Stderr_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PinputPipeStream(Result)^ := PProcess(Params^[0])^.Stderr;
+end;
+
 procedure Register_TProcess(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -436,9 +547,9 @@ begin
     addClassVar('TProcess', 'ThreadHandle', 'THandle', @TProcess_ThreadHandle_Read, nil);
     addClassVar('TProcess', 'ProcessID', 'Integer', @TProcess_ProcessID_Read, nil);
     addClassVar('TProcess', 'ThreadID', 'Integer', @TProcess_ThreadID_Read, nil);
-   { addClassVar('TProcess', 'Input', 'TOutputPipeStream', @TProcess_Input_Read, nil);
+    addClassVar('TProcess', 'Input', 'TOutputPipeStream', @TProcess_Input_Read, nil);
     addClassVar('TProcess', 'Output', 'TInputPipeStream', @TProcess_Output_Read, nil);
-    addClassVar('TProcess', 'Stderr', 'TinputPipeStream', @TProcess_Stderr_Read, nil); }
+    addClassVar('TProcess', 'Stderr', 'TinputPipeStream', @TProcess_Stderr_Read, nil);
     addClassVar('TProcess', 'ExitStatus', 'Integer', @TProcess_ExitStatus_Read, nil);
     addClassVar('TProcess', 'InheritHandles', 'Boolean', @TProcess_InheritHandles_Read, @TProcess_InheritHandles_Write);
     addClassVar('TProcess', 'PipeBufferSize', 'cardinal', @TProcess_PipeBufferSize_Read, @TProcess_PipeBufferSize_Write);
@@ -481,6 +592,8 @@ begin
      addGlobalType('set of TStartupOption', 'TStartupOptions');
    end;
 
+  Register_TInputPipeStream(Compiler);
+  Register_TOutputPipeStream(Compiler);
   Register_TProcess(Compiler);
 end;
 
