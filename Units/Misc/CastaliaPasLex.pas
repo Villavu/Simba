@@ -1000,7 +1000,7 @@ begin
   if KeyComp('WideChar') then fExID := tokWideChar else
     if KeyComp('Stdcall') then fExID := tokStdcall else
       if KeyComp('Const') then Result := tokConst else
-        if KeyComp('Native') then Result := tokNative;
+        if KeyComp('Native') then fExID := tokNative;
 end;
 
 {$IFDEF D8_NEWER} //JThurman 2004-03-2003
