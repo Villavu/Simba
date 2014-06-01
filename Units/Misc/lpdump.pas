@@ -85,41 +85,9 @@ begin
 end;
 
 function TLPCompiler.addDelayedCode(ACode: lpString; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base;
-  function ExtractHeader(Method: string): string;
-  var
-    I: LongInt;
-  begin
-    I := 1;
-    while (I <= Length(Method)) do
-    begin
-      case Method[I] of
-        '(': begin
-            while (Method[I] <> ')') do
-            begin
-              Result += Method[I];
-              Inc(I);
-            end;
-            Result += ')';
-          end;
-        ';': Break;
-        else
-          Result += Method[I];
-      end;
-
-      Inc(I);
-    end;
-    Result += ';';
-  end;
-var
-  Header: string;
 begin
   Result := inherited;
-
-  Header := Trim(ExtractHeader(ACode));
-  if (Lowercase(Copy(Header, 1, 10)) = 'procedure ') or (Lowercase(Copy(Header, 1, 9)) = 'function ') then
-    Header += ' forward;';
-
-  FItems.Add(Header);
+  FItems.Add(ACode);
 end;
 
 procedure TLPCompiler.getInfo(aItems: TStrings);
