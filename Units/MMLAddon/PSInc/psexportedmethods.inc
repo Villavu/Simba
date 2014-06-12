@@ -217,6 +217,7 @@ AddFunction(@ps_InputQuery,'function InputQuery(const ACaption, APrompt : String
 AddFunction(@ps_ShowMessage,'procedure ShowMessage(msg : string);');
 AddFunction(@ps_messageBox,'function MessageBox(Text, Caption: string; Flags: LongInt): Integer;');
 AddFunction(@ps_MessageDlg,'function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType;  Buttons: TMsgDlgButtons) : integer;');
+AddFunction(@ps_ShowBalloonHint, 'procedure ShowBalloonHint(const Title, Hint: string; const Timeout: Integer; const Flag: TBalloonFlags);');
 AddFunction(@ps_SetClipBoard, 'procedure SetClipBoard(const Data: string);');
 AddFunction(@ps_GetClipBoard, 'function GetClipBoard: string;');
 AddFunction(@ps_GetProcesses, 'function GetProcesses: TSysProcArr;');
