@@ -412,3 +412,12 @@ procedure ps_BlurMatrix(var Matrix: T2DIntegerArray; const Block: integer); extd
 begin
   BlurMatrix(Matrix, Block);
 end;
+
+function ps_RotateBitmapEx(Bitmap: Integer; Angle: Single; Expand: Boolean; Smooth: Boolean): Integer; extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+  begin
+    Result := CreateBMP(0,0);
+    Bmp[Bitmap].RotateBitmapEx(Angle, Expand, Smooth, Bmp[Result]);
+  end;
+end;
