@@ -233,6 +233,10 @@ type
       ShowAutomatically: TBooleanSetting;
     end;
 
+    TShowBalloonHints = class(TSection)
+      Show: TBooleanSetting;
+    end;
+
     TCodeCompletionSection = class(TSection)
       ShowAutomatically: TBooleanSetting;
     end;
@@ -280,6 +284,7 @@ type
       CodeHints: TCodeHintsSection;
       CodeCompletion: TCodeCompletionSection;
       Notes: TNotesSetion;
+      ShowBalloonHints: TShowBalloonHints;
 
       ScriptManager: TScriptManagerSection;
 
@@ -847,6 +852,8 @@ procedure GetFunctionListShowOnStart(obj: TObject); begin TBooleanSetting(obj).V
 procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
+procedure GetShowBalloonHints(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
 procedure GetScriptManagerURL(obj: TObject); begin TStringSetting(obj).Value := 'http://127.0.0.1/'; end;
 procedure GetScriptManagerPath(obj: TObject); begin TFileSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
 procedure GetScriptManagerFile(obj: TObject); begin TStringSetting(obj).Value := 'ScriptManager.xml'; end;
@@ -873,6 +880,10 @@ procedure GetNotesVisible(obj: TObject); begin TBooleanSetting(obj).Value := Fal
 constructor TSimbaSettings.Create;
 begin
   inherited;
+
+  ShowBalloonHints := AddChild(TShowBalloonHints.Create()) as TShowBalloonHints;
+  ShowBalloonHints.Show := ShowBalloonHints.AddChild(TBooleanSetting.Create(ssShowBalloonHints)) as TBooleanSetting;
+  ShowBalloonHints.Show.onDefault := @GetShowBalloonHints;
 
   Includes := AddChild(TIncludesSection.Create()) as TIncludesSection;
   Includes.Path := Includes.AddChild(TPathSetting.Create(ssIncludesPath)) as TPathSetting;
