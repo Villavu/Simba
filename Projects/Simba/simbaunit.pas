@@ -3842,6 +3842,16 @@ begin
       m_ShowMessage : ShowMessage(PChar(data));
       m_MessageBox : with PMessageBoxData(data)^ do res := Application.MessageBox(AText,ACaption,AFlags);
       m_MessageDlg : with PMessageDlgData(data)^ do res := MessageDlg(ACaption,AMsg,ADlgType,AButtons,0);
+      m_BalloonHint:
+       with (PBalloonHintData(Data)^) do
+         with (MTrayIcon) do
+         begin
+           BalloonHint := AHint;
+           BalloonTimeout := ATimeout;
+           BalloonTitle := ATitle;
+           BalloonFlags := AFlag;
+           ShowBalloonHint();
+         end;
     end;
 end;
 
