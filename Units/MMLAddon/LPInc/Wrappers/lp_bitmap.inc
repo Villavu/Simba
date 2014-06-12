@@ -342,3 +342,8 @@ procedure Lape_BlurMatrix(const Params: PParamArray); lape_extdecl
 begin
   ps_BlurMatrix(P2DIntegerArray(Params^[0])^, PInteger(Params^[1])^);
 end;
+
+procedure Lape_RotateBitmapEx(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := ps_RotateBitmapEx(PInteger(Params^[0])^, PSingle(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+end;
