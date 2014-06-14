@@ -198,6 +198,17 @@ begin
   Value := InputQueryData.Value;
 end;
 
+procedure ps_ShowBalloonHint(const Title, Hint: string; const Timeout: Integer; const Flag: TBalloonFlags); extdecl;
+var
+  Data: TBalloonHintData;
+begin
+  Data.ATitle := Title;
+  Data.AHint := Hint;
+  Data.ATimeout := Timeout;
+  Data.AFlag := Flag;
+  CurrThread.FormCallBack(m_BalloonHint, @Data);
+end;
+
 procedure ps_TerminateScript; extdecl;
 begin;
   CurrThread.Terminate;

@@ -238,6 +238,12 @@ begin
   PMufasaBitmap(Params^[0])^.RotateBitmap(PExtended(Params^[1])^, PMufasaBitmap(Params^[2])^);
 end;
 
+//procedure RotateBitmapEx(Angle: Single; Expand: Boolean; Smooth: Boolean; TargetBitmap: TMufasaBitmap);
+procedure TMufasaBitmap_RotateBitmapEx(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.RotateBitmapEx(PSingle(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^, PMufasaBitmap(Params^[4])^);
+end;
+
 //procedure Desaturate(TargetBitmap : TMufasaBitmap); overload;
 procedure TMufasaBitmap_Desaturate(const Params: PParamArray); lape_extdecl
 begin
@@ -515,6 +521,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);', @TMufasaBitmap_CopyClientToBitmap);
     addGlobalFunc('procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject;Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer); overload;', @TMufasaBitmap_CopyClientToBitmapEx);
     addGlobalFunc('procedure TMufasaBitmap.RotateBitmap(angle: Extended; TargetBitmap : TMufasaBitmap);', @TMufasaBitmap_RotateBitmap);
+    addGlobalFunc('procedure TMufasaBitmap.RotateBitmapEx(Angle: Single; Expand: Boolean; Smooth: Boolean; TargetBitmap: TMufasaBitmap);', @TMufasaBitmap_RotateBitmapEx);
     addGlobalFunc('procedure TMufasaBitmap.Desaturate(TargetBitmap : TMufasaBitmap);', @TMufasaBitmap_Desaturate);
     addGlobalFunc('procedure TMufasaBitmap.Desaturate(); overload;', @TMufasaBitmap_DesaturateEx);
     addGlobalFunc('procedure TMufasaBitmap.GreyScale(TargetBitmap : TMufasaBitmap);', @TMufasaBitmap_GreyScale);

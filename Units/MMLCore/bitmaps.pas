@@ -86,7 +86,8 @@ type
     procedure FastReplaceColor(OldColor, NewColor: TColor);
     procedure CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);overload;
     procedure CopyClientToBitmap(MWindow : TObject;Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer);overload;
-    procedure RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );
+    procedure RotateBitmap(angle: Extended; TargetBitmap: TMufasaBitmap);
+    procedure RotateBitmapEx(Angle: Single; Expand: Boolean; Smooth: Boolean; TargetBitmap: TMufasaBitmap);
     procedure Desaturate(TargetBitmap : TMufasaBitmap); overload;
     procedure Desaturate;overload;
     procedure GreyScale(TargetBitmap : TMufasaBitmap);overload;
@@ -114,6 +115,7 @@ type
     procedure LoadFromTBitmap(bmp: TBitmap);
     procedure LoadFromRawImage(RawImage: TRawImage);
     function CreateTMask : TMask;
+    procedure ResizeBilinear(NewW, NewH: Integer);
     procedure SetTransparentColor(Col : TColor);
     function GetTransparentColor : TColor;
     property TransparentColorSet : boolean read FTransparentSet;
@@ -432,7 +434,6 @@ begin
   H := Length(Matrix);
   ratioX := (W-1) / NewW;
   ratioY := (H-1) / NewH;
-  SetLength(Matrix, NewH, NewW);
   SetLength(Res, NewH, NewW);
   Dec(NewW);
 
@@ -1417,7 +1418,7 @@ begin
 end;
 
 //Scar rotates unit circle-wise.. Oh, scar doesnt update the bounds, so kinda crops ur image.
-procedure TMufasaBitmap.RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );
+procedure TMufasaBitmap.RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap);
 var
   NewW,NewH : integer;
   CosAngle,SinAngle : extended;
@@ -1450,10 +1451,10 @@ begin
     if NewCorners[i].y < MinY then
       MinY := NewCorners[i].y;
   end;
-  mDebugLn(Format('Min: (%d,%d) Max : (%d,%d)',[MinX,MinY,MaxX,MaxY]));
+  //mDebugLn(Format('Min: (%d,%d) Max : (%d,%d)',[MinX,MinY,MaxX,MaxY]));
   NewW := MaxX - MinX+1;
   NewH := MaxY - MinY+1;
-  mDebugLn(format('New bounds: %d,%d',[NewW,NewH]));
+ // mDebugLn(format('New bounds: %d,%d',[NewW,NewH]));
   TargetBitmap.SetSize(NewW,NewH);
   for y := NewH - 1 downto 0 do
     for x := NewW - 1 downto 0 do
@@ -1463,6 +1464,202 @@ begin
       if not ((Oldx <0) or (Oldx >= w) or (Oldy < 0) or (Oldy >= h)) then
         TargetBitmap.FData[ y * NewW + x] := Self.FData[OldY * W + OldX];
     end;
+end;
+
+procedure __RotateNoExpand(Bitmap: TMufasaBitmap; Angle: Extended; TargetBitmap: TMufasaBitmap);
+var
+  x,y,mx,my,i,j,wid,hei: Int32;
+  cosa,sina: Single;
+begin
+  TargetBitmap.SetSize(Bitmap.Width, Bitmap.Height);
+
+  mx := (Bitmap.Width div 2);
+  my := (Bitmap.Height div 2);
+  cosa := cos(angle);
+  sina := sin(angle);
+  wid := (Bitmap.Width - 1);
+  hei := (Bitmap.Height - 1);
+
+  for i:=0 to hei do
+    for j:=0 to wid do
+    begin
+      x := Round(mx + cosa * (j - mx) - sina * (i - my));
+      y := Round(my + sina * (j - mx) + cosa * (i - my));
+      if (x >= 0) and (x < wid) and (y >= 0) and (y < hei) then
+        TargetBitmap.FData[i * Bitmap.Width + j] := Bitmap.FData[y * Bitmap.Width + x];
+      end;
+end;
+
+procedure __RotateBINoExpand(Bitmap: TMufasaBitmap; Angle: Single; TargetBitmap: TMufasaBitmap);
+var
+  i,j,k,RR,GG,BB,mx,my,fX,fY,cX,cY,wid,hei: Int32;
+  rX,rY,dX,dY,cosa,sina:Single;
+  p0,p1,p2,p3: TRGB32;
+  topR,topG,topB,BtmR,btmG,btmB:Single;
+begin
+  TargetBitmap.SetSize(Bitmap.Width, Bitmap.Height);
+
+  cosa := Cos(Angle);
+  sina := Sin(Angle);
+  mX := Bitmap.Width div 2;
+  mY := Bitmap.Height div 2;
+  wid := (Bitmap.Width - 1);
+  hei := (Bitmap.Height - 1);
+
+  for i := 0 to hei do begin
+    for j := 0 to wid do begin
+      rx := (mx + cosa * (j - mx) - sina * (i - my));
+      ry := (my + sina * (j - mx) + cosa * (i - my));
+
+      fX := Trunc(rX);
+      fY := Trunc(rY);
+      cX := Ceil(rX);
+      cY := Ceil(rY);
+
+      if not((fX < 0) or (cX < 0) or (fX > wid) or (cX > wid) or
+             (fY < 0) or (cY < 0) or (fY > hei) or (cY > hei)) then
+      begin
+        dx := rX - fX;
+        dy := rY - fY;
+
+        p0 := Bitmap.FData[fY * Bitmap.Width + fX];
+        p1 := Bitmap.FData[fY * Bitmap.Width + cX];
+        p2 := Bitmap.FData[cY * Bitmap.Width + fX];
+        p3 := Bitmap.FData[cY * Bitmap.Width + cX];
+
+        TopR := (1 - dx) * p0.R + dx * p1.R;
+        TopG := (1 - dx) * p0.G + dx * p1.G;
+        TopB := (1 - dx) * p0.B + dx * p1.B;
+        BtmR := (1 - dx) * p2.R + dx * p3.R;
+        BtmG := (1 - dx) * p2.G + dx * p3.G;
+        BtmB := (1 - dx) * p2.B + dx * p3.B;
+
+        RR := Round((1 - dy) * TopR + dy * BtmR);
+        GG := Round((1 - dy) * TopG + dy * BtmG);
+        BB := Round((1 - dy) * TopB + dy * BtmB);
+
+        if (RR < 0) then RR := 0
+        else if (RR > 255)then RR := 255;
+        if (GG < 0) then GG := 0
+        else if (GG > 255)then GG := 255;
+        if (BB < 0) then BB := 0
+        else if (BB > 255)then BB := 255;
+
+        k := i * Bitmap.Width + j;
+        TargetBitmap.FData[k].r := RR;
+        TargetBitmap.FData[k].g := GG;
+        TargetBitmap.FData[k].b := BB;
+      end;
+    end;
+  end;
+end;
+
+procedure __RotateBIExpand(Bitmap: TMufasaBitmap; Angle: Single; TargetBitmap: TMufasaBitmap);
+
+  function __GetNewSizeRotated(W,H:Int32; Angle:Single): TBox;
+    function Rotate(p:TPoint; angle:Single; mx,my:Int32): TPoint;
+    begin
+      Result.X := Round(mx + cos(angle) * (p.x - mx) - sin(angle) * (p.y - my));
+      Result.Y := Round(my + sin(angle) * (p.x - mx) + cos(angle) * (p.y - my));
+    end;
+  var B: TPointArray;
+  begin
+    SetLength(B, 4);
+    FillChar(Result, SizeOf(TBox), 0);
+    Result.X1 := $FFFFFF;
+    Result.Y1 := $FFFFFF;
+    B[0]:= Rotate(Point(0,h),angle, W div 2, H div 2);
+    B[1]:= Rotate(Point(w,h),angle, W div 2, H div 2);
+    B[2]:= Rotate(Point(w,0),angle, W div 2, H div 2);
+    B[3]:= Rotate(Point(0,0),angle, W div 2, H div 2);
+    Result := GetTPABounds(B);
+  end;
+
+var
+  i,j,RR,GG,BB,mx,my,nW,nH,fX,fY,cX,cY,wid,hei,k: Int32;
+  rX,rY,dX,dY,cosa,sina:Single;
+  topR,topG,topB,BtmR,btmG,btmB:Single;
+  p0,p1,p2,p3: TRGB32;
+  NewB:TBox;
+begin
+  NewB := __GetNewSizeRotated(Bitmap.Width, Bitmap.Height,Angle);
+  nW := (NewB.x2 - NewB.x1) + 1;
+  nH := (NewB.y2 - NewB.y1) + 1;
+  mX := nW div 2;
+  mY := nH div 2;
+  wid := (Bitmap.Width - 1);
+  hei := (Bitmap.Height - 1);
+  TargetBitmap.SetSize(nW, nH);
+  cosa := Cos(Angle);
+  sina := Sin(Angle);
+  nW -= 1; nH -= 1;
+
+  for i := 0 to nH do begin
+    for j := 0 to nW do begin
+      rx := (mx + cosa * (j - mx) - sina * (i - my));
+      ry := (my + sina * (j - mx) + cosa * (i - my));
+
+      fX := (Trunc(rX)+ NewB.x1);
+      fY := (Trunc(rY)+ NewB.y1);
+      cX := (Ceil(rX) + NewB.x1);
+      cY := (Ceil(rY) + NewB.y1);
+
+      if not((fX < 0) or (cX < 0) or (fX >= wid) or (cX >= wid) or
+             (fY < 0) or (cY < 0) or (fY >= hei) or (cY >= hei)) then
+      begin
+        dx := rX - (fX - NewB.x1);
+        dy := rY - (fY - NewB.y1);
+
+        p0 := Bitmap.FData[fY * Bitmap.Width + fX];
+        p1 := Bitmap.FData[fY * Bitmap.Width + cX];
+        p2 := Bitmap.FData[cY * Bitmap.Width + fX];
+        p3 := Bitmap.FData[cY * Bitmap.Width + cX];
+
+        TopR := (1 - dx) * p0.R + dx * p1.R;
+        TopG := (1 - dx) * p0.G + dx * p1.G;
+        TopB := (1 - dx) * p0.B + dx * p1.B;
+        BtmR := (1 - dx) * p2.R + dx * p3.R;
+        BtmG := (1 - dx) * p2.G + dx * p3.G;
+        BtmB := (1 - dx) * p2.B + dx * p3.B;
+
+        RR := Round((1 - dy) * TopR + dy * BtmR);
+        GG := Round((1 - dy) * TopG + dy * BtmG);
+        BB := Round((1 - dy) * TopB + dy * BtmB);
+
+        if (RR < 0) then RR := 0
+        else if (RR > 255) then RR := 255;
+        if (GG < 0) then GG := 0
+        else if (GG > 255) then GG := 255;
+        if (BB < 0) then BB := 0
+        else if (BB > 255) then BB := 255;
+
+        k := i * TargetBitmap.Width + j;
+        TargetBitmap.FData[k].r := RR;
+        TargetBitmap.FData[k].g := GG;
+        TargetBitmap.FData[k].b := BB;
+      end;
+    end;
+  end;
+end;
+
+procedure TMufasaBitmap.RotateBitmapEx(Angle: Single; Expand: Boolean; Smooth: Boolean; TargetBitmap: TMufasaBitmap);
+begin
+  case (Expand) of
+    True:
+      case (Smooth) of
+        True:
+          __RotateBIExpand(Self, Angle, TargetBitmap);
+        False:
+          Self.RotateBitmap(Angle, TargetBitmap);
+      end;
+    False:
+      case (Smooth) of
+        True:
+          __RotateBINoExpand(Self, Angle, TargetBitmap);
+        False:
+          __RotateNoExpand(Self, Angle, TargetBitmap);
+      end;
+  end;
 end;
 
 procedure TMufasaBitmap.Desaturate;
@@ -1837,7 +2034,56 @@ begin
   SetLength(result.White,Result.WhiteHi+1);
 end;
 
+procedure TMufasaBitmap.ResizeBilinear(NewW, NewH: Integer);
+var
+  x,y,i,j: Integer;
+  p0,p1,p2,p3: TRGB32;
+  ratioX,ratioY,dx,dy: Single;
+  Temp: TMufasaBitmap;
+  RR,GG,BB: Single;
+  Row,RowT: TPRGB32Array;
+begin
+  Temp := Self.Copy();
+  RowT:= Temp.RowPtrs;
+  ratioX := (Self.Width-1) / NewW;
+  ratioY := (Self.Height-1) / NewH;
+  Self.SetSize(NewW, NewH);
+  Row := Self.RowPtrs;
+  Dec(NewW);
+  for i:=0 to NewH-1 do
+  for j:=0 to NewW do
+  begin
+    x := Trunc(ratioX * j);
+    y := Trunc(ratioY * i);
+    dX := ratioX * j - x;
+    dY := ratioY * i - y;
 
+    p0 := RowT[y][x];
+    p1 := RowT[y][x+1];
+    p2 := RowT[y+1][x];
+    p3 := RowT[y+1][x+1];
+
+    RR := p0.R * (1-dX) * (1-dY) +
+          p1.R * (dX * (1-dY)) +
+          p2.R * (dY * (1-dX)) +
+          p3.R * (dX * dY);
+
+    GG := p0.G * (1-dX) * (1-dY) +
+          p1.G * (dX * (1-dY)) +
+          p2.G * (dY * (1-dX)) +
+          p3.G * (dX * dY);
+
+    BB := p0.B * (1-dX) * (1-dY) +
+          p1.B * (dX * (1-dY)) +
+          p2.B * (dY * (1-dX)) +
+          p3.B * (dX * dY);
+
+    Row[i][j].R := Trunc(RR);
+    Row[i][j].G := Trunc(GG);
+    Row[i][j].B := Trunc(BB);
+  end;
+  Temp.Free();
+end;
 
 constructor TMBitmaps.Create(Owner: TObject);
 begin
@@ -1955,12 +2201,7 @@ begin
 
   case (method) of
     RM_Nearest: Self.StretchResize(NewWidth, NewHeight);
-    RM_Bilinear: begin
-                   Matrix := Self.ToMatrix();
-                   ResizeBilinearMatrix(Matrix, NewWidth, NewHeight);
-                   Self.DrawMatrix(Matrix);
-                   SetLength(Matrix, 0);
-                 end;
+    RM_Bilinear: Self.ResizeBilinear(NewWidth, NewHeight);
   end;
 end;
 
