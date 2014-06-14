@@ -167,3 +167,10 @@ procedure Lape_GetEnvironmentVariable(const Params: PParamArray; const Result: P
 begin
   PlpString(Result)^ := ps_GetEnvironmentVariable(PString(Params^[0])^);
 end;
+
+procedure Lape_ShowBalloonHint(const Params: PParamArray); lape_extdecl
+type
+  PBalloonFlags = ^TBalloonFlags;
+begin
+  ps_ShowBalloonHint(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PBalloonFlags(Params^[3])^);
+end;

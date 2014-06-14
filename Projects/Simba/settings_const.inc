@@ -50,6 +50,7 @@ ssScriptsPath = ssSettings + ssScripts + 'Path';
 ssCodeHintsShowAutomatically = ssSettings + ssCodeInsight + 'CodeHints/ShowAutomatically';
 ssCodeCompletionShowAutomatically = ssSettings + ssCodeInsight + 'CodeCompletion/ShowAutomatically';
 
+ssShowBalloonHints = ssSettings + 'ShowBalloonHints';
 
 ssSourceEditorLazColors = ssSettings + ssSourceEditor + 'LazColors';
 ssSourceEditorFont = ssSettings + ssSourceEditor + 'Font/';

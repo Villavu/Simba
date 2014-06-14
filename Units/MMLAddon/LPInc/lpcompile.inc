@@ -92,6 +92,7 @@ addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
 addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
 addGlobalType('set of (mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose)', 'TMsgDlgButtons');
 addGlobalType('(mtWarning, mtError, mtInformation, mtConfirmation, mtCustom)', 'TMsgDlgType');
+addGlobalType('(bfNone, bfInfo, bfWarning, bfError)', 'TBalloonFlags');
 
 addGlobalType('array of string', 'TStringArray');
 addGlobalType('array of TStringArray', 'T2DStringArray');

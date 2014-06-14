@@ -38,7 +38,7 @@ uses
   {$ENDIF}
   MufasaTypes, MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs, internets,scriptproperties,
-  settings, settingssandbox, lcltype, dialogs
+  settings, settingssandbox, lcltype, dialogs, ExtCtrls
   {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
@@ -57,6 +57,7 @@ const
   m_ShowMessage = 8; //Data = PChar
   m_MessageBox = 9; //Data =  PMessageBoxData
   m_MessageDlg = 10; //Data = PMessageDlg
+  m_BalloonHint = 11; //Data = PBalloonHintData
 
   {$I settings_const.inc}
   {$WARNING REMOVEME}
@@ -111,6 +112,14 @@ type
       Res : integer;
     end;
     PMessageDlgData = ^TMessageDlgData;
+
+    PBalloonHintData = ^TBalloonHintData;
+    TBalloonHintData = record
+      ATitle: String;
+      AHint: String;
+      ATimeout: Integer;
+      AFlag: TBalloonFlags;
+    end;
 
     { TMThread }
 

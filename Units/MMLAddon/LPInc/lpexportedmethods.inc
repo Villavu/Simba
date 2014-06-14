@@ -45,6 +45,7 @@ AddGlobalFunc('procedure ShowMessage(msg: string);', @Lape_ShowMessage);
 AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integer', @Lape_MessageBox);
 AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer', @Lape_MessageDlg);
 AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
+AddGlobalFunc('procedure ShowBalloonHint(const Title, Hint: string; const Timeout: Integer; const Flag: TBalloonFlags);', @Lape_ShowBalloonHint);
 AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
 AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 {$IFNDEF FUNC_LIST}
@@ -126,6 +127,7 @@ AddGlobalFunc('function FindBitmapSpiral(bitmap: Integer; var x, y: Integer; xs,
 AddGlobalFunc('function FindBitmapsSpiralTolerance(bitmap: integer; x, y: Integer; var Points: TPointArray; xs, ys, xe, ye,tolerance: Integer): Boolean', @Lape_FindBitmapsSpiralTolerance);
 AddGlobalFunc('function FindBitmapSpiralTolerance(bitmap: integer; var x, y: Integer; xs, ys, xe, ye,tolerance: integer): Boolean', @Lape_FindBitmapSpiralTolerance);
 AddGlobalFunc('function RotateBitmap(bitmap: Integer; angle: Extended): Integer', @Lape_RotateBitmap);
+AddGlobalFunc('function RotateBitmapEx(Bitmap: Integer; Angle: Single; Expand: Boolean; Smooth: Boolean): Integer', @Lape_RotateBitmapEx);
 AddGlobalFunc('function Desaturate(Bitmap: integer): integer', @Lape_Desaturate);
 AddGlobalFunc('procedure InvertBitmap(Bitmap: integer);', @Lape_InvertBitmap);
 AddGlobalFunc('function CopyBitmap(Bitmap: integer): integer', @Lape_CopyBitmap);
