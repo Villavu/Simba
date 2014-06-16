@@ -65,6 +65,7 @@ type
     procedure Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1; ManageStream: Boolean = False); reintroduce;
 
     procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
+    procedure GetProcInfo(Item: TDeclaration; out Header, Name: String);
     procedure FillProposal;
     procedure FillSynCompletionProposal(ItemList, InsertList: TStrings; Prefix: string = '');
 
@@ -1214,6 +1215,7 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
   begin
     s := FormatFirstColumn(Item.ProcType);
     d := Item.Items.GetFirstItemOfClass(TciProcedureName);
+
     if (d = nil) then
       Exit;
     n := d.ShortText;
@@ -1382,6 +1384,46 @@ begin
   end;
 end;
 
+procedure TCodeInsight.GetProcInfo(Item: TDeclaration; out Header, Name: String);
+var
+  ProcItem: TCIProcedureDeclaration;
+  Decl, d: TDeclaration;
+  s: string;
+begin
+  Header := '';
+  Name := '';
+
+  if (Item = nil) then
+    Exit();
+
+  if (Item is TCIProcedureDeclaration) then
+    ProcItem := TCIProcedureDeclaration(Item)
+  else
+    Exit();
+
+  if (ProcItem <> nil) then
+  begin
+    Decl := ProcItem.Items.GetFirstItemOfClass(TciProcedureName);
+
+    if (Decl = nil) or (ProcItem.Items.Count = 0) then // nil stuff
+      Exit();
+
+    if (Boolean(ProcItem.Items[0].ClassType = TciProcedureClassName)) then // we dont want type funcs.
+      Exit();
+
+    s := ProcItem.ProcType + ' ' + Decl.ShortText; //procedure foo
+    if (ProcItem.Params <> '') then // add any params
+      s += '(' + ProcItem.Params + ')';
+
+    d := ProcItem.Items.GetFirstItemOfClass(TciReturnType);
+    if (d <> nil) then // returns something
+      s += ': ' + d.ShortText;
+
+    Header := s + ';'; // dont forget the ";"!
+    Name := Decl.ShortText;
+  end;
+end;
+
 procedure TCodeInsight.FillProposal;
 var
   i: Integer;
@@ -1442,7 +1484,7 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
   end;
 
 var
-  i, ii, iii: Integer;
+  i, ii: Integer;
   d, dDecl: TDeclaration;
   dType: String;
 begin

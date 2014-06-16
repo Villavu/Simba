@@ -3240,25 +3240,117 @@ begin;
     Result += '(';
 end;
 
+procedure lpGetInteralProcs(Headers, Names: TStrings);
+var
+  i: integer;
+  Thread: TMThread;
+  s, ss: String;
+  ms: TMemoryStream;
+  ci: TCodeInsight;
+  Info: TStringList;
+begin
+  // Create a temporary Lape thread to get data from
+  Thread := TLPThread.Create(True, nil, '');
+  Thread.FreeOnTerminate := False; // We will free it before it even starts :-)
+
+  with (TLPThread(Thread)) do
+  try
+    Info := TStringList.Create();
+    Compiler.getInfo(Info);
+  finally
+    Free();
+  end;
+
+  // Parsing data from Lape
+  ci := TCodeInsight.Create;
+  ms := TMemoryStream.Create;
+
+  with (ci) do
+  try
+    OnMessage := @SimbaForm.OnCCMessage;
+    Info.SaveToStream(ms);
+    Run(ms, nil, -1, True);
+  except
+    formWritelnEx('Failed to parse Lape interal procs');
+  end;
+
+  // Getting proc info from our parsed data and adding to the results
+  Headers.BeginUpdate();
+  Names.BeginUpdate();
+
+  try
+    for i := 0 to (ci.Items.Count - 1) do
+    begin
+      ci.GetProcInfo(ci.Items[i], s, ss);
+
+      if (s <> '') and (ss <> '') then
+      begin
+        Headers.Add(s);
+        Names.Add(ss);
+      end;
+    end;
+  finally
+    Headers.EndUpdate();
+    Names.EndUpdate();
+  end;
+
+  // Headers.SaveToFile('C:/Simba/Headers.txt');
+  // Names.SaveToFile('C:/Simba/Names.txt');
+
+  ci.Free();
+  Info.Free();
+end;
+
 procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
 var
   Methods : TExpMethodArr;
   LastSection : string;
   Sections : TStringList;
   Nodes : array of TTreeNode;
-  i : integer;
+  i, Len, h: integer;
   Index : integer;
   TempNode : TTreeNode;
   Temp2Node : TTreeNode;
   Tree : TTreeView;
+  Names, Headers: TStringList;
+  ExportedArr: TStringArray;
 begin
-  SetLength(nodes,0);
+  SetLength(nodes, 0);
   frmFunctionList.FunctionList.BeginUpdate;
-  if frmFunctionList.FunctionList.Items.Count = 0 then
-  begin;
+  if (frmFunctionList.FunctionList.Items.Count = 0) then
+  begin
     case SimbaSettings.Interpreter._Type.Value of
-      {$IFDEF USE_PASCALSCRIPT}interp_PS: Methods := TPSThread.GetExportedMethods(); {$ENDIF}
-      interp_LP: Methods := TLPThread.GetExportedMethods();
+      {$IFDEF USE_PASCALSCRIPT}
+      interp_PS:
+        Methods := TPSThread.GetExportedMethods();
+      {$ENDIF}
+      interp_LP:
+        begin
+          Methods := TLPThread.GetExportedMethods(); // Get methods added via Simba (lpExportedMethods.pas)
+          Headers := TStringList.Create();
+          Names := TStringList.Create();
+
+          lpGetInteralProcs(Headers, Names);
+
+          // Let's lowercase these once...
+          H := High(Methods);
+          SetLength(ExportedArr, H + 1);
+          for i := 0 to H do
+            ExportedArr[i] := Lowercase(Methods[i].FuncDecl);
+
+          for i := 0 to (Names.Count - 1) do
+            if (not IsStrInArr(Lowercase(Names[i]), ExportedArr)) then
+            begin
+              Len := Length(Methods);
+              SetLength(Methods, Len + 1);
+              Methods[Len].FuncDecl := Headers[i];
+              Methods[Len].FuncPtr := nil;
+              Methods[Len].Section := 'Lape';
+            end;
+
+          Headers.Free();
+          Names.Free();
+        end;
       else
         raise Exception.Create('Invalid Interpreter!');
     end;
