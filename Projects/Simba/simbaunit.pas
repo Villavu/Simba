@@ -337,6 +337,7 @@ type
       Shift: TShiftState);
     procedure editSearchListKeyPress(Sender: TObject; var Key: char);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
+    function GetInterepterMethods(const SimbaMethods: TExpMethodArr): TExpMethodArr;
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
@@ -953,7 +954,6 @@ end;
 function TSimbaForm.SetSourceEditorFont(obj: TObject): Boolean;
 var
   I: LongInt;
-  TempFont: TFont;
 begin
   if (TFontSetting(obj).Color.Value <> clDefault) then
   begin
@@ -1424,6 +1424,7 @@ begin
       ScriptState := ss_Running;
     end;
   end;
+
 end;
 
 procedure TSimbaForm.StopScript;
@@ -1433,7 +1434,8 @@ begin
     case ScriptState of
       ss_Stopping:
         begin    //Terminate the thread the tough way.
-          mDebugLn('Terminating the Scriptthread');
+          mDebugLn('Terminating the Scriptthread in 500ms');
+          Sleep(500);
           mDebugLn('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
           WaitForThreadTerminate(ScriptThread.Handle, 0);
           FreeAndNil(ScriptThread);
@@ -1729,7 +1731,7 @@ end;
 { Load settings }
 procedure TSimbaForm.LoadFormSettings;
 var
-  str,str2 : string;
+  str: string;
   Data : TStringArray;
   i,ii : integer;
 begin
@@ -1916,7 +1918,7 @@ var
   Script: string;
   loadFontsOnScriptStart: boolean;
   Continue: boolean;
-  H, I: LongInt;
+
 begin
   if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
   begin
@@ -2220,7 +2222,6 @@ end;
 
 procedure TSimbaForm.ActionFontExecute(Sender: TObject);
 var
-  I: LongInt;
   Dialog: TFontDialog;
 begin
   Dialog := TFontDialog.Create(nil);
@@ -2821,8 +2822,15 @@ begin
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
 
-    //Stream.Free; // TCodeInsight free's the stream!
+    // Now we have internal interpeter methods lets add em to function list
+    if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
+    begin
+      frmFunctionList.FunctionList.Items.Clear();
+      MenuitemFillFunctionList.Click();
+      frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text, True);
+    end;
   end;
+  //Stream.Free; // TCodeInsight free's the stream!
 end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
@@ -3240,80 +3248,59 @@ begin;
     Result += '(';
 end;
 
-procedure lpGetInteralProcs(Headers, Names: TStrings);
+function TSimbaForm.GetInterepterMethods(const SimbaMethods: TExpMethodArr): TExpMethodArr;
 var
-  i: integer;
-  Thread: TMThread;
-  s, ss: String;
-  ms: TMemoryStream;
-  ci: TCodeInsight;
-  Info: TStringList;
+  Headers, Names, SortedHeaders: TStringList;
+  Len, h, i, p: Integer;
+  Methods: TStringArray;
 begin
-  // Create a temporary Lape thread to get data from
-  Thread := TLPThread.Create(True, nil, '');
-  Thread.FreeOnTerminate := False; // We will free it before it even starts :-)
+  h := High(SimbaMethods);
 
-  with (TLPThread(Thread)) do
-  try
-    Info := TStringList.Create();
-    Compiler.getInfo(Info);
-  finally
-    Free();
-  end;
+  if (h < 0) or (Length(CoreBuffer) = 0) then
+    Exit();
 
-  // Parsing data from Lape
-  ci := TCodeInsight.Create;
-  ms := TMemoryStream.Create;
-
-  with (ci) do
-  try
-    OnMessage := @SimbaForm.OnCCMessage;
-    Info.SaveToStream(ms);
-    Run(ms, nil, -1, True);
-  except
-    formWritelnEx('Failed to parse Lape interal procs');
-  end;
-
-  // Getting proc info from our parsed data and adding to the results
-  Headers.BeginUpdate();
-  Names.BeginUpdate();
+  Headers := TStringList.Create;
+  Names := TStringList.Create;
+  SortedHeaders := TStringList.Create;
+  SortedHeaders.Sorted := True;
+  CoreBuffer[Low(CoreBuffer)].GetProcedures(Headers, Names);
 
   try
-    for i := 0 to (ci.Items.Count - 1) do
+    SetLength(Methods, h + 1);
+    for i := 0 to h do
+      Methods[i] := Lowercase(SimbaMethods[i].FuncDecl);
+
+    for i := 0 to (Names.Count - 1) do
+      if (not IsStrInArr(Lowercase(Names[i]), Methods)) then
+        SortedHeaders.Add(Names[i] + '###' + Headers[i]);
+
+    for i := 0 to (SortedHeaders.Count - 1) do
     begin
-      ci.GetProcInfo(ci.Items[i], s, ss);
-
-      if (s <> '') and (ss <> '') then
-      begin
-        Headers.Add(s);
-        Names.Add(ss);
-      end;
+      p := (Pos('###', SortedHeaders[i]) + 3);
+      Len := Length(Result);
+      SetLength(Result, Len + 1);
+      Result[Len].FuncDecl := Copy(SortedHeaders[i], p, Length(SortedHeaders[i]) - p);
+      Result[Len].FuncPtr := nil;
+      Result[Len].Section := 'Lape';
     end;
   finally
-    Headers.EndUpdate();
-    Names.EndUpdate();
+    Headers.Free();
+    Names.Free();
+    SortedHeaders.Free();
   end;
-
-  // Headers.SaveToFile('C:/Simba/Headers.txt');
-  // Names.SaveToFile('C:/Simba/Names.txt');
-
-  ci.Free();
-  Info.Free();
 end;
 
 procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
 var
-  Methods : TExpMethodArr;
+  Methods, InterpMethods: TExpMethodArr;
   LastSection : string;
   Sections : TStringList;
   Nodes : array of TTreeNode;
-  i, Len, h: integer;
+  i, Len: integer;
   Index : integer;
   TempNode : TTreeNode;
   Temp2Node : TTreeNode;
   Tree : TTreeView;
-  Names, Headers: TStringList;
-  ExportedArr: TStringArray;
 begin
   SetLength(nodes, 0);
   frmFunctionList.FunctionList.BeginUpdate;
@@ -3326,30 +3313,19 @@ begin
       {$ENDIF}
       interp_LP:
         begin
-          Methods := TLPThread.GetExportedMethods(); // Get methods added via Simba (lpExportedMethods.pas)
-          Headers := TStringList.Create();
-          Names := TStringList.Create();
+          Methods := TLPThread.GetExportedMethods();
 
-          lpGetInteralProcs(Headers, Names);
+          if (Length(CoreBuffer) > 0) then
+          begin
+            InterpMethods := Self.GetInterepterMethods(Methods);
 
-          // Let's lowercase these once...
-          H := High(Methods);
-          SetLength(ExportedArr, H + 1);
-          for i := 0 to H do
-            ExportedArr[i] := Lowercase(Methods[i].FuncDecl);
-
-          for i := 0 to (Names.Count - 1) do
-            if (not IsStrInArr(Lowercase(Names[i]), ExportedArr)) then
+            for i := 0 to high(InterpMethods) do
             begin
               Len := Length(Methods);
               SetLength(Methods, Len + 1);
-              Methods[Len].FuncDecl := Headers[i];
-              Methods[Len].FuncPtr := nil;
-              Methods[Len].Section := 'Lape';
+              Methods[Len] := InterpMethods[i];
             end;
-
-          Headers.Free();
-          Names.Free();
+          end;
         end;
       else
         raise Exception.Create('Invalid Interpreter!');

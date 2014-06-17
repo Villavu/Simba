@@ -2241,12 +2241,6 @@ begin
         SynError(InvalidForStatement);
     end;
     Expression;
-
-    if (TokenID = tokWith) then
-    begin
-      NextToken;
-      Expression;
-    end;
   end;
 
   Expected(tokDo);
@@ -2569,7 +2563,7 @@ begin
     tokAddressOp, tokDoubleAddressOp, tokIdentifier, tokPointerSymbol, tokRoundOpen:
       begin
         Designator;
-        if TokenID = tokAssign then
+        if TokenID in [tokAssign, tokPlusAsgn, tokMinusAsgn, tokMulAsgn, tokDivAsgn, tokPowAsgn] then
         begin
           NextToken;
           if TokenID = tokInherited then
@@ -2854,38 +2848,24 @@ end;
 
 procedure TmwSimplePasPar.MultiplicativeOperator;
 begin
+  //slacknote
   case TokenID of
-    tokAnd:
-      begin
-        NextToken;
-      end;
-    tokDiv:
-      begin
-        NextToken;
-      end;
-    tokMod:
-      begin
-        NextToken;
-      end;
-    tokShl:
-      begin
-        NextToken;
-      end;
-    tokShr:
-      begin
-        NextToken;
-      end;
-    tokSlash:
-      begin
-        NextToken;
-      end;
-    tokStar:
-      begin
-        NextToken;
-      end;
+    tokAnd:   NextToken;
+    tokDiv:   NextToken;
+    tokMod:   NextToken;
+    tokShl:   NextToken;
+    tokShr:   NextToken;
+    tokSlash: NextToken;
+    tokStar:  NextToken;
+    tokStarStar: NextToken;
+    
+    tokPlusAsgn: NextToken;
+    tokMinusAsgn:NextToken;
+    tokDivAsgn:  NextToken;
+    tokMulAsgn:  NextToken;
+    tokPowAsgn:  NextToken;
   else
-    begin SynError(InvalidMultiplicativeOperator);
-    end;
+    SynError(InvalidMultiplicativeOperator);
   end;
 end;
 
@@ -2978,7 +2958,8 @@ end;
 procedure TmwSimplePasPar.Term;
 begin
   Factor;
-  while TokenID in [tokAnd, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar] do
+  while (TokenID in [tokAnd, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar, 
+                     tokPlusAsgn, tokMinusAsgn, tokDivAsgn, tokMulAsgn, tokPowAsgn]) do
   begin
     MultiplicativeOperator;
     Factor;
@@ -4534,7 +4515,7 @@ end;
 
 procedure TmwSimplePasPar.TypeKind;
 begin
-  if (TokenID = tokIdentifier) and (GenID = tokPrivate) then
+  if (TokenID = tokIdentifier) and (GenID = tokPrivate) then //skip tokPrivate - dgby714
     NextToken;
 
   case TokenID of
@@ -4607,7 +4588,7 @@ begin
           case Lexer.AheadTokenID of
             tokAnd, tokBegin, tokCase, tokColon, tokEnd, tokElse, tokIf, tokMinus, tokNull,
               tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokWhile, tokWith,
-              tokXor: break;
+              tokXor, tokStarStar, tokPlusAsgn, tokMinusAsgn, tokDivAsgn, tokMulAsgn, tokPowAsgn: break;
             tokRoundOpen:
               begin
                 repeat
@@ -4637,7 +4618,8 @@ begin
               RecordConstant;
             end;
           tokNull: ;
-          tokAnd, tokMinus, tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokXor:
+          tokAnd, tokMinus, tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokStarStar, tokXor,
+          tokPlusAsgn, tokMinusAsgn, tokDivAsgn, tokMulAsgn, tokPowAsgn:
             begin
               ConstantExpression;
             end;

@@ -1358,7 +1358,7 @@ begin
             '(': fProcTable[I] := RoundOpenProc;
             ')': fProcTable[I] := RoundCloseProc;
             '*': fProcTable[I] := StarProc;
-			'+': fProcTable[I] := PlusProc;
+            '+': fProcTable[I] := PlusProc;
             ',': fProcTable[I] := CommaProc;
             '-': fProcTable[I] := MinusProc;
             '.': fProcTable[I] := PointProc;
@@ -1873,7 +1873,12 @@ end;
 procedure TmwBasePasLex.MinusProc;
 begin
   inc(Run);
-  fTokenID := tokMinus;
+  if FOrigin[Run] = '=' then 
+  begin
+    inc(Run);
+    fTokenID := tokMinusAsgn;
+  end else
+    fTokenID := tokMinus;
 end;
 
 procedure TmwBasePasLex.NullProc;
@@ -1900,7 +1905,12 @@ end;
 procedure TmwBasePasLex.PlusProc;
 begin
   inc(Run);
-  fTokenID := tokPlus;
+  if FOrigin[Run] = '=' then 
+  begin
+    inc(Run);
+    fTokenID := tokPlusAsgn;
+  end else
+    fTokenID := tokPlus;
 end;
 
 procedure TmwBasePasLex.PointerSymbolProc;
@@ -2137,6 +2147,11 @@ begin
           inc(Run);
         end;
       end;
+    '=':
+      begin
+        inc(Run, 2);
+        fTokenID := tokDivAsgn;
+      end;
   else
     begin
       inc(Run);
@@ -2168,7 +2183,25 @@ end;
 procedure TmwBasePasLex.StarProc;
 begin
   inc(Run);
-  fTokenID := tokStar;
+  case FOrigin[Run] of
+    '=':
+      begin
+        Inc(Run);
+        fTokenID := tokMulAsgn;
+      end;
+    '*':
+      begin
+        Inc(Run);
+        if FOrigin[Run] = '=' then
+        begin
+          Inc(Run);
+          fTokenID := tokPowAsgn;
+        end else
+          fTokenID := tokStarStar;
+      end;
+    else
+      fTokenID := tokStar;
+  end;
 end;
 
 procedure TmwBasePasLex.StringProc;
@@ -2614,7 +2647,7 @@ end;
 
 function TmwBasePasLex.GetIsMulOperator: Boolean;
 begin
-  Result := fTokenID in [tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar];
+  Result := fTokenID in [tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar];
 end;
 
 function TmwBasePasLex.GetIsRelativeOperator: Boolean;
