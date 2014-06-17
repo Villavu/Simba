@@ -344,22 +344,17 @@ begin
   end;
 end;
 
-procedure TScriptFrame.SynEditProcessUserCommand(Sender: TObject;
-  var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
-{var
-  LineText,SearchText : string;
-  Caret : TPoint;
-  i,endI : integer;}
+procedure TScriptFrame.SynEditProcessUserCommand(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 var
   mp: TCodeInsight;
   ms: TMemoryStream;
-  ItemList, InsertList: TStringList;
-  sp, ep,bcc,cc,bck,posi,bracketpos: Integer;
+  ItemList, InsertList, NameList: TStringList;
+  sp, ep,bcc,cc,bck,posi,bracketpos,i,DotPos: Integer;
   p: TPoint;
-  s, Filter: string;
+  s, Filter, sname, ProcName, TypeName: string;
   Attri: TSynHighlighterAttributes;
-  d: TDeclaration;
-  dd: TDeclaration;
+  d, dd: TDeclaration;
+  FoundItems: TDeclarationArray;
 begin
   if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(Point(SynEdit.CaretX - 1, SynEdit.CaretY), s, Attri)) or
                                       ((Attri.Name <> SYNS_AttrComment) and (Attri.name <> SYNS_AttrString) and (Attri.name <> SYNS_AttrDirective))) then
@@ -429,6 +424,7 @@ begin
 
     ms := TMemoryStream.Create;
     synedit.Lines.SaveToStream(ms);
+
     try
       Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
       if (SynEdit.CaretY <= 0) or (SynEdit.CaretY > SynEdit.Lines.Count) then
@@ -448,10 +444,63 @@ begin
         bracketpos := posi + length(s);
 
       cc := LastDelimiter('(', s);
-      if cc > 0 then
+      if (cc > 0) then
         delete(s, cc, length(s) - cc + 1);
 
       d := mp.FindVarBase(s);
+      DotPos := pos('.', s);
+
+      if (d = nil) and (DotPos > 0) then // if it's a type proc.
+      begin
+        sName := Lowercase(copy(s, DotPos + 1, (length(s) - DotPos) + 1));
+        if (sName = '') then
+          Exit();
+
+        s := Copy(s, 0, DotPos - 1);
+        NameList := TStringList.Create();
+        FoundItems := mp.GetTypeProcs(NameList, s); // Return items found in the type
+
+        // Loop though looking for a match from what is currently typed.
+        for i := 0 to (NameList.Count - 1) do
+          if (Pos(sName, Lowercase(NameList[i])) > 0) then // We found a match!
+          begin
+            if (Pos('(', NameList[i]) > 0) then // Check there is actually params
+              SimbaForm.ParamHint.Show(PosToCaretXY(synedit, posi), PosToCaretXY(synedit, bracketpos), TciProcedureDeclaration(FoundItems[i]), synedit, mp)
+            else
+              mDebugLn('< CodeHints: No params expected (Type) >');
+
+            Break; // We're done here regardless if we show or not
+          end;
+
+        NameList.Free();
+        SetLength(FoundItems, 0);
+        Exit(); // Not needed anymore. :)
+      end;
+
+      // Check FindVarBase didn't find a Proc attached to a Type.
+      // Maybe Add FindVarBase with a option to not find type procs?
+      if (d <> nil) then
+      begin
+        ProcName := d.ShortText;
+
+        if (d.Owner <> nil) then
+          if (d.Owner.Items.Count > 0) then
+          begin
+            TypeName := d.Owner.Items[0].ShortText;
+
+            if (TypeName <> ProcName) then
+            begin
+              if (mp.FindProcedure(ProcName, d)) then
+                if (TciProcedureDeclaration(d).Params <> '') then
+                  SimbaForm.ParamHint.Show(PosToCaretXY(synedit, posi), PosToCaretXY(synedit,bracketpos), TciProcedureDeclaration(d), synedit, mp)
+                else
+                  mDebugLn('< CodeHints: No params expected >');
+
+              Exit();
+            end;
+          end;
+      end;
+
       dd := nil;
 
       //Find the declaration -> For example if one uses var x : TNotifyEvent..
@@ -460,32 +509,36 @@ begin
       begin
         dd := d;
         d := d.Owner.Items.GetFirstItemOfClass(TciTypeKind);
+
         if (d <> nil) then
         begin
           d := TciTypeKind(d).GetRealType;
           if (d <> nil) and (d is TciReturnType) then
             d := d.Owner;
         end;
+
         if (d <> nil) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) then
           d := mp.FindVarBase(d.CleanText)
         else
           Break;
       end;
+
       //Yeah, we should have found the procedureDeclaration now!
       if (d <> nil) and (d <> dd) and (d.Owner <> nil) and ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration)) then
       begin
         if (not (d is TciProcedureDeclaration)) and (d.Owner is TciProcedureDeclaration) then
           d := d.Owner;
+
         if (TciProcedureDeclaration(d).Params <> '') then
           SimbaForm.ParamHint.Show(PosToCaretXY(synedit,posi), PosToCaretXY(synedit,bracketpos),
-                                   TciProcedureDeclaration(d), synedit,mp)
+                                   TciProcedureDeclaration(d), synedit, mp)
         else
           mDebugLn('<no parameters expected>');
       end;
     except
       on e : exception do
         mDebugLn(e.message);
-      //Do not free the MP, we need to use this.
+      // Do not free the MP, we need to use this (Paramhint.Show uses it!!)
     end;
   end;
 end;
