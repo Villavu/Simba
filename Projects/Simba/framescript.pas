@@ -379,6 +379,7 @@ begin
         s := ''
       else
         s := SynEdit.Lines[SynEdit.CaretY - 1];
+
       if ep > length(s) then //We are outside the real text, go back to the last char
          mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX) + 1)
       else
@@ -417,6 +418,10 @@ begin
   begin
     if SimbaForm.ParamHint.Visible = true then
       SimbaForm.ParamHint.hide;
+
+    if (Pos('writeln(', Lowercase(SynEdit.Lines[SynEdit.CaretY - 1])) > 0) then
+      Exit();
+
     mp := TCodeInsight.Create;
     mp.OnMessage := @SimbaForm.OnCCMessage;
     mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
@@ -431,6 +436,7 @@ begin
         s := ''
       else
         s := SynEdit.Lines[SynEdit.CaretY - 1];
+
       if ep > length(s) then //We are outside the real text, go back to the last char
         mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX), True)
       else
