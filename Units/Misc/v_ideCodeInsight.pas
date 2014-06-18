@@ -1625,7 +1625,8 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
 var
   i, ii: Integer;
   d, dDecl: TDeclaration;
-  dType: String;
+  dType, _Prefix: string;
+  isType: boolean;
 begin
   ItemList.BeginUpdate;
   InsertList.BeginUpdate;
@@ -1633,8 +1634,15 @@ begin
     ItemList.Clear;
     InsertList.Clear;
 
-    if (PrepareString(Prefix) <> '') then
+    _Prefix := PrepareString(Prefix);
+    if (_Prefix <> '') then
     begin
+      if (_Prefix = 'SELF') then
+      begin
+        Prefix := _Prefix;
+        isType := True;
+      end else
+        isType := False;
 
       d := FindVarBase(Prefix, True, vbType);
 
@@ -1646,6 +1654,8 @@ begin
       if (dDecl <> nil) then
       begin
         dType := dDecl.CleanText;
+        if (isType) then
+          dType := Trim(dType);
 
         checkInclude(Self, dType);
         for i := High(CoreBuffer) downto Low(CoreBuffer) do
