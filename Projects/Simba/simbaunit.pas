@@ -3240,67 +3240,6 @@ begin;
     Result += '(';
 end;
 
-procedure lpGetInteralProcs(Headers, Names: TStrings);
-var
-  i: integer;
-  Thread: TMThread;
-  s, ss: String;
-  ms: TMemoryStream;
-  ci: TCodeInsight;
-  Info: TStringList;
-begin
-  // Create a temporary Lape thread to get data from
-  Thread := TLPThread.Create(True, nil, '');
-  Thread.FreeOnTerminate := False; // We will free it before it even starts :-)
-
-  with (TLPThread(Thread)) do
-  try
-    Info := TStringList.Create();
-    Compiler.getInfo(Info);
-  finally
-    Free();
-  end;
-
-  // Parsing data from Lape
-  ci := TCodeInsight.Create;
-  ms := TMemoryStream.Create;
-
-  with (ci) do
-  try
-    OnMessage := @SimbaForm.OnCCMessage;
-    Info.SaveToStream(ms);
-    Run(ms, nil, -1, True);
-  except
-    formWritelnEx('Failed to parse Lape interal procs');
-  end;
-
-  // Getting proc info from our parsed data and adding to the results
-  Headers.BeginUpdate();
-  Names.BeginUpdate();
-
-  try
-    for i := 0 to (ci.Items.Count - 1) do
-    begin
-      ci.GetProcInfo(ci.Items[i], s, ss);
-
-      if (s <> '') and (ss <> '') then
-      begin
-        Headers.Add(s);
-        Names.Add(ss);
-      end;
-    end;
-  finally
-    Headers.EndUpdate();
-    Names.EndUpdate();
-  end;
-
-  // Headers.SaveToFile('C:/Simba/Headers.txt');
-  // Names.SaveToFile('C:/Simba/Names.txt');
-
-  ci.Free();
-  Info.Free();
-end;
-
 procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
 var
   Methods : TExpMethodArr;
@@ -3312,8 +3251,11 @@ var
   TempNode : TTreeNode;
   Temp2Node : TTreeNode;
   Tree : TTreeView;
-  Names, Headers: TStringList;
+  Names, Headers, ValueDefs: TStringList;
   ExportedArr: TStringArray;
+  Thread: TMThread;
+  Stream: TMemoryStream;
+  Buffer: TCodeInsight;
 begin
   SetLength(nodes, 0);
   frmFunctionList.FunctionList.BeginUpdate;
@@ -3327,10 +3269,44 @@ begin
       interp_LP:
         begin
           Methods := TLPThread.GetExportedMethods(); // Get methods added via Simba (lpExportedMethods.pas)
+
+          Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);
+          Thread.FreeOnTerminate := False;
+
+          if (not (Assigned(Thread))) then
+            Exit();
+
+          ValueDefs := TStringList.Create();
           Headers := TStringList.Create();
           Names := TStringList.Create();
 
-          lpGetInteralProcs(Headers, Names);
+          try
+            TLPThread(Thread).Compiler.getInfo(ValueDefs);
+          finally
+            TLPThread(Thread).Free();
+          end;
+
+          try
+            Stream := TMemoryStream.Create;
+            ValueDefs.SaveToStream(Stream);
+          finally
+            ValueDefs.Free;
+          end;
+
+          if (Assigned(Stream)) then
+          begin
+            Buffer := TCodeInsight.Create;
+            with Buffer do
+            try
+              OnMessage := @OnCCMessage;
+              Run(Stream, nil, -1, True);
+              FileName := '"FunctionList"';
+            except
+              mDebugLn('FUNCTION LIST ERROR: Could not parse Lape imports');
+            end;
+          end;
+
+          Buffer.GetProcedures(Headers, Names);
 
           // Let's lowercase these once...
           H := High(Methods);
@@ -3350,6 +3326,8 @@ begin
 
           Headers.Free();
           Names.Free();
+          Buffer.Free(); // Also free's the Stream.
+          // Thread is created suspended, which means nothing to free, will go out of scope and free after this :)
         end;
       else
         raise Exception.Create('Invalid Interpreter!');

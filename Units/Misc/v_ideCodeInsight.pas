@@ -65,7 +65,7 @@ type
     procedure Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1; ManageStream: Boolean = False); reintroduce;
 
     procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
-    procedure GetProcInfo(Item: TDeclaration; out Header, Name: String);
+    procedure GetProcedures(Headers, Names: TStrings; FindTypeProcs: Boolean = False);
     function GetTypeProcs(Names: TStrings; const Prefix: string): TDeclarationArray;
     function FindProcedure(ProcNameToFind: string; out Decl: TDeclaration): boolean;
     procedure FillProposal;
@@ -1385,46 +1385,6 @@ begin
   end;
 end;
 
-procedure TCodeInsight.GetProcInfo(Item: TDeclaration; out Header, Name: String);
-var
-  ProcItem: TCIProcedureDeclaration;
-  Decl, d: TDeclaration;
-  s: string;
-begin
-  Header := '';
-  Name := '';
-
-  if (Item = nil) then
-    Exit();
-
-  if (Item is TCIProcedureDeclaration) then
-    ProcItem := TCIProcedureDeclaration(Item)
-  else
-    Exit();
-
-  if (ProcItem <> nil) then
-  begin
-    Decl := ProcItem.Items.GetFirstItemOfClass(TciProcedureName);
-
-    if (Decl = nil) or (ProcItem.Items.Count = 0) then // nil stuff
-      Exit();
-
-    if (Boolean(ProcItem.Items[0].ClassType = TciProcedureClassName)) then // we dont want type funcs.
-      Exit();
-
-    s := ProcItem.ProcType + ' ' + Decl.ShortText; //procedure foo
-    if (ProcItem.Params <> '') then // add any params
-      s += '(' + ProcItem.Params + ')';
-
-    d := ProcItem.Items.GetFirstItemOfClass(TciReturnType);
-    if (d <> nil) then // returns something
-      s += ': ' + d.ShortText;
-
-    Header := s + ';'; // dont forget the ";"!
-    Name := Decl.ShortText;
-  end;
-end;
-
 procedure TCodeInsight.FillProposal;
 var
   i: Integer;
@@ -1443,6 +1403,66 @@ begin
       Proposal_InsertList.EndUpdate;
     end;
   end;
+end;
+
+(*
+ * Returns Headers and Names of all functions/procedures found in self.
+ * eg: Headers = ['procedure foo;', 'function HiDgby: boolean;']
+ *     Names = [foo, HiDgby]
+*)
+procedure TCodeInsight.GetProcedures(Headers, Names: TStrings; FindTypeProcs: Boolean = False);
+var
+  ProcItem: TCIProcedureDeclaration;
+  Decl, d: TDeclaration;
+  i, c: integer;
+  s: string;
+begin
+  if (Headers = nil) or (Names = nil) then
+    Exit();
+
+  c := (Self.Items.Count - 1);
+  if (c < 1) then
+    Exit();
+
+  Headers.BeginUpdate(); // No drawing here, so who knows if this does anything.
+  Names.BeginUpdate();
+
+  for i := 0 to c do
+  begin
+    if (Items[i] = nil) then
+      Continue;
+
+    if (Items[i] is TCIProcedureDeclaration) then
+      ProcItem := TCIProcedureDeclaration(Items[i])
+    else
+      Continue;
+
+    Decl := ProcItem.Items.GetFirstItemOfClass(TciProcedureName);
+
+    if (Decl = nil) or (ProcItem.Items.Count = 0) then // nil stuff
+      Continue;
+
+    if (not FindTypeProcs) then
+      if (Boolean(ProcItem.Items[0].ClassType = TciProcedureClassName)) then // Is a type linked to the proc?
+        Continue;
+
+    s := '';
+    s := ProcItem.ProcType + ' ' + Decl.ShortText; //procedure foo
+    if (ProcItem.Params <> '') then // add any params
+      s += '(' + ProcItem.Params + ')';
+
+    d := ProcItem.Items.GetFirstItemOfClass(TciReturnType);
+    if (d <> nil) then // if returns something, lets add it
+      s += ': ' + d.ShortText;
+
+    s += ';'; // dont forget the ";"!
+
+    Headers.Add(s);
+    Names.Add(Decl.ShortText);
+  end;
+
+  Headers.EndUpdate();
+  Names.EndUpdate();
 end;
 
 (*
