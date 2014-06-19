@@ -381,22 +381,21 @@ begin
       else
         s := SynEdit.Lines[SynEdit.CaretY - 1];
 
-      ss := trim(s); // if anyone ever adds support for 50.toString() remove this. :)
-      if (ss <> '') then
-        if (ss[1] in ['0'..'9']) then
-        begin
-          mDebugLn('Codehints: Not opening on a digit');
-          Exit();
-        end;
-
       if ep > length(s) then //We are outside the real text, go back to the last char
          mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX) + 1)
       else
          mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX));
 
       s := mp.GetExpressionAtPos;
+
       if (s <> '') then
       begin
+        if (s[1] in ['0'..'9']) then
+        begin
+          mDebugLn('Codehints: Not opening on a digit');
+          Exit();
+        end;
+
         ep := LastDelimiter('.', s);
         if (ep > 0) then
           Delete(s, ep, Length(s) - ep + 1)
