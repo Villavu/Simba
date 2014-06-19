@@ -3246,19 +3246,89 @@ var
   LastSection : string;
   Sections : TStringList;
   Nodes : array of TTreeNode;
-  i : integer;
+  i, Len, h: integer;
   Index : integer;
   TempNode : TTreeNode;
   Temp2Node : TTreeNode;
   Tree : TTreeView;
+  Names, Headers, ValueDefs: TStringList;
+  ExportedArr: TStringArray;
+  Thread: TMThread;
+  Stream: TMemoryStream;
+  Buffer: TCodeInsight;
 begin
-  SetLength(nodes,0);
+  SetLength(nodes, 0);
   frmFunctionList.FunctionList.BeginUpdate;
-  if frmFunctionList.FunctionList.Items.Count = 0 then
-  begin;
+  if (frmFunctionList.FunctionList.Items.Count = 0) then
+  begin
     case SimbaSettings.Interpreter._Type.Value of
-      {$IFDEF USE_PASCALSCRIPT}interp_PS: Methods := TPSThread.GetExportedMethods(); {$ENDIF}
-      interp_LP: Methods := TLPThread.GetExportedMethods();
+      {$IFDEF USE_PASCALSCRIPT}
+      interp_PS:
+        Methods := TPSThread.GetExportedMethods();
+      {$ENDIF}
+      interp_LP:
+        begin
+          Methods := TLPThread.GetExportedMethods(); // Get methods added via Simba (lpExportedMethods.pas)
+
+          Thread := TLPThread.Create(True, @CurrentSyncInfo, SimbaSettings.Plugins.Path.Value);
+          Thread.FreeOnTerminate := False;
+
+          if (not (Assigned(Thread))) then
+            Exit();
+
+          ValueDefs := TStringList.Create();
+          Headers := TStringList.Create();
+          Names := TStringList.Create();
+
+          try
+            TLPThread(Thread).Compiler.getInfo(ValueDefs);
+          finally
+            TLPThread(Thread).Free();
+          end;
+
+          try
+            Stream := TMemoryStream.Create;
+            ValueDefs.SaveToStream(Stream);
+          finally
+            ValueDefs.Free;
+          end;
+
+          if (Assigned(Stream)) then
+          begin
+            Buffer := TCodeInsight.Create;
+            with Buffer do
+            try
+              OnMessage := @OnCCMessage;
+              Run(Stream, nil, -1, True);
+              FileName := '"FunctionList"';
+            except
+              mDebugLn('FUNCTION LIST ERROR: Could not parse Lape imports');
+            end;
+          end;
+
+          Buffer.GetProcedures(Headers, Names);
+
+          // Let's lowercase these once...
+          H := High(Methods);
+          SetLength(ExportedArr, H + 1);
+          for i := 0 to H do
+            ExportedArr[i] := Lowercase(Methods[i].FuncDecl);
+
+          for i := 0 to (Names.Count - 1) do
+            if (not IsStrInArr(Lowercase(Names[i]), ExportedArr)) then
+            begin
+              Len := Length(Methods);
+              SetLength(Methods, Len + 1);
+              Methods[Len].FuncDecl := Headers[i];
+              Methods[Len].FuncPtr := nil;
+              Methods[Len].Section := 'Lape';
+            end;
+
+          Headers.Free();
+          Names.Free();
+          Buffer.Free(); // Also free's the Stream.
+          // Thread is created suspended, which means nothing to free, will go out of scope and free after this :)
+        end;
       else
         raise Exception.Create('Invalid Interpreter!');
     end;

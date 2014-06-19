@@ -2237,7 +2237,7 @@ begin;
   result := false;
   if len >= 31 then
   begin;
-    Writeln('You cannot have more than 32 TPA''s in your ATPA for this function');
+    writeln('You cannot have more than 32 TPA''s in your ATPA for this function');
     exit;
   end;
   if len <= 0 then
@@ -2262,7 +2262,7 @@ begin;
     end;
   w := MinBox.x2-minbox.x1;
   h := minbox.y2 - minbox.y1;
-  Writeln(format('(%d,%d,%d,%d)',[minbox.x1,minbox.y1,minbox.x2,minbox.y2]));
+  //Writeln(format('(%d,%d,%d,%d)',[minbox.x1,minbox.y1,minbox.x2,minbox.y2]));
   SetLength(Grid,w + 1);
   for i := (W) downto 0 do
   begin;
