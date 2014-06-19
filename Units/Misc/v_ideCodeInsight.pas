@@ -67,7 +67,7 @@ type
     procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
     procedure GetProcedures(Headers, Names: TStrings; FindTypeProcs: Boolean = False);
     function GetTypeProcs(Names: TStrings; const Prefix: string): TDeclarationArray;
-    function FindProcedure(ProcNameToFind: string; out Decl: TDeclaration): boolean;
+    function FindProcedure(ProcNameToFind: string; out Decl: TDeclaration; out HasParams: Boolean): boolean;
     procedure FillProposal;
     procedure FillSynCompletionProposal(ItemList, InsertList: TStrings; Prefix: string = '');
 
@@ -1536,18 +1536,19 @@ end;
 
 (*
  * Returns true if we find the procedure *NON TYPE* in the ci, and Simbas internals.
- * Also returns the Item if found in Decl.
+ * Also returns the Item if found in Decl and if the Item has params or not.
 *)
-function TCodeInsight.FindProcedure(ProcNameToFind: string; out Decl: TDeclaration): boolean;
+function TCodeInsight.FindProcedure(ProcNameToFind: string; out Decl: TDeclaration; out HasParams: Boolean): boolean;
 
   // Search the ci for the procedure!
-  function FindMatch(_include: TCodeInsight; ProcName: String; out TheItem: TDeclaration): Boolean;
+  function FindMatch(_include: TCodeInsight; ProcName: String; out TheItem: TDeclaration; out Params: Boolean): Boolean;
   var
     i, ii: Integer;
     LProcName: string;
     ProcItem: TCIProcedureDeclaration;
   begin
     Result := False;
+    HasParams := False;
     LProcName := Lowercase(ProcName);
 
     for i := 0 to (_include.Items.Count - 1) do
@@ -1556,11 +1557,15 @@ function TCodeInsight.FindProcedure(ProcNameToFind: string; out Decl: TDeclarati
         begin
           ProcItem := TCIProcedureDeclaration(_include.Items[i]);
 
+          if (ProcItem.Items.Count = 0) then
+            Continue;
+
           if (Boolean(ProcItem.Items[0].ClassType = TciProcedureClassName)) then // we dont want type funcs.
             Continue;
 
           if (Lowercase(ProcItem.Name.CleanText) = LProcName) then
            begin
+             Params := Boolean(ProcItem.Params <> '');
              TheItem := _include.Items[i];
              Exit(True);
            end;
@@ -1568,18 +1573,18 @@ function TCodeInsight.FindProcedure(ProcNameToFind: string; out Decl: TDeclarati
 
      if (Length(_include.Includes) > 0) then
        for i := 0 to Length(_include.Includes) - 1 do
-         if (FindMatch(_include.Includes[i], ProcName, TheItem)) then
+         if (FindMatch(_include.Includes[i], ProcName, TheItem, Params)) then
            Exit(True);
   end;
 
 var
   i: Integer;
 begin
-  if (FindMatch(Self, ProcNameToFind, Decl)) then // scan ci
+  if (FindMatch(Self, ProcNameToFind, Decl, HasParams)) then // scan ci
     Exit(True);
 
   for i := High(CoreBuffer) downto Low(CoreBuffer) do // Scan simbas internals
-    if (FindMatch(CoreBuffer[i], ProcNameToFind, Decl)) then
+    if (FindMatch(CoreBuffer[i], ProcNameToFind, Decl, HasParams)) then
       Exit(True);
 end;
 

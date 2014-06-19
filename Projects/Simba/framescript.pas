@@ -355,6 +355,7 @@ var
   Attri: TSynHighlighterAttributes;
   d, dd: TDeclaration;
   FoundItems: TDeclarationArray;
+  HasParams: Boolean;
 begin
   if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(Point(SynEdit.CaretX - 1, SynEdit.CaretY), s, Attri)) or
                                       ((Attri.Name <> SYNS_AttrComment) and (Attri.name <> SYNS_AttrString) and (Attri.name <> SYNS_AttrDirective))) then
@@ -419,9 +420,6 @@ begin
     if SimbaForm.ParamHint.Visible = true then
       SimbaForm.ParamHint.hide;
 
-    if (Pos('writeln(', Lowercase(SynEdit.Lines[SynEdit.CaretY - 1])) > 0) then
-      Exit();
-
     mp := TCodeInsight.Create;
     mp.OnMessage := @SimbaForm.OnCCMessage;
     mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
@@ -473,7 +471,7 @@ begin
             if (Pos('(', NameList[i]) > 0) then // Check there is actually params
               SimbaForm.ParamHint.Show(PosToCaretXY(synedit, posi), PosToCaretXY(synedit, bracketpos), TciProcedureDeclaration(FoundItems[i]), synedit, mp)
             else
-              mDebugLn('< CodeHints: No params expected (Type) >');
+              mDebugLn('<CodeHints: No params expected (Type)>');
 
             Break; // We're done here regardless if we show or not
           end;
@@ -487,6 +485,7 @@ begin
       // Maybe Add FindVarBase with a option to not find type procs?
       if (d <> nil) then
       begin
+        HasParams := False;
         ProcName := d.ShortText;
 
         if (d.Owner <> nil) then
@@ -496,13 +495,14 @@ begin
 
             if (TypeName <> ProcName) then
             begin
-              if (mp.FindProcedure(ProcName, d)) then
-                if (TciProcedureDeclaration(d).Params <> '') then
+              if (mp.FindProcedure(ProcName, d, HasParams)) then
+                if (HasParams) then
+                begin
                   SimbaForm.ParamHint.Show(PosToCaretXY(synedit, posi), PosToCaretXY(synedit,bracketpos), TciProcedureDeclaration(d), synedit, mp)
-                else
-                  mDebugLn('< CodeHints: No params expected >');
+                end else
+                  mDebugLn('<CodeHints: No parameters expected>');
 
-              Exit();
+              Exit(); // We're done.
             end;
           end;
       end;
@@ -539,11 +539,11 @@ begin
           SimbaForm.ParamHint.Show(PosToCaretXY(synedit,posi), PosToCaretXY(synedit,bracketpos),
                                    TciProcedureDeclaration(d), synedit, mp)
         else
-          mDebugLn('<no parameters expected>');
+          mDebugLn('<CodeHints: no parameters expected>');
       end;
     except
       on e : exception do
-        mDebugLn(e.message);
+        mDebugLn('CodeHints exception: ' + e.message);
       // Do not free the MP, we need to use this (Paramhint.Show uses it!!)
     end;
   end;
