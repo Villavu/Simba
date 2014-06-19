@@ -238,7 +238,7 @@ end;
 
 function TAutoCompleteListBox.getInsert: string;
 begin
-  if (ItemIndex < 0) or (ItemIndex > Length(fIndexList)) then
+  if (ItemIndex < 0) or (ItemIndex >= Length(fIndexList)) then
     Result := ''
   else
     Result := fInsertList[fIndexList[ItemIndex]];
