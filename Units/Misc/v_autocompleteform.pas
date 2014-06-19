@@ -566,6 +566,9 @@ end;
 
 procedure TAutoCompletePopup.Show(Pos: TPoint; ItemList, InsertList: TStrings; Filter: string = ''; Editor: TWinControl = nil);
 begin
+  if (ItemList.Count = 0) and (InsertList.Count = 0) then
+    Exit();
+
   ListBox.setLists(ItemList, InsertList);
   ListBox.Redirect := Editor;
   ListBox.Filter := Filter;
