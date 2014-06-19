@@ -351,7 +351,7 @@ var
   ItemList, InsertList, NameList: TStringList;
   sp, ep,bcc,cc,bck,posi,bracketpos,i,DotPos: Integer;
   p: TPoint;
-  s, Filter, sname, ProcName, TypeName: string;
+  s, ss, Filter, sname, ProcName, TypeName: string;
   Attri: TSynHighlighterAttributes;
   d, dd: TDeclaration;
   FoundItems: TDeclarationArray;
@@ -380,6 +380,14 @@ begin
         s := ''
       else
         s := SynEdit.Lines[SynEdit.CaretY - 1];
+
+      ss := trim(s); // if anyone ever adds support for 50.toString() remove this. :)
+      if (ss <> '') then
+        if (ss[1] in ['0'..'9']) then
+        begin
+          mDebugLn('Codehints: Not opening on a digit');
+          Exit();
+        end;
 
       if ep > length(s) then //We are outside the real text, go back to the last char
          mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX) + 1)
@@ -450,6 +458,9 @@ begin
       cc := LastDelimiter('(', s);
       if (cc > 0) then
         delete(s, cc, length(s) - cc + 1);
+
+      if (s = '') then
+        exit();
 
       d := mp.FindVarBase(s);
       DotPos := pos('.', s);
