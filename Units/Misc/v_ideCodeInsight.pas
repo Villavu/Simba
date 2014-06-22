@@ -98,7 +98,7 @@ var
 implementation
 
 uses
-  v_Constants, v_MiscFunctions, newsimbasettings;
+  v_Constants, v_MiscFunctions, newsimbasettings, mufasabase;
 
 procedure ClearCoreBuffer;
 var
@@ -1617,41 +1617,113 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
       AddFile(Item.Includes[i], ItemList, InsertList);
   end;
 
-  procedure checkInclude(_include: TCodeInsight; _dType: String);
+  function GetParentType(const Item: TciTypeKind; out Name: string): Boolean;
   var
-    i, ii: Integer;
+    i, j: Integer;
+    Str: String;
   begin
-    for i := 0 to _include.Items.Count - 1 do
-      for ii := 0 to _include.Items[i].Items.Count - 1 do
-        if (_include.Items[i].Items[ii].ClassType = TciProcedureClassName) and (lowercase(_include.Items[i].Items[ii].ShortText) = lowercase(_dType)) then
-          Proposal_AddDeclaration(_include.Items[i], ItemList, InsertList, True);
+    if (Item = nil) or (Item.Owner = nil) then
+      Exit();
 
-    if (length(_include.Includes) > 0) then
-      for i := 0 to length(_include.Includes) - 1 do
-        checkInclude(_include.Includes[i], _dType);
+    if (Item.Owner.Items.Count < 1) then
+      Exit();
+
+    Str := Trim(Lowercase(Item.Owner.Items[1].CleanText));
+    if (Str = '') then
+      Exit();
+
+    Name := '';
+
+    if (Pos(' ', Str) = 0) then // type TObject...
+      Name := Str
+    else if (Pos('record', Str) = 1) then // Record(TObject)
+    begin
+      i := 7;
+
+      while (i < Length(Str)) and (Str[i] = ' ') do
+        Inc(i);
+
+      if (Str[i] = '(') then
+      begin
+        j := i + 1;
+        while (i < Length(Str)) and (Str[i] <> ')') do
+          inc(i);
+
+        if (Str[i] = ')') then
+          Name := Copy(Str, j, i - j);
+      end;
+    end;
+
+    Result := (Name <> '') and (Name <> 'pointer') and (Name <> 'tobject');
+  end;
+
+  function checkInclude(Incl: TCodeInsight; _dType: String): string;
+  var
+    i, ii, c, cc, Len: Integer;
+    TypeToFind, ParentName, ParentName2, Str: string;
+    FoundParent: Boolean;
+  begin
+    Result := '';
+    FoundParent := False;
+    TypeToFind := Lowercase(_dType);
+
+    c := Incl.Items.Count - 1;
+    for i := 0 to c do
+    begin
+      cc := Incl.Items[i].Items.Count - 1;
+
+      for ii := 0 to cc do
+      begin
+        if (Lowercase(Incl.Items[i].Items[ii].ShortText) <> TypeToFind) then
+          Continue;
+
+        if (Incl.items[i] is TciProcedureDeclaration) then
+        begin
+          if (Incl.Items[i].Items[ii].ClassType = TciProcedureClassName) then
+            Proposal_AddDeclaration(Incl.Items[i], ItemList, InsertList, True);
+        end else
+          if (not FoundParent) then
+            if (Incl.Items[i].Items[ii] is TciTypeName) and (ii < cc) then // "foo" = record
+              if (Incl.Items[i].Items[ii + 1] is TciTypeKind) then // foo = "record"
+                if (GetParentType(TciTypeKind(Incl.Items[i].Items[ii + 1]), ParentName)) then
+                begin
+                  FoundParent := True;
+                  Result := ParentName;
+                end;
+      end;
+    end;
+
+    ParentName2 := '';
+    Len := Length(Incl.Includes);
+
+    if (Len > 0) then
+      for i := 0 to (Len - 1) do
+      begin
+        Str := checkInclude(Incl.Includes[i], _dType);
+        if (Str <> '') then
+          ParentName2 := Str;
+      end;
+
+    if (ParentName2 <> '') then
+      Result := ParentName2;
   end;
 
 var
   i, ii: Integer;
   d, dDecl: TDeclaration;
-  dType, _Prefix: string;
-  isType: boolean;
+  dType, Parent: string;
 begin
   ItemList.BeginUpdate;
   InsertList.BeginUpdate;
+
   try
     ItemList.Clear;
     InsertList.Clear;
 
-    _Prefix := PrepareString(Prefix);
-    if (_Prefix <> '') then
+    if (Prefix <> '') then
     begin
-      if (_Prefix = 'SELF') then
-      begin
-        Prefix := _Prefix;
-        isType := True;
-      end else
-        isType := False;
+      if (Lowercase(Prefix) = 'self') then
+        Prefix := 'SELF';
 
       d := FindVarBase(Prefix, True, vbType);
 
@@ -1662,13 +1734,36 @@ begin
       dDecl := FindVarBase(Prefix, False, vbType);
       if (dDecl <> nil) then
       begin
-        dType := dDecl.CleanText;
-        if (isType) then
-          dType := Trim(dType);
+        dType := Trim(dDecl.CleanText);
 
-        checkInclude(Self, dType);
+        Parent := '';
+        Parent := checkInclude(Self, dType); // Scan script + includes
+
+        if (Parent <> '') then
+          while (Parent <> '') do
+          begin
+            mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+
+            d := FindVarBase(Parent, True, vbType);
+
+            if (d <> nil) then
+              for i := 0 to d.Items.Count - 1 do
+                Proposal_AddDeclaration(d.Items[i], ItemList, InsertList);
+            Parent := checkInclude(Self, Parent);
+          end;
+
         for i := High(CoreBuffer) downto Low(CoreBuffer) do
-          checkInclude(CoreBuffer[i], dType);
+        begin
+          Parent := '';
+          Parent := checkInclude(CoreBuffer[i], dType);
+
+          if (Parent <> '') then
+          while (Parent <> '') do
+          begin
+            mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+            Parent := checkInclude(CoreBuffer[i], Parent);
+          end;
+        end;
       end;
     end else
     begin
