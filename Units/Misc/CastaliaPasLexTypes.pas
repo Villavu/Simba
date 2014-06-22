@@ -233,6 +233,7 @@ type
     tokSquareClose,
     tokSquareOpen,
     tokStar,
+    tokStarStar, //Power
   {$IFDEF D8_NEWER} //JThurman 2004-03-20
   tokStatic,
   {$ENDIF}
@@ -275,6 +276,12 @@ type
 
     tokNative,
 
+    tokPlusAsgn,
+    tokMinusAsgn,
+    tokDivAsgn,
+    tokMulAsgn,
+    tokPowAsgn,
+    
     tok_DONE);
 
 TmwPasLexStatus = record
