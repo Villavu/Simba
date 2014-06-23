@@ -4515,6 +4515,9 @@ end;
 
 procedure TmwSimplePasPar.TypeKind;
 begin
+  if (TokenID = tokIdentifier) and (GenID = tokPrivate) then //skip tokPrivate - dgby714
+    NextToken;
+
   case TokenID of
     tokAsciiChar, tokFloat, tokIntegerConst, tokMinus, tokNil, tokPlus, tokRoundOpen,
       tokSquareOpen, tokStringConst:
