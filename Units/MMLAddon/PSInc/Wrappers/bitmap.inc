@@ -421,3 +421,18 @@ begin
     Bmp[Bitmap].RotateBitmapEx(Angle, Expand, Smooth, Bmp[Result]);
   end;
 end;
+
+procedure ps_RectangleBitmapEx(const Bitmap: Integer; const Box: TBox; const Color: Integer; const Transparency: Extended); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].Rectangle(Box, Color, Transparency);
+end;
+
+procedure ps_DrawTextBitmap(const Bitmap: Integer; const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].DrawText(Text, FontName, Pnt, Shadow, Color);
+end;
+
+procedure ps_DrawSystemTextBitmap(const Bitmap: Integer; const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].DrawSystemText(Text, FontName, FontSize, Pnt, Shadow, Color);
+end;

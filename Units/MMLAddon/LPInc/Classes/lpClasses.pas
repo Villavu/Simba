@@ -48,7 +48,10 @@ uses
   {$IFDEF LINUX}, lpTIOManager_Linux {$ENDIF}
 
   , lpTClient,
-  lpTMMLSettingsSandbox;
+
+  lpTMMLSettingsSandbox,
+
+  lpTMMLTimer;
 
 procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 begin
@@ -101,6 +104,8 @@ begin
   Register_TClient(Compiler);
 
   Register_TMMLSettingsSandbox(Compiler);
+
+  Register_TMMLTimer(Compiler);
 end;
 
 end.

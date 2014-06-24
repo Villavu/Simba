@@ -171,7 +171,7 @@ begin
   result := PosMulti(SubStr, Text);
 end;
 
-function ps_IsStrInArr(const s: string; const arr: TStringArray): boolean; extdecl;
+function ps_IsStrInArr(const s: string; const UsePos: Boolean; const arr: TStringArray): boolean; extdecl;
 begin
-  result := IsStrInArr(s, arr);
+  result := IsStrInArr(s, UsePos, arr);
 end;

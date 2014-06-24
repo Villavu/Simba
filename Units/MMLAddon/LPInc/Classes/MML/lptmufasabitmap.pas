@@ -440,6 +440,21 @@ begin
   PMufasaBitmap(Params^[0])^.Blur(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
 end;
 
+procedure TMufasaBitmap_RectangleEx(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Rectangle(PBox(Params^[1])^, PInteger(Params^[2])^, PExtended(Params^[3])^);
+end;
+
+procedure TMufasaBitmap_DrawText(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.DrawText(PString(Params^[1])^, PString(Params^[2])^, PPoint(Params^[3])^, PBoolean(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure TMufasaBitmap_DrawSystemText(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.DrawSystemText(PString(Params^[1])^, PString(Params^[2])^, PInteger(Params^[3])^, PPoint(Params^[4])^, PBoolean(Params^[5])^, PInteger(Params^[6])^);
+end;
+
 //Read: List: TMBitmaps;
 procedure TMufasaBitmap_List_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -502,6 +517,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.SaveToFile(const FileName : string): boolean;', @TMufasaBitmap_SaveToFile);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(const FileName : string);', @TMufasaBitmap_LoadFromFile);
     addGlobalFunc('procedure TMufasaBitmap.Rectangle(const Box : TBox;FillCol : TColor);', @TMufasaBitmap_Rectangle);
+    addGlobalFunc('procedure TMufasaBitmap.Rectangle(const Box: TBox; const Color: Integer; const Transparency: Extended); overload;', @TMufasaBitmap_RectangleEx);
     addGlobalFunc('procedure TMufasaBitmap.FloodFill(const StartPT : TPoint; const SearchCol, ReplaceCol : TColor);', @TMufasaBitmap_FloodFill);
     addGlobalFunc('procedure TMufasaBitmap.SetPixel(x,y : integer; Color : TColor);', @TMufasaBitmap_FastSetPixel);
     addGlobalFunc('procedure TMufasaBitmap.SetPixels(Points : TPointArray; Colors : TIntegerArray);', @TMufasaBitmap_FastSetPixels);
@@ -536,6 +552,8 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Posterize(Po : integer); overload;', @TMufasaBitmap_PosterizeEx);
     addGlobalFunc('procedure TMufasaBitmap.Blur(const Block: integer);', @TMufasaBitmap_Blur);
     addGlobalFunc('procedure TMufasaBitmap.Blur(const Block, xs, ys, xe, ye: integer); overload;', @TMufasaBitmap_BlurEx);
+    addGlobalFunc('procedure TMufasaBitmap.DrawText(const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);', @TMufasaBitmap_DrawText);
+    addGlobalFunc('procedure TMufasaBitmap.DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);', @TMufasaBitmap_DrawSystemText);
     addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);', @TMufasaBitmap_Convolute);
     addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer): TMufasaBitmap;', @TMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy(): TMufasaBitmap; overload;', @TMufasaBitmap_CopyEx);

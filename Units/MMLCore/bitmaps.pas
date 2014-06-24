@@ -67,6 +67,7 @@ type
     function SaveToFile(const FileName : string) :boolean;
     procedure LoadFromFile(const FileName : string);
     procedure Rectangle(const Box : TBox;FillCol : TColor);
+    procedure Rectangle(const Box: TBox; const Color: Integer; const Transparency: Extended); overload;
     procedure FloodFill(const StartPT : TPoint; const SearchCol, ReplaceCol : TColor);
     procedure FastSetPixel(x,y : integer; Color : TColor);
     procedure FastSetPixels(Points : TPointArray; Colors : TIntegerArray);
@@ -116,6 +117,8 @@ type
     procedure LoadFromRawImage(RawImage: TRawImage);
     function CreateTMask : TMask;
     procedure ResizeBilinear(NewW, NewH: Integer);
+    procedure DrawText(const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);
+    procedure DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);
     procedure SetTransparentColor(Col : TColor);
     function GetTransparentColor : TColor;
     property TransparentColorSet : boolean read FTransparentSet;
@@ -162,7 +165,7 @@ implementation
 
 uses
   paszlib,DCPbase64,math, client,tpa,
-  colour_conv,IOManager,mufasatypesutil,FileUtil;
+  colour_conv,IOManager,mufasatypesutil,FileUtil,ocr;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
@@ -2083,6 +2086,114 @@ begin
     Row[i][j].B := Trunc(BB);
   end;
   Temp.Free();
+end;
+
+procedure TMufasaBitmap.Rectangle(const Box: TBox; const Color: Integer; const Transparency: Extended); overload;
+var
+  RR, GG, BB: Byte;
+  Line, x, y: Longword;
+begin
+  Self.ValidatePoint(Box.X1, Box.Y1);
+  Self.ValidatePoint(Box.X2, Box.Y2);
+
+  if (Transparency > 1.00) then
+  begin
+    Self.Rectangle(Box, Color);
+    Exit();
+  end;
+
+  if (Transparency = 0.00) then
+    Exit();
+
+  ColorToRGB(Color, RR, GG, BB);
+
+  for y := Box.Y1 to Box.Y2 do
+  begin
+    Line := (y * Self.Width) + Box.x1;
+    for x := Box.X1 to Box.X2 do
+    begin
+      Self.FData[Line].r := Round((Self.FData[Line].r * (1.0 - Transparency)) + (RR * Transparency));
+      Self.FData[Line].g := Round((Self.FData[Line].g * (1.0 - Transparency)) + (GG * Transparency));
+      Self.FData[Line].b := Round((Self.FData[Line].b * (1.0 - Transparency)) + (BB * Transparency));
+      Inc(Line);
+    end;
+  end;
+end;
+
+procedure TMufasaBitmap.DrawText(const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);
+var
+  TPA: TPointArray;
+  ATPA: T2DPointArray;
+  tW, tH, i: LongInt;
+begin
+  if (Self.FList = nil) or (not Assigned(Self.FList)) then
+    raise Exception.Create('DrawText will not work unless the owner has been assigned');
+
+  if (Text <> '') then
+  begin
+    if (not TClient(Self.FList.Client).MOCR.Fonts.IsFontLoaded(FontName)) then
+      raise Exception.CreateFmt('DrawText: Font "%s" doesn''t exist', [FontName]);
+
+    SetLength(ATPA, 1);
+    ATPA[0] := TClient(Self.FList.Client).MOCR.TextToFontTPA(Text, FontName, tW, tH);
+
+    if (Length(ATPA[0]) > 0) then
+    begin
+      OffsetTPA(ATPA[0], Pnt);
+
+      if (Shadow) then
+      begin
+        TPA := System.Copy(ATPA[0], 0, Length(ATPA[0]));
+        OffsetTPA(TPA, Point(1, 1));
+        SetLength(ATPA, 2); // Text & Shadow
+        ATPA[1] := ClearTPAFromTPA(TPA, ATPA[0]);
+        Inc(tW); Inc(tH); // Text will be bigger with a shadow
+      end;
+
+      for i := 0 to High(ATPA) do
+        if (ATPA[i][0].x < 0) or (ATPA[i][0].y < 0) or ((ATPA[i][0].x + tW) >= Self.Width) or ((ATPA[i][0].y + tH) >= Self.Height) then // check fits on bitmap
+          FilterPointsBox(ATPA[i], 0, 0, Self.Width - 1, Self.Height - 1);
+
+      if (not Shadow) then
+        Self.DrawTPA(ATPA[0], Color)
+      else begin
+        Self.DrawTPA(ATPA[0], Color);
+        Self.DrawTPA(ATPA[1], 0); // Shadow
+      end;
+    end;
+  end;
+end;
+
+// Note: The font is automaticly free'd when the client is free'd, There's a good chance the script will use it more than once so its best to keep it loaded
+procedure TMufasaBitmap.DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);
+var
+  f: TFont;
+  s: string;
+begin
+  if (Self.FList = nil) or (not Assigned(Self.FList)) then
+    raise Exception.Create('DrawSystemText will not work unless the owner has been assigned');
+
+  s := FontName + '_' + IntToStr(FontSize);
+  if (TClient(Self.FList.Client).MOCR.Fonts.IsFontLoaded(s)) then
+  begin
+    Self.DrawText(Text, s, Pnt, Shadow, Color);
+    Exit();
+  end;
+
+  mDebugLn('Font "%s" not loaded, going to load it', [FontName]);
+  f := TFont.Create;
+
+  try
+    f.Name := FontName;
+    f.Size := FontSize;
+
+    if (TClient(Self.FList.Client).MOCR.Fonts.LoadSystemFont(f, s)) then
+      Self.DrawText(Text, s, Pnt, Shadow, Color)
+    else
+      mDebugLn('DrawSystemText: Failed to load system font "%s"', [FontName]);
+  finally
+    f.Free();
+  end;
 end;
 
 constructor TMBitmaps.Create(Owner: TObject);
