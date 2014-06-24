@@ -347,3 +347,18 @@ procedure Lape_RotateBitmapEx(const Params: PParamArray; const Result: Pointer);
 begin
   PInteger(Result)^ := ps_RotateBitmapEx(PInteger(Params^[0])^, PSingle(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
+
+procedure Lape_RectangleBitmapEx(const Params: PParamArray); lape_extdecl
+begin
+  ps_RectangleBitmapEx(PInteger(Params^[0])^, PBox(Params^[1])^, PInteger(Params^[2])^, PExtended(Params^[3])^);
+end;
+
+procedure Lape_DrawTextBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_DrawTextBitmap(PInteger(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PPoint(Params^[3])^, PBoolean(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure Lape_DrawSystemTextBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_DrawSystemTextBitmap(PInteger(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PInteger(Params^[3])^, PPoint(Params^[4])^, PBoolean(Params^[5])^, PInteger(Params^[6])^);
+end;

@@ -1358,7 +1358,7 @@ begin
             '(': fProcTable[I] := RoundOpenProc;
             ')': fProcTable[I] := RoundCloseProc;
             '*': fProcTable[I] := StarProc;
-            '+': fProcTable[I] := PlusProc;
+			'+': fProcTable[I] := PlusProc;
             ',': fProcTable[I] := CommaProc;
             '-': fProcTable[I] := MinusProc;
             '.': fProcTable[I] := PointProc;
@@ -1873,10 +1873,9 @@ end;
 procedure TmwBasePasLex.MinusProc;
 begin
   inc(Run);
-  if FOrigin[Run] = '=' then 
-  begin
-    inc(Run);
-    fTokenID := tokMinusAsgn;
+  if FOrigin[Run] = '=' then begin
+      inc(Run);
+      fTokenID := tokMinusAsgn;
   end else
     fTokenID := tokMinus;
 end;
@@ -1905,10 +1904,9 @@ end;
 procedure TmwBasePasLex.PlusProc;
 begin
   inc(Run);
-  if FOrigin[Run] = '=' then 
-  begin
-    inc(Run);
-    fTokenID := tokPlusAsgn;
+  if FOrigin[Run] = '=' then begin
+      inc(Run);
+      fTokenID := tokPlusAsgn;
   end else
     fTokenID := tokPlus;
 end;
@@ -2147,9 +2145,9 @@ begin
           inc(Run);
         end;
       end;
-    '=':
+    '=': 
       begin
-        inc(Run, 2);
+        inc(Run,2);
         fTokenID := tokDivAsgn;
       end;
   else
@@ -2183,18 +2181,18 @@ end;
 procedure TmwBasePasLex.StarProc;
 begin
   inc(Run);
-  case FOrigin[Run] of
+  case FOrigin[Run]  of
     '=':
       begin
-        Inc(Run);
+        inc(Run);
         fTokenID := tokMulAsgn;
       end;
     '*':
       begin
-        Inc(Run);
+        inc(Run);
         if FOrigin[Run] = '=' then
         begin
-          Inc(Run);
+          inc(Run);
           fTokenID := tokPowAsgn;
         end else
           fTokenID := tokStarStar;
