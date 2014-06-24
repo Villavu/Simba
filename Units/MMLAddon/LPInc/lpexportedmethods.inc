@@ -409,7 +409,7 @@ AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_N
 AddGlobalFunc('function StringMatch(checkCompare, goalCompare: string): extended;', @Lape_StringMatch);
 AddGlobalFunc('function MultiBetween(str, s1, s2: string): TStringArray;', @Lape_MultiBetween);
 AddGlobalFunc('function IsArrInStr(strArr: TStringArray; s: string): boolean;', @Lape_IsArrInStr);
-AddGlobalFunc('function IsStrInArr(const s: string; const arr: TStringArray): boolean;', @Lape_IsStrInArr);
+AddGlobalFunc('function IsStrInArr(const s: string; const UsePos: Boolean; const arr: TStringArray): boolean;', @Lape_IsStrInArr);
 AddGlobalFunc('function PosMulti(const SubStr: String; Text: string): TIntegerArray;', @Lape_PosMulti);
 
 { TPA }

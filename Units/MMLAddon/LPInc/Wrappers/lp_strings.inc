@@ -105,5 +105,5 @@ end;
 
 procedure Lape_IsStrInArr(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PBoolean(Result)^ := ps_IsStrInArr(PString(Params^[0])^, PStringArray(Params^[1])^);
+  PBoolean(Result)^ := ps_IsStrInArr(PString(Params^[0])^, PBoolean(Params^[1])^, PStringArray(Params^[2])^);
 end;

@@ -3271,7 +3271,7 @@ begin
       Methods[i] := Lowercase(SimbaMethods[i].FuncDecl);
 
     for i := 0 to (Names.Count - 1) do
-      if (not IsStrInArr(Lowercase(Names[i]), Methods)) then
+      if (not IsStrInArr(Lowercase(Names[i]), True, Methods)) then
         SortedHeaders.Add(Names[i] + '###' + Headers[i]);
 
     for i := 0 to (SortedHeaders.Count - 1) do
