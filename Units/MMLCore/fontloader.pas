@@ -84,6 +84,7 @@ end;
 
 destructor TMFont.Destroy;
 begin
+  writeln('FREEING ', name);
   Name:='';
 
   inherited;

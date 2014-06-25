@@ -233,7 +233,7 @@ type
     tokSquareClose,
     tokSquareOpen,
     tokStar,
-    tokStarStar, //Power
+    tokStarStar,
   {$IFDEF D8_NEWER} //JThurman 2004-03-20
   tokStatic,
   {$ENDIF}
@@ -276,10 +276,10 @@ type
 
     tokNative,
 
-    tokPlusAsgn,
-    tokMinusAsgn,
     tokDivAsgn,
     tokMulAsgn,
+    tokPlusAsgn,
+    tokMinusAsgn,
     tokPowAsgn,
     
     tok_DONE);
