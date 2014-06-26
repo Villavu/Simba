@@ -47,7 +47,7 @@ function NormLevDistance(src, target: string): Extended;
 function StringMatch(checkCompare, goalCompare: string): extended;
 function MultiBetween(str, s1, s2: string): TStringArray;
 function IsArrInStr(strArr: TStringArray; s: string): boolean;
-function IsStrInArr(const s: string; const arr: TStringArray): boolean;
+function IsStrInArr(const s: string; const UsePos: Boolean; const Arr: TStringArray): boolean;
 function PosMulti(const SubStr, Text:String): TIntegerArray;
 
 implementation
@@ -356,16 +356,23 @@ begin
   result := false;
 end;
 
-function IsStrInArr(const s: string; const arr: TStringArray): boolean;
+function IsStrInArr(const s: string; const UsePos: Boolean; const Arr: TStringArray): boolean;
 var
   i, h: integer;
 begin
   Result := False;
   h := High(arr);
 
-  for i := 0 to h do
-    if (Pos(s, arr[i]) > 0) then
-      Exit(True);
+  case (UsePos) of
+    True:
+      for i := 0 to h do
+        if (Pos(s, arr[i]) > 0) then
+          Exit(True);
+    False:
+      for i := 0 to h do
+        if (SameText(s, arr[i])) then
+          Exit(True);
+  end;
 end;
 
 function PosMulti(const SubStr, Text:String): TIntegerArray;
