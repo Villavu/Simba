@@ -390,12 +390,6 @@ begin
 
       if (s <> '') then
       begin
-        if (s[1] in ['0'..'9']) then
-        begin
-          mDebugLn('Codehints: Not opening on a digit');
-          Exit();
-        end;
-
         ep := LastDelimiter('.', s);
         if (ep > 0) then
           Delete(s, ep, Length(s) - ep + 1)

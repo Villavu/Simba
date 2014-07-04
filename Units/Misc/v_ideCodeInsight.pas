@@ -1742,7 +1742,7 @@ begin
         if (Parent <> '') then
           while (Parent <> '') do
           begin
-            mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+            //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
 
             d := FindVarBase(Parent, True, vbType);
 
@@ -1760,7 +1760,7 @@ begin
           if (Parent <> '') then
           while (Parent <> '') do
           begin
-            mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+            //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
             Parent := checkInclude(CoreBuffer[i], Parent);
           end;
         end;
