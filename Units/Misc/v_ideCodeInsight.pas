@@ -1709,9 +1709,11 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
   end;
 
 var
-  i, ii: Integer;
+  i, ii, p, pp: Integer;
   d, dDecl: TDeclaration;
-  dType, Parent: string;
+  FoundItems: TDeclarationArray;
+  NamesList: TStringList;
+  dType, Parent, Str, TypeStr: string;
 begin
   ItemList.BeginUpdate;
   InsertList.BeginUpdate;
@@ -1732,17 +1734,56 @@ begin
           Proposal_AddDeclaration(d.Items[i], ItemList, InsertList);
 
       dDecl := FindVarBase(Prefix, False, vbType);
+
+      if (dDecl = nil) and (d = nil) then
+      begin
+        p := LastDelimiter('.', Prefix);
+        Str := LowerCase(Copy(Prefix, 1, p - 1));
+
+        pp := LastDelimiter('.', Str);
+        TypeStr := Copy(Str, pp + 1, (Length(Str) - pp) + 1);
+
+        if (p > 0) and ((p + 1) <= Length(Prefix)) and (Str <> '') and (TypeStr <> '') then
+        begin
+          Prefix := PrePrepareString(Copy(Prefix, p + 1, (Length(Prefix) - p) + 1));
+          mDebugLn('CC: Prefix|Type [%s, %s]', [Prefix, TypeStr]);
+          NamesList := TStringList.Create();
+
+          try
+            FoundItems := Self.GetTypeProcs(NamesList, TypeStr);
+
+            for i := 0 to (NamesList.Count - 1) do
+              if (SameText(NamesList[i], Prefix)) then
+              begin
+                dDecl := TciProcedureDeclaration(FoundItems[i]).Items.GetFirstItemOfClass(TciReturnType);
+                if (dDecl <> nil) then
+                begin
+                  d := Self.FindVarBase(Prefix, True, vbType);
+
+                  if (d <> nil) then // adding properties
+                    for ii := 0 to (d.Items.Count - 1) do
+                      Proposal_AddDeclaration(d.Items[ii], ItemList, InsertList);
+                end;
+
+                Break; // Now we will break from the loop, contiune.. and add methods!
+              end;
+          finally
+            NamesList.Free();
+          end;
+        end;
+      end;
+
+
       if (dDecl <> nil) then
       begin
         dType := Trim(dDecl.CleanText);
-
         Parent := '';
         Parent := checkInclude(Self, dType); // Scan script + includes
 
         if (Parent <> '') then
           while (Parent <> '') do
           begin
-            mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+            //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
 
             d := FindVarBase(Parent, True, vbType);
 
@@ -1760,7 +1801,7 @@ begin
           if (Parent <> '') then
           while (Parent <> '') do
           begin
-            mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+            //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
             Parent := checkInclude(CoreBuffer[i], Parent);
           end;
         end;

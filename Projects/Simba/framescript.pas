@@ -349,7 +349,7 @@ var
   mp: TCodeInsight;
   ms: TMemoryStream;
   ItemList, InsertList, NameList: TStringList;
-  sp, ep,bcc,cc,bck,posi,bracketpos,i,DotPos: Integer;
+  sp, ep,bcc,cc,bck,posi,bracketpos,i,DotPos, BPos: Integer;
   p: TPoint;
   s, ss, Filter, sname, ProcName, TypeName: string;
   Attri: TSynHighlighterAttributes;
@@ -390,12 +390,6 @@ begin
 
       if (s <> '') then
       begin
-        if (s[1] in ['0'..'9']) then
-        begin
-          mDebugLn('Codehints: Not opening on a digit');
-          Exit();
-        end;
-
         ep := LastDelimiter('.', s);
         if (ep > 0) then
           Delete(s, ep, Length(s) - ep + 1)
@@ -462,11 +456,13 @@ begin
         exit();
 
       d := mp.FindVarBase(s);
-      DotPos := pos('.', s);
+      DotPos := Pos('.', s);
+      HasParams := False;
 
       if (d = nil) and (DotPos > 0) then // if it's a type proc.
       begin
-        sName := Lowercase(copy(s, DotPos + 1, (length(s) - DotPos) + 1));
+        sName := Lowercase(Copy(s, DotPos + 1, (length(s) - DotPos) + 1));
+
         if (sName = '') then
           Exit();
 
@@ -476,15 +472,16 @@ begin
 
         // Loop though looking for a match from what is currently typed.
         for i := 0 to (NameList.Count - 1) do
-          if (Pos(sName, Lowercase(NameList[i])) > 0) then // We found a match!
-          begin
-            if (Pos('(', NameList[i]) > 0) then // Check there is actually params
-              SimbaForm.ParamHint.Show(PosToCaretXY(synedit, posi), PosToCaretXY(synedit, bracketpos), TciProcedureDeclaration(FoundItems[i]), synedit, mp)
-            else
-              mDebugLn('<CodeHints: No params expected (Type)>');
+        begin
+          BPos := Pos('(', NameList[i]);
 
-            Break; // We're done here regardless if we show or not
-          end;
+          if (BPos > 0) then // Has params
+            if (SameText(Copy(NameList[i], 0, BPos - 1), sName)) then
+            begin
+              SimbaForm.ParamHint.Show(PosToCaretXY(synedit, posi), PosToCaretXY(synedit, bracketpos), TciProcedureDeclaration(FoundItems[i]), synedit, mp);
+              Break; // We out
+            end;
+        end;
 
         NameList.Free();
         SetLength(FoundItems, 0);
