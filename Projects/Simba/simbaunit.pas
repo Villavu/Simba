@@ -3249,6 +3249,19 @@ begin;
 end;
 
 function TSimbaForm.GetInterepterMethods(const SimbaMethods: TExpMethodArr): TExpMethodArr;
+
+  function PrepareStr(const Str: string): string;
+  var
+    i, Len: Integer;
+  begin
+    Result := '';
+    Len := Length(Str);
+
+    for i := 1 to Len do
+      if (Str[i] <> ' ') and (Str[i] <> ';') then
+        Result += Str[i];
+  end;
+
 var
   Headers, Names, SortedHeaders: TStringList;
   Len, h, i, p: Integer;
@@ -3268,10 +3281,10 @@ begin
   try
     SetLength(Methods, h + 1);
     for i := 0 to h do
-      Methods[i] := Lowercase(SimbaMethods[i].FuncDecl);
+      Methods[i] := PrepareStr(Lowercase(SimbaMethods[i].FuncDecl));
 
     for i := 0 to (Names.Count - 1) do
-      if (not IsStrInArr(Lowercase(Names[i]), True, Methods)) then
+      if (not IsStrInArr(PrepareStr(Lowercase(Headers[i])), False, Methods)) then
         SortedHeaders.Add(Names[i] + '###' + Headers[i]);
 
     for i := 0 to (SortedHeaders.Count - 1) do
@@ -3319,7 +3332,7 @@ begin
           begin
             InterpMethods := Self.GetInterepterMethods(Methods);
 
-            for i := 0 to high(InterpMethods) do
+            for i := 0 to High(InterpMethods) do
             begin
               Len := Length(Methods);
               SetLength(Methods, Len + 1);
