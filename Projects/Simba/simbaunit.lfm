@@ -132,7 +132,7 @@ object SimbaForm: TSimbaForm
       ShowHint = True
     end
     object ToolButton2: TToolButton
-      Left = 195
+      Left = 149
       Top = 2
       Width = 5
       Caption = 'ToolButton2'
@@ -153,7 +153,7 @@ object SimbaForm: TSimbaForm
       Action = ActionSaveScript
     end
     object TB_SaveAll: TToolButton
-      Left = 149
+      Left = 126
       Hint = 'Save all'
       Top = 2
       Action = ActionSaveAll
@@ -175,14 +175,14 @@ object SimbaForm: TSimbaForm
       OnClick = TT_UpdateClick
     end
     object TT_Cut: TToolButton
-      Left = 126
+      Left = 154
       Top = 2
       Caption = 'Cu&t'
       ImageIndex = 3
       OnClick = ActionCutExecute
     end
     object TT_Copy: TToolButton
-      Left = 172
+      Left = 177
       Top = 2
       Caption = '&Copy'
       ImageIndex = 22
