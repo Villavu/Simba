@@ -353,6 +353,10 @@ interface
         procedure SetKeyMouseTarget(idx: integer);
         procedure FreeTarget(idx: integer);
         procedure SetState(val: Boolean);
+
+        {$ifdef mswindows}
+          procedure SetGrabberType(Grabber: integer); virtual; abstract;
+        {$endif}
         
         function GetProcesses: TSysProcArr; virtual; abstract;
         procedure SetTargetEx(Proc: TSysProc); virtual; abstract;

@@ -17,6 +17,7 @@ ssConsole = 'Console/';
 ssNews = 'News/';
 ssPlugins = 'Plugins/';
 ssNotes = 'Notes/';
+ssGrabber = 'ScreenGrabber/';
 ssCodeInsight = 'CodeInsight/';
 ssFunctionList = 'FunctionList/';
 
@@ -88,4 +89,6 @@ ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';
 ssSMFile = ssScriptManager + 'File';
 ssFRun = ssScriptManager + 'FirstRun';
+
+ssActivateDx = ssSettings + ssGrabber + 'ActivateDXGrabber';
 
