@@ -235,7 +235,8 @@ end;
 
 procedure ClickList(o: TObject);
 begin
-  EditPlayer(Lb_PlayerList.Items[Lb_PlayerList.ItemIndex]);
+  if((Lb_PlayerList.Items.Count > Lb_PlayerList.ItemIndex) and not(Lb_PlayerList.ItemIndex < 0)) then
+    EditPlayer(Lb_PlayerList.Items[Lb_PlayerList.ItemIndex]);
 end;
 
 function StringToBitmapTS(const w, h: Integer; str: String): TBitmap;
