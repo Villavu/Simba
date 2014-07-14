@@ -1540,7 +1540,7 @@ end;
 
 procedure TLPThread.LoadPlugin(plugidx: integer);
 var
-  I: integer;
+  I,len: integer;
   Wrapper: TImportClosure;
 begin
   with PluginsGlob.MPlugins[plugidx] do
@@ -1567,9 +1567,17 @@ begin
 
     for i := 0 to MethodLen - 1 do
     begin
-      Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
-      Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
-      ImportWrappers.Add(Wrapper);
+      len := length(Methods[i].FuncStr);
+      case LowerCase(Copy(Methods[i].FuncStr, len-8, len)) = 'external;' of
+        False:
+        begin
+          Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
+          Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
+          ImportWrappers.Add(Wrapper);
+        end;
+        True: //`external;` indicates that it's properly exported and using lapes wrapper-format.
+          Compiler.addGlobalFunc(Copy(Methods[i].FuncStr, 0, len-9), Methods[i].FuncPtr);
+      end;
     end;
 
     Compiler.EndImporting;
