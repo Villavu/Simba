@@ -1544,18 +1544,18 @@ var
   Wrapper: TImportClosure;
   method: String;
   
-  //Check if the string ends with an `External`-keyword.
-  function isExternal(str:String; var Res:String): boolean;
+  //Check if the string ends with an `Native`-keyword.
+  function isNative(str:String; var Res:String): boolean;
   var len:Int32;
   begin
     Res := Trim(Str);
     Len := Length(Res);
     if (Res[len] = ';') then Dec(Len);
-    if not (LowerCase(Copy(Res, len-7, 8)) = 'external') then
+    if not (LowerCase(Copy(Res, len-5, 6)) = 'native') then
       Exit(False);
-    Dec(len,8);
+    Dec(len,6);
     SetLength(Res, len);
-    while Res[len] in [#9,#10,#32,#13] do Dec(len);
+    while Res[len] in [#9,#10,#13,#32] do Dec(len);
     Result := (Res[len] = ';');
   end;
   
@@ -1584,15 +1584,12 @@ begin
 
     for i := 0 to MethodLen - 1 do
     begin
-      case isExternal(Methods[i].FuncStr, method) of
-        False:
-        begin
-          Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
-          Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
-          ImportWrappers.Add(Wrapper);
-        end;
-        True: //`external` indicates that it's properly exported and using lapes wrapper-format.
-          Compiler.addGlobalFunc(method, Methods[i].FuncPtr);
+      if isNative(Methods[i].FuncStr, Method) then
+        Compiler.addGlobalFunc(Method, Methods[i].FuncPtr)
+      else begin
+        Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
+        Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
+        ImportWrappers.Add(Wrapper);
       end;
     end;
 
