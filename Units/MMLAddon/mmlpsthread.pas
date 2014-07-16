@@ -1538,10 +1538,27 @@ begin
   end;
 end;
 
-procedure TLPThread.LoadPlugin(plugidx: integer);
+procedure TLPThread.LoadPlugin(plugidx: integer); 
 var
   I: integer;
   Wrapper: TImportClosure;
+  method: String;
+  
+  //Check if the string ends with an `Native`-keyword.
+  function isNative(str:String; var Res:String): boolean;
+  var len:Int32;
+  begin
+    Res := Trim(Str);
+    Len := Length(Res);
+    if (Res[len] = ';') then Dec(Len);
+    if not (LowerCase(Copy(Res, len-5, 6)) = 'native') then
+      Exit(False);
+    Dec(len,6);
+    SetLength(Res, len);
+    while Res[len] in [#9,#10,#13,#32] do Dec(len);
+    Result := (Res[len] = ';');
+  end;
+  
 begin
   with PluginsGlob.MPlugins[plugidx] do
   begin
@@ -1567,9 +1584,13 @@ begin
 
     for i := 0 to MethodLen - 1 do
     begin
-      Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
-      Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
-      ImportWrappers.Add(Wrapper);
+      if isNative(Methods[i].FuncStr, Method) then
+        Compiler.addGlobalFunc(Method, Methods[i].FuncPtr)
+      else begin
+        Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
+        Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
+        ImportWrappers.Add(Wrapper);
+      end;
     end;
 
     Compiler.EndImporting;
