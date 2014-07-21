@@ -1760,7 +1760,7 @@ begin
                 begin
                   d := Self.FindVarBase(Prefix, True, vbType);
 
-                  if (d <> nil) then // adding propertys
+                  if (d <> nil) then // adding properties
                     for ii := 0 to (d.Items.Count - 1) do
                       Proposal_AddDeclaration(d.Items[ii], ItemList, InsertList);
                 end;
