@@ -18,7 +18,13 @@ implementation
    PTimer = ^TTimer;
    PCustomImage = ^TCustomImage;
    PImage = ^TImage;
-   PTranslateString = ^TTranslateString;
+   PCustomPanel = ^TCustomPanel;
+   PBevelWidth = ^TBevelWidth;
+   PPanelBevel = ^TPanelBevel;
+   PAlignment = ^TAlignMent;
+   PPanel = ^TPanel;
+   PShape = ^TShape;
+   PShapeType = ^TShapeType;
 
    {TTimer}
 
@@ -223,31 +229,11 @@ procedure TCustomImage_OnPictureChanged_Write(const Params: PParamArray); lape_e
 begin
   PCustomImage(Params^[0])^.OnPictureChanged := PNotifyEvent(Params^[1])^;
 end;
-                                  //PTranslateString(Params^[1])^;
+
 //procedure Free();
 procedure TCustomImage_Free(const Params: PParamArray); lape_extdecl
 begin
   PCustomImage(Params^[0])^.Free();
-end;
-
-procedure TCustomImage_ShowHint_Write(const Params: PParamArray); lape_extdecl
-begin
-  PCustomImage(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
-end;
-
-procedure TCustomImage_ShowHint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PBoolean(Result)^ := PCustomImage(Params^[0])^.ShowHint;
-end;
-
-procedure TCustomImage_Hint_Write(const Params: PParamArray); lape_extdecl
-begin
-  PCustomImage(Params^[0])^.Hint := PTranslateString(Params^[1])^;
-end;
-
-procedure TCustomImage_Hint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PLPString(Result)^ := PCustomImage(Params^[0])^.Hint;
 end;
 
 procedure Register_TCustomImage(Compiler: TLapeCompiler);
@@ -265,8 +251,6 @@ begin
     addClassVar('TCustomImage', 'Transparent', 'Boolean', @TCustomImage_Transparent_Read, @TCustomImage_Transparent_Write);
     addClassVar('TCustomImage', 'Proportional', 'Boolean', @TCustomImage_Proportional_Read, @TCustomImage_Proportional_Write);
     addClassVar('TCustomImage', 'OnPictureChanged', 'TNotifyEvent', @TCustomImage_OnPictureChanged_Read, @TCustomImage_OnPictureChanged_Write);
-    addClassVar('TCustomImage', 'Hint', 'String', @TCustomImage_Hint_Read, @TCustomImage_Hint_Write);
-    addClassVar('TCustomimage', 'ShowHint', 'Boolean', @TCustomImage_ShowHint_Read, @TCustomImage_ShowHint_Write);
     addGlobalFunc('procedure TCustomImage.Free();', @TCustomImage_Free);
   end;
 end;
@@ -281,6 +265,26 @@ end;
 procedure TImage_Free(const Params: PParamArray); lape_extdecl
 begin
   PImage(Params^[0])^.Free();
+end;
+
+procedure TImage_ShowHint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PImage(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
+end;
+
+procedure TImage_ShowHint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+ PBoolean(Result)^ := PImage(Params^[0])^.ShowHint;
+end;
+
+procedure TImage_Hint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PImage(Params^[0])^.Hint := PLPString(Params^[1])^;
+end;
+
+procedure TImage_Hint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLPString(Result)^ := PImage(Params^[0])^.Hint;
 end;
 
 procedure TImage_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
@@ -303,6 +307,36 @@ begin
   PImage(Params^[0])^.OnMouseLeave := PNotifyEvent(Params^[1])^;
 end;
 
+procedure TImage_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+var
+  Component: TComponent;
+begin
+  Component := PImage(Params^[0])^.FindComponent('MouseMove');
+
+  if (Assigned(Component)) then
+    PMouseMoveEventWrapper(Result)^ := TOnMouseMoveWrapper(Component).InternalMethod
+  else
+    PMouseMoveEvent(Result)^ := nil;
+end;
+
+procedure TImage_OnMouseMove_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
+begin
+  Component := PImage(Params^[0])^.FindComponent('MouseMove');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnMouseMoveWrapper.Create(PImage(Params^[0])^);
+    Component.Name := 'MouseMove';
+  end;
+
+  with TOnMouseMoveWrapper(Component) do
+  begin
+    InternalMethod := PMouseMoveEventWrapper(Params^[1])^;
+    PImage(Params^[0])^.OnMouseMove := @MouseMove;
+  end;
+end;
+
 procedure Register_TImage(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -311,18 +345,211 @@ begin
 
     addGlobalFunc('procedure TImage.Init(AOwner: TComponent);', @TImage_Init);
     addGlobalFunc('procedure TImage.Free();', @TImage_Free);
+    addClassVar('TImage', 'Hint', 'String', @TImage_Hint_Read, @TImage_Hint_Write);
+    addClassVar('TImage', 'ShowHint', 'Boolean', @TImage_ShowHint_Read, @TImage_ShowHint_Write);
     addClassVar('TImage', 'OnMouseEnter', 'TNotifyEvent', @TImage_OnMouseEnter_Read, @TImage_OnMouseEnter_Write);
     addClassVar('TImage', 'OnMouseLeave', 'TNotifyEvent', @TImage_OnMouseLeave_Read, @TImage_OnMouseLeave_Write);
+    addClassVar('TImage', 'OnMouseMove', 'TMouseMoveEvent', @TImage_OnMouseMove_Read, @TImage_OnMouseMove_Write);
+  end;
+end;
+
+//Read: property Alignment: TAlignment read FAlignment write SetAlignment default taCenter;
+procedure TCustomPanel_Alignment_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlignment(Result)^ := PCustomPanel(Params^[0])^.Alignment;
+end;
+
+//Write: property Alignment: TAlignment read FAlignment write SetAlignment default taCenter;
+procedure TCustomPanel_Alignment_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.Alignment := PAlignment(Params^[1])^;
+end;
+
+//Read: property BevelInner: TPanelBevel read FBevelInner write SetBevelInner default bvNone;
+procedure TCustomPanel_BevelInner_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPanelBevel(Result)^ := PCustomPanel(Params^[0])^.BevelInner;
+end;
+
+//Write: property BevelInner: TPanelBevel read FBevelInner write SetBevelInner default bvNone;
+procedure TCustomPanel_BevelInner_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.BevelInner := PPanelBevel(Params^[1])^;
+end;
+
+//Read: property BevelOuter: TPanelBevel read FBevelOuter write SetBevelOuter default bvRaised;
+procedure TCustomPanel_BevelOuter_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPanelBevel(Result)^ := PCustomPanel(Params^[0])^.BevelOuter;
+end;
+
+//Write: property BevelOuter: TPanelBevel read FBevelOuter write SetBevelOuter default bvRaised;
+procedure TCustomPanel_BevelOuter_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.BevelOuter := PPanelBevel(Params^[1])^;
+end;
+
+//Read: property BevelWidth: TBevelWidth read FBevelWidth write SetBevelWidth default 1;
+procedure TCustomPanel_BevelWidth_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBevelWidth(Result)^ := PCustomPanel(Params^[0])^.BevelWidth;
+end;
+
+//Write: property BevelWidth: TBevelWidth read FBevelWidth write SetBevelWidth default 1;
+procedure TCustomPanel_BevelWidth_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.BevelWidth := PBevelWidth(Params^[1])^;
+end;
+
+//Read: property FullRepaint: Boolean read FFullRepaint write FFullRepaint default True;
+procedure TCustomPanel_FullRepaint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomPanel(Params^[0])^.FullRepaint;
+end;
+
+//Write: property FullRepaint: Boolean read FFullRepaint write FFullRepaint default True;
+procedure TCustomPanel_FullRepaint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.FullRepaint := PBoolean(Params^[1])^;
+end;
+
+//constructor Create();
+procedure TCustomPanel_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^ := TCustomPanel.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TCustomPanel_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.Free();
+end;
+
+procedure Register_TCustomPanel(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TCustomPanel', 'TCustomControl');
+    addClassVar('TCustomPanel', 'Alignment', 'TAlignment', @TCustomPanel_Alignment_Read, @TCustomPanel_Alignment_Write);
+    addClassVar('TCustomPanel', 'BevelInner', 'TPanelBevel', @TCustomPanel_BevelInner_Read, @TCustomPanel_BevelInner_Write);
+    addClassVar('TCustomPanel', 'BevelOuter', 'TPanelBevel', @TCustomPanel_BevelOuter_Read, @TCustomPanel_BevelOuter_Write);
+    addClassVar('TCustomPanel', 'BevelWidth', 'TBevelWidth', @TCustomPanel_BevelWidth_Read, @TCustomPanel_BevelWidth_Write);
+    addClassVar('TCustomPanel', 'FullRepaint', 'Boolean', @TCustomPanel_FullRepaint_Read, @TCustomPanel_FullRepaint_Write);
+    addGlobalFunc('procedure TCustomPanel.Init(TheOwner: TComponent);', @TCustomPanel_Init);
+    addGlobalFunc('procedure TCustomPanel.Free();', @TCustomPanel_Free);
+  end;
+end;
+
+//constructor Create();
+procedure TPanel_Init(const Params: PParamArray); lape_extdecl
+begin
+  PPanel(Params^[0])^ := TPanel.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TPanel_Free(const Params: PParamArray); lape_extdecl
+begin
+  PPanel(Params^[0])^.Free();
+end;
+
+procedure Register_TPanel(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TPanel', 'TCustomPanel');
+
+    addGlobalFunc('procedure TPanel.Init(TheOwner: TComponent);', @TPanel_Init);
+    addGlobalFunc('procedure TPanel.Free();', @TPanel_Free);
+  end;
+end;
+
+//procedure StyleChanged(Sender: TObject);
+procedure TShape_StyleChanged(const Params: PParamArray); lape_extdecl
+begin
+  PShape(Params^[0])^.StyleChanged(PObject(Params^[1])^);
+end;
+
+//Read: property Brush: TBrush read FBrush write SetBrush;
+procedure TShape_Brush_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBrush(Result)^ := PShape(Params^[0])^.Brush;
+end;
+
+//Write: property Brush: TBrush read FBrush write SetBrush;
+procedure TShape_Brush_Write(const Params: PParamArray); lape_extdecl
+begin
+  PShape(Params^[0])^.Brush := PBrush(Params^[1])^;
+end;
+
+//Read: property Pen: TPen read FPen write SetPen;
+procedure TShape_Pen_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPen(Result)^ := PShape(Params^[0])^.Pen;
+end;
+
+//Write: property Pen: TPen read FPen write SetPen;
+procedure TShape_Pen_Write(const Params: PParamArray); lape_extdecl
+begin
+  PShape(Params^[0])^.Pen := PPen(Params^[1])^;
+end;
+
+//Read: property Shape: TShapeType read FShape write SetShape default stRectangle;
+procedure TShape_Shape_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PShapeType(Result)^ := PShape(Params^[0])^.Shape;
+end;
+
+//Write: property Shape: TShapeType read FShape write SetShape default stRectangle;
+procedure TShape_Shape_Write(const Params: PParamArray); lape_extdecl
+begin
+  PShape(Params^[0])^.Shape := PShapeType(Params^[1])^;
+end;
+
+//constructor Create();
+procedure TShape_Init(const Params: PParamArray); lape_extdecl
+begin
+  PShape(Params^[0])^ := TShape.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TShape_Free(const Params: PParamArray); lape_extdecl
+begin
+  PShape(Params^[0])^.Free();
+end;
+
+procedure Register_TShape(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TShape', 'TGraphicControl');
+
+    addGlobalFunc('procedure TShape.StyleChanged(Sender: TObject);', @TShape_StyleChanged);
+    addClassVar('TShape', 'Brush', 'TBrush', @TShape_Brush_Read, @TShape_Brush_Write);
+    addClassVar('TShape', 'Pen', 'TPen', @TShape_Pen_Read, @TShape_Pen_Write);
+    addClassVar('TShape', 'Shape', 'TShapeType', @TShape_Shape_Read, @TShape_Shape_Write);
+    addGlobalFunc('procedure TShape.Init(TheOwner: TComponent);', @TShape_Init);
+    addGlobalFunc('procedure TShape.Free();', @TShape_Free);
   end;
 end;
 
 procedure RegisterLCLExtCtrls(Compiler: TLapeCompiler);
 begin
+   with Compiler do
+   begin
+     addGlobalType('(bvNone, bvLowered, bvRaised, bvSpace)', 'TGraphicsBevelCut');
+     addGlobalType('TGraphicsBevelCut', 'TBevelCut');
+     addGlobalType('TBevelCut', 'TPanelBevel');
+     addGlobalType('Integer', 'TBevelWidth');
+     addGlobalType('(stRectangle, stSquare, stRoundRect, stRoundSquare, stEllipse, stCircle, stSquaredDiamond, stDiamond, stTriangle)', 'TShapeType');
+   end;
+
    Register_TCustomTimer(Compiler);
    Register_TTimer(Compiler);
    Register_TCustomImage(Compiler);
    Register_TImage(Compiler);
-
+   Register_TCustomPanel(Compiler);
+   Register_TPanel(Compiler);
+   Register_TShape(Compiler);
 end;
 
 end.
