@@ -7,7 +7,7 @@ unit lplclforms;
 interface
 
 uses
-  Classes, SysUtils, Forms, lpcompiler, lptypes, lpClassHelper;
+  Classes, SysUtils, Forms, controls, lpcompiler, lptypes, lpClassHelper;
 
 type
   PCustomForm = ^TCustomForm;
@@ -15,14 +15,15 @@ type
   PCloseAction = ^TCloseAction;
   PCloseEvent = ^TCloseEvent;
   PPosition = ^TPosition;
+  PScrollBox = ^TScrollBox;
+  PFormBorderStyle = ^TFormBorderStyle;
 
 procedure RegisterLCLForms(Compiler: TLapeCompiler);
 
 implementation
- uses lplclsystem,lplclgraphics,lplclcontrols,controls;
+ uses lplclsystem,lplclgraphics,lplclcontrols;
 
  type
-   PFormBorderStyle = ^TFormBorderStyle;
    PCloseQueryEvent = ^TCloseQueryEvent;
    PFormBorderIcons = ^TBorderIcons;
 
@@ -975,20 +976,44 @@ begin
   end;
 end;
 
+//constructor Create();
+procedure TScrollBox_Init(const Params: PParamArray); lape_extdecl
+begin
+  PScrollBox(Params^[0])^ := TScrollBox.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TScrollBox_Free(const Params: PParamArray); lape_extdecl
+begin
+  PScrollBox(Params^[0])^.Free();
+end;
+
+procedure Register_TScrollBox(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TScrollBox', 'TScrollingWinControl');
+
+    addGlobalFunc('procedure TScrollBox.Init(AOwner: TComponent);', @TScrollBox_Init);
+    addGlobalFunc('procedure TScrollBox.Free();', @TScrollBox_Free);
+  end;
+end;
+
 procedure RegisterLCLForms(Compiler: TLapeCompiler);
 begin
-  with compiler do
+  with Compiler do
     begin
       AddGlobalType('(caNone, caHide, caFree, caMinimize)','TCloseAction');
       AddGlobalType('procedure(Sender: TObject; var CloseAction: TCloseAction)','TCloseEvent');
       AddGlobalType('procedure(Sender : TObject; var CanClose : boolean)','TCloseQueryEvent');
-      AddGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow,bsSizeToolWin)','TFormBorderStyle');
       AddGlobalType('(poDesigned, poDefault, poDefaultPosOnly, poDefaultSizeOnly, poScreenCenter, poMainFormCenter, poOwnerFormCenter)', 'TPosition');
       AddGlobalType('(biSystemMenu, biMinimize, biMaximize, biHelp)', 'TBorderIcon');
       AddGlobalType('set of TBorderIcon', 'TBorderIcons');
     end;
-    Register_TCustomForm(compiler);
-    Register_TForm(compiler);
+    Register_TCustomForm(Compiler);
+    Register_TForm(Compiler);
+    Register_TScrollBox(Compiler);
+
 end;
 
 end.

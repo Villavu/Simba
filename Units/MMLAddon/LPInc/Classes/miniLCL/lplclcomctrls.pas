@@ -1336,7 +1336,6 @@ begin
   end;
 end;
 
-
 procedure RegisterLCLComCtrls(Compiler: TLapeCompiler);
 begin
   with Compiler do
