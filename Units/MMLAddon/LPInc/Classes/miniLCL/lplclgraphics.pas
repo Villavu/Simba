@@ -1403,9 +1403,9 @@ end;
    with Compiler do
      begin
        AddGlobalType('record Left,Top,Right,Bottom : Longint;end;','TRect');
-       AddGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)','TFontStyles');
+       AddGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)','TFontStyle');
        AddGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
-      // AddGlobalType('set of TFontStyle','TFontStyles');
+       AddGlobalType('set of TFontStyle','TFontStyles');   
        AddGlobalType('(fpDefault, fpVariable, fpFixed)','TFontPitch');
        AddGlobalType('integer','TCopyMode');
        AddGlobalType('(psSolid, psDash, psDot, psDashDot, psDashDotDot, psinsideFrame, psPattern,psClear)','TPenStyle');
