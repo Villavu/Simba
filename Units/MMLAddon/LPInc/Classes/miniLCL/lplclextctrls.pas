@@ -19,6 +19,11 @@ implementation
    PCustomImage = ^TCustomImage;
    PImage = ^TImage;
    PTranslateString = ^TTranslateString;
+   PCustomPanel = ^TCustomPanel;
+   PBevelWidth = ^TBevelWidth;
+   PPanelBevel = ^TPanelBevel;
+   PAlignment = ^TAlignMent;
+   PPanel = ^TPanel;
 
    {TTimer}
 
@@ -316,13 +321,132 @@ begin
   end;
 end;
 
+//Read: property Alignment: TAlignment read FAlignment write SetAlignment default taCenter;
+procedure TCustomPanel_Alignment_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlignment(Result)^ := PCustomPanel(Params^[0])^.Alignment;
+end;
+
+//Write: property Alignment: TAlignment read FAlignment write SetAlignment default taCenter;
+procedure TCustomPanel_Alignment_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.Alignment := PAlignment(Params^[1])^;
+end;
+
+//Read: property BevelInner: TPanelBevel read FBevelInner write SetBevelInner default bvNone;
+procedure TCustomPanel_BevelInner_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPanelBevel(Result)^ := PCustomPanel(Params^[0])^.BevelInner;
+end;
+
+//Write: property BevelInner: TPanelBevel read FBevelInner write SetBevelInner default bvNone;
+procedure TCustomPanel_BevelInner_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.BevelInner := PPanelBevel(Params^[1])^;
+end;
+
+//Read: property BevelOuter: TPanelBevel read FBevelOuter write SetBevelOuter default bvRaised;
+procedure TCustomPanel_BevelOuter_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPanelBevel(Result)^ := PCustomPanel(Params^[0])^.BevelOuter;
+end;
+
+//Write: property BevelOuter: TPanelBevel read FBevelOuter write SetBevelOuter default bvRaised;
+procedure TCustomPanel_BevelOuter_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.BevelOuter := PPanelBevel(Params^[1])^;
+end;
+
+//Read: property BevelWidth: TBevelWidth read FBevelWidth write SetBevelWidth default 1;
+procedure TCustomPanel_BevelWidth_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBevelWidth(Result)^ := PCustomPanel(Params^[0])^.BevelWidth;
+end;
+
+//Write: property BevelWidth: TBevelWidth read FBevelWidth write SetBevelWidth default 1;
+procedure TCustomPanel_BevelWidth_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.BevelWidth := PBevelWidth(Params^[1])^;
+end;
+
+//Read: property FullRepaint: Boolean read FFullRepaint write FFullRepaint default True;
+procedure TCustomPanel_FullRepaint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomPanel(Params^[0])^.FullRepaint;
+end;
+
+//Write: property FullRepaint: Boolean read FFullRepaint write FFullRepaint default True;
+procedure TCustomPanel_FullRepaint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.FullRepaint := PBoolean(Params^[1])^;
+end;
+
+//constructor Create();
+procedure TCustomPanel_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^ := TCustomPanel.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TCustomPanel_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCustomPanel(Params^[0])^.Free();
+end;
+
+procedure Register_TCustomPanel(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TCustomPanel', 'TCustomControl');
+    addClassVar('TCustomPanel', 'Alignment', 'TAlignment', @TCustomPanel_Alignment_Read, @TCustomPanel_Alignment_Write);
+    addClassVar('TCustomPanel', 'BevelInner', 'TPanelBevel', @TCustomPanel_BevelInner_Read, @TCustomPanel_BevelInner_Write);
+    addClassVar('TCustomPanel', 'BevelOuter', 'TPanelBevel', @TCustomPanel_BevelOuter_Read, @TCustomPanel_BevelOuter_Write);
+    addClassVar('TCustomPanel', 'BevelWidth', 'TBevelWidth', @TCustomPanel_BevelWidth_Read, @TCustomPanel_BevelWidth_Write);
+    addClassVar('TCustomPanel', 'FullRepaint', 'Boolean', @TCustomPanel_FullRepaint_Read, @TCustomPanel_FullRepaint_Write);
+    addGlobalFunc('procedure TCustomPanel.Init(TheOwner: TComponent);', @TCustomPanel_Init);
+    addGlobalFunc('procedure TCustomPanel.Free();', @TCustomPanel_Free);
+  end;
+end;
+
+//constructor Create();
+procedure TPanel_Init(const Params: PParamArray); lape_extdecl
+begin
+  PPanel(Params^[0])^ := TPanel.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TPanel_Free(const Params: PParamArray); lape_extdecl
+begin
+  PPanel(Params^[0])^.Free();
+end;
+
+procedure Register_TPanel(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TPanel', 'TCustomPanel');
+
+    addGlobalFunc('procedure TPanel.Init(TheOwner: TComponent);', @TPanel_Init);
+    addGlobalFunc('procedure TPanel.Free();', @TPanel_Free);
+  end;
+end;
+
 procedure RegisterLCLExtCtrls(Compiler: TLapeCompiler);
 begin
+   with Compiler do
+   begin
+     addGlobalType('(bvNone, bvLowered, bvRaised, bvSpace)', 'TGraphicsBevelCut');
+     addGlobalType('TGraphicsBevelCut', 'TBevelCut');
+     addGlobalType('TBevelCut', 'TPanelBevel');
+     addGlobalType('Integer', 'TBevelWidth');
+   end;
+
    Register_TCustomTimer(Compiler);
    Register_TTimer(Compiler);
    Register_TCustomImage(Compiler);
    Register_TImage(Compiler);
-
+   Register_TCustomPanel(Compiler);
+   Register_TPanel(Compiler);
 end;
 
 end.
