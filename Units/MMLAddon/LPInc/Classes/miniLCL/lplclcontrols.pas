@@ -1693,6 +1693,16 @@ begin
   PGraphicControl(Params^[0])^.Update();
 end;
 
+procedure TGraphicControl_Align_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlign(Result)^ := PGraphicControl(Params^[0])^.Align;
+end;
+
+procedure TGraphicControl_Align_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGraphicControl(Params^[0])^.Align := PAlign(Params^[1])^;
+end;
+
 procedure Register_TGraphicControl(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1701,6 +1711,7 @@ begin
 
     addGlobalFunc('procedure TGraphicControl.Update();', @TGraphicControl_Update);
     addClassVar('TGraphicControl', 'Canvas', 'TCanvas', @TGraphicControl_Canvas_Read);
+    addClassVar('TGraphicControl', 'Alignment', 'TAlign', @TGraphicControl_Align_Read, @TGraphicControl_Align_Write);
   end;
 end;
 
@@ -1717,7 +1728,7 @@ begin
      addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)', 'TMouseMoveEvent');
      addGlobalType('(sbHorizontal, sbVertical)','TScrollBarKind');
      addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TAlign');
-     addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow,bsSizeToolWin)','TFormBorderStyle');
+     addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)','TFormBorderStyle');
      addGlobalType('Integer', 'TCursor');
      addGlobalVar(crNone, 'crNone').isConstant := True;
      addGlobalVar(crCross, 'crCross').isConstant := True;

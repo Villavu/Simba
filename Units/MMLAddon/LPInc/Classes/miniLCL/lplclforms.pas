@@ -1013,6 +1013,7 @@ begin
     Register_TCustomForm(Compiler);
     Register_TForm(Compiler);
     Register_TScrollBox(Compiler);
+
 end;
 
 end.
