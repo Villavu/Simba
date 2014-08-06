@@ -324,17 +324,36 @@ begin
   PMenuItem(Params^[0])^.RightJustify := Pboolean(Params^[1])^;
 end;
 
-//Read: property OnClick: TNotifyEvent read FOnClick write FOnClick stored IsOnClickStored;
 procedure TMenuItem_OnClick_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PNotifyEvent(Result)^ := PMenuItem(Params^[0])^.OnClick;
+  Component := PMenuItem(Params^[0])^.FindComponent('OnClickEvent');
+
+  if (Assigned(Component)) then
+    PClickWrapper(Result)^ := TOnClickWrapper(Component).InternalMethod
+  else
+    PClickWrapper(Result)^ := nil;
 end;
 
-//Write: property OnClick: TNotifyEvent read FOnClick write FOnClick stored IsOnClickStored;
 procedure TMenuItem_OnClick_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PMenuItem(Params^[0])^.OnClick := PNotifyEvent(Params^[1])^;
+  Component := PMenuItem(Params^[0])^.FindComponent('OnClickEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnClickWrapper.Create(PMenuItem(Params^[0])^);
+    Component.Name := 'OnClickEvent';
+  end;
+
+  with TOnClickWrapper(Component) do
+  begin
+    InternalMethod := PClickWrapper(Params^[1])^;
+    PMenuItem(Params^[0])^.OnClick := @OnClick;
+  end;
 end;
+
 
 //constructor Create();
 procedure TMenuItem_Init(const Params: PParamArray); lape_extdecl

@@ -26,6 +26,200 @@ implementation
  type
    PCloseQueryEvent = ^TCloseQueryEvent;
    PFormBorderIcons = ^TBorderIcons;
+   PSizeConstraints = ^TSizeConstraints;
+   PConstraintSize = ^TConstraintSize;
+
+//constructor Create(AControl: TControl); virtual;
+procedure TSizeConstraints_Init(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^ := TSizeConstraints.Create(PControl(Params^[1])^);
+end;
+
+//procedure UpdateInterfaceConstraints; virtual;
+procedure TSizeConstraints_UpdateInterfaceConstraints(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^.UpdateInterfaceConstraints();
+end;
+
+//procedure SetInterfaceConstraints(MinW, MinH, MaxW, MaxH: integer); virtual;
+procedure TSizeConstraints_SetInterfaceConstraints(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^.SetInterfaceConstraints(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
+end;
+
+//function EffectiveMinWidth: integer; virtual;
+procedure TSizeConstraints_EffectiveMinWidth(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.EffectiveMinWidth();
+end;
+
+//function EffectiveMinHeight: integer; virtual;
+procedure TSizeConstraints_EffectiveMinHeight(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.EffectiveMinHeight();
+end;
+
+//function EffectiveMaxWidth: integer; virtual;
+procedure TSizeConstraints_EffectiveMaxWidth(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.EffectiveMaxWidth();
+end;
+
+//function EffectiveMaxHeight: integer; virtual;
+procedure TSizeConstraints_EffectiveMaxHeight(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.EffectiveMaxHeight();
+end;
+
+//function MinMaxWidth(Width: integer): integer;
+procedure TSizeConstraints_MinMaxWidth(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.MinMaxWidth(Pinteger(Params^[1])^);
+end;
+
+//function MinMaxHeight(Height: integer): integer;
+procedure TSizeConstraints_MinMaxHeight(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.MinMaxHeight(Pinteger(Params^[1])^);
+end;
+
+//Read: property MaxInterfaceHeight: integer read FMaxInterfaceHeight;
+procedure TSizeConstraints_MaxInterfaceHeight_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.MaxInterfaceHeight;
+end;
+
+//Read: property MaxInterfaceWidth: integer read FMaxInterfaceWidth;
+procedure TSizeConstraints_MaxInterfaceWidth_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.MaxInterfaceWidth;
+end;
+
+//Read: property MinInterfaceHeight: integer read FMinInterfaceHeight;
+procedure TSizeConstraints_MinInterfaceHeight_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.MinInterfaceHeight;
+end;
+
+//Read: property MinInterfaceWidth: integer read FMinInterfaceWidth;
+procedure TSizeConstraints_MinInterfaceWidth_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PSizeConstraints(Params^[0])^.MinInterfaceWidth;
+end;
+
+//Read: property Control: TControl read FControl;
+procedure TSizeConstraints_Control_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PControl(Result)^ := PSizeConstraints(Params^[0])^.Control;
+end;
+
+//Read: property Options: TSizeConstraintsOptions read FOptions write SetOptions default [];
+procedure TSizeConstraints_Options_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  //PSizeConstraintsOptions(Result)^ := PSizeConstraints(Params^[0])^.Options;
+end;
+
+//Write: property Options: TSizeConstraintsOptions read FOptions write SetOptions default [];
+procedure TSizeConstraints_Options_Write(const Params: PParamArray); lape_extdecl
+begin
+ // PSizeConstraints(Params^[0])^.Options := PSizeConstraintsOptions(Params^[1])^;
+end;
+
+//Read: property OnChange: TNotifyEvent read FOnChange write FOnChange;
+procedure TSizeConstraints_OnChange_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PSizeConstraints(Params^[0])^.OnChange;
+end;
+
+//Write: property OnChange: TNotifyEvent read FOnChange write FOnChange;
+procedure TSizeConstraints_OnChange_Write(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property MaxHeight: TConstraintSize read FMaxHeight write SetMaxHeight default 0;
+procedure TSizeConstraints_MaxHeight_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PConstraintSize(Result)^ := PSizeConstraints(Params^[0])^.MaxHeight;
+end;
+
+//Write: property MaxHeight: TConstraintSize read FMaxHeight write SetMaxHeight default 0;
+procedure TSizeConstraints_MaxHeight_Write(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^.MaxHeight := PConstraintSize(Params^[1])^;
+end;
+
+//Read: property MaxWidth: TConstraintSize read FMaxWidth write SetMaxWidth default 0;
+procedure TSizeConstraints_MaxWidth_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MaxWidth;
+end;
+
+//Write: property MaxWidth: TConstraintSize read FMaxWidth write SetMaxWidth default 0;
+procedure TSizeConstraints_MaxWidth_Write(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^.MaxWidth := PInteger(Params^[1])^;
+end;
+
+//Read: property MinHeight: TConstraintSize read FMinHeight write SetMinHeight default 0;
+procedure TSizeConstraints_MinHeight_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MinHeight;
+end;
+
+//Write: property MinHeight: TConstraintSize read FMinHeight write SetMinHeight default 0;
+procedure TSizeConstraints_MinHeight_Write(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^.MinHeight := PInteger(Params^[1])^;
+end;
+
+//Read: property MinWidth: TConstraintSize read FMinWidth write SetMinWidth default 0;
+procedure TSizeConstraints_MinWidth_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MinWidth;
+end;
+
+//Write: property MinWidth: TConstraintSize read FMinWidth write SetMinWidth default 0;
+procedure TSizeConstraints_MinWidth_Write(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^.MinWidth := PConstraintSize(Params^[1])^;
+end;
+
+//procedure Free();
+procedure TSizeConstraints_Free(const Params: PParamArray); lape_extdecl
+begin
+  PSizeConstraints(Params^[0])^.Free();
+end;
+
+procedure Register_TSizeConstraints(Compiler: TLapeCompiler);
+begin
+ with Compiler do
+ begin
+   addClass('TSizeConstraints', 'TPersistent');
+
+   addGlobalFunc('procedure TSizeConstraints.Init(AControl: TControl);', @TSizeConstraints_Init);
+   addGlobalFunc('procedure TSizeConstraints.UpdateInterfaceConstraints();', @TSizeConstraints_UpdateInterfaceConstraints);
+   addGlobalFunc('procedure TSizeConstraints.SetInterfaceConstraints(MinW, MinH, MaxW, MaxH: integer);', @TSizeConstraints_SetInterfaceConstraints);
+   addGlobalFunc('function TSizeConstraints.EffectiveMinWidth(): integer;', @TSizeConstraints_EffectiveMinWidth);
+   addGlobalFunc('function TSizeConstraints.EffectiveMinHeight(): integer;', @TSizeConstraints_EffectiveMinHeight);
+   addGlobalFunc('function TSizeConstraints.EffectiveMaxWidth(): integer;', @TSizeConstraints_EffectiveMaxWidth);
+   addGlobalFunc('function TSizeConstraints.EffectiveMaxHeight(): integer;', @TSizeConstraints_EffectiveMaxHeight);
+   addGlobalFunc('function TSizeConstraints.MinMaxWidth(Width: integer): integer;', @TSizeConstraints_MinMaxWidth);
+   addGlobalFunc('function TSizeConstraints.MinMaxHeight(Height: integer): integer;', @TSizeConstraints_MinMaxHeight);
+   addClassVar('TSizeConstraints', 'MaxInterfaceHeight', 'integer', @TSizeConstraints_MaxInterfaceHeight_Read, nil);
+   addClassVar('TSizeConstraints', 'MaxInterfaceWidth', 'integer', @TSizeConstraints_MaxInterfaceWidth_Read, nil);
+   addClassVar('TSizeConstraints', 'MinInterfaceHeight', 'integer', @TSizeConstraints_MinInterfaceHeight_Read, nil);
+   addClassVar('TSizeConstraints', 'MinInterfaceWidth', 'integer', @TSizeConstraints_MinInterfaceWidth_Read, nil);
+   addClassVar( 'TSizeConstraints', 'Control', 'TControl', @TSizeConstraints_Control_Read, nil);
+  // addClassVar('TSizeConstraints', 'Options', 'TSizeConstraintsOptions', @TSizeConstraints_Options_Read, @TSizeConstraints_Options_Write);
+   addClassVar('TSizeConstraints', 'OnChange', 'TNotifyEvent', @TSizeConstraints_OnChange_Read, @TSizeConstraints_OnChange_Write);
+   addClassVar('TSizeConstraints', 'MaxHeight', 'Integer', @TSizeConstraints_MaxHeight_Read, @TSizeConstraints_MaxHeight_Write);
+   addClassVar('TSizeConstraints', 'MaxWidth', 'Integer', @TSizeConstraints_MaxWidth_Read, @TSizeConstraints_MaxWidth_Write);
+   addClassVar('TSizeConstraints', 'MinHeight', 'Integer', @TSizeConstraints_MinHeight_Read, @TSizeConstraints_MinHeight_Write);
+   addClassVar('TSizeConstraints', 'MinWidth', 'Integer', @TSizeConstraints_MinWidth_Read, @TSizeConstraints_MinWidth_Write);
+   addGlobalFunc('procedure TSizeConstraints.Free();', @TSizeConstraints_Free);
+ end;
+end;
 
  {TCustomForm}
  //constructor Create(AOwner: TComponent);
@@ -500,10 +694,20 @@ begin
   PFormBorderIcons(Result)^ := PCustomForm(Params^[0])^.BorderIcons;
 end;
 
+procedure TCustomForm_Constraints_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PSizeConstraints(Result)^ := PCustomForm(Params^[0])^.Constraints;
+end;
+
+procedure TCustomForm_Constraints_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomForm(Params^[0])^.Constraints := PSizeConstraints(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TCustomForm_Free(const Params: PParamArray); lape_extdecl
 begin
-  PCustomForm(Params^[0])^.Free();
+  PCustomForm(Params^[0])^.Free;
 end;
 
 procedure Register_TCustomForm(Compiler: TLapeCompiler);
@@ -570,6 +774,7 @@ begin
     addClassVar('TCustomForm', 'RestoredTop', 'integer', @TCustomForm_RestoredTop_Read);
     addClassVar('TCustomForm', 'RestoredWidth', 'integer', @TCustomForm_RestoredWidth_Read);
     addClassVar('TCustomForm', 'RestoredHeight', 'integer', @TCustomForm_RestoredHeight_Read);
+    addClassVar('TCustomForm', 'Constraints', 'TSizeConstraints', @TCustomForm_Constraints_Read, @TCustomForm_Constraints_Write);
     addGlobalFunc('procedure TCustomForm.Free();', @TCustomForm_Free);
   end;
 end;
@@ -1010,10 +1215,10 @@ begin
       AddGlobalType('(biSystemMenu, biMinimize, biMaximize, biHelp)', 'TBorderIcon');
       AddGlobalType('set of TBorderIcon', 'TBorderIcons');
     end;
+    Register_TSizeConstraints(Compiler);
     Register_TCustomForm(Compiler);
     Register_TForm(Compiler);
     Register_TScrollBox(Compiler);
-
 end;
 
 end.
