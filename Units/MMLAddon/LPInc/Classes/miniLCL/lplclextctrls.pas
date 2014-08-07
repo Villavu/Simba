@@ -233,7 +233,43 @@ end;
 //procedure Free();
 procedure TCustomImage_Free(const Params: PParamArray); lape_extdecl
 begin
-  PCustomImage(Params^[0])^.Free();
+  PCustomImage(Params^[0])^.Free;
+end;
+
+procedure TCustomImage_OnMouseDown_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
+begin
+  Component := PCustomImage(Params^[0])^.FindComponent('OnMouseDownEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnMouseEventWrapper.Create(PCustomImage(Params^[0])^);
+    Component.Name := 'OnMouseDownEvent';
+  end;
+
+  with TOnMouseEventWrapper(Component) do
+  begin
+    InternalMethod := PMouseEventWrapper(Params^[1])^;
+    PCustomImage(Params^[0])^.OnMouseDown := @MouseEvent;
+  end;
+end;
+
+procedure TCustomImage_OnMouseUp_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
+begin
+  Component := PCustomImage(Params^[0])^.FindComponent('OnMouseUpEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnMouseEventWrapper.Create(PCustomImage(Params^[0])^);
+    Component.Name := 'OnMouseUpEvent';
+  end;
+
+  with TOnMouseEventWrapper(Component) do
+  begin
+    InternalMethod := PMouseEventWrapper(Params^[1])^;
+    PCustomImage(Params^[0])^.OnMouseUp := @MouseEvent;
+  end;
 end;
 
 procedure Register_TCustomImage(Compiler: TLapeCompiler);
@@ -251,6 +287,8 @@ begin
     addClassVar('TCustomImage', 'Transparent', 'Boolean', @TCustomImage_Transparent_Read, @TCustomImage_Transparent_Write);
     addClassVar('TCustomImage', 'Proportional', 'Boolean', @TCustomImage_Proportional_Read, @TCustomImage_Proportional_Write);
     addClassVar('TCustomImage', 'OnPictureChanged', 'TNotifyEvent', @TCustomImage_OnPictureChanged_Read, @TCustomImage_OnPictureChanged_Write);
+    addClassVar('TCustomImage', 'OnMouseDown', 'TMouseEvent', nil, @TCustomImage_OnMouseDown_Write);
+    addClassVar('TCustomImage', 'OnMouseUp', 'TMouseEvent', nil, @TCustomImage_OnMouseUp_Write);
     addGlobalFunc('procedure TCustomImage.Free();', @TCustomImage_Free);
   end;
 end;
