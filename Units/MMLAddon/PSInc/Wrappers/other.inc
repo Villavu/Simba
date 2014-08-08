@@ -147,58 +147,70 @@ begin
   CurrThread.FormCallBack(m_Disguise,PCaption);
 end;
 
-procedure ps_ShowMessage(msg : string); extdecl;
+procedure ps_ShowMessage(msg: string); extdecl;
 var
-  PMsg : Pchar;
+  PMsg: Pchar;
 begin
-  PMsg := PChar(msg);
-  CurrThread.FormCallBack(m_ShowMessage,PMsg);
+  if (GetCurrentThreadID() = MainThreadID) then
+    ShowMessage(msg)
+  else begin
+    PMsg := PChar(msg);
+    CurrThread.FormCallBack(m_ShowMessage, PMsg);
+  end;
 end;
-
 
 function ps_MessageBox(Text, Caption: string; Flags: LongInt): Integer;
 var
-  MessageBoxData : TMessageBoxdata;
+  MessageBoxData: TMessageBoxdata;
 begin
-  with MessageBoxData do
-  begin
-    AText := PChar(text);
-    ACaption := PChar(Caption);
-    AFlags := Flags;
-    CurrThread.FormCallBack(m_MessageBox,@MessageBoxData);
-    Result := res;
+  if (GetCurrentThreadID() = MainThreadID) then
+    Result := Application.MessageBox(PChar(Text), PChar(Caption), Flags)
+  else
+    with MessageBoxData do
+    begin
+      AText := PChar(Text);
+      ACaption := PChar(Caption);
+      AFlags := Flags;
+      CurrThread.FormCallBack(m_MessageBox,@MessageBoxData);
+      Result := res;
+    end;
+end;
+
+function ps_MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer;
+var
+  MessageDlgData: TMessageDlgData;
+begin
+  if (GetCurrentThreadID() = MainThreadID) then
+    Result := MessageDlg(Caption, Msg, DlgType, Buttons, 0)
+  else
+    with MessageDlgData do
+    begin
+      ACaption := Caption;
+      AMsg := Msg;
+      ADlgType := DlgType;
+      Abuttons := Buttons;
+      CurrThread.FormCallBack(m_MessageDlg,@MessageDlgData);
+      Result := res;
+    end;
+end;
+
+function ps_InputQuery(const ACaption, APrompt : String; var Value : String): Boolean;
+var
+  InputQueryData: TInputQueryData;
+begin
+  if (GetCurrentThreadID() = MainThreadID) then
+    Result := InputQuery(ACaption, APrompt, Value)
+  else begin
+    InputQueryData.ACaption:= ACaption;
+    InputQueryData.APrompt:= APrompt;
+    InputQueryData.Value:= Value;
+    CurrThread.FormCallBack(m_InputQuery, @InputQueryData);
+    Result := InputQueryData.Res;
+    Value := InputQueryData.Value;
   end;
 end;
 
-function ps_MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType;
-  Buttons: TMsgDlgButtons) : integer;
-var
-  MessageDlgData : TMessageDlgData;
-begin
-  with MessageDlgData do
-  begin
-    ACaption := Caption;
-    AMsg := Msg;
-    ADlgType := DlgType;
-    Abuttons := Buttons;
-    CurrThread.FormCallBack(m_MessageDlg,@MessageDlgData);
-    Result := res;
-  end;
-end;
-
-function ps_InputQuery(const ACaption, APrompt : String; var Value : String) : Boolean;extdecl;
-var
-  InputQueryData : TInputQueryData;
-begin
-  InputQueryData.ACaption:= ACaption;
-  InputQueryData.APrompt:= APrompt;
-  InputQueryData.Value:= Value;
-  CurrThread.FormCallBack(m_InputQuery,@InputQueryData);
-  Result := InputQueryData.Res;
-  Value := InputQueryData.Value;
-end;
-
-procedure ps_ShowBalloonHint(const Title, Hint: string; const Timeout: Integer; const Flag: TBalloonFlags); extdecl;
+procedure ps_ShowBalloonHint(const Title, Hint: string; const Timeout: Integer; const Flag: TBalloonFlags);
 var
   Data: TBalloonHintData;
 begin

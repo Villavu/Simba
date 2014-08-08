@@ -1350,6 +1350,7 @@ begin
 end;
 
 {$I LPInc/Wrappers/lp_other.inc}
+
 {$I LPInc/Wrappers/lp_settings.inc}
 {$I LPInc/Wrappers/lp_bitmap.inc}
 
