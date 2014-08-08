@@ -50,6 +50,9 @@ AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
 AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 {$IFNDEF FUNC_LIST}
 AddGlobalFunc('function GetSystemTime: LongWord', PPointer(Compiler['GetTickCount'].Ptr)^); //TODO: FIX!!
+AddGlobalFunc('function MessageBox2(Text, Caption: string; Flags: LongInt): Integer;', @Lape_MessageBox2);
+AddGlobalFunc('function MessageDlg2(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): Integer;', @Lape_MessageDlg2);
+AddGlobalFunc('function InputQuery2(const ACaption, APrompt: String; var Value: String): Boolean;', @Lape_InputQuery2);
 {$ENDIF}
 AddGlobalFunc('function GetTClient: TClient', @Lape_GetTClient);
 AddGlobalFunc('procedure ConvertTime(Time: integer; var h,m,s: integer);', @Lape_ConvertTime);

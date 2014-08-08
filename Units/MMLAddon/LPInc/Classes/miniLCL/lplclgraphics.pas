@@ -50,6 +50,7 @@ type
   PHbitmap = ^HBitmap;
   PHPalette = ^HPalette;
   PClipboardFormat = ^TClipboardFormat;
+  PAntialiasingMode = ^TAntialiasingMode;
 
   {TGraphicsObject}
 //Read: property OnChanging: TNotifyEvent read OnChanging write OnChanging;
@@ -851,6 +852,36 @@ begin
   PCanvas(Params^[0])^.Clear();
 end;
 
+procedure TCanvas_Frame(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Frame(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure TCanvas_Frame3D(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Frame3D(PRect(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure TCanvas_LineTo(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.LineTo(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure TCanvas_MoveTo(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.MoveTo(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure TCanvas_AntialiasingMode_Set(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.AntialiasingMode := PAntialiasingMode(Params^[1])^;
+end;
+
+procedure TCanvas_AntialiasingMode_Get(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAntialiasingMode(Result)^ := PCanvas(Params^[0])^.AntialiasingMode;
+end;
+
 procedure Register_TCanvas(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -898,6 +929,10 @@ begin
     addGlobalFunc('procedure TCanvas.SetPixels(TPA: TPointArray; Cols: TIntegerArray); overload;', @TCanvas_SetPixels);
     addGlobalFunc('function TCanvas.GetPixels(const TPA: TPointArray): TIntegerArray;', @TCanvas_GetPixels);
     addGlobalFunc('procedure TCanvas.Clear();', @TCanvas_Clear);
+    addGlobalFunc('procedure TCanvas.MoveTo(x, y: Integer);', @TCanvas_MoveTo);
+    addGlobalFunc('procedure TCanvas.LineTo(x, y: Integer);', @TCanvas_LineTo);
+    addGlobalFunc('procedure TCanvas.Frame3D(var ARect: TRect; TopColor, BottomColor: TColor; const FrameWidth: integer)', @TCanvas_Frame3D);
+    addGlobalFunc('procedure TCanvas.Frame(X1, Y1, X2, Y2: Integer);', @TCanvas_Frame);
     addClassVar('TCanvas', 'AutoRedraw', 'Boolean', @TCanvas_AutoRedraw_Read, @TCanvas_AutoRedraw_Write);
     addClassVar('TCanvas', 'Brush', 'TBrush', @TCanvas_Brush_Read, @TCanvas_Brush_Write);
     addClassVar('TCanvas', 'CopyMode', 'TCopyMode', @TCanvas_CopyMode_Read, @TCanvas_CopyMode_Write);
@@ -907,6 +942,7 @@ begin
     addClassVar('TCanvas', 'Width', 'integer', @TCanvas_Width_Read);
     addClassVar('TCanvas', 'OnChange', 'TNotifyEvent', @TCanvas_OnChange_Read, @TCanvas_OnChange_Write);
     addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @TCanvas_OnChanging_Read, @TCanvas_OnChanging_Write);
+    addClassVar('TCanvas', 'AntialiasingMode', 'TAntialiasingMode', @TCanvas_AntialiasingMode_Get, @TCanvas_AntialiasingMode_Set);
     addGlobalFunc('procedure TCanvas.Init();', @TCanvas_Init);
     addGlobalFunc('procedure TCanvas.Free();', @TCanvas_Free);
   end;
@@ -1463,6 +1499,7 @@ end;
        addGlobalType('integer','HBITMAP');
        addGlobalType('integer','HPALETTE');
        addGlobalType('(tmAuto, tmFixed)','TTransparentMode');
+       addGlobalType('(amDontCare, amOn, amOff)', 'TAntialiasingMode');
 
        //register graphics
        Register_TGraphicsObject(Compiler);
