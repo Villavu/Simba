@@ -174,3 +174,4 @@ type
 begin
   ps_ShowBalloonHint(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PBalloonFlags(Params^[3])^);
 end;
+
