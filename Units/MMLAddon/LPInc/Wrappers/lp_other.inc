@@ -175,18 +175,3 @@ begin
   ps_ShowBalloonHint(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PBalloonFlags(Params^[3])^);
 end;
 
-procedure Lape_MessageBox2(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PInteger(Result)^ := Application.MessageBox(PChar(PString(Params^[0])^), PChar(PString(Params^[1])^), PInteger(Params^[2])^);
-end;
-
-procedure Lape_MessageDlg2(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  Pinteger(Result)^ := MessageDlg(Pstring(Params^[0])^, Pstring(Params^[1])^, PMsgDlgType(Params^[2])^, PMsgDlgButtons(Params^[3])^, 0);
-end;
-
-procedure Lape_InputQuery2(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PBoolean(Result)^ := InputQuery(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
-end;
-
