@@ -2318,12 +2318,67 @@ end;
 
 procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
 var
-  Matrix: T2DIntegerArray;
+  i,size: Int32;
+  upper: PtrUInt;
+  vMin,vMax,threshold: UInt8;
+  Counter: Int64;
+  Tab: Array [0..256] of UInt8;
+  ptr: PRGB32;
 begin
-  Matrix := Self.ToMatrix();
-  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, InvertIt, Method, C);
-  Self.DrawMatrix(Matrix);
-  SetLength(Matrix, 0);
+  if Alpha = Beta then Exit;
+  if Alpha > Beta then Swap(Alpha, Beta);
+
+  size := (Self.Width * Self.Height) - 1;
+  upper := PtrUInt(@Self.FData[size]);
+  //Finding the threshold - While at it convert image to grayscale.
+  Threshold := 0;
+  case Method of
+    //Find the Arithmetic Mean / Average.
+    TM_Mean:
+    begin
+      Counter := 0;
+      ptr := Self.FData;
+      while PtrUInt(Ptr) <= upper do
+      begin
+        Ptr^.B := (Ptr^.B + Ptr^.G + Ptr^.R) div 3;
+        Counter += Ptr^.B;
+        Inc(Ptr);
+      end;
+      Threshold := (Counter div size) + C;
+    end;
+
+    //Middle of Min- and Max-value
+    TM_MinMax:
+    begin
+      vMin := 255;
+      vMax := 0;
+      ptr := Self.FData;
+      while PtrUInt(Ptr) <= upper do
+      begin
+        ptr^.B := (ptr^.B + ptr^.G + ptr^.R) div 3;
+        if ptr^.B < vMin then
+          vMin := ptr^.B
+        else if ptr^.B > vMax then
+          vMax := ptr^.B;
+        Inc(ptr);
+      end;
+      Threshold := ((vMax+Int32(vMin)) shr 1) + C;
+    end;
+  end;
+
+  if InvertIt then Swap(Alpha, Beta);
+  for i:=0 to (Threshold-1) do Tab[i] := Alpha;
+  for i:=Threshold to 255 do Tab[i] := Beta;
+
+  ptr := Self.FData;
+  while PtrUInt(Ptr) <= upper do
+  begin
+    ptr^.R := Tab[Ptr^.B];
+    ptr^.G := 0;
+    ptr^.B := 0;
+    ptr^.A := 0;
+    Inc(ptr);
+  end;
 end;
 
 procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);
