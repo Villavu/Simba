@@ -383,16 +383,6 @@ begin
   CurrThread.Client.MBitmaps[bmp].DrawMatrix(matrix);
 end;
 
-procedure ps_ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); extdecl;
-begin
-  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, Invert, Method, C);
-end;
-
-procedure ps_ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer); extdecl;
-begin
-  ResizeBilinearMatrix(Matrix, NewW, NewH);
-end;
-
 procedure ps_ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer); extdecl;
 begin
   CurrThread.Client.MBitmaps[bmp].ResizeEx(Method, NewWidth, NewHeight);
@@ -406,11 +396,6 @@ end;
 procedure ps_BlurBitmap(const bmp, block: integer); extdecl;
 begin
   CurrThread.Client.MBitmaps[bmp].Blur(block);
-end;
-
-procedure ps_BlurMatrix(var Matrix: T2DIntegerArray; const Block: integer); extdecl;
-begin
-  BlurMatrix(Matrix, Block);
 end;
 
 function ps_RotateBitmapEx(Bitmap: Integer; Angle: Single; Expand: Boolean; Smooth: Boolean): Integer; extdecl;

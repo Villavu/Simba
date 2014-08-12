@@ -61,6 +61,7 @@ function CIELabToColor(L, a, b: Extended): TColor; inline;
 procedure ColorToCIELab(Color: integer; out L, a, b: Extended); inline;
 procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended); inline;
 procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended); inline;
+function ColorToGray(const Color: Integer): Byte; inline;
 
 
 implementation
@@ -498,6 +499,11 @@ var
 begin
   HSLtoRGB(HH, SS, LL, rr, gg, bb);
   RGBToCIELab(rr, gg, bb, L, a, b);
+end;
+
+function ColorToGray(const Color: Integer): Byte; inline;
+begin
+  Result := ((Color and $FF) + ((Color shr 8) and $FF) + ((Color shr 16) and $FF)) div 3;
 end;
 
 end.
