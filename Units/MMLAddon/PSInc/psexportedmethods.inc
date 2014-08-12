@@ -486,6 +486,7 @@ AddFunction(@ps_CropBitmap,'procedure CropBitmap(const bmp: integer; const xs, y
 AddFunction(@ps_GetColorsBitmap,'function GetColorsBitmap(const bmp: integer): TIntegerArray;');
 AddFunction(@ps_BitmapToMatrix,'function BitmapToMatrix(const bmp: integer): T2DIntegerArray;');
 AddFunction(@ps_DrawMatrixBitmap,'procedure DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray);');
+AddFunction(@ps_ThresholdAdaptiveBitmap,'procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);');
 {$ENDIF}
 
 {tpa}
