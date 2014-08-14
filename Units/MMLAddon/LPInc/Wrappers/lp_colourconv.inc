@@ -78,7 +78,7 @@ begin
   ps_RGBToCIELab(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
 end;
 
-procedure Lape_CIELabToColor(const Params: PParamArray; out Result : Pointer); lape_extdecl
+procedure Lape_CIELabToColor(const Params: PParamArray; const Result : Pointer); lape_extdecl
 begin
   PColor(Result)^ := ps_CIELabToColor(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^);
 end;
@@ -96,4 +96,9 @@ end;
 procedure Lape_HSLToCIELab(const Params: PParamArray); lape_extdecl
 begin
   ps_HSLToCIELab(PExtended(Params^[0])^, PExtended(Params^[1])^, PExtended(Params^[2])^, PExtended(Params^[3])^, PExtended(Params^[4])^, PExtended(Params^[5])^);
+end;
+
+procedure Lape_ColorToGray(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PColor(Result)^ := ps_ColorToGray(PInteger(Params^[0])^);
 end;
