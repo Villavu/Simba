@@ -32,7 +32,7 @@ uses
   Interfaces, Forms, SimbaUnit, colourhistory, About, debugimage, bitmapconv,
   selectonruntime, code, cselectonruntime, cstruct,
   {$IFDEF USE_FORMDESIGNER}design_frm, frmdesigner,{$ENDIF}
-  sclist, dcpbase64,sm_main, LPDump, lplclregexpr;
+  sclist, dcpbase64,sm_main, LPDump;
 
 {$R Simba.res}
 
