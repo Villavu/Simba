@@ -155,9 +155,6 @@ AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1, Bmp2: Integer; CPoints:
 AddGlobalFunc('function GetColorsBitmap(const bmp: integer): TIntegerArray;', @Lape_GetColorsBitmap);
 AddGlobalFunc('function BitmapToMatrix(const bmp: integer): T2DIntegerArray;',@Lape_BitmapToMatrix);
 AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const Matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
-AddGlobalFunc('procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveMatrix);
-AddGlobalFunc('procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);', @Lape_ResizeBilinearMatrix);
-AddGlobalFunc('procedure BlurMatrix(var Matrix: T2DIntegerArray; const Block: integer);', @Lape_BlurMatrix);
 
 { Math }
 SetCurrSection('Math');
@@ -165,11 +162,11 @@ AddGlobalFunc('function pow(base,exponent: extended): extended', @Lape_pow);
 AddGlobalFunc('function RiemannGauss(Xstart,StepSize,Sigma: extended; AmountSteps: integer): extended', @Lape_RiemannGauss);
 AddGlobalFunc('function DiscreteGauss(Xstart,Xend: integer; sigma: extended): TExtendedArray', @Lape_DiscreteGauss);
 AddGlobalFunc('function GaussMatrix(N: integer; sigma: extended): T2DExtendedArray', @Lape_GaussMatrix);
-AddGlobalFunc('function Max(a,b: integer): integer', @Lape_Max);
+AddGlobalFunc('function Max(a, b: integer): integer', @Lape_Max);
 AddGlobalFunc('function Min(a, b: Integer): Integer', @Lape_Min);
 AddGlobalFunc('function MinE(a, b: extended): extended', @Lape_MinE);
-AddGlobalFunc('function MaxE(a,b: extended): extended', @Lape_MaxE);
-AddGlobalFunc('function Point(x,y: integer): TPoint', @Lape_Point);
+AddGlobalFunc('function MaxE(a, b: extended): extended', @Lape_MaxE);
+AddGlobalFunc('function Point(x, y: integer): TPoint', @Lape_Point);
 AddGlobalFunc('function Distance(x1,y1,x2,y2: integer): integer', @Lape_Distance);
 AddGlobalFunc('function Hypot(X, Y: Extended): Extended', @Lape_Hypot);
 AddGlobalFunc('function RandomRange(const aFrom, aTo: Integer): Integer', @Lape_RandomRange);
@@ -264,6 +261,7 @@ AddGlobalFunc('function CIELabToColor(L, a, b: Extended): TColor;', @Lape_CIELab
 AddGlobalFunc('procedure ColorToCIELab(Color: integer; out L, a, b: Extended);', @Lape_ColorToCIELab);
 AddGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);', @Lape_CIELabToHSL);
 AddGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);', @Lape_HSLToCIELab);
+AddGlobalFunc('function ColorToGray(const Color: Integer): TColor', @Lape_ColorToGray);
 
 { Crypto }
 SetCurrSection('Crypto');

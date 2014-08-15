@@ -157,15 +157,12 @@ type
   function CalculatePixelShiftTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray): integer;
   function CalculatePixelTolerance(Bmp1,Bmp2 : TMufasaBitmap; CompareBox : TBox; CTS : integer) : extended;
   function CalculatePixelToleranceTPA(Bmp1, Bmp2: TMufasaBitmap; CPoints: TPointArray; CTS: integer): extended;
-  procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
-  procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);
-  procedure BlurMatrix(var Matrix: T2DIntegerArray; const Block: Integer);
 
 implementation
 
 uses
   paszlib,DCPbase64,math, client,tpa,
-  colour_conv,IOManager,mufasatypesutil,FileUtil,ocr;
+  colour_conv,IOManager,mufasatypesutil,FileUtil;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
@@ -327,216 +324,6 @@ begin
           Result := Result / ((bounds.x2 - bounds.x1 + 1) * (bounds.y2-bounds.y1 + 1)); //We want the value for the whole Pixel;
         end;
   end;
-end;
-
-function ColorToGray(Color:Integer): Byte; inline;
-begin
-  Result := ((Color and $FF) + ((Color shr 8) and $FF) + ((Color shr 16) and $FF)) div 3;
-end;
-
-procedure Swap(var a, b: byte); inline;
-var
-  t: byte;
-begin
-  t := a;
-  a := b;
-  b := t;
-end;
-
-{*
- This function first finds the Mean of the image, and set the threshold to it. Again: colors bellow the Threshold will be set to `Alpha`
- the colors above or equal to the Mean/Threshold will be set to `Beta`.
- @params:
-    Alpha: Minvalue for result
-    Beta: Maxvalue for result
-    Invert: Bellow Mean is set to Beta, rather then Alpha.
-    Method: TM_Mean or TM_MinMax
-    C: Substract or add to the mean.
-*}
-procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
-var
-  W,H,x,y,i:Integer;
-  Color,IMin,IMax: Byte;
-  Threshold,Counter: Integer;
-  Temp: T2DByteArray;
-  Tab: Array [0..256] of Byte;
-begin
-  if (length(matrix) = 0) then
-      raise exception.Create('Matrix with length 0 has been passed to ThresholdAdaptiveMatrix');
-
-  W := Length(Matrix[0]);
-  H := Length(Matrix);
-  SetLength(Temp, H,W);
-  Dec(W);
-  Dec(H);
-
-  //Finding the threshold - While at it convert image to grayscale.
-  Threshold := 0;
-  Case Method of
-    //Find the Arithmetic Mean / Average.
-    TM_Mean:
-    begin
-      for y:=0 to H do
-      begin
-        Counter := 0;
-        for x:=0 to W do
-        begin
-          Color := ColorToGray(Matrix[y][x]);
-          Temp[y][x] := Color;
-          Counter := Counter + Color;
-        end;
-        Threshold := Threshold + (Counter div W);
-      end;
-      if (C < 0) then Threshold := (Threshold div H) - Abs(C)
-      else Threshold := (Threshold div H) + C;
-    end;
-
-    //Mean of Min and Max values
-    TM_MinMax:
-    begin
-      IMin := ColorToGray(Matrix[0][0]);
-      IMax := IMin;
-      for y:=0 to H do
-        for x:=0 to W do
-        begin
-          Color := ColorToGray(Matrix[y][x]);
-          Temp[y][x] := Color;
-          if Color < IMin then
-            IMin := Color
-          else if Color > IMax then
-            IMax := Color;
-        end;
-      if (C < 0) then Threshold := ((IMax+IMin) div 2) - Abs(C)
-      else Threshold := ((IMax+IMin) div 2) + C;
-    end;
-  end;
-
-  Threshold := Max(0, Min(Threshold, 255)); //In range 0..255
-  if Invert then Swap(Alpha, Beta);
-
-  for i:=0 to (Threshold-1) do Tab[i] := Alpha;
-  for i:=Threshold to 255 do Tab[i] := Beta;
-  for y:=0 to H do
-    for x:=0 to W do
-      Matrix[y][x] := Tab[Temp[y][x]];
-
-  SetLength(Temp, 0);
-end;
-
-procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);
-var
-  W,H,x,y,p0,p1,p2,p3,i,j: Integer;
-  ratioX,ratioY,dx,dy: Single;
-  R,G,B: Single;
-  Res: T2DIntegerArray;
-begin
-  if (length(matrix) = 0) then
-    raise exception.Create('Matrix with length 0 has been passed to ResizeBilinearMatrix');
-
-  W := Length(Matrix[0]);
-  H := Length(Matrix);
-  ratioX := (W-1) / NewW;
-  ratioY := (H-1) / NewH;
-  SetLength(Res, NewH, NewW);
-  Dec(NewW);
-
-  for i:=0 to NewH-1 do
-  for j:=0 to NewW do
-  begin
-    x := Trunc(ratioX * j);
-    y := Trunc(ratioY * i);
-    dX := ratioX * j - x;
-    dY := ratioY * i - y;
-
-    p0 := Matrix[y][x];
-    p1 := Matrix[y][x+1];
-    p2 := Matrix[y+1][x];
-    p3 := Matrix[y+1][x+1];
-
-    R := (p0 and $FF) * (1-dX) * (1-dY) +
-         (p1 and $FF) * (dX * (1-dY)) +
-         (p2 and $FF) * (dY * (1-dX)) +
-         (p3 and $FF) * (dX * dY);
-
-    G := ((p0 shr 8) and $FF) * (1-dX) * (1-dY) +
-         ((p1 shr 8) and $FF) * (dX * (1-dY)) +
-         ((p2 shr 8) and $FF) * (dY * (1-dX)) +
-         ((p3 shr 8) and $FF) * (dX * dY);
-
-    B := ((p0 shr 16) and $FF) * (1-dX) * (1-dY) +
-         ((p1 shr 16) and $FF) * (dX * (1-dY)) +
-         ((p2 shr 16) and $FF) * (dY * (1-dX)) +
-         ((p3 shr 16) and $FF) * (dX * dY);
-
-    Res[i][j] := Trunc(R) or Trunc(G) shl 8 or Trunc(B) shl 16;
-  end;
-
-  Matrix := Res;
-  SetLength(Res, 0);
-end;
-
-procedure BlurMatrix(var Matrix: T2DIntegerArray; const Block: Integer);
-var
-  W,H,x,y,mid,fx,fy,size:Integer;
-  R,G,B,color,lx,ly,hx,hy:Integer;
-  BlurredMatrix: T2DIntegerArray;
-begin
-  Size := (Block*Block);
-
-  W := High(Matrix[0]);
-  H := High(Matrix);
-
-  if (Size<=1) or (Block mod 2 = 0) then
-    Exit;
-
-  if (W < 1) and (H < 1) then
-    raise exception.Create('BlurMatrix(): Matrix with length 0 has been passed to BlurMatrix');
-
-  SetLength(BlurredMatrix, H+1, W+1);
-  mid := Block div 2;
-
-  for y:=0 to H do
-  begin
-    ly := Max(0,y-mid);
-    hy := Min(H,y+mid);
-    for x:=0 to W do
-    begin
-      lx := Max(0,x-mid);
-      hx := Min(W,x+mid);
-      Size := 0;
-      R := 0; G := 0; B := 0;
-
-      for fy:=ly to hy do
-        for fx:=lx to hx do
-        begin
-          Color := Matrix[fy][fx];
-          R := R + (Color and $FF);
-          G := G + ((Color shr 8) and $FF);
-          B := B + ((Color shr 16) and $FF);
-          Inc(Size);
-        end;
-      BlurredMatrix[y][x] := (R div size) or ((G div size) shl 8) or ((B div size) shl 16);
-    end;
-  end;
-
-  Matrix := BlurredMatrix;
-  SetLength(BlurredMatrix, 0);
-end;
-
-function Min(a,b:integer) : integer; inline;
-begin
-  if a < b then
-    result := a
-  else
-    result := b;
-end;
-
-function Max(a,b:integer) : integer; inline;
-begin
-  if (a < b) then
-    result := b
-  else
-    result := a;
 end;
 
 { TMBitmaps }
@@ -2316,14 +2103,78 @@ begin
   end;
 end;
 
+procedure Swap(var a, b: byte); inline;
+var
+  t: Byte;
+begin
+  t := a;
+  a := b;
+  b := t;
+end;
+
 procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
 var
-  Matrix: T2DIntegerArray;
+  i,size: Int32;
+  upper: PtrUInt;
+  vMin,vMax,threshold: UInt8;
+  Counter: Int64;
+  Tab: Array [0..256] of UInt8;
+  ptr: PRGB32;
 begin
-  Matrix := Self.ToMatrix();
-  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, InvertIt, Method, C);
-  Self.DrawMatrix(Matrix);
-  SetLength(Matrix, 0);
+  if Alpha = Beta then Exit;
+  if Alpha > Beta then Swap(Alpha, Beta);
+
+  size := (Self.Width * Self.Height) - 1;
+  upper := PtrUInt(@Self.FData[size]);
+  //Finding the threshold - While at it convert image to grayscale.
+  Threshold := 0;
+  case Method of
+    //Find the Arithmetic Mean / Average.
+    TM_Mean:
+    begin
+      Counter := 0;
+      ptr := Self.FData;
+      while PtrUInt(Ptr) <= upper do
+      begin
+        Ptr^.B := (Ptr^.B + Ptr^.G + Ptr^.R) div 3;
+        Counter += Ptr^.B;
+        Inc(Ptr);
+      end;
+      Threshold := (Counter div size) + C;
+    end;
+
+    //Middle of Min- and Max-value
+    TM_MinMax:
+    begin
+      vMin := 255;
+      vMax := 0;
+      ptr := Self.FData;
+      while PtrUInt(Ptr) <= upper do
+      begin
+        ptr^.B := (ptr^.B + ptr^.G + ptr^.R) div 3;
+        if ptr^.B < vMin then
+          vMin := ptr^.B
+        else if ptr^.B > vMax then
+          vMax := ptr^.B;
+        Inc(ptr);
+      end;
+      Threshold := ((vMax+Int32(vMin)) shr 1) + C;
+    end;
+  end;
+
+  if InvertIt then Swap(Alpha, Beta);
+  for i:=0 to (Threshold-1) do Tab[i] := Alpha;
+  for i:=Threshold to 255 do Tab[i] := Beta;
+
+  ptr := Self.FData;
+  while PtrUInt(Ptr) <= upper do
+  begin
+    ptr^.R := Tab[Ptr^.B];
+    ptr^.G := 0;
+    ptr^.B := 0;
+    ptr^.A := 0;
+    Inc(ptr);
+  end;
 end;
 
 procedure TMufasaBitmap.SetPersistentMemory(mem: PtrUInt; awidth, aheight: integer);
