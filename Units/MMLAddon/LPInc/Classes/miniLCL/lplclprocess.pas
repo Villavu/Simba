@@ -110,9 +110,9 @@ begin
   begin
     addClass('TInputPipeStream', 'THandleStream');
 
-    addGlobalFunc('function TInputPipeStream.Write(Const Buffer; Count : Longint): Longint;', @TInputPipeStream_Write);
+    addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Longint): Longint;', @TInputPipeStream_Write);
     addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64;', @TInputPipeStream_Seek);
-    addGlobalFunc('function TInputPipeStream.Read(Var Buffer; Count : Longint): longint;', @TInputPipeStream_Read);
+    addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Longint): longint;', @TInputPipeStream_Read);
     addClassVar('TInputPipeStream', 'NumBytesAvailable', 'DWord', @TInputPipeStream_NumBytesAvailable_Read, nil);
     addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle);', @TInputPipeStream_Init);
     addGlobalFunc('procedure TInputPipeStream.Free();', @TInputPipeStream_Free);

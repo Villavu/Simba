@@ -166,6 +166,7 @@ type
   TciProcedureClassName = class(TDeclaration);                              //Class Procedure/Function
   TciReturnType = class(TciTypeKind);                                       //Function Result
   TciForward = class(TciTypeKind);                                          //Forwarding
+  TciConstRefParameter = class(TDeclaration);                               //Procedure/Function Parameters
   TciConstParameter = class(TDeclaration);                                  //Procedure/Function Parameters
   TciOutParameter = class(TDeclaration);                                    //Procedure/Function Parameters
   TciFormalParameter = class(TDeclaration);                                 //Procedure/Function Parameters
@@ -241,6 +242,7 @@ type
     procedure ObjectNameOfMethod; override;                                     //Class Procedure/Function
     procedure ReturnType; override;                                             //Function Result
     procedure ForwardDeclaration; override;                                     //Forwarding
+    procedure ConstRefParameter; override;                                      //Procedure/Function Parameters
     procedure ConstParameter; override;                                         //Procedure/Function Parameters
     procedure OutParameter; override;                                           //Procedure/Function Parameters
     procedure ParameterFormal; override;                                        //Procedure/Function Parameters
@@ -1387,6 +1389,19 @@ begin
   end;
 
   PushStack(TciForward);
+  inherited;
+  PopStack;
+end;
+
+procedure TCodeParser.ConstRefParameter;
+begin
+  if (not InDeclarations([TciProcedureDeclaration, TciProceduralType, TciClassMethodHeading])) then
+  begin
+    inherited;
+    Exit;
+  end;
+
+  PushStack(TciConstRefParameter);
   inherited;
   PopStack;
 end;

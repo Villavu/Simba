@@ -77,7 +77,7 @@ type
     tokComma,
     tokComp,
     tokCompDirect,
-    tokConst,
+    tokConst, tokConstRef,
     tokConstructor,
 	tokContains,
     tokContinue, //JThurman 2004-11-8 (flow control routines)
