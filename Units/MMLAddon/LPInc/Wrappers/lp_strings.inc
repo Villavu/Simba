@@ -58,10 +58,10 @@ begin
   Pboolean(Result)^ := ps_ExecRegExpr(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
-//procedure Lape_SplitRegExpr(const Params: PParamArray); lape_extdecl
-//begin
-//  ps_SplitRegExpr(PString(Params^[0])^, PString(Params^[1])^, PStrings(Params^[2])^);
-//end;
+procedure Lape_SplitRegExpr(const Params: PParamArray); lape_extdecl
+begin
+  ps_SplitRegExpr(PString(Params^[0])^, PString(Params^[1])^, PStrings(Params^[2])^);
+end;
 
 procedure Lape_ReplaceRegExpr(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -81,4 +81,29 @@ end;
 procedure Lape_NormLevDist(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   PExtended(Result)^ := ps_NormLevDist(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure Lape_StringMatch(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PExtended(Result)^ := ps_StringMatch(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure Lape_MultiBetween(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStringArray(Result)^ := ps_MultiBetween(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure Lape_IsArrInStr(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_IsArrInStr(PStringArray(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure Lape_PosMulti(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PIntegerArray(Result)^ := ps_PosMulti(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure Lape_IsStrInArr(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_IsStrInArr(PString(Params^[0])^, PBoolean(Params^[1])^, PStringArray(Params^[2])^);
 end;

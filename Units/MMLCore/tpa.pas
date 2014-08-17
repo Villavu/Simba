@@ -54,12 +54,17 @@ procedure SortTPAFrom(var a: TPointArray; const From: TPoint);
 procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);
 procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);
 procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);
+procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);
 procedure InvertTPA(var a: TPointArray);
 procedure InvertATPA(var a: T2DPointArray);
 function MiddleTPAEx(const TPA: TPointArray; var x, y: Integer): Boolean;
 function MiddleTPA(const tpa: TPointArray): TPoint;
+procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);
+function MedianTPA(var tpa: TPointArray): TPoint;
 procedure SortATPASize(var a: T2DPointArray; const BigFirst: Boolean);
 procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
+procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
 function CombineTPA(const Ar1, Ar2: TPointArray): TPointArray;
 function CombineIntArray(const Ar1, Ar2: TIntegerArray): TIntegerArray;
 function InIntArrayEx(const a: TIntegerArray; var Where: Integer; const Number: Integer): Boolean;
@@ -68,6 +73,8 @@ procedure ClearSameIntegers(var a: TIntegerArray);
 procedure ClearSameIntegersAndTPA(var a: TIntegerArray; var p: TPointArray);
 function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
+function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
+function ClusterTPA(const TPA: TPointArray; dist: Integer): T2DPointArray;
 function  TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer = -1;
           const IsSortedAscending: Boolean = False): Integer;
 function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;
@@ -75,6 +82,7 @@ function FloodFillTPA(const TPA : TPointArray) : T2DPointArray;
 procedure FilterPointsPie(var Points: TPointArray; const SD, ED, MinR, MaxR: Extended; Mx, My: Integer; Natural: Boolean);
 procedure FilterPointsDist(var Points: TPointArray; const MinDist,MaxDist: Extended; Mx, My: Integer);
 procedure FilterPointsLine(var Points: TPointArray; Radial: Extended; Radius, MX, MY: Integer);
+procedure FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer);
 procedure FilterTPADist(var TPA: TPointArray; maxDist: integer);
 function RemoveDistTPointArray(x, y, dist: Integer;const ThePoints: TPointArray; RemoveHigher: Boolean): TPointArray;
 function GetATPABounds(const ATPA: T2DPointArray): TBox;
@@ -92,6 +100,7 @@ function EdgeFromBox(const Box: TBox): TPointArray;
 function TPAFromBox(const Box : TBox) : TPointArray;
 function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer): TPointArray;
 function TPAFromCircle(const CX, CY, Radius: Integer): TPointArray;
+function TPAFromPolygon(const shape: TPointArray): TPointArray;
 procedure FillEllipse(var a: TPointArray);
 function FindTPAEdges(const p: TPointArray): TPointArray;
 function PointInTPA(const p: TPoint;const arP: TPointArray): Boolean;
@@ -108,7 +117,7 @@ function SameTPA(const aTPA, bTPA: TPointArray): Boolean;
 function TPAInATPA(const TPA: TPointArray;const InATPA: T2DPointArray; var Index: LongInt): Boolean;
 procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
 procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
-function MiddleBox(b : TBox) : TPoint;
+function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
 
 implementation
 
@@ -717,6 +726,54 @@ begin
 end;
 
 {/\
+  Sorts the T2DPointArray a from the first X point of each TPA by from.
+/\}
+procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);
+var
+   i, l: Integer;
+   DistArr: TIntegerArray;
+begin
+  l := High(a);
+  if (l < 0) then
+    Exit;
+
+  SetLength(DistArr, l + 1);
+  for i := 0 to l do
+  begin
+    if (length(a[i]) <= 0) then
+      continue;
+
+    DistArr[i] := Round(Sqr(From.x - a[i][0].x));
+  end;
+
+  QuickATPASort(DistArr, a, 0, l, True);
+end;
+
+{/\
+  Sorts the T2DPointArray a from the first Y point of each TPA by from.
+/\}
+procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);
+var
+   i, l: Integer;
+   DistArr: TIntegerArray;
+begin
+  l := high(a);
+  if (l < 0) then
+    Exit;
+
+  setLength(DistArr, l + 1);
+  for i := 0 to l do
+  begin
+    if (length(a[i]) <= 0) then
+      continue;
+
+    DistArr[i] := Round(Sqr(From.y - a[i][0].y));
+  end;
+
+  QuickATPASort(DistArr, a, 0, l, True);
+end;
+
+{/\
   Inverts / Reverses the TPointArray a.
 /\}
 
@@ -794,6 +851,34 @@ begin
 end;
 
 {/\
+  Returns the x and y coords of the point in the tpa which is closest to the middle of the tpa.
+/\}
+procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);
+var
+  p: TPoint;
+begin
+  x := -1;
+  y := -1;
+
+  if (length(tpa) < 1) then
+    exit;
+
+  p := middleTPA(tpa);
+  sortTPAFrom(tpa, p);
+
+  x := tpa[0].x;
+  y := tpa[0].y;
+end;
+
+{/\
+  Returns the *point in the tpa* closest to the middle of the tpa.
+/\}
+function MedianTPA(var tpa: TPointArray): TPoint;
+begin
+  MedianTPAEx(tpa, result.x, result.y);
+end;
+
+{/\
   Sorts the T2DPointArray a from either largest or smallest, by the amount of points in the TPAs.
 /\}
 
@@ -825,6 +910,38 @@ begin
   for i := 0 to l do
     SizeArr[i] := Abs(Length(a[i]) - Size);
   QuickATPASort(SizeArr, a, 0, l, CloseFirst);
+end;
+
+procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
+var
+  tmpATPA: T2DPointArray;
+  l, i, x, a: integer;
+begin
+  if (minLength > maxLength) then
+  begin
+    writeln('FilterTPAsBetween: Tour min length is greater than your max length');
+    exit;
+  end;
+
+  l := length(atpa);
+  a := 0;
+
+  if (l < 1) then
+    exit;
+
+  for i := 0 to (l - 1) do
+  begin
+    x := length(atpa[i]);
+
+    if (not inRange(x, minLength, maxLength)) then
+    begin
+      setLength(tmpATPA, a + 1);
+      tmpATPA[a] := atpa[i];
+      inc(a);
+    end;
+  end;
+
+  atpa := tmpATPA;
 end;
 
 {/\
@@ -1054,6 +1171,332 @@ begin
     Inc(c);
   end;
   SetLength(Result, c);
+end;
+
+{/\
+Splits TPA with dist (alternative method for SplitTPA)
+/\}
+function ClusterTPA(const TPA: TPointArray; dist: Integer): T2DPointArray;
+type
+  TPointScan = record
+    skipRow: Boolean;
+    count: Integer;
+  end;
+var
+  h, i, l, c, s, x, y, o, r, d, m: Integer;
+  p: array of array of TPointScan;
+  q: TPointArray;
+  a, b, t: TBox;
+  e: Extended;
+  z: TPoint;
+  v: Boolean;
+begin
+  SetLength(Result, 0);
+  h := High(TPA);
+  if (h > -1) then
+    if (h > 0) then
+    begin
+      b.X1 := TPA[0].X;
+      b.Y1 := TPA[0].Y;
+      b.X2 := TPA[0].X;
+      b.Y2 := TPA[0].Y;
+      r := 0;
+      for i := 1 to h do
+      begin
+        if (TPA[i].X < b.X1) then
+          b.X1 := TPA[i].X
+        else
+          if (TPA[i].X > b.X2) then
+            b.X2 := TPA[i].X;
+        if (TPA[i].Y < b.Y1) then
+          b.Y1 := TPA[i].Y
+        else
+          if (TPA[i].Y > b.Y2) then
+            b.Y2 := TPA[i].Y;
+      end;
+      SetLength(p, ((b.X2 - b.X1) + 1));
+      for i := 0 to (b.X2 - b.X1) do
+      begin
+        SetLength(p[i], ((b.Y2 - b.Y1) + 1));
+        for c := 0 to (b.Y2 - b.Y1) do
+        begin
+          p[i][c].count := 0;
+          p[i][c].skipRow := False;
+        end;
+      end;
+      e := Extended(dist);
+      if (e < 0.0) then
+        e := 0.0;
+      d := Ceil(e);
+      m := Max(((b.X2 - b.X1) + 1), ((b.Y2 - b.Y1) + 1));
+      if (d > m) then
+        d := m;
+      for i := 0 to h do
+        Inc(p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+      for i := 0 to h do
+        if (p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count > 0) then
+        begin
+          c := Length(Result);
+          SetLength(Result, (c + 1));
+          SetLength(Result[c], p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+          for o := 0 to (p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count - 1) do
+            Result[c][o] := TPA[i];
+          r := (r + p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+          if (r > h) then
+            Exit;
+          SetLength(q, 1);
+          q[0] := TPA[i];
+          p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count := 0;
+          s := 1;
+          while (s > 0) do
+          begin
+            s := High(q);
+            z := q[s];
+            a.X1 := (z.X - d);
+            a.Y1 := (z.Y - d);
+            a.X2 := (z.X + d);
+            a.Y2 := (z.Y + d);
+            t := a;
+            SetLength(q, s);
+            if (a.X1 < b.X1) then
+              a.X1 := b.X1
+            else
+              if (a.X1 > b.X2) then
+                a.X1 := b.X2;
+            if (a.Y1 < b.Y1) then
+              a.Y1 := b.Y1
+            else
+              if (a.Y1 > b.Y2) then
+                a.Y1 := b.Y2;
+            if (a.X2 < b.X1) then
+              a.X2 := b.X1
+            else
+              if (a.X2 > b.X2) then
+                a.X2 := b.X2;
+            if (a.Y2 < b.Y1) then
+              a.Y2 := b.Y1
+            else
+              if (a.Y2 > b.Y2) then
+                a.Y2 := b.Y2;
+            case ((t.X1 <> a.X1) or (t.X2 <> a.X2)) of
+              True:
+              for y := a.Y1 to a.Y2 do
+                if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
+                for x := a.X1 to a.X2 do
+                  if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
+                    if (Round(Sqrt(Sqr(z.X - x) + Sqr(z.Y - y))) <= dist) then
+                    begin
+                      l := Length(Result[c]);
+                      SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
+                      for o := 0 to (p[(x - b.X1)][(y - b.Y1)].count - 1) do
+                      begin
+                        Result[c][(l + o)].X := x;
+                        Result[c][(l + o)].Y := y;
+                      end;
+                      r := (r + p[(x - b.X1)][(y - b.Y1)].count);
+                      if (r > h) then
+                        Exit;
+                      p[(x - b.X1)][(y - b.Y1)].count := 0;
+                      SetLength(q, (s + 1));
+                      q[s] := Result[c][l];
+                      Inc(s);
+                    end;
+              False:
+              for y := a.Y1 to a.Y2 do
+                if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
+                begin
+                  v := True;
+                  for x := a.X1 to a.X2 do
+                    if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
+                      if (Round(Sqrt(Sqr(z.X - x) + Sqr(z.Y - y))) <= dist) then
+                      begin
+                        l := Length(Result[c]);
+                        SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
+                        for o := 0 to (p[(x - b.X1)][(y - b.Y1)].count - 1) do
+                        begin
+                          Result[c][(l + o)].X := x;
+                          Result[c][(l + o)].Y := y;
+                        end;
+                        r := (r + p[(x - b.X1)][(y - b.Y1)].count);
+                        if (r > h) then
+                          Exit;
+                        p[(x - b.X1)][(y - b.Y1)].count := 0;
+                        SetLength(q, (s + 1));
+                        q[s] := Result[c][l];
+                        Inc(s);
+                      end else
+                        v := False;
+                  if v then
+                    p[(a.X2 - b.X1)][(y - b.Y1)].skipRow := True;
+                end;
+            end;
+          end;
+        end;
+    end else
+    begin
+      SetLength(Result, 1);
+      SetLength(Result[0], 1);
+      Result[0][0] := TPA[0];
+    end;
+end;
+
+{/\
+ Splits TPA with width, height (alternative method for SplitTPAEx).
+ /\}
+function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
+type
+  TPointScan = record
+    skipRow: Boolean;
+    count: Integer;
+  end;
+var
+  h, i, l, c, s, x, y, o, r, dw, dh: Integer;
+  p: array of array of TPointScan;
+  q: TPointArray;
+  a, b, t: TBox;
+  z: TPoint;
+begin
+  SetLength(Result, 0);
+  h := High(TPA);
+  if (((width > 0) and (height > 0)) and (h > -1)) then
+    if (h > 0) then
+    begin
+      dw := width;
+      dh := height;
+      b.X1 := TPA[0].X;
+      b.Y1 := TPA[0].Y;
+      b.X2 := TPA[0].X;
+      b.Y2 := TPA[0].Y;
+      r := 0;
+      for i := 1 to h do
+      begin
+        if (TPA[i].X < b.X1) then
+          b.X1 := TPA[i].X
+        else
+          if (TPA[i].X > b.X2) then
+            b.X2 := TPA[i].X;
+        if (TPA[i].Y < b.Y1) then
+          b.Y1 := TPA[i].Y
+        else
+          if (TPA[i].Y > b.Y2) then
+            b.Y2 := TPA[i].Y;
+      end;
+      SetLength(p, ((b.X2 - b.X1) + 1));
+      for i := 0 to (b.X2 - b.X1) do
+      begin
+        SetLength(p[i], ((b.Y2 - b.Y1) + 1));
+        for c := 0 to (b.Y2 - b.Y1) do
+        begin
+          p[i][c].count := 0;
+          p[i][c].skipRow := False;
+        end;
+      end;
+      if (dw > ((b.X2 - b.X1) + 1)) then
+        dw := ((b.X2 - b.X1) + 1);
+      if (dh > ((b.Y2 - b.Y1) + 1)) then
+        dh := ((b.Y2 - b.Y1) + 1);
+      for i := 0 to h do
+        Inc(p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+      for i := 0 to h do
+        if (p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count > 0) then
+        begin
+          c := Length(Result);
+          SetLength(Result, (c + 1));
+          SetLength(Result[c], p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+          for o := 0 to (p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count - 1) do
+            Result[c][o] := TPA[i];
+          r := (r + p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count);
+          if (r > h) then
+            Exit;
+          SetLength(q, 1);
+          q[0] := TPA[i];
+          p[(TPA[i].X - b.X1)][(TPA[i].Y - b.Y1)].count := 0;
+          s := 1;
+          while (s > 0) do
+          begin
+            s := High(q);
+            z := q[s];
+            a.X1 := (z.X - dw);
+            a.Y1 := (z.Y - dh);
+            a.X2 := (z.X + dw);
+            a.Y2 := (z.Y + dh);
+            t := a;
+            SetLength(q, s);
+            if (a.X1 < b.X1) then
+              a.X1 := b.X1
+            else
+              if (a.X1 > b.X2) then
+                a.X1 := b.X2;
+            if (a.Y1 < b.Y1) then
+              a.Y1 := b.Y1
+            else
+              if (a.Y1 > b.Y2) then
+                a.Y1 := b.Y2;
+            if (a.X2 < b.X1) then
+              a.X2 := b.X1
+            else
+              if (a.X2 > b.X2) then
+                a.X2 := b.X2;
+            if (a.Y2 < b.Y1) then
+              a.Y2 := b.Y1
+            else
+              if (a.Y2 > b.Y2) then
+                a.Y2 := b.Y2;
+            case ((t.X1 <> a.X1) or (t.X2 <> a.X2)) of
+              True:
+              for y := a.Y1 to a.Y2 do
+                if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
+                for x := a.X1 to a.X2 do
+                  if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
+                  begin
+                    l := Length(Result[c]);
+                    SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
+                    for o := 0 to (p[(x - b.X1)][(y - b.Y1)].count - 1) do
+                    begin
+                      Result[c][(l + o)].X := x;
+                      Result[c][(l + o)].Y := y;
+                    end;
+                    r := (r + p[(x - b.X1)][(y - b.Y1)].count);
+                    if (r > h) then
+                      Exit;
+                    p[(x - b.X1)][(y - b.Y1)].count := 0;
+                    SetLength(q, (s + 1));
+                    q[s] := Result[c][l];
+                    Inc(s);
+                  end;
+              False:
+              for y := a.Y1 to a.Y2 do
+                if not p[(a.X2 - b.X1)][(y - b.Y1)].skipRow then
+                begin
+                  for x := a.X1 to a.X2 do
+                    if (p[(x - b.X1)][(y - b.Y1)].count > 0) then
+                    begin
+                      l := Length(Result[c]);
+                      SetLength(Result[c], (l + p[(x - b.X1)][(y - b.Y1)].count));
+                      for o := 0 to (p[(x - b.X1)][(y - b.Y1)].count - 1) do
+                      begin
+                        Result[c][(l + o)].X := x;
+                        Result[c][(l + o)].Y := y;
+                      end;
+                      r := (r + p[(x - b.X1)][(y - b.Y1)].count);
+                      if (r > h) then
+                        Exit;
+                      p[(x - b.X1)][(y - b.Y1)].count := 0;
+                      SetLength(q, (s + 1));
+                      q[s] := Result[c][l];
+                      Inc(s);
+                    end;
+                  p[(a.X2 - b.X1)][(y - b.Y1)].skipRow := True;
+                end;
+            end;
+          end;
+        end;
+    end else
+    begin
+      SetLength(Result, 1);
+      SetLength(Result[0], 1);
+      Result[0][0] := TPA[0];
+    end;
 end;
 
 function TPAPosNext(const Find: TPoint; const V: TPointArray;
@@ -1336,8 +1779,8 @@ begin
 
     for I := 0 to T do
     begin
-      if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MY)) > 0) and
-         ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MY)) < 0)) xor Over180) then
+      if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MX)) > 0) and
+         ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MX)) < 0)) xor Over180) then
         continue;
       G[L] := Points[I];
       Inc(L);
@@ -1415,6 +1858,42 @@ begin
   end;
   SetLength(P, Ind);
   Points:= P;
+end;
+
+{/\
+  Removes the points that are not within the box
+/\}
+procedure FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer);
+var
+  h, c, i, tmp: integer;
+begin
+  h := high(points);
+  c := 0;
+
+  if (x1 > x2) then
+  begin
+    tmp := x1;
+
+    x1 := x2;
+    x2 := tmp;
+  end;
+
+  if (y1 > y2) then
+  begin
+    tmp := y1;
+
+    y1 := y2;
+    y2 := tmp;
+  end;
+
+  for i := 0 to h do
+    if (points[i].x > x1) and (points[i].x < x2) and (points[i].y > y1) and (points[i].y < y2) then
+    begin
+      points[c] := points[i];
+      inc(c);
+    end;
+
+  setlength(points,c);
 end;
 
 {/\
@@ -1758,7 +2237,7 @@ begin;
   result := false;
   if len >= 31 then
   begin;
-    Writeln('You cannot have more than 32 TPA''s in your ATPA for this function');
+    writeln('You cannot have more than 32 TPA''s in your ATPA for this function');
     exit;
   end;
   if len <= 0 then
@@ -1783,7 +2262,7 @@ begin;
     end;
   w := MinBox.x2-minbox.x1;
   h := minbox.y2 - minbox.y1;
-  Writeln(format('(%d,%d,%d,%d)',[minbox.x1,minbox.y1,minbox.x2,minbox.y2]));
+  //Writeln(format('(%d,%d,%d,%d)',[minbox.x1,minbox.y1,minbox.x2,minbox.y2]));
   SetLength(Grid,w + 1);
   for i := (W) downto 0 do
   begin;
@@ -2212,6 +2691,100 @@ begin
 end;
 
 {/\
+  Returns polygon as a TPointArray from a shape, which can be working either as
+  an array of main points OR border points. note: The order of the points are important.
+/\}
+function TPAFromPolygon(const shape: TPointArray): TPointArray;
+var
+  b: TBox;
+  x, y, h, i, l, r, z: Integer;
+  o: TPointArray;
+  f: Boolean;
+  t: array of TBoolArray;
+  e: Extended;
+  q, p, d: TPoint;
+begin
+  h := High(shape);
+  if (h > -1) then
+  begin
+    SetLength(o, 0);
+
+    b.x1 := shape[0].x;
+    b.y1 := shape[0].y;
+    b.x2 := shape[0].x;
+    b.y2 := shape[0].y;
+
+    for i := 0 to h do
+    begin
+      q := shape[i];
+      if (i < h) then
+        p := shape[(i + 1)]
+      else
+        p := shape[0];
+      r := Length(o);
+      if ((q.X <> p.X) or (q.Y <> p.Y)) then
+      begin
+        l := Max(Round(Abs(q.X - p.X)), Round(Abs(q.Y - p.Y)));
+        SetLength(o, ((r + l) + 1));
+        for z := 0 to l do
+          o[(r + z)] := Point((q.X + Round((p.X - q.X) * (z / Extended(l)))), (q.Y + Round((p.Y - q.Y) * (z / Extended(l)))));
+      end else
+      begin
+        SetLength(o, (r + 1));
+        o[r] := q;
+      end;
+      if (shape[i].X < b.X1) then
+        b.X1 := shape[i].X
+      else
+        if (shape[i].X > b.X2) then
+          b.X2 := shape[i].X;
+      if (shape[i].Y < b.Y1) then
+        b.Y1 := shape[i].Y
+      else
+        if (shape[i].Y > b.Y2) then
+          b.Y2 := shape[i].Y;
+    end;
+
+    SetLength(t, ((b.X2 - b.X1) + 1), ((b.Y2 - b.Y1) + 1));
+    l := Length(o);
+    for i := 0 to (l - 1) do
+      if not t[(o[i].X - b.X1)][(o[i].Y - b.Y1)] then
+        t[(o[i].X - b.X1)][(o[i].Y - b.Y1)] := True;
+    for y := 0 to (b.Y2 - b.Y1) do
+      for x := 0 to (b.X2 - b.X1) do
+      begin
+        f := t[x][y];
+        if not f then
+        begin
+          d := Point((x + b.X1), (y + b.Y1));
+          q := shape[0];
+          for i := 0 to (h + 1) do
+          begin
+            p := shape[(i mod (h + 1))];
+            if (d.Y > Min(q.Y, p.Y)) then
+              if (d.Y <= Max(q.Y, p.Y)) then
+                if (d.X <= Max(q.X, p.X)) then
+                begin
+                  if (q.y <> p.y) then
+                    e := ((d.Y - q.Y) * (p.X - q.X) / Extended((p.Y - q.Y)) + q.X);
+                  if ((q.X = p.X) or (d.X < e)) then
+                    f := not f;
+                end;
+            q := p;
+          end;
+        end;
+        if f then
+        begin
+          l := Length(Result);
+          SetLength(Result, (l + 1));
+          Result[l] := Point((x + b.X1), (y + b.Y1));
+        end;
+      end;
+  end else
+    SetLength(Result, 0);
+end;
+
+{/\
   Fills a Ellipse generated by TPAFromEllipse or TPAFromCircle.
 /\}
 procedure FillEllipse(var a: TPointArray);
@@ -2334,74 +2907,103 @@ end;
 {/\
   Removes the given ClearPoints from arP.
 /\}
-
 function ClearTPAFromTPA(const arP, ClearPoints: TPointArray): TPointArray;
 var
-  i, j, l, l2: Integer;
-  Found: Boolean;
-begin
-  Setlength(result,0);
-  l := High(arP);
-  l2 := High(ClearPoints);
-  for i := 0 to l do
+  v, h, r, l, x, y: Integer;
+  B: array of TBoolArray;
+  bx, tmp: TBox;
+begin;
+  r := 0;
+  l := Length(arP);
+
+  if (l > 0) then
   begin
-    Found := false;
-    for j := 0 to l2 do
-      if (arP[i].x = ClearPoints[j].x) and (arP[i].y = ClearPoints[j].y) then
-      begin
-        Found := True;
-        Break;
-      end;
-    if not found then
-//    if (j = l2 + 1) then
+    SetLength(Result, l);
+    bx := GetTPABounds(arP);
+    h := High(ClearPoints);
+
+    if (h > -1) then
     begin
-      SetLength(Result, Length(Result) + 1);
-      Result[High(Result)] := arP[i];
+      tmp := GetTPABounds(clearPoints);
+      bx.X1 := Min(bx.X1, tmp.X1);
+      bx.Y1 := Min(bx.Y1, tmp.Y1);
+      bx.X2 := Max(bx.X2, tmp.X2);
+      bx.Y2 := Max(bx.Y2, tmp.Y2);
     end;
+
+    SetLength(B, ((bx.X2 - bx.X1) + 1));
+
+    for v := 0 to (bx.X2 - bx.X1) do
+    begin
+      SetLength(B[v], ((bx.Y2 - bx.Y1) + 1));
+      y := High(B[v]);
+      for x := 0 to y do
+        B[v][x] := False;
+    end;
+
+    for x := 0 to h do
+      B[(ClearPoints[x].X - bx.X1)][(ClearPoints[x].Y - bx.Y1)] := True;
+
+    for v := 0 to (l - 1) do
+      if not B[(arP[v].X - bx.X1)][(arP[v].Y - bx.Y1)] then
+      begin
+        Result[r] := arP[v];
+        Inc(r);
+      end;
+
+    SetLength(B, 0);
   end;
+
+  SetLength(Result, r);
 end;
 
 {/\
   Removes all the doubles point from a TPA.
 /\}
-{Fixed by Cynic}
-
 procedure ClearDoubleTPA(var TPA: TPointArray);
 var
-  i,j,k : integer;
-  flag  : boolean;
-  tmp     : TPointArray;
-Begin
-  i:=0;
-  SetLength(tmp,0);
-  while i < Length(TPA) do
+  v, h, r: Integer;
+  B: array of TBoolArray;
+  bx: TBox;
+begin;
+  h := high(TPA);
+  r := 0;
+
+  if (h > 0) then
   begin
-    flag:=false;
-    k:=0;
-    while (k < Length(tmp)) and (not flag) do
+    bx.x1 := TPA[0].x;
+    bx.y1 := TPA[0].Y;
+    bx.x2 := TPA[0].X;
+    bx.y2 := TPA[0].Y;
+
+    for v := 1 to h do
     begin
-      flag:=tmp[k]=TPA[i];
-      Inc(k);
+      if (TPA[v].X < bx.X1) then
+        bx.X1 := TPA[v].X
+      else
+        if (TPA[v].X > bx.X2) then
+          bx.X2 := TPA[v].X;
+      if (TPA[v].Y < bx.Y1) then
+        bx.Y1 := TPA[v].Y
+      else
+        if (TPA[v].Y > bx.Y2) then
+          bx.Y2 := TPA[v].Y;
     end;
-    if not flag then
-    begin
-      k:=Length(tmp);
-      SetLength(tmp,k+1);
-      tmp[k]:=TPA[i];
-      Inc(i);
-    end
-    else
-     begin
-      j:=i;
-      while j < length (TPA)-1 do
+    SetLength(B, ((bx.X2 - bx.X1) + 1));
+    for v := 0 to (bx.X2 - bx.X1) do
+      SetLength(B[v], ((bx.Y2 - bx.Y1) + 1));
+    for v := 0 to h do
+      if not B[(TPA[v].X - bx.X1)][(TPA[v].Y - bx.Y1)] then
       begin
-        TPA[j]:=TPA[j+1];
-        inc(j);
+        B[(TPA[v].X - bx.X1)][(TPA[v].Y - bx.Y1)] := True;
+        TPA[r] := TPA[v];
+        Inc(r);
       end;
-      SetLength(TPA,Length(TPA)-1);
-    end;
+    SetLength(TPA, r);
+    SetLength(B, 0);
   end;
 end;
+
 {/\
   Uses Box to define an area around TotalTPA.
   Every point that is not in TotalTPA, but is in Box, is added to the Result.
@@ -2652,11 +3254,29 @@ begin
     OffsetTPA(ATPA[i],Offset);
 end;
 
-function MiddleBox(b : TBox) : TPoint;
+function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
+var
+  i,x,y,id,l,cols,rows,h:Integer;
+  Area:TBox;
 begin
-  result := point((b.x2+b.x1) div 2,(b.y2+b.y1) div 2);
+  H := High(TPA);
+  if (H < 0) then Exit;
+  Area := GetTPABounds(TPA);
+  Area.X2 := (Area.X2 - Area.X1) + 1;  //Width
+  Area.Y2 := (Area.Y2 - Area.Y1) + 1;  //Height
+  Cols := Ceil(Area.X2 / BoxWidth);
+  Rows := Ceil(Area.Y2 / BoxHeight);
+  SetLength(Result, (Cols+1)*(Rows+1));
+  for i:=0 to H do
+  begin
+    X := (TPA[i].x-Area.x1) div BoxWidth;
+    Y := (TPA[i].y-Area.y1) div BoxHeight;
+    ID := (Y*Cols)+X;
+    L := Length(Result[ID]);
+    SetLength(Result[ID], L+1);
+    Result[ID][L] := TPA[i];
+  end;
 end;
-
 
 end.
 

@@ -68,14 +68,17 @@ type
     function AddFileToManagedList(Path: string; FS: TFileStream; Mode: Integer): Integer;
   end;
 
-    // We don't need one per object. :-)
+  // We don't need one per object. :-)
   function GetFiles(Path, Ext: string): TStringArray;
   function GetDirectories(Path: string): TstringArray;
+  function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
   function FindFile(var Filename: string; const Dirs: array of string): boolean;
+  procedure UnZipFile(const FilePath, TargetPath: string);
+  procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
 
 implementation
 uses
-  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client,FileUtil;
+  {$IFDEF MSWINDOWS}Windows,{$ENDIF} IniFiles,Client,FileUtil, Zipper;
 
 { GetFiles in independant of the TMFiles class }
 
@@ -96,6 +99,42 @@ begin
     until FindNext(SearchRec) <> 0;
     SysUtils.FindClose(SearchRec);
   end;
+end;
+
+function DeleteDirectoryEx(const Directory: string; const Empty: boolean): boolean;
+var
+  FileInfo: TSearchRec;
+  CurSrcDir: String;
+  CurFilename: String;
+begin
+  if (not Empty) then
+    exit(RemoveDirUTF8(Directory));
+
+  Result := False;
+  CurSrcDir := CleanAndExpandDirectory(Directory);
+
+  if (FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile,FileInfo) = 0) then
+  begin
+    repeat
+      if (FileInfo.Name <> '.') and (FileInfo.Name <> '..') and (FileInfo.Name <> '') then
+      begin
+        CurFilename := CurSrcDir + FileInfo.Name;
+
+        if (FileInfo.Attr and faDirectory)>0 then
+        begin
+          if (not DeleteDirectory(CurFilename, False)) then
+            exit();
+        end else
+        begin
+          if (not DeleteFileUTF8(CurFilename)) then
+            exit();
+        end;
+      end;
+    until (FindNextUTF8(FileInfo) <> 0);
+  end;
+
+  FindCloseUTF8(FileInfo);
+  Result := RemoveDirUTF8(Directory); // remember to delete the directory we actually wanted to
 end;
 
 function GetDirectories(Path: string): TstringArray;
@@ -127,10 +166,48 @@ begin;
   for I := 0 to H do
     if FileExistsUTF8(IncludeTrailingPathDelimiter(Dirs[I]) + Filename) then
     begin
-      Filename := IncludeTrailingPathDelimiter(Dirs[I]) + Filename;
+      Filename := ExpandFileName(IncludeTrailingPathDelimiter(Dirs[I]) + Filename);
       Result := True;
       Exit;
     end;
+end;
+
+procedure UnZipFile(const FilePath, TargetPath: string);
+var
+  UnZipper: TUnZipper;
+begin
+  if (not FileExistsUTF8(FilePath)) then
+    raise exception.createfmt('UnZipFile: FilePath "%s" Doesn''t exist', [FilePath]);
+
+  UnZipper := TUnZipper.Create;
+  try
+    UnZipper.FileName := FilePath;
+    UnZipper.OutputPath := TargetPath;
+    UnZipper.Examine;
+    UnZipper.UnZipAllFiles;
+  finally
+    UnZipper.Free;
+  end;
+end;
+
+procedure ZipFiles(const ToFolder: string; const Files: TStringArray);
+var
+  OurZipper: TZipper;
+  I: Integer;
+begin
+  if (Length(Files) = 0) then
+    raise exception.create('ZipFiles: No Files to zip; Files length = 0');
+
+  OurZipper := TZipper.Create;
+  try
+    OurZipper.FileName := ToFolder;
+    for I := 0 to High(Files) do
+      OurZipper.Entries.AddFileEntry(Files[i], ExtractFileNameOnly(Files[i]) + ExtractFileExt(Files[i]));
+
+    OurZipper.ZipAllFiles();
+  finally
+    OurZipper.Free;
+  end;
 end;
 
 constructor TMFiles.Create(Owner : TObject);
@@ -413,7 +490,6 @@ begin
     TClient(Client).Writeln(Format('ReWriteFile - Exception. Could not create file: %s',[path]));
   end;
 end;
-
 
 function TMFiles.DeleteFile(Filename: string): Boolean;
 var

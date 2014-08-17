@@ -143,7 +143,7 @@ begin
   Writeln('Plugin Version:', PluginVersion);
 
   Plugins[NumPlugins].ABI := PluginVersion;
-  Plugins[NumPlugins].handle := Plugin;
+  Plugins[NumPlugins].Handle := Plugin;
 
   if PluginVersion < 2 then
   begin

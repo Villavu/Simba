@@ -116,14 +116,15 @@ begin
   begin
     RegisterMethod(@TMufasaBitmap.ToTBitmap,'ToTBitmap');
     RegisterMethod(@TMufasaBitmap.SetSize,'SetSize');
-    RegisterMethod(@TMufasaBitmap.StretchResize,'StretcRresize');
+    RegisterMethod(@TMufasaBitmap.StretchResize,'StretchResize');
     RegisterMethod(@TMufasaBitmap.SetPersistentMemory, 'SetPersistentMemory');
-    RegisterMethod(@TMufasaBitmap.ResetPersistentMemory, 'SetPersistentMemory');
+    RegisterMethod(@TMufasaBitmap.ResetPersistentMemory, 'ResetPersistentMemory');
     RegisterMethod(@TMufasaBitmap.FastSetPixel,'FastSetPixel');
     RegisterMethod(@TMufasaBitmap.FastSetPixels,'FastSetPixels');
     RegisterMethod(@TMufasaBitmap.DrawATPA,'DrawATPA');
     RegisterMethod(@TMufasaBitmap.DrawTPA,'DrawTPA');
     RegisterMethod(@TMufasaBitmap.LineTo,'LineTo');
+    RegisterMethod(@TMufasaBitmap.FindColors,'FindColors');
     RegisterMethod(@TMufasaBitmap.DrawToCanvas, 'DrawToCanvas');
     RegisterMethod(@TMufasaBitmap.FloodFill,'FloodFill');
     RegisterMethod(@TMufasaBitmap.Rectangle,'Rectangle');
@@ -142,6 +143,7 @@ begin
     RegisterMethod(@TMufasaBitmap.Invert,'Invert');
     RegisterMethod(@TMufasaBitmap.Posterize,'Posterize');
     RegisterMethod(@TMufasaBitmap.Copy, 'Copy');
+    RegisterMethod(@TMufasaBitmap.Crop, 'Crop');
     RegisterMethod(@TMufasaBitmap.ToString,'ToString');
     RegisterMethod(@TMufasaBitmap.CreateTMask,'CreateTMask');
     RegisterPropertyHelper(@MBmp_TransColorSet_r,nil,'TransparentColorSet');

@@ -999,7 +999,8 @@ begin
   Result := tokIdentifier;
   if KeyComp('WideChar') then fExID := tokWideChar else
     if KeyComp('Stdcall') then fExID := tokStdcall else
-      if KeyComp('Const') then Result := tokConst;
+      if KeyComp('Const') then Result := tokConst else
+        if KeyComp('Native') then fExID := tokNative;
 end;
 
 {$IFDEF D8_NEWER} //JThurman 2004-03-2003
@@ -1015,6 +1016,7 @@ function TmwBasePasLex.Func73: TptTokenKind;
 begin
   Result := tokIdentifier;
   if KeyComp('Except') then Result := tokExcept;
+  if KeyComp('Union') then Result := tokUnion;
 end;
 
 function TmwBasePasLex.Func75: TptTokenKind;
@@ -1155,7 +1157,8 @@ function TmwBasePasLex.Func100: TptTokenKind;
 begin
   Result := tokIdentifier;
   if KeyComp('Automated') then fExID := tokAutomated else
-    if KeyComp('Smallint') then fExID := tokSmallint;
+    if KeyComp('Smallint') then fExID := tokSmallint else
+      if KeyComp('Constref') then Result := tokConstRef;
 end;
 
 function TmwBasePasLex.Func101: TptTokenKind;
@@ -1871,7 +1874,11 @@ end;
 procedure TmwBasePasLex.MinusProc;
 begin
   inc(Run);
-  fTokenID := tokMinus;
+  if FOrigin[Run] = '=' then begin
+      inc(Run);
+      fTokenID := tokMinusAsgn;
+  end else
+    fTokenID := tokMinus;
 end;
 
 procedure TmwBasePasLex.NullProc;
@@ -1898,21 +1905,27 @@ end;
 procedure TmwBasePasLex.PlusProc;
 begin
   inc(Run);
-  fTokenID := tokPlus;
+  if FOrigin[Run] = '=' then begin
+      inc(Run);
+      fTokenID := tokPlusAsgn;
+  end else
+    fTokenID := tokPlus;
 end;
 
 procedure TmwBasePasLex.PointerSymbolProc;
+var
+  Temp: LongInt;
 begin
-  inc(Run);
+  Inc(Run);
   fTokenID := tokPointerSymbol;
   
   //This is a wierd Pascal construct that rarely appears, but needs to be 
   //supported. ^M is a valid char reference (#13, in this case)
-  if FOrigin[Run] in ['a'..'z','A'..'Z'] then
+  {if (FOrigin[Run] in ['a'..'z','A'..'Z']) then
   begin
-    inc(Run);
+    Inc(Run);     //Not needed and conflicts with ^T2DType defines - Dgby
     fTokenID := tokAsciiChar;
-  end;
+  end;}
 end;
 
 procedure TmwBasePasLex.PointProc;
@@ -2133,6 +2146,11 @@ begin
           inc(Run);
         end;
       end;
+    '=': 
+      begin
+        inc(Run,2);
+        fTokenID := tokDivAsgn;
+      end;
   else
     begin
       inc(Run);
@@ -2164,7 +2182,25 @@ end;
 procedure TmwBasePasLex.StarProc;
 begin
   inc(Run);
-  fTokenID := tokStar;
+  case FOrigin[Run]  of
+    '=':
+      begin
+        inc(Run);
+        fTokenID := tokMulAsgn;
+      end;
+    '*':
+      begin
+        inc(Run);
+        if FOrigin[Run] = '=' then
+        begin
+          inc(Run);
+          fTokenID := tokPowAsgn;
+        end else
+          fTokenID := tokStarStar;
+      end;
+    else
+      fTokenID := tokStar;
+  end;
 end;
 
 procedure TmwBasePasLex.StringProc;
@@ -2610,7 +2646,7 @@ end;
 
 function TmwBasePasLex.GetIsMulOperator: Boolean;
 begin
-  Result := fTokenID in [tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar];
+  Result := fTokenID in [tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar];
 end;
 
 function TmwBasePasLex.GetIsRelativeOperator: Boolean;

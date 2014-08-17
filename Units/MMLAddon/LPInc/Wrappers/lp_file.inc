@@ -112,3 +112,18 @@ procedure Lape_ExtractFileExt(const Params: PParamArray; const Result: Pointer);
 begin
   Pstring(Result)^ := ps_ExtractFileExt(Pstring(Params^[0])^);
 end;
+
+procedure Lape_DeleteDirectory(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_DeleteDirectory(PString(Params^[0])^, PBoolean(Params^[1])^);
+end;
+
+procedure Lape_UnZipFile(const Params: PParamArray); lape_extdecl
+begin
+  ps_UnZipFile(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+procedure Lape_ZipFiles(const Params: PParamArray); lape_extdecl
+begin
+  ps_ZipFiles(PString(Params^[0])^, PStringArray(Params^[1])^);
+end;

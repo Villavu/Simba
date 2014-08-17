@@ -108,20 +108,24 @@ function TExtensionManager.LoadPSExtension(Filename: string; enabled: boolean): 
 var
   Ext : TExtension;
 begin
-  if GetExtensionIndex(filename) <> -1 then
-    exit(true);
+  if (GetExtensionIndex(filename) <> -1) then
+    Exit(true);
+
   Result := False;
   try
-    Ext := TSimbaPSExtension.Create(filename,True);
-//    result := TSimbaPSExtension(ext).Working;
+    Ext := TSimbaPSExtension.Create(Filename, True);
     Extensions.Add(ext);
+
     ext.Settings := TMMLSettingsSandbox.Create(SimbaSettings.MMLSettings);
-    ext.Settings.Prefix := format('Extensions/Extension%d/Settings/',[Extensions.Count - 1]);
-    if enabled then
-      ext.Enabled := true;
-    ext.OnChange:= FOnChange;
-    if assigned(FOnChange) then
+    ext.Settings.Prefix := format('Extensions/Extension%d/Settings/', [Extensions.Count - 1]);
+
+    if (Enabled) or ((Lowercase(ExtractFileName(Filename)) = 'extension.sex') and (not ext.Settings.IsDirectory(''))) then
+      ext.Enabled := True;
+
+    ext.OnChange := FOnChange;
+    if Assigned(FOnChange) then
       FOnChange(Self);
+
     Result := True;
   except
     on e : exception do

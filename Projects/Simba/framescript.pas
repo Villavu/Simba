@@ -283,8 +283,9 @@ end;
 procedure TScriptFrame.SynEditDragDrop(Sender, Source: TObject; X, Y: Integer);
 begin
   if Source is TFunctionListFrame then
-    if TFunctionListFrame(Source).DraggingNode.Data <> nil then
-      SynEdit.InsertTextAtCaret( GetMethodName(PMethodInfo(TFunctionListFrame(Source).DraggingNode.Data)^.MethodStr,true));
+    with TFunctionListFrame(Source).DraggingNode do
+      if (Level > 0) and (Data <> nil) then
+        SynEdit.InsertTextAtCaret(GetMethodName(PMethodInfo(Data)^.MethodStr, True));
 end;
 
 procedure TScriptFrame.SynEditDragOver(Sender, Source: TObject; X, Y: Integer;
@@ -343,22 +344,18 @@ begin
   end;
 end;
 
-procedure TScriptFrame.SynEditProcessUserCommand(Sender: TObject;
-  var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
-{var
-  LineText,SearchText : string;
-  Caret : TPoint;
-  i,endI : integer;}
+procedure TScriptFrame.SynEditProcessUserCommand(Sender: TObject; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: pointer);
 var
   mp: TCodeInsight;
   ms: TMemoryStream;
-  ItemList, InsertList: TStringList;
-  sp, ep,bcc,cc,bck,posi,bracketpos: Integer;
+  ItemList, InsertList, NameList: TStringList;
+  sp, ep,bcc,cc,bck,posi,bracketpos,i,DotPos, BPos: Integer;
   p: TPoint;
-  s, Filter: string;
+  s, ss, Filter, sname, ProcName, TypeName: string;
   Attri: TSynHighlighterAttributes;
-  d: TDeclaration;
-  dd: TDeclaration;
+  d, dd: TDeclaration;
+  FoundItems: TDeclarationArray;
+  HasParams: Boolean;
 begin
   if (Command = ecCodeCompletion) and ((not SynEdit.GetHighlighterAttriAtRowCol(Point(SynEdit.CaretX - 1, SynEdit.CaretY), s, Attri)) or
                                       ((Attri.Name <> SYNS_AttrComment) and (Attri.name <> SYNS_AttrString) and (Attri.name <> SYNS_AttrDirective))) then
@@ -383,12 +380,14 @@ begin
         s := ''
       else
         s := SynEdit.Lines[SynEdit.CaretY - 1];
+
       if ep > length(s) then //We are outside the real text, go back to the last char
          mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX) + 1)
       else
          mp.Run(ms, nil, Synedit.SelStart + (ep - Synedit.CaretX));
 
       s := mp.GetExpressionAtPos;
+
       if (s <> '') then
       begin
         ep := LastDelimiter('.', s);
@@ -421,6 +420,7 @@ begin
   begin
     if SimbaForm.ParamHint.Visible = true then
       SimbaForm.ParamHint.hide;
+
     mp := TCodeInsight.Create;
     mp.OnMessage := @SimbaForm.OnCCMessage;
     mp.OnFindInclude := @SimbaForm.OnCCFindInclude;
@@ -428,12 +428,14 @@ begin
 
     ms := TMemoryStream.Create;
     synedit.Lines.SaveToStream(ms);
+
     try
       Synedit.GetWordBoundsAtRowCol(Synedit.CaretXY, sp, ep);
       if (SynEdit.CaretY <= 0) or (SynEdit.CaretY > SynEdit.Lines.Count) then
         s := ''
       else
         s := SynEdit.Lines[SynEdit.CaretY - 1];
+
       if ep > length(s) then //We are outside the real text, go back to the last char
         mp.Run(ms, nil, Synedit.SelStart + (Length(s) - Synedit.CaretX), True)
       else
@@ -447,10 +449,71 @@ begin
         bracketpos := posi + length(s);
 
       cc := LastDelimiter('(', s);
-      if cc > 0 then
+      if (cc > 0) then
         delete(s, cc, length(s) - cc + 1);
 
+      if (s = '') then
+        exit();
+
       d := mp.FindVarBase(s);
+      DotPos := Pos('.', s);
+      HasParams := False;
+
+      if (d = nil) and (DotPos > 0) then // if it's a type proc.
+      begin
+        sName := Lowercase(Copy(s, DotPos + 1, (length(s) - DotPos) + 1));
+
+        if (sName = '') then
+          Exit();
+
+        s := Copy(s, 0, DotPos - 1);
+        NameList := TStringList.Create();
+        FoundItems := mp.GetTypeProcs(NameList, s); // Return items found in the type
+
+        // Loop though looking for a match from what is currently typed.
+        for i := 0 to (NameList.Count - 1) do
+        begin
+          BPos := Pos('(', NameList[i]);
+
+          if (BPos > 0) then // Has params
+            if (SameText(Copy(NameList[i], 0, BPos - 1), sName)) then
+            begin
+              SimbaForm.ParamHint.Show(PosToCaretXY(synedit, posi), PosToCaretXY(synedit, bracketpos), TciProcedureDeclaration(FoundItems[i]), synedit, mp);
+              Break; // We out
+            end;
+        end;
+
+        NameList.Free();
+        SetLength(FoundItems, 0);
+        Exit(); // Not needed anymore. :)
+      end;
+
+      // Check FindVarBase didn't find a Proc attached to a Type.
+      // Maybe Add FindVarBase with a option to not find type procs?
+      if (d <> nil) then
+      begin
+        HasParams := False;
+        ProcName := d.ShortText;
+
+        if (d.Owner <> nil) then
+          if (d.Owner.Items.Count > 0) then
+          begin
+            TypeName := d.Owner.Items[0].ShortText;
+
+            if (TypeName <> ProcName) then
+            begin
+              if (mp.FindProcedure(ProcName, d, HasParams)) then
+                if (HasParams) then
+                begin
+                  SimbaForm.ParamHint.Show(PosToCaretXY(synedit, posi), PosToCaretXY(synedit,bracketpos), TciProcedureDeclaration(d), synedit, mp)
+                end else
+                  mDebugLn('<CodeHints: No parameters expected>');
+
+              Exit(); // We're done.
+            end;
+          end;
+      end;
+
       dd := nil;
 
       //Find the declaration -> For example if one uses var x : TNotifyEvent..
@@ -459,32 +522,36 @@ begin
       begin
         dd := d;
         d := d.Owner.Items.GetFirstItemOfClass(TciTypeKind);
+
         if (d <> nil) then
         begin
           d := TciTypeKind(d).GetRealType;
           if (d <> nil) and (d is TciReturnType) then
             d := d.Owner;
         end;
+
         if (d <> nil) and (d.Owner <> nil) and (not ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration))) then
           d := mp.FindVarBase(d.CleanText)
         else
           Break;
       end;
+
       //Yeah, we should have found the procedureDeclaration now!
       if (d <> nil) and (d <> dd) and (d.Owner <> nil) and ((d is TciProcedureDeclaration) or (d.Owner is TciProcedureDeclaration)) then
       begin
         if (not (d is TciProcedureDeclaration)) and (d.Owner is TciProcedureDeclaration) then
           d := d.Owner;
+
         if (TciProcedureDeclaration(d).Params <> '') then
           SimbaForm.ParamHint.Show(PosToCaretXY(synedit,posi), PosToCaretXY(synedit,bracketpos),
-                                   TciProcedureDeclaration(d), synedit,mp)
+                                   TciProcedureDeclaration(d), synedit, mp)
         else
-          mDebugLn('<no parameters expected>');
+          mDebugLn('<CodeHints: no parameters expected>');
       end;
     except
       on e : exception do
-        mDebugLn(e.message);
-      //Do not free the MP, we need to use this.
+        mDebugLn('CodeHints exception: ' + e.message);
+      // Do not free the MP, we need to use this (Paramhint.Show uses it!!)
     end;
   end;
 end;
@@ -563,6 +630,8 @@ begin
 end;
 
 procedure TScriptFrame.HandleErrorData;
+var
+  RetStr: string;
 begin
   if ErrorData.Module <> '' then
   begin;
@@ -578,17 +647,29 @@ begin
       exit;
     end;
   end;
+
   MakeActiveScriptFrame;
-  ScriptErrorLine:= ErrorData.Row;
+  if (ErrorData.Row > 0) then
+    ScriptErrorLine := ErrorData.Row;
+
   SynEdit.Invalidate;
-  if ErrorData.Col = -1 then
-    SynEdit.SelStart:= ErrorData.Position
-  else
-    SynEdit.LogicalCaretXY := Point(ErrorData.Col,ErrorData.Row);
-  if pos('error',lowercase(ErrorData.Error)) > 0 then
-    formWriteln(Format('%s at line %d',[ErrorData.Error,ErrorData.Row]))
-  else
-    formWriteln(Format('Error: %s at line %d',[ErrorData.Error,ErrorData.Row]));
+
+  if (ErrorData.Row > 0) then
+    if ErrorData.Col = -1 then
+      SynEdit.SelStart := ErrorData.Position
+    else
+      SynEdit.LogicalCaretXY := Point(ErrorData.Col, ErrorData.Row);
+
+  RetStr := '';
+  if (Pos('error', Lowercase(ErrorData.Error)) = 0) then
+    RetStr += 'Error: ';
+
+  RetStr += ErrorData.Error;
+
+  if (ErrorData.Row > 0) then
+    RetStr += ' at line ' + IntToStr(ErrorData.Row);
+
+  formWriteln(RetStr);
 end;
 
 procedure TScriptFrame.MakeActiveScriptFrame;
@@ -670,10 +751,13 @@ begin
   inherited Create(TheOwner);
   SyncEdit := TSynPluginSyncroEdit.Create(SynEdit);
   SimbaForm.Mufasa_Image_List.GetBitmap(28,SyncEdit.GutterGlyph);
+
+  SynEdit.Font.Assign(SimbaSettings.SourceEditor.Font.Value);
+
   OwnerSheet := TTabSheet(TheOwner);
   OwnerPage := TPageControl(OwnerSheet.Owner);
 
-  SynEdit.Lines.text := SimbaForm.DefaultScript;
+  SynEdit.Lines.Text := SimbaForm.DefaultScript;
   StartText:= SynEdit.Lines.text;
   ScriptDefault:= StartText;
   ScriptName:= 'Untitled';

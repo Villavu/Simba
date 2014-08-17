@@ -77,7 +77,7 @@ type
     tokComma,
     tokComp,
     tokCompDirect,
-    tokConst,
+    tokConst, tokConstRef,
     tokConstructor,
 	tokContains,
     tokContinue, //JThurman 2004-11-8 (flow control routines)
@@ -200,6 +200,7 @@ type
     tokReal,
     tokReal48,
     tokRecord,
+    tokUnion,
   {$IFDEF D12_NEWER}
     tokReference, //JThurman 2008-25-07 (anonymous methods)
   {$ENDIF}
@@ -232,6 +233,7 @@ type
     tokSquareClose,
     tokSquareOpen,
     tokStar,
+    tokStarStar,
   {$IFDEF D8_NEWER} //JThurman 2004-03-20
   tokStatic,
   {$ENDIF}
@@ -272,6 +274,14 @@ type
     tokWriteonly,
     tokXor,
 
+    tokNative,
+
+    tokDivAsgn,
+    tokMulAsgn,
+    tokPlusAsgn,
+    tokMinusAsgn,
+    tokPowAsgn,
+    
     tok_DONE);
 
 TmwPasLexStatus = record

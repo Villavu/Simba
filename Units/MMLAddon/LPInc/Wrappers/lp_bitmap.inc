@@ -287,3 +287,63 @@ procedure Lape_BitmapExists(const Params : PParamArray; const Result : Pointer);
 begin
   PBoolean(Result)^ := ps_BitmapExists(PLongInt(Params^[0])^);
 end;
+
+procedure Lape_FindColorsBitmap(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := ps_FindColorsBitmap(PInteger(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_CropBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_CropBitmap(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure Lape_GetColorsBitmap(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PIntegerArray(Result)^ := ps_GetColorsBitmap(PInteger(Params^[0])^);
+end;
+
+procedure Lape_BitmapToMatrix(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DIntegerArray(Result)^ := ps_BitmapToMatrix(PInteger(Params^[0])^);
+end;
+
+procedure Lape_DrawMatrixBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_DrawMatrixBitmap(PInteger(Params^[0])^, P2DIntegerArray(Params^[1])^);
+end;
+
+procedure Lape_ResizeBitmapEx(const Params: PParamArray); lape_extdecl
+begin
+  ps_ResizeBitmapEx(PInteger(Params^[0])^, PBmpResizeMethod(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure Lape_ThresholdAdaptiveBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_ThresholdAdaptiveBitmap(PInteger(Params^[0])^, PByte(Params^[1])^, PByte(Params^[2])^, PBoolean(Params^[3])^, PBmpThreshMethod(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure Lape_BlurBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_BlurBitmap(PInteger(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+procedure Lape_RotateBitmapEx(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := ps_RotateBitmapEx(PInteger(Params^[0])^, PSingle(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+end;
+
+procedure Lape_RectangleBitmapEx(const Params: PParamArray); lape_extdecl
+begin
+  ps_RectangleBitmapEx(PInteger(Params^[0])^, PBox(Params^[1])^, PInteger(Params^[2])^, PExtended(Params^[3])^);
+end;
+
+procedure Lape_DrawTextBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_DrawTextBitmap(PInteger(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PPoint(Params^[3])^, PBoolean(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure Lape_DrawSystemTextBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_DrawSystemTextBitmap(PInteger(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PInteger(Params^[3])^, PPoint(Params^[4])^, PBoolean(Params^[5])^, PInteger(Params^[6])^);
+end;

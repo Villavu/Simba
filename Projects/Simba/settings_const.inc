@@ -17,6 +17,8 @@ ssConsole = 'Console/';
 ssNews = 'News/';
 ssPlugins = 'Plugins/';
 ssNotes = 'Notes/';
+ssCodeInsight = 'CodeInsight/';
+ssFunctionList = 'FunctionList/';
 
 ssCheckUpdate = ssSettings + ssUpdater + 'CheckForUpdates';
 ssCheckUpdateMinutes = ssSettings + ssUpdater + 'CheckEveryXMinutes';
@@ -45,11 +47,13 @@ ssColourPickerAddToHistoryOnPick = ssSettings + ssColourPicker + 'AddToHistoryOn
 
 ssScriptsPath = ssSettings + ssScripts + 'Path';
 
-ssCodeHintsShowAutomatically = ssSettings + 'CodeHints/ShowAutomatically';
-ssCodeCompletionShowAutomatically = ssSettings + 'CodeCompletion/ShowAutomatically';
+ssCodeHintsShowAutomatically = ssSettings + ssCodeInsight + 'CodeHints/ShowAutomatically';
+ssCodeCompletionShowAutomatically = ssSettings + ssCodeInsight + 'CodeCompletion/ShowAutomatically';
 
+ssShowBalloonHints = ssSettings + 'ShowBalloonHints';
 
 ssSourceEditorLazColors = ssSettings + ssSourceEditor + 'LazColors';
+ssSourceEditorFont = ssSettings + ssSourceEditor + 'Font/';
 ssSourceEditorDefScriptPath = ssSettings + ssSourceEditor + 'DefScriptPath';
 
 ssNewsLink = ssSettings + ssNews + 'URL';
@@ -69,7 +73,8 @@ ssMainFormState = ssLastConfig + ssMainForm + 'State';
 ssMainFormNormalSize = ssSettings + ssMainForm + 'NormalSize';
 ssFunctionListShown = ssLastConfig + ssMainForm + 'FunctionListShown';
 
-ssFunctionListShowOnStart = ssSettings + 'FunctionList/ShowOnStart';
+ssCodeInsightShowHidden = ssSettings + ssCodeInsight + 'ShowHidden';
+ssFunctionListShowOnStart = ssSettings + ssCodeInsight + ssFunctionList + 'ShowOnStart';
 
 ssMaxRecentFiles = ssSettings + 'General/MaxRecentFiles';
 ssRecentFiles = ssLastConfig + ssMainForm + 'RecentFiles';

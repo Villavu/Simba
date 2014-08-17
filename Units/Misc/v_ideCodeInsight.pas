@@ -64,7 +64,10 @@ type
     procedure Assign(From: TObject); override;
     procedure Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1; ManageStream: Boolean = False); reintroduce;
 
-    procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings);
+    procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
+    procedure GetProcedures(Headers, Names: TStrings; FindTypeProcs: Boolean = False);
+    function GetTypeProcs(Names: TStrings; const Prefix: string): TDeclarationArray;
+    function FindProcedure(ProcNameToFind: string; out Decl: TDeclaration; out HasParams: Boolean): boolean;
     procedure FillProposal;
     procedure FillSynCompletionProposal(ItemList, InsertList: TStrings; Prefix: string = '');
 
@@ -95,7 +98,7 @@ var
 implementation
 
 uses
-  v_Constants, v_MiscFunctions;
+  v_Constants, v_MiscFunctions, newsimbasettings, mufasabase;
 
 procedure ClearCoreBuffer;
 var
@@ -138,23 +141,17 @@ var
 begin
   lc := 1;//FileAge(FileName);
   Defines := ci.Lexer.SaveDefines;
-  l := Length(IncludeBuffer);
+  FileName := Trim(FileName);
 
-  for i := l - 1 downto 0 do
+  for i := Length(IncludeBuffer) - 1 downto 0 do
   begin
     if (IncludeBuffer[i].CodeInsight <> nil) and (IncludeBuffer[i].CodeInsight.FileName = FileName) then
     begin
       DefineMatch := (IncludeBuffer[i].DefinesIn.Defines = Defines.Defines) and (IncludeBuffer[i].DefinesIn.Stack = Defines.Stack);
 
-      if (ci.FileName = IncludeBuffer[i].Script) and (not DefineMatch) then
+      if (ci.FileName = IncludeBuffer[i].Script) then
       begin
-        DeleteIncludeBufferIndex(i);
-        Dec(l);
-        Break;
-      end
-      else if DefineMatch then
-      begin
-        //if (IncludeBuffer[i].LastChanged = lc) then
+        if (DefineMatch) and (IncludeBuffer[i].LastChanged = lc) then
         begin
           ci.Lexer.LoadDefines(IncludeBuffer[i].DefinesOut);
           Result := IncludeBuffer[i];
@@ -162,11 +159,11 @@ begin
         end;
 
         DeleteIncludeBufferIndex(i);
-        Dec(l);
         Break;
       end;
     end;
   end;
+
   with NewBuf do
   begin
     Script := ci.FileName;
@@ -177,32 +174,39 @@ begin
     with CodeInsight do
     begin
       Assign(ci);
-      //Lexer.CloneDefinesFrom(ci.Lexer);
 
       if (ci.Lexer.Defines.IndexOf('IS_INCLUDE') < 0) then
         i := ci.Lexer.Defines.Add('IS_INCLUDE')
       else
         i := -1;
+
       Run;
+
       if (i > -1) then
       begin
         i := ci.Lexer.Defines.IndexOf('IS_INCLUDE');
+
         if (i > -1) then
           ci.Lexer.Defines.Delete(i);
       end;
-      //DefinesOut := Lexer.SaveDefines;  Weird bug, so moved out of the with statement
+
       ci.Lexer.CloneDefinesFrom(Lexer);
     end;
   end;
+
   InitCriticalSection(cs);
   EnterCriticalsection(cs);
+
   try
+    l := Length(IncludeBuffer);
     SetLength(IncludeBuffer, l + 1);
     IncludeBuffer[l] := NewBuf;
   finally
     LeaveCriticalsection(cs);
   end;
+
   DoneCriticalsection(cs);
+
   IncludeBuffer[l].DefinesOut := IncludeBuffer[l].CodeInsight.Lexer.SaveDefines;
   Result := IncludeBuffer[l];
 end;
@@ -214,14 +218,14 @@ begin
   s := FileName;
   if Assigned(OnFindInclude) and OnFindInclude(Self, s) then
   begin
-    FileName := s;
+    FileName := ExpandFileName(s);
     Exit(True);
   end;
 
   s := ExtractFilePath(fFileName);
   if (s <> '') and FileExists(s + FileName) then
   begin
-    FileName := s + FileName;
+    FileName := ExpandFileName(s + FileName);
     Exit(True);
   end;
 
@@ -239,11 +243,11 @@ end;
 
 procedure TCodeInsight.ParseInclude(FileName: string);
 var
-  l: Integer;
+  L: LongInt;
 begin
-  l := Length(fIncludes);
-  SetLength(fIncludes, l + 1);
-  fIncludes[l] := GetIncludeBuffer(FileName, Self).CodeInsight;
+  L := Length(fIncludes);
+  SetLength(fIncludes, L + 1);
+  fIncludes[L] := GetIncludeBuffer(FileName, Self).CodeInsight;
 end;
 
 function TCodeInsight.LoadLibrary(var LibName: string): Boolean;
@@ -283,11 +287,12 @@ begin
       CodeInsight := ci;
       CodeInsight.FileName := LibPrefix+LibName;
     end;
+
     InitCriticalSection(cs);
     EnterCriticalsection(cs);
     try
       SetLength(IncludeBuffer, Length(IncludeBuffer) + 1);
-      IncludeBuffer[high(IncludeBuffer)] := tmp;
+      IncludeBuffer[High(IncludeBuffer)] := tmp;
     finally
       LeaveCriticalsection(cs);
     end;
@@ -502,6 +507,7 @@ begin
       begin
         b := a[ii].Items.GetItemsOfClass(c[2]);
         for iii := Low(b) to High(b) do
+        begin
           if (PrepareString(b[iii].CleanText) = s) then
           begin
             Result := True;
@@ -512,6 +518,7 @@ begin
             Exit;
           end;
         end;
+      end;
     end;
 
     if (Return = vbName) then
@@ -610,6 +617,7 @@ begin
   begin
     b := a[i].Items.GetItemsOfClass(TciTypeName);
     for ii := Low(b) to High(b) do
+    begin
       if (PrepareString(b[ii].CleanText) = s) then
       begin
         Result := True;
@@ -620,6 +628,7 @@ begin
             Decl := a[i].Items.GetFirstItemOfClass(TciClassType);
           if (Decl is TciTypeKind) then
             Decl := TciTypeKind(Decl).GetRealType(ArrayCount);
+
           if (Decl is TciStruct) then
             Result := True
           else
@@ -627,9 +636,11 @@ begin
         end
         else
           Decl := b[ii];
+
         if (Decl <> nil) then
           Exit;
       end;
+    end;
   end;
 end;
 
@@ -781,77 +792,117 @@ function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return:
 
   function DoGetVarType(s: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
 
-    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean = True): Boolean;
+    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean; var Checked: TCodeInsightArray): Boolean;
     var
       i: Integer;
     begin
-      Result := False;
-      if Item.GetVarType(s, Decl, Return) then
-        Exit(True);
+      Result := Item.GetVarType(s, Decl, Return);
+      if Result then
+        Exit();
+
+      for i := High(Checked) downto 0 do
+        if (Checked[i] = Item) then
+          Exit;
+
+      SetLength(Checked, Length(Checked) + 1);
+      Checked[High(Checked)] := Item;
 
       for i := High(Item.Includes) downto Low(Item.Includes) do
-        if CheckIt(s, Item.Includes[i], Decl, Return) then
-          Exit(True);
+      begin
+        Result := CheckIt(s, Item.Includes[i], Decl, Return, False, Checked);
+        if Result then
+          Exit();
+      end;
 
       if (not CheckCore) then
         Exit;
-      for i := High(CoreBuffer) downto Low(CoreBuffer) do
-        if CheckIt(s, CoreBuffer[i], Decl, Return, False) then
-          Exit(True);
-    end;
 
+      for i := High(CoreBuffer) downto Low(CoreBuffer) do
+      begin
+        Result := CheckIt(s, CoreBuffer[i], Decl, Return, False, Checked);
+        if Result then
+          Exit();
+      end;
+    end;
+  var
+    CheckedArr: TCodeInsightArray;
   begin
-    Result := CheckIt(s, Self, Decl, Return);
+    Result := CheckIt(s, Self, Decl, Return, True, CheckedArr);
   end;
 
   function DoGetFuncType(FuncName, FuncClass: string; out Decl: TDeclaration; Return: TVarBase): Boolean;
 
-    function CheckIt(FuncName, FuncClass: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean = True): Boolean;
+    function CheckIt(FuncName, FuncClass: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; const CheckCore: Boolean; var Checked: TCodeInsightArray): Boolean;
     var
       i: Integer;
     begin
       Result := False;
+
+      for i := High(Checked) downto 0 do
+        if (Checked[i] = Item) then
+          Exit;
+
+      SetLength(Checked, Length(Checked) + 1);
+      Checked[High(Checked)] := Item;
+
       if Item.GetFuncType(FuncName, FuncClass, Decl, Return) then
         Exit(True);
 
       for i := High(Item.Includes) downto Low(Item.Includes) do
-        if CheckIt(FuncName, FuncClass, Item.Includes[i], Decl, Return) then
+        if CheckIt(FuncName, FuncClass, Item.Includes[i], Decl, Return, False, Checked) then
           Exit(True);
 
       if (not CheckCore) then
         Exit;
+
       for i := High(CoreBuffer) downto Low(CoreBuffer) do
-        if CheckIt(FuncName, FuncClass, CoreBuffer[i], Decl, Return, False) then
+        if CheckIt(FuncName, FuncClass, CoreBuffer[i], Decl, Return, False, Checked) then
           Exit(True);
     end;
-
+  var
+    CheckedArr: TCodeInsightArray;
   begin
-    Result := CheckIt(FuncName, FuncClass, Self, Decl, Return);
+    Result := CheckIt(FuncName, FuncClass, Self, Decl, Return, True, CheckedArr);
   end;
 
-  function DoFindStruct(s: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
+    function DoFindStruct(s: string; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer): Boolean;
 
-    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer; const CheckCore: Boolean = True): Boolean;
+    function CheckIt(s: string; Item: TCodeInsight; out Decl: TDeclaration; Return: TVarBase; var ArrayCount: Integer; const CheckCore: Boolean; var Checked: TCodeInsightArray): Boolean;
     var
       i: Integer;
     begin
       Result := False;
-      if Item.FindStruct(s, Decl, Return, ArrayCount) then
-        Exit(True);
 
-      for i := High(Item.Includes) downto Low(Item.Includes) do
-        if CheckIt(s, Item.Includes[i], Decl, Return, ArrayCount) then
+      for i := High(Checked) downto 0 do
+        if (Checked[i] = Item) then
+          Exit;
+
+      SetLength(Checked, Length(Checked) + 1);
+      Checked[High(Checked)] := Item;
+      try
+        if Item.FindStruct(s, Decl, Return, ArrayCount) then
           Exit(True);
 
-      if (not CheckCore) then
-        Exit;
-      for i := High(CoreBuffer) downto Low(CoreBuffer) do
-        if CheckIt(s, CoreBuffer[i], Decl, Return, ArrayCount, False) then
-          Exit(True);
+       for i := High(Item.Includes) downto Low(Item.Includes) do
+          if CheckIt(s, Item.Includes[i], Decl, Return, ArrayCount, False, Checked) then
+            Exit(True);
+
+        if (not CheckCore) then
+          Exit;
+
+        for i := High(CoreBuffer) downto Low(CoreBuffer) do
+          if CheckIt(s, CoreBuffer[i], Decl, Return, ArrayCount, False, Checked) then
+            Exit(True);
+      except
+        on e : exception do
+          WriteLn('Codeinsight[CheckIt]: ' + e.message);
+      end;
     end;
-
+  var
+    CheckedArr: TCodeInsightArray;
   begin
-    Result := CheckIt(s, Self, Decl, Return, ArrayCount);
+    SetLength(CheckedArr, 0);
+    Result := CheckIt(s, Self, Decl, Return, ArrayCount, True, CheckedArr);
   end;
 
 var
@@ -877,6 +928,7 @@ begin
   begin
     if (fDeclarationAtPos is TciProcedureName) and (fDeclarationAtPos.Owner <> nil) then
     begin
+
       if fDeclarationAtPos.HasOwnerClass(TciClassType, d, True) and (d.Owner <> nil) then
       begin
         d := d.Owner.Items.GetFirstItemOfClass(TciTypeName);
@@ -1003,6 +1055,8 @@ begin
   Reset;
 
   Lexer.Defines.AddStrings(CoreDefines);
+  if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
+    Lexer.Defines.Add('CODEINSIGHT');
 
   fOwnStream := (fFileName <> '');
   if fOwnStream then
@@ -1049,6 +1103,9 @@ begin
     Lexer.ClearDefines;
     Lexer.Defines.AddStrings(CoreDefines);
     Lexer.Defines.AddStrings(BaseDefines);
+
+    if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
+      Lexer.Defines.Add('CODEINSIGHT');
   end;
   SetLength(fIncludes, 0);
 
@@ -1072,7 +1129,7 @@ begin
     Position := MaxPos;
 end;
 
-procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings);
+procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
 
   function FormatFirstColumn(s: string): string; inline;
   begin
@@ -1096,7 +1153,7 @@ procedure TCodeInsight.Proposal_AddDeclaration(Item: TDeclaration; ItemList, Ins
 
   function GetEnumTypeName(Item: TDeclaration): string;
   begin
-    Result := 'Enumeration';
+    Result := '';
     if (Item.Items.Count > 0) then
     begin
       Result := Result + '(' + Item.Items[0].ShortText;
@@ -1230,11 +1287,13 @@ var
   b: array[1..2] of TDeclaration;
   c: array[0..2] of TDeclarationClass;
 begin
-  if item = nil then
-    exit;
+  if (Item = nil) then
+    Exit;
+
   if (Item is TciProcedureDeclaration) then
   begin
-    AddFuncDeclaration(TciProcedureDeclaration(Item), ItemList, InsertList);
+    if (ShowTypeMethods) or (Item.Items.GetFirstItemOfClass(TciProcedureClassName) = nil) then
+      AddFuncDeclaration(TciProcedureDeclaration(Item), ItemList, InsertList);
     Exit;
   end;
 
@@ -1350,6 +1409,189 @@ begin
   end;
 end;
 
+(*
+ * Returns Headers and Names of all functions/procedures found in self.
+ * eg: Headers = ['procedure foo;', 'function HiDgby: boolean;']
+ *     Names = [foo, HiDgby]
+*)
+procedure TCodeInsight.GetProcedures(Headers, Names: TStrings; FindTypeProcs: Boolean = False);
+var
+  ProcItem: TCIProcedureDeclaration;
+  Decl, d: TDeclaration;
+  i, c: integer;
+  s: string;
+begin
+  if (Headers = nil) or (Names = nil) then
+    Exit();
+
+  c := (Self.Items.Count - 1);
+  if (c < 1) then
+    Exit();
+
+  Headers.BeginUpdate(); // No drawing here, so who knows if this does anything.
+  Names.BeginUpdate();
+
+  for i := 0 to c do
+  begin
+    if (Items[i] = nil) then
+      Continue;
+
+    if (Items[i] is TCIProcedureDeclaration) then
+      ProcItem := TCIProcedureDeclaration(Items[i])
+    else
+      Continue;
+
+    Decl := ProcItem.Items.GetFirstItemOfClass(TciProcedureName);
+
+    if (Decl = nil) or (ProcItem.Items.Count = 0) then // nil stuff
+      Continue;
+
+    if (not FindTypeProcs) then
+      if (Boolean(ProcItem.Items[0].ClassType = TciProcedureClassName)) then // Is a type linked to the proc?
+        Continue;
+
+    s := '';
+    s := ProcItem.ProcType + ' ' + Decl.ShortText; //procedure foo
+    if (ProcItem.Params <> '') then // add any params
+      s += '(' + ProcItem.Params + ')';
+
+    d := ProcItem.Items.GetFirstItemOfClass(TciReturnType);
+    if (d <> nil) then // if returns something, lets add it
+      s += ': ' + d.ShortText;
+
+    s += ';'; // dont forget the ";"!
+
+    Headers.Add(s);
+    Names.Add(Decl.ShortText);
+  end;
+
+  Headers.EndUpdate();
+  Names.EndUpdate();
+end;
+
+(*
+ * Returns all functions / procedures names and item of the type found by Prefix.
+ * The following will return all functions/procedures of the TMufasaBitmap.
+ * var bmp: TMufasaBitmap
+ * FoundItems := ci.GetTypeProcs(NamesList, 'bmp');
+*)
+function TCodeInsight.GetTypeProcs(Names: TStrings; const Prefix: string): TDeclarationArray;
+
+  // Returns Info of the proc. ie: Foo(var: string);
+  function GetInfo(Item: TDeclaration): string;
+  var
+    ProcItem: TCIProcedureDeclaration;
+  begin
+    if (Item is TCIProcedureDeclaration) then
+    begin
+      ProcItem := TCIProcedureDeclaration(Item);
+      Result := ProcItem.Name.CleanText;
+
+      if (ProcItem.Params <> '') then  // has params
+        Result += '(' + ProcItem.Params + ')';
+    end;
+  end;
+
+  procedure Scan(_include: TCodeInsight; _dType: String; Names: TStrings; var fItems: TDeclarationArray);
+  var
+    i, ii, Len: Integer;
+    s: string;
+  begin
+    for i := 0 to (_include.Items.Count - 1) do
+      for ii := 0 to (_include.Items[i].Items.Count - 1) do
+         if (_include.Items[i].Items[ii].ClassType = TciProcedureClassName) and (Lowercase(_include.Items[i].Items[ii].ShortText) = Lowercase(_dType)) then
+         begin
+           s := GetInfo(_include.Items[i]);
+
+           if (s <> '') then
+           begin
+             Names.Add(s);
+
+             Len := Length(fItems);
+             SetLength(fItems, Len + 1);
+             fItems[Len] := _Include.Items[i];
+           end;
+         end;
+
+     if (Length(_include.Includes) > 0) then
+       for i := 0 to length(_include.Includes) - 1 do
+         Scan(_include.Includes[i], _dType, Names, fItems);
+   end;
+
+var
+  i: integer;
+  dDecl: TDeclaration;
+  dType: string;
+begin
+  if (Prefix = '') then
+    Exit();
+
+  dDecl := FindVarBase(Prefix, False, vbType);
+
+  if (dDecl = nil) then // No luck. :(
+    Exit();
+
+  dType := dDecl.CleanText; // Var type; ie TBox.
+  Scan(Self, dType, Names, Result); // Scan current script + (includes ?)
+
+  for i := High(CoreBuffer) downto Low(CoreBuffer) do // Scan simbas internals
+    Scan(CoreBuffer[i], dType, Names, Result);
+end;
+
+(*
+ * Returns true if we find the procedure *NON TYPE* in the ci, and Simbas internals.
+ * Also returns the Item if found in Decl and if the Item has params or not.
+*)
+function TCodeInsight.FindProcedure(ProcNameToFind: string; out Decl: TDeclaration; out HasParams: Boolean): boolean;
+
+  // Search the ci for the procedure!
+  function FindMatch(_include: TCodeInsight; ProcName: String; out TheItem: TDeclaration; out Params: Boolean): Boolean;
+  var
+    i, ii: Integer;
+    LProcName: string;
+    ProcItem: TCIProcedureDeclaration;
+  begin
+    Result := False;
+    HasParams := False;
+    LProcName := Lowercase(ProcName);
+
+    for i := 0 to (_include.Items.Count - 1) do
+      for ii := 0 to (_include.Items[i].Items.Count - 1) do
+        if (_include.Items[i] is TCIProcedureDeclaration) then
+        begin
+          ProcItem := TCIProcedureDeclaration(_include.Items[i]);
+
+          if (ProcItem.Items.Count = 0) then
+            Continue;
+
+          if (Boolean(ProcItem.Items[0].ClassType = TciProcedureClassName)) then // we dont want type funcs.
+            Continue;
+
+          if (Lowercase(ProcItem.Name.CleanText) = LProcName) then
+           begin
+             Params := Boolean(ProcItem.Params <> '');
+             TheItem := _include.Items[i];
+             Exit(True);
+           end;
+        end;
+
+     if (Length(_include.Includes) > 0) then
+       for i := 0 to Length(_include.Includes) - 1 do
+         if (FindMatch(_include.Includes[i], ProcName, TheItem, Params)) then
+           Exit(True);
+  end;
+
+var
+  i: Integer;
+begin
+  if (FindMatch(Self, ProcNameToFind, Decl, HasParams)) then // scan ci
+    Exit(True);
+
+  for i := High(CoreBuffer) downto Low(CoreBuffer) do // Scan simbas internals
+    if (FindMatch(CoreBuffer[i], ProcNameToFind, Decl, HasParams)) then
+      Exit(True);
+end;
+
 procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings; Prefix: string = '');
 
   procedure AddFile(Item: TCodeInsight; ItemList, InsertList: TStrings);
@@ -1357,7 +1599,8 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
     i: Integer;
   begin
     if (item = nil) or (ItemList = nil) or (InsertList = nil) or (Item.Proposal_InsertList = nil) or (Item.Proposal_ItemList = nil) then
-      exit;
+      Exit;
+
     if (not Item.Proposal_Filled) then
       Item.FillProposal;
 
@@ -1367,35 +1610,203 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
     {$ELSE}
     for i := 0 to Item.Proposal_InsertList.Count - 1 do
       if (InsertList.IndexOf(Item.Proposal_InsertList[i]) = -1) then
-      begin
         ItemList.Insert(InsertList.Add(Item.Proposal_InsertList[i]), Item.Proposal_ItemList[i]);
-        //ItemList.Add(Item.Proposal_ItemList[i]);
-      end;
     {$ENDIF}
 
-    //AddEnums(Item, ItemList, InsertList);
     for i := Low(Item.Includes) to High(Item.Includes) do
       AddFile(Item.Includes[i], ItemList, InsertList);
   end;
 
+  function GetParentType(const Item: TciTypeKind; out Name: string): Boolean;
+  var
+    i, j: Integer;
+    Str: String;
+  begin
+    if (Item = nil) or (Item.Owner = nil) then
+      Exit();
+
+    if (Item.Owner.Items.Count < 1) then
+      Exit();
+
+    Str := Trim(Lowercase(Item.Owner.Items[1].CleanText));
+    if (Str = '') then
+      Exit();
+
+    Name := '';
+
+    if (Pos(' ', Str) = 0) then // type TObject...
+      Name := Str
+    else if (Pos('record', Str) = 1) then // Record(TObject)
+    begin
+      i := 7;
+
+      while (i < Length(Str)) and (Str[i] = ' ') do
+        Inc(i);
+
+      if (Str[i] = '(') then
+      begin
+        j := i + 1;
+        while (i < Length(Str)) and (Str[i] <> ')') do
+          inc(i);
+
+        if (Str[i] = ')') then
+          Name := Copy(Str, j, i - j);
+      end;
+    end;
+
+    Result := (Name <> '') and (Name <> 'pointer') and (Name <> 'tobject');
+  end;
+
+  function checkInclude(Incl: TCodeInsight; _dType: String): string;
+  var
+    i, ii, c, cc, Len: Integer;
+    TypeToFind, ParentName, ParentName2, Str: string;
+    FoundParent: Boolean;
+  begin
+    Result := '';
+    FoundParent := False;
+    TypeToFind := Lowercase(_dType);
+
+    c := Incl.Items.Count - 1;
+    for i := 0 to c do
+    begin
+      cc := Incl.Items[i].Items.Count - 1;
+
+      for ii := 0 to cc do
+      begin
+        if (Lowercase(Incl.Items[i].Items[ii].ShortText) <> TypeToFind) then
+          Continue;
+
+        if (Incl.items[i] is TciProcedureDeclaration) then
+        begin
+          if (Incl.Items[i].Items[ii].ClassType = TciProcedureClassName) then
+            Proposal_AddDeclaration(Incl.Items[i], ItemList, InsertList, True);
+        end else
+          if (not FoundParent) then
+            if (Incl.Items[i].Items[ii] is TciTypeName) and (ii < cc) then // "foo" = record
+              if (Incl.Items[i].Items[ii + 1] is TciTypeKind) then // foo = "record"
+                if (GetParentType(TciTypeKind(Incl.Items[i].Items[ii + 1]), ParentName)) then
+                begin
+                  FoundParent := True;
+                  Result := ParentName;
+                end;
+      end;
+    end;
+
+    ParentName2 := '';
+    Len := Length(Incl.Includes);
+
+    if (Len > 0) then
+      for i := 0 to (Len - 1) do
+      begin
+        Str := checkInclude(Incl.Includes[i], _dType);
+        if (Str <> '') then
+          ParentName2 := Str;
+      end;
+
+    if (ParentName2 <> '') then
+      Result := ParentName2;
+  end;
+
 var
-  i, ii: Integer;
-  d: TDeclaration;
+  i, ii, p, pp: Integer;
+  d, dDecl: TDeclaration;
+  FoundItems: TDeclarationArray;
+  NamesList: TStringList;
+  dType, Parent, Str, TypeStr: string;
 begin
   ItemList.BeginUpdate;
   InsertList.BeginUpdate;
+
   try
     ItemList.Clear;
     InsertList.Clear;
 
-    if (PrepareString(Prefix) <> '') then
+    if (Prefix <> '') then
     begin
+      if (Lowercase(Prefix) = 'self') then
+        Prefix := 'SELF';
+
       d := FindVarBase(Prefix, True, vbType);
+
       if (d <> nil) then
         for i := 0 to d.Items.Count - 1 do
           Proposal_AddDeclaration(d.Items[i], ItemList, InsertList);
-    end
-    else
+
+      dDecl := FindVarBase(Prefix, False, vbType);
+
+      if (dDecl = nil) and (d = nil) then
+      begin
+        p := LastDelimiter('.', Prefix);
+        Str := LowerCase(Copy(Prefix, 1, p - 1));
+
+        pp := LastDelimiter('.', Str);
+        TypeStr := Copy(Str, pp + 1, (Length(Str) - pp) + 1);
+
+        if (p > 0) and ((p + 1) <= Length(Prefix)) and (Str <> '') and (TypeStr <> '') then
+        begin
+          Prefix := PrePrepareString(Copy(Prefix, p + 1, (Length(Prefix) - p) + 1));
+          mDebugLn('CC: Prefix|Type [%s, %s]', [Prefix, TypeStr]);
+          NamesList := TStringList.Create();
+
+          try
+            FoundItems := Self.GetTypeProcs(NamesList, TypeStr);
+
+            for i := 0 to (NamesList.Count - 1) do
+              if (SameText(NamesList[i], Prefix)) then
+              begin
+                dDecl := TciProcedureDeclaration(FoundItems[i]).Items.GetFirstItemOfClass(TciReturnType);
+                if (dDecl <> nil) then
+                begin
+                  d := Self.FindVarBase(Prefix, True, vbType);
+
+                  if (d <> nil) then // adding properties
+                    for ii := 0 to (d.Items.Count - 1) do
+                      Proposal_AddDeclaration(d.Items[ii], ItemList, InsertList);
+                end;
+
+                Break; // Now we will break from the loop, contiune.. and add methods!
+              end;
+          finally
+            NamesList.Free();
+          end;
+        end;
+      end;
+
+
+      if (dDecl <> nil) then
+      begin
+        dType := Trim(dDecl.CleanText);
+        Parent := '';
+        Parent := checkInclude(Self, dType); // Scan script + includes
+
+        if (Parent <> '') then
+          while (Parent <> '') do
+          begin
+            //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+
+            d := FindVarBase(Parent, True, vbType);
+
+            if (d <> nil) then
+              for i := 0 to d.Items.Count - 1 do
+                Proposal_AddDeclaration(d.Items[i], ItemList, InsertList);
+            Parent := checkInclude(Self, Parent);
+          end;
+
+        for i := High(CoreBuffer) downto Low(CoreBuffer) do
+        begin
+          Parent := '';
+          Parent := checkInclude(CoreBuffer[i], dType);
+
+          if (Parent <> '') then
+          while (Parent <> '') do
+          begin
+            //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
+            Parent := checkInclude(CoreBuffer[i], Parent);
+          end;
+        end;
+      end;
+    end else
     begin
       for i := High(InWith) downto Low(InWith) do
         if (i <> InClassFunction) then

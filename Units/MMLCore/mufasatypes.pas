@@ -85,10 +85,17 @@ type
     IncPtrWith : integer;
     RowLen : integer;
   end;
+
   TBmpMirrorStyle = (MirrorWidth,MirrorHeight,MirrorLine); //LineMirror is in line x=y;
+  TBmpThreshMethod = (TM_Mean, TM_MinMax);
+  TBmpResizeMethod = (RM_Nearest, RM_Bilinear);
+
   TTargetWindowMode = (w_BMP, w_Window, w_HDC, w_ArrayPtr, w_XWindow);
   TClickType = (mouse_Left, mouse_Right, mouse_Middle);
   TMousePress = (mouse_Down, mouse_Up);
+
+  PBmpThreshMethod = ^TBmpThreshMethod;
+  PBmpResizeMethod = ^TBmpResizeMethod;
 
   TStringArray = array of String;
   T2DStringArray = array of TStringArray;
@@ -108,6 +115,9 @@ type
   P2DIntArray = ^T2DIntArray;
   T2DIntArray = array of TIntegerArray;
   T2DIntegerArray = T2DIntArray;
+
+  TByteArray = array of Byte;
+  T2DByteArray = array of TByteArray;
 
   TBoolArray = array of boolean;
   TBooleanArray = TBoolArray;

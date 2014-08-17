@@ -272,3 +272,8 @@ procedure Lape_InAbstractBox(const Params : PParamArray; const Result: Pointer);
 begin
   PBoolean(Result)^ := InAbstractBox(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^, PInteger(Params^[8])^, PInteger(Params^[9])^);
 end;
+
+procedure Lape_MiddleBox(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPoint(Result)^ := ps_MiddleBox(PBox(Params^[0])^);
+end;

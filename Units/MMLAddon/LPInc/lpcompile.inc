@@ -86,8 +86,13 @@ addGlobalType('Integer', 'TColor');
 
 addGlobalType('(Numbers, Letters, Others)', 'StrExtr');
 addGlobalType('(MirrorWidth, MirrorHeight, MirrorLine)', 'TBmpMirrorStyle');
+addGlobalType('(TM_Mean, TM_MinMax)', 'TBmpThreshMethod');
+addGlobalType('(RM_Nearest, RM_Bilinear)', 'TBmpResizeMethod');
 addGlobalType('(mouse_Down, mouse_Up)', 'TMousePress');
 addGlobalType('(SP_WriteTimeStamp, SP_OnTerminate)', 'TSP_Property');
+addGlobalType('set of (mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose)', 'TMsgDlgButtons');
+addGlobalType('(mtWarning, mtError, mtInformation, mtConfirmation, mtCustom)', 'TMsgDlgType');
+addGlobalType('(bfNone, bfInfo, bfWarning, bfError)', 'TBalloonFlags');
 
 addGlobalType('array of string', 'TStringArray');
 addGlobalType('array of TStringArray', 'T2DStringArray');
@@ -95,7 +100,12 @@ addGlobalType('array of Integer', 'TIntegerArray');
 addGlobalType('array of TIntegerArray', 'T2DIntegerArray');
 addGlobalType('array of TIntegerArray', 'T2DIntArray');
 addGlobalType('array of T2DIntegerArray', 'T3DIntegerArray');
+addGlobalType('array of Cardinal', 'TCardinalArray');
+addGlobalType('array of TCardinalArray', 'T2DCardinalArray'); 
+addGlobalType('array of Char', 'TCharArray');
+addGlobalType('array of TCharArray', 'T2DCharArray');
 addGlobalType('array of byte', 'TByteArray');
+addGlobalType('array of TByteArray', 'T2DByteArray');
 addGlobalType('array of extended', 'TExtendedArray');
 addGlobalType('array of TExtendedArray', 'T2DExtendedArray');
 addGlobalType('array of T2DExtendedArray', 'T3DExtendedArray');

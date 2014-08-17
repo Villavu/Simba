@@ -160,7 +160,7 @@ begin
 
   t:=gettickcount;
 
-  s := C.MOCR.GetUpTextAtEx(XXX, YYY, Shadow);
+  s := C.MOCR.GetUpTextAtEx(XXX, YYY, Shadow, 'UpChars');
 
   writeln(inttostr(gettickcount-t));
 

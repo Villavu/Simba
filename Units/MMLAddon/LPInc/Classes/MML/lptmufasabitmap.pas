@@ -172,10 +172,10 @@ begin
   PMufasaBitmap(Params^[0])^.LineTo(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
 end;
 
-//function CreateTPA(SearchCol : TColor) : TPointArray;
-procedure TMufasaBitmap_CreateTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
+//function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): boolean;
+procedure TMufasaBitmap_FindColors(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PPointArray(Result)^ := PMufasaBitmap(Params^[0])^.CreateTPA(PColor(Params^[1])^);
+  PBoolean(result)^ := PMufasaBitmap(Params^[0])^.FindColors(PPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
 
 //function FastGetPixel(x,y : integer) : TColor;
@@ -236,6 +236,12 @@ end;
 procedure TMufasaBitmap_RotateBitmap(const Params: PParamArray); lape_extdecl
 begin
   PMufasaBitmap(Params^[0])^.RotateBitmap(PExtended(Params^[1])^, PMufasaBitmap(Params^[2])^);
+end;
+
+//procedure RotateBitmapEx(Angle: Single; Expand: Boolean; Smooth: Boolean; TargetBitmap: TMufasaBitmap);
+procedure TMufasaBitmap_RotateBitmapEx(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.RotateBitmapEx(PSingle(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^, PMufasaBitmap(Params^[4])^);
 end;
 
 //procedure Desaturate(TargetBitmap : TMufasaBitmap); overload;
@@ -340,6 +346,42 @@ begin
   PlpString(Result)^ := PMufasaBitmap(Params^[0])^.ToString();
 end;
 
+//procedure Crop(xs, ys, xe, ye: integer);
+procedure TMufasaBitmap_Crop(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Crop(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^)
+end;
+
+//function GetColors(): TIntegerArray;
+procedure TMufasaBitmap_GetColors(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PIntegerArray(Result)^ := PMufasaBitmap(Params^[0])^.GetColors();
+end;
+
+//function ToMatrix: T2DIntegerArray;
+procedure TMufasaBitmap_ToMatrix(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DIntArray(Result)^ := PMufasaBitmap(Params^[0])^.ToMatrix();
+end;
+
+//procedure DrawMatrix(matrix: T2DIntegerArray);
+procedure TMufasaBitmap_DrawMatrix(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.DrawMatrix(P2DIntArray(Params^[1])^);
+end;
+
+//procedure ResizeEx(method: TBmpResizeMethod, newW, newH: integer);
+procedure TMufasaBitmap_ResizeEx(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.ResizeEx(PBmpResizeMethod(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+//procedure ThresholdAdaptive(Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);
+procedure TMufasaBitmap_ThresholdAdaptive(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.ThresholdAdaptive(PByte(Params^[1])^, PByte(Params^[2])^, PBoolean(Params^[3])^, PBmpThreshMethod(Params^[4])^, PInteger(Params^[5])^);
+end;
+
 //function RowPtrs : TPRGB32Array;
 procedure TMufasaBitmap_RowPtrs(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -388,6 +430,31 @@ begin
   PMufasaBitmap(Params^[0])^.SetAlphaValue(Pbyte(Params^[1])^);
 end;
 
+procedure TMufasaBitmap_Blur(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Blur(PInteger(Params^[1])^);
+end;
+
+procedure TMufasaBitmap_BlurEx(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Blur(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure TMufasaBitmap_RectangleEx(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Rectangle(PBox(Params^[1])^, PInteger(Params^[2])^, PExtended(Params^[3])^);
+end;
+
+procedure TMufasaBitmap_DrawText(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.DrawText(PString(Params^[1])^, PString(Params^[2])^, PPoint(Params^[3])^, PBoolean(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure TMufasaBitmap_DrawSystemText(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.DrawSystemText(PString(Params^[1])^, PString(Params^[2])^, PInteger(Params^[3])^, PPoint(Params^[4])^, PBoolean(Params^[5])^, PInteger(Params^[6])^);
+end;
+
 //Read: List: TMBitmaps;
 procedure TMufasaBitmap_List_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -421,9 +488,9 @@ begin
   begin
     addClass('TMufasaBitmap');
 
-    addGlobalType('packed record B, G, R: UInt32; end;', 'TRGB24');
+    addGlobalType('packed record B, G, R: UInt8; end;', 'TRGB24');
     addGlobalType('^TRGB24', 'PRGB24');
-    addGlobalType('record B, G, R, A: UInt32; end;', 'TRGB32');
+    addGlobalType('packed record B, G, R, A: UInt8; end;', 'TRGB32');
     addGlobalType('^TRGB32', 'PRGB32');
     addGlobalType('array of TRGB32', 'TRGB32Array');
     addGlobalType('^TRGB32Array', 'PRGB32Array');
@@ -450,6 +517,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.SaveToFile(const FileName : string): boolean;', @TMufasaBitmap_SaveToFile);
     addGlobalFunc('procedure TMufasaBitmap.LoadFromFile(const FileName : string);', @TMufasaBitmap_LoadFromFile);
     addGlobalFunc('procedure TMufasaBitmap.Rectangle(const Box : TBox;FillCol : TColor);', @TMufasaBitmap_Rectangle);
+    addGlobalFunc('procedure TMufasaBitmap.Rectangle(const Box: TBox; const Color: Integer; const Transparency: Extended); overload;', @TMufasaBitmap_RectangleEx);
     addGlobalFunc('procedure TMufasaBitmap.FloodFill(const StartPT : TPoint; const SearchCol, ReplaceCol : TColor);', @TMufasaBitmap_FloodFill);
     addGlobalFunc('procedure TMufasaBitmap.SetPixel(x,y : integer; Color : TColor);', @TMufasaBitmap_FastSetPixel);
     addGlobalFunc('procedure TMufasaBitmap.SetPixels(Points : TPointArray; Colors : TIntegerArray);', @TMufasaBitmap_FastSetPixels);
@@ -458,7 +526,7 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.DrawTPA(Points : TPointArray; Color : TColor);', @TMufasaBitmap_DrawTPA);
     addGlobalFunc('procedure TMufasaBitmap.DrawToCanvas(x,y : integer; Canvas : TCanvas);', @TMufasaBitmap_DrawToCanvas);
     addGlobalFunc('procedure TMufasaBitmap.LineTo(Src,Dst: TPoint;Color: TColor);', @TMufasaBitmap_LineTo);
-    addGlobalFunc('function TMufasaBitmap.CreateTPA(SearchCol : TColor): TPointArray;', @TMufasaBitmap_CreateTPA);
+    addGlobalFunc('function TMufasaBitmap.FindColors(var points: TPointArray; const color: integer): Boolean;', @TMufasaBitmap_FindColors);
     addGlobalFunc('function TMufasaBitmap.GetPixel(x,y : integer): TColor;', @TMufasaBitmap_FastGetPixel);
     addGlobalFunc('function TMufasaBitmap.GetPixels(Points : TPointArray): TIntegerArray;', @TMufasaBitmap_FastGetPixels);
     addGlobalFunc('function TMufasaBitmap.GetAreaColors(xs,ys,xe,ye : integer): T2DIntArray;', @TMufasaBitmap_GetAreaColors);
@@ -468,7 +536,8 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.ReplaceColor(OldColor, NewColor: TColor);', @TMufasaBitmap_FastReplaceColor);
     addGlobalFunc('procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject;Resize : boolean; xs, ys, xe, ye: Integer);', @TMufasaBitmap_CopyClientToBitmap);
     addGlobalFunc('procedure TMufasaBitmap.CopyClientToBitmap(MWindow : TObject;Resize : boolean;x,y : integer; xs, ys, xe, ye: Integer); overload;', @TMufasaBitmap_CopyClientToBitmapEx);
-    addGlobalFunc('procedure TMufasaBitmap.RotateBitmap(angle: Extended;TargetBitmap : TMufasaBitmap );', @TMufasaBitmap_RotateBitmap);
+    addGlobalFunc('procedure TMufasaBitmap.RotateBitmap(angle: Extended; TargetBitmap : TMufasaBitmap);', @TMufasaBitmap_RotateBitmap);
+    addGlobalFunc('procedure TMufasaBitmap.RotateBitmapEx(Angle: Single; Expand: Boolean; Smooth: Boolean; TargetBitmap: TMufasaBitmap);', @TMufasaBitmap_RotateBitmapEx);
     addGlobalFunc('procedure TMufasaBitmap.Desaturate(TargetBitmap : TMufasaBitmap);', @TMufasaBitmap_Desaturate);
     addGlobalFunc('procedure TMufasaBitmap.Desaturate(); overload;', @TMufasaBitmap_DesaturateEx);
     addGlobalFunc('procedure TMufasaBitmap.GreyScale(TargetBitmap : TMufasaBitmap);', @TMufasaBitmap_GreyScale);
@@ -481,9 +550,19 @@ begin
     addGlobalFunc('procedure TMufasaBitmap.Invert(); overload;', @TMufasaBitmap_InvertEx);
     addGlobalFunc('procedure TMufasaBitmap.Posterize(TargetBitmap : TMufasaBitmap; Po : integer);', @TMufasaBitmap_Posterize);
     addGlobalFunc('procedure TMufasaBitmap.Posterize(Po : integer); overload;', @TMufasaBitmap_PosterizeEx);
+    addGlobalFunc('procedure TMufasaBitmap.Blur(const Block: integer);', @TMufasaBitmap_Blur);
+    addGlobalFunc('procedure TMufasaBitmap.Blur(const Block, xs, ys, xe, ye: integer); overload;', @TMufasaBitmap_BlurEx);
+    addGlobalFunc('procedure TMufasaBitmap.DrawText(const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);', @TMufasaBitmap_DrawText);
+    addGlobalFunc('procedure TMufasaBitmap.DrawSystemText(const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);', @TMufasaBitmap_DrawSystemText);
     addGlobalFunc('procedure TMufasaBitmap.Convolute(TargetBitmap : TMufasaBitmap; Matrix : T2DExtendedArray);', @TMufasaBitmap_Convolute);
     addGlobalFunc('function TMufasaBitmap.Copy(const xs,ys,xe,ye : integer): TMufasaBitmap;', @TMufasaBitmap_Copy);
     addGlobalFunc('function TMufasaBitmap.Copy(): TMufasaBitmap; overload;', @TMufasaBitmap_CopyEx);
+    addGlobalFunc('procedure TMufasaBitmap.Crop(xs, ys, xe, ye: integer);', @TMufasaBitmap_Crop);
+    addGlobalFunc('function TMufasaBitmap.GetColors(): TIntegerArray;', @TMufasaBitmap_GetColors);
+    addGlobalFunc('function TMufasaBitmap.ToMatrix(): T2DIntArray;', @TMufasaBitmap_ToMatrix);
+    addGlobalFunc('procedure TMufasaBitmap.DrawMatrix(const matrix: T2DIntArray);', @TMufasaBitmap_DrawMatrix);
+    addGlobalFunc('procedure TMufasaBitmap.ThresholdAdaptive(Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @TMufasaBitmap_ThresholdAdaptive);
+    addGlobalFunc('procedure TMufasaBitmap.ResizeEx(Method: TBmpResizeMethod; NewW, NewH: integer);', @TMufasaBitmap_ResizeEx);
     addGlobalFunc('function TMufasaBitmap.ToTBitmap(): TBitmap;', @TMufasaBitmap_ToTBitmap);
     addGlobalFunc('function TMufasaBitmap.ToString(): string;', @TMufasaBitmap_ToString);
     addGlobalFunc('function TMufasaBitmap.RowPtrs(): TPRGB32Array;', @TMufasaBitmap_RowPtrs);

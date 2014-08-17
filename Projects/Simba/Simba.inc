@@ -35,12 +35,13 @@
                         // command line flags.
 
 {$DEFINE USE_DEBUGGER}
-{$DEFINE USE_SCRIPTMANAGER} // TODO
+//{$DEFINE USE_SCRIPTMANAGER} // TODO
 {$DEFINE USE_FORMDESIGNER}
 
+{$DEFINE USE_PASCALSCRIPT}
 {$DEFINE USE_LAPE}
 
-{$DEFINE USE_SQLITE} // TO build with SQLite3 support.
+//{$DEFINE USE_SQLITE} // TO build with SQLite3 support. //Has issues currently
 
 {$DEFINE USE_EXTENSIONS}
 //{$DEFINE USE_CODECOMPLETION} // TODO
@@ -52,4 +53,10 @@
 
 {$if defined(UNIX) or defined(cpu64)}
 	{$UNDEF USE_EXTENSIONS}
+	{$UNDEF USE_PASCALSCRIPT}
 {$ifend}
+
+{$IFNDEF USE_PASCALSCRIPT}
+         {$UNDEF USE_DEBUGGER}
+         {$UNDEF USE_EXTENSIONS}
+{$ENDIF}

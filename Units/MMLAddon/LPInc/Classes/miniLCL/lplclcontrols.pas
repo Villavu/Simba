@@ -21,12 +21,18 @@ type
   PGraphicControl = ^TGraphicControl;
 
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
+
 implementation
-uses lplclsystem,lplclgraphics,forms;
+
+uses lplclsystem, lplclgraphics, forms, lplclforms;
+
 type
   PScrollBarKind = ^TScrollBarKind;
   PControlScrollBar = ^TcontrolScrollBar;
   PScrollingWinControl = ^TScrollingWinControl;
+  PAlign = ^TAlign;
+  PCursor = ^TCursor;
+
 {TControl}
 //procedure AdjustSize;
 procedure TControl_AdjustSize(const Params: PParamArray); lape_extdecl
@@ -526,16 +532,34 @@ begin
   PControl(Params^[0])^.OnChangeBounds := PNotifyEvent(Params^[1])^;
 end;
 
-//Read: property OnClick: TNotifyEvent read OnClick write OnClick;
 procedure TControl_OnClick_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PNotifyEvent(Result)^ := PControl(Params^[0])^.OnClick;
+  Component := PControl(Params^[0])^.FindComponent('OnClickEvent');
+
+  if (Assigned(Component)) then
+    PClickWrapper(Result)^ := TOnClickWrapper(Component).InternalMethod
+  else
+    PClickWrapper(Result)^ := nil;
 end;
 
-//Write: property OnClick: TNotifyEvent read OnClick write OnClick;
 procedure TControl_OnClick_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PControl(Params^[0])^.OnClick := PNotifyEvent(Params^[1])^;
+  Component := PControl(Params^[0])^.FindComponent('OnClickEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnClickWrapper.Create(PControl(Params^[0])^);
+    Component.Name := 'OnClickEvent';
+  end;
+
+  with TOnClickWrapper(Component) do
+  begin
+    InternalMethod := PClickWrapper(Params^[1])^;
+    PControl(Params^[0])^.OnClick := @OnClick;
+  end;
 end;
 
 //Read: property OnResize: TNotifyEvent read OnResize write OnResize;
@@ -548,6 +572,16 @@ end;
 procedure TControl_OnResize_Write(const Params: PParamArray); lape_extdecl
 begin
   PControl(Params^[0])^.OnResize := PNotifyEvent(Params^[1])^;
+end;
+
+procedure TControl_Align_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlign(Result)^ := PControl(Params^[0])^.Align;
+end;
+
+procedure TControl_Align_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Align := PAlign(Params^[1])^;
 end;
 
 //Read: property Visible: Boolean read Visible write Visible;
@@ -634,6 +668,54 @@ begin
   PControl(Params^[0])^.Width := PInteger(Params^[1])^;
 end;
 
+// Procedure ShowHint();
+procedure TControl_ShowHint(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.ShowHint := true;
+end;
+
+//Read: property Parent: TWinControl;
+procedure TControl_Parent_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PWinControl(Result)^ := PControl(Params^[0])^.Parent;
+end;
+
+//Write: property Parent: TWinControl;
+procedure TControl_Parent_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Parent := PWinControl(Params^[1])^;
+end;
+
+procedure TControl_Hint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLPString(Result)^ := PControl(Params^[0])^.Hint;
+end;
+
+procedure TControl_Hint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Hint := PLPString(Params^[1])^;
+end;
+
+procedure TControl_ShowHint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PControl(Params^[0])^.ShowHint;
+end;
+
+procedure TControl_ShowHint_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
+end;
+
+procedure TControl_Cursor_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCursor(Result)^ := PControl(Params^[0])^.Cursor;
+end;
+
+procedure TControl_Cursor_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Cursor := PCursor(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TControl_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -645,7 +727,7 @@ begin
   with Compiler do
   begin
     addClass('TControl', 'TComponent');
-
+	
     addGlobalFunc('procedure TControl.AdjustSize();', @TControl_AdjustSize);
     addGlobalFunc('function TControl.AutoSizeDelayed(): boolean;', @TControl_AutoSizeDelayed);
     addGlobalFunc('function TControl.AutoSizeDelayedReport(): string;', @TControl_AutoSizeDelayedReport);
@@ -703,6 +785,7 @@ begin
     addGlobalFunc('function TControl.ParentDestroyingHandle(): boolean;', @TControl_ParentDestroyingHandle);
     addGlobalFunc('function TControl.ParentHandlesAllocated(): boolean;', @TControl_ParentHandlesAllocated);
     addGlobalFunc('procedure TControl.InitiateAction();', @TControl_InitiateAction);
+    addClassVar('TControl', 'Cursor', 'TCursor', @TControl_Cursor_Read, @TControl_Cursor_Write);      addClassVar('TControl', 'Align', 'TAlign', @TControl_Align_Read, @TControl_Align_Write);
     addClassVar('TControl', 'AutoSize', 'Boolean', @TControl_AutoSize_Read, @TControl_AutoSize_Write);
     addClassVar('TControl', 'BoundsRect', 'TRect', @TControl_BoundsRect_Read, @TControl_BoundsRect_Write);
     addClassVar('TControl', 'BoundsRectForNewParent', 'TRect', @TControl_BoundsRectForNewParent_Read, @TControl_BoundsRectForNewParent_Write);
@@ -721,6 +804,7 @@ begin
     addClassVar('TControl', 'OnClick', 'TNotifyEvent', @TControl_OnClick_Read, @TControl_OnClick_Write);
     addClassVar('TControl', 'OnResize', 'TNotifyEvent', @TControl_OnResize_Read, @TControl_OnResize_Write);
     addClassVar('TControl', 'Visible', 'Boolean', @TControl_Visible_Read, @TControl_Visible_Write);
+    addClassVar('TControl', 'ShowHint', 'Boolean', @TControl_ShowHint_Read, @TControl_ShowHint_Write);
     addGlobalFunc('function TControl.UseRightToLeftAlignment(): Boolean;', @TControl_UseRightToLeftAlignment);
     addGlobalFunc('function TControl.UseRightToLeftReading(): Boolean;', @TControl_UseRightToLeftReading);
     addGlobalFunc('function TControl.UseRightToLeftScrollBar(): Boolean;', @TControl_UseRightToLeftScrollBar);
@@ -729,6 +813,9 @@ begin
     addClassVar('TControl', 'Height', 'Integer', @TControl_Height_Read, @TControl_Height_Write);
     addClassVar('TControl', 'Top', 'Integer', @TControl_Top_Read, @TControl_Top_Write);
     addClassVar('TControl', 'Width', 'Integer', @TControl_Width_Read, @TControl_Width_Write);
+    addGlobalFunc('procedure TControl.ShowHint();', @TControl_ShowHint);
+    addClassVar('TControl', 'Hint', 'String', @TControl_Hint_Read, @TControl_Hint_Write);
+    addClassVar('TControl', 'Parent', 'TControl', @TControl_Parent_Read, @TControl_Parent_Write); //FIXME: Should be OS-Depend TControl
     addGlobalFunc('procedure TControl.Free();', @TControl_Free);
   end;
 end;
@@ -854,40 +941,58 @@ begin
   PWinControl(Params^[0])^.OnExit := PNotifyEvent(Params^[1])^;
 end;
 
-//Read: property OnKeyDown: TKeyEvent read FOnKeyDown write FOnKeyDown;
-procedure TWinControl_OnKeyDown_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PKeyEvent(Result)^ := PWinControl(Params^[0])^.OnKeyDown;
-end;
-
-//Write: property OnKeyDown: TKeyEvent read FOnKeyDown write FOnKeyDown;
 procedure TWinControl_OnKeyDown_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PWinControl(Params^[0])^.OnKeyDown := PKeyEvent(Params^[1])^;
+  Component := PWinControl(Params^[0])^.FindComponent('OnKeyDownEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnKeyEventWrapper.Create(PWinControl(Params^[0])^);
+    Component.Name := 'OnKeyDownEvent';
+  end;
+
+  with TOnKeyEventWrapper(Component) do
+  begin
+    InternalMethod := PKeyEventWrapper(Params^[1])^;
+    PWinControl(Params^[0])^.OnKeyDown := @KeyEvent;
+  end;
 end;
 
-//Read: property OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
-procedure TWinControl_OnKeyPress_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PKeyPressEvent(Result)^ := PWinControl(Params^[0])^.OnKeyPress;
-end;
-
-//Write: property OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
 procedure TWinControl_OnKeyPress_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PWinControl(Params^[0])^.OnKeyPress := PKeyPressEvent(Params^[1])^;
+  Component := PWinControl(Params^[0])^.FindComponent('OnKeyPressEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnKeyPressWrapper.Create(PWinControl(Params^[0])^);
+    Component.Name := 'OnKeyPressEvent';
+  end;
+
+  with TOnKeyPressWrapper(Component) do
+  begin
+    InternalMethod := PKeyPressEventWrapper(Params^[1])^;
+    PWinControl(Params^[0])^.OnKeyPress := @KeyPress;
+  end;
 end;
 
-//Read: property OnKeyUp: TKeyEvent read FOnKeyUp write FOnKeyUp;
-procedure TWinControl_OnKeyUp_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PKeyEvent(Result)^ := PWinControl(Params^[0])^.OnKeyUp;
-end;
-
-//Write: property OnKeyUp: TKeyEvent read FOnKeyUp write FOnKeyUp;
 procedure TWinControl_OnKeyUp_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
 begin
-  PWinControl(Params^[0])^.OnKeyUp := PKeyEvent(Params^[1])^;
+  Component := PWinControl(Params^[0])^.FindComponent('OnKeyUpEvent');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnKeyEventWrapper.Create(PWinControl(Params^[0])^);
+    Component.Name := 'OnKeyUpEvent';
+  end;
+
+  with TOnKeyEventWrapper(Component) do
+  begin
+    InternalMethod := PKeyEventWrapper(Params^[1])^;
+    PWinControl(Params^[0])^.OnKeyUp := @KeyEvent;
+  end;
 end;
 
 //Read: property ParentWindow: THandle read FParentWindow write SetParentWindow;
@@ -1227,9 +1332,9 @@ begin
     addClassVar('TWinControl', 'TabStop', 'Boolean', @TWinControl_TabStop_Read, @TWinControl_TabStop_Write);
     addClassVar('TWinControl', 'OnEnter', 'TNotifyEvent', @TWinControl_OnEnter_Read, @TWinControl_OnEnter_Write);
     addClassVar('TWinControl', 'OnExit', 'TNotifyEvent', @TWinControl_OnExit_Read, @TWinControl_OnExit_Write);
-    addClassVar('TWinControl', 'OnKeyDown', 'TKeyEvent', @TWinControl_OnKeyDown_Read, @TWinControl_OnKeyDown_Write);
-    addClassVar('TWinControl', 'OnKeyPress', 'TKeyPressEvent', @TWinControl_OnKeyPress_Read, @TWinControl_OnKeyPress_Write);
-    addClassVar('TWinControl', 'OnKeyUp', 'TKeyEvent', @TWinControl_OnKeyUp_Read, @TWinControl_OnKeyUp_Write);
+    addClassVar('TWinControl', 'OnKeyDown', 'TKeyEvent', nil, @TWinControl_OnKeyDown_Write);
+    addClassVar('TWinControl', 'OnKeyPress', 'TKeyPressEvent', nil, @TWinControl_OnKeyPress_Write);
+    addClassVar('TWinControl', 'OnKeyUp', 'TKeyEvent', nil, @TWinControl_OnKeyUp_Write);
     addClassVar('TWinControl', 'ParentWindow', 'THandle', @TWinControl_ParentWindow_Read, @TWinControl_ParentWindow_Write);
     addClassVar('TWinControl', 'Showing', 'Boolean', @TWinControl_Showing_Read);
     addClassVar('TWinControl', 'VisibleDockClientCount', 'Integer', @TWinControl_VisibleDockClientCount_Read, nil);
@@ -1317,6 +1422,11 @@ begin
   PCustomControl(Params^[0])^.OnPaint := PNotifyEvent(Params^[1])^;
 end;
 
+procedure TCustomControl_BorderStyle_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomControl(Params^[0])^.BorderStyle := PFormBorderStyle(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TCustomControl_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -1332,6 +1442,7 @@ begin
     addGlobalFunc('procedure TCustomControl.Init(AOwner: TComponent);', @TCustomControl_Init);
     addClassVar('TCustomControl', 'Canvas', 'TCanvas', @TCustomControl_Canvas_Read, @TCustomControl_Canvas_Write);
     addClassVar('TCustomControl', 'OnPaint', 'TNotifyEvent', @TCustomControl_OnPaint_Read, @TCustomControl_OnPaint_Write);
+    addClassVar('TCustomControl', 'BorderStyle', 'TFormBorderStyle', nil, @TCustomControl_BorderStyle_Write);
     addGlobalFunc('procedure TCustomControl.Free();', @TCustomControl_Free);
   end;
 end;
@@ -1582,6 +1693,16 @@ begin
   PGraphicControl(Params^[0])^.Update();
 end;
 
+procedure TGraphicControl_Align_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlign(Result)^ := PGraphicControl(Params^[0])^.Align;
+end;
+
+procedure TGraphicControl_Align_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGraphicControl(Params^[0])^.Align := PAlign(Params^[1])^;
+end;
+
 procedure Register_TGraphicControl(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1590,21 +1711,31 @@ begin
 
     addGlobalFunc('procedure TGraphicControl.Update();', @TGraphicControl_Update);
     addClassVar('TGraphicControl', 'Canvas', 'TCanvas', @TGraphicControl_Canvas_Read);
+    addClassVar('TGraphicControl', 'Alignment', 'TAlign', @TGraphicControl_Align_Read, @TGraphicControl_Align_Write);
   end;
 end;
 
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
 begin
-  with compiler do
+  with Compiler do
    begin
-     AddGlobalType('(ssShift, ssAlt, ssCtrl,ssLeft, ssRight, ssMiddle, ssDouble,ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum,ssScroll,ssTriple,ssQuad,ssExtra1,ssExtra2)','TShiftState');
-     AddGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState)','TKeyEvent');
-     AddGlobalType('procedure(Sender: TObject; var Key: char)','TKeyPressEvent');
-     AddGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)','TMouseButton');
-     AddGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer)','TMouseEvent');
-     AddGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)','TMouseMoveEvent');
-     AddGlobalType('(sbHorizontal, sbVertical)','TScrollBarKind');
+     addGlobalType('(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble, ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum, ssScroll, ssTriple, ssQuad, ssExtra1, ssExtra2)', 'TShiftStateEnum');
+     addGlobalType('set of TShiftStateEnum', 'TShiftState');
+     addGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState)','TKeyEvent');
+     addGlobalType('procedure(Sender: TObject; var Key: char)','TKeyPressEvent');
+     addGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)','TMouseButton');
+     addGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer)','TMouseEvent');
+     addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)', 'TMouseMoveEvent');
+     addGlobalType('(sbHorizontal, sbVertical)','TScrollBarKind');
+     addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TAlign');
+     addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)','TFormBorderStyle');
+     addGlobalType('Integer', 'TCursor');
+     addGlobalVar(crNone, 'crNone').isConstant := True;
+     addGlobalVar(crCross, 'crCross').isConstant := True;
+     addGlobalVar(crHandPoint, 'crHandPoint').isConstant := True;
+     addGlobalVar(crIBeam, 'crIBeam').isConstant := True;
    end;
+
   Register_TControl(Compiler);
   Register_TWinControl(Compiler);
   Register_TCustomControl(Compiler);

@@ -32,14 +32,17 @@ unit mmlpsthread;
 interface
 
 uses
-  Classes, SysUtils, client, uPSComponent, uPSCompiler, PSDump,
-  uPSRuntime, uPSPreProcessor, MufasaTypes, MufasaBase, web, fontloader,
+  Classes, SysUtils, client,
+  {$IFDEF USE_PASCALSCRIPT}
+  uPSComponent, uPSCompiler, PSDump, uPSRuntime, uPSPreProcessor,
+  {$ENDIF}
+  MufasaTypes, MufasaBase, web, fontloader,
   bitmaps, plugins, dynlibs, internets,scriptproperties,
-  settings, settingssandbox, lcltype, dialogs
+  settings, settingssandbox, lcltype, dialogs, ExtCtrls
   {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_LAPE}
   , lpparser, lpcompiler, lptypes, lpvartypes,
-    lpeval, lpinterpreter, lputils
+    lpeval, lpinterpreter, lputils, lpexceptions, LPDump
   {$ENDIF};
 
 const
@@ -54,6 +57,7 @@ const
   m_ShowMessage = 8; //Data = PChar
   m_MessageBox = 9; //Data =  PMessageBoxData
   m_MessageDlg = 10; //Data = PMessageDlg
+  m_BalloonHint = 11; //Data = PBalloonHintData
 
   {$I settings_const.inc}
   {$WARNING REMOVEME}
@@ -109,6 +113,14 @@ type
     end;
     PMessageDlgData = ^TMessageDlgData;
 
+    PBalloonHintData = ^TBalloonHintData;
+    TBalloonHintData = record
+      ATitle: String;
+      AHint: String;
+      ATimeout: Integer;
+      AFlag: TBalloonFlags;
+    end;
+
     { TMThread }
 
     TMThread = class(TThread)
@@ -119,13 +131,13 @@ type
     protected
       AppPath, DocPath, ScriptPath, ScriptFile, IncludePath, PluginPath, FontPath: string;
       DebugTo: TWritelnProc;
-      ExportedMethods : TExpMethodArr;
       Includes : TStringList;
       FOpenConnectionEvent : TOpenConnectionEvent;
       FWriteFileEvent : TWriteFileEvent;
       FOpenFileEvent : TOpenFileEvent;
       procedure LoadPlugin(plugidx: integer); virtual; abstract;
-
+      function CallMethod(const Method: string; var Args: array of Variant): Variant; virtual; abstract;
+      procedure HandleScriptTerminates; virtual;
     public
       Prop: TScriptProperties;
       Client: TClient;
@@ -144,14 +156,19 @@ type
 
       CompileOnly : boolean;
 
+      ExportedMethods: TExpMethodArr;
+
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
-      procedure HandleError(ErrorRow,ErrorCol,ErrorPosition : integer; ErrorStr : string; ErrorType : TErrorType; ErrorModule : string);
+      procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+      {$IFDEF USE_PASCALSCRIPT}
       function ProcessDirective(Sender: TPSPreProcessor;
                     Parser: TPSPascalPreProcessorParser;
                     Active: Boolean;
                     DirectiveName, DirectiveArgs: string; Filename:String): boolean;
+      {$ENDIF}
       function LoadFile(ParentFile: string; var FileName, Content: string): boolean;
+
       procedure AddMethod(meth: TExpMethod); virtual;
 
       procedure SetDebug( writelnProc : TWritelnProc );
@@ -167,7 +184,7 @@ type
       constructor Create(CreateSuspended: boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
       destructor Destroy; override;
 
-      class function GetExportedMethods : TExpMethodArr;
+      class function GetExportedMethods: TExpMethodArr; virtual; abstract;
 
       property OpenConnectionEvent : TOpenConnectionEvent read FOpenConnectionEvent write SetOpenConnectionEvent;
       property WriteFileEvent : TWriteFileEvent read FWriteFileEvent write SetWriteFileEvent;
@@ -175,7 +192,7 @@ type
     end;
 
     { TPSThread }
-
+    {$IFDEF USE_PASCALSCRIPT}
     TPSThread = class(TMThread)
       public
         procedure OnProcessDirective(Sender: TPSPreProcessor;
@@ -200,40 +217,50 @@ type
         procedure OnCompImport(Sender: TObject; x: TPSPascalCompiler);
         procedure OnExecImport(Sender: TObject; se: TPSExec; x: TPSRuntimeClassImporter);
         procedure OutputMessages;
-        procedure HandleScriptTerminates;
+        function CallMethod(const Method: string; var Args: array of Variant): Variant; override;
+        procedure HandleScriptTerminates; override;
       public
         PSScript: TPSScriptExtension;
         constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
         destructor Destroy; override;
+
+        procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+
+        class function GetExportedMethods: TExpMethodArr; override;
+
         procedure SetScript(script: string); override;
         procedure Execute; override;
         procedure Terminate; override;
     end;
+    {$ENDIF}
 
    {$IFDEF USE_LAPE}
    { TLPThread }
    TLPThread = class(TMThread)
    protected
      procedure LoadPlugin(plugidx: integer); override;
+     function CallMethod(const Method: string; var Args: array of Variant): Variant; override;
    public
      Parser: TLapeTokenizerString;
-     Compiler: TLapeCompiler;
+     Compiler: TLPCompiler;
      Running: TInitBool;
      ImportWrappers: TList;
      ExportWrappers: TList;
 
      constructor Create(CreateSuspended: Boolean; TheSyncInfo : PSyncInfo; plugin_dir: string);
      destructor Destroy; override;
+
+     procedure HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+
+     class function GetExportedMethods: TExpMethodArr; override;
+
      procedure SetScript(Script: string); override;
      procedure SetFonts(Fonts: TMFonts); override;
      procedure Execute; override;
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
      function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
-     function Natify(s: string): Pointer;
-     function Natify(c: TCodePos): Pointer; overload;
    end;
-   {$ENDIF}
 
    TSyncMethod = class
    private
@@ -242,6 +269,8 @@ type
      constructor Create(Method: Pointer);
      procedure Call;
    end;
+
+   {$ENDIF}
 
 threadvar
   CurrThread : TMThread;
@@ -254,21 +283,24 @@ uses
   SimbaUnit,
   colour_conv, dtmutil,
   {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
+  {$IFDEF USE_PASCALSCRIPT}
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
   uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
   uPSUtils,
+  {$ENDIF}
   IOmanager,//TTarget_Exported
   IniFiles,//Silly INI files
   stringutil, //String st00f
   newsimbasettings, // SimbaSettings
   {$IFDEF USE_DEBUGGER}debugger,{$ENDIF}
-
+  {$IFDEF USE_PASCALSCRIPT}
   uPSR_std, uPSR_controls,uPSR_classes,uPSR_graphics,uPSR_stdctrls,uPSR_forms, uPSR_mml,
   uPSR_menus, uPSR_dll,
   uPSI_ComCtrls, uPSI_Dialogs,
+  uPSR_extctrls, //Runtime-libs
+  {$ENDIF}
   files,
   dtm, //Dtms!
-  uPSR_extctrls, //Runtime-libs
   Graphics, //For Graphics types
   math, //Maths!
   mmath, //Real maths!
@@ -410,17 +442,19 @@ begin
   Synchronize(CallBackData^.FormCallBack);
 end;
 
-procedure TMThread.HandleError(ErrorRow,ErrorCol, ErrorPosition: integer; ErrorStr: string; ErrorType: TErrorType; ErrorModule : string);
+procedure TMThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
 begin
-  if OnError = nil then
-    exit;
-  ErrorData^.Row:= ErrorRow - 1;
-  ErrorData^.Col := ErrorCol;
-  ErrorData^.Position:= ErrorPosition;
-  ErrorData^.Error:= ErrorStr;
-  ErrorData^.ErrType:= ErrorType;
-  ErrorData^.Module:= ErrorModule;
-  ErrorData^.IncludePath:= IncludePath;
+  if (OnError = nil) then
+    Exit;
+
+  ErrorData^.Row := Row;
+  ErrorData^.Col := Col;
+  ErrorData^.Position := Pos;
+  ErrorData^.Error := Error;
+  ErrorData^.ErrType := Typ;
+  ErrorData^.Module := Filename;
+  ErrorData^.IncludePath := IncludePath;
+
   CurrThread.Synchronize(OnError);
 end;
 
@@ -431,6 +465,7 @@ end;
 
 procedure TMThread.AddMethod(meth: TExpMethod);
 begin
+  raise Exception.Create('AddMethod not Implememnted!');
 end;
 
 function TMThread.LoadFile(ParentFile: string; var FileName, Content: string): boolean;
@@ -456,6 +491,7 @@ begin
   end;
 end;
 
+{$IFDEF USE_PASCALSCRIPT}
 function TMThread.ProcessDirective(Sender: TPSPreProcessor;
         Parser: TPSPascalPreProcessorParser;
         Active: Boolean;
@@ -523,21 +559,13 @@ begin
     if (DirectiveArgs <> '') then
     begin
       Result := True;
-      {if FileName = '' then
-        psWriteln(format('Error: In %s: at row: %d, col: %d, pos %d: %s',
-                               ['Main script', Parser.row, Parser.col,
-                               Parser.pos, DirectiveArgs]))
-      else
-        psWriteln(format('Error: In file %s: at row: %d, col: %d, pos %d: %s',
-                             [FileName, Parser.row, Parser.col,
-                             Parser.pos, DirectiveArgs])); }
-      HandleError(Parser.Row - 1, Parser.Col, Parser.Pos, 'Error: ' + DirectiveArgs, errCompile, FileName);
+      HandleError(Parser.Row, Parser.Col, Parser.Pos, DirectiveArgs, errCompile, FileName);
       raise EPSPreProcessor.Create('ERROR directive found');
     end;
   end else
-    Result := False; // If we do not know the directive; return true so Continue
-                    // will be false.
+    Result := False;
 end;
+{$ENDIF}
 
 procedure TMThread.SetDebug(writelnProc: TWritelnProc);
 begin
@@ -565,6 +593,18 @@ begin
     Client.MOCR.Fonts := Fonts;
 end;
 
+procedure TMThread.HandleScriptTerminates;
+var
+  I: integer;
+  V: array of Variant;
+begin
+  SetLength(V, 0);
+  if (SP_OnTerminate in Prop.Properties) then
+    for I := 0 to Prop.OnTerminateProcs.Count - 1 do
+      CallMethod(Prop.OnTerminateProcs[I], V);
+end;
+
+{$IFDEF USE_PASCALSCRIPT}
 function ThreadSafeCall(aProcName: string; var V: TVariantArray): Variant; extdecl;
 begin
   if GetCurrentThreadId = MainThreadID then
@@ -586,13 +626,16 @@ begin
   with TPSThread(currthread).PSScript do
     Result := Exec.RunProcPVar(V,Exec.GetProc(aProcName));
 end;
+{$ENDIF}
 
 {$I PSInc/Wrappers/other.inc}
 {$I PSInc/Wrappers/settings.inc}
 {$I PSInc/Wrappers/bitmap.inc}
+
 {$I PSInc/Wrappers/window.inc}
 {$I PSInc/Wrappers/tpa.inc}
 {$I PSInc/Wrappers/strings.inc}
+
 {$I PSInc/Wrappers/crypto.inc}
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
@@ -606,37 +649,8 @@ end;
 {$I PSInc/Wrappers/dtm.inc}
 {$I PSInc/Wrappers/ocr.inc}
 {$I PSInc/Wrappers/internets.inc}
+{$IFDEF USE_PASCALSCRIPT}
 {$I PSInc/psmethods.inc}
-
-class function TMThread.GetExportedMethods: TExpMethodArr;
-var
-  c : integer;
-  CurrSection : string;
-
-procedure SetCurrSection(str : string);
-begin;
-  CurrSection := Str;
-end;
-
-procedure AddFunction( Ptr : Pointer; DeclStr : String);
-begin;
-  if c >= 500 then
-    raise exception.create('PSThread.LoadMethods: Exported more than 500 functions');
-  Result[c].FuncDecl:= DeclStr;
-  Result[c].FuncPtr:= Ptr;
-  Result[c].Section:= CurrSection;
-  inc(c);
-end;
-
-begin
-  c := 0;
-  CurrSection := 'Other';
-  SetLength(Result, 500);
-
-  {$i PSInc/psexportedmethods.inc}
-
-  SetLength(Result,c);
-end;
 
 {***implementation TPSThread***}
 
@@ -685,6 +699,38 @@ destructor TPSThread.Destroy;
 begin
   PSScript.Free;
   inherited;
+end;
+
+class function TPSThread.GetExportedMethods: TExpMethodArr;
+var
+  c : integer;
+  CurrSection : string;
+
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
+procedure AddFunction( Ptr : Pointer; DeclStr : String);
+begin;
+  if c >= 600 then
+    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
+
+  Result[c].FuncDecl:= DeclStr;
+  Result[c].FuncPtr:= Ptr;
+  Result[c].Section:= CurrSection;
+
+  Inc(c);
+end;
+
+begin
+  c := 0;
+  CurrSection := 'Other';
+  SetLength(Result, 550);
+
+  {$i PSInc/psexportedmethods.inc}
+
+  SetLength(Result, c);
 end;
 
 procedure TPSThread.OnProcessDirective(Sender: TPSPreProcessor;
@@ -1170,7 +1216,7 @@ begin
       b := True;
       if OnError <> nil then
         with PSScript.CompilerMessages[l] do
-          HandleError(Row + 1, Col, Pos, MessageToString,errCompile, ModuleName)
+          HandleError(Row, Col, Pos, MessageToString, errCompile, ModuleName)
       else
         psWriteln(PSScript.CompilerErrorToStr(l) + ' at line ' + inttostr(PSScript.CompilerMessages[l].Row - 1));
     end else
@@ -1178,20 +1224,15 @@ begin
   end;
 end;
 
-procedure TPSThread.HandleScriptTerminates;
-var
-  I : integer;
+function TPSThread.CallMethod(const Method: string; var Args: array of Variant): Variant;
 begin
-  if (PSScript.Exec.ExceptionCode =ErNoError) and  (SP_OnTerminate in Prop.Properties) then
-  begin;
-    for i := 0 to Prop.OnTerminateProcs.Count - 1 do
-    begin
-      try
-        PSScript.ExecuteFunction([],Prop.OnTerminateProcs[i]);
-      finally
-      end;
-    end;
-  end;
+  Result := PSScript.ExecuteFunction(Args, Method);
+end;
+
+procedure TPSThread.HandleScriptTerminates;
+begin
+  if (PSScript.Exec.ExceptionCode = ErNoError) then
+    inherited;
 end;
 
 procedure TPSThread.Execute;
@@ -1208,7 +1249,7 @@ begin
         exit;
 //      if not (ScriptState = SCompiling) then
         if not PSScript.Execute then
-          HandleError(PSScript.ExecErrorRow,PSScript.ExecErrorCol,PSScript.ExecErrorPosition,PSScript.ExecErrorToString,
+          HandleError(PSScript.ExecErrorRow, PSScript.ExecErrorCol, PSScript.ExecErrorPosition, PSScript.ExecErrorToString,
                       errRuntime, PSScript.ExecErrorFileName)
         else
         begin
@@ -1236,6 +1277,12 @@ begin
    PSScript.Script.Text := LineEnding + Script; //A LineEnding to conform with the info we add to includes
 end;
 
+procedure TPSThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+begin
+  inherited HandleError(Row + 1, Col, Pos, Error, Typ, Filename);
+end;
+{$ENDIF}
+
 {$IFDEF USE_LAPE}
 { TLPThread }
 
@@ -1261,6 +1308,10 @@ type
   PMDTM = ^TMDTM;
   PMDTMPoint = ^TMDTMPoint;
   PSDTM = ^TSDTM;
+  PMsgDlgType = ^TMsgDlgType;
+  PMsgDlgButtons = ^TMsgDlgButtons;
+  PClient = ^TClient;
+  PStrings = ^TStrings;
 
 threadvar
   WriteLnStr: string;
@@ -1285,7 +1336,7 @@ procedure lp_Sync(Params: PParamArray); lape_extdecl
 var
   Method: TSyncMethod;
 begin
-  Method := TSyncMethod.Create(TLPThread(CurrThread).Natify(PCodePos(Params^[0])^));
+  Method := TSyncMethod.Create(PPointer(Params^[0])^);
   try
     TThread.Synchronize(CurrThread, @Method.Call);
   finally
@@ -1295,30 +1346,14 @@ end;
 
 procedure lp_CurrThreadID(Params: PParamArray; Result: Pointer); lape_extdecl
 begin
-{$IFDEF WINDOWS}
   PPtrUInt(Result)^ := GetCurrentThreadID();
-{$ELSE}
-  {$IFDEF LINUX}
-  PPtrUInt(Result)^ := TThreadID(pthread_self);
-  {$ELSE}
-  PPtrUInt(Result)^ := GetThreadID();
-  {$ENDIF}
-{$ENDIF}
-end;
-
-procedure lp_Natify(Params: PParamArray; Result: Pointer); lape_extdecl
-begin
-  PPointer(Result)^ := TLPThread(CurrThread).Natify(PlpString(Params^[0])^);
-end;
-
-procedure lp_NatifyP(Params: PParamArray; Result: Pointer); lape_extdecl
-begin
-  PPointer(Result)^ := TLPThread(CurrThread).Natify(PCodePos(Params^[0])^);
 end;
 
 {$I LPInc/Wrappers/lp_other.inc}
+
 {$I LPInc/Wrappers/lp_settings.inc}
 {$I LPInc/Wrappers/lp_bitmap.inc}
+
 {$I LPInc/Wrappers/lp_window.inc}
 {$I LPInc/Wrappers/lp_tpa.inc}
 {$I LPInc/Wrappers/lp_strings.inc}
@@ -1337,13 +1372,14 @@ end;
 {$I LPInc/Wrappers/lp_internets.inc}
 
 constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
+  procedure SetCurrSection(x: string); begin end;
 var
   I: integer;
 begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 
   Parser := TLapeTokenizerString.Create('');
-  Compiler := TLapeCompiler.Create(Parser);
+  Compiler := TLPCompiler.Create(Parser);
   Running := bFalse;
 
   InitializePascalScriptBasics(Compiler);
@@ -1369,15 +1405,14 @@ begin
     addGlobalFunc('procedure Sync(proc: Pointer);', @lp_Sync);
     addGlobalFunc('function GetCurrThreadID(): PtrUInt;', @lp_CurrThreadID);
 
-    addGlobalFunc('function natify(s: string): Pointer;', @lp_Natify);
-    addGlobalFunc('function natify(p: Pointer): Pointer; overload;', @lp_NatifyP);
-
     for I := 0 to High(VirtualKeys) do
       addGlobalVar(VirtualKeys[I].Key, Format('VK_%S', [VirtualKeys[i].Str])).isConstant := True;
 
     RegisterLCLClasses(Compiler);
     RegisterMMLClasses(Compiler);
+
     addGlobalVar('TClient', @Client, 'Client').isConstant := True;
+    addGlobalVar('TMMLSettingsSandbox', @Sett, 'Settings').isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
 
@@ -1423,6 +1458,40 @@ begin
   inherited Destroy;
 end;
 
+class function TLPThread.GetExportedMethods: TExpMethodArr;
+var
+  c : integer;
+  CurrSection : string;
+
+procedure SetCurrSection(str : string);
+begin;
+  CurrSection := Str;
+end;
+
+procedure AddGlobalFunc(DeclStr: string; Ptr: Pointer);
+begin;
+  if c >= 600 then
+    raise exception.create('TMThread.LoadMethods: Exported more than 600 functions');
+
+  Result[c].FuncDecl:= DeclStr;
+  Result[c].FuncPtr:= Ptr;
+  Result[c].Section:= CurrSection;
+
+  Inc(c);
+end;
+
+begin
+  c := 0;
+  CurrSection := 'Other';
+  SetLength(Result, 550);
+
+  {$DEFINE FUNC_LIST}
+  {$i LPInc/lpexportedmethods.inc}
+  {$UNDEF FUNC_LIST}
+
+  SetLength(Result, c);
+end;
+
 procedure TLPThread.SetScript(Script: string);
 begin
   Parser.Doc := Script;
@@ -1443,74 +1512,6 @@ begin
   Compiler.EndImporting;
 end;
 
-function TLPThread.Natify(s: string): Pointer;
-var
-  Wrapper: TExportClosure;
-begin
-  Result := nil;
-
-  if (not FFILoaded) then
-    raise Exception.Create('libffi seems to be missing!');
-
-  Wrapper := LapeExportWrapper(Compiler.Globals[s]);
-  if (Wrapper <> nil) then
-  begin
-    Result := Wrapper.Func;
-    ExportWrappers.Add(Wrapper);
-  end;
-end;
-
-function TLPThread.Natify(c: TCodePos): Pointer;
-  function isCodePos(Decl: TLapeDeclaration; CodePos: TCodePos): boolean;
-  begin
-    Result := False;
-    if (Decl = nil) then
-      Exit;
-
-    if ((Decl as TLapeGlobalVar).Ptr = nil) then
-      Exit;
-
-    Result := TCodePos((Decl as TLapeGlobalVar).Ptr^) = CodePos;
-  end;
-
-  function getByCodePos(DeclarationList: TLapeDeclarationList; CodePos: TCodePos): TLapeDeclaration;
-  var
-    Declarations: TLapeDeclArray;
-    H, I: UInt32;
-  begin
-    Result := nil;
-    Declarations := DeclarationList.getByClass(TLapeGlobalVar, bTrue);
-
-    H := High(Declarations);
-    for I := 0 to H do
-      if (isCodePos(Declarations[I], CodePos)) then
-      begin
-        Result := Declarations[I];
-        Exit;
-      end;
-  end;
-var
-  Declaration: TLapeDeclaration;
-  Wrapper: TExportClosure;
-begin
-  Result := nil;
-
-  if (not FFILoaded) then
-    raise Exception.Create('libffi seems to be missing!');
-
-  Declaration := getByCodePos(Compiler.GlobalDeclarations, c);
-
-  if (Declaration <> nil) then
-  begin
-    Wrapper := LapeExportWrapper(Declaration as TLapeGlobalVar);
-    if (Wrapper <> nil) then
-    begin
-      Result := Wrapper.Func;
-      ExportWrappers.Add(Wrapper);
-    end;
-  end;
-end;
-
 function TLPThread.OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
 begin
   Result := nil;
@@ -1523,7 +1524,7 @@ var
   plugin_idx: integer;
 begin
   Result := False;
-  if (not InPeek) and (Directive = 'loadlib') then
+  if (not InPeek) and (CompareText(Directive,'LOADLIB') = 0) then
   begin
     if (Argument <> '') then
     begin
@@ -1539,17 +1540,34 @@ begin
   end;
 end;
 
-procedure TLPThread.LoadPlugin(plugidx: integer);
+procedure TLPThread.LoadPlugin(plugidx: integer); 
 var
   I: integer;
   Wrapper: TImportClosure;
+  method: String;
+  
+  //Check if the string ends with an `Native`-keyword.
+  function isNative(str:String; var Res:String): boolean;
+  var len:Int32;
+  begin
+    Res := Trim(Str);
+    Len := Length(Res);
+    if (Res[len] = ';') then Dec(Len);
+    if not (LowerCase(Copy(Res, len-5, 6)) = 'native') then
+      Exit(False);
+    Dec(len,6);
+    SetLength(Res, len);
+    while Res[len] in [#9,#10,#13,#32] do Dec(len);
+    Result := (Res[len] = ';');
+  end;
+  
 begin
   with PluginsGlob.MPlugins[plugidx] do
   begin
     {$IFDEF CPU32}
     if ABI < 2 then
     begin
-      psWriteln('Skipping plugin due to ABI <= 2');
+      psWriteln('Skipping plugin due to ABI being older than version 2');
       exit; // Can't set result?
     end;
     {$ENDIF}
@@ -1568,45 +1586,101 @@ begin
 
     for i := 0 to MethodLen - 1 do
     begin
-      Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
-      Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
-      ImportWrappers.Add(Wrapper);
+      if isNative(Methods[i].FuncStr, Method) then
+        Compiler.addGlobalFunc(Method, Methods[i].FuncPtr)
+      else begin
+        Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
+        Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
+        ImportWrappers.Add(Wrapper);
+      end;
     end;
 
     Compiler.EndImporting;
   end;
 end;
 
+function TLPThread.CallMethod(const Method: string; var Args: array of Variant): Variant;
+begin
+  if (not FFILoaded) then
+    raise Exception.Create('libffi seems to be missing!');
+
+  if (Length(Args) > 0) then
+    raise Exception.Create('Lape''s CallMethod only supports procedures with no arguments.');
+
+  with LapeExportWrapper(Compiler.Globals[Method]) do
+  try
+    TProcedure(func)();
+  finally
+    Free;
+  end;
+end;
+
 procedure TLPThread.Execute;
+var
+  Failed: boolean;
 begin
   CurrThread := Self;
+  Starttime := GetTickCount;
+
   try
-    Starttime := GetTickCount;
-
-    if Compiler.Compile() then
-    begin
-      psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
-
-      if CompileOnly then
-        Exit;
-
-      Running := bTrue;
-      RunCode(Compiler.Emitter.Code, Running);
-
-      psWriteln('Successfully executed.');
-    end else
-      psWriteln('Compiling failed.');
+    Failed := not Compiler.Compile();
   except
-     on E : Exception do
-       psWriteln('Exception in Script: ' + e.message);
+    on e: lpException do
+    begin
+      HandleError(e.DocPos.Line, e.DocPos.Col, 0, e.OldMsg, errCompile, e.DocPos.FileName);
+      Failed := True;
+    end;
+    on e: Exception do
+    begin
+      HandleError(0, 0, 0, e.message, errCompile, '');
+      Failed := True;
+    end;
   end;
+
+  if (not (Failed)) then
+  begin
+    psWriteln('Compiled successfully in ' + IntToStr(GetTickCount - Starttime) + ' ms.');
+
+    if CompileOnly then
+      Exit;
+
+    Running := bTrue;
+    try
+      RunCode(Compiler.Emitter.Code, Running);
+      HandleScriptTerminates();
+    except
+      on e: lpException do
+      begin
+        HandleError(e.DocPos.Line, e.DocPos.Col, 0, e.OldMsg, errRuntime, e.DocPos.FileName);
+        Failed := True;
+      end;
+      on e: Exception do
+      begin
+        HandleError(0, 0, 0, e.message, errRuntime, '');
+        Failed := True;
+      end;
+    end;
+
+    if (not (Failed)) then
+      psWriteln('Successfully executed.')
+    else
+      psWriteLn('Execution failed.');
+  end else
+    psWriteln('Compiling failed.');
 end;
 
 procedure TLPThread.Terminate;
 begin
   Running := bFalse;
 end;
-{$ENDIF}
+
+procedure TLPThread.HandleError(Row, Col, Pos: integer; Error: string; Typ: TErrorType; Filename: string);
+begin
+  if (PosEx('Runtime error: "', Error, 1) = 1) then
+    Error := Copy(Error, 17, Length(Error) - 17);
+
+  inherited HandleError(Row, Col, Pos, Error, Typ, Filename);
+end;
 
 constructor TSyncMethod.Create(Method: Pointer);
 begin
@@ -1619,6 +1693,8 @@ type
 begin
   TProc(FMethod)();
 end;
+
+{$ENDIF}
 
 initialization
   PluginsGlob := TMPlugins.Create;

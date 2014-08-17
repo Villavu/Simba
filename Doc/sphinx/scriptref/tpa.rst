@@ -1,4 +1,3 @@
-
 .. _scriptref_tpa:
 
 TPointArray Functions
@@ -136,7 +135,7 @@ SortATPAFrom
 
     procedure SortATPAFrom(var a: T2DPointArray; const From: TPoint);
 
-Sorts the T2DPointArray a from the TPoint From
+Loops though each index of the T2DPointArray sorting each tpa from the TPoint
 
 
 SortATPAFromFirstPoint
@@ -145,6 +144,38 @@ SortATPAFromFirstPoint
 .. code-block:: pascal
 
     procedure SortATPAFromFirstPoint(var a: T2DPointArray; const From: TPoint);
+
+Sorts the T2DPointArray from the TPoint, based from the first point in each TPointArray
+
+
+SortATPAFromMidPoint
+--------------------
+
+.. code-block:: pascal
+
+    procedure SortATPAFromMidPoint(var a: T2DPointArray; const From: TPoint);
+
+Sorts the T2DPointArray from the TPoint, based from the middle point in each TPointArray
+
+
+SortATPAFromFirstPointX
+-----------------------
+
+.. code-block:: pascal
+
+    procedure SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint);
+
+Sorts the T2DPointArray from the TPoint, based from the first point X value in each TPointArray
+
+
+SortATPAFromFirstPointY
+-----------------------
+
+.. code-block:: pascal
+
+    procedure SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint);
+
+Sorts the T2DPointArray from the TPoint, based from the first point Y value in each TPointArray
 
 
 InvertTPA
@@ -219,6 +250,26 @@ The following example like the previous one gives you the coordinates for the Mi
     end.
 
 
+MedianTPAEx
+-----------
+
+.. code-block:: pascal
+
+    procedure MedianTPAEx(var tpa: TPointArray; out x, y: integer);
+
+Finds the point closest to the middle of the TPointArray, returns the TPoint in parameter x and y.
+
+
+MedianTPA
+---------
+
+.. code-block:: pascal
+
+    function MedianTPA(var tpa: TPointArray): TPoint;
+
+Returns the point closest to the middle of the TPointArray.
+
+
 SortATPASize
 ------------
 
@@ -252,6 +303,16 @@ SortATPAFromSize
     procedure SortATPAFromSize(var a: T2DPointArray; const Size: Integer; CloseFirst: Boolean);
 
 Sorts the T2DPointArray from Size by the closest first if CloseFirst is true
+
+
+FilterTPAsBetween
+-----------------
+
+.. code-block:: pascal
+
+    procedure FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer);
+
+Loops though each index of the T2DPointArray, removing the TPointArrays if their length falls beetween minLength and MaxLength.
 
 
 InIntArrayEx
@@ -301,7 +362,7 @@ SplitTPAEx
 
     function SplitTPAEx(const arr: TPointArray; w, h: Integer): T2DPointArray;
 
-Splits the points with max X and Y distances W and H to their 
+Splits the points with max X and Y distances W and H to their own TPointArrays;
 
 
 SplitTPA
@@ -312,6 +373,28 @@ SplitTPA
     function SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;
 
 Splits the points with max distance Dist to their own TPointArrays
+
+
+ClusterTPAEx
+------------
+
+.. code-block:: pascal
+
+    function ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;
+
+Splits the points to their own TPointArrays if they fall outside of 'width' and 'height' bounds.
+An alternative to SplitTPAEx, will be extremely fast compared to SplitTPAEx with a width/height less than 100.
+
+
+ClusterTPA
+----------
+
+.. code-block:: pascal
+
+    function ClusterTPA(const TPA: TPointArray; dist: Extended): T2DPointArray;
+
+Splits the points with max distance 'dist' to their own TPointArrays.
+An alternative to SplitTPA, will be extremely fast compared to SplitTPA with a distance less than 100.
 
 
 FloodFillTPA
@@ -352,6 +435,16 @@ FilterPointsDist
 
 Removes the points from the TPointArray Points that are not within the radius MinDist (Min Distance) and MaxDist
     from the origin Mx and My
+
+
+FilterPointsBox
+---------------
+
+.. code-block:: pascal
+
+    procedure FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer);
+
+Removes the points from the TPointArray that are not within the bounds of the box.
 
 
 GetATPABounds
@@ -554,6 +647,26 @@ AppendTPA
 Attaches the TPointArray ToAppend onto the end of TPA
 
 
+TPAFromLine
+-----------
+
+.. code-block:: pascal
+
+    function TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;
+
+Returns a TPointArray of a line specified by the end points x1,y1 and x2,y2.       
+
+
+EdgeFromBox
+-----------
+
+.. code-block:: pascal
+
+    function EdgeFromBox(const Box: TBox): TPointArray;
+
+Creates a TPointArray from the edge of the TBox box
+
+
 TPAFromBox
 ----------
 
@@ -562,6 +675,68 @@ TPAFromBox
     function TPAFromBox(const Box : TBox) : TPointArray;
 
 Create a TPointArray from the top left and the bottom right of the TBox Box
+
+
+TPAFromEllipse
+--------------
+
+.. code-block:: pascal
+
+    function TPAFromEllipse(const CX, CY, XRadius, YRadius : Integer) : TPointArray;
+
+Creates and returns a TPointArray of the outline of a ellipse 
+
+
+TPAFromCircle
+-------------
+
+.. code-block:: pascal
+
+    function TPAFromCircle(const CX, CY, Radius : Integer) : TPointArray;
+
+Creates and returns a TPointArray of a circle, around the center point (CX, CY), with the size determined by Radius
+
+
+TPAFromPolygon
+--------------
+
+.. code-block:: pascal
+
+    function TPAFromPolygon(const shape: TPointArray) : TPointArray;
+
+Returns polygon as a TPointArray from a shape, which can be working either as
+an array of main points OR border points. note: The order of the points are important.        
+
+.. code-block:: pascal
+
+  program TPAFromPolygonExample;
+
+  var
+    tpa, shape: TPointArray;
+    bmp: integer;
+
+  begin
+    tpa := [point(70,90), point(185,90), point(185,116), point(70,116),
+            point(70,140), point(35,105), point(70,70)];
+
+    shape := TPAFromPolygon(tpa);
+
+    bmp := createBitmap(230, 200);
+    drawTPABitmap(bmp, shape, 255);
+
+    displayDebugImgWindow(230, 200);
+    drawBitmapDebugImg(bmp);
+  end.  
+
+
+FillEllipse
+-----------
+
+.. code-block:: pascal
+
+    procedure FillEllipse(var a: TPointArray);
+
+Fills a ellipse, suggested to be used with TPAFromEllipse or TPAFromCircle
 
 
 RotatePoints
@@ -621,7 +796,7 @@ ClearDoubleTPA
 
     procedure ClearDoubleTPA(var TPA: TPointArray);
 
-Deletes duplicate TPAs int he TPointArray TPA
+Deletes duplicate TPAs in the TPointArray TPA
 
 
 TPACountSort
@@ -898,4 +1073,37 @@ CopyATPA
     function CopyATPA(const ATPA : T2DPointArray) : T2DPointArray;
 
 Returns the T2DPointArray ATPA
+
+
+PartitionTPA
+------------
+
+.. code-block:: pascal
+
+    function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: integer): T2DPointArray;
+
+Partitions the TPA in boxes of BoxWidth and BoxHeight.
+
+The following example will partition a TPA in boxes of 10 width, 10 height and debug it.
+
+.. code-block:: pascal
+
+  program PartitionTPA_Test;
+   var
+     tpa: TPointArray;
+     atpa: T2DPointArray;
+     canvas: integer;
+  begin
+    tpa := TPAFromEllipse(50, 50, 33, 45);
+    FillEllipse(tpa);
+    atpa := PartitionTPA(tpa, 10, 10);
+
+    // debugging the result
+    canvas := CreateBitmap(100, 100);
+    DrawATPABitmap(canvas, atpa);
+    ClearDebugImg();
+    DisplayDebugImgWindow(100, 100);
+    DrawBitmapDebugImg(canvas);
+    FreeBitmap(canvas);
+  end.  
 

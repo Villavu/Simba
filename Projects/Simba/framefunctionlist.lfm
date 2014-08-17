@@ -16,7 +16,9 @@ object FunctionListFrame: TFunctionListFrame
     Top = 20
     Width = 182
     Align = alClient
-    DefaultItemHeight = 17
+    DefaultItemHeight = 18
+    HideSelection = False
+    Images = SimbaForm.Mufasa_Image_List
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 0
@@ -24,7 +26,7 @@ object FunctionListFrame: TFunctionListFrame
     OnDeletion = FunctionListDeletion
     OnMouseDown = FunctionListMouseDown
     OnMouseUp = FunctionListMouseUp
-    Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
+    Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
   end
   object FunctionListLabel: TLabel
     Left = 2

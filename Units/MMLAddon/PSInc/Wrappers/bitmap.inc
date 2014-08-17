@@ -357,3 +357,67 @@ begin
   with CurrThread.Client.MBitmaps do
     result := ExistsBMP(Index);
 end;
+
+function ps_FindColorsBitmap(bmp: integer; var points: TPointArray; const color: integer): boolean; extdecl;
+begin;
+  result := CurrThread.Client.MBitmaps[bmp].findColors(points, color);
+end;
+
+procedure ps_CropBitmap(const bmp: integer; const xs, ys, xe, ye: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Crop(xs, ys, xe, ye);
+end;
+
+function ps_GetColorsBitmap(const bmp: integer): TIntegerArray; extdecl;
+begin
+  result := CurrThread.Client.MBitmaps[bmp].GetColors();
+end;
+
+function ps_BitmapToMatrix(const bmp: integer): T2DIntegerArray; extdecl;
+begin
+  result := CurrThread.Client.MBitmaps[bmp].ToMatrix();
+end;
+
+procedure ps_DrawMatrixBitmap(const bmp: integer; const matrix: T2DIntegerArray); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].DrawMatrix(matrix);
+end;
+
+procedure ps_ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].ResizeEx(Method, NewWidth, NewHeight);
+end;
+
+procedure ps_ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].ThresholdAdaptive(Alpha, Beta, Invert, Method, C);
+end;
+
+procedure ps_BlurBitmap(const bmp, block: integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps[bmp].Blur(block);
+end;
+
+function ps_RotateBitmapEx(Bitmap: Integer; Angle: Single; Expand: Boolean; Smooth: Boolean): Integer; extdecl;
+begin
+  with CurrThread.Client.MBitmaps do
+  begin
+    Result := CreateBMP(0,0);
+    Bmp[Bitmap].RotateBitmapEx(Angle, Expand, Smooth, Bmp[Result]);
+  end;
+end;
+
+procedure ps_RectangleBitmapEx(const Bitmap: Integer; const Box: TBox; const Color: Integer; const Transparency: Extended); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].Rectangle(Box, Color, Transparency);
+end;
+
+procedure ps_DrawTextBitmap(const Bitmap: Integer; const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].DrawText(Text, FontName, Pnt, Shadow, Color);
+end;
+
+procedure ps_DrawSystemTextBitmap(const Bitmap: Integer; const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].DrawSystemText(Text, FontName, FontSize, Pnt, Shadow, Color);
+end;

@@ -238,7 +238,7 @@ end;
 
 function TAutoCompleteListBox.getInsert: string;
 begin
-  if (ItemIndex < 0) or (ItemIndex > Length(fIndexList)) then
+  if (ItemIndex < 0) or (ItemIndex >= Length(fIndexList)) then
     Result := ''
   else
     Result := fInsertList[fIndexList[ItemIndex]];
@@ -566,6 +566,9 @@ end;
 
 procedure TAutoCompletePopup.Show(Pos: TPoint; ItemList, InsertList: TStrings; Filter: string = ''; Editor: TWinControl = nil);
 begin
+  if (ItemList.Count = 0) and (InsertList.Count = 0) then
+    Exit();
+
   ListBox.setLists(ItemList, InsertList);
   ListBox.Redirect := Editor;
   ListBox.Filter := Filter;

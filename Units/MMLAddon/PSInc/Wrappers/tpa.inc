@@ -89,6 +89,16 @@ begin
   SortATPAFromMidPoint(a,from);
 end;
 
+procedure ps_SortATPAFromFirstPointX(var a: T2DPointArray; const From: TPoint); extdecl;
+begin
+  SortATPAFromFirstPointX(a, From);
+end;
+
+procedure ps_SortATPAFromFirstPointY(var a: T2DPointArray; const From: TPoint); extdecl;
+begin
+  SortATPAFromFirstPointY(a, From);
+end;
+
 procedure ps_InvertTPA(var a: TPointArray); extdecl;
 begin
   InvertTPA(a);
@@ -147,6 +157,16 @@ end;
 function ps_SplitTPA(const arr: TPointArray; Dist: Integer): T2DPointArray;  extdecl;
 begin
   result := SplitTPA(arr,dist);
+end;
+
+function ps_ClusterTPAEx(const TPA: TPointArray; width, height: Integer): T2DPointArray;  extdecl;
+begin
+   result := ClusterTPAEx(tpa, width, height);
+end;
+
+function ps_ClusterTPA(const TPA: TPointArray; dist: Integer): T2DPointArray;  extdecl;
+begin
+   result := ClusterTPA(tpa, dist);
 end;
 
 function ps_FloodFillTPA(const TPA : TPointArray) : T2DPointArray; extdecl;
@@ -302,6 +322,11 @@ end;
 function ps_TPAFromCircle(const CX, CY, Radius: Integer) : TPointArray;  extdecl;
 begin
   result := TPAFromCircle(CX, CY, Radius);
+end;
+
+function ps_TPAFromPolygon(const shape: TPointArray): TPointArray; extdecl;
+begin
+  result := TPAFromPolygon(shape);
 end;
 
 procedure ps_FillEllipse(var a: TPointArray);
@@ -505,3 +530,27 @@ begin
   result:=GlueTPAs(V1,V2,IsSortedAscending,byDifference);
 end;
 
+procedure ps_FilterTPAsBetween(var atpa: T2DPointArray; const minLength, maxLength: integer); extdecl;
+begin
+  filterTPAsBetween(atpa, minLength, maxLength);
+end;
+
+procedure ps_MedianTPAEx(var tpa: TPointArray; out x, y: integer); extdecl;
+begin
+  MedianTPAEx(tpa, x, y);
+end;
+
+function ps_MedianTPA(var tpa: TPointArray): TPoint; extdecl;
+begin
+  result := MedianTPA(tpa);
+end;
+
+procedure ps_FilterPointsBox(var points: TPointArray; x1, y1, x2, y2: integer); extdecl;
+begin
+  FilterPointsBox(points, x1, y1, x2, y2);
+end;
+
+function ps_PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray; extdecl;
+begin
+  Result := PartitionTPA(TPA, BoxWidth, BoxHeight);
+end;

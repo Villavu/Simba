@@ -28,22 +28,22 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, MufasaBase,Forms, ComCtrls, StdCtrls, Controls,
-  ExtCtrls, Buttons,mmisc,v_ideCodeInsight;
+  ExtCtrls, Buttons,mmisc,v_ideCodeInsight, newsimbasettings;
 
 type
 
   { TFillThread }
-
   TFillThread = class(TThread)
   public
-    Analyzer : TCodeInsight;
-    MS : TMemoryStream;
-    FunctionList : ^TTreeView;
-    IncludesNode,ScriptNode : TTreeNode;
-    procedure execute; override;
+    Analyzer: TCodeInsight;
+    MS: TMemoryStream;
+    IncludesNode, PluginsNode, ScriptNode: TTreeNode;
+    LastIncludeCount: PLongInt;
+    procedure Update;
+    procedure Execute; override;
   end;
-  { TFunctionListFrame }
 
+  { TFunctionListFrame }
   TFunctionListFrame = class(TFrame)
     editSearchList: TEdit;
     FunctionList: TTreeView;
@@ -66,38 +66,42 @@ type
     procedure FunctionListMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
   private
-    FFilterTree : TTreeView;
-    FLastScript : string;
-    Filtering : boolean;
-    FillThread : TFillThread;
+    FFilterTree: TTreeView;
+    FLastScript: string;
+    FLastInterp: Integer;
+    Filtering: boolean;
+    FillThread: TFillThread;
     procedure FilterTreeVis(Vis : boolean);
     function GetFilterTree: TTreeView;
     { private declarations }
   public
-    DraggingNode : TTreeNode;
-    ScriptNode : TTreeNode;
-    IncludesNode : TTreeNode;
-    InCodeCompletion : boolean;
-    CompletionCaret : TPoint;
-    StartWordCompletion : TPoint;
-    CompletionLine : string;
-    CompletionStart : string;
-    property FilterTree : TTreeView read GetFilterTree;
-    procedure LoadScriptTree( Script : String);
-    function Find(Next : boolean; backwards : boolean = false) : boolean;
+    DraggingNode: TTreeNode;
+    ScriptNode: TTreeNode;
+    PluginsNode: TTreeNode;
+    IncludesNode: TTreeNode;
+    InCodeCompletion: boolean;
+    CompletionCaret: TPoint;
+    StartWordCompletion: TPoint;
+    CompletionLine: string;
+    CompletionStart: string;
+    LastIncludeCount: LongInt;
+    procedure Terminate;
+    property FilterTree: TTreeView read GetFilterTree;
+    procedure LoadScriptTree(Script: String; Force: Boolean = False);
+    function Find(Next: boolean; backwards: boolean = false) : boolean;
     { public declarations }
   end; 
 
   TMethodInfo = packed record
-    MethodStr,Filename : PChar;
-    BeginPos,endpos : integer;
+    MethodStr, Filename: PChar;
+    BeginPos, endpos: integer;
   end;
   PMethodInfo = ^TMethodInfo;
 
 implementation
 
 uses
-  SimbaUnit, Graphics, stringutil, simpleanalyzer,v_ideCodeParser,lclintf;
+  SimbaUnit, Graphics, stringutil, simpleanalyzer, v_ideCodeParser, lclintf, dynlibs;
 
 { TFunctionListFrame }
 
@@ -142,9 +146,17 @@ begin
 end;
 
 procedure TFunctionListFrame.FunctionListDblClick(Sender: TObject);
+  procedure OpenDocs(MethodInfo: TMethodInfo);
+  var
+    Arr: array of string;
+  begin
+    Arr := Explode('/', Copy(MethodInfo.Filename, 6, Length(MethodInfo.Filename) - 5));
+    if (Length(Arr) = 2) then
+      OpenURL(Format('http://docs.villavu.com/simba/scriptref/%s.html#%s', [Arr[0], Arr[1]]));
+  end;
 var
-  Node : TTreeNode;
-  MethodInfo : TMethodInfo;
+  Node: TTreeNode;
+  MethodInfo: TMethodInfo;
 begin
   if FilterTree.Visible then
     Node := FilterTree.Selected
@@ -160,14 +172,27 @@ begin
     else
     begin
       MethodInfo := PMethodInfo(node.Data)^;
-      if (DraggingNode = node) and (MethodInfo.BeginPos > 0) then
-        if (MethodInfo.Filename = nil) or ((MethodInfo.Filename = '') xor FileExistsUTF8(MethodInfo.Filename)) then
+      if (DraggingNode = node) and (MethodInfo.BeginPos >= 0) then
+      begin
+        if (MethodInfo.Filename <> nil) and (MethodInfo.Filename <> '') then
         begin
-          if (MethodInfo.Filename <> nil) and (MethodInfo.Filename <> '') then
-            SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true);
+          case Copy(MethodInfo.Filename, 1, 5) of
+            'docs:': OpenDocs(MethodInfo);
+            else
+              if (FileExistsUTF8(MethodInfo.Filename)) then
+                SimbaForm.LoadScriptFile(MethodInfo.Filename,true,true)
+              else
+                Exit;
+          end;
+        end;
+
+
+        if (MethodInfo.BeginPos > 0) then
+        begin
           SimbaForm.CurrScript.SynEdit.SelStart := MethodInfo.BeginPos + 1;
           SimbaForm.CurrScript.SynEdit.SelEnd := MethodInfo.EndPos + 1;
         end;
+      end;
     end;
 end;
 
@@ -226,15 +251,17 @@ end;
 
 procedure TFunctionListFrame.FilterTreeVis(Vis: boolean);
 begin
-  FunctionList.Visible:= not Vis;
+  FunctionList.Visible := not Vis;
   FilterTree.Visible := Vis;
 end;
 
 function TFunctionListFrame.GetFilterTree: TTreeView;
 begin
   Result := FFilterTree;
+
   if Assigned(Result) then
-    exit;
+    Exit;
+
   FFilterTree := TTreeView.Create(Self);
   FFilterTree.Parent := Self;
   FFilterTree.Visible := false;
@@ -242,17 +269,20 @@ begin
   FFilterTree.Align := alClient;
   FFilterTree.ReadOnly:= True;
   FFilterTree.ScrollBars:= ssAutoBoth;
-  FFilterTree.OnMouseDown:= FunctionList.OnMouseDown;
-  FFilterTree.OnMouseUp:= FunctionList.OnMouseUp;
-  FFilterTree.OnChange:= FunctionList.OnChange;
+  FFilterTree.Images := FunctionList.Images;
+  FFilterTree.OnMouseDown := FunctionList.OnMouseDown;
+  FFilterTree.OnMouseUp := FunctionList.OnMouseUp;
+  FFilterTree.OnChange := FunctionList.OnChange;
   FFilterTree.OnExit := FunctionList.OnExit;
-  FFilterTree.OnDblClick:= FunctionList.OnDblClick;
+  FFilterTree.OnDblClick := FunctionList.OnDblClick;
+
   Result := FFilterTree;
+
   //We do not want to delete the data from the FilterTree
-//  FilterTree.OnDeletion:= FunctionList.OnDeletion;
+  //FilterTree.OnDeletion := FunctionList.OnDeletion;
 end;
 
-procedure TFunctionListFrame.LoadScriptTree(Script: String);
+procedure TFunctionListFrame.LoadScriptTree(Script: String; Force: Boolean = False);
 begin
   if script = '' then
     exit;
@@ -260,18 +290,18 @@ begin
     exit;
   if FillThread <> nil then {Already busy filling!}
     exit;
-  if FLastScript = Script then
+  if ((FLastScript = Script) and (FLastInterp = SimbaSettings.Interpreter._Type.Value)) and (not Force) then
     exit;
   if SimbaForm.CurrScript = nil then
     exit;
-  FLastScript:= Script;
+  FLastScript := Script;
+  FLastInterp := SimbaSettings.Interpreter._Type.Value;
   Filtering := FilterTree.Visible;
   if FilterTree.Visible then
     FilterTreeVis(false);
   FunctionList.BeginUpdate;
   ScriptNode.DeleteChildren;
   FillThread := TFillThread.Create(true);
-  FillThread.FunctionList := @Self.FunctionList;
   FillThread.Analyzer := TCodeInsight.Create;
   with FillThread,FillThread.Analyzer do
   begin
@@ -279,13 +309,15 @@ begin
     OnLoadLibrary := @SimbaForm.OnCCLoadLibrary;
     FileName := SimbaForm.CurrScript.ScriptFile;
     MS := TMemoryStream.Create;
-    MS.Write(Script[1],length(script));
-    OnTerminate:=@FillThreadTerminate;
+    MS.Write(Script[1], Length(script));
+    OnTerminate := @FillThreadTerminate;
     FreeOnTerminate := True;
+    LastIncludeCount := @Self.LastIncludeCount;
     FillThread.ScriptNode := self.ScriptNode;
+    FillThread.PluginsNode := self.PluginsNode;
     FillThread.IncludesNode := self.IncludesNode;
   end;
-  FillThread.resume;
+  FillThread.Resume;
  //See FillThreadTerminate for the rest of this procedure
 end;
 
@@ -312,22 +344,23 @@ begin
     end;
     FilterTreeVis(False);
     ScriptNode.Expand(true);
-    exit;
+    Exit;
   end;
 
   //We only have to search the next item in our filter tree.. Fu-king easy!
-  if next then
+  if Next then
   begin;
     if FilterTree.Visible = false then
     begin;
       mDebugLn('ERROR: You cannot search next, since the Tree isnt generated yet');
       Find(false);
-      exit;
+      Exit;
     end;
+
     if FilterTree.Selected <> nil then
     begin;
       if backwards then
-        start := FilterTree.Selected.AbsoluteIndex  - 1
+        start := FilterTree.Selected.AbsoluteIndex - 1
       else
         Start := FilterTree.Selected.AbsoluteIndex + 1;
     end
@@ -370,42 +403,57 @@ begin
     LastSection[1] := '';
     LastSection[2] := '';
     for i := start to start + FunctionList.Items.Count - 1 do
-    begin;
+    begin
       Node := FunctionList.Items[i mod FunctionList.Items.Count];
-      if(Node.Level >= 1) and (node.HasChildren = false) then
+      if(Node.Level >= 1) and (Node.HasChildren = false) then
         if(pos(lowercase(editSearchList.Text), lowercase(Node.Text)) > 0)then
         begin
           if not FoundFunction then
           begin
             FoundFunction := True;
-            index := i mod FunctionList.Items.Count;
-            InsertStr:= node.Text;
+            Index := i mod FunctionList.Items.Count;
+            InsertStr := Node.Text;
           end;
-          if node.level = 2 then
-          begin;
-            if node.Parent.text <> lastsection[2] then
+          if Node.Level = 2 then
+          begin
+            if Node.Parent.Text <> lastsection[2] then
             begin
-              if node.parent.parent.text <> lastsection[1] then
-              begin;
-                rootnode := FilterTree.Items.AddChild(nil,node.parent.parent.text);
-                lastsection[1] := rootnode.text;
-                rootnode := FilterTree.Items.AddChild(Rootnode,node.parent.text);
-                lastsection[2] := rootnode.text;
+              if Node.Parent.Parent.Text <> lastsection[1] then
+              begin
+                RootNode := FilterTree.Items.AddChild(nil, Node.Parent.Parent.Text);
+                RootNode.ImageIndex := Node.Parent.Parent.ImageIndex;
+                RootNode.SelectedIndex := Node.Parent.Parent.SelectedIndex;
+                lastsection[1] := RootNode.Text;
+                RootNode := FilterTree.Items.AddChild(RootNode, Node.Parent.Text);
+                RootNode.ImageIndex := Node.Parent.ImageIndex;
+                RootNode.SelectedIndex := Node.Parent.SelectedIndex;
+                lastsection[2] := RootNode.Text;
               end else
               begin
-                rootnode := FilterTree.Items.AddChild(rootnode.parent,node.parent.text);
-                lastsection[2] := rootnode.text;
+                RootNode := FilterTree.Items.AddChild(RootNode.Parent, Node.Parent.Text);
+                RootNode.ImageIndex := Node.Parent.ImageIndex;
+                RootNode.SelectedIndex := Node.Parent.SelectedIndex;
+                lastsection[2] := RootNode.Text;
               end;
             end;
           end else
           begin
-            if node.parent.text <> lastsection[1] then
+            if (Node.Parent.Text <> lastsection[1]) then
             begin
-              rootnode := FilterTree.Items.AddChild(nil,node.parent.text);
+              RootNode := FilterTree.Items.AddChild(nil, Node.Parent.Text);
+              RootNode.ImageIndex := Node.Parent.ImageIndex;
+              RootNode.SelectedIndex := Node.Parent.SelectedIndex;
               lastsection[1] := Rootnode.text;
             end;
           end;
-          FilterTree.Items.AddChild(RootNode,Node.Text).Data := Node.Data;
+
+          with FilterTree.Items.AddChild(RootNode, Node.Text) do
+          begin
+            Data := Node.Data;
+            ImageIndex := Node.ImageIndex;
+            SelectedIndex := Node.SelectedIndex;
+          end;
+
   //        break;
         end;
       end;
@@ -485,65 +533,265 @@ begin
     exit;
   end;
   Self.DragKind := dkDrag;
-  if(Button = mbLeft) and (N.Level > 0)then
+  if ((Button = mbLeft) and (N.Level > 0) and (N.Parent <> PluginsNode)) then
     Self.BeginDrag(False, 10);
   DraggingNode := N;
 end;
 
+procedure TFunctionListFrame.Terminate;
+begin
+  if (FillThread <> nil) then
+    FillThread.Terminate;
+end;
 
 { TFillThread }
 
-procedure TFillThread.execute;
-  procedure AddProcsTree(Node : TTreeNode; Procs : TDeclarationList; Path : string);
-  var
-    i : integer;
-    tmpNode : TTreeNode;
-  begin;
-    if procs = nil then
-      exit;
-    for i := 0 to Procs.Count - 1 do
-      if (Procs[i] <> nil) and (Procs[i] is TciProcedureDeclaration) then
-        with Procs[i] as TciProcedureDeclaration do
-          if name <> nil then
+procedure TFillThread.Update;
+  procedure AddProcsTree(Node: TTreeNode; Procs: TDeclarationList; Path: string);
+    procedure ProcessProcedure(Node: TTreeNode; Proc: TciProcedureDeclaration);
+      function findNodeStartingWith(Node: TTreeNode; x: string): TTreeNode;
+      var
+        x_len: LongInt;
+      begin
+        x_len := Length(x);
+
+        Result := Node.GetFirstChild();
+        while (Result <> nil) and (Copy(Result.Text, 1, x_len) <> x) do
+          Result := Result.GetNextSibling();
+      end;
+    var
+      tmpNode: TTreeNode;
+      Name, FirstLine: string;
+      Index: LongInt;
+      ClassName: TDeclaration;
+    begin
+      if (Assigned(Proc.Name)) then
+      begin
+        Name := Proc.Name.ShortText + '; ';
+
+        ClassName := Proc.Items.GetFirstItemOfClass(TciProcedureClassName);
+        if (Assigned(ClassName)) then
+        begin
+          tmpNode := findNodeStartingWith(Node, ClassName.ShortText + ' =');
+          if (tmpNode = nil) then
+            tmpNode := findNodeStartingWith(Node, ClassName.ShortText);
+
+          if (tmpNode = nil) then
           begin
-            tmpNode := FunctionList^.Items.AddChild(Node,name.ShortText);
-            tmpNode.Data := GetMem(SizeOf(TMethodInfo));
-            FillChar(PMethodInfo(tmpNode.Data)^,SizeOf(TMethodInfo),0);
-            with PMethodInfo(tmpNode.Data)^ do
-            begin
-              MethodStr := strnew(Pchar(CleanDeclaration));
-              Filename:= strnew(pchar(path));
-              BeginPos:= name.StartPos ;
-              EndPos :=  name.StartPos + Length(TrimRight(name.RawText));
-            end;
+            tmpNode := Node.TreeNodes.AddChild(Node, ClassName.CleanText);
+            tmpNode.ImageIndex := 36;
+            tmpNode.SelectedIndex := 36;
           end;
-  end;
 
-  procedure AddIncludes(ParentNode : TTreeNode; Include : TCodeInsight);
+          Node := tmpNode;
+        end;
+
+        FirstLine := Lowercase(Proc.CleanText);
+
+        Index := Pos(#13, FirstLine);
+        if (Index > 0) then
+          FirstLine := Copy(FirstLine, 1, Index - 1);
+
+        Index := Node.IndexOfText(Trim(Name));
+        if (Index = -1)  then
+          Index := Node.IndexOfText(Name + 'override;');
+        if (Index = -1)  then
+          Index := Node.IndexOfText(Name + 'overload;');
+        if (Index > -1) then
+          Node := Node.Items[Index];
+
+        if (Pos('override;', FirstLine) > 0) then
+          Name += 'override; ';
+        if (Pos('overload;', FirstLine) > 0) then
+          Name += 'overload; ';
+
+        tmpNode := Node.TreeNodes.AddChild(Node, Trim(Name));
+        tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+
+        tmpNode.ImageIndex := 34;
+        if (Proc.ProcType = 'procedure') then tmpNode.ImageIndex := 35;
+        tmpNode.SelectedIndex := tmpNode.ImageIndex;
+
+        FillChar(PMethodInfo(tmpNode.Data)^, SizeOf(TMethodInfo), 0);
+
+        with PMethodInfo(tmpNode.Data)^ do
+        begin
+          MethodStr := strnew(Pchar(Proc.CleanDeclaration));
+          Filename := strnew(pchar(Path));
+          BeginPos := Proc.Name.StartPos;
+          EndPos :=  Proc.Name.StartPos + Length(TrimRight(Proc.Name.RawText));
+        end;
+      end;
+    end;
+    procedure ProcessDecl(Node: TTreeNode; Decl: TDeclaration);
+      function getVarName(Decl: TDeclaration): string;
+      begin
+        case Decl.ClassName of
+          'TciVarDeclaration': Result := Decl.Items.GetFirstItemOfClass(TciVarName).ShortText;
+          'TciConstantDeclaration': Result := Decl.Items.GetFirstItemOfClass(TciConstantName).ShortText;
+          'TciClassField': Result := Decl.Items.GetFirstItemOfClass(TciFieldName).ShortText;
+        end;
+      end;
+    var
+      tmpNode: TTreeNode;
+    begin
+      tmpNode := Node.TreeNodes.AddChild(Node, Trim(Decl.CleanText));
+      tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+
+      if (Decl is TciConstantDeclaration) then tmpNode.ImageIndex := 33;
+      if (Decl is TciVarDeclaration) or (Decl is TciClassField) then tmpNode.ImageIndex := 37;
+      tmpNode.SelectedIndex := tmpNode.ImageIndex;
+
+      FillChar(PMethodInfo(tmpNode.Data)^, SizeOf(TMethodInfo), 0);
+
+      with PMethodInfo(tmpNode.Data)^ do
+      begin
+        MethodStr := strnew(Pchar(getVarName(Decl)));
+        Filename := strnew(pchar(Path));
+        BeginPos := Decl.StartPos;
+        EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
+      end;
+    end;
+    procedure ProcessType(Node: TTreeNode; Decl: TciTypeDeclaration);
+    var
+      tmpNode: TTreeNode;
+      TypeKind: TciTypeKind;
+      TypeName: TciTypeName;
+      Index, Count: LongInt;
+      Str, Txt: String;
+      EndOfLine: Integer;
+    begin
+      TypeKind := TciTypeKind(Decl.Items.GetFirstItemOfClass(TciTypeKind));
+      TypeName := TciTypeName(Decl.Items.GetFirstItemOfClass(TciTypeName));
+
+      Txt := Lowercase(TypeKind.ShortText);
+      Str := TypeKind.GetRealType.ShortText;
+      EndOfLine := Pos(LineEnding, Str);
+
+      if (EndOfLine > 0) then
+         Str := Copy(Str, 0, EndOfLine);
+
+      case Txt of
+         'record', 'union': tmpNode := Node.TreeNodes.AddChild(Node, Trim(TypeName.CleanText) + ' = ' + Str);
+         'packed record': tmpNode := Node.TreeNodes.AddChild(Node, Trim(TypeName.CleanText) + ' = ' + 'packed ' + Str);
+       else
+          tmpNode := Node.TreeNodes.AddChild(Node, Trim(Decl.CleanText));
+      end;
+
+      tmpNode.ImageIndex := 36;
+      tmpNode.SelectedIndex := 36;
+      tmpNode.Data := GetMem(SizeOf(TMethodInfo));
+      FillChar(PMethodInfo(tmpNode.Data)^, SizeOf(TMethodInfo), 0);
+
+      with PMethodInfo(tmpNode.Data)^ do
+      begin
+        MethodStr := strnew(Pchar(Decl.CleanText));
+        Filename := strnew(pchar(Path));
+        BeginPos := Decl.StartPos;
+        EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
+      end;
+
+      if (Txt = 'record') or (Txt = 'union') or (Txt = 'packed record') then
+      begin
+        Count := TypeKind.GetRealType.Items.Count - 1;
+        for Index := 0 to Count do
+          if (not (TypeKind.GetRealType.Items[Index] is TciJunk)) then
+            ProcessDecl(tmpNode, TypeKind.GetRealType.Items[Index]);
+      end;
+    end;
+
   var
-    i : integer;
+    I: integer;
   begin;
-    parentNode := FunctionList^.Items.AddChild(
-                 IncludesNode,ExtractFileNameOnly(
-                 Include.FileName));
-    AddProcsTree(parentNode,Include.Items,Include.FileName);
-    for i := 0 to high(Include.Includes) do
-      AddIncludes(ParentNode,Include.Includes[i])
-  end;
-var
-  i : integer;
-begin
-  Analyzer.Run(MS,nil,-1,true);
-  AddProcsTree(ScriptNode,Analyzer.Items,Analyzer.FileName); //Add the procedures of the script to the script tree
+    if (not Assigned(Procs)) then
+      Exit;
 
-  //Lame condition.. We must check if nothing new has been included since
-  //last generation of the tree.. However, this will do fine for now ;)
-  if IncludesNode.Count <> length(Analyzer.Includes) then
-  begin;
-    IncludesNode.DeleteChildren;
-    for i := 0 to high(Analyzer.Includes) do
-      AddIncludes(IncludesNode, Analyzer.Includes[i]);
+    for I := 0 to Procs.Count - 1 do
+      if (Assigned(Procs[I])) then
+        case Procs[I].ClassName of
+          'TciProcedureDeclaration': ProcessProcedure(Node, Procs[I] as TciProcedureDeclaration);
+          'TciVarDeclaration', 'TciConstantDeclaration': ProcessDecl(Node, Procs[I] as TDeclaration);
+          'TciTypeDeclaration': ProcessType(Node, Procs[I] as TciTypeDeclaration);
+          'TciJunk', 'TciInclude', 'TciCompoundStatement': ;
+          else
+            WriteLn('Unknown Class: ', Procs[I].ClassName);
+        end;
   end;
+
+  function isLib(ci: TCodeInsight): boolean; inline;
+  begin
+    Result := (Length(ci.FileName) > 4) and (Copy(ci.FileName, 1, 4) = 'lib:');
+  end;
+
+  procedure AddInclude(ParentNode: TTreeNode; Include: TCodeInsight);
+  var
+    I: integer;
+  begin;
+    I := ParentNode.IndexOfText(ExtractFileNameOnly(Include.FileName));
+    if (I < 0) then
+    begin
+      ParentNode.TreeNodes.AddChild(ParentNode, ExtractFileNameOnly(Include.FileName));
+      I := ParentNode.IndexOfText(ExtractFileNameOnly(Include.FileName));
+
+      with ParentNode.Items[I] do
+      begin
+        if (isLib(Include)) then
+          ImageIndex := 42
+        else
+          ImageIndex := 38;
+        SelectedIndex := ImageIndex;
+
+        Data := GetMem(SizeOf(TMethodInfo));
+        FillChar(PMethodInfo(Data)^, SizeOf(TMethodInfo), 0);
+      end;
+    end;
+
+    ParentNode := ParentNode.Items[I];
+
+    if (PMethodInfo(ParentNode.Data)^.Filename <> nil) and (PMethodInfo(ParentNode.Data)^.Filename = Include.FileName) then
+      Exit;
+
+    PMethodInfo(ParentNode.Data)^.Filename := strnew(PChar(Include.FileName));
+
+    AddProcsTree(ParentNode, Include.Items, Include.FileName);
+
+    for I := 0 to High(Include.Includes) do
+      if (isLib(Include.Includes[I])) then
+        AddInclude(PluginsNode, Include.Includes[I])
+      else
+        AddInclude(ParentNode.Parent, Include.Includes[I]);
+  end;
+
+  function getCount(Analyzer: TCodeInsight): LongWord;
+  begin
+    Result := Length(Analyzer.Includes) + Analyzer.Lexer.Defines.Count;
+  end;
+
+var
+  I: LongInt;
+begin
+  AddProcsTree(ScriptNode, Analyzer.Items, Analyzer.FileName);
+
+  if (LastIncludeCount^ <> getCount(Analyzer)) then
+  begin
+    PluginsNode.DeleteChildren;
+    IncludesNode.DeleteChildren;
+
+    for I := 0 to High(Analyzer.Includes) do
+      if (isLib(Analyzer.Includes[I])) then
+        AddInclude(PluginsNode, Analyzer.Includes[I])
+      else
+        AddInclude(IncludesNode, Analyzer.Includes[I]);
+
+    LastIncludeCount^ := getCount(Analyzer);
+  end;
+end;
+
+procedure TFillThread.execute;
+begin
+  Analyzer.Run(MS, nil, -1, True);
+
+  Synchronize(@Update);
 end;
 
 initialization

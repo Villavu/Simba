@@ -27,6 +27,8 @@ type
   PStringList = ^TStringList;
   PNotifyEvent = ^TNotifyEvent;//register in Register Classes
   PStringListSortCompare = ^TStringListSortCompare;//register in Register Classes
+  PCollectionItem = ^TCollectionItem;
+  PCollection = ^TCollection;
 
 procedure RegisterLCLSystem(Compiler: TLapeCompiler);
 
@@ -255,10 +257,10 @@ begin
     addClass('TStream');
 
     addGlobalFunc('function TStream.Read(var Buffer; Count: Longint): Longint;', @TStream_Read);
-    addGlobalFunc('function TStream.Write(const Buffer; Count: Longint): Longint;', @TStream_Write);
+    addGlobalFunc('function TStream.Write(constref Buffer; Count: Longint): Longint;', @TStream_Write); //test
     addGlobalFunc('function TStream.Seek(Offset: Longint; Origin: Word): Longint;', @TStream_Seek);
     addGlobalFunc('procedure TStream.ReadBuffer(var Buffer; Count: Longint);', @TStream_ReadBuffer);
-    addGlobalFunc('procedure TStream.WriteBuffer(const Buffer; Count: Longint);', @TStream_WriteBuffer);
+    addGlobalFunc('procedure TStream.WriteBuffer(constref Buffer; Count: Longint);', @TStream_WriteBuffer);
     addGlobalFunc('function TStream.CopyFrom(Source: TStream; Count: Int64): Int64;', @TStream_CopyFrom);
     addGlobalFunc('function TStream.ReadComponent(Instance: TComponent): TComponent;', @TStream_ReadComponent);
     addGlobalFunc('function TStream.ReadComponentRes(Instance: TComponent): TComponent;', @TStream_ReadComponentRes);
@@ -328,7 +330,7 @@ begin
 
     addGlobalFunc('procedure THandleStream.Init(AHandle: THandle);', @THandleStream_Init);
     addGlobalFunc('function THandleStream.Read(var Buffer; Count: Longint): Longint;', @THandleStream_Read);
-    addGlobalFunc('function THandleStream.Write(const Buffer; Count: Longint): Longint;', @THandleStream_Write);
+    addGlobalFunc('function THandleStream.Write(constref Buffer; Count: Longint): Longint;', @THandleStream_Write);
     addGlobalFunc('function THandleStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;', @THandleStream_Seek);
     addClassVar('THandleStream', 'Handle', 'THandle', @THandleStream_Handle_Read);
     addGlobalFunc('procedure THandleStream.Free();', @THandleStream_Free);
@@ -487,7 +489,7 @@ begin
     addGlobalFunc('procedure TMemoryStream.LoadFromStream(Stream: TStream);', @TMemoryStream_LoadFromStream);
     addGlobalFunc('procedure TMemoryStream.LoadFromFile(const FileName: string);', @TMemoryStream_LoadFromFile);
     addGlobalFunc('procedure TMemoryStream.SetSize(NewSize: PtrInt);', @TMemoryStream_SetSize);
-    addGlobalFunc('function TMemoryStream.Write(const Buffer; Count: LongInt): LongInt;', @TMemoryStream_Write);
+    addGlobalFunc('function TMemoryStream.Write(constref Buffer; Count: LongInt): LongInt;', @TMemoryStream_Write);
     addGlobalFunc('procedure TMemoryStream.Init();', @TMemoryStream_Init);
     addGlobalFunc('procedure TMemoryStream.Free();', @TMemoryStream_Free);
   end;
@@ -552,7 +554,7 @@ begin
     addGlobalFunc('function TStringStream.Read(var Buffer; Count: Longint): Longint;', @TStringStream_Read);
     addGlobalFunc('function TStringStream.ReadString(Count: Longint): string;', @TStringStream_ReadString);
     addGlobalFunc('function TStringStream.Seek(Offset: Longint; Origin: Word): Longint;', @TStringStream_Seek);
-    addGlobalFunc('function TStringStream.Write(const Buffer; Count: Longint): Longint;', @TStringStream_Write);
+    addGlobalFunc('function TStringStream.Write(constref Buffer; Count: Longint): Longint;', @TStringStream_Write);
     addGlobalFunc('procedure TStringStream.WriteString(const AString: string);', @TStringStream_WriteString);
     addClassVar('TStringStream', 'DataString', 'string', @TStringStream_DataString_Read);
     addGlobalFunc('procedure TStringStream.Free();', @TStringStream_Free);
@@ -722,6 +724,18 @@ begin
   PStrings(Params^[0])^.Strings[PInteger(Params^[1])^] := PlpString(Params^[2])^;
 end;
 
+//Read: property Values[string]: string
+procedure TStrings_Values_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PlpString(Result)^ := PStrings(Params^[0])^.Values[PlpString(Params^[1])^];
+end;
+
+//Write: property Values[string]: string
+procedure TStrings_Values_Write(const Params: PParamArray); lape_extdecl
+begin
+  PStrings(Params^[0])^.Values[PlpString(Params^[1])^] := PlpString(Params^[2])^;
+end;
+
 //Read: property Text: string read Text write Text;
 procedure TStrings_Text_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -774,15 +788,12 @@ begin
     addGlobalFunc('procedure TStrings.Move(CurIndex, NewIndex: Integer);', @TStrings_Move);
     addGlobalFunc('procedure TStrings.SaveToFile(const FileName: string);', @TStrings_SaveToFile);
     addGlobalFunc('procedure TStrings.SaveToStream(Stream: TStream);', @TStrings_SaveToStream);
-    addGlobalFunc('function TStrings.GetObjects(index: integer):TObject;', @TStrings_Objects_Read);
-    addGlobalFunc('function TStrings.GetStrings(index: integer):string;', @TStrings_Strings_Read);
-    addGlobalFunc('procedure TStrings.SetObjects(index: integer;obj: TObject);', @TStrings_Objects_Write);
-    addGlobalFunc('procedure TStrings.SetStrings(index: integer; text: string);', @TStrings_Strings_Write);
-
     addClassVar( 'TStrings', 'Count', 'Integer', @TStrings_Count_Read);
-   // addClassVar('TStrings', 'Objects', 'TObject', @TStrings_Objects_Read, @TStrings_Objects_Write);
-   // addClassVar('TStrings', 'Values', 'string', @TStrings_Values_Read, @TStrings_Values_Write);
-   // addClassVar('TStrings', 'Strings', 'string', @TStrings_Strings_Read, @TStrings_Strings_Write);
+
+    addClassVar('TStrings', 'Objects', 'TObject', @TStrings_Objects_Read, @TStrings_Objects_Write, True);
+    addClassVar('TStrings', 'Values', 'string', @TStrings_Values_Read, @TStrings_Values_Write, True, 'string');
+    addClassVar('TStrings', 'Strings', 'string', @TStrings_Strings_Read, @TStrings_Strings_Write, True);
+
     addClassVar('TStrings', 'Text', 'string', @TStrings_Text_Read, @TStrings_Text_Write);
     addGlobalFunc('procedure TStrings.Init();', @TStrings_Init);
     addGlobalFunc('procedure TStrings.Free();', @TStrings_Free);
@@ -1073,6 +1084,200 @@ begin
     addGlobalFunc('procedure TComponent.Free();', @TComponent_Free);
   end;
 end;
+
+procedure Register_TCollection_Forward(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+    addClass('TCollection', 'TPersistent');
+end;
+
+//constructor Create(ACollection: TCollection); virtual;
+procedure TCollectionItem_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCollectionItem(Params^[0])^ := TCollectionItem.Create(PCollection(Params^[1])^);
+end;
+
+//function GetNamePath: string; override;
+procedure TCollectionItem_GetNamePath(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLPString(Result)^ := PCollectionItem(Params^[0])^.GetNamePath();
+end;
+
+//Read: property Collection: TCollection read FCollection write SetCollection;
+procedure TCollectionItem_Collection_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCollection(Result)^ := PCollectionItem(Params^[0])^.Collection;
+end;
+
+//Write: property Collection: TCollection read FCollection write SetCollection;
+procedure TCollectionItem_Collection_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCollectionItem(Params^[0])^.Collection := PCollection(Params^[1])^;
+end;
+
+//Read: property ID: Integer read FID;
+procedure TCollectionItem_ID_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCollectionItem(Params^[0])^.ID;
+end;
+
+//Read: property Index: Integer read GetIndex write SetIndex;
+procedure TCollectionItem_Index_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCollectionItem(Params^[0])^.Index;
+end;
+
+//Write: property Index: Integer read GetIndex write SetIndex;
+procedure TCollectionItem_Index_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCollectionItem(Params^[0])^.Index := PInteger(Params^[1])^;
+end;
+
+//Read: property DisplayName: string read GetDisplayName write SetDisplayName;
+procedure TCollectionItem_DisplayName_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PlpString(Result)^ := PCollectionItem(Params^[0])^.DisplayName;
+end;
+
+//Write: property DisplayName: string read GetDisplayName write SetDisplayName;
+procedure TCollectionItem_DisplayName_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCollectionItem(Params^[0])^.DisplayName := PlpString(Params^[1])^;
+end;
+
+//procedure Free();
+procedure TCollectionItem_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCollectionItem(Params^[0])^.Free();
+end;
+
+procedure Register_TCollectionItem(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TCollectionItem', 'TPersistent');
+
+    addGlobalFunc('procedure TCollectionItem.Init(ACollection: TCollection);', @TCollectionItem_Init);
+    addGlobalFunc('function TCollectionItem.GetNamePath(): string;', @TCollectionItem_GetNamePath);
+    addClassVar('TCollectionItem', 'Collection', 'TCollection', @TCollectionItem_Collection_Read, @TCollectionItem_Collection_Write);
+    addClassVar('TCollectionItem', 'ID', 'Integer', @TCollectionItem_ID_Read, nil);
+    addClassVar('TCollectionItem', 'Index', 'Integer', @TCollectionItem_Index_Read, @TCollectionItem_Index_Write);
+    addClassVar('TCollectionItem', 'DisplayName', 'string', @TCollectionItem_DisplayName_Read, @TCollectionItem_DisplayName_Write);
+    addGlobalFunc('procedure TCollectionItem.Free();', @TCollectionItem_Free);
+  end;
+end;
+
+//function Owner: TPersistent;
+procedure TCollection_Owner(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPersistent(Result)^ := PCollection(Params^[0])^.Owner();
+end;
+
+//function Add: TCollectionItem;
+procedure TCollection_Add(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCollectionItem(Result)^ := PCollection(Params^[0])^.Add();
+end;
+
+//procedure Assign(Source: TPersistent); override;
+procedure TCollection_Assign(const Params: PParamArray); lape_extdecl
+begin
+  PCollection(Params^[0])^.Assign(PPersistent(Params^[1])^);
+end;
+
+//procedure BeginUpdate; virtual;
+procedure TCollection_BeginUpdate(const Params: PParamArray); lape_extdecl
+begin
+  PCollection(Params^[0])^.BeginUpdate();
+end;
+
+//procedure Clear;
+procedure TCollection_Clear(const Params: PParamArray); lape_extdecl
+begin
+  PCollection(Params^[0])^.Clear();
+end;
+
+//procedure EndUpdate; virtual;
+procedure TCollection_EndUpdate(const Params: PParamArray); lape_extdecl
+begin
+  PCollection(Params^[0])^.EndUpdate();
+end;
+
+//procedure Delete(Index: Integer);
+procedure TCollection_Delete(const Params: PParamArray); lape_extdecl
+begin
+  PCollection(Params^[0])^.Delete(PInteger(Params^[1])^);
+end;
+
+//function GetNamePath: string; override;
+procedure TCollection_GetNamePath(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PLPString(Result)^ := PCollection(Params^[0])^.GetNamePath();
+end;
+
+//function Insert(Index: Integer): TCollectionItem;
+procedure TCollection_Insert(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCollectionItem(Result)^ := PCollection(Params^[0])^.Insert(PInteger(Params^[1])^);
+end;
+
+//function FindItemID(ID: Integer): TCollectionItem;
+procedure TCollection_FindItemID(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCollectionItem(Result)^ := PCollection(Params^[0])^.FindItemID(PInteger(Params^[1])^);
+end;
+
+//procedure Exchange(Const Index1, index2: integer);
+procedure TCollection_Exchange(const Params: PParamArray); lape_extdecl
+begin
+  PCollection(Params^[0])^.Exchange(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+//Read: property Count: Integer read GetCount;
+procedure TCollection_Count_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PInteger(Result)^ := PCollection(Params^[0])^.Count;
+end;
+
+//Read: property Items[Index: Integer]: TCollectionItem read GetItem write SetItem;
+procedure TCollection_Items_Index_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCollectionItem(Result)^ := PCollection(Params^[0])^.Items[PInteger(Params^[1])^];
+end;
+
+//Write: property Items[Index: Integer]: TCollectionItem read GetItem write SetItem;
+procedure TCollection_Items_Index_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCollection(Params^[0])^.Items[PInteger(Params^[1])^] := PCollectionItem(Params^[2])^;
+end;
+
+//procedure Free();
+procedure TCollection_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCollection(Params^[0])^.Free();
+end;
+
+procedure Register_TCollection(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addGlobalFunc('function TCollection.Owner(): TPersistent;', @TCollection_Owner);
+    addGlobalFunc('function TCollection.Add(): TCollectionItem;', @TCollection_Add);
+    addGlobalFunc('procedure TCollection.Assign(Source: TPersistent);', @TCollection_Assign);
+    addGlobalFunc('procedure TCollection.BeginUpdate();', @TCollection_BeginUpdate);
+    addGlobalFunc('procedure TCollection.Clear();', @TCollection_Clear);
+    addGlobalFunc('procedure TCollection.EndUpdate();', @TCollection_EndUpdate);
+    addGlobalFunc('procedure TCollection.Delete(Index: Integer);', @TCollection_Delete);
+    addGlobalFunc('function TCollection.GetNamePath(): string; override;', @TCollection_GetNamePath);
+    addGlobalFunc('function TCollection.Insert(Index: Integer): TCollectionItem;', @TCollection_Insert);
+    addGlobalFunc('function TCollection.FindItemID(ID: Integer): TCollectionItem;', @TCollection_FindItemID);
+    addGlobalFunc('procedure TCollection.Exchange(Const Index1, index2: integer);', @TCollection_Exchange);
+    addClassVar('TCollection', 'Count', 'Integer', @TCollection_Count_Read, nil);
+    addClassVar('TCollection', 'Items', 'TCollectionItem', @TCollection_Items_Index_Read, @TCollection_Items_Index_Write, True);
+    addGlobalFunc('procedure TCollection.Free();', @TCollection_Free);
+  end;
+end;
+
 {Registration classes procedure}
 procedure RegisterLCLSystem(Compiler: TLapeCompiler);
 begin
@@ -1083,6 +1288,7 @@ begin
     addGlobalType('dword','THandle');
     addGlobalType('string','TComponentName');
     addGlobalType('(soBeginning, soCurrent, soEnd)','TSeekOrigin');
+    addGlobalType('string', 'TCaption');
 
     Register_TPersistent(Compiler);
     Register_TComponent(Compiler);
@@ -1094,6 +1300,9 @@ begin
     Register_TStringStream(Compiler);
     Register_TStrings(Compiler);
     Register_TStringList(Compiler);
+    Register_TCollection_Forward(Compiler);
+    Register_TCollectionItem(Compiler);
+    Register_TCollection(Compiler);
   end;
 end;
 

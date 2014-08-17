@@ -493,11 +493,6 @@ begin
   P2DPointArray(Result)^ := ps_CopyATPA(P2DPointArray(Params^[0])^);
 end;
 
-procedure Lape_MiddleBox(const Params: PParamArray; const Result: Pointer); lape_extdecl
-begin
-  PPoint(Result)^ := ps_MiddleBox(PBox(Params^[0])^);
-end;
-
 procedure Lape_TPAPosNext(const Params: PParamArray;const Result: pointer); lape_extdecl
 begin
  PInteger(Result)^:= ps_TPAPosNext(PPoint(Params^[0])^, PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
@@ -507,3 +502,55 @@ procedure Lape_GlueTPAs(const Params: PParamArray; const Result: Pointer); lape_
 begin
  PPointArray(Result)^:= ps_GlueTPAs(PPointArray(Params^[0])^, PPointArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
+
+procedure Lape_SortATPAFromFirstPointX(const Params: PParamArray); lape_extdecl
+begin
+  ps_SortATPAFromFirstPointX(P2DPointArray(Params^[0])^, PPoint(Params^[1])^);
+end;
+
+procedure Lape_SortATPAFromFirstPointY(const Params: PParamArray); lape_extdecl
+begin
+  ps_SortATPAFromFirstPointY(P2DPointArray(Params^[0])^, PPoint(Params^[1])^);
+end;
+
+procedure Lape_FilterTPAsBetween(const Params: PParamArray); lape_extdecl
+begin
+  ps_filterTPAsBetween(P2DPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_MedianTPAEx(const Params: PParamArray); lape_extdecl
+begin
+  ps_MedianTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_MedianTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPoint(Result)^ := ps_MedianTPA(PPointArray(Params^[0])^);
+end;
+
+procedure Lape_FilterPointsBox(const Params: PParamArray); lape_extdecl
+begin
+  ps_FilterPointsBox(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure Lape_TPAFromPolygon(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPointArray(Result)^ := ps_TPAFromPolygon(PPointArray(Params^[0])^);
+end;
+
+procedure Lape_ClusterTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DPointArray(Result)^ := ps_ClusterTPA(PPointArray(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+procedure Lape_ClusterTPAEx(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DPointArray(Result)^ := ps_ClusterTPAEx(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure Lape_PartitionTPA(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  P2DPointArray(Result)^ := ps_PartitionTPA(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+
