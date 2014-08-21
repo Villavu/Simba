@@ -121,6 +121,9 @@ type
       AFlag: TBalloonFlags;
     end;
 
+    TTypeProc = procedure of object;
+    TTypeProcArray = array of TTypeProc;
+
     { TMThread }
 
     TMThread = class(TThread)
@@ -157,6 +160,7 @@ type
       CompileOnly : boolean;
 
       ExportedMethods: TExpMethodArr;
+      OnTermTypeProcs: TTypeProcArray;
 
       procedure FormCallBackEx(cmd : integer; var data : pointer);
       procedure FormCallBack(cmd : integer; data : pointer);
@@ -1301,7 +1305,6 @@ type
   PExtendedArray = ^TExtendedArray;
   P2DIntegerArray = ^T2DIntegerArray;
   PFont = ^TFont;
-//  PStrExtr = ^TStrExtr;
   PReplaceFlags = ^TReplaceFlags;
   PClickType = ^TClickType;
   P2DExtendedArray = ^T2DExtendedArray;
@@ -1312,6 +1315,8 @@ type
   PMsgDlgButtons = ^TMsgDlgButtons;
   PClient = ^TClient;
   PStrings = ^TStrings;
+  PTypeProc = ^TTypeProc;
+  PTypeProcArr = ^TTypeProcArray;
 
 threadvar
   WriteLnStr: string;
@@ -1349,6 +1354,30 @@ begin
   PPtrUInt(Result)^ := GetCurrentThreadID();
 end;
 
+function lp_OnTerm_FreeTypeProcs(): String;
+begin
+  Result :=
+  'procedure __OnTerm_FreeTypeProcs();'                      + LineEnding +
+  'var'                                                      + LineEnding +
+    'Procs: TTypeProcArray;'                                 + LineEnding +
+    'i: Integer;'                                            + LineEnding +
+  'begin'                                                    + LineEnding +
+    'Procs := GetOnTerminate();'                             + LineEnding +
+    'if (Length(Procs) = 0) then'                            + LineEnding +
+      'Exit();'                                              + LineEnding +
+
+    'for i := 0 to High(Procs) do'                           + LineEnding +
+      'if (@Procs[i] <> nil) then'                           + LineEnding +
+      'begin'                                                + LineEnding +
+        'try'                                                + LineEnding +
+          'Procs[i]();'                                      + LineEnding +
+        'except'                                             + LineEnding +
+          'Writeln(''OnTerm: Failed to call type method'');' + LineEnding +
+        'end;'                                               + LineEnding +
+      'end;'                                                 + LineEnding +
+  'end;';
+end;
+
 {$I LPInc/Wrappers/lp_other.inc}
 
 {$I LPInc/Wrappers/lp_settings.inc}
@@ -1374,7 +1403,8 @@ end;
 constructor TLPThread.Create(CreateSuspended: Boolean; TheSyncInfo: PSyncInfo; plugin_dir: string);
   procedure SetCurrSection(x: string); begin end;
 var
-  I: integer;
+  I: Integer;
+  V: array [0..0] of Variant;
 begin
   inherited Create(CreateSuspended, TheSyncInfo, plugin_dir);
 
@@ -1388,6 +1418,9 @@ begin
   Compiler['Move'].Name := 'MemMove';
   Compiler.OnFindFile := @OnFindFile;
   Compiler.OnHandleDirective := @OnHandleDirective;
+
+  V[0] := '__OnTerm_FreeTypeProcs';
+  Prop.SetProp(SP_OnTerminate, V);
 
   with Compiler do
   begin
@@ -1415,6 +1448,8 @@ begin
     addGlobalVar('TMMLSettingsSandbox', @Sett, 'Settings').isConstant := True;
 
     {$I LPInc/lpexportedmethods.inc}
+
+    addDelayedCode(lp_OnTerm_FreeTypeProcs());
 
     EndImporting;
   end;

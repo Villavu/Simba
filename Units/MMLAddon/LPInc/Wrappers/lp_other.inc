@@ -175,3 +175,16 @@ begin
   ps_ShowBalloonHint(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PBalloonFlags(Params^[3])^);
 end;
 
+procedure Lape_AddOnTerm_Type(const Params: PParamArray); lape_extdecl
+var
+  L: Integer;
+begin
+  L := Length(CurrThread.OnTermTypeProcs);
+  SetLength(CurrThread.OnTermTypeProcs, L + 1);
+  CurrThread.OnTermTypeProcs[L] := PTypeProc(Params^[0])^;
+end;
+
+procedure Lape_GetOnTerm_Type(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PTypeProcArr(Result)^ := CurrThread.OnTermTypeProcs;
+end;

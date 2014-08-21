@@ -25,6 +25,8 @@
 SetCurrSection('Other');
 //AddGlobalFunc('procedure Writeln(const str: string);', @Lape_Writeln);
 AddGlobalFunc('function AddOnTerminate(const proc: string): Boolean;', @Lape_AddOnTerm);
+AddGlobalFunc('function AddOnTerminate(const Addr: TTypeProc): Boolean; overload;', @Lape_AddOnTerm_Type);
+AddGlobalFunc('function GetOnTerminate(): TTypeProcArray;', @Lape_GetOnTerm_Type);
 AddGlobalFunc('function DeleteOnTerminate(const proc: string): Boolean;', @Lape_DelOnTerm);
 AddGlobalFunc('function SetScriptProp(prop: TSP_Property; Value: TVariantArray): boolean', @Lape_SetScriptProp);
 AddGlobalFunc('function GetScriptProp(prop: TSP_Property; var Value: TVariantArray): boolean', @Lape_GetScriptProp);
