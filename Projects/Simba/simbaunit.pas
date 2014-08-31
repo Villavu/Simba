@@ -3121,8 +3121,6 @@ begin
   Handled := ActionList.IsShortCut(Msg);
 end;
 
-
-
 procedure TSimbaForm.LabeledEditSearchEnter(Sender: TObject);
 begin
   SearchStart := CurrScript.SynEdit.LogicalCaretXY;
@@ -3262,6 +3260,13 @@ function TSimbaForm.GetInterepterMethods(const SimbaMethods: TExpMethodArr): TEx
         Result += Str[i];
   end;
 
+  function isInternal(const Str: string): Boolean;
+  begin
+    if (Length(Str) = 0) then
+      Exit(False);
+    Result := (Str[1] = '_');
+  end;
+
 var
   Headers, Names, SortedHeaders: TStringList;
   Len, h, i, p: Integer;
@@ -3284,7 +3289,7 @@ begin
       Methods[i] := PrepareStr(Lowercase(SimbaMethods[i].FuncDecl));
 
     for i := 0 to (Names.Count - 1) do
-      if (not IsStrInArr(PrepareStr(Lowercase(Headers[i])), False, Methods)) then
+      if (not IsStrInArr(PrepareStr(Lowercase(Headers[i])), False, Methods)) and (not isInternal(Names[i])) then
         SortedHeaders.Add(Names[i] + '###' + Headers[i]);
 
     for i := 0 to (SortedHeaders.Count - 1) do
