@@ -124,6 +124,7 @@ type
     property TransparentColorSet : boolean read FTransparentSet;
     property List: TMBitmaps read FList write FList;
     procedure SetAlphaValue(const value : byte);
+    procedure Show();
     constructor Create;
     destructor Destroy;override;
   end;
@@ -162,7 +163,7 @@ implementation
 
 uses
   paszlib,DCPbase64,math, client,tpa,
-  colour_conv,IOManager,mufasatypesutil,FileUtil;
+  colour_conv,IOManager,mufasatypesutil,FileUtil, mmlpsthread;
 
 // Needs more fixing. We need to either copy the memory ourself, or somehow
 // find a TRawImage feature to skip X bytes after X bytes read. (Most likely a
@@ -2207,6 +2208,17 @@ procedure TMufasaBitmap.ValidatePoint(x, y: integer);
 begin
   if not(PointInBitmap(x,y)) then
     raise Exception.CreateFmt('You are accessing an invalid point, (%d,%d) at bitmap[%d]',[x,y,index]);
+end;
+
+procedure TMufasaBitmap.Show();
+var
+  Size: TPoint;
+begin
+  Size.x := Self.Width;
+  Size.y := Self.Height;
+  CurrThread.FormCallBack(m_ClearDebugImg, nil);
+  CurrThread.FormCallBack(m_DisplayDebugImgWindow, @Size);
+  CurrThread.FormCallBack(m_DrawBitmapDebugImg, Pointer(Self));
 end;
 
 constructor TMufasaBitmap.Create;

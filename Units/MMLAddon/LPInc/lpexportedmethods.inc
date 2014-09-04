@@ -155,6 +155,7 @@ AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1, Bmp2: Integer; CPoints:
 AddGlobalFunc('function GetColorsBitmap(const bmp: integer): TIntegerArray;', @Lape_GetColorsBitmap);
 AddGlobalFunc('function BitmapToMatrix(const bmp: integer): T2DIntegerArray;',@Lape_BitmapToMatrix);
 AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const Matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
+AddGlobalFunc('procedure ShowBitmap(const Bmp: Integer);', @Lape_ShowBitmap);
 
 { Math }
 SetCurrSection('Math');
