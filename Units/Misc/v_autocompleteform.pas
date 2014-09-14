@@ -222,7 +222,7 @@ begin
           Items.Append(fList[i]);
 
           if (LowerCase(fInsertList[i]) = fFilter) then
-            ItemIndex := i;
+            ItemIndex := c;
 
           fIndexList[c] := i;
           Inc(c);
