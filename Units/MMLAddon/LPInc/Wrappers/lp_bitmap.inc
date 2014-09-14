@@ -347,3 +347,8 @@ procedure Lape_DrawSystemTextBitmap(const Params: PParamArray); lape_extdecl
 begin
   ps_DrawSystemTextBitmap(PInteger(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PInteger(Params^[3])^, PPoint(Params^[4])^, PBoolean(Params^[5])^, PInteger(Params^[6])^);
 end;
+
+procedure Lape_ShowBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_ShowBitmap(PInteger(Params^[0])^);
+end;

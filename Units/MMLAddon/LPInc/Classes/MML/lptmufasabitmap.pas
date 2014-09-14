@@ -467,6 +467,11 @@ begin
   PMufasaBitmap(Params^[0])^.List := PMBitmaps(Params^[1])^;
 end;
 
+procedure TMufasaBitmap_Show(const Params: PParamArray); lape_extdecl
+begin
+  PMufasaBitmap(Params^[0])^.Show();
+end;
+
 //constructor Create;
 procedure TMufasaBitmap_Init(const Params: PParamArray); lape_extdecl
 begin
@@ -571,6 +576,7 @@ begin
     addGlobalFunc('function TMufasaBitmap.CreateTMask(): TMask;', @TMufasaBitmap_CreateTMask);
     addGlobalFunc('procedure TMufasaBitmap.SetTransparentColor(Col : TColor);', @TMufasaBitmap_SetTransparentColor);
     addGlobalFunc('function TMufasaBitmap.GetTransparentColor(): TColor;', @TMufasaBitmap_GetTransparentColor);
+    addGlobalFunc('procedure TMufasaBitmap.Show();', @TMufasaBitmap_Show);
     addClassVar('TMufasaBitmap', 'TransparentColorSet', 'boolean', @TMufasaBitmap_TransparentColorSet_Read, nil);
     addGlobalFunc('procedure TMufasaBitmap.SetAlphaValue(const value : byte);', @TMufasaBitmap_SetAlphaValue);
     addClassVar('TMufasaBitmap', 'List', 'TObject', @TMufasaBitmap_List_Read, @TMufasaBitmap_List_Write);

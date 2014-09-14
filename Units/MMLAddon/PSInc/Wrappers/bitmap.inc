@@ -421,3 +421,8 @@ procedure ps_DrawSystemTextBitmap(const Bitmap: Integer; const Text, FontName: s
 begin
   CurrThread.Client.MBitmaps.Bmp[Bitmap].DrawSystemText(Text, FontName, FontSize, Pnt, Shadow, Color);
 end;
+
+procedure ps_ShowBitmap(const Bitmap: Integer);
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].Show();
+end;
