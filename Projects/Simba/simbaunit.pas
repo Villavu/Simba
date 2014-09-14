@@ -3678,7 +3678,7 @@ end;
 
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
 begin
-  CurrScript.FScriptState:= State;
+  CurrScript.FScriptState := State;
   with Self.StatusBar.panels[Panel_State] do
     case state of
       ss_Running : begin Text := 'Running'; TB_Run.Enabled:= False; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
@@ -3691,9 +3691,9 @@ begin
                            ActionDebugger.Enabled := True;
                          {$ENDIF}
                    end;
-      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
+      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows} TB_Pause.Enabled:= False; {$endif}
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
-                         TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := True; TrayPause.Enabled := True;{$endif}
+                         TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := True; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= False;
                    end;
       ss_Stopping: begin Text := 'Stopping';TB_Run.Enabled:= False; TB_Pause.Enabled:= False; TB_Stop.Enabled:= True;
