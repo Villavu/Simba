@@ -179,3 +179,9 @@ procedure Lape_PauseScript(const Params: PParamArray); lape_extdecl
 begin
   ps_PauseScript();
 end;
+
+procedure Lape_CloseSimba(const Params: PParamArray); lape_extdecl
+begin
+  ps_CloseSimba();
+end;
+

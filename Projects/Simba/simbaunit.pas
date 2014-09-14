@@ -3955,6 +3955,20 @@ begin
           PageControl1.TabIndex := OldTab;
           RefreshTab;
         end;
+      m_CloseSimba: begin
+        for I := 0 to Tabs.Count - 1 do
+          if (Assigned(Tabs[I])) then
+            with TMufasaTab(Tabs[I]).ScriptFrame do
+              if (Assigned(ScriptThread) and (ScriptThread.ThreadID = PThreadID(Data)^)) then
+              begin
+                PageControl1.TabIndex := I;
+                RefreshTab;
+                StopScript; //Try a stop (it will fail, the script thread is waiting on me...)
+                StopScript; //This will terminate the script thread
+                Break;
+              end;
+        SimbaForm.Close;
+      end;
     end;
 end;
 

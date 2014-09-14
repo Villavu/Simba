@@ -47,6 +47,7 @@ AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgT
 AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
 AddGlobalFunc('procedure ShowBalloonHint(const Title, Hint: string; const Timeout: Integer; const Flag: TBalloonFlags);', @Lape_ShowBalloonHint);
 AddGlobalFunc('procedure PauseScript();', @Lape_PauseScript);
+AddGlobalFunc('procedure CloseSimba();', @Lape_CloseSimba);
 AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
 AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 {$IFNDEF FUNC_LIST}

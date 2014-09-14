@@ -58,8 +58,8 @@ const
   m_MessageBox = 9; //Data =  PMessageBoxData
   m_MessageDlg = 10; //Data = PMessageDlg
   m_BalloonHint = 11; //Data = PBalloonHintData
-
   m_PauseScript = 12; //Data = PThreadID
+  m_CloseSimba = 13; //Data = PThreadID
 
   {$I settings_const.inc}
   {$WARNING REMOVEME}

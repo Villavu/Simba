@@ -229,6 +229,14 @@ begin
   CurrThread.FormCallBack(m_PauseScript, @Data);
 end;
 
+procedure ps_CloseSimba();
+var
+  Data: TThreadID;
+begin
+  Data := CurrThread.ThreadID;
+  CurrThread.FormCallBack(m_CloseSimba, @Data);
+end;
+
 procedure ps_TerminateScript; extdecl;
 begin;
   CurrThread.Terminate;
