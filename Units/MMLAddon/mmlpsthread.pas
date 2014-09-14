@@ -59,6 +59,8 @@ const
   m_MessageDlg = 10; //Data = PMessageDlg
   m_BalloonHint = 11; //Data = PBalloonHintData
 
+  m_PauseScript = 12; //Data = PThreadID
+
   {$I settings_const.inc}
   {$WARNING REMOVEME}
 
@@ -121,8 +123,9 @@ type
       AFlag: TBalloonFlags;
     end;
 
-    { TMThread }
+    PThreadID = ^TThreadID;
 
+    { TMThread }
     TMThread = class(TThread)
     private
       procedure SetOpenConnectionEvent(const AValue: TOpenConnectionEvent);

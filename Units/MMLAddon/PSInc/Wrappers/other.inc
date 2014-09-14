@@ -221,6 +221,14 @@ begin
   CurrThread.FormCallBack(m_BalloonHint, @Data);
 end;
 
+procedure ps_PauseScript();
+var
+  Data: TThreadID;
+begin
+  Data := CurrThread.ThreadID;
+  CurrThread.FormCallBack(m_PauseScript, @Data);
+end;
+
 procedure ps_TerminateScript; extdecl;
 begin;
   CurrThread.Terminate;

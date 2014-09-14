@@ -3909,6 +3909,8 @@ end;
 {$endif}
 
 procedure TSimbaForm.FormCallBack;
+var
+  OldTab, I: LongInt;
 begin
   with FormCallBackData do
     case Cmd of
@@ -3937,6 +3939,22 @@ begin
             end;
         end else
           WriteLn('Cannot show balloon hint due to setting value = false');
+      m_PauseScript: begin
+          OldTab := PageControl1.TabIndex;
+          for I := 0 to Tabs.Count - 1 do
+            if (Assigned(Tabs[I])) then
+              with TMufasaTab(Tabs[I]).ScriptFrame do
+                if (Assigned(ScriptThread) and (ScriptThread.ThreadID = PThreadID(Data)^)) then
+                begin
+                  PageControl1.TabIndex := I;
+                  RefreshTab;
+                  PauseScript;
+                  Break;
+                end;
+
+          PageControl1.TabIndex := OldTab;
+          RefreshTab;
+        end;
     end;
 end;
 

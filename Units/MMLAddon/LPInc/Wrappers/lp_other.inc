@@ -175,3 +175,7 @@ begin
   ps_ShowBalloonHint(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PBalloonFlags(Params^[3])^);
 end;
 
+procedure Lape_PauseScript(const Params: PParamArray); lape_extdecl
+begin
+  ps_PauseScript();
+end;
