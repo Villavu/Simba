@@ -27,7 +27,9 @@ ssUpdaterVersionLink = ssSettings + ssUpdater + 'RemoteVersionLink';
 ssAutomaticallyUpdate = ssSettings + ssUpdater + 'AutomaticallyUpdate';
 ssUpdaterReleaseChannel = ssSettings + ssUpdater + 'ReleaseChannel';
 
-ssLoadFontsOnStart = ssSettings + ssFonts + 'LoadOnStartUp';
+ssCheckForFontUpdates = ssSettings + ssFonts + 'CheckForUpdates';
+ssLoadFontsOnSimbaStart = ssSettings + ssFonts + 'LoadOnSimbaStart';
+ssLoadFontsOnScriptStart = ssSettings + ssFonts + 'LoadOnScriptStart';
 ssFontsVersion = ssSettings + ssFonts + 'Version';
 ssFontsLink = ssSettings + ssFonts + 'UpdateLink';
 ssFontsVersionLink = ssSettings + ssFonts + 'VersionLink';
