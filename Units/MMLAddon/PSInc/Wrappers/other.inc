@@ -268,32 +268,31 @@ begin;
   result := True;
 end;
 
-function ps_DeleteOnTerminate(const proc : string): Boolean; extdecl;
+function ps_DeleteOnTerminate(const Proc : string): Boolean; extdecl;
 var
-  oldProcs, newProcs : TVariantArray;
-  oldProcsHigh, i : Integer;
-  lowerCaseProc, lowerCaseOldProc : string;
+  curProcs, newProcs: TVariantArray;
+  I, C: Integer;
+  _Proc: string;
 begin;
-  result := False;
+  Result := False;
 
-  if not CurrThread.Prop.GetProp(SP_OnTerminate, OldProcs) then
-     exit;
+  if (not (CurrThread.Prop.GetProp(SP_OnTerminate, curProcs))) then
+     Exit;
 
-  oldProcsHigh  := High(oldProcs);
-  lowerCaseProc := LowerCase(proc);
+  _Proc := Lowercase(Proc);
+  SetLength(newProcs, Length(curProcs));
 
-  for i := 0 to oldProcsHigh do
-    lowerCaseOldProc := lowercase(OldProcs[i]);
-    if lowerCaseOldProc = lowerCaseProc then
-      result := true
-    else
+  C := 0;
+  for I := 0 to High(curProcs) do
+    if (not (Lowercase(curProcs[I]) = _Proc)) then
     begin
-      setlength(newProcs, Length(newProcs) + 1);
-      newProcs[High(newProcs)] := lowerCaseOldProc;
-    end;
+      newProcs[C] := curProcs[I];
+      Inc(C);
+    end else
+      Result := True;
 
-  CurrThread.Prop.SetProp(SP_OnTerminate, NewProcs);
-
+  SetLength(newProcs, C);
+  Result := Result and CurrThread.Prop.SetProp(SP_OnTerminate, newProcs);
 end;
 
 function ps_GetTimeRunning: LongWord; extdecl;
