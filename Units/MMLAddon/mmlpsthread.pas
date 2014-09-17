@@ -629,6 +629,7 @@ end;
 {$ENDIF}
 
 {$I PSInc/Wrappers/other.inc}
+
 {$I PSInc/Wrappers/settings.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 

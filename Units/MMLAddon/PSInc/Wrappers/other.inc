@@ -398,3 +398,24 @@ function ps_GetEnvironmentVariable(const VarName: string): string; extdecl;
 begin
   result := GetEnvironmentVariableUTF8(VarName);
 end;
+
+procedure ps_ShowBitmap(const Bitmap: TMufasaBitmap); extdecl;
+var
+  p: TPoint;
+begin
+  if (not Assigned(Bitmap)) then
+    Exit();
+
+  p := Classes.Point(Bitmap.Width, Bitmap.Height);
+  with (CurrThread) do
+  begin
+    FormCallBack(m_ClearDebugImg, nil);
+    FormCallBack(m_DisplayDebugImgWindow, @p);
+    FormCallBack(m_DrawBitmapDebugImg, Pointer(Bitmap));
+  end;
+end;
+
+procedure ps_ShowBitmap(const Bitmap: Integer); overload; extdecl;
+begin
+  ps_ShowBitmap(CurrThread.Client.MBitmaps[Bitmap]);
+end;
