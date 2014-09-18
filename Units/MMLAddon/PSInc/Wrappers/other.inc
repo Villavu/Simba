@@ -419,3 +419,22 @@ procedure ps_ShowBitmap(const Bitmap: Integer); overload; extdecl;
 begin
   ps_ShowBitmap(CurrThread.Client.MBitmaps[Bitmap]);
 end;
+
+procedure ps_SetWindowParent(const Child, Parent: PtrUInt; X, Y: Integer); extdecl;
+{$IFDEF MSWindows}
+begin
+  Windows.SetParent(Child, Parent);
+  Windows.SetWindowPos(Child, HWND_TOP, X, Y, 0, 0, SWP_NOSIZE);
+end;
+{$ELSE}
+var
+  Display: PDisplay;
+begin
+  Display := XOpenDisplay(nil);
+  if (Display = nil) then
+    raise Exception.Create('SetWindowParent: Could not open a connection to the X Display');
+  XReparentWindow(Display, Child, Parent, X, Y);
+  XCloseDisplay(Display);
+end;
+{$ENDIF}
+

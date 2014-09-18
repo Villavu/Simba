@@ -65,6 +65,7 @@ AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_E
 AddGlobalFunc('function GetEnvironmentVariable(const VarName: string): string;', @Lape_GetEnvironmentVariable);
 AddGlobalFunc('procedure ShowBitmap(const Bitmap: Integer);', @Lape_ShowBitmap);
 AddGlobalFunc('procedure ShowBitmap(const Bitmap: TMufasaBitmap); overload;', @Lape_ShowBitmap_Mufasa);
+AddGlobalFunc('procedure SetWindowParent(const Child, Parent: PtrUInt; X, Y: Integer);', @Lape_SetWindowParent);
 
 { DTM }
 SetCurrSection('DTM');

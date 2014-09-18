@@ -184,3 +184,8 @@ procedure Lape_ShowBitmap_Mufasa(const Params: PParamArray); lape_extdecl
 begin
   ps_ShowBitmap(PMufasaBitmap(Params^[0])^);
 end;
+
+procedure Lape_SetWindowParent(const Params: PParamArray); lape_extdecl
+begin
+  ps_SetWindowParent(PPtrUInt(Params^[0])^, PPtrUInt(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
