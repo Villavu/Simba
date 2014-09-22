@@ -427,14 +427,18 @@ begin
   Windows.SetWindowPos(Child, HWND_TOP, X, Y, 0, 0, SWP_NOSIZE);
 end;
 {$ELSE}
-var
-  Display: PDisplay;
 begin
-  Display := XOpenDisplay(nil);
-  if (Display = nil) then
-    raise Exception.Create('SetWindowParent: Could not open a connection to the X Display');
-  XReparentWindow(Display, Child, Parent, X, Y);
-  XCloseDisplay(Display);
+  XReparentWindow(CurrThread.Client.IOManager.Display, Child, Parent, X, Y);
 end;
 {$ENDIF}
 
+procedure ps_SetWindowText(const Window: PtrUInt; const NewTitle: String); extdecl;
+{$IFDEF MSWindows}
+begin
+  Windows.SetWindowText(Window, PChar(NewTitle));
+end;
+{$ELSE}
+begin
+  Writeln('SetWindowText is on the to-do list');
+end;
+{$ENDIF}

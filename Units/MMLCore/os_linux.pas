@@ -49,7 +49,10 @@ interface
 
     TWindow = class(TWindow_Abstract)
       public
-        constructor Create(display: PDisplay; screennum: integer; window: x.TWindow);
+        { display is the connection to the X server }
+        display: PDisplay;
+
+        constructor Create(_display: PDisplay; screennum: integer; window: x.TWindow);
         destructor Destroy; override;
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
@@ -72,20 +75,17 @@ interface
         procedure MoveMouse(x,y: integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
-        function  IsMouseButtonHeld( button : TClickType) : boolean;override;
+        function  IsMouseButtonHeld( button : TClickType) : boolean; override;
 
         procedure SendString(str: string; keywait, keymodwait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
-        function GetKeyCode(c : char) : integer;override;
+        function GetKeyCode(c : char) : integer; override;
 
         function GetNativeWindow: TNativeWindow;
-        function GetHandle(): PtrUInt;
+        function GetHandle(): PtrUInt; override;
       private
-        { display is the connection to the X server }
-        display: PDisplay;
-
         { screen-number and selected window }
         screennum: integer;
         window: x.TWindow;
@@ -228,14 +228,14 @@ implementation
   end;
 
   { See if the semaphores / CS are initialised }
-  constructor TWindow.Create(display: PDisplay; screennum: integer; window: x.TWindow);
+  constructor TWindow.Create(_display: PDisplay; screennum: integer; window: x.TWindow);
   begin
     inherited Create;
-    self.display:= display;
-    self.screennum:= screennum;
-    self.window:= window;
-    self.dirty:= false;
-    self.keyinput:= TKeyInput.Create;
+    self.display := _display;
+    self.screennum := screennum;
+    self.window := window;
+    self.dirty := false;
+    self.keyinput := TKeyInput.Create;
     self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
     self.mcaset := false;
     self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
