@@ -432,13 +432,46 @@ begin
 end;
 {$ENDIF}
 
-procedure ps_SetWindowText(const Window: PtrUInt; const NewTitle: String); extdecl;
+procedure ps_SetWindowTitle(const Window: PtrUInt; const NewTitle: String); extdecl;
 {$IFDEF MSWindows}
 begin
   Windows.SetWindowText(Window, PChar(NewTitle));
 end;
 {$ELSE}
+var
+  Name: TXTextProperty;
 begin
-  Writeln('SetWindowText is on the to-do list');
+  Name.value    := PCUChar(NewTitle);
+  Name.encoding := XA_STRING;
+  Name.format   := 8;
+  Name.nitems   := Length(NewTitle);
+  XSetWMName(CurrThread.Client.IOManager.Display, Window, @Name);
+  XFlush(CurrThread.Client.IOManager.Display);
+end;
+{$ENDIF}
+
+function ps_GetWindowTitle(const Window: PtrUInt): String;
+{$IFDEF MSWindows}
+var
+  c: PChar;
+begin
+  Windows.GetWindowText(Window, c, Windows.GetWindowTextLength(Window));
+  Result := String(c);
+end;
+{$ELSE}
+var
+  title: TXTextProperty;
+begin
+  title.value    := nil;
+  title.encoding := XA_STRING;
+  title.format   := 8;
+  title.nitems   := 0;
+
+  XGetWMName(CurrThread.Client.IOManager.Display, Window, @title);
+  if (title.value <> nil) and (title.nitems <> 0) then
+  begin
+    SetLength(Result, title.nitems);
+    Move(title.value[0], Result[1], title.nitems);
+  end;
 end;
 {$ENDIF}

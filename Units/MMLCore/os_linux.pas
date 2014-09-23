@@ -49,9 +49,6 @@ interface
 
     TWindow = class(TWindow_Abstract)
       public
-        { display is the connection to the X server }
-        display: PDisplay;
-
         constructor Create(_display: PDisplay; screennum: integer; window: x.TWindow);
         destructor Destroy; override;
         procedure GetTargetDimensions(out w, h: integer); override;
@@ -86,6 +83,9 @@ interface
         function GetNativeWindow: TNativeWindow;
         function GetHandle(): PtrUInt; override;
       private
+        { display is the connection to the X server }
+        display: PDisplay;
+
         { screen-number and selected window }
         screennum: integer;
         window: x.TWindow;

@@ -282,7 +282,11 @@ implementation
 uses
   SimbaUnit,
   colour_conv, dtmutil,
-  {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
+  {$IFDEF MSWindows}
+  windows,  MMSystem,
+  {$ELSE}
+  xlib, xutil, ctypes, xatom,
+  {$ENDIF}
   {$IFDEF USE_PASCALSCRIPT}
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
   uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
@@ -629,7 +633,6 @@ end;
 {$ENDIF}
 
 {$I PSInc/Wrappers/other.inc}
-
 {$I PSInc/Wrappers/settings.inc}
 {$I PSInc/Wrappers/bitmap.inc}
 

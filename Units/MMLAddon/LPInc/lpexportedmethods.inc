@@ -66,7 +66,8 @@ AddGlobalFunc('function GetEnvironmentVariable(const VarName: string): string;',
 AddGlobalFunc('procedure ShowBitmap(const Bitmap: Integer);', @Lape_ShowBitmap);
 AddGlobalFunc('procedure ShowBitmap(const Bitmap: TMufasaBitmap); overload;', @Lape_ShowBitmap_Mufasa);
 AddGlobalFunc('procedure SetWindowParent(const Child, Parent: PtrUInt; X, Y: Integer);', @Lape_SetWindowParent);
-AddGlobalFunc('procedure SetWindowText(const Window: PtrUInt; const NewTitle: String);', @Lape_SetWindowText);
+AddGlobalFunc('procedure SetWindowTitle(const Window: PtrUInt; const NewTitle: String);', @Lape_SetWindowTitle);
+AddGlobalFunc('function GetWindowTitle(const Window: PtrUInt): String;', @Lape_GetWindowTitle);
 
 { DTM }
 SetCurrSection('DTM');
