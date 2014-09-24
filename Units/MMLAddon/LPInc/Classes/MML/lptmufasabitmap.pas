@@ -496,7 +496,7 @@ begin
     addGlobalType('^TRGB32Array', 'PRGB32Array');
     addGlobalType('array of PRGB32', 'TPRGB32Array');
     addGlobalType('^TPRGB32Array', 'PPRGB32Array');
-    addGlobalType('record H, S, L: extended; end;', 'THSL');
+    addGlobalType('packed record H, S, L: extended; end;', 'THSL');
     addGlobalType('^THSL', 'PHSL');
     addGlobalType('array of THSL', 'THSLArray');
     addGlobalType('^THSLArray', 'PHSLArray');
