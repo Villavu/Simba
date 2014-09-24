@@ -1057,7 +1057,6 @@ end;
 function TMufasaBitmap.GetHSLValues(xs, ys, xe, ye: integer): T2DHSLArray;
 var
   x, y: integer;
-  R, G, B, C: integer;
 begin
   ValidatePoint(xs,ys);
   ValidatePoint(xe,ye);
