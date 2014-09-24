@@ -70,7 +70,7 @@ type
   PPRGB32Array = ^TPRGB32Array;
   TPRGB32Array = array of PRGB32; //Array of Pointers
 
-  THSL = record
+  THSL = packed record
     H, S, L: extended;
   end;
   PHSL = ^THSL;
