@@ -262,7 +262,7 @@ type
      procedure Execute; override;
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
-     function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+     function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
    end;
 
    TSyncMethod = class
@@ -1522,7 +1522,7 @@ begin
     FileName := '';
 end;
 
-function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
   plugin_idx: integer;
 begin
@@ -1531,12 +1531,14 @@ begin
   begin
     if (Argument <> '') then
     begin
+      Result := True;
+      if (InIgnore) then
+        Exit;
+
       plugin_idx := PluginsGlob.LoadPlugin(Argument);
       if (plugin_idx >= 0) then
-      begin
-        LoadPlugin(plugin_idx);
-        Result := True;
-      end else
+        LoadPlugin(plugin_idx)
+      else
         psWriteln(Format('Your DLL %s has not been found', [Argument]))
     end else
       psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');

@@ -3188,15 +3188,11 @@ function AverageExtended(const tE: TExtendedArray): Extended;
 var
   i, h: Integer;
 begin
-  Result := 1;
-  try
-    h := High(tE);
-    for i := 0 to h do
-      Result := (Result * tE[i]);
-    Result := Power(Result, 1/(h + 1));
-  except
-    Result := 0.0;
-  end;
+  h := High(tE);
+  if h < 0 then Exit(0);
+  for i := 0 to h do
+    Result := (Result + tE[i]);
+  Result := Result / (H+1);  
 end;
 
 {/\
