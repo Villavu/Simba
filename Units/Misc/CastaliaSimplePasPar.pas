@@ -256,6 +256,7 @@ type
     procedure ConstantType; virtual;
     procedure ConstantValue; virtual;
     procedure ConstantValueTyped; virtual;
+    procedure ConstRefParameter; virtual;
     procedure ConstParameter; virtual;
     procedure ConstructorHeading; virtual;
     procedure ConstructorName; virtual;
@@ -1863,6 +1864,10 @@ begin
     CustomAttribute;
   {$ENDIF}
   case TokenID of
+    tokConstRef:
+      begin
+        ConstRefParameter;
+      end;
     tokConst:
       begin
         ConstParameter;
@@ -1881,6 +1886,24 @@ begin
       begin
         VarParameter;
       end;
+  end;
+end;
+
+procedure TmwSimplePasPar.ConstRefParameter;
+begin
+  Expected(tokConstRef);
+  ParameterNameList;
+  case TokenID of
+    tokColon:
+      begin
+        NextToken;
+        NewFormalParameterType;
+        if TokenID = tokEqual then
+        begin
+          NextToken;
+          TypedConstant;
+        end;
+      end
   end;
 end;
 
@@ -2569,7 +2592,7 @@ begin
     tokAddressOp, tokDoubleAddressOp, tokIdentifier, tokPointerSymbol, tokRoundOpen:
       begin
         Designator;
-        if TokenID = tokAssign then
+        if TokenID in [tokAssign, tokMulAsgn, tokDivAsgn, tokPlusAsgn, tokMinusAsgn, tokPowAsgn] then
         begin
           NextToken;
           if TokenID = tokInherited then
@@ -2749,7 +2772,7 @@ begin //mw 12/7/2000
           NextToken;
           {$IFDEF D8_NEWER}
           if TokenID in [tokAnd, tokArray, tokAs, tokASM, tokBegin, tokCase, tokClass,
-            tokConst, tokConstructor, tokDestructor, tokDispInterface, tokDiv, tokDo,
+            tokConst, tokConstRef, tokConstructor, tokDestructor, tokDispInterface, tokDiv, tokDo,
             tokDOwnto, tokElse, tokEnd, tokExcept, tokExports, tokFile, tokFinal,
             tokFinalization, tokFinally, tokFor, tokFunction, tokGoto, tokIf,
             tokImplementation, tokIn, tokInherited, tokInitialization, tokInline,
@@ -2855,34 +2878,14 @@ end;
 procedure TmwSimplePasPar.MultiplicativeOperator;
 begin
   case TokenID of
-    tokAnd:
-      begin
-        NextToken;
-      end;
-    tokDiv:
-      begin
-        NextToken;
-      end;
-    tokMod:
-      begin
-        NextToken;
-      end;
-    tokShl:
-      begin
-        NextToken;
-      end;
-    tokShr:
-      begin
-        NextToken;
-      end;
-    tokSlash:
-      begin
-        NextToken;
-      end;
-    tokStar:
-      begin
-        NextToken;
-      end;
+    tokAnd: NextToken;
+    tokDiv: NextToken;
+    tokMod: NextToken;
+    tokShl: NextToken;
+    tokShr: NextToken;
+    tokSlash: NextToken;
+    tokStar:  NextToken;
+    tokStarStar: NextToken;
   else
     begin SynError(InvalidMultiplicativeOperator);
     end;
@@ -2978,7 +2981,7 @@ end;
 procedure TmwSimplePasPar.Term;
 begin
   Factor;
-  while TokenID in [tokAnd, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar] do
+  while TokenID in [tokAnd, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar] do
   begin
     MultiplicativeOperator;
     Factor;
@@ -4606,7 +4609,7 @@ begin
         while Lexer.AheadTokenID <> tokSemiColon do
           case Lexer.AheadTokenID of
             tokAnd, tokBegin, tokCase, tokColon, tokEnd, tokElse, tokIf, tokMinus, tokNull,
-              tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokWhile, tokWith,
+              tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokStarStar, tokWhile, tokWith,
               tokXor: break;
             tokRoundOpen:
               begin
@@ -4632,12 +4635,9 @@ begin
             Lexer.AheadNext;
           end;
         case Lexer.AheadTokenID of
-          tokColon:
-            begin
-              RecordConstant;
-            end;
+          tokColon: RecordConstant;
           tokNull: ;
-          tokAnd, tokMinus, tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokXor:
+          tokAnd, tokMinus, tokOr, tokPlus, tokShl, tokShr, tokSlash, tokStar, tokStarStar, tokXor:
             begin
               ConstantExpression;
             end;
@@ -5874,7 +5874,7 @@ end;
 procedure TmwSimplePasPar.AttributeName;
 begin
   case TokenID of
-    tokIn, tokOut, tokConst, tokVar:
+    tokIn, tokOut, tokConst, tokConstRef, tokVar:
       NextToken;
   else
     Expected(tokIdentifier);

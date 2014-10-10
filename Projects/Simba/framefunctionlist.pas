@@ -657,14 +657,24 @@ procedure TFillThread.Update;
       tmpNode: TTreeNode;
       TypeKind: TciTypeKind;
       TypeName: TciTypeName;
-      Index: LongInt;
+      Index, Count: LongInt;
+      Str, Txt: String;
+      EndOfLine: Integer;
     begin
       TypeKind := TciTypeKind(Decl.Items.GetFirstItemOfClass(TciTypeKind));
       TypeName := TciTypeName(Decl.Items.GetFirstItemOfClass(TciTypeName));
 
-      case TypeKind.ShortText of
-        'record', 'union': tmpNode := Node.TreeNodes.AddChild(Node, Trim(TypeName.CleanText) + ' = ' + TypeKind.GetRealType.ShortText);
-        else
+      Txt := Lowercase(TypeKind.ShortText);
+      Str := TypeKind.GetRealType.ShortText;
+      EndOfLine := Pos(LineEnding, Str);
+
+      if (EndOfLine > 0) then
+         Str := Copy(Str, 0, EndOfLine);
+
+      case Txt of
+         'record', 'union': tmpNode := Node.TreeNodes.AddChild(Node, Trim(TypeName.CleanText) + ' = ' + Str);
+         'packed record': tmpNode := Node.TreeNodes.AddChild(Node, Trim(TypeName.CleanText) + ' = ' + 'packed ' + Str);
+       else
           tmpNode := Node.TreeNodes.AddChild(Node, Trim(Decl.CleanText));
       end;
 
@@ -681,10 +691,13 @@ procedure TFillThread.Update;
         EndPos :=  Decl.StartPos + Length(TrimRight(Decl.RawText));
       end;
 
-      if (TypeKind.ShortText = 'record') or (TypeKind.ShortText = 'union') then
-        for Index := 0 to TypeKind.GetRealType.Items.Count - 1 do
+      if (Txt = 'record') or (Txt = 'union') or (Txt = 'packed record') then
+      begin
+        Count := TypeKind.GetRealType.Items.Count - 1;
+        for Index := 0 to Count do
           if (not (TypeKind.GetRealType.Items[Index] is TciJunk)) then
             ProcessDecl(tmpNode, TypeKind.GetRealType.Items[Index]);
+      end;
     end;
 
   var

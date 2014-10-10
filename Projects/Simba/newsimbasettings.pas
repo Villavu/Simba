@@ -111,6 +111,8 @@ type
     private
       procedure SetValue(val: string);
     public
+      function GetDefValue(val: string): string; virtual;
+
       property Value: string read GetValue write SetValue;
     end;
 
@@ -645,6 +647,14 @@ begin
   FValueSet := True;
   if Assigned(OnChange) then
     OnChange(Self);
+end;
+
+function TPathSetting.GetDefValue(val: String): String;
+begin
+  if (not (FValueSet)) then
+    Value := val;
+
+  Result := Value;
 end;
 
 procedure TPathSetting.SetValue(val: string);

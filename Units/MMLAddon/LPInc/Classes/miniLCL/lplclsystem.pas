@@ -257,10 +257,10 @@ begin
     addClass('TStream');
 
     addGlobalFunc('function TStream.Read(var Buffer; Count: Longint): Longint;', @TStream_Read);
-    addGlobalFunc('function TStream.Write(const Buffer; Count: Longint): Longint;', @TStream_Write);
+    addGlobalFunc('function TStream.Write(constref Buffer; Count: Longint): Longint;', @TStream_Write); //test
     addGlobalFunc('function TStream.Seek(Offset: Longint; Origin: Word): Longint;', @TStream_Seek);
     addGlobalFunc('procedure TStream.ReadBuffer(var Buffer; Count: Longint);', @TStream_ReadBuffer);
-    addGlobalFunc('procedure TStream.WriteBuffer(const Buffer; Count: Longint);', @TStream_WriteBuffer);
+    addGlobalFunc('procedure TStream.WriteBuffer(constref Buffer; Count: Longint);', @TStream_WriteBuffer);
     addGlobalFunc('function TStream.CopyFrom(Source: TStream; Count: Int64): Int64;', @TStream_CopyFrom);
     addGlobalFunc('function TStream.ReadComponent(Instance: TComponent): TComponent;', @TStream_ReadComponent);
     addGlobalFunc('function TStream.ReadComponentRes(Instance: TComponent): TComponent;', @TStream_ReadComponentRes);
@@ -330,7 +330,7 @@ begin
 
     addGlobalFunc('procedure THandleStream.Init(AHandle: THandle);', @THandleStream_Init);
     addGlobalFunc('function THandleStream.Read(var Buffer; Count: Longint): Longint;', @THandleStream_Read);
-    addGlobalFunc('function THandleStream.Write(const Buffer; Count: Longint): Longint;', @THandleStream_Write);
+    addGlobalFunc('function THandleStream.Write(constref Buffer; Count: Longint): Longint;', @THandleStream_Write);
     addGlobalFunc('function THandleStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;', @THandleStream_Seek);
     addClassVar('THandleStream', 'Handle', 'THandle', @THandleStream_Handle_Read);
     addGlobalFunc('procedure THandleStream.Free();', @THandleStream_Free);
@@ -489,7 +489,7 @@ begin
     addGlobalFunc('procedure TMemoryStream.LoadFromStream(Stream: TStream);', @TMemoryStream_LoadFromStream);
     addGlobalFunc('procedure TMemoryStream.LoadFromFile(const FileName: string);', @TMemoryStream_LoadFromFile);
     addGlobalFunc('procedure TMemoryStream.SetSize(NewSize: PtrInt);', @TMemoryStream_SetSize);
-    addGlobalFunc('function TMemoryStream.Write(const Buffer; Count: LongInt): LongInt;', @TMemoryStream_Write);
+    addGlobalFunc('function TMemoryStream.Write(constref Buffer; Count: LongInt): LongInt;', @TMemoryStream_Write);
     addGlobalFunc('procedure TMemoryStream.Init();', @TMemoryStream_Init);
     addGlobalFunc('procedure TMemoryStream.Free();', @TMemoryStream_Free);
   end;
@@ -554,7 +554,7 @@ begin
     addGlobalFunc('function TStringStream.Read(var Buffer; Count: Longint): Longint;', @TStringStream_Read);
     addGlobalFunc('function TStringStream.ReadString(Count: Longint): string;', @TStringStream_ReadString);
     addGlobalFunc('function TStringStream.Seek(Offset: Longint; Origin: Word): Longint;', @TStringStream_Seek);
-    addGlobalFunc('function TStringStream.Write(const Buffer; Count: Longint): Longint;', @TStringStream_Write);
+    addGlobalFunc('function TStringStream.Write(constref Buffer; Count: Longint): Longint;', @TStringStream_Write);
     addGlobalFunc('procedure TStringStream.WriteString(const AString: string);', @TStringStream_WriteString);
     addClassVar('TStringStream', 'DataString', 'string', @TStringStream_DataString_Read);
     addGlobalFunc('procedure TStringStream.Free();', @TStringStream_Free);

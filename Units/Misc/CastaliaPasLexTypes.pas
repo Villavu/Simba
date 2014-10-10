@@ -77,7 +77,7 @@ type
     tokComma,
     tokComp,
     tokCompDirect,
-    tokConst,
+    tokConst, tokConstRef,
     tokConstructor,
 	tokContains,
     tokContinue, //JThurman 2004-11-8 (flow control routines)
@@ -233,6 +233,7 @@ type
     tokSquareClose,
     tokSquareOpen,
     tokStar,
+    tokStarStar,
   {$IFDEF D8_NEWER} //JThurman 2004-03-20
   tokStatic,
   {$ENDIF}
@@ -275,6 +276,12 @@ type
 
     tokNative,
 
+    tokDivAsgn,
+    tokMulAsgn,
+    tokPlusAsgn,
+    tokMinusAsgn,
+    tokPowAsgn,
+    
     tok_DONE);
 
 TmwPasLexStatus = record

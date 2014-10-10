@@ -20,6 +20,7 @@ type
 
     function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
     function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; override;
+    function addGlobalVar(Val: Int32; AName: lpString): TLapeGlobalVar; override;
     function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
     function addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar; override;
@@ -62,6 +63,13 @@ begin
   Result := inherited;
   if (Length(AName) > 0) and (AName[1] <> '!') and (Lowercase(AName) <> Lowercase(Typ)) then
     FItems.Add(AddLeadingSemiColon('var ' + AName + ': ' + Typ));
+end;
+
+function TLPCompiler.addGlobalVar(Val: Int32; AName: lpString): TLapeGlobalVar;
+begin
+  Result := inherited;
+  if (Length(AName) > 0) and (AName[1] <> '!') then
+    FItems.Add(AddLeadingSemiColon('var ' + AName + ': ' + IntToStr(Val)));
 end;
 
 function TLPCompiler.addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType;

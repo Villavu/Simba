@@ -2,6 +2,10 @@ program SRLUpdater;
 
 {$I ./Updater.sei}
 
+{$IFNDEF SIMBAMAJOR1100}
+  {$I ./PlayerManager.sei}
+{$ENDIF}
+
 function CheckSRL(Name: string; I: integer): boolean;
 var
   X: integer;
@@ -58,6 +62,7 @@ end;
 (*
 ** Adds a file extension 'bak' to all the directorys in path, used to we can add files that are currently loaded.
 *)
+{$IFDEF SIMBAMAJOR1100}
 procedure BackupDirectorys(path: string; files: TStringArray);
 var
   i, h: integer;
@@ -79,6 +84,7 @@ begin
         writeln('Plugins Updater: Failed to rename directory ' + path + files[i]);
   end;
 end;
+{$ENDIF}
 
 (*
 ** Moves files 'srcFiles' from 'srcPath' into 'targPath'.
@@ -99,11 +105,51 @@ begin
       writeln('Plugins Updater: Failed to move file '+srcPath+srcFiles[i]);
 end;
 
+{$IFNDEF SIMBAMAJOR1100}
+function SuccessPlugins_Old(Cont: string; I: integer): boolean;
+var
+  X: integer;
+  Files: TStringArray;
+  Overwrite: boolean;
+begin
+  Files := GetFiles(UpdaterArr[I].Folder, {$IFDEF WIN32}'dll'{$ELSE}'so'{$ENDIF});
+  Overwrite := True;
+
+  for X := 0 to High(Files) do
+    if (FileExists(PluginPath + Files[X])) then
+    begin
+      Overwrite := (MessageDlg('SRL Updater', 'Do you want to overwrite the plugins?', mtConfirmation, [mbNo, mbYes], 0) = mrYes);
+      Break;
+    end;
+
+  if overwrite then
+  begin
+    for x := 0 to high(files) do
+      if FileExists(PluginPath + Files[X]) then
+      begin
+        if FileExists(PluginPath + Files[X] + '.bak') then
+          DeleteFile(PluginPath + Files[X] + '.bak');
+
+        if RenameFile(PluginPath + Files[X], PluginPath + Files[X] + '.bak') then
+          writeln('Renamed ' + PluginPath + Files[X] + ' to ' + PluginPath + Files[X] + '.bak')
+        else
+          writeln('Plugins Updater: failed to rename ' + PluginPath + Files[X] + ' to ' +
+              PluginPath + Files[X] + '.bak');
+      end;
+  end;
+
+  Result := UnTarEx(Cont, PluginPath, Overwrite);
+  if not Result then
+    writeln('Failed to update plugins! Restart Simba and update before starting a script.');
+end;
+{$ENDIF}
+
 function SuccessDownload(Cont: string; I: integer): boolean; // called if files are succesfully dl'd
 var
   ExtensionPath, SavePath: string;
   PluginFiles, ExtensionFiles, Folders: TStringArray;
 begin
+  {$IFDEF SIMBAMAJOR1100}
   SavePath := PluginPath + '.temp/'; // paths to save the tar.bz2 into
   ExtensionPath := AppPath + 'Extensions/';  //dunno why Simba doesn't have this
 
@@ -133,18 +179,25 @@ begin
   finally
     DeleteDirectory(SavePath, true);
   end;
+{$ELSE}
+  SuccessPlugins_Old(Cont, I);
+{$ENDIF}
 end;
 
 procedure ClickRafiki(Sender: TObject);
 var
   RafikiPath: string;
 begin
+{$IFDEF SIMBAMAJOR1100}
   RafikiPath := IncludePath + 'srl-6/lib/misc/playermanager.simba';
 
   if (FileExists(RafikiPath)) then
     OpenScriptEx(RafikiPath, True)
   else
     writeln('SRL: Failed to find Rafiki player manager, Make sure you''ve installed SRL-6!');
+{$ELSE}
+  RunRafikiPlayerManager();
+{$ENDIF}
 end;
 
 procedure ClickBugs(Sender: TObject);
@@ -189,7 +242,11 @@ begin
   end;
 
   Settings.SetKeyValue('Plugins_Visible', 'True');
+  {$IFNDEF SIMBAMAJOR1100}
+  if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins.tar.bz2', 'http://wizzup.org/static/srl/plugins_version', PluginPath + '.temp\', True, True, Plugins)) then
+  {$ELSE}
   if (AddUpdater('Plugins', 'http://wizzup.org/static/srl/simba_plugins_new.tar.bz2', 'http://wizzup.org/static/srl/plugins_new_version', PluginPath + '.temp\', True, True, Plugins)) then
+  {$ENDIF}
   begin
     UpdaterArr[Plugins].MainMenu.Visible := true;
     UpdaterArr[Plugins].Hooks[BEFORE_UPDATE] := @BeforeUpdateEx;

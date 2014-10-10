@@ -383,16 +383,6 @@ begin
   CurrThread.Client.MBitmaps[bmp].DrawMatrix(matrix);
 end;
 
-procedure ps_ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer); extdecl;
-begin
-  ThresholdAdaptiveMatrix(Matrix, Alpha, Beta, Invert, Method, C);
-end;
-
-procedure ps_ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer); extdecl;
-begin
-  ResizeBilinearMatrix(Matrix, NewW, NewH);
-end;
-
 procedure ps_ResizeBitmapEx(const bmp: integer; const Method: TBmpResizeMethod; const NewWidth, NewHeight: integer); extdecl;
 begin
   CurrThread.Client.MBitmaps[bmp].ResizeEx(Method, NewWidth, NewHeight);
@@ -408,11 +398,6 @@ begin
   CurrThread.Client.MBitmaps[bmp].Blur(block);
 end;
 
-procedure ps_BlurMatrix(var Matrix: T2DIntegerArray; const Block: integer); extdecl;
-begin
-  BlurMatrix(Matrix, Block);
-end;
-
 function ps_RotateBitmapEx(Bitmap: Integer; Angle: Single; Expand: Boolean; Smooth: Boolean): Integer; extdecl;
 begin
   with CurrThread.Client.MBitmaps do
@@ -420,4 +405,19 @@ begin
     Result := CreateBMP(0,0);
     Bmp[Bitmap].RotateBitmapEx(Angle, Expand, Smooth, Bmp[Result]);
   end;
+end;
+
+procedure ps_RectangleBitmapEx(const Bitmap: Integer; const Box: TBox; const Color: Integer; const Transparency: Extended); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].Rectangle(Box, Color, Transparency);
+end;
+
+procedure ps_DrawTextBitmap(const Bitmap: Integer; const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].DrawText(Text, FontName, Pnt, Shadow, Color);
+end;
+
+procedure ps_DrawSystemTextBitmap(const Bitmap: Integer; const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); extdecl;
+begin
+  CurrThread.Client.MBitmaps.Bmp[Bitmap].DrawSystemText(Text, FontName, FontSize, Pnt, Shadow, Color);
 end;

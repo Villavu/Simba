@@ -140,11 +140,14 @@ AddGlobalFunc('function FindMaskTolerance(const mask: TMask; var x, y: Integer; 
 AddGlobalFunc('function FindBitmapMaskTolerance(mask: Integer; var x, y: Integer; xs, ys, xe, ye: Integer; Tolerance, ContourTolerance: Integer): Boolean', @Lape_FindBitmapMaskTolerance);
 AddGlobalFunc('function FindDeformedBitmapToleranceIn(bitmap: integer; var x, y: Integer; xs, ys, xe, ye: Integer; tolerance: Integer; Range: Integer; AllowPartialAccuracy: Boolean; var accuracy: Extended): Boolean', @Lape_FindDeformedBitmapToleranceIn);
 AddGlobalFunc('procedure RectangleBitmap(bitmap: integer; const box: TBox; Color: TColor);', @Lape_RectangleBitmap);
+AddGlobalFunc('procedure RectangleBitmapEx(const Bitmap: Integer; const Box: TBox; const Color: Integer; const Transparency: Extended);', @Lape_RectangleBitmapEx);
 AddGlobalFunc('procedure FloodFillBitmap(bitmap: integer; const StartPoint: TPoint; const SearchCol,ReplaceCol: TColor);', @Lape_FloodFillBitmap);
 AddGlobalFunc('function ConvoluteBitmap(bitmap: integer; matrix: T2DExtendedArray): integer;', @Lape_ConvoluteBitmap);
 AddGlobalFunc('procedure ThresholdAdaptiveBitmap(const bmp: integer; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveBitmap);
 AddGlobalFunc('procedure CropBitmap(const bmp: integer; const xs, ys, xe, ye: integer);', @Lape_CropBitmap);
 AddGlobalFunc('procedure BlurBitmap(const bmp, block: integer);', @Lape_BlurBitmap);
+AddGlobalFunc('procedure DrawTextBitmap(const Bitmap: Integer; const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer);', @Lape_DrawTextBitmap);
+AddGlobalFunc('procedure DrawSystemTextBitmap(const Bitmap: Integer; const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); ', @Lape_DrawSystemTextBitmap);
 AddGlobalFunc('function CalculatePixelShift(Bmp1, Bmp2: Integer; CompareBox: TBox): integer', @Lape_CalculatePixelShift);
 AddGlobalFunc('function CalculatePixelShiftTPA(Bmp1, Bmp2: Integer; CPoints: TPointArray) : integer;', @Lape_CalculatePixelShiftTPA);
 AddGlobalFunc('function CalculatePixelTolerance(Bmp1, Bmp2: Integer; CompareBox: TBox; CTS: integer): extended', @Lape_CalculatePixelTolerance);
@@ -152,9 +155,6 @@ AddGlobalFunc('function CalculatePixelToleranceTPA(Bmp1, Bmp2: Integer; CPoints:
 AddGlobalFunc('function GetColorsBitmap(const bmp: integer): TIntegerArray;', @Lape_GetColorsBitmap);
 AddGlobalFunc('function BitmapToMatrix(const bmp: integer): T2DIntegerArray;',@Lape_BitmapToMatrix);
 AddGlobalFunc('procedure DrawMatrixBitmap(const bmp: integer; const Matrix: T2DIntegerArray);', @Lape_DrawMatrixBitmap);
-AddGlobalFunc('procedure ThresholdAdaptiveMatrix(var Matrix: T2DIntegerArray; Alpha, Beta: Byte; Invert: Boolean; Method: TBmpThreshMethod; C: Integer);', @Lape_ThresholdAdaptiveMatrix);
-AddGlobalFunc('procedure ResizeBilinearMatrix(var Matrix: T2DIntegerArray; NewW, NewH: Integer);', @Lape_ResizeBilinearMatrix);
-AddGlobalFunc('procedure BlurMatrix(var Matrix: T2DIntegerArray; const Block: integer);', @Lape_BlurMatrix);
 
 { Math }
 SetCurrSection('Math');
@@ -162,11 +162,11 @@ AddGlobalFunc('function pow(base,exponent: extended): extended', @Lape_pow);
 AddGlobalFunc('function RiemannGauss(Xstart,StepSize,Sigma: extended; AmountSteps: integer): extended', @Lape_RiemannGauss);
 AddGlobalFunc('function DiscreteGauss(Xstart,Xend: integer; sigma: extended): TExtendedArray', @Lape_DiscreteGauss);
 AddGlobalFunc('function GaussMatrix(N: integer; sigma: extended): T2DExtendedArray', @Lape_GaussMatrix);
-AddGlobalFunc('function Max(a,b: integer): integer', @Lape_Max);
+AddGlobalFunc('function Max(a, b: integer): integer', @Lape_Max);
 AddGlobalFunc('function Min(a, b: Integer): Integer', @Lape_Min);
 AddGlobalFunc('function MinE(a, b: extended): extended', @Lape_MinE);
-AddGlobalFunc('function MaxE(a,b: extended): extended', @Lape_MaxE);
-AddGlobalFunc('function Point(x,y: integer): TPoint', @Lape_Point);
+AddGlobalFunc('function MaxE(a, b: extended): extended', @Lape_MaxE);
+AddGlobalFunc('function Point(x, y: integer): TPoint', @Lape_Point);
 AddGlobalFunc('function Distance(x1,y1,x2,y2: integer): integer', @Lape_Distance);
 AddGlobalFunc('function Hypot(X, Y: Extended): Extended', @Lape_Hypot);
 AddGlobalFunc('function RandomRange(const aFrom, aTo: Integer): Integer', @Lape_RandomRange);
@@ -261,6 +261,7 @@ AddGlobalFunc('function CIELabToColor(L, a, b: Extended): TColor;', @Lape_CIELab
 AddGlobalFunc('procedure ColorToCIELab(Color: integer; out L, a, b: Extended);', @Lape_ColorToCIELab);
 AddGlobalFunc('procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended);', @Lape_CIELabToHSL);
 AddGlobalFunc('procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);', @Lape_HSLToCIELab);
+AddGlobalFunc('function ColorToGray(const Color: Integer): TColor', @Lape_ColorToGray);
 
 { Crypto }
 SetCurrSection('Crypto');
@@ -409,6 +410,7 @@ AddGlobalFunc('function NormLevDistance(src, target: string): Extended', @Lape_N
 AddGlobalFunc('function StringMatch(checkCompare, goalCompare: string): extended;', @Lape_StringMatch);
 AddGlobalFunc('function MultiBetween(str, s1, s2: string): TStringArray;', @Lape_MultiBetween);
 AddGlobalFunc('function IsArrInStr(strArr: TStringArray; s: string): boolean;', @Lape_IsArrInStr);
+AddGlobalFunc('function IsStrInArr(const s: string; const UsePos: Boolean; const arr: TStringArray): boolean;', @Lape_IsStrInArr);
 AddGlobalFunc('function PosMulti(const SubStr: String; Text: string): TIntegerArray;', @Lape_PosMulti);
 
 { TPA }

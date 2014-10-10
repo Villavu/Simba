@@ -337,6 +337,7 @@ type
       Shift: TShiftState);
     procedure editSearchListKeyPress(Sender: TObject; var Key: char);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
+    function GetInterepterMethods(const SimbaMethods: TExpMethodArr): TExpMethodArr;
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
@@ -958,7 +959,6 @@ end;
 function TSimbaForm.SetSourceEditorFont(obj: TObject): Boolean;
 var
   I: LongInt;
-  TempFont: TFont;
 begin
   if (TFontSetting(obj).Color.Value <> clDefault) then
   begin
@@ -1444,6 +1444,7 @@ begin
       ScriptState := ss_Running;
     end;
   end;
+
 end;
 
 procedure TSimbaForm.StopScript;
@@ -1453,7 +1454,8 @@ begin
     case ScriptState of
       ss_Stopping:
         begin    //Terminate the thread the tough way.
-          mDebugLn('Terminating the Scriptthread');
+          mDebugLn('Terminating the Scriptthread in 500ms');
+          Sleep(500);
           mDebugLn('Exit code terminate: ' +inttostr(KillThread(ScriptThread.Handle)));
           WaitForThreadTerminate(ScriptThread.Handle, 0);
           FreeAndNil(ScriptThread);
@@ -1749,7 +1751,7 @@ end;
 { Load settings }
 procedure TSimbaForm.LoadFormSettings;
 var
-  str,str2 : string;
+  str: string;
   Data : TStringArray;
   i,ii : integer;
 begin
@@ -1936,7 +1938,7 @@ var
   Script: string;
   loadFontsOnScriptStart: boolean;
   Continue: boolean;
-  H, I: LongInt;
+
 begin
   if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
   begin
@@ -2260,7 +2262,6 @@ end;
 
 procedure TSimbaForm.ActionFontExecute(Sender: TObject);
 var
-  I: LongInt;
   Dialog: TFontDialog;
 begin
   Dialog := TFontDialog.Create(nil);
@@ -2869,8 +2870,15 @@ begin
     SetLength(CoreBuffer, 1);
     CoreBuffer[0] := Buffer;
 
-    //Stream.Free; // TCodeInsight free's the stream!
+    // Now we have internal interpeter methods lets add em to function list
+    if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
+    begin
+      frmFunctionList.FunctionList.Items.Clear();
+      MenuitemFillFunctionList.Click();
+      frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text, True);
+    end;
   end;
+  //Stream.Free; // TCodeInsight free's the stream!
 end;
 
 procedure TSimbaForm.FormCreate(Sender: TObject);
@@ -3293,25 +3301,98 @@ begin;
     Result += '(';
 end;
 
+function TSimbaForm.GetInterepterMethods(const SimbaMethods: TExpMethodArr): TExpMethodArr;
+
+  function PrepareStr(const Str: string): string;
+  var
+    i, Len: Integer;
+  begin
+    Result := '';
+    Len := Length(Str);
+
+    for i := 1 to Len do
+      if (Str[i] <> ' ') and (Str[i] <> ';') then
+        Result += Str[i];
+  end;
+
+var
+  Headers, Names, SortedHeaders: TStringList;
+  Len, h, i, p: Integer;
+  Methods: TStringArray;
+begin
+  h := High(SimbaMethods);
+
+  if (h < 0) or (Length(CoreBuffer) = 0) then
+    Exit();
+
+  Headers := TStringList.Create;
+  Names := TStringList.Create;
+  SortedHeaders := TStringList.Create;
+  SortedHeaders.Sorted := True;
+  CoreBuffer[Low(CoreBuffer)].GetProcedures(Headers, Names);
+
+  try
+    SetLength(Methods, h + 1);
+    for i := 0 to h do
+      Methods[i] := PrepareStr(Lowercase(SimbaMethods[i].FuncDecl));
+
+    for i := 0 to (Names.Count - 1) do
+      if (not IsStrInArr(PrepareStr(Lowercase(Headers[i])), False, Methods)) then
+        SortedHeaders.Add(Names[i] + '###' + Headers[i]);
+
+    for i := 0 to (SortedHeaders.Count - 1) do
+    begin
+      p := (Pos('###', SortedHeaders[i]) + 3);
+      Len := Length(Result);
+      SetLength(Result, Len + 1);
+      Result[Len].FuncDecl := Copy(SortedHeaders[i], p, Length(SortedHeaders[i]) - p);
+      Result[Len].FuncPtr := nil;
+      Result[Len].Section := 'Lape';
+    end;
+  finally
+    Headers.Free();
+    Names.Free();
+    SortedHeaders.Free();
+  end;
+end;
+
 procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
 var
-  Methods : TExpMethodArr;
+  Methods, InterpMethods: TExpMethodArr;
   LastSection : string;
   Sections : TStringList;
   Nodes : array of TTreeNode;
-  i : integer;
+  i, Len: integer;
   Index : integer;
   TempNode : TTreeNode;
   Temp2Node : TTreeNode;
   Tree : TTreeView;
 begin
-  SetLength(nodes,0);
+  SetLength(nodes, 0);
   frmFunctionList.FunctionList.BeginUpdate;
-  if frmFunctionList.FunctionList.Items.Count = 0 then
-  begin;
+  if (frmFunctionList.FunctionList.Items.Count = 0) then
+  begin
     case SimbaSettings.Interpreter._Type.Value of
-      {$IFDEF USE_PASCALSCRIPT}interp_PS: Methods := TPSThread.GetExportedMethods(); {$ENDIF}
-      interp_LP: Methods := TLPThread.GetExportedMethods();
+      {$IFDEF USE_PASCALSCRIPT}
+      interp_PS:
+        Methods := TPSThread.GetExportedMethods();
+      {$ENDIF}
+      interp_LP:
+        begin
+          Methods := TLPThread.GetExportedMethods();
+
+          if (Length(CoreBuffer) > 0) then
+          begin
+            InterpMethods := Self.GetInterepterMethods(Methods);
+
+            for i := 0 to High(InterpMethods) do
+            begin
+              Len := Length(Methods);
+              SetLength(Methods, Len + 1);
+              Methods[Len] := InterpMethods[i];
+            end;
+          end;
+        end;
       else
         raise Exception.Create('Invalid Interpreter!');
     end;

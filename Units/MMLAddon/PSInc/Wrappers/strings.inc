@@ -166,7 +166,12 @@ begin
   result := isArrInStr(strArr, s);
 end;
 
-function ps_PosMulti(const SubStr:String; text: string): TIntegerArray;
+function ps_PosMulti(const SubStr:String; text: string): TIntegerArray; extdecl;
 begin
   result := PosMulti(SubStr, Text);
+end;
+
+function ps_IsStrInArr(const s: string; const UsePos: Boolean; const arr: TStringArray): boolean; extdecl;
+begin
+  result := IsStrInArr(s, UsePos, arr);
 end;

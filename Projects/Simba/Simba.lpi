@@ -44,7 +44,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="61">
+    <Units Count="63">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -374,6 +374,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="lplclprocess"/>
       </Unit60>
+      <Unit61>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/MML/lptmmltimer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="lpTMMLTimer"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="../../Units/MMLAddon/LPInc/Classes/miniLCL/lplclregexpr.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="lplclregexpr"/>
+      </Unit62>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -405,23 +415,4 @@
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>
-  <Debugging>
-    <Exceptions Count="5">
-      <Item1>
-        <Name Value="ESyntaxError"/>
-      </Item1>
-      <Item2>
-        <Name Value="lpException"/>
-      </Item2>
-      <Item3>
-        <Name Value="EDOMError"/>
-      </Item3>
-      <Item4>
-        <Name Value="EConvertError"/>
-      </Item4>
-      <Item5>
-        <Name Value="EInvalidOperation"/>
-      </Item5>
-    </Exceptions>
-  </Debugging>
 </CONFIG>

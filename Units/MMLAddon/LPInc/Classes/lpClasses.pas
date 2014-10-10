@@ -27,6 +27,7 @@ uses
   lplclmenus,
   lplclspin,
   lplclprocess,
+  lplclregexpr,
 
   lpTMDTM, lpTMDTMS,
 
@@ -48,7 +49,10 @@ uses
   {$IFDEF LINUX}, lpTIOManager_Linux {$ENDIF}
 
   , lpTClient,
-  lpTMMLSettingsSandbox;
+
+  lpTMMLSettingsSandbox,
+
+  lpTMMLTimer;
 
 procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 begin
@@ -65,6 +69,7 @@ begin
   RegisterLCLMenus(Compiler);
   RegisterLCLSpinCtrls(Compiler);
   RegisterLCLProcess(Compiler);
+  RegisterLCLTRegExpr(Compiler);
 end;
 
 procedure RegisterMMLClasses(Compiler: TLapeCompiler);
@@ -101,6 +106,8 @@ begin
   Register_TClient(Compiler);
 
   Register_TMMLSettingsSandbox(Compiler);
+
+  Register_TMMLTimer(Compiler);
 end;
 
 end.

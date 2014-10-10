@@ -112,3 +112,8 @@ procedure ps_HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended);
 begin
   HSLToCIELab(HH, SS, LL, L, a, b);
 end;
+
+function ps_ColorToGray(const Color: Integer): Byte;
+begin
+  Result := ColorToGray(Color);
+end;

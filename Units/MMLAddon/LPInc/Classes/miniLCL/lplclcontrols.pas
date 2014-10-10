@@ -21,12 +21,18 @@ type
   PGraphicControl = ^TGraphicControl;
 
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
+
 implementation
-uses lplclsystem,lplclgraphics,forms;
+
+uses lplclsystem, lplclgraphics, forms, lplclforms;
+
 type
   PScrollBarKind = ^TScrollBarKind;
   PControlScrollBar = ^TcontrolScrollBar;
   PScrollingWinControl = ^TScrollingWinControl;
+  PAlign = ^TAlign;
+  PCursor = ^TCursor;
+
 {TControl}
 //procedure AdjustSize;
 procedure TControl_AdjustSize(const Params: PParamArray); lape_extdecl
@@ -568,6 +574,16 @@ begin
   PControl(Params^[0])^.OnResize := PNotifyEvent(Params^[1])^;
 end;
 
+procedure TControl_Align_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlign(Result)^ := PControl(Params^[0])^.Align;
+end;
+
+procedure TControl_Align_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Align := PAlign(Params^[1])^;
+end;
+
 //Read: property Visible: Boolean read Visible write Visible;
 procedure TControl_Visible_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
@@ -690,6 +706,16 @@ begin
   PControl(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
 end;
 
+procedure TControl_Cursor_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PCursor(Result)^ := PControl(Params^[0])^.Cursor;
+end;
+
+procedure TControl_Cursor_Write(const Params: PParamArray); lape_extdecl
+begin
+  PControl(Params^[0])^.Cursor := PCursor(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TControl_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -759,6 +785,7 @@ begin
     addGlobalFunc('function TControl.ParentDestroyingHandle(): boolean;', @TControl_ParentDestroyingHandle);
     addGlobalFunc('function TControl.ParentHandlesAllocated(): boolean;', @TControl_ParentHandlesAllocated);
     addGlobalFunc('procedure TControl.InitiateAction();', @TControl_InitiateAction);
+    addClassVar('TControl', 'Cursor', 'TCursor', @TControl_Cursor_Read, @TControl_Cursor_Write);      addClassVar('TControl', 'Align', 'TAlign', @TControl_Align_Read, @TControl_Align_Write);
     addClassVar('TControl', 'AutoSize', 'Boolean', @TControl_AutoSize_Read, @TControl_AutoSize_Write);
     addClassVar('TControl', 'BoundsRect', 'TRect', @TControl_BoundsRect_Read, @TControl_BoundsRect_Write);
     addClassVar('TControl', 'BoundsRectForNewParent', 'TRect', @TControl_BoundsRectForNewParent_Read, @TControl_BoundsRectForNewParent_Write);
@@ -1395,6 +1422,11 @@ begin
   PCustomControl(Params^[0])^.OnPaint := PNotifyEvent(Params^[1])^;
 end;
 
+procedure TCustomControl_BorderStyle_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomControl(Params^[0])^.BorderStyle := PFormBorderStyle(Params^[1])^;
+end;
+
 //procedure Free();
 procedure TCustomControl_Free(const Params: PParamArray); lape_extdecl
 begin
@@ -1410,6 +1442,7 @@ begin
     addGlobalFunc('procedure TCustomControl.Init(AOwner: TComponent);', @TCustomControl_Init);
     addClassVar('TCustomControl', 'Canvas', 'TCanvas', @TCustomControl_Canvas_Read, @TCustomControl_Canvas_Write);
     addClassVar('TCustomControl', 'OnPaint', 'TNotifyEvent', @TCustomControl_OnPaint_Read, @TCustomControl_OnPaint_Write);
+    addClassVar('TCustomControl', 'BorderStyle', 'TFormBorderStyle', nil, @TCustomControl_BorderStyle_Write);
     addGlobalFunc('procedure TCustomControl.Free();', @TCustomControl_Free);
   end;
 end;
@@ -1660,6 +1693,16 @@ begin
   PGraphicControl(Params^[0])^.Update();
 end;
 
+procedure TGraphicControl_Align_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlign(Result)^ := PGraphicControl(Params^[0])^.Align;
+end;
+
+procedure TGraphicControl_Align_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGraphicControl(Params^[0])^.Align := PAlign(Params^[1])^;
+end;
+
 procedure Register_TGraphicControl(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1668,23 +1711,31 @@ begin
 
     addGlobalFunc('procedure TGraphicControl.Update();', @TGraphicControl_Update);
     addClassVar('TGraphicControl', 'Canvas', 'TCanvas', @TGraphicControl_Canvas_Read);
+    addClassVar('TGraphicControl', 'Alignment', 'TAlign', @TGraphicControl_Align_Read, @TGraphicControl_Align_Write);
   end;
 end;
 
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
 begin
-  with compiler do
+  with Compiler do
    begin
      addGlobalType('(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble, ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum, ssScroll, ssTriple, ssQuad, ssExtra1, ssExtra2)', 'TShiftStateEnum');
      addGlobalType('set of TShiftStateEnum', 'TShiftState');
-
-     AddGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState)','TKeyEvent');
-     AddGlobalType('procedure(Sender: TObject; var Key: char)','TKeyPressEvent');
-     AddGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)','TMouseButton');
-     AddGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer)','TMouseEvent');
+     addGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState)','TKeyEvent');
+     addGlobalType('procedure(Sender: TObject; var Key: char)','TKeyPressEvent');
+     addGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)','TMouseButton');
+     addGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer)','TMouseEvent');
      addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)', 'TMouseMoveEvent');
-     AddGlobalType('(sbHorizontal, sbVertical)','TScrollBarKind');
+     addGlobalType('(sbHorizontal, sbVertical)','TScrollBarKind');
+     addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TAlign');
+     addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)','TFormBorderStyle');
+     addGlobalType('Integer', 'TCursor');
+     addGlobalVar(crNone, 'crNone').isConstant := True;
+     addGlobalVar(crCross, 'crCross').isConstant := True;
+     addGlobalVar(crHandPoint, 'crHandPoint').isConstant := True;
+     addGlobalVar(crIBeam, 'crIBeam').isConstant := True;
    end;
+
   Register_TControl(Compiler);
   Register_TWinControl(Compiler);
   Register_TCustomControl(Compiler);

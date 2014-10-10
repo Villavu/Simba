@@ -64,6 +64,13 @@ type
     procedure KeyPress(Sender: TObject; var Key: char); register;
   end;
 
+  PMouseEventWrapper = ^TMouseEventWrapper;
+  TMouseEventWrapper = procedure(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); cdecl;
+  TOnMouseEventWrapper = class(specialize TRegisterWrapper<TMouseEventWrapper>)
+  public
+    procedure MouseEvent(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); register;
+  end;
+
 implementation
 
 procedure TLapeCompilerHelper.addClass(const Name: string; const Parent: string = 'TObject');
@@ -123,6 +130,12 @@ procedure TOnKeyPressWrapper.KeyPress(Sender: TObject; var Key: char); register;
 begin
   if (Assigned(FMethod)) then
     FMethod(Sender, Key);
+end;
+
+procedure TOnMouseEventWrapper.MouseEvent(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); register;
+begin
+  if (Assigned(FMethod)) then
+    FMethod(Sender, Button, Shift, X, Y);
 end;
 
 end.

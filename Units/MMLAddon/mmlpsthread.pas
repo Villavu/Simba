@@ -259,7 +259,7 @@ type
      procedure Execute; override;
      procedure Terminate; override;
      function OnFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
-     function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+     function OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
    end;
 
    TSyncMethod = class
@@ -635,6 +635,7 @@ end;
 {$I PSInc/Wrappers/window.inc}
 {$I PSInc/Wrappers/tpa.inc}
 {$I PSInc/Wrappers/strings.inc}
+
 {$I PSInc/Wrappers/crypto.inc}
 {$I PSInc/Wrappers/colour.inc}
 {$I PSInc/Wrappers/colourconv.inc}
@@ -1349,6 +1350,7 @@ begin
 end;
 
 {$I LPInc/Wrappers/lp_other.inc}
+
 {$I LPInc/Wrappers/lp_settings.inc}
 {$I LPInc/Wrappers/lp_bitmap.inc}
 
@@ -1409,8 +1411,8 @@ begin
     RegisterLCLClasses(Compiler);
     RegisterMMLClasses(Compiler);
 
-    addGlobalVar('TClient', @Client, 'Client').isConstant := True;
-    addGlobalVar('TMMLSettingsSandbox', @Sett, 'Settings').isConstant := True;
+    addGlobalVar('TClient', @Client, 'Client');
+    addGlobalVar('TMMLSettingsSandbox', @Sett, 'Settings');
 
     {$I LPInc/lpexportedmethods.inc}
 
@@ -1517,7 +1519,7 @@ begin
     FileName := '';
 end;
 
-function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek: Boolean): Boolean;
+function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
   plugin_idx: integer;
 begin
@@ -1526,22 +1528,41 @@ begin
   begin
     if (Argument <> '') then
     begin
+      Result := True;
+      if (InIgnore) then
+        Exit;
+
       plugin_idx := PluginsGlob.LoadPlugin(Argument);
       if (plugin_idx >= 0) then
-      begin
-        LoadPlugin(plugin_idx);
-        Result := True;
-      end else
+        LoadPlugin(plugin_idx)
+      else
         psWriteln(Format('Your DLL %s has not been found', [Argument]))
     end else
       psWriteln('Your LoadLib directive has no params, thus cannot find the plugin');
   end;
 end;
 
-procedure TLPThread.LoadPlugin(plugidx: integer);
+procedure TLPThread.LoadPlugin(plugidx: integer); 
 var
   I: integer;
   Wrapper: TImportClosure;
+  method: String;
+  
+  //Check if the string ends with an `Native`-keyword.
+  function isNative(str:String; var Res:String): boolean;
+  var len:Int32;
+  begin
+    Res := Trim(Str);
+    Len := Length(Res);
+    if (Res[len] = ';') then Dec(Len);
+    if not (LowerCase(Copy(Res, len-5, 6)) = 'native') then
+      Exit(False);
+    Dec(len,6);
+    SetLength(Res, len);
+    while Res[len] in [#9,#10,#13,#32] do Dec(len);
+    Result := (Res[len] = ';');
+  end;
+  
 begin
   with PluginsGlob.MPlugins[plugidx] do
   begin
@@ -1567,9 +1588,13 @@ begin
 
     for i := 0 to MethodLen - 1 do
     begin
-      Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
-      Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
-      ImportWrappers.Add(Wrapper);
+      if isNative(Methods[i].FuncStr, Method) then
+        Compiler.addGlobalFunc(Method, Methods[i].FuncPtr)
+      else begin
+        Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
+        Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
+        ImportWrappers.Add(Wrapper);
+      end;
     end;
 
     Compiler.EndImporting;

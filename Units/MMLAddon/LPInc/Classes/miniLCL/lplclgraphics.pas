@@ -44,11 +44,13 @@ procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
 implementation
 
 uses
-  MufasaTypes,LCLType,lplclsystem, stringutil;
+  MufasaTypes,LCLType,lplclsystem, stringutil, Clipbrd;
 
 type
   PHbitmap = ^HBitmap;
   PHPalette = ^HPalette;
+  PClipboardFormat = ^TClipboardFormat;
+  PAntialiasingMode = ^TAntialiasingMode;
 
   {TGraphicsObject}
 //Read: property OnChanging: TNotifyEvent read OnChanging write OnChanging;
@@ -777,6 +779,18 @@ begin
   PCanvas(Params^[0])^.OnChanging := PNotifyEvent(Params^[1])^;
 end;
 
+procedure TCanvas_GetPixels(const Params: PParamArray; const Result: Pointer); lape_extdecl
+var
+  TPA: TPointArray;
+  i, h: Integer;
+begin
+  TPA := PPointArray(Params^[1])^;
+  h := High(TPA);
+  SetLength(PIntegerArray(Result)^, h + 1);
+  for i := 0 to h do
+    PIntegerArray(Result)^[i] := PCanvas(Params^[0])^.Pixels[TPA[i].x, TPA[i].y];
+end;
+
 procedure TCanvas_Get_Pixel(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
   PColor(Result)^ := PCanvas(Params^[0])^.Pixels[PInteger(Params^[1])^, PInteger(Params^[2])^];
@@ -789,12 +803,30 @@ end;
 
 procedure TCanvas_Set_Pixels(const Params: PParamArray); lape_extdecl
 var
-  i, l: integer;
+  TPA: TPointArray;
+  i, h: integer;
+  Col: TColor;
 begin
-  l := length(PPointArray(Params^[1])^);
+  TPA := PPointArray(Params^[1])^;
+  Col := PColor(Params^[2])^;
+  h := High(TPA);
 
-  for i := 0 to (l - 1) do
-    PCanvas(Params^[0])^.Pixels[PPointArray(Params^[1])^[i].x, PPointArray(Params^[1])^[i].y] := PColor(Params^[2])^;
+  for i := 0 to h do
+    PCanvas(Params^[0])^.Pixels[TPA[i].x, TPA[i].y] := Col;
+end;
+
+procedure TCanvas_SetPixels(const Params: PParamArray); lape_extdecl
+var
+  TPA: TPointArray;
+  Cols: TIntegerArray;
+  i, h: integer;
+begin
+  TPA := PPointArray(Params^[1])^;
+  Cols := PIntegerArray(Params^[2])^;
+  h := High(TPA);
+
+  for i := 0 to h do
+    PCanvas(Params^[0])^.Pixels[TPA[i].x, TPA[i].y] := Cols[i];
 end;
 
 //procedure Draw(X,Y: Integer; SrcGraphic: TGraphic);
@@ -813,6 +845,41 @@ end;
 procedure TCanvas_Free(const Params: PParamArray); lape_extdecl
 begin
   PCanvas(Params^[0])^.Free();
+end;
+
+procedure TCanvas_Clear(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Clear();
+end;
+
+procedure TCanvas_Frame(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Frame(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure TCanvas_Frame3D(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Frame3D(PRect(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+procedure TCanvas_LineTo(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.LineTo(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure TCanvas_MoveTo(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.MoveTo(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure TCanvas_AntialiasingMode_Set(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.AntialiasingMode := PAntialiasingMode(Params^[1])^;
+end;
+
+procedure TCanvas_AntialiasingMode_Get(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAntialiasingMode(Result)^ := PCanvas(Params^[0])^.AntialiasingMode;
 end;
 
 procedure Register_TCanvas(Compiler: TLapeCompiler);
@@ -855,10 +922,17 @@ begin
     addGlobalFunc('procedure TCanvas.TextRect( ARect: TRect; X, Y: integer;  Text: string);', @TCanvas_TextRect);
     addGlobalFunc('function TCanvas.TextHeight( Text: string): Integer;', @TCanvas_TextHeight);
     addGlobalFunc('function TCanvas.TextWidth( Text: string): Integer;', @TCanvas_TextWidth);
-    addGlobalFunc('function TCanvas.HandleAllocated(): boolean;', @TCanvas_HandleAllocated);
-    addGlobalFunc('function TCanvas.GetPixel(x, y: integer): TColor', @TCanvas_Set_Pixel);
-    addGlobalFunc('procedure TCanvas.SetPixel(x, y: integer; colour: TColor);', @TCanvas_Set_Pixel);
-    addGlobalFunc('procedure TCanvas.SetPixels(tpa: TPointArray; colour: TColor);', @TCanvas_Set_Pixels);
+    addGlobalFunc('function TCanvas.HandleAllocated(): Boolean;', @TCanvas_HandleAllocated);
+    addGlobalFunc('function TCanvas.GetPixel(x, y: integer): TColor', @TCanvas_Get_Pixel);
+    addGlobalFunc('procedure TCanvas.SetPixel(x, y: integer; Colour: TColor);', @TCanvas_Set_Pixel);
+    addGlobalFunc('procedure TCanvas.SetPixels(TPA: TPointArray; Colour: TColor);', @TCanvas_Set_Pixels);
+    addGlobalFunc('procedure TCanvas.SetPixels(TPA: TPointArray; Cols: TIntegerArray); overload;', @TCanvas_SetPixels);
+    addGlobalFunc('function TCanvas.GetPixels(const TPA: TPointArray): TIntegerArray;', @TCanvas_GetPixels);
+    addGlobalFunc('procedure TCanvas.Clear();', @TCanvas_Clear);
+    addGlobalFunc('procedure TCanvas.MoveTo(x, y: Integer);', @TCanvas_MoveTo);
+    addGlobalFunc('procedure TCanvas.LineTo(x, y: Integer);', @TCanvas_LineTo);
+    addGlobalFunc('procedure TCanvas.Frame3D(var ARect: TRect; TopColor, BottomColor: TColor; const FrameWidth: integer)', @TCanvas_Frame3D);
+    addGlobalFunc('procedure TCanvas.Frame(X1, Y1, X2, Y2: Integer);', @TCanvas_Frame);
     addClassVar('TCanvas', 'AutoRedraw', 'Boolean', @TCanvas_AutoRedraw_Read, @TCanvas_AutoRedraw_Write);
     addClassVar('TCanvas', 'Brush', 'TBrush', @TCanvas_Brush_Read, @TCanvas_Brush_Write);
     addClassVar('TCanvas', 'CopyMode', 'TCopyMode', @TCanvas_CopyMode_Read, @TCanvas_CopyMode_Write);
@@ -868,6 +942,7 @@ begin
     addClassVar('TCanvas', 'Width', 'integer', @TCanvas_Width_Read);
     addClassVar('TCanvas', 'OnChange', 'TNotifyEvent', @TCanvas_OnChange_Read, @TCanvas_OnChange_Write);
     addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @TCanvas_OnChanging_Read, @TCanvas_OnChanging_Write);
+    addClassVar('TCanvas', 'AntialiasingMode', 'TAntialiasingMode', @TCanvas_AntialiasingMode_Get, @TCanvas_AntialiasingMode_Set);
     addGlobalFunc('procedure TCanvas.Init();', @TCanvas_Init);
     addGlobalFunc('procedure TCanvas.Free();', @TCanvas_Free);
   end;
@@ -1000,6 +1075,14 @@ begin
   PGraphic(Params^[0])^.Free();
 end;
 
+procedure TGraphic_LoadFromClipboardFormat(const Params: PParamArray); lape_extdecl
+begin
+  if (not Clipboard.HasPictureFormat) then
+    raise Exception.Create('Clipboard has no image')
+  else
+    PGraphic(Params^[0])^.LoadFromClipboardFormat(CF_Bitmap);
+end;
+
 procedure Register_TGraphic(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1011,6 +1094,7 @@ begin
     addGlobalFunc('procedure TGraphic.Clear();', @TGraphic_Clear);
     addGlobalFunc('procedure TGraphic.LoadFromFile(const Filename: string);', @TGraphic_LoadFromFile);
     addGlobalFunc('procedure TGraphic.SaveToFile(const Filename: string);', @TGraphic_SaveToFile);
+    addGlobalFunc('procedure TGraphic.LoadFromClipboardFormat();', @TGraphic_LoadFromClipboardFormat);
     addClassVar('TGraphic', 'Empty', 'Boolean', @TGraphic_Empty_Read);
     addClassVar('TGraphic', 'Height', 'Integer', @TGraphic_Height_Read, @TGraphic_Height_Write);
     addClassVar('TGraphic', 'Modified', 'Boolean', @TGraphic_Modified_Read, @TGraphic_Modified_Write);
@@ -1402,20 +1486,20 @@ end;
  begin
    with Compiler do
      begin
-       AddGlobalType('record Left,Top,Right,Bottom : Longint;end;','TRect');
-       AddGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)','TFontStyles');
-       AddGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
-      // AddGlobalType('set of TFontStyle','TFontStyles');
-       AddGlobalType('(fpDefault, fpVariable, fpFixed)','TFontPitch');
-       AddGlobalType('integer','TCopyMode');
-       AddGlobalType('(psSolid, psDash, psDot, psDashDot, psDashDotDot, psinsideFrame, psPattern,psClear)','TPenStyle');
-       AddGlobalType('(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy,pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge,pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)','TPenMode');
-       AddGlobalType('(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal,bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)','TBrushStyle');
-       AddGlobalType('(fsSurface,fsBorder)','TFillStyle');
-       //AddGlobalType('^TPointArray','PPoint');
-       AddGlobalType('integer','HBITMAP');
-       AddGlobalType('integer','HPALETTE');
-       AddGlobalType('(tmAuto,tmFixed)','TTransparentMode');
+       addGlobalType('record Left,Top,Right,Bottom : Longint;end;','TRect');
+       addGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)','TFontStyle');
+       addGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TFontQuality');
+       addGlobalType('set of TFontStyle','TFontStyles');
+       addGlobalType('(fpDefault, fpVariable, fpFixed)','TFontPitch');
+       addGlobalType('integer','TCopyMode');
+       addGlobalType('(psSolid, psDash, psDot, psDashDot, psDashDotDot, psinsideFrame, psPattern,psClear)','TPenStyle');
+       addGlobalType('(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy,pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge,pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)','TPenMode');
+       addGlobalType('(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal,bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)','TBrushStyle');
+       addGlobalType('(fsSurface,fsBorder)','TFillStyle');
+       addGlobalType('integer','HBITMAP');
+       addGlobalType('integer','HPALETTE');
+       addGlobalType('(tmAuto, tmFixed)','TTransparentMode');
+       addGlobalType('(amDontCare, amOn, amOff)', 'TAntialiasingMode');
 
        //register graphics
        Register_TGraphicsObject(Compiler);
