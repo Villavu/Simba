@@ -65,6 +65,11 @@ AddGlobalFunc('function GetProcessID : LongInt', @Lape_GetProcessID);
 AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
 AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_ExtractFileExt);
 AddGlobalFunc('function GetEnvironmentVariable(const VarName: string): string;', @Lape_GetEnvironmentVariable);
+AddGlobalFunc('procedure ShowBitmap(const Bitmap: Integer);', @Lape_ShowBitmap);
+AddGlobalFunc('procedure ShowBitmap(const Bitmap: TMufasaBitmap); overload;', @Lape_ShowBitmap_Mufasa);
+AddGlobalFunc('procedure SetWindowParent(const Child, Parent: PtrUInt; X, Y: Integer);', @Lape_SetWindowParent);
+AddGlobalFunc('procedure SetWindowTitle(const Window: PtrUInt; const NewTitle: String);', @Lape_SetWindowTitle);
+AddGlobalFunc('function GetWindowTitle(const Window: PtrUInt): String;', @Lape_GetWindowTitle);
 
 { DTM }
 SetCurrSection('DTM');

@@ -1285,6 +1285,16 @@ begin
   PBoolean(Result)^ := PBitmap(Params^[0])^.Transparent;
 end;
 
+procedure TBitmap_Monochrome_Write(const Params: PParamArray); lape_extdecl
+begin
+  PBitmap(Params^[0])^.Monochrome := PBoolean(Params^[1])^;
+end;
+
+procedure TBitmap_Monochrome_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PBitmap(Params^[0])^.Monochrome;
+end;
+
 procedure TBitmap_ToString(const Params: PParamArray; const Result: Pointer); lape_extdecl
 var
   b: TBitmap;
@@ -1352,6 +1362,7 @@ begin
     addClassVar('TBitmap', 'TransparentColor', 'TColor', @TBitmap_TransparentColor_Read, @TBitmap_TransparentColor_Write);
     addClassVar('TBitmap', 'TransparentMode', 'TTransparentMode', @TBitmap_TransparentMode_Read, @TBitmap_TransparentMode_Write);
     addClassVar('TBitmap', 'Transparent', 'Boolean', @TBitmap_TransparentMode_Read, @TBitmap_Transparent_Write);
+    addClassVar('TBitmap', 'Monochrome', 'Boolean', @TBitmap_Monochrome_Read, @TBitmap_Monochrome_Write);
     addGlobalFunc('procedure TBitmap.Free();', @TBitmap_Free);
   end;
 end;

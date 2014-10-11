@@ -417,3 +417,80 @@ function ps_GetEnvironmentVariable(const VarName: string): string; extdecl;
 begin
   result := GetEnvironmentVariableUTF8(VarName);
 end;
+
+procedure ps_ShowBitmap(const Bitmap: TMufasaBitmap); extdecl;
+var
+  p: TPoint;
+begin
+  if (not Assigned(Bitmap)) then
+    Exit();
+
+  p := Classes.Point(Bitmap.Width, Bitmap.Height);
+  with (CurrThread) do
+  begin
+    FormCallBack(m_ClearDebugImg, nil);
+    FormCallBack(m_DisplayDebugImgWindow, @p);
+    FormCallBack(m_DrawBitmapDebugImg, Pointer(Bitmap));
+  end;
+end;
+
+procedure ps_ShowBitmap(const Bitmap: Integer); overload; extdecl;
+begin
+  ps_ShowBitmap(CurrThread.Client.MBitmaps[Bitmap]);
+end;
+
+procedure ps_SetWindowParent(const Child, Parent: PtrUInt; X, Y: Integer); extdecl;
+{$IFDEF MSWindows}
+begin
+  Windows.SetParent(Child, Parent);
+  Windows.SetWindowPos(Child, HWND_TOP, X, Y, 0, 0, SWP_NOSIZE);
+end;
+{$ELSE}
+begin
+  XReparentWindow(CurrThread.Client.IOManager.Display, Child, Parent, X, Y);
+end;
+{$ENDIF}
+
+procedure ps_SetWindowTitle(const Window: PtrUInt; const NewTitle: String); extdecl;
+{$IFDEF MSWindows}
+begin
+  Windows.SetWindowText(Window, PChar(NewTitle));
+end;
+{$ELSE}
+var
+  Name: TXTextProperty;
+begin
+  Name.value    := PCUChar(NewTitle);
+  Name.encoding := XA_STRING;
+  Name.format   := 8;
+  Name.nitems   := Length(NewTitle);
+  XSetWMName(CurrThread.Client.IOManager.Display, Window, @Name);
+  XFlush(CurrThread.Client.IOManager.Display);
+end;
+{$ENDIF}
+
+function ps_GetWindowTitle(const Window: PtrUInt): String;
+{$IFDEF MSWindows}
+var
+  c: PChar;
+begin
+  Windows.GetWindowText(Window, c, Windows.GetWindowTextLength(Window));
+  Result := String(c);
+end;
+{$ELSE}
+var
+  title: TXTextProperty;
+begin
+  title.value    := nil;
+  title.encoding := XA_STRING;
+  title.format   := 8;
+  title.nitems   := 0;
+
+  XGetWMName(CurrThread.Client.IOManager.Display, Window, @title);
+  if (title.value <> nil) and (title.nitems <> 0) then
+  begin
+    SetLength(Result, title.nitems);
+    Move(title.value[0], Result[1], title.nitems);
+  end;
+end;
+{$ENDIF}
