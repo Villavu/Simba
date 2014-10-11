@@ -2424,6 +2424,7 @@ end;
 procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
 begin
   {$IFDEF USE_FORMDESIGNER}
+  CompForm.Interpreter:=Integer(SimbaSettings.Interpreter._Type.Value);
   if (CompForm.Visible) then
     CompForm.{$IFDEF WINDOWS}Hide{$ELSE}Visible := False{$ENDIF}
   else
