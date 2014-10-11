@@ -8,7 +8,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
   stdctrls, ExtCtrls, Menus, LCLIntf, LCLType, LCLProc, LResources, LMessages, design_frm,
-  types,sclist,StrUtils,bitmaps,code;
+  types,sclist,StrUtils,bitmaps,CodeGen;
 
 type
   TControlsClassStandard = array [0..9] of TComponentClass;
@@ -86,6 +86,7 @@ type
   private
     FButtonDown: TToolButton;
     FControlsClassPStd: TControlsClassStandard;
+    FInterpreterType: integer;
     procedure ComponentToSimba(cmp: TControl;var smb: TSimbaComponent);
     function GetButtonIndex: Integer;
     procedure ApplySimbaToComponent(smb: TSimbaComponent;cmp: TControl);
@@ -98,6 +99,7 @@ type
     property ButtonDown:TToolButton read FButtonDown write FButtonDown;
     property ControlsClassPStd:TControlsClassStandard read FControlsClassPStd
       write FControlsClassPStd;
+    property Interpreter: integer read FInterpreterType write FInterpreterType;
     function GetControlType(cmp: TControl): integer;
     procedure AddToStringGrid(cmp: TControl);//not used now
     procedure FormToSCList(form: TDsgnForm);
@@ -114,14 +116,13 @@ var
   ecomp: TComponent;
   curcomp: TControl;
   f: TDsgnForm;
-  codefrm: TCodeGen;
   curitem: TComponent;
   sfdlg: TSaveDialog;
   ofdlg: TOpenDialog;
 implementation
 
 {$R *.lfm}
-uses typinfo,rttiutils{,commctrl};
+uses typinfo,rttiutils,simbaunit{,commctrl};
 
 function TrimCharLeft(const S: string; C: Char): string;
 var
@@ -357,13 +358,24 @@ end;
 
 
 procedure TCompForm.MenuItem10Click(Sender: TObject);
+var
+  C: TCodeGenerator;
 begin
-  if Assigned(codefrm) then
+ { if Assigned(codefrm) then
   codefrm.Free;
-  codefrm:=TCodeGen.Create(self);
+  codefrm:=TCodeGen.Create(self);}
+  SimbaForm.AddTab;
   FormToSCList(f);
-  codefrm.CreateScript(CompList);
-  codefrm.Show;
+  {codefrm.CreateScript(CompList);}
+  try
+  C:=TCodeGenerator.Create(Interpreter);
+  SimbaForm.CurrScript.SynEdit.Lines.Clear;
+  SimbaForm.CurrScript.SynEdit.Lines.AddStrings(C.GetScript(CompList));
+  //codefrm.memo1.Lines.AddStrings(C.GetScript(CompList));
+  finally
+      C.Free;
+  end;
+ // codefrm.Show;
 end;
 
 procedure TCompForm.MenuItem15Click(Sender: TObject);
