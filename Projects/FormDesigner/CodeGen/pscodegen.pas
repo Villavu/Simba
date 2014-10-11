@@ -1,152 +1,34 @@
-unit code;
+unit PSCodeGen;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  SynEdit, SynHighlighterPas, SynGutterBase, SynGutterMarks,
-  SynGutterLineNumber, SynGutterChanges, SynGutter, SynGutterCodeFolding,
-  sclist, ClipBrd, Menus;
-
+  Classes, SysUtils,sclist,AbstractCodeGen;
 type
+ //The form code generator for Pascal Script interpreter by Cynic
+  { TPSCodeGen }
 
-  { TCodeGen }
-
-  TCodeGen = class(TForm)
-    MenuItem1: TMenuItem;
-    PopupMenu1: TPopupMenu;
-    memo1: TSynEdit;
-    SynPasSyn1: TSynPasSyn;
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure FormCreate(Sender: TObject);
-    procedure MenuItem1Click(Sender: TObject);
-  private
-    CmpList: TSimbaComponentList;
-    labels,edits,images,buttons,checkboxes,listboxes,comboboxes,RadBtns: TSimbaComponentList;
-    FormCode,LabelsCode,EditsCode,ImagesCode,ButtonsCode,CheckBoxesCode,ListBoxesCode,
-    ComboBoxesCode, RadBtnsCode,HeaderCode,ScriptCode: TStringList;
-    procedure GenerateScriptHeader;
-    procedure GenerateProgressHeader;
-    { private declarations }
-  public
-    { public declarations }
-    procedure CreateScript(list: TSimbaComponentList);
-    Procedure GetComponentCode(smbl: TSimbaComponentList);
-    Procedure SmbToCodeList(smb: TSimbaComponent;list: TStringList);
-    Procedure GenerateFormCode(smbl: TSimbaComponentList);
-    Procedure GenerateProgressCode(smbl: TSimbaComponentList);
-    Procedure CreateFormCode(smb: TSimbaComponent;List: TStringList);
-    function GetSimbaCType(smb: TSimbaComponent):integer;
-  end; 
-
-var
-  CodeGen: TCodeGen;
-  Stream: TStringStream;
-   img: integer;
+  TPSCodeGen = class(TAbstractCodeGen)
+    public
+     procedure GenerateScriptHeader;override;
+     procedure GenerateProgressHeader;override;
+     procedure CreateScript(list: TSimbaComponentList);override;
+     Procedure GetComponentCode(smbl: TSimbaComponentList);override;
+     Procedure SmbToCodeList(smb: TSimbaComponent;list: TStringList);override;
+     Procedure GenerateFormCode(smbl: TSimbaComponentList);override;
+     Procedure GenerateProgressCode(smbl: TSimbaComponentList);override;
+     Procedure CreateFormCode(smb: TSimbaComponent;List: TStringList);override;
+     function GetSimbaCType(smb: TSimbaComponent):integer;override;
+     function GetScript(const List: TSimbaComponentList): TStrings;override;
+  end;
 
 implementation
+  uses Graphics;
+{ TPSCodeGen }
 
-{$R *.lfm}
-function GenSpaces(c: integer): string;
-var
-  i: integer;
-  s: string;
-begin
- s:='';
- for i := 0 to c -1 do
-  begin
-     s:=s+#32;
-    end;
-  result:=s;
-end;
-
-
-{ TCodeGen }
-
-procedure TCodeGen.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-
-Labels.Free;
-  Edits.Free;
-  Images.Free;
-  Buttons.Free;
-  CheckBoxes.Free;
-  ListBoxes.Free;
-  ComboBoxes.Free;
-  RadBtns.Free;
-  CmpList.Free;
-  HeaderCode.Free;
-  ScriptCode.Free;
-  LabelsCode.Free;
-  EditsCode.Free;
-  ImagesCode.Free;
-  CheckBoxesCode.Free;
-  ListBoxesCode.Free;
-  ComboBoxesCode.Free;
-  RadBtnsCode.Free;
-  FormCode.Free;
-  Stream.Free;
-end;
-
-procedure TCodeGen.FormCreate(Sender: TObject);
-begin
-  Stream:=TStringStream.Create('');
- Labels:=TSimbaComponentList.Create;
-  Edits:=TSimbaComponentList.Create;
-  Images:=TSimbaComponentList.Create;
-  Buttons:=TSimbaComponentList.Create;
-  CheckBoxes:=TSimbaComponentList.Create;
-  ListBoxes:=TSimbaComponentList.Create;
-  ComboBoxes:=TSimbaComponentList.Create;
-  RadBtns:=TSimbaComponentList.Create;
-  CmpList:=TSimbaComponentList.Create;
-  HeaderCode:=TStringList.Create;
-  ScriptCode:=TStringList.Create;
-  LabelsCode:=TStringList.Create;
-  ButtonsCode:=TStringList.Create;
-  EditsCode:=TStringList.Create;
-  ImagesCode:=TStringList.Create;
-  CheckBoxesCode:=TStringList.Create;
-  ListBoxesCode:=TStringList.Create;
-  ComboBoxesCode:=TStringList.Create;
-  RadBtnsCode:=TStringList.Create;
-  FormCode:=TStringList.Create;
-  img:=0;
-end;
-
-
-procedure TCodeGen.MenuItem1Click(Sender: TObject);
-begin
-  ClipBoard.AsText:=memo1.Text;
-end;
-
-procedure TCodeGen.CreateScript(list: TSimbaComponentList);
-var
-  i: integer;
-  cmp: TSimbaComponent;
-begin
-  for i:=0 to list.Count -1 do begin
-    cmp:=CmpList.AddItem;
-    cmp.clsname:=list[i].clsname;
-    cmp.compname:=list[i].compname;
-    cmp.caption:=list[i].caption;
-    cmp.fontcolor:=list[i].fontcolor;
-    cmp.fontname:=list[i].fontname;
-    cmp.img:=list[i].img;
-    cmp.heigth:=list[i].heigth;
-    cmp.width:=list[i].width;
-  //  cmp.ItemContainer.AddStrings(list[i].ItemContainer);
-    cmp.left:=list[i].left;
-    cmp.top:=list[i].top;
-  end;
-  GenerateFormCode(CmpList);
-  Stream.Position := 0;
-  memo1.Lines.LoadFromStream(Stream);
-end;
-
-procedure TCodeGen.GenerateScriptHeader;
+procedure TPSCodeGen.GenerateScriptHeader;
 var
  i: integer;
  s: string;
@@ -286,6 +168,82 @@ begin
   i:=0;
   HeaderCode.Add(s+': TBitmap;');
 end;
+with HeaderCode do
+begin
+  Add('const');
+  Add(GenSpaces(2) + 'default = ' + #39 + 'Comic Sans MS' + #39 + ';');
+  Add('');
+  Add('');
+  Add('');
+  Add('procedure YourClickProcedure(Sender: TObject);');
+  Add('begin');
+  Add(GenSpaces(2) + 'ShowMessage(' + #39 + 'click' + #39 + ');');
+  Add('end;');
+end;
+end;
+
+procedure TPSCodeGen.GenerateProgressHeader;
+var
+ i: integer;
+ s: string;
+ b: integer;
+begin
+  b:=0;
+HeaderCode.Add('var');
+HeaderCode.Add(GenSpaces(2)+cmpList[0].compname+':TForm;');
+if Labels.count> 0 then
+  begin
+  s:=GenSpaces(2);
+  for i:=0 to labels.count -1 do
+  begin
+   if i<labels.Count-1 then
+   s:=s+Labels[i].compname+','
+    else
+   s:=s+Labels[i].compname;
+  end;
+  i:=0;
+  HeaderCode.Add(s+': string;');
+  end;
+  if Images.count> 0 then
+  begin
+  s:=GenSpaces(2);
+  for i:=0 to Images.count -1 do
+  begin
+   if Images[i].img.switcher = true then inc(b);
+   if i<Images.Count-1 then
+   s:=s+Images[i].compname+','
+    else
+   s:=s+Images[i].compname
+  end;
+  i:=0;
+  HeaderCode.Add(s+': TBitmap;');
+end;
+if img > 0 then
+begin
+ s:=GenSpaces(2);
+  for i:=0 to img -1 do
+  begin
+   if i<img-1 then
+   s:=s+'bmps'+inttostr(i)+','
+    else
+   s:=s+'bmps'+inttostr(i);
+  end;
+  i:=0;
+  HeaderCode.Add(s+': TMufasaBitmap;');
+end;
+{if img > 0 then
+begin
+ s:=GenSpaces(2);
+  for i:=0 to img -1 do
+  begin
+   if i<img-1 then
+   s:=s+'bmp'+inttostr(i)+','
+    else
+   s:=s+'bmp'+inttostr(i);
+  end;
+  i:=0;
+  HeaderCode.Add(s+': TBitmap;');
+end;}
 HeaderCode.Add('const');
 HeaderCode.Add(GenSpaces(2)+'default = '+#39+'Comic Sans MS'+#39+';');
 HeaderCode.Add('');
@@ -297,29 +255,35 @@ HeaderCode.Add(GenSpaces(2)+'ShowMessage('+#39+'click'+#39+');');
 HeaderCode.Add('end;');
 end;
 
-function TCodeGen.GetSimbaCType(smb: TSimbaComponent):integer;
+procedure TPSCodeGen.CreateScript(list: TSimbaComponentList);
+var
+  i: integer;
+  cmp: TSimbaComponent;
 begin
-  Result := -1;
-   if CompareText(smb.clsname, 'TDsgnForm') = 0 then
-    result:=0;
-   if CompareText(smb.clsname, 'TLabel') = 0 then
-    result:=1;
-   if CompareText(smb.clsname, 'TEdit') = 0 then
-    result:=2;
-   if CompareText(smb.clsname, 'TImage') = 0 then
-    result:=3;
-   if CompareText(smb.clsname, 'TButton') = 0 then
-    result:=4;
-   if CompareText(smb.clsname, 'TCheckBox') = 0 then
-    result:=5;
-   if CompareText(smb.clsname, 'TListBox') = 0 then
-    result:=6;
-   if CompareText(smb.clsname, 'TComboBox') = 0 then
-    result:=7;
-   if CompareText(smb.clsname, 'TRadioButton') = 0 then
-    result:=8;
+  ResultScript.Clear;
+  for i := 0 to list.Count - 1 do
+  begin
+    cmp := CmpList.AddItem;
+    with cmp do
+    begin
+      clsname := list[i].clsname;
+      compname := list[i].compname;
+      caption := list[i].caption;
+      fontcolor := list[i].fontcolor;
+      fontname := list[i].fontname;
+      img := list[i].img;
+      heigth := list[i].heigth;
+      width := list[i].width;
+      left := list[i].left;
+      top := list[i].top;
+    end;
+  end;
+  GenerateFormCode(CmpList);
+  Stream.Position := 0;
+  ResultScript.LoadFromStream(Stream);
 end;
-procedure TCodeGen.GetComponentCode(smbl: TSimbaComponentList);
+
+procedure TPSCodeGen.GetComponentCode(smbl: TSimbaComponentList);
 var
   i,j: integer;
   smb,cmp: TSimbaComponent;
@@ -455,7 +419,7 @@ begin
   GenerateScriptHeader;
 end;
 
-procedure TCodeGen.SmbToCodeList(smb: TSimbaComponent; list: TStringList);
+procedure TPSCodeGen.SmbToCodeList(smb: TSimbaComponent; list: TStringList);
 var
   i,p,u: integer;
   s,s1,s2: string;//strings for bitmap;
@@ -653,168 +617,120 @@ end;
 
 end;
 
-procedure TCodeGen.GenerateFormCode(smbl: TSimbaComponentList);
+procedure TPSCodeGen.GenerateFormCode(smbl: TSimbaComponentList);
 begin
- GetComponentCode(smbl);
- ScriptCode.AddStrings(HeaderCode);
- ScriptCode.Add('');
- ScriptCode.Add('');
- ScriptCode.Add('procedure InitForm;');
- SCriptCode.Add('begin');
- ScriptCode.AddStrings(FormCode);
- if LabelsCode.Count> 0 then
-    ScriptCode.AddStrings(LabelsCode);
- if EditsCode.Count> 0 then
-    ScriptCode.AddStrings(EditsCode);
- if ImagesCode.Count> 0 then
-    ScriptCode.AddStrings(ImagesCode);
- if ButtonsCode.Count> 0 then
-    ScriptCode.AddStrings(ButtonsCode);
- if CheckBoxesCode.Count> 0 then
-    ScriptCode.AddStrings(CheckBoxesCode);
- if ListBoxesCode.Count> 0 then
-    ScriptCode.AddStrings(ListBoxesCode);
- if ComboBoxesCode.Count> 0 then
-    ScriptCode.AddStrings(ComboBoxesCode);
- if RadBtnsCode.Count> 0 then
-    ScriptCode.AddStrings(RadBtnsCode);
- ScriptCode.Add('end;');
- ScriptCode.Add('');
- ScriptCode.Add('procedure SafeInitForm;');
- ScriptCode.Add('var');
- ScriptCode.Add(GenSpaces(2)+'v: TVariantArray;');
- ScriptCode.Add('begin');
- ScriptCode.Add(GenSpaces(2)+'setarraylength(V, 0);');
- ScriptCode.Add(GenSpaces(2)+'ThreadSafeCall('+#39+'InitForm'+#39+', v); ');
- ScriptCode.Add('end;');
- ScriptCode.Add('');
- ScriptCode.Add('');
- ScriptCode.Add('procedure ShowFormModal;');
- ScriptCode.Add('begin');
- ScriptCode.Add(GenSpaces(2)+cmpList[0].compname + '.ShowModal;');
- ScriptCode.Add('end;');
- ScriptCode.Add('');
- ScriptCode.Add('');
- ScriptCode.Add('procedure SafeShowFormModal;');
- ScriptCode.Add('var');
- ScriptCode.Add(GenSpaces(2)+'v: TVariantArray;');
- ScriptCode.Add('begin');
- ScriptCode.Add(GenSpaces(2)+'SetArrayLength(V, 0);');
- ScriptCode.Add(GenSpaces(2)+'ThreadSafeCall('+#39+'ShowFormModal'+#39+', v);');
- ScriptCode.Add('end;');
- ScriptCode.Add('');
- ScriptCode.Add('');
- ScriptCode.Add('begin');
- ScriptCode.Add(GenSpaces(2)+'SafeInitForm; ');
- ScriptCode.Add(GenSpaces(2)+'SafeShowFormModal;');
- ScriptCode.Add('end.');
- ScriptCode.SaveToStream(Stream);
-
-end;
-
-procedure TCodeGen.GenerateProgressCode(smbl: TSimbaComponentList);
-begin
-
-end;
-
-procedure TCodeGen.CreateFormCode(smb: TSimbaComponent;list: TStringList);
-begin
-  list.Add('//'+smb.compname+'\\');
-  list.Add(GenSpaces(1)+smb.compname+':=TForm.Create(nil);');
-  list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
-  list.Add(GenSpaces(4)+'begin');
-  list.Add(GenSpaces(6)+'Caption:='+#39+cmpList[0].caption+#39+';');
-  list.Add(GenSpaces(6)+'Left:='+IntToStr(smb.left)+';');
-  list.Add(GenSpaces(6)+'Top:='+IntToStr(smb.top)+';');
-  list.Add(GenSpaces(6)+'Width:='+IntToStr(smb.width)+';');
-  list.Add(GenSpaces(6)+'Height:='+IntToStr(smb.heigth)+';');
-  list.Add(GenSpaces(6)+'Font.Name:='+smb.fontname+';');
-  list.Add(GenSpaces(6)+'Font.Color:='+ColorToString(smb.fontcolor)+';');
-  list.Add(GenSpaces(6)+'Font.Size:='+IntToStr(smb.fontsize)+';');
-  list.Add(GenSpaces(2)+'end;');
-end;
-
-procedure TCodeGen.GenerateProgressHeader;
-var
- i: integer;
- s: string;
- b: integer;
-begin
-  b:=0;
-HeaderCode.Add('var');
-HeaderCode.Add(GenSpaces(2)+cmpList[0].compname+':TForm;');
-if Labels.count> 0 then
+  GetComponentCode(smbl);
+  with ScriptCode do
   begin
-  s:=GenSpaces(2);
-  for i:=0 to labels.count -1 do
-  begin
-   if i<labels.Count-1 then
-   s:=s+Labels[i].compname+','
-    else
-   s:=s+Labels[i].compname;
+    AddStrings(HeaderCode);
+    Add('');
+    Add('');
+    Add('procedure InitForm;');
+    Add('begin');
+    AddStrings(FormCode);
+    if LabelsCode.Count > 0 then
+      AddStrings(LabelsCode);
+    if EditsCode.Count > 0 then
+      AddStrings(EditsCode);
+    if ImagesCode.Count > 0 then
+      AddStrings(ImagesCode);
+    if ButtonsCode.Count > 0 then
+      AddStrings(ButtonsCode);
+    if CheckBoxesCode.Count > 0 then
+      AddStrings(CheckBoxesCode);
+    if ListBoxesCode.Count > 0 then
+      AddStrings(ListBoxesCode);
+    if ComboBoxesCode.Count > 0 then
+      AddStrings(ComboBoxesCode);
+    if RadBtnsCode.Count > 0 then
+      AddStrings(RadBtnsCode);
+    Add('end;');
+    Add('');
+    Add('procedure SafeInitForm;');
+    Add('var');
+    Add(GenSpaces(2) + 'v: TVariantArray;');
+    Add('begin');
+    Add(GenSpaces(2) + 'setarraylength(V, 0);');
+    Add(GenSpaces(2) + 'ThreadSafeCall(' + #39 + 'InitForm' + #39 + ', v); ');
+    Add('end;');
+    Add('');
+    Add('');
+    Add('procedure ShowFormModal;');
+    Add('begin');
+    Add(GenSpaces(2) + cmpList[0].compname + '.ShowModal;');
+    Add('end;');
+    Add('');
+    Add('');
+    Add('procedure SafeShowFormModal;');
+    Add('var');
+    Add(GenSpaces(2) + 'v: TVariantArray;');
+    Add('begin');
+    Add(GenSpaces(2) + 'SetArrayLength(V, 0);');
+    Add(GenSpaces(2) + 'ThreadSafeCall(' + #39 + 'ShowFormModal' + #39 + ', v);');
+    Add('end;');
+    Add('');
+    Add('');
+    Add('begin');
+    Add(GenSpaces(2) + 'SafeInitForm; ');
+    Add(GenSpaces(2) + 'SafeShowFormModal;');
+    Add('end.');
+    SaveToStream(Stream);
   end;
-  i:=0;
-  HeaderCode.Add(s+': string;');
-  end;
-  if Images.count> 0 then
-  begin
-  s:=GenSpaces(2);
-  for i:=0 to Images.count -1 do
-  begin
-   if Images[i].img.switcher = true then inc(b);
-   if i<Images.Count-1 then
-   s:=s+Images[i].compname+','
-    else
-   s:=s+Images[i].compname
-  end;
-  i:=0;
-  HeaderCode.Add(s+': TBitmap;');
-end;
-if img > 0 then
-begin
- s:=GenSpaces(2);
-  for i:=0 to img -1 do
-  begin
-   if i<img-1 then
-   s:=s+'bmps'+inttostr(i)+','
-    else
-   s:=s+'bmps'+inttostr(i);
-  end;
-  i:=0;
-  HeaderCode.Add(s+': TMufasaBitmap;');
-end;
-{if img > 0 then
-begin
- s:=GenSpaces(2);
-  for i:=0 to img -1 do
-  begin
-   if i<img-1 then
-   s:=s+'bmp'+inttostr(i)+','
-    else
-   s:=s+'bmp'+inttostr(i);
-  end;
-  i:=0;
-  HeaderCode.Add(s+': TBitmap;');
-end;}
-HeaderCode.Add('const');
-HeaderCode.Add(GenSpaces(2)+'default = '+#39+'Comic Sans MS'+#39+';');
-HeaderCode.Add('');
-HeaderCode.Add('');
-HeaderCode.Add('');
-HeaderCode.Add('procedure YourClickProcedure(Sender: TObject);');
-HeaderCode.Add('begin');
-HeaderCode.Add(GenSpaces(2)+'ShowMessage('+#39+'click'+#39+');');
-HeaderCode.Add('end;');
 end;
 
-Procedure GenerateProgressCode(smbl: TSimbaComponentList);
+procedure TPSCodeGen.GenerateProgressCode(smbl: TSimbaComponentList);
 begin
 
 end;
 
+procedure TPSCodeGen.CreateFormCode(smb: TSimbaComponent; List: TStringList);
+begin
+  with List do
+  begin
+    Add('//' + smb.compname + '\\');
+    Add(GenSpaces(1) + smb.compname + ':=TForm.Create(nil);');
+    Add(GenSpaces(2) + 'with' + GenSpaces(1) + smb.compname + GenSpaces(1) + 'do');
+    Add(GenSpaces(4) + 'begin');
+    Add(GenSpaces(6) + 'Caption:=' + #39 + cmpList[0].caption + #39 + ';');
+    Add(GenSpaces(6) + 'Left:=' + IntToStr(smb.left) + ';');
+    Add(GenSpaces(6) + 'Top:=' + IntToStr(smb.top) + ';');
+    Add(GenSpaces(6) + 'Width:=' + IntToStr(smb.width) + ';');
+    Add(GenSpaces(6) + 'Height:=' + IntToStr(smb.heigth) + ';');
+    Add(GenSpaces(6) + 'Font.Name:=' + smb.fontname + ';');
+    Add(GenSpaces(6) + 'Font.Color:=' + ColorToString(smb.fontcolor) + ';');
+    Add(GenSpaces(6) + 'Font.Size:=' + IntToStr(smb.fontsize) + ';');
+    Add(GenSpaces(2) + 'end;');
+  end;
+end;
 
+function TPSCodeGen.GetSimbaCType(smb: TSimbaComponent): integer;
+begin
+  Result := -1;
+   if CompareText(smb.clsname, 'TDsgnForm') = 0 then
+    result:=0;
+   if CompareText(smb.clsname, 'TLabel') = 0 then
+    result:=1;
+   if CompareText(smb.clsname, 'TEdit') = 0 then
+    result:=2;
+   if CompareText(smb.clsname, 'TImage') = 0 then
+    result:=3;
+   if CompareText(smb.clsname, 'TButton') = 0 then
+    result:=4;
+   if CompareText(smb.clsname, 'TCheckBox') = 0 then
+    result:=5;
+   if CompareText(smb.clsname, 'TListBox') = 0 then
+    result:=6;
+   if CompareText(smb.clsname, 'TComboBox') = 0 then
+    result:=7;
+   if CompareText(smb.clsname, 'TRadioButton') = 0 then
+    result:=8;
+end;
 
-
+function TPSCodeGen.GetScript(const List: TSimbaComponentList): TStrings;
+begin
+  CreateScript(List);
+  result:=ResultScript;
+end;
 
 end.
 
