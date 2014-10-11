@@ -161,7 +161,9 @@ type
 
     TFontsSection = class(TSection)
       Path: TPathSetting;
-      LoadOnStartUp: TBooleanSetting;
+      CheckForUpdates: TBooleanSetting;
+      LoadOnSimbaStart: TBooleanSetting;
+      LoadOnScriptStart: TBooleanSetting;
       Version: TIntegerSetting;
       VersionLink: TStringSetting;
       UpdateLink: TStringSetting;
@@ -850,6 +852,7 @@ procedure GetUpdaterVersionLink(obj: TObject); begin TStringSetting(obj).Value :
 procedure GetInterpreterType(obj: TObject); begin TIntegerSetting(obj).Value := 1; end; // 1 is Lape
 procedure GetInterpreterAllowSysCalls(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
+procedure GetFontsCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsLoadOnStartUp(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsVersion(obj: TObject); begin TIntegerSetting(obj).Value := -1; end;
 procedure GetFontsVersionLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Version'; end;
@@ -914,8 +917,12 @@ begin
   Fonts.Path := Fonts.AddChild(TPathSetting.Create(ssFontsPath)) as TPathSetting;
   Fonts.Path.onDefault := @GetFontPath;
 
-  Fonts.LoadOnStartUp := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnStart)) as TBooleanSetting;
-  Fonts.LoadOnStartUp.onDefault := @GetFontsLoadOnStartUp;
+  Fonts.CheckForUpdates := Fonts.AddChild(TBooleanSetting.Create(ssCheckForFontUpdates)) as TBooleanSetting;
+  Fonts.CheckForUpdates.onDefault := @GetFontsCheckForUpdates;
+  Fonts.LoadOnSimbaStart := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnSimbaStart)) as TBooleanSetting;
+  Fonts.LoadOnSimbaStart.onDefault := @GetFontsLoadOnStartUp;
+  Fonts.LoadOnScriptStart := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnScriptStart)) as TBooleanSetting;
+  Fonts.LoadOnScriptStart.onDefault := @GetFontsLoadOnStartUp;
   Fonts.Version := Fonts.AddChild(TIntegerSetting.Create(ssFontsVersion)) as TIntegerSetting;
   Fonts.Version.onDefault := @GetFontsVersion;
   Fonts.VersionLink := Fonts.AddChild(TStringSetting.Create(ssFontsVersionLink)) as TStringSetting;

@@ -1316,18 +1316,19 @@ end;
 
 procedure TSimbaForm.UpdateTimerCheck(Sender: TObject);
 var
-   chk: Boolean;
-   time:integer;
-  LatestVersion : integer;
+  Time, LatestVersion: integer;
 begin
   UpdateTimer.Interval := MaxInt;
-  FontUpdate;
-  chk := SimbaSettings.Updater.CheckForUpdates.GetDefValue(True);
 
-  if not chk then
+  if (SimbaSettings.Fonts.CheckForUpdates.GetDefValue(True)) then
+    FontUpdate()
+  else if (SimbaSettings.Fonts.LoadOnSimbaStart.GetDefValue(True)) then
+    OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
+
+  if (not (SimbaSettings.Updater.CheckForUpdates.GetDefValue(True))) then
     Exit;
 
-  LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
+  LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion();
   if LatestVersion > SimbaVersion then
   begin
     if SimbaSettings.Updater.AutomaticallyUpdate.GetDefValue(True) then
@@ -1342,16 +1343,14 @@ begin
       formWritelnEx('A new update of Simba is available!');
       formWritelnEx(format('Current version is %d. Latest version is %d',[SimbaVersion,LatestVersion]));
     end;
-
-
   end else
   begin
     mDebugLn(format('Current Simba version: %d',[SimbaVersion]));
     mDebugLn('Latest Simba Version: ' + IntToStr(LatestVersion));
   end;
-  time := SimbaSettings.Updater.CheckEveryXMinutes.GetDefValue(30);
 
-  UpdateTimer.Interval:= time {mins} * 60 {secs} * 1000 {ms};//Every half hour
+  Time := SimbaSettings.Updater.CheckEveryXMinutes.GetDefValue(30);
+  UpdateTimer.Interval := Time {mins} * 60 {secs} * 1000 {ms};//Every half hour
 end;
 
 procedure TSimbaForm.UpdateMenuButtonClick(Sender: TObject);
@@ -2009,16 +2008,17 @@ begin
   if selector.haspicked then
      Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-  loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnStartUp.GetDefValue(True);
-  if (loadFontsOnScriptStart) then
+  if (not (Assigned(OCR_Fonts))) then
   begin
-    if ((not (Assigned(OCR_Fonts))) and DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
-    begin
-      OCR_Fonts := TMOCR.Create(Thread.Client);
-      OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
-    end;
-    Thread.SetFonts(OCR_Fonts.Fonts);
+    OCR_Fonts := TMOCR.Create(Thread.Client);
+    if (DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
+      OCR_Fonts.Fonts.Path := SimbaSettings.Fonts.Path.Value;
   end;
+
+  loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnScriptStart.GetDefValue(True);
+  if ((loadFontsOnScriptStart) and (DirectoryExists(SimbaSettings.Fonts.Path.Value))) then
+    OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
+  Thread.SetFonts(OCR_Fonts.Fonts);
 
   {
     We pass the entire settings to the script; it will then create a Sandbox
@@ -2464,6 +2464,7 @@ end;
 procedure TSimbaForm.CallFormDesignerExecute(Sender: TObject);
 begin
   {$IFDEF USE_FORMDESIGNER}
+  CompForm.Interpreter:=Integer(SimbaSettings.Interpreter._Type.Value);
   if (CompForm.Visible) then
     CompForm.{$IFDEF WINDOWS}Hide{$ELSE}Visible := False{$ENDIF}
   else
@@ -3734,7 +3735,7 @@ end;
 
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
 begin
-  CurrScript.FScriptState:= State;
+  CurrScript.FScriptState := State;
   with Self.StatusBar.panels[Panel_State] do
     case state of
       ss_Running : begin Text := 'Running'; TB_Run.Enabled:= False; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
@@ -3747,9 +3748,9 @@ begin
                            ActionDebugger.Enabled := True;
                          {$ENDIF}
                    end;
-      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows}TB_Pause.Enabled:= True; {$endif}
+      ss_Paused  : begin Text := 'Paused'; TB_Run.Enabled:= True; {$ifdef MSWindows} TB_Pause.Enabled:= False; {$endif}
                          TB_Stop.ImageIndex := Image_Stop; TB_Stop.Enabled:= True;
-                         TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := True; TrayPause.Enabled := True;{$endif}
+                         TrayPlay.Checked := false; TrayPlay.Enabled := True; {$ifdef MSWindows}TrayPause.Checked := True; TrayPause.Enabled := False;{$endif}
                          TrayStop.Enabled:= True; TrayStop.Checked:= False;
                    end;
       ss_Stopping: begin Text := 'Stopping';TB_Run.Enabled:= False; TB_Pause.Enabled:= False; TB_Stop.Enabled:= True;
@@ -3891,11 +3892,17 @@ begin
         begin;
           FormWriteln('Successfully installed the new fonts!');
           SimbaSettings.Fonts.Version.Value := LatestVersion;
-          if Assigned(self.OCR_Fonts) then
-            self.OCR_Fonts.Free;
+
+          if Assigned(OCR_Fonts) then
+            OCR_Fonts.Free;
+
           FormWriteln('Freeing the current fonts. Creating new ones now');
-          Self.OCR_Fonts := TMOCR.Create(nil);
-          OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
+
+          OCR_Fonts := TMOCR.Create(nil);
+          OCR_Fonts.Fonts.Path := SimbaSettings.Fonts.Path.Value;
+
+          if (SimbaSettings.Fonts.LoadOnSimbaStart.GetDefValue(True)) then
+            OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
         end;
         UnTarrer.Free;
         Decompress.Result.Free;
@@ -3966,6 +3973,8 @@ end;
 {$endif}
 
 procedure TSimbaForm.FormCallBack;
+var
+  OldTab, I: LongInt;
 begin
   with FormCallBackData do
     case Cmd of
@@ -3994,6 +4003,36 @@ begin
             end;
         end else
           WriteLn('Cannot show balloon hint due to setting value = false');
+      m_PauseScript: begin
+          OldTab := PageControl1.TabIndex;
+          for I := 0 to Tabs.Count - 1 do
+            if (Assigned(Tabs[I])) then
+              with TMufasaTab(Tabs[I]).ScriptFrame do
+                if (Assigned(ScriptThread) and (ScriptThread.ThreadID = PThreadID(Data)^)) then
+                begin
+                  PageControl1.TabIndex := I;
+                  RefreshTab;
+                  PauseScript;
+                  Break;
+                end;
+
+          PageControl1.TabIndex := OldTab;
+          RefreshTab;
+        end;
+      m_CloseSimba: begin
+        for I := 0 to Tabs.Count - 1 do
+          if (Assigned(Tabs[I])) then
+            with TMufasaTab(Tabs[I]).ScriptFrame do
+              if (Assigned(ScriptThread) and (ScriptThread.ThreadID = PThreadID(Data)^)) then
+              begin
+                PageControl1.TabIndex := I;
+                RefreshTab;
+                StopScript; //Try a stop (it will fail, the script thread is waiting on me...)
+                StopScript; //This will terminate the script thread
+                Break;
+              end;
+        SimbaForm.Close;
+      end;
     end;
 end;
 
