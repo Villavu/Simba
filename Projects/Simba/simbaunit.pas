@@ -34,7 +34,7 @@ interface
 uses
   {$IFDEF LINUX}cthreads, cmem,{$ENDIF}
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterPas,
+  StdCtrls, Menus, ComCtrls, ExtCtrls, SynEdit, SynHighlighterLape,
 
   mufasabase, MufasaTypes,
   mmlpsthread, // Code to use the interpreters in threads.
