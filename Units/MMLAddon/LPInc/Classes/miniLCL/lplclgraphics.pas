@@ -882,6 +882,16 @@ begin
   PAntialiasingMode(Result)^ := PCanvas(Params^[0])^.AntialiasingMode;
 end;
 
+procedure TCanvas_Handle_Set(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Handle := PPtrUInt(Params^[1])^;
+end;
+
+procedure TCanvas_Handle_Get(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPtrUInt(Result)^ := PCanvas(Params^[0])^.Handle;
+end;
+
 procedure Register_TCanvas(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -943,6 +953,7 @@ begin
     addClassVar('TCanvas', 'OnChange', 'TNotifyEvent', @TCanvas_OnChange_Read, @TCanvas_OnChange_Write);
     addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @TCanvas_OnChanging_Read, @TCanvas_OnChanging_Write);
     addClassVar('TCanvas', 'AntialiasingMode', 'TAntialiasingMode', @TCanvas_AntialiasingMode_Get, @TCanvas_AntialiasingMode_Set);
+    addClassVar('TCanvas', 'Handle', 'PtrUInt', @TCanvas_Handle_Get, @TCanvas_Handle_Set);
     addGlobalFunc('procedure TCanvas.Init();', @TCanvas_Init);
     addGlobalFunc('procedure TCanvas.Free();', @TCanvas_Free);
   end;

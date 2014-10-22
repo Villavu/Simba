@@ -29,7 +29,7 @@ ssUpdaterReleaseChannel = ssSettings + ssUpdater + 'ReleaseChannel';
 
 ssCheckForFontUpdates = ssSettings + ssFonts + 'CheckForUpdates';
 ssLoadFontsOnSimbaStart = ssSettings + ssFonts + 'LoadOnSimbaStart';
-ssLoadFontsOnScriptStart = ssSettings + ssFonts + 'LoadOnScriptStart';
+ssFontsDisableLoading = ssSettings + ssFonts + 'DisableLoading';
 ssFontsVersion = ssSettings + ssFonts + 'Version';
 ssFontsLink = ssSettings + ssFonts + 'UpdateLink';
 ssFontsVersionLink = ssSettings + ssFonts + 'VersionLink';

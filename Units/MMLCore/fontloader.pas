@@ -262,7 +262,8 @@ begin
 
   if FontFound then
   begin
-    TClient(Client).Writeln('Font ' + Name + ' already loaded as: ' + n);
+    if (Client <> nil) then
+      TClient(Client).Writeln('Font ' + Name + ' already loaded as: ' + n);
     Exit(False);
   end;
 
@@ -272,7 +273,6 @@ begin
     F.Name := F.Name + '_s';
   f.Data := InitOCR(LoadGlyphMasks(fontPath + DS, Shadow));
   Fonts.Add(f);
-  TClient(Client).Writeln('Loaded Font ' + f.Name);
 end;
 
 function TMFonts.LoadSystemFont(const SysFont: TFont; const FontName: string): boolean;

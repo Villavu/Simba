@@ -408,7 +408,6 @@
       </CompilerMessages>
       <CustomOptions Value="-dUseCThreads
 -dM_MEMORY_DEBUG
--dFONTDEBUG
 -dLape_CDECL
 -dStaticFFI"/>
       <CompilerPath Value="$(CompPath)"/>

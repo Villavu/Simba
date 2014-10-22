@@ -535,7 +535,7 @@ type
     procedure SaveFormSettings;
     procedure LoadExtensions;
     procedure AddRecentFile(const filename : string);
-    procedure InitializeTMThread(out Thread : TMThread);
+    procedure InitializeTMThread(out Thread : TMThread; const onStartup: Boolean = False);
     procedure HandleParameters;
     procedure HandleConfigParameter;
     procedure OnSaveScript(const Filename : string);
@@ -543,6 +543,7 @@ type
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
     function DefaultScript : string;
+    procedure InitOCR(var OCR: TMOCR; TheThread: TMThread);
 
     procedure UpdateSimbaSilent(Force: Boolean);
   end;
@@ -1299,11 +1300,9 @@ var
   Time, LatestVersion: integer;
 begin
   UpdateTimer.Interval := MaxInt;
-
   if (SimbaSettings.Fonts.CheckForUpdates.GetDefValue(True)) then
-    FontUpdate()
-  else if (SimbaSettings.Fonts.LoadOnSimbaStart.GetDefValue(True)) then
-    OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
+    if (not SimbaSettings.Fonts.DisableLoading.GetDefValue(False)) then
+      FontUpdate();
 
   if (not (SimbaSettings.Updater.CheckForUpdates.GetDefValue(True))) then
     Exit;
@@ -1908,16 +1907,40 @@ begin
     RecentFileItems[len - 1-i].Caption:= ExtractFileName(RecentFiles[i]);
 end;
 
+procedure TSimbaForm.InitOCR(var OCR: TMOCR; TheThread: TMThread);
+var
+  i: Integer;
+  s: String = '';
+begin
+  FormWriteln('Initializing OCR');
+
+  if (TheThread <> nil) then
+    OCR := TMOCR.Create(TheThread.Client)
+  else
+    OCR := TMOCR.Create(nil);
+
+  if (DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
+    OCR.Fonts.Path := SimbaSettings.Fonts.Path.Value;
+  OCR.InitTOCR(SimbaSettings.Fonts.Path.Value);
+
+  for i := 0 to OCR.Fonts.Count - 1 do
+    s += OCR.Fonts[i].Name + ', ';
+
+  if (s <> '') then
+  begin
+    SetLength(s, Length(s) - 2);
+    FormWriteln('Loaded '+ IntToStr(OCR.Fonts.Count) + ' Fonts: ' + s);
+  end else
+    FormWriteln('No fonts were loaded, directory was invaild or empty!');
+end;
 
 { Loads/Creates the required stuff for a script thread. }
 
-procedure TSimbaForm.InitializeTMThread(out Thread: TMThread);
+procedure TSimbaForm.InitializeTMThread(out Thread: TMThread; const onStartup: Boolean = False);
 var
   ScriptPath: string;
   Script: string;
-  loadFontsOnScriptStart: boolean;
   Continue: boolean;
-
 begin
   if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
   begin
@@ -1981,21 +2004,23 @@ begin
 
   Thread.SetPath(ScriptPath);
 
-  if selector.haspicked then
+  if (Selector.HasPicked) then
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-  if (not (Assigned(OCR_Fonts))) then
+  if (not SimbaSettings.Fonts.DisableLoading.GetDefValue(False)) then
   begin
-    OCR_Fonts := TMOCR.Create(Thread.Client);
-    if (DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
-      OCR_Fonts.Fonts.Path := SimbaSettings.Fonts.Path.Value;
+    if (onStartup) and (SimbaSettings.Fonts.LoadOnSimbaStart.GetDefValue(True)) then // Startup of Simba, Let's load the fonts
+    begin
+      if (not (Assigned(OCR_Fonts))) then
+        InitOCR(OCR_Fonts, Thread);
+    end else
+      if (not onStartup) and (not SimbaSettings.Fonts.LoadOnSimbaStart.GetDefValue(True)) then // Script starting up, let's load them
+        if (not (Assigned(OCR_Fonts))) then
+          InitOCR(OCR_Fonts, Thread);
+
+    if (Assigned(OCR_Fonts)) then
+      Thread.SetFonts(OCR_Fonts.Fonts);
   end;
-
-  loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnScriptStart.GetDefValue(True);
-  if ((loadFontsOnScriptStart) and (DirectoryExists(SimbaSettings.Fonts.Path.Value))) then
-    OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
-  Thread.SetFonts(OCR_Fonts.Fonts);
-
   {
     We pass the entire settings to the script; it will then create a Sandbox
     for settings that are exported to the script. This way we can access all
@@ -2773,7 +2798,7 @@ begin
     end;
   end;
 
-  InitializeTMThread(Thread);
+  InitializeTMThread(Thread, True);
   Thread.FreeOnTerminate := False;
 
   if (not (Assigned(Thread))) then
@@ -3836,16 +3861,14 @@ begin
           FormWriteln('Successfully installed the new fonts!');
           SimbaSettings.Fonts.Version.Value := LatestVersion;
 
-          if Assigned(OCR_Fonts) then
+          if (Assigned(OCR_Fonts)) then
             OCR_Fonts.Free;
 
           FormWriteln('Freeing the current fonts. Creating new ones now');
 
-          OCR_Fonts := TMOCR.Create(nil);
-          OCR_Fonts.Fonts.Path := SimbaSettings.Fonts.Path.Value;
-
           if (SimbaSettings.Fonts.LoadOnSimbaStart.GetDefValue(True)) then
-            OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
+            if (not SimbaSettings.Fonts.DisableLoading.GetDefValue(False)) then
+              InitOCR(OCR_Fonts, nil);
         end;
         UnTarrer.Free;
         Decompress.Result.Free;
