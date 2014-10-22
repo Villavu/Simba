@@ -163,7 +163,7 @@ type
       Path: TPathSetting;
       CheckForUpdates: TBooleanSetting;
       LoadOnSimbaStart: TBooleanSetting;
-      LoadOnScriptStart: TBooleanSetting;
+      DisableLoading: TBooleanSetting;
       Version: TIntegerSetting;
       VersionLink: TStringSetting;
       UpdateLink: TStringSetting;
@@ -845,6 +845,7 @@ procedure GetInterpreterAllowSysCalls(obj: TObject); begin TBooleanSetting(obj).
 
 procedure GetFontsCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsLoadOnStartUp(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFontsDisableLoading(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 procedure GetFontsVersion(obj: TObject); begin TIntegerSetting(obj).Value := -1; end;
 procedure GetFontsVersionLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Version'; end;
 procedure GetFontsUpdateLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Fonts.tar.bz2'; end;
@@ -910,8 +911,8 @@ begin
   Fonts.CheckForUpdates.onDefault := @GetFontsCheckForUpdates;
   Fonts.LoadOnSimbaStart := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnSimbaStart)) as TBooleanSetting;
   Fonts.LoadOnSimbaStart.onDefault := @GetFontsLoadOnStartUp;
-  Fonts.LoadOnScriptStart := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnScriptStart)) as TBooleanSetting;
-  Fonts.LoadOnScriptStart.onDefault := @GetFontsLoadOnStartUp;
+  Fonts.DisableLoading := Fonts.AddChild(TBooleanSetting.Create(ssFontsDisableLoading)) as TBooleanSetting;
+  Fonts.DisableLoading.onDefault := @GetFontsDisableLoading;
   Fonts.Version := Fonts.AddChild(TIntegerSetting.Create(ssFontsVersion)) as TIntegerSetting;
   Fonts.Version.onDefault := @GetFontsVersion;
   Fonts.VersionLink := Fonts.AddChild(TStringSetting.Create(ssFontsVersionLink)) as TStringSetting;
