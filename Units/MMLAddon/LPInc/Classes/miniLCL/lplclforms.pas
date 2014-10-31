@@ -1139,6 +1139,16 @@ begin
   end;
 end;
 
+procedure TForm_ParentWindow_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPtrUInt(Result)^ := PForm(Params^[0])^.ParentWindow;
+end;
+
+procedure TForm_ParentWindow_Write(const Params: PParamArray); lape_extdecl
+begin
+  PForm(Params^[0])^.ParentWindow := PPtrUInt(Params^[1])^;
+end;
+
 procedure Register_TForm(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1153,6 +1163,7 @@ begin
     addGlobalFunc('procedure TForm.Show();', @TForm_Show);
     addGlobalFunc('procedure TForm.Close();', @TForm_Close);
     addGlobalFunc('procedure TForm.Hide();', @TForm_Hide);
+    addClassVar('TForm', 'ParentWindow', 'PtrUInt', @TForm_ParentWindow_Read, @TForm_ParentWindow_Write);
     addClassVar('TForm', 'ClientWidth', 'Integer', @TForm_ClientWidth_Read, @TForm_ClientWidth_Write);
     addClassVar('TForm', 'ClientHeight', 'Integer', @TForm_ClientHeight_Read, @TForm_ClientHeight_Write);
     addClassVar('TForm', 'OnClose', 'TCloseEvent', @TForm_OnClose_Read, @TForm_OnClose_Write);

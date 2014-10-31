@@ -1019,31 +1019,36 @@ end;
 
 procedure ClearSameIntegers(var a: TIntegerArray);
 var
-  i, t, c, l: Integer;
-  b: TIntegerArray;
-  Found: Boolean;
+  n,l,i,j,c:Int32;
+  hash: UInt32;
+  table: Array of TIntegerArray;
+  Isset:Boolean;
 begin
-  b := Copy(a);
-  l := High(b);
+  n := Length(a);
+  SetLength(Table, Trunc(Power(2, Floor(Logn(2,n)) + 1)));
   c := 0;
-  for i := 0 to l do
+  for i:=0 to n-1 do
   begin
-    Found := False;
-    for t := 0 to c -1 do
-      if (b[i] = a[t]) then
+    Isset := False;
+    hash := a[i] and High(Table);
+    l := Length(Table[hash]);
+    for j:=0 to l-1 do
+      if (Table[hash][j] = a[i]) then
       begin
-        Found := True;
+        Isset := True;
         Break;
       end;
-    if not Found then
-//    if (t >= c) then
+    if not(Isset) then
     begin
-      a[c] := b[i];
+      SetLength(Table[hash], l+1);
+      Table[hash][l] := a[i];
+      a[c] := a[i];
       Inc(c);
     end;
   end;
   SetLength(a, c);
 end;
+
 
 {/\
   Clears the duplicates in the integer array a and the TPointArray p.
