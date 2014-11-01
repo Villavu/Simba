@@ -1604,6 +1604,9 @@ begin
       end;
     end;
 
+    if (DelayedCode <> '') then
+      Compiler.addDelayedCode(DelayedCode);
+
     Compiler.EndImporting;
   end;
 end;

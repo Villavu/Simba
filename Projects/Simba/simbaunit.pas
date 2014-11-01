@@ -845,6 +845,7 @@ begin
         b.Add('type ' + Types[i].TypeName + ' = ' + AddTrailingSemiColon(Types[i].TypeDef));
       for i := 0 to MethodLen - 1 do
         b.Add(AddTrailingForward(Methods[i].FuncStr));
+      b.Add(DelayedCode);
     end;
 
     ms := TMemoryStream.Create;
