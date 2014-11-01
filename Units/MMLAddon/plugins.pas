@@ -358,7 +358,7 @@ begin
        PD := StrAlloc(ArrC);
        PD := GetDelayedCode();
        Plugins[NumPlugins].DelayedCode := PD;
-       Writeln(Plugins[NumPlugins].DelayedCode);
+       //Writeln(Plugins[NumPlugins].DelayedCode);
        StrDispose(PD);
       end;
     end;
