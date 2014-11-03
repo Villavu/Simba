@@ -1,7 +1,7 @@
 from __init__ import *
 
 if __name__ == '__main__':
-    DLL = MMLCore('../libmml.so')
+    DLL = MMLCore('../mml.dll')
 
     client = DLL.dll.create_client()
     print 'Python Client: %d' % client

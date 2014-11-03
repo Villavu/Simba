@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 
 from ctypes import *
+
 from mouse import Mouse
 from color import Color
+from keyboard import Keyboard
+from window import Window
+
+# from . import mouse
+# from . import color
+
 from time import sleep
 from mtypes import PINTEGER
 

@@ -10,9 +10,9 @@ TODO:
     -   Document C api
 
 Functions:
-    -   KeyDown, KeyUp, SendKeys, KeyPress (PressKey?)
+    -   KeyDown, KeyUp, SendKeys, KeyPress (PressKey?) (DONE -ianhedoesit)
 
-    -   The rest of the FindColor* functions.
+    -   The rest of the FindColor* functions. (DONE -ianhedoesit)
 
     -   FindBitmap, FindBitmaps, FindBitmapToleranceIn, FindBitmapsToleranceIn,
             FindBitmapDeformedToleranceIn
@@ -23,6 +23,9 @@ Functions:
     -   All Bitmap/DTM creation functions.
 
     -   All Colour Conversion Functions
+    - - Not sure if this is necessary. This goes along with TPA functions; is it best to
+        remake them all in each language or to export all the functions to save ~5k lines
+        of porting per language? -ianhedoesit
 
     -   Target Window Functions
 
