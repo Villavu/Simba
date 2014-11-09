@@ -533,6 +533,7 @@ AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @La
 AddGlobalFunc('function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;',@Lape_TPAPosNext);
 AddGlobalFunc('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;',@Lape_GlueTPAs);
 AddGlobalFunc('function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: Integer): T2DPointArray;', @Lape_PartitionTPA);
+AddGlobalFunc('function TPABorder(const TPA: TPointArray): TPointArray;', @Lape_TPABorder);
 
 { Window }
 SetCurrSection('Window');
