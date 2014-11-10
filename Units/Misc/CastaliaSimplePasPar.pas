@@ -2895,7 +2895,7 @@ end;
 procedure TmwSimplePasPar.Factor;
 begin
   case TokenID of
-    tokAsciiChar, tokStringConst:
+    tokAsciiChar, tokStringConst, tokStringDQConst:
       begin
         CharString;
       end;
@@ -5425,10 +5425,10 @@ end;
 procedure TmwSimplePasPar.CharString;
 begin //updated mw 2/22/00, JThurman 6/24/2004
   case TokenID of
-    tokAsciiChar, tokIdentifier, tokRoundOpen, tokStringConst:
+    tokAsciiChar, tokIdentifier, tokRoundOpen, tokStringConst, tokStringDQConst:
       while TokenID in
-        [tokAsciiChar, tokIdentifier, tokPlus, tokRoundOpen, tokStringConst,
-        tokString] do
+        [tokAsciiChar, tokIdentifier, tokPlus, tokRoundOpen, tokStringConst, 
+        tokStringDQConst, tokString] do
       begin
         case TokenID of
           tokIdentifier, tokRoundOpen:
