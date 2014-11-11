@@ -129,6 +129,9 @@ addGlobalType('record int1,int2,int3,int4,int5,int6,int7,int8,int9,int10,int11,i
 addGlobalType('record Title: string; Handle: integer; Pid: integer; Width, Height: integer; end', 'TSysProc');
 addGlobalType('array of TSysProc', 'TSysProcArr');
 
+addGlobalType('record Handle: PtrUInt; Width, Height: Integer; end', 'TChildWindow');
+addGlobalType('array of TChildWindow', 'TChildWindowArr');
+
 addGlobalType('packed record _type: integer; is_text_color: boolean; r_low,r_high,g_low,g_high,b_low,b_high,set_col: integer; ref_color,tol,cts: integer; end;', 'TOCRFilterData');
 
 addGlobalType('array of TOCRFilterData', 'TOCRFilterDataArray');
