@@ -120,6 +120,8 @@ interface
 
         function GetProcesses: TSysProcArr; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
+
+        function GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr; override;
       private
         procedure NativeInit; override;
         procedure NativeFree; override;
@@ -674,6 +676,11 @@ implementation
   procedure TIOManager.SetTargetEx(Proc: TSysProc);
   begin
     raise Exception.Create('SetTargetEx: Not Implemented.');
+  end;
+
+  function TIOManager.GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;
+  begin
+    raise Exception.Create('GetChildWindows: Not Implemented.');
   end;
 
 end.

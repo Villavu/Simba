@@ -50,6 +50,11 @@ begin
   PSysProcArr(Result)^ := PIOManager(Params^[0])^.GetProcesses();
 end;
 
+procedure TIOManager_GetChildWindows(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PChildWindowArr(Result)^ := PIOManager(Params^[0])^.GetChildWindows(PPtrUInt(Params^[1])^);
+end;
+
 //procedure SetTargetEx(Proc: TSysProc); overload;
 procedure TIOManager_SetTargetEx(const Params: PParamArray); lape_extdecl
 begin
@@ -76,6 +81,7 @@ begin
     addGlobalFunc('procedure TIOManager.SetDesktop();', @TIOManager_SetDesktop);
     addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr;', @TIOManager_GetProcesses);
     addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc);', @TIOManager_SetTargetEx);
+    addGlobalFunc('function TIOManager.GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;', @TIOManager_GetChildWindows);
     addGlobalFunc('procedure TIOManager.Free();', @TIOManager_Free);
   end;
 end;

@@ -554,3 +554,8 @@ function ps_PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight:Integer): T
 begin
   Result := PartitionTPA(TPA, BoxWidth, BoxHeight);
 end;
+
+function ps_TPABorder(const TPA: TPointArray): TPointArray; extdecl;
+begin
+  Result := TPABorder(TPA);
+end;

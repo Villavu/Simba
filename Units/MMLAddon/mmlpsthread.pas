@@ -1421,7 +1421,19 @@ begin
     addGlobalVar('TClient', @Client, 'Client');
     addGlobalVar('TMMLSettingsSandbox', @Sett, 'Settings');
 
-    {$I LPInc/lpexportedmethods.inc}
+    { TODO: When new libffi, merge into CallMethod }
+    addDelayedCode(
+      'procedure _CallProc(Method: String);' +
+      'var' +
+      '  p: Integer := LastDelimiter(''.'', Method);' +
+      'begin' +
+      '  if (p > 0) then' +
+      '    VariantInvokeEx(Copy(Method, 1, p - 1), Copy(Method, p + 1, (Length(Method) - p) + 1))' +
+      '  else' +
+      '    VariantInvoke(Method);' +
+      'end;');
+
+      {$I LPInc/lpexportedmethods.inc}
 
     EndImporting;
   end;
@@ -1612,6 +1624,8 @@ begin
 end;
 
 function TLPThread.CallMethod(const Method: string; var Args: array of Variant): Variant;
+type
+  TCallProc = procedure(Method: String); cdecl;
 begin
   if (not FFILoaded) then
     raise Exception.Create('libffi seems to be missing!');
@@ -1619,9 +1633,9 @@ begin
   if (Length(Args) > 0) then
     raise Exception.Create('Lape''s CallMethod only supports procedures with no arguments.');
 
-  with LapeExportWrapper(Compiler.Globals[Method]) do
+  with LapeExportWrapper(Compiler.Globals['_CallProc']) do
   try
-    TProcedure(func)();
+    TCallProc(Func)(Method);
   finally
     Free;
   end;
