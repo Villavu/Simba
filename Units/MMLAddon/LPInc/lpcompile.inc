@@ -79,6 +79,9 @@ addGlobalVar(ps_mouse_right, 'mouse_Right').isConstant := True;   //0
 addGlobalVar(ps_mouse_left, 'mouse_Left').isConstant := True;     //1
 addGlobalVar(ps_mouse_middle, 'mouse_Middle').isConstant := True; //2
 
+addGlobalVar(LineEnding, 'LineEnding').isConstant := True;
+addGlobalVar(DirectorySeparator, 'DirSeparator').isConstant := True;
+
 addGlobalType('UInt32', 'TClickType');
 addGlobalType('UInt32', 'DWord');
 

@@ -1,0 +1,134 @@
+type
+  TBMPType = (bt_ColourPicker);
+
+var
+  TheForm: TForm;
+  Memo: TMemo;
+  rg: TRadioGroup;
+  sbColorPicker: TSpeedButton;
+  StatusBar: TStatusBar;
+  StatPanelMouse: TStatusPanel;
+
+function getBitmap(bmp_type: TBMPType): TBitmap;
+var
+  idx: Integer;
+  mBmp: TMufasaBitmap;
+begin
+  case (bmp_type) of
+    bt_ColourPicker: idx := Client.getMBitmaps().CreateBMPFromString(16, 16, 'meJyV0DEOgyAUBuC79Q5dexlO4iUIEyuMsnYkYSGshIEA/VOssYKKf4wh8XuP5yvlOtPzUR/v/Qgu73l+LSWD+NIvX//xka8S7x2mlHZ9CGFbsmIhRNcTQra3rNg5d4SNMRPyK+GcW2tTSicYZ7QFZoxJKdvltxgzaK2VUphk17yLwWKM+P2c8whuB76Lq7+LyTeXuHoEG8OGsbRzjHwAwMZ/gw==');
+  end;
+
+  mBmp := Client.getMBitmaps().GetBMP(idx);
+  Result := mBmp.ToTBitmap();
+  Result.Mask($FFFFFF);
+  mBmp.Free();
+end;
+
+procedure FormWriteln(s: String);
+begin
+  Memo.getLines().Add(s);
+end;
+
+procedure onMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); Native;
+begin
+  StatPanelMouse.setText(Format('(%d, %d)', [X, Y]));
+end;
+
+procedure onRadioSelect(Sender: TObject); Native;
+var
+  i: Integer;
+begin
+  FormWriteln('Radio ' + IntToStr(rg.getItemIndex() + 1) + ' selected');
+end;
+
+procedure onNotifyEvent(Sender: TObject); Native;
+var
+  Picker: TColorDialog
+begin
+  case (Sender) of
+    sbColorPicker:
+      begin
+        Picker.Init(TheForm);
+        Picker.Execute();
+        FormWriteln('Picked: ' + toString(Picker.getColor()));
+      end;
+  end;
+end;
+
+procedure Form_Create(); Native;
+var
+  bmp: TBitmap;
+begin
+  TheForm.Init(nil);
+  with (TheForm) do
+  begin
+    setCaption('Form test');
+    setPosition(poScreenCenter);
+    setWidth(500);
+    setHeight(225);
+    setOnMouseMove(onMouseMove);
+  end;
+
+  Memo.Init(TheForm);
+  with (Memo) do
+  begin
+    setParent(TheForm);
+    setBounds(0, 125, 500, 75);
+    getLines().Add('Form has been created');
+    setScrollBars(ssAutoBoth);
+  end;
+
+  rg.Init(TheForm);
+  with (rg) do
+  begin
+    setParent(TheForm);
+    setBounds(415, 0, 83, 80);
+    setOnSelectionChanged(onRadioSelect);
+    setCaption('Radio Group');
+
+    with (rg.getItems()) do
+    begin
+      Add('Radio 1');
+      Add('Radio 2');
+      Add('Radio 3');
+    end;
+  end;
+
+  sbColorPicker.Init(TheForm);
+  with (sbColorPicker) do
+  begin
+    bmp := getBitmap(bt_ColourPicker);
+
+    setParent(TheForm);
+    setBounds(370, 87, 120, 30);
+    setGlyph(bmp);
+    setCaption('Pick Colour');
+    setOnClick(onNotifyEvent);
+
+    bmp.Free();
+  end;
+
+  StatusBar.Init(TheForm);
+  with (StatusBar) do
+  begin
+    setParent(TheForm);
+    setSimplePanel(False);
+    StatPanelMouse := StatusBar.getPanels().Add();
+  end;
+
+  TheForm.ShowModal();
+end;
+
+procedure Form_Free(); Native;
+begin
+  if (TheForm <> nil) then
+    TheForm.Free();
+end;
+
+begin
+  try
+    Sync(Form_Create);
+  finally
+    Sync(Form_Free);
+  end;
+end;
