@@ -100,6 +100,11 @@ begin
   PIOManager(Params^[0])^.Free();
 end;
 
+procedure TIOManager_GetChildWindows(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PChildWindowArr(Result)^ := PIOManager(Params^[0])^.GetChildWindows(PPtrUInt(Params^[1])^);
+end;
+
 procedure Register_TIOManager(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -114,6 +119,7 @@ begin
     addGlobalFunc('function TIOManager.SetTarget(target: TNativeWindow): integer;', @TIOManager_SetTarget);
     addGlobalFunc('procedure TIOManager.SetDesktopAsTarget();', @TIOManager_SetDesktop);
     addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr;', @TIOManager_GetProcesses);
+    addGlobalFunc('function TIOManager.GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;', @TIOManager_GetChildWindows);
     addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc);', @TIOManager_SetTargetEx);
     addClassVar('TIOManager', 'display', 'PDisplay', @TIOManager_display_Read, @TIOManager_display_Write);
     addClassVar('TIOManager', 'screennum', 'integer', @TIOManager_screennum_Read, @TIOManager_screennum_Write);

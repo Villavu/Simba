@@ -115,9 +115,10 @@ function AverageTIA(const tI: TIntegerArray): Integer;
 function AverageExtended(const tE: TExtendedArray): Extended;
 function SameTPA(const aTPA, bTPA: TPointArray): Boolean;
 function TPAInATPA(const TPA: TPointArray;const InATPA: T2DPointArray; var Index: LongInt): Boolean;
-procedure OffsetTPA(var TPA : TPointArray; const Offset : TPoint);
-procedure OffsetATPA(var ATPA : T2DPointArray; const Offset : TPoint);
-function PartitionTPA(const TPA:TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
+procedure OffsetTPA(var TPA: TPointArray; const Offset : TPoint);
+procedure OffsetATPA(var ATPA: T2DPointArray; const Offset : TPoint);
+function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight:Integer): T2DPointArray;
+function TPABorder(const TPA: TPointArray): TPointArray;
 
 implementation
 
@@ -3277,6 +3278,112 @@ begin
     SetLength(Result[ID], L+1);
     Result[ID][L] := TPA[i];
   end;
+end;
+
+{*
+ Walk around current, from previous. It's 8way.
+*}
+procedure RotatingAdjecent(var Adj:TPointArray;const Curr:TPoint; const Prev:TPoint); Inline;
+var
+  i: Integer;
+  dx,dy,x,y:Single;
+begin
+  x := Prev.x; y := Prev.y;
+  adj[7] := Prev;
+  for i:=0 to 6 do
+  begin
+    dx := x - Curr.x;
+    dy := y - Curr.y;
+    x := ((dy * 0.7070) + (dx * 0.7070)) + Curr.x;
+    y := ((dy * 0.7070) - (dx * 0.7070)) + Curr.y;
+    adj[i] := Point(Round(x),Round(y));
+  end;
+end;
+
+function TPABorder(const TPA:TPointArray): TPointArray;
+var
+  i,j,h,x,y,hit,len,MaxLen:Integer;
+  Matrix: T2DIntArray;
+  adj: TPointArray;
+  start,prev,endpt:TPoint;
+  Area: TBox;
+  isset:Boolean;
+begin
+  H := High(TPA);
+  if (H < 0) then
+    Exit;
+
+  Area := GetTPABounds(TPA);
+  Area.X2 := (Area.X2 - Area.X1) + 3;  //Width
+  Area.Y2 := (Area.Y2 - Area.Y1) + 3;  //Height
+  Area.X1 := Area.X1 - 1;
+  Area.Y1 := Area.Y1 - 1;
+
+  SetLength(Matrix, Area.X2+1, Area.Y2+1);
+
+  start := Point(Area.X2, Area.Y2);
+  for i:=0 to H do
+    Matrix[(TPA[i].y-Area.Y1)][(TPA[i].x-Area.X1)] := 1;
+
+  //find FIRST starting y coord.
+  Isset := False;
+  Start := Point(Area.X2, Area.Y2);
+  for y:=0 to Area.Y2-1 do begin
+    for x:=0 to Area.X2-1 do
+      if Matrix[y][x] <> 0 then
+      begin
+        Start := Point(x,y);
+        Isset := True;
+        Break;
+      end;
+    if Isset then Break;
+  end;
+
+  H := H*4;
+  endpt := Start;
+  prev := Point(start.x, start.y-1);
+  hit := 0;
+  len := 0;
+  MaxLen := 1024;
+  SetLength(Result, MaxLen);
+  SetLength(adj, 8);
+
+  for i:=0 to H do
+  begin
+    if ((endpt = start) and (i>1)) then begin
+      if hit = 1 then Break;
+      Inc(hit);
+    end;
+    RotatingAdjecent(adj, start, prev);
+    for j:=0 to 7 do begin
+      x := adj[j].x;
+      y := adj[j].y;
+      if (x >= 0) and (x < Area.X2) and
+         (y >= 0) and (y < Area.Y2) then
+        if Matrix[y][x] <= 0 then begin
+          if Matrix[y][x] = 0 then
+          begin
+            if (Len > MaxLen) then
+            begin
+              MaxLen := MaxLen * 2;
+              SetLength(Result, MaxLen);
+            end;
+            Result[len].X := adj[j].x+Area.x1;
+            Result[len].Y := adj[j].y+Area.y1;
+            Inc(len);
+            Dec(Matrix[y][x]);
+          end;
+        end else if Matrix[y][x] >= 1 then
+        begin
+          prev := start;
+          start := adj[j];
+          Break;
+        end;
+    end;
+  end;
+  SetLength(Result, len);
+  SetLength(Adj, 0);
+  SetLength(Matrix, 0);
 end;
 
 end.

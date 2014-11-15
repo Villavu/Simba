@@ -209,3 +209,13 @@ procedure Lape_GetWindowTitle(const Params: PParamArray; const Result: Pointer);
 begin
   PlpString(Result)^ := ps_GetWindowTitle(PPtrUInt(Params^[0])^);
 end;
+
+procedure Lape_SetTarget2(const Params: PParamArray); lape_extdecl
+begin
+  ps_SetTarget2(PPtrUInt(Params^[0])^);
+end;
+
+procedure Lape_GetChildWindows(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PChildWindowArr(Result)^ := ps_GetChildWindows(PPtrUInt(Params^[0])^);
+end;

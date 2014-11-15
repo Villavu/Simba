@@ -553,4 +553,8 @@ begin
   P2DPointArray(Result)^ := ps_PartitionTPA(PPointArray(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+procedure Lape_TPABorder(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPointArray(Result)^ := ps_TPABorder(PPointArray(Params^[0])^);
+end;
 

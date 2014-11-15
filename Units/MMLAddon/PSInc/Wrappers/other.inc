@@ -413,6 +413,11 @@ begin
   CurrThread.Client.IOManager.SetTargetEx(Proc);
 end;
 
+procedure ps_SetTarget2(TheHWND: PtrUInt);
+begin
+  CurrThread.Client.IOManager.SetTarget(TheHWND);
+end;
+
 function ps_GetEnvironmentVariable(const VarName: string): string; extdecl;
 begin
   result := GetEnvironmentVariableUTF8(VarName);
@@ -494,3 +499,8 @@ begin
   end;
 end;
 {$ENDIF}
+
+function ps_GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;
+begin
+  Result := CurrThread.Client.IOManager.GetChildWindows(ParentHWND);
+end;
