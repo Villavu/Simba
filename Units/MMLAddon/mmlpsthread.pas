@@ -58,6 +58,8 @@ const
   m_MessageBox = 9; //Data =  PMessageBoxData
   m_MessageDlg = 10; //Data = PMessageDlg
   m_BalloonHint = 11; //Data = PBalloonHintData
+  m_PauseScript = 12; //Data = PThreadID
+  m_CloseSimba = 13; //Data = PThreadID
 
   {$I settings_const.inc}
   {$WARNING REMOVEME}
@@ -121,8 +123,9 @@ type
       AFlag: TBalloonFlags;
     end;
 
-    { TMThread }
+    PThreadID = ^TThreadID;
 
+    { TMThread }
     TMThread = class(TThread)
     private
       procedure SetOpenConnectionEvent(const AValue: TOpenConnectionEvent);
@@ -282,7 +285,11 @@ implementation
 uses
   SimbaUnit,
   colour_conv, dtmutil,
-  {$ifdef mswindows}windows,  MMSystem,{$endif}//MMSystem -> Sounds
+  {$IFDEF MSWindows}
+  windows,  MMSystem,
+  {$ELSE}
+  xlib, xutil, ctypes, xatom,
+  {$ENDIF}
   {$IFDEF USE_PASCALSCRIPT}
   uPSC_std, uPSC_controls,uPSC_classes,uPSC_graphics,uPSC_stdctrls,uPSC_forms, uPSC_menus,
   uPSC_extctrls, uPSC_mml, uPSC_dll, //Compile-libs
@@ -1596,6 +1603,9 @@ begin
         ImportWrappers.Add(Wrapper);
       end;
     end;
+
+    if (DelayedCode <> '') then
+      Compiler.addDelayedCode(DelayedCode);
 
     Compiler.EndImporting;
   end;

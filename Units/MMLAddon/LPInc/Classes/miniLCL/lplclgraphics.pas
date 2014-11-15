@@ -479,6 +479,9 @@ begin
 end;
 
 {TCanvas}
+
+
+
 //procedure Lock;
 procedure TCanvas_Lock(const Params: PParamArray); lape_extdecl
 begin
@@ -882,6 +885,16 @@ begin
   PAntialiasingMode(Result)^ := PCanvas(Params^[0])^.AntialiasingMode;
 end;
 
+procedure TCanvas_Handle_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPtrUInt(Result)^ := PCanvas(Params^[0])^.Handle;
+end;
+
+procedure TCanvas_Handle_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Handle := PPtrUInt(Params^[1])^;
+end;
+
 procedure Register_TCanvas(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -943,6 +956,7 @@ begin
     addClassVar('TCanvas', 'OnChange', 'TNotifyEvent', @TCanvas_OnChange_Read, @TCanvas_OnChange_Write);
     addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @TCanvas_OnChanging_Read, @TCanvas_OnChanging_Write);
     addClassVar('TCanvas', 'AntialiasingMode', 'TAntialiasingMode', @TCanvas_AntialiasingMode_Get, @TCanvas_AntialiasingMode_Set);
+    addClassVar('TCanvas', 'Handle', 'PtrUInt', @TCanvas_Handle_Read, @TCanvas_Handle_Write);
     addGlobalFunc('procedure TCanvas.Init();', @TCanvas_Init);
     addGlobalFunc('procedure TCanvas.Free();', @TCanvas_Free);
   end;
@@ -1285,6 +1299,16 @@ begin
   PBoolean(Result)^ := PBitmap(Params^[0])^.Transparent;
 end;
 
+procedure TBitmap_Monochrome_Write(const Params: PParamArray); lape_extdecl
+begin
+  PBitmap(Params^[0])^.Monochrome := PBoolean(Params^[1])^;
+end;
+
+procedure TBitmap_Monochrome_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PBitmap(Params^[0])^.Monochrome;
+end;
+
 procedure TBitmap_ToString(const Params: PParamArray; const Result: Pointer); lape_extdecl
 var
   b: TBitmap;
@@ -1352,6 +1376,7 @@ begin
     addClassVar('TBitmap', 'TransparentColor', 'TColor', @TBitmap_TransparentColor_Read, @TBitmap_TransparentColor_Write);
     addClassVar('TBitmap', 'TransparentMode', 'TTransparentMode', @TBitmap_TransparentMode_Read, @TBitmap_TransparentMode_Write);
     addClassVar('TBitmap', 'Transparent', 'Boolean', @TBitmap_TransparentMode_Read, @TBitmap_Transparent_Write);
+    addClassVar('TBitmap', 'Monochrome', 'Boolean', @TBitmap_Monochrome_Read, @TBitmap_Monochrome_Write);
     addGlobalFunc('procedure TBitmap.Free();', @TBitmap_Free);
   end;
 end;

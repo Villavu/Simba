@@ -356,6 +356,8 @@ interface
         
         function GetProcesses: TSysProcArr; virtual; abstract;
         procedure SetTargetEx(Proc: TSysProc); virtual; abstract;
+
+        function GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr; virtual; abstract;
       protected
         function SetImageTarget(target: TTarget): integer;
         function SetKeyMouseTarget(target: TTarget): integer;

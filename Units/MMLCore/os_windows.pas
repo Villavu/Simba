@@ -117,6 +117,8 @@ interface
         
         function GetProcesses: TSysProcArr; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
+
+        function GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr; override;
       protected
         DesktopHWND : Hwnd;
         procedure NativeInit; override;
@@ -569,6 +571,7 @@ end;
 
 threadvar
   ProcArr: TSysProcArr;
+  CWindowArr: TChildWindowArr;
 
 function EnumProcess(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
 var
@@ -588,6 +591,28 @@ begin
     GetWindowThreadProcessId(Handle, pPid);
     ProcArr[I].Pid := pPid;
   end;
+end;
+
+function EnumWindow(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
+var
+  L: Integer;
+begin
+  Result := (not ((Handle = 0) or (Handle = null)));
+  if (Result) then
+  begin
+    L := Length(CWindowArr);
+    SetLength(CWindowArr, L + 1);
+
+    CWindowArr[L].Handle := Handle;
+    GetWindowSize(Handle, CWindowArr[L].Width, CWindowArr[L].Height);
+  end;
+end;
+
+function TIOManager.GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;
+begin
+  SetLength(CWindowArr, 0);
+  EnumChildWindows(ParentHWND, @EnumWindow, 0);
+  Result := CWindowArr;
 end;
 
 function TIOManager.GetProcesses: TSysProcArr;

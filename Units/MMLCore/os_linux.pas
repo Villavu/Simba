@@ -49,7 +49,7 @@ interface
 
     TWindow = class(TWindow_Abstract)
       public
-        constructor Create(display: PDisplay; screennum: integer; window: x.TWindow);
+        constructor Create(_display: PDisplay; screennum: integer; window: x.TWindow);
         destructor Destroy; override;
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
@@ -72,16 +72,16 @@ interface
         procedure MoveMouse(x,y: integer); override;
         procedure HoldMouse(x,y: integer; button: TClickType); override;
         procedure ReleaseMouse(x,y: integer; button: TClickType); override;
-        function  IsMouseButtonHeld( button : TClickType) : boolean;override;
+        function  IsMouseButtonHeld( button : TClickType) : boolean; override;
 
         procedure SendString(str: string; keywait, keymodwait: integer); override;
         procedure HoldKey(key: integer); override;
         procedure ReleaseKey(key: integer); override;
         function IsKeyHeld(key: integer): boolean; override;
-        function GetKeyCode(c : char) : integer;override;
+        function GetKeyCode(c : char) : integer; override;
 
         function GetNativeWindow: TNativeWindow;
-        function GetHandle(): PtrUInt;
+        function GetHandle(): PtrUInt; override;
       private
         { display is the connection to the X server }
         display: PDisplay;
@@ -120,6 +120,8 @@ interface
 
         function GetProcesses: TSysProcArr; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
+
+        function GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr; override;
       private
         procedure NativeInit; override;
         procedure NativeFree; override;
@@ -228,14 +230,14 @@ implementation
   end;
 
   { See if the semaphores / CS are initialised }
-  constructor TWindow.Create(display: PDisplay; screennum: integer; window: x.TWindow);
+  constructor TWindow.Create(_display: PDisplay; screennum: integer; window: x.TWindow);
   begin
     inherited Create;
-    self.display:= display;
-    self.screennum:= screennum;
-    self.window:= window;
-    self.dirty:= false;
-    self.keyinput:= TKeyInput.Create;
+    self.display := _display;
+    self.screennum := screennum;
+    self.window := window;
+    self.dirty := false;
+    self.keyinput := TKeyInput.Create;
     self.mx1 := 0; self.my1 := 0; self.mx2 := 0; self.my2 := 0;
     self.mcaset := false;
     self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
@@ -674,6 +676,11 @@ implementation
   procedure TIOManager.SetTargetEx(Proc: TSysProc);
   begin
     raise Exception.Create('SetTargetEx: Not Implemented.');
+  end;
+
+  function TIOManager.GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;
+  begin
+    raise Exception.Create('GetChildWindows: Not Implemented.');
   end;
 
 end.

@@ -61,6 +61,7 @@ type
     MethodLen: integer;
     Types: array of TPasScriptType;
     TypesLen: integer;
+    DelayedCode: string;
     MemMgrSet: boolean;
     ABI: Integer;
     Handle: TLibHandle;
@@ -111,6 +112,9 @@ var
   GetTypeCount: function: integer; callconv
   GetFuncCount: function: integer; callconv
   GetFuncInfo: function(x: Integer; var ProcAddr: Pointer; var ProcDef: PChar): integer; callconv
+  GetDelayedCodeLength: function(): Integer; callconv
+  GetDelayedCode: function(): PChar; callconv
+
   SetPluginMemManager: procedure(MemMgr : TMemoryManager); callconv
   OnAttach: procedure(info: Pointer); callconv
 
@@ -339,6 +343,23 @@ begin
         end;
 
         StrDispose(PD);
+      end;
+    end;
+
+    Pointer(GetDelayedCode) := GetProcAddress(Plugin, PChar('GetDelayedCode'));
+    if (Assigned(GetDelayedCode)) then
+    begin
+      Pointer(GetDelayedCodeLength) := GetProcAddress(Plugin, PChar('GetDelayedCodeLength'));
+
+      if (Assigned(GetDelayedCodeLength)) then
+      begin
+       ArrC := GetDelayedCodeLength();
+       Writeln('Adding delayed code(', ArrC, ')');
+       PD := StrAlloc(ArrC);
+       PD := GetDelayedCode();
+       Plugins[NumPlugins].DelayedCode := PD;
+       //Writeln(Plugins[NumPlugins].DelayedCode);
+       StrDispose(PD);
       end;
     end;
   end;

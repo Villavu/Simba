@@ -262,6 +262,8 @@ var
   newLeft, newTop, newRight, newBottom:Integer;
   parentRight, parentBootom:Integer;
 begin
+ parentRight:=0; //first fix
+ parentBootom:=0; //Second fix
   // Se estб reposicionando?
   if (Self._InReposition) then begin
 
@@ -746,9 +748,9 @@ begin
     // Visible y no en diseсo
     TControl(Self._Nodes.Items[Node]).Visible :=
       AVisible{ and (not (csDesigning in Self.ComponentState))};
-    if (repos) then begin
-      TControl(Self._Nodes.Items[Node]).Parent := wc;
-    end;
+   { if (repos) then begin
+       TControl(Self._Nodes.Items[Node]).Parent := wc;
+    end;}
 
     // No visible?
     if (not AVisible) then begin

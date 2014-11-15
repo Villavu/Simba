@@ -175,3 +175,47 @@ begin
   ps_ShowBalloonHint(PString(Params^[0])^, PString(Params^[1])^, PInteger(Params^[2])^, PBalloonFlags(Params^[3])^);
 end;
 
+procedure Lape_PauseScript(const Params: PParamArray); lape_extdecl
+begin
+  ps_PauseScript();
+end;
+
+procedure Lape_CloseSimba(const Params: PParamArray); lape_extdecl
+begin
+  ps_CloseSimba();
+end;
+
+procedure Lape_ShowBitmap(const Params: PParamArray); lape_extdecl
+begin
+  ps_ShowBitmap(PInteger(Params^[0])^);
+end;
+
+procedure Lape_ShowBitmap_Mufasa(const Params: PParamArray); lape_extdecl
+begin
+  ps_ShowBitmap(PMufasaBitmap(Params^[0])^);
+end;
+
+procedure Lape_SetWindowParent(const Params: PParamArray); lape_extdecl
+begin
+  ps_SetWindowParent(PPtrUInt(Params^[0])^, PPtrUInt(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure Lape_SetWindowTitle(const Params: PParamArray); lape_extdecl
+begin
+  ps_SetWindowTitle(PPtrUInt(Params^[0])^, PlpString(Params^[1])^);
+end;
+
+procedure Lape_GetWindowTitle(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PlpString(Result)^ := ps_GetWindowTitle(PPtrUInt(Params^[0])^);
+end;
+
+procedure Lape_SetTarget2(const Params: PParamArray); lape_extdecl
+begin
+  ps_SetTarget2(PPtrUInt(Params^[0])^);
+end;
+
+procedure Lape_GetChildWindows(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PChildWindowArr(Result)^ := ps_GetChildWindows(PPtrUInt(Params^[0])^);
+end;

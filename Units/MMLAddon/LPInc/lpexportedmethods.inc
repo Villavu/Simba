@@ -46,6 +46,8 @@ AddGlobalFunc('function MessageBox(Text, Caption: string; Flags: LongInt): Integ
 AddGlobalFunc('function MessageDlg(const Caption, Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): integer', @Lape_MessageDlg);
 AddGlobalFunc('function InputQuery(const ACaption, APrompt: String; var Value: String): Boolean', @Lape_InputQuery);
 AddGlobalFunc('procedure ShowBalloonHint(const Title, Hint: string; const Timeout: Integer; const Flag: TBalloonFlags);', @Lape_ShowBalloonHint);
+AddGlobalFunc('procedure PauseScript();', @Lape_PauseScript);
+AddGlobalFunc('procedure CloseSimba();', @Lape_CloseSimba);
 AddGlobalFunc('procedure TerminateScript;', @Lape_TerminateScript);
 AddGlobalFunc('function GetTimeRunning: LongWord', @Lape_GetTimeRunning);
 {$IFNDEF FUNC_LIST}
@@ -63,6 +65,14 @@ AddGlobalFunc('function GetProcessID : LongInt', @Lape_GetProcessID);
 AddGlobalFunc('procedure SetTarget(Proc: TSysProc);', @Lape_SetTarget);
 AddGlobalFunc('function ExtractFileExt(const FileName: string): string', @Lape_ExtractFileExt);
 AddGlobalFunc('function GetEnvironmentVariable(const VarName: string): string;', @Lape_GetEnvironmentVariable);
+AddGlobalFunc('procedure ShowBitmap(const Bitmap: Integer);', @Lape_ShowBitmap);
+AddGlobalFunc('procedure ShowBitmap(const Bitmap: TMufasaBitmap); overload;', @Lape_ShowBitmap_Mufasa);
+AddGlobalFunc('procedure SetWindowParent(const Child, Parent: PtrUInt; X, Y: Integer);', @Lape_SetWindowParent);
+AddGlobalFunc('procedure SetWindowTitle(const Window: PtrUInt; const NewTitle: String);', @Lape_SetWindowTitle);
+AddGlobalFunc('function GetWindowTitle(const Window: PtrUInt): String;', @Lape_GetWindowTitle);
+AddGlobalFunc('procedure SetTarget(TheHWND: PtrUInt); overload;', @Lape_SetTarget2);
+AddGlobalFunc('function GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;', @Lape_GetChildWindows);
+
 
 { DTM }
 SetCurrSection('DTM');
@@ -526,6 +536,7 @@ AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @La
 AddGlobalFunc('function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;',@Lape_TPAPosNext);
 AddGlobalFunc('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;',@Lape_GlueTPAs);
 AddGlobalFunc('function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: Integer): T2DPointArray;', @Lape_PartitionTPA);
+AddGlobalFunc('function TPABorder(const TPA: TPointArray): TPointArray;', @Lape_TPABorder);
 
 { Window }
 SetCurrSection('Window');
