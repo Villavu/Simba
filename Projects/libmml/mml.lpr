@@ -23,7 +23,8 @@ Debatable:
 {$mode objfpc}{$H+}
 
 uses
-  cmem,Classes,interfaces,graphics,client,sysutils,MufasaTypes, dtmutil, dtm;
+  cmem, Classes, interfaces, graphics, client, sysutils, MufasaTypes, dtmutil,
+  dtm;
 
 //{$R *.res}
 
@@ -194,12 +195,14 @@ end;
 { Reallocate memory with libMML }
 function realloc_mem(ptr: Pointer; size, objsize: PtrUInt): Pointer; cdecl;
 begin
-  result := ReAllocMem(ptr, size*objsize);
+  result := ReAllocMem(ptr, size * objsize);
 end;
 
 {$I input.pas}
 {$I colour.pas}
 {$I dtmi.pas}
+{$I ocri.pas}
+{$I windowi.pas}
 
 
 (*
@@ -255,8 +258,24 @@ exports
 
   find_dtm,
 
-  set_array_target;
+  set_array_target,
 
+  // ianhedoesit
+
+  key_down, key_up, key_press, is_key_down, get_key_code, send_keys,
+
+  find_color_spiral, find_color_spiral_tolerance, find_colored_area,
+  find_colored_area_tolerance, count_color, count_color_tolerance,
+  similar_colors, set_tolerance_speed, get_tolerance_speed,
+  set_tolerance_speed_2_modifiers, get_tolerance_speed_2_modifiers,
+
+  find_dtms, // I did not implement this, only exported for testing
+
+  rs_get_up_text, rs_get_up_text_at_ex, rs_get_up_text_at,
+
+  set_desktop_as_client, free_target, get_client_dimensions,
+  get_client_position, freeze, unfreeze, activate_client, is_target_valid,
+  get_native_window;
 
 begin
 end.

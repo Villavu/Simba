@@ -14,7 +14,6 @@ class MMLException(Exception):
     def __init__(self, err):
         Exception.__init__(self, err)
 
-
 #class PascalArray(object):
 #    """
 #        PascalArray is a class that allows one to easily use a Pascal-style
@@ -75,5 +74,7 @@ class MMLException(Exception):
 
 PPOINT = POINTER(POINT)
 PINTEGER = POINTER(c_int)
+TPOINTARRAY = POINTER(PPOINT)
+#PPOINTARRAY = POINTER(TPOINTARRAY)
 
 isiterable = lambda x: hasattr(x, '__iter__')

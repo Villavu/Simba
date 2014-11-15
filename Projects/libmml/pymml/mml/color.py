@@ -38,8 +38,8 @@ class Color(object):
         Yields integer.
         """
         col = c_int(-1)
-        self._mc.dll.get_color(self._cli, pt[0], pt[1], byref(col))
-        if col is RESULT_OK:
+        ret = self._mc.dll.get_color(self._cli, pt.x, pt.y, byref(col))
+        if ret is RESULT_OK:
             return col
         elif ret is RESULT_ERROR:
             raise ColorException(self._mc.get_last_error())
@@ -264,3 +264,6 @@ class Color(object):
         self._mc.dll.get_tolerance_speed_2_modifiers.argtypes = [c_ulong,
                                                                  PINTEGER,
                                                                  PINTEGER]
+
+        # self._mc.dll.get_color.restype = c_int
+        # self._mc.dll.get_color.argtypes = [c_ulong, c_int, c_int, c_int]
