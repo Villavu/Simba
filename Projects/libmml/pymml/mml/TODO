@@ -21,3 +21,5 @@ Currently pyMML takes ctypes types but returns Python types - it should take Pyt
 Get rid of any "Ex" functions! Use optional parameters or something Pythonic.
 
 Have a better way of using modules other than passing the DLL and client to them for each module.
+
+Correct all of the c_void_p nonsense in bitmap functions argtypes.
