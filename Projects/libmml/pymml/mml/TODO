@@ -1,0 +1,23 @@
+Everything in here needs to be fixed to be more idiomatic Python. Currently it's inefficient, ugly, and extremely verbose! But it works.
+
+For example, all of the findBitmap* functions can be combined into one, nice, big find function which takes all sorts of optional arguments.
+
+Some helper functions should be moved somewhere or removed completely, maybe? Things like bitmapExists? How should this be handled in Python (and other languages)?
+
+The bitmap functions that modify bitmaps in place need to change (shouldn't pass the bitmap when self is already available).
+
+window.py doesn't work. I don't know what to do about it right now.
+
+I can't decide if I want to just have python wrappers for tpa.py or do it all(?) natively. I'm going to export them all in libMML anyway.
+
+DTMs need to be done.
+
+Deal with MufasaType differences. Related to that, there are a lot of Pascal types I'm not sure how to handle (Extended, TColor, etc.)
+
+Properly handle return values from libMML - currently not dealing with it at all.
+
+Currently pyMML takes ctypes types but returns Python types - it should take Python types and return Python types. Convert to ctypes only internally in private functions, probably.
+
+Get rid of any "Ex" functions! Use optional parameters or something Pythonic.
+
+Have a better way of using modules other than passing the DLL and client to them for each module.

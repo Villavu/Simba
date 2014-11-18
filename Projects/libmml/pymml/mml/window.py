@@ -25,18 +25,53 @@ class Window(object):
   def setDesktopAsClient(self):
     self._setDesktopAsClient()
 
+  def setTargetArray(self, p, w, h):
+    return self._setTargetArray(p, w, h)
+
+  def setTargetBitmap(self, bmp):
+    return self._setTargetBitmap(bmp)
+
+  def setEIOSTarget(self, name, args):
+    return self._setEIOSTarget(name, args)
+
+  def mouseSetClientArea(self, x1, y1, x2, y2):
+    return self._mouseSetClientArea(x1, y1, x2, y2)
+
+  def mouseResetClientArea(self):
+    self._mouseResetClientArea()
+
+  def imageSetClientArea(self, x1, y1, x2, y2):
+    return self._imageSetClientArea(x1, y1, x2, y2)
+
+  def imageResetClientArea(self):
+    self._imageResetClientArea()
+
+  def setImageTarget(self):
+    return self._setImageTarget()
+
+  def setKeyMouseTarget(self):
+    return self._setKeyMouseTarget()
+
+  def getImageTarget(self):
+    return self._getImageTarget()
+
+  def getKeyMouseTarget(self):
+    return self._getKeyMouseTarget()
+
+  def exportImageTarget(self):
+    return self._exportImageTarget()
+
+  def exportKeyMouseTarget(self):
+    return self._exportKeyMouseTarget()
+
   def freeTarget(self, idx):
     self._freeTarget(idx)
 
   def getClientDimensions(self):
-    #test_w = test_h = -1
     return self._getClientDimensions()
-    #return (test_w, test_h)
 
   def getClientPosition(self):
-    #test_top = test_left = -1
     return self._getClientPosition()
-    #return (test_top, test_left)
 
   def freeze(self):
     self._freeze()
@@ -49,18 +84,113 @@ class Window(object):
 
   def isTargetValid(self):
     return self._isTargetValid()
-    #return test
-
-  def getNativeWindow(self):
-    test = -1
-    test = self._getNativeWindow(test)
-    return test
 
   def _setDesktopAsClient(self):
     ok = self._mc.dll.set_desktop_as_client(self._cli)
     if ok != RESULT_OK:
       pass # error
     return ok
+
+  def _setTargetArray(self, p, w, h):
+    ret = c_short()
+    ok = self._mc.dll.set_target_array(self._cli, p, w, h, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+  def _setTargetBitmap(self, bmp):
+    ret = c_short()
+    ok = self._mc.dll.set_target_array(self._cli, bmp, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+  def _setEIOSTarget(self, name, args):
+    ret = c_short()
+    ok = self._mc.dll.set_eios_target(self._cli, name, args, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+  def _mouseSetClientArea(self, x1, y1, x2, y2):
+    ret = c_bool()
+    ok = self._mc.dll.mouse_set_client_area(self._cli, x1, y1, x2, y2, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+  def _mouseResetClientArea(self):
+    ok = self._mc.dll.mouse_reset_client_area(self._cli)
+    if ok != RESULT_OK:
+      pass # error
+    return ok
+
+  def _imageSetClientArea(self, x1, y1, x2, y2):
+    ret = c_bool()
+    ok = self._mc.dll.image_set_client_area(self._cli, x1, y1, x2, y2, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+  def _imageResetClientArea(self):
+    ok = self._mc.dll.image_reset_client_area(self._cli)
+    if ok != RESULT_OK:
+      pass # error
+    return ok
+
+  def _setImageTarget(self):
+    ret = c_short()
+    ok = self._mc.dll.set_image_target(self._cli, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+  def _setKeyMouseTarget(self):
+    ret = c_short()
+    ok = self._mc.dll.set_key_mouse_target(self._cli, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+  def _getImageTarget(self):
+    ret = c_short()
+    ok = self._mc.dll.get_image_target(self._cli, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+  def _getKeyMouseTarget(self):
+    ret = c_short()
+    ok = self._mc.dll.get_key_mouse_target(self._cli, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+# TODO: FIX - TTarget_Exported ???
+  def _exportImageTarget(self):
+    """
+      Currently always returns None.
+    """
+    return None
+
+    ret = None
+    ok = self._mc.dll.export_image_target(self._cli, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
+
+# TODO: FIX - TTarget_Exported ???
+  def _exportKeyMouseTarget(self):
+    """
+      Currently always returns None.
+    """
+    return None
+
+    ret = None
+    ok = self._mc.dll.export_key_mouse_target(self._cli, byref(ret))
+    if ok != RESULT_OK:
+      pass # error
+    return ret.value
 
   def _freeTarget(self, idx):
     ok = self._mc.dll.free_target(self._cli)
@@ -107,13 +237,6 @@ class Window(object):
       pass # error
     return ret.value
 
-  def _getNativeWindow(self):
-    ret = c_short()
-    ok = self._mc.dll.get_native_window(self._cli, byref(ret))
-    if ok != RESULT_OK:
-      pass # error
-    return ret.value
-
   def _initialiseDLLFuncs(self):
     self._mc.dll.set_desktop_as_client.restype = c_int
     self._mc.dll.set_desktop_as_client.argtypes = [c_int]
@@ -138,6 +261,3 @@ class Window(object):
     
     self._mc.dll.is_target_valid.restype = c_int
     self._mc.dll.is_target_valid.argtypes = [c_int]
-    
-    self._mc.dll.get_native_window.restype = c_int
-    self._mc.dll.get_native_window.argtypes = [c_int]
