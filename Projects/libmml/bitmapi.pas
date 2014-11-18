@@ -736,7 +736,9 @@ begin
   end;
 end;
 
-// XXX: first param has name mask but is being used as a managed bitmap id?
+// XXX: first param has name mask but is being used as a managed bitmap id
+// Oh, I see. This just takes a managed bitmap and makes the mask instead of
+// Just passing the mask. Why not just overload?
 function find_bitmap_mask_tolerance(C: TClient; mask: Integer; var x, y: Integer; xs, ys, xe, ye, tol, contourTol: Integer; var test: Boolean): Integer; cdecl;
 begin
   try
@@ -891,11 +893,11 @@ begin
   end;
 end;
 
-function bitmap_exists(C: TClient; id: Integer; var test: Boolean): Integer; cdecl;
+function bitmap_exists(C: TClient; bmp: Integer; var test: Boolean): Integer; cdecl;
 begin
   try
     begin
-      test := C.MBitmaps.ExistsBMP(id);
+      test := C.MBitmaps.ExistsBMP(bmp);
       result := RESULT_OK;
     end;
   except on e : Exception do

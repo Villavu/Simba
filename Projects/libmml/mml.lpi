@@ -37,7 +37,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="27">
+    <Units Count="24">
       <Unit0>
         <Filename Value="mml.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -46,372 +46,323 @@
         <WindowIndex Value="0"/>
         <TopLine Value="261"/>
         <CursorPos X="18" Y="299"/>
-        <UsageCount Value="192"/>
+        <UsageCount Value="195"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="../../Units/MMLCore/client.pas"/>
         <UnitName Value="Client"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
         <TopLine Value="58"/>
         <CursorPos X="5" Y="72"/>
-        <UsageCount Value="82"/>
+        <UsageCount Value="83"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="../../Units/MMLCore/iomanager.pas"/>
         <UnitName Value="IOManager"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1321"/>
         <CursorPos X="33" Y="1321"/>
-        <UsageCount Value="72"/>
+        <UsageCount Value="73"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="../../Units/MMLCore/os_linux.pas"/>
-        <UnitName Value="os_linux"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="56"/>
-        <CursorPos X="75" Y="32"/>
-        <UsageCount Value="0"/>
-      </Unit3>
-      <Unit4>
         <Filename Value="../../Units/MMLCore/finder.pas"/>
         <UnitName Value="finder"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1038"/>
         <CursorPos X="3" Y="1062"/>
         <UsageCount Value="11"/>
-      </Unit4>
-      <Unit5>
+      </Unit3>
+      <Unit4>
         <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
         <UnitName Value="bitmaps"/>
-        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="119"/>
-        <CursorPos X="14" Y="132"/>
-        <UsageCount Value="65"/>
-        <Loaded Value="True"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="../../../lazarus/lcl/graphics.pp"/>
-        <UnitName Value="Graphics"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="23"/>
-        <CursorPos X="1" Y="1"/>
-        <UsageCount Value="0"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="../../Units/MMLCore/mufasabase.pas"/>
-        <UnitName Value="mufasabase"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="63"/>
-        <CursorPos X="1" Y="1"/>
-        <UsageCount Value="0"/>
-      </Unit7>
-      <Unit8>
+        <TopLine Value="1434"/>
+        <CursorPos X="31" Y="1440"/>
+        <UsageCount Value="64"/>
+      </Unit4>
+      <Unit5>
         <Filename Value="../../Units/MMLCore/mufasatypes.pas"/>
         <UnitName Value="MufasaTypes"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="84"/>
-        <CursorPos X="3" Y="98"/>
-        <UsageCount Value="30"/>
+        <TopLine Value="92"/>
+        <CursorPos X="3" Y="106"/>
+        <UsageCount Value="31"/>
         <Loaded Value="True"/>
-      </Unit8>
-      <Unit9>
+      </Unit5>
+      <Unit6>
         <Filename Value="../../Units/MMLCore/tpa.pas"/>
         <UnitName Value="tpa"/>
         <WindowIndex Value="0"/>
         <TopLine Value="3251"/>
         <CursorPos X="2" Y="3256"/>
         <UsageCount Value="2"/>
-      </Unit9>
-      <Unit10>
+      </Unit6>
+      <Unit7>
         <Filename Value="../../Units/MMLCore/dtm.pas"/>
         <UnitName Value="dtm"/>
         <WindowIndex Value="0"/>
         <TopLine Value="27"/>
         <CursorPos X="1" Y="1"/>
         <UsageCount Value="11"/>
-      </Unit10>
-      <Unit11>
+      </Unit7>
+      <Unit8>
         <Filename Value="colour.pas"/>
         <UnitName Value="colour"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="8"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="272"/>
+        <TopLine Value="1"/>
         <CursorPos X="73" Y="25"/>
-        <UsageCount Value="89"/>
+        <UsageCount Value="90"/>
         <Loaded Value="True"/>
-      </Unit11>
-      <Unit12>
+      </Unit8>
+      <Unit9>
         <Filename Value="dtmi.pas"/>
         <UnitName Value="dtmi"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <WindowIndex Value="0"/>
         <TopLine Value="49"/>
         <CursorPos X="70" Y="75"/>
-        <UsageCount Value="74"/>
+        <UsageCount Value="75"/>
         <Loaded Value="True"/>
-      </Unit12>
-      <Unit13>
+      </Unit9>
+      <Unit10>
         <Filename Value="input.pas"/>
         <UnitName Value="input"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="10"/>
         <WindowIndex Value="0"/>
         <TopLine Value="121"/>
         <CursorPos X="43" Y="14"/>
-        <UsageCount Value="27"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
-      </Unit13>
-      <Unit14>
+      </Unit10>
+      <Unit11>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/keyboard.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="15"/>
         <CursorPos X="34" Y="42"/>
         <UsageCount Value="9"/>
-      </Unit14>
-      <Unit15>
+      </Unit11>
+      <Unit12>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/ocr.inc"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="11"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="60" Y="26"/>
-        <UsageCount Value="74"/>
+        <UsageCount Value="75"/>
         <Loaded Value="True"/>
-      </Unit15>
-      <Unit16>
+      </Unit12>
+      <Unit13>
         <Filename Value="ocr.pas"/>
         <UnitName Value="ocr"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="5" Y="11"/>
         <UsageCount Value="10"/>
-      </Unit16>
-      <Unit17>
+      </Unit13>
+      <Unit14>
         <Filename Value="ocri.pas"/>
         <UnitName Value="ocri"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="9"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="73"/>
+        <UsageCount Value="74"/>
         <Loaded Value="True"/>
-      </Unit17>
-      <Unit18>
+      </Unit14>
+      <Unit15>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/window.inc"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
         <TopLine Value="17"/>
         <CursorPos X="3" Y="22"/>
-        <UsageCount Value="70"/>
+        <UsageCount Value="71"/>
         <Loaded Value="True"/>
-      </Unit18>
-      <Unit19>
+      </Unit15>
+      <Unit16>
         <Filename Value="windowi.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="windowi"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="1"/>
-        <UsageCount Value="139"/>
+        <UsageCount Value="142"/>
         <Loaded Value="True"/>
-      </Unit19>
-      <Unit20>
+      </Unit16>
+      <Unit17>
         <Filename Value="bitmapi.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="bitmapi"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="111"/>
-        <CursorPos X="46" Y="122"/>
+        <TopLine Value="879"/>
+        <CursorPos X="39" Y="900"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
-          <IsVisibleTab Value="True"/>
-          <EditorIndex Value="1"/>
           <WindowIndex Value="1"/>
           <TopLine Value="864"/>
-          <CursorPos X="28" Y="872"/>
+          <CursorPos X="36" Y="870"/>
         </ExtraEditor1>
-        <UsageCount Value="127"/>
+        <UsageCount Value="130"/>
         <Loaded Value="True"/>
-      </Unit20>
-      <Unit21>
+      </Unit17>
+      <Unit18>
         <Filename Value="../../Units/MMLAddon/PSInc/Wrappers/bitmap.inc"/>
-        <EditorIndex Value="0"/>
+        <IsVisibleTab Value="True"/>
         <WindowIndex Value="1"/>
-        <TopLine Value="311"/>
+        <TopLine Value="279"/>
         <CursorPos X="71" Y="349"/>
-        <UsageCount Value="64"/>
-        <Loaded Value="True"/>
-      </Unit21>
-      <Unit22>
+        <UsageCount Value="63"/>
+      </Unit18>
+      <Unit19>
         <Filename Value="../../../../../../../../lazarus/fpc/2.6.4/source/rtl/objpas/objpas.pp"/>
         <UnitName Value="objpas"/>
         <WindowIndex Value="0"/>
         <TopLine Value="18"/>
         <CursorPos X="8" Y="40"/>
         <UsageCount Value="6"/>
-      </Unit22>
-      <Unit23>
+      </Unit19>
+      <Unit20>
         <Filename Value="../../Units/MMLCore/mufasatypesutil.pas"/>
         <UnitName Value="mufasatypesutil"/>
         <WindowIndex Value="0"/>
         <TopLine Value="38"/>
         <CursorPos X="1" Y="1"/>
         <UsageCount Value="6"/>
-      </Unit23>
-      <Unit24>
+      </Unit20>
+      <Unit21>
         <Filename Value="../../../../../../../../lazarus/lcl/graphics.pp"/>
         <UnitName Value="Graphics"/>
         <WindowIndex Value="0"/>
         <TopLine Value="36"/>
         <CursorPos X="3" Y="58"/>
         <UsageCount Value="9"/>
-      </Unit24>
-      <Unit25>
+      </Unit21>
+      <Unit22>
         <Filename Value="../../../../../../../../lazarus/lcl/graphtype.pp"/>
         <UnitName Value="GraphType"/>
         <WindowIndex Value="0"/>
         <TopLine Value="11"/>
         <CursorPos X="3" Y="33"/>
         <UsageCount Value="9"/>
-      </Unit25>
-      <Unit26>
+      </Unit22>
+      <Unit23>
         <Filename Value="../../../../../../../../lazarus/fpc/2.6.4/source/rtl/inc/objpash.inc"/>
         <WindowIndex Value="0"/>
         <TopLine Value="229"/>
         <CursorPos X="20" Y="241"/>
         <UsageCount Value="10"/>
-      </Unit26>
+      </Unit23>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="25" HistoryIndex="24">
       <Position1>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="120" Column="58" TopLine="93"/>
+        <Caret Line="227" Column="109" TopLine="217"/>
       </Position1>
       <Position2>
-        <Filename Value="bitmapi.pas"/>
-        <Caret Line="261" Column="19" TopLine="218"/>
+        <Filename Value="mml.lpr"/>
+        <Caret Line="297" Column="17" TopLine="255"/>
       </Position2>
       <Position3>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="257" Column="62" TopLine="218"/>
+        <Caret Line="646" Column="32" TopLine="603"/>
       </Position3>
       <Position4>
-        <Filename Value="mml.lpr"/>
-        <Caret Line="27" Column="43" TopLine="1"/>
+        <Filename Value="bitmapi.pas"/>
+        <Caret Line="801" Column="114" TopLine="758"/>
       </Position4>
       <Position5>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="430" Column="23" TopLine="387"/>
+        <Caret Line="807" Column="12" TopLine="764"/>
       </Position5>
       <Position6>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="460" Column="29" TopLine="417"/>
+        <Caret Line="811" Column="12" TopLine="768"/>
       </Position6>
       <Position7>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="501" Column="24" TopLine="471"/>
+        <Caret Line="520" Column="58" TopLine="501"/>
       </Position7>
       <Position8>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="227" Column="109" TopLine="217"/>
+        <Caret Line="550" Column="78" TopLine="536"/>
       </Position8>
       <Position9>
-        <Filename Value="mml.lpr"/>
-        <Caret Line="297" Column="17" TopLine="255"/>
+        <Filename Value="bitmapi.pas"/>
+        <Caret Line="561" Column="112" TopLine="547"/>
       </Position9>
       <Position10>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="646" Column="32" TopLine="603"/>
+        <Caret Line="584" Column="60" TopLine="570"/>
       </Position10>
       <Position11>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="801" Column="114" TopLine="758"/>
+        <Caret Line="760" Column="131" TopLine="746"/>
       </Position11>
       <Position12>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="807" Column="12" TopLine="764"/>
+        <Caret Line="762" Column="19" TopLine="746"/>
       </Position12>
       <Position13>
-        <Filename Value="bitmapi.pas"/>
-        <Caret Line="811" Column="12" TopLine="768"/>
+        <Filename Value="mml.lpr"/>
+        <Caret Line="299" Column="52" TopLine="264"/>
       </Position13>
       <Position14>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="520" Column="58" TopLine="501"/>
+        <Caret Line="247" Column="13" TopLine="230"/>
       </Position14>
       <Position15>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="550" Column="78" TopLine="536"/>
+        <Caret Line="13" Column="9" TopLine="1"/>
       </Position15>
       <Position16>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="561" Column="112" TopLine="547"/>
+        <Caret Line="12" Column="45" TopLine="1"/>
       </Position16>
       <Position17>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="584" Column="60" TopLine="570"/>
+        <Caret Line="257" Column="52" TopLine="243"/>
       </Position17>
       <Position18>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="760" Column="131" TopLine="746"/>
+        <Caret Line="235" Column="18" TopLine="3"/>
       </Position18>
       <Position19>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="762" Column="19" TopLine="746"/>
+        <Caret Line="12" Column="43" TopLine="1"/>
       </Position19>
       <Position20>
-        <Filename Value="mml.lpr"/>
-        <Caret Line="299" Column="52" TopLine="264"/>
+        <Filename Value="bitmapi.pas"/>
+        <Caret Line="13" Column="21" TopLine="1"/>
       </Position20>
       <Position21>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="247" Column="13" TopLine="230"/>
+        <Caret Line="12" Column="36" TopLine="24"/>
       </Position21>
       <Position22>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="13" Column="9" TopLine="1"/>
+        <Caret Line="120" Column="40" TopLine="108"/>
       </Position22>
       <Position23>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="12" Column="45" TopLine="1"/>
+        <Caret Line="122" Column="46" TopLine="111"/>
       </Position23>
       <Position24>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="257" Column="52" TopLine="243"/>
+        <Caret Line="119" Column="24" TopLine="194"/>
       </Position24>
       <Position25>
         <Filename Value="bitmapi.pas"/>
-        <Caret Line="235" Column="18" TopLine="3"/>
+        <Caret Line="700" Column="32" TopLine="701"/>
       </Position25>
-      <Position26>
-        <Filename Value="bitmapi.pas"/>
-        <Caret Line="12" Column="43" TopLine="1"/>
-      </Position26>
-      <Position27>
-        <Filename Value="bitmapi.pas"/>
-        <Caret Line="13" Column="21" TopLine="1"/>
-      </Position27>
-      <Position28>
-        <Filename Value="../../Units/MMLCore/bitmaps.pas"/>
-        <Caret Line="1241" Column="55" TopLine="80"/>
-      </Position28>
-      <Position29>
-        <Filename Value="bitmapi.pas"/>
-        <Caret Line="12" Column="36" TopLine="24"/>
-      </Position29>
-      <Position30>
-        <Filename Value="bitmapi.pas"/>
-        <Caret Line="120" Column="40" TopLine="108"/>
-      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
