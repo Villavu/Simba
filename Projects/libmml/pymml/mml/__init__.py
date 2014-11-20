@@ -6,6 +6,7 @@ from mouse import Mouse
 from color import Color
 from keyboard import Keyboard
 from window import Window
+from bitmap import Bitmap
 
 # from . import mouse
 # from . import color

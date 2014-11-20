@@ -19,25 +19,30 @@ class DTMPoint(object):
         self.x, self.y, self.c, self.t, self.asz, self.bp = x, y, c, t, asz, bp
 
 class DTMException(Exception):
-    pass
+    def __init__(self, err):
+        Exception.__init__(self, err)
 
 class DTM(object):
 
-    def __init__(self, points):
+    def __init__(self, MC, cli, points, name = 'Unnamed DTM'):
         if type(points) not in [list, tuple]:
             raise DTMException('points is not a list or tuple')
         for i in points:
             if type(i) is not DTMPoint:
                 raise DTMException('Each point in points should be a DTMPoint')
 
-        self.points = points
-        self.name = 'Unnamed DTM'
+        self._mc = MC
+        self._cli = cli
+        self._points = points
+        self._name = name
+
+        self._id = -1 # Should we treat each DTM as an int (id) or DTM itself?
 
     def __del__(self):
         pass
 
     def __repr__(self):
-        return '<DTM: %s>' % self.name
+        return '<DTM: %s>' % self._name
 
     def to_str(self):
         pass
@@ -48,8 +53,5 @@ class DTM(object):
     def find(self):
         pass
 
-    def set_name(self):
-        self.name = name
-        pass
-
-
+    def set_name(self, name):
+        self._name = name

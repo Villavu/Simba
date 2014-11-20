@@ -24,7 +24,7 @@ Debatable:
 
 uses
   cmem, Classes, interfaces, graphics, client, sysutils, MufasaTypes, dtmutil,
-  dtm;
+  dtm, IOManager, bitmaps;
 
 //{$R *.res}
 
@@ -59,7 +59,7 @@ var
 
 (*
 
-libMLL Specific Functions
+libMML Specific Functions
 =========================
 
 
@@ -203,6 +203,7 @@ end;
 {$I dtmi.pas}
 {$I ocri.pas}
 {$I windowi.pas}
+{$I bitmapi.pas}
 
 
 (*
@@ -275,7 +276,29 @@ exports
 
   set_desktop_as_client, free_target, get_client_dimensions,
   get_client_position, freeze, unfreeze, activate_client, is_target_valid,
-  get_native_window;
+  //get_native_window, // I don't know why I export this? it's not exported in ps
+  set_target_array, set_target_bitmap, set_eios_target, mouse_set_client_area,
+  mouse_reset_client_area, image_set_client_area, image_reset_client_area,
+  set_image_target, set_key_mouse_target, get_image_target,
+  get_key_mouse_target, export_image_target, export_key_mouse_target,
+
+  create_bitmap_string, get_mufasa_bitmap, create_bitmap, free_bitmap,
+  save_bitmap, set_persistent_memory_bitmap, reset_persistent_memory_bitmap,
+  bitmap_from_string, load_bitmap, set_bitmap_size, stretch_bitmap_resize,
+  get_bitmap_size, set_bitmap_name, create_mirrored_bitmap,
+  create_mirrored_bitmap_ex, fast_get_pixel, fast_get_pixels,
+  get_bitmap_area_colors, fast_set_pixel, fast_set_pixels, draw_tpa_bitmap,
+  draw_atpa_bitmap, draw_atpa_bitmap_ex, fast_draw_clear, draw_bitmap,
+  fast_draw_transparent, set_transparent_color, get_transparent_color,
+  fast_replace_color, copy_client_to_bitmap, bitmap_from_client, find_bitmap,
+  find_bitmap_in, find_bitmap_tolerance_in, find_bitmap_spiral,
+  find_bitmaps_spiral_tolerance, find_bitmap_spiral_tolerance, rotate_bitmap,
+  desaturate, invert_bitmap, copy_bitmap, grey_scale_bitmap, brightness_bitmap,
+  contrast_bitmap, posterize_bitmap, create_mask_from_bitmap,
+  find_mask_tolerance, find_bitmap_mask_tolerance,
+  find_deformed_bitmap_tolerance_in, rectangle_bitmap, flood_fill_bitmap,
+  convolute_bitmap, calculate_pixel_shift, calculate_pixel_shift_tpa,
+  calculate_pixel_tolerance, calculate_pixel_tolerance_tpa, bitmap_exists;
 
 begin
 end.

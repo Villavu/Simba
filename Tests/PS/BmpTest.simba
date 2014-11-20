@@ -26,9 +26,10 @@ begin
        '4upNx+J4yNt35OZ5yOh8W8eMRqNnQ6hWMqlTJaRXFaU5N6JBQrFIR' +
        'rdaKqlIL6ZNKqM8CKc5VZw04N8w//2m/vq5/v7M6vzghtfEhr+Ohc' +
        'NgYbRYU7lKUKo3O6k9K6s3KqQ/KKRILp8/D6k7GKZBMZwwqL86/P2' +
-       'S9f/j//zlzP73nNrfpMeprdp0hMlyqcxincxYY7tXOLFHDehUEnQ=' +
-       '');
+       'S9f/j//zlzP73nNrfpMeprdp0hMlyqcxincxYY7tXOLFHDehUEnQ=');
   GetClientDimensions(w,h);
-  if FindBitmapToleranceIn(bmp,x,y,0,0,w-1,h-1,25) then
-    MoveMouse(x,y);
+  if FindBitmap(bmp, x, y) then
+    MoveMouse(x, y);
+  //if FindBitmapToleranceIn(bmp,x,y,0,0,w-1,h-1,25) then
+    //MoveMouse(x,y);
 end.
