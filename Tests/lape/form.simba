@@ -8,6 +8,7 @@ var
   sbColorPicker: TSpeedButton;
   StatusBar: TStatusBar;
   StatPanelMouse: TStatusPanel;
+  Grid: TStringGrid;
 
 function getBitmap(bmp_type: TBMPType): TBitmap;
 var
@@ -55,9 +56,20 @@ begin
   end;
 end;
 
+procedure OnKeyPress(Sender: TObject; var Key: Char); Native;
+begin
+  if (Ord(Key) = 8) then
+    Exit();
+
+  if (Grid.Row = 1) and (Grid.Col = 0) then
+    Key := '*';
+end;
+
 procedure Form_Create(); Native;
 var
   bmp: TBitmap;
+  s: TStringList;
+  o: TGridOptions;
 begin
   TheForm.Init(nil);
   with (TheForm) do
@@ -65,7 +77,7 @@ begin
     setCaption('Form test');
     setPosition(poScreenCenter);
     setWidth(500);
-    setHeight(225);
+    setHeight(500);
     setOnMouseMove(onMouseMove);
   end;
 
@@ -73,7 +85,7 @@ begin
   with (Memo) do
   begin
     setParent(TheForm);
-    setBounds(0, 125, 500, 75);
+    setBounds(0, 425, 500, 75);
     getLines().Add('Form has been created');
     setScrollBars(ssAutoBoth);
   end;
@@ -115,6 +127,24 @@ begin
     setSimplePanel(False);
     StatPanelMouse := StatusBar.getPanels().Add();
   end;
+
+  Grid.Init(TheForm);
+  Grid.setParent(TheForm);
+  Grid.SetBounds(0, 0, 200, 120);
+  Grid.setOnKeyPress(onKeyPress);
+  Grid.setFixedCols(0);
+
+  o := Grid.getOptions();
+  Grid.setOptions(o + goEditing);
+
+  Grid.getColumns().Add();
+  Grid.getColumns().getItems(0).setCaption('Wizzup');
+
+  Grid.getColumns().Add();
+  Grid.getColumns().getItems(1).setButtonStyle(cbsCheckboxColumn);
+  Grid.getColumns().getItems(0).setWidth(120);
+
+  Grid.setCell(1, 1, '1');
 
   TheForm.ShowModal();
 end;

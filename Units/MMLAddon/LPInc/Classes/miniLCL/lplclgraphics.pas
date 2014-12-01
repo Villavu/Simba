@@ -895,6 +895,11 @@ begin
   PCanvas(Params^[0])^.Handle := PPtrUInt(Params^[1])^;
 end;
 
+procedure TCanvas_FillRectEx(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.FillRect(PRect(Params^[1])^);
+end;
+
 procedure Register_TCanvas(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -933,6 +938,7 @@ begin
     addGlobalFunc('procedure TCanvas.RoundRect( Rect: TRect; RX,RY: Integer); overload;', @TCanvas_RoundRectEx);
     addGlobalFunc('procedure TCanvas.TextOut(X,Y: Integer;  Text: String);', @TCanvas_TextOut);
     addGlobalFunc('procedure TCanvas.TextRect( ARect: TRect; X, Y: integer;  Text: string);', @TCanvas_TextRect);
+    addGlobalFunc('procedure TCanvas.FillRect(ARect: TRect); overload;', @TCanvas_FillRectEx);
     addGlobalFunc('function TCanvas.TextHeight( Text: string): Integer;', @TCanvas_TextHeight);
     addGlobalFunc('function TCanvas.TextWidth( Text: string): Integer;', @TCanvas_TextWidth);
     addGlobalFunc('function TCanvas.HandleAllocated(): Boolean;', @TCanvas_HandleAllocated);
