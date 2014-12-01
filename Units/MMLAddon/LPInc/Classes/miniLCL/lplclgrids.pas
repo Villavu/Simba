@@ -1175,21 +1175,6 @@ begin
   PStringGrid(Params^[0])^.Free();
 end;
 
-procedure Test(s: TStringGrid);
-begin
-  with s.Columns.Add() do
-    ButtonStyle:= cbsCheckboxColumn;
-  s.Columns[0].Title.Caption:= '1';
-
-  with s.Columns.Add() do
-    Title.Caption:= '2';
-end;
-
-procedure TStringGrid_Test(const Params: PParamArray); lape_extdecl
-begin
-  Test(PStringGrid(Params^[0])^);
-end;
-
 procedure Register_TStringGrid(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1198,7 +1183,6 @@ begin
 
     addGlobalFunc('procedure TStringGrid.Init(TheOwner: TComponent);', @TStringGrid_Init);
     addGlobalFunc('procedure TStringGrid.Free();', @TStringGrid_Free);
-    addGLobalFunc('procedure TStringGrid.Test();', @TStringGrid_Test);
   end;
 end;
 
