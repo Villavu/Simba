@@ -3933,6 +3933,7 @@ begin
       m_ShowMessage : ShowMessage(PChar(data));
       m_MessageBox : with PMessageBoxData(data)^ do res := Application.MessageBox(AText,ACaption,AFlags);
       m_MessageDlg : with PMessageDlgData(data)^ do res := MessageDlg(ACaption,AMsg,ADlgType,AButtons,0);
+      m_SaveSettings: Self.SaveFormSettings();
       m_BalloonHint:
         if (SimbaSettings.ShowBalloonHints.Show.GetDefValue(True)) then
         begin
