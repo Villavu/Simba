@@ -6,7 +6,7 @@ unit lpClassHelper;
 interface
 
 uses
-  Classes, SysUtils, lpcompiler, lptypes, lpvartypes, Controls, StdCtrls;
+  Classes, SysUtils, lpcompiler, lptypes, lpvartypes, Controls, StdCtrls, Grids;
 
 type
   TLapeCompilerHelper = class helper for TLapeCompiler
@@ -41,6 +41,13 @@ type
   TOnMouseMoveWrapper = class(specialize TRegisterWrapper<TMouseMoveEventWrapper>)
   public
     procedure MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); register;
+  end;
+
+  PDrawCellEventWrapper = ^TDrawCellEventWrapper;
+  TDrawCellEventWrapper = procedure(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState); cdecl;
+  TOnDrawCellWrapper = class(specialize TRegisterWrapper<TDrawCellEventWrapper>)
+  public
+    procedure DrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState); register;
   end;
 
   PClickWrapper = ^TClickWrapper;
@@ -136,6 +143,12 @@ procedure TOnMouseEventWrapper.MouseEvent(Sender: TObject; Button: TMouseButton;
 begin
   if (Assigned(FMethod)) then
     FMethod(Sender, Button, Shift, X, Y);
+end;
+
+procedure TOnDrawCellWrapper.DrawCell(Sender: TObject; aCol, aRow: Integer; aRect: TRect; aState: TGridDrawState) register;
+begin
+  if (Assigned(FMethod)) then
+    FMethod(Sender, aCol, aRow, aRect, aState);
 end;
 
 end.

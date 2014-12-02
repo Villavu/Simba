@@ -504,3 +504,8 @@ function ps_GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;
 begin
   Result := CurrThread.Client.IOManager.GetChildWindows(ParentHWND);
 end;
+
+procedure ps_SaveSettings(); extdecl;
+begin
+  CurrThread.FormCallBack(m_SaveSettings, nil);
+end;

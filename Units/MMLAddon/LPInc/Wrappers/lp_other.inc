@@ -219,3 +219,8 @@ procedure Lape_GetChildWindows(const Params: PParamArray; const Result: Pointer)
 begin
   PChildWindowArr(Result)^ := ps_GetChildWindows(PPtrUInt(Params^[0])^);
 end;
+
+procedure Lape_SaveSettings(const Params: PParamArray); lape_extdecl
+begin
+  ps_SaveSettings();
+end;

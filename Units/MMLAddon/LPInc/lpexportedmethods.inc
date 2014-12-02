@@ -72,7 +72,7 @@ AddGlobalFunc('procedure SetWindowTitle(const Window: PtrUInt; const NewTitle: S
 AddGlobalFunc('function GetWindowTitle(const Window: PtrUInt): String;', @Lape_GetWindowTitle);
 AddGlobalFunc('procedure SetTarget(TheHWND: PtrUInt); overload;', @Lape_SetTarget2);
 AddGlobalFunc('function GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;', @Lape_GetChildWindows);
-
+AddGlobalFunc('procedure SaveSettings();', @Lape_SaveSettings);
 
 { DTM }
 SetCurrSection('DTM');

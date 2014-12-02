@@ -60,6 +60,7 @@ const
   m_BalloonHint = 11; //Data = PBalloonHintData
   m_PauseScript = 12; //Data = PThreadID
   m_CloseSimba = 13; //Data = PThreadID
+  m_SaveSettings = 14; //Data = nil
 
   {$I settings_const.inc}
   {$WARNING REMOVEME}

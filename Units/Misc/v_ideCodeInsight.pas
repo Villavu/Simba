@@ -1667,9 +1667,15 @@ procedure TCodeInsight.FillSynCompletionProposal(ItemList, InsertList: TStrings;
     FoundParent := False;
     TypeToFind := Lowercase(_dType);
 
+    if (Incl.Items = nil) then
+      Exit();
+
     c := Incl.Items.Count - 1;
     for i := 0 to c do
     begin
+      if (Incl.Items[i].Items = nil) then
+        Continue;
+
       cc := Incl.Items[i].Items.Count - 1;
 
       for ii := 0 to cc do

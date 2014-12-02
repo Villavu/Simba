@@ -28,6 +28,7 @@ uses
   lplclspin,
   lplclprocess,
   lplclregexpr,
+  lplclgrids,
 
   lpTMDTM, lpTMDTMS,
 
@@ -70,6 +71,7 @@ begin
   RegisterLCLSpinCtrls(Compiler);
   RegisterLCLProcess(Compiler);
   RegisterLCLTRegExpr(Compiler);
+  RegisterLCLGrids(Compiler);
 end;
 
 procedure RegisterMMLClasses(Compiler: TLapeCompiler);
