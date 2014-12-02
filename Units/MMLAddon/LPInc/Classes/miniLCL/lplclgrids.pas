@@ -45,6 +45,117 @@ type
   PAlignment = ^TAlignment;
   PFont = ^TFont;
   PTextLayout = ^TTextLayout;
+  PPrefixOption = ^TPrefixOption;
+  PGridColumnTitle = ^TGridColumnTitle;
+
+//procedure FillTitleDefaultFont;
+procedure TGridColumnTitle_FillTitleDefaultFont(const Params: PParamArray); lape_extdecl
+begin
+  PGridColumnTitle(Params^[0])^.FillTitleDefaultFont();
+end;
+
+//function IsDefault: boolean;
+procedure TGridColumnTitle_IsDefault(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PGridColumnTitle(Params^[0])^.IsDefault();
+end;
+
+//Read: property Alignment: TAlignment read GetAlignment write SetAlignment stored IsAlignmentStored;
+procedure TGridColumnTitle_Alignment_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PAlignment(Result)^ := PGridColumnTitle(Params^[0])^.Alignment;
+end;
+
+//Write: property Alignment: TAlignment read GetAlignment write SetAlignment stored IsAlignmentStored;
+procedure TGridColumnTitle_Alignment_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGridColumnTitle(Params^[0])^.Alignment := PAlignment(Params^[1])^;
+end;
+
+//Read: property Caption: TCaption read GetCaption write SetCaption stored IsCaptionStored;
+procedure TGridColumnTitle_Caption_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PlpString(Result)^ := PGridColumnTitle(Params^[0])^.Caption;
+end;
+
+//Write: property Caption: TCaption read GetCaption write SetCaption stored IsCaptionStored;
+procedure TGridColumnTitle_Caption_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGridColumnTitle(Params^[0])^.Caption := PlpString(Params^[1])^;
+end;
+
+//Read: property Color: TColor read GetColor write SetColor stored IsColorStored;
+procedure TGridColumnTitle_Color_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PColor(Result)^ := PGridColumnTitle(Params^[0])^.Color;
+end;
+
+//Write: property Color: TColor read GetColor write SetColor stored IsColorStored;
+procedure TGridColumnTitle_Color_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGridColumnTitle(Params^[0])^.Color := PColor(Params^[1])^;
+end;
+
+//Read: property Font: TFont read GetFont write SetFont stored IsFontStored;
+procedure TGridColumnTitle_Font_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PFont(Result)^ := PGridColumnTitle(Params^[0])^.Font;
+end;
+
+//Write: property Font: TFont read GetFont write SetFont stored IsFontStored;
+procedure TGridColumnTitle_Font_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGridColumnTitle(Params^[0])^.Font := PFont(Params^[1])^;
+end;
+
+//Read: property PrefixOption: TPrefixOption read FPrefixOption write SetPrefixOption default poNone;
+procedure TGridColumnTitle_PrefixOption_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPrefixOption(Result)^ := PGridColumnTitle(Params^[0])^.PrefixOption;
+end;
+
+//Write: property PrefixOption: TPrefixOption read FPrefixOption write SetPrefixOption default poNone;
+procedure TGridColumnTitle_PrefixOption_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGridColumnTitle(Params^[0])^.PrefixOption := PPrefixOption(Params^[1])^;
+end;
+
+//procedure Free();
+procedure TGridColumnTitle_Free(const Params: PParamArray); lape_extdecl
+begin
+  PGridColumnTitle(Params^[0])^.Free();
+end;
+
+//Read: property Layout: TTextLayout read GetLayout write SetLayout stored IsLayoutStored;
+procedure TGridColumnTitle_Layout_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PTextLayout(Result)^ := PGridColumnTitle(Params^[0])^.Layout;
+end;
+
+//Write: property Layout: TTextLayout read GetLayout write SetLayout stored IsLayoutStored;
+procedure TGridColumnTitle_Layout_Write(const Params: PParamArray); lape_extdecl
+begin
+  PGridColumnTitle(Params^[0])^.Layout := PTextLayout(Params^[1])^;
+end;
+
+procedure Register_TGridColumnTitle(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TGridColumnTitle', 'TPersistent');
+
+    addGlobalFunc('procedure TGridColumnTitle.FillTitleDefaultFont();', @TGridColumnTitle_FillTitleDefaultFont);
+    addGlobalFunc('function TGridColumnTitle.IsDefault(): boolean;', @TGridColumnTitle_IsDefault);
+    addClassVar('TGridColumnTitle', 'Alignment', 'TAlignment', @TGridColumnTitle_Alignment_Read, @TGridColumnTitle_Alignment_Write);
+    addClassVar('TGridColumnTitle', 'Caption', 'TCaption', @TGridColumnTitle_Caption_Read, @TGridColumnTitle_Caption_Write);
+    addClassVar('TGridColumnTitle', 'Color', 'TColor', @TGridColumnTitle_Color_Read, @TGridColumnTitle_Color_Write);
+    addClassVar('TGridColumnTitle', 'Font', 'TFont', @TGridColumnTitle_Font_Read, @TGridColumnTitle_Font_Write);
+    addClassVar('TGridColumnTitle', 'Layout', 'TTextLayout', @TGridColumnTitle_Layout_Read, @TGridColumnTitle_Layout_Write);
+    addClassVar('TGridColumnTitle', 'PrefixOption', 'TPrefixOption', @TGridColumnTitle_PrefixOption_Read, @TGridColumnTitle_PrefixOption_Write);
+    addGlobalFunc('procedure TGridColumnTitle.Free();', @TGridColumnTitle_Free);
+  end;
+end;
+
 
 //procedure FillDefaultFont;
 procedure TGridColumn_FillDefaultFont(const Params: PParamArray); lape_extdecl
@@ -229,13 +340,13 @@ end;
 //Read: property Title: TGridColumnTitle read FTitle write SetTitle;
 procedure TGridColumn_Title_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PlpString(Result)^ := PGridColumn(Params^[0])^.Title.Caption;
+  PGridColumnTitle(Result)^ := PGridColumn(Params^[0])^.Title
 end;
 
 //Write: property Title: TGridColumnTitle read FTitle write SetTitle;
 procedure TGridColumn_Title_Write(const Params: PParamArray); lape_extdecl
 begin
-  PGridColumn(Params^[0])^.Title.Caption := PlpString(Params^[1])^;
+  PGridColumn(Params^[0])^.Title := PGridColumnTitle(Params^[1])^;
 end;
 
 //Read: property Width: Integer read GetWidth write SetWidth stored IsWidthStored default DEFCOLWIDTH;
@@ -297,7 +408,7 @@ begin
     addClassVar('TGridColumn', 'ReadOnly', 'Boolean', @TGridColumn_ReadOnly_Read, @TGridColumn_ReadOnly_Write);
     addClassVar('TGridColumn', 'SizePriority', 'Integer', @TGridColumn_SizePriority_Read, @TGridColumn_SizePriority_Write);
     addClassVar('TGridColumn', 'Tag', 'Integer', @TGridColumn_Tag_Read, @TGridColumn_Tag_Write);
-    addClassVar('TGridColumn', 'Caption', 'String', @TGridColumn_Title_Read, @TGridColumn_Title_Write);
+    addClassVar('TGridColumn', 'Title', 'TGridColumnTitle', @TGridColumn_Title_Read, @TGridColumn_Title_Write);
     addClassVar('TGridColumn', 'Width', 'Integer', @TGridColumn_Width_Read, @TGridColumn_Width_Write);
     addClassVar('TGridColumn', 'Visible', 'Boolean', @TGridColumn_Visible_Read, @TGridColumn_Visible_Write);
     addGlobalFunc('procedure TGridColumn.Init(ACollection: TCollection);', @TGridColumn_Init);
@@ -1186,7 +1297,6 @@ begin
   end;
 end;
 
-
 procedure RegisterLCLGrids(Compiler: TLapeCompiler);
 begin
   with (Compiler) do
@@ -1204,6 +1314,7 @@ begin
     addGlobalType('set of TKeyOption', 'TKeyOptions');
     addGlobalType('(esSimple, esEllipsis, esPickList)', 'TEditStyle');
     addGlobalType('(tlTop, tlCenter, tlBottom)', 'TTextLayout');
+    addGlobalType('(poNone, poHeaderClick)', 'TPrefixOption');
 
     addGlobalType('(goFixedVertLine, goFixedHorzLine, goVertLine,  goHorzLine, goRangeSelect,goDrawFocusSelected, goRowSizing, goColSizing,goRowMoving, goColMoving, goEditing, goAutoAddRows, goTabs, goRowSelect, goAlwaysShowEditor, goThumbTracking, goColSpanning, goRelaxedRowSelect, goDblClickAutoSize, goSmoothScroll, goFixedRowNumbering, goScrollKeepVisible, goHeaderHotTracking, goHeaderPushedLook, goSelectionActive, goFixedColSizing, goDontScrollPartCell, goCellHints, goTruncCellHints, goCellEllipsis, goAutoAddRowsSkipContentCheck, goRowHighlight)', 'TGridOption');
     addGlobalType('set of TGridOption', 'TGridOptions');
@@ -1218,6 +1329,7 @@ begin
     addGlobalType('procedure(Sender: TObject; ACol, ARow: Longint; const KeyName, KeyValue: string)', 'TOnValidateEvent');
   end;
 
+  Register_TGridColumnTitle(Compiler);
   Register_TGridColumn(Compiler);
   Register_TGridColumns(Compiler);
   Register_TCustomGrid(Compiler);

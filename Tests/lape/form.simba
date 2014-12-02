@@ -68,8 +68,6 @@ end;
 procedure Form_Create(); Native;
 var
   bmp: TBitmap;
-  s: TStringList;
-  o: TGridOptions;
 begin
   TheForm.Init(nil);
   with (TheForm) do
@@ -77,7 +75,7 @@ begin
     setCaption('Form test');
     setPosition(poScreenCenter);
     setWidth(500);
-    setHeight(500);
+    setHeight(150);
     setOnMouseMove(onMouseMove);
   end;
 
@@ -129,22 +127,35 @@ begin
   end;
 
   Grid.Init(TheForm);
-  Grid.setParent(TheForm);
-  Grid.SetBounds(0, 0, 200, 120);
-  Grid.setOnKeyPress(onKeyPress);
-  Grid.setFixedCols(0);
+  with (Grid) do
+  begin
+    setParent(TheForm);
+    setBounds(0, 0, 200, 110);
+    setOnKeyPress(onKeyPress);
+    setFixedCols(0);
+    setBorderStyle(bsNone);
+    setOptions(getOptions() + goEditing);
 
-  o := Grid.getOptions();
-  Grid.setOptions(o + goEditing);
+    with (getColumns()) do
+    begin
+      with (Add()) do
+      begin
+        getTitle().setCaption('Wizzup');
+        getTitle().setAlignment(taCenter);
+        setWidth(120);
+      end;
 
-  Grid.getColumns().Add();
-  Grid.getColumns().getItems(0).setCaption('Wizzup');
+      with (Add()) do
+      begin
+        getTitle().setCaption('Checkboxes');
+        getTitle().setAlignment(taCenter);
+        setButtonStyle(cbsCheckboxColumn);
+        setWidth(80);
+      end;
+    end;
 
-  Grid.getColumns().Add();
-  Grid.getColumns().getItems(1).setButtonStyle(cbsCheckboxColumn);
-  Grid.getColumns().getItems(0).setWidth(120);
-
-  Grid.setCell(1, 1, '1');
+    setCell(1, 1, '0');
+  end;
 
   TheForm.ShowModal();
 end;
