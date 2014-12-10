@@ -46,8 +46,9 @@ ssTabsCheckBeforeOpen = ssSettings + ssTabs + 'CheckTabsBeforeOpen';
 ssColourPickerShowHistoryOnPick = ssSettings + ssColourPicker + 'ShowHistoryOnPick';
 ssColourPickerAddToHistoryOnPick = ssSettings + ssColourPicker + 'AddToHistoryOnPick';
 
-
+ssScriptSaveOnCompile = ssSettings + ssScripts + 'SaveOnCompile';
 ssScriptsPath = ssSettings + ssScripts + 'Path';
+ssScriptsBackupPath = ssSettings + ssScripts + 'BackupPath';
 
 ssCodeHintsShowAutomatically = ssSettings + ssCodeInsight + 'CodeHints/ShowAutomatically';
 ssCodeCompletionShowAutomatically = ssSettings + ssCodeInsight + 'CodeCompletion/ShowAutomatically';
