@@ -231,7 +231,7 @@ type
     procedure GreaterProc;
     procedure IdentProc;
     procedure IntegerProc;
-	procedure LFProc;
+    procedure LFProc;
     procedure LowerProc;
     procedure MinusProc;
     procedure NullProc;
@@ -247,8 +247,8 @@ type
     procedure SquareCloseProc;
     procedure SquareOpenProc;
     procedure StarProc;
-	procedure StringProc;
-	procedure StringDQProc;
+    procedure StringProc;
+    procedure StringDQProc;
     procedure SymbolProc;
     procedure UnknownProc;
     function GetToken: string;
@@ -1341,25 +1341,26 @@ begin
   for I := #0 to #255 do
     case I of
       #0: fProcTable[I] := NullProc;
-	  #10: fProcTable[I] := LFProc;
-	  #13: fProcTable[I] := CRProc;
+      #10: fProcTable[I] := LFProc;
+      #13: fProcTable[I] := CRProc;
       #1..#9, #11, #12, #14..#32:
         fProcTable[I] := SpaceProc;
       '#': fProcTable[I] := AsciiCharProc;
       '$': fProcTable[I] := IntegerProc;
+      #34: fProcTable[I] := StringDQProc;
       #39: fProcTable[I] := StringProc;
       '0'..'9': fProcTable[I] := NumberProc;
       'A'..'Z', 'a'..'z', '_':
         fProcTable[I] := IdentProc;
       '{': fProcTable[I] := BraceOpenProc;
       '}': fProcTable[I] := BraceCloseProc;
-      '!', '"', '%', '&', '('..'/', ':'..'@', '['..'^', '`', '~':
+      '!', '%', '&', '('..'/', ':'..'@', '['..'^', '`', '~':
         begin
           case I of
             '(': fProcTable[I] := RoundOpenProc;
             ')': fProcTable[I] := RoundCloseProc;
             '*': fProcTable[I] := StarProc;
-			'+': fProcTable[I] := PlusProc;
+            '+': fProcTable[I] := PlusProc;
             ',': fProcTable[I] := CommaProc;
             '-': fProcTable[I] := MinusProc;
             '.': fProcTable[I] := PointProc;
@@ -1372,12 +1373,11 @@ begin
             '@': fProcTable[I] := AddressOpProc;
             '[': fProcTable[I] := SquareOpenProc;
             ']': fProcTable[I] := SquareCloseProc;
-			'^': fProcTable[I] := PointerSymbolProc;
-			'"': fProcTable[I] := StringDQProc; // DR 2002-01-14
-      {$IFDEF D8_NEWER} //JThurman 2004-04-06
-      '&': fProcTable[I] := AmpersandOpProc;
-      {$ENDIF}
-          else fProcTable[I] := SymbolProc;
+            '^': fProcTable[I] := PointerSymbolProc; 
+            {$IFDEF D8_NEWER} //JThurman 2004-04-06
+            '&': fProcTable[I] := AmpersandOpProc;
+            {$ENDIF}
+            else fProcTable[I] := SymbolProc;
           end;
         end;
     else fProcTable[I] := UnknownProc;
@@ -2207,30 +2207,30 @@ procedure TmwBasePasLex.StringProc;
 begin
   fTokenID := tokStringConst;
   repeat
-	inc(Run);
-	case FOrigin[Run] of
-	  #0, #10, #13:
-		begin
-		  if Assigned(FOnMessage) then
-			FOnMessage(Self, meError, 'Unterminated string', PosXY.X, PosXY.Y);
-		  break;
-		end;
-	  #39:
-		begin
-		  while (FOrigin[Run] = #39) and (FOrigin[Run + 1] = #39) do
-		  begin
-			inc(Run, 2);
-		  end;
-		end;
-	end;
+    inc(Run);
+    case FOrigin[Run] of
+      #0, #10, #13:
+      begin
+        if Assigned(FOnMessage) then
+        FOnMessage(Self, meError, 'Unterminated string', PosXY.X, PosXY.Y);
+        break;
+      end;
+      #39:
+      begin
+        while (FOrigin[Run] = #39) and (FOrigin[Run + 1] = #39) do
+        begin
+        inc(Run, 2);
+        end;
+      end;
+    end;
   until FOrigin[Run] = #39;
   if FOrigin[Run] = #39 then
   begin
-	inc(Run);
-	if TokenLen = 3 then
-	begin
-	  fTokenID := tokAsciiChar;
-	end;
+    inc(Run);
+    if TokenLen = 3 then
+    begin
+      fTokenID := tokAsciiChar;
+    end;
   end;
 end;
 
@@ -2585,16 +2585,19 @@ end;
 
 function TmwBasePasLex.GetStringContent: string;
 var
+  sign:Char;
   TempString: string;
   sEnd: Integer;
 begin
-  if TokenID <> tokStringConst then
+  if (TokenID <> tokStringConst) and (TokenID <> tokStringDQConst) then
     Result := ''
   else
   begin
+    sign := #39;
+    if (TokenID = tokStringDQConst) then sign := #34;
     TempString := Token;
     sEnd := Length(TempString);
-    if TempString[sEnd] <> #39 then inc(sEnd);
+    if TempString[sEnd] <> sign then inc(sEnd);
     Result := Copy(TempString, 2, sEnd - 2);
     TempString := '';
   end;
@@ -2626,10 +2629,9 @@ begin
   if fTokenID = tokIdentifier then
     Result := fExID in [tokAnsiString, tokWideString]
   else
-    if fTokenID = tokString then
-      Result := True
-    else
-      if fTokenID = tokStringConst then Result := True;
+    Result := (fTokenID = tokString) or
+              (fTokenID = tokStringConst) or 
+              (fTokenID = tokStringDQConst);
 end;
 
 function TmwBasePasLex.GetIsVarantType: Boolean;
@@ -2892,6 +2894,28 @@ end;
 
 procedure TmwBasePasLex.StringDQProc;
 begin
+  fTokenID := tokStringDQConst;
+  repeat
+    inc(Run);
+    case FOrigin[Run] of
+      #0{, #10, #13}:
+        begin
+          if Assigned(FOnMessage) then
+          FOnMessage(Self, meError, 'Unterminated string', PosXY.X, PosXY.Y);
+          break;
+        end;
+      #34:
+        while (FOrigin[Run] = #34) and (FOrigin[Run + 1] = #34) do
+          inc(Run, 2);
+    end;
+  until FOrigin[Run] = #34;
+  if FOrigin[Run] = #34 then
+  begin
+    inc(Run);
+    if TokenLen = 3 then
+      fTokenID := tokAsciiChar;
+  end;
+  {
 	if not fAsmCode then
 	begin
 		SymbolProc;
@@ -2916,6 +2940,7 @@ begin
   until FOrigin[Run] = '"';
   if FOrigin[Run] = '"' then
 	inc(Run);
+  }
 end;
 
 {$IFDEF D8_NEWER} //JThurman 2004-04-06

@@ -238,6 +238,7 @@ type
     procedure SquareOpenProc;
     procedure StarProc;
     procedure StringProc;
+    procedure StringDQProc;
     procedure SymbolProc;
     procedure UnknownProc;
     function GetToken: string;
@@ -870,13 +871,14 @@ begin
         fProcTable[I]:={$IFDEF FPC}@{$ENDIF}SpaceProc;
       '#': fProcTable[I]:={$IFDEF FPC}@{$ENDIF}AsciiCharProc;
       '$': fProcTable[I]:={$IFDEF FPC}@{$ENDIF}IntegerProc;
+      #34: fProcTable[I]:={$IFDEF FPC}@{$ENDIF}StringDQProc;
       #39: fProcTable[I]:={$IFDEF FPC}@{$ENDIF}StringProc;
       '0'..'9': fProcTable[I]:={$IFDEF FPC}@{$ENDIF}NumberProc;
       'A'..'Z', 'a'..'z', '_':
         fProcTable[I]:={$IFDEF FPC}@{$ENDIF}IdentProc;
       '{': fProcTable[I]:={$IFDEF FPC}@{$ENDIF}BraceOpenProc;
       '}': fProcTable[I]:={$IFDEF FPC}@{$ENDIF}BraceCloseProc;
-      '!', '"', '%', '&', '('..'/', ':'..'@', '['..'^', '`', '~':
+      '!', '%', '&', '('..'/', ':'..'@', '['..'^', '`', '~':
         begin
           case I of
             '(': fProcTable[I]:={$IFDEF FPC}@{$ENDIF}RoundOpenProc;
@@ -1104,7 +1106,7 @@ end;
 
 function TmwPasLex.InSymbols(aChar: Char): Boolean;
 begin
-  if aChar in ['#', '$', '&', #39, '(', ')', '*', '+', ',', '–', '.', '/', ':',
+  if aChar in ['#', '$', '&', #34, #39, '(', ')', '*', '+', ',', '–', '.', '/', ':',
     ';', '<', '=', '>', '@', '[', ']', '^']then Result:=True else Result:=False;
 end;
 
@@ -1523,6 +1525,19 @@ begin
     end;
     Inc(Run);
   until FOrigin[Run]=#39;
+  if FOrigin[Run]<>#0 then Inc(Run);
+end;
+
+procedure TmwPasLex.StringDQProc;
+begin
+  fTokenID:=tkString;
+  if(FOrigin[Run+1]=#34) and (FOrigin[Run+2]=#34)then Inc(Run, 2);
+  repeat
+    case FOrigin[Run] of
+      #0{, #10, #13}: Break;
+    end;
+    Inc(Run);
+  until FOrigin[Run]=#34;
   if FOrigin[Run]<>#0 then Inc(Run);
 end;
 
