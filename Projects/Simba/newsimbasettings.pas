@@ -176,6 +176,8 @@ type
 
     TScriptsSection = class(TSection)
       Path: TPathSetting;
+      BackupPath: TPathSetting;
+      SaveOnCompile: TBooleanSetting;
     end;
 
     TFunctionListSection = class(TSection)
@@ -824,6 +826,11 @@ begin
   TPathSetting(obj).Value := DocPath + 'Scripts' + DS;
 end;
 
+procedure GetScriptBackupPath(obj: TObject);
+begin
+  TPathSetting(obj).Value := DocPath + 'Scripts' + DS + 'Backups' + DS;
+end;
+
 procedure GetFontPath(obj: TObject);
 begin
   TPathSetting(obj).Value := DataPath + 'Fonts' + DS;
@@ -833,6 +840,8 @@ procedure GetDefScriptPath(obj: TObject);
 begin
   TFileSetting(obj).Value := DataPath + 'default.simba';
 end;
+
+procedure GetScriptSaveOnCompile(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetUpdaterGetCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetUpdaterGetAutomaticallyUpdate(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
@@ -930,6 +939,10 @@ begin
   Scripts := AddChild(TScriptsSection.Create()) as TScriptsSection;
   Scripts.Path := Scripts.AddChild(TPathSetting.Create(ssScriptsPath)) as TPathSetting;
   Scripts.Path.onDefault := @GetScriptPath;
+  Scripts.BackupPath := Scripts.AddChild(TPathSetting.Create(ssScriptsBackupPath)) as TPathSetting;
+  Scripts.BackupPath.onDefault := @GetScriptBackupPath;
+  Scripts.SaveOnCompile := Scripts.AddChild(TBooleanSetting.Create(ssScriptSaveOnCompile)) as TBooleanSetting;
+  Scripts.SaveOnCompile.onDefault:= @GetScriptSaveOnCompile;
 
   CodeInsight := AddChild(TCodeInsightSection.Create()) as TCodeInsightSection;
   with CodeInsight do

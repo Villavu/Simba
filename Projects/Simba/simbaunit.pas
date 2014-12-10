@@ -1914,13 +1914,10 @@ end;
 
 procedure TSimbaForm.InitializeTMThread(out Thread: TMThread);
 var
-  ScriptPath: string;
-  Script: string;
-  loadFontsOnScriptStart: boolean;
-  Continue: boolean;
-
+  ScriptPath, Script, Path: String;
+  loadFontsOnScriptStart, Continue: Boolean;
 begin
-  if (CurrScript.ScriptFile <> '') and CurrScript.GetReadOnly() then
+  if (CurrScript.ScriptFile <> '') and (CurrScript.GetReadOnly()) then
   begin
     formWriteln('Reloading read only script');
     CurrScript.ReloadScript;
@@ -2011,6 +2008,19 @@ begin
   Thread.OpenConnectionEvent := @ThreadOpenConnectionEvent;
   Thread.WriteFileEvent := @ThreadWriteFileEvent;
   Thread.OpenFileEvent := @ThreadOpenFileEvent;
+
+  if (SimbaSettings.Scripts.SaveOnCompile.GetDefValue(True)) then
+  begin
+    if (SameText(CurrScript.ScriptName, 'Untitled')) and (not CurrScript.ScriptChanged) then
+      Exit();
+
+    if (not DirectoryExistsUTF8(SimbaSettings.Scripts.BackupPath.Value)) then
+      if (not CreateDirUTF8(SimbaSettings.Scripts.BackupPath.Value)) then
+        Exit();
+
+    // Overwrites fine if that file already exists.
+    CurrScript.SynEdit.Lines.SaveToFile(SimbaSettings.Scripts.BackupPath.GetDefValue(DocPath) + CurrScript.ScriptName + '.simba.bak');
+  end;
 end;
 
 procedure TSimbaForm.HandleConfigParameter;
