@@ -637,7 +637,7 @@ end;
 //procedure LoadFromStream(AStream: TStream);
 procedure TCustomGrid_LoadFromStream(const Params: PParamArray); lape_extdecl
 begin
-  PCustomGrid(Params^[0])^.LoadFromStream(PStream(Params^[1])^);
+  // PCustomGrid(Params^[0])^.LoadFromStream(PStream(Params^[1])^);
 end;
 
 //function  MouseCoord(X,Y: Integer): TGridCoord;
@@ -679,7 +679,7 @@ end;
 //procedure SaveToStream(AStream: TStream);
 procedure TCustomGrid_SaveToStream(const Params: PParamArray); lape_extdecl
 begin
-  PCustomGrid(Params^[0])^.SaveToStream(PStream(Params^[1])^);
+  // PCustomGrid(Params^[0])^.SaveToStream(PStream(Params^[1])^);
 end;
 
 //procedure SetFocus; override;
@@ -1146,13 +1146,13 @@ end;
 //procedure InsertRowWithValues(Index: Integer; Values: array of String);
 procedure TCustomStringGrid_InsertRowWithValues(const Params: PParamArray); lape_extdecl
 begin
-  PCustomStringGrid(Params^[0])^.InsertRowWithValues(PInteger(Params^[1])^, PStringArray(Params^[2])^);
+  //PCustomStringGrid(Params^[0])^.InsertRowWithValues(PInteger(Params^[1])^, PStringArray(Params^[2])^);
 end;
 
 //procedure LoadFromCSVStream(AStream: TStream; ADelimiter: Char=','; WithHeader: boolean=true);
 procedure TCustomStringGrid_LoadFromCSVStream(const Params: PParamArray); lape_extdecl
 begin
-  PCustomStringGrid(Params^[0])^.LoadFromCSVStream(PStream(Params^[1])^, PChar(Params^[2])^, Pboolean(Params^[3])^);
+ //  PCustomStringGrid(Params^[0])^.LoadFromCSVStream(PStream(Params^[1])^, PChar(Params^[2])^, Pboolean(Params^[3])^);
 end;
 
 //procedure LoadFromCSVFile(AFilename: string; ADelimiter: Char=','; WithHeader: boolean=true);
