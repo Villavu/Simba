@@ -442,6 +442,7 @@ type
     ScriptStartData : TScriptStartData;
     ScriptOpenData : TScriptOpenData;
     FillThread: TProcThread;
+    Disguised: Boolean;
 
     function SilentUpdateBeat: Boolean;
 
@@ -3034,6 +3035,8 @@ begin
 
   TT_Update.Visible:= false;
 
+  Disguised := False;
+
   //Load the extensions
   {$IFDEF USE_EXTENSIONS}LoadExtensions;{$ENDIF}
 
@@ -3923,7 +3926,6 @@ begin
   with FormCallBackData do
     case Cmd of
       m_Status: StatusBar.Panels[Panel_General].Text:= PChar(data);
-      m_Disguise: begin Self.Caption:= Pchar(Data); Application.Title:= PChar(Data); end;
       m_DisplayDebugImgWindow: DebugImgForm.ShowDebugImgForm(ppoint(data)^);
       m_DrawBitmapDebugImg: DebugImgForm.DrawBitmap(TMufasaBitmap(data));
       m_GetDebugBitmap : DebugImgForm.GetDebugImage(TMufasaBitmap(data));
@@ -3934,6 +3936,14 @@ begin
       m_MessageBox : with PMessageBoxData(data)^ do res := Application.MessageBox(AText,ACaption,AFlags);
       m_MessageDlg : with PMessageDlgData(data)^ do res := MessageDlg(ACaption,AMsg,ADlgType,AButtons,0);
       m_SaveSettings: Self.SaveFormSettings();
+      m_Disguise:
+        begin
+          Self.Caption:= Pchar(Data);
+          Application.Title:= PChar(Data);
+          Self.MTrayIcon.Hint := String(Data);
+          Disguised := True;
+        end;
+
       m_BalloonHint:
         if (SimbaSettings.ShowBalloonHints.Show.GetDefValue(True)) then
         begin
@@ -3947,7 +3957,7 @@ begin
               ShowBalloonHint();
             end;
         end else
-          WriteLn('Cannot show balloon hint due to setting value = false');
+          mDebugLn('Cannot show balloon hint due to setting value = false');
       m_PauseScript: begin
           OldTab := PageControl1.TabIndex;
           for I := 0 to Tabs.Count - 1 do
@@ -4043,20 +4053,28 @@ end;
 
 procedure TSimbaForm.UpdateTitle;
 begin
-  Application.Title:= PChar('Simba'); // XXX - Sure you want to do this for Disguise?
-  if CurrScript.ScriptChanged then
+  if (not Disguised) then
+    Application.Title:= PChar('Simba');
+
+  if (CurrScript.ScriptChanged) then
   begin;
-    CurrTab.TabSheet.Caption:= CurrScript.ScriptName + '*';
-    Self.Caption := Format(WindowTitle,[CurrScript.ScriptName + '*']);
-    ActionSaveScript.Enabled:= True;
+    CurrTab.TabSheet.Caption := CurrScript.ScriptName + '*';
+    if (not Disguised) then
+      Self.Caption := Format(WindowTitle, [CurrScript.ScriptName + '*']);
+    ActionSaveScript.Enabled := True;
   end else
   begin;
     ActionSaveScript.Enabled:= False;
-    CurrTab.TabSheet.Caption:= CurrScript.ScriptName;
-    Self.Caption := Format(WindowTitle,[CurrScript.ScriptName]);
+    CurrTab.TabSheet.Caption := CurrScript.ScriptName;
+    if (not Disguised) then
+      Self.Caption := Format(WindowTitle, [CurrScript.ScriptName]);
   end;
-  StatusBar.Panels[Panel_ScriptName].Text:= CurrScript.ScriptName;
-  StatusBar.Panels[Panel_ScriptPath].text:= CurrScript.ScriptFile;
+
+  StatusBar.Panels[Panel_ScriptName].Text := CurrScript.ScriptName;
+  StatusBar.Panels[Panel_ScriptPath].Text := CurrScript.ScriptFile;
+
+  if (not Disguised) then
+    Self.MTrayIcon.Hint := CurrScript.ScriptName;
 end;
 
 function TSimbaForm.OpenScript: boolean;
