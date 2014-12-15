@@ -702,15 +702,23 @@ procedure TFillThread.Update;
 
   var
     I: integer;
+    Consts, Vars: Boolean;
   begin;
     if (not Assigned(Procs)) then
       Exit;
+
+    with (SimbaSettings.CodeInsight.FunctionList) do
+    begin
+      Consts := ShowConsts.GetDefValue(True);
+      Vars := ShowVars.GetDefValue(True);
+    end;
 
     for I := 0 to Procs.Count - 1 do
       if (Assigned(Procs[I])) then
         case Procs[I].ClassName of
           'TciProcedureDeclaration': ProcessProcedure(Node, Procs[I] as TciProcedureDeclaration);
-          'TciVarDeclaration', 'TciConstantDeclaration': ProcessDecl(Node, Procs[I] as TDeclaration);
+          'TciVarDeclaration': if (Vars) then ProcessDecl(Node, Procs[I] as TDeclaration);
+          'TciConstantDeclaration': if (Consts) then ProcessDecl(Node, Procs[I] as TDeclaration);
           'TciTypeDeclaration': ProcessType(Node, Procs[I] as TciTypeDeclaration);
           'TciJunk', 'TciInclude', 'TciCompoundStatement': ;
           else

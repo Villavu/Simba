@@ -147,6 +147,8 @@ type
     LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     Memo1: TMemo;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
     MenuItemFont: TMenuItem;
     MenuItemDivider51: TMenuItem;
     MenuItemShowHidden: TMenuItem;
@@ -184,6 +186,7 @@ type
     MouseTimer: TTimer;
     NewsTimer: TTimer;
     FunctionListTimer: TTimer;
+    FunctionListPopup: TPopupMenu;
     SCARHighlighter: TSynPasSyn;
     NotesSplitter: TSplitter;
     ToolButton5: TToolButton;
@@ -336,7 +339,11 @@ type
     procedure editSearchListKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure editSearchListKeyPress(Sender: TObject; var Key: char);
+    procedure FillFunctionListPopup(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
+    procedure FunctionListLabelMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure FunctionListPopupEvent(Sender: TObject);
     function GetInterepterMethods(const SimbaMethods: TExpMethodArr): TExpMethodArr;
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
@@ -2604,6 +2611,35 @@ begin
   for i := 0 to high(filenames) do
    LoadScriptFile(FileNames[i],true);
   {$EndIf};
+end;
+
+procedure TSimbaForm.FillFunctionListPopup(Sender: TObject);
+begin
+  FunctionListPopup.Items[0].Checked := SimbaSettings.CodeInsight.FunctionList.ShowVars.GetDefValue(True);
+  FunctionListPopup.Items[1].Checked := SimbaSettings.CodeInsight.FunctionList.ShowConsts.GetDefValue(True);
+end;
+
+procedure TSimbaForm.FunctionListLabelMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if (Button = mbRight) then
+    FunctionListPopup.PopUp();
+end;
+
+procedure TSimbaForm.FunctionListPopupEvent(Sender: TObject);
+begin
+  if (Sender = FunctionListPopup.Items[0]) then
+  begin
+    FunctionListPopup.Items[0].Checked := not FunctionListPopup.Items[0].Checked;
+    SimbaSettings.CodeInsight.FunctionList.ShowVars.Value := FunctionListPopup.Items[0].Checked;
+  end else if (Sender = FunctionListPopup.Items[1]) then
+  begin
+    FunctionListPopup.Items[1].Checked := not FunctionListPopup.Items[1].Checked;
+    SimbaSettings.CodeInsight.FunctionList.ShowConsts.Value := FunctionListPopup.Items[1].Checked;
+  end;
+
+  if (CurrScript <> nil) then
+    frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text, True);
 end;
 
 procedure TSimbaForm.FunctionListChange(Sender: TObject; Node: TTreeNode);

@@ -77,6 +77,8 @@ ssFunctionListShown = ssLastConfig + ssMainForm + 'FunctionListShown';
 
 ssCodeInsightShowHidden = ssSettings + ssCodeInsight + 'ShowHidden';
 ssFunctionListShowOnStart = ssSettings + ssCodeInsight + ssFunctionList + 'ShowOnStart';
+ssFunctionListShowVars = ssSettings + ssCodeInsight + ssFunctionList + 'ShowVars';
+ssFunctionListShowConsts = ssSettings + ssCodeInsight + ssFunctionList + 'ShowConsts';
 
 ssMaxRecentFiles = ssSettings + 'General/MaxRecentFiles';
 ssRecentFiles = ssLastConfig + ssMainForm + 'RecentFiles';
