@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 411
+  Left = 1210
   Height = 623
-  Top = 77
+  Top = 343
   Width = 660
   ActiveControl = ScriptPanel
   AllowDropFiles = True
@@ -16,7 +16,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '1.0.10.0'
+  LCLVersion = '1.2.4.0'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -411,7 +411,6 @@ object SimbaForm: TSimbaForm
           0000000000000000000000000000000000000000000000000000000000000000
           0000000000000000000000000000000000000000000000000000
         }
-        NumGlyphs = 0
         OnClick = SpeedButtonSearchClick
       end
       object LabeledEditSearch: TLabeledEdit
@@ -424,10 +423,10 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Side = asrBottom
-        EditLabel.Left = 71
-        EditLabel.Height = 16
-        EditLabel.Top = 9
-        EditLabel.Width = 30
+        EditLabel.Left = 72
+        EditLabel.Height = 15
+        EditLabel.Top = 10
+        EditLabel.Width = 29
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -463,8 +462,10 @@ object SimbaForm: TSimbaForm
       ClientWidth = 150
       OnEndDock = nil
       TabOrder = 3
+      DesignLeft = 434
+      DesignTop = 200
       inherited FunctionList: TTreeView
-        Height = 316
+        Height = 317
         Width = 150
         HideSelection = True
         Images = nil
@@ -477,6 +478,7 @@ object SimbaForm: TSimbaForm
       end
       inherited FunctionListLabel: TLabel
         Width = 146
+        OnMouseDown = FunctionListLabelMouseDown
       end
       inherited Panel1: TPanel
         Top = 336
@@ -3928,5 +3930,21 @@ object SimbaForm: TSimbaForm
     StringKeywordMode = spsmNone
     left = 528
     top = 200
+  end
+  object FunctionListPopup: TPopupMenu
+    TrackButton = tbLeftButton
+    OnPopup = FillFunctionListPopup
+    left = 408
+    top = 104
+    object MenuItem1: TMenuItem
+      Caption = 'Show Variables'
+      Checked = True
+      OnClick = FunctionListPopupEvent
+    end
+    object MenuItem2: TMenuItem
+      Caption = 'Show Constants'
+      Checked = True
+      OnClick = FunctionListPopupEvent
+    end
   end
 end

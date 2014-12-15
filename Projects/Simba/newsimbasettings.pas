@@ -180,6 +180,8 @@ type
 
     TFunctionListSection = class(TSection)
       ShowOnStart: TBooleanSetting;
+      ShowVars: TBooleanSetting;
+      ShowConsts: TBooleanSetting;
     end;
 
     TCodeInsightSection = class(TSection)
@@ -861,6 +863,8 @@ procedure GetColourPickerAddToHistoryOnPick(obj: TObject); begin TBooleanSetting
 
 procedure GetCodeInsightShowHidden(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 procedure GetFunctionListShowOnStart(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFunctionListShowVars(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFunctionListShowConsts(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
@@ -940,6 +944,10 @@ begin
     FunctionList := CodeInsight.AddChild(TFunctionListSection.Create()) as TFunctionListSection;
     FunctionList.ShowOnStart := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowOnStart)) as TBooleanSetting;
     FunctionList.ShowOnStart.onDefault := @GetFunctionListShowOnStart;
+    FunctionList.ShowVars := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowVars)) as TBooleanSetting;
+    FunctionList.ShowVars.onDefault := @GetFunctionListShowVars;
+    FunctionList.ShowConsts := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowConsts)) as TBooleanSetting;
+    FunctionList.ShowConsts.onDefault := @GetFunctionListShowConsts;
   end;
 
   Tray := AddChild(TTraySection.Create()) as TTraySection;
