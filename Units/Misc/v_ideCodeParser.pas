@@ -118,23 +118,33 @@ type
     fProcType: string;
     fParams: string;
     fName: TciProcedureName;
-    fCleanDecl : string;
+    fCleanDecl: string;
+    fTypeName: string;
+    fIsOverload: string;
+    fIsOverride: string;
 
     function GetCleanDeclaration: string;
     function GetName: TciProcedureName;
     function GetProcType: string;
     function GetParams: string;
+    function GetTypeName: string;
+    function GetIsOverload: Boolean;
+    function GetIsOverride: Boolean;
 
     function GetShortText: string; override;
   public
     function GetParamDeclarations: TDeclarationArray;
 
-    property CleanDeclaration : string read GetCleanDeclaration;
-    property Name : TciProcedureName read GetName;
+    property isOverride: Boolean read GetIsOverride;
+    property isOverload: Boolean read GetIsOverload;
+    property TypeName: string read GetTypeName;
+    property CleanDeclaration: string read GetCleanDeclaration;
+    property Name: TciProcedureName read GetName;
     property ProcType: string read GetProcType;
     property Params: string read GetParams;
   end;
 
+  TciProcedureDirective = class(TDeclaration);
   TciUsedUnit = class(TDeclaration);                                        //Included Units
   TciInclude = class(TDeclaration);                                         //Includes
   TciJunk = class(TDeclaration);                                            //Junk
@@ -280,6 +290,8 @@ type
 
     procedure EnumeratedType; override;                                         //Enum
     procedure QualifiedIdentifier; override;                                    //Enum
+
+    procedure DirectiveBinding; override;                                       //Overload, Override
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -924,6 +936,65 @@ begin
       SetLength(Result, Length(Result) + 1);
       Result[High(Result)] := fItems[i];
     end;
+end;
+
+function TciProcedureDeclaration.GetTypeName: String;
+begin
+  Result := '';
+  if (fTypeName <> '') then
+    Result := fTypeName
+  else begin
+    if (Items = nil) or (Items.Count = 0) then
+      Exit;
+
+    if (Items[0] is TciProcedureClassName) then
+      fTypeName := TciProcedureClassName(Items[0]).RawText;
+    Result := fTypeName;
+  end;
+end;
+
+function TciProcedureDeclaration.GetIsOverload: Boolean;
+var
+  Decl: TDeclaration;
+begin
+  if (fIsOverload = '') then
+  begin
+    Result := False;
+    fIsOverLoad := 'false';
+
+    Decl := Items.GetFirstItemOfClass(TciProcedureDirective);
+    if (Decl = nil) then
+      Exit;
+
+    if (SameText(Decl.RawText, 'overload')) then
+    begin
+      fIsOverload := 'true';
+      Result := True;
+    end;
+  end else
+    Result := StrToBoolDef(fIsOverload, False);
+end;
+
+function TciProcedureDeclaration.GetIsOverride: Boolean;
+var
+  Decl: TDeclaration;
+begin
+  if (fIsOverride = '') then
+  begin
+    Result := False;
+    fIsOverride := 'false';
+
+    Decl := Items.GetFirstItemOfClass(TciProcedureDirective);
+    if (Decl = nil) then
+      Exit;
+
+    if (SameText(Decl.RawText, 'override')) then
+    begin
+      fIsOverride := 'true';
+      Result := True;
+    end;
+  end else
+    Result := StrToBoolDef(fIsOverride, False);
 end;
 
 function TCodeParser.InDeclaration(AClass: TDeclarationClass): Boolean;
@@ -1783,6 +1854,19 @@ begin
   end;
 
   PushStack(TciQualifiedIdentifier);
+  inherited;
+  PopStack;
+end;
+
+procedure TCodeParser.DirectiveBinding;
+begin
+  if (not InDeclaration(TciProcedureDeclaration)) then
+  begin
+    inherited;
+    Exit;
+  end;
+
+  PushStack(TciProcedureDirective);
   inherited;
   PopStack;
 end;

@@ -1,6 +1,7 @@
 unit v_ideCodeInsight;
 
 {$include ValistusDefines.inc}
+//{$DEFINE ci_STANDALONE}
 
 interface
 
@@ -98,7 +99,8 @@ var
 implementation
 
 uses
-  v_Constants, v_MiscFunctions, newsimbasettings, mufasabase;
+  v_Constants, v_MiscFunctions, mufasabase
+  {$IFNDEF ci_STANDALONE} , newsimbasettings {$ENDIF};
 
 procedure ClearCoreBuffer;
 var
@@ -1055,8 +1057,10 @@ begin
   Reset;
 
   Lexer.Defines.AddStrings(CoreDefines);
+  {$IFNDEF ci_STANDALONE}
   if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
     Lexer.Defines.Add('CODEINSIGHT');
+  {$ENDIF}
 
   fOwnStream := (fFileName <> '');
   if fOwnStream then
@@ -1103,9 +1107,10 @@ begin
     Lexer.ClearDefines;
     Lexer.Defines.AddStrings(CoreDefines);
     Lexer.Defines.AddStrings(BaseDefines);
-
+    {$IFNDEF ci_STANDALONE}
     if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
       Lexer.Defines.Add('CODEINSIGHT');
+    {$ENDIF}
   end;
   SetLength(fIncludes, 0);
 
