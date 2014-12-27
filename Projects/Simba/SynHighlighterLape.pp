@@ -28,7 +28,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: synhighlighterpas.pp 41162 2013-05-13 09:07:09Z martin $
+$Id: synhighlighterpas.pp 46390 2014-10-01 00:32:59Z martin $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -39,7 +39,7 @@ Known Issues:
 @abstract(Provides a Pascal/Delphi syntax highlighter for SynEdit)
 @author(Martin Waldenburg)
 @created(1998, converted to SynEdit 2000-04-07)
-@lastmod(2014-10-17)
+@lastmod(2014-12-27)
 The SynHighlighterPas unit provides SynEdit with a Object Pascal (modified for Lape) syntax highlighter.
 An extra boolean property "D4Syntax" is included to enable the recognition of the
 advanced features found in Object Pascal in Delphi 4.
@@ -53,7 +53,7 @@ interface
 uses
   SysUtils, LCLProc,
   Classes, Registry, Graphics, SynEditHighlighterFoldBase, SynEditMiscProcs,
-  SynEditTypes, SynEditHighlighter, SynEditTextBase, SynEditStrConst;
+  SynEditTypes, SynEditHighlighter, SynEditTextBase, SynEditStrConst, SynEditMiscClasses;
 
 type
   TSynPasStringMode = (spsmDefault, spsmStringOnly, spsmNone);
@@ -92,8 +92,8 @@ type
     rsAfterClassMembers,  // Encountered a procedure, function, property, constructor or destructor in a class
     rsAfterClassField,    // after ";" of a field (static needs highlight)
     rsVarTypeInSpecification, // between ":"/"=" and ";" in a var or type section (or class members)
-                             // var a: Integer; type b = Int64;
-    rsString                 //' ... '
+                              // var a: Integer; type b = Int64;
+    rsString
   );
   TRangeStates = set of TRangeState;
 
@@ -139,7 +139,8 @@ const
     [low(TPascalCodeFoldBlockType)..high(TPascalCodeFoldBlockType)];
   PascalWordTripletRanges: TPascalCodeFoldBlockTypes =
     [cfbtBeginEnd, cfbtTopBeginEnd, cfbtProcedure, cfbtClass, cfbtProgram, cfbtRecord,
-     cfbtTry, cfbtExcept, cfbtRepeat, cfbtAsm, cfbtCase
+     cfbtTry, cfbtExcept, cfbtRepeat, cfbtAsm, cfbtCase, cfbtCaseElse,
+     cfbtIfDef, cfbtRegion
     ];
 
   // restrict cdecl etc to places where they can be.
@@ -279,14 +280,6 @@ type
     //   DecLastLineCodeFoldLevelFix <> DecLastLinePasFoldFix
   end;
 
-  { TLazSynPasFoldNodeInfoList }
-
-  TLazSynPasFoldNodeInfoList = class(TLazSynFoldNodeInfoList)
-  protected
-    function Match(const AnInfo: TSynFoldNodeInfo;
-      AnActionFilter: TSynFoldActions; AGroupFilter: Integer = 0): Boolean; override;
-  end;
-
   TProcTableProc = procedure of object;
 
   PIdentFuncTableFunc = ^TIdentFuncTableFunc;
@@ -302,6 +295,7 @@ type
     FStartCodeFoldBlockLevel: integer;
     FPasStartLevel: Smallint;
     fRange: TRangeStates;
+    FOldRange: TRangeStates;
     FStringKeywordMode: TSynPasStringMode;
     FSynPasRangeInfo: TSynPasRangeInfo;
     FAtLineStart: Boolean; // Line had only spaces or comments sofar
@@ -323,17 +317,17 @@ type
     fSymbolAttri: TSynHighlighterAttributes;
     fAsmAttri: TSynHighlighterAttributes;
     fCommentAttri: TSynHighlighterAttributes;
-    FIDEDirectiveAttri: TSynHighlighterAttributes;
-    FCurIDEDirectiveAttri: TSynHighlighterAttributes;
+    FIDEDirectiveAttri: TSynHighlighterAttributesModifier;
+    FCurIDEDirectiveAttri: TSynSelectedColorMergeResult;
     fIdentifierAttri: TSynHighlighterAttributes;
     fSpaceAttri: TSynHighlighterAttributes;
-    FCaseLabelAttri: TSynHighlighterAttributes;
-    FCurCaseLabelAttri: TSynHighlighterAttributes;
+    FCaseLabelAttri: TSynHighlighterAttributesModifier;
+    FCurCaseLabelAttri: TSynSelectedColorMergeResult;
     fDirectiveAttri: TSynHighlighterAttributes;
     FCompilerMode: TPascalCompilerMode;
     fD4syntax: boolean;
     FCatchNodeInfo: Boolean;
-    FCatchNodeInfoList: TLazSynPasFoldNodeInfoList;
+    FCatchNodeInfoList: TLazSynFoldNodeInfoList;
     // Divider
     FDividerDrawConfig: Array [TSynPasDividerDrawLocation] of TSynDividerDrawConfig;
 
@@ -503,7 +497,8 @@ type
     procedure InitFoldNodeInfo(AList: TLazSynFoldNodeInfoList; Line: TLineIdx); override;
 
   protected
-    function LastLinePasFoldLevelFix(Index: Integer; AType: Integer = 1): integer; // TODO deprecated; // foldable nodes
+    function LastLinePasFoldLevelFix(Index: Integer; AType: Integer = 1;
+                                     AIncludeDisabled: Boolean = False): integer; // TODO deprecated; // foldable nodes
 
     // Divider
     function GetDrawDivider(Index: integer): TSynDividerDrawConfigSetting; override;
@@ -535,14 +530,14 @@ type
     procedure Next; override;
 
     procedure ResetRange; override;
-    procedure SetLine({$IFDEF FPC}const {$ENDIF}NewValue: string;
-      LineNumber: Integer); override;
+    procedure SetLine(const NewValue: string; LineNumber: Integer); override;
     procedure SetRange(Value: Pointer); override;
     procedure StartAtLineIndex(LineNumber:Integer); override; // 0 based
 
     function UseUserSettings(settingIndex: integer): boolean; override;
     procedure EnumUserSettings(settings: TStrings); override;
 
+    function IsLineStartingInDirective(ALineIndex: TLineIdx): Boolean;
     // Info about Folds
     //function FoldBlockOpeningCount(ALineIndex: TLineIdx; const AFilter: TSynFoldBlockFilter): integer; override; overload;
     //function FoldBlockClosingCount(ALineIndex: TLineIdx; const AFilter: TSynFoldBlockFilter): integer; override; overload;
@@ -561,7 +556,7 @@ type
     property AsmAttri: TSynHighlighterAttributes read fAsmAttri write fAsmAttri;
     property CommentAttri: TSynHighlighterAttributes read fCommentAttri
       write fCommentAttri;
-    property IDEDirectiveAttri: TSynHighlighterAttributes read FIDEDirectiveAttri
+    property IDEDirectiveAttri: TSynHighlighterAttributesModifier read FIDEDirectiveAttri
       write FIDEDirectiveAttri;
     property IdentifierAttri: TSynHighlighterAttributes read fIdentifierAttri
       write fIdentifierAttri;
@@ -574,7 +569,7 @@ type
       write fStringAttri;
     property SymbolAttri: TSynHighlighterAttributes read fSymbolAttri
       write fSymbolAttri;
-    property CaseLabelAttri: TSynHighlighterAttributes read FCaseLabelAttri
+    property CaseLabelAttri: TSynHighlighterAttributesModifier read FCaseLabelAttri
       write FCaseLabelAttri;
     property DirectiveAttri: TSynHighlighterAttributes read fDirectiveAttri
       write fDirectiveAttri;
@@ -669,23 +664,11 @@ begin
       mHashTable[Char(I)] := 0;
     end;
     IsIntegerChar[I]:=(I in ['0'..'9', 'A'..'F', 'a'..'f']);
-    IsNumberChar[I]:=(I in ['0'..'9', '.', 'e', 'E']);
+    IsNumberChar[I]:=(I in ['0'..'9']);
     IsSpaceChar[I]:=(I in [#1..#9, #11, #12, #14..#32]);
     IsUnderScoreOrNumberChar[I]:=(I in ['_','0'..'9']);
     IsLetterChar[I]:=(I in ['a'..'z','A'..'Z']);
   end;
-end;
-
-{ TLazSynPasFoldNodeInfoList }
-
-function TLazSynPasFoldNodeInfoList.Match(const AnInfo: TSynFoldNodeInfo;
-  AnActionFilter: TSynFoldActions; AGroupFilter: Integer): Boolean;
-begin
-  Result := (AnInfo.FoldAction * AnActionFilter = AnActionFilter) and
-            ( (AGroupFilter = 0) or
-              ( (AGroupFilter in [1..3]) and (AnInfo.FoldGroup = AGroupFilter) ) or
-              ( (AGroupFilter = 4) and (AnInfo.FoldGroup in [1,4]) )
-            );
 end;
 
 procedure TSynPasSyn.InitIdent;
@@ -695,14 +678,9 @@ var
 begin
   pF := PIdentFuncTableFunc(@fIdentFuncTable);
   for I := Low(fIdentFuncTable) to High(fIdentFuncTable) do begin
-    {$IFDEF FPC}
     pF^ := @AltFunc;
-    {$ELSE}
-    pF^ := AltFunc;
-    {$ENDIF}
     Inc(pF);
   end;
-  {$IFDEF FPC}
   fIdentFuncTable[15] := @Func15;
   fIdentFuncTable[19] := @Func19;
   fIdentFuncTable[20] := @Func20;
@@ -792,81 +770,6 @@ begin
   fIdentFuncTable[170] := @Func170;
   fIdentFuncTable[181] := @Func181;
   fIdentFuncTable[191] := @Func191;
-  {$ELSE}
-  fIdentFuncTable[15] := Func15;
-  fIdentFuncTable[19] := Func19;
-  fIdentFuncTable[20] := Func20;
-  fIdentFuncTable[21] := Func21;
-  fIdentFuncTable[23] := Func23;
-  fIdentFuncTable[25] := Func25;
-  fIdentFuncTable[27] := Func27;
-  fIdentFuncTable[28] := Func28;
-  fIdentFuncTable[32] := Func32;
-  fIdentFuncTable[33] := Func33;
-  fIdentFuncTable[35] := Func35;
-  fIdentFuncTable[37] := Func37;
-  fIdentFuncTable[38] := Func38;
-  fIdentFuncTable[39] := Func39;
-  fIdentFuncTable[40] := Func40;
-  fIdentFuncTable[41] := Func41;
-  fIdentFuncTable[44] := Func44;
-  fIdentFuncTable[45] := Func45;
-  fIdentFuncTable[47] := Func47;
-  fIdentFuncTable[49] := Func49;
-  fIdentFuncTable[52] := Func52;
-  fIdentFuncTable[54] := Func54;
-  fIdentFuncTable[55] := Func55;
-  fIdentFuncTable[56] := Func56;
-  fIdentFuncTable[57] := Func57;
-  fIdentFuncTable[59] := Func59;
-  fIdentFuncTable[60] := Func60;
-  fIdentFuncTable[61] := Func61;
-  fIdentFuncTable[63] := Func63;
-  fIdentFuncTable[64] := Func64;
-  fIdentFuncTable[65] := Func65;
-  fIdentFuncTable[66] := Func66;
-  fIdentFuncTable[69] := Func69;
-  fIdentFuncTable[71] := Func71;
-  fIdentFuncTable[72] := Func72;
-  fIdentFuncTable[73] := Func73;
-  fIdentFuncTable[75] := Func75;
-  fIdentFuncTable[76] := Func76;
-  fIdentFuncTable[79] := Func79;
-  fIdentFuncTable[81] := Func81;
-  fIdentFuncTable[84] := Func84;
-  fIdentFuncTable[85] := Func85;
-  fIdentFuncTable[86] := Func86;
-  fIdentFuncTable[87] := Func87;
-  fIdentFuncTable[88] := Func88;
-  fIdentFuncTable[91] := Func91;
-  fIdentFuncTable[92] := Func92;
-  fIdentFuncTable[94] := Func94;
-  fIdentFuncTable[95] := Func95;
-  fIdentFuncTable[96] := Func96;
-  fIdentFuncTable[97] := Func97;
-  fIdentFuncTable[98] := Func98;
-  fIdentFuncTable[99] := Func99;
-  fIdentFuncTable[100] := Func100;
-  fIdentFuncTable[101] := Func101;
-  fIdentFuncTable[102] := Func102;
-  fIdentFuncTable[103] := Func103;
-  fIdentFuncTable[105] := Func105;
-  fIdentFuncTable[106] := Func106;
-  fIdentFuncTable[117] := Func117;
-  fIdentFuncTable[124] := Func124;
-  fIdentFuncTable[126] := Func126;
-  fIdentFuncTable[129] := Func129;
-  fIdentFuncTable[132] := Func132;
-  fIdentFuncTable[133] := Func133;
-  fIdentFuncTable[136] := Func136;
-  fIdentFuncTable[141] := Func141;
-  fIdentFuncTable[143] := Func143;
-  fIdentFuncTable[158] := Func158;
-  fIdentFuncTable[166] := Func166;
-  fIdentFuncTable[168] := Func168;
-  fIdentFuncTable[181] := Func181;
-  fIdentFuncTable[191] := Func191;
-  {$ENDIF}
 end;
 
 function TSynPasSyn.KeyHash: Integer;
@@ -1180,7 +1083,15 @@ end;
 
 function TSynPasSyn.Func40: TtkTokenKind;
 begin
-  if KeyComp('Packed') then Result := tkKey else Result := tkIdentifier;
+  if KeyComp('Packed') then begin
+    Result := tkKey;
+    if (fRange * [rsProperty, rsAfterEqualOrColon] =  [rsAfterEqualOrColon]) and
+       (PasCodeFoldRange.BracketNestLevel = 0)
+    then
+      FOldRange := FOldRange - [rsAfterEqualOrColon]; // Keep flag in FRange
+  end
+  else
+    Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func41: TtkTokenKind;
@@ -1989,7 +1900,17 @@ end;
 
 function TSynPasSyn.Func122: TtkTokenKind;
 begin
-  if KeyComp('Otherwise') then Result := tkKey else Result := tkIdentifier;
+  if KeyComp('Otherwise') then begin
+    Result := tkKey;
+    while (TopPascalCodeFoldBlockType = cfbtIfThen) do
+      EndPascalCodeFoldBlock;
+    if TopPascalCodeFoldBlockType = cfbtCase then begin
+      StartPascalCodeFoldBlock(cfbtCaseElse);
+      FTokenIsCaseLabel := True;
+    end;
+  end
+  else
+    Result := tkIdentifier;
 end;
 
 function TSynPasSyn.Func124: TtkTokenKind;
@@ -2301,7 +2222,7 @@ begin
   fToIdent := p;
   HashKey := KeyHash;
   if HashKey < 192 then
-    Result := fIdentFuncTable[HashKey]{$IFDEF FPC}(){$ENDIF}
+    Result := fIdentFuncTable[HashKey]()
   else
     Result := tkIdentifier;
 end;
@@ -2311,7 +2232,6 @@ var
   I: Char;
 begin
   for I := #0 to #255 do
-    {$IFDEF FPC}
     case I of
       #0: fProcTable[I] := @NullProc;
       #10: fProcTable[I] := @LFProc;
@@ -2349,43 +2269,6 @@ begin
     else
       fProcTable[I] := @UnknownProc;
     end;
-    {$ELSE}
-    case I of
-      #0: fProcTable[I] := NullProc;
-      #10: fProcTable[I] := LFProc;
-      #13: fProcTable[I] := CRProc;
-      #1..#9, #11, #12, #14..#32:
-        fProcTable[I] := SpaceProc;
-      '#': fProcTable[I] := AsciiCharProc;
-      '$': fProcTable[I] := HexProc;
-      #39,#34: fProcTable[I] := StringProc;
-      '0'..'9': fProcTable[I] := NumberProc;
-      'A'..'Z', 'a'..'z', '_':
-        fProcTable[I] := IdentProc;
-      '{': fProcTable[I] := BraceOpenProc;
-      '}', '!', '"', '%', '&', '('..'/', ':'..'@', '['..'^', '`', '~':
-        begin
-          case I of
-            '(': fProcTable[I] := RoundOpenProc;
-            ')': fProcTable[I] := RoundCloseProc;
-            '[': fProcTable[I] := SquareOpenProc;
-            ']': fProcTable[I] := SquareCloseProc;
-            '=': fProcTable[I] := EqualSignProc;
-            '.': fProcTable[I] := PointProc;
-            ';': fProcTable[I] := SemicolonProc;                                //mh 2000-10-08
-            '/': fProcTable[I] := SlashProc;
-            ':': fProcTable[I] := ColonProc;
-            '>': fProcTable[I] := GreaterProc;
-            '<': fProcTable[I] := LowerProc;
-            '@': fProcTable[I] := AddressOpProc;
-          else
-            fProcTable[I] := SymbolProc;
-          end;
-        end;
-    else
-      fProcTable[I] := UnknownProc;
-    end;
-    {$ENDIF}
 end;
 
 constructor TSynPasSyn.Create(AOwner: TComponent);
@@ -2395,37 +2278,38 @@ begin
   FExtendedKeywordsMode := False;
   CreateDividerDrawConfig;
   fD4syntax := true;
-  fAsmAttri := TSynHighlighterAttributes.Create(SYNS_AttrAssembler, SYNS_XML_AttrAssembler);
+  fAsmAttri := TSynHighlighterAttributes.Create(@SYNS_AttrAssembler, SYNS_XML_AttrAssembler);
   AddAttribute(fAsmAttri);
-  fCommentAttri := TSynHighlighterAttributes.Create(SYNS_AttrComment, SYNS_XML_AttrComment);
+  fCommentAttri := TSynHighlighterAttributes.Create(@SYNS_AttrComment, SYNS_XML_AttrComment);
   fCommentAttri.Style:= [fsItalic];
   AddAttribute(fCommentAttri);
-  FIDEDirectiveAttri := TSynHighlighterAttributes.Create(SYNS_AttrIDEDirective, SYNS_XML_AttrIDEDirective);
-  FIDEDirectiveAttri.Features := FIDEDirectiveAttri.Features + [hafStyleMask];
+  FIDEDirectiveAttri := TSynHighlighterAttributesModifier.Create(@SYNS_AttrIDEDirective, SYNS_XML_AttrIDEDirective);
   AddAttribute(FIDEDirectiveAttri);
-  FCurIDEDirectiveAttri := TSynHighlighterAttributes.Create(SYNS_AttrIDEDirective, SYNS_XML_AttrIDEDirective);
-  fIdentifierAttri := TSynHighlighterAttributes.Create(SYNS_AttrIdentifier, SYNS_XML_AttrIdentifier);
+  // FCurIDEDirectiveAttri, FCurCaseLabelAttri
+  // They are not available through the "Attribute" property (not added via AddAttribute
+  // But they are returned via GetTokenAttribute, so they should have a name.
+  FCurIDEDirectiveAttri := TSynSelectedColorMergeResult.Create(@SYNS_AttrIDEDirective, SYNS_XML_AttrIDEDirective);
+  fIdentifierAttri := TSynHighlighterAttributes.Create(@SYNS_AttrIdentifier, SYNS_XML_AttrIdentifier);
   AddAttribute(fIdentifierAttri);
-  fKeyAttri := TSynHighlighterAttributes.Create(SYNS_AttrReservedWord, SYNS_XML_AttrReservedWord);
+  fKeyAttri := TSynHighlighterAttributes.Create(@SYNS_AttrReservedWord, SYNS_XML_AttrReservedWord);
   fKeyAttri.Style:= [fsBold];
   AddAttribute(fKeyAttri);
-  fNumberAttri := TSynHighlighterAttributes.Create(SYNS_AttrNumber, SYNS_XML_AttrNumber);
+  fNumberAttri := TSynHighlighterAttributes.Create(@SYNS_AttrNumber, SYNS_XML_AttrNumber);
   AddAttribute(fNumberAttri);
-  fSpaceAttri := TSynHighlighterAttributes.Create(SYNS_AttrSpace, SYNS_XML_AttrSpace);
+  fSpaceAttri := TSynHighlighterAttributes.Create(@SYNS_AttrSpace, SYNS_XML_AttrSpace);
   AddAttribute(fSpaceAttri);
-  fStringAttri := TSynHighlighterAttributes.Create(SYNS_AttrString, SYNS_XML_AttrString);
+  fStringAttri := TSynHighlighterAttributes.Create(@SYNS_AttrString, SYNS_XML_AttrString);
   AddAttribute(fStringAttri);
-  fSymbolAttri := TSynHighlighterAttributes.Create(SYNS_AttrSymbol, SYNS_XML_AttrSymbol);
+  fSymbolAttri := TSynHighlighterAttributes.Create(@SYNS_AttrSymbol, SYNS_XML_AttrSymbol);
   AddAttribute(fSymbolAttri);
-  FCaseLabelAttri := TSynHighlighterAttributes.Create(SYNS_AttrCaseLabel, SYNS_XML_AttrCaseLabel);
-  FCaseLabelAttri.Features := FCaseLabelAttri.Features + [hafStyleMask];
+  FCaseLabelAttri := TSynHighlighterAttributesModifier.Create(@SYNS_AttrCaseLabel, SYNS_XML_AttrCaseLabel);
   AddAttribute(FCaseLabelAttri);
-  FCurCaseLabelAttri := TSynHighlighterAttributes.Create(SYNS_AttrCaseLabel, SYNS_XML_AttrCaseLabel);
-  fDirectiveAttri := TSynHighlighterAttributes.Create(SYNS_AttrDirective, SYNS_XML_AttrDirective);
+  FCurCaseLabelAttri := TSynSelectedColorMergeResult.Create(@SYNS_AttrCaseLabel, SYNS_XML_AttrCaseLabel);
+  fDirectiveAttri := TSynHighlighterAttributes.Create(@SYNS_AttrDirective, SYNS_XML_AttrDirective);
   fDirectiveAttri.Style:= [fsItalic];
   AddAttribute(fDirectiveAttri);
   CompilerMode:=pcmDelphi;
-  SetAttributesOnChange({$IFDEF FPC}@{$ENDIF}DefHighlightChange);
+  SetAttributesOnChange(@DefHighlightChange);
 
   InitIdent;
   MakeMethodTables;
@@ -2626,35 +2510,58 @@ procedure TSynPasSyn.BraceOpenProc;
     end;
   end;
 
+  procedure StartDirectiveFoldBlock(ABlockType: TPascalCodeFoldBlockType); inline;
+  begin
+    dec(Run);
+    inc(fStringLen); // include $
+    StartCustomCodeFoldBlock(ABlockType);
+    inc(Run);
+  end;
+
+  procedure EndDirectiveFoldBlock(ABlockType: TPascalCodeFoldBlockType); inline;
+  begin
+    dec(Run);
+    inc(fStringLen); // include $
+    EndCustomCodeFoldBlock(ABlockType);
+    inc(Run);
+  end;
+
+  procedure EndStartDirectiveFoldBlock(ABlockType: TPascalCodeFoldBlockType); inline;
+  begin
+    dec(Run);
+    inc(fStringLen); // include $
+    EndCustomCodeFoldBlock(ABlockType);
+    StartCustomCodeFoldBlock(ABlockType);
+    inc(Run);
+  end;
+
 var
   nd: PSynFoldNodeInfo;
 begin
   if (Run < fLineLen-1) and (fLine[Run+1] = '$') then begin
     // compiler directive
     fRange := fRange + [rsDirective];
-    inc(Run,2);
+    inc(Run, 2);
     fToIdent := Run;
     KeyHash;
     if (fLine[Run] in ['i', 'I']) and
        ( KeyComp('if') or KeyComp('ifc') or KeyComp('ifdef') or KeyComp('ifndef') or
          KeyComp('ifopt') )
     then
-      StartCustomCodeFoldBlock(cfbtIfDef)
+      StartDirectiveFoldBlock(cfbtIfDef)
     else
     if ( (fLine[Run] in ['e', 'E']) and ( KeyComp('endif') or KeyComp('endc') ) ) or
        KeyComp('ifend')
     then
-      EndCustomCodeFoldBlock(cfbtIfDef)
+      EndDirectiveFoldBlock(cfbtIfDef)
     else
     if (fLine[Run] in ['e', 'E']) and
        ( KeyComp('else') or KeyComp('elsec') or KeyComp('elseif') or KeyComp('elifc') )
-    then begin
-      EndCustomCodeFoldBlock(cfbtIfDef);
-      StartCustomCodeFoldBlock(cfbtIfDef);
-    end
+    then
+      EndStartDirectiveFoldBlock(cfbtIfDef)
     else
     if KeyComp('region') then begin
-      StartCustomCodeFoldBlock(cfbtRegion);
+      StartDirectiveFoldBlock(cfbtRegion);
       if FCatchNodeInfo then
         // Scan ahead
         if ScanRegion then begin
@@ -2664,7 +2571,7 @@ begin
         end;
     end
     else if KeyComp('endregion') then
-      EndCustomCodeFoldBlock(cfbtRegion);
+      EndDirectiveFoldBlock(cfbtRegion);
     DirectiveProc;
   end else begin
     // curly bracket open -> borland comment
@@ -2677,7 +2584,7 @@ begin
       fToIdent := Run;
       KeyHash;
       if KeyComp('region') then begin
-        StartCustomCodeFoldBlock(cfbtRegion);
+        StartDirectiveFoldBlock(cfbtRegion);
         if FCatchNodeInfo then
           // Scan ahead
           if ScanRegion then begin
@@ -2687,7 +2594,7 @@ begin
           end;
       end
       else if KeyComp('endregion') then
-        EndCustomCodeFoldBlock(cfbtRegion)
+        EndDirectiveFoldBlock(cfbtRegion)
       else begin
         dec(Run, 2);
         StartPascalCodeFoldBlock(cfbtBorCommand);
@@ -2771,6 +2678,11 @@ begin
     while FLine[Run] in ['0'..'7'] do inc(Run);
   end
   else
+  if FLine[Run] in ['A'..'Z', 'a'..'z', '_'] then begin
+    fTokenID := tkIdentifier;
+    while Identifiers[fLine[Run]] do inc(Run);
+  end
+  else
     fTokenID := tkSymbol;
 end;
 
@@ -2804,10 +2716,15 @@ begin
   inc(Run);
   fTokenID := tkNumber;
   if Run<fLineLen then begin
-    while (IsNumberChar[FLine[Run]]) do begin
-      if (FLine[Run]='.') and (fLine[Run+1]='.')  then
-        break;
+    while (IsNumberChar[FLine[Run]]) do inc(Run);
+    if (FLine[Run]='.') and not(fLine[Run+1]='.')  then begin
       inc(Run);
+      while (IsNumberChar[FLine[Run]]) do inc(Run);
+    end;
+    if (FLine[Run]='e') or (fLine[Run]='E')  then begin
+      inc(Run);
+      if (FLine[Run]='+') or (fLine[Run]='-')  then inc(Run);
+      while (IsNumberChar[FLine[Run]]) do inc(Run);
     end;
   end;
 end;
@@ -2889,9 +2806,11 @@ begin
   inc(Run);
   fTokenID := tkSymbol;
   PasCodeFoldRange.DecBracketNestLevel;
-  fRange := fRange + [rsAtClosingBracket];
-  if (PasCodeFoldRange.BracketNestLevel = 0) then
+  if (PasCodeFoldRange.BracketNestLevel = 0) then begin
+    if (fRange * [rsAfterClass] <> []) then
+      fRange := fRange + [rsAtClosingBracket];
     Exclude(fRange, rsInProcHeader);
+  end;
 end;
 
 procedure TSynPasSyn.SquareOpenProc;
@@ -3009,17 +2928,17 @@ end;
 procedure TSynPasSyn.StringProc;
 begin
   fTokenID := tkString;
-  
   if (fLine[Run] = #34) or (rsString in fRange) then  // heredoc
   begin
     fTokenID := tkString;
     if (Run > 0) and (length(fLine) > 0) then
       Inc(Run);
 
-    if not(rsString in fRange) then
+    if (not (rsString in fRange)) then
     begin
-      fRange := fRange+[rsString];
-      if (Run = 0) then Inc(Run);
+      fRange := fRange + [rsString];
+      if (Run = 0) then
+        Inc(Run);
     end;
 
     while (not (fLine[Run] in [#0])) do
@@ -3030,7 +2949,7 @@ begin
         if (fLine[Run] <> #34) then
         begin
           fRange := fRange - [rsString];
-          break;
+          Break;
         end;
       end;
       Inc(Run);
@@ -3044,7 +2963,7 @@ begin
       if fLine[Run] = #39 then begin
         Inc(Run);
         if (fLine[Run] <> #39) then
-          break;
+          Break;
       end;
       Inc(Run);
     end;
@@ -3068,7 +2987,6 @@ end;
 procedure TSynPasSyn.Next;
 var
   IsAtCaseLabel: Boolean;
-  OldRange: TRangeStates;
 begin
   fAsmStart := False;
   fTokenPos := Run;
@@ -3077,7 +2995,8 @@ begin
     NullProc;
     exit;
   end;
-  if rsString in fRange then
+
+  if (rsString in fRange) then
     StringProc
   else case fLine[Run] of
      #0: NullProc;
@@ -3093,7 +3012,7 @@ begin
       else if rsSlash in fRange then
         SlashContinueProc
       else begin
-        OldRange := fRange;
+        FOldRange := fRange;
         //if rsAtEqual in fRange then
         //  fRange := fRange + [rsAfterEqualOrColon] - [rsAtEqual]
         //else
@@ -3112,15 +3031,15 @@ begin
              not(rsAtClosingBracket in fRange)
           then
             fRange := fRange - [rsAfterClass];
-          if rsAfterEqualOrColon in OldRange then
+          if rsAfterEqualOrColon in FOldRange then
             fRange := fRange - [rsAfterEqualOrColon];
-          if rsAtPropertyOrReadWrite in OldRange then
+          if rsAtPropertyOrReadWrite in FOldRange then
             fRange := fRange - [rsAtPropertyOrReadWrite];
           fRange := fRange - [rsAtClosingBracket];
-          if rsAfterClassField in OldRange then
+          if rsAfterClassField in FOldRange then
             fRange := fRange - [rsAfterClassField];
           if rsAtClass in fRange then begin
-            if OldRange * [rsAtClass, rsAfterClass] <> [] then
+            if FOldRange * [rsAtClass, rsAfterClass] <> [] then
               fRange := fRange + [rsAfterClass] - [rsAtClass]
             else
               fRange := fRange + [rsAfterClass];
@@ -3188,21 +3107,14 @@ begin
 end;
 
 function TSynPasSyn.GetTokenAttribute: TSynHighlighterAttributes;
-var
-  sMask: TFontStyles;
 begin
   case GetTokenID of
     tkAsm: Result := fAsmAttri;
     tkComment: Result := fCommentAttri;
     tkIDEDirective: begin
+      FCurIDEDirectiveAttri.Assign(FCommentAttri);
+      FCurIDEDirectiveAttri.Merge(FIDEDirectiveAttri);
       Result := FCurIDEDirectiveAttri;
-      Result.Assign(FCommentAttri);
-      if FIDEDirectiveAttri.Background <> clNone then Result.Background := FIDEDirectiveAttri.Background;
-      if FIDEDirectiveAttri.Foreground <> clNone then Result.Foreground := FIDEDirectiveAttri.Foreground;
-      if FIDEDirectiveAttri.FrameColor <> clNone then Result.FrameColor := FIDEDirectiveAttri.FrameColor;
-      sMask := FIDEDirectiveAttri.StyleMask + (fsNot(FIDEDirectiveAttri.StyleMask) * FIDEDirectiveAttri.Style); // Styles to be taken from FIDEDirectiveAttri
-      Result.Style:= (Result.Style * fsNot(sMask)) + (FIDEDirectiveAttri.Style * sMask);
-      Result.StyleMask:= (Result.StyleMask * fsNot(sMask)) + (FIDEDirectiveAttri.StyleMask * sMask);
     end;
     tkIdentifier: Result := fIdentifierAttri;
     tkKey: Result := fKeyAttri;
@@ -3215,17 +3127,12 @@ begin
   else
     Result := nil;
   end;
-  if FTokenIsCaseLabel and
-     (GetTokenID in [tkIdentifier, tkKey, tkNumber, tkString])
+
+  if FTokenIsCaseLabel and (GetTokenID in [tkIdentifier, tkKey, tkNumber, tkString])
   then begin
     FCurCaseLabelAttri.Assign(Result);
+    FCurCaseLabelAttri.Merge(FCaseLabelAttri);
     Result := FCurCaseLabelAttri;
-    if FCaseLabelAttri.Background <> clNone then Result.Background := FCaseLabelAttri.Background;
-    if FCaseLabelAttri.Foreground <> clNone then Result.Foreground := FCaseLabelAttri.Foreground;
-    if FCaseLabelAttri.FrameColor <> clNone then Result.FrameColor := FCaseLabelAttri.FrameColor;
-    sMask := FCaseLabelAttri.StyleMask + (fsNot(FCaseLabelAttri.StyleMask) * FCaseLabelAttri.Style); // Styles to be taken from FCaseLabelAttri
-    Result.Style:= (Result.Style * fsNot(sMask)) + (FCaseLabelAttri.Style * sMask);
-    Result.StyleMask:= (Result.StyleMask * fsNot(sMask)) + (FCaseLabelAttri.StyleMask * sMask);
   end;
 end;
 
@@ -3280,7 +3187,7 @@ end;
 procedure TSynPasSyn.EnumUserSettings(settings: TStrings);
 begin
   { returns the user settings that exist in the registry }
-  with TBetterRegistry.Create do
+  with TRegistry.Create do
   begin
     try
       RootKey := HKEY_LOCAL_MACHINE;
@@ -3299,6 +3206,17 @@ begin
       Free;
     end;
   end;
+end;
+
+function TSynPasSyn.IsLineStartingInDirective(ALineIndex: TLineIdx): Boolean;
+var
+  r: Pointer;
+begin
+  Result := False;
+  if ALineIndex < 1 then exit;
+  r := CurrentRanges[ALineIndex-1];
+  if (r <> nil) and (r <> NullRange) then
+    Result := rsDirective in TRangeStates(Integer(PtrUInt(TSynPasSynRange(r).RangeType)));
 end;
 
 function TSynPasSyn.FoldBlockEndLevel(ALineIndex: TLineIdx;
@@ -3336,12 +3254,18 @@ begin
 
   if AFilter.FoldGroup  in [0, FOLDGROUP_REGION] then begin
     // All or REGION
-    Result := Result + inf.EndLevelRegion;
+    if FFoldConfig[ord(cfbtRegion)].Enabled or
+       (sfbIncludeDisabled in AFilter.Flags)
+    then
+      Result := Result + inf.EndLevelRegion;
   end;
 
   if AFilter.FoldGroup  in [0, FOLDGROUP_IFDEF] then begin
     // All or IFDEF
-    Result := Result + inf.EndLevelIfDef;
+    if FFoldConfig[ord(cfbtIfDef)].Enabled or
+       (sfbIncludeDisabled in AFilter.Flags)
+    then
+      Result := Result + inf.EndLevelIfDef;
   end;
 end;
 
@@ -3362,7 +3286,7 @@ begin
 
   if AFilter.FoldGroup  in [0, FOLDGROUP_PASCAL] then begin
     // All or Pascal
-    (* Range.EndLevel can be smaller. because it Range.MinLevel does not know the LastLiineFix
+    (* Range.EndLevel can be smaller. because Range.MinLevel does not know the LastLineFix
        Using a copy of FoldBlockEndLevel *)
     r := CurrentRanges[ALineIndex];
     if (r <> nil) and (r <> NullRange) then begin
@@ -3487,8 +3411,8 @@ function TSynPasSyn.FoldTypeAtNodeIndex(ALineIndex, FoldIndex: Integer;
 var
   act: TSynFoldActions;
 begin
-  act := [sfaOpen, sfaFold];
-  if UseCloseNodes then act := [sfaClose, sfaFold];
+  act := [sfaOpenFold, sfaFold];
+  if UseCloseNodes then act := [sfaCloseFold, sfaFold];
   case TPascalCodeFoldBlockType(PtrUInt(FoldNodeInfo[ALineIndex].NodeInfoEx(FoldIndex, act).FoldType)) of
     cfbtRegion:
       Result := 2;
@@ -3504,7 +3428,7 @@ var
   atype : Integer;
   node: TSynFoldNodeInfo;
 begin
-  node := FoldNodeInfo[ALineIndex].NodeInfoEx(FoldIndex, [sfaOpen, sfaFold]);
+  node := FoldNodeInfo[ALineIndex].NodeInfoEx(FoldIndex, [sfaOpenFold, sfaFold]);
   if sfaInvalid in node.FoldAction then exit(-1);
   if sfaOneLineOpen in node.FoldAction then exit(0);
   case TPascalCodeFoldBlockType(PtrUInt(node.FoldType)) of
@@ -3529,7 +3453,7 @@ var
   lvl, cnt, atype : Integer;
   node: TSynFoldNodeInfo;
 begin
-  node := FoldNodeInfo[ALineIndex].NodeInfoEx(FoldIndex, [sfaOpen, sfaFold]);
+  node := FoldNodeInfo[ALineIndex].NodeInfoEx(FoldIndex, [sfaOpenFold, sfaFold]);
   if sfaInvalid in node.FoldAction then exit(-1);
   if sfaOneLineOpen in node.FoldAction then exit(ALineIndex);
   case TPascalCodeFoldBlockType(PtrUInt(node.FoldType)) of
@@ -3553,30 +3477,26 @@ begin
     dec(Result);
 end;
 
-function TSynPasSyn.LastLinePasFoldLevelFix(Index: Integer; AType: Integer = 1): integer;
+function TSynPasSyn.LastLinePasFoldLevelFix(Index: Integer; AType: Integer;
+  AIncludeDisabled: Boolean): integer;
 var
   r: TSynPasSynRange;
 begin
+  // AIncludeDisabled only works for Pascal Nodes
   case AType of
     2: Result := 0;
     3: Result := 0;
-    4:  // all pascal nodes (incl. not folded)
-      begin
-        if (Index < 0) or (Index >= CurrentLines.Count) then
-          exit(0);
-        r := TSynPasSynRange(CurrentRanges[Index]);
-        if (r <> nil) and (Pointer(r) <> NullRange) then
-          Result := r.LastLineCodeFoldLevelFix
-        else
-          Result := 0;
-      end;
     else
       begin
         if (Index < 0) or (Index >= CurrentLines.Count) then
           exit(0);
         r := TSynPasSynRange(CurrentRanges[Index]);
-        if (r <> nil) and (Pointer(r) <> NullRange) then
-          Result := r.PasFoldFixLevel
+        if (r <> nil) and (Pointer(r) <> NullRange) then begin
+          if AIncludeDisabled then
+            Result := r.LastLineCodeFoldLevelFix  // all pascal nodes (incl. not folded)
+          else
+            Result := r.PasFoldFixLevel
+        end
         else
           Result := 0;
       end;
@@ -3590,6 +3510,7 @@ var
   i: Integer;
   nd: PSynFoldNodeInfo;
 begin
+  aActions := aActions + [sfaMultiLine];
   Node.LineIndex := LineIndex;
   Node.LogXStart := Run;
   Node.LogXEnd := Run + fStringLen;
@@ -3600,14 +3521,20 @@ begin
     cfbtRegion:
       begin
         node.FoldGroup := FOLDGROUP_REGION;
-        Node.FoldLvlStart := FSynPasRangeInfo.EndLevelRegion;
+        if AIsFold then
+          Node.FoldLvlStart := FSynPasRangeInfo.EndLevelRegion
+        else
+          Node.FoldLvlStart := 0;
         Node.NestLvlStart := FSynPasRangeInfo.EndLevelRegion;
         OneLine := (EndOffs < 0) and (Node.FoldLvlStart > FSynPasRangeInfo.MinLevelRegion);
       end;
     cfbtIfDef:
       begin
         node.FoldGroup := FOLDGROUP_IFDEF;
-        Node.FoldLvlStart := FSynPasRangeInfo.EndLevelIfDef;
+        if AIsFold then
+          Node.FoldLvlStart := FSynPasRangeInfo.EndLevelIfDef
+        else
+          Node.FoldLvlStart := 0;
         Node.NestLvlStart := FSynPasRangeInfo.EndLevelIfDef;
         OneLine := (EndOffs < 0) and (Node.FoldLvlStart > FSynPasRangeInfo.MinLevelIfDef);
       end;
@@ -3619,7 +3546,7 @@ begin
           Node.NestLvlStart := PasCodeFoldRange.CodeFoldStackSize;
           OneLine := (EndOffs < 0) and (Node.FoldLvlStart > PasCodeFoldRange.PasFoldMinLevel); // MinimumCodeFoldBlockLevel);
         end else begin
-          Node.FoldLvlStart := PasCodeFoldRange.CodeFoldStackSize;
+          Node.FoldLvlStart := PasCodeFoldRange.CodeFoldStackSize; // Todo: zero?
           Node.NestLvlStart := PasCodeFoldRange.CodeFoldStackSize;
           OneLine := (EndOffs < 0) and (Node.FoldLvlStart > PasCodeFoldRange.MinimumCodeFoldBlockLevel);
         end;
@@ -3635,7 +3562,7 @@ begin
     while (i >= 0) and
           ( (nd^.FoldType <> node.FoldType) or
             (nd^.FoldGroup <> node.FoldGroup) or
-            (not (sfaOpen in nd^.FoldAction)) or
+            (not (sfaOpenFold in nd^.FoldAction)) or
             (nd^.FoldLvlEnd <> Node.FoldLvlStart)
           )
     do begin
@@ -3643,16 +3570,17 @@ begin
       nd := FCatchNodeInfoList.ItemPointer[i];
     end;
     if i >= 0 then begin
-      nd^.FoldAction  := nd^.FoldAction + [sfaOneLineOpen];
-      Node.FoldAction := Node.FoldAction + [sfaOneLineClose];
+      nd^.FoldAction  := nd^.FoldAction + [sfaOneLineOpen, sfaSingleLine] - [sfaMultiLine];
+      Node.FoldAction := Node.FoldAction + [sfaOneLineClose, sfaSingleLine] - [sfaMultiLine];
       if (sfaFoldHide in nd^.FoldAction) then begin
+        assert(sfaFold in nd^.FoldAction, 'sfaFoldHide without sfaFold');
         // one liner: hide-able / not fold-able
         nd^.FoldAction  := nd^.FoldAction - [sfaFoldFold];
         Node.FoldAction := Node.FoldAction - [sfaFoldFold];
       end else begin
         // one liner: nether hide-able nore fold-able
-        nd^.FoldAction  := nd^.FoldAction - [sfaOpen, sfaFold];
-        Node.FoldAction := Node.FoldAction - [sfaClose, sfaFold];
+        nd^.FoldAction  := nd^.FoldAction - [sfaOpenFold, sfaFold, sfaFoldFold];
+        Node.FoldAction := Node.FoldAction - [sfaCloseFold, sfaFold, sfaFoldFold];
       end;
     end;
   end;
@@ -3664,13 +3592,17 @@ procedure TSynPasSyn.StartCustomCodeFoldBlock(ABlockType: TPascalCodeFoldBlockTy
 var
   act: TSynFoldActions;
   nd: TSynFoldNodeInfo;
+  FoldBlock: Boolean;
 begin
-  if not FFoldConfig[ord(ABlockType)].Enabled then exit;
+  FoldBlock := FFoldConfig[ord(ABlockType)].Enabled;
+  //if not FFoldConfig[ord(ABlockType)].Enabled then exit;
   if FCatchNodeInfo then begin // exclude subblocks, because they do not increase the foldlevel yet
-    act := FFoldConfig[ord(ABlockType)].FoldActions;
+    act := [sfaOpen, sfaOpenFold];
+    if FoldBlock then
+      act := act + FFoldConfig[ord(ABlockType)].FoldActions;
     if not FAtLineStart then
       act := act - [sfaFoldHide];
-    InitNode(nd, +1, ABlockType, [sfaOpen] + act, True);
+    InitNode(nd, +1, ABlockType, act, FoldBlock);
     FCatchNodeInfoList.Add(nd);
   end;
   case ABlockType of
@@ -3683,12 +3615,17 @@ end;
 
 procedure TSynPasSyn.EndCustomCodeFoldBlock(ABlockType: TPascalCodeFoldBlockType);
 var
+  act: TSynFoldActions;
   nd: TSynFoldNodeInfo;
+  FoldBlock: Boolean;
 begin
-  if not FFoldConfig[ord(ABlockType)].Enabled then exit;
+  FoldBlock := FFoldConfig[ord(ABlockType)].Enabled;
+  //if not FFoldConfig[ord(ABlockType)].Enabled then exit;
   if FCatchNodeInfo then begin // exclude subblocks, because they do not increase the foldlevel yet
-    InitNode(nd, -1, ABlockType,
-             [sfaClose, sfaFold], True); // + FFoldConfig[ord(ABlockType)].FoldActions);
+    act := [sfaClose, sfaCloseFold];
+    if FoldBlock then
+      act := act + FFoldConfig[ord(ABlockType)].FoldActions;
+    InitNode(nd, -1, ABlockType, act, FoldBlock); // + FFoldConfig[ord(ABlockType)].FoldActions);
     FCatchNodeInfoList.Add(nd);
   end;
   case ABlockType of
@@ -3711,7 +3648,7 @@ end;
 
 function TSynPasSyn.CreateFoldNodeInfoList: TLazSynFoldNodeInfoList;
 begin
-  Result := TLazSynPasFoldNodeInfoList.Create;
+  Result := TLazSynFoldNodeInfoList.Create;
 end;
 
 procedure TSynPasSyn.InitFoldNodeInfo(AList: TLazSynFoldNodeInfoList; Line: TLineIdx);
@@ -3720,16 +3657,18 @@ var
   i: Integer;
 begin
   FCatchNodeInfo := True;
-  FCatchNodeInfoList := TLazSynPasFoldNodeInfoList(AList);
+  FCatchNodeInfoList := TLazSynFoldNodeInfoList(AList);
 
   StartAtLineIndex(Line);
   fStringLen := 0;
   NextToEol;
 
   fStringLen := 0;
-  i := LastLinePasFoldLevelFix(Line+1, 4);
+  i := LastLinePasFoldLevelFix(Line+1, FOLDGROUP_PASCAL, True);  // all pascal nodes (incl. not folded)
   while i < 0 do begin
     EndPascalCodeFoldBlock;
+    FCatchNodeInfoList.LastItemPointer^.FoldAction :=
+      FCatchNodeInfoList.LastItemPointer^.FoldAction + [sfaCloseForNextLine];
     inc(i);
   end;
   if Line = CurrentLines.Count - 1 then begin
@@ -3762,7 +3701,7 @@ begin
   FoldBlock := FFoldConfig[ord(ABlockType)].Enabled;
   p := 0;
   if FCatchNodeInfo then begin // exclude subblocks, because they do not increase the foldlevel yet
-    act := [sfaOpen];
+    act := [sfaOpen, sfaOpenFold];
     if FoldBlock then
       act := act + FFoldConfig[ord(ABlockType)].FoldActions;
     if not FAtLineStart then
@@ -3785,7 +3724,7 @@ begin
   BlockType := TopCodeFoldBlockType;
   DecreaseLevel := BlockType < CountPascalCodeFoldBlockOffset;
   if FCatchNodeInfo then begin // exclude subblocks, because they do not increase the foldlevel yet
-    act := [sfaClose];
+    act := [sfaClose, sfaCloseFold];
     if DecreaseLevel then
       act := act + [sfaFold]; //FFoldConfig[PtrUInt(BlockType)].FoldActions;
     InitNode(nd, -1, TopPascalCodeFoldBlockType, act, DecreaseLevel);
@@ -3906,10 +3845,10 @@ begin
   // SetRange[Index] has the folds at the start of this line
   // ClosedByNextLine: Folds closed by the next lines LastLineFix
   //                   must be taken from SetRange[Index+1] (end of this line)
-  ClosedByNextLine := -LastLinePasFoldLevelFix(Index + 1, 4);
+  ClosedByNextLine := -LastLinePasFoldLevelFix(Index + 1, FOLDGROUP_PASCAL, True);
   // ClosedInLastLine: Folds Closed by this lines LastLineFix
   //                   must be ignored. (They are part of SetRange[Index] / this line)
-  ClosedInLastLine := -LastLinePasFoldLevelFix(Index, 4);
+  ClosedInLastLine := -LastLinePasFoldLevelFix(Index, FOLDGROUP_PASCAL, True);
 
   // Get the highest close-offset
   i := ClosedByNextLine - 1;
@@ -4002,7 +3941,7 @@ begin
   for i := low(TSynPasDividerDrawLocation) to high(TSynPasDividerDrawLocation) do
   begin
     FDividerDrawConfig[i] := TSynDividerDrawConfig.Create;
-    FDividerDrawConfig[i].OnChange := {$IFDEF FPC}@{$ENDIF}DefHighlightChange;
+    FDividerDrawConfig[i].OnChange := @DefHighlightChange;
     FDividerDrawConfig[i].MaxDrawDepth := PasDividerDrawLocationDefaults[i];
   end;
 end;
@@ -4145,15 +4084,15 @@ function TSynPasSyn.UseUserSettings(settingIndex: integer): boolean;
       EnumUserSettings(s);
       if (settingIndex < 0) or (settingIndex >= s.Count) then Result := false
       else begin
-        tmpStringAttri    := TSynHighlighterAttributes.Create('');
-        tmpNumberAttri    := TSynHighlighterAttributes.Create('');
-        tmpKeyAttri       := TSynHighlighterAttributes.Create('');
-        tmpSymbolAttri    := TSynHighlighterAttributes.Create('');
-        tmpAsmAttri       := TSynHighlighterAttributes.Create('');
-        tmpCommentAttri   := TSynHighlighterAttributes.Create('');
-        tmpDirectiveAttri := TSynHighlighterAttributes.Create('');
-        tmpIdentifierAttri:= TSynHighlighterAttributes.Create('');
-        tmpSpaceAttri     := TSynHighlighterAttributes.Create('');
+        tmpStringAttri    := TSynHighlighterAttributes.Create(nil);
+        tmpNumberAttri    := TSynHighlighterAttributes.Create(nil);
+        tmpKeyAttri       := TSynHighlighterAttributes.Create(nil);
+        tmpSymbolAttri    := TSynHighlighterAttributes.Create(nil);
+        tmpAsmAttri       := TSynHighlighterAttributes.Create(nil);
+        tmpCommentAttri   := TSynHighlighterAttributes.Create(nil);
+        tmpDirectiveAttri := TSynHighlighterAttributes.Create(nil);
+        tmpIdentifierAttri:= TSynHighlighterAttributes.Create(nil);
+        tmpSpaceAttri     := TSynHighlighterAttributes.Create(nil);
         tmpStringAttri    .Assign(fStringAttri);
         tmpNumberAttri    .Assign(fNumberAttri);
         tmpKeyAttri       .Assign(fKeyAttri);
