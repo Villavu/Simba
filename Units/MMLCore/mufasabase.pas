@@ -29,7 +29,7 @@ interface
 {$undef mDebug}
 
 uses
-  Classes, SysUtils{$ifdef MSWindows},windows{$endif};
+  Classes, SysUtils;
 
 {$I Simba.inc}
 

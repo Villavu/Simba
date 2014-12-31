@@ -28,7 +28,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, MufasaBase,Forms, ComCtrls, StdCtrls, Controls,
-  ExtCtrls, Buttons,mmisc,v_ideCodeInsight, newsimbasettings, v_ideCodeParser;
+  ExtCtrls, Buttons,v_ideCodeInsight, newsimbasettings, v_ideCodeParser;
 
 type
 
@@ -105,7 +105,7 @@ type
 implementation
 
 uses
-  SimbaUnit, Graphics, stringutil, simpleanalyzer, lclintf, dynlibs;
+  SimbaUnit, Graphics, stringutil, lclintf;
 
 { TFunctionListFrame }
 
@@ -239,7 +239,6 @@ procedure TFunctionListFrame.FunctionListMouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
    N: TTreeNode;
-   MethodInfo : TMethodInfo;
 begin
   if InCodeCompletion then
   begin;
@@ -327,12 +326,11 @@ end;
 
 function TFunctionListFrame.Find(Next : boolean; backwards : boolean = false) : boolean;
 var
-  Start,Len,i,ii,index,posi,c: Integer;
+  Start,Len,i,index,posi,c: Integer;
   FoundFunction : boolean;
   LastSection : Array[1..2] of String;
   str : string;
   RootNode : TTreeNode;
-  NormalNode,tmpNode : TTreeNode;
   Node : TTreeNode;
   InsertStr : string;
 begin

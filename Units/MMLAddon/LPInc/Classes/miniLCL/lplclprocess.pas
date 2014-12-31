@@ -13,23 +13,20 @@ procedure RegisterLCLProcess(Compiler: TLapeCompiler);
 implementation
 
 uses
-  lplclcontrols, lplclsystem, Process, Pipes;
+  lplclsystem, Process, Pipes;
 
 type
   PProcess = ^TProcess;
   PRect = ^TRect;
   PHandle = ^THandle;
-  PProcessOption = ^TProcessOption;
   PShowWindowOptions = ^TShowWindowOptions;
   PStartupOptions = ^TStartupOptions;
   PProcessOptions = ^TProcessOptions;
   PProcessPriority = ^TProcessPriority;
-  PStartupOption = ^TStartupOption;
   POutputPipeStream = ^TOutputPipeStream;
   PInputPipeStream = ^TInputPipeStream;
   PInt64 = ^Int64;
   PLongInt = ^LongInt;
-
 
 //function Seek(const Offset: int64; Origin: TSeekOrigin): int64; override;
 procedure TOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); lape_extdecl

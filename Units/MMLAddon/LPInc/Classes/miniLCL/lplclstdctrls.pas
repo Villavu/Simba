@@ -17,7 +17,6 @@ type
   PCustomScrollBar = ^TCustomScrollBar;
   PScrollBarKind = ^TScrollBarKind;
   PScrollEvent = ^TScrollEvent;
-  PScrollCode = ^TScrollCode;
   PScrollStyle = ^TScrollStyle;
   PScrollBar = ^TScrollBar;
   //Combobox

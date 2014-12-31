@@ -6,6 +6,7 @@ object FunctionListFrame: TFunctionListFrame
   Align = alLeft
   ClientHeight = 240
   ClientWidth = 182
+  LCLVersion = '1.2.4.0'
   OnEndDock = FrameEndDock
   TabOrder = 0
   DesignLeft = 120

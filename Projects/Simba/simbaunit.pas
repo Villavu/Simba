@@ -57,7 +57,6 @@ uses
 
   v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
-  {$IFDEF USE_PASCALSCRIPT}PSDump, {$ENDIF}
 
   updater,
   SM_Main,
@@ -3054,7 +3053,6 @@ procedure TSimbaForm.FillFunctionList();
 
 var
   Tree: TTreeView;
-  Methods: TExpMethodArr;
   t: UInt64;
 begin
   with (frmFunctionList) do
@@ -4229,7 +4227,7 @@ begin
     begin
       filename := SetDirSeparators(filename);
       SynEdit.Lines.LoadFromFile(filename);
-
+      SynEdit.Font.Quality:= fqNonAntialiased;
       if assigned(onScriptOpen) then
       begin
         script := SynEdit.Lines.text;

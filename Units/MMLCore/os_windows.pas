@@ -27,7 +27,7 @@ unit os_windows;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, windows, graphics, LCLType, LCLIntf, bitmaps, IOManager, WinKeyInput;
+    Classes, SysUtils, mufasatypes, windows, graphics, LCLType, LCLIntf, IOManager, WinKeyInput;
     
   type
 
@@ -374,7 +374,6 @@ implementation
   }
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
   var
-    temp: PRGB32;
     w,h : integer;
   begin
     GetTargetDimensions(w,h);
@@ -407,7 +406,6 @@ implementation
   procedure TWindow.MoveMouse(x,y: integer);
   var
     rect : TRect;
-    w,h: integer;
   begin
     MouseApplyAreaOffset(x, y);
     WindowRect(rect);
@@ -575,7 +573,6 @@ threadvar
 
 function EnumProcess(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
 var
-  Proc: TSysProc;
   I: integer;
   pPid: DWORD;
 begin

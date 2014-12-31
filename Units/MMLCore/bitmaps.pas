@@ -363,7 +363,7 @@ var
 begin
   Bitmap := TMufasaBitmap.Create;
   Bitmap.SetSize(w,h);
-  addBMP(Bitmap);
+  Result := addBMP(Bitmap);
 end;
 
 function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;
@@ -2090,8 +2090,6 @@ begin
 end;
 
 procedure TMufasaBitmap.ResizeEx(method: TBmpResizeMethod; NewWidth, NewHeight: integer);
-var
-  Matrix: T2DIntegerArray;
 begin
   if (Self.FExternData) then
     raise Exception.Create('Cannot resize a bitmap with FExternData = True!');
