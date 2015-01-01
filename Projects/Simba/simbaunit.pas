@@ -4227,7 +4227,7 @@ begin
     begin
       filename := SetDirSeparators(filename);
       SynEdit.Lines.LoadFromFile(filename);
-      SynEdit.Font.Quality:= fqNonAntialiased;
+
       if assigned(onScriptOpen) then
       begin
         script := SynEdit.Lines.text;
