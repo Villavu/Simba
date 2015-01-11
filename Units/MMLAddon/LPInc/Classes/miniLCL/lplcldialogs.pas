@@ -11,7 +11,7 @@ uses
 procedure RegisterLCLDialogs(Compiler: TLapeCompiler);
 
 implementation
-  uses MufasaTypes, stdctrls, forms, lplclsystem, lplclgraphics, lplclcontrols, ComCtrls, Dialogs, LCLClasses;
+  uses MufasaTypes, forms, lplclsystem, lplclgraphics, Dialogs, LCLClasses;
 
 type
   PCommonDialog = ^TCommonDialog;

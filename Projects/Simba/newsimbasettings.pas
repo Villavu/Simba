@@ -318,7 +318,7 @@ implementation
 uses
    mufasabase,
    mufasatypes,
-   fileutil, stringutil,
+   fileutil,
    simbaunit; // mDebugLn
 
 const

@@ -6,12 +6,12 @@ unit lplclcomctrls;
 interface
 
 uses
-  Classes, SysUtils, lpcompiler, lptypes, lpClassHelper, lplclstdctrls;
+  Classes, SysUtils, lpcompiler, lptypes, lpClassHelper;
 
 procedure RegisterLCLComCtrls(Compiler: TLapeCompiler);
 
 implementation
-  uses MufasaTypes,stdctrls,forms,lplclsystem,lplclgraphics,lplclcontrols, ComCtrls, CheckLst, Controls;
+  uses MufasaTypes,stdctrls,forms,lplclsystem,lplclgraphics, ComCtrls, CheckLst, Controls;
 
 type
   PCustomProgressBar = ^TCustomProgressBar;
@@ -30,7 +30,6 @@ type
 
   PCustomCheckListBox = ^TCustomCheckListBox;
   PCheckBoxState = ^TCheckBoxState;
-  PCheckListClicked  = ^TCheckListClicked;
   PCheckListBox = ^TCheckListBox;
 
   PCustomPage = ^TCustomPage;
@@ -39,7 +38,6 @@ type
   PTabChangingEvent = ^TTabChangingEvent;
   PCTabControlOption = ^TCTabControlOption;
   PTabPosition = ^TTabPosition;
-  PTabStyle = ^TTabStyle;
   PCTabControlOptions = ^TCTabControlOptions;
 
   PPageControl = ^TPageControl;
@@ -51,7 +49,6 @@ type
   PStatusPanelBevel = ^TStatusPanelBevel;
   PStatusPanelStyle = ^TStatusPanelStyle;
   PStatusPanels = ^TStatusPanels;
-  PPanelPart = ^TPanelPart;
   PPanelParts = ^TPanelParts;
   PCaption = ^TCaption;
 

@@ -44,12 +44,11 @@ procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
 implementation
 
 uses
-  MufasaTypes,LCLType,lplclsystem, stringutil, Clipbrd;
+  MufasaTypes,LCLType,lplclsystem, Clipbrd;
 
 type
   PHbitmap = ^HBitmap;
   PHPalette = ^HPalette;
-  PClipboardFormat = ^TClipboardFormat;
   PAntialiasingMode = ^TAntialiasingMode;
 
   {TGraphicsObject}
@@ -1317,7 +1316,6 @@ end;
 
 procedure TBitmap_ToString(const Params: PParamArray; const Result: Pointer); lape_extdecl
 var
-  b: TBitmap;
   x, y, w, h: integer;
   Addition, Data: string;
 begin
@@ -1340,7 +1338,7 @@ end;
 
 procedure TBitmap_LoadFromString(const Params: PParamArray); lape_extdecl
 var
-  x, y, w, h: integer;
+  x, y: Integer;
 begin
   PBitmap(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 

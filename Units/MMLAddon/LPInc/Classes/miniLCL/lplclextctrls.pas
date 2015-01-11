@@ -580,7 +580,7 @@ begin
 end;
 
 //procedure FlipChildren(AllLevels: Boolean); override;
-procedure TCustomRadioGroup_FlipChildren(AllLevels: Boolean; const Params: PParamArray); lape_extdecl
+procedure TCustomRadioGroup_FlipChildren(const Params: PParamArray); lape_extdecl
 begin
   PCustomRadioGroup(Params^[0])^.FlipChildren(PBoolean(Params^[1])^);
 end;

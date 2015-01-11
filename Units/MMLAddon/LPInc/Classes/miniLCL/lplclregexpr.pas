@@ -6,7 +6,7 @@ unit lplclregexpr;
 interface
 
 uses
-  Classes, SysUtils, RegExpr, lpcompiler, lptypes, lpClassHelper;
+  Classes, SysUtils, RegExpr, lpCompiler, lpTypes, lpClassHelper;
 
 procedure RegisterLCLTRegExpr(Compiler: TLapeCompiler);
 

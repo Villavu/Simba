@@ -1,18 +1,19 @@
 object FunctionListFrame: TFunctionListFrame
   Left = 0
-  Height = 522
+  Height = 240
   Top = 0
   Width = 182
   Align = alLeft
-  ClientHeight = 522
+  ClientHeight = 240
   ClientWidth = 182
+  LCLVersion = '1.2.4.0'
   OnEndDock = FrameEndDock
   TabOrder = 0
   DesignLeft = 120
   DesignTop = 203
   object FunctionList: TTreeView
     Left = 0
-    Height = 477
+    Height = 195
     Top = 19
     Width = 182
     Align = alClient
@@ -130,7 +131,7 @@ object FunctionListFrame: TFunctionListFrame
   object Panel1: TPanel
     Left = 0
     Height = 26
-    Top = 496
+    Top = 214
     Width = 182
     Align = alBottom
     Caption = 'Panel1'
@@ -144,7 +145,6 @@ object FunctionListFrame: TFunctionListFrame
       Width = 29
       Align = alRight
       Caption = 'x'
-      NumGlyphs = 0
       OnClick = ClearSearchClick
     end
     object editSearchList: TEdit

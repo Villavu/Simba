@@ -11,7 +11,7 @@ uses
 procedure RegisterLCLSpinCtrls(Compiler: TLapeCompiler);
 
 implementation
-  uses MufasaTypes, lplclsystem, lplclstdctrls, Spin;
+  uses MufasaTypes, lplclsystem, Spin;
 
 type
   PCustomFloatSpinEdit = ^TCustomFloatSpinEdit;

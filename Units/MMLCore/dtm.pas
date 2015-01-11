@@ -301,10 +301,9 @@ end;
 
 function TMDTM.LoadFromString(const s: string): boolean;
 var
-  MDTM : TMDTM;
   Source : String;
   DestLen : longword;
-  i,ii,c : integer;
+  i,ii : integer;
   DPoints : PMDTMPoint;
   Ptr : Pointer;
   function ReadInteger : integer;

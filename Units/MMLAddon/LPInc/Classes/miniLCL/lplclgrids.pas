@@ -13,10 +13,9 @@ procedure RegisterLCLGrids(Compiler: TLapeCompiler);
 implementation
 
 uses
-  MufasaTypes, lplclsystem, ValEdit, Grids, Graphics, controls;
+  MufasaTypes, lplclsystem, Grids, Graphics, controls;
 
 type
-  PValueListEditor = ^TValueListEditor;
   PCustomGrid = ^TCustomGrid;
   PSortOrder = ^TSortOrder;
   PRect = ^TRect;
@@ -33,15 +32,10 @@ type
   POnSelectCellEvent = ^TOnSelectCellEvent;
   PCustomStringGrid = ^TCustomStringGrid;
   PGridZoneSet = ^TGridZoneSet;
-  PKeyOptions = ^TKeyOptions;
-  PValueListStrings = ^TValueListStrings;
-  PGetPickListEvent = ^TGetPickListEvent;
-  POnValidateEvent = ^TOnValidateEvent;
   PStringGrid = ^TStringGrid;
   PGridOptions = ^TGridOptions;
   PGridColumns = ^TGridColumns;
   PGridColumn = ^TGridColumn;
-  PCollectionItemClass = ^TCollectionItemClass;
   PAlignment = ^TAlignment;
   PFont = ^TFont;
   PTextLayout = ^TTextLayout;

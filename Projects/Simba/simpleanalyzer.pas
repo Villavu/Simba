@@ -28,7 +28,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, SynEdit, SynHighlighterPas,MufasaBase, Clipbrd;
+  SynEdit, SynHighlighterPas,MufasaBase, Clipbrd;
 
 type
 
@@ -73,14 +73,10 @@ type
     Destructor  Destroy; override;
   end;
 
-
-
 implementation
 
 uses
-  mPasLex,strutils;
-
-
+  mPasLex;
 
 destructor TScriptAnalyzer.Destroy;
 var
