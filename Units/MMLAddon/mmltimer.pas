@@ -33,6 +33,8 @@ type
     FContinue: Boolean;
     FRunning: Boolean;
     FEnabled: Boolean;
+    FTimer: TTimerThread;
+    FSynchronize: Boolean;
     procedure   SetEnabled(Value: Boolean );
     function GetInterval: integer;
     procedure SetInterval(Value: integer);
@@ -43,10 +45,11 @@ type
     procedure   StopTimer;
     property    Continue: Boolean read FContinue write FContinue;
   public
-    constructor Create;
+    constructor Create(Synchronize: Boolean);
     destructor  Destroy;
     procedure   On;
     procedure   Off;
+    procedure   WaitFor;
   published
     property    Enabled: Boolean read FEnabled write SetEnabled;
     property    Interval: Integer read FInterval write FInterval;
@@ -83,7 +86,10 @@ begin
   while FTimer.Continue do
   begin
     Last := _GetTickCount;
-    Synchronize(@DoExecute);
+    if (FTimer.FSynchronize) then
+      Synchronize(@DoExecute)
+    else
+      DoExecute();
     SleepTime := FTimer.FInterval - (_GetTickCount - Last);
     if SleepTime < 10 then
       SleepTime := 10;
@@ -99,10 +105,11 @@ end;
 
 { TMMLTimer }
 
-constructor TMMLTimer.Create;
+constructor TMMLTimer.Create(Synchronize: Boolean);
 begin
   FPriority := tpNormal;
-  FInterval:=1000;
+  FInterval := 1000;
+  FSynchronize := Synchronize;
 end;
 
 destructor TMMLTimer.Destroy;
@@ -120,6 +127,12 @@ begin
     else
       StopTimer;
   end;
+end;
+
+procedure TMMLTimer.WaitFor;
+begin
+  if (Assigned(Self.FTimer)) then
+    Self.FTimer.WaitFor;
 end;
 
 function TMMLTimer.GetInterval: integer;
@@ -155,11 +168,12 @@ begin
   if FRunning then
     Exit; //==>
   FContinue := True;
-    with TTimerThread.CreateTimerThread(Self) do
-    begin
-      Priority := FPriority;
-      Resume;
-    end;
+  FTimer := TTimerThread.CreateTimerThread(Self);
+  with FTimer do
+  begin
+    Priority := FPriority;
+    Resume;
+  end;
   FRunning := True;
 end;
 
@@ -178,7 +192,6 @@ procedure TMMLTimer.Off;
 begin
   StopTimer;
 end;
-
 
 end.
 

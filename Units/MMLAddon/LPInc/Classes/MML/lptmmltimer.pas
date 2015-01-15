@@ -22,7 +22,7 @@ type
 
 procedure TMMLTimer_Init(const Params: PParamArray); lape_extdecl
 begin
-  PMMLTimer(Params^[0])^ := TMMLTimer.Create;
+  PMMLTimer(Params^[0])^ := TMMLTimer.Create(PBoolean(Params^[1])^);
 end;
 
 procedure TMMLTimer_Free(const Params: PParamArray); lape_extdecl
@@ -80,6 +80,11 @@ begin
   PMMLTimer(Params^[0])^.OnTimer := PNotifyEvent(Params^[1])^;
 end;
 
+procedure TMMLTimer_WaitFor(const Params: PParamArray); lape_extdecl
+begin
+  PMMLTimer(Params^[0])^.WaitFor();
+end;
+
 procedure Register_TMMLTimer(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -92,9 +97,10 @@ begin
     addClassVar('TMMLTimer', 'Interval', 'Integer', @TMMLTimer_Interval_Read, @TMMLTimer_Interval_Write);
     addClassVar('TMMLTimer', 'ThreadPriority', 'TThreadPriority', @TMMLTimer_ThreadPriority_Read, @TMMLTimer_ThreadPriority_Write);
     addClassVar('TMMLTimer', 'OnTimer', 'TNotifyEvent', @TMMLTimer_OnTimer_Read, @TMMLTimer_OnTimer_Write);
+    addGlobalFunc('procedure TMMLTimer.WaitFor();', @TMMLTimer_WaitFor);
     addGlobalFunc('procedure TMMLTimer.On();', @TMMLTimer_On);
     addGlobalFunc('procedure TMMLTimer.Off();', @TMMLTimer_Off);
-    addGlobalFunc('procedure TMMLTimer.Init();', @TMMLTimer_Init);
+    addGlobalFunc('procedure TMMLTimer.Init(Synchronize: Boolean = True);', @TMMLTimer_Init);
     addGlobalFunc('procedure TMMLTimer.Free();', @TMMLTimer_Free);
   end;
 end;
