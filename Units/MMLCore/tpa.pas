@@ -3320,7 +3320,7 @@ begin
   Area.X1 := Area.X1 - 1;
   Area.Y1 := Area.Y1 - 1;
 
-  SetLength(Matrix, Area.X2+1, Area.Y2+1);
+  SetLength(Matrix, Area.Y2+1, Area.X2+1);
 
   start := Point(Area.X2, Area.Y2);
   for i:=0 to H do
