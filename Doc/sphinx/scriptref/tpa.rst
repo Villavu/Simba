@@ -1105,5 +1105,32 @@ The following example will partition a TPA in boxes of 10 width, 10 height and d
     DisplayDebugImgWindow(100, 100);
     DrawBitmapDebugImg(canvas);
     FreeBitmap(canvas);
-  end.  
+  end. 
+
+TPABorder
+---------
+
+.. code-block:: pascal
+
+    function TPABorder(const TPA: TPointArray): TPointArray;
+
+Returns the outter edge (+1 px) of the shape.
+
+.. code-block:: pascal
+ 
+program TPABorder_Example;
+
+var
+  Shape: TPointArray;
+  img: Byte := CreateBitmap(250, 250);
+begin
+  Shape := TPAFromCircle(125, 125, 88);
+
+  for 1 to 3 do
+    Shape := CombineTPA(Shape, TPABorder(Shape));
+
+  DrawTPABitmap(img, Shape, 6565633);
+  ShowBitmap(img);
+  FreeBitmap(img);
+end.             
 
