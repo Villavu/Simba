@@ -10,7 +10,7 @@ var
   Extensions: string;
 
 type
-  {$IFNDEF SIMBAMAJOR1000}
+  {$IFNDEF SIMBAMAJOR1100}
   TCharArray = array of Char;
   {$ENDIF}
 
@@ -260,7 +260,7 @@ end;
 
 function GetVersion : string;
 begin;
-  result := '0.1';
+  result := '0.2';
 end;
 
 begin
