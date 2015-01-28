@@ -3,7 +3,7 @@ program AssociateFiles;
 //http://villavu.com/forum/showthread.php?t=56853
 
 const
-  ExtensionsDef = 'simb,simba,sex';
+  ExtensionsDef = 'simb,simba,sex,sei';
 
 var
   SimbaMenu: TMenuItem;
