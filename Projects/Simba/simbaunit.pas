@@ -1416,7 +1416,7 @@ begin
       ScriptThread.Suspended:= True;
       ScriptState:= ss_Paused;
       {$else}
-      mDebugLn('Simba doesn''t suspending scripts on Linux yet');
+      mDebugLn('Simba doesn''t support suspending scripts on Linux yet');
       {$endif}
     end else if ScriptState = ss_Paused then
     begin;
