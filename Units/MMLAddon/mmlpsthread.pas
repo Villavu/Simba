@@ -1530,6 +1530,7 @@ end;
 function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
   plugin_idx: integer;
+  Path: String;
 begin
   Result := False;
   if (not InPeek) and (CompareText(Directive,'LOADLIB') = 0) then
