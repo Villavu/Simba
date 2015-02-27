@@ -53,7 +53,6 @@ interface
         destructor Destroy; override;
         procedure ValidateDirs;
         procedure AddPath(path: string);
-        procedure DeletePath(Path: string);
         procedure FreePlugins; virtual;
         function LoadPlugin(PluginName : string) : integer;
         property Loaded: TGenericLibArray read FLoaded;
@@ -64,32 +63,18 @@ implementation
   uses
     MufasaTypes,MufasaBase,FileUtil;
 
-  procedure TGenericLoader.AddPath(Path: string);
+  procedure TGenericLoader.AddPath(path: string);
   var
-    Verified: string;
+    idx: integer;
+    verified : string;
   begin
-    Verified := VerifyPath(Path);
-
-    with PluginDirs do
-      if (IndexOf(Verified) = -1) then
-      begin
-        Add(Verified);
-        mDebugLn('Added Plugin Path: ' + Verified);
-      end;
-  end;
-
-  procedure TGenericLoader.DeletePath(Path: string);
-  var
-    Verified: string;
-  begin
-    Verified := VerifyPath(Path);
-
-    with PluginDirs do
-      if (IndexOf(Verified) > -1) then
-      begin
-        Delete(IndexOf(Verified));
-        mDebugLn('Deleted Plugin Path: ' + Verified);
-      end;
+    verified := VerifyPath(path);
+    //IDK who changed this to loading a dir, but DON'T
+    if not PluginDirs.Find(verified,idx) then
+    begin
+      mDebugLn('Adding Plugin Path: ' + verified);
+      PluginDirs.Add(verified);
+    end;
   end;
 
   procedure TGenericLoader.ValidateDirs;
@@ -146,6 +131,7 @@ implementation
 
     if PluginDirs.Count = 0 then
       Exit;
+
     ValidateDirs;
     PluginName := ExtractFileNameWithoutExt(PluginName);
     for i := 0 to PluginDirs.Count - 1 do

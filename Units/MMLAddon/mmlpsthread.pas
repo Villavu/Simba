@@ -1530,7 +1530,6 @@ end;
 function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
   plugin_idx: integer;
-  Path: String;
 begin
   Result := False;
   if (not InPeek) and (CompareText(Directive,'LOADLIB') = 0) then
@@ -1541,13 +1540,7 @@ begin
       if (InIgnore) then
         Exit;
 
-      Path := ExtractFilePath(Sender.Tokenizer.FileName);
-      if (Path <> '') then
-        PluginsGlob.AddPath(Path);
       plugin_idx := PluginsGlob.LoadPlugin(Argument);
-      if (Path <> '') then
-        PluginsGlob.DeletePath(Path);
-
       if (plugin_idx >= 0) then
         LoadPlugin(plugin_idx)
       else
