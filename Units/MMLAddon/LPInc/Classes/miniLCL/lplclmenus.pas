@@ -612,6 +612,157 @@ begin
   end;
 end;
 
+type
+  PPopupMenu = ^TPopupMenu;
+  PPopupAlignment = ^TPopupAlignment;
+  PTrackButton = ^TTrackButton;
+  PHelpContext = ^THelpContext;
+
+//procedure PopUp;
+procedure TPopupMenu_PopUp(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.PopUp();
+end;
+
+//procedure PopUp(X, Y: Integer); virtual;
+procedure TPopupMenu_PopUpEx(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.PopUp(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+//Read: property PopupComponent: TComponent read FPopupComponent write FPopupComponent;
+procedure TPopupMenu_PopupComponent_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PComponent(Result)^ := PPopupMenu(Params^[0])^.PopupComponent;
+end;
+
+//Write: property PopupComponent: TComponent read FPopupComponent write FPopupComponent;
+procedure TPopupMenu_PopupComponent_Write(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.PopupComponent := PComponent(Params^[1])^;
+end;
+
+//Read: property PopupPoint: TPoint read FPopupPoint;
+procedure TPopupMenu_PopupPoint_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPoint(Result)^ := PPopupMenu(Params^[0])^.PopupPoint;
+end;
+
+//procedure Close;
+procedure TPopupMenu_Close(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.Close();
+end;
+
+//Read: property Alignment: TPopupAlignment read FAlignment write FAlignment default paLeft;
+procedure TPopupMenu_Alignment_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPopupAlignment(Result)^ := PPopupMenu(Params^[0])^.Alignment;
+end;
+
+//Write: property Alignment: TPopupAlignment read FAlignment write FAlignment default paLeft;
+procedure TPopupMenu_Alignment_Write(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.Alignment := PPopupAlignment(Params^[1])^;
+end;
+
+//Read: property AutoPopup: Boolean read FAutoPopup write FAutoPopup default True;
+procedure TPopupMenu_AutoPopup_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PPopupMenu(Params^[0])^.AutoPopup;
+end;
+
+//Write: property AutoPopup: Boolean read FAutoPopup write FAutoPopup default True;
+procedure TPopupMenu_AutoPopup_Write(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.AutoPopup := PBoolean(Params^[1])^;
+end;
+
+//Read: property HelpContext: THelpContext read GetHelpContext write SetHelpContext default 0;
+procedure TPopupMenu_HelpContext_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PHelpContext(Result)^ := PPopupMenu(Params^[0])^.HelpContext;
+end;
+
+//Write: property HelpContext: THelpContext read GetHelpContext write SetHelpContext default 0;
+procedure TPopupMenu_HelpContext_Write(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.HelpContext := PHelpContext(Params^[1])^;
+end;
+
+//Read: property TrackButton: TTrackButton read FTrackButton write FTrackButton default tbRightButton;
+procedure TPopupMenu_TrackButton_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PTrackButton(Result)^ := PPopupMenu(Params^[0])^.TrackButton;
+end;
+
+//Write: property TrackButton: TTrackButton read FTrackButton write FTrackButton default tbRightButton;
+procedure TPopupMenu_TrackButton_Write(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.TrackButton := PTrackButton(Params^[1])^;
+end;
+
+//Read: property OnPopup: TNotifyEvent read FOnPopup write FOnPopup;
+procedure TPopupMenu_OnPopup_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PPopupMenu(Params^[0])^.OnPopup;
+end;
+
+//Write: property OnPopup: TNotifyEvent read FOnPopup write FOnPopup;
+procedure TPopupMenu_OnPopup_Write(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.OnPopup := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property OnClose: TNotifyEvent read FOnClose write FOnClose;
+procedure TPopupMenu_OnClose_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PPopupMenu(Params^[0])^.OnClose;
+end;
+
+//Write: property OnClose: TNotifyEvent read FOnClose write FOnClose;
+procedure TPopupMenu_OnClose_Write(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.OnClose := PNotifyEvent(Params^[1])^;
+end;
+
+//constructor Create();
+procedure TPopupMenu_Init(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^ := TPopupMenu.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TPopupMenu_Free(const Params: PParamArray); lape_extdecl
+begin
+  PPopupMenu(Params^[0])^.Free();
+end;
+
+procedure Register_TPopupMenu(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addGlobalType('(paLeft, paRight, paCenter)', 'TPopupAlignment');
+    addGlobalType('(tbRightButton, tbLeftButton)', 'TTrackButton');
+
+    addClass('TPopupMenu', 'TMenu');
+
+    addGlobalFunc('procedure TPopupMenu.PopUp();', @TPopupMenu_PopUp);
+    addGlobalFunc('procedure TPopupMenu.PopUp(X, Y: Integer); overload;', @TPopupMenu_PopUpEx);
+    addClassVar('TPopupMenu', 'PopupComponent', 'TComponent', @TPopupMenu_PopupComponent_Read, @TPopupMenu_PopupComponent_Write);
+    addClassVar('TPopupMenu', 'PopupPoint', 'TPoint', @TPopupMenu_PopupPoint_Read, nil);
+    addGlobalFunc('procedure TPopupMenu.Close();', @TPopupMenu_Close);
+    addClassVar('TPopupMenu', 'Alignment', 'TPopupAlignment', @TPopupMenu_Alignment_Read, @TPopupMenu_Alignment_Write);
+    addClassVar('TPopupMenu', 'AutoPopup', 'Boolean', @TPopupMenu_AutoPopup_Read, @TPopupMenu_AutoPopup_Write);
+    addClassVar('TPopupMenu', 'HelpContext', 'Int32', @TPopupMenu_HelpContext_Read, @TPopupMenu_HelpContext_Write);
+    addClassVar('TPopupMenu', 'TrackButton', 'TTrackButton', @TPopupMenu_TrackButton_Read, @TPopupMenu_TrackButton_Write);
+    addClassVar('TPopupMenu', 'OnPopup', 'TNotifyEvent', @TPopupMenu_OnPopup_Read, @TPopupMenu_OnPopup_Write);
+    addClassVar('TPopupMenu', 'OnClose', 'TNotifyEvent', @TPopupMenu_OnClose_Read, @TPopupMenu_OnClose_Write);
+    addGlobalFunc('procedure TPopupMenu.Init(AOwner: TComponent);', @TPopupMenu_Init);
+    addGlobalFunc('procedure TPopupMenu.Free();', @TPopupMenu_Free);
+  end;
+end;
+
 
 procedure RegisterLCLMenus(Compiler: TLapeCompiler);
 begin
@@ -619,6 +770,7 @@ begin
   Register_TMenuItem(Compiler);
   Register_TMenu(Compiler);
   Register_TMainMenu(Compiler);
+  Register_TPopupMenu(Compiler);
 end;
 
 
