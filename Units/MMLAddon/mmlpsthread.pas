@@ -1540,7 +1540,13 @@ begin
       if (InIgnore) then
         Exit;
 
+      Path := ExtractFilePath(Sender.Tokenizer.FileName);
+      if (Path <> '') then
+        PluginsGlob.AddPath(Path); // Add the scripts file path to plugin path 
       plugin_idx := PluginsGlob.LoadPlugin(Argument);
+      if (Path <> '') then
+        PluginsGlob.DeletePath(Path); // If we added the path, delete it since PluginsGlob is global (used in every script).
+
       if (plugin_idx >= 0) then
         LoadPlugin(plugin_idx)
       else
