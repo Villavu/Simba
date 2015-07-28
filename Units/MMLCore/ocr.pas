@@ -59,6 +59,7 @@ type
   public
     constructor Create(Owner: TObject);
     destructor Destroy; override;
+    procedure SetPath(const path: string);
     function InitTOCR(const path: string): boolean;
     function getTextPointsIn(sx, sy, w, h: Integer; shadow: boolean;
            var _chars, _shadows: T2DPointArray): Boolean;
@@ -158,6 +159,23 @@ begin
 
   Self.FFonts.Free;
   inherited Destroy;
+end;
+
+(*
+SetPath
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function TMOCR.SetPath(const path: string): boolean;
+
+SetPath sets the path for FFonts
+We don't do this in the constructor because we may not yet have the path.
+
+*)
+procedure TMOCR.SetPath(const path: string);
+begin
+  FFonts.Path := path;
 end;
 
 (*

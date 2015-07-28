@@ -1916,7 +1916,6 @@ procedure TSimbaForm.InitializeTMThread(out Thread: TMThread);
 var
   ScriptPath: string;
   Script: string;
-  loadFontsOnScriptStart: boolean;
   Continue: boolean;
 
 begin
@@ -1985,16 +1984,16 @@ begin
   if selector.haspicked then
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-  loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnStartUp.GetDefValue(True);
-  if (loadFontsOnScriptStart) then
+  if ((not (Assigned(OCR_Fonts))) and DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
   begin
-    if ((not (Assigned(OCR_Fonts))) and DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
-    begin
-      OCR_Fonts := TMOCR.Create(Thread.Client);
-      OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
-    end;
-    Thread.SetFonts(OCR_Fonts.Fonts);
+    OCR_Fonts := TMOCR.Create(Thread.Client);
+
+    if SimbaSettings.Fonts.LoadOnStartUp.Value then
+      OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value)
+    else
+      OCR_Fonts.SetPath(SimbaSettings.Fonts.Path.Value);
   end;
+  Thread.SetFonts(OCR_Fonts.Fonts);
 
   {
     We pass the entire settings to the script; it will then create a Sandbox
