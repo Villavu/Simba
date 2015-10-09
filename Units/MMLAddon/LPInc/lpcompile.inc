@@ -74,6 +74,7 @@ addGlobalVar(40000, 'SQLITE_OPEN_PRIVATECACHE').isConstant := true;
 
 //addGlobalVar(maxLongint, 'MaxLongInt').isConstant := True;  //Don't need these...
 //addGlobalVar(maxLongint, 'MaxInt').isConstant := True;      //High works here....
+addGlobalVar(FormatSettings.DecimalSeparator, 'DECIMAL_SEPARATOR').isConstant := True;
 
 addGlobalVar(ps_mouse_right, 'mouse_Right').isConstant := True;   //0
 addGlobalVar(ps_mouse_left, 'mouse_Left').isConstant := True;     //1
