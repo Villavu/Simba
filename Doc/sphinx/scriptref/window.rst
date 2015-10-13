@@ -235,7 +235,7 @@ Example usage:
     begin
       T:= GetProcesses();
       for I := 0 to high(T) do
-        if StartsWith(TitlePrefix, T[i].Title) then
+        if ExecRegExpr('^' + TitlePrefix, T[i].Title) then
         begin
           Result := True;
           if SetAsTarget then
