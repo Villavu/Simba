@@ -1074,7 +1074,7 @@ begin
     addGlobalFunc('function TComponent.FindComponent(const AName: string): TComponent;', @TComponent_FindComponent);
     addGlobalFunc('procedure TComponent.InsertComponent(AComponent: TComponent);', @TComponent_InsertComponent);
     addGlobalFunc('procedure TComponent.RemoveComponent(AComponent: TComponent);', @TComponent_RemoveComponent);
-    addGlobalFunc('procedure TComponent.GetComponent(index: integer);', @TComponent_Components);
+    addGlobalFunc('function TComponent.GetComponent(index: integer): TComponent;', @TComponent_Components);
     addClassVar('TComponent', 'ComponentCount', 'Integer', @TComponent_ComponentCount_Read);
     addClassVar('TComponent', 'ComponentIndex', 'Integer', @TComponent_ComponentIndex_Read, @TComponent_ComponentIndex_Write);
     addClassVar('TComponent', 'ComponentState', 'TComponentState', @TComponent_ComponentState_Read);
