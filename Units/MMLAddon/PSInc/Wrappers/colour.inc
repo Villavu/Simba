@@ -58,7 +58,7 @@ end;
 
 function ps_GetToleranceSpeed: Integer; extdecl;
 begin
- Result := CurrThread.Client.MFinder.GetToleranceSpeed;
+  Result := CurrThread.Client.MFinder.GetToleranceSpeed;
 end;
 
 procedure ps_SetToleranceSpeed2Modifiers(nHue, nSat: Extended); extdecl;
