@@ -469,6 +469,8 @@ type
     function SetSourceEditorFont(obj: TObject): Boolean;
     function SetTrayVisiblity(obj: TObject): Boolean;
 
+    {$ifdef mswindows}function SetDXGrabber(obj: TObject): boolean;{$endif}
+
     procedure SetShowParamHintAuto(const AValue: boolean);
     procedure SetShowCodeCompletionAuto(const AValue: boolean);
     procedure SetScriptState(const State: TScriptState);
@@ -543,6 +545,9 @@ type
     property ShowCodeCompletionAuto: Boolean read GetShowCodeCompletionAuto write SetShowCodeCompletionAuto;
     property CurrHighlighter : TSynCustomHighlighter read GetHighlighter;
     function DefaultScript : string;
+    {$ifdef mswindows}
+    procedure ApplyGrabber(AManager: TIOManager);
+    {$endif}
 
     procedure UpdateSimbaSilent(Force: Boolean);
   end;
@@ -1002,6 +1007,21 @@ begin
   frmFunctionList.FunctionList.Items.Clear;
   MenuitemFillFunctionList.Click;
 end;
+{$ifdef mswindows}
+function TSimbaForm.SetDXGrabber(obj: TObject): boolean;
+var
+  currValue: boolean;
+begin
+  currValue:= TBooleanSetting(obj).Value;
+  With Manager do
+  begin
+    if not currValue then
+      SetGrabberType(0)
+     else
+      SetGrabberType(1);
+    end;
+end;
+{$endif}
 
 function TSimbaForm.SetTrayVisiblity(obj: TObject): Boolean;
 begin
@@ -1982,8 +2002,12 @@ begin
 
   Thread.SetPath(ScriptPath);
 
+  {$ifdef mswindows}
+  ApplyGrabber(Thread.Client.IOManager);
+  {$endif}
+
   if selector.haspicked then
-    Thread.Client.IOManager.SetTarget(Selector.LastPick);
+     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
   loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnStartUp.GetDefValue(True);
   if (loadFontsOnScriptStart) then
@@ -2105,6 +2129,22 @@ begin
                 end;
   end;
 end;
+
+{$IFDEF mswindows}
+procedure TSimbaForm.ApplyGrabber(AManager: TIOManager);
+var
+  useDX: boolean;
+begin
+  useDX:= SimbaSettings.ScreenGrabber.TypeOfGrabber.Value;
+  With AManager do
+  begin
+    if not useDX then
+      SetGrabberType(0)
+     else
+      SetGrabberType(1);
+    end;
+end;
+{$endif}
 
 
 procedure TSimbaForm.ActionTabLastExecute(Sender: TObject);
@@ -2437,11 +2477,19 @@ var
   y: integer = -1;
 begin
   if Self.Manager.TargetValid = false then
+   begin
+    {$ifdef mswindows}
+    ApplyGrabber(self.manager);
+    {$endif}
     self.Manager.SetDesktop;
+   end;
   Self.Manager.GetMousePos(x, y);
   if self.Manager.ReceivedError() then
   begin
     FormWritelnEx('Our window no longer exists -> Resetting to desktop');
+    {$ifdef mswindows}
+    ApplyGrabber(self.manager);
+    {$endif}
     self.Manager.SetDesktop;
     self.Manager.ResetError;
   end;
@@ -2890,6 +2938,7 @@ var
   Params: string;
   I: LongInt;
   sei: TShellExecuteInfoA;
+//  UseDX: boolean;
   {$ENDIF}
 begin
   // Set our own exception handler.
@@ -2900,8 +2949,8 @@ begin
   isElevated := UserInGroup(DOMAIN_ALIAS_RID_ADMINS);
   isWritable := DirectoryIsWritable(Application.Location);
 
-  WriteLn('Elevated: ' + BoolToStr(isElevated, True));
-  WriteLn('Writable: ' + BoolToStr(isWritable, True));
+  WriteLn('Elevated: ' + BoolToStr(isElevated));
+  WriteLn('Writable: ' + BoolToStr(isWritable));
 
   if (not isWritable) and (not isElevated) then
   begin
@@ -3052,6 +3101,10 @@ begin
 
   HandleParameters;
   FillThread.Start;
+
+  {$ifdef mswindows}
+   ApplyGrabber(manager);
+  {$endif}
 
   self.EndFormUpdate;
 end;
@@ -3557,6 +3610,9 @@ end;
 procedure TSimbaForm.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
+  {$ifdef mswindows}
+  ApplyGrabber(Manager);
+  {$endif}
   Manager.SetTarget(Selector.Drag);
   FormWritelnEx('New window: ' + IntToStr(Selector.LastPick));
 end;
@@ -3769,6 +3825,7 @@ begin
   SimbaSettings.Fonts.Path.onChange:= @SetFontsPath;
   SimbaSettings.Includes.Path.onChange:= @SetIncludesPath;
   SimbaSettings.Scripts.Path.onChange:= @SetScriptsPath;
+  {$IFDEF MSWINDOWS}SimbaSettings.ScreenGrabber.TypeOfGrabber.onChange:=@SetDXGrabber;{$ENDIF}
   {$IFDEF USE_EXTENSIONS}SimbaSettings.Extensions.Path.onChange := @SetExtensionsPath;{$ENDIF}
 
   SimbaSettings.SourceEditor.DefScriptPath.onChange := @SetDefaultScriptPath;

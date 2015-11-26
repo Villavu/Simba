@@ -27,9 +27,11 @@ unit os_windows;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, windows, graphics, LCLType, LCLIntf, bitmaps, IOManager, WinKeyInput;
+    Classes, SysUtils, mufasatypes, windows, graphics,forms, LCLType, LCLIntf, bitmaps, IOManager, WinKeyInput, D3DX9,Direct3D9;
     
   type
+
+    TGrabberType = (gtWinapi = 0,gtDirectX = 1);
 
     TNativeWindow = Hwnd;
 
@@ -44,11 +46,12 @@ interface
     TWindow = class(TWindow_Abstract)
       public
         constructor Create;
-        constructor Create(target: Hwnd); 
+        constructor Create(target: Hwnd);
         destructor Destroy; override;
         procedure GetTargetDimensions(out w, h: integer); override;
         procedure GetTargetPosition(out left, top: integer); override;
         function ReturnData(xs, ys, width, height: Integer): TRetData; override;
+        function ReturnDataByDX(x,y,width, height: integer): TRetData;
         function GetColor(x,y : integer) : TColor; override;
 
         function  GetError: String; override;
@@ -86,6 +89,11 @@ interface
         buffer_raw: prgb32;
         width,height: integer;
         keyinput: TKeyInput;
+        //DirectX screen grabbing
+        GrabberType: TGrabberType;
+
+
+        //
 
 
         { (Forced) Client Area }
@@ -108,16 +116,20 @@ interface
       function WindowRect(out Rect : TRect) : Boolean;override;
     end;
 
+    { TIOManager }
+
     TIOManager = class(TIOManager_Abstract)
       public
         constructor Create;
         constructor Create(plugin_dir: string);
+        procedure SetGrabberType(Grabber: integer); override;
         function SetTarget(target: TNativeWindow): integer; overload;
         procedure SetDesktop; override;
         
         function GetProcesses: TSysProcArr; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
       protected
+        GrabberType: TGRabberType;
         DesktopHWND : Hwnd;
         procedure NativeInit; override;
         procedure NativeFree; override;
@@ -198,6 +210,7 @@ implementation
     self.mcaset := false;
     self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
     self.icaset := false;
+    //self.GrabberType:=gtWinapi;
   end;
 
   constructor TWindow.Create(target: Hwnd);
@@ -213,6 +226,7 @@ implementation
     self.mcaset := false;
     self.ix1 := 0; self.iy1 := 0; self.ix2 := 0; self.iy2 := 0;
     self.icaset := false;
+   // self.GrabberType:=gtWinapi;
   end;
   
   destructor TWindow.Destroy;
@@ -375,19 +389,97 @@ implementation
     temp: PRGB32;
     w,h : integer;
   begin
-    GetTargetDimensions(w,h);
-    ValidateBuffer(w,h);
-    if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
-      raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
+    if (GrabberType = gtWinapi) then
+     begin
+      GetTargetDimensions(w,h);
+      ValidateBuffer(w,h);
+      if (xs < 0) or (xs + width > w) or (ys < 0) or (ys + height > h) then
+        raise Exception.CreateFMT('TMWindow.ReturnData: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d',[xs,ys,width,height]);
 
-    ImageApplyAreaOffset(xs, ys);
+      ImageApplyAreaOffset(xs, ys);
 
-    Windows.BitBlt(self.buffer.Canvas.Handle,0,0, width, height, self.dc, xs,ys, SRCCOPY);
-    Result.Ptr:= self.buffer_raw;
+      Windows.BitBlt(self.buffer.Canvas.Handle,0,0, width, height, self.dc, xs,ys, SRCCOPY);
+      Result.Ptr:= self.buffer_raw;
 
-    Result.IncPtrWith:= w - width;
-    Result.RowLen:= w;
+      Result.IncPtrWith:= w - width;
+      Result.RowLen:= w;
+      end
+      else
+      result:=ReturnDataByDX(xs,ys,width,height);
   end;
+
+function TWindow.ReturnDataByDX(x, y, width, height: integer): TRetData;
+ var
+  w, h: integer;
+  BitsPerPixel: Byte;
+  pD3D: IDirect3D9;
+  Buff: ID3DXBuffer;
+  pSurface: IDirect3DSurface9;
+  g_pD3DDevice: IDirect3DDevice9;
+  D3DPP: TD3DPresentParameters;
+  mode: TD3DDISPLAYMODE;
+  ARect: TRect;
+  i, Hr, size: Integer;
+  LockedRect: TD3DLockedRect;
+  p: pointer;
+  pt: TPoint;
+begin
+  GetTargetDimensions(w, h);
+  ValidateBuffer(w, h);
+  if (x < 0) or (x + width > w) or (y < 0) or (y + height > h) then
+    raise Exception.CreateFMT('TMWindow.ReturnDatabyDX: The parameters passed are wrong; xs,ys %d,%d width,height %d,%d', [x, y, width, height]);
+  ImageApplyAreaOffset(x, y);
+  BitsPerPixel := 32;
+  try
+    SetForegroundWindow(Handle);
+    pD3D := Direct3DCreate9(D3D_SDK_VERSION);
+    Hr := pD3D.GetAdapterDisplayMode(D3DADAPTER_DEFAULT, mode);
+    if (Hr <> D3D_OK) then
+      raise exception.CreateFmt('IDirect3D9::GetAdapterDisplayMode() failed with %d', [hr]);
+    FillChar(d3dpp, SizeOf(d3dpp), 0);
+    with D3DPP do
+    begin
+      Windowed := True;
+      SwapEffect := D3DSWAPEFFECT_DISCARD;
+      BackBufferWidth := mode.Width;
+      BackBufferHeight := mode.Height;
+      BackBufferFormat := D3DFMT_UNKNOWN;
+    end;
+    Hr := pD3D.CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetDesktopwindow, D3DCREATE_SOFTWARE_VERTEXPROCESSING, @ D3DPP, g_pD3DDevice);
+    if (Hr <> D3D_OK) then
+      raise exception.CreateFmt('IDirect3D9::CreateDevice() failed with %d', [hr]);
+    Hr := g_pD3DDevice.CreateOffscreenPlainSurface(mode.Width, mode.Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, pSurface, nil);
+    if (Hr <> D3D_OK) then
+      raise exception.CreateFmt('IDirect3DDevice9::CreateOffscreenPlainSurface() failed with %d', [hr]);
+    hr := g_pD3DDevice.GetFrontBufferData(0, pSurface);
+    if (Hr <> D3D_OK) then
+      raise exception.CreateFmt('IDirect3DDevice9::GetFrontBufferData() failed with %d', [hr]);
+    WindowRect(ARect);
+    Hr := pSurface.LockRect(LockedRect, @ ARect, D3DLOCK_NO_DIRTY_UPDATE or D3DLOCK_NOSYSLOCK or D3DLOCK_READONLY);
+    if (Hr <> D3D_OK) then
+      raise exception.CreateFmt('IDirect3DDevice9::LockRect() failed with %d', [hr]);
+    P := LockedRect.pBits;
+    try
+      for i := 0 to Height - 1 do
+      begin
+        Move(P ^, Buffer_Raw[i * width], width * BitsPerPixel div 8);
+        p := p + LockedRect.Pitch;
+      end;
+    except
+      on E: Exception do
+        raise Exception.Create(E.Message);
+    end;
+    Result.Ptr := Buffer_raw;
+    Result.IncPtrWith := w - width;
+    Result.RowLen := w;
+  finally
+    pSurface.UnLockRect;
+    pD3D := nil;
+    pSurface := nil;
+    g_pD3DDevice := nil;
+  end;
+end;
+
 
   procedure TWindow.GetMousePosition(out x,y: integer);
   var
@@ -548,6 +640,11 @@ begin
   inherited Create(plugin_dir);
 end;
 
+procedure TIOManager.SetGrabberType(Grabber: integer);
+begin
+  self.GrabberType:=TGrabberType(Grabber);
+end;
+
 procedure TIOManager.NativeInit;
 begin
   self.DesktopHWND:= GetDesktopWindow;
@@ -557,15 +654,24 @@ procedure TIOManager.NativeFree;
 begin
 end;
 
-procedure TIOManager.SetDesktop;
+procedure TIOManager.SetDesktop();
+var
+  wnd: TDesktopWindow;
 begin
-  SetBothTargets(TDesktopWindow.Create(DesktopHWND));
+  wnd:=TDesktopWindow.Create(DesktopHWND);
+  wnd.GrabberType:=self.GrabberType;
+  SetBothTargets(wnd);
 end;
 
 function TIOManager.SetTarget(target: TNativeWindow): integer;
+var
+  wnd: TWindow;
 begin
-  SetBothTargets(TWindow.Create(target));
+  wnd:=TWindow.Create(target);
+  wnd.GrabberType:=self.GrabberType;
+  SetBothTargets(wnd);
 end;
+
 
 threadvar
   ProcArr: TSysProcArr;
