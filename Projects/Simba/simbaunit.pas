@@ -43,7 +43,7 @@ uses
   {$IFDEF MSWINDOWS} os_windows, windows, shellapi,{$ENDIF} //For ColorPicker etc.
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
 
-  colourpicker, windowselector, // We need these for the Colour Picker and Window Selector
+  colourpicker, windowselector, Clipbrd, // We need these for the Colour Picker and Window Selector
 
   framescript,
 
@@ -3534,6 +3534,7 @@ procedure TSimbaForm.ButtonPickClick(Sender: TObject);
 var
    c, x, y: Integer;
    cobj: TColourPickerObject;
+   coordinate: String; 
 begin
   if Picker.Picking then
   begin
@@ -3550,7 +3551,14 @@ begin
   if SimbaSettings.ColourPicker.ShowHistoryOnPick.GetDefValue(True) then
     ColourHistoryForm.Show;
 
-  FormWritelnEx('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
+  coordinate := inttostr(x) + ', ' + inttostr(y);
+  FormWritelnEx('Picked colour: ' + inttostr(c) + ' at (' + coordinate + ')');
+  try
+    Clipboard.AsText := coordinate;
+  except
+    on e: exception do
+      mDebugLn('Exception in TSimbaForm.ButtonPickClick: ' + e.message);
+  end; 
 end;
 
 
