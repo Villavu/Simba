@@ -3528,13 +3528,11 @@ begin
   {$ENDIF}
 end;
 
-
-
 procedure TSimbaForm.ButtonPickClick(Sender: TObject);
 var
    c, x, y: Integer;
    cobj: TColourPickerObject;
-   coordinate: String; 
+   coordinate, colour, clipboardtext: String;
 begin
   if Picker.Picking then
   begin
@@ -3551,16 +3549,28 @@ begin
   if SimbaSettings.ColourPicker.ShowHistoryOnPick.GetDefValue(True) then
     ColourHistoryForm.Show;
 
+  colour := inttostr(c);
   coordinate := inttostr(x) + ', ' + inttostr(y);
-  FormWritelnEx('Picked colour: ' + inttostr(c) + ' at (' + coordinate + ')');
+  FormWritelnEx('Picked colour: ' + colour + ' at (' + coordinate + ')');
+  if (SimbaSettings.ColourPicker.AddColourToClipBoard.GetDefValue(False)) then
+  begin
+    clipboardtext := colour;
+    if (SimbaSettings.ColourPicker.AddCoordinateToClipBoard.GetDefValue(False)) then
+      clipboardtext := clipboardtext + ', ' + coordinate;
+  end else
+    if (SimbaSettings.ColourPicker.AddCoordinateToClipBoard.GetDefValue(False)) then
+      clipboardtext := coordinate;
+
+  if clipboardtext = '' then
+    Exit;
+
   try
-    Clipboard.AsText := coordinate;
+    Clipboard.AsText := clipboardtext;
   except
     on e: exception do
       mDebugLn('Exception in TSimbaForm.ButtonPickClick: ' + e.message);
-  end; 
+  end;
 end;
-
 
 procedure TSimbaForm.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
@@ -4274,4 +4284,3 @@ initialization
 
 
 end.
-
