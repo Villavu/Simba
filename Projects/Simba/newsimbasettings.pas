@@ -229,6 +229,8 @@ type
     TColourPickerSection = class(TSection)
       AddToHistoryOnPick: TBooleanSetting;
       ShowHistoryOnPick: TBooleanSetting;
+      AddCoordinateToClipBoard: TBooleanSetting;
+      AddColourToClipBoard: TBooleanSetting;
     end;
 
     TCodeHintsSection = class(TSection)
@@ -855,6 +857,8 @@ procedure GetGeneralMaxRecentFiles(obj: TObject); begin TIntegerSetting(obj).Val
 
 procedure GetColourPickerShowHistoryonPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetColourPickerAddToHistoryOnPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetColourPickerAddCoordinateToClipBoard(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetColourPickerAddColourToClipBoard(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
 procedure GetCodeInsightShowHidden(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 procedure GetFunctionListShowOnStart(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
@@ -989,6 +993,10 @@ begin
   ColourPicker.AddToHistoryOnPick.onDefault := @GetColourPickerAddToHistoryOnPick;
   ColourPicker.ShowHistoryOnPick := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerShowHistoryOnPick)) as TBooleanSetting;
   ColourPicker.ShowHistoryOnPick.onDefault := @GetColourPickerShowHistoryonPick;
+  ColourPicker.AddCoordinateToClipBoard := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerAddCoordinateToClipBoard)) as TBooleanSetting;
+  ColourPicker.AddCoordinateToClipBoard.onDefault := @GetColourPickerAddCoordinateToClipBoard;
+  ColourPicker.AddColourToClipBoard := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerAddColourToClipBoard)) as TBooleanSetting;
+  ColourPicker.AddColourToClipBoard.onDefault := @GetColourPickerAddColourToClipBoard;
 
   CodeHints := AddChild(TCodeHintsSection.Create()) as TCodeHintsSection;
   CodeHints.ShowAutomatically := CodeHints.AddChild(TBooleanSetting.Create(ssCodeHintsShowAutomatically)) as TBooleanSetting;
@@ -1037,4 +1045,3 @@ end;
 
 
 end.
-
