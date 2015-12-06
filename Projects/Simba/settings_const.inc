@@ -43,7 +43,8 @@ ssTabsCheckBeforeOpen = ssSettings + ssTabs + 'CheckTabsBeforeOpen';
 
 ssColourPickerShowHistoryOnPick = ssSettings + ssColourPicker + 'ShowHistoryOnPick';
 ssColourPickerAddToHistoryOnPick = ssSettings + ssColourPicker + 'AddToHistoryOnPick';
-
+ssColourPickerAddCoordinateToClipBoard = ssSettings + ssColourPicker + 'AddCoordinateToClipBoard';
+ssColourPickerAddColourToClipBoard = ssSettings + ssColourPicker + 'AddColourToClipBoard';
 
 ssScriptsPath = ssSettings + ssScripts + 'Path';
 
@@ -88,4 +89,3 @@ ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';
 ssSMFile = ssScriptManager + 'File';
 ssFRun = ssScriptManager + 'FirstRun';
-
