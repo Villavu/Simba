@@ -1388,9 +1388,15 @@ begin
       Exit;
     end else
     if ScriptState <> ss_None then
-    begin;
-      FormWritelnEx('The script hasn''t stopped yet, so we cannot start a new one.');
-      exit;
+    begin
+      if not SimbaSettings.Misc.RestartScriptIfStarted.GetDefValue(False) then
+      begin
+        FormWritelnEx('The script hasn''t stopped yet, so we cannot start a new one.');
+        exit;
+      end;
+
+      FormWritelnEx('Script already started! Restarting script...');
+      StopScript();
     end;
     InitializeTMThread(scriptthread);
     if (Assigned(ScriptThread)) then
@@ -4210,7 +4216,8 @@ function TSimbaForm.CanExitOrOpen: boolean;
 begin;
   Self.Enabled := False;//We HAVE to answer the popup
   Result := True;
-  if ScriptState <> ss_None then
+
+  if (ScriptState <> ss_None) and SimbaSettings.Misc.WarnIfRunning.GetDefValue(true) then
   begin
     if ScriptState <> ss_Stopping then
     begin
@@ -4226,7 +4233,9 @@ begin;
                         mrYes: StopScript;
                       end;
   end;
-  if Result and (CurrScript.StartText <> CurrScript.SynEdit.Lines.text) then
+
+  if Result and (CurrScript.StartText <> CurrScript.SynEdit.Lines.text) and
+     SimbaSettings.Misc.WarnIfModified.GetDefValue(true) then
   begin
     case MessageDlg('Script has been modified.', 'Do you want to save the script?',
                 mtConfirmation, mbYesNoCancel, 0) of
