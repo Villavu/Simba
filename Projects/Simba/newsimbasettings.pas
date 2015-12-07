@@ -264,9 +264,15 @@ type
       MainForm: TMainForm;
     end;
 
-    TNotesSetion = class(TSection)
+    TNotesSection = class(TSection)
       Content: TStringSetting;
       Visible: TBooleanSetting;
+    end;
+
+    TMiscSection = class(TSection)
+      RestartScriptIfStarted: TBooleanSetting;
+      WarnIfRunning: TBooleanSetting;
+      WarnIfModified: TBooleanSetting;
     end;
 
     TSimbaSettings = class(TSection)
@@ -287,7 +293,8 @@ type
       ColourPicker: TColourPickerSection;
       CodeHints: TCodeHintsSection;
       CodeCompletion: TCodeCompletionSection;
-      Notes: TNotesSetion;
+      Notes: TNotesSection;
+      Misc: TMiscSection;
       ShowBalloonHints: TShowBalloonHints;
 
       ScriptManager: TScriptManagerSection;
@@ -891,6 +898,10 @@ procedure GetSimbaNewsURL(obj: TObject); begin TStringSetting(obj).Value := 'htt
 procedure GetNotesContent(obj: TObject); begin TStringSetting(obj).Value := 'FQAAAHic88svSS1WCE5NLsnMz1PQVXAqSvRWBABR+Abt'; end;
 procedure GetNotesVisible(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
+procedure GetMiscRestartScriptIfStarted(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetMiscWarnIfRunning(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetMiscWarnIfModified(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
 constructor TSimbaSettings.Create;
 begin
   inherited;
@@ -1006,11 +1017,19 @@ begin
   CodeCompletion.ShowAutomatically := CodeCompletion.AddChild(TBooleanSetting.Create(ssCodeCompletionShowAutomatically)) as TBooleanSetting;
   CodeCompletion.ShowAutomatically.onDefault := @GetCodeCompletionShowAutomatically;
 
-  Notes := AddChild(TNotesSetion.Create()) as TNotesSetion;
+  Notes := AddChild(TNotesSection.Create()) as TNotesSection;
   Notes.Content := Notes.AddChild(TStringSetting.Create(ssNotesContent)) as TStringSetting;
   Notes.Content.onDefault := @GetNotesContent;
   Notes.Visible := Notes.AddChild(TBooleanSetting.Create(ssNotesVisible)) as TBooleanSetting;
   Notes.Visible.onDefault := @GetNotesVisible;
+
+  Misc := AddChild(TMiscSection.Create()) as TMiscSection;
+  Misc.RestartScriptIfStarted := Misc.AddChild(TBooleanSetting.Create(ssMiscRestartScriptIfStarted)) as TBooleanSetting;
+  Misc.RestartScriptIfStarted.onDefault := @GetMiscRestartScriptIfStarted;
+  Misc.WarnIfRunning := Misc.AddChild(TBooleanSetting.Create(ssMiscWarnIfRunning)) as TBooleanSetting;
+  Misc.WarnIfRunning.onDefault := @GetMiscWarnIfRunning;
+  Misc.WarnIfModified := Misc.AddChild(TBooleanSetting.Create(ssMiscWarnIfModified)) as TBooleanSetting;
+  Misc.WarnIfModified.onDefault := @GetMiscWarnIfModified;
 
   ScriptManager := AddChild(TScriptManagerSection.Create()) as TScriptManagerSection;
   ScriptManager.ServerURL := ScriptManager.AddChild(TStringSetting.Create(ssSMURL)) as TStringSetting;
