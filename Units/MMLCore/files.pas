@@ -88,7 +88,7 @@ var
     c : integer;
 begin
   c := 0;
-  if FindFirst(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
+  if FindFirstUTF8(Path + '*.' + ext, faAnyFile, SearchRec) = 0 then
   begin
     repeat
       if (SearchRec.Attr and faDirectory) = faDirectory then
@@ -97,7 +97,7 @@ begin
       SetLength(Result,c);
       Result[c-1] := SearchRec.Name;
     until FindNext(SearchRec) <> 0;
-    SysUtils.FindClose(SearchRec);
+    FindCloseUTF8(SearchRec);
   end;
 end;
 
