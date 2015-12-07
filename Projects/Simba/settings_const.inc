@@ -17,6 +17,7 @@ ssConsole = 'Console/';
 ssNews = 'News/';
 ssPlugins = 'Plugins/';
 ssNotes = 'Notes/';
+ssMisc = 'Misc/';
 ssCodeInsight = 'CodeInsight/';
 ssFunctionList = 'FunctionList/';
 
@@ -84,6 +85,10 @@ ssRecentFileN = ssLastConfig + ssMainForm + 'RecentFiles/File';
 
 ssNotesContent = ssSettings + ssNotes + 'Content';
 ssNotesVisible = ssSettings + ssNotes + 'Visible';
+
+ssMiscRestartScriptIfStarted = ssSettings + ssMisc + 'RestartScriptIfStarted';
+ssMiscWarnIfRunning = ssSettings + ssMisc + 'WarnIfRunning';
+ssMiscWarnIfModified = ssSettings + ssMisc + 'WarnIfModified';
 
 ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';
