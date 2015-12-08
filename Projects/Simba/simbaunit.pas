@@ -3698,7 +3698,7 @@ end;
 
 function TSimbaForm.GetShowCodeCompletionAuto: boolean;
 begin
-  Result := SimbaSettings.CodeHints.ShowAutomatically.GetDefValue(True);
+  Result := SimbaSettings.CodeCompletion.ShowAutomatically.GetDefValue(True);
 end;
 
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
