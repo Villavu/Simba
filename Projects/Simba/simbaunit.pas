@@ -1396,6 +1396,7 @@ begin
       end;
 
       FormWritelnEx('Script already started! Restarting script...');
+      ScriptState := ss_Stopping;
       StopScript();
     end;
     InitializeTMThread(scriptthread);
@@ -3697,7 +3698,7 @@ end;
 
 function TSimbaForm.GetShowCodeCompletionAuto: boolean;
 begin
-  Result := SimbaSettings.CodeHints.ShowAutomatically.GetDefValue(True);
+  Result := SimbaSettings.CodeCompletion.ShowAutomatically.GetDefValue(True);
 end;
 
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
