@@ -930,7 +930,7 @@ begin
   {$IFDEF USE_EXTENSIONS}
   Extensions := AddChild(TExtensionsSection.Create()) as TExtensionsSection;
   Extensions.Path := Extensions.AddChild(TPathSetting.Create(ssExtensionsPath)) as TPathSetting;
-  {$IFDEF USE_EXTENSIONS}Extensions.Path.onDefault := @GetExtPath;{$ENDIF}
+  Extensions.Path.onDefault := @GetExtPath;
   Extensions.FileExtension := Extensions.AddChild(TStringSetting.Create(ssExtensionsFileExtension)) as TStringSetting;
   Extensions.FileExtension.onDefault := @GetExtensionsFileExtension;
   {$ENDIF}
