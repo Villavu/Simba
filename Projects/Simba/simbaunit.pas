@@ -1396,6 +1396,7 @@ begin
       end;
 
       FormWritelnEx('Script already started! Restarting script...');
+      ScriptState := ss_Stopping;
       StopScript();
     end;
     InitializeTMThread(scriptthread);
