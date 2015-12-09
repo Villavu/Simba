@@ -119,6 +119,7 @@ interface
         procedure SetDesktop; override;
 
         function GetProcesses: TSysProcArr; override;
+        function GetProcessMem(processID: LongInt): LongInt; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
       private
         procedure NativeInit; override;
@@ -669,6 +670,11 @@ implementation
   function TIOManager.GetProcesses: TSysProcArr;
   begin
     raise Exception.Create('GetProcesses: Not Implemented.');
+  end;
+
+  function TIOManager.GetProcesMem(processID: LongInt): LongInt;
+  begin
+    raise Exception.Create('GetProcesMem: Not Implemented.');
   end;
 
   procedure TIOManager.SetTargetEx(Proc: TSysProc);

@@ -355,6 +355,7 @@ interface
         procedure SetState(val: Boolean);
         
         function GetProcesses: TSysProcArr; virtual; abstract;
+        function GetProcessMem(processID: LongInt): LongInt; virtual; abstract;
         procedure SetTargetEx(Proc: TSysProc); virtual; abstract;
       protected
         function SetImageTarget(target: TTarget): integer;
