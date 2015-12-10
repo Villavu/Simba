@@ -29,6 +29,7 @@ ssAutomaticallyUpdate = ssSettings + ssUpdater + 'AutomaticallyUpdate';
 ssUpdaterReleaseChannel = ssSettings + ssUpdater + 'ReleaseChannel';
 
 ssLoadFontsOnStart = ssSettings + ssFonts + 'LoadOnStartUp';
+ssFontsCheckForUpdates = ssSettings + ssFonts + 'CheckForUpdates';
 ssFontsVersion = ssSettings + ssFonts + 'Version';
 ssFontsLink = ssSettings + ssFonts + 'UpdateLink';
 ssFontsVersionLink = ssSettings + ssFonts + 'VersionLink';
