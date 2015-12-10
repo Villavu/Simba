@@ -1296,15 +1296,15 @@ end;
 
 procedure TSimbaForm.UpdateTimerCheck(Sender: TObject);
 var
-   chk: Boolean;
    time:integer;
   LatestVersion : integer;
 begin
   UpdateTimer.Interval := MaxInt;
-  FontUpdate;
-  chk := SimbaSettings.Updater.CheckForUpdates.GetDefValue(True);
 
-  if not chk then
+  if SimbaSettings.Fonts.CheckForUpdates.GetDefValue(True) then
+    FontUpdate;
+
+  if not SimbaSettings.Updater.CheckForUpdates.GetDefValue(True) then
     Exit;
 
   LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion;
