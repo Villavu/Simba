@@ -672,9 +672,19 @@ implementation
     raise Exception.Create('GetProcesses: Not Implemented.');
   end;
 
-  function TIOManager.GetProcesMem(processID: LongInt): LongInt;
+  function TIOManager.GetProcessMem(processID: LongInt): LongInt;
+  var
+    list: TStringList;
   begin
-    raise Exception.Create('GetProcesMem: Not Implemented.');
+    Result := -1;
+    list := TStringList.Create;
+    list.NameValueSeparator:=':';
+    try
+      list.LoadFromFile( Format('/proc/%d/status', [proc]) );
+      Result := StrToInt64( ExtractFromStr(list.Values['VmRSS'], NUMBERS) );
+    finally
+      list.Free();
+    end;
   end;
 
   procedure TIOManager.SetTargetEx(Proc: TSysProc);
