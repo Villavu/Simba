@@ -116,7 +116,7 @@ interface
         procedure SetDesktop; override;
         
         function GetProcesses: TSysProcArr; override;
-        function GetProcessMem(processID: LongInt): LongInt; override;
+        function GetProcessMem(processID: LongInt): Int64; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
       protected
         DesktopHWND : Hwnd;
@@ -598,7 +598,7 @@ begin
   Result := ProcArr;
 end;
 
-function TIOManager.GetProcessMem(processID: LongInt): LongInt;
+function TIOManager.GetProcessMem(processID: LongInt): Int64;
 var
   openHandle: HANDLE;
   ppsmemCounters: PROCESS_MEMORY_COUNTERS;

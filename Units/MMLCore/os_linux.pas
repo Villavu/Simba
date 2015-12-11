@@ -119,7 +119,7 @@ interface
         procedure SetDesktop; override;
 
         function GetProcesses: TSysProcArr; override;
-        function GetProcessMem(processID: LongInt): LongInt; override;
+        function GetProcessMem(processID: LongInt): Int64; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
       private
         procedure NativeInit; override;
@@ -134,7 +134,7 @@ interface
 
 implementation
 
-  uses GraphType, interfacebase, lcltype;
+  uses GraphType, interfacebase, lcltype, StringUtil;
 
   { PROBLEM: .Create is called on the main thread. ErrorCS etc aren't
     created on other threads. We will create them on the fly...
@@ -672,7 +672,7 @@ implementation
     raise Exception.Create('GetProcesses: Not Implemented.');
   end;
 
-  function TIOManager.GetProcessMem(processID: LongInt): LongInt;
+  function TIOManager.GetProcessMem(processID: LongInt): Int64;
   var
     list: TStringList;
   begin
@@ -681,7 +681,7 @@ implementation
     list.NameValueSeparator:=':';
     try
       list.LoadFromFile( Format('/proc/%d/status', [proc]) );
-      Result := StrToInt64( ExtractFromStr(list.Values['VmRSS'], NUMBERS) );
+      Result := StrToInt64(ExtractFromStr(list.Values['VmRSS'], NUMBERS)) shl 10;
     finally
       list.Free();
     end;

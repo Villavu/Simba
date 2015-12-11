@@ -155,7 +155,7 @@ end;
 
 procedure Lape_GetProcessMem(const Params : PParamArray; const Result : Pointer); lape_extdecl
 begin
-  PLongInt(Result)^ := ps_GetProcessMem(PLongInt(Params^[0])^);
+  PInt64(Result)^ := ps_GetProcessMem(PLongInt(Params^[0])^);
 end;
 
 procedure Lape_GetProcesses(const Params: PParamArray; const Result: Pointer); lape_extdecl
