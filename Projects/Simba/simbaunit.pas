@@ -571,7 +571,7 @@ var
   PrevWndProc : WNDPROC;
   {$endif}
   CurrentSyncInfo : TSyncInfo;//We need this for SafeCallThread
-
+  TerminatedByUser : Boolean;
 
 implementation
 uses
@@ -1399,6 +1399,7 @@ begin
       ScriptState := ss_Stopping;
       StopScript();
     end;
+    TerminatedByUser := False;
     InitializeTMThread(scriptthread);
     if (Assigned(ScriptThread)) then
     begin
@@ -2405,6 +2406,7 @@ end;
 
 procedure TSimbaForm.ActionStopExecute(Sender: TObject);
 begin
+  TerminatedByUser := True;
   Self.StopScript;
 end;
 

@@ -5,7 +5,7 @@ end;
 
 procedure Lape_AddOnTerm(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PBoolean(Result)^ := ps_AddOnTerminate(PlpString(Params^[0])^);
+  PBoolean(Result)^ := ps_AddOnTerminate(PlpString(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
 procedure Lape_DelOnTerm(const Params: PParamArray; const Result: Pointer); lape_extdecl
