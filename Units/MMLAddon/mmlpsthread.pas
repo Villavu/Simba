@@ -601,7 +601,8 @@ begin
   SetLength(V, 0);
   if (SP_OnTerminate in Prop.Properties) then
     for I := 0 to Prop.OnTerminateProcs.Count - 1 do
-      CallMethod(Prop.OnTerminateProcs[I], V);
+      if (not Prop.OnTerminateProcsSkip[i]) or (not TerminatedByUser) then
+        CallMethod(Prop.OnTerminateProcs[I], V);
 end;
 
 {$IFDEF USE_PASCALSCRIPT}
