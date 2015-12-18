@@ -564,11 +564,6 @@ var
 
   [DllImport(DLLUtilName, CharSet = CharSet.Ansi,
     SetLastError = False, CallingConvention= CallingConvention.cdecl,
-    EntryPoint =  'RAND_screen')]
-    procedure RandScreen; external;
-
-  [DllImport(DLLUtilName, CharSet = CharSet.Ansi,
-    SetLastError = False, CallingConvention= CallingConvention.cdecl,
     EntryPoint =  'BIO_new')]
     function BioNew(b: PBIO_METHOD): PBIO; external;
 
@@ -738,7 +733,6 @@ var
   procedure ErrRemoveState(pid: integer);
   procedure OPENSSLaddallalgorithms;
   procedure CRYPTOcleanupAllExData;
-  procedure RandScreen;
   function BioNew(b: PBIO_METHOD): PBIO;
   procedure BioFreeAll(b: PBIO);
   function BioSMem: PBIO_METHOD;
@@ -845,7 +839,6 @@ type
   TErrRemoveState = procedure(pid: integer); cdecl;
   TOPENSSLaddallalgorithms = procedure; cdecl;
   TCRYPTOcleanupAllExData = procedure; cdecl;
-  TRandScreen = procedure; cdecl;
   TBioNew = function(b: PBIO_METHOD): PBIO; cdecl;
   TBioFreeAll = procedure(b: PBIO); cdecl;
   TBioSMem = function: PBIO_METHOD; cdecl;
@@ -943,7 +936,6 @@ var
   _ErrRemoveState: TErrRemoveState = nil;
   _OPENSSLaddallalgorithms: TOPENSSLaddallalgorithms = nil;
   _CRYPTOcleanupAllExData: TCRYPTOcleanupAllExData = nil;
-  _RandScreen: TRandScreen = nil;
   _BioNew: TBioNew = nil;
   _BioFreeAll: TBioFreeAll = nil;
   _BioSMem: TBioSMem = nil;
@@ -1422,12 +1414,6 @@ begin
     _CRYPTOcleanupAllExData;
 end;
 
-procedure RandScreen;
-begin
-  if InitSSLInterface and Assigned(_RandScreen) then
-    _RandScreen;
-end;
-
 function BioNew(b: PBIO_METHOD): PBIO;
 begin
   if InitSSLInterface and Assigned(_BioNew) then
@@ -1807,7 +1793,6 @@ begin
         _ErrRemoveState := GetProcAddr(SSLUtilHandle, 'ERR_remove_state');
         _OPENSSLaddallalgorithms := GetProcAddr(SSLUtilHandle, 'OPENSSL_add_all_algorithms_noconf');
         _CRYPTOcleanupAllExData := GetProcAddr(SSLUtilHandle, 'CRYPTO_cleanup_all_ex_data');
-        _RandScreen := GetProcAddr(SSLUtilHandle, 'RAND_screen');
         _BioNew := GetProcAddr(SSLUtilHandle, 'BIO_new');
         _BioFreeAll := GetProcAddr(SSLUtilHandle, 'BIO_free_all');
         _BioSMem := GetProcAddr(SSLUtilHandle, 'BIO_s_mem');
@@ -1836,7 +1821,6 @@ begin
         SslLibraryInit;
         SslLoadErrorStrings;
         OPENSSLaddallalgorithms;
-        RandScreen;
 {$ELSE}
         SetLength(s, 1024);
         x := GetModuleFilename(SSLLibHandle,PChar(s),Length(s));
@@ -1853,8 +1837,6 @@ begin
           _SslLoadErrorStrings;
         if assigned(_OPENSSLaddallalgorithms) then
           _OPENSSLaddallalgorithms;
-        if assigned(_RandScreen) then
-          _RandScreen;
         if assigned(_CRYPTOnumlocks) and assigned(_CRYPTOsetlockingcallback) then
           InitLocks;
 {$ENDIF}
@@ -1991,7 +1973,6 @@ begin
     _ErrRemoveState := nil;
     _OPENSSLaddallalgorithms := nil;
     _CRYPTOcleanupAllExData := nil;
-    _RandScreen := nil;
     _BioNew := nil;
     _BioFreeAll := nil;
     _BioSMem := nil;
