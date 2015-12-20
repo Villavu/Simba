@@ -3850,7 +3850,7 @@ object SimbaForm: TSimbaForm
     end
   end
   object dlgReplace: TReplaceDialog
-    Options = [frDown, frFindNext, frHideUpDown]
+    Options = [frDown, frFindNext, frHideUpDown, frEntireScope]
     OnFind = dlgReplaceFind
     OnReplace = dlgReplaceReplace
     left = 608

@@ -2696,7 +2696,7 @@ var
  end;
 
 begin
-  Y:= False;
+  Y:= not (frPromptOnReplace in dlgReplace.Options);
   SOptions:= [];
   if(frMatchCase in dlgReplace.Options)then SOptions:= [ssoMatchCase];
   if(frWholeWord in dlgReplace.Options)then SOptions+= [ssoWholeWord];
