@@ -2008,9 +2008,8 @@ begin
     OCR_Fonts := TMOCR.Create(Thread.Client);
     if (DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
       OCR_Fonts.Fonts.Path := SimbaSettings.Fonts.Path.Value;
-  
-    loadFontsOnScriptStart := SimbaSettings.Fonts.LoadOnScriptStart.GetDefValue(True);
-    if ((loadFontsOnScriptStart) and (DirectoryExists(SimbaSettings.Fonts.Path.Value))) then
+
+    if DirectoryExists(SimbaSettings.Fonts.Path.Value) then
       OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
   end;
   Thread.SetFonts(OCR_Fonts.Fonts);
