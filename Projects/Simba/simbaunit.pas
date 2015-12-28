@@ -3953,9 +3953,7 @@ begin
 
           OCR_Fonts := TMOCR.Create(nil);
           OCR_Fonts.Fonts.Path := SimbaSettings.Fonts.Path.Value;
-
-          if (SimbaSettings.Fonts.LoadOnSimbaStart.GetDefValue(True)) then
-            OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
+          OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
         end;
         UnTarrer.Free;
         Decompress.Result.Free;
