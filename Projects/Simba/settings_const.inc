@@ -17,6 +17,7 @@ ssConsole = 'Console/';
 ssNews = 'News/';
 ssPlugins = 'Plugins/';
 ssNotes = 'Notes/';
+ssMisc = 'Misc/';
 ssCodeInsight = 'CodeInsight/';
 ssFunctionList = 'FunctionList/';
 
@@ -27,9 +28,8 @@ ssUpdaterVersionLink = ssSettings + ssUpdater + 'RemoteVersionLink';
 ssAutomaticallyUpdate = ssSettings + ssUpdater + 'AutomaticallyUpdate';
 ssUpdaterReleaseChannel = ssSettings + ssUpdater + 'ReleaseChannel';
 
-ssCheckForFontUpdates = ssSettings + ssFonts + 'CheckForUpdates';
-ssLoadFontsOnSimbaStart = ssSettings + ssFonts + 'LoadOnSimbaStart';
-ssLoadFontsOnScriptStart = ssSettings + ssFonts + 'LoadOnScriptStart';
+ssLoadFontsOnStart = ssSettings + ssFonts + 'LoadOnStartUp';
+ssFontsCheckForUpdates = ssSettings + ssFonts + 'CheckForUpdates';
 ssFontsVersion = ssSettings + ssFonts + 'Version';
 ssFontsLink = ssSettings + ssFonts + 'UpdateLink';
 ssFontsVersionLink = ssSettings + ssFonts + 'VersionLink';
@@ -45,7 +45,8 @@ ssTabsCheckBeforeOpen = ssSettings + ssTabs + 'CheckTabsBeforeOpen';
 
 ssColourPickerShowHistoryOnPick = ssSettings + ssColourPicker + 'ShowHistoryOnPick';
 ssColourPickerAddToHistoryOnPick = ssSettings + ssColourPicker + 'AddToHistoryOnPick';
-
+ssColourPickerAddCoordinateToClipBoard = ssSettings + ssColourPicker + 'AddCoordinateToClipBoard';
+ssColourPickerAddColourToClipBoard = ssSettings + ssColourPicker + 'AddColourToClipBoard';
 
 ssScriptsPath = ssSettings + ssScripts + 'Path';
 
@@ -88,8 +89,11 @@ ssRecentFileN = ssLastConfig + ssMainForm + 'RecentFiles/File';
 ssNotesContent = ssSettings + ssNotes + 'Content';
 ssNotesVisible = ssSettings + ssNotes + 'Visible';
 
+ssMiscRestartScriptIfStarted = ssSettings + ssMisc + 'RestartScriptIfStarted';
+ssMiscWarnIfRunning = ssSettings + ssMisc + 'WarnIfRunning';
+ssMiscWarnIfModified = ssSettings + ssMisc + 'WarnIfModified';
+
 ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';
 ssSMFile = ssScriptManager + 'File';
 ssFRun = ssScriptManager + 'FirstRun';
-

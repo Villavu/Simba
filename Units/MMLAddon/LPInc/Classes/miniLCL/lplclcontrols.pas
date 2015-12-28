@@ -337,7 +337,7 @@ end;
 //function GetChildsRect(Scrolled: boolean): TRect;
 procedure TControl_GetChildsRect(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PRect(Result)^ := PControl(Params^[0])^.GetChildsRect(Pboolean(Params^[1])^);
+  PRect(Result)^ := PControl(Params^[0])^.GetChildrenRect(Pboolean(Params^[1])^);
 end;
 
 //procedure Show;
@@ -1106,7 +1106,7 @@ end;
 //function  GetChildsRect(Scrolled: boolean): TRect;
 procedure TWinControl_GetChildsRect(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PRect(Result)^ := PWinControl(Params^[0])^.GetChildsRect(Pboolean(Params^[1])^);
+  PRect(Result)^ := PWinControl(Params^[0])^.GetChildrenRect(Pboolean(Params^[1])^);
 end;
 
 //procedure DisableAlign;

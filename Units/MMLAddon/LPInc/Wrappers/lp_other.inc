@@ -5,7 +5,7 @@ end;
 
 procedure Lape_AddOnTerm(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PBoolean(Result)^ := ps_AddOnTerminate(PlpString(Params^[0])^);
+  PBoolean(Result)^ := ps_AddOnTerminate(PlpString(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
 procedure Lape_DelOnTerm(const Params: PParamArray; const Result: Pointer); lape_extdecl
@@ -125,7 +125,7 @@ end;
 
 procedure Lape_ConvertTime64(const Params: PParamArray); lape_extdecl
 begin
-  ps_ConvertTime64(Pinteger(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, Pinteger(Params^[7])^);
+  ps_ConvertTime64(Pint64(Params^[0])^, Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^, Pinteger(Params^[5])^, Pinteger(Params^[6])^, Pinteger(Params^[7])^);
 end;
 
 procedure Lape_HakunaMatata(const Params: PParamArray); lape_extdecl

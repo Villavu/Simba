@@ -43,7 +43,7 @@ uses
   {$IFDEF MSWINDOWS} os_windows, windows, shellapi,{$ENDIF} //For ColorPicker etc.
   {$IFDEF LINUX} os_linux, {$ENDIF} //For ColorPicker etc.
 
-  colourpicker, windowselector, // We need these for the Colour Picker and Window Selector
+  colourpicker, windowselector, Clipbrd, // We need these for the Colour Picker and Window Selector
 
   framescript,
 
@@ -579,7 +579,7 @@ var
   PrevWndProc : WNDPROC;
   {$endif}
   CurrentSyncInfo : TSyncInfo;//We need this for SafeCallThread
-
+  TerminatedByUser : Boolean;
 
 implementation
 uses
@@ -1309,16 +1309,14 @@ end;
 
 procedure TSimbaForm.UpdateTimerCheck(Sender: TObject);
 var
-  Time, LatestVersion: integer;
+  Time, LatestVersion: Integer;
 begin
   UpdateTimer.Interval := MaxInt;
 
-  if (SimbaSettings.Fonts.CheckForUpdates.GetDefValue(True)) then
-    FontUpdate()
-  else if (SimbaSettings.Fonts.LoadOnSimbaStart.GetDefValue(True)) then
-    OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value);
+  if SimbaSettings.Fonts.CheckForUpdates.GetDefValue(True) then
+    FontUpdate;
 
-  if (not (SimbaSettings.Updater.CheckForUpdates.GetDefValue(True))) then
+  if not SimbaSettings.Updater.CheckForUpdates.GetDefValue(True) then
     Exit;
 
   LatestVersion:= SimbaUpdateForm.GetLatestSimbaVersion();
@@ -1400,10 +1398,18 @@ begin
       Exit;
     end else
     if ScriptState <> ss_None then
-    begin;
-      FormWritelnEx('The script hasn''t stopped yet, so we cannot start a new one.');
-      exit;
+    begin
+      if not SimbaSettings.Misc.RestartScriptIfStarted.GetDefValue(False) then
+      begin
+        FormWritelnEx('The script hasn''t stopped yet, so we cannot start a new one.');
+        exit;
+      end;
+
+      FormWritelnEx('Script already started! Restarting script...');
+      ScriptState := ss_Stopping;
+      StopScript();
     end;
+    TerminatedByUser := False;
     InitializeTMThread(scriptthread);
     if (Assigned(ScriptThread)) then
     begin
@@ -1428,7 +1434,7 @@ begin
       ScriptThread.Suspended:= True;
       ScriptState:= ss_Paused;
       {$else}
-      mDebugLn('Linux does not yet support suspending threads.');
+      mDebugLn('Simba doesn''t support suspending scripts on Linux yet');
       {$endif}
     end else if ScriptState = ss_Paused then
     begin;
@@ -2411,6 +2417,7 @@ end;
 
 procedure TSimbaForm.ActionStopExecute(Sender: TObject);
 begin
+  TerminatedByUser := True;
   Self.StopScript;
 end;
 
@@ -2730,7 +2737,7 @@ var
  end;
 
 begin
-  Y:= False;
+  Y:= not (frPromptOnReplace in dlgReplace.Options);
   SOptions:= [];
   if(frMatchCase in dlgReplace.Options)then SOptions:= [ssoMatchCase];
   if(frWholeWord in dlgReplace.Options)then SOptions+= [ssoWholeWord];
@@ -3619,6 +3626,7 @@ procedure TSimbaForm.ButtonPickClick(Sender: TObject);
 var
    c, x, y: Integer;
    cobj: TColourPickerObject;
+   coordinate, colour, clipboardtext: String;
 begin
   if Picker.Picking then
   begin
@@ -3635,9 +3643,28 @@ begin
   if SimbaSettings.ColourPicker.ShowHistoryOnPick.GetDefValue(True) then
     ColourHistoryForm.Show;
 
-  FormWritelnEx('Picked colour: ' + inttostr(c) + ' at (' + inttostr(x) + ', ' + inttostr(y) + ')');
-end;
+  colour := inttostr(c);
+  coordinate := inttostr(x) + ', ' + inttostr(y);
+  FormWritelnEx('Picked colour: ' + colour + ' at (' + coordinate + ')');
+  if (SimbaSettings.ColourPicker.AddColourToClipBoard.GetDefValue(False)) then
+  begin
+    clipboardtext := colour;
+    if (SimbaSettings.ColourPicker.AddCoordinateToClipBoard.GetDefValue(False)) then
+      clipboardtext := clipboardtext + ', ' + coordinate;
+  end else
+    if (SimbaSettings.ColourPicker.AddCoordinateToClipBoard.GetDefValue(False)) then
+      clipboardtext := coordinate;
 
+  if clipboardtext = '' then
+    Exit;
+
+  try
+    Clipboard.AsText := clipboardtext;
+  except
+    on e: exception do
+      mDebugLn('Exception in TSimbaForm.ButtonPickClick: ' + e.message);
+  end;
+end;
 
 procedure TSimbaForm.ButtonSelectorDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
@@ -3758,7 +3785,7 @@ end;
 
 function TSimbaForm.GetShowCodeCompletionAuto: boolean;
 begin
-  Result := SimbaSettings.CodeHints.ShowAutomatically.GetDefValue(True);
+  Result := SimbaSettings.CodeCompletion.ShowAutomatically.GetDefValue(True);
 end;
 
 procedure TSimbaForm.SetScriptState(const State: TScriptState);
@@ -4329,7 +4356,8 @@ function TSimbaForm.CanExitOrOpen: boolean;
 begin;
   Self.Enabled := False;//We HAVE to answer the popup
   Result := True;
-  if ScriptState <> ss_None then
+
+  if (ScriptState <> ss_None) and SimbaSettings.Misc.WarnIfRunning.GetDefValue(true) then
   begin
     if ScriptState <> ss_Stopping then
     begin
@@ -4345,7 +4373,9 @@ begin;
                         mrYes: StopScript;
                       end;
   end;
-  if Result and (CurrScript.StartText <> CurrScript.SynEdit.Lines.text) then
+
+  if Result and (CurrScript.StartText <> CurrScript.SynEdit.Lines.text) and
+     SimbaSettings.Misc.WarnIfModified.GetDefValue(true) then
   begin
     case MessageDlg('Script has been modified.', 'Do you want to save the script?',
                 mtConfirmation, mbYesNoCancel, 0) of
@@ -4403,4 +4433,3 @@ initialization
 
 
 end.
-

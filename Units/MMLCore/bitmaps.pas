@@ -587,28 +587,37 @@ var
 begin
   ArrDataToRawImage(FData,Point(w,h),RawImage);
   result := true;
-  try
-    if RightStr(Filename, 3) = 'png' then
-    begin
-      png := TPortableNetworkGraphic.Create;
-      png.LoadFromRawImage(RawImage, False);
-      png.SaveToFile(UTF8ToSys(Filename));
-      png.Free;
-    end else if (RightStr(Filename, 3) = 'jpg') or (RightStr(Filename, 4) = 'jpeg') then
-    begin
-      jpg := TJPEGImage.Create;
-      jpg.LoadFromRawImage(RawImage, False);
-      jpg.SaveToFile(UTF8ToSys(Filename));
-      jpg.Free;
-    end else // Assume .bmp
-    begin
-      Bmp := TLazIntfImage.Create(RawImage,false);
-      Bmp.SaveToFile(UTF8ToSys(FileName));
-      Bmp.Free;
+
+  if LowerCase(RightStr(Filename, 3)) = 'png' then
+  begin
+    png := TPortableNetworkGraphic.Create;
+    try
+       png.LoadFromRawImage(RawImage, False);
+       png.SaveToFile(UTF8ToSys(Filename));
+    except
+       result := false;
     end;
-  except
-    result := false;
-  end;
+    png.Free;
+  end else if (LowerCase(RightStr(Filename, 3)) = 'jpg') or (LowerCase(RightStr(Filename, 4)) = 'jpeg') then
+  begin
+    jpg := TJPEGImage.Create;
+    try
+       jpg.LoadFromRawImage(RawImage, False);
+       jpg.SaveToFile(UTF8ToSys(Filename));
+    except
+       result := false;
+    end;
+    jpg.Free;
+  end else // Assume .bmp
+  begin
+    Bmp := TLazIntfImage.Create(RawImage,false);
+    try
+       Bmp.SaveToFile(UTF8ToSys(FileName));
+    except
+       result := false;
+    end;
+    Bmp.Free;
+  end; 
 end;
 
 procedure TMufasaBitmap.LoadFromFile(const FileName: string);

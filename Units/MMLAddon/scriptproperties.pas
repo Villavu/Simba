@@ -44,19 +44,20 @@ type
     private
       FProperties : TSP_Properties;
       FOnTerminateProcs : TStringList;
+      FOnTerminateProcsSkip : TBooleanArray;
       function HasTimeStamp: boolean;
     public
       constructor Create;
       destructor Destroy; override;
-      function GetProperty(name: ansistring; var Prop : TSP_Property): boolean;
-      function GetProp(name: ansistring; var Value : TVariantArray) : Boolean;overload;
       function GetProp(Prop : TSP_Property; var Value : TVariantArray) : Boolean;overload;
-      function SetProp(Name: ansistring; Value: TVariantArray): Boolean;overload;
-      function SetProp(Prop : TSP_Property; Value: TVariantArray): Boolean;overload;
+      function AddProp(Prop : TSP_Property; Value: Variant; skipIfUserTerminated: Boolean = false): Boolean;
+      function DeleteOnTerminateProcs(Value: Variant): Boolean;
+      procedure ClearOnTerminateProcs;
     public
       property Properties : TSP_Properties read FProperties;
       property WriteTimeStamp : boolean read HasTimeStamp;
       property OnTerminateProcs : TStringList read FOnTerminateProcs;
+      property OnTerminateProcsSkip : TBooleanArray read FOnTerminateProcsSkip;
     end;
 
 
@@ -74,8 +75,6 @@ begin
   FProperties := [];
   FOnTerminateProcs := TStringList.Create;
   FOnTerminateProcs.CaseSensitive:= false;
-  FOnTerminateProcs.Duplicates:= dupIgnore;
-  { set default values }
 end;
 
 destructor TScriptProperties.Destroy;
@@ -84,95 +83,75 @@ begin
   inherited Destroy;
 end;
 
-function TScriptProperties.GetProperty(name: ansistring; var Prop : TSP_Property): boolean;
-const
-  Names : array[TSP_Property] of ansistring = ('writetimestamp','onterminate');
-var
-  i : integer;
-begin
-  Result := false;
-  for i := 0 to length(names)- 1 do
-    if lowercase(name) = Names[TSP_Property(i)] then
-    begin
-      Prop := (TSP_Property(i));
-      Exit(true);
-    end;
-end;
-
-function TScriptProperties.GetProp(name: ansistring; var Value: TVariantArray): Boolean;
-var
-  Prop : TSP_Property;
-begin
-  Result := false;
-  if GetProperty(name,prop) then
-    Result := (GetProp(Prop,value));
-end;
-
-function TScriptProperties.GetProp(Prop: TSP_Property; var Value: TVariantArray
-  ): Boolean;
+function TScriptProperties.GetProp(Prop: TSP_Property; var Value: TVariantArray): Boolean;
 var
   i : integer;
 begin
   Result := true;
   Setlength(value,0);
   case Prop of
-    SP_WriteTimeStamp : begin SetLength(Value,1); Value[0] := BoolToStr(Prop in FProperties,true); end;
+    SP_WriteTimeStamp :
+    begin
+      SetLength(Value,1);
+      Value[0] := BoolToStr(Prop in FProperties,true);
+    end;
     SP_OnTerminate :
-      begin
-        if not (Prop in FProperties) then
-          exit;
-        setlength(value,FOnTerminateProcs.Count);
-        for i := 0 to high(Value) do
-          value[i] := FOnTerminateProcs[i];
-        result := true;
-      end;
+    begin
+      if not (Prop in FProperties) then
+        exit(false);
+      setlength(value,FOnTerminateProcs.Count);
+      for i := 0 to high(Value) do
+        value[i] := FOnTerminateProcs[i];
+    end;
   end;
 end;
 
-function TScriptProperties.SetProp(Name: ansistring; Value: TVariantArray): Boolean;
-var
-  Prop : TSP_Property;
+function TScriptProperties.AddProp(Prop: TSP_Property; Value: Variant; skipIfUserTerminated: Boolean = false): Boolean;
 begin
-  Result := false;
-  if GetProperty(name,prop) then
-    Result := (SetProp(Prop,value));
-end;
-
-function TScriptProperties.SetProp(Prop: TSP_Property; Value: TVariantArray): Boolean;
-var
-  i : integer;
-begin
-  result := false;
-  if Length(value) < 1 then
-  begin;
-    mDebugLn('SetProp passed a TVarArray with a length of 0' );
-    exit;
-  end;
+  result := True;
   case Prop of
-    SP_WriteTimeStamp : begin
-                          if length(Value) <> 1 then
-                          begin
-                            mDebugLn('SP_WriteTimeStamp only needs 1 value in the array');
-                            exit;
-                          end;
-                          try
-                            if Value[0] = True then
-                              FProperties := FProperties + [Prop]
-                            else
-                              FProperties := FProperties - [Prop];
-                          except
-                            mDebugLn('Could not convert your value passed to SetProp');
-                          end;
-                       end;
-    SP_OnTerminate :
-      begin
-        FOnTerminateProcs.Clear;
-        for i := 0 to high(value) do
-          FOnTerminateProcs.Add(Value[i]);
-        FProperties := FProperties + [prop];
-        Result := True;
+    SP_WriteTimeStamp :
+      try
+        if Value = True then
+          FProperties := FProperties + [Prop]
+        else
+          FProperties := FProperties - [Prop];
+      except
+        mDebugLn('Could not convert your value passed to SetProp');
+        Exit(False);
       end;
+
+    SP_OnTerminate :
+    begin
+      if FOnTerminateProcs.IndexOf(Value) > -1 then
+        Exit;
+      FOnTerminateProcs.Add(Value);
+      SetLength(FOnTerminateProcsSkip, FOnTerminateProcs.Count);
+      FOnTerminateProcsSkip[FOnTerminateProcs.Count - 1] := skipIfUserTerminated;
+      FProperties := FProperties + [prop];
+    end;
   end;
+end;
+
+function TScriptProperties.DeleteOnTerminateProcs(Value: Variant): Boolean;
+var
+  index, i: Integer;
+begin
+  Result := True;
+  index := FOnTerminateProcs.IndexOf(value);
+  if index = -1 then
+    Exit(False);
+  FOnTerminateProcs.Delete(index);
+
+  for i := index to FOnTerminateProcs.Count - 1 do
+    FOnTerminateProcsSkip[i + 1] := FOnTerminateProcsSkip[i];
+  SetLength(FOnTerminateProcsSkip, FOnTerminateProcs.Count);
+end;
+
+procedure TScriptProperties.ClearOnTerminateProcs;
+begin
+  FOnTerminateProcs.Clear;
+  SetLength(FOnTerminateProcsSkip, 0);
 end;
 
 end.
