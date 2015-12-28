@@ -853,7 +853,6 @@ procedure GetUpdaterVersionLink(obj: TObject); begin TStringSetting(obj).Value :
 procedure GetInterpreterType(obj: TObject); begin TIntegerSetting(obj).Value := 1; end; // 1 is Lape
 procedure GetInterpreterAllowSysCalls(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
-procedure GetFontsCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsLoadOnStartUp(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsVersion(obj: TObject); begin TIntegerSetting(obj).Value := -1; end;
