@@ -4062,7 +4062,7 @@ begin
     else
       InitialDir := SimbaSettings.Scripts.Path.Value;
     Options := [ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail];
-    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;' +
+    Filter:= 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.pas' +
     {$IFDEF USE_EXTENSIONS}';*.' + SimbaSettings.Extensions.FileExtension.GetDefValue('sex') + ';*.sei' + {$ENDIF}
              '|Any files|*.*';
     if Execute then
@@ -4182,7 +4182,7 @@ begin
       InitialDir := ExtractFileDir(CurrScript.ScriptFile)
     else
       InitialDir := SimbaSettings.Scripts.Path.Value;
-    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt' +
+    filter := 'Simba Files|*.simba;*.simb;*.cogat;*.mufa;*.txt;*.pas' +
     {$IFDEF USE_EXTENSIONS}';*.' + SimbaSettings.Extensions.FileExtension.GetDefValue('sex') + ';*.sei' + {$ENDIF}
               '|Any files|*.*';
     if Execute then
