@@ -65,12 +65,11 @@ implementation
 
   procedure TGenericLoader.AddPath(path: string);
   var
-    idx: integer;
     verified : string;
   begin
     verified := VerifyPath(path);
     //IDK who changed this to loading a dir, but DON'T
-    if not PluginDirs.Find(verified,idx) then
+    if PluginDirs.IndexOf(verified) = -1 then
     begin
       mDebugLn('Adding Plugin Path: ' + verified);
       PluginDirs.Add(verified);
