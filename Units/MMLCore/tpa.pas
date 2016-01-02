@@ -2567,6 +2567,7 @@ begin
   if Len <= 0 then
   begin
     writeln('EdgeFromBox: Box {X1 = ', Box.X1, ', Y1 = ', Box.Y1, ', X2 = ', Box.X2, ', Y2 = ', Box.Y2, '} is invalid');
+    SetLength(Result, 0);
     Exit;
   end;
   SetLength(Result, Len);
