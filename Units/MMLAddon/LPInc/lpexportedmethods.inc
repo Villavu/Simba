@@ -24,7 +24,7 @@
 { Other }
 SetCurrSection('Other');
 //AddGlobalFunc('procedure Writeln(const str: string);', @Lape_Writeln);
-AddGlobalFunc('function AddOnTerminate(const proc: string): Boolean;', @Lape_AddOnTerm);
+AddGlobalFunc('function AddOnTerminate(const proc: string; skipIfUserTerminated: Boolean = False): Boolean;', @Lape_AddOnTerm);
 AddGlobalFunc('function DeleteOnTerminate(const proc: string): Boolean;', @Lape_DelOnTerm);
 AddGlobalFunc('function SetScriptProp(prop: TSP_Property; Value: TVariantArray): boolean', @Lape_SetScriptProp);
 AddGlobalFunc('function GetScriptProp(prop: TSP_Property; var Value: TVariantArray): boolean', @Lape_GetScriptProp);
@@ -70,6 +70,9 @@ AddGlobalFunc('procedure ShowBitmap(const Bitmap: TMufasaBitmap); overload;', @L
 AddGlobalFunc('procedure SetWindowParent(const Child, Parent: PtrUInt; X, Y: Integer);', @Lape_SetWindowParent);
 AddGlobalFunc('procedure SetWindowTitle(const Window: PtrUInt; const NewTitle: String);', @Lape_SetWindowTitle);
 AddGlobalFunc('function GetWindowTitle(const Window: PtrUInt): String;', @Lape_GetWindowTitle);
+AddGlobalFunc('procedure SetTarget(TheHWND: PtrUInt); overload;', @Lape_SetTarget2);
+AddGlobalFunc('function GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;', @Lape_GetChildWindows);
+AddGlobalFunc('procedure SaveSettings();', @Lape_SaveSettings);
 
 { DTM }
 SetCurrSection('DTM');
@@ -533,6 +536,7 @@ AddGlobalFunc('function CopyATPA(const ATPA: T2DPointArray): T2DPointArray', @La
 AddGlobalFunc('function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer;',@Lape_TPAPosNext);
 AddGlobalFunc('function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending,byDifference: Boolean):TPointArray;',@Lape_GlueTPAs);
 AddGlobalFunc('function PartitionTPA(const TPA: TPointArray; BoxWidth, BoxHeight: Integer): T2DPointArray;', @Lape_PartitionTPA);
+AddGlobalFunc('function TPABorder(const TPA: TPointArray): TPointArray;', @Lape_TPABorder);
 
 { Window }
 SetCurrSection('Window');

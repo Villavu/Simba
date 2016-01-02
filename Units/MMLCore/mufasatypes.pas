@@ -168,6 +168,14 @@ type
   PSysProcArr = ^TSysProcArr;
   PSysProc = ^TSysProc;
 
+  TChildWindow = record
+    Handle: PtrUInt;
+    Width, Height: Integer;
+  end;
+  TChildWindowArr = array of TChildWindow;
+  PChildWindowArr = ^TChildWindowArr;
+  PChildWindow = ^TChildWindow;
+
 const
   TMDTMPointSize = 5*SizeOf(integer)+Sizeof(boolean);
 type

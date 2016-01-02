@@ -60,6 +60,7 @@ const
   m_BalloonHint = 11; //Data = PBalloonHintData
   m_PauseScript = 12; //Data = PThreadID
   m_CloseSimba = 13; //Data = PThreadID
+  m_SaveSettings = 14; //Data = nil
 
   {$I settings_const.inc}
   {$WARNING REMOVEME}
@@ -608,7 +609,8 @@ begin
   SetLength(V, 0);
   if (SP_OnTerminate in Prop.Properties) then
     for I := 0 to Prop.OnTerminateProcs.Count - 1 do
-      CallMethod(Prop.OnTerminateProcs[I], V);
+      if (not Prop.OnTerminateProcsSkip[i]) or (not TerminatedByUser) then
+        CallMethod(Prop.OnTerminateProcs[I], V);
 end;
 
 {$IFDEF USE_PASCALSCRIPT}
@@ -1529,6 +1531,7 @@ end;
 function TLPThread.OnHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 var
   plugin_idx: integer;
+  Path: String;
 begin
   Result := False;
   if (not InPeek) and (CompareText(Directive,'LOADLIB') = 0) then
@@ -1539,7 +1542,13 @@ begin
       if (InIgnore) then
         Exit;
 
+      Path := ExtractFilePath(Sender.Tokenizer.FileName);
+      if (Path <> '') then
+        PluginsGlob.AddPath(Path); // Add the scripts file path to plugin path 
       plugin_idx := PluginsGlob.LoadPlugin(Argument);
+      if (Path <> '') then
+        PluginsGlob.DeletePath(Path); // If we added the path, delete it since PluginsGlob is global (used in every script).
+
       if (plugin_idx >= 0) then
         LoadPlugin(plugin_idx)
       else
@@ -1603,6 +1612,9 @@ begin
         ImportWrappers.Add(Wrapper);
       end;
     end;
+
+    if (DelayedCode <> '') then
+      Compiler.addDelayedCode(DelayedCode);
 
     Compiler.EndImporting;
   end;

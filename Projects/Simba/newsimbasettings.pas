@@ -161,9 +161,8 @@ type
 
     TFontsSection = class(TSection)
       Path: TPathSetting;
+      LoadOnStartUp: TBooleanSetting;
       CheckForUpdates: TBooleanSetting;
-      LoadOnSimbaStart: TBooleanSetting;
-      LoadOnScriptStart: TBooleanSetting;
       Version: TIntegerSetting;
       VersionLink: TStringSetting;
       UpdateLink: TStringSetting;
@@ -180,6 +179,8 @@ type
 
     TFunctionListSection = class(TSection)
       ShowOnStart: TBooleanSetting;
+      ShowVars: TBooleanSetting;
+      ShowConsts: TBooleanSetting;
     end;
 
     TCodeInsightSection = class(TSection)
@@ -231,6 +232,8 @@ type
     TColourPickerSection = class(TSection)
       AddToHistoryOnPick: TBooleanSetting;
       ShowHistoryOnPick: TBooleanSetting;
+      AddCoordinateToClipBoard: TBooleanSetting;
+      AddColourToClipBoard: TBooleanSetting;
     end;
 
     TCodeHintsSection = class(TSection)
@@ -270,9 +273,15 @@ type
       MainForm: TMainForm;
     end;
 
-    TNotesSetion = class(TSection)
+    TNotesSection = class(TSection)
       Content: TStringSetting;
       Visible: TBooleanSetting;
+    end;
+
+    TMiscSection = class(TSection)
+      RestartScriptIfStarted: TBooleanSetting;
+      WarnIfRunning: TBooleanSetting;
+      WarnIfModified: TBooleanSetting;
     end;
 
     TSimbaSettings = class(TSection)
@@ -293,7 +302,8 @@ type
       ColourPicker: TColourPickerSection;
       CodeHints: TCodeHintsSection;
       CodeCompletion: TCodeCompletionSection;
-      Notes: TNotesSetion;
+      Notes: TNotesSection;
+      Misc: TMiscSection;
       ShowBalloonHints: TShowBalloonHints;
 
       ScriptManager: TScriptManagerSection;
@@ -325,7 +335,7 @@ implementation
 uses
    mufasabase,
    mufasatypes,
-   fileutil, stringutil,
+   fileutil,
    simbaunit; // mDebugLn
 
 const
@@ -852,8 +862,8 @@ procedure GetUpdaterVersionLink(obj: TObject); begin TStringSetting(obj).Value :
 procedure GetInterpreterType(obj: TObject); begin TIntegerSetting(obj).Value := 1; end; // 1 is Lape
 procedure GetInterpreterAllowSysCalls(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
-procedure GetFontsCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsLoadOnStartUp(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFontsCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetFontsVersion(obj: TObject); begin TIntegerSetting(obj).Value := -1; end;
 procedure GetFontsVersionLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Version'; end;
 procedure GetFontsUpdateLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Fonts.tar.bz2'; end;
@@ -867,9 +877,13 @@ procedure GetGeneralMaxRecentFiles(obj: TObject); begin TIntegerSetting(obj).Val
 
 procedure GetColourPickerShowHistoryonPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetColourPickerAddToHistoryOnPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetColourPickerAddCoordinateToClipBoard(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetColourPickerAddColourToClipBoard(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
 procedure GetCodeInsightShowHidden(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 procedure GetFunctionListShowOnStart(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFunctionListShowVars(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFunctionListShowConsts(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
@@ -901,6 +915,10 @@ procedure GetSimbaNewsURL(obj: TObject); begin TStringSetting(obj).Value := 'htt
 procedure GetNotesContent(obj: TObject); begin TStringSetting(obj).Value := 'FQAAAHic88svSS1WCE5NLsnMz1PQVXAqSvRWBABR+Abt'; end;
 procedure GetNotesVisible(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
 
+procedure GetMiscRestartScriptIfStarted(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetMiscWarnIfRunning(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetMiscWarnIfModified(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+
 constructor TSimbaSettings.Create;
 begin
   inherited;
@@ -917,12 +935,10 @@ begin
   Fonts.Path := Fonts.AddChild(TPathSetting.Create(ssFontsPath)) as TPathSetting;
   Fonts.Path.onDefault := @GetFontPath;
 
-  Fonts.CheckForUpdates := Fonts.AddChild(TBooleanSetting.Create(ssCheckForFontUpdates)) as TBooleanSetting;
+  Fonts.LoadOnStartUp := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnStart)) as TBooleanSetting;
+  Fonts.LoadOnStartUp.onDefault := @GetFontsLoadOnStartUp;
+  Fonts.CheckForUpdates := Fonts.AddChild(TBooleanSetting.Create(ssFontsCheckForUpdates)) as TBooleanSetting;
   Fonts.CheckForUpdates.onDefault := @GetFontsCheckForUpdates;
-  Fonts.LoadOnSimbaStart := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnSimbaStart)) as TBooleanSetting;
-  Fonts.LoadOnSimbaStart.onDefault := @GetFontsLoadOnStartUp;
-  Fonts.LoadOnScriptStart := Fonts.AddChild(TBooleanSetting.Create(ssLoadFontsOnScriptStart)) as TBooleanSetting;
-  Fonts.LoadOnScriptStart.onDefault := @GetFontsLoadOnStartUp;
   Fonts.Version := Fonts.AddChild(TIntegerSetting.Create(ssFontsVersion)) as TIntegerSetting;
   Fonts.Version.onDefault := @GetFontsVersion;
   Fonts.VersionLink := Fonts.AddChild(TStringSetting.Create(ssFontsVersionLink)) as TStringSetting;
@@ -933,7 +949,7 @@ begin
   {$IFDEF USE_EXTENSIONS}
   Extensions := AddChild(TExtensionsSection.Create()) as TExtensionsSection;
   Extensions.Path := Extensions.AddChild(TPathSetting.Create(ssExtensionsPath)) as TPathSetting;
-  {$IFDEF USE_EXTENSIONS}Extensions.Path.onDefault := @GetExtPath;{$ENDIF}
+  Extensions.Path.onDefault := @GetExtPath;
   Extensions.FileExtension := Extensions.AddChild(TStringSetting.Create(ssExtensionsFileExtension)) as TStringSetting;
   Extensions.FileExtension.onDefault := @GetExtensionsFileExtension;
   {$ENDIF}
@@ -951,6 +967,10 @@ begin
     FunctionList := CodeInsight.AddChild(TFunctionListSection.Create()) as TFunctionListSection;
     FunctionList.ShowOnStart := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowOnStart)) as TBooleanSetting;
     FunctionList.ShowOnStart.onDefault := @GetFunctionListShowOnStart;
+    FunctionList.ShowVars := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowVars)) as TBooleanSetting;
+    FunctionList.ShowVars.onDefault := @GetFunctionListShowVars;
+    FunctionList.ShowConsts := FunctionList.AddChild(TBooleanSetting.Create(ssFunctionListShowConsts)) as TBooleanSetting;
+    FunctionList.ShowConsts.onDefault := @GetFunctionListShowConsts;
   end;
 
   Tray := AddChild(TTraySection.Create()) as TTraySection;
@@ -1007,6 +1027,10 @@ begin
   ColourPicker.AddToHistoryOnPick.onDefault := @GetColourPickerAddToHistoryOnPick;
   ColourPicker.ShowHistoryOnPick := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerShowHistoryOnPick)) as TBooleanSetting;
   ColourPicker.ShowHistoryOnPick.onDefault := @GetColourPickerShowHistoryonPick;
+  ColourPicker.AddCoordinateToClipBoard := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerAddCoordinateToClipBoard)) as TBooleanSetting;
+  ColourPicker.AddCoordinateToClipBoard.onDefault := @GetColourPickerAddCoordinateToClipBoard;
+  ColourPicker.AddColourToClipBoard := ColourPicker.AddChild(TBooleanSetting.Create(ssColourPickerAddColourToClipBoard)) as TBooleanSetting;
+  ColourPicker.AddColourToClipBoard.onDefault := @GetColourPickerAddColourToClipBoard;
 
   CodeHints := AddChild(TCodeHintsSection.Create()) as TCodeHintsSection;
   CodeHints.ShowAutomatically := CodeHints.AddChild(TBooleanSetting.Create(ssCodeHintsShowAutomatically)) as TBooleanSetting;
@@ -1016,11 +1040,19 @@ begin
   CodeCompletion.ShowAutomatically := CodeCompletion.AddChild(TBooleanSetting.Create(ssCodeCompletionShowAutomatically)) as TBooleanSetting;
   CodeCompletion.ShowAutomatically.onDefault := @GetCodeCompletionShowAutomatically;
 
-  Notes := AddChild(TNotesSetion.Create()) as TNotesSetion;
+  Notes := AddChild(TNotesSection.Create()) as TNotesSection;
   Notes.Content := Notes.AddChild(TStringSetting.Create(ssNotesContent)) as TStringSetting;
   Notes.Content.onDefault := @GetNotesContent;
   Notes.Visible := Notes.AddChild(TBooleanSetting.Create(ssNotesVisible)) as TBooleanSetting;
   Notes.Visible.onDefault := @GetNotesVisible;
+
+  Misc := AddChild(TMiscSection.Create()) as TMiscSection;
+  Misc.RestartScriptIfStarted := Misc.AddChild(TBooleanSetting.Create(ssMiscRestartScriptIfStarted)) as TBooleanSetting;
+  Misc.RestartScriptIfStarted.onDefault := @GetMiscRestartScriptIfStarted;
+  Misc.WarnIfRunning := Misc.AddChild(TBooleanSetting.Create(ssMiscWarnIfRunning)) as TBooleanSetting;
+  Misc.WarnIfRunning.onDefault := @GetMiscWarnIfRunning;
+  Misc.WarnIfModified := Misc.AddChild(TBooleanSetting.Create(ssMiscWarnIfModified)) as TBooleanSetting;
+  Misc.WarnIfModified.onDefault := @GetMiscWarnIfModified;
 
   ScriptManager := AddChild(TScriptManagerSection.Create()) as TScriptManagerSection;
   ScriptManager.ServerURL := ScriptManager.AddChild(TStringSetting.Create(ssSMURL)) as TStringSetting;
@@ -1061,4 +1093,3 @@ end;
 
 
 end.
-

@@ -27,8 +27,15 @@ end;
 
 {$IFNDEF MML_EXPORT_THREADSAFE}
 function ps_SetScriptProp(prop : TSP_Property; Value: TVariantArray): boolean; extdecl;
+var
+  i: Integer;
 begin
-  Exit(CurrThread.Prop.SetProp(prop, Value));
+  Result := True;
+  if prop = SP_OnTerminate then
+    CurrThread.Prop.ClearOnTerminateProcs;
+  for i:= 0 to High(Value) do
+    if not CurrThread.Prop.AddProp(prop, Value[i]) then
+      Result := False;
 end;
 
 function ps_GetScriptProp(prop : TSP_Property; var Value : TVariantArray) : boolean; extdecl;
@@ -246,56 +253,14 @@ begin;
 end;
 
 {$DEFINE PS_ADDONTERMINATE}
-function ps_AddOnTerminate(const proc : string): Boolean; extdecl;
-var
-  oldProcs : TVariantArray;
-  oldProcsHigh, i : Integer;
-  lowerCaseProc : string;
+function ps_AddOnTerminate(const proc : string; skipIfUserTerminated: Boolean = False): Boolean; extdecl;
 begin;
-  result := false;
-
-  if not CurrThread.Prop.GetProp(SP_OnTerminate, oldProcs) then
-     SetLength(oldProcs, 1);
-
-  oldProcsHigh  := High(oldProcs);
-  lowerCaseProc := LowerCase(proc);
-
-  for i := 0 to oldProcsHigh do
-    if LowerCase(oldProcs[i]) = lowerCaseProc then
-      exit;
-
-  SetLength(oldProcs, Length(oldProcs) + 1);
-  oldProcs[High(oldProcs)] := proc;
-  CurrThread.Prop.SetProp(SP_OnTerminate, oldProcs);
-
-  result := True;
+  result := CurrThread.Prop.AddProp(SP_OnTerminate, proc, skipIfUserTerminated);
 end;
 
 function ps_DeleteOnTerminate(const Proc : string): Boolean; extdecl;
-var
-  curProcs, newProcs: TVariantArray;
-  I, C: Integer;
-  _Proc: string;
 begin;
-  Result := False;
-
-  if (not (CurrThread.Prop.GetProp(SP_OnTerminate, curProcs))) then
-     Exit;
-
-  _Proc := Lowercase(Proc);
-  SetLength(newProcs, Length(curProcs));
-
-  C := 0;
-  for I := 0 to High(curProcs) do
-    if (not (Lowercase(curProcs[I]) = _Proc)) then
-    begin
-      newProcs[C] := curProcs[I];
-      Inc(C);
-    end else
-      Result := True;
-
-  SetLength(newProcs, C);
-  Result := Result and CurrThread.Prop.SetProp(SP_OnTerminate, newProcs);
+  Result := CurrThread.Prop.DeleteOnTerminateProcs(Proc);
 end;
 
 function ps_GetTimeRunning: LongWord; extdecl;
@@ -413,6 +378,11 @@ begin
   CurrThread.Client.IOManager.SetTargetEx(Proc);
 end;
 
+procedure ps_SetTarget2(TheHWND: PtrUInt);
+begin
+  CurrThread.Client.IOManager.SetTarget(TheHWND);
+end;
+
 function ps_GetEnvironmentVariable(const VarName: string): string; extdecl;
 begin
   result := GetEnvironmentVariableUTF8(VarName);
@@ -494,3 +464,13 @@ begin
   end;
 end;
 {$ENDIF}
+
+function ps_GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;
+begin
+  Result := CurrThread.Client.IOManager.GetChildWindows(ParentHWND);
+end;
+
+procedure ps_SaveSettings(); extdecl;
+begin
+  CurrThread.FormCallBack(m_SaveSettings, nil);
+end;

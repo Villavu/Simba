@@ -44,12 +44,11 @@ procedure RegisterLCLGraphics(Compiler: TLapeCompiler);
 implementation
 
 uses
-  MufasaTypes,LCLType,lplclsystem, stringutil, Clipbrd;
+  MufasaTypes,LCLType,lplclsystem, Clipbrd;
 
 type
   PHbitmap = ^HBitmap;
   PHPalette = ^HPalette;
-  PClipboardFormat = ^TClipboardFormat;
   PAntialiasingMode = ^TAntialiasingMode;
 
   {TGraphicsObject}
@@ -479,6 +478,9 @@ begin
 end;
 
 {TCanvas}
+
+
+
 //procedure Lock;
 procedure TCanvas_Lock(const Params: PParamArray); lape_extdecl
 begin
@@ -882,6 +884,21 @@ begin
   PAntialiasingMode(Result)^ := PCanvas(Params^[0])^.AntialiasingMode;
 end;
 
+procedure TCanvas_Handle_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPtrUInt(Result)^ := PCanvas(Params^[0])^.Handle;
+end;
+
+procedure TCanvas_Handle_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.Handle := PPtrUInt(Params^[1])^;
+end;
+
+procedure TCanvas_FillRectEx(const Params: PParamArray); lape_extdecl
+begin
+  PCanvas(Params^[0])^.FillRect(PRect(Params^[1])^);
+end;
+
 procedure Register_TCanvas(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -920,6 +937,7 @@ begin
     addGlobalFunc('procedure TCanvas.RoundRect( Rect: TRect; RX,RY: Integer); overload;', @TCanvas_RoundRectEx);
     addGlobalFunc('procedure TCanvas.TextOut(X,Y: Integer;  Text: String);', @TCanvas_TextOut);
     addGlobalFunc('procedure TCanvas.TextRect( ARect: TRect; X, Y: integer;  Text: string);', @TCanvas_TextRect);
+    addGlobalFunc('procedure TCanvas.FillRect(ARect: TRect); overload;', @TCanvas_FillRectEx);
     addGlobalFunc('function TCanvas.TextHeight( Text: string): Integer;', @TCanvas_TextHeight);
     addGlobalFunc('function TCanvas.TextWidth( Text: string): Integer;', @TCanvas_TextWidth);
     addGlobalFunc('function TCanvas.HandleAllocated(): Boolean;', @TCanvas_HandleAllocated);
@@ -943,6 +961,7 @@ begin
     addClassVar('TCanvas', 'OnChange', 'TNotifyEvent', @TCanvas_OnChange_Read, @TCanvas_OnChange_Write);
     addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @TCanvas_OnChanging_Read, @TCanvas_OnChanging_Write);
     addClassVar('TCanvas', 'AntialiasingMode', 'TAntialiasingMode', @TCanvas_AntialiasingMode_Get, @TCanvas_AntialiasingMode_Set);
+    addClassVar('TCanvas', 'Handle', 'PtrUInt', @TCanvas_Handle_Read, @TCanvas_Handle_Write);
     addGlobalFunc('procedure TCanvas.Init();', @TCanvas_Init);
     addGlobalFunc('procedure TCanvas.Free();', @TCanvas_Free);
   end;
@@ -1297,7 +1316,6 @@ end;
 
 procedure TBitmap_ToString(const Params: PParamArray; const Result: Pointer); lape_extdecl
 var
-  b: TBitmap;
   x, y, w, h: integer;
   Addition, Data: string;
 begin
@@ -1320,7 +1338,7 @@ end;
 
 procedure TBitmap_LoadFromString(const Params: PParamArray); lape_extdecl
 var
-  x, y, w, h: integer;
+  x, y: Integer;
 begin
   PBitmap(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 

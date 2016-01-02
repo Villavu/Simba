@@ -25,10 +25,13 @@ implementation
    PPanel = ^TPanel;
    PShape = ^TShape;
    PShapeType = ^TShapeType;
+   PCustomRadioGroup = ^TCustomRadioGroup;
+   PRadioGroup = ^TRadioGroup;
+   PColumnLayout = ^TColumnLayout;
 
-   {TTimer}
+{TTimer}
 
-   //constructor Create(AOwner: TComponent);
+//constructor Create(AOwner: TComponent);
 procedure TCustomTimer_Init(const Params: PParamArray); lape_extdecl
 begin
   PCustomTimer(Params^[0])^ := TCustomTimer.Create(PComponent(Params^[1])^);
@@ -570,6 +573,164 @@ begin
   end;
 end;
 
+//function CanModify: boolean; virtual;
+procedure TCustomRadioGroup_CanModify(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pboolean(Result)^ := PCustomRadioGroup(Params^[0])^.CanModify();
+end;
+
+//procedure FlipChildren(AllLevels: Boolean); override;
+procedure TCustomRadioGroup_FlipChildren(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.FlipChildren(PBoolean(Params^[1])^);
+end;
+
+//function Rows: integer;
+procedure TCustomRadioGroup_Rows(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomRadioGroup(Params^[0])^.Rows();
+end;
+
+//Read: property AutoFill: Boolean read FAutoFill write SetAutoFill;
+procedure TCustomRadioGroup_AutoFill_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PBoolean(Result)^ := PCustomRadioGroup(Params^[0])^.AutoFill;
+end;
+
+//Write: property AutoFill: Boolean read FAutoFill write SetAutoFill;
+procedure TCustomRadioGroup_AutoFill_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.AutoFill := PBoolean(Params^[1])^;
+end;
+
+//Read: property ItemIndex: integer read GetItemIndex write SetItemIndex default -1;
+procedure TCustomRadioGroup_ItemIndex_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomRadioGroup(Params^[0])^.ItemIndex;
+end;
+
+//Write: property ItemIndex: integer read GetItemIndex write SetItemIndex default -1;
+procedure TCustomRadioGroup_ItemIndex_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.ItemIndex := Pinteger(Params^[1])^;
+end;
+
+//Read: property Items: TStrings read FItems write SetItems;
+procedure TCustomRadioGroup_Items_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PStrings(Result)^ := PCustomRadioGroup(Params^[0])^.Items;
+end;
+
+//Write: property Items: TStrings read FItems write SetItems;
+procedure TCustomRadioGroup_Items_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.Items := PStrings(Params^[1])^;
+end;
+
+//Read: property Columns: integer read FColumns write SetColumns default 1;
+procedure TCustomRadioGroup_Columns_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  Pinteger(Result)^ := PCustomRadioGroup(Params^[0])^.Columns;
+end;
+
+//Write: property Columns: integer read FColumns write SetColumns default 1;
+procedure TCustomRadioGroup_Columns_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.Columns := Pinteger(Params^[1])^;
+end;
+
+//Read: property ColumnLayout: TColumnLayout read FColumnLayout write SetColumnLayout default clHorizontalThenVertical;
+procedure TCustomRadioGroup_ColumnLayout_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PColumnLayout(Result)^ := PCustomRadioGroup(Params^[0])^.ColumnLayout;
+end;
+
+//Write: property ColumnLayout: TColumnLayout read FColumnLayout write SetColumnLayout default clHorizontalThenVertical;
+procedure TCustomRadioGroup_ColumnLayout_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.ColumnLayout := PColumnLayout(Params^[1])^;
+end;
+
+//Read: property OnClick: TNotifyEvent read FOnClick write FOnClick;
+procedure TCustomRadioGroup_OnClick_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomRadioGroup(Params^[0])^.OnClick;
+end;
+
+//Write: property OnClick: TNotifyEvent read FOnClick write FOnClick;
+procedure TCustomRadioGroup_OnClick_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.OnClick := PNotifyEvent(Params^[1])^;
+end;
+
+//Read: property OnSelectionChanged: TNotifyEvent read FOnSelectionChanged write FOnSelectionChanged;
+procedure TCustomRadioGroup_OnSelectionChanged_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PNotifyEvent(Result)^ := PCustomRadioGroup(Params^[0])^.OnSelectionChanged;
+end;
+
+//Write: property OnSelectionChanged: TNotifyEvent read FOnSelectionChanged write FOnSelectionChanged;
+procedure TCustomRadioGroup_OnSelectionChanged_Write(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.OnSelectionChanged := PNotifyEvent(Params^[1])^;
+end;
+
+//constructor Create();
+procedure TCustomRadioGroup_Init(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^ := TCustomRadioGroup.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TCustomRadioGroup_Free(const Params: PParamArray); lape_extdecl
+begin
+  PCustomRadioGroup(Params^[0])^.Free();
+end;
+
+procedure Register_TCustomRadioGroup(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TCustomRadioGroup', 'TCustomGroupBox');
+
+    addGlobalFunc('function TCustomRadioGroup.CanModify(): boolean;', @TCustomRadioGroup_CanModify);
+    addGlobalFunc('procedure TCustomRadioGroup.FlipChildren(AllLevels: Boolean);', @TCustomRadioGroup_FlipChildren);
+    addGlobalFunc('function TCustomRadioGroup.Rows(): Integer;', @TCustomRadioGroup_Rows);
+    addClassVar('TCustomRadioGroup', 'AutoFill', 'Boolean', @TCustomRadioGroup_AutoFill_Read, @TCustomRadioGroup_AutoFill_Write);
+    addClassVar('TCustomRadioGroup', 'ItemIndex', 'Integer', @TCustomRadioGroup_ItemIndex_Read, @TCustomRadioGroup_ItemIndex_Write);
+    addClassVar('TCustomRadioGroup', 'Items', 'TStrings', @TCustomRadioGroup_Items_Read, @TCustomRadioGroup_Items_Write);
+    addClassVar('TCustomRadioGroup', 'Columns', 'Integer', @TCustomRadioGroup_Columns_Read, @TCustomRadioGroup_Columns_Write);
+    addClassVar('TCustomRadioGroup', 'ColumnLayout', 'TColumnLayout', @TCustomRadioGroup_ColumnLayout_Read, @TCustomRadioGroup_ColumnLayout_Write);
+    addClassVar('TCustomRadioGroup', 'OnClick', 'TNotifyEvent', @TCustomRadioGroup_OnClick_Read, @TCustomRadioGroup_OnClick_Write);
+    addClassVar('TCustomRadioGroup', 'OnSelectionChanged', 'TNotifyEvent', @TCustomRadioGroup_OnSelectionChanged_Read, @TCustomRadioGroup_OnSelectionChanged_Write);
+    addGlobalFunc('procedure TCustomRadioGroup.Init(TheOwner: TComponent);', @TCustomRadioGroup_Init);
+    addGlobalFunc('procedure TCustomRadioGroup.Free();', @TCustomRadioGroup_Free);
+  end;
+end;
+
+//constructor Create();
+procedure TRadioGroup_Init(const Params: PParamArray); lape_extdecl
+begin
+  PRadioGroup(Params^[0])^ := TRadioGroup.Create(PComponent(Params^[1])^);
+end;
+
+//procedure Free();
+procedure TRadioGroup_Free(const Params: PParamArray); lape_extdecl
+begin
+  PRadioGroup(Params^[0])^.Free();
+end;
+
+procedure Register_TRadioGroup(Compiler: TLapeCompiler);
+begin
+  with Compiler do
+  begin
+    addClass('TRadioGroup', 'TCustomRadioGroup');
+
+    addGlobalFunc('procedure TRadioGroup.Init(TheOwner: TComponent);', @TRadioGroup_Init);
+    addGlobalFunc('procedure TRadioGroup.Free();', @TRadioGroup_Free);
+  end;
+end;
+
 procedure RegisterLCLExtCtrls(Compiler: TLapeCompiler);
 begin
    with Compiler do
@@ -579,6 +740,7 @@ begin
      addGlobalType('TBevelCut', 'TPanelBevel');
      addGlobalType('Integer', 'TBevelWidth');
      addGlobalType('(stRectangle, stSquare, stRoundRect, stRoundSquare, stEllipse, stCircle, stSquaredDiamond, stDiamond, stTriangle)', 'TShapeType');
+     addGlobalType('(clHorizontalThenVertical, clVerticalThenHorizontal)', 'TColumnLayout');
    end;
 
    Register_TCustomTimer(Compiler);
@@ -588,6 +750,8 @@ begin
    Register_TCustomPanel(Compiler);
    Register_TPanel(Compiler);
    Register_TShape(Compiler);
+   Register_TCustomRadioGroup(Compiler);
+   Register_TRadioGroup(Compiler);
 end;
 
 end.

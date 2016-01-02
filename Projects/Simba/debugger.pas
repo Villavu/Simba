@@ -294,8 +294,6 @@ procedure TDebuggerForm._FillInfo();
   end;
 
   function ToStr(P: PIFVariant): string;
-  var
-    I: LongInt;
   begin
     Result := ': ' + BT2S(P^.FType);
     case P^.FType.BaseType of

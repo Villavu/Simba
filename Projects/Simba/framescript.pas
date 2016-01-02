@@ -30,7 +30,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, SynHighlighterPas, SynEdit, SynEditMarkupHighAll,
   mmlpsthread,ComCtrls, SynEditKeyCmds, LCLType,MufasaBase, Graphics, Controls, SynEditStrConst,
-  v_ideCodeInsight, v_ideCodeParser,  SynEditHighlighter, SynPluginSyncroEdit, SynGutterBase,
+  v_ideCodeInsight, v_ideCodeParser, SynEditHighlighter, SynPluginSyncroEdit,
   SynEditMarks, newsimbasettings;
 const
    ecCodeCompletion = ecUserFirst;
@@ -351,7 +351,7 @@ var
   ItemList, InsertList, NameList: TStringList;
   sp, ep,bcc,cc,bck,posi,bracketpos,i,DotPos, BPos: Integer;
   p: TPoint;
-  s, ss, Filter, sname, ProcName, TypeName: string;
+  s, Filter, sname, ProcName, TypeName: string;
   Attri: TSynHighlighterAttributes;
   d, dd: TDeclaration;
   FoundItems: TDeclarationArray;

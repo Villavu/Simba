@@ -28,7 +28,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, MufasaBase,Forms, ComCtrls, StdCtrls, Controls,
-  ExtCtrls, Buttons,mmisc,v_ideCodeInsight, newsimbasettings;
+  ExtCtrls, Buttons,v_ideCodeInsight, newsimbasettings, v_ideCodeParser;
 
 type
 
@@ -73,12 +73,14 @@ type
     FillThread: TFillThread;
     procedure FilterTreeVis(Vis : boolean);
     function GetFilterTree: TTreeView;
-    { private declarations }
   public
     DraggingNode: TTreeNode;
+    SimbaNode: TTreeNode;
     ScriptNode: TTreeNode;
     PluginsNode: TTreeNode;
     IncludesNode: TTreeNode;
+    ClassesNode: TTreeNode;
+    CompilerNode: TTreeNode;
     InCodeCompletion: boolean;
     CompletionCaret: TPoint;
     StartWordCompletion: TPoint;
@@ -89,7 +91,9 @@ type
     property FilterTree: TTreeView read GetFilterTree;
     procedure LoadScriptTree(Script: String; Force: Boolean = False);
     function Find(Next: boolean; backwards: boolean = false) : boolean;
-    { public declarations }
+    function SortProc(Node1, Node2: TTreeNode): LongInt;
+    function addProcNode(Proc: TciProcedureDeclaration; AFile: String; AParent: TTreeNode = nil): TTreeNode;
+    function addProcNode(ADecl: String; AFile: String; AParent: TTreeNode = nil): TTreeNode; overload;
   end; 
 
   TMethodInfo = packed record
@@ -101,7 +105,7 @@ type
 implementation
 
 uses
-  SimbaUnit, Graphics, stringutil, simpleanalyzer, v_ideCodeParser, lclintf, dynlibs;
+  SimbaUnit, Graphics, stringutil, lclintf;
 
 { TFunctionListFrame }
 
@@ -235,7 +239,6 @@ procedure TFunctionListFrame.FunctionListMouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
    N: TTreeNode;
-   MethodInfo : TMethodInfo;
 begin
   if InCodeCompletion then
   begin;
@@ -323,12 +326,11 @@ end;
 
 function TFunctionListFrame.Find(Next : boolean; backwards : boolean = false) : boolean;
 var
-  Start,Len,i,ii,index,posi,c: Integer;
+  Start,Len,i,index,posi,c: Integer;
   FoundFunction : boolean;
   LastSection : Array[1..2] of String;
   str : string;
   RootNode : TTreeNode;
-  NormalNode,tmpNode : TTreeNode;
   Node : TTreeNode;
   InsertStr : string;
 begin
@@ -344,6 +346,7 @@ begin
     end;
     FilterTreeVis(False);
     ScriptNode.Expand(true);
+    SimbaNode.Expand(False);
     Exit;
   end;
 
@@ -544,6 +547,95 @@ begin
     FillThread.Terminate;
 end;
 
+// Used for sorting nodes alphabetically
+function TFunctionListFrame.SortProc(Node1, Node2: TTreeNode): LongInt;
+begin
+  Exit(AnsiStrIComp(PChar(Node1.Text), PChar(Node2.Text)));
+end;
+
+function TFunctionListFrame.addProcNode(Proc: TciProcedureDeclaration; AFile: String; AParent: TTreeNode = nil): TTreeNode;
+var
+  ProcName: TciProcedureName;
+  ProcNameStr: String;
+  Temp: TTreeNode = nil;
+begin
+  if (Proc = nil) then
+    Exit;
+
+  ProcName := TciProcedureName(Proc.Items.GetFirstItemOfClass(TciProcedureName));
+  if (ProcName = nil) then
+    Exit;
+
+  ProcNameStr := Trim(ProcName.RawText);
+
+  if (Proc.isOverload) or (Proc.isOverride) then
+  begin
+    Temp := AParent.FindNode(ProcNameStr);
+
+    if (Temp <> nil) then
+    begin
+      AParent := Temp;
+      if (Proc.isOverload) then
+        ProcNameStr += '; overload'
+      else if (Proc.isOverride) then
+        ProcNameStr += '; override';
+    end;
+  end;
+
+  if (AParent <> nil) then
+    Result := FunctionList.Items.AddChild(AParent, ProcNameStr)
+  else
+    Result := FunctionList.Items.Add(nil, ProcNameStr);
+
+  if (Temp <> nil) and (AParent.Expanded = False) then
+    AParent.Expand(False);
+
+  case (SameText(Proc.ProcType, 'function')) of
+    True:
+      Result.ImageIndex := 34;
+    False:
+      Result.ImageIndex := 35;
+  end;
+
+  Result.Data := GetMem(SizeOf(TMethodInfo));
+  FillChar(PMethodInfo(Result.Data)^, SizeOf(TMethodInfo), 0);
+  with (PMethodInfo(Result.Data)^) do
+  begin
+    MethodStr := StrNew(PChar(Proc.CleanDeclaration));
+    Filename := StrNew(PChar(AFile));
+  end;
+
+  Result.SelectedIndex := Result.ImageIndex;
+end;
+
+function TFunctionListFrame.addProcNode(ADecl: String; AFile: String; AParent: TTreeNode = nil): TTreeNode; overload;
+var
+  ProcName: String;
+begin
+  ProcName := GetMethodName(ADecl, False);
+  if (ProcName = '') then
+    Exit;
+
+  if (AParent <> nil) then
+    Result := FunctionList.Items.AddChild(AParent, ProcName)
+  else
+    Result := FunctionList.Items.Add(nil, ProcName);
+
+  case (Pos('function', Lowercase(ADecl)) = 0) of
+    True:
+      Result.ImageIndex := 34;
+    False:
+      Result.ImageIndex := 35;
+  end;
+
+  Result.Data := GetMem(SizeOf(TMethodInfo));
+  FillChar(PMethodInfo(Result.Data)^, SizeOf(TMethodInfo), 0);
+  with (PMethodInfo(Result.Data)^) do
+    MethodStr := StrNew(PChar(ADecl));
+
+  Result.SelectedIndex := Result.ImageIndex;
+end;
+
 { TFillThread }
 
 procedure TFillThread.Update;
@@ -702,15 +794,23 @@ procedure TFillThread.Update;
 
   var
     I: integer;
+    Consts, Vars: Boolean;
   begin;
     if (not Assigned(Procs)) then
       Exit;
+
+    with (SimbaSettings.CodeInsight.FunctionList) do
+    begin
+      Consts := ShowConsts.GetDefValue(True);
+      Vars := ShowVars.GetDefValue(True);
+    end;
 
     for I := 0 to Procs.Count - 1 do
       if (Assigned(Procs[I])) then
         case Procs[I].ClassName of
           'TciProcedureDeclaration': ProcessProcedure(Node, Procs[I] as TciProcedureDeclaration);
-          'TciVarDeclaration', 'TciConstantDeclaration': ProcessDecl(Node, Procs[I] as TDeclaration);
+          'TciVarDeclaration': if (Vars) then ProcessDecl(Node, Procs[I] as TDeclaration);
+          'TciConstantDeclaration': if (Consts) then ProcessDecl(Node, Procs[I] as TDeclaration);
           'TciTypeDeclaration': ProcessType(Node, Procs[I] as TciTypeDeclaration);
           'TciJunk', 'TciInclude', 'TciCompoundStatement': ;
           else

@@ -18,6 +18,7 @@ ssNews = 'News/';
 ssPlugins = 'Plugins/';
 ssNotes = 'Notes/';
 ssGrabber = 'ScreenGrabber/';
+ssMisc = 'Misc/';
 ssCodeInsight = 'CodeInsight/';
 ssFunctionList = 'FunctionList/';
 
@@ -28,9 +29,8 @@ ssUpdaterVersionLink = ssSettings + ssUpdater + 'RemoteVersionLink';
 ssAutomaticallyUpdate = ssSettings + ssUpdater + 'AutomaticallyUpdate';
 ssUpdaterReleaseChannel = ssSettings + ssUpdater + 'ReleaseChannel';
 
-ssCheckForFontUpdates = ssSettings + ssFonts + 'CheckForUpdates';
-ssLoadFontsOnSimbaStart = ssSettings + ssFonts + 'LoadOnSimbaStart';
-ssLoadFontsOnScriptStart = ssSettings + ssFonts + 'LoadOnScriptStart';
+ssLoadFontsOnStart = ssSettings + ssFonts + 'LoadOnStartUp';
+ssFontsCheckForUpdates = ssSettings + ssFonts + 'CheckForUpdates';
 ssFontsVersion = ssSettings + ssFonts + 'Version';
 ssFontsLink = ssSettings + ssFonts + 'UpdateLink';
 ssFontsVersionLink = ssSettings + ssFonts + 'VersionLink';
@@ -46,7 +46,8 @@ ssTabsCheckBeforeOpen = ssSettings + ssTabs + 'CheckTabsBeforeOpen';
 
 ssColourPickerShowHistoryOnPick = ssSettings + ssColourPicker + 'ShowHistoryOnPick';
 ssColourPickerAddToHistoryOnPick = ssSettings + ssColourPicker + 'AddToHistoryOnPick';
-
+ssColourPickerAddCoordinateToClipBoard = ssSettings + ssColourPicker + 'AddCoordinateToClipBoard';
+ssColourPickerAddColourToClipBoard = ssSettings + ssColourPicker + 'AddColourToClipBoard';
 
 ssScriptsPath = ssSettings + ssScripts + 'Path';
 
@@ -78,6 +79,8 @@ ssFunctionListShown = ssLastConfig + ssMainForm + 'FunctionListShown';
 
 ssCodeInsightShowHidden = ssSettings + ssCodeInsight + 'ShowHidden';
 ssFunctionListShowOnStart = ssSettings + ssCodeInsight + ssFunctionList + 'ShowOnStart';
+ssFunctionListShowVars = ssSettings + ssCodeInsight + ssFunctionList + 'ShowVars';
+ssFunctionListShowConsts = ssSettings + ssCodeInsight + ssFunctionList + 'ShowConsts';
 
 ssMaxRecentFiles = ssSettings + 'General/MaxRecentFiles';
 ssRecentFiles = ssLastConfig + ssMainForm + 'RecentFiles';
@@ -87,10 +90,13 @@ ssRecentFileN = ssLastConfig + ssMainForm + 'RecentFiles/File';
 ssNotesContent = ssSettings + ssNotes + 'Content';
 ssNotesVisible = ssSettings + ssNotes + 'Visible';
 
+ssMiscRestartScriptIfStarted = ssSettings + ssMisc + 'RestartScriptIfStarted';
+ssMiscWarnIfRunning = ssSettings + ssMisc + 'WarnIfRunning';
+ssMiscWarnIfModified = ssSettings + ssMisc + 'WarnIfModified';
+
 ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';
 ssSMFile = ssScriptManager + 'File';
 ssFRun = ssScriptManager + 'FirstRun';
 
 ssActivateDx = ssSettings + ssGrabber + 'ActivateDXGrabber';
-

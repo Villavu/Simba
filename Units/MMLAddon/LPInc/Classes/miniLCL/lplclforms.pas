@@ -1139,6 +1139,52 @@ begin
   end;
 end;
 
+procedure TForm_OnMouseDown_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
+begin
+  Component := PForm(Params^[0])^.FindComponent('MouseDown');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnMouseEventWrapper.Create(PForm(Params^[0])^);
+    Component.Name := 'MouseDown';
+  end;
+
+  with TOnMouseEventWrapper(Component) do
+  begin
+    InternalMethod := PMouseEventWrapper(Params^[1])^;
+    PForm(Params^[0])^.OnMouseDown := @MouseEvent;
+  end;
+end;
+
+procedure TForm_OnMouseUp_Write(const Params: PParamArray); lape_extdecl
+var
+  Component: TComponent;
+begin
+  Component := PForm(Params^[0])^.FindComponent('MouseUp');
+  if (not Assigned(Component)) then
+  begin
+    Component := TOnMouseEventWrapper.Create(PForm(Params^[0])^);
+    Component.Name := 'Mouseup';
+  end;
+
+  with TOnMouseEventWrapper(Component) do
+  begin
+    InternalMethod := PMouseEventWrapper(Params^[1])^;
+    PForm(Params^[0])^.OnMouseDown := @MouseEvent;
+  end;
+end;
+
+procedure TForm_ParentWindow_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
+begin
+  PPtrUInt(Result)^ := PForm(Params^[0])^.ParentWindow;
+end;
+
+procedure TForm_ParentWindow_Write(const Params: PParamArray); lape_extdecl
+begin
+  PForm(Params^[0])^.ParentWindow := PPtrUInt(Params^[1])^;
+end;
+
 procedure Register_TForm(Compiler: TLapeCompiler);
 begin
   with Compiler do
@@ -1153,6 +1199,7 @@ begin
     addGlobalFunc('procedure TForm.Show();', @TForm_Show);
     addGlobalFunc('procedure TForm.Close();', @TForm_Close);
     addGlobalFunc('procedure TForm.Hide();', @TForm_Hide);
+    addClassVar('TForm', 'ParentWindow', 'PtrUInt', @TForm_ParentWindow_Read, @TForm_ParentWindow_Write);
     addClassVar('TForm', 'ClientWidth', 'Integer', @TForm_ClientWidth_Read, @TForm_ClientWidth_Write);
     addClassVar('TForm', 'ClientHeight', 'Integer', @TForm_ClientHeight_Read, @TForm_ClientHeight_Write);
     addClassVar('TForm', 'OnClose', 'TCloseEvent', @TForm_OnClose_Read, @TForm_OnClose_Write);
@@ -1174,10 +1221,12 @@ begin
     addClassVar('TForm', 'Height', 'Integer', @TForm_Height_Read, @TForm_Height_Write);
     addClassVar('TForm', 'Top', 'Integer', @TForm_Top_Read, @TForm_Top_Write);
     addClassVar('TForm', 'Width', 'Integer', @TForm_Width_Read, @TForm_Width_Write);
-    addClassVar('TForm', 'Caption', 'string', @TForm_Caption_Read, @TForm_Caption_Write);
+    addClassVar('TForm', 'Caption', 'String', @TForm_Caption_Read, @TForm_Caption_Write);
     addClassVar('TForm', 'Position', 'TPosition', @TForm_Position_Read, @TForm_Position_Write);
     addGlobalFunc('procedure TForm.Free();', @TForm_Free);
     addClassVar('TForm', 'OnMouseMove', 'TMouseMoveEvent', @TForm_OnMouseMove_Read, @TForm_OnMouseMove_Write);
+    addClassVar('TForm', 'OnMouseDown', 'TMouseEvent', nil, @TForm_OnMouseDown_Write);
+    addClassVar('TForm', 'OnMouseUp', 'TMouseEvent', nil, @TForm_OnMouseUp_Write);
   end;
 end;
 

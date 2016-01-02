@@ -27,8 +27,8 @@ unit os_windows;
 interface
 
   uses
-    Classes, SysUtils, mufasatypes, windows, graphics,forms, LCLType, LCLIntf, bitmaps, IOManager, WinKeyInput, D3DX9,Direct3D9;
-    
+    Classes, SysUtils, mufasatypes, windows, graphics, LCLType, LCLIntf, IOManager, WinKeyInput, D3DX9, Direct3D9;
+
   type
 
     TGrabberType = (gtWinapi = 0,gtDirectX = 1);
@@ -128,6 +128,8 @@ interface
         
         function GetProcesses: TSysProcArr; override;
         procedure SetTargetEx(Proc: TSysProc); overload;
+
+        function GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr; override;
       protected
         GrabberType: TGRabberType;
         DesktopHWND : Hwnd;
@@ -386,7 +388,6 @@ implementation
   }
   function TWindow.ReturnData(xs, ys, width, height: Integer): TRetData;
   var
-    temp: PRGB32;
     w,h : integer;
   begin
     if (GrabberType = gtWinapi) then
@@ -497,7 +498,6 @@ end;
   procedure TWindow.MoveMouse(x,y: integer);
   var
     rect : TRect;
-    w,h: integer;
   begin
     MouseApplyAreaOffset(x, y);
     WindowRect(rect);
@@ -675,10 +675,10 @@ end;
 
 threadvar
   ProcArr: TSysProcArr;
+  CWindowArr: TChildWindowArr;
 
 function EnumProcess(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
 var
-  Proc: TSysProc;
   I: integer;
   pPid: DWORD;
 begin
@@ -694,6 +694,28 @@ begin
     GetWindowThreadProcessId(Handle, pPid);
     ProcArr[I].Pid := pPid;
   end;
+end;
+
+function EnumWindow(Handle: HWND; Param: LPARAM): WINBOOL; stdcall;
+var
+  L: Integer;
+begin
+  Result := (not ((Handle = 0) or (Handle = null)));
+  if (Result) then
+  begin
+    L := Length(CWindowArr);
+    SetLength(CWindowArr, L + 1);
+
+    CWindowArr[L].Handle := Handle;
+    GetWindowSize(Handle, CWindowArr[L].Width, CWindowArr[L].Height);
+  end;
+end;
+
+function TIOManager.GetChildWindows(ParentHWND: PtrUInt): TChildWindowArr;
+begin
+  SetLength(CWindowArr, 0);
+  EnumChildWindows(ParentHWND, @EnumWindow, 0);
+  Result := CWindowArr;
 end;
 
 function TIOManager.GetProcesses: TSysProcArr;
