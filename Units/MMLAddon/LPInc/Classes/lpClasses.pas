@@ -52,7 +52,7 @@ uses
 
   lpTMMLSettingsSandbox,
 
-  lpTMMLTimer;
+  lpTMMLTimer, lpjson;
 
 procedure RegisterLCLClasses(Compiler: TLapeCompiler);
 begin
@@ -108,6 +108,7 @@ begin
   Register_TMMLSettingsSandbox(Compiler);
 
   Register_TMMLTimer(Compiler);
+  Register_JSON(Compiler);
 end;
 
 end.
