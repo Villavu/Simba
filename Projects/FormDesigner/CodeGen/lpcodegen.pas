@@ -199,7 +199,7 @@ begin
   ResultScript.Clear;
   for i := 0 to list.Count - 1 do
   begin
-    cmp := CmpList.AddItem;
+    cmp := TSimbaComponent.Create;
     with cmp do
     begin
       clsname := list[i].clsname;
@@ -208,11 +208,12 @@ begin
       fontcolor := list[i].fontcolor;
       fontname := list[i].fontname;
       img := list[i].img;
-      heigth := list[i].heigth;
+      height := list[i].height;
       width := list[i].width;
       left := list[i].left;
       top := list[i].top;
     end;
+      CMPList.Add(Cmp);
   end;
   GenerateFormCode(CmpList);
   Stream.Position := 0;
@@ -221,137 +222,73 @@ end;
 
 procedure TLPCodeGen.GetComponentCode(smbl: TSimbaComponentList);
 var
-  i,j: integer;
-  smb,cmp: TSimbaComponent;
+  i, j: integer;
+  smb, cmp: TSimbaComponent;
 begin
-  for i:=0 to smbl.count - 1 do
-   begin
-     smb:=smbl[i];
-     j:=GetSimbaCType(smb);
-     case j of
-     0: begin CreateFormCode(smb,FormCode); end;
-     1: begin
-         SmbToCodeList(smb,LabelsCode);
-         cmp:=Labels.AddItem;
-         cmp.clsname:=smb.clsname;
-         cmp.compname:=smb.compname;
-         cmp.caption:=smb.caption;
-         cmp.fontcolor:=smb.fontcolor;
-         cmp.fontname:=smb.fontname;
-         cmp.img:=smb.img;
-         cmp.heigth:=smb.heigth;
-         cmp.width:=smb.width;
-        // cmp.ItemContainer.AddStrings(smb.ItemContainer);
-         cmp.left:=smb.left;
-         cmp.top:=smb.top;
+  for i := 0 to smbl.count - 1 do
+  begin
+    smb := smbl[i];
+    j := GetSimbaCType(smb);
+    case j of
+      0: CreateFormCode(smb, FormCode);
+      1:
+        begin
+          SmbToCodeList(smb, LabelsCode);
+          cmp := TSimbaComponent.Create;
+          cmp.Assign(smb);
+          Labels.Add(cmp);
         end;
-     2: begin
-         SmbToCodeList(smb,EditsCode);
-         cmp:=Edits.AddItem;
-         cmp.clsname:=smb.clsname;
-         cmp.compname:=smb.compname;
-         cmp.caption:=smb.caption;
-         cmp.fontcolor:=smb.fontcolor;
-         cmp.fontname:=smb.fontname;
-         cmp.img:=smb.img;
-         cmp.heigth:=smb.heigth;
-         cmp.width:=smb.width;
-       //  cmp.ItemContainer.AddStrings(smb.ItemContainer);
-         cmp.left:=smb.left;
-         cmp.top:=smb.top;
+      2:
+        begin
+          SmbToCodeList(smb, EditsCode);
+          cmp := TSimbaComponent.Create;
+          cmp.Assign(smb);
+          Edits.Add(cmp);
         end;
-     3: begin
-         SmbToCodeList(smb,ImagesCode);
-         cmp:=Images.AddItem;
-         cmp.clsname:=smb.clsname;
-         cmp.compname:=smb.compname;
-         cmp.caption:=smb.caption;
-         cmp.fontcolor:=smb.fontcolor;
-         cmp.fontname:=smb.fontname;
-         cmp.img:=smb.img;
-         cmp.heigth:=smb.heigth;
-         cmp.width:=smb.width;
-     //    cmp.ItemContainer.AddStrings(smb.ItemContainer);
-         cmp.left:=smb.left;
-         cmp.top:=smb.top;
+      3:
+        begin
+          SmbToCodeList(smb, ImagesCode);
+          cmp := TSimbaComponent.Create;
+          cmp.Assign(smb);
+          Images.Add(cmp);
         end;
-     4: begin
-         SmbToCodeList(smb,ButtonsCode);
-         cmp:=Buttons.AddItem;
-         cmp.clsname:=smb.clsname;
-         cmp.compname:=smb.compname;
-         cmp.caption:=smb.caption;
-         cmp.fontcolor:=smb.fontcolor;
-         cmp.fontname:=smb.fontname;
-         cmp.img:=smb.img;
-         cmp.heigth:=smb.heigth;
-         cmp.width:=smb.width;
-     //    cmp.ItemContainer.AddStrings(smb.ItemContainer);
-         cmp.left:=smb.left;
-         cmp.top:=smb.top;
+      4:
+        begin
+          SmbToCodeList(smb, ButtonsCode);
+          cmp := TSimbaComponent.Create;
+          cmp.Assign(smb);
+          Buttons.Add(cmp);
         end;
-     5: begin
-         SmbToCodeList(smb,CheckBoxesCode);
-         cmp:=CheckBoxes.AddItem;
-         cmp.clsname:=smb.clsname;
-         cmp.compname:=smb.compname;
-         cmp.caption:=smb.caption;
-         cmp.fontcolor:=smb.fontcolor;
-         cmp.fontname:=smb.fontname;
-         cmp.img:=smb.img;
-         cmp.heigth:=smb.heigth;
-         cmp.width:=smb.width;
-     //    cmp.ItemContainer.AddStrings(smb.ItemContainer);
-         cmp.left:=smb.left;
-         cmp.top:=smb.top;
+      5:
+        begin
+          SmbToCodeList(smb, CheckBoxesCode);
+          cmp := TSimbaComponent.Create;
+          cmp.Assign(smb);
+          CheckBoxes.Add(cmp);
         end;
-     6: begin
-         SmbToCodeList(smb,ListBoxesCode);
-         cmp:=ListBoxes.AddItem;
-         cmp.clsname:=smb.clsname;
-         cmp.compname:=smb.compname;
-         cmp.caption:=smb.caption;
-         cmp.fontcolor:=smb.fontcolor;
-         cmp.fontname:=smb.fontname;
-         cmp.img:=smb.img;
-         cmp.heigth:=smb.heigth;
-         cmp.width:=smb.width;
-     //    cmp.ItemContainer.AddStrings(smb.ItemContainer);
-         cmp.left:=smb.left;
-         cmp.top:=smb.top;
+      6:
+        begin
+          SmbToCodeList(smb, ListBoxesCode);
+          cmp := TSimbaComponent.Create;
+          cmp.Assign(smb);
+          ListBoxes.Add(cmp);
         end;
-     7: begin
-         SmbToCodeList(smb,ComboBoxesCode);
-         cmp:=Comboboxes.AddItem;
-         cmp.clsname:=smb.clsname;
-         cmp.compname:=smb.compname;
-         cmp.caption:=smb.caption;
-         cmp.fontcolor:=smb.fontcolor;
-         cmp.fontname:=smb.fontname;
-         cmp.img:=smb.img;
-         cmp.heigth:=smb.heigth;
-         cmp.width:=smb.width;
-     //    cmp.ItemContainer.AddStrings(smb.ItemContainer);
-         cmp.left:=smb.left;
-         cmp.top:=smb.top;
+      7:
+        begin
+          SmbToCodeList(smb, ComboBoxesCode);
+          cmp := TSimbaComponent.Create;
+          cmp.Assign(smb);
+          Comboboxes.Add(cmp);
         end;
-     8: begin
-         SmbToCodeList(smb,RadBtnsCode);
-         cmp:=RadBtns.AddItem;
-         cmp.clsname:=smb.clsname;
-         cmp.compname:=smb.compname;
-         cmp.caption:=smb.caption;
-         cmp.fontcolor:=smb.fontcolor;
-         cmp.fontname:=smb.fontname;
-         cmp.img:=smb.img;
-         cmp.heigth:=smb.heigth;
-         cmp.width:=smb.width;
-     //    cmp.ItemContainer.AddStrings(smb.ItemContainer);
-         cmp.left:=smb.left;
-         cmp.top:=smb.top;
+      8:
+        begin
+          SmbToCodeList(smb, RadBtnsCode);
+          cmp := TSimbaComponent.Create;
+          cmp.Assign(smb);
+          RadBtns.Add(cmp);
         end;
-     end;
-   end;
+    end;
+  end;
   GenerateScriptHeader;
 end;
 
@@ -369,7 +306,7 @@ begin
        list.Add(GenSpaces(4)+'begin');
        list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
        list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
        list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
        list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
@@ -383,7 +320,7 @@ begin
        list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
        list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
        list.Add(GenSpaces(6)+'SetText('+#39+'Input your text here!'+#39+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
        list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
        list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
@@ -396,11 +333,11 @@ begin
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
        list.Add(GenSpaces(4)+'begin');
        list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        if smb.img.switcher = true then
          begin
           s:=smb.img.imgcode;
-          if (smb.heigth<= 24) and (smb.width <=24) then
+          if (smb.height<= 24) and (smb.width <=24) then
           begin
           s1:=#13#10+GenSpaces(6)+#39;
           for p:=0 to Length(s)-1 do begin
@@ -432,16 +369,16 @@ begin
               end;
             end;
             end;
-          List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=client.getMBitmaps().CreateBMPFromString('+IntToStr(smb.width)+','+IntToStr(smb.Heigth)+','+s1+#39+');');
+          List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=client.getMBitmaps().CreateBMPFromString('+IntToStr(smb.width)+','+IntToStr(smb.height)+','+s1+#39+');');
           List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+':=client.getMBitmaps().GetBMP(bmp'+IntToStr(img)+');');
          // List.Add(GenSpaces(6)+'Picture.Bitmap.handle:=bmp'+IntToStr(img)+'.handle;');
           end else begin
           s2:=#39+s+#39;
         //  List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=TBitmap.Create;');
-          List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=client.getMBitmaps().CreateBMPFromString('+IntToStr(smb.width)+','+IntToStr(smb.Heigth)+','+s2+');');
+          List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=client.getMBitmaps().CreateBMPFromString('+IntToStr(smb.width)+','+IntToStr(smb.height)+','+s2+');');
           List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+':=client.getMBitmaps().GetBMP(bmp'+IntToStr(img)+');');
           //List.Add(GenSpaces(6)+'Picture.Bitmap.handle:=bmp'+IntToStr(img)+'.handle;');
-         // List.Add(GenSpaces(6)+'DrawBitmap(bmps'+IntToStr(img)+',Canvas,'+IntToStr(smb.width)+','+IntToStr(smb.Heigth)+');');
+         // List.Add(GenSpaces(6)+'DrawBitmap(bmps'+IntToStr(img)+',Canvas,'+IntToStr(smb.width)+','+IntToStr(smb.height)+');');
          //list.Add(GenSpaces(6)+'Picture.Bitmap.LoadFromFile('+#39+smb.img.path+#39+');');
           end;
           List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+'.DrawToCanvas(0,0,getCanvas());');
@@ -458,7 +395,7 @@ begin
        list.Add(GenSpaces(4)+'begin');
        list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
        list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        list.Add(GenSpaces(6)+'SetOnClick(procedure_OnClick);');
        list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
        list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
@@ -474,7 +411,7 @@ begin
        list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
        list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
        //list.Add(GenSpaces(6)+'Checked:=false'+';');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        list.Add(GenSpaces(6)+'SetOnClick(procedure_OnClick);');
        list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
        list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
@@ -487,7 +424,7 @@ begin
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
        list.Add(GenSpaces(4)+'begin');
        list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        list.Add(GenSpaces(6)+'//add your items here');
        list.Add(GenSpaces(6)+'GetItems().Add('+#39+'YourItem'+#39+')'+';');
        list.Add(GenSpaces(6)+'//End items');
@@ -503,7 +440,7 @@ begin
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
        list.Add(GenSpaces(4)+'begin');
        list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        list.Add(GenSpaces(6)+'//add your items here');
        list.Add(GenSpaces(6)+'GetItems().Add('+#39+'YourItem'+#39+')'+';');
        list.Add(GenSpaces(6)+'//End items');
@@ -520,7 +457,7 @@ begin
        list.Add(GenSpaces(4)+'begin');
        list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
        list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
        list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
        list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
@@ -607,7 +544,7 @@ procedure TLPCodeGen.CreateFormCode(smb: TSimbaComponent; List: TStringList);
   list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
   list.Add(GenSpaces(4)+'begin');
   list.Add(GenSpaces(6)+'SetCaption('+#39+cmpList[0].caption+#39+');');
-  list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.heigth)]));
+  list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
   list.Add(GenSpaces(6)+'SetPosition(poScreenCenter);');
   list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
   list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
