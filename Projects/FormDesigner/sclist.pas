@@ -13,82 +13,177 @@ type TBitmapContainer = record
 type
 
   { TSimbaComponent }
-
-  TSimbaComponent = class(TCollectionItem)
-
-  Public
-    clsname: string;
-    caption: string;
-    compname: string;
-    img: TBitmapContainer;
-    //ItemContainer: TStrings;
-    left,top,width,heigth: integer;
-    fontcolor: TColor;
-    fontname: string;
-    fontsize: integer;
-  constructor Create(Col: TCollection); override;
-  destructor Destroy; override;
+  TSimbaComponent = class(TObject)
+    private
+      FBitmapContainer: TBitmapContainer;
+      FCLSName: string;
+      FCaption: string;
+      fComponentName: string;
+      FImage: TBitmapContainer;
+      FLeft,FTop,FWidth,FHeight: integer;
+      FFontColor: TColor;
+      FFontName: string;
+      FFontSize: integer;
+      procedure Clear;
+    public
+      Constructor Create;
+      Procedure Assign(smb: TSimbaComponent);
+      property CLSName: string read FCLSName write FCLSName;
+      property Caption: string read FCaption write FCaption;
+      property CompName: string read FComponentName write FComponentName;
+      property Img: TBitmapContainer read FBitmapContainer write FBitmapContainer;
+      property Left: integer read FLeft write FLeft;
+      property Top: integer read FTop write FTop;
+      property Width: integer read FWidth write FWidth;
+      property Height: integer read FHeight write FHeight;
+      property FontColor: TColor read FFontColor write FFontColor;
+      property FontName: string read FFontName write FFontName;
+      property FontSize: integer read FFontSize write FFontSize;
   end;
 
 { TSimbaComponentList }
 
-TSimbaComponentList = class (TCollection)
+TSimbaComponentList = class
   private
-    function GetItems(Index: Integer): TSimbaComponent;
+    FSimbaComponents: TList;
+    function GetCount: Integer;
+    function GeTSimbaComponent(Index: Integer): TSimbaComponent;
   public
-    function AddItem: TSimbaComponent;
-
     constructor Create;
-
-    function FindByName(aName: string): TSimbaComponent;
-
-    property Items[Index: Integer]: TSimbaComponent  read GetItems; default;
+    destructor Destroy; override;
+    procedure Clear;
+    procedure Add(aSimbaComponent: TSimbaComponent);
+    procedure Assign(Src: TSimbaComponentList);
+    function IndexOf(aItem: TSimbaComponent): Integer; overload;
+    function IndexOf(Name: String): Integer; overload;
+    procedure Delete(Index: Integer); overload;
+    procedure Delete(aItem: TSimbaComponent); overload;
+    property Count: Integer read GetCount;
+    property SimbaComponent[Index: Integer]: TSimbaComponent read GeTSimbaComponent; default;
   end;
 
-
+const
+  ErrItemNotFound = 'Item not found!';
 implementation
 
-function TSimbaComponentList.GetItems(Index: Integer): TSimbaComponent;
+{ TSimbaComponent }
+
+procedure TSimbaComponent.Clear;
 begin
-   Result := TSimbaComponent(inherited Items[Index]);
+  CLSName:='';
+  Caption:='';
+  CompName:='';
+  Left:=0;
+  Top:=0;
+  Width:=0;
+  Height:=0;
+  FontName:='';
+  FontSize:=0;
 end;
 
-
-function TSimbaComponentList.AddItem: TSimbaComponent;
+constructor TSimbaComponent.Create;
 begin
-   Result := TSimbaComponent(inherited Add());
+  Clear;
 end;
+
+procedure TSimbaComponent.Assign(smb: TSimbaComponent);
+begin
+  clsname:=smb.clsname;
+  compname:=smb.compname;
+  caption:=smb.caption;
+  fontcolor:=smb.fontcolor;
+  fontname:=smb.fontname;
+  img:=smb.img;
+  height:=smb.height;
+  width:=smb.width;
+  left:=smb.left;
+  top:=smb.top;
+end;
+
+{ TSimbaComponentList }
 
 constructor TSimbaComponentList.Create;
 begin
-   inherited Create(TSimbaComponent);
+ FSimbaComponents := TList.Create;
 end;
 
-function TSimbaComponentList.FindByName(aName: string): TSimbaComponent;
-var I: Integer;
+procedure TSimbaComponentList.Delete(Index: Integer);
 begin
- Result := nil;
-  for I := 0 to Count - 1 do
-    if AnsiCompareText(Trim(Items[i].compname),Trim(aName))=0 then
-    begin
-      Result := Items[i];
-      Break;
-    end;
+ if (Index < 0) or (Index >= Count) then
+   raise Exception.Create(ErrItemNotFound);
+
+ TSimbaComponent(FSimbaComponents[Index]).Free;
+ FSimbaComponents.Delete(Index);
 end;
 
-{ TSimbaComponentList }
-
-
-
-constructor TSimbaComponent.Create(Col: TCollection);
+procedure TSimbaComponentList.Delete(aItem: TSimbaComponent);
 begin
-  inherited Create(Col);
+ Delete(IndexOf(aItem));
 end;
 
-destructor TSimbaComponent.Destroy;
+destructor TSimbaComponentList.Destroy;
 begin
-  inherited Destroy;
+ Clear;
+ FSimbaComponents.Free;
+ inherited;
 end;
+
+procedure TSimbaComponentList.Add(aSimbaComponent: TSimbaComponent);
+begin
+ FSimbaComponents.Add(aSimbaComponent);
+end;
+
+procedure TSimbaComponentList.Assign(Src: TSimbaComponentList);
+var
+ I: Integer;
+begin
+ Clear;
+ for I := 0 to Src.Count - 1 do
+   Add(Src[I]);
+end;
+
+procedure TSimbaComponentList.Clear;
+var
+ I: Integer;
+begin
+ for I := 0 to FSimbaComponents.Count - 1 do
+   SimbaComponent[I].Free;
+ FSimbaComponents.Clear;
+end;
+
+
+function TSimbaComponentList.GetCount: Integer;
+begin
+ Result := FSimbaComponents.Count;
+end;
+
+function TSimbaComponentList.GeTSimbaComponent(Index: Integer): TSimbaComponent;
+begin
+ if (Index >= 0) and (Index < Count) then
+   Result := TSimbaComponent(FSimbaComponents[Index])
+ else
+   Result := nil;
+end;
+
+function TSimbaComponentList.IndexOf(aItem: TSimbaComponent): Integer;
+begin
+Result := FSimbaComponents.IndexOf(aItem);
+end;
+
+function TSimbaComponentList.IndexOf(Name: String): Integer;
+var
+ I: Integer;
+begin
+ for I := 0 to Count - 1 do
+   if SimbaComponent[I].CompName = Name then
+   begin
+     Result := I;
+     Exit;
+   end;
+ Result := -1;
+end;
+
+
 
 end.
 
