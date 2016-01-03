@@ -8,7 +8,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
   stdctrls, ExtCtrls, Menus, LCLIntf, LCLType, LCLProc, LResources, LMessages, design_frm,
-  types,sclist,StrUtils,bitmaps,CodeGen;
+  types, sclist, StrUtils, bitmaps, codegen;
 
 type
   TControlsClassStandard = array [0..9] of TComponentClass;
