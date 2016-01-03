@@ -2564,6 +2564,12 @@ begin
   Width := (Box.x2 - Box.x1);
   Height := (Box.y2 - Box.y1);
   Len := ((Width * 2) + (Height * 2));
+  if Len <= 0 then
+  begin
+    writeln('EdgeFromBox: Box {X1 = ', Box.X1, ', Y1 = ', Box.Y1, ', X2 = ', Box.X2, ', Y2 = ', Box.Y2, '} is invalid');
+    SetLength(Result, 0);
+    Exit;
+  end;
   SetLength(Result, Len);
   for I := 0 to Width do
   begin
