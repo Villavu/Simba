@@ -8,7 +8,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
   stdctrls, ExtCtrls, Menus, LCLIntf, LCLType, LCLProc, LResources, LMessages, design_frm,
-  types,sclist,StrUtils,bitmaps,code;
+  types,sclist,StrUtils,bitmaps,CodeGen;
 
 type
   TControlsClassStandard = array [0..9] of TComponentClass;
@@ -86,7 +86,8 @@ type
   private
     FButtonDown: TToolButton;
     FControlsClassPStd: TControlsClassStandard;
-    procedure ComponentToSimba(cmp: TControl;var smb: TSimbaComponent);
+    FInterpreterType: integer;
+    procedure ComponentToSimba(cmp: TControl);
     function GetButtonIndex: Integer;
     procedure ApplySimbaToComponent(smb: TSimbaComponent;cmp: TControl);
     procedure SaveDesignForm(filename: string);
@@ -98,6 +99,7 @@ type
     property ButtonDown:TToolButton read FButtonDown write FButtonDown;
     property ControlsClassPStd:TControlsClassStandard read FControlsClassPStd
       write FControlsClassPStd;
+    property Interpreter: integer read FInterpreterType write FInterpreterType;
     function GetControlType(cmp: TControl): integer;
     procedure AddToStringGrid(cmp: TControl);//not used now
     procedure FormToSCList(form: TDsgnForm);
@@ -114,14 +116,13 @@ var
   ecomp: TComponent;
   curcomp: TControl;
   f: TDsgnForm;
-  codefrm: TCodeGen;
   curitem: TComponent;
   sfdlg: TSaveDialog;
   ofdlg: TOpenDialog;
 implementation
 
 {$R *.lfm}
-uses typinfo,rttiutils{,commctrl};
+uses typinfo,rttiutils,simbaunit{,commctrl};
 
 function TrimCharLeft(const S: string; C: Char): string;
 var
@@ -213,8 +214,7 @@ begin
   LCLIntf.SetParent(f.Handle,self.Panel1.Handle);
   SetModeScript;
   ppEdit.OnExit:=OnExit;
-  smbCmp:= CompList.AddItem;
- ComponentToSimba(f,smbCmp);
+ ComponentToSimba(f);
  ofdlg:= TOpenDialog.Create(self);
  ofdlg.Filter:='Simba form files only|*.smf';
  sfdlg:= TSaveDialog.Create(self);
@@ -357,13 +357,24 @@ end;
 
 
 procedure TCompForm.MenuItem10Click(Sender: TObject);
+var
+  C: TCodeGenerator;
 begin
-  if Assigned(codefrm) then
+ { if Assigned(codefrm) then
   codefrm.Free;
-  codefrm:=TCodeGen.Create(self);
+  codefrm:=TCodeGen.Create(self);}
+  SimbaForm.AddTab;
   FormToSCList(f);
-  codefrm.CreateScript(CompList);
-  codefrm.Show;
+  {codefrm.CreateScript(CompList);}
+  try
+  C:=TCodeGenerator.Create(Interpreter);
+  SimbaForm.CurrScript.SynEdit.Lines.Clear;
+  SimbaForm.CurrScript.SynEdit.Lines.AddStrings(C.GetScript(CompList));
+  //codefrm.memo1.Lines.AddStrings(C.GetScript(CompList));
+  finally
+      C.Free;
+  end;
+ // codefrm.Show;
 end;
 
 procedure TCompForm.MenuItem15Click(Sender: TObject);
@@ -467,44 +478,58 @@ begin
  end;
 end;
 
-procedure TCompForm.ComponentToSimba(cmp: TControl;var smb: TSimbaComponent);
+procedure TCompForm.ComponentToSimba(cmp: TControl);
 var
-   mb: TMufasaBitmap;
+  mb: TMufasaBitmap;
+  smb: TSimbaComponent;
+  Image: TBitmapContainer;
 begin
- mb:=TMufasaBitmap.Create;
- try
-   smb.caption:=cmp.Caption;
-   smb.top:=cmp.Top;
-   smb.width:=cmp.Width;
-   smb.left:=cmp.Left;
-   smb.heigth:=cmp.Height;
-   smb.clsname:=cmp.ClassName;
-   smb.compname:=cmp.Name;
-   smb.fontcolor:=cmp.Font.Color;
-   if (CompareText(cmp.Font.Name,'default'))=0 then
-   smb.fontname:=cmp.Font.Name else smb.fontname:=#39+cmp.Font.Name+#39;
-   smb.fontsize:=cmp.Font.Size;
-   if (CompareText(cmp.ClassName,'TImage')) = 0 then
+  mb := TMufasaBitmap.Create;
+  try
+    smb := TSimbaComponent.Create;
+    with smb do
     begin
-     smb.img.switcher:=true;
-     mb.LoadFromTBitmap(TImage(cmp).Picture.Bitmap);
-     smb.img.imgcode:=mb.ToString;
+      caption := cmp.Caption;
+      top := cmp.Top;
+      width := cmp.Width;
+      left := cmp.Left;
+      height := cmp.Height;
+      clsname := cmp.ClassName;
+      compname := cmp.Name;
+      fontcolor := cmp.Font.Color;
+      if (CompareText(cmp.Font.Name, 'default')) = 0 then
+        fontname := cmp.Font.Name
+      else
+        fontname := #39 + cmp.Font.Name + #39;
+      fontsize := cmp.Font.Size;
+      if (CompareText(cmp.ClassName, 'TImage')) = 0 then
+      begin
+        image.switcher := true;
+        mb.LoadFromTBitmap(TImage(cmp).Picture.Bitmap);
+        image.imgcode := mb.ToString;
+        smb.Img := Image;
+      end;
     end;
-   finally
-     mb.Free;
-     end;
+    CompList.Add(smb);
+  finally
+    if mb <> nil then
+      mb.Free;
+  end;
 end;
 
 procedure TCompForm.ApplySimbaToComponent(smb: TSimbaComponent; cmp: TControl);
 begin
- cmp.Caption:=smb.caption;
- cmp.Top:=smb.top;
- cmp.Width:=smb.width;
- cmp.Left:=smb.left;
- cmp.Height:=smb.heigth;
- cmp.Font.Color:=smb.fontcolor;
- cmp.Font.Name:=smb.fontname;
- cmp.Font.Size:=smb.fontsize;
+  with cmp do
+  begin
+    Caption := smb.caption;
+    Top := smb.top;
+    Width := smb.width;
+    Left := smb.left;
+    Height := smb.height;
+    Font.Color := smb.fontcolor;
+    Font.Name := Smb.fontname;
+    Font.Size := smb.fontsize;
+  end;
 end;
 
 procedure TCompForm.SaveDesignForm(filename: string);
@@ -513,7 +538,8 @@ var
   ms: TMemoryStream;
 begin
   filename:=filename+'.smf';
-   if not assigned(f) then exit;
+   if not assigned(f) then
+    exit;
   fs := TFileStream.Create(FileName, fmCreate);
   ms := TMemoryStream.Create;
   try
@@ -577,19 +603,14 @@ end;
 procedure TCompForm.FormToSCList(form: TDsgnForm);
 var
    i: integer;
-   smb: TSimbaComponent;
 begin
  if assigned(complist) then
    complist.Free;
   complist:=TSimbaComponentList.Create;
-  smb:=CompList.AddItem;
-  ComponentToSimba(form,smb);
+  ComponentToSimba(form);
   for i := 0 to form.ControlCount - 1 do
-   begin
-      smb:=CompList.AddItem;
      //CompList.AddItem(ComponentToSimba(Form.Controls[i]),i+1);
-      ComponentToSimba(Form.Controls[i],smb);
-   end;
+      ComponentToSimba(Form.Controls[i]);
 end;
 
 procedure TCompForm.AddToStringGridEx(smb: TSimbaComponent);
