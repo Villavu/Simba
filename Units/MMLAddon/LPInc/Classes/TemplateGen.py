@@ -24,7 +24,7 @@ procedure Register_$ClassName(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addClass(Compiler, '$ClassName', '$ClassParent');
+    addClass('$ClassName', '$ClassParent');
 
     $Registers
   end;

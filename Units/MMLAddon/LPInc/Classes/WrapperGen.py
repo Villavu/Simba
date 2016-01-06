@@ -5,7 +5,7 @@ import re
 import string
 import base64
 
-template = base64.b64decode(b'dW5pdCBscCRDbGFzc05hbWU7Ci8vRGVwZW5kczogJERlcGVuZHMKCnskbW9kZSBvYmpmcGN9eyRIK30KeyRJIFNpbWJhLmluY30KCmludGVyZmFjZQoKdXNlcwogIENsYXNzZXMsIFN5c1V0aWxzLCBscGNvbXBpbGVyLCBscHR5cGVzLCBscENsYXNzSGVscGVyOwoKcHJvY2VkdXJlIFJlZ2lzdGVyXyRDbGFzc05hbWUoQ29tcGlsZXI6IFRMYXBlQ29tcGlsZXIpOwoKaW1wbGVtZW50YXRpb24KCnR5cGUKICAkQ2xhc3NOYW1lUCA9IF4kQ2xhc3NOYW1lOwoKJE1ldGhvZHMKCnByb2NlZHVyZSBSZWdpc3Rlcl8kQ2xhc3NOYW1lKENvbXBpbGVyOiBUTGFwZUNvbXBpbGVyKTsKYmVnaW4KICB3aXRoIENvbXBpbGVyIGRvCiAgYmVnaW4KICAgIGFkZENsYXNzKENvbXBpbGVyLCAnJENsYXNzTmFtZScsICckQ2xhc3NQYXJlbnQnKTsKCiAgICAkUmVnaXN0ZXJzCiAgZW5kOwplbmQ7CgplbmQuCg==').decode("utf-8")
+template = base64.b64decode(b'dW5pdCBscCRDbGFzc05hbWU7Ci8vRGVwZW5kczogJERlcGVuZHMKCnskbW9kZSBvYmpmcGN9eyRIK30KeyRJIFNpbWJhLmluY30KCmludGVyZmFjZQoKdXNlcwogIENsYXNzZXMsIFN5c1V0aWxzLCBscGNvbXBpbGVyLCBscHR5cGVzLCBscENsYXNzSGVscGVyOwoKcHJvY2VkdXJlIFJlZ2lzdGVyXyRDbGFzc05hbWUoQ29tcGlsZXI6IFRMYXBlQ29tcGlsZXIpOwoKaW1wbGVtZW50YXRpb24KCnR5cGUKICAkQ2xhc3NOYW1lUCA9IF4kQ2xhc3NOYW1lOwoKJE1ldGhvZHMKCnByb2NlZHVyZSBSZWdpc3Rlcl8kQ2xhc3NOYW1lKENvbXBpbGVyOiBUTGFwZUNvbXBpbGVyKTsKYmVnaW4KICB3aXRoIENvbXBpbGVyIGRvCiAgYmVnaW4KICAgIGFkZENsYXNzKCckQ2xhc3NOYW1lJywgJyRDbGFzc1BhcmVudCcpOwoKICAgICRSZWdpc3RlcnMKICBlbmQ7CmVuZDsKCmVuZC4K').decode("utf-8")
 
 class PointerDict(dict):		
 	def __missing__(self, key):
@@ -94,7 +94,7 @@ def Variable(obj, x, line):
 		x.append(' ')
 		x.append(' ')
 		
-	obj.Registers.append("addClassVar(Compiler, '%s', '%s', '%s', %s, %s);" % (obj.Name, x[0], x[1], '@%s_%s_Read' % (obj.Name, x[0]) if x[2] else 'nil', '@%s_%s_Write' % (obj.Name, x[0]) if x[3] else 'nil'))
+	obj.Registers.append("addClassVar('%s', '%s', '%s', %s, %s);" % (obj.Name, x[0], x[1], '@%s_%s_Read' % (obj.Name, x[0]) if x[2] else 'nil', '@%s_%s_Write' % (obj.Name, x[0]) if x[3] else 'nil'))
 	if (x[1] not in obj.Depends):
 		obj.Depends.append(x[1])
 	
@@ -166,7 +166,7 @@ class ClassParser:
 					Definition[0](self, list(x.groups()), line.strip())
 					break
 			else:
-				print('Unknown Line:', line, file=sys.stderr)
+				sys.stderr.write(line)
 			
 			if (self.Done == True):
 				break
@@ -195,7 +195,7 @@ class ClassParser:
 		))
 
 if __name__ == '__main__':
-	Parser = ClassParser('''''')
+	Parser = ClassParser(''' ''')
 	
 	Parser.Parse()
 	Parser.Print()
