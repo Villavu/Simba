@@ -36,7 +36,7 @@ begin
   Child.SetText('Maeve Ascendant');
 
   Child := Node.AddChild('description');
-  Child.SetText('After the "collapse" of a "nanotechnology" society in England, ' +
+  Child.SetText('After the "collapse" of a <nanotechnology> society in England, ' +
   'the young survivors lay the foundation for a new society.');
 
   Child := Node.AddChild('keywords');

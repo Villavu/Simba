@@ -1,6 +1,6 @@
 unit uxml;
 
-{ VerySimpleXML v1.0 - a lightweight, one-unit XML reader/writer
+{ VerySimpleXML v1.1 - a lightweight, one-unit XML reader/writer
   by Dennis Spreen
   http://blog.spreendigital.de/2011/11/10/verysimplexml-a-lightweight-delphi-xml-reader-and-writer/
 
@@ -113,7 +113,11 @@ type
     procedure SetHeader(AValue: TXMLNode);
     procedure SetIdent(AValue: string);
     procedure SetRoot(AValue: TXMLNode);
+    function Escape(Value: String): String;
+    function UnEscape(Value: String): String;
     procedure Walk(Lines: TStringList; Prefix: String; Node: TXmlNode);
+    procedure OnNodeSetText(Sender: TObject; Node: TXmlNode; Text: String); inline;
+    procedure OnNodeSetName(Sender: TObject; Node: TXmlNode; Name: String); inline;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -134,7 +138,7 @@ const
 implementation
 
 uses
-  SysUtils;
+  SysUtils, StrUtils;
 
 constructor TXMLNodeList.Create;
 begin
@@ -399,7 +403,7 @@ begin
               end;
             end;
 
-            Node.NodeName := Tag;
+            OnNodeSetName(Self, Node, Tag);
             Node.Parent := Parent;
             if assigned(Parent) then
               Parent.ChildNodes.Add(Node)
@@ -426,7 +430,7 @@ begin
           IsText := False;
           while (Length(Text) > 0) and (Text[1] = ' ') do
             delete(Text, 1, 1);
-          Node.Text := Text;
+          OnNodeSetText(Self, Node, UnEscape(Text));
         end;
       end;
 
@@ -463,6 +467,25 @@ procedure TVerySimpleXml.SetRoot(AValue: TXMLNode);
 begin
  FRoot := AValue;
 end;
+
+function TVerySimpleXml.Escape(Value: String): String;
+begin
+  Result := ReplaceStr(Value, '&', '&amp;');
+  Result := ReplaceStr(Result, '<', '&lt;');
+  Result := ReplaceStr(Result, '>', '&gt;');
+  Result := ReplaceStr(Result, chr(39), '&apos;');
+  Result := ReplaceStr(Result, '"', '&quot;');
+end;
+
+function TVerySimpleXml.UnEscape(Value: String): String;
+begin
+  Result := ReplaceStr(Value, '&lt;', '<' );
+  Result := ReplaceStr(Result, '&gt;', '>');
+  Result := ReplaceStr(Result, '&apos;', chr(39));
+  Result := ReplaceStr(Result, '&quot;', '"');
+  Result := ReplaceStr(Result, '&amp;', '&');
+end;
+
 
 procedure TVerySimpleXml.SaveToFile(const FileName: String);
 var
@@ -512,7 +535,7 @@ begin
 
   S := S + '>';
   if Length(Node.Text) > 0 then
-    S := S + Node.Text;
+    S := S + Escape(Node.Text);
 
   if (Node.ChildNodes.Count = 0) and (Length(Node.Text) > 0) then
   begin
@@ -529,6 +552,18 @@ begin
     if (Node <> Header) and (not IsSelfClosing) then
       Lines.Add(OriginalPrefix + '</' + Node.NodeName + '>');
   end;
+end;
+
+procedure TVerySimpleXml.OnNodeSetText(Sender: TObject; Node: TXmlNode;
+  Text: String);
+begin
+  Node.Text := Text;
+end;
+
+procedure TVerySimpleXml.OnNodeSetName(Sender: TObject; Node: TXmlNode;
+  Name: String);
+begin
+  Node.NodeName := Name;
 end;
 
 { TXmlNode }
