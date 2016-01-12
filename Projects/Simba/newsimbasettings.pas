@@ -1055,7 +1055,7 @@ begin
   LastConfig.MainForm.State.onDefault := @GetMainFormState;
   LastConfig.MainForm.FunctionListShown := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
   LastConfig.MainForm.FunctionListShown.onDefault := @GetFunctionListShowOnStart;
-  LastConfig.MainForm.ConsoleVisible := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssFunctionListShown)) as TBooleanSetting;
+  LastConfig.MainForm.ConsoleVisible := LastConfig.MainForm.AddChild(TBooleanSetting.Create(ssConsoleVisible)) as TBooleanSetting;
   LastConfig.MainForm.ConsoleVisible.onDefault := @GetMainFormConsoleVisible;
 
 end;
