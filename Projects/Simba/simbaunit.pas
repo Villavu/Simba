@@ -1992,16 +1992,19 @@ begin
   if selector.haspicked then
     Thread.Client.IOManager.SetTarget(Selector.LastPick);
 
-  if ((not (Assigned(OCR_Fonts))) and DirectoryExists(SimbaSettings.Fonts.Path.Value)) then
+  if DirectoryExists(SimbaSettings.Fonts.Path.Value) then
   begin
-    OCR_Fonts := TMOCR.Create(Thread.Client);
+    if not Assigned(OCR_Fonts) then
+    begin
+      OCR_Fonts := TMOCR.Create(Thread.Client);
 
-    if SimbaSettings.Fonts.LoadOnStartUp.Value then
-      OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value)
-    else
-      OCR_Fonts.SetPath(SimbaSettings.Fonts.Path.Value);
+      if SimbaSettings.Fonts.LoadOnStartUp.Value then
+        OCR_Fonts.InitTOCR(SimbaSettings.Fonts.Path.Value)
+      else
+        OCR_Fonts.SetPath(SimbaSettings.Fonts.Path.Value);
+    end;
+    Thread.SetFonts(OCR_Fonts.Fonts);
   end;
-  Thread.SetFonts(OCR_Fonts.Fonts);
 
   {
     We pass the entire settings to the script; it will then create a Sandbox
