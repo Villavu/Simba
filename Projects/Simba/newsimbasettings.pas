@@ -276,6 +276,12 @@ type
       WarnIfModified: TBooleanSetting;
     end;
 
+    TFormatterSection = class(TSection)
+      AsNewScript: TBooleanSetting;
+      AllowComments: TBooleanSetting;
+      ReturnComments: TBooleanSetting;
+    end;
+
     TSimbaSettings = class(TSection)
     public
       Includes: TIncludesSection;
@@ -299,6 +305,8 @@ type
       ShowBalloonHints: TShowBalloonHints;
 
       ScriptManager: TScriptManagerSection;
+
+      Formatter: TFormatterSection;
 
       LastConfig: TLastConfig;
 
@@ -904,6 +912,12 @@ procedure GetMiscRestartScriptIfStarted(obj: TObject); begin TBooleanSetting(obj
 procedure GetMiscWarnIfRunning(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 procedure GetMiscWarnIfModified(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
+{$IFDEF USE_EXTIDEFEATURES}
+procedure GetFormatterAsNewScript(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetFormatterAllowComments(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFormatterReturnComments(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+{$ENDIF}
+
 constructor TSimbaSettings.Create;
 begin
   inherited;
@@ -1044,6 +1058,16 @@ begin
   ScriptManager.FileName.onDefault := @GetScriptManagerFile;
   ScriptManager.FirstRun := ScriptManager.AddChild(TBooleanSetting.Create(ssFRun)) as TBooleanSetting;
   ScriptManager.FirstRun.onDefault := @GetScriptManagerFirstRun;
+
+  {$IFDEF USE_EXTIDEFEATURES}
+   Formatter := AddChild(TFormatterSection.Create()) as TFormatterSection;
+   Formatter.AsNewScript := Formatter.AddChild(TBooleanSetting.Create(ssFormatterAsNewScript)) as TBooleanSetting;
+   Formatter.AsNewScript.onDefault:=@GetFormatterAsNewScript;
+   Formatter.AllowComments:= Formatter.AddChild(TBooleanSetting.Create(ssFormatterAllowComment)) as TBooleanSetting;
+   Formatter.AllowComments.onDefault:=@GetFormatterAllowComments;
+   Formatter.ReturnComments:= Formatter.AddChild(TBooleanSetting.Create(ssFormatterReturnComment)) as TBooleanSetting;
+   Formatter.ReturnComments.onDefault:=@GetFormatterReturnComments;
+  {$ENDIF}
 
   LastConfig := AddChild(TLastConfig.Create()) as TLastConfig;
   LastConfig.MainForm := LastConfig.AddChild(TMainForm.Create()) as TMainForm;

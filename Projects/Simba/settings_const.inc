@@ -1,6 +1,7 @@
 ssSettings = 'Settings/';
 ssLastConfig = 'LastConfig/';
 ssScriptManager = 'ScriptManager/';
+ssFormatter = 'Formatter/';
 
 ssUpdater = 'Updater/';
 ssFonts = 'Fonts/';
@@ -90,6 +91,11 @@ ssNotesVisible = ssSettings + ssNotes + 'Visible';
 ssMiscRestartScriptIfStarted = ssSettings + ssMisc + 'RestartScriptIfStarted';
 ssMiscWarnIfRunning = ssSettings + ssMisc + 'WarnIfRunning';
 ssMiscWarnIfModified = ssSettings + ssMisc + 'WarnIfModified';
+
+ssFormatterAsNewScript = ssFormatter + 'AsNewScript';
+ssFormatterAllowComment = ssFormatter + 'AllowComments';
+ssFormatterReturnComment = ssFormatter + 'ReturnComments';
+
 
 ssSMURL = ssScriptManager + 'URL';
 ssSMPath = ssScriptManager + 'Path';

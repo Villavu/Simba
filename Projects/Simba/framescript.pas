@@ -309,6 +309,16 @@ begin
   end
   else if key = VK_ESCAPE then
     SimbaForm.ParamHint.Hide;
+  {$IFDEF USE_EXTIDEFEATURES}
+  if ((ssCtrl in Shift) and (not ((ssShift in Shift) and not (ssAlt in Shift)))) then
+   begin
+    if Key = VK_Q{VK_SLASH} then
+    SimbaForm.ActCodeCommentExecute(Sender);
+    if Key = VK_D then
+    SimbaForm.ActionScriptFormatExecute(Sender);
+
+   end;
+  {$ENDIF}
 
   SimbaForm.CodeCompletionForm.HandleKeyDown(Sender, Key, Shift);
 end;

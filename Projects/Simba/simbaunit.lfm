@@ -16,7 +16,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '1.0.10.0'
+  LCLVersion = '1.4.4.0'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -54,6 +54,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolButton1: TToolButton
       Left = 297
+      Height = 22
       Top = 2
       Width = 5
       Caption = 'ToolButton1'
@@ -73,6 +74,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolButton4: TToolButton
       Left = 348
+      Height = 22
       Top = 2
       Width = 5
       Caption = 'ToolButton4'
@@ -102,6 +104,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolButton8: TToolButton
       Left = 445
+      Height = 22
       Top = 2
       Width = 5
       Caption = 'ToolButton8'
@@ -133,6 +136,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolButton2: TToolButton
       Left = 149
+      Height = 22
       Top = 2
       Width = 5
       Caption = 'ToolButton2'
@@ -161,6 +165,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolButton3: TToolButton
       Left = 519
+      Height = 22
       Top = 2
       Width = 5
       Caption = 'ToolButton3'
@@ -195,6 +200,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolButton9: TToolButton
       Left = 223
+      Height = 22
       Top = 2
       Width = 5
       Caption = 'ToolButton9'
@@ -215,6 +221,7 @@ object SimbaForm: TSimbaForm
     end
     object ToolButton6: TToolButton
       Left = 47
+      Height = 22
       Top = 2
       Width = 10
       Caption = 'ToolButton6'
@@ -411,7 +418,6 @@ object SimbaForm: TSimbaForm
           0000000000000000000000000000000000000000000000000000000000000000
           0000000000000000000000000000000000000000000000000000
         }
-        NumGlyphs = 0
         OnClick = SpeedButtonSearchClick
       end
       object LabeledEditSearch: TLabeledEdit
@@ -424,10 +430,10 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideRight.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Side = asrBottom
-        EditLabel.Left = 71
-        EditLabel.Height = 16
-        EditLabel.Top = 9
-        EditLabel.Width = 30
+        EditLabel.Left = 72
+        EditLabel.Height = 15
+        EditLabel.Top = 10
+        EditLabel.Width = 29
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
         LabelPosition = lpLeft
@@ -464,7 +470,8 @@ object SimbaForm: TSimbaForm
       OnEndDock = nil
       TabOrder = 3
       inherited FunctionList: TTreeView
-        Height = 316
+        Height = 317
+        Top = 19
         Width = 150
         HideSelection = True
         Images = nil
@@ -476,6 +483,7 @@ object SimbaForm: TSimbaForm
         Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips]
       end
       inherited FunctionListLabel: TLabel
+        Height = 15
         Width = 146
       end
       inherited Panel1: TPanel
@@ -3575,6 +3583,15 @@ object SimbaForm: TSimbaForm
       Caption = 'Font'
       OnExecute = ActionFontExecute
     end
+    object ActCodeComment: TAction
+      Caption = 'ActCodeComment'
+      OnExecute = ActCodeCommentExecute
+    end
+    object ActionScriptFormat: TAction
+      Caption = 'Format'
+      OnExecute = ActionScriptFormatExecute
+      ShortCut = 16454
+    end
   end
   object DebugTimer: TTimer
     OnTimer = ProcessDebugStream
@@ -3848,6 +3865,20 @@ object SimbaForm: TSimbaForm
       Caption = 'Replace'
       OnClick = ActionReplaceExecute
     end
+    object PopupItemDivider4: TMenuItem
+      Caption = '-'
+    end
+    object PopupItemComment: TMenuItem
+      Action = ActCodeComment
+      Caption = '&Comment '
+      ShortCut = 16465
+    end
+    object PopupItemDivider5: TMenuItem
+      Caption = '-'
+    end
+    object PopupItemFormat: TMenuItem
+      Action = ActionScriptFormat
+    end
   end
   object dlgReplace: TReplaceDialog
     Options = [frDown, frFindNext, frHideUpDown, frEntireScope]
@@ -3881,21 +3912,10 @@ object SimbaForm: TSimbaForm
   end
   object SCARHighlighter: TSynPasSyn
     Enabled = False
-    AsmAttri.FrameEdges = sfeAround
     CommentAttri.Foreground = clGreen
-    CommentAttri.FrameEdges = sfeAround
     CommentAttri.Style = []
-    IDEDirectiveAttri.FrameEdges = sfeAround
-    IdentifierAttri.FrameEdges = sfeAround
-    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clNavy
-    NumberAttri.FrameEdges = sfeAround
-    SpaceAttri.FrameEdges = sfeAround
     StringAttri.Foreground = clFuchsia
-    StringAttri.FrameEdges = sfeAround
-    SymbolAttri.FrameEdges = sfeAround
-    CaseLabelAttri.FrameEdges = sfeAround
-    DirectiveAttri.FrameEdges = sfeAround
     CompilerMode = pcmObjFPC
     NestedComments = False
     StringKeywordMode = spsmNone
@@ -3904,24 +3924,13 @@ object SimbaForm: TSimbaForm
   end
   object LazHighlighter: TSynPasSyn
     Enabled = False
-    AsmAttri.FrameEdges = sfeAround
     CommentAttri.Foreground = clBlue
-    CommentAttri.FrameEdges = sfeAround
     CommentAttri.Style = [fsBold]
-    IDEDirectiveAttri.FrameEdges = sfeAround
     IdentifierAttri.Foreground = clDefault
-    IdentifierAttri.FrameEdges = sfeAround
-    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clNavy
-    NumberAttri.FrameEdges = sfeAround
-    SpaceAttri.FrameEdges = sfeAround
     StringAttri.Foreground = clBlue
-    StringAttri.FrameEdges = sfeAround
     SymbolAttri.Foreground = clRed
-    SymbolAttri.FrameEdges = sfeAround
-    CaseLabelAttri.FrameEdges = sfeAround
     DirectiveAttri.Foreground = clRed
-    DirectiveAttri.FrameEdges = sfeAround
     DirectiveAttri.Style = [fsBold]
     CompilerMode = pcmObjFPC
     NestedComments = False

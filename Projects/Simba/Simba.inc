@@ -33,6 +33,8 @@
 //{$DEFINE NOTPORTABLE} // NOTPORTABLE makes it easier to build portable by
                         // default, yet keep it possible to disable it with
                         // command line flags.
+{$DEFINE USE_EXTIDEFEATURES} //Extended SIMBA features like commenter, formater, etc.						
+						
 
 {$DEFINE USE_DEBUGGER}
 //{$DEFINE USE_SCRIPTMANAGER} // TODO

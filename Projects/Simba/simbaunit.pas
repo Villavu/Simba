@@ -49,7 +49,7 @@ uses
 
   lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
-  SynEditMarkupHighAll, LMessages, Buttons,
+  SynEditMarkupHighAll, SynHighlighterPas, LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil,
   about, framefunctionlist, ocr, updateform, Simbasettingsold,
   Simbasettingssimple,
@@ -58,7 +58,10 @@ uses
   v_ideCodeInsight, CastaliaPasLexTypes, // Code completion units
   CastaliaSimplePasPar, v_AutoCompleteForm,  // Code completion units
   {$IFDEF USE_PASCALSCRIPT}PSDump, {$ENDIF}
-
+  {$IFDEF USE_EXTIDEFEATURES}
+  scriptcommenter,
+  scriptformatter,
+  {$ENDIF}
   updater,
   SM_Main,
   newsimbasettings
@@ -103,6 +106,8 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActCodeComment: TAction;
+    ActionScriptFormat: TAction;
     ActionFont: TAction;
     ActionShowHidden: TAction;
     ActionNotes: TAction;
@@ -147,6 +152,10 @@ type
     LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     Memo1: TMemo;
+    PopupItemFormat: TMenuItem;
+    PopupItemDivider5: TMenuItem;
+    PopupItemComment: TMenuItem;
+    PopupItemDivider4: TMenuItem;
     MenuItemFont: TMenuItem;
     MenuItemDivider51: TMenuItem;
     MenuItemShowHidden: TMenuItem;
@@ -289,6 +298,7 @@ type
     TB_SelectClient: TToolButton;
     ToolButton8: TToolButton;
     MTrayIcon: TTrayIcon;
+    procedure ActCodeCommentExecute(Sender: TObject);
     procedure ActionClearDebugExecute(Sender: TObject);
     procedure ActionCloseTabExecute(Sender: TObject);
     procedure ActionCompileScriptExecute(Sender: TObject);
@@ -320,6 +330,7 @@ type
     procedure ActionSaveAsExecute(Sender: TObject);
     procedure ActionSaveDefExecute(Sender: TObject);
     procedure ActionSaveExecute(Sender: TObject);
+    procedure ActionScriptFormatExecute(Sender: TObject);
     procedure ActionSelectAllExecute(Sender: TObject);
     procedure ActionShowHiddenExecute(Sender: TObject);
     procedure ActionStopExecute(Sender: TObject);
@@ -2273,6 +2284,30 @@ procedure TSimbaForm.ActionClearDebugExecute(Sender: TObject);
 begin
   Memo1.Clear;
 end;
+{$IFDEF USE_EXTIDEFEATURES}
+procedure TSimbaForm.ActCodeCommentExecute(Sender: TObject);
+var
+  ScriptCommenter: TScriptCommenter;
+  CurPos: TPoint;
+begin
+  with CurrScript.SynEdit do
+  begin
+    ScriptCommenter := TScriptCommenter.Create(SelStart, SelEnd);
+    try
+      try
+        CurPos := CaretXY;
+        ScriptCommenter.Lines := Lines;
+        ScriptCommenter.Process;
+        CaretXY := CurPos;
+      except
+        mDebugLn('Cannot comment the selected code!');
+      end;
+    finally
+      ScriptCommenter.Free;
+    end;
+  end;
+end;
+{$ENDIF}
 
 procedure TSimbaForm.ActionNewExecute(Sender: TObject);
 begin
@@ -2386,6 +2421,36 @@ procedure TSimbaForm.ActionSaveExecute(Sender: TObject);
 begin
   Self.SaveCurrentScript;
 end;
+{$IFDEF USE_EXTIDEFEATURES}
+procedure TSimbaForm.ActionScriptFormatExecute(Sender: TObject);
+var
+  frt: TCodeParser;
+  CurPos: TPoint;
+begin
+  frt := TCodeFactory.GetCodeParser(ptFormatter);
+  try
+    with SimbaSettings.Formatter do
+    begin
+      frt.AllowComments := SimbaSettings.Formatter.AllowComments.Value;
+      frt.ReturnComments := SimbaSettings.Formatter.ReturnComments.Value;
+      frt.Script := CurrScript.SynEdit.Text;
+      frt.ProcessScript;
+      if not AsNewScript.Value then
+      begin
+        CurPos := CurrScript.SynEdit.CaretXY;
+        CurrScript.SynEdit.Lines.Clear;
+      end
+      else
+        AddTab;
+      CurrScript.SynEdit.Lines.Text := frt.OutputScript;
+      if not AsNewScript.Value then
+        CurrScript.SynEdit.CaretXY := CurPos;
+    end;
+  finally
+    frt.free;
+  end;
+end;
+{$ENDIF}
 
 procedure TSimbaForm.ActionSelectAllExecute(Sender: TObject);
 begin
