@@ -595,14 +595,25 @@ end;
 
 procedure TMThread.HandleScriptTerminates;
 var
-  I: integer;
   V: array of Variant;
+  index: integer;
+  proc: String;
 begin
+  if (not (SP_OnTerminate in Prop.Properties)) then
+    exit;
+
   SetLength(V, 0);
-  if (SP_OnTerminate in Prop.Properties) then
-    for I := 0 to Prop.OnTerminateProcs.Count - 1 do
-      if (not Prop.OnTerminateProcsSkip[i]) or (not TerminatedByUser) then
-        CallMethod(Prop.OnTerminateProcs[I], V);
+  index := 0;
+  while (Prop.OnTerminateProcs.Count > 0) do
+  begin
+    proc := Prop.OnTerminateProcs[0];
+    Prop.OnTerminateProcs.Delete(0); //call first incase proc invoke DeleteOnTerminate on itself
+
+    if (not Prop.OnTerminateProcsSkip[index]) or (not TerminatedByUser) then
+      CallMethod(proc, V);
+
+    Inc(index);
+  end;
 end;
 
 {$IFDEF USE_PASCALSCRIPT}
