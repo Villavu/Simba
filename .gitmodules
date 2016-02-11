@@ -4,3 +4,6 @@
 [submodule "PascalScript"]
 	path = Units/PascalScript
 	url = git://github.com/SRL/PascalScript.git
+[submodule "autobuild/travis-lazarus"]
+	path = autobuild/travis-lazarus
+	url = https://github.com/nielsAD/travis-lazarus.git
