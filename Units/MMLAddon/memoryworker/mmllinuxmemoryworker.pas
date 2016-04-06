@@ -25,9 +25,9 @@ type
   end;
 
 implementation
-
+{$IFDEF OLDKERNEL}
 uses libc;
-
+{$ENDIF}
 const
   ErrFailedToAttach = 'Failed to attach to %d!';
   ErrSigStopWaiting = 'There was an error waiting for the target to stop!';
