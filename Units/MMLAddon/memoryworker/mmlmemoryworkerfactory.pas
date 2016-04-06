@@ -5,7 +5,7 @@ unit mmlmemoryworkerfactory;
 interface
 
 uses
-  Classes, SysUtils, mmlbasememoryworker, {$IFNDEF MSWINDOWS}mmmlinuxmemoryworker{$ELSE}mmlwindowsmemoryworker{$ENDIF};
+  Classes, SysUtils, mmlbasememoryworker, {$IFNDEF MSWINDOWS}mmlinuxmemoryworker{$ELSE}mmlwindowsmemoryworker{$ENDIF};
 
 type
 
