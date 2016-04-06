@@ -5,7 +5,7 @@ unit mmlmemoryworkerfactory;
 interface
 
 uses
-  Classes, SysUtils, mmlbasememoryworker, {$IFNDEF MSWINDOWS}mmlinuxmemoryworker{$ELSE}mmlwindowsmemoryworker{$ENDIF};
+  Classes, SysUtils, mmlbasememoryworker, {$IFNDEF MSWINDOWS}mmllinuxmemoryworker{$ELSE}mmlwindowsmemoryworker{$ENDIF};
 
 type
 
@@ -26,7 +26,8 @@ begin
 {$IFNDEF MSWINDOWS}
   result := TLinuxMemoryWorker.Create(PID);
 {$ELSE}
-  result := TWindowsMemoryWorker.Create(PID); {$ENDIF}
+  result := TWindowsMemoryWorker.Create(PID); 
+{$ENDIF}
 end;
 
 end.
