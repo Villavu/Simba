@@ -1,4 +1,4 @@
-unit ScriptCommenter;
+unit scriptcommenter;
 
 {$mode objfpc}{$H+}
 
