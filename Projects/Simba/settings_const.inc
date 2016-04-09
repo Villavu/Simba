@@ -55,6 +55,7 @@ ssCodeCompletionShowAutomatically = ssSettings + ssCodeInsight + 'CodeCompletion
 ssShowBalloonHints = ssSettings + 'ShowBalloonHints';
 
 ssSourceEditorLazColors = ssSettings + ssSourceEditor + 'LazColors';
+ssSourceEditorCaretPastEOL = ssSettings + ssSourceEditor + 'CaretPastEOL';
 ssSourceEditorFont = ssSettings + ssSourceEditor + 'Font/';
 ssSourceEditorDefScriptPath = ssSettings + ssSourceEditor + 'DefScriptPath';
 
