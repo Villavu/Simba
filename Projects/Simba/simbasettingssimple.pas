@@ -105,15 +105,9 @@ type
     tsAdvanced: TTabSheet;
     procedure ButtonCancelClick(Sender: TObject);
     procedure ButtonOKClick(Sender: TObject);
-    procedure CodeToolsCheckBoxesClick(Sender: TObject);
-    procedure ColourPickerCheckGroupClick(Sender: TObject);
     procedure EnvOtherItemClick(Sender: TObject; Index: integer);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure GroupBox2Click(Sender: TObject);
-    procedure HighlightLazColoursChange(Sender: TObject);
-    procedure CaretPastEOLChange(Sender: TObject);
-    procedure Label2Click(Sender: TObject);
     procedure SettingsTabsListAdvancedCustomDrawItem(Sender: TCustomListView;
       Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage;
       var DefaultDraw: Boolean);
@@ -229,16 +223,6 @@ begin
   end;
 end;
 
-procedure TSettingsSimpleForm.CodeToolsCheckBoxesClick(Sender: TObject);
-begin
-
-end;
-
-procedure TSettingsSimpleForm.ColourPickerCheckGroupClick(Sender: TObject);
-begin
-
-end;
-
 { For live changes }
 procedure TSettingsSimpleForm.EnvOtherItemClick(Sender: TObject;
   Index: integer);
@@ -321,27 +305,6 @@ begin
   SettingsTabState[1] := 0;
   SettingsTabState[2] := 0;
 end;
-
-procedure TSettingsSimpleForm.GroupBox2Click(Sender: TObject);
-begin
-
-end;
-
-procedure TSettingsSimpleForm.HighlightLazColoursChange(Sender: TObject);
-begin
-
-end;
-
-procedure TSettingsSimpleForm.CaretPastEOLChange(Sender: TObject);
-begin
-
-end;
-
-procedure TSettingsSimpleForm.Label2Click(Sender: TObject);
-begin
-
-end;
-
 
 // Part of Faux Tabs - Controls switching of tabs
 procedure TSettingsSimpleForm.SwitchSettingsTab(NewTab: Integer);
