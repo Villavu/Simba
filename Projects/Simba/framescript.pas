@@ -767,10 +767,14 @@ begin
   OwnerSheet.Caption:= ScriptName;
 
   SynEdit.Enabled := True; // For some reason we need this?
-
+  
   SynEdit.Highlighter := SimbaForm.CurrHighlighter;
-  SynEdit.Options := SynEdit.Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing] - [eoSmartTabs];
+  SynEdit.Options := SynEdit.Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   SynEdit.Options2 := SynEdit.Options2 + [eoCaretSkipsSelection];
+  
+  if not SimbaSettings.SourceEditor.CaretPastEOL.GetDefValue(True) then
+    SynEdit.Options := SynEdit.Options - [eoScrollPastEol, eoTrimTrailingSpaces];
+  
   SynEdit.Gutter.CodeFoldPart.MarkupInfo.Background:= clWhite;
   for i := low(i) to high(i) do
     if i in AdditionalFolds then
