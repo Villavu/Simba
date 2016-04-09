@@ -308,7 +308,6 @@ object SettingsSimpleForm: TSettingsSimpleForm
           'Automatically show hints'
           'Automatically show completion'
         )
-        OnClick = CodeToolsCheckBoxesClick
         TabOrder = 0
         Data = {
           020000000202
@@ -335,7 +334,6 @@ object SettingsSimpleForm: TSettingsSimpleForm
           'Show history on pick'
           'Add to history on pick'
         )
-        OnClick = ColourPickerCheckGroupClick
         TabOrder = 1
         Data = {
           020000000202
@@ -350,14 +348,12 @@ object SettingsSimpleForm: TSettingsSimpleForm
         ClientHeight = 88
         ClientWidth = 399
         TabOrder = 2
-        OnClick = GroupBox2Click
         object HighlightLazColours: TCheckBox
           Left = 14
           Height = 19
           Top = 8
           Width = 116
           Caption = 'Use Lazarus colors'
-          OnChange = HighlightLazColoursChange
           TabOrder = 0
         end
         object Label2: TLabel
@@ -367,7 +363,6 @@ object SettingsSimpleForm: TSettingsSimpleForm
           Width = 73
           Caption = 'Default script:'
           ParentColor = False
-          OnClick = Label2Click
         end
         object DefaultScriptedit: TEdit
           Left = 110
@@ -383,7 +378,6 @@ object SettingsSimpleForm: TSettingsSimpleForm
           Top = 32
           Width = 97
           Caption = 'Caret past EOL'
-          OnChange = CaretPastEOLChange
           TabOrder = 2
         end
       end
