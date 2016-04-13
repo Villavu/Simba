@@ -7,9 +7,21 @@ interface
 
 uses
   Classes, SysUtils, mmlbasememoryworker;
-
+{$ifndef OLDKERNEL}
+const
+  clib = 'c';
+{$endif}
 type
-
+  {$IFNDEF OLDKERNEL}
+    pid_t = longint;
+    Piovec = ^iovec;
+   iovec = record
+        iov_base : pointer;
+        iov_len : longint;
+     end;
+   ulong = dword;
+   ssize_t = longint;
+  {$endif}
   { TLinuxMemoryWorker }
 
   TLinuxMemoryWorker = class(TBaseMemoryWorker)
@@ -25,8 +37,9 @@ type
   end;
 
 implementation
-
+{$IFDEF OLDKERNEL}
 uses libc;
+{$endif}
 
 const
   ErrFailedToAttach = 'Failed to attach to %d!';
@@ -44,6 +57,7 @@ function TLinuxMemoryWorker.Attach: boolean;
 var
   Status: longint = 0;
 begin
+  {$ifdef OLDKERNEL}
   if PTrace(PTRACE_ATTACH, pid_t(PID), nil, 0) = -1 then
   begin
     result := false;
@@ -54,16 +68,16 @@ begin
     result := false;
     raise Exception.Create(ErrSigStopWaiting);
   end;
+  {$endif}
   result := true;
 end;
 
 function TLinuxMemoryWorker.Detach: boolean;
 begin
-  result := PTrace(PTRACE_DETACH, PID, nil, nil) > -1;
+  result := {$ifdef OLDKERNEL}PTrace(PTRACE_DETACH, PID, nil, nil) > -1{$ELSE}true{$endif};
 end;
 
 {$IFDEF OLDKERNEL}
-
 function TLinuxMemoryWorker.GetValue(Address: integer; ValueSize: integer;
   Value: Pointer): boolean;
 var
@@ -144,4 +158,4 @@ begin
 end;
 {$ENDIF}
 
-end.
+end.

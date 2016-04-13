@@ -6,7 +6,7 @@ unit lplclcontrols;
 interface
 
 uses
-  Classes, SysUtils,Controls, lpcompiler, lptypes, lpClassHelper;
+  Classes, SysUtils,Controls,LCLVersion, lpcompiler, lptypes, lpClassHelper;
 
 type
   PControl = ^TControl;
@@ -21,7 +21,14 @@ type
   PGraphicControl = ^TGraphicControl;
 
 procedure RegisterLCLControls(Compiler: TLapeCompiler);
-
+{works only here, heh}
+{$IF LCL_MAJOR <= 1}
+  {$IF LCL_MINOR <= 2}
+   {$IF LCL_RELEASE <= 4}
+    {$DEFINE OLDLAZ}
+   {$ENDIF}
+  {$ENDIF}
+{$ENDIF}
 implementation
 
 uses lplclsystem, lplclgraphics, forms, lplclforms;
@@ -337,7 +344,7 @@ end;
 //function GetChildsRect(Scrolled: boolean): TRect;
 procedure TControl_GetChildsRect(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PRect(Result)^ := PControl(Params^[0])^.GetChildrenRect(Pboolean(Params^[1])^);
+  PRect(Result)^ := PControl(Params^[0])^.{$ifdef OLDLAZ}GetChildsRect{$else}GetChildrenRect{$endif}(Pboolean(Params^[1])^);
 end;
 
 //procedure Show;
@@ -1106,7 +1113,7 @@ end;
 //function  GetChildsRect(Scrolled: boolean): TRect;
 procedure TWinControl_GetChildsRect(const Params: PParamArray; const Result: Pointer); lape_extdecl
 begin
-  PRect(Result)^ := PWinControl(Params^[0])^.GetChildrenRect(Pboolean(Params^[1])^);
+  PRect(Result)^ := PWinControl(Params^[0])^.{$ifdef OLDLAZ}GetChildsRect{$else}GetChildrenRect{$endif}(Pboolean(Params^[1])^);
 end;
 
 //procedure DisableAlign;
@@ -1745,4 +1752,4 @@ begin
 end;
 
 end.
-
+
