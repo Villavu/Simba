@@ -32,8 +32,9 @@ Settings:
             X   Add to history on pick
 
         X   Source Editor
-            X   LazColors (boolean)
+            X   LazColors (Boolean)
             X   Default Script (Path)
+            X   CaretPastEOL (Boolean)
 
         X   Tray:
             X   Always Visible
@@ -72,6 +73,7 @@ type
     ButtonCancel: TButton;
     CheckForUpdatesBox: TCheckBox;
     AutomaticallyUpdateBox: TCheckBox;
+    CaretPastEOL: TCheckBox;
     UpdaterURLLabel: TLabel;
     UpdaterURLVersionLabel: TLabel;
     UpdaterURLVersion: TEdit;
@@ -184,6 +186,7 @@ begin
   // Source Editor
   SimbaSettings.SourceEditor.LazColors.Value := HighlightLazColours.Checked;
   SimbaSettings.SourceEditor.DefScriptPath.Value := DefaultScriptedit.Text;
+  SimbaSettings.SourceEditor.CaretPastEOL.Value := CaretPastEOL.Checked;
 
   // Other
   SimbaSettings.Tray.AlwaysVisible.Value := EnvOther.Checked[0];
@@ -265,7 +268,8 @@ begin
   // Source Editor
   HighlightLazColours.Checked := SimbaSettings.SourceEditor.LazColors.Value;
   DefaultScriptedit.Text := SimbaSettings.SourceEditor.DefScriptPath.Value;
-
+  CaretPastEOL.Checked := SimbaSettings.SourceEditor.CaretPastEOL.Value;
+  
   // Other
   EnvOther.Checked[0] := SimbaSettings.Tray.AlwaysVisible.Value;
   EnvOther.Checked[1] := SimbaSettings.CodeInsight.FunctionList.ShowOnStart.Value;
@@ -301,7 +305,6 @@ begin
   SettingsTabState[1] := 0;
   SettingsTabState[2] := 0;
 end;
-
 
 // Part of Faux Tabs - Controls switching of tabs
 procedure TSettingsSimpleForm.SwitchSettingsTab(NewTab: Integer);

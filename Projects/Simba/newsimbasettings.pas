@@ -198,6 +198,7 @@ type
     TSourceEditorSection = class(TSection)
       DefScriptPath: TFileSetting;
       LazColors: TBooleanSetting;
+      CaretPastEOL: TBooleanSetting;
       Font: TFontSetting;
     end;
 
@@ -883,6 +884,7 @@ procedure GetScriptManagerFile(obj: TObject); begin TStringSetting(obj).Value :=
 procedure GetScriptManagerFirstRun(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetSourceEditorLazColors(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetSourceEditorCaretPastEOL(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
 
 procedure GetExtensionsFileExtension(obj: TObject); begin TStringSetting(obj).Value := 'sex'; end;
 
@@ -969,6 +971,8 @@ begin
   SourceEditor.DefScriptPath.onDefault := @GetDefScriptPath;
   SourceEditor.LazColors := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorLazColors)) as TBooleanSetting;
   SourceEditor.LazColors.onDefault := @GetSourceEditorLazColors;
+  SourceEditor.CaretPastEOL := SourceEditor.AddChild(TBooleanSetting.Create(ssSourceEditorCaretPastEOL)) as TBooleanSetting;
+  SourceEditor.CaretPastEOL.onDefault := @GetSourceEditorCaretPastEOL;
   SourceEditor.Font := SourceEditor.AddChild(TFontSetting.Create(ssSourceEditorFont)) as TFontSetting;
 
   News := AddChild(TNewsSection.Create()) as TNewsSection;
