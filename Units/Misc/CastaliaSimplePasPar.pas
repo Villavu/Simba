@@ -4575,7 +4575,14 @@ begin
       end;
     tokPointerSymbol:
       begin
-        PointerType;
+        Lexer.InitAhead;
+        if Lexer.AheadTokenID = tokConst then
+        begin
+          NextToken;
+          NextToken;
+          TypeKind;
+        end else
+          PointerType;
       end;
     tokString:
       begin
