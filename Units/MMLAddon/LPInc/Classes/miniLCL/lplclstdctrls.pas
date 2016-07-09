@@ -1986,10 +1986,10 @@ begin
    begin
      addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth,ssAutoHorizontal, ssAutoVertical, ssAutoBoth)','TScrollStyle');
      addGlobalType('(scLineUp,scLineDown, scPageUp,scPageDown,scPosition, scTrack,scTop,scBottom,scEndScroll)','TScrollCode');
-     addGlobalType('procedure(Sender: TObject; ScrollCode: TScrollCode;var ScrollPos: Integer)','TScrollEvent');
+     addNativeGlobalType('procedure(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer)', 'TScrollEvent');
      addGlobalType('(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odPainted)' , 'TOwnerDrawStateType');
      addGlobalType('set of TOwnerDrawStateType', 'TOwnerDrawState');
-     addGlobalType('procedure(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState)', 'TDrawItemEvent');
+     addNativeGlobalType('procedure(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState)', 'TDrawItemEvent');
      addGlobalType('(csDropDown,csSimple,csDropDownList,csOwnerDrawFixed,csOwnerDrawVariable)','TComboBoxStyle');
      addGlobalType('(lbStandard, lbOwnerDrawFixed, lbOwnerDrawVariable, lbVirtual)', 'TListBoxStyle');
      addGlobalType('(sbsNone, sbsSingle, sbsSunken)','TStaticBorderStyle');

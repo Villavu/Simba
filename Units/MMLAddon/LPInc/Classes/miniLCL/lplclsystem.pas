@@ -1283,7 +1283,7 @@ procedure RegisterLCLSystem(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addGlobalType('Procedure(Sender:TObject)','TNotifyEvent');
+    addNativeGlobalType('procedure(Sender: TObject)', 'TNotifyEvent');
     addGlobalType('^TNotifyEvent','PNotifyEvent');
     addGlobalType('dword','THandle');
     addGlobalType('string','TComponentName');

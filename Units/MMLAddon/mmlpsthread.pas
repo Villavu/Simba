@@ -41,7 +41,7 @@ uses
   settings, settingssandbox, lcltype, dialogs, ExtCtrls
   {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_LAPE}
-  , lpparser, lpcompiler, lptypes, lpvartypes,
+  , lpparser, lpcompiler, lptypes, lpvartypes, ffi, lpffi, lpffiwrappers,
     lpeval, lpinterpreter, lputils, lpexceptions, LPDump
   {$ENDIF};
 
@@ -312,7 +312,6 @@ uses
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
   Clipbrd,
-  lpffi, ffi, // For lape FFI
 
   DCPcrypt2,
   DCPrc2, DCPrc4, DCPrc5, DCPrc6,
@@ -321,7 +320,7 @@ uses
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger
 
-  {$IFDEF USE_LAPE}, lpClasses{$ENDIF};
+  {$IFDEF USE_LAPE}, lpClasses, lpClassHelper{$ENDIF};
 
 {$ifdef Linux}
   {$define PS_SafeCall}
@@ -1394,6 +1393,7 @@ begin
   Compiler := TLPCompiler.Create(Parser);
   Running := bFalse;
 
+  InitializeFFI(Compiler);
   InitializePascalScriptBasics(Compiler);
   ExposeGlobals(Compiler);
 
@@ -1414,7 +1414,8 @@ begin
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
 
-    addGlobalFunc('procedure Sync(proc: Pointer);', @lp_Sync);
+    addNativeGlobalType('procedure();', 'TSyncMethod');
+    addGlobalFunc('procedure Sync(Proc: TSyncMethod);', @lp_Sync);
     addGlobalFunc('function GetCurrThreadID(): PtrUInt;', @lp_CurrThreadID);
 
     for I := 0 to High(VirtualKeys) do
