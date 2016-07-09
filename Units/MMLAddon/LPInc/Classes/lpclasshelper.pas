@@ -13,6 +13,7 @@ type
   public
     procedure addClass(const Name: string; const Parent: string = 'TObject');
     procedure addClassVar(const Obj, Item, Typ: string; const Read: Pointer; const Write: Pointer = nil; const Arr: boolean = False; const ArrType: string = 'UInt32');
+    function addNativeGlobalType(Str: lpString; AName: lpString): TLapeType;
   end;
 
   generic TRegisterWrapper<_T> = class(TComponent)
@@ -72,6 +73,15 @@ type
   end;
 
 implementation
+
+function TLapeCompilerHelper.addNativeGlobalType(Str: lpString; AName: lpString): TLapeType;
+begin
+  with addGlobalType(Str, '_' + AName) do
+  begin
+    addGlobalType('native _' + AName, AName);
+    Name := '!' + AName;
+  end;
+end;
 
 procedure TLapeCompilerHelper.addClass(const Name: string; const Parent: string = 'TObject');
 begin

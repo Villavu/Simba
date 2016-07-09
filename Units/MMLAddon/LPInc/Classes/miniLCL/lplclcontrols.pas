@@ -1721,11 +1721,11 @@ begin
    begin
      addGlobalType('(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble, ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum, ssScroll, ssTriple, ssQuad, ssExtra1, ssExtra2)', 'TShiftStateEnum');
      addGlobalType('set of TShiftStateEnum', 'TShiftState');
-     addGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState)','TKeyEvent');
-     addGlobalType('procedure(Sender: TObject; var Key: char)','TKeyPressEvent');
+     addNativeGlobalType('procedure(Sender: TObject; var Key: Word; Shift: TShiftState)','TKeyEvent');
+     addNativeGlobalType('procedure(Sender: TObject; var Key: char)','TKeyPressEvent');
      addGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)','TMouseButton');
-     addGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer)','TMouseEvent');
-     addGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)', 'TMouseMoveEvent');
+     addNativeGlobalType('procedure(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer)','TMouseEvent');
+     addNativeGlobalType('procedure(Sender: TObject; Shift: TShiftState; X, Y: Integer)', 'TMouseMoveEvent');
      addGlobalType('(sbHorizontal, sbVertical)','TScrollBarKind');
      addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TAlign');
      addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)','TFormBorderStyle');

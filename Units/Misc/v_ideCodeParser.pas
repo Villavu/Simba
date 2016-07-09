@@ -919,7 +919,8 @@ begin
        (fItems[i] is TciOutParameter) or
        (fItems[i] is TciFormalParameter) or
        (fItems[i] is TciInParameter) or
-       (fItems[i] is TciVarParameter) then
+       (fItems[i] is TciVarParameter) or
+       (fItems[i] is TciConstRefParameter) then
     begin
       SetLength(Result, Length(Result) + 1);
       Result[High(Result)] := fItems[i];
@@ -1042,9 +1043,9 @@ begin
       if (TokenID = TokUses) then
         MainUsesClause;
 
-      while TokenID in [TokClass, TokConst, TokConstructor, TokDestructor, TokExports,
+      while (TokenID in [TokClass, TokConst, TokConstructor, TokDestructor, TokExports,
         TokFunction, TokLabel, TokProcedure, TokResourceString, TokThreadVar, TokType,
-        TokVar{$IFDEF D8_NEWER}, TokSquareOpen{$ENDIF}] do
+        TokVar{$IFDEF D8_NEWER}, TokSquareOpen{$ENDIF}]) or (Lexer.ExID = tokOperator) do
       begin
         DeclarationSection;
       end;
@@ -1224,7 +1225,7 @@ end;
 
 procedure TCodeParser.TypedConstant;
 begin
-  if (not InDeclarations([TciVarDeclaration, TciConstParameter, TciOutParameter, TciFormalParameter, TciInParameter, TciVarParameter])) then
+  if (not InDeclarations([TciVarDeclaration, TciConstParameter, TciOutParameter, TciFormalParameter, TciInParameter, TciVarParameter, TciConstRefParameter])) then
   begin
     inherited;
     Exit;
@@ -1473,7 +1474,7 @@ end;
 
 procedure TCodeParser.ParameterName;
 begin
-  if (not InDeclarations([TciConstParameter, TciOutParameter, TciFormalParameter, TciInParameter, TciVarParameter])) then
+  if (not InDeclarations([TciConstParameter, TciOutParameter, TciFormalParameter, TciInParameter, TciVarParameter, TciConstRefParameter])) then
   begin
     inherited;
     Exit;
@@ -1486,7 +1487,7 @@ end;
 
 procedure TCodeParser.NewFormalParameterType;
 begin
-  if (not InDeclarations([TciConstParameter, TciOutParameter, TciFormalParameter, TciInParameter, TciVarParameter])) then
+  if (not InDeclarations([TciConstParameter, TciOutParameter, TciFormalParameter, TciInParameter, TciVarParameter, TciConstRefParameter])) then
   begin
     inherited;
     Exit;

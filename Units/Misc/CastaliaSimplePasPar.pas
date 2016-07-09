@@ -1145,9 +1145,9 @@ end;
 
 procedure TmwSimplePasPar.Block;
 begin
-  while TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokExports,
+  while (TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokExports,
     tokFunction, tokLabel, tokProcedure, tokResourceString, tokThreadVar, tokType,
-    tokVar{$IFDEF D8_NEWER}, tokSquareOpen{$ENDIF}] do
+    tokVar{$IFDEF D8_NEWER}, tokSquareOpen{$ENDIF}]) do
   begin
     DeclarationSection;
   end;
@@ -1186,8 +1186,10 @@ begin
       begin
         ExportsClause;
       end;
-    tokFunction:
+    tokFunction, tokIdentifier:
       begin
+        if (TokenID = tokIdentifier) and (Lexer.ExId <> tokOperator) then
+          SynError(InvalidDeclarationSection);
         ProcedureDeclarationSection;
       end;
     tokLabel:
@@ -2106,7 +2108,30 @@ end;
 
 procedure TmwSimplePasPar.FunctionProcedureName;
 begin
-  Expected(tokIdentifier);
+  if not (Lexer.TokenID in [tokIdentifier,
+
+    //Operators =)
+    tokMinus, tokOr, tokPlus, tokXor,
+    tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar,
+    tokEqual, tokGreater, tokGreaterEqual, tokLower, tokLowerEqual,
+    tokIn, tokIs, tokNotEqual,
+    tokDivAsgn,
+    tokMulAsgn,
+    tokPlusAsgn,
+    tokMinusAsgn,
+    tokPowAsgn]) then
+  begin
+    if TokenID = tokNull then
+      ExpectedFatal(tokIdentifier) {jdj 7/22/1999}
+    else
+    begin
+      if Assigned(FOnMessage) then
+        FOnMessage(Self, meError, Format(rsExpected, [TokenName(tokIdentifier), fLexer.Token]),
+          fLexer.PosXY.X, fLexer.PosXY.Y);
+    end;
+  end
+  else
+    NextToken;
 end;
 
 procedure TmwSimplePasPar.ObjectNameOfMethod;
@@ -2130,13 +2155,12 @@ var
   NoExternal: Boolean;
 begin
   NoExternal := True;
-  if TokenID = tokSemiColon
-    then SEMICOLON;
+  if TokenID = tokSemiColon then SEMICOLON;
   case ExID of
     tokForward:
       ForwardDeclaration; // DR 2001-07-23
   else
-    while ExID in [tokAbstract, tokCdecl, tokDynamic, tokExport, tokExternal, tokFar,
+    while (ExID in [tokAbstract, tokCdecl, tokDynamic, tokExport, tokExternal, tokFar,
       tokMessage, tokNear, tokOverload, tokOverride, tokPascal, tokRegister,
       tokReintroduce, tokSafeCall, tokStdCall, tokVirtual,
       tokDeprecated, tokLibrary, tokPlatform, // DR 2001-10-20
@@ -2148,20 +2172,29 @@ begin
       {$IFDEF D9_NEWER}
       , tokInline
       {$ENDIF}
-       ] // DR 2001-11-14
+      , tokConst
+       ]) or (TokenID = tokConstRef)// DR 2001-11-14
     do
       begin
-        case ExId of
-          tokExternal:
+        case TokenID of
+          tokConstRef:
+            begin
+              NextToken;
+              if (TokenID = tokSemiColon) then SEMICOLON;
+            end
+        else
+          case ExId of
+            tokExternal:
+              begin
+                ProceduralDirective;
+                if TokenID = tokSemiColon then SEMICOLON;
+                NoExternal := False;
+              end;
+          else
             begin
               ProceduralDirective;
               if TokenID = tokSemiColon then SEMICOLON;
-              NoExternal := False;
             end;
-        else
-          begin
-            ProceduralDirective;
-            if TokenID = tokSemiColon then SEMICOLON;
           end;
         end;
       end;
@@ -4537,7 +4570,7 @@ end;
 
 procedure TmwSimplePasPar.TypeKind;
 begin
-  if (TokenID = tokIdentifier) and (GenID = tokPrivate) then
+  if ((TokenID = tokIdentifier) and (GenID = tokPrivate)) or (ExID = tokNative) then
     NextToken;
 
   case TokenID of
@@ -4575,7 +4608,14 @@ begin
       end;
     tokPointerSymbol:
       begin
-        PointerType;
+        Lexer.InitAhead;
+        if Lexer.AheadTokenID = tokConst then
+        begin
+          NextToken;
+          NextToken;
+          TypeKind;
+        end else
+          PointerType;
       end;
     tokString:
       begin
@@ -5008,7 +5048,7 @@ begin
       tokDeprecated, tokLibrary, tokPlatform, // DR 2001-10-20
       tokLocal, tokVarargs // DR 2001-11-14
       {$IFDEF D8_NEWER}, tokStatic{$ENDIF}{$IFDEF D9_NEWER}, tokInline{$ENDIF}
-      ] do
+      , tokConst] do
     begin
       ProceduralDirective;
       if TokenID = tokSemiColon then SEMICOLON;

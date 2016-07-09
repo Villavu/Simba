@@ -24,7 +24,7 @@ type
     function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
     function addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar; override;
-    function addDelayedCode(ACode: lpString; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
+    function addDelayedCode(ACode: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
     procedure getInfo(aItems: TStrings);
   end;
 
@@ -69,7 +69,7 @@ function TLPCompiler.addGlobalVar(Val: Int32; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited;
   if (Length(AName) > 0) and (AName[1] <> '!') then
-    FItems.Add(AddLeadingSemiColon('var ' + AName + ': ' + IntToStr(Val)));
+    FItems.Add(AddLeadingSemiColon('var ' + AName + ': Int32 = ' + IntToStr(Val)));
 end;
 
 function TLPCompiler.addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType;
@@ -92,7 +92,7 @@ begin
   FItems.Add(AddLeadingSemiColon(AHeader) + ' forward;');
 end;
 
-function TLPCompiler.addDelayedCode(ACode: lpString; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base;
+function TLPCompiler.addDelayedCode(ACode: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base;
 begin
   Result := inherited;
   FItems.Add(ACode);

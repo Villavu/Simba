@@ -1346,8 +1346,8 @@ begin
      addGlobalType('(tmBottomRight, tmTopLeft, tmBoth)', 'TTickMark');
      addGlobalType('(tsNone, tsAuto, tsManual)', 'TTickStyle');
      addGlobalType('(trLeft, trRight, trTop, trBottom)', 'TTrackBarScalePos');
-     addGlobalType('procedure(Sender: TObject; Index: integer)', 'TCheckListClicked');
-     addGlobalType('procedure(Sender: TObject; var AllowChange: Boolean)', 'TTabChangingEvent');
+     addNativeGlobalType('procedure(Sender: TObject; Index: integer)', 'TCheckListClicked');
+     addNativeGlobalType('procedure(Sender: TObject; var AllowChange: Boolean)', 'TTabChangingEvent');
      addGlobalType('(tsTabs, tsButtons, tsFlatButtons)', 'TTabStyle');
      addGlobalType('(tpTop, tpBottom, tpLeft, tpRight)', 'TTabPosition');
      addGlobalType('(nboShowCloseButtons, nboMultiLine, nboHidePageListPopup, nboKeyboardTabSwitch, nboShowAddTabButton)', 'TCTabControlOption');
