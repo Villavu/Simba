@@ -4537,7 +4537,7 @@ end;
 
 procedure TmwSimplePasPar.TypeKind;
 begin
-  if (TokenID = tokIdentifier) and (GenID = tokPrivate) then
+  if ((TokenID = tokIdentifier) and (GenID = tokPrivate)) or (ExID = tokNative) then
     NextToken;
 
   case TokenID of
