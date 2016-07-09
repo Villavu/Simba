@@ -1042,9 +1042,9 @@ begin
       if (TokenID = TokUses) then
         MainUsesClause;
 
-      while TokenID in [TokClass, TokConst, TokConstructor, TokDestructor, TokExports,
+      while (TokenID in [TokClass, TokConst, TokConstructor, TokDestructor, TokExports,
         TokFunction, TokLabel, TokProcedure, TokResourceString, TokThreadVar, TokType,
-        TokVar{$IFDEF D8_NEWER}, TokSquareOpen{$ENDIF}] do
+        TokVar{$IFDEF D8_NEWER}, TokSquareOpen{$ENDIF}]) or (Lexer.ExID = tokOperator) do
       begin
         DeclarationSection;
       end;
