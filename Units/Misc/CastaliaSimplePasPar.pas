@@ -1029,6 +1029,7 @@ end;
 procedure TmwSimplePasPar.ProgramFile;
 begin
  // DR 2002-01-11
+  Write(IntToStr(Lexer.LineNumber) + ': '); WriteLn(TokenID);
   Expected(tokProgram);
   QualifiedIdentifier;
   if TokenID = tokRoundOpen then
@@ -1145,9 +1146,9 @@ end;
 
 procedure TmwSimplePasPar.Block;
 begin
-  while TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokExports,
+  while (TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokExports,
     tokFunction, tokLabel, tokProcedure, tokResourceString, tokThreadVar, tokType,
-    tokVar{$IFDEF D8_NEWER}, tokSquareOpen{$ENDIF}] do
+    tokVar{$IFDEF D8_NEWER}, tokSquareOpen{$ENDIF}]) do
   begin
     DeclarationSection;
   end;
@@ -1186,8 +1187,10 @@ begin
       begin
         ExportsClause;
       end;
-    tokFunction:
+    tokFunction, tokIdentifier:
       begin
+        if (TokenID = tokIdentifier) and (Lexer.ExId <> tokOperator) then
+          SynError(InvalidDeclarationSection);
         ProcedureDeclarationSection;
       end;
     tokLabel:
@@ -2106,7 +2109,28 @@ end;
 
 procedure TmwSimplePasPar.FunctionProcedureName;
 begin
-  Expected(tokIdentifier);
+  if not (Lexer.TokenID in [tokIdentifier,
+
+    //Operators =)
+    tokMinus, tokOr, tokPlus, tokXor,
+    tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar,
+    tokDivAsgn,
+    tokMulAsgn,
+    tokPlusAsgn,
+    tokMinusAsgn,
+    tokPowAsgn]) then
+  begin
+    if TokenID = tokNull then
+      ExpectedFatal(tokIdentifier) {jdj 7/22/1999}
+    else
+    begin
+      if Assigned(FOnMessage) then
+        FOnMessage(Self, meError, Format(rsExpected, [TokenName(tokIdentifier), fLexer.Token]),
+          fLexer.PosXY.X, fLexer.PosXY.Y);
+    end;
+  end
+  else
+    NextToken;
 end;
 
 procedure TmwSimplePasPar.ObjectNameOfMethod;
