@@ -1339,7 +1339,8 @@ begin
           (Item is TciOutParameter) or
           (Item is TciFormalParameter) or
           (Item is TciInParameter) or
-          (Item is TciVarParameter) then
+          (Item is TciVarParameter) or
+          (Item is TciConstRefParameter) then
   begin
     FirstColumn := FormatFirstColumn('param');
     c[0] := TciParameterName;

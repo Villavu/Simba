@@ -2113,6 +2113,8 @@ begin
     //Operators =)
     tokMinus, tokOr, tokPlus, tokXor,
     tokAnd, tokAs, tokDiv, tokMod, tokShl, tokShr, tokSlash, tokStar, tokStarStar,
+    tokEqual, tokGreater, tokGreaterEqual, tokLower, tokLowerEqual,
+    tokIn, tokIs, tokNotEqual,
     tokDivAsgn,
     tokMulAsgn,
     tokPlusAsgn,
@@ -2153,13 +2155,12 @@ var
   NoExternal: Boolean;
 begin
   NoExternal := True;
-  if TokenID = tokSemiColon
-    then SEMICOLON;
+  if TokenID = tokSemiColon then SEMICOLON;
   case ExID of
     tokForward:
       ForwardDeclaration; // DR 2001-07-23
   else
-    while ExID in [tokAbstract, tokCdecl, tokDynamic, tokExport, tokExternal, tokFar,
+    while (ExID in [tokAbstract, tokCdecl, tokDynamic, tokExport, tokExternal, tokFar,
       tokMessage, tokNear, tokOverload, tokOverride, tokPascal, tokRegister,
       tokReintroduce, tokSafeCall, tokStdCall, tokVirtual,
       tokDeprecated, tokLibrary, tokPlatform, // DR 2001-10-20
@@ -2171,20 +2172,29 @@ begin
       {$IFDEF D9_NEWER}
       , tokInline
       {$ENDIF}
-       ] // DR 2001-11-14
+      , tokConst
+       ]) or (TokenID = tokConstRef)// DR 2001-11-14
     do
       begin
-        case ExId of
-          tokExternal:
+        case TokenID of
+          tokConstRef:
+            begin
+              NextToken;
+              if (TokenID = tokSemiColon) then SEMICOLON;
+            end
+        else
+          case ExId of
+            tokExternal:
+              begin
+                ProceduralDirective;
+                if TokenID = tokSemiColon then SEMICOLON;
+                NoExternal := False;
+              end;
+          else
             begin
               ProceduralDirective;
               if TokenID = tokSemiColon then SEMICOLON;
-              NoExternal := False;
             end;
-        else
-          begin
-            ProceduralDirective;
-            if TokenID = tokSemiColon then SEMICOLON;
           end;
         end;
       end;
@@ -5038,7 +5048,7 @@ begin
       tokDeprecated, tokLibrary, tokPlatform, // DR 2001-10-20
       tokLocal, tokVarargs // DR 2001-11-14
       {$IFDEF D8_NEWER}, tokStatic{$ENDIF}{$IFDEF D9_NEWER}, tokInline{$ENDIF}
-      ] do
+      , tokConst] do
     begin
       ProceduralDirective;
       if TokenID = tokSemiColon then SEMICOLON;
