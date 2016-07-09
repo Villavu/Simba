@@ -41,7 +41,7 @@ uses
   settings, settingssandbox, lcltype, dialogs, ExtCtrls
   {$IFDEF USE_SQLITE}, msqlite3{$ENDIF}
   {$IFDEF USE_LAPE}
-  , lpparser, lpcompiler, lptypes, lpvartypes,
+  , lpparser, lpcompiler, lptypes, lpvartypes, ffi, lpffi, lpffiwrappers,
     lpeval, lpinterpreter, lputils, lpexceptions, LPDump
   {$ENDIF};
 
@@ -312,7 +312,6 @@ uses
   SynRegExpr,
   lclintf,  // for GetTickCount and others.
   Clipbrd,
-  lpffi, ffi, // For lape FFI
 
   DCPcrypt2,
   DCPrc2, DCPrc4, DCPrc5, DCPrc6,
@@ -1394,6 +1393,7 @@ begin
   Compiler := TLPCompiler.Create(Parser);
   Running := bFalse;
 
+  InitializeFFI(Compiler);
   InitializePascalScriptBasics(Compiler);
   ExposeGlobals(Compiler);
 
