@@ -24,7 +24,7 @@ type
     function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
     function addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar; override;
-    function addDelayedCode(ACode: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; virtual;
+    function addDelayedCode(ACode: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
     procedure getInfo(aItems: TStrings);
   end;
 
