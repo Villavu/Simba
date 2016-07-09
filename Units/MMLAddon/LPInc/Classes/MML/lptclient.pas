@@ -143,7 +143,7 @@ begin
   begin
     addClass('TClient');
 
-    addGlobalType('procedure(s: string)', 'TWriteLnProc');
+    addNativeGlobalType('procedure(s: string)', 'TWriteLnProc');
 
     addClassVar('TClient', 'IOManager', 'TIOManager', @TClient_IOManager_Read, @TClient_IOManager_Write);
     addClassVar('TClient', 'MFiles', 'TMFiles', @TClient_MFiles_Read, @TClient_MFiles_Write);
