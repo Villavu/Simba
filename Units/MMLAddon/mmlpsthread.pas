@@ -320,7 +320,7 @@ uses
   DCPsha1, DCPsha256, DCPsha512,
   DCPtiger
 
-  {$IFDEF USE_LAPE}, lpClasses{$ENDIF};
+  {$IFDEF USE_LAPE}, lpClasses, lpClassHelper{$ENDIF};
 
 {$ifdef Linux}
   {$define PS_SafeCall}
@@ -1414,7 +1414,8 @@ begin
     addGlobalFunc('procedure _writeln; override;', @lp_WriteLn);
     addGlobalFunc('procedure DebugLn(s: string);', @lp_DebugLn);
 
-    addGlobalFunc('procedure Sync(proc: Pointer);', @lp_Sync);
+    addNativeGlobalType('procedure();', 'TSyncMethod');
+    addGlobalFunc('procedure Sync(Proc: TSyncMethod);', @lp_Sync);
     addGlobalFunc('function GetCurrThreadID(): PtrUInt;', @lp_CurrThreadID);
 
     for I := 0 to High(VirtualKeys) do
