@@ -1029,7 +1029,6 @@ end;
 procedure TmwSimplePasPar.ProgramFile;
 begin
  // DR 2002-01-11
-  Write(IntToStr(Lexer.LineNumber) + ': '); WriteLn(TokenID);
   Expected(tokProgram);
   QualifiedIdentifier;
   if TokenID = tokRoundOpen then
