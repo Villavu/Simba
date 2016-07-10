@@ -3435,7 +3435,7 @@ end;
 
 procedure TSimbaForm.MenuItemReportBugClick(Sender: TObject);
 begin
-  OpenURL('http://bugs.villavu.com/mantis/bug_report_page.php');
+  OpenURL('https://github.com/MerlijnWajer/Simba/issues/new');
 end;
 
 procedure TSimbaForm.MenuItemSettingsButtonClick(Sender: TObject);
