@@ -2765,6 +2765,7 @@ var
   ValueDefs: TStringList;
   Stream: TMemoryStream;
   Buffer: TCodeInsight;
+  I: Integer;
 begin
   if UpdatingFonts then
   begin
@@ -2808,7 +2809,8 @@ begin
       with TLPThread(Thread) do
       try
         Compiler.getInfo(ValueDefs);
-        CoreDefines.AddStrings(Compiler.BaseDefines);
+        for I := 0 to Compiler.BaseDefines.Count - 1 do
+          CoreDefines.Add(Compiler.BaseDefines.Names[I]);
       finally
         Free();
       end;
