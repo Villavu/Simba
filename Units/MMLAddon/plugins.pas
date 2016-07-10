@@ -39,7 +39,7 @@ const
   // stdcall
   cv_StdCall = 0;
 
-  // register call
+  // register
   cv_Register = 1;
 
   // default (cdecl where supported) otherwise native platform convention
@@ -111,6 +111,7 @@ var
   GetTypeCount: function: integer; callconv
   GetFuncCount: function: integer; callconv
   GetFuncInfo: function(x: Integer; var ProcAddr: Pointer; var ProcDef: PChar): integer; callconv
+  GetFuncConv: function(x: Integer): Integer; callconv
   SetPluginMemManager: procedure(MemMgr : TMemoryManager); callconv
   OnAttach: procedure(info: Pointer); callconv
 
@@ -304,7 +305,9 @@ begin
           writeln('Loading: ', Plugins[NumPlugins].Methods[I].FuncStr);
 
           if (Assigned(GetFuncConv_std)) then
-            Plugins[NumPlugins].Methods[I].FuncConv := GetFuncConv_std(I);
+            Plugins[NumPlugins].Methods[I].FuncConv := GetFuncConv_std(I)
+          else
+            Plugins[NumPlugins].Methods[I].FuncConv := cv_default;
         end;
 
         StrDispose(PD);
@@ -316,6 +319,7 @@ begin
     if (Assigned(GetFuncCount)) then
     begin
       Pointer(GetFuncInfo) := GetProcAddress(Plugin, PChar('GetFunctionInfo'));
+      Pointer(GetFuncConv) := GetProcAddress(Plugin, PChar('GetFunctionCallingConv'));
 
       if (Assigned(GetFuncInfo)) then
       begin
@@ -330,10 +334,12 @@ begin
           if (GetFuncInfo(I, pntr, PD) < 0) then
             Continue;
 
-          writeln(pd);
           Plugins[NumPlugins].Methods[I].FuncPtr := pntr;
           Plugins[NumPlugins].Methods[I].FuncStr := PD;
-          Plugins[NumPlugins].Methods[I].FuncConv := cv_default;
+          if (Assigned(GetFuncConv)) then
+            Plugins[NumPlugins].Methods[I].FuncConv := GetFuncConv(I)
+          else
+            Plugins[NumPlugins].Methods[I].FuncConv := cv_default;
 
           writeln('Loading: ', Plugins[NumPlugins].Methods[I].FuncStr);
         end;
