@@ -1367,11 +1367,6 @@ object SimbaForm: TSimbaForm
         Action = ActionExtensions
         OnClick = ActionExtensionsExecute
       end
-      object MenuItemShowHidden: TMenuItem
-        Action = ActionShowHidden
-        Caption = '&Show Hidden'
-        Hint = 'Shows Hidden Methods in Function List'
-      end
     end
     object MenuTools: TMenuItem
       Caption = '&Tools'
@@ -3581,10 +3576,6 @@ object SimbaForm: TSimbaForm
     object CallFormDesigner: TAction
       Caption = 'CallFormDesigner'
       OnExecute = CallFormDesignerExecute
-    end
-    object ActionShowHidden: TAction
-      Caption = 'Show Hidden'
-      OnExecute = ActionShowHiddenExecute
     end
     object ActionFont: TAction
       Caption = 'Font'

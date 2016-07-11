@@ -104,7 +104,6 @@ type
 
   TSimbaForm = class(TForm)
     ActionFont: TAction;
-    ActionShowHidden: TAction;
     ActionNotes: TAction;
     CallFormDesigner: TAction;
     ActionDebugger: TAction;
@@ -149,7 +148,6 @@ type
     Memo1: TMemo;
     MenuItemFont: TMenuItem;
     MenuItemDivider51: TMenuItem;
-    MenuItemShowHidden: TMenuItem;
     MenuItemNotes: TMenuItem;
     NotesMemo: TMemo;
     MenuFile: TMenuItem;
@@ -321,7 +319,6 @@ type
     procedure ActionSaveDefExecute(Sender: TObject);
     procedure ActionSaveExecute(Sender: TObject);
     procedure ActionSelectAllExecute(Sender: TObject);
-    procedure ActionShowHiddenExecute(Sender: TObject);
     procedure ActionStopExecute(Sender: TObject);
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
@@ -1777,8 +1774,6 @@ begin
   else
     FunctionListShown(false);
 
-  ActionShowHidden.Checked := SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False);
-
   {$ifdef MSWindows}
   ShowConsole(SimbaSettings.LastConfig.MainForm.ConsoleVisible.GetDefValue(True));
   {$endif}
@@ -2400,14 +2395,6 @@ begin
   else if LabeledEditSearch.Focused then
     LabeledEditSearch.SelectAll;
 
-end;
-
-procedure TSimbaForm.ActionShowHiddenExecute(Sender: TObject);
-begin
-  ActionShowHidden.Checked := not ActionShowHidden.Checked;
-  SimbaSettings.CodeInsight.ShowHidden.Value := ActionShowHidden.Checked;
-  if (CurrScript <> nil) then
-    frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text, True);
 end;
 
 procedure TSimbaForm.ActionStopExecute(Sender: TObject);
