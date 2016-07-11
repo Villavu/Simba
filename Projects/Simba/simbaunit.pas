@@ -3060,10 +3060,14 @@ begin
   if SimbaSettings.Oops then
     formWriteln('WARNING: No permissions to write to ' + SimbaSettingsFile);
 
-  NotesMemo.Lines.Text := DecompressString(Base64Decode(SimbaSettings.Notes.Content.Value));
-  NotesMemo.Visible := SimbaSettings.Notes.Visible.Value;
-  NotesSplitter.Visible := SimbaSettings.Notes.Visible.Value;
-  ActionNotes.Checked := SimbaSettings.Notes.Visible.Value;
+  try
+    NotesMemo.Lines.Text := DecompressString(Base64Decode(SimbaSettings.Notes.Content.Value));
+    NotesMemo.Visible := SimbaSettings.Notes.Visible.Value;
+    NotesSplitter.Visible := SimbaSettings.Notes.Visible.Value;
+    ActionNotes.Checked := SimbaSettings.Notes.Visible.Value;
+  except
+    formWriteln('There was an issue loading Notes.');
+  end;
 
   HandleParameters;
   FillThread.Start;
