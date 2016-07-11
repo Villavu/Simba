@@ -526,18 +526,5 @@ object CompForm: TCompForm
         OnClick = MenuItem17Click
       end
     end
-    object MenuItem11: TMenuItem
-      Caption = 'Help'
-      object MenuItem12: TMenuItem
-        Caption = 'Help'
-        Enabled = False
-      end
-      object MenuItem13: TMenuItem
-        Caption = '-------------'
-      end
-      object MenuItem14: TMenuItem
-        Caption = 'About'
-      end
-    end
   end
 end
