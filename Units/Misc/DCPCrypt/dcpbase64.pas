@@ -25,6 +25,7 @@
 unit DCPbase64;
 
 {$mode delphi}
+{$RANGECHECKS OFF}
 //{$mode objfpc}{$H+}
 // mode objfpc works fine too, as far as I can see.
 // But let's keep it at delphi for now?
