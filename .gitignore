@@ -8,3 +8,6 @@
 *.res
 *.pyc
 *.log
+default.simba
+settings.xml
+^build\/
