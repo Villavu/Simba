@@ -2224,9 +2224,12 @@ begin
       frmFunctionList.editSearchList.SetFocus;
   end else
   begin
-    SearchPanel.Visible:= true;
+    SearchPanel.Visible := True;
     if LabeledEditSearch.CanFocus then
       LabeledEditSearch.SetFocus;
+
+    if (CurrScript.SynEdit.SelAvail) then
+      LabeledEditSearch.Text := CurrScript.SynEdit.SelText;
   end;
 end;
 
@@ -2727,7 +2730,7 @@ end;
 
 procedure TSimbaForm.EditSearchChange(Sender: TObject);
 begin
-  SearchString :=LabeledEditSearch.Text;
+  SearchString := LabeledEditSearch.Text;
   DoSearch(false, true);
 end;
 
