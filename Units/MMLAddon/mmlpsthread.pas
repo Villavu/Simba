@@ -1575,7 +1575,29 @@ var
     while Res[len] in [#9,#10,#13,#32] do Dec(len);
     Result := (Res[len] = ';');
   end;
-  
+  function MufCC2LapeCC(MufCC: Integer): TFFIABI;
+  begin
+    case MufCC of
+      {$IFDEF CPU86}
+      cv_default: Result := FFI_CDECL;
+      cv_StdCall: Result := FFI_STDCALL;
+      cv_Register: Result := FFI_REGISTER;
+      {$ENDIF}
+      {$IFDEF CPUX86_64}
+      {$IFDEF UNIX}
+      cv_StdCall, cv_default, cv_Register: Result := FFI_UNIX64;
+      {$ENDIF}
+      {$IFDEF MSWINDOWS}
+      cv_StdCall, cv_default, cv_Register: Result := FFI_WIN64;
+      {$ENDIF}
+      {$ENDIF}
+      {$IFDEF ARM}
+      cv_StdCall, cv_default, cv_Register: Result := FFI_CDECL;
+      {$ENDIF}
+      else
+        raise Exception.CreateFmt('Unknown Calling Convention [%d]', [MufCC]);
+    end;
+  end;
 begin
   with PluginsGlob.MPlugins[plugidx] do
   begin
@@ -1604,7 +1626,7 @@ begin
       if isNative(Methods[i].FuncStr, Method) then
         Compiler.addGlobalFunc(Method, Methods[i].FuncPtr)
       else begin
-        Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr);
+        Wrapper := LapeImportWrapper(Methods[i].FuncPtr, Compiler, Methods[i].FuncStr, MufCC2LapeCC(Methods[i].FuncConv));
         Compiler.addGlobalFunc(Methods[i].FuncStr, Wrapper.func);
         ImportWrappers.Add(Wrapper);
       end;
