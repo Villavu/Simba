@@ -48,11 +48,9 @@ type
     CHImages: TImageList;
     CHMainMenu: TMainMenu;
     CHFile: TMenuItem;
-    CHHelp: TMenuItem;
     CHClear: TMenuItem;
     CHLoad: TMenuItem;
     CHSave: TMenuItem;
-    CHAbout: TMenuItem;
     OkButton: TButton;
     ColourValue: TEdit;
     CoordValue: TLabel;
@@ -63,7 +61,6 @@ type
     CHSaveDialog: TSaveDialog;
     SelectionName: TEdit;
     ColourTree: TTreeView;
-    procedure CHAboutClick(Sender: TObject);
     procedure ChangeName(Sender: TObject);
     procedure CHClearClick(Sender: TObject);
     procedure CHLoadClick(Sender: TObject);
@@ -491,11 +488,6 @@ begin
       TreeChanged:=False;
       XMLDoc.Free;
     end;
-end;
-
-procedure TColourHistoryForm.CHAboutClick(Sender: TObject);
-begin
-
 end;
 
 constructor TColourHistoryForm.Create(TheOwner: TComponent);
