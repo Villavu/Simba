@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 49
+  Left = 481
   Height = 671
-  Top = 77
+  Top = 133
   Width = 660
   ActiveControl = ScriptPanel
   AllowDropFiles = True
@@ -451,13 +451,27 @@ object SimbaForm: TSimbaForm
         OnKeyPress = LabeledEditSearchKeyPress
       end
       object CheckBoxMatchCase: TCheckBox
-        Left = 320
+        Left = 200
         Height = 19
-        Top = 7
+        Top = 8
         Width = 80
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
+      end
+      object SpeedButtonFindNext: TSpeedButton
+        Left = 304
+        Height = 22
+        Top = 7
+        Width = 56
+        Action = ActionFindNext
+      end
+      object SpeedButtonFindPrev: TSpeedButton
+        Left = 368
+        Height = 22
+        Top = 8
+        Width = 64
+        Action = ActionFindPrev
       end
     end
     object SplitterFunctionList: TSplitter
@@ -1180,6 +1194,9 @@ object SimbaForm: TSimbaForm
       object MenuItemFindNext: TMenuItem
         Action = ActionFindNext
         OnClick = ActionFindNextExecute
+      end
+      object MenuItemFindPrev: TMenuItem
+        Action = ActionFindPrev
       end
       object MenuItemReplace: TMenuItem
         Action = ActionReplace
@@ -3515,6 +3532,11 @@ object SimbaForm: TSimbaForm
       Caption = 'Find &next'
       OnExecute = ActionFindNextExecute
       ShortCut = 114
+    end
+    object ActionFindPrev: TAction
+      Caption = 'Find &previous'
+      OnExecute = ActionFindPrevExecute
+      Visible = False
     end
     object ActionReplace: TAction
       Caption = 'R&eplace...'

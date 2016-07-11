@@ -49,7 +49,7 @@ uses
 
   lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
-  SynEditMarkupHighAll, LMessages, Buttons,
+  SynEditMarkupHighAll, SynHighlighterPas, LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil,
   about, framefunctionlist, ocr, updateform, Simbasettingsold,
   Simbasettingssimple,
@@ -103,6 +103,7 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionFindPrev: TAction;
     ActionFont: TAction;
     ActionNotes: TAction;
     CallFormDesigner: TAction;
@@ -146,6 +147,7 @@ type
     LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     Memo1: TMemo;
+    MenuItemFindPrev: TMenuItem;
     MenuItemFont: TMenuItem;
     MenuItemDivider51: TMenuItem;
     MenuItemNotes: TMenuItem;
@@ -184,6 +186,8 @@ type
     FunctionListTimer: TTimer;
     SCARHighlighter: TSynPasSyn;
     NotesSplitter: TSplitter;
+    SpeedButtonFindNext: TSpeedButton;
+    SpeedButtonFindPrev: TSpeedButton;
     ToolButton5: TToolButton;
     TB_FromDesigner: TToolButton;
     TT_ScriptManager: TToolButton;
@@ -299,6 +303,7 @@ type
     procedure ActionExtensionsExecute(Sender: TObject);
     procedure ActionExtensionsUpdate(Sender: TObject);
     procedure ActionFindNextExecute(Sender: TObject);
+    procedure ActionFindPrevExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionFontExecute(Sender: TObject);
     procedure ActionGotoExecute(Sender: TObject);
@@ -2210,6 +2215,11 @@ end;
 procedure TSimbaForm.ActionFindNextExecute(Sender: TObject);
 begin
   DoSearch(true, false);
+end;
+
+procedure TSimbaForm.ActionFindPrevExecute(Sender: TObject);
+begin
+  // TODO: Find previous
 end;
 
 procedure TSimbaForm.ActionFindstartExecute(Sender: TObject);
