@@ -33,3 +33,6 @@ install:
 
 script:
   - $LAZ_WINE lazbuild $LAZ_OPT ./Projects/Simba/Simba.lpi
+
+notifications:
+  irc: "irc.rizon.net#simba"
