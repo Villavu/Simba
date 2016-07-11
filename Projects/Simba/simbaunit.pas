@@ -2949,7 +2949,8 @@ begin
 
   self.BeginFormUpdate;
   Randomize;
-  DecimalSeparator := '.';
+  FormatSettings.DecimalSeparator := '.';
+  DecimalSeparator := '.'; //This should be the same thing as above, but just in case...
 
   AppPath := IncludeTrailingPathDelimiter(Application.Location);
   DocPath := GetDocPath();
