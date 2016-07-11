@@ -883,6 +883,7 @@ begin
     interp_LP: MenuItemLape.RadioItem := True;
   end;
 {$ENDIF}
+{$IFDEF USE_DEBUGGER}ActionDebugger.Visible := SimbaSettings.Interpreter._Type.Value = interp_PS;{$ENDIF}
 end;
 
 procedure TSimbaForm.HandleConnectionData;
@@ -2351,7 +2352,7 @@ end;
 
 procedure TSimbaForm.ActionReplaceExecute(Sender: TObject);
 begin
-  if(ScriptPopup.HandleAllocated)then
+  if (ScriptPopup.HandleAllocated) and (CurrScript.SynEdit.SelAvail) then
     dlgReplace.FindText:= CurrScript.SynEdit.SelText;
   dlgReplace.Execute;
 end;
@@ -2994,10 +2995,7 @@ begin
 
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
-  {$IFDEF USE_DEBUGGER}
-  Application.CreateForm(TDebuggerForm, DebuggerForm);
-  ActionDebugger.Visible := True;
-  {$ENDIF}
+  {$IFDEF USE_DEBUGGER}Application.CreateForm(TDebuggerForm, DebuggerForm);{$ENDIF}
 
   HandleConfigParameter;
 
@@ -3058,6 +3056,7 @@ begin
   {$IFDEF USE_PASCALSCRIPT}ActionPascalScript.Visible := True;{$ENDIF}
   {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
   {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
+  {$IFDEF USE_DEBUGGER}ActionDebugger.Visible := SimbaSettings.Interpreter._Type.Value = interp_PS;{$ENDIF}
 
   // TODO TEST
   if SimbaSettings.Oops then
