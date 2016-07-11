@@ -16,7 +16,7 @@ object SimbaForm: TSimbaForm
   OnDropFiles = FormDropFiles
   OnHide = doOnHide
   OnShortCut = FormShortCuts
-  LCLVersion = '1.4.0.1'
+  LCLVersion = '1.4.5.0'
   Visible = True
   object ToolBar1: TToolBar
     Left = 0
@@ -222,6 +222,7 @@ object SimbaForm: TSimbaForm
       Caption = 'TT_ScriptManager'
       ImageIndex = 30
       OnClick = TT_ScriptManagerClick
+      Visible = False
     end
     object ToolButton6: TToolButton
       Left = 47
@@ -3895,21 +3896,10 @@ object SimbaForm: TSimbaForm
   end
   object SCARHighlighter: TSynPasSyn
     Enabled = False
-    AsmAttri.FrameEdges = sfeAround
     CommentAttri.Foreground = clGreen
-    CommentAttri.FrameEdges = sfeAround
     CommentAttri.Style = []
-    IDEDirectiveAttri.FrameEdges = sfeAround
-    IdentifierAttri.FrameEdges = sfeAround
-    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clNavy
-    NumberAttri.FrameEdges = sfeAround
-    SpaceAttri.FrameEdges = sfeAround
     StringAttri.Foreground = clFuchsia
-    StringAttri.FrameEdges = sfeAround
-    SymbolAttri.FrameEdges = sfeAround
-    CaseLabelAttri.FrameEdges = sfeAround
-    DirectiveAttri.FrameEdges = sfeAround
     CompilerMode = pcmObjFPC
     NestedComments = False
     StringKeywordMode = spsmNone
@@ -3918,24 +3908,13 @@ object SimbaForm: TSimbaForm
   end
   object LazHighlighter: TSynPasSyn
     Enabled = False
-    AsmAttri.FrameEdges = sfeAround
     CommentAttri.Foreground = clBlue
-    CommentAttri.FrameEdges = sfeAround
     CommentAttri.Style = [fsBold]
-    IDEDirectiveAttri.FrameEdges = sfeAround
     IdentifierAttri.Foreground = clDefault
-    IdentifierAttri.FrameEdges = sfeAround
-    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clNavy
-    NumberAttri.FrameEdges = sfeAround
-    SpaceAttri.FrameEdges = sfeAround
     StringAttri.Foreground = clBlue
-    StringAttri.FrameEdges = sfeAround
     SymbolAttri.Foreground = clRed
-    SymbolAttri.FrameEdges = sfeAround
-    CaseLabelAttri.FrameEdges = sfeAround
     DirectiveAttri.Foreground = clRed
-    DirectiveAttri.FrameEdges = sfeAround
     DirectiveAttri.Style = [fsBold]
     CompilerMode = pcmObjFPC
     NestedComments = False
