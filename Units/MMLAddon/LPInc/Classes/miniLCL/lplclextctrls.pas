@@ -237,39 +237,13 @@ begin
 end;
 
 procedure TCustomImage_OnMouseDown_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PCustomImage(Params^[0])^.FindComponent('OnMouseDownEvent');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnMouseEventWrapper.Create(PCustomImage(Params^[0])^);
-    Component.Name := 'OnMouseDownEvent';
-  end;
-
-  with TOnMouseEventWrapper(Component) do
-  begin
-    InternalMethod := PMouseEventWrapper(Params^[1])^;
-    PCustomImage(Params^[0])^.OnMouseDown := @MouseEvent;
-  end;
+  PCustomImage(Params^[0])^.OnMouseDown := PMouseEvent(Params^[1])^;;
 end;
 
 procedure TCustomImage_OnMouseUp_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PCustomImage(Params^[0])^.FindComponent('OnMouseUpEvent');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnMouseEventWrapper.Create(PCustomImage(Params^[0])^);
-    Component.Name := 'OnMouseUpEvent';
-  end;
-
-  with TOnMouseEventWrapper(Component) do
-  begin
-    InternalMethod := PMouseEventWrapper(Params^[1])^;
-    PCustomImage(Params^[0])^.OnMouseUp := @MouseEvent;
-  end;
+  PCustomImage(Params^[0])^.OnMouseUp := PMouseEvent(Params^[1])^;
 end;
 
 procedure Register_TCustomImage(Compiler: TLapeCompiler);
@@ -346,33 +320,13 @@ begin
 end;
 
 procedure TImage_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PImage(Params^[0])^.FindComponent('MouseMove');
-
-  if (Assigned(Component)) then
-    PMouseMoveEventWrapper(Result)^ := TOnMouseMoveWrapper(Component).InternalMethod
-  else
-    PMouseMoveEvent(Result)^ := nil;
+  PMouseMoveEvent(Result)^ := PImage(Params^[0])^.OnMouseMove;
 end;
 
 procedure TImage_OnMouseMove_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PImage(Params^[0])^.FindComponent('MouseMove');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnMouseMoveWrapper.Create(PImage(Params^[0])^);
-    Component.Name := 'MouseMove';
-  end;
-
-  with TOnMouseMoveWrapper(Component) do
-  begin
-    InternalMethod := PMouseMoveEventWrapper(Params^[1])^;
-    PImage(Params^[0])^.OnMouseMove := @MouseMove;
-  end;
+  PImage(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
 end;
 
 procedure Register_TImage(Compiler: TLapeCompiler);

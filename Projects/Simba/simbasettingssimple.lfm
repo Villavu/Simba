@@ -14,7 +14,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.4.0.1'
+  LCLVersion = '1.4.5.0'
   object PgControlAdvanced: TPageControl
     Left = 8
     Height = 304
@@ -200,7 +200,7 @@ object SettingsSimpleForm: TSettingsSimpleForm
           Left = 16
           Height = 15
           Top = 115
-          Width = 108
+          Width = 107
           Caption = 'Updater Version URL'
           ParentColor = False
         end
@@ -405,12 +405,11 @@ object SettingsSimpleForm: TSettingsSimpleForm
         Items.Strings = (
           'Tray always Visible'
           'Show Function List on Start'
-          'Show Command Prompt (Windows only)'
         )
         OnItemClick = EnvOtherItemClick
         TabOrder = 0
         Data = {
-          03000000020202
+          020000000202
         }
       end
     end

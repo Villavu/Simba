@@ -58,6 +58,7 @@ type
   PCustomSpeedButton = ^TCustomSpeedButton;
   PSpeedButton = ^TSpeedButton;
   PButtonLayout = ^TButtonLayout;
+  PDrawItemEvent = ^TDrawItemEvent;
 
 {TCustomScrollBar}
 
@@ -799,21 +800,8 @@ begin
 end;
 
 procedure TCustomListBox_OnDrawItem_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PCustomListBox(Params^[0])^.FindComponent('DrawItem');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnDrawItemWrapper.Create(PCustomListBox(Params^[0])^);
-    Component.Name := 'DrawItem';
-  end;
-
-  with TOnDrawItemWrapper(Component) do
-  begin
-    InternalMethod := PDrawItemEventWrapper(Params^[1])^;
-    PCustomListBox(Params^[0])^.OnDrawItem := @DrawItem;
-  end;
+  PCustomListBox(Params^[0])^.OnDrawItem := PDrawItemEvent(Params^[1])^;
 end;
 
 procedure Register_TCustomListBox(Compiler: TLapeCompiler);
