@@ -27,10 +27,6 @@ type
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
-    MenuItem11: TMenuItem;
-    MenuItem12: TMenuItem;
-    MenuItem13: TMenuItem;
-    MenuItem14: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -236,9 +232,8 @@ end;
 procedure TCompForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if (Key = VK_DELETE) then begin
-   f.DeleteComponent();
-  end;
+  if (Key = VK_DELETE) then
+    f.DeleteComponent();
 end;
 
 procedure TCompForm.FormKeyPress(Sender: TObject; var Key: char);

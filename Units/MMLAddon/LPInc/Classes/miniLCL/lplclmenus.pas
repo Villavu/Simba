@@ -325,33 +325,13 @@ begin
 end;
 
 procedure TMenuItem_OnClick_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PMenuItem(Params^[0])^.FindComponent('OnClickEvent');
-
-  if (Assigned(Component)) then
-    PClickWrapper(Result)^ := TOnClickWrapper(Component).InternalMethod
-  else
-    PClickWrapper(Result)^ := nil;
+  PNotifyEvent(Result)^ := PMenuItem(Params^[0])^.OnClick;
 end;
 
 procedure TMenuItem_OnClick_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PMenuItem(Params^[0])^.FindComponent('OnClickEvent');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnClickWrapper.Create(PMenuItem(Params^[0])^);
-    Component.Name := 'OnClickEvent';
-  end;
-
-  with TOnClickWrapper(Component) do
-  begin
-    InternalMethod := PClickWrapper(Params^[1])^;
-    PMenuItem(Params^[0])^.OnClick := @OnClick;
-  end;
+  PMenuItem(Params^[0])^.OnClick := PNotifyEvent(Params^[1])^;
 end;
 
 

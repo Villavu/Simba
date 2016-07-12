@@ -533,33 +533,13 @@ begin
 end;
 
 procedure TControl_OnClick_Read(const Params: PParamArray; const Result: Pointer); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PControl(Params^[0])^.FindComponent('OnClickEvent');
-
-  if (Assigned(Component)) then
-    PClickWrapper(Result)^ := TOnClickWrapper(Component).InternalMethod
-  else
-    PClickWrapper(Result)^ := nil;
+  PNotifyEvent(Result)^ := PControl(Params^[0])^.OnClick;
 end;
 
 procedure TControl_OnClick_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PControl(Params^[0])^.FindComponent('OnClickEvent');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnClickWrapper.Create(PControl(Params^[0])^);
-    Component.Name := 'OnClickEvent';
-  end;
-
-  with TOnClickWrapper(Component) do
-  begin
-    InternalMethod := PClickWrapper(Params^[1])^;
-    PControl(Params^[0])^.OnClick := @OnClick;
-  end;
+  PControl(Params^[0])^.OnClick := PNotifyEvent(Params^[1])^;
 end;
 
 //Read: property OnResize: TNotifyEvent read OnResize write OnResize;
@@ -942,57 +922,18 @@ begin
 end;
 
 procedure TWinControl_OnKeyDown_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PWinControl(Params^[0])^.FindComponent('OnKeyDownEvent');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnKeyEventWrapper.Create(PWinControl(Params^[0])^);
-    Component.Name := 'OnKeyDownEvent';
-  end;
-
-  with TOnKeyEventWrapper(Component) do
-  begin
-    InternalMethod := PKeyEventWrapper(Params^[1])^;
-    PWinControl(Params^[0])^.OnKeyDown := @KeyEvent;
-  end;
+  PWinControl(Params^[0])^.OnKeyDown := PKeyEvent(Params^[1])^;
 end;
 
 procedure TWinControl_OnKeyPress_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PWinControl(Params^[0])^.FindComponent('OnKeyPressEvent');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnKeyPressWrapper.Create(PWinControl(Params^[0])^);
-    Component.Name := 'OnKeyPressEvent';
-  end;
-
-  with TOnKeyPressWrapper(Component) do
-  begin
-    InternalMethod := PKeyPressEventWrapper(Params^[1])^;
-    PWinControl(Params^[0])^.OnKeyPress := @KeyPress;
-  end;
+  PWinControl(Params^[0])^.OnKeyPress := PKeyPressEvent(Params^[1])^;
 end;
 
 procedure TWinControl_OnKeyUp_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PWinControl(Params^[0])^.FindComponent('OnKeyUpEvent');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnKeyEventWrapper.Create(PWinControl(Params^[0])^);
-    Component.Name := 'OnKeyUpEvent';
-  end;
-
-  with TOnKeyEventWrapper(Component) do
-  begin
-    InternalMethod := PKeyEventWrapper(Params^[1])^;
-    PWinControl(Params^[0])^.OnKeyUp := @KeyEvent;
-  end;
+  PWinControl(Params^[0])^.OnKeyUp := PKeyEvent(Params^[1])^;
 end;
 
 //Read: property ParentWindow: THandle read FParentWindow write SetParentWindow;

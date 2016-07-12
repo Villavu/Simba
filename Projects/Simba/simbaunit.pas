@@ -49,7 +49,7 @@ uses
 
   lcltype, ActnList,
   SynExportHTML, SynEditKeyCmds, SynEditHighlighter,
-  SynEditMarkupHighAll, LMessages, Buttons,
+  SynEditMarkupHighAll, SynHighlighterPas, LMessages, Buttons,
   mmisc, stringutil,mufasatypesutil,
   about, framefunctionlist, ocr, updateform, Simbasettingsold,
   Simbasettingssimple,
@@ -103,8 +103,8 @@ type
   { TSimbaForm }
 
   TSimbaForm = class(TForm)
+    ActionFindPrev: TAction;
     ActionFont: TAction;
-    ActionShowHidden: TAction;
     ActionNotes: TAction;
     CallFormDesigner: TAction;
     ActionDebugger: TAction;
@@ -147,9 +147,9 @@ type
     LazHighlighter: TSynPasSyn;
     MainMenu: TMainMenu;
     Memo1: TMemo;
+    MenuItemFindPrev: TMenuItem;
     MenuItemFont: TMenuItem;
     MenuItemDivider51: TMenuItem;
-    MenuItemShowHidden: TMenuItem;
     MenuItemNotes: TMenuItem;
     NotesMemo: TMemo;
     MenuFile: TMenuItem;
@@ -186,6 +186,8 @@ type
     FunctionListTimer: TTimer;
     SCARHighlighter: TSynPasSyn;
     NotesSplitter: TSplitter;
+    SpeedButtonFindNext: TSpeedButton;
+    SpeedButtonFindPrev: TSpeedButton;
     ToolButton5: TToolButton;
     TB_FromDesigner: TToolButton;
     TT_ScriptManager: TToolButton;
@@ -301,6 +303,7 @@ type
     procedure ActionExtensionsExecute(Sender: TObject);
     procedure ActionExtensionsUpdate(Sender: TObject);
     procedure ActionFindNextExecute(Sender: TObject);
+    procedure ActionFindPrevExecute(Sender: TObject);
     procedure ActionFindstartExecute(Sender: TObject);
     procedure ActionFontExecute(Sender: TObject);
     procedure ActionGotoExecute(Sender: TObject);
@@ -321,7 +324,6 @@ type
     procedure ActionSaveDefExecute(Sender: TObject);
     procedure ActionSaveExecute(Sender: TObject);
     procedure ActionSelectAllExecute(Sender: TObject);
-    procedure ActionShowHiddenExecute(Sender: TObject);
     procedure ActionStopExecute(Sender: TObject);
     procedure ActionTabLastExecute(Sender: TObject);
     procedure ActionTabNextExecute(Sender: TObject);
@@ -883,6 +885,7 @@ begin
     interp_LP: MenuItemLape.RadioItem := True;
   end;
 {$ENDIF}
+{$IFDEF USE_DEBUGGER}ActionDebugger.Visible := SimbaSettings.Interpreter._Type.Value = interp_PS;{$ENDIF}
 end;
 
 procedure TSimbaForm.HandleConnectionData;
@@ -1776,8 +1779,6 @@ begin
   else
     FunctionListShown(false);
 
-  ActionShowHidden.Checked := SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False);
-
   {$ifdef MSWindows}
   ShowConsole(SimbaSettings.LastConfig.MainForm.ConsoleVisible.GetDefValue(True));
   {$endif}
@@ -2216,6 +2217,11 @@ begin
   DoSearch(true, false);
 end;
 
+procedure TSimbaForm.ActionFindPrevExecute(Sender: TObject);
+begin
+  // TODO: Find previous
+end;
+
 procedure TSimbaForm.ActionFindstartExecute(Sender: TObject);
 begin
   if frmFunctionList.Focused or frmFunctionList.FunctionList.Focused or frmFunctionList.editSearchList.Focused then
@@ -2224,9 +2230,12 @@ begin
       frmFunctionList.editSearchList.SetFocus;
   end else
   begin
-    SearchPanel.Visible:= true;
+    SearchPanel.Visible := True;
     if LabeledEditSearch.CanFocus then
       LabeledEditSearch.SetFocus;
+
+    if (CurrScript.SynEdit.SelAvail) then
+      LabeledEditSearch.Text := CurrScript.SynEdit.SelText;
   end;
 end;
 
@@ -2348,7 +2357,7 @@ end;
 
 procedure TSimbaForm.ActionReplaceExecute(Sender: TObject);
 begin
-  if(ScriptPopup.HandleAllocated)then
+  if (ScriptPopup.HandleAllocated) and (CurrScript.SynEdit.SelAvail) then
     dlgReplace.FindText:= CurrScript.SynEdit.SelText;
   dlgReplace.Execute;
 end;
@@ -2396,14 +2405,6 @@ begin
   else if LabeledEditSearch.Focused then
     LabeledEditSearch.SelectAll;
 
-end;
-
-procedure TSimbaForm.ActionShowHiddenExecute(Sender: TObject);
-begin
-  ActionShowHidden.Checked := not ActionShowHidden.Checked;
-  SimbaSettings.CodeInsight.ShowHidden.Value := ActionShowHidden.Checked;
-  if (CurrScript <> nil) then
-    frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text, True);
 end;
 
 procedure TSimbaForm.ActionStopExecute(Sender: TObject);
@@ -2727,7 +2728,7 @@ end;
 
 procedure TSimbaForm.EditSearchChange(Sender: TObject);
 begin
-  SearchString :=LabeledEditSearch.Text;
+  SearchString := LabeledEditSearch.Text;
   DoSearch(false, true);
 end;
 
@@ -2991,10 +2992,7 @@ begin
 
   Application.CreateForm(TSimbaUpdateForm, SimbaUpdateForm);
   {$IFDEF USE_EXTENSIONS}Application.CreateForm(TExtensionsForm, ExtensionsForm);{$ENDIF}
-  {$IFDEF USE_DEBUGGER}
-  Application.CreateForm(TDebuggerForm, DebuggerForm);
-  ActionDebugger.Visible := True;
-  {$ENDIF}
+  {$IFDEF USE_DEBUGGER}Application.CreateForm(TDebuggerForm, DebuggerForm);{$ENDIF}
 
   HandleConfigParameter;
 
@@ -3055,6 +3053,7 @@ begin
   {$IFDEF USE_PASCALSCRIPT}ActionPascalScript.Visible := True;{$ENDIF}
   {$IFDEF USE_LAPE}ActionLape.Visible := True;{$ENDIF}
   {$IFDEF USE_EXTENSIONS}ActionExtensions.Visible := True;{$ENDIF}
+  {$IFDEF USE_DEBUGGER}ActionDebugger.Visible := SimbaSettings.Interpreter._Type.Value = interp_PS;{$ENDIF}
 
   // TODO TEST
   if SimbaSettings.Oops then
