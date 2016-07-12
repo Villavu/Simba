@@ -17,6 +17,7 @@ type
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
+    MenuItemDelete: TMenuItem;
     PopupMenu1: TPopupMenu;
     sor: TSelectOnRunTime;
     procedure FormChangeBounds(Sender: TObject);
@@ -31,6 +32,7 @@ type
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
+    procedure MenuItemDeleteClick(Sender: TObject);
     procedure sorBeforeSelect(Sender: TObject; Selected: TControl;
       var Select: Boolean);
     procedure OnResizeCtrl(Sender: TObject);
@@ -186,6 +188,11 @@ begin
      SetPropValue(CurComp.Font,'Color',FontDialog1.Font.Color);
   end;
 
+end;
+
+procedure TDsgnForm.MenuItemDeleteClick(Sender: TObject);
+begin
+  DeleteComponent;
 end;
 
 procedure TDsgnForm.sorBeforeSelect(Sender: TObject; Selected: TControl;
@@ -398,12 +405,13 @@ end;
 
 procedure TDsgnForm.DeleteComponent();
 begin
-  if not assigned(CurComp) then exit else
-    begin
-      sor.Selected := False;
-      sor.SelectControl := nil;
-      FreeAndNil(CurComp);
-    end;
+  if Assigned(CurComp) then
+  begin
+    sor.Selected := False;
+    sor.SelectControl := nil;
+    FreeAndNil(CurComp);
+  end else
+    WriteLn('You do not have a component selected.');
 end;
 
 procedure TDsgnForm.SetMode(i: integer);
