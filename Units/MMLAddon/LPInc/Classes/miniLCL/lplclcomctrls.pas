@@ -562,21 +562,8 @@ begin
 end;
 
 procedure TCustomCheckListBox_OnCheckListClicked_Write(const Params: PParamArray); lape_extdecl
-var
-  Component: TComponent;
 begin
-  Component := PCustomCheckListBox(Params^[0])^.FindComponent('CheckListClicked');
-  if (not Assigned(Component)) then
-  begin
-    Component := TOnCheckListClicked.Create(PCustomCheckListBox(Params^[0])^);
-    Component.Name := 'CheckListClicked';
-  end;
-
-  with TOnCheckListClicked(Component) do
-  begin
-    InternalMethod := PCheckListClickedWrapper(Params^[1])^;
-    PCustomCheckListBox(Params^[0])^.OnItemClick := @CheckListClicked;
-  end;
+  PCustomCheckListBox(Params^[0])^.OnItemClick := PCheckListClicked(Params^[1])^;
 end;
 
 procedure Register_TCustomCheckListBox(Compiler: TLapeCompiler);
