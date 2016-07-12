@@ -35,4 +35,7 @@ script:
   - $LAZ_WINE lazbuild $LAZ_OPT ./Projects/Simba/Simba.lpi
 
 notifications:
-  irc: "irc.rizon.net#simba"
+  irc:
+    channels: "irc.rizon.net#simba"
+    template:
+      - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
