@@ -37,7 +37,8 @@ var
 begin
   b:=0;
 HeaderCode.Add('var');
-HeaderCode.Add(GenSpaces(2)+CmpList[0].compname+':TForm;');
+HeaderCode.Add(GenSpaces(2)+CmpList[0].compname+': TForm;');
+HeaderCode.Add(GenSpaces(2)+'Font: TFont;');
 if Labels.count> 0 then
   begin
   s:=GenSpaces(2);
@@ -171,15 +172,12 @@ begin
 end;
 with HeaderCode do
 begin
+  Add('');
   Add('const');
-  Add(GenSpaces(2) + 'default = ' + #39 + 'Comic Sans MS' + #39 + ';');
+  Add(GenSpaces(2) + 'default = ' + #39 + 'New Times Roman' + #39 + ';');
   Add(GenSpaces(2) + 'clDefault = $20000000;');
   Add('');
-  Add('');
   Add('procedure procedure_OnClick(sender: TObject);');
-  Add('{$IFNDEF CODEINSIGHT}');
-  Add('native;');
-  Add('{$ENDIF}');
   Add('begin');
   Add(GenSpaces(2) + 'client.writeln(' + #39 + 'click' + #39 + ');');
   Add('end;');
@@ -300,46 +298,54 @@ begin
   i:=GetSimbaCtype(smb);
   Case i of
   1: begin
-       list.Add('//'+smb.compname+'\\');
-       list.Add(GenSpaces(1)+ smb.compname+'.Init('+cmpList[0].compname+');');
+       list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+       list.Add(GenSpaces(2)+ smb.compname+'.Init('+cmpList[0].compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
+       list.Add(GenSpaces(2)+'begin');
+       list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+       list.Add(GenSpaces(4)+'SetCaption('+#39+smb.caption+#39+');');
+       list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+       list.Add(GenSpaces(4)+'Font := GetFont();');
+       list.Add(GenSpaces(4)+'with Font do');
        list.Add(GenSpaces(4)+'begin');
-       list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
-       list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
-       list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
-       list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(6)+'SetName('+smb.fontname+');');
+       list.Add(GenSpaces(6)+'SetColor('+IntToStr(smb.fontcolor)+');');
+       list.Add(GenSpaces(6)+'SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(4)+'end;');
        list.Add(GenSpaces(2)+'end;');
   end;
   2: begin
-       list.Add('//'+smb.compname+'\\');
-       list.Add(GenSpaces(1)+ smb.compname+'.Init('+cmpList[0].compname+');');
+       list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+       list.Add(GenSpaces(2)+ smb.compname+'.Init('+cmpList[0].compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
+       list.Add(GenSpaces(2)+'begin');
+       list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+       list.Add(GenSpaces(4)+'SetCaption('+#39+smb.caption+#39+');');
+       list.Add(GenSpaces(4)+'SetText('+#39+'Input your text here!'+#39+');');
+       list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+       list.Add(GenSpaces(4)+'Font := GetFont();');
+       list.Add(GenSpaces(4)+'with Font do');
        list.Add(GenSpaces(4)+'begin');
-       list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
-       list.Add(GenSpaces(6)+'SetText('+#39+'Input your text here!'+#39+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
-       list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
-       list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
-       list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(5)+'SetName('+smb.fontname+');');
+       list.Add(GenSpaces(5)+'SetColor('+IntToStr(smb.fontcolor)+');');
+       list.Add(GenSpaces(5)+'SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(4)+'end;');
        list.Add(GenSpaces(2)+'end;');
   end;
   3: begin
        s:=''; s1:=''; s2:='';
-       list.Add('//'+smb.compname+'\\');
-       list.Add(GenSpaces(1)+ smb.compname+'.Init('+cmpList[0].compname+');');
+       list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+       list.Add(GenSpaces(2)+ smb.compname+'.Init('+cmpList[0].compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
-       list.Add(GenSpaces(4)+'begin');
-       list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+       list.Add(GenSpaces(2)+'begin');
+       list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+       list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
        if smb.img.switcher = true then
          begin
           s:=smb.img.imgcode;
           if (smb.height<= 24) and (smb.width <=24) then
           begin
-          s1:=#13#10+GenSpaces(6)+#39;
+          s1:=#13#10+GenSpaces(4)+#39;
           for p:=0 to Length(s)-1 do begin
             SetLength(s1,Length(s1)+1);
             s1[Length(s1)]:=s[p+1];
@@ -369,100 +375,120 @@ begin
               end;
             end;
             end;
-          List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=client.getMBitmaps().CreateBMPFromString('+IntToStr(smb.width)+','+IntToStr(smb.height)+','+s1+#39+');');
-          List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+':=client.getMBitmaps().GetBMP(bmp'+IntToStr(img)+');');
-         // List.Add(GenSpaces(6)+'Picture.Bitmap.handle:=bmp'+IntToStr(img)+'.handle;');
+          List.Add(GenSpaces(4)+'bmp'+IntToStr(img)+':=client.getMBitmaps().CreateBMPFromString('+IntToStr(smb.width)+','+IntToStr(smb.height)+','+s1+#39+');');
+          List.Add(GenSpaces(4)+'bmps'+IntToStr(img)+':=client.getMBitmaps().GetBMP(bmp'+IntToStr(img)+');');
+         // List.Add(GenSpaces(4)+'Picture.Bitmap.handle:=bmp'+IntToStr(img)+'.handle;');
           end else begin
           s2:=#39+s+#39;
-        //  List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=TBitmap.Create;');
-          List.Add(GenSpaces(6)+'bmp'+IntToStr(img)+':=client.getMBitmaps().CreateBMPFromString('+IntToStr(smb.width)+','+IntToStr(smb.height)+','+s2+');');
-          List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+':=client.getMBitmaps().GetBMP(bmp'+IntToStr(img)+');');
-          //List.Add(GenSpaces(6)+'Picture.Bitmap.handle:=bmp'+IntToStr(img)+'.handle;');
-         // List.Add(GenSpaces(6)+'DrawBitmap(bmps'+IntToStr(img)+',Canvas,'+IntToStr(smb.width)+','+IntToStr(smb.height)+');');
-         //list.Add(GenSpaces(6)+'Picture.Bitmap.LoadFromFile('+#39+smb.img.path+#39+');');
+        //  List.Add(GenSpaces(4)+'bmp'+IntToStr(img)+':=TBitmap.Create;');
+          List.Add(GenSpaces(4)+'bmp'+IntToStr(img)+':=client.getMBitmaps().CreateBMPFromString('+IntToStr(smb.width)+','+IntToStr(smb.height)+','+s2+');');
+          List.Add(GenSpaces(4)+'bmps'+IntToStr(img)+':=client.getMBitmaps().GetBMP(bmp'+IntToStr(img)+');');
+          //List.Add(GenSpaces(4)+'Picture.Bitmap.handle:=bmp'+IntToStr(img)+'.handle;');
+         // List.Add(GenSpaces(4)+'DrawBitmap(bmps'+IntToStr(img)+',Canvas,'+IntToStr(smb.width)+','+IntToStr(smb.height)+');');
+         //list.Add(GenSpaces(4)+'Picture.Bitmap.LoadFromFile('+#39+smb.img.path+#39+');');
           end;
-          List.Add(GenSpaces(6)+'bmps'+IntToStr(img)+'.DrawToCanvas(0,0,getCanvas());');
-          List.Add(GenSpaces(6)+'client.getMBitmaps().RemoveBMP(bmp'+inttostr(img)+');');
+          List.Add(GenSpaces(4)+'bmps'+IntToStr(img)+'.DrawToCanvas(0,0,getCanvas());');
+          List.Add(GenSpaces(4)+'client.getMBitmaps().RemoveBMP(bmp'+inttostr(img)+');');
          end else
-       list.Add(GenSpaces(6)+'//'+'load bitmap to image here');
+       list.Add(GenSpaces(4)+'//'+'load bitmap to image here');
        list.Add(GenSpaces(2)+'end;');
        img:=img+1;
   end;
   4: begin
-       list.Add('//'+smb.compname+'\\');
-       list.Add(GenSpaces(1)+ smb.compname+'.Init('+cmpList[0].compname+');');
+       list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+       list.Add(GenSpaces(2)+ smb.compname+'.Init('+cmpList[0].compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
+       list.Add(GenSpaces(2)+'begin');
+       list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+       list.Add(GenSpaces(4)+'SetCaption('+#39+smb.caption+#39+');');
+       list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+       list.Add(GenSpaces(4)+'SetOnClick(@procedure_OnClick);');
+       list.Add(GenSpaces(4)+'Font := GetFont();');
+       list.Add(GenSpaces(4)+'with Font do');
        list.Add(GenSpaces(4)+'begin');
-       list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
-       list.Add(GenSpaces(6)+'SetOnClick(procedure_OnClick);');
-       list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
-       list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
-       list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(6)+'SetName('+smb.fontname+');');
+       list.Add(GenSpaces(6)+'SetColor('+IntToStr(smb.fontcolor)+');');
+       list.Add(GenSpaces(6)+'SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(4)+'end;');
        list.Add(GenSpaces(2)+'end;');
 
   end;
     5: begin
-       list.Add('//'+smb.compname+'\\');
-       list.Add(GenSpaces(1)+ smb.compname+'.Init('+cmpList[0].compname+');');
+       list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+       list.Add(GenSpaces(2)+ smb.compname+'.Init('+cmpList[0].compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
+       list.Add(GenSpaces(2)+'begin');
+       list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+       list.Add(GenSpaces(4)+'SetCaption('+#39+smb.caption+#39+');');
+       //list.Add(GenSpaces(4)+'Checked:=false'+';');
+       list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+       list.Add(GenSpaces(4)+'SetOnClick(@procedure_OnClick);');
+       list.Add(GenSpaces(4)+'Font := GetFont();');
+       list.Add(GenSpaces(4)+'with Font do');
        list.Add(GenSpaces(4)+'begin');
-       list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
-       //list.Add(GenSpaces(6)+'Checked:=false'+';');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
-       list.Add(GenSpaces(6)+'SetOnClick(procedure_OnClick);');
-       list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
-       list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
-       list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(6)+'SetName('+smb.fontname+');');
+       list.Add(GenSpaces(6)+'SetColor('+IntToStr(smb.fontcolor)+');');
+       list.Add(GenSpaces(6)+'SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(4)+'end;');
        list.Add(GenSpaces(2)+'end;');
   end;
     6: begin
-       list.Add('//'+smb.compname+'\\');
-       list.Add(GenSpaces(1)+ smb.compname+'.Init('+cmpList[0].compname+');');
+       list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+       list.Add(GenSpaces(2)+ smb.compname+'.Init('+cmpList[0].compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
-       list.Add(GenSpaces(4)+'begin');
-       list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
-       list.Add(GenSpaces(6)+'//add your items here');
-       list.Add(GenSpaces(6)+'GetItems().Add('+#39+'YourItem'+#39+')'+';');
-       list.Add(GenSpaces(6)+'//End items');
-       list.Add(GenSpaces(6)+'SetOnClick(procedure_OnClick);');
-       list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
-       list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
-       list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(2)+'begin');
+       list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+       list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+       list.Add(GenSpaces(4)+'//add your items here');
+       list.Add(GenSpaces(4)+'GetItems().Add('+#39+'YourItem'+#39+')'+';');
+       list.Add(GenSpaces(4)+'//End items');
+       list.Add(GenSpaces(4)+'SetOnClick(@procedure_OnClick);');
+       list.Add(GenSpaces(4)+'Font := GetFont();');
+       list.Add(GenSpaces(6)+'with Font do');
+       list.Add(GenSpaces(6)+'begin');
+       list.Add(GenSpaces(6)+'SetName('+smb.fontname+');');
+       list.Add(GenSpaces(6)+'SetColor('+IntToStr(smb.fontcolor)+');');
+       list.Add(GenSpaces(6)+'SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(4)+'end;');
        list.Add(GenSpaces(2)+'end;');
   end;
     7: begin
-       list.Add('//'+smb.compname+'\\');
-       list.Add(GenSpaces(1)+ smb.compname+'.Init('+cmpList[0].compname+');');
+       list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+       list.Add(GenSpaces(2)+ smb.compname+'.Init('+cmpList[0].compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
-       list.Add(GenSpaces(4)+'begin');
-       list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
-       list.Add(GenSpaces(6)+'//add your items here');
-       list.Add(GenSpaces(6)+'GetItems().Add('+#39+'YourItem'+#39+')'+';');
-       list.Add(GenSpaces(6)+'//End items');
-       list.Add(GenSpaces(6)+'SetOnClick(procedure_OnClick);');
-       list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
-       list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
-       list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(2)+'begin');
+       list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+       list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+       list.Add(GenSpaces(4)+'//add your items here');
+       list.Add(GenSpaces(4)+'GetItems().Add('+#39+'YourItem'+#39+')'+';');
+       list.Add(GenSpaces(4)+'//End items');
+       list.Add(GenSpaces(4)+'SetOnClick(@procedure_OnClick);');
+       list.Add(GenSpaces(4)+'Font := GetFont();');
+       list.Add(GenSpaces(4)+'with Font do');
+       list.Add(GenSpaces(6)+'begin');
+       list.Add(GenSpaces(6)+'SetName('+smb.fontname+');');
+       list.Add(GenSpaces(6)+'SetColor('+IntToStr(smb.fontcolor)+');');
+       list.Add(GenSpaces(6)+'SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(4)+'end;');
        list.Add(GenSpaces(2)+'end;');
   end;
-    8: begin
-       list.Add('//'+smb.compname+'\\');
-       list.Add(GenSpaces(1)+ smb.compname+'.Init('+cmpList[0].compname+');');
+  {  8: begin
+       list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+       list.Add(GenSpaces(2)+ smb.compname+'.Init('+cmpList[0].compname+');');
        list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
+       list.Add(GenSpaces(2)+'begin');
+       list.Add(GenSpaces(4)+'SetParent('+cmpList[0].compname+');');
+       list.Add(GenSpaces(4)+'SetCaption('+#39+smb.caption+#39+');');
+       list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+       list.Add(GenSpaces(4)+'Font := GetFont();');
+       list.Add(GenSpaces(4)+'with Font do');
        list.Add(GenSpaces(4)+'begin');
-       list.Add(GenSpaces(6)+'SetParent('+cmpList[0].compname+');');
-       list.Add(GenSpaces(6)+'SetCaption('+#39+smb.caption+#39+');');
-       list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
-       list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
-       list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
-       list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(6)+'SetName('+smb.fontname+');');
+       list.Add(GenSpaces(6)+'SetColor('+IntToStr(smb.fontcolor)+');');
+       list.Add(GenSpaces(6)+'SetSize('+IntToStr(smb.fontsize)+');');
+       list.Add(GenSpaces(4)+'end;');
        list.Add(GenSpaces(2)+'end;');
-  end;
+  end;      }
 end;
 
 end;
@@ -474,11 +500,7 @@ begin
   begin
     AddStrings(HeaderCode);
     Add('');
-    Add('');
     Add('procedure InitForm;');
-    Add('{$IFNDEF CODEINSIGHT}');
-    Add('native;');
-    Add('{$ENDIF}');
     Add('begin');
     AddStrings(FormCode);
     if LabelsCode.Count > 0 then
@@ -501,13 +523,11 @@ begin
     Add('end;');
     Add('');
     Add('');
-    Add('procedure Free;');
-    Add('{$IFNDEF CODEINSIGHT}');
-    Add('native;');
-    Add('{$ENDIF}');
+    Add('procedure FreeForm;');
     Add('begin');
     Add(GenSpaces(2)+'if ('+cmpList[0].compname+' = nil) then');
-    Add(GenSpaces(3)+'exit();');
+    Add(GenSpaces(4)+'exit();');
+    Add('');
     Add(GenSpaces(2)+'client.writeln('+#39+'Freeing form...'+#39+');');
     Add(GenSpaces(2)+cmpList[0].compname+'.free;');
     Add('end;');
@@ -516,11 +536,11 @@ begin
     Add('procedure ShowForm();');
     Add('begin');
     Add(GenSpaces(2) + 'try');
-    Add(GenSpaces(4)+'sync(InitForm);');
+    Add(GenSpaces(4)+'sync(@InitForm);');
     Add(GenSpaces(2) + 'except');
     Add(GenSpaces(4) + 'writeln('+#39+'ERROR: Failed to initialize form'+#39+'); ');
     Add(GenSpaces(2)+'finally');
-    Add(GenSpaces(4)+('sync(Free);'));
+    Add(GenSpaces(4)+('sync(@FreeForm);'));
     Add(GenSpaces(2)+'end;');
     Add('end;');
     Add('');
@@ -539,16 +559,20 @@ end;
 
 procedure TLPCodeGen.CreateFormCode(smb: TSimbaComponent; List: TStringList);
  begin
-  list.Add('//'+smb.compname+'\\');
-  list.Add(GenSpaces(1)+smb.compname+'.Init(nil);');
+  list.Add(GenSpaces(2)+'//'+smb.compname+'\\');
+  list.Add(GenSpaces(2)+smb.compname+'.Init(nil);');
   list.Add(GenSpaces(2)+'with'+GenSpaces(1)+smb.compname+GenSpaces(1)+'do');
+  list.Add(GenSpaces(2)+'begin');
+  list.Add(GenSpaces(4)+'SetCaption('+#39+cmpList[0].caption+#39+');');
+  list.Add(GenSpaces(4)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
+  list.Add(GenSpaces(4)+'SetPosition(poScreenCenter);');
+  list.Add(GenSpaces(4)+'Font := GetFont();');
+  list.Add(GenSpaces(4)+'with Font do');
   list.Add(GenSpaces(4)+'begin');
-  list.Add(GenSpaces(6)+'SetCaption('+#39+cmpList[0].caption+#39+');');
-  list.Add(GenSpaces(6)+Format('SetBounds(%s,%s,%s,%s);',[IntToStr(smb.left),IntToStr(smb.top),IntToStr(smb.width),IntToStr(smb.height)]));
-  list.Add(GenSpaces(6)+'SetPosition(poScreenCenter);');
-  list.Add(GenSpaces(6)+'GetFont().SetName('+smb.fontname+');');
-  list.Add(GenSpaces(6)+'GetFont().SetColor('+IntToStr(smb.fontcolor)+');');
-  list.Add(GenSpaces(6)+'GetFont().SetSize('+IntToStr(smb.fontsize)+');');
+  list.Add(GenSpaces(6)+'SetName('+smb.fontname+');');
+  list.Add(GenSpaces(6)+'SetColor('+IntToStr(smb.fontcolor)+');');
+  list.Add(GenSpaces(6)+'SetSize('+IntToStr(smb.fontsize)+');');
+  list.Add(GenSpaces(4)+'end;');
   list.Add(GenSpaces(2)+'end;');
  end;
 
