@@ -232,9 +232,8 @@ end;
 procedure TCompForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if (Key = VK_DELETE) then begin
-   f.DeleteComponent();
-  end;
+  if (Key = VK_DELETE) then
+    f.DeleteComponent();
 end;
 
 procedure TCompForm.FormKeyPress(Sender: TObject; var Key: char);

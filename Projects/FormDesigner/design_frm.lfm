@@ -44,6 +44,10 @@ object DsgnForm: TDsgnForm
       Caption = 'Edit list items'
       Visible = False
     end
+    object MenuItemDelete: TMenuItem
+      Caption = 'Delete'
+      OnClick = MenuItemDeleteClick
+    end
   end
   object FontDialog1: TFontDialog
     MinFontSize = 0
