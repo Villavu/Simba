@@ -97,7 +97,7 @@ begin
     Param := 'const Index: ' + ArrType;
 
   if (Assigned(Read)) then
-    addGlobalFunc(Format('function %s.get%s(%s): %s;', [Obj, Item, Param, Typ]), Read);
+    addGlobalFunc(Format('function %s.get%s(%s): %s; constref;', [Obj, Item, Param, Typ]), Read);
 
   if Arr then
     Param += '; ';
