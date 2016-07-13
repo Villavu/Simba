@@ -30,6 +30,9 @@ type
 
 implementation
 
+uses
+  lpeval;
+
 function AddLeadingSemiColon(x: string): string;
 begin
   Result := Trim(x);
@@ -89,13 +92,15 @@ end;
 function TLPCompiler.addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar;
 begin
   Result := inherited;
-  FItems.Add(AddLeadingSemiColon(AHeader) + ' forward;');
+  if (Length(Result.Name) > 0) and (Result.Name[1] <> '_') then
+    FItems.Add(AddLeadingSemiColon(AHeader) + ' forward;');
 end;
 
 function TLPCompiler.addDelayedCode(ACode: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base;
 begin
   Result := inherited;
-  FItems.Add(ACode);
+  if (AFileName <> '!addDelayedCore') then
+    FItems.Add(ACode);
 end;
 
 procedure TLPCompiler.getInfo(aItems: TStrings);
