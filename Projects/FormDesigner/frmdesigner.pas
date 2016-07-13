@@ -102,7 +102,6 @@ type
     procedure AddToStringGridEx(smb: TSimbaComponent);//не забыть проверку свойства tag
     procedure UpdateControlData();
     procedure SetControl(Sender: TObject);
-    function MouseClickOnSubItem(rc: TRect; item: TListItem;x,y: integer): boolean;
     procedure SetModeScript();
     procedure SetModeProgress();
   end;
@@ -653,12 +652,6 @@ begin
       end;
     end;
 end;
-end;
-
-function TCompForm.MouseClickOnSubItem(rc: TRect; item: TListItem; x, y: integer
-  ): boolean;
-begin
-
 end;
 
 procedure TCompForm.SetModeScript();

@@ -64,7 +64,7 @@ type
     procedure InternalLoadFromXML(XMLDoc: TXMLDocument);
     procedure WriteXMLData(n: TTreeNode;
                      XMLNode: TDOMNode; XMLDoc: TXMLDocument;
-                     var XMLChild: TDOMNode; var C: Integer);
+                     out XMLChild: TDOMNode; var C: Integer);
     procedure WalkTree(Node: TTreeNode; XMLNode: TDOMNode; XMLDoc: TXMLDocument;
                  var C: Integer);
     function GetKeyValueDefLoadFirst(KeyName, defVal, fileName: String): String;
@@ -542,6 +542,8 @@ begin
   newN := TTreeNode.Create(Nodes);
   newN.Text := Path[High(Path)];
   newN.MoveTo(nParent, naAddChild);
+
+  Result := True;
 end;
 
 {
@@ -617,7 +619,7 @@ end;
 
 procedure TMMLSettings.WriteXMLData(n: TTreeNode;
                        XMLNode: TDOMNode; XMLDoc: TXMLDocument;
-                       var XMLChild: TDOMNode; var C: Integer);
+                       out XMLChild: TDOMNode; var C: Integer);
 begin
   if assigned(n.data) and (n.HasChildren) then
     mDebugLn('WriteXMLData - Has data and children! Please close simba and remove settings.xml. if problem persists, please report your settings.xml');

@@ -2710,6 +2710,7 @@ var
   e: Extended;
   q, p, d: TPoint;
 begin
+  Result := nil;
   h := High(shape);
   if (h > -1) then
   begin
@@ -2786,8 +2787,7 @@ begin
           Result[l] := Point((x + b.X1), (y + b.Y1));
         end;
       end;
-  end else
-    SetLength(Result, 0);
+  end;
 end;
 
 {/\

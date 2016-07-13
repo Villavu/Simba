@@ -22,16 +22,14 @@ uses
   Graphics;
 
 type
-    TOnChangeSettings = function (obj: TObject): Boolean of object;
-    TOnDefaultSetting = procedure (obj: TObject);
-
     TSetting = class(TObject)
     public
       procedure Save(MMLSettings: TMMLSettings); virtual; abstract;
       procedure Load(MMLSettings: TMMLSettings); virtual; abstract;
-
-      destructor Destroy; virtual; abstract;
     end;
+
+    TOnChangeSettings = procedure (obj: TSetting) of object;
+    TOnDefaultSetting = procedure (obj: TSetting);
 
     TSettingsArray = array of TSetting;
 
@@ -70,15 +68,15 @@ type
     TStringSetting = class(TValueSetting)
     private
       FValue: string;
-      function GetValue: string;
-      procedure SetValue(val: string);
+      function GetValue: string; virtual;
+      procedure SetValue(val: string); virtual;
     public
       constructor Create(APath: string; val: string); overload;
 
       procedure Save(MMLSettings: TMMLSettings); override;
       procedure Load(MMLSettings: TMMLSettings); override;
 
-      function GetDefValue(val: string): string; virtual;
+      function GetDefValue(val: string): string;
 
       property Value: string read GetValue write SetValue;
     end;
@@ -101,19 +99,15 @@ type
 
     TFileSetting = class(TStringSetting)
     private
-      function GetValue: string;
-      procedure SetValue(val: string);
+      function GetValue: string; override;
+      procedure SetValue(val: string); override;
     public
       property Value: string read GetValue write SetValue;
     end;
 
     TPathSetting = class(TFileSetting)
     private
-      procedure SetValue(val: string);
-    public
-      function GetDefValue(val: string): string; virtual;
-
-      property Value: string read GetValue write SetValue;
+      procedure SetValue(val: string); override;
     end;
 
     TFontSetting = class(TSetting)
@@ -306,7 +300,7 @@ type
       MMLSettings: TMMLSettings;
       Oops: Boolean;
 
-      constructor Create;
+      constructor Create; override;
 
       procedure Save(SettingsFileName: String); overload;
     end;
@@ -651,14 +645,6 @@ begin
     OnChange(Self);
 end;
 
-function TPathSetting.GetDefValue(val: String): String;
-begin
-  if (not (FValueSet)) then
-    Value := val;
-
-  Result := Value;
-end;
-
 procedure TPathSetting.SetValue(val: string);
 begin
   {$IFNDEF NOTPORTABLE}
@@ -811,100 +797,100 @@ begin
     nodes[i].Load(MMLSettings)
 end;
 
-procedure GetIncludePath(obj: TObject);
+procedure GetIncludePath(obj: TSetting);
 begin
   TPathSetting(obj).Value := DataPath + 'Includes' + DS;
 end;
 
-procedure GetPluginPath(obj: TObject);
+procedure GetPluginPath(obj: TSetting);
 begin
   TPathSetting(obj).Value := DataPath + 'Plugins' + DS;
 end;
 
 {$IFDEF USE_EXTENSIONS}
-procedure GetExtPath(obj: TObject);
+procedure GetExtPath(obj: TSetting);
 begin
   TPathSetting(obj).Value := DataPath + 'Extensions' + DS;
 end;
 {$ENDIF}
 
-procedure GetScriptPath(obj: TObject);
+procedure GetScriptPath(obj: TSetting);
 begin
   TPathSetting(obj).Value := DocPath + 'Scripts' + DS;
 end;
 
-procedure GetFontPath(obj: TObject);
+procedure GetFontPath(obj: TSetting);
 begin
   TPathSetting(obj).Value := DataPath + 'Fonts' + DS;
 end;
 
-procedure GetDefScriptPath(obj: TObject);
+procedure GetDefScriptPath(obj: TSetting);
 begin
   TFileSetting(obj).Value := DataPath + 'default.simba';
 end;
 
-procedure GetUpdaterGetCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetUpdaterGetAutomaticallyUpdate(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetUpdaterCheckEveryXminutes(obj: TObject); begin TIntegerSetting(obj).Value := 30; end;
-procedure GetUpdaterLink(obj: TObject); begin TStringSetting(obj).Value := SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};; end;
-procedure GetUpdaterVersionLink(obj: TObject); begin TStringSetting(obj).Value := SimbaURL + 'Version'; end;
+procedure GetUpdaterGetCheckForUpdates(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetUpdaterGetAutomaticallyUpdate(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetUpdaterCheckEveryXminutes(obj: TSetting); begin TIntegerSetting(obj).Value := 30; end;
+procedure GetUpdaterLink(obj: TSetting); begin TStringSetting(obj).Value := SimbaURL + 'Simba'{$IFDEF WINDOWS} +'.exe'{$ENDIF};; end;
+procedure GetUpdaterVersionLink(obj: TSetting); begin TStringSetting(obj).Value := SimbaURL + 'Version'; end;
 
-procedure GetInterpreterType(obj: TObject); begin TIntegerSetting(obj).Value := 1; end; // 1 is Lape
-procedure GetInterpreterAllowSysCalls(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetInterpreterType(obj: TSetting); begin TIntegerSetting(obj).Value := 1; end; // 1 is Lape
+procedure GetInterpreterAllowSysCalls(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
 
-procedure GetFontsLoadOnStartUp(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetFontsCheckForUpdates(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetFontsVersion(obj: TObject); begin TIntegerSetting(obj).Value := -1; end;
-procedure GetFontsVersionLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Version'; end;
-procedure GetFontsUpdateLink(obj: TObject); begin TStringSetting(obj).Value := FontURL + 'Fonts.tar.bz2'; end;
-
-
-procedure GetTabOpenNextOnClose(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
-procedure GetOpenScriptInNewTab(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetTabCheckBeforeOpen(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-
-procedure GetGeneralMaxRecentFiles(obj: TObject); begin TIntegerSetting(obj).Value := 10; end;
-
-procedure GetColourPickerShowHistoryonPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetColourPickerAddToHistoryOnPick(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetColourPickerAddCoordinateToClipBoard(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
-procedure GetColourPickerAddColourToClipBoard(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
-
-procedure GetCodeInsightShowHidden(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
-procedure GetFunctionListShowOnStart(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-
-procedure GetCodeHintsShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetCodeCompletionShowAutomatically(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-
-procedure GetShowBalloonHints(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-
-procedure GetScriptManagerURL(obj: TObject); begin TStringSetting(obj).Value := 'http://127.0.0.1/'; end;
-procedure GetScriptManagerPath(obj: TObject); begin TFileSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
-procedure GetScriptManagerFile(obj: TObject); begin TStringSetting(obj).Value := 'ScriptManager.xml'; end;
-procedure GetScriptManagerFirstRun(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-
-procedure GetSourceEditorLazColors(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetSourceEditorCaretPastEOL(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-
-procedure GetExtensionsFileExtension(obj: TObject); begin TStringSetting(obj).Value := 'sex'; end;
+procedure GetFontsLoadOnStartUp(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFontsCheckForUpdates(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetFontsVersion(obj: TSetting); begin TIntegerSetting(obj).Value := -1; end;
+procedure GetFontsVersionLink(obj: TSetting); begin TStringSetting(obj).Value := FontURL + 'Version'; end;
+procedure GetFontsUpdateLink(obj: TSetting); begin TStringSetting(obj).Value := FontURL + 'Fonts.tar.bz2'; end;
 
 
-procedure GetMainFormNormalSize(obj: TObject); begin TStringSetting(obj).Value := '739:555'; end;
-procedure GetMainFormPosition(obj: TObject); begin TStringSetting(obj).Value := ''; end;
-procedure GetMainFormState(obj: TObject); begin TStringSetting(obj).Value := 'normal'; end;
+procedure GetTabOpenNextOnClose(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
+procedure GetOpenScriptInNewTab(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetTabCheckBeforeOpen(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 
-procedure GetMainFormConsoleVisible(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetGeneralMaxRecentFiles(obj: TSetting); begin TIntegerSetting(obj).Value := 10; end;
 
-procedure GetTrayAlwaysVisible(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetColourPickerShowHistoryonPick(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetColourPickerAddToHistoryOnPick(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetColourPickerAddCoordinateToClipBoard(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
+procedure GetColourPickerAddColourToClipBoard(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
 
-procedure GetSimbaNewsURL(obj: TObject); begin TStringSetting(obj).Value := 'http://simba.villavu.com/bin/news'; end;
+procedure GetCodeInsightShowHidden(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
+procedure GetFunctionListShowOnStart(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 
-procedure GetNotesContent(obj: TObject); begin TStringSetting(obj).Value := 'FQAAAHic88svSS1WCE5NLsnMz1PQVXAqSvRWBABR+Abt'; end;
-procedure GetNotesVisible(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
+procedure GetCodeHintsShowAutomatically(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetCodeCompletionShowAutomatically(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 
-procedure GetMiscRestartScriptIfStarted(obj: TObject); begin TBooleanSetting(obj).Value := False; end;
-procedure GetMiscWarnIfRunning(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
-procedure GetMiscWarnIfModified(obj: TObject); begin TBooleanSetting(obj).Value := True; end;
+procedure GetShowBalloonHints(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetScriptManagerURL(obj: TSetting); begin TStringSetting(obj).Value := 'http://127.0.0.1/'; end;
+procedure GetScriptManagerPath(obj: TSetting); begin TFileSetting(obj).Value := SimbaSettings.Scripts.Path.Value+'ScriptStorage.xml'; end;
+procedure GetScriptManagerFile(obj: TSetting); begin TStringSetting(obj).Value := 'ScriptManager.xml'; end;
+procedure GetScriptManagerFirstRun(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetSourceEditorLazColors(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetSourceEditorCaretPastEOL(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetExtensionsFileExtension(obj: TSetting); begin TStringSetting(obj).Value := 'sex'; end;
+
+
+procedure GetMainFormNormalSize(obj: TSetting); begin TStringSetting(obj).Value := '739:555'; end;
+procedure GetMainFormPosition(obj: TSetting); begin TStringSetting(obj).Value := ''; end;
+procedure GetMainFormState(obj: TSetting); begin TStringSetting(obj).Value := 'normal'; end;
+
+procedure GetMainFormConsoleVisible(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
+
+procedure GetTrayAlwaysVisible(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+
+procedure GetSimbaNewsURL(obj: TSetting); begin TStringSetting(obj).Value := 'http://simba.villavu.com/bin/news'; end;
+
+procedure GetNotesContent(obj: TSetting); begin TStringSetting(obj).Value := 'FQAAAHic88svSS1WCE5NLsnMz1PQVXAqSvRWBABR+Abt'; end;
+procedure GetNotesVisible(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
+
+procedure GetMiscRestartScriptIfStarted(obj: TSetting); begin TBooleanSetting(obj).Value := False; end;
+procedure GetMiscWarnIfRunning(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
+procedure GetMiscWarnIfModified(obj: TSetting); begin TBooleanSetting(obj).Value := True; end;
 
 constructor TSimbaSettings.Create;
 begin

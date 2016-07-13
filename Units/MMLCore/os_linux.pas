@@ -81,7 +81,7 @@ interface
         function GetKeyCode(c : char) : integer;override;
 
         function GetNativeWindow: TNativeWindow;
-        function GetHandle(): PtrUInt;
+        function GetHandle(): PtrUInt; override;
       private
         { display is the connection to the X server }
         display: PDisplay;
@@ -119,7 +119,7 @@ interface
         procedure SetDesktop; override;
 
         function GetProcesses: TSysProcArr; override;
-        procedure SetTargetEx(Proc: TSysProc); overload;
+        procedure SetTargetEx(Proc: TSysProc); override;
       private
         procedure NativeInit; override;
         procedure NativeFree; override;

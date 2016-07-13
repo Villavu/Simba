@@ -1011,6 +1011,7 @@ begin
       begin
         fComment := csBor;
         i := 1;
+        s := '';
         while (FOrigin[Run + 1 + i] <> #0) and (i <= 8) do
         begin
           s := s + FOrigin[Run + 1 + i];

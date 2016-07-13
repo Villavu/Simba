@@ -296,7 +296,7 @@ end;
 
 function TMDTM.SaveToFile(const FileName: string): boolean;
 begin
-
+  Result := False;
 end;
 
 function TMDTM.LoadFromString(const s: string): boolean;

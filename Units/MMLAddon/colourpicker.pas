@@ -103,7 +103,6 @@ var
 procedure TMColorPicker.Pick(Out C, X, Y: Integer);
 var
    w, h: integer;
-   SS : TShiftState;
    p : TPoint;
    bmp2 : Graphics.TBitmap;
    bmp: TMufasaBitmap;
@@ -199,7 +198,7 @@ begin
 
   { Display the data on the info form }
   p := ImageMain.ScreenToClient(Mouse.CursorPos);
-  ImageMainMouseMove(nil, SS, p.x, p.y);
+  ImageMainMouseMove(nil, [], p.x, p.y);
 
   closed := False;
 
