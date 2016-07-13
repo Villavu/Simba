@@ -464,7 +464,7 @@ type
     procedure SetInterpreter(obj: TSetting);
     procedure SetPluginsPath(obj: TSetting);
     procedure SetScriptsPath(obj: TSetting);
-    {$IFDEF USE_EXTENSIONS}procedure SetExtensionsPath(obj: Tobject);{$ENDIF}
+    {$IFDEF USE_EXTENSIONS}procedure SetExtensionsPath(obj: TSetting);{$ENDIF}
     procedure SetIncludesPath(obj: TSetting);
     procedure SetFontsPath(obj: TSetting);
     procedure SetDefaultScriptPath(obj: TSetting);
