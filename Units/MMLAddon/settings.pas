@@ -346,7 +346,6 @@ var
   i : integer;
 begin
   result := false;
-  writeln(oldkey);
   Path := KeyNameToKeys(OldKey);
   if length(path) = 1 then
     exit;

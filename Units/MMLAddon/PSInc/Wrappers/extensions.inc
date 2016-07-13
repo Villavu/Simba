@@ -215,7 +215,6 @@ var
   Arr: TStringArray;
   I, H: LongInt;
 begin
-  WriteLn(Data);
   Parser := TJSONParser.Create(Data);
   try
     Parent := Parser.Parse;
