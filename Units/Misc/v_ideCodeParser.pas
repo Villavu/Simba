@@ -719,6 +719,7 @@ function TciStruct.HasField(Name: string; out Decl: TDeclaration; Return: TVarBa
 var
   a: Integer;
 begin
+  a := 0;
   Result := HasField(Name, Decl, Return, a);
 end;
 
@@ -809,6 +810,7 @@ function TciTypeKind.GetRealType: TDeclaration;
 var
   a: Integer;
 begin
+  a := 0;
   Result := GetRealType(a);
 end;
 

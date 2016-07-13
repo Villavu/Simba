@@ -461,15 +461,15 @@ type
     function GetSimbaNews: String;
 
     { Settings Hooks }
-    function SetInterpreter(obj: TObject): Boolean;
-    function SetPluginsPath(obj: Tobject): Boolean;
-    function SetScriptsPath(obj: Tobject): Boolean;
-    {$IFDEF USE_EXTENSIONS}function SetExtensionsPath(obj: Tobject): Boolean;{$ENDIF}
-    function SetIncludesPath(obj: Tobject): Boolean;
-    function SetFontsPath(obj: Tobject): Boolean;
-    function SetDefaultScriptPath(obj: TObject): Boolean;
-    function SetSourceEditorFont(obj: TObject): Boolean;
-    function SetTrayVisiblity(obj: TObject): Boolean;
+    procedure SetInterpreter(obj: TSetting);
+    procedure SetPluginsPath(obj: TSetting);
+    procedure SetScriptsPath(obj: TSetting);
+    {$IFDEF USE_EXTENSIONS}procedure SetExtensionsPath(obj: Tobject);{$ENDIF}
+    procedure SetIncludesPath(obj: TSetting);
+    procedure SetFontsPath(obj: TSetting);
+    procedure SetDefaultScriptPath(obj: TSetting);
+    procedure SetSourceEditorFont(obj: TSetting);
+    procedure SetTrayVisiblity(obj: TSetting);
 
     procedure SetShowParamHintAuto(const AValue: boolean);
     procedure SetShowCodeCompletionAuto(const AValue: boolean);
@@ -919,42 +919,42 @@ begin
     result := SCARHighlighter;
 end;
 
-function TSimbaForm.SetIncludesPath(obj: TObject): Boolean;
+procedure TSimbaForm.SetIncludesPath(obj: TSetting);
 begin
   {$IFDEF SIMBA_VERBOSE}
   writeln('--- SetIncludesPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
-function TSimbaForm.SetPluginsPath(obj: TObject): Boolean;
+procedure TSimbaForm.SetPluginsPath(obj: TSetting);
 begin
   {$IFDEF SIMBA_VERBOSE}
   writeln('--- SetPluginsPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
-function TSimbaForm.SetFontsPath(obj: TObject): Boolean;
+procedure TSimbaForm.SetFontsPath(obj: TSetting);
 begin
   {$IFDEF SIMBA_VERBOSE}
   writeln('--- SetFontsPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
-function TSimbaForm.SetScriptsPath(obj: TObject): Boolean;
+procedure TSimbaForm.SetScriptsPath(obj: TSetting);
 begin
   {$IFDEF SIMBA_VERBOSE}
   writeln('--- SetScriptPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
-function TSimbaForm.SetDefaultScriptPath(obj: TObject): Boolean;
+procedure TSimbaForm.SetDefaultScriptPath(obj: TSetting);
 begin
   {$IFDEF SIMBA_VERBOSE}
   writeln('--- SetDefaultScriptPath with value: ' + TPathSetting(obj).Value);
   {$ENDIF}
 end;
 
-function TSimbaForm.SetSourceEditorFont(obj: TObject): Boolean;
+procedure TSimbaForm.SetSourceEditorFont(obj: TSetting);
 var
   I: LongInt;
 begin
@@ -969,7 +969,7 @@ begin
 end;
 
 {$IFDEF USE_EXTENSIONS}
-function TSimbaForm.SetExtensionsPath(obj: TObject): Boolean;
+procedure TSimbaForm.SetExtensionsPath(obj: TSetting);
 begin
   {$IFDEF SIMBA_VERBOSE}
   writeln('--- SetExtensionPath with value: ' + TPathSetting(obj).Value);
@@ -978,7 +978,7 @@ end;
 {$ENDIF}
 
 
-function TSimbaForm.SetInterpreter(obj: TObject): Boolean;
+procedure TSimbaForm.SetInterpreter(obj: TSetting);
 var
   UpdateCurrScript: Boolean;
   Interpreter: Integer;
@@ -1006,7 +1006,7 @@ begin
   MenuitemFillFunctionList.Click;
 end;
 
-function TSimbaForm.SetTrayVisiblity(obj: TObject): Boolean;
+procedure TSimbaForm.SetTrayVisiblity(obj: TSetting);
 begin
   MTrayIcon.Visible := TBooleanSetting(obj).Value;
 end;

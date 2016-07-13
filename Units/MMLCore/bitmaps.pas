@@ -108,7 +108,7 @@ type
     procedure Blur(const Block: integer); overload;
     procedure Crop(const xs, ys, xe, ye: integer);
     function ToTBitmap: TBitmap;
-    function ToString : string;
+    function ToString : string; override;
     function ToMatrix: T2DIntegerArray;
     procedure DrawMatrix(const matrix: T2DIntegerArray);
     procedure ThresholdAdaptive(Alpha, Beta: Byte; InvertIt: Boolean; Method: TBmpThreshMethod; C: Integer);
@@ -363,7 +363,7 @@ var
 begin
   Bitmap := TMufasaBitmap.Create;
   Bitmap.SetSize(w,h);
-  addBMP(Bitmap);
+  Result := addBMP(Bitmap);
 end;
 
 function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;

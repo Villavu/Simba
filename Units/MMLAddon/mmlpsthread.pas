@@ -1638,6 +1638,8 @@ end;
 
 function TLPThread.CallMethod(const Method: string; var Args: array of Variant): Variant;
 begin
+  Result := Unassigned;
+
   if (not FFILoaded) then
     raise Exception.Create('libffi seems to be missing!');
 
