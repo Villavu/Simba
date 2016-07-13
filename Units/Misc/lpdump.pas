@@ -104,9 +104,17 @@ begin
 end;
 
 procedure TLPCompiler.getInfo(aItems: TStrings);
+var
+  i: Integer;
 begin
   aItems.Clear();
   aItems.addStrings(FItems);
+
+  // Add magic Lape methods.
+  // We cannot automate getting parameter/result information for now,
+  // but we can link to documentation.
+  for i := 0 to InternalMethodMap.Count - 1 do
+    aItems.Add('procedure ' + InternalMethodMap.Key[i] + '(); forward;');
 end;
 
 end.
