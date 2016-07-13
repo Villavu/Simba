@@ -3536,7 +3536,7 @@ object SimbaForm: TSimbaForm
     object ActionFindPrev: TAction
       Caption = 'Find &previous'
       OnExecute = ActionFindPrevExecute
-      Visible = False
+      ShortCut = 8306
     end
     object ActionReplace: TAction
       Caption = 'R&eplace...'

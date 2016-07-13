@@ -529,7 +529,7 @@ type
     procedure ClearTab( TabIndex : integer);
     procedure CloseTabs(Exclude: integer = -1; Silent : boolean = false); //-1 for no exclusion
     procedure SetEditActions;
-    procedure DoSearch(ANext : boolean; HighlightAll : boolean);
+    procedure DoSearch(SearchOptions: TSynSearchOptions; HighlightAll: Boolean);
     procedure RefreshTab;//Refreshes all the form items that depend on the Script (Panels, title etc.)
     procedure RefreshTabSender(sender : PtrInt);
     procedure CreateDefaultEnvironment;
@@ -1602,42 +1602,38 @@ begin
     EditActions(false,false,false,false,false,false);
 end;
 
-procedure TSimbaForm.DoSearch(ANext: boolean; HighlightAll : boolean);
+procedure TSimbaForm.DoSearch(SearchOptions: TSynSearchOptions; HighlightAll: Boolean);
 var
   Res : integer;
-  CurrPos : TPoint;
-  SearchOptions : TSynSearchOptions;
 begin
-  SearchOptions:= [];
   if CheckBoxMatchCase.Checked then
-    SearchOptions := [ssoMatchCase];
+    Include(SearchOptions, ssoMatchCase);
+
   if SearchString = '' then
   begin
     res := -1;
     CurrScript.Synedit.SetHighlightSearch('',[]);
-//    CurrScript.SynEdit.SelectionMode:=
-//    CurrScript.SynEdit.CaretXY :=     CurrScript.SynEdit.CaretXY;
     CurrScript.SynEdit.LogicalCaretXY := SearchStart;
   end
   else
   begin
+    if (not (ssoFindContinue in SearchOptions)) and CurrScript.SynEdit.SelAvail then
+      if (ssoBackwards in SearchOptions) then
+        CurrScript.SynEdit.LogicalCaretXY := CurrScript.SynEdit.BlockEnd
+      else
+        CurrScript.SynEdit.LogicalCaretXY := CurrScript.SynEdit.BlockBegin;
+
     mDebugLn('Searching: ' + SearchString);
-    if ANext then
-      CurrPos := CurrScript.SynEdit.LogicalCaretXY
-    else
-      CurrPos := SearchStart;
-    Res := CurrScript.SynEdit.SearchReplaceEx(SearchString,'',SearchOptions,CurrPos);
-    if res = 0 then
+    res := CurrScript.SynEdit.SearchReplace(SearchString, '', SearchOptions);
+
+    if (res = 0) then
     begin
-      res := CurrScript.SynEdit.SearchReplaceEx(SearchString,'',SearchOptions,Classes.Point(0,0));
-      if res > 0 then
-      begin;
-        mDebugLn('End of document reached');
-        SearchStart.x := 0;
-        SearchStart.Y := CurrScript.SynEdit.LogicalCaretXY.y;
-      end;
+      mDebugLn('Search wrap around');
+      Include(SearchOptions, ssoEntireScope);
+      res := CurrScript.SynEdit.SearchReplace(SearchString, '', SearchOptions);
     end;
   end;
+
   if res = 0 then
   begin;
     LabeledEditSearch.Color := 6711039;
@@ -1649,6 +1645,7 @@ begin
   begin
     LabeledEditSearch.Color:= clWindow;
     LabeledEditSearch.Font.Color:= clWindowText;
+
     with CurrScript.SynEdit do
     begin
       HighlightAllColor.Background:= clYellow;
@@ -2214,12 +2211,12 @@ end;
 
 procedure TSimbaForm.ActionFindNextExecute(Sender: TObject);
 begin
-  DoSearch(true, false);
+  DoSearch([ssoFindContinue], False);
 end;
 
 procedure TSimbaForm.ActionFindPrevExecute(Sender: TObject);
 begin
-  // TODO: Find previous
+  DoSearch([ssoFindContinue, ssoBackwards], False);
 end;
 
 procedure TSimbaForm.ActionFindstartExecute(Sender: TObject);
@@ -2466,7 +2463,7 @@ begin
   RefreshTab;
   CurrScript.SynEdit.MarkupByClass[TSynEditMarkupHighlightAllCaret].TempDisable;
   SearchString := LabeledEditSearch.Text;
-  DoSearch(false, true);
+  DoSearch([], true);
   CurrScript.SynEdit.UseIncrementalColor:= true;
   LabeledEditSearch.SetFocus;
 end;
@@ -2684,7 +2681,7 @@ end;
 procedure TSimbaForm.dlgReplaceFind(Sender: TObject);
 begin
   SearchString := dlgReplace.FindText;
-  DoSearch(True, False);
+  DoSearch([ssoFindContinue], False);
 end;
 
 procedure TSimbaForm.dlgReplaceReplace(Sender: TObject);
@@ -2729,7 +2726,7 @@ end;
 procedure TSimbaForm.EditSearchChange(Sender: TObject);
 begin
   SearchString := LabeledEditSearch.Text;
-  DoSearch(false, true);
+  DoSearch([], true);
 end;
 
 procedure TSimbaForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -3176,7 +3173,7 @@ begin
   if key = #13 then
   begin;
     SearchString:= LabeledEditSearch.Text;
-    DoSearch(true, true);
+    DoSearch([ssoFindContinue], True);
     key := #0;
 //    LabeledEditSearch.SelStart:= Length(LabeledEditSearch.Text);
   end;
