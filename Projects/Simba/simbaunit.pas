@@ -1650,7 +1650,7 @@ begin
     begin
       HighlightAllColor.Background:= clYellow;
       if HighlightAll then
-        SetHighlightSearch(SearchString,[])
+        SetHighlightSearch(SearchString, SearchOptions)
       else
         SetHighlightSearch('',[]);
     end;
