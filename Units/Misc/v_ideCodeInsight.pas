@@ -21,6 +21,8 @@ type
 
   TCodeInsight = class(TCodeParser)
   protected
+    fRefCount: Integer;
+
     fFileName: string;
     fMemoryStream: TMemoryStream;
     fOwnStream: Boolean;
@@ -45,8 +47,11 @@ type
     procedure Reset;
     procedure Init;
 
-    function FindInclude(var FileName: string): Boolean;
-    procedure ParseInclude(FileName: string);
+    procedure AddInclude(const ci: TCodeInsight);
+    procedure FreeIncludes();
+
+    function FindInclude(var AFileName: string): Boolean;
+    procedure ParseInclude(AFileName: string);
     function LoadLibrary(var LibName: string): Boolean;
     procedure OnInclude(Sender: TmwBasePasLex); override;
 
@@ -59,9 +64,13 @@ type
     function GetExpressionAtPos: string; overload;
     function FindVarBase(s: string; GetStruct: Boolean = False; Return: TVarBase = vbName): TDeclaration;
 
-    constructor Create(FileName: string = ''); reintroduce;
+    constructor Create(AFileName: string = ''); reintroduce;
     destructor Destroy; override;
+
     procedure Assign(From: TObject); override;
+    procedure AddRef();
+    procedure DecRef();
+
     procedure Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1; ManageStream: Boolean = False); reintroduce;
 
     procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
@@ -80,183 +89,200 @@ type
   end;
 
   TIncludeBuffer = record
-    Script: string;
     DefinesIn, DefinesOut: TSaveDefinesRec;
-    LastChanged: Integer;
+    LastUsed, LastChanged: Integer;
     CodeInsight: TCodeInsight;
   end;
   TIncludeBufferArray = array of TIncludeBuffer;
 
-const
-  LibPrefix = 'lib:';
-
 var
   CoreBuffer: TCodeInsightArray;
-  IncludeBuffer: TIncludeBufferArray;
   CoreDefines: TStringList;
 
 implementation
 
 uses
-  v_Constants, v_MiscFunctions, newsimbasettings, mufasabase;
+  v_Constants, v_MiscFunctions, newsimbasettings, mufasabase, syncobjs;
+
+var
+  IncludeBuffer: TIncludeBufferArray;
+  IncludeBufferCS: TCriticalSection;
+
+const
+  LibPrefix = 'lib:';
+  PurgeThreshold = 500;
 
 procedure ClearCoreBuffer;
 var
   i: Integer;
 begin
   for i := 0 to High(CoreBuffer) do
-    FreeAndNil(CoreBuffer[i]);
-  SetLength(IncludeBuffer, 0);
-end;
-
-procedure DeleteIncludeBufferIndex(Index: Integer);
-var
-  i: Integer;
-  tmp : TCodeInsight;
-begin
-  tmp := IncludeBuffer[Index].CodeInsight;
-  for i := Index to High(IncludeBuffer) - 1 do
-    IncludeBuffer[i] := IncludeBuffer[i + 1];
-  SetLength(IncludeBuffer, Length(IncludeBuffer) - 1);
-  tmp.free;
+    CoreBuffer[i].DecRef();
 end;
 
 procedure ClearIncludeBuffer;
 var
   i: Integer;
 begin
-  for i := 0 to High(IncludeBuffer) do
-    IncludeBuffer[i].CodeInsight.Free;
-
-  SetLength(IncludeBuffer, 0);
-end;
-
-function GetIncludeBuffer(FileName: string; ci: TCodeInsight): TIncludeBuffer;
-var
-  i, l, lc: Integer;
-  Defines: TSaveDefinesRec;
-  DefineMatch: Boolean;
-  NewBuf : TIncludeBuffer;
-  CS : TRTLCriticalSection;
-begin
-  lc := 1;//FileAge(FileName);
-  Defines := ci.Lexer.SaveDefines;
-  FileName := Trim(FileName);
-
-  for i := Length(IncludeBuffer) - 1 downto 0 do
-  begin
-    if (IncludeBuffer[i].CodeInsight <> nil) and (IncludeBuffer[i].CodeInsight.FileName = FileName) then
-    begin
-      DefineMatch := (IncludeBuffer[i].DefinesIn.Defines = Defines.Defines) and (IncludeBuffer[i].DefinesIn.Stack = Defines.Stack);
-
-      if (ci.FileName = IncludeBuffer[i].Script) then
-      begin
-        if (DefineMatch) and (IncludeBuffer[i].LastChanged = lc) then
-        begin
-          ci.Lexer.LoadDefines(IncludeBuffer[i].DefinesOut);
-          Result := IncludeBuffer[i];
-          Exit;
-        end;
-
-        DeleteIncludeBufferIndex(i);
-        Break;
-      end;
-    end;
-  end;
-
-  with NewBuf do
-  begin
-    Script := ci.FileName;
-    DefinesIn := Defines;
-    LastChanged := lc;
-    CodeInsight := TCodeInsight.Create(FileName);
-
-    with CodeInsight do
-    begin
-      Assign(ci);
-
-      if (ci.Lexer.Defines.IndexOf('IS_INCLUDE') < 0) then
-        i := ci.Lexer.Defines.Add('IS_INCLUDE')
-      else
-        i := -1;
-
-      Run;
-
-      if (i > -1) then
-      begin
-        i := ci.Lexer.Defines.IndexOf('IS_INCLUDE');
-
-        if (i > -1) then
-          ci.Lexer.Defines.Delete(i);
-      end;
-
-      ci.Lexer.CloneDefinesFrom(Lexer);
-    end;
-  end;
-
-  InitCriticalSection(cs);
-  EnterCriticalsection(cs);
+  IncludeBufferCS.Acquire();
 
   try
-    l := Length(IncludeBuffer);
-    SetLength(IncludeBuffer, l + 1);
-    IncludeBuffer[l] := NewBuf;
+    for i := 0 to High(IncludeBuffer) do
+      IncludeBuffer[i].CodeInsight.DecRef();
+
+    SetLength(IncludeBuffer, 0);
   finally
-    LeaveCriticalsection(cs);
+    IncludeBufferCS.Release();
   end;
-
-  DoneCriticalsection(cs);
-
-  IncludeBuffer[l].DefinesOut := IncludeBuffer[l].CodeInsight.Lexer.SaveDefines;
-  Result := IncludeBuffer[l];
 end;
 
-function TCodeInsight.FindInclude(var FileName: string): Boolean;
+function GetIncludeBuffer(out Buffer: TIncludeBuffer; FileName: string; LastChanged: Integer; Defines: PSaveDefinesRec = nil): Boolean;
+var
+  i, l: Integer;
+begin
+  l := High(IncludeBuffer);
+
+  for i := l downto 0 do
+  begin
+    if (IncludeBuffer[i].CodeInsight <> nil) and (IncludeBuffer[i].CodeInsight.FileName = FileName) then
+      if (IncludeBuffer[i].LastChanged <> LastChanged) then
+        IncludeBuffer[i].LastUsed := PurgeThreshold
+      else if (Defines <> nil) and ((IncludeBuffer[i].DefinesIn.Stack <> Defines^.Stack) or (IncludeBuffer[i].DefinesIn.Defines <> Defines^.Defines)) then
+        Inc(IncludeBuffer[i].LastUsed, 3)
+      else
+      begin
+        IncludeBuffer[i].LastUsed := 0;
+        Buffer := IncludeBuffer[i];
+        Result := True;
+      end
+    else
+      Inc(IncludeBuffer[i].LastUsed, 1);
+
+    if (IncludeBuffer[i].LastUsed >= PurgeThreshold) then
+    begin
+      mDebugLn('Purging from CI include cache: ' + IncludeBuffer[i].CodeInsight.FileName);
+      IncludeBuffer[i].CodeInsight.DecRef();
+      IncludeBuffer[i] := IncludeBuffer[l];
+      Dec(l);
+    end;
+  end;
+
+  SetLength(IncludeBuffer, l+1);
+end;
+
+procedure AddIncludeBuffer(const Buffer: TIncludeBuffer);
+var
+  l: Integer;
+begin
+  l := Length(IncludeBuffer);
+  SetLength(IncludeBuffer, l + 1);
+
+  Buffer.CodeInsight.AddRef();
+  IncludeBuffer[l] := Buffer;
+end;
+
+procedure TCodeInsight.AddInclude(const ci: TCodeInsight);
+var
+  l: Integer;
+begin
+  l := Length(fIncludes);
+  SetLength(fIncludes, l + 1);
+
+  ci.AddRef();
+  fIncludes[l] := ci;
+end;
+
+procedure TCodeInsight.FreeIncludes();
+var
+  i: Integer;
+begin
+  for i := 0 to High(fIncludes) do
+    fIncludes[i].DecRef();
+end;
+
+function TCodeInsight.FindInclude(var AFileName: string): Boolean;
 var
   s: string;
 begin
-  s := FileName;
+  s := AFileName;
   if Assigned(OnFindInclude) and OnFindInclude(Self, s) then
   begin
-    FileName := ExpandFileName(s);
+    AFileName := ExpandFileName(s);
     Exit(True);
   end;
 
   s := ExtractFilePath(fFileName);
-  if (s <> '') and FileExists(s + FileName) then
+  if (s <> '') and FileExists(s + AFileName) then
   begin
-    FileName := ExpandFileName(s + FileName);
+    AFileName := ExpandFileName(s + AFileName);
     Exit(True);
   end;
-
-  {s := ExtractFilePath(ParamStr(0));
-  if (s <> '') and FileExists(s + FileName) then
-  begin
-    FileName := s + FileName;
-    Exit(True);
-  end;
-
-  Result := FileExists(FileName);}
 
   Result := False;
 end;
 
-procedure TCodeInsight.ParseInclude(FileName: string);
+procedure TCodeInsight.ParseInclude(AFileName: string);
 var
-  L: LongInt;
+  i, Age: Integer;
+  Def: TSaveDefinesRec;
+  Buf: TIncludeBuffer;
 begin
-  L := Length(fIncludes);
-  SetLength(fIncludes, L + 1);
-  fIncludes[L] := GetIncludeBuffer(FileName, Self).CodeInsight;
+  IncludeBufferCS.Acquire();
+
+  try
+    Age := FileAge(AFileName);
+    Def := Lexer.SaveDefines;
+
+    if GetIncludeBuffer(Buf, AFileName, Age, @Def) then
+    begin
+      Lexer.LoadDefines(Buf.DefinesOut);
+      AddInclude(Buf.CodeInsight);
+      Exit;
+    end;
+
+    with Buf do
+    begin
+      DefinesIn := Def;
+      LastChanged := Age;
+      LastUsed := 0;
+
+      CodeInsight := TCodeInsight.Create(AFileName);
+      CodeInsight.Assign(Self);
+
+      if (CodeInsight.Lexer.Defines.IndexOf('IS_INCLUDE') < 0) then
+        i := CodeInsight.Lexer.Defines.Add('IS_INCLUDE')
+      else
+        i := -1;
+
+      CodeInsight.Run;
+
+      if (i > -1) then
+      begin
+        i := CodeInsight.Lexer.Defines.IndexOf('IS_INCLUDE');
+
+        if (i > -1) then
+          CodeInsight.Lexer.Defines.Delete(i);
+      end;
+
+      Lexer.CloneDefinesFrom(CodeInsight.Lexer);
+      DefinesOut := Lexer.SaveDefines();
+
+      AddInclude(CodeInsight);
+      AddIncludeBuffer(Buf);
+
+      CodeInsight.DecRef();
+    end;
+  finally
+    IncludeBufferCS.Release();
+  end;
 end;
 
 function TCodeInsight.LoadLibrary(var LibName: string): Boolean;
 var
-  i: Integer;
+  i, Age: Integer;
   s: string;
   ci: TCodeInsight;
-  tmp : TIncludeBuffer;
-  CS : TRTLCriticalSection;
+  Buf: TIncludeBuffer;
 begin
   Result := False;
 
@@ -264,40 +290,40 @@ begin
     if (fIncludes[i].FileName = LibPrefix+LibName) then
       Exit(True);
 
-  for i := High(IncludeBuffer) downto 0 do
-    if (IncludeBuffer[i].Script = LibPrefix+LibName) then
+  Age := FileAge(LibName);
+  IncludeBufferCS.Acquire();
+
+  try
+
+    if GetIncludeBuffer(Buf, LibPrefix+LibName, Age, nil) then
     begin
-      SetLength(fIncludes, Length(fIncludes) + 1);
-      fIncludes[High(fIncludes)] := IncludeBuffer[i].CodeInsight;
+      AddInclude(Buf.CodeInsight);
+      Exit;
+    end;
+
+    s := LibName;
+    if Assigned(OnLoadLibrary) and OnLoadLibrary(Self, s, ci) and (ci <> nil) then
+    begin
+      LibName := s;
+
+      with Buf do
+      begin
+        LastChanged := Age;
+        LastUsed := 0;
+
+        CodeInsight := ci;
+        CodeInsight.FileName := LibPrefix+LibName;
+
+        AddInclude(CodeInsight);
+        AddIncludeBuffer(Buf);
+
+        CodeInsight.DecRef();
+      end;
 
       Exit(True);
     end;
-
-  s := LibName;
-  if Assigned(OnLoadLibrary) and OnLoadLibrary(Self, s, ci) and (ci <> nil) then
-  begin
-    LibName := s;
-
-    SetLength(fIncludes, Length(fIncludes) + 1);
-    fIncludes[High(fIncludes)] := ci;
-
-    with tmp do
-    begin
-      Script := LibPrefix+LibName;
-      CodeInsight := ci;
-      CodeInsight.FileName := LibPrefix+LibName;
-    end;
-
-    InitCriticalSection(cs);
-    EnterCriticalsection(cs);
-    try
-      SetLength(IncludeBuffer, Length(IncludeBuffer) + 1);
-      IncludeBuffer[High(IncludeBuffer)] := tmp;
-    finally
-      LeaveCriticalsection(cs);
-    end;
-    DoneCriticalsection(cs);
-    Exit(True);
+  finally
+    IncludeBufferCS.Release();
   end;
 end;
 
@@ -425,8 +451,8 @@ end;
 procedure TCodeInsight.Reset;
 begin
   Lexer.Init;
+  FreeIncludes();
 
-  //SetLength(fIncludes, 0);
   SetLength(InFunc, 0);
   SetLength(InWith, 0);
   InClassFunction := -1;
@@ -879,24 +905,20 @@ function TCodeInsight.FindVarBase(s: string; GetStruct: Boolean = False; Return:
 
       SetLength(Checked, Length(Checked) + 1);
       Checked[High(Checked)] := Item;
-      try
-        if Item.FindStruct(s, Decl, Return, ArrayCount) then
+
+      if Item.FindStruct(s, Decl, Return, ArrayCount) then
+        Exit(True);
+
+      for i := High(Item.Includes) downto Low(Item.Includes) do
+        if CheckIt(s, Item.Includes[i], Decl, Return, ArrayCount, False, Checked) then
           Exit(True);
 
-       for i := High(Item.Includes) downto Low(Item.Includes) do
-          if CheckIt(s, Item.Includes[i], Decl, Return, ArrayCount, False, Checked) then
-            Exit(True);
+      if (not CheckCore) then
+        Exit;
 
-        if (not CheckCore) then
-          Exit;
-
-        for i := High(CoreBuffer) downto Low(CoreBuffer) do
-          if CheckIt(s, CoreBuffer[i], Decl, Return, ArrayCount, False, Checked) then
-            Exit(True);
-      except
-        on e : exception do
-          WriteLn('Codeinsight[CheckIt]: ' + e.message);
-      end;
+      for i := High(CoreBuffer) downto Low(CoreBuffer) do
+        if CheckIt(s, CoreBuffer[i], Decl, Return, ArrayCount, False, Checked) then
+          Exit(True);
     end;
   var
     CheckedArr: TCodeInsightArray;
@@ -1038,7 +1060,7 @@ begin
   end;
 end;
 
-constructor TCodeInsight.Create(FileName: string = '');
+constructor TCodeInsight.Create(AFileName: string = '');
 begin
   inherited Create;
 
@@ -1048,9 +1070,11 @@ begin
 
   fOnFindInclude := nil;
   fOnLoadLibrary := nil;
-  fFileName := FileName;
+  fFileName := AFileName;
   if (fFileName <> '') and (not FileExists(fFileName)) then
     fFileName := '';
+
+  fRefCount := 1;
   fPos := -1;
   Reset;
 
@@ -1064,7 +1088,7 @@ begin
     fMemoryStream := TMemoryStream.Create;
     with TStringList.Create do
     begin
-      LoadFromFile(filename);  //Converts the line-endings.
+      LoadFromFile(AFileName);  //Converts the line-endings.
       SaveToStream(fMemoryStream);
       Free;
     end;
@@ -1075,6 +1099,10 @@ end;
 
 destructor TCodeInsight.Destroy;
 begin
+  if InterlockedCompareExchange(fRefCount, 0, 1) <> 1 then
+    raise Exception.Create('Trying to destroy TCodeInsight with refcount > 1');
+
+  FreeIncludes();
   if fOwnStream then
     FreeAndNil(fMemoryStream);
 
@@ -1096,6 +1124,20 @@ begin
   inherited;
 end;
 
+procedure TCodeInsight.AddRef();
+begin
+  InterLockedIncrement(fRefCount);
+end;
+
+procedure TCodeInsight.DecRef();
+begin
+  if (InterLockedDecrement(fRefCount) = 0) then
+  begin
+    AddRef();
+    Free();
+  end;
+end;
+
 procedure TCodeInsight.Run(SourceStream: TCustomMemoryStream = nil; BaseDefines: TStringList = nil; MaxPos: Integer = -1; ManageStream: Boolean = False);
 begin
   if Assigned(BaseDefines) then
@@ -1107,7 +1149,8 @@ begin
     if (not SimbaSettings.CodeInsight.ShowHidden.GetDefValue(False)) then
       Lexer.Defines.Add('CODEINSIGHT');
   end;
-  SetLength(fIncludes, 0);
+
+  FreeIncludes();
 
   if ManageStream then
   begin
@@ -1799,7 +1842,6 @@ begin
           Parent := '';
           Parent := checkInclude(CoreBuffer[i], dType);
 
-          if (Parent <> '') then
           while (Parent <> '') do
           begin
             //mDebugLn('CC: %s is a parent for %s, adding...', [Parent, dType]);
@@ -1833,11 +1875,14 @@ begin
 end;
 
 initialization
-  {nothing}
-  CoreDefines := TStringList.Create;
+  CoreDefines := TStringList.Create();
+  IncludeBufferCS := TCriticalSection.Create();
+
 finalization
-  ClearIncludeBuffer;
   ClearCoreBuffer;
-  CoreDefines.Free;
+  CoreDefines.Free();
+
+  ClearIncludeBuffer;
+  IncludeBufferCS.Free()
 
 end.

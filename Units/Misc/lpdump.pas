@@ -114,7 +114,11 @@ begin
   // We cannot automate getting parameter/result information for now,
   // but we can link to documentation.
   for i := 0 to InternalMethodMap.Count - 1 do
-    aItems.Add('procedure ' + InternalMethodMap.Key[i] + '(); forward;');
+    if (InternalMethodMap.Key[i] <> 'GOTO') and
+       (InternalMethodMap.Key[i] <> 'LABEL') and
+       (InternalMethodMap.Key[i] <> 'RAISE')
+    then
+      aItems.Add('procedure ' + InternalMethodMap.Key[i] + '(); forward;');
 end;
 
 end.
