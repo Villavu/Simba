@@ -2230,12 +2230,12 @@ begin
       frmFunctionList.editSearchList.SetFocus;
   end else
   begin
+    if (CurrScript.SynEdit.SelAvail) then
+      LabeledEditSearch.Text := CurrScript.SynEdit.SelText;
+
     SearchPanel.Visible := True;
     if LabeledEditSearch.CanFocus then
       LabeledEditSearch.SetFocus;
-
-    if (CurrScript.SynEdit.SelAvail) then
-      LabeledEditSearch.Text := CurrScript.SynEdit.SelText;
   end;
 end;
 
