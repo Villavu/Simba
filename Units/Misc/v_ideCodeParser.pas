@@ -526,24 +526,24 @@ function TDeclaration.GetCleanText: string;
 var
   i: Integer;
   a: TDeclarationArray;
+  s: string;
 begin
-  Result := '';
-  if (fCleanText <> '') then
-    Result := fCleanText
-  else if (fStartPos <> fEndPos) and (fOrigin <> nil) then
+  if (fCleanText = '') and (fStartPos <> fEndPos) and (fOrigin <> nil) then
   begin
-    fCleanText := RawText;
+    s := RawText;
     a := Items.GetItemsOfClass(TciJunk, True);
     for i := High(a) downto 0 do
     begin
-      Delete(fCleanText, a[i].StartPos - fStartPos + 1, a[i].EndPos - a[i].StartPos);
+      Delete(s, a[i].StartPos - fStartPos + 1, a[i].EndPos - a[i].StartPos);
       if (Pos(LineEnding, a[i].GetRawText) > 0) then
-        Insert(LineEnding, fCleanText, a[i].StartPos - fStartPos + 1)
+        Insert(LineEnding, s, a[i].StartPos - fStartPos + 1)
       else
-        Insert(' ', fCleanText, a[i].StartPos - fStartPos + 1);
+        Insert(' ', s, a[i].StartPos - fStartPos + 1);
     end;
-    Result := fCleanText;
+    fCleanText := s;
   end;
+
+  Result := fCleanText;
 end;
 
 function TDeclaration.GetShortText: string;
@@ -739,15 +739,17 @@ end;
 function TciParentedStruct.GetShortText: string;
 var
   P: LongInt;
+  s: string;
 begin
   if (fShortText = '') then
   begin
-    fShortText := CleanText;
-    P := Pos(')', fShortText);
+    s := CleanText;
+    P := Pos(')', s);
     if (P > 0) then
-      fShortText := Copy(fShortText, 1, P)
+      s := Copy(s, 1, P)
     else
-      fShortText := GetFirstWord(fShortText);
+      s := GetFirstWord(s);
+    fShortText := s;
   end;
   Result := fShortText;
 end;
@@ -887,20 +889,20 @@ function TciProcedureDeclaration.GetParams: string;
 var
   i: Integer;
   a: TDeclarationArray;
+  s: string;
 begin
-  Result := '';
-  if (fParams <> '') then
-    Result := fParams
-  else if (fItems.Count > 0) then
+  if (fParams = '') and (fItems.Count > 0) then
   begin
     a := GetParamDeclarations;
+    s := '';
     for i := Low(a) to High(a) do
-      if (fParams <> '') then
-        fParams := fParams + '; ' + a[i].ShortText
+      if (s <> '') then
+        s := s + '; ' + a[i].ShortText
       else
-        fParams := fParams + a[i].ShortText;
-    Result := fParams;
+        s := s + a[i].ShortText;
+    fParams := s;
   end;
+  Result := fParams;
 end;
 
 function TciProcedureDeclaration.GetShortText: string;

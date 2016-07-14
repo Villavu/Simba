@@ -140,45 +140,60 @@ function GetIncludeBuffer(out Buffer: TIncludeBuffer; FileName: string; LastChan
 var
   i, l: Integer;
 begin
-  l := High(IncludeBuffer);
+  // Should already be in critical section (!)
+  IncludeBufferCS.Acquire();
 
-  for i := l downto 0 do
-  begin
-    if (IncludeBuffer[i].CodeInsight <> nil) and (IncludeBuffer[i].CodeInsight.FileName = FileName) then
-      if (IncludeBuffer[i].LastChanged <> LastChanged) then
-        IncludeBuffer[i].LastUsed := PurgeThreshold
-      else if (Defines <> nil) and ((IncludeBuffer[i].DefinesIn.Stack <> Defines^.Stack) or (IncludeBuffer[i].DefinesIn.Defines <> Defines^.Defines)) then
-        Inc(IncludeBuffer[i].LastUsed, 3)
-      else
-      begin
-        IncludeBuffer[i].LastUsed := 0;
-        Buffer := IncludeBuffer[i];
-        Result := True;
-      end
-    else
-      Inc(IncludeBuffer[i].LastUsed, 1);
+  try
+    l := High(IncludeBuffer);
 
-    if (IncludeBuffer[i].LastUsed >= PurgeThreshold) then
+    for i := l downto 0 do
     begin
-      mDebugLn('Purging from CI include cache: ' + IncludeBuffer[i].CodeInsight.FileName);
-      IncludeBuffer[i].CodeInsight.DecRef();
-      IncludeBuffer[i] := IncludeBuffer[l];
-      Dec(l);
-    end;
-  end;
+      if (IncludeBuffer[i].CodeInsight <> nil) and (IncludeBuffer[i].CodeInsight.FileName = FileName) then
+        if (IncludeBuffer[i].LastChanged <> LastChanged) then
+          IncludeBuffer[i].LastUsed := PurgeThreshold
+        else if (Defines <> nil) and ((IncludeBuffer[i].DefinesIn.Stack <> Defines^.Stack) or (IncludeBuffer[i].DefinesIn.Defines <> Defines^.Defines)) then
+          Inc(IncludeBuffer[i].LastUsed, 3)
+        else
+        begin
+          IncludeBuffer[i].LastUsed := 0;
+          Buffer := IncludeBuffer[i];
+          Result := True;
+        end
+      else
+        Inc(IncludeBuffer[i].LastUsed, 1);
 
-  SetLength(IncludeBuffer, l+1);
+      if (IncludeBuffer[i].LastUsed >= PurgeThreshold) then
+      begin
+        mDebugLn('Purging from CI include cache: ' + IncludeBuffer[i].CodeInsight.FileName);
+        IncludeBuffer[i].CodeInsight.DecRef();
+        IncludeBuffer[i] := IncludeBuffer[l];
+        Dec(l);
+      end;
+    end;
+
+    SetLength(IncludeBuffer, l+1);
+
+  finally
+    IncludeBufferCS.Release();
+  end;
 end;
 
 procedure AddIncludeBuffer(const Buffer: TIncludeBuffer);
 var
   l: Integer;
 begin
-  l := Length(IncludeBuffer);
-  SetLength(IncludeBuffer, l + 1);
+  // Should already be in critical section (!)
+  IncludeBufferCS.Acquire();
 
-  Buffer.CodeInsight.AddRef();
-  IncludeBuffer[l] := Buffer;
+  try
+    l := Length(IncludeBuffer);
+    SetLength(IncludeBuffer, l + 1);
+
+    Buffer.CodeInsight.AddRef();
+    IncludeBuffer[l] := Buffer;
+  finally
+    IncludeBufferCS.Release();
+  end;
 end;
 
 procedure TCodeInsight.AddInclude(const ci: TCodeInsight);
@@ -198,6 +213,7 @@ var
 begin
   for i := 0 to High(fIncludes) do
     fIncludes[i].DecRef();
+  SetLength(fIncludes, 0);
 end;
 
 function TCodeInsight.FindInclude(var AFileName: string): Boolean;
@@ -451,7 +467,9 @@ end;
 procedure TCodeInsight.Reset;
 begin
   Lexer.Init;
-  FreeIncludes();
+
+  //Do not free includes here, it's called before filling suggestions
+  //FreeIncludes();
 
   SetLength(InFunc, 0);
   SetLength(InWith, 0);
