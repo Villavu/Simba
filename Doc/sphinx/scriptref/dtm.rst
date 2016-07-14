@@ -317,3 +317,10 @@ CreateDTMPoint
 
 
 Create a DTM point.
+
+DTMExists
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function DTMExists(index: Integer): Boolean

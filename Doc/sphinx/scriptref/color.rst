@@ -331,3 +331,66 @@ Example getting the modifiers:
         Writeln(format('H = %f; S = %f', [H, S])); 
     end;
 
+
+FindColoredArea
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindColoredArea(var x, y: Integer; Color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean
+
+FindColoredAreaTolerance
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean
+
+GetColorsWrap
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure GetColorsWrap(Coords: TPointArray; var Colors: TIntegerArray)
+
+GetToleranceSpeed2Modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended)
+
+GetToleranceSpeed3Modifier
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetToleranceSpeed3Modifier: Extended
+
+GetToleranceSpeed
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetToleranceSpeed: Integer
+
+SetColorToleranceSpeed
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetColorToleranceSpeed(cts: Integer)
+
+SetToleranceSpeed2Modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended)
+
+SetToleranceSpeed3Modifier
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetToleranceSpeed3Modifier(Modifier: Extended)

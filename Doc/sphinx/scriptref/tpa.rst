@@ -1107,3 +1107,80 @@ The following example will partition a TPA in boxes of 10 width, 10 height and d
     FreeBitmap(canvas);
   end.  
 
+
+EdgeFromBoxWrap
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure EdgeFromBoxWrap(const Box: TBox; var Res: TPointArray)
+
+FilterTPADist
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure FilterTPADist(var TPA: TPointArray; maxDist: Integer)
+
+FindTPAColumns
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindTPAColumns(a: TPointArray): T2DPointArray
+
+FindTPARows
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindTPARows(a: TPointArray): T2DPointArray
+
+GlueTPAs
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending, byDifference: Boolean): TPointArray
+
+SortTPAByX
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean)
+
+SortTPAByY
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean)
+
+TPAFromCircleWrap
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TPAFromCircleWrap(const CX, CY, Radius: Integer; var Res: TPointArray)
+
+TPAFromEllipseWrap
+~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TPAFromEllipseWrap(const CX, CY, XRadius, YRadius: Integer; var Res: TPointArray)
+
+TPAFromLineWrap
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TPAFromLineWrap(const xs, ys, xe, ye: Integer; var Res: TPointArray)
+
+TPAPosNext
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer

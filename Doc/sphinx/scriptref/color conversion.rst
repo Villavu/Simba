@@ -107,3 +107,80 @@ XYZToRGB
 
 ..
     TODO: Add CIE L*a*b.
+
+CIELabToColor
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function CIELabToColor(L, a, b: Extended): TColor
+
+CIELabToHSL
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure CIELabToHSL(L, a, b: Extended; out HH, SS, LL: Extended)
+
+CIELabToRGB
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure CIELabToRGB(L, a, b: Extended; out rr, gg, bb: Integer)
+
+CIELabtoXYZ
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure CIELabtoXYZ(L, a, b: Extended; out X, Y, Z: Extended)
+
+ColorToCIELab
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ColorToCIELab(Color: Integer; out L, a, b: Extended)
+
+ColorToGray
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function ColorToGray(const Color: Integer): TColor
+
+HSLToCIELab
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure HSLToCIELab(HH, SS, LL: Extended; out L, a, b: Extended)
+
+HSLToXYZ
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure HSLToXYZ(H, S, L: Extended; out X, Y, Z: Extended)
+
+RGBToCIELab
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure RGBToCIELab(rr, gg, bb: Integer; out L, a, b: Extended)
+
+XYZtoCIELab
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure XYZtoCIELab(X, Y, Z: Extended; out L, a, b: Extended)
+
+XYZToHSL
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure XYZToHSL(X, Y, Z: Extended; out H, S, L: Extended)

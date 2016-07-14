@@ -279,3 +279,24 @@ DeleteDirectory
     function DeleteDirectory(const Dir: String; const Empty: Boolean): Boolean;   
 
 Deletes the directory *dir*, if Empty is true will delete the directorys contents else will not.
+
+RenameFile
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function RenameFile(const Oldname, NewName: string): Boolean
+
+UnZipFile
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure UnZipFile(const FilePath, TargetPath: string)
+
+ZipFiles
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ZipFiles(const ToFolder: string; const Files: TstringArray)

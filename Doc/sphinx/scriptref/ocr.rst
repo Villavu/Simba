@@ -336,3 +336,17 @@ Example:
       SetDesktopAsClient;
       FreeBitmap(bmp);
     end.
+
+IsFontLoaded
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function IsFontLoaded(const FontName: string): Boolean
+
+ocr_FilterUpTextByCharacteristics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ocr_FilterUpTextByCharacteristics(Bitmap: TMufasaBitmap)
