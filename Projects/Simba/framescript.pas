@@ -468,7 +468,7 @@ begin
 
         s := Copy(s, 0, DotPos - 1);
         NameList := TStringList.Create();
-        FoundItems := mp.GetTypeProcs(NameList, s); // Return items found in the type
+        FoundItems := mp.GetTypeProcs(NameList, s, True); // Return items found in the type
 
         // Loop though looking for a match from what is currently typed.
         for i := 0 to (NameList.Count - 1) do

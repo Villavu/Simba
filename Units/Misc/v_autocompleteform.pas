@@ -674,7 +674,9 @@ begin
     exit;}
   for i := 0 to high(FParameters) do
   begin
-    if (FParameters[i] is TciConstParameter) then
+    if (FParameters[i] is TciConstRefParameter) then
+      s := 'constref '
+    else if (FParameters[i] is TciConstParameter) then
       s := 'const '
     else if (FParameters[i] is TciOutParameter) then
       s := 'out '
