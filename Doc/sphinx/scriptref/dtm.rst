@@ -67,8 +67,8 @@ Better would be to write:
 
 As you can see it is perfectly valid to use negative points.
 
-Colour and Tolerance
---------------------
+Color and Tolerance
+-------------------
 
 The color value of a point in a DTM is just a RGB integer value.
 Black = 0, Red = 255, White = 16777215, et cetera.
@@ -81,8 +81,8 @@ we say that a DTM matches if for each
 point in the DTM, the color at the relative point matches the color in dtm
 with the given tolerance.
 
-.. Colour and Tolerance
-.. --------------------
+.. Color and Tolerance
+.. -------------------
 
 .. \forall p \in P, \forall t \in Tol, \forall c \in Col : T(C(p), c) \leq t
 

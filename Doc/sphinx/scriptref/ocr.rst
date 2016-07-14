@@ -236,7 +236,7 @@ Example:
         ocr_Limit_Low = 65;
 
 
-        { `base' Colours of the Uptext }
+        { `base' Colors of the Uptext }
 
         { White }
         ocr_White = 16777215;
