@@ -496,10 +496,10 @@ begin
       else
         fontname := #39 + cmp.Font.Name + #39;
       fontsize := cmp.Font.Size;
-      if (CompareText(cmp.ClassName, 'TImage')) = 0 then
+      if (CompareText(cmp.ClassName, 'TImage') = 0) and Assigned(TImage(cmp).Picture.Graphic) then
       begin
-        image.switcher := true;
         mb.LoadFromTBitmap(TImage(cmp).Picture.Bitmap);
+        image.switcher := True;
         image.imgcode := mb.ToString;
         smb.Img := Image;
       end;
