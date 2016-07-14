@@ -766,7 +766,7 @@ begin
   begin
     addClass('TStrings', 'TPersistent');
 
-    addGlobalFunc('function TStrings.Add(const S: string): Integer;', @TStrings_Add);
+    addGlobalFunc('function TStrings.Add(const S: string): Integer; constref;', @TStrings_Add);
     addGlobalFunc('function TStrings.AddObject(const S: string; AObject: TObject): Integer;', @TStrings_AddObject);
     addGlobalFunc('procedure TStrings.Append(const S: string);', @TStrings_Append);
     addGlobalFunc('procedure TStrings.AddStrings(const TheStrings: TStrings);', @TStrings_AddStrings);
