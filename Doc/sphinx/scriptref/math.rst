@@ -1,4 +1,12 @@
 
+.. _scriptref-math:
+
+Math
+====
+
+Math Functions
+--------------
+
 BinCoe
 ~~~~~~
 
@@ -216,14 +224,14 @@ PointToBox
 
     function PointToBox(PT1, PT2: TPoint): TBox
 
-pow
+Pow
 ~~~
 
 .. code-block:: pascal
 
     function pow(base, exponent: Extended): Extended
 
-radians
+Radians
 ~~~~~~~
 
 .. code-block:: pascal

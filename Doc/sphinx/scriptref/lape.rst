@@ -1,4 +1,71 @@
 
+.. _scriptref-lape:
+
+Lape
+====
+
+Magic Functions
+---------------
+
+ASSERT
+~~~~~~
+
+.. code-block:: pascal
+
+    procedure ASSERT
+
+BREAK
+~~~~~
+
+.. code-block:: pascal
+
+    procedure BREAK
+
+CONTINUE
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure CONTINUE
+
+COPY
+~~~~
+
+.. code-block:: pascal
+
+    procedure COPY
+
+DEC
+~~~
+
+.. code-block:: pascal
+
+    procedure DEC
+
+DEFAULT
+~~~~~~~
+
+.. code-block:: pascal
+
+    procedure DEFAULT
+
+DELETE
+~~~~~~
+
+.. code-block:: pascal
+
+    procedure DELETE
+
+DISPOSE
+~~~~~~~
+
+.. code-block:: pascal
+
+    procedure DISPOSE
+
+Standard Library Functions
+--------------------------
+
 AdjustLineBreaks
 ~~~~~~~~~~~~~~~~
 
@@ -118,26 +185,12 @@ ArcTanH
 
     function ArcTanH(x: Extended): Extended
 
-ASSERT
-~~~~~~
-
-.. code-block:: pascal
-
-    procedure ASSERT
-
 Assigned
 ~~~~~~~~
 
 .. code-block:: pascal
 
     function Assigned(constref p): EvalBool
-
-BREAK
-~~~~~
-
-.. code-block:: pascal
-
-    procedure BREAK
 
 Ceil
 ~~~~
@@ -152,12 +205,6 @@ Chr
 .. code-block:: pascal
 
     function Chr(IntValue: UInt16): WideChar
-
-Chr
-~~~
-
-.. code-block:: pascal
-
     function Chr(IntValue: UInt8): AnsiChar
 
 CompareMem
@@ -180,20 +227,6 @@ CompareText
 .. code-block:: pascal
 
     function CompareText(s1, s2: string): Int32
-
-CONTINUE
-~~~~~~~~
-
-.. code-block:: pascal
-
-    procedure CONTINUE
-
-COPY
-~~~~
-
-.. code-block:: pascal
-
-    procedure COPY
 
 Cosecant
 ~~~~~~~~
@@ -278,34 +311,6 @@ DecodeTime
 .. code-block:: pascal
 
     procedure DecodeTime(DateTime: TDateTime; var Hour, Min, Sec, MSec: UInt16)
-
-DEC
-~~~
-
-.. code-block:: pascal
-
-    procedure DEC
-
-DEFAULT
-~~~~~~~
-
-.. code-block:: pascal
-
-    procedure DEFAULT
-
-DELETE
-~~~~~~
-
-.. code-block:: pascal
-
-    procedure DELETE
-
-DISPOSE
-~~~~~~~
-
-.. code-block:: pascal
-
-    procedure DISPOSE
 
 EncodeDate
 ~~~~~~~~~~

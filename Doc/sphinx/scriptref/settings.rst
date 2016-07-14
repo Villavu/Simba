@@ -1,4 +1,12 @@
 
+.. _scriptref-settings:
+
+Settings
+========
+
+Setting Functions
+-----------------
+
 DeleteSetting
 ~~~~~~~~~~~~~
 

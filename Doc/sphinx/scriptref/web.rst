@@ -1,8 +1,8 @@
 
-.. _scriptref_web:
+.. _scriptref-web:
 
-Internet Functions
-==================
+Internet
+========
 
 The internet functions in Simba range from HTTP functions and low-level
 socket functions. With the HTTP functions you can scrape the web, send form data

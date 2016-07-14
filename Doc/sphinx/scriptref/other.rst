@@ -1,4 +1,12 @@
 
+.. _scriptref-other:
+
+Miscellaneous
+=============
+
+Miscellaneous Functions
+-----------------------
+
 AddOnTerminate
 ~~~~~~~~~~~~~~
 

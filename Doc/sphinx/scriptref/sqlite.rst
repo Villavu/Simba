@@ -1,15 +1,18 @@
 .. _scriptref-sqlite:
 
-SQLite Functions
-==================
+SQLite
+======
 
 Simba has support for reading and manipulating SQLite databases.
 Open connections are all represented by integers in scripts. The integers point to an index in an internal array of pointers which is managed by Simba.
 sqlite_open and function sqlite_open_v2 return an integer that you use for most other functions. This page documents only the functions, and not `SQLite <http://www.sqlite.org>`_ or the `SQL <http://en.wikipedia.org/wiki/SQL>`_ language.
 After opening a connection, you should use sqlite_close on it when you are no longer using it. If, however, for some reason you forget, Simba will free all unfreed connections automatically.
 
+Functions
+---------
+
 sqlite_open
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -26,7 +29,7 @@ This will return -1 if no connection could be established.
     DB := sqlite_open('test.db'); // DB would be an integer that you pass as the index parameter to the other methods.
 
 sqlite_open_v2
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -56,7 +59,7 @@ Does the same as sqlite_open however you can provide flags to use when opening.
 	DB := sqlite_open_v2('test.db', SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE); // Open as read write, will create file.
 
 sqlite_version
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -69,7 +72,7 @@ Returns the version of the loaded SQLite library expressed as a string (x.y.z).
 	Writeln(sqlite_version()); // Outputs 3.7.10 for me
 
 sqlite_version_num
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -84,7 +87,7 @@ Returns the version of the loaded SQLite library expressed as an integer (x * 10
     Writeln(sqlite_version_num()); // Outputs 3007010 for me
 
 sqlite_query
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -101,7 +104,7 @@ If it returns false, it is useful to see what sqlite_errMsg outputs.
 	sqlite_query(DB, 'INSERT INTO test (name) VALUES (''Sex'');');
 
 sqlite_queryValue
------------------
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -119,7 +122,7 @@ If it returns false, it is useful to see what sqlite_errMsg outputs.
 	Writeln(Results); // Should output [['id', 'name'], ['1', 'Sex']]
 
 sqlite_queryResult
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -138,7 +141,7 @@ If an error occurred during the query, the error boolean will be set to true. Ot
 	Writeln(Results); // Should output [['id', 'name'], ['1', 'Sex']]
 
 sqlite_escape
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -153,7 +156,7 @@ Sanitizes a string for input into the database by replacing apostrophes with ano
 	Writeln(sqlite_escape('foo '' or 1=1')); // Outputs foo '' or 1=1. Note that it looks as I inputted it as SQLite uses the same escaping conventions for apostrophes as Pascal.
 
 sqlite_close
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -170,7 +173,7 @@ Closes the database handle specified by index (removing file locks, etc.). Don't
 	sqlite_close(DB);
 
 sqlite_errMsg
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -187,7 +190,7 @@ If no error has occurred, this will return 'not an error'.
 	Writeln(sqlite_errmsg(DB)); // near "asdfghjkl": syntax error
 
 sqlite_errCode
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
