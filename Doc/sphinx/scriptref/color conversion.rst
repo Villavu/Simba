@@ -1,19 +1,19 @@
 .. _scriptref-colorconv:
 
-Colour Conversions
-==================
+Color Conversions
+=================
 
 ..
     TODO:
 
-Colour spaces
--------------
+Color spaces
+------------
 
 Explain some color spaces here.
 
 
-Colour Conversion Methods
--------------------------
+Color Conversion Methods
+------------------------
 
 .. _scriptref-colortorgb:
 

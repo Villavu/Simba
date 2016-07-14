@@ -3,8 +3,8 @@
 
 .. _scriptref-finding:
 
-Colour Finding
-==============
+Color Finding
+=============
 
 
 Finding colors on the screen is quite simple. Simba offers methods like
@@ -47,8 +47,8 @@ components:
     ``color``; the code for compatibility sake uses ``color``, without the u.
 
 
-Colour Finding Methods
-----------------------
+Color Finding Methods
+---------------------
 
 A list of all color finding methods in Simba.
 
@@ -82,7 +82,7 @@ Example printing the color on coordinate (25, 25).
     program printcolor;
 
     begin
-      Writeln('Colour is ' + IntToStr(GetColor(25, 25)))
+      Writeln('Color is ' + IntToStr(GetColor(25, 25)))
     end.
 
 .. _scriptref-getcolors:
@@ -234,14 +234,14 @@ to 25.
 
     function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe, ye, MinArea, Tolerance : Integer): Boolean;
 
-FindColoredArea finds an area that consists out of Colours that match *Color* with
+FindColoredArea finds an area that consists out of Colors that match *Color* with
 the given *Tolerance* and has a minimal size of *MinArea*.
 If you want minimal area of 5x5 pixels (25), then set MinArea to 25.
 
 .. _scriptref-CTS:
 
-Colour tolerance
-----------------
+Color tolerance
+---------------
 
 Simba contains several algorithms for determining if two colors are equal
 given a tolerance. There are three algorithms, from fastest to slowest:
@@ -266,8 +266,8 @@ given a tolerance. There are three algorithms, from fastest to slowest:
 .. _scriptref-gettolerancespeed:
 .. _scriptref-setcolortolerancespeed:
 
-Get and Set Colour Tolerance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Get and Set Color Tolerance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -296,8 +296,8 @@ Example printing the Color Tolerance
 .. _scriptref-settolerancespeed2modifiers:
 .. _scriptref-gettolerancespeed2modifiers:
 
-Get And Set Colour Modifiers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Get And Set Color Modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
