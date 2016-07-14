@@ -239,8 +239,8 @@ AddGlobalFunc('function FindColorsSpiralTolerance(x, y: Integer; var Points: TPo
 AddGlobalFunc('function FindColoredArea(var x, y: Integer; color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean', @Lape_FindColoredArea);
 AddGlobalFunc('function FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean', @Lape_FindColoredAreaTolerance);
 
-{ Color Conversions }
-SetCurrSection('Color Conversions');
+{ Color Conversion }
+SetCurrSection('Color Conversion');
 AddGlobalFunc('procedure ColorToRGB(Color: integer; var r, g, b: Integer);', @Lape_ColorToRGB);
 AddGlobalFunc('function RGBtoColor(r, g, b: Integer): TColor', @Lape_RGBtoColor);
 AddGlobalFunc('procedure ColorToHSL(Color: Integer; var h, s, l: Extended);', @Lape_ColorToHSL);
