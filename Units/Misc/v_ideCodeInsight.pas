@@ -314,14 +314,12 @@ begin
     if GetIncludeBuffer(Buf, LibPrefix+LibName, Age, nil) then
     begin
       AddInclude(Buf.CodeInsight);
-      Exit;
+      Exit(True);
     end;
 
     s := LibName;
     if Assigned(OnLoadLibrary) and OnLoadLibrary(Self, s, ci) and (ci <> nil) then
     begin
-      LibName := s;
-
       with Buf do
       begin
         LastChanged := Age;

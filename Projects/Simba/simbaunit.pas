@@ -855,10 +855,11 @@ begin
     try
       OnMessage := @SimbaForm.OnCCMessage;
       b.SaveToStream(ms);
-      WriteLn(LibName);
       FileName := PluginsGlob.Loaded[Index].Filename;
       Run(ms, nil, -1, True);
+      Result := True;
     except
+      Result := False;
       mDebugLn('CC ERROR: Could not parse imports for plugin: ' + LibName);
     end;
   finally
