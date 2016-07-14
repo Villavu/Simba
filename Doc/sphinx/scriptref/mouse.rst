@@ -172,3 +172,24 @@ The following example clicks the right mouse button at a specified point.
     end.
 
 
+
+ConvIntClickType
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function ConvIntClickType(Int: Integer): TClickType
+
+IsMouseButtonDown
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function IsMouseButtonDown(button: Integer): Boolean
+
+ScrollMouse
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ScrollMouse(x, y: Integer; Clicks: Integer)

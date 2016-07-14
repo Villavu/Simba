@@ -300,3 +300,10 @@ ImageResetClientArea
 
 Reset the `Client Area`_ for the Image Target.
 
+
+GetNativeWindow
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetNativeWindow: Integer

@@ -274,3 +274,31 @@ IsArrInStr
 
 Returns true if any of the indexes in TStringArray StrArr is found in string s
 
+
+IsStrInArr
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function IsStrInArr(const s: string; const UsePos: Boolean; const arr: TstringArray): Boolean
+
+LevDistance
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function LevDistance(src, target: string): Integer
+
+NormLevDistance
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function NormLevDistance(src, target: string): Extended
+
+PosMulti
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function PosMulti(const SubStr: string; Text: string): TIntegerArray

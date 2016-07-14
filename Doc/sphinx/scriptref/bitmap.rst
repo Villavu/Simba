@@ -1,8 +1,8 @@
 
 .. _scriptref-bitmap:
 
-Bitmaps
-=======
+Bitmap
+======
 
 A bitmap in Simba is simply a two dimensional *field of colors*. These colors
 can all be the same, or they can be of different colors. Simba features
@@ -836,3 +836,87 @@ Uses the Bilinear resize method to resize a image matrix (created by BitmapToMat
 .. code-block:: pascal
 
     ResizeBilinearMatrix(matrix, 500, 500);
+
+BitmapExists
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function BitmapExists(Index: Integer): Boolean
+
+BlurBitmap
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure BlurBitmap(const Bitmap, block: Integer)
+
+CalculatePixelShiftTPA
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function CalculatePixelShiftTPA(Bitmap1, Bitmap2: Integer; CPoints: TPointArray): Integer
+
+CalculatePixelToleranceTPA
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function CalculatePixelToleranceTPA(Bitmap1, Bitmap2: Integer; CPoints: TPointArray; CTS: Integer): Extended
+
+ConvoluteBitmap
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function ConvoluteBitmap(Bitmap: Integer; matrix: T2DExtendedArray): Integer
+
+Desaturate
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function Desaturate(Bitmap: Integer): Integer
+
+DrawSystemTextBitmap
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure DrawSystemTextBitmap(const Bitmap: Integer; const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); 
+
+DrawTextBitmap
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure DrawTextBitmap(const Bitmap: Integer; const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer)
+
+FindColorsBitmap
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindColorsBitmap(Bitmap: Integer; var points: TPointArray; const Color: Integer): Boolean
+
+RectangleBitmapEx
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure RectangleBitmapEx(const Bitmap: Integer; const Box: TBox; const Color: Integer; const Transparency: Extended)
+
+ResizeBitmapEx
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ResizeBitmapEx(const Bitmap: Integer; const Method: TBitmapResizeMethod; const NewWidth, NewHeight: Integer)
+
+RotateBitmapEx
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function RotateBitmapEx(Bitmap: Integer; Angle: Single; Expand: Boolean; Smooth: Boolean): Integer
