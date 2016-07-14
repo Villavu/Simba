@@ -1,4 +1,4 @@
-.. _scriptref-colourconv:
+.. _scriptref-colorconv:
 
 Colour Conversions
 ==================
@@ -9,7 +9,7 @@ Colour Conversions
 Colour spaces
 -------------
 
-Explain some colour spaces here.
+Explain some color spaces here.
 
 
 Colour Conversion Methods

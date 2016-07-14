@@ -1,11 +1,11 @@
 
-.. _scriptref-bitmaps:
+.. _scriptref-bitmap:
 
 Bitmaps
 =======
 
-A bitmap in Simba is simply a two dimensional *field of colours*. These colours
-can all be the same, or they can be of different colours. Simba features
+A bitmap in Simba is simply a two dimensional *field of colors*. These colors
+can all be the same, or they can be of different colors. Simba features
 functions to create, manipulate and search for bitmaps.
 
 .. INSERT BITMAP EXAMPLE HERE (Picture, etc)
@@ -26,7 +26,7 @@ an integer:
     end;
 
 Note that the previous example doesn't make a lot of sense as the bitmap has
-only been created and not filled with any colours, they are as of yet,
+only been created and not filled with any colors, they are as of yet,
 undefined. You can also create bitmaps from screenshots and load them when your
 script starts using the :ref:`scriptref-bitmapfromstring` function, or
 simple store them as files and load them using the :ref:`scriptref-loadbitmap`
@@ -274,7 +274,7 @@ FastGetPixel
 
     function FastGetPixel(bmp, x,y : integer) : TColor;
 
-Return the colour of pixel on the bitmap, position specified by x, y.
+Return the color of pixel on the bitmap, position specified by x, y.
 
 .. _scriptref-fastgetpixels:
 
@@ -285,7 +285,7 @@ FastGetPixels
 
     function FastGetPixels(Bmp : integer; TPA : TPointArray) : TIntegerArray;
 
-Return an array of the colours on the bitmap; positions specified by *TPA*.
+Return an array of the colors on the bitmap; positions specified by *TPA*.
 
 .. _scriptref-getbitmapareacolors:
 
@@ -296,7 +296,7 @@ GetBitmapAreaColors
 
     function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntegerArray;
 
-Returns all the colours in the area defined by (*xs*, *xy*, *xe*, *ye*) on the
+Returns all the colors in the area defined by (*xs*, *xy*, *xe*, *ye*) on the
 bitmap in a two dimensions integer array.
 
 .. _scriptref-fastdrawclear:
@@ -747,7 +747,7 @@ GetColorsBitmap
 
     function GetColorsBitmap(const bmp: integer): TIntegerArray;
 
-Returns a TIntegerArray of all colours on the bitmap, the result will be sorted row by row.
+Returns a TIntegerArray of all colors on the bitmap, the result will be sorted row by row.
 
 .. code-block:: pascal
 
