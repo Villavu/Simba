@@ -108,7 +108,7 @@ type
 implementation
 
 uses
-  StrUtils {$IFDEF FPC}, lclintf{$ENDIF},math, Themes;
+  StrUtils {$IFDEF FPC}, lclintf{$ENDIF},math, Themes, mufasabase;
 
 procedure TAutoCompleteListBox.setItemList(List: TStrings);
 begin
@@ -288,9 +288,9 @@ begin
   inherited;
 
   {$IFDEF FPC}
-  if (message.Result = 0) and (Redirect <> nil) and (not (TLMChar(message).CharCode in [13, 10])) then
+  if (message.Result = 0) and (Redirect <> nil) and Redirect.CanFocus and (not (TLMChar(message).CharCode in [13, 10])) then
   {$ELSE}
-  if (message.Result = 0) and (Redirect <> nil) and (not (TWMChar(message).CharCode in [13, 10])) then
+  if (message.Result = 0) and (Redirect <> nil) and Redirect.CanFocus and (not (TWMChar(message).CharCode in [13, 10])) then
   {$ENDIF}
   begin
     Redirect.SetFocus;
@@ -577,7 +577,7 @@ begin
 
   inherited Show;
 
-  if (Editor <> nil) then
+  if (Editor <> nil) and Editor.CanFocus then
     Editor.SetFocus;
 end;
 
@@ -1005,8 +1005,15 @@ begin
 
   CalculateBounds;  //Calculate the size we need!
 
-  FSynEdit.SetFocus();
-  self.Visible := true;
+  if FSynEdit.CanFocus then
+  begin
+    FSynEdit.SetFocus();
+
+    Application.ProcessMessages();
+    Self.Visible := true;
+  end
+  else
+    mDebugLn('Trying to display ParamHint on invisible editor');
 end;
 
 
@@ -1015,9 +1022,13 @@ begin
   if (not Visible) then exit;
   try
     UpdateHint;
-    Sleep(1);
+    Sleep(15);
   except
-    Hide;
+    on E: Exception do
+    begin
+      mDebugLn('ParamHint exception caught: "%s"', [E.Message]);
+      Hide;
+    end;
   end;
 end;
 
