@@ -1,5 +1,5 @@
 
-.. _scriptref_ocr:
+.. _scriptref-ocr:
 
 OCR 
 ===
@@ -21,7 +21,7 @@ If you create or load a new font, they will need to be given a name.
 LoadSystemFont
 ~~~~~~~~~~~~~~
 
-.. _scriptref_fonts:
+.. _scriptref-fonts:
 
 .. code-block:: pascal
 

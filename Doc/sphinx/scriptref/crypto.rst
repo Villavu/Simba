@@ -1,4 +1,12 @@
 
+.. _scriptref-crypto:
+
+Cryptography
+============
+
+Hash Functions
+--------------
+
 haval
 ~~~~~
 
