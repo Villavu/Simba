@@ -5,7 +5,7 @@ Deformable Template Models (DTM)
 
 A DTM is in my view just a relatively simple way of defining a relationship
 between several points. Each of these points have a relative offset to each
-other, and may different in colour, tolerance, area size and shape.
+other, and may different in color, tolerance, area size and shape.
 A DTM generally consists out of one *Main Point*, and several
 *Sub Points*.
 
@@ -19,7 +19,7 @@ The structure of a DTM looks like this:
    :scale: 100 %
    :alt: Structure of a DTM
 
-Where each point in a DTM has a colour, tolerance, area size and area shape
+Where each point in a DTM has a color, tolerance, area size and area shape
 entity. The main point's *point* is typically ``(0, 0)``, and all the
 *subpoint* points are relative to the main point.
 
@@ -49,7 +49,7 @@ Then we could create the following MDTM structure:
 	dtm.p[1] = Point(122, 460)
 	dtm.p[2] = Point(120, 450)
 
-Note that we do not include other variables, such as colour, tolerance, area
+Note that we do not include other variables, such as color, tolerance, area
 size and area shape; they are of no importance in this example.
 
 However, this code is not very clear about the DTM's points.
@@ -70,15 +70,15 @@ As you can see it is perfectly valid to use negative points.
 Colour and Tolerance
 --------------------
 
-The colour value of a point in a DTM is just a RGB integer value.
+The color value of a point in a DTM is just a RGB integer value.
 Black = 0, Red = 255, White = 16777215, et cetera.
 
-The value tolerance decides if a colour is similar enough to the given
-colour; if this is the case, we say that the colours *matched*.
+The value tolerance decides if a color is similar enough to the given
+color; if this is the case, we say that the colors *matched*.
 
 With no Area Size and Area Shape specified
 we say that a DTM matches if for each
-point in the DTM, the colour at the relative point matches the colour in dtm
+point in the DTM, the color at the relative point matches the color in dtm
 with the given tolerance.
 
 .. Colour and Tolerance
@@ -86,14 +86,14 @@ with the given tolerance.
 
 .. \forall p \in P, \forall t \in Tol, \forall c \in Col : T(C(p), c) \leq t
 
-..    With C() defining the colour at the given point, and T() defining the tolerance
-..    between the two given colours.
+..    With C() defining the color at the given point, and T() defining the tolerance
+..    between the two given colors.
 
 Area Size and Shape
 -------------------
 
 Area Size and Shape add that nifty extra functionality to DTM's.
-*Area Size* defines the area that should all match the colour
+*Area Size* defines the area that should all match the color
 with the given tolerance.
 *Area Shape* is currently not implemented, mainly because
 we haven't found a good use for area shapes.

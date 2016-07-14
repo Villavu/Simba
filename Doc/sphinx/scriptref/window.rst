@@ -105,7 +105,7 @@ SetImageTarget
     procedure SetImageTarget(idx: integer);
 
 Set the Image target defined by index *idx* as active target.
-An Image target controls what data Simba performs colour (and bitmap, dtm, etc)
+An Image target controls what data Simba performs color (and bitmap, dtm, etc)
 searches on.
 
 Both `SetTargetBitmap`_, and `SetTargetArray`_ return a target index.
