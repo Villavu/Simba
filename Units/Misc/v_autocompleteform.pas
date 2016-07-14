@@ -288,9 +288,9 @@ begin
   inherited;
 
   {$IFDEF FPC}
-  if (message.Result = 0) and (Redirect <> nil) and (TLMChar(message).CharCode <> VK_DOWN) and (TLMChar(message).CharCode <> VK_UP) and (TLMChar(message).CharCode <> VK_RETURN) then
+  if (message.Result = 0) and (Redirect <> nil) and (not (TLMChar(message).CharCode in [13, 10])) then
   {$ELSE}
-  if (message.Result = 0) and (Redirect <> nil) and (TWMChar(message).CharCode <> VK_DOWN) and (TWMChar(message).CharCode <> VK_UP) and (TWMChar(message).CharCode <> VK_RETURN) then
+  if (message.Result = 0) and (Redirect <> nil) and (not (TWMChar(message).CharCode in [13, 10])) then
   {$ENDIF}
   begin
     Redirect.SetFocus;
@@ -1004,6 +1004,8 @@ begin
   FBracketPoint:= BracketPoint;
 
   CalculateBounds;  //Calculate the size we need!
+
+  FSynEdit.SetFocus();
   self.Visible := true;
 end;
 
