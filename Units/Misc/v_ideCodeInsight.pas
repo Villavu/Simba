@@ -75,7 +75,7 @@ type
 
     procedure Proposal_AddDeclaration(Item: TDeclaration; ItemList, InsertList: TStrings; ShowTypeMethods: Boolean = False);
     procedure GetProcedures(Headers, Names: TStrings; FindTypeProcs: Boolean = False);
-    function GetTypeProcs(Names: TStrings; const Prefix: string): TDeclarationArray;
+    function GetTypeProcs(Names: TStrings; const Prefix: string; WithParams: Boolean): TDeclarationArray;
     function FindProcedure(ProcNameToFind: string; out Decl: TDeclaration; out HasParams: Boolean): boolean;
     procedure FillProposal;
     procedure FillSynCompletionProposal(ItemList, InsertList: TStrings; Prefix: string = '');
@@ -1519,7 +1519,7 @@ end;
  * var bmp: TMufasaBitmap
  * FoundItems := ci.GetTypeProcs(NamesList, 'bmp');
 *)
-function TCodeInsight.GetTypeProcs(Names: TStrings; const Prefix: string): TDeclarationArray;
+function TCodeInsight.GetTypeProcs(Names: TStrings; const Prefix: string; WithParams: Boolean): TDeclarationArray;
 
   // Returns Info of the proc. ie: Foo(var: string);
   function GetInfo(Item: TDeclaration): string;
@@ -1531,7 +1531,7 @@ function TCodeInsight.GetTypeProcs(Names: TStrings; const Prefix: string): TDecl
       ProcItem := TCIProcedureDeclaration(Item);
       Result := ProcItem.Name.CleanText;
 
-      if (ProcItem.Params <> '') then  // has params
+      if WithParams and (ProcItem.Params <> '') then  // has params
         Result += '(' + ProcItem.Params + ')';
     end;
   end;
@@ -1794,7 +1794,7 @@ begin
           NamesList := TStringList.Create();
 
           try
-            FoundItems := Self.GetTypeProcs(NamesList, TypeStr);
+            FoundItems := Self.GetTypeProcs(NamesList, TypeStr, False);
 
             for i := 0 to (NamesList.Count - 1) do
               if (SameText(NamesList[i], Prefix)) then
