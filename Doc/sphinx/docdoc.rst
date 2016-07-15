@@ -37,8 +37,7 @@ Writing documentation
 ---------------------
 
 Sphinx uses the reStructuredText markup language. It is not a hard language, but
-looking through the quickstart is a good idea:
-http://docutils.sourceforge.net/docs/user/rst/quickstart.html
+looking through the quickstart is a good idea: https://en.wikipedia.org/wiki/ReStructuredText
 
 As stated above, the markup language is not the hard part about writing
 documentation; the hard part is simply coming up with good content suited for
