@@ -13,7 +13,7 @@ sphinx-pdf: pics
 sphinx-html: pics
 	$(MAKE) -C sphinx/ html
 
-test:
+test: pics
 	$(MAKE) -C sphinx/ linkcheck
 
 release: sphinx-html
