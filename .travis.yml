@@ -39,3 +39,20 @@ notifications:
     channels: "irc.rizon.net#simba"
     template:
       - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: oNnsz3xT3A7YNUXFuNsdltQwono2Qu2vobH0X+gkdaV0vq6AvPtNgcPC1TXB4NXsS2ky1AfMxxTb7TxDp7a6dDlU2/cey72I+cBwZmJwL1NZcGXZ4GRy3Nz6PuwKnQltNyWwsP6/LwVMZYl4j2InYHTHC7GkJAq6I5pd6GDRb/o=
+  file:
+    - "Simba.i386-win32.exe"
+    - "Simba.i386-win32-debug.exe"
+    - "Simba.x86_64-win64.exe"
+    - "Simba.x86_64-win64-debug.exe"
+    - "Simba.i386-linux"
+    - "Simba.i386-linux-debug"
+    - "Simba.x86_64-linux"
+    - "Simba.x86_64-linux-debug"
+  skip_cleanup: true
+  on:
+    tags: true
