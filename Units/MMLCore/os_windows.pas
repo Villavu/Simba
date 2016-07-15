@@ -564,7 +564,7 @@ end;
 
 function TIOManager.SetTarget(target: TNativeWindow): integer;
 begin
-  SetBothTargets(TWindow.Create(target));
+  Result := SetBothTargets(TWindow.Create(target));
 end;
 
 threadvar
