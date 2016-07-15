@@ -1,18 +1,29 @@
-.PHONY:    default clean tarball
+.PHONY: default pics sphinx sphinx-pdf sphinx-html test release clean tarball
 
-core = client ocr
+default: all
+all:     sphinx
+sphinx:  sphinx-html sphinx-pdf
 
-all:
-#	@python docgen.py `echo $(core) | sed -r \
-#        's/(\w+)/..\/Units\/MMLCore\/\1.pas/g'` > /dev/null
-	@make -C Pics/
-	@make -C sphinx/ singlehtml latexpdf
+pics:
+	$(MAKE) -C Pics/
+
+sphinx-pdf: pics
+	$(MAKE) -C sphinx/ latexpdf
+
+sphinx-html: pics
+	$(MAKE) -C sphinx/ html
+
+test: pics
+	$(MAKE) -C sphinx/ linkcheck
+
+release: sphinx-html
+	mv sphinx/_build/html ../Documentation
+	ln -s ../Documentation/html/index.html ../Documentation/Documentation.html
 
 clean:
-#	@rm -f `echo $(core) | sed -r 's/(\w+)/sphinx\/\1.rst/g'`
-	@make -C Pics/ clean
-	@make -C sphinx/ clean
+	$(MAKE) -C Pics/ clean
+	$(MAKE) -C sphinx/ clean
 
-tarball:
-	@$(MAKE) all
-#	@tar cjf doc.tar.bz2 -C sphinx/_build/ html
+tarball: html
+	$(MAKE) -cjf doc.tar.bz2 -C sphinx/_build/html
+

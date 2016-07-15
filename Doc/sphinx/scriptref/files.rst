@@ -1,3 +1,5 @@
+.. _scriptref-files:
+
 Working with Files
 ==================
 
@@ -6,8 +8,11 @@ turn point to operating system files. Functions like CreateFile and OpenFile
 return a file handle. You should not forget to close these when you no longer
 need them.
 
+File System Functions
+---------------------
+
 CreateFile
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -17,7 +22,7 @@ Create a file with *Path*. Raturns -1 on failure, otherwise returns the handle
 to the file.
 
 OpenFile
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -28,7 +33,7 @@ Returns -1 on failure, otherwise returns the handle to the file.
 
 
 RewriteFile
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -39,7 +44,7 @@ Opens shared if *Shared* is true.
 Returns -1 on failure, otherwise returns the handle to the file.
 
 AppendFile
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -49,7 +54,7 @@ Opens file for writing (appending).
 Returns -1 on failure, otherwise returns the handle to the file.
 
 CloseFile
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -58,7 +63,7 @@ CloseFile
 Close the file defined by *FileNum*. Never forget to close your files!
 
 DeleteFile
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -67,7 +72,7 @@ DeleteFile
 Delete the file with name *Filename*. Returns true on success.
 
 EndOfFile
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -76,7 +81,7 @@ EndOfFile
 Returns true if the end of the file has been reached.
 
 FileSize
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -86,7 +91,7 @@ Returns the file size in characters.
 
 
 ReadFileString
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -97,7 +102,7 @@ Read *x* characters into string *s* from file *FileNum*.
 Returns true if the number of characters read equals *x*.
 
 WriteFileString
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -107,7 +112,7 @@ Writes *s* to file *FileNum*. Returns false on failure.
 
 
 SetFileCharPointer
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -125,7 +130,7 @@ Origin can be any of these:
     FsFromEnd       = 2;
 
 FilePointerPos
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -135,7 +140,7 @@ Returns the position of the *cursur* in the file.
 (What character # you are at)
 
 DirectoryExists
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -144,7 +149,7 @@ DirectoryExists
 Returns true if the directory exists.
 
 CreateDirectory
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -153,7 +158,7 @@ CreateDirectory
 Creates a directory. Returns true on success.
 
 FileExists 
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -163,7 +168,7 @@ Returns true if the file exists.
 
 
 ForceDirectories
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -172,7 +177,7 @@ ForceDirectories
 Creates multiple *nested* directories. Returns true on success.
 
 GetFiles
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -182,7 +187,7 @@ Returns the files in the directory defined by *Path* with extension *Ext*.
 You can also set Ext as '*' to return all files in Path.
 
 GetDirectories
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -191,7 +196,7 @@ GetDirectories
 Returns the directories in *path*.
 
 WriteINI
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -222,7 +227,7 @@ The following example writes to a specific Line in a Specified INI File.
     This procedure can be used in conjunction with ReadINI to saved Player Data for the next time a script is run.
 
 ReadINI
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -246,7 +251,7 @@ The following example writes to a specific Line in a Specified INI File then Rea
     end.
 
 DeleteINI
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -263,7 +268,7 @@ The following example deletes the specific line inside the specified INI file.
     end;
 
 ExtractFileExt
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -272,10 +277,31 @@ ExtractFileExt
 Returns the file extension from file *Filename*.
 
 DeleteDirectory
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     function DeleteDirectory(const Dir: String; const Empty: Boolean): Boolean;   
 
 Deletes the directory *dir*, if Empty is true will delete the directorys contents else will not.
+
+RenameFile
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function RenameFile(const Oldname, NewName: string): Boolean
+
+UnZipFile
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure UnZipFile(const FilePath, TargetPath: string)
+
+ZipFiles
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ZipFiles(const ToFolder: string; const Files: TstringArray)

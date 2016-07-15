@@ -1,5 +1,4 @@
-
-.. _scriptref_ocr:
+.. _scriptref-ocr:
 
 OCR 
 ===
@@ -21,7 +20,7 @@ If you create or load a new font, they will need to be given a name.
 LoadSystemFont
 ~~~~~~~~~~~~~~
 
-.. _scriptref_fonts:
+.. _scriptref-fonts:
 
 .. code-block:: pascal
 
@@ -83,7 +82,7 @@ BitmapFromText
 
 This function creates a bitmap from a string *text* with the given *font*.
 For an explanation on how to use and work with Bitmaps, please refer to 
-:ref:`scriptref-bitmaps`.
+:ref:`scriptref-bitmap`.
 
 TPAFromText
 ~~~~~~~~~~~
@@ -94,7 +93,7 @@ TPAFromText
 
 This function creates a TPA from a string *text* with the given *font*.
 For an explanation on how to use and work with TPAs, please refer to 
-:ref:`scriptref-tpointarray`.
+:ref:`scriptref-tpa`.
 
 TPAFromTextWrap
 ~~~~~~~~~~~~~~~
@@ -115,7 +114,7 @@ MaskFromText
 
 This function creates a Mask from a string *text* with the given *font*.
 For an explanation on how to use and work with TPAs, please refer to 
-:ref:`scriptref-masks`.
+:ref:`scriptref-createmaskfrombitmap`.
 
 Reading Text
 ------------
@@ -163,8 +162,8 @@ GetTextAt
 
 A general function for reading text.
 Reads text at (*atX*, *atY*) with a minimal vertical spacing of *minvspacing*
-and a maximal vertical spacing of *maxvspacing*, the text colour should match
-the colour *color* with the given tolerance *Tolerance*; the length of the text
+and a maximal vertical spacing of *maxvspacing*, the text color should match
+the color *color* with the given tolerance *Tolerance*; the length of the text
 is specified with *len*. Finally, the font to use for the identifying is
 specified with the fontname *font*.
 
@@ -178,8 +177,8 @@ GetTextAtEx
 A general function for reading text.
 Reads text in the rectangle defined by (*xs*, *ys*), (*xe*, *ye*)
 with a minimal vertical spacing of *minvspacing*
-and a maximal vertical spacing of *maxvspacing*, the text colour should match
-the colour *color* with the given tolerance *Tolerance*; the length of the text
+and a maximal vertical spacing of *maxvspacing*, the text color should match
+the color *color* with the given tolerance *Tolerance*; the length of the text
 is specified with *len*. Finally, the font to use for the identifying is
 specified with the fontname *font*.
 
@@ -209,7 +208,7 @@ Modifying the Uptext filter
 rs_ResetUpTextFilter
 ~~~~~~~~~~~~~~~~~~~~
 
-Reset the colours for the colour-filter to default.
+Reset the colors for the color-filter to default.
 See `rs_SetUpTextFilter`_ for an example.
 
 rs_SetUpTextFilter
@@ -219,7 +218,7 @@ rs_SetUpTextFilter
 
     procedure rs_SetUpTextFilter(filter: TOCRFilterDataArray);
 
-Defines the colours that the colour-filter will look for.
+Defines the colors that the color-filter will look for.
 
 
 Example:
@@ -236,7 +235,7 @@ Example:
         ocr_Limit_Low = 65;
 
 
-        { `base' Colours of the Uptext }
+        { `base' Colors of the Uptext }
 
         { White }
         ocr_White = 16777215;
@@ -284,8 +283,8 @@ Example:
 
     {
     Load our own ``filter data''. This particular set doesn't contain the item
-    colours - those are replaced with extra (effectively nill as they already
-    exist) green colours.
+    colors - those are replaced with extra (effectively nill as they already
+    exist) green colors.
     }
     rocedure foo;
     var filterdata: TOCRFilterDataArray;
@@ -336,3 +335,17 @@ Example:
       SetDesktopAsClient;
       FreeBitmap(bmp);
     end.
+
+IsFontLoaded
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function IsFontLoaded(const FontName: string): Boolean
+
+ocr_FilterUpTextByCharacteristics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ocr_FilterUpTextByCharacteristics(Bitmap: TMufasaBitmap)

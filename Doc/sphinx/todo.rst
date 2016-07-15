@@ -9,7 +9,6 @@ Documentation TODO
 *   think of good chapters for the complete tutorial. (it should teach basic
     stuff, not document all features. script reference is for that purpose)
 *   write a lot more chapters for simba references. There's plenty to document.
-    It may be useful to check http://wizzup.org/simba/article/4
 *   Features -> Perhaps (interactive) images?
 
 *   Expand "Troubleshooting"
