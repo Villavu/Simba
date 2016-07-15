@@ -405,11 +405,6 @@
         <StackChecks Value="True"/>
       </Checks>
     </CodeGeneration>
-    <Linking>
-      <Debugging>
-        <UseHeaptrc Value="True"/>
-      </Debugging>
-    </Linking>
     <Other>
       <CustomOptions Value="-dUseCThreads
 -dM_MEMORY_DEBUG
