@@ -327,7 +327,8 @@ begin
           ppedit.Text := _item.SubItems[_i-1];
           ppedit.SetBounds(_rect.Left + Left, _rect.Top + Top, _rect.Right - _rect.Left, _rect.Bottom - _rect.Top);
           ppedit.Visible := true;
-          ppedit.SetFocus;
+          if ppEdit.CanFocus then
+            ppedit.SetFocus;
           Exit;
        end
          else

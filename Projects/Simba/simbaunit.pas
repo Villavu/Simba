@@ -2469,7 +2469,9 @@ begin
   SearchString := LabeledEditSearch.Text;
   DoSearch([], true);
   CurrScript.SynEdit.UseIncrementalColor:= true;
-  LabeledEditSearch.SetFocus;
+
+  if LabeledEditSearch.CanFocus then
+    LabeledEditSearch.SetFocus;
 end;
 
 procedure TSimbaForm.ClearSearchClick(Sender: TObject);
@@ -2574,7 +2576,9 @@ begin
       CurrScript.SynEdit.Lines[frmFunctionList.CompletionCaret.y - 1] := frmFunctionList.CompletionStart;
       CurrScript.SynEdit.LogicalCaretXY:= Classes.point(frmFunctionList.CompletionCaret.x,frmFunctionList.CompletionCaret.y);
       CurrScript.SynEdit.SelEnd:= CurrScript.SynEdit.SelStart;
-      CurrScript.SynEdit.SetFocus;
+
+      if CurrScript.SynEdit.CanFocus then
+        CurrScript.SynEdit.SetFocus;
     end else
     if key in [' ',',','.','(',')'] then //on on these chars we will insert the function!
     begin;
@@ -2585,7 +2589,9 @@ begin
       CurrScript.SynEdit.LogicalCaretXY:= frmFunctionList.CompletionCaret;
       CurrScript.SynEdit.SelStart:= CurrScript.SynEdit.SelEnd;
       CurrScript.SynEdit.ExecuteCommand(ecChar,key,nil);
-      CurrScript.SynEdit.SetFocus;
+
+      if CurrScript.SynEdit.CanFocus then
+        CurrScript.SynEdit.SetFocus;
       key := #0;
     end;
   end;
@@ -4004,10 +4010,11 @@ begin
       begin
         SplitterFunctionList.Show;
         frmFunctionList.Show;
-      end else frmFunctionList.Parent.Show;
-      if Self.Visible then
-        if editSearchList.CanFocus then
-          editSearchList.SetFocus;
+      end else
+        frmFunctionList.Parent.Show;
+
+      if Self.Visible and editSearchList.CanFocus then
+        editSearchList.SetFocus;
 
       //Lets load up this Script tree!
       FillFunctionList();

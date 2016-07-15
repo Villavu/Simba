@@ -320,13 +320,8 @@ begin
   ColourImage.Canvas.Brush.Color := TColourPickerObject(Node.Data).Colour;
   ColourImage.Canvas.Rectangle(0,0,ColourImage.Width, ColourImage.Height);
 
-  if Self.Visible then
-  begin
-    try
-      SelectionName.SetFocus;
-    finally
-    end;
-  end;
+  if Self.Visible and SelectionName.CanFocus then
+    SelectionName.SetFocus;
 end;
 
 procedure TColourHistoryForm.ColourTreeDragDrop(Sender, Source: TObject; X,
