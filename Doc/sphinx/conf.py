@@ -257,3 +257,10 @@ epub_copyright = u'2009-2012, Merlijn Wajer, Raymond van Venetie'
 
 # Allow duplicate toc entries.
 #epub_tocdup = True
+
+
+# -- Options for linkcheck builder ---------------------------------------------
+
+linkcheck_workers = 1
+linkcheck_timeout = 30
+
