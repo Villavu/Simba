@@ -16,7 +16,7 @@ be found at the bottom of the page.
 .. note::
     It is important to note that there is also a database SQL fulltext engine
     called Sphinx, but this is not the project we use. We use the Sphinx
-    "documentation system" ( http://sphinx.pocoo.org/ )
+    "documentation system" ( http://www.sphinx-doc.org )
 
 Building the documentation
 --------------------------

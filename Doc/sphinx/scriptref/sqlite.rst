@@ -5,7 +5,8 @@ SQLite
 
 Simba has support for reading and manipulating SQLite databases.
 Open connections are all represented by integers in scripts. The integers point to an index in an internal array of pointers which is managed by Simba.
-sqlite_open and function sqlite_open_v2 return an integer that you use for most other functions. This page documents only the functions, and not `SQLite <http://www.sqlite.org>`_ or the `SQL <http://en.wikipedia.org/wiki/SQL>`_ language.
+sqlite_open and function sqlite_open_v2 return an integer that you use for most other functions. This page documents only the functions, and not `SQLite <http://www.sqlite.org>`_ or the `SQL 
+<https://en.wikipedia.org/wiki/SQL>`_ language.
 After opening a connection, you should use sqlite_close on it when you are no longer using it. If, however, for some reason you forget, Simba will free all unfreed connections automatically.
 
 Functions
