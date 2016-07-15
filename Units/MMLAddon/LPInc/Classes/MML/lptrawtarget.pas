@@ -101,11 +101,11 @@ begin
     addClass(Compiler, 'TRawTarget', 'TTarget');
 
     addGlobalFunc('procedure TRawTarget.Init(rgb: prgb32; w,h: integer; CopyData : boolean = false);', @TRawTarget_Init);
-    addGlobalFunc('procedure TRawTarget.GetTargetDimensions(out w, h: integer); override();', @TRawTarget_GetTargetDimensions(out w, h: integer); override);
-    addGlobalFunc('procedure TRawTarget.GetTargetPosition(out left, top: integer); override();', @TRawTarget_GetTargetPosition(out left, top: integer); override);
-    addGlobalFunc('function TRawTarget.ReturnData(xs, ys, width, height: Integer): TRetData; override;', @TRawTarget_ReturnData);
-    addGlobalFunc('function TRawTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean; override;', @TRawTarget_ImageSetClientArea);
-    addGlobalFunc('procedure TRawTarget.ImageResetClientArea; override();', @TRawTarget_ImageResetClientArea; override);
+    addGlobalFunc('procedure TRawTarget.GetTargetDimensions(out w, h: integer); override(); constref;', @TRawTarget_GetTargetDimensions(out w, h: integer); override);
+    addGlobalFunc('procedure TRawTarget.GetTargetPosition(out left, top: integer); override(); constref;', @TRawTarget_GetTargetPosition(out left, top: integer); override);
+    addGlobalFunc('function TRawTarget.ReturnData(xs, ys, width, height: Integer): TRetData; constref; override;', @TRawTarget_ReturnData);
+    addGlobalFunc('function TRawTarget.ImageSetClientArea(x1, y1, x2, y2: integer): boolean; constref; override;', @TRawTarget_ImageSetClientArea);
+    addGlobalFunc('procedure TRawTarget.ImageResetClientArea; override(); constref;', @TRawTarget_ImageResetClientArea; override);
     addClassVar(Compiler, 'TRawTarget', 'rgb', 'prgb32', @TRawTarget_rgb_Read, @TRawTarget_rgb_Write);
     addClassVar(Compiler, 'TRawTarget', 'freedata', 'boolean', @TRawTarget_freedata_Read, @TRawTarget_freedata_Write);
     addClassVar(Compiler, 'TRawTarget', 'w,h', 'integer', @TRawTarget_w,h_Read, @TRawTarget_w,h_Write);

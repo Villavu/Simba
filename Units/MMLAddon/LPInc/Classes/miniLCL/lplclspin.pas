@@ -127,9 +127,9 @@ begin
   begin
     addClass('TCustomFloatSpinEdit', 'TCustomEdit');
 
-    addGlobalFunc('function TCustomFloatSpinEdit.GetLimitedValue(const AValue: Double): Double;', @TCustomFloatSpinEdit_GetLimitedValue);
-    addGlobalFunc('function TCustomFloatSpinEdit.ValueToStr(const AValue: Double): String;', @TCustomFloatSpinEdit_ValueToStr);
-    addGlobalFunc('function TCustomFloatSpinEdit.StrToValue(const S: String): Double;', @TCustomFloatSpinEdit_StrToValue);
+    addGlobalFunc('function TCustomFloatSpinEdit.GetLimitedValue(const AValue: Double): Double; constref;', @TCustomFloatSpinEdit_GetLimitedValue);
+    addGlobalFunc('function TCustomFloatSpinEdit.ValueToStr(const AValue: Double): String; constref;', @TCustomFloatSpinEdit_ValueToStr);
+    addGlobalFunc('function TCustomFloatSpinEdit.StrToValue(const S: String): Double; constref;', @TCustomFloatSpinEdit_StrToValue);
     addClassVar('TCustomFloatSpinEdit', 'DecimalPlaces', 'Integer', @TCustomFloatSpinEdit_DecimalPlaces_Read, @TCustomFloatSpinEdit_DecimalPlaces_Write);
     addClassVar('TCustomFloatSpinEdit', 'Increment', 'Double', @TCustomFloatSpinEdit_Increment_Read, @TCustomFloatSpinEdit_Increment_Write);
     addClassVar('TCustomFloatSpinEdit', 'MinValue', 'Double', @TCustomFloatSpinEdit_MinValue_Read, @TCustomFloatSpinEdit_MinValue_Write);

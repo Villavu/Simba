@@ -180,8 +180,8 @@ begin
   begin
     addClass('TCustomProgressBar', 'TWinControl');
     addGlobalFunc('procedure TCustomProgressBar.Init(AOwner: TComponent);', @TCustomProgressBar_Init);
-    addGlobalFunc('procedure TCustomProgressBar.StepIt();', @TCustomProgressBar_StepIt);
-    addGlobalFunc('procedure TCustomProgressBar.StepBy(Delta: Integer);', @TCustomProgressBar_StepBy);
+    addGlobalFunc('procedure TCustomProgressBar.StepIt(); constref;', @TCustomProgressBar_StepIt);
+    addGlobalFunc('procedure TCustomProgressBar.StepBy(Delta: Integer); constref;', @TCustomProgressBar_StepBy);
     addClassVar('TCustomProgressBar', 'Max', 'Integer', @TCustomProgressBar_Max_Read, @TCustomProgressBar_Max_Write);
     addClassVar('TCustomProgressBar', 'Min', 'Integer', @TCustomProgressBar_Min_Read, @TCustomProgressBar_Min_Write);
     addClassVar('TCustomProgressBar', 'Orientation', 'TProgressBarOrientation', @TCustomProgressBar_Orientation_Read, @TCustomProgressBar_Orientation_Write);
@@ -422,7 +422,7 @@ begin
     addClass('TCustomTrackBar', 'TWinControl');
 
     addGlobalFunc('procedure TCustomTrackBar.Init(AOwner: TComponent);', @TCustomTrackBar_Init);
-    addGlobalFunc('procedure TCustomTrackBar.SetTick(Value: Integer);', @TCustomTrackBar_SetTick);
+    addGlobalFunc('procedure TCustomTrackBar.SetTick(Value: Integer); constref;', @TCustomTrackBar_SetTick);
     addClassVar('TCustomTrackBar', 'Frequency', 'Integer', @TCustomTrackBar_Frequency_Read, @TCustomTrackBar_Frequency_Write);
     addClassVar('TCustomTrackBar', 'LineSize', 'Integer', @TCustomTrackBar_LineSize_Read, @TCustomTrackBar_LineSize_Write);
     addClassVar('TCustomTrackBar', 'Max', 'Integer', @TCustomTrackBar_Max_Read, @TCustomTrackBar_Max_Write);
@@ -572,8 +572,8 @@ begin
   begin
     addClass('TCustomCheckListBox', 'TCustomListBox');
 
-    addGlobalFunc('procedure TCustomCheckListBox.Toggle(AIndex: Integer);', @TCustomCheckListBox_Toggle);
-    addGlobalFunc('procedure TCustomCheckListBox.CheckAll(AState: TCheckBoxState; aAllowGrayed: Boolean = True; aAllowDisabled: Boolean = True);', @TCustomCheckListBox_CheckAll);
+    addGlobalFunc('procedure TCustomCheckListBox.Toggle(AIndex: Integer); constref;', @TCustomCheckListBox_Toggle);
+    addGlobalFunc('procedure TCustomCheckListBox.CheckAll(AState: TCheckBoxState; aAllowGrayed: Boolean = True; aAllowDisabled: Boolean = True); constref;', @TCustomCheckListBox_CheckAll);
     addClassVar('TCustomCheckListBox', 'AllowGrayed', 'Boolean', @TCustomCheckListBox_AllowGrayed_Read, @TCustomCheckListBox_AllowGrayed_Write);
     addClassVar('TCustomCheckListBox', 'Checked', 'Boolean', @TCustomCheckListBox_Checked_Read, @TCustomCheckListBox_Checked_Write, true);
     addClassVar('TCustomCheckListBox', 'ItemEnabled', 'Boolean', @TCustomCheckListBox_ItemEnabled_Read, @TCustomCheckListBox_ItemEnabled_Write, true);
@@ -702,10 +702,10 @@ begin
     addClass('TCustomPage', 'TWinControl');
 
     addGlobalFunc('procedure TCustomPage.Init(TheOwner: TComponent);', @TCustomPage_Init);
-    addGlobalFunc('function TCustomPage.CanTab(): boolean;', @TCustomPage_CanTab);
-    addGlobalFunc('function TCustomPage.IsControlVisible(): Boolean;', @TCustomPage_IsControlVisible);
-    addGlobalFunc('function TCustomPage.HandleObjectShouldBeVisible(): boolean;', @TCustomPage_HandleObjectShouldBeVisible);
-    addGlobalFunc('function TCustomPage.VisibleIndex(): integer;', @TCustomPage_VisibleIndex);
+    addGlobalFunc('function TCustomPage.CanTab(): boolean; constref;', @TCustomPage_CanTab);
+    addGlobalFunc('function TCustomPage.IsControlVisible(): Boolean; constref;', @TCustomPage_IsControlVisible);
+    addGlobalFunc('function TCustomPage.HandleObjectShouldBeVisible(): boolean; constref;', @TCustomPage_HandleObjectShouldBeVisible);
+    addGlobalFunc('function TCustomPage.VisibleIndex(): integer; constref;', @TCustomPage_VisibleIndex);
     addClassVar('TCustomPage', 'PageIndex', 'Integer', @TCustomPage_PageIndex_Read, @TCustomPage_PageIndex_Write);
     addClassVar('TCustomPage', 'TabVisible', 'Boolean', @TCustomPage_TabVisible_Read, @TCustomPage_TabVisible_Write);
     addClassVar('TCustomPage', 'OnHide', 'TNotifyEvent', @TCustomPage_OnHide_Read, @TCustomPage_OnHide_Write);
@@ -906,18 +906,18 @@ begin
   begin
     addClass('TCustomTabControl', 'TWinControl');
 
-    addGlobalFunc('function TCustomTabControl.TabIndexAtClientPos(ClientPos: TPoint): integer;', @TCustomTabControl_TabIndexAtClientPos);
-    addGlobalFunc('function TCustomTabControl.TabRect(AIndex: Integer): TRect;', @TCustomTabControl_TabRect);
-    addGlobalFunc('function TCustomTabControl.GetImageIndex(ThePageIndex: Integer): Integer;', @TCustomTabControl_GetImageIndex);
-    addGlobalFunc('function TCustomTabControl.IndexOf(APage: TPersistent): integer;', @TCustomTabControl_IndexOf);
-    addGlobalFunc('function TCustomTabControl.CustomPage(Index: integer): TCustomPage;', @TCustomTabControl_CustomPage);
-    addGlobalFunc('function TCustomTabControl.CanChangePageIndex(): boolean;', @TCustomTabControl_CanChangePageIndex);
-    addGlobalFunc('function TCustomTabControl.GetMinimumTabWidth(): integer;', @TCustomTabControl_GetMinimumTabWidth);
-    addGlobalFunc('function TCustomTabControl.GetMinimumTabHeight(): integer;', @TCustomTabControl_GetMinimumTabHeight);
-    addGlobalFunc('function TCustomTabControl.TabToPageIndex(AIndex: integer): integer;', @TCustomTabControl_TabToPageIndex);
-    addGlobalFunc('function TCustomTabControl.PageToTabIndex(AIndex: integer): integer;', @TCustomTabControl_PageToTabIndex);
-    addGlobalFunc('function TCustomTabControl.IndexOfTabAt(X, Y: Integer): Integer;', @TCustomTabControl_IndexOfTabAt);
-    addGlobalFunc('procedure TCustomTabControl.DoCloseTabClicked(APage: TCustomPage);', @TCustomTabControl_DoCloseTabClicked);
+    addGlobalFunc('function TCustomTabControl.TabIndexAtClientPos(ClientPos: TPoint): integer; constref;', @TCustomTabControl_TabIndexAtClientPos);
+    addGlobalFunc('function TCustomTabControl.TabRect(AIndex: Integer): TRect; constref;', @TCustomTabControl_TabRect);
+    addGlobalFunc('function TCustomTabControl.GetImageIndex(ThePageIndex: Integer): Integer; constref;', @TCustomTabControl_GetImageIndex);
+    addGlobalFunc('function TCustomTabControl.IndexOf(APage: TPersistent): integer; constref;', @TCustomTabControl_IndexOf);
+    addGlobalFunc('function TCustomTabControl.CustomPage(Index: integer): TCustomPage; constref;', @TCustomTabControl_CustomPage);
+    addGlobalFunc('function TCustomTabControl.CanChangePageIndex(): boolean; constref;', @TCustomTabControl_CanChangePageIndex);
+    addGlobalFunc('function TCustomTabControl.GetMinimumTabWidth(): integer; constref;', @TCustomTabControl_GetMinimumTabWidth);
+    addGlobalFunc('function TCustomTabControl.GetMinimumTabHeight(): integer; constref;', @TCustomTabControl_GetMinimumTabHeight);
+    addGlobalFunc('function TCustomTabControl.TabToPageIndex(AIndex: integer): integer; constref;', @TCustomTabControl_TabToPageIndex);
+    addGlobalFunc('function TCustomTabControl.PageToTabIndex(AIndex: integer): integer; constref;', @TCustomTabControl_PageToTabIndex);
+    addGlobalFunc('function TCustomTabControl.IndexOfTabAt(X, Y: Integer): Integer; constref;', @TCustomTabControl_IndexOfTabAt);
+    addGlobalFunc('procedure TCustomTabControl.DoCloseTabClicked(APage: TCustomPage); constref;', @TCustomTabControl_DoCloseTabClicked);
     addClassVar('TCustomTabControl', 'MultiLine', 'Boolean', @TCustomTabControl_MultiLine_Read, @TCustomTabControl_MultiLine_Write);
     addClassVar('TCustomTabControl', 'OnChanging', 'TTabChangingEvent', @TCustomTabControl_OnChanging_Read, @TCustomTabControl_OnChanging_Write);
     addClassVar('TCustomTabControl', 'Options', 'TCTabControlOptions', @TCustomTabControl_Options_Read, @TCustomTabControl_Options_Write);
@@ -1015,8 +1015,8 @@ begin
   with Compiler do
   begin
     addClass('TPageControl', 'TCustomTabControl');
-    addGlobalFunc('procedure TPageControl.SelectNextPage(GoForward: Boolean; CheckTabVisible: Boolean);', @TPageControl_SelectNextPageEx);
-    addGlobalFunc('function TPageControl.AddTabSheet(): TTabSheet;', @TPageControl_AddTabSheet);
+    addGlobalFunc('procedure TPageControl.SelectNextPage(GoForward: Boolean; CheckTabVisible: Boolean); constref;', @TPageControl_SelectNextPageEx);
+    addGlobalFunc('function TPageControl.AddTabSheet(): TTabSheet; constref;', @TPageControl_AddTabSheet);
     addClassVar('TPageControl', 'Pages', 'Integer', @TPageControl_Pages_Read, nil);
     addClassVar('TPageControl', 'ActivePage', 'TTabSheet', @TPageControl_ActivePage_Read, @TPageControl_ActivePage_Write);
     addGlobalFunc('procedure TPageControl.Init(TheOwner: TComponent);', @TPageControl_Init);
@@ -1114,7 +1114,7 @@ begin
   begin
     addClass('TStatusPanel', 'TCollectionItem');
 
-    addGlobalFunc('function TStatusPanel.StatusBar(): TStatusBar;', @TStatusPanel_StatusBar);
+    addGlobalFunc('function TStatusPanel.StatusBar(): TStatusBar; constref;', @TStatusPanel_StatusBar);
     addClassVar('TStatusPanel', 'Alignment', 'TAlignment', @TStatusPanel_Alignment_Read, @TStatusPanel_Alignment_Write);
     addClassVar('TStatusPanel', 'Bevel', 'TStatusPanelBevel', @TStatusPanel_Bevel_Read, @TStatusPanel_Bevel_Write);
     addClassVar('TStatusPanel', 'Style', 'TStatusPanelStyle', @TStatusPanel_Style_Read, @TStatusPanel_Style_Write);
@@ -1168,7 +1168,7 @@ begin
     addClass('TStatusPanels', 'TCollection');
 
     addGlobalFunc('procedure TStatusPanels.Init(AStatusBar: TStatusBar);', @TStatusPanels_Init);
-    addGlobalFunc('function TStatusPanels.Add(): TStatusPanel;', @TStatusPanels_Add);
+    addGlobalFunc('function TStatusPanels.Add(): TStatusPanel; constref;', @TStatusPanels_Add);
     addClassVar('TStatusPanels', 'Items', 'TStatusPanel', @TStatusPanels_Items_Index_Read, @TStatusPanels_Items_Index_Write, True); // array
     addClassVar('TStatusPanels', 'StatusBar', 'TStatusBar', @TStatusPanels_StatusBar_Read, nil);
     addGlobalFunc('procedure TStatusPanels.Free();', @TStatusPanels_Free);
@@ -1305,12 +1305,12 @@ procedure Register_TStatusBar(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addGlobalFunc('procedure TStatusBar.InvalidatePanel(PanelIndex: integer; PanelParts: TPanelParts);', @TStatusBar_InvalidatePanel);
-    addGlobalFunc('procedure TStatusBar.BeginUpdate();', @TStatusBar_BeginUpdate);
-    addGlobalFunc('procedure TStatusBar.EndUpdate();', @TStatusBar_EndUpdate);
-    addGlobalFunc('function TStatusBar.GetPanelIndexAt(X, Y: Integer): Integer;', @TStatusBar_GetPanelIndexAt);
-    addGlobalFunc('function TStatusBar.SizeGripEnabled(): Boolean;', @TStatusBar_SizeGripEnabled);
-    addGlobalFunc('function TStatusBar.UpdatingStatusBar(): boolean;', @TStatusBar_UpdatingStatusBar);
+    addGlobalFunc('procedure TStatusBar.InvalidatePanel(PanelIndex: integer; PanelParts: TPanelParts); constref;', @TStatusBar_InvalidatePanel);
+    addGlobalFunc('procedure TStatusBar.BeginUpdate(); constref;', @TStatusBar_BeginUpdate);
+    addGlobalFunc('procedure TStatusBar.EndUpdate(); constref;', @TStatusBar_EndUpdate);
+    addGlobalFunc('function TStatusBar.GetPanelIndexAt(X, Y: Integer): Integer; constref;', @TStatusBar_GetPanelIndexAt);
+    addGlobalFunc('function TStatusBar.SizeGripEnabled(): Boolean; constref;', @TStatusBar_SizeGripEnabled);
+    addGlobalFunc('function TStatusBar.UpdatingStatusBar(): boolean; constref;', @TStatusBar_UpdatingStatusBar);
     addClassVar('TStatusBar', 'Canvas', 'TCanvas', @TStatusBar_Canvas_Read, nil);
     addClassVar('TStatusBar', 'AutoHint', 'Boolean', @TStatusBar_AutoHint_Read, @TStatusBar_AutoHint_Write);
     addClassVar('TStatusBar', 'Panels', 'TStatusPanels', @TStatusBar_Panels_Read, @TStatusBar_Panels_Write);

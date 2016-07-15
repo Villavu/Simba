@@ -201,8 +201,8 @@ begin
     addClass('TCustomScrollBar', 'TWinControl');
 
     addGlobalFunc('procedure TCustomScrollBar.Init(AOwner: TComponent);', @TCustomScrollBar_Init);
-    addGlobalFunc('procedure TCustomScrollBar.SetParams(APosition, AMin, AMax, APageSize: Integer);', @TCustomScrollBar_SetParams);
-    addGlobalFunc('procedure TCustomScrollBar.SetParams(APosition, AMin, AMax: Integer); overload;', @TCustomScrollBar_SetParamsEx);
+    addGlobalFunc('procedure TCustomScrollBar.SetParams(APosition, AMin, AMax, APageSize: Integer); constref;', @TCustomScrollBar_SetParams);
+    addGlobalFunc('procedure TCustomScrollBar.SetParams(APosition, AMin, AMax: Integer); constref; overload;', @TCustomScrollBar_SetParamsEx);
     addClassVar('TCustomScrollBar', 'Kind', 'TScrollBarKind', @TCustomScrollBar_Kind_Read, @TCustomScrollBar_Kind_Write);
     addClassVar('TCustomScrollBar', 'LargeChange', 'integer', @TCustomScrollBar_LargeChange_Read, @TCustomScrollBar_LargeChange_Write);
     addClassVar('TCustomScrollBar', 'Max', 'Integer', @TCustomScrollBar_Max_Read, @TCustomScrollBar_Max_Write);
@@ -490,14 +490,14 @@ begin
     addClass('TCustomComboBox', 'TWinControl');
 
     addGlobalFunc('procedure TCustomComboBox.Init(TheOwner: TComponent);', @TCustomComboBox_Init);
-    addGlobalFunc('procedure TCustomComboBox.IntfGetItems();', @TCustomComboBox_IntfGetItems);
-    addGlobalFunc('procedure TCustomComboBox.AddItem(const Item: String; AnObject: TObject);', @TCustomComboBox_AddItem);
-    addGlobalFunc('procedure TCustomComboBox.AddHistoryItem(const Item: string; MaxHistoryCount: integer;SetAsText, CaseSensitive: boolean);', @TCustomComboBox_AddHistoryItem);
-    addGlobalFunc('procedure TCustomComboBox.AddHistoryItem(const Item: string; AnObject: TObject;MaxHistoryCount: integer; SetAsText, CaseSensitive: boolean); overload;', @TCustomComboBox_AddHistoryItemEx);
-    addGlobalFunc('procedure TCustomComboBox.Clear();', @TCustomComboBox_Clear);
-    addGlobalFunc('procedure TCustomComboBox.ClearSelection();', @TCustomComboBox_ClearSelection);
+    addGlobalFunc('procedure TCustomComboBox.IntfGetItems(); constref;', @TCustomComboBox_IntfGetItems);
+    addGlobalFunc('procedure TCustomComboBox.AddItem(const Item: String; AnObject: TObject); constref;', @TCustomComboBox_AddItem);
+    addGlobalFunc('procedure TCustomComboBox.AddHistoryItem(const Item: string; MaxHistoryCount: integer;SetAsText, CaseSensitive: boolean); constref;', @TCustomComboBox_AddHistoryItem);
+    addGlobalFunc('procedure TCustomComboBox.AddHistoryItem(const Item: string; AnObject: TObject;MaxHistoryCount: integer; SetAsText, CaseSensitive: boolean); constref; overload;', @TCustomComboBox_AddHistoryItemEx);
+    addGlobalFunc('procedure TCustomComboBox.Clear(); constref;', @TCustomComboBox_Clear);
+    addGlobalFunc('procedure TCustomComboBox.ClearSelection(); constref;', @TCustomComboBox_ClearSelection);
     addClassVar('TCustomComboBox', 'DroppedDown', 'Boolean', @TCustomComboBox_DroppedDown_Read, @TCustomComboBox_DroppedDown_Write);
-    addGlobalFunc('procedure TCustomComboBox.SelectAll();', @TCustomComboBox_SelectAll);
+    addGlobalFunc('procedure TCustomComboBox.SelectAll(); constref;', @TCustomComboBox_SelectAll);
     addClassVar('TCustomComboBox', 'AutoComplete', 'boolean', @TCustomComboBox_AutoComplete_Read, @TCustomComboBox_AutoComplete_Write);
     addClassVar('TCustomComboBox', 'AutoDropDown', 'Boolean', @TCustomComboBox_AutoDropDown_Read, @TCustomComboBox_AutoDropDown_Write);
     addClassVar('TCustomComboBox', 'AutoSelect', 'Boolean', @TCustomComboBox_AutoSelect_Read, @TCustomComboBox_AutoSelect_Write);
@@ -811,22 +811,22 @@ begin
     addClass('TCustomListBox', 'TWinControl');
 
     addGlobalFunc('procedure TCustomListBox.Init(TheOwner: TComponent);', @TCustomListBox_Init);
-    addGlobalFunc('procedure TCustomListBox.AddItem(const Item: String; AnObject: TObject);', @TCustomListBox_AddItem);
-    addGlobalFunc('procedure TCustomListBox.Click();', @TCustomListBox_Click);
-    addGlobalFunc('procedure TCustomListBox.Clear();', @TCustomListBox_Clear);
-    addGlobalFunc('procedure TCustomListBox.ClearSelection();', @TCustomListBox_ClearSelection);
-    addGlobalFunc('function TCustomListBox.GetIndexAtXY(X, Y: integer): integer;', @TCustomListBox_GetIndexAtXY);
-    addGlobalFunc('function TCustomListBox.GetIndexAtY(Y: integer): integer;', @TCustomListBox_GetIndexAtY);
-    addGlobalFunc('function TCustomListBox.GetSelectedText(): string;', @TCustomListBox_GetSelectedText);
-    addGlobalFunc('function TCustomListBox.ItemAtPos(const Pos: TPoint; Existing: Boolean): Integer;', @TCustomListBox_ItemAtPos);
-    addGlobalFunc('function TCustomListBox.ItemRect(Index: Integer): TRect;', @TCustomListBox_ItemRect);
-    addGlobalFunc('function TCustomListBox.ItemVisible(Index: Integer): boolean;', @TCustomListBox_ItemVisible);
-    addGlobalFunc('function TCustomListBox.ItemFullyVisible(Index: Integer): boolean;', @TCustomListBox_ItemFullyVisible);
-    addGlobalFunc('procedure TCustomListBox.LockSelectionChange();', @TCustomListBox_LockSelectionChange);
-    addGlobalFunc('procedure TCustomListBox.MakeCurrentVisible();', @TCustomListBox_MakeCurrentVisible);
-    addGlobalFunc('procedure TCustomListBox.MeasureItem(Index: Integer; var TheHeight: Integer);', @TCustomListBox_MeasureItem);
-    addGlobalFunc('procedure TCustomListBox.SelectAll();', @TCustomListBox_SelectAll);
-    addGlobalFunc('procedure TCustomListBox.UnlockSelectionChange();', @TCustomListBox_UnlockSelectionChange);
+    addGlobalFunc('procedure TCustomListBox.AddItem(const Item: String; AnObject: TObject); constref;', @TCustomListBox_AddItem);
+    addGlobalFunc('procedure TCustomListBox.Click(); constref;', @TCustomListBox_Click);
+    addGlobalFunc('procedure TCustomListBox.Clear(); constref;', @TCustomListBox_Clear);
+    addGlobalFunc('procedure TCustomListBox.ClearSelection(); constref;', @TCustomListBox_ClearSelection);
+    addGlobalFunc('function TCustomListBox.GetIndexAtXY(X, Y: integer): integer; constref;', @TCustomListBox_GetIndexAtXY);
+    addGlobalFunc('function TCustomListBox.GetIndexAtY(Y: integer): integer; constref;', @TCustomListBox_GetIndexAtY);
+    addGlobalFunc('function TCustomListBox.GetSelectedText(): string; constref;', @TCustomListBox_GetSelectedText);
+    addGlobalFunc('function TCustomListBox.ItemAtPos(const Pos: TPoint; Existing: Boolean): Integer; constref;', @TCustomListBox_ItemAtPos);
+    addGlobalFunc('function TCustomListBox.ItemRect(Index: Integer): TRect; constref;', @TCustomListBox_ItemRect);
+    addGlobalFunc('function TCustomListBox.ItemVisible(Index: Integer): boolean; constref;', @TCustomListBox_ItemVisible);
+    addGlobalFunc('function TCustomListBox.ItemFullyVisible(Index: Integer): boolean; constref;', @TCustomListBox_ItemFullyVisible);
+    addGlobalFunc('procedure TCustomListBox.LockSelectionChange(); constref;', @TCustomListBox_LockSelectionChange);
+    addGlobalFunc('procedure TCustomListBox.MakeCurrentVisible(); constref;', @TCustomListBox_MakeCurrentVisible);
+    addGlobalFunc('procedure TCustomListBox.MeasureItem(Index: Integer; var TheHeight: Integer); constref;', @TCustomListBox_MeasureItem);
+    addGlobalFunc('procedure TCustomListBox.SelectAll(); constref;', @TCustomListBox_SelectAll);
+    addGlobalFunc('procedure TCustomListBox.UnlockSelectionChange(); constref;', @TCustomListBox_UnlockSelectionChange);
     addClassVar('TCustomListBox', 'Canvas', 'TCanvas', @TCustomListBox_Canvas_Read);
     addClassVar('TCustomListBox', 'ClickOnSelChange', 'boolean', @TCustomListBox_ClickOnSelChange_Read, @TCustomListBox_ClickOnSelChange_Write);
     addClassVar('TCustomListBox', 'Columns', 'Integer', @TCustomListBox_Columns_Read, @TCustomListBox_Columns_Write);
@@ -1069,13 +1069,13 @@ begin
     addClass('TCustomEdit', 'TWinControl');
 
     addGlobalFunc('procedure TCustomEdit.Init(AOwner: TComponent);', @TCustomEdit_Init);
-    addGlobalFunc('procedure TCustomEdit.Clear();', @TCustomEdit_Clear);
-    addGlobalFunc('procedure TCustomEdit.SelectAll();', @TCustomEdit_SelectAll);
-    addGlobalFunc('procedure TCustomEdit.ClearSelection();', @TCustomEdit_ClearSelection);
-    addGlobalFunc('procedure TCustomEdit.CopyToClipboard();', @TCustomEdit_CopyToClipboard);
-    addGlobalFunc('procedure TCustomEdit.CutToClipboard();', @TCustomEdit_CutToClipboard);
-    addGlobalFunc('procedure TCustomEdit.PasteFromClipboard();', @TCustomEdit_PasteFromClipboard);
-    addGlobalFunc('procedure TCustomEdit.Undo();', @TCustomEdit_Undo);
+    addGlobalFunc('procedure TCustomEdit.Clear(); constref;', @TCustomEdit_Clear);
+    addGlobalFunc('procedure TCustomEdit.SelectAll(); constref;', @TCustomEdit_SelectAll);
+    addGlobalFunc('procedure TCustomEdit.ClearSelection(); constref;', @TCustomEdit_ClearSelection);
+    addGlobalFunc('procedure TCustomEdit.CopyToClipboard(); constref;', @TCustomEdit_CopyToClipboard);
+    addGlobalFunc('procedure TCustomEdit.CutToClipboard(); constref;', @TCustomEdit_CutToClipboard);
+    addGlobalFunc('procedure TCustomEdit.PasteFromClipboard(); constref;', @TCustomEdit_PasteFromClipboard);
+    addGlobalFunc('procedure TCustomEdit.Undo(); constref;', @TCustomEdit_Undo);
     addClassVar('TCustomEdit', 'CanUndo', 'Boolean', @TCustomEdit_CanUndo_Read);
     addClassVar('TCustomEdit', 'CaretPos', 'TPoint', @TCustomEdit_CaretPos_Read, @TCustomEdit_CaretPos_Write);
     addClassVar('TCustomEdit', 'HideSelection', 'Boolean', @TCustomEdit_HideSelection_Read, @TCustomEdit_HideSelection_Write);
@@ -1302,7 +1302,7 @@ begin
     addClass('TCustomMemo', 'TCustomEdit');
 
     addGlobalFunc('procedure TCustomMemo.Init(AOwner: TComponent);', @TCustomMemo_Init);
-    addGlobalFunc('procedure TCustomMemo.Append(const Value: String);', @TCustomMemo_Append);
+    addGlobalFunc('procedure TCustomMemo.Append(const Value: String); constref;', @TCustomMemo_Append);
     addClassVar('TCustomMemo', 'Lines', 'TStrings', @TCustomMemo_Lines_Read, @TCustomMemo_Lines_Write);
     addClassVar('TCustomMemo', 'HorzScrollBar', 'TMemoScrollBar', @TCustomMemo_HorzScrollBar_Read, @TCustomMemo_HorzScrollBar_Write);
     addClassVar('TCustomMemo', 'VertScrollBar', 'TMemoScrollBar', @TCustomMemo_VertScrollBar_Read, @TCustomMemo_VertScrollBar_Write);
@@ -1555,11 +1555,11 @@ begin
     addClass('TCustomButton', 'TButtonControl');
 
     addGlobalFunc('procedure TCustomButton.Init(TheOwner: TComponent);', @TCustomButton_Init);
-    addGlobalFunc('procedure TCustomButton.ExecuteDefaultAction();', @TCustomButton_ExecuteDefaultAction);
-    addGlobalFunc('procedure TCustomButton.ExecuteCancelAction();', @TCustomButton_ExecuteCancelAction);
-    addGlobalFunc('procedure TCustomButton.ActiveDefaultControlChanged(NewControl: TControl);', @TCustomButton_ActiveDefaultControlChanged);
-    addGlobalFunc('procedure TCustomButton.UpdateRolesForForm();', @TCustomButton_UpdateRolesForForm);
-    addGlobalFunc('function TCustomButton.UseRightToLeftAlignment(): Boolean;', @TCustomButton_UseRightToLeftAlignment);
+    addGlobalFunc('procedure TCustomButton.ExecuteDefaultAction(); constref;', @TCustomButton_ExecuteDefaultAction);
+    addGlobalFunc('procedure TCustomButton.ExecuteCancelAction(); constref;', @TCustomButton_ExecuteCancelAction);
+    addGlobalFunc('procedure TCustomButton.ActiveDefaultControlChanged(NewControl: TControl); constref;', @TCustomButton_ActiveDefaultControlChanged);
+    addGlobalFunc('procedure TCustomButton.UpdateRolesForForm(); constref;', @TCustomButton_UpdateRolesForForm);
+    addGlobalFunc('function TCustomButton.UseRightToLeftAlignment(): Boolean; constref;', @TCustomButton_UseRightToLeftAlignment);
     addClassVar('TCustomButton', 'Active', 'boolean', @TCustomButton_Active_Read);
     addClassVar('TCustomButton', 'Default', 'Boolean', @TCustomButton_Default_Read, @TCustomButton_Default_Write);
     addClassVar('TCustomButton', 'Cancel', 'Boolean', @TCustomButton_Cancel_Read, @TCustomButton_Cancel_Write);
@@ -1720,10 +1720,10 @@ begin
     addClass('TCustomLabel', 'TGraphicControl');
 
     addGlobalFunc('procedure TCustomLabel.Init(TheOwner: TComponent);', @TCustomLabel_Init);
-    addGlobalFunc('function TCustomLabel.ColorIsStored(): boolean;', @TCustomLabel_ColorIsStored);
-    addGlobalFunc('function TCustomLabel.AdjustFontForOptimalFill(): Boolean;', @TCustomLabel_AdjustFontForOptimalFill);
-    addGlobalFunc('procedure TCustomLabel.Paint();', @TCustomLabel_Paint);
-    addGlobalFunc('procedure TCustomLabel.SetBounds(aLeft, aTop, aWidth, aHeight: integer);', @TCustomLabel_SetBounds);
+    addGlobalFunc('function TCustomLabel.ColorIsStored(): boolean; constref;', @TCustomLabel_ColorIsStored);
+    addGlobalFunc('function TCustomLabel.AdjustFontForOptimalFill(): Boolean; constref;', @TCustomLabel_AdjustFontForOptimalFill);
+    addGlobalFunc('procedure TCustomLabel.Paint(); constref;', @TCustomLabel_Paint);
+    addGlobalFunc('procedure TCustomLabel.SetBounds(aLeft, aTop, aWidth, aHeight: integer); constref;', @TCustomLabel_SetBounds);
     addGlobalFunc('procedure TCustomLabel.Free();', @TCustomLabel_Free);
   end;
 end;
@@ -1924,8 +1924,8 @@ begin
   begin
     addClass('TCustomSpeedButton', 'TGraphicControl');
 
-    addGlobalFunc('function TCustomSpeedButton.FindDownButton(): TCustomSpeedButton;', @TCustomSpeedButton_FindDownButton);
-    addGlobalFunc('procedure TCustomSpeedButton.LoadGlyphFromLazarusResource(const AName: String);', @TCustomSpeedButton_LoadGlyphFromLazarusResource);
+    addGlobalFunc('function TCustomSpeedButton.FindDownButton(): TCustomSpeedButton; constref;', @TCustomSpeedButton_FindDownButton);
+    addGlobalFunc('procedure TCustomSpeedButton.LoadGlyphFromLazarusResource(const AName: String); constref;', @TCustomSpeedButton_LoadGlyphFromLazarusResource);
     addClassVar('TCustomSpeedButton', 'AllowAllUp', 'Boolean', @TCustomSpeedButton_AllowAllUp_Read, @TCustomSpeedButton_AllowAllUp_Write);
     addClassVar('TCustomSpeedButton', 'Down', 'Boolean', @TCustomSpeedButton_Down_Read, @TCustomSpeedButton_Down_Write);
     addClassVar('TCustomSpeedButton', 'Flat', 'Boolean', @TCustomSpeedButton_Flat_Read, @TCustomSpeedButton_Flat_Write);

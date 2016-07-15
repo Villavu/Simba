@@ -92,8 +92,8 @@ begin
     addClassVar('TMMLTimer', 'Interval', 'Integer', @TMMLTimer_Interval_Read, @TMMLTimer_Interval_Write);
     addClassVar('TMMLTimer', 'ThreadPriority', 'TThreadPriority', @TMMLTimer_ThreadPriority_Read, @TMMLTimer_ThreadPriority_Write);
     addClassVar('TMMLTimer', 'OnTimer', 'TNotifyEvent', @TMMLTimer_OnTimer_Read, @TMMLTimer_OnTimer_Write);
-    addGlobalFunc('procedure TMMLTimer.On();', @TMMLTimer_On);
-    addGlobalFunc('procedure TMMLTimer.Off();', @TMMLTimer_Off);
+    addGlobalFunc('procedure TMMLTimer.On(); constref;', @TMMLTimer_On);
+    addGlobalFunc('procedure TMMLTimer.Off(); constref;', @TMMLTimer_Off);
     addGlobalFunc('procedure TMMLTimer.Init();', @TMMLTimer_Init);
     addGlobalFunc('procedure TMMLTimer.Free();', @TMMLTimer_Free);
   end;
