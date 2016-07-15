@@ -2,10 +2,6 @@
 
 sudo: true
 
-os:
-  - linux
-  - osx
-
 env:
   global:
     - WINEPREFIX=~/.winelaz
