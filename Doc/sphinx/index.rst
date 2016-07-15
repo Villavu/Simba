@@ -27,7 +27,7 @@ certain input or as a reaction to a certain action.
 Simba is created by the SRL community, fully open source and actively
 maintained.
 
-For community forums see http://villavu.com/
+For community forums see https://villavu.com/
 
 
 Contents:
