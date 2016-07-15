@@ -1,4 +1,3 @@
-
 .. _scriptref-window:
 
 Target Window

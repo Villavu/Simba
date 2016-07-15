@@ -1,4 +1,3 @@
-
 .. _scriptref-string:
 
 Strings
@@ -269,7 +268,7 @@ PosEx
 
 
 IsArrInStr
-~~~~~~~~~
+~~~~~~~~~~
 
 .. code-block:: pascal
 

@@ -1,6 +1,4 @@
 .. _scriptref-color:
-
-
 .. _scriptref-finding:
 
 Color Finding

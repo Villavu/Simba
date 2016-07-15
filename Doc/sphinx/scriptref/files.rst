@@ -1,3 +1,5 @@
+.. _scriptref-files:
+
 Working with Files
 ==================
 

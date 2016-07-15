@@ -1,4 +1,3 @@
-
 .. _scriptref-crypto:
 
 Cryptography

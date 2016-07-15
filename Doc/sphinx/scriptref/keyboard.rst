@@ -1,3 +1,5 @@
+.. _scriptref-keyboard:
+
 Keyboard
 ========
 
@@ -7,7 +9,7 @@ Features range from clicking and moving the mouse to faking keypresses.
 Types
 -----
 
-Keyboard functions often use Virtual Keys. See :ref:`virtualkeys` for a complete
+Keyboard functions often use Virtual Keys. See :ref:`scriptref-virtualkeys` for a complete
 list.
 
 

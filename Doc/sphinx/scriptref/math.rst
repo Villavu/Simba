@@ -1,4 +1,3 @@
-
 .. _scriptref-math:
 
 Math

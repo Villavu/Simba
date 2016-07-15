@@ -1,4 +1,3 @@
-
 .. _scriptref-sound:
 
 Multimedia Functions
