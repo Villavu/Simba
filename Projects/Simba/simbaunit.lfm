@@ -428,8 +428,8 @@ object SimbaForm: TSimbaForm
       end
       object LabeledEditSearch: TLabeledEdit
         Left = 79
-        Height = 21
-        Top = 9
+        Height = 23
+        Top = 8
         Width = 248
         EditLabel.AnchorSideTop.Control = LabeledEditSearch
         EditLabel.AnchorSideTop.Side = asrCenter
@@ -437,8 +437,8 @@ object SimbaForm: TSimbaForm
         EditLabel.AnchorSideBottom.Control = LabeledEditSearch
         EditLabel.AnchorSideBottom.Side = asrBottom
         EditLabel.Left = 47
-        EditLabel.Height = 13
-        EditLabel.Top = 13
+        EditLabel.Height = 15
+        EditLabel.Top = 12
         EditLabel.Width = 29
         EditLabel.Caption = 'Find: '
         EditLabel.ParentColor = False
@@ -452,9 +452,9 @@ object SimbaForm: TSimbaForm
       end
       object CheckBoxMatchCase: TCheckBox
         Left = 398
-        Height = 17
-        Top = 11
-        Width = 74
+        Height = 19
+        Top = 10
+        Width = 80
         Caption = 'Match case'
         OnClick = CheckBoxMatchCaseClick
         TabOrder = 1
@@ -468,7 +468,7 @@ object SimbaForm: TSimbaForm
         Caption = '▿'
       end
       object SpeedButtonFindPrev: TSpeedButton
-        Left = 366
+        Left = 363
         Height = 25
         Top = 7
         Width = 25
