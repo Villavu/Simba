@@ -121,13 +121,13 @@ begin
 
     addGlobalFunc('procedure TRegExpr.Init();', @TRegExpr_Init);
     addClassVar('TRegExpr', 'Expression', 'String', @TRegExpr_Expression_Read, @TRegExpr_Expression_Write);
-    addGlobalFunc('function TRegExpr.Exec(const AInputString :String): boolean;', @TRegExpr_Exec);
-    addGlobalFunc('function TRegExpr.ExecNext(): boolean;', @TRegExpr_ExecNext);
-    addGlobalFunc('function TRegExpr.ExecPos(AOffset: PtrInt): boolean;', @TRegExpr_ExecPos);
+    addGlobalFunc('function TRegExpr.Exec(const AInputString :String): boolean; constref;', @TRegExpr_Exec);
+    addGlobalFunc('function TRegExpr.ExecNext(): boolean; constref;', @TRegExpr_ExecNext);
+    addGlobalFunc('function TRegExpr.ExecPos(AOffset: PtrInt): boolean; constref;', @TRegExpr_ExecPos);
     addClassVar('TRegExpr', 'InputString', 'String', @TRegExpr_InputString_Read, @TRegExpr_InputString_Write);
-    addGlobalFunc('function TRegExpr.Substitute(const ATemplate : String): String;', @TRegExpr_Substitute);
-    addGlobalFunc('procedure TRegExpr.Split(AInputStr: String; APieces: TStrings);', @TRegExpr_Split);
-    addGlobalFunc('function TRegExpr.Replace(AInputStr : String; const AReplaceStr : String; AUseSubstitution : Boolean): String;', @TRegExpr_Replace);
+    addGlobalFunc('function TRegExpr.Substitute(const ATemplate : String): String; constref;', @TRegExpr_Substitute);
+    addGlobalFunc('procedure TRegExpr.Split(AInputStr: String; APieces: TStrings); constref;', @TRegExpr_Split);
+    addGlobalFunc('function TRegExpr.Replace(AInputStr : String; const AReplaceStr : String; AUseSubstitution : Boolean): String; constref;', @TRegExpr_Replace);
     addClassVar('TRegExpr', 'SubExprMatchCount', 'integer', @TRegExpr_SubExprMatchCount_Read, nil);
     addClassVar('TRegExpr', 'MatchPos', 'PtrInt', @TRegExpr_MatchPos_Read, nil, True);
     addClassVar('TRegExpr', 'MatchLen', 'PtrInt', @TRegExpr_MatchLen_Read, nil, True);

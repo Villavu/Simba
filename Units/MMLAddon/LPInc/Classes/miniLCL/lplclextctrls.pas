@@ -254,7 +254,7 @@ begin
 
     addGlobalFunc('procedure TCustomImage.Init(AOwner: TComponent);', @TCustomImage_Init);
     addClassVar('TCustomImage', 'Canvas', 'TCanvas', @TCustomImage_Canvas_Read);
-    addGlobalFunc('function TCustomImage.DestRect(): TRect;', @TCustomImage_DestRect);
+    addGlobalFunc('function TCustomImage.DestRect(): TRect; constref;', @TCustomImage_DestRect);
     addClassVar('TCustomImage', 'Center', 'Boolean', @TCustomImage_Center_Read, @TCustomImage_Center_Write);
     addClassVar('TCustomImage', 'Picture', 'TPicture', @TCustomImage_Picture_Read, @TCustomImage_Picture_Write);
     addClassVar('TCustomImage', 'Stretch', 'Boolean', @TCustomImage_Stretch_Read, @TCustomImage_Stretch_Write);
@@ -515,7 +515,7 @@ begin
   begin
     addClass('TShape', 'TGraphicControl');
 
-    addGlobalFunc('procedure TShape.StyleChanged(Sender: TObject);', @TShape_StyleChanged);
+    addGlobalFunc('procedure TShape.StyleChanged(Sender: TObject); constref;', @TShape_StyleChanged);
     addClassVar('TShape', 'Brush', 'TBrush', @TShape_Brush_Read, @TShape_Brush_Write);
     addClassVar('TShape', 'Pen', 'TPen', @TShape_Pen_Read, @TShape_Pen_Write);
     addClassVar('TShape', 'Shape', 'TShapeType', @TShape_Shape_Read, @TShape_Shape_Write);
