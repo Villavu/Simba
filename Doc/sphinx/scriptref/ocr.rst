@@ -1,4 +1,3 @@
-
 .. _scriptref-ocr:
 
 OCR 
@@ -94,7 +93,7 @@ TPAFromText
 
 This function creates a TPA from a string *text* with the given *font*.
 For an explanation on how to use and work with TPAs, please refer to 
-:ref:`scriptref-tpointarray`.
+:ref:`scriptref-tpa`.
 
 TPAFromTextWrap
 ~~~~~~~~~~~~~~~
@@ -115,7 +114,7 @@ MaskFromText
 
 This function creates a Mask from a string *text* with the given *font*.
 For an explanation on how to use and work with TPAs, please refer to 
-:ref:`scriptref-masks`.
+:ref:`scriptref-createmaskfrombitmap`.
 
 Reading Text
 ------------

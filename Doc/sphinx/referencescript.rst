@@ -12,17 +12,23 @@ default (Pascal) engine.
 
 .. toctree::
 
-    scriptref/mouseandkeyboard.rst
-    scriptref/colourfinding.rst
-    scriptref/colourconverting.rst
-    scriptref/files.rst
-    scriptref/ocr.rst
-    scriptref/dtm.rst
-    scriptref/window.rst
     scriptref/web.rst
-    scriptref/bitmaps.rst
-    scriptref/sqlite.rst
-    scriptref/string.rst
-    scriptref/tpa.rst
+    scriptref/math.rst
     scriptref/sound.rst
+    scriptref/mouse.rst
+    scriptref/keyboard.rst
+    scriptref/other.rst
+    scriptref/tpa.rst
+    scriptref/string.rst
+    scriptref/settings.rst
+    scriptref/color conversion.rst
+    scriptref/color.rst
+    scriptref/crypto.rst
+    scriptref/bitmap.rst
+    scriptref/ocr.rst
+    scriptref/lape.rst
+    scriptref/dtm.rst
+    scriptref/sqlite.rst
+    scriptref/window.rst
+    scriptref/files.rst
 
