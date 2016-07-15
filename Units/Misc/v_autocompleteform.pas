@@ -293,8 +293,10 @@ begin
   if (message.Result = 0) and (Redirect <> nil) and Redirect.CanFocus and (not (TWMChar(message).CharCode in [13, 10])) then
   {$ENDIF}
   begin
-    Redirect.SetFocus;
+    if Redirect.CanFocus then
+      Redirect.SetFocus;
     Application.ProcessMessages;
+
     if (Redirect is TSynEdit) then
       TSynEdit(Redirect).CommandProcessor(ecChar, TUTF8Char(Chr(TLMChar(message).CharCode)), nil)
     else
