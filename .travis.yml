@@ -26,7 +26,7 @@ matrix:
 
 before_install:
   # Install environment prerequisites
-  - sudo apt-get update && sudo apt-get install xvfb python-sphinx libxtst-dev libkeybinder-dev || true
+  - sudo apt-get update && sudo apt-get install xvfb python-sphinx graphviz libxtst-dev libkeybinder-dev || true
   - Xvfb $DISPLAY &
 
 install:
