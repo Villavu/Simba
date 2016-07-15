@@ -3,7 +3,7 @@
 Reporting Bugs
 ==============
 
-Report all bugs at http://bugs.villavu.com/
+Report all bugs at https://github.com/MerlijnWajer/Simba/issues
 
 Make sure you do a quick search for your bug to see if it already exist. If it does,
 click its link and add any information you can into the comments. If your bug does not
