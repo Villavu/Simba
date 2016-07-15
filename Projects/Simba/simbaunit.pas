@@ -340,6 +340,8 @@ type
     procedure editSearchListKeyPress(Sender: TObject; var Key: char);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
     function GetInterepterMethods(const SimbaMethods: TExpMethodArr): TExpMethodArr;
+    procedure FillFunctionList(Force: Boolean = False);
+    procedure FillFunctionListForce;
     procedure FunctionListChange(Sender: TObject; Node: TTreeNode);
     procedure FunctionListEnter(Sender: TObject);
     procedure FunctionListExit(Sender: TObject);
@@ -1682,7 +1684,8 @@ begin
         CurrScript.SynEdit.SetFocus;      // XXX: This is never called
 
   StopCodeCompletion;//To set the highlighting back to normal;
-  frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
+  FillFunctionList();
+
   with CurrScript.SynEdit do
   begin
     SetHighlightSearch('',[]);
@@ -2631,7 +2634,7 @@ end;
 
 procedure TSimbaForm.FunctionListEnter(Sender: TObject);
 begin
-  frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
+  FillFunctionList();
 end;
 
 procedure TSimbaForm.FunctionListExit(Sender: TObject);
@@ -2641,8 +2644,8 @@ end;
 
 procedure TSimbaForm.FunctionListTimerTimer(Sender: TObject);
 begin
-  if Self.Visible and (CurrScript <> nil) then
-    frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
+  if Self.Visible then
+    FillFunctionList();
 end;
 
 procedure TSimbaForm.Memo1KeyDown(Sender: TObject; var Key: Word;
@@ -2837,11 +2840,7 @@ begin
 
     // Now we have internal interpeter methods lets add em to function list
     if (SimbaSettings.Interpreter._Type.Value = interp_LP) then
-    begin
-      frmFunctionList.FunctionList.Items.Clear();
-      MenuitemFillFunctionList.Click();
-      frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text, True);
-    end;
+      TThread.Synchronize(nil, @FillFunctionListForce);
   end;
   //Stream.Free; // TCodeInsight free's the stream!
 end;
@@ -3319,7 +3318,7 @@ begin
   end;
 end;
 
-procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
+procedure TSimbaForm.FillFunctionList(Force: Boolean = False);
 var
   Methods, InterpMethods: TExpMethodArr;
   LastSection : string;
@@ -3332,9 +3331,12 @@ var
   Tree : TTreeView;
 begin
   SetLength(nodes, 0);
-  frmFunctionList.FunctionList.BeginUpdate;
-  if (frmFunctionList.FunctionList.Items.Count = 0) then
+
+  if Force or (frmFunctionList.FunctionList.Items.Count = 0) then
   begin
+    frmFunctionList.FunctionList.BeginUpdate();
+    frmFunctionList.FunctionList.Items.Clear();
+
     case SimbaSettings.Interpreter._Type.Value of
       {$IFDEF USE_PASCALSCRIPT}
       interp_PS:
@@ -3407,11 +3409,23 @@ begin
         Filename := strnew(PChar(Lowercase('docs:' + Methods[i].Section + '/' + GetMethodName(Methods[i].FuncDecl,false))));
       end;
     end;
+
     Sections.free;
+    frmFunctionList.FunctionList.EndUpdate;
   end;
-  frmFunctionList.FunctionList.EndUpdate;
+
   if CurrScript <> nil then
-    frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text);
+    frmFunctionList.LoadScriptTree(CurrScript.SynEdit.Text, Force);
+end;
+
+procedure TSimbaForm.FillFunctionListForce;
+begin
+  FillFunctionList(True);
+end;
+
+procedure TSimbaForm.MenuitemFillFunctionListClick(Sender: TObject);
+begin
+  FillFunctionList(False);
 end;
 
 procedure TSimbaForm.MenuItemHideClick(Sender: TObject);
@@ -3994,9 +4008,9 @@ begin
       if Self.Visible then
         if editSearchList.CanFocus then
           editSearchList.SetFocus;
+
       //Lets load up this Script tree!
-      if CurrScript <> nil then
-        frmFunctionList.LoadScriptTree(CurrScript.SynEdit.text);
+      FillFunctionList();
     end else begin
       if(frmFunctionList.Parent is TPanel)then
         frmFunctionList.Hide
