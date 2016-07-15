@@ -60,7 +60,7 @@ uses
   {$IFDEF USE_PASCALSCRIPT}PSDump, {$ENDIF}
 
   updater,
-  SM_Main,
+  {$IFDEF USE_SCRIPTMANAGER}SM_Main,{$ENDIF}
   newsimbasettings
   {$IFDEF USE_DEBUGGER}, debugger{$ENDIF};
 
@@ -3902,8 +3902,10 @@ end;
 
 procedure TSimbaForm.TT_ScriptManagerClick(Sender: TObject);
 begin
+  {$IFDEF USE_SCRIPTMANAGER}
   SManager.SetOptions(AppPath,SimbaSettings.ScriptManager.ServerURL.Value,SimbaSettings.ScriptManager.StoragePath.Value,SimbaSettings.ScriptManager.FileName.Value,SimbaSettings.ScriptManager.FirstRun.Value);
   if not (SManager.Visible = false) then Smanager.Show else SManager.Hide;
+  {$ENDIF}
 end;
 
 procedure TSimbaForm.SetShowParamHintAuto(const AValue: boolean);
