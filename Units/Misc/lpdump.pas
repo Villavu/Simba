@@ -20,7 +20,6 @@ type
 
     function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
     function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; override;
-    function addGlobalVar(Val: Int32; AName: lpString): TLapeGlobalVar; override;
     function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
     function addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar; override;
@@ -33,10 +32,10 @@ implementation
 uses
   lpeval;
 
-function AddLeadingSemiColon(x: string): string;
+function AddTrailingSemiColon(x: string): string;
 begin
   Result := Trim(x);
-  if (Result[Length(Result)] <> ';') then
+  if (Result <> '') and (Result[Length(Result)] <> ';') then
     Result += ';';
 end;
 
@@ -57,43 +56,39 @@ end;
 function TLPCompiler.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar;
 begin
   Result := inherited;
-  //if (Length(AName) > 0) and (AName[1] <> '!') then
-    //FItems.Add(AddLeadingSemiColon('const ' + AName + ' = ' + AVar.AsString));
+  if (Length(AName) > 0) and (AName[1] <> '!') and (AVar.BaseType in LapeOrdinalTypes-LapeOrdinalTypes+LapeRealTypes+LapeStringTypes+LapeSetTypes) then
+    FItems.Add('const ' + AName + ': ' + AVar.VarType.AsString + ' = ' + AVar.AsString + ';');
 end;
 
 function TLPCompiler.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited;
   if (Length(AName) > 0) and (AName[1] <> '!') and (Lowercase(AName) <> Lowercase(Typ)) then
-    FItems.Add(AddLeadingSemiColon('var ' + AName + ': ' + Typ));
-end;
-
-function TLPCompiler.addGlobalVar(Val: Int32; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited;
-  if (Length(AName) > 0) and (AName[1] <> '!') then
-    FItems.Add(AddLeadingSemiColon('var ' + AName + ': Int32 = ' + IntToStr(Val)));
+    if (Value <> '') then
+      FItems.Add('const ' + AName + ': ' + Typ + ' = ' + Value + ';')
+    else
+      FItems.Add('var ' + AName + ': ' + Typ + ';');
 end;
 
 function TLPCompiler.addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType;
 begin
   Result := inherited;
   if (Length(AName) > 0) and (AName[1] <> '!') and (Lowercase(AName) <> Lowercase(Typ.Name)) then
-    FItems.Add(AddLeadingSemiColon('type ' + AName + ' = ' + Typ.Name));
+    FItems.Add('type ' + AName + ' = ' + Typ.Name + ';');
 end;
 
 function TLPCompiler.addGlobalType(Str: lpString; AName: lpString): TLapeType;
 begin
   Result := inherited;
   if (Length(AName) > 0) and (AName[1] <> '!') and (Lowercase(AName) <> Lowercase(Str)) then
-    FItems.Add(AddLeadingSemiColon('type ' + AName + ' = ' + Str));
+    FItems.Add('type ' + AName + ' = ' + AddTrailingSemiColon(Str));
 end;
 
 function TLPCompiler.addGlobalFunc(AHeader: lpString; Value: Pointer): TLapeGlobalVar;
 begin
   Result := inherited;
-  if (Length(Result.Name) > 0) and (Result.Name[1] <> '_') then
-    FItems.Add(AddLeadingSemiColon(AHeader) + ' forward;');
+  if (Length(Result.Name) = 0) or (Result.Name[1] <> '_') then
+    FItems.Add(AddTrailingSemiColon(AHeader) + ' forward;');
 end;
 
 function TLPCompiler.addDelayedCode(ACode: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base;
@@ -114,7 +109,11 @@ begin
   // We cannot automate getting parameter/result information for now,
   // but we can link to documentation.
   for i := 0 to InternalMethodMap.Count - 1 do
-    aItems.Add('procedure ' + InternalMethodMap.Key[i] + '(); forward;');
+    if (InternalMethodMap.Key[i] <> 'GOTO') and
+       (InternalMethodMap.Key[i] <> 'LABEL') and
+       (InternalMethodMap.Key[i] <> 'RAISE')
+    then
+      aItems.Add('procedure ' + InternalMethodMap.Key[i] + '(); forward;');
 end;
 
 end.

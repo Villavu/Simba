@@ -108,7 +108,7 @@ type
 implementation
 
 uses
-  StrUtils {$IFDEF FPC}, lclintf{$ENDIF},math, Themes;
+  StrUtils {$IFDEF FPC}, lclintf{$ENDIF},math, Themes, mufasabase;
 
 procedure TAutoCompleteListBox.setItemList(List: TStrings);
 begin
@@ -288,9 +288,9 @@ begin
   inherited;
 
   {$IFDEF FPC}
-  if (message.Result = 0) and (Redirect <> nil) and (TLMChar(message).CharCode <> VK_DOWN) and (TLMChar(message).CharCode <> VK_UP) and (TLMChar(message).CharCode <> VK_RETURN) then
+  if (message.Result = 0) and (Redirect <> nil) and Redirect.CanFocus and (not (TLMChar(message).CharCode in [13, 10])) then
   {$ELSE}
-  if (message.Result = 0) and (Redirect <> nil) and (TWMChar(message).CharCode <> VK_DOWN) and (TWMChar(message).CharCode <> VK_UP) and (TWMChar(message).CharCode <> VK_RETURN) then
+  if (message.Result = 0) and (Redirect <> nil) and Redirect.CanFocus and (not (TWMChar(message).CharCode in [13, 10])) then
   {$ENDIF}
   begin
     Redirect.SetFocus;
@@ -577,7 +577,7 @@ begin
 
   inherited Show;
 
-  if (Editor <> nil) then
+  if (Editor <> nil) and Editor.CanFocus then
     Editor.SetFocus;
 end;
 
@@ -674,7 +674,9 @@ begin
     exit;}
   for i := 0 to high(FParameters) do
   begin
-    if (FParameters[i] is TciConstParameter) then
+    if (FParameters[i] is TciConstRefParameter) then
+      s := 'constref '
+    else if (FParameters[i] is TciConstParameter) then
       s := 'const '
     else if (FParameters[i] is TciOutParameter) then
       s := 'out '
@@ -1002,7 +1004,16 @@ begin
   FBracketPoint:= BracketPoint;
 
   CalculateBounds;  //Calculate the size we need!
-  self.Visible := true;
+
+  if FSynEdit.CanFocus then
+  begin
+    FSynEdit.SetFocus();
+
+    Application.ProcessMessages();
+    Self.Visible := true;
+  end
+  else
+    mDebugLn('Trying to display ParamHint on invisible editor');
 end;
 
 
@@ -1011,9 +1022,13 @@ begin
   if (not Visible) then exit;
   try
     UpdateHint;
-    Sleep(1);
+    Sleep(15);
   except
-    Hide;
+    on E: Exception do
+    begin
+      mDebugLn('ParamHint exception caught: "%s"', [E.Message]);
+      Hide;
+    end;
   end;
 end;
 

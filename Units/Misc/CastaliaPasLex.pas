@@ -68,6 +68,7 @@ type
   end;
   TDefineRecArray = array of TDefineRec;
 
+  PSaveDefinesRec = ^TSaveDefinesRec;
   TSaveDefinesRec = record
     RecArray: TDefineRecArray;
     Stack: Integer;
