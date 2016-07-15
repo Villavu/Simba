@@ -1,11 +1,13 @@
+.. _scriptref-string:
 
-.. _scriptref_string:
+Strings
+=======
 
-String Functions
-================
+Functions
+---------
 
 Capitalize
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -13,7 +15,7 @@ Capitalize
 
 
 CompressString
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -21,7 +23,7 @@ CompressString
 
 
 DecompressString
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -29,7 +31,7 @@ DecompressString
 
 
 Base64Encode
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -37,7 +39,7 @@ Base64Encode
 
 
 Base64Decode
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -45,7 +47,7 @@ Base64Decode
 
 
 Format
-------
+~~~~~~
 
 .. code-block:: pascal
 
@@ -53,7 +55,7 @@ Format
 
 
 ToStr
------
+~~~~~
 
 .. code-block:: pascal
 
@@ -61,7 +63,7 @@ ToStr
 
 
 StringMatch
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -71,7 +73,7 @@ Uses levenshtein distance to work out the match % of the two strings.
 
 
 Between
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -79,7 +81,7 @@ Between
 
 
 MultiBetween
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -90,7 +92,7 @@ tag. Useful for data reading
 
 
 IntToStr
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -98,7 +100,7 @@ IntToStr
 
 
 FloatToStr
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -106,7 +108,7 @@ FloatToStr
 
 
 BoolToStr
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -114,7 +116,7 @@ BoolToStr
 
 
 StrToInt
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -122,7 +124,7 @@ StrToInt
 
 
 StrToIntDef
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -130,7 +132,7 @@ StrToIntDef
 
 
 StrToFloat
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -138,7 +140,7 @@ StrToFloat
 
 
 StrToFloatDef
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -146,7 +148,7 @@ StrToFloatDef
 
 
 StrToBool
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -154,7 +156,7 @@ StrToBool
 
 
 StrToBoolDef
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -162,7 +164,7 @@ StrToBoolDef
 
 
 ExtractFromStr
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -170,7 +172,7 @@ ExtractFromStr
 
 
 Replace
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -178,7 +180,7 @@ Replace
 
 
 ReplaceWrap
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -186,7 +188,7 @@ ReplaceWrap
 
 
 Implode
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -194,7 +196,7 @@ Implode
 
 
 Explode
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -202,7 +204,7 @@ Explode
 
 
 ExplodeWrap
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -210,7 +212,7 @@ ExplodeWrap
 
 
 Padl
-----
+~~~~
 
 .. code-block:: pascal
 
@@ -218,7 +220,7 @@ Padl
 
 
 Padz
-----
+~~~~
 
 .. code-block:: pascal
 
@@ -226,7 +228,7 @@ Padz
 
 
 Padr
-----
+~~~~
 
 .. code-block:: pascal
 
@@ -234,7 +236,7 @@ Padr
 
 
 ExecRegExpr
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -242,7 +244,7 @@ ExecRegExpr
 
 
 SplitRegExpr
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -250,7 +252,7 @@ SplitRegExpr
 
 
 ReplaceRegExpr
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -258,7 +260,7 @@ ReplaceRegExpr
 
 
 PosEx
------
+~~~~~
 
 .. code-block:: pascal
 
@@ -266,7 +268,7 @@ PosEx
 
 
 IsArrInStr
----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -274,3 +276,31 @@ IsArrInStr
 
 Returns true if any of the indexes in TStringArray StrArr is found in string s
 
+
+IsStrInArr
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function IsStrInArr(const s: string; const UsePos: Boolean; const arr: TstringArray): Boolean
+
+LevDistance
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function LevDistance(src, target: string): Integer
+
+NormLevDistance
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function NormLevDistance(src, target: string): Extended
+
+PosMulti
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function PosMulti(const SubStr: string; Text: string): TIntegerArray

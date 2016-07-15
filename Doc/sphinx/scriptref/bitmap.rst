@@ -1,11 +1,10 @@
+.. _scriptref-bitmap:
 
-.. _scriptref-bitmaps:
+Bitmap
+======
 
-Bitmaps
-=======
-
-A bitmap in Simba is simply a two dimensional *field of colours*. These colours
-can all be the same, or they can be of different colours. Simba features
+A bitmap in Simba is simply a two dimensional *field of colors*. These colors
+can all be the same, or they can be of different colors. Simba features
 functions to create, manipulate and search for bitmaps.
 
 .. INSERT BITMAP EXAMPLE HERE (Picture, etc)
@@ -26,7 +25,7 @@ an integer:
     end;
 
 Note that the previous example doesn't make a lot of sense as the bitmap has
-only been created and not filled with any colours, they are as of yet,
+only been created and not filled with any colors, they are as of yet,
 undefined. You can also create bitmaps from screenshots and load them when your
 script starts using the :ref:`scriptref-bitmapfromstring` function, or
 simple store them as files and load them using the :ref:`scriptref-loadbitmap`
@@ -60,8 +59,11 @@ the bitmaps)
 If you still want access to the TMufasaBitmap, use *GetMufasaBitmap*, described
 below.
 
+Bitmap Functions
+----------------
+
 GetMufasaBitmap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -89,7 +91,7 @@ then call this function to get the class reference.
 .. _scriptref-createbitmapstring:
 
 CreateBitmapString
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -102,7 +104,7 @@ later use, for example loading it again using :ref:`scriptref-bitmapfromstring`.
 .. _scriptref-createbitmap:
 
 CreateBitmap
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -114,7 +116,7 @@ Returns the reference to the created bitmap.
 .. _scriptref-freebitmap:
 
 FreeBitmap
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -128,7 +130,7 @@ stop it in time, in which case Simba will free the bitmaps for you)
 .. _scriptref-savebitmap:
 
 SaveBitmap
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -139,7 +141,7 @@ Save the given bitmap to the specified path.
 .. _scriptref-bitmapfromstring:
 
 BitmapFromString
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -151,7 +153,7 @@ Bitmap to String feature in Simba.
 .. _scriptref-loadbitmap:
 
 LoadBitmap
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -163,7 +165,7 @@ images.
 .. _scriptref-setbitmapsize:
 
 SetBitmapSize
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -177,7 +179,7 @@ destroy the old data, but shrinking it will inevitably destroy some data.
 .. _scriptref-getbitmapsize:
 
 GetBitmapSize
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -188,7 +190,7 @@ Returns the size of the bitmap in *BmpW*, *BmpH*.
 .. _scriptref-setpersistentmemorybitmap:
 
 SetPersistentMemoryBitmap
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -204,7 +206,7 @@ Previous data in the bitmap will be lost.
 .. _scriptref-resetpersistentmemorybitmap:
 
 ResetPersistentMemoryBitmap
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -216,7 +218,7 @@ Data in the bitmap before the SetPersistentMemoryBitmap will not be restored.
 .. _scriptref-stretchbitmapresize:
 
 StretchBitmapResize
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -226,7 +228,7 @@ StretchBitmapResize
 .. _scriptref-createmirroredbitmap:
 
 CreateMirroredBitmap
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -236,7 +238,7 @@ CreateMirroredBitmap
 .. _scriptref-createmirroredbitmapex:
 
 CreateMirroredBitmapEx
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -246,7 +248,7 @@ CreateMirroredBitmapEx
 .. _scriptref-fastsetpixel:
 
 FastSetPixel
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -257,7 +259,7 @@ Set the pixel on the bitmap at position x, y to *color*.
 .. _scriptref-fastsetpixels:
 
 FastSetPixels
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -268,41 +270,41 @@ Set the pixels on the bitmap at position TPA[index] to Colors[index].
 .. _scriptref-fastgetpixel:
 
 FastGetPixel
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     function FastGetPixel(bmp, x,y : integer) : TColor;
 
-Return the colour of pixel on the bitmap, position specified by x, y.
+Return the color of pixel on the bitmap, position specified by x, y.
 
 .. _scriptref-fastgetpixels:
 
 FastGetPixels
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     function FastGetPixels(Bmp : integer; TPA : TPointArray) : TIntegerArray;
 
-Return an array of the colours on the bitmap; positions specified by *TPA*.
+Return an array of the colors on the bitmap; positions specified by *TPA*.
 
 .. _scriptref-getbitmapareacolors:
 
 GetBitmapAreaColors
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     function GetBitmapAreaColors(bmp,xs, ys, xe, ye: Integer): T2DIntegerArray;
 
-Returns all the colours in the area defined by (*xs*, *xy*, *xe*, *ye*) on the
+Returns all the colors in the area defined by (*xs*, *xy*, *xe*, *ye*) on the
 bitmap in a two dimensions integer array.
 
 .. _scriptref-fastdrawclear:
 
 FastDrawClear
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -313,7 +315,7 @@ Draw *Color* on every pixel on the bitmap.
 .. _scriptref-fastdrawtransparent:
 
 FastDrawTransparent
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -323,7 +325,7 @@ FastDrawTransparent
 .. _scriptref-setransparentcolor:
 
 SetTransparentColor
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -332,7 +334,7 @@ SetTransparentColor
 .. _scriptref-getransparentcolor:
 
 GetTransparentColor
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -341,7 +343,7 @@ GetTransparentColor
 .. _scriptref-fastreplacecolor:
 
 FastReplaceColor
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -350,7 +352,7 @@ FastReplaceColor
 .. _scriptref-copyclienttobitmap:
 
 CopyClientToBitmap
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -361,7 +363,7 @@ Copy client area *xs, ys, xe, ye* to specified bitmap.
 .. _scriptref-bitmapfromclient:
 
 BitmapFromClient
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -372,7 +374,7 @@ Create a bitmap from the client. Area specified by *xs, ye, xe, ye*.
 .. _scriptref-setbitmapname:
 
 SetBitmapName
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -396,7 +398,7 @@ name of the bitmap if it hasn't been freed.)
 .. _scriptref-findbitmap:
 
 FindBitmap
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -408,7 +410,7 @@ If found, *x, y* specifies the position where the bitmap was found.
 .. _scriptref-findbitmapin:
 
 FindBitmapIn
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -422,7 +424,7 @@ was found.
 .. _scriptref-findbitmaptolerancein:
 
 FindBitmapToleranceIn
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -437,7 +439,7 @@ was found.
 .. _scriptref-findbitmapspiral:
 
 FindBitmapSpiral
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -451,7 +453,7 @@ was found. Search starts from a point defined by *x, y*.
 .. _scriptref-findbitmapsspiraltolerance:
 
 FindBitmapsSpiralTolerance
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -467,7 +469,7 @@ Returns true if found. If found, each point in *TPA* specifies a match.
 .. _scriptref-findbitmapspiraltolerance:
 
 FindBitmapSpiralTolerance
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -483,7 +485,7 @@ was found.
 .. _scriptref-rotatebitmap:
 
 RotateBitmap
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -493,7 +495,7 @@ RotateBitmap
 .. _scriptref-desaturatebitmap:
 
 DesaturateBitmap
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -503,7 +505,7 @@ DesaturateBitmap
 .. _scriptref-invertbitmap:
 
 InvertBitmap
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -513,7 +515,7 @@ InvertBitmap
 .. _scriptref-copybitmap:
 
 CopyBitmap
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -524,7 +526,7 @@ Creates a copy of the *Bitmap*. Returns the bitmap copy.
 .. _scriptref-greyscalebitmap:
 
 GreyScaleBitmap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -535,7 +537,7 @@ Creates a copy of the bitmap, greyscaled.
 .. _scriptref-brightnessbitmap:
 
 BrightnessBitmap
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -550,7 +552,7 @@ If you instead want to apply brightness to the current bitmap, see
 .. _scriptref-contrastbitmap:
 
 ContrastBitmap
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -562,7 +564,7 @@ applied.
 .. _scriptref-posterizebitmap:
 
 PosterizeBitmap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -594,7 +596,7 @@ Applying a filter on the current bitmap
 .. _scriptref-createmaskfrombitmap:
 
 CreateMaskFromBitmap
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -604,7 +606,7 @@ CreateMaskFromBitmap
 .. _scriptref-findmasktolerance:
 
 FindMaskTolerance
------------------
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -614,7 +616,7 @@ FindMaskTolerance
 .. _scriptref-findbitmapmasktolerance:
 
 FindBitmapMaskTolerance
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -624,7 +626,7 @@ FindBitmapMaskTolerance
 .. _scriptref-finddeformedbitmaptolerancein:
 
 FindDeformedBitmapToleranceIn
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -634,7 +636,7 @@ FindDeformedBitmapToleranceIn
 .. _scriptref-drawtpabitmap:
 
 DrawTPABitmap
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -647,7 +649,7 @@ to *color*.
 .. _scriptref-drawatpabitmap:
 
 DrawATPABitmap
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -661,7 +663,7 @@ to a color. Colors differ per TPointArray (group).
 .. _scriptref-drawatpabitmapex:
 
 DrawATPABitmapEx
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -675,7 +677,7 @@ to a color. Colors are defined by *Colors*.
 .. _scriptref-drawbitmap:
 
 DrawBitmap
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -686,7 +688,7 @@ Draw the bitmap to a TCanvas.
 .. _scriptref-rectanglebitmap:
 
 RectangleBitmap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -696,7 +698,7 @@ RectangleBitmap
 .. _scriptref-floodfillbitmap:
 
 FloodFillBitmap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -706,7 +708,7 @@ FloodFillBitmap
 .. _scriptref-calculatepixelshift:
 
 CalculatePixelShift
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -716,14 +718,14 @@ CalculatePixelShift
 .. _scriptref-calculatepixeltolerance:
 
 CalculatePixelTolerance
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     function CalculatePixelTolerance(Bmp1,Bmp2 : Integer; CompareBox : TBox; CTS : integer) : extended;');
 
 CropBitmap
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -741,13 +743,13 @@ Crops the bitmap, removes all points outside (xs, ys, xe, ye).
     end;
 
 GetColorsBitmap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     function GetColorsBitmap(const bmp: integer): TIntegerArray;
 
-Returns a TIntegerArray of all colours on the bitmap, the result will be sorted row by row.
+Returns a TIntegerArray of all colors on the bitmap, the result will be sorted row by row.
 
 .. code-block:: pascal
 
@@ -763,7 +765,7 @@ Returns a TIntegerArray of all colours on the bitmap, the result will be sorted 
     end;
 
 BitmapToMatrix
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -786,7 +788,7 @@ Returns a two dimensions integer array of all the colors on the bitmap.
     end;  
 
 DrawMatrixBitmap
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -799,7 +801,7 @@ Draws a matrix onto the bitmap.
     DrawMatrixBitmap(bmp, matrix); 
 
 ThresholdAdaptiveBitmap
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -812,7 +814,7 @@ Applys a ThresholdAdaptive filter onto the bitmap. Vaild TBmpThreshMethods are (
     ThresholdAdaptiveBitmap(bmp, 0, 255, false, TM_Mean, 0);
 
 ThresholdAdaptiveMatrix
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -825,7 +827,7 @@ Applys a ThresholdAdaptive filter onto a image matrix (created by BitmapToMatrix
     ThresholdAdaptiveBitmap(matrix, 0, 255, false, TM_Mean, 0);
 
 ResizeBilinearMatrix
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -836,3 +838,87 @@ Uses the Bilinear resize method to resize a image matrix (created by BitmapToMat
 .. code-block:: pascal
 
     ResizeBilinearMatrix(matrix, 500, 500);
+
+BitmapExists
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function BitmapExists(Index: Integer): Boolean
+
+BlurBitmap
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure BlurBitmap(const Bitmap, block: Integer)
+
+CalculatePixelShiftTPA
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function CalculatePixelShiftTPA(Bitmap1, Bitmap2: Integer; CPoints: TPointArray): Integer
+
+CalculatePixelToleranceTPA
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function CalculatePixelToleranceTPA(Bitmap1, Bitmap2: Integer; CPoints: TPointArray; CTS: Integer): Extended
+
+ConvoluteBitmap
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function ConvoluteBitmap(Bitmap: Integer; matrix: T2DExtendedArray): Integer
+
+Desaturate
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function Desaturate(Bitmap: Integer): Integer
+
+DrawSystemTextBitmap
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure DrawSystemTextBitmap(const Bitmap: Integer; const Text, FontName: string; const FontSize: Integer; const pnt: TPoint; const Shadow: Boolean; const Color: Integer); 
+
+DrawTextBitmap
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure DrawTextBitmap(const Bitmap: Integer; const Text, FontName: string; const pnt: TPoint; const Shadow: Boolean; const Color: Integer)
+
+FindColorsBitmap
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindColorsBitmap(Bitmap: Integer; var points: TPointArray; const Color: Integer): Boolean
+
+RectangleBitmapEx
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure RectangleBitmapEx(const Bitmap: Integer; const Box: TBox; const Color: Integer; const Transparency: Extended)
+
+ResizeBitmapEx
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure ResizeBitmapEx(const Bitmap: Integer; const Method: TBitmapResizeMethod; const NewWidth, NewHeight: Integer)
+
+RotateBitmapEx
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function RotateBitmapEx(Bitmap: Integer; Angle: Single; Expand: Boolean; Smooth: Boolean): Integer

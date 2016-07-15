@@ -1,11 +1,13 @@
+.. _scriptref-window:
 
-.. _scriptref_window:
+Target Window
+=============
 
 Target Window Functions
-=======================
+-----------------------
 
 Freeze
-------
+~~~~~~
 
 .. code-block:: pascal
 
@@ -33,7 +35,7 @@ Use like:
 Make sure you never forget to call Unfreeze!
 
 Unfreeze
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -43,7 +45,7 @@ Unfreeze the client data and restore the original client. See *Freeze* for more
 details.
 
 GetClientDimensions
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -53,7 +55,7 @@ Return the size of the client in *w* and *h*.
 If it fails, it returns -1 for both h and w.
 
 GetClientPosition
------------------
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -64,7 +66,7 @@ May return negative values.
 
 
 SetTargetBitmap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -76,7 +78,7 @@ the same effect as `SetTargetArray`_.
 
 
 SetTargetArray
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -88,7 +90,7 @@ Simba to efficiently target its memory. See the SMART source on how to do this.
 
 
 SetEIOSTarget
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -98,14 +100,14 @@ SetEIOSTarget
 .. _image-target:
 
 SetImageTarget
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     procedure SetImageTarget(idx: integer);
 
 Set the Image target defined by index *idx* as active target.
-An Image target controls what data Simba performs colour (and bitmap, dtm, etc)
+An Image target controls what data Simba performs color (and bitmap, dtm, etc)
 searches on.
 
 Both `SetTargetBitmap`_, and `SetTargetArray`_ return a target index.
@@ -115,7 +117,7 @@ Alternatively you can get the index of the current target with `GetImageTarget`_
 .. _mouse_target:
 
 SetKeyMouseTarget
------------------
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -126,7 +128,7 @@ A KeyMouse target controls how Simba moves the mouse cursor and emulates the
 keyboard.
 
 GetImageTarget
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -136,7 +138,7 @@ Returns the current Image target.
 
 
 GetKeyMouseTarget
------------------
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -145,7 +147,7 @@ GetKeyMouseTarget
 Returns the current KeyMouse target.
 
 ExportImageTarget 
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -153,7 +155,7 @@ ExportImageTarget
 
 
 ExportKeyMouseTarget 
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -161,7 +163,7 @@ ExportKeyMouseTarget
 
 
 FreeTarget
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -173,7 +175,7 @@ This procedure does not free the data associated with the target as in the
 case of `SetTargetBitmap`_ or `SetTargetArray`_.
 
 SetDesktopAsClient
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -182,7 +184,7 @@ SetDesktopAsClient
 Set the default desktop as client.
 
 ActivateClient
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -192,7 +194,7 @@ Set the current target as active for key input.
 
 
 IsTargetValid
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -200,11 +202,18 @@ IsTargetValid
 
 Returns true if the current target is valid.
 
+GetNativeWindow
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetNativeWindow: Integer
+
 Finding a specific window
-=========================
+-------------------------
 
 GetProcesses
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -247,7 +256,7 @@ Example usage:
     end;
 
 Client Area
-===========
+-----------
 
 Client Areas were introduced to cope with clients which have a normal
 coordinate system, but a variable base for this coordinate system.
@@ -265,7 +274,7 @@ Setting an area multiple times is the same as resetting it and then setting
 the area. Multiple calls to \*SetClientArea will not result in nested areas.
 
 MouseSetClientArea
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -274,7 +283,7 @@ MouseSetClientArea
 Define a new `Client Area`_ for all Mouse operations on this Mouse target.
 
 MouseResetClientArea
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -283,7 +292,7 @@ MouseResetClientArea
 Reset the `Client Area`_ for the Mouse Target.
 
 ImageSetClientArea
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -292,7 +301,7 @@ ImageSetClientArea
 Define a new `Client Area`_ for all Image operations on this Image Target.
 
 ImageResetClientArea
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 

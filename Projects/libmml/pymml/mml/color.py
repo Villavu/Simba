@@ -89,8 +89,7 @@ class Color(object):
         
     def find_spiral(self, col, box, tol = 0):
         """
-        Find a color in a box, searching in the direction of a spiral, with a
-            specific tolerance.
+        Find a color in a box, searching in the direction of a spiral, with a specific tolerance.
         Yields a tuple of x, y values of found color.
         """
         x, y = (c_int(-1), c_int(-1))
@@ -111,8 +110,7 @@ class Color(object):
         
     def find_area(self, col, box, min_a, tol = 0):
         """
-        Finds a colored area in box with min area min_a with a specific
-            tolerance.
+        Finds a colored area in box with min area min_a with a specific tolerance.
         Yields a tuple of x, y values of found area.
         """
         x, y = (c_int(-1), c_int(-1))

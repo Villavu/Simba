@@ -16,7 +16,7 @@ be found at the bottom of the page.
 .. note::
     It is important to note that there is also a database SQL fulltext engine
     called Sphinx, but this is not the project we use. We use the Sphinx
-    "documentation system" ( http://sphinx.pocoo.org/ )
+    "documentation system" ( http://www.sphinx-doc.org )
 
 Building the documentation
 --------------------------
@@ -37,8 +37,7 @@ Writing documentation
 ---------------------
 
 Sphinx uses the reStructuredText markup language. It is not a hard language, but
-looking through the quickstart is a good idea:
-http://docutils.sourceforge.net/docs/user/rst/quickstart.html
+looking through the quickstart is a good idea: https://en.wikipedia.org/wiki/ReStructuredText
 
 As stated above, the markup language is not the hard part about writing
 documentation; the hard part is simply coming up with good content suited for

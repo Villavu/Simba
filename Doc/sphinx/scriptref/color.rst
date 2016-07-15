@@ -1,19 +1,17 @@
-.. _scriptref-colour:
-
-
+.. _scriptref-color:
 .. _scriptref-finding:
 
-Colour Finding
-==============
+Color Finding
+=============
 
 
-Finding colours on the screen is quite simple. Simba offers methods like
-``FindColor`` to locate colours on the screen.
+Finding colors on the screen is quite simple. Simba offers methods like
+``FindColor`` to locate colors on the screen.
 
 These methods are usually composed out of several (but not always all) 
 components:
 
-    *   The colour to search for. This is an RGB color.
+    *   The color to search for. This is an RGB color.
 
     *   An area to search in, defined by *x1*, *y1*, *x2*, *y2*.
         If any of coordinates are outside the clients bounds; two things can
@@ -23,14 +21,14 @@ components:
             -   Simba will resize the bounds to fit the client without notifying
                 you.
 
-    *   Tolerance applied to the colour matching. With a maximum tolerance all
-        colours are matched.
+    *   Tolerance applied to the color matching. With a maximum tolerance all
+        colors are matched.
 
     *   Spiral. A spiral defines a point where the search will start from.
         This is particulary useful if you want the first result near specific
         coordinates.
 
-    *   AreaSize. The size the box of colours should be. Usually this is not
+    *   AreaSize. The size the box of colors should be. Usually this is not
         adjustable.
 
     *   A single point in *x*, *y* can be returned, or a set or points called
@@ -44,13 +42,13 @@ components:
 .. note::
 
     Although the documentation uses the ``English`` spelling of 
-    ``colour``; the code for compatibility sake uses ``color``, without the u.
+    ``color``; the code for compatibility sake uses ``color``, without the u.
 
 
-Colour Finding Methods
-----------------------
+Color Finding Methods
+---------------------
 
-A list of all colour finding methods in Simba.
+A list of all color finding methods in Simba.
 
 .. _scriptref-similarcolors:
 
@@ -61,7 +59,7 @@ SimilarColors
 
     function SimilarColors(C1, C2, Tolerance: Integer): Boolean;
 
-SimilarColors returns true if the two passed colours are *similar* given the
+SimilarColors returns true if the two passed colors are *similar* given the
 passed *Tolerance*. 
 
 .. _scriptref-getcolor:
@@ -75,14 +73,14 @@ GetColor
 
 GetColor returns the color on the coordinate *(x, y)*.
 
-Example printing the colour on coordinate (25, 25).
+Example printing the color on coordinate (25, 25).
 
 .. code-block:: pascal
 
-    program printcolour;
+    program printcolor;
 
     begin
-      Writeln('Colour is ' + IntToStr(GetColor(25, 25)))
+      Writeln('Color is ' + IntToStr(GetColor(25, 25)))
     end.
 
 .. _scriptref-getcolors:
@@ -94,7 +92,7 @@ GetColors
 
     function GetColors(const Coords : TPointArray) : TIntegerArray;
 
-GetColors returns an array of the colours at the given *Coords*.
+GetColors returns an array of the colors at the given *Coords*.
 
 .. _scriptref-countcolor:
 
@@ -130,7 +128,7 @@ FindColor
     function FindColor(var x, y: Integer; col, x1, y1, x2, y2: Integer): Boolean;
 
 
-FindColor returns true if the exact colour given (col) is found in the box
+FindColor returns true if the exact color given (col) is found in the box
 defined by *x1*, *y1*, *x2*, *y2*.
 The point is returned in *x* and *y*.
 It searches from the top left to the bottom right and will stop
@@ -145,11 +143,11 @@ FindColorTolerance
 
     function FindColorTolerance(var x, y: Integer; col, x1, y1, x2, y2, tol: Integer): Boolean;
 
-FindColorTolerance returns true if a colour within the given tolerance range
-*tol* of the given colour *col* is found in the box defined by *x1*, *y1*,
+FindColorTolerance returns true if a color within the given tolerance range
+*tol* of the given color *col* is found in the box defined by *x1*, *y1*,
 *x2*, *y2*.
 Only the first point is returned in *x* and *y*.
-Whether or not a colour is within the tolerance range is determined by the
+Whether or not a color is within the tolerance range is determined by the
 :ref:`scriptref-CTS` mode. It searches from the top left to the bottom right
 and will stop after matching a point.
 
@@ -162,7 +160,7 @@ FindColors
 
     function FindColors(var pts: TPointArray; col, x1, y1, x2, y2): Boolean;
 
-FindColors returns a list of all points that match the colour *col* in an area
+FindColors returns a list of all points that match the color *col* in an area
 defined by *x1*, *y1*, *x2*, *y2*. It returns true if one or more points have
 been found.
 
@@ -177,7 +175,7 @@ FindColorsTolerance
 
 FindColorsTolerance returns true if at least one point was found.
 A point is found if it is within the given tolerance range *tol*
-of the given colour *col* and inside the box defined by *x1*, *y1*, *x2*, *y2*.
+of the given color *col* and inside the box defined by *x1*, *y1*, *x2*, *y2*.
 Whether or not a color is within the tolerance range is determined by the
 :ref:`scriptref-CTS` mode.
 It searches from the top left to the bottom right and will find all
@@ -219,7 +217,7 @@ Same as FindColorsTolerance, but starts searching from *x*, *y*.
 .. _scriptref-findcoloredarea:
 .. _scriptref-findcoloredareatolerance:
 
-Find areas of colours
+Find areas of colors
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
@@ -234,16 +232,16 @@ to 25.
 
     function FindColoredAreaTolerance(var x, y : Integer; color, xs, ys, xe, ye, MinArea, Tolerance : Integer): Boolean;
 
-FindColoredArea finds an area that consists out of Colours that match *Color* with
+FindColoredArea finds an area that consists out of Colors that match *Color* with
 the given *Tolerance* and has a minimal size of *MinArea*.
 If you want minimal area of 5x5 pixels (25), then set MinArea to 25.
 
 .. _scriptref-CTS:
 
-Colour tolerance
-----------------
+Color tolerance
+---------------
 
-Simba contains several algorithms for determining if two colours are equal
+Simba contains several algorithms for determining if two colors are equal
 given a tolerance. There are three algorithms, from fastest to slowest:
 
     *   CTS 0: Quick and dirty comparison. Matches if the differences between the
@@ -255,25 +253,25 @@ given a tolerance. There are three algorithms, from fastest to slowest:
     *   CTS 2: HSL comparison. It has two modifiers that modify the
         result tolerance, Hue and Saturation. The lower the modifier, the higher
         tolerance required for a match. They can be set seperately and therefore
-        used to distinguish very specific colours. Some differ a lot in saturation, but
+        used to distinguish very specific colors. Some differ a lot in saturation, but
         very little in hue. Luminance is assigned a somewhat static function, and
         has no modifier.
 
-    *   CTS 3: Comparison using CIE L*a*b colour space, uses Pythagorean
+    *   CTS 3: Comparison using CIE L*a*b color space, uses Pythagorean
         distance.
 
 
 .. _scriptref-gettolerancespeed:
 .. _scriptref-setcolortolerancespeed:
 
-Get and Set Colour Tolerance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Get and Set Color Tolerance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     procedure SetColorToleranceSpeed(cts: integer);
 
-Set the current colour tolerance speed. Valid values are: 0, 1 and 2.
+Set the current color tolerance speed. Valid values are: 0, 1 and 2.
 Somewhat improperly named compared to the other CTS functions.
 
 .. code-block:: pascal
@@ -281,7 +279,7 @@ Somewhat improperly named compared to the other CTS functions.
     SetColorToleranceSpeed(2);
 
 And the proper way to get the current tolerance is to use the following
-function, which returns the current colour tolerance speed:
+function, which returns the current color tolerance speed:
 
 .. code-block:: pascal
 
@@ -296,14 +294,14 @@ Example printing the Color Tolerance
 .. _scriptref-settolerancespeed2modifiers:
 .. _scriptref-gettolerancespeed2modifiers:
 
-Get And Set Colour Modifiers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Get And Set Color Modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
     procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended);
 
-Set colour speed 2 modifiers.
+Set color speed 2 modifiers.
 
 .. code-block:: pascal
 
@@ -317,7 +315,7 @@ The following function
 
     procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended);
 
-returns colour speed 2 modifiers.
+returns color speed 2 modifiers.
 
 Example getting the modifiers:
 
@@ -331,3 +329,66 @@ Example getting the modifiers:
         Writeln(format('H = %f; S = %f', [H, S])); 
     end;
 
+
+FindColoredArea
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindColoredArea(var x, y: Integer; Color, xs, ys, xe, ye: Integer; MinArea: Integer): Boolean
+
+FindColoredAreaTolerance
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindColoredAreaTolerance(var x, y: Integer; Color, xs, ys, xe, ye, MinArea, tol: Integer): Boolean
+
+GetColorsWrap
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure GetColorsWrap(Coords: TPointArray; var Colors: TIntegerArray)
+
+GetToleranceSpeed2Modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure GetToleranceSpeed2Modifiers(var hMod, sMod: Extended)
+
+GetToleranceSpeed3Modifier
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetToleranceSpeed3Modifier: Extended
+
+GetToleranceSpeed
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetToleranceSpeed: Integer
+
+SetColorToleranceSpeed
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetColorToleranceSpeed(cts: Integer)
+
+SetToleranceSpeed2Modifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetToleranceSpeed2Modifiers(nHue, nSat: Extended)
+
+SetToleranceSpeed3Modifier
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetToleranceSpeed3Modifier(Modifier: Extended)

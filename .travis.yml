@@ -2,37 +2,44 @@
 
 sudo: true
 
-os:
-  - linux
-  - osx
-
 env:
   global:
     - WINEPREFIX=~/.winelaz
     - DISPLAY=:99.0
-  matrix:
-    - LAZ_VER=1.4.4
 
 matrix:
   allow_failures:
     - os: osx
   include:
+    - os: osx
+      env: LAZ_VER=1.4.4
     - os: linux
-      env: LAZ_VER=1.4.4  LAZ_WINE=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
+      env: LAZ_VER=1.4.4 DOCS=test
     - os: linux
-      env: LAZ_VER=1.4.4  LAZ_WINE=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
+      env: LAZ_VER=1.4.4 LAZ_WINE=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
+    - os: linux
+      env: LAZ_VER=1.4.4 LAZ_WINE=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
 
 before_install:
-    # Start virtual display server
-  - sh -e /etc/init.d/xvfb start || true
-  - sudo apt-get update && sudo apt-get install libxtst-dev libkeybinder-dev || true
+  # Install environment prerequisites
+  - sudo apt-get update && sudo apt-get install xvfb python-sphinx graphviz libxtst-dev libkeybinder-dev || true
+  - Xvfb $DISPLAY &
 
 install:
-    # Install prerequisites (wine/fpc/lazarus)
+  # Install testing prerequisites (wine/fpc/lazarus)
   - ./autobuild/travis-lazarus/.travis.install.py
 
 script:
-  - $LAZ_WINE lazbuild $LAZ_OPT ./Projects/Simba/Simba.lpi
+  # Generate Simba.exe in debug and release mode
+  - $LAZ_WINE lazbuild --bm=debug   $LAZ_OPT ./Projects/Simba/Simba.lpi
+  - $LAZ_WINE lazbuild --bm=release $LAZ_OPT ./Projects/Simba/Simba.lpi
+
+  # Validate references in documentation
+  - test -z "$DOCS" || make -C ./Doc $DOCS
+
+before_deploy:
+  # Generate documentation, ignore result if sphinx-build not available
+  - make -C ./Doc release tarball || ! command -v sphinx-build
 
 notifications:
   irc:

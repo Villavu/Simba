@@ -1,10 +1,13 @@
-.. _scriptref_tpa:
+.. _scriptref-tpa:
 
-TPointArray Functions
-=====================
+TPointArrays
+============
+
+Functions
+---------
 
 Quicksort
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -14,7 +17,7 @@ Sorts a TIntegerArray using the Quicksort algorithm
 
 
 tSwap
------
+~~~~~
 
 .. code-block:: pascal
 
@@ -44,7 +47,7 @@ illustrate the change.
 
 
 tpaSwap
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -54,7 +57,7 @@ Swaps the values of a and b around
 
 
 SwapE
------
+~~~~~
 
 .. code-block:: pascal
 
@@ -64,7 +67,7 @@ Swaps the values of a and b around
 
 
 RAaSTPAEx
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -73,7 +76,7 @@ RAaSTPAEx
 Leaves one point per box with side lengths W and H to the TPA
 
 RAaSTPA
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -83,7 +86,7 @@ Leaves one point per box with the side length Dist
 
 
 NearbyPointInArrayEx
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -93,7 +96,7 @@ Returns true if the point P is near a point in the TPA a with the
 
 
 NearbyPointInArray
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -103,7 +106,7 @@ Returns true if the point P is near a point in the TPA a with the
 
 
 QuickTPASort
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -111,7 +114,7 @@ QuickTPASort
 
 
 QuickATPASort
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -119,7 +122,7 @@ QuickATPASort
 
 
 SortTPAFrom
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -129,7 +132,7 @@ Sorts the TPA a from the TPoint From
 
 
 SortATPAFrom
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -139,7 +142,7 @@ Loops though each index of the T2DPointArray sorting each tpa from the TPoint
 
 
 SortATPAFromFirstPoint
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -149,7 +152,7 @@ Sorts the T2DPointArray from the TPoint, based from the first point in each TPoi
 
 
 SortATPAFromMidPoint
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -159,7 +162,7 @@ Sorts the T2DPointArray from the TPoint, based from the middle point in each TPo
 
 
 SortATPAFromFirstPointX
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -169,7 +172,7 @@ Sorts the T2DPointArray from the TPoint, based from the first point X value in e
 
 
 SortATPAFromFirstPointY
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -179,7 +182,7 @@ Sorts the T2DPointArray from the TPoint, based from the first point Y value in e
 
 
 InvertTPA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -189,7 +192,7 @@ Reverses the TPA
 
 
 InvertATPA
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -199,7 +202,7 @@ Reverses the T2dPointArray
 
 
 MiddleTPAEx
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -225,7 +228,7 @@ The following example will find the Colors and make a TPA then give you the x an
 
 
 MiddleTPA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -251,7 +254,7 @@ The following example like the previous one gives you the coordinates for the Mi
 
 
 MedianTPAEx
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -261,7 +264,7 @@ Finds the point closest to the middle of the TPointArray, returns the TPoint in 
 
 
 MedianTPA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -271,7 +274,7 @@ Returns the point closest to the middle of the TPointArray.
 
 
 SortATPASize
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -296,7 +299,7 @@ The following Example Sorts the ATPA from largest to smallest.
     end.
 
 SortATPAFromSize
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -306,7 +309,7 @@ Sorts the T2DPointArray from Size by the closest first if CloseFirst is true
 
 
 FilterTPAsBetween
------------------
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -316,7 +319,7 @@ Loops though each index of the T2DPointArray, removing the TPointArrays if their
 
 
 InIntArrayEx
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -326,7 +329,7 @@ Returns true if Number was found in the TIntegerArray a and returns its location
 
 
 InIntArray
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -336,7 +339,7 @@ Returns true if Number is found in the TintegerArray a
 
 
 ClearSameIntegers
------------------
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -346,7 +349,7 @@ Deletes the indexes in the TintegerArray a which are duplicated
 
 
 ClearSameIntegersAndTPA
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -356,7 +359,7 @@ Deletes the indexes in the TIntegerArray a and TPointArray p which are duplicate
 
 
 SplitTPAEx
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -366,7 +369,7 @@ Splits the points with max X and Y distances W and H to their own TPointArrays;
 
 
 SplitTPA
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -376,7 +379,7 @@ Splits the points with max distance Dist to their own TPointArrays
 
 
 ClusterTPAEx
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -387,7 +390,7 @@ An alternative to SplitTPAEx, will be extremely fast compared to SplitTPAEx with
 
 
 ClusterTPA
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -398,7 +401,7 @@ An alternative to SplitTPA, will be extremely fast compared to SplitTPA with a d
 
 
 FloodFillTPA
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -406,7 +409,7 @@ FloodFillTPA
 
 
 FilterPointsPie
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -417,7 +420,7 @@ Removes the points that are in the TPointArray Points that are not within the th
 
 
 FilterPointsLine
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -427,7 +430,7 @@ Returns the result in the TPointArray Points. Returns the points from the TPoint
 
 
 FilterPointsDist
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -438,7 +441,7 @@ Removes the points from the TPointArray Points that are not within the radius Mi
 
 
 FilterPointsBox
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -448,7 +451,7 @@ Removes the points from the TPointArray that are not within the bounds of the bo
 
 
 GetATPABounds
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -458,7 +461,7 @@ Returns the boundaries of the T2DPointArray ATPA as a TBox
 
 
 GetTPABounds
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -468,7 +471,7 @@ Returns the boundaries of the TPointArray TPA as a TBox
 
 
 FindTPAinTPA
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -478,7 +481,7 @@ Looks for the TPoints from SearchTPA inside TotalTPA and stores the matches insi
 
 
 GetSamePointsATPA
------------------
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -488,7 +491,7 @@ Finds duplicate Points inside the T2DPointArray ATPA and stores the results insi
 
 
 FindTextTPAinTPA
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -498,7 +501,7 @@ Looks for the TPoints from SearchTPA inside TotalTPA with a maximum y distance o
 
 
 SortCircleWise
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -508,7 +511,7 @@ Sorts the TPointArray tpa from the point cx, cy if Sortup is true. Starting at S
 
 
 LinearSort
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -518,7 +521,7 @@ Sorts the TPointArray tpa from cx, cy if Sortup is true on the degree angle sd
 
 
 RotatePoint
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -528,7 +531,7 @@ Rotates the TPoint p around the center mx, my with the angle
 
 
 ChangeDistPT
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -538,7 +541,7 @@ Returns a TPoint with the distance newdist from the point mx, my based on the po
 
 
 ChangeDistTPA
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -548,7 +551,7 @@ Returns the result in the TPointArray TPA with the distance newdist from mx, my 
 
 
 FindGapsTPA
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -558,7 +561,7 @@ Finds the possible gaps in the TPointArray TPA and results the gaps as a T2DPoin
 
 
 RemoveDistTPointArray
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -568,7 +571,7 @@ Finds the possible gaps in the TPointArray TPA and removes the gaps. Considers a
 
 
 CombineTPA
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -578,7 +581,7 @@ Attaches the TPointArray Ar2 onto the end of Ar1 and returns it as the result
 
 
 ReArrangeandShortenArrayEx
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -588,7 +591,7 @@ Results the TPointArray a with one point per box with side lengths W and H left
 
 
 ReArrangeandShortenArray
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -598,7 +601,7 @@ Results the TPointArray a with one point per box with side length Dist left
 
 
 TPAtoATPAEx
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -608,7 +611,7 @@ Splits the TPA to boxes with sidelengths W and H and results them as a T2DPointA
 
 
 TPAtoATPA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -618,7 +621,7 @@ Splits the TPA to boxes with sidelength Dist and results them as a T2DPointArray
 
 
 CombineIntArray
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -628,7 +631,7 @@ Attaches the TIntegerArray Ar2 onto the end of Ar1 and returns it as the result
 
 
 MergeATPA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -638,7 +641,7 @@ Combines all the TPointArrays from the T2DPointArray ATPA into the result
 
 
 AppendTPA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -648,7 +651,7 @@ Attaches the TPointArray ToAppend onto the end of TPA
 
 
 TPAFromLine
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -658,7 +661,7 @@ Returns a TPointArray of a line specified by the end points x1,y1 and x2,y2.
 
 
 EdgeFromBox
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -668,7 +671,7 @@ Creates a TPointArray from the edge of the TBox box
 
 
 TPAFromBox
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -678,7 +681,7 @@ Create a TPointArray from the top left and the bottom right of the TBox Box
 
 
 TPAFromEllipse
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -688,7 +691,7 @@ Creates and returns a TPointArray of the outline of a ellipse
 
 
 TPAFromCircle
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -698,7 +701,7 @@ Creates and returns a TPointArray of a circle, around the center point (CX, CY),
 
 
 TPAFromPolygon
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -730,7 +733,7 @@ an array of main points OR border points. note: The order of the points are impo
 
 
 FillEllipse
------------
+~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -740,7 +743,7 @@ Fills a ellipse, suggested to be used with TPAFromEllipse or TPAFromCircle
 
 
 RotatePoints
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -750,7 +753,7 @@ Rotates the TPointArray P around the center cx, cy with the angle a
 
 
 FindTPAEdges
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -760,7 +763,7 @@ Returns a TPointArray of the edge points of the TPointArray p
 
 
 ClearTPAFromTPA
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -770,7 +773,7 @@ Removes the points in TPointArray ClearPoints from arP
 
 
 ReturnPointsNotInTPA
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -780,7 +783,7 @@ All the points from the TPointArray TotalTPA that are not in the TBox Box are re
 
 
 PointInTPA
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -790,7 +793,7 @@ Returns true if the TPoint p is found in the TPointArray arP
 
 
 ClearDoubleTPA
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -800,7 +803,7 @@ Deletes duplicate TPAs in the TPointArray TPA
 
 
 TPACountSort
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -808,7 +811,7 @@ TPACountSort
 
 
 TPACountSortBase
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -816,7 +819,7 @@ TPACountSortBase
 
 
 InvertTIA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -826,7 +829,7 @@ Reverses the TIntegerArray tI
 
 
 SumIntegerArray
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -836,7 +839,7 @@ Retuns the sum of all the integers in the TIntegerArray Ints
 
 
 AverageTIA
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -846,7 +849,7 @@ Gives an average of the sum of the integers in the TIntegerArray tI
 
 
 AverageExtended
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -856,7 +859,7 @@ Gives an average of the sum of the extendeds in the TExtendedArray tI
 
 
 SplitTPAExWrap
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -866,7 +869,7 @@ Splits the points with max X and Y distances W and H to their and returns the re
 
 
 SplitTPAWrap
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -876,7 +879,7 @@ Splits the points with max distance Dist to their own TPointArrays and returns t
 
 
 FindGapsTPAWrap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -886,7 +889,7 @@ Finds the possible gaps in the TPointArray TPA and the result is returned in the
 
 
 RemoveDistTPointArrayWrap
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -896,7 +899,7 @@ Finds the possible gaps in the TPointArray TPA and removes the gaps. Considers a
 
 
 CombineTPAWrap
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -906,7 +909,7 @@ Attaches the TPointArray Ar2 onto the end of Ar1 and returns the result in the T
 
 
 ReArrangeandShortenArrayExWrap
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -916,7 +919,7 @@ Results the TPointArray a with one point per box with side lengths W and H left 
 
 
 ReArrangeandShortenArrayWrap
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -926,7 +929,7 @@ Results the TPointArray a with one point per box with side length Dist left and 
 
 
 TPAtoATPAExWrap
----------------
+~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -936,7 +939,7 @@ Splits the TPA to boxes with sidelengths W and H and results them as a T2DPointA
 
 
 TPAtoATPAWrap
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -946,7 +949,7 @@ Splits the TPA to boxes with sidelength Dist and results them as a T2DPointArray
 
 
 CombineIntArrayWrap
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -956,7 +959,7 @@ Attaches the TIntegerArray Ar2 onto the end of Ar1 and returns it in the TIntege
 
 
 ReturnPointsNotInTPAWrap
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -966,7 +969,7 @@ All the points from the TPointArray TotalTPA that are not in the TBox Box are re
 
 
 MergeATPAWrap
--------------
+~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -976,7 +979,7 @@ Combines all the TPointArrays from the T2DPointArray ATPA into the TPointArray R
 
 
 TPAFromBoxWrap
---------------
+~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -986,7 +989,7 @@ Create a TPointArray from the top left and the bottom right of the TBox Box and 
 
 
 RotatePointsWrap
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -996,7 +999,7 @@ Rotates the TPointArray P around the center cx, cy with the angle a and returns 
 
 
 FindTPAEdgesWrap
-----------------
+~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -1006,7 +1009,7 @@ Returns a TPointArray of the edge points of the TPointArray p and returns the re
 
 
 ClearTPAFromTPAWrap
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -1016,7 +1019,7 @@ Removes the points in TPointArray ClearPoints from arP and returns the results i
 
 
 SameTPA
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -1026,7 +1029,7 @@ Returns true if the TPointArray aTPA is the same as bTPA
 
 
 TPAInATPA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -1036,7 +1039,7 @@ Returns true if the TPointArray TPA is found in the T2DPointArray InATPA and sto
 
 
 OffsetTPA
----------
+~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -1046,7 +1049,7 @@ Offsets all the TPAs int the TPointArray TPA but the TPoint Offset
 
 
 OffsetATPA
-----------
+~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -1056,7 +1059,7 @@ Offsets all the TPAs int the T2DPointArray ATPA but the TPoint Offset
 
 
 CopyTPA
--------
+~~~~~~~
 
 .. code-block:: pascal
 
@@ -1066,7 +1069,7 @@ Returns the TPointArray TPA
 
 
 CopyATPA
---------
+~~~~~~~~
 
 .. code-block:: pascal
 
@@ -1076,7 +1079,7 @@ Returns the T2DPointArray ATPA
 
 
 PartitionTPA
-------------
+~~~~~~~~~~~~
 
 .. code-block:: pascal
 
@@ -1107,3 +1110,80 @@ The following example will partition a TPA in boxes of 10 width, 10 height and d
     FreeBitmap(canvas);
   end.  
 
+
+EdgeFromBoxWrap
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure EdgeFromBoxWrap(const Box: TBox; var Res: TPointArray)
+
+FilterTPADist
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure FilterTPADist(var TPA: TPointArray; maxDist: Integer)
+
+FindTPAColumns
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindTPAColumns(a: TPointArray): T2DPointArray
+
+FindTPARows
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindTPARows(a: TPointArray): T2DPointArray
+
+GlueTPAs
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function GlueTPAs(const V1, V2: TPointArray; const IsSortedAscending, byDifference: Boolean): TPointArray
+
+SortTPAByX
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SortTPAByX(var a: TPointArray; const LowToHi: Boolean)
+
+SortTPAByY
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SortTPAByY(var a: TPointArray; const LowToHi: Boolean)
+
+TPAFromCircleWrap
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TPAFromCircleWrap(const CX, CY, Radius: Integer; var Res: TPointArray)
+
+TPAFromEllipseWrap
+~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TPAFromEllipseWrap(const CX, CY, XRadius, YRadius: Integer; var Res: TPointArray)
+
+TPAFromLineWrap
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure TPAFromLineWrap(const xs, ys, xe, ye: Integer; var Res: TPointArray)
+
+TPAPosNext
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function TPAPosNext(const Find: TPoint; const V: TPointArray; const PrevPos: Integer;const IsSortedAscending: Boolean): Integer
