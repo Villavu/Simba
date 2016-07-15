@@ -22,7 +22,7 @@ function TLapeCompilerHelper.addNativeGlobalType(Str: lpString; AName: lpString)
 begin
   with addGlobalType(Str, '_' + AName) do
   begin
-    addGlobalType('native _' + AName, AName);
+    Result := addGlobalType('native _' + AName, AName);
     Name := '!' + AName;
   end;
 end;

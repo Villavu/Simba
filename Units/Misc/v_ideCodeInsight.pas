@@ -144,6 +144,7 @@ begin
   IncludeBufferCS.Acquire();
 
   try
+    Result := False;
     l := High(IncludeBuffer);
 
     for i := l downto 0 do
@@ -1583,6 +1584,7 @@ var
   dDecl: TDeclaration;
   dType: string;
 begin
+  Result := nil;
   if (Prefix = '') then
     Exit();
 

@@ -1085,11 +1085,9 @@ function TMOCR.GetTextAt(xs, ys, xe,ye, minvspacing, maxvspacing, hspacing,
 var
   TPA : TPointArray;
   STPA : T2DPointArray;
-  B : TBox;
 begin;
   SetLength(TPA, 0);
   TClient(Client).MFinder.FindColorsTolerance(TPA, color, xs,ys,xe,ye,tol);
-  b := GetTPABounds(TPA);
 
   { Split the text points into something usable. }
   { +1 because splittpa will not split well if we use 0 space ;) }
