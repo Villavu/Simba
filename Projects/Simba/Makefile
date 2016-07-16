@@ -89,9 +89,9 @@ clean:
 	rm -f ../../Units/*/*.a ../../Units/*/*.o ../../Units/*/*.ppu ../../Units/*/*.rst
 
 $(binary)-debug$(binary_extension):
-	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --lazarusdir="$(lazaruspath)" --compiler="$(fpcpath)" --bm=Debug Projects/Simba/Simba.lpi
+	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --lazarusdir="$(lazaruspath)" --compiler="$(fpcpath)" --bm=Debug Simba.lpi
 $(binary)$(binary_extension):
-	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --lazarusdir="$(lazaruspath)" --compiler="$(fpcpath)" --bm=Release Projects/Simba/Simba.lpi
+	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --lazarusdir="$(lazaruspath)" --compiler="$(fpcpath)" --bm=Release Simba.lpi
 	
 ifdef distrib
 # you may not want this down below here, just don't define distrib (it makes a distribution .7z file in the top-level directory)
