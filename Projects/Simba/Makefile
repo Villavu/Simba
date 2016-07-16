@@ -6,6 +6,12 @@
 
 .PHONY: default build rebuild unknown recursive_build clean i386-linux x86_64-linux i386-win32 x86_64-win64 all
 
+ifdef LAZARUS_PATH
+lazaruspath := $(LAZARUS_PATH)
+else
+lazaruspath := /usr/lib/lazarus/0.9.28.2
+endif
+
 # uncomment this or send distrib=1 via command line to build the distributable archive as well
 # if you set distrib, be sure to set the next option as well
 #distrib := 1
@@ -76,9 +82,9 @@ clean:
 	rm -f ../../Units/*/*.a ../../Units/*/*.o ../../Units/*/*.ppu ../../Units/*/*.rst
 
 $(binary)-debug$(binary_extension):
-	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --bm=Debug Projects/Simba/Simba.lpi
+	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --lazarusdir="$(lazaruspath)" --bm=Debug Projects/Simba/Simba.lpi
 $(binary)$(binary_extension):
-	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --bm=Release Projects/Simba/Simba.lpi
+	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --lazarusdir="$(lazaruspath)" --bm=Release Projects/Simba/Simba.lpi
 	
 ifdef distrib
 # you may not want this down below here, just don't define distrib (it makes a distribution .7z file in the top-level directory)
