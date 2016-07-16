@@ -62,21 +62,14 @@ else
 	our_target := unknown
 endif
 
-CC := $(fpcpath)
+CC := lazbuild
 build := $(CC)
-
-# -Xd doesn't seem to cause problems when not cross-compiling, and is needed when cross-compiling, so I'm leaving it here
-# -Xg = External debug file (Simba.dbg)
-common_flags := -Xd -MObjFPC -Scgi -O2 -OoREGVAR -gl -vewnhi -l -Fu. -dM_MEMORY_DEBUG -dLCL -Xg
-units := -Fu../../Units/MMLCore/ -Fu../../Units/MMLAddon/ -Fu../../Units/MMLAddon/PSInc/ -Fu../../Units/PascalScript/ -Fu../../Units/Misc/ -Fu../../Units/Linux/ -Fu../../Units/Synapse/  -Fu../../Units/lape -Fu../../Units/Misc/DCPCrypt -Fu../../Units/Misc/DCPCrypt/Ciphers -Fu../../Units/Misc/DCPCrypt/Hashes -Fu../../Units/lape/extensions/ffi -Fu../../Units/lape -Fu../../Units/MMLAddon/LPInc/Classes -Fu../../Units/MMLAddon/LPInc/Classes/MML -Fu../../Units/MMLAddon/LPInc/Classes/miniLCL -Fi../../Units/lape -Fu../ScriptManager -Fu../FormDesigner -Fu../FormDesigner/CodeGen -dLape_CDECL
 
 binary := Simba.$(platform)
 # windows wants executables to end in .exe
 ifeq ($(widgetset),win32)
 	binary_extension := .exe
 endif
-lclplatpath := $(lazaruspath)/lcl/units/$(platform)/
-lazarusunits := -Fu$(lazaruspath)/components/synedit/units/$(platform)/ -Fu$(lazaruspath)ideintf/units/$(platform)/ -Fu$(lclplatpath) -Fu$(lclplatpath)$(widgetset)/ -Fu$(lazaruspath)/packager/units/$(platform)/ -Fu$(lazaruspath)/components/mouseandkeyinput/ -Fu$(lazaruspath)/components/lazutils/ -Fu$(lazaruspath)/components/synedit
 
 default: build
 
@@ -84,7 +77,7 @@ build: $(our_target)
 
 rebuild: clean build
 
-recursive_build: $(binary)$(binary_extension)
+recursive_build: $(binary)-debug$(binary_extension) $(binary)$(binary_extension)
 
 unknown:
 	@echo Unable to auto-detect the OS and architecture you wish to build for, please specify target manually.
@@ -95,9 +88,11 @@ clean:
 #       now clean all the unit directories (I love Bash...)
 	rm -f ../../Units/*/*.a ../../Units/*/*.o ../../Units/*/*.ppu ../../Units/*/*.rst
 
+$(binary)-debug$(binary_extension):
+	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --lazarusdir="$(lazaruspath)" --compiler="$(fpcpath)" --bm=Debug -B -d Simba.lpi
 $(binary)$(binary_extension):
-	$(CC) $(common_flags) $(platform_flags) -dLCL$(widgetset) $(units) $(lazarusunits) -o$(binary)$(binary_extension) Simba.lpr
-	strip $(binary)$(binary_extension)
+	$(CC) --os=$(os) --cpu=$(cpu) --ws=$(widgetset) --lazarusdir="$(lazaruspath)" --compiler="$(fpcpath)" --bm=Release -B -d Simba.lpi
+	
 ifdef distrib
 # you may not want this down below here, just don't define distrib (it makes a distribution .7z file in the top-level directory)
 
@@ -108,7 +103,7 @@ ifdef distrib
 	#mv ../../Plugins ../../Plugins_bak
 	#mkdir -p ../../Plugins
 	#cp $(plugins_dir)/$(platform)/* ../../Plugins/
-	7z a ../../$(binary).7z $(binary)$(binary_extension) ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
+	7z a ../../$(binary).7z ../../$(binary)$(binary_extension) ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
 # now undo everything we did above
 	#rm -rf ../../Plugins
 	#mv ../../Plugins_bak ../../Plugins
@@ -117,20 +112,18 @@ ifdef distrib
 endif
 
 i386-linux:
-	$(MAKE) recursive_build platform="i386-linux" widgetset="gtk2" platform_flags="-Tlinux -Pi386 -dUseCThreads -dStaticFFI"
+	$(MAKE) recursive_build platform="i386-linux" widgetset="gtk2" os="linux" cpu="i386"
 	mv Simba.dbg Simba.i386-linux.dbg
 
 x86_64-linux:
-	$(MAKE) recursive_build platform="x86_64-linux" widgetset="gtk2" platform_flags="-Tlinux -Px86_64 -dUseCThreads -dStaticFFI"
+	$(MAKE) recursive_build platform="x86_64-linux" widgetset="gtk2" os="linux" cpu="x86_64"
 	mv Simba.dbg Simba.x86_64-linux.dbg
 
 i386-win32:
-	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" platform_flags="-Twin32 -Pi386 -Fl../../Units/lape/extensions/ffi/bin/win32 -dStaticFFI"
-	# Windows already names the .dbg properly...
+	$(MAKE) recursive_build platform="i386-win32" widgetset="win32" os="win32" cpu="i386"
 
 x86_64-win64:
-	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" platform_flags="-Twin64 -Px86_64 -Fl../../Units/lape/extensions/ffi/bin/win64 -dDynamicFFI"
-	# Windows already names the .dbg properly...
+	$(MAKE) recursive_build platform="x86_64-win64" widgetset="win32" os="win64" cpu="x86_64"
 
 all: i386-linux x86_64-linux i386-win32 x86_64-win64
 
@@ -142,7 +135,7 @@ all-in-one-distrib: all
 	#mv ../../Plugins ../../Plugins_bak
 	#mkdir -p ../../Plugins
 	#cp $(plugins_dir)/all-in-one/* ../../Plugins/
-	7z a ../../Simba.all-in-one.7z Simba.i386-* Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
+	7z a ../../Simba.all-in-one.7z ../../Simba.i386-* ../../Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
 # now undo everything we did above
 	#rm -rf ../../Plugins
 	#mv ../../Plugins_bak ../../Plugins
