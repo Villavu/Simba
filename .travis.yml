@@ -46,3 +46,7 @@ notifications:
     channels: "irc.rizon.net#simba"
     template:
       - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
+    on_success: change
+    on_failure: always
+    use_notice: true
+    skip_join: true
