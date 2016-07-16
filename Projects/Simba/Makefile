@@ -135,7 +135,7 @@ all-in-one-distrib: all
 	#mv ../../Plugins ../../Plugins_bak
 	#mkdir -p ../../Plugins
 	#cp $(plugins_dir)/all-in-one/* ../../Plugins/
-	7z a ../../Simba.all-in-one.7z Simba.i386-* Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
+	7z a ../../Simba.all-in-one.7z ../../Simba.i386-* ../../Simba.x86_64-* ../../Extensions/ ../../Fonts/ ../../Includes/ ../../Plugins/ ../../Scripts ../../Documentation
 # now undo everything we did above
 	#rm -rf ../../Plugins
 	#mv ../../Plugins_bak ../../Plugins
