@@ -89,14 +89,14 @@ begin
     addClass('TMFonts');
 
     addGlobalFunc('procedure TMFonts.Init(Owner : TObject);', @TMFonts_Init);
-    addGlobalFunc('function TMFonts.GetFont(const Name: String): TOcrData;', @TMFonts_GetFont);
-    addGlobalFunc('function TMFonts.FreeFont(const Name: String): Boolean;', @TMFonts_FreeFont);
-    addGlobalFunc('function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean;', @TMFonts_LoadFont);
-    addGlobalFunc('function TMFonts.LoadSystemFont(const SysFont : TFont; const FontName : string): boolean;', @TMFonts_LoadSystemFont);
-    addGlobalFunc('function TMFonts.Copy(Owner : TObject): TMFonts;', @TMFonts_Copy);
-    addGlobalFunc('function TMFonts.Count(): integer;', @TMFonts_Count);
+    addGlobalFunc('function TMFonts.GetFont(const Name: String): TOcrData; constref;', @TMFonts_GetFont);
+    addGlobalFunc('function TMFonts.FreeFont(const Name: String): Boolean; constref;', @TMFonts_FreeFont);
+    addGlobalFunc('function TMFonts.LoadFont(const Name: String; Shadow: Boolean): boolean; constref;', @TMFonts_LoadFont);
+    addGlobalFunc('function TMFonts.LoadSystemFont(const SysFont : TFont; const FontName : string): boolean; constref;', @TMFonts_LoadSystemFont);
+    addGlobalFunc('function TMFonts.Copy(Owner : TObject): TMFonts; constref;', @TMFonts_Copy);
+    addGlobalFunc('function TMFonts.Count(): integer; constref;', @TMFonts_Count);
     addClassVar('TMFonts', 'Path', 'string', @TMFonts_Path_Read, @TMFonts_Path_Write);
-    addGlobalFunc('procedure TMFonts.Free();', @TMFonts_Free);
+    addGlobalFunc('procedure TMFonts.Free(); constref;', @TMFonts_Free);
   end;
 end;
 

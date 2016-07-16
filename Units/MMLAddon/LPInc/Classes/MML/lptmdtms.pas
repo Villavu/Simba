@@ -80,14 +80,14 @@ begin
     addGlobalType('array of TSDTMPointDef;', 'TSDTMPointDefArray');
     addGlobalType('record MainPoint: TSDTMPointDef; SubPoints: TSDTMPointDefArray; end;', 'TSDTM');
 	
-    addGlobalFunc('function TMDTMS.AddDTM(const d: TSDTM): Integer;', @TMDTMS_AddDTM);
-    addGlobalFunc('function TMDTMS.AddDTM(const d: TMDTM): Integer; overload;', @TMDTMS_AddDTMEx);
-    addGlobalFunc('function TMDTMS.ExistsDTM(index : integer): boolean;', @TMDTMS_ExistsDTM);
-    addGlobalFunc('function TMDTMS.GetDTM(index: Integer): TMDTM;', @TMDTMS_GetDTM);
-    addGlobalFunc('procedure TMDTMS.FreeDTM(DTM: Integer);', @TMDTMS_FreeDTM);
-    addGlobalFunc('function TMDTMS.StringToDTM(const S: String): Integer;', @TMDTMS_StringToDTM);
+    addGlobalFunc('function TMDTMS.AddDTM(const d: TSDTM): Integer; constref;', @TMDTMS_AddDTM);
+    addGlobalFunc('function TMDTMS.AddDTM(const d: TMDTM): Integer; constref; overload;', @TMDTMS_AddDTMEx);
+    addGlobalFunc('function TMDTMS.ExistsDTM(index : integer): boolean; constref;', @TMDTMS_ExistsDTM);
+    addGlobalFunc('function TMDTMS.GetDTM(index: Integer): TMDTM; constref;', @TMDTMS_GetDTM);
+    addGlobalFunc('procedure TMDTMS.FreeDTM(DTM: Integer); constref;', @TMDTMS_FreeDTM);
+    addGlobalFunc('function TMDTMS.StringToDTM(const S: String): Integer; constref;', @TMDTMS_StringToDTM);
     addGlobalFunc('procedure TMDTMS.Init(Owner: TObject);', @TMDTMS_Init);
-    addGlobalFunc('procedure TMDTMS.Free();', @TMDTMS_Free);
+    addGlobalFunc('procedure TMDTMS.Free(); constref;', @TMDTMS_Free);
   end;
 end;
 

@@ -395,7 +395,7 @@ begin
                   Font.Style := Font.Style - [fsUnderline];
             end;
           end
-          else if (s[p1 + 1] = '|') then
+          else if (s[p1 + 1] = '|') and (col < Length(ColumnSizes)) then
           begin
             if (ColumnSizes[col] = -1) then
               ColumnSizes[col] := Canvas.TextWidth('constructor') + 5;

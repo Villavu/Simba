@@ -198,14 +198,14 @@ begin
    addClass('TSizeConstraints', 'TPersistent');
 
    addGlobalFunc('procedure TSizeConstraints.Init(AControl: TControl);', @TSizeConstraints_Init);
-   addGlobalFunc('procedure TSizeConstraints.UpdateInterfaceConstraints();', @TSizeConstraints_UpdateInterfaceConstraints);
-   addGlobalFunc('procedure TSizeConstraints.SetInterfaceConstraints(MinW, MinH, MaxW, MaxH: integer);', @TSizeConstraints_SetInterfaceConstraints);
-   addGlobalFunc('function TSizeConstraints.EffectiveMinWidth(): integer;', @TSizeConstraints_EffectiveMinWidth);
-   addGlobalFunc('function TSizeConstraints.EffectiveMinHeight(): integer;', @TSizeConstraints_EffectiveMinHeight);
-   addGlobalFunc('function TSizeConstraints.EffectiveMaxWidth(): integer;', @TSizeConstraints_EffectiveMaxWidth);
-   addGlobalFunc('function TSizeConstraints.EffectiveMaxHeight(): integer;', @TSizeConstraints_EffectiveMaxHeight);
-   addGlobalFunc('function TSizeConstraints.MinMaxWidth(Width: integer): integer;', @TSizeConstraints_MinMaxWidth);
-   addGlobalFunc('function TSizeConstraints.MinMaxHeight(Height: integer): integer;', @TSizeConstraints_MinMaxHeight);
+   addGlobalFunc('procedure TSizeConstraints.UpdateInterfaceConstraints(); constref;', @TSizeConstraints_UpdateInterfaceConstraints);
+   addGlobalFunc('procedure TSizeConstraints.SetInterfaceConstraints(MinW, MinH, MaxW, MaxH: integer); constref;', @TSizeConstraints_SetInterfaceConstraints);
+   addGlobalFunc('function TSizeConstraints.EffectiveMinWidth(): integer; constref;', @TSizeConstraints_EffectiveMinWidth);
+   addGlobalFunc('function TSizeConstraints.EffectiveMinHeight(): integer; constref;', @TSizeConstraints_EffectiveMinHeight);
+   addGlobalFunc('function TSizeConstraints.EffectiveMaxWidth(): integer; constref;', @TSizeConstraints_EffectiveMaxWidth);
+   addGlobalFunc('function TSizeConstraints.EffectiveMaxHeight(): integer; constref;', @TSizeConstraints_EffectiveMaxHeight);
+   addGlobalFunc('function TSizeConstraints.MinMaxWidth(Width: integer): integer; constref;', @TSizeConstraints_MinMaxWidth);
+   addGlobalFunc('function TSizeConstraints.MinMaxHeight(Height: integer): integer; constref;', @TSizeConstraints_MinMaxHeight);
    addClassVar('TSizeConstraints', 'MaxInterfaceHeight', 'integer', @TSizeConstraints_MaxInterfaceHeight_Read, nil);
    addClassVar('TSizeConstraints', 'MaxInterfaceWidth', 'integer', @TSizeConstraints_MaxInterfaceWidth_Read, nil);
    addClassVar('TSizeConstraints', 'MinInterfaceHeight', 'integer', @TSizeConstraints_MinInterfaceHeight_Read, nil);
@@ -217,7 +217,7 @@ begin
    addClassVar('TSizeConstraints', 'MaxWidth', 'Integer', @TSizeConstraints_MaxWidth_Read, @TSizeConstraints_MaxWidth_Write);
    addClassVar('TSizeConstraints', 'MinHeight', 'Integer', @TSizeConstraints_MinHeight_Read, @TSizeConstraints_MinHeight_Write);
    addClassVar('TSizeConstraints', 'MinWidth', 'Integer', @TSizeConstraints_MinWidth_Read, @TSizeConstraints_MinWidth_Write);
-   addGlobalFunc('procedure TSizeConstraints.Free();', @TSizeConstraints_Free);
+   addGlobalFunc('procedure TSizeConstraints.Free(); constref;', @TSizeConstraints_Free);
  end;
 end;
 
@@ -718,36 +718,36 @@ begin
 
     addGlobalFunc('procedure TCustomForm.Init(AOwner: TComponent);', @TCustomForm_Init);
     addGlobalFunc('procedure TCustomForm.InitNew(AOwner: TComponent; Num: Integer);', @TCustomForm_CreateNew);
-    addGlobalFunc('procedure TCustomForm.AfterConstruction();', @TCustomForm_AfterConstruction);
-    addGlobalFunc('procedure TCustomForm.BeforeDestruction();', @TCustomForm_BeforeDestruction);
-    addGlobalFunc('procedure TCustomForm.Close();', @TCustomForm_Close);
-    addGlobalFunc('function TCustomForm.CloseQuery(): boolean;', @TCustomForm_CloseQuery);
-    addGlobalFunc('procedure TCustomForm.DefocusControl(Control: TWinControl; Removing: Boolean);', @TCustomForm_DefocusControl);
-    addGlobalFunc('procedure TCustomForm.DestroyWnd();', @TCustomForm_DestroyWnd);
-    addGlobalFunc('procedure TCustomForm.EnsureVisible(AMoveToTop: Boolean);', @TCustomForm_EnsureVisible);
-    addGlobalFunc('procedure TCustomForm.FocusControl(WinControl: TWinControl);', @TCustomForm_FocusControl);
-    addGlobalFunc('function TCustomForm.FormIsUpdating(): boolean;', @TCustomForm_FormIsUpdating);
-    addGlobalFunc('function TCustomForm.GetFormImage(): TBitmap;', @TCustomForm_GetFormImage);
-    addGlobalFunc('procedure TCustomForm.Hide();', @TCustomForm_Hide);
-    addGlobalFunc('procedure TCustomForm.IntfDropFiles(const FileNames: TStringArray);', @TCustomForm_IntfDropFiles);
-    addGlobalFunc('procedure TCustomForm.IntfHelp(AComponent: TComponent);', @TCustomForm_IntfHelp);
-    addGlobalFunc('function TCustomForm.AutoSizeDelayedHandle(): Boolean;', @TCustomForm_AutoSizeDelayedHandle);
-    addGlobalFunc('procedure TCustomForm.GetPreferredSize(var PreferredWidth, PreferredHeight: integer;Raw,WithThemeSpace: boolean );', @TCustomForm_GetPreferredSize);
-    addGlobalFunc('procedure TCustomForm.Release();', @TCustomForm_Release);
-    addGlobalFunc('function TCustomForm.CanFocus(): Boolean;', @TCustomForm_CanFocus);
-    addGlobalFunc('procedure TCustomForm.SetFocus();', @TCustomForm_SetFocus);
-    addGlobalFunc('function TCustomForm.SetFocusedControl(Control: TWinControl): Boolean;', @TCustomForm_SetFocusedControl);
-    addGlobalFunc('procedure TCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: integer);', @TCustomForm_SetRestoredBounds);
-    addGlobalFunc('procedure TCustomForm.Show();', @TCustomForm_Show);
-    addGlobalFunc('function TCustomForm.ShowModal(): Integer;', @TCustomForm_ShowModal);
-    addGlobalFunc('procedure TCustomForm.ShowOnTop();', @TCustomForm_ShowOnTop);
-    addGlobalFunc('procedure TCustomForm.RemoveAllHandlersOfObject(AnObject: TObject);', @TCustomForm_RemoveAllHandlersOfObject);
-    addGlobalFunc('procedure TCustomForm.AddHandlerFirstShow(OnFirstShowHandler: TNotifyEvent;AsFirst: Boolean);', @TCustomForm_AddHandlerFirstShow);
-    addGlobalFunc('procedure TCustomForm.RemoveHandlerFirstShow(OnFirstShowHandler: TNotifyEvent);', @TCustomForm_RemoveHandlerFirstShow);
-    addGlobalFunc('procedure TCustomForm.AddHandlerClose(OnCloseHandler: TCloseEvent; AsFirst: Boolean);', @TCustomForm_AddHandlerClose);
-    addGlobalFunc('procedure TCustomForm.RemoveHandlerClose(OnCloseHandler: TCloseEvent);', @TCustomForm_RemoveHandlerClose);
-    addGlobalFunc('procedure TCustomForm.AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean);', @TCustomForm_AddHandlerCreate);
-    addGlobalFunc('procedure TCustomForm.RemoveHandlerCreate(OnCreateHandler: TNotifyEvent);', @TCustomForm_RemoveHandlerCreate);
+    addGlobalFunc('procedure TCustomForm.AfterConstruction(); constref;', @TCustomForm_AfterConstruction);
+    addGlobalFunc('procedure TCustomForm.BeforeDestruction(); constref;', @TCustomForm_BeforeDestruction);
+    addGlobalFunc('procedure TCustomForm.Close(); constref;', @TCustomForm_Close);
+    addGlobalFunc('function TCustomForm.CloseQuery(): boolean; constref;', @TCustomForm_CloseQuery);
+    addGlobalFunc('procedure TCustomForm.DefocusControl(Control: TWinControl; Removing: Boolean); constref;', @TCustomForm_DefocusControl);
+    addGlobalFunc('procedure TCustomForm.DestroyWnd(); constref;', @TCustomForm_DestroyWnd);
+    addGlobalFunc('procedure TCustomForm.EnsureVisible(AMoveToTop: Boolean); constref;', @TCustomForm_EnsureVisible);
+    addGlobalFunc('procedure TCustomForm.FocusControl(WinControl: TWinControl); constref;', @TCustomForm_FocusControl);
+    addGlobalFunc('function TCustomForm.FormIsUpdating(): boolean; constref;', @TCustomForm_FormIsUpdating);
+    addGlobalFunc('function TCustomForm.GetFormImage(): TBitmap; constref;', @TCustomForm_GetFormImage);
+    addGlobalFunc('procedure TCustomForm.Hide(); constref;', @TCustomForm_Hide);
+    addGlobalFunc('procedure TCustomForm.IntfDropFiles(const FileNames: TStringArray); constref;', @TCustomForm_IntfDropFiles);
+    addGlobalFunc('procedure TCustomForm.IntfHelp(AComponent: TComponent); constref;', @TCustomForm_IntfHelp);
+    addGlobalFunc('function TCustomForm.AutoSizeDelayedHandle(): Boolean; constref;', @TCustomForm_AutoSizeDelayedHandle);
+    addGlobalFunc('procedure TCustomForm.GetPreferredSize(var PreferredWidth, PreferredHeight: integer;Raw,WithThemeSpace: boolean ); constref;', @TCustomForm_GetPreferredSize);
+    addGlobalFunc('procedure TCustomForm.Release(); constref;', @TCustomForm_Release);
+    addGlobalFunc('function TCustomForm.CanFocus(): Boolean; constref;', @TCustomForm_CanFocus);
+    addGlobalFunc('procedure TCustomForm.SetFocus(); constref;', @TCustomForm_SetFocus);
+    addGlobalFunc('function TCustomForm.SetFocusedControl(Control: TWinControl): Boolean; constref;', @TCustomForm_SetFocusedControl);
+    addGlobalFunc('procedure TCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: integer); constref;', @TCustomForm_SetRestoredBounds);
+    addGlobalFunc('procedure TCustomForm.Show(); constref;', @TCustomForm_Show);
+    addGlobalFunc('function TCustomForm.ShowModal(): Integer; constref;', @TCustomForm_ShowModal);
+    addGlobalFunc('procedure TCustomForm.ShowOnTop(); constref;', @TCustomForm_ShowOnTop);
+    addGlobalFunc('procedure TCustomForm.RemoveAllHandlersOfObject(AnObject: TObject); constref;', @TCustomForm_RemoveAllHandlersOfObject);
+    addGlobalFunc('procedure TCustomForm.AddHandlerFirstShow(OnFirstShowHandler: TNotifyEvent;AsFirst: Boolean); constref;', @TCustomForm_AddHandlerFirstShow);
+    addGlobalFunc('procedure TCustomForm.RemoveHandlerFirstShow(OnFirstShowHandler: TNotifyEvent); constref;', @TCustomForm_RemoveHandlerFirstShow);
+    addGlobalFunc('procedure TCustomForm.AddHandlerClose(OnCloseHandler: TCloseEvent; AsFirst: Boolean); constref;', @TCustomForm_AddHandlerClose);
+    addGlobalFunc('procedure TCustomForm.RemoveHandlerClose(OnCloseHandler: TCloseEvent); constref;', @TCustomForm_RemoveHandlerClose);
+    addGlobalFunc('procedure TCustomForm.AddHandlerCreate(OnCreateHandler: TNotifyEvent; AsFirst: Boolean); constref;', @TCustomForm_AddHandlerCreate);
+    addGlobalFunc('procedure TCustomForm.RemoveHandlerCreate(OnCreateHandler: TNotifyEvent); constref;', @TCustomForm_RemoveHandlerCreate);
     addClassVar('TCustomForm', 'BorderStyle', 'TFormBorderStyle', @TCustomForm_Read_BorderStyle, @TCustomForm_Write_BorderStyle);
     addClassVar('TCustomForm', 'BorderIcons', 'TBorderIcons', @TCustomForm_Read_BorderIcons, @TCustomForm_Write_BorderIcons);
     addClassVar('TCustomForm', 'Active', 'Boolean', @TCustomForm_Active_Read);
@@ -775,7 +775,7 @@ begin
     addClassVar('TCustomForm', 'RestoredWidth', 'integer', @TCustomForm_RestoredWidth_Read);
     addClassVar('TCustomForm', 'RestoredHeight', 'integer', @TCustomForm_RestoredHeight_Read);
     addClassVar('TCustomForm', 'Constraints', 'TSizeConstraints', @TCustomForm_Constraints_Read, @TCustomForm_Constraints_Write);
-    addGlobalFunc('procedure TCustomForm.Free();', @TCustomForm_Free);
+    addGlobalFunc('procedure TCustomForm.Free(); constref;', @TCustomForm_Free);
   end;
 end;
  {TForm}
@@ -1126,13 +1126,13 @@ begin
     addClass('TForm', 'TCustomForm');
 
     addGlobalFunc('procedure TForm.Init(TheOwner: TComponent);', @TForm_Init);
-    addGlobalFunc('procedure TForm.Cascade();', @TForm_Cascade);
-    addGlobalFunc('procedure TForm.Next();', @TForm_Next);
-    addGlobalFunc('procedure TForm.Previous();', @TForm_Previous);
-    addGlobalFunc('procedure TForm.Tile();', @TForm_Tile);
-    addGlobalFunc('procedure TForm.Show();', @TForm_Show);
-    addGlobalFunc('procedure TForm.Close();', @TForm_Close);
-    addGlobalFunc('procedure TForm.Hide();', @TForm_Hide);
+    addGlobalFunc('procedure TForm.Cascade(); constref;', @TForm_Cascade);
+    addGlobalFunc('procedure TForm.Next(); constref;', @TForm_Next);
+    addGlobalFunc('procedure TForm.Previous(); constref;', @TForm_Previous);
+    addGlobalFunc('procedure TForm.Tile(); constref;', @TForm_Tile);
+    addGlobalFunc('procedure TForm.Show(); constref;', @TForm_Show);
+    addGlobalFunc('procedure TForm.Close(); constref;', @TForm_Close);
+    addGlobalFunc('procedure TForm.Hide(); constref;', @TForm_Hide);
     addClassVar('TForm', 'ClientWidth', 'Integer', @TForm_ClientWidth_Read, @TForm_ClientWidth_Write);
     addClassVar('TForm', 'ClientHeight', 'Integer', @TForm_ClientHeight_Read, @TForm_ClientHeight_Write);
     addClassVar('TForm', 'OnClose', 'TCloseEvent', @TForm_OnClose_Read, @TForm_OnClose_Write);
@@ -1156,7 +1156,7 @@ begin
     addClassVar('TForm', 'Width', 'Integer', @TForm_Width_Read, @TForm_Width_Write);
     addClassVar('TForm', 'Caption', 'string', @TForm_Caption_Read, @TForm_Caption_Write);
     addClassVar('TForm', 'Position', 'TPosition', @TForm_Position_Read, @TForm_Position_Write);
-    addGlobalFunc('procedure TForm.Free();', @TForm_Free);
+    addGlobalFunc('procedure TForm.Free(); constref;', @TForm_Free);
     addClassVar('TForm', 'OnMouseMove', 'TMouseMoveEvent', @TForm_OnMouseMove_Read, @TForm_OnMouseMove_Write);
   end;
 end;
@@ -1180,7 +1180,7 @@ begin
     addClass('TScrollBox', 'TScrollingWinControl');
 
     addGlobalFunc('procedure TScrollBox.Init(AOwner: TComponent);', @TScrollBox_Init);
-    addGlobalFunc('procedure TScrollBox.Free();', @TScrollBox_Free);
+    addGlobalFunc('procedure TScrollBox.Free(); constref;', @TScrollBox_Free);
   end;
 end;
 
