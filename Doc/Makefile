@@ -2,7 +2,7 @@
 
 default: all
 all:     sphinx
-sphinx:  sphinx-html sphinx-pdf
+sphinx:  sphinx-html sphinx-pdf sphinx-singlehtml
 
 pics:
 	$(MAKE) -C Pics/
