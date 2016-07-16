@@ -99,18 +99,18 @@ begin
   begin
     addClass('TMBitmaps');
 
-    addGlobalFunc('function TMBitmaps.GetBMP(Index : integer): TMufasaBitmap;', @TMBitmaps_GetBMP);
-    addGlobalFunc('function TMBitmaps.CreateBMP(w, h: integer): Integer;', @TMBitmaps_CreateBMP);
-    addGlobalFunc('function TMBitmaps.ExistsBMP(Index : integer): boolean;', @TMBitmaps_ExistsBMP);
-    addGlobalFunc('function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer;', @TMBitmaps_AddBMP);
-    addGlobalFunc('function TMBitmaps.CopyBMP( Bitmap : integer): Integer;', @TMBitmaps_CopyBMP);
-    addGlobalFunc('function TMBitmaps.CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer;', @TMBitmaps_CreateMirroredBitmap);
-    addGlobalFunc('function TMBitmaps.CreateBMPFromFile(const Path : string): integer;', @TMBitmaps_CreateBMPFromFile);
-    addGlobalFunc('function TMBitmaps.CreateBMPFromString(width,height : integer; Data : string): integer;', @TMBitmaps_CreateBMPFromString);
-    addGlobalFunc('function TMBitmaps.CreateBMPFromString(BmpName : string; width,height : integer; Data : string): integer; overload;', @TMBitmaps_CreateBMPFromStringEx);
-    addGlobalFunc('procedure TMBitmaps.RemoveBMP(Number: integer);', @TMBitmaps_RemoveBMP);
+    addGlobalFunc('function TMBitmaps.GetBMP(Index : integer): TMufasaBitmap; constref;', @TMBitmaps_GetBMP);
+    addGlobalFunc('function TMBitmaps.CreateBMP(w, h: integer): Integer; constref;', @TMBitmaps_CreateBMP);
+    addGlobalFunc('function TMBitmaps.ExistsBMP(Index : integer): boolean; constref;', @TMBitmaps_ExistsBMP);
+    addGlobalFunc('function TMBitmaps.AddBMP(_bmp: TMufasaBitmap): Integer; constref;', @TMBitmaps_AddBMP);
+    addGlobalFunc('function TMBitmaps.CopyBMP( Bitmap : integer): Integer; constref;', @TMBitmaps_CopyBMP);
+    addGlobalFunc('function TMBitmaps.CreateMirroredBitmap(bitmap: Integer; MirrorStyle : TBmpMirrorStyle): Integer; constref;', @TMBitmaps_CreateMirroredBitmap);
+    addGlobalFunc('function TMBitmaps.CreateBMPFromFile(const Path : string): integer; constref;', @TMBitmaps_CreateBMPFromFile);
+    addGlobalFunc('function TMBitmaps.CreateBMPFromString(width,height : integer; Data : string): integer; constref;', @TMBitmaps_CreateBMPFromString);
+    addGlobalFunc('function TMBitmaps.CreateBMPFromString(BmpName : string; width,height : integer; Data : string): integer; constref; overload;', @TMBitmaps_CreateBMPFromStringEx);
+    addGlobalFunc('procedure TMBitmaps.RemoveBMP(Number: integer); constref;', @TMBitmaps_RemoveBMP);
     addGlobalFunc('procedure TMBitmaps.Init(Owner : TObject);', @TMBitmaps_Init);
-    addGlobalFunc('procedure TMBitmaps.Free();', @TMBitmaps_Free);
+    addGlobalFunc('procedure TMBitmaps.Free(); constref;', @TMBitmaps_Free);
   end;
 end;
 

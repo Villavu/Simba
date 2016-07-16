@@ -98,14 +98,14 @@ begin
   begin
     addClass('TMMLSettingsSandbox', 'TObject');
 
-    addGlobalFunc('function TMMLSettingsSandbox.IsKey(const KeyName: String): Boolean;', @TMMLSettingsSandbox_IsKey);
-    addGlobalFunc('function TMMLSettingsSandbox.IsDirectory(const KeyName: String): Boolean;', @TMMLSettingsSandbox_IsDirectory);
-    addGlobalFunc('function TMMLSettingsSandbox.SetKeyValue(const Keyname, Value : string): boolean;', @TMMLSettingsSandbox_SetKeyValue);
-    addGlobalFunc('function TMMLSettingsSandbox.GetKeyValue(const KeyName: String): String;', @TMMLSettingsSandbox_GetKeyValue);
-    addGlobalFunc('function TMMLSettingsSandbox.GetKeyValueDef(const KeyName, defVal: String): String;', @TMMLSettingsSandbox_GetKeyValueDef);
-    addGlobalFunc('function TMMLSettingsSandbox.ListKeys(const KeyName: String; out Keys : TStringArray): boolean;', @TMMLSettingsSandbox_ListKeys);
-    addGlobalFunc('function TMMLSettingsSandbox.DeleteKey(const KeyName: String): Boolean;', @TMMLSettingsSandbox_DeleteKey);
-    addGlobalFunc('function TMMLSettingsSandbox.DeleteSubKeys(const KeyName: String): Boolean;', @TMMLSettingsSandbox_DeleteSubKeys);
+    addGlobalFunc('function TMMLSettingsSandbox.IsKey(const KeyName: String): Boolean; constref;', @TMMLSettingsSandbox_IsKey);
+    addGlobalFunc('function TMMLSettingsSandbox.IsDirectory(const KeyName: String): Boolean; constref;', @TMMLSettingsSandbox_IsDirectory);
+    addGlobalFunc('function TMMLSettingsSandbox.SetKeyValue(const Keyname, Value : string): boolean; constref;', @TMMLSettingsSandbox_SetKeyValue);
+    addGlobalFunc('function TMMLSettingsSandbox.GetKeyValue(const KeyName: String): String; constref;', @TMMLSettingsSandbox_GetKeyValue);
+    addGlobalFunc('function TMMLSettingsSandbox.GetKeyValueDef(const KeyName, defVal: String): String; constref;', @TMMLSettingsSandbox_GetKeyValueDef);
+    addGlobalFunc('function TMMLSettingsSandbox.ListKeys(const KeyName: String; out Keys : TStringArray): boolean; constref;', @TMMLSettingsSandbox_ListKeys);
+    addGlobalFunc('function TMMLSettingsSandbox.DeleteKey(const KeyName: String): Boolean; constref;', @TMMLSettingsSandbox_DeleteKey);
+    addGlobalFunc('function TMMLSettingsSandbox.DeleteSubKeys(const KeyName: String): Boolean; constref;', @TMMLSettingsSandbox_DeleteSubKeys);
     addClassVar('TMMLSettingsSandbox', 'prefix', 'string', @TMMLSettingsSandbox_prefix_Read, @TMMLSettingsSandbox_prefix_Write);
   end;
 end;

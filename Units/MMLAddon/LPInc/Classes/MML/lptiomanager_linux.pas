@@ -111,14 +111,14 @@ begin
 
     addGlobalFunc('procedure TIOManager.Init(); overload;', @TIOManager_Init);
     addGlobalFunc('procedure TIOManager.Init(plugin_dir: string); overload;', @TIOManager_InitEx);
-    addGlobalFunc('function TIOManager.SetTarget(target: TNativeWindow): integer;', @TIOManager_SetTarget);
-    addGlobalFunc('procedure TIOManager.SetDesktopAsTarget();', @TIOManager_SetDesktop);
-    addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr;', @TIOManager_GetProcesses);
-    addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc);', @TIOManager_SetTargetEx);
+    addGlobalFunc('function TIOManager.SetTarget(target: TNativeWindow): integer; constref;', @TIOManager_SetTarget);
+    addGlobalFunc('procedure TIOManager.SetDesktopAsTarget(); constref;', @TIOManager_SetDesktop);
+    addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr; constref;', @TIOManager_GetProcesses);
+    addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc); constref;', @TIOManager_SetTargetEx);
     addClassVar('TIOManager', 'display', 'PDisplay', @TIOManager_display_Read, @TIOManager_display_Write);
     addClassVar('TIOManager', 'screennum', 'integer', @TIOManager_screennum_Read, @TIOManager_screennum_Write);
     addClassVar('TIOManager', 'desktop', 'TNativeWindow', @TIOManager_desktop_Read, @TIOManager_desktop_Write);
-    addGlobalFunc('procedure TIOManager.Free();', @TIOManager_Free);
+    addGlobalFunc('procedure TIOManager.Free(); constref;', @TIOManager_Free);
   end;
 end;
 

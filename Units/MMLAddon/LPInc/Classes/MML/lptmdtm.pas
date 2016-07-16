@@ -147,20 +147,20 @@ begin
 
     addClassVar('TMDTM', 'Name', 'string', @TMDTM_Name_Read, @TMDTM_Name_Write);
     addClassVar('TMDTM', 'Index', 'integer', @TMDTM_Index_Read, @TMDTM_Index_Write);
-    addGlobalFunc('function TMDTM.ToString(): string;', @TMDTM_ToString);
-    addGlobalFunc('function TMDTM.SaveToFile(const FileName : string): boolean;', @TMDTM_SaveToFile);
-    addGlobalFunc('function TMDTM.LoadFromString(const s : string): boolean;', @TMDTM_LoadFromString);
-    addGlobalFunc('procedure TMDTM.Normalize();', @TMDTM_Normalize);
-    addGlobalFunc('function TMDTM.Valid(): boolean;', @TMDTM_Valid);
-    addGlobalFunc('procedure TMDTM.DeletePoint(Point : integer);', @TMDTM_DeletePoint);
-    addGlobalFunc('procedure TMDTM.SwapPoint(p1, p2: integer);', @TMDTM_SwapPoint);
-    addGlobalFunc('procedure TMDTM.MovePoint(fromIndex, toIndex: integer);', @TMDTM_MovePoint);
-    addGlobalFunc('function TMDTM.AddPoint(Point: TMDTMPoint): integer;', @TMDTM_AddPoint);
+    addGlobalFunc('function TMDTM.ToString(): string; constref;', @TMDTM_ToString);
+    addGlobalFunc('function TMDTM.SaveToFile(const FileName : string): boolean; constref;', @TMDTM_SaveToFile);
+    addGlobalFunc('function TMDTM.LoadFromString(const s : string): boolean; constref;', @TMDTM_LoadFromString);
+    addGlobalFunc('procedure TMDTM.Normalize(); constref;', @TMDTM_Normalize);
+    addGlobalFunc('function TMDTM.Valid(): boolean; constref;', @TMDTM_Valid);
+    addGlobalFunc('procedure TMDTM.DeletePoint(Point : integer); constref;', @TMDTM_DeletePoint);
+    addGlobalFunc('procedure TMDTM.SwapPoint(p1, p2: integer); constref;', @TMDTM_SwapPoint);
+    addGlobalFunc('procedure TMDTM.MovePoint(fromIndex, toIndex: integer); constref;', @TMDTM_MovePoint);
+    addGlobalFunc('function TMDTM.AddPoint(Point: TMDTMPoint): integer; constref;', @TMDTM_AddPoint);
     addClassVar('TMDTM', 'PPoints', 'PMDTMPoint', @TMDTM_PPoints_Read);
     addClassVar('TMDTM', 'Count', 'integer', @TMDTM_Count_Read, @TMDTM_Count_Write);
     addClassVar('TMDTM', 'Points', 'TMDTMPointArray', @TMDTM_Points_Read);
     addGlobalFunc('procedure TMDTM.Init();', @TMDTM_Init);
-    addGlobalFunc('procedure TMDTM.Free();', @TMDTM_Free);
+    addGlobalFunc('procedure TMDTM.Free(); constref;', @TMDTM_Free);
   end;
 end;
 

@@ -61,10 +61,10 @@ begin
   begin
     addClass('TOutputPipeStream', 'THandleStream');
 
-    addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64;', @TOutputPipeStream_Seek);
-    addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Longint): longint;', @TOutputPipeStream_Read);
+    addGlobalFunc('function TOutputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @TOutputPipeStream_Seek);
+    addGlobalFunc('function TOutputPipeStream.Read(Var Buffer; Count : Longint): longint; constref;', @TOutputPipeStream_Read);
     addGlobalFunc('procedure TOutputPipeStream.Init(AHandle: THandle);', @TOutputPipeStream_Init);
-    addGlobalFunc('procedure TOutputPipeStream.Free();', @TOutputPipeStream_Free);
+    addGlobalFunc('procedure TOutputPipeStream.Free(); constref;', @TOutputPipeStream_Free);
   end;
 end;
 
@@ -110,12 +110,12 @@ begin
   begin
     addClass('TInputPipeStream', 'THandleStream');
 
-    addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Longint): Longint;', @TInputPipeStream_Write);
-    addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64;', @TInputPipeStream_Seek);
-    addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Longint): longint;', @TInputPipeStream_Read);
+    addGlobalFunc('function TInputPipeStream.Write(constref Buffer; Count : Longint): Longint; constref;', @TInputPipeStream_Write);
+    addGlobalFunc('function TInputPipeStream.Seek(const Offset: int64; Origin: TSeekOrigin): int64; constref;', @TInputPipeStream_Seek);
+    addGlobalFunc('function TInputPipeStream.Read(var Buffer; Count : Longint): longint; constref;', @TInputPipeStream_Read);
     addClassVar('TInputPipeStream', 'NumBytesAvailable', 'DWord', @TInputPipeStream_NumBytesAvailable_Read, nil);
     addGlobalFunc('procedure TInputPipeStream.Init(AHandle: THandle);', @TInputPipeStream_Init);
-    addGlobalFunc('procedure TInputPipeStream.Free();', @TInputPipeStream_Free);
+    addGlobalFunc('procedure TInputPipeStream.Free(); constref;', @TInputPipeStream_Free);
   end;
 end;
 
@@ -533,14 +533,14 @@ begin
   begin
     addClass('TProcess', 'TComponent');
 
-    addGlobalFunc('procedure TProcess.Execute();', @TProcess_Execute);
-    addGlobalFunc('procedure TProcess.CloseInput();', @TProcess_CloseInput);
-    addGlobalFunc('procedure TProcess.CloseOutput();', @TProcess_CloseOutput);
-    addGlobalFunc('procedure TProcess.CloseStderr();', @TProcess_CloseStderr);
-    addGlobalFunc('function TProcess.Resume(): Integer;', @TProcess_Resume);
-    addGlobalFunc('function TProcess.Suspend(): Integer;', @TProcess_Suspend);
-    addGlobalFunc('function TProcess.Terminate(AExitCode : Integer): Boolean;', @TProcess_Terminate);
-    addGlobalFunc('function TProcess.WaitOnExit(): Boolean;', @TProcess_WaitOnExit);
+    addGlobalFunc('procedure TProcess.Execute(); constref;', @TProcess_Execute);
+    addGlobalFunc('procedure TProcess.CloseInput(); constref;', @TProcess_CloseInput);
+    addGlobalFunc('procedure TProcess.CloseOutput(); constref;', @TProcess_CloseOutput);
+    addGlobalFunc('procedure TProcess.CloseStderr(); constref;', @TProcess_CloseStderr);
+    addGlobalFunc('function TProcess.Resume(): Integer; constref;', @TProcess_Resume);
+    addGlobalFunc('function TProcess.Suspend(): Integer; constref;', @TProcess_Suspend);
+    addGlobalFunc('function TProcess.Terminate(AExitCode : Integer): Boolean; constref;', @TProcess_Terminate);
+    addGlobalFunc('function TProcess.WaitOnExit(): Boolean; constref;', @TProcess_WaitOnExit);
     addClassVar('TProcess', 'WindowRect', 'TRect', @TProcess_WindowRect_Read, @TProcess_WindowRect_Write);
     addClassVar('TProcess', 'Handle', 'THandle', @TProcess_Handle_Read, nil);
     addClassVar('TProcess', 'ProcessHandle', 'THandle', @TProcess_ProcessHandle_Read, nil);
@@ -576,7 +576,7 @@ begin
     addClassVar('TProcess', 'FillAttribute', 'Cardinal', @TProcess_FillAttribute_Read, @TProcess_FillAttribute_Write);
     addClassVar('TProcess', 'XTermProgram', 'String', @TProcess_XTermProgram_Read, @TProcess_XTermProgram_Write);
     addGlobalFunc('procedure TProcess.Init(AOwner : TComponent);', @TProcess_Init);
-    addGlobalFunc('procedure TProcess.Free();', @TProcess_Free);
+    addGlobalFunc('procedure TProcess.Free(); constref;', @TProcess_Free);
   end;
 end;
 

@@ -68,10 +68,10 @@ begin
   begin
     addClass('TPersistent');
 
-    addGlobalFunc('procedure TPersistent.Assign(Source: TPersistent);', @TPersistent_Assign);
-    addGlobalFunc('function TPersistent.GetNamePath(): string;', @TPersistent_GetNamePath);
+    addGlobalFunc('procedure TPersistent.Assign(Source: TPersistent); constref;', @TPersistent_Assign);
+    addGlobalFunc('function TPersistent.GetNamePath(): string; constref;', @TPersistent_GetNamePath);
     addGlobalFunc('procedure TPersistent.Init();', @TPersistent_Init);
-    addGlobalFunc('procedure TPersistent.Free();', @TPersistent_Free);
+    addGlobalFunc('procedure TPersistent.Free(); constref;', @TPersistent_Free);
   end;
 end;
 
@@ -256,33 +256,33 @@ begin
   begin
     addClass('TStream');
 
-    addGlobalFunc('function TStream.Read(var Buffer; Count: Longint): Longint;', @TStream_Read);
-    addGlobalFunc('function TStream.Write(constref Buffer; Count: Longint): Longint;', @TStream_Write); //test
-    addGlobalFunc('function TStream.Seek(Offset: Longint; Origin: Word): Longint;', @TStream_Seek);
-    addGlobalFunc('procedure TStream.ReadBuffer(var Buffer; Count: Longint);', @TStream_ReadBuffer);
-    addGlobalFunc('procedure TStream.WriteBuffer(constref Buffer; Count: Longint);', @TStream_WriteBuffer);
-    addGlobalFunc('function TStream.CopyFrom(Source: TStream; Count: Int64): Int64;', @TStream_CopyFrom);
-    addGlobalFunc('function TStream.ReadComponent(Instance: TComponent): TComponent;', @TStream_ReadComponent);
-    addGlobalFunc('function TStream.ReadComponentRes(Instance: TComponent): TComponent;', @TStream_ReadComponentRes);
-    addGlobalFunc('procedure TStream.WriteComponent(Instance: TComponent);', @TStream_WriteComponent);
-    addGlobalFunc('procedure TStream.WriteComponentRes(const ResName: string; Instance: TComponent);', @TStream_WriteComponentRes);
-    addGlobalFunc('procedure TStream.WriteDescendent(Instance, Ancestor: TComponent);', @TStream_WriteDescendent);
-    addGlobalFunc('procedure TStream.WriteDescendentRes(const ResName: string; Instance, Ancestor: TComponent);', @TStream_WriteDescendentRes);
-    addGlobalFunc('procedure TStream.WriteResourceHeader(const ResName: string; var FixupInfo: Integer);', @TStream_WriteResourceHeader);
-    addGlobalFunc('procedure TStream.FixupResourceHeader(FixupInfo: Integer);', @TStream_FixupResourceHeader);
-    addGlobalFunc('procedure TStream.ReadResHeader();', @TStream_ReadResHeader);
-    addGlobalFunc('function TStream.ReadByte(): Byte;', @TStream_ReadByte);
-    addGlobalFunc('function TStream.ReadWord(): Word;', @TStream_ReadWord);
-    addGlobalFunc('function TStream.ReadDWord(): Cardinal;', @TStream_ReadDWord);
-    addGlobalFunc('function TStream.ReadAnsiString(): String;', @TStream_ReadAnsiString);
-    addGlobalFunc('procedure TStream.WriteByte(b : Byte);', @TStream_WriteByte);
-    addGlobalFunc('procedure TStream.WriteWord(w : Word);', @TStream_WriteWord);
-    addGlobalFunc('procedure TStream.WriteDWord(d : Cardinal);', @TStream_WriteDWord);
-    addGlobalFunc('procedure TStream.WriteAnsiString(const S : String);', @TStream_WriteAnsiString);
+    addGlobalFunc('function TStream.Read(var Buffer; Count: Longint): Longint; constref;', @TStream_Read);
+    addGlobalFunc('function TStream.Write(constref Buffer; Count: Longint): Longint; constref;', @TStream_Write); //test
+    addGlobalFunc('function TStream.Seek(Offset: Longint; Origin: Word): Longint; constref;', @TStream_Seek);
+    addGlobalFunc('procedure TStream.ReadBuffer(var Buffer; Count: Longint); constref;', @TStream_ReadBuffer);
+    addGlobalFunc('procedure TStream.WriteBuffer(constref Buffer; Count: Longint); constref;', @TStream_WriteBuffer);
+    addGlobalFunc('function TStream.CopyFrom(Source: TStream; Count: Int64): Int64; constref;', @TStream_CopyFrom);
+    addGlobalFunc('function TStream.ReadComponent(Instance: TComponent): TComponent; constref;', @TStream_ReadComponent);
+    addGlobalFunc('function TStream.ReadComponentRes(Instance: TComponent): TComponent; constref;', @TStream_ReadComponentRes);
+    addGlobalFunc('procedure TStream.WriteComponent(Instance: TComponent); constref;', @TStream_WriteComponent);
+    addGlobalFunc('procedure TStream.WriteComponentRes(const ResName: string; Instance: TComponent); constref;', @TStream_WriteComponentRes);
+    addGlobalFunc('procedure TStream.WriteDescendent(Instance, Ancestor: TComponent); constref;', @TStream_WriteDescendent);
+    addGlobalFunc('procedure TStream.WriteDescendentRes(const ResName: string; Instance, Ancestor: TComponent); constref;', @TStream_WriteDescendentRes);
+    addGlobalFunc('procedure TStream.WriteResourceHeader(const ResName: string; var FixupInfo: Integer); constref;', @TStream_WriteResourceHeader);
+    addGlobalFunc('procedure TStream.FixupResourceHeader(FixupInfo: Integer); constref;', @TStream_FixupResourceHeader);
+    addGlobalFunc('procedure TStream.ReadResHeader(); constref;', @TStream_ReadResHeader);
+    addGlobalFunc('function TStream.ReadByte(): Byte; constref;', @TStream_ReadByte);
+    addGlobalFunc('function TStream.ReadWord(): Word; constref;', @TStream_ReadWord);
+    addGlobalFunc('function TStream.ReadDWord(): Cardinal; constref;', @TStream_ReadDWord);
+    addGlobalFunc('function TStream.ReadAnsiString(): String; constref;', @TStream_ReadAnsiString);
+    addGlobalFunc('procedure TStream.WriteByte(b : Byte); constref;', @TStream_WriteByte);
+    addGlobalFunc('procedure TStream.WriteWord(w : Word); constref;', @TStream_WriteWord);
+    addGlobalFunc('procedure TStream.WriteDWord(d : Cardinal); constref;', @TStream_WriteDWord);
+    addGlobalFunc('procedure TStream.WriteAnsiString(const S : String); constref;', @TStream_WriteAnsiString);
     addClassVar('TStream', 'Position', 'Integer', @TStream_Position_Read, @TStream_Position_Write);
     addClassVar('TStream', 'Size', 'Integer', @TStream_Size_Read, @TStream_Size_Write);
     addGlobalFunc('procedure TStream.Init();', @TStream_Init);
-    addGlobalFunc('procedure TStream.Free();', @TStream_Free);
+    addGlobalFunc('procedure TStream.Free(); constref;', @TStream_Free);
   end;
 end;
 {THandleStream}
@@ -329,11 +329,11 @@ begin
     addClass('THandleStream', 'TStream');
 
     addGlobalFunc('procedure THandleStream.Init(AHandle: THandle);', @THandleStream_Init);
-    addGlobalFunc('function THandleStream.Read(var Buffer; Count: Longint): Longint;', @THandleStream_Read);
-    addGlobalFunc('function THandleStream.Write(constref Buffer; Count: Longint): Longint;', @THandleStream_Write);
-    addGlobalFunc('function THandleStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;', @THandleStream_Seek);
+    addGlobalFunc('function THandleStream.Read(var Buffer; Count: Longint): Longint; constref;', @THandleStream_Read);
+    addGlobalFunc('function THandleStream.Write(constref Buffer; Count: Longint): Longint; constref;', @THandleStream_Write);
+    addGlobalFunc('function THandleStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; constref;', @THandleStream_Seek);
     addClassVar('THandleStream', 'Handle', 'THandle', @THandleStream_Handle_Read);
-    addGlobalFunc('procedure THandleStream.Free();', @THandleStream_Free);
+    addGlobalFunc('procedure THandleStream.Free(); constref;', @THandleStream_Free);
   end;
 end;
 
@@ -372,7 +372,7 @@ begin
     addGlobalFunc('procedure TFileStream.Init(const AFileName: string; Mode: Word);', @TFileStream_Init);
   //  addGlobalFunc('procedure TFileStream.Init(const AFileName: string; Mode: Word; Rights: Cardinal); overload;', @TFileStream_InitEx);
     addClassVar('TFileStream', 'FileName', 'String', @TFileStream_FileName_Read);
-    addGlobalFunc('procedure TFileStream.Free();', @TFileStream_Free);
+    addGlobalFunc('procedure TFileStream.Free(); constref;', @TFileStream_Free);
   end;
 end;
 
@@ -426,13 +426,13 @@ begin
   begin
     addClass('TCustomMemoryStream', 'TStream');
 
-    addGlobalFunc('function TCustomMemoryStream.Read(var Buffer; Count: LongInt): LongInt;', @TCustomMemoryStream_Read);
-    addGlobalFunc('function TCustomMemoryStream.Seek(const Offset: Integer; Origin: TSeekOrigin): Int64;', @TCustomMemoryStream_Seek);
-    addGlobalFunc('procedure TCustomMemoryStream.SaveToStream(Stream: TStream);', @TCustomMemoryStream_SaveToStream);
-    addGlobalFunc('procedure TCustomMemoryStream.SaveToFile(const FileName: string);', @TCustomMemoryStream_SaveToFile);
+    addGlobalFunc('function TCustomMemoryStream.Read(var Buffer; Count: LongInt): LongInt; constref;', @TCustomMemoryStream_Read);
+    addGlobalFunc('function TCustomMemoryStream.Seek(const Offset: Integer; Origin: TSeekOrigin): Int64; constref;', @TCustomMemoryStream_Seek);
+    addGlobalFunc('procedure TCustomMemoryStream.SaveToStream(Stream: TStream); constref;', @TCustomMemoryStream_SaveToStream);
+    addGlobalFunc('procedure TCustomMemoryStream.SaveToFile(const FileName: string); constref;', @TCustomMemoryStream_SaveToFile);
     addClassVar('TCustomMemoryStream', 'Memory', 'Pointer', @TCustomMemoryStream_Memory_Read);
     addGlobalFunc('procedure TCustomMemoryStream.Init();', @TCustomMemoryStream_Init);
-    addGlobalFunc('procedure TCustomMemoryStream.Free();', @TCustomMemoryStream_Free);
+    addGlobalFunc('procedure TCustomMemoryStream.Free(); constref;', @TCustomMemoryStream_Free);
   end;
 end;
 
@@ -485,13 +485,13 @@ begin
   begin
     addClass('TMemoryStream', 'TCustomMemoryStream');
 
-    addGlobalFunc('procedure TMemoryStream.Clear();', @TMemoryStream_Clear);
-    addGlobalFunc('procedure TMemoryStream.LoadFromStream(Stream: TStream);', @TMemoryStream_LoadFromStream);
-    addGlobalFunc('procedure TMemoryStream.LoadFromFile(const FileName: string);', @TMemoryStream_LoadFromFile);
-    addGlobalFunc('procedure TMemoryStream.SetSize(NewSize: PtrInt);', @TMemoryStream_SetSize);
-    addGlobalFunc('function TMemoryStream.Write(constref Buffer; Count: LongInt): LongInt;', @TMemoryStream_Write);
+    addGlobalFunc('procedure TMemoryStream.Clear(); constref;', @TMemoryStream_Clear);
+    addGlobalFunc('procedure TMemoryStream.LoadFromStream(Stream: TStream); constref;', @TMemoryStream_LoadFromStream);
+    addGlobalFunc('procedure TMemoryStream.LoadFromFile(const FileName: string); constref;', @TMemoryStream_LoadFromFile);
+    addGlobalFunc('procedure TMemoryStream.SetSize(NewSize: PtrInt); constref;', @TMemoryStream_SetSize);
+    addGlobalFunc('function TMemoryStream.Write(constref Buffer; Count: LongInt): LongInt; constref;', @TMemoryStream_Write);
     addGlobalFunc('procedure TMemoryStream.Init();', @TMemoryStream_Init);
-    addGlobalFunc('procedure TMemoryStream.Free();', @TMemoryStream_Free);
+    addGlobalFunc('procedure TMemoryStream.Free(); constref;', @TMemoryStream_Free);
   end;
 end;
 
@@ -551,13 +551,13 @@ begin
     addClass('TStringStream', 'TStream');
 
     addGlobalFunc('procedure TStringStream.Init(const AString: string);', @TStringStream_Init);
-    addGlobalFunc('function TStringStream.Read(var Buffer; Count: Longint): Longint;', @TStringStream_Read);
-    addGlobalFunc('function TStringStream.ReadString(Count: Longint): string;', @TStringStream_ReadString);
-    addGlobalFunc('function TStringStream.Seek(Offset: Longint; Origin: Word): Longint;', @TStringStream_Seek);
-    addGlobalFunc('function TStringStream.Write(constref Buffer; Count: Longint): Longint;', @TStringStream_Write);
-    addGlobalFunc('procedure TStringStream.WriteString(const AString: string);', @TStringStream_WriteString);
+    addGlobalFunc('function TStringStream.Read(var Buffer; Count: Longint): Longint; constref;', @TStringStream_Read);
+    addGlobalFunc('function TStringStream.ReadString(Count: Longint): string; constref;', @TStringStream_ReadString);
+    addGlobalFunc('function TStringStream.Seek(Offset: Longint; Origin: Word): Longint; constref;', @TStringStream_Seek);
+    addGlobalFunc('function TStringStream.Write(constref Buffer; Count: Longint): Longint; constref;', @TStringStream_Write);
+    addGlobalFunc('procedure TStringStream.WriteString(const AString: string); constref;', @TStringStream_WriteString);
     addClassVar('TStringStream', 'DataString', 'string', @TStringStream_DataString_Read);
-    addGlobalFunc('procedure TStringStream.Free();', @TStringStream_Free);
+    addGlobalFunc('procedure TStringStream.Free(); constref;', @TStringStream_Free);
   end;
 end;
 
@@ -767,27 +767,27 @@ begin
     addClass('TStrings', 'TPersistent');
 
     addGlobalFunc('function TStrings.Add(const S: string): Integer; constref;', @TStrings_Add);
-    addGlobalFunc('function TStrings.AddObject(const S: string; AObject: TObject): Integer;', @TStrings_AddObject);
-    addGlobalFunc('procedure TStrings.Append(const S: string);', @TStrings_Append);
-    addGlobalFunc('procedure TStrings.AddStrings(const TheStrings: TStrings);', @TStrings_AddStrings);
-    addGlobalFunc('procedure TStrings.Assign(Source: TPersistent);', @TStrings_Assign);
-    addGlobalFunc('procedure TStrings.BeginUpdate();', @TStrings_BeginUpdate);
-    addGlobalFunc('procedure TStrings.Clear();', @TStrings_Clear);
-    addGlobalFunc('procedure TStrings.Delete(Index: Integer);', @TStrings_Delete);
-    addGlobalFunc('procedure TStrings.EndUpdate();', @TStrings_EndUpdate);
-    addGlobalFunc('function TStrings.EqualsObj(Obj: TObject): Boolean;', @TStrings_EqualsObj);
-    addGlobalFunc('function TStrings.EqualsStrings(TheStrings: TStrings): Boolean;', @TStrings_EqualsStrings);
-    addGlobalFunc('procedure TStrings.Exchange(Index1, Index2: Integer);', @TStrings_Exchange);
-    addGlobalFunc('function TStrings.IndexOf(const S: string): Integer;', @TStrings_IndexOf);
-    addGlobalFunc('function TStrings.IndexOfName(const Name: string): Integer;', @TStrings_IndexOfName);
-    addGlobalFunc('function TStrings.IndexOfObject(AObject: TObject): Integer;', @TStrings_IndexOfObject);
-    addGlobalFunc('procedure TStrings.Insert(Index: Integer; const S: string);', @TStrings_Insert);
-    addGlobalFunc('procedure TStrings.InsertObject(Index: Integer; const S: string;AObject:Tobject);', @TStrings_InsertObject);
-    addGlobalFunc('procedure TStrings.LoadFromFile(const FileName: string);', @TStrings_LoadFromFile);
-    addGlobalFunc('procedure TStrings.LoadFromStream(Stream: TStream);', @TStrings_LoadFromStream);
-    addGlobalFunc('procedure TStrings.Move(CurIndex, NewIndex: Integer);', @TStrings_Move);
-    addGlobalFunc('procedure TStrings.SaveToFile(const FileName: string);', @TStrings_SaveToFile);
-    addGlobalFunc('procedure TStrings.SaveToStream(Stream: TStream);', @TStrings_SaveToStream);
+    addGlobalFunc('function TStrings.AddObject(const S: string; AObject: TObject): Integer; constref;', @TStrings_AddObject);
+    addGlobalFunc('procedure TStrings.Append(const S: string); constref;', @TStrings_Append);
+    addGlobalFunc('procedure TStrings.AddStrings(const TheStrings: TStrings); constref;', @TStrings_AddStrings);
+    addGlobalFunc('procedure TStrings.Assign(Source: TPersistent); constref;', @TStrings_Assign);
+    addGlobalFunc('procedure TStrings.BeginUpdate(); constref;', @TStrings_BeginUpdate);
+    addGlobalFunc('procedure TStrings.Clear(); constref;', @TStrings_Clear);
+    addGlobalFunc('procedure TStrings.Delete(Index: Integer); constref;', @TStrings_Delete);
+    addGlobalFunc('procedure TStrings.EndUpdate(); constref;', @TStrings_EndUpdate);
+    addGlobalFunc('function TStrings.EqualsObj(Obj: TObject): Boolean; constref;', @TStrings_EqualsObj);
+    addGlobalFunc('function TStrings.EqualsStrings(TheStrings: TStrings): Boolean; constref;', @TStrings_EqualsStrings);
+    addGlobalFunc('procedure TStrings.Exchange(Index1, Index2: Integer); constref;', @TStrings_Exchange);
+    addGlobalFunc('function TStrings.IndexOf(const S: string): Integer; constref;', @TStrings_IndexOf);
+    addGlobalFunc('function TStrings.IndexOfName(const Name: string): Integer; constref;', @TStrings_IndexOfName);
+    addGlobalFunc('function TStrings.IndexOfObject(AObject: TObject): Integer; constref;', @TStrings_IndexOfObject);
+    addGlobalFunc('procedure TStrings.Insert(Index: Integer; const S: string); constref;', @TStrings_Insert);
+    addGlobalFunc('procedure TStrings.InsertObject(Index: Integer; const S: string;AObject:Tobject); constref;', @TStrings_InsertObject);
+    addGlobalFunc('procedure TStrings.LoadFromFile(const FileName: string); constref;', @TStrings_LoadFromFile);
+    addGlobalFunc('procedure TStrings.LoadFromStream(Stream: TStream); constref;', @TStrings_LoadFromStream);
+    addGlobalFunc('procedure TStrings.Move(CurIndex, NewIndex: Integer); constref;', @TStrings_Move);
+    addGlobalFunc('procedure TStrings.SaveToFile(const FileName: string); constref;', @TStrings_SaveToFile);
+    addGlobalFunc('procedure TStrings.SaveToStream(Stream: TStream); constref;', @TStrings_SaveToStream);
     addClassVar( 'TStrings', 'Count', 'Integer', @TStrings_Count_Read);
 
     addClassVar('TStrings', 'Objects', 'TObject', @TStrings_Objects_Read, @TStrings_Objects_Write, True);
@@ -796,7 +796,7 @@ begin
 
     addClassVar('TStrings', 'Text', 'string', @TStrings_Text_Read, @TStrings_Text_Write);
     addGlobalFunc('procedure TStrings.Init();', @TStrings_Init);
-    addGlobalFunc('procedure TStrings.Free();', @TStrings_Free);
+    addGlobalFunc('procedure TStrings.Free(); constref;', @TStrings_Free);
   end;
 end;
 
@@ -934,22 +934,22 @@ begin
   begin
     addClass('TStringList', 'TStrings');
     addGlobalType('function(List: TStringList; Index1, Index2: Integer): Integer','TStringListSortCompare');
-    addGlobalFunc('function TStringList.Add(const S: string): Integer;', @TStringList_Add);
-    addGlobalFunc('procedure TStringList.Clear();', @TStringList_Clear);
-    addGlobalFunc('procedure TStringList.Delete(Index: Integer);', @TStringList_Delete);
-    addGlobalFunc('procedure TStringList.Exchange(Index1, Index2: Integer);', @TStringList_Exchange);
-    addGlobalFunc('function TStringList.Find(const S: string; Out Index: Integer): Boolean;', @TStringList_Find);
-    addGlobalFunc('function TStringList.IndexOf(const S: string): Integer;', @TStringList_IndexOf);
-    addGlobalFunc('procedure TStringList.Insert(Index: Integer; const S: string);', @TStringList_Insert);
-    addGlobalFunc('procedure TStringList.Sort();', @TStringList_Sort);
-    addGlobalFunc('procedure TStringList.CustomSort(CompareFn: TStringListSortCompare);', @TStringList_CustomSort);
+    addGlobalFunc('function TStringList.Add(const S: string): Integer; constref;', @TStringList_Add);
+    addGlobalFunc('procedure TStringList.Clear(); constref;', @TStringList_Clear);
+    addGlobalFunc('procedure TStringList.Delete(Index: Integer); constref;', @TStringList_Delete);
+    addGlobalFunc('procedure TStringList.Exchange(Index1, Index2: Integer); constref;', @TStringList_Exchange);
+    addGlobalFunc('function TStringList.Find(const S: string; Out Index: Integer): Boolean; constref;', @TStringList_Find);
+    addGlobalFunc('function TStringList.IndexOf(const S: string): Integer; constref;', @TStringList_IndexOf);
+    addGlobalFunc('procedure TStringList.Insert(Index: Integer; const S: string); constref;', @TStringList_Insert);
+    addGlobalFunc('procedure TStringList.Sort(); constref;', @TStringList_Sort);
+    addGlobalFunc('procedure TStringList.CustomSort(CompareFn: TStringListSortCompare); constref;', @TStringList_CustomSort);
     addClassVar('TStringList', 'Sorted', 'Boolean', @TStringList_Sorted_Read, @TStringList_Sorted_Write);
     addClassVar('TStringList', 'CaseSensitive', 'Boolean', @TStringList_CaseSensitive_Read, @TStringList_CaseSensitive_Write);
     addClassVar('TStringList', 'OnChange', 'TNotifyEvent', @TStringList_OnChange_Read, @TStringList_OnChange_Write);
     addClassVar('TStringList', 'OnChanging', 'TNotifyEvent', @TStringList_OnChanging_Read, @TStringList_OnChanging_Write);
     addClassVar('TStringList', 'OwnsObjects', 'boolean', @TStringList_OwnsObjects_Read, @TStringList_OwnsObjects_Write);
     addGlobalFunc('procedure TStringList.Init();', @TStringList_Init);
-    addGlobalFunc('procedure TStringList.Free();', @TStringList_Free);
+    addGlobalFunc('procedure TStringList.Free(); constref;', @TStringList_Free);
   end;
 end;
 
@@ -1069,19 +1069,19 @@ begin
     addGlobalType('^TComponentState','PComponentState');
     addGlobalType('^string','PComponentName');
     addGlobalFunc('procedure TComponent.Init(AOwner: TComponent);', @TComponent_Init);
-    addGlobalFunc('procedure TComponent.DestroyComponents();', @TComponent_DestroyComponents);
-    addGlobalFunc('procedure TComponent.Destroying();', @TComponent_Destroying);
-    addGlobalFunc('function TComponent.FindComponent(const AName: string): TComponent;', @TComponent_FindComponent);
-    addGlobalFunc('procedure TComponent.InsertComponent(AComponent: TComponent);', @TComponent_InsertComponent);
-    addGlobalFunc('procedure TComponent.RemoveComponent(AComponent: TComponent);', @TComponent_RemoveComponent);
-    addGlobalFunc('function TComponent.GetComponent(index: integer): TComponent;', @TComponent_Components);
+    addGlobalFunc('procedure TComponent.DestroyComponents(); constref;', @TComponent_DestroyComponents);
+    addGlobalFunc('procedure TComponent.Destroying(); constref;', @TComponent_Destroying);
+    addGlobalFunc('function TComponent.FindComponent(const AName: string): TComponent; constref;', @TComponent_FindComponent);
+    addGlobalFunc('procedure TComponent.InsertComponent(AComponent: TComponent); constref;', @TComponent_InsertComponent);
+    addGlobalFunc('procedure TComponent.RemoveComponent(AComponent: TComponent); constref;', @TComponent_RemoveComponent);
+    addGlobalFunc('function TComponent.GetComponent(index: integer): TComponent; constref;', @TComponent_Components);
     addClassVar('TComponent', 'ComponentCount', 'Integer', @TComponent_ComponentCount_Read);
     addClassVar('TComponent', 'ComponentIndex', 'Integer', @TComponent_ComponentIndex_Read, @TComponent_ComponentIndex_Write);
     addClassVar('TComponent', 'ComponentState', 'TComponentState', @TComponent_ComponentState_Read);
     addClassVar('TComponent', 'Owner', 'TComponent', @TComponent_Owner_Read);
     addClassVar('TComponent', 'Name', 'TComponentName', @TComponent_Name_Read, @TComponent_Name_Write);
     addClassVar('TComponent', 'Tag', 'Integer', @TComponent_Tag_Read, @TComponent_Tag_Write);
-    addGlobalFunc('procedure TComponent.Free();', @TComponent_Free);
+    addGlobalFunc('procedure TComponent.Free(); constref;', @TComponent_Free);
   end;
 end;
 
@@ -1158,12 +1158,12 @@ begin
     addClass('TCollectionItem', 'TPersistent');
 
     addGlobalFunc('procedure TCollectionItem.Init(ACollection: TCollection);', @TCollectionItem_Init);
-    addGlobalFunc('function TCollectionItem.GetNamePath(): string;', @TCollectionItem_GetNamePath);
+    addGlobalFunc('function TCollectionItem.GetNamePath(): string; constref;', @TCollectionItem_GetNamePath);
     addClassVar('TCollectionItem', 'Collection', 'TCollection', @TCollectionItem_Collection_Read, @TCollectionItem_Collection_Write);
     addClassVar('TCollectionItem', 'ID', 'Integer', @TCollectionItem_ID_Read, nil);
     addClassVar('TCollectionItem', 'Index', 'Integer', @TCollectionItem_Index_Read, @TCollectionItem_Index_Write);
     addClassVar('TCollectionItem', 'DisplayName', 'string', @TCollectionItem_DisplayName_Read, @TCollectionItem_DisplayName_Write);
-    addGlobalFunc('procedure TCollectionItem.Free();', @TCollectionItem_Free);
+    addGlobalFunc('procedure TCollectionItem.Free(); constref;', @TCollectionItem_Free);
   end;
 end;
 
@@ -1261,20 +1261,20 @@ procedure Register_TCollection(Compiler: TLapeCompiler);
 begin
   with Compiler do
   begin
-    addGlobalFunc('function TCollection.Owner(): TPersistent;', @TCollection_Owner);
-    addGlobalFunc('function TCollection.Add(): TCollectionItem;', @TCollection_Add);
-    addGlobalFunc('procedure TCollection.Assign(Source: TPersistent);', @TCollection_Assign);
-    addGlobalFunc('procedure TCollection.BeginUpdate();', @TCollection_BeginUpdate);
-    addGlobalFunc('procedure TCollection.Clear();', @TCollection_Clear);
-    addGlobalFunc('procedure TCollection.EndUpdate();', @TCollection_EndUpdate);
-    addGlobalFunc('procedure TCollection.Delete(Index: Integer);', @TCollection_Delete);
-    addGlobalFunc('function TCollection.GetNamePath(): string; override;', @TCollection_GetNamePath);
-    addGlobalFunc('function TCollection.Insert(Index: Integer): TCollectionItem;', @TCollection_Insert);
-    addGlobalFunc('function TCollection.FindItemID(ID: Integer): TCollectionItem;', @TCollection_FindItemID);
-    addGlobalFunc('procedure TCollection.Exchange(Const Index1, index2: integer);', @TCollection_Exchange);
+    addGlobalFunc('function TCollection.Owner(): TPersistent; constref;', @TCollection_Owner);
+    addGlobalFunc('function TCollection.Add(): TCollectionItem; constref;', @TCollection_Add);
+    addGlobalFunc('procedure TCollection.Assign(Source: TPersistent); constref;', @TCollection_Assign);
+    addGlobalFunc('procedure TCollection.BeginUpdate(); constref;', @TCollection_BeginUpdate);
+    addGlobalFunc('procedure TCollection.Clear(); constref;', @TCollection_Clear);
+    addGlobalFunc('procedure TCollection.EndUpdate(); constref;', @TCollection_EndUpdate);
+    addGlobalFunc('procedure TCollection.Delete(Index: Integer); constref;', @TCollection_Delete);
+    addGlobalFunc('function TCollection.GetNamePath(): string; constref; override;', @TCollection_GetNamePath);
+    addGlobalFunc('function TCollection.Insert(Index: Integer): TCollectionItem; constref;', @TCollection_Insert);
+    addGlobalFunc('function TCollection.FindItemID(ID: Integer): TCollectionItem; constref;', @TCollection_FindItemID);
+    addGlobalFunc('procedure TCollection.Exchange(Const Index1, index2: integer); constref;', @TCollection_Exchange);
     addClassVar('TCollection', 'Count', 'Integer', @TCollection_Count_Read, nil);
     addClassVar('TCollection', 'Items', 'TCollectionItem', @TCollection_Items_Index_Read, @TCollection_Items_Index_Write, True);
-    addGlobalFunc('procedure TCollection.Free();', @TCollection_Free);
+    addGlobalFunc('procedure TCollection.Free(); constref;', @TCollection_Free);
   end;
 end;
 
