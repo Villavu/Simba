@@ -318,7 +318,7 @@ begin
     addGlobalFunc('function TMFinder.Create_CTSInfoArray(color, tolerance: array of integer): TCTSInfoArray; constref;', @TMFinder_Create_CTSInfoArray);
     addGlobalFunc('function TMFinder.Create_CTSInfo2DArray(w, h: integer; data: TPRGB32Array; Tolerance: Integer): TCTSInfo2DArray; constref;', @TMFinder_Create_CTSInfo2DArray);
     addGlobalFunc('procedure TMFinder.Init(aClient: TObject);', @TMFinder_Init);
-    addGlobalFunc('procedure TMFinder.Free();', @TMFinder_Free);
+    addGlobalFunc('procedure TMFinder.Free(); constref;', @TMFinder_Free);
   end;
 end;
 

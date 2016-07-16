@@ -132,7 +132,7 @@ begin
     addClassVar('TRegExpr', 'MatchPos', 'PtrInt', @TRegExpr_MatchPos_Read, nil, True);
     addClassVar('TRegExpr', 'MatchLen', 'PtrInt', @TRegExpr_MatchLen_Read, nil, True);
     addClassVar('TRegExpr', 'Match', 'String', @TRegExpr_Match_Read, nil, True);
-    addGlobalFunc('procedure TRegExpr.Free();', @TRegExpr_Free);
+    addGlobalFunc('procedure TRegExpr.Free(); constref;', @TRegExpr_Free);
   end;
 end;
 

@@ -118,7 +118,7 @@ begin
     addClassVar('TIOManager', 'display', 'PDisplay', @TIOManager_display_Read, @TIOManager_display_Write);
     addClassVar('TIOManager', 'screennum', 'integer', @TIOManager_screennum_Read, @TIOManager_screennum_Write);
     addClassVar('TIOManager', 'desktop', 'TNativeWindow', @TIOManager_desktop_Read, @TIOManager_desktop_Write);
-    addGlobalFunc('procedure TIOManager.Free();', @TIOManager_Free);
+    addGlobalFunc('procedure TIOManager.Free(); constref;', @TIOManager_Free);
   end;
 end;
 

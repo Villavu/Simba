@@ -224,7 +224,7 @@ begin
     addGlobalFunc('function TTarget.GetKeyCode(C : char): integer; constref;', @TTarget_GetKeyCode);
     addGlobalFunc('function TTarget.GetHandle(): PtrUInt; constref;', @TTarget_GetHandle);
     addGlobalFunc('procedure TTarget.Init();', @TTarget_Init);
-    addGlobalFunc('procedure TTarget.Free();', @TTarget_Free);
+    addGlobalFunc('procedure TTarget.Free(); constref;', @TTarget_Free);
   end;
 end;
 

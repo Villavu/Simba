@@ -109,7 +109,7 @@ begin
     addClassVar(Compiler, 'TRawTarget', 'rgb', 'prgb32', @TRawTarget_rgb_Read, @TRawTarget_rgb_Write);
     addClassVar(Compiler, 'TRawTarget', 'freedata', 'boolean', @TRawTarget_freedata_Read, @TRawTarget_freedata_Write);
     addClassVar(Compiler, 'TRawTarget', 'w,h', 'integer', @TRawTarget_w,h_Read, @TRawTarget_w,h_Write);
-    addGlobalFunc('procedure TRawTarget.Free();', @TRawTarget_Free);
+    addGlobalFunc('procedure TRawTarget.Free(); constref;', @TRawTarget_Free);
   end;
 end;
 

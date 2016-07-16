@@ -76,7 +76,7 @@ begin
     addGlobalFunc('procedure TIOManager.SetDesktop(); constref;', @TIOManager_SetDesktop);
     addGlobalFunc('function TIOManager.GetProcesses(): TSysProcArr; constref;', @TIOManager_GetProcesses);
     addGlobalFunc('procedure TIOManager.SetTargetEx(Proc: TSysProc); constref;', @TIOManager_SetTargetEx);
-    addGlobalFunc('procedure TIOManager.Free();', @TIOManager_Free);
+    addGlobalFunc('procedure TIOManager.Free(); constref;', @TIOManager_Free);
   end;
 end;
 

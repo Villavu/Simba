@@ -76,7 +76,7 @@ begin
     addClassVar('TMFont', 'Data', 'TOcrData', @TMFont_Data_Read, @TMFont_Data_Write);
     addGlobalFunc('procedure TMFont.Init();', @TMFont_Init);
     addGlobalFunc('function TMFont.Copy(): TMFont; constref;', @TMFont_Copy);
-    addGlobalFunc('procedure TMFont.Free();', @TMFont_Free);
+    addGlobalFunc('procedure TMFont.Free(); constref;', @TMFont_Free);
   end;
 end;
 

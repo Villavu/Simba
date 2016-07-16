@@ -298,7 +298,7 @@ begin
     addGlobalFunc('function TJSONArray.toString(): string; constref; overload; override;', @TJSONArray_toString);
     addGlobalFunc('function TJSONArray.toString(indentFactor : integer): string; constref; overload;', @TJSONArray_toStringEx);
     addGlobalFunc('function TJSONArray.toString(indentFactor, indent : integer): string; constref; overload;', @TJSONArray_toStringExEx);
-    addGlobalFunc('procedure TJSONArray.Free();', @TJSONArray_Free);
+    addGlobalFunc('procedure TJSONArray.Free(); constref;', @TJSONArray_Free);
   end;
 end;
 
@@ -599,7 +599,7 @@ begin
     addGlobalFunc('function TJSONObject.toString(): string ;  constref; overload; override;', @TJSONObject_toString);
     addGlobalFunc('function TJSONObject.toString(indentFactor : integer): string; constref; overload;', @TJSONObject_toStringEx);
     addGlobalFunc('function TJSONObject.toString(indentFactor, indent : integer): string; constref; overload;', @TJSONObject_toStringExEx);
-    addGlobalFunc('procedure TJSONObject.Free();', @TJSONObject_Free);
+    addGlobalFunc('procedure TJSONObject.Free(); constref;', @TJSONObject_Free);
   end;
 end;
 
