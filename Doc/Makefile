@@ -13,6 +13,9 @@ sphinx-pdf: pics
 sphinx-html: pics
 	$(MAKE) -C sphinx/ html
 
+sphinx-singlehtml: pics
+	$(MAKE) -C sphinx/ singlehtml
+
 test: pics
 	$(MAKE) -C sphinx/ linkcheck
 
