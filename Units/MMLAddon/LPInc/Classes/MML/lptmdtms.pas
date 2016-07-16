@@ -87,7 +87,7 @@ begin
     addGlobalFunc('procedure TMDTMS.FreeDTM(DTM: Integer); constref;', @TMDTMS_FreeDTM);
     addGlobalFunc('function TMDTMS.StringToDTM(const S: String): Integer; constref;', @TMDTMS_StringToDTM);
     addGlobalFunc('procedure TMDTMS.Init(Owner: TObject);', @TMDTMS_Init);
-    addGlobalFunc('procedure TMDTMS.Free();', @TMDTMS_Free);
+    addGlobalFunc('procedure TMDTMS.Free(); constref;', @TMDTMS_Free);
   end;
 end;
 

@@ -217,7 +217,7 @@ begin
    addClassVar('TSizeConstraints', 'MaxWidth', 'Integer', @TSizeConstraints_MaxWidth_Read, @TSizeConstraints_MaxWidth_Write);
    addClassVar('TSizeConstraints', 'MinHeight', 'Integer', @TSizeConstraints_MinHeight_Read, @TSizeConstraints_MinHeight_Write);
    addClassVar('TSizeConstraints', 'MinWidth', 'Integer', @TSizeConstraints_MinWidth_Read, @TSizeConstraints_MinWidth_Write);
-   addGlobalFunc('procedure TSizeConstraints.Free();', @TSizeConstraints_Free);
+   addGlobalFunc('procedure TSizeConstraints.Free(); constref;', @TSizeConstraints_Free);
  end;
 end;
 
@@ -775,7 +775,7 @@ begin
     addClassVar('TCustomForm', 'RestoredWidth', 'integer', @TCustomForm_RestoredWidth_Read);
     addClassVar('TCustomForm', 'RestoredHeight', 'integer', @TCustomForm_RestoredHeight_Read);
     addClassVar('TCustomForm', 'Constraints', 'TSizeConstraints', @TCustomForm_Constraints_Read, @TCustomForm_Constraints_Write);
-    addGlobalFunc('procedure TCustomForm.Free();', @TCustomForm_Free);
+    addGlobalFunc('procedure TCustomForm.Free(); constref;', @TCustomForm_Free);
   end;
 end;
  {TForm}
@@ -1156,7 +1156,7 @@ begin
     addClassVar('TForm', 'Width', 'Integer', @TForm_Width_Read, @TForm_Width_Write);
     addClassVar('TForm', 'Caption', 'string', @TForm_Caption_Read, @TForm_Caption_Write);
     addClassVar('TForm', 'Position', 'TPosition', @TForm_Position_Read, @TForm_Position_Write);
-    addGlobalFunc('procedure TForm.Free();', @TForm_Free);
+    addGlobalFunc('procedure TForm.Free(); constref;', @TForm_Free);
     addClassVar('TForm', 'OnMouseMove', 'TMouseMoveEvent', @TForm_OnMouseMove_Read, @TForm_OnMouseMove_Write);
   end;
 end;
@@ -1180,7 +1180,7 @@ begin
     addClass('TScrollBox', 'TScrollingWinControl');
 
     addGlobalFunc('procedure TScrollBox.Init(AOwner: TComponent);', @TScrollBox_Init);
-    addGlobalFunc('procedure TScrollBox.Free();', @TScrollBox_Free);
+    addGlobalFunc('procedure TScrollBox.Free(); constref;', @TScrollBox_Free);
   end;
 end;
 

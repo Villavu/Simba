@@ -110,7 +110,7 @@ begin
     addGlobalFunc('function TMBitmaps.CreateBMPFromString(BmpName : string; width,height : integer; Data : string): integer; constref; overload;', @TMBitmaps_CreateBMPFromStringEx);
     addGlobalFunc('procedure TMBitmaps.RemoveBMP(Number: integer); constref;', @TMBitmaps_RemoveBMP);
     addGlobalFunc('procedure TMBitmaps.Init(Owner : TObject);', @TMBitmaps_Init);
-    addGlobalFunc('procedure TMBitmaps.Free();', @TMBitmaps_Free);
+    addGlobalFunc('procedure TMBitmaps.Free(); constref;', @TMBitmaps_Free);
   end;
 end;
 

@@ -179,7 +179,7 @@ begin
     addGlobalFunc('function TMOCR.TextToFontBitmap(Text, font: String): TMufasaBitmap; constref;', @TMOCR_TextToFontBitmap);
     addGlobalFunc('function TMOCR.TextToMask(Text, font: String): TMask; constref;', @TMOCR_TextToMask);
     addClassVar('TMOCR', 'Fonts', 'TMFonts', @TMOCR_Fonts_Read, @TMOCR_Fonts_Write);
-    addGlobalFunc('procedure TMOCR.Free();', @TMOCR_Free);
+    addGlobalFunc('procedure TMOCR.Free(); constref;', @TMOCR_Free);
   end;
 end;
 

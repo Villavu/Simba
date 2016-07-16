@@ -95,7 +95,7 @@ begin
     addGlobalFunc('procedure TMMLTimer.On(); constref;', @TMMLTimer_On);
     addGlobalFunc('procedure TMMLTimer.Off(); constref;', @TMMLTimer_Off);
     addGlobalFunc('procedure TMMLTimer.Init();', @TMMLTimer_Init);
-    addGlobalFunc('procedure TMMLTimer.Free();', @TMMLTimer_Free);
+    addGlobalFunc('procedure TMMLTimer.Free(); constref;', @TMMLTimer_Free);
   end;
 end;
 

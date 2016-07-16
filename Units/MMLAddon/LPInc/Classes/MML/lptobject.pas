@@ -37,7 +37,7 @@ begin
     addClass('TObject', 'Pointer');
 
     addGlobalFunc('procedure TObject.Init();', @TObject_Init);
-    addGlobalFunc('procedure TObject.Free();', @TObject_Free);
+    addGlobalFunc('procedure TObject.Free(); constref;', @TObject_Free);
     addGlobalFunc('function TObject.ToString(): string; constref;', @TObject_ToString);
   end;
 end;

@@ -98,7 +98,7 @@ begin
     addClassVar('TGraphicsObject', 'OnChanging', 'TNotifyEvent', @TGraphicsObject_OnChanging_Read, @TGraphicsObject_OnChanging_Write);
     addClassVar('TGraphicsObject', 'OnChange', 'TNotifyEvent', @TGraphicsObject_OnChange_Read, @TGraphicsObject_OnChange_Write);
     addGlobalFunc('procedure TGraphicsObject.Init();', @TGraphicsObject_Init);
-    addGlobalFunc('procedure TGraphicsObject.Free();', @TGraphicsObject_Free);
+    addGlobalFunc('procedure TGraphicsObject.Free(); constref;', @TGraphicsObject_Free);
   end;
 end;
 
@@ -308,7 +308,7 @@ begin
     addClassVar('TFont', 'Size', 'Integer', @TFont_Size_Read, @TFont_Size_Write);
     addClassVar('TFont', 'Style', 'TFontStyles', @TFont_Style_Read, @TFont_Style_Write);
     addClassVar('TFont', 'Quality', 'TFontQuality', @TFont_Quality_Read, @TFont_Quality_Write);
-    addGlobalFunc('procedure TFont.Free();', @TFont_Free);
+    addGlobalFunc('procedure TFont.Free(); constref;', @TFont_Free);
   end;
 end;
 
@@ -417,7 +417,7 @@ begin
     addClassVar('TPen', 'Mode', 'TPenMode', @TPen_Mode_Read, @TPen_Mode_Write);
     addClassVar('TPen', 'Style', 'TPenStyle', @TPen_Style_Read, @TPen_Style_Write);
     addClassVar('TPen', 'Width', 'integer', @TPen_Width_Read, @TPen_Width_Write);
-    addGlobalFunc('procedure TPen.Free();', @TPen_Free);
+    addGlobalFunc('procedure TPen.Free(); constref;', @TPen_Free);
   end;
 end;
 
@@ -474,7 +474,7 @@ begin
     addGlobalFunc('procedure TBrush.Init();', @TBrush_Init);
     addClassVar('TBrush', 'Color', 'Integer', @TBrush_Color_Read, @TBrush_Color_Write);
     addClassVar('TBrush', 'Style', 'TBrushStyle', @TBrush_Style_Read, @TBrush_Style_Write);
-    addGlobalFunc('procedure TBrush.Free();', @TBrush_Free);
+    addGlobalFunc('procedure TBrush.Free(); constref;', @TBrush_Free);
   end;
 end;
 
@@ -944,7 +944,7 @@ begin
     addClassVar('TCanvas', 'OnChanging', 'TNotifyEvent', @TCanvas_OnChanging_Read, @TCanvas_OnChanging_Write);
     addClassVar('TCanvas', 'AntialiasingMode', 'TAntialiasingMode', @TCanvas_AntialiasingMode_Get, @TCanvas_AntialiasingMode_Set);
     addGlobalFunc('procedure TCanvas.Init();', @TCanvas_Init);
-    addGlobalFunc('procedure TCanvas.Free();', @TCanvas_Free);
+    addGlobalFunc('procedure TCanvas.Free(); constref;', @TCanvas_Free);
   end;
 end;
 {TGraphics}
@@ -1103,7 +1103,7 @@ begin
     addClassVar('TGraphic', 'PaletteModified', 'Boolean', @TGraphic_PaletteModified_Read, @TGraphic_PaletteModified_Write);
     addClassVar('TGraphic', 'Transparent', 'Boolean', @TGraphic_Transparent_Read, @TGraphic_Transparent_Write);
     addClassVar('TGraphic', 'Width', 'Integer', @TGraphic_Width_Read, @TGraphic_Width_Write);
-    addGlobalFunc('procedure TGraphic.Free();', @TGraphic_Free);
+    addGlobalFunc('procedure TGraphic.Free(); constref;', @TGraphic_Free);
   end;
 end;
 {TBitmap}
@@ -1352,7 +1352,7 @@ begin
     addClassVar('TBitmap', 'TransparentColor', 'TColor', @TBitmap_TransparentColor_Read, @TBitmap_TransparentColor_Write);
     addClassVar('TBitmap', 'TransparentMode', 'TTransparentMode', @TBitmap_TransparentMode_Read, @TBitmap_TransparentMode_Write);
     addClassVar('TBitmap', 'Transparent', 'Boolean', @TBitmap_TransparentMode_Read, @TBitmap_Transparent_Write);
-    addGlobalFunc('procedure TBitmap.Free();', @TBitmap_Free);
+    addGlobalFunc('procedure TBitmap.Free(); constref;', @TBitmap_Free);
   end;
 end;
 {TPicture}
@@ -1477,7 +1477,7 @@ begin
     addClassVar('TPicture', 'Height', 'Integer', @TPicture_Height_Read);
     addClassVar('TPicture', 'Width', 'Integer', @TPicture_Width_Read);
     addClassVar('TPicture', 'OnChange', 'TNotifyEvent', @TPicture_OnChange_Read, @TPicture_OnChange_Write);
-    addGlobalFunc('procedure TPicture.Free();', @TPicture_Free);
+    addGlobalFunc('procedure TPicture.Free(); constref;', @TPicture_Free);
   end;
 end;
 

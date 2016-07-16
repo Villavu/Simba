@@ -160,7 +160,7 @@ begin
     addClassVar('TMDTM', 'Count', 'integer', @TMDTM_Count_Read, @TMDTM_Count_Write);
     addClassVar('TMDTM', 'Points', 'TMDTMPointArray', @TMDTM_Points_Read);
     addGlobalFunc('procedure TMDTM.Init();', @TMDTM_Init);
-    addGlobalFunc('procedure TMDTM.Free();', @TMDTM_Free);
+    addGlobalFunc('procedure TMDTM.Free(); constref;', @TMDTM_Free);
   end;
 end;
 

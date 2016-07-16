@@ -351,7 +351,7 @@ begin
     addGlobalFunc('procedure TIOManager_Abstract.SetKeyMouseTarget(idx: integer); constref;', @TIOManager_Abstract_SetKeyMouseTarget);
     addGlobalFunc('procedure TIOManager_Abstract.FreeTarget(idx: integer); constref;', @TIOManager_Abstract_FreeTarget);
     addGlobalFunc('procedure TIOManager_Abstract.SetState(val: Boolean); constref;', @TIOManager_Abstract_SetState);
-    addGlobalFunc('procedure TIOManager_Abstract.Free();', @TIOManager_Abstract_Free);
+    addGlobalFunc('procedure TIOManager_Abstract.Free(); constref;', @TIOManager_Abstract_Free);
   end;
 end;
 

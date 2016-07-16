@@ -796,7 +796,7 @@ begin
     addGlobalFunc('procedure TControl.ShowHint(); constref;', @TControl_ShowHint);
     addClassVar('TControl', 'Hint', 'String', @TControl_Hint_Read, @TControl_Hint_Write);
     addClassVar('TControl', 'Parent', 'TControl', @TControl_Parent_Read, @TControl_Parent_Write); //FIXME: Should be OS-Depend TControl
-    addGlobalFunc('procedure TControl.Free();', @TControl_Free);
+    addGlobalFunc('procedure TControl.Free(); constref;', @TControl_Free);
   end;
 end;
 
@@ -1327,7 +1327,7 @@ begin
     addGlobalFunc('function TWinControl.BrushCreated(): Boolean; constref;', @TWinControl_BrushCreated);
     addGlobalFunc('procedure TWinControl.PaintTo(ACanvas: TCanvas; X, Y: Integer); constref;', @TWinControl_PaintTo);
     addGlobalFunc('procedure TWinControl.SetShape(AShape: TBitmap); constref;', @TWinControl_SetShape);
-    addGlobalFunc('procedure TWinControl.Free();', @TWinControl_Free);
+    addGlobalFunc('procedure TWinControl.Free(); constref;', @TWinControl_Free);
   end;
 end;
 
@@ -1384,7 +1384,7 @@ begin
     addClassVar('TCustomControl', 'Canvas', 'TCanvas', @TCustomControl_Canvas_Read, @TCustomControl_Canvas_Write);
     addClassVar('TCustomControl', 'OnPaint', 'TNotifyEvent', @TCustomControl_OnPaint_Read, @TCustomControl_OnPaint_Write);
     addClassVar('TCustomControl', 'BorderStyle', 'TFormBorderStyle', nil, @TCustomControl_BorderStyle_Write);
-    addGlobalFunc('procedure TCustomControl.Free();', @TCustomControl_Free);
+    addGlobalFunc('procedure TCustomControl.Free(); constref;', @TCustomControl_Free);
   end;
 end;
 
@@ -1555,7 +1555,7 @@ begin
     addClassVar('TControlScrollBar', 'Range', 'Integer', @TControlScrollBar_Range_Read, @TControlScrollBar_Range_Write);
     addClassVar('TControlScrollBar', 'Tracking', 'Boolean', @TControlScrollBar_Tracking_Read, @TControlScrollBar_Tracking_Write);
     addClassVar('TControlScrollBar', 'Visible', 'Boolean', @TControlScrollBar_Visible_Read, @TControlScrollBar_Visible_Write);
-    addGlobalFunc('procedure TControlScrollBar.Free();', @TControlScrollBar_Free);
+    addGlobalFunc('procedure TControlScrollBar.Free(); constref;', @TControlScrollBar_Free);
   end;
 end;
 {TScrollingWinControl}
@@ -1618,7 +1618,7 @@ begin
     addGlobalFunc('procedure TScrollingWinControl.ScrollBy(DeltaX, DeltaY: Integer); constref;', @TScrollingWinControl_ScrollBy);
     addClassVar('TScrollingWinControl', 'HorzScrollBar', 'TControlScrollBar', @TScrollingWinControl_HorzScrollBar_Read, @TScrollingWinControl_HorzScrollBar_Write);
     addClassVar('TScrollingWinControl', 'VertScrollBar', 'TControlScrollBar', @TScrollingWinControl_VertScrollBar_Read, @TScrollingWinControl_VertScrollBar_Write);
-    addGlobalFunc('procedure TScrollingWinControl.Free();', @TScrollingWinControl_Free);
+    addGlobalFunc('procedure TScrollingWinControl.Free(); constref;', @TScrollingWinControl_Free);
   end;
 end;
 

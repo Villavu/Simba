@@ -429,7 +429,7 @@ begin
     addClassVar('TMenuItem', 'OnClick', 'TNotifyEvent', @TMenuItem_OnClick_Read, @TMenuItem_OnClick_Write);
     addClassVar('TMenuItem', 'Caption', 'String', @TMenuItem_Caption_Read, @TMenuItem_Caption_Write);
     addGlobalFunc('procedure TMenuItem.Init(AOwner: TComponent);', @TMenuItem_Init);
-    addGlobalFunc('procedure TMenuItem.Free();', @TMenuItem_Free);
+    addGlobalFunc('procedure TMenuItem.Free(); constref;', @TMenuItem_Free);
   end;
 end;
 
@@ -565,7 +565,7 @@ begin
     addClassVar('TMenu', 'ShortcutHandled', 'boolean', @TMenu_ShortcutHandled_Read, @TMenu_ShortcutHandled_Write);
     addClassVar('TMenu', 'Items', 'TMenuItem', @TMenu_Items_Read, nil);
     addGlobalFunc('procedure TMenu.Init(AOwner: TComponent);', @TMenu_Init);
-    addGlobalFunc('procedure TMenu.Free();', @TMenu_Free);
+    addGlobalFunc('procedure TMenu.Free(); constref;', @TMenu_Free);
   end;
 end;
 
@@ -588,7 +588,7 @@ begin
     addClass('TMainMenu', 'TMenu');
 
     addGlobalFunc('procedure TMainMenu.Init(AOwner: TComponent);', @TMainMenu_Init);
-    addGlobalFunc('procedure TMainMenu.Free();', @TMainMenu_Free);
+    addGlobalFunc('procedure TMainMenu.Free(); constref;', @TMainMenu_Free);
   end;
 end;
 
