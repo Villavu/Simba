@@ -1319,7 +1319,7 @@ begin
          if StartD > EndD then EndD := EndD + 360;
     end;
 
-    Over180 := (Max(StartD, EndD) - Min(StartD, EndD)) > 180;
+    Over180 := (MaxE(StartD, EndD) - MinE(StartD, EndD)) > 180;
 
     if Over180 then
     begin
@@ -1336,8 +1336,8 @@ begin
 
     for I := 0 to T do
     begin
-      if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MY)) > 0) and
-         ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MY)) < 0)) xor Over180) then
+      if (not(((BminusAx * (Points[i].y - MY)) - (BminusAy * (Points[i].x - MX)) > 0) and
+         ((CminusAx * (Points[i].y - MY)) - (CminusAy * (Points[i].x - MX)) < 0)) xor Over180) then
         continue;
       G[L] := Points[I];
       Inc(L);
@@ -1346,7 +1346,7 @@ begin
     Points := G;
   end;
   FilterPointsDist(Points, MinR, MaxR, Mx, My);   //TODO: move this to the MMLAddon section, this doesn't belong in FilterPointsPie
-end;
+end;                              
 
 {/\
   Removes the points that don't have a dist between mindist/maxdist with (mx,my)
