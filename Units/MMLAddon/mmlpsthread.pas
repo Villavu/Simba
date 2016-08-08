@@ -322,17 +322,8 @@ uses
 
   {$IFDEF USE_LAPE}, lpClasses, lpClassHelper{$ENDIF};
 
-{$ifdef Linux}
-  {$define PS_SafeCall}
-{$else}
-//{$define PS_SafeCall}
-{$endif}
 {$MACRO ON}
-{$ifdef PS_SafeCall}
-  {$define extdecl := safecall}
-{$else}
-  {$define extdecl := register}
-{$endif}
+{$define extdecl := register}
 
 {Some General PS Functions here}
 procedure psWriteln(str : string); extdecl;
@@ -827,8 +818,7 @@ begin
   //Export all the methods
   for i := 0 to high(ExportedMethods) do
     if ExportedMethods[i].FuncPtr <> nil then
-      Sender.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl,
-                             {$ifdef PS_SafeCall}cdSafeCall{$else}cdRegister{$endif});
+      Sender.AddFunctionEx(ExportedMethods[i].FuncPtr,ExportedMethods[i].FuncDecl, cdRegister);
 end;
 
 function TPSThread.RequireFile(Sender: TObject; const OriginFileName: string; var FileName, OutPut: string): Boolean;
