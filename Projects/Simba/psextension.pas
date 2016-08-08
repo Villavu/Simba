@@ -109,17 +109,8 @@ uses
 
   , SimbaUnit, updateform, mmisc, mmlpsthread;  // for GetTickCount and others.//Writeln
 
-{$ifdef Linux}
-  {$define PS_SafeCall}
-{$else}
-//{$define PS_SafeCall}
-{$endif}
 {$MACRO ON}
-{$ifdef PS_SafeCall}
-  {$define extdecl := safecall}
-{$else}
-  {$define extdecl := register}
-{$endif}
+{$define extdecl := register}
 
 procedure psWriteLn(s: string);
 begin
